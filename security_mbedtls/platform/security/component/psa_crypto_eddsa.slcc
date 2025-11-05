@@ -1,0 +1,29 @@
+id: psa_crypto_eddsa
+package: security_mbedtls
+label: EdDSA
+description: >-
+    This component provides support for signature generation and verification
+    with EdDSA in PSA Crypto.
+category: Platform|Security|PSA Crypto|Signatures
+quality: production
+provides:
+  - name: psa_crypto_eddsa
+requires:
+  - name: psa_crypto
+  - name: device_has_semailbox
+  - name: psa_crypto_ecc_edwards_curve
+template_contribution:
+  - name: psa_crypto_config
+    value: PSA_WANT_ALG_EDDSA 1
+documentation:
+    url: https://armmbed.github.io/mbed-crypto/html/api/ops/sign.html#c.PSA_ALG_PURE_EDDSA
+metadata:
+    sbom:
+        license: Apache-2.0
+        upstream:
+            name: Mbed TLS
+            version: v3.6.2
+            supplier: Trusted Firmware
+            url: https://github.com/Mbed-TLS/mbedtls.git
+            comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
+root_path: security_mbedtls

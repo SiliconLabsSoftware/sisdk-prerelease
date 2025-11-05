@@ -1,0 +1,40 @@
+# Basic .gitignore file
+*.o
+*.d
+*.bak
+*~
+*.swp
+*.swo
+*.log
+
+# DMM 2014-04-08 emacs
+*.#?
+
+# ignore FIB backups created by changeVariant.py
+fib-backup-*.s37
+
+#cscope Files
+cscope.files
+cscope.*out
+ncscope.out
+
+#Python compiled files
+*.pyc
+
+#Mac OS
+.DS_Store
+#Other random git cruft from merges
+*~*
+.merge_file*
+*.orig
+
+# Ignore anything in the submodules folder not explicitly tracked
+/submodules/
+
+# Ignore the built versions of the em3xx_* and stm32_* tools
+/hal/micro/cortexm3/loader/build/
+/hal/host/cortexm3/stm32f103ret/loader/build
+
+# Untracked content that is specific to an individual's computer should
+# go here
+/untracked/

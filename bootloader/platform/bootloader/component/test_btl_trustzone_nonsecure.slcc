@@ -1,0 +1,31 @@
+id: test_btl_trustzone_nonsecure
+label: Bootloader test helper component that provides configuration to create TrustZone non-secure application.
+package: bootloader
+quality: internal
+category: Platform|Bootloader|Test
+requires:
+  - name: trustzone_nonsecure
+  - name: tz_secure_key_library
+template_contribution:
+  - name: memory_flash_start
+    value: 0x8010000
+    unless: [device_sdid_200, device_sdid_205]
+  - name: memory_flash_start
+    value: 0xE000
+    condition: [device_sdid_200]
+  - name: memory_flash_start
+    value: 0x10000
+    condition: [device_sdid_205]
+  - name: memory_flash_size
+    value: 65536
+  - name: memory_ram_start
+    value: 0x20004000
+  - name: memory_ram_size
+    value: 0x4000
+toolchain_settings:
+  - option: cmse
+    value: enabled
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

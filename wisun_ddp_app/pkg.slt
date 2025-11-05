@@ -1,0 +1,5 @@
+# Version defaults to "0" if not defined
+version = "0.1"
+
+[dependency]
+wisun = { version = ">=2.10.0 <2.10.1", prerelease = true, installer = "conan" }

@@ -1,0 +1,19 @@
+id: opn_device_host
+label: OPN Device Host
+package: devices
+description: Device component for host-based environment with simulation headers.
+category: Platform|Device|Host
+quality: production
+include:
+  - file_list:
+      - path: em_device.h
+      - path: simulation_event_sc12.h
+      - path: simulation_gpio.h
+      - path: simulation_gpio_p.h
+      - path: simulation_sc.h
+    path: platform/Device/SiliconLabs/simulation/Include/
+provides:
+  - name: device
+  - name: device_host
+  - name: opn_device_host
+root_path: devices

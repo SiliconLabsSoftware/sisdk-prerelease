@@ -1,0 +1,32 @@
+id: test_btl_tz_lib
+label: Bootloader TZ Test Component
+package: bootloader
+category: Platform|Bootloader|Test
+quality: internal
+provides:
+  - name: test_btl_tz_lib
+library:
+  - path: platform/bootloader/build/lib/bootloader_secure_lib_xg21.o
+    condition: [device_sdid_200]
+  - path: platform/bootloader/build/lib/bootloader_secure_lib_xg22.o
+    condition: [device_sdid_205]
+  - path: platform/bootloader/build/lib/bootloader_secure_lib_xg23.o
+    condition: [device_sdid_210]
+  - path: platform/bootloader/build/lib/bootloader_secure_lib_xg24.o
+    condition: [device_sdid_215]
+  - path: platform/bootloader/build/lib/bootloader_secure_lib_xg25.o
+    condition: [device_sdid_220]
+  - path: platform/bootloader/build/lib/bootloader_secure_lib_xg26.o
+    condition: [device_sdid_225]
+  - path: platform/bootloader/build/lib/bootloader_secure_lib_xg27.o
+    condition: [device_sdid_230]
+  - path: platform/bootloader/build/lib/bootloader_secure_lib_xg28.o
+    condition: [device_sdid_235]
+  - path: platform/bootloader/build/lib/bootloader_secure_lib_xg29.o
+    condition: [device_sdid_240]
+  - path: platform/bootloader/build/lib/bootloader_secure_lib_xg2d.o
+    condition: [device_sdid_260]
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

@@ -1,0 +1,5 @@
+version = "0"
+
+[dependency]
+connect_sdk = {version = ">=4.1.0 <4.1.1", installer = "conan", user = "silabs", prerelease = true}
+slc_cli = "~"

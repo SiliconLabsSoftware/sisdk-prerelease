@@ -1,0 +1,25 @@
+id: stub_btl_core
+label: Bootloader Core Stubs
+package: bootloader
+description: >
+    The Bootloader Core stubs
+category: Platform|Bootloader|Stubs
+quality: internal
+
+source:
+  - path: platform/bootloader/test/stubs/core/flash/btl_internal_flash.c
+  - path: platform/bootloader/test/stubs/core/btl_reset.c
+
+include:
+  - path: platform/bootloader/test/stubs
+    file_list:
+      - path: core/flash/btl_internal_flash.h
+      - path: core/btl_reset.h
+
+provides:
+  - name: stub_btl_core
+
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

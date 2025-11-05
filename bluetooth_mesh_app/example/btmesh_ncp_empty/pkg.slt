@@ -1,0 +1,5 @@
+version = "0"
+
+[dependency]
+bluetooth_mesh_middleware = {version = "~10.0.0", installer = "conan", prerelease = true}
+commander="~"

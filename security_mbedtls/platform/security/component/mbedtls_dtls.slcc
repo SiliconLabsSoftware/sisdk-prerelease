@@ -1,0 +1,30 @@
+id: mbedtls_dtls
+package: security_mbedtls
+label: DTLS
+description: >-
+    This component provides support for the DTLS protocol using Mbed TLS.
+category: Platform|Security|Mbed TLS|Upper Layer
+quality: production
+provides:
+  - name: mbedtls_dtls
+requires:
+  - name: mbedtls_tls
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_SSL_PROTO_DTLS
+  - name: mbedtls_config
+    value: MBEDTLS_SSL_DTLS_ANTI_REPLAY
+  - name: mbedtls_config
+    value: MBEDTLS_SSL_DTLS_HELLO_VERIFY
+  - name: mbedtls_config
+    value: MBEDTLS_SSL_COOKIE_C
+metadata:
+    sbom:
+        license: Apache-2.0
+        upstream:
+            name: Mbed TLS
+            version: v3.6.2
+            supplier: Trusted Firmware
+            url: https://github.com/Mbed-TLS/mbedtls.git
+            comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
+root_path: security_mbedtls

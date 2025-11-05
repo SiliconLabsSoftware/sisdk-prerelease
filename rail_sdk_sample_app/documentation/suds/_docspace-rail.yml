@@ -1,0 +1,9 @@
+objectType: docSpace
+id: rail
+version: "2.19.0"
+curators:
+  - anyone@silabs.com
+title: "RAIL"
+menu:
+  items:
+    - docleaf://rail-sdk-services/2.19.0

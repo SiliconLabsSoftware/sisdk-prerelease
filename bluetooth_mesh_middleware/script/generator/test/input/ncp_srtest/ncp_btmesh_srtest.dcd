@@ -1,0 +1,10 @@
+[
+  {
+    "name": "Primary Element",
+    "location": "0x0000",
+    "vendor_models" : [
+      { "cid": "0x02ff", "mid": "0xfffe", "name": "SRTest Server" },
+      { "cid": "0x02ff", "mid": "0xffff", "name": "SRTest Client" }
+    ]
+  }
+]

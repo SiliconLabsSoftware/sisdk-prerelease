@@ -1,0 +1,19 @@
+id: stub_btl_crc
+label: Cyclic Redundancy Check Stub
+package: bootloader
+description: >
+    CRC32 Stub for Bootloader Fuzzing
+category: Platform|Bootloader|Utils
+quality: internal
+source:
+  - path: platform/bootloader/test/stubs/security/btl_crc32.c
+include:
+  - path: platform/bootloader/test/stubs/security/
+    file_list:
+      - path: btl_crc32.h
+provides:
+  - name: stub_btl_crc
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

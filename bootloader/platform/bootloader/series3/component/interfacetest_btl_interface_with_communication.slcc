@@ -1,0 +1,16 @@
+id: interface_test_btl_interface_with_communication
+label: Bootloader Interface test for interface_with_communication
+package: bootloader
+description: >
+    This component is an interface test case for interface_with_communication
+category: Platform|Bootloader|Test
+quality: internal
+source:
+  - path: "platform/bootloader/series3/test/src/interface/interface_test.c"
+requires:
+  - name: peripheral_test_utils
+  - name: bootloader_interface
+  - name: sl_main_custom_main
+provides:
+  - name: interface_test_btl_interface_with_communication
+root_path: bootloader

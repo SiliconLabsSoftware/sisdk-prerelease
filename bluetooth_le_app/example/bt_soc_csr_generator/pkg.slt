@@ -1,0 +1,5 @@
+version = "0"
+[dependency]
+bluetooth_apploader = {version = "~11.0.0", installer = "conan", prerelease = true}
+bluetooth_le_host = {version = "~11.0.0", installer = "conan", prerelease = true}
+platform = {version = "~6.0.0", installer = "conan", prerelease = true}

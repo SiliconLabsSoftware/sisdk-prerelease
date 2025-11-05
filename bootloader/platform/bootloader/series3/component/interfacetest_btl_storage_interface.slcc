@@ -1,0 +1,19 @@
+id: interface_test_btl_storage_interface
+label: Bootloader Interface test for storage_interface
+package: bootloader
+description: >
+    This component is an interface test case for storage_interface
+category: Platform|Bootloader|Test
+quality: internal
+source:
+  - path: "platform/bootloader/series3/test/src/storage_interface/storage_interface_test.c"
+requires:
+  - name: peripheral_test_utils
+  - name: bootloader_interface
+  - name: sl_main_custom_main
+define:
+  - name: SL_STACK_SIZE
+    value: 16384
+provides:
+  - name: interface_test_btl_storage_interface
+root_path: bootloader

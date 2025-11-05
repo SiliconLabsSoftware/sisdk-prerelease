@@ -1,0 +1,37 @@
+id: unittest_btl_callbacks
+label: Bootloader Unit Test for callbacks
+package: bootloader
+description: >
+    This component is a unit test case for bootloader callbacks
+category: Platform|Bootloader|Test
+quality: internal
+define:
+  - name: "MAIN_BOOTLOADER_TEST"
+    value: 1
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_callback_test.h)
+source:
+  - path: "platform/bootloader/test/src/callbacks/callbacks_test.c"
+  - path: "platform/bootloader/core/btl_reset.c"
+  - path: "platform/bootloader/core/flash/btl_internal_flash.c"
+  - path: "platform/bootloader/core/btl_bootload.c"
+include:
+  - path: platform/bootloader
+    file_list:
+      - path: api/btl_interface.h
+      - path: config/btl_config.h
+      - path: core/btl_reset.h
+      - path: core/flash/btl_internal_flash.h
+requires:
+  - name: test_btl_core
+  - name: unity
+  - name: emlib
+  - name: bootloader_aes_sha_ecdsa
+  - name: bootloader_debug
+  - name: memory_manager
+provides:
+  - name: unittest_btl_callbacks
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

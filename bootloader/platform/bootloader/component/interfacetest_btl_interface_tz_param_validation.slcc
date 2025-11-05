@@ -1,0 +1,27 @@
+id: interfacetest_btl_interface_tz_param_validation
+label: Bootloader Interface test for TZ param validation
+package: bootloader
+category: Platform|Bootloader|Test
+quality: internal
+
+source:
+  - path: platform/bootloader/test/src/interface/interface_test_tz_param_validation.c
+
+requires:
+  - name: unity
+  - name: emlib
+  - name: sl_system_init
+  - name: bootloader_interface
+  - name: interfacetest_btl_interface_tz_core
+  - name: trustzone_nonsecure
+
+provides:
+  - name: interfacetest_btl_interface_tz_config
+
+toolchain_settings:
+  - option: optimize
+    value: debug
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

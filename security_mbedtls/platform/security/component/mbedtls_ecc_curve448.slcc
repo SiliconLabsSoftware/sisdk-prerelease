@@ -1,0 +1,33 @@
+id: mbedtls_ecc_curve448
+package: security_mbedtls
+label: Curve448
+description: >-
+    This component enables support for usage of the Curve448 elliptic curve with Mbed TLS.
+category: Platform|Security|Mbed TLS|Elliptic Curves
+quality: production
+
+provides:
+  - name: mbedtls_ecc_curve448
+  - name: mbedtls_ecc_curve
+    allow_multiple: true
+
+requires:
+  - name: mbedtls_ecc
+  - name: psa_crypto_ecc_curve448
+    condition: [psa_crypto]
+
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_ECP_DP_CURVE448_ENABLED
+  - name: mbedtls_mpi_max
+    value: 56
+metadata:
+    sbom:
+        license: Apache-2.0
+        upstream:
+            name: Mbed TLS
+            version: v3.6.2
+            supplier: Trusted Firmware
+            url: https://github.com/Mbed-TLS/mbedtls.git
+            comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
+root_path: security_mbedtls

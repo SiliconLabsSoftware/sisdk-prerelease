@@ -1,0 +1,11 @@
+#!/bin/bash
+
+LOC=`dirname "$0"`
+SUM=0
+
+for A in ${LOC}/../*.xml; do 
+	xmllint --noout --schema ${LOC}/../schema/zcl.xsd  $A
+	SUM=$(( $SUM + $?))
+done
+
+exit $SUM

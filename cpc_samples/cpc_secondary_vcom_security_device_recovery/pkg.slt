@@ -1,0 +1,4 @@
+[dependency]
+cpc_samples = { version = "1.0.0-alpha.3", installer = "conan" }
+slc-cli = "~"
+gcc-arm-none-eabi = "~"

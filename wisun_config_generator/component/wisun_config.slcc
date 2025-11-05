@@ -1,0 +1,162 @@
+id: wisun_config
+label: "Wi-SUN Configurator"
+package: "wisun_config"
+description: >
+  When initiating a new Wi-SUN project, a Wi-SUN Configurator is automatically
+  included. This Configurator serves as an interface to the main settings of
+  the Wi-SUN application, comprising three panels: Application, Security and
+  Radio. For some examples, the Wi-SUN Configurator only displays the Radio panel.
+  These examples do not have the application and security infrastructure.
+category: Wi-SUN|Application
+quality: production
+metadata:
+  sbom:
+    license: Zlib
+root_path: "wisun_config_generator/component/wisun_config"
+provides:
+- name: wisun_config
+- name: wisun_stack_configuration
+- name: wisun_phy_configuration
+
+config_file:
+#------------------------------------------------ restriction files with conditions
+# LFN not support
+- path: config/restrictions/lfn_not_supported.restriction
+  directory: wisun
+  unless:
+  - "wisun_stack_lfn"
+# tabs' restriction files
+- path: config/restrictions/only_radio.restriction
+  directory: wisun
+  unless:
+  - "sl_wisun_full_config"
+  - "wisun_br_stack"
+- path: config/restrictions/app_radio_tab.restriction
+  directory: wisun
+  condition:
+  - "wisun_br_stack"
+
+#------------------------------------------------ default full configuration
+- path: config/EU_1_1a/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - brd4271a
+
+# NA_1_1b
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - brd4270a
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - brd4270b
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - brd4276a
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - brd4400a
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - brd4400b
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - brd4400c
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - brd4401a
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - brd4401b
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - brd4401c
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - brd2705a
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - brd4204a
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - brd4204b
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - brd4204c
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - brd4204d
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - brd4210a
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - brd4263a
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - brd4263b
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - brd4263c
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - brd4264a
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - brd4264b
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - brd4264c
+
+# CN_1_1b
+- path: config/CN_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - brd4272a
+
+# based on IC all NA_1_1b
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - device_generic_family_efr32xg25
+  unless:
+  - hardware_board
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - device_generic_family_efr32xg28
+  unless:
+  - hardware_board
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+  - device_generic_family_efr32xg23
+  unless:
+  - hardware_board
+
+#------------------------------------------------ default configuration end
+
+template_contribution:
+#---------------- Component Catalog ------------------
+- name: component_catalog
+  value: wisun_config

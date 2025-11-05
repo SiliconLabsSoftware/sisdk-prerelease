@@ -1,0 +1,35 @@
+id: interfacetest_btl_storage_se_upgrade_negative
+label: Bootloader Interface test for storage_se_upgrade_negative
+package: bootloader
+description: >
+    This component is an interface test case for storage_se_upgrade_negative
+category: Platform|Bootloader|Test
+quality: internal
+define:
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_library.h)
+source:
+  - path: "platform/bootloader/test/src/storage_se_negative_upgrade/storage_se_negative_upgrade_test.c"
+  - path: "platform/bootloader/core/btl_reset.c"
+  - path: "platform/bootloader/core/btl_bootload.c"
+include:
+  - path: "platform/bootloader/config/"
+    file_list:
+      - path: efr32xg21/btl_config_efr32xg21_storage_internal
+        condition:
+          - brd4182a
+          - brd4001a
+      - path: efr32xg21/btl_config_efr32xg21_storage_internal
+        condition:
+          - brd2503a
+requires:
+  - name: unity
+  - name: emlib
+  - name: bootloader_interface
+  - name: mbedtls_aes
+provides:
+  - name: interfacetest_btl_storage_se_upgrade_negative
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

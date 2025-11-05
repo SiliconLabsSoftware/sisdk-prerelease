@@ -1,0 +1,26 @@
+id: interfacetest_btl_interface_with_internal_storage_dma
+label: Bootloader Interface Test for interface_with_internal_storage_dma
+package: bootloader
+description: >
+    This component is an interface test for interface_with_internal_storage_dma
+category: Platform|Bootloader|Test
+quality: internal
+define:
+  - name: "TEST_DMA_MSC_INTERFACE"
+    value: 1
+  - name: "CHECK_SECURE_BOOT_FLAG"
+    value: 1
+source:
+  - path: "platform/bootloader/test/src/interface/interface_test.c"
+requires:
+  - name: unity
+  - name: emlib
+  - name: bootloader_interface
+  - name: interfacetest_btl_interface_tz_core
+    condition: [trustzone_nonsecure]
+provides:
+  - name: interfacetest_btl_interface_with_internal_storage_dma
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

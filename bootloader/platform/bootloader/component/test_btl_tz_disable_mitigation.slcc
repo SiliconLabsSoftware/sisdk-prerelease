@@ -1,0 +1,10 @@
+id: test_btl_tz_disable_mitigation
+package: bootloader
+category: Platform|Bootloader|Test
+quality: internal
+provides:
+  - name: test_btl_tz_disable_mitigation
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

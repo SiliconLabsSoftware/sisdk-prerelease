@@ -1,0 +1,26 @@
+id: mbedtls_cipher_padding_pkcs7
+package: security_mbedtls
+label: PKCS#7 Padding
+description: >-
+    This component provides support for PKCS#7 padding for cipher modes. Currently only CBC is supported.
+category: Platform|Security|Mbed TLS|Encryption
+quality: production
+provides:
+  - name: mbedtls_cipher_padding_pkcs7
+requires:
+  - name: mbedtls_cipher_cbc
+  - name: psa_crypto_cipher_cbc_pkcs7
+    condition: [psa_crypto]
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_CIPHER_PADDING_PKCS7
+metadata:
+    sbom:
+        license: Apache-2.0
+        upstream:
+            name: Mbed TLS
+            version: v3.6.2
+            supplier: Trusted Firmware
+            url: https://github.com/Mbed-TLS/mbedtls.git
+            comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
+root_path: security_mbedtls

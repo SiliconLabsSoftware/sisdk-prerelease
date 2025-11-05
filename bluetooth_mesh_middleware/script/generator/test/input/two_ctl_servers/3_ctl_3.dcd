@@ -1,0 +1,12 @@
+[
+      {
+        "name": "Element 3",
+        "location": "0x0003",
+        "sig_models" : [
+          { "mid": "0x1004", "name": "Generic Default Transition Time Server" },
+          { "mid": "0x1000", "name": "Generic OnOff Server" },
+          { "mid": "0x1002", "name": "Generic Level Server" },
+          { "mid": "0x1306", "name": "Light CTL Temperature Server" }
+        ]
+      }
+]

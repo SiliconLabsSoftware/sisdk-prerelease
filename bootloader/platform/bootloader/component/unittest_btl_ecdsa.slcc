@@ -1,0 +1,29 @@
+id: unittest_btl_ecdsa
+label: Bootloader Unit Test for ECDSA
+package: bootloader
+description: >
+    This component is a unit test case for bootloader ecdsa
+category: Platform|Bootloader|Test
+quality: internal
+define:
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_library.h)
+    condition: toolchain_gcc
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_library.h)
+    condition: toolchain_llvm
+source:
+  - path: "platform/bootloader/test/src/ecdsa/ecdsa_test.c"
+requires:
+  - name: test_btl_core
+  - name: unity
+  - name: emlib
+  - name: bootloader_aes_sha_ecdsa
+  - name: bootloader_debug
+  - name: memory_manager
+provides:
+  - name: unittest_btl_ecdsa
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

@@ -1,0 +1,20 @@
+id: bootloader_custom_size
+label: Bootloader Custom Size
+package: bootloader
+description: >
+    The Bootloader Custom Size component can be used to alter the allocated space for the main bootloader
+    to create custom-sized bootloaders by altering the value of "bootloader_main_size".
+category: Platform|Bootloader
+quality: internal
+provides:
+  - name: bootloader_custom_size
+define:
+  - name: BOOTLOADER_CUSTOM_SIZE
+    value: 1
+template_contribution:
+  - name: bootloader_main_size
+    value: -8192
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

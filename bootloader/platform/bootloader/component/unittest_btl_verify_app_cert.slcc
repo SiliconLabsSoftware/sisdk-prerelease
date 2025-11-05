@@ -1,0 +1,97 @@
+id: unittest_btl_verify_app_cert
+label: Bootloader Unit Test for bootloader verify_app_cert
+package: bootloader
+description: >
+    This component is a unit test case for bootloader verify_app_cert
+category: Platform|Bootloader|Test
+quality: internal
+define:
+  - name: "BOOTLOADER_SUPPORT_CERTIFICATES"
+    value: 1
+    condition:
+      - brd4181a
+      - brd4001a
+  - name: "BOOTLOADER_SUPPORT_CERTIFICATES"
+    value: 1
+    condition:
+      - brd4182a
+      - brd4001a
+  - name: "BOOTLOADER_SUPPORT_CERTIFICATES"
+    value: 1
+    condition:
+      - brd2503a
+  - name: "BOOTLOADER_SUPPORT_CERTIFICATES"
+    value: 1
+    condition:
+      - brd4263a
+  - name: "BOOTLOADER_SUPPORT_CERTIFICATES"
+    value: 1
+    condition:
+      - brd4263b
+  - name: "BOOTLOADER_SUPPORT_CERTIFICATES"
+    value: 1
+    condition:
+      - brd4263c
+  - name: "BOOTLOADER_SUPPORT_CERTIFICATES"
+    value: 1
+    condition:
+      - brd4186a
+  - name: "BOOTLOADER_SUPPORT_CERTIFICATES"
+    value: 1
+    condition:
+      - brd4187a
+  - name: "BOOTLOADER_SUPPORT_CERTIFICATES"
+    value: 1
+    condition:
+      - brd2601a
+  - name: "BOOTLOADER_SUPPORT_CERTIFICATES"
+    value: 1
+    condition:
+      - brd4270a
+  - name: "BOOTLOADER_SUPPORT_CERTIFICATES"
+    value: 1
+    condition:
+      - brd4194a
+  - name: "BOOTLOADER_SUPPORT_CERTIFICATES"
+    value: 1
+    condition:
+      - brd4116a
+  - name: "BOOTLOADER_SUPPORT_CERTIFICATES"
+    value: 1
+    condition:
+      - brd4400a
+  - name: "BOOTLOADER_SUPPORT_CERTIFICATES"
+    value: 1
+    condition:
+      - brd4413a
+  - name: "BOOTLOADER_SUPPORT_CERTIFICATES"
+    value: 1
+    condition:
+      - brd4277a
+  - name: "MAIN_BOOTLOADER_TEST"
+    value: 1
+  - name: "PARSER_REQUIRE_CERTIFICATE_AUTHENTICITY"
+    value: 1
+  - name: "BOOTLOADER_ENFORCE_SECURE_BOOT"
+    value: 1
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_library.h)
+source:
+  - path: "platform/bootloader/test/src/verify_app/verify_app_cert_test.c"
+  - path: "platform/bootloader/core/flash/btl_internal_flash.c"
+  - path: "platform/bootloader/core/btl_bootload.c"
+  - path: "platform/bootloader/core/btl_bootload.c"
+requires:
+  - name: test_btl_core
+  - name: unity
+  - name: emlib
+  - name: bootloader_crc
+  - name: bootloader_aes_sha_ecdsa
+  - name: bootloader_token_management
+  - name: toolchain_gcc_lto_disable
+provides:
+  - name: unittest_btl_verify_app_cert
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

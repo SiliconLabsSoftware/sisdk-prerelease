@@ -1,0 +1,70 @@
+hal/insight-haltest.h
+hal/insight-rfeval.h
+
+#stm32f103ret CMSIS code
+hal/host/cortexm3/stm32f103ret/Libraries/CMSIS/*
+
+hal/host/cortexm3/stm32f103ret/Libraries/STM32F10x_StdPeriph_Driver/*
+
+#lwip files
+lwip/src/*
+
+#rtos files
+rtos/freertos/*
+rtos/efm32/rtos-timer-override.c
+rtos/efr32/rtos-timer-override.c
+
+#template files
+tools/meta/templates/*
+#The use of a '*' doesn't work, so call out all the files in templates*
+tools/meta/templates/banner-c.txt
+tools/meta/templates/banner-ddf.txt
+tools/meta/templates/banner-jam.txt
+tools/meta/templates/banner-yml.txt
+tools/meta/templates/cortexm3-efm32-token-manufacturing.h
+tools/meta/templates/cortexm3-em3xx-token-manufacturing.h
+tools/meta/templates/memmap.h
+tools/meta/templates/efm32/memmap.h
+tools/meta/templates/efm32/micro.i79
+tools/meta/templates/efm32/micro.menu
+tools/meta/templates/efm32lgdie/mpu-config.h
+tools/meta/templates/efr32die/memmap.h
+tools/meta/templates/em35x/em31x_device_template.h
+tools/meta/templates/em35x/em34x_device_template.h
+tools/meta/templates/em35x/em355x_device_template.h
+tools/meta/templates/em35x/em358x_device_template.h
+tools/meta/templates/em35x/em359x_device_template.h
+tools/meta/templates/em35x/em35x_device_template.h
+tools/meta/templates/em35x/em_device_template.h
+tools/meta/templates/em35x/gcc-cfg.ld
+tools/meta/templates/em35x/iar-cfg-htol.icf
+tools/meta/templates/em35x/iar-cfg-min.icf
+tools/meta/templates/em35x/iar-cfg.icf
+tools/meta/templates/em35x/memmap.h
+tools/meta/templates/em35x/micro.i79
+tools/meta/templates/em35x/micro.menu
+tools/meta/templates/em35x/mpu.c
+tools/meta/templates/em35x/sky66107_device_template.h
+tools/meta/templates/em35x/startup_em35x_template.s
+tools/meta/templates/em35x/startup_heckla_template.c
+tools/meta/templates/em35x/startup_lipari_template.c
+tools/meta/templates/em35x/system_em35x_template.c
+tools/meta/templates/em35x/system_heckla_template.h
+tools/meta/templates/em35x/system_lipari_template.h
+tools/meta/templates/hekla/mpu-config.h
+tools/meta/templates/lipari/mpu-config.h
+
+#WDS3-generated files
+phy/*/radio[_-]config*.h
+
+#Segger files
+hal/micro/cortexm3/efm32/config/segger/*
+
+#Atheros files
+phy/bridge/ethernet/homeplug/green-phy/atheros/Ath*
+
+# micro.c:379 inside halGetExtendedResetString() trips up uncrustify
+# with the use defines, variable definitions, and includes to create
+# a static array of basename##ResetStringTable.
+# EMHAL-1872
+hal/micro/cortexm3/efm32/micro.c

@@ -1,0 +1,100 @@
+id: unittest_btl_app_upgrade_version
+label: Bootloader Unit Test for App Upgrade Version
+package: bootloader
+description: >
+    This component is a unit test case for app_upgrade_version
+category: Platform|Bootloader|Test
+quality: internal
+source:
+  - path: platform/bootloader/core/btl_bootload.c
+  - path: platform/bootloader/test/src/app_upgrade_valid/app_upgrade_valid_test.c
+  - path: platform/bootloader/test/src/app_upgrade_valid/bootloader_tables.c
+  - path: platform/bootloader/app_version/btl_parser_app_version_check.c
+  - path: platform/bootloader/api
+include:
+  - path: platform/bootloader/api
+    file_list:
+      - path: application_properties.h
+      - path: btl_errorcode.h
+      - path: btl_interface.h
+      - path: btl_interface_parser.h
+      - path: btl_interface_storage.h
+      - path: btl_reset_info.h
+  - path: platform/bootloader
+    file_list:
+      - path: config/btl_config.h
+      - path: core/btl_bootload.h
+      - path: debug/btl_debug.h
+      - path: core/btl_util.h
+      - path: core/flash/btl_internal_flash.h
+      - path: config/test/btl_config_efr32xg21_storage_internal.h
+      - path: config/test/btl_config_efr32xg22_storage_internal.h
+      - path: config/test/btl_config_efr32xg23_storage_internal.h
+      - path: config/test/btl_config_efr32xg24_storage_internal.h
+      - path: config/test/btl_config_efr32xg25_storage_internal.h
+      - path: config/test/btl_config_efr32xg26_storage_internal.h
+      - path: config/test/btl_config_efr32xg27_storage_internal.h
+      - path: config/test/btl_config_efr32xg28_storage_internal.h
+      - path: config/test/btl_config_efr32xg29_storage_internal.h
+      - path: config/test/btl_config_efr32fg2d_storage_internal.h
+  - path: platform/bootloader/core
+    file_list:
+      - path: btl_reset.h
+define:
+  - name: "MAIN_BOOTLOADER_TEST"
+    value: 1
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32xg21_storage_internal.h)
+    condition:
+      - device_sdid_200
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32xg22_storage_internal.h)
+    condition:
+      - device_sdid_205
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32xg23_storage_internal.h)
+    condition:
+      - device_sdid_210
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32xg24_storage_internal.h)
+    condition:
+      - device_sdid_215
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32xg25_storage_internal.h)
+    condition:
+      - device_sdid_220
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32xg26_storage_internal.h)
+    condition:
+      - device_sdid_225
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32xg27_storage_internal.h)
+    condition:
+      - device_sdid_230
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32xg28_storage_internal.h)
+    condition:
+      - device_sdid_235
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32xg29_storage_internal.h)
+    condition:
+      - device_sdid_240
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32fg2d_storage_internal.h)
+    condition:
+      - device_sdid_260
+  - name: "PARSER_HAS_APPLICATION_UPGRADE_VALIDATION_CALLBACK"
+    value: 1
+requires:
+  - name: test_btl_core
+  - name: unity
+  - name: bootloader_aes_sha_ecdsa
+  - name: emlib
+  - name: bootloader_image_parser
+provides:
+  - name: unittest_btl_app_upgrade_version
+metadata:
+    sbom:
+        license: MSLA
+
+root_path: bootloader

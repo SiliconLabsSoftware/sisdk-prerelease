@@ -1,0 +1,20 @@
+id: interfacetest_btl_parser_interface_tz
+label: Bootloader Interface test for parser_interface_tz
+package: bootloader
+description: >
+    This component is an interface test case for parser_interface_tz
+category: Platform|Bootloader|Test
+quality: internal
+
+provides:
+  - name: interfacetest_btl_parser_interface_tz
+
+requires:
+  - name: interfacetest_btl_interface_tz_ns_test_app_core
+
+source:
+  - path: "platform/bootloader/test/src/parser_interface/parser_interface_test.c"
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

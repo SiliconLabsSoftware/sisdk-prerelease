@@ -1,0 +1,32 @@
+id: psa_crypto_cmac
+package: security_mbedtls
+label: CMAC
+description: >-
+    This component provides support for the CMAC, Cipher based Message
+    Authentication Code algorithm in PSA Crypto.
+category: Platform|Security|PSA Crypto|Message Authentication Codes
+quality: production
+provides:
+  - name: psa_crypto_cmac
+requires:
+  - name: psa_crypto_aes
+  - name: sl_si91x_psa_mac
+    condition: [device_si91x]
+template_contribution:
+  - name: psa_crypto_config
+    value: PSA_WANT_ALG_CMAC 1
+  - name: psa_crypto_builtin_config
+    value: "MBEDTLS_PSA_BUILTIN_ALG_CMAC 1"
+    condition: [mbedtls_cmac]
+documentation:
+    url: https://armmbed.github.io/mbed-crypto/html/api/ops/macs.html#c.PSA_ALG_CMAC
+metadata:
+    sbom:
+        license: Apache-2.0
+        upstream:
+            name: Mbed TLS
+            version: v3.6.2
+            supplier: Trusted Firmware
+            url: https://github.com/Mbed-TLS/mbedtls.git
+            comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
+root_path: security_mbedtls

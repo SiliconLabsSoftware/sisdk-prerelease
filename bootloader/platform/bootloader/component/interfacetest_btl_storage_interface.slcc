@@ -1,0 +1,21 @@
+id: interfacetest_btl_storage_interface
+label: Bootloader Interface test for storage_interface
+package: bootloader
+description: >
+    This component is an interface test case for storage_interface
+category: Platform|Bootloader|Test
+quality: internal
+source:
+  - path: "platform/bootloader/test/src/storage_interface/storage_interface_test.c"
+requires:
+  - name: unity
+  - name: emlib
+  - name: bootloader_interface
+  - name: interfacetest_btl_interface_tz_core
+    condition: [trustzone_nonsecure]
+provides:
+  - name: interfacetest_btl_storage_interface
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

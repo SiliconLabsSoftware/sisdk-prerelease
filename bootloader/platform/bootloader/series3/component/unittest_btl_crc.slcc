@@ -1,0 +1,34 @@
+id: unit_test_btl_crc
+label: Bootloader Unit Test for crc
+package: bootloader
+description: >
+    This component is a unit test case for bootloader crc
+category: Platform|Bootloader|Test
+quality: internal
+source:
+  - path: "platform/bootloader/series3/test/src/crc/crc_test.c"
+  - path: "platform/bootloader/series3/security/btl_crc32.c"
+  - path: "platform/bootloader/series3/security/btl_crc16.c"
+define:
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_library.h)
+include:
+  - path: platform/bootloader/series3/api
+    file_list:
+      - path: btl_interface_parser.h
+      - path: btl_interface_storage.h
+  - path: platform/bootloader
+  - path: platform/bootloader/api
+    file_list:
+      - path: btl_errorcode.h
+      - path: btl_reset_info.h
+requires:
+  - name: btl_crc
+  - name: test_bootloader_core
+  - name: peripheral_test_utils
+  - name: bootloader_aes_sha_ecdsa
+  - name: memory_manager
+  - name: sl_main_custom_main
+provides:
+  - name: unit_test_btl_crc
+root_path: bootloader

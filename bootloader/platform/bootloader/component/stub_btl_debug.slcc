@@ -1,0 +1,19 @@
+id: stub_btl_debug
+label: Stubs Debug
+package: bootloader
+description: >
+    Stubs component Debug componenet with all required files 
+category: Platform|Bootloader|Stubs
+quality: internal
+source:
+  - path: platform/bootloader/test/stubs/debug/btl_debug.c
+  - path: platform/bootloader/test/stubs/debug/btl_debug_swo.c
+include:
+  - path: platform/bootloader/test/stubs
+    file_list:
+      - path: debug/btl_debug.h
+provides:
+  - name: stub_btl_debug
+config_file:
+  - path: platform/bootloader/test/stubs/debug/config/btl_debug_cfg.h
+root_path: bootloader

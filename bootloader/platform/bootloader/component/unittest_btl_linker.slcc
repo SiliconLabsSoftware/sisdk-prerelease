@@ -1,0 +1,143 @@
+id: unittest_btl_linker
+label: Bootloader Unit Test for linker file
+package: bootloader
+description: >
+    This component is a unit test case for bootloader linker file generation
+category: Platform|Bootloader|Test
+quality: internal
+template_contribution:
+  - name: bootloader_unit_test
+    value: 1
+  - name: bl_app_start
+    value: 0
+    condition:
+      - brd4182a
+  - name: bl_app_end
+    value: 0x80000
+    condition:
+      - brd4182a
+  - name: bl_app_start
+    value: 0
+    condition:
+      - brd4257b
+  - name: bl_app_end
+    value: 0x40000
+    condition:
+      - brd4257b
+ #PG22_DK2503A
+  - name: bl_app_start
+    value: 0
+    condition:
+      - brd2503a
+  - name: bl_app_end
+    value: 0x80000
+    condition:
+      - brd2503a
+ #SLSTK3701A_EFM32GG11
+  - name: bl_app_start
+    value: 0
+    condition:
+      - brd2204a
+  - name: bl_app_end
+    value: 0x200000
+    condition:
+      - brd2204a
+ #SLTB009A_EFM32GG12
+  - name: bl_app_start
+    value: 0
+    condition:
+      - brd2207a
+  - name: bl_app_end
+    value: 0x100000
+    condition:
+      - brd2207a
+ #SLSTK3401A_EFM32PG
+  - name: bl_app_start
+    value: 0
+    condition:
+      - brd2500a
+  - name: bl_app_end
+    value: 0x40000
+    condition:
+      - brd2500a
+ #SLSTK3402A_EFM32PG12
+  - name: bl_app_start
+    value: 0
+    condition:
+      - brd2501a
+  - name: bl_app_end
+    value: 0x100000
+    condition:
+      - brd2501a
+  - name: bl_app_start
+    value: 0
+    condition:
+      - brd4154a
+      - brd4001a
+  - name: bl_app_end
+    value: 0x40000
+    condition:
+      - brd4154a
+      - brd4001a
+  - name: bl_app_start
+    value: 0
+    condition:
+      - brd4151a
+      - brd4001a
+  - name: bl_app_end
+    value: 0x40000
+    condition:
+      - brd4151a
+      - brd4001a
+  - name: bl_app_start
+    value: 0
+    condition:
+      - brd4165b
+      - brd4001a
+  - name: bl_app_end
+    value: 0x80000
+    condition:
+      - brd4165b
+      - brd4001a
+  - name: bl_app_start
+    value: 0
+    condition:
+      - brd4161a
+      - brd4001a
+  - name: bl_app_end
+    value: 0x100000
+    condition:
+      - brd4161a
+      - brd4001a
+  - name: bl_app_start
+    value: 0
+    condition:
+      - brd4159a
+      - brd4001a
+  - name: bl_app_end
+    value: 0x80000
+    condition:
+      - brd4159a
+      - brd4001a
+  - name: bl_app_start
+    value: 0x0
+    condition:
+      - brd4181a
+  - name: bl_app_end
+    value: 0x00100000
+    condition:
+      - brd4181a
+  - name: bl_app_start
+    value: 0x8000000
+    condition:
+      - device_sdid_210
+  - name: bl_app_end
+    value: 0x80000
+    condition:
+      - device_sdid_210
+provides:
+  - name: unittest_btl_linker
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

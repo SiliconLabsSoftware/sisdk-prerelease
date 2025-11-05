@@ -1,0 +1,70 @@
+id: interfacetest_btl_interface_tz_ns_test_app_core
+label: Bootloader Interface test core for NS test apps
+package: bootloader
+description: >
+    TrustZone-enabled bootloader interface test core for Non-Secure test apps used
+    in combination with the Secure test app from test/app/tz_secure_app.
+category: Platform|Bootloader|Test
+quality: internal
+
+provides:
+  - name: interfacetest_btl_interface_tz_ns_test_app_core
+
+requires:
+  - name: unity
+  - name: emlib
+  - name: bootloader_interface
+  - name: trustzone_nonsecure
+  - name: tz_secure_key_library
+  - name: toolchain_gcc_lto_disable
+  - name: test_btl_core
+
+template_contribution:
+  - name: memory_flash_start
+    value: 0xE000
+    condition:
+      - device_sdid_200
+
+  - name: memory_flash_start
+    value: 0x10000
+    condition:
+      - device_sdid_205
+
+  - name: memory_flash_start
+    value: 0x8010000
+    unless: [device_sdid_200, device_sdid_205]
+
+  - name: memory_flash_size
+    value: 16384
+
+  - name: memory_ram_start
+    value: 0x20004000
+
+  - name: memory_ram_size
+    value: 16384
+
+library:
+  - path: platform/bootloader/test/app/tz_secure_app/tz_btl_interface_lib_xg21.o
+    condition: [device_sdid_200]
+  - path: platform/bootloader/test/app/tz_secure_app/tz_btl_interface_lib_xg22.o
+    condition: [device_sdid_205]
+  - path: platform/bootloader/test/app/tz_secure_app/tz_btl_interface_lib_xg23.o
+    condition: [device_sdid_210]
+  - path: platform/bootloader/test/app/tz_secure_app/tz_btl_interface_lib_xg24.o
+    condition: [device_sdid_215]
+  - path: platform/bootloader/test/app/tz_secure_app/tz_btl_interface_lib_xg25.o
+    condition: [device_sdid_220]
+  - path: platform/bootloader/test/app/tz_secure_app/tz_btl_interface_lib_xg26.o
+    condition: [device_sdid_225]
+  - path: platform/bootloader/test/app/tz_secure_app/tz_btl_interface_lib_xg27.o
+    condition: [device_sdid_230]
+  - path: platform/bootloader/test/app/tz_secure_app/tz_btl_interface_lib_xg28.o
+    condition: [device_sdid_235]
+  - path: platform/bootloader/test/app/tz_secure_app/tz_btl_interface_lib_xg29.o
+    condition: [device_sdid_240]
+  - path: platform/bootloader/test/app/tz_secure_app/tz_btl_interface_lib_xg2d.o
+    condition: [device_sdid_260]
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

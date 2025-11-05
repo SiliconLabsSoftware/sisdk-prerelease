@@ -1,0 +1,128 @@
+project_name: basic_functions
+package: "rail_sdk_sample_app"
+quality: internal
+label: RAIL - Basic functionality tester
+description: >
+  Basic functionality tester: VCOM, LED, Button, Sleeptimer, Power manager and OSs
+category: RAIL Examples
+source:
+  - path: app.c
+  - path: app_cli.c
+include:
+  - path: .
+    file_list:
+    - path: app_init.h
+    - path: app_process.h
+component:
+  - id: sl_main
+  - id: clock_manager
+  - id: device_init
+  - id: board_control
+    condition: [hardware_board]
+  - id: udelay
+  - id: sleeptimer
+  - id: cli
+    instance: [example]
+  - id: iostream_recommended_stream
+  - id: printf
+  - id: iostream_retarget_stdio
+#---------------Code Classification------------------
+  - id: code_classification
+
+#----------------- Require list ----------------------
+requires:
+  - name: sl_rail_sdk_simple_os
+    condition:
+      - "kernel"
+
+#------------ Configuration overrides ----------------
+configuration:
+  - name: SL_BOARD_ENABLE_VCOM
+    value: "1"
+  - name: SL_CLI_LOCAL_ECHO
+    value: "(1)"
+  - name: SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+    value: "(1)"
+  - name: SL_IOSTREAM_USART_VCOM_FLOW_CONTROL_TYPE
+    value: "usartHwFlowControlNone"
+  - name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+    value: "(1)"
+  - name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
+    value: "SL_IOSTREAM_EUSART_UART_FLOW_CTRL_NONE"
+    condition:
+      - device_series_2
+  - name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
+    value: "SL_IOSTREAM_EUSART_UART_FLOW_CTRL_NONE"
+    condition:
+      - device_series_3
+  - name: SL_BOARD_ENABLE_DISPLAY
+    value: "1"
+    condition:
+      - glib
+#------------- FreeRTOS OS        --------------------
+  - name: configMINIMAL_STACK_SIZE
+    value: "1024"
+#-------------- Template Contribution ----------------
+template_contribution:
+#------------------ CLI commands ---------------------
+  - name: cli_command
+    value:
+      name: echo
+      handler: cli_echo
+      help: Echo back the echo command
+  - name: cli_command
+    value:
+      name: led0
+      handler: cli_led_0
+      help: Toggles LED0
+    condition:
+      - "simple_led"
+  - name: cli_command
+    value:
+      name: led1
+      handler: cli_led_1
+      help: Toggles LED1
+    condition:
+      - "simple_led"
+  - name: cli_command
+    value:
+      name: button0
+      handler: cli_button_0
+      help: Waits for a BTN0 input
+    condition:
+      - "simple_button"
+  - name: cli_command
+    value:
+      name: button1
+      handler: cli_button_1
+      help: Waits for a BTN1 input
+    condition:
+      - "simple_button"
+  - name: cli_command
+    value:
+      name: sleeptimer
+      handler: cli_sleeptimer
+      help: Starts a sleeptimer for 2 seconds
+    condition:
+      - "sleeptimer"
+  - name: cli_command
+    value:
+      name: deepsleep
+      handler: cli_deep_sleep
+      help: Starts a deep sleep for 2 seconds
+    condition:
+      - "sleeptimer"
+      - "power_manager"
+
+#--------------------- Toolchain ------------------------
+toolchain_settings:
+  - option: optimize
+    value: debug
+
+filter:
+  - name: "Wireless Technology"
+    value: ["RAIL"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]

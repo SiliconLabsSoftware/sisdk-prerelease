@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Main",
+    "location": "0x0000",
+    "vendor_models" : [
+      { "cid": "0x02ff", "mid": "0xffff", "name": "Vendor Model 1" },
+      { "cid": "0x02ff", "mid": "0xfffe", "name": "Vendor Model 2" },
+      { "cid": "0x02ff", "mid": "0xfffd", "name": "Vendor Model 3" },
+      { "cid": "0x02ff", "mid": "0xfffc", "name": "Vendor Model 4" },
+      { "cid": "0x02ff", "mid": "0xfffb", "name": "Vendor Model 5" }
+    ]
+  },
+  {
+    "name": "Secondary Element",
+    "location": "0x0001",
+    "vendor_models" : [
+      { "cid": "0x02ff", "mid": "0xfffd", "name": "Vendor Model 3" },
+      { "cid": "0x02ff", "mid": "0xfffc", "name": "Vendor Model 4" },
+      { "cid": "0x02ff", "mid": "0xfffb", "name": "Vendor Model 5" }
+    ]
+  }
+]

@@ -1,0 +1,37 @@
+id: psa_crypto_sha384
+package: security_mbedtls
+label: SHA-384
+description: >-
+    This component provides support for the SHA-384 hash algorithm in PSA Crypto.
+category: Platform|Security|PSA Crypto|Hashing
+quality: production
+provides:
+  - name: psa_crypto_sha384
+  - name: psa_hash_function
+    allow_multiple: true
+requires:
+  - name: psa_crypto_hash
+  - name: mbedtls_sha384
+    condition: [device_security_se]
+  - name: mbedtls_sha384
+    condition: [device_security_rot]
+  - name: mbedtls_sha384
+    condition: [device_security_base]
+template_contribution:
+  - name: psa_crypto_config
+    value: PSA_WANT_ALG_SHA_384 1
+  - name: psa_crypto_builtin_config
+    value: "MBEDTLS_PSA_BUILTIN_ALG_SHA_384 1"
+    condition: [mbedtls_sha384]
+documentation:
+    url: https://armmbed.github.io/mbed-crypto/html/api/ops/hashes.html#c.PSA_ALG_SHA_384
+metadata:
+    sbom:
+        license: Apache-2.0
+        upstream:
+            name: Mbed TLS
+            version: v3.6.2
+            supplier: Trusted Firmware
+            url: https://github.com/Mbed-TLS/mbedtls.git
+            comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
+root_path: security_mbedtls

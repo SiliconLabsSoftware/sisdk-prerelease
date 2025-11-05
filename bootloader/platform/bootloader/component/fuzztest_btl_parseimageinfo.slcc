@@ -1,0 +1,55 @@
+id: fuzztest_btl_parseimageinfo
+label: "Fuzzing Parser"
+package: bootloader
+description: >
+    The Fuzzing parser is a test component for libfuzzer.
+category: Platform|Bootloader
+quality: internal
+source:
+  - path: platform/bootloader/test/src/fuzz/fuzz_parseimageinfo_test.c
+  - path: platform/bootloader/core/btl_bootload.c
+  - path: platform/bootloader/parser/gbl/btl_gbl_custom_tags.c
+  - path: platform/bootloader/parser/gbl/btl_gbl_format.c
+  - path: platform/bootloader/parser/gbl/btl_gbl_parser.c
+  - path: platform/bootloader/core/btl_parse.c
+include:
+  - path: platform/bootloader/config
+    file_list:
+      - path: btl_config.h
+  - path: platform/bootloader/core
+    file_list:
+      - path: btl_util.h
+      - path: btl_core.h
+  - path: platform/bootloader/
+    file_list:
+      - path: core/btl_bootload.h
+      - path: core/btl_reset.h
+      - path: core/btl_parse.h
+      - path: core/flash/btl_internal_flash.h
+      - path: api/btl_interface.h
+  - path: platform/bootloader/parser
+    file_list:
+      - path: gbl/btl_gbl_parser.h
+
+config_file:
+  - path: platform/bootloader/config/device_series_2/btl_core_cfg.h
+    file_id: btl_core_config
+  - path: platform/bootloader/test/stubs/emlib/em_cmu.h
+    file_id: em_cmu
+  - path: platform/bootloader/test/stubs/emlib/em_common.h
+    file_id: em_common
+  - path: platform/bootloader/test/stubs/emlib/em_core.h
+    file_id: em_core
+  - path: platform/bootloader/test/stubs/emlib/em_device.h
+    file_id: em_device
+provides:
+  - name: fuzztest_btl_parseimageinfo
+requires:
+  - name: stub_btl_crc
+  - name: stub_btl_aes_sha_ecdsa
+  - name: bootloader_token_management
+  - name: bootloader_include_parser
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

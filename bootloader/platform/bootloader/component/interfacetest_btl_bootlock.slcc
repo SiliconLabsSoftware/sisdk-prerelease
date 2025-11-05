@@ -1,0 +1,17 @@
+id: interfacetest_btl_bootlock
+label: Bootloader Interface test to test bootloader page lock functionality
+package: bootloader
+category: Platform|Bootloader|Test
+quality: internal
+source:
+  - path: platform/bootloader/test/src/interface/interface_test_bootlock.c
+requires:
+  - name: unity
+  - name: emlib
+  - name: bootloader_interface
+provides:
+  - name: interfacetest_btl_bootlock
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

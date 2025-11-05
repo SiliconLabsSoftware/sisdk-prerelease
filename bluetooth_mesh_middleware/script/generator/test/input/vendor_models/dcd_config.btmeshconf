@@ -1,0 +1,91 @@
+{
+  "composition_data": {
+    "cid": "0x02ff",
+    "pid": "0x0017",
+    "vid": "0x0700",
+    "elements": [
+      {
+        "name": "Main",
+        "location": "0x0000",
+        "sig_models" : [
+          {"mid":"0x0000", "name":"Configuration Server"},
+          {"mid":"0x0002", "name":"Health Server"}
+        ]
+      }
+    ]
+  },
+  "vendor_model_descriptors": [
+  {
+    "cid": "0x02FF",
+    "mid": "0xFFFF",
+    "name": "Vendor Model 1",
+    "multiplicity": "1",
+    "element_constraint": "primary",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "cid": "0x02FF",
+    "mid": "0xFFFE",
+    "name": "Vendor Model 2",
+    "multiplicity": "0..1",
+    "element_constraint": "primary",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "devkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "cid": "0x02FF",
+    "mid": "0xFFFD",
+    "name": "Vendor Model 3",
+    "multiplicity": "1..*",
+    "element_constraint": "primary_any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "cid": "0x02FF",
+    "mid": "0xFFFC",
+    "name": "Vendor Model 4",
+    "multiplicity": "0..*",
+    "element_constraint": "primary_any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Vendor Model 5",
+        "element_constraint": "same"
+      }
+    ],
+    "extends": [
+      {
+        "model": "Vendor Model 3",
+        "element_constraint": "same"
+      }
+    ]
+  },
+    {
+    "cid": "0x02FF",
+    "mid": "0xFFFB",
+    "name": "Vendor Model 5",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "devkey",
+    "corresponds": [
+      {
+        "model": "Vendor Model 4",
+        "element_constraint": "same"
+      }
+    ],
+    "extends": []
+  }
+  ]
+} 

@@ -1,0 +1,5 @@
+{
+	"name": "random",
+	"target": "regression-test",
+	"parser": "unity"
+}

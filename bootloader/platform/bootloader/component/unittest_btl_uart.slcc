@@ -1,0 +1,77 @@
+id: unittest_btl_uart
+label: Bootloader Unit Test for UART
+package: bootloader
+description: >
+    This component is a unit test case for UART
+category: Platform|Bootloader|Test
+quality: internal
+source:
+  - path: "platform/bootloader/driver/btl_driver_util.c"
+  - path: "platform/bootloader/test/src/uartdriver/uart_test.c"
+requires:
+  - name: test_btl_core
+  - name: unity
+  - name: emlib
+  - name: bootloader_debug
+  - name: bootloader_uart_driver
+  - name: bootloader_delay_driver
+  - name: memory_manager
+include:
+  - path: "platform/bootloader/config/device_series_2"
+    file_list:
+      - path: "btl_core_cfg.h"
+define:
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32mg22_uart.h)
+    condition:
+      - device_family_efr32mg22
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32fg23_brd4263b_uart.h)
+    condition:
+      - brd4263b
+      - brd4001a
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32fg23_brd4263c_uart.h)
+    condition:
+      - brd4263c
+      - brd4001a
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32fg23_uart.h)
+    condition:
+      - brd4263a
+      - brd4001a
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32mg24_uart.h)
+    condition:
+      - brd4187a
+      - brd4001a
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32mg21_uart.h)
+    condition:
+      - device_family_efr32mg21
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32mg26_uart.h)
+    condition:
+      - device_family_efr32mg26
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32mg27_uart.h)
+    condition:
+      - device_family_efr32mg27
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32fg28_uart.h)
+    condition:
+      - device_family_efr32fg28
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32xg29_uart.h)
+    condition:
+      - device_sdid_240
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32fg2d_uart.h)
+    condition:
+      - device_sdid_260
+provides:
+  - name: unittest_btl_uart
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

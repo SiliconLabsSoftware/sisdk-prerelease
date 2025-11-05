@@ -1,0 +1,28 @@
+id: unittest_btl_tz_memory_boundary
+label: Bootloader Unit Test for TZ memory boundary setup
+package: bootloader
+description: >
+    This component is a unit test case for TZ memory boundary setup
+category: Platform|Bootloader|Test
+quality: internal
+source:
+  - path: platform/bootloader/test/src/tz_memory_boundary/tz_memory_boundary.c
+requires:
+  - name: bootloader_core_secure
+  - name: unity
+
+  # build dependencies
+  - name: mbedtls_aes
+  - name: bootloader_debug
+  - name: bootloader_crc
+  - name: bootloader_aes_sha_ecdsa
+  - name: bootloader_image_parser
+define:
+  - name: TEST_BOOTLOADER_MEMORY_BOUNDARY
+    value: 1
+provides:
+  - name: unittest_btl_tz_memory_boundary
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

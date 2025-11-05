@@ -1,0 +1,24 @@
+id: psa_crypto_rsa_8192
+package: security_mbedtls
+label: RSA-8192
+description: >-
+    This component adds support for 8192-bit RSA operations.
+category: Platform|Security|PSA Crypto|RSA
+quality: evaluation
+provides:
+  - name: psa_crypto_rsa_8192
+  - name: psa_crypto_rsa_size
+    allow_multiple: true
+requires:
+  - name: psa_crypto_rsa
+  - name: mbedtls_rsa_8192
+metadata:
+    sbom:
+        license: Apache-2.0
+        upstream:
+            name: Mbed TLS
+            version: v3.6.2
+            supplier: Trusted Firmware
+            url: https://github.com/Mbed-TLS/mbedtls.git
+            comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
+root_path: security_mbedtls

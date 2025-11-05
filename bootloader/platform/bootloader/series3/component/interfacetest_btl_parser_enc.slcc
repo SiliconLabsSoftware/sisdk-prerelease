@@ -1,0 +1,16 @@
+id: interface_test_btl_gblv4_parser_enc
+label: Bootloader Unit Test for reset reason
+package: bootloader
+description: >
+    This component is a unit test case for bootloader reset reason
+category: Platform|Bootloader|Test
+quality: internal
+source:
+  - path: "platform/bootloader/series3/test/src/gblv4_parser_upgrade_enc/gblv4_parser_enc_test.c"
+requires:
+  - name: peripheral_test_utils
+  - name: bootloader_interface
+  - name: sl_main_custom_main
+provides:
+  - name: interface_test_btl_gblv4_parser_enc
+root_path: bootloader

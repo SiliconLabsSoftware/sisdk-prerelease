@@ -1,0 +1,43 @@
+id: unittest_btl_delay
+label: Bootloader Unit Test for Bootloader delay driver
+package: bootloader
+description: >
+    This component is a unit test case for bootloader delay driver
+category: Platform|Bootloader|Test
+quality: internal
+source:
+  - path: "platform/bootloader/driver/btl_driver_util.c"
+  - path: "platform/bootloader/test/src/delay/delay_test.c"
+include:
+  - path: platform/bootloader/driver
+    file_list:
+      - path: btl_driver_util.h
+requires:
+  - name: test_btl_core
+  - name: bootloader_delay_driver
+  - name: emlib
+  - name: unity
+  - name: hal_sysrtc
+    condition:
+      - device_sdid_210
+  - name: hal_sysrtc
+    condition:
+      - device_sdid_215
+  - name: hal_sysrtc
+    condition:
+      - device_sdid_220
+  - name: hal_sysrtc
+    condition:
+      - device_sdid_225
+  - name: hal_sysrtc
+    condition:
+      - device_sdid_235
+  - name: hal_sysrtc
+    condition:
+      - device_sdid_260
+provides:
+  - name: unittest_btl_delay
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

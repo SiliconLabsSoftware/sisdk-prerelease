@@ -1,0 +1,286 @@
+#Lists of part/board support for samples in multiprotocol package
+definitions:
+  zb_all_supported_parts: &zb_all_supported_parts
+    - .*efr32mg2[124679].*
+    - .*mgm2[12467].*
+    - .*rm21.*
+    - .*simg301.*
+  zb_all_supported_parts_no_modules: &zb_all_supported_parts_no_modules
+    - .*efr32mg2[124679].*
+    - .*rm21.*
+    - .*simg301.*
+  zb_64kb_ram_and_up: &zb_64kb_ram_and_up
+    - .*efr32mg2[14679].*
+    - .*mgm2[1467].*
+    - .*rm21.*
+    - .*simg301.*
+  zb_64kb_ram_and_up_and_no_modules: &zb_64kb_ram_and_up_and_no_modules
+    - .*efr32mg2[14679].*
+    - .*rm21.*
+    - .*simg301.*
+  zb_efr_parts_only: &zb_efr_parts_only
+    - .*efr32mg2[124679].*
+    - .*simg301.*
+  zb_zuth_supported_parts: &zb_zuth_supported_parts
+    - .*efr32mg2[1246].*
+  zb_sleepy_to_sleepy_supported_parts: &zb_sleepy_to_sleepy_supported_parts
+    - .*efr32mg2[124679].*
+    - .*mgm2[1467].*
+    - .*simg301.*
+  zb_dual_phy_ncp_parts: &zb_dual_phy_ncp_parts
+    - .*efr32mg24.*
+  zb_ncp_ot_rcp_parts: &zb_ncp_ot_rcp_parts
+    - .*efr32mg2[14].*
+    - .*mgm2[1467].*
+    - .*simg301.*
+
+  # Series 2 Parts supported by openthread projects
+  ot_parts_s2: &ot_parts_s2
+    - .*efr32mg21.*
+    - .*efr32mg24.*
+    - .*efr32mg26.*
+    - .*mgm21.*
+    - .*mgm24.*
+    - .*mgm26.*
+    - .*rm21.*
+
+  # Series 3 Parts supported by openthread projects
+  ot_parts_s3: &ot_parts_s3
+    - .*simg301.*
+
+  # Parts supported by openthread non-RCP projects
+  ot_parts_all: &ot_parts_all
+    - *ot_parts_s2
+    - *ot_parts_s3
+
+  # Parts supported by openthread RCP projects
+  ot_parts_rcp: &ot_parts_rcp
+    - *ot_parts_all
+    - .*efr32mr21.*
+
+  # Parts supported by openthread trustzone workspaces
+  ot_parts_tz: &ot_parts_tz
+    - *ot_parts_s2
+
+  # Parts supported by openthread projects with no boards
+  # Compatibility needs to be explicitly declared in sample apps.
+  ot_parts_without_boards: &ot_parts_without_boards
+    - .*efr32mr21.*
+
+  # Parts supported by host and simulation openthread projects
+  ot_parts_host: &ot_parts_host
+    - .*host.*
+
+  # Label to support adding workspace project to template file
+  # with no visibility in the project creation menu.
+  ot_parts_hidden: &ot_parts_hidden
+    - .*hidden.*
+
+  # IDEs supported by openthread projects
+  ot_ides: &ot_ides
+    - makefile-ide
+    - simplicity-ide
+    - visual-studio-code
+    - generic-template
+
+  # Toolchains supported by openthread projects
+  ot_toolchains: &ot_toolchains
+    - gcc
+    - llvm
+
+# templates for use by examples: below
+template:
+  supported_development_environments: &supported_development_environments
+    - generic-template
+    - iar-embedded-workbench
+    - makefile-ide
+    - simplicity-ide
+    - visual-studio-code
+# example specific settings
+example:
+  - path: ../zigbee/app/projects/ncp/ncp-cmp/zigbee_ncp-ot_rcp-spi.slcp
+    part_compatibility: *zb_ncp_ot_rcp_parts
+    toolchain_compatibility:
+      - gcc
+    ide_compatibility: *supported_development_environments
+    board_blacklist:
+      - brd2601a
+      - brd2601b
+      - brd2606a
+      - brd2703a
+      - brd2704a
+      - brd4118a # SPI EUSART config is not available
+      - brd4120a # SPI EUSART config is not available
+      - brd4121a # SPI EUSART config is not available 
+  - path: ../zigbee/app/projects/ncp/ncp-cmp/zigbee_ncp-ot_rcp-uart.slcp
+    part_compatibility: *zb_ncp_ot_rcp_parts
+    toolchain_compatibility:
+      - gcc
+    ide_compatibility: *supported_development_environments
+  - path: ../zigbee/app/projects/ncp/zigbee_ncp_ot_rcp_uart_gp_multi_rail/zigbee_ncp_ot_rcp_uart_gp_multi_rail.slcp
+    part_compatibility: *zb_ncp_ot_rcp_parts
+    toolchain_compatibility:
+      - gcc
+    ide_compatibility: *supported_development_environments
+  - path: ../zigbee/app/projects/ncp/ncp-dmp/zigbee_ncp-ble_ncp-spi.slcp
+    part_compatibility: *zb_64kb_ram_and_up
+    toolchain_compatibility:
+      - gcc
+    ide_compatibility: *supported_development_environments
+    board_blacklist:
+      - brd4118a # SPI EUSART config is not available
+      - brd4120a # SPI EUSART config is not available
+      - brd4121a # SPI EUSART config is not available
+  - path: ../zigbee/app/projects/ncp/ncp-dmp/zigbee_ncp-ble_ncp-uart.slcp
+    part_compatibility: *zb_64kb_ram_and_up
+    toolchain_compatibility:
+      - gcc      
+    ide_compatibility: *supported_development_environments
+  - path: ../zigbee/app/projects/multiprotocol/z3-light_ot-ftd_soc/z3-light_ot-ftd_soc.slcp
+    part_compatibility: *zb_64kb_ram_and_up_and_no_modules
+    toolchain_compatibility:
+      - gcc
+    ide_compatibility: *supported_development_environments
+  - path: ../zigbee/app/projects/multiprotocol/zigbee_ble_direct_device_light/zigbee_ble_direct_device_light.slcp
+    part_compatibility: *zb_efr_parts_only
+    ide_compatibility: *supported_development_environments
+    board_blacklist:
+      - brd2601a
+      - brd2601b
+      - brd2606a
+      - brd2608a
+      - brd2703a
+      - brd2704a
+      - brd4415a
+  - path: ../zigbee/app/projects/multiprotocol/zigbee_ble_dynamic_multiprotocol_light/zigbee_ble_dynamic_multiprotocol_light.slcp
+    part_compatibility: *zb_64kb_ram_and_up_and_no_modules
+    board_blacklist:
+      - brd2601a
+      - brd2601b
+      - brd2606a
+      - brd2608a
+      - brd2703a
+      - brd2704a
+      - brd4112a # Button and LED is on same GPIO
+      - brd4113a # Button and LED is on same GPIO
+      - brd4179b
+      - brd4415a
+    ide_compatibility: *supported_development_environments
+  - path: ../zigbee/app/projects/multiprotocol/zigbee_ble_dynamic_multiprotocol_light/zigbee_ble_dynamic_multiprotocol_light_minimal.slcp
+    part_compatibility: *zb_64kb_ram_and_up_and_no_modules
+    board_blacklist:
+      - brd4415a
+    ide_compatibility: *supported_development_environments
+  - path: ../zigbee/app/projects/multiprotocol/zigbee_ble_dynamic_multiprotocol_light_sed/zigbee_ble_dynamic_multiprotocol_light_sed.slcp
+    part_compatibility: *zb_64kb_ram_and_up_and_no_modules
+    board_blacklist:
+      - brd2601a
+      - brd2601b
+      - brd2606a
+      - brd2608a
+      - brd2703a
+      - brd2704a
+      - brd4112a # Button and LED is on same GPIO
+      - brd4113a # Button and LED is on same GPIO
+      - brd4179b
+      - brd4415a
+    ide_compatibility: *supported_development_environments
+  - path: ../zigbee/app/projects/multiprotocol/zigbee_ble_dynamic_multiprotocol_light_sed/zigbee_ble_dynamic_multiprotocol_light_sed_minimal.slcp
+    part_compatibility: *zb_64kb_ram_and_up_and_no_modules
+    board_blacklist:
+      - brd4415a
+    ide_compatibility: *supported_development_environments
+  - path: ../openthread/sample-apps/ot-ble-dmp/ot-ble-dmp-no-rtos.slcp
+    part_compatibility: *ot_parts_all
+    ide_compatibility: *ot_ides
+    toolchain_compatibility: *ot_toolchains
+  - path: ../openthread/sample-apps/ot-ble-dmp/ot-ble-dmp-no-buttons.slcp
+    part_compatibility: *ot_parts_all
+    ide_compatibility: *ot_ides
+    toolchain_compatibility: *ot_toolchains
+  - path: ../openthread/sample-apps/ot-ble-dmp/ot-ble-dmp.slcp
+    part_compatibility: *ot_parts_all
+    ide_compatibility: *ot_ides
+    toolchain_compatibility: *ot_toolchains
+    board_blacklist:
+      - brd2704a
+  - path: ../openthread/sample-apps/ot-ncp/dmp/ot-ncp-ftd-ble-rcp.slcp
+    part_compatibility: *ot_parts_all
+    ide_compatibility: *ot_ides
+    toolchain_compatibility: *ot_toolchains
+  - path: ../openthread/sample-apps/ot-ncp/dmp/rcp-spi-802154-blehci.slcp
+    part_compatibility: *ot_parts_rcp
+    orphan_part_compatibility: *ot_parts_without_boards
+    ide_compatibility: *ot_ides
+    toolchain_compatibility: *ot_toolchains
+  - path: ../openthread/sample-apps/ot-ncp/dmp/rcp-uart-802154-blehci.slcp
+    part_compatibility: *ot_parts_rcp
+    orphan_part_compatibility: *ot_parts_without_boards
+    ide_compatibility: *ot_ides
+    toolchain_compatibility: *ot_toolchains
+  - path: ../openthread/sample-apps/ot-ble-dmp/multi-instance/ot-ble-dmp-multi-instance.slcp
+    part_compatibility: *ot_parts_all
+    ide_compatibility: *ot_ides
+    toolchain_compatibility: *ot_toolchains
+    board_blacklist:
+      - brd2704a
+  - path: ../openthread/sample-apps/ot-ble-dmp/trustzone/ot-ble-dmp-tz-ns.slcp
+    part_compatibility: *ot_parts_hidden
+  - path: ../openthread/sample-apps/ot-ble-dmp/trustzone/ot-ble-dmp-tz.slcw
+    part_compatibility: *ot_parts_tz
+    ide_compatibility: *ot_ides
+    toolchain_compatibility: *ot_toolchains
+    board_blacklist:
+      - brd2704a
+# pre-built demo files
+## needs the prebuild_demo tag be defined in the app. for example:
+##
+## tag:
+##  - prebuilt_demo
+##
+demo:
+  - path: ../zigbee/app/projects/multiprotocol/zigbee_ble_direct_device_light/zigbee_ble_direct_device_light.slcp
+    board_whitelist:
+      - brd4180a
+  - path: ../zigbee/app/projects/multiprotocol/zigbee_ble_dynamic_multiprotocol_light/zigbee_ble_dynamic_multiprotocol_light.slcp
+    board_whitelist:
+      - brd4186c
+  - path: ../zigbee/app/projects/multiprotocol/zigbee_ble_dynamic_multiprotocol_light_sed/zigbee_ble_dynamic_multiprotocol_light_sed.slcp
+    board_whitelist:
+      - brd4186c
+  - path: ../openthread/sample-apps/ot-ble-dmp/ot-ble-dmp-no-buttons.slcp
+    board_whitelist:
+      - brd4180a
+      - brd4186c
+      - brd2703a
+      - brd4116a
+      - brd4407a
+  - path: ../openthread/sample-apps/ot-ble-dmp/ot-ble-dmp.slcp
+    board_whitelist:
+      - brd4180a
+      - brd4186c
+      - brd2703a
+      - brd4116a
+      - brd4407a
+  - path: ../openthread/sample-apps/ot-ncp/dmp/ot-ncp-ftd-ble-rcp.slcp
+    board_whitelist:
+      - brd4180a
+      - brd4186c
+      - brd2703a
+      - brd4116a
+      - brd4407a
+  - path: ../openthread/sample-apps/ot-ncp/dmp/rcp-spi-802154-blehci.slcp
+    board_whitelist:
+      - brd4180a
+      - brd4180b
+      - brd4186c
+      - brd4116a
+      - brd4407a
+  - path: ../openthread/sample-apps/ot-ncp/dmp/rcp-uart-802154-blehci.slcp
+    board_whitelist:
+      - brd4180a
+      - brd4180b
+      - brd4186c
+      - brd2703a
+      - brd4116a
+      - brd4407a

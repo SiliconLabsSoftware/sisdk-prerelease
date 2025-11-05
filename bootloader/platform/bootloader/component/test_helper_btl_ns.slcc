@@ -1,0 +1,15 @@
+id: test_helper_btl_ns
+package: bootloader
+category: Platform|Bootloader|Test
+quality: internal
+provides:
+  - name: test_helper_btl_ns
+source:
+  - path: platform/bootloader/test/host/bootloader_ns_tests.c
+define:
+  - name: TEST_BOOTLOADER_NS
+    value: 1
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

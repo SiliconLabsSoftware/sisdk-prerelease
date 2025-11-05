@@ -1,0 +1,62 @@
+{
+  "wildcards": {
+  },
+  "standard": {
+    "": {
+      "module": "Platform",
+      "component": "base"
+    },
+
+    "/hal/config":{
+      "component": "HAL_CONFIG"
+    },
+
+    "/hal/host":{
+      "component": "HAL_HOST"
+    },
+
+    "/hal/micro/cortexm3":{
+      "component": "HAL_MICRO_CORTEXM3"
+    },
+
+    "/hal/micro/cortexm3/bootloader":{
+      "component": "HAL_MICRO_CORTEXM3_BOOTLOADER"
+    },
+
+    "/hal/micro/cortexm3/common":{
+      "component": "HAL_MICRO_CORTEXM3_COMMON"
+    },
+
+    "/hal/micro/cortexm3/efm32":{
+      "component": "HAL_MICRO_CORTEXM3_EFM32"
+    },
+
+    "/hal/micro/cortexm3/em35x":{
+      "component": "HAL_MICRO_CORTEXM3_EM35X"
+    },
+
+    "/hal/micro/cortexm3/usb":{
+      "component": "HAL_MICRO_CORTEXM3_USB"
+    },
+
+    "/hal/micro/generic":{
+      "component": "HAL_MICRO_GENERIC"
+    },
+
+    "/hal/micro/unix":{
+      "component": "HAL_MICRO_UNIX"
+    },
+
+    "/hal/plugin":{
+      "component": "HAL_PLUGIN"
+    },
+
+    "/hal": {
+      "component": "HAL"
+    },
+
+    "/phy": {
+      "component": "PHY"
+    }
+  }
+}

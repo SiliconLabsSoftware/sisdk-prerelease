@@ -1,0 +1,51 @@
+id: stub_btl_defines
+label: "Fuzzing Parser"
+package: bootloader
+description: >
+    All defines required for Fuzzing
+category: Platform|Bootloader
+quality: internal
+source:
+  - path: platform/bootloader/test/src/fuzz/fuzz_define_mainstage_btl.c
+include:
+  - path: platform/bootloader/test/src/fuzz
+    file_list:
+      - path: fuzz_define_mainstage_btl.h
+define:
+  - name: BOOTLOADER_ON_HOST
+  - name: FLASH_PAGE_SIZE
+    value: 0x2000UL
+  - name: FLASH_BASE
+    value: 0x8000000UL
+  - name: SL_WEAK
+    value: "__attribute__ ((weak))"
+  - name: FLASH_SIZE
+    value: 0x80000UL
+  - name: MAIN_BOOTLOADER_TEST
+    value: 1
+  - name: LOCKBITS_BASE
+    value: 2000
+  - name: SRAM_BASE
+    value: 0x20000000UL
+  - name: SRAM_SIZE
+    value: 0x200000UL
+  - name: BOOTLOADER_FALLBACK_LEGACY_KEY
+    value: 1
+  - name: __STATIC_INLINE
+    value: "static inline"
+  - name: SL_NORETURN
+    value: "__attribute__ ((noreturn))"
+  - name: SL_MAX(a, b)
+    value: "((a) > (b) ? (a) : (b))"
+  - name: SL_MIN(a, b)
+    value: "((a) > (b) ? (b) : (a))"
+  - name: NVIC_SystemReset()
+    value: "do{ } while(0)"
+  - name: _SILICON_LABS_GECKO_INTERNAL_SDID_240
+    value: 1
+provides:
+  - name: stub_btl_defines
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

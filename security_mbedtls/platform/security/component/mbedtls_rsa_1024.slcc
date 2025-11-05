@@ -1,0 +1,26 @@
+id: mbedtls_rsa_1024
+package: security_mbedtls
+label: RSA-1024
+description: >-
+    This component adds support for 1024-bit RSA operations.
+category: Platform|Security|Mbed TLS|RSA
+quality: evaluation
+provides:
+  - name: mbedtls_rsa_1024
+  - name: mbedtls_rsa_size
+    allow_multiple: true
+requires:
+  - name: mbedtls_rsa
+template_contribution:
+  - name: mbedtls_mpi_max
+    value: 128
+metadata:
+    sbom:
+        license: Apache-2.0
+        upstream:
+            name: Mbed TLS
+            version: v3.6.2
+            supplier: Trusted Firmware
+            url: https://github.com/Mbed-TLS/mbedtls.git
+            comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
+root_path: security_mbedtls

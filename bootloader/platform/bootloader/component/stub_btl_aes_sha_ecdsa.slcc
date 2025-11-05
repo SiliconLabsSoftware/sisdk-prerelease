@@ -1,0 +1,26 @@
+id: stub_btl_aes_sha_ecdsa
+label: Crypto
+package: bootloader
+description: >
+    Stubs slcc for AES , SHA and ECDSA
+category: Platform|Bootloader|Stubs
+quality: internal
+source:
+  - path: platform/bootloader/test/stubs/security/sha/se_sha.c
+  - path: platform/bootloader/test/stubs/security/btl_security_sha256.c
+  - path: platform/bootloader/test/stubs/security/btl_security_ecdsa.c
+  - path: platform/bootloader/test/stubs/security/btl_security_aes.c
+include:
+  - path: platform/bootloader/test/stubs
+    file_list:
+      - path: security/sha/btl_sha256.h
+      - path: security/btl_security_ecdsa.h
+      - path: security/btl_security_sha256.h
+      - path: security/btl_security_aes.h
+      - path: security/btl_security_types.h
+provides:
+  - name: stub_btl_aes_sha_ecdsa
+metadata:
+    sbom:
+        license: MSLA AND APACHE-2.0
+root_path: bootloader

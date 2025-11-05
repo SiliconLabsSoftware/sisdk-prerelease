@@ -1,0 +1,68 @@
+id: unittest_btl_bootloadinfo_spiflash
+label: Bootloader BootloadInfo SPI Flash
+package: bootloader
+description: >
+    This component is a unit test case for bootloader bootloadinfo spiflash
+category: Platform|Bootloader|Test
+quality: internal
+define:
+  - name: "SL_DEBUG_PRINT"
+    value: 1
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32xg21_storage_spiflash.h)
+    condition:
+      - device_sdid_200
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32xg22_storage_spiflash.h)
+    condition:
+      - device_sdid_205
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32xg23_storage_spiflash.h)
+    condition:
+      - device_sdid_210
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32xg24_storage_spiflash.h)
+    condition:
+      - device_sdid_215
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32xg25_storage_spiflash.h)
+    condition:
+      - device_sdid_220
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32xg26_storage_spiflash.h)
+    condition:
+      - device_sdid_225
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32xg27_storage_spiflash.h)
+    condition:
+      - device_sdid_230
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32xg28_storage_spiflash.h)
+    condition:
+      - device_sdid_235
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32xg29_storage_spiflash.h)
+    condition:
+      - device_sdid_240
+  - name: "BTL_CONFIG_FILE"
+    value: QUOTE(config/test/btl_config_efr32fg2d_storage_spiflash.h)
+    condition:
+      - device_sdid_260
+source:
+  - path: "platform/bootloader/driver/btl_driver_util.c"
+  - path: "platform/bootloader/storage/btl_storage_library.c"
+  - path: "platform/bootloader/storage/bootloadinfo/btl_storage_bootloadinfo.c"
+  - path: "platform/bootloader/test/src/bootloadinfo/bootloadinfo_test.c"
+requires:
+  - name: test_btl_core
+  - name: unity
+  - name: emlib
+  - name: bootloader_spiflash_storage
+  - name: bootloader_aes_sha_ecdsa
+  - name: bootloader_common_storage
+provides:
+  - name: unittest_btl_bootloadinfo_spiflash
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader

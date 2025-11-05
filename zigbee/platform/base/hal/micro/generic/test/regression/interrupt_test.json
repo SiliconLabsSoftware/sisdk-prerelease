@@ -1,0 +1,5 @@
+{
+  "name": "interrupt",
+  "target": "regression-test",
+  "parser": "unity"
+}

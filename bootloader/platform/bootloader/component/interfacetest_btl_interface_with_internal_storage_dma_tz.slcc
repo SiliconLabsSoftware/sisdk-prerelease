@@ -1,0 +1,24 @@
+id: interfacetest_btl_interface_with_internal_storage_dma_tz
+label: Bootloader Interface Test for interface_with_internal_storage_dma_tz
+package: bootloader
+description: >
+    This component is an interface test for interface_with_internal_storage_dma_tz
+category: Platform|Bootloader|Test
+quality: internal
+
+provides:
+  - name: interfacetest_btl_interface_with_internal_storage_dma_tz
+
+requires:
+  - name: interfacetest_btl_interface_tz_ns_test_app_core
+
+define:
+  - name: "TEST_DMA_MSC_INTERFACE"
+    value: 1
+
+source:
+  - path: "platform/bootloader/test/src/interface/interface_test.c"
+metadata:
+    sbom:
+        license: MSLA
+root_path: bootloader
