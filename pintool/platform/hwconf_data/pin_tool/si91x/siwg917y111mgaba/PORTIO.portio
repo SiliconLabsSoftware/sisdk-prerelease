@@ -1708,19 +1708,12 @@
         <enumValue value="Disabled"/>
         <enumValue value="Enabled"/>	
       </enumProperty>
-      <enumProperty label="Location" id="portio.dac0.location.dac_out" description="" defaultValueIndex="0">
+      <enumProperty label="Location" id="portio.dac.location.dac_out" description="" defaultValueIndex="0">
         <enumValue value="0"/>
       </enumProperty>
-      <enumProperty label="OUT" id="portio.dac0.enable.dac_out" description="" defaultValueIndex="0">
+      <enumProperty label="OUT" id="portio.dac.enable.dac_out" description="" defaultValueIndex="0">
         <enumValue value="Disabled"/>
-        <enumValue value="Enabled"/>	
-      </enumProperty>
-      <enumProperty label="Location" id="portio.dac1.location.dac_out" description="" defaultValueIndex="0">
-        <enumValue value="0"/>
-      </enumProperty>
-      <enumProperty label="OUT" id="portio.dac1.enable.dac_out" description="" defaultValueIndex="0">
-        <enumValue value="Disabled"/>
-        <enumValue value="Enabled"/>	
+        <enumValue value="Enabled"/>
       </enumProperty>
       <enumProperty label="Location" id="portio.sysrtc.location.sysrtc_prs_in_g0" description="" defaultValueIndex="0">
         <enumValue value="0"/>
@@ -2307,12 +2300,12 @@
           <propertyRef refId="portio.comp2.enable.n1"/>
         </subCategory>
         <subCategory label="DAC0">
-          <propertyRef refId="portio.dac0.location.dac_out"/>
-          <propertyRef refId="portio.dac0.enable.dac_out"/>
+          <propertyRef refId="portio.dac.location.dac_out"/>
+          <propertyRef refId="portio.dac.enable.dac_out"/>
         </subCategory>
         <subCategory label="DAC1">
-          <propertyRef refId="portio.dac1.location.dac_out"/>
-          <propertyRef refId="portio.dac1.enable.dac_out"/>
+          <propertyRef refId="portio.dac.location.dac_out"/>
+          <propertyRef refId="portio.dac.enable.dac_out"/>
         </subCategory>
         <subCategory label="SYSRTC">
           <propertyRef refId="portio.sysrtc.location.sysrtc_prs_in_g0"/>
@@ -3888,15 +3881,15 @@
         </selector>			
       </module>
       <module name="DAC0">
-        <selector name="OUT" locationPropertyId="portio.dac0.location.dac_out">
-          <route name="OUT" enablePropertyId="portio.dac0.enable.dac_out">
+        <selector name="OUT" locationPropertyId="portio.dac.location.dac_out">
+          <route name="OUT" enablePropertyId="portio.dac.enable.dac_out">
             <location number="0" portBankIndex="1" pinIndex="4"/>
           </route>
         </selector>			
       </module>
       <module name="DAC1">
-        <selector name="OUT" locationPropertyId="portio.dac1.location.dac_out">
-          <route name="OUT" enablePropertyId="portio.dac1.enable.dac_out">
+        <selector name="OUT" locationPropertyId="portio.dac.location.dac_out">
+          <route name="OUT" enablePropertyId="portio.dac.enable.dac_out">
             <location number="0" portBankIndex="0" pinIndex="30"/>
           </route>
         </selector>			

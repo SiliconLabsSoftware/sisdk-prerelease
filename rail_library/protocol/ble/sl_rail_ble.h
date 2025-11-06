@@ -316,13 +316,21 @@ SLI_RAIL_ENUM(sl_rail_ble_signal_identifier_mode_t) {
    */
   SL_RAIL_BLE_SIGNAL_IDENTIFIER_MODE_DISABLE = 0u,
   /**
-   * BLE 1 Mbps (GFSK) detection mode.
+   * BLE 1 Mbps (GFSK) detection mode with SI block reset on GPIO falling edge (via PRS).
    */
   SL_RAIL_BLE_SIGNAL_IDENTIFIER_MODE_1_MBPS = 1u,
   /**
-   * BLE 2 Mbps (GFSK) detection mode.
+   * BLE 2 Mbps (GFSK) detection mode with SI block reset on GPIO falling edge (via PRS).
    */
   SL_RAIL_BLE_SIGNAL_IDENTIFIER_MODE_2_MBPS = 2u,
+  /**
+   * BLE 1 Mbps (GFSK) detection mode with SI block reset on AGC negative step.
+   */
+  SL_RAIL_BLE_SIGNAL_IDENTIFIER_MODE_1_MBPS_WITH_AGC_RESET = 3u,
+  /**
+   * BLE 2 Mbps (GFSK) detection mod with SI block reset on AGC negative step.
+   */
+  SL_RAIL_BLE_SIGNAL_IDENTIFIER_MODE_2_MBPS_WITH_AGC_RESET = 4u,
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -330,6 +338,8 @@ SLI_RAIL_ENUM(sl_rail_ble_signal_identifier_mode_t) {
 #define SL_RAIL_BLE_SIGNAL_IDENTIFIER_MODE_DISABLE ((sl_rail_ble_signal_identifier_mode_t) SL_RAIL_BLE_SIGNAL_IDENTIFIER_MODE_DISABLE)
 #define SL_RAIL_BLE_SIGNAL_IDENTIFIER_MODE_1_MBPS  ((sl_rail_ble_signal_identifier_mode_t) SL_RAIL_BLE_SIGNAL_IDENTIFIER_MODE_1_MBPS)
 #define SL_RAIL_BLE_SIGNAL_IDENTIFIER_MODE_2_MBPS  ((sl_rail_ble_signal_identifier_mode_t) SL_RAIL_BLE_SIGNAL_IDENTIFIER_MODE_2_MBPS)
+#define SL_RAIL_BLE_SIGNAL_IDENTIFIER_MODE_1_MBPS_WITH_AGC_RESET  ((sl_rail_ble_signal_identifier_mode_t) SL_RAIL_BLE_SIGNAL_IDENTIFIER_MODE_1_MBPS_WITH_AGC_RESET)
+#define SL_RAIL_BLE_SIGNAL_IDENTIFIER_MODE_2_MBPS_WITH_AGC_RESET  ((sl_rail_ble_signal_identifier_mode_t) SL_RAIL_BLE_SIGNAL_IDENTIFIER_MODE_2_MBPS_WITH_AGC_RESET)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /**

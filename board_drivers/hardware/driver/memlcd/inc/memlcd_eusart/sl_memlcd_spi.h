@@ -32,13 +32,8 @@
 
 #include "sl_status.h"
 #include "em_device.h"
-#if defined(_SILICON_LABS_32B_SERIES_2)
-#include "em_eusart.h"
-#define eusart_ClockMode     EUSART_ClockMode_TypeDef
-#else
 #include "sl_hal_eusart.h"
 #define eusart_ClockMode     sl_hal_eusart_clock_mode_t
-#endif
 #include "sl_clock_manager.h"
 
 #ifdef __cplusplus

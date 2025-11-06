@@ -100,7 +100,7 @@ void sl_hal_pdm_init(PDM_TypeDef *pdm,
 #endif
 
   // Write the CFG1 register with the configurations.
-  pdm->CFG1 = (pdm->CFG1 & ~(_PDM_CFG1_PRESC_MASK))
+  pdm->CFG1 = (pdm->CFG1 & ~_PDM_CFG1_PRESC_MASK)
               | ((uint32_t)init->clk_prescaler            << _PDM_CFG1_PRESC_SHIFT);
 
   sl_hal_pdm_enable(pdm);

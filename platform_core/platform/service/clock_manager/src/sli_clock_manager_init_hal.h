@@ -221,6 +221,7 @@ extern "C" {
 // Calculate optimal PCLK divider to keep the PCLK frequency inside the operating conditions.
 #if !defined(SLI_CLOCK_MANAGER_PCLK_MAX_FREQ_HZ)
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \

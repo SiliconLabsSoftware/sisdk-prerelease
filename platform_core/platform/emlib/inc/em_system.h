@@ -268,6 +268,9 @@ typedef enum {
   systemPartFamilyBlue2B = DEVINFO_PART_FAMILY_BG | (31 << _DEVINFO_PART_FAMILYNUM_SHIFT),   /**< EFR32 Blue Gecko Series 2 Config 11 Value Device Family */
   systemPartFamilyXg2B = DEVINFO_PART_FAMILY_FG | (31 << _DEVINFO_PART_FAMILYNUM_SHIFT),   /**< EFR32 XG Gecko Series 2 Config 11 Value Device Family */
 #endif
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)
+  systemPartFamilyFlex2D = DEVINFO_PART_FAMILY_FG | (33 << _DEVINFO_PART_FAMILYNUM_SHIFT),  /**< EFR32 Flex Gecko Series 2 Config 8 Value Device Family */
+#endif
 /* Deprecated family #defines */
 #if defined(_DEVINFO_PART_DEVICE_FAMILY_G)
   systemPartFamilyGecko   = _DEVINFO_PART_DEVICE_FAMILY_G,   /**< Gecko Device Family. */

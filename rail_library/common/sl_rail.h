@@ -6248,17 +6248,22 @@ void sl_railcb_assert_failed(sl_rail_handle_t rail_handle,
 sl_rail_status_t sl_rail_start_thermistor_measurement(sl_rail_handle_t rail_handle);
 
 /**
- * Get the thermistor impedance measurement and return \ref
- * SL_RAIL_INVALID_THERMISTOR_VALUE if the thermistor is not properly
+ * Get the thermistor impedance measurement. Sets the output parameter to
+ * \ref SL_RAIL_INVALID_THERMISTOR_VALUE if the thermistor is not properly
  * configured or the thermistor measurement is not ready.
  *
  * @param[in] rail_handle A radio-generic or real RAIL instance handle.
  * @param[out] p_thermistor_impedance_ohms A pointer to a uint32_t updated
- *   with the current thermistor impedance measurement in Ohms.
+ *   with the current thermistor impedance measurement in Ohms, or
+ *   \ref SL_RAIL_INVALID_THERMISTOR_VALUE on error.
  * @return Status code indicating success of the function call.
  *
  * @note This function is already called in \ref sl_rail_calibrate_hfxo().
  *   It does not need to be manually called during the compensation sequence.
+ *
+ * @note When HFXO compensation is enabled and a measurement is in progress,
+ *   this function returns \ref SL_RAIL_STATUS_NO_ERROR with the most recent
+ *   cached thermistor value.
  */
 sl_rail_status_t sl_rail_get_thermistor_impedance(sl_rail_handle_t rail_handle,
                                                   uint32_t *p_thermistor_impedance_ohms);

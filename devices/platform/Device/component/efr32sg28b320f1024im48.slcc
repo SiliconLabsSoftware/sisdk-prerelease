@@ -13,10 +13,10 @@
     - device_content_override
     value: system
 - source:
-  - path: platform/Device/SiliconLabs/EFR32SG28/Source/system_efr32sg28.c
+  - path: platform/Device/SiliconLabs/EFR32SG28/Source/startup_efr32sg28.c
     unless:
     - device_content_override
-  - path: platform/Device/SiliconLabs/EFR32SG28/Source/startup_efr32sg28.c
+  - path: platform/Device/SiliconLabs/EFR32SG28/Source/system_efr32sg28.c
     unless:
     - device_content_override
 - include:
@@ -167,6 +167,7 @@
   - name: device_has_radio
   - name: device_has_radio_subghz
   - name: device_has_swo
+  - name: device_has_1024kb_flash
   - name: device_compute_basic
 - recommends:
   - id: trustzone_unaware

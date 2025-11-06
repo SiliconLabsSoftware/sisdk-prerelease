@@ -64,6 +64,50 @@ config_file:
   directory: rail
   condition:
   - brd2705a
+- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
+  directory: rail
+  condition:
+  - brd4204a
+- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
+  directory: rail
+  condition:
+  - brd4204b
+- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
+  directory: rail
+  condition:
+  - brd4204c
+- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
+  directory: rail
+  condition:
+  - brd4204d
+- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
+  directory: rail
+  condition:
+  - brd4210a
+- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
+  directory: rail
+  condition:
+  - brd4263a
+- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
+  directory: rail
+  condition:
+  - brd4263b
+- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
+  directory: rail
+  condition:
+  - brd4263c
+- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
+  directory: rail
+  condition:
+  - brd4264a
+- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
+  directory: rail
+  condition:
+  - brd4264b
+- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
+  directory: rail
+  condition:
+  - brd4264c
 
 #CN_1_1b/radio_settings based on boards
 - path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg25/CN_1_1b/radio_settings.radioconf
@@ -82,6 +126,12 @@ config_file:
   directory: rail
   condition:
   - device_generic_family_efr32xg28
+  unless:
+  - hardware_board
+- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
+  directory: rail
+  condition:
+  - device_generic_family_efr32xg23
   unless:
   - hardware_board
 root_path: proprietary_default_radio_confs

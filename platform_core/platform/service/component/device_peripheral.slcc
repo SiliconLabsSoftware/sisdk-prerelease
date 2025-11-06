@@ -21,6 +21,7 @@ provides:
   - name: device_peripheral
 requires:
   - name: device_clock
+  - name: device_dma
   - name: device_peripheral_hal
   - name: code_classification
 define:

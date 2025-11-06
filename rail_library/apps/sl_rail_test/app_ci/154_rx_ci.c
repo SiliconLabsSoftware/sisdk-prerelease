@@ -1325,11 +1325,13 @@ void enable802154SignalIdentifier(sl_cli_command_arg_t *args)
 {
 #if SL_RAIL_IEEE802154_SUPPORTS_SIGNAL_IDENTIFIER
   sl_rail_status_t status;
-  bool enable = sl_cli_get_argument_uint8(args, 0);
+  sl_rail_ieee802154_signal_identifier_mode_t siMode = (sl_rail_ieee802154_signal_identifier_mode_t)sl_cli_get_argument_uint8(args, 0);
+  bool enable = (siMode != SL_RAIL_IEEE802154_SIGNAL_IDENTIFIER_MODE_DISABLE);
+
   if (sl_rail_ieee802154_is_enabled(railHandle)) {
     sl_rail_ieee802154_phy_t phyId = sl_rail_ieee802154_get_phy_id(railHandle);
     if (phyId < SL_RAIL_IEEE802154_PHY_863_MHZ_GB868) {
-      status = sl_rail_ieee802154_config_signal_identifier(railHandle, (sl_rail_ieee802154_signal_identifier_mode_t)enable);
+      status = sl_rail_ieee802154_config_signal_identifier(railHandle, siMode);
       if (status == SL_RAIL_STATUS_NO_ERROR) {
         status = sl_rail_ieee802154_enable_signal_detection(railHandle, enable);
       }

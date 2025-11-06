@@ -13,10 +13,10 @@
     - device_content_override
     value: system
 - source:
-  - path: platform/Device/SiliconLabs/SIMG301/Source/system_simg301.c
+  - path: platform/Device/SiliconLabs/SIMG301/Source/startup_simg301.c
     unless:
     - device_content_override
-  - path: platform/Device/SiliconLabs/SIMG301/Source/startup_simg301.c
+  - path: platform/Device/SiliconLabs/SIMG301/Source/system_simg301.c
     unless:
     - device_content_override
 - include:
@@ -184,6 +184,7 @@
   - name: device_supports_bluetooth_cte
   - name: device_supports_connect
   - name: device_compute_basic
+  - name: device_has_65344kb_flash
 - recommends:
   - id: trustzone_unaware
     vendor: silabs

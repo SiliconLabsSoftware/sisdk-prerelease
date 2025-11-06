@@ -14,7 +14,7 @@ provides:
 requires:
   - name: clock_manager_runtime
   - name: gpio
-  - name: emlib_usart
+  - name: hal_usart
   - name: sleeptimer
   - name: status
 include:

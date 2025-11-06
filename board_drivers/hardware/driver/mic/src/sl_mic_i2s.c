@@ -30,7 +30,7 @@
 #include <stddef.h>
 #include <math.h>
 #include "sl_clock_manager.h"
-#include "em_usart.h"
+#include "sl_hal_usart.h"
 #include "em_ldma.h"
 #include "sl_gpio.h"
 #include "dmadrv.h"
@@ -100,8 +100,9 @@ sl_status_t sl_mic_init(uint32_t sample_rate, uint8_t n_channels)
     return SL_STATUS_INVALID_PARAMETER;
   }
 
+  uint32_t ref_freq;
   uint32_t status;
-  USART_InitI2s_TypeDef usartInit = USART_INITI2S_DEFAULT;
+  sl_hal_usart_i2s_config_t usartInit = SL_HAL_USART_INIT_I2S_DEFAULT;
   sl_gpio_t mic_i2s_rx_gpio = {
     .port = SL_MIC_I2S_RX_PORT,
     .pin = SL_MIC_I2S_RX_PIN,
@@ -119,23 +120,28 @@ sl_status_t sl_mic_init(uint32_t sample_rate, uint8_t n_channels)
   sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_GPIO);
   sl_clock_manager_enable_bus_clock(MIC_I2S_USART_CLOCK(SL_MIC_I2S_PERIPHERAL_NO));
 
+  sl_clock_manager_get_clock_branch_frequency(SL_CLOCK_BRANCH_PCLK, &ref_freq);
   /* Setup GPIO pins */
   sl_gpio_set_pin_mode(&mic_i2s_rx_gpio, SL_GPIO_MODE_INPUT, 0);
   sl_gpio_set_pin_mode(&mic_i2s_clk_gpio, SL_GPIO_MODE_PUSH_PULL, 0);
   sl_gpio_set_pin_mode(&mic_i2s_cs_gpio, SL_GPIO_MODE_PUSH_PULL, 0);
 
   /* Setup USART in I2S mode to get data from microphone */
-  usartInit.sync.enable   = usartEnable;
-  usartInit.sync.baudrate = sample_rate * 64; // 32-bit stereo frame
-  usartInit.sync.autoTx   = true;
-  usartInit.format        = usartI2sFormatW32D16;
+  usartInit.sync.data_bits = SL_HAL_USART_DATA_BITS_16;
+  usartInit.sync.msb_first = true;
+  usartInit.sync.clock_div = sl_hal_usart_sync_calculate_clock_div(ref_freq, sample_rate * 64); // 32-bit stereo frame;
+  usartInit.sync.auto_tx   = true;
+  usartInit.format         = SL_HAL_USART_I2S_FORMAT_W32D16;
 
   if (n_channels == 1) {
     // Split DMA requests to discard right-channel data
-    usartInit.dmaSplit      = true;
+    usartInit.dma_split      = true;
   }
 
-  USART_InitI2s(SL_MIC_I2S_PERIPHERAL, &usartInit);
+  sl_hal_usart_enable(SL_MIC_I2S_PERIPHERAL);
+  sl_hal_usart_init_i2s(SL_MIC_I2S_PERIPHERAL, &usartInit);
+  sl_hal_usart_enable_rx(SL_MIC_I2S_PERIPHERAL);
+  sl_hal_usart_enable_tx(SL_MIC_I2S_PERIPHERAL);
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
   GPIO->USARTROUTE->ROUTEEN = GPIO_USART_ROUTEEN_RXPEN | GPIO_USART_ROUTEEN_CLKPEN | GPIO_USART_ROUTEEN_CSPEN;
@@ -211,7 +217,7 @@ sl_status_t sl_mic_deinit(void)
   sl_mic_stop();
 
   /* Reset USART peripheral and disable IO pins */
-  USART_Reset(SL_MIC_I2S_PERIPHERAL);
+  sl_hal_usart_reset(SL_MIC_I2S_PERIPHERAL);
   SL_MIC_I2S_PERIPHERAL->I2SCTRL = 0;
 
   sl_gpio_set_pin_mode(&mic_i2s_clk_gpio, SL_GPIO_MODE_DISABLED, 0);

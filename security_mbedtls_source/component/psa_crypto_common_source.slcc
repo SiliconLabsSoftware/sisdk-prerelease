@@ -38,6 +38,10 @@ include:
   - path: psa/crypto_struct.h
   - path: psa/crypto_types.h
   - path: psa/crypto_values.h
+- path: library
+  file_list:
+  - path: bignum_core_invasive.h
+  - path: common.h
 
 metadata:
   sbom:

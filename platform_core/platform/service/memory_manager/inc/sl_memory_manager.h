@@ -630,6 +630,7 @@ typedef struct sl_memory_pool {
   sli_memory_pool_free_cnt_entry_t *empty_free_cnt_head;      ///< Pointer to the empty free count entries.
   uint32_t free_blk_cnt;                                      ///< Pool available free blocks.
   sli_bank_coverage_t banks_full;                             ///< The first/end pool fully owned bank indexes.
+  sl_memory_heap_t *heap;                                     ///< Pointer to heap handle the pool belongs to.
 #else
   void *block_address;                 ///< Reserved block base address.
   uint32_t  *block_free;               ///< Pointer to pool's free blocks list.

@@ -3,6 +3,7 @@ label: Memory manager call stack usage statistics
 package: platform_core
 description: >
     Instrument and calculate the call stack usage of an application.
+    Incompatible with RTOS environments as each task has its own stack.
 category: Services|Memory Manager
 quality: evaluation
 metadata:
@@ -18,6 +19,8 @@ source:
 requires:
   - name: memory_manager
   - name: device_cortexm
+conflicts:
+  - name: kernel
 provides:
   - name: memory_manager_call_stack_usage
     condition: [device_cortexm]

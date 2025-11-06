@@ -167,8 +167,8 @@ void sl_hal_vdac_init_channel(VDAC_TypeDef *vdac,
   if (channel == SL_HAL_VDAC_CHANNEL_0) {
     vdac->CH0CFG = channel_config;
 
-    vdac->OUTTIMERCFG = ((uint32_t)(vdac->OUTTIMERCFG & ~(_VDAC_OUTTIMERCFG_CH0OUTHOLDTIME_MASK)))
-                        | (((uint32_t)init->hold_out_time << _VDAC_OUTTIMERCFG_CH0OUTHOLDTIME_SHIFT));
+    vdac->OUTTIMERCFG = (vdac->OUTTIMERCFG & ~_VDAC_OUTTIMERCFG_CH0OUTHOLDTIME_MASK)
+                        | (init->hold_out_time << _VDAC_OUTTIMERCFG_CH0OUTHOLDTIME_SHIFT);
 
     sl_hal_vdac_enable(vdac);
 
@@ -183,8 +183,8 @@ void sl_hal_vdac_init_channel(VDAC_TypeDef *vdac,
   } else {
     vdac->CH1CFG = channel_config;
 
-    vdac->OUTTIMERCFG = (vdac->OUTTIMERCFG & ~(_VDAC_OUTTIMERCFG_CH1OUTHOLDTIME_MASK))
-                        | ((uint32_t)init->hold_out_time << _VDAC_OUTTIMERCFG_CH1OUTHOLDTIME_SHIFT);
+    vdac->OUTTIMERCFG = (vdac->OUTTIMERCFG & ~_VDAC_OUTTIMERCFG_CH1OUTHOLDTIME_MASK)
+                        | (init->hold_out_time << _VDAC_OUTTIMERCFG_CH1OUTHOLDTIME_SHIFT);
 
     sl_hal_vdac_enable(vdac);
 

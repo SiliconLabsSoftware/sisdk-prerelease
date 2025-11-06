@@ -35,10 +35,6 @@
 #include "sl_gpio.h"
 #include "sl_code_classification.h"
 
-#if defined(_SILICON_LABS_32B_SERIES_3)
-#define eusartClockMode0    SL_HAL_EUSART_CLOCK_MODE_0
-#endif
-
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
 #endif
@@ -100,13 +96,6 @@ static sli_memlcd_spi_handle_t spi_handle = {
   .miso_pin  = SL_MEMLCD_SPI_VALUE_NONE,
   .clk_port  = SL_MEMLCD_SPI_CLK_PORT,
   .clk_pin   = SL_MEMLCD_SPI_CLK_PIN,
-#if defined(_SILICON_LABS_32B_SERIES_0)
-  .loc       = SL_MEMLCD_SPI_ROUTE_LOC,
-#elif defined(_SILICON_LABS_32B_SERIES_1)
-  .mosi_loc  = SL_MEMLCD_SPI_TX_LOC,
-  .miso_loc  = SL_MEMLCD_SPI_VALUE_NONE,
-  .clk_loc   = SL_MEMLCD_SPI_CLK_LOC,
-#endif
 };
 #endif
 
@@ -134,9 +123,9 @@ sl_status_t sl_memlcd_configure(struct sl_memlcd_t *device)
 
   /* Initialize the SPI bus. */
 #if defined(SL_MEMLCD_USE_EUSART)
-  sli_memlcd_spi_init(&spi_handle, device->spi_freq, eusartClockMode0);
+  sli_memlcd_spi_init(&spi_handle, device->spi_freq, SL_HAL_EUSART_CLOCK_MODE_0);
 #elif defined(SL_MEMLCD_USE_USART)
-  sli_memlcd_spi_init(&spi_handle, device->spi_freq, usartClockMode0);
+  sli_memlcd_spi_init(&spi_handle, device->spi_freq, SL_HAL_USART_CLOCK_MODE_0);
 #endif
 
   /* Setup GPIOs */
@@ -166,9 +155,9 @@ sl_status_t sl_memlcd_configure(struct sl_memlcd_t *device)
 sl_status_t sl_memlcd_refresh(const struct sl_memlcd_t *device)
 {
   #if defined(SL_MEMLCD_USE_EUSART)
-  sli_memlcd_spi_init(&spi_handle, device->spi_freq, eusartClockMode0);
+  sli_memlcd_spi_init(&spi_handle, device->spi_freq, SL_HAL_EUSART_CLOCK_MODE_0);
   #elif defined(SL_MEMLCD_USE_USART)
-  sli_memlcd_spi_init(&spi_handle, device->spi_freq, usartClockMode0);
+  sli_memlcd_spi_init(&spi_handle, device->spi_freq, SL_HAL_USART_CLOCK_MODE_0);
   #endif
 
   return SL_STATUS_OK;

@@ -15,7 +15,6 @@
  *
  ******************************************************************************/
 
-#include <string.h>
 #include <stdio.h>
 #include <sl_cpc.h>
 #include <sli_cpc.h>

@@ -16,12 +16,6 @@ requires:
   - name: psa_crypto_config
   - name: psa_crypto_common_source
 
-define:
-  - name: MBEDTLS_PSA_CRYPTO_CLIENT
-    unless:
-      - psa_crypto
-      - device_family_host
-
 metadata:
     sbom:
         license: Zlib

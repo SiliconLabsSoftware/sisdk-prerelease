@@ -57,7 +57,8 @@ int uart_plt_tx(struct sl_wsrcp_uart_plt *uart_ctxt, const void *buf, int buf_le
     osMutexRelease(uart_ctxt->tx_lock);
 
     TRACE(TR_HDLC, "hdlc tx: %s (%d bytes)",
-           bytes_str(buf, buf_len, NULL, trace_buffer, sizeof(trace_buffer), DELIM_SPACE | ELLIPSIS_STAR), buf_len);
+          str_bytes(buf, buf_len, NULL, trace_buffer, sizeof(trace_buffer),
+                    DELIM_SPACE | ELLIPSIS_STAR), buf_len);
     return buf_len;
 }
 

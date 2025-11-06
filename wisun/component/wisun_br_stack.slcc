@@ -49,6 +49,7 @@ include:
   - path: "inc/"
     file_list:
       - path: "sl_wisun_api.h"
+      - path: "sl_wisun_msg_api.h"
       - path: "sl_wisun_common.h"
       - path: "sl_wisun_connection_params_api.h"
       - path: "sl_wisun_events.h"
@@ -63,6 +64,7 @@ include:
       - path: "sli_wisun_internal_api.h"
       - path: "sli_wisun_timer_service.h"
       - path: "border_router/sl_wisun_br_api.h"
+      - path: "border_router/sl_wisun_br_msg_api.h"
       - path: "border_router/sl_wisun_br_connection_params_api.h"
       - path: "border_router/sl_wisun_br_lfn_params_api.h"
   - path: "inc/socket/"
@@ -74,7 +76,6 @@ include:
   - path: "src/"
     file_list:
       - path: "sli_wisun_certificate.h"
-      - path: "sl_wisun_msg_api.h"
   - path: "src/common/"
     file_list:
       - path: "bits.h"
@@ -86,9 +87,6 @@ include:
       - path: "ns_list.h"
       - path: "ns_types.h"
       - path: "string_extra.h"
-  - path: "src/border_router/"
-    file_list:
-      - path: "sl_wisun_br_msg_api.h"
 
 metadata:
     sbom:

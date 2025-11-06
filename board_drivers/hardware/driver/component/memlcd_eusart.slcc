@@ -35,6 +35,7 @@ requires:
   - name: sleeptimer
   - name: udelay
   - name: status
+  - name: hal_eusart
   - name: hal_generic_eusart
   - name: clock_manager_runtime
   - name: gpio

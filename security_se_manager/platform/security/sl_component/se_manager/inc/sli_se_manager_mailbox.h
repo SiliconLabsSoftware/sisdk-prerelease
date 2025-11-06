@@ -230,6 +230,8 @@ extern "C" {
     #define SLI_SE_COMMAND_WRITE_DATA_REGION              0xFF630000UL
     #define SLI_SE_COMMAND_GET_DATA_REGION_LOCATION       0xFF640000UL
     #define SLI_SE_COMMAND_ERASE_HOST_FLASH               0xFF700000UL
+    #define SLI_SE_COMMAND_SPI_DEVICE_COMMAND             0xFF090000UL
+    #define SLI_SE_COMMAND_WRITE_SPI_REGISTERS            0xFF0C0000UL
   #endif
 #endif // SLI_MAILBOX_COMMAND_SUPPORTED
 
@@ -364,7 +366,11 @@ extern "C" {
 
 /** Maximum amount of parameters for largest command in defined command set */
 #ifndef SLI_SE_COMMAND_MAX_PARAMETERS
-#define SLI_SE_COMMAND_MAX_PARAMETERS                   5U
+  #if defined(_SILICON_LABS_32B_SERIES_3) && (_SILICON_LABS_32B_SERIES_3_CONFIG >= 350)
+    #define SLI_SE_COMMAND_MAX_PARAMETERS           8U
+  #else
+    #define SLI_SE_COMMAND_MAX_PARAMETERS           5U
+  #endif
 #endif
 
 /* Sanity-check defines */

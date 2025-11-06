@@ -37,6 +37,7 @@
 #include "sl_memory_manager_config.h"
 #include "sl_memory_manager.h"
 #include "sli_memory_manager.h"
+#include "sli_code_classification.h"
 #include "sl_assert.h"
 #include "sl_bit.h"
 #include "sl_common.h"
@@ -45,7 +46,8 @@
 #include "sl_component_catalog.h"
 #endif
 
-#if defined(SL_CATALOG_BANK_RETENTION_CONTROL_PRESENT)
+#if defined(SL_CATALOG_BANK_RETENTION_CONTROL_PRESENT) ||  \
+    defined(SL_CATALOG_BANK_RETENTION_CONTROL_STUBBED_PRESENT)
 #include "sli_memory_manager_retention_control.h"
 #endif
 
@@ -439,7 +441,8 @@ sl_status_t sli_memory_create_heap(void *base_addr,
   sli_block_len_dword_encode(free_lt_list_head, (SLI_BLOCK_LEN_BYTE_TO_DWORD(size - SLI_BLOCK_METADATA_SIZE_BYTE)));
   heap->free_blocks_number++;
 
-#if defined(SL_CATALOG_BANK_RETENTION_CONTROL_PRESENT)
+#if defined(SL_CATALOG_BANK_RETENTION_CONTROL_PRESENT) ||  \
+    defined(SL_CATALOG_BANK_RETENTION_CONTROL_STUBBED_PRESENT)
   sli_memory_manager_hal_init(heap);
 #endif
 
@@ -457,6 +460,7 @@ sl_status_t sli_memory_create_heap(void *base_addr,
 /***************************************************************************//**
  * Get the heap in which a block is allocated.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_MEMORY_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 sl_memory_heap_t *sli_memory_get_heap_handle(const void *block)
 {
   (void)block;

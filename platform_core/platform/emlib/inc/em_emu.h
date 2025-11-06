@@ -1459,6 +1459,21 @@ __STATIC_INLINE bool EMU_LDOStatusGet(void)
 
 /***************************************************************************//**
  * @brief
+ *   Executes WFI with required memory barriers.
+ *
+ * @note
+ *   Calls __DSB() and __ISB() before __WFI() to ensure instruction and data
+ *   synchronization before entering sleep mode.
+ ******************************************************************************/
+__STATIC_INLINE void EMU_CallWFI(void)
+{
+  __DSB();
+  __ISB();
+  __WFI();
+}
+
+/***************************************************************************//**
+ * @brief
  *   Enter energy mode 1 (EM1).
  *
  * @note
@@ -1471,7 +1486,7 @@ __STATIC_INLINE void EMU_EnterEM1(void)
 {
   /* Enter sleep mode. */
   SCB->SCR &= ~SCB_SCR_SLEEPDEEP_Msk;
-  __WFI();
+  EMU_CallWFI();
 }
 
 #if defined(EMU_VSCALE_EM01_PRESENT)

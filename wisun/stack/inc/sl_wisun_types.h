@@ -33,6 +33,7 @@
 
 #include <stdint.h>
 #include "sl_common.h"
+#include "sl_status.h"
 #include "socket/socket.h"
 
 /**************************************************************************//**
@@ -964,12 +965,14 @@ typedef enum {
   SL_WISUN_TRACE_GROUP_TIM_SRV = 37,    ///< Timer service
   SL_WISUN_TRACE_GROUP_LFN_TIM = 38,    ///< LFN timing measurement
   SL_WISUN_TRACE_GROUP_RALG    = 39,    ///< Adaptive rate algorithms
-  SL_WISUN_TRACE_GROUP_MAC_FSM = 40,    ///< MAC Finite state machine
+  SL_WISUN_TRACE_GROUP_FSM     = 40,    ///< Finite state machine. Kept for backward compatibility.
+  SL_WISUN_TRACE_GROUP_WS_FSM  = 40,    ///< Wi-SUN Finite state machine
   SL_WISUN_TRACE_GROUP_APP     = 41,    ///< Application
   SL_WISUN_TRACE_GROUP_DC      = 42,    ///< Direct Connect
   SL_WISUN_TRACE_GROUP_REG     = 43,    ///< Regional regulation
   SL_WISUN_TRACE_GROUP_TXALG   = 44,    ///< RFC 8415 TX algorithm
-  SL_WISUN_TRACE_GROUP_WS_FSM  = 45,    ///< Wi-SUN Finite state machine
+  SL_WISUN_TRACE_GROUP_MAC_FSM = 45,    ///< MAC Finite state machine
+
   // [...] reserved for future use
   SL_WISUN_TRACE_GROUP_INT     = 63,    ///< Internal usage
   SL_WISUN_TRACE_GROUP_COUNT   = 64     ///< Max number of trace group in this enum

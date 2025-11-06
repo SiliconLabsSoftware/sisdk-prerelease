@@ -425,8 +425,10 @@ UARTDRV_Status_t UARTDRV_GetTransmitStatus(UARTDRV_Handle_t handle,
                                            UARTDRV_Count_t *bytesRemaining);
 
 uint8_t UARTDRV_GetReceiveDepth(UARTDRV_Handle_t handle);
+uint16_t UARTDRV_GetReceiveDepthExt(UARTDRV_Handle_t handle);
 
 uint8_t UARTDRV_GetTransmitDepth(UARTDRV_Handle_t handle);
+uint16_t UARTDRV_GetTransmitDepthExt(UARTDRV_Handle_t handle);
 
 Ecode_t UARTDRV_Transmit(UARTDRV_Handle_t handle,
                          uint8_t *data,

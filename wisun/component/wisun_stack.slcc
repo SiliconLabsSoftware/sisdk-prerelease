@@ -55,6 +55,7 @@ include:
   - path: "inc/"
     file_list:
       - path: "sl_wisun_api.h"
+      - path: "sl_wisun_msg_api.h"
       - path: "sl_wisun_common.h"
       - path: "sl_wisun_events.h"
       - path: "sl_wisun_regdb.h"

@@ -43,11 +43,10 @@
 
 #endif
 
-
+#if defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
 /* SiLabs Driver Headers */
 #include "sli_psa_driver_features.h"
 #include "sli_psa_crypto.h"
-
 #include <string.h>
 
 #if defined(SLI_MBEDTLS_DEVICE_HSE)
@@ -105,6 +104,7 @@
 #ifdef SLI_SECURE_KEY_STORAGE_DEVICE_SI91X
 #include "sl_si91x_psa_wrap.h"
 #endif /* Secure key storage driver **/
+#endif /* MBEDTLS_PSA_CRYPTO_DRIVERS */
 
 /* END-driver headers */
 
@@ -151,6 +151,7 @@
 static inline psa_status_t psa_driver_wrapper_validate_key_usage(
     const psa_key_policy_t *policy)
 {
+#if defined(PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT)
     if ((policy->usage & ~(PSA_KEY_USAGE_EXPORT |
                            PSA_KEY_USAGE_COPY |
                            PSA_KEY_USAGE_ENCRYPT |
@@ -172,6 +173,9 @@ static inline psa_status_t psa_driver_wrapper_validate_key_usage(
                            )) != 0) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
+#else
+    (void) policy;
+#endif
     return PSA_SUCCESS;
 }
 
@@ -195,6 +199,7 @@ static inline psa_status_t psa_driver_wrapper_init( void )
         return( status );
 #endif
 
+#if defined(PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT)
 #if defined(SLI_MBEDTLS_DEVICE_HSE)
     status = sli_se_transparent_driver_init();
     if( status != PSA_SUCCESS )
@@ -220,6 +225,7 @@ static inline psa_status_t psa_driver_wrapper_init( void )
     if( status != PSA_SUCCESS )
         return( status );
 #endif
+#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 
     (void) status;
     return( PSA_SUCCESS );
@@ -547,8 +553,7 @@ static inline psa_status_t psa_driver_wrapper_sign_hash(
 #endif /* PSA_CRYPTO_DRIVER_TEST */
 #if defined (MBEDTLS_PSA_P256M_DRIVER_ENABLED)
             if( PSA_KEY_TYPE_IS_ECC( psa_get_key_type(attributes) ) &&
-                PSA_ALG_IS_ECDSA(alg) &&
-                !PSA_ALG_ECDSA_IS_DETERMINISTIC( alg ) &&
+                PSA_ALG_IS_RANDOMIZED_ECDSA(alg) &&
                 PSA_KEY_TYPE_ECC_GET_FAMILY(psa_get_key_type(attributes)) == PSA_ECC_FAMILY_SECP_R1 &&
                 psa_get_key_bits(attributes) == 256 )
             {
@@ -694,7 +699,6 @@ static inline psa_status_t psa_driver_wrapper_verify_hash(
 #if defined (MBEDTLS_PSA_P256M_DRIVER_ENABLED)
             if( PSA_KEY_TYPE_IS_ECC( psa_get_key_type(attributes) ) &&
                 PSA_ALG_IS_ECDSA(alg) &&
-                !PSA_ALG_ECDSA_IS_DETERMINISTIC( alg ) &&
                 PSA_KEY_TYPE_ECC_GET_FAMILY(psa_get_key_type(attributes)) == PSA_ECC_FAMILY_SECP_R1 &&
                 psa_get_key_bits(attributes) == 256 )
             {
@@ -1041,6 +1045,7 @@ static inline psa_status_t psa_driver_wrapper_get_key_buffer_size_from_key_data(
             return( ( *key_buffer_size != 0 ) ?
                     PSA_SUCCESS : PSA_ERROR_NOT_SUPPORTED );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
+#if defined(PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT)
 #if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             *key_buffer_size = data_length;
@@ -1074,6 +1079,7 @@ static inline psa_status_t psa_driver_wrapper_get_key_buffer_size_from_key_data(
           return PSA_SUCCESS;
           break;
 #endif
+#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 
         default:
             (void)key_type;
@@ -1436,7 +1442,6 @@ static inline psa_status_t psa_driver_wrapper_import_key(
           return ( status );
           break;
 #endif
-#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 #if defined(SLI_PSA_DRIVER_FEATURE_KSU)
         case SL_PSA_KEY_LOCATION_KSU_0:
             status = sli_se_ksu_import_key(attributes,
@@ -1445,6 +1450,7 @@ static inline psa_status_t psa_driver_wrapper_import_key(
                                           key_buffer_length, bits);
             return status;
 #endif
+#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             (void)status;
             return( PSA_ERROR_INVALID_ARGUMENT );
@@ -1460,10 +1466,12 @@ static inline psa_status_t psa_driver_wrapper_destroy_key(
     PSA_KEY_LIFETIME_GET_LOCATION(psa_get_key_lifetime(attributes));
 
   switch ( location ) {
+#if defined(PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT)
 #if defined(SLI_PSA_DRIVER_FEATURE_KSU)
     case SL_PSA_KEY_LOCATION_KSU_0:
       status = sli_se_ksu_destroy_key(attributes);
       return status;
+#endif
 #endif
     default:
       (void)status;
@@ -1528,8 +1536,6 @@ static inline psa_status_t psa_driver_wrapper_export_key(
         ));
 #endif
 
-
-#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 #if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_WRAPPED_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             // We are on a vault device, call opaque driver
@@ -1551,6 +1557,7 @@ static inline psa_status_t psa_driver_wrapper_export_key(
                                            data_length ) );
           break;
 #endif
+#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             /* Key is declared with a lifetime not known to us */
             return( status );
@@ -1615,7 +1622,6 @@ static inline psa_status_t psa_driver_wrapper_copy_key(
                                           target_key_buffer_length);
         }
 #endif
-#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 #if defined(SLI_PSA_DRIVER_FEATURE_KSU)
         case SL_PSA_KEY_LOCATION_KSU_0:
                 return sli_se_ksu_copy_key(source_attributes,
@@ -1626,6 +1632,7 @@ static inline psa_status_t psa_driver_wrapper_copy_key(
                                           target_key_buffer_size,
                                           target_key_buffer_length);
 #endif
+#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             (void)source_key;
             (void)source_loc;
@@ -1843,7 +1850,6 @@ static inline psa_status_t psa_driver_wrapper_cipher_encrypt(
                         output_size,
                         output_length ) );
 #endif
-#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 #if defined(SLI_PSA_DRIVER_FEATURE_KSU)
         case SL_PSA_KEY_LOCATION_KSU_0:
             status = sli_hostcrypto_opaque_cipher_encrypt(
@@ -1860,6 +1866,7 @@ static inline psa_status_t psa_driver_wrapper_cipher_encrypt(
                         output_length );
             return( status );
 #endif
+#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             /* Key is declared with a lifetime not known to us */
             (void)status;
@@ -2025,10 +2032,8 @@ static inline psa_status_t psa_driver_wrapper_cipher_decrypt(
                         output_length );
             return( status );
 #endif
-#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 
         /* Add cases for opaque driver here */
-#if defined(PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT)
 #if defined(PSA_CRYPTO_DRIVER_TEST)
         case PSA_CRYPTO_TEST_DRIVER_LOCATION:
             return( mbedtls_test_opaque_cipher_decrypt( attributes,
@@ -2054,7 +2059,6 @@ static inline psa_status_t psa_driver_wrapper_cipher_decrypt(
                         output_size,
                         output_length ) );
 #endif
-#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 #if defined(SLI_PSA_DRIVER_FEATURE_KSU)
         case SL_PSA_KEY_LOCATION_KSU_0:
             return ( sli_hostcrypto_transparent_cipher_decrypt(
@@ -2068,6 +2072,7 @@ static inline psa_status_t psa_driver_wrapper_cipher_decrypt(
                         output_size,
                         output_length ) );
 #endif
+#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             /* Key is declared with a lifetime not known to us */
             (void)status;
@@ -2216,10 +2221,8 @@ static inline psa_status_t psa_driver_wrapper_cipher_encrypt_setup(
                 operation->id = SLI_SE_TRANSPARENT_DRIVER_ID;
             return( status );
 #endif
-#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 
         /* Add cases for opaque driver here */
-#if defined(PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT)
 #if defined(PSA_CRYPTO_DRIVER_TEST)
         case PSA_CRYPTO_TEST_DRIVER_LOCATION:
             status = mbedtls_test_opaque_cipher_encrypt_setup(
@@ -2245,7 +2248,6 @@ static inline psa_status_t psa_driver_wrapper_cipher_encrypt_setup(
                 operation->id = SLI_SE_OPAQUE_DRIVER_ID;
             return( status );
 #endif
-#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 #if defined(SLI_PSA_DRIVER_FEATURE_KSU)
         case SL_PSA_KEY_LOCATION_KSU_0:
             status = sli_hostcrypto_transparent_cipher_encrypt_setup(
@@ -2258,6 +2260,7 @@ static inline psa_status_t psa_driver_wrapper_cipher_encrypt_setup(
                 operation->id = SLI_HOSTCRYPTO_TRANSPARENT_DRIVER_ID;
             return( status );
 #endif
+#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             /* Key is declared with a lifetime not known to us */
             (void)status;
@@ -2402,10 +2405,8 @@ static inline psa_status_t psa_driver_wrapper_cipher_decrypt_setup(
                 operation->id = SLI_SE_TRANSPARENT_DRIVER_ID;
             return( status );
 #endif
-#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 
         /* Add cases for opaque driver here */
-#if defined(PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT)
 #if defined(PSA_CRYPTO_DRIVER_TEST)
         case PSA_CRYPTO_TEST_DRIVER_LOCATION:
             status = mbedtls_test_opaque_cipher_decrypt_setup(
@@ -2431,7 +2432,6 @@ static inline psa_status_t psa_driver_wrapper_cipher_decrypt_setup(
                 operation->id = SLI_SE_OPAQUE_DRIVER_ID;
             return( status );
 #endif
-#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 #if defined(SLI_PSA_DRIVER_FEATURE_KSU)
         case SL_PSA_KEY_LOCATION_KSU_0:
             status = sli_hostcrypto_transparent_cipher_decrypt_setup(
@@ -2444,6 +2444,7 @@ static inline psa_status_t psa_driver_wrapper_cipher_decrypt_setup(
                 operation->id = SLI_HOSTCRYPTO_TRANSPARENT_DRIVER_ID;
             return( status );
 #endif
+#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             /* Key is declared with a lifetime not known to us */
             (void)status;
@@ -3225,8 +3226,6 @@ static inline psa_status_t psa_driver_wrapper_aead_encrypt(
                         ciphertext, ciphertext_size, ciphertext_length );
             return( status );
 #endif
-#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
-
         /* Add cases for opaque driver here */
 #if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
@@ -3270,6 +3269,7 @@ static inline psa_status_t psa_driver_wrapper_aead_encrypt(
                         ciphertext, ciphertext_size, ciphertext_length );
             return( status );
 #endif
+#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             /* Key is declared with a lifetime not known to us */
             (void)status;
@@ -3405,8 +3405,6 @@ static inline psa_status_t psa_driver_wrapper_aead_decrypt(
                         plaintext, plaintext_size, plaintext_length );
             return( status );
 #endif
-#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
-
         /* Add cases for opaque driver here */
 #if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
@@ -3420,8 +3418,8 @@ static inline psa_status_t psa_driver_wrapper_aead_decrypt(
 #endif
 #if defined(SLI_AEAD_DEVICE_SI91X)
 #if defined(SLI_SECURE_KEY_STORAGE_DEVICE_SI91X)
-    case PSA_KEY_VOLATILE_PERSISTENT_WRAPPED:
-    case PSA_KEY_VOLATILE_PERSISTENT_WRAP_IMPORT:
+        case PSA_KEY_VOLATILE_PERSISTENT_WRAPPED:
+        case PSA_KEY_VOLATILE_PERSISTENT_WRAP_IMPORT:
             status = sli_si91x_crypto_aead_decrypt(
                                   attributes,
                                   key_buffer,
@@ -3450,6 +3448,7 @@ static inline psa_status_t psa_driver_wrapper_aead_decrypt(
                         plaintext, plaintext_size, plaintext_length );
             return( status );
 #endif
+#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             /* Key is declared with a lifetime not known to us */
             (void)status;
@@ -3551,7 +3550,6 @@ static inline psa_status_t psa_driver_wrapper_aead_encrypt_setup(
                         alg );
             return( status );
 #endif
-#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 
         /* Add cases for opaque driver here */
 #if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
@@ -3573,6 +3571,7 @@ static inline psa_status_t psa_driver_wrapper_aead_encrypt_setup(
                         alg );
             return( status );
 #endif
+#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             /* Key is declared with a lifetime not known to us */
             (void)status;
@@ -3676,8 +3675,6 @@ static inline psa_status_t psa_driver_wrapper_aead_decrypt_setup(
                         alg );
             return( status );
 #endif
-#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
-
         /* Add cases for opaque driver here */
 #if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
@@ -3698,6 +3695,7 @@ static inline psa_status_t psa_driver_wrapper_aead_decrypt_setup(
                         alg );
             return( status );
 #endif
+#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             /* Key is declared with a lifetime not known to us */
             (void)status;
@@ -4329,7 +4327,6 @@ static inline psa_status_t psa_driver_wrapper_mac_compute(
                         input, input_length,
                         mac, mac_size, mac_length ) );
 #endif
-#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 #if defined(SLI_PSA_DRIVER_FEATURE_KSU)
         case SL_PSA_KEY_LOCATION_KSU_0:
             return sli_hostcrypto_transparent_mac_compute(
@@ -4337,6 +4334,7 @@ static inline psa_status_t psa_driver_wrapper_mac_compute(
                         input, input_length,
                         mac, mac_size, mac_length );
 #endif
+#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             /* Key is declared with a lifetime not known to us */
             (void) key_buffer;
@@ -4472,10 +4470,7 @@ static inline psa_status_t psa_driver_wrapper_mac_sign_setup(
                 operation->id = SLI_SE_TRANSPARENT_DRIVER_ID;
             return status;
 #endif
-#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
-
         /* Add cases for opaque driver here */
-#if defined(PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT)
 #if defined(PSA_CRYPTO_DRIVER_TEST)
         case PSA_CRYPTO_TEST_DRIVER_LOCATION:
             status = mbedtls_test_opaque_mac_sign_setup(
@@ -4500,7 +4495,6 @@ static inline psa_status_t psa_driver_wrapper_mac_sign_setup(
                 operation->id = SLI_SE_OPAQUE_DRIVER_ID;
             return( status );
 #endif
-#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 #if defined(SLI_PSA_DRIVER_FEATURE_KSU)
         case SL_PSA_KEY_LOCATION_KSU_0:
             status = sli_hostcrypto_transparent_mac_sign_setup(
@@ -4512,6 +4506,7 @@ static inline psa_status_t psa_driver_wrapper_mac_sign_setup(
                 operation->id = SLI_HOSTCRYPTO_TRANSPARENT_DRIVER_ID;
             return status;
 #endif
+#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             /* Key is declared with a lifetime not known to us */
             (void) status;
@@ -4643,10 +4638,7 @@ static inline psa_status_t psa_driver_wrapper_mac_verify_setup(
                 operation->id = SLI_SE_TRANSPARENT_DRIVER_ID;
             return( status );
 #endif
-#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
-
         /* Add cases for opaque driver here */
-#if defined(PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT)
 #if defined(PSA_CRYPTO_DRIVER_TEST)
         case PSA_CRYPTO_TEST_DRIVER_LOCATION:
             status = mbedtls_test_opaque_mac_verify_setup(
@@ -4671,7 +4663,6 @@ static inline psa_status_t psa_driver_wrapper_mac_verify_setup(
                 operation->id = SLI_SE_OPAQUE_DRIVER_ID;
             return( status );
 #endif
-#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 #if defined(SLI_PSA_DRIVER_FEATURE_KSU)
         case SL_PSA_KEY_LOCATION_KSU_0:
             status = sli_hostcrypto_transparent_mac_verify_setup(
@@ -4683,6 +4674,7 @@ static inline psa_status_t psa_driver_wrapper_mac_verify_setup(
                 operation->id = SLI_HOSTCRYPTO_TRANSPARENT_DRIVER_ID;
             return( status );
 #endif
+#endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             /* Key is declared with a lifetime not known to us */
             (void) status;

@@ -78,16 +78,22 @@ enum {
 #define BUG(...)                  __BUG("" __VA_ARGS__)
 #define BUG_ON(COND, ...)         __BUG_ON(COND, "" __VA_ARGS__)
 
-enum bytes_str_options {
-    DELIM_SPACE     = 0x01, // Add space between each bytes
-    DELIM_COLON     = 0x02, // Add colon between each bytes
-    ELLIPSIS_ABRT   = 0x04, // Assert if output is too small
-    ELLIPSIS_STAR   = 0x08, // End output with * if too small
-    ELLIPSIS_DOTS   = 0x10, // End output with ... if too small
-    UPPER_HEX       = 0x20, // Use upper letters for hexadecimal digits
+enum str_bytes_options {
+    DELIM_SPACE     = 0x001, // Add space between each bytes
+    DELIM_COLON     = 0x002, // Add colon between each bytes
+    DELIM_COMMA     = 0x004, // Add comma and a space between each bytes
+    ELLIPSIS_ABRT   = 0x008, // Assert if output is too small
+    ELLIPSIS_STAR   = 0x010, // End output with * if too small
+    ELLIPSIS_DOTS   = 0x020, // End output with ... if too small
+    FMT_LHEX        = 0x040, // Use lower hexadecimal digits (%02x) (default)
+    FMT_UHEX        = 0x080, // Use upper hexadecimal digits (%02X)
+    FMT_DEC         = 0x100, // Use decimal digits (%u)
+    FMT_DEC_PAD     = 0x200, // Use padded decimal digits (%3u)
+    FMT_ASCII_ALNUM = 0x400, // Use plain chars and escaped values for non-alphanum values (%c or \\x%02x)
+    FMT_ASCII_PRINT = 0x800, // Use plain chars and escaped values for non-printable values (%c or \\x%02x)
 };
 
-char *bytes_str(const void *in_start, size_t in_len, const void **in_done, char *out_start, size_t out_len, int opt);
+char *str_bytes(const void *in_start, size_t in_len, const void **in_done, char *out_start, size_t out_len, int opt);
 
 #define __TRACE(COND, MSG, ...) \
     do {                                                             \

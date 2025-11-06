@@ -153,8 +153,8 @@ extern "C" {
                                                                                                      sli_memory_manager_get_bank_id_by_addr(heap, start_addr), \
                                                                                                      sli_memory_manager_get_bank_id_by_addr(heap, end_addr))
 #else
-#define INCREMENT_BANK_COUNTER(heap, start_addr, end_addr)
-#define DECREMENT_BANK_COUNTER(heap, start_addr, end_addr)
+#define INCREMENT_BANK_COUNTER(heap, start_addr, end_addr) (void)heap;
+#define DECREMENT_BANK_COUNTER(heap, start_addr, end_addr) (void)heap;
 #endif
 
 /*******************************************************************************
@@ -209,14 +209,14 @@ struct sli_memory_pool_block {
  ****************************   GLOBAL VARIABLES   *****************************
  ******************************************************************************/
 
-extern sl_memory_heap_t sli_general_purpose_heap;
+extern sl_memory_heap_t sli_general_purpose_heap SL_FAST_DATA;
 
 #if defined(SL_CATALOG_MEMORY_MANAGER_DTCM_PRESENT)
-extern sl_memory_heap_t sli_dtcm_heap;
+extern sl_memory_heap_t sli_dtcm_heap SL_FAST_DATA;
 #endif
 
 #if defined(SL_CATALOG_MEMORY_MANAGER_PSRAM_PRESENT)
-extern sl_memory_heap_t sli_psram_heap;
+extern sl_memory_heap_t sli_psram_heap SL_FAST_DATA;
 #endif
 
 #if defined(DEBUG_EFM) || defined(DEBUG_EFM_USER)

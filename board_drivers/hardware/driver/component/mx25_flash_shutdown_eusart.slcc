@@ -15,6 +15,7 @@ provides:
   - name: mx25_flash_shutdown_driver
 requires:
   - name: clock_manager_runtime
+  - name: hal_eusart
   - name: hal_generic_eusart
   - name: gpio
   - name: udelay

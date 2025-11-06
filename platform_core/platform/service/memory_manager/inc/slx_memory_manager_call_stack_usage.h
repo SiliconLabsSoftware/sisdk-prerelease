@@ -57,11 +57,15 @@ extern "C" {
 /***************************************************************************//**
  * Watermark the call stack. Watermark the call stack by writing a known value
  * to the unused space.
+ *
+ * @note Does not work in RTOS environments as each task has its own stack.
  ******************************************************************************/
 void slx_memory_manager_watermark_call_stack(void);
 
 /***************************************************************************//**
  * Get the call stack usage since the last watermark.
+ *
+ * @note Does not work in RTOS environments as each task has its own stack.
  *
  * @return Call stack usage in bytes.
  ******************************************************************************/

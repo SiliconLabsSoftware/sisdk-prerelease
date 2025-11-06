@@ -28,6 +28,10 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
+
+#ifndef SLI_CRYPTO_KSU_MANAGER_H
+#define SLI_CRYPTO_KSU_MANAGER_H
+
 #if defined (KSU_PRESENT)
 #include "sl_se_manager_internal_keys.h"
 #include "sl_se_manager_util.h"
@@ -36,6 +40,8 @@
 #include "sl_status.h"
 #include "sl_component_catalog.h"
 #include "sli_ksu_keyslots_config.h"
+
+#include <stddef.h>
 
 typedef enum {
   SLI_KSU_SLOT_STATUS_AVAILABLE = 0,
@@ -154,3 +160,5 @@ sl_status_t sli_ksu_key_slot_generate(sl_se_key_descriptor_t *key_desc,
                                       void *user_ref);
 
 #endif // KSU_PRESENT
+
+#endif // SLI_CRYPTO_KSU_MANAGER_H

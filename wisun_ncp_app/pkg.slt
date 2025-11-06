@@ -1,0 +1,10 @@
+# Version defaults to "0" if not defined
+version = "0.1"
+
+[dependency]
+gcc-arm-none-eabi = { version = "12.2.rel1", installer = "conan" }
+iar-embedded-workbench = { version = "9.40.1", installer = "conan" }
+radio_config_generator = { type = "tools", version = ">=0.0.0 <0.1.0", prerelease= true, installer = "conan"}
+cpc = { version = ">=4.8.0 <4.8.1", prerelease= true, installer = "conan"}
+
+wisun = { version = ">=2.10.0 <2.10.1", prerelease = true, installer = "conan" }

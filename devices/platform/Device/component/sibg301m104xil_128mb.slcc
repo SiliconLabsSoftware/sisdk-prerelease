@@ -182,6 +182,7 @@
   - name: device_supports_bluetooth_cte
   - name: device_supports_connect
   - name: device_compute_basic
+  - name: device_has_130880kb_flash
 - recommends:
   - id: trustzone_unaware
     vendor: silabs

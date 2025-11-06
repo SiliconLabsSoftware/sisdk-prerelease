@@ -30,7 +30,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
-#include "em_usart.h"
+#include "sl_hal_usart.h"
 #include "sl_gpio.h"
 #include "sl_clock_manager.h"
 #include "sl_sleeptimer.h"
@@ -996,11 +996,14 @@ sl_status_t sl_icm20648_spi_init(void)
     .port = SL_ICM20648_SPI_CS_PORT,
     .pin = SL_ICM20648_SPI_CS_PIN,
   };
-  USART_TypeDef *usart = SL_ICM20648_SPI_PERIPHERAL;
+  uint32_t baudrate = 3300000;  // SPI-frequency at 3.3 MHz
+  sl_hal_usart_sync_init_t init = SL_HAL_USART_INIT_SYNC_DEFAULT;
+  uint32_t ref_freq;
 
-  USART_InitSync_TypeDef init = USART_INITSYNC_DEFAULT;
-  init.msbf = true;           // Send most significant byte first
-  init.baudrate = 3300000;    // SPI-frequency at 3.3 MHz
+  /* Get peripheral clock branch frequency */
+  sl_clock_manager_get_clock_branch_frequency(SL_CLOCK_BRANCH_PCLK, &ref_freq);
+  init.clock_div = sl_hal_usart_sync_calculate_clock_div(ref_freq, baudrate);
+  init.msb_first = true;           // Send most significant byte first
 
   /* Enabling clock to USART */
   sl_clock_manager_enable_bus_clock(ICM20648_SPI_CLK(SL_ICM20648_SPI_PERIPHERAL_NO));
@@ -1012,10 +1015,13 @@ sl_status_t sl_icm20648_spi_init(void)
   sl_gpio_set_pin_mode(&spi_clk_gpio, SL_GPIO_MODE_PUSH_PULL, 0);  /* Clock */
   sl_gpio_set_pin_mode(&spi_cs_gpio, SL_GPIO_MODE_PUSH_PULL, 1); /* CS */
 
-  USART_Reset(SL_ICM20648_SPI_PERIPHERAL);
+  sl_hal_usart_reset(SL_ICM20648_SPI_PERIPHERAL);
 
   /* Initialize USART, in SPI master mode. */
-  USART_InitSync(usart, &init);
+  sl_hal_usart_enable(SL_ICM20648_SPI_PERIPHERAL);
+  sl_hal_usart_init_sync(SL_ICM20648_SPI_PERIPHERAL, &init);
+  sl_hal_usart_enable_rx(SL_ICM20648_SPI_PERIPHERAL);
+  sl_hal_usart_enable_tx(SL_ICM20648_SPI_PERIPHERAL);
 
   /* Enable pins at correct UART/USART location. */
 #if defined(_SILICON_LABS_32B_SERIES_2)
@@ -1051,12 +1057,12 @@ void sl_icm20648_read_register(uint16_t addr, int numBytes, uint8_t *data)
   sl_icm20648_chip_select_set(true);
 
   /* Set R/W bit to 1 - read */
-  USART_Tx(SL_ICM20648_SPI_PERIPHERAL, (regAddr | 0x80) );
-  USART_Rx(SL_ICM20648_SPI_PERIPHERAL);
+  sl_hal_usart_tx(SL_ICM20648_SPI_PERIPHERAL, (regAddr | 0x80) );
+  sl_hal_usart_rx(SL_ICM20648_SPI_PERIPHERAL);
   /* Transmit 0's to provide clock and read the data */
   while ( numBytes-- ) {
-    USART_Tx(SL_ICM20648_SPI_PERIPHERAL, 0x00);
-    *data++ = USART_Rx(SL_ICM20648_SPI_PERIPHERAL);
+    sl_hal_usart_tx(SL_ICM20648_SPI_PERIPHERAL, 0x00);
+    *data++ = sl_hal_usart_rx(SL_ICM20648_SPI_PERIPHERAL);
   }
 
   /* Disable chip select */
@@ -1080,12 +1086,12 @@ void sl_icm20648_write_register(uint16_t addr, uint8_t data)
   sl_icm20648_chip_select_set(true);
 
   /* clear R/W bit - write, send the address */
-  USART_Tx(SL_ICM20648_SPI_PERIPHERAL, (regAddr & 0x7F) );
-  USART_Rx(SL_ICM20648_SPI_PERIPHERAL);
+  sl_hal_usart_tx(SL_ICM20648_SPI_PERIPHERAL, (regAddr & 0x7F) );
+  sl_hal_usart_rx(SL_ICM20648_SPI_PERIPHERAL);
 
   /* Send the data */
-  USART_Tx(SL_ICM20648_SPI_PERIPHERAL, data);
-  USART_Rx(SL_ICM20648_SPI_PERIPHERAL);
+  sl_hal_usart_tx(SL_ICM20648_SPI_PERIPHERAL, data);
+  sl_hal_usart_rx(SL_ICM20648_SPI_PERIPHERAL);
 
   /* Disable chip select */
   sl_icm20648_chip_select_set(false);
@@ -1100,12 +1106,12 @@ void sl_icm20648_select_register_bank(uint8_t bank)
   sl_icm20648_chip_select_set(true);
 
   /* Select the Bank Select register */
-  USART_Tx(SL_ICM20648_SPI_PERIPHERAL, ICM20648_REG_BANK_SEL);
-  USART_Rx(SL_ICM20648_SPI_PERIPHERAL);
+  sl_hal_usart_tx(SL_ICM20648_SPI_PERIPHERAL, ICM20648_REG_BANK_SEL);
+  sl_hal_usart_rx(SL_ICM20648_SPI_PERIPHERAL);
 
   /* Write the desired bank address 0..3 */
-  USART_Tx(SL_ICM20648_SPI_PERIPHERAL, (bank << 4) );
-  USART_Rx(SL_ICM20648_SPI_PERIPHERAL);
+  sl_hal_usart_tx(SL_ICM20648_SPI_PERIPHERAL, (bank << 4) );
+  sl_hal_usart_rx(SL_ICM20648_SPI_PERIPHERAL);
 
   /* Disable chip select */
   sl_icm20648_chip_select_set(false);

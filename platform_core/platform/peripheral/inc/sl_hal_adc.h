@@ -135,11 +135,21 @@ SL_ENUM(sl_hal_adc_repetition_delay_t) {
 
 /// Analog gain.
 SL_ENUM(sl_hal_adc_analog_gain_t) {
+#if defined(_ADC_CFG_ANALOGGAIN_GAIN_0_3125)
   SL_HAL_ADC_ANALOG_GAIN_0_3125 = _ADC_CFG_ANALOGGAIN_GAIN_0_3125,  ///< Gain for sampling cap of 0.3125x.
+#endif
+#if defined(_ADC_CFG_ANALOGGAIN_GAIN_0_5)
   SL_HAL_ADC_ANALOG_GAIN_0_5    = _ADC_CFG_ANALOGGAIN_GAIN_0_5,     ///< Gain for sampling cap of 0.5x.
+#endif
+#if defined(_ADC_CFG_ANALOGGAIN_GAIN_1)
   SL_HAL_ADC_ANALOG_GAIN_1      = _ADC_CFG_ANALOGGAIN_GAIN_1,       ///< Gain for sampling cap of 1x.
+#endif
+#if defined(_ADC_CFG_ANALOGGAIN_GAIN_2)
   SL_HAL_ADC_ANALOG_GAIN_2      = _ADC_CFG_ANALOGGAIN_GAIN_2,       ///< Gain for sampling cap of 2x.
-  SL_HAL_ADC_ANALOG_GAIN_4      = _ADC_CFG_ANALOGGAIN_GAIN_4        ///< Gain for sampling cap of 3x.
+#endif
+#if defined(_ADC_CFG_ANALOGGAIN_GAIN_4)
+  SL_HAL_ADC_ANALOG_GAIN_4      = _ADC_CFG_ANALOGGAIN_GAIN_4        ///< Gain for sampling cap of 4x.
+#endif
 };
 
 #if defined(_ADC_CFG_OSMODE_MASK)

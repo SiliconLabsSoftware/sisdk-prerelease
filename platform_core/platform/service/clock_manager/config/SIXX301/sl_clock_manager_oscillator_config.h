@@ -85,6 +85,14 @@
 #define SL_CLOCK_MANAGER_HFXO_CTUNE    170
 #endif
 
+// <q SL_CLOCK_MANAGER_HFXO_ENXIDCBIASANA> Enable DC Bias (AC-Coupled EXTCLK)
+// <i> Enable to add an internal DC bias
+// <i> when AC-coupled connected external oscillator
+// <d> 0
+#ifndef SL_CLOCK_MANAGER_HFXO_ENXIDCBIASANA
+#define SL_CLOCK_MANAGER_HFXO_ENXIDCBIASANA    0
+#endif
+
 // <o SL_CLOCK_MANAGER_HFXO_PRECISION> Precision in PPM <0-65535>
 // <d> 50
 #ifndef SL_CLOCK_MANAGER_HFXO_PRECISION
@@ -155,6 +163,13 @@
 // <d> 63
 #ifndef SL_CLOCK_MANAGER_LFXO_CTUNE
 #define SL_CLOCK_MANAGER_LFXO_CTUNE    63
+#endif
+
+// <o SL_CLOCK_MANAGER_LFXO_GAIN> Gain <0-3>
+// <i> LFXO gain setting for load capacitance matching
+// <d> 1
+#ifndef SL_CLOCK_MANAGER_LFXO_GAIN
+#define SL_CLOCK_MANAGER_LFXO_GAIN    1
 #endif
 
 // <o SL_CLOCK_MANAGER_LFXO_PRECISION> LFXO precision in PPM <0-65535>

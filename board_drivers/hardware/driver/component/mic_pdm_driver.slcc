@@ -14,7 +14,7 @@ provides:
   - name: mic_pdm_driver
 requires:
   - name: clock_manager_runtime
-  - name: emlib_pdm
+  - name: hal_pdm
   - name: emlib_ldma
   - name: hal_generic_gpio
   - name: dmadrv

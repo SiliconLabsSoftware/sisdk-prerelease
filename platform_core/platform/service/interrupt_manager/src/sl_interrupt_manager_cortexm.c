@@ -156,6 +156,13 @@ static void sli_interrupt_manager_isr_wrapper(void)
   __enable_irq();
 
   sli_interrupt_manager_irq_exit_hook();
+
+#if defined(SL_CATALOG_POWER_MANAGER_ARM_SLEEP_ON_EXIT_PRESENT)
+  if (SCB->SCR & SCB_SCR_SLEEPONEXIT_Msk && interrupt_nesting_counter == 0U) {
+    __DSB();
+    __ISB();
+  }
+#endif
 }
 
 #endif /* SL_INTERRUPT_MANAGER_ENABLE_HOOKS */

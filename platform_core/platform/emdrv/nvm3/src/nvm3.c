@@ -199,6 +199,9 @@ static uint32_t getObjContent(nvm3_Handle_t *h, size_t hdrLen, nvm3_Obj_t *obj, 
 static uint32_t readCounter(nvm3_Handle_t *h, nvm3_Obj_t *);
 static sl_status_t repackUntilGood(nvm3_Handle_t *h);
 static size_t findValidPageCnt(nvm3_Handle_t *h);
+static void findFirstPage(nvm3_Handle_t *h);
+static void findFirstObj(nvm3_Handle_t *h);
+static void cacheUpdate(nvm3_Handle_t *h);
 #if defined(NVM3_SECURITY)
 static sl_status_t fifoReadObj(nvm3_Handle_t *h, void *dstPtr,
                                size_t ofs, size_t len, nvm3_ObjPtr_t obj,
@@ -218,10 +221,11 @@ __STATIC_INLINE size_t pagesRepack(nvm3_Handle_t *h)
   // 4 bytes of the last object will be in the first page.
   size_t cntRepackA = 1;
   size_t objSizeRepack = h->maxObjectSize - 4;
-#if defined(NVM3_SECURITY)
-  objSizeRepack += NVM3_GCM_SIZE_OVERHEAD;
-#endif
   size_t cntRepackB = OBJ_PAGES_REQ(h->halInfo.pageSize, objSizeRepack);
+  // For a 4096-byte page size, cap at one page to keep it consistent across all max object sizes.
+  if (h->halInfo.pageSize == PAGE_SIZE_4096 && cntRepackB > 1U) {
+    cntRepackB = 1U;
+  }
   size_t cntExtra = EXTRA_HARD_PAGES;
 
   return cntRepackA + cntRepackB + cntExtra;
@@ -236,7 +240,21 @@ __STATIC_INLINE size_t thrFull(nvm3_Handle_t *h, size_t objSize)
 __STATIC_INLINE size_t thrRepack(nvm3_Handle_t *h)
 {
   // The repack threshold is the size of the pages required for a repack
-  return pagesRepack(h) * (h->halInfo.pageSize - NVM3_PAGE_HEADER_SIZE);
+  size_t repackSz = pagesRepack(h) * (h->halInfo.pageSize - NVM3_PAGE_HEADER_SIZE);
+
+  // For a 4096-byte page size, add 5% buffer to handle large objects crossing into a third page, then round to 4 bytes.
+  if (h->halInfo.pageSize == PAGE_SIZE_4096) {
+    size_t secondPageUsableBytes = h->halInfo.pageSize - NVM3_PAGE_HEADER_SIZE - NVM3_OBJ_HEADER_SIZE_LARGE;
+#if defined(NVM3_SECURITY)
+    secondPageUsableBytes -= NVM3_GCM_SIZE_OVERHEAD;
+#endif
+    // For an object extending from first page to subsequent pages, at least 4 bytes must remain on the first page.
+    size_t thirdPageCrossoverThreshold = 4U + secondPageUsableBytes;
+    if (h->maxObjectSize > thirdPageCrossoverThreshold) {
+      repackSz += (((h->halInfo.pageSize - NVM3_PAGE_HEADER_SIZE) / 20U + 3U) & ~3U);
+    }
+  }
+  return repackSz;
 }
 
 __STATIC_INLINE size_t thrHard(nvm3_Handle_t *h, size_t objSize)
@@ -246,7 +264,9 @@ __STATIC_INLINE size_t thrHard(nvm3_Handle_t *h, size_t objSize)
   // And the object to write
   size_t sizeRepack = thrRepack(h);
 #if defined(NVM3_SECURITY)
-  objSize += NVM3_GCM_SIZE_OVERHEAD;
+  if (objSize > 0) {
+    objSize += NVM3_GCM_SIZE_OVERHEAD;
+  }
 #endif
   size_t sizeObj = OBJ_LEN_REQ(h->halInfo.pageSize, objSize);
 
@@ -730,7 +750,10 @@ static sl_status_t writeObj(nvm3_Handle_t *h, nvm3_Obj_t *srcObj, nvm3_Obj_t *ds
       } else {
         if ((srcObj->totalLen > 0U) && (srcObj->isFragmented)) {
           if (h->secType == NVM3_SECURITY_AEAD) {
-            srcLen -= ((srcObj->frag.idx - 1U) * NVM3_GCM_SIZE_OVERHEAD);
+            size_t overhead = (srcObj->frag.idx - 1U) * NVM3_GCM_SIZE_OVERHEAD;
+            if (srcLen >= overhead) {
+              srcLen -= overhead;
+            }
           } else {
             NVM3_ERROR_ASSERT();
             return SL_STATUS_INVALID_TYPE;
@@ -1169,37 +1192,28 @@ static sl_status_t fifoWriteObj(nvm3_Handle_t *h, nvm3_Obj_t *srcObj, bool copyO
     if (sta == SL_STATUS_OK) {
       h->fifoNextObj = pObjC->nextObjAdr;
     } else if (sta == SL_STATUS_FLASH_PROGRAM_FAILED) {
-      size_t curIdx;
-      nvm3_HalPtr_t curAdr;
-      size_t badIdx;
-      nvm3_HalPtr_t badAdr;
       sl_status_t staCpy = SL_STATUS_OK;
 
       // Handle a write error.
       // Copy any objects in front of the failing object, then rewrite the object.
-      do {
-        // Src
-        curIdx = pageIdxFromAdr(h, dstAdr);
-        curAdr = nvm3_pageGetFirstObj(pageAdrFromIdx(h, curIdx));
-        // Dst
-        nextObj = getFirstObjAdrInNextGoodPage(h, h->fifoNextObj);
-        if (nextObj != h->fifoFirstObj) {
-          h->fifoNextObj = nextObj;
-          h->unusedNvmSize -= pageFreeSize(h, pObjC->nextObjAdr);
-        } else {
-          break;
-        }
+      // Src
+      size_t curIdx = pageIdxFromAdr(h, dstAdr);
+      nvm3_HalPtr_t curAdr = nvm3_pageGetFirstObj(pageAdrFromIdx(h, curIdx));
+      // Dst
+      nextObj = getFirstObjAdrInNextGoodPage(h, h->fifoNextObj);
+      if (nextObj != h->fifoFirstObj) {
+        h->fifoNextObj = nextObj;
+        h->unusedNvmSize -= pageFreeSize(h, pObjC->nextObjAdr);
         // Length
         size_t len = (size_t)dstAdr - (size_t)curAdr;
         // Use idx and len to check if the error is on a page with previous data.
-        badIdx = pageIdxFromAdr(h, wrFailure.addrError);
+        size_t badIdx = pageIdxFromAdr(h, wrFailure.addrError);
         if ((badIdx == curIdx) && (len > 0U)) {
-          // To copy obj to a new page, decrypt the obj first then encrypt the obj with obj and page info
+          // To copy obj to a new page, decrypt the obj first then encrypt the obj with obj and page info.
           NVM3_OBJ_T_ALLOCATION(pObjD);
           nvm3_ObjHdrSmall_t fraHdrSmall;
           nvm3_ObjGroup_t group;
           nvm3_ObjectKey_t key;
-          nvm3_ObjPtr_t dstAdr1;
           objBegin(pObjD);
           objBegin(pObjE);
           while (len != 0U) {
@@ -1207,50 +1221,63 @@ static sl_status_t fifoWriteObj(nvm3_Handle_t *h, nvm3_Obj_t *srcObj, bool copyO
             nvm3_halReadWords(HAL, curAdr, &fraHdrSmall, NVM3_OBJ_HEADER_SIZE_WSMALL);
             key = nvm3_objHdrGetKey(&fraHdrSmall);
             staCpy = findObj(h, key, pObjD, &group);
-            if (staCpy == SL_STATUS_OK) {
-              if (pObjD->isFragmented) {
-                len += (pObjD->totalLen - pObjD->frag.detail[pObjD->frag.idx - 1U].len);
-                curAdr = (uint8_t *)curAdr + pObjD->frag.detail[pObjD->frag.idx - 1U].len + NVM3_OBJ_HEADER_SIZE_LARGE;
-              }
-              dstAdr1 = h->fifoNextObj;
-              nvm3_objInit(pObjE, dstAdr1);
-              staCpy = writeObj(h, pObjD, pObjE, dstAdr1, COPY_OBJ_TRUE, group, &wrFailure);
-              if (staCpy == SL_STATUS_OK) {
-                h->fifoNextObj = pObjE->nextObjAdr;
-                nvm3_cacheSet(&h->cache, pObjE->key, pObjE->objAdr, group);
-                if ((pObjD->totalLen > NVM3_OBJ_SMALL_MAX_SIZE) || (pObjD->isFragmented)) {
-                  len -= (pObjD->totalLen + NVM3_OBJ_HEADER_SIZE_LARGE);
-                  if (!pObjD->isFragmented) {
-                    curAdr = (uint8_t *)curAdr + pObjD->totalLen + NVM3_OBJ_HEADER_SIZE_LARGE;
-                  }
-                } else {
-                  len -= (pObjD->totalLen + NVM3_OBJ_HEADER_SIZE_SMALL);
-                  curAdr = (uint8_t *)curAdr + pObjD->totalLen + NVM3_OBJ_HEADER_SIZE_SMALL;
-                }
-              } else {
-                nvm3_tracePrint(NVM3_TRACE_LEVEL_ERROR, "NVM3 ERROR - fifoWriteObj: write failed during copy obj, key=%lu, staCpy=0x%lx.\n", key, staCpy);
-                NVM3_ERROR_ASSERT();
-                return staCpy;
-              }
-            } else {
+            if (staCpy != SL_STATUS_OK) {
               nvm3_tracePrint(NVM3_TRACE_LEVEL_ERROR, "NVM3 ERROR - fifoWriteObj: find obj failed during copy obj, key=%lu, staCpy=0x%lx.\n", key, staCpy);
               NVM3_ERROR_ASSERT();
+              objEnd(pObjD);
+              objEnd(pObjE);
               return staCpy;
+            }
+            if (pObjD->isFragmented) {
+              len += (pObjD->totalLen - pObjD->frag.detail[pObjD->frag.idx - 1U].len);
+              curAdr = (uint8_t *)curAdr + pObjD->frag.detail[pObjD->frag.idx - 1U].len + NVM3_OBJ_HEADER_SIZE_LARGE;
+            }
+            dstAdr = h->fifoNextObj;
+            nvm3_objInit(pObjE, dstAdr);
+            staCpy = writeObj(h, pObjD, pObjE, dstAdr, COPY_OBJ_TRUE, group, &wrFailure);
+            if (staCpy != SL_STATUS_OK) {
+              nvm3_tracePrint(NVM3_TRACE_LEVEL_ERROR, "NVM3 ERROR - fifoWriteObj: write failed during copy obj, key=%lu, staCpy=0x%lx.\n", key, staCpy);
+              NVM3_ERROR_ASSERT();
+              objEnd(pObjD);
+              objEnd(pObjE);
+              return staCpy;
+            }
+            h->fifoNextObj = pObjE->nextObjAdr;
+#if defined(NVM3_OPTIMIZATION) && (NVM3_OPTIMIZATION == 1)
+            // Check and update existing cache entry else add new entry
+            if (!(nvm3_cacheUpdateEntry(&h->cache, pObjE->key, pObjE->objAdr, group))) {
+              // Add new cache entry
+              nvm3_cacheAddEntry(&h->cache, pObjE->key, pObjE->objAdr, group);
+            }
+#else
+            nvm3_cacheSet(&h->cache, pObjE->key, pObjE->objAdr, group);
+#endif
+            // Determine header size and update len and curAdr
+            bool isLargeObj = (pObjD->totalLen > NVM3_OBJ_SMALL_MAX_SIZE) || (pObjD->isFragmented);
+            size_t headerSize = isLargeObj ? NVM3_OBJ_HEADER_SIZE_LARGE : NVM3_OBJ_HEADER_SIZE_SMALL;
+            size_t objLenIncHeader = pObjD->totalLen + headerSize;
+            if (len >= objLenIncHeader) {
+              len -= objLenIncHeader;
+            }
+            if (isLargeObj && !pObjD->isFragmented) {
+              curAdr = (uint8_t *)curAdr + pObjD->totalLen + NVM3_OBJ_HEADER_SIZE_LARGE;
+            } else if (!isLargeObj) {
+              curAdr = (uint8_t *)curAdr + pObjD->totalLen + NVM3_OBJ_HEADER_SIZE_SMALL;
             }
           }
           objEnd(pObjD);
           objEnd(pObjE);
-        } else {
-          staCpy = SL_STATUS_OK;
         }
         // Mark page as invalid.
-        badAdr = pageAdrFromIdx(h, badIdx);
+        nvm3_HalPtr_t badAdr = pageAdrFromIdx(h, badIdx);
         nvm3_pageSetBad(HAL, badAdr);
 
         // Adjust handle variables according to operation.
         (void)findValidPageCnt(h);
+        findFirstPage(h);
+        findFirstObj(h);
         h->unusedNvmSize = getFreeSize(h);
-      } while ((staCpy != SL_STATUS_OK) && (writeFullAllowed(h, srcObj->totalLen)));
+      }
     } else {
       break;
     }
@@ -1336,7 +1363,17 @@ static sl_status_t fifoWriteObj(nvm3_Handle_t *h, nvm3_Obj_t *srcObj, bool copyO
 
         // Adjust handle variables according to operation.
         (void)findValidPageCnt(h);
+        findFirstPage(h);
+        findFirstObj(h);
         h->unusedNvmSize = getFreeSize(h);
+        if (staCpy == SL_STATUS_OK) {
+          cacheUpdate(h);
+#if defined(NVM3_OPTIMIZATION) && (NVM3_OPTIMIZATION == 1)
+          if (h->cache.usedCount > 1U) {
+            nvm3_cacheSort(&h->cache);
+          }
+#endif
+        }
       } while ((staCpy != SL_STATUS_OK) && (writeFullAllowed(h, srcObj->totalLen)));
     } else {
       break;
@@ -1481,6 +1518,10 @@ static sl_status_t fifoReadObj(nvm3_Handle_t *h, void *dstPtr,
     }
     nvm3_tracePrint(TRACE_LEVEL_LOW, "  fifoReadObj: hdrLen=%u, fragLen=%u.\n", hdrLen, fragLen);
 
+    if (fragLen == 0) {
+      // If fragLen is 0, return without retrieving data
+      return SL_STATUS_OK;
+    }
     // Jump over the header.
     srcAdr = calcAdr(fragAdr, hdrLen);
     memset(nonceVal, 0, sizeof(nonceVal));
@@ -1543,7 +1584,10 @@ static sl_status_t fifoReadObj(nvm3_Handle_t *h, void *dstPtr,
     if (read_operation == read_data) {
       size_t decBufLen = len;
       if (h->secType == NVM3_SECURITY_AEAD) {
-        decBufLen -= (obj->frag.idx * NVM3_GCM_SIZE_OVERHEAD);
+        size_t overhead = obj->frag.idx * NVM3_GCM_SIZE_OVERHEAD;
+        if (decBufLen >= overhead) {
+          decBufLen -= overhead;
+        }
       } else {
         NVM3_ERROR_ASSERT();
         return SL_STATUS_INVALID_TYPE;
@@ -2260,7 +2304,9 @@ static bool repackFirstPageScanCacheCallback(nvm3_Cache_t* cache_h, nvm3_ObjectK
     parameters->status = findObj(parameters->h, key, pObjB, &objFindGroup);
     if ((parameters->status == SL_STATUS_OK) && samePage(parameters->h, pObjB->objAdr, parameters->h->fifoFirstObj)) {
 #if defined(NVM3_SECURITY)
-      if ((parameters->copyMode == repackCopySome) && ((pObjB->totalLen - (pObjB->frag.idx * NVM3_GCM_SIZE_OVERHEAD) + parameters->copyAccumulated) > h->maxObjectSize)) {
+      size_t overhead = pObjB->frag.idx * NVM3_GCM_SIZE_OVERHEAD;
+      size_t adjustedLen = (pObjB->totalLen >= overhead) ? (pObjB->totalLen - overhead) : 0;
+      if ((parameters->copyMode == repackCopySome) && ((adjustedLen + parameters->copyAccumulated) > h->maxObjectSize)) {
 #else
       if ((parameters->copyMode == repackCopySome) && ((pObjB->totalLen + parameters->copyAccumulated) > h->maxObjectSize)) {
 #endif
@@ -2272,7 +2318,7 @@ static bool repackFirstPageScanCacheCallback(nvm3_Cache_t* cache_h, nvm3_ObjectK
           parameters->h->fifoNextObj = getFirstObjAdrInNextGoodPage(parameters->h, parameters->h->fifoFirstObj);
         }
 #if defined(NVM3_SECURITY)
-        parameters->copyAccumulated += (pObjB->totalLen - (pObjB->frag.idx * NVM3_GCM_SIZE_OVERHEAD) + NVM3_OBJ_HEADER_SIZE_LARGE);
+        parameters->copyAccumulated += (adjustedLen + NVM3_OBJ_HEADER_SIZE_LARGE);
 #else
         parameters->copyAccumulated += (pObjB->totalLen + NVM3_OBJ_HEADER_SIZE_LARGE);
 #endif
@@ -2308,14 +2354,16 @@ static bool repackFirstPageCallback(nvm3_Handle_t *h, nvm3_ObjPtr_t obj, nvm3_Ob
     if ((parameters->status == SL_STATUS_OK) && (objFindGroup != objGroupDeleted) && (pObjB->objAdr == obj->objAdr)) {
       objEnd(pObjB);
 #if defined(NVM3_SECURITY)
-      if ((parameters->copyMode == repackCopySome) && ((obj->totalLen - (obj->frag.idx * NVM3_GCM_SIZE_OVERHEAD) + parameters->copyAccumulated) > h->maxObjectSize)) {
+      size_t overhead = obj->frag.idx * NVM3_GCM_SIZE_OVERHEAD;
+      size_t adjustedLen = (obj->totalLen >= overhead) ? (obj->totalLen - overhead) : 0;
+      if ((parameters->copyMode == repackCopySome) && ((adjustedLen + parameters->copyAccumulated) > h->maxObjectSize)) {
 #else
       if ((parameters->copyMode == repackCopySome) && ((obj->totalLen + parameters->copyAccumulated) > h->maxObjectSize)) {
 #endif
         parameters->copyAllDone = false;
       } else {
 #if defined(NVM3_SECURITY)
-        parameters->copyAccumulated += (obj->totalLen - (obj->frag.idx * NVM3_GCM_SIZE_OVERHEAD) + NVM3_OBJ_HEADER_SIZE_LARGE);
+        parameters->copyAccumulated += (adjustedLen + NVM3_OBJ_HEADER_SIZE_LARGE);
 #else
         parameters->copyAccumulated += (obj->totalLen + NVM3_OBJ_HEADER_SIZE_LARGE);
 #endif
@@ -3520,7 +3568,10 @@ sl_status_t nvm3_readPartialData(nvm3_Handle_t* h, nvm3_ObjectKey_t key, void* v
         return SL_STATUS_INVALID_TYPE;
       }
       if (pObjA->totalLen > 0U) {
-        objLen = (pObjA->totalLen - (pObjA->frag.idx * sizeOverhead));
+        size_t totalOverhead = pObjA->frag.idx * sizeOverhead;
+        if (pObjA->totalLen >= totalOverhead) {
+          objLen = (pObjA->totalLen - totalOverhead);
+        }
       } else {
         objLen = pObjA->totalLen;
       }

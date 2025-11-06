@@ -29,7 +29,7 @@
  ******************************************************************************/
 
 #include "sl_clock_manager.h"
-#include "em_usart.h"
+#include "sl_hal_usart.h"
 #include "sl_gpio.h"
 #include "sl_udelay.h"
 #include "sl_mx25_flash_shutdown.h"
@@ -73,7 +73,8 @@ void sl_mx25_flash_shutdown(void)
 {
 #ifdef SL_MX25_FLASH_SHUTDOWN_PERIPHERAL
   // Init flash
-  USART_InitSync_TypeDef init = USART_INITSYNC_DEFAULT;
+  sl_hal_usart_sync_init_t init = SL_HAL_USART_INIT_SYNC_DEFAULT;
+  uint32_t ref_freq;
   sl_gpio_t mx25_flash_shutdown_tx_gpio = {
     .port = SL_MX25_FLASH_SHUTDOWN_TX_PORT,
     .pin = SL_MX25_FLASH_SHUTDOWN_TX_PIN,
@@ -93,12 +94,15 @@ void sl_mx25_flash_shutdown(void)
 
   sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_GPIO);
   sl_clock_manager_enable_bus_clock(SL_MX25_FLASH_SHUTDOWN_CLK);
-
-  init.msbf     = true;
-  init.baudrate = SL_MX25_FLASH_SHUTDOWN_BAUDRATE;
-
-  USART_InitSync(SL_MX25_FLASH_SHUTDOWN_PERIPHERAL, &init);
-
+  sl_clock_manager_get_clock_branch_frequency(SL_CLOCK_BRANCH_PCLK, &ref_freq);
+  init.msb_first = true;
+  init.clock_div = sl_hal_usart_sync_calculate_clock_div(ref_freq, SL_MX25_FLASH_SHUTDOWN_BAUDRATE);
+  
+  sl_hal_usart_enable(SL_MX25_FLASH_SHUTDOWN_PERIPHERAL);
+  sl_hal_usart_init_sync(SL_MX25_FLASH_SHUTDOWN_PERIPHERAL, &init);
+  sl_hal_usart_enable_rx(SL_MX25_FLASH_SHUTDOWN_PERIPHERAL);
+  sl_hal_usart_enable_tx(SL_MX25_FLASH_SHUTDOWN_PERIPHERAL);
+  
   // IO configs
   sl_gpio_set_pin_mode(&mx25_flash_shutdown_tx_gpio, SL_GPIO_MODE_PUSH_PULL, 1);
   sl_gpio_set_pin_mode(&mx25_flash_shutdown_rx_gpio, SL_GPIO_MODE_INPUT, 0);
@@ -137,7 +141,7 @@ void sl_mx25_flash_shutdown(void)
   cs_low();
 
   // Deep Power Down Mode command (0xB9)
-  USART_SpiTransfer(SL_MX25_FLASH_SHUTDOWN_PERIPHERAL, 0xB9);
+  sl_hal_usart_spi_transfer(SL_MX25_FLASH_SHUTDOWN_PERIPHERAL, 0xB9);
 
   // Chip select go high to end a flash command
   cs_high();
@@ -148,7 +152,7 @@ void sl_mx25_flash_shutdown(void)
   sl_gpio_set_pin_mode(&mx25_flash_shutdown_clk_gpio, SL_GPIO_MODE_DISABLED, 1);
   sl_gpio_set_pin_mode(&mx25_flash_shutdown_cs_gpio, SL_GPIO_MODE_DISABLED, 1);
 
-  USART_Reset(SL_MX25_FLASH_SHUTDOWN_PERIPHERAL);
+  sl_hal_usart_reset(SL_MX25_FLASH_SHUTDOWN_PERIPHERAL);
 
 #ifdef _GPIO_USART_ROUTEEN_MASK
   GPIO->USARTROUTE[SL_MX25_FLASH_SHUTDOWN_PERIPHERAL_NO].ROUTEEN  = _GPIO_USART_ROUTEEN_RESETVALUE;

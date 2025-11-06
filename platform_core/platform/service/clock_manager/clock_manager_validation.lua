@@ -53,6 +53,7 @@ local is_efr32xg26 = slc.is_provided("device_generic_family_efr32xg26")
 local is_efr32xg27 = slc.is_provided("device_generic_family_efr32xg27")
 local is_efr32xg28 = slc.is_provided("device_generic_family_efr32xg28")
 local is_efr32xg29 = slc.is_provided("device_generic_family_efr32xg29")
+local is_efr32xg2b = slc.is_provided("device_generic_family_efr32xg2b")
 local is_efr32xg2d = slc.is_provided("device_generic_family_efr32xg2d")
 local is_sixx301 = slc.is_provided("device_generic_family_sixx301")
 

@@ -92,6 +92,7 @@ SL_ENUM(sl_i2c_clock_hlr_t) {
                                                  || (freq_mode == SL_I2C_FREQ_FAST_MODE)  \
                                                  || (freq_mode == SL_I2C_FREQ_FASTPLUS_MODE))
 
+
 /** @} (end addtogroup device_i2c) */
 
 #ifdef __cplusplus

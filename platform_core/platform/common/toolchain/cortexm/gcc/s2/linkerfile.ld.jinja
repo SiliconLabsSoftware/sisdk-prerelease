@@ -165,17 +165,6 @@ SECTIONS
   } > DUMMY
 {%- endif %}
 
-{%- if apploader_enable %}
-  .text_apploader :
-  {
-    KEEP(*(.binapploader*))
-  } > FLASH
-  .text_signature :
-  {
-    . = ALIGN({{ flash_page_size }});
-  } > FLASH
-{%- endif %}
-
   .vectors :
   {
     linker_vectors_begin = .;

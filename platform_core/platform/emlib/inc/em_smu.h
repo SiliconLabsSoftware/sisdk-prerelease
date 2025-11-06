@@ -1014,7 +1014,7 @@ typedef struct {
   bool privilegedCRYPTOACC    : 1;  /**< Privileged access enabler for CRYPTOACC    */
   bool privilegedAHBRADIO     : 1;  /**< Privileged access enabler for AHBRADIO     */
 
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
   bool privilegedReserved0    : 1;  /**< Reserved privileged access enabler         */
   bool privilegedEMU          : 1;  /**< Privileged access enabler for EMU          */
   bool privilegedCMU          : 1;  /**< Privileged access enabler for CMU          */
@@ -1481,6 +1481,65 @@ typedef struct {
   bool privilegedACMP0        : 1;  /**< Privileged access enabler for ACMP0        */
   bool privilegedI2C0         : 1;  /**< Privileged access enabler for I2C0         */
   bool privilegedAMUXCP0      : 1;  /**< Privileged access enabler for AMUXCP0      */
+  bool privilegedEUSART0      : 1;  /**< Privileged access enabler for EUSART0      */
+  bool privilegedSEMAILBOX    : 1;  /**< Privileged access enabler for SEMAILBOX    */
+  bool privilegedAHBRADIO     : 1;  /**< Privileged access enabler for AHBRADIO     */
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)
+  bool privilegedReserved0    : 1;  /**< Reserved privileged access enabler         */
+  bool privilegedEMU          : 1;  /**< Privileged access enabler for EMU          */
+  bool privilegedCMU          : 1;  /**< Privileged access enabler for CMU          */
+  bool privilegedHFRCO0       : 1;  /**< Privileged access enabler for HFRCO0       */
+  bool privilegedFSRCO        : 1;  /**< Privileged access enabler for FSRCO        */
+  bool privilegedDPLL0        : 1;  /**< Privileged access enabler for DPLL0        */
+  bool privilegedLFXO         : 1;  /**< Privileged access enabler for LFXO         */
+  bool privilegedLFRCO        : 1;  /**< Privileged access enabler for LFRCO        */
+  bool privilegedULFRCO       : 1;  /**< Privileged access enabler for ULFRCO       */
+  bool privilegedMSC          : 1;  /**< Privileged access enabler for MSC          */
+  bool privilegedICACHE0      : 1;  /**< Privileged access enabler for ICACHE0      */
+  bool privilegedPRS          : 1;  /**< Privileged access enabler for PRS0         */
+  bool privilegedGPIO         : 1;  /**< Privileged access enabler for GPIO         */
+  bool privilegedLDMA         : 1;  /**< Privileged access enabler for LDMA         */
+  bool privilegedLDMAXBAR     : 1;  /**< Privileged access enabler for LDMAXBAR     */
+  bool privilegedTIMER0       : 1;  /**< Privileged access enabler for TIMER0       */
+  bool privilegedTIMER1       : 1;  /**< Privileged access enabler for TIMER1       */
+  bool privilegedTIMER2       : 1;  /**< Privileged access enabler for TIMER2       */
+  bool privilegedTIMER3       : 1;  /**< Privileged access enabler for TIMER3       */
+  bool privilegedTIMER4       : 1;  /**< Privileged access enabler for TIMER4       */
+  bool privilegedUSART0       : 1;  /**< Privileged access enabler for USART0       */
+  bool privilegedBURTC        : 1;  /**< Privileged access enabler for BURTC        */
+  bool privilegedI2C1         : 1;  /**< Privileged access enabler for I2C1         */
+  bool privilegedCHIPTESTCTRL : 1;  /**< Privileged access enabler for CHIPTESTCTRL */
+  bool privilegedSYSCFGCFGNS  : 1;  /**< Privileged access enabler for SYSCFGCFGNS  */
+  bool privilegedSYSCFG       : 1;  /**< Privileged access enabler for SYSCFG       */
+  bool privilegedBURAM        : 1;  /**< Privileged access enabler for BURAM        */
+  bool privilegedGPCRC        : 1;  /**< Privileged access enabler for GPCRC        */
+  bool privilegedDCDC         : 1;  /**< Privileged access enabler for DCDC         */
+  bool privilegedHOSTMAILBOX  : 1;  /**< Privileged access enabler for HOSTMAILBOX  */
+  bool privilegedEUSART1      : 1;  /**< Privileged access enabler for EUSART1      */
+  bool privilegedEUSART2      : 1;  /**< Privileged access enabler for EUSART2      */
+
+  bool privilegedSYSRTC       : 1;  /**< Privileged access enabler for SYSRTC       */
+  bool privilegedLCD          : 1;  /**< Privileged access enabler for LCD          */
+  bool privilegedKEYSCAN      : 1;  /**< Privileged access enabler for KEYSCAN      */
+  bool privilegedDMEM         : 1;  /**< Privileged access enabler for DMEM         */
+  bool privilegedLCDRF        : 1;  /**< Privileged access enabler for LCDRF        */
+  bool privilegedPFMXPPRF     : 1;  /**< Privileged access enabler for PFMXPPRF     */
+  bool privilegedWDOG0        : 1;  /**< Privileged access enabler for WDOG0        */
+  bool privilegedRADIOAES     : 1;  /**< Privileged access enabler for RADIOAES     */
+  bool privilegedSMU          : 1;  /**< Privileged access enabler for SMU          */
+  bool privilegedSMUCFGNS     : 1;  /**< Privileged access enabler for SMUCFGNS     */
+  bool privilegedLETIMER0     : 1;  /**< Privileged access enabler for LETIMER0     */
+  bool privilegedIADC0        : 1;  /**< Privileged access enabler for IADC0        */
+  bool privilegedACMP0        : 1;  /**< Privileged access enabler for ACMP0        */
+  bool privilegedACMP1        : 1;  /**< Privileged access enabler for ACMP1        */
+  bool privilegedAMUXCP0      : 1;  /**< Privileged access enabler for AMUXCP0      */
+  bool privilegedVDAC0        : 1;  /**< Privileged access enabler for VDAC0        */
+  bool privilegedPCNT         : 1;  /**< Privileged access enabler for PCNT         */
+  bool privilegedLESENSE      : 1;  /**< Privileged access enabler for LESENSE      */
+  bool privilegedHFRCO1       : 1;  /**< Privileged access enabler for HFRCO1       */
+  bool privilegedHFXO0        : 1;  /**< Privileged access enabler for HFXO0        */
+  bool privilegedI2C0         : 1;  /**< Privileged access enabler for I2C0         */
+  bool privilegedWDOG1        : 1;  /**< Privileged access enabler for WDOG1        */
   bool privilegedEUSART0      : 1;  /**< Privileged access enabler for EUSART0      */
   bool privilegedSEMAILBOX    : 1;  /**< Privileged access enabler for SEMAILBOX    */
   bool privilegedAHBRADIO     : 1;  /**< Privileged access enabler for AHBRADIO     */

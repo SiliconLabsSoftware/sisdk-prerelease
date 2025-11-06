@@ -349,14 +349,14 @@ SL_RAMFUNC_DEFINITION_BEGIN
 static void __attribute__ ((noinline)) ramWFI(void)
 {
 #if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_205)
-  __WFI();                      // Enter EM2 or EM3
+  EMU_CallWFI();                      // Enter EM2 or EM3
   if (CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk) {
     for (volatile int i = 0; i < 6; i++) {
     }                           // Dummy wait loop ...
   }
 
 #else
-  __WFI();                      // Enter EM2 or EM3
+  EMU_CallWFI();                      // Enter EM2 or EM3
 #if defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
@@ -379,7 +379,7 @@ static void __attribute__ ((noinline)) ramWFI(void)
    * quickly when coming out of EM2/EM3. Ram execution is needed to meet timing.
    * Calibration is re-enabled after voltage scaling completes. */
   uint32_t temp = EMU_PORBOD | EMU_PORBOD_GMC_CALIB_DISABLE;
-  __WFI();
+  EMU_CallWFI();
   EMU_PORBOD = temp;
 }
 SL_RAMFUNC_DEFINITION_END
@@ -1040,7 +1040,7 @@ void EMU_EnterEM2(bool restore)
   CORE_CRITICAL_SECTION(ramWFI(); )
 #if defined(ERRATA_FIX_EMU_E110_ENABLE)
 } else {
-  __WFI();
+  EMU_CallWFI();
 }
 #endif
 #elif defined(ERRATA_FIX_EMU_E220_DECBOD_ENABLE)
@@ -1048,10 +1048,10 @@ void EMU_EnterEM2(bool restore)
   if ((EMU->CTRL & EMU_CTRL_EM23VSCALEAUTOWSEN) != 0U) {
     CORE_CRITICAL_SECTION(ramWFI(); )
   } else {
-    __WFI();
+    EMU_CallWFI();
   }
 #else
-  __WFI();
+  EMU_CallWFI();
 #endif
   EMU_EFPEM23PostsleepHook();
   EMU_EM23PostsleepHook();
@@ -1253,7 +1253,7 @@ void EMU_EnterEM3(bool restore)
   CORE_CRITICAL_SECTION(ramWFI(); )
 #if defined(ERRATA_FIX_EMU_E110_ENABLE)
 } else {
-  __WFI();
+  EMU_CallWFI();
 }
 #endif
 #elif defined(ERRATA_FIX_EMU_E220_DECBOD_ENABLE)
@@ -1261,10 +1261,10 @@ void EMU_EnterEM3(bool restore)
   if ((EMU->CTRL & EMU_CTRL_EM23VSCALEAUTOWSEN) != 0U) {
     CORE_CRITICAL_SECTION(ramWFI(); )
   } else {
-    __WFI();
+    EMU_CallWFI();
   }
 #else
-  __WFI();
+  EMU_CallWFI();
 #endif
   EMU_EM23PostsleepHook();
 
@@ -1598,7 +1598,7 @@ __NO_RETURN void EMU_EnterEM4(void)
 #endif
 
   // Wait for EM4 entry using WFI.
-  __WFI();
+  EMU_CallWFI();
 
   for (;; ) {
     // __NO_RETURN

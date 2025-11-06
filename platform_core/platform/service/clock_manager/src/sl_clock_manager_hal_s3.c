@@ -50,6 +50,9 @@
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
 #endif
+#if defined(CLOCK_MANAGER_INIT_HAL_INTERNAL_PRESENT)
+#include "sli_clock_manager_init_hal_internal.h"
+#endif
 
 /*******************************************************************************
  *******************************   DEFINES   ***********************************
@@ -2079,6 +2082,23 @@ sl_status_t sli_clock_manager_hal_get_ext_flash_clk(sl_oscillator_t *oscillator)
   return SL_STATUS_OK;
 #else
   (void)oscillator;
+  return SL_STATUS_NOT_SUPPORTED;
+#endif
+}
+
+/***************************************************************************//**
+ * Retrieves the FREQPLAN NWP SOCPLL config.
+ ******************************************************************************/
+sl_status_t sli_clock_manager_hal_get_nwp_socpll_freqplan_config(const uint16_t **socpll_freqplan_config,
+                                                                 uint8_t *target_frequency_index)
+{
+#if defined(SLI_CLOCK_MANAGER_NWPSOCPLL_FREQPLAN_DATA)
+  *socpll_freqplan_config = SLI_CLOCK_MANAGER_NWPSOCPLL_FREQPLAN_DATA->socpll_config;
+  *target_frequency_index = SLI_CLOCK_MANAGER_NWPSOCPLL_FREQPLAN_DATA->default_freqsel;
+  return SL_STATUS_OK;
+#else
+  (void)socpll_freqplan_config;
+  (void)target_frequency_index;
   return SL_STATUS_NOT_SUPPORTED;
 #endif
 }

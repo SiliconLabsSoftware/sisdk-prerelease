@@ -30,7 +30,7 @@
 #include <stddef.h>
 #include <math.h>
 #include "dmadrv.h"
-#include "em_pdm.h"
+#include "sl_hal_pdm.h"
 #include "sl_hal_gpio.h"
 #include "sl_gpio.h"
 #include "sl_clock_manager.h"
@@ -143,31 +143,24 @@ sl_status_t sl_mic_init(uint32_t sample_rate, uint8_t n_channels)
   }
 
   // Initialize the PDM
-  PDM_Init_TypeDef init = PDM_INIT_DEFAULT;
-  init.prescaler = prescaler_val;
-  init.dsr = dsr;
+  sl_hal_pdm_init_t init = SL_HAL_PDM_INIT_DEFAULT;
+  init.clk_prescaler = prescaler_val;
+  init.down_sampling_rate = dsr;
   init.gain = gain;
-
-  // Don't start PDM filter after initialization
-  init.start = false;
-
-#if defined(PDM_CTRL_OUTCLKEN)
-  init.outClkEn = false;
-#endif
 
   if (n_channels == 1) {
     // Right-align the 16-bit sample in FIFO
-    init.dataFormat = pdmDataFormatRight16;
-    init.enableCh0Ch1Stereo = false;
-    init.numChannels = pdmNumberOfChannelsOne;
+    init.data_format = SL_HAL_PDM_DATA_FORMAT_RIGHT_16;
+    init.ch0ch1_stereo_enable = false;
+    init.number_channels = SL_HAL_PDM_NUMBER_OF_CHANNELS_ONE;
   } else if (n_channels == 2) {
     // Pack two 16-bit samples in one 32-bit FIFO entry
-    init.dataFormat = pdmDataFormatDouble16;
-    init.enableCh0Ch1Stereo = true;
-    init.numChannels = pdmNumberOfChannelsTwo;
+    init.data_format = SL_HAL_PDM_DATA_FORMAT_DOUBLE_16;
+    init.ch0ch1_stereo_enable = true;
+    init.number_channels = SL_HAL_PDM_NUMBER_OF_CHANNELS_TWO;
   }
 
-  PDM_Init(PDM, &init);
+  sl_hal_pdm_init(PDM, &init);
 
   // Setup DMA
   DMADRV_Init();
@@ -274,7 +267,10 @@ sl_status_t sl_mic_deinit(void)
   DMADRV_StopTransfer(dma_channel_id);
 
   // DE-initialize the PDM peripheral
-  PDM_DeInit(PDM);
+  sl_hal_pdm_stop(PDM);
+  sl_hal_pdm_clear(PDM);
+  sl_hal_pdm_fifo_flush(PDM);
+  sl_hal_pdm_reset(PDM);
 
   sl_gpio_t mic_pdm_dat0_gpio = {
     .port = SL_MIC_PDM_DAT0_PORT,
@@ -316,9 +312,9 @@ sl_status_t sl_mic_start(void)
   }
 
   // Clear and start the PDM filter
-  PDM_Clear(PDM);
-  PDM_FifoFlush(PDM);
-  PDM_Start(PDM);
+  sl_hal_pdm_clear(PDM);
+  sl_hal_pdm_fifo_flush(PDM);
+  sl_hal_pdm_start(PDM);
 
   // Reset descriptors, drop the first 4096 samples
   dma_descriptor[0].xfer.dstInc = ldmaCtrlDstIncNone;
@@ -355,9 +351,9 @@ sl_status_t sl_mic_stop(void)
   DMADRV_StopTransfer(dma_channel_id);
 
   // Stop the PDM filter
-  PDM_Stop(PDM);
+  sl_hal_pdm_stop(PDM);
 
-  while ((PDM->STATUS & PDM_STATUS_ACT) == 1U) {
+  while ((sl_hal_pdm_get_status(PDM) & PDM_STATUS_ACT) == 1U) {
     // Wait until PDM is no longer running
   }
 

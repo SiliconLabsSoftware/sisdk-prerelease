@@ -2715,5 +2715,4 @@ template_contribution:
         handler: resetCrcInitVal
         help: Reset the CRC initialization value to it's\n                    original setting from the Radio Configurator.
 
-
 root_path: rail_library

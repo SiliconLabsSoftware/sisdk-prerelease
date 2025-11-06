@@ -184,6 +184,7 @@ board_release_whitelist:
     - BRD4350A
     - BRD4351A
     - BRD4356A
+    - BRD4356Z
     - BRD4400A
     - BRD4400B
     - BRD4400C

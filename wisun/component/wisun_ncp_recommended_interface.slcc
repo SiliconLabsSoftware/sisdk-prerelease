@@ -13,11 +13,9 @@ provides:
 
 requires:
   - name: wisun_ncp_interface
-  - name: wisun_ncp_cpc
-    condition: [cpc_secondary]
 
 recommends:
-  - id: wisun_ncp_uart
+  - id: wisun_ncp_cpc
 
     vendor: silabs
 ui_hints:

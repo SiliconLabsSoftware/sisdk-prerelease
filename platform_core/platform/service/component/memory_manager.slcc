@@ -55,8 +55,20 @@ requires:
 recommends:
   - id: memory_manager_pool_power_aware
     vendor: silabs
+    condition: [device_generic_family_sixx353]
+  - id: memory_manager_pool_power_aware
+    vendor: silabs
+    condition: [device_generic_family_sixx300]
+  - id: memory_manager_pool
+    vendor: silabs
+    condition: [device_series_2]
+  - id: memory_manager_pool
+    vendor: silabs
+    condition: [device_generic_family_sixx301]
 template_contribution:
   - name: component_catalog
+    value: memory_manager
+  - name: code_classification_components
     value: memory_manager
   - name: event_handler
     condition: [sl_system, kernel]
@@ -69,6 +81,9 @@ template_contribution:
 documentation:
     docset: gecko-platform
     document: platform-service/memory-manager
+define:
+  - name: SL_CODE_COMPONENT_MEMORY_MANAGER
+    value: memory_manager
 toolchain_settings:
   - option: gcc_linker_option
     value: -Wl,--wrap=_free_r -Wl,--wrap=_malloc_r -Wl,--wrap=_calloc_r -Wl,--wrap=_realloc_r

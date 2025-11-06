@@ -2113,11 +2113,25 @@ UARTDRV_Status_t UARTDRV_GetPeripheralStatus(UARTDRV_Handle_t handle)
  * @param[in] handle Pointer to a UART driver handle.
  *
  * @return
- *    The number of queued operations.
+ *    The number of queued operations in a uint8_t format.
  ******************************************************************************/
 uint8_t UARTDRV_GetReceiveDepth(UARTDRV_Handle_t handle)
 {
   return (uint8_t)handle->rxQueue->used;
+}
+
+/***************************************************************************//**
+ * @brief
+ *    Return the number of queued receive operations.
+ *
+ * @param[in] handle Pointer to a UART driver handle.
+ *
+ * @return
+ *    The number of queued operations in a uint16_t format.
+ ******************************************************************************/
+uint16_t UARTDRV_GetReceiveDepthExt(UARTDRV_Handle_t handle)
+{
+  return handle->rxQueue->used;
 }
 
 /***************************************************************************//**
@@ -2171,11 +2185,25 @@ UARTDRV_Status_t UARTDRV_GetReceiveStatus(UARTDRV_Handle_t handle,
  * @param[in] handle Pointer to a UART driver handle.
  *
  * @return
- *    The number of queued operations.
+ *    The number of queued operations in a uint8_t format.
  ******************************************************************************/
 uint8_t UARTDRV_GetTransmitDepth(UARTDRV_Handle_t handle)
 {
   return (uint8_t)handle->txQueue->used;
+}
+
+/***************************************************************************//**
+ * @brief
+ *    Returns the number of queued transmit operations.
+ *
+ * @param[in] handle Pointer to a UART driver handle.
+ *
+ * @return
+ *    The number of queued operations in a uint16_t format.
+ ******************************************************************************/
+uint16_t UARTDRV_GetTransmitDepthExt(UARTDRV_Handle_t handle)
+{
+  return handle->txQueue->used;
 }
 
 /***************************************************************************//**

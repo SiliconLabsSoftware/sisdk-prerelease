@@ -22,7 +22,6 @@ provides:
 requires:
   - name: device
   - name: hal_system
-  - name: device_series_3
   - name: device_has_adc
   - name: enum
   - name: status

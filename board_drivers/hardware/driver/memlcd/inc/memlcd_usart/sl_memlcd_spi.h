@@ -31,7 +31,7 @@
 #define SL_MEMLCD_SPI_H
 
 #include "sl_status.h"
-#include "em_usart.h"
+#include "sl_hal_usart.h"
 #include "sl_clock_manager.h"
 
 #ifdef __cplusplus
@@ -55,13 +55,6 @@ typedef struct {
   uint8_t miso_pin;
   uint8_t clk_port;
   uint8_t clk_pin;
-#if defined(_SILICON_LABS_32B_SERIES_0) || defined(DOXYGEN)
-  uint8_t loc;
-#elif defined(_SILICON_LABS_32B_SERIES_1) || defined(DOXYGEN)
-  uint8_t mosi_loc;
-  uint8_t miso_loc;
-  uint8_t clk_loc;
-#endif
 } sli_memlcd_spi_handle_t;
 
 /***************************************************************************//**
@@ -82,7 +75,7 @@ typedef struct {
  *   If all operations completed sucessfully SL_STATUS_OK is returned. On
  *   failure a different status code is returned specifying the error.
  *****************************************************************************/
-sl_status_t sli_memlcd_spi_init(sli_memlcd_spi_handle_t *handle, int baudrate, USART_ClockMode_TypeDef mode);
+sl_status_t sli_memlcd_spi_init(sli_memlcd_spi_handle_t *handle, int baudrate, sl_hal_usart_clock_mode_t mode);
 
 /***************************************************************************//**
  * @brief

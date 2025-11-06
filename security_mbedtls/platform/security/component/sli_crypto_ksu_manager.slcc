@@ -21,6 +21,7 @@ provides:
 requires:
   - name: device
   - name: device_series_3
+  - name: se_manager
   - name: status
   - name: sl_assert
   - name: sxsymcrypt

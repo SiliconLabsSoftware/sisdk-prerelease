@@ -31,7 +31,7 @@
 #ifndef SL_SEGMENTLCD_CONFIG_H
 #define SL_SEGMENTLCD_CONFIG_H
 
-#include "em_lcd.h"
+#include "sl_hal_lcd.h"
 #include "sl_segmentlcd_pin_config.h"
 
 #ifdef __cplusplus
@@ -60,20 +60,20 @@ extern "C" {
 
 // <h> LDMA settings
 // <o SL_SEGMENT_LCD_LDMA_MODE> LDMA mode of operation
-// <lcdDmaModeDisable=> No DMA requests are generated 
-// <lcdDmaModeFrameCounterEvent=> DMA request on frame counter event
-// <lcdDmaModeDisplayEvent=> DMA request on display counter event
-// <i> Default: lcdDmaModeDisable
-#define SL_SEGMENT_LCD_LDMA_MODE      lcdDmaModeDisable
+// <SL_HAL_LCD_DMA_MODE_DISABLE=> No DMA requests are generated 
+// <SL_HAL_LCD_DMA_MODE_FRAME_COUNTER_EVENT=> DMA request on frame counter event
+// <SL_HAL_LCD_DMA_MODE_DISPLAY_EVENT=> DMA request on display counter event
+// <i> Default: SL_HAL_LCD_DMA_MODE_DISABLE
+#define SL_SEGMENT_LCD_LDMA_MODE      SL_HAL_LCD_DMA_MODE_DISABLE
 
 // <o SL_SEGMENT_LCD_BACFG_FCPRESC> Frame Counter Clock Prescaler
 // FC-CLK = FrameRate (Hz) / this factor.
-// <lcdFCPrescDiv1=> Prescale Div 1 
-// <lcdFCPrescDiv2=> Prescale Div 2
-// <lcdFCPrescDiv4=> Prescale Div 4
-// <lcdFCPrescDiv8=> Prescale Div 8
-// <i> Default: lcdFCPrescDiv1
-#define SL_SEGMENT_LCD_BACFG_FCPRESC   lcdFCPrescDiv1
+// <SL_HAL_LCD_FC_PRESC_DIV1=> Prescale Div 1 
+// <SL_HAL_LCD_FC_PRESC_DIV2=> Prescale Div 2
+// <SL_HAL_LCD_FC_PRESC_DIV4=> Prescale Div 4
+// <SL_HAL_LCD_FC_PRESC_DIV8=> Prescale Div 8
+// <i> Default: SL_HAL_LCD_FC_PRESC_DIV1
+#define SL_SEGMENT_LCD_BACFG_FCPRESC   SL_HAL_LCD_FRAME_COUNTER_PRESCALE_DIV1
 // </h> end LDMA settings
 
 // <o SL_SEGMENT_LCD_CONTRAST> LCD contrast
@@ -90,48 +90,49 @@ extern "C" {
 #define SL_SEGMENT_LCD_ENABLE_CONTROLLER      true
 
 // <o SL_SEGMENT_LCD_MUX_CONFIG> Mux configuration
-// <lcdMuxStatic=> Static 
-// <lcdMuxDuplex=> Duplex (1/2 duty cycle)
-// <lcdMuxTriplex=> Triplex (1/3 duty cycle)
-// <lcdMuxQuadruplex=> Quadruplex (1/4 duty cycle)
-// <i> Default: lcdMuxQuadruplex
-#define SL_SEGMENT_LCD_MUX_CONFIG             lcdMuxQuadruplex
+// <SL_HAL_LCD_MUX_STATIC=> Static 
+// <SL_HAL_LCD_MUX_DUPLEX=> Duplex (1/2 duty cycle)
+// <SL_HAL_LCD_MUX_TRIPLEX=> Triplex (1/3 duty cycle)
+// <SL_HAL_LCD_MUX_QUADRUPLEX=> Quadruplex (1/4 duty cycle)
+// <SL_HAL_LCD_MUX_SEXTAPLEX=> Sextaplex (1/6 duty cycle)
+// <SL_HAL_LCD_MUX_OCTAPLEX=> Octaplex (1/8 duty cycle)
+// <i> Default: SL_HAL_LCD_MUX_OCTAPLEX
+#define SL_SEGMENT_LCD_MUX_CONFIG             SL_HAL_LCD_MUX_QUADRUPLEX
 
 // <o SL_SEGMENT_LCD_WAVE_TYPE> Wave type
-// <lcdWaveLowPower=> Low power
-// <lcdWaveNormal=> Regular
-// <i> Default: lcdWaveLowPower
-#define SL_SEGMENT_LCD_WAVE_TYPE              lcdWaveLowPower
+// <SL_HAL_LCD_WAVE_LOW_POWER=> Low power
+// <SL_HAL_LCD_WAVE_NORMAL=> Regular
+// <i> Default: SL_HAL_LCD_WAVE_LOW_POWER
+#define SL_SEGMENT_LCD_WAVE_TYPE              SL_HAL_LCD_WAVE_LOW_POWER
 
 // <o SL_SEGMENT_LCD_BIAS_SETTING> Bias setting
-// <lcdBiasStatic=> Static (2 levels)
-// <lcdBiasOneHalf=> 1/2 bias (3 levels)
-// <lcdBiasOneThird=> 1/3 bias (4 levels)
-// <lcdBiasOneFourth=> 1/4 bias (5 levels)
-// <i> Default: lcdBiasOneThird
-#define SL_SEGMENT_LCD_BIAS_SETTING           lcdBiasOneThird
+// <SL_HAL_LCD_BIAS_STATIC=> Static (2 levels)
+// <SL_HAL_LCD_BIAS_ONE_HALF=> 1/2 bias (3 levels)
+// <SL_HAL_LCD_BIAS_ONE_THIRD=> 1/3 bias (4 levels)
+// <SL_HAL_LCD_BIAS_ONE_FOURTH=> 1/4 bias (5 levels)
+// <i> Default: SL_HAL_LCD_BIAS_ONE_THIRD
+#define SL_SEGMENT_LCD_BIAS_SETTING           SL_HAL_LCD_BIAS_ONE_THIRD
 
 // <o SL_SEGMENT_LCD_MODE_OPERATION> Mode of operation
-// <lcdModeStepDown=> Mode step down
-// <lcdModeChargePump=> Mode charge pump
-// <i> Default: lcdModeChargePump
-#define SL_SEGMENT_LCD_MODE_OPERATION         lcdModeChargePump
+// <SL_HAL_LCD_MODE_STEP_DOWN=> Mode step down
+// <SL_HAL_LCD_MODE_CHARGE_PUMP=> Mode charge pump
+// <i> Default: SL_HAL_LCD_MODE_CHARGE_PUMP
+#define SL_SEGMENT_LCD_MODE_OPERATION         SL_HAL_LCD_MODE_CHARGE_PUMP
 
 // <o SL_SEGMENT_LCD_CHARGE_REDIS_CYCL> Charge redistribution cycles
-// <lcdChargeRedistributionDisable=> Disabled
-// <lcdChargeRedistributionEnable=> 1 prescaled low frequency
-// <lcdChargeRedistributionTwoCycle=> 2 prescaled low frequency
-// <lcdChargeRedistributionThreeCycle=> 3 prescaled low frequency
-// <lcdChargeRedistributionFourCycle=> 4 prescaled low frequency
-// <i> Default: lcdChargeRedistributionDisable
-#define SL_SEGMENT_LCD_CHARGE_REDIS_CYCL       lcdChargeRedistributionDisable
+// <SL_HAL_LCD_CHARGE_REDISTRIBUTION_DISABLE=> Disabled
+// <SL_HAL_LCD_CHARGE_REDISTRIBUTION_ENABLE=> 1 prescaled low frequency
+// <SL_HAL_LCD_CHARGE_REDISTRIBUTION_TWO_CYCLE=> 2 prescaled low frequency
+// <SL_HAL_LCD_CHARGE_REDISTRIBUTION_THREE_CYCLE=> 3 prescaled low frequency
+// <SL_HAL_LCD_CHARGE_REDISTRIBUTION_FOUR_CYCLE=> 4 prescaled low frequency
+// <i> Default: SL_HAL_LCD_CHARGE_REDISTRIBUTION_DISABLE
+#define SL_SEGMENT_LCD_CHARGE_REDIS_CYCL       SL_HAL_LCD_CHARGE_REDISTRIBUTION_DISABLE
 
 // <<< end of configuration section >>>
 
 // LCD initialization structure
 #define SL_SEGMENT_LCD_INIT_DEF             \
-  { SL_SEGMENT_LCD_ENABLE_CONTROLLER,       \
-    SL_SEGMENT_LCD_MUX_CONFIG,              \
+  { SL_SEGMENT_LCD_MUX_CONFIG,              \
     SL_SEGMENT_LCD_BIAS_SETTING,            \
     SL_SEGMENT_LCD_WAVE_TYPE,               \
     SL_SEGMENT_LCD_MODE_OPERATION,          \
@@ -235,13 +236,13 @@ typedef enum {
 // Utility Macros
 #define SL_SEGMENT_LCD_NUMBER_OFF()                                     \
   do {                                                                  \
-    LCD_SegmentSetLow(0, SL_SEGMENT_LCD_ALL_SEG_BITMASK &               \
+    sl_hal_lcd_segment_set_low(0, SL_SEGMENT_LCD_ALL_SEG_BITMASK &               \
                       (~( (1 << SL_SEGMENT_LCD_SEG_S03)|                \
                           (1 << SL_SEGMENT_LCD_SEG_S05)|                \
                       (1 << SL_SEGMENT_LCD_SEG_S08))), 0x0000);         \
-    LCD_SegmentSetLow(1, SL_SEGMENT_LCD_ALL_SEG_BITMASK, 0x0000);       \
-    LCD_SegmentSetLow(2, SL_SEGMENT_LCD_ALL_SEG_BITMASK, 0x0000);       \
-    LCD_SegmentSetLow(3, SL_SEGMENT_LCD_ALL_SEG_BITMASK &               \
+    sl_hal_lcd_segment_set_low(1, SL_SEGMENT_LCD_ALL_SEG_BITMASK, 0x0000);       \
+    sl_hal_lcd_segment_set_low(2, SL_SEGMENT_LCD_ALL_SEG_BITMASK, 0x0000);       \
+    sl_hal_lcd_segment_set_low(3, SL_SEGMENT_LCD_ALL_SEG_BITMASK &               \
                       (~( (1 << SL_SEGMENT_LCD_SEG_S01)|                \
                           (1 << SL_SEGMENT_LCD_SEG_S07)))               \
                       , 0x0000);                                        \
@@ -249,36 +250,36 @@ typedef enum {
 
 #define SL_SEGMENT_LCD_ALL_SEGMENTS_OFF()  \
   do {                                     \
-    LCD_SegmentSetLow(0, 0xFFFFF, 0x0000); \
-    LCD_SegmentSetLow(1, 0xFFFFF, 0x0000); \
-    LCD_SegmentSetLow(2, 0xFFFFF, 0x0000); \
-    LCD_SegmentSetLow(3, 0xFFFFF, 0x0000); \
+    sl_hal_lcd_segment_set_low(0, 0xFFFFF, 0x0000); \
+    sl_hal_lcd_segment_set_low(1, 0xFFFFF, 0x0000); \
+    sl_hal_lcd_segment_set_low(2, 0xFFFFF, 0x0000); \
+    sl_hal_lcd_segment_set_low(3, 0xFFFFF, 0x0000); \
   } while (0)
 
 #define SL_SEGMENT_LCD_ALL_SEGMENTS_ON()      \
     do {                                      \
-      LCD_SegmentSetLow(0, 0xFFFFF, 0xFFFFF); \
-      LCD_SegmentSetLow(1, 0xFFFFF, 0xFFFFF); \
-      LCD_SegmentSetLow(2, 0xFFFFF, 0xFFFFF); \
-      LCD_SegmentSetLow(3, 0xFFFFF, 0xFFFFF); \
+      sl_hal_lcd_segment_set_low(0, 0xFFFFF, 0xFFFFF); \
+      sl_hal_lcd_segment_set_low(1, 0xFFFFF, 0xFFFFF); \
+      sl_hal_lcd_segment_set_low(2, 0xFFFFF, 0xFFFFF); \
+      sl_hal_lcd_segment_set_low(3, 0xFFFFF, 0xFFFFF); \
     } while (0)
 
 #define SL_SEGMENT_LCD_SEGMENTS_ENABLE()             \
   do {                                               \
-    LCD_ComEnable(SL_SEGMENT_LCD_COM_C00, true);     \
-    LCD_ComEnable(SL_SEGMENT_LCD_COM_C01, true);     \
-    LCD_ComEnable(SL_SEGMENT_LCD_COM_C02, true);     \
-    LCD_ComEnable(SL_SEGMENT_LCD_COM_C03, true);     \
-    LCD_SegmentEnable(SL_SEGMENT_LCD_SEG_S00, true); \
-    LCD_SegmentEnable(SL_SEGMENT_LCD_SEG_S01, true); \
-    LCD_SegmentEnable(SL_SEGMENT_LCD_SEG_S02, true); \
-    LCD_SegmentEnable(SL_SEGMENT_LCD_SEG_S03, true); \
-    LCD_SegmentEnable(SL_SEGMENT_LCD_SEG_S04, true); \
-    LCD_SegmentEnable(SL_SEGMENT_LCD_SEG_S05, true); \
-    LCD_SegmentEnable(SL_SEGMENT_LCD_SEG_S06, true); \
-    LCD_SegmentEnable(SL_SEGMENT_LCD_SEG_S07, true); \
-    LCD_SegmentEnable(SL_SEGMENT_LCD_SEG_S08, true); \
-    LCD_SegmentEnable(SL_SEGMENT_LCD_SEG_S09, true); \
+    sl_hal_lcd_enable_com_line(SL_SEGMENT_LCD_COM_C00);     \
+    sl_hal_lcd_enable_com_line(SL_SEGMENT_LCD_COM_C01);     \
+    sl_hal_lcd_enable_com_line(SL_SEGMENT_LCD_COM_C02);     \
+    sl_hal_lcd_enable_com_line(SL_SEGMENT_LCD_COM_C03);     \
+    sl_hal_lcd_segment_enable(SL_SEGMENT_LCD_SEG_S00);      \
+    sl_hal_lcd_segment_enable(SL_SEGMENT_LCD_SEG_S01);      \
+    sl_hal_lcd_segment_enable(SL_SEGMENT_LCD_SEG_S02);      \
+    sl_hal_lcd_segment_enable(SL_SEGMENT_LCD_SEG_S03);      \
+    sl_hal_lcd_segment_enable(SL_SEGMENT_LCD_SEG_S04);      \
+    sl_hal_lcd_segment_enable(SL_SEGMENT_LCD_SEG_S05);      \
+    sl_hal_lcd_segment_enable(SL_SEGMENT_LCD_SEG_S06);      \
+    sl_hal_lcd_segment_enable(SL_SEGMENT_LCD_SEG_S07);      \
+    sl_hal_lcd_segment_enable(SL_SEGMENT_LCD_SEG_S08);      \
+    sl_hal_lcd_segment_enable(SL_SEGMENT_LCD_SEG_S09);      \
     ;                                                \
   } while (0)
 

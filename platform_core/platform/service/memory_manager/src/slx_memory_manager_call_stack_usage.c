@@ -31,6 +31,11 @@
 #include "em_device.h"
 #include "sl_memory_manager.h"
 #include "slx_memory_manager_call_stack_usage.h"
+#include "sl_component_catalog.h"
+
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+#error "memory_manager_call_stack_usage component is not compatible with RTOS environments."
+#endif
 
 /*******************************************************************************
  *********************************   DEFINES   *********************************

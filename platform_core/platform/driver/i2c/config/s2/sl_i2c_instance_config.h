@@ -55,7 +55,8 @@
 // <i2c signal=SCL,SDA> SL_I2C_INSTANCE
 // $[I2C_SL_I2C_INSTANCE]
 // #warning "I2C peripheral not configured"
-#define SL_I2C_INSTANCE_PERIPHERAL      SL_PERIPHERAL_I2C0
+#define SL_I2C_INSTANCE_PERIPHERAL                 I2C0
+#define SL_I2C_INSTANCE_PERIPHERAL_NO              0
 
 #define SL_I2C_INSTANCE_SCL_PORT        SL_GPIO_PORT_C
 #define SL_I2C_INSTANCE_SCL_PIN         0

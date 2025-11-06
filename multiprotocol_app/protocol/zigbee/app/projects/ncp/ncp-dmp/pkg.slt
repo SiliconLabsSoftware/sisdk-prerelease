@@ -5,5 +5,4 @@ zigbee =  {version = ">=9.0.0-alpha.2 <9.0.1", installer = "conan", prerelease =
 cpc = {version = ">=4.8.0 <4.8.1", installer = "conan", prerelease = true}
 bluetooth_le_host = {version = ">=11.0.0 <11.0.1", installer = "conan", prerelease = true}
 bluetooth_le_middleware = {version = ">=11.0.0 <11.0.1", installer = "conan", prerelease = true}
-slc_cli = "~"
 gcc-arm-none-eabi = {version = "12.2.rel1", user = "silabs"}

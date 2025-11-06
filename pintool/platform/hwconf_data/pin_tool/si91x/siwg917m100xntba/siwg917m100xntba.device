@@ -188,8 +188,8 @@
       <peripheral componentIdRef="pin_tool.wfm.si91x.adc_ch16" displayName="ADC_CH16" name="ADC_CH16" revision="A" category="Analog" hidden="false"/>
       <peripheral componentIdRef="pin_tool.wfm.si91x.comp1" displayName="COMP1" name="COMP1" revision="A" category="Analog" hidden="false"/>
       <peripheral componentIdRef="pin_tool.wfm.si91x.comp2" displayName="COMP2" name="COMP2" revision="A" category="Analog" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.wfm.si91x.dac0" displayName="DAC0" name="DAC0" revision="A" category="Analog" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.wfm.si91x.dac1" displayName="DAC1" name="DAC1" revision="A" category="Analog" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.wfm.si91x.dac" displayName="DAC0" name="DAC0" revision="A" category="Analog" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.wfm.si91x.dac" displayName="DAC1" name="DAC1" revision="A" category="Analog" hidden="false"/>
       <peripheral componentIdRef="pin_tool.wfm.si91x.sysrtc" displayName="SYSRTC" name="SYSRTC" revision="A" category="Other" hidden="false"/>
       <peripheral componentIdRef="pin_tool.wfm.si91x.uulp_module" displayName="UULP_VBAT_GPIO" name="UULP_VBAT_GPIO" revision="A" category="Other" hidden="false"/>
       <peripheral componentIdRef="pin_tool.wfm.si91x.sdio" displayName="SDIO" name="SDIO" revision="A" category="Other" hidden="false"/>

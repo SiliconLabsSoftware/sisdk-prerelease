@@ -462,7 +462,7 @@ typedef sl_hal_timer_dti_init_t sl_hal_timer_dti_config_t;
 /** @endcond */
 
 #if defined(_TIMER_DTFCFG_DTEM23FEN_MASK)
-/// Default configuration for TIMER DTI initialization structure. TODO CM SL_HAL_TIMER_DTI_CONFIG_DEFAULT incorrect
+/// Default configuration for TIMER DTI initialization structure. 
 #define SL_HAL_TIMER_DTI_INIT_DEFAULT                                                                             \
   {                                                                                                               \
     (bool)_TIMER_DTCFG_DTDAS_DEFAULT,                        /* No auto restart when debugger exits. */           \

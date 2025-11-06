@@ -35,8 +35,7 @@
 #include "em_device.h"
 #include "sl_clock_manager.h"
 #include "sl_gpio.h"
-#include "em_lcd.h"
-
+#include "sl_hal_lcd.h"
 #include "sl_segmentlcd.h"
 
 /***************************************************************************//**
@@ -213,17 +212,13 @@ const uint16_t blocks[] = {
 /* sign is last element of the table  */
 const uint16_t sign_index = sizeof(segment_numbers) / sizeof(uint16_t) - 1;
 
-const LCD_Init_TypeDef lcd_init = SL_SEGMENT_LCD_INIT_DEF;
+const sl_hal_lcd_init_t lcd_init = SL_SEGMENT_LCD_INIT_DEF;
 
-#if defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_2)
 static bool dynamic_chg_redist_enabled = true;
-#endif
 
 /** @endcond */
 
-#if defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_2)
 void sl_segment_lcd_update_chg_rdst(void);
-#endif
 
 /**************************************************************************//**
  *    Disable all segments
@@ -233,24 +228,13 @@ void sl_segment_lcd_all_off(void)
   /* Turn on low segments */
   SL_SEGMENT_LCD_ALL_SEGMENTS_OFF();
 
-#if defined(_SILICON_LABS_32B_SERIES_2)
-  LCD_SyncStart(false, lcdLoadAddrNone);
-  LCD_LoadBusyWait();
-#endif
+  sl_hal_lcd_start_sync(false, SL_HAL_LCD_LOAD_ADDRESS_NONE);
+  sl_hal_lcd_wait_load_busy();
 
-#if defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_2)
   /* Switching charge redistribution OFF (if dynamic change is enabled)*/
   if (dynamic_chg_redist_enabled) {
-    /* Disable the controller before reconfiguration. */
-    LCD_Enable(false);
-#if defined(_SILICON_LABS_32B_SERIES_2)
-    LCD_ReadyWait();
-#endif
-    LCD->DISPCTRL = (LCD->DISPCTRL & ~_LCD_DISPCTRL_CHGRDST_MASK)
-                    | lcdChargeRedistributionDisable;
-    LCD_Enable(true);
+    sl_segment_lcd_charge_redistribution_enable(false);
   }
-#endif
 }
 
 /**************************************************************************//**
@@ -260,24 +244,13 @@ void sl_segment_lcd_all_on(void)
 {
   SL_SEGMENT_LCD_ALL_SEGMENTS_ON();
 
-#if defined(_SILICON_LABS_32B_SERIES_2)
-  LCD_SyncStart(false, lcdLoadAddrNone);
-  LCD_LoadBusyWait();
-#endif
+  sl_hal_lcd_start_sync(false, SL_HAL_LCD_LOAD_ADDRESS_NONE);
+  sl_hal_lcd_wait_load_busy();
 
-#if defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_2)
   /* Switching charge redistribution ON (if dynamic change is enabled) */
   if (dynamic_chg_redist_enabled) {
-    /* Disable the controller before reconfiguration. */
-    LCD_Enable(false);
-#if defined(_SILICON_LABS_32B_SERIES_2)
-    LCD_ReadyWait();
-#endif
-    LCD->DISPCTRL = (LCD->DISPCTRL & ~_LCD_DISPCTRL_CHGRDST_MASK)
-                    | lcdChargeRedistributionEnable;
-    LCD_Enable(true);
+    sl_segment_lcd_charge_redistribution_enable(true);
   }
-#endif
 }
 
 /**************************************************************************//**
@@ -288,13 +261,11 @@ void sl_segment_lcd_alpha_number_off(void)
 {
   SL_LCD_ALPHA_NUMBER_OFF();
 
-#if defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_2)
   /* Evaluating the updated display contents and switching charge
      redistribution ON or OFF accordingly (only if dynamic change is enabled) */
   if (dynamic_chg_redist_enabled) {
     sl_segment_lcd_update_chg_rdst();
   }
-#endif
 }
 #endif
 
@@ -307,27 +278,15 @@ void sl_segment_lcd_block(
   sl_segment_lcd_block_mode_t bot_mode[SL_SEGMENT_LCD_NUM_BLOCK_COLUMNS])
 {
   /* If an update is in progress we must block, or there might be tearing */
-#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
-  LCD_SyncBusyDelay(0xFFFFFFFF);
-
-  /* Freeze LCD to avoid partial updates */
-  LCD_FreezeEnable(true);
-#else
-  LCD_ReadyWait();
-#endif
+  sl_hal_lcd_wait_ready();
 
   /* Turn all segments off */
   sl_segment_lcd_alpha_number_off();
 
   display_block(top_mode, bot_mode);
 
-#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
-  /* Sync LCD registers to LE domain */
-  LCD_FreezeEnable(false);
-#else
-  LCD_SyncStart(false, lcdLoadAddrNone);
-  LCD_LoadBusyWait();
-#endif
+  sl_hal_lcd_start_sync(false, SL_HAL_LCD_LOAD_ADDRESS_NONE);
+  sl_hal_lcd_wait_load_busy();
 }
 #endif
 
@@ -337,22 +296,12 @@ void sl_segment_lcd_block(
 void sl_segment_lcd_disable(void)
 {
   /* Disable LCD */
-  LCD_Enable(false);
+  sl_hal_lcd_disable();
 
-#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
-  /* Make sure CTRL register has been updated */
-  LCD_SyncBusyDelay(LCD_SYNCBUSY_CTRL);
-#else
-  LCD_ReadyWait();
-#endif
+  sl_hal_lcd_wait_ready();
 
   /* Turn off LCD clock */
   sl_clock_manager_disable_bus_clock(SL_BUS_CLOCK_LCD);
-
-#if defined(_SILICON_LABS_32B_SERIES_0)
-  /* Turn off voltage boost if enabled */
-  CMU->LCDCTRL = 0;
-#endif
 }
 
 /**************************************************************************//**
@@ -360,86 +309,57 @@ void sl_segment_lcd_disable(void)
  *****************************************************************************/
 void sl_segment_lcd_init(bool use_boost)
 {
-#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
-  /* Ensure LE modules are accessible */
-  CMU_ClockEnable(cmuClock_CORELE, true);
-
-  /* Enable LFRCO as LFACLK in CMU (will also enable oscillator if not enabled) */
-  CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFRCO);
-
-  /* LCD Controller Prescaler  */
-  CMU_ClockDivSet(cmuClock_LCDpre, LCD_CMU_CLK_PRE);
-
-  /* Frame Rate */
-  CMU_LCDClkFDIVSet(LCD_CMU_CLK_DIV);
-#endif
-
   /* Enable clock to LCD module */
   sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_LCD);
 
   SL_SEGMENT_LCD_DISPLAY_ENABLE();
 
   /* Disable interrupts */
-  LCD_IntDisable(0xFFFFFFFF);
+  sl_hal_lcd_disable_interrupts(0xFFFFFFFF);
 
   /* Initialize and enable LCD controller */
-  LCD_Init(&lcd_init);
-#if defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_2)
-  if (lcd_init.chargeRedistribution == lcdChargeRedistributionDisable) {
+  sl_hal_lcd_init(&lcd_init);
+  sl_hal_lcd_enable();
+  if (lcd_init.charge_redistribution == SL_HAL_LCD_CHARGE_REDISTRIBUTION_DISABLE) {
     dynamic_chg_redist_enabled = false;
   }
-#endif
 
   /* Enable all display segments */
   SL_SEGMENT_LCD_SEGMENTS_ENABLE();
 
-#if defined(_SILICON_LABS_32B_SERIES_2)
   sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_GPIO);
-#endif
 
   /* Enable boost if necessary */
   if (use_boost) {
-#if defined(_SILICON_LABS_32B_SERIES_0)
-    LCD_VBoostSet(LCD_BOOST_LEVEL);
-    LCD_VLCDSelect(lcdVLCDSelVExtBoost);
-    CMU->LCDCTRL |= CMU_LCDCTRL_VBOOSTEN;
-#elif defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_2)
     /* Set charge pump mode and adjust contrast */
-#if defined(_SILICON_LABS_32B_SERIES_1)
-    LCD_ModeSet(lcdModeCpIntOsc);
-#else
-    LCD_ModeSet(lcdModeChargePump);
-#endif
-    LCD_ContrastSet(SL_SEGMENT_LCD_BOOST_CONTRAST);
-#endif
+    sl_hal_lcd_set_mode(SL_HAL_LCD_MODE_CHARGE_PUMP);
+    sl_hal_lcd_set_contrast(SL_SEGMENT_LCD_BOOST_CONTRAST);
   }
 
-  if (SL_SEGMENT_LCD_LDMA_MODE != lcdDmaModeDisable) {
+  if (SL_SEGMENT_LCD_LDMA_MODE != SL_HAL_LCD_DMA_MODE_DISABLE) {
     // Setting the LDMA mode
-    LCD_DmaModeSet(SL_SEGMENT_LCD_LDMA_MODE);
+    sl_hal_lcd_set_dma_mode(SL_SEGMENT_LCD_LDMA_MODE);
     // Frame Counter event occurs
-    LCD_FrameCountInit_TypeDef fc_init = {
-      .enable = true,
+    sl_hal_lcd_frame_counter_init_t fc_init = {
       .top = 32,
       .prescale = SL_SEGMENT_LCD_BACFG_FCPRESC
     };
-    LCD_FrameCountInit(&fc_init);
+    sl_hal_lcd_disable();
+    sl_hal_lcd_init_frame_counter(&fc_init);
+    sl_hal_lcd_enable();
+    sl_hal_lcd_enable_frame_counter();
   #if defined(SL_SEGMENT_LCD_MODULE_CE322_1002)
     // Sync the SEGn registers automatically when SEG3 is written to
-    LCD_SyncStart(true, lcdLoadAddrSegd3);
+    sl_hal_lcd_start_sync(true, SL_HAL_LCD_LOAD_ADDRESS_SEGD3);
   #elif defined(SL_SEGMENT_LCD_MODULE_CL010_1087)
     // Sync the SEGn registers automatically when SEG7 is written to
-    LCD_SyncStart(true, lcdLoadAddrSegd7);
+    sl_hal_lcd_start_sync(true, SL_HAL_LCD_LOAD_ADDRESS_SEGD7);
   #endif
   }
   /* Turn all segments off */
   sl_segment_lcd_all_off();
 
-#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
-  LCD_SyncBusyDelay(0xFFFFFFFF);
-#else
-  LCD_ReadyWait();
-#endif
+  sl_hal_lcd_wait_ready();
 }
 
 /**************************************************************************//**
@@ -489,9 +409,6 @@ void sl_segment_lcd_lower_number(int num)
   bool val = true;
 
   memset(str, 0, sizeof(str));
-#if defined(_SILICON_LABS_32B_SERIES_0)
-  sl_segment_lcd_symbol(SL_LCD_SYMBOL_MINUS, false);
-#endif
 
   if ((num > SL_SEGMENT_LCD_ALPHA_VAL_MAX) || (num < SL_SEGMENT_LCD_ALPHA_VAL_MIN)) {
     sl_segment_lcd_write("Ovrflow");
@@ -513,11 +430,6 @@ void sl_segment_lcd_lower_number(int num)
     num /= 10;
     val = (num != 0);
   }
-#if defined(_SILICON_LABS_32B_SERIES_0)
-  if (neg) {
-    sl_segment_lcd_symbol(SL_LCD_SYMBOL_MINUS, true);
-  }
-#endif
 
   sl_segment_lcd_write(str);
 }
@@ -570,7 +482,7 @@ void sl_segment_lcd_number(int value)
 {
   uint8_t  i, com, bit, digit, neg;
   uint32_t div;
-  uint32_t j, segment_data_reg[LCD_COM_LINES_MAX];
+  uint32_t j, segment_data_reg[SL_HAL_LCD_COM_LINES_MAX];
   uint16_t bitpattern;
   uint16_t num;
 
@@ -588,16 +500,9 @@ void sl_segment_lcd_number(int value)
     neg = 0;
   }
 
-  /* If an update is in progress we must block, or there might be tearing */
-#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
-  LCD_SyncBusyDelay(0xFFFFFFFF);
-  /* Freeze updates to avoid partial refresh of display */
-  LCD_FreezeEnable(true);
-#else
-  LCD_LoadBusyWait();
-#endif
+  sl_hal_lcd_wait_load_busy();
 
-  for (j = 0; j < LCD_COM_LINES_MAX; j++) {
+  for (j = 0; j < SL_HAL_LCD_COM_LINES_MAX; j++) {
     segment_data_reg[j] = 0;
   }
 
@@ -620,25 +525,19 @@ void sl_segment_lcd_number(int value)
     div = div * 10;
   }
 
-  for (j = 0; j < LCD_COM_LINES_MAX; j++) {
-    LCD_SegmentSetLow(j, SL_SEGMENT_LCD_ALL_SEG_BITMASK, segment_data_reg[j]);
+  for (j = 0; j < SL_HAL_LCD_COM_LINES_MAX; j++) {
+    sl_hal_lcd_segment_set_low(j, SL_SEGMENT_LCD_ALL_SEG_BITMASK, segment_data_reg[j]);
   }
 
   /* Sync LCD registers to LE domain */
-#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
-  LCD_FreezeEnable(false);
-#else
-  LCD_SyncStart(false, lcdLoadAddrNone);
-  LCD_LoadBusyWait();
-#endif
+  sl_hal_lcd_start_sync(false, SL_HAL_LCD_LOAD_ADDRESS_NONE);
+  sl_hal_lcd_wait_load_busy();
 
-#if defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_2)
   /* Evaluating the updated display contents and switching charge
      redistribution ON or OFF accordingly (only if dynamic change is enabled) */
   if (dynamic_chg_redist_enabled) {
     sl_segment_lcd_update_chg_rdst();
   }
-#endif
 }
 
 /**************************************************************************//**
@@ -649,18 +548,8 @@ void sl_segment_lcd_number_off(void)
   /* Turn off all number segments */
   SL_SEGMENT_LCD_NUMBER_OFF();
 
-#if defined(_SILICON_LABS_32B_SERIES_2)
-  LCD_SyncStart(false, lcdLoadAddrNone);
-  LCD_LoadBusyWait();
-#endif
-
-#if defined(_SILICON_LABS_32B_SERIES_1)
-  /* Evaluating the updated display contents and switching charge
-     redistribution ON or OFF accordingly (only if dynamic change is enabled) */
-  if (dynamic_chg_redist_enabled) {
-    sl_segment_lcd_update_chg_rdst();
-  }
-#endif
+  sl_hal_lcd_start_sync(false, SL_HAL_LCD_LOAD_ADDRESS_NONE);
+  sl_hal_lcd_wait_load_busy();
 }
 
 /**************************************************************************//**
@@ -1036,23 +925,19 @@ void sl_segment_lcd_symbol(sl_segment_lcd_symbol_t s, int on)
       break;
   }
   if (on) {
-    LCD_SegmentSet(com, bit, true);
+    sl_hal_lcd_segment_set(com, bit, true);
   } else {
-    LCD_SegmentSet(com, bit, false);
+    sl_hal_lcd_segment_set(com, bit, false);
   }
 
-#if defined(_SILICON_LABS_32B_SERIES_2)
-  LCD_SyncStart(false, lcdLoadAddrNone);
-  LCD_LoadBusyWait();
-#endif
+  sl_hal_lcd_start_sync(false, SL_HAL_LCD_LOAD_ADDRESS_NONE);
+  sl_hal_lcd_wait_load_busy();
 
-#if defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_2)
   /* Evaluating the updated display contents and switching charge
      redistribution ON or OFF accordingly (only if dynamic change is enabled) */
   if (dynamic_chg_redist_enabled) {
     sl_segment_lcd_update_chg_rdst();
   }
-#endif
 }
 
 /**************************************************************************//**
@@ -1061,7 +946,7 @@ void sl_segment_lcd_symbol(sl_segment_lcd_symbol_t s, int on)
 void sl_segment_lcd_unsigned_hex(uint32_t value)
 {
   uint8_t      num, i, com, bit, digit;
-  uint32_t j, segment_data_reg[LCD_COM_LINES_MAX];
+  uint32_t j, segment_data_reg[SL_HAL_LCD_COM_LINES_MAX];
   uint16_t bitpattern;
 
   /* Parameter consistancy check */
@@ -1069,17 +954,10 @@ void sl_segment_lcd_unsigned_hex(uint32_t value)
     value = SL_SEGMENT_LCD_NUM_VAL_MAX_HEX;
   }
 
-#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   /* If an update is in progress we must block, or there might be tearing */
-  LCD_SyncBusyDelay(0xFFFFFFFF);
+  sl_hal_lcd_wait_load_busy();
 
-  /* Freeze updates to avoid partial refresh of display */
-  LCD_FreezeEnable(true);
-#else
-  LCD_LoadBusyWait();
-#endif
-
-  for (j = 0; j < LCD_COM_LINES_MAX; j++) {
+  for (j = 0; j < SL_HAL_LCD_COM_LINES_MAX; j++) {
     segment_data_reg[j] = 0;
   }
 
@@ -1095,25 +973,19 @@ void sl_segment_lcd_unsigned_hex(uint32_t value)
     }
   }
 
-  for (j = 0; j < LCD_COM_LINES_MAX; j++) {
-    LCD_SegmentSetLow(j, SL_SEGMENT_LCD_ALL_SEG_BITMASK, segment_data_reg[j]);
+  for (j = 0; j < SL_HAL_LCD_COM_LINES_MAX; j++) {
+    sl_hal_lcd_segment_set_low(j, SL_SEGMENT_LCD_ALL_SEG_BITMASK, segment_data_reg[j]);
   }
 
-#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   /* Sync LCD registers to LE domain */
-  LCD_FreezeEnable(false);
-#else
-  LCD_SyncStart(false, lcdLoadAddrNone);
-  LCD_LoadBusyWait();
-#endif
+  sl_hal_lcd_start_sync(false, SL_HAL_LCD_LOAD_ADDRESS_NONE);
+  sl_hal_lcd_wait_load_busy();
 
-#if defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_2)
   /* Evaluating the updated display contents and switching charge
      redistribution ON or OFF accordingly (only if dynamic change is enabled) */
   if (dynamic_chg_redist_enabled) {
     sl_segment_lcd_update_chg_rdst();
   }
-#endif
 }
 
 /**************************************************************************//**
@@ -1123,7 +995,7 @@ void sl_segment_lcd_unsigned_hex(uint32_t value)
 void sl_segment_lcd_write(const char *string)
 {
   uint8_t  data, length, index, i;
-  uint32_t j, segment_data_reg[LCD_COM_LINES_MAX];
+  uint32_t j, segment_data_reg[SL_HAL_LCD_COM_LINES_MAX];
   uint16_t bitfield;
   uint32_t com, bit;
 
@@ -1131,16 +1003,9 @@ void sl_segment_lcd_write(const char *string)
   index  = 0;
 
   /* If an update is in progress we must block, or there might be tearing */
-#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
-  LCD_SyncBusyDelay(0xFFFFFFFF);
+  sl_hal_lcd_wait_ready();
 
-  /* Freeze LCD to avoid partial updates */
-  LCD_FreezeEnable(true);
-#else
-  LCD_ReadyWait();
-#endif
-
-  for (j = 0; j < LCD_COM_LINES_MAX; j++) {
+  for (j = 0; j < SL_HAL_LCD_COM_LINES_MAX; j++) {
     segment_data_reg[j] = 0;
   }
 
@@ -1171,32 +1036,25 @@ void sl_segment_lcd_write(const char *string)
     string++;
   }
 
-  for (j = 0; j < LCD_COM_LINES_MAX; j++) {
-    LCD_SegmentSetLow(j, SL_SEGMENT_LCD_ALL_SEG_BITMASK, segment_data_reg[j]);
+  for (j = 0; j < SL_HAL_LCD_COM_LINES_MAX; j++) {
+    sl_hal_lcd_segment_set_low(j, SL_SEGMENT_LCD_ALL_SEG_BITMASK, segment_data_reg[j]);
   }
 
-#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   /* Sync LCD registers to LE domain */
-  LCD_FreezeEnable(false);
-#else
-  LCD_SyncStart(false, lcdLoadAddrNone);
-  LCD_LoadBusyWait();
-#endif
+  sl_hal_lcd_start_sync(false, SL_HAL_LCD_LOAD_ADDRESS_NONE);
+  sl_hal_lcd_wait_load_busy();
 
-#if defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_2)
   /* Evaluating the updated display contents and switching charge
      redistribution ON or OFF accordingly (only if dynamic change is enabled) */
   if (dynamic_chg_redist_enabled) {
     sl_segment_lcd_update_chg_rdst();
   }
-#endif
 }
 #endif
 
 /**************************************************************************//**
  *    Counting the number of active segments in a single common line
  *****************************************************************************/
-#if defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_2)
 uint16_t sl_segment_lcd_seg_cnt(uint32_t segdl, uint32_t segdh)
 {
   /* Number of ones in a nibble */
@@ -1218,36 +1076,28 @@ uint16_t sl_segment_lcd_seg_cnt(uint32_t segdl, uint32_t segdh)
 
   return cnt;
 }
-#endif
 
 /**************************************************************************//**
  *    Enabling/disabling dynamic charge redistribution
  *****************************************************************************/
-#if defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_2)
 void sl_segment_lcd_charge_redistribution_enable(bool enable)
 {
   /* Disable the controller before reconfiguration. */
-  LCD_Enable(false);
-#if defined(_SILICON_LABS_32B_SERIES_2)
-  LCD_ReadyWait();
-#endif
+  sl_hal_lcd_disable();
+  sl_hal_lcd_wait_ready();
   if ( enable ) {
-    LCD->DISPCTRL = (LCD->DISPCTRL & ~_LCD_DISPCTRL_CHGRDST_MASK)
-                    | lcdChargeRedistributionEnable;
+    sl_hal_lcd_set_charge_redistribution_cycle(SL_HAL_LCD_CHARGE_REDISTRIBUTION_ENABLE);
     dynamic_chg_redist_enabled = true;
   } else {
-    LCD->DISPCTRL = (LCD->DISPCTRL & ~_LCD_DISPCTRL_CHGRDST_MASK)
-                    | lcdChargeRedistributionDisable;
+    sl_hal_lcd_set_charge_redistribution_cycle(SL_HAL_LCD_CHARGE_REDISTRIBUTION_DISABLE);
     dynamic_chg_redist_enabled = false;
   }
-  LCD_Enable(true);
+  sl_hal_lcd_enable();
 }
-#endif
 
 /**************************************************************************//**
  *    Dynamically switching charge redistribution ON/OFF based on display contents
  *****************************************************************************/
-#if defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_2)
 void sl_segment_lcd_update_chg_rdst(void)
 {
   bool switch_chg_redist_on_old = ((LCD->DISPCTRL & _LCD_DISPCTRL_CHGRDST_MASK) != 0);
@@ -1255,10 +1105,6 @@ void sl_segment_lcd_update_chg_rdst(void)
   const uint16_t COM_0_THRESHOLD_LO = 14;
   const uint16_t COM_1_6_THRESHOLD_HI = 11;
   const uint16_t COM_1_6_THRESHOLD_LO = 9;
-#if defined(_SILICON_LABS_32B_SERIES_1)
-  const uint16_t COM_7_THRESHOLD_HI = 28;
-  const uint16_t COM_7_THRESHOLD_LO = 24;
-#endif
   const uint16_t SEG_TOTAL_THRESHOLD = 40;
   uint32_t segdl;
   uint16_t seg_cnt_acc = 0, seg_cnt;
@@ -1266,13 +1112,8 @@ void sl_segment_lcd_update_chg_rdst(void)
   bool threshold_lo_reached = false;
   bool switch_chg_redist_on = false;
 
-#if defined(_SILICON_LABS_32B_SERIES_1)
-  segdl = LCD->SEGD0L;
-  seg_cnt = sl_segment_lcd_seg_cnt(segdl, LCD->SEGD0H);
-#else
   segdl = LCD->SEGD0;
   seg_cnt = sl_segment_lcd_seg_cnt(segdl, 0);
-#endif
   if (seg_cnt >= COM_0_THRESHOLD_HI) {
     threshold_hi_reached = true;
   }
@@ -1281,13 +1122,8 @@ void sl_segment_lcd_update_chg_rdst(void)
   }
   seg_cnt_acc += seg_cnt;
 
-#if defined(_SILICON_LABS_32B_SERIES_1)
-  segdl = LCD->SEGD1L;
-  seg_cnt = sl_segment_lcd_seg_cnt(segdl, LCD->SEGD1H);
-#else
   segdl = LCD->SEGD1;
   seg_cnt = sl_segment_lcd_seg_cnt(segdl, 0);
-#endif
   if (seg_cnt >= COM_1_6_THRESHOLD_HI) {
     threshold_hi_reached = true;
   }
@@ -1296,13 +1132,8 @@ void sl_segment_lcd_update_chg_rdst(void)
   }
   seg_cnt_acc += seg_cnt;
 
-#if defined(_SILICON_LABS_32B_SERIES_1)
-  segdl = LCD->SEGD2L;
-  seg_cnt = sl_segment_lcd_seg_cnt(segdl, LCD->SEGD2H);
-#else
   segdl = LCD->SEGD2;
   seg_cnt = sl_segment_lcd_seg_cnt(segdl, 0);
-#endif
   if (seg_cnt >= COM_1_6_THRESHOLD_HI) {
     threshold_hi_reached = true;
   }
@@ -1311,13 +1142,8 @@ void sl_segment_lcd_update_chg_rdst(void)
   }
   seg_cnt_acc += seg_cnt;
 
-#if defined(_SILICON_LABS_32B_SERIES_1)
-  segdl = LCD->SEGD3L;
-  seg_cnt = sl_segment_lcd_seg_cnt(segdl, LCD->SEGD3H);
-#else
   segdl = LCD->SEGD3;
   seg_cnt = sl_segment_lcd_seg_cnt(segdl, 0);
-#endif
   if (seg_cnt >= COM_1_6_THRESHOLD_HI) {
     threshold_hi_reached = true;
   }
@@ -1325,48 +1151,6 @@ void sl_segment_lcd_update_chg_rdst(void)
     threshold_lo_reached = true;
   }
   seg_cnt_acc += seg_cnt;
-
-#if defined(_SILICON_LABS_32B_SERIES_1)
-  segdl = LCD->SEGD4L;
-  seg_cnt = sl_segment_lcd_seg_cnt(segdl, LCD->SEGD4H);
-  if (seg_cnt >= COM_1_6_THRESHOLD_HI) {
-    threshold_hi_reached = true;
-  }
-  if (seg_cnt >= COM_1_6_THRESHOLD_LO) {
-    threshold_lo_reached = true;
-  }
-  seg_cnt_acc += seg_cnt;
-
-  segdl = LCD->SEGD5L;
-  seg_cnt = sl_segment_lcd_seg_cnt(segdl, LCD->SEGD5H);
-  if (seg_cnt >= COM_1_6_THRESHOLD_HI) {
-    threshold_hi_reached = true;
-  }
-  if (seg_cnt >= COM_1_6_THRESHOLD_LO) {
-    threshold_lo_reached = true;
-  }
-  seg_cnt_acc += seg_cnt;
-
-  segdl = LCD->SEGD6L;
-  seg_cnt = sl_segment_lcd_seg_cnt(segdl, LCD->SEGD6H);
-  if (seg_cnt >= COM_1_6_THRESHOLD_HI) {
-    threshold_hi_reached = true;
-  }
-  if (seg_cnt >= COM_1_6_THRESHOLD_LO) {
-    threshold_lo_reached = true;
-  }
-  seg_cnt_acc += seg_cnt;
-
-  segdl = LCD->SEGD7L;
-  seg_cnt = sl_segment_lcd_seg_cnt(segdl, LCD->SEGD7H);
-  if (seg_cnt >= COM_7_THRESHOLD_HI) {
-    threshold_hi_reached = true;
-  }
-  if (seg_cnt >= COM_7_THRESHOLD_LO) {
-    threshold_lo_reached = true;
-  }
-  seg_cnt_acc += seg_cnt;
-#endif
 
   /* Switch charge redistribution ON if condition 1 or 2 (or both) below is met
      1. at least one of the common lines has reached its high threshold
@@ -1378,25 +1162,10 @@ void sl_segment_lcd_update_chg_rdst(void)
     (threshold_hi_reached)
     || (threshold_lo_reached && (seg_cnt_acc >= SEG_TOTAL_THRESHOLD));
   if (switch_chg_redist_on_old != switch_chg_redist_on) {
-    /* Disable the controller before reconfiguration. */
-    LCD_Enable(false);
-  #if defined(_SILICON_LABS_32B_SERIES_2)
-    LCD_ReadyWait();
-  #endif
-    if (switch_chg_redist_on) {
-      /* Switching charge redistribution ON */
-      LCD->DISPCTRL = (LCD->DISPCTRL & ~_LCD_DISPCTRL_CHGRDST_MASK)
-                      | lcdChargeRedistributionEnable;
-    } else {
-      /* Switching charge redistribution OFF */
-      LCD->DISPCTRL = (LCD->DISPCTRL & ~_LCD_DISPCTRL_CHGRDST_MASK)
-                      | lcdChargeRedistributionDisable;
-    }
-    LCD_Enable(true);
+    sl_segment_lcd_charge_redistribution_enable(switch_chg_redist_on);
     switch_chg_redist_on_old = switch_chg_redist_on;
   }
 }
-#endif
 
 /******************************************************************************
 * @brief Display blocks on LCD display: blank, fill, outline, outline & fill
@@ -1431,7 +1200,7 @@ static void display_block(
         com = efm_display.top_blocks[index].com[i];
 
         // Turn on segment
-        LCD_SegmentSet(com, bit, true);
+        sl_hal_lcd_segment_set(com, bit, true);
       }
     }
   }
@@ -1448,7 +1217,7 @@ static void display_block(
         com = efm_display.bot_blocks[index].com[i];
 
         // Turn on segment
-        LCD_SegmentSet(com, bit, true);
+        sl_hal_lcd_segment_set(com, bit, true);
       }
     }
   }
@@ -1465,7 +1234,7 @@ void sl_segment_lcd_array(int element, bool on)
 
   com = efm_display.Array.com[element];
   bit = efm_display.Array.bit[element];
-  LCD_SegmentSet(com, bit, on);
+  sl_hal_lcd_segment_set(com, bit, on);
 }
 
 #elif defined(SL_SEGMENT_LCD_MODULE_CL010_1087)
@@ -1481,9 +1250,9 @@ void sl_segment_lcd_aring(int anum, int on)
   bit = efm_display.aring.bit[anum];
 
   if (on) {
-    LCD_SegmentSet(com, bit, true);
+    sl_hal_lcd_segment_set(com, bit, true);
   } else {
-    LCD_SegmentSet(com, bit, false);
+    sl_hal_lcd_segment_set(com, bit, false);
   }
 }
 
@@ -1505,9 +1274,9 @@ void sl_segment_lcd_battery(int battery_level)
     bit = efm_display.battery.bit[i];
 
     if (on) {
-      LCD_SegmentSet(com, bit, true);
+      sl_hal_lcd_segment_set(com, bit, true);
     } else {
-      LCD_SegmentSet(com, bit, false);
+      sl_hal_lcd_segment_set(com, bit, false);
     }
   }
 }
@@ -1523,9 +1292,9 @@ void sl_segment_lcd_energy_mode(int em, int on)
   bit = efm_display.emode.bit[em];
 
   if (on) {
-    LCD_SegmentSet(com, bit, true);
+    sl_hal_lcd_segment_set(com, bit, true);
   } else {
-    LCD_SegmentSet(com, bit, false);
+    sl_hal_lcd_segment_set(com, bit, false);
   }
 }
 #endif

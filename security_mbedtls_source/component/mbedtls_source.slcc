@@ -368,6 +368,7 @@ include:
   - path: block_cipher_internal.h
   - path: bn_mul.h
   - path: check_crypto_config.h
+  - path: cipher_invasive.h
   - path: cipher_wrap.h
   - path: common.h
   - path: constant_time_impl.h

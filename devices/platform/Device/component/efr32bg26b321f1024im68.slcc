@@ -13,10 +13,10 @@
     - device_content_override
     value: system
 - source:
-  - path: platform/Device/SiliconLabs/EFR32BG26/Source/system_efr32bg26.c
+  - path: platform/Device/SiliconLabs/EFR32BG26/Source/startup_efr32bg26.c
     unless:
     - device_content_override
-  - path: platform/Device/SiliconLabs/EFR32BG26/Source/startup_efr32bg26.c
+  - path: platform/Device/SiliconLabs/EFR32BG26/Source/system_efr32bg26.c
     unless:
     - device_content_override
 - include:
@@ -177,6 +177,7 @@
   - name: device_has_radio
   - name: device_has_radio_2g4hz
   - name: device_has_swo
+  - name: device_has_1024kb_flash
   - name: device_supports_rail
   - name: device_supports_rail_stack
   - name: device_supports_bluetooth

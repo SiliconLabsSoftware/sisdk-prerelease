@@ -253,14 +253,6 @@ define block HEAP with expanding size, alignment = 8
 };
 {%- endif %}
 
-{%- if apploader_enable %}
-define block apploader with alignment = {{ flash_page_size }}
-{
-  readonly section .binapploader
-};
-keep { section .binapploader };
-{%- endif %}
-
 {#-
   Exclude the NVM3 region for the TZ secure applications
 #}
@@ -535,16 +527,6 @@ keep { section .intvec };
 {%- if bootloader_enable %}
 place in ROM_region   { block ROM_CONTENT };
 {%- else %}
-{%- if apploader_enable %}
-".text_apploader":
-place at start of ROM_region  { block apploader };
-"application":
-place in ROM_region
-{
-  block .text,
-  block text_ram_init,
-};
-{%- else %}
 "application":
 place at start of ROM_region
 {
@@ -558,7 +540,6 @@ place at start of ROM_region
   block .text,
   block text_ram_init,
 };
-{%- endif %}
 {%- endif %}
 
 "storage_regions":

@@ -1852,15 +1852,20 @@ SLI_RAIL_ENUM(sl_rail_ieee802154_signal_identifier_mode_t) {
    */
   SL_RAIL_IEEE802154_SIGNAL_IDENTIFIER_MODE_DISABLE = 0u,
   /**
-   * 2.4 GHz 802.15.4 signal detection mode.
+   * 2.4 GHz 802.15.4 signal detection mode with SI block reset on GPIO falling edge (via PRS).
    */
   SL_RAIL_IEEE802154_SIGNAL_IDENTIFIER_MODE_154 = 1u,
+  /**
+   * 2.4 GHz 802.15.4 signal detection mode with SI block reset on AGC negative step.
+   */
+  SL_RAIL_IEEE802154_SIGNAL_IDENTIFIER_MODE_154_WITH_AGC_RESET = 2u,
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // Self-referencing defines minimize compiler complaints when using SLI_RAIL_ENUM
 #define SL_RAIL_IEEE802154_SIGNAL_IDENTIFIER_MODE_DISABLE ((sl_rail_ieee802154_signal_identifier_mode_t) SL_RAIL_IEEE802154_SIGNAL_IDENTIFIER_MODE_DISABLE)
 #define SL_RAIL_IEEE802154_SIGNAL_IDENTIFIER_MODE_154     ((sl_rail_ieee802154_signal_identifier_mode_t) SL_RAIL_IEEE802154_SIGNAL_IDENTIFIER_MODE_154)
+#define SL_RAIL_IEEE802154_SIGNAL_IDENTIFIER_MODE_154_WITH_AGC_RESET     ((sl_rail_ieee802154_signal_identifier_mode_t) SL_RAIL_IEEE802154_SIGNAL_IDENTIFIER_MODE_154_WITH_AGC_RESET)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /**

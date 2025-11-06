@@ -33,18 +33,44 @@
 #include "sli_crypto_ksu_manager.h"
 #include "sl_se_manager.h"
 
+#if defined (SL_COMPONENT_CATALOG_PRESENT)
+  #include "sl_component_catalog.h"
+#endif
+
 // -----------------------------------------------------------------------------
 // Static variable Declarations
 
 // Create KSU slots for NWP and HOST.
 static sli_ksu_slot_t ksu_slots[SLI_KSU_MAX_KEY_SLOTS] = { 0 }; // If we want to use this in PSA driver then will need to remove the static
 
+#if defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT) || defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
+// Threading support (as opposed to API calls only from a single thread)
+// is currently required in RTOS mode.
+// Lock mutex for synchronizing multiple threads calling into the KSU Manager API.
+#include "sli_psec_osal.h"
+static sli_psec_osal_lock_t sli_ksu_lock = { 0 };
+#endif
+
+// -----------------------------------------------------------------------------
+// Function Declarations
+
+/**
+ * @brief
+ *   Initialize KSU Manager resources
+ */
 sl_status_t sli_ksu_init(void)
 {
-  sl_status_t status = sl_se_init();
-  if (status != SL_STATUS_OK) {
-    return status;
+  sl_status_t sl_status = sl_se_init();
+  if (sl_status != SL_STATUS_OK) {
+    return sl_status;
   }
+#if defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT) || defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
+  // Initialize KSU lock
+  sl_status = sli_psec_osal_init_lock(&sli_ksu_lock);
+  if (sl_status != SL_STATUS_OK) {
+    return sl_status;
+  }
+#endif
 
   // Initialize reserved KSU slots
   for (int i = 0; i < SLI_KSU_KEY_SLOT_USER_START; i++) {
@@ -62,6 +88,40 @@ sl_status_t sli_ksu_init(void)
   }
 
   return SL_STATUS_OK;
+}
+
+/**
+ * @brief
+ *   Acquire the KSU lock for exclusive access if necessary (thread mode).
+ */
+static inline sl_status_t sli_ksu_lock_acquire(void)
+{
+  sl_status_t sl_status = SL_STATUS_OK;
+#if defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT) || defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
+  // Acquire the KSU lock (mutex) to protect KSU slot operations
+  sl_status = sli_psec_osal_take_lock(&sli_ksu_lock);
+  if (sl_status != SL_STATUS_OK) {
+    return sl_status;
+  }
+#endif
+  return sl_status;
+}
+
+/**
+ * @brief
+ *   Release the KSU lock if necessary (thread mode).
+ */
+static inline sl_status_t sli_ksu_lock_release(void)
+{
+  sl_status_t sl_status = SL_STATUS_OK;
+#if defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT) || defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
+  // Acquire the KSU lock (mutex) to protect KSU slot operations
+  sl_status = sli_psec_osal_give_lock(&sli_ksu_lock);
+  if (sl_status != SL_STATUS_OK) {
+    return sl_status;
+  }
+#endif
+  return sl_status;
 }
 
 /**
@@ -103,8 +163,8 @@ sl_status_t sli_ksu_allocate_key_slot(sl_se_key_descriptor_t *key_desc,
 
   sl_status_t sl_status = SL_STATUS_OK;
 
-  // Acquire the SE manager mutex to protect KSU slot operations
-  sl_status = sli_se_lock_acquire();
+  // Acquire the KSU lock (mutex) to protect KSU slot operations
+  sl_status = sli_ksu_lock_acquire();
   if (sl_status != SL_STATUS_OK) {
     return sl_status;
   }
@@ -112,7 +172,7 @@ sl_status_t sli_ksu_allocate_key_slot(sl_se_key_descriptor_t *key_desc,
   // Find available slot in KSU and set up descriptor
   sl_status = sli_ksu_find_free_slot(key_desc, user_ref);
   if (sl_status != SL_STATUS_OK) {
-    sli_se_lock_release();
+    sli_ksu_lock_release();
     return sl_status;
   }
 
@@ -127,7 +187,8 @@ sl_status_t sli_ksu_allocate_key_slot(sl_se_key_descriptor_t *key_desc,
 
   // Update available RAM
 
-  sli_se_lock_release();
+  // Release the KSU manager lock (mutex)
+  sli_ksu_lock_release();
   return SL_STATUS_OK;
 }
 
@@ -141,16 +202,11 @@ sl_status_t sli_ksu_key_slot_import(sl_se_key_descriptor_t *key_desc,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  sl_status_t sl_status = SL_STATUS_OK;
-  // Initialize to an invalid value.
-  uint8_t key_slot_id = ((uint8_t)SLI_KSU_MAX_KEY_SLOTS);
-  // Acquire the SE manager mutex to protect KSU slot operations
-  sl_status = sli_se_lock_acquire();
+  // Acquire the KSU manager lock (mutex) to protect KSU slot operations
+  sl_status_t sl_status = sli_ksu_lock_acquire();
   if (sl_status != SL_STATUS_OK) {
     return sl_status;
   }
-
-  // Check if space is available in the KSU (must be inside mutex for thread safety)
 
   // Create a key desc representing the plaintext input key
   sl_se_key_descriptor_t plaintext_key_desc = *key_desc;
@@ -159,6 +215,8 @@ sl_status_t sli_ksu_key_slot_import(sl_se_key_descriptor_t *key_desc,
   plaintext_key_desc.storage.location.buffer.pointer = (uint8_t *)key_data;
   plaintext_key_desc.storage.location.buffer.size = (key_data_length + 3) & ~3;
 
+  // Initialize to an invalid value.
+  uint8_t key_slot_id = ((uint8_t)SLI_KSU_MAX_KEY_SLOTS);
   sl_se_command_context_t cmd_ctx = SL_SE_COMMAND_CONTEXT_INIT;
 
   // Find available slot in KSU
@@ -209,8 +267,8 @@ sl_status_t sli_ksu_key_slot_import(sl_se_key_descriptor_t *key_desc,
     }
   }
 
-  // Release the SE manager mutex
-  sli_se_lock_release();
+  // Release the KSU manager lock (mutex)
+  sli_ksu_lock_release();
   return sl_status;
 }
 
@@ -223,8 +281,8 @@ sl_status_t sli_ksu_key_slot_generate(sl_se_key_descriptor_t *key_desc,
 
   sl_status_t sl_status = SL_STATUS_OK;
 
-  // Acquire the SE manager mutex to protect KSU slot operations
-  sl_status = sli_se_lock_acquire();
+  // Acquire the KSU manager lock (mutex) to protect KSU slot operations
+  sl_status = sli_ksu_lock_acquire();
   if (sl_status != SL_STATUS_OK) {
     return sl_status;
   }
@@ -277,8 +335,8 @@ sl_status_t sli_ksu_key_slot_generate(sl_se_key_descriptor_t *key_desc,
     }
   }
 
-  // Release the SE manager mutex
-  sli_se_lock_release();
+  // Release the KSU manager lock (mutex)
+  sli_ksu_lock_release();
   return sl_status;
 }
 
@@ -296,8 +354,8 @@ sl_status_t sli_ksu_delete_key(sl_se_key_descriptor_t *key_desc)
   // Take mutex here
   // This is a placeholder for mutex acquisition logic.
 
-  // Acquire the SE manager mutex to protect KSU slot operations
-  sl_status_t sl_status = sli_se_lock_acquire();
+  // Acquire the KSU manager lock (mutex) to protect KSU slot operations
+  sl_status_t sl_status = sli_ksu_lock_acquire();
   if (sl_status != SL_STATUS_OK) {
     return sl_status;
   }
@@ -326,8 +384,8 @@ sl_status_t sli_ksu_delete_key(sl_se_key_descriptor_t *key_desc)
   ksu_slots[key_slot_id].crypto_engine_id = 0;
 
   exit:
-  // Release the SE manager mutex
-  sli_se_lock_release();
+  // Release the KSU manager lock (mutex)
+  sli_ksu_lock_release();
 
   if (sl_status != SL_STATUS_OK) {
     return sl_status;
@@ -376,8 +434,8 @@ sl_status_t sli_ksu_key_slot_copy(sl_se_key_descriptor_t *source_key_desc,
 
   sl_status_t sl_status = SL_STATUS_OK;
 
-  // Acquire the SE manager mutex to protect KSU slot operations
-  sl_status = sli_se_lock_acquire();
+  // Acquire the KSU manager lock (mutex) to protect KSU slot operations
+  sl_status = sli_ksu_lock_acquire();
   if (sl_status != SL_STATUS_OK) {
     return sl_status;
   }
@@ -432,8 +490,8 @@ sl_status_t sli_ksu_key_slot_copy(sl_se_key_descriptor_t *source_key_desc,
     }
   }
 
-  // Release the SE manager mutex
-  sli_se_lock_release();
+  // Release the KSU manager lock (mutex)
+  sli_ksu_lock_release();
   return sl_status;
 }
 

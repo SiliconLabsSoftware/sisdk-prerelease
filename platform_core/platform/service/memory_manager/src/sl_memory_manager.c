@@ -35,6 +35,7 @@
 #include "sl_memory_manager_config.h"
 #include "sl_memory_manager.h"
 #include "sli_memory_manager.h"
+#include "sli_code_classification.h"
 #include "sl_assert.h"
 #include "sl_bit.h"
 #include "sl_common.h"
@@ -89,17 +90,19 @@ extern char __HeapLimit[];
  ***************************  LOCAL VARIABLES   ********************************
  ******************************************************************************/
 
-sl_memory_heap_t sli_general_purpose_heap;
+sl_memory_heap_t sli_general_purpose_heap SL_FAST_DATA;
 #if defined(SL_CATALOG_MEMORY_MANAGER_PSRAM_PRESENT)
-sl_memory_heap_t sli_psram_heap;
+sl_memory_heap_t sli_psram_heap SL_FAST_DATA;
 #endif
 #if defined(SL_CATALOG_MEMORY_MANAGER_DTCM_PRESENT)
-sl_memory_heap_t sli_dtcm_heap;
+sl_memory_heap_t sli_dtcm_heap SL_FAST_DATA;
 #endif
 
 #if defined(DEBUG_EFM) || defined(DEBUG_EFM_USER)
 bool reserve_no_retention_first = true;
 #endif
+
+bool sli_mm_initialized = false;
 
 /*******************************************************************************
  ***************************   LOCAL FUNCTIONS   *******************************
@@ -130,6 +133,12 @@ sl_status_t sl_memory_init(void)
 {
   sl_status_t status = SL_STATUS_OK;
   sl_memory_region_t heap_region = sl_memory_get_heap_region();
+
+  // Check for double initialization
+  if (sli_mm_initialized) {
+    status = SL_STATUS_ALREADY_INITIALIZED;
+    return status;
+  }
 
   // Create the general-purpose heap.
   status = sli_memory_create_heap(heap_region.addr,
@@ -202,6 +211,9 @@ sl_status_t sl_memory_init(void)
   SEGGER_SYSVIEW_NameResource((uint32_t) HEAP_ST_ID, "HEAP SHORT TERM");
 #endif
 
+  if (status == SL_STATUS_OK) {
+    sli_mm_initialized = true;
+  }
   return status;
 }
 
@@ -1863,6 +1875,7 @@ static sl_status_t memory_manage_allocation_fallback(size_t size,
 /***************************************************************************//**
  * Gets the DTCM heap handle.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_MEMORY_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 sl_memory_heap_t *sl_memory_manager_get_dtcm_heap(void)
 {
   return &sli_dtcm_heap;
@@ -1873,6 +1886,7 @@ sl_memory_heap_t *sl_memory_manager_get_dtcm_heap(void)
 /***************************************************************************//**
  * Gets the PSRAM heap handle.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_MEMORY_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 sl_memory_heap_t *sl_memory_manager_get_psram_heap(void)
 {
   return &sli_psram_heap;

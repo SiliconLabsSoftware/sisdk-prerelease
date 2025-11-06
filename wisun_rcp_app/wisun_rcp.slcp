@@ -4,7 +4,7 @@ description: >
   The Wi-SUN RCP (radio coprocessor) application provides a radio interface to a
   Linux host. It is meant to be paired with wsbrd (Wi-SUN Network
   implementation for Linux) to run as a Linux border router device.
-package: wisun_rcp
+package: wisun_rcp_app
 category: Wi-SUN Examples
 quality: production
 

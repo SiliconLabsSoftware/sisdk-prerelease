@@ -843,10 +843,17 @@ psa_status_t sli_se_key_desc_from_psa_attributes(
     bool can_export = usage & PSA_KEY_USAGE_EXPORT;
     bool can_copy = usage & PSA_KEY_USAGE_COPY;
 
-    // Allow copying for wrapped keys (can be copied to KSU), but not for other opaque keys
     if (can_copy) {
+      #if defined(SLI_PSA_DRIVER_FEATURE_KSU)
+      // When KSU is present, allow copying of wrapped keys (can be copied to KSU), but not for other opaque keys
+      if (location != PSA_KEY_LOCATION_SLI_SE_OPAQUE) {
+        // We do not support copying opaque keys (except wrapped keys that can go to KSU).
+        return PSA_ERROR_NOT_SUPPORTED;
+      }
+      #else
       // We do not support copying opaque keys (currently).
       return PSA_ERROR_NOT_SUPPORTED;
+      #endif
     }
     if (!can_export) {
       key_desc->flags |= SL_SE_KEY_FLAG_NON_EXPORTABLE;
@@ -1434,9 +1441,21 @@ psa_status_t sli_se_ksu_copy_key(const psa_key_attributes_t *source_attributes,
   psa_key_location_t target_location =
     PSA_KEY_LIFETIME_GET_LOCATION(psa_get_key_lifetime(target_attributes));
 
+  // Target location must be KSU
   if (target_location != SL_PSA_KEY_LOCATION_KSU_0) {
     return PSA_ERROR_NOT_SUPPORTED;
   }
+  // Check if source key has the DISALLOW_KSU flag set
+  psa_key_usage_t source_usage = psa_get_key_usage_flags(source_attributes);
+  if (source_usage & SLI_PSA_KSU_KEY_ATTR_DISALLOW_KSU) {
+    return PSA_ERROR_NOT_PERMITTED;
+  }
+
+  // Check if source key has the COPY usage flag - required for copy operations
+  if (!(source_usage & PSA_KEY_USAGE_COPY)) {
+    return PSA_ERROR_NOT_PERMITTED;
+  }
+
   switch (source_location) {
     case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
       return sli_ksu_opaque_copy_key(source_attributes,
@@ -2294,17 +2313,6 @@ psa_status_t sli_ksu_opaque_copy_key(const psa_key_attributes_t *source_attribut
     return PSA_ERROR_INVALID_ARGUMENT;
   }
   *target_key_buffer_length = 0;
-
-  // Check if source key has the DISALLOW_KSU flag set
-  psa_key_usage_t source_usage = psa_get_key_usage_flags(source_attributes);
-  if (source_usage & SLI_PSA_KSU_KEY_ATTR_DISALLOW_KSU) {
-    return PSA_ERROR_NOT_PERMITTED;
-  }
-
-  // Check if source key has the COPY usage flag - required for copy operations
-  if (!(source_usage & PSA_KEY_USAGE_COPY)) {
-    return PSA_ERROR_NOT_PERMITTED;
-  }
 
   if (source_key_length < sizeof(sli_se_opaque_wrapped_key_context_t)) {
     return PSA_ERROR_INVALID_ARGUMENT;

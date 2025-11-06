@@ -348,8 +348,7 @@ void Zero_Table()
 #endif // defined(__START) && defined(__GNUC__)
 
 #if !defined(SL_LEGACY_LINKER) \
-  && !defined(SL_RAM_LINKER)   \
-  && !defined(BOOTLOADER_ENABLE)
+  && !defined(SL_RAM_LINKER)
 #if defined (__GNUC__) && !defined(__clang__)
 __attribute__((optimize("no-tree-loop-distribute-patterns")))
 #endif
@@ -387,7 +386,7 @@ void CopyToRam(void)
 }
 #pragma language=restore
 #endif // defined(__GNUC__)
-#endif // !defined(SL_LEGACY_LINKER) && !defined(SL_RAM_LINKER) && !defined(BOOTLOADER_ENABLE)
+#endif // !defined(SL_LEGACY_LINKER) && !defined(SL_RAM_LINKER)
 /*---------------------------------------------------------------------------
  * Reset Handler called on controller reset
  *---------------------------------------------------------------------------*/
@@ -405,10 +404,9 @@ __NO_RETURN void Reset_Handler(void)
   #endif
 
 #if !defined(SL_LEGACY_LINKER) \
-  && !defined(SL_RAM_LINKER)   \
-  && !defined(BOOTLOADER_ENABLE)
+  && !defined(SL_RAM_LINKER)
   CopyToRam();
-#endif // !defined(SL_LEGACY_LINKER) && !defined(SL_RAM_LINKER) && !defined(BOOTLOADER_ENABLE)
+#endif // !defined(SL_LEGACY_LINKER) && !defined(SL_RAM_LINKER)
 
 #if defined(BOOTLOADER_ENABLE) || defined(USER_SYSTEM_INIT_ENABLE)
   SystemInit2();

@@ -14,7 +14,7 @@ provides:
 requires:
   - name: clock_manager_runtime
   - name: gpio
-  - name: emlib_lcd
+  - name: hal_lcd
   - name: status
   - name: device_has_lcd
   ##- name: hardware_board_has_segment_lcd

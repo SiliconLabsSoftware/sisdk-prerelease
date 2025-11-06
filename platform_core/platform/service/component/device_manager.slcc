@@ -18,3 +18,4 @@ requires:
   - name: device_peripheral
   - name: device_gpio
   - name: device_i2c
+  - name: device_dma

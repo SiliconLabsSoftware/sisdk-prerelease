@@ -1,6 +1,6 @@
 version = "0"
 
 [dependency]
-openthread = {version = "3.0.0-alpha.8", installer = "conan", prerelease = true}
+openthread = {version = "3.0.0-alpha.9", installer = "conan", prerelease = true}
 cpc =  {version = ">=4.8.0 <4.8.1", installer = "conan", prerelease = true}
 gcc-arm-none-eabi = {version = "12.2.rel1", user = "silabs"}

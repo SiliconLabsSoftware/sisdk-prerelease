@@ -235,7 +235,7 @@ void sl_hal_iadc_init(IADC_TypeDef *iadc,
   wanted_prescale = init->src_clk_prescale;
   // Use wanted SRC_CLK prescaler setting instead if it is high enough.
   if (wanted_prescale >= src_clk_prescale) {
-    src_clk_prescale = wanted_prescale;
+    src_clk_prescale = (uint8_t)wanted_prescale;
   }
 
   sl_hal_iadc_disable(iadc);
@@ -269,7 +269,7 @@ void sl_hal_iadc_init(IADC_TypeDef *iadc,
   }
   iadc->CTRL = tmp;
 
-  iadc->TIMER = (iadc->TIMER & ~(_IADC_TIMER_TIMER_MASK))
+  iadc->TIMER = (iadc->TIMER & ~_IADC_TIMER_TIMER_MASK)
                 | ((uint32_t) init->timer_cycles) << _IADC_TIMER_TIMER_SHIFT;
 
   iadc->CMPTHR = (iadc->CMPTHR & ~(_IADC_CMPTHR_ADGT_MASK | _IADC_CMPTHR_ADLT_MASK))
@@ -280,7 +280,7 @@ void sl_hal_iadc_init(IADC_TypeDef *iadc,
   for (uint8_t config = 0; config < IADC_CONFIGNUM(IADC_NUM(iadc)); config++) {
     // Find min allowed ADC_CLK prescaler setting for given mode.
     adc_mode = init->configs[config].adc_mode;
-    wanted_prescale = init->configs[config].adc_clk_prescale;
+    wanted_prescale = (uint16_t)init->configs[config].adc_clk_prescale;
     adc_clk_prescale = sl_hal_iadc_calculate_adc_clk_prescale(iadc,
                                                               IADC_ANA_CLK_MAX_FREQ(adc_mode),
                                                               src_clk_freq,
@@ -381,6 +381,7 @@ void sl_hal_iadc_reset(IADC_TypeDef *iadc)
                           | IADC_STATUS_SINGLEQUEUEPENDING
                           | IADC_STATUS_TIMERACTIVE))
          != 0UL) {
+    // No operation is performed, the loop simply waits for the IADC to stop.
   }
 
   // Reset all WSYNC registers.
@@ -391,6 +392,7 @@ void sl_hal_iadc_reset(IADC_TypeDef *iadc)
   while ((iadc->STATUS & (IADC_STATUS_MASKREQWRITEPENDING
                           | IADC_STATUS_SINGLEWRITEPENDING))
          != 0UL) {
+    // No operation is needed here.
   }
 
   // Pull from FIFOs until they are empty.
@@ -473,11 +475,11 @@ void sl_hal_iadc_init_scan(IADC_TypeDef *iadc,
     iadc->SCANTABLE[entry_num].SCAN = (iadc->SCANTABLE[entry_num].SCAN & ~(_IADC_SCAN_PINNEG_MASK | _IADC_SCAN_PORTNEG_MASK
                                                                            | _IADC_SCAN_PINPOS_MASK | _IADC_SCAN_PORTPOS_MASK
                                                                            | _IADC_SCAN_CFG_MASK | _IADC_SCAN_CMP_MASK))
-                                      |  (((uint32_t) scan_table->entries[entry_num].negative_port << _IADC_SCAN_PORTNEG_SHIFT))
-                                      |  (((uint32_t) scan_table->entries[entry_num].negative_pin << _IADC_SCAN_PINNEG_SHIFT))
-                                      |  (((uint32_t) scan_table->entries[entry_num].positive_port << _IADC_SCAN_PORTPOS_SHIFT))
-                                      |  (((uint32_t) scan_table->entries[entry_num].positive_pin << _IADC_SCAN_PINPOS_SHIFT))
-                                      |  (((uint32_t) scan_table->entries[entry_num].config_id << _IADC_SCAN_CFG_SHIFT))
+                                      |  ((uint32_t) scan_table->entries[entry_num].negative_port << _IADC_SCAN_PORTNEG_SHIFT)
+                                      |  ((uint32_t) scan_table->entries[entry_num].negative_pin << _IADC_SCAN_PINNEG_SHIFT)
+                                      |  ((uint32_t) scan_table->entries[entry_num].positive_port << _IADC_SCAN_PORTPOS_SHIFT)
+                                      |  ((uint32_t) scan_table->entries[entry_num].positive_pin << _IADC_SCAN_PINPOS_SHIFT)
+                                      |  ((uint32_t) scan_table->entries[entry_num].config_id << _IADC_SCAN_CFG_SHIFT)
                                       |  (((uint32_t) scan_table->entries[entry_num].compare) << _IADC_SINGLE_CMP_SHIFT);
   }
 }
@@ -498,11 +500,11 @@ void sl_hal_iadc_update_scan_entry(IADC_TypeDef *iadc,
   iadc->SCANTABLE[id].SCAN = (iadc->SCANTABLE[id].SCAN & ~(_IADC_SCAN_PINNEG_MASK | _IADC_SCAN_PORTNEG_MASK
                                                            | _IADC_SCAN_PINPOS_MASK | _IADC_SCAN_PORTPOS_MASK
                                                            | _IADC_SCAN_CFG_MASK | _IADC_SCAN_CMP_MASK))
-                             |  (((uint32_t) entry->negative_port << _IADC_SCAN_PORTNEG_SHIFT))
-                             |  (((uint32_t) entry->negative_pin << _IADC_SCAN_PINNEG_SHIFT))
-                             |  (((uint32_t) entry->positive_port << _IADC_SCAN_PORTPOS_SHIFT))
-                             |  (((uint32_t) entry->positive_pin << _IADC_SCAN_PINPOS_SHIFT))
-                             |  (((uint32_t) entry->config_id << _IADC_SCAN_CFG_SHIFT))
+                             |  ((uint32_t) entry->negative_port << _IADC_SCAN_PORTNEG_SHIFT)
+                             |  ((uint32_t) entry->negative_pin << _IADC_SCAN_PINNEG_SHIFT)
+                             |  ((uint32_t) entry->positive_port << _IADC_SCAN_PORTPOS_SHIFT)
+                             |  ((uint32_t) entry->positive_pin << _IADC_SCAN_PINPOS_SHIFT)
+                             |  ((uint32_t) entry->config_id << _IADC_SCAN_CFG_SHIFT)
                              |  (((uint32_t) entry->compare) << _IADC_SINGLE_CMP_SHIFT);
 
   sl_hal_iadc_enable(iadc);
@@ -524,7 +526,7 @@ void sl_hal_iadc_set_scan_mask(IADC_TypeDef *iadc, uint32_t mask)
 
   sl_hal_iadc_enable(iadc);
 
-  iadc->MASKREQ = (iadc->MASKREQ & ~(_IADC_MASKREQ_MASKREQ_MASK))
+  iadc->MASKREQ = (iadc->MASKREQ & ~_IADC_MASKREQ_MASKREQ_MASK)
                   | (mask << _IADC_MASKREQ_MASKREQ_SHIFT);
 }
 
@@ -541,7 +543,7 @@ void sl_hal_iadc_set_scan_mask_multiple_entries(IADC_TypeDef *iadc,
 
   sl_hal_iadc_enable(iadc);
 
-  iadc->MASKREQ &= ~(_IADC_MASKREQ_MASKREQ_SHIFT);
+  iadc->MASKREQ &= ~_IADC_MASKREQ_MASKREQ_SHIFT;
   // Set scan mask.
   for (uint8_t entry_num = 0; entry_num < IADC_SCANENTRIES(iadc); entry_num++) {
     if (scan_table->entries[entry_num].include_in_scan) {
@@ -603,11 +605,11 @@ void sl_hal_iadc_update_single_input(IADC_TypeDef *iadc,
   iadc->SINGLE = (iadc->SINGLE & ~(_IADC_SINGLE_PORTNEG_MASK | _IADC_SINGLE_PINNEG_MASK
                                    | _IADC_SINGLE_PORTPOS_MASK | _IADC_SINGLE_PINPOS_MASK
                                    | _IADC_SINGLE_CFG_MASK | _IADC_SINGLE_CMP_MASK))
-                 |  (((uint32_t) input->negative_port << _IADC_SINGLE_PORTNEG_SHIFT))
-                 |  (((uint32_t) input->negative_pin << _IADC_SINGLE_PINNEG_SHIFT))
-                 |  (((uint32_t) input->positive_port << _IADC_SINGLE_PORTPOS_SHIFT))
-                 |  (((uint32_t) input->positive_pin << _IADC_SINGLE_PINPOS_SHIFT))
-                 |  (((uint32_t) input->single_input_config_id << _IADC_SINGLE_CFG_SHIFT))
+                 |  ((uint32_t) input->negative_port << _IADC_SINGLE_PORTNEG_SHIFT)
+                 |  ((uint32_t) input->negative_pin << _IADC_SINGLE_PINNEG_SHIFT)
+                 |  ((uint32_t) input->positive_port << _IADC_SINGLE_PORTPOS_SHIFT)
+                 |  ((uint32_t) input->positive_pin << _IADC_SINGLE_PINPOS_SHIFT)
+                 |  ((uint32_t) input->single_input_config_id << _IADC_SINGLE_CFG_SHIFT)
                  |  (((uint32_t) input->compare) << _IADC_SINGLE_CMP_SHIFT);
 }
 /***************************************************************************//**
@@ -685,7 +687,7 @@ uint8_t sl_hal_iadc_calculate_timebase(IADC_TypeDef *iadc,
   }
   // If src_clk_freq is greater than 40MHz, then divide by the prescaler HSCLKRATE.
   if (src_clk_freq > IADC_CLK_MAX_FREQ) {
-    uint32_t prescaler = (uint32_t)(iadc->CTRL & _IADC_CTRL_HSCLKRATE_MASK) >> _IADC_CTRL_HSCLKRATE_SHIFT;
+    uint32_t prescaler = (iadc->CTRL & _IADC_CTRL_HSCLKRATE_MASK) >> _IADC_CTRL_HSCLKRATE_SHIFT;
     src_clk_freq /= (prescaler + 1);
   }
 
@@ -983,7 +985,7 @@ static void iadc_calculate_normal_highspeed_gain_offset(IADC_TypeDef *iadc,
   }
 
   i_offset = IADC_ROUND_D2I(-offset);
-  
+
   // We only have 18 bits available for OFFSET in SCALE register
   // OFFSET is a 2nd complement number.
   if (i_offset > 131071) {           // Positive overflow at 0x0001FFFF ?
@@ -993,7 +995,7 @@ static void iadc_calculate_normal_highspeed_gain_offset(IADC_TypeDef *iadc,
   } else {
     scale |= (uint32_t)i_offset & 0x3FFFFU;
   }
-  
+
   iadc->CFG[config].SCALE = scale;
 }
 
@@ -1026,7 +1028,12 @@ static void iadc_calculate_high_accuracy_gain_offset(IADC_TypeDef *iadc,
   const float osr_high_acc[6] = { 16.0, 32.0, 64.0, 92.0, 128.0, 256.0 };
 
   // Get reference voltage in volts.
-  ref_voltage = (float)sl_hal_iadc_get_reference_voltage(init->configs[config].reference) / 1000.0f;
+  if (init->configs[config].reference == SL_HAL_IADC_REFERENCE_VREFINT_1V2) {
+    // Internal reference voltage (VBGR) depends on the chip revision.
+    ref_voltage = (float)sl_hal_iadc_get_reference_voltage(init->configs[config].reference) / 1000.0f;
+  } else {
+    ref_voltage = (float)init->configs[config].vref / 1000.0f;
+  }
 
   // Get OSR from config register.
   osr_value = (iadc->CFG[config].CFG & _IADC_CFG_OSRHA_MASK) >> _IADC_CFG_OSRHA_SHIFT;
@@ -1039,9 +1046,9 @@ static void iadc_calculate_high_accuracy_gain_offset(IADC_TypeDef *iadc,
     // for OSR != 92, gain_sys_high_acc = OSR/(OSR + 1).
     gain_sys_high_acc = osr_high_acc[osr_value] / (osr_high_acc[osr_value] + 1.0f);
   }
-  
-  ana_gain = (float) calc_ana_gain / 32768.0f * gain_sys_high_acc;
-  ana_gain_round = IADC_ROUND_D2I(32768.0f * ana_gain);
+
+  ana_gain = (float) calc_ana_gain * gain_sys_high_acc;
+  ana_gain_round = IADC_ROUND_D2I(ana_gain);
   iadc->CFG[config].SCALE &= ~_IADC_SCALE_MASK;
 
   // Write GAIN3MSB.
@@ -1055,15 +1062,15 @@ static void iadc_calculate_high_accuracy_gain_offset(IADC_TypeDef *iadc,
   iadc->CFG[config].SCALE |= ((uint32_t)ana_gain_round & 0x1FFF) << _IADC_SCALE_GAIN13LSB_SHIFT;
 
   // Get offset value for high accuracy mode from DEVINFO.
-  offset_ana1_high_acc_int = (uint16_t)(DEVINFO->IADC0OFFSETCAL0 & _DEVINFO_IADC0OFFSETCAL0_OFFSETANA1HIACC_MASK)
-                             >> _DEVINFO_IADC0OFFSETCAL0_OFFSETANA1HIACC_SHIFT;
+  offset_ana1_high_acc_int = (uint16_t)((DEVINFO->IADC0OFFSETCAL0 & _DEVINFO_IADC0OFFSETCAL0_OFFSETANA1HIACC_MASK)
+                                        >> _DEVINFO_IADC0OFFSETCAL0_OFFSETANA1HIACC_SHIFT);
 
   // 2. OSR adjustment.
   // Get offset from DEVINFO.
-  offset_ana_base = (int16_t)(DEVINFO->IADC0OFFSETCAL0 & _DEVINFO_IADC0OFFSETCAL0_OFFSETANABASE_MASK)
-                    >> _DEVINFO_IADC0OFFSETCAL0_OFFSETANABASE_SHIFT;
+  offset_ana_base = (int16_t)((DEVINFO->IADC0OFFSETCAL0 & _DEVINFO_IADC0OFFSETCAL0_OFFSETANABASE_MASK)
+                              >> _DEVINFO_IADC0OFFSETCAL0_OFFSETANABASE_SHIFT);
   // 1 << osr_value is the same as pow(2, osr_value).
-  offset_ana = offset_ana_base + (float)(offset_ana1_high_acc_int / (1 << osr_value));
+  offset_ana = offset_ana_base + (float)offset_ana1_high_acc_int / (float)(1 << osr_value);
 
   // 3. Reference voltage adjustment.
   offset_ana = offset_ana * (1.25f / ref_voltage);

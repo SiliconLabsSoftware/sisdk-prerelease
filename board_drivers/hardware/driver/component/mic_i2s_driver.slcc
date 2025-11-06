@@ -15,7 +15,7 @@ provides:
 requires:
   - name: clock_manager_runtime
   - name: emlib_ldma
-  - name: emlib_usart
+  - name: hal_usart
   - name: gpio
   - name: dmadrv
 include:

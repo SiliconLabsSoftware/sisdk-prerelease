@@ -76,7 +76,8 @@ int cpc_tx(void *ctxt, void *buf, int buf_len)
     ret = sl_cpc_write(cpc_ep, buf, (uint16_t)buf_len, 0, NULL);
     BUG_ON(ret);
     TRACE(TR_HDLC, "hdlc tx: %s (%d bytes)",
-           bytes_str(buf, buf_len, NULL, trace_buffer, sizeof(trace_buffer), DELIM_SPACE | ELLIPSIS_STAR), buf_len);
+          str_bytes(buf, buf_len, NULL, trace_buffer, sizeof(trace_buffer),
+                    DELIM_SPACE | ELLIPSIS_STAR), buf_len);
     osSemaphoreAcquire(g_tx_lock, osWaitForever);
     return ret;
 }
@@ -95,7 +96,8 @@ int cpc_rx(void *ctxt, void *buf, int buf_len)
     memcpy(buf, cpc_buf, cpc_buf_len);
     sl_cpc_free_rx_buffer(cpc_buf);
     TRACE(TR_HDLC, "hdlc rx: %s (%d bytes)",
-           bytes_str(buf, cpc_buf_len, NULL, trace_buffer, sizeof(trace_buffer), DELIM_SPACE | ELLIPSIS_STAR), cpc_buf_len);
+          str_bytes(buf, cpc_buf_len, NULL, trace_buffer, sizeof(trace_buffer),
+                    DELIM_SPACE | ELLIPSIS_STAR), cpc_buf_len);
     return cpc_buf_len;
 }
 

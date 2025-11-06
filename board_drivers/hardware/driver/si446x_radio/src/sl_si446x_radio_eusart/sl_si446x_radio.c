@@ -120,7 +120,7 @@ static volatile sl_ext_device_interrupt_depth_t sli_ext_device_interrupt_depth =
 
 //== HELPER FUNCTIONS ==
 
-#if     (defined(SL_EXT_DEVICE_READY_IRQ) || defined(SL_EXT_DEVICE_INTERRUPT_IRQ))
+#if (defined(SL_EXT_DEVICE_READY_IRQ) || defined(SL_EXT_DEVICE_INTERRUPT_IRQ))
 
 /** @brief GPIO event handler to map interrupt event to its handler.
  *

@@ -31,7 +31,7 @@ requires:
   - name: sleeptimer
   - name: udelay
   - name: status
-  - name: emlib_usart
+  - name: hal_usart
   - name: clock_manager_runtime
   - name: gpio
   - name: memlcd_screen

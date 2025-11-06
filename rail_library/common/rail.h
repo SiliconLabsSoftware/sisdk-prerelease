@@ -7359,17 +7359,22 @@ void RAILCb_AssertFailed(RAIL_Handle_t railHandle,
 RAIL_Status_t RAIL_StartThermistorMeasurement(RAIL_Handle_t railHandle);
 
 /**
- * Get the thermistor impedance measurement and return \ref
- * RAIL_INVALID_THERMISTOR_VALUE if the thermistor is not properly
+ * Get the thermistor impedance measurement. Sets the output parameter to
+ * \ref RAIL_INVALID_THERMISTOR_VALUE if the thermistor is not properly
  * configured or the thermistor measurement is not ready.
  *
  * @param[in] railHandle A radio-generic or real RAIL instance handle.
  * @param[out] thermistorImpedance A pointer to a uint32_t updated
- *   with the current thermistor impedance measurement in Ohms.
+ *   with the current thermistor impedance measurement in Ohms, or
+ *   \ref RAIL_INVALID_THERMISTOR_VALUE on error.
  * @return Status code indicating success of the function call.
  *
  * @note This function is already called in \ref RAIL_CalibrateHFXO().
  *   It does not need to be manually called during the compensation sequence.
+ *
+ * @note When HFXO compensation is enabled and a measurement is in progress,
+ *   this function returns \ref RAIL_STATUS_NO_ERROR with the most recent
+ *   cached thermistor value.
  *
  * @deprecated RAIL 2.x synonym of \ref sl_rail_get_thermistor_impedance().
  */

@@ -1401,7 +1401,7 @@ __INLINE void sl_hal_iadc_set_command(IADC_TypeDef *iadc,
   // Make sure the module exists on the selected chip.
   EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
-  iadc->CMD = (uint32_t)cmd;
+  iadc->CMD = cmd;
 #if defined(_IADC_EN_DISABLING_MASK)
   sl_hal_iadc_wait_ready(iadc);
 #endif
