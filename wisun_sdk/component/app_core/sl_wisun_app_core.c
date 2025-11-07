@@ -363,14 +363,9 @@ void sl_wisun_disconnected_event_hnd(sl_wisun_evt_t *evt)
 /* Connection lost event handler */
 void sl_wisun_connection_lost_event_hnd(sl_wisun_evt_t *evt)
 {
-  sl_status_t stat;
 
-  // connect to network (using the PHY settings)
-  stat = sl_wisun_join((const uint8_t *)_setting.network_name, &_setting.phy);
+  printf("[Connection lost, connecting to \"%s\"]\n", _setting.network_name);
 
-  if (stat == SL_STATUS_OK) {
-    printf("[Connection lost, connecting to \"%s\"]\n", _setting.network_name);
-  }
   _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_NETWORK_CONNECTION_LOST);
   _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_NETWORK_DISCONNECTED);
   _app_wisun_core_clear_state(SL_WISUN_APP_CORE_STATE_NETWORK_CONNECTED);

@@ -122,9 +122,6 @@ post_build:
 
 tag:
   - prebuilt_demo
-  - hardware:rf:band:2400
-  - hardware:component:sensor:si7021
-  - hardware:component:button:1+
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:!device:device_generic_family_efr32xg22
   - hwfilter:board:simple_button:btn0

@@ -1,5 +1,5 @@
 version = "0"
 
 [dependency]
-zigbee = {version = "9.0.0-alpha.4", installer = "conan", prerelease = true}
+zigbee = {version = "9.0.0-alpha.5", installer = "conan", prerelease = true}
 gcc-arm-none-eabi = {version = "12.2.rel1", user = "silabs"}

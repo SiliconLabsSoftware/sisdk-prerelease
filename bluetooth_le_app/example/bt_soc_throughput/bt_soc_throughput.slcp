@@ -113,9 +113,6 @@ post_build:
     condition: [device_series_2, bootloader_app_properties]
 
 tag:
-  - hardware:rf:band:2400
-  - hardware:component:button:2+
-  - hardware:device:flash:257
   - prebuilt_demo
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_series_2

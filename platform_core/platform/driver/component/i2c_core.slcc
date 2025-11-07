@@ -21,8 +21,6 @@ ui_hints:
 root_path: platform_core/platform/driver/i2c
 provides:
   - name: i2c_core
-conflicts:
-  - name: i2cspm
 requires:
   - name: status
   - name: device_manager

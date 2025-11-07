@@ -153,8 +153,8 @@ extern "C" {
                                                                                                      sli_memory_manager_get_bank_id_by_addr(heap, start_addr), \
                                                                                                      sli_memory_manager_get_bank_id_by_addr(heap, end_addr))
 #else
-#define INCREMENT_BANK_COUNTER(heap, start_addr, end_addr) (void)heap;
-#define DECREMENT_BANK_COUNTER(heap, start_addr, end_addr) (void)heap;
+#define INCREMENT_BANK_COUNTER(heap, start_addr, end_addr) (void)heap
+#define DECREMENT_BANK_COUNTER(heap, start_addr, end_addr) (void)heap
 #endif
 
 /*******************************************************************************

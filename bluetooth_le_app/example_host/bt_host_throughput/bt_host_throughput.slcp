@@ -47,6 +47,7 @@ library:
   - system: libcjson
 
 tag:
+  - toolchain:gcc
   - hwfilter:device:device_family_host
 
 readme:

@@ -121,9 +121,6 @@ post_build:
 
 tag:
   - prebuilt_demo
-  - hardware:rf:band:2400
-  - hardware:component:button:2+
-  - hardware:device:flash:257
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:!device:device_generic_family_efr32xg22
   - hwfilter:board:simple_button:btn0

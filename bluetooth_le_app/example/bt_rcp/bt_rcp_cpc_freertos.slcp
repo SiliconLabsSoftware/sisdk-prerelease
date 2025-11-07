@@ -95,7 +95,6 @@ configuration:
       - psa_crypto
 
 tag:
-  - hardware:rf:band:2400
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:!device:device_generic_family_efr32xg22
 

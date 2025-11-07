@@ -81,6 +81,48 @@ void sli_i2c_leader_dispatch_interrupt(sl_i2c_handle_t *i2c_handle);
  ******************************************************************************/
 void sli_i2c_follower_dispatch_interrupt(sl_i2c_handle_t *i2c_handle);
 
+/***************************************************************************//**
+ * Leader Mode: Send data from two buffers consecutively without STOP between them.
+ *
+ * @details Performs an atomic I2C write operation by transmitting data from two buffers
+ *          in a single transaction: S+ADDR(W)+DATA1+DATA2+P.
+ *          The buffers are transmitted consecutively. This is primarily used for
+ *          I2CSPM compatibility to support write-write operations.
+ *
+ * @note
+ *   - Only supports 7-bit addressing (address must be ≤ 0x7F)
+ *   - Only available in leader mode operation
+ *   - Both buffer lengths must be greater than 0
+ *   - Designed for I2CSPM write-write compatibility
+ *   - @deprecated This API should be removed when I2CSPM is deprecated
+ *
+ * @param[in] i2c_handle   Pointer to the I2C instance handle.
+ * @param[in] address      Address of the follower device (7-bit).
+ * @param[in] tx_buffer1   Pointer to the first transmit data buffer.
+ * @param[in] tx_len1      Length of the first buffer to transmit.
+ * @param[in] tx_buffer2   Pointer to the second transmit data buffer.
+ * @param[in] tx_len2      Length of the second buffer to transmit.
+ * @param[in] timeout      Timeout in milliseconds.
+ *
+ * @return
+ *   - SL_STATUS_OK if transfer completed successfully.
+ *   - SL_STATUS_NULL_POINTER if i2c_handle, tx_buffer1, or tx_buffer2 is NULL.
+ *   - SL_STATUS_INVALID_MODE if not in leader mode.
+ *   - SL_STATUS_INVALID_PARAMETER if address > 0x7F or any length is 0.
+ *   - SL_STATUS_TIMEOUT if operation timed out.
+ *   - SL_STATUS_NOT_FOUND if address NACK received.
+ *   - SL_STATUS_ABORT if data NACK received.
+ *   - SL_STATUS_TRANSMIT if arbitration lost.
+ *   - SL_STATUS_IO for other bus errors.
+ ******************************************************************************/
+sl_status_t sli_i2c_leader_write_no_stop_blocking(sl_i2c_handle_t *i2c_handle,
+                                                  uint16_t address,
+                                                  const uint8_t *tx_buffer1,
+                                                  uint32_t tx_len1,
+                                                  const uint8_t *tx_buffer2,
+                                                  uint32_t tx_len2,
+                                                  uint32_t timeout);
+
 #ifdef __cplusplus
 }
 #endif

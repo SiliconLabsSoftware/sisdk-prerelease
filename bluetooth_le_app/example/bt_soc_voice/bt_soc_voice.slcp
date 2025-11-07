@@ -157,11 +157,6 @@ post_build:
 
 tag:
   - prebuilt_demo
-  - hardware:rf:band:2400
-  - hardware:component:microphone
-  - hardware:component:button:1+
-  - hardware:component:led:1+
-  - hardware:component:vcom
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_series_2
   - hwfilter:board:simple_led:led0

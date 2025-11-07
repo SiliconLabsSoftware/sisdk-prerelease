@@ -41,4 +41,5 @@ include:
       - path: app_log_cli.h
 
 tag:
+  - toolchain:gcc
   - hwfilter:device:device_family_host

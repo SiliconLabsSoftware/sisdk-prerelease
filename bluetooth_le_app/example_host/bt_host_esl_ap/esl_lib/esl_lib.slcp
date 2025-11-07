@@ -104,4 +104,5 @@ library:
 
 tag:
   - companion:esl_ap
+  - toolchain:gcc
   - hwfilter:device:device_family_host

@@ -116,7 +116,6 @@ define:
       - hardware_board_supports_wstk_lcd
 
 tag:
-  - hardware:rf:band:2400
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_series_2
 

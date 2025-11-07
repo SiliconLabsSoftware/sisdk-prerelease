@@ -32,6 +32,7 @@ component:
   - id: iostream_stdio
   - id: app_assert
   - id: opn_device_host
+  - id: toolchain_gcc
 
 source:
   - path: app.c
@@ -73,4 +74,5 @@ template_contribution:
       handler: app_ble_peer_manager_on_event
 
 tag:
+  - toolchain:gcc
   - hwfilter:device:device_family_host

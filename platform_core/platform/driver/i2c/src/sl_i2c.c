@@ -97,6 +97,12 @@ static sl_status_t i2c_leader_mode_blocking_state_machine(sl_i2c_handle_t *i2c_h
                                                           uint8_t *rx_buffer,
                                                           uint32_t rx_len,
                                                           uint32_t timeout);
+static sl_status_t i2c_leader_mode_write_no_stop_blocking_state_machine(sl_i2c_handle_t *i2c_handle,
+                                                                        const uint8_t *tx_buffer1,
+                                                                        uint32_t tx_len1,
+                                                                        const uint8_t *tx_buffer2,
+                                                                        uint32_t tx_len2,
+                                                                        uint32_t timeout);
 static sl_status_t i2c_follower_mode_blocking_state_machine(sl_i2c_handle_t *i2c_handle,
                                                             const uint8_t *tx_buffer,
                                                             uint32_t tx_len,
@@ -1084,6 +1090,55 @@ void sli_i2c_follower_dispatch_interrupt(sl_i2c_handle_t *i2c_handle)
   }
 }
 
+/***************************************************************************//**
+ * Leader Mode: Send data from two buffers in a single I2C transaction.
+ ******************************************************************************/
+sl_status_t sli_i2c_leader_write_no_stop_blocking(sl_i2c_handle_t *i2c_handle,
+                                                  uint16_t address,
+                                                  const uint8_t *tx_buffer1,
+                                                  uint32_t tx_len1,
+                                                  const uint8_t *tx_buffer2,
+                                                  uint32_t tx_len2,
+                                                  uint32_t timeout)
+{
+  CORE_DECLARE_IRQ_STATE;
+  sl_status_t status = SL_STATUS_OK;
+
+  // Validate input parameters
+  if (i2c_handle == NULL || tx_buffer1 == NULL || tx_buffer2 == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+  // Only allow leader mode for this API
+  if (i2c_handle->operating_mode != SL_I2C_LEADER_MODE) {
+    return SL_STATUS_INVALID_MODE;
+  }
+  // Validate the input and length of data to send and receive
+  if (tx_len1 == 0 || tx_len2 == 0) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  // Only support 7-bit addresses for write-write
+  if (address > 0x7F) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  CORE_ENTER_ATOMIC();
+
+  // Initialize transaction parameters
+  i2c_handle->follower_address = address;
+  i2c_handle->tx_offset = 0;
+  i2c_handle->rx_offset = 0;
+  i2c_handle->transfer_direction = SL_I2C_WRITE;
+
+  // Initialize the I2C transfer
+  i2c_setup_blocking_transfer_interrupts(i2c_handle);
+
+  status = i2c_leader_mode_write_no_stop_blocking_state_machine(i2c_handle, tx_buffer1, tx_len1, tx_buffer2, tx_len2, timeout);
+
+  CORE_EXIT_ATOMIC();
+
+  return status;
+}
+
 /*******************************************************************************
  ***************************   LOCAL FUNCTIONS   *******************************
  ******************************************************************************/
@@ -1350,6 +1405,154 @@ static sl_status_t i2c_leader_mode_blocking_state_machine(sl_i2c_handle_t *i2c_h
           } else {
             sl_hal_i2c_send_ack(i2c_base_addr);
           }
+        }
+        break;
+
+      case SL_I2C_STATE_SEND_STOP:
+        if (pending_irq & I2C_IF_MSTOP) {
+          sl_hal_i2c_clear_interrupts(i2c_base_addr, I2C_IF_MSTOP);
+          if (i2c_handle->event == SL_I2C_EVENT_ADDR_NACK) {
+            return SL_STATUS_NOT_FOUND;
+          } else if (i2c_handle->event == SL_I2C_EVENT_DATA_NACK) {
+            return SL_STATUS_ABORT;
+          } else {
+            i2c_handle->event = SL_I2C_EVENT_COMPLETED;
+            return SL_STATUS_OK;
+          }
+        }
+        break;
+
+      default:
+        i2c_handle->event = SL_I2C_EVENT_SW_FAULT;
+        i2c_handle->state = SL_I2C_STATE_ERROR;
+        return SL_STATUS_FAIL;
+    }
+  }
+}
+
+/***************************************************************************//**
+ * State machine for write-write operation in blocking I2C transfer.
+ *
+ * @details
+ *   Implements a blocking state machine for I2C write-write operations that
+ *   transmits two separate buffers consecutively in a single atomic I2C transaction.
+ *   The transaction format is: S+ADDR(W)+DATA1+DATA2+P.
+ *   This ensures atomicity and is primarily designed for I2CSPM compatibility.
+ *
+ * @param[in] i2c_handle  Pointer to the I2C handle structure.
+ * @param[in] tx_buffer1  Pointer to the first transmit buffer.
+ * @param[in] tx_len1     Number of bytes in the first buffer.
+ * @param[in] tx_buffer2  Pointer to the second transmit buffer.
+ * @param[in] tx_len2     Number of bytes in the second buffer.
+ * @param[in] timeout     Timeout duration in milliseconds (0 = no timeout).
+ *
+ * @return
+ *   SL_STATUS_OK on success, or appropriate error code on failure.
+ *
+ * @note
+ *   This function supports I2CSPM write_write compatibility, enabling seamless
+ *   migration from I2CSPM to I2C driver for applications requiring atomic
+ *   two-buffer write operations.
+ *   @deprecated This function will be removed when I2CSPM is deprecated.
+ ******************************************************************************/
+static sl_status_t i2c_leader_mode_write_no_stop_blocking_state_machine(sl_i2c_handle_t *i2c_handle,
+                                                                        const uint8_t *tx_buffer1,
+                                                                        uint32_t tx_len1,
+                                                                        const uint8_t *tx_buffer2,
+                                                                        uint32_t tx_len2,
+                                                                        uint32_t timeout)
+{
+  uint32_t pending_irq;
+  I2C_TypeDef *i2c_base_addr = sl_device_peripheral_i2c_get_base_addr(i2c_handle->i2c_peripheral);
+
+  i2c_handle->state = SL_I2C_STATE_SEND_START_AND_ADDR;
+
+  uint16_t actual_follower_addr = (i2c_handle->follower_address << 1);
+  uint8_t first_addr_byte;
+  first_addr_byte = (actual_follower_addr & SL_I2C_7BIT_FOLLOWER_ADDRESS_MASK);
+
+  uint32_t start_time = get_current_time_ms();
+
+  // Local variables to track current buffer and state
+  const uint8_t *current_tx_buffer = tx_buffer1;
+  uint32_t current_tx_len = tx_len1;
+  bool is_second_buffer = false;
+
+  while (true) {
+    if (timeout > 0 && (get_current_time_ms() - start_time >= timeout)) {
+      i2c_base_addr->CMD = I2C_CMD_ABORT;
+      i2c_handle->event = SL_I2C_EVENT_TIMEOUT;
+      return SL_STATUS_TIMEOUT;
+    }
+
+    pending_irq = sl_hal_i2c_get_enabled_pending_interrupts(i2c_base_addr);
+
+    // Handle errors first - fastest path for error conditions
+    if (pending_irq & SL_HAL_I2C_IF_ERRORS) {
+      sl_hal_i2c_clear_interrupts(i2c_base_addr, _I2C_IF_MASK);
+      i2c_base_addr->CMD = I2C_CMD_ABORT;
+      i2c_handle->state = SL_I2C_STATE_ERROR;
+
+      if (pending_irq & I2C_IF_ARBLOST) {
+        i2c_handle->event = SL_I2C_EVENT_ARBITRATION_LOST;
+        return SL_STATUS_TRANSMIT;
+      } else {
+        i2c_handle->event = SL_I2C_EVENT_BUS_ERROR;
+        return SL_STATUS_IO;
+      }
+    }
+
+    switch (i2c_handle->state) {
+      case SL_I2C_STATE_SEND_START_AND_ADDR:
+        sl_hal_i2c_start_cmd(i2c_base_addr);
+        sl_hal_i2c_tx(i2c_base_addr, first_addr_byte);
+        i2c_handle->state = SL_I2C_STATE_ADDR_WAIT_FOR_ACK_OR_NACK;
+        i2c_handle->event = SL_I2C_EVENT_IN_PROGRESS;
+        break;
+
+      case SL_I2C_STATE_ADDR_WAIT_FOR_ACK_OR_NACK:
+        if (pending_irq & I2C_IF_ACK) {
+          sl_hal_i2c_clear_interrupts(i2c_base_addr, I2C_IF_ACK);
+          i2c_handle->state = SL_I2C_STATE_SEND_DATA;
+        } else if (pending_irq & I2C_IF_NACK) {
+          sl_hal_i2c_clear_interrupts(i2c_base_addr, I2C_IF_NACK);
+          sl_hal_i2c_stop_cmd(i2c_base_addr);
+          i2c_handle->event = SL_I2C_EVENT_ADDR_NACK;
+          i2c_handle->state = SL_I2C_STATE_SEND_STOP;
+        }
+        break;
+
+      case SL_I2C_STATE_SEND_DATA:
+        if (i2c_handle->tx_offset < current_tx_len) {
+          sl_hal_i2c_tx(i2c_base_addr, current_tx_buffer[i2c_handle->tx_offset++]);
+          i2c_handle->state = SL_I2C_STATE_DATA_WAIT_FOR_ACK_OR_NACK;
+        } else {
+          // Current buffer complete
+          if (!is_second_buffer) {
+            // First buffer complete - switch to second buffer without STOP
+            current_tx_buffer = tx_buffer2;
+            current_tx_len = tx_len2;
+            i2c_handle->tx_offset = 0;
+            is_second_buffer = true;
+            // Stay in SL_I2C_STATE_SEND_DATA to continue with second buffer
+          } else {
+            // Second buffer complete - send STOP
+            sl_hal_i2c_stop_cmd(i2c_base_addr);
+            i2c_handle->state = SL_I2C_STATE_SEND_STOP;
+          }
+        }
+        break;
+
+      case SL_I2C_STATE_DATA_WAIT_FOR_ACK_OR_NACK:
+        if (pending_irq & I2C_IF_ACK) {
+          sl_hal_i2c_clear_interrupts(i2c_base_addr, I2C_IF_ACK);
+          i2c_handle->state = SL_I2C_STATE_SEND_DATA;
+        } else if (pending_irq & I2C_IF_NACK) {
+          sl_hal_i2c_clear_interrupts(i2c_base_addr, I2C_IF_NACK);
+
+          sl_hal_i2c_stop_cmd(i2c_base_addr);
+          i2c_handle->state = SL_I2C_STATE_SEND_STOP;
+          i2c_handle->event = SL_I2C_EVENT_DATA_NACK;
         }
         break;
 

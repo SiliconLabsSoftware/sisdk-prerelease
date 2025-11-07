@@ -18,15 +18,15 @@
 #ifndef HAL_H
 #define HAL_H
 
-#ifdef TOKEN_MANAGER_TEST
+#if defined(TOKEN_MANAGER_TEST) || defined(SL_TOKEN_MANAGER_COMPATIBILITY)
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
-#else // TOKEN_MANAGER_TEST
+#else // TOKEN_MANAGER_TEST || SL_TOKEN_MANAGER_COMPATIBILITY
 #ifndef EZSP_HOST
 #include "sl_zigbee.h"
 #endif
-#endif // TOKEN_MANAGER_TEST
+#endif // TOKEN_MANAGER_TEST || SL_TOKEN_MANAGER_COMPATIBILITY
 #include "micro.h"
 #include "serial.h"
 #include "led.h"

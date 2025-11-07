@@ -2,6 +2,6 @@ version = "0"
 
 [dependency]
 multiprotocol = {version = ">=1.0.0-alpha.2 <1.0.1", installer = "conan", prerelease = true}
-zigbee = {version = "9.0.0-alpha.4", installer = "conan", prerelease = true}
+zigbee = {version = "9.0.0-alpha.5", installer = "conan", prerelease = true}
 openthread_stack = {version = ">=3.0.0 <3.0.1", installer = "conan", prerelease = true}
 gcc-arm-none-eabi = {version = "12.2.rel1", user = "silabs"}

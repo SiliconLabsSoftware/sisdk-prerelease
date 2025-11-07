@@ -23,6 +23,7 @@ provides:
 requires:
   - name: hal_generic_gpio
   - name: clock_manager_runtime
+  - name: i2c_core
   - name: hal_generic_i2c
   - name: udelay
   - name: device_manager

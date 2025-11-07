@@ -128,9 +128,6 @@ post_build:
   profile: tz_nonsecure_application
 
 tag:
-  - hardware:rf:band:2400
-  - hardware:device:flash:512
-  - hardware:device:ram:32
   - companion:secure_app  # Needs a companion app and cannot be built alone
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_series_2

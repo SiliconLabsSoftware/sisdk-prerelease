@@ -835,8 +835,8 @@ sl_status_t nvm3_getMemInfo(nvm3_Handle_t *h, nvm3_MemInfo_t *memInfo);
    The repackHeadroom value defines the difference between the user and forced
    threshold. The forced threshold is the minimum low memory threshold defined
    by the page size and maximum object size and can't be changed by the user.
-   The default value for the repack headroom is 0, meaning that the forced and
-   user thresholds are equal.
+   By default, the repack headroom is 0, making the user threshold equal to the
+   forced threshold plus the maximum object size configured.
 
    An NVM3 function that deletes or modifies data or counter object will trigger
    an automatic repack operation when free memory is below the forced threshold.
@@ -1094,30 +1094,29 @@ sl_status_t nvm3_getMemInfo(nvm3_Handle_t *h, nvm3_MemInfo_t *memInfo);
    with enough flash pages to put the maximum allowed basic storage significantly
    higher than the actual basic storage. Note that with security features such as
    authenticated encryption (AES-GCM) enabled, the available basic storage is
-   reduced by 16 bytes.
+   reduced by 8 bytes.
 
    ## Max Allowed Basic Storage with 4 kB page size
    |                Flash pages    |                Total size (bytes)    |    Max allowed basic storage (bytes)    |                                     |                                      |                                      |
    |-------------------------------|--------------------------------------|-----------------------------------------|-------------------------------------|--------------------------------------|--------------------------------------|
    |                               |                                      |    Max object size = 204 bytes          |    Max object size = 254 bytes      |    Max object size = 1900 bytes      |    Max object size = 4096 bytes      |
-   |    3                          |    12228                             |    3652                                 |    3552                             |    260                               |    0                                 |
-   |    4                          |    16304                             |    7728                                 |    7628                             |    4336                              |    0                                 |
-   |    5                          |    20380                             |    11804                                |    11704                            |    8412                              |    3800                              |
-   |    6                          |    24456                             |    15880                                |    15780                            |    12488                             |    7876                              |
-   |    7                          |    28532                             |    19956                                |    19856                            |    16564                             |    11952                             |
-   |    8                          |    32608                             |    24032                                |    23932                            |    20640                             |    16028                             |
-   |    9                          |    36684                             |    28108                                |    28008                            |    24716                             |    20104                             |
-   |    10                         |    40760                             |    32184                                |    32084                            |    28792                             |    24180                             |
+   |    3                          |    12228                             |    3864                                 |    3814                             |    2168                              |    0                                 |
+   |    4                          |    16304                             |    7940                                 |    7890                             |    6244                              |    0                                 |
+   |    5                          |    20380                             |    12016                                |    11966                            |    10320                             |    7912                              |
+   |    6                          |    24456                             |    16092                                |    16042                            |    14400                             |    11988                             |
+   |    7                          |    28532                             |    20168                                |    20118                            |    18472                             |    16064                             |
+   |    8                          |    32608                             |    24244                                |    24194                            |    22548                             |    20140                             |
+   |    9                          |    36684                             |    28320                                |    28270                            |    26624                             |    24216                             |
+   |    10                         |    40760                             |    32396                                |    32346                            |    30700                             |    28292                             |
 
    ## Max Allowed Basic Storage with 8 kB page size
    |                Flash pages    |                Total size (bytes)    |    Max allowed basic storage (bytes)    |                                     |                                      |                                      |
    |-------------------------------|--------------------------------------|-----------------------------------------|-------------------------------------|--------------------------------------|--------------------------------------|
    |                               |                                      |    Max object size = 204 bytes          |    Max object size = 254 bytes      |    Max object size = 1900 bytes      |    Max object size = 4096 bytes      |
-   |    3                          |    24516                             |    7748                                 |    7648                             |    4356                              |    0                                 |
-   |    4                          |    32688                             |    15920                                |    15820                            |    12528                             |    8136                              |
-   |    5                          |    40860                             |    24092                                |    23992                            |    20700                             |    16308                             |
-   |    6                          |    49032                             |    32264                                |    32164                            |    28872                             |    24480                             |
-
+   |    3                          |    24516                             |    7960                                 |    7910                             |    6264                              |    0                                 |
+   |    4                          |    32688                             |    16132                                |    16082                            |    14436                             |    12240                             |
+   |    5                          |    40860                             |    24304                                |    24254                            |    22608                             |    20412                             |
+   |    6                          |    49032                             |    32476                                |    32426                            |    30780                             |    28584                             |
    # Default Instance {#nvm3_default}
    Several NVM3 instances can be created on a device and live independently of each other,
    but to save memory, it is usually desirable to use only one NVM3 instance as each

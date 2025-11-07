@@ -51,4 +51,5 @@ ui_hints:
       focus: true
 
 tag:
+  - toolchain:gcc
   - hwfilter:device:device_family_host

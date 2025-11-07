@@ -1302,14 +1302,33 @@ psa_status_t store_key_desc_in_context(sl_se_key_descriptor_t *key_desc,
       return PSA_ERROR_BUFFER_TOO_SMALL;
     }
 
-    sli_se_opaque_wrapped_key_context_t *key_context =
-      (sli_se_opaque_wrapped_key_context_t *)key_buffer;
+    // If the key buffer is unaligned, use a temporary buffer to prevent
+    // hardfaults caused by instructions that do not support unaligned words
+    // (e.g. STR, STM).
+    sli_se_opaque_wrapped_key_context_t key_context_temp;
+    sli_se_opaque_wrapped_key_context_t *key_context;
+
+    if ((uintptr_t)key_buffer & 0x3) {
+      // Copy existing content to temporary buffer if it exists
+      memcpy(&key_context_temp, key_buffer, sizeof(sli_se_opaque_wrapped_key_context_t));
+      key_context = &key_context_temp;
+    } else {
+      key_context = (sli_se_opaque_wrapped_key_context_t *)key_buffer;
+    }
+
     key_context->header.struct_version = SLI_SE_OPAQUE_KEY_CONTEXT_VERSION;
     key_context->header.builtin_key_id = 0;
     memset(&key_context->header.reserved, 0, sizeof(key_context->header.reserved));
     key_context->key_type = key_desc->type;
     key_context->key_size = key_desc->size;
     key_context->key_flags = key_desc->flags;
+
+    // Copy back to original buffer if we used a temporary buffer
+    if ((uintptr_t)key_buffer & 0x3) {
+      memcpy(key_buffer, &key_context_temp, sizeof(sli_se_opaque_wrapped_key_context_t));
+      // Clear temporary buffer to prevent sensitive key material from remaining in memory
+      sli_psa_zeroize(&key_context_temp, sizeof(sli_se_opaque_wrapped_key_context_t));
+    }
 #if defined(SLI_PSA_DRIVER_FEATURE_KSU)
   } else if (key_desc->storage.method == SL_SE_KEY_STORAGE_INTERNAL_KSU) {
     if (key_buffer_size < sizeof(uint8_t)) {

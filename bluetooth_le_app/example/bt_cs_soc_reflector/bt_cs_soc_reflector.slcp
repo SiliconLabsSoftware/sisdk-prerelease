@@ -114,8 +114,8 @@ post_build:
     condition: [device_series_2, bootloader_app_properties]
 
 tag:
-  - hardware:rf:band:2400
   - prebuilt_demo
+  - toolchain:gcc
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_generic_family_efr32xg24
   - hwfilter:board:hardware_board_has_hfxo_freq_40mhz

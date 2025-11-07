@@ -311,11 +311,6 @@ __STATIC_INLINE bool writeHardAllowed(nvm3_Handle_t *h, size_t objSize)
   return h->unusedNvmSize >= thrHard(h, objSize);
 }
 
-__STATIC_INLINE bool softMinimumAvailable(nvm3_Handle_t *h)
-{
-  return h->unusedNvmSize >= thrSoftMinimum(h);
-}
-
 __STATIC_INLINE bool softUserAvailable(nvm3_Handle_t *h)
 {
   return h->unusedNvmSize >= thrSoftUser(h);
@@ -2661,7 +2656,7 @@ static sl_status_t repackOnce(nvm3_Handle_t *h)
   return sta;
 }
 
-// Run repack until the soft threshold is reached or the FIFO has been passed through.
+// Run repack until the hard threshold is reached or the FIFO has been passed through.
 static sl_status_t repackUntilGood(nvm3_Handle_t *h)
 {
   size_t i = 0;
@@ -2671,9 +2666,9 @@ static sl_status_t repackUntilGood(nvm3_Handle_t *h)
   size_t freePre;
 #endif
 
-  nvm3_tracePrint(TRACE_LEVEL_REPACK, "  repackUntilGood: Begin, unusedNvmSize=%u, thrSoftMinimum=%u.\n", h->unusedNvmSize, thrSoftMinimum(h));
+  nvm3_tracePrint(TRACE_LEVEL_REPACK, "  repackUntilGood: Begin, unusedNvmSize=%u, thrHard=%u.\n", h->unusedNvmSize, thrHard(h, h->maxObjectSize));
 
-  while ((!softMinimumAvailable(h)) && (i < (h->validNvmPageCnt * 2U))) {
+  while ((!writeHardAllowed(h, h->maxObjectSize)) && (i < (h->validNvmPageCnt * 2U))) {
 #if NVM3_TRACE_ENABLED
     freePre = h->unusedNvmSize;
 #endif
@@ -4194,10 +4189,11 @@ sl_status_t nvm3_resize(nvm3_Handle_t *h, nvm3_HalPtr_t newAddr, size_t newSize)
 static void getMemInfo(nvm3_Handle_t *h)
 {
   // Update the low memory flag
-  h->memInfo.isMemoryLow = (h->unusedNvmSize < (thrSoftMinimum(h) + h->lowMemoryThreshold));
+  size_t hardThr = thrHard(h, h->maxObjectSize);
+  h->memInfo.isMemoryLow = (h->unusedNvmSize < (hardThr + h->lowMemoryThreshold));
   // Calculate available memory for user
-  h->memInfo.availableMemory = (h->unusedNvmSize > thrSoftMinimum(h))
-                               ? (h->unusedNvmSize - thrSoftMinimum(h))
+  h->memInfo.availableMemory = (h->unusedNvmSize > hardThr)
+                               ? (h->unusedNvmSize - hardThr)
                                : 0;
   // Update the low cache flag
   h->memInfo.isCacheLow = h->cache.overflow;

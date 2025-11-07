@@ -32,8 +32,26 @@
 #include "sli_coulomb_counter_hal.h"
 #include "sl_hal_dcdc_coulomb_counter.h"
 
+
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 #define ARRAY_SIZE(_array)  (sizeof(_array) / sizeof(_array[0]))
+
+// Suppress deprecated function warnings
+#if defined(__GNUC__)
+#define SL_IGNORE_DEPRECATED_BEGIN \
+  _Pragma("GCC diagnostic push")      \
+  _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
+#define SL_IGNORE_DEPRECATED_END \
+  _Pragma("GCC diagnostic pop")
+#elif defined(__ICCARM__)
+#define SL_IGNORE_DEPRECATED_BEGIN \
+  _Pragma("diag_suppress=Pe1215")
+#define SL_IGNORE_DEPRECATED_END \
+  _Pragma("diag_default=Pe1215")
+#else
+#define SL_IGNORE_DEPRECATED_BEGIN
+#define SL_IGNORE_DEPRECATED_END
+#endif
 /// @endcond
 
 /// DCDC's supported outputs.
@@ -283,7 +301,9 @@ float sli_coulomb_counter_hal_cal_get_load_current(int8_t ccl_level)
  ******************************************************************************/
 float sli_coulomb_counter_hal_get_osc_frequency(void)
 {
+  SL_IGNORE_DEPRECATED_BEGIN
   return (float)sl_hal_dcdc_coulomb_counter_get_cal_reference_freq();
+  SL_IGNORE_DEPRECATED_END
 }
 
 /***************************************************************************//**
@@ -356,8 +376,10 @@ sl_status_t sli_coulomb_counter_hal_cal_start(sli_coulomb_counter_output_t *outp
   config.cal_count = nreq;
   config.cal_load_level = ccl;
 
+  SL_IGNORE_DEPRECATED_BEGIN
   sl_hal_dcdc_coulomb_counter_cal_init(config);
   sl_hal_dcdc_coulomb_counter_cal_start();
+  SL_IGNORE_DEPRECATED_END
   return SL_STATUS_OK;
 }
 
@@ -367,7 +389,9 @@ sl_status_t sli_coulomb_counter_hal_cal_start(sli_coulomb_counter_output_t *outp
  ******************************************************************************/
 sl_status_t sli_coulomb_counter_hal_cal_stop(void)
 {
+  SL_IGNORE_DEPRECATED_BEGIN
   sl_hal_dcdc_coulomb_counter_cal_stop();
+  SL_IGNORE_DEPRECATED_END
   return SL_STATUS_OK;
 }
 

@@ -54,9 +54,10 @@ __WEAK const sl_peripheral_adc_val_t sl_peripheral_val_adc0 = { .base = 0xFFFFFF
                                                                 .dma_signal_scan = SL_DMA_SIGNAL_NONE };
 
 // Weak definition of peripheral ADC1.
-__WEAK const sl_peripheral_val_t sl_peripheral_val_adc1 = { .base = 0xFFFFFFFF,
+__WEAK const sl_peripheral_adc_val_t sl_peripheral_val_adc1 = { .base = 0xFFFFFFFF,
                                                             .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                            .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                            .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                            .dma_signal_scan = SL_DMA_SIGNAL_NONE };
 
 // Weak definition of peripheral AES.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_aes = { .base = 0xFFFFFFFF,

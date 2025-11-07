@@ -157,16 +157,13 @@ post_build:
     condition: [device_series_2, bootloader_app_properties]
 
 tag:
-  - hardware:device:flash:512
-  - hardware:device:ram:32
-  - hardware:rf:band:2400
-  - hardware:component:button:1+
-  - hardware:component:led:1+
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_series_2
   - hwfilter:board:simple_led:led1
   - hwfilter:board:simple_button:btn0
   - hwfilter:board:hardware_board_supports_wstk_lcd
+  - hwfilter:flash:512k
+  - hwfilter:ram:32k
 
 ui_hints:
   highlight:

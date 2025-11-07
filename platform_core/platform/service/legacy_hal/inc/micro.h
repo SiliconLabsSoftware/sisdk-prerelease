@@ -43,7 +43,7 @@
 
 // Make sure that a proper plat/micro combination was selected if we aren't
 // building for a host processor
-#if ((!defined(EZSP_HOST)) && (!defined(UNIX_HOST)) && (!defined(TOKEN_MANAGER_TEST)) && !defined(SL_ZIGBEE_TEST) && !defined(ZIGBEE_STACK_ON_HOST))
+#if ((!defined(EZSP_HOST)) && (!defined(UNIX_HOST)) && (!defined(TOKEN_MANAGER_TEST)) && (!defined(SL_TOKEN_MANAGER_COMPATIBILITY)) && !defined(SL_ZIGBEE_TEST) && !defined(ZIGBEE_STACK_ON_HOST))
 
 #ifndef PLAT
   #error no platform defined, or unsupported
@@ -80,7 +80,7 @@ const char * halGetResetString(void);
 
 #if defined(CORTEXM3_EFM32_MICRO)
   #include "efm32_micro.h"
-#elif defined(TOKEN_MANAGER_TEST) || defined(SL_ZIGBEE_TEST) || defined(ZIGBEE_STACK_ON_HOST)
+#elif defined(SL_TOKEN_MANAGER_COMPATIBILITY) || defined(TOKEN_MANAGER_TEST) || defined(SL_ZIGBEE_TEST) || defined(ZIGBEE_STACK_ON_HOST)
 // pass
 #elif ((defined(EZSP_HOST) || defined(UNIX_HOST)))
   #include "micro_host.h"

@@ -825,16 +825,16 @@ sl_rail_status_t sl_rail_mux_IEEE802154_Config2p4GHzRadioAntDiv(sl_rail_handle_t
   return sl_rail_ieee802154_config_2p4_ghz_radio_ant_div(mux_rail_handle);
 }
 
-sl_rail_status_t sl_rail_ieee802154_config_2p4_ghz_radio_fast_channel_switching(sl_rail_handle_t railHandle)
+sl_rail_status_t sl_rail_mux_ieee802154_config_2p4_ghz_radio_fast_channel_switching(sl_rail_handle_t railHandle)
 {
   (void)railHandle;
-  return sl_rail_mux_ieee802154_config_2p4_ghz_radio_fast_channel_switching(mux_rail_handle);
+  return sl_rail_ieee802154_config_2p4_ghz_radio_fast_channel_switching(mux_rail_handle);
 }
 
-sl_rail_status_t sl_rail_ieee802154_config_2p4_ghz_radio_rx_duty_cycling(sl_rail_handle_t railHandle)
+sl_rail_status_t sl_rail_mux_ieee802154_config_2p4_ghz_radio_rx_duty_cycling(sl_rail_handle_t railHandle)
 {
   (void)railHandle;
-  return sl_rail_mux_ieee802154_config_2p4_ghz_radio_rx_duty_cycling(mux_rail_handle);
+  return sl_rail_ieee802154_config_2p4_ghz_radio_rx_duty_cycling(mux_rail_handle);
 }
 
 

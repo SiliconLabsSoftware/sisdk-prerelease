@@ -72,7 +72,7 @@ extern "C" {
 #define SL_PERIPHERAL_ADC0 ((sl_peripheral_t)&sl_peripheral_val_adc0)
 
 /// Define pointer to ADC1 peripheral structure.
-#define SL_PERIPHERAL_ADC1 (&sl_peripheral_val_adc1)
+#define SL_PERIPHERAL_ADC1 ((sl_peripheral_t)&sl_peripheral_val_adc1)
 
 /// Define pointer to AES peripheral structure.
 #define SL_PERIPHERAL_AES (&sl_peripheral_val_aes)
@@ -633,7 +633,7 @@ extern const sl_peripheral_val_t sl_peripheral_val_acmp1;
 extern const sl_peripheral_adc_val_t sl_peripheral_val_adc0;
 
 // External declaration for ADC1 peripheral structure.
-extern const sl_peripheral_val_t sl_peripheral_val_adc1;
+extern const sl_peripheral_adc_val_t sl_peripheral_val_adc1;
 
 // External declaration for AES peripheral structure.
 extern const sl_peripheral_val_t sl_peripheral_val_aes;

@@ -90,7 +90,6 @@ define:
     value: '1'  # Expose the powerCurvesState variable to access the current state of PA Curves
 
 tag:
-  - hardware:rf:band:2400
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_generic_family_efr32xg24
   - hwfilter:!device:device_is_module

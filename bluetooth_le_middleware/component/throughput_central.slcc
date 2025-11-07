@@ -31,21 +31,38 @@ config_file:
 source:
   - path: common/throughput_central/throughput_central.c
   - path: common/throughput_central/platform/throughput_central_interface.c
+    condition:
+      - device_cortexm
   - path: common/throughput_central/rta/throughput_central_rta.c
+    condition:
+      - device_cortexm
 requires:
   - name: app_log
   - name: app_assert
   - name: app_rta
+    condition:
+      - device_cortexm
   - name: memory_manager
-  - name: bluetooth_stack
+  - name: bluetooth_api
   - name: bluetooth_feature_system
+    condition:
+      - device_cortexm
   - name: bluetooth_feature_power_control
+    condition:
+      - device_cortexm
   - name: bluetooth_feature_connection_role_central
+    condition:
+      - device_cortexm
   - name: bluetooth_feature_legacy_scanner
+    condition:
+      - device_cortexm
   - name: bluetooth_feature_extended_scanner
+    condition:
+      - device_cortexm
   - name: bluetooth_feature_gatt
+    condition:
+      - device_cortexm
   - name: component_catalog
-  - name: power_manager
   - name: throughput
   - name: app_timer
   - name: throughput_ui
@@ -60,10 +77,14 @@ template_contribution:
     value:
         include: throughput_central_rta.h
         handler: throughput_central_rta_init
+    condition:
+      - device_cortexm
   - name: app_rta_ready
     value:
         include: throughput_central_rta.h
         handler: throughput_central_rta_ready
+    condition:
+      - device_cortexm
   - name: bluetooth_on_event
     value:
         include: throughput_central.h
@@ -81,11 +102,15 @@ template_contribution:
         event: is_ok_to_sleep
         include: throughput_central.h
         handler: throughput_central_is_ok_to_sleep
+    condition:
+      - power_manager
   - name: power_manager_handler
     value:
         event: sleep_on_isr_exit
         include: throughput_central.h
         handler: throughput_central_sleep_on_isr_exit
+    condition:
+      - power_manager
   - name: cli_group
     value:
         name: throughput_central

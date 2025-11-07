@@ -38,6 +38,7 @@
 #include "throughput_central.h"
 #include "throughput_central_interface.h"
 #include "throughput_ui_types.h"
+#include "throughput_ui.h"
 #include "throughput_common.h"
 #include "throughput_central_rta.h"
 

@@ -1322,11 +1322,11 @@ sl_status_t sl_btmesh_node_set_provisioning_data(aes_key_128 device_key,
  * @param[in] output_actions Enum @ref sl_btmesh_node_oob_output_action_flag_t.
  *   Allowed OOB Output Action types
  * @param[in] output_size Maximum Output OOB size Valid values range from 0
- *   (feature not supported) to 32.
+ *   (feature not supported) to 8.
  * @param[in] input_actions Enum @ref sl_btmesh_node_oob_input_action_flag_t.
  *   Allowed OOB Input Action types
  * @param[in] input_size Maximum Input OOB size. Valid values range from 0
- *   (feature not supported) to 32.
+ *   (feature not supported) to 8.
  * @param[in] oob_location Defines the OOB data location bitmask. See @ref
  *   sl_btmesh_prov_oob_capabilities.
  *
@@ -3190,10 +3190,10 @@ sl_status_t sl_btmesh_prov_send_oob_auth_response(uuid_128 uuid,
  * @param[in] input_actions Enum @ref sl_btmesh_node_oob_input_action_flag_t.
  *   Allowed OOB Input Action types
  * @param[in] min_size Minimum input/output OOB size. Values range from 0
- *   (input/output OOB not used) to 32.
+ *   (input/output OOB not used) to 8.
  * @param[in] max_size Maximum input/output OOB size. Must be larger than or
  *   equal to the minimum size. Values range from 0 (input/output OOB not used)
- *   to 32.
+ *   to 8.
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
