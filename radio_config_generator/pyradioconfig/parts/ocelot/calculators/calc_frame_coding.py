@@ -57,18 +57,3 @@ class CALC_Frame_Coding_Ocelot(CALC_Whitening):
         else:
             super().calc_frame_coding(model)
 
-    def calc_frame_coding_array_packed(self, model):
-        # Pack the frame coding values into 32 bits integers
-
-        symbol_encoding = model.vars.symbol_encoding.value
-        demod_select = model.vars.demod_select.value
-
-        if (symbol_encoding == model.vars.symbol_encoding.var_enum.Manchester or
-            symbol_encoding == model.vars.symbol_encoding.var_enum.Inv_Manchester) and \
-                demod_select == model.vars.demod_select.var_enum.TRECS_VITERBI:
-
-            coding_array = model.vars.frame_coding_array.value
-            width = model.vars.frame_coding_array_width.value
-            model.vars.frame_coding_array_packed.value = self.pack_list(coding_array, width)
-        else:
-            super().calc_frame_coding_array_packed(model)

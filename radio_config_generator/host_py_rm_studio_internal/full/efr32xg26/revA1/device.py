@@ -39,7 +39,7 @@ from . SEQ import *
 from . SYNTH_NS import *
 from . SYNTH_S import *
 
-import imp
+import importlib
 import os
 
 _PKG_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -113,7 +113,7 @@ class RM_Device_EFR32XG26XFULL_RevA1(Base_RM_Device):
         self.__dict__['zz_frozen'] = False
         super(RM_Device_EFR32XG26XFULL_RevA1, self).__init__(rmio, label,
             'EFR32XG26XFULL',
-            RM_SVD_Info('EFR32XG26XFULL_SEQ.svd', 'ddf0adb30a873f003621d3be4a7b6b68'))
+            RM_SVD_Info('EFR32XG26XFULL_SEQ.svd', '1df929323ed37d39b1b1c56c7b889187'))
 
         self.AGC_NS = RM_Peripheral_AGC_NS(self.zz_rmio, self.zz_label)
         self.zz_pdict['AGC_NS'] = self.AGC_NS
@@ -183,6 +183,8 @@ class RM_Device_EFR32XG26XFULL_RevA1(Base_RM_Device):
 
         excluded_regs_fn = os.path.join(_PKG_PATH, _EXCLUDED_REGS_MOD_NAME + '.py')
         if os.path.exists(excluded_regs_fn) and hasattr(self, 'excludeFromDumpByName'):
-            mod = imp.load_source(_EXCLUDED_REGS_MOD_NAME, excluded_regs_fn)
+            spec = importlib.util.spec_from_file_location(_EXCLUDED_REGS_MOD_NAME, excluded_regs_fn)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
             excluded_regs = getattr(mod, _EXCLUDED_REGS_LIST_NAME)
             self.excludeFromDumpByName(excluded_regs)

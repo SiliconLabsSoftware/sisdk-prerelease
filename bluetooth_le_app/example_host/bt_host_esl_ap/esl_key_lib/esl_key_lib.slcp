@@ -21,7 +21,7 @@ filter:
 component:
   - id: toolchain_gcc
   - id: esl_tag_core
-  - id: native_host
+  - id: opn_device_host
   - id: app_log
   - id: iostream_stdio
   - id: bluetooth_api_ncp_host
@@ -62,6 +62,5 @@ library:
       - win32
 
 tag:
-  - companion:esl_ap
   - toolchain:gcc
   - hwfilter:device:device_family_host

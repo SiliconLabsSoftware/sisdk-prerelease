@@ -35,7 +35,7 @@ component:
   - id: sl_rail_util_init
     instance:
       - inst0
-  - id: rail_util_recommended
+  # - id: rail_util_recommended # Temporary workaround for RAIL_LIB-14534
   - id: rail_lib_multiprotocol
   - id: radio_config_simple_rail_singlephy
   - id: cli

@@ -8,15 +8,24 @@ from py_2_and_3_compatibility import *
 
 class PhysRailBaseStandardIeee802154Rainier(PhysRAILBaseStandardIEEE802154Bobcat):
 
+    def _set_xtal_frequency(self, phy, xtal_freq=None):
+        if xtal_freq is None:
+            phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        else:
+            phy.profile_inputs.xtal_frequency_hz.value = xtal_freq
+
+    def _part_specific_phy_overrides(self, phy, model):
+        pass
+
     # ################
     # Common 802154 configuration (framing settings, etc)
     # ###############
 
-    def IEEE802154_2p4GHz_base(self, phy, model):
-        super().IEEE802154_2p4GHz_base(phy, model)
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
-
-        return phy
+    # def IEEE802154_2p4GHz_base(self, phy, model):
+    #     super().IEEE802154_2p4GHz_base(phy, model)
+    #     phy.profile_inputs.xtal_frequency_hz.value = 38400000
+    #
+    #     return phy
 
     # ################
     # 802154 Legacy PHYs
@@ -78,7 +87,7 @@ class PhysRailBaseStandardIeee802154Rainier(PhysRAILBaseStandardIEEE802154Bobcat
         phy.profile_inputs.rx_xtal_error_ppm.value = 0
 
         # XTAL
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy)
 
         """ Packet Structure"""
         PHY_COMMON_FRAME_154(phy, model)
@@ -258,6 +267,8 @@ class PhysRailBaseStandardIeee802154Rainier(PhysRAILBaseStandardIEEE802154Bobcat
         phy.profile_outputs.MODEM_CTRL2_SQITHRESH.override = 56
         model.vars.synth_tx_mode.value_forced = model.vars.synth_tx_mode.var_enum.MODE_IEEE802154
 
+        self._part_specific_phy_overrides(phy, model)
+
     def PHY_IEEE802154_2p4GHz_cohdsa_iqmod(self, model, phy_name=None):
         phy = self.PHY_IEEE802154_2p4GHz_cohdsa(model, phy_name="PHY_IEEE802154_2p4GHz_cohdsa_iqmod")
         phy.profile_inputs.modulator_select.value = model.vars.modulator_select.var_enum.IQ_MOD
@@ -357,7 +368,7 @@ class PhysRailBaseStandardIeee802154Rainier(PhysRAILBaseStandardIEEE802154Bobcat
         phy = self.PHY_IEEE802154_2p4GHz_Enhanced(model, phy_name=phy_name)
 
         self.fast_detection_ehdsss_settings(phy, model)
-        ## Port overrides from Signify work as these give better sensitivity and freqoffset for all 2ZB
+        ## Port overrides from ModeSwitch work as these give better sensitivity and freqoffset for all 2ZB
         self.fast_framedet_ehdsss_settings(phy, model)
         self.fast_hopping_demod_ctrl_settings(phy, model)
 
@@ -399,7 +410,7 @@ class PhysRailBaseStandardIeee802154Rainier(PhysRAILBaseStandardIEEE802154Bobcat
         phy.profile_outputs.MODEM_EHDSSSCFG1_DSSSCORRTHD.override = 400
         phy.profile_outputs.MODEM_EHDSSSCFG3_LQIAVGWIN.override = 0
 
-        # Special Signify modeswitch requirements to achieve minimum timing from TX to FRAMEDET timing
+        # Special modeswitch requirements to achieve minimum timing from TX to FRAMEDET timing
         phy.profile_outputs.MODEM_EHDSSSCTRL_DSSSDSATHD.override = 0
         phy.profile_outputs.MODEM_EHDSSSCTRL_DSSSFRMTIMEOUT.override = 7
         phy.profile_outputs.MODEM_PHDMODCTRL_PMDETEN.override = 0
@@ -500,104 +511,6 @@ class PhysRailBaseStandardIeee802154Rainier(PhysRAILBaseStandardIEEE802154Bobcat
         phy.profile_outputs.MODEM_SQEXT_SQSTG3TIMOUT.override = 0
 
         phy.profile_outputs.MODEM_SRCCHF_CHMUTETIMER.override = 215
-
-        return phy
-
-
-    ### ZB Dual Sync PHY with HDR Settings for Minimal Diff (non-switching)###
-    # This PHY should not be used in production and is only present for RTL regression
-
-    signify_hdrlist = ['MODEM_TRECSCFG_(?!DTIMLOSS)', 'MODEM_VITERBIDEMOD_*', 'MODEM_VTCORRCFG0_*', 'MODEM_VTCORRCFG1_*',
-                      'MODEM_TRECPM*', 'MODEM_REALTIMCFE_*']
-
-    @concurrent_phy(phy_name='PHY_Signify_SUN_FSK_2Mbps_500kHz', reg_field_list=signify_hdrlist)
-    def PHY_Signify_Mode_Switch(self, model, phy_name='PHY_Signify_Mode_Switch'):
-        phy = self.PHY_IEEE802154_2p4GHz_Enhanced_Scan(model, phy_name=phy_name)
-
-        phy.profile_inputs.frame_length_type.value = model.vars.frame_length_type.var_enum.FIXED_LENGTH
-        phy.profile_inputs.payload_crc_en.value = False
-        phy.profile_inputs.header_en.value = False
-
-        phy.profile_inputs.var_length_includecrc.value = False
-        phy.profile_inputs.var_length_minlength.value = 0
-        phy.profile_inputs.var_length_includecrc.value = False
-
-        phy.profile_inputs.syncword_length.value = 32
-        phy.profile_inputs.syncword_0.value = long(0x3E721ED5)
-        phy.profile_inputs.syncword_1.value = long(0xC18DE12A)
-
-        phy.profile_inputs.hop_enable.value = model.vars.hop_enable.var_enum.DISABLED
-        phy.profile_inputs.synth_settling_mode.value = model.vars.synth_settling_mode.var_enum.FAST
-
-        # Enable TRECS
-        phy.profile_outputs.MODEM_VITERBIDEMOD_VTDEMODEN.override = 1
-
-        ### Zigbee Sync-word & Mode Switch packet
-        phy.profile_outputs.MODEM_SYNC2_SYNC2.override = 167
-        phy.profile_outputs.MODEM_SYNC3_SYNC3.override = 47
-        phy.profile_outputs.MODEM_SYNCWORDCTRL_SYNCDET2TH.override = 1
-        phy.profile_outputs.MODEM_SYNCWORDCTRL_DUALSYNC2TH.override = 1
-        phy.profile_outputs.MODEM_SYNCWORDCTRL_SYNCBITS2TH.override = 7
-        phy.profile_outputs.MODEM_SYNCWORDCTRL_SYNCSWFEC.override = 0
-
-
-        ### to reduce the latency of framedet
-        phy.profile_outputs.MODEM_EHDSSSCFG2_DSSSCORRSCHWIN.override = 3
-        phy.profile_outputs.MODEM_EHDSSSCFG3_LQIAVGWIN.override = 0
-
-        ### CH power detection theshold
-        phy.profile_outputs.MODEM_COH0_COHCHPWRTH0.override = 212
-
-        phy.profile_outputs.MODEM_COCURRMODE_DSSSDSACHK.override = 50
-        phy.profile_outputs.MODEM_COCURRMODE_TRECSDSACHK.override = 16
-        phy.profile_outputs.MODEM_COCURRMODE_CORRCHKMUTE.override = 8
-
-        ### enable Enhanced DSSS demod & TRECS demod for DSA detection
-        phy.profile_outputs.MODEM_DIGMIXCTRL_DSSSCFECOMBO.override = 0  ## change from 2 to 0 to save power
-        phy.profile_outputs.MODEM_DUALTIM_DUALTIMEN.override = 0
-        phy.profile_outputs.MODEM_REALTIMCFE_MINCOSTTHD.override = 850
-        phy.profile_outputs.MODEM_REALTIMCFE_SYNCACQWIN.override = 31
-
-        phy.profile_inputs.syncword_trisync.value = True
-
-        return phy
-
-    ### Signify Fast Switching PHY ###
-    # This PHY should not be used in production and is only present for RTL regression
-
-    def PHY_Signify_2ZB_Concurrent_Hop(self, model, phy_name='PHY_Signify_2ZB_Concurrent_Hop'):
-        phy = self.PHY_Signify_Mode_Switch(model, phy_name=phy_name)
-        phy.profile_inputs.hop_enable.value = model.vars.hop_enable.var_enum.ENABLED
-
-        phy.profile_inputs.frame_length_type.value = model.vars.frame_length_type.var_enum.FIXED_LENGTH  # : YJC - Changing to Fixed length. We can't set VARIABLE_LENGTH if header en is set to False
-        phy.profile_inputs.var_length_minlength.value = 4
-        phy.profile_inputs.var_length_includecrc.value = True
-
-        ## Hopping Timeout Monitor
-        phy.profile_outputs.MODEM_SQ_SQTIMOUT.override = 96                     # Set to same for all hopping PHYs
-        phy.profile_outputs.MODEM_SQEXT_SQSTG2TIMOUT.override = 128
-        phy.profile_outputs.MODEM_SQEXT_SQSTG3TIMOUT.override = 650
-
-        phy.profile_outputs.MODEM_COH0_COHCHPWRTH2.override = 16
-
-        phy.profile_outputs.MODEM_PHDMODCTRL_CHPWRQUAL.override = 0
-
-        phy.profile_outputs.MODEM_EHDSSSCFG2_DSSSFRTCORRTHD.override = 750
-        phy.profile_outputs.MODEM_EHDSSSCFG2_DSSSCORRSCHWIN.override = 2
-        phy.profile_outputs.MODEM_EHDSSSCTRL_DSSSFRMTIMEOUT.override = 7
-
-        phy.profile_outputs.MODEM_VTCORRCFG0_EXPECTPATT.override = long(0x3E721ED5)
-        phy.profile_outputs.MODEM_EXPECTPATTDUAL_EXPECTPATTDUAL.override = long(0xC18DE12A)
-        phy.profile_outputs.MODEM_DUALTIM_MINCOSTTHD2.override = 600
-        phy.profile_outputs.MODEM_DUALTIM_SYNCACQWIN2.override = 31
-        phy.profile_outputs.MODEM_TRECSCFG_SOFTD.override = 1
-        phy.profile_outputs.MODEM_TRECSCFG_SDSCALE.override = 3
-        phy.profile_outputs.MODEM_VITERBIDEMOD_SYNTHAFC.override = 1
-        phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI1.override = 65
-        phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI2.override = 51
-        phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI3.override = 41
-
-        phy.profile_outputs.MODEM_SRCCHF_CHMUTETIMER.override = 245  # ZBRX value in sim fast sw SEQACC table
 
         return phy
 

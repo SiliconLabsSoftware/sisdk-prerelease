@@ -10,6 +10,9 @@ class CalcGlobalRainier(Calc_Global_Bobcat):
         self._add_syctrl_regs_s3(model)
         self._add_spare_regs(model)
 
+    def _add_shaping_filter_gain_variable(self, model):
+        self._addModelActual(model, 'shaping_filter_gain', float, ModelVariableFormat.FLOAT)
+
     def _add_spare_regs(self, model):
         self._addModelRegister(model, 'MODEM.SPARE.SPARE', int, ModelVariableFormat.HEX)
 

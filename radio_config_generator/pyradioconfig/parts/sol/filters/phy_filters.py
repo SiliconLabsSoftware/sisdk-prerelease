@@ -4,10 +4,11 @@ from pyradioconfig.calculator_model_framework.interfaces.iphy_filter import IPhy
 class PhyFilters_Sol(IPhyFilter):
 
     # Studio black list (files removed before Studio distribution)
-    customer_phy_groups = ['Phys_Internal_Base_Customer_Chamberlain',
-                           'Phys_Internal_Base_Customer_Landis_Gyr',
-                           'Phys_Internal_Base_Customer_Sigfox',
-                           'Phys_Internal_Base_Customer_Itron',
+    customer_phy_groups = ['secret10',
+                           'secret7',
+                           'secret18',
+                           'secret19',
+                           'secret20',
                            'Phys_Internal_Base_Experimental',
                            'Phys_Internal_Base_Standard_SUNFSK',
                            'Phys_Internal_Base_Utility',
@@ -21,7 +22,6 @@ class PhyFilters_Sol(IPhyFilter):
                            'Phys_Internal_WiSUN_OFDM_MCSx',
                            'Phys_Internal_Base_Standard_IEEE802154',
                            'Phys_RAIL_Base_Standard_ZWave',
-                           'Phys_Internal_Base_Customer_Melco',
                         ]
 
     # Studio white list (these PHYs show in Studio as proprietary starting points)

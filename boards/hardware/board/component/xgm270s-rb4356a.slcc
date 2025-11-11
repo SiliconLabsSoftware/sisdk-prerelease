@@ -2,7 +2,7 @@
 - id: xgm270s_rb4356a
 - label: XGM270S-RB4356A
 - package: boards
-- description: Kit BSP support for the xGM270S +8 dBm SiP Module Radio Board.
+- description: Kit BSP support for the xGM270S SiP Module Radio Board.
 - category: Platform|Board|Kit|Radio Board
 - quality: production
 - metadata:

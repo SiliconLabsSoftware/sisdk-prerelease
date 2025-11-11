@@ -1,7 +1,0 @@
-# Version defaults to "0" if not defined
-version = "0"
-
-[dependency]
-zwave = { version = ">=7.25.0 <7.25.1", installer = "conan", prerelease = true }
-zwave_cc_configurator = { version = ">=1.0.0 <1.0.1", installer = "conan", prerelease = true }
-slc-cli = "~"

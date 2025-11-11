@@ -16,7 +16,7 @@ requires:
   - name: device
   - name: device_init
   - name: rail_lib
-  - name: rail_util_pa
+  - name: sl_rail_util_pa
   - name: sleeptimer
   - name: power_manager
   - name: clock_manager_runtime

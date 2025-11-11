@@ -450,7 +450,6 @@ class CalcDemodulatorRainier(Calc_Demodulator_Bobcat):
         trecs_used = model.vars.MODEM_VITERBIDEMOD_VTDEMODEN.value
         enhdsss_used = model.vars.MODEM_EHDSSSCTRL_EHDSSSEN.value
         # https://jira.silabs.com/browse/MCUW_RADIO_CFG-2587
-        # enabling concurrent detection on signify PHYs causes FSM to get stuck in presense of 802154 blocker
         # making this calculation makes sure concurrent detection is disabled for standalone PHYs
         if trecs_used and enhdsss_used:
             self._reg_write(model.vars.MODEM_COCURRMODE_DSSSCONCURRENT, 1)
@@ -463,7 +462,6 @@ class CalcDemodulatorRainier(Calc_Demodulator_Bobcat):
         is_ble_longrange = model.vars.MODEM_LONGRANGE_LRBLE.value
         # https://jira.silabs.com/browse/MCUW_RADIO_CFG-2587
         # For the most PHYs, FEC is not selected in PHY's definition. So, TRECSCFG_SOFTD = 0 is as the default.
-        # For Signify 1M PHY, FEC is selected in PHY's definition and uses TRECS demod. TRECS demod provides softcode
         # and hardcode to Viterbi decoder in FRC. So, we set TRECSCFG_SOFTD = 1 to get better performance.
 
         if not(is_ble_longrange) and (trecs_used and fec_enabled):
@@ -563,4 +561,41 @@ class CalcDemodulatorRainier(Calc_Demodulator_Bobcat):
         self._reg_write(model.vars.MODEM_DIGMIXCTRL_HOPPINGSRC, hoppingsrc)
         self._reg_write(model.vars.MODEM_DIGMIXCTRL_FWHOPPING, fwhopping)
 
+    # Due to the inheriting the CALC_Demodulator_bobcat class from prior parts, the functions below are copied in order to maintain functionality
+    def calc_interpolation_gain_actual(self, model):
+        #This function calculates the actual interpolation gain
+
+        #Load model variables into local variables
+        txbrnum = model.vars.MODEM_TXBR_TXBRNUM.value
+        modformat = model.vars.modulation_type.value
+
+        if txbrnum < 256:
+            interpolation_gain = txbrnum / 1.0
+        elif modformat == model.vars.modulation_type.var_enum.BPSK or \
+             modformat == model.vars.modulation_type.var_enum.DBPSK:
+            interpolation_gain = 16 * txbrnum * 2 ** (3-floor(log(txbrnum, 2)))
+        elif txbrnum < 512:
+            interpolation_gain = txbrnum / 2.0
+        elif txbrnum < 1024:
+            interpolation_gain = txbrnum / 4.0
+        elif txbrnum < 2048:
+            interpolation_gain = txbrnum / 8.0
+        elif txbrnum < 4096:
+            interpolation_gain = txbrnum / 16.0
+        elif txbrnum < 8192:
+            interpolation_gain = txbrnum / 32.0
+        elif txbrnum < 16384:
+            interpolation_gain = txbrnum / 64.0
+        else:
+            interpolation_gain = txbrnum / 128.0
+        
+        # following the rtl
+        interpolation_gain = floor(interpolation_gain)
+
+        # calculate phase interpolation gain for OQPSK cases
+        if modformat == model.vars.modulation_type.var_enum.OQPSK:
+            interpolation_gain = 2 ** (ceil(log(interpolation_gain, 2)))
+
+        #Load local variables back into model variables
+        model.vars.interpolation_gain_actual.value = float(interpolation_gain)
 

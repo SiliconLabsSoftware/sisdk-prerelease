@@ -438,7 +438,7 @@ static const char *sli_status_group_bluetooth_att[] =
   "PREPARE_QUEUE_FULL",
   "ATT_NOT_FOUND",
   "ATT_NOT_LONG",
-  "INSUFFICIENT_ENC_KEY_SIZE",
+  "ENCRYPTION_KEY_SIZE_TOO_SHORT",
   "INVALID_ATT_LENGTH",
   "UNLIKELY_ERROR",
   "INSUFFICIENT_ENCRYPTION",
@@ -704,7 +704,8 @@ static const char *sli_status_group_bluetooth_smp[] =
   "NUMERIC_COMPARISON_FAILED",
   "BREDR_PAIRING_IN_PROGRESS",
   "CROSS_TRANSPORT_KEY_DERIVATION_GENERATION_NOT_ALLOWED",
-  "KEY_REJECTED"
+  "KEY_REJECTED",
+  "BUSY"
 };
 #endif
 

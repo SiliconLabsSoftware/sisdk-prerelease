@@ -95,8 +95,9 @@ class ModelVariable(object):
                  format=ModelVariableFormat.HEX, forceable=True):
         #: The variable name
         self.name = name
+
         if not issubclass(var_type, Enum):
-            assert var_type in (basestring, bool, complex, float, int, long, str), \
+            assert var_type in (basestring, bool, complex, float, int, long, str, dict), \
                 "FATAL ERROR: Unsupported class for var_type: {}".format(var_type)
         #: The class type of the variable
         self._var_type = var_type
@@ -318,7 +319,7 @@ class ModelVariable(object):
         return isinstance(value, var_type)
 
     def _get_type_str(self):
-        if self._var_type in (bool, complex, float, int, long):
+        if self._var_type in (bool, complex, float, int, long, dict):
             return self._var_type.__name__
         elif self._var_type is basestring:
             return "string"
@@ -562,6 +563,8 @@ class ModelVariableXml(ModelVariable):
                 return getattr(__builtin__, var_root.type_)
         if var_root.type_ =='string':
             return str
+        elif var_root.type_ == 'dict':
+            return dict
         elif var_root.type_ == 'enum':
             return Enum
         else:

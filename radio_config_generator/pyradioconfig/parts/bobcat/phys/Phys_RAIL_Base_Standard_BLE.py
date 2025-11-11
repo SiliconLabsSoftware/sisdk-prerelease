@@ -852,6 +852,8 @@ class PHYS_Bluetooth_LE_Bobcat(IPhy):
         phy.profile_outputs.MODEM_LONGRANGE1_LOGICBASEDLRDEMODGATE.override = 0
         phy.profile_outputs.MODEM_LONGRANGE6_LRSPIKETHD.override = 0 # MCUW_RADIO_CFG-1705, RAIL_LIB-6014 to be compatible with lynx workaround of MCUW_RADIO_CFG-1701
 
+        phy.profile_outputs.FRC_FECCTRL_CONVMODE.override = 0
+
         phy.profile_outputs.rx_sync_delay_ns.override = 50000
         phy.profile_outputs.rx_eof_delay_ns.override = 11750
         phy.profile_outputs.tx_sync_delay_ns.override = 2000

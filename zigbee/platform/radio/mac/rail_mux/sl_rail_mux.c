@@ -94,10 +94,12 @@ static inline void SET_CHANNEL_SWITCHING_CFG_CH(uint8_t context_index, uint16_t 
 // Some of these settings only take effect when radio is idle
 static inline void CONFIGURE_RX_CHANNEL_SWITCHING(sl_rail_handle_t mux_rail_handle, sl_rail_ieee802154_rx_channel_switching_cfg_t channel_switching_cfg)
 {
-  sl_rail_util_ieee802154_config_radio(mux_rail_handle);
+  sl_rail_idle(mux_rail_handle, SL_RAIL_IDLE, true);
+      sl_rail_status_t status = sl_rail_util_ieee802154_config_radio(mux_rail_handle);
+    assert(status == SL_RAIL_STATUS_NO_ERROR);
+    //this checks if stacks are actually on 2 different channels regardless of fcs being enabled
   if (sli_is_multi_channel_enabled()) {
-    sl_rail_idle(mux_rail_handle, SL_RAIL_IDLE, true);
-    sl_rail_status_t status = sl_rail_ieee802154_config_rx_channel_switching(mux_rail_handle, &channel_switching_cfg);
+    status = sl_rail_ieee802154_config_rx_channel_switching(mux_rail_handle, &channel_switching_cfg);
     assert(status == SL_RAIL_STATUS_NO_ERROR);
     status = sl_rail_config_rx_options(mux_rail_handle, SL_RAIL_RX_OPTION_CHANNEL_SWITCHING, SL_RAIL_RX_OPTION_CHANNEL_SWITCHING);
     assert(status == SL_RAIL_STATUS_NO_ERROR);
@@ -828,13 +830,21 @@ sl_rail_status_t sl_rail_mux_IEEE802154_Config2p4GHzRadioAntDiv(sl_rail_handle_t
 sl_rail_status_t sl_rail_mux_ieee802154_config_2p4_ghz_radio_fast_channel_switching(sl_rail_handle_t railHandle)
 {
   (void)railHandle;
+  #ifdef SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
   return sl_rail_ieee802154_config_2p4_ghz_radio_fast_channel_switching(mux_rail_handle);
+  #else
+  return SL_STATUS_NOT_SUPPORTED;
+  #endif
 }
 
 sl_rail_status_t sl_rail_mux_ieee802154_config_2p4_ghz_radio_rx_duty_cycling(sl_rail_handle_t railHandle)
 {
   (void)railHandle;
+  #ifdef SL_CATALOG_SL_RAIL_UTIL_IEEE802154_RX_DUTY_CYCLING_PRESENT
   return sl_rail_ieee802154_config_2p4_ghz_radio_rx_duty_cycling(mux_rail_handle);
+  #else
+  return SL_STATUS_NOT_SUPPORTED;
+  #endif
 }
 
 

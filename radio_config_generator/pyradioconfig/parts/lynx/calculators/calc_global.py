@@ -58,7 +58,6 @@ class CALC_Global_lynx(CALC_Global_panther):
         self._addModelRegister(model, 'AGC.PNRFATT3.LNAMIXRFATT17', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'AGC.SEQIF.RSSIVALID', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'FRC.DFLCTRL.DFLBOIOFFSET', int, ModelVariableFormat.HEX)
-        self._addModelRegister(model, 'FRC.CTRL.LPMODEDIS', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'FRC.CTRL.WAITEOFEN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'FRC.TRAILTXDATACTRL.TRAILTXREPLEN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'FRC.TRAILTXDATACTRL.TXSUPPLENOVERIDE', int, ModelVariableFormat.HEX)

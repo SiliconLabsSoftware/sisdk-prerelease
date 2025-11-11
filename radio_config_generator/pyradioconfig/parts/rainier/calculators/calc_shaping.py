@@ -7,16 +7,6 @@ from pyradioconfig.calculator_model_framework.Utils.CustomExceptions import Calc
 
 class CalcShapingRainier(Calc_Shaping_Bobcat):
 
-    def buildVariables(self, model):
-        """Populates a list of needed variables for this calculator
-
-        Args:
-            model (ModelRoot) : Builds the variables specific to this calculator
-        """
-        super().buildVariables(model)
-
-        self._addModelActual(model, 'shaping_filter_gain_iqmod', float, ModelVariableFormat.DECIMAL)
-
     def calc_shaping_filter_gain_actual(self, model):
         # The Ocelot shaping filter registers have changed in the register map, so need to override this function
 
@@ -50,7 +40,7 @@ class CalcShapingRainier(Calc_Shaping_Bobcat):
                                    sf[6] + sf[14] + sf[22] + sf[30] + sf[38] + sf[46] + sf[54] + sf[62] +
                                    sf[7] + sf[15] + sf[23] + sf[31] + sf[39] + sf[47] + sf[55] + sf[63]) / 8.0 / 128.0
 
-        model.vars.shaping_filter_gain_iqmod_actual.value = float(shaping_filter_gain)
+        model.vars.shaping_filter_gain_actual.value = float(shaping_filter_gain)
 
 
     def gaussian_shaping_filter(self, model, scaling_fac = 127):
@@ -166,7 +156,6 @@ class CalcShapingRainier(Calc_Shaping_Bobcat):
             shaping = 3
             coeff = self.update_coeffs(model, c, coeff)
 
-        # filter derived from Imagotag legacy PHY transmit capture
         elif shaping_filter_option.value == model.vars.shaping_filter.var_enum.Custom_PSK.value:
             coeff[0] = 51
             coeff[1] = 117

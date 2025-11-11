@@ -323,8 +323,10 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
             interpolation_gain = txbrnum / 32.0
         elif txbrnum < 16384:
             interpolation_gain = txbrnum / 64.0
-        else:
+        elif txbrnum < 32768:
             interpolation_gain = txbrnum / 128.0
+        else:
+            interpolation_gain = txbrnum / 256.0
 
         # following the rtl
         interpolation_gain = floor(interpolation_gain)
@@ -373,3 +375,29 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
             bandwidth_tol = 0.0
 
         model.vars.bandwidth_tol.value = float(bandwidth_tol)
+
+    def calc_bitrate_gross(self, model):
+        #This function calculates the gross bitrate (bitrate including redundant coding bits)
+        #Note that this gross bitrate excludes DSSS, because in RX the DSSS chips never make it
+        #through the demod path (they are only used for correlation)
+
+        #Read from model variables
+        bitrate = model.vars.bitrate.value
+        encoding = model.vars.symbol_encoding.value
+        mbus_encoding = model.vars.mbus_symbol_encoding.value
+        fec_enabled = model.vars.fec_enabled.value
+        ble_concurrent = (model.vars.MODEM_LONGRANGE_LRBLE.value == 1) and (model.vars.MODEM_COCURRMODE_CONCURRENT.value == 1)
+
+        #Start by assuming the gross bitrate is equal to the net bitrate
+        bitrate_gross = bitrate
+
+        #Calculate the encoded bitrate based on the encoding parameters
+        if (encoding == model.vars.symbol_encoding.var_enum.Manchester or encoding == model.vars.symbol_encoding.var_enum.Inv_Manchester):
+            bitrate_gross *= 2
+        if (mbus_encoding == model.vars.mbus_symbol_encoding.var_enum.MBUS_3OF6):
+            bitrate_gross *= 1.5
+        if fec_enabled or ble_concurrent:
+            bitrate_gross *= 2
+
+        #Write the model variable
+        model.vars.bitrate_gross.value =  int(round(bitrate_gross))

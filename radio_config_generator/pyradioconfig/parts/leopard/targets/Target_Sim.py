@@ -1,5 +1,6 @@
 from pyradioconfig.calculator_model_framework.interfaces.itarget import ITarget
 from os.path import join
+from pyradioconfig.calculator_model_framework.decorators.target_decorators import skip_target_calc
 
 class target_sim_leopard(ITarget):
 
@@ -9,6 +10,7 @@ class target_sim_leopard(ITarget):
     _cfg_location = join('target_sim','leopard')
     _tag = "SIM"
 
+    @skip_target_calc
     def target_calculate(self, model):
         def target_calculate(self, model):
 

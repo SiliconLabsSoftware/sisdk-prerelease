@@ -32,15 +32,6 @@ class CALC_Frame_ocelot(CALC_Frame_panther):
         model.vars.header_excludesubframewcnt_en.value = header_excludesubframewcnt_en
         model.vars.payload_excludesubframewcnt_en.value = payload_excludesubframewcnt_en
 
-    def calc_ctrl_lpmodedis_reg(self, model):
-        # This method calculates the LPMODEDIS field
-
-        # Calculate the field
-        lpmodedis = 0
-
-        # Write the register
-        self._reg_write(model.vars.FRC_CTRL_LPMODEDIS, lpmodedis)
-
     def calc_ctrl2_rxfrcdis(self, model):
         # This method calculates the RXFRCDIS field
         # Disable writing to FRC in direct mode

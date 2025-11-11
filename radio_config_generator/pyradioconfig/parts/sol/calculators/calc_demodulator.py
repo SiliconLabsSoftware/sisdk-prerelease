@@ -72,8 +72,10 @@ class Calc_Demodulator_Sol(CALC_Demodulator_ocelot):
             interpolation_gain = txbrnum / 32.0
         elif txbrnum < 16384:
             interpolation_gain = txbrnum / 64.0
-        else:
+        elif txbrnum < 32768:
             interpolation_gain = txbrnum / 128.0
+        else:
+            interpolation_gain = txbrnum / 256.0
 
         # match HW truncation
         interpolation_gain = floor(interpolation_gain)

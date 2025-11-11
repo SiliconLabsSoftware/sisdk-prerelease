@@ -98,20 +98,6 @@ bool            sli_ot_radio_instance_is_filter_mask_broadcast(uint8_t aFilterMa
 
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
 
-// Energy scan parameters structure (needed for external API compatibility)
-typedef struct energyScanParams
-{
-    uint8_t  scanChannel;  ///< Energy scan channel
-    uint16_t scanDuration; ///< Energy scan duration
-} energyScanParams;
-
-// External API constants for backward compatibility
-#define kPendingCommandTypeTransmit 0
-#define kPendingCommandTypeEnergyScan 1
-
-// Enum type for backward compatibility (defined as int to avoid forward reference issues)
-typedef int pendingCommandType;
-
 // Command management
 bool sli_ot_radio_instance_queue_transmit(otInstance *instance, otRadioFrame *frame);
 bool sli_ot_radio_instance_queue_energy_scan(otInstance *instance, uint16_t channel, sl_rail_time_t duration);

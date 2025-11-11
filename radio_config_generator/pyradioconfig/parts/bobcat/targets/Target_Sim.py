@@ -1,5 +1,6 @@
 from pyradioconfig.calculator_model_framework.interfaces.itarget import ITarget
 from os.path import join
+from pyradioconfig.calculator_model_framework.decorators.target_decorators import skip_target_calc
 
 class Target_Sim_Bobcat(ITarget):
 
@@ -9,6 +10,7 @@ class Target_Sim_Bobcat(ITarget):
     _cfg_location = join('target_sim','bobcat')
     _tag = "SIM"
 
+    @skip_target_calc
     def target_calculate(self, model):
 
         #Always use fixed length in sim results

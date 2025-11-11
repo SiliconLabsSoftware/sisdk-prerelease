@@ -50,7 +50,7 @@ class ProfileSidewalkOcelot(ProfileSidewalkNerio):
         IProfile.make_hidden_input(profile, model.vars.frame_length_type, 'frame_general',
                                    readable_name="Frame Length Algorithm")
         IProfile.make_hidden_input(profile, model.vars.fixed_length_size, category='frame_fixed_length',
-                                   readable_name="Fixed Payload Size", value_limit_min=0, value_limit_max=0x7fffffff)
+                                   readable_name="Fixed Payload Size", value_limit_min=0, value_limit_max=4095)
 
         # Hidden inputs to allow for keeping absolute tolerance the same when testing at 915M
         IProfile.make_hidden_input(profile, model.vars.rx_xtal_error_ppm, category="general",

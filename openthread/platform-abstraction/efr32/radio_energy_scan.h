@@ -43,6 +43,13 @@
 #include "sl_rail_types.h"
 #include "sl_status.h"
 
+// Energy scan parameters structure (needed for external API compatibility)
+typedef struct EnergyScanParams
+{
+    uint8_t  scanChannel;  ///< Energy scan channel
+    uint16_t scanDuration; ///< Energy scan duration
+} EnergyScanParams;
+
 #ifdef __cplusplus
 extern "C" {
 #endif

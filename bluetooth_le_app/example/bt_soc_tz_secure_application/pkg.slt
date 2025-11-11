@@ -1,3 +1,0 @@
-version = "0"
-[dependency]
-platform = {version = "~6.0.0", installer = "conan", prerelease = true}

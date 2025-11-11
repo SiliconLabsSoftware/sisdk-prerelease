@@ -220,7 +220,6 @@ class PHYS_Bluetooth_LE_Sol(IPhy):
         phy.profile_outputs.AGC_STEPDWN_STEPDWN3.override = 3
         phy.profile_outputs.AGC_STEPDWN_STEPDWN4.override = 3
         phy.profile_outputs.AGC_STEPDWN_STEPDWN5.override = 5
-        phy.profile_outputs.FRC_CTRL_LPMODEDIS.override = 1
 
     def PHY_Bluetooth_LE_Viterbi_noDSA(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='BLE Viterbi No DSA PHY for Lynx',

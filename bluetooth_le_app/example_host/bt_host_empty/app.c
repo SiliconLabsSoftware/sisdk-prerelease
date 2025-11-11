@@ -126,8 +126,6 @@ void app_process_action(void)
  *****************************************************************************/
 void app_deinit(void)
 {
-  ncp_host_deinit();
-
   /////////////////////////////////////////////////////////////////////////////
   // Put your additional application deinit code here!                       //
   // This is called once during termination.                                 //

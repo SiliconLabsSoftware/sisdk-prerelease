@@ -255,34 +255,24 @@ class CALC_Whitening(ICalculator):
                 word_being_built = long(0)
         return packed_list
 
-    def calc_frame_coding_array_packed(self, model):
-
-        #Only perform this calculation when dealing with a frame_coding setting that produces a frame_coding_array
-        #that is not None
-        frame_coding = model.vars.frame_coding.value
-        if frame_coding != model.vars.frame_coding.var_enum.NONE and \
-                frame_coding != model.vars.frame_coding.var_enum.UART_NO_VAL:
-
-            coding_array = model.vars.frame_coding_array.value
-            width = model.vars.frame_coding_array_width.value
-            if width == 0:
-                model.vars.frame_coding_array_packed.value = None
-            elif width == 8:
-                if (len(coding_array) % 4) != 0:
-                    raise CalculationException("Frame coding array not word aligned!")
-                model.vars.frame_coding_array_packed.value = self.pack_list(coding_array, width)
-            elif width == 16:
-                if (len(coding_array) % 2) != 0:
-                    raise CalculationException("Frame coding array not word aligned!")
-                model.vars.frame_coding_array_packed.value = self.pack_list(coding_array, width)
-            else:
-                raise CalculationException("Unexpected frame coding array width of %s!" % width)
-
     def calc_blockwhitemode(self, model):
         # This method calculates the FRC_FECCTRL_BLOCKWHITEMODE field
 
         #The LFSR used for whitening is also used for block coding forward-error-correction.
         # This means that it is not possible to perform both whitening and block coding on the same frame.
+
+        class BlockWhiteEnum(Enum):
+            """
+            Enum for the FRC_FECCTRL_BLOCKWHITEMODE register field
+            """
+            DIRECT = 0
+            WHITE = 1
+            BYTEWHITE = 2
+            INTERLEAVEDWHITE0 = 3
+            INTERLEAVEDWHITE1 = 4
+            BLOCKCODEINSERT = 5
+            BLOCKCODEREPLACE = 6
+            BLOCKLOOKUP = 7
 
         #Read in model variables
         ber_force_whitening = model.vars.ber_force_whitening.value
@@ -294,33 +284,33 @@ class CALC_Whitening(ICalculator):
 
         if ber_force_whitening:
             # Force whitening when desired for BER testing
-            blockwhitemode = 1
+            blockwhitemode = BlockWhiteEnum.WHITE.value
         elif frame_coding_array_width > 0:
             # Using block coding
-            blockwhitemode = 7
+            blockwhitemode = BlockWhiteEnum.BLOCKLOOKUP.value
         elif payload_white_en or header_white_en:
             # Whitening is turned on for either header or payload
-            if fec_enabled:
+            if 'byte' in white_poly.name.lower():
+                # Using whitening polynomial enum corresponding to bytewhite
+                blockwhitemode = BlockWhiteEnum.BYTEWHITE.value
+            elif fec_enabled:
                 if payload_white_en and header_white_en:
                     # Using FEC with whitening of header and payload
                     # Should work with interleaving enabled, need to verify operation with interleaving disabled
-                    blockwhitemode = 3
+                    blockwhitemode = BlockWhiteEnum.INTERLEAVEDWHITE0.value
                 elif payload_white_en:
                     #Using FEC with whitening of only payload (skip whitening of first 16*interleavewidth bits)
-                    blockwhitemode = 4
-            elif 'byte' in white_poly.name.lower():
-                # Using whitening polynomial enum corresponding to bytewhite
-                blockwhitemode = 2
+                    blockwhitemode = BlockWhiteEnum.INTERLEAVEDWHITE1.value
             else:
                 # Standard whitening
-                blockwhitemode = 1
+                blockwhitemode = BlockWhiteEnum.WHITE.value
         elif white_poly != model.vars.white_poly.var_enum.NONE:
             #If a whitening polynomial is present, then enable standard whitening
             #This still allows disabling whitening via the SKIPWHITE field in each FCD
-            blockwhitemode = 1
+            blockwhitemode = BlockWhiteEnum.WHITE.value
         else:
             # Disable whitening
-            blockwhitemode = 0
+            blockwhitemode = BlockWhiteEnum.DIRECT.value
 
         #Write the register
         self._reg_write(model.vars.FRC_FECCTRL_BLOCKWHITEMODE,blockwhitemode)

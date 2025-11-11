@@ -12,6 +12,7 @@ __all__ = [ 'get_xml_str_values',
 DUMMY_VAR_VALUE = {
     bool    : False,
     complex : 0j,
+    dict    : {},
     float   : 0.0,
     int     : 0,
     long    : long(0),
@@ -52,7 +53,7 @@ def cast_value_from_xml(var, xml_value):
                 return None
             else:
                 return (var.var_type)(xml_value[0])
-    elif var.var_type is bool:
+    elif var.var_type in (bool, dict):
         if var.is_array:
             values = []
             for str_value in xml_value:
@@ -90,8 +91,8 @@ def cast_value_from_xml(var, xml_value):
 def get_dummy_var_value(var):
     assert isinstance(var, ModelVariable)
     if var.var_type == Enum:
-        # get first value in the enum
-        return var.var_enum.__members__.items()[0][1].value
+        # get first value in the enum - Python 2/3 compatible
+        return list(var.var_enum.__members__.values())[0].value
     else:
         # get a standard dummy value
         return DUMMY_VAR_VALUE[var.var_type]

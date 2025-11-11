@@ -83,8 +83,6 @@ requires:
   - name: "hal_system"
   - name: "sleeptimer"
   - name: "rail_lib"
-  - name: "rail_util_pa"
-  - name: "sl_rail_util_built_in_phys"
   - name: "device_supports_bluetooth"
   - name: "component_catalog"
   - name: "power_manager"

@@ -167,16 +167,6 @@
 #define SL_BT_CONTROLLER_PRIMARY_EXT_PACKET_INCLUDE_ADDRESS      (0)
 // </e>
 // </h> Advertising Configuration
-
-// <o SL_BT_CONTROLLER_PA_CONFIG> Power Amplifier (PA) Configuration
-// <SL_BT_BLUETOOTH_PA_AUTOMODE=> Automode PA configuration
-// <SL_BT_BLUETOOTH_HIGHEST_PA=> Highest available PA configuration
-// <SL_BT_BLUETOOTH_RAIL_UTIL_PA=> RAIL Utility component PA configuration
-// <i> Select the Power Amplifier configuration
-// <i> Default: RAIL Utility component PA configuration
-#ifndef SL_BT_CONTROLLER_PA_CONFIG
-#define SL_BT_CONTROLLER_PA_CONFIG     SL_BT_BLUETOOTH_RAIL_UTIL_PA
-#endif
 // </h> Bluetooth Controller Configuration
 
 // <<< end of configuration section >>>

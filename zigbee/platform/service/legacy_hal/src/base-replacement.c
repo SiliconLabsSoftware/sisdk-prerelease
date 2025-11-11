@@ -19,7 +19,7 @@
 
 #include <stdio.h>
 #include "hal.h"
-#include "pa_conversions_efr32.h"
+#include "sl_rail_util_pa_conversions.h"
 #include "sl_sleeptimer.h"
 #include "sl_power_manager.h"
 #include "rail.h"
@@ -142,7 +142,8 @@ void halInit(void)
 
   halInternalStartSystemTimer();
 
-  RAIL_InitTxPowerCurvesAlt(&RAIL_TxPowerCurvesVbat);
+  sl_rail_util_pa_init_tx_power_table(NULL, &sl_rail_util_pa_tx_power_table);
+  
 }
 
 void halReboot(void)

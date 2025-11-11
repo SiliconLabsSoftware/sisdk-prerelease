@@ -56,6 +56,9 @@ LPWH74000:
       0xB0250000: 8
       0xB2000000: 9
       0xB2010000: 10
+      0xB2700000: 11
+      0xB2710000: 12
+      0x5F000000: 13
       0xFFFFFFFF: 0xFFFFFFFF
     Alias:
       SEQRAM: 0xB0010000

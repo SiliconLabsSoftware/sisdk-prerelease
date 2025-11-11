@@ -1117,6 +1117,8 @@ int8_t otPlatRadioGetRssi(otInstance *aInstance)
 
 #if (FAST_CHANNEL_SWITCHING_SUPPORT && OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE)
     channel = sli_ot_radio_channel_switching_get_channel(aInstance);
+#else
+    OT_UNUSED_VARIABLE(aInstance);
 #endif
 
     sli_ot_energy_scan(channel, SL_OPENTHREAD_RSSI_AVERAGING_TIME, &rssi);
@@ -1931,6 +1933,8 @@ static void processNextRxPacket(otInstance *aInstance)
     rxBuffer *rxPacketBuf = prepareNextRxPacketforCb();
 
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
+    OT_UNUSED_VARIABLE(aInstance);
+
     if (isRxPacketBroadcast())
     {
         processBroadcastRxPacket();

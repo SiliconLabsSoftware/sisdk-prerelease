@@ -3061,7 +3061,8 @@ void CMU_HFXOInit(const CMU_HFXOInit_TypeDef *hfxoInit)
                     | (hfxoInit->ctuneXiAna      << _HFXO_XTALCTRL_CTUNEXIANA_SHIFT)
                     | (hfxoInit->coreBiasAna     << _HFXO_XTALCTRL_COREBIASANA_SHIFT);
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)
   // See [PM-2871] for details.
   BUS_RegMaskedWrite((volatile uint32_t*)(HFXO0_BASE + 0x38U),
                      0x00000C00U,

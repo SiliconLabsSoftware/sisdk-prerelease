@@ -370,7 +370,7 @@ class calc_softmodem_sol(ICalculator):
 
         if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM:
             ofdm_stf_length = model.vars.ofdm_stf_length.value
-            cfg2_nbstf = int(ofdm_stf_length * 5 / 2)  # For Melco PHYs longer preamble
+            cfg2_nbstf = int(ofdm_stf_length * 5 / 2)
         else:
             cfg2_nbstf = 0
 
@@ -446,23 +446,24 @@ class calc_softmodem_sol(ICalculator):
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         lodiv_actual = model.vars.lodiv_actual.value
         xtal_frequency_hz = model.vars.xtal_frequency_hz.value
+        if_frequency_hz = model.vars.if_frequency_hz.value
         ofdm_option_index = int(model.vars.ofdm_option.value)
         adc_freq_actual = model.vars.adc_freq_actual.value
         dec0_actual = model.vars.dec0_actual.value
 
         if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM:
-            afc_correction = 2
             fdec0_out_hz = adc_freq_actual/8.0/dec0_actual
 
-            if afc_correction == 2: #For now we always choose this
+            if if_frequency_hz == 0: # in ZIF AFC is done through DIGMIX to keep DC notch at channel center whatever frequency ppm offset
+                afc_correction = 1
+                afc_mixer_ratio_att = 15 
+                afc_mixer_ratio_gain = round(1302/fdec0_out_hz*(2**(14+afc_mixer_ratio_att-ofdm_option_index)))
+            else: # in LIF AFC is done through SYNTH
+                afc_correction = 2
                 for afc_mixer_ratio_att in [16,15]:
                     afc_mixer_ratio_gain = round(1302*lodiv_actual/xtal_frequency_hz*(2**(13+afc_mixer_ratio_att-ofdm_option_index)))
                     if afc_mixer_ratio_gain <= 65535:  # no saturation occurs
                         break
-            else:
-                afc_mixer_ratio_att = 15
-                afc_mixer_ratio_gain = round(1302/fdec0_out_hz*(2**(14+afc_mixer_ratio_att-ofdm_option_index)))
-
         else:
             afc_correction = 0
             afc_mixer_ratio_att = 0

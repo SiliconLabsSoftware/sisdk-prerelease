@@ -3,11 +3,16 @@ from pyradioconfig.parts.ocelot.phys.Phys_Internal_Base_Standard_IEEE802154 impo
 
 class PhysRAILBaseStandardIEEE802154Bobcat(PhysInternalBaseStandardIEEE802154Ocelot):
 
+    def _set_xtal_frequency(self, phy, xtal_freq=None):
+        if xtal_freq is None:
+            phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        else:
+            phy.profile_inputs.xtal_frequency_hz.value = xtal_freq
+
     def IEEE802154_2p4GHz_base(self, phy, model):
         super().IEEE802154_2p4GHz_base(phy, model)
 
         # Set XO to 39M and use 2450M center freq (required for BWSEL, see MCUW_RADIO_CFG-2012)
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
         phy.profile_inputs.base_frequency_hz.value = int(2450000000)
 
         # RAIL timings
@@ -21,7 +26,8 @@ class PhysRAILBaseStandardIEEE802154Bobcat(PhysInternalBaseStandardIEEE802154Oce
         super().IEEE802154_2p4GHz_cohdsa_base(phy, model)
 
         # Set XO to 39M
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        # phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        # self._set_xtal_frequency(phy)
 
         # RAIL timings
         phy.profile_outputs.rx_sync_delay_ns.override = 6125

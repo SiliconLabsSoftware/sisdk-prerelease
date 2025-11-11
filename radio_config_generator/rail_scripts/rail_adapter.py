@@ -31,6 +31,13 @@ class RAILAdapter(object):
     0xA8020000,
     0xB0000000,
   )
+  _REG_BASES_EFR32XG2B = (
+    0xA8000000,
+    0xA8010000,
+    0xA8020000,
+    0xA8030000,
+    0xB0000000,
+  )
   _REG_BASES_EFR32XG25 = (
     0x400C0000,
     0xA8000000,
@@ -147,6 +154,10 @@ class RAILAdapter(object):
         # but it's not used anyway
         basePos = 24
         regBases = self._REG_BASES_EFR32XG25
+      elif family in ["curl"]:
+        regBases = self._REG_BASES_EFR32XG2B
+      else:
+        pass
 
     else:
       # Series 3
@@ -183,7 +194,7 @@ class RAILAdapter(object):
   def _getSeriesFromFamily(family):
     if family in ["dumbo", "jumbo", "nerio", "nixi"]:
       series = 1
-    elif family in ["panther", "lynx", "ocelot", "bobcat", "leopard", "margay", "caracal", "lion", "sol", "serval"]:
+    elif family in ["panther", "lynx", "ocelot", "bobcat", "leopard", "margay", "caracal", "lion", "sol", "serval", "curl"]:
       series = 2
     else:
       series = 3

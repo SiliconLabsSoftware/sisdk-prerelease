@@ -47,9 +47,9 @@ static RAIL_FrameType_t {{frameTypeEntryName}} = {
   (uint16_t *)&{{frameTypeEntry.frameLen.value._uniqueName}}[0], {{frameTypeEntry.offset}}, {{frameTypeEntry.mask}}, {{frameTypeEntry.isValid|listToHexEncoding}}, {{frameTypeEntry.addressFilter|listToHexEncoding}}
 };
 {% endfor %}
-{%- for frameCodingTableEntryName, frameCodingTableEntry in multiPhyConfig.commonStructures.frameCodingTableEntries.items() %}
-uint32_t {{frameCodingTableEntryName}}[] = {
-  {%- for items in frameCodingTableEntry|batch(4) %}
+{%- for lookupTableEntryName, lookupTableEntry in multiPhyConfig.commonStructures.lookupTableEntries.items() %}
+uint32_t {{lookupTableEntry['tableName']}}[] = {
+  {%- for items in lookupTableEntry['values']|batch(4) %}
   {{ items|join(", ") -}},
   {%- endfor %}
 };

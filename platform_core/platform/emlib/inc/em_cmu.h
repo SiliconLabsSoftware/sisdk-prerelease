@@ -929,7 +929,8 @@ typedef struct {
 #if defined(HFXO_CTRL_EM23ONDEMAND)
 
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)
 // See [PM-2871] for details.
 /** Default configuration of fixed tuning capacitance on XI or XO for EFR32XG23 and EFR32XG28. */
 #define CMU_HFXOINIT_CTUNEFIXANA_DEFAULT cmuHfxoCtuneFixCap_Xo

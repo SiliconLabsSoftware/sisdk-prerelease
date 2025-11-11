@@ -5,12 +5,12 @@ class PhyFilters(IPhyFilter):
 
     #Studio black list (files removed before Studio distribution)
     customer_phy_groups = [
-                            'Phys_Internal_Base_Customer_Aclara',
-                            'Phys_Internal_Base_Customer_Acuity',
-                            'Phys_Internal_Base_Customer_Chamberlain',
-                            'Phys_Internal_Base_Customer_Essence',
-                            'Phys_Internal_Base_Customer_HoneywellEnergyAxis',
-                            'Phys_Internal_Base_Customer_Lutron',
+                            'secret15',
+                            'secret2',
+                            'secret10',
+                            'secret5',
+                            'secret11',
+                            'secret8',
                             'Phys_Internal_Base_Experimental',
                             'Phys_Internal_Base_Utility',
                             'Phys_Internal_Base_ValOnly',
@@ -48,4 +48,4 @@ class PhyFilters(IPhyFilter):
     non_functional_phy_groups = []
 
     # PHYs to exclude from regression
-    virtual_phy_groups = ['phys_studio_wisun_fan_1_1_virtual']
+    virtual_phy_groups = ['phys_studio_wisun_fan_1_1_virtual', 'Phys_Internal_Base_ValOnly_aliases']

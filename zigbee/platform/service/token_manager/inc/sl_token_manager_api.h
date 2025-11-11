@@ -41,6 +41,10 @@
 extern "C" {
 #endif
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif  // SL_COMPONENT_CATALOG_PRESENT
+
 /***************************************************************************//**
  * @addtogroup common_token_manager
  * @{
@@ -169,7 +173,7 @@ void halInternalAssertFailed(const char * filename, int linenumber);
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
-#if defined(SL_TOKEN_MANAGER_BACKWARD_COMPATIBILITY) || defined(SL_TOKEN_MANAGER_BACKEND_INT_FLASH)
+#if (defined(SL_TOKEN_MANAGER_BACKWARD_COMPATIBILITY) || defined(SL_TOKEN_MANAGER_BACKEND_INT_FLASH)) && defined(SL_CATALOG_TOKEN_MANAGER_PRESENT)
 // Note: Below header is for S2 backward compatibility.
 // The legacy hal API support for silicon labs EFR series 2 devices
 // are planned for deprecation. However the new API's listed above

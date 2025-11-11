@@ -337,7 +337,8 @@
 #define SL_STATUS_BT_ATT_PREPARE_QUEUE_FULL                                                              ((sl_status_t)0x1109)      ///< Too many prepare writes have been queued
 #define SL_STATUS_BT_ATT_ATT_NOT_FOUND                                                                   ((sl_status_t)0x110A)     ///< No attribute found within the given attribute handle range.
 #define SL_STATUS_BT_ATT_ATT_NOT_LONG                                                                    ((sl_status_t)0x110B)     ///< The attribute cannot be read or written using the Read Blob Request
-#define SL_STATUS_BT_ATT_INSUFFICIENT_ENC_KEY_SIZE                                                       ((sl_status_t)0x110C)     ///< The Encryption Key Size used for encrypting this link is insufficient.
+#define SL_STATUS_BT_ATT_ENCRYPTION_KEY_SIZE_TOO_SHORT                                                   ((sl_status_t)0x110C)     ///< The Encryption Key Size used for encrypting this link is too short.
+#define SL_STATUS_BT_ATT_INSUFFICIENT_ENC_KEY_SIZE                                                       SL_STATUS_BT_ATT_ENCRYPTION_KEY_SIZE_TOO_SHORT     ///< @deprecated Use SL_STATUS_BT_ATT_ENCRYPTION_KEY_SIZE_TOO_SHORT instead.
 #define SL_STATUS_BT_ATT_INVALID_ATT_LENGTH                                                              ((sl_status_t)0x110D)     ///< The attribute value length is invalid for the operation
 #define SL_STATUS_BT_ATT_UNLIKELY_ERROR                                                                  ((sl_status_t)0x110E)     ///< The attribute request that was requested has encountered an error that was unlikely, and therefore could not be completed as requested.
 #define SL_STATUS_BT_ATT_INSUFFICIENT_ENCRYPTION                                                         ((sl_status_t)0x110F)     ///< The attribute requires encryption before it can be read or written.
@@ -367,6 +368,7 @@
 #define SL_STATUS_BT_SMP_BREDR_PAIRING_IN_PROGRESS                                                       ((sl_status_t)0x120D)     ///< Indicates that the pairing over the LE transport failed due to a Pairing Request sent over the BR/EDR transport in process.
 #define SL_STATUS_BT_SMP_CROSS_TRANSPORT_KEY_DERIVATION_GENERATION_NOT_ALLOWED                           ((sl_status_t)0x120E)     ///< Indicates that the BR/EDR Link Key generated on the BR/EDR transport cannot be used to derive and distribute keys for the LE transport.
 #define SL_STATUS_BT_SMP_KEY_REJECTED                                                                    ((sl_status_t)0x120F)     ///< Indicates that the device chose not to accept a distributed key.
+#define SL_STATUS_BT_SMP_BUSY                                                                            ((sl_status_t)0x1210)     ///< Indicates that the device is not ready to perform a pairing procedure.
 
 // Bluetooth Mesh status codes
 #define SL_STATUS_BT_MESH_ALREADY_EXISTS                                                                 ((sl_status_t)0x0501)      ///< Returned when trying to add a key or some other unique resource with an ID which already exists

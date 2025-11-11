@@ -5,6 +5,15 @@ from py_2_and_3_compatibility import *
 
 class PhysRAILBaseStandardIEEE802154Lynx(IPhy):
 
+    def _set_xtal_frequency(self, phy, xtal_freq=None):
+        if xtal_freq is None:
+            phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        else:
+            phy.profile_inputs.xtal_frequency_hz.value = xtal_freq
+
+    def _part_specific_phy_overrides(self, phy, model):
+        pass
+
     def IEEE802154_2p4GHz_base(self, phy, model):
 
         # Use the commmon ZB frame definition and override min length for 802.15.4E Seq# Suppression
@@ -44,7 +53,8 @@ class PhysRAILBaseStandardIEEE802154Lynx(IPhy):
         phy.profile_inputs.timing_resync_period.value = 2
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        # phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy)
 
         # Gate clocks (reduce current)
         phy.profile_outputs.FRC_AUTOCG_AUTOCGEN.override = 7
@@ -59,6 +69,8 @@ class PhysRAILBaseStandardIEEE802154Lynx(IPhy):
         # RAIL timings
         phy.profile_outputs.rx_sync_delay_ns.override = 6125
         phy.profile_outputs.rx_eof_delay_ns.override = 6125
+
+        self._part_specific_phy_overrides(phy, model)
 
     def _set_synth_cal_regs(self, phy):
         phy.profile_outputs.SYNTH_LPFCTRL1CAL_OP1BWCAL.override = 11

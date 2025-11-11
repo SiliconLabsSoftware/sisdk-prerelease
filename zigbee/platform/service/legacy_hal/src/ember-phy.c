@@ -32,28 +32,28 @@
 #include PLATFORM_HEADER
 #include "../inc/hal.h"
 #include "rail_types.h"
-#include "pa_conversions_efr32.h"
+#include "sl_rail_util_pa_conversions.h"
 #include "sl_rail_util_pa_config.h"
 
 // In newer SDKs this content should come from the rail_util_pa component. For
 // backwards compatibility reasons we define the same structures here using the
 // old names.
-static const RAIL_TxPowerConfig_t paInit2p4 =
+static const sl_rail_tx_power_config_t paInit2p4 =
 {
   .mode = SL_RAIL_UTIL_PA_SELECTION_2P4GHZ,
-  .voltage = SL_RAIL_UTIL_PA_VOLTAGE_MV,
-  .rampTime = SL_RAIL_UTIL_PA_RAMP_TIME_US,
+  .voltage_mv = SL_RAIL_UTIL_PA_VOLTAGE_MV,
+  .ramp_time_us = SL_RAIL_UTIL_PA_RAMP_TIME_US,
 };
-const RAIL_TxPowerConfig_t* halInternalPa2p4GHzInit = &paInit2p4;
+const sl_rail_tx_power_config_t* halInternalPa2p4GHzInit = &paInit2p4;
 
 #if RAIL_FEAT_SUBGIG_RADIO
-static const RAIL_TxPowerConfig_t paInitSub =
+static const sl_rail_tx_power_config_t paInitSub =
 {
   .mode = SL_RAIL_UTIL_PA_SELECTION_SUBGHZ,
-  .voltage = SL_RAIL_UTIL_PA_VOLTAGE_MV,
-  .rampTime = SL_RAIL_UTIL_PA_RAMP_TIME_US,
+  .voltage_mv = SL_RAIL_UTIL_PA_VOLTAGE_MV,
+  .ramp_time_us = SL_RAIL_UTIL_PA_RAMP_TIME_US,
 };
-const RAIL_TxPowerConfig_t* halInternalPaSubGHzInit = &paInitSub;
+const sl_rail_tx_power_config_t* halInternalPaSubGHzInit = &paInitSub;
 #else
-const RAIL_TxPowerConfig_t* halInternalPaSubGHzInit = NULL;
+const sl_rail_tx_power_config_t* halInternalPaSubGHzInit = NULL;
 #endif

@@ -33,7 +33,7 @@ from . RAC import *
 from . SEQ import *
 from . SYNTH import *
 
-import imp
+import importlib
 import os
 
 _PKG_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -153,6 +153,8 @@ class RM_Device_EFR32XG13XFULL_RevA0(Base_RM_Device):
 
         excluded_regs_fn = os.path.join(_PKG_PATH, _EXCLUDED_REGS_MOD_NAME + '.py')
         if os.path.exists(excluded_regs_fn) and hasattr(self, 'excludeFromDumpByName'):
-            mod = imp.load_source(_EXCLUDED_REGS_MOD_NAME, excluded_regs_fn)
+            spec = importlib.util.spec_from_file_location(_EXCLUDED_REGS_MOD_NAME, excluded_regs_fn)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
             excluded_regs = getattr(mod, _EXCLUDED_REGS_LIST_NAME)
             self.excludeFromDumpByName(excluded_regs)

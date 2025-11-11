@@ -40,7 +40,7 @@ from . SEQ_S import *
 from . SYNTH_NS import *
 from . SYNTH_S import *
 
-import imp
+import importlib
 import os
 
 _PKG_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -114,7 +114,7 @@ class RM_Device_SIXG301XFULL_RevB0(Base_RM_Device):
         self.__dict__['zz_frozen'] = False
         super(RM_Device_SIXG301XFULL_RevB0, self).__init__(rmio, label,
             'SIXG301XFULL',
-            RM_SVD_Info('SIXG301XFULL_SEQ.svd', 'f7c3a18e48a4a9043d9fbb7e0a639870'))
+            RM_SVD_Info('SIXG301XFULL_SEQ.svd', 'af41e736ec3aa42ab0de42189a758331'))
 
         self.AGC_NS = RM_Peripheral_AGC_NS(self.zz_rmio, self.zz_label)
         self.zz_pdict['AGC_NS'] = self.AGC_NS
@@ -188,6 +188,8 @@ class RM_Device_SIXG301XFULL_RevB0(Base_RM_Device):
 
         excluded_regs_fn = os.path.join(_PKG_PATH, _EXCLUDED_REGS_MOD_NAME + '.py')
         if os.path.exists(excluded_regs_fn) and hasattr(self, 'excludeFromDumpByName'):
-            mod = imp.load_source(_EXCLUDED_REGS_MOD_NAME, excluded_regs_fn)
+            spec = importlib.util.spec_from_file_location(_EXCLUDED_REGS_MOD_NAME, excluded_regs_fn)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
             excluded_regs = getattr(mod, _EXCLUDED_REGS_LIST_NAME)
             self.excludeFromDumpByName(excluded_regs)

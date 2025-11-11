@@ -22,7 +22,7 @@ component:
   - id: app_log
   - id: iostream_stdio
   - id: app_assert
-  - id: native_host
+  - id: opn_device_host
   - id: host_main
   - id: toolchain_gcc
 

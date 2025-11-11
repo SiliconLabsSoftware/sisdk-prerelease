@@ -9,8 +9,18 @@ else:
     basestring = str
     sys.maxint = 9223372036854775807
     import builtins as __builtin__
-    import imp
-    reload = imp.reload
+    try:
+        # Python 3.4+ has importlib.reload
+        from importlib import reload
+    except ImportError:
+        # Python 3.0-3.3 fallback to imp.reload
+        try:
+            import imp
+            reload = imp.reload
+        except ImportError:
+            # If imp is not available (Python 3.12+), define a no-op reload
+            def reload(module):
+                pass
 
 # try:
 #     import __builtin__

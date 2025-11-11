@@ -6,6 +6,15 @@ from py_2_and_3_compatibility import *
 class PHYS_connect_Bobcat(IPhy):
     # inherit from Nixi (Jumbo)
 
+    def _set_xtal_frequency(self, phy, xtal_freq=None):
+        if xtal_freq is None:
+            phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        else:
+            phy.profile_inputs.xtal_frequency_hz.value = xtal_freq
+
+    def _part_specific_phy_overrides(self, phy, model):
+        pass
+
     def Connect_base(self, phy, model):
 
         phy.profile_inputs.baudrate_tol_ppm.value = 0
@@ -17,7 +26,7 @@ class PHYS_connect_Bobcat(IPhy):
         phy.profile_inputs.shaping_filter.value = model.vars.shaping_filter.var_enum.Gaussian
         phy.profile_inputs.shaping_filter_param.value = 0.5
         phy.profile_inputs.symbol_encoding.value = model.vars.symbol_encoding.var_enum.NRZ
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy)
         phy.profile_inputs.rx_xtal_error_ppm.value = 10
         phy.profile_inputs.tx_xtal_error_ppm.value = 10
         phy.profile_inputs.diff_encoding_mode.value = model.vars.diff_encoding_mode.var_enum.DISABLED
@@ -30,6 +39,8 @@ class PHYS_connect_Bobcat(IPhy):
         phy.profile_inputs.syncword_1.value = long(0)
         phy.profile_inputs.syncword_length.value = 16
         phy.profile_inputs.white_poly.value = model.vars.white_poly.var_enum.PN9
+
+        self._part_specific_phy_overrides(phy, model)
 
 
     # Owner     : Young-Joon Choi

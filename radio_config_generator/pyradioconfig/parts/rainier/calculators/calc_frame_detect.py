@@ -13,6 +13,8 @@ class CalcFrameDetectRainier(Calc_Frame_Detect_Bobcat):
         """
         super().buildVariables(model)
         self._addModelVariable(model, 'syncword_trisync', bool, ModelVariableFormat.ASCII, desc='Enable tri syncword detection')
+        self._addModelActual(model, 'preamble_string', str, ModelVariableFormat.ASCII,
+                               desc='Output string representing the actual preamble pattern in binary')
 
     def calc_preerrors_val(self, model):
         demod_select = model.vars.demod_select.value
@@ -116,3 +118,21 @@ class CalcFrameDetectRainier(Calc_Frame_Detect_Bobcat):
 
         model.vars.syncword_length_actual.value = model.vars.MODEM_CTRL1_SYNCBITS.value + 1
 
+    def calc_preamble_string_actual(self, model):
+        if model.vars.MODEM_CTRL0_CODING.value == 2 or model.vars.MODEM_PRE_DSSSPRE.value == 1:
+            # : Preamble base pattern is irrelevant if DSSS is enabled. Preamble bits are always substituted with
+            # : Base chip sequence (i.e. base patttern = 0)
+            preamble_pattern_string = '0'
+            preamble_length = model.vars.MODEM_CTRL0_DSSSLEN.value + 1
+            repeats = int(preamble_length)
+        elif model.vars.MODEM_LONGRANGE_LRBLE.value == 1 and model.vars.MODEM_CTRL0_CODING.value == 3:
+            preamble_pattern_string = '00111100'
+            repeats = model.vars.MODEM_PRE_TXBASES.value
+        else:
+            preamble_pattern_len = model.vars.MODEM_PRE_BASEBITS.value+1
+            preamble_pattern_value = self.flip_bits(model.vars.MODEM_PRE_BASE.value,preamble_pattern_len)
+            preamble_pattern_string = ('{:0' + str(preamble_pattern_len) + 'b}').format(preamble_pattern_value)
+            repeats = model.vars.MODEM_PRE_TXBASES.value
+        #The preamble string is for the full TX preamble
+        preamble_string = preamble_pattern_string * repeats
+        model.vars.preamble_string_actual.value = preamble_string

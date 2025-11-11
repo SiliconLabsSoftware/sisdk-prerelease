@@ -11,8 +11,9 @@ class PhyFilters_Caracal(IPhyFilter):
                            'Phys_Internal_MBus',
                            'Phys_Internal_Base_Standard_IEEE802154',
                            'Phys_RAIL_Base_Standard_ZWave',
-                           'Phys_Internal_Base_Customer_Signify',
-                           'Phys_Studio_IEEE802154'
+                           'secret1',
+                           'Phys_Studio_IEEE802154',
+                           'Phys_Internal_Base_ValOnly_aliases'
                         ]
 
     # Studio white list (these PHYs show in Studio as proprietary starting points)
@@ -23,3 +24,6 @@ class PhyFilters_Caracal(IPhyFilter):
 
     # Special designation for non-functional PHYs
     non_functional_phy_groups = []
+
+    # PHYs to exclude from regression
+    virtual_phy_groups = ['Phys_Internal_Base_ValOnly_aliases']

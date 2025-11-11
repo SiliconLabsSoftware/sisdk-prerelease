@@ -387,9 +387,6 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
 
         # Determine which modulation index to use for the purposes of KSI calculation
         mi_to_use = mi_min + (mi_max - mi_min) * 0.5
-        if (modtype == model.vars.modulation_type.var_enum.FSK4 and \
-                demod_sel == model.vars.demod_select.var_enum.BCR):
-            mi_to_use *= 3  # KSI values used for 4FSK + BCR are primarily for CFE-DSA (2FSK-like)
 
         model.vars.modulation_index_for_ksi.value = mi_to_use
 

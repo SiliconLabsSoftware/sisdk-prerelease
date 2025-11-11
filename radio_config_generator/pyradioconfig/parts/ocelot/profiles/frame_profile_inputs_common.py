@@ -4,7 +4,7 @@ class frame_profile_inputs_common_ocelot(object):
 
     def build_frame_inputs(self, model, profile):
         MIN_FRAME_LENGTH = 1
-        MAX_FRAME_LENGTH = 0x7fffffff
+        MAX_FRAME_LENGTH = 4095
         MIN_HEADER_LENGTH = 1
         MAX_HEADER_LENGTH = 254
         MAX_FRAME_TYPE_LENGTH = 0xffff

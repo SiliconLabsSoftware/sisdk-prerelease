@@ -1,11 +1,9 @@
 from pyradioconfig.parts.ocelot.phys.Phys_Studio_Base import PHYS_Studio_Base_Ocelot
+from pyradioconfig.calculator_model_framework.decorators.phy_decorators import do_not_inherit_phys
 from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
 
-class PHYS_Studio_Base_Bobcat(IPhy):
-
-    #Copy the 2FSK base function from Ocelot
-    def Studio_2GFSK_base(self, phy, model):
-        PHYS_Studio_Base_Ocelot().Studio_2GFSK_base(phy, model)
+@do_not_inherit_phys
+class PHYS_Studio_Base_Bobcat(PHYS_Studio_Base_Ocelot):
 
     # Owner     : Young-Joon Choi
     # Jira Link : https://jira.silabs.com/browse/PGBOBCATVALTEST-208

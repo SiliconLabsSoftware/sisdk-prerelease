@@ -22,7 +22,7 @@
 #include "sl_zigbee_types.h"
 #include "multi-pan-token-config.h"
 #include "stack-info.h"
-#include "binding-table.h"
+#include "stack/include/binding-table.h"
 
 #if !defined(EZSP_HOST) && (defined(SL_CATALOG_ZIGBEE_GREEN_POWER_PRESENT) || defined(SL_ZIGBEE_TEST)) && !defined(SL_ZIGBEE_AF_API_TOKEN) && !defined(ZIGBEE_PRO_COMPLIANCE_ON_HOST)
 #include "sl_zigbee_green_power_config.h"

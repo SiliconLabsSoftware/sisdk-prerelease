@@ -1,5 +1,0 @@
-version = "0"
-
-[dependency]
-connect_stack = {version = ">=4.2.0 <4.2.1", installer = "conan", user = "silabs", prerelease = true}
-cpc = {version = ">=4.8.0 <4.8.1", installer = "conan", user = "silabs", prerelease = true}

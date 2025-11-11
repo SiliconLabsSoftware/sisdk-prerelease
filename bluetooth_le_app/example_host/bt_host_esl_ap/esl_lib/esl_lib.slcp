@@ -21,7 +21,7 @@ filter:
 component:
   - id: toolchain_gcc
   - id: esl_tag_core
-  - id: native_host
+  - id: opn_device_host
   - id: sl_main
   - id: sl_main_custom_main
   - id: app_log
@@ -103,6 +103,5 @@ library:
       - win32
 
 tag:
-  - companion:esl_ap
   - toolchain:gcc
   - hwfilter:device:device_family_host

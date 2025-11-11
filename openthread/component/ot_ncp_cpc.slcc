@@ -14,7 +14,7 @@ requires:
   - name: ot_coex
     # For now disable coex on series3 and NCP devices
     condition: [device_series_2, ot_rcp]
-  - name: rail_util_ieee802154_fast_channel_switching
+  - name: sl_rail_util_ieee802154_fast_channel_switching
     # For now disable FCS on NCP devices
     condition: [rail_ieee802154_supports_rx_channel_switching, ot_rcp]
 # For concurrent listening on xG26

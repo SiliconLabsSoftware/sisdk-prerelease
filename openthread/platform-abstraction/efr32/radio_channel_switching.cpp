@@ -115,6 +115,8 @@ uint8_t sli_ot_radio_channel_switching_get_channel_index(uint8_t aChannel)
             return i;
         }
     }
+#else
+    OT_UNUSED_VARIABLE(aChannel);
 #endif
     return INVALID_INTERFACE_INDEX;
 }

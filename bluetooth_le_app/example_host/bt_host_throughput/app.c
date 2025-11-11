@@ -480,7 +480,6 @@ static void log_step(void)
 void app_deinit(void)
 {
   app_log_info("Shutting down." APP_LOG_NL);
-  ncp_host_deinit();
   if (logfile_descriptor > 0) {
     close(logfile_descriptor);
   }

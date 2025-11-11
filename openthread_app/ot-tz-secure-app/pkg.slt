@@ -1,5 +1,0 @@
-version = "0"
-
-[dependency]
-platform =  {version = ">=6.0.0 <6.0.1", installer = "conan", prerelease = true}
-gcc-arm-none-eabi = {version = "12.2.rel1", user = "silabs"}

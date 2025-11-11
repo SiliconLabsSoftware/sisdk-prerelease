@@ -74,22 +74,22 @@ static bool             sPhyStackEventEnabled = false;
 static void processTxPacketSentEvent(void);
 static void processTxChannelBusyEvent(void);
 static void processTxBlockedEvent(void);
-static void processTxUnderflowAbortedEvent(sl_rail_events_t aEvents);
+static void processTxUnderflowAbortedEvent(void);
 static void processTxCcaEvents(sl_rail_events_t aEvents);
 static void processRxPacketReceivedEvent(void);
 #ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
-static void processRxSyncDetectedEvent(sl_rail_events_t aEvents);
+static void processRxSyncDetectedEvent(void);
 static void processRxFilterPassedEvent(void);
 static void processRxFrameErrorEvent(void);
-static void processRxFilteredEvent(sl_rail_events_t aEvents);
+static void processRxFilteredEvent(void);
 #endif // SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
 static void processAckSentEvent(void);
-static void processAckAbortedEvent(sl_rail_events_t aEvents);
+static void processAckAbortedEvent(void);
 static void processAckBlockedEvent(void);
 static void processScheduledTxEvent(void);
 static void processScheduledTxMissedEvent(void);
 static void processScheduledRxEvent(void);
-static void processScheduledRxEndMissedEvent(sl_rail_events_t aEvents);
+static void processScheduledRxEndMissedEvent(void);
 
 #ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
 static void processCoexSignalDetectedEvent(void);
@@ -151,6 +151,9 @@ sl_rail_util_ieee802154_stack_event_t sli_ot_radio_events_handle_phy_stack_event
     {
         return sl_rail_mux_ieee802154_on_event(railHandle, stackEvent, supplement);
     }
+#else
+    OT_UNUSED_VARIABLE(stackEvent);
+    OT_UNUSED_VARIABLE(supplement);
 #endif
     return SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_IDLED;
 }
@@ -177,7 +180,7 @@ void sli_ot_radio_events_process_callback(sl_rail_handle_t aRailHandle, sl_rail_
 #ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
     if (aEvents & (SL_RAIL_EVENT_RX_SYNC_0_DETECT | SL_RAIL_EVENT_RX_SYNC_1_DETECT))
     {
-        processRxSyncDetectedEvent(aEvents);
+        processRxSyncDetectedEvent();
     }
 #endif
 
@@ -238,7 +241,7 @@ void sli_ot_radio_events_process_callback(sl_rail_handle_t aRailHandle, sl_rail_
     if (aEvents
         & (SL_RAIL_EVENT_RX_PACKET_ABORTED | SL_RAIL_EVENT_RX_ADDRESS_FILTERED | SL_RAIL_EVENT_RX_FIFO_OVERFLOW))
     {
-        processRxFilteredEvent(aEvents);
+        processRxFilteredEvent();
     }
 #endif
 
@@ -318,7 +321,7 @@ void sli_ot_radio_events_process_tx_events(sl_rail_events_t aEvents)
     }
     else if (aEvents & (SL_RAIL_EVENT_TX_UNDERFLOW | SL_RAIL_EVENT_TX_ABORTED))
     {
-        processTxUnderflowAbortedEvent(aEvents);
+        processTxUnderflowAbortedEvent();
     }
     else
     {
@@ -355,7 +358,7 @@ void sli_ot_radio_events_process_scheduled_rx_events(sl_rail_events_t aEvents)
 
     if (aEvents & SL_RAIL_EVENT_RX_SCHEDULED_RX_END || aEvents & SL_RAIL_EVENT_RX_SCHEDULED_RX_MISSED)
     {
-        processScheduledRxEndMissedEvent(aEvents);
+        processScheduledRxEndMissedEvent();
     }
 }
 
@@ -368,7 +371,7 @@ void sli_ot_radio_events_process_ack_events(sl_rail_events_t aEvents)
 
     if (aEvents & (SL_RAIL_EVENT_TXACK_ABORTED | SL_RAIL_EVENT_TXACK_UNDERFLOW))
     {
-        processAckAbortedEvent(aEvents);
+        processAckAbortedEvent();
     }
 
     if (aEvents & SL_RAIL_EVENT_TXACK_BLOCKED)
@@ -419,7 +422,7 @@ static void processTxBlockedEvent(void)
     txFailedCallback(false, EVENT_TX_FAILED);
 }
 
-static void processTxUnderflowAbortedEvent(sl_rail_events_t aEvents)
+static void processTxUnderflowAbortedEvent(void)
 {
     sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ABORTED,
                                                static_cast<uint32_t>(txWaitingForAck()));
@@ -445,6 +448,8 @@ static void processTxCcaEvents(sl_rail_events_t aEvents)
     {
         sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_STARTED, 0U);
     }
+#else
+    OT_UNUSED_VARIABLE(aEvents);
 #endif
 }
 
@@ -454,7 +459,7 @@ static void processRxPacketReceivedEvent(void)
 }
 
 #ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
-static void processRxSyncDetectedEvent(sl_rail_events_t aEvents)
+static void processRxSyncDetectedEvent(void)
 {
     sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_STARTED,
                                                static_cast<uint32_t>(sli_ot_radio_state_is_receiving_frame()));
@@ -472,7 +477,7 @@ static void processRxFrameErrorEvent(void)
                                                static_cast<uint32_t>(sli_ot_radio_state_is_receiving_frame()));
 }
 
-static void processRxFilteredEvent(sl_rail_events_t aEvents)
+static void processRxFilteredEvent(void)
 {
     sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_FILTERED,
                                                static_cast<uint32_t>(sli_ot_radio_state_is_receiving_frame()));
@@ -486,7 +491,7 @@ static void processAckSentEvent(void)
     packetSentCallback(true);
 }
 
-static void processAckAbortedEvent(sl_rail_events_t aEvents)
+static void processAckAbortedEvent(void)
 {
     sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACK_ABORTED,
                                                static_cast<uint32_t>(sli_ot_radio_state_is_receiving_frame()));
@@ -516,7 +521,7 @@ static void processScheduledRxEvent(void)
     sli_ot_radio_state_set_internal_flag(EVENT_SCHEDULED_RX_STARTED, true);
 }
 
-static void processScheduledRxEndMissedEvent(sl_rail_events_t aEvents)
+static void processScheduledRxEndMissedEvent(void)
 {
     sli_ot_radio_state_set_internal_flag(FLAG_SCHEDULED_RX_PENDING | EVENT_SCHEDULED_RX_STARTED, false);
     sli_ot_radio_state_set_idle();

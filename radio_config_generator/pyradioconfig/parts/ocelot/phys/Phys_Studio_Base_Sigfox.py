@@ -20,7 +20,8 @@ class PHYS_Studio_Base_Sigfox_Ocelot(IPhy):
         be configured.
         '''
         phy = PHYS_Studio_Base_Ocelot().PHY_Studio_868M_2GFSK_600bps_800(model,
-                                                                             phy_name='PHY_Sigfox_915MHz_2GFSK_600bps_RXOnly')
+                                                                         phy_name='PHY_Sigfox_915MHz_2GFSK_600bps_RXOnly',
+                                                                         readable_name="Sigfox RX 915MHz 2GFSK 600bps")
 
         phy.profile_inputs.rx_xtal_error_ppm.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
@@ -93,7 +94,8 @@ class PHYS_Studio_Base_Sigfox_Ocelot(IPhy):
         be configured.
         '''
         phy = PHYS_Studio_Base_Ocelot().PHY_Studio_868M_2GFSK_600bps_800(model,
-                                                                             phy_name='PHY_Sigfox_868MHz_2GFSK_600bps_RXOnly')
+                                                                         phy_name='PHY_Sigfox_868MHz_2GFSK_600bps_RXOnly',
+                                                                         readable_name="Sigfox RX 868MHz 2GFSK 600bps")
 
         phy.profile_inputs.rx_xtal_error_ppm.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0

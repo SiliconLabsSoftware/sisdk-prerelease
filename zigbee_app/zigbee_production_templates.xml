@@ -467,8 +467,8 @@
     <properties key="readmeFiles" value="zigbee_app/app/projects/zigbeed/readme.md" />
     <properties key="boardCompatibility" value="com.silabs.board.none" />
     <properties key="partCompatibility" value=".*linux.* .*macos.* .*win32.*" />
-    <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code" />
-    <properties key="toolchainCompatibility" value="gcc" />
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code" />
+    <properties key="toolchainCompatibility" value="gcc iar" />
     <properties key="category" value="Zigbee Host Application" />
     <properties key="quality" value="PRODUCTION" />
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />

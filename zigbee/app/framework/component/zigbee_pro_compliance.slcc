@@ -131,6 +131,7 @@ include:
       - path: debug-gen.h
       - path: sli_zigbee_dynamic_commissioning.h
       - path: eui64.h
+      - path: zigbee_debug_stack_on_host.h
   - path: stack/zigbee
     file_list:
       - path: aps-keys.h

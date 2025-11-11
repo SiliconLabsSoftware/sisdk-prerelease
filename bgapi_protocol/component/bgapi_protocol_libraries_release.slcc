@@ -13,6 +13,20 @@ provides:
   - name: bgapi_protocol_libraries
   - name: bgapi_protocol_libraries_release
 library:
+  - path: build/gcc/cortex-m33/bgapi_trace/release/libbgapi_trace_stub.a
+    condition:
+      - toolchain_gcc
+      - cortexm33
+    unless:
+      - bgapi_trace
+  - path: build/gcc/cortex-m33/protocol/command/release/libbgapi_command.a
+    condition:
+      - toolchain_gcc
+      - cortexm33
+  - path: build/gcc/cortex-m33/protocol/core/release/libbgapi_core.a
+    condition:
+      - toolchain_gcc
+      - cortexm33
   - path: build/gcc/cortex-m33/protocol/device/release/libbgapi_device.a
     condition:
       - toolchain_gcc
@@ -24,6 +38,26 @@ library:
   - path: build/gcc/cortex-m33/protocol/release/libbgapi_protocol.a
     condition:
       - toolchain_gcc
+      - cortexm33
+  - path: build/gcc/cortex-m33/rtos_adaptation/release/libbgapi_protocol_rtos_adaptation_stub.a
+    condition:
+      - toolchain_gcc
+      - cortexm33
+    unless:
+      - bgapi_protocol_rtos_adaptation
+  - path: build/iar/cortex-m33/bgapi_trace/release/libbgapi_trace_stub.a
+    condition:
+      - toolchain_iar
+      - cortexm33
+    unless:
+      - bgapi_trace
+  - path: build/iar/cortex-m33/protocol/command/release/libbgapi_command.a
+    condition:
+      - toolchain_iar
+      - cortexm33
+  - path: build/iar/cortex-m33/protocol/core/release/libbgapi_core.a
+    condition:
+      - toolchain_iar
       - cortexm33
   - path: build/iar/cortex-m33/protocol/device/release/libbgapi_device.a
     condition:
@@ -37,6 +71,26 @@ library:
     condition:
       - toolchain_iar
       - cortexm33
+  - path: build/iar/cortex-m33/rtos_adaptation/release/libbgapi_protocol_rtos_adaptation_stub.a
+    condition:
+      - toolchain_iar
+      - cortexm33
+    unless:
+      - bgapi_protocol_rtos_adaptation
+  - path: build/llvm/cortex-m33/bgapi_trace/release/libbgapi_trace_stub.a
+    condition:
+      - toolchain_llvm
+      - cortexm33
+    unless:
+      - bgapi_trace
+  - path: build/llvm/cortex-m33/protocol/command/release/libbgapi_command.a
+    condition:
+      - toolchain_llvm
+      - cortexm33
+  - path: build/llvm/cortex-m33/protocol/core/release/libbgapi_core.a
+    condition:
+      - toolchain_llvm
+      - cortexm33
   - path: build/llvm/cortex-m33/protocol/device/release/libbgapi_device.a
     condition:
       - toolchain_llvm
@@ -49,6 +103,12 @@ library:
     condition:
       - toolchain_llvm
       - cortexm33
+  - path: build/llvm/cortex-m33/rtos_adaptation/release/libbgapi_protocol_rtos_adaptation_stub.a
+    condition:
+      - toolchain_llvm
+      - cortexm33
+    unless:
+      - bgapi_protocol_rtos_adaptation
 metadata:
     sbom:
         license: MSLA

@@ -217,9 +217,6 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
   config->rtos_enabled = true;
 #endif // !SL_CATALOG_KERNEL_PRESENT
 
-  // The PA config is in sl_btctrl_config.h
-  config->paMode = SL_BT_CONTROLLER_PA_CONFIG;
-
 // Beginning of TX Power and IRQ priority initialization section
 #if defined(SL_CATALOG_BLUETOOTH_PRESENT) // Stack present
 
@@ -561,6 +558,10 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
 #if !defined(SL_BLUETOOTH_NO_VS_HCI_COMMANDS)
   sl_bthci_init_vs();
 #endif // SL_BLUETOOTH_NO_VS_HCI_COMMANDS
+
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_EVENT_INFO_REPORTING_PRESENT)
+  sl_btctrl_init_event_info_report();
+#endif
 
   sl_btctrl_hci_parser_init_default();
 

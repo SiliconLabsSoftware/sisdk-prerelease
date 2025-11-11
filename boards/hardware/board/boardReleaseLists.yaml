@@ -66,6 +66,7 @@ board_release_whitelist:
     - BRD3201A
     - BRD4001A
     - BRD4002A
+    - BRD4002B
     - BRD4108A
     - BRD4109A
     - BRD4110A

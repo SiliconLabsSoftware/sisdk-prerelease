@@ -5,6 +5,14 @@ from pyradioconfig.parts.common.phys.phy_common import PHY_COMMON_FRAME_INTERNAL
 class PHYS_Studio_Base_Ocelot(IPhy):
 
     ##########2FSK PHYS##########
+    def _part_specific_phy_overrides(self, phy, model):
+        pass
+
+    def _set_xtal_frequency(self, phy, xtal_freq=None):
+        if xtal_freq is None:
+            phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        else:
+            phy.profile_inputs.xtal_frequency_hz.value = xtal_freq
 
     #Base Functions
 
@@ -29,10 +37,12 @@ class PHYS_Studio_Base_Ocelot(IPhy):
         phy.profile_inputs.syncword_1.value = 0x0
         phy.profile_inputs.syncword_length.value = 16
         phy.profile_inputs.tx_xtal_error_ppm.value = 10
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy)
 
         # Common frame settings
         PHY_COMMON_FRAME_INTERNAL(phy, model)
+
+        self._part_specific_phy_overrides(phy, model)
 
     #Derivative PHYs
 
@@ -178,8 +188,10 @@ class PHYS_Studio_Base_Ocelot(IPhy):
 
     # Owner: Casey Weltzin
     # JIRA Link: https://jira.silabs.com/browse/PGOCELOTVALTEST-190
-    def PHY_Studio_868M_2GFSK_600bps_800(self, model, phy_name=None):
-        phy = self._makePhy(model, model.profiles.Base, readable_name='868MHz 2GFSK 600bps 800Hz', phy_name=phy_name)
+    def PHY_Studio_868M_2GFSK_600bps_800(self, model, phy_name=None, readable_name=None):
+        if readable_name is None:
+            readable_name = '868MHz 2GFSK 600bps 800Hz'
+        phy = self._makePhy(model, model.profiles.Base, readable_name=readable_name, phy_name=phy_name)
 
         # Start with the base function
         self.Studio_2GFSK_base(phy, model)
@@ -427,10 +439,12 @@ class PHYS_Studio_Base_Ocelot(IPhy):
         phy.profile_inputs.syncword_1.value = 0x0
         phy.profile_inputs.syncword_length.value = 16
         phy.profile_inputs.tx_xtal_error_ppm.value = 10
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy)
 
         # Common frame settings
         PHY_COMMON_FRAME_INTERNAL(phy, model)
+
+        self._part_specific_phy_overrides(phy, model)
 
     # Derivative PHYs
 
@@ -494,10 +508,12 @@ class PHYS_Studio_Base_Ocelot(IPhy):
         phy.profile_inputs.syncword_1.value = 0x0
         phy.profile_inputs.syncword_length.value = 16
         phy.profile_inputs.tx_xtal_error_ppm.value = 10
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy)
 
         # Common frame settings
         PHY_COMMON_FRAME_INTERNAL(phy, model)
+
+        self._part_specific_phy_overrides(phy, model)
 
     # Derivative PHYs
 
@@ -624,12 +640,14 @@ class PHYS_Studio_Base_Ocelot(IPhy):
         phy.profile_inputs.syncword_length.value = 16
 
         """ XO Parameters """
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy)
         phy.profile_inputs.rx_xtal_error_ppm.value = 10
         phy.profile_inputs.tx_xtal_error_ppm.value = 10
 
         # Common frame settings
         PHY_COMMON_FRAME_INTERNAL(phy, model)
+
+        self._part_specific_phy_overrides(phy, model)
 
     # Owner: Young-Joon Choi
     # JIRA Link: https://jira.silabs.com/browse/PGOCELOTVALTEST-189

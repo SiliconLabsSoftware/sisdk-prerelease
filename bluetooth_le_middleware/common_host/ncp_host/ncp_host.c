@@ -37,6 +37,7 @@
 #include "app_timer.h"
 #include "ncp_host_config.h"
 #include "host_comm_config.h"
+#include <stdlib.h>
 
 // Default parameter values.
 #define MAX_OPT_LEN                   255
@@ -96,6 +97,11 @@ sl_status_t ncp_host_init(void)
 
   if (sc == SL_STATUS_OK) {
     sc = host_comm_init();
+  }
+
+  if (sc == SL_STATUS_OK) {
+    int exit_reg_status = atexit(ncp_host_deinit);
+    sc = (exit_reg_status == 0) ? SL_STATUS_OK : SL_STATUS_FAIL;
   }
 
 #if defined(SECURITY) && SECURITY == 1

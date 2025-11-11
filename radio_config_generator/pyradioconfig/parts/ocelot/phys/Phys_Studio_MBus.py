@@ -3,6 +3,15 @@ from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
 
 class PHYS_Mbus_Studio_Ocelot(IPhy):
 
+    def _part_specific_phy_overrides(self, phy, model):
+        pass
+
+    def _set_xtal_frequency(self, phy, xtal_freq=None):
+        if xtal_freq is None:
+            phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        else:
+            phy.profile_inputs.xtal_frequency_hz.value = xtal_freq
+
     # Owner: Efrain Gaxiola
     # JIRA Link: https://jira.silabs.com/browse/PGOCELOTVALTEST-30
     def PHY_wMbus_ModeNabef_4p8K_frameA(self, model, phy_name=None):
@@ -24,7 +33,8 @@ class PHYS_Mbus_Studio_Ocelot(IPhy):
         phy.profile_inputs.syncword_dualsync.value = False
 
         #Xtal frequency
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy)
+        self._part_specific_phy_overrides(phy, model)
 
         return phy
 
@@ -49,7 +59,8 @@ class PHYS_Mbus_Studio_Ocelot(IPhy):
         phy.profile_inputs.syncword_dualsync.value = False
 
         # Xtal frequency
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy)
+        self._part_specific_phy_overrides(phy, model)
 
         phy.profile_inputs.deviation_tol_ppm.value = 300000          # Required for pro2 calc to set fdev compensation
 
@@ -79,7 +90,8 @@ class PHYS_Mbus_Studio_Ocelot(IPhy):
         phy.profile_inputs.mbus_postamble_length.value = 1
 
         # Xtal frequency
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy)
+        self._part_specific_phy_overrides(phy, model)
 
         return phy
 
@@ -104,7 +116,8 @@ class PHYS_Mbus_Studio_Ocelot(IPhy):
         phy.profile_inputs.syncword_dualsync.value = False
 
         # Xtal frequency
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy)
+        self._part_specific_phy_overrides(phy, model)
 
         return phy
 
@@ -142,7 +155,8 @@ class PHYS_Mbus_Studio_Ocelot(IPhy):
         phy.profile_inputs.syncword_dualsync.value = False
 
         # Xtal frequency
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy)
+        self._part_specific_phy_overrides(phy, model)
 
         return phy
 
@@ -180,7 +194,8 @@ class PHYS_Mbus_Studio_Ocelot(IPhy):
         phy.profile_inputs.syncword_dualsync.value = False
 
         # Xtal frequency
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy)
+        self._part_specific_phy_overrides(phy, model)
 
         # Postamble length: Always set to 0, except for Mode T, Mode R or Mode S
         phy.profile_inputs.mbus_postamble_length.value = 1
@@ -221,7 +236,8 @@ class PHYS_Mbus_Studio_Ocelot(IPhy):
         phy.profile_inputs.syncword_dualsync.value = False
 
         # Xtal frequency
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy)
+        self._part_specific_phy_overrides(phy, model)
 
         return phy
 
@@ -272,7 +288,8 @@ class PHYS_Mbus_Studio_Ocelot(IPhy):
         phy.profile_inputs.syncword_dualsync.value = False
 
         # Xtal frequency
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy)
+        self._part_specific_phy_overrides(phy, model)
 
         # Postamble length: Always set to 0, except for Mode T, Mode R or Mode S
         phy.profile_inputs.mbus_postamble_length.value = 1
@@ -300,7 +317,8 @@ class PHYS_Mbus_Studio_Ocelot(IPhy):
         phy.profile_inputs.syncword_dualsync.value = False
 
         # Xtal frequency
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy)
+        self._part_specific_phy_overrides(phy, model)
 
         return phy
 
@@ -338,7 +356,8 @@ class PHYS_Mbus_Studio_Ocelot(IPhy):
         phy.profile_inputs.syncword_dualsync.value = False
 
         # Xtal frequency
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy)
+        self._part_specific_phy_overrides(phy, model)
 
         phy.profile_inputs.deviation_tol_ppm.value = 300000          # Required for pro2 calc to set fdev compensation
 
@@ -379,7 +398,8 @@ class PHYS_Mbus_Studio_Ocelot(IPhy):
         phy.profile_inputs.syncword_dualsync.value = False
 
         # Xtal frequency
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy)
+        self._part_specific_phy_overrides(phy, model)
 
         # Postamble length: Always set to 0, except for Mode T, Mode R or Mode S
         phy.profile_inputs.mbus_postamble_length.value = 1
@@ -410,7 +430,8 @@ class PHYS_Mbus_Studio_Ocelot(IPhy):
         phy.profile_inputs.syncword_dualsync.value = False
 
         # Xtal frequency
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy)
+        self._part_specific_phy_overrides(phy, model)
 
         # Postamble length: Set for mode T
         phy.profile_inputs.mbus_postamble_length.value = 1

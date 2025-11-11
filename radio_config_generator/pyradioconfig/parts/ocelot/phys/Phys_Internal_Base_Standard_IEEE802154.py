@@ -13,6 +13,12 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
     #
     # Useful to copy here as many register overrides do not exist on Series 2
 
+    def _set_xtal_frequency(self, phy, xtal_freq=None):
+        if xtal_freq is None:
+            phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        else:
+            phy.profile_inputs.xtal_frequency_hz.value = xtal_freq
+
     def IEEE802154_Base(self, phy, model):
         # Inputs
         phy.profile_inputs.diff_encoding_mode.value = model.vars.diff_encoding_mode.var_enum.DISABLED
@@ -26,10 +32,12 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_inputs.syncword_length.value = 8
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy)
 
         # Add 15.4 Packet Configuration
         PHY_COMMON_FRAME_154(phy, model)
+
+        self._part_specific_phy_overrides(phy, model)
 
     def PHY_IEEE802154_780MHz_OQPSK(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='IEEE 802.15.4 780MHz OQPSK', phy_name=phy_name)
@@ -403,6 +411,8 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_outputs.MODEM_CTRL4_PREDISTDEB.override = 1
         phy.profile_outputs.MODEM_CTRL4_PREDISTGAIN.override = 3
 
+        phy.profile_outputs.SEQ_MISC_DIG_RAMP_EN.override = 1
+
         return phy
 
     def PHY_IEEE802154_915MHz_BPSK_40kbps(self, model, phy_name=None):
@@ -598,7 +608,8 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_inputs.timing_detection_threshold.value = 65
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        # phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy)
         phy.profile_inputs.target_osr.value = 5  # Calc SRC
 
         # Additional overrides introduced when Series 2 AGC calculations added. These prevent the PHY from changing versus what was used during Validation.

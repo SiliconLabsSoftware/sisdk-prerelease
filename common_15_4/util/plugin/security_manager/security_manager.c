@@ -22,6 +22,10 @@
 #include "sli_psa_crypto.h"
 #include "psa/internal_trusted_storage.h"
 #include "psa/sli_internal_trusted_storage.h"
+#include "sl_status.h"
+#if defined(KSU_PRESENT)
+#include "sli_crypto_ksu_manager.h"
+#endif
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif // SL_COMPONENT_CATALOG_PRESENT
@@ -617,3 +621,211 @@ psa_status_t sl_sec_man_verify(psa_key_id_t        sl_psa_key_id,
   exit:
   return status;
 }
+
+// ============================================================================
+// KSU Key Registry - Protocol-agnostic KSU key management
+// ============================================================================
+
+#if defined(KSU_PRESENT)
+// Maximum number of keys that can be registered with KSU slots
+// This should be large enough to accommodate all protocols (OT + Zigbee + ...)
+#ifndef SL_SEC_MAN_MAX_KSU_KEYS
+#define SL_SEC_MAN_MAX_KSU_KEYS 16
+#endif
+
+// Entry in the KSU key registry
+typedef struct {
+  psa_key_id_t key_ref;    // PSA key ID (0 means unused slot)
+  uint8_t      ksu_slot;   // KSU hardware slot number
+} ksu_key_entry_t;
+
+// KSU key registry table
+static ksu_key_entry_t ksu_registry[SL_SEC_MAN_MAX_KSU_KEYS] = { 0 };
+
+psa_status_t sl_sec_man_register_ksu_key(psa_key_id_t key_ref, uint8_t ksu_slot)
+{
+  if (key_ref == 0) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  // Check if key is already registered - update its slot if found
+  for (size_t i = 0; i < SL_SEC_MAN_MAX_KSU_KEYS; i++) {
+    if (ksu_registry[i].key_ref == key_ref) {
+      ksu_registry[i].ksu_slot = ksu_slot;
+      return PSA_SUCCESS;
+    }
+  }
+
+  // Find an empty slot and register the key
+  for (size_t i = 0; i < SL_SEC_MAN_MAX_KSU_KEYS; i++) {
+    if (ksu_registry[i].key_ref == 0) {
+      ksu_registry[i].key_ref  = key_ref;
+      ksu_registry[i].ksu_slot = ksu_slot;
+      return PSA_SUCCESS;
+    }
+  }
+
+  // No space left in registry
+  return PSA_ERROR_INSUFFICIENT_MEMORY;
+}
+
+psa_status_t sl_sec_man_unregister_ksu_key(psa_key_id_t key_ref)
+{
+  if (key_ref == 0) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  // Find and remove the key from the registry
+  for (size_t i = 0; i < SL_SEC_MAN_MAX_KSU_KEYS; i++) {
+    if (ksu_registry[i].key_ref == key_ref) {
+      ksu_registry[i].key_ref  = 0;
+      ksu_registry[i].ksu_slot = 0xFF;
+      psa_destroy_key(key_ref);
+      return PSA_SUCCESS;
+    }
+  }
+
+  // Key not found in registry
+  return PSA_ERROR_DOES_NOT_EXIST;
+}
+
+psa_status_t sl_sec_man_get_ksu_slot_for_key(psa_key_id_t key_ref, uint8_t *ksu_slot)
+{
+  if (ksu_slot == NULL) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  if (key_ref == 0) {
+    *ksu_slot = 0xFF;
+    return PSA_ERROR_DOES_NOT_EXIST;
+  }
+
+  // Search for the key in the registry
+  for (size_t i = 0; i < SL_SEC_MAN_MAX_KSU_KEYS; i++) {
+    if (ksu_registry[i].key_ref == key_ref) {
+      *ksu_slot = ksu_registry[i].ksu_slot;
+      // Verify the slot is valid
+      if (*ksu_slot != 0xFF) {
+        return PSA_SUCCESS;
+      } else {
+        return PSA_ERROR_DOES_NOT_EXIST;
+      }
+    }
+  }
+
+  // Key not found in registry
+  *ksu_slot = 0xFF;
+  return PSA_ERROR_DOES_NOT_EXIST;
+}
+
+psa_status_t sl_sec_man_copy_key_to_ksu(psa_key_id_t source_key_id,
+                                        psa_key_id_t *ksu_key_id,
+                                        uint8_t *ksu_slot)
+{
+  psa_status_t psa_status;
+  psa_key_attributes_t source_attrs = PSA_KEY_ATTRIBUTES_INIT;
+  psa_key_attributes_t target_attrs = PSA_KEY_ATTRIBUTES_INIT;
+  psa_key_id_t new_ksu_key_id = 0;
+  uint8_t slot = 0xFF;
+
+  // Validate source key ID
+  if (source_key_id == 0) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  // Get source key attributes
+  psa_status = psa_get_key_attributes(source_key_id, &source_attrs);
+  if (psa_status != PSA_SUCCESS) {
+    psa_reset_key_attributes(&source_attrs);
+    return psa_status;
+  }
+
+  // Configure target attributes for KSU storage
+  psa_set_key_type(&target_attrs, psa_get_key_type(&source_attrs));
+  psa_set_key_bits(&target_attrs, psa_get_key_bits(&source_attrs));
+  psa_set_key_algorithm(&target_attrs, psa_get_key_algorithm(&source_attrs));
+  psa_set_key_usage_flags(&target_attrs, psa_get_key_usage_flags(&source_attrs) 
+  | PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT | PSA_KEY_USAGE_COPY);
+  psa_set_key_lifetime(&target_attrs,
+                       PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(
+                           PSA_KEY_PERSISTENCE_VOLATILE,
+                           SL_PSA_KEY_LOCATION_KSU_0));
+
+  // Copy key to KSU
+  psa_status = psa_copy_key(source_key_id, &target_attrs, &new_ksu_key_id);
+  
+  // Clean up attributes
+  psa_reset_key_attributes(&target_attrs);
+  psa_reset_key_attributes(&source_attrs);
+
+  if (psa_status != PSA_SUCCESS || new_ksu_key_id == 0) {
+    return (psa_status != PSA_SUCCESS) ? psa_status : PSA_ERROR_GENERIC_ERROR;
+  }
+
+  // Query the KSU manager for the actual slot ID
+  sl_status_t sl_status = sli_ksu_get_key_slot_id_from_user_ref((void *)new_ksu_key_id, &slot);
+  if (sl_status != SL_STATUS_OK) {
+    // Failed to determine slot - destroy the key and return error
+    psa_destroy_key(new_ksu_key_id);
+    return PSA_ERROR_GENERIC_ERROR;
+  }
+
+  // Register the key with the KSU registry
+  psa_status = sl_sec_man_register_ksu_key(new_ksu_key_id, slot);
+  if (psa_status != PSA_SUCCESS) {
+    // Failed to register - destroy the key and return error
+    psa_destroy_key(new_ksu_key_id);
+    return psa_status;
+  }
+
+  // Return the key ID and slot if requested
+  if (ksu_key_id != NULL) {
+    *ksu_key_id = new_ksu_key_id;
+  }
+  if (ksu_slot != NULL) {
+    *ksu_slot = slot;
+  }
+
+  return PSA_SUCCESS;
+}
+
+#else // !defined(SL_PSA_KEY_LOCATION_KSU_0)
+
+// Stub implementations when KSU is not available
+psa_status_t sl_sec_man_register_ksu_key(psa_key_id_t key_ref, uint8_t ksu_slot)
+{
+  (void)key_ref;
+  (void)ksu_slot;
+  return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t sl_sec_man_unregister_ksu_key(psa_key_id_t key_ref)
+{
+  (void)key_ref;
+  return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t sl_sec_man_get_ksu_slot_for_key(psa_key_id_t key_ref, uint8_t *ksu_slot)
+{
+  (void)key_ref;
+  if (ksu_slot != NULL) {
+    *ksu_slot = 0xFF;
+  }
+  return PSA_ERROR_DOES_NOT_EXIST;
+}
+
+psa_status_t sl_sec_man_copy_key_to_ksu(psa_key_id_t source_key_id,
+                                        psa_key_id_t *ksu_key_id,
+                                        uint8_t *ksu_slot)
+{
+  (void)source_key_id;
+  if (ksu_key_id != NULL) {
+    *ksu_key_id = 0;
+  }
+  if (ksu_slot != NULL) {
+    *ksu_slot = 0xFF;
+  }
+  return PSA_ERROR_NOT_SUPPORTED;
+}
+
+#endif // defined(SL_PSA_KEY_LOCATION_KSU_0)

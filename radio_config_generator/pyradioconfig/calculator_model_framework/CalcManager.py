@@ -804,8 +804,8 @@ class CalcManager(object):
                 LogMgr.Warning(f"WARNING: These regex did not find a register field match: {regs_regex_found}")
 
         # Call any target specific calculate functions last (these overwrite all other settings)
-        if not profile.skip_target_calculation:
-            self._call_target_calculate(modem_model)
+        # if not profile.skip_target_calculation:
+        self._call_target_calculate(modem_model)
 
     def create_modem_model_instance(self, phy_name=None, profile_name=None):
         """Creates an empty model instance for a PHY or Profile

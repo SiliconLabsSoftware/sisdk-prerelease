@@ -3,7 +3,7 @@ from enum import Enum
 from pycalcmodel.core.variable import ModelVariableFormat, CreateModelVariableEnum
 from pyradioconfig.parts.bobcat.calculators.calc_modulator import Calc_Modulator_Bobcat
 from pyradioconfig.calculator_model_framework.Utils.CustomExceptions import CalculationException
-
+from pyradioconfig.calculator_model_framework.Utils.LogMgr import LogMgr
 
 class CalcModulatorRainier(Calc_Modulator_Bobcat):
 
@@ -133,7 +133,7 @@ class CalcModulatorRainier(Calc_Modulator_Bobcat):
         fxo = model.vars.xtal_frequency.value * 1.0
         modformat = model.vars.modulation_type.value
         freq_dev_hz = model.vars.deviation.value * 1.0
-        shaping_filter_gain = model.vars.shaping_filter_gain_iqmod_actual.value
+        shaping_filter_gain = model.vars.shaping_filter_gain_actual.value
         br2m = model.vars.br2m.value
         baudrate = model.vars.baudrate.value
 
@@ -207,12 +207,22 @@ class CalcModulatorRainier(Calc_Modulator_Bobcat):
         modindex_e = model.vars.MODEM_MODINDEX_MODINDEXE.value
         modindex_m = model.vars.MODEM_MODINDEX_MODINDEXM.value
         self._reg_write(model.vars.SEQ_MODINDEX_CALC_MODINDEXE, int(modindex_e))
+        self._reg_write(model.vars.SEQ_MODINDEX_CALC_MODINDEXM, int(modindex_m))
         if model.target.upper() == 'IC':
-            self._reg_write(model.vars.SEQ_MODINDEX_CALC_MODINDEXE_DOUBLED_MODINDEXE, int(modindex_e+1))
+            if modindex_e < pow(2, model.vars.SEQ_MODINDEX_CALC_MODINDEXE.get_bit_width()) - 1:
+                self._reg_write(model.vars.SEQ_MODINDEX_CALC_MODINDEXE_DOUBLED_MODINDEXE, int(modindex_e+1))
+                self._reg_write(model.vars.SEQ_MODINDEX_CALC_MODINDEXE_DOUBLED_MODINDEXM, int(modindex_m))
+            else:
+                # check if we can double Mantisaa
+                if modindex_m * 2 < pow(2, model.vars.SEQ_MODINDEX_CALC_MODINDEXM.get_bit_width()) - 1:
+                    self._reg_write(model.vars.SEQ_MODINDEX_CALC_MODINDEXE_DOUBLED_MODINDEXE, int(modindex_e))
+                    self._reg_write(model.vars.SEQ_MODINDEX_CALC_MODINDEXE_DOUBLED_MODINDEXM, int(modindex_m*2))
+                else:
+                    LogMgr.Error('Can not calculate DOUBLE MODINDEXE and MODEINDEXM due to Overflow')
         else:
             self._reg_write(model.vars.SEQ_MODINDEX_CALC_MODINDEXE_DOUBLED_MODINDEXE, int(modindex_e))
-        self._reg_write(model.vars.SEQ_MODINDEX_CALC_MODINDEXM, int(modindex_m))
-        self._reg_write(model.vars.SEQ_MODINDEX_CALC_MODINDEXE_DOUBLED_MODINDEXM, int(modindex_m))
+            self._reg_write(model.vars.SEQ_MODINDEX_CALC_MODINDEXE_DOUBLED_MODINDEXM, int(modindex_m))
+
 
     def calc_modindex_actual(self, model):
         """
@@ -255,7 +265,7 @@ class CalcModulatorRainier(Calc_Modulator_Bobcat):
         """
         modformat = model.vars.modulation_type.value
         modindex = model.vars.modindex_actual.value
-        shaping_filter_gain = model.vars.shaping_filter_gain_iqmod_actual.value
+        shaping_filter_gain = model.vars.shaping_filter_gain_actual.value
 
         mod_samp_rate = self.get_modulator_sample_rate(model)
 

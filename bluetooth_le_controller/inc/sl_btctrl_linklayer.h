@@ -411,4 +411,9 @@ void sl_btctrl_init_conn_tasklet(void);
 void sl_btctrl_init_dtm_tasklet(void);
 void sl_btctrl_init_scan_tasklet(void);
 
+/**
+ * @brief Initializes event info reporting vendor specific feature.
+ */
+void sl_btctrl_init_event_info_report(void);
+
 #endif

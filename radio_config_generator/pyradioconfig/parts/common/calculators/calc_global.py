@@ -207,7 +207,7 @@ class CALC_Global(ICalculator):
         self._addModelActual(model,    'rxbrfrac'              , float,   ModelVariableFormat.DECIMAL)
         self._addModelActual(model,    'rxbrint'               ,  int,    ModelVariableFormat.DECIMAL)
         self._addModelActual(model,    'rxbrnum'               ,  int,    ModelVariableFormat.DECIMAL)
-        self._addModelActual(model,    'shaping_filter_gain'   ,  int,    ModelVariableFormat.DECIMAL)
+        self._add_shaping_filter_gain_variable(model)  # We will override for Rainier as Pass
         self._addModelActual(model,    'synth_res'             , float,   ModelVariableFormat.DECIMAL)
         self._addModelActual(model,    'timingbases'           ,  int,    ModelVariableFormat.DECIMAL)
         self._addModelActual(model,    'timthresh'             ,  int,    ModelVariableFormat.DECIMAL)
@@ -226,6 +226,9 @@ class CALC_Global(ICalculator):
         self._addModelActual(model,    'afc_scale'             , float,   ModelVariableFormat.DECIMAL)
         self._addModelActual(model,    'offsub_ratio'          , float,   ModelVariableFormat.DECIMAL)
         self._addModelActual(model,    'afc_limit_hz'          , float,   ModelVariableFormat.DECIMAL)
+
+    def _add_shaping_filter_gain_variable(self,model):
+        self._addModelActual(model, 'shaping_filter_gain', int, ModelVariableFormat.DECIMAL)
 
     def _add_modulation_type_variable(self, model):
 

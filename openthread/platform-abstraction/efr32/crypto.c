@@ -314,10 +314,14 @@ otError otPlatCryptoImportKey(otCryptoKeyRef      *aKeyId,
         keySize     = SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE;
     }
 
-    status = sl_sec_man_import_key(aKeyId,
+    bool is_aes_ecb_key = (aKeyType == OT_CRYPTO_KEY_TYPE_AES) && (aKeyAlgorithm == OT_CRYPTO_KEY_ALG_AES_ECB)
+                          && ((aKeyUsage & OT_CRYPTO_KEY_USAGE_ENCRYPT) != 0)
+                          && ((aKeyUsage & OT_CRYPTO_KEY_USAGE_DECRYPT) != 0);
+    int key_usage_mask = is_aes_ecb_key ? PSA_KEY_USAGE_COPY : 0;
+    status             = sl_sec_man_import_key(aKeyId,
                                    getPsaKeyType(aKeyType),
                                    getPsaAlgorithm(aKeyAlgorithm),
-                                   getPsaKeyUsage(aKeyUsage),
+                                   getPsaKeyUsage(aKeyUsage) | key_usage_mask,
                                    getPsaKeyPersistence(aKeyPersistence),
                                    keyToImport,
                                    keySize);

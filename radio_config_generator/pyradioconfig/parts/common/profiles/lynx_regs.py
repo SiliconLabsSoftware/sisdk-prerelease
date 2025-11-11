@@ -592,7 +592,6 @@ def build_modem_regs_lynx_only(model, profile):
         profile.outputs.append(ModelOutput(model.vars.AGC_CTRL6_SEQPNUPALLOW, '',         ModelOutputType.SVD_REG_FIELD, readable_name='AGC.CTRL6.SEQPNUPALLOW'           ))
         profile.outputs.append(ModelOutput(model.vars.AGC_CTRL6_SEQRFPKDEN, '',         ModelOutputType.SVD_REG_FIELD, readable_name='AGC.CTRL6.SEQRFPKDEN'           ))
     profile.outputs.append(ModelOutput(model.vars.FRC_DFLCTRL_DFLBOIOFFSET, '',         ModelOutputType.SVD_REG_FIELD, readable_name='FRC.DFLCTRL.DFLBOIOFFSET'           ))
-    profile.outputs.append(ModelOutput(model.vars.FRC_CTRL_LPMODEDIS, '',         ModelOutputType.SVD_REG_FIELD, readable_name='FRC.CTRL.LPMODEDIS'           ))
     profile.outputs.append(ModelOutput(model.vars.FRC_CTRL_WAITEOFEN, '',         ModelOutputType.SVD_REG_FIELD, readable_name='FRC.CTRL.WAITEOFEN'           ))
     profile.outputs.append(ModelOutput(model.vars.FRC_TRAILTXDATACTRL_TRAILTXREPLEN, '',         ModelOutputType.SVD_REG_FIELD, readable_name='FRC.TRAILTXDATACTRL.TRAILTXREPLEN'           ))
     profile.outputs.append(ModelOutput(model.vars.FRC_TRAILTXDATACTRL_TXSUPPLENOVERIDE, '',         ModelOutputType.SVD_REG_FIELD, readable_name='FRC.TRAILTXDATACTRL.TXSUPPLENOVERIDE'           ))

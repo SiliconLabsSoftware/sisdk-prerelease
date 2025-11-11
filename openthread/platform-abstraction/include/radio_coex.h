@@ -70,6 +70,10 @@
 #include "common/code_utils.hpp"
 #include "utils/code_utils.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum
 {
     SL_OT_COEX_EVENT_REQUEST_COUNT = 0,
@@ -108,5 +112,9 @@ void sli_ot_radio_coex_counter_on_event(sl_rail_util_coex_event_t event);
  */
 void sli_ot_radio_coex_clear_counters(void);
 #endif // SL_OPENTHREAD_COEX_COUNTER_ENABLE
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // RADIO_COEX_H_

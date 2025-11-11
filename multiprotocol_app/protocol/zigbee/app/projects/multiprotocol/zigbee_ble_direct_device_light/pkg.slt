@@ -1,7 +1,0 @@
-version = "0"
-
-[dependency]
-bluetooth_le_host = {version = ">=11.0.0 <11.0.1", installer = "conan", prerelease = true}
-zigbee =  {version = ">=9.0.0-alpha.2 <9.0.1", installer = "conan", prerelease = true}
-multiprotocol = {version = "1.0.0-alpha.4", installer = "conan", prerelease = true}
-gcc-arm-none-eabi = {version = "12.2.rel1", user = "silabs"}

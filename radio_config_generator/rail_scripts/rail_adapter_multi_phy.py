@@ -550,9 +550,16 @@ class RAILAdapter_MultiPhy(RAILAdapter):
           chBchArray = None
           if getattr(radioConfigModel.profile.outputs, 'bch_lut_data', None):
             chBchArray = radioConfigModel.profile.outputs.get_output('bch_lut_data').var_value
-          chFrameCodingArray = getattr(radioConfigModel.profile.outputs, 'frame_coding_array_packed', None)
-          if chFrameCodingArray is not None:
-            chFrameCodingArray = radioConfigModel.profile.outputs.get_output('frame_coding_array_packed').var_value
+
+          chFrameCodingArray = None
+          generic_lut = getattr(model.profile.outputs, 'generic_lookup_tables', None)
+
+          try:
+            var_value = getattr(generic_lut, 'var_value', None)
+            if var_value and 'frameCodingTable' in var_value:
+              chFrameCodingArray = generic_lut.var_value['frameCodingTable']
+          except(AttributeError, KeyError):
+            pass
 
           # Check if FEC is enabled on any channel config entry related to refConfigName
           if chFecEnabled:
@@ -1010,7 +1017,7 @@ class RAILAdapter_MultiPhy(RAILAdapter):
           newRailChannelConfigEntryAttr = commonStructures.railChannelConfigEntryAttrEntries.addNewElement("channel_config_entry_attr")
         else:
           newRailChannelConfigEntryAttr = commonStructures.railChannelConfigEntryAttrEntries.addNewElement("channelConfigEntryAttr")
-        if (self.partFamily.lower() in ["dumbo","jumbo","nerio","nixi", "lynx", "leopard", "lion"]):
+        if (self.partFamily.lower() in ["dumbo","jumbo","nerio","nixi", "lynx", "leopard", "lion", "curl"]):
           newRailChannelConfigEntryAttr.calValues.value = 1
         else:
           newRailChannelConfigEntryAttr.calValues.value = 2 #panther has 2 RF paths
@@ -1409,28 +1416,72 @@ class RAILAdapter_MultiPhy(RAILAdapter):
 
   def _generateFrameCodingTable(self, phyConfigEntry, model):
 
-    codingArray = getattr(model.profile.outputs, 'frame_coding_array_packed', None)
+    generic_lut = getattr(model.profile.outputs, 'generic_lookup_tables', None)
 
-    if codingArray is not None and codingArray.var_value:
-      # Traverse existing frameCodingTableEntries and check for duplicates
-      entryFound = False
-      commonStructures = self.railModel.multiPhyConfig.commonStructures
-      for i, frameCodingTableEntry in enumerate(commonStructures.frameCodingTableEntries._elements):
-        if frameCodingTableEntry.values == codingArray.var_value:
-          # Register the entry with the current phyConfigEntry
-          phyConfigEntry.frameCodingTableEntry.value = frameCodingTableEntry
-          entryFound = True
-          break
+    try:
+      var_value = getattr(generic_lut, 'var_value', None)
+      if var_value and 'frameCodingTable' in var_value:
+        codingArray = generic_lut.var_value['frameCodingTable']
+        # Traverse existing frameCodingTableEntries and check for duplicates
+        entryFound = False
+        commonStructures = self.railModel.multiPhyConfig.commonStructures
+        for i, frameCodingTableEntry in enumerate(commonStructures.frameCodingTableEntries._elements):
+          if frameCodingTableEntry.values == codingArray:
+            # Register the entry with the current phyConfigEntry
+            phyConfigEntry.frameCodingTableEntry.value = frameCodingTableEntry
+            entryFound = True
+            break
 
-      if not entryFound:
-        # Create a new frameCodingTable entry in common structures
-        if self.rail_version >= 3:
-          newframeCodingTableEntry = commonStructures.frameCodingTableEntries.addNewElement("frame_coding_table")
-        else:
-          newframeCodingTableEntry = commonStructures.frameCodingTableEntries.addNewElement("frameCodingTable")
-        newframeCodingTableEntry.values = codingArray.var_value
-        # Register the new entry with the current phyConfigEntry
-        phyConfigEntry.frameCodingTableEntry.value = newframeCodingTableEntry
+        if not entryFound:
+          # Create a new frameCodingTable entry in common structures
+          if self.rail_version >= 3:
+            newframeCodingTableEntry = commonStructures.frameCodingTableEntries.addNewElement("frame_coding_table")
+            # Update lookup table key since this is used to generate the variable on the C side
+            model.vars.generic_lookup_tables.value['frame_coding_table'] = model.vars.generic_lookup_tables.value[
+              'frameCodingTable']
+            del model.vars.generic_lookup_tables.value['frameCodingTable']
+
+          else:
+            newframeCodingTableEntry = commonStructures.frameCodingTableEntries.addNewElement("frameCodingTable")
+
+          newframeCodingTableEntry.values = codingArray
+          # Register the new entry with the current phyConfigEntry
+          phyConfigEntry.frameCodingTableEntry.value = newframeCodingTableEntry
+    except (AttributeError, TypeError):
+      pass
+
+  def _generateLookupTable(self, model):
+    # Check if the model has the generic lookup tables variable
+    if hasattr(model.vars, 'generic_lookup_tables') and model.vars.generic_lookup_tables.value:
+      lookupTablesDict = model.vars.generic_lookup_tables.value
+
+      # Ensure lookupTablesDict is a dictionary
+      if lookupTablesDict and isinstance(lookupTablesDict, dict):
+        commonStructures = self.railModel.multiPhyConfig.commonStructures
+
+        # Iterate through each lookup table in the dictionary
+        for tableName, tableValues in lookupTablesDict.items():
+          if tableValues and isinstance(tableValues, list):
+            # Ensure all values are integers
+            lookupValues = [int(x) for x in tableValues]
+
+            # Traverse existing lookupTableEntries and check for duplicates
+            entryFound = False
+            for i, lookupTableEntry in enumerate(commonStructures.lookupTableEntries._elements):
+              if (hasattr(lookupTableEntry, 'tableName') and
+                      hasattr(lookupTableEntry, 'values') and
+                      lookupTableEntry.tableName.value == tableName and
+                      lookupTableEntry.values.values == lookupValues):
+                entryFound = True
+                break
+
+            if not entryFound:
+              # Create a new lookupTable entry in common structures
+              newLookupTableEntry = commonStructures.lookupTableEntries.addNewElement(
+                "genericLookupTable")
+              newLookupTableEntry.tableName.value = tableName
+              newLookupTableEntry.values.values = lookupValues
+              newLookupTableEntry._uniqueName = tableName
 
   def _loadBchLookupTable(self, model, regs, regAddress, codingArray):
 
@@ -1819,12 +1870,15 @@ class RAILAdapter_MultiPhy(RAILAdapter):
           #Handle Frame Coding tables
           self._generateFrameCodingTable(phyConfigEntry, radioConfigModel)
 
+          # Handle generic lookup tables
+          self._generateLookupTable(radioConfigModel)
+
           # Handle Dynamic Slicer Configuration (for OOK PHYs)
           self._generateDynamicSlicerConfiguration(phyConfigEntry, baseConfigOptions, radioConfigModel)
 
           # Generic Model Info
-          phyConfigEntry.xtalFrequency.value = radioConfigModel.vars.xtal_frequency.value
-          phyConfigEntry.baseFrequency.value = radioConfigModel.vars.base_frequency.value
+          phyConfigEntry.xtalFrequency.value = radioConfigModel.vars.xtal_frequency_hz.value
+          phyConfigEntry.baseFrequency.value = radioConfigModel.vars.base_frequency_hz.value
           phyConfigEntry.bitrate.value = radioConfigModel.vars.bitrate.value
           phyConfigEntry.modType.value = radioConfigModel.vars.modulation_type.value
           phyConfigEntry.deviation.value = radioConfigModel.vars.deviation.value
@@ -1832,8 +1886,16 @@ class RAILAdapter_MultiPhy(RAILAdapter):
           phyConfigEntry.fecEnabled.value = bool(radioConfigModel.profile.outputs.get_output('fec_enabled').var_value)
           phyConfigEntry.convDecodeBufferSize.value = radioConfigModel.profile.outputs.get_output('frc_conv_decoder_buffer_size').var_value
           phyConfigEntry.arrayTable = None
-          if getattr(radioConfigModel.profile.outputs, 'frame_coding_array_packed', None):
-            phyConfigEntry.arrayTable = radioConfigModel.profile.outputs.get_output('frame_coding_array_packed').var_value
+
+
+          generic_lut = getattr(radioConfigModel.profile.outputs, 'generic_lookup_tables', None)
+
+          try:
+            var_value = getattr(generic_lut, 'var_value', None)
+            if var_value and 'frameCodingTable' in var_value:
+              phyConfigEntry.arrayTable = generic_lut.var_value['frameCodingTable']
+          except (AttributeError, TypeError):
+            pass
           phyConfigEntry.bchArray = None
           if getattr(radioConfigModel.profile.outputs, 'bch_lut_data', None):
             phyConfigEntry.bchArray = radioConfigModel.profile.outputs.get_output('bch_lut_data').var_value

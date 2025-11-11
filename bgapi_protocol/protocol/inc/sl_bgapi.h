@@ -19,6 +19,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 #include "sl_status.h"
 #include "sl_bgapi_config.h"
 
@@ -295,6 +296,26 @@ sl_status_t sl_bgapi_obtain_message_buffer(size_t max_payload_size,
  * @param[in] buffer The buffer to release
  */
 void sl_bgapi_release_message_buffer(void *buffer);
+
+/**
+ * @brief Check if the specified command is marked as sensitive.
+ *
+ * This function is provided for NCP/CPC components that need to handle BGAPI
+ * commands and responses in their binary format. If the NCP/CPC transport
+ * supports encryption, it can use this function to determine if the specified
+ * command is considered as sensitive and should be encrypted. If the execution
+ * of a sensitive command is attempted over an unencrypted transport, the
+ * NCP/CPC component can choose to reject the command.
+ *
+ * @param[in] command_header The header of the command to check
+ * @param[out] is_sensitive Set to true if the command is considered sensitive,
+ *   otherwise set to false
+ *
+ * @return SL_STATUS_OK if the sensitivity of the command was successfully
+ *   determined, otherwise an error code
+ */
+sl_status_t sl_bgapi_check_command_sensitivity(uint32_t command_header,
+                                               bool *is_sensitive);
 
 /**
  * @brief Execute a BGAPI command in binary format.

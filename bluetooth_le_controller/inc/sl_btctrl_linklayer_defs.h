@@ -76,7 +76,6 @@ struct sl_btctrl_config {
   int16_t rxGain;
   int16_t tx_power_min;
   int16_t tx_power_max;
-  uint8_t paMode;
   uint8_t linklayer_irq_priority;
   uint8_t radio_irq_priority;
   uint16_t conn_ce_length_min;

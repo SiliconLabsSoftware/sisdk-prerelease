@@ -42,6 +42,12 @@
 #include "sli_crypto.h"
 #endif
 
+#if defined(LPWAES_PRESENT) && (defined(KSU_PRESENT))
+#include "security_manager.h" // For sl_sec_man_get_ksu_slot_for_key
+#include "sl_se_manager.h"
+#include "sl_se_manager_key_handling.h"
+#endif
+
 #include <assert.h>
 #include "common/code_utils.hpp"
 #include "common/debug.hpp"
@@ -257,15 +263,43 @@ void TxSecurityProcessing::Finalize(void *aTag)
 #endif
 
 #if defined(LPWAES_PRESENT)
-static inline void efr32CreateKeyDesc(const otMacKeyMaterial *key, sli_crypto_descriptor_t *key_desc)
+// Ensure we declare the function with C linkage so it matches the
+// implementation in radio_security.cpp (which uses extern "C").
+extern "C" psa_status_t sl_sec_man_get_ksu_slot_for_key(psa_key_id_t key_ref, uint8_t *ksu_slot);
+void                    efr32CreateKeyDesc(const otMacKeyMaterial *key, sli_crypto_descriptor_t *key_desc)
 {
+    key_desc->engine = SLI_CRYPTO_LPWAES;
+    key_desc->yield  = false;
+
+#if defined(KSU_PRESENT)
+    // Check if key is stored in KSU (has valid key reference). If so use
+    // the KSU slot; otherwise fall back to the plaintext key. The previous
+    // patch mistakenly placed the preprocessor #else in a way that omitted
+    // the plaintext fallback when KSU was enabled, leaving the descriptor
+    // uninitialised in the "not-in-KSU" case.
+    uint8_t ksu_slot = 0xFF;
+    if ((key->mKeyMaterial.mKeyRef != 0)
+        && (sl_sec_man_get_ksu_slot_for_key(key->mKeyMaterial.mKeyRef, &ksu_slot) == PSA_SUCCESS))
+    {
+        key_desc->location     = SLI_CRYPTO_KEY_LOCATION_KSU;
+        key_desc->key.key_slot = ksu_slot;
+    }
+    else
+    {
+        key_desc->location                         = SLI_CRYPTO_KEY_LOCATION_PLAINTEXT;
+        key_desc->key.plaintext_key.buffer.pointer = (uint8_t *)key->mKeyMaterial.mKey.m8;
+        key_desc->key.plaintext_key.buffer.size    = OT_MAC_KEY_SIZE;
+        key_desc->key.plaintext_key.key_size       = OT_MAC_KEY_SIZE;
+    }
+#else
+    /* KSU not enabled in this build -- use plaintext key as before */
     key_desc->location                         = SLI_CRYPTO_KEY_LOCATION_PLAINTEXT;
-    key_desc->engine                           = SLI_CRYPTO_LPWAES;
     key_desc->key.plaintext_key.buffer.pointer = (uint8_t *)key->mKeyMaterial.mKey.m8;
     key_desc->key.plaintext_key.buffer.size    = OT_MAC_KEY_SIZE;
     key_desc->key.plaintext_key.key_size       = OT_MAC_KEY_SIZE;
-    key_desc->yield                            = false;
+#endif
 }
+
 #endif
 
 void efr32PlatProcessTransmitAesCcm(otRadioFrame *aFrame, const otExtAddress *aExtAddress)

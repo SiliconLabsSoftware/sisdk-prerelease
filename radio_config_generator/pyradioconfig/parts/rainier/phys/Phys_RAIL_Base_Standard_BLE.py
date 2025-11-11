@@ -247,7 +247,7 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         """ Channel and Bandwidth Settings """
         phy.profile_inputs.base_frequency_hz.value = long(2402000000)
         phy.profile_inputs.deviation.value = 250000
-        phy.profile_inputs.channel_spacing_hz.value = 1000000
+        phy.profile_inputs.channel_spacing_hz.value = 2000000
         phy.profile_inputs.bitrate.value = 1000000
         phy.profile_inputs.baudrate_tol_ppm.value = 5000
         phy.profile_inputs.bandwidth_hz.value = 1099233
@@ -294,8 +294,7 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         phy.profile_outputs.MODEM_CGCLKSTOP_FORCEOFF.override = 56831
         phy.profile_outputs.MODEM_CTRL0_FRAMEDETDEL.override = 2
         phy.profile_outputs.MODEM_CTRL6_RXBRCALCDIS.override = 1
-        phy.profile_outputs.MODEM_PRE_BASE.override = 2
-
+        
         # FRC Overrides
         phy.profile_outputs.FRC_AUTOCG_AUTOCGEN.override = 7
         phy.profile_outputs.FRC_PUNCTCTRL_PUNCT0.override = 1
@@ -902,6 +901,8 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         phy.profile_outputs.MODEM_CTRL2_RATESELMODE.override = 0
         phy.profile_outputs.MODEM_PRE_TXBASES.override = 4
         phy.profile_outputs.MODEM_CTRL0_CODING.override = 0
+
+        phy.profile_outputs.FRC_FECCTRL_CONVMODE.override = 0
 
         # : Set for both Bobcat and Lynx
         phy.profile_outputs.MODEM_CGCLKSTOP_FORCEOFF.override = 56831  # : copy clock gating settings from BLE 1M

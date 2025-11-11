@@ -1,2 +1,2 @@
-from pyradioconfig.calculator_model_framework.Utils.ClassManager import ClassManager
-__all__ = ClassManager.getModuleNamesFromPath(__file__)
+from .lut_wisun_fan1v0 import LutWisunFan1v0
+from .lut_wisun_fan1v1 import LutWisunFan1v1

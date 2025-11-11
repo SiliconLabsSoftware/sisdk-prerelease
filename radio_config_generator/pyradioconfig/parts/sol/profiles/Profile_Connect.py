@@ -49,7 +49,7 @@ class Profile_Connect_Sol(Profile_Base_Sol):
         self.make_hidden_input(profile, model.vars.frame_length_type, 'frame_general',
                                    readable_name="Frame Length Algorithm")
         self.make_hidden_input(profile, model.vars.fixed_length_size, category='frame_fixed_length',
-                                   readable_name="Fixed Payload Size", value_limit_min=0, value_limit_max=0x7fffffff)
+                                   readable_name="Fixed Payload Size", value_limit_min=0, value_limit_max=4095)
 
         return profile
 

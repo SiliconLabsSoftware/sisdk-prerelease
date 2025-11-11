@@ -111,12 +111,3 @@ class CALC_Frame_lynx(CALC_Frame_panther):
             # Use the same settings, but in FCD2
             self._configure_fcd(model, fcdindex="2", buf=1, **fcdDict)
         return
-
-    def calc_ctrl_lpmodedis_reg(self, model):
-        # This method calculates the LPMODEDIS field
-
-        # Set LPMODEDIS=1 for all phys due to FRC clock enabling bug
-        lpmodedis = 1
-
-        # Write the register
-        self._reg_write(model.vars.FRC_CTRL_LPMODEDIS, lpmodedis)

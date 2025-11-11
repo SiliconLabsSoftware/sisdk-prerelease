@@ -83,7 +83,7 @@
   - name: SL_BOARD_NAME
     value: '"BRD4413A"'
   - name: SL_BOARD_REV
-    value: '"A05"'
+    value: '"A06"'
   - name: HFXO_FREQ
     value: 38400000
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
@@ -92,7 +92,7 @@
 - tag:
   - board:pn:BRD4413
   - board:variant:A
-  - board:revision:A05
+  - board:revision:A06
   - board:device:efr32mg29b230f1024cm40
   - hardware:has:vcom
   - hardware:has:pti

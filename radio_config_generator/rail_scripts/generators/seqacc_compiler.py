@@ -871,7 +871,8 @@ class SequenceGenerator(object):
                         self.source[sequencesObj.fileName][sequence] = number + 1
                     elif '#if' in line:
                         raise TypeError('#if/#ifdef detected in C file {}.c::{} while generating Trace file. '
-                                        'Feature not available yet, please remove it to continue.'.format(sequencesObj.fileName, sequence))
+                                        'Feature not available yet, sequences will still be generated but Trace '
+                                        'file will not.'.format(sequencesObj.fileName, sequence))
                     else:
                         pass
         cFile.close()
@@ -1045,7 +1046,8 @@ def main(argv=None):
         sources.append(args.source)
 
     if args.trace:
-        traceFile = open(os.path.join(destination, "sequences.trace"), 'w+')
+        traceFileName = os.path.join(destination, "sequences.trace")
+        traceFile = open(traceFileName, 'w+')
 
     for source in sources:
         print('YAML sequence source path: {}'.format(os.path.join(os.path.dirname(args.source), source)))
@@ -1060,7 +1062,14 @@ def main(argv=None):
 
         if args.trace:
             # Generate Trace file
-            generator.generateTrace(sequences, destination, traceFile)
+            try:
+                generator.generateTrace(sequences, destination, traceFile)
+            except Exception  as e:
+                traceFile.close()
+                os.remove(traceFileName)
+                args.trace = False
+                print(e)
+                pass
 
     if args.trace:
         traceFile.close()
