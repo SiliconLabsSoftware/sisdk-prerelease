@@ -193,6 +193,10 @@ SLI_RAIL_ENUM(sl_rail_ble_phy_t) {
    * BLE 2 Mbps PHY with CS.
    */
   SL_RAIL_BLE_PHY_CS_2_MBPS = 8u,
+  /**
+   * BLE PHY undefined.
+   */
+  SL_RAIL_BLE_PHY_UNDEFINED = 0xFFu,
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -411,6 +415,18 @@ sl_rail_status_t sl_rail_ble_deinit(sl_rail_handle_t rail_handle);
  * a call to \ref sl_rail_ble_init() and disabled by a call to \ref sl_rail_ble_deinit().
  */
 bool sl_rail_ble_is_enabled(sl_rail_handle_t rail_handle);
+
+/**
+ * Load BLE channel config.
+ *
+ * @param[in] rail_handle A real RAIL instance handle.
+ * @param[in] channel_config Pointer to the channel configuration structure.
+ * @param[in] phy_id The PHY ID to configure.
+ * @return Status code indicating success of the function call.
+ */
+sl_rail_status_t sl_rail_ble_config_channels(sl_rail_handle_t rail_handle,
+                                             const sl_rail_channel_config_t * channel_config,
+                                             sl_rail_ble_phy_t phy_id);
 
 /**
  * Switch to the 1 Mbps Quuppa PHY.
@@ -2130,23 +2146,23 @@ sl_rail_status_t sl_rail_ble_calibrate_ir(sl_rail_handle_t rail_handle,
 
 #include "rail_ble.h"
 #define sl_rail_ble_phy_1_mbps \
-  ((const sl_rail_channel_config_t * const)RAIL_BLE_Phy1MbpsViterbi)
+  ((const sl_rail_channel_config_t *)RAIL_BLE_Phy1MbpsViterbi)
 #define sl_rail_ble_phy_2_mbps \
-  ((const sl_rail_channel_config_t * const)RAIL_BLE_Phy2MbpsViterbi)
+  ((const sl_rail_channel_config_t *)RAIL_BLE_Phy2MbpsViterbi)
 #define sl_rail_ble_phy_1_mbps_cs \
-  ((const sl_rail_channel_config_t * const)RAIL_BLE_Phy1MbpsViterbiCs)
+  ((const sl_rail_channel_config_t *)RAIL_BLE_Phy1MbpsViterbiCs)
 #define sl_rail_ble_phy_2_mbps_cs \
-  ((const sl_rail_channel_config_t * const)RAIL_BLE_Phy2MbpsViterbiCs)
+  ((const sl_rail_channel_config_t *)RAIL_BLE_Phy2MbpsViterbiCs)
 #define sl_rail_ble_phy_2_mbps_aox \
-  ((const sl_rail_channel_config_t * const)RAIL_BLE_Phy2MbpsAox)
+  ((const sl_rail_channel_config_t *)RAIL_BLE_Phy2MbpsAox)
 #define sl_rail_ble_phy_125_kbps \
-  ((const sl_rail_channel_config_t * const)RAIL_BLE_Phy125kbps)
+  ((const sl_rail_channel_config_t *)RAIL_BLE_Phy125kbps)
 #define sl_rail_ble_phy_500_kbps \
-  ((const sl_rail_channel_config_t * const)RAIL_BLE_Phy500kbps)
+  ((const sl_rail_channel_config_t *)RAIL_BLE_Phy500kbps)
 #define sl_rail_ble_phy_simulscan \
-  ((const sl_rail_channel_config_t * const)RAIL_BLE_PhySimulscan)
+  ((const sl_rail_channel_config_t *)RAIL_BLE_PhySimulscan)
 #define sl_rail_ble_phy_quuppa \
-  ((const sl_rail_channel_config_t * const)RAIL_BLE_PhyQuuppa)
+  ((const sl_rail_channel_config_t *)RAIL_BLE_PhyQuuppa)
 
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 

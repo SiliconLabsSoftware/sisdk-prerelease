@@ -75,7 +75,7 @@
 #include "sl_rail_ieee802154.h"
 #include "soft_source_match_table.h"
 
-#include "pa_conversions_efr32.h"
+#include "sl_rail_util_pa_conversions.h"
 #include "sl_openthread_radio_config.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT

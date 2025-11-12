@@ -43,7 +43,7 @@
 #include "utils/code_utils.h"
 #include "utils/mac_frame.h"
 
-#include "pa_conversions_efr32.h"
+#include "sl_rail_util_pa_conversions.h"
 #include "platform-efr32.h"
 #include "radio_instance.h"
 #include "sl_core.h"
