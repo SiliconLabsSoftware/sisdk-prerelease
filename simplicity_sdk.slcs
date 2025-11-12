@@ -62,10 +62,10 @@ component_path:
 - path: multiprotocol/protocol/zigbee/component
 - path: multiprotocol/platform/radio/mac/component
 - path: multiprotocol/protocol/openthread/component
-- path: openthread/component
-- path: openthread_stack/component
 - path: openthread_internal/component
 - path: openthread_internal/component/internal
+- path: openthread_stack/component
+- path: openthread/component
 - path: platform_common/platform/common/component
 - path: platform_core/util/plugin/component
 - path: platform_core/hardware/driver/component
@@ -116,16 +116,9 @@ component_path:
 - path: wisun/component
 - path: wisun_config_generator/component
 - path: wisun_sdk/component
-- path: zigbee_internal/platform/radio/mac/component
-- path: zigbee_internal/platform/radio/rail_lib/plugin/component
-- path: zigbee_internal/component
-- path: zigbee_internal/util/plugin/component
-- path: zigbee_internal/util/silicon_labs/silabs_core/component
-- path: zigbee_internal/app/framework/component
-- path: zigbee_internal/platform/service/component
-- path: zigbee_wwah/app/framework/component
 - path: zigbee_sleepy_to_sleepy/component
 - path: zigbee_sleepy_to_sleepy/app/framework/component
+- path: zigbee_smart_energy/component
 - path: zigbee/platform/radio/mac/component
 - path: zigbee/platform/radio/rail_lib/plugin/component
 - path: zigbee/component
@@ -133,7 +126,14 @@ component_path:
 - path: zigbee/util/silicon_labs/silabs_core/component
 - path: zigbee/app/framework/component
 - path: zigbee/platform/service/component
-- path: zigbee_smart_energy/component
+- path: zigbee_wwah/app/framework/component
+- path: zigbee_internal/platform/radio/mac/component
+- path: zigbee_internal/platform/radio/rail_lib/plugin/component
+- path: zigbee_internal/component
+- path: zigbee_internal/util/plugin/component
+- path: zigbee_internal/util/silicon_labs/silabs_core/component
+- path: zigbee_internal/app/framework/component
+- path: zigbee_internal/platform/service/component
 - path: zwave/component
 - path: zwave/component/CommandClasses
 - path: zwave/component-internal
@@ -169,9 +169,9 @@ documentation:
 - docset: wisun
   version: 2.10.0
 - docset: zigbee
-  version: 9.0.0
-- docset: zigbee
   version: 8.2.0
+- docset: zigbee
+  version: 9.0.0
 upgrade_manifest:
 - path: bluetooth_le_middleware/upgrade.slcu
 - path: openthread/component/upgrade.slcu
@@ -183,8 +183,8 @@ upgrade_manifest:
 - path: unity_test_framework/component/upgrade.slcu
 - path: wisun_config_generator/wisun_config_generator.slcu
 - path: wisun_sdk/app/wisun/upgrade.slcu
-- path: zigbee_internal/component/upgrade.slcu
 - path: zigbee/component/upgrade.slcu
+- path: zigbee_internal/component/upgrade.slcu
 post_build_profile:
 - path: openthread/postbuild_profile/
 - path: platform_core/platform/common/postbuild_profile

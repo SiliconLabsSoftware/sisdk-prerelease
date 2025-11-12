@@ -21,42 +21,42 @@ define:
   - name: OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE
     value: 1
 library:
-  - path: protocol/openthread/libs/libsl_ot_stack_ftd_coap_efr32mg21_gcc.a
+  - path: libs/libsl_ot_stack_ftd_coap_efr32mg21_gcc.a
     condition:
       - toolchain_gcc
       - device_sdid_200
       - ot_stack_ftd
-  - path: protocol/openthread/libs/libsl_ot_stack_mtd_coap_efr32mg21_gcc.a
+  - path: libs/libsl_ot_stack_mtd_coap_efr32mg21_gcc.a
     condition:
       - toolchain_gcc
       - device_sdid_200
       - ot_stack_mtd
-  - path: protocol/openthread/libs/libsl_ot_stack_ftd_coap_efr32mg24_gcc.a
+  - path: libs/libsl_ot_stack_ftd_coap_efr32mg24_gcc.a
     condition:
       - toolchain_gcc
       - device_sdid_215
       - ot_stack_ftd
-  - path: protocol/openthread/libs/libsl_ot_stack_mtd_coap_efr32mg24_gcc.a
+  - path: libs/libsl_ot_stack_mtd_coap_efr32mg24_gcc.a
     condition:
       - toolchain_gcc
       - device_sdid_215
       - ot_stack_mtd
-  - path: protocol/openthread/libs/libsl_ot_stack_ftd_coap_efr32mg26_gcc.a
+  - path: libs/libsl_ot_stack_ftd_coap_efr32mg26_gcc.a
     condition:
       - toolchain_gcc
       - device_sdid_225
       - ot_stack_ftd
-  - path: protocol/openthread/libs/libsl_ot_stack_mtd_coap_efr32mg26_gcc.a
+  - path: libs/libsl_ot_stack_mtd_coap_efr32mg26_gcc.a
     condition:
       - toolchain_gcc
       - device_sdid_225
       - ot_stack_mtd
-  - path: protocol/openthread/libs/libsl_ot_stack_ftd_coap_simg301_gcc.a
+  - path: libs/libsl_ot_stack_ftd_coap_simg301_gcc.a
     condition:
       - toolchain_gcc
       - device_generic_family_sixx301
       - ot_stack_ftd
-  - path: protocol/openthread/libs/libsl_ot_stack_mtd_coap_simg301_gcc.a
+  - path: libs/libsl_ot_stack_mtd_coap_simg301_gcc.a
     condition:
       - toolchain_gcc
       - device_generic_family_sixx301

@@ -2183,7 +2183,7 @@ static void emRadioEnablePta(bool enable)
 static void efr32CoexInit(void)
 {
 #if SL_OPENTHREAD_COEX_COUNTER_ENABLE && defined(SL_CATALOG_RAIL_MULTIPLEXER_PRESENT)
-    sli_ot_radio_interface_rail_set_coex_counter_handler(&sli_ot_radio_coex_counter_on_event);
+    sli_ot_radio_interface_rail_set_coex_counter_handler((void*)(&sli_ot_radio_coex_counter_on_event));
 #else
     sli_radio_coex_reset();
 #endif // SL_OPENTHREAD_COEX_COUNTER_ENABLE && defined(SL_CATALOG_RAIL_MULTIPLEXER_PRESENT)

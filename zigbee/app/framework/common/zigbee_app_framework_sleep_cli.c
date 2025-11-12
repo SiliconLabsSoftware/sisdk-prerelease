@@ -79,6 +79,21 @@ void sl_zigbee_af_idle_sleep_power_mode_eco_command(sl_cli_command_arg_t *argume
   status = sl_clock_manager_set_ext_flash_clk(SL_OSCILLATOR_FSRCO);
   sl_zigbee_core_debug_println("Switched to power save mode with status %02X", status);
 }
+#if SL_CATALOG_SL_RAIL_UTIL_IEEE802154_RX_DUTY_CYCLING_PRESENT
+void sl_zigbee_af_radio_rx_duty_cycle_command(sl_cli_command_arg_t *arguments)
+{
+  sl_rail_handle_t *rail_handle = (sl_rail_handle_t *)sl_zigbee_get_rail_handle();
+  sl_rail_status_t status = SL_RAIL_STATUS_INVALID_STATE;
+  if (rail_handle) {
+    status = sl_rail_ieee802154_config_2p4_ghz_radio_rx_duty_cycling(*rail_handle);
+  }
+  if (status == SL_RAIL_STATUS_NO_ERROR) {
+    sl_zigbee_core_debug_println("Started radio RX duty cycle, status %02X", status);
+  } else {
+    sl_zigbee_core_debug_println("Failed to start RX duty cycle, status: %02X", status);
+  }
+}
+#endif //SL_CATALOG_SL_RAIL_UTIL_IEEE802154_RX_DUTY_CYCLING_PRESENT
 #endif //_SILICON_LABS_32B_SERIES_3
 
 #endif //#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)

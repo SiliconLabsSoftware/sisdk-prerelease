@@ -45,9 +45,6 @@
 #include "platform-band.h"
 #include "sl_rail_types.h"
 
-// Forward declarations for radio.cpp internals
-struct efr32BandConfig;
-
 // PHY layer constants
 #if RADIO_CONFIG_SUBGHZ_SUPPORT
 #define PHY_HEADER_SIZE 2
@@ -75,7 +72,7 @@ sl_rail_handle_t sli_ot_radio_interface_get_rail_handle(void);
  *
  * @returns Pointer to band configuration, or nullptr if invalid channel
  */
-struct efr32BandConfig *sli_ot_radio_interface_get_band_config(uint8_t aChannel);
+efr32BandConfig *sli_ot_radio_interface_get_band_config(uint8_t aChannel);
 
 /**
  * Load RAIL configuration for a band
@@ -83,12 +80,12 @@ struct efr32BandConfig *sli_ot_radio_interface_get_band_config(uint8_t aChannel)
  * @param[in] aBandConfig  The band configuration to load
  * @param[in] aTxPower     The transmit power setting
  */
-void sli_ot_radio_interface_load_rail_config(struct efr32BandConfig *aBandConfig, int8_t aTxPower);
+void sli_ot_radio_interface_load_rail_config(efr32BandConfig *aBandConfig, int8_t aTxPower);
 
 /**
  * Get the current band configuration
  */
-struct efr32BandConfig *sli_ot_radio_interface_get_current_band_config(void);
+efr32BandConfig *sli_ot_radio_interface_get_current_band_config(void);
 
 /**
  * Get pointer to common configuration structure
@@ -231,7 +228,7 @@ void sli_ot_radio_interface_set_tx_power(int8_t aTxPower);
  *
  * @param[in] aBandConfig  Pointer to band configuration
  */
-void sli_ot_radio_interface_set_current_band_config(struct efr32BandConfig *aBandConfig);
+void sli_ot_radio_interface_set_current_band_config(efr32BandConfig *aBandConfig);
 
 /**
  * Get CCA threshold

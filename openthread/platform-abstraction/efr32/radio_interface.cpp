@@ -94,7 +94,7 @@ sl_rail_handle_t gRailHandle;
 sl_rail_handle_t emPhyRailHandle;
 #endif
 
-struct efr32BandConfig *sCurrentBandConfig = nullptr;
+efr32BandConfig *sCurrentBandConfig = nullptr;
 
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
 struct efr32RadioCounters railDebugCounters;
@@ -146,10 +146,6 @@ const sl_rail_ieee802154_config_t sRailIeee802154Config = {
 // Forward declarations for PA functions (mocked in test environment)
 extern "C" void *sl_rail_util_pa_get_tx_power_config_subghz(void);
 extern "C" void *sl_rail_util_pa_get_tx_power_config_2p4ghz(void);
-
-// Forward declarations for internal functions
-struct efr32BandConfig *sli_ot_radio_interface_get_band_config_internal(uint8_t aChannel);
-void                    sli_ot_radio_interface_load_rail_config_internal(efr32BandConfig *aBandConfig, int8_t aTxPower);
 
 // External function declarations
 extern void sli_update_tx_power_after_config_update(const sl_rail_tx_power_config_t *txPowerConfig, int8_t aTxPower);
@@ -250,12 +246,7 @@ sl_rail_handle_t sli_ot_radio_interface_get_rail_handle(void)
 #endif
 }
 
-struct efr32BandConfig *sli_ot_radio_interface_get_band_config(uint8_t aChannel)
-{
-    return sli_ot_radio_interface_get_band_config_internal(aChannel);
-}
-
-struct efr32BandConfig *sli_ot_radio_interface_get_current_band_config(void)
+efr32BandConfig *sli_ot_radio_interface_get_current_band_config(void)
 {
     return sCurrentBandConfig;
 }
@@ -268,11 +259,6 @@ efr32CommonConfig *sli_ot_radio_interface_get_common_config_ptr(void)
 efr32BandConfig *sli_ot_radio_interface_get_band_config_ptr(void)
 {
     return &sBandConfig;
-}
-
-void sli_ot_radio_interface_load_rail_config(struct efr32BandConfig *aBandConfig, int8_t aTxPower)
-{
-    sli_ot_radio_interface_load_rail_config_internal(aBandConfig, aTxPower);
 }
 
 otError sli_ot_radio_interface_set_rx(uint8_t aChannel)
@@ -368,7 +354,7 @@ void sli_ot_radio_interface_cancel_timer(struct sl_rail_multi_timer *aTimer)
     sl_rail_cancel_multi_timer(gRailHandle, aTimer);
 }
 
-struct efr32BandConfig *sli_ot_radio_interface_get_band_config_internal(uint8_t aChannel)
+efr32BandConfig *sli_ot_radio_interface_get_band_config(uint8_t aChannel)
 {
     efr32BandConfig *config = nullptr;
 
@@ -381,7 +367,7 @@ struct efr32BandConfig *sli_ot_radio_interface_get_band_config_internal(uint8_t 
     return config;
 }
 
-void sli_ot_radio_interface_load_rail_config_internal(efr32BandConfig *aBandConfig, int8_t aTxPower)
+void sli_ot_radio_interface_load_rail_config(efr32BandConfig *aBandConfig, int8_t aTxPower)
 {
     sl_rail_status_t                 status;
     const sl_rail_tx_power_config_t *txPowerConfig = nullptr;
@@ -435,17 +421,18 @@ void sli_ot_radio_interface_load_rail_config_internal(efr32BandConfig *aBandConf
 
 otError sli_ot_radio_interface_load_channel_config(uint8_t aChannel, int8_t aTxPower)
 {
-    // Get the band config for the channel
-    efr32BandConfig *bandConfig = sli_ot_radio_interface_get_band_config_internal(aChannel);
-    if (bandConfig == nullptr)
-    {
-        return OT_ERROR_INVALID_ARGS;
-    }
+    otError          error      = OT_ERROR_NONE;
+    efr32BandConfig *bandConfig = sli_ot_radio_interface_get_band_config(aChannel);
 
-    // Load the rail config
-    sli_ot_radio_interface_load_rail_config_internal(bandConfig, aTxPower);
+    otEXPECT_ACTION(bandConfig != nullptr, error = OT_ERROR_INVALID_ARGS);
 
-    return OT_ERROR_NONE;
+    otEXPECT_ACTION(bandConfig != sCurrentBandConfig, sli_ot_radio_interface_set_tx_power(aTxPower));
+
+    sli_ot_radio_interface_rail_idle();
+    sli_ot_radio_interface_load_rail_config(bandConfig, aTxPower);
+
+exit:
+    return error;
 }
 
 void sli_ot_radio_interface_init_config(void)
@@ -483,7 +470,7 @@ void sli_ot_radio_interface_set_tx_power(int8_t aTxPower)
     sli_set_tx_power_in_rail(aTxPower);
 }
 
-void sli_ot_radio_interface_set_current_band_config(struct efr32BandConfig *aBandConfig)
+void sli_ot_radio_interface_set_current_band_config(efr32BandConfig *aBandConfig)
 {
     sCurrentBandConfig = aBandConfig;
 }

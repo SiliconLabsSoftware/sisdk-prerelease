@@ -56,6 +56,27 @@
 #define PERSISTENCE_KEY_ID_USED_MAX (7)
 #define MAX_HMAC_KEY_SIZE (32)
 
+#if !defined(_SILICON_LABS_32B_SERIES_3)
+static psa_status_t reImportUnwrapped(const otCryptoKey *aKey, otCryptoKeyRef *aHmacKeyRef);
+#endif
+
+static inline otCryptoKeyRef getHmacKeyRef(const otCryptoKey *aKey)
+{
+    otCryptoKeyRef keyRef = PSA_KEY_ID_NULL;
+
+#if defined(_SILICON_LABS_32B_SERIES_3)
+    keyRef = aKey->mKeyRef;
+#else
+    psa_status_t status = reImportUnwrapped(aKey, &keyRef);
+    if (status != PSA_SUCCESS)
+    {
+        keyRef = PSA_KEY_ID_NULL; // Return invalid key on error
+    }
+#endif
+
+    return keyRef;
+}
+
 // Helper function to convert otCryptoKeyType to psa_key_type_t
 static psa_key_type_t getPsaKeyType(otCryptoKeyType aKeyType)
 {
@@ -301,11 +322,12 @@ otError otPlatCryptoImportKey(otCryptoKeyRef      *aKeyId,
                               const uint8_t       *aKey,
                               size_t               aKeyLen)
 {
-    otError        error = OT_ERROR_NONE;
-    psa_status_t   status;
-    uint8_t        aPrivateKey[SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE];
-    const uint8_t *keyToImport = aKey;
-    size_t         keySize     = aKeyLen;
+    otError         error = OT_ERROR_NONE;
+    psa_status_t    status;
+    uint8_t         aPrivateKey[SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE];
+    const uint8_t  *keyToImport  = aKey;
+    size_t          keySize      = aKeyLen;
+    psa_key_usage_t keyUsageMask = 0;
 
     if (aKeyType == OT_CRYPTO_KEY_TYPE_ECDSA)
     {
@@ -314,14 +336,16 @@ otError otPlatCryptoImportKey(otCryptoKeyRef      *aKeyId,
         keySize     = SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE;
     }
 
+#if defined(LPWAES_PRESENT) && (defined(KSU_PRESENT))
     bool is_aes_ecb_key = (aKeyType == OT_CRYPTO_KEY_TYPE_AES) && (aKeyAlgorithm == OT_CRYPTO_KEY_ALG_AES_ECB)
                           && ((aKeyUsage & OT_CRYPTO_KEY_USAGE_ENCRYPT) != 0)
                           && ((aKeyUsage & OT_CRYPTO_KEY_USAGE_DECRYPT) != 0);
-    int key_usage_mask = is_aes_ecb_key ? PSA_KEY_USAGE_COPY : 0;
-    status             = sl_sec_man_import_key(aKeyId,
+    keyUsageMask = is_aes_ecb_key ? PSA_KEY_USAGE_COPY : 0;
+#endif
+    status = sl_sec_man_import_key(aKeyId,
                                    getPsaKeyType(aKeyType),
                                    getPsaAlgorithm(aKeyAlgorithm),
-                                   getPsaKeyUsage(aKeyUsage) | key_usage_mask,
+                                   getPsaKeyUsage(aKeyUsage) | keyUsageMask,
                                    getPsaKeyPersistence(aKeyPersistence),
                                    keyToImport,
                                    keySize);
@@ -430,6 +454,7 @@ otError otPlatCryptoHmacSha256Deinit(otCryptoContext *aContext)
     return error;
 }
 
+#if !defined(_SILICON_LABS_32B_SERIES_3)
 static psa_status_t reImportUnwrapped(const otCryptoKey *aKey, otCryptoKeyRef *aHmacKeyRef)
 {
     psa_status_t status = PSA_SUCCESS;
@@ -465,6 +490,7 @@ exit:
 #endif
     return status;
 }
+#endif
 
 otError otPlatCryptoHmacSha256Start(otCryptoContext *aContext, const otCryptoKey *aKey)
 {
@@ -473,18 +499,19 @@ otError otPlatCryptoHmacSha256Start(otCryptoContext *aContext, const otCryptoKey
     psa_status_t         status;
     otCryptoKeyRef       hmacKeyRef;
 
-    status = reImportUnwrapped(aKey, &hmacKeyRef);
-    error  = mapPsaStatusToOtError(status);
+    hmacKeyRef = getHmacKeyRef(aKey);
+    otEXPECT_ACTION(hmacKeyRef != PSA_KEY_ID_NULL, error = OT_ERROR_FAILED);
 
     status = sl_sec_man_hmac_start(mMacOperation, hmacKeyRef);
     error  = mapPsaStatusToOtError(status);
 
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SEMAILBOX_PRESENT) && !defined(_SILICON_LABS_32B_SERIES_3)
     sl_sec_man_destroy_key(hmacKeyRef);
 #else
-    hmacKeyRef = 0;
+    hmacKeyRef = PSA_KEY_ID_NULL;
 #endif
 
+exit:
     return error;
 }
 

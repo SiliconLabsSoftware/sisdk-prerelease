@@ -307,6 +307,15 @@ template_contribution:
       - zigbee_zcl_framework_core
       - device_series_3
 
+  - name: cli_command
+    value:
+        name: radio-rx-duty-cycle
+        handler: sl_zigbee_af_radio_rx_duty_cycle
+        help: Start radio duty cycling on rx.
+    condition:
+      - sl_rail_util_ieee802154_rx_duty_cycling
+      - device_series_3
+
 tag:
   - idle-sleep
   - rtos
