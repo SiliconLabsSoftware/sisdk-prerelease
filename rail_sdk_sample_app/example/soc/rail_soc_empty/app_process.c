@@ -33,6 +33,7 @@
 // -----------------------------------------------------------------------------
 #include "sl_component_catalog.h"
 #include "sl_rail.h"
+#include "sl_rail_util_init.h"
 #include "sl_code_classification.h"
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
@@ -63,6 +64,10 @@
  *****************************************************************************/
 void app_process_action(void)
 {
+  // this handle is used to interact with the RAIL library
+  sl_rail_handle_t rail_handle = sl_rail_util_get_handle(SL_RAIL_UTIL_HANDLE_INST0);
+  (void) rail_handle;
+
   ///////////////////////////////////////////////////////////////////////////
   // Put your application code here!                                       //
   // This is called infinitely.                                            //

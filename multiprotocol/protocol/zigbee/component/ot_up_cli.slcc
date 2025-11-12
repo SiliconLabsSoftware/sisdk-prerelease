@@ -118,6 +118,21 @@ template_contribution:
         argument:
           - type: string
             help: destination IPV6 address
+
+  - name: cli_command
+    value:
+        name: txpower
+        handler: thread_txpower_get
+        help: get radio TX power (dBm)
+
+  - name: cli_command
+    value:
+        name: txpower_set
+        handler: thread_txpower_set
+        argument:
+          - type: int8
+            help: Transmit power in dBm
+        help: set radio TX power (dBm)
 metadata:
     sbom:
         license: MSLA

@@ -8,5 +8,5 @@ prop.subLabel=Wi-SUN Config Generator\\ 1.0.0
 # General properties are prepended with "prop."
 prop.file.templatesFile=
 prop.file.demosFile=
-prop.file.adapterPacks=
+prop.file.adapterPacks=apack.info
 prop.file.hkconfAdkModels=

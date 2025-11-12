@@ -37,102 +37,23 @@ config_file:
   - "wisun_br_stack"
 
 #------------------------------------------------ default full configuration
+# EU_1_1a
 - path: config/EU_1_1a/wisun_settings.wisunconf
   directory: wisun
   condition:
-  - brd4271a
+  - hardware_board_default_rf_band_868
 
 # NA_1_1b
 - path: config/NA_1_1b/wisun_settings.wisunconf
   directory: wisun
   condition:
-  - brd4270a
-- path: config/NA_1_1b/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-  - brd4270b
-- path: config/NA_1_1b/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-  - brd4276a
-- path: config/NA_1_1b/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-  - brd4400a
-- path: config/NA_1_1b/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-  - brd4400b
-- path: config/NA_1_1b/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-  - brd4400c
-- path: config/NA_1_1b/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-  - brd4401a
-- path: config/NA_1_1b/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-  - brd4401b
-- path: config/NA_1_1b/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-  - brd4401c
-- path: config/NA_1_1b/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-  - brd2705a
-- path: config/NA_1_1b/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-  - brd4204a
-- path: config/NA_1_1b/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-  - brd4204b
-- path: config/NA_1_1b/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-  - brd4204c
-- path: config/NA_1_1b/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-  - brd4204d
-- path: config/NA_1_1b/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-  - brd4210a
-- path: config/NA_1_1b/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-  - brd4263a
-- path: config/NA_1_1b/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-  - brd4263b
-- path: config/NA_1_1b/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-  - brd4263c
-- path: config/NA_1_1b/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-  - brd4264a
-- path: config/NA_1_1b/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-  - brd4264b
-- path: config/NA_1_1b/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-  - brd4264c
+  - hardware_board_default_rf_band_915
 
 # CN_1_1b
 - path: config/CN_1_1b/wisun_settings.wisunconf
   directory: wisun
   condition:
-  - brd4272a
+  - hardware_board_default_rf_band_470
 
 # based on IC all NA_1_1b
 - path: config/NA_1_1b/wisun_settings.wisunconf

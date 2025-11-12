@@ -1,0 +1,12 @@
+# Properties file for Simplicity Studio metadata.
+id=com.silabs.sdk.eval.wisun_sdk_sample_app
+label=wisun_sdk_app Evaluation
+description= WiSun SDK Smaple applications
+version=1.0.0
+prop.subLabel=wisun_sdk_sample_app\\ 1.0.0
+
+# General properties are prepended with "prop."
+prop.file.templatesFile=templates.xml
+prop.file.demosFile=
+prop.file.adapterPacks=
+prop.file.hkconfAdkModels=adk_models

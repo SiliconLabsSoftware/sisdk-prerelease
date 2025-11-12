@@ -27,7 +27,7 @@
 
 // <<< end of configuration section >>>
 #include <em_eusart.h>
-#define UART_PERIPHERAL_VAL     &sl_peripheral_val_eusart0
+#define UART_PERIPHERAL_VAL     SL_PERIPHERAL_EUSART0
 #define UART_PERIPHERAL         EUSART0
 #define UART_RX_IRQ             EUSART0_RX_IRQn
 #define UART_LDMA_SIGNAL_RX     ldmaPeripheralSignal_EUSART0_RXFL

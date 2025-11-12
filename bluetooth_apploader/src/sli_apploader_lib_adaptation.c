@@ -17,7 +17,7 @@
 #include "sli_apploader_lib_adaptation.h"
 #include <em_device.h>
 #include <em_cmu.h>
-#include <pa_conversions_efr32.h> // TODO: switch to sl_rail_util_pa_conversions.h
+#include <sl_rail_util_pa_conversions.h>
 
 void sli_apploader_set_interrupt_priorities()
 {

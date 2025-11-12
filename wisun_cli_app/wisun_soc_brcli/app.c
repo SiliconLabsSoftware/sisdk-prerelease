@@ -1538,7 +1538,7 @@ void app_pan_defect_advertise(sl_cli_command_arg_t *arguments)
   if (ret != SL_STATUS_OK) {
     printf("[Failed: unable to set PAN Defect: %lu]\r\n", ret);
   } else {
-    printf("[PAN Defect advertisement started]\r\n");
+    printf("[PAN Defect advertisement %s]\r\n", defect_advertise ? "started" : "cancelled");
   }
 cleanup:
   app_wisun_cli_mutex_unlock();

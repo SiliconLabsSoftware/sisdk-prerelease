@@ -4,8 +4,8 @@
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.projects.z3.zigbee_z3_gateway_cpc.zigbee_z3_gateway_cpc.slcp" />
-    <properties key="projectFilePaths" value="zigbee_app/app/projects/z3/zigbee_z3_gateway_cpc/zigbee_z3_gateway_cpc.slcp" />
-    <properties key="readmeFiles" value="zigbee_app/app/projects/z3/zigbee_z3_gateway_cpc/readme.md" />
+    <properties key="projectFilePaths" value="app/projects/z3/zigbee_z3_gateway_cpc/zigbee_z3_gateway_cpc.slcp" />
+    <properties key="readmeFiles" value="app/projects/z3/zigbee_z3_gateway_cpc/readme.md" />
     <properties key="boardCompatibility" value="com.silabs.board.none" />
     <properties key="partCompatibility" value=".*linux.* .*macos.* .*win32.*" />
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code" />
@@ -13,8 +13,6 @@
     <properties key="category" value="Zigbee Host Application" />
     <properties key="quality" value="EXPERIMENTAL" />
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
-    <properties key="sltPackageIds" value="{&quot;zigbee&quot;:&quot;0.0.1&quot;}" />
-    <properties key="sltPackagePath" value="app/projects/z3/zigbee_z3_gateway_cpc/zigbee_z3_gateway_cpc.slcp" />
     <properties key="filters" value="Device\ Type|Host Project\ Difficulty|Advanced Wireless\ Technology|Zigbee" />
   </descriptors>
 </ns0:MDescriptors>

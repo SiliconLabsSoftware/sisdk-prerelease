@@ -52,10 +52,13 @@ typedef enum  {
   OT_CLI_THREAD_START,
   OT_CLI_THREAD_STATE,
   OT_CLI_DATASET,
+  OT_CLI_TXPOWER_GET,
+  OT_CLI_TXPOWER_SET,
 } ot_cli_t;
 
 static ot_cli_t ot_cli_to_execute = OT_CLI_DATASET_GET_ACTIVE;
 static otPingSenderConfig config;
+static int8_t sTxPowerPending = 0;
 static void HandlePingStatistics(const otPingSenderStatistics *aStatistics, void *aContext);
 static void HandlePingReply(const otPingSenderReply *aReply, void *aContext);
 
@@ -96,6 +99,20 @@ void thread_ping_ipaddr(sl_cli_command_arg_t *arguments)
   }
   ot_cli_to_execute = OT_CLI_THREAD_PING_IPADDR;
 
+  sl_ot_rtos_set_pending_event(SL_OT_RTOS_EVENT_APP);
+}
+void thread_txpower_get(sl_cli_command_arg_t *arguments)
+{
+  (void)arguments;
+  ot_cli_to_execute = OT_CLI_TXPOWER_GET;
+  sl_ot_rtos_set_pending_event(SL_OT_RTOS_EVENT_APP);
+}
+
+void thread_txpower_set(sl_cli_command_arg_t *arguments)
+{
+  int32_t val = sl_cli_get_argument_int32(arguments, 0);
+  sTxPowerPending = (int8_t)val;
+  ot_cli_to_execute = OT_CLI_TXPOWER_SET;
   sl_ot_rtos_set_pending_event(SL_OT_RTOS_EVENT_APP);
 }
 void dataset_init_new(sl_cli_command_arg_t *arguments)
@@ -299,6 +316,28 @@ void sl_ot_rtos_application_tick(void)
 
       if (sDataset.mComponents.mIsPanIdPresent) {
         sl_zigbee_app_debug_println("PAN ID: 0x%04X", sDataset.mPanId);
+      }
+      break;
+    }
+    case OT_CLI_TXPOWER_GET:
+    {
+      int8_t power = 0;
+      otError error = otPlatRadioGetTransmitPower(otGetInstance(), &power);
+      if (error == OT_ERROR_NONE) {
+        sl_zigbee_app_debug_println("TxPower(dBm): %d", (int)power);
+      } else {
+        sl_zigbee_app_debug_println("Status: 0x%0x", error);
+      }
+      break;
+    }
+    case OT_CLI_TXPOWER_SET:
+    {
+      otError error = otPlatRadioSetTransmitPower(otGetInstance(), sTxPowerPending);
+
+      // Show what the driver actually configured (may be clamped)
+      int8_t eff = 0;
+      if (otPlatRadioGetTransmitPower(otGetInstance(), &eff) == OT_ERROR_NONE) {
+        sl_zigbee_app_debug_println("TxPower(dBm): %d", (int)eff);
       }
       break;
     }

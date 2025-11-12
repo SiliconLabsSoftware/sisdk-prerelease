@@ -31,6 +31,7 @@
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
+#include "sl_rail_util_init.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -56,6 +57,10 @@
  *****************************************************************************/
 void rail_app_init(void)
 {
+  // this handle is used to interact with the RAIL library
+  sl_rail_handle_t rail_handle = sl_rail_util_get_handle(SL_RAIL_UTIL_HANDLE_INST0);
+  (void) rail_handle;
+
   /////////////////////////////////////////////////////////////////////////////
   // Put your application init code here!                                    //
   // This is called once during start-up.                                    //

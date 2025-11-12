@@ -1,0 +1,12 @@
+# Properties file for Simplicity Studio metadata.
+id=com.silabs.sdk.eval.rail_sdk_sample_app
+label=Rail SDK Sample Applications
+description=Rail SDK Sample Applications
+version=1.0.0
+prop.subLabel=rail_sdk_sample_app\\ 1.0.0
+
+# General properties are prepended with "prop."
+prop.file.templatesFile=templates.xml
+prop.file.demosFile=
+prop.file.adapterPacks=
+prop.file.hkconfAdkModels=adk_models

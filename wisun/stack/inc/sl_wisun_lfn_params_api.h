@@ -236,7 +236,7 @@ static const sl_wisun_lfn_params_t SL_WISUN_PARAMS_LFN_TEST = {
     .min_be = 3,
     .max_be = 5,
     .max_cca_retries = 8,
-    .max_frame_retries = 19,
+    .max_frame_retries = 7,
   },
 };
 
@@ -295,7 +295,7 @@ static const sl_wisun_lfn_params_t SL_WISUN_PARAMS_LFN_BALANCED = {
     .min_be = 3,
     .max_be = 5,
     .max_cca_retries = 8,
-    .max_frame_retries = 19,
+    .max_frame_retries = 7,
   },
 };
 
@@ -354,7 +354,7 @@ static const sl_wisun_lfn_params_t SL_WISUN_PARAMS_LFN_ECO = {
     .min_be = 3,
     .max_be = 5,
     .max_cca_retries = 8,
-    .max_frame_retries = 19,
+    .max_frame_retries = 7,
   },
 };
 

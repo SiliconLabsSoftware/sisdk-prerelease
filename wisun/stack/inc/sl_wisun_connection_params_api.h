@@ -494,7 +494,7 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_TEST = {
     .min_be = 3,
     .max_be = 5,
     .max_cca_retries = 8,
-    .max_frame_retries = 19,
+    .max_frame_retries = 7,
   },
 };
 
@@ -623,7 +623,7 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_CERTIF = {
     .min_be = 3,
     .max_be = 5,
     .max_cca_retries = 8,
-    .max_frame_retries = 19,
+    .max_frame_retries = 7,
   },
 };
 
@@ -752,7 +752,7 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_SMALL = {
     .min_be = 3,
     .max_be = 5,
     .max_cca_retries = 8,
-    .max_frame_retries = 19,
+    .max_frame_retries = 7,
   }
 };
 
@@ -881,7 +881,7 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_MEDIUM = {
     .min_be = 3,
     .max_be = 5,
     .max_cca_retries = 8,
-    .max_frame_retries = 19,
+    .max_frame_retries = 7,
   }
 };
 
@@ -1010,7 +1010,7 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_LARGE = {
     .min_be = 3,
     .max_be = 5,
     .max_cca_retries = 8,
-    .max_frame_retries = 19,
+    .max_frame_retries = 7,
   }
 };
 

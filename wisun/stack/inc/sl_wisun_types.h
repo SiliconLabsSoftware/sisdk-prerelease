@@ -1230,7 +1230,7 @@ typedef struct {
   /// after 1 + max_cca_retries attempts. The default value is 8.
   uint8_t max_cca_retries;
   /// Maximum number of transmission retries. The transmission is aborted if no acknowledgment
-  /// has been received after 1 + max_frame_retries attempts. The default value is 19.
+  /// has been received after 1 + max_frame_retries attempts. The default value is 7.
   uint8_t max_frame_retries;
   /// Reserved, set to zero
   uint8_t reserved[2];

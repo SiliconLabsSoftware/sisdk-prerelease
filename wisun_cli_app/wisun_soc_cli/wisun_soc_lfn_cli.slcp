@@ -124,6 +124,8 @@ configuration:
     condition: [device_sdid_220]
   - name: SL_SLEEPTIMER_WALLCLOCK_CONFIG
     value: 1
+  - name: SL_SLEEPTIMER_PERIPHERAL
+    value: SL_SLEEPTIMER_PERIPHERAL_BURTC
 
 template_contribution:
   - name: "event_handler"

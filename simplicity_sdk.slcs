@@ -6,13 +6,13 @@ specification_version: 14
 supplier: Silicon Laboratories, Inc.
 component_path:
 - path: bgapi_protocol/component
-- path: bluetooth_apploader/component
 - path: bluetooth_le_controller/component
 - path: bluetooth_common/component
 - path: bluetooth_le_middleware/component
 - path: bluetooth_mesh/component
 - path: bluetooth_mesh_middleware/component
 - path: bluetooth_le_host/component
+- path: bluetooth_apploader/component
 - path: board_drivers/hardware/driver/component
 - path: boards_everest_internal/hardware/board/component
 - path: boards_everest_internal/platform/common/component
@@ -92,11 +92,11 @@ component_path:
 - path: printf/component
 - path: proprietary_default_radio_confs/.
 - path: protocol_user_sequencer_internal/component/protocol_user_sequencer_internal
-- path: rail_library_internal_chips/component/rail_library_internal_chips
 - path: rail_internal/component/rail_internal
 - path: rail_library/component/rail_library
 - path: rail_library_alpha_chips/component/rail_library_alpha_chips
 - path: rail_sdk/component
+- path: rail_library_internal_chips/component/rail_library_internal_chips
 - path: realtime_locationing/component
 - path: rv2_framework_internal/component
 - path: security_mbedtls/platform/security/component
@@ -113,9 +113,9 @@ component_path:
 - path: unity_internal/component
 - path: usb/protocol/usb/component
 - path: usb_internal/protocol/usb/component
+- path: wisun/component
 - path: wisun_config_generator/component
 - path: wisun_sdk/component
-- path: wisun/component
 - path: zigbee_internal/platform/radio/mac/component
 - path: zigbee_internal/platform/radio/rail_lib/plugin/component
 - path: zigbee_internal/component
@@ -188,7 +188,6 @@ upgrade_manifest:
 post_build_profile:
 - path: openthread/postbuild_profile/
 - path: platform_core/platform/common/postbuild_profile
-- path: proprietary_default_radio_confs/None
 - path: zwave/postbuild_profile
 compatible_sdk: []
 vendor: silabs

@@ -137,8 +137,7 @@ necessary tools to handle packet formatting and interpretation.
 - **Packet Coding and Decoding**: Functions to encode and decode Wireless M-Bus
 packets, ensuring correct data formatting for transmission and reception.
 - **Function Codes**: Defines a set of function codes used in the first block's
-C-field, such as \ref WMBUS_FUNCTION_SND_NKE, \ref WMBUS_FUNCTION_SND_UD, and
-\ref WMBUS_FUNCTION_SND_NR.
+C-field (see \ref sl_rail_sdk_wmbus_function_code_t), such as WMBUS_FUNCTION_SND_NKE, WMBUS_FUNCTION_SND_UD, and WMBUS_FUNCTION_SND_NR.
 - **Device Types**: Supports various device types used in address fields,
 including oil meters, electricity meters, gas meters, and more.
 - **Manufacturer ID**: Functions to retrieve the manufacturer ID (M-field)
