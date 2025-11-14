@@ -5,25 +5,25 @@ label: Trust Center Network Key Update Broadcast
 category: Zigbee|Trust Center
 quality: production
 provides:
-  - name: zigbee_trust_center_nwk_key_update_broadcast
+- name: zigbee_trust_center_nwk_key_update_broadcast
 source:
-  - path: app/framework/plugin/trust-center-nwk-key-update-broadcast/trust-center-nwk-key-update-broadcast.c
+- path: app/framework/plugin/trust-center-nwk-key-update-broadcast/trust-center-nwk-key-update-broadcast.c
 include:
-  - path: app/framework/plugin/trust-center-nwk-key-update-broadcast
-    file_list:
-      - path: trust-center-nwk-key-update-broadcast.h
+- path: app/framework/plugin/trust-center-nwk-key-update-broadcast
+  file_list:
+  - path: trust-center-nwk-key-update-broadcast.h
 template_contribution:
-  - name: component_catalog
-    value: zigbee_trust_center_nwk_key_update_broadcast
-  - name: zigbee_af_callback
-    value:
-        callback_type: event_init
-        function_name: sli_zigbee_af_trust_center_nwk_key_update_broadcast_init_callback
+- name: component_catalog
+  value: zigbee_trust_center_nwk_key_update_broadcast
+- name: zigbee_af_callback
+  value:
+    callback_type: event_init
+    function_name: sli_zigbee_af_trust_center_nwk_key_update_broadcast_init_callback
 
 documentation:
-    docset: zigbee
-    document: zigbee-af-api/trust-center-nwk-key-update-broadcast
+  docset: zigbee
+  document: zigbee-af-api/trust-center-nwk-key-update-broadcast
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

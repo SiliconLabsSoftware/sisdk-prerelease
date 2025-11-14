@@ -35,7 +35,11 @@
 #include "app_button_handler.h"
 #include "app_button_press.h"
 #include "app_button_press_config.h"
+
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
+#endif
+
 #include "sl_simple_button_instances.h"
 #include "sl_power_manager.h"
 #include <events.h>

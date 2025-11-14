@@ -1,0 +1,7 @@
+id=com.silabs.sdk.zwave_sample_app
+version=1.0.0.0
+label=Z-Wave Sample App
+description=Z-Wave Sample Apps for EFR32 devices
+
+prop.file.templatesFile=z-wave_application_templates.xml
+# prop.file.demosFile=

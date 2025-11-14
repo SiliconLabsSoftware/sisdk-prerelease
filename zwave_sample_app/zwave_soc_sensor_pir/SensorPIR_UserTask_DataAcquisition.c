@@ -9,8 +9,6 @@
 #include <zaf_event_distributor_soc.h>
 #include "events.h"
 #include <SizeOf.h>
-#include <zpal_power_manager.h>
-#include "zw_power_manager_ids.h"
 #include "zpal_log.h"
 
 /****************************************************************
@@ -54,15 +52,12 @@ NO_RETURN static void executeThread(void)
 {
   for (;;) {
     // force acquisition of the lock with relock
-    zw_power_manager_relock(ZPAL_PM_TYPE_DEEP_SLEEP, 0, ZPAL_PM_APP_DEEP_SLEEP_APPLICATION_ID);
 
     ////////////////////////////////////
     //Do something user specific
     ////////////////////////////////////
 
     zaf_event_distributor_enqueue_app_event(EVENT_APP_USERTASK_DATA_ACQUISITION_FINISHED);  // An event to be send to the main app.
-    zw_power_manager_lock_cancel(ZPAL_PM_TYPE_DEEP_SLEEP, ZPAL_PM_APP_DEEP_SLEEP_APPLICATION_ID);
-
     vTaskDelay(pdMS_TO_TICKS(USER_TASK_WAKEUP_PERIOD));
   }
 }

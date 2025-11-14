@@ -5,25 +5,25 @@ category: OpenThread
 quality: production
 description: This component adds support for RTT logging.
 provides:
-  - name: ot_logging
-  - name: ot_rtt_log
+- name: ot_logging
+- name: ot_rtt_log
 requires:
-  - name: ot_platform_abstraction_implementation
-  - name: segger_rtt
+- name: ot_platform_abstraction_implementation
+- name: segger_rtt
 conflicts:
-  - name: ot_backchannel_log
+- name: ot_backchannel_log
 recommends:
-  - id: ot_platform_abstraction_source
-    vendor: silabs
+- id: ot_platform_abstraction_source
+  vendor: silabs
 source:
-  - path: platform-abstraction/efr32/logging_rtt.c
+- path: platform-abstraction/efr32/logging_rtt.c
 define:
-  - name: OPENTHREAD_CONFIG_LOG_OUTPUT
-    value: OPENTHREAD_CONFIG_LOG_OUTPUT_PLATFORM_DEFINED
+- name: OPENTHREAD_CONFIG_LOG_OUTPUT
+  value: OPENTHREAD_CONFIG_LOG_OUTPUT_PLATFORM_DEFINED
 template_contribution:
-  - name: component_catalog
-    value: ot_rtt_log
+- name: component_catalog
+  value: ot_rtt_log
 metadata:
-    sbom:
-        license: BSD-3-Clause
+  sbom:
+    license: BSD-3-Clause
 root_path: openthread

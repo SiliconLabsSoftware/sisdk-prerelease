@@ -6,34 +6,34 @@ category: "Bluetooth Mesh|Stack"
 quality: "production"
 
 requires:
-  - name: "btmesh_stack"
-  - name: "btmesh_stack_proxy"
-  - name: "btmesh_core"
-  - name: "bluetooth_feature_gatt_server"
-    condition:
-      - device_efx
-  - name: "bluetooth_feature_dynamic_gattdb"
-    condition:
-      - device_efx
-  - name: gatt_configuration
-    condition:
-      - device_efx
+- name: "btmesh_stack"
+- name: "btmesh_stack_proxy"
+- name: "btmesh_core"
+- name: "bluetooth_feature_gatt_server"
+  condition:
+  - device_efx
+- name: "bluetooth_feature_dynamic_gattdb"
+  condition:
+  - device_efx
+- name: gatt_configuration
+  condition:
+  - device_efx
 
 provides:
-  - name: "btmesh_stack_proxy_server"
+- name: "btmesh_stack_proxy_server"
 
 config_file:
-  - path: component/gatt_service_mesh_proxy.xml
-    directory: btconf
+- path: component/gatt_service_mesh_proxy.xml
+  directory: btconf
 
 template_contribution:
-  - name: btmesh_bgapi_class
-    value:
-        class: "proxy_server"
-    priority: 1
-  - name: btmesh_stack_proxy_server
-    value: 1
+- name: btmesh_bgapi_class
+  value:
+    class: "proxy_server"
+  priority: 1
+- name: btmesh_stack_proxy_server
+  value: 1
 metadata:
-    sbom:
-        reference: btmesh_stack
+  sbom:
+    reference: btmesh_stack
 root_path: bluetooth_mesh

@@ -5,22 +5,22 @@ description: BTC (Bluetooth Classic) component for RAILAPP
 category: Platform|Radio
 quality: production
 metadata:
-    sbom:
-        license: Zlib
+  sbom:
+    license: Zlib
 provides:
-  - name: railapp_btc
+- name: railapp_btc
 requires:
-  - name: sl_core
+- name: sl_core
 source:
-  - path: apps/sl_rail_app/railapp_btc.c
-  - path: apps/sl_rail_app/railapp_seq_stub.c
+- path: apps/sl_rail_app/railapp_btc.c
+- path: apps/sl_rail_app/railapp_seq_stub.c
 
 include:
-  - path: apps/sl_rail_app
-    file_list:
-      - path: railapp_btc.h
-  - path: protocol/btc
-    file_list:
-      - path: sl_rail_btc.h
-  - path: common
+- path: apps/sl_rail_app
+  file_list:
+  - path: railapp_btc.h
+- path: protocol/btc
+  file_list:
+  - path: sl_rail_btc.h
+- path: common
 root_path: rail_library

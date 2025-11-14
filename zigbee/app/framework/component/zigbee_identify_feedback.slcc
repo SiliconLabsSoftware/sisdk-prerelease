@@ -5,30 +5,30 @@ quality: production
 id: zigbee_identify_feedback
 category: Zigbee|Cluster Library|Common
 provides:
-  - name: zigbee_identify_feedback
+- name: zigbee_identify_feedback
 requires:
-  - name: zigbee_identify
+- name: zigbee_identify
 recommends:
-  - id: simple_led_recommended_instance
+- id: simple_led_recommended_instance
   # Adding this only for non-host apps
-    condition:
-      - zigbee_stack_common
-    vendor: silabs
+  condition:
+  - zigbee_stack_common
+  vendor: silabs
 config_file:
-  - path: app/framework/plugin/identify-feedback/config/identify-feedback-config.h
+- path: app/framework/plugin/identify-feedback/config/identify-feedback-config.h
 validation_helper:
-  - path: app/framework/component/scripts/zigbee_identify_feedback.lua
+- path: app/framework/component/scripts/zigbee_identify_feedback.lua
 source:
-  - path: app/framework/plugin/identify-feedback/identify-feedback.c
+- path: app/framework/plugin/identify-feedback/identify-feedback.c
 template_contribution:
-  - name: component_catalog
-    value: zigbee_identify_feedback
-  - name: zigbee_af_callback
-    value:
-        callback_type: event_init
-        function_name: sli_zigbee_af_identify_init_callback
+- name: component_catalog
+  value: zigbee_identify_feedback
+- name: zigbee_af_callback
+  value:
+    callback_type: event_init
+    function_name: sli_zigbee_af_identify_init_callback
 
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

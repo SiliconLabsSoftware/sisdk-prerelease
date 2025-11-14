@@ -5,26 +5,26 @@ description: "Provides Bluetooth mesh Remote Provisioning Client model. Remote p
 category: "Bluetooth Mesh|Stack|Models|Core"
 quality: "production"
 include:
-  - path: "inc"
-    file_list:
-      - path: "sl_btmesh_model_specification_v1_1_defs.h"
+- path: "inc"
+  file_list:
+  - path: "sl_btmesh_model_specification_v1_1_defs.h"
 
 requires:
-  - name: "btmesh_stack"
-  - name: "btmesh_core"
-  - name: "btmesh_stack_node"
+- name: "btmesh_stack"
+- name: "btmesh_core"
+- name: "btmesh_stack_node"
 provides:
-  - name: "btmesh_stack_remote_provisioning_client"
+- name: "btmesh_stack_remote_provisioning_client"
 
 template_contribution:
-  - name: btmesh_bgapi_class
-    value:
-        class: "remote_provisioning_client"
-    priority: 1
-  - name: component_catalog
-    value: btmesh_stack_rpr_client
+- name: btmesh_bgapi_class
+  value:
+    class: "remote_provisioning_client"
+  priority: 1
+- name: component_catalog
+  value: btmesh_stack_rpr_client
 
 metadata:
-    sbom:
-        reference: btmesh_stack
+  sbom:
+    reference: btmesh_stack
 root_path: bluetooth_mesh

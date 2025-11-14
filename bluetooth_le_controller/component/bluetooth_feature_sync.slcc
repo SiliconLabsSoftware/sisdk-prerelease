@@ -2,22 +2,22 @@ id: "bluetooth_feature_sync"
 label: "Periodic Advertising Synchronization"
 package: bluetooth_le_controller
 description: >
-    Bluetooth periodic advertising synchronization feature
+  Bluetooth periodic advertising synchronization feature
 category: Bluetooth|Bluetooth LE Controller (Link Layer)|Features with Commands and Events
 quality: "production"
 requires:
-  - name: "bluetooth_controller"
+- name: "bluetooth_controller"
 config_file:
-  - path: "config/sl_bluetooth_periodic_sync_config.h"
+- path: "config/sl_bluetooth_periodic_sync_config.h"
 provides:
-  - name: "bluetooth_feature_sync"
+- name: "bluetooth_feature_sync"
 template_contribution:
-  - name: component_catalog
-    value: bluetooth_feature_sync
+- name: component_catalog
+  value: bluetooth_feature_sync
 documentation:
-    docset: bluetooth
-    document: bluetooth-stack-api/sl-bt-sync
+  docset: bluetooth
+  document: bluetooth-stack-api/sl-bt-sync
 metadata:
-    sbom:
-        license: Zlib AND MSLA
+  sbom:
+    license: Zlib AND MSLA
 root_path: bluetooth_le_controller

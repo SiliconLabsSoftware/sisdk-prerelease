@@ -55,6 +55,14 @@ bool zpal_radio_protocol_mode_supports_long_range(zpal_radio_protocol_mode_t mod
 bool zpal_radio_region_is_long_range(zpal_radio_region_t region);
 
 /**
+ * @brief Retrieve the current number of Phy channels
+ *
+ * @param[in] mode Protocol mode.
+ * @return Number of Phy channels
+ */
+uint8_t zpal_radio_get_num_phy_channels(zpal_radio_protocol_mode_t mode);
+
+/**
  * @brief Function to get valid region value.
  *
  * If region is not specified (default value), it would return region set as default.

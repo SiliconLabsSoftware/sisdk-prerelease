@@ -5,18 +5,18 @@ description: "Provides functionality to migrate Mesh model configuration data fr
 category: "Bluetooth Mesh|Stack"
 quality: "production"
 provides:
-  - name: btmesh_stack_model_storage_v1_to_v2_migrate
+- name: btmesh_stack_model_storage_v1_to_v2_migrate
 conflicts:
-  - name: btmesh_stack_model_storage_v1
+- name: btmesh_stack_model_storage_v1
 requires:
-  - name: btmesh_stack_model_storage_v2
+- name: btmesh_stack_model_storage_v2
 template_contribution:
-  - name: btmesh_bgapi_class
-    value:
-        class: "model_migration"
-    priority: 3
+- name: btmesh_bgapi_class
+  value:
+    class: "model_migration"
+  priority: 3
 metadata:
-    sbom:
-        reference: btmesh_stack
+  sbom:
+    reference: btmesh_stack
 
 root_path: bluetooth_mesh

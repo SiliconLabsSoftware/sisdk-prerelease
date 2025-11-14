@@ -255,12 +255,18 @@ ZW_WEAK u3c_db_operation_result CC_UserCredential_delete_user_and_report(
   }
 
   u3c_db_operation_result operation_result = CC_UserCredential_get_user(uuid, &user, name);
+
+  if (is_rx_frame_initiated_locally(p_rx_options)) {
+    // Locally initiated request, no report is required on error.
+    if (operation_result != U3C_DB_OPERATION_RESULT_SUCCESS) {
+      return operation_result;
+    } else {
+      fill_rx_frame_with_local(p_rx_options);
+    }
+  }
+
   switch (operation_result) {
     case U3C_DB_OPERATION_RESULT_SUCCESS: {
-      if (is_rx_frame_initiated_locally(p_rx_options)) {
-        fill_rx_frame_with_local(p_rx_options);
-      }
-
       CC_UserCredential_delete_all_credentials_of_type(uuid, CREDENTIAL_TYPE_NONE);
       operation_result = CC_UserCredential_delete_user(user.unique_identifier);
 

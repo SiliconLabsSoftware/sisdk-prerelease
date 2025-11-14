@@ -5,35 +5,35 @@ quality: production
 id: zigbee_level_control
 category: Zigbee|Cluster Library|Common
 provides:
-  - name: zigbee_level_control
+- name: zigbee_level_control
 config_file:
-  - path: app/framework/plugin/level-control/config/level-control-config.h
+- path: app/framework/plugin/level-control/config/level-control-config.h
 source:
-  - path: app/framework/plugin/level-control/level-control.c
-  - path: app/framework/plugin/level-control/level-control-cb.c
+- path: app/framework/plugin/level-control/level-control.c
+- path: app/framework/plugin/level-control/level-control-cb.c
 include:
-  - path: app/framework/plugin/level-control
-    file_list:
-      - path: level-control.h
+- path: app/framework/plugin/level-control
+  file_list:
+  - path: level-control.h
 template_contribution:
-  - name: component_catalog
-    value: zigbee_level_control
-  - name: cluster_service
-    value:
-        cluster_id: '0x0008'
-        mfg_id: NOT_MFG_SPECIFIC
-        side: SERVER
-        service_function: sl_zigbee_af_level_control_cluster_server_command_parse
-  - name: cluster_functions
-    value:
-        cluster_name: LevelControl
-        cluster_id: 0x8
-        cluster_type: server
-        init_function: sl_zigbee_af_level_control_cluster_server_init_cb
+- name: component_catalog
+  value: zigbee_level_control
+- name: cluster_service
+  value:
+    cluster_id: '0x0008'
+    mfg_id: NOT_MFG_SPECIFIC
+    side: SERVER
+    service_function: sl_zigbee_af_level_control_cluster_server_command_parse
+- name: cluster_functions
+  value:
+    cluster_name: LevelControl
+    cluster_id: 0x8
+    cluster_type: server
+    init_function: sl_zigbee_af_level_control_cluster_server_init_cb
 documentation:
-    docset: zigbee
-    document: zigbee-af-api/level-control
+  docset: zigbee
+  document: zigbee-af-api/level-control
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

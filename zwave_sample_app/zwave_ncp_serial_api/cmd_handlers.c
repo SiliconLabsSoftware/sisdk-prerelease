@@ -15,6 +15,7 @@
 #include <zpal_misc.h>
 #include <zpal_watchdog.h>
 #include "zpal_log.h"
+#include "ZW_basis_api.h"
 
 #include "app_node_info.h"
 #include "virtual_slave_node_info.h"
@@ -1590,13 +1591,13 @@ ZW_ADD_CMD(FUNC_ID_ZW_SET_LEARN_MODE)
 
   if (SERIALPI_SET_LEARN_MODE_LEARN_PLUS_OFFSET > frame->payload[0]) {
     /* Plain ZW_SetLearnMode */
-    /* ZW_SET_LEARN_MODE_DISABLE          0x00 */
-    /* ZW_SET_LEARN_MODE_CLASSIC          0x01 */
-    /* ZW_SET_LEARN_MODE_NWI              0x02 */
-    /* ZW_SET_LEARN_MODE_NWE              0x03 */
+    /* ELEARNMODE_DISABLED                0x00 */
+    /* ELEARNMODE_CLASSIC                 0x01 */
+    /* ELEARNMODE_NETWORK_WIDE_INCLUSION  0x02 */
+    /* ELEARNMODE_NETWORK_WIDE_EXCLUSION  0x03 */
     SZwaveCommandPackage Command = {
       .eCommandType = EZWAVECOMMANDTYPE_SET_LEARN_MODE,
-      .uCommandParams.SetLearnMode.eLearnMode = frame->payload[0],
+      .uCommandParams.SetLearnMode.eLearnMode = (ELearnMode)frame->payload[0],
       .uCommandParams.SetLearnMode.useCB = frame->payload[1] != 0
     };
     QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&Command, 0);

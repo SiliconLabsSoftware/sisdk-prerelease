@@ -5,35 +5,35 @@ quality: production
 id: zigbee_time_server
 category: Zigbee|Cluster Library|Common
 provides:
-  - name: zigbee_time_server
+- name: zigbee_time_server
 config_file:
-  - path: app/framework/plugin/time-server/config/time-server-config.h
+- path: app/framework/plugin/time-server/config/time-server-config.h
 source:
-  - path: app/framework/plugin/time-server/time-server.c
+- path: app/framework/plugin/time-server/time-server.c
 include:
-  - path: app/framework/plugin/time-server
-    file_list:
-      - path: time-server.h
+- path: app/framework/plugin/time-server
+  file_list:
+  - path: time-server.h
 template_contribution:
-  - name: component_catalog
-    value: zigbee_time_server
-  - name: cluster_functions
-    value:
-        cluster_name: Time
-        cluster_id: 0x000a
-        cluster_type: server
-        init_function: sl_zigbee_af_time_cluster_server_init_cb
-  - name: cluster_functions
-    value:
-        cluster_name: Time
-        cluster_id: 0x000a
-        cluster_type: server
-        pre_attribute_changed_function: sl_zigbee_af_time_cluster_server_pre_attribute_changed_cb
+- name: component_catalog
+  value: zigbee_time_server
+- name: cluster_functions
+  value:
+    cluster_name: Time
+    cluster_id: 0x000a
+    cluster_type: server
+    init_function: sl_zigbee_af_time_cluster_server_init_cb
+- name: cluster_functions
+  value:
+    cluster_name: Time
+    cluster_id: 0x000a
+    cluster_type: server
+    pre_attribute_changed_function: sl_zigbee_af_time_cluster_server_pre_attribute_changed_cb
 
 documentation:
-    docset: zigbee
-    document: zigbee-af-api/time-server
+  docset: zigbee
+  document: zigbee-af-api/time-server
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

@@ -86,20 +86,6 @@ configuration:
     value: 100
   - name: SL_BOARD_ENABLE_VCOM
     value: 1
-  - name: SL_DEVICE_INIT_EMU_EM4_STATE
-    value: emuEM4Hibernate
-  - name: SL_DEVICE_INIT_EMU_EM4_RETAIN_LFRCO
-    value: 1
-  - name: SL_DEVICE_INIT_EMU_EM4_PIN_RETENTION_MODE
-    value: emuPinRetentionLatch
-  - name: SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
-    value: 1
-  - name: SL_IOSTREAM_USART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
-    value: 0    # UART RX shouldn't prevent EM2
-  - name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
-    value: 1
-  - name: SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
-    value: 0    # UART RX shouldn't prevent EM2
   - name: configUSE_IDLE_HOOK
     value: 1
   - name: configTIMER_TASK_PRIORITY
@@ -112,8 +98,6 @@ configuration:
     condition: [device_series_2]
   - name: configTIMER_QUEUE_LENGTH
     value: 8
-  - name: SL_DEVICE_INIT_DCDC_BYPASS
-    value: 1
   - name: SL_PSA_ITS_USER_MAX_FILES
     value: 32
     condition: ["device_series_2", "device_security_vault"]
@@ -137,7 +121,24 @@ configuration:
     value: '"switch_on_off"'
   - name: SL_CLOCK_MANAGER_WDOG0CLK_SOURCE
     value: CMU_WDOG0CLKCTRL_CLKSEL_LFRCO
-
+  - name: SL_CLOCK_MANAGER_EUSART0CLK_SOURCE
+    value: CMU_EUSART0CLKCTRL_CLKSEL_LFRCO
+    # USART configuration
+  - name: SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+    value: 1
+  - name: SL_IOSTREAM_USART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: 0    # UART RX shouldn't prevent EM2
+  # EUSART configuration
+  - name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+    value: 1
+  - name: SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: 0    # EUSART RX shouldn't prevent EM2
+  - name: SL_IOSTREAM_EUSART_INSTANCE_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: 0
+  - name: SL_IOSTREAM_EUSART_VCOM_BAUDRATE
+    value: 9600 # In EM2 the eusart is working only with 9600 baud
+  - name: SL_IOSTREAM_EUSART_VCOM_ENABLE_HIGH_FREQUENCY # Disable high frequency mode for EUSART to work in EM2
+    value: 0
 define:
   - name: APP_PROPERTIES_CONFIG_FILE
     value: <application_properties_config.h>

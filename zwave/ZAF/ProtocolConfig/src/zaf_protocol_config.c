@@ -33,7 +33,11 @@ static SRadioConfig_t RadioConfig =
   .iTxPowerLevelMaxLR = APP_MAX_TX_POWER_LR,
   .eRegion = ZW_REGION,
   .radio_debug_enable = ENABLE_RADIO_DEBUG,
-  .radio_application = ZPAL_RADIO_APPLICATION_DEFAULT,
+#ifdef ZW_CONTROLLER
+  .radio_application = ZPAL_RADIO_APPLICATION_CONTROLLER,
+#else
+  .radio_application = ZPAL_RADIO_APPLICATION_END_DEVICE
+#endif
 };
 
 static const SProtocolConfig_t ProtocolConfig = {

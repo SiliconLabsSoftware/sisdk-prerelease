@@ -5,24 +5,24 @@ quality: production
 id: zigbee_ota_client_policy
 category: Zigbee|Over-The-Air Bootloading
 provides:
-  - name: zigbee_ota_client_policy
+- name: zigbee_ota_client_policy
 requires:
-  - name: zigbee_ota_client
+- name: zigbee_ota_client
 config_file:
-  - path: app/framework/plugin/ota-client-policy/config/ota-client-policy-config.h
+- path: app/framework/plugin/ota-client-policy/config/ota-client-policy-config.h
 source:
-  - path: app/framework/plugin/ota-client-policy/ota-client-policy.c
+- path: app/framework/plugin/ota-client-policy/ota-client-policy.c
 include:
-  - path: app/framework/plugin/ota-client-policy
-    file_list:
-      - path: ota-client-policy.h
+- path: app/framework/plugin/ota-client-policy
+  file_list:
+  - path: ota-client-policy.h
 template_contribution:
-  - name: component_catalog
-    value: zigbee_ota_client_policy
+- name: component_catalog
+  value: zigbee_ota_client_policy
 documentation:
-    docset: zigbee
-    document: zigbee-af-api/ota-client-policy
+  docset: zigbee
+  document: zigbee-af-api/ota-client-policy
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

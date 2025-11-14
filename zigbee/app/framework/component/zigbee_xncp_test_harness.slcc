@@ -6,23 +6,23 @@ quality: production
 description: Allows a test harness running on a host to control non-standard behavior on the NCP.
 
 provides:
-  - name: zigbee_xncp_test_harness
+- name: zigbee_xncp_test_harness
 
 requires:
-  - name: zigbee_xncp
+- name: zigbee_xncp
 
 include:
-  - path: app/xncp-test-harness
-    file_list:
-      - path: xncp-test-harness.h
+- path: app/xncp-test-harness
+  file_list:
+  - path: xncp-test-harness.h
 
 source:
-  - path: app/xncp-test-harness/xncp-test-harness.c
+- path: app/xncp-test-harness/xncp-test-harness.c
 
 template_contribution:
-  - name: component_catalog
-    value: zigbee_xncp_test_harness
+- name: component_catalog
+  value: zigbee_xncp_test_harness
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

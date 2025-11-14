@@ -167,6 +167,7 @@ bool sl_zigbee_af_green_power_cluster_gp_notification_forward_cb(uint16_t option
   return false;
 }
 
+#ifndef SL_CATALOG_ZIGBEE_CUSTOM_EZSP_PRESENT
 // EZSP Custom Frame handler for messages from host
 void sl_zigbee_ezsp_custom_frame_handler(int8u payloadLength,
                                          int8u* payload)
@@ -175,6 +176,7 @@ void sl_zigbee_ezsp_custom_frame_handler(int8u payloadLength,
   sl_zigbee_app_debug_print_buffer(payload, payloadLength, true);
   sl_zigbee_app_debug_println("");
 }
+#endif // SL_CATALOG_ZIGBEE_CUSTOM_EZSP_PRESENT
 
 //-------------------------------------
 // Custom CLI commands and related code

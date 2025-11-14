@@ -64,7 +64,9 @@ const size_t __rom_end__ @ "ROM_SIZE";
 
 // BootloaderResetCause_t occupies the first 4 bytes (0-3).
 #define BTL_RESET_REGION_PC_READ_FLAG_OFFSET  2  // Offset to 2nd uint16_t element (bytes 4-5)
+#define BTL_RESET_REGION_QSPI_ERROR_FLAG_OFFSET  3  // Offset to 3rd uint16_t element (bytes 6-7)
 #define BTL_RESET_REGION_PC_READ_MAGIC        0xDEAD
+#define BTL_RESET_REGION_QSPI_ERROR_MAGIC     0xBEEF
 
 // -----------------------------------------------------------------------------
 // External Symbols
@@ -235,7 +237,12 @@ void busfault_ram_handler(void)
 
   volatile uint16_t *extendedResetRegion = (volatile uint16_t *)&__ResetReasonStart__;
 
+  // If PC read flag is set, this bus fault occurred during application read
   if (extendedResetRegion[BTL_RESET_REGION_PC_READ_FLAG_OFFSET] == BTL_RESET_REGION_PC_READ_MAGIC) {
+    // Set QSPI error flag to indicate bus fault occurred during read
+    extendedResetRegion[BTL_RESET_REGION_QSPI_ERROR_FLAG_OFFSET] = BTL_RESET_REGION_QSPI_ERROR_MAGIC;
+    // Clear PC read flag
+    extendedResetRegion[BTL_RESET_REGION_PC_READ_FLAG_OFFSET] = 0;
 
     uint32_t aircr = SCB->AIRCR;
     aircr = (0x5FAUL << SCB_AIRCR_VECTKEY_Pos)
@@ -513,13 +520,22 @@ void SystemInit2(void)
     verifyApp = false;
   }
 
+#if defined(LOCKBIT_SKIP_BOOT_CHECK)
+  bool skipLockBitCheck = true;
+#else
+  bool skipLockBitCheck = false;
+#endif
+
+  sl_se_code_region_config_t region_config = { 0 };
+  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_init_command_context(&cmd_ctx);
+  sl_se_code_region_get_config(&cmd_ctx, &region_config, 1, 1);
 
   uint32_t startOfAppSpace = (uint32_t)mainStageTable.startOfAppSpace;
 
   // Only perform vector table validation if we're planning to enter the app
   // If enter_bootloader() returned true, skip this to go into firmware upgrade mode
-  if (enterApp) {
-
+  if (enterApp && ((region_config.locked == true) || skipLockBitCheck)) {
     volatile uint16_t *extendedResetRegion = (volatile uint16_t *)&__ResetReasonStart__;
     extendedResetRegion[BTL_RESET_REGION_PC_READ_FLAG_OFFSET] = BTL_RESET_REGION_PC_READ_MAGIC;
     
@@ -544,6 +560,8 @@ void SystemInit2(void)
     
     // Clear the PC read flag after application validation operations complete
     extendedResetRegion[BTL_RESET_REGION_PC_READ_FLAG_OFFSET] = 0;
+  } else {
+    enterApp = false;
   }
 
   if (enterApp) {
@@ -632,11 +650,11 @@ bool enter_bootloader(void)
 bool check_qspi_authentication_error(void)
 {
   volatile uint16_t *extendedResetRegion = (volatile uint16_t *)&__ResetReasonStart__;
-  
-  // Check if PC read flag indicates QSPI authentication error occurred
-  if (extendedResetRegion[BTL_RESET_REGION_PC_READ_FLAG_OFFSET] == BTL_RESET_REGION_PC_READ_MAGIC) {
-    // Clear the flag to prevent repeated bootloader entry
-    extendedResetRegion[BTL_RESET_REGION_PC_READ_FLAG_OFFSET] = 0;
+
+  // Check if QSPI error flag indicates bus fault occurred during application read
+  if (extendedResetRegion[BTL_RESET_REGION_QSPI_ERROR_FLAG_OFFSET] == BTL_RESET_REGION_QSPI_ERROR_MAGIC) {
+    // Clear QSPI error flag to prevent repeated bootloader entry
+    extendedResetRegion[BTL_RESET_REGION_QSPI_ERROR_FLAG_OFFSET] = 0;
     return true;  // QSPI authentication error - enter bootloader for recovery
   }
   

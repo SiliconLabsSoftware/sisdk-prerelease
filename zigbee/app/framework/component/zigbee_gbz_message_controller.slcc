@@ -5,25 +5,25 @@ quality: production
 id: zigbee_gbz_message_controller
 category: Zigbee|Great Britain Companion Specification
 provides:
-  - name: zigbee_gbz_message_controller
+- name: zigbee_gbz_message_controller
 requires:
-  - name: zigbee_key_establishment
-  - name: zigbee_gbcs_compatibility
+- name: zigbee_key_establishment
+- name: zigbee_gbcs_compatibility
 source:
-  - path: app/framework/plugin/gbz-message-controller/gbz-message-controller.c
-  - path: app/framework/plugin/gbz-message-controller/gbz-message-controller-cb.c
+- path: app/framework/plugin/gbz-message-controller/gbz-message-controller.c
+- path: app/framework/plugin/gbz-message-controller/gbz-message-controller-cb.c
 include:
-  - path: app/framework/plugin/gbz-message-controller
-    file_list:
-      - path: gbz-message-controller.h
+- path: app/framework/plugin/gbz-message-controller
+  file_list:
+  - path: gbz-message-controller.h
 template_contribution:
-  - name: component_catalog
-    value: zigbee_gbz_message_controller
+- name: component_catalog
+  value: zigbee_gbz_message_controller
 
 documentation:
-    docset: zigbee
-    document: zigbee-af-api/gbz-message-controller
+  docset: zigbee
+  document: zigbee-af-api/gbz-message-controller
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

@@ -8,16 +8,16 @@ ui_hints: {}
 quality: production
 template_file: []
 provides:
-  - name: zigbee_emberSerialPrintf
-  - name: zigbee_host_unix_printf
+- name: zigbee_emberSerialPrintf
+- name: zigbee_host_unix_printf
 requires:
-  - name: device_host
+- name: device_host
 source:
-  - path: app/util/serial/linux-serial.c
+- path: app/util/serial/linux-serial.c
 template_contribution:
-  - name: component_catalog
-    value: zigbee_host_unix_printf
+- name: component_catalog
+  value: zigbee_host_unix_printf
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

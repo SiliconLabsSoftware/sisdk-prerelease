@@ -5,20 +5,20 @@ description: Component that provides stdio compatibility.
 category: Platform|Utilities
 quality: production
 metadata:
-    sbom:
-        license: Zlib
+  sbom:
+    license: Zlib
 root_path: platform_core/platform/common
 include:
-  - path: inc
-    file_list:
-      - path: sl_stdio.h
+- path: inc
+  file_list:
+  - path: sl_stdio.h
 source:
-  - path: src/sl_stdio.c
+- path: src/sl_stdio.c
 provides:
-  - name: stdio
+- name: stdio
 requires:
-  - name: iostream
-  - name: status
+- name: iostream
+- name: status
 documentation:
-    docset: gecko-platform
-    document: platform-common/stdio
+  docset: gecko-platform
+  document: platform-common/stdio

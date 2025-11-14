@@ -5,81 +5,81 @@ quality: production
 id: zigbee_address_table
 category: Zigbee|Utility
 provides:
-  - name: zigbee_address_table
+- name: zigbee_address_table
 config_file:
-  - path: app/framework/plugin/address-table/config/address-table-config.h
+- path: app/framework/plugin/address-table/config/address-table-config.h
 validation_helper:
-  - path: app/framework/component/scripts/zigbee_address_table.lua
+- path: app/framework/component/scripts/zigbee_address_table.lua
 source:
-  - path: app/framework/plugin/address-table/address-table.c
-  - path: app/framework/plugin/address-table/address-table-cli.c
-    condition:
-      - cli
+- path: app/framework/plugin/address-table/address-table.c
+- path: app/framework/plugin/address-table/address-table-cli.c
+  condition:
+  - cli
 include:
-  - path: app/framework/plugin/address-table
-    file_list:
-      - path: address-table.h
+- path: app/framework/plugin/address-table
+  file_list:
+  - path: address-table.h
 template_contribution:
-  - name: component_catalog
-    value: zigbee_address_table
-  - name: zigbee_af_callback
-    value:
-        callback_type: ncp_init
-        function_name: sl_zigbee_af_address_table_ncp_init_cb
-    condition:
-      - zigbee_ezsp
-  - name: cli_group
-    value:
-        name: address-table
-        group: plugin
-  - name: cli_command
-    value:
-        group: address-table
-        name: add
-        handler: sl_zigbee_af_address_table_add_command
-        help: ''
-        argument:
-          - type: hex
-            help: Entry to be added
-  - name: cli_command
-    value:
-        group: address-table
-        name: set
-        handler: sl_zigbee_af_address_table_set_command
-        help: Sets an entry in the address table according to the arguments specified.
-        argument:
-          - type: uint8
-          - type: hex
-          - type: uint16
-  - name: cli_command
-    value:
-        group: address-table
-        name: remove
-        handler: sl_zigbee_af_address_table_remove_command
-        help: Removes an entry from the address table.
-        argument:
-          - type: hex
-            help: Entry to be removed
-  - name: cli_command
-    value:
-        group: address-table
-        name: lookup
-        handler: sl_zigbee_af_address_table_lookup_command
-        help: Looks up an entry in the address table.
-        argument:
-          - type: hex
-            help: Entry to be looked up
-  - name: cli_command
-    value:
-        group: address-table
-        name: print
-        handler: sl_zigbee_af_address_table_print_command
-        help: Prints the address table.
+- name: component_catalog
+  value: zigbee_address_table
+- name: zigbee_af_callback
+  value:
+    callback_type: ncp_init
+    function_name: sl_zigbee_af_address_table_ncp_init_cb
+  condition:
+  - zigbee_ezsp
+- name: cli_group
+  value:
+    name: address-table
+    group: plugin
+- name: cli_command
+  value:
+    group: address-table
+    name: add
+    handler: sl_zigbee_af_address_table_add_command
+    help: ''
+    argument:
+    - type: hex
+      help: Entry to be added
+- name: cli_command
+  value:
+    group: address-table
+    name: set
+    handler: sl_zigbee_af_address_table_set_command
+    help: Sets an entry in the address table according to the arguments specified.
+    argument:
+    - type: uint8
+    - type: hex
+    - type: uint16
+- name: cli_command
+  value:
+    group: address-table
+    name: remove
+    handler: sl_zigbee_af_address_table_remove_command
+    help: Removes an entry from the address table.
+    argument:
+    - type: hex
+      help: Entry to be removed
+- name: cli_command
+  value:
+    group: address-table
+    name: lookup
+    handler: sl_zigbee_af_address_table_lookup_command
+    help: Looks up an entry in the address table.
+    argument:
+    - type: hex
+      help: Entry to be looked up
+- name: cli_command
+  value:
+    group: address-table
+    name: print
+    handler: sl_zigbee_af_address_table_print_command
+    help: Prints the address table.
 
 documentation:
-    docset: zigbee
-    document: zigbee-af-api/address-table
+  docset: zigbee
+  document: zigbee-af-api/address-table
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

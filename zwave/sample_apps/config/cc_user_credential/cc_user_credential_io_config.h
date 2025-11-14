@@ -17,7 +17,7 @@
 
 // <<< Use Configuration Wizard in Context Menu >>>
 
-// <h> Command Class User Credential I/O Configuration
+// <h> User Credential Command Class I/O Configuration
 
 // <o U3C_BUFFER_SIZE_CREDENTIAL_DATA> Size of buffer for holding Credential Data <1..255:1> <f.d>
 // <i> Default: 100

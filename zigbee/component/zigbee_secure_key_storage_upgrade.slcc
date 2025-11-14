@@ -6,32 +6,32 @@ category: Zigbee|Utility
 quality: production
 
 provides:
-  - name: zigbee_secure_key_storage_upgrade_common
-  - name: zigbee_secure_key_storage_upgrade
+- name: zigbee_secure_key_storage_upgrade_common
+- name: zigbee_secure_key_storage_upgrade
 
 requires:
-  - name: zigbee_secure_key_storage
+- name: zigbee_secure_key_storage
 
 source:
-  - path: stack/security/zigbee-secure-key-storage-upgrade.c
+- path: stack/security/zigbee-secure-key-storage-upgrade.c
 
 include:
-  - path: stack/security/
-    file_list:
-      - path: zigbee-secure-key-storage-upgrade.h
+- path: stack/security/
+  file_list:
+  - path: zigbee-secure-key-storage-upgrade.h
 
 template_contribution:
-  - name: component_catalog
-    value: zigbee_secure_key_storage_upgrade
-  - name: event_handler
-    value:
-        event: stack_init
-        include: zigbee-secure-key-storage-upgrade.h
-        handler: sli_zb_sec_man_upgrade_key_storage
-    priority: -8923
-    unless:
-      - cmsis_rtos2
+- name: component_catalog
+  value: zigbee_secure_key_storage_upgrade
+- name: event_handler
+  value:
+    event: stack_init
+    include: zigbee-secure-key-storage-upgrade.h
+    handler: sli_zb_sec_man_upgrade_key_storage
+  priority: -8923
+  unless:
+  - cmsis_rtos2
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

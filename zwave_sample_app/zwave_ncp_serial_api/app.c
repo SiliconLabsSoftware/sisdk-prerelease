@@ -37,18 +37,23 @@
 #include "zaf_protocol_config.h"
 #include "ZAF_PrintAppInfo.h"
 #include "ZAF_AppName.h"
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#include "sl_power_manager.h"
+#endif
 
 #include <assert.h>
-
-#if defined(SL_CATALOG_ZW_PM_TRANSITION_EVENT_PRESENT)
-#include "app_pm_transition_event.h"
-#endif
 
 #if (!defined(SL_CATALOG_SILICON_LABS_ZWAVE_APPLICATION_PRESENT) && !defined(UNIT_TEST))
 #include "app_hw.h"
 #endif
 
-#include "zw_power_manager_ids.h"
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+
+#ifdef SL_CATALOG_ZW_SHUTDOWN_MANAGER_PRESENT
+#include "zw_shutdown_manager.h"
+#endif
 
 /* Basic level definitions */
 #define BASIC_ON 0xFF
@@ -127,7 +132,6 @@ extern uint8_t bWatchdogStarted;
 /* Last system wakeup reason - is set in ApplicationInit */
 zpal_reset_reason_t g_eApplResetReason;
 
-SSwTimer mWakeupTimer;
 bool bTxStatusReportEnabled;
 
 static void ApplicationInitSW(void);
@@ -160,6 +164,11 @@ extern void ZCB_ComplHandler_ZW_SetSlaveLearnMode(uint8_t bStatus, uint8_t orgID
 #if SUPPORT_ZW_SET_RF_RECEIVE_MODE
 extern uint8_t SetRFReceiveMode(uint8_t mode);
 #endif
+
+ZW_WEAK void cmds_power_management_init(void)
+{
+  // Do nothing
+}
 
 void set_state_and_notify(uint8_t st)
 {
@@ -463,9 +472,13 @@ ApplicationTask(SApplicationHandles* pAppHandles)
   ZW_system_startup_SetCCSet(&CommandClasses);
 
   AppTimerInit(EAPPLICATIONEVENT_TIMER, (void *) g_AppTaskHandle);
-  zw_power_manager_lock(ZPAL_PM_TYPE_USE_RADIO, 0, ZPAL_PM_APP_RADIO_APPLICATION_ID);
-  zw_power_manager_lock(ZPAL_PM_TYPE_DEEP_SLEEP, 0, ZPAL_PM_APP_DEEP_SLEEP_APPLICATION_ID);
-
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  // This requirement is necessary only when power_manager_deepsleep component is used
+  sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
+#endif
+#ifdef SL_CATALOG_ZW_SHUTDOWN_MANAGER_PRESENT
+  zw_shutdown_manager_add_lock();
+#endif
   zaf_event_distributor_init();
 
   set_state_and_notify(stateStartup);
@@ -690,17 +703,6 @@ PopCommandQueue(void)
   set_state_and_notify(stateIdle);
 }
 
-/**
- * @brief wakeup after sleep timeout event
- *
- * @param pTimer Timer connected to this method
- */
-void
-ZCB_WakeupTimeout(__attribute__((unused)) SSwTimer *pTimer)
-{
-  ZPAL_LOG_DEBUG(ZPAL_LOG_APP, "ZCB_WakeupTimeout\n");
-}
-
 /*==============================   ApplicationInitSW   ======================
 **    Initialization of the Application Software
 **
@@ -773,7 +775,7 @@ ApplicationInitSW(void)
   }
 
 #endif /* #if SUPPORT_STARTUP_NOTIFICATION */
-  AppTimerDeepSleepPersistentRegister(&mWakeupTimer, false, ZCB_WakeupTimeout);   // register for event jobs timeout event
+  cmds_power_management_init();
 }
 
 /*==============================   ApplicationInit   ======================
@@ -784,10 +786,12 @@ ZW_APPLICATION_STATUS
 ApplicationInit(
   zpal_reset_reason_t eResetReason)
 {
+#ifdef SL_CATALOG_ZW_SHUTDOWN_MANAGER_PRESENT
+  zw_shutdown_manager_init();
+#endif
   // enable the watchdog at init of application
   zpal_watchdog_init();
   zpal_enable_watchdog(true);
-  zw_power_manager_init();
 
   // Serial API can control hardware with information
   // set in the file system therefore it should be the first
@@ -796,11 +800,6 @@ ApplicationInit(
 
 #if (!defined(SL_CATALOG_SILICON_LABS_ZWAVE_APPLICATION_PRESENT) && !defined(UNIT_TEST))
   app_hw_init();
-#endif
-
-#if defined(SL_CATALOG_ZW_PM_TRANSITION_EVENT_PRESENT)
-  // register callback from power manager transitions
-  ZW_PmTransitionEventInit();
 #endif
 
   /* g_eApplResetReason now contains lastest System Reset reason */

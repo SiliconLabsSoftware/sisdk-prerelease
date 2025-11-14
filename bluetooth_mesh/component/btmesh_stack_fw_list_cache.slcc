@@ -6,25 +6,25 @@ category: "Bluetooth Mesh|Stack|Models|DFU"
 quality: "production"
 
 requires:
-  - name: "btmesh_stack_fw_list_cache_libraries"
-  - name: "btmesh_stack_fw_distribution_server"
+- name: "btmesh_stack_fw_list_cache_libraries"
+- name: "btmesh_stack_fw_distribution_server"
 recommends:
-  - id: "btmesh_stack_fw_list_cache_libraries_release"
-    condition:
-      - "btmesh_stack_libraries_release"
-    vendor: silabs
-  - id: "btmesh_stack_fw_list_cache_libraries_debug"
-    condition:
-      - "btmesh_stack_libraries_debug"
-    vendor: silabs
+- id: "btmesh_stack_fw_list_cache_libraries_release"
+  condition:
+  - "btmesh_stack_libraries_release"
+  vendor: silabs
+- id: "btmesh_stack_fw_list_cache_libraries_debug"
+  condition:
+  - "btmesh_stack_libraries_debug"
+  vendor: silabs
 template_contribution:
-  - name: btmesh_bgapi_class
-    value:
-        class: "ncp_fw_list"
-    priority: 1
-  - name: component_catalog
-    value: btmesh_stack_fw_list_cache
+- name: btmesh_bgapi_class
+  value:
+    class: "ncp_fw_list"
+  priority: 1
+- name: component_catalog
+  value: btmesh_stack_fw_list_cache
 metadata:
-    sbom:
-        reference: btmesh_stack_models
+  sbom:
+    reference: btmesh_stack_models
 root_path: bluetooth_mesh

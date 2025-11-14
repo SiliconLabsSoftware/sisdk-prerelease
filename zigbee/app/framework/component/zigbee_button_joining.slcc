@@ -5,48 +5,48 @@ quality: evaluation
 id: zigbee_button_joining
 category: Zigbee|Utility
 provides:
-  - name: zigbee_button_joining
+- name: zigbee_button_joining
 config_file:
-  - path: app/framework/plugin/button-joining/config/button-joining-config.h
+- path: app/framework/plugin/button-joining/config/button-joining-config.h
 source:
-  - path: app/framework/plugin/button-joining/button-joining.c
-  - path: app/framework/plugin/button-joining/button-joining-cli.c
-    condition:
-      - cli
-  - path: app/framework/plugin/button-joining/button-joining-cb.c
+- path: app/framework/plugin/button-joining/button-joining.c
+- path: app/framework/plugin/button-joining/button-joining-cli.c
+  condition:
+  - cli
+- path: app/framework/plugin/button-joining/button-joining-cb.c
 include:
-  - path: app/framework/plugin/button-joining
-    file_list:
-      - path: button-joining.h
+- path: app/framework/plugin/button-joining
+  file_list:
+  - path: button-joining.h
 template_contribution:
-  - name: component_catalog
-    value: zigbee_button_joining
-  - name: zigbee_af_callback
-    value:
-        callback_type: event_init
-        function_name: sli_zigbee_af_button_joining_init_callback
-  - name: cli_group
-    value:
-        group: plugin
-        name: button-joining
-        help: button-joining related commands.
-  - name: cli_command
-    value:
-        group: button-joining
-        name: button0
-        handler: sl_zigbee_af_button_joining_button0_command
-        help: Simulates a depression of button 0.
-  - name: cli_command
-    value:
-        group: button-joining
-        name: button1
-        handler: sl_zigbee_af_button_joining_button1_command
-        help: Simulate a depression of button 1.
+- name: component_catalog
+  value: zigbee_button_joining
+- name: zigbee_af_callback
+  value:
+    callback_type: event_init
+    function_name: sli_zigbee_af_button_joining_init_callback
+- name: cli_group
+  value:
+    group: plugin
+    name: button-joining
+    help: button-joining related commands.
+- name: cli_command
+  value:
+    group: button-joining
+    name: button0
+    handler: sl_zigbee_af_button_joining_button0_command
+    help: Simulates a depression of button 0.
+- name: cli_command
+  value:
+    group: button-joining
+    name: button1
+    handler: sl_zigbee_af_button_joining_button1_command
+    help: Simulate a depression of button 1.
 
 documentation:
-    docset: zigbee
-    document: zigbee-af-api/button-joining
+  docset: zigbee
+  document: zigbee-af-api/button-joining
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

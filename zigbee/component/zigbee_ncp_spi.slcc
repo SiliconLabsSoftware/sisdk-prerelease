@@ -6,39 +6,39 @@ quality: production
 description: Provides the functionality for a network coprocessor (NCP) application to communicate with a host over SPI.
 
 provides:
-  - name: zigbee_ncp
-  - name: zigbee_ncp_spi
+- name: zigbee_ncp
+- name: zigbee_ncp_spi
 
 requires:
-  - name: spidrv_core
-  - name: legacy_ncp_spi
-    condition:
-      - device_cortexm
-  - name: gpiointerrupt
-  - name: zigbee_ncp_spi_implementation
-  - name: zigbee_ncp_spi_library
-    condition:
-      - zigbee_use_release_libraries
-  - name: zigbee_ncp_framework
+- name: spidrv_core
+- name: legacy_ncp_spi
+  condition:
+  - device_cortexm
+- name: gpiointerrupt
+- name: zigbee_ncp_spi_implementation
+- name: zigbee_ncp_spi_library
+  condition:
+  - zigbee_use_release_libraries
+- name: zigbee_ncp_framework
 
 recommends:
-  - id: zigbee_ncp_spi_library_internal
-    vendor: silabs
+- id: zigbee_ncp_spi_library_internal
+  vendor: silabs
 
 define:
-  - name: EZSP_SPI
-  - name: EMBER_SC2_MODE
-    value: SL_ZIGBEE_SPI_SLAVE
+- name: EZSP_SPI
+- name: EMBER_SC2_MODE
+  value: SL_ZIGBEE_SPI_SLAVE
 
 template_contribution:
-  - name: component_catalog
-    value: zigbee_ncp_spi
+- name: component_catalog
+  value: zigbee_ncp_spi
 
 
 documentation:
-    docset: zigbee
-    document: zigbee-af-api/ncp-spi
+  docset: zigbee
+  document: zigbee-af-api/ncp-spi
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

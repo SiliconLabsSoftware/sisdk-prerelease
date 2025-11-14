@@ -5,20 +5,20 @@ description: "This component should be added in order to use the Gecko Bootloade
 category: Zigbee|Bootloader
 quality: production
 provides:
-  - name: zigbee_application_bootloader
+- name: zigbee_application_bootloader
 requires:
-  - name: bootloader_interface
-    condition:
-      - device_has_radio
+- name: bootloader_interface
+  condition:
+  - device_has_radio
 source:
-  - path: app/util/common/app_properties.c
-    unless:
-      - bootloader_app_properties
-      - btl_app_properties
+- path: app/util/common/app_properties.c
+  unless:
+  - bootloader_app_properties
+  - btl_app_properties
 template_contribution:
-  - name: component_catalog
-    value: zigbee_application_bootloader
+- name: component_catalog
+  value: zigbee_application_bootloader
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

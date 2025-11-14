@@ -36,9 +36,37 @@
 // NOTE: This API is for use by applications only.
 
 /**************************************************************************//**
- * @addtogroup code_placement
- * @brief Code Classification API
+ * @addtogroup code_placement Code Placement
+ * @brief Code Placement API
+ * @details
+ *  Provides support for executing code from RAM rather than flash memory.
+ * @note
+ *  Inlined functions are placed wherever the calling function resides.
  * @{
+ * @n @section ramfunc_use_cases Use Cases
+ *
+ * Consider placing code in RAM when:
+ * - The function is performance-critical and called frequently
+ * - The function must execute with minimal latency
+ * - The function is called during flash operations (erase/write)
+ * - Deterministic timing is required (eliminates flash wait states)
+ *
+ * @n @section ramfunc_linker Linker Requirements
+ *
+ * The linker script must define the appropriate RAM section "text_application_ram" for code placement.
+ *
+ * The "text_application_ram" section is pre-configured in Silicon Labs linker scripts,
+ * but custom linker scripts must include the "text_application_ram" section.
+ *
+ * @n @section ramfunc_usage Usage
+ * In your .h file:
+ * @code{.c}
+ * #include "sl_code_classification.h"
+ *
+ * SL_CODE_RAM
+ * void MyPrint(const char* string);
+ * @endcode
+ *
  *****************************************************************************/
 
 /******************************************************************************/

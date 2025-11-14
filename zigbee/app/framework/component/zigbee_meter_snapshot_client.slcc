@@ -5,22 +5,22 @@ quality: production
 id: zigbee_meter_snapshot_client
 category: Zigbee|Cluster Library|Smart Energy
 provides:
-  - name: zigbee_meter_snapshot_client
+- name: zigbee_meter_snapshot_client
 requires:
-  - name: zigbee_simple_metering_client
+- name: zigbee_simple_metering_client
 source:
-  - path: app/framework/plugin/meter-snapshot-client/meter-snapshot-client.c
+- path: app/framework/plugin/meter-snapshot-client/meter-snapshot-client.c
 template_contribution:
-  - name: component_catalog
-    value: zigbee_meter_snapshot_client
-  - name: cluster_service
-    value:
-        cluster_id: '0x0702'
-        mfg_id: NOT_MFG_SPECIFIC
-        side: CLIENT
-        service_function: sl_zigbee_af_simple_metering_cluster_client_snapshot_command_parse
+- name: component_catalog
+  value: zigbee_meter_snapshot_client
+- name: cluster_service
+  value:
+    cluster_id: '0x0702'
+    mfg_id: NOT_MFG_SPECIFIC
+    side: CLIENT
+    service_function: sl_zigbee_af_simple_metering_cluster_client_snapshot_command_parse
 
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

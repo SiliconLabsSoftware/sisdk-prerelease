@@ -5,21 +5,21 @@ package: rail_library
 category: Platform|Radio
 quality: production
 metadata:
-    sbom:
-        id: sl_rail_util_mp_transition_time_override
-        name: RAIL Utility, Overrides the template_contributions in the sl_rail_util_mp_transition_time component
-        license: Zlib
+  sbom:
+    id: sl_rail_util_mp_transition_time_override
+    name: RAIL Utility, Overrides the template_contributions in the sl_rail_util_mp_transition_time component
+    license: Zlib
 provides:
-  - name: sl_rail_util_mp_transition_time_override
+- name: sl_rail_util_mp_transition_time_override
 requires:
-  - name: device
-  - name: rail_lib
-  - name: sl_rail_util_mp_transition_time
-  - name: component_catalog
+- name: device
+- name: rail_lib
+- name: sl_rail_util_mp_transition_time
+- name: component_catalog
 template_contribution:
-  - name: component_catalog
-    value: sl_rail_util_mp_transition_time_override
+- name: component_catalog
+  value: sl_rail_util_mp_transition_time_override
 documentation:
-    docset: rail
-    document: rail-api/sl-rail-util-mp-transition-time
+  docset: rail
+  document: rail-api/sl-rail-util-mp-transition-time
 root_path: rail_library

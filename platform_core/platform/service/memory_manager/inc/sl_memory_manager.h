@@ -537,15 +537,6 @@ extern "C" {
 #define SL_MEMORY_BLOCK_ALIGN_256_BYTES   256U    ///< 256 bytes alignment.
 #define SL_MEMORY_BLOCK_ALIGN_512_BYTES   512U    ///< 512 bytes alignment.
 
-/// @cond
-// Macro to place data in DTCM memory.
-#if defined(SL_CATALOG_MEMORY_MANAGER_DTCM_PRESENT) && defined(__GNUC__)
-#define SL_FAST_DATA          __attribute__ ((section(".dtcm")))
-#else
-#define SL_FAST_DATA
-#endif
-/// @endcond
-
 // ----------------------------------------------------------------------------
 // DATA TYPES
 

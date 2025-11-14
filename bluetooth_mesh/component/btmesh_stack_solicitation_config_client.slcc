@@ -6,16 +6,16 @@ category: "Bluetooth Mesh|Stack|Models|Core"
 quality: "production"
 
 requires:
-  - name: "btmesh_stack"
-  - name: "btmesh_core"
+- name: "btmesh_stack"
+- name: "btmesh_core"
 provides:
-  - name: "btmesh_stack_solicitation_config_client"
+- name: "btmesh_stack_solicitation_config_client"
 template_contribution:
-  - name: btmesh_bgapi_class
-    value:
-        class: "solicitation_config_client"
-    priority: 1
+- name: btmesh_bgapi_class
+  value:
+    class: "solicitation_config_client"
+  priority: 1
 metadata:
-    sbom:
-        reference: btmesh_stack
+  sbom:
+    reference: btmesh_stack
 root_path: bluetooth_mesh

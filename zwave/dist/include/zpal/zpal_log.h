@@ -50,6 +50,7 @@ typedef enum zpal_log_component_t_ {
   ZPAL_LOG_ZAF_NVM,
   ZPAL_LOG_ZAF_TRANSPORT,
   ZPAL_LOG_ZAF_TSE,
+  ZPAL_LOG_SHUTDOWN_MANAGER,
   ZPAL_LOG_END
 } zpal_log_component_t;
 

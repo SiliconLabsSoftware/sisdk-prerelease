@@ -5,18 +5,18 @@ description: Basic implementation of memory pool.
 category: Services|Utilities
 quality: production
 metadata:
-    sbom:
-        license: Zlib
+  sbom:
+    license: Zlib
 ui_hints:
-    visibility: never
+  visibility: never
 source:
-  - path: platform/service/mem_pool/src/sl_mem_pool.c
+- path: platform/service/mem_pool/src/sl_mem_pool.c
 include:
-  - path: platform/service/mem_pool/inc
-    file_list:
-      - path: sli_mem_pool.h
+- path: platform/service/mem_pool/inc
+  file_list:
+  - path: sli_mem_pool.h
 provides:
-  - name: mem_pool
+- name: mem_pool
 requires:
-  - name: sl_core
+- name: sl_core
 root_path: platform_core

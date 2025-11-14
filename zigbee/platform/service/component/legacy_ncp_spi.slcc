@@ -5,24 +5,24 @@ description: Legacy SPI implementation for NCP.
 category: Services|Ember Legacy
 quality: production
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee/platform/service/legacy_ncp_spi
 define:
-  - name: LEGACY_NCP_SPI
-    value: 1
+- name: LEGACY_NCP_SPI
+  value: 1
 provides:
-  - name: legacy_ncp_spi
+- name: legacy_ncp_spi
 source:
-  - path: src/spi-protocol.c
+- path: src/spi-protocol.c
 include:
-  - path: inc
-    file_list:
-      - path: spi-protocol.h
-      - path: spi-protocol-device.h
+- path: inc
+  file_list:
+  - path: spi-protocol.h
+  - path: spi-protocol-device.h
 config_file:
-  - path: config/legacy_ncp_spi_config.h
-    file_id: legacy_ncp_spi_config
+- path: config/legacy_ncp_spi_config.h
+  file_id: legacy_ncp_spi_config
 template_contribution:
-  - name: component_catalog
-    value: legacy_ncp_spi
+- name: component_catalog
+  value: legacy_ncp_spi

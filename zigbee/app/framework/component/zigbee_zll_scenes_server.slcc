@@ -5,28 +5,28 @@ quality: evaluation
 id: zigbee_zll_scenes_server
 category: Zigbee|Zigbee Light Link
 provides:
-  - name: zigbee_zll_scenes_server
+- name: zigbee_zll_scenes_server
 requires:
-  - name: zigbee_scenes
+- name: zigbee_scenes
 source:
-  - path: app/framework/plugin/zll-scenes-server/zll-scenes-server.c
+- path: app/framework/plugin/zll-scenes-server/zll-scenes-server.c
 include:
-  - path: app/framework/plugin/zll-scenes-server
-    file_list:
-      - path: zll-scenes-server.h
+- path: app/framework/plugin/zll-scenes-server
+  file_list:
+  - path: zll-scenes-server.h
 template_contribution:
-  - name: component_catalog
-    value: zigbee_zll_scenes_server
-  - name: cluster_service
-    value:
-        cluster_id: '0x0005'
-        mfg_id: NOT_MFG_SPECIFIC
-        side: SERVER
-        service_function: sl_zigbee_af_zll_scenes_cluster_server_command_parse
+- name: component_catalog
+  value: zigbee_zll_scenes_server
+- name: cluster_service
+  value:
+    cluster_id: '0x0005'
+    mfg_id: NOT_MFG_SPECIFIC
+    side: SERVER
+    service_function: sl_zigbee_af_zll_scenes_cluster_server_command_parse
 documentation:
-    docset: zigbee
-    document: zigbee-af-api/zll-scenes-server
+  docset: zigbee
+  document: zigbee-af-api/zll-scenes-server
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

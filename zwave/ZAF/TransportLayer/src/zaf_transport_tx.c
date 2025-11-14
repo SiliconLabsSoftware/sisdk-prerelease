@@ -187,6 +187,7 @@ zaf_transport_rx_to_tx_options(RECEIVE_OPTIONS_TYPE_EX *rx_options,
   tx_options->dest_endpoint = rx_options->sourceNode.endpoint;
   tx_options->bit_addressing = rx_options->sourceNode.endpoint != 0;
   tx_options->security_key = rx_options->securityKey;
+  tx_options->agi_profile = NULL;
 
   tx_options->tx_options = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_EXPLORE | ZWAVE_PLUS_TX_OPTIONS;
   if (rx_options->rxStatus & RECEIVE_STATUS_LOW_POWER) {

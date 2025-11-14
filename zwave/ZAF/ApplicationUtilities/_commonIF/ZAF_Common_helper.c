@@ -1,6 +1,35 @@
 /**
  * @file
  * @copyright 2018 Silicon Laboratories Inc.
+ *
+ * @section zaf_helper_power_management ZAF Helper Power Management During Application Events
+ *
+ * The ZAF Common Helper manages device power state during critical application events
+ * to ensure the device remains awake for important operations:
+ *
+ * @verbatim
+ * ZAF Application Event Radio Power Management Timeline (FLiRS device):
+ *
+ * Time:     0ms    400ms   800ms   1200ms  1600ms  2000ms  2400ms  2800ms  3200ms  3600ms  4000ms  4400ms
+ * State:    |-------|-------|-------|-------|-------|-------|-------|-------|-------|-------|-------|
+ *           ^                                             ^                                       ^
+ *           |                                             |                                       |
+ *   Critical App Event                                2sec timeout                        Stay-awake expires
+ *   Update 2 sec stay-awake                            (extend if needed)                  (automatic sleep)
+ *   zpal_radio_update_stay_awake(2000ms)                                                          |
+ *           |                                                                                     |
+ *           |<------------- Application Event Processing --------->|                              |
+ *           |                                                      |                              |
+ *        Start App                                             Complete                     Allow sleep
+ *        Event                                                App Event                     after timeout
+ *
+ * @endverbatim
+ *
+ * - If the device is a sleeping listening (FLiRS) device, the ZAF_FLiRS_StayAwake
+ *   function will be called when calling zaf_stay_awake. If the device is a
+ *   sleeping reporting (never listening) device supporting CC_Wake_Up, the
+ *   CC_WakeUp_stay_awake_if_active function will be called when calling zaf_stay_awake.
+ *
  */
 
 #include <assert.h>
@@ -18,7 +47,6 @@
 #include <ZAF_nvm_app.h>
 #include <ZAF_nvm.h>
 #include "zpal_nvm.h"
-#include "zpal_power_manager.h"
 #include "zaf_config_api.h"
 #include <zaf_cc_list_generator.h>
 #include <ZW_system_startup_api.h>
@@ -26,9 +54,7 @@
 #include "zaf_protocol_config.h"
 #include "zaf_transport_tx.h"
 #include "ZAF_AppName.h"
-#include "zpal_power_manager.h"
 #include "zpal_log.h"
-#include "zw_power_manager_ids.h"
 
 static TaskHandle_t m_AppTaskHandle;
 static SCommandClassSet_t m_CCSet;
@@ -58,9 +84,6 @@ void ZAF_Init(TaskHandle_t AppTaskHandle, SApplicationHandles *pAppHandles)
   zaf_cc_list_t *secure_included_secure_cc;
 
   ZPAL_LOG_DEBUG(ZPAL_LOG_ZAF_COMMON, "* ZAF_Init *\r\n");
-
-  // Init and register power manager APP domain
-  zw_power_manager_init();
 
   // Set ZAF variables as soon as possible
   ZAF_setAppHandle(pAppHandles);
@@ -157,11 +180,14 @@ void ZAF_Reset(void)
  * Keeps a FLiRS application awake for 2 seconds.
  *
  * The 2 seconds are specified for the Listening Sleeping role type.
+ *
+ * RT:08.11.0005.1 The LSEN MUST stay awake for at least 2 seconds after communicating.
  */
 static void ZAF_FLiRS_StayAwake(void)
 {
+  static zpal_radio_stay_awake_id_t stay_awake_id = 0;
   ZPAL_LOG_DEBUG(ZPAL_LOG_ZAF_COMMON, "\r\nZAF_FLiRS_StayAwake\r\n");
-  zpal_pm_relock(ZPAL_PM_TYPE_USE_RADIO, ZPAL_PM_DOMAIN_APP, 2000, ZPAL_PM_APP_RADIO_ZAF_COMMON_HELPER_ID);
+  zpal_radio_update_stay_awake(&stay_awake_id, 2000);
 }
 
 TaskHandle_t ZAF_getAppTaskHandle(void)

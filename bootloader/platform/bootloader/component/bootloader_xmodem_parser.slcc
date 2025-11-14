@@ -2,25 +2,25 @@ id: bootloader_xmodem_parser
 label: "XMODEM Parser"
 package: bootloader
 description: >
-    The Bootloader XMODEM Parser component provides XMODEM parser implementation.
+  The Bootloader XMODEM Parser component provides XMODEM parser implementation.
 category: Platform|Bootloader|Communication
 quality: production
 source:
-  - path: platform/bootloader/communication/xmodem-parser/btl_xmodem.c
+- path: platform/bootloader/communication/xmodem-parser/btl_xmodem.c
 include:
-  - path: platform/bootloader/communication/xmodem-parser
-    file_list:
-      - path: btl_xmodem.h
+- path: platform/bootloader/communication/xmodem-parser
+  file_list:
+  - path: btl_xmodem.h
 provides:
-  - name: bootloader_xmodem_parser
-  - name: bootloader_nonsecure_incompatible
-    condition: [bootloader_core_nonsecure]
+- name: bootloader_xmodem_parser
+- name: bootloader_nonsecure_incompatible
+  condition: [bootloader_core_nonsecure]
 requires:
-  - name: bootloader_crc
-    condition: [device_series_2]
-  - name: btl_crc
-    condition: [device_series_3]
+- name: bootloader_crc
+  condition: [device_series_2]
+- name: btl_crc
+  condition: [device_series_3]
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: bootloader

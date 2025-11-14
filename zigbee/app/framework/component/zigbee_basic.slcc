@@ -5,27 +5,27 @@ label: Basic Server Cluster
 category: Zigbee|Cluster Library|Common
 quality: production
 provides:
-  - name: zigbee_basic
+- name: zigbee_basic
 source:
-  - path: app/framework/plugin/basic/basic.c
-  - path: app/framework/plugin/basic/basic-cb.c
+- path: app/framework/plugin/basic/basic.c
+- path: app/framework/plugin/basic/basic-cb.c
 include:
-  - path: app/framework/plugin/basic
-    file_list:
-      - path: basic.h
+- path: app/framework/plugin/basic
+  file_list:
+  - path: basic.h
 template_contribution:
-  - name: component_catalog
-    value: zigbee_basic
-  - name: cluster_service
-    value:
-        cluster_id: '0x0000'
-        mfg_id: NOT_MFG_SPECIFIC
-        side: SERVER
-        service_function: sl_zigbee_af_basic_cluster_server_command_parse
+- name: component_catalog
+  value: zigbee_basic
+- name: cluster_service
+  value:
+    cluster_id: '0x0000'
+    mfg_id: NOT_MFG_SPECIFIC
+    side: SERVER
+    service_function: sl_zigbee_af_basic_cluster_server_command_parse
 documentation:
-    docset: zigbee
-    document: zigbee-af-api/basic
+  docset: zigbee
+  document: zigbee-af-api/basic
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

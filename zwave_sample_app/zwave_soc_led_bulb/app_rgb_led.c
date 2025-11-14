@@ -35,7 +35,11 @@
 #include <string.h>
 #include "app_rgb_led.h"
 #include "CC_MultilevelSwitch_Support.h"
+
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
+#endif
+
 #include "assert.h"
 #include "zpal_log.h"
 

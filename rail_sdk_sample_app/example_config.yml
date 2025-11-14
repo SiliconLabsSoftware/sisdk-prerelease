@@ -1,0 +1,466 @@
+---
+template:
+  rail_toolchains: &rail_toolchains
+    - gcc
+    - iar
+    - segger
+  rail_ides: &rail_ides
+    - generic-template
+    - iar-embedded-workbench
+    - makefile-ide
+    - simplicity-ide
+    - visual-studio-code
+    - visual-studio-code-cmake
+#example specific settings
+example:
+#rail
+  - path: example/soc/rail_soc_burst_duty_cycle/rail_soc_burst_duty_cycle.slcp
+    # templates.xml::partCompatibility
+    part_whitelist_filter:
+      - efr32[fmb]g2[2-9]
+      - efr32[fmz]g23
+      - efr32[fmz]g2d
+      - efr32zg28
+      - fgm230s.*
+      - si[bmx]g301.*
+    part_blacklist_filter:
+      - efr32bg22c112
+    part_compatibility:
+      - .*(?!efr32bg22c112)efr32[fmb]g2[2-9].*
+      - .*efr32[fmz]g23.*
+      - .*efr32[fmz]g2d.*
+      - .*efr32zg28.*
+      - .*fgm230s.*
+      - .*si[bmx]g301.*
+    toolchain_compatibility: *rail_toolchains
+    ide_compatibility: *rail_ides
+  - path: example/soc/rail_soc_emode/rail_soc_emode.slcp
+    # templates.xml::partCompatibility
+    part_whitelist_filter:
+      - efr32[fmb]g2[2-9]
+      - efr32[fmz]g23
+      - efr32[fmz]g2d
+      - efr32zg28
+      - fgm230s.*
+      - si[bmx]g301.*
+    part_blacklist_filter:
+      - efr32bg22c112
+    part_compatibility:
+      - .*(?!efr32bg22c112)efr32[fmb]g2[2-9].*
+      - .*efr32[fmz]g23.*
+      - .*efr32[fmz]g2d.*
+      - .*efr32zg28.*
+      - .*fgm230s.*
+      - .*si[bmx]g301.*
+    board_blacklist:
+      - brd2606a
+    toolchain_compatibility: *rail_toolchains
+    ide_compatibility: *rail_ides
+  - path: example/soc/rail_soc_light/rail_soc_light.slcp
+    # templates.xml::partCompatibility
+    part_whitelist_filter:
+      - efr32[fmb]g2[2-9]
+      - efr32[fmz]g23
+      - efr32[fmz]g2d
+      - efr32zg28
+      - fgm230s.*
+      - si[bmx]g301.*
+    part_blacklist_filter:
+      - efr32bg22c112
+    part_compatibility:
+      - .*(?!efr32bg22c112)efr32[fmb]g2[2-9].*
+      - .*efr32[fmz]g23.*
+      - .*efr32[fmz]g2d.*
+      - .*fgm230s.*
+      - .*efr32zg28.*
+      - .*si[bmx]g301.*
+    toolchain_compatibility: *rail_toolchains
+    ide_compatibility: *rail_ides
+  - path: example/soc/rail_soc_long_preamble_duty_cycle/rail_soc_long_preamble_duty_cycle.slcp
+    # templates.xml::partCompatibility
+    part_whitelist_filter:
+      - efr32[fmb]g2[2-9]
+      - efr32[fmz]g23
+      - efr32[fmz]g2d
+      - efr32zg28
+      - fgm230s.*
+      - si[bmx]g301.*
+    part_blacklist_filter:
+      - efr32bg22c112
+    part_compatibility:
+      - .*(?!efr32bg22c112)efr32[fmb]g2[2-9].*
+      - .*efr32[fmz]g23.*
+      - .*efr32[fmz]g2d.*
+      - .*efr32zg28.*
+      - .*fgm230s.*
+      - .*si[bmx]g301.*
+    board_blacklist:
+      - brd2606a
+    toolchain_compatibility: *rail_toolchains
+    ide_compatibility: *rail_ides
+  - path: example/soc/rail_soc_empty/rail_soc_empty.slcp
+    # templates.xml::partCompatibility
+    part_whitelist_filter:
+      - efr32[fmb]g2[2-9]
+      - efr32[fmz]g23
+      - efr32[fmz]g2d
+      - efr32zg28
+      - fgm230s.*
+      - si[bmx]g301.*
+    part_blacklist_filter:
+      - efr32bg22c112
+    part_compatibility:
+      - .*(?!efr32bg22c112)efr32[fmb]g2[2-9].*
+      - .*efr32[fmz]g23.*
+      - .*efr32[fmz]g2d.*
+      - .*efr32zg28.*
+      - .*fgm230s.*
+      - .*si[bmx]g301.*
+    board_blacklist:
+      - brd2606a
+    toolchain_compatibility: *rail_toolchains
+    ide_compatibility: *rail_ides
+  - path: example/soc/rail_soc_railtest/rail_soc_railtest.slcp
+    # templates.xml::partCompatibility
+    part_whitelist_filter:
+      - efr32[zfmb]g2[013456789]
+      - efr32[zfm]g2d
+      - efr32[zfmb]g22(?!l)
+      - efr32[m]r21
+      - zgm
+      - fgm230s
+      - rm21
+      - mgm240s
+      - mgm240p
+      - mgm260p
+      - mgm270s
+    part_compatibility:
+      - .*efr32[zfmb]g2[013456789].*
+      - .*efr32[zfm]g2d.*
+      - .*efr32[zfmb]g22(?!l).*
+      - .*efr32[m]r21.*
+      - .*zgm.*
+      - .*fgm230s.*
+      - .*rm21.*
+      - .*mgm240s.*
+      - .*mgm240p.*
+      - .*mgm260p.*
+      - .*mgm270s.*
+    part_blacklist_filter:
+      - efr32bg22l
+    board_blacklist:
+      - brd2606a
+      - brd2900a
+      - brd2901a
+    toolchain_compatibility: *rail_toolchains
+    ide_compatibility: *rail_ides
+  - path: example/soc/rail_soc_railtest/rail_soc_railtest_series3.slcp
+    # templates.xml::partCompatibility
+    part_whitelist_filter:
+      - si[bmx]g301.*
+    part_compatibility:
+      - .*si[bmx]g301.*
+    toolchain_compatibility:
+      - gcc
+    ide_compatibility: *rail_ides
+  - path: example/soc/rail_soc_range_test/rail_soc_range_test.slcp
+    # templates.xml::partCompatibility
+    part_whitelist_filter:
+      - efr32[fmb]g2[2-9]
+      - efr32[fmz]g23
+      - efr32[fmz]g2d
+      - efr32zg28
+      - fgm230s.*
+      - si[bmx]g301.*
+    part_blacklist_filter:
+      - efr32bg22c112
+    part_compatibility:
+      - .*(?!efr32bg22c112)efr32[fmb]g2[2-9].*
+      - .*efr32[fmz]g23.*
+      - .*efr32[fmz]g2d.*
+      - .*efr32zg28.*
+      - .*fgm230s.*
+      - .*si[bmx]g301.*
+    board_blacklist:
+      - brd2606a
+    toolchain_compatibility: *rail_toolchains
+    ide_compatibility: *rail_ides
+  - path: example/soc/rail_bt_dmp_soc_range_test/rail_bt_dmp_soc_range_test.slcp
+    # templates.xml::partCompatibility
+    part_whitelist_filter:
+      - efr32[mb]g2[246-9]
+      - efr32[fmbz]g28
+      - si[bmx]g301.*
+    part_blacklist_filter:
+      - efr32bg22c112
+    part_compatibility:
+      - .*(?!efr32bg22c112)efr32[mb]g2[246-9].*
+      - .*efr32[fmbz]g28.*
+      - .*si[bmx]g301.*
+    board_blacklist:
+      - brd2606a
+    toolchain_compatibility: *rail_toolchains
+    ide_compatibility: *rail_ides
+  - path: example/soc/rail_soc_range_test_std/rail_soc_range_test_std.slcp
+    # templates.xml::partCompatibility
+    part_whitelist_filter:
+      - efr32[fmb]g2[1246-9]
+      - efr32[fmbz]g28
+      - rm21.*
+      - si[bmx]g301.*
+    part_blacklist_filter:
+      - efr32bg22c112
+    part_compatibility:
+      - .*(?!efr32bg22c112)efr32[fmb]g2[1246-9].*
+      - .*efr32[fmbz]g28.*
+      - .*rm21.*
+      - .*si[bmx]g301.*
+    board_blacklist:
+      - brd2606a
+    toolchain_compatibility: *rail_toolchains
+    ide_compatibility: *rail_ides
+  - path: example/soc/rail_bt_dmp_soc_range_test_std/rail_bt_dmp_soc_range_test_std.slcp
+    # templates.xml::partCompatibility
+    part_whitelist_filter:
+      - efr32[mb]g2[1246-9]
+      - efr32[fmbz]g28
+      - rm21.*
+      - si[bmx]g301.*
+    part_blacklist_filter:
+      - efr32bg22c112
+    part_compatibility:
+      - .*(?!efr32bg22c112)efr32[mb]g2[1246-9].*
+      - .*efr32[fmbz]g28.*
+      - .*rm21.*
+      - .*si[bmx]g301.*
+    board_blacklist:
+      - brd2606a
+    toolchain_compatibility: *rail_toolchains
+    ide_compatibility: *rail_ides
+  - path: example/soc/rail_soc_simple_trx/rail_soc_simple_trx.slcp
+    # templates.xml::partCompatibility
+    part_whitelist_filter:
+      - efr32[fmb]g2[2-9]
+      - efr32[fmz]g23
+      - efr32[fmz]g2d
+      - efr32zg28
+      - fgm230s.*
+      - si[bmx]g301.*
+    part_blacklist_filter:
+      - efr32bg22c112
+    part_compatibility:
+      - .*(?!efr32bg22c112)efr32[fmb]g2[2-9].*
+      - .*efr32[fmz]g23.*
+      - .*efr32[fmz]g2d.*
+      - .*efr32zg28.*
+      - .*fgm230s.*
+      - .*si[bmx]g301.*
+    board_blacklist:
+      - brd2606a
+    toolchain_compatibility: *rail_toolchains
+    ide_compatibility: *rail_ides
+  - path: example/soc/rail_soc_simple_trx_ncp/rail_soc_simple_trx_ncp.slcp
+    # templates.xml::partCompatibility
+    part_whitelist_filter:
+      - efr32[fmb]g2[2-9]
+      - efr32[fmz]g23
+      - efr32[fmz]g2d
+      - efr32zg28
+      - fgm230s.*
+      - si[bmx]g301.*
+    part_blacklist_filter:
+      - efr32bg22c112
+    part_compatibility:
+      - .*(?!efr32bg22c112)efr32[fmb]g2[2-9].*
+      - .*efr32[fmz]g23.*
+      - .*efr32[fmz]g2d.*
+      - .*efr32zg28.*
+      - .*fgm230s.*
+      - .*si[bmx]g301.*
+    board_blacklist:
+      - brd2606a
+    toolchain_compatibility: *rail_toolchains
+    ide_compatibility: *rail_ides
+  - path: example/soc/rail_soc_simple_trx_ncp/rail_soc_simple_trx_ncp_spi.slcp
+    # templates.xml::partCompatibility
+    part_whitelist_filter:
+      - efr32[fmb]g2[2-9]
+      - efr32[fmz]g23
+      - efr32[fmz]g2d
+      - efr32zg28
+      - fgm230s.*
+      - si[bmx]g301.*
+    part_blacklist_filter:
+      - efr32bg22c112
+    part_compatibility:
+      - .*(?!efr32bg22c112)efr32[fmb]g2[2-9].*
+      - .*efr32[fmz]g23.*
+      - .*efr32[fmz]g2d.*
+      - .*efr32zg28.*
+      - .*fgm230s.*
+      - .*si[bmx]g301.*
+    board_blacklist:
+      - brd2600a
+      - brd2606a
+      - brd2719a
+    toolchain_compatibility: *rail_toolchains
+    ide_compatibility: *rail_ides
+  - path: example/soc/rail_soc_simple_trx_std/rail_soc_simple_trx_std.slcp
+    # templates.xml::partCompatibility
+    part_whitelist_filter:
+      - efr32[fmb]g2[124-9]
+      - efr32[fmbz]g28
+      - rm21.*
+      - si[bmx]g301.*
+    part_blacklist_filter:
+      - efr32bg22c112
+    part_compatibility:
+      - .*(?!efr32bg22c112)efr32[fmb]g2[124-9].*
+      - .*(?!efr32bg22c112)efr32[fmbz]g28.*
+      - .*rm21.*
+      - .*si[bmx]g301.*
+    board_blacklist:
+      - brd2606a
+    toolchain_compatibility: *rail_toolchains
+    ide_compatibility: *rail_ides
+  - path: example/soc/rail_soc_simple_trx_auto_ack/rail_soc_simple_trx_auto_ack.slcp
+    # templates.xml::partCompatibility
+    part_whitelist_filter:
+      - efr32[fmb]g2[2-9]
+      - efr32[fmz]g23
+      - efr32[fmz]g2d
+      - efr32zg28
+      - fgm230s.*
+      - si[bmx]g301.*
+    part_blacklist_filter:
+      - efr32bg22c112
+    part_compatibility:
+      - .*(?!efr32bg22c112)efr32[fmb]g2[2-9].*
+      - .*efr32[fmz]g23.*
+      - .*efr32[fmz]g2d.*
+      - .*efr32zg28.*
+      - .*fgm230s.*
+      - .*si[bmx]g301.*
+    board_blacklist:
+      - brd2606a
+    toolchain_compatibility: *rail_toolchains
+    ide_compatibility: *rail_ides
+  - path: example/soc/rail_soc_simple_trx_multiphy/rail_soc_simple_trx_multiphy.slcp
+    # templates.xml::partCompatibility
+    part_whitelist_filter:
+      - efr32[fmbz]g2[8]
+    part_blacklist_filter:
+      - efr32bg22c112
+    part_compatibility:
+      - .*(?!efr32bg22c112)efr32[fmbz]g2[8].*
+    board_blacklist:
+      - brd2606a
+    toolchain_compatibility: *rail_toolchains
+    ide_compatibility: *rail_ides
+  - path: example/soc/rail_soc_switch/rail_soc_switch.slcp
+    # templates.xml::partCompatibility
+    part_whitelist_filter:
+      - efr32[fmb]g2[2-9]
+      - efr32[fmz]g23
+      - efr32[fmz]g2d
+      - efr32zg28
+      - fgm230s.*
+      - si[bmx]g301.*
+    part_blacklist_filter:
+      - efr32bg22c112
+    part_compatibility:
+      - .*(?!efr32bg22c112)efr32[fmb]g2[2-9].*
+      - .*efr32[fmz]g23.*
+      - .*efr32[fmz]g2d.*
+      - .*efr32zg28.*
+      - .*fgm230s.*
+      - .*si[bmx]g301.*
+    board_blacklist:
+      - brd2606a
+    toolchain_compatibility: *rail_toolchains
+    ide_compatibility: *rail_ides
+  - path: example/soc/rail_soc_wmbus_collector/rail_soc_wmbus_collector.slcp
+    # templates.xml::partCompatibility
+    part_whitelist_filter:
+      - efr32[fmbz]g2[38]
+      - efr32[fmz]g2d
+      - fgm230s.*
+    part_blacklist_filter:
+      - efr32bg22c112
+    part_compatibility:
+      - .*(?!efr32bg22c112)efr32[fmbz]g2[38].*
+      - .*efr32[fmz]g2d.*
+      - .*fgm230s.*
+    board_blacklist:
+      - brd2606a
+    toolchain_compatibility: *rail_toolchains
+    ide_compatibility: *rail_ides
+  - path: example/soc/rail_soc_wmbus_meter/rail_soc_wmbus_meter.slcp
+    # templates.xml::partCompatibility
+    part_whitelist_filter:
+      - efr32[fmbz]g2[38]
+      - efr32[fmz]g2d
+      - fgm230s.*
+    part_blacklist_filter:
+      - efr32bg22c112
+    part_compatibility:
+      - .*(?!efr32bg22c112)efr32[fmbz]g2[38].*
+      - .*efr32[fmz]g2d.*
+      - .*fgm230s.*
+    board_blacklist:
+      - brd2606a
+    toolchain_compatibility: *rail_toolchains
+    ide_compatibility: *rail_ides
+  - path: example/internal_test/basic_functions/basic_functions.slcp
+    # templates.xml::partCompatibility
+    part_whitelist_filter:
+      - .*efr32.*
+      - si[bmx]g301.*
+    part_blacklist_filter: []
+    part_compatibility:
+      - .*efr32.*
+      - .*si[bmx]g301.*
+    board_blacklist:
+      - brd2606a
+  - path: example/soc/rail_soc_mode_switch/rail_soc_mode_switch.slcp
+    # templates.xml::partCompatibility
+    part_whitelist_filter:
+      - efr32[fmb]g25
+    part_blacklist_filter: []
+    part_compatibility:
+      - .*efr32[fmb]g25.*
+    board_blacklist:
+      - brd2606a
+    toolchain_compatibility: *rail_toolchains
+    ide_compatibility: *rail_ides
+
+#demo files
+demo:
+  - path: example/soc/rail_bt_dmp_soc_range_test_std/rail_bt_dmp_soc_range_test_std.slcp
+    board_whitelist:
+      - brd4180a
+      - brd4181a
+      - brd4186a
+      - brd4186b
+      - brd4186c
+      - brd4187a
+      - brd4187b
+      - brd4187c
+      - brd4188a
+  - path: example/soc/rail_bt_dmp_soc_range_test_std/rail_bt_dmp_soc_range_test_std_demo.slcp
+    board_whitelist:
+      - brd4308c
+      - brd4308d
+  - path: example/soc/rail_soc_range_test/rail_soc_range_test.slcp
+    board_whitelist:
+      - brd4263a
+      - brd4263b
+      - brd4263c
+      - brd4264a
+      - brd4264b
+      - brd4264c
+      - brd4210a
+      - brd4204a
+      - brd4204b
+      - brd4204c
+      - brd4204d

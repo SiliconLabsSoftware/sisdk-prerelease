@@ -21,8 +21,8 @@ version = "0"
   glib = [{ installer = "conan", ref = "glib/1.0.0@silabs#939887fee635ec153f39ef5df3d79a63", type = "sdk", version = "1.0.0" }]
   java21 = [{ installer = "archive", type = "tools", version = "21.0.5" }]
   micriumos = [{ installer = "conan", ref = "micriumos/6.0.0@silabs#da8669154fe08a08eb210fe81127f72f", type = "sdk", version = "6.0.0" }]
-  openthread = [{ installer = "conan", ref = "openthread/3.0.0-alpha.12@silabs#7345d9bb033eeeac49f4066bcecfbcefa7c8b203", type = "sdk", version = "3.0.0-alpha.12" }]
-  openthread_stack = [{ installer = "conan", ref = "openthread_stack/3.0.0-alpha.12@silabs#7345d9bb033eeeac49f4066bcecfbcefa7c8b203", type = "sdk", version = "3.0.0-alpha.12" }]
+  openthread = [{ installer = "conan", ref = "openthread/3.0.0-alpha.13@silabs#c99dc2fc30b34766658422e7e371e9b6b9d16a4e", type = "sdk", version = "3.0.0-alpha.13" }]
+  openthread_stack = [{ installer = "conan", ref = "openthread_stack/3.0.0-alpha.13@silabs#c99dc2fc30b34766658422e7e371e9b6b9d16a4e", type = "sdk", version = "3.0.0-alpha.13" }]
   pintool = [{ installer = "conan", ref = "pintool/1.0.0@silabs#e24952147df5b6e1b91838b953cc1f9c", type = "sdk", version = "1.0.0" }]
   platform = [{ installer = "conan", ref = "platform/6.0.0-alpha.11@silabs#8c327d34ac6324065d51f9010c3892cf", type = "sdk", version = "6.0.0-alpha.11" }]
   platform_common = [{ installer = "conan", ref = "platform_common/1.0.0@silabs#6e64c30602a354fc169365e03b1cd085", type = "sdk", version = "1.0.0" }]
@@ -30,7 +30,7 @@ version = "0"
   platform_core = [{ installer = "conan", ref = "platform_core/1.0.0@silabs#5814a179201d7f39eddb97229dade5f7", type = "sdk", version = "1.0.0" }]
   printf = [{ installer = "conan", ref = "printf/1.0.0@silabs#271eb7b8622d329a952f23063eab689f", type = "sdk", version = "1.0.0" }]
   python = [{ installer = "archive", type = "apack", version = "3.10.1" }]
-  rail_library = [{ installer = "conan", ref = "rail_library/3.0.0-alpha.18@silabs#3b8a2eb1ca79dd9af9c845fea88eeac887bb05b9", type = "sdk", version = "3.0.0-alpha.18" }]
+  rail_library = [{ installer = "conan", ref = "rail_library/3.0.0-alpha.19@silabs#8226b8aa12ce8062123a5cf004c32548bdf888d9", type = "sdk", version = "3.0.0-alpha.19" }]
   realtime_locationing = [{ installer = "conan", ref = "realtime_locationing/11.0.0-alpha.4@silabs#38470a3a6b20ff229adbbf4c27f5a0c7d3c45894", type = "sdk", version = "11.0.0-alpha.4" }]
   security_libcryptosoc = [{ installer = "conan", ref = "security_libcryptosoc/1.0.0@silabs#a133e03e4642011680935008ffd8a93f", type = "sdk", version = "1.0.0" }]
   security_mbedtls = [{ installer = "conan", ref = "security_mbedtls/1.0.0@silabs#a9598abe9e5e4819693049b812179f02", type = "sdk", version = "1.0.0" }]
@@ -45,7 +45,7 @@ version = "0"
   unity_test_framework = [{ installer = "conan", ref = "unity_test_framework/1.0.0@silabs#861d729761c49a68604719d027338e4e", type = "sdk", version = "1.0.0" }]
   usb = [{ installer = "conan", ref = "usb/1.0.0@silabs#9a15afdb110c9bd20678641cb47f8eab", type = "sdk", version = "1.0.0" }]
   zap = [{ installer = "archive", type = "apack", version = "v2025.10.23" }]
-  zigbee = [{ installer = "conan", ref = "zigbee/9.0.0-alpha.7@silabs#ed212e9469ade6adaef5c2d3bf04dfebf19055eb", type = "sdk", version = "9.0.0-alpha.7" }]
+  zigbee = [{ installer = "conan", ref = "zigbee/9.0.0-alpha.8@silabs#d86d13e969782f6365ffcbba44aab2c565cddb4c", type = "sdk", version = "9.0.0-alpha.8" }]
 
 [engine]
   conan-repos = [

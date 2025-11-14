@@ -37,7 +37,7 @@
  */
 #define MAX_NUM_APP_TIMERS           12 // Max number of timers total. I.e. the sum of normal timers and persistent timers
 #define MAX_NUM_PERSISTENT_APP_TIMERS 6 // Max number of persistent timers.
-#define APP_TIMER_RETENTION_REGISTER_RESERVED_COUNT (MAX_NUM_PERSISTENT_APP_TIMERS + 2) // Number of reserved retention registers.
+#define APP_TIMER_RETENTION_REGISTER_RESERVED_COUNT MAX_NUM_PERSISTENT_APP_TIMERS // Number of reserved retention registers.
 
 /**
  * AppTimer object
@@ -143,6 +143,14 @@ void AppTimerNotificationHandler(void);
  * Clear storage used for persisting application timers during deep sleep hibernate
  */
 void AppTimerDeepSleepPersistentResetStorage(void);
+
+/**
+ * Checks if any deep sleep persistent timer is expiring soon.
+ *
+ * @retval true  If any persistent timer is about to expire soon.
+ * @retval false Otherwise.
+ */
+bool AppTimerDeepSleepPersistentIsAnyTimerExpiringSoon(void);
 
 /**
  * Save SSwTimers that should survive deep sleep Hibernate

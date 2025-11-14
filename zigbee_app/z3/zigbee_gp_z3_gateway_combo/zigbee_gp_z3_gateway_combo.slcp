@@ -60,6 +60,7 @@ component:
   - id: zigbee_aes_software
   - id: zigbee_zcl_cli
   - id: zigbee_core_cli
+  - id: zigbee_custom_ezsp
 
 configuration:
   - name: SL_BOARD_ENABLE_VCOM
@@ -93,9 +94,6 @@ configuration:
 
 include:
   - path: ./
-  - path: ../../../../app/xncp
-    file_list:
-      - path: xncp-sample-custom-ezsp-protocol.h
 
 source:
   - path: main.c

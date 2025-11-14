@@ -84,29 +84,29 @@ typedef struct SApplicationCmdClassInfo{
 typedef struct SApplicationConfiguration_v7_15_3  // Cannot pack this (change size) as it is already in the field.
 {
   zpal_radio_region_t rfRegion;
-  int8_t              iTxPower;            // changed to zpal_tx_power_t { aka int16_t } in APP_VERSION_7_18_1
-  int8_t              ipower0dbmMeasured;  // changed to zpal_tx_power_t { aka int16_t } in APP_VERSION_7_18_1
+  int8_t              iTxPower;            // changed to zpal_tx_power_decidbm_t { aka int16_t } in APP_VERSION_7_18_1
+  int8_t              ipower0dbmMeasured;  // changed to zpal_tx_power_decidbm_t { aka int16_t } in APP_VERSION_7_18_1
   uint8_t             radio_debug_enable;
-  int16_t             maxTxPower;          // changed to zpal_tx_power_t { aka int16_t } in APP_VERSION_7_18_1
+  int16_t             maxTxPower;          // changed to zpal_tx_power_decidbm_t { aka int16_t } in APP_VERSION_7_18_1
 } SApplicationConfiguration_v7_15_3;
 
 //declare the old structure only for the migration process.
 //No variable should be declared with this type (excepted for migration process).
 typedef struct __attribute__((packed)) SApplicationConfiguration_V7_18_1 {
   zpal_radio_region_t           rfRegion;
-  zpal_tx_power_t               iTxPower;
-  zpal_tx_power_t               ipower0dbmMeasured;
+  zpal_tx_power_decidbm_t       iTxPower;
+  zpal_tx_power_decidbm_t       ipower0dbmMeasured;
   uint8_t                       radio_debug_enable;
-  zpal_tx_power_t               maxTxPower; // For LR only
+  zpal_tx_power_decidbm_t       maxTxPower; // For LR only
 } SApplicationConfiguration_V7_18_1;
 
 typedef struct __attribute__((packed)) SApplicationConfiguration  // Must be packet as it is saved on NVM.
 {
   zpal_radio_region_t           rfRegion;
-  zpal_tx_power_t               iTxPower;
-  zpal_tx_power_t               ipower0dbmMeasured;
+  zpal_tx_power_decidbm_t       iTxPower;
+  zpal_tx_power_decidbm_t       ipower0dbmMeasured;
   uint8_t                       radio_debug_enable;
-  zpal_tx_power_t               maxTxPower; // For LR only
+  zpal_tx_power_decidbm_t       maxTxPower; // For LR only
   eSerialAPISetupNodeIdBaseType nodeIdBaseType;
 } SApplicationConfiguration;
 
@@ -554,7 +554,7 @@ ReadApplicationNodeIdBaseType(eSerialAPISetupNodeIdBaseType* nodeIdBaseType)
 }
 
 uint8_t
-SaveApplicationTxPowerlevel(zpal_tx_power_t ipower, zpal_tx_power_t power0dbmMeasured)
+SaveApplicationTxPowerlevel(zpal_tx_power_decidbm_t ipower, zpal_tx_power_decidbm_t power0dbmMeasured)
 {
   SApplicationConfiguration tApplicationConfiguration = { 0 };
   uint8_t dataIsWritten = false;
@@ -573,7 +573,7 @@ SaveApplicationTxPowerlevel(zpal_tx_power_t ipower, zpal_tx_power_t power0dbmMea
 }
 
 uint8_t
-ReadApplicationTxPowerlevel(zpal_tx_power_t *ipower, zpal_tx_power_t *power0dbmMeasured)
+ReadApplicationTxPowerlevel(zpal_tx_power_decidbm_t *ipower, zpal_tx_power_decidbm_t *power0dbmMeasured)
 {
   SApplicationConfiguration tApplicationConfiguration = { 0 };
   uint8_t dataIsRead = false;
@@ -591,7 +591,7 @@ ReadApplicationTxPowerlevel(zpal_tx_power_t *ipower, zpal_tx_power_t *power0dbmM
 }
 
 uint8_t
-SaveApplicationMaxLRTxPwr(zpal_tx_power_t maxTxPwr)
+SaveApplicationMaxLRTxPwr(zpal_tx_power_decidbm_t maxTxPwr)
 {
   SApplicationConfiguration tApplicationConfiguration = { 0 };
   uint8_t dataIsWritten = false;
@@ -609,7 +609,7 @@ SaveApplicationMaxLRTxPwr(zpal_tx_power_t maxTxPwr)
 }
 
 uint8_t
-ReadApplicationMaxLRTxPwr(zpal_tx_power_t *maxTxPwr)
+ReadApplicationMaxLRTxPwr(zpal_tx_power_decidbm_t *maxTxPwr)
 {
   SApplicationConfiguration tApplicationConfiguration = { 0 };
   uint8_t dataIsRead = false;

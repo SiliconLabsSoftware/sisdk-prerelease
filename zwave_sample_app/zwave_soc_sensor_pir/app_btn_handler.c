@@ -34,7 +34,6 @@
 #include <events.h>
 #include <zaf_event_distributor_soc.h>
 #include "app_button_handler.h"
-#include <zpal_power_manager.h>
 #include "ZAF_nvm_app.h"
 
 // -----------------------------------------------------------------------------

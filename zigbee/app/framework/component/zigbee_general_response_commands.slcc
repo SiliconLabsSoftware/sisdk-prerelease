@@ -5,21 +5,21 @@ label: General Response Commands
 category: Zigbee|Utility
 quality: production
 provides:
-  - name: zigbee_general_response_commands
+- name: zigbee_general_response_commands
 source:
-  - path: app/framework/plugin/general-response-commands/general-response-commands.c
+- path: app/framework/plugin/general-response-commands/general-response-commands.c
 template_contribution:
-  - name: component_catalog
-    value: zigbee_general_response_commands
-  - name: zigbee_af_callback
-    value:
-        callback_type: read_attributes_response
-        function_name: sli_zigbee_af_general_response_commands_read_attributes_response_callback
-  - name: zigbee_af_callback
-    value:
-        callback_type: report_attributes
-        function_name: sli_zigbee_af_general_response_commands_report_attributes_callback
+- name: component_catalog
+  value: zigbee_general_response_commands
+- name: zigbee_af_callback
+  value:
+    callback_type: read_attributes_response
+    function_name: sli_zigbee_af_general_response_commands_read_attributes_response_callback
+- name: zigbee_af_callback
+  value:
+    callback_type: report_attributes
+    function_name: sli_zigbee_af_general_response_commands_report_attributes_callback
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

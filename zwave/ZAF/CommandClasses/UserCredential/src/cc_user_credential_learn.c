@@ -5,6 +5,44 @@
  * @details The Credential Learn module provides functions to start and cancel
  * the learning process for user credentials.
  *
+ * @section credential_learn_power_management User Credential Learn Power Management
+ *
+ * The User Credential Learn process manages device power state to ensure the device
+ * remains awake during credential learning operations:
+ *
+ * @verbatim
+ * User Credential Learn Radio Power Management Timeline:
+ *
+ * Time:     0sec    30sec    60sec    90sec   120sec   150sec   180sec   210sec   240sec   270sec   300sec
+ * State:    |--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|
+ *           ^                                                                                   ^
+ *           |                                                                                   |
+ *   Credential Learn Start                                                             Learn Complete
+ *   Update stay-awake timeout                                                          Revoke stay-awake
+ *   zpal_radio_update_stay_awake(timeout_seconds)                                     zpal_radio_revoke_stay_awake()
+ *           |                                                                                   |
+ *           |<------------- Credential Learning Process ------------->|                         |
+ *           |                                                         |                         |
+ *        Start Credential                                         Complete                     Allow sleep
+ *        Learn Mode                                              Learn Mode                    after learn
+ *
+ * @endverbatim
+ *
+ * - **Learn Mode Start**: When entering credential learn mode, we update the stay-awake
+ *   timeout using zpal_radio_update_stay_awake() with the configured timeout duration.
+ *   This ensures the device remains awake during the credential learning window.
+ *
+ * - **Learning Window**: The stay-awake period covers the entire credential learning
+ *   process, allowing the device to receive and process credential data from users
+ *   or external systems.
+ *
+ * - **Learn Mode End**: When credential learning completes (success, timeout, or cancel),
+ *   we revoke the stay-awake request using zpal_radio_revoke_stay_awake() to allow
+ *   the device to return to its normal sleep/wake cycle.
+ *
+ * - **Configurable Timeout**: The stay-awake duration is configurable based on the
+ *   credential learning timeout requirements for the specific application.
+ *
  * @copyright 2023 Silicon Laboratories Inc.
  */
 
@@ -19,6 +57,7 @@
 #include "cc_user_credential_validation.h"
 #include "ZAF_Common_interface.h"
 #include "zpal_log.h"
+#include "zpal_radio.h"
 
 /****************************************************************************/
 /*                       PRIVATE TYPES and DEFINITIONS                      */
@@ -42,6 +81,7 @@ typedef struct credential_learn_status_t_ {
 /// Static Credential Learn data
 static credential_learn_status_t cl_state;
 static SSwTimer cl_timeout_timer;
+static zpal_radio_stay_awake_id_t credential_learn_stay_awake_id = 0;
 
 /****************************************************************************/
 /*                             PRIVATE FUNCTIONS                            */
@@ -76,7 +116,7 @@ void credential_learn_reset()
   } else {
     TimerStop(&cl_timeout_timer);
   }
-  zw_power_manager_lock_cancel(ZPAL_PM_TYPE_USE_RADIO, ZPAL_PM_APP_RADIO_ZAF_CC_USER_CREDENTIAL_ID);
+  zpal_radio_revoke_stay_awake(&credential_learn_stay_awake_id);
   memset(&cl_state, 0, sizeof(cl_state));
 }
 
@@ -231,8 +271,7 @@ ZW_WEAK void CC_UserCredential_learn_event_handler(
        * Keep device awake for the duration of this step.
        * This is necessary to ensure that the final reports will be sent out correctly.
        */
-      zw_power_manager_lock(ZPAL_PM_TYPE_USE_RADIO, cl_state.data.timeout_seconds * S_TO_MS,
-                            ZPAL_PM_APP_RADIO_ZAF_CC_USER_CREDENTIAL_ID);
+      zpal_radio_update_stay_awake(&credential_learn_stay_awake_id, cl_state.data.timeout_seconds);
       CC_UserCredential_CredentialLearnStatusReport_tx(
         CL_STATUS_STARTED, &cl_state.data.target, *remaining_steps, &cl_state.rx_options
         );
@@ -245,7 +284,7 @@ ZW_WEAK void CC_UserCredential_learn_event_handler(
       uint8_t * data = p_event_data->data;
 
       TimerStop(&cl_timeout_timer);
-      zw_power_manager_lock_cancel(ZPAL_PM_TYPE_USE_RADIO, ZPAL_PM_APP_RADIO_ZAF_CC_USER_CREDENTIAL_ID);
+      zpal_radio_revoke_stay_awake(&credential_learn_stay_awake_id);
       /**
        * Silently fail if the payload is missing or the process was not already
        * initiated
@@ -340,7 +379,6 @@ ZW_WEAK void CC_UserCredential_learn_event_handler(
       if (is_credential_learn_in_progress()) {
         const uint8_t * const remaining_steps = (const uint8_t * const) p_data;
         TimerRestart(&cl_timeout_timer);
-        zw_power_manager_relock(ZPAL_PM_TYPE_USE_RADIO, cl_state.data.timeout_seconds * S_TO_MS, ZPAL_PM_APP_RADIO_ZAF_CC_USER_CREDENTIAL_ID);
         CC_UserCredential_CredentialLearnStatusReport_tx(
           CL_STATUS_STEP_RETRY, &cl_state.data.target, *remaining_steps, &cl_state.rx_options);
       }

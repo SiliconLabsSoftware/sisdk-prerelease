@@ -164,10 +164,23 @@ bool zpal_bootloader_is_first_boot(bool *updated_successfully);
 void zpal_bootloader_reset_page_counters(void);
 
 /**
+ * @brief Erases the storage slot used by the bootloader.
+ *
+ * This function erases the designated storage slot, typically used for storing
+ * firmware images or other data required by the bootloader. After erasure, the
+ * storage slot will be empty and ready for new data to be written.
+ *
+ * @return zpal_status_t Returns a status code indicating the result of the operation.
+ *         Possible values include:
+ *           - ZPAL_STATUS_OK: The storage slot was successfully erased.
+ *           - ZPAL_STATUS_ERROR: An error occurred during the erase operation.
+ */
+zpal_status_t zpal_bootloader_erase_storage_slot(void);
+
+/**
  * @} //zpal-bootloader
  * @} //zpal
  */
-
 #ifdef __cplusplus
 }
 #endif

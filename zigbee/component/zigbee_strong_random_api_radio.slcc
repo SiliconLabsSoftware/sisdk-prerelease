@@ -6,21 +6,21 @@ category: Zigbee|Utility
 quality: production
 
 provides:
-  - name: zigbee_strong_random
-  - name: zigbee_strong_random_api_radio
+- name: zigbee_strong_random
+- name: zigbee_strong_random_api_radio
 
 source:
-  - path: stack/framework/strong-random-api.c
+- path: stack/framework/strong-random-api.c
 
 template_contribution:
-  - name: component_catalog
-    value: zigbee_strong_random_api_radio
+- name: component_catalog
+  value: zigbee_strong_random_api_radio
 
 
 documentation:
-    docset: zigbee
-    document: zigbee-af-api/strong-random-api-radio
+  docset: zigbee
+  document: zigbee-af-api/strong-random-api-radio
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

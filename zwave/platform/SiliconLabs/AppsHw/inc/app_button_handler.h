@@ -40,7 +40,10 @@ extern "C" {
 // -----------------------------------------------------------------------------
 #include <zaf_event_distributor_soc.h>
 #include "app_button_press.h"
+
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
+#endif
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------

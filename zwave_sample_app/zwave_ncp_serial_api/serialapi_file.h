@@ -88,31 +88,31 @@ ReadApplicationNodeIdBaseType(eSerialAPISetupNodeIdBaseType* nodeIdBaseType);
  * @brief Writes the application Tx power configuration to file system
  */
 uint8_t
-SaveApplicationTxPowerlevel(zpal_tx_power_t ipower, zpal_tx_power_t power0dbmMeasured);
+SaveApplicationTxPowerlevel(zpal_tx_power_decidbm_t ipower, zpal_tx_power_decidbm_t power0dbmMeasured);
 
 /**
  * @brief Reads the application Tx power configuration from file system
  */
 uint8_t
-ReadApplicationTxPowerlevel(zpal_tx_power_t *ipower, zpal_tx_power_t *power0dbmMeasured);
+ReadApplicationTxPowerlevel(zpal_tx_power_decidbm_t *ipower, zpal_tx_power_decidbm_t *power0dbmMeasured);
 
 /**
  * Writes the application Max LR tx power value configuration to file system
  *
- * @param maxTxPwr  the LR max tx power value in deci
+ * @param maxTxPwr  the LR max tx power value in deci dBm
  * @return value was saved correctly
  */
 uint8_t
-SaveApplicationMaxLRTxPwr(zpal_tx_power_t maxTxPwr);
+SaveApplicationMaxLRTxPwr(zpal_tx_power_decidbm_t maxTxPwr);
 
 /**
  * Reads the application Max LR tx power value configuration from file system
  *
- * @param maxTxPwr  pointer to the LR max tx power value in deci
+ * @param maxTxPwr  pointer to the LR max tx power value in deci dBm
  * @return value was read correctly
  */
 uint8_t
-ReadApplicationMaxLRTxPwr(zpal_tx_power_t *maxTxPwr);
+ReadApplicationMaxLRTxPwr(zpal_tx_power_decidbm_t *maxTxPwr);
 
 /**
  * @brief Writes radio_debug_enable to file system

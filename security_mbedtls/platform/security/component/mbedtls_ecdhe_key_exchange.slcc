@@ -2,45 +2,45 @@ id: mbedtls_ecdhe_key_exchange
 package: security_mbedtls
 label: ECDHE-Based Key Exchange
 description: >-
-    This component provides support for key exchange mechanisms in Mbed TLS'
-    TLS implementation based on ephemeral ECDH keys. It will turn on all ECDHE key
-    exchange methods available with the currently configured components.
-    If a smaller selection of key exchange mechanisms is preferable, then please
-    do not enable this component, but rather set the relevant
-    'SL_MBEDTLS_KEY_EXCHANGE_xxx' configuration options manually.
+  This component provides support for key exchange mechanisms in Mbed TLS'
+  TLS implementation based on ephemeral ECDH keys. It will turn on all ECDHE key
+  exchange methods available with the currently configured components.
+  If a smaller selection of key exchange mechanisms is preferable, then please
+  do not enable this component, but rather set the relevant
+  'SL_MBEDTLS_KEY_EXCHANGE_xxx' configuration options manually.
 category: Platform|Security|Mbed TLS|Upper Layer
 quality: evaluation
 
 provides:
-  - name: mbedtls_ecdhe_key_exchange
+- name: mbedtls_ecdhe_key_exchange
 
 requires:
-  - name: mbedtls_tls
-  - name: psa_crypto_ecdh
+- name: mbedtls_tls
+- name: psa_crypto_ecdh
 
   # Added for backwards compatibility. There didn't use to exist any
   # distinction between signatures and encryption for the RSA component.
-  - name: psa_crypto_rsa_sign_pss
-    condition: [psa_crypto_rsa]
-  - name: psa_crypto_rsa_sign_legacy
-    condition: [psa_crypto_rsa]
+- name: psa_crypto_rsa_sign_pss
+  condition: [psa_crypto_rsa]
+- name: psa_crypto_rsa_sign_legacy
+  condition: [psa_crypto_rsa]
 
 template_contribution:
-  - name: mbedtls_config
-    value: MBEDTLS_KEY_EXCHANGE_ECDHE_PSK_ENABLED
-  - name: mbedtls_config
-    value: MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED
-    condition: [psa_crypto_rsa_sign]
-  - name: mbedtls_config
-    value: MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED
-    condition: [psa_crypto_ecdsa]
+- name: mbedtls_config
+  value: MBEDTLS_KEY_EXCHANGE_ECDHE_PSK_ENABLED
+- name: mbedtls_config
+  value: MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED
+  condition: [psa_crypto_rsa_sign]
+- name: mbedtls_config
+  value: MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED
+  condition: [psa_crypto_ecdsa]
 metadata:
-    sbom:
-        license: Apache-2.0
-        upstream:
-            name: Mbed TLS
-            version: v3.6.2
-            supplier: Trusted Firmware
-            url: https://github.com/Mbed-TLS/mbedtls.git
-            comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
+  sbom:
+    license: Apache-2.0
+    upstream:
+      name: Mbed TLS
+      version: v3.6.2
+      supplier: Trusted Firmware
+      url: https://github.com/Mbed-TLS/mbedtls.git
+      comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
 root_path: security_mbedtls

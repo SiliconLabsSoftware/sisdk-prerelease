@@ -6,26 +6,26 @@ category: "Bluetooth Mesh|Stack|Features"
 quality: "production"
 
 requires:
-  - name: "btmesh_stack"
-  - name: "btmesh_core"
-  - name: component_catalog
+- name: "btmesh_stack"
+- name: "btmesh_core"
+- name: component_catalog
 provides:
-  - name: "btmesh_stack_proxy"
+- name: "btmesh_stack_proxy"
 template_contribution:
-  - name: btmesh_bgapi_class
-    value:
-        class: "proxy"
-    priority: 1
-  - name: btmesh_feature_bitmask
-    value:
-        count: 2
-  - name: btmesh_stack_proxy
-    value: 1
-  - name: component_catalog
-    value: btmesh_stack_proxy
+- name: btmesh_bgapi_class
+  value:
+    class: "proxy"
+  priority: 1
+- name: btmesh_feature_bitmask
+  value:
+    count: 2
+- name: btmesh_stack_proxy
+  value: 1
+- name: component_catalog
+  value: btmesh_stack_proxy
 validation_helper:
-  - path: component/proxy_validation.lua
+- path: component/proxy_validation.lua
 metadata:
-    sbom:
-        reference: btmesh_stack
+  sbom:
+    reference: btmesh_stack
 root_path: bluetooth_mesh

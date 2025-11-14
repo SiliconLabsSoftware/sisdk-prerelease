@@ -5,19 +5,19 @@ description: Provides Bluetooth mesh relay functionality. Relay nodes retransmit
 category: "Bluetooth Mesh|Features"
 quality: "production"
 tag:
-  - No-Code
+- No-Code
 
 requires:
-  - name: "btmesh_stack"
-  - name: "btmesh_core"
-  - name: component_catalog
+- name: "btmesh_stack"
+- name: "btmesh_core"
+- name: component_catalog
 provides:
-  - name: "btmesh_stack_relay"
+- name: "btmesh_stack_relay"
 template_contribution:
-  - name: btmesh_feature_bitmask
-    value:
-        count: 1
+- name: btmesh_feature_bitmask
+  value:
+    count: 1
 metadata:
-    sbom:
-        reference: btmesh_stack
+  sbom:
+    reference: btmesh_stack
 root_path: bluetooth_mesh

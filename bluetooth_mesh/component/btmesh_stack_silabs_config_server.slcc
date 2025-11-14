@@ -6,18 +6,18 @@ category: "Bluetooth Mesh|Stack|Models|Proprietary"
 quality: "production"
 
 requires:
- - name: "btmesh_stack"
- - name: "btmesh_core"
+- name: "btmesh_stack"
+- name: "btmesh_core"
 provides:
- - name: "btmesh_stack_silabs_config_server"
+- name: "btmesh_stack_silabs_config_server"
 template_contribution:
- - name: btmesh_bgapi_class
-   value:
-      class: "silabs_config_server"
-   priority: 1
- - name: component_catalog
-   value: btmesh_stack_silabs_config_server
+- name: btmesh_bgapi_class
+  value:
+    class: "silabs_config_server"
+  priority: 1
+- name: component_catalog
+  value: btmesh_stack_silabs_config_server
 metadata:
-   sbom:
-      reference: btmesh_stack
+  sbom:
+    reference: btmesh_stack
 root_path: bluetooth_mesh

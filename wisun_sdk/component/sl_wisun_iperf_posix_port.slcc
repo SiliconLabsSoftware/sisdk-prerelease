@@ -5,24 +5,24 @@ description: "Network layer implementation for sl_iperf."
 category: "Wi-SUN|Wi-SUN Services"
 quality: "production"
 metadata:
-    sbom:
-        license: Zlib
+  sbom:
+    license: Zlib
 root_path: "wisun_sdk/component/iperf_posix_port"
 provides:
-  - name: sl_wisun_iperf_posix_port
+- name: sl_wisun_iperf_posix_port
 
 source:
-  - path: "sl_wisun_iperf_posix_port.c"
+- path: "sl_wisun_iperf_posix_port.c"
 
 requires:
-  - name: "sl_wisun_app_core"
-  - name: "sleeptimer"
+- name: "sl_wisun_app_core"
+- name: "sleeptimer"
 
 ui_hints:
-    visibility: never
+  visibility: never
 
 #-------------- Template Contribution ----------------
 template_contribution:
 #---------------- Component Catalog ------------------
-  - name: component_catalog
-    value: iperf_wisun_posix_port
+- name: component_catalog
+  value: iperf_wisun_posix_port

@@ -5,56 +5,56 @@ quality: production
 id: zigbee_ota_bootload
 category: Zigbee|Over-The-Air Bootloading
 provides:
-  - name: zigbee_ota_bootload
+- name: zigbee_ota_bootload
 requires:
-  - name: zigbee_ota_common
-  - name: zigbee_ota_storage_common
-  - name: slot_manager
-    condition:
-      - device_has_radio
+- name: zigbee_ota_common
+- name: zigbee_ota_storage_common
+- name: slot_manager
+  condition:
+  - device_has_radio
 config_file:
-  - path: app/framework/plugin/ota-bootload/config/ota-bootload-config.h
+- path: app/framework/plugin/ota-bootload/config/ota-bootload-config.h
 source:
-  - path: app/framework/plugin/ota-bootload/ota-bootload-cli.c
-    condition:
-      - cli
-  - path: app/framework/plugin/ota-bootload/ota-bootload-ncp.c
-    condition:
-      - zigbee_ezsp
-  - path: app/framework/plugin/ota-bootload/ota-bootload-ncp-uart.c
-    condition:
-      - zigbee_ezsp_uart
-  - path: app/framework/plugin/ota-bootload/ota-bootload-ncp-spi.c
-    condition:
-      - zigbee_ezsp_spi
-  - path: app/framework/plugin/ota-bootload/ota-bootload-xmodem.c
-    condition:
-      - zigbee_ezsp
-  - path: app/framework/plugin/ota-bootload/ota-bootload-soc.c
-    condition:
-      - zigbee_stack_common
+- path: app/framework/plugin/ota-bootload/ota-bootload-cli.c
+  condition:
+  - cli
+- path: app/framework/plugin/ota-bootload/ota-bootload-ncp.c
+  condition:
+  - zigbee_ezsp
+- path: app/framework/plugin/ota-bootload/ota-bootload-ncp-uart.c
+  condition:
+  - zigbee_ezsp_uart
+- path: app/framework/plugin/ota-bootload/ota-bootload-ncp-spi.c
+  condition:
+  - zigbee_ezsp_spi
+- path: app/framework/plugin/ota-bootload/ota-bootload-xmodem.c
+  condition:
+  - zigbee_ezsp
+- path: app/framework/plugin/ota-bootload/ota-bootload-soc.c
+  condition:
+  - zigbee_stack_common
 include:
-  - path: app/framework/plugin/ota-bootload
-    file_list:
-      - path: ota-bootload-ncp.h
-      - path: ota-bootload-xmodem.h
+- path: app/framework/plugin/ota-bootload
+  file_list:
+  - path: ota-bootload-ncp.h
+  - path: ota-bootload-xmodem.h
 
 template_contribution:
-  - name: component_catalog
-    value: zigbee_ota_bootload
-  - name: cli_group
-    value:
-        group: plugin
-        name: ota-bootload
-        help: ota-bootload related commands
-  - name: cli_command
-    value:
-        group: ota-bootload
-        name: info
-        handler: printBootloaderInfoCommand
-        help: Prints info about the installed bootloader.
+- name: component_catalog
+  value: zigbee_ota_bootload
+- name: cli_group
+  value:
+    group: plugin
+    name: ota-bootload
+    help: ota-bootload related commands
+- name: cli_command
+  value:
+    group: ota-bootload
+    name: info
+    handler: printBootloaderInfoCommand
+    help: Prints info about the installed bootloader.
 
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

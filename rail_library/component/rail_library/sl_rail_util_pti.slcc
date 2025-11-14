@@ -5,16 +5,16 @@ package: rail_library
 category: Platform|Radio
 quality: evaluation
 metadata:
-    sbom:
-        id: sl_rail_util_pti
-        name: SL RAIL Utility, PTI
-        license: Zlib
+  sbom:
+    id: sl_rail_util_pti
+    name: SL RAIL Utility, PTI
+    license: Zlib
 provides:
-  - name: sl_rail_util_pti
+- name: sl_rail_util_pti
 requires:
-  - name: rail_util_pti
-  - name: component_catalog
+- name: rail_util_pti
+- name: component_catalog
 template_contribution:
-  - name: component_catalog
-    value: sl_rail_util_pti
+- name: component_catalog
+  value: sl_rail_util_pti
 root_path: rail_library

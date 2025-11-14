@@ -5,16 +5,16 @@ package: rail_library
 category: Platform|Radio
 quality: evaluation
 metadata:
-    sbom:
-        id: sl_rail_util_ant_div
-        name: SL RAIL Utility, Antenna Diversity Configuration
-        license: MSLA
+  sbom:
+    id: sl_rail_util_ant_div
+    name: SL RAIL Utility, Antenna Diversity Configuration
+    license: MSLA
 provides:
-  - name: sl_rail_util_ant_div
+- name: sl_rail_util_ant_div
 requires:
-  - name: rail_util_ant_div
-  - name: component_catalog
+- name: rail_util_ant_div
+- name: component_catalog
 template_contribution:
-  - name: component_catalog
-    value: sl_rail_util_ant_div
+- name: component_catalog
+  value: sl_rail_util_ant_div
 root_path: rail_library

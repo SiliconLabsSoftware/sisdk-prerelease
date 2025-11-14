@@ -2,42 +2,42 @@ id: psa_crypto_ecc_secp256k1
 package: security_mbedtls
 label: secp256k1
 description: >-
-    This component adds support for the secp256k1 elliptic curve,
-    a 256-bit Koblitz curve, in PSA Crypto.
+  This component adds support for the secp256k1 elliptic curve,
+  a 256-bit Koblitz curve, in PSA Crypto.
 category: Platform|Security|PSA Crypto|Elliptic Curves
 quality: production
 provides:
-  - name: psa_crypto_ecc_secp256k1
-  - name: psa_crypto_ecc_curve
-    allow_multiple: true
+- name: psa_crypto_ecc_secp256k1
+- name: psa_crypto_ecc_curve
+  allow_multiple: true
 requires:
-  - name: psa_crypto_ecc
-  - name: mbedtls_ecc
-    condition: [device_has_semailbox]
+- name: psa_crypto_ecc
+- name: mbedtls_ecc
+  condition: [device_has_semailbox]
 template_contribution:
-  - name: psa_crypto_config
-    value: PSA_WANT_ECC_SECP_K1_256 1
-  - name: psa_crypto_builtin_config
-    value: "MBEDTLS_PSA_BUILTIN_ECC_SECP_K1_256 1"
-    unless: [device_has_cryptoacc]
-  - name: mbedtls_config
-    value: MBEDTLS_ECP_DP_SECP256K1_ENABLED
-    unless: [device_has_cryptoacc]
-  - name: mbedtls_config
-    value: MBEDTLS_ECP_DP_SECP256K1_ENABLED
-    condition: [device_has_cryptoacc, mbedtls_uses_psa_crypto]
-  - name: mbedtls_mpi_max
-    value: 32
-    condition: [mbedtls_uses_psa_crypto]
+- name: psa_crypto_config
+  value: PSA_WANT_ECC_SECP_K1_256 1
+- name: psa_crypto_builtin_config
+  value: "MBEDTLS_PSA_BUILTIN_ECC_SECP_K1_256 1"
+  unless: [device_has_cryptoacc]
+- name: mbedtls_config
+  value: MBEDTLS_ECP_DP_SECP256K1_ENABLED
+  unless: [device_has_cryptoacc]
+- name: mbedtls_config
+  value: MBEDTLS_ECP_DP_SECP256K1_ENABLED
+  condition: [device_has_cryptoacc, mbedtls_uses_psa_crypto]
+- name: mbedtls_mpi_max
+  value: 32
+  condition: [mbedtls_uses_psa_crypto]
 documentation:
-    url: https://armmbed.github.io/mbed-crypto/html/api/keys/types.html#c.PSA_ECC_FAMILY_SECP_K1
+  url: https://armmbed.github.io/mbed-crypto/html/api/keys/types.html#c.PSA_ECC_FAMILY_SECP_K1
 metadata:
-    sbom:
-        license: Apache-2.0
-        upstream:
-            name: Mbed TLS
-            version: v3.6.2
-            supplier: Trusted Firmware
-            url: https://github.com/Mbed-TLS/mbedtls.git
-            comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
+  sbom:
+    license: Apache-2.0
+    upstream:
+      name: Mbed TLS
+      version: v3.6.2
+      supplier: Trusted Firmware
+      url: https://github.com/Mbed-TLS/mbedtls.git
+      comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
 root_path: security_mbedtls

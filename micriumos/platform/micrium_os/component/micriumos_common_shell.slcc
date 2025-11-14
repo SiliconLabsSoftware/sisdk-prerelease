@@ -5,28 +5,28 @@ description: Micrium OS Common Shell
 category: Services|Micrium|Common
 quality: production
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 source:
-  - path: source/shell/shell_cmd.c
-  - path: source/shell/shell.c
+- path: source/shell/shell_cmd.c
+- path: source/shell/shell.c
 include:
-  - path: source
-    file_list:
-      - path: shell/shell_cmd_priv.h
-      - path: shell/shell_priv.h
-  - path: include
-    file_list:
-      - path: shell.h
+- path: source
+  file_list:
+  - path: shell/shell_cmd_priv.h
+  - path: shell/shell_priv.h
+- path: include
+  file_list:
+  - path: shell.h
 provides:
-  - name: common_shell
+- name: common_shell
 requires:
-  - name: common_core
-  - name: common_lib
-  - name: cpu
-  - name: micriumos_kernel
-  - name: common_lib_mem_cmd
+- name: common_core
+- name: common_lib
+- name: cpu
+- name: micriumos_kernel
+- name: common_lib_mem_cmd
 template_contribution:
-  - name: micriumos_component_avails
-    value: COMMON_SHELL
+- name: micriumos_component_avails
+  value: COMMON_SHELL
 root_path: micriumos/platform/micrium_os/common

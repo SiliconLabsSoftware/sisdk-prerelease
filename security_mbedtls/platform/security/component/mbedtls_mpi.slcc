@@ -2,27 +2,27 @@ id: mbedtls_mpi
 package: security_mbedtls
 label: Multi-Precision Integers
 description: >-
-    This component enables the Mbed TLS multi-precision integer (MPI) library.
+  This component enables the Mbed TLS multi-precision integer (MPI) library.
 category: Platform|Security|Mbed TLS|Utilities
 quality: production
 provides:
-  - name: mbedtls_mpi
+- name: mbedtls_mpi
 requires:
-  - name: mbedtls_core
+- name: mbedtls_core
 template_contribution:
-  - name: mbedtls_config
-    value: MBEDTLS_BIGNUM_C
+- name: mbedtls_config
+  value: MBEDTLS_BIGNUM_C
   # Default to support 256 bit MPI numbers. This can be increased by
   # other components when needed.
-  - name: mbedtls_mpi_max
-    value: 32
+- name: mbedtls_mpi_max
+  value: 32
 metadata:
-    sbom:
-        license: Apache-2.0
-        upstream:
-            name: Mbed TLS
-            version: v3.6.2
-            supplier: Trusted Firmware
-            url: https://github.com/Mbed-TLS/mbedtls.git
-            comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
+  sbom:
+    license: Apache-2.0
+    upstream:
+      name: Mbed TLS
+      version: v3.6.2
+      supplier: Trusted Firmware
+      url: https://github.com/Mbed-TLS/mbedtls.git
+      comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
 root_path: security_mbedtls

@@ -5,37 +5,37 @@ package: rail_library
 category: Platform|Radio
 quality: production
 metadata:
-    sbom:
-        id: sl_rail_util_ieee802154_fast_channel_switching
-        name: RAIL Utility, IEEE802.15.4 Fast Channel Switching Configuration
-        license: Zlib
+  sbom:
+    id: sl_rail_util_ieee802154_fast_channel_switching
+    name: RAIL Utility, IEEE802.15.4 Fast Channel Switching Configuration
+    license: Zlib
 requires:
-  - name: sl_rail_util_ieee802154_phy_select
+- name: sl_rail_util_ieee802154_phy_select
 provides:
-  - name: sl_rail_util_ieee802154_fast_channel_switching
+- name: sl_rail_util_ieee802154_fast_channel_switching
 config_file:
-  - path: plugin/rail_util_ieee802154/config/sl_rail_util_ieee802154_fast_channel_switching_config.h
-    file_id: sl_rail_util_ieee802154_fast_channel_switching_config
+- path: plugin/rail_util_ieee802154/config/sl_rail_util_ieee802154_fast_channel_switching_config.h
+  file_id: sl_rail_util_ieee802154_fast_channel_switching_config
 include:
-  - path: plugin/rail_util_ieee802154
-    file_list:
-      - path: sl_rail_util_ieee802154_fast_channel_switching.h
-  - path: plugin/rail_util_ieee802154/sixg301
-    condition: [device_generic_family_sixx301]
-    file_list:
-      - path: sl_rail_util_ieee802154_fast_channel_switching_radio_config.h
+- path: plugin/rail_util_ieee802154
+  file_list:
+  - path: sl_rail_util_ieee802154_fast_channel_switching.h
+- path: plugin/rail_util_ieee802154/sixg301
+  condition: [device_generic_family_sixx301]
+  file_list:
+  - path: sl_rail_util_ieee802154_fast_channel_switching_radio_config.h
 source:
-  - path: plugin/rail_util_ieee802154/sl_rail_util_ieee802154_fast_channel_switching.c
-  - path: plugin/rail_util_ieee802154/sixg301/sl_rail_util_ieee802154_fast_channel_switching_radio_config.c
-    condition: [device_generic_family_sixx301]
+- path: plugin/rail_util_ieee802154/sl_rail_util_ieee802154_fast_channel_switching.c
+- path: plugin/rail_util_ieee802154/sixg301/sl_rail_util_ieee802154_fast_channel_switching_radio_config.c
+  condition: [device_generic_family_sixx301]
 template_contribution:
-  - name: rail_util_ieee802154_phy_select_callbacks
-    value:
-        config_include: sl_rail_util_ieee802154_fast_channel_switching_config.h
-        include: sl_rail_util_ieee802154_fast_channel_switching.h
-        runtime_phy_features: SL_RAIL_UTIL_IEEE802154_RUNTIME_PHY_FEATURES_2P4_RX_CH_SWITCHING
-        default_phy_features: SL_RAIL_UTIL_IEEE802154_DEFAULT_PHY_FEATURES_2P4_RX_CH_SWITCHING
-        get_phy_features: sl_rail_util_ieee802154_get_fast_channel_switching_phy_features
-  - name: component_catalog
-    value: sl_rail_util_ieee802154_fast_channel_switching
+- name: rail_util_ieee802154_phy_select_callbacks
+  value:
+    config_include: sl_rail_util_ieee802154_fast_channel_switching_config.h
+    include: sl_rail_util_ieee802154_fast_channel_switching.h
+    runtime_phy_features: SL_RAIL_UTIL_IEEE802154_RUNTIME_PHY_FEATURES_2P4_RX_CH_SWITCHING
+    default_phy_features: SL_RAIL_UTIL_IEEE802154_DEFAULT_PHY_FEATURES_2P4_RX_CH_SWITCHING
+    get_phy_features: sl_rail_util_ieee802154_get_fast_channel_switching_phy_features
+- name: component_catalog
+  value: sl_rail_util_ieee802154_fast_channel_switching
 root_path: rail_library

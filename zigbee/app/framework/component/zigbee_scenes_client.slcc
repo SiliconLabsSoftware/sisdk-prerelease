@@ -5,27 +5,27 @@ label: Scenes Client Cluster
 category: Zigbee|Cluster Library|Common
 quality: production
 provides:
-  - name: zigbee_scenes_client
+- name: zigbee_scenes_client
 source:
-  - path: app/framework/plugin/scenes-client/scenes-client.c
+- path: app/framework/plugin/scenes-client/scenes-client.c
 include:
-  - path: app/framework/plugin/scenes-client
-    file_list:
-      - path: scenes-client.h
+- path: app/framework/plugin/scenes-client
+  file_list:
+  - path: scenes-client.h
 template_contribution:
-  - name: component_catalog
-    value: zigbee_scenes_client
-  - name: cluster_service
-    value:
-        cluster_id: '0x0005'
-        mfg_id: NOT_MFG_SPECIFIC
-        side: CLIENT
-        service_function: sl_zigbee_af_scenes_cluster_client_command_parse
+- name: component_catalog
+  value: zigbee_scenes_client
+- name: cluster_service
+  value:
+    cluster_id: '0x0005'
+    mfg_id: NOT_MFG_SPECIFIC
+    side: CLIENT
+    service_function: sl_zigbee_af_scenes_cluster_client_command_parse
 
 documentation:
-    docset: zigbee
-    document: zigbee-af-api/scenes-client
+  docset: zigbee
+  document: zigbee-af-api/scenes-client
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

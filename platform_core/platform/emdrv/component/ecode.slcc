@@ -2,18 +2,18 @@ id: ecode
 label: EMDRV Common Headers
 package: platform_core
 description: |-
-    Common headers for emdrv components.
+  Common headers for emdrv components.
 category: Platform|Driver
 quality: production
 metadata:
-    sbom:
-        license: Zlib
+  sbom:
+    license: Zlib
 include:
-  - path: platform/emdrv/common/inc
-    file_list: [path: ecode.h]
+- path: platform/emdrv/common/inc
+  file_list: [path: ecode.h]
 provides:
-  - name: ecode
+- name: ecode
 documentation:
-    docset: gecko-platform
-    document: platform-driver/ecode
+  docset: gecko-platform
+  document: platform-driver/ecode
 root_path: platform_core

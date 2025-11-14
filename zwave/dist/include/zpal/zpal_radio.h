@@ -39,158 +39,6 @@ extern "C" {
  * The radio API assumes that the radio will return to receive mode with channel
  * hopping enabled after transmitting a frame.
  *
- * Initialization of the radio
- * ---------------------------
- *
- * \code{.c}
- *
- * void
- * RXHandlerFromISR(zpal_radio_event_t rxStatus)
- * {
- *    // Rx handle in ISR context
- * }
- *
- * void
- * TXHandlerFromISR(zpal_radio_event_t txEvent)
- * {
- *   // Tx complete handle in ISR context
- * }
- *
- * void
- * RegionChangeHandler(zpal_radio_event_t regionChangeStatus)
- * {
- *   // Region changed, make sure region specific data and statistics are cleared
- * }
- *
- * void
- * RadioAssertHandler(zpal_radio_event_t assertVal)
- * {
- *   // Radio driver or hardware asserted, handle it
- * }
- *
- * initialize_radio()
- * {
- *   static zpal_radio_profile_t RfProfile;
- *   static zpal_radio_network_stats_t sNetworkStatistic = {0};
- *   static uint8_t network_homeid[4] = {0xDE, 0xAD, 0xBE, 0xEF};
- *
- *   // Set radio for US always on mode
- *   static zpal_radio_profile_t RfProfile = {.region = REGION_US,
- *                                     .wakeup = ZPAL_RADIO_WAKEUP_ALWAYS_LISTEN,
- *                                     .listen_before_talk_threshold = ELISTENBEFORETALKTRESHOLD_DEFAULT,
- *                                     .tx_power_max = 0,
- *                                     .tx_power_adjust = 33,
- *                                     .tx_power_max_lr = 140,
- *                                     .home_id = &network_homeid,
- *                                     .rx_cb = RXHandlerFromISR,
- *                                     .tx_cb = TXHandlerFromISR,
- *                                     .region_change_cb = RegionChangeHandler,
- *                                     .assert_cb = RadioAssertHandler,
- *                                     .network_stats = &sNetworkStatistic,
- *                                     .radio_debug_enable = false,
- *                                     .primary_lr_channel = ZPAL_RADIO_LR_CHANNEL_A};
- *
- *   zpal_radio_init(RfProfile);
- * }
- *
- * \endcode
- *
- * Transmitting a frame
- * --------------------
- *
- * \code{.c}
- *
- * #define TX_FAILED          0
- * #define TX_FRAME_SUCCESS   1
- * #define TX_BEAM_SUCCESS    2
- *
- * static const zpal_radio_transmit_parameter_t TxParameter100kCh1 = {.speed = ZPAL_RADIO_SPEED_100K,
- *                                                                    .channel_id = 0,
- *                                                                    .crc = ZPAL_RADIO_CRC_16_BIT_CCITT,
- *                                                                    .preamble = 0x55,
- *                                                                    .preamble_length = 40,
- *                                                                    .start_of_frame = 0xF0,
- *                                                                    .repeats = 0};
- *
- * zpal_status_t transmit_frame()
- * {
- *   // Singlecast MAC header from node 1 to node 2
- *   uint8_t header_buffer[9] = {0xDE, 0xAD, 0xBE, 0xEF, 0x01, 0x41, 0x01, 14, 0x02};
- *   // Basic set On frame
- *   uint8_t payload_buffer[3] = {0x20, 0x01, 0xFF};
- *
- *   return zpal_radio_transmit(&TxParameter100kCh1,         // use 100kbps FSK profile
- *                              9,
- *                              (uint8_t *)&header_buffer,
- *                              3,
- *                              (uint8_t *)&payload_buffer,
- *                              true,                        // Do LBT before transmit
- *                              0);                          // Transmit power 0dBm
- * }
- *
- * void
- * TXHandlerFromISR(zpal_radio_event_t txEvent)
- * {
- *   uint8_t status;
- *
- *   if ((ZPAL_RADIO_EVENT_TX_FAIL == txEvent) || (ZPAL_RADIO_EVENT_TX_FAIL_LBT == txEvent))
- *   {
- *     status = TX_FAILED;
- *   }
- *   else if (txEvent & ZPAL_RADIO_EVENT_FLAG_BEAM)
- *   {
- *     status = TX_BEAM_SUCCESS;
- *   }
- *   else
- *   {
- *     status = TX_FRAME_SUCCESS;
- *   }
- *   / Get out of ISR context and handle transmit complete
- *   HandleTransmitComplete(status);
- * }
- *
- * \endcode
- *
- * Receiving a frame
- * -----------------
- *
- * \code{.c}
- *
- * #define RX_ABORT                 0
- * #define RX_BEAM                  1
- * #define RX_FRAME                 2
- * #define RX_CALIBRATION_NEEDED    3
- *
- * void
- * RXHandlerFromISR(zpal_radio_event_t rxStatus)
- * {
- *   uint8_t status;
- *
- *   switch (rxStatus)
- *   {
- *     case ZPAL_RADIO_EVENT_RX_BEAM:
- *       // Beam received
- *       status = RX_BEAM;
- *       break;
- *     case ZPAL_RADIO_EVENT_RX_ABORT:
- *       // Receive was aborted due to an error in the frame
- *       status = RX_ABORT;
- *       break;
- *     case ZPAL_RADIO_EVENT_RX:
- *       // Valid frame received
- *       status = RX_FRAME;
- *       break;
- *     case ZPAL_RADIO_EVENT_RXTX_CALIBRATE:
- *       // Radio reports that calibration is needed
- *       status = RX_CALIBRATION_NEEDED;
- *       break;
- *   }
- *
- *   / Get out of ISR context and handle frame
- *   HandleFrame(status);
- * }
- *
- * \endcode
  *
  * @{
  */
@@ -202,9 +50,11 @@ extern "C" {
 #define ZPAL_RADIO_RSSI_NOT_AVAILABLE (127)
 
 //deci-dBm values
-#define ZW_TX_POWER_10DBM  100
-#define ZW_TX_POWER_14DBM  140
-#define ZW_TX_POWER_20DBM  200
+#define ZW_TX_POWER_100_DDBM  100
+#define ZW_TX_POWER_140_DDBM  140
+#define ZW_TX_POWER_200_DDBM  200
+
+#define ZPAL_RADIO_STAY_AWAKE_ALWAYS UINT32_MAX
 
 /**
  * @addtogroup ZPAL_RADIO_NUM_CHANNELS Number of Channels
@@ -225,18 +75,25 @@ typedef uint16_t node_id_t;
 /**
  * @brief Parameter type to store deci dBm values.
  */
-typedef int16_t zpal_tx_power_t;
+typedef int16_t zpal_tx_power_decidbm_t;
+/// definition for maximum output power to use with zpal_tx_power_decidbm_t.
+#define ZPAL_TX_POWER_DECIDBM_MAX   0x7FFF
+
+/**
+ * @brief Parameter type to store stay awake ids.
+ */
+typedef uint32_t zpal_radio_stay_awake_id_t;
 
 /**
  * @brief Wakeup interval for the radio. A FLiRS node will use 250 or 1000 ms interval, all other
  * nodes should be configured as always listening.
  */
 typedef enum {
-  ZPAL_RADIO_WAKEUP_NEVER_LISTEN,  ///< Node is not listening (Only listen when application requests it).
-  ZPAL_RADIO_WAKEUP_ALWAYS_LISTEN, ///< Node is always listening.
-  ZPAL_RADIO_WAKEUP_EVERY_250ms,   ///< Node wakes up every 250 ms interval to listen for a wakeup beam.
-  ZPAL_RADIO_WAKEUP_EVERY_1000ms,  ///< Node wakes up every 1000 ms interval to listen for a wakeup beam.
-} zpal_radio_wakeup_t;
+  ZPAL_RADIO_LISTEN_NEVER,  ///< Node is not listening (Only listen when application requests it).
+  ZPAL_RADIO_LISTEN_ALWAYS, ///< Node is always listening.
+  ZPAL_RADIO_LISTEN_FREQUENTLY_250ms,   ///< Node wakes up every 250 ms interval to listen for a wakeup beam.
+  ZPAL_RADIO_LISTEN_FREQUENTLY_1000ms,  ///< Node wakes up every 1000 ms interval to listen for a wakeup beam.
+} zpal_radio_listen_t;
 
 /**
  * @brief Enumeration containing supported checksum types in Z-Wave.
@@ -344,6 +201,8 @@ typedef enum {
 
 /**
  * @brief Enumeration containing Tx power settings.
+ * WARNING: this enum is converted into decidbm as it is a dbm integer instead of enum.
+ *
  */
 typedef enum {
   ZPAL_RADIO_TX_POWER_DEFAULT, ///< Max Tx power.
@@ -356,8 +215,12 @@ typedef enum {
   ZPAL_RADIO_TX_POWER_MINUS7_DBM,
   ZPAL_RADIO_TX_POWER_MINUS8_DBM,
   ZPAL_RADIO_TX_POWER_MINUS9_DBM,
-  ZPAL_RADIO_TX_POWER_UNINITIALIZED = 126,
-  ZPAL_RADIO_TX_POWER_REDUCED = 127, ///< Default reduced Tx power.
+  ZPAL_RADIO_TX_POWER_MINUS10_DBM,
+  ZPAL_RADIO_TX_POWER_MINUS11_DBM,
+  ZPAL_RADIO_TX_POWER_MINUS12_DBM,
+  ZPAL_RADIO_TX_POWER_MINUS13_DBM,
+  ZPAL_RADIO_TX_POWER_MINUS14_DBM,
+  ZPAL_RADIO_TX_POWER_REDUCED = ZPAL_RADIO_TX_POWER_MINUS3_DBM, ///< Default reduced Tx power.
 } zpal_radio_tx_power_t;
 
 /**
@@ -372,7 +235,10 @@ typedef struct {
   uint8_t start_of_frame;                ///< The start of frame byte used to indicate the end of preamble and the start of frame.
   uint8_t repeats;                       ///< Number of repetitions for the frame. This is used for wakeup beams where the beam is to be repeated for 250 or 1000 ms.
   uint8_t use_lbt;                       ///< 1 to transmit frame with LBT, 0 without LBT
-  zpal_radio_tx_power_t tx_power;        ///< The RF tx power to use for transmitting in dBm.
+  union {
+    zpal_radio_tx_power_t tx_power_index;  ///< The RF tx power to use for transmitting.
+    zpal_tx_power_decidbm_t lr_tx_power;   ///< The RF tx power to use for transmitting on Long Range channels in deci-dBm.
+  };
   zpal_time_t turnaround_ref_tick;       /**< Timestamp (in zpal base time) that must be used as reference for the
                                               Rx-To-Tx turnaround time. Mostly used for Ack.
                                               If not 0, the zpal must guarantee the minimum Rx-To-Tx turnaround
@@ -404,6 +270,14 @@ typedef struct {
   zpal_time_t rx_zpal_tick;                         ///< Timestamp when the frame was received
 } zpal_radio_rx_parameters_t;
 
+typedef struct _zpal_radio_beam_info_t_ {
+  node_id_t   node_id;
+  int8_t      rssi;
+  int8_t      tx_power_dbm;
+  uint8_t     radio_channel;
+  uint8_t     home_id_hash;
+} zpal_radio_beam_info_t;
+
 /**
  * @brief Enumeratio radio events.
  */
@@ -422,22 +296,19 @@ typedef enum {
   ZPAL_RADIO_EVENT_TX_TIMEOUT = 254,
 } zpal_radio_event_t;
 
-typedef enum {
-  ZPAL_RADIO_STATUS_IDLE,
-  ZPAL_RADIO_STATUS_RX,                         /// RX in progress
-  ZPAL_RADIO_STATUS_TX,                         /// TX in progress
-  ZPAL_RADIO_STATUS_TX_BEAM,                    /// Beam TX in progress
-  ZPAL_RADIO_STATUS_RX_BEAM                     /// Beam RX in progress
-} zpal_radio_status_t;
-
 typedef void (*zpal_radio_callback_t)(const zpal_radio_event_t event);
+
+#define ZWAVE_MAXIMUM_PAYLOAD_LEGACY        64
+#define ZWAVE_MAXIMUM_PAYLOAD_SIZE          170
+#define ZWAVE_MAXIMUM_PAYLOAD_SIZE_LR       190
 
 /**
  * @brief Z-Wave receive frame.
  */
 typedef struct {
-  uint8_t frame_content_length; ///< Length of payload following this frame.
-  uint8_t frame_content[];      ///< Array with complete frame data received.
+  zpal_radio_rx_parameters_t rx_parameters;              ///< Parameters for the received frame.
+  uint8_t frame_content_length;                           ///< Length of payload following this frame.
+  uint8_t frame_content[ZWAVE_MAXIMUM_PAYLOAD_SIZE_LR];   ///< Array with complete frame data received.
 } zpal_radio_receive_frame_t;
 
 /**
@@ -467,22 +338,9 @@ typedef struct {
   uint32_t tx_time_channel[ZPAL_RADIO_ZWAVE_CHANNEL_NUM];  ///< Accumulated transmission time in ms for channel 0.
 } zpal_radio_network_stats_t;
 
-/**
- * @brief rf channel statistics structure
- *
- */
-typedef struct {
-  uint32_t rf_channel_tx_frames;                  ///< Transmitted frames on rf channel
-  uint32_t rf_channel_tx_retries;                 ///< Frame transmit retries on rf channel
-  uint32_t rf_channel_tx_lbt_failures;            ///< Frame transmit failed by lbt on rf channel
-  uint32_t rf_channel_rx_foreign_homeid;          ///< Frames received with foreign homeid on rf channel
-  uint32_t rf_channel_rx_crc_error;               ///< Frames received with CRC error on rf channel
-  int8_t   rf_channel_background_rssi_average;    ///< Background RSSI average on rf channel
-  int8_t   rf_channel_end_device_rssi_average;    ///< End Device RSSI average on rf channel
-} zpal_radio_rf_channel_statistic_t;
-
 typedef enum {
-  ZPAL_RADIO_APPLICATION_DEFAULT = 0,        ///< Normal mode.
+  ZPAL_RADIO_APPLICATION_CONTROLLER = 0,     ///< Controller mode.
+  ZPAL_RADIO_APPLICATION_END_DEVICE,         ///< End Device mode
   ZPAL_RADIO_APPLICATION_ZNIFFER             ///< Zniffer mode.
 } zpal_radio_application_t;
 
@@ -491,7 +349,7 @@ typedef enum {
  */
 typedef struct {
   zpal_radio_region_t region;                      ///< Region in which this system operates.
-  zpal_radio_wakeup_t wakeup;                      ///< Wakeup interval for the radio.
+  zpal_radio_listen_t wakeup;                      ///< Wakeup interval for the radio.
   zpal_radio_lr_channel_t primary_lr_channel;      ///< Primary Long Range Channel.
   bool lr_channel_auto_mode;                       ///< Longe Range channel selection mode
   zpal_radio_lr_channel_config_t active_lr_channel_config; /**< Long Range channel configuration. Set only when
@@ -499,17 +357,17 @@ typedef struct {
                                                               requested channel configuration is different than the
                                                               active one.*/
   int8_t listen_before_talk_threshold;             ///< LBT Threshold for Transmit backoff in dBm.
-  zpal_tx_power_t tx_power_max;                    ///< Z-Wave Transmit Power in deci dBm.
-  zpal_tx_power_t tx_power_adjust;                 ///< Adjustment for antenna gain in deci dBm.
-  zpal_tx_power_t tx_power_max_lr;                 ///< Max transmit power for Z-Wave LR in deci dBm.
+  zpal_tx_power_decidbm_t tx_power_max;            ///< Z-Wave Transmit Power in deci dBm.
+  zpal_tx_power_decidbm_t tx_power_adjust;         ///< Adjustment for antenna gain in deci dBm.
+  zpal_tx_power_decidbm_t tx_power_max_lr;         ///< Max transmit power for Z-Wave LR in deci dBm.
   zpal_radio_callback_t rx_cb;                     ///< Pointer to function called by RF on Rx Completion.
   zpal_radio_callback_t tx_cb;                     ///< Pointer to function called by RF on Tx Completion.
   zpal_radio_callback_t region_change_cb;          ///< Pointer to function called by RF on Region change.
   zpal_radio_callback_t assert_cb;                 ///< Pointer to function called by RF on fatal Assert.
   zpal_radio_network_stats_t *network_stats;       ///< Pointer to structure where to RF Statistics are placed.
   uint8_t radio_debug_enable;                      ///< Enable radio debugging which is vendor specific.
-  zpal_radio_receive_handler_t receive_handler_cb; ///< Pointer to receive handler.
   zpal_radio_application_t radio_application;      ///< Application type.
+  bool is_joinable;                      ///< Indicate if the node has been correctly included in a network. Correctly included means that the node is joinable with tuple (homeid, nodeid).
 } zpal_radio_profile_t;
 
 /**
@@ -522,11 +380,22 @@ typedef struct {
 void zpal_radio_set_network_ids(uint32_t home_id, node_id_t node_id, uint8_t home_id_hash);
 
 /**
- * @brief Initializes the radio.
+ * @brief Initializes the radio hardware with the specified configuration profile.
  *
- * @param[in] profile Pointer to the profile with information to configure the radio.
+ * This function sets up the radio module based on the provided profile,
+ * ensuring it is ready for operation. The profile contains necessary
+ * configuration parameters such as frequency, and other radio-specific settings.
+ *
+ * @param[in] profile Pointer to a structure containing the configuration
+ *                    parameters for the radio. This must be properly
+ *                    initialized before calling this function.
+ *
+ * @note Ensure that the profile is valid and all required fields are set
+ *       before invoking this function to avoid undefined behavior.
+ * @return @ref ZPAL_STATUS_OK if the zpal radio layer is ready
+ *         @ref ZPAL_STATUS_INVALID_ARGUMENT if profile is NULL.
  */
-void zpal_radio_init(zpal_radio_profile_t * const profile);
+zpal_status_t zpal_radio_init(const zpal_radio_profile_t * const profile);
 
 /**
  * @brief Function used to change region and Long Range mode at the same time.
@@ -558,7 +427,8 @@ zpal_status_t zpal_radio_transmit(zpal_radio_transmit_parameter_t const *const t
                                   uint8_t frame_header_length,
                                   uint8_t const *const frame_header_buffer,
                                   uint8_t frame_payload_length,
-                                  uint8_t const *const frame_payload_buffer);
+                                  uint8_t const *const frame_payload_buffer,
+                                  uint8_t is_retransmission);
 
 /**
  * @brief Function for transmitting a Z-Wave Beam frame though the radio.
@@ -576,18 +446,44 @@ zpal_status_t zpal_radio_transmit_beam(zpal_radio_transmit_parameter_t const *co
  * @brief Starts the receiver and enables reception of frames.
  * If the receiver is already started, nothing will happen.
  */
-void zpal_radio_start_receive(void);
+zpal_status_t zpal_radio_start_receive(void);
 
 /**
- * @brief Function to get last received frame.
- * If a frame is received, @ref zpal_radio_receive_handler_t will be invoked.
+ * @brief Checks if data is available for processing in the radio module.
+ *
+ * This function determines whether there is any data available in the
+ * radio module that can be processed or retrieved.
+ *
+ * @return True if data is available, false otherwise.
  */
-void zpal_radio_get_last_received_frame(void);
+bool zpal_radio_is_data_available(void);
 
 /**
- * @brief Powers down the radio transceiver.
+ * @brief Restart the radio if a frame reception is in progress. The radio is restarted once the frame is completed.
+ *
+ * @details If a frame reception is in progress, the function wait for the end of the frame then
+ *          restart the radio (in Rx mode). In other case, the function does nothing
+ *
+ * @return @ref ZPAL_STATUS_OK if the radio ready in receiver mode
+ *         @ref ZPAL_STATUS_BUSY if the radio is not in Rx.
+ *         @ref ZPAL_STATUS_FAIL if the function has failed to restart the radio
  */
-void zpal_radio_power_down(void);
+zpal_status_t zpal_radio_restart_if_rx_in_progress(void);
+
+/**
+ * @brief Function to get the last received frame.
+ *
+ * @details This function retrieves the oldest received Z-Wave frame
+ *          from the radio module. The frame data is stored in the provided
+ *          structure.
+ *
+ * @param[out] frame Pointer to a structure where the last received frame
+ *                   will be stored.
+ *
+ * @return @ref ZPAL_STATUS_OK if a valid frame is available and retrieved.
+ *         @ref ZPAL_STATUS_FAIL if no frame is available or an error occurred.
+ */
+zpal_status_t zpal_radio_get_last_received_frame(zpal_radio_receive_frame_t* frame);
 
 /**
  * @brief Function to get the protocol mode used in the configured region.
@@ -595,22 +491,6 @@ void zpal_radio_power_down(void);
  * @return Protocol mode used in the configured region.
  */
 zpal_radio_protocol_mode_t zpal_radio_get_protocol_mode(void);
-
-/**
- * @brief Get last beam channel.
- * Retrieve the channel on which we have last received a beam on.
- *
- * @return Last beam channel.
- */
-zpal_radio_zwave_channel_t zpal_radio_get_last_beam_channel(void);
-
-/**
- * @brief Get last beam RSSI.
- * Retrieve the RSSI of the last beam received.
- *
- * @return Last beam rssi.
- */
-int8_t zpal_radio_get_last_beam_rssi(void);
 
 /**
  * @brief Function for setting the LBT RSSI level.
@@ -639,65 +519,6 @@ void zpal_radio_clear_tx_timers(void);
 void zpal_radio_clear_network_stats(void);
 
 /**
- * @brief Function for clearing specified rf channel statistics.
- *
- * @param zwavechannel rf channel for which statistics will be cleared.
- */
-void zpal_radio_rf_channel_statistic_clear(zpal_radio_zwave_channel_t zwavechannel);
-
-/**
- * @brief
- *
- * @param zwavechannel zwave channel for which statistics will be returned.
- * @param p_radio_channel_statistic pointer to structure where statistics for specified zwave channel should be copied.
- * @return true  If delivered structure has been filled with current statistic for specified zwavechannel.
- * @return false If delivered structure has NOT been filled with any channel statistics.
- */
-bool zpal_radio_rf_channel_statistic_get(zpal_radio_zwave_channel_t zwavechannel, zpal_radio_rf_channel_statistic_t* p_radio_channel_statistic);
-
-/**
- * @brief Function for setting the zwavechannel used when calling zpal_radio_rf_channel_statistic_tx_frames,
- *        zpal_radio_rf_channel_statistic_tx_retries and zpal_radio_rf_channel_statistic_tx_lbt_failures.
- *
- * @param zwavechannel Z-Wave channel current rf channel statistic 'tx channel' should be set to.
- */
-void zpal_radio_rf_channel_statistic_tx_channel_set(zpal_radio_zwave_channel_t zwavechannel);
-
-/**
- * @brief Function for incrementing the rf channel tx frame statistic.
- *
- */
-void zpal_radio_rf_channel_statistic_tx_frames(void);
-
-/**
- * @brief Function for incrementing the rf channel tx retries statistic.
- *
- */
-void zpal_radio_rf_channel_statistic_tx_retries(void);
-
-/**
- * @brief Function for incrementing the rf channel tx lbt failures.
- *
- */
-void zpal_radio_rf_channel_statistic_tx_lbt_failures(void);
-
-/**
- * @brief Function for updating the rf channel background noise rssi average statistic.
- *
- * @param zwavechannel Z-Wave channel on which background noise rssi average should be updated.
- * @param rssi rssi to add to sampleset used for calculating average background noise rssi on specified Z-Wave channel.
- */
-void zpal_radio_rf_channel_statistic_background_rssi_average_update(zpal_radio_zwave_channel_t zwavechannel, int8_t rssi);
-
-/**
- * @brief Function for updating the rf channel end device noise rssi average statistic.
- *
- * @param zwavechannel Z-Wave channel on which end device noise rssi average should be updated.
- * @param rssi rssi to add to sampleset used for calculating average end device noise rssi on specified Z-Wave channel.
- */
-void zpal_radio_rf_channel_statistic_end_device_rssi_average_update(zpal_radio_zwave_channel_t zwavechannel, int8_t rssi);
-
-/**
  * @brief Returns the background RSSI.
  *
  * @param[in]   channel   uint8_t channel Id for measurement.
@@ -713,40 +534,37 @@ zpal_status_t zpal_radio_get_background_rssi(uint8_t channel, int8_t *rssi);
  *
  * @return The default RF TX power in deci dBm
  */
-zpal_tx_power_t zpal_radio_get_default_tx_power(void);
+zpal_tx_power_decidbm_t zpal_radio_get_default_tx_power(void);
 
 /**
- * @brief Function for getting the current reduce RF tx power compared to the default normal power in dBm.
+ * @brief Puts the radio into an idle state.
  *
- * @return The current reduce RF TX power in dBm.
+ * This function transitions the radio to an idle state where it is neither
+ * transmitting nor receiving. It can be used to conserve power or prepare
+ * the radio for a new operation.
  */
-zpal_radio_tx_power_t zpal_radio_get_reduce_tx_power(void);
+zpal_status_t zpal_radio_idle(void);
 
 /**
- * @brief Allows the radio to go into FLiRS receive mode.
- */
-void zpal_radio_enable_flirs(void);
-
-/**
- * @brief Returns whether FLiRS mode is enabled in the radio.
+ * @brief Aborts any ongoing radio operation.
  *
- * @return True when FLiRS mode is enabled.
+ * This function halts any current transmission or reception activity
+ * and brings the radio to an idle state. It can be used to immediately
+ * stop the radio's operation in case of an error or when a higher-priority
+ * operation needs to be performed.
  */
-bool zpal_radio_is_flirs_enabled(void);
+zpal_status_t zpal_radio_abort(void);
 
 /**
- * @brief Starts the receiver after power down.
+ * @brief Shuts down the radio hardware.
  *
- * @param[in] wait_for_beam If set to true, the radio will listen for a beam. Otherwise, it will
- *                          listen normally.
- */
-void zpal_radio_start_receive_after_power_down(bool wait_for_beam);
-
-/**
- * @brief Turn radio off without changing configuration.
+ * This function powers down the radio hardware, ensuring it is in a low-power state.
+ * It should be called when the radio is no longer needed to conserve energy.
  *
+ * @note This function is definitive and should be used with caution.
+ *       Once called, the radio cannot be restarted without reinitializing it.
  */
-void zpal_radio_abort(void);
+zpal_status_t zpal_radio_shutdown(void);
 
 /**
  * @brief Resets the radio configuration to receive mode after having received a beam.
@@ -754,7 +572,7 @@ void zpal_radio_abort(void);
  * @param[in] start_receiver If set to true, the receiver will start listening. Otherwise, it will
  *                           stay inactive.
  */
-void zpal_radio_reset_after_beam_receive(bool start_receiver);
+zpal_status_t zpal_radio_reset_after_beam_receive(bool start_receiver);
 
 /**
  * @brief Returns whether use of fragmented beams is enabled or not for the active region.
@@ -762,13 +580,6 @@ void zpal_radio_reset_after_beam_receive(bool start_receiver);
  * @return True if use of fragmented beams is enabled, false otherwise.
  */
 bool zpal_radio_is_fragmented_beam_enabled(void);
-
-/**
- * @brief Calibrates the radio.
- * Z-Wave expects the radio ZPAL implementation to generate a @ref ZPAL_RADIO_EVENT_RXTX_CALIBRATE event when
- * calibration is required. The event will invoke this function in non-interrupt context.
- */
-void zpal_radio_calibrate(void);
 
 /**
  * @brief Returns whether listen before talk (LBT) is enabled.
@@ -786,25 +597,18 @@ bool zpal_radio_is_lbt_enabled(void);
 uint16_t zpal_radio_get_beam_startup_time(void);
 
 /**
- * @brief Returns the node ID associated with most recently received beam frame.
- *
- * @return Node ID associated with the most recently received beam frame.
- */
-node_id_t zpal_radio_get_beam_node_id(void);
-
-/**
  * @brief Returns the minimum transmit power for Z-Wave Long Range.
  *
- * @return Minimum TX power in dBm.
+ * @return Minimum TX power in deci dBm.
  */
-zpal_tx_power_t zpal_radio_get_minimum_lr_tx_power(void);
+zpal_tx_power_decidbm_t zpal_radio_get_minimum_lr_tx_power(void);
 
 /**
  * @brief Returns the maximum transmit power for Z-Wave Long Range.
  *
- * @return Maximum TX power in dBm.
+ * @return Maximum TX power in deci dBm.
  */
-zpal_tx_power_t zpal_radio_get_maximum_lr_tx_power(void);
+zpal_tx_power_decidbm_t zpal_radio_get_maximum_lr_tx_power(void);
 
 /**
  * @brief Returns whether debug is enabled or disabled.
@@ -824,7 +628,7 @@ bool zpal_radio_is_debug_enabled(void);
  *                    - true: Enable debug mode.
  *                    - false: Disable debug mode.
  */
-void zpal_radio_debug_configure(bool enable);
+zpal_status_t zpal_radio_debug_configure(bool enable);
 
 /**
  * @brief a getter on the current rf profile.
@@ -876,20 +680,6 @@ bool zpal_radio_get_long_range_channel_auto_mode(void);
 void zpal_radio_set_long_range_channel_auto_mode(bool enable);
 
 /**
- * @brief Function to the set Long Range channel Locked status.
- *
- * @param[in] lock Long Range channel Locked status.
- */
-void zpal_radio_set_long_range_lock(bool lock);
-
-/**
- * @brief Function to read the Long Range channel Locked status.
- *
- * @return True if node shall use Long Range channel only.
- */
-bool zpal_radio_is_long_range_locked(void);
-
-/**
  * @brief Function to check if the stack implementation supports a given region
  *
  * @param[in] region  Region to check
@@ -899,25 +689,15 @@ bool zpal_radio_is_long_range_locked(void);
 bool zpal_radio_is_region_supported(zpal_radio_region_t region);
 
 /**
- * @brief Read the saved tx power of the last received long-range beam.
- *
- * @return The tx power of the last received long-range beam.
- */
-int8_t zpal_radio_get_flirs_beam_tx_power(void);
-
-/**
  * @brief Check if transmission is allowed for specified channel.
  *
  * @param[in] channel         The channel to check.
  * @param[in] frame_length    The length of the frame to send.
- * @param[in] frame_priority  The Tx priority of the frame.
+ * @param[in] cca             If true, the function will provision cca_duration into transmission time.
  * @return True if node shall use Long Range channel only.
  *
- * @note  In Japan all communication must comply to a max 100ms transmit
- *        followed by min 100ms silence period.
- * @note  Cause a channel shift.
  */
-bool zpal_radio_is_transmit_allowed(uint8_t channel, uint8_t frame_length, uint8_t frame_priority);
+bool zpal_radio_is_transmit_allowed(uint8_t channel, uint8_t frame_length, bool cca);
 
 /**
  * @brief Function to reduce Tx power of classic non-listening devices.
@@ -933,7 +713,17 @@ bool zpal_radio_attenuate(zpal_radio_tx_power_t adjust_tx_power);
  *
  * @return The maximum board supported tx power in deci dBm.
  */
-zpal_tx_power_t zpal_radio_get_maximum_tx_power(void);
+zpal_tx_power_decidbm_t zpal_radio_get_maximum_tx_power(void);
+
+/**
+ * @brief Function to adjust the requested tx power for Long Range.
+ * This function ensures that the requested power is within the allowed range
+ *
+ * @param[in] requested_power  The requested tx power in deci dBm.
+ *
+ * @return The adjusted tx power in deci dBm.
+ */
+zpal_tx_power_decidbm_t zpal_radio_limit_lr_power_to_capability(zpal_tx_power_decidbm_t requested_power);
 
 /**
  * @brief Function to radio calibration.
@@ -942,6 +732,103 @@ zpal_tx_power_t zpal_radio_get_maximum_tx_power(void);
  *                    If false, radio calibration is performed only if it is required.
  */
 void zpal_radio_request_calibration(bool forced);
+
+/**
+ * @brief Retrieves information about the last received beam.
+ *
+ * @param[out] beamInfo Pointer to the structure where the beam information will be stored.
+ * @return @ref ZPAL_STATUS_OK if the beam information was successfully retrieved,
+ *         @ref ZPAL_STATUS_INVALID_ARGUMENT if beamInfo is NULL.
+ */
+zpal_status_t zpal_radio_get_last_beam_info(zpal_radio_beam_info_t * beamInfo);
+
+/**
+ * @brief Stores the average RSSI (Received Signal Strength Indicator) for a given Z-Wave channel.
+ *
+ * This function stores the background RSSI average for the specified Z-Wave channel.
+ *
+ * @param zwavechannel The Z-Wave channel for which the RSSI average is to be calculated.
+ * @param averagerssi The average RSSI value to be used for the calculation.
+ */
+void zpal_radio_rf_channel_statistic_store_background_rssi_average(zpal_radio_zwave_channel_t zwavechannel, int8_t averagerssi);
+
+/**
+ * @brief Requests the radio to stay awake for a specified number of milliseconds.
+ *
+ * @param msecs Number of millisecs to stay awake (ZPAL_RADIO_STAY_AWAKE_ALWAYS = never ends).
+ * @param id    Pointer to a variable where the identifier for the stay-awake request will be stored.
+ *              This identifier is used to revoke the request later. NULL value is accepted, but it won't be
+ *              possible to revoke the request later.
+ * @return @ref ZPAL_STATUS_OK if the request was successful, @ref ZPAL_STATUS_FAIL otherwise.
+ *
+ * @note **Timer Synchronization**: This API uses platform-specific timers (hardware-based on Silicon Labs).
+ *       When combining with OS-level timers (e.g., FreeRTOS ctimer), ensure stay_awake duration exceeds
+ *       the OS timeout to account for scheduler latency. Example: if ctimer fires at 240ms, set stay_awake
+ *       to 440ms (240 + 200ms margin). This prevents device to shutoff radio and eventually sleep before
+ *       callback execution on low-power devices.
+ */
+zpal_status_t zpal_radio_request_stay_awake(uint32_t msecs, zpal_radio_stay_awake_id_t *id);
+
+/**
+ * @brief Revokes a previous stay-awake request, allowing the radio to sleep as normal.
+ *
+ * @param id Pointer to the identifier of the stay-awake request to revoke.
+ *           NULL is used as a special value to revoke permanent stay-awake requests.
+ *
+ * @note The pointer to the identifier is set to 0 after revocation.
+ * @note Radio will transition to off or flirs mode if there are no other active stay-awake requests.
+ */
+zpal_status_t zpal_radio_revoke_stay_awake(zpal_radio_stay_awake_id_t *id);
+
+/**
+ * @brief Lengthens the current stay-awake period.
+ *
+ * @param id Pointer to the identifier of the stay-awake request to update.
+ * @param new_msecs The new length (in millisecs) to request from now.
+ * @return @ref ZPAL_STATUS_OK if the request was successful, @ref ZPAL_STATUS_FAIL otherwise.
+ *
+ * @note This function is equivalent to revoking the previous request and creating a new one.
+ */
+zpal_status_t zpal_radio_update_stay_awake(zpal_radio_stay_awake_id_t *id, uint32_t new_msecs);
+
+typedef enum {
+  ZPAL_RADIO_STATUS_OFF = 0,           ///< Radio is off
+  ZPAL_RADIO_STATUS_FLIRS,             ///< Radio is in Beam receive mode
+  ZPAL_RADIO_STATUS_ON                 ///< Radio is in normal operating mode
+} zpal_radio_status_t;
+
+/**
+ * @brief Getter of wakeup state of the radio
+ * @return Current wakeup state of the radio
+ */
+zpal_radio_status_t zpal_radio_get_wakeup_status(void);
+
+typedef void (*zpal_radio_status_callback_t)(const zpal_radio_status_t state);
+
+/**
+ * @brief Registers a callback function to be invoked on radio state changes.
+ *
+ * This function sets the callback that will be called whenever the radio state changes.
+ * The callback function should match the signature defined by zpal_radio_state_callback_t.
+ *
+ * @param[in] callback  The function pointer to the callback to be registered.
+ *                      Pass NULL to unregister the current callback.
+ *
+ * @return zpal_status_t Returns status code indicating success or failure of the operation.
+ */
+zpal_status_t zpal_radio_set_status_callback(zpal_radio_status_callback_t callback);
+
+/**
+ * @brief Inform the ZPAL radio layer that the node has been correctly included in a network.
+ *
+ * Correctly included means that the node is joinable with tuple (homeid, nodeid).
+ *
+ * @param[in] is_joinable true if the node has been correctly included, false otherwise.
+ *
+ * @return zpal_status_t Returns status code indicating success or failure of the operation.
+ * @ref ZPAL_STATUS_OK if the operation was successful.
+ */
+zpal_status_t zpal_radio_set_joinable(bool is_joinable);
 
 /**
  * @} //zpal-radio

@@ -13,6 +13,37 @@
  *       issues during the OTA process, including transfer failures, CRC errors, and bootloader
  *       problems. Enable the zw_log component and configure appropriate log levels to capture
  *       detailed OTA-related debug information.
+ *
+ * @section ota_power_management Power Management During OTA
+ *
+ * The OTA update process manages device power state to ensure reliable firmware transfer:
+ *
+ * @verbatim
+ * OTA Radio Power Management Timeline:
+ *
+ * Time:     0min    5min    10min   15min   20min   25min   30min   35min   40min
+ * State:    |-------|-------|-------|-------|-------|-------|-------|-------|
+ *           ^                                                               ^
+ *           |                                                               |
+ *   Request 40min stay-awake                                        Update to 100ms
+ *   (OTA_AWAKE_PERIOD_LONG_TERM)                              (OTA_AWAKE_PERIOD_GRACEFUL_OFF)
+ *   zpal_radio_request_stay_awake()                           zpal_radio_update_stay_awake()
+ *           |                                                               |
+ *           |<-------------- OTA Transfer Process ------------->|           |
+ *           |                                                   |           |
+ *        Start OTA                                           Complete       Allow sleep
+ *        Process                                             OTA/Error      after reboot
+ *
+ * @endverbatim
+ *
+ * - **Initial Request (40 minutes)**: When OTA starts, we request a long stay-awake period
+ *   using zpal_radio_request_stay_awake() with OTA_AWAKE_PERIOD_LONG_TERM (40 minutes).
+ *   This ensures the device remains awake during the entire firmware transfer process.
+ *
+ * - **Final Update (100ms)**: At the end of OTA (success or failure), we update the
+ *   stay-awake period to OTA_AWAKE_PERIOD_GRACEFUL_OFF (100ms) using
+ *   zpal_radio_update_stay_awake(). This brief period allows any pending ACK/NACK
+ *   transmissions to complete before the device reboots or returns to sleep mode.
  */
 
 /****************************************************************************/
@@ -38,8 +69,6 @@
 
 #include <zpal_misc.h>
 #include <zpal_bootloader.h>
-#include <zpal_power_manager.h>
-#include "zw_power_manager_ids.h"
 
 #include "stdlib.h"
 #include <ZAF_file_ids.h>
@@ -117,6 +146,7 @@ typedef struct _OTA_UTIL_{
   uint8_t requestReport;   /// Status to send in FW Update Request Report
   uint8_t statusReport;    /// Status to send in FW Update MD Status Report
   uint8_t reportsReceived; /// counter to keep track of how many reports are received so far during one multiFrame session. (not from start)
+  zpal_radio_stay_awake_id_t stay_awake_id;
 } OTA_UTIL;
 
 //If this struct is changed please increase FIRMWARE_UPDATE_FILE_VERSION in ota_util.c
@@ -914,11 +944,8 @@ void handleCmdClassFirmwareUpdateMdReqGet(
   }
 
   // Keep awake for a long time, but not forever.
-  zw_power_manager_lock(ZPAL_PM_TYPE_USE_RADIO, OTA_AWAKE_PERIOD_LONG_TERM, ZPAL_PM_APP_RADIO_ZAF_CC_OTA_ID);
-
-  // Reset the internal page counters so they point to the start of the storage slot.
-  zpal_bootloader_reset_page_counters();
-
+  zpal_radio_request_stay_awake(OTA_AWAKE_PERIOD_LONG_TERM, &myOta.stay_awake_id);
+  zpal_bootloader_erase_storage_slot();
   initOTAState();
   memcpy( (uint8_t*) &myOta.rxOpt, (uint8_t*)rxOpt, sizeof(RECEIVE_OPTIONS_TYPE_EX));
 
@@ -1075,7 +1102,7 @@ static void ZCB_FinishFwUpdate(__attribute__((unused)) TRANSMISSION_RESULT * pTr
    * Remove lock on power manager to allow going back to sleep with a delay
    * in case of buffered packets or ACK/NACK/RES that needs to be send.
    */
-  zw_power_manager_relock(ZPAL_PM_TYPE_USE_RADIO, OTA_AWAKE_PERIOD_GRACEFUL_OFF, ZPAL_PM_APP_RADIO_ZAF_CC_OTA_ID);
+  zpal_radio_update_stay_awake(&myOta.stay_awake_id, OTA_AWAKE_PERIOD_GRACEFUL_OFF);
   ZPAL_LOG_INFO(ZPAL_LOG_CC_FIRMWARE_UPDATE, " --> OTA_UTIL.C TURNED OFF DEVICE! ---\n");
 }
 

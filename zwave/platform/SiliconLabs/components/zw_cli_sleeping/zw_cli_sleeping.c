@@ -31,7 +31,10 @@
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
+
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
+#endif
 
 #ifdef SL_CATALOG_ZW_CLI_SLEEPING_PRESENT
 
@@ -43,9 +46,10 @@
 #include "zw_cli_sleeping.h"
 #include "ev_man.h"
 #include "events.h"
-#include "zpal_power_manager.h"
+#include "sl_sleeptimer.h"
+#include "zw_shutdown_manager.h"
 
-#include "zw_power_manager_ids.h"
+static sl_sleeptimer_timer_handle_t cli_sleeptimer_handle;
 
 /******************************************************************************
  * CLI - sleeping: Enabling or disabling the device to go into sleep mode
@@ -71,15 +75,21 @@ void cli_sleeping(sl_cli_command_arg_t *arguments)
 void zw_cli_sleeping_util_prevent_sleeping(bool is_prevent)
 {
   if ((true == is_prevent)) {
-    zpal_pm_relock(ZPAL_PM_TYPE_USE_RADIO, ZPAL_PM_DOMAIN_APP, 0, ZPAL_PM_APP_RADIO_CLI_ID);
+    zw_shutdown_manager_add_lock();
   } else {
-    zpal_pm_lock_cancel(ZPAL_PM_TYPE_USE_RADIO, ZPAL_PM_DOMAIN_APP, ZPAL_PM_APP_RADIO_CLI_ID);
+    zw_shutdown_manager_release_lock();
   }
+}
+
+static void zw_cli_sleeping_sleeptimer_callback(__attribute__((unused)) sl_sleeptimer_timer_handle_t *handle, __attribute__((unused)) void *contextData)
+{
+  zw_shutdown_manager_release_lock();
 }
 
 void zw_cli_sleeping_util_prevent_sleeping_timeout(uint8_t seconds)
 {
-  zpal_pm_lock(ZPAL_PM_TYPE_USE_RADIO, ZPAL_PM_DOMAIN_APP, seconds * 1000, ZPAL_PM_APP_RADIO_CLI_ID);
+  zw_shutdown_manager_add_lock();
+  sl_sleeptimer_start_timer_ms(&cli_sleeptimer_handle, seconds * 1000, zw_cli_sleeping_sleeptimer_callback, NULL, 0, 0);
 }
 
 #endif // SL_CATALOG_ZW_CLI_SLEEPING_PRESENT

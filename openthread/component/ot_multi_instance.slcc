@@ -5,33 +5,33 @@ category: OpenThread
 quality: production
 description: This component provides support for OpenThread multi-instance CLI enablement
 provides:
-  - name: ot_multi_instance_cli
+- name: ot_multi_instance_cli
 requires:
-  - name: ot_platform_abstraction
-  - name: sl_ot_custom_cli
+- name: ot_platform_abstraction
+- name: sl_ot_custom_cli
 recommends:
-  - id: ot_platform_abstraction
-    vendor: silabs
+- id: ot_platform_abstraction
+  vendor: silabs
 template_contribution:
-  - name: sl_ot_cli_command
-    value:
-        name: "instance"
-        handler: "instanceCommandHandler"
-        macro: "SL_OPENTHREAD_MULTI_INSTANCE_CLI_ENABLE"
+- name: sl_ot_cli_command
+  value:
+    name: "instance"
+    handler: "instanceCommandHandler"
+    macro: "SL_OPENTHREAD_MULTI_INSTANCE_CLI_ENABLE"
 source:
-  - path: src/cli/multi_instance_cli.c
+- path: src/cli/multi_instance_cli.c
 include:
-  - path: src/
-    file_list:
-      - path: cli/multi_instance_cli.h
+- path: src/
+  file_list:
+  - path: cli/multi_instance_cli.h
 define:
-  - name: OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
-    value: 1
-  - name: OPENTHREAD_CONFIG_MULTIPLE_STATIC_INSTANCE_ENABLE
-    value: 1
-  - name: SL_OPENTHREAD_MULTI_INSTANCE_CLI_ENABLE
-    value: 1
+- name: OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
+  value: 1
+- name: OPENTHREAD_CONFIG_MULTIPLE_STATIC_INSTANCE_ENABLE
+  value: 1
+- name: SL_OPENTHREAD_MULTI_INSTANCE_CLI_ENABLE
+  value: 1
 metadata:
-    sbom:
-        license: Zlib
+  sbom:
+    license: Zlib
 root_path: openthread

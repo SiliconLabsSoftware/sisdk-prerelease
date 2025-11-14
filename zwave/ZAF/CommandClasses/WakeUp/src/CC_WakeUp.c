@@ -2,6 +2,42 @@
  * @file CC_WakeUp.c
  * @brief Handler for Command Class Wake Up.
  * @copyright 2018 Silicon Laboratories Inc.
+ *
+ * @section wakeup_power_management Wake Up Command Class Power Management
+ *
+ * The Wake Up Command Class manages device power state during post-inclusion
+ * operations to ensure the device remains awake for initial configuration:
+ *
+ * @verbatim
+ * Wake Up Post-Inclusion Radio Power Management Timeline:
+ *
+ * Time:     0sec     2sec     4sec     6sec     8sec    10sec    12sec    14sec    16sec    18sec    20sec
+ * State:    |--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|
+ *           ^                                                                                   ^
+ *           |                                                                                   |
+ *   Post-Inclusion Start                                                              Stay-awake timeout
+ *   Update stay-awake timeout                                                      (automatic sleep)
+ *   zpal_radio_update_stay_awake(POST_INCLUSION_STAY_AWAKE_TIME)
+ *           |                                                                                   |
+ *           |<------------- Post-Inclusion Configuration Window ----------->|                   |
+ *           |                                                               |                   |
+ *        Start Post                                                     Config                Allow sleep
+ *        Inclusion                                                      Complete              after timeout
+ *
+ * @endverbatim
+ *
+ * - **Post-Inclusion Stay-Awake**: After successful inclusion, we update the stay-awake
+ *   timeout to POST_INCLUSION_STAY_AWAKE_TIME using zpal_radio_update_stay_awake().
+ *   This ensures the device remains awake for initial configuration commands from
+ *   the controller.
+ *
+ * - **Configuration Window**: The stay-awake period provides a window for the controller
+ *   to send initial configuration commands such as associations, parameters, and
+ *   other setup commands.
+ *
+ * - **Automatic Timeout**: The stay-awake request automatically expires after the
+ *   configured timeout, allowing the device to return to its normal sleep/wake cycle
+ *   without requiring explicit revocation.
  */
 
 /****************************************************************************/
@@ -23,16 +59,12 @@
 #include <ZAF_nvm_app.h>
 #include <ZAF_nvm.h>
 #include <ZW_system_startup_api.h>
-#include "zw_power_manager_ids.h"
 #include "zpal_log.h"
+#include "zpal_radio.h"
 
 /****************************************************************************/
 /*                      PRIVATE TYPES and DEFINITIONS                       */
 /****************************************************************************/
-
-/* [sec] We should avoid sleeping close or less than 10 seconds with a buffer of 1 second.
- * This is due to POST_INCLUSION_STAY_AWAKE_TIME. */
-#define MINIMUM_SLEEP_TIME                11     // [sec]
 
 #define POST_INCLUSION_STAY_AWAKE_TIME    10000  // [ms]
 
@@ -48,6 +80,8 @@ static void (*ZCB_WakeUpTxCallback)(uint8_t txStatus, TX_STATUS_TYPE* pExtendedT
 static SWakeupCcData gWakeupCcData;
 
 static SSwTimer WakeUpTimer;
+
+static zpal_radio_stay_awake_id_t stay_awake_id = 0;
 
 /****************************************************************************/
 /*                              EXPORTED DATA                               */
@@ -361,10 +395,10 @@ CC_WakeUp_handler(
     case WAKE_UP_NO_MORE_INFORMATION_V2:
       /*
        * The wakeup destination/master node has nothing more to send.
-       * From the WakeUp CC perspective we're ready sleep immediately.
-       * We signal that to the PM module by releasing our PM lock.
+       * From the WakeUp CC perspective we're ready to stop radio immediately.
+       * We signal that to the radio module.
        */
-      zw_power_manager_lock_cancel(ZPAL_PM_TYPE_USE_RADIO, ZPAL_PM_APP_RADIO_ZAF_CC_WAKEUP_ID);
+      zpal_radio_revoke_stay_awake(&stay_awake_id);
       wakeUpIsActive = false;
 
       autoStayAwakeAfterInclusion = false;
@@ -414,9 +448,8 @@ CC_WakeUp_handler(
 static void
 CC_WakeUp_stayAwake10s(void)
 {
-  /* Don't sleep the next 10 seconds */
-  // note: use relock to extend the stay awake time by 10 sec if already locked
-  zw_power_manager_relock(ZPAL_PM_TYPE_USE_RADIO, POST_INCLUSION_STAY_AWAKE_TIME, ZPAL_PM_APP_RADIO_ZAF_CC_WAKEUP_ID);
+  /* Keep radio alive the next 10 seconds */
+  zpal_radio_update_stay_awake(&stay_awake_id, POST_INCLUSION_STAY_AWAKE_TIME);
 }
 
 /**

@@ -13,14 +13,9 @@
 
 /**
  * @brief Validate the PIN Code credential
- * This function implements the manufactorer specific recommendations for PIN Code validation.
- * If the SDK supports User Code Command Class, these requirements shouldn't be followed, because
- * the User Code Command Class is less strict than the User Credential Command Class, and this can lead
- * to incompatibility between the two Command Classes and result in a failed certification.
- * Every SDK provider can decide to use these recommendations or not as a default implementation.
- * To switch between the two implementations, the USE_U3C_PIN_CODE_RECOMMENDATIONS macro should be used.
- *  - 0: The User Credential Command Class recommendations are not used
- *  - 1: The User Credential Command Class recommendations are used
+ * This function implements the manufacturer specific recommendations for PIN Code validation.
+ * The behavior of this function can be configured with the USE_U3C_PIN_CODE_RECOMMENDATIONS macro.
+ * @see cc_user_credential_config.h
  *
  * @param[in] p_credential Pointer to the credential to validate
  *
@@ -28,8 +23,13 @@
  */
 static bool CC_UserCredential_manufacturer_validate_pin_code(const u3c_credential_t * const p_credential)
 {
-  // The following requirements are marked as SHOULD in the specification.
-  // Manufacturers can change freely.
+  /**
+   * The following requirements are marked as SHOULD in the specification.
+   * If the application supports the User Code Command Class, then enforcing these recommendations
+   * can result in a failed certification as the User Code Command Class is less strict
+   * than the User Credential Command Class.
+   * It is up to the manufacturer to decide whether to use these recommendations or not.
+   */
 
 #if USE_U3C_PIN_CODE_RECOMMENDATIONS
   // Check if the PIN Code only contains the same digit

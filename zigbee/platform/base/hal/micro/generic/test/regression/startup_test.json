@@ -1,5 +1,0 @@
-{
-  "name": "startup",
-  "target": "regression-test",
-  "parser": "unity"
-}

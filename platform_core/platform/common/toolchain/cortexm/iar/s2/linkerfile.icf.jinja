@@ -148,6 +148,14 @@ define block nvm with alignment = {{ flash_page_size }}
   section SIMEE,
 };
 keep { block nvm };
+
+{%- if logger_enable %}
+define block logger with alignment = 4
+{
+  section log_fmt,
+};
+keep { block logger };
+{%- endif %}
 {%- endif %} {#- trustzone_secure #}
 {%- if trustzone_secure %}
 define block Veneer$$CMSE with alignment = {{ 32 }}
@@ -245,6 +253,11 @@ do not initialize
 {%- else %}
   section .heap
 {%- endif %}
+{%- if trustzone_secure is not defined %}
+{%- if logger_enable %}
+  , section log_fmt
+{%- endif %}
+{%- endif %}
 };
 
 keep { section .intvec };
@@ -268,6 +281,9 @@ place at end of MAIN_FLASH_region {
   block zwavenvm,
   {%- endif %}
   block nvm,
+{%- if logger_enable %}
+  block logger,
+{%- endif %}
 {%- endif %} {#- trustzone_secure #}
 {%- if trustzone_secure %}
   block Veneer$$CMSE

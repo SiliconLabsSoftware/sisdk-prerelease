@@ -5,16 +5,16 @@ package: rail_library
 category: Platform|Radio
 quality: evaluation
 metadata:
-    sbom:
-        id: sl_rail_util_sfm_sequencer
-        name: SL RAIL Utility, SFM Sequencer Image Selection
-        license: Zlib
+  sbom:
+    id: sl_rail_util_sfm_sequencer
+    name: SL RAIL Utility, SFM Sequencer Image Selection
+    license: Zlib
 provides:
-  - name: sl_rail_util_sfm_sequencer
+- name: sl_rail_util_sfm_sequencer
 requires:
-  - name: rail_util_sfm_sequencer
-  - name: component_catalog
+- name: rail_util_sfm_sequencer
+- name: component_catalog
 template_contribution:
-  - name: component_catalog
-    value: sl_rail_util_sfm_sequencer
+- name: component_catalog
+  value: sl_rail_util_sfm_sequencer
 root_path: rail_library

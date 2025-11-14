@@ -5,53 +5,53 @@ category: Zigbee|Utility
 quality: production
 description: Zigbee Dynamic Node Type
 provides:
-  - name: zigbee_dynamic_node_type
+- name: zigbee_dynamic_node_type
 requires:
-  - name: zigbee_system_common
-  - name: zigbee_zcl_framework_core
+- name: zigbee_system_common
+- name: zigbee_zcl_framework_core
 
 source:
-  - path: stack/zigbee/dynamic-node-type.c
-  - path: app/framework/plugin/dynamic-node-type-cli/dynamic-node-type-cli.c
-    condition:
-      - cli
+- path: stack/zigbee/dynamic-node-type.c
+- path: app/framework/plugin/dynamic-node-type-cli/dynamic-node-type-cli.c
+  condition:
+  - cli
 
 include:
-  - path: stack/include
-    file_list:
-      - path: zigbee-dynamic-node-type.h
-  - path: stack/zigbee
-    file_list:
-      - path: dynamic-node-type.h
+- path: stack/include
+  file_list:
+  - path: zigbee-dynamic-node-type.h
+- path: stack/zigbee
+  file_list:
+  - path: dynamic-node-type.h
 
 template_contribution:
-  - name: component_catalog
-    value: zigbee_dynamic_node_type
+- name: component_catalog
+  value: zigbee_dynamic_node_type
 
 # CLI Commands
-  - name: cli_group
-    value:
-        name: dynamic-node-type
-        help: Custom commands
+- name: cli_group
+  value:
+    name: dynamic-node-type
+    help: Custom commands
 
-  - name: cli_command
-    value:
-        group: dynamic-node-type
-        name: switch-to-router
-        handler: sl_zigbee_af_dynamic_node_type_switch_to_router
-        help: Sets the Zigbee node type to router
+- name: cli_command
+  value:
+    group: dynamic-node-type
+    name: switch-to-router
+    handler: sl_zigbee_af_dynamic_node_type_switch_to_router
+    help: Sets the Zigbee node type to router
 
-  - name: cli_command
-    value:
-        group: dynamic-node-type
-        name: switch-to-sed
-        handler: sl_zigbee_af_dynamic_node_type_switch_to_sleepy_end_device
-        help: Sets the Zigbee node type to sleepy end device
-        argument:
-          - type: uint8
-            help: The end device configuration flags
+- name: cli_command
+  value:
+    group: dynamic-node-type
+    name: switch-to-sed
+    handler: sl_zigbee_af_dynamic_node_type_switch_to_sleepy_end_device
+    help: Sets the Zigbee node type to sleepy end device
+    argument:
+    - type: uint8
+      help: The end device configuration flags
 
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

@@ -4,13 +4,13 @@ package: micriumos
 description: RTOS Description
 category: RTOS|Micrium OS|Common
 ui_hints:
-    visibility: never
+  visibility: never
 quality: production
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 provides:
-  - name: rtos_description
+- name: rtos_description
 template_file:
-  - path: platform/micrium_os/cfg/rtos_description.h.jinja
+- path: platform/micrium_os/cfg/rtos_description.h.jinja
 root_path: micriumos

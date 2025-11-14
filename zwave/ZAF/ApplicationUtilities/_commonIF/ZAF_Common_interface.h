@@ -12,7 +12,6 @@
 #define _ZAF_COMMON_IF_H_
 
 #include <ZAF_CmdPublisher.h>
-#include <zpal_power_manager.h>
 #include <zpal_radio.h>
 
 #include <ZW_application_transport_interface.h>

@@ -2,30 +2,30 @@ id: mbedtls_ecc_secp521r1
 package: security_mbedtls
 label: secp521r1
 description: >-
-    This component adds support for the secp521r1 elliptic curve,
-    a 521-bit prime field Weierstrass curve, in Mbed TLS.
+  This component adds support for the secp521r1 elliptic curve,
+  a 521-bit prime field Weierstrass curve, in Mbed TLS.
 category: Platform|Security|Mbed TLS|Elliptic Curves
 quality: production
 provides:
-  - name: mbedtls_ecc_secp521r1
-  - name: mbedtls_ecc_curve
-    allow_multiple: true
+- name: mbedtls_ecc_secp521r1
+- name: mbedtls_ecc_curve
+  allow_multiple: true
 requires:
-  - name: mbedtls_ecc
-  - name: psa_crypto_ecc_secp521r1
-    condition: [psa_crypto]
+- name: mbedtls_ecc
+- name: psa_crypto_ecc_secp521r1
+  condition: [psa_crypto]
 template_contribution:
-  - name: mbedtls_config
-    value: MBEDTLS_ECP_DP_SECP521R1_ENABLED
-  - name: mbedtls_mpi_max
-    value: 66
+- name: mbedtls_config
+  value: MBEDTLS_ECP_DP_SECP521R1_ENABLED
+- name: mbedtls_mpi_max
+  value: 66
 metadata:
-    sbom:
-        license: Apache-2.0
-        upstream:
-            name: Mbed TLS
-            version: v3.6.2
-            supplier: Trusted Firmware
-            url: https://github.com/Mbed-TLS/mbedtls.git
-            comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
+  sbom:
+    license: Apache-2.0
+    upstream:
+      name: Mbed TLS
+      version: v3.6.2
+      supplier: Trusted Firmware
+      url: https://github.com/Mbed-TLS/mbedtls.git
+      comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
 root_path: security_mbedtls

@@ -5,37 +5,37 @@ description: "The component provides thread-safe and bare-metal-compatible tempe
 category: "Wi-SUN|Wi-SUN Services"
 quality: "production"
 metadata:
-    sbom:
-        license: Zlib
+  sbom:
+    license: Zlib
 root_path: "wisun_sdk/component/rht_measurement"
 provides:
-  - name: sl_wisun_rht_measurement
+- name: sl_wisun_rht_measurement
 
 source:
-  - path: "sl_wisun_rht_measurement.c"
+- path: "sl_wisun_rht_measurement.c"
 
 include:
-  - path: "."
-    file_list:
-      - "path": "sl_wisun_rht_measurement.h"
+- path: "."
+  file_list:
+  - "path": "sl_wisun_rht_measurement.h"
 
 requires:
-  - name: si70xx_driver
-    condition:
-      - "hardware_board_has_tempsensor"
-  - name: i2cspm
-    condition:
-      - "hardware_board_has_tempsensor"
-  - name: sl_wisun_app_core
+- name: si70xx_driver
+  condition:
+  - "hardware_board_has_tempsensor"
+- name: i2cspm
+  condition:
+  - "hardware_board_has_tempsensor"
+- name: sl_wisun_app_core
 
 ui_hints:
-    visibility: never
+  visibility: never
 
 #-------------- Template Contribution ----------------
 template_contribution:
 #---------------- Component Catalog ------------------
-  - name: component_catalog
-    value: wisun_rht_measurement
-  - name: component_catalog
-    value: temp_sensor
-    condition: [hardware_board_has_tempsensor]
+- name: component_catalog
+  value: wisun_rht_measurement
+- name: component_catalog
+  value: temp_sensor
+  condition: [hardware_board_has_tempsensor]

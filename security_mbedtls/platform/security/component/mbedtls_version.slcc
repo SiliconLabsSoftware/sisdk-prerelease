@@ -2,27 +2,27 @@ id: mbedtls_version
 package: security_mbedtls
 label: Version Helpers
 description: >-
-    This component enables the Mbed TLS run-time version information API functions.
+  This component enables the Mbed TLS run-time version information API functions.
 category: Platform|Security|Mbed TLS|Utilities
 quality: production
 source:
-  - path: platform/security/sl_component/sl_mbedtls_support/src/version_features.c
+- path: platform/security/sl_component/sl_mbedtls_support/src/version_features.c
 provides:
-  - name: mbedtls_version
+- name: mbedtls_version
 requires:
-  - name: mbedtls_core
+- name: mbedtls_core
 template_contribution:
-  - name: mbedtls_config
-    value: MBEDTLS_VERSION_C
-  - name: mbedtls_config
-    value: MBEDTLS_VERSION_FEATURES
+- name: mbedtls_config
+  value: MBEDTLS_VERSION_C
+- name: mbedtls_config
+  value: MBEDTLS_VERSION_FEATURES
 metadata:
-    sbom:
-        license: Apache-2.0
-        upstream:
-            name: Mbed TLS
-            version: v3.6.2
-            supplier: Trusted Firmware
-            url: https://github.com/Mbed-TLS/mbedtls.git
-            comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
+  sbom:
+    license: Apache-2.0
+    upstream:
+      name: Mbed TLS
+      version: v3.6.2
+      supplier: Trusted Firmware
+      url: https://github.com/Mbed-TLS/mbedtls.git
+      comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
 root_path: security_mbedtls

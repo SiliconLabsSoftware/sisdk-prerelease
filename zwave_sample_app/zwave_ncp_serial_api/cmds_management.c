@@ -168,7 +168,7 @@ void func_id_serial_api_get_LR_nodes(__attribute__((unused)) uint8_t inputLength
 
 extern bool bTxStatusReportEnabled;
 
-zpal_tx_power_t
+zpal_tx_power_decidbm_t
 GetMaxSupportedTxPower(void)
 {
   const SApplicationHandles *pAppHandles = ZAF_getAppHandle();
@@ -183,7 +183,7 @@ GetMaxSupportedTxPower(void)
       return result.Content.GetTxPowerMaximumSupported.tx_power_max_supported;
     }
   }
-  return ZW_TX_POWER_14DBM;
+  return ZW_TX_POWER_140_DDBM;
 }
 
 void func_id_serial_api_setup(uint8_t inputLength,
@@ -194,8 +194,8 @@ void func_id_serial_api_setup(uint8_t inputLength,
   uint8_t i = 0;
   uint8_t cmdRes;
   zpal_radio_region_t rfRegion;
-  zpal_tx_power_t iPowerLevel = 0;
-  zpal_tx_power_t iPower0dbmMeasured = 0;
+  zpal_tx_power_decidbm_t iPowerLevel = 0;
+  zpal_tx_power_decidbm_t iPower0dbmMeasured = 0;
 
   /* We assume operation is nonesuccessful */
   cmdRes = false;
@@ -335,8 +335,8 @@ void func_id_serial_api_setup(uint8_t inputLength,
 
     case SERIAL_API_SETUP_CMD_TX_POWERLEVEL_SET:
     {
-      zpal_tx_power_t iTxPower;
-      zpal_tx_power_t iAdjust;
+      zpal_tx_power_decidbm_t iTxPower;
+      zpal_tx_power_decidbm_t iAdjust;
       /**
        *  HOST->ZW: SERIAL_API_SETUP_CMD_TX_POWER_SET | NormalTxPowerLevel | Measured0dBmPower
        *  ZW->HOST: SERIAL_API_SETUP_CMD_TX_POWER_SET | cmdRes
@@ -388,26 +388,26 @@ void func_id_serial_api_setup(uint8_t inputLength,
 
     case SERIAL_API_SETUP_CMD_TX_POWERLEVEL_SET_16_BIT:
     {
-      zpal_tx_power_t iTxPower;
-      zpal_tx_power_t iAdjust;
-      zpal_tx_power_t iTxPowerMaxSupported;
+      zpal_tx_power_decidbm_t iTxPower;
+      zpal_tx_power_decidbm_t iAdjust;
+      zpal_tx_power_decidbm_t iTxPowerMaxSupported;
       /**
        *  HOST->ZW: SERIAL_API_SETUP_CMD_TX_POWER_SET | NormalTxPowerLevel (MSB) |NormalTxPowerLevel (LSB) | Measured0dBmPower (MSB)| Measured0dBmPower (LSB)
        *  ZW->HOST: SERIAL_API_SETUP_CMD_TX_POWER_SET | cmdRes
        */
       if (SERIAL_API_SETUP_CMD_TX_POWERLEVEL_SET_CMD_LENGTH_MIN <= inputLength) {
-        iTxPower = (zpal_tx_power_t)GET_16BIT_VALUE(&pInputBuffer[1]);
-        iAdjust  = (zpal_tx_power_t)GET_16BIT_VALUE(&pInputBuffer[3]);
+        iTxPower = (zpal_tx_power_decidbm_t)GET_16BIT_VALUE(&pInputBuffer[1]);
+        iAdjust  = (zpal_tx_power_decidbm_t)GET_16BIT_VALUE(&pInputBuffer[3]);
         iTxPowerMaxSupported = GetMaxSupportedTxPower();
 
         /**
          * Only allow power level between -10dBm and 14 or 20dBm if 20dBm OPN used (API is in deci dBm)
          * Only allow measured0dBmPower level between -10dBm and 10dBm
          */
-        if ((iTxPower >= -ZW_TX_POWER_10DBM)
+        if ((iTxPower >= -ZW_TX_POWER_100_DDBM)
             && (iTxPower <=  iTxPowerMaxSupported)
-            && (iAdjust  >= -ZW_TX_POWER_10DBM)
-            && (iAdjust  <=  ZW_TX_POWER_10DBM)
+            && (iAdjust  >= -ZW_TX_POWER_100_DDBM)
+            && (iAdjust  <=  ZW_TX_POWER_100_DDBM)
             ) {
           cmdRes = SaveApplicationTxPowerlevel(iTxPower, iAdjust);
         }
@@ -457,17 +457,17 @@ void func_id_serial_api_setup(uint8_t inputLength,
        *  HOST->ZW: SERIAL_API_SETUP_CMD_MAX_LR_TX_PWR_SET | maxtxpower (16-bit)
        *  ZW->HOST: SERIAL_API_SETUP_CMD_MAX_LR_TX_PWR_SET | cmdRes
        */
-      zpal_tx_power_t iTxPower;
-      zpal_tx_power_t iTxPowerMaxSupported;
+      zpal_tx_power_decidbm_t iTxPower;
+      zpal_tx_power_decidbm_t iTxPowerMaxSupported;
 
       if (SERIAL_API_SETUP_CMD_TX_POWERLEVEL_SET_CMD_LENGTH_MIN <= inputLength) {
-        iTxPower = (zpal_tx_power_t)GET_16BIT_VALUE(&pInputBuffer[1]);
+        iTxPower = (zpal_tx_power_decidbm_t)GET_16BIT_VALUE(&pInputBuffer[1]);
         iTxPowerMaxSupported = GetMaxSupportedTxPower();
 
         /**
          * Only allow power level between -10dBm and 14 or 20dBm if 20dBm OPN used (API is in deci dBm)
          */
-        if ((iTxPower >= -ZW_TX_POWER_10DBM)
+        if ((iTxPower >= -ZW_TX_POWER_100_DDBM)
             && (iTxPower <=  iTxPowerMaxSupported)
             ) {
           cmdRes = SaveApplicationMaxLRTxPwr(iTxPower);

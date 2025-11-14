@@ -1,3 +1,0 @@
-# CIB Token patch for em317 +13dBm RCM to force radio configs onto +13dBm LP PA
-# $ em3xx_load --cibtokenspatch PHY_CONFIG=13dBm_LP_PA.cibtok --ip <ISA3>
-TOKEN_MFG_PHY_CONFIG            : 0xFFF4

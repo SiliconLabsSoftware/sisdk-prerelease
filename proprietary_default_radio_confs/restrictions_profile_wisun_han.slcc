@@ -5,34 +5,34 @@ description: Component provides profile_wisun_han.restriction configuration file
 category: Platform|Radio Configuration
 quality: production
 metadata:
-    sbom:
-        license: Zlib
+  sbom:
+    license: Zlib
 root_path: proprietary_default_radio_confs/restrictions
 requires:
-  - name: rail_lib
-  - name: device_has_radio
+- name: rail_lib
+- name: device_has_radio
 
 #------- Set provided component name
 provides:
-  - name: restrictions_profile_wisun_han
+- name: restrictions_profile_wisun_han
 
 #-------- Include restriction config json file --------
 config_file:
-  - path: profile_wisun_han.restriction
-    directory: rail
-    condition:
-      - device_generic_family_efr32xg23
-  - path: profile_wisun_han.restriction
-    directory: rail
-    condition:
-      - device_generic_family_efr32xg25
-  - path: profile_wisun_han.restriction
-    directory: rail
-    condition:
-      - device_generic_family_efr32xg28
+- path: profile_wisun_han.restriction
+  directory: rail
+  condition:
+  - device_generic_family_efr32xg23
+- path: profile_wisun_han.restriction
+  directory: rail
+  condition:
+  - device_generic_family_efr32xg25
+- path: profile_wisun_han.restriction
+  directory: rail
+  condition:
+  - device_generic_family_efr32xg28
 
 #-------- Hides Component for user in Studio ---------
 ui_hints:
-    visibility: never
+  visibility: never
 
 

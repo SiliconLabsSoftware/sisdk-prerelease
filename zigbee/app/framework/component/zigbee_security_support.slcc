@@ -8,25 +8,25 @@ ui_hints: {}
 quality: production
 template_file: []
 provides:
-  - name: zigbee_security_support
+- name: zigbee_security_support
 requires:
-  - name: device_host
-  - name: zigbee_ezsp
+- name: device_host
+- name: zigbee_ezsp
 
 source:
-  - path: app/framework/plugin-host/security-support/security-support.c
-  - path: tool/random/random-linux.c
+- path: app/framework/plugin-host/security-support/security-support.c
+- path: tool/random/random-linux.c
 
 include:
-  - path: tool/random/
-    file_list:
-      - path: random-number-generation.h
+- path: tool/random/
+  file_list:
+  - path: random-number-generation.h
 
 template_contribution:
-  - name: component_catalog
-    value: zigbee_security_support
+- name: component_catalog
+  value: zigbee_security_support
 
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

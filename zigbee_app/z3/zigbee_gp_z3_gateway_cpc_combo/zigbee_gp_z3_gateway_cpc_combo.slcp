@@ -61,6 +61,7 @@ component:
   - id: zigbee_green_power_translation_table_cli
   - id: zigbee_groups_server
   - id: zigbee_scenes
+  - id: zigbee_custom_ezsp
 
 configuration:
   - name: SL_BOARD_ENABLE_VCOM
@@ -94,9 +95,6 @@ configuration:
 
 include:
   - path: ./
-  - path: ../../../../app/xncp
-    file_list:
-      - path: xncp-sample-custom-ezsp-protocol.h
 
 source:
   - path: main.c

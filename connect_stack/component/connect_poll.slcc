@@ -5,34 +5,34 @@ category: "Connect"
 quality: "production"
 description: "Implements polling for end devices."
 provides:
-  - name: "connect_poll"
+- name: "connect_poll"
 requires:
-  - name: "connect_stack_common"
+- name: "connect_stack_common"
 source:
-  - path: "poll/poll.c"
+- path: "poll/poll.c"
 include:
-  - path: "poll"
-    file_list:
-      - path: "poll.h"
+- path: "poll"
+  file_list:
+  - path: "poll.h"
 config_file:
-  - path: "poll/config/poll-config.h"
+- path: "poll/config/poll-config.h"
 template_contribution:
-  - name: stack_callback
-    value:
-        callback_type: "stack_status"
-        function_name: "emberAfPluginPollStackStatusCallback"
-  - name: event_system
-    value:
-        event_control: "emberAfPluginPollEventControl"
-        event_handler: "emberAfPluginPollEventHandler"
-  - name: component_catalog
-    value: connect_poll
+- name: stack_callback
+  value:
+    callback_type: "stack_status"
+    function_name: "emberAfPluginPollStackStatusCallback"
+- name: event_system
+  value:
+    event_control: "emberAfPluginPollEventControl"
+    event_handler: "emberAfPluginPollEventHandler"
+- name: component_catalog
+  value: connect_poll
 
 documentation:
-    docset: connect-stack
-    document: group-poll
+  docset: connect-stack
+  document: group-poll
 
 metadata:
-    sbom:
-        license: Zlib
+  sbom:
+    license: Zlib
 root_path: connect_stack

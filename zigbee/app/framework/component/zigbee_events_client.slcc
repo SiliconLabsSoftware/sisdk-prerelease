@@ -5,19 +5,19 @@ label: Events Client
 category: Zigbee|Cluster Library|Smart Energy
 quality: production
 provides:
-  - name: zigbee_events_client
+- name: zigbee_events_client
 source:
-  - path: app/framework/plugin/events-client/events-client.c
+- path: app/framework/plugin/events-client/events-client.c
 template_contribution:
-  - name: component_catalog
-    value: zigbee_events_client
-  - name: cluster_service
-    value:
-        cluster_id: '0x0709'
-        mfg_id: NOT_MFG_SPECIFIC
-        side: CLIENT
-        service_function: sl_zigbee_af_events_cluster_client_command_parse
+- name: component_catalog
+  value: zigbee_events_client
+- name: cluster_service
+  value:
+    cluster_id: '0x0709'
+    mfg_id: NOT_MFG_SPECIFIC
+    side: CLIENT
+    service_function: sl_zigbee_af_events_cluster_client_command_parse
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

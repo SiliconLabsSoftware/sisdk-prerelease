@@ -6,15 +6,15 @@ category: "Bluetooth Mesh|Stack"
 quality: "production"
 
 requires:
-  - name: "btmesh_stack"
+- name: "btmesh_stack"
 provides:
-  - name: "btmesh_stack_migration"
+- name: "btmesh_stack_migration"
 template_contribution:
-  - name: btmesh_bgapi_class
-    value:
-        class: "migration"
-    priority: 3
+- name: btmesh_bgapi_class
+  value:
+    class: "migration"
+  priority: 3
 metadata:
-    sbom:
-        reference: btmesh_stack
+  sbom:
+    reference: btmesh_stack
 root_path: bluetooth_mesh

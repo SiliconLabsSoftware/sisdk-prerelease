@@ -5,14 +5,14 @@ label: Zigbee Enhanced Routing With LQI
 category: Zigbee|Utility
 quality: production
 provides:
-  - name: zigbee_enhanced_routing
+- name: zigbee_enhanced_routing
 source:
-  - path: app/framework/common/zigbee_enhanced_routing.c
+- path: app/framework/common/zigbee_enhanced_routing.c
 
 template_contribution:
-  - name: component_catalog
-    value: zigbee_enhanced_routing
+- name: component_catalog
+  value: zigbee_enhanced_routing
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

@@ -15,11 +15,14 @@
  * Mode parameters to ZW_SetLearnMode
  * @{
  */
-#define ZW_SET_LEARN_MODE_DISABLE           0x00 ///< Disable Learn Mode
-#define ZW_SET_LEARN_MODE_CLASSIC           0x01 ///< Start Classic Learn Mode
-#define ZW_SET_LEARN_MODE_NWI               0x02 ///< Enable Network Wide Inclusion
-#define ZW_SET_LEARN_MODE_NWE               0x03 ///< Enable Network Wide Exclusion
-#define ZW_SET_LEARN_MODE_SMARTSTART        0x04 ///< Enable SmartStart Inclusion
+typedef enum {
+  ZW_SET_LEARN_MODE_DISABLE = 0,
+  ZW_SET_LEARN_MODE_CLASSIC = 1,
+  ZW_SET_LEARN_MODE_NWI = 2,
+  ZW_SET_LEARN_MODE_NWE = 3,
+  ZW_SET_LEARN_MODE_SMARTSTART = 4
+} ZW_LearnMode_t;
+
 ///@}
 
 ///@}

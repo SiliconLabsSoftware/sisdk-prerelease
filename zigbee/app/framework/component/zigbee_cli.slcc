@@ -5,25 +5,25 @@ category: Zigbee|Utility
 quality: production
 description: This component is used to bring in the basic Zigbee CLI functionality
 ui_hints:
-    visibility: never
+  visibility: never
 
 provides:
-  - name: zigbee_cli
+- name: zigbee_cli
 requires:
-  - name: cli
+- name: cli
 include:
-  - path: app/util/serial
-    file_list:
-      - path: sl_zigbee_command_interpreter.h
+- path: app/util/serial
+  file_list:
+  - path: sl_zigbee_command_interpreter.h
 source:
-  - path: app/util/serial/sl_zigbee_command_interpreter.c
+- path: app/util/serial/sl_zigbee_command_interpreter.c
 
 validation_helper:
-  - path: app/framework/component/scripts/zigbee_cli_task_stack_size.lua
+- path: app/framework/component/scripts/zigbee_cli_task_stack_size.lua
 template_contribution:
-  - name: component_catalog
-    value: zigbee_cli
+- name: component_catalog
+  value: zigbee_cli
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

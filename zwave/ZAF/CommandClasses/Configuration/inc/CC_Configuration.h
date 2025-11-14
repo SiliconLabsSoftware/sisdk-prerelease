@@ -138,7 +138,8 @@ typedef void * cc_configuration_handle_t;
  * Sets a configuration parameter with the given number to the given value.
  * * Upon invocation CC_Configuration_Set_handler will be called given that the number and value is
  * valid.
- * @param[in] handle CC Configuration handle.
+ * If the value was successfully changed, a Configuration Report will be sent to the lifeline.
+ * @param[in] handle [deprecated] CC Configuration handle. (Not used)
  * @param[in] number The number of the parameter to be set.
  * @param[in] value The value that the parameter must be set to.
  * @return Returns true if the value was set, false otherwise.

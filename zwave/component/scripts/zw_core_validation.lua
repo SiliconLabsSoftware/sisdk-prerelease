@@ -7,12 +7,10 @@
 --  4.1 configKERNEL_INTERRUPT_PRIORITY must be set to 224 in zwave application for Series 1
 --  4.2 configKERNEL_INTERRUPT_PRIORITY must be set to 112 in zwave application for Series 2
 --  5. configTIMER_QUEUE_LENGTH must be set to 8 in zwave application
--- 2. sl_device required settings
---  1. SL_DEVICE_INIT_DCDC_BYPASS must be set to 1 in Z_Wave applications
--- 3. sl_psa required settings
+-- 2. sl_psa required settings
 --  1. SL_PSA_ITS_USER_MAX_FILES must be set to 32 in Z_Wave applications for Series 2 with Security Vault
 --  2. SL_PSA_KEY_USER_SLOT_COUNT must be set to 12 in Z_Wave applications for Series 2 with Security Vault
--- 4. sl_sleeptimer required settings
+-- 3. sl_sleeptimer required settings
 --  1. SL_SLEEPTIMER_PERIPHERAL must be set to SL_SLEEPTIMER_PERIPHERAL_BURTC in Z_Wave applications for Series 2
 -- -- 5. sl_power_manager
 -- --  1. power_manager_deepsleep component must be added to Z_Wave applications to support the lowest energy mode EM3
@@ -59,11 +57,6 @@ else
     validate_config_component("configTIMER_QUEUE_LENGTH", "8")
 end
 
--- sl_device
-if device_init_dcdc then
-    validate_config_component("SL_DEVICE_INIT_DCDC_BYPASS", "1")
-end
-
 -- sl_psa
 if device_series_2 and device_security_vault and psa_crypto and psa_its then
     validate_config_component("SL_PSA_ITS_USER_MAX_FILES", "32")
@@ -74,11 +67,6 @@ end
 if device_series_2 then
     validate_config_component("SL_SLEEPTIMER_PERIPHERAL", "SL_SLEEPTIMER_PERIPHERAL_BURTC")
 end
-
--- -- sl_board
--- if not slc.is_selected("power_manager_deepsleep") then
---     validation.error('zwave requires power_manager_deepsleep to support the lowest energy mode being EM3', validation.target_for_project())
--- end
 
 --
 -- EOF

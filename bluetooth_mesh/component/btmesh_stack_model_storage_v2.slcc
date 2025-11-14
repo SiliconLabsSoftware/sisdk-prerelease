@@ -5,23 +5,23 @@ description: "Provides persistent storage for Mesh model configuration data, suc
 category: "Bluetooth Mesh|Stack"
 quality: "production"
 provides:
-  - name: btmesh_stack_model_storage_v2
-  - name: btmesh_stack_model_storage
+- name: btmesh_stack_model_storage_v2
+- name: btmesh_stack_model_storage
 conflicts:
-  - name: btmesh_stack_model_storage_v1
+- name: btmesh_stack_model_storage_v1
 requires:
-  - name: btmesh_stack_model_storage_v2_libraries
+- name: btmesh_stack_model_storage_v2_libraries
 recommends:
-  - id: btmesh_stack_model_storage_v2_libraries_release
-    condition:
-      - btmesh_stack_libraries_release
-    vendor: silabs
-  - id: btmesh_stack_model_storage_v2_libraries_debug
-    condition:
-      - btmesh_stack_libraries_debug
-    vendor: silabs
+- id: btmesh_stack_model_storage_v2_libraries_release
+  condition:
+  - btmesh_stack_libraries_release
+  vendor: silabs
+- id: btmesh_stack_model_storage_v2_libraries_debug
+  condition:
+  - btmesh_stack_libraries_debug
+  vendor: silabs
 metadata:
-    sbom:
-        reference: btmesh_stack
+  sbom:
+    reference: btmesh_stack
 
 root_path: bluetooth_mesh

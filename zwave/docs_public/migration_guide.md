@@ -1,6 +1,23 @@
 # Migration Guide {#migration-guide}
 
 This guide shows how to migrate projects from previous SDKs to a newer one.
+# 7.25.0 {#migrate-section-7-25-0}
+
+## zpal_power_manager APIs migration
+Following the removal of zpal_power_manager, here are the APIs you need to remove from your code:
+- `zpal_pm_lock`, `zpal_pm_relock`, `zpal_get_max_timeout`, `zpal_pm_lock_is_active`, `zpal_pm_register_domain`, `zpal_pm_lock_cancel`, `zpal_zw_pm_event_handler`, `zpal_pm_halt`
+- `zw_power_manager_lock`, `zw_power_manager_relock`, `zw_power_manager_is_active`, `zw_power_manager_lock_cancel`, `zw_power_manager_init`
+
+These APIs can be replaced with three different modules depending on your usage:
+- If you want to handle the power manager "state" (e.g., EM state) of the ARM core, you can now use the dedicated platform APIs of [sl_power_manager](https://docs.silabs.com/gecko-platform/3.0/service/api/group-power-manager).
+- If you want to maintain the Z-Wave radio in an active state (RX active when no TX is in progress), you should use the new dedicated APIs `zpal_radio_request_stay_awake` or `zpal_radio_update_stay_awake` instead of the previous API: `zpal_pm_lock(ZPAL_PM_TYPE_USE_RADIO)`.
+  - To revoke a previous request, use `zpal_radio_revoke_stay_awake`.
+- If you want to maintain deep sleep mode, equivalent to the previous `zpal_pm_lock(ZPAL_PM_TYPE_DEEP_SLEEP)`, you can now use the new component module called `zw_shutdown_manager`. The logic of this module works the same way as `sl_power_manager`: adding or subtracting 1 to a global counter based on lock requests. When count == 0, the module considers the device ready to enter shutdown mode (EM4).
+
+APIs of this new module are:
+- `zw_shutdown_manager_add_lock` to request a lock
+- `zw_shutdown_manager_release_lock` to release a lock
+- `zw_shutdown_manager_take_temporary_lock` to take a temporary lock for a given duration
 
 # 7.24.1 {#migrate-section-7-24-1}
 

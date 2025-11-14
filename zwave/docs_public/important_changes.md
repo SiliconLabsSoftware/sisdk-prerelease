@@ -5,6 +5,43 @@ existing application. The description serves the purpose of helping to fix the f
 
 # 7.25.0 {#section-7-25-0}
 
+## Removal of enterPowerDown() and exitPowerDown() hooks
+FreeRTOS power down hooks (`configPRE_SLEEP_PROCESSING` and `configPOST_SLEEP_PROCESSING`) related to the zpal_power_manager module have been removed. With the removal of zpal_power_manager, applications should now use the Silicon Labs `sl_power_manager` API directly to manage power states, or use `zw_shutdown_manager` for controlling entry into shutdown mode.
+
+## Removal of zpal_power_manager module
+- The zpal_power_manager module is removed from Z-Wave. To handle the power manager state of the platform, refer to the Silicon Labs [`sl_power_manager`](https://docs.silabs.com/gecko-platform/3.0/service/api/group-power-manager) module APIs.
+
+- The Z-Wave stack is now independent from the EM state of the platform, meaning that using `sl_power_manager` APIs will not interfere with Z-Wave stack logic.
+
+- Previous to this release, the EM1 state was required during radio operations (RX). Now, the [EM1P](https://docs.silabs.com/rail/latest/efr32-migration-guide-for-proprietary-apps/04-em1p-on-efr32xg22) energy mode is maintained during radio RX operations. This improves the overall power consumption of the application.
+
+- A new `zw_shutdown_manager` component module has been introduced to manage shutdown mode (EM4) locks, replacing the deep sleep functionality previously provided by zpal_power_manager.
+
+- New radio stay awake APIs have been introduced: `zpal_radio_request_stay_awake`, `zpal_radio_update_stay_awake`, and `zpal_radio_revoke_stay_awake` replace the previous `zpal_pm_lock(ZPAL_PM_TYPE_USE_RADIO)` mechanism for keeping the radio in receive mode.
+
+## CLI
+- Now that all applications can make use of EM1P, the CLI has been configured to rely on the LFRCO clock (which implies a lower baud rate of 9600) for SoC applications. Therefore, the CLI will remain active in EM1P.
+
+## TX POWER
+The ADJUST_RAIL_TX_POWER (1.4 dBm) empirical offset in the zpal_radio layer has been removed. In the case of OTA updates from versions prior to 7.25 to higher versions, TX power values need to be adjusted.
+
+Moreover, the zpal_radio layer has been refactored to comply strictly with regulatory rules, including TX power levels for EU and US regions, and LBT and duty cycle rules for JP and KR regions.
+
+## ENTROPY GENERATOR
+The zpal_entropy API is now based entirely on the RNG generator, and radio is no longer used to generate random data.
+
+## ZPAL Zniffer API
+The zpal_radio_get_last_beam_info API has been added to allow beam management from the stack side in the Zniffer application.
+
+## Noise Detection Module Refactoring
+Noise detection management has been moved from the Z-Wave stack layer (`ZW_noise_detect`) to the ZPAL layer (`zpal_noise`). This refactoring improves modularity and allows for better platform-specific implementations.
+
+## New Dynamic Tx Power algorithm
+The new algorithm stores the output power for all LR nodes. Output power is stored in RAM only.
+Controller & end device manage their power independently to be able to adapt to different noise levels.
+To reduce latency, the third transmission always uses maximum output power.
+This standard algorithm can be overloaded by customer to suit specific usages.
+
 ## Improve frame transmission validation
 Nodes won't be able to send frame with their own node ID as destination node ID anymore.
 

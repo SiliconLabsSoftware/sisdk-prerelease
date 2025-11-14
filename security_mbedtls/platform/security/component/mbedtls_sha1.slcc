@@ -2,29 +2,29 @@ id: mbedtls_sha1
 package: security_mbedtls
 label: SHA-1
 description: >-
-    This component provides support for the SHA-1 hash function using Mbed TLS.
+  This component provides support for the SHA-1 hash function using Mbed TLS.
 category: Platform|Security|Mbed TLS|Hashing
 quality: production
 provides:
-  - name: mbedtls_sha1
-  - name: mbedtls_hash_function
-    allow_multiple: true
-  - name: mbedtls_sha_function
-    allow_multiple: true
+- name: mbedtls_sha1
+- name: mbedtls_hash_function
+  allow_multiple: true
+- name: mbedtls_sha_function
+  allow_multiple: true
 requires:
-  - name: mbedtls_hash
-  - name: psa_crypto_sha1
-    condition: [psa_crypto]
+- name: mbedtls_hash
+- name: psa_crypto_sha1
+  condition: [psa_crypto]
 template_contribution:
-  - name: mbedtls_config
-    value: MBEDTLS_SHA1_C
+- name: mbedtls_config
+  value: MBEDTLS_SHA1_C
 metadata:
-    sbom:
-        license: Apache-2.0
-        upstream:
-            name: Mbed TLS
-            version: v3.6.2
-            supplier: Trusted Firmware
-            url: https://github.com/Mbed-TLS/mbedtls.git
-            comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
+  sbom:
+    license: Apache-2.0
+    upstream:
+      name: Mbed TLS
+      version: v3.6.2
+      supplier: Trusted Firmware
+      url: https://github.com/Mbed-TLS/mbedtls.git
+      comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
 root_path: security_mbedtls

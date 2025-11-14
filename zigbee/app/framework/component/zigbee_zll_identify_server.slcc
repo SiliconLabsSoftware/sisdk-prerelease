@@ -5,27 +5,27 @@ quality: production
 id: zigbee_zll_identify_server
 category: Zigbee|Zigbee Light Link
 provides:
-  - name: zigbee_zll_identify_server
+- name: zigbee_zll_identify_server
 requires:
-  - name: zigbee_identify
+- name: zigbee_identify
 config_file:
-  - path: app/framework/plugin/zll-identify-server/config/zll-identify-server-config.h
+- path: app/framework/plugin/zll-identify-server/config/zll-identify-server-config.h
 source:
-  - path: app/framework/plugin/zll-identify-server/zll-identify-server.c
+- path: app/framework/plugin/zll-identify-server/zll-identify-server.c
 template_contribution:
-  - name: component_catalog
-    value: zigbee_zll_identify_server
-  - name: zigbee_af_callback
-    value:
-        callback_type: event_init
-        function_name: sli_zigbee_af_zll_identify_server_init_callback
-  - name: cluster_service
-    value:
-        cluster_id: '0x0003'
-        mfg_id: NOT_MFG_SPECIFIC
-        side: SERVER
-        service_function: sl_zigbee_af_zll_identify_cluster_server_command_parse
+- name: component_catalog
+  value: zigbee_zll_identify_server
+- name: zigbee_af_callback
+  value:
+    callback_type: event_init
+    function_name: sli_zigbee_af_zll_identify_server_init_callback
+- name: cluster_service
+  value:
+    cluster_id: '0x0003'
+    mfg_id: NOT_MFG_SPECIFIC
+    side: SERVER
+    service_function: sl_zigbee_af_zll_identify_cluster_server_command_parse
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

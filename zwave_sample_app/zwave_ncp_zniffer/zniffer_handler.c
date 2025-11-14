@@ -205,15 +205,18 @@ void beamReceiveHandler(uint16_t beamNodeId, uint16_t homeId, uint8_t channel, u
   }
 }
 
-void parseFrame(zpal_radio_rx_parameters_t * pRxParameters, zpal_radio_receive_frame_t * pFrame, uint8_t len)
+void llRxFrameHandler(zpal_radio_receive_frame_t * pFrame)
 {
+  if (stopSniffer || NULL == pFrame) {
+    return;
+  }
   if (handling_beam) {
     handling_beam = false;
     beam_stop_frame.sof = '!';
     beam_stop_frame.type = BEAM_STOP;
     beam_stop_frame.timestamp1 = 0;
     beam_stop_frame.timestamp2 = 0;
-    beam_stop_frame.rssi = ((uint8_t)pRxParameters->rssi) >> 2; // TODO
+    beam_stop_frame.rssi = ((uint8_t)pFrame->rx_parameters.rssi) >> 2; // TODO
     beam_stop_frame.counter = counter;
     comm_interface_transmit_frame(BEAM_STOP, BEAM_FRAME, (uint8_t *)&beam_stop_frame, 0, NULL);
     comm_interface_wait_transmit_done();
@@ -223,21 +226,14 @@ void parseFrame(zpal_radio_rx_parameters_t * pRxParameters, zpal_radio_receive_f
   frame.type = 1;
   frame.timestamp1 = 0;
   frame.timestamp2 = 0;
-  frame.ch_speed = (GetRadioChannel(pRxParameters) << 5) | GetRadioSpeed(pRxParameters->speed);
+  frame.ch_speed = (GetRadioChannel(&pFrame->rx_parameters) << 5) | GetRadioSpeed(pFrame->rx_parameters.speed);
   frame.region_no = zpal_radio_get_region();
-  frame.rssi = ((uint8_t)pRxParameters->rssi) >> 2; // TODO
+  frame.rssi = ((uint8_t)pFrame->rx_parameters.rssi) >> 2; // TODO
   frame.sodm = '!';
   frame.sod = 0x3;
-  frame.len = len;
-  memcpy(frame.payload, pFrame->frame_content, len);
-  comm_interface_transmit_frame(0, DATA_FRAME, (uint8_t *)&frame, len, NULL);
-}
-
-void radioFrameReceiveHandler(zpal_radio_rx_parameters_t * pRxParameters, zpal_radio_receive_frame_t * pFrame)
-{
-  if (!stopSniffer) {
-    parseFrame(pRxParameters, pFrame, pFrame->frame_content_length);
-  }
+  frame.len = pFrame->frame_content_length;
+  memcpy(frame.payload, pFrame->frame_content, pFrame->frame_content_length);
+  comm_interface_transmit_frame(0, DATA_FRAME, (uint8_t *)&frame, pFrame->frame_content_length, NULL);
 }
 
 /** This function is used to get the index of the given region in SUPPORTED_REGION_LIST

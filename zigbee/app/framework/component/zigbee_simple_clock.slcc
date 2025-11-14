@@ -5,28 +5,28 @@ label: Simple Clock
 category: Zigbee|Utility
 quality: production
 provides:
-  - name: zigbee_simple_clock
+- name: zigbee_simple_clock
 source:
-  - path: app/framework/plugin/simple-clock/simple-clock.c
+- path: app/framework/plugin/simple-clock/simple-clock.c
 include:
-  - path: app/framework/plugin/simple-clock
-    file_list:
-      - path: simple-clock.h
+- path: app/framework/plugin/simple-clock
+  file_list:
+  - path: simple-clock.h
 template_contribution:
-  - name: component_catalog
-    value: zigbee_simple_clock
-  - name: zigbee_af_callback
-    value:
-        callback_type: event_init
-        function_name: sl_zigbee_af_simple_clock_init_cb
-  - name: zigbee_af_callback
-    value:
-        callback_type: init_done
-        function_name: sl_zigbee_af_simple_clock_init_cb
+- name: component_catalog
+  value: zigbee_simple_clock
+- name: zigbee_af_callback
+  value:
+    callback_type: event_init
+    function_name: sl_zigbee_af_simple_clock_init_cb
+- name: zigbee_af_callback
+  value:
+    callback_type: init_done
+    function_name: sl_zigbee_af_simple_clock_init_cb
 documentation:
-    docset: zigbee
-    document: zigbee-af-api/simple-clock
+  docset: zigbee
+  document: zigbee-af-api/simple-clock
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

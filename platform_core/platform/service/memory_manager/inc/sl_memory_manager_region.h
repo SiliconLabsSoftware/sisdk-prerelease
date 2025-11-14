@@ -47,6 +47,41 @@ extern "C" {
  ******************************************************************************/
 
 // ----------------------------------------------------------------------------
+// MACROS
+/// @cond
+
+/// Macro to place data in PSRAM memory.
+#if defined(SL_CATALOG_MEMORY_MANAGER_PSRAM_PRESENT)
+#if defined(__GNUC__)
+#define SL_PSRAM_DATA __attribute__((section(".psram_data")))
+
+#elif defined(__ICCARM__)
+#define SL_PSRAM_DATA _Pragma("location =\"psram_data\"")
+
+#else
+#define SL_PSRAM_DATA
+#endif // defined(__GNUC__)
+#else
+#define SL_PSRAM_DATA
+#endif // defined(SL_CATALOG_MEMORY_MANAGER_PSRAM_PRESENT)
+
+/// Macro to place data in DTCM memory.
+#if defined(SL_CATALOG_MEMORY_MANAGER_DTCM_PRESENT)
+#if defined(__GNUC__)
+#define SL_FAST_DATA          __attribute__ ((section(".dtcm")))
+
+#elif defined(__ICCARM__)
+#define SL_FAST_DATA _Pragma("location =\"dtcm\"")
+
+#else
+#define SL_FAST_DATA
+#endif // defined(__GNUC__)
+#else
+#define SL_FAST_DATA
+#endif // defined(SL_CATALOG_MEMORY_MANAGER_DTCM_PRESENT)
+/// @endcond
+
+// ----------------------------------------------------------------------------
 // DATA TYPES
 
 /// @brief Memory region structure.

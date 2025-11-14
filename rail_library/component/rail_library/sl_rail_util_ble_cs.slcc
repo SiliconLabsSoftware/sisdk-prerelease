@@ -5,16 +5,16 @@ package: rail_library
 category: Platform|Radio
 quality: evaluation
 metadata:
-    sbom:
-        id: sl_rail_util_ble_cs
-        name: SL RAIL Utility, BLE Channel Sounding
-        license: MSLA
+  sbom:
+    id: sl_rail_util_ble_cs
+    name: SL RAIL Utility, BLE Channel Sounding
+    license: MSLA
 provides:
-  - name: sl_rail_util_ble_cs
+- name: sl_rail_util_ble_cs
 requires:
-  - name: rail_util_ble_cs
-  - name: component_catalog
+- name: rail_util_ble_cs
+- name: component_catalog
 template_contribution:
-  - name: component_catalog
-    value: sl_rail_util_ble_cs
+- name: component_catalog
+  value: sl_rail_util_ble_cs
 root_path: rail_library

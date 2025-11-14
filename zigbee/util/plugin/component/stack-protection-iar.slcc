@@ -7,31 +7,31 @@ quality: production
 description: This component enables stack protection and also provides stack protection definitions for IAR.
 
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 
 provides:
-  - name: stack_protection_iar
+- name: stack_protection_iar
 
 requires:
-  - name: toolchain_iar
-  - name: legacy_hal
+- name: toolchain_iar
+- name: legacy_hal
 
 source:
-  - path: "util/plugin/plugin-common/stack-protection-iar/stack-protection.c"
+- path: "util/plugin/plugin-common/stack-protection-iar/stack-protection.c"
 
 define:
-  - name: STACK_PROTECTION
+- name: STACK_PROTECTION
 
 include:
-  - path: "platform/service"
+- path: "platform/service"
 
 toolchain_settings:
-  - option: iar_compiler_option
-    value: "--stack_protection"
+- option: iar_compiler_option
+  value: "--stack_protection"
 
 template_contribution:
-  - name: component_catalog
-    value: stack_protection_iar
+- name: component_catalog
+  value: stack_protection_iar
 
 root_path: zigbee

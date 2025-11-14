@@ -20,6 +20,7 @@ component:
   - id: zw_api_controller
   - id: zw_dcdc_override
   - id: ZW_MIGRATION_FROM_7_20
+  - id: power_manager_no_deepsleep
   # Platform
   - id: emlib_letimer
   - id: emlib_timer
@@ -90,12 +91,6 @@ configuration:
     value: 100
   - name: SL_BOARD_ENABLE_VCOM
     value: 1
-  - name: SL_DEVICE_INIT_EMU_EM4_STATE
-    value: emuEM4Hibernate
-  - name: SL_DEVICE_INIT_EMU_EM4_RETAIN_LFRCO
-    value: 1
-  - name: SL_DEVICE_INIT_EMU_EM4_PIN_RETENTION_MODE
-    value: emuPinRetentionLatch
   - name: SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
     value: 1
   - name: SL_IOSTREAM_USART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
@@ -116,8 +111,6 @@ configuration:
     condition: [device_series_2]
   - name: configTIMER_QUEUE_LENGTH
     value: 8
-  - name: SL_DEVICE_INIT_DCDC_BYPASS
-    value: 1
   - name: SL_PSA_ITS_USER_MAX_FILES
     value: 32
     condition: ["device_series_2", "device_security_vault"]

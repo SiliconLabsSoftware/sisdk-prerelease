@@ -5,13 +5,13 @@ category: Services|Ember Legacy
 description: Legacy Ember ASH implementation for Host.
 quality: production
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee/platform/service/legacy_host_ash
 provides:
-  - name: legacy_host_ash
+- name: legacy_host_ash
 requires:
-  - name: legacy_common_ash
+- name: legacy_common_ash
 template_contribution:
-  - name: component_catalog
-    value: legacy_host_ash
+- name: component_catalog
+  value: legacy_host_ash

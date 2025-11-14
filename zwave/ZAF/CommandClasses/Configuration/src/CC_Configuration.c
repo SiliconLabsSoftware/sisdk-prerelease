@@ -21,6 +21,7 @@
 #include <string.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <string.h>
 #include <assert.h>
 #include <CC_Configuration.h>
 #include <ZW_TransportEndpoint.h>
@@ -29,6 +30,8 @@
 #include <cc_configuration_config_api.h>
 #include <cc_configuration_io.h>
 #include "zaf_transport_tx.h"
+#include "ZAF_TSE.h"
+#include "zaf_tse_config.h"
 
 // -----------------------------------------------------------------------------
 //                Macros and Typedefs
@@ -36,6 +39,15 @@
 #define SLI_CC_CONFIGURATION_MAX_STR_LENGTH (256)
 #define DEFAULT_FLAG (0x80)
 #define HANDSHAKE_FLAG (0x40)
+
+/**
+ * Data structure for TSE lifeline reporting
+ */
+typedef struct {
+  RECEIVE_OPTIONS_TYPE_EX rxOptions;  // Must be first member (TSE requirement)
+  uint16_t parameter_number;
+} s_cc_configuration_report_tse_trigger_t;
+
 // -----------------------------------------------------------------------------
 //              Static Function Declarations
 // -----------------------------------------------------------------------------
@@ -155,7 +167,6 @@ cc_configuration_command_default_reset(RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
  * @param[out] pFrame the raw frame where the data will be copied to
  * @param[in] parameter_buffer reference to the parameter
  * @param[in] pField which will be copied from
- * @return Result of the conversion which is a recevived_frame_status_t type
  */
 static void
 cc_configuration_copyToFrame(cc_config_parameter_value_t* pFrame,
@@ -337,6 +348,13 @@ cc_configuration_strnlen(const char *str, size_t maxlen);
 // -----------------------------------------------------------------------------
 /**< cc_configuration_t pointer to the meta data of the parameters */
 static cc_configuration_t const* configuration_pool;
+
+/**
+ * Static array for TSE data - one entry per possible queued trigger
+ */
+static s_cc_configuration_report_tse_trigger_t report_tse_triggers[ZAF_TSE_MAXIMUM_SIMULTANEOUS_TRIGGERS] = { 0 };
+static uint8_t report_tse_trigger_index = 0;
+
 // -----------------------------------------------------------------------------
 //              Public Function Definitions
 // -----------------------------------------------------------------------------
@@ -1329,6 +1347,83 @@ cc_configuration_set(uint16_t parameter_number, cc_config_parameter_value_t* new
   }
 
   return return_value;
+}
+
+/**
+ * TSE callback function to send Configuration Report to lifeline
+ * @param[in] tx_options Transmission options
+ * @param[in] pData Pointer to TSE data
+ */
+static void
+cc_configuration_report_stx(zaf_tx_options_t *tx_options, void *p_tse_data)
+{
+  if (p_tse_data == NULL) {
+    return;
+  }
+
+  uint16_t parameter_number = ((s_cc_configuration_report_tse_trigger_t *)p_tse_data)->parameter_number;
+  cc_config_parameter_buffer_t parameter_buffer;
+  bool get_result = cc_configuration_get(parameter_number, &parameter_buffer);
+  if (get_result == false || parameter_buffer.metadata == NULL) {
+    return;
+  }
+
+  ZW_APPLICATION_TX_BUFFER txBuf;
+  memset(&txBuf, 0, sizeof(ZW_APPLICATION_TX_BUFFER));
+
+  txBuf.ZW_ConfigurationReport4byteV4Frame.cmdClass = COMMAND_CLASS_CONFIGURATION_V4;
+  txBuf.ZW_ConfigurationReport4byteV4Frame.cmd = CONFIGURATION_REPORT_V4;
+  txBuf.ZW_ConfigurationReport4byteV4Frame.parameterNumber = (uint8_t)parameter_number;
+  txBuf.ZW_ConfigurationReport4byteV4Frame.level = (uint8_t)parameter_buffer.metadata->attributes.size;
+
+  cc_configuration_copyToFrame((cc_config_parameter_value_t *)&txBuf.ZW_ConfigurationReport4byteV4Frame.configurationValue1,
+                               &parameter_buffer,
+                               &parameter_buffer.data_buffer);
+
+  zaf_transport_tx((uint8_t*) &txBuf,
+                   sizeof(txBuf.ZW_ConfigurationReport4byteV4Frame),
+                   ZAF_TSE_TXCallback,
+                   tx_options);
+}
+
+ZW_WEAK bool
+CC_Configuration_SetValue(__attribute__((unused)) cc_configuration_handle_t handle, // Unused, kept for API compatibility
+                          uint16_t number,
+                          cc_config_parameter_value_t value)
+{
+  cc_config_parameter_buffer_t parameter_buffer;
+  bool get_result = cc_configuration_get(number, &parameter_buffer);
+
+  // Check if parameter exists and is not read-only
+  if ((get_result == false)
+      || (parameter_buffer.metadata == NULL)
+      || (parameter_buffer.metadata->attributes.flags.read_only == true)) {
+    return false;
+  }
+  // If the existing value is the same as the new one, skip setting and reporting
+  if (memcmp(&parameter_buffer.data_buffer, &value, sizeof(cc_config_parameter_value_t)) == 0) {
+    return true;
+  }
+
+  cc_config_configuration_set_return_value result = cc_configuration_set(
+    number, &value, parameter_buffer.metadata->attributes.size);
+
+  if (result == CC_CONFIG_RETURN_CODE_OK) {
+    // Get a slot from the TSE data pool (round-robin allocation)
+    s_cc_configuration_report_tse_trigger_t *tse_trigger = &report_tse_triggers[report_tse_trigger_index];
+
+    // Initialize rxOptions (zero-initialized for local changes)
+    memset(&tse_trigger->rxOptions, 0, sizeof(RECEIVE_OPTIONS_TYPE_EX));
+    tse_trigger->parameter_number = number;
+
+    // Only increment index if TSE successfully accepted the trigger.
+    // This prevents overwriting pending triggers that haven't been processed yet.
+    if (ZAF_TSE_Trigger(cc_configuration_report_stx, tse_trigger, false)) {
+      report_tse_trigger_index = (report_tse_trigger_index + 1) % ZAF_TSE_MAXIMUM_SIMULTANEOUS_TRIGGERS;
+    }
+  }
+
+  return (result == CC_CONFIG_RETURN_CODE_OK);
 }
 
 bool

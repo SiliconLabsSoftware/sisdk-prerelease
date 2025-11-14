@@ -6,24 +6,24 @@ category: Zigbee|Utility
 quality: production
 
 provides:
-  - name: zigbee_strong_random
-  - name: zigbee_strong_random_api_psa
+- name: zigbee_strong_random
+- name: zigbee_strong_random_api_psa
 
 requires:
-  - name: psa_crypto
+- name: psa_crypto
 
 source:
-  - path: stack/framework/strong-random-api.c
+- path: stack/framework/strong-random-api.c
 
 template_contribution:
-  - name: component_catalog
-    value: zigbee_strong_random_api_psa
+- name: component_catalog
+  value: zigbee_strong_random_api_psa
 
 
 documentation:
-    docset: zigbee
-    document: zigbee-af-api/strong-random-api-psa
+  docset: zigbee
+  document: zigbee-af-api/strong-random-api-psa
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

@@ -163,6 +163,7 @@ SECTIONS
   .nvm (NOLOAD) : {
     KEEP(*(.simee*))
   } > DUMMY
+
 {%- endif %}
 
   .vectors :
@@ -427,6 +428,12 @@ heap_size = heap_limit - __HeapBase;
   .nvm (DSECT) : {
     KEEP(*(.simee*))
   } > FLASH
+
+{%- if logger_enable %}
+  .log_fmt (NOLOAD) : {
+    KEEP(*(.log_fmt*))
+  } > FLASH
+{%- endif %}
 {%- endif %}
 
   __ramfuncs_start__ = __vma_ramfuncs_start__;

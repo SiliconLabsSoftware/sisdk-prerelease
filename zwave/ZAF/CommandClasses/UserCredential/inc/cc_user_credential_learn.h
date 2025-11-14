@@ -15,8 +15,6 @@
 #include "zaf_transport_tx.h"
 #include "zaf_event_distributor_soc.h"
 #include "AppTimer.h"
-#include "zpal_power_manager.h"
-#include "zw_power_manager_ids.h"
 
 /**
  * @return true if a Credential Learn operation is in currently progress

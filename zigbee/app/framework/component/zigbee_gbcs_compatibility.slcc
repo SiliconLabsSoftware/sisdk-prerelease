@@ -5,12 +5,12 @@ label: GBCS Compatibility
 category: Zigbee|Great Britain Companion Specification
 quality: production
 provides:
-  - name: zigbee_gbcs_compatibility
+- name: zigbee_gbcs_compatibility
 template_contribution:
-  - name: component_catalog
-    value: zigbee_gbcs_compatibility
+- name: component_catalog
+  value: zigbee_gbcs_compatibility
 
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

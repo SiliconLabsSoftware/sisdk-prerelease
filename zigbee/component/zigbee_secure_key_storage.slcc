@@ -6,36 +6,36 @@ category: Zigbee|Utility
 quality: production
 
 provides:
-  - name: zigbee_key_storage
-  - name: zigbee_secure_key_storage
-  - name: zigbee_aes
+- name: zigbee_key_storage
+- name: zigbee_secure_key_storage
+- name: zigbee_aes
 
 requires:
-  - name: security_manager
-  - name: psa_crypto_cipher_ecb
-    condition:
-      - device_cortexm
-  - name: zigbee_secure_key_storage_upgrade_common
+- name: security_manager
+- name: psa_crypto_cipher_ecb
+  condition:
+  - device_cortexm
+- name: zigbee_secure_key_storage_upgrade_common
 
 recommends:
-  - id: zigbee_secure_key_storage_upgrade
-    condition: [device_series_2]
-    vendor: silabs
-  - id: zigbee_secure_key_storage_no_upgrade
-    condition: [device_series_3]
-    vendor: silabs
+- id: zigbee_secure_key_storage_upgrade
+  condition: [device_series_2]
+  vendor: silabs
+- id: zigbee_secure_key_storage_no_upgrade
+  condition: [device_series_3]
+  vendor: silabs
 
 source:
-  - path: stack/security/zigbee-security-manager-vault-support.c
+- path: stack/security/zigbee-security-manager-vault-support.c
 
 include:
-  - path: stack/security/
-    file_list:
-      - path: zigbee-security-manager-vault-support.h
+- path: stack/security/
+  file_list:
+  - path: zigbee-security-manager-vault-support.h
 
 template_contribution:
-  - name: component_catalog
-    value: zigbee_secure_key_storage
+- name: component_catalog
+  value: zigbee_secure_key_storage
 
   # ZB needs 2 volatile keys for internal operations, and another batch
   # for transient keys if using Z3 joining
@@ -43,42 +43,42 @@ template_contribution:
   # once, they can simply configure the SL_PSA_KEY_USER_SLOT_COUNT item to
   # account for the extra number of devices that they want to join
 
-  - name: psa_key_slots
-    value:
-        name: psa_key_slots_zigbee_stack
-        count: 2 + 30
-    condition:
-      - zigbee_network_creator
-  - name: psa_key_slots
-    value:
-        name: psa_key_slots_zigbee_stack
-        count: 2 + 30
-    condition:
-      - zigbee_network_steering
-  - name: psa_key_slots
-    value:
-        name: psa_key_slots_zigbee_stack
-        count: 2 + 30
-    condition:
-      - zigbee_ncp
-  - name: psa_key_slots
-    value:
-        name: psa_key_slots_zigbee_stack
-        count: 2
-    unless:
-      - zigbee_network_creator
-      - zigbee_network_steering
-      - zigbee_ncp
+- name: psa_key_slots
+  value:
+    name: psa_key_slots_zigbee_stack
+    count: 2 + 30
+  condition:
+  - zigbee_network_creator
+- name: psa_key_slots
+  value:
+    name: psa_key_slots_zigbee_stack
+    count: 2 + 30
+  condition:
+  - zigbee_network_steering
+- name: psa_key_slots
+  value:
+    name: psa_key_slots_zigbee_stack
+    count: 2 + 30
+  condition:
+  - zigbee_ncp
+- name: psa_key_slots
+  value:
+    name: psa_key_slots_zigbee_stack
+    count: 2
+  unless:
+  - zigbee_network_creator
+  - zigbee_network_steering
+  - zigbee_ncp
 
   # For non-volatile keys, we always reserve 127, since that's the max value
   # SL_ZIGBEE_KEY_TABLE_SIZE can be. This reservation does not impact code size in
   # the event that the key table is not used.
 
-  - name: psa_its_files
-    value:
-        name: psa_its_files_zigbee_stack
-        count: 127
+- name: psa_its_files
+  value:
+    name: psa_its_files_zigbee_stack
+    count: 127
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

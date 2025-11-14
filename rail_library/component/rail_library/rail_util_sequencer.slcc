@@ -5,35 +5,35 @@ package: rail_library
 category: Platform|Radio
 quality: production
 metadata:
-    sbom:
-        id: rail_util_sequencer
-        name: RAIL Utility, Radio Sequencer Image Selection
-        license: Zlib
+  sbom:
+    id: rail_util_sequencer
+    name: RAIL Utility, Radio Sequencer Image Selection
+    license: Zlib
 ui_hints:
-    visibility: never
+  visibility: never
 requires:
-  - name: rail_lib
+- name: rail_lib
 provides:
-  - name: rail_util_sequencer
+- name: rail_util_sequencer
 documentation:
-    docset: rail
-    document: rail-api/rail-util-sequencer
+  docset: rail
+  document: rail-api/rail-util-sequencer
 config_file:
-  - path: plugin/rail_util_sequencer/config/efr32xg24/pa_10dbm/sl_rail_util_sequencer_config.h
-    condition: [device_sdid_215, device_pa_10dbm]
-    file_id: rail_util_sequencer_config
-  - path: plugin/rail_util_sequencer/config/efr32xg24/pa_20dbm/sl_rail_util_sequencer_config.h
-    condition: [device_sdid_215, device_pa_20dbm]
-    file_id: rail_util_sequencer_config
-  - path: plugin/rail_util_sequencer/config/efr32xg26/pa_10dbm/sl_rail_util_sequencer_config.h
-    condition: [device_sdid_225, device_pa_10dbm]
-    file_id: rail_util_sequencer_config
-  - path: plugin/rail_util_sequencer/config/efr32xg26/pa_20dbm/sl_rail_util_sequencer_config.h
-    condition: [device_sdid_225, device_pa_20dbm]
-    file_id: rail_util_sequencer_config
+- path: plugin/rail_util_sequencer/config/efr32xg24/pa_10dbm/sl_rail_util_sequencer_config.h
+  condition: [device_sdid_215, device_pa_10dbm]
+  file_id: rail_util_sequencer_config
+- path: plugin/rail_util_sequencer/config/efr32xg24/pa_20dbm/sl_rail_util_sequencer_config.h
+  condition: [device_sdid_215, device_pa_20dbm]
+  file_id: rail_util_sequencer_config
+- path: plugin/rail_util_sequencer/config/efr32xg26/pa_10dbm/sl_rail_util_sequencer_config.h
+  condition: [device_sdid_225, device_pa_10dbm]
+  file_id: rail_util_sequencer_config
+- path: plugin/rail_util_sequencer/config/efr32xg26/pa_20dbm/sl_rail_util_sequencer_config.h
+  condition: [device_sdid_225, device_pa_20dbm]
+  file_id: rail_util_sequencer_config
 source:
-  - path: plugin/rail_util_sequencer/sl_rail_util_sequencer.c
-    condition: [device_sdid_215]
-  - path: plugin/rail_util_sequencer/sl_rail_util_sequencer.c
-    condition: [device_sdid_225]
+- path: plugin/rail_util_sequencer/sl_rail_util_sequencer.c
+  condition: [device_sdid_215]
+- path: plugin/rail_util_sequencer/sl_rail_util_sequencer.c
+  condition: [device_sdid_225]
 root_path: rail_library

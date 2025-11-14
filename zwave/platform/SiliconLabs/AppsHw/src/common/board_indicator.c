@@ -12,12 +12,16 @@
 #include <assert.h>
 #include "em_letimer.h"
 #include "em_cmu.h"
-#include <zpal_power_manager.h>
 #include "sl_simple_led_instances.h"
 #include "sl_sleeptimer.h"
 
-#include "zw_power_manager_ids.h"
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
 
+#ifdef SL_CATALOG_ZW_SHUTDOWN_MANAGER_PRESENT
+#include "zw_shutdown_manager.h"
+#endif
 /****************************************************************************/
 /*                      PRIVATE TYPES and DEFINITIONS                       */
 /****************************************************************************/
@@ -64,7 +68,9 @@ static void sleeptimer_off_cb(__attribute__((unused)) sl_sleeptimer_timer_handle
     sl_sleeptimer_start_timer_ms(&my_sleeptimer_handle, indicator_settings.off_time_ms, sleeptimer_on_cb, NULL, 0, 0);
   } else {
     m_indicator_active_from_cc = false;
-    zw_power_manager_lock_cancel(ZPAL_PM_TYPE_DEEP_SLEEP, ZPAL_PM_APP_DEEP_SLEEP_BOARD_INDICATOR_ID);
+#ifdef SL_CATALOG_ZW_SHUTDOWN_MANAGER_PRESENT
+    zw_shutdown_manager_release_lock();
+#endif
   }
 }
 
@@ -112,7 +118,9 @@ bool Board_IndicatorControl(uint32_t on_time_ms,
     indicator_settings.off_time_ms = 0;
     indicator_settings.on_time_ms  = 0;
     m_indicator_active_from_cc = false;
-    zw_power_manager_lock_cancel(ZPAL_PM_TYPE_DEEP_SLEEP, ZPAL_PM_APP_DEEP_SLEEP_BOARD_INDICATOR_ID);
+#ifdef SL_CATALOG_ZW_SHUTDOWN_MANAGER_PRESENT
+    zw_shutdown_manager_release_lock();
+#endif
   } else {
     if (indicator_settings.cycles == 0) {
       // Indefinite long blinking
@@ -124,7 +132,9 @@ bool Board_IndicatorControl(uint32_t on_time_ms,
 
     sl_simple_led_turn_on(sl_led_led0.context);
     sl_sleeptimer_start_timer_ms(&my_sleeptimer_handle, indicator_settings.on_time_ms, sleeptimer_off_cb, NULL, 0, 0);
-    zw_power_manager_lock(ZPAL_PM_TYPE_DEEP_SLEEP, 0, ZPAL_PM_APP_DEEP_SLEEP_BOARD_INDICATOR_ID);
+#ifdef SL_CATALOG_ZW_SHUTDOWN_MANAGER_PRESENT
+    zw_shutdown_manager_add_lock();
+#endif
     m_indicator_active_from_cc = called_from_indicator_cc;
   }
 

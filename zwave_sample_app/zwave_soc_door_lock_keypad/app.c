@@ -30,13 +30,8 @@
 #include "zaf_protocol_config.h"
 #include "ZAF_PrintAppInfo.h"
 
-#ifdef SL_CATALOG_ZW_CLI_SLEEPING_PRESENT
-#include "zw_cli_sleeping.h"
-#include "zw_cli_sleeping_config.h"
-#endif
-
-#ifdef SL_CATALOG_ZW_PM_TRANSITION_EVENT_PRESENT
-#include "app_pm_transition_event.h"
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
 #endif
 
 #ifdef SL_CATALOG_ZW_CLI_COMMON_PRESENT
@@ -68,11 +63,6 @@ ZW_APPLICATION_STATUS ApplicationInit(__attribute__((unused)) zpal_reset_reason_
   ZPAL_LOG_INFO(ZPAL_LOG_APP, "ApplicationInit eResetReason = %d\n", eResetReason);
 
   RadioConfig = zaf_get_radio_config();
-
-#ifdef SL_CATALOG_ZW_PM_TRANSITION_EVENT_PRESENT
-  // register callback from power manager transitions
-  ZW_PmTransitionEventInit();
-#endif
 
   // Read Rf region from MFG_ZWAVE_COUNTRY_FREQ
   zpal_radio_region_t regionMfg;

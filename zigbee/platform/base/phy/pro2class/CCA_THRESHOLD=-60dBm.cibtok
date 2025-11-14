@@ -1,3 +1,0 @@
-# CIB Token patch for increasing CCA_THRESHOLD to -60 dBm
-# $ em3xx_load --cibtokenspatch CCA_THRESHOLD=-60dBm.cibtok --ip <ISA3>
-TOKEN_MFG_CCA_THRESHOLD           : 0x00C4

@@ -5,24 +5,24 @@ package: rail_library
 category: Platform|Radio
 quality: production
 metadata:
-    sbom:
-        id: rail_util_sfm_sequencer
-        name: RAIL Utility, SFM Sequencer Image Selection
-        license: Zlib
+  sbom:
+    id: rail_util_sfm_sequencer
+    name: RAIL Utility, SFM Sequencer Image Selection
+    license: Zlib
 requires:
-  - name: rail_lib
+- name: rail_lib
 provides:
-  - name: rail_util_sfm_sequencer
+- name: rail_util_sfm_sequencer
 documentation:
-    docset: rail
-    document: rail-api/rail-util-sfm-sequencer
+  docset: rail
+  document: rail-api/rail-util-sfm-sequencer
 config_file:
-  - path: plugin/rail_util_sfm_sequencer/config/efr32xg25/sl_rail_util_sfm_sequencer_config.h
-    condition:
-      - device_sdid_220
-    file_id: rail_util_sfm_sequencer_config
+- path: plugin/rail_util_sfm_sequencer/config/efr32xg25/sl_rail_util_sfm_sequencer_config.h
+  condition:
+  - device_sdid_220
+  file_id: rail_util_sfm_sequencer_config
 source:
-  - path: plugin/rail_util_sfm_sequencer/sl_rail_util_sfm_sequencer.c
-    condition:
-      - device_sdid_220
+- path: plugin/rail_util_sfm_sequencer/sl_rail_util_sfm_sequencer.c
+  condition:
+  - device_sdid_220
 root_path: rail_library

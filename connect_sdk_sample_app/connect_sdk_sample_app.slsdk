@@ -1,0 +1,12 @@
+# Properties file for Simplicity Studio metadata.
+id=com.silabs.sdk.eval.connect_sdk_sample_app
+label=Connect SDK Sample Applications
+description= Test
+version=1.0.0
+prop.subLabel=Connect SDK Applications
+
+# General properties are prepended with "prop."
+prop.file.templatesFile=templates.xml
+prop.file.demosFile=
+prop.file.adapterPacks=
+prop.file.hkconfAdkModels=adk_models

@@ -2,6 +2,41 @@
  * @file ZW_TransportMulticast.c
  * @brief Handles multicast frames in the Z-Wave Framework.
  * @copyright 2019 Silicon Laboratories Inc.
+ *
+ * @section multicast_power_management Multicast Power Management During Transmission
+ *
+ * The multicast transmission process manages device power state to ensure reliable
+ * delivery to multiple nodes in the network:
+ *
+ * @verbatim
+ * Multicast Transmission Radio Power Management Timeline:
+ *
+ * Time:     0ms    200ms   400ms   600ms   800ms   1000ms  1200ms  1400ms  1600ms  1800ms  2000ms
+ * State:    |-------|-------|-------|-------|--------|-------|-------|-------|-------|-------|
+ *           ^                                                                                ^
+ *           |                                                                                |
+ *   Multicast TX Start (with supervision)                                                 TX Complete
+ *   Request 1sec stay-awake                                                            Release stay-awake
+ *   zpal_radio_request_stay_awake(1000ms)                                           zpal_radio_revoke_stay_awake()
+ *           |                                                                                |
+ *           |<------------- Multicast Transmission Process ------------->|                   |
+ *           |                                                            |                   |
+ *        Start MC TX                                                  TX Done            Allow sleep
+ *          Process                                                     Event              after TX
+ *
+ * @endverbatim
+ *
+ * - **Initial Request (1 second)**: When starting multicast transmission, we request
+ *   a 1-second stay-awake period using zpal_radio_request_stay_awake(1000).
+ *   This ensures the device remains awake during the multicast frame transmission
+ *   to multiple destination nodes.
+ *
+ * - **Transmission Complete**: When multicast transmission completes, we revoke
+ *   the stay-awake request using zpal_radio_revoke_stay_awake() to allow the
+ *   device to return to sleep mode.
+ *
+ * - **Multicast Coverage**: The stay-awake period covers the transmission to all
+ *   nodes in the multicast group, including any necessary retransmissions.
  */
 
 /****************************************************************************/
@@ -19,7 +54,7 @@
 #include <ZAF_Common_interface.h>
 #include <CC_Supervision.h>
 #include "zpal_log.h"
-#include "zw_power_manager_ids.h"
+#include "zpal_radio.h"
 
 /****************************************************************************/
 /*                      PRIVATE TYPES and DEFINITIONS                       */
@@ -71,6 +106,8 @@ static uint32_t remainingNodeCount;
 static ZAF_TRANSPORT_TX_BUFFER txBuf = { 0 };
 
 static bool multiCastInProgress;
+
+static zpal_radio_stay_awake_id_t stay_awake_id;
 
 /****************************************************************************/
 /*                              EXPORTED DATA                               */
@@ -501,7 +538,7 @@ ZCB_multicast_callback(TRANSMISSION_RESULT * pTransmissionResult)
       ZCB_multicast_callback);
     // If Supervision CC is used, keep Radio Powered on 1 sec after transmission.
     if (fSupervisionEnableHold) {
-      zpal_pm_lock(ZPAL_PM_TYPE_USE_RADIO, ZPAL_PM_DOMAIN_APP, 1000, ZPAL_PM_APP_RADIO_ZAF_TRANSPORT_MULTICAST_ID);
+      zpal_radio_request_stay_awake(1000, &stay_awake_id);
     }
 
     if (ZAF_ENQUEUE_STATUS_SUCCESS != txResult) {
@@ -521,7 +558,7 @@ ZCB_multicast_callback(TRANSMISSION_RESULT * pTransmissionResult)
 void
 ZW_TransportMulticast_clearTimeout(void)
 {
-  zpal_pm_lock_cancel(ZPAL_PM_TYPE_USE_RADIO, ZPAL_PM_DOMAIN_APP, ZPAL_PM_APP_RADIO_ZAF_TRANSPORT_MULTICAST_ID);
+  zpal_radio_revoke_stay_awake(&stay_awake_id);
   if (multicast_cb_called) {
     return;
   }

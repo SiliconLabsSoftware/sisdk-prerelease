@@ -4,23 +4,23 @@ package: "connect_stack"
 category: "Connect"
 quality: "production"
 ui_hints:
-    visibility: never
+  visibility: never
 description: "Provides the Connect Parent Support library."
 provides:
-  - name: "connect_parent_support_implementation"
+- name: "connect_parent_support_implementation"
 requires:
-  - name: "connect_parent_support"
+- name: "connect_parent_support"
 library:
-  - path: "libs/libconnect-parent-support-library-efr32xg2x-iar.a"
-    condition:
-      - "toolchain_iar"
-      - device_series_2
-  - path: "libs/libconnect-parent-support-library-efr32xg2x-gcc.a"
-    condition:
-      - "toolchain_gcc"
-      - device_series_2
+- path: "libs/libconnect-parent-support-library-efr32xg2x-iar.a"
+  condition:
+  - "toolchain_iar"
+  - device_series_2
+- path: "libs/libconnect-parent-support-library-efr32xg2x-gcc.a"
+  condition:
+  - "toolchain_gcc"
+  - device_series_2
 
 metadata:
-    sbom:
-        license: Zlib
+  sbom:
+    license: Zlib
 root_path: connect_stack

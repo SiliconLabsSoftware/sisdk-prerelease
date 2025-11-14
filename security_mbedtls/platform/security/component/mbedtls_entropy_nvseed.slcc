@@ -2,36 +2,36 @@ id: mbedtls_entropy_nvseed
 package: security_mbedtls
 label: Device-Unique Seed Entropy Source
 description: >-
-    This component provides support for using entropy gathered from a device-unique seed.
+  This component provides support for using entropy gathered from a device-unique seed.
 category: Platform|Security|Mbed TLS|Randomness
 quality: production
 source:
-  - path: sl_component/sl_mbedtls_support/src/sl_entropy_nvseed.c
+- path: sl_component/sl_mbedtls_support/src/sl_entropy_nvseed.c
 provides:
-  - name: mbedtls_entropy_source
-    allow_multiple: true
-  - name: mbedtls_entropy_nvseed
+- name: mbedtls_entropy_source
+  allow_multiple: true
+- name: mbedtls_entropy_nvseed
 requires:
-  - name: device_has_devinfo
-  - name: nvm3_default
+- name: device_has_devinfo
+- name: nvm3_default
 template_contribution:
-  - name: mbedtls_config
-    value: MBEDTLS_ENTROPY_NV_SEED
-  - name: mbedtls_config
-    value: MBEDTLS_PLATFORM_C
-  - name: mbedtls_config
-    value: MBEDTLS_PLATFORM_NV_SEED_ALT
-  - name: mbedtls_config
-    value: MBEDTLS_PLATFORM_STD_NV_SEED_READ sli_nv_seed_read
-  - name: mbedtls_config
-    value: MBEDTLS_PLATFORM_STD_NV_SEED_WRITE sli_nv_seed_write
+- name: mbedtls_config
+  value: MBEDTLS_ENTROPY_NV_SEED
+- name: mbedtls_config
+  value: MBEDTLS_PLATFORM_C
+- name: mbedtls_config
+  value: MBEDTLS_PLATFORM_NV_SEED_ALT
+- name: mbedtls_config
+  value: MBEDTLS_PLATFORM_STD_NV_SEED_READ sli_nv_seed_read
+- name: mbedtls_config
+  value: MBEDTLS_PLATFORM_STD_NV_SEED_WRITE sli_nv_seed_write
 metadata:
-    sbom:
-        license: Zlib AND Apache-2.0
-        upstream:
-            name: Mbed TLS
-            version: v3.6.2
-            supplier: Trusted Firmware
-            url: https://github.com/Mbed-TLS/mbedtls.git
-            comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
+  sbom:
+    license: Zlib AND Apache-2.0
+    upstream:
+      name: Mbed TLS
+      version: v3.6.2
+      supplier: Trusted Firmware
+      url: https://github.com/Mbed-TLS/mbedtls.git
+      comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
 root_path: security_mbedtls/platform/security

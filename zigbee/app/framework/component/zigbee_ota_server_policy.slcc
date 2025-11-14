@@ -5,23 +5,23 @@ quality: evaluation
 id: zigbee_ota_server_policy
 category: Zigbee|Over-The-Air Bootloading
 provides:
-  - name: zigbee_ota_server_policy
+- name: zigbee_ota_server_policy
 requires:
-  - name: zigbee_ota_server
+- name: zigbee_ota_server
 source:
-  - path: app/framework/plugin/ota-server-policy/ota-server-policy.c
-  - path: app/framework/plugin/ota-server-policy/ota-server-policy-cb.c
+- path: app/framework/plugin/ota-server-policy/ota-server-policy.c
+- path: app/framework/plugin/ota-server-policy/ota-server-policy-cb.c
 include:
-  - path: app/framework/plugin/ota-server-policy
-    file_list:
-      - path: ota-server-policy.h
+- path: app/framework/plugin/ota-server-policy
+  file_list:
+  - path: ota-server-policy.h
 template_contribution:
-  - name: component_catalog
-    value: zigbee_ota_server_policy
+- name: component_catalog
+  value: zigbee_ota_server_policy
 documentation:
-    docset: zigbee
-    document: zigbee-af-api/ota-server-policy
+  docset: zigbee
+  document: zigbee-af-api/ota-server-policy
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

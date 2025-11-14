@@ -5,13 +5,13 @@ package: platform_core
 category: Services|IO Stream
 quality: production
 metadata:
-    sbom:
-        license: Zlib
+  sbom:
+    license: Zlib
 provides:
-  - name: iostream_recommended_debug
+- name: iostream_recommended_debug
 requires:
-  - name: iostream_debug_support
+- name: iostream_debug_support
 recommends:
-  - id: iostream_debug
-    vendor: silabs
+- id: iostream_debug
+  vendor: silabs
 root_path: platform_core

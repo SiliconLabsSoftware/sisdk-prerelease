@@ -5,11 +5,11 @@ description: Enables Micrium OS task exit garbage collection, allowing deferred 
 category: RTOS|Micrium OS|Common
 quality: production
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 provides:
-  - name: micriumos_enable_task_exit_garbage_collect
+- name: micriumos_enable_task_exit_garbage_collect
 define:
-  - name: ENABLE_MICRIUM_TASK_EXIT_GARBAGE_COLLECT
-    value: 1
+- name: ENABLE_MICRIUM_TASK_EXIT_GARBAGE_COLLECT
+  value: 1
 root_path: micriumos/platform/micrium_os

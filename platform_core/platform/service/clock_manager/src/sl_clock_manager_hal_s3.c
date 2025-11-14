@@ -334,8 +334,6 @@ sl_status_t sli_clock_manager_hal_enable_bus_clock(sl_bus_clock_t module_bus_clo
     return SL_STATUS_NOT_AVAILABLE;
   }
 #else
-  // Starting with SIXG353, the bus_clock value stores the module
-  // register in CMU with the CLKEN field
   reg = (uint32_t *)(*module_bus_clock);
   if (reg == SL_BUS_CLOCK_INVALID || reg == (uint32_t *)0xFFFFFFFF) {
     return SL_STATUS_NOT_AVAILABLE;

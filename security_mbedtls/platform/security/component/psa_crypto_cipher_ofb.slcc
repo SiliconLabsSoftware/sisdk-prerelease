@@ -2,28 +2,28 @@ id: psa_crypto_cipher_ofb
 package: security_mbedtls
 label: OFB Mode
 description: >-
-    This component provides support for the OFB stream cipher mode in PSA Crypto.
+  This component provides support for the OFB stream cipher mode in PSA Crypto.
 category: Platform|Security|PSA Crypto|Encryption
 quality: production
 provides:
-  - name: psa_crypto_cipher_ofb
+- name: psa_crypto_cipher_ofb
 requires:
-  - name: psa_crypto_aes
+- name: psa_crypto_aes
 template_contribution:
-  - name: psa_crypto_config
-    value: PSA_WANT_ALG_OFB 1
-  - name: psa_crypto_builtin_config
-    value: "MBEDTLS_PSA_BUILTIN_ALG_OFB 1"
-    condition: [mbedtls_cipher_ofb]
+- name: psa_crypto_config
+  value: PSA_WANT_ALG_OFB 1
+- name: psa_crypto_builtin_config
+  value: "MBEDTLS_PSA_BUILTIN_ALG_OFB 1"
+  condition: [mbedtls_cipher_ofb]
 documentation:
-    url: https://armmbed.github.io/mbed-crypto/html/api/ops/ciphers.html#c.PSA_ALG_OFB
+  url: https://armmbed.github.io/mbed-crypto/html/api/ops/ciphers.html#c.PSA_ALG_OFB
 metadata:
-    sbom:
-        license: Apache-2.0
-        upstream:
-            name: Mbed TLS
-            version: v3.6.2
-            supplier: Trusted Firmware
-            url: https://github.com/Mbed-TLS/mbedtls.git
-            comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
+  sbom:
+    license: Apache-2.0
+    upstream:
+      name: Mbed TLS
+      version: v3.6.2
+      supplier: Trusted Firmware
+      url: https://github.com/Mbed-TLS/mbedtls.git
+      comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
 root_path: security_mbedtls

@@ -5,47 +5,47 @@ quality: production
 id: zigbee_smart_energy_registration
 category: Zigbee|Cluster Library|Smart Energy
 provides:
-  - name: zigbee_smart_energy_registration
+- name: zigbee_smart_energy_registration
 requires:
-  - name: zigbee_address_table
-  - name: zigbee_esi_management
+- name: zigbee_address_table
+- name: zigbee_esi_management
 config_file:
-  - path: app/framework/plugin/smart-energy-registration/config/smart-energy-registration-config.h
+- path: app/framework/plugin/smart-energy-registration/config/smart-energy-registration-config.h
 source:
-  - path: app/framework/plugin/smart-energy-registration/smart-energy-registration.c
-  - path: app/framework/plugin/smart-energy-registration/smart-energy-registration-cli.c
-    condition:
-      - cli
+- path: app/framework/plugin/smart-energy-registration/smart-energy-registration.c
+- path: app/framework/plugin/smart-energy-registration/smart-energy-registration-cli.c
+  condition:
+  - cli
 include:
-  - path: app/framework/plugin/smart-energy-registration
-    file_list:
-      - path: smart-energy-registration.h
+- path: app/framework/plugin/smart-energy-registration
+  file_list:
+  - path: smart-energy-registration.h
 template_contribution:
-  - name: component_catalog
-    value: zigbee_smart_energy_registration
-  - name: zigbee_af_callback
-    value:
-        callback_type: event_init
-        function_name: sli_zigbee_af_smart_energy_registration_init_callback
-  - name: cli_group
-    value:
-        group: plugin
-        name: smart-energy-registration
-        help: smart-energy-registration related commands.
-  - name: cli_command
-    value:
-        group: smart-energy-registration
-        name: set-period
-        handler: setRegistrationDelayPeriod
-        help: Sets the discovery period (in seconds).
-        argument:
-          - type: uint32
-            help: The discovery period (in seconds)
+- name: component_catalog
+  value: zigbee_smart_energy_registration
+- name: zigbee_af_callback
+  value:
+    callback_type: event_init
+    function_name: sli_zigbee_af_smart_energy_registration_init_callback
+- name: cli_group
+  value:
+    group: plugin
+    name: smart-energy-registration
+    help: smart-energy-registration related commands.
+- name: cli_command
+  value:
+    group: smart-energy-registration
+    name: set-period
+    handler: setRegistrationDelayPeriod
+    help: Sets the discovery period (in seconds).
+    argument:
+    - type: uint32
+      help: The discovery period (in seconds)
 
 documentation:
-    docset: zigbee
-    document: zigbee-af-api/smart-energy-registration
+  docset: zigbee
+  document: zigbee-af-api/smart-energy-registration
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

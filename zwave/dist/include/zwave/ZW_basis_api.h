@@ -148,6 +148,18 @@ void ZW_RequestEncryptionStatus(uint32_t status);
 #endif
 
 /**
+ * @brief Wrapper of stack logic to prepares the system for deep sleep (EM4) mode.
+ *
+ * This function performs any necessary actions, through callbacks, to prepare the system for
+ * entering deep sleep mode, such as notifying other components or
+ * saving state information.
+ *
+ * @todo: this call is a workaround and should be replaced with a proper implementation.
+ *
+ */
+void ZW_stack_shutdown(void);
+
+/**
  * @} // BASIS
  * @} // ZWaveAPI
  */

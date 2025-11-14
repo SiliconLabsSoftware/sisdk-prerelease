@@ -8,25 +8,25 @@ ui_hints: {}
 quality: production
 template_file: []
 provides:
-  - name: zigbee_file_descriptor_dispatch
+- name: zigbee_file_descriptor_dispatch
 requires:
-  - name: device_host
-  - name: cli_threaded_host
+- name: device_host
+- name: cli_threaded_host
 include:
-  - path: app/framework/plugin-host/file-descriptor-dispatch
-    file_list:
-      - path: file-descriptor-dispatch.h
+- path: app/framework/plugin-host/file-descriptor-dispatch
+  file_list:
+  - path: file-descriptor-dispatch.h
 source:
-  - path: app/framework/plugin-host/file-descriptor-dispatch/file-descriptor-dispatch.c
-  - path: app/framework/plugin-host/file-descriptor-dispatch/file-descriptor-dispatch-cb.c
+- path: app/framework/plugin-host/file-descriptor-dispatch/file-descriptor-dispatch.c
+- path: app/framework/plugin-host/file-descriptor-dispatch/file-descriptor-dispatch-cb.c
 template_contribution:
-  - name: component_catalog
-    value: zigbee_file_descriptor_dispatch
+- name: component_catalog
+  value: zigbee_file_descriptor_dispatch
 
 documentation:
-    docset: zigbee
-    document: zigbee-af-api/file-descriptor-dispatch
+  docset: zigbee
+  document: zigbee-af-api/file-descriptor-dispatch
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

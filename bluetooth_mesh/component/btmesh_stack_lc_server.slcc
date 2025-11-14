@@ -6,20 +6,20 @@ category: "Bluetooth Mesh|Stack|Models"
 quality: "production"
 
 requires:
-  - name: "btmesh_stack"
-  - name: "btmesh_stack_lc_setup_server"
-  - name: "btmesh_stack_generic_server"
-  - name: "btmesh_core"
+- name: "btmesh_stack"
+- name: "btmesh_stack_lc_setup_server"
+- name: "btmesh_stack_generic_server"
+- name: "btmesh_core"
 provides:
-  - name: "btmesh_stack_lc_server"
-  - name: "btmesh_lighting_model"
-    allow_multiple: true
+- name: "btmesh_stack_lc_server"
+- name: "btmesh_lighting_model"
+  allow_multiple: true
 template_contribution:
-  - name: btmesh_bgapi_class
-    value:
-        class: "lc_server"
-    priority: 1
+- name: btmesh_bgapi_class
+  value:
+    class: "lc_server"
+  priority: 1
 metadata:
-    sbom:
-        reference: btmesh_stack_models
+  sbom:
+    reference: btmesh_stack_models
 root_path: bluetooth_mesh

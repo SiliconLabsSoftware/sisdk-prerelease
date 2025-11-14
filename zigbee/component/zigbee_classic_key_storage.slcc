@@ -6,49 +6,49 @@ category: Zigbee|Utility
 quality: production
 
 provides:
-  - name: zigbee_key_storage
-  - name: zigbee_classic_key_storage
+- name: zigbee_key_storage
+- name: zigbee_classic_key_storage
   # If generating for hardware, we provide AES routines, else, zigbee_aes_software
   # (below) will provide software AES support
-  - name: zigbee_aes
-    condition:
-      - device_cortexm
+- name: zigbee_aes
+  condition:
+  - device_cortexm
 
 requires:
   # AES hardware implementation (by calling internal PSA calls)
-  - name: psa_crypto_aes
-    condition:
-      - device_series_2
-  - name: psa_crypto_cipher_ecb
-    condition:
-      - device_series_2
-  - name: psa_crypto_ccm
-    condition:
-      - device_series_2
+- name: psa_crypto_aes
+  condition:
+  - device_series_2
+- name: psa_crypto_cipher_ecb
+  condition:
+  - device_series_2
+- name: psa_crypto_ccm
+  condition:
+  - device_series_2
   # AES software implementation
-  - name: zigbee_aes_software
-    condition:
-      - operating_system
-  - name: zigbee_aes_software
-    condition:
-      - native
-  - name: zigbee_aes_software
-    condition:
-      - zigbee_simulation_or_zigbee_stack_unix
+- name: zigbee_aes_software
+  condition:
+  - operating_system
+- name: zigbee_aes_software
+  condition:
+  - native
+- name: zigbee_aes_software
+  condition:
+  - zigbee_simulation_or_zigbee_stack_unix
 
 source:
-  - path: stack/security/zigbee-security-manager-no-vault.c
-  - path: stack/framework/aes-ecb.c
+- path: stack/security/zigbee-security-manager-no-vault.c
+- path: stack/framework/aes-ecb.c
 
 include:
-  - path: stack/platform/micro
-    file_list:
-      - path: aes.h
+- path: stack/platform/micro
+  file_list:
+  - path: aes.h
 
 template_contribution:
-  - name: component_catalog
-    value: zigbee_classic_key_storage
+- name: component_catalog
+  value: zigbee_classic_key_storage
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

@@ -5,19 +5,19 @@ label: ZLL Utility Client Cluster
 category: Zigbee|Zigbee Light Link
 quality: production
 provides:
-  - name: zigbee_zll_utility_client
+- name: zigbee_zll_utility_client
 source:
-  - path: app/framework/plugin/zll-utility-client/zll-utility-client.c
+- path: app/framework/plugin/zll-utility-client/zll-utility-client.c
 template_contribution:
-  - name: component_catalog
-    value: zigbee_zll_utility_client
-  - name: cluster_service
-    value:
-        cluster_id: '0x1000'
-        mfg_id: NOT_MFG_SPECIFIC
-        side: CLIENT
-        service_function: sl_zigbee_af_zll_commissioning_cluster_client_command_parse
+- name: component_catalog
+  value: zigbee_zll_utility_client
+- name: cluster_service
+  value:
+    cluster_id: '0x1000'
+    mfg_id: NOT_MFG_SPECIFIC
+    side: CLIENT
+    service_function: sl_zigbee_af_zll_commissioning_cluster_client_command_parse
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

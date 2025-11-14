@@ -5,29 +5,29 @@ label: Prepayment Client
 category: Zigbee|Cluster Library|Smart Energy
 quality: production
 provides:
-  - name: zigbee_prepayment_client
+- name: zigbee_prepayment_client
 source:
-  - path: app/framework/plugin/prepayment-client/prepayment-client.c
-  - path: app/framework/plugin/prepayment-client/prepayment-client-cli.c
-    condition:
-      - cli
+- path: app/framework/plugin/prepayment-client/prepayment-client.c
+- path: app/framework/plugin/prepayment-client/prepayment-client-cli.c
+  condition:
+  - cli
 include:
-  - path: app/framework/plugin/prepayment-client
-    file_list:
-      - path: prepayment-client.h
+- path: app/framework/plugin/prepayment-client
+  file_list:
+  - path: prepayment-client.h
 template_contribution:
-  - name: component_catalog
-    value: zigbee_prepayment_client
-  - name: cluster_service
-    value:
-        cluster_id: '0x0705'
-        mfg_id: NOT_MFG_SPECIFIC
-        side: CLIENT
-        service_function: sl_zigbee_af_prepayment_cluster_client_command_parse
+- name: component_catalog
+  value: zigbee_prepayment_client
+- name: cluster_service
+  value:
+    cluster_id: '0x0705'
+    mfg_id: NOT_MFG_SPECIFIC
+    side: CLIENT
+    service_function: sl_zigbee_af_prepayment_cluster_client_command_parse
 documentation:
-    docset: zigbee
-    document: zigbee-af-api/prepayment-client
+  docset: zigbee
+  document: zigbee-af-api/prepayment-client
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

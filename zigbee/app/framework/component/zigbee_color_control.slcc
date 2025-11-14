@@ -5,21 +5,21 @@ label: Color Control Cluster (deprecated)
 category: Zigbee|Cluster Library|Home Automation
 quality: deprecated
 provides:
-  - name: zigbee_color_control
-  - name: zigbee_color_control_server_implementation
+- name: zigbee_color_control
+- name: zigbee_color_control_server_implementation
 source:
-  - path: app/framework/plugin/color-control/color-control.c
-  - path: app/framework/plugin/color-control/color-control-cb.c
+- path: app/framework/plugin/color-control/color-control.c
+- path: app/framework/plugin/color-control/color-control-cb.c
 template_contribution:
-  - name: component_catalog
-    value: zigbee_color_control
-  - name: cluster_service
-    value:
-        cluster_id: '0x0300'
-        mfg_id: NOT_MFG_SPECIFIC
-        side: SERVER
-        service_function: sl_zigbee_af_color_control_cluster_server_command_parse
+- name: component_catalog
+  value: zigbee_color_control
+- name: cluster_service
+  value:
+    cluster_id: '0x0300'
+    mfg_id: NOT_MFG_SPECIFIC
+    side: SERVER
+    service_function: sl_zigbee_af_color_control_cluster_server_command_parse
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

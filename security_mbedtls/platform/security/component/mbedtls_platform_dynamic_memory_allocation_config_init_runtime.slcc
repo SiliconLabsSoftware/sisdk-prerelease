@@ -3,30 +3,30 @@ package: security_mbedtls
 label: Runtime initialisation of dynamic memory allocation functions for Mbed TLS.
 
 description: >-
-    This component allows for runtime initialisation of the dynamic memory
-    allocation functions for Mbed TLS.
+  This component allows for runtime initialisation of the dynamic memory
+  allocation functions for Mbed TLS.
 
 category: Platform|Security|Mbed TLS
 
 quality: production
 
 provides:
-  - name: mbedtls_platform_dynamic_memory_allocation_config
-  - name: mbedtls_platform_dynamic_memory_allocation_config_init_runtime
+- name: mbedtls_platform_dynamic_memory_allocation_config
+- name: mbedtls_platform_dynamic_memory_allocation_config_init_runtime
 
 template_contribution:
-  - name: mbedtls_config
-    value: MBEDTLS_PLATFORM_C
-  - name: mbedtls_config
-    value: MBEDTLS_PLATFORM_MEMORY
+- name: mbedtls_config
+  value: MBEDTLS_PLATFORM_C
+- name: mbedtls_config
+  value: MBEDTLS_PLATFORM_MEMORY
 
 metadata:
-    sbom:
-        license: Apache-2.0
-        upstream:
-            name: Mbed TLS
-            version: v3.6.2
-            supplier: Trusted Firmware
-            url: https://github.com/Mbed-TLS/mbedtls.git
-            comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
+  sbom:
+    license: Apache-2.0
+    upstream:
+      name: Mbed TLS
+      version: v3.6.2
+      supplier: Trusted Firmware
+      url: https://github.com/Mbed-TLS/mbedtls.git
+      comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
 root_path: security_mbedtls

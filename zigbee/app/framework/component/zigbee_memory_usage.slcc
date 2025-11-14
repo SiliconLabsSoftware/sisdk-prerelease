@@ -5,18 +5,18 @@ category: Zigbee|Utility
 quality: evaluation
 description: Provides memory usage CLI commands for accessing flash and ram usage metrics on apps.
 provides:
-  - name: zigbee_memory_usage
+- name: zigbee_memory_usage
 requires:
-  - name: memory_usage_api
-    condition: [zigbee_stack_common]
-  - name: zigbee_memory_usage_cli
-    condition: [zigbee_zcl_framework_core]
+- name: memory_usage_api
+  condition: [zigbee_stack_common]
+- name: zigbee_memory_usage_cli
+  condition: [zigbee_zcl_framework_core]
 source:
-  - path: stack/debug/sl_zigbee_memory_usage.c
-    unless: [native_host]
-  - path: util/plugin/plugin-common/generic-memory-usage/memory_usage.c
-    unless: [native_host, zigbee_stack_common] #do not duplicate this file
+- path: stack/debug/sl_zigbee_memory_usage.c
+  unless: [native_host]
+- path: util/plugin/plugin-common/generic-memory-usage/memory_usage.c
+  unless: [native_host, zigbee_stack_common]   #do not duplicate this file
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

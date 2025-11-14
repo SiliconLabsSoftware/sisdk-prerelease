@@ -5,16 +5,16 @@ package: rail_library
 category: Platform|Radio
 quality: evaluation
 metadata:
-    sbom:
-        id: sl_rail_util_thermistor
-        name: SL RAIL Utility, Thermistor Utility
-        license: Zlib
+  sbom:
+    id: sl_rail_util_thermistor
+    name: SL RAIL Utility, Thermistor Utility
+    license: Zlib
 provides:
-  - name: sl_rail_util_thermistor
+- name: sl_rail_util_thermistor
 requires:
-  - name: rail_util_thermistor
-  - name: component_catalog
+- name: rail_util_thermistor
+- name: component_catalog
 template_contribution:
-  - name: component_catalog
-    value: sl_rail_util_thermistor
+- name: component_catalog
+  value: sl_rail_util_thermistor
 root_path: rail_library

@@ -5,57 +5,57 @@ quality: production
 id: zigbee_trust_center_keepalive
 category: Zigbee|Trust Center
 provides:
-  - name: zigbee_tc_connectivity
-  - name: zigbee_trust_center_keepalive
+- name: zigbee_tc_connectivity
+- name: zigbee_trust_center_keepalive
 config_file:
-  - path: app/framework/plugin/trust-center-keepalive/config/trust-center-keepalive-config.h
+- path: app/framework/plugin/trust-center-keepalive/config/trust-center-keepalive-config.h
 source:
-  - path: app/framework/plugin/trust-center-keepalive/trust-center-keepalive.c
-  - path: app/framework/plugin/trust-center-keepalive/trust-center-keepalive-cb.c
-  - path: app/framework/plugin/trust-center-keepalive/trust-center-keepalive-cli.c
-    condition:
-      - cli
+- path: app/framework/plugin/trust-center-keepalive/trust-center-keepalive.c
+- path: app/framework/plugin/trust-center-keepalive/trust-center-keepalive-cb.c
+- path: app/framework/plugin/trust-center-keepalive/trust-center-keepalive-cli.c
+  condition:
+  - cli
 include:
-  - path: app/framework/plugin/trust-center-keepalive
-    file_list:
-      - path: trust-center-keepalive.h
+- path: app/framework/plugin/trust-center-keepalive
+  file_list:
+  - path: trust-center-keepalive.h
 template_contribution:
-  - name: component_catalog
-    value: zigbee_trust_center_keepalive
-  - name: zigbee_af_callback
-    value:
-        callback_type: event_init
-        function_name: sl_zigbee_af_trust_center_keepalive_init_cb
-  - name: zigbee_af_callback
-    value:
-        callback_type: local_data_init
-        function_name: sl_zigbee_af_trust_center_keepalive_init_cb
-  - name: zigbee_stack_callback
-    value:
-        callback_type: stack_status
-        function_name: sl_zigbee_af_trust_center_keepalive_stack_status_cb
-  - name: cluster_functions
-    value:
-        cluster_name: Keepalive
-        cluster_id: 0x0025
-        cluster_type: client
-        default_response_function: sl_zigbee_af_keepalive_cluster_client_default_response_cb
-  - name: cli_group
-    value:
-        group: plugin
-        name: tc-keepalive
-        help: tc-keepalive related commands
-  - name: cli_command
-    value:
-        group: tc-keepalive
-        name: now
-        handler: sl_zigbee_af_send_keepalive_now_command
-        help: Send a TC Keepalive now. If the TC Keepalive server hasn't been discovered yet, a Match Descriptor is sent first
+- name: component_catalog
+  value: zigbee_trust_center_keepalive
+- name: zigbee_af_callback
+  value:
+    callback_type: event_init
+    function_name: sl_zigbee_af_trust_center_keepalive_init_cb
+- name: zigbee_af_callback
+  value:
+    callback_type: local_data_init
+    function_name: sl_zigbee_af_trust_center_keepalive_init_cb
+- name: zigbee_stack_callback
+  value:
+    callback_type: stack_status
+    function_name: sl_zigbee_af_trust_center_keepalive_stack_status_cb
+- name: cluster_functions
+  value:
+    cluster_name: Keepalive
+    cluster_id: 0x0025
+    cluster_type: client
+    default_response_function: sl_zigbee_af_keepalive_cluster_client_default_response_cb
+- name: cli_group
+  value:
+    group: plugin
+    name: tc-keepalive
+    help: tc-keepalive related commands
+- name: cli_command
+  value:
+    group: tc-keepalive
+    name: now
+    handler: sl_zigbee_af_send_keepalive_now_command
+    help: Send a TC Keepalive now. If the TC Keepalive server hasn't been discovered yet, a Match Descriptor is sent first
 
 documentation:
-    docset: zigbee
-    document: zigbee-af-api/trust-center-keepalive
+  docset: zigbee
+  document: zigbee-af-api/trust-center-keepalive
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

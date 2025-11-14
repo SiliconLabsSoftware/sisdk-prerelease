@@ -267,6 +267,7 @@ SECTIONS
   .nvm (NOLOAD) : {
     KEEP(*(.simee*))
   } > DUMMY
+
 {%- endif %}
 
 {%- if tz_non_secure_execution is defined %}
@@ -656,6 +657,12 @@ heap_size = heap_limit - __HeapBase;
   .nvm (DSECT) : {
     KEEP(*(.simee*))
   } > FLASH
+
+{%- if logger_enable %}
+  .log_fmt (NOLOAD) : {
+    KEEP(*(.log_fmt*))
+  } > FLASH
+{%- endif %}
 {%- endif %}
 
 {%- if not bootloader_enable %}

@@ -5,17 +5,17 @@ quality: production
 id: zigbee_packet_handoff
 category: Zigbee|Utility
 provides:
-  - name: zigbee_packet_handoff
+- name: zigbee_packet_handoff
 config_file:
-  - path: app/framework/plugin-soc/packet-handoff/config/packet-handoff-config.h
+- path: app/framework/plugin-soc/packet-handoff/config/packet-handoff-config.h
 source:
-  - path: app/framework/plugin-soc/packet-handoff/packet-handoff.c
-  - path: app/framework/plugin-soc/packet-handoff/packet-handoff-cb.c
+- path: app/framework/plugin-soc/packet-handoff/packet-handoff.c
+- path: app/framework/plugin-soc/packet-handoff/packet-handoff-cb.c
 template_contribution:
-  - name: component_catalog
-    value: zigbee_packet_handoff
+- name: component_catalog
+  value: zigbee_packet_handoff
 
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

@@ -106,12 +106,6 @@ configuration:
     value: 100
   - name: SL_BOARD_ENABLE_VCOM
     value: 1
-  - name: SL_DEVICE_INIT_EMU_EM4_STATE
-    value: emuEM4Hibernate
-  - name: SL_DEVICE_INIT_EMU_EM4_RETAIN_LFRCO
-    value: 1
-  - name: SL_DEVICE_INIT_EMU_EM4_PIN_RETENTION_MODE
-    value: emuPinRetentionLatch
   - name: configUSE_IDLE_HOOK
     value: 1
   - name: configTIMER_TASK_PRIORITY
@@ -124,8 +118,6 @@ configuration:
     condition: [device_series_2]
   - name: configTIMER_QUEUE_LENGTH
     value: 8
-  - name: SL_DEVICE_INIT_DCDC_BYPASS
-    value: 1
   - name: SL_PSA_ITS_USER_MAX_FILES
     value: 32
     condition: ["device_series_2", "device_security_vault"]
@@ -151,8 +143,6 @@ configuration:
     value: '"door_lock_keypad"'
   - name: U3C_BUFFER_SIZE_CREDENTIAL_DATA
     value: 32
-  - name: SL_RAIL_UTIL_RAIL_POWER_MANAGER_INIT
-    value: 0
   # USART configuration
   - name: SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
     value: 1

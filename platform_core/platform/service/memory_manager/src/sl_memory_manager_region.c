@@ -33,8 +33,6 @@
 #include "sl_memory_manager_region_config.h"
 #include "sl_component_catalog.h"
 
-#define IAR_HEAP_BLOCK_NAME      "MEMORY_MANAGER_HEAP"
-
 // Prevent's compilation errors when building in simulation.
 #ifndef   __USED
   #define __USED
@@ -52,6 +50,8 @@ extern char __HeapBase[];
 extern char __HeapLimit[];
 
 #elif defined(__ICCARM__)
+#define IAR_HEAP_BLOCK_NAME      "MEMORY_MANAGER_HEAP"
+
 // Declare stack object used with IAR.
 __root char sl_stack[SL_STACK_SIZE] @ ".stack";
 
@@ -92,6 +92,12 @@ sl_memory_region_t sl_memory_get_heap_region(void)
 }
 
 #if defined(SL_CATALOG_MEMORY_MANAGER_PSRAM_PRESENT)
+
+#if defined(__ICCARM__)
+#define IAR_PSRAM_BLOCK_NAME "PSRAM_HEAP"
+#pragma section=IAR_PSRAM_BLOCK_NAME
+#endif
+
 /***************************************************************************//**
  * Gets size and location of the PSRAM heap.
  ******************************************************************************/
@@ -99,15 +105,30 @@ sl_memory_region_t sl_memory_get_psram_heap_region(void)
 {
   sl_memory_region_t region;
 
-  // Report the actual heap region.
-  region.addr = (void *) PSRAM_BASE;
-  region.size = PSRAM_SIZE;
+  // Report the actual PSRAM heap region.
+#if defined(__GNUC__)
+  extern char __HeapPsramBase[];
+  extern char __HeapPsramLimit[];
+
+  region.addr = __HeapPsramBase;
+  region.size = (uintptr_t) __HeapPsramLimit - (uintptr_t) __HeapPsramBase;
+
+#elif defined(__ICCARM__)
+  region.addr = __section_begin(IAR_PSRAM_BLOCK_NAME);
+  region.size = __section_size(IAR_PSRAM_BLOCK_NAME);
+#endif
 
   return region;
 }
 #endif
 
 #if defined(SL_CATALOG_MEMORY_MANAGER_DTCM_PRESENT)
+
+#if defined(__ICCARM__)
+#define IAR_DTCM_BLOCK_NAME "DTCM_HEAP"
+#pragma section=IAR_DTCM_BLOCK_NAME
+#endif
+
 /***************************************************************************//**
  * Gets size and location of the DTCM heap.
  ******************************************************************************/
@@ -115,17 +136,17 @@ sl_memory_region_t sl_memory_get_dtcm_heap_region(void)
 {
   sl_memory_region_t region;
 
-  // Report the actual heap region.
+  // Report the actual DTCM heap region.
 #if defined(__GNUC__)
-  extern char __vma_dtcm_start__[];
-  extern char __vma_dtcm_end__[];
+  extern char __HeapDtcmBase[];
+  extern char __HeapDtcmLimit[];
 
-  region.addr = __vma_dtcm_end__;
-  region.size = ((uintptr_t)__vma_dtcm_start__ + CORE_DTCM_SIZE) - (uintptr_t)__vma_dtcm_end__;
+  region.addr = __HeapDtcmBase;
+  region.size = (uintptr_t) __HeapDtcmLimit - (uintptr_t) __HeapDtcmBase;
 
 #elif defined(__ICCARM__)
-  region.addr = (void *)CORE_NS_DTCM_MEM_BASE;
-  region.size = CORE_DTCM_SIZE;
+  region.addr = __section_begin(IAR_DTCM_BLOCK_NAME);
+  region.size = __section_size(IAR_DTCM_BLOCK_NAME);
 #endif
 
   return region;

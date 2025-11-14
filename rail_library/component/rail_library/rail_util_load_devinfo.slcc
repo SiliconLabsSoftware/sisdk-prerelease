@@ -5,23 +5,23 @@ package: rail_library
 category: Platform|Radio
 quality: production
 metadata:
-    sbom:
-        id: rail_util_load_devinfo
-        name: RAIL Utility, Load Devinfo
-        license: Zlib
+  sbom:
+    id: rail_util_load_devinfo
+    name: RAIL Utility, Load Devinfo
+    license: Zlib
 requires:
-  - name: rail_lib
+- name: rail_lib
 provides:
-  - name: rail_util_load_devinfo
+- name: rail_util_load_devinfo
 include:
-  - path: plugin/rail_util_load_devinfo
-    file_list:
-      - path: sl_rail_util_load_devinfo.h
+- path: plugin/rail_util_load_devinfo
+  file_list:
+  - path: sl_rail_util_load_devinfo.h
 source:
-  - path: plugin/rail_util_load_devinfo/sl_rail_util_load_devinfo.c
+- path: plugin/rail_util_load_devinfo/sl_rail_util_load_devinfo.c
 template_contribution:
-  - name: event_handler
-    value:
+- name: event_handler
+  value:
         # Must be in Stage 1 (pre-RTOS) to properly access DEVINFO.
         # Was previously registered to stack_init which runs in
         # Stage 2 after RTOS start, but this caused DEVINFO access
@@ -29,8 +29,8 @@ template_contribution:
         # Stage 2, it may configure security restrictions that
         # prevent proper DEVINFO access by the time stack_init runs,
         # even with priority ensuring it ran before sl_rail_util_init.
-        event: internal_init_early
-        include: sl_rail_util_load_devinfo.h
-        handler: sl_rail_util_load_devinfo
-    priority: -9010 # Must be called before sl_rail_util_init
+    event: internal_init_early
+    include: sl_rail_util_load_devinfo.h
+    handler: sl_rail_util_load_devinfo
+  priority: -9010   # Must be called before sl_rail_util_init
 root_path: rail_library

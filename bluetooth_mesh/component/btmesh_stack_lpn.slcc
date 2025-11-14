@@ -6,22 +6,22 @@ category: "Bluetooth Mesh|Stack|Features"
 quality: "production"
 
 requires:
-  - name: "btmesh_stack"
-  - name: "btmesh_stack_node"
-  - name: component_catalog
+- name: "btmesh_stack"
+- name: "btmesh_stack_node"
+- name: component_catalog
 provides:
-  - name: "btmesh_stack_lpn"
+- name: "btmesh_stack_lpn"
 template_contribution:
-  - name: btmesh_bgapi_class
-    value:
-        class: "lpn"
-    priority: 1
-  - name: btmesh_feature_bitmask
-    value:
-        count: 8
-  - name: component_catalog
-    value: btmesh_stack_lpn
+- name: btmesh_bgapi_class
+  value:
+    class: "lpn"
+  priority: 1
+- name: btmesh_feature_bitmask
+  value:
+    count: 8
+- name: component_catalog
+  value: btmesh_stack_lpn
 metadata:
-    sbom:
-        reference: btmesh_stack
+  sbom:
+    reference: btmesh_stack
 root_path: bluetooth_mesh

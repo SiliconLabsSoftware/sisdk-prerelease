@@ -2,19 +2,19 @@ id: math_types
 label: Math Types
 package: compute
 description: >
-    This component provides some math type features.
+  This component provides some math type features.
 category: Compute
 quality: production
 root_path: compute/math
 metadata:
-    sbom:
-        license: Zlib
+  sbom:
+    license: Zlib
 include:
-  - path: inc
-    file_list:
-      - path: sl_math_types.h
+- path: inc
+  file_list:
+  - path: sl_math_types.h
 provides:
-  - name: math_types
+- name: math_types
 toolchain_settings:
-  - option: fp16
-    value: enabled
+- option: fp16
+  value: enabled

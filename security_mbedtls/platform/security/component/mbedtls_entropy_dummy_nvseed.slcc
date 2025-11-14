@@ -2,29 +2,29 @@ id: mbedtls_entropy_dummy_nvseed
 package: security_mbedtls
 label: Dummy NV Seed Entropy Source
 description: >-
-    A very bad implementation of a non-volatile seed for randomness generation in
-    Mbed TLS. In fact, this implemention is both predictable and volatile. The
-    purpose of this entropy source is to be used before NVM3 and/or a proper TRNG
-    is available on S3 devices.
+  A very bad implementation of a non-volatile seed for randomness generation in
+  Mbed TLS. In fact, this implemention is both predictable and volatile. The
+  purpose of this entropy source is to be used before NVM3 and/or a proper TRNG
+  is available on S3 devices.
 category: Platform|Security|Mbed TLS|Randomness
-quality: internal
+quality: production
 source:
-  - path: sl_component/sl_mbedtls_support/src/sl_entropy_nvseed_dummy.c
+- path: sl_component/sl_mbedtls_support/src/sl_entropy_nvseed_dummy.c
 provides:
-  - name: mbedtls_entropy_source
-    allow_multiple: true
-  - name: mbedtls_entropy_dummy_nvseed
+- name: mbedtls_entropy_source
+  allow_multiple: true
+- name: mbedtls_entropy_dummy_nvseed
 requires:
-  - name: device_series_3
+- name: device_series_3
 template_contribution:
-  - name: mbedtls_config
-    value: MBEDTLS_ENTROPY_NV_SEED
-  - name: mbedtls_config
-    value: MBEDTLS_PLATFORM_C
-  - name: mbedtls_config
-    value: MBEDTLS_PLATFORM_NV_SEED_ALT
-  - name: mbedtls_config
-    value: MBEDTLS_PLATFORM_STD_NV_SEED_READ sli_nv_seed_read
-  - name: mbedtls_config
-    value: MBEDTLS_PLATFORM_STD_NV_SEED_WRITE sli_nv_seed_write
+- name: mbedtls_config
+  value: MBEDTLS_ENTROPY_NV_SEED
+- name: mbedtls_config
+  value: MBEDTLS_PLATFORM_C
+- name: mbedtls_config
+  value: MBEDTLS_PLATFORM_NV_SEED_ALT
+- name: mbedtls_config
+  value: MBEDTLS_PLATFORM_STD_NV_SEED_READ sli_nv_seed_read
+- name: mbedtls_config
+  value: MBEDTLS_PLATFORM_STD_NV_SEED_WRITE sli_nv_seed_write
 root_path: security_mbedtls/platform/security

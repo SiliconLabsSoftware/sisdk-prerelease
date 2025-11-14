@@ -1276,8 +1276,6 @@ typedef enum EProtocolEvent{
   EPROTOCOLEVENT_NETWORKID_UPDATE,
   EPROTOCOLEVENT_CHANGE_RADIO_PHY,
   EPROTOCOLEVENT_RADIO_ASSERT,
-  EPROTOCOLEVENT_RADIO_TX_TIMEOUT,
-  EPROTOCOLEVENT_RADIO_CALIBRATE,
 #ifdef ZW_SECURITY_PROTOCOL
   EPROTOCOLEVENT_SECURITY_RUN,
 #endif
@@ -1594,13 +1592,13 @@ typedef struct SApplicationHandles{
 } SApplicationHandles;
 
 typedef struct SRadioConfig_t{
-  int8_t iListenBeforeTalkThreshold;          /**< Db (negative) or EListenBeforeTalkThreshold_t */
-  zpal_tx_power_t iTxPowerLevelMax;           /**< Db (negative) or EtxPowerLevel_t */
-  zpal_tx_power_t iTxPowerLevelAdjust;        /**< Db (negative) or EtxPowerLevel_t */
-  int16_t iTxPowerLevelMaxLR;                 /**< Maximum transmission power for Z-Wave LR */
-  zpal_radio_region_t eRegion;                /**< RF Region setting */
-  uint8_t radio_debug_enable;                 /**< Enable radio PTI */
-  zpal_radio_application_t radio_application; /**< Radio Application type */
+  int8_t iListenBeforeTalkThreshold;            /**< Db (negative) or EListenBeforeTalkThreshold_t */
+  zpal_tx_power_decidbm_t iTxPowerLevelMax;     /**< deci dBm (negative) or EtxPowerLevel_t */
+  zpal_tx_power_decidbm_t iTxPowerLevelAdjust;  /**< deci dBm (negative) or EtxPowerLevel_t */
+  int16_t iTxPowerLevelMaxLR;                   /**< Maximum transmission power for Z-Wave LR */
+  zpal_radio_region_t eRegion;                  /**< RF Region setting */
+  uint8_t radio_debug_enable;                   /**< Enable radio PTI */
+  zpal_radio_application_t radio_application;   /**< Radio Application type */
 } SRadioConfig_t;
 
 typedef struct SAppNodeInfo_t{
@@ -1871,7 +1869,7 @@ typedef struct SZWaveGetIncludedNodesNLS{
 } SZWaveGetIncludedNodesNLS;
 
 typedef struct SZWaveTxPowerMaxSupported{
-  zpal_tx_power_t tx_power_max_supported;
+  zpal_tx_power_decidbm_t tx_power_max_supported;
 } SZWaveTxPowerMaxSupported;
 
 typedef struct SCommandTransferProtocolCC{

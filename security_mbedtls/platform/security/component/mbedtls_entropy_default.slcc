@@ -2,43 +2,43 @@ id: mbedtls_entropy_default
 package: security_mbedtls
 label: Default Entropy Source
 description: >-
-    This component can be used in order to make sure that a suitable component for
-    an entropy source is included in the project. Depending on the device's
-    capabilities, this can be either a hardware (TRNG, Radio or ADC) source, or a
-    device-unique seed in non-volatile storage.
+  This component can be used in order to make sure that a suitable component for
+  an entropy source is included in the project. Depending on the device's
+  capabilities, this can be either a hardware (TRNG, Radio or ADC) source, or a
+  device-unique seed in non-volatile storage.
 category: Platform|Security|Mbed TLS|Randomness
 quality: production
 provides:
-  - name: mbedtls_entropy_default
+- name: mbedtls_entropy_default
 requires:
   # Require a default entropy source if we don't require one indirectly
-  - name: mbedtls_entropy_source
+- name: mbedtls_entropy_source
 
   # Require actual hardware sources as long as we have them
-  - name: mbedtls_entropy_hardware
-    condition: [device_series_2]
-  - name: mbedtls_entropy_hardware
-    condition: [device_generic_family_sixx301]
+- name: mbedtls_entropy_hardware
+  condition: [device_series_2]
+- name: mbedtls_entropy_hardware
+  condition: [device_generic_family_sixx301]
   # PLATFORM_HYD-5151
-  - name: mbedtls_entropy_dummy_nvseed
-    condition: [device_generic_family_sixx353]
-  - name: mbedtls_entropy_dummy_nvseed
-    condition: [device_family_sixg300xiwifi74000]
+- name: mbedtls_entropy_dummy_nvseed
+  condition: [device_generic_family_sixx353]
+- name: mbedtls_entropy_dummy_nvseed
+  condition: [device_family_sixg300xiwifi74000]
 recommends:
   # recommend NV seed for resolution instead of ADC, since ADC
   # requires taking ownership of the ADC peripheral
-  - id: mbedtls_entropy_nvseed
-    vendor: silabs
+- id: mbedtls_entropy_nvseed
+  vendor: silabs
 documentation:
-    docset: mbed-tls
-    document: group-rng-module
+  docset: mbed-tls
+  document: group-rng-module
 metadata:
-    sbom:
-        license: Zlib AND Apache-2.0
-        upstream:
-            name: Mbed TLS
-            version: v3.6.2
-            supplier: Trusted Firmware
-            url: https://github.com/Mbed-TLS/mbedtls.git
-            comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
+  sbom:
+    license: Zlib AND Apache-2.0
+    upstream:
+      name: Mbed TLS
+      version: v3.6.2
+      supplier: Trusted Firmware
+      url: https://github.com/Mbed-TLS/mbedtls.git
+      comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
 root_path: security_mbedtls/platform/security

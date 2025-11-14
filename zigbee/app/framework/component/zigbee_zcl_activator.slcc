@@ -8,11 +8,11 @@ ui_hints: {}
 quality: production
 template_file: []
 provides:
-  - name: zigbee_zcl_activator
+- name: zigbee_zcl_activator
 config_file:
-  - path: app/framework/common/zcl_config.zap
-    directory: zcl
+- path: app/framework/common/zcl_config.zap
+  directory: zcl
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

@@ -5,15 +5,15 @@ quality: production
 id: zigbee_update_ha_tc_link_key
 category: Zigbee|Zigbee 3.0
 provides:
-  - name: zigbee_update_ha_tc_link_key
+- name: zigbee_update_ha_tc_link_key
 requires:
-  - name: zigbee_device_database
+- name: zigbee_device_database
 source:
-  - path: app/framework/plugin/update-ha-tc-link-key/update-ha-tc-link-key.c
+- path: app/framework/plugin/update-ha-tc-link-key/update-ha-tc-link-key.c
 template_contribution:
-  - name: component_catalog
-    value: zigbee_update_ha_tc_link_key
+- name: component_catalog
+  value: zigbee_update_ha_tc_link_key
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

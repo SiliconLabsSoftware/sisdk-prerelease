@@ -5,18 +5,18 @@ description: Memory allocation component for SL RAILAPP debug buffer capture
 category: Platform|Radio
 quality: evaluation
 metadata:
-    sbom:
-        license: Zlib
+  sbom:
+    license: Zlib
 provides:
-  - name: sl_railapp_malloc
+- name: sl_railapp_malloc
 requires:
-  - name: sl_core
+- name: sl_core
 config_file:
-  - path: apps/sl_rail_app/config/sl_railapp_malloc_config.h
+- path: apps/sl_rail_app/config/sl_railapp_malloc_config.h
 source:
-  - path: apps/sl_rail_app/railapp_malloc.c
+- path: apps/sl_rail_app/railapp_malloc.c
 include:
-  - path: apps/sl_rail_app
-    file_list:
-      - path: railapp_malloc.h
+- path: apps/sl_rail_app
+  file_list:
+  - path: railapp_malloc.h
 root_path: rail_library

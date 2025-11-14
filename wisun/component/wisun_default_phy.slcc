@@ -7,19 +7,19 @@ quality: production
 
 
 ui_hints:
-    visibility: never
+  visibility: never
 
 provides:
-  - name: wisun_default_phy
+- name: wisun_default_phy
 
 config_file:
-  - path: plugin/config/sl_wisun_default_phy.h
+- path: plugin/config/sl_wisun_default_phy.h
 
 template_contribution:
-  - name: component_catalog
-    value: wisun_default_phy
+- name: component_catalog
+  value: wisun_default_phy
 
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: wisun

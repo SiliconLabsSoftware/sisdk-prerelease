@@ -1,0 +1,13 @@
+# This file provides metadata for the stack directory, as part of ESF.
+id=com.silabs.stack.wisun
+label=Wi-SUN
+description=Silicon Labs Wi-SUN SDK
+
+version=2.10.0
+prop.subLabel=Wi-SUN SDK
+
+# General properties are prepended with "prop."
+prop.file.templatesFile=
+prop.file.adapterPacks=
+prop.file.docsFile=documentation/slWi-SUN_docContent.xml
+prop.file.demosFile=

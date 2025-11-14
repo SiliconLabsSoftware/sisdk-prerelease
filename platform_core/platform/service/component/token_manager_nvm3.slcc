@@ -5,21 +5,21 @@ description: Token Manager using NVM3 for storage.
 category: Services|Token Manager
 quality: production
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 provides:
-  - name: token_manager_nvm3
-  - name: token_manager_storage
+- name: token_manager_nvm3
+- name: token_manager_storage
 requires:
-  - name: nvm3_lib
-  - name: nvm3_default
-  - name: token_manager
+- name: nvm3_lib
+- name: nvm3_default
+- name: token_manager
 define:
-  - name: USE_NVM3
+- name: USE_NVM3
 template_contribution:
-  - name: component_catalog
-    value: token_manager_nvm3
+- name: component_catalog
+  value: token_manager_nvm3
 documentation:
-    docset: gecko-platform
-    document: platform-service/token-manager
+  docset: gecko-platform
+  document: platform-service/token-manager
 root_path: platform_core

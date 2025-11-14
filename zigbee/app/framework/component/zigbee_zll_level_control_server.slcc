@@ -5,22 +5,22 @@ quality: production
 id: zigbee_zll_level_control_server
 category: Zigbee|Zigbee Light Link
 provides:
-  - name: zigbee_zll_level_control_server
+- name: zigbee_zll_level_control_server
 requires:
-  - name: zigbee_level_control
+- name: zigbee_level_control
 source:
-  - path: app/framework/plugin/zll-level-control-server/zll-level-control-server.c
+- path: app/framework/plugin/zll-level-control-server/zll-level-control-server.c
 include:
-  - path: app/framework/plugin/zll-level-control-server
-    file_list:
-      - path: zll-level-control-server.h
+- path: app/framework/plugin/zll-level-control-server
+  file_list:
+  - path: zll-level-control-server.h
 template_contribution:
-  - name: component_catalog
-    value: zigbee_zll_level_control_server
+- name: component_catalog
+  value: zigbee_zll_level_control_server
 documentation:
-    docset: zigbee
-    document: zigbee-af-api/zll-level-control-server
+  docset: zigbee
+  document: zigbee-af-api/zll-level-control-server
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

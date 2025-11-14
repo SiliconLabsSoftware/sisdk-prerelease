@@ -19,6 +19,14 @@
           <metadata>{"selectedPhy":"PHY_WISUN_FAN_1v1_915MHz_Plan1_2FSK_2a_NA"}</metadata>
           <phy_name_override>PHY_WISUN_FAN_1v1_915MHz_Plan1_2FSK_2a_NA</phy_name_override>
         </channel_config_entry>
+        <channel_config_entry name="WiSunConf Channel Group 5">
+          <channel_number_start>1280</channel_number_start>
+          <channel_number_end>1343</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{"selectedPhy":"PHY_WISUN_FAN_1v1_915MHz_Plan2_2FSK_3_NA"}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_915MHz_Plan2_2FSK_3_NA</phy_name_override>
+        </channel_config_entry>
         <channel_config_entry name="WiSunConf Channel Group 119">
           <channel_number_start>1536</channel_number_start>
           <channel_number_end>1599</channel_number_end>
@@ -160,6 +168,14 @@
           <max_power>RAIL_TX_POWER_MAX</max_power>
           <metadata>{"selectedPhy":"PHY_WISUN_FAN_1v1_915MHz_Plan1_2FSK_2a_BZ"}</metadata>
           <phy_name_override>PHY_WISUN_FAN_1v1_915MHz_Plan1_2FSK_2a_BZ</phy_name_override>
+        </channel_config_entry>
+        <channel_config_entry name="WiSunConf Channel Group 161">
+          <channel_number_start>1280</channel_number_start>
+          <channel_number_end>1343</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{"selectedPhy":"PHY_WISUN_FAN_1v1_915MHz_Plan2_2FSK_3_BZ"}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_915MHz_Plan2_2FSK_3_BZ</phy_name_override>
         </channel_config_entry>
       </channel_config_entries>
       <metadata>{"selectedPhy":"PHY_WISUN_FAN_1v1_915MHz_Plan1_2FSK_1b_BZ"}</metadata>

@@ -5,14 +5,14 @@ description: Micrium OS Extension to Common libraries provide additional librari
 category: Services|Micrium|Common
 quality: production
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 source:
-  - path: source/common/common.c
-  - path: source/lib/lib_math.c
+- path: source/common/common.c
+- path: source/lib/lib_math.c
 provides:
-  - name: common_lib
+- name: common_lib
 requires:
-  - name: common_core
-  - name: common_platform_manager
+- name: common_core
+- name: common_platform_manager
 root_path: micriumos/platform/micrium_os/common

@@ -5,185 +5,185 @@ quality: production
 id: zigbee_mac_address_filtering
 category: Zigbee|Utility
 provides:
-  - name: zigbee_mac_address_filtering
+- name: zigbee_mac_address_filtering
 requires:
-  - name: zigbee_packet_handoff
+- name: zigbee_packet_handoff
 config_file:
-  - path: app/framework/plugin-soc/mac-address-filtering/config/mac-address-filtering-config.h
+- path: app/framework/plugin-soc/mac-address-filtering/config/mac-address-filtering-config.h
 source:
-  - path: app/framework/plugin-soc/mac-address-filtering/mac-address-filtering.c
-  - path: app/framework/plugin-soc/mac-address-filtering/mac-address-filtering-cli.c
-    condition:
-      - cli
+- path: app/framework/plugin-soc/mac-address-filtering/mac-address-filtering.c
+- path: app/framework/plugin-soc/mac-address-filtering/mac-address-filtering-cli.c
+  condition:
+  - cli
 include:
-  - path: app/framework/plugin-soc/mac-address-filtering
-    file_list:
-      - path: mac-address-filtering.h
+- path: app/framework/plugin-soc/mac-address-filtering
+  file_list:
+  - path: mac-address-filtering.h
 template_contribution:
-  - name: component_catalog
-    value: zigbee_mac_address_filtering
-  - name: zigbee_af_callback
-    value:
-        callback_type: local_data_init
-        function_name: sl_zigbee_af_mac_address_filtering_init_cb
-  - name: cli_group
-    value:
-        name: mac-address-filtering
-        group: plugin
-        help: Mac address filtering related commands.
-  - name: cli_group
-    value:
-        name: long-address-list
-        group: mac-address-filtering
-        help: Mac address filtering related commands for long address.
-  - name: cli_group
-    value:
-        name: pan-id-list
-        group: mac-address-filtering
-        help: Mac address filtering related commands for PAN ID.
-  - name: cli_group
-    value:
-        name: short-address-list
-        group: mac-address-filtering
-        help: Mac address filtering related commands for short address.
-  - name: cli_group
-    value:
-        name: set-config
-        group: mac-address-filtering
-        help: Mac address filtering config commands.
-  - name: cli_command
-    value:
-        name: clear-stats
-        group: mac-address-filtering
-        handler: sl_zigbee_af_mac_address_filtering_clear_stats_command
-        help: Clears all packet counts for all modes.
-  - name: cli_command
-    value:
-        name: print-config
-        group: mac-address-filtering
-        handler: sl_zigbee_af_mac_address_filtering_print_config_command
-        help: Prints the current filtering config and statistics.
-  - name: cli_command
-    value:
-        name: reset
-        group: mac-address-filtering
-        handler: sl_zigbee_af_mac_address_filtering_reset
-        help: Resets the state of the component to the default of no filtering.
-  - name: cli_command
-    value:
-        name: no-address-filter
-        group: set-config
-        handler: sl_zigbee_af_mac_address_filtering_filter_no_address_command
-        help: Enables/disables filtering of no-address messages.
-        argument:
-          - type: uint8
-  - name: cli_command
-    value:
-        name: add
-        group: long-address-list
-        handler: sl_zigbee_af_mac_address_filtering_add_long_address_command
-        help: Adds a long address to the long address filter.
-        argument:
-          - type: hex
-  - name: cli_command
-    value:
-        name: add
-        group: pan-id-list
-        handler: sl_zigbee_af_mac_address_filtering_add_pan_id_command
-        help: Adds a PAN ID to the filter.
-        argument:
-          - type: uint16
-  - name: cli_command
-    value:
-        name: add
-        group: short-address-list
-        handler: sl_zigbee_af_mac_address_filtering_add_short_address_command
-        help: Adds an address to the short address list.
-        argument:
-          - type: uint16
-  - name: cli_command
-    value:
-        name: clear
-        group: long-address-list
-        handler: sl_zigbee_af_mac_address_filtering_clear_long_address_list
-        help: Clears the long address list filter.
-  - name: cli_command
-    value:
-        name: clear
-        group: pan-id-list
-        handler: sl_zigbee_af_mac_address_filtering_clear_pan_id_list
-        help: Clears the PAN ID list filter.
-  - name: cli_command
-    value:
-        name: clear
-        group: short-address-list
-        handler: sl_zigbee_af_mac_address_filtering_clear_short_address_list
-        help: Clears the short address list filter.
-  - name: cli_command
-    value:
-        name: delete
-        group: long-address-list
-        handler: sl_zigbee_af_mac_address_filtering_long_address_delete_entry
-        help: Deletes an entry in the long address list filter.
-        argument:
-          - type: uint8
-  - name: cli_command
-    value:
-        name: delete
-        group: pan-id-list
-        handler: sl_zigbee_af_mac_address_filtering_pan_id_delete_entry
-        help: Deletes an entry in the PAN ID list filter.
-        argument:
-          - type: uint8
-  - name: cli_command
-    value:
-        name: delete
-        group: short-address-list
-        handler: sl_zigbee_af_mac_address_filtering_short_address_delete_entry
-        help: Deletes an entry in the short address list filter.
-        argument:
-          - type: uint8
-  - name: cli_command
-    value:
-        name: set-blacklist
-        group: long-address-list
-        handler: sl_zigbee_af_mac_address_filtering_set_long_address_list_type_command
-        help: Sets the long address list filter to a deny list.
-  - name: cli_command
-    value:
-        name: set-blacklist
-        group: pan-id-list
-        handler: sl_zigbee_af_mac_address_filtering_set_pan_id_list_type_command
-        help: Sets the PAN_ID list filter to a deny list.
-  - name: cli_command
-    value:
-        name: set-blacklist
-        group: short-address-list
-        handler: sl_zigbee_af_mac_address_filtering_set_short_address_list_type_command
-        help: Sets the short address list filter to a deny list.
-  - name: cli_command
-    value:
-        name: set-whitelist
-        group: long-address-list
-        handler: sl_zigbee_af_mac_address_filtering_set_long_address_list_type_command
-        help: Sets the long address list filter to an allow list.
-  - name: cli_command
-    value:
-        name: set-whitelist
-        group: pan-id-list
-        handler: sl_zigbee_af_mac_address_filtering_set_pan_id_list_type_command
-        help: Sets the PAN-ID list filter to an allow list.
-  - name: cli_command
-    value:
-        name: set-whitelist
-        group: short-address-list
-        handler: sl_zigbee_af_mac_address_filtering_set_short_address_list_type_command
-        help: Sets the short address list filter to an allow list.
+- name: component_catalog
+  value: zigbee_mac_address_filtering
+- name: zigbee_af_callback
+  value:
+    callback_type: local_data_init
+    function_name: sl_zigbee_af_mac_address_filtering_init_cb
+- name: cli_group
+  value:
+    name: mac-address-filtering
+    group: plugin
+    help: Mac address filtering related commands.
+- name: cli_group
+  value:
+    name: long-address-list
+    group: mac-address-filtering
+    help: Mac address filtering related commands for long address.
+- name: cli_group
+  value:
+    name: pan-id-list
+    group: mac-address-filtering
+    help: Mac address filtering related commands for PAN ID.
+- name: cli_group
+  value:
+    name: short-address-list
+    group: mac-address-filtering
+    help: Mac address filtering related commands for short address.
+- name: cli_group
+  value:
+    name: set-config
+    group: mac-address-filtering
+    help: Mac address filtering config commands.
+- name: cli_command
+  value:
+    name: clear-stats
+    group: mac-address-filtering
+    handler: sl_zigbee_af_mac_address_filtering_clear_stats_command
+    help: Clears all packet counts for all modes.
+- name: cli_command
+  value:
+    name: print-config
+    group: mac-address-filtering
+    handler: sl_zigbee_af_mac_address_filtering_print_config_command
+    help: Prints the current filtering config and statistics.
+- name: cli_command
+  value:
+    name: reset
+    group: mac-address-filtering
+    handler: sl_zigbee_af_mac_address_filtering_reset
+    help: Resets the state of the component to the default of no filtering.
+- name: cli_command
+  value:
+    name: no-address-filter
+    group: set-config
+    handler: sl_zigbee_af_mac_address_filtering_filter_no_address_command
+    help: Enables/disables filtering of no-address messages.
+    argument:
+    - type: uint8
+- name: cli_command
+  value:
+    name: add
+    group: long-address-list
+    handler: sl_zigbee_af_mac_address_filtering_add_long_address_command
+    help: Adds a long address to the long address filter.
+    argument:
+    - type: hex
+- name: cli_command
+  value:
+    name: add
+    group: pan-id-list
+    handler: sl_zigbee_af_mac_address_filtering_add_pan_id_command
+    help: Adds a PAN ID to the filter.
+    argument:
+    - type: uint16
+- name: cli_command
+  value:
+    name: add
+    group: short-address-list
+    handler: sl_zigbee_af_mac_address_filtering_add_short_address_command
+    help: Adds an address to the short address list.
+    argument:
+    - type: uint16
+- name: cli_command
+  value:
+    name: clear
+    group: long-address-list
+    handler: sl_zigbee_af_mac_address_filtering_clear_long_address_list
+    help: Clears the long address list filter.
+- name: cli_command
+  value:
+    name: clear
+    group: pan-id-list
+    handler: sl_zigbee_af_mac_address_filtering_clear_pan_id_list
+    help: Clears the PAN ID list filter.
+- name: cli_command
+  value:
+    name: clear
+    group: short-address-list
+    handler: sl_zigbee_af_mac_address_filtering_clear_short_address_list
+    help: Clears the short address list filter.
+- name: cli_command
+  value:
+    name: delete
+    group: long-address-list
+    handler: sl_zigbee_af_mac_address_filtering_long_address_delete_entry
+    help: Deletes an entry in the long address list filter.
+    argument:
+    - type: uint8
+- name: cli_command
+  value:
+    name: delete
+    group: pan-id-list
+    handler: sl_zigbee_af_mac_address_filtering_pan_id_delete_entry
+    help: Deletes an entry in the PAN ID list filter.
+    argument:
+    - type: uint8
+- name: cli_command
+  value:
+    name: delete
+    group: short-address-list
+    handler: sl_zigbee_af_mac_address_filtering_short_address_delete_entry
+    help: Deletes an entry in the short address list filter.
+    argument:
+    - type: uint8
+- name: cli_command
+  value:
+    name: set-blacklist
+    group: long-address-list
+    handler: sl_zigbee_af_mac_address_filtering_set_long_address_list_type_command
+    help: Sets the long address list filter to a deny list.
+- name: cli_command
+  value:
+    name: set-blacklist
+    group: pan-id-list
+    handler: sl_zigbee_af_mac_address_filtering_set_pan_id_list_type_command
+    help: Sets the PAN_ID list filter to a deny list.
+- name: cli_command
+  value:
+    name: set-blacklist
+    group: short-address-list
+    handler: sl_zigbee_af_mac_address_filtering_set_short_address_list_type_command
+    help: Sets the short address list filter to a deny list.
+- name: cli_command
+  value:
+    name: set-whitelist
+    group: long-address-list
+    handler: sl_zigbee_af_mac_address_filtering_set_long_address_list_type_command
+    help: Sets the long address list filter to an allow list.
+- name: cli_command
+  value:
+    name: set-whitelist
+    group: pan-id-list
+    handler: sl_zigbee_af_mac_address_filtering_set_pan_id_list_type_command
+    help: Sets the PAN-ID list filter to an allow list.
+- name: cli_command
+  value:
+    name: set-whitelist
+    group: short-address-list
+    handler: sl_zigbee_af_mac_address_filtering_set_short_address_list_type_command
+    help: Sets the short address list filter to an allow list.
 
 documentation:
-    docset: zigbee
-    document: zigbee-af-api/mac-address-filtering
+  docset: zigbee
+  document: zigbee-af-api/mac-address-filtering
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

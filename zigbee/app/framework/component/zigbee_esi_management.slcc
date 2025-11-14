@@ -5,26 +5,26 @@ quality: production
 id: zigbee_esi_management
 category: Zigbee|Cluster Library|Smart Energy
 provides:
-  - name: zigbee_esi_management
+- name: zigbee_esi_management
 config_file:
-  - path: app/framework/plugin/esi-management/config/esi-management-config.h
+- path: app/framework/plugin/esi-management/config/esi-management-config.h
 source:
-  - path: app/framework/plugin/esi-management/esi-management.c
+- path: app/framework/plugin/esi-management/esi-management.c
 include:
-  - path: app/framework/plugin/esi-management
-    file_list:
-      - path: esi-management.h
+- path: app/framework/plugin/esi-management
+  file_list:
+  - path: esi-management.h
 template_contribution:
-  - name: component_catalog
-    value: zigbee_esi_management
-  - name: zigbee_af_callback
-    value:
-        callback_type: local_data_init
-        function_name: sl_zigbee_af_esi_management_init_cb
+- name: component_catalog
+  value: zigbee_esi_management
+- name: zigbee_af_callback
+  value:
+    callback_type: local_data_init
+    function_name: sl_zigbee_af_esi_management_init_cb
 documentation:
-    docset: zigbee
-    document: zigbee-af-api/esi-management
+  docset: zigbee
+  document: zigbee-af-api/esi-management
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

@@ -6,19 +6,19 @@ category: "Bluetooth Mesh|Stack|Models|Time and Scenes"
 quality: "production"
 
 requires:
-  - name: "btmesh_stack"
-  - name: "btmesh_core"
-  - name: "btmesh_stack_time_server"
-  - name: "btmesh_stack_scene_server"
-  - name: "btmesh_stack_generic_server"
+- name: "btmesh_stack"
+- name: "btmesh_core"
+- name: "btmesh_stack_time_server"
+- name: "btmesh_stack_scene_server"
+- name: "btmesh_stack_generic_server"
 provides:
-  - name: "btmesh_stack_scheduler_server"
+- name: "btmesh_stack_scheduler_server"
 template_contribution:
-  - name: btmesh_bgapi_class
-    value:
-        class: "scheduler_server"
-    priority: 1
+- name: btmesh_bgapi_class
+  value:
+    class: "scheduler_server"
+  priority: 1
 metadata:
-    sbom:
-        reference: btmesh_stack_models
+  sbom:
+    reference: btmesh_stack_models
 root_path: bluetooth_mesh

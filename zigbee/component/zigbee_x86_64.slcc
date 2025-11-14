@@ -6,19 +6,19 @@ quality: production
 description: This plugin contains defines to build Zigbee apps against x86_64.
 
 provides:
-  - name: x86-64
-  - name: zigbee_x86_64
+- name: x86-64
+- name: zigbee_x86_64
 
 requires:
-  - name: linux_arch_64
+- name: linux_arch_64
 
 validation_helper:
-  - path: component/scripts/zigbee_linux_arch_validation.lua
+- path: component/scripts/zigbee_linux_arch_validation.lua
 
 documentation:
-    docset: zigbee
-    document: zigbee-af-api/x86_64
+  docset: zigbee
+  document: zigbee-af-api/x86_64
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

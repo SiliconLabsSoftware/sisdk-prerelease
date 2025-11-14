@@ -5,12 +5,12 @@ description: Component catalog that provides the list of APIs present in the pro
 category: Platform|Utilities
 quality: production
 metadata:
-    sbom:
-        license: Zlib
+  sbom:
+    license: Zlib
 root_path: platform_common/platform/common/component_catalog
 template_file:
-  - path: sl_component_catalog.h.jinja
+- path: sl_component_catalog.h.jinja
 provides:
-  - name: component_catalog
+- name: component_catalog
 define:
-  - name: SL_COMPONENT_CATALOG_PRESENT
+- name: SL_COMPONENT_CATALOG_PRESENT

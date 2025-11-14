@@ -41,6 +41,10 @@
 #include <stdbool.h>
 #include "zpal_log.h"
 
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+
 #ifdef SL_CATALOG_ZW_CC_USER_CREDENTIAL_PRESENT
 #include "CC_UserCredential.h"
 #endif

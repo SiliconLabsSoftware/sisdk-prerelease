@@ -5,11 +5,11 @@ description: The Supervisor Mode feature provides APIs that can be used to acces
 category: Platform|Utilities
 quality: production
 metadata:
-    sbom:
-        license: Zlib
+  sbom:
+    license: Zlib
 root_path: platform_core/platform/common
 provides:
-  - name: event_system_supervisor_mode
+- name: event_system_supervisor_mode
 template_contribution:
-  - name: component_catalog
-    value: event_system_supervisor_mode
+- name: component_catalog
+  value: event_system_supervisor_mode

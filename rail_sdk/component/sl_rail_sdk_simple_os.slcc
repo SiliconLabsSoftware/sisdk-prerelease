@@ -5,34 +5,34 @@ description: "Adds task init function for RAIL Sample Apps. Compatible with Micr
 category: "RAIL-SDK|Extension"
 quality: "production"
 metadata:
-    sbom:
-        license: Zlib
+  sbom:
+    license: Zlib
 root_path: "rail_sdk/component/sl_rail_sdk_simple_os"
 provides:
-  - name: sl_rail_sdk_simple_os
+- name: sl_rail_sdk_simple_os
 
 requires:
-  - name: sleeptimer
-    condition:
-      - "micriumos"
-      - "device_series_2"
-  - name: kernel
-  - name: device_has_radio
+- name: sleeptimer
+  condition:
+  - "micriumos"
+  - "device_series_2"
+- name: kernel
+- name: device_has_radio
 
 source:
-  - path: "freertos/app_task_init.c"
-    condition:
-      - "freertos"
-  - path: "micrium/app_task_init.c"
-    condition:
-      - "micriumos"
+- path: "freertos/app_task_init.c"
+  condition:
+  - "freertos"
+- path: "micrium/app_task_init.c"
+  condition:
+  - "micriumos"
 include:
-  - path: "."
-    file_list:
-      - "path": "app_task_init.h"
+- path: "."
+  file_list:
+  - "path": "app_task_init.h"
 
 #-------------- Template Contribution ----------------
 template_contribution:
 #---------------- Component Catalog ------------------
-  - name: component_catalog
-    value: sl_rail_sdk_simple_os
+- name: component_catalog
+  value: sl_rail_sdk_simple_os

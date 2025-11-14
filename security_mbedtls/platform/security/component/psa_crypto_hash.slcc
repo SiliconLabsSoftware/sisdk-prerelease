@@ -4,34 +4,34 @@ category: Platform|Security|PSA Crypto|Hashing
 package: security_mbedtls
 quality: production
 ui_hints:
-    visibility: never
+  visibility: never
 description: >-
-    This component makes sure that there is at least one hash function included.
+  This component makes sure that there is at least one hash function included.
 
 provides:
-  - name: psa_crypto_hash
+- name: psa_crypto_hash
 
 requires:
-  - name: psa_crypto
-  - name: psa_hash_function
-  - name: sl_si91x_psa_sha
-    condition: [device_si91x]
+- name: psa_crypto
+- name: psa_hash_function
+- name: sl_si91x_psa_sha
+  condition: [device_si91x]
 
 recommends:
-  - id: psa_crypto_sha256
+- id: psa_crypto_sha256
 
-    vendor: silabs
+  vendor: silabs
 template_contribution:
-  - name: mbedtls_config
-    value: MBEDTLS_MD_C
-    condition: [mbedtls_uses_psa_crypto]
+- name: mbedtls_config
+  value: MBEDTLS_MD_C
+  condition: [mbedtls_uses_psa_crypto]
 metadata:
-    sbom:
-        license: Apache-2.0
-        upstream:
-            name: Mbed TLS
-            version: v3.6.2
-            supplier: Trusted Firmware
-            url: https://github.com/Mbed-TLS/mbedtls.git
-            comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
+  sbom:
+    license: Apache-2.0
+    upstream:
+      name: Mbed TLS
+      version: v3.6.2
+      supplier: Trusted Firmware
+      url: https://github.com/Mbed-TLS/mbedtls.git
+      comment: Mbed TLS is a C library implementing the PSA Cryptography API, cryptographic primitives, X.509 certificate manipulation and the SSL/TLS and DTLS protocols
 root_path: security_mbedtls

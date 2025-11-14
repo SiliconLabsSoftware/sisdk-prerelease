@@ -25,6 +25,10 @@
 #include "zaf_protocol_config.h"
 #include "ZAF_PrintAppInfo.h"
 
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+
 #ifdef SL_CATALOG_ZW_CLI_COMMON_PRESENT
 #include "zw_cli_common.h"
 #endif

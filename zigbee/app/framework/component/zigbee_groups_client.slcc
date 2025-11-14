@@ -5,19 +5,19 @@ label: Groups Client Cluster
 category: Zigbee|Cluster Library|Common
 quality: production
 provides:
-  - name: zigbee_groups_client
+- name: zigbee_groups_client
 source:
-  - path: app/framework/plugin/groups-client/groups-client.c
+- path: app/framework/plugin/groups-client/groups-client.c
 template_contribution:
-  - name: component_catalog
-    value: zigbee_groups_client
-  - name: cluster_service
-    value:
-        cluster_id: '0x0004'
-        mfg_id: NOT_MFG_SPECIFIC
-        side: CLIENT
-        service_function: sl_zigbee_af_groups_cluster_client_command_parse
+- name: component_catalog
+  value: zigbee_groups_client
+- name: cluster_service
+  value:
+    cluster_id: '0x0004'
+    mfg_id: NOT_MFG_SPECIFIC
+    side: CLIENT
+    service_function: sl_zigbee_af_groups_cluster_client_command_parse
 metadata:
-    sbom:
-        license: MSLA
+  sbom:
+    license: MSLA
 root_path: zigbee

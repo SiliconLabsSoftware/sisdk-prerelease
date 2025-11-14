@@ -5,39 +5,39 @@ package: rail_library
 category: Platform|Radio
 quality: production
 metadata:
-    sbom:
-        id: rail_util_ieee802154_stack_event
-        name: RAIL Utility, IEEE802.15.4 stack event configuration
-        license: Zlib
+  sbom:
+    id: rail_util_ieee802154_stack_event
+    name: RAIL Utility, IEEE802.15.4 stack event configuration
+    license: Zlib
 ui_hints:
-    visibility: never
+  visibility: never
 requires:
-  - name: device
-  - name: status
-  - name: hal_generic_common
-  - name: rail_lib
-  - name: code_classification
+- name: device
+- name: status
+- name: hal_generic_common
+- name: rail_lib
+- name: code_classification
 provides:
-  - name: rail_util_ieee802154_stack_event
+- name: rail_util_ieee802154_stack_event
 documentation:
-    docset: rail
-    document: rail-api/rail-util-ieee802154-stack-event
+  docset: rail
+  document: rail-api/rail-util-ieee802154-stack-event
 include:
-  - path: plugin/rail_util_ieee802154
-    file_list:
-      - path: sl_rail_util_ieee802154_stack_event.h
+- path: plugin/rail_util_ieee802154
+  file_list:
+  - path: sl_rail_util_ieee802154_stack_event.h
 source:
-  - path: plugin/rail_util_ieee802154/sl_rail_util_ieee802154_rail_event.c
-    condition:
-      - rail_test_core
+- path: plugin/rail_util_ieee802154/sl_rail_util_ieee802154_rail_event.c
+  condition:
+  - rail_test_core
 define:
-  - name: SL_CODE_COMPONENT_RAIL_UTIL_IEEE802154_STACK_EVENT
-    value: rail_util_ieee802154_stack_event
+- name: SL_CODE_COMPONENT_RAIL_UTIL_IEEE802154_STACK_EVENT
+  value: rail_util_ieee802154_stack_event
 template_file:
-  - path: plugin/rail_util_ieee802154/sl_rail_util_ieee802154_stack_event.c.jinja
+- path: plugin/rail_util_ieee802154/sl_rail_util_ieee802154_stack_event.c.jinja
 template_contribution:
-  - name: component_catalog
-    value: rail_util_ieee802154_stack_event
-  - name: code_classification_components
-    value: rail_util_ieee802154_stack_event
+- name: component_catalog
+  value: rail_util_ieee802154_stack_event
+- name: code_classification_components
+  value: rail_util_ieee802154_stack_event
 root_path: rail_library
