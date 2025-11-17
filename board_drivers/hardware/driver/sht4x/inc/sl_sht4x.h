@@ -101,8 +101,8 @@ sl_status_t sl_sht4x_init(sl_i2cspm_t *i2cspm, uint8_t addr);
  * @param[out] device_id
  *   Write device ID if device responds. Pass in NULL to discard.
  *   Each SHT4x sensor has unique 48-bit serial number.
- * @retval true An SHT4x device is present on the I2C bus
- * @retval false No SHT4x device present
+ * @retval SL_STATUS_OK An SHT4x device responded and device_id is valid (if non-NULL)
+ * @retval SL_STATUS_TRANSMIT I2C transmission error or no device response
  *****************************************************************************/
 sl_status_t sl_sht4x_present(sl_i2cspm_t *i2cspm, uint8_t addr, uint64_t *device_id);
 

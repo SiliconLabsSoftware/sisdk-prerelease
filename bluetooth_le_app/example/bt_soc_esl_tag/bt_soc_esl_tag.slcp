@@ -22,7 +22,6 @@ component:
   - id: gatt_service_device_information_override
   - id: board_control
   - id: mpu
-  - id: in_place_ota_dfu
   - id: simple_led
     instance:
       - led1

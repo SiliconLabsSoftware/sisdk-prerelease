@@ -29,9 +29,6 @@ component:
   - id: bluetooth_feature_system
   - id: bluetooth_feature_sm
   - id: mpu
-  - id: in_place_ota_dfu
-    condition:
-      - device_series_2
   - id: rail_lib_multiprotocol
   - id: sl_rail_sdk_802154_support
   - id: app_assert

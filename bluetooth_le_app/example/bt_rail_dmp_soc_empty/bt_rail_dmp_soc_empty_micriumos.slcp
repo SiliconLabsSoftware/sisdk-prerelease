@@ -29,9 +29,6 @@ component:
   - id: bluetooth_feature_sm
   - id: bluetooth_feature_system
   - id: mpu
-  - id: in_place_ota_dfu
-    condition:
-      - device_series_2
   - id: sl_rail_util_init
     instance:
       - inst0

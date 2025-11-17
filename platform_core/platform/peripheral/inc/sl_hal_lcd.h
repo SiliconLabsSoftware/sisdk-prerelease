@@ -796,5 +796,75 @@ __INLINE void sl_hal_lcd_set_mode(sl_hal_lcd_mode_t mode)
 }
 #endif
 
+/***************************************************************************//**
+ * @addtogroup lcd LCD - Liquid Crystal Display
+ * @{
+ *
+ * @n @section lcd_example Example
+ *  This example demonstrates initialization, basic configuration, and usage of the
+ *  LCD peripheral. It shows how to:
+ *  - Initialize the LCD with default settings
+ *  - Show a blink animation of segment 0-7 of com line 0.
+ *
+ * @code{.c}
+ * #include "sl_hal_lcd.h"
+ * #include "sl_clock_manager.h"
+ * void lcd_example(void)
+ * {
+ *   // Enable clock to LCD module.
+ *   sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_LCD);
+ *   // Disable interrupts.
+ *   sl_hal_lcd_disable_interrupts(_LCD_IF_MASK);
+ *   // Initialize lcd configuration structure.
+ *   sl_hal_lcd_init_t init = {
+ *     .mux = SL_HAL_LCD_MUX_QUADRUPLEX,
+ *     .bias = SL_HAL_LCD_BIAS_ONE_THIRD,
+ *     .wave = SL_HAL_LCD_WAVE_LOW_POWER,
+ *     .mode = SL_HAL_LCD_MODE_CHARGE_PUMP,
+ *     .charge_redistribution = SL_HAL_LCD_CHARGE_REDISTRIBUTION_THREE_CYCLE,
+ *     .frame_rate_divider = 8,
+ *     .contrast_level = 25,
+ *     .clock_prescaler = 128
+ *   };
+ *   sl_hal_lcd_frame_counter_init_t fc_init = {
+ *     .top = 48,
+ *     .prescale = SL_HAL_LCD_FRAME_COUNTER_PRESCALE_DIV1
+ *   };
+ *
+ *   // Disable LCD before config.
+ *   sl_hal_lcd_disable();
+ *   sl_hal_lcd_wait_ready();
+ *   // Initialize LCD.
+ *   sl_hal_lcd_init(&init);
+ *   // Initialize frame counter.
+ *   sl_hal_lcd_init_frame_counter(&fc_init);
+ *   // Enable the LCD.
+ *   sl_hal_lcd_enable();
+ *   // Enable frame counter.
+ *   sl_hal_lcd_enable_frame_counter();
+ *
+ *   // Enable display segment.
+ *   sl_hal_lcd_enable_com_line(0);
+ *   for(uint8_t segment_num = 0; segment_num < 8; segment_num++) {
+ *     sl_hal_lcd_segment_enable(segment_num);
+ *   }
+ *   
+ *   // Initialize lcd blink animation configuration structure.
+ *   sl_hal_lcd_animation_init_t animation_init = {
+ *       .A_reg = 0x80,
+ *       .A_shift = SL_HAL_LCD_ANIMATION_SHIFT_LEFT,
+ *       .B_reg = 0x00,
+ *       .B_shift = SL_HAL_LCD_ANIMATION_SHIFT_NONE,
+ *       .animation_logic = SL_HAL_LCD_ANIMATION_LOGIC_OR,
+ *       .start_segment = SL_HAL_LCD_ANIMATION_LOCATION_SEG0_TO_7
+ *   };
+ *   sl_hal_lcd_init_animation(&animation_init);
+ *   sl_hal_lcd_animation_enable();
+ * }
+ * @endcode
+ *
+ * @} (end addtogroup lcd)
+ ******************************************************************************/
+
 #endif /* defined(LCD_COUNT) && (LCD_COUNT > 0) */
 #endif /* SL_HAL_LCD_H */

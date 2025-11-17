@@ -13,7 +13,8 @@ include:
   - path: simulation_sc.h
   path: platform/Device/SiliconLabs/simulation/Include/
 provides:
-- name: device
-- name: device_host
 - name: opn_device_host
+metadata:
+  sbom:
+    license: Zlib
 root_path: devices

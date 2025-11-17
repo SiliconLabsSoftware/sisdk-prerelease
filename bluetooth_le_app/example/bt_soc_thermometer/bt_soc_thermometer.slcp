@@ -27,7 +27,6 @@ component:
   - id: bluetooth_feature_sm
   - id: bluetooth_feature_system
   - id: bluetooth_feature_power_control
-  - id: in_place_ota_dfu
   - id: rail_util_pti
   - id: cli
     instance:

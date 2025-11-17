@@ -32,7 +32,6 @@
 #include "sl_sht4x.h"
 #include "sl_i2cspm.h"
 #include "sl_sleeptimer.h"
-#include "stddef.h"
 
 /*******************************************************************************
  *******************************   DEFINES   ***********************************
@@ -54,7 +53,7 @@ static uint8_t sht4x_cmd_read_serial = SHT4X_CMD_READ_SERIAL;
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 // Local prototypes
 static sl_status_t sl_sht4x_send_command(sl_i2cspm_t *i2cspm, uint8_t addr, uint8_t command);
-static int32_t sl_sht4x_get_celcius_temperature(int32_t temp_data);
+static int32_t sl_sht4x_get_celsius_temperature(int32_t temp_data);
 static uint32_t sl_sht4x_get_percent_relative_humidity(uint32_t rh_data);
 static sl_status_t sl_sht4x_read_data(sl_i2cspm_t *i2cspm, uint8_t addr, uint64_t *data);
 /** @endcond */
@@ -68,6 +67,17 @@ sl_status_t sl_sht4x_init(sl_i2cspm_t *i2cspm, uint8_t addr)
 
   /* check if the sensor is ready */
   status = sl_sht4x_present(i2cspm, addr, NULL);
+
+  if (status != SL_STATUS_OK) {
+    /* Wait for sensor to become ready */
+    sl_sleeptimer_delay_millisecond(80);
+
+    if (sl_sht4x_present(i2cspm, addr, NULL) != SL_STATUS_OK) {
+      status = SL_STATUS_INITIALIZATION;
+    } else {
+      status = SL_STATUS_OK;
+    }
+  }
 
   return status;
 }
@@ -94,7 +104,7 @@ sl_status_t sl_sht4x_measure_rh_and_temp(sl_i2cspm_t *i2cspm, uint8_t addr, uint
   /* Wait for sensor to get ready */
   sl_sleeptimer_delay_millisecond(10);
 
-  /*Read the Temp and Relative Humidity values*/
+  /* Read the Temp and Relative Humidity values*/
   retval = sl_sht4x_read_data(i2cspm, addr, &Data);
 
   *tData = (Data >> 32) & 0xFFFF;
@@ -103,8 +113,8 @@ sl_status_t sl_sht4x_measure_rh_and_temp(sl_i2cspm_t *i2cspm, uint8_t addr, uint
   /* Convert the relative humidity measurement to percent relative humidity*/
   *rhData = sl_sht4x_get_percent_relative_humidity(*rhData);
 
-  /*Convert the temperature measurement to temperature in degrees Celcius*/
-  *tData = sl_sht4x_get_celcius_temperature(*tData);
+  /* Convert the temperature measurement to temperature in degrees Celsius*/
+  *tData = sl_sht4x_get_celsius_temperature(*tData);
 
   return retval;
 }
@@ -132,7 +142,7 @@ sl_status_t sl_sht4x_read_rh_and_temp(sl_i2cspm_t *i2cspm, uint8_t addr, uint32_
   /* Wait for sensor to become ready */
   sl_sleeptimer_delay_millisecond(10);
 
-  /*Read the Temp and Relative Humidity values */
+  /* Read the Temp and Relative Humidity values */
   retval = sl_sht4x_read_data(i2cspm, addr, &Data);
 
   *tData = (Data >> 32) & 0xFFFF;
@@ -147,23 +157,24 @@ sl_status_t sl_sht4x_read_rh_and_temp(sl_i2cspm_t *i2cspm, uint8_t addr, uint32_
  *****************************************************************************/
 sl_status_t sl_sht4x_present(sl_i2cspm_t *i2cspm, uint8_t addr, uint64_t *device_id)
 {
-  sl_status_t retval;
-  I2C_TransferSeq_TypeDef    seq;
+  sl_status_t               retval;
+  I2C_TransferSeq_TypeDef   seq;
   I2C_TransferReturn_TypeDef ret;
-  uint8_t                    i2c_read_data[6];
+  uint8_t                   i2c_read_data[6];
 
-  seq.addr  = addr << 1;
-  seq.flags = I2C_FLAG_READ;
-  /* Select location/length of data to be read */
-  seq.buf[0].data = i2c_read_data;
-  seq.buf[0].len  = 6;
-
-  /* Send the command to read the unique serial number of the sensor*/
+  /* Send the command to read the unique serial number of the sensor */
   retval = sl_sht4x_send_command(i2cspm, addr, sht4x_cmd_read_serial);
-
   if (retval != SL_STATUS_OK) {
     return retval;
   }
+
+  /* Give the device a short time before reading */
+  sl_sleeptimer_delay_millisecond(1);
+
+  seq.addr  = addr << 1;
+  seq.flags = I2C_FLAG_READ;
+  seq.buf[0].data = i2c_read_data;
+  seq.buf[0].len  = 6;
 
   ret = I2CSPM_Transfer(i2cspm, &seq);
 
@@ -172,9 +183,12 @@ sl_status_t sl_sht4x_present(sl_i2cspm_t *i2cspm, uint8_t addr, uint64_t *device
     return SL_STATUS_TRANSMIT;
   }
 
-  if (NULL != device_id) {
-    // Combine the 6 bytes of the read data into a 64-bit variable
-    *device_id = (i2c_read_data[0] << 24) | (i2c_read_data[1] << 16) | (i2c_read_data[3] << 8) | i2c_read_data[4];
+  if (device_id != NULL) {
+    /* Combine the 6 bytes of the read data into a 64-bit variable */
+    *device_id = (uint64_t)((uint32_t)i2c_read_data[0] << 24)
+                | (uint64_t)((uint32_t)i2c_read_data[1] << 16)
+                | (uint64_t)((uint32_t)i2c_read_data[3] << 8)
+                | (uint64_t)i2c_read_data[4];
   }
 
   return SL_STATUS_OK;
@@ -224,7 +238,7 @@ static sl_status_t sl_sht4x_send_command(sl_i2cspm_t *i2cspm, uint8_t addr, uint
   seq.buf[0].data   = i2c_write_data;
   seq.buf[0].len    = 1;
   /* No data to be read */
-  seq.buf[1].data = i2c_read_data; // NULL
+  seq.buf[1].data = i2c_read_data;
   seq.buf[1].len  = 0;
 
   ret = I2CSPM_Transfer(i2cspm, &seq);
@@ -297,7 +311,7 @@ static uint32_t sl_sht4x_get_percent_relative_humidity(uint32_t rh_data)
 
 /**************************************************************************//**
  * @brief
- *   Converts a temperature measurement to temperature in degrees Celcius
+ *   Converts a temperature measurement to temperature in degrees Celsius
  *   (multiplied by 1000)
  *   Formula for conversion of the sensor signals, optimized for fixed
  *   point algebra:
@@ -307,7 +321,7 @@ static uint32_t sl_sht4x_get_percent_relative_humidity(uint32_t rh_data)
  * @return
  *   The converted temperature measurement
  *****************************************************************************/
-static int32_t sl_sht4x_get_celcius_temperature(int32_t temp_data)
+static int32_t sl_sht4x_get_celsius_temperature(int32_t temp_data)
 {
   return (((temp_data) * 21875L) >> 13) - 45000;
 }

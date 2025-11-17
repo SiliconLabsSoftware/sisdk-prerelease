@@ -33,9 +33,9 @@
 sl_rail_status_t sl_rail_ieee802154_config_2p4_ghz_radio_rx_duty_cycling(sl_rail_handle_t rail_handle)
 {
 #if SL_RAIL_SUPPORTS_RX_DUTY_CYCLING
-  return sl_rail_ieee802154_config_channels_2p4_ghz(rail_handle,
-                                                    (const sl_rail_channel_config_t*) sl_rail_ieee802154_phy_2p4_ghz_rx_duty_cycling,
-                                                    SL_RAIL_IEEE802154_PHY_2P4_GHZ_RX_DUTY_CYCLING);
+  return sl_rail_ieee802154_config_channels(rail_handle,
+                                            (const sl_rail_channel_config_t*) sl_rail_ieee802154_phy_2p4_ghz_rx_duty_cycling,
+                                            SL_RAIL_IEEE802154_PHY_2P4_GHZ_RX_DUTY_CYCLING);
 #else
   (void) rail_handle;
   return SL_RAIL_STATUS_INVALID_CALL;

@@ -46,6 +46,10 @@ extern "C" {
 /***************************************************************************//**
  * @addtogroup vdac VDAC - Digital to Analog Voltage Converter.
  * @brief Digital to Analog Voltage Converter (VDAC) Peripheral API.
+ * @details This module contains functions to control the VDAC peripheral of Silicon
+ *          Labs' 32-bit MCUs and SoCs. VDAC converts digital values to analog
+ *          signals at up to 500 ksps with 12-bit accuracy. VDAC is designed for
+ *          low energy consumption, but can also provide very good performance.
  * @{
  ******************************************************************************/
 
@@ -686,53 +690,46 @@ __INLINE uint32_t sl_hal_vdac_get_status(VDAC_TypeDef *vdac)
 }
 #endif
 
-/* *INDENT-OFF* */
-// *****************************************************************************
-///   @addtogroup vdac VDAC - Voltage DAC
-///   Digital to Analog Voltage Converter (VDAC) Peripheral API
-///   @{
-///
-///   @details This module contains functions to control the VDAC peripheral of Silicon
-///          Labs' 32-bit MCUs and SoCs. VDAC converts digital values to analog
-///          signals at up to 500 ksps with 12-bit accuracy. VDAC is designed for
-///          low energy consumption, but can also provide very good performance.
-///
-///   The following steps are necessary for basic operation:
-///
-///   Clock enable:
-///   @code
-///   sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_VDAC0);
-///   @endcode
-///
-///   Initialize the VDAC with default settings and modify selected fields:
-///   @code
-///   sl_hal_vdac_init_t vdac_init                 = SL_HAL_VDAC_INIT_DEFAULT;
-///   sl_hal_vdac_init_channel_t vdac_channel_init = SL_HAL_VDAC_CHANNEL_INIT_DEFAULT;
-///   @endcode
-///
-///   Set prescaler to get 1 MHz VDAC clock frequency.
-///   Calculate clock frequency used for VDAC.
-///   @code
-///   sl_clock_branch_t clock_branch;
-///   uint32_t src_clk_freq;
-///   clock_branch = sl_device_peripheral_get_clock_branch(SL_PERIPHERAL_VDAC0);
-///
-///   sl_clock_manager_get_clock_branch_frequency(clock_branch, &src_clk_freq);
-///   vdac_init.prescaler = sl_hal_vdac_calculate_prescaler(VDAC0, 1000000, src_clk_freq);
-///
-///   sl_hal_vdac_init(VDAC0, &vdac_init);
-///   sl_hal_vdac_init_channel(VDAC0, &vdac_channel_init, 0);
-///   sl_hal_vdac_enable_channel(VDAC0, 0);
-///   @endcode
-///
-///   Perform a conversion:
-///   @code
-///   sl_hal_vdac_set_output_channel(VDAC0, 0, 250);
-///   @endcode
-///
-///   @} (end addtogroup vdac)
-// *****************************************************************************
-/* *INDENT-ON* */
+/***************************************************************************//**
+ * @addtogroup vdac VDAC - Voltage DAC
+ * Digital to Analog Voltage Converter (VDAC) Peripheral API
+ * @{
+ *
+ * The following steps are necessary for basic operation:
+ *
+ * Clock enable:
+ * @code
+ * sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_VDAC0);
+ * @endcode
+ *
+ * Initialize the VDAC with default settings and modify selected fields:
+ * @code
+ * sl_hal_vdac_init_t vdac_init                 = SL_HAL_VDAC_INIT_DEFAULT;
+ * sl_hal_vdac_init_channel_t vdac_channel_init = SL_HAL_VDAC_CHANNEL_INIT_DEFAULT;
+ * @endcode
+ *
+ * Set prescaler to get 1 MHz VDAC clock frequency.
+ * Calculate clock frequency used for VDAC.
+ * @code
+ * sl_clock_branch_t clock_branch;
+ * uint32_t src_clk_freq;
+ * clock_branch = sl_device_peripheral_get_clock_branch(SL_PERIPHERAL_VDAC0);
+ *
+ * sl_clock_manager_get_clock_branch_frequency(clock_branch, &src_clk_freq);
+ * vdac_init.prescaler = sl_hal_vdac_calculate_prescaler(VDAC0, 1000000, src_clk_freq);
+ *
+ * sl_hal_vdac_init(VDAC0, &vdac_init);
+ * sl_hal_vdac_init_channel(VDAC0, &vdac_channel_init, 0);
+ * sl_hal_vdac_enable_channel(VDAC0, 0);
+ * @endcode
+ *
+ * Perform a conversion:
+ * @code
+ * sl_hal_vdac_set_output_channel(VDAC0, 0, 250);
+ * @endcode
+ *
+ * @} (end addtogroup vdac)
+ ******************************************************************************/
 
 #endif /* defined(VDAC_PRESENT) */
 #endif /* SL_HAL_VDAC_H */

@@ -19,7 +19,7 @@ filter:
 
 component:
   - id: toolchain_gcc
-  - id: opn_device_host
+  - id: native_host
   - id: host_main
   - id: app_log
   - id: iostream_stdio

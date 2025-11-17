@@ -45,9 +45,6 @@ component:
   - id: bluetooth_feature_connection_phy_update
   - id: bluetooth_feature_legacy_scanner
   - id: bluetooth_feature_extended_scanner
-  - id: bootloader_interface
-    condition:
-      - device_series_2
   - id: app_assert
   - id: sl_main
   - id: app_os_helper

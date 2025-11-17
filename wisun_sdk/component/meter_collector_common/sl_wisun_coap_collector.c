@@ -389,10 +389,10 @@ sl_status_t sl_wisun_coap_collector_remove_meter(const sockaddr_in6_t * meter_ad
   const sl_wisun_meter_entry_t *tmp_meter_entry = NULL;
   sl_status_t res                               = SL_STATUS_FAIL;
   const char *ip_addr                           = NULL;
+  bool found                                    = false;
 
   // mutex lock
   _mutex_acquire();
-
   if (meter_addr == NULL) {
     sl_wisun_release_mtx_and_ret_val(SL_STATUS_FAIL);
   }
@@ -402,12 +402,13 @@ sl_status_t sl_wisun_coap_collector_remove_meter(const sockaddr_in6_t * meter_ad
   while (block != NULL) {
     tmp_meter_entry = (sl_wisun_meter_entry_t *) block->start_addr;
     if (sli_wisun_compare_addresses(&tmp_meter_entry->addr, meter_addr)) {
+      found = true;
       break;
     }
     block = block->next;
   }
 
-  if (tmp_meter_entry == NULL) {
+  if (!found) {
     printf("[Attempt to remove non registered meter]\n");
     sl_wisun_release_mtx_and_ret_val(SL_STATUS_FAIL);
   }

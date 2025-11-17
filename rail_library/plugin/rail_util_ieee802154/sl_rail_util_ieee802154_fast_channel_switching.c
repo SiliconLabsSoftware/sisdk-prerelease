@@ -33,9 +33,9 @@
 sl_rail_status_t sl_rail_ieee802154_config_2p4_ghz_radio_fast_channel_switching(sl_rail_handle_t rail_handle)
 {
 #if SL_RAIL_IEEE802154_SUPPORTS_RX_CHANNEL_SWITCHING && defined(_SILICON_LABS_32B_SERIES_3)
-  return sl_rail_ieee802154_config_channels_2p4_ghz(rail_handle,
-                                                    (const sl_rail_channel_config_t*) sl_rail_ieee802154_phy_2p4_ghz_rx_ch_switching,
-                                                    SL_RAIL_IEEE802154_PHY_2P4_GHZ_RX_CH_SWITCHING);
+  return sl_rail_ieee802154_config_channels(rail_handle,
+                                            (const sl_rail_channel_config_t*) sl_rail_ieee802154_phy_2p4_ghz_rx_ch_switching,
+                                            SL_RAIL_IEEE802154_PHY_2P4_GHZ_RX_CH_SWITCHING);
 #else
   (void) rail_handle;
   return SL_RAIL_STATUS_INVALID_CALL;

@@ -37,8 +37,14 @@ requires:
 - name: status
 - name: memory_manager_region
   condition: [device_cortexm]
+- name: opn_device_host
+  condition: [device_host]
 conflicts:
 - name: memory_manager
   condition: [device_series_2]
 - name: memory_manager
   condition: [device_series_3]
+template_contribution:
+- name: component_catalog
+  value: si91x_soc_mode
+  condition: [device_si91x]

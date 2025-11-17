@@ -24,7 +24,6 @@ component:
   - id: app_os_helper
   - id: clock_manager
   - id: device_init
-  - id: bootloader_interface
   - id: uartdrv_usart
     instance:
       - vcom

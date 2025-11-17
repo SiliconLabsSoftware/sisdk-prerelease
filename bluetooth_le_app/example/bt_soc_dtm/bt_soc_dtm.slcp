@@ -36,7 +36,6 @@ component:
       - device_supports_bluetooth_iq_sampling
       - device_supports_bluetooth_antenna_switching
       - hardware_board_has_rfswitch_aox
-  - id: in_place_ota_dfu
   - id: app_assert
   - id: memory_manager
   - id: board_control

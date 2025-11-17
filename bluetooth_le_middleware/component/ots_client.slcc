@@ -43,6 +43,7 @@ requires:
 - name: slist
 - name: sl_core
 - name: app_queue
+- name: app_timer
 template_contribution:
 - name: bluetooth_on_event
   value:

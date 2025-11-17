@@ -32,9 +32,6 @@ component:
   - id: bluetooth_feature_legacy_scanner
   - id: bluetooth_feature_sm
   - id: bluetooth_feature_system
-  - id: in_place_ota_dfu
-    condition:
-      - device_series_2
   - id: rail_util_pti
   - id: app_assert
   - id: mpu

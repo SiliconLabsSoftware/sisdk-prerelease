@@ -17,4 +17,7 @@ define:
 template_contribution:
 - name: compiler_is_llvm_lto
   value: true
+metadata:
+  sbom:
+    license: Zlib
 root_path: platform_core

@@ -436,60 +436,68 @@ __INLINE uint32_t sl_hal_pdm_get_enabled_pending_interrupts(PDM_TypeDef *pdm)
 }
 
 /* *INDENT-OFF* */
-//  ******** THE REST OF THE FILE IS DOCUMENTATION ONLY !***********************
-///  @addtogroup pdm PDM - Pulse Density Modulation
-///  Pulse Density Modulation (PDM) peripheral API
-///
-///  @details
-///  PDM API functions provide full support for the PDM peripheral.
-///  The PDM peripheral accepts PDM bitstreams and produces PCM encoded output.
-///
-///  <b> The following is an example PDM usage when interfacing to two PDM microphones: </b>
-///
-///  Configure clocks and GPIO pins:
-///
-///  @code
-///  sl_hal_pdm_init_t pdm_init = SL_HAL_PDM_INIT_DEFAULT;
-///  sl_gpio_t mic_clk_gpio;
-///  sl_gpio_t mic_data_gpio;
-///
-///  mic_clk_gpio.port = MIC_CLK_PORT;
-///  mic_clk_gpio.pin = MIC_CLK_PIN;
-///  mic_data_gpio.port = MIC_DATA_PORT;
-///  mic_data_gpio.pin = MIC_DATA_PIN;
-///
-///  sl_hal_gpio_set_pin_mode(&mic_clk_gpio, SL_GPIO_MODE_PUSH_PULL, 0);
-///  sl_hal_gpio_set_pin_mode(&mic_data_gpio, SL_GPIO_MODE_INPUT, 0);
-///
-///  Set fast slew rate on PDM mic CLK and DATA pins
-///  sl_hal_gpio_set_slew_rate(&mic_clk_gpio, 7U);
-///
-///  Enable PDM peripheral clock.
-///  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_PDM);
-///
-///  Route PDM signals to correct GPIO's.
-///  GPIO->PDMROUTE.ROUTEEN = GPIO_PDM_ROUTEEN_CLKPEN;
-///  GPIO->PDMROUTE.CLKROUTE = (mic_clk_gpio.port  << _GPIO_PDM_CLKROUTE_PORT_SHIFT)
-///                            | (mic_clk_gpio.pin << _GPIO_PDM_CLKROUTE_PIN_SHIFT);
-///  GPIO->PDMROUTE.DAT0ROUTE = (mic_data_gpio.port  << _GPIO_PDM_DAT0ROUTE_PORT_SHIFT)
-///                              | (mic_data_gpio.pin << _GPIO_PDM_DAT0ROUTE_PIN_SHIFT);
-///  GPIO->PDMROUTE.ROUTEEN |= GPIO_PDM_ROUTEEN_DAT0PEN;
-///  @endcode
-///
-///  Initialize and start PDM, then read PCM samples from FIFO:
-///
-///  @code
-///  sl_hal_pdm_init_t init = SL_HAL_PDM_INIT_DEFAULT;
-///  sl_hal_pdm_init(pdm, &init);
-///
-///  while (true) {
-///    *pBuffer++ = sl_hal_pdm_rx(pdm);
-///  }
-///  @endcode
-///
-/// @{
-/// @} (end addtogroup pdm)
-// ******************************************************************************/
+/*******************************************************************************
+ *  @addtogroup pdm PDM - Pulse Density Modulation
+ *  Pulse Density Modulation (PDM) peripheral API
+ *
+ *  @details
+ *  PDM API functions provide full support for the PDM peripheral.
+ *  The PDM peripheral accepts PDM bitstreams and produces PCM encoded output.
+ *
+ *  <b> The following is an example PDM usage when interfacing to PDM microphones: </b>
+ *
+ *  Configure clocks and GPIO pins:
+ *
+ *  @code
+ *  uint32_t pBuffer[1000];
+ *  sl_hal_pdm_init_t pdm_init = SL_HAL_PDM_INIT_DEFAULT;
+ *  sl_gpio_t mic_clk_gpio;
+ *  sl_gpio_t mic_data_gpio;
+ *
+ *  mic_clk_gpio.port = SL_MIC_PDM_CLK_PORT;
+ *  mic_clk_gpio.pin = SL_MIC_PDM_CLK_PIN;
+ *  mic_data_gpio.port = SL_MIC_PDM_DAT0_PORT;
+ *  mic_data_gpio.pin = SL_MIC_PDM_DAT0_PIN;
+ *
+ *  sl_hal_gpio_set_pin_mode(&mic_clk_gpio, SL_GPIO_MODE_PUSH_PULL, 0);
+ *  sl_hal_gpio_set_pin_mode(&mic_data_gpio, SL_GPIO_MODE_INPUT, 0);
+ *
+ *  Set fast slew rate on PDM mic CLK and DATA pins.
+ *  sl_hal_gpio_set_slew_rate(&mic_clk_gpio, 7U);
+ *
+ *  // Enable PDM peripheral clock.
+ *  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_PDM);
+ *  // Note: In clock manager configuration UI, select clock source for EM01GRPBCLK branch (PDM reference clock source) as HFRCODPLL.
+ *  // Note: Select pll frequency in clock manager UI to be 1,411,209 Hz
+ *  // to achieve 44,100 kHz PCM sampling rate when using 32x PDM oversampling.
+ *
+ *  Route PDM signals to correct GPIO's.
+ *  GPIO->PDMROUTE.ROUTEEN = GPIO_PDM_ROUTEEN_CLKPEN;
+ *  GPIO->PDMROUTE.CLKROUTE = (mic_clk_gpio.port  << _GPIO_PDM_CLKROUTE_PORT_SHIFT)
+ *                            | (mic_clk_gpio.pin << _GPIO_PDM_CLKROUTE_PIN_SHIFT);
+ *  GPIO->PDMROUTE.DAT0ROUTE = (mic_data_gpio.port  << _GPIO_PDM_DAT0ROUTE_PORT_SHIFT)
+ *                              | (mic_data_gpio.pin << _GPIO_PDM_DAT0ROUTE_PIN_SHIFT);
+ *  @endcode
+ *
+ *  Initialize and start PDM, then read PDM samples from FIFO:
+ *
+ *  @code
+ *  sl_hal_pdm_init_t init = SL_HAL_PDM_INIT_DEFAULT;
+ *  sl_hal_pdm_init(PDM, &init);
+ *  sl_hal_pdm_enable(PDM);
+ *  sl_hal_pdm_clear(PDM);
+ *  sl_hal_pdm_fifo_flush(PDM);
+ *  sl_hal_pdm_start(PDM);
+ *  
+ *  for(uint32_t i = 0; i < 1000; i++) {
+ *    pBuffer[i] = sl_hal_pdm_rx(PDM);
+ *  }
+ *  sl_hal_pdm_stop(PDM);
+ *  @endcode
+ *
+ * @{
+ * @} (end addtogroup pdm)
+ ******************************************************************************/
 /* *INDENT-ON* */
 
 #ifdef __cplusplus

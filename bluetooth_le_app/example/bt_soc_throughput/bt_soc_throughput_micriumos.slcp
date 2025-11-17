@@ -21,9 +21,6 @@ component:
   - id: memory_manager
   - id: bluetooth_stack
   - id: gatt_service_device_information_override
-  - id: in_place_ota_dfu
-    condition:
-      - device_series_2
   - id: app_assert
   - id: app_log
   - id: mpu

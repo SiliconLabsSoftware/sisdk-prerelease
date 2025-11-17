@@ -56,7 +56,6 @@ component:
   - id: device_init
   - id: iostream_recommended_stream
   - id: iostream_bgapi_trace
-  - id: in_place_ota_dfu
   - id: ls013b7dh03
     condition:
       - hardware_board_supports_wstk_lcd

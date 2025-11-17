@@ -50,9 +50,6 @@ component:
     condition:
       - device_series_3
   - id: mpu
-  - id: bootloader_interface
-    condition:
-      - device_series_2
   - id: app_assert
   - id: sl_main
   - id: app_os_helper

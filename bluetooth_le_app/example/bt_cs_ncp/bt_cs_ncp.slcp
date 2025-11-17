@@ -51,7 +51,6 @@ component:
   - id: sl_main
   - id: clock_manager
   - id: device_init
-  - id: bootloader_interface
   - id: rtllib
   - id: rail_util_ble_cs_antenna_offset
   - id: cs_reflector

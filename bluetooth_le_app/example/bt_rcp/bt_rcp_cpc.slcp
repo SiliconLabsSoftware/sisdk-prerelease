@@ -33,7 +33,6 @@ component:
   - id: bluetooth_feature_connection_phy_update
   - id: bluetooth_feature_legacy_scanner
   - id: bluetooth_feature_extended_scanner
-  - id: bootloader_interface
   - id: sl_main
   - id: app_os_helper
   - id: clock_manager

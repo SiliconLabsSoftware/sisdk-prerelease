@@ -31,6 +31,13 @@
  ******************************************************************************/
 
 #include <stdlib.h>
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+
+#if defined(SL_CATALOG_SI91X_SOC_MODE_PRESENT)
+#include "sl_si91x_memory_manager.h"
+#endif
 
 #include "sl_memory_manager.h"
 
@@ -394,8 +401,12 @@ size_t sl_memory_heap_get_total_size(const sl_memory_heap_t *heap)
  ******************************************************************************/
 size_t sl_memory_get_free_heap_size(void)
 {
+#if defined(SL_CATALOG_SI91X_SOC_MODE_PRESENT)
+  return sl_si91x_memory_get_free_heap_size();
+#else
   // Stub implementation: Return zero.
   return 0;
+#endif
 }
 
 /***************************************************************************//**
@@ -416,8 +427,12 @@ size_t sl_memory_heap_get_free_size(const sl_memory_heap_t *heap)
  ******************************************************************************/
 size_t sl_memory_get_used_heap_size(void)
 {
+#if defined(SL_CATALOG_SI91X_SOC_MODE_PRESENT)
+  return sl_si91x_memory_get_used_heap_size();
+#else
   // Stub implementation: Return zero.
   return 0;
+#endif
 }
 
 /***************************************************************************//**
@@ -438,8 +453,12 @@ size_t sl_memory_heap_get_used_size(const sl_memory_heap_t *heap)
  ******************************************************************************/
 size_t sl_memory_get_heap_high_watermark(void)
 {
+#if defined(SL_CATALOG_SI91X_SOC_MODE_PRESENT)
+  return sl_si91x_memory_get_heap_high_watermark();
+#else
   // Stub implementation: Return zero.
   return 0;
+#endif
 }
 
 /***************************************************************************//**
@@ -460,7 +479,12 @@ size_t sl_memory_heap_get_high_watermark(const sl_memory_heap_t *heap)
  ******************************************************************************/
 void sl_memory_reset_heap_high_watermark(void)
 {
+#if defined(SL_CATALOG_SI91X_SOC_MODE_PRESENT)
+  sl_si91x_memory_reset_heap_high_watermark();
+#else
   // Stub implementation: No operation performed.
+  (void)0;
+#endif
 }
 
 /***************************************************************************//**

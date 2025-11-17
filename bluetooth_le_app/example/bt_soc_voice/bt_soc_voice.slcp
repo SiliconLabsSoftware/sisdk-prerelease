@@ -33,7 +33,6 @@ component:
   - id: device_init
   - id: gatt_configuration
   - id: gatt_service_device_information_override
-  - id: in_place_ota_dfu
   - id: memory_manager
   - id: mic_driver
   - id: rail_util_pti

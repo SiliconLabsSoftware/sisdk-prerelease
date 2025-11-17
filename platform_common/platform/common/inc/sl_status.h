@@ -496,6 +496,7 @@
 #define SL_STATUS_ZIGBEE_SEND_UNICAST_NO_ROUTE                 ((sl_status_t)0x0C26)  ///< No active route to the destination.
 #define SL_STATUS_ZIGBEE_BROADCAST_TO_SLEEPY_CHILDREN_TIMEOUT  ((sl_status_t)0x0C27)  ///< Broadcast message timeout while waiting for sleepy children to poll.
 #define SL_STATUS_ZIGBEE_BROADCAST_RELAY_FAILED                ((sl_status_t)0x0C28)  ///< Expected a neighbor to relay the message, but none did.
+#define SL_STATUS_ZIGBEE_REJOIN_FAILED_BUT_NETWORK_RESTORED    ((sl_status_t)0x0C29)  ///< On a router, this indicates that a network rejoin attempt was made and did not succeed, and that the router is resuming operation on its current network. This network status is always followed by a SL_STATUS_NETWORK_UP status.
 
 // -----------------------------------------------------------------------------
 // Data Types

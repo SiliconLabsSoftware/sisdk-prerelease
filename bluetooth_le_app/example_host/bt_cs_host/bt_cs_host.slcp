@@ -31,7 +31,7 @@ component:
   - id: app_log
   - id: iostream_stdio
   - id: app_assert
-  - id: opn_device_host
+  - id: native_host
   - id: toolchain_gcc
 
 source:

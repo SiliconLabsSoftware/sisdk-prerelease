@@ -21,7 +21,7 @@ filter:
 component:
   - id: toolchain_gcc
   - id: esl_tag_core
-  - id: opn_device_host
+  - id: native_host
   - id: app_log
   - id: iostream_stdio
   - id: bluetooth_api_ncp_host

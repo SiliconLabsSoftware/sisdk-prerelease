@@ -1486,6 +1486,110 @@ __INLINE uint32_t sl_hal_lesense_get_enabled_pending_interrupts(void)
 }
 #endif
 
+/***************************************************************************//**
+ * @addtogroup lesense LESENSE - Low Energy Sensor Interface
+ * @{
+ *
+ * @n @section lesense_example Example
+ *  This example demonstrates initialization, basic configuration, and usage of the
+ *  LESENSE peripheral. It shows how to:
+ *  - Initialize the LESENSE with default settings to sample a single channel. LESENSE
+ *  uses ACMP to sample input state of a button 0 and will trigger an interrupt to toggle
+ *  LED0.
+ *
+ * @code{.c}
+ * #include "sl_hal_lesense.h"
+ * #include "sl_hal_acmp.h"
+ * #include "sl_hal_gpio.h"
+ * #include "sl_clock_manager.h"
+ * 
+ * sl_gpio_t led0 = {LED0_PORT, LED0_PIN};
+ * void init_gpio(void)
+ * {
+ *   sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_GPIO);
+ *   sl_hal_gpio_set_pin_mode(&led0, SL_GPIO_MODE_PUSH_PULL, 0);
+ * }
+ * 
+ * void init_ACMP(void)
+ * {
+ *   sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_ACMP0);
+ *   sl_hal_acmp_init_t amcp_init = SL_HAL_ACMP_INIT_DEFAULT;
+ *   
+ *   sl_hal_acmp_init(ACMP0, &amcp_init);
+ *   if (BTN0_PIN % 2 == 0) {
+ *      GPIO->BBUSALLOC_SET = GPIO_BBUSALLOC_BEVEN0_ACMP0;
+ *   } else {
+ *      GPIO->BBUSALLOC_SET = GPIO_BBUSALLOC_BODD0_ACMP0;
+ *   }
+ *   sl_hal_acmp_enable(ACMP0);
+ *   // Set 1.25V internal as reference voltage for ACMP negative input and port B external interface override.
+ *   sl_hal_acmp_set_input(ACMP0, SL_HAL_ACMP_INPUT_VREFDIV1V25, SL_HAL_ACMP_INPUT_EXTPB);
+ *   // Wait for warm-up.
+ *   while (!(ACMP0->STATUS & ACMP_IF_ACMPRDY));
+ * }
+ * 
+ * void lesense_acmp_example(void)
+ * {
+ *   init_gpio();
+ *   init_ACMP();
+ *   // Initialize configuration structure with default settings
+ *   sl_hal_lesense_init_t init = SL_HAL_LESENSE_INIT_DEFAULT;
+ *   sl_hal_lesense_channel_descriptor_t lesense_channel = SL_HAL_LESENSE_CHANNEL_CONFIG_DEFAULT;
+ *   uint32_t reference_freq;
+ *
+ *   // Enable clock.
+ *   sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_LFRCO);
+ *   sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_LESENSE);
+ *   sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_PRS);
+ *
+ *   // Get the frequency of LFRCO for LESENSE reference.
+ *   sl_clock_manager_get_oscillator_frequency(SL_OSCILLATOR_LFRCO, &reference_freq);
+ *
+ *   // Do not store scan result and invert ACMP0 to accommodate PB0 pull-up.
+ *   init.core_control.store_scanres = false;
+ *   init.core_control.invert_acmp0 = true;
+ *   // Enable LESENSE control of ACMP0 positive input mux.
+ *   init.per_control.acmp0_mode = SL_HAL_LESENSE_ACMP_MODE_MUX;
+ *
+ *   // Config lesense channel.
+ *   lesense_channel.enable_scan = true;
+ *   lesense_channel.enable_interrupt = true;
+ *   lesense_channel.sample_mode = SL_HAL_LESENSE_SAMPLE_MODE_ACMP;
+ *   lesense_channel.interrupt_mode = SL_HAL_LESENSE_SET_INTERRUPT_POSITIVE_EDGE;
+ *   lesense_channel.offset = PB0_PIN; // push button pin number.
+ *
+ *   // Initialize and enable LESENSE with default settings.
+ *   sl_hal_lesense_init(&init);
+ *   // Config channel 0.
+ *   sl_hal_lesense_channel_config(&lesense_channel, 0);
+ *   // Get 32 samples per second.
+ *   sl_hal_lesense_disable();
+ *   sl_hal_lesense_set_scan_frequency(reference_freq, 32);
+ *
+ *   // Start LESENSE scanning.
+ *   sl_hal_lesense_enable();
+ *   sl_hal_lesense_start_scan();
+ *   
+ *   // Enable interrupt in NVIC.
+ *   NVIC_ClearPendingIRQ(LESENSE_IRQn);
+ *   NVIC_EnableIRQ(LESENSE_IRQn);
+ * }
+ * 
+ * void LESENSE_IRQHandler(void)
+ * {
+ *   // Clear all LESENSE interrupt flag
+ *   uint32_t flags = sl_hal_lesense_get_pending_interrupts();
+ *   sl_hal_lesense_clear_interrupts(flags);
+ *   // Toggle LED0.
+ *   if (flags & LESENSE_IF_CH0) {
+ *     sl_hal_gpio_toggle_pin(&led0);
+ *   }
+ * }
+ * @endcode
+ *
+ * @} (end addtogroup lesense)
+ ******************************************************************************/
+
 #endif /* defined(LESENSE_COUNT) && (LESENSE_COUNT > 0) */
 
 #endif /* SL_HAL_LESENSE_H */

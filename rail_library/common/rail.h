@@ -686,7 +686,8 @@ uint16_t RAIL_SetFixedLength(RAIL_Handle_t railHandle, uint16_t length);
  *   what is stored in Flash by the configuration tool.
  * @param[in] cb A pointer to a function called whenever a radio
  *   configuration change occurs. May be NULL if do not need a callback.
- * @return The first available channel in the configuration.
+ * @return The first available channel in the configuration, or
+ *   \ref SL_RAIL_CHANNEL_INVALID if an error occurs during configuration.
  *
  * When configuring channels on EFR32, the radio tuner is reconfigured
  * based on the frequency and channel spacing in the channel configuration

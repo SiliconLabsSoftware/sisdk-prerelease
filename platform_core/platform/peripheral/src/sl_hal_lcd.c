@@ -119,7 +119,7 @@ void sl_hal_lcd_init(const sl_hal_lcd_init_t *init)
   // Update the display controller.
   LCD->DISPCTRL  = display_control;
 
-  sl_hal_lcd_set_mode(init->mode << _LCD_BIASCTRL_MODE_SHIFT);
+  sl_hal_lcd_set_mode(init->mode);
   LCD->FRAMERATE = init->frame_rate_divider;
   sl_hal_lcd_set_contrast(init->contrast_level);
 }

@@ -25,9 +25,6 @@ component:
   - id: bluetooth_feature_connection_role_peripheral
   - id: bluetooth_feature_gatt_server
   - id: bluetooth_feature_system
-  - id: in_place_ota_dfu
-    condition:
-      - device_series_2
   - id: rail_util_pti
   - id: app_assert
   - id: mpu

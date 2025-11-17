@@ -41,7 +41,6 @@ component:
     instance:
       - vcom
   - id: mpu
-  - id: bootloader_interface
   - id: sl_main
   - id: app_os_helper
   - id: clock_manager

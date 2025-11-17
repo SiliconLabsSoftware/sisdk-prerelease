@@ -20,7 +20,7 @@ component:
   - id: ncp_version
   - id: host_main
   - id: host_ncp
-  - id: opn_device_host
+  - id: native_host
   - id: app_log
   - id: iostream_stdio
   - id: app_assert

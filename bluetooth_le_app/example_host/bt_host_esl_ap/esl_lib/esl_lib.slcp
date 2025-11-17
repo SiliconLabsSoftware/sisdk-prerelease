@@ -21,7 +21,7 @@ filter:
 component:
   - id: toolchain_gcc
   - id: esl_tag_core
-  - id: opn_device_host
+  - id: native_host
   - id: sl_main
   - id: sl_main_custom_main
   - id: app_log

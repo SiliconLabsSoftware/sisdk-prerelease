@@ -541,42 +541,44 @@ __INLINE uint32_t sl_hal_msc_get_enabled_pending_interrupts(void)
 #endif
 
 /* *INDENT-OFF* */
-//   ******** THE REST OF THE FILE IS DOCUMENTATION ONLY !***********************
-///   @addtogroup msc MSC - Memory System Controller
-///
-///   @brief Memory System Controller API
-///
-///   @details
-///   Contains functions to control the MSC, primarily the Flash.
-///   Users can perform Flash memory write and erase operations, as well as
-///   optimization of the CPU instruction fetch interface for the application.
-///   Available instruction fetch features depends on the MCU or SoC family, but
-///   features such as instruction pre-fetch, cache, and configurable branch prediction
-///   are typically available.
-///
-///   The flash write and erase runs from RAM on the EFM32G devices. On all other
-///   devices the flash write and erase functions run from flash.
-///
-///   Flash erase may add ms of delay to interrupt latency if executing from Flash.
-///   Flash write and erase operations are supported by @ref sl_hal_msc_write_word(),
-///   @ref sl_hal_msc_erase_page(), and sl_hal_msc_mass_erase().
-///   Mass erase is supported for MCU and SoC families with larger Flash sizes.
-///
-///   @ref sl_hal_msc_init() must be called prior to any Flash write or erase operation.
-///    The following steps are necessary to perform a page erase and write:
-///
-///    @code
-///    uint32_t * user_data_page = (uint32_t *) USERDATA_BASE;
-///    uint32_t user_data[] = {
-///         0x01020304,
-///         0x05060708
-///       };
-///     sl_hal_msc_erase_page(user_data_page);
-///     sl_hal_msc_write_word(user_data_page, user_data, sizeof(user_data));
-///     @endcode
-///
-/// @} (end addtogroup msc)
-// *****************************************************************************
+/***************************************************************************//**
+ * @addtogroup msc MSC - Memory System Controller
+ *
+ * @brief Memory System Controller API
+ *
+ * @details
+ * Contains functions to control the MSC, primarily the Flash.
+ * Users can perform Flash memory write and erase operations, as well as
+ * optimization of the CPU instruction fetch interface for the application.
+ * Available instruction fetch features depends on the MCU or SoC family, but
+ * features such as instruction pre-fetch, cache, and configurable branch prediction
+ * are typically available.
+ *
+ *
+ * Flash erase may add ms of delay to interrupt latency if executing from Flash.
+ * Flash write and erase operations are supported by @ref sl_hal_msc_write_word(),
+ * @ref sl_hal_msc_erase_page(), and sl_hal_msc_mass_erase().
+ * Mass erase is supported for MCU and SoC families with larger Flash sizes.
+ *
+ * @ref sl_hal_msc_init() must be called prior to any Flash write or erase operation.
+ * The following steps are necessary to perform a page erase and write:
+ *
+ * @code
+ * uint32_t *user_data_page = (uint32_t *) USERDATA_BASE;
+ * uint32_t user_data = 0x05060708;
+ * #if defined(_CMU_CLKEN1_MSC_MASK)
+ *   sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_MSC);
+ * #endif
+ * // Initialize MSC module.
+ * sl_hal_msc_init();
+ * // Erase user data page.
+ * sl_hal_msc_erase_page(user_data_page);
+ * // Write value to user data page.
+ * sl_hal_msc_write_word(user_data_page, &user_data, sizeof(user_data));
+ * @endcode
+ *
+ * @} (end addtogroup msc)
+ ******************************************************************************/
 /* *INDENT-ON* */
 
 #endif /* defined(MSC_COUNT) && (MSC_COUNT > 0) */

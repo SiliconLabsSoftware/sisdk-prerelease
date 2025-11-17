@@ -19,7 +19,7 @@ filter:
 
 component:
   - id: toolchain_gcc
-  - id: opn_device_host
+  - id: native_host
   - id: gatt_configuration
   - id: ncp_gatt
   - id: ncp_version

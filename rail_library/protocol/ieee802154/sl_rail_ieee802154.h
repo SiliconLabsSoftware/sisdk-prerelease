@@ -674,6 +674,28 @@ sl_rail_status_t sl_rail_ieee802154_config_2p4_ghz_radio_ant_div_coex_fem(sl_rai
 #define SL_RAIL_IEEE802154_2_MBPS_RECEIVE_TIMEOUT_US 1500UL
 
 /**
+ * @brief Enables high data rate mode switching for 2.4 GHz IEEE 802.15.4.
+ *
+ * Enables switching between the standard 2.4 GHz 802.15.4 PHY and a proprietary
+ * 2.4 GHz high data rate PHY.
+ *
+ * **Note:** This function does not modify or load the channel configuration.
+ * It is required that a channel configuration supporting high data rate mode
+ * switching has already been loaded before calling this API.
+ *
+ * @param[in] rail_handle Handle to a valid RAIL instance.
+ *
+ * @return
+ *   - \ref SL_RAIL_STATUS_NO_ERROR: The operation completed successfully.
+ *   - \ref SL_RAIL_STATUS_INVALID_PARAMETER: The rail_handle is invalid or a suitable
+ *     channel configuration has not been loaded.
+ *   - Other status codes as defined by sl_rail_status_t.
+ *
+ * \ref sl_rail_ieee802154_config_channel_switch() for channel config loading.
+ */
+sl_rail_status_t sl_rail_ieee802154_enable_2p4_ghz_high_data_rate(sl_rail_handle_t rail_handle);
+
+/**
  * Configure the radio for 2.4 GHz 802.15.4 for 250 kbps or 2 Mbps operation.
  *
  * @param[in] rail_handle A real RAIL instance handle.
@@ -965,14 +987,14 @@ SLI_RAIL_ENUM(sl_rail_ieee802154_phy_t) {
 #define SL_RAIL_IEEE802154_PHY_EXTERNAL_MASK       (0x10U)
 
 /**
- * Load a 2.4Ghz 802.15.4 channel config.
+ * Load an 802.15.4 channel config.
  *
  * @param[in] rail_handle A real RAIL instance handle.
  * @param channelConfig A pointer to a channel configuration.
  * @param phy_id PTI config ID.
  * @return Status code indicating success of the function call.
  *
- * This initializes the radio for 2.4 GHz operation. It takes the place of
+ * This initializes the radio for 802.15.4 operation. It takes the place of
  * calling \ref sl_rail_config_channels(). After this call,
  * channels 11-26 will be available, giving the frequencies of those channels
  * on channel page 0, as defined by IEEE 802.15.4-2011 section 8.1.2.2.
@@ -981,9 +1003,9 @@ SLI_RAIL_ENUM(sl_rail_ieee802154_phy_t) {
  *
  * @note This call implicitly disables all \ref sl_rail_ieee802154_g_options_t.
  */
-sl_rail_status_t sl_rail_ieee802154_config_channels_2p4_ghz(sl_rail_handle_t rail_handle,
-                                                            const sl_rail_channel_config_t * channelConfig,
-                                                            sl_rail_ieee802154_phy_t phy_id);
+sl_rail_status_t sl_rail_ieee802154_config_channels(sl_rail_handle_t rail_handle,
+                                                    const sl_rail_channel_config_t * channelConfig,
+                                                    sl_rail_ieee802154_phy_t phy_id);
 
 /**
  * Return IEEE802.15.4 PHY identifier.

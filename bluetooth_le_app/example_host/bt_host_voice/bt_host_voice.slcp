@@ -30,7 +30,7 @@ component:
   - id: ble_peer_manager_common
   - id: ble_peer_manager_central
   - id: ble_peer_manager_peripheral
-  - id: opn_device_host
+  - id: native_host
 
 source:
   - path: app.c

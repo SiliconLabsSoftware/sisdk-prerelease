@@ -14,6 +14,7 @@ config_file:
 - path: config/sl_ncp_evt_filter_config.h
 source:
 - path: sl_ncp_evt_filter.c
+  unless: [bluetooth_api_ncp_host]
 include:
 - path: .
   file_list:
@@ -22,7 +23,7 @@ include:
 provides:
 - name: ncp_evt_filter
 requires:
-- name: bluetooth_stack
+- name: bluetooth_api
 - name: status
 documentation:
   docset: bluetooth

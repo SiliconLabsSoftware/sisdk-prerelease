@@ -26,7 +26,6 @@ component:
     instance:
       - exp
   - id: mpu
-  - id: bootloader_interface
   - id: sl_main
   - id: clock_manager
 

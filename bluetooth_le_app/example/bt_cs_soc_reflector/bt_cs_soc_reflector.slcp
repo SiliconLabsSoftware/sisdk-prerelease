@@ -41,7 +41,6 @@ component:
     instance:
       - btn0
       - btn1
-  - id: in_place_ota_dfu
   - id: sl_main
   - id: clock_manager
   - id: device_init
