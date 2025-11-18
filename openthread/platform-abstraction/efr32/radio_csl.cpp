@@ -59,18 +59,15 @@ typedef struct
 #endif
 } csl_state_t;
 
-#if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
-static csl_state_t sCslState[OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM];
-#else
-static csl_state_t sCslState[1];
-#endif
+// Per-instance CSL state
+static csl_state_t sCslState[RADIO_INTERFACE_COUNT];
 
 // Helper function to get CSL state for an instance
 static csl_state_t *getCslState(otInstance *aInstance)
 {
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
     instanceIndex_t index = sli_ot_radio_instance_get_index(aInstance);
-    OT_ASSERT(index < OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM);
+    OT_ASSERT(index < RADIO_INTERFACE_COUNT);
     return &sCslState[index];
 #else
     OT_UNUSED_VARIABLE(aInstance);
@@ -90,7 +87,7 @@ void sli_ot_radio_csl_init(void)
 {
     // Reset CSL state for all instances
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
-    for (size_t i = 0; i < OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM; i++)
+    for (size_t i = 0; i < RADIO_INTERFACE_COUNT; i++)
     {
         otInstance *instance = sli_ot_radio_instance_get(i);
         if (instance != nullptr)
@@ -107,7 +104,7 @@ void sli_ot_radio_csl_deinit(void)
 {
     // Reset CSL state for all instances
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
-    for (size_t i = 0; i < OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM; i++)
+    for (size_t i = 0; i < RADIO_INTERFACE_COUNT; i++)
     {
         otInstance *instance = sli_ot_radio_instance_get(i);
         if (instance != nullptr)

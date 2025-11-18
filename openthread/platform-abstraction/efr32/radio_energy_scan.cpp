@@ -32,7 +32,6 @@
  */
 
 #include "radio_energy_scan.h"
-#include "radio_instance.h"
 
 #include <assert.h>
 #include <string.h>
@@ -48,6 +47,7 @@
 #include "utils/code_utils.h"
 
 #include "platform-efr32.h"
+#include "radio_instance.h"
 #include "radio_interface.h"
 #include "radio_power_manager.h"
 #include "radio_state.h"
@@ -221,8 +221,8 @@ exit:
 // Process scan completion
 void processCompletion(EnergyScan *scan)
 {
-    otEXPECT_ACTION(scan != nullptr, return);
-    otEXPECT_ACTION(scan->isCompleted(), return);
+    otEXPECT(scan != nullptr);
+    otEXPECT(scan->isCompleted());
 
     if (scan->isAsynchronous())
     {

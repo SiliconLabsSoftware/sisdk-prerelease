@@ -36,13 +36,16 @@ component:
   - id: simple_led
     instance: [led0, led1]
   - id: clock_manager
+  - id: common_token_manager
+  - id: common_token_manager_compatibility
+    condition: [device_series_2]
 source:
   - path: app_node_info.c
   - path: cmd_handlers_invoker.c
   - path: cmd_handlers.c
   - path: cmd_get_capabilities.c
-  - path: cmds_dcdc.c # Proprietary commands for Silabs only
-  - path: cmds_power_management.c # Proprietary commands for Silabs only
+  - path: silabs/sl_dcdc_cmd_handlers.c # Proprietary commands for Silabs only
+  - path: silabs/end_device/sl_power_management_cmd_handlers.c # Enhanced Power Management for Silabs only
   - path: cmds_management.c
   - path: cmds_rf.c
   - path: cmds_security.c
@@ -52,6 +55,7 @@ source:
   - path: app.c
   - path: utils.c
   - path: virtual_slave_node_info.c
+  - path: silabs/sl_debug_cmd_handlers.c
 include:
   - path: .
     file_list:
@@ -135,7 +139,6 @@ configuration:
     value: 0
   - name: ZAF_APP_NAME
     value: '"serial_api_end_device"'
-
 define:
   - name: APP_PROPERTIES_CONFIG_FILE
     value: <application_properties_config.h>

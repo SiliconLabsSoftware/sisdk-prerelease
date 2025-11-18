@@ -117,6 +117,8 @@ template_contribution:
 
 tag:
   - prebuilt_demo
+  - hwfilter:device:device_supports_thread
+  - hwfilter:board:hardware_board_has_uart
 
 readme:
   - path: ./README-MP-DMP-RCP.md

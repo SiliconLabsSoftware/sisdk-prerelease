@@ -67,10 +67,10 @@ struct wrap_timer_data
 };
 
 // millisecond timer (sleeptimer)
-static sl_sleeptimer_timer_handle_t sl_handle[OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM];
+static sl_sleeptimer_timer_handle_t sl_handle[RADIO_INTERFACE_COUNT];
 
 // microsecond timer (RAIL timer)
-static sl_rail_multi_timer_t rail_timer[OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM];
+static sl_rail_multi_timer_t rail_timer[RADIO_INTERFACE_COUNT];
 
 // forward declare generic alarm handle
 struct AlarmHandle;
@@ -100,10 +100,10 @@ struct AlarmHandle
 typedef void (*StackAlarmCallback)(otInstance *);
 
 // alarm handle instances
-static AlarmHandle sMsAlarmHandles[OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM];
-static AlarmHandle sUsAlarmHandles[OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM];
+static AlarmHandle sMsAlarmHandles[RADIO_INTERFACE_COUNT];
+static AlarmHandle sUsAlarmHandles[RADIO_INTERFACE_COUNT];
 
-static uint64_t sPendingTimeMs[OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM];
+static uint64_t sPendingTimeMs[RADIO_INTERFACE_COUNT];
 
 // millisecond-alarm callback
 STATIC void msAlarmCallback(sl_sleeptimer_timer_handle_t *aHandle, void *aData);
@@ -339,7 +339,7 @@ static inline AlarmHandle *GetAlarmHandle(AlarmHandle *aHandleList, otInstance *
 
 static AlarmHandle *GetFirstFiredAlarm(AlarmHandle *aHandleList)
 {
-    return GetNextFiredAlarm(aHandleList, aHandleList + OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM);
+    return GetNextFiredAlarm(aHandleList, aHandleList + RADIO_INTERFACE_COUNT);
 }
 
 static AlarmHandle *GetNextFiredAlarm(AlarmHandle *aAlarm, const AlarmHandle *aAlarmEnd)
@@ -386,7 +386,7 @@ void efr32AlarmInit(void)
     memset(&sl_handle, 0, sizeof sl_handle);
     memset(&rail_timer, 0, sizeof rail_timer);
 
-    for (uint8_t i = 0; i < OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM; i++)
+    for (uint8_t i = 0; i < RADIO_INTERFACE_COUNT; i++)
     {
         sPendingTimeMs[i] = 0;
 
@@ -419,7 +419,7 @@ void efr32AlarmProcess(const otInstance *aInstance)
     otEXPECT(HasAnyAlarmFired());
 
     AlarmHandle       *msAlarm    = GetFirstFiredAlarm(sMsAlarmHandles);
-    const AlarmHandle *msAlarmEnd = sMsAlarmHandles + OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM;
+    const AlarmHandle *msAlarmEnd = sMsAlarmHandles + RADIO_INTERFACE_COUNT;
 
     StackAlarmCallback alarmCb;
 
@@ -440,7 +440,7 @@ void efr32AlarmProcess(const otInstance *aInstance)
     }
 #if OPENTHREAD_CONFIG_PLATFORM_USEC_TIMER_ENABLE
     AlarmHandle       *usAlarm    = GetFirstFiredAlarm(sUsAlarmHandles);
-    const AlarmHandle *usAlarmEnd = sUsAlarmHandles + OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM;
+    const AlarmHandle *usAlarmEnd = sUsAlarmHandles + RADIO_INTERFACE_COUNT;
 
     while (usAlarm != NULL)
     {

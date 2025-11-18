@@ -73,8 +73,6 @@
 #define SERIAL_TASK_ENABLED (0)
 #endif
 
-// sInstance removed - was unused global variable
-
 #if defined(SL_CATALOG_OPENTHREAD_NCP_PRESENT)
 static void efr32NcpProcess(void);
 #else
@@ -125,8 +123,6 @@ void otSysDeinit(void)
 
 void otSysProcessDrivers(otInstance *aInstance)
 {
-    // sInstance assignment removed - was unused
-
     // should sleep and wait for interrupts here
 #if OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE
     efr32GpProcess();

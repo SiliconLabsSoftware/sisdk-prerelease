@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "sl_memory_manager.h"
-#include <assert.h>
+#include "sl_assert.h"
 #include <cmsis_os2.h>
 #include "errno.h"
 #include "sl_cli.h"
@@ -407,7 +407,7 @@ void app_cli_init(void)
   };
 
   app_task_id = osThreadNew(app_cli_task, NULL, &app_task_attribute);
-  assert(app_task_id != 0);
+  EFM_ASSERT(app_task_id != 0);
 
   app_event_log_init();
 }

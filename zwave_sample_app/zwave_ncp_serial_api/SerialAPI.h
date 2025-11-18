@@ -313,8 +313,8 @@
 /* Obsoleted */
 #define FUNC_ID_ZW_GET_ROUTING_MAX                      0xD5  // This define is never used
 
-#define FUNC_ID_PM_STAY_AWAKE                           0xD7
-#define FUNC_ID_PM_CANCEL                               0xD8
+#define FUNC_ID_POWER_MANAGEMENT_STAY_AWAKE             0xD7  // Power Management Stay Awake Command
+#define FUNC_ID_POWER_MANAGEMENT_CANCEL                 0xD8  // Power Management Cancel Command
 /* Unimplemented - END */
 
 /* Allocated for setting the maximum number of 128sec ticks inbetween SmartStart inclusion requests. */
@@ -341,8 +341,9 @@
 #define FUNC_ID_ZW_NUNIT_RUN                            0xE3 // This define is never used (DEPRECATED)
 #define FUNC_ID_ZW_NUNIT_END                            0xE4 // This define is never used (DEPRECATED)
 
-#define FUNC_ID_ENABLE_RADIO_PTI                        0xE7
-#define FUNC_ID_GET_RADIO_PTI                           0xE8
+#define FUNC_ID_RADIO_DEBUG_GET_PROTOCOL_LIST           0xE6  // Radio Debug Get Protocol List Command
+#define FUNC_ID_RADIO_DEBUG_ENABLE                      0xE7  // Radio Debug Enable Command
+#define FUNC_ID_RADIO_DEBUG_STATUS                      0xE8  // Radio Debug Status Command
 
 /* Specified but not yet implemented */
 #define FUNC_ID_SEND_NOP                                0xE9  // This define is never used (mentioned in the comment above)
@@ -379,6 +380,14 @@ typedef enum {
   NVM_BACKUP_RESTORE_ADDR_SIZE = 2,     ///< 2 bytes for the legacy NVM backup & restore command
   NVM_EXT_BACKUP_RESTORE_ADDR_SIZE = 4, ///< 4 bytes for the extended NVM backup & restore command
 } nvm_backup_restore_addr_size_t;
+
+/**
+ * @brief Power Lock Type enumeration
+ */
+typedef enum {
+  POWER_LOCK_TYPE_RADIO = 0,  /**< Radio power lock */
+  POWER_LOCK_TYPE_IO = 1,     /**< IO power lock (requires Shutdown Manager) */
+} power_lock_type_t;
 
 ///@}
 ///@}

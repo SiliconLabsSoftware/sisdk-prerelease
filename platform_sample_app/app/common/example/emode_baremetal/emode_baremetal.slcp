@@ -35,12 +35,18 @@ component:
     instance:
       - btn0
       - btn1
-  - id: emlib_timer
+  - id: hal_timer
   - id: app_em4h_reset
 requires:
   - name: hal_sysrtc
     condition:
       - "device_has_sysrtc"
+  - name: hal_rtcc
+    condition:
+      - "device_has_rtcc"
+  - name: hal_burtc
+    condition:
+      - "device_has_burtc"
 define:
   - name: DEBUG_EFM
 readme:

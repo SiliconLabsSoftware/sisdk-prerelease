@@ -1720,6 +1720,113 @@ sl_status_t sl_bt_system_set_lazy_soft_timer(uint32_t time,
 /** @} */ // end addtogroup sl_bt_system
 
 /**
+ * @addtogroup sl_bt_linklayer Link Layer
+ * @{
+ *
+ * @brief Link Layer
+ *
+ * Commands and events in this class provide access to low-level Bluetooth link
+ * layer functionality that is not available via higher-level APIs of the
+ * Bluetooth host stack.
+ */
+
+/* Command and Response IDs */
+#define sl_bt_cmd_linklayer_event_info_reporting_enable_id           0x00600020
+#define sl_bt_rsp_linklayer_event_info_reporting_enable_id           0x00600020
+
+/**
+ * @addtogroup sl_bt_evt_linklayer_event_info_report sl_bt_evt_linklayer_event_info_report
+ * @{
+ * @brief Sent when the link layer reports an event info report that was
+ * previously enabled with a call to @ref
+ * sl_bt_linklayer_event_info_reporting_enable
+ */
+
+/** @brief Identifier of the event_info_report event */
+#define sl_bt_evt_linklayer_event_info_report_id                     0x006000a0
+
+/***************************************************************************//**
+ * @brief Data structure of the event_info_report event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_bt_evt_linklayer_event_info_report_s
+{
+  uint32_t   configuration;  /**< Bitmask to specify the event info reporting
+                                  configuration. See the link layer
+                                  documentation of
+                                  HCI_VS_Siliconlabs_Event_Info_Reporting_Enable
+                                  for detailed description of each bit. */
+  uint8_t    procedure_type; /**< The type of the procedure that is reporting an
+                                  event. See the link layer documentation of
+                                  HCI_VS_Siliconlabs_Event_Info_Reporting_Enable
+                                  for detailed description of available
+                                  procedure types. */
+  uint8array data;           /**< A variable-length byte array that consists of
+                                  the following parameters in the specified
+                                  order:
+                                    - @p procedure_identifier_length (1 byte)
+                                    - @p procedure_identifier (@p
+                                      procedure_identifier_length * 1 byte)
+                                    - @p event_info_length (1 byte)
+                                    - @p event_info (@p event_info_length * 1
+                                      byte)
+
+                                  The length of @p data must be (2 + @p
+                                  procedure_identifier_length + @p
+                                  event_info_length) bytes. See the link layer
+                                  documentation of
+                                  HCI_VS_Siliconlabs_Event_Info_Report for a
+                                  detailed description of the parameters. */
+});
+
+typedef struct sl_bt_evt_linklayer_event_info_report_s sl_bt_evt_linklayer_event_info_report_t;
+
+/** @} */ // end addtogroup sl_bt_evt_linklayer_event_info_report
+
+/***************************************************************************//**
+ *
+ * Enable or disable link layer event info reporting. This command passes the
+ * parameters directly to the vendor-specific HCI command
+ * HCI_VS_Siliconlabs_Event_Info_Reporting_Enable. This command is only
+ * available if the bluetooth_feature_event_info_reporting component is included
+ * in the application. See the documentation of the HCI command for detailed
+ * description of each parameter and the behavior of the command.
+ *
+ * Events that have been succesfully enabled will be reported with the @ref
+ * sl_bt_evt_linklayer_event_info_report event.
+ *
+ * @param[in] enable Enable or disable event info reporting. Values:
+ *     - <b>0:</b> Disable event info reporting
+ *     - <b>1:</b> Enable event info reporting
+ * @param[in] configuration Bitmask to specify the event info reporting
+ *   configuration. See the link layer documentation of
+ *   HCI_VS_Siliconlabs_Event_Info_Reporting_Enable for detailed description of
+ *   each bit.
+ * @param[in] procedure_type The type of the procedure that this configuration
+ *   is for. See the link layer documentation of
+ *   HCI_VS_Siliconlabs_Event_Info_Reporting_Enable for detailed description of
+ *   available procedure types.
+ * @param[in] procedure_identifier_len Length of data in @p procedure_identifier
+ * @param[in] procedure_identifier The identifier of the procedure that this
+ *   configuration is for. See the link layer documentation of
+ *   HCI_VS_Siliconlabs_Event_Info_Reporting_Enable for detailed description of
+ *   procedure identifiers.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_bt_evt_linklayer_event_info_report - Sent for each event info
+ *     report received from the link layer.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_linklayer_event_info_reporting_enable(uint8_t enable,
+                                                        uint32_t configuration,
+                                                        uint8_t procedure_type,
+                                                        size_t procedure_identifier_len,
+                                                        const uint8_t* procedure_identifier);
+
+/** @} */ // end addtogroup sl_bt_linklayer
+
+/**
  * @addtogroup sl_bt_resource Resource Report
  * @{
  *
@@ -16130,6 +16237,11 @@ typedef struct sl_bt_evt_connection_analyzer_completed_s sl_bt_evt_connection_an
  * measurements. The parameters in this command provide necessary information to
  * identify the connection and schedule operations to follow its transmissions.
  *
+ * When this device is in central role, the analyzer generates a report only
+ * after the peripheral responds to the central in a connection event. If the
+ * peripheral does not respond, the analyzer does not generate a report for that
+ * connection event.
+ *
  * If the other device uses Silabs' Bluetooth stack, the information of the
  * connection could be retrieved with command @ref
  * sl_bt_connection_get_scheduling_details. The method of passing the
@@ -16393,6 +16505,7 @@ PACKSTRUCT( struct sl_bt_msg {
     sl_bt_evt_system_resource_exhausted_t                        evt_system_resource_exhausted; /**< Data field for event sl_bt_evt_system_resource_exhausted_id */
     sl_bt_evt_system_external_signal_t                           evt_system_external_signal; /**< Data field for event sl_bt_evt_system_external_signal_id */
     sl_bt_evt_system_soft_timer_t                                evt_system_soft_timer; /**< Data field for event sl_bt_evt_system_soft_timer_id */
+    sl_bt_evt_linklayer_event_info_report_t                      evt_linklayer_event_info_report; /**< Data field for event sl_bt_evt_linklayer_event_info_report_id */
     sl_bt_evt_resource_status_t                                  evt_resource_status; /**< Data field for event sl_bt_evt_resource_status_id */
     sl_bt_evt_advertiser_timeout_t                               evt_advertiser_timeout; /**< Data field for event sl_bt_evt_advertiser_timeout_id */
     sl_bt_evt_advertiser_scan_request_t                          evt_advertiser_scan_request; /**< Data field for event sl_bt_evt_advertiser_scan_request_id */

@@ -58,6 +58,6 @@ mesh_device_property_t mesh_sensor_data_from_buf (uint16_t property_id, const ui
  *
  * @return SL_STATUS_OK on success; an error code otherwise
  */
-sl_status_t mesh_lib_sensor_descriptors_from_buf(sensor_descriptor_t *descriptor, uint8_t *buf, int16_t input_len);
+sl_status_t mesh_lib_sensor_descriptors_from_buf(sensor_descriptor_t *descriptor, const uint8_t *buf, int16_t input_len);
 
 #endif

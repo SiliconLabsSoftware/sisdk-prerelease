@@ -34,6 +34,8 @@
 #ifndef RADIO_SECURITY_H
 #define RADIO_SECURITY_H
 
+#include <openthread-core-config.h>
+
 #include <openthread/platform/radio.h>
 
 #ifdef __cplusplus

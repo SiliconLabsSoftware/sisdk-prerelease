@@ -24,6 +24,7 @@ static TaskHandle_t wallclockTaskHandle = NULL;
 // FreeRTOS task function for wallclock logic
 static void wallclock_task(void *pvParameters)
 {
+  (void)pvParameters;
   sleeptimer_app_init();
   while (1) {
     sleeptimer_app_process_action();

@@ -34,6 +34,7 @@ component:
     instance: [vcom]
   - id: "wisun_cli_util"
   - id: "errno"
+  - id: "wisun_crash_handler"
 
 source:
   - path: "app.c"

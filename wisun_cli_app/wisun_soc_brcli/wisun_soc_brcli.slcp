@@ -34,6 +34,7 @@ component:
   - id: "wisun_br_dhcpv6_server"
   - id: "wisun_select"
   - id: "errno"
+  - id: "wisun_crash_handler"
 
 requires:
   - name: wisun_br_dhcpv6

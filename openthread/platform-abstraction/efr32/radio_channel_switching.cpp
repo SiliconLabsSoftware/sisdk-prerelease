@@ -45,11 +45,10 @@
 
 #include "platform-efr32.h"
 #include "radio_instance.h"
+#include "radio_interface.h"
 #include "sl_rail.h"
 #include "sl_rail_ieee802154.h"
 #include "sl_status.h"
-
-// Note: INVALID_INTERFACE_INDEX is defined in radio_instance.h
 
 // Channel value used to indicate an uninitialized channel slot
 #define UNINITIALIZED_CHANNEL 0xFF
@@ -61,9 +60,6 @@ static SL_RAIL_IEEE802154_RX_CHANNEL_SWITCHING_BUF_ALIGNMENT_TYPE
     sChannelSwitchingBuffer[SL_RAIL_IEEE802154_RX_CHANNEL_SWITCHING_BUF_BYTES
                             / SL_RAIL_IEEE802154_RX_CHANNEL_SWITCHING_BUF_ALIGNMENT];
 #endif
-
-// External dependencies
-#include "radio_interface.h"
 
 bool sli_ot_radio_channel_switching_is_multi_channel_enabled(void)
 {

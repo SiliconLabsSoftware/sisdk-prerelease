@@ -34,6 +34,8 @@
 #ifndef RADIO_INSTANCE_H
 #define RADIO_INSTANCE_H
 
+#include <openthread-core-config.h>
+
 #include "sl_rail.h"
 #include "sl_rail_ieee802154.h"
 #include <openthread/instance.h>
@@ -44,7 +46,7 @@ extern "C" {
 #endif
 
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
-#define RADIO_INTERFACE_COUNT (OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM + 1)
+#define RADIO_INTERFACE_COUNT OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM
 #else
 #define RADIO_INTERFACE_COUNT 1
 #endif
@@ -60,11 +62,7 @@ otInstance     *sli_ot_radio_instance_from_filter_mask(uint8_t aFilterMask);
 bool            sli_ot_radio_instance_is_filter_mask_broadcast(uint8_t aFilterMask);
 
 #ifndef RADIO_REQUEST_BUFFER_COUNT
-#ifdef OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM
-#define RADIO_REQUEST_BUFFER_COUNT OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM
-#else
-#define RADIO_REQUEST_BUFFER_COUNT 1
-#endif
+#define RADIO_REQUEST_BUFFER_COUNT RADIO_INTERFACE_COUNT
 #endif
 
 #define RADIO_EXT_ADDR_COUNT RADIO_REQUEST_BUFFER_COUNT
@@ -98,25 +96,19 @@ bool            sli_ot_radio_instance_is_filter_mask_broadcast(uint8_t aFilterMa
 
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
 
-// Command management
-bool sli_ot_radio_instance_queue_transmit(otInstance *instance, otRadioFrame *frame);
-bool sli_ot_radio_instance_queue_energy_scan(otInstance *instance, uint16_t channel, sl_rail_time_t duration);
+// Command queue management
+void sli_ot_radio_instance_init_command_queue(void);
 void sli_ot_radio_instance_process_commands(void);
+void sli_ot_radio_instance_queue_transmit(otInstance *aInstance, otRadioFrame *aFrame);
+void sli_ot_radio_instance_queue_energy_scan(otInstance *aInstance, uint8_t aScanChannel, uint16_t aScanDuration);
 
 // State management
 bool sli_ot_radio_instance_is_busy(void);
-bool sli_ot_radio_instance_should_defer(otInstance *instance);
 
 // Queue management
-bool    sli_ot_radio_instance_is_queue_empty(void);
-uint8_t sli_ot_radio_instance_get_queue_size(void);
-void    sli_ot_radio_instance_clear_queue(void);
+bool sli_ot_radio_instance_is_queue_empty(void);
+void sli_ot_radio_instance_clear_queue(void);
 
-// Callback management
-void sli_ot_radio_instance_set_overflow_callback(void (*callback)(void));
-
-void    sli_ot_radio_instance_set_tx_aborted(uint8_t index, bool aborted);
-bool    sli_ot_radio_instance_get_tx_aborted(uint8_t index);
 void    sli_ot_radio_instance_set_tx_busy(bool busy);
 bool    sli_ot_radio_instance_get_tx_busy(void);
 uint8_t sli_ot_radio_instance_get_rail_filter_mask(void);
@@ -124,7 +116,6 @@ void    sli_ot_radio_instance_set_rail_filter_mask(uint8_t mask);
 void    sli_ot_radio_instance_update_rail_filter_mask_for_pan_id(uint16_t aPanId, uint8_t aPanIndex);
 
 #if FAST_CHANNEL_SWITCHING_SUPPORT && OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
-bool    sl_is_multi_channel_enabled(void);
 otError sl_get_channel_switching_cfg(sl_rail_ieee802154_rx_channel_switching_cfg_t *channelSwitchingCfg);
 uint8_t fastChannelSwitchingChannel(otInstance *aInstance);
 #endif // FAST_CHANNEL_SWITCHING_SUPPORT && OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
@@ -132,7 +123,7 @@ uint8_t fastChannelSwitchingChannel(otInstance *aInstance);
 #endif // OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
 
 // Energy scan defer functions (available in both single and multi-instance builds)
-bool sli_ot_radio_instance_energy_scan_should_defer(otInstance *aInstance);
+bool sli_ot_radio_instance_energy_scan_should_defer(void);
 void sli_ot_radio_instance_energy_scan_defer(otInstance *aInstance, uint8_t aScanChannel, uint16_t aScanDuration);
 
 #ifdef __cplusplus

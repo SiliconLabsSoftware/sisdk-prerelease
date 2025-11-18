@@ -18,7 +18,9 @@
 #include <string.h>
 #include <float.h>
 
-#include "em_core.h"
+#include "em_device.h"
+#include "sl_common.h"
+#include "sl_core.h"
 #include "coulomb_app.h"
 #include "nvm3_default.h"
 #include "nvm3_default_config.h"

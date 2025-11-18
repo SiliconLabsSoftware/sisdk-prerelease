@@ -152,6 +152,8 @@ struct sl_btctrl_cs_config {
   uint8_t configs_per_connection;
   /** number of simultaneous channel sounding procedures */
   uint8_t procedures;
+  /** max number of antennas used in channel sounding sync packets */
+  uint8_t cs_sync_antennas_max;
 };
 
 struct sl_btctrl_adv_config {

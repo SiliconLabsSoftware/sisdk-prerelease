@@ -86,15 +86,6 @@ uint8_t array_test_data[8] = { 0xab, 0xac, 0xba, 0xbe, 0xec, 0xfc, 0xda, 0xae };
  ******************************************************************************/
 
 /******************************************************************************
-* Weak function to address compilation issue with assert handler.
-******************************************************************************/
-SL_WEAK void token_manager_test_assert_handler(const char * filename, int linenumber)
-{
-  (void)filename;
-  (void)linenumber;
-}
-
-/******************************************************************************
 * Write static secure tokens using common token manager.
 ******************************************************************************/
 void write_custom_static_secure_data_token()

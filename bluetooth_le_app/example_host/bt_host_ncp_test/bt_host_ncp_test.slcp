@@ -36,10 +36,12 @@ include:
   - path: ../../common_host/app_log
     file_list:
       - path: app_log_cli.h
+  - path: ../common/ncp
+    file_list:
+      - path: ncp_user_cmd.h
   - path: .
     file_list:
       - path: test.h
-      - path: ncp_user_cmd.h
 
 tag:
   - toolchain:gcc

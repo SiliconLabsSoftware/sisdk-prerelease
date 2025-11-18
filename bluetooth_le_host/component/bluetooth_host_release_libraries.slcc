@@ -59,12 +59,6 @@ library:
   - toolchain_gcc
   - cortexm33
   - bluetooth_feature_channel_classification
-- path: build/gcc/cortex-m33/channel_classification/release/libble_host_channel_classification_stub.a
-  condition:
-  - toolchain_gcc
-  - cortexm33
-  unless:
-  - bluetooth_feature_channel_classification
 - path: build/gcc/cortex-m33/connection_subrating/release/libble_host_connection_subrating.a
   condition:
   - toolchain_gcc
@@ -149,12 +143,6 @@ library:
   - toolchain_iar
   - cortexm33
   - bluetooth_feature_channel_classification
-- path: build/iar/cortex-m33/channel_classification/release/libble_host_channel_classification_stub.a
-  condition:
-  - toolchain_iar
-  - cortexm33
-  unless:
-  - bluetooth_feature_channel_classification
 - path: build/iar/cortex-m33/connection_subrating/release/libble_host_connection_subrating.a
   condition:
   - toolchain_iar
@@ -238,12 +226,6 @@ library:
   condition:
   - toolchain_llvm
   - cortexm33
-  - bluetooth_feature_channel_classification
-- path: build/llvm/cortex-m33/channel_classification/release/libble_host_channel_classification_stub.a
-  condition:
-  - toolchain_llvm
-  - cortexm33
-  unless:
   - bluetooth_feature_channel_classification
 - path: build/llvm/cortex-m33/connection_subrating/release/libble_host_connection_subrating.a
   condition:

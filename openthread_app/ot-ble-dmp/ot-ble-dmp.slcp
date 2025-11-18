@@ -131,6 +131,8 @@ config_file:
 tag:
   - prebuilt_demo
   - hardware:device:flash:768
+  - hwfilter:device:device_supports_thread
+  - hwfilter:device:device_supports_bluetooth
 
 readme:
   - path: ./README.md

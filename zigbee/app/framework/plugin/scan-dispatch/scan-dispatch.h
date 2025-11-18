@@ -25,6 +25,9 @@
 #else
 #include "app/framework/plugin/scan-dispatch/config/scan-dispatch-config.h"
 #endif
+#ifdef SL_CATALOG_CLI_PRESENT
+#include "sl_cli.h"
+#endif // SL_CATALOG_CLI_PRESENT
 
 /**
  * @defgroup scan-dispatch  Scan Dispatch
@@ -207,6 +210,17 @@ sl_status_t sl_zigbee_af_scan_dispatch_schedule_scan(sl_zigbee_af_plugin_scan_di
  * performing.
  */
 void sl_zigbee_af_scan_dispatch_clear(void);
+
+#ifdef SL_CATALOG_CLI_PRESENT
+/**
+ * @brief CLI command handler for energy scan.
+ *
+ * Initiates an energy scan with CLI-specific output formatting.
+ *
+ * @param arguments CLI arguments containing channel mask and scan duration
+ */
+void sli_zigbee_af_scan_dispatch_energy_scan_cli_command(sl_cli_command_arg_t *arguments);
+#endif // SL_CATALOG_CLI_PRESENT
 
 /** @} */ // end of name API
 /** @} */ // end of scan-dispatch

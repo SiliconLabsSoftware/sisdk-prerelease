@@ -88,6 +88,7 @@ enum sli_bt_class_id
 {
     sli_bt_dfu_class_id = 0x00,
     sli_bt_system_class_id = 0x01,
+    sli_bt_linklayer_class_id = 0x60,
     sli_bt_resource_class_id = 0x5f,
     sli_bt_gap_class_id = 0x02,
     sli_bt_advertiser_class_id = 0x04,
@@ -145,6 +146,7 @@ enum sli_bt_command_id
     sli_bt_system_data_buffer_clear_command_id = 0x14,
     sli_bt_system_get_counters_command_id = 0x0f,
     sli_bt_system_set_lazy_soft_timer_command_id = 0x1a,
+    sli_bt_linklayer_event_info_reporting_enable_command_id = 0x00,
     sli_bt_resource_get_status_command_id = 0x00,
     sli_bt_resource_set_report_threshold_command_id = 0x01,
     sli_bt_resource_enable_connection_tx_report_command_id = 0x02,
@@ -402,6 +404,7 @@ enum sli_bt_response_id
     sli_bt_system_data_buffer_clear_response_id = 0x14,
     sli_bt_system_get_counters_response_id = 0x0f,
     sli_bt_system_set_lazy_soft_timer_response_id = 0x1a,
+    sli_bt_linklayer_event_info_reporting_enable_response_id = 0x00,
     sli_bt_resource_get_status_response_id = 0x00,
     sli_bt_resource_set_report_threshold_response_id = 0x01,
     sli_bt_resource_enable_connection_tx_report_response_id = 0x02,
@@ -648,6 +651,7 @@ enum sli_bt_event_id
     sli_bt_system_external_signal_event_id = 0x03,
     sli_bt_system_awake_event_id = 0x04,
     sli_bt_system_soft_timer_event_id = 0x07,
+    sli_bt_linklayer_event_info_report_event_id = 0x00,
     sli_bt_resource_status_event_id = 0x00,
     sli_bt_advertiser_timeout_event_id = 0x01,
     sli_bt_advertiser_scan_request_event_id = 0x02,
@@ -812,6 +816,16 @@ PACKSTRUCT( struct sl_bt_cmd_system_set_lazy_soft_timer_s
 });
 
 typedef struct sl_bt_cmd_system_set_lazy_soft_timer_s sl_bt_cmd_system_set_lazy_soft_timer_t;
+
+PACKSTRUCT( struct sl_bt_cmd_linklayer_event_info_reporting_enable_s
+{
+    uint8_t enable;
+    uint32_t configuration;
+    uint8_t procedure_type;
+    uint8array procedure_identifier;
+});
+
+typedef struct sl_bt_cmd_linklayer_event_info_reporting_enable_s sl_bt_cmd_linklayer_event_info_reporting_enable_t;
 
 PACKSTRUCT( struct sl_bt_cmd_resource_set_report_threshold_s
 {
@@ -2839,6 +2853,13 @@ PACKSTRUCT( struct sl_bt_rsp_system_set_lazy_soft_timer_s
 
 typedef struct sl_bt_rsp_system_set_lazy_soft_timer_s sl_bt_rsp_system_set_lazy_soft_timer_t;
 
+PACKSTRUCT( struct sl_bt_rsp_linklayer_event_info_reporting_enable_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_bt_rsp_linklayer_event_info_reporting_enable_s sl_bt_rsp_linklayer_event_info_reporting_enable_t;
+
 PACKSTRUCT( struct sl_bt_rsp_resource_get_status_s
 {
     uint16_t result;
@@ -4595,6 +4616,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_system_data_buffer_write_t                         cmd_system_data_buffer_write;
     sl_bt_cmd_system_get_counters_t                              cmd_system_get_counters;
     sl_bt_cmd_system_set_lazy_soft_timer_t                       cmd_system_set_lazy_soft_timer;
+    sl_bt_cmd_linklayer_event_info_reporting_enable_t            cmd_linklayer_event_info_reporting_enable;
     sl_bt_cmd_resource_set_report_threshold_t                    cmd_resource_set_report_threshold;
     sl_bt_cmd_resource_enable_connection_tx_report_t             cmd_resource_enable_connection_tx_report;
     sl_bt_cmd_resource_get_connection_tx_status_t                cmd_resource_get_connection_tx_status;
@@ -4826,6 +4848,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_system_data_buffer_clear_t                         rsp_system_data_buffer_clear;
     sl_bt_rsp_system_get_counters_t                              rsp_system_get_counters;
     sl_bt_rsp_system_set_lazy_soft_timer_t                       rsp_system_set_lazy_soft_timer;
+    sl_bt_rsp_linklayer_event_info_reporting_enable_t            rsp_linklayer_event_info_reporting_enable;
     sl_bt_rsp_resource_get_status_t                              rsp_resource_get_status;
     sl_bt_rsp_resource_set_report_threshold_t                    rsp_resource_set_report_threshold;
     sl_bt_rsp_resource_enable_connection_tx_report_t             rsp_resource_enable_connection_tx_report;
@@ -5065,6 +5088,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_evt_system_resource_exhausted_t                        evt_system_resource_exhausted;
     sl_bt_evt_system_external_signal_t                           evt_system_external_signal;
     sl_bt_evt_system_soft_timer_t                                evt_system_soft_timer;
+    sl_bt_evt_linklayer_event_info_report_t                      evt_linklayer_event_info_report;
     sl_bt_evt_resource_status_t                                  evt_resource_status;
     sl_bt_evt_advertiser_timeout_t                               evt_advertiser_timeout;
     sl_bt_evt_advertiser_scan_request_t                          evt_advertiser_scan_request;

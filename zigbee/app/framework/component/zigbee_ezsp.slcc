@@ -107,12 +107,6 @@ include:
 - path: platform/base
   condition:
   - zigbee_host_simulation
-- path: platform/base/hal
-  condition:
-  - zigbee_host_simulation
-- path: platform/base/hal/plugin
-  condition:
-  - zigbee_host_simulation
 - path: platform/service/legacy_hal/inc/
   file_list:
   - path: button.h

@@ -59,6 +59,9 @@ component:
   - id: zw_cli_common
     condition: [zw_stack_release_libraries]
   - id: clock_manager
+  - id: common_token_manager
+  - id: common_token_manager_compatibility
+    condition: [device_series_2]
 
 source:
   - path: app.c
@@ -163,7 +166,6 @@ configuration:
     value: CMU_WDOG0CLKCTRL_CLKSEL_LFRCO
   - name: SL_CLOCK_MANAGER_EUSART0CLK_SOURCE
     value: CMU_EUSART0CLKCTRL_CLKSEL_LFRCO
-
 define:
   - name: APP_PROPERTIES_CONFIG_FILE
     value: <application_properties_config.h>

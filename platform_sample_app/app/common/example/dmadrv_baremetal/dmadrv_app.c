@@ -20,7 +20,7 @@
 #include <stdarg.h>
 #include "sl_sleeptimer.h"
 #include "dmadrv.h"
-#include "em_assert.h"
+#include "sl_assert.h"
 
 /*******************************************************************************
  *******************************   DEFINES   ***********************************

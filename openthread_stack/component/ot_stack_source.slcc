@@ -18,6 +18,8 @@ source:
 - path: api/backbone_router_ftd_api.cpp
 - path: api/ble_secure_api.cpp
 - path: api/border_agent_api.cpp
+- path: api/border_agent_tracker_api.cpp
+- path: api/border_agent_txt_data_api.cpp
 - path: api/border_router_api.cpp
 - path: api/border_routing_api.cpp
 - path: api/channel_manager_api.cpp
@@ -79,10 +81,14 @@ source:
 - path: backbone_router/bbr_manager.cpp
 - path: backbone_router/multicast_listeners_table.cpp
 - path: backbone_router/ndproxy_table.cpp
+- path: border_router/br_log.cpp
 - path: border_router/br_tracker.cpp
+- path: border_router/br_types.cpp
 - path: border_router/dhcp6_pd_client.cpp
 - path: border_router/infra_if.cpp
+- path: border_router/multi_ail_detector.cpp
 - path: border_router/routing_manager.cpp
+- path: border_router/rx_ra_tracker.cpp
 - path: coap/coap.cpp
 - path: coap/coap_message.cpp
 - path: coap/coap_secure.cpp
@@ -138,6 +144,8 @@ source:
 - path: mac/wakeup_tx_scheduler.cpp
 - path: meshcop/announce_begin_client.cpp
 - path: meshcop/border_agent.cpp
+- path: meshcop/border_agent_tracker.cpp
+- path: meshcop/border_agent_txt_data.cpp
 - path: meshcop/commissioner.cpp
 - path: meshcop/dataset.cpp
 - path: meshcop/dataset_manager.cpp

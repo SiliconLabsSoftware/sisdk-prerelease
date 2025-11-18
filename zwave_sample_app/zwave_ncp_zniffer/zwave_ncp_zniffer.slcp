@@ -26,6 +26,9 @@ component:
   - id: simple_led
     instance: [led0, led1]
   - id: clock_manager
+  - id: common_token_manager
+  - id: common_token_manager_compatibility
+    condition: [device_series_2]
 
 requires:
   - name: iostream_swo
@@ -103,7 +106,6 @@ configuration:
     value: 5
   - name: ZAF_APP_NAME
     value: '"zniffer"'
-
 define:
   - name: APP_PROPERTIES_CONFIG_FILE
     value: <application_properties_config.h>

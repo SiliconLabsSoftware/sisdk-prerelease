@@ -7,6 +7,7 @@ var group__sl__bt__common__types_unionsl__bt__msg_8data =
     [ "evt_system_resource_exhausted", "group__sl__bt__common__types.html#ab0248346384157cc3115287197c9676f", null ],
     [ "evt_system_external_signal", "group__sl__bt__common__types.html#a19a2befbece82056e2c458a1cb0e388f", null ],
     [ "evt_system_soft_timer", "group__sl__bt__common__types.html#aa1129745097659fbc54c9c0d6682cf59", null ],
+    [ "evt_linklayer_event_info_report", "group__sl__bt__common__types.html#a6dfca974e0f8e82f3f90c46b2ece233b", null ],
     [ "evt_resource_status", "group__sl__bt__common__types.html#affef37a5a28996df4b4619c015773eb6", null ],
     [ "evt_advertiser_timeout", "group__sl__bt__common__types.html#a7cbb758c23cd09c4cfe59d347840995d", null ],
     [ "evt_advertiser_scan_request", "group__sl__bt__common__types.html#a38d5af7435ce13540e12136ed70e3e6a", null ],

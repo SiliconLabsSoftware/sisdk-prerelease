@@ -21,9 +21,9 @@ include:
     - path: app.h
     - path: segment_lcd_app.h
 component:
-  - id: emlib_lcd
+  - id: hal_lcd
   - id: sl_main
-  - id: emlib_ldma
+  - id: hal_ldma
   - id: device_init
   - id: clock_manager
   - id: segment_lcd_driver
@@ -37,4 +37,4 @@ tag:
   - hardware:component:segment_lcd_driver:cl010-1087-04
 configuration:
   - name: SL_SEGMENT_LCD_LDMA_MODE
-    value: lcdDmaModeFrameCounterEvent
+    value: SL_HAL_LCD_DMA_MODE_FRAME_COUNTER_EVENT

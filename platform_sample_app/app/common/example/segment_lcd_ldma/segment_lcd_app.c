@@ -29,17 +29,19 @@
  ******************************************************************************/
 
 #include "sl_segmentlcd.h"
-#include "em_ldma.h"
+#include "sl_hal_ldma.h"
+#include "sl_clock_manager.h"
 
-#define LDMA_CHANNEL      0
-#define LDMA_CH_MASK      (1 << LDMA_CHANNEL)
-#define NUM_NUMBER        10
-#define NUM_STATE         10
-#define NUM_DIGIT         4
-#define NUM_SEG           8
+#define LDMA_CHANNEL                    0
+#define LDMA_CH_MASK                    (1 << LDMA_CHANNEL)
+#define NUM_NUMBER                      10
+#define NUM_STATE                       10
+#define NUM_DIGIT                       4
+#define NUM_SEG                         8
+#define LDMA_INIT_IRQ_PRIORITY_DEFAULT  3
 
 uint32_t display[NUM_STATE][NUM_SEG];
-LDMA_Descriptor_t descriptors[3];
+sl_hal_ldma_descriptor_t descriptors[3];
 
 /**************************************************************************//**
  * Working instance of LCD display
@@ -106,10 +108,10 @@ void LDMA_IRQHandler(void)
   uint32_t pending;
 
   // Read interrupt source
-  pending = LDMA_IntGet();
+  pending = sl_hal_ldma_get_pending_interrupts(LDMA0);
 
   // Clear interrupts
-  LDMA_IntClear(pending);
+  sl_hal_ldma_clear_interrupts(LDMA0, pending);
 
   // Check for LDMA error
   if (pending & LDMA_IF_ERROR) {
@@ -128,10 +130,10 @@ void segment_lcd_app_init(void)
 
   // Initialize the LCD
   sl_segment_lcd_init(true);
-
+#if defined(SL_SEGMENT_LCD_MODULE_CL010_1087)
   // Example only used upper numeric segments; disable unused segments
   SL_LCD_SEGMENTS_ALPHA_DIS();
-
+#endif
   // Fill the segments[][][] buffer
   segment_lcd_ldma_buffer_init();
 
@@ -145,17 +147,26 @@ void segment_lcd_app_init(void)
     }
   }
 
-  // Initialize the LDMA
-  LDMA_Init_t init = LDMA_INIT_DEFAULT;
-  LDMA_Init(&init);
+  // Enable the LDMA and LDMAXBAR clock
+  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_LDMA0);
+  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_LDMAXBAR0);
 
+  // Initialize the LDMA
+  sl_hal_ldma_init_t init = SL_HAL_LDMA_INIT_DEFAULT;
+  sl_hal_ldma_init(LDMA0, &init);
+  NVIC_ClearPendingIRQ(LDMA_IRQn);
+
+  /* Range is 0-7, where 0 is the highest priority. */
+  NVIC_SetPriority(LDMA_IRQn, LDMA_INIT_IRQ_PRIORITY_DEFAULT);
+
+  NVIC_EnableIRQ(LDMA_IRQn);
   // Configure the LDMA to trigger on an LCD DMA request
-  LDMA_TransferCfg_t transferCfg = LDMA_TRANSFER_CFG_PERIPHERAL_LOOP(
-    ldmaPeripheralSignal_LCD,
+  sl_hal_ldma_transfer_init_t transfer_config = SL_HAL_LDMA_TRANSFER_CFG_PERIPHERAL_LOOP(
+    SL_HAL_LDMA_PERIPHERAL_SIGNAL_LCD,
     NUM_STATE - 1);
 
   // 1st descriptor sets the base SRC address of the LDMA channel
-  descriptors[0] = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_LINKREL_WRITE(
+  descriptors[0] = (sl_hal_ldma_descriptor_t)SL_HAL_LDMA_DESCRIPTOR_LINKREL_WRITE(
     (uint32_t)&(display[0][0]),
     &(LDMA->CH[LDMA_CHANNEL].SRC),
     1);
@@ -163,25 +174,30 @@ void segment_lcd_app_init(void)
   // 2nd descriptor writes values from display[][] buffer to the LCD_SEGn
   // registers
   uint32_t count = get_count();
-  descriptors[1] = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_LINKREL_M2M_WORD(
+  descriptors[1] = (sl_hal_ldma_descriptor_t)SL_HAL_LDMA_DESCRIPTOR_LINKREL_M2M(
+    SL_HAL_LDMA_CTRL_SIZE_WORD,
     0,
     &(LCD->SEGD0),
     count,
     0);
-  descriptors[1].xfer.srcAddrMode = ldmaCtrlSrcAddrModeRel;
-  descriptors[1].xfer.srcInc = ldmaCtrlSrcIncOne;
-  descriptors[1].xfer.dstInc = ldmaCtrlDstIncTwo;
-  descriptors[1].xfer.structReq = false;
-  descriptors[1].xfer.decLoopCnt = 1;
+  descriptors[1].xfer.src_addr_mode = SL_HAL_LDMA_CTRL_SRC_ADDR_MODE_REL;
+  descriptors[1].xfer.src_inc = SL_HAL_LDMA_CTRL_SRC_INC_ONE;
+  descriptors[1].xfer.dst_inc = SL_HAL_LDMA_CTRL_DST_INC_TWO;
+  descriptors[1].xfer.struct_req = false;
+  descriptors[1].xfer.dec_loop_count = 1;
 
   // 3rd descriptor resets the LOOP counter
-  descriptors[2] = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_LINKREL_WRITE(
+  descriptors[2] = (sl_hal_ldma_descriptor_t)SL_HAL_LDMA_DESCRIPTOR_LINKREL_WRITE(
     NUM_STATE - 1,
     &(LDMA->CH[LDMA_CHANNEL].LOOP),
     -2);
 
   // Start LDMA transfers
-  LDMA_StartTransfer(0, (void *)&transferCfg, (void *)&descriptors[0]);
+  sl_hal_ldma_enable(LDMA0);
+  sl_hal_ldma_enable_interrupts(LDMA0, LDMA_IF_ERROR);
+  sl_hal_ldma_enable_interrupts(LDMA0, LDMA_IF_DONE0);
+  sl_hal_ldma_init_transfer(LDMA0, 0, &transfer_config, &descriptors[0]);
+  sl_hal_ldma_start_transfer(LDMA0, 0);
 }
 
 /***************************************************************************//**

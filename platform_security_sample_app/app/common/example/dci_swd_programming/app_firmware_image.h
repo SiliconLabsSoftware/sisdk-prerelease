@@ -23,7 +23,8 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include "app_process.h"
-#include "em_common.h"
+#include "sl_common.h"
+#include "em_device.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs

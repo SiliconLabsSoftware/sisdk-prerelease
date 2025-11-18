@@ -611,31 +611,18 @@ zpal_tx_power_decidbm_t zpal_radio_get_minimum_lr_tx_power(void);
 zpal_tx_power_decidbm_t zpal_radio_get_maximum_lr_tx_power(void);
 
 /**
- * @brief Returns whether debug is enabled or disabled.
+ * @brief Disable the radio debug mode.
  *
- * @return True if debug is enabled, false otherwise.
+ * This function disables the radio debug mode
+ *
  */
-bool zpal_radio_is_debug_enabled(void);
-
-/**
- * @brief Configures the radio debug mode.
- *
- * This function enables or disables the radio debug mode based on the
- * provided parameter. When enabled, additional debug information may
- * be available for troubleshooting and development purposes.
- *
- * @param[in] enable A boolean value to enable or disable the radio debug mode.
- *                    - true: Enable debug mode.
- *                    - false: Disable debug mode.
- */
-zpal_status_t zpal_radio_debug_configure(bool enable);
+zpal_status_t zpal_radio_disable_debug(void);
 
 /**
  * @brief a getter on the current rf profile.
  * Function return a pointer (instead of a struct) to reduce RAM memory usage and execution time.
  * The pointer target a const structure because it should not be used to modify the content of the
  * structure.
- *
  *
  * @return pointer on the current rf profile.
  */

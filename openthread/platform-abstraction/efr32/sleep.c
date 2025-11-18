@@ -209,7 +209,7 @@ static bool shouldInterruptSleep(void)
 
     uint8_t instanceIndex = 0;
 
-    while ((!shouldWake) && instanceIndex < OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM)
+    while ((!shouldWake) && instanceIndex < RADIO_INTERFACE_COUNT)
     {
         // Use instance offset from multipan index for multipan configuration
         instance   = sli_ot_radio_instance_get(instanceIndex);

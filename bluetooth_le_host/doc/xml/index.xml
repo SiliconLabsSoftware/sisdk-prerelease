@@ -405,6 +405,11 @@
     <member refid="structsl__bt__evt__l2cap__le__channel__open__response__s_1ad1dd596008920ad9e5c001358c2533dd" kind="variable"><name>errorcode</name></member>
     <member refid="structsl__bt__evt__l2cap__le__channel__open__response__s_1aa59eec5d77d66f9dfc4a0c3d1e19a270" kind="variable"><name>remote_cid</name></member>
   </compound>
+  <compound refid="structsl__bt__evt__linklayer__event__info__report__s" kind="struct"><name>sl_bt_evt_linklayer_event_info_report_s</name>
+    <member refid="structsl__bt__evt__linklayer__event__info__report__s_1aafa964e7d56c99c0f953a45fe3b642b8" kind="variable"><name>configuration</name></member>
+    <member refid="structsl__bt__evt__linklayer__event__info__report__s_1a839f5dc264eab5ed8d63ef0f591c7589" kind="variable"><name>procedure_type</name></member>
+    <member refid="structsl__bt__evt__linklayer__event__info__report__s_1a9454584a3a08e929bd04ae89a2dea440" kind="variable"><name>data</name></member>
+  </compound>
   <compound refid="structsl__bt__evt__pawr__advertiser__response__report__s" kind="struct"><name>sl_bt_evt_pawr_advertiser_response_report_s</name>
     <member refid="structsl__bt__evt__pawr__advertiser__response__report__s_1ab07939b6a6800a8021c8ee36fc77451f" kind="variable"><name>advertising_set</name></member>
     <member refid="structsl__bt__evt__pawr__advertiser__response__report__s_1a7bae203da9406b838ab30fd7d55de992" kind="variable"><name>subevent</name></member>
@@ -613,6 +618,7 @@
     <member refid="unionsl__bt__msg_8data_1ab0248346384157cc3115287197c9676f" kind="variable"><name>evt_system_resource_exhausted</name></member>
     <member refid="unionsl__bt__msg_8data_1a19a2befbece82056e2c458a1cb0e388f" kind="variable"><name>evt_system_external_signal</name></member>
     <member refid="unionsl__bt__msg_8data_1aa1129745097659fbc54c9c0d6682cf59" kind="variable"><name>evt_system_soft_timer</name></member>
+    <member refid="unionsl__bt__msg_8data_1a6dfca974e0f8e82f3f90c46b2ece233b" kind="variable"><name>evt_linklayer_event_info_report</name></member>
     <member refid="unionsl__bt__msg_8data_1affef37a5a28996df4b4619c015773eb6" kind="variable"><name>evt_resource_status</name></member>
     <member refid="unionsl__bt__msg_8data_1a7cbb758c23cd09c4cfe59d347840995d" kind="variable"><name>evt_advertiser_timeout</name></member>
     <member refid="unionsl__bt__msg_8data_1a38d5af7435ce13540e12136ed70e3e6a" kind="variable"><name>evt_advertiser_scan_request</name></member>
@@ -811,6 +817,9 @@
     <member refid="group__sl__bt__evt__system__external__signal_1ga9165ef387e34213b7b15fbc7a2b9a593" kind="define"><name>sl_bt_evt_system_external_signal_id</name></member>
     <member refid="group__sl__bt__evt__system__awake_1gac671086d87b33e79d055df0098b40d7b" kind="define"><name>sl_bt_evt_system_awake_id</name></member>
     <member refid="group__sl__bt__evt__system__soft__timer_1gabae9bb31e70cb251e1a7d539416bc127" kind="define"><name>sl_bt_evt_system_soft_timer_id</name></member>
+    <member refid="group__sl__bt__linklayer_1gad0b08b8edc5e44c264565d086828f9dc" kind="define"><name>sl_bt_cmd_linklayer_event_info_reporting_enable_id</name></member>
+    <member refid="group__sl__bt__linklayer_1ga732050aea39b247cd6b54d16d86363e3" kind="define"><name>sl_bt_rsp_linklayer_event_info_reporting_enable_id</name></member>
+    <member refid="group__sl__bt__evt__linklayer__event__info__report_1gaa207a70e32c88d5c5fd239232d13d683" kind="define"><name>sl_bt_evt_linklayer_event_info_report_id</name></member>
     <member refid="group__sl__bt__resource_1ga3e388e1c9065574f6fb3c7139507228f" kind="define"><name>sl_bt_cmd_resource_get_status_id</name></member>
     <member refid="group__sl__bt__resource_1gad3409792229ff38835d0eb0e001a9f8b" kind="define"><name>sl_bt_cmd_resource_set_report_threshold_id</name></member>
     <member refid="group__sl__bt__resource_1gad54c32a3753e9ee2da837e0027dec822" kind="define"><name>sl_bt_cmd_resource_enable_connection_tx_report_id</name></member>
@@ -1694,6 +1703,7 @@
     <member refid="group__sl__bt__evt__system__resource__exhausted_1gab375bdb9dfb131cf6b54700fce9533e9" kind="typedef"><name>sl_bt_evt_system_resource_exhausted_t</name></member>
     <member refid="group__sl__bt__evt__system__external__signal_1gaf00c909ba83ba614e46691837cceaf6d" kind="typedef"><name>sl_bt_evt_system_external_signal_t</name></member>
     <member refid="group__sl__bt__evt__system__soft__timer_1ga9b11a5daf47cc9ec8bb3af2daacb5d32" kind="typedef"><name>sl_bt_evt_system_soft_timer_t</name></member>
+    <member refid="group__sl__bt__evt__linklayer__event__info__report_1gaacb3ddce3a15f0296d7820a6cf3a2f9a" kind="typedef"><name>sl_bt_evt_linklayer_event_info_report_t</name></member>
     <member refid="group__sl__bt__evt__resource__status_1gabd8d42898ee6cccc71666aa7ca625e87" kind="typedef"><name>sl_bt_evt_resource_status_t</name></member>
     <member refid="group__sl__bt__evt__advertiser__timeout_1ga95dbf1e9bca7f7ad62bd5e4013dbb720" kind="typedef"><name>sl_bt_evt_advertiser_timeout_t</name></member>
     <member refid="group__sl__bt__evt__advertiser__scan__request_1ga4cda6e28813b3cef105fc6c9ac10cff4" kind="typedef"><name>sl_bt_evt_advertiser_scan_request_t</name></member>
@@ -1791,6 +1801,7 @@
     <member refid="group__sl__bt__system_1gaac6a6022a5e62cf89e9a41ca16d3ace2" kind="function"><name>sl_bt_system_data_buffer_clear</name></member>
     <member refid="group__sl__bt__system_1ga6a5b4be087b9cfe14368a848a4414cef" kind="function"><name>sl_bt_system_get_counters</name></member>
     <member refid="group__sl__bt__system_1gaf9557a321d9adb6e96d9feca004a00c3" kind="function"><name>sl_bt_system_set_lazy_soft_timer</name></member>
+    <member refid="group__sl__bt__linklayer_1ga7626df3c11d39b180f58b2bf688eff8c" kind="function"><name>sl_bt_linklayer_event_info_reporting_enable</name></member>
     <member refid="group__sl__bt__resource_1ga364e6338e65b335e0ebfcbbb600c1757" kind="function"><name>sl_bt_resource_get_status</name></member>
     <member refid="group__sl__bt__resource_1gac43c1de372fd21b3cdacd15fca685caa" kind="function"><name>sl_bt_resource_set_report_threshold</name></member>
     <member refid="group__sl__bt__resource_1gad776c2696303de220282839c6dcbf5f8" kind="function"><name>sl_bt_resource_enable_connection_tx_report</name></member>
@@ -2236,6 +2247,15 @@
   <compound refid="group__sl__bt__evt__system__soft__timer" kind="group"><name>sl_bt_evt_system_soft_timer</name>
     <member refid="group__sl__bt__evt__system__soft__timer_1ga9b11a5daf47cc9ec8bb3af2daacb5d32" kind="typedef"><name>sl_bt_evt_system_soft_timer_t</name></member>
     <member refid="group__sl__bt__evt__system__soft__timer_1gabae9bb31e70cb251e1a7d539416bc127" kind="define"><name>sl_bt_evt_system_soft_timer_id</name></member>
+  </compound>
+  <compound refid="group__sl__bt__linklayer" kind="group"><name>sl_bt_linklayer</name>
+    <member refid="group__sl__bt__linklayer_1ga7626df3c11d39b180f58b2bf688eff8c" kind="function"><name>sl_bt_linklayer_event_info_reporting_enable</name></member>
+    <member refid="group__sl__bt__linklayer_1gad0b08b8edc5e44c264565d086828f9dc" kind="define"><name>sl_bt_cmd_linklayer_event_info_reporting_enable_id</name></member>
+    <member refid="group__sl__bt__linklayer_1ga732050aea39b247cd6b54d16d86363e3" kind="define"><name>sl_bt_rsp_linklayer_event_info_reporting_enable_id</name></member>
+  </compound>
+  <compound refid="group__sl__bt__evt__linklayer__event__info__report" kind="group"><name>sl_bt_evt_linklayer_event_info_report</name>
+    <member refid="group__sl__bt__evt__linklayer__event__info__report_1gaacb3ddce3a15f0296d7820a6cf3a2f9a" kind="typedef"><name>sl_bt_evt_linklayer_event_info_report_t</name></member>
+    <member refid="group__sl__bt__evt__linklayer__event__info__report_1gaa207a70e32c88d5c5fd239232d13d683" kind="define"><name>sl_bt_evt_linklayer_event_info_report_id</name></member>
   </compound>
   <compound refid="group__sl__bt__resource" kind="group"><name>sl_bt_resource</name>
     <member refid="group__sl__bt__resource_1ga364e6338e65b335e0ebfcbbb600c1757" kind="function"><name>sl_bt_resource_get_status</name></member>
@@ -3699,27 +3719,27 @@
   </compound>
   <compound refid="md_doc_bgapi" kind="page"><name>md_doc_bgapi</name>
   </compound>
-  <compound refid="dir_2391b89f2879365d74a63a728bba7d01" kind="dir"><name>/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi</name>
+  <compound refid="dir_2391b89f2879365d74a63a728bba7d01" kind="dir"><name>/var/lib/jenkins/github@2/bluetooth_le_host/build/native/ble_bgapi</name>
   </compound>
-  <compound refid="dir_e2f731d1cb9f97679faa790ae39b91e5" kind="dir"><name>/var/lib/jenkins/github/bluetooth_le_host</name>
+  <compound refid="dir_e2f731d1cb9f97679faa790ae39b91e5" kind="dir"><name>/var/lib/jenkins/github@2/bluetooth_le_host</name>
   </compound>
-  <compound refid="dir_b1a1817b9387e5b054018a5428eb2a3f" kind="dir"><name>/var/lib/jenkins/github/bluetooth_le_host/build</name>
+  <compound refid="dir_b1a1817b9387e5b054018a5428eb2a3f" kind="dir"><name>/var/lib/jenkins/github@2/bluetooth_le_host/build</name>
   </compound>
   <compound refid="dir_5a46a304ca1f10f7c478657ff1bdae3a" kind="dir"><name>doc</name>
   </compound>
-  <compound refid="dir_d9a0b0c47291d7e9365bb8ce2e415e2a" kind="dir"><name>/var/lib/jenkins/github/bluetooth_le_host/event_system</name>
+  <compound refid="dir_d9a0b0c47291d7e9365bb8ce2e415e2a" kind="dir"><name>/var/lib/jenkins/github@2/bluetooth_le_host/event_system</name>
   </compound>
-  <compound refid="dir_ae20ecc429096018a2fe615dace667aa" kind="dir"><name>/var/lib/jenkins/github/bgapi_protocol/protocol/inc</name>
+  <compound refid="dir_ae20ecc429096018a2fe615dace667aa" kind="dir"><name>/var/lib/jenkins/github@2/bgapi_protocol/protocol/inc</name>
   </compound>
-  <compound refid="dir_d0da292a01e2631d4fa972006f72b194" kind="dir"><name>/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc</name>
+  <compound refid="dir_d0da292a01e2631d4fa972006f72b194" kind="dir"><name>/var/lib/jenkins/github@2/bluetooth_le_host/build/native/ble_bgapi/inc</name>
   </compound>
-  <compound refid="dir_2e99f0e5add2c6d752cf2b568e810fad" kind="dir"><name>/var/lib/jenkins/github/bluetooth_le_host/event_system/inc</name>
+  <compound refid="dir_2e99f0e5add2c6d752cf2b568e810fad" kind="dir"><name>/var/lib/jenkins/github@2/bluetooth_le_host/event_system/inc</name>
   </compound>
-  <compound refid="dir_848835a5aecb994e59a4c4b7340e87b9" kind="dir"><name>/var/lib/jenkins/github/bluetooth_le_host/inc</name>
+  <compound refid="dir_848835a5aecb994e59a4c4b7340e87b9" kind="dir"><name>/var/lib/jenkins/github@2/bluetooth_le_host/inc</name>
   </compound>
-  <compound refid="dir_9ef8797857fbe1d47af7accb030e7afd" kind="dir"><name>/var/lib/jenkins/github/bluetooth_le_host/build/native</name>
+  <compound refid="dir_9ef8797857fbe1d47af7accb030e7afd" kind="dir"><name>/var/lib/jenkins/github@2/bluetooth_le_host/build/native</name>
   </compound>
-  <compound refid="dir_6d235e19420f7bb65a9187ffe80ccb69" kind="dir"><name>/var/lib/jenkins/github/bgapi_protocol/protocol</name>
+  <compound refid="dir_6d235e19420f7bb65a9187ffe80ccb69" kind="dir"><name>/var/lib/jenkins/github@2/bgapi_protocol/protocol</name>
   </compound>
   <compound refid="indexpage" kind="page"><name>index</name>
   </compound>

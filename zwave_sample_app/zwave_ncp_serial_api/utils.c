@@ -271,22 +271,6 @@ void SetLongRangeVirtualNodes(uint8_t bitmask)
   assert(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
 }
 
-uint8_t GetPTIConfig(void)
-{
-  const SApplicationHandles * m_pAppHandles = ZAF_getAppHandle();
-  SZwaveCommandPackage cmdPackage = {
-    .eCommandType = EZWAVECOMMANDTYPE_ZW_GET_PTI_CONFIG
-  };
-  __attribute__((unused)) EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(m_pAppHandles->pZwCommandQueue, (uint8_t *)&cmdPackage, 500);
-  assert(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
-  SZwaveCommandStatusPackage cmdStatus = { .eStatusType = EZWAVECOMMANDSTATUS_ZW_GET_PTI_CONFIG };
-  if (GetCommandResponse(&cmdStatus, cmdStatus.eStatusType)) {
-    return cmdStatus.Content.GetPTIconfig.result;
-  }
-  assert(false);
-  return 0;
-}
-
 void SetTaskHandle(TaskHandle_t new_task_handle)
 {
   task_handle = new_task_handle;

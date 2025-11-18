@@ -36,8 +36,6 @@ bool    SetLongRangeChannel(uint8_t channel);
 
 void SetLongRangeVirtualNodes(uint8_t bitmask);
 
-uint8_t GetPTIConfig(void);
-
 void SetTaskHandle(TaskHandle_t new_task_handle);
 TaskHandle_t GetTaskHandle(void);
 

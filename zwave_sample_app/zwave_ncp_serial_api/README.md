@@ -20,6 +20,24 @@ The host-based sample applications are described in the respective SDK overview 
 The Serial API leverages the Z-Wave Protocol API. The Serial API introduces additional messages related
 to inter-host communications.
 
+## PTI Configuration Format
+
+When using Radio Debug Enable Command (0xE7) V2 format with Configuration, the Configuration field contains PTI-specific parameters:
+
+| Byte | Field | Description |
+|------|-------|-------------|
+| 0 | `mode` | PTI mode: 0=OFF, 1=SPI, 2=UART, 3=UART_ONEWIRE |
+| 1 | `baud_msb` | Baud rate MSB (for UART modes) |
+| 2 | `baud_2` | Baud rate byte 2 |
+| 3 | `baud_1` | Baud rate byte 1 |
+| 4 | `baud_lsb` | Baud rate LSB |
+| 5 | `dout_port` | Data out GPIO port number |
+| 6 | `dout_pin` | Data out GPIO pin number |
+| 7 | `dclk_port` | Clock GPIO port number |
+| 8 | `dclk_pin` | Clock GPIO pin number |
+| 9 | `dframe_port` | Frame GPIO port number |
+| 10 | `dframe_pin` | Frame GPIO pin number |
+
 ## Known Issues
 
 ### OTW Update

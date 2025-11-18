@@ -216,7 +216,7 @@ static sl_rail_status_t startTxStream(sl_rail_stream_mode_t aMode)
     uint16_t         txChannel;
     sl_rail_status_t status;
 
-    SuccessOrExit(status = sli_ot_radio_interface_rail_get_channel_for_diag(&txChannel));
+    SuccessOrExit(status = sli_ot_radio_interface_rail_get_channel(&txChannel));
     sl_rail_tx_options_t txOptions = SL_RAIL_TX_OPTIONS_DEFAULT;
 
 #ifdef SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
@@ -246,9 +246,9 @@ static sl_rail_status_t stopTxStream(void)
     SuccessOrExit(status = sli_ot_radio_interface_rail_stop_tx_stream());
     // Since start transmit stream turn off the radio state,
     // call the sl_rail_start_rx to turn on radio
-    IgnoreError(sli_ot_radio_interface_rail_get_channel_for_diag(&currentChannel));
+    IgnoreError(sli_ot_radio_interface_rail_get_channel(&currentChannel));
 
-    status = sli_ot_radio_interface_rail_start_rx_for_diag(currentChannel, &rxSchedulerInfo);
+    status = sli_ot_radio_interface_rail_start_rx(currentChannel, &rxSchedulerInfo);
     OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
 
 exit:
@@ -325,7 +325,7 @@ void otPlatDiagChannelSet(uint8_t aChannel)
     error = sli_ot_radio_interface_load_channel_config(aChannel, sTxPower);
     OT_ASSERT(error == OT_ERROR_NONE);
 
-    status = sli_ot_radio_interface_rail_start_rx_for_diag(aChannel, &bgRxSchedulerInfo);
+    status = sli_ot_radio_interface_rail_start_rx(aChannel, &bgRxSchedulerInfo);
     OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
 }
 
@@ -335,7 +335,7 @@ void otPlatDiagTxPowerSet(int8_t aTxPower)
 
     // sl_rail_set_tx_power_dbm() takes power in units of deci-dBm (0.1dBm)
     // Multiply by 10 because aPower is supposed be in units dBm
-    status = sli_ot_radio_interface_rail_set_tx_power_dbm_for_diag(((sl_rail_tx_power_t)aTxPower) * 10);
+    status = sli_ot_radio_interface_rail_set_tx_power_dbm(((sl_rail_tx_power_t)aTxPower) * 10);
     OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
     sTxPower = aTxPower;
 }

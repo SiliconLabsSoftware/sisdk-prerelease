@@ -19,7 +19,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
+#include "sl_assert.h"
 #include <cmsis_os2.h>
 #include "errno.h"
 #include "em_device.h"
@@ -1738,7 +1738,7 @@ void app_init(void)
 
   task_id = osThreadNew(app_task, NULL, &task_attribute);
   (void)task_id; // prevents unused variable warning in release builds
-  assert(task_id != 0);
+  EFM_ASSERT(task_id != 0);
 }
 
 void sl_wisun_on_event(sl_wisun_evt_t *evt)

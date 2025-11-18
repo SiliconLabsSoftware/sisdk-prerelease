@@ -120,6 +120,16 @@
 #define OPENTHREAD_CONFIG_DNS_CLIENT_OVER_TCP_ENABLE 0
 #endif
 // </h>
+// <e> DHCP6 Prefix Delegation feature
+#ifndef OPENTHREAD_CONFIG_BORDER_ROUTING_DHCP6_PD_ENABLE
+#define OPENTHREAD_CONFIG_BORDER_ROUTING_DHCP6_PD_ENABLE       OPENTHREAD_FTD
+#endif
+// </e>
+// <e>  DHCP6 Prefix Delegation (PD) built-in client feature
+#ifndef OPENTHREAD_CONFIG_BORDER_ROUTING_DHCP6_PD_CLIENT_ENABLE
+#define OPENTHREAD_CONFIG_BORDER_ROUTING_DHCP6_PD_CLIENT_ENABLE       0
+#endif
+// </e>
 #endif // OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_3
 
 // <h>  The following features apply only to NCP devices

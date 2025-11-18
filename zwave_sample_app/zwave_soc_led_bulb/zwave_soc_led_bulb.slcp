@@ -54,7 +54,9 @@ component:
   - id: simple_led
     instance: [led0]
   - id: clock_manager
-
+  - id: common_token_manager
+  - id: common_token_manager_compatibility
+    condition: [device_series_2]
 source:
   - path: app.c
   - path: app_cli.c

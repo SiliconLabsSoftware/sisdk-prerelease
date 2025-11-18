@@ -98,6 +98,7 @@ SLI_BT_DECLARE_BGAPI_CLASS(bt, test);
 SLI_BT_DECLARE_BGAPI_CLASS(bt, coex);
 SLI_BT_DECLARE_BGAPI_CLASS(bt, resource);
 SLI_BT_DECLARE_BGAPI_CLASS(bt, connection_analyzer);
+SLI_BT_DECLARE_BGAPI_CLASS(bt, linklayer);
 
 // Some features do not correspond directly to a particular component but are
 // needed depending on a specific combination of components. Decide the derived
@@ -609,6 +610,12 @@ static sli_bgapi_component_deinit_func_t * const bt_component_deinit_functions[]
 #define SLI_BT_BGAPI_CONNECTION_ANALYZER
 #endif
 
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_LINKLAYER_INTERFACE_PRESENT)
+#define SLI_BT_BGAPI_LINKLAYER SLI_BT_USE_BGAPI_CLASS(bt, linklayer),
+#else
+#define SLI_BT_BGAPI_LINKLAYER
+#endif
+
 /** @brief Table of BGAPI classes available when Bluetooth is started */
 static const struct sli_bgapi_class * const bt_bgapi_classes_when_started[] =
 {
@@ -649,6 +656,7 @@ static const struct sli_bgapi_class * const bt_bgapi_classes_when_started[] =
   SLI_BT_BGAPI_COEX
   SLI_BT_BGAPI_RESOURCE
   SLI_BT_BGAPI_CONNECTION_ANALYZER
+  SLI_BT_BGAPI_LINKLAYER
   NULL
 };
 

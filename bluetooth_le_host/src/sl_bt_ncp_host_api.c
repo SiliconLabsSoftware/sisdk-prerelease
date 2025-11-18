@@ -441,6 +441,33 @@ sl_status_t sl_bt_system_set_lazy_soft_timer(uint32_t time,
     return rsp->data.rsp_system_set_lazy_soft_timer.result;
 }
 
+sl_status_t sl_bt_linklayer_event_info_reporting_enable(uint8_t enable,
+                                                        uint32_t configuration,
+                                                        uint8_t procedure_type,
+                                                        size_t procedure_identifier_len,
+                                                        const uint8_t* procedure_identifier)
+{
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+    size_t cmd_payload_len = sizeof(sl_bt_cmd_linklayer_event_info_reporting_enable_t) + procedure_identifier_len;
+    if (cmd_payload_len > SL_BGAPI_MAX_PAYLOAD_SIZE) {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
+
+    cmd->header = SLI_BGAPI_MSG_HEADER(sli_bt_linklayer_class_id,
+                                       sli_bt_linklayer_event_info_reporting_enable_command_id,
+                                       (uint8_t) sl_bgapi_msg_type_cmd | (uint8_t) sl_bgapi_dev_type_bt,
+                                       cmd_payload_len);
+    cmd->data.cmd_linklayer_event_info_reporting_enable.enable = enable;
+    cmd->data.cmd_linklayer_event_info_reporting_enable.configuration = configuration;
+    cmd->data.cmd_linklayer_event_info_reporting_enable.procedure_type = procedure_type;
+    cmd->data.cmd_linklayer_event_info_reporting_enable.procedure_identifier.len = procedure_identifier_len;
+    memcpy(cmd->data.cmd_linklayer_event_info_reporting_enable.procedure_identifier.data, procedure_identifier, procedure_identifier_len);
+    sl_bt_host_handle_command();
+
+    return rsp->data.rsp_linklayer_event_info_reporting_enable.result;
+}
+
 sl_status_t sl_bt_resource_get_status(uint32_t *total_bytes,
                                       uint32_t *free_bytes)
 {

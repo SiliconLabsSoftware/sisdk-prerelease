@@ -28,7 +28,7 @@
  *
  ******************************************************************************/
 
-#include <assert.h>
+#include "sl_assert.h"
 #include <cmsis_os2.h>
 #include <string.h>
 #include "sl_memory_manager.h"

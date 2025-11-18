@@ -241,6 +241,16 @@
 #define OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE      0
 #endif
 // </e>
+// <e>  Multiple Static Instance Support
+#ifndef OPENTHREAD_CONFIG_MULTIPLE_STATIC_INSTANCE_ENABLE
+#define OPENTHREAD_CONFIG_MULTIPLE_STATIC_INSTANCE_ENABLE      0
+#endif
+// </e>
+// <e>  Number of OpenThread Instances For Static Buffer Allocation
+#ifndef OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM
+#define OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM      2
+#endif
+// </e>
 // <e>  OTNS (OpenThread Network Simulator)
 #ifndef OPENTHREAD_CONFIG_OTNS_ENABLE
 #define OPENTHREAD_CONFIG_OTNS_ENABLE               0

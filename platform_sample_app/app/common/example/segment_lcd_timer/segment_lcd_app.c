@@ -31,8 +31,7 @@
 #include "sl_simple_button_instances.h"
 #include "sl_clock_manager.h"
 #include "em_device.h"
-#include "em_emu.h"
-#include "em_letimer.h"
+#include "sl_hal_letimer.h"
 #include "sl_segmentlcd.h"
 #include "sl_gpio.h"
 
@@ -53,8 +52,8 @@ volatile uint32_t hold_timer;  // Timer to counter hold time elapsed on PB1
 void LETIMER0_IRQHandler(void)
 {
   // Clear all interrupt flags
-  uint32_t flags = LETIMER_IntGet(LETIMER0);
-  LETIMER_IntClear(LETIMER0, flags);
+  uint32_t flags = sl_hal_letimer_get_pending_interrupts(LETIMER0);
+  sl_hal_letimer_clear_interrupts(LETIMER0, flags);
 
   // If compare match, re-configure counter as blinking flag
   if (compare_match) {
@@ -98,7 +97,12 @@ static void on_button_0_change(uint8_t int_no, void *ctx)
     // For all other cases, PB0 is used to start/stop the LETIMER
     else {
       letimer_enable = (letimer_enable + 1) % 2;
-      LETIMER_Enable(LETIMER0, letimer_enable);
+      if (letimer_enable) {
+        sl_hal_letimer_enable(LETIMER0);
+        sl_hal_letimer_start(LETIMER0);
+      } else {
+        sl_hal_letimer_disable(LETIMER0);
+      }
     }
   }
 }
@@ -116,14 +120,15 @@ static void on_button_1_change(uint8_t int_no, void *ctx)
 {
   (void)ctx;
   if (int_no == BTN1_INSTANCE.pin) {
-    LETIMER_Enable(LETIMER0, true);  // Need LETIMER running to detect compare
-                                     // mode
+    sl_hal_letimer_enable(LETIMER0);  // Need LETIMER running to detect compare
+                                      // mode
+    sl_hal_letimer_start(LETIMER0);
     // If in compare mode set up
     if (compare_mode) {
       compare_start = 1;  // start compare mode
       compare_mode = 0;   // reset compare_mode variable
       letimer_enable = 0; // reset LETIMER flag
-      LETIMER_Enable(LETIMER0, false);  // If in compare mode, disable LETIMER
+      sl_hal_letimer_disable(LETIMER0);  // If in compare mode, disable LETIMER
     }
     // For all other cases, PB1 will act as a timer reset
     else {
@@ -186,13 +191,14 @@ void init_letimer(void)
 {
   // LETIMER initialization
   // Top value = LF Clock frequency, compare match frequency = 1 HZ
-  LETIMER_Init_TypeDef initLetimer = LETIMER_INIT_DEFAULT;
-  initLetimer.enable = false;
-  initLetimer.topValue = 32768;
-  LETIMER_Init(LETIMER0, &initLetimer);
+  sl_hal_letimer_init_t init_letimer = SL_HAL_LETIMER_INIT_DEFAULT;
+  init_letimer.enable_top = true;
+  sl_hal_letimer_enable(LETIMER0);
+  sl_hal_letimer_set_top(LETIMER0, 32768);
+  sl_hal_letimer_init(LETIMER0, &init_letimer);
 
-  LETIMER_IntDisable(LETIMER0, _LETIMER_IEN_MASK);
-  LETIMER_IntEnable(LETIMER0, LETIMER_IEN_COMP0);
+  sl_hal_letimer_disable_interrupts(LETIMER0, _LETIMER_IEN_MASK);
+  sl_hal_letimer_enable_interrupts(LETIMER0, LETIMER_IEN_COMP0);
 
   NVIC_ClearPendingIRQ(LETIMER0_IRQn);
   NVIC_EnableIRQ(LETIMER0_IRQn);
@@ -217,7 +223,9 @@ void segment_lcd_app_init(void)
   sl_segment_lcd_init(false);
   LCD->BIASCTRL_SET = LCD_BIASCTRL_VDDXSEL_AVDD;
   // Example only used upper numeric segments; disable unused segments
+#if defined(SL_SEGMENT_LCD_MODULE_CL010_1087)
   SL_LCD_SEGMENTS_ALPHA_DIS();
+#endif
   sl_segment_lcd_number(0);
 }
 
@@ -274,9 +282,9 @@ void segment_lcd_app_process_action(void)
       counter_compare();
     }
     // Once completed, disable LETIMER to allow reset
-    letimer_enable = 0;
     counter = 0;
-    LETIMER_Enable(LETIMER0, letimer_enable);
+    letimer_enable = 0;
+    sl_hal_letimer_disable(LETIMER0);
   }
   // compare match
   else if (compare_match) {

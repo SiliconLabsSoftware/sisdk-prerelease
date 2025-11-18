@@ -2,10 +2,9 @@ project_name: bt_soc_app_ota_dfu_freertos
 package: bluetooth_le_app
 label: Bluetooth - SoC Application OTA DFU FreeRTOS
 description: >
-  Demonstrates the integration of FreeRTOS into Bluetooth applications.
-  RTOS is added to the Bluetooth - SoC Application OTA DFU sample
-  application that realize over-the-air device firmware updates in user
-  application scope.
+  A minimal project structure, that serves as a starting point for custom
+  Bluetooth applications that provides Over-The-Air device firmware update in
+  user application runtime.
 category: Bluetooth Examples
 quality: production
 
@@ -84,16 +83,15 @@ configuration:
       - device_series_2
 
 post_build:
-  - path: ../../postbuild_profile/bt_common_s2.slpb
+  - path: ../../postbuild_profile/bt_dfu_app_s2.slpb
     condition:
-      - bootloader_app_properties
       - device_series_2
-  - path: ../../postbuild_profile/bt_common_s3.slpb
+  - path: ../../postbuild_profile/bt_dfu_app_s3.slpb
     condition:
-      - bootloader_app_properties
       - device_series_3
 
 tag:
+  - companion:bootloader
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:!device:device_generic_family_efr32xg22
   - hwfilter:board:simple_button:btn0

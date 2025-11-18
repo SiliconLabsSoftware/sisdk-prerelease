@@ -124,11 +124,11 @@ configuration:
     value: "APP_LOG_NEW_LINE_RN"
 
 post_build:
-  - path: ../../postbuild_profile/bt_common_s2.slpb
-    condition: [device_series_2, bootloader_app_properties]
+  - path: ../../postbuild_profile/bt_dfu_app_s2.slpb
 
 tag:
   - prebuilt_demo
+  - companion:bootloader
   - hardware:board_only
   - hwfilter:board:brd2602a
   - hwfilter:device:device_family_efr32bg27

@@ -73,10 +73,10 @@
 #include "sl_packet_utils.h"
 #include "sl_rail.h"
 #include "sl_rail_ieee802154.h"
-#include "soft_source_match_table.h"
 
-#include "sl_rail_util_pa_conversions.h"
 #include "sl_openthread_radio_config.h"
+#include "sl_rail_util_pa_conversions.h"
+#include "soft_source_match_table.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -132,8 +132,10 @@ void txFailedCallback(bool isAck, uint32_t status);
 void ackTimeoutCallback(void);
 void dataRequestCommandCallback(sl_rail_handle_t aRailHandle);
 void schedulerEventCallback(sl_rail_handle_t aRailHandle);
-bool txWaitingForAck(void);
 }
+
+// Static inline helper - forward declaration
+static inline bool txWaitingForAck(void);
 
 using rxPacketDetails = struct
 {
@@ -220,20 +222,12 @@ static bool rxPacketQueueOverflowCallback(const Queue_t *queue, void *data)
 }
 
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
-[[noreturn]] static void pendingCommandQueueOverflowCallbackWrapper(void)
-{
-    OT_ASSERT(false);
-}
-#endif
-
-#if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
 
 // Case 1: Packet was directed towards broadcast address or broadcast PAN ID
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
 static bool isFilterMaskBroadcast(uint8_t mask)
 {
-    bool isBroadcast = ((mask & RADIO_BCAST_PANID_FILTER_MASK) != 0) || ((mask & RADIO_BCAST_ADDR_FILTER_MASK) != 0);
-    return isBroadcast;
+    return ((mask & RADIO_BCAST_PANID_FILTER_MASK) != 0) || ((mask & RADIO_BCAST_ADDR_FILTER_MASK) != 0);
 }
 
 // Case 2: Packet was directed to one of our valid address/PANID combos
@@ -242,20 +236,16 @@ SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_C
 static bool isFilterMaskInstanceSpecific(uint8_t mask)
 {
     // Find any non-broadcast PAN ID match and compare it to address matches for same IID
-    bool isInstanceSpecific =
-        ((((mask & (RADIO_INDEX0_PANID_FILTER_MASK | RADIO_INDEX1_PANID_FILTER_MASK | RADIO_INDEX2_PANID_FILTER_MASK))
-           >> RADIO_PANID_FILTER_SHIFT)
-          & (RADIO_GET_ADDR_FILTER_MASK(mask) >> RADIO_ADDR_FILTER_SHIFT))
-         != 0);
-    return isInstanceSpecific;
+    return (((RADIO_GET_PANID_FILTER_MASK(mask) >> RADIO_PANID_FILTER_SHIFT)
+             & (RADIO_GET_ADDR_FILTER_MASK(mask) >> RADIO_ADDR_FILTER_SHIFT))
+            != 0);
 }
 
 // Case 3: Packet is missing either destination addressing field or destination PAN ID
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
 static bool isFilterMaskMissingAddressing(uint8_t mask)
 {
-    bool isMissingAddressing = ((RADIO_GET_PANID_FILTER_MASK(mask)) == 0) || ((RADIO_GET_ADDR_FILTER_MASK(mask)) == 0);
-    return isMissingAddressing;
+    return ((RADIO_GET_PANID_FILTER_MASK(mask)) == 0) || ((RADIO_GET_ADDR_FILTER_MASK(mask)) == 0);
 }
 
 #endif // OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
@@ -263,16 +253,12 @@ static bool isFilterMaskMissingAddressing(uint8_t mask)
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
 static bool isFilterMaskValid(uint8_t mask)
 {
-    bool valid;
-
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
-    valid = isFilterMaskBroadcast(mask) || isFilterMaskInstanceSpecific(mask) || isFilterMaskMissingAddressing(mask);
+    return isFilterMaskBroadcast(mask) || isFilterMaskInstanceSpecific(mask) || isFilterMaskMissingAddressing(mask);
 #else
     (void)mask;
-    valid = true;
+    return true;
 #endif
-
-    return valid;
 }
 
 #if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
@@ -289,20 +275,15 @@ static uint8_t generateAckIeData(otInstance   *aInstance,
 {
     OT_UNUSED_VARIABLE(aLinkMetricsIeData);
     OT_UNUSED_VARIABLE(aLinkMetricsIeDataLen);
+    OT_UNUSED_VARIABLE(aReceivedFrame);
 
     uint8_t offset = 0;
 
     // If instance is nullptr (broadcast packet), skip IE data generation
-    if (aInstance == nullptr)
-    {
-        OT_UNUSED_VARIABLE(aReceivedFrame);
-        return 0;
-    }
+    otEXPECT(aInstance != nullptr);
 
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
     offset += sli_ot_radio_csl_generate_ack_ie_data(aInstance, aReceivedFrame, sAckIeData);
-#else
-    OT_UNUSED_VARIABLE(aReceivedFrame);
 #endif
 
 #if OPENTHREAD_CONFIG_MLE_LINK_METRICS_SUBJECT_ENABLE
@@ -312,6 +293,7 @@ static uint8_t generateAckIeData(otInstance   *aInstance,
     }
 #endif
 
+exit:
     return offset;
 }
 
@@ -391,6 +373,749 @@ static void updateRxFrameTimestamp(bool aIsAckFrame, sl_rail_time_t aTimestamp);
 
 static otError skipRxPacketLengthBytes(sl_rail_rx_packet_info_t *pPacketInfo);
 
+//==============================================================================
+// Radio State Management (from radio_state.cpp)
+// This section can be extracted to a separate file for future modularization.
+// These are timing-critical functions that need to be inline-optimized.
+//==============================================================================
+
+// Internal state flags
+#define FLAG_RADIO_INIT_DONE 0x00000001
+#define FLAG_ONGOING_TX_DATA 0x00000002
+#define FLAG_ONGOING_TX_ACK 0x00000004
+#define FLAG_WAITING_FOR_ACK 0x00000008
+#define FLAG_CURRENT_TX_USE_CSMA 0x00000010
+#define FLAG_SCHEDULED_RX_PENDING 0x00000020
+#define FLAG_SCHEDULED_TX_PENDING 0x00000040
+
+// Internal state variables
+static volatile uint32_t sMiscRadioState = 0;
+static bool              sEmPendingData  = false;
+
+// Core flag operations - static inline for internal use only
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
+static inline void setInternalFlag(uint32_t aFlag, bool aVal)
+{
+    CORE_DECLARE_IRQ_STATE;
+    CORE_ENTER_ATOMIC();
+    sMiscRadioState = (aVal ? (sMiscRadioState | aFlag) : (sMiscRadioState & ~aFlag));
+    CORE_EXIT_ATOMIC();
+}
+
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
+static inline bool getInternalFlag(uint32_t aFlag)
+{
+    bool isFlagSet;
+    CORE_DECLARE_IRQ_STATE;
+    CORE_ENTER_ATOMIC();
+    isFlagSet = (sMiscRadioState & aFlag) ? true : false;
+    CORE_EXIT_ATOMIC();
+
+    return isFlagSet;
+}
+
+// Public API - these have external linkage for other radio modules
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
+void sli_ot_radio_state_set_internal_flag(uint32_t aFlag, bool aVal)
+{
+    setInternalFlag(aFlag, aVal);
+}
+
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
+bool sli_ot_radio_state_get_internal_flag(uint32_t aFlag)
+{
+    return getInternalFlag(aFlag);
+}
+
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
+void sli_ot_radio_state_set_idle(void)
+{
+    if (sli_ot_radio_interface_rail_get_radio_state() != SL_RAIL_RF_STATE_IDLE)
+    {
+        sli_ot_radio_interface_rail_idle();
+#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+        sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_IDLED, 0U);
+        sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_IDLED, 0U);
+#endif
+    }
+    sli_ot_radio_interface_rail_yield_radio();
+}
+
+// Internal-only wrappers - static inline for ISR performance
+static inline bool isTransmitting(void)
+{
+    return (getInternalFlag(FLAG_ONGOING_TX_DATA) || getInternalFlag(FLAG_ONGOING_TX_ACK));
+}
+
+static inline bool isTxDataOngoing(void)
+{
+    return getInternalFlag(FLAG_ONGOING_TX_DATA);
+}
+
+static inline bool hasTxEvents(void)
+{
+    return getInternalFlag(RADIO_TX_EVENTS);
+}
+
+// External API functions - regular linkage for other modules
+bool sli_ot_radio_state_is_transmitting(void)
+{
+    return isTransmitting();
+}
+
+bool sli_ot_radio_state_is_transmitting_or_scanning(void)
+{
+    return (sli_ot_energy_scan_is_in_progress() || isTxDataOngoing() || hasTxEvents());
+}
+
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
+bool sli_ot_radio_state_is_waiting_for_ack(void)
+{
+    return isTxDataOngoing() && getInternalFlag(FLAG_WAITING_FOR_ACK);
+}
+
+bool sli_ot_radio_state_is_tx_scheduled(void)
+{
+    return getInternalFlag(FLAG_SCHEDULED_TX_PENDING | EVENT_SCHEDULED_TX_STARTED);
+}
+
+void sli_ot_radio_state_set_scheduled_rx_pending(bool aPending)
+{
+    setInternalFlag(FLAG_SCHEDULED_RX_PENDING, aPending);
+}
+
+bool sli_ot_radio_state_is_rx_scheduled(void)
+{
+    return getInternalFlag(FLAG_SCHEDULED_RX_PENDING);
+}
+
+void sli_ot_radio_state_set_scheduled_rx_started(bool aStarted)
+{
+    setInternalFlag(EVENT_SCHEDULED_RX_STARTED, aStarted);
+}
+
+bool sli_ot_radio_state_is_initialized(void)
+{
+    return getInternalFlag(FLAG_RADIO_INIT_DONE);
+}
+
+void sli_ot_radio_state_mark_initialized(void)
+{
+    setInternalFlag(FLAG_RADIO_INIT_DONE, true);
+}
+
+bool sli_ot_radio_state_is_tx_data_ongoing(void)
+{
+    return isTxDataOngoing();
+}
+
+void sli_ot_radio_state_set_tx_data_ongoing(bool aOngoing)
+{
+    setInternalFlag(FLAG_ONGOING_TX_DATA, aOngoing);
+}
+
+bool sli_ot_radio_state_is_tx_ack_ongoing(void)
+{
+    return getInternalFlag(FLAG_ONGOING_TX_ACK);
+}
+
+void sli_ot_radio_state_set_tx_ack_ongoing(bool aOngoing)
+{
+    setInternalFlag(FLAG_ONGOING_TX_ACK, aOngoing);
+}
+
+bool sli_ot_radio_state_is_using_csma(void)
+{
+    return getInternalFlag(FLAG_CURRENT_TX_USE_CSMA);
+}
+
+void sli_ot_radio_state_set_using_csma(bool aUseCsma)
+{
+    setInternalFlag(FLAG_CURRENT_TX_USE_CSMA, aUseCsma);
+}
+
+void sli_ot_radio_state_set_waiting_for_ack(bool aWaiting)
+{
+    setInternalFlag(FLAG_WAITING_FOR_ACK, aWaiting);
+}
+
+void sli_ot_radio_state_set_scheduled_tx_pending(bool aPending)
+{
+    setInternalFlag(FLAG_SCHEDULED_TX_PENDING, aPending);
+}
+
+void sli_ot_radio_state_set_scheduled_tx_started(bool aStarted)
+{
+    setInternalFlag(EVENT_SCHEDULED_TX_STARTED, aStarted);
+}
+
+bool sli_ot_radio_state_has_tx_events(void)
+{
+    return hasTxEvents();
+}
+
+void sli_ot_radio_state_clear_all_tx_events(void)
+{
+    setInternalFlag(RADIO_TX_EVENTS, false);
+}
+
+bool sli_ot_radio_state_has_tx_success(void)
+{
+    return getInternalFlag(EVENT_TX_SUCCESS);
+}
+
+void sli_ot_radio_state_set_tx_success(bool aSuccess)
+{
+    setInternalFlag(EVENT_TX_SUCCESS, aSuccess);
+}
+
+bool sli_ot_radio_state_has_tx_cca_failed(void)
+{
+    return getInternalFlag(EVENT_TX_CCA_FAILED);
+}
+
+void sli_ot_radio_state_set_tx_cca_failed(bool aFailed)
+{
+    setInternalFlag(EVENT_TX_CCA_FAILED, aFailed);
+}
+
+bool sli_ot_radio_state_has_tx_no_ack(void)
+{
+    return getInternalFlag(EVENT_TX_NO_ACK);
+}
+
+void sli_ot_radio_state_set_tx_no_ack(bool aNoAck)
+{
+    setInternalFlag(EVENT_TX_NO_ACK, aNoAck);
+}
+
+bool sli_ot_radio_state_has_tx_failed(void)
+{
+    return getInternalFlag(EVENT_TX_FAILED);
+}
+
+void sli_ot_radio_state_set_tx_failed(bool aFailed)
+{
+    setInternalFlag(EVENT_TX_FAILED, aFailed);
+}
+
+void sli_ot_radio_state_clear_tx_data_and_wait_for_ack(void)
+{
+    setInternalFlag(FLAG_ONGOING_TX_DATA | FLAG_WAITING_FOR_ACK | EVENT_SCHEDULED_TX_STARTED, false);
+}
+
+void sli_ot_radio_state_clear_all_scheduled_events(void)
+{
+    setInternalFlag(FLAG_SCHEDULED_RX_PENDING | FLAG_SCHEDULED_TX_PENDING | EVENT_SCHEDULED_TX_STARTED, false);
+}
+
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
+bool sli_ot_radio_state_is_receiving_frame(void)
+{
+#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+    sl_rail_handle_t railHandle = sli_ot_radio_interface_get_rail_handle();
+
+    return (sl_rail_get_radio_state(railHandle) & SL_RAIL_RF_STATE_RX_ACTIVE) == SL_RAIL_RF_STATE_RX_ACTIVE;
+#else
+    return false;
+#endif
+}
+
+void sli_ot_radio_state_set_em_pending_data(bool aPending)
+{
+    sEmPendingData = aPending;
+}
+
+bool sli_ot_radio_state_get_em_pending_data(void)
+{
+    return sEmPendingData;
+}
+
+void sli_ot_radio_state_init(void)
+{
+    sMiscRadioState = 0;
+    sEmPendingData  = false;
+}
+
+void sli_ot_radio_state_deinit(void)
+{
+    sMiscRadioState = 0;
+    sEmPendingData  = false;
+}
+
+//==============================================================================
+// Radio Event Processing
+//==============================================================================
+
+// Internal event state
+static sl_rail_events_t sCurrentEventConfig   = SL_RAIL_EVENTS_NONE;
+static bool             sPhyStackEventEnabled = false;
+
+// Forward declarations for internal event processing functions
+static void processTxPacketSentEvent(void);
+static void processTxChannelBusyEvent(void);
+static void processTxBlockedEvent(void);
+static void processTxUnderflowAbortedEvent(void);
+static void processTxCcaEvents(sl_rail_events_t aEvents);
+static void processRxPacketReceivedEvent(void);
+#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+static void processRxSyncDetectedEvent(void);
+static void processRxFilterPassedEvent(void);
+static void processRxFrameErrorEvent(void);
+static void processRxFilteredEvent(void);
+#endif // SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+static void processAckSentEvent(void);
+static void processAckAbortedEvent(void);
+static void processAckBlockedEvent(void);
+static void processScheduledTxEvent(void);
+static void processScheduledTxMissedEvent(void);
+static void processScheduledRxEvent(void);
+static void processScheduledRxEndMissedEvent(void);
+
+#ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+static void processCoexSignalDetectedEvent(void);
+#endif // SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+
+static void processDataRequestCommandEvent(sl_rail_handle_t aRailHandle);
+
+void sli_ot_radio_events_init(void)
+{
+    sCurrentEventConfig   = SL_RAIL_EVENTS_NONE;
+    sPhyStackEventEnabled = false;
+}
+
+void sli_ot_radio_events_deinit(void)
+{
+    sCurrentEventConfig   = SL_RAIL_EVENTS_NONE;
+    sPhyStackEventEnabled = false;
+}
+
+void sli_ot_radio_events_update_config(sl_rail_events_t mask, sl_rail_events_t values)
+{
+    sl_rail_status_t status;
+    sl_rail_events_t newEventConfig = (sCurrentEventConfig & ~mask) | (values & mask);
+
+    if (newEventConfig != sCurrentEventConfig)
+    {
+        sl_rail_handle_t railHandle = sli_ot_radio_interface_get_rail_handle();
+        if (railHandle != nullptr)
+        {
+            status = sl_rail_config_events(railHandle, mask, values);
+
+            if (status != SL_RAIL_STATUS_NO_ERROR)
+            {
+                otLogWarnPlat("Failed to configure radio events: %lu", status);
+            }
+            sCurrentEventConfig = newEventConfig;
+        }
+    }
+}
+
+#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+sl_rail_util_ieee802154_stack_event_t sli_ot_radio_events_handle_phy_stack_event_with_status(
+    sl_rail_util_ieee802154_stack_event_t stackEvent,
+    uint32_t                              supplement)
+{
+    if (!sPhyStackEventEnabled)
+    {
+        return SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_IDLED;
+    }
+
+#ifdef SL_CATALOG_RAIL_MULTIPLEXER_PRESENT
+    sl_rail_handle_t railHandle = sli_ot_radio_interface_get_rail_handle();
+    if (railHandle != nullptr)
+    {
+        return sl_rail_mux_ieee802154_on_event(railHandle, stackEvent, supplement);
+    }
+#else
+    OT_UNUSED_VARIABLE(stackEvent);
+    OT_UNUSED_VARIABLE(supplement);
+#endif
+    return SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_IDLED;
+}
+
+void sli_ot_radio_events_handle_phy_stack_event(sl_rail_util_ieee802154_stack_event_t stackEvent, uint32_t supplement)
+{
+    sli_ot_radio_events_handle_phy_stack_event_with_status(stackEvent, supplement);
+}
+#endif // SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+
+bool sli_ot_radio_events_is_phy_stack_enabled(void)
+{
+    return sPhyStackEventEnabled;
+}
+
+void sli_ot_radio_events_set_phy_stack_enabled(bool enabled)
+{
+    sPhyStackEventEnabled = enabled;
+}
+
+void sli_ot_radio_events_process_callback(sl_rail_handle_t aRailHandle, sl_rail_events_t aEvents)
+{
+    // Process RX sync detection events first
+#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+    if (aEvents & (SL_RAIL_EVENT_RX_SYNC_0_DETECT | SL_RAIL_EVENT_RX_SYNC_1_DETECT))
+    {
+        processRxSyncDetectedEvent();
+    }
+#endif
+
+    // Process coexistence events
+#ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+    if (aEvents & SL_RAIL_EVENT_SIGNAL_DETECTED)
+    {
+        processCoexSignalDetectedEvent();
+    }
+#endif
+
+    // Process data request command events
+    if ((aEvents & SL_RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND)
+#ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+        && !sl_rail_is_rx_auto_ack_paused(aRailHandle)
+#endif
+    )
+    {
+        processDataRequestCommandEvent(aRailHandle);
+    }
+
+    // Process RX filter passed events
+#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+    if (aEvents & SL_RAIL_EVENT_RX_FILTER_PASSED)
+    {
+        processRxFilterPassedEvent();
+    }
+#endif
+
+    // Process TX events
+    sli_ot_radio_events_process_tx_events(aEvents);
+
+    // Process scheduled events for Thread 1.2+
+#if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
+    if (sli_ot_radio_state_is_rx_scheduled())
+    {
+        sli_ot_radio_events_process_scheduled_rx_events(aEvents);
+    }
+    else
+    {
+        sli_ot_radio_events_process_scheduled_tx_events(aEvents);
+    }
+#endif
+
+    // Process RX packet received events
+    if (aEvents & SL_RAIL_EVENT_RX_PACKET_RECEIVED)
+    {
+        processRxPacketReceivedEvent();
+    }
+
+    // Process RX error events
+#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+    if (aEvents & SL_RAIL_EVENT_RX_FRAME_ERROR)
+    {
+        processRxFrameErrorEvent();
+    }
+
+    if (aEvents
+        & (SL_RAIL_EVENT_RX_PACKET_ABORTED | SL_RAIL_EVENT_RX_ADDRESS_FILTERED | SL_RAIL_EVENT_RX_FIFO_OVERFLOW))
+    {
+        processRxFilteredEvent();
+    }
+#endif
+
+    // Process ACK events
+    sli_ot_radio_events_process_ack_events(aEvents);
+
+    if (aEvents & SL_RAIL_EVENT_CONFIG_UNSCHEDULED)
+    {
+        sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_IDLED, 0U);
+#if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
+        railDebugCounters.mRailEventConfigUnScheduled++;
+#endif
+    }
+
+    if (aEvents & SL_RAIL_EVENT_CONFIG_SCHEDULED)
+    {
+#if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
+        railDebugCounters.mRailEventConfigScheduled++;
+#endif
+    }
+
+    if (aEvents & SL_RAIL_EVENT_SCHEDULER_STATUS)
+    {
+        schedulerEventCallback(aRailHandle);
+    }
+
+    if (aEvents & SL_RAIL_EVENT_CAL_NEEDED)
+    {
+        sl_rail_status_t status;
+
+        status = sl_rail_calibrate(aRailHandle, NULL, SL_RAIL_CAL_ALL_PENDING);
+        // Non-RTOS DMP case fails but is unsupported
+#if (!defined(SL_CATALOG_BLUETOOTH_PRESENT) || defined(SL_CATALOG_KERNEL_PRESENT))
+        // TEMPORARY - this asserts on Mux - OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
+        OT_UNUSED_VARIABLE(status);
+#else
+        OT_UNUSED_VARIABLE(status);
+#endif
+
+#if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
+        railDebugCounters.mRailEventCalNeeded++;
+#endif
+    }
+
+    // scheduled and unscheduled config events happen very often,
+    // especially in a DMP situation where there is an active BLE connection.
+    // Waking up the OT RTOS task on every one of these occurrences causes
+    // a lower priority Serial task to starve and makes it appear like a code lockup
+    // There is no reason to wake the OT task for these events!
+    if (!(aEvents & SL_RAIL_EVENT_CONFIG_SCHEDULED) && !(aEvents & SL_RAIL_EVENT_CONFIG_UNSCHEDULED))
+    {
+        otSysEventSignalPending();
+    }
+}
+
+void sli_ot_radio_events_process_tx_events(sl_rail_events_t aEvents)
+{
+    if (aEvents & SL_RAIL_EVENT_TX_PACKET_SENT)
+    {
+        processTxPacketSentEvent();
+    }
+    else if (aEvents & SL_RAIL_EVENT_TX_CHANNEL_BUSY)
+    {
+        processTxChannelBusyEvent();
+    }
+    else if (aEvents & SL_RAIL_EVENT_TX_BLOCKED)
+    {
+        processTxBlockedEvent();
+    }
+    else if (aEvents & (SL_RAIL_EVENT_TX_UNDERFLOW | SL_RAIL_EVENT_TX_ABORTED))
+    {
+        processTxUnderflowAbortedEvent();
+    }
+    else
+    {
+        // Process CCA-related events
+        processTxCcaEvents(aEvents);
+    }
+}
+
+void sli_ot_radio_events_process_rx_events(sl_rail_events_t aEvents)
+{
+    // RX events are processed in the main callback
+    // This function is provided for future extensibility
+    OT_UNUSED_VARIABLE(aEvents);
+}
+
+void sli_ot_radio_events_process_scheduled_tx_events(sl_rail_events_t aEvents)
+{
+    if (aEvents & SL_RAIL_EVENT_TX_SCHEDULED_TX_STARTED)
+    {
+        processScheduledTxEvent();
+    }
+    else if (aEvents & SL_RAIL_EVENT_TX_SCHEDULED_TX_MISSED)
+    {
+        processScheduledTxMissedEvent();
+    }
+}
+
+void sli_ot_radio_events_process_scheduled_rx_events(sl_rail_events_t aEvents)
+{
+    if (aEvents & SL_RAIL_EVENT_RX_SCHEDULED_RX_STARTED)
+    {
+        processScheduledRxEvent();
+    }
+
+    if (aEvents & SL_RAIL_EVENT_RX_SCHEDULED_RX_END || aEvents & SL_RAIL_EVENT_RX_SCHEDULED_RX_MISSED)
+    {
+        processScheduledRxEndMissedEvent();
+    }
+}
+
+void sli_ot_radio_events_process_ack_events(sl_rail_events_t aEvents)
+{
+    if (aEvents & SL_RAIL_EVENT_TXACK_PACKET_SENT)
+    {
+        processAckSentEvent();
+    }
+
+    if (aEvents & (SL_RAIL_EVENT_TXACK_ABORTED | SL_RAIL_EVENT_TXACK_UNDERFLOW))
+    {
+        processAckAbortedEvent();
+    }
+
+    if (aEvents & SL_RAIL_EVENT_TXACK_BLOCKED)
+    {
+        processAckBlockedEvent();
+    }
+
+    // Deal with ACK timeout after possible RX completion in case RAIL
+    // notifies us of the ACK and the timeout simultaneously -- we want
+    // the ACK to win over the timeout.
+    if ((aEvents & SL_RAIL_EVENT_RX_ACK_TIMEOUT) && (sli_ot_radio_state_get_internal_flag(FLAG_WAITING_FOR_ACK)))
+    {
+        ackTimeoutCallback();
+    }
+}
+
+void sli_ot_radio_events_process_coex_events(sl_rail_events_t aEvents)
+{
+    // Coexistence events are processed in the main callback
+    // This function is provided for future extensibility
+    OT_UNUSED_VARIABLE(aEvents);
+}
+
+void sli_ot_radio_events_process_data_request_events(sl_rail_handle_t aRailHandle, sl_rail_events_t aEvents)
+{
+    if (aEvents & SL_RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND)
+    {
+        processDataRequestCommandEvent(aRailHandle);
+    }
+}
+
+void sli_ot_radio_events_process_error_events(sl_rail_events_t aEvents)
+{
+    // Error events are processed in the main callback
+    // This function is provided for future extensibility
+    OT_UNUSED_VARIABLE(aEvents);
+}
+
+// Internal event processing functions
+static inline void processTxPacketSentEvent(void)
+{
+    packetSentCallback(false);
+}
+
+static inline void processTxChannelBusyEvent(void)
+{
+    sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_BLOCKED,
+                                               static_cast<uint32_t>(txWaitingForAck()));
+    txFailedCallback(false, EVENT_TX_CCA_FAILED);
+}
+
+static inline void processTxBlockedEvent(void)
+{
+    sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_BLOCKED,
+                                               static_cast<uint32_t>(txWaitingForAck()));
+    txFailedCallback(false, EVENT_TX_FAILED);
+}
+
+static inline void processTxUnderflowAbortedEvent(void)
+{
+    sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ABORTED,
+                                               static_cast<uint32_t>(txWaitingForAck()));
+    txFailedCallback(false, EVENT_TX_FAILED);
+}
+
+static inline void processTxCcaEvents(sl_rail_events_t aEvents)
+{
+#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+    if (aEvents & SL_RAIL_EVENT_TX_START_CCA)
+    {
+        sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_CCA_SOON, 0U);
+    }
+
+    if (aEvents & SL_RAIL_EVENT_TX_CCA_RETRY)
+    {
+        sl_rail_handle_t railHandle = sli_ot_radio_interface_get_rail_handle();
+        sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_CCA_BUSY,
+                                                   static_cast<uint32_t>(sl_rail_is_next_cca_now(railHandle)));
+    }
+
+    if (aEvents & SL_RAIL_EVENT_TX_CHANNEL_CLEAR)
+    {
+        sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_STARTED, 0U);
+    }
+#else
+    OT_UNUSED_VARIABLE(aEvents);
+#endif
+}
+
+static inline void processRxPacketReceivedEvent(void)
+{
+    packetReceivedCallback();
+}
+
+#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+static inline void processRxSyncDetectedEvent(void)
+{
+    sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_STARTED,
+                                               static_cast<uint32_t>(sli_ot_radio_state_is_receiving_frame()));
+}
+
+static inline void processRxFilterPassedEvent(void)
+{
+    sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACCEPTED,
+                                               static_cast<uint32_t>(sli_ot_radio_state_is_receiving_frame()));
+}
+
+static inline void processRxFrameErrorEvent(void)
+{
+    sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_CORRUPTED,
+                                               static_cast<uint32_t>(sli_ot_radio_state_is_receiving_frame()));
+}
+
+static inline void processRxFilteredEvent(void)
+{
+    sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_FILTERED,
+                                               static_cast<uint32_t>(sli_ot_radio_state_is_receiving_frame()));
+}
+#endif // SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+
+static inline void processAckSentEvent(void)
+{
+    sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACK_SENT,
+                                               static_cast<uint32_t>(sli_ot_radio_state_is_receiving_frame()));
+    packetSentCallback(true);
+}
+
+static inline void processAckAbortedEvent(void)
+{
+    sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACK_ABORTED,
+                                               static_cast<uint32_t>(sli_ot_radio_state_is_receiving_frame()));
+    txFailedCallback(true, 0xFF);
+}
+
+static inline void processAckBlockedEvent(void)
+{
+    sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACK_BLOCKED,
+                                               static_cast<uint32_t>(sli_ot_radio_state_is_receiving_frame()));
+}
+
+static inline void processScheduledTxEvent(void)
+{
+    sli_ot_radio_state_set_internal_flag(EVENT_SCHEDULED_TX_STARTED, true);
+    sli_ot_radio_state_set_internal_flag(FLAG_SCHEDULED_TX_PENDING, false);
+}
+
+static inline void processScheduledTxMissedEvent(void)
+{
+    sli_ot_radio_state_set_internal_flag(FLAG_SCHEDULED_TX_PENDING, false);
+    txFailedCallback(false, EVENT_TX_SCHEDULER_ERROR);
+}
+
+static inline void processScheduledRxEvent(void)
+{
+    sli_ot_radio_state_set_internal_flag(EVENT_SCHEDULED_RX_STARTED, true);
+}
+
+static inline void processScheduledRxEndMissedEvent(void)
+{
+    sli_ot_radio_state_set_internal_flag(FLAG_SCHEDULED_RX_PENDING | EVENT_SCHEDULED_RX_STARTED, false);
+    sli_ot_radio_state_set_idle();
+}
+
+#ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+static inline void processCoexSignalDetectedEvent(void)
+{
+    sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_SIGNAL_DETECTED, 0U);
+}
+#endif // SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+
+static inline void processDataRequestCommandEvent(sl_rail_handle_t aRailHandle)
+{
+    dataRequestCommandCallback(aRailHandle);
+}
+//==============================================================================
+
 //------------------------------------------------------------------------------
 // Helper Functions
 
@@ -421,7 +1146,7 @@ static bool phyStackEventIsEnabled(void)
 #endif // SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
 
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
-inline bool txWaitingForAck(void)
+static inline bool txWaitingForAck(void)
 {
     return (sli_ot_radio_state_is_tx_data_ongoing() && sCurrentTxPacket != nullptr
             && ((sCurrentTxPacket->frame.mPsdu[0] & IEEE802154_FRAME_FLAG_ACK_REQUIRED) != 0));
@@ -430,23 +1155,19 @@ inline bool txWaitingForAck(void)
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
 static bool txIsDataRequest(void)
 {
-    if (!sli_ot_radio_state_is_tx_data_ongoing() || sCurrentTxPacket == nullptr)
-    {
-        return false;
-    }
+    bool     isDataRequest = false;
+    uint16_t fcf;
 
-    uint16_t fcf = (uint16_t)sCurrentTxPacket->frame.mPsdu[IEEE802154_FCF_OFFSET]
-                   | (uint16_t)(sCurrentTxPacket->frame.mPsdu[IEEE802154_FCF_OFFSET + 1] << 8);
+    otEXPECT(sli_ot_radio_state_is_tx_data_ongoing() && sCurrentTxPacket != nullptr);
 
-    return ((fcf & IEEE802154_FRAME_TYPE_MASK) == IEEE802154_FRAME_TYPE_COMMAND);
+    fcf = (uint16_t)sCurrentTxPacket->frame.mPsdu[IEEE802154_FCF_OFFSET]
+          | (uint16_t)(sCurrentTxPacket->frame.mPsdu[IEEE802154_FCF_OFFSET + 1] << 8);
+
+    isDataRequest = ((fcf & IEEE802154_FRAME_TYPE_MASK) == IEEE802154_FRAME_TYPE_COMMAND);
+
+exit:
+    return isDataRequest;
 }
-
-#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
-static inline bool isReceivingFrame(void)
-{
-    return (sli_ot_radio_interface_rail_get_radio_state() & SL_RAIL_RF_STATE_RX_ACTIVE) == SL_RAIL_RF_STATE_RX_ACTIVE;
-}
-#endif
 
 #if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
 static otError radioScheduleRx(uint8_t aChannel, uint32_t aStart, uint32_t aDuration)
@@ -543,7 +1264,7 @@ void efr32RadioInit(void)
     sReceiveAck.frame.mPsdu   = sReceiveAckPsdu;
 
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
-    sli_ot_radio_instance_set_overflow_callback(pendingCommandQueueOverflowCallbackWrapper);
+    sli_ot_radio_instance_init_command_queue();
 #endif
 
     for (uint8_t i = 0; i < RADIO_REQUEST_BUFFER_COUNT; i++)
@@ -580,6 +1301,10 @@ void efr32RadioInit(void)
     sli_ot_radio_channel_switching_init();
 #endif
 
+#if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
+    sli_ot_radio_csl_init();
+#endif
+
     // Initialize the queue for received packets.
     queueStatus = queueInit(&sRxPacketQueue, SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT);
     OT_ASSERT(queueStatus);
@@ -606,6 +1331,13 @@ void efr32RadioDeinit(void)
 
     sli_ot_radio_interface_set_current_band_config(nullptr);
     sli_ot_radio_events_deinit();
+
+    // Clean up any ongoing energy scan
+    sli_ot_energy_scan_deinit();
+
+#if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
+    sli_ot_radio_csl_deinit();
+#endif
 
     sl_memory_delete_pool(&sRxPacketMemPoolHandle);
 }
@@ -1146,7 +1878,7 @@ otError otPlatRadioEnergyScan(otInstance *aInstance, uint8_t aScanChannel, uint1
 
     otEXPECT_ACTION(sl_ot_rtos_task_can_access_pal(), error = OT_ERROR_REJECTED);
 
-    shouldDefer = sli_ot_radio_instance_energy_scan_should_defer(aInstance);
+    shouldDefer = sli_ot_radio_instance_energy_scan_should_defer();
     otEXPECT_ACTION(!shouldDefer, sli_ot_radio_instance_energy_scan_defer(aInstance, aScanChannel, aScanDuration));
 
     error = sli_ot_energy_scan_status_to_ot_error(
@@ -1475,8 +2207,9 @@ void packetReceivedCallback(void)
 #endif
         sReceiveAck.frame.mLength = length;
 
-        sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ENDED,
-                                                   static_cast<uint32_t>(isReceivingFrame()));
+        sli_ot_radio_events_handle_phy_stack_event(
+            SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ENDED,
+            static_cast<uint32_t>(sli_ot_radio_interface_rail_is_receiving_frame()));
 
         if (txWaitingForAck()
             && (sReceiveAck.frame.mPsdu[IEEE802154_DSN_OFFSET] == sCurrentTxPacket->frame.mPsdu[IEEE802154_DSN_OFFSET]))
@@ -1549,16 +2282,18 @@ void packetReceivedCallback(void)
 
         if (macFcf & IEEE802154_FRAME_FLAG_ACK_REQUIRED)
         {
-            sli_ot_radio_events_handle_phy_stack_event((sli_ot_radio_interface_rail_is_rx_auto_ack_paused()
-                                                            ? SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACK_BLOCKED
-                                                            : SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACKING),
-                                                       static_cast<uint32_t>(isReceivingFrame()));
+            sli_ot_radio_events_handle_phy_stack_event(
+                (sli_ot_radio_interface_rail_is_rx_auto_ack_paused()
+                     ? SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACK_BLOCKED
+                     : SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACKING),
+                static_cast<uint32_t>(sli_ot_radio_interface_rail_is_receiving_frame()));
             sli_ot_radio_state_set_tx_ack_ongoing(true);
         }
         else
         {
-            sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ENDED,
-                                                       static_cast<uint32_t>(isReceivingFrame()));
+            sli_ot_radio_events_handle_phy_stack_event(
+                SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ENDED,
+                static_cast<uint32_t>(sli_ot_radio_interface_rail_is_receiving_frame()));
             // We received a frame that does not require an ACK as result of a data
             // poll: we yield the radio here.
             if (sli_ot_radio_state_get_em_pending_data())
@@ -1571,8 +2306,9 @@ void packetReceivedCallback(void)
 exit:
     if (dropPacket)
     {
-        sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_CORRUPTED,
-                                                   static_cast<uint32_t>(isReceivingFrame()));
+        sli_ot_radio_events_handle_phy_stack_event(
+            SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_CORRUPTED,
+            static_cast<uint32_t>(sli_ot_radio_interface_rail_is_receiving_frame()));
 
         (void)sl_memory_pool_free(&sRxPacketMemPoolHandle, rxPacketBuf);
     }
@@ -1683,8 +2419,9 @@ void schedulerEventCallback(sl_rail_handle_t aRailHandle)
         sli_ot_radio_state_clear_all_scheduled_events();
         if (sli_ot_radio_state_is_tx_ack_ongoing())
         {
-            sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACK_ABORTED,
-                                                       static_cast<uint32_t>(isReceivingFrame()));
+            sli_ot_radio_events_handle_phy_stack_event(
+                SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACK_ABORTED,
+                static_cast<uint32_t>(sli_ot_radio_interface_rail_is_receiving_frame()));
             txFailedCallback(true, EVENT_TX_FAILED);
         }
         // We were in the process of TXing a data frame, treat it as a CCA_FAIL.
@@ -1916,7 +2653,7 @@ exit:
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
 static void processBroadcastRxPacket(void)
 {
-    for (uint8_t i = 0; i < OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM; i++)
+    for (uint8_t i = 0; i < RADIO_INTERFACE_COUNT; i++)
     {
         otInstance *instance = sli_ot_radio_instance_get(i);
         if (instance != nullptr && otInstanceIsInitialized(instance))
@@ -1964,22 +2701,6 @@ static void processTxComplete(otInstance *aInstance)
     OT_UNUSED_VARIABLE(aInstance);
     otError       txStatus;
     otRadioFrame *ackFrame = nullptr;
-
-#if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
-    instanceIndex_t index = sli_ot_radio_instance_get_index(aInstance);
-
-    CORE_DECLARE_IRQ_STATE;
-    CORE_ENTER_ATOMIC();
-
-    /* Check first if a TX has been aborted because radio was already transmitting */
-    if (sli_ot_radio_instance_get_tx_aborted(index) && !sli_ot_radio_state_is_tx_data_ongoing())
-    {
-        sli_ot_radio_instance_set_tx_aborted(index, false);
-        otPlatRadioTxDone(aInstance, &sTransmitBuffer[index].frame, ackFrame, OT_ERROR_ABORT);
-    }
-
-    CORE_EXIT_ATOMIC();
-#endif
 
     if (sli_ot_radio_state_has_tx_events())
     {
@@ -2183,7 +2904,7 @@ static void emRadioEnablePta(bool enable)
 static void efr32CoexInit(void)
 {
 #if SL_OPENTHREAD_COEX_COUNTER_ENABLE && defined(SL_CATALOG_RAIL_MULTIPLEXER_PRESENT)
-    sli_ot_radio_interface_rail_set_coex_counter_handler((void*)(&sli_ot_radio_coex_counter_on_event));
+    sli_ot_radio_interface_rail_set_coex_counter_handler((void *)(&sli_ot_radio_coex_counter_on_event));
 #else
     sli_radio_coex_reset();
 #endif // SL_OPENTHREAD_COEX_COUNTER_ENABLE && defined(SL_CATALOG_RAIL_MULTIPLEXER_PRESENT)
@@ -2283,10 +3004,12 @@ static void emRadioHoldOffInternalIsr(uint8_t active)
     }
 }
 
+extern "C" {
 // External API used by Coex Component
 SL_WEAK void emRadioHoldOffIsr(bool active)
 {
     emRadioHoldOffInternalIsr((uint8_t)active | (sRhoActive & ~RHO_EXT_ACTIVE));
 }
+} // extern "C"
 
 #endif // SL_CATALOG_RAIL_UTIL_COEX_PRESENT

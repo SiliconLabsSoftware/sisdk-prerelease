@@ -1086,14 +1086,7 @@ typedef enum EZwaveCommandType{
    */
   EZWAVECOMMANDTYPE_UNUSED1, //122
   EZWAVECOMMANDTYPE_UNUSED2, //123
-
-  /**
-   * @brief Check if the PTI Zniffer functionality is enabled/disabled
-   *
-   * @param[out] GetPTIconfig.result true if enabled else false
-   */
-  EZWAVECOMMANDTYPE_ZW_GET_PTI_CONFIG,  // 124
-
+  EZWAVECOMMANDTYPE_UNUSED3, //124
   /**
    * @brief Reduce Tx power of classic non-listening devices
    *
@@ -2033,7 +2026,6 @@ typedef union UCommandStatus{
   SZWaveGeneric8bStatus         InitiateShutdownStatus;
   SZWaveGeneric8bStatus         GetLRChannel;
   SZWaveGeneric8bStatus         SetLRChannel;
-  SZWaveGeneric8bStatus         GetPTIconfig;
   SZWaveGenericBoolStatus       SetTxAttenuation;
   SZWaveTxPowerMaxSupported     GetTxPowerMaximumSupported;
   SCommandGetNodeNLSStateStatus GetNodeNlsStateStatus;

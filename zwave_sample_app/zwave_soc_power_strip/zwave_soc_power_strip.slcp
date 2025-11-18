@@ -63,6 +63,9 @@ component:
     instance: [led1]
     condition: [zw_board_has_rgb]
   - id: clock_manager
+  - id: common_token_manager
+  - id: common_token_manager_compatibility
+    condition: [device_series_2]
 
 source:
   - path: app.c

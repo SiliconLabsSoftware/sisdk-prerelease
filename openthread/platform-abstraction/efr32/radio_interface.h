@@ -325,14 +325,12 @@ void             sli_ot_radio_interface_rail_set_coex_counter_handler(void *hand
 sl_rail_status_t sli_ot_radio_interface_rail_set_cca_threshold(int8_t threshold);
 
 // Additional RAIL functions for diag.c
-sl_rail_status_t sli_ot_radio_interface_rail_get_channel_for_diag(uint16_t *channel);
+sl_rail_status_t sli_ot_radio_interface_rail_get_channel(uint16_t *channel);
 sl_rail_status_t sli_ot_radio_interface_rail_start_tx_stream(uint8_t               channel,
                                                              sl_rail_stream_mode_t mode,
                                                              sl_rail_tx_options_t  options);
 sl_rail_status_t sli_ot_radio_interface_rail_stop_tx_stream(void);
-sl_rail_status_t sli_ot_radio_interface_rail_start_rx_for_diag(uint8_t                         channel,
-                                                               const sl_rail_scheduler_info_t *scheduler);
-sl_rail_status_t sli_ot_radio_interface_rail_set_tx_power_dbm_for_diag(sl_rail_tx_power_t powerDbm);
+sl_rail_status_t sli_ot_radio_interface_rail_start_rx(uint8_t channel, const sl_rail_scheduler_info_t *scheduler);
 
 //------------------------------------------------------------------------------
 // Accessor functions for global variables moved from radio.cpp
@@ -344,30 +342,6 @@ bool        sli_ot_radio_interface_is_src_match_enabled(void);
 void        sli_ot_radio_interface_set_src_match_enabled(bool enable);
 bool        sli_ot_radio_interface_is_coex_enabled(void);
 void        sli_ot_radio_interface_set_coex_enabled(bool enable);
-
-// CSL IE support for enhanced ACKs
-#if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
-uint8_t sli_ot_radio_interface_generate_ack_ie_data_csl(uint8_t *aIeData);
-void    sli_ot_radio_interface_update_enh_ack_csl_ie(otRadioFrame *aEnhAckFrame,
-                                                     uint32_t      rxTimestamp,
-                                                     uint16_t      packetBytes,
-                                                     uint8_t       receivedFrameLength);
-
-/**
- * Get the current CSL period
- *
- * @returns CSL period in units of 10 symbols
- */
-uint32_t sli_ot_radio_interface_get_csl_period(void);
-
-/**
- * Calculate CSL phase for a given SHR TX time
- *
- * @param[in] shrTxTime  The time when SHR transmission completes
- * @returns CSL phase in units of 10 symbols
- */
-uint16_t sli_ot_radio_interface_get_csl_phase(uint32_t shrTxTime);
-#endif
 
 /**
  * Get the current PTI radio configuration

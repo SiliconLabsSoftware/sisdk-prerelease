@@ -32,7 +32,7 @@
 //                                   Includes
 // -----------------------------------------------------------------------------
 #include <stdio.h>
-#include <assert.h>
+#include "sl_assert.h"
 #include <string.h>
 #include "cmsis_os2.h"
 #include "sl_wisun_cli_core.h"
@@ -79,13 +79,13 @@ static const osMutexAttr_t _app_wisun_cli_mtx_attr = {
 /* Public app core mutex lock */
 void app_wisun_cli_mutex_lock(void)
 {
-  assert(osMutexAcquire(_app_wisun_cli_mtx, osWaitForever) == osOK);
+  EFM_ASSERT(osMutexAcquire(_app_wisun_cli_mtx, osWaitForever) == osOK);
 }
 
 /* Public app core mutex unlock */
 void app_wisun_cli_mutex_unlock(void)
 {
-  assert(osMutexRelease(_app_wisun_cli_mtx) == osOK);
+  EFM_ASSERT(osMutexRelease(_app_wisun_cli_mtx) == osOK);
 }
 
 /* Init App Wi-SUN CLI component */
@@ -93,7 +93,7 @@ void app_wisun_cli_init(void)
 {
   // init cli network mutex
   _app_wisun_cli_mtx = osMutexNew(&_app_wisun_cli_mtx_attr);
-  assert(_app_wisun_cli_mtx != NULL);
+  EFM_ASSERT(_app_wisun_cli_mtx != NULL);
   app_settings_init();
 }
 

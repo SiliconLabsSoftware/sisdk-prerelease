@@ -70,6 +70,7 @@ template_contribution:
 
 tag:
   - companion:nonsecure_app # Needs a companion app and cannot be built alone
+  - hwfilter:device:device_supports_thread
 
 import:
   # Import the config files from the TZ Non-Secure application

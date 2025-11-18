@@ -78,14 +78,18 @@ void segment_lcd_app_init(void)
   // Default display value 0
   sl_segment_lcd_init(false);
   LCD->BIASCTRL_SET = LCD_BIASCTRL_VDDXSEL_AVDD;
+#if defined(SL_SEGMENT_LCD_MODULE_CL010_1087) || defined(SL_SEGMENT_LCD_MODULE_CE322_1001)
   // Example only used upper numeric segments; disable unused segments
   SL_LCD_SEGMENTS_NUM_DIS();
   // Display 25 degC upon initialization
   sl_segment_lcd_lower_number(25000);
+#endif
   // Display Degree C symbol
   sl_segment_lcd_symbol(SL_LCD_SYMBOL_DEGC, 1);
+#if defined(SL_SEGMENT_LCD_MODULE_CL010_1087)
   // Display decimal symbol
   sl_segment_lcd_symbol(SL_LCD_SYMBOL_DP5, 1);
+#endif
 }
 
 /***************************************************************************//**

@@ -32,6 +32,7 @@ component:
     instance: [vcom]
   - id: "wisun_cli_util"
   - id: "wisun_low_power"
+  - id: "wisun_crash_handler"
 
 source:
   - path: "app.c"

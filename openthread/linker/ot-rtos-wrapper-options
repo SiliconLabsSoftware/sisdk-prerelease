@@ -20,7 +20,7 @@
 -Xlinker --wrap=otBleSecureIsCommandClassAuthorized
 -Xlinker --wrap=otBleSecureIsConnected
 -Xlinker --wrap=otBleSecureIsConnectionActive
--Xlinker --wrap=otBleSecureIsTcatEnabled
+-Xlinker --wrap=otBleSecureIsTcatAgentStarted
 -Xlinker --wrap=otBleSecureConnect
 -Xlinker --wrap=otBleSecureFlush
 -Xlinker --wrap=otBleSecureGetPeerCertificateBase64
@@ -31,6 +31,7 @@
 -Xlinker --wrap=otBleSecureSend
 -Xlinker --wrap=otBleSecureSendApplicationTlv
 -Xlinker --wrap=otBleSecureSendMessage
+-Xlinker --wrap=otBleSecureSetTcatAgentState
 -Xlinker --wrap=otBleSecureSetTcatVendorInfo
 -Xlinker --wrap=otBleSecureStart
 -Xlinker --wrap=otBleSecureTcatStart
@@ -60,6 +61,11 @@
 -Xlinker --wrap=otBorderAgentSetEnabled
 -Xlinker --wrap=otBorderAgentSetMeshCoPServiceChangedCallback
 -Xlinker --wrap=otBorderAgentSetVendorTxtData
+-Xlinker --wrap=otBorderAgentTrackerIsRunning
+-Xlinker --wrap=otBorderAgentTrackerGetNextAgent
+-Xlinker --wrap=otBorderAgentTrackerInitIterator
+-Xlinker --wrap=otBorderAgentTrackerSetEnabled
+-Xlinker --wrap=otBorderAgentTxtDataParse
 -Xlinker --wrap=otBorderRouterAddOnMeshPrefix
 -Xlinker --wrap=otBorderRouterAddRoute
 -Xlinker --wrap=otBorderRouterGetNetData
@@ -360,6 +366,8 @@
 -Xlinker --wrap=otIp6NewMessageFromBuffer
 -Xlinker --wrap=otIp6PrefixMatch
 -Xlinker --wrap=otIp6AddressToString
+-Xlinker --wrap=otIp6ExtractExtAddressFromIp6AddressIid
+-Xlinker --wrap=otIp6FormLinkLocalAddressFromExtAddress
 -Xlinker --wrap=otIp6GetPrefix
 -Xlinker --wrap=otIp6PrefixToString
 -Xlinker --wrap=otIp6RemoveAllUnsecurePorts

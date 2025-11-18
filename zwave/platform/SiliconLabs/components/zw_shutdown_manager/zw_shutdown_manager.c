@@ -42,7 +42,8 @@
  * It's made possible because there is no overlapping period for those timers.
  */
 static sl_sleeptimer_timer_handle_t em4_sleeptimer_handle;
-static uint8_t em4_locks_counter = 0;
+static volatile uint8_t em4_locks_counter = 0;
+static bool temporary_lock_active = false; // Track if a temporary lock is currently active
 
 void zw_shutdown_manager_callback(sl_power_manager_em_t from, sl_power_manager_em_t to)
 {
@@ -136,16 +137,26 @@ void zw_shutdown_manager_add_lock(void)
 
 static void temporary_lock_revoke_callback(__attribute__((unused)) sl_sleeptimer_timer_handle_t *handle, __attribute__((unused)) void *contextData)
 {
-  zw_shutdown_manager_release_lock();
+  // Only release the lock if it's actually active to prevent double-release
+  if (temporary_lock_active) {
+    zw_shutdown_manager_release_lock();
+    temporary_lock_active = false;
+  }
 }
 
 void zw_shutdown_manager_take_temporary_lock(uint32_t duration)
 {
-  zw_shutdown_manager_add_lock();
-  sl_status_t status = sl_sleeptimer_start_timer_ms(&em4_sleeptimer_handle, duration, temporary_lock_revoke_callback, NULL, 0, 0);
-  if (status != SL_STATUS_OK) {
-    assert(0); // for debug build only block here.
+  // If a temporary lock is already active, just restart the timer and return early
+  if (temporary_lock_active) {
+    sl_sleeptimer_restart_timer_ms(&em4_sleeptimer_handle, duration, temporary_lock_revoke_callback, NULL, 0, 0);
+    return;
   }
+
+  // First time: acquire the lock
+  zw_shutdown_manager_add_lock();
+  temporary_lock_active = true;
+  __attribute__((unused)) sl_status_t status = sl_sleeptimer_start_timer_ms(&em4_sleeptimer_handle, duration, temporary_lock_revoke_callback, NULL, 0, 0);
+  assert(status == SL_STATUS_OK); // Verify timer started successfully
 }
 
 void zw_shutdown_manager_release_lock(void)
@@ -158,4 +169,5 @@ void zw_shutdown_manager_release_lock(void)
 void zw_shutdown_manager_reset(void)
 {
   em4_locks_counter = 0;
+  temporary_lock_active = false;
 }

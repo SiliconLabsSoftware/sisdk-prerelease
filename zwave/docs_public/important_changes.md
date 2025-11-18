@@ -5,6 +5,20 @@ existing application. The description serves the purpose of helping to fix the f
 
 # 7.25.0 {#section-7-25-0}
 
+## Power Management Commands - Lock Behavior
+
+- The permanent IO lock can only be acquired once. Subsequent requests with timeout=0 will be ignored if the lock is already held.
+- Only one temporary lock can be held at a time. Requesting a second temporary lock will cancel and replace the first one.
+- Temporary locks cannot be revoked using `FUNC_ID_POWER_MANAGEMENT_CANCEL`. They can only expire naturally after their timeout period.
+- If a permanent lock is already held, requesting a temporary lock will not prevent the temporary lock mechanism from working - they operate independently.
+
+## PTI Configuration
+- Starting with this version, the PTI feature is mainly configured in sl_rail_util_pti component.
+- The whole PTI configuration is loaded from rail_util_pti component. 
+- PTI is disabled by default in all sample_apps except zniffer. It can be overloaded using the ENABLE_RADIO_DEBUG param in zw_config_rf.h.
+- It's not possible to deactivate PTI on Zniffer app.
+- The user is now free to align PTI pins with the pinout of his board.
+
 ## Removal of enterPowerDown() and exitPowerDown() hooks
 FreeRTOS power down hooks (`configPRE_SLEEP_PROCESSING` and `configPOST_SLEEP_PROCESSING`) related to the zpal_power_manager module have been removed. With the removal of zpal_power_manager, applications should now use the Silicon Labs `sl_power_manager` API directly to manage power states, or use `zw_shutdown_manager` for controlling entry into shutdown mode.
 

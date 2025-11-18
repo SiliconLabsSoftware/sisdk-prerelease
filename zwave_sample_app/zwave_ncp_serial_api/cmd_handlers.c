@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+
 #include <AppTimer.h>
 #include <SyncEvent.h>
 #include <ZAF_Common_interface.h>
@@ -2694,20 +2695,6 @@ ZW_ADD_CMD(FUNC_ID_ZW_SET_LR_VIRTUAL_IDS)
 {
   SetLongRangeVirtualNodes(frame->payload[0]);
   set_state_and_notify(stateIdle);
-}
-#endif
-
-#if SUPPORT_SERIAL_ENABLE_RADIO_PTI
-ZW_ADD_CMD(FUNC_ID_ENABLE_RADIO_PTI)
-{
-  const uint8_t retVal = SaveApplicationEnablePTI(frame->payload[0]);
-  DoRespond(retVal);
-}
-
-ZW_ADD_CMD(FUNC_ID_GET_RADIO_PTI)
-{
-  const uint8_t retVal = GetPTIConfig();
-  DoRespond(retVal);
 }
 #endif
 

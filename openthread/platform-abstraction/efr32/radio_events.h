@@ -35,7 +35,8 @@
 #ifndef RADIO_EVENTS_H
 #define RADIO_EVENTS_H
 
-#include "openthread-core-config.h"
+#include <openthread-core-config.h>
+
 #include "sl_rail.h"
 #include "sl_rail_types.h"
 #include "openthread/instance.h"
@@ -107,13 +108,6 @@ void sli_ot_radio_events_process_callback(sl_rail_handle_t aRailHandle, sl_rail_
  * @param values New values for the masked events
  */
 void sli_ot_radio_events_update_config(sl_rail_events_t mask, sl_rail_events_t values);
-
-/**
- * @brief Get current event configuration
- *
- * @return Current event configuration mask
- */
-sl_rail_events_t sli_ot_radio_events_get_config(void);
 
 #ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
 /**

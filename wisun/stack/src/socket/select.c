@@ -27,7 +27,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
-#include <assert.h>
+#include "sl_assert.h"
 #include <string.h>
 #include <cmsis_os2.h>
 
@@ -227,15 +227,15 @@ void sl_wisun_select_init(void)
     0
   };
   sock_fds_check_event_id = osEventFlagsNew(&select_flags_attr);
-  assert(sock_fds_check_event_id != NULL);
+  EFM_ASSERT(sock_fds_check_event_id != NULL);
 }
 
 void sl_wisun_check_read_sockfd_set(void)
 {
-  assert((osEventFlagsSet(sock_fds_check_event_id, READ_SOCK_FDS_CHECK_FLAG) & CMSIS_RTOS_ERROR_MASK) == 0);
+  EFM_ASSERT((osEventFlagsSet(sock_fds_check_event_id, READ_SOCK_FDS_CHECK_FLAG) & CMSIS_RTOS_ERROR_MASK) == 0);
 }
 
 void sl_wisun_check_write_sockfd_set(void)
 {
-  assert((osEventFlagsSet(sock_fds_check_event_id, WRITE_SOCK_FDS_CHECK_FLAG) & CMSIS_RTOS_ERROR_MASK) == 0);
+  EFM_ASSERT((osEventFlagsSet(sock_fds_check_event_id, WRITE_SOCK_FDS_CHECK_FLAG) & CMSIS_RTOS_ERROR_MASK) == 0);
 }

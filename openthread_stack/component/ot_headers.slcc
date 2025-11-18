@@ -19,6 +19,8 @@ include:
   - path: backbone_router_ftd.h
   - path: ble_secure.h
   - path: border_agent.h
+  - path: border_agent_tracker.h
+  - path: border_agent_txt_data.h
   - path: border_router.h
   - path: border_routing.h
   - path: channel_manager.h
@@ -120,10 +122,14 @@ include:
   - path: backbone_router/bbr_manager.hpp
   - path: backbone_router/multicast_listeners_table.hpp
   - path: backbone_router/ndproxy_table.hpp
+  - path: border_router/br_log.hpp
   - path: border_router/br_tracker.hpp
+  - path: border_router/br_types.hpp
   - path: border_router/dhcp6_pd_client.hpp
   - path: border_router/infra_if.hpp
+  - path: border_router/multi_ail_detector.hpp
   - path: border_router/routing_manager.hpp
+  - path: border_router/rx_ra_tracker.hpp
   - path: coap/coap.hpp
   - path: coap/coap_message.hpp
   - path: coap/coap_secure.hpp
@@ -254,6 +260,8 @@ include:
   - path: mac/wakeup_tx_scheduler.hpp
   - path: meshcop/announce_begin_client.hpp
   - path: meshcop/border_agent.hpp
+  - path: meshcop/border_agent_tracker.hpp
+  - path: meshcop/border_agent_txt_data.hpp
   - path: meshcop/commissioner.hpp
   - path: meshcop/dataset.hpp
   - path: meshcop/dataset_manager.hpp

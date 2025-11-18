@@ -41,7 +41,6 @@
 #define SUPPORT_SERIAL_GET_LR_CHANNEL                   1
 #define SUPPORT_SERIAL_SET_LR_CHANNEL                   1
 #define SUPPORT_SERIAL_SET_LR_VIRTUAL_IDS               1
-#define SUPPORT_SERIAL_ENABLE_RADIO_PTI                 1
 #define SUPPORT_ZW_SEND_PROTOCOL_DATA                   1 /* ZW_SendProtocolData */
 #define SUPPORT_ZW_TRANSFER_PROTOCOL_CC                 1
 #define SUPPORT_ZW_REQUEST_PROTOCOL_CC_ENCRYPTION       1

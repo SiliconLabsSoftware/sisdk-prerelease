@@ -103,11 +103,6 @@ include:
   - path: coexistence-common-802154.h
   condition:
   - zigbee_pro_stack_support
-- path: ../../../protocol/zigbee/stack/include/
-  file_list:
-  - path: sl_zigbee_types.h
-  condition:
-  - zigbee_pro_stack_support
 source:
 - path: plugin/coexistence/common/coexistence.c
 - path: plugin/coexistence/common/coexistence-pwm.c

@@ -193,3 +193,8 @@ filter:
     value: [Advanced]
 tag:
   - hardware:device:ram:96
+  - hwfilter:device:device_supports_zigbee
+  - hwfilter:device:device_supports_thread
+  - hwfilter:!device:rm21z000f1024im32
+  - hwfilter:!device:device_family_mgm22
+  - hwfilter:ram:96k

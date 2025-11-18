@@ -35,12 +35,26 @@
 // <o SL_BT_CONFIG_MAX_CS_CONFIGS_PER_CONNECTION> Maximum number of CS configurations per Bluetooth connection <1-4>
 // <i> Default: 4
 // <i> Define the number of CS configurations the application needs per Bluetooth connection.
+#ifndef SL_BT_CONFIG_MAX_CS_CONFIGS_PER_CONNECTION
 #define SL_BT_CONFIG_MAX_CS_CONFIGS_PER_CONNECTION     (4)
+#endif
 
 // <o SL_BT_CONFIG_MAX_CS_PROCEDURES> Maximum number of procedures per CS configuration <1-32>
 // <i> Default: 2
 // <i> Define the maximum number of simultaneous procedures the CS device supports.
+#ifndef SL_BT_CONFIG_MAX_CS_PROCEDURES
 #define SL_BT_CONFIG_MAX_CS_PROCEDURES     (2)
+#endif
+
+// <o SL_BT_CONFIG_CS_SYNC_MAX_ANTENNAS> Max number of antennas used for CS sync packets <1-4>.
+// <i> Default: 0xFF
+// <i> Define the maximum number of antennas used for CS sync packets.
+// <i> When set to 0xFF, the controller will automatically determine the maximum from the ACI.
+// <i> This configuration is relevant if the application is configuring CS Sync Antenna Selection
+// <i> to non-static pattern.
+#ifndef SL_BT_CONFIG_CS_SYNC_MAX_ANTENNAS
+#define SL_BT_CONFIG_CS_SYNC_MAX_ANTENNAS  (0xFF)
+#endif
 
 // <<< end of configuration section >>>
 #endif

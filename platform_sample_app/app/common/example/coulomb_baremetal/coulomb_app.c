@@ -308,7 +308,7 @@ void coulomb_app_reset_total(void)
   if (ECODE_NVM3_OK == nvm3_writeData(NVM3_DEFAULT_HANDLE, key_total, (float *)&total_charge, len)) {
     printf("Reset total counter to zero.\r\n");
   } else {
-    printf("Error while reseting.\r\n");
+    printf("Error while resetting.\r\n");
   }
   CORE_EXIT_CRITICAL();
 }

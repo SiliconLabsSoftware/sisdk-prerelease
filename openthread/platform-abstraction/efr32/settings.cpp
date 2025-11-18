@@ -308,6 +308,7 @@ static sl_status_t addSetting(uint16_t key, const uint8_t *value, uint16_t value
             status         = writeNvm3Object(settingsKey, value, valueLength);
             availableIndex = true;
         }
+        idx++;
     }
 
 exit:

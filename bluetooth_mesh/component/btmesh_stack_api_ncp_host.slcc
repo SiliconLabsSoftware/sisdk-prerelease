@@ -13,14 +13,18 @@ include:
   file_list:
   - path: sl_btmesh_api.h
   - path: sl_btmesh_bgapi.h
+  - path: sli_btmesh_api.h
   - path: sl_btmesh_compatibility_macros.h
   - path: sl_btmesh_capi_types.h
+  - path: sl_btmesh_device_properties.h
+  - path: sl_btmesh_generic_model_capi_types.h
+  - path: sl_btmesh_lighting_model_capi_types.h
   - path: sl_btmesh_memory_config.h
   - path: sl_btmesh_model_specification_defs.h
   - path: sl_btmesh_model_specification_v1_1_defs.h
   - path: sl_btmesh_ncp_host.h
+  - path: sl_btmesh_sensor_model_capi_types.h
   - path: sl_btmesh_stack_init.h
-  - path: sli_btmesh_api.h
 source:
 - path: src/sl_btmesh_ncp_host_api.c
 - path: src/sl_btmesh_ncp_host.c

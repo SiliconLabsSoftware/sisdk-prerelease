@@ -154,6 +154,42 @@ extern void sli_set_tx_power_in_rail(int8_t aTxPower);
 // External functions from radio.cpp
 extern bool sl_rail_util_coex_is_enabled(void);
 
+static otRadioCaps sRadioCapabilities =
+    (OT_RADIO_CAPS_ACK_TIMEOUT | OT_RADIO_CAPS_CSMA_BACKOFF | OT_RADIO_CAPS_ENERGY_SCAN | OT_RADIO_CAPS_SLEEP_TO_TX
+#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
+     | OT_RADIO_CAPS_TRANSMIT_SEC
+     // When scheduled tx is required, we support sl_rail_start_scheduled_cca_csma_tx
+     // (delay is indicated in tx frame info set in MAC)
+     | OT_RADIO_CAPS_TRANSMIT_TIMING
+     // When scheduled rx is required, we support sl_rail_start_scheduled_rx in our
+     // implementation of otPlatRadioReceiveAt
+     | OT_RADIO_CAPS_RECEIVE_TIMING
+#endif
+    );
+
+static bool sPromiscuous       = false;
+static bool sIsSrcMatchEnabled = false;
+static bool sRadioCoexEnabled  = true;
+
+// Constants needed for moved functions
+#ifndef USERDATA_MFG_CUSTOM_EUI_64
+#define USERDATA_MFG_CUSTOM_EUI_64 (2)
+#endif
+
+#ifndef OT_EXT_ADDRESS_SIZE
+#define OT_EXT_ADDRESS_SIZE (8)
+#endif
+
+// Device capability macro for MCU enable check
+#if defined(_SILICON_LABS_32B_SERIES_2)
+#define DEVICE_CAPABILITY_MCU_EN (DEVINFO->SWCAPA1 & _DEVINFO_SWCAPA1_RFMCUEN_MASK)
+#else
+#define DEVICE_CAPABILITY_MCU_EN (DEVINFO->SWCAPA & _DEVINFO_SWCAPA_RFMCUEN_MASK)
+#endif
+
+//------------------------------------------------------------------------------
+// Function Implementations
+
 // Functions moved from radio.cpp
 #if RADIO_CONFIG_ENABLE_CUSTOM_EUI_SUPPORT && defined(_SILICON_LABS_32B_SERIES_2)
 
@@ -203,40 +239,6 @@ void sli_ot_radio_interface_init_antenna_config(void)
 }
 #endif // SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
 
-// Global variables moved from radio.cpp
-static otRadioCaps sRadioCapabilities =
-    (OT_RADIO_CAPS_ACK_TIMEOUT | OT_RADIO_CAPS_CSMA_BACKOFF | OT_RADIO_CAPS_ENERGY_SCAN | OT_RADIO_CAPS_SLEEP_TO_TX
-#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
-     | OT_RADIO_CAPS_TRANSMIT_SEC
-     // When scheduled tx is required, we support sl_rail_start_scheduled_cca_csma_tx
-     // (delay is indicated in tx frame info set in MAC)
-     | OT_RADIO_CAPS_TRANSMIT_TIMING
-     // When scheduled rx is required, we support sl_rail_start_scheduled_rx in our
-     // implementation of otPlatRadioReceiveAt
-     | OT_RADIO_CAPS_RECEIVE_TIMING
-#endif
-    );
-
-static bool sPromiscuous       = false;
-static bool sIsSrcMatchEnabled = false;
-static bool sRadioCoexEnabled  = true;
-
-// Constants needed for moved functions
-#ifndef USERDATA_MFG_CUSTOM_EUI_64
-#define USERDATA_MFG_CUSTOM_EUI_64 (2)
-#endif
-
-#ifndef OT_EXT_ADDRESS_SIZE
-#define OT_EXT_ADDRESS_SIZE (8)
-#endif
-
-// Device capability macro for MCU enable check
-#if defined(_SILICON_LABS_32B_SERIES_2)
-#define DEVICE_CAPABILITY_MCU_EN (DEVINFO->SWCAPA1 & _DEVINFO_SWCAPA1_RFMCUEN_MASK)
-#else
-#define DEVICE_CAPABILITY_MCU_EN (DEVINFO->SWCAPA & _DEVINFO_SWCAPA_RFMCUEN_MASK)
-#endif
-
 sl_rail_handle_t sli_ot_radio_interface_get_rail_handle(void)
 {
 #ifdef SL_CATALOG_RAIL_MULTIPLEXER_PRESENT
@@ -279,7 +281,7 @@ otError sli_ot_radio_interface_set_rx(uint8_t aChannel)
     }
 
 #if FAST_CHANNEL_SWITCHING_SUPPORT && OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
-    if (sl_is_multi_channel_enabled())
+    if (sli_ot_radio_channel_switching_is_multi_channel_enabled())
     {
         // Calling sl_rail_start_rx with a channel not listed in the channel
         // switching config is a bug.
@@ -785,8 +787,7 @@ sl_rail_status_t sli_ot_radio_interface_rail_set_cca_threshold(int8_t aThreshold
     return sl_rail_set_cca_threshold(gRailHandle, aThreshold);
 }
 
-// Additional RAIL functions for diag.c
-sl_rail_status_t sli_ot_radio_interface_rail_get_channel_for_diag(uint16_t *aChannel)
+sl_rail_status_t sli_ot_radio_interface_rail_get_channel(uint16_t *aChannel)
 {
     return sl_rail_get_channel(gRailHandle, aChannel);
 }
@@ -803,15 +804,9 @@ sl_rail_status_t sli_ot_radio_interface_rail_stop_tx_stream(void)
     return sl_rail_stop_tx_stream(gRailHandle);
 }
 
-sl_rail_status_t sli_ot_radio_interface_rail_start_rx_for_diag(uint8_t                         aChannel,
-                                                               const sl_rail_scheduler_info_t *aScheduler)
+sl_rail_status_t sli_ot_radio_interface_rail_start_rx(uint8_t aChannel, const sl_rail_scheduler_info_t *aScheduler)
 {
     return sl_rail_start_rx(gRailHandle, aChannel, aScheduler);
-}
-
-sl_rail_status_t sli_ot_radio_interface_rail_set_tx_power_dbm_for_diag(sl_rail_tx_power_t aPowerDbm)
-{
-    return sl_rail_set_tx_power_dbm(gRailHandle, aPowerDbm);
 }
 
 //------------------------------------------------------------------------------

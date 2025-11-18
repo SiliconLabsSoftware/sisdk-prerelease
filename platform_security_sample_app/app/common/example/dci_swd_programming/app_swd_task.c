@@ -122,29 +122,44 @@ void get_device_info(char *name, uint64_t *uid)
   buf2 = (buf2 & _DEVINFO_MSIZE_FLASH_MASK) >> _DEVINFO_MSIZE_FLASH_SHIFT;
   flash_size = buf2 * 1024;
 
+#if defined(DEVINFO_PART_FAMILY_FG)
   if ((buf0 & _DEVINFO_PART_FAMILY_MASK) == DEVINFO_PART_FAMILY_FG) {
     sprintf(name, "%s%2lu%c%03luF%lu", "EFR32FG",
             (buf0 & _DEVINFO_PART_FAMILYNUM_MASK) >> _DEVINFO_PART_FAMILYNUM_SHIFT,
             alpha, buf1, buf2);
-  } else if ((buf0 & _DEVINFO_PART_FAMILY_MASK) == DEVINFO_PART_FAMILY_MG) {
+  }
+#endif
+#if defined(DEVINFO_PART_FAMILY_MG)
+  if ((buf0 & _DEVINFO_PART_FAMILY_MASK) == DEVINFO_PART_FAMILY_MG) {
     sprintf(name, "%s%2lu%c%03luF%lu", "EFR32MG",
             (buf0 & _DEVINFO_PART_FAMILYNUM_MASK) >> _DEVINFO_PART_FAMILYNUM_SHIFT,
             alpha, buf1, buf2);
-  } else if ((buf0 & _DEVINFO_PART_FAMILY_MASK) == DEVINFO_PART_FAMILY_BG) {
+  }
+#endif
+#if defined(DEVINFO_PART_FAMILY_BG)
+  if ((buf0 & _DEVINFO_PART_FAMILY_MASK) == DEVINFO_PART_FAMILY_BG) {
     sprintf(name, "%s%2lu%c%03luF%lu", "EFR32BG",
             (buf0 & _DEVINFO_PART_FAMILYNUM_MASK) >> _DEVINFO_PART_FAMILYNUM_SHIFT,
             alpha, buf1, buf2);
-  } else if ((buf0 & _DEVINFO_PART_FAMILY_MASK) == ((_DEVINFO_PART_FAMILY_BG + 1) << 24)) {
+  }
+#endif
+#if defined(DEVINFO_PART_FAMILY_ZG)
+  if ((buf0 & _DEVINFO_PART_FAMILY_MASK) == ((_DEVINFO_PART_FAMILY_BG + 1) << 24)) {
     sprintf(name, "%s%2lu%c%03luF%lu", "EFR32ZG",
             (buf0 & _DEVINFO_PART_FAMILYNUM_MASK) >> _DEVINFO_PART_FAMILYNUM_SHIFT,
             alpha, buf1, buf2);
-  } else if ((buf0 & _DEVINFO_PART_FAMILY_MASK) == DEVINFO_PART_FAMILY_PG) {
+  }
+#endif
+#if defined(DEVINFO_PART_FAMILY_PG)
+  if ((buf0 & _DEVINFO_PART_FAMILY_MASK) == DEVINFO_PART_FAMILY_PG) {
     sprintf(name, "%s%2lu%c%03luF%lu", "EFM32PG",
             (buf0 & _DEVINFO_PART_FAMILYNUM_MASK) >> _DEVINFO_PART_FAMILYNUM_SHIFT,
             alpha, buf1, buf2);
-  } else {
-    RAISE(SWD_ERROR_UNKNOWN_DEVICE);
   }
+#endif
+#if !defined(DEVINFO_PART_FAMILY_FG) && !defined(DEVINFO_PART_FAMILY_MG) && !defined(DEVINFO_PART_FAMILY_BG) && !defined(DEVINFO_PART_FAMILY_ZG) && !defined(DEVINFO_PART_FAMILY_PG)
+  RAISE(SWD_ERROR_UNKNOWN_DEVICE);
+#endif
 
   // Retrieve high and low part of unique ID
   *uid = read_mem((uint32_t)&(DEVINFO->EUI64H));

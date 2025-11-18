@@ -21,8 +21,8 @@ include:
     - path: app.h
     - path: segment_lcd_app.h
 component:
-  - id: emlib_letimer
-  - id: emlib_lcd
+  - id: hal_letimer
+  - id: hal_lcd
   - id: sl_main
   - id: device_init
   - id: clock_manager

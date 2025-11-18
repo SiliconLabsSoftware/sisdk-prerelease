@@ -34,6 +34,8 @@
 #ifndef RADIO_STATE_H
 #define RADIO_STATE_H
 
+#include <openthread-core-config.h>
+
 #include <stdbool.h>
 #include <stdint.h>
 

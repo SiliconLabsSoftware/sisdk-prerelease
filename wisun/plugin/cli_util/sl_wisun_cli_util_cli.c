@@ -32,7 +32,7 @@
 //                                   Includes
 // -----------------------------------------------------------------------------
 #include <stdio.h>
-#include <assert.h>
+#include "sl_assert.h"
 #include <string.h>
 #include "sl_cli.h"
 #include "sl_wisun_cli_core.h"

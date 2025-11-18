@@ -34,6 +34,7 @@
 #include <openthread-core-config.h>
 
 #include "platform-band.h"
+#include "radio_channel_switching.h"
 #include "radio_instance.h"
 #include "radio_interface.h"
 #include "radio_multi_channel.h"
@@ -49,8 +50,7 @@
 #include "sl_rail_util_ieee802154_fast_channel_switching_config.h"
 #endif // SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
 
-constexpr size_t RADIO_POWER_MANAGER_MAX_INSTANCES =
-    OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE ? OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM : 1;
+constexpr size_t RADIO_POWER_MANAGER_MAX_INSTANCES = RADIO_INTERFACE_COUNT;
 
 #if !OPENTHREAD_CONFIG_POWER_CALIBRATION_ENABLE
 
@@ -110,7 +110,7 @@ static int8_t sli_get_max_tx_power_across_instances(uint16_t channel)
 
 #if FAST_CHANNEL_SWITCHING_SUPPORT && OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
 
-    if (sl_is_multi_channel_enabled())
+    if (sli_ot_radio_channel_switching_is_multi_channel_enabled())
     {
         sl_rail_ieee802154_rx_channel_switching_cfg_t channel_switching_cfg;
 

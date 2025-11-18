@@ -42,8 +42,6 @@
 #define SUPPORT_SERIAL_ENABLE_RADIO_PTI                 0
 #define SUPPORT_SERIAL_GET_NLS_NODES                    0
 
-/* */
-
 /**************************************************************************/
 /* Common for all slaves */
 /* SerialAPI functionality support definitions */

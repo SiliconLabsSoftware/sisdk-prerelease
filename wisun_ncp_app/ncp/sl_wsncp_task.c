@@ -17,7 +17,7 @@
 
 #include <stdint.h>
 #include <string.h>
-#include <assert.h>
+#include "sl_assert.h"
 #include <cmsis_os2.h>
 #include <inttypes.h>
 #include "sl_wisun_events.h"
@@ -78,22 +78,22 @@ static void sl_wsncp_ind_handler(void);
 // Task flag management helpers
 static inline void sl_wsncp_signal_request_ready(void)
 {
-  assert((osEventFlagsSet(sl_wsncp_task_flags, SL_WSNCP_TASK_FLAG_REQ_READY) & CMSIS_RTOS_ERROR_MASK) == 0);
+  EFM_ASSERT((osEventFlagsSet(sl_wsncp_task_flags, SL_WSNCP_TASK_FLAG_REQ_READY) & CMSIS_RTOS_ERROR_MASK) == 0);
 }
 
 static inline void sl_wsncp_signal_indication_ready(void)
 {
-  assert((osEventFlagsSet(sl_wsncp_task_flags, SL_WSNCP_TASK_FLAG_IND_READY) & CMSIS_RTOS_ERROR_MASK) == 0);
+  EFM_ASSERT((osEventFlagsSet(sl_wsncp_task_flags, SL_WSNCP_TASK_FLAG_IND_READY) & CMSIS_RTOS_ERROR_MASK) == 0);
 }
 
 static inline void sl_wsncp_signal_indication_done(void)
 {
-  assert((osEventFlagsSet(sl_wsncp_task_flags, SL_WSNCP_TASK_FLAG_IND_DONE) & CMSIS_RTOS_ERROR_MASK) == 0);
+  EFM_ASSERT((osEventFlagsSet(sl_wsncp_task_flags, SL_WSNCP_TASK_FLAG_IND_DONE) & CMSIS_RTOS_ERROR_MASK) == 0);
 }
 
 static inline void sl_wsncp_set_busy(void)
 {
-  assert((osEventFlagsWait(sl_wsncp_task_flags,
+  EFM_ASSERT((osEventFlagsWait(sl_wsncp_task_flags,
                            SL_WSNCP_TASK_FLAG_COMM_READY,
                            osFlagsWaitAny,
                            osWaitForever) & CMSIS_RTOS_ERROR_MASK) == 0);
@@ -101,8 +101,8 @@ static inline void sl_wsncp_set_busy(void)
 
 static inline void sl_wsncp_clr_busy(void)
 {
-  assert((osEventFlagsSet(sl_wsncp_task_flags,
-                          SL_WSNCP_TASK_FLAG_COMM_READY) & CMSIS_RTOS_ERROR_MASK) == 0);
+  EFM_ASSERT((osEventFlagsSet(sl_wsncp_task_flags,
+                              SL_WSNCP_TASK_FLAG_COMM_READY) & CMSIS_RTOS_ERROR_MASK) == 0);
 }
 
 // Buffer completion callbacks
@@ -118,12 +118,12 @@ static void sl_wsncp_ind_complete_callback(void)
 
 /**
  * @brief Transmit data with proper buffer management and safety checks
- * 
+ *
  * This function ensures that:
  * - Only one transmission can be active at a time
  * - Buffers are properly managed (cleared after transmission completion)
  * - All parameters are validated before transmission
- * 
+ *
  * @param len Length of data to transmit
  * @param data Pointer to data to transmit
  * @param type String description for logging (e.g., "CNF", "IND")
@@ -133,33 +133,33 @@ static void sl_wsncp_ind_complete_callback(void)
 static void sl_wsncp_transmit(uint16_t len, void *data, const char *type, uint32_t id, sl_wsncp_tx_type_t tx_type)
 {
   uint32_t timediff;
-  
+
   // Parameter validation
   if (data == NULL) {
     sl_wisun_trace_error("Data pointer is NULL for %s", type);
     return;
   }
-  
+
   if (len == 0) {
     sl_wisun_trace_error("Length is zero for %s", type);
     return;
   }
-  
+
   if (tx_type == SL_WSNCP_TX_TYPE_NONE) {
     sl_wisun_trace_error("Invalid transmission type for %s", type);
     return;
   }
-  
+
   // Check if we're already transmitting
   if (current_tx_type != SL_WSNCP_TX_TYPE_NONE) {
-    sl_wisun_trace_error("Already transmitting %s, current type: %d, new type: %d", 
+    sl_wisun_trace_error("Already transmitting %s, current type: %d, new type: %d",
                         type, current_tx_type, tx_type);
     return;
   }
-  
+
   // Set the current transmission type
   current_tx_type = tx_type;
-  
+
   // Transmit the data
   sl_status_t status = sl_wsncp_interface_transmit(len, data);
   if (status != SL_STATUS_OK) {
@@ -167,11 +167,11 @@ static void sl_wsncp_transmit(uint16_t len, void *data, const char *type, uint32
     current_tx_type = SL_WSNCP_TX_TYPE_NONE; // Reset on failure
     return;
   }
-  
+
   // Track timing
   ncp_timestamp_tx = sl_sleeptimer_get_tick_count();
   sl_wsncp_set_busy();
-  
+
   // Calculate and log timing
   timediff = sl_sleeptimer_get_tick_count() - ncp_timestamp_tx;
   sl_wisun_trace_debug("%s: id = %d transmitted in %"PRIu32"ms", type, id, sl_sleeptimer_tick_to_ms(timediff));
@@ -194,18 +194,18 @@ void sl_wsncp_on_transmit_complete_cb(sl_status_t status)
     case SL_WSNCP_TX_TYPE_CNF:
       sl_wsncp_buffer_clear(&sl_wsncp_cnf);
       break;
-      
+
     case SL_WSNCP_TX_TYPE_IND:
       sl_wsncp_buffer_clear(&sl_wsncp_ind);
       sl_wsncp_signal_indication_done(); // Signal indication processing complete
       break;
-      
+
     case SL_WSNCP_TX_TYPE_NONE:
     default:
       // Unexpected transmission type - no trace in IRQ context
       break;
   }
-  
+
   // Reset transmission type
   current_tx_type = SL_WSNCP_TX_TYPE_NONE;
 
@@ -254,19 +254,19 @@ void sl_wsncp_task_init(void)
 
   // Initialize message buffers with error checking
   sl_status_t status;
-  
+
   status = sl_wsncp_buffer_init(&sl_wsncp_req);
   if (status != SL_STATUS_OK) {
     sl_wisun_trace_error("Failed to initialize request buffer: %d", status);
     return;
   }
-  
+
   status = sl_wsncp_buffer_init(&sl_wsncp_cnf);
   if (status != SL_STATUS_OK) {
     sl_wisun_trace_error("Failed to initialize confirmation buffer: %d", status);
     return;
   }
-  
+
   status = sl_wsncp_buffer_init(&sl_wsncp_ind);
   if (status != SL_STATUS_OK) {
     sl_wisun_trace_error("Failed to initialize indication buffer: %d", status);
@@ -281,7 +281,7 @@ void sl_wsncp_task_init(void)
   };
 
   sl_wsncp_task_flags = osEventFlagsNew(&sl_wsncp_task_flags_attr);
-  assert(sl_wsncp_task_flags != NULL);
+  EFM_ASSERT(sl_wsncp_task_flags != NULL);
 
   osThreadAttr_t sl_wsncp_task_attribute = {
     "Wi-SUN NCP Task",
@@ -298,7 +298,7 @@ void sl_wsncp_task_init(void)
   sl_wsncp_task_id = osThreadNew(&sl_wsncp_task,
                                  NULL,
                                  &sl_wsncp_task_attribute);
-  assert(sl_wsncp_task_id != 0);
+  EFM_ASSERT(sl_wsncp_task_id != 0);
 
 }
 
@@ -316,11 +316,11 @@ void sl_wisun_on_event(sl_wisun_evt_t *evt)
                                    SL_WSNCP_TASK_FLAG_IND_DONE,
                                    osFlagsWaitAny,
                                    osWaitForever);
-  assert((flags & CMSIS_RTOS_ERROR_MASK) == 0);
-  
+  EFM_ASSERT((flags & CMSIS_RTOS_ERROR_MASK) == 0);
+
   // Add event data to the indication buffer
   sl_status_t status = sl_wsncp_buffer_add_data(&sl_wsncp_ind, evt->header.length, (const uint8_t*)evt, sl_wsncp_ind_complete_callback);
-  
+
   if (status != SL_STATUS_OK) {
     sl_wisun_trace_error("Failed to add indication data, status: %d", status);
   }
@@ -333,14 +333,14 @@ static void sl_wsncp_req_handler(void)
 {
   // Check if request buffer has a complete message
   if(sl_wsncp_buffer_get_state(&sl_wsncp_req) != SL_WSNCP_BUFFER_STATE_COMPLETE) {
-    sl_wisun_trace_error("No complete request available, state: %d", 
+    sl_wisun_trace_error("No complete request available, state: %d",
                          sl_wsncp_buffer_get_state(&sl_wsncp_req));
     return;
   }
 
   // Check if confirmation buffer is available (empty)
   if(sl_wsncp_buffer_get_state(&sl_wsncp_cnf) != SL_WSNCP_BUFFER_STATE_EMPTY) {
-    sl_wisun_trace_error("Confirmation buffer not available, state: %d", 
+    sl_wisun_trace_error("Confirmation buffer not available, state: %d",
                          sl_wsncp_buffer_get_state(&sl_wsncp_cnf));
     return;
   }
@@ -350,7 +350,7 @@ static void sl_wsncp_req_handler(void)
   sl_wisun_trace_debug("REQ: id = %d len = %u", req_header->id, sl_wsncp_req.length);
 
   // Send request using the public API
-  sl_status_t status = sl_wisun_send_request(sl_wsncp_req.data, sl_wsncp_req.length, 
+  sl_status_t status = sl_wisun_send_request(sl_wsncp_req.data, sl_wsncp_req.length,
                                              sl_wsncp_cnf.data, SL_WSNCP_BUFFER_SIZE);
   if (status != SL_STATUS_OK) {
     sl_wisun_trace_error("Failed to send message request: %d", status);
@@ -375,7 +375,7 @@ static void sl_wsncp_ind_handler(void)
 {
   // Check if indication buffer has a complete message
   if(sl_wsncp_buffer_get_state(&sl_wsncp_ind) != SL_WSNCP_BUFFER_STATE_COMPLETE) {
-    sl_wisun_trace_error("No complete indication available, state: %d", 
+    sl_wisun_trace_error("No complete indication available, state: %d",
                          sl_wsncp_buffer_get_state(&sl_wsncp_ind));
     return;
   }
@@ -407,7 +407,7 @@ static void sl_wsncp_task(void *argument)
                              SL_WSNCP_TASK_FLAG_REQ_READY + SL_WSNCP_TASK_FLAG_IND_READY,
                              osFlagsWaitAny,
                              osWaitForever);
-    assert((flags & CMSIS_RTOS_ERROR_MASK) == 0);
+    EFM_ASSERT((flags & CMSIS_RTOS_ERROR_MASK) == 0);
 
     // Handle request
     if (flags & SL_WSNCP_TASK_FLAG_REQ_READY) {

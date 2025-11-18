@@ -17,6 +17,19 @@ include:
 template_contribution:
 - name: component_catalog
   value: zigbee_scan_dispatch
+
+  # CLI command to scan dispatch component
+- name: cli_command
+  value:
+    name: energy-scan
+    handler: sli_zigbee_af_scan_dispatch_energy_scan_cli_command
+    help: Perform energy scan on provided channel mask and duration.
+    argument:
+    - type: uint32
+      help: Channel mask (bitfield of channels to scan)
+    - type: uint8
+      help: Scan duration (0-14, where actual time = (aBaseSuperframeDuration * (2^n + 1)) symbols)
+
 - name: zigbee_af_callback
   value:
     callback_type: event_init

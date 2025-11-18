@@ -127,7 +127,7 @@ Please note external wakeup is not supported on button 1 in case of brd2603a and
     <td>Sends Battery Report</td>
 </tr><tr>
     <td>Medium Press</td>
-    <td>Toggles "motion detected" event simulation.</td>
+    <td>Simulates motion detection for 10 seconds. Notifications are generated when motion is detected and when the sensor returns to idle.</td>
 </tr><tr>
     <td rowspan="2">BTN1</td>
     <td>Short Press</td>

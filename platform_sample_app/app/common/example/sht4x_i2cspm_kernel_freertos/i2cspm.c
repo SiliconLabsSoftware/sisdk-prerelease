@@ -294,11 +294,32 @@ static void i2cspm_task(void *arg)
 
   // Check for device presence
   // Each SHT4x sensor has a unique 48-bit device Id
-  // Loop until the sensor is ready
-  while (ret == i2cTransferDone) {
-    ret = SHT4X_transaction(I2C_FLAG_WRITE_READ, cmdReadId, 1, deviceId, 6);
-    sl_sleeptimer_delay_millisecond(80);
+  for (uint8_t attempt = 0; attempt < 5 && ret != i2cTransferDone; attempt++) {
+    ret = SHT4X_transaction(I2C_FLAG_WRITE,
+                            cmdReadId,
+                            sizeof(cmdReadId),
+                            NULL,
+                            0);
+    if (ret != i2cTransferDone) {
+      vTaskDelay(xDelay);
+      continue;
+    }
+
+    vTaskDelay(pdMS_TO_TICKS(1));
+
+    ret = SHT4X_transaction(I2C_FLAG_READ,
+                            NULL,
+                            0,
+                            deviceId,
+                            sizeof(deviceId));
+    if (ret == i2cTransferDone) {
+      break;
+    }
+
+    vTaskDelay(xDelay);
   }
+
+  EFM_ASSERT(ret == i2cTransferDone);
 
   // printf is configured to redirect to vcom in project file
   printf("\r\nWelcome to the I2C SPM sample application using FreeRTOS\r\n\r\n");

@@ -110,6 +110,8 @@ template_contribution:
 tag:
   - prebuilt_demo
   - hardware:component:exp_header:spi
+  - hwfilter:device:device_supports_thread
+  - hwfilter:board:hardware_board_has_spi
 
 readme:
   - path: ./README-MP-DMP-RCP.md

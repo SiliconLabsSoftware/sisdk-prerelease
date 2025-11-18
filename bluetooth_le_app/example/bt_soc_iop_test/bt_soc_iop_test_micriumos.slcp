@@ -34,11 +34,6 @@ component:
   - id: bluetooth_feature_system
   - id: component_catalog
   - id: in_place_ota_dfu
-    condition:
-      - device_series_2
-  - id: app_ota_dfu
-    condition:
-      - device_series_3
   - id: rail_util_pti
   - id: app_assert
   - id: mpu
@@ -112,7 +107,6 @@ configuration:
     value: "2048"
     condition:
       - app_ota_dfu
-      - device_series_2
   - name: LIB_MEM_CFG_HEAP_SIZE
     value: "6500"
   - name: OS_CFG_TMR_EN
@@ -159,7 +153,11 @@ define:
     condition:
       - hardware_board_supports_wstk_lcd
 
+post_build:
+  - path: ../../postbuild_profile/bt_dfu_app.slpb
+
 tag:
+  - companion:bootloader
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_series_2
   - hwfilter:!device:device_generic_family_efr32xg22

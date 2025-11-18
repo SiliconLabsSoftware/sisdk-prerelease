@@ -16,7 +16,9 @@
  ******************************************************************************/
 
 #include "app/framework/include/af.h"
-
+#ifdef SL_CATALOG_CLI_PRESENT
+#include "app/util/serial/sl_zigbee_command_interpreter.h"
+#endif // SL_CATALOG_CLI_PRESENT
 #include "scan-dispatch.h"
 
 // -----------------------------------------------------------------------------
@@ -24,6 +26,8 @@
 
 static sl_zigbee_af_event_t scanNetworkEvents[SL_ZIGBEE_SUPPORTED_NETWORKS];
 static void scanNetworkEventHandler(sl_zigbee_af_event_t * event);
+
+static bool cliInitiatedScan = false;
 
 // -----------------------------------------------------------------------------
 // Internal implementation elements
@@ -141,6 +145,10 @@ void sli_zigbee_af_scan_dispatch_energy_scan_result_callback(uint8_t channel, in
                        false,     // complete?
                        false,     // failure?
                        NULL);     // network
+  if (cliInitiatedScan) {
+    sl_zigbee_af_debug_println("Energy scan result: channel %d, RSSI %d dBm",
+                               channel, rssi);
+  }
 }
 
 void sli_zigbee_af_scan_dispatch_network_found_callback(sl_zigbee_zigbee_network_t *networkFound,
@@ -157,21 +165,50 @@ void sli_zigbee_af_scan_dispatch_network_found_callback(sl_zigbee_zigbee_network
 
 void sli_zigbee_af_scan_dispatch_scan_complete_callback(uint8_t channel, sl_status_t status)
 {
-  maybeCallNextHandler(status,
-                       channel,
-                       handlerQueue[head].scanType,
-                       true,     // complete?
-                       false,     // failure?
-                       NULL);     // network
+  if (!handlerQueueIsEmpty()) {
+      maybeCallNextHandler(status,
+                          channel,
+                          handlerQueue[head].scanType,
+                          true,     // complete?
+                          false,     // failure?
+                          NULL);     // network
+  }
 
   // The scan is done when the status is set to SL_STATUS_OK.
   // See documentation for the sl_zigbee_scan_complete_handler callback.
   // For Active scan we call the EMBER_ACTIVE_SCAN_XX anyways,
   // beacuse of the change in network-steering code which
   // continues to schedule a scan on the next channel after a failure
+
+  if (cliInitiatedScan) {
+    if (status == SL_STATUS_OK) {
+      sl_zigbee_af_debug_println("Energy scan complete");
+    }
+    cliInitiatedScan = false;  // Reset CLI flag
+  }
+  
   if ((status == SL_STATUS_OK) && !handlerQueueIsEmpty()) {
     head = handlerQueueNextIndex(head);
     count--;
     sl_zigbee_af_event_set_active(scanNetworkEvents);
   }
 }
+
+#ifdef SL_CATALOG_CLI_PRESENT
+void sli_zigbee_af_scan_dispatch_energy_scan_cli_command(sl_cli_command_arg_t *arguments)
+{
+  uint32_t channelMask = sl_cli_get_argument_uint32(arguments, 0);
+  uint8_t scanDuration = sl_cli_get_argument_uint8(arguments, 1);
+  sl_status_t status = sl_zigbee_start_scan(SL_ZIGBEE_ENERGY_SCAN,
+                                            channelMask,
+                                            scanDuration);
+  if (status == SL_STATUS_OK) {
+    cliInitiatedScan = true;
+    sl_zigbee_af_debug_println("Energy scan started on channel mask 0x%08X, duration %d",
+                               channelMask,
+                               scanDuration);
+  } else {
+    sl_zigbee_af_debug_println("Energy scan failed to start: 0x%08X", status);
+  }
+}
+#endif // SL_CATALOG_CLI_PRESENT

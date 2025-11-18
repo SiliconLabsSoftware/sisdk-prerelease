@@ -6,12 +6,12 @@ specification_version: 14
 supplier: Silicon Laboratories, Inc.
 component_path:
 - path: bgapi_protocol/component
-- path: bluetooth_le_controller/component
-- path: bluetooth_common/component
 - path: bluetooth_le_middleware/component
-- path: bluetooth_mesh/component
+- path: bluetooth_le_controller/component
 - path: bluetooth_mesh_middleware/component
 - path: bluetooth_le_host/component
+- path: bluetooth_mesh/component
+- path: bluetooth_common/component
 - path: bluetooth_apploader/component
 - path: board_drivers/hardware/driver/component
 - path: boards_everest_internal/hardware/board/component
@@ -62,9 +62,9 @@ component_path:
 - path: multiprotocol/protocol/zigbee/component
 - path: multiprotocol/platform/radio/mac/component
 - path: multiprotocol/protocol/openthread/component
+- path: openthread_stack/component
 - path: openthread_internal/component
 - path: openthread_internal/component/internal
-- path: openthread_stack/component
 - path: openthread/component
 - path: platform_core/util/plugin/component
 - path: platform_core/hardware/driver/component
@@ -92,10 +92,10 @@ component_path:
 - path: printf/component
 - path: proprietary_default_radio_confs/.
 - path: protocol_user_sequencer_internal/component/protocol_user_sequencer_internal
-- path: rail_library_internal_chips/component/rail_library_internal_chips
-- path: rail_sdk/component
 - path: rail_library/component/rail_library
+- path: rail_sdk/component
 - path: rail_library_alpha_chips/component/rail_library_alpha_chips
+- path: rail_library_internal_chips/component/rail_library_internal_chips
 - path: rail_internal/component/rail_internal
 - path: realtime_locationing/component
 - path: rv2_framework_internal/component
@@ -113,16 +113,12 @@ component_path:
 - path: unity_internal/component
 - path: usb/protocol/usb/component
 - path: usb_internal/protocol/usb/component
-- path: wisun/component
 - path: wisun_config_generator/component
 - path: wisun_sdk/component
-- path: zigbee_internal/platform/radio/mac/component
-- path: zigbee_internal/platform/radio/rail_lib/plugin/component
-- path: zigbee_internal/component
-- path: zigbee_internal/util/plugin/component
-- path: zigbee_internal/util/silicon_labs/silabs_core/component
-- path: zigbee_internal/app/framework/component
-- path: zigbee_internal/platform/service/component
+- path: wisun/component
+- path: zigbee_sleepy_to_sleepy/component
+- path: zigbee_sleepy_to_sleepy/app/framework/component
+- path: zigbee_smart_energy/component
 - path: zigbee/platform/radio/mac/component
 - path: zigbee/platform/radio/rail_lib/plugin/component
 - path: zigbee/component
@@ -130,10 +126,14 @@ component_path:
 - path: zigbee/util/silicon_labs/silabs_core/component
 - path: zigbee/app/framework/component
 - path: zigbee/platform/service/component
-- path: zigbee_smart_energy/component
-- path: zigbee_sleepy_to_sleepy/component
-- path: zigbee_sleepy_to_sleepy/app/framework/component
 - path: zigbee_wwah/app/framework/component
+- path: zigbee_internal/platform/radio/mac/component
+- path: zigbee_internal/platform/radio/rail_lib/plugin/component
+- path: zigbee_internal/component
+- path: zigbee_internal/util/plugin/component
+- path: zigbee_internal/util/silicon_labs/silabs_core/component
+- path: zigbee_internal/app/framework/component
+- path: zigbee_internal/platform/service/component
 - path: zwave/component
 - path: zwave/component/CommandClasses
 - path: zwave/component-internal
@@ -141,9 +141,9 @@ component_path:
 toolchain_mapping: toolchains.slct
 documentation:
 - docset: machine-learning
-  version: 2.1.2
+  version: 2.2.0
 - docset: bluetooth_le_siwx91x
-  version: 4.0.0-beta.1
+  version: 4.0.0-beta.2
 - docset: mcu-bootloader
   version: 3.1.0
 - docset: connect-sdk
@@ -153,23 +153,23 @@ documentation:
 - docset: openthread
   version: 2.7.0
 - docset: platform_siwx91x
-  version: 4.0.0-beta.1
+  version: 4.0.0-beta.2
 - docset: platform_nwp_siwx91x
-  version: 4.0.0-beta.1
+  version: 4.0.0-beta.2
 - docset: rail
   version: 3.0.0
 - docset: protocol-usb
   version: 1.5.0
 - docset: wifi
-  version: 4.0.0-beta.1
+  version: 4.0.0-beta.2
 - docset: wifi_sqa_internal
   version: 4.0.0-beta.1
 - docset: wisun
   version: 2.10.0
 - docset: zigbee
-  version: 9.0.0
-- docset: zigbee
   version: 8.2.0
+- docset: zigbee
+  version: 9.0.0
 upgrade_manifest:
 - path: bluetooth_le_middleware/upgrade.slcu
 - path: openthread/component/upgrade.slcu
@@ -181,7 +181,6 @@ upgrade_manifest:
 - path: unity_test_framework/component/upgrade.slcu
 - path: wisun_config_generator/wisun_config_generator.slcu
 - path: wisun_sdk/app/wisun/upgrade.slcu
-- path: zigbee_internal/component/upgrade.slcu
 - path: zigbee/component/upgrade.slcu
 post_build_profile:
 - path: openthread/postbuild_profile/

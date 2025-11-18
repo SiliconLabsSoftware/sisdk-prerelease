@@ -184,6 +184,7 @@ uint8_t mesh_sensor_data_to_buf(uint16_t property_id, uint8_t *ptr, uint8_t *val
     } break;
     case INITIAL_PLANCKIAN_DISTANCE:
     case PRESENT_PLANCKIAN_DISTANCE:
+    case PRESENT_DEVICE_OPERATING_TEMPERATURE:
     {
       uint8_to_buf(ptr++, 2);
       int16_to_buf(ptr, *(int16_t*)value);
@@ -202,7 +203,6 @@ uint8_t mesh_sensor_data_to_buf(uint16_t property_id, uint8_t *ptr, uint8_t *val
     case LIGHT_CONTROL_LIGHTNESS_ON:
     case LIGHT_CONTROL_LIGHTNESS_PROLONG:
     case LIGHT_CONTROL_LIGHTNESS_STANDBY:
-    case PRESENT_DEVICE_OPERATING_TEMPERATURE:
     case TIME_SINCE_PRESENCE_DETECTED:
     case PRESENT_INPUT_VOLTAGE:
     case PRESENT_OUTPUT_VOLTAGE:
@@ -226,7 +226,6 @@ uint8_t mesh_sensor_data_to_buf(uint16_t property_id, uint8_t *ptr, uint8_t *val
     case LIGHT_CONTROL_AMBIENT_LUXLEVEL_PROLONG:
     case LIGHT_CONTROL_AMBIENT_LUXLEVEL_STANDBY:
     case LUMINOUS_ENERGY_SINCE_TURN_ON:
-    case RELATIVE_RUNTIME_IN_A_CORRELATED_COLOR_TEMPERATURE_RANGE:
     case TOTAL_LUMINOUS_ENERGY:
     case LUMINOUS_EXPOSURE:
     case PRESENT_DEVICE_INPUT_POWER:
@@ -370,7 +369,7 @@ uint8_t mesh_sensor_data_to_buf(uint16_t property_id, uint8_t *ptr, uint8_t *val
       uint8_to_buf(ptr, stat->average);
       uint8_to_buf(ptr + 1, stat->standard_deviation_value);
       uint8_to_buf(ptr + 2, stat->minimum_value);
-      uint8_to_buf(ptr + 3, stat->minimum_value);
+      uint8_to_buf(ptr + 3, stat->maximum_value);
       uint8_to_buf(ptr + 4, stat->sensing_duration);
       ret += 6;
     } break;
@@ -379,7 +378,7 @@ uint8_t mesh_sensor_data_to_buf(uint16_t property_id, uint8_t *ptr, uint8_t *val
       uint8_to_buf(ptr++, 4);
       temperature_range_t *r = (temperature_range_t*)value;
       uint16_to_buf(ptr, r->minimum);
-      uint16_to_buf(ptr, r->maximum);
+      uint16_to_buf(ptr + 2, r->maximum);
       ret += 5;
     } break;
     case DEVICE_OPERATING_TEMPERATURE_STATISTICAL_VALUES:
@@ -452,6 +451,7 @@ mesh_device_property_t mesh_sensor_data_from_buf(uint16_t property_id, const uin
     } break;
     case INITIAL_PLANCKIAN_DISTANCE:
     case PRESENT_PLANCKIAN_DISTANCE:
+    case PRESENT_DEVICE_OPERATING_TEMPERATURE:
     {
       property.int16 = int16_from_buf(ptr);
     } break;
@@ -468,7 +468,6 @@ mesh_device_property_t mesh_sensor_data_from_buf(uint16_t property_id, const uin
     case LIGHT_CONTROL_LIGHTNESS_ON:
     case LIGHT_CONTROL_LIGHTNESS_PROLONG:
     case LIGHT_CONTROL_LIGHTNESS_STANDBY:
-    case PRESENT_DEVICE_OPERATING_TEMPERATURE:
     case TIME_SINCE_PRESENCE_DETECTED:
     case PRESENT_INPUT_VOLTAGE:
     case PRESENT_OUTPUT_VOLTAGE:
@@ -490,7 +489,6 @@ mesh_device_property_t mesh_sensor_data_from_buf(uint16_t property_id, const uin
     case LIGHT_CONTROL_AMBIENT_LUXLEVEL_PROLONG:
     case LIGHT_CONTROL_AMBIENT_LUXLEVEL_STANDBY:
     case LUMINOUS_ENERGY_SINCE_TURN_ON:
-    case RELATIVE_RUNTIME_IN_A_CORRELATED_COLOR_TEMPERATURE_RANGE:
     case TOTAL_LUMINOUS_ENERGY:
     case LUMINOUS_EXPOSURE:
     case PRESENT_DEVICE_INPUT_POWER:
@@ -619,7 +617,7 @@ mesh_device_property_t mesh_sensor_data_from_buf(uint16_t property_id, const uin
     {
       property.voltage_specification.minimum = uint16_from_buf(ptr);
       property.voltage_specification.typical = uint16_from_buf(ptr + 2);
-      property.voltage_specification.maximum = uint16_from_buf(ptr + 2);
+      property.voltage_specification.maximum = uint16_from_buf(ptr + 4);
     } break;
     case INPUT_VOLTAGE_STATISTICS:
     case OUTPUT_VOLTAGE_STATISTICS:
@@ -654,7 +652,7 @@ sl_status_t mesh_lib_sensor_server_init(uint16_t elem_idx, uint8_t number_of_sen
   return SL_STATUS_OK;
 }
 
-sl_status_t mesh_lib_sensor_descriptors_from_buf(sensor_descriptor_t *descriptor, uint8_t *buf, int16_t input_len)
+sl_status_t mesh_lib_sensor_descriptors_from_buf(sensor_descriptor_t *descriptor, const uint8_t *buf, int16_t input_len)
 {
   // Descriptor array length should be a multiply of 8
   if (input_len & 0x07) {
@@ -668,7 +666,7 @@ sl_status_t mesh_lib_sensor_descriptors_from_buf(sensor_descriptor_t *descriptor
       descriptor[idx].negative_tolerance = (buf[pos + 3] >> 4) | (buf[pos + 4] << 4);
       descriptor[idx].sampling_function = buf[pos + 5];
       descriptor[idx].measurement_period = buf[pos + 6];
-      descriptor[idx].measurement_period = buf[pos + 7];
+      descriptor[idx].update_interval = buf[pos + 7];
       pos += 8;
       idx++;
     }

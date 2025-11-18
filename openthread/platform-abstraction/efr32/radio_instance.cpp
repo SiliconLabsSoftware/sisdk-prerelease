@@ -32,31 +32,76 @@
  *   including instance accessors, transmit queueing, and energy scan deferral.
  */
 
+#include <openthread-core-config.h>
 #include "radio_instance.h"
-#include "radio_energy_scan.h"
 #include "sl_core.h"
 #include "sl_rail.h"
 #include "sl_rail_ieee802154.h"
 
 #include <assert.h>
 #include "common/code_utils.hpp"
+#include "common/debug.hpp"
 #include "utils/code_utils.h"
 
-// Include OpenThread headers for multipan functionality
-#include <openthread-core-config.h>
+#include <openthread/platform/radio.h>
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
 #include <openthread/platform/multipan.h>
 #endif
 
-// Include necessary headers for constants
+extern "C" {
+#include "circular_queue.h"
+}
 #include "radio_channel_switching.h"
+#include "radio_energy_scan.h"
 #include "radio_interface.h"
 #include "radio_state.h"
+#include "sl_memory_manager.h"
+
+//------------------------------------------------------------------------------
+// Type Definitions
+
+#if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
+
+typedef struct energyScanParams
+{
+    uint8_t  scanChannel;  ///< Energy scan channel
+    uint16_t scanDuration; ///< Energy scan duration
+} energyScanParams;
+
+enum class PendingCommandType : uint8_t
+{
+    Transmit   = 0,
+    EnergyScan = 1
+};
+
+struct PendingCommandEntry
+{
+    otInstance        *instance;
+    PendingCommandType cmdType;
+    union
+    {
+        otRadioFrame    *txFrame;
+        energyScanParams energyScan;
+    } request;
+};
+
+#endif // OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
+
+//------------------------------------------------------------------------------
+// Static Variables
 
 // Global state for filter mask (used in multi-instance mode)
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
 static uint8_t sRailFilterMask = RADIO_BCAST_PANID_FILTER_MASK;
-#endif
+
+static Queue_t sPendingCommandQueue;
+
+static volatile bool tx_busy = false;
+
+#endif // OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
+
+//------------------------------------------------------------------------------
+// Instance Accessor Functions
 
 #if OPENTHREAD_CONFIG_MULTIPLE_STATIC_INSTANCE_ENABLE
 instanceIndex_t sli_ot_radio_instance_get_index(otInstance *aInstance)
@@ -100,6 +145,13 @@ otInstance *sli_ot_radio_instance_from_filter_mask(uint8_t aFilterMask)
     bool        foundInstance = false;
     uint8_t     panFilterMask;
 
+#if !OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
+    // Single-instance mode: Always return the single instance for security processing
+    // This matches the old radio.c behavior where getIidFromFilterMask() always returned
+    // a valid IID (0) in single-instance mode
+    return sli_ot_radio_instance_get(0);
+#endif
+
     // Check if this is a broadcast packet
     otEXPECT(!sli_ot_radio_instance_is_filter_mask_broadcast(aFilterMask));
 
@@ -117,7 +169,7 @@ otInstance *sli_ot_radio_instance_from_filter_mask(uint8_t aFilterMask)
 
     // Find the first set bit in the PAN filter mask
     // Skip bit 0 (broadcast) and look for instance-specific matches
-    for (uint8_t i = 1; i < RADIO_INTERFACE_COUNT && i < 8; i++)
+    for (uint8_t i = 1; i <= RADIO_INTERFACE_COUNT && i < 8; i++)
     {
         if (panFilterMask & (1 << i))
         {
@@ -142,220 +194,121 @@ exit:
 }
 
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
-
-// Modern C++ enum class for better type safety
-enum class PendingCommandType : uint8_t
+//------------------------------------------------------------------------------
+// Overflow callback for pending command queue
+static bool pendingCommandQueueOverflowCallback(const Queue_t *queue, void *data)
 {
-    Transmit   = 0,
-    EnergyScan = 1
-};
+    OT_UNUSED_VARIABLE(queue);
+    OT_UNUSED_VARIABLE(data);
 
-// Pending command entry structure
-struct PendingCommandEntry
+    // We should never hit this callback because a host can only request
+    // one command at a time. Hence, added an assert if it happens.
+    OT_ASSERT(false);
+
+    return false;
+}
+
+//------------------------------------------------------------------------------
+// Push a command to pending queue
+static void pushPendingCommand(PendingCommandType aCmdType, otInstance *aInstance, void *aCmdParams)
 {
-    otInstance        *instance;
-    PendingCommandType command;
-    union
+    PendingCommandEntry *pendingCommand = (PendingCommandEntry *)sl_malloc(sizeof(PendingCommandEntry));
+    OT_ASSERT(pendingCommand != NULL);
+
+    pendingCommand->instance = aInstance;
+    pendingCommand->cmdType  = aCmdType;
+
+    if (aCmdType == PendingCommandType::Transmit)
     {
-        struct
+        otRadioFrame *txFrame           = (otRadioFrame *)aCmdParams;
+        pendingCommand->request.txFrame = txFrame;
+    }
+    else if (aCmdType == PendingCommandType::EnergyScan)
+    {
+        const energyScanParams *energyScanReq           = (energyScanParams *)aCmdParams;
+        pendingCommand->request.energyScan.scanChannel  = energyScanReq->scanChannel;
+        pendingCommand->request.energyScan.scanDuration = energyScanReq->scanDuration;
+    }
+
+    if (!queueAdd(&sPendingCommandQueue, (void *)pendingCommand))
+    {
+        sl_free(pendingCommand);
+    }
+}
+
+//------------------------------------------------------------------------------
+// Init pending command queue
+void sli_ot_radio_instance_init_command_queue(void)
+{
+    bool queueStatus;
+
+    // Initialize the queue for pending commands.
+    queueStatus = queueInit(&sPendingCommandQueue, RADIO_REQUEST_BUFFER_COUNT);
+    OT_ASSERT(queueStatus);
+
+    // Specify a callback to be called upon queue overflow.
+    queueStatus = queueOverflow(&sPendingCommandQueue, &pendingCommandQueueOverflowCallback);
+    OT_ASSERT(queueStatus);
+}
+
+//------------------------------------------------------------------------------
+// Process pending commands
+void sli_ot_radio_instance_process_commands(void)
+{
+    // Check and process pending transmit and energy scan commands if radio is not busy.
+    if (!queueIsEmpty(&sPendingCommandQueue) && !sli_ot_radio_instance_is_busy())
+    {
+        // Dequeue the pending command
+        PendingCommandEntry *pendingCommand = (PendingCommandEntry *)queueRemove(&sPendingCommandQueue);
+        OT_ASSERT(pendingCommand != NULL);
+
+        switch (pendingCommand->cmdType)
         {
-            otRadioFrame *frame;
-        } transmit;
-        struct
-        {
-            uint16_t       channel;
-            sl_rail_time_t duration;
-        } energy_scan;
-    } data;
-};
+        case PendingCommandType::Transmit:
+            otPlatRadioTransmit(pendingCommand->instance, pendingCommand->request.txFrame);
+            break;
 
-// Global state
-static PendingCommandEntry sPendingCommandQueue[RADIO_REQUEST_BUFFER_COUNT];
-static uint8_t             sPendingCommandCount = 0;
-static void (*sOverflowCallback)(void)          = nullptr;
+        case PendingCommandType::EnergyScan:
+            sli_ot_energy_scan_async(pendingCommand->instance,
+                                     pendingCommand->request.energyScan.scanChannel,
+                                     pendingCommand->request.energyScan.scanDuration);
+            break;
 
-static volatile bool tx_aborted[RADIO_REQUEST_BUFFER_COUNT] = {false};
-static volatile bool tx_busy                                = false;
+        default:
+            OT_ASSERT(false);
+            break;
+        }
 
-// Forward declarations for external functions
-extern "C" {
-extern sl_status_t sli_ot_energy_scan_async(otInstance *instance, uint16_t channel, sl_rail_time_t duration);
-extern otError     otPlatRadioTransmit(otInstance *aInstance, otRadioFrame *aFrame);
-}
-
-static void txCurrentPacket(otInstance *instance, otRadioFrame *frame) noexcept
-{
-    // Match radio.c behavior: call otPlatRadioTransmit() to handle all setup
-    // (channel config, CSL, security, etc.) before transmitting
-    otPlatRadioTransmit(instance, frame);
-}
-
-// Command management functions
-extern "C" {
-bool sli_ot_radio_instance_queue_transmit(otInstance *instance, otRadioFrame *frame)
-{
-    bool                 success = sPendingCommandCount < RADIO_REQUEST_BUFFER_COUNT;
-    PendingCommandEntry *entry   = nullptr;
-
-    otEXPECT_ACTION(success, if (sOverflowCallback) { sOverflowCallback(); });
-
-    entry                      = &sPendingCommandQueue[sPendingCommandCount++];
-    entry->instance            = instance;
-    entry->command             = PendingCommandType::Transmit;
-    entry->data.transmit.frame = frame;
-
-exit:
-    return success;
-}
-}
-
-bool sli_ot_radio_instance_queue_energy_scan(otInstance *instance, uint16_t channel, sl_rail_time_t duration)
-{
-    bool                 success = sPendingCommandCount < RADIO_REQUEST_BUFFER_COUNT;
-    PendingCommandEntry *entry   = nullptr;
-
-    otEXPECT_ACTION(success, if (sOverflowCallback) { sOverflowCallback(); });
-
-    entry                            = &sPendingCommandQueue[sPendingCommandCount++];
-    entry->instance                  = instance;
-    entry->command                   = PendingCommandType::EnergyScan;
-    entry->data.energy_scan.channel  = channel;
-    entry->data.energy_scan.duration = duration;
-
-exit:
-    return success;
+        // Free the allocated memory.
+        sl_free(pendingCommand);
+    }
 }
 
 // State management functions
-extern "C" {
 bool sli_ot_radio_instance_is_busy(void)
 {
     return sli_ot_radio_state_is_transmitting_or_scanning();
-}
-}
-
-bool sli_ot_radio_instance_should_defer(otInstance *instance)
-{
-    OT_UNUSED_VARIABLE(instance);
-    // For now, defer if radio is busy
-    return sli_ot_radio_instance_is_busy();
 }
 
 // Queue management functions
 bool sli_ot_radio_instance_is_queue_empty(void)
 {
-    return sPendingCommandCount == 0;
-}
-
-uint8_t sli_ot_radio_instance_get_queue_size(void)
-{
-    return sPendingCommandCount;
+    return queueIsEmpty(&sPendingCommandQueue);
 }
 
 void sli_ot_radio_instance_clear_queue(void)
 {
-    sPendingCommandCount = 0;
-}
-
-extern "C" {
-void sli_ot_radio_instance_process_commands(void)
-{
-    while (sPendingCommandCount > 0)
+    while (!queueIsEmpty(&sPendingCommandQueue))
     {
-        // Check if radio is busy
-        if (sli_ot_radio_instance_is_busy())
-        {
-            break;
-        }
-
-        // Process first command in queue
-        const PendingCommandEntry &entry = sPendingCommandQueue[0];
-
-        switch (entry.command)
-        {
-        case PendingCommandType::Transmit:
-            txCurrentPacket(entry.instance, entry.data.transmit.frame);
-            break;
-
-        case PendingCommandType::EnergyScan:
-            sli_ot_energy_scan_async(entry.instance, entry.data.energy_scan.channel, entry.data.energy_scan.duration);
-            break;
-        }
-
-        // Remove processed command by shifting remaining commands
-        if (sPendingCommandCount > 1)
-        {
-            // Shift remaining commands forward, ensuring we don't exceed array bounds
-            for (uint8_t i = 0; (i < sPendingCommandCount - 1) && (i + 1 < RADIO_REQUEST_BUFFER_COUNT); i++)
-            {
-                sPendingCommandQueue[i] = sPendingCommandQueue[i + 1];
-            }
-        }
-        sPendingCommandCount--;
+        PendingCommandEntry *entry = (PendingCommandEntry *)queueRemove(&sPendingCommandQueue);
+        sl_free(entry);
     }
-}
-}
-
-// Callback management
-extern "C" {
-void sli_ot_radio_instance_set_overflow_callback(void (*callback)(void))
-{
-    sOverflowCallback = callback;
-}
-}
-
-static void pushPendingCommand(PendingCommandType aCmdType, otInstance *aInstance, void *aCmdParams)
-{
-    bool success = false;
-
-    if (aCmdType == PendingCommandType::Transmit)
-    {
-        otRadioFrame *txFrame = (otRadioFrame *)aCmdParams;
-        success               = sli_ot_radio_instance_queue_transmit(aInstance, txFrame);
-    }
-    else if (aCmdType == PendingCommandType::EnergyScan)
-    {
-        const EnergyScanParams *energyScanReq = (EnergyScanParams *)aCmdParams;
-        success                               = sli_ot_radio_instance_queue_energy_scan(aInstance,
-                                                          (uint16_t)energyScanReq->scanChannel,
-                                                          (sl_rail_time_t)energyScanReq->scanDuration);
-    }
-
-    assert(success);
 }
 
 // Multi-instance state management functions
-extern "C" {
-void sli_ot_radio_instance_set_tx_aborted(uint8_t index, bool aborted)
-{
-    otEXPECT(index < RADIO_REQUEST_BUFFER_COUNT);
-
-    tx_aborted[index] = aborted;
-
-exit:
-    return;
-}
-}
-
-extern "C" {
-bool sli_ot_radio_instance_get_tx_aborted(uint8_t index)
-{
-    bool aborted = false;
-
-    otEXPECT(index < RADIO_REQUEST_BUFFER_COUNT);
-
-    aborted = tx_aborted[index];
-
-exit:
-    return aborted;
-}
-}
-
-extern "C" {
 void sli_ot_radio_instance_set_tx_busy(bool busy)
 {
     tx_busy = busy;
-}
 }
 
 bool sli_ot_radio_instance_get_tx_busy(void)
@@ -384,13 +337,9 @@ void sli_ot_radio_instance_update_rail_filter_mask_for_pan_id(uint16_t aPanId, u
         sRailFilterMask |= RADIO_GET_FILTER_MASK(aPanIndex + 1);
     }
 }
-}
+} // extern "C"
 
 #if FAST_CHANNEL_SWITCHING_SUPPORT
-bool sl_is_multi_channel_enabled(void)
-{
-    return sli_ot_radio_channel_switching_is_multi_channel_enabled();
-}
 
 otError sl_get_channel_switching_cfg(sl_rail_ieee802154_rx_channel_switching_cfg_t *channelSwitchingCfg)
 {
@@ -398,12 +347,32 @@ otError sl_get_channel_switching_cfg(sl_rail_ieee802154_rx_channel_switching_cfg
 }
 
 #endif // FAST_CHANNEL_SWITCHING_SUPPORT
-
 #endif // OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
 
-bool sli_ot_radio_instance_energy_scan_should_defer(otInstance *aInstance)
+void sli_ot_radio_instance_queue_transmit(otInstance *aInstance, otRadioFrame *aFrame)
 {
+#if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
+    pushPendingCommand(PendingCommandType::Transmit, aInstance, aFrame);
+#else
     OT_UNUSED_VARIABLE(aInstance);
+    OT_UNUSED_VARIABLE(aFrame);
+#endif
+}
+
+void sli_ot_radio_instance_queue_energy_scan(otInstance *aInstance, uint8_t aScanChannel, uint16_t aScanDuration)
+{
+#if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
+    energyScanParams params = {aScanChannel, aScanDuration};
+    pushPendingCommand(PendingCommandType::EnergyScan, aInstance, &params);
+#else
+    OT_UNUSED_VARIABLE(aInstance);
+    OT_UNUSED_VARIABLE(aScanChannel);
+    OT_UNUSED_VARIABLE(aScanDuration);
+#endif
+}
+
+bool sli_ot_radio_instance_energy_scan_should_defer(void)
+{
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
     return sli_ot_radio_instance_is_busy();
 #else
@@ -413,15 +382,7 @@ bool sli_ot_radio_instance_energy_scan_should_defer(otInstance *aInstance)
 
 void sli_ot_radio_instance_energy_scan_defer(otInstance *aInstance, uint8_t aScanChannel, uint16_t aScanDuration)
 {
-#if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
-    EnergyScanParams params = {aScanChannel, aScanDuration};
-    pushPendingCommand(PendingCommandType::EnergyScan, aInstance, &params);
-#else
-    OT_UNUSED_VARIABLE(aInstance);
-    OT_UNUSED_VARIABLE(aScanChannel);
-    OT_UNUSED_VARIABLE(aScanDuration);
-    // Single instance: this should never be called since should_defer returns false
-#endif
+    sli_ot_radio_instance_queue_energy_scan(aInstance, aScanChannel, aScanDuration);
 }
 
 //------------------------------------------------------------------------------

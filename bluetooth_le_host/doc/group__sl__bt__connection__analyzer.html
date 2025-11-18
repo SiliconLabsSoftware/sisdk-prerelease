@@ -228,6 +228,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p >Start to analyze another device's connection and report the RSSI measurements. The parameters in this command provide necessary information to identify the connection and schedule operations to follow its transmissions.</p>
+<p >When this device is in central role, the analyzer generates a report only after the peripheral responds to the central in a connection event. If the peripheral does not respond, the analyzer does not generate a report for that connection event.</p>
 <p >If the other device uses Silabs' Bluetooth stack, the information of the connection could be retrieved with command <a class="el" href="group__sl__bt__connection.html#gad62e5d430b422114957d0d45005cd8bb">sl_bt_connection_get_scheduling_details</a>. The method of passing the information to this device is application layer logic.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">

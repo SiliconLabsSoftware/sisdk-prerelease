@@ -6,6 +6,7 @@ var modules =
     [ "BT Common Types", "group__sl__bt__common__types.html", "group__sl__bt__common__types" ],
     [ "Device Firmware Update", "group__sl__bt__dfu.html", "group__sl__bt__dfu" ],
     [ "System", "group__sl__bt__system.html", "group__sl__bt__system" ],
+    [ "Link Layer", "group__sl__bt__linklayer.html", "group__sl__bt__linklayer" ],
     [ "Resource Report", "group__sl__bt__resource.html", "group__sl__bt__resource" ],
     [ "GAP", "group__sl__bt__gap.html", "group__sl__bt__gap" ],
     [ "Advertiser", "group__sl__bt__advertiser.html", "group__sl__bt__advertiser" ],

@@ -1237,7 +1237,6 @@ static
 void handleEvent(uint8_t event)
 {
   uint8_t len = sizeof_array(OTA_transition_table);
-  static bool radio_debug_disabled = false;
   int i = 0;
   for (; i < len; i++) {
     // Check if event exists in transition table
@@ -1262,14 +1261,7 @@ void handleEvent(uint8_t event)
         if ((OTA_transition_table[i].state == FW_STATE_IDLE) != (myOta.currentState == FW_STATE_IDLE)) {
           // IDLE -> OTA
           if (OTA_transition_table[i].state == FW_STATE_IDLE) {
-            if (zpal_radio_is_debug_enabled()) {
-              zpal_radio_debug_configure(false);
-              radio_debug_disabled = true;
-            }
-          } else {
-            if (radio_debug_disabled) {
-              zpal_radio_debug_configure(true);
-            }
+            zpal_radio_disable_debug();
           }
         }
 

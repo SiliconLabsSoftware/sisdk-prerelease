@@ -84,6 +84,7 @@ configuration:
 tag:
   - hardware:device:flash:1024
   - "companion:workspace_application"
+  - hwfilter:device:device_supports_thread
 
 import:
   - id: application

@@ -164,8 +164,9 @@
 
 static sl_btctrl_ll_priorities sli_btctrl_priority_table = SL_BTCTRL_SCHEDULER_PRIORITIES;
 
-SL_WEAK void sl_btctrl_debug_init()
+SL_WEAK void sl_btctrl_debug_init(struct sl_btctrl_config *config)
 {
+  (void) config;
 }
 
 sl_status_t sl_btctrl_init_internal(struct sl_btctrl_config *config)
@@ -484,6 +485,7 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
   struct sl_btctrl_cs_config cs_config = { 0 };
   cs_config.configs_per_connection = SL_BT_CONFIG_MAX_CS_CONFIGS_PER_CONNECTION;
   cs_config.procedures = SL_BT_CONFIG_MAX_CS_PROCEDURES;
+  cs_config.cs_sync_antennas_max = SL_BT_CONFIG_CS_SYNC_MAX_ANTENNAS;
   sl_btctrl_init_cs(&cs_config);
 #endif // SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT or SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT
 
@@ -625,7 +627,7 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
 #if SL_BT_CONTROLLER_USE_LEGACY_VENDOR_SPECIFIC_EVENT_CODE == 1
   sl_btctrl_init_hci_vs_legacy_event();
 #endif // SL_BT_CONTROLLER_USE_LEGACY_VENDOR_SPECIFIC_EVENT_CODE
-  sl_btctrl_debug_init();
+  sl_btctrl_debug_init(config);
 
   return status;
 }

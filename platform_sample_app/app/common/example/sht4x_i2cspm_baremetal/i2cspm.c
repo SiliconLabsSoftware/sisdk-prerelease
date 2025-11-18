@@ -256,13 +256,33 @@ void i2cspm_app_init(void)
   // Wait for sensor to become ready
   sl_sleeptimer_delay_millisecond(80);
 
-  // Check for device presence
-  // Each SHT4x sensor has a unique 48-bit device Id
-  // Loop until the sensor is ready
-  while (ret == i2cTransferDone) {
-    ret = SHT4X_transaction(I2C_FLAG_WRITE_READ, cmdReadId, 1, deviceId, 6);
+  // Check for device presence with a bounded retry loop
+  for (uint8_t attempt = 0; attempt < 5 && ret != i2cTransferDone; attempt++) {
+    ret = SHT4X_transaction(I2C_FLAG_WRITE,
+                            cmdReadId,
+                            sizeof(cmdReadId),
+                            NULL,
+                            0);
+    if (ret != i2cTransferDone) {
+      sl_sleeptimer_delay_millisecond(80);
+      continue;
+    }
+
+    sl_sleeptimer_delay_millisecond(1);
+
+    ret = SHT4X_transaction(I2C_FLAG_READ,
+                            NULL,
+                            0,
+                            deviceId,
+                            sizeof(deviceId));
+    if (ret == i2cTransferDone) {
+      break;
+    }
+
     sl_sleeptimer_delay_millisecond(80);
   }
+
+  EFM_ASSERT(ret == i2cTransferDone);
 
   // Initialize LED PWM module
   initialise_temp_limits();

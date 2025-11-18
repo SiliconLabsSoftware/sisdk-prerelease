@@ -34,6 +34,8 @@
 #ifndef RADIO_ENERGY_SCAN_H
 #define RADIO_ENERGY_SCAN_H
 
+#include <openthread-core-config.h>
+
 #include <stdbool.h>
 #include <stdint.h>
 
