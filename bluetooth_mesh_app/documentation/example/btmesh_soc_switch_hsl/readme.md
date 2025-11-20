@@ -62,27 +62,13 @@ To learn more about programming an SoC application, see [UG472: Silicon Labs Blu
 
 [UG295: Silicon Labs Bluetooth ® Mesh C Application Developer's Guide for SDK v2.x](https://www.silabs.com/documents/public/user-guides/ug295-bluetooth-mesh-dev-guide.pdf) gives code-level information on the stack and the common pitfalls to avoid.
 
-## Device Firmware Update
-
-Device Firmware Update (DFU) is a new feature introduced in the Bluetooth Mesh Model specification v1.1 that provides a standard way to update device firmware over a Bluetooth mesh network. The example has the Target node functionality enabled by default that is fulfilled by installing the Firmware Update and BLOB Transfer model components:
-
-- Firmware Update Server
-- BLOB Transfer Server
-
-![Bluetooth Mesh Firmware Update Components](readme_img9.png)
-
-![Bluetooth Mesh Transfer Components](readme_img10.png)
-
-For more information on the DFU examples, see **AN1370: Bluetooth® Mesh Device Firmware Update Example Walkthrough**. To learn the basics of the Bluetooth Mesh Device Firmware Update specification, see **AN1319: Bluetooth® Mesh Device Firmware Update**.
-
 ## Testing the Bluetooth Mesh - SoC Switch Application
 
 To test the application, do the following:
 
-1. Make sure a bootloader is installed. See the Troubleshooting section.
-2. Build and flash the **Bluetooth Mesh - SoC Switch** example to the device.
-3. Reset the device by pressing and releasing the reset button on the mainboard while pressing BTN0. The message "Factory reset" should appear on the LCD.
-4. Provision the device in one of three ways:
+1. Build and flash the **Bluetooth Mesh - SoC Switch** example to the device.
+2. Reset the device by pressing and releasing the reset button on the mainboard while pressing BTN0. The message "Factory reset" should appear on the LCD.
+3. Provision the device in one of three ways:
 
    - NCP Host provisioner examples, see for example an SDK folder `example_host/btmesh_host_provisioner` or [github](https://github.com/SiliconLabs/bluetooth_mesh_stack_features/tree/master/provisioning)
 
@@ -94,23 +80,23 @@ To test the application, do the following:
 
 ![Bluetooth Mesh start screen](readme_img6.png)
 
-5. Open the app, choose the Provision Browser, and tap **Scan**.
+4. Open the app, choose the Provision Browser, and tap **Scan**.
 
 ![Bluetooth Mesh Provision Browser](readme_img2.png)
 
-6. Tap **PROVISION** and continue provisioning.
+5. Tap **PROVISION** and continue provisioning.
 
 ![Bluetooth Mesh Provisioning Device](readme_img3.png)
 
-7. Select the right "Group" and then tap the "Functionality" menu.
+6. Select the right "Group" and then tap the "Functionality" menu.
 
 ![Bluetooth Mesh Device Configuration](readme_img4.png)
 
-8. Configure the device as **Light HSL Client**. If you want to test the Bluetooth Mesh Generic OnOff Model, the Light Lightness Model, the Scene Model or some other Mesh Model, then select the respective client instead. You can use only one at a time in our mobile application. With the **SoC Light CTL** demo use the **SoC Switch CTL** example.
+7. Configure the device as **Light HSL Client**. If you want to test the Bluetooth Mesh Generic OnOff Model, the Light Lightness Model, the Scene Model or some other Mesh Model, then select the respective client instead. You can use only one at a time in our mobile application. With the **SoC Light CTL** demo use the **SoC Switch CTL** example.
 
 ![Bluetooth Mesh Functionalities](readme_img5.png)
 
-9. The next step is to add a light or several lights into your network, if it has not already been done. This is required to fully test the whole system, for example the friendship and other features. You can then control the **Bluetooth Mesh - SoC Light** and **Bluetooth Mesh - SoC HSL Light** examples by pressing the buttons on the device. Read the applicable example project documentation to learn more.
+8. The next step is to add a light or several lights into your network, if it has not already been done. This is required to fully test the whole system, for example the friendship and other features. You can then control the **Bluetooth Mesh - SoC Light** and **Bluetooth Mesh - SoC HSL Light** examples by pressing the buttons on the device. Read the applicable example project documentation to learn more.
 
 For more information on the example, see [AN1299: Understanding the Silicon Labs Bluetooth Mesh SDK v2.x Lighting Demonstration](https://www.silabs.com/documents/public/application-notes/an1299-understanding-bluetooth-mesh-lighting-demo-sdk-2x.pdf).
 
@@ -122,14 +108,6 @@ The button presses in this example:
 - Very long press recalls the scenes (only when **Scene Server** model is configured)
 
 ## Troubleshooting
-
-Note that Software Example-based projects do not include a bootloader. However, they are configured to expect a bootloader to be present on the device. To install a bootloader, from the Launcher perspective's EXAMPLE PROJECTS & DEMOS tab either build and flash one of the bootloader examples or run one of the precompiled demos. Precompiled demos flash a bootloader as well as the application image.
-
-- To flash an OTA DFU-capable bootloader to the device, flash the **Bluetooth Mesh - SoC Switch** demo.
-- To flash a UART DFU-capable bootloader to the device, flash the **Bluetooth Mesh - NCP Empty** demo.
-- For other bootloader types, create your own bootloader project and flash it to the device before flashing your application.
-- When you flash your application image to the device, use the *.hex* or *.s37* output file. Flashing *.bin* files may overwrite (erase) the bootloader.
-- For more information, see [UG103.6: Bootloader Fundamentals](https://www.silabs.com/documents/public/user-guides/ug103-06-fundamentals-bootloading.pdf) and [UG489: Silicon Labs Gecko Bootloader User's Guide for GSDK 4.0 and Higher](https://cn.silabs.com/documents/public/user-guides/ug489-gecko-bootloader-user-guide-gsdk-4.pdf).
 
 Before programming the radio board mounted on the mainboard, make sure the power supply switch the AEM position (right side) as shown below.
 

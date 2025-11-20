@@ -30,8 +30,6 @@
 #ifndef _SL_MAIN_INIT_H
 #define _SL_MAIN_INIT_H
 
-#include "sl_common.h"
-
 /***************************************************************************//**
  * @addtogroup sl_main System Setup (sl_main)
  * @brief System Setup (sl_main)
@@ -260,7 +258,7 @@ void app_init_early(void);
  * This function allows the user to perform any initialization required by his
  * application after all SiSDK modules initializations.
  *****************************************************************************/
-SL_WEAK void app_init(void);
+void app_init(void);
 
 /******************************************************************************
  * @brief User-defined function to process a baremetal action periodically.
@@ -268,7 +266,7 @@ SL_WEAK void app_init(void);
  * @details Only used when the firmware type is baremetal.
  * This function will be called every iteration of the main loop.
  *****************************************************************************/
-SL_WEAK void app_process_action(void);
+void app_process_action(void);
 
 /******************************************************************************
  * @brief Main entry function calling key platform modules initialization functions.

@@ -23,8 +23,6 @@ component:
   - id: app_button_press
   - id: app_log
   - id: app_timer
-  - id: bootloader_interface
-  - id: bt_post_build
   - id: btmesh_blob_transfer_server_recommended_instance_all
   - id: btmesh_distributor
   - id: btmesh_factory_reset

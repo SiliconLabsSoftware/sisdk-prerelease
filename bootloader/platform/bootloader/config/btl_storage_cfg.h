@@ -3,7 +3,7 @@
  * @brief Configuration header for bootloader common storage
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2025 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -20,14 +20,27 @@
 // <<< Use Configuration Wizard in Context Menu >>>
 // <h> Bootloader Common Storage Configuration
 
+// <e BTL_STORAGE_CUSTOM_BASE_ADDRESS> Custom base address config
+// <i> Default: 1
+#define BTL_STORAGE_CUSTOM_BASE_ADDRESS  1
+
+#if BTL_STORAGE_CUSTOM_BASE_ADDRESS
+
 // <o BTL_STORAGE_BASE_ADDRESS> Start address of bootload info
 // <i> Default: 0
-// <i> Absolute start address for the "bootload info" meta-information about which storage slot to attempt firmware update 
+// <i> Absolute start address for the "bootload info" meta-information about which storage slot to attempt firmware update
 // <i> from, in which order. Take care to ensure that any storage slots don't overlap with the location of bootload info.
 #define BTL_STORAGE_BASE_ADDRESS  0
 
+// </e>
+
+#else // BTL_STORAGE_CUSTOM_BASE_ADDRESS
+
+#include "btl_storage_cfg_default.h"
+
+#endif // BTL_STORAGE_CUSTOM_BASE_ADDRESS
+
 // </h>
 // <<< end of configuration section >>>
-
 
 #endif // BTL_STORAGE_CONFIG_H

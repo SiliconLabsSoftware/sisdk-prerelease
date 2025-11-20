@@ -23,7 +23,6 @@ component:
   - id: app_log
   - id: apploader
   - id: bootloader_interface
-  - id: bt_post_build
   - id: device_init
   - id: clock_manager
   - id: iostream_usart

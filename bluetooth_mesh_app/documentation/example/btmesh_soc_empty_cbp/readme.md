@@ -90,7 +90,9 @@ As described above, an empty example does nothing except broadcast unprovisioned
 
 ## Troubleshooting
 
-Note that Software Example-based projects do not include a bootloader. However, they are configured to expect a bootloader to be present on the device. To install a bootloader, from the Launcher perspective's EXAMPLE PROJECTS & DEMOS tab either build and flash one of the bootloader examples or run one of the precompiled demos. Precompiled demos flash a bootloader as well as the application image.
+The TrustZone variant of Bluetooth Mesh - SoC Empty with Certificate-Based Provisioning support example requires bootloader.
+
+Note that Software Example-based projects do not include a bootloader. However, some projects are configured to expect a bootloader to be present on the device. To install a bootloader, from the Launcher perspective's EXAMPLE PROJECTS & DEMOS tab either build and flash one of the bootloader examples or run one of the precompiled demos. Precompiled demos flash a bootloader as well as the application image.
 
 - To flash an OTA DFU-capable bootloader to the device, flash the **Bluetooth Mesh - SoC Switch** demo.
 - To flash a UART DFU-capable bootloader to the device, flash the **Bluetooth Mesh - NCP Empty** demo.

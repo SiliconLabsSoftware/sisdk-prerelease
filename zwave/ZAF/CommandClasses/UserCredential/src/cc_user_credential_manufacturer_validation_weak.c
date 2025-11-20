@@ -73,7 +73,7 @@ static bool CC_UserCredential_manufacturer_validate_pin_code(const u3c_credentia
    */
   bool is_zeros = true;
   for (uint8_t i = 0; i < p_credential->metadata.length; ++i) {
-    if (p_credential->data[i] != 0) {
+    if (p_credential->data[i] != '0') {
       is_zeros = false;
       break;
     }

@@ -21,8 +21,6 @@ filter:
 component:
   - id: app_assert
   - id: app_log
-  - id: bootloader_interface
-  - id: bt_post_build
   - id: btmesh_cmt
   - id: btmesh_stack_gatt_prov_bearer
   - id: btmesh_stack_relay

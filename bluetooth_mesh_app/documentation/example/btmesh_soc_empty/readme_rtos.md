@@ -64,29 +64,20 @@ The **Bluetooth Mesh - SoC Empty** application is ***almost*** empty. It impleme
 As described above, an empty example does nothing except broadcast unprovisioned beacons. To test this feature, do the following:
 
 1. Clear the NVM Mesh settings, for example by performing an Erase Chip with Simplicity Commander, since the example has no button control. See [UG162: Simplicity Commander Reference Guide](https://www.silabs.com/documents/public/user-guides/ug162-simplicity-commander-reference-guide.pdf) for more information.
-2. Make sure a bootloader is installed. See the Troubleshooting section.
-3. Build and flash the **Bluetooth Mesh - SoC Empty** example to your device. The flashing can be done, for example, using the Simplicity Studio internal **Flash Programmer** or external **Simplicity Commander** tools.
-4. Download the Silicon Labs **Bluetooth Mesh** smartphone application available on [iOS](https://apps.apple.com/us/app/bluetooth-mesh-by-silicon-labs/id1411352948) and [Android](https://play.google.com/store/apps/details?id=com.siliconlabs.bluetoothmesh). Make sure to reset the local database by pressing the "Reset local database" button in the menu "More".
+2. Build and flash the **Bluetooth Mesh - SoC Empty** example to your device. The flashing can be done, for example, using the Simplicity Studio internal **Flash Programmer** or external **Simplicity Commander** tools.
+3. Download the Silicon Labs **Bluetooth Mesh** smartphone application available on [iOS](https://apps.apple.com/us/app/bluetooth-mesh-by-silicon-labs/id1411352948) and [Android](https://play.google.com/store/apps/details?id=com.siliconlabs.bluetoothmesh). Make sure to reset the local database by pressing the "Reset local database" button in the menu "More".
 
 ![Bluetooth Mesh App Reset local database](readme_img3.png)
 
-5. Open the app, choose the Provision Browser, and tap **Scan**.
+4. Open the app, choose the Provision Browser, and tap **Scan**.
 
 ![Bluetooth Mesh App Scan](readme_img4.png)
 
-6. Now you should find your device advertising. Tap **PROVISION**.
+5. Now you should find your device advertising. Tap **PROVISION**.
 
 ![Bluetooth Mesh App Provision](readme_img5.png)
 
 ## Troubleshooting
-
-Note that Software Example-based projects do not include a bootloader. However, they are configured to expect a bootloader to be present on the device. To install a bootloader, from the Launcher perspective's EXAMPLE PROJECTS & DEMOS tab either build and flash one of the bootloader examples or run one of the precompiled demos. Precompiled demos flash a bootloader as well as the application image.
-
-- To flash an OTA DFU-capable bootloader to the device, flash the **Bluetooth Mesh - SoC Switch** demo.
-- To flash a UART DFU-capable bootloader to the device, flash the **Bluetooth Mesh - NCP Empty** demo.
-- For other bootloader types, create your own bootloader project and flash it to the device before flashing your application.
-- When you flash your application image to the device, use the *.hex* or *.s37* output file. Flashing *.bin* files may overwrite (erase) the bootloader.
-- For more information, see [UG103.6: Bootloader Fundamentals](https://www.silabs.com/documents/public/user-guides/ug103-06-fundamentals-bootloading.pdf) and [UG489: Silicon Labs Gecko Bootloader User's Guide for GSDK 4.0 and Higher](https://cn.silabs.com/documents/public/user-guides/ug489-gecko-bootloader-user-guide-gsdk-4.pdf).
 
 Before programming the radio board mounted on the mainboard, make sure the power supply switch the AEM position (right side) as shown below.
 

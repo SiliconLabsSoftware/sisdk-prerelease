@@ -21,7 +21,7 @@
 // Bootloader Version
 //
 #define BOOTLOADER_VERSION_MAIN_MAJOR             3
-#define BOOTLOADER_VERSION_MAIN_MINOR             1
+#define BOOTLOADER_VERSION_MAIN_MINOR             2
 
 #include "core/btl_util.h"
 MISRAC_DISABLE
@@ -37,7 +37,7 @@ MISRAC_ENABLE
 #endif
 
 #ifndef BOOTLOADER_VERSION_MAIN_CUSTOMER
-#define BOOTLOADER_VERSION_MAIN_CUSTOMER          1
+#define BOOTLOADER_VERSION_MAIN_CUSTOMER          0
 #endif
 
 #define BOOTLOADER_VERSION_MAIN (BOOTLOADER_VERSION_MAIN_MAJOR   << 24 \

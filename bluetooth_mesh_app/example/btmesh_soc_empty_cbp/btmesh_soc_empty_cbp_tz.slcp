@@ -22,7 +22,6 @@ component:
   - id: app_log
   - id: bootloader_interface
   - id: bootloader_app_properties
-  - id: bt_post_build
   - id: btmesh_stack_gatt_prov_bearer
   - id: btmesh_stack_relay
   - id: btmesh_provisionee

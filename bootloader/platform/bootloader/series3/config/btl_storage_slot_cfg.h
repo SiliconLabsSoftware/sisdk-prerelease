@@ -3,7 +3,7 @@
  * @brief Configuration header for bootloader
  *******************************************************************************
  * # License
- * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2025 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -26,6 +26,12 @@
  *
  *
  ******************************************************************************/
+// <e SLOT_CUSTOM_CONFIG> Custom Slot Configuration
+// <i> Default: 1
+#define SLOT_CUSTOM_CONFIG 1
+
+#if SLOT_CUSTOM_CONFIG
+
 // <e SLOT_OVERLAP_ENABLE> Enable Overlapping Slots
 // <i> Default: 0
 #define SLOT_OVERLAP_ENABLE 0
@@ -69,6 +75,14 @@
 // </e>
 // </e>
 // </e>
+// </e>
+
+#else // SLOT_CUSTOM_CONFIG
+
+#include "btl_storage_slot_cfg_default.h"
+
+#endif //SLOT_CUSTOM_CONFIG
+
 // </h>
 
 #if (SLOT0_ENABLE == 1 && SLOT1_ENABLE == 1 && SLOT2_ENABLE == 1)

@@ -60,7 +60,6 @@ config_file:
       component: bootloader_uart_driver
       file_id: btl_uart_driver_cfg
       vendor: silabs
-      package: bootloader
     unless:
       - hardware_board
 

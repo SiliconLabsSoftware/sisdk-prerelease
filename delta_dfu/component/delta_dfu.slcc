@@ -23,4 +23,7 @@ library:
   condition:
   - toolchain_llvm
   - cortexm33
+metadata:
+  sbom:
+    license: MSLA
 root_path: delta_dfu

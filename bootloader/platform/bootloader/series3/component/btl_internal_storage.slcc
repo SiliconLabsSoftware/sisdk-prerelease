@@ -30,6 +30,16 @@ define:
   value: 1
 provides:
 - name: btl_internal_storage
+config_file:
+- path: platform/bootloader/series3/config/internal_storage_slot_cfg/btl_storage_slot_cfg_default.h
+  override:
+    component: btl_storage_slots
+    file_id: btl_storage_slot_cfg_default
+    vendor: silabs
+  unless: [btl_storage_slot_cfg_default_override]
+template_file:
+- path: platform/bootloader/series3/config/internal_storage_slot_cfg/btl_internal_storage_slot_cfg_default.h.jinja
+  unless: [btl_storage_slot_cfg_default_override]
 metadata:
   sbom:
     license: MSLA

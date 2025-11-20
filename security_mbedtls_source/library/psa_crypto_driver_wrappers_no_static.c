@@ -188,6 +188,16 @@ psa_status_t psa_driver_wrapper_get_key_buffer_size(
             return( PSA_SUCCESS );
 #if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
+#if defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
+            if( psa_key_id_is_builtin(
+                    MBEDTLS_SVC_KEY_ID_GET_KEY_ID(
+                        psa_get_key_id( attributes ) ) ) )
+            {
+                *key_buffer_size = sizeof( sli_se_opaque_key_context_header_t );
+                return( PSA_SUCCESS );
+            }
+#endif
+            // Not a builtin key, then it must be a wrapped key
             buffer_size = PSA_EXPORT_KEY_OUTPUT_SIZE( key_type, key_bits );
             if( buffer_size == 0 ||
                 ( PSA_KEY_TYPE_IS_ECC_PUBLIC_KEY(key_type) && buffer_size == 1 ) )

@@ -27,4 +27,7 @@ template_contribution:
   value: MBEDTLS_PLATFORM_STD_NV_SEED_READ sli_nv_seed_read
 - name: mbedtls_config
   value: MBEDTLS_PLATFORM_STD_NV_SEED_WRITE sli_nv_seed_write
+metadata:
+  sbom:
+    license: Zlib
 root_path: security_mbedtls/platform/security

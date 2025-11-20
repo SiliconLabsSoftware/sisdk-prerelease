@@ -22,7 +22,6 @@ component:
   - id: app_assert
   - id: app_log
   - id: app_timer
-  - id: bootloader_interface
   - id: app_button_press
   - id: btmesh_factory_reset
   - id: btmesh_generic_level_client_ext

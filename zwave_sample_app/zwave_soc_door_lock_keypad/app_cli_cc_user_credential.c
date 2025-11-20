@@ -547,25 +547,27 @@ static bool u3c_add_user(const char * const user_name)
  */
 static bool u3c_modify_credential(uint16_t slot, u3c_credential_type type, unsigned char* credential_data)
 {
-  u3c_credential_t credential = {
-    .metadata = {
-      .uuid = 0,
-      .type = 0,
-      .slot = 0,
-      .modifier_node_id = 0,
-      .length = 0,
-      .modifier_type = 0
-    },
-    .data = NULL
-  };
   bool operation_result = false;
 
-  if (!validate_new_credential_metadata(&credential.metadata)
-      || !validate_new_credential_data(&credential, NULL)) {
-    app_log_error("Invalid credential!\r\n");
+  // Retrieve the credential from the database
+  u3c_credential_t credential = { 0 };
+  u3c_db_operation_result get_result = CC_UserCredential_get_credential(0, type, slot, &credential.metadata, NULL);
+  if (get_result != U3C_DB_OPERATION_RESULT_SUCCESS) {
+    app_log_error("Credential does not exist!\r\n");
     return false;
   }
 
+  // Commit the new credential data locally
+  credential.data = credential_data;
+  credential.metadata.length = strnlen((char *)credential_data, U3C_BUFFER_SIZE_CREDENTIAL_DATA);
+  credential.metadata.modifier_type    = MODIFIER_TYPE_LOCALLY;
+  credential.metadata.modifier_node_id = 0;
+
+  /**
+   * Check if the credential length is valid.
+   * This covers the checks performed in validate_new_credential_metadata()
+   * so it doesn't need to be invoked.
+   */
   uint8_t credential_min_length = cc_user_credential_get_min_length_of_data(credential.metadata.type);
   uint8_t credential_max_length = cc_user_credential_get_max_length_of_data(credential.metadata.type);
   if (credential.metadata.length < credential_min_length
@@ -574,21 +576,15 @@ static bool u3c_modify_credential(uint16_t slot, u3c_credential_type type, unsig
     return false;
   }
 
-  if (CC_UserCredential_get_credential(0, type, slot, &credential.metadata, credential.data) == U3C_DB_OPERATION_RESULT_SUCCESS) {
-    credential.metadata.modifier_type    = MODIFIER_TYPE_LOCALLY;
-    credential.metadata.modifier_node_id = 0;
-    credential.metadata.length           = strnlen((char *)credential_data, U3C_BUFFER_SIZE_CREDENTIAL_DATA);
-    credential.data                      = credential_data;
+  // Check the new credential data for conformance with the specification and manufacturer security rules
+  if (!validate_new_credential_data(&credential, NULL)) {
+    app_log_error("Invalid credential data!\r\n");
+    return false;
+  }
 
-    if (!CC_UserCredential_manufacturer_validate_credential(&credential)) {
-      app_log_error("Credential does not follow manufacturer security rules!\r\n");
-      return false;
-    }
-
-    RECEIVE_OPTIONS_TYPE_EX rx_options = { 0 };
-    if (CC_UserCredential_modify_credential_and_report(&credential, &rx_options) == U3C_DB_OPERATION_RESULT_SUCCESS) {
-      operation_result = true;
-    }
+  RECEIVE_OPTIONS_TYPE_EX rx_options = { 0 };
+  if (CC_UserCredential_modify_credential_and_report(&credential, &rx_options) == U3C_DB_OPERATION_RESULT_SUCCESS) {
+    operation_result = true;
   }
 
   return operation_result;

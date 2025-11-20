@@ -1,15 +1,23 @@
 -- Validation script for bootloader storage slots
 
+local slot_custom_config = slc.config('SLOT_CUSTOM_CONFIG')
+
+if tonumber(slot_custom_config.value) == 0 then
+	-- Default configuration is enabled so validation shall be skipped because
+	-- the configuration option macros are defined elsewhere.
+	return
+end
+
 local slot_overlap = slc.config('SLOT_OVERLAP_ENABLE')
-	
+
 local slot0_enable = slc.config('SLOT0_ENABLE')
 local slot1_enable = slc.config('SLOT1_ENABLE')
 local slot2_enable = slc.config('SLOT2_ENABLE')
-	
+
 local slot0_size = slc.config('SLOT0_SIZE')
 local slot1_size = slc.config('SLOT1_SIZE')
 local slot2_size = slc.config('SLOT2_SIZE')
-	
+
 local slot0_start_addr = slc.config('SLOT0_START')
 local slot1_start_addr = slc.config('SLOT1_START')
 local slot2_start_addr = slc.config('SLOT2_START')

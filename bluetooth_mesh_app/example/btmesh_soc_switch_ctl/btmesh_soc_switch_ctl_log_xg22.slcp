@@ -24,8 +24,6 @@ component:
   - id: app_button_press
   - id: app_log
   - id: app_timer
-  - id: bootloader_interface
-  - id: bt_post_build
   - id: btmesh_ctl_client
   - id: btmesh_factory_reset
   - id: btmesh_stack_gatt_prov_bearer
@@ -34,7 +32,6 @@ component:
   - id: btmesh_provisionee
   - id: btmesh_provisioning_decorator
   - id: btmesh_proxy
-  - id: btmesh_target_node
   - id: btmesh_iv_update
   - id: cli
     instance:
@@ -99,22 +96,8 @@ configuration:
     value: "0x6000"
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"
-  - name: SL_BTMESH_BLOB_TRANSFER_SERVER_DFU_TARGET_MAX_BLOCK_SIZE_LOG_CFG_VAL
-    value: "9"
-  - name: SL_BTMESH_BLOB_TRANSFER_SERVER_DFU_TARGET_LPN_MODE_CFG_VAL
-    value: "1"
-  - name: SL_BTMESH_BLOB_TRANSFER_SERVER_DFU_TARGET_MAX_CHUNK_SIZE_CFG_VAL
-    value: "8"
-  - name: SL_BTMESH_BLOB_TRANSFER_SERVER_DFU_TARGET_MAX_CHUNKS_PER_BLOCK_CFG_VAL
-    value: "64"
-  - name: SL_BTMESH_BLOB_TRANSFER_SERVER_DFU_TARGET_PUSH_MODE_CFG_VAL
-    value: "0"
   - name: SL_BTMESH_CONFIG_MAX_PROV_BEARERS
     value: "3"
-  - name: SL_BTMESH_FW_UPDATE_SERVER_FWID_CFG_VAL
-    value: '"socbtmswitchctl_v1"'
-  - name: SL_BTMESH_FW_UPDATE_SERVER_METADATA_LENGTH_CFG_VAL
-    value: "31"
   - name: SL_CLI_NUM_HISTORY_BYTES
     value: "0"
   - name: SL_PSA_KEY_USER_SLOT_COUNT

@@ -41,7 +41,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <errno.h>
-#include "system.h"
 #include "sl_bt_api.h"
 #include "sl_btmesh_ncp_host.h"
 #include "sl_bt_ncp_host.h"

@@ -164,6 +164,32 @@ SL_WEAK void app_init_early(void)
 }
 
 /******************************************************************************
+ * @brief User-defined function for app initialization.
+ *
+ * @details This function is called from main():
+ * - After all SiSDKs modules have been initialized (e.g. memory management,
+ * clock, oscillators, interrupt management, drivers, services, stacks).
+ * - After initializing and starting the kernel (if RTOS-based application)
+ * This function allows the user to perform any initialization required by his
+ * application after all SiSDK modules initializations.
+ *****************************************************************************/
+SL_WEAK void app_init(void)
+{
+  // User defined.
+}
+
+/******************************************************************************
+ * @brief User-defined function to process a baremetal action periodically.
+ *
+ * @details Only used when the firmware type is baremetal.
+ * This function will be called every iteration of the main loop.
+ *****************************************************************************/
+SL_WEAK void app_process_action(void)
+{
+  // User defined.
+}
+
+/******************************************************************************
  * @brief Internal function used to aggregate driver, services stacks and internal apps
  * initialization function.
  *

@@ -6,9 +6,9 @@ label=Platform Security Sample App Package
 
 description=Platform Security Sample App Package
 
-version=1.0.0-beta.1
+version=1.0.0-beta.2
 
-prop.subLabel=Platform\\ Security\\ Sample\\ App\\ Package\\ 1.0.0-beta.1
+prop.subLabel=Platform\\ Security\\ Sample\\ App\\ Package\\ 1.0.0-beta.2
 
 prop.file.templatesFile=platform_production_templates.xml
 

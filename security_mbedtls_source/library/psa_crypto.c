@@ -3044,7 +3044,7 @@ static psa_status_t psa_sign_verify_check_alg(int input_is_message,
      * sign-message which needs to hash first for all algorithms
      * supported at the moment. */
 
-    if (hash_alg == 0 && input_is_message) {
+    if (hash_alg == 0 && input_is_message && PSA_ALG_IS_SIGN_HASH(alg)) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
     if (hash_alg == PSA_ALG_ANY_HASH) {

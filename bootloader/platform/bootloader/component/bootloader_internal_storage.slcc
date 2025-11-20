@@ -37,6 +37,15 @@ requires:
 config_file:
 - path: platform/bootloader/config/btl_internal_storage_cfg.h
   file_id: btl_internal_storage_config
+- path: platform/bootloader/config/internal_storage_slot_cfg/btl_storage_slot_cfg_default.h
+  override:
+    component: bootloader_storage_slots
+    file_id: btl_storage_slot_cfg_default
+    vendor: silabs
+  unless: [btl_storage_slot_cfg_default_override]
+template_file:
+- path: platform/bootloader/config/internal_storage_slot_cfg/btl_internal_storage_slot_cfg_default.h.jinja
+  unless: [btl_storage_slot_cfg_default_override]
 metadata:
   sbom:
     license: MSLA

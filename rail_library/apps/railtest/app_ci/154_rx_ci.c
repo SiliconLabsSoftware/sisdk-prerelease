@@ -37,6 +37,7 @@
 
 #include "rail.h"
 #include "rail_ieee802154.h"
+#include "sl_rail_ieee802154.h"
 #include "app_common.h"
 
 #ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
@@ -234,7 +235,9 @@ static IEEE802154_2p4GHzConfig_t ieee802154Configs[] = {
   { "UNSUPPORTED", &RAIL_IEEE802154_Config2p4GHzRadioCustom1 },
 #if RAIL_IEEE802154_SUPPORTS_2MBPS_PHY
   { "IEEE802154_2P4_MODE_2MBPS", &RAIL_IEEE802154_Config2p4GHzRadio2Mbps },
-  { "IEEE802154_2P4_MODE_1MBPS_FEC", &RAIL_IEEE802154_Config2p4GHzRadio1MbpsFec }
+  { "IEEE802154_2P4_MODE_1MBPS_FEC", &RAIL_IEEE802154_Config2p4GHzRadio1MbpsFec },
+  { "IEEE802154_2P4_MODE_FCS_2MBPS", (RAIL_IEEE802154_2p4GHzRadioConfig_t)&sl_rail_ieee802154_config_2p4_ghz_radio_fcs_2_mbps },
+  { "IEEE802154_2P4_MODE_FCS_1MBPS_FEC", (RAIL_IEEE802154_2p4GHzRadioConfig_t)&sl_rail_ieee802154_config_2p4_ghz_radio_fcs_1_mbps_fec }
 #endif
 };
 

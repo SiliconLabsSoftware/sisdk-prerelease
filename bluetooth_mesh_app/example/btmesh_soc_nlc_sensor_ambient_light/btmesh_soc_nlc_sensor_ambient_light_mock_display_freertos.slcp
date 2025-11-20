@@ -24,7 +24,6 @@ component:
   - id: app_button_press
   - id: app_log
   - id: app_timer
-  - id: bootloader_interface
   - id: btmesh_factory_reset
   - id: btmesh_lpn
   - id: btmesh_nlc_ambient_light_sensor

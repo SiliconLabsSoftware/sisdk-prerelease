@@ -46,7 +46,6 @@
 #include "sl_common.h"
 #include "sl_bt_api.h"
 #include "sl_btmesh_api.h"
-#include "sl_bt_api.h"
 #include "sl_btmesh_ncp_host.h"
 #include "sl_bt_ncp_host.h"
 #include "sl_ncp_evt_filter_common.h"
@@ -55,18 +54,18 @@
 #include "btmesh_prov.h"
 #include "btmesh_conf.h"
 
-#ifdef SL_CATALOG_APP_REMOTE_PROV_PRESENT
-#ifdef SL_CATALOG_APP_PROV_CBP_PRESENT
+#ifdef SL_CATALOG_BTMESH_HOST_APP_REMOTE_PROV_PRESENT
+#ifdef SL_CATALOG_BTMESH_HOST_APP_PROV_CBP_PRESENT
 #include "btmesh_app_prov_cbp.h"
-#endif // SL_CATALOG_APP_PROV_CBP_PRESENT
+#endif // SL_CATALOG_BTMESH_HOST_APP_PROV_CBP_PRESENT
 #include "btmesh_app_remote_prov.h"
 #include "btmesh_remote_prov.h"
 #else
-#ifdef SL_CATALOG_APP_PROV_CBP_PRESENT
+#ifdef SL_CATALOG_BTMESH_HOST_APP_PROV_CBP_PRESENT
 #include "btmesh_app_prov_cbp.h"
-#endif // SL_CATALOG_APP_PROV_CBP_PRESENT
+#endif // SL_CATALOG_BTMESH_HOST_APP_PROV_CBP_PRESENT
 #include "app_prov_only.h"
-#endif // SL_CATALOG_APP_REMOTE_PROV_PRESENT
+#endif // SL_CATALOG_BTMESH_HOST_APP_REMOTE_PROV_PRESENT
 
 // -----------------------------------------------------------------------------
 // Macros
@@ -162,7 +161,7 @@ void app_init(int argc, char *argv[])
 
   SL_BTMESH_API_REGISTER();
 
-  app_log_info("Empty NCP-host initialised." APP_LOG_NEW_LINE);
+  app_log_info("NCP host provisioner initialised." APP_LOG_NEW_LINE);
 
   /////////////////////////////////////////////////////////////////////////////
   // Put your additional application init code here!                         //
@@ -347,6 +346,8 @@ sl_status_t app_add_user_event_filter(const uint32_t event_id)
 
 void btmesh_prov_on_provision_failed_evt(uint8_t reason, uuid_128 uuid)
 {
+  (void)reason;
+  (void)uuid;
   command_state_t prov_command_state;
 
   btmesh_app_prov_get_command(NULL, &prov_command_state);
@@ -361,6 +362,8 @@ void btmesh_prov_on_provision_failed_evt(uint8_t reason, uuid_128 uuid)
 void app_on_node_configuration_end(uint16_t netkey_index,
                                    uint16_t server_address)
 {
+  (void)netkey_index;
+  (void)server_address;
   command_state_t prov_command_state;
 
   btmesh_app_prov_get_command(NULL, &prov_command_state);

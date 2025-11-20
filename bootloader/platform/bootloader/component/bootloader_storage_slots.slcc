@@ -13,6 +13,8 @@ provides:
 config_file:
 - path: platform/bootloader/config/btl_storage_slot_cfg.h
   file_id: btl_storage_slot_cfg
+- path: platform/bootloader/config/btl_storage_slot_cfg_default.h
+  file_id: btl_storage_slot_cfg_default
 validation_helper:
 - path: platform/bootloader/component/scripts/bootloader_storage_validation.lua
 metadata:

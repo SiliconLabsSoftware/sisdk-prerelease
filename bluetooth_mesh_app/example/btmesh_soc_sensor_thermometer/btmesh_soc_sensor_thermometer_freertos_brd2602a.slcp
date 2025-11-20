@@ -22,9 +22,7 @@ component:
   - id: app_assert
   - id: app_log
   - id: app_timer
-  - id: bootloader_interface
   - id: app_button_press
-  - id: bt_post_build
   - id: btmesh_event_log
   - id: btmesh_factory_reset
   - id: btmesh_lpn

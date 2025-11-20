@@ -21,9 +21,7 @@ component:
   - id: app_assert
   - id: app_log
   - id: app_timer
-  - id: bootloader_interface
   - id: app_button_press
-  - id: bt_post_build
   - id: btmesh_factory_reset
   - id: btmesh_friend
   - id: btmesh_stack_gatt_prov_bearer
@@ -32,7 +30,6 @@ component:
   - id: btmesh_provisioning_decorator
   - id: btmesh_proxy
   - id: btmesh_sensor_client
-  - id: btmesh_target_node
   - id: btmesh_iv_update
   - id: cli
     instance:
@@ -99,8 +96,6 @@ configuration:
     value: "1"
   - name: SL_BTMESH_CONFIG_MAX_PROV_BEARERS
     value: "3"
-  - name: SL_BTMESH_FW_UPDATE_SERVER_FWID_CFG_VAL
-    value: '"socbtmsensclnt_v1"'
   - name: SL_CLI_NUM_HISTORY_BYTES
     value: "0"
   - name: SL_PSA_KEY_USER_SLOT_COUNT

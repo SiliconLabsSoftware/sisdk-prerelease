@@ -110,13 +110,13 @@
 #define CS_HOST_OPTIONS                                                            \
   "    -m  CS main mode.\n"                                                        \
   "        <cs_main_mode> Integer representing CS main mode, default: 2, PBR.\n"   \
-  "        Used only for initiator instances"                                      \
+  "        Used only for initiator instances\n"                                    \
   "        1 : RTT\n"                                                              \
   "        2 : PBR\n"                                                              \
   "        Note: see -M\n"                                                         \
   "    -M  CS sub mode\n"                                                          \
   "        <cs_sub_mode> Integer representing CS sub mode, default: No sub mode\n" \
-  "        Used only for initiator instances"                                      \
+  "        Used only for initiator instances\n"                                    \
   "        1: RTT\n"                                                               \
   "        255: no sub mode\n"                                                     \
   "        Note: Only main mode = PBR, sub mode = RTT supported now\n"             \
@@ -128,34 +128,34 @@
   "    -F  Enable reflector BLE address filtering in format:\n"                    \
   "        AA:BB:CC:DD:EE:FF or aabbccddeeff\n"                                    \
   "        <reflector_ble_address>\n"                                              \
-  "        Used only for initiator instances"                                      \
+  "        Used only for initiator instances\n"                                    \
   "    -w  Use wired antenna offset\n"                                             \
   "    -o  Object tracking mode, default: 2\n"                                     \
-  "        Used only for initiator instances"                                      \
+  "        Used only for initiator instances\n"                                    \
   "        0 : moving object tracking (REAL_TIME_BASIC)\n"                         \
   "        1 : stationary object tracking (STATIC_HIGH_ACCURACY)\n"                \
   "        2 : moving object tracking fast (REAL_TIME_FAST)\n"                     \
   "    -p  Pre-set parameters for channel map selection, default: 2\n"             \
-  "        Used only for initiator instances"                                      \
+  "        Used only for initiator instances\n"                                    \
   "        0 : low (channel spacing: 1, number of channels: 20)\n"                 \
   "        1 : medium (channel spacing: 2, number of channels: 38)\n"              \
   "        2 : high (channel spacing: 1, number of channels: 72)\n"                \
   "        3 : load custom from configuration macro CS_CUSTOM_CHANNEL_MAP\n"       \
   "    -a  Antenna configuration index for antenna switching, default: 7\n"        \
-  "        Used only for initiator instances"                                      \
+  "        Used only for initiator instances\n"                                    \
   "        0 : Single antennas on both sides\n"                                    \
   "        1 : Dual antenna initiator & single antenna reflector\n"                \
   "        4 : Single antenna initiator & dual antenna reflector\n"                \
   "        7 : Dual antennas on both sides\n"                                      \
   "        Note: considered only with CS main mode: PBR!\n"                        \
   "    -q  Antenna usage for CS SYNC packets, default: 0xFE\n"                     \
-  "        Used for both initiator and reflector instances"                        \
+  "        Used for both initiator and reflector instances\n"                      \
   "        1 : use antenna ID1 only\n"                                             \
   "        2 : use antenna ID2 only\n"                                             \
   "        0xFE : Switching between antennas for each channel\n"                   \
   "        Note: considered only with CS main mode: RTT!\n"                        \
   "    -s  Optimized procedure scheduling\n"                                       \
-  "        Used only for initiator instances"                                      \
+  "        Used only for initiator instances\n"                                    \
   "        0 : Optimized for frequency update\n"                                   \
   "        1 : Optimized for energy consumption\n"                                 \
   "        2 : Custom\n"                                                           \
@@ -164,7 +164,7 @@
   "    -T  Enable RTT trace including BGAPI messages and RTL log.\n"               \
   "        Note that the RTT blocks the target if no client is connected.\n"       \
   "    -P  Use 1M connection PHY\n"                                                \
-  "        Used only for initiator instances"                                      \
+  "        Used only for initiator instances\n"                                    \
   "        Note: Default is 2M\n"                                                  \
   "    -S  Enable synchronized mode\n"                                             \
   "        max_procedure_count = 1\n"
@@ -249,7 +249,7 @@ static void check_supported_capabilities(sl_bt_msg_t *evt);
 /******************************************************************************
  * Application initialization
  *****************************************************************************/
-void app_init(int argc, char *argv[])
+void app_cli_init(int argc, char *argv[])
 {
   sl_status_t sc;
   int cli_opt;
@@ -623,6 +623,14 @@ void app_init(int argc, char *argv[])
   app_log_info(APP_PREFIX "NCP host initialized" APP_LOG_NL);
   app_log_info(APP_PREFIX "Press Crtl+C to quit" APP_LOG_NL);
   app_log_info("+-------------------------------------------------------+" APP_LOG_NL APP_LOG_NL);
+}
+
+void app_init(void)
+{
+  /////////////////////////////////////////////////////////////////////////////
+  // Put your additional application init code here!                         //
+  // This is called once during start-up.                                    //
+  /////////////////////////////////////////////////////////////////////////////
 }
 
 void sl_bt_on_event(sl_bt_msg_t *evt)

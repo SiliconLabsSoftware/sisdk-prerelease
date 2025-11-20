@@ -24,8 +24,6 @@ component:
   - id: bluetooth_feature_gatt
   - id: bluetooth_feature_gatt_server
   - id: bluetooth_feature_nvm
-  - id: bootloader_interface
-  - id: bt_post_build
   - id: btmesh_dcd_configuration
   - id: btmesh_stack_gatt_prov_bearer
   - id: btmesh_stack_generic_server

@@ -3,7 +3,10 @@
 The changes described in this file will possibly break the build and/or functionality of an
 existing application. The description serves the purpose of helping to fix the failing build.
 
-# 7.25.0 {#section-7-25-0}
+# 8.0.0 {#section-8-0-0}
+
+Version has been bumped to 8.0.0 to reflect the major changes in the stack. In the future the stack version will follow semver.
+
 
 ## Power Management Commands - Lock Behavior
 
@@ -37,7 +40,7 @@ FreeRTOS power down hooks (`configPRE_SLEEP_PROCESSING` and `configPOST_SLEEP_PR
 - Now that all applications can make use of EM1P, the CLI has been configured to rely on the LFRCO clock (which implies a lower baud rate of 9600) for SoC applications. Therefore, the CLI will remain active in EM1P.
 
 ## TX POWER
-The ADJUST_RAIL_TX_POWER (1.4 dBm) empirical offset in the zpal_radio layer has been removed. In the case of OTA updates from versions prior to 7.25 to higher versions, TX power values need to be adjusted.
+The ADJUST_RAIL_TX_POWER (1.4 dBm) empirical offset in the zpal_radio layer has been removed. In the case of OTA updates from versions prior to 8.0 to higher versions, TX power values need to be adjusted.
 
 Moreover, the zpal_radio layer has been refactored to comply strictly with regulatory rules, including TX power levels for EU and US regions, and LBT and duty cycle rules for JP and KR regions.
 

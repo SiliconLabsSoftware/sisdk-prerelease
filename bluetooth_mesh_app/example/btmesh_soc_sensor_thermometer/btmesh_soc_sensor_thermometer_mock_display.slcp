@@ -22,9 +22,7 @@ component:
   - id: app_assert
   - id: app_log
   - id: app_timer
-  - id: bootloader_interface
   - id: app_button_press
-  - id: bt_post_build
   - id: btmesh_factory_reset
   - id: btmesh_lpn
   - id: btmesh_provisionee
@@ -34,7 +32,6 @@ component:
   - id: btmesh_sensor_server
   - id: btmesh_stack_gatt_prov_bearer
   - id: btmesh_stack_relay
-  - id: btmesh_target_node
   - id: btmesh_iv_update
   - id: btmesh_wstk_lcd
   - id: cli
@@ -103,19 +100,8 @@ configuration:
     value: "1"
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"
-  - name: SL_BTMESH_BLOB_TRANSFER_SERVER_DFU_TARGET_LPN_MODE_CFG_VAL
-    value: "1"
-  - name: SL_BTMESH_BLOB_TRANSFER_SERVER_DFU_TARGET_MAX_BLOCK_SIZE_LOG_CFG_VAL
-    value: "0xB"
-    unless:
-      - "device_sdid_205"  # xG22
-      - "device_sdid_230"  # xG27
   - name: SL_BTMESH_CONFIG_MAX_PROV_BEARERS
     value: "3"
-  - name: SL_BTMESH_FW_UPDATE_SERVER_FWID_CFG_VAL
-    value: '"socbtmsensortherm_v1"'
-  - name: SL_BTMESH_FW_UPDATE_SERVER_METADATA_LENGTH_CFG_VAL
-    value: "31"
   - name: SL_CLI_NUM_HISTORY_BYTES
     value: "0"
     condition:

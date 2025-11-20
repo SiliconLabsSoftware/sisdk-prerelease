@@ -1,7 +1,8 @@
 # Migration Guide {#migration-guide}
 
 This guide shows how to migrate projects from previous SDKs to a newer one.
-# 7.25.0 {#migrate-section-7-25-0}
+
+# 8.0.0 {#migrate-section-8-0-0}
 
 ## zpal_power_manager APIs migration
 Following the removal of zpal_power_manager, here are the APIs you need to remove from your code:

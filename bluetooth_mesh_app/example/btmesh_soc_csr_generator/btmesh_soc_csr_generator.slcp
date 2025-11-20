@@ -21,7 +21,6 @@ component:
   - id: app_assert
   - id: app_log
   - id: bootloader_interface
-  - id: bt_post_build
   - id: clock_manager
   - id: device_init
   - id: iostream_usart

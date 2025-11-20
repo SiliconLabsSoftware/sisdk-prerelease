@@ -27,6 +27,8 @@ requires:
 config_file:
 - path: platform/bootloader/series3/config/btl_storage_cfg.h
   file_id: btl_storage_config
+- path: platform/bootloader/series3/config/btl_storage_cfg_default.h
+  file_id: btl_storage_config_default
 metadata:
   sbom:
     license: MSLA
