@@ -131,6 +131,24 @@
 #define CUSTOM_BTL_APP_SPACE_SIZE                                  0
 // </e>
 
+#ifdef BOOTLOADER_SUPPORT_STORAGE
+// <e BOOTLOADER_UPGRADE_WATCHDOG> Enable watchdog during firmware upgrade
+// <i> If enabled, the bootloader starts WDOG before applying staged updates (SE/BL/App).
+// <i> It is disabled automatically when parking in the reset-loop guard.
+// <i> Default: 0
+#ifndef BOOTLOADER_UPGRADE_WATCHDOG
+#define BOOTLOADER_UPGRADE_WATCHDOG                0
+#endif
+
+  // <o BOOTLOADER_UPGRADE_WATCHDOG_PERIOD> Watchdog timeout (period selector)
+  // <i> Select one of the device WDOG period enums 
+  // <i> Default: wdogPeriod_256k
+  #ifndef BOOTLOADER_UPGRADE_WATCHDOG_PERIOD
+  #define BOOTLOADER_UPGRADE_WATCHDOG_PERIOD       wdogPeriod_256k
+  #endif
+// </e>
+#endif
+
 #if USE_CUSTOM_APP_SIZE
 #define BTL_APP_SPACE_SIZE                    CUSTOM_BTL_APP_SPACE_SIZE
 #else

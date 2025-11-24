@@ -13,6 +13,8 @@ requires:
 - name: sl_rail_util_ieee802154_phy_select
 provides:
 - name: sl_rail_util_ieee802154_fast_channel_switching
+conflicts:
+- name: rail_util_ieee802154_fast_channel_switching
 config_file:
 - path: plugin/rail_util_ieee802154/config/sl_rail_util_ieee802154_fast_channel_switching_config.h
   file_id: sl_rail_util_ieee802154_fast_channel_switching_config

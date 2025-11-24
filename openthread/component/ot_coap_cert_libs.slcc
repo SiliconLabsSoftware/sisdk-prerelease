@@ -4,7 +4,7 @@ package: openthread
 category: OpenThread
 quality: production
 description: >
-  Includes OpenThread stack and PAL libraries that could be used for certification by inheritance. Uses default certification configurations.
+  Includes OpenThread stack libraries that could be used for certification by inheritance. Uses default certification configurations.
   Note: Please refer to the release notes to verify if the SDK has been qualified for certification.
 provides:
 - name: ot_coap_cert_libs

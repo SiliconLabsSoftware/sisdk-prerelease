@@ -26,6 +26,13 @@ source:
   condition:
   - zigbee_use_ipc
 
+
+- path: stack/internal/src/ipc/zigbee_ipc_callback_event_stub.c
+  condition:
+  - zigbee_use_ipc
+- path: stack/internal/src/ipc/zigbee_ipc_callback_events.c
+  condition:
+  - zigbee_use_ipc
 include:
   #for an include on stack/framework/packet-header.h
 - path: stack

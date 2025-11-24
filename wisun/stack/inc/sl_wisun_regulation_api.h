@@ -35,14 +35,16 @@
 #define SL_WISUN_REGULATION_PARAMS_API_VERSION  1
 
 /**************************************************************************//**
- * @addtogroup SL_WISUN_REGULATION_API Wi-SUN Regional Regulation API
+ * @addtogroup SL_WISUN_REGULATION_API Regional Regulation API
  * @ingroup SL_WISUN_API
- * @brief Wi-SUN Regional Regulation API
- * @details
- * This API provides the parameters for regional regulation compliance.
- * It allows to set the duty cycle budget, thresholds for warnings and alerts,
- * and other parameters related to the regional regulation.
- * The Wi-SUN stack provides predefined parameter sets for the following regulations:
+ *
+ * Wi-SUN Regional Regulation API provides the parameters for regional
+ * regulation compliance.
+ *
+ * The API allows the application to set the duty cycle budget, thresholds
+ * for warnings and alerts, and other parameters related to the regional
+ * regulation. The Wi-SUN stack provides predefined parameter sets for the
+ * following regulations:
  * - ARIB (Japan)
  * - WPC (India)
  * - ETSI (Europe)
@@ -65,6 +67,7 @@
  * duration complies with the ARIB regulation by:
  * - reducing the frame length
  * - adjusting the 6LoWPAN MTU leading to fragmentation for larger packets
+ *
  * @{
  *****************************************************************************/
 
@@ -103,7 +106,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_regulation_params_t;
 SL_PACK_END()
 
-/***************************************************************************//**
+/**************************************************************************//**
  * @addtogroup SL_WISUN_REGULATION_PARAMETER_SETS Predefined regional regulation parameter sets
  *
  * Predefined regional regulation parameter sets for sl_wisun_set_regulation_parameters().
@@ -112,7 +115,7 @@ SL_PACK_END()
  * value for an application-specific parameter set.
  *
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Default parameter set for no regional regulation.
 /// This parameter set is used when no regional regulation is applied.

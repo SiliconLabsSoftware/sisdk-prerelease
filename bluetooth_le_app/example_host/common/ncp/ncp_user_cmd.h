@@ -41,4 +41,3 @@
 #define USER_RSP_GET_BOARD_NAME_LEN       8
 
 #endif // NCP_USER_CMD_H
- 

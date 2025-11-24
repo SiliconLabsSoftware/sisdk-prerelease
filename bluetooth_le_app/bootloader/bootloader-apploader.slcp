@@ -27,3 +27,4 @@ tag:
   - companion:application
   - hwfilter:device:device_series_2
   - hwfilter:device:device_supports_bluetooth
+  - hwfilter:!device:device_is_module

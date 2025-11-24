@@ -35,6 +35,7 @@
 #define PA_CONVERSIONS_EFR32_H
 
 #include "rail_types.h"
+#include "sl_rail_util_compatible_pa.h"
 
 // This macro is defined when Silicon Labs builds curves into the library as WEAK
 // to ensure it can be overriden by customer versions of these functions. It
@@ -162,32 +163,6 @@ RAIL_Status_t RAIL_GetTxPowerCurveLimits(RAIL_Handle_t railHandle,
                                          RAIL_TxPower_t *increment);
 
 /**
- * Initialize PA TX Curves.
- */
-void sl_rail_util_pa_init(void);
-
-/**
- * Get a pointer to the TX Power Config 2.4 GHz structure.
- *
- * @return A pointer to the TX Power Config stucture.
- */
-RAIL_TxPowerConfig_t *sl_rail_util_pa_get_tx_power_config_2p4ghz(void);
-
-/**
- * Get a pointer to the TX Power Config Sub-GHz structure.
- *
- * @return A pointer to the TX Power Config stucture.
- */
-RAIL_TxPowerConfig_t *sl_rail_util_pa_get_tx_power_config_subghz(void);
-
-/**
- * Get a pointer to the TX Power Config OFDM structure.
- *
- * @return A pointer to the TX Power Config stucture.
- */
-RAIL_TxPowerConfig_t *sl_rail_util_pa_get_tx_power_config_ofdm(void);
-
-/**
  * Provide a channel config change callback capable of configuring the PA
  * correctly.
  *
@@ -199,53 +174,6 @@ void sl_rail_util_pa_on_channel_config_change(RAIL_Handle_t rail_handle,
                                               const RAIL_ChannelConfigEntry_t *entry);
 
 /** @} */ // PA_Curve_Conversions
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-
-// Temporary RAIL 3.x API mappings to RAIL 2.x APIs
-#include "sl_rail_types.h"
-#define sl_rail_tx_power_curves_vbat \
-  RAIL_TxPowerCurvesVbat
-#define sl_rail_tx_power_curves_dcdc \
-  RAIL_TxPowerCurvesDcdc
-#define sl_rail_init_tx_power_curves(a, b)                         \
-  ((sl_rail_status_t)RAIL_InitTxPowerCurvesAlt((RAIL_Handle_t)(a), \
-                                               (const RAIL_TxPowerCurvesConfigAlt_t *)(b)))
-#define sl_rail_get_tx_power_curve_limits(a, b, c, d)                    \
-  ((sl_rail_status_t)RAIL_GetTxPowerCurveLimits((RAIL_Handle_t)(a),      \
-                                                (RAIL_TxPowerMode_t)(b), \
-                                                (RAIL_TxPower_t *)(c),   \
-                                                (RAIL_TxPower_t *)(d)))
-#define sl_rail_util_pa_convert_raw_to_dbm(a, b, c)                  \
-  ((sl_rail_tx_power_t)RAIL_ConvertRawToDbm((RAIL_Handle_t)(a),      \
-                                            (RAIL_TxPowerMode_t)(b), \
-                                            (RAIL_TxPowerLevel_t)(c)))
-#define sl_rail_util_pa_convert_dbm_to_raw(a, b, c)                        \
-  ((sl_rail_tx_power_level_t)RAIL_ConvertDbmToRaw((RAIL_Handle_t)(a),      \
-                                                  (RAIL_TxPowerMode_t)(b), \
-                                                  (RAIL_TxPower_t)(c)))
-#define sl_rail_util_pa_convert_dbm_to_power_setting_entry(a, b, c, d)           \
-  ((sl_rail_status_t)RAIL_ConvertDbmToPowerSettingEntry((RAIL_Handle_t)(a),      \
-                                                        (RAIL_TxPowerMode_t)(b), \
-                                                        (RAIL_TxPower_t)(c),     \
-                                                        (RAIL_TxPowerSettingEntry_t *)(d)))
-#define sl_rail_util_pa_get_power_setting_table(a, b, c, d, e)                            \
-  ((const sl_rail_pa_power_setting_t *)RAIL_GetPowerSettingTable((RAIL_Handle_t)(a),      \
-                                                                 (RAIL_TxPowerMode_t)(b), \
-                                                                 (RAIL_TxPower_t *)(c),   \
-                                                                 (RAIL_TxPower_t *)(d),   \
-                                                                 (RAIL_TxPowerLevel_t *)(e)))
-// Handle cross-component dependency between RAIL 2 and 3 callbacks component
-#ifdef SL_COMPONENT_CATALOG_PRESENT
-#include "sl_component_catalog.h"
-#endif
-#ifdef  SL_CATALOG_SL_RAIL_UTIL_CALLBACKS_PRESENT
-#define sl_rail_util_pa_on_channel_config_change(a, b)       \
-  sl_rail_util_pa_on_channel_config_change((RAIL_Handle_t)a, \
-                                           (const RAIL_ChannelConfigEntry_t *)(b))
-#endif//SL_CATALOG_SL_RAIL_UTIL_CALLBACKS_PRESENT
-
-#endif//DOXYGEN_SHOULD_SKIP_THIS
 
 #ifdef __cplusplus
 }

@@ -49,12 +49,20 @@
 #define result_log_info(...)  log_info(__VA_ARGS__)
 #define result_log_append(...) log_append(__VA_ARGS__)
 #define result_log_error(...) log_error(__VA_ARGS__)
+#if defined(CS_RESULT_DEBUG_LOG) && CS_RESULT_DEBUG_LOG
+#define result_log_debug(...) log_debug(__VA_ARGS__)
+#else // defined(CS_RESULT_DEBUG_LOG) && CS_RESULT_DEBUG_LOG
 #define result_log_debug(...)
+#endif // defined(CS_RESULT_DEBUG_LOG) && CS_RESULT_DEBUG_LOG
 #else
 #define result_log_info(...) app_log_info(__VA_ARGS__)
 #define result_log_append(...) app_log_append_info(__VA_ARGS__)
 #define result_log_error(...) app_log_error(__VA_ARGS__)
+#if defined(CS_RESULT_DEBUG_LOG) && CS_RESULT_DEBUG_LOG
 #define result_log_debug(...) app_log_debug(__VA_ARGS__)
+#else // defined(CS_RESULT_DEBUG_LOG) && CS_RESULT_DEBUG_LOG
+#define result_log_debug(...)
+#endif // defined(CS_RESULT_DEBUG_LOG) && CS_RESULT_DEBUG_LOG
 #endif // defined(SL_CATALOG_APP_TRACE_PRESENT)
 #else
 #define result_log_info(...)

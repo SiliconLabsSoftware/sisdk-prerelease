@@ -40,6 +40,10 @@
 #include "app_project_info.h"
 #include "sl_wisun_config.h"
 #include "sl_component_catalog.h"
+
+#if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
+#include "border_router/sl_wisun_br_api.h"
+#endif
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -93,6 +97,7 @@ void sl_wisun_app_core_util_project_info_print(const bool json_format)
   }
 }
 
+#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
 /* Connect and wait */
 void sl_wisun_app_core_util_connect_and_wait(void)
 {
@@ -103,16 +108,23 @@ void sl_wisun_app_core_util_connect_and_wait(void)
 /* Waiting for connection */
 void sl_wisun_app_core_util_wait_for_connection(void)
 {
-#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
-  (void) sl_wisun_app_core_wait_state((1 << SL_WISUN_APP_CORE_STATE_NETWORK_CONNECTED), osWaitForever);
-#else
-  (void) 0;
-#endif
+  (void) sl_wisun_app_core_wait_state((1 << SL_WISUN_APP_CORE_STATE_NETWORK_CONNECTED),
+                                      osWaitForever);
 }
+#endif
 
 bool sl_wisun_app_core_util_network_is_connected(void)
 {
+#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
   return sl_wisun_app_core_get_join_state() == SL_WISUN_JOIN_STATE_OPERATIONAL;
+#else
+  sl_wisun_br_state_t state = SL_WISUN_BR_STATE_INITIALIZED;
+  if (sl_wisun_br_get_state(&state) == SL_STATUS_OK) {
+    return state == SL_WISUN_BR_STATE_OPERATIONAL;
+  } else {
+    return false;
+  }
+#endif
 }
 
 void sl_wisun_app_core_util_dispatch_thread(void)

@@ -17,6 +17,8 @@ requires:
 - name: component_catalog
 provides:
 - name: rail_util_init_core
+conflicts:
+- name: sl_rail_util_init_core
 template_file:
 - path: plugin/rail_util_init/sl_rail_util_init.c.jinja
 - path: plugin/rail_util_init/sl_rail_util_init.h.jinja

@@ -1,12 +1,15 @@
-/***************************************************************************/ /**
+/***************************************************************************//**
  * @file
  * @brief Bluetooth over-the-air (OTA) device firmware update (DFU) example
  *
- * Bluetooth over-the-air (OTA) device firmware update (DFU) example for
- * x86 host using Network Co-Processor (NCP)
+ * This example application demonstrates how to make a Bluetooth over-the-air
+ * (OTA) firmware update.
+ * To use this application you need a radio board with NCP firmware connected
+ * to your computer. This example application uses this NCP device to push the
+ * OTA update to a remote device.
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2025 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -30,15 +33,6 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
-
-/**
- * This an example application that demonstrates how to make a Bluetooth Over-the-Air (OTA)
- * firmware update.
- *
- * To use this application you must have a WSTK configured into NCP mode connected to your
- * PC and it is used as a Bluetooth radio to push the OTA update to a remote device.
- *
- */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -73,18 +67,18 @@
   "        <max_mtu>        Maximum MTU size in bytes\n" NCP_HOST_OPTIONS           \
   "    -h  Print this help message.\n"
 
-/** dfu file to upload*/
+// dfu file to upload
 FILE *dfu_file = NULL;
-/** remote device address*/
+// remote device address
 static uint8_t remote_address_type;
 static bd_addr remote_address;
 static bd_addr remote_public_address;
 static uint8_t addr_found = 0;
-/** Force using write without response commands */
+// Force using write without response commands
 static uint32_t force_write_without_rsp = 0;
-/*Bluetooth connection*/
+// Bluetooth connection handle
 uint8_t ble_connection;
-/*found OTA descriptors*/
+// found OTA descriptors
 uint32_t ota_gatt_service_handle;
 uint16_t ota_control_characteristic;
 uint16_t ota_data_characteristic;
@@ -92,7 +86,7 @@ uint16_t ota_version_characteristic;
 uint16_t apploader_version_characteristic;
 uint16_t bootloader_version_characteristic;
 uint16_t application_version_characteristic;
-/*OTA UUIDS*/
+// OTA UUIDS
 uint8_t uuid_ota_service[] = { 0xf0, 0x19, 0x21, 0xb4, 0x47, 0x8f, 0xa4, 0xbf, 0xa1, 0x4f, 0x63, 0xfd, 0xee, 0xd6, 0x14, 0x1d };         // 1d14d6ee-fd63-4fa1-bfa4-8f47b42119f0
 uint8_t uuid_ota_control[] = { 0x63, 0x60, 0x32, 0xe0, 0x37, 0x5e, 0xa4, 0x88, 0x53, 0x4e, 0x6d, 0xfb, 0x64, 0x35, 0xbf, 0xf7 };         // f7bf3564-fb6d-4e53-88a4-5e37e0326063
 uint8_t uuid_ota_data[] = { 0x53, 0xa1, 0x81, 0x1f, 0x58, 0x2c, 0xd0, 0xa5, 0x45, 0x40, 0xfc, 0x34, 0xf3, 0x27, 0x42, 0x98 };            // 984227f3-34fc-4045-a5d0-2c581f81a153
@@ -101,7 +95,7 @@ uint8_t uuid_apploader_version[] = { 0x9f, 0x3e, 0xe2, 0x2e, 0x0e, 0xcf, 0xff, 0
 uint8_t uuid_ota_version[] = { 0x16, 0x53, 0x1e, 0xc4, 0x4c, 0xba, 0xad, 0x9d, 0x32, 0x4b, 0x68, 0x08, 0xcf, 0x7b, 0xc0, 0x4c };         // 4cc07bcf-0868-4b32-9dad-ba4cc41e5316
 uint8_t uuid_application_version[] = { 0xf8, 0x92, 0x7a, 0xac, 0x96, 0xcd, 0xa9, 0xbf, 0xf2, 0x49, 0xc1, 0x4a, 0x11, 0xcc, 0x77, 0x0d }; // 0d77cc11-4ac1-49f2-bfa9-cd96ac7a92f8
 
-/*Error macro*/
+// Error macro
 #define ERROR_EXIT(...)   \
   do                      \
   {                       \
@@ -111,9 +105,7 @@ uint8_t uuid_application_version[] = { 0xf8, 0x92, 0x7a, 0xac, 0x96, 0xcd, 0xa9,
 
 #define GAP_ADDR_TYPE 0x1b
 
-/*
-   Enumeration of possible OTA states
- */
+// Enumeration of possible OTA states
 enum ota_states{
   OTA_INIT,                     // default state
   OTA_CONNECT,                  // connect to remote device
@@ -133,7 +125,7 @@ enum ota_states{
   OTA_READ_APPLICATION_VERSION, // Read application version
 } ota_state = OTA_INIT;
 
-/// DFU
+// DFU
 #define MAX_DFU_PACKET 256
 uint8_t dfu_data[MAX_DFU_PACKET];
 bool dfu_resync = false;
@@ -154,23 +146,18 @@ uint8_t ota_version = 0;
 
 static void ota_change_state(enum ota_states new_state);
 static int parse_address(const char *str, bd_addr *addr);
+static int parse_scan_data(uint8_t *data, uint8_t len, bd_addr *addr);
+static int dfu_read_size(void);
 static void send_dfu_block(void);
 static void send_dfu_packet_with_confirmation(void);
 static void handle_scan_event(uint8_t *address,
                               uint8_t address_type,
                               uint8_t *data,
                               uint8_t data_len);
-static void sync_boot();
 
-void app_init(void)
-{
-  /////////////////////////////////////////////////////////////////////////////
-  // Put your additional application init code here!                         //
-  // This is called once during start-up.                                    //
-  /////////////////////////////////////////////////////////////////////////////
-  ota_change_state(OTA_INIT);
-}
-
+/******************************************************************************
+ * Application Init.
+ *****************************************************************************/
 void app_cli_init(int argc, char *argv[])
 {
   sl_status_t sc;
@@ -253,7 +240,15 @@ void app_cli_init(int argc, char *argv[])
   app_log("NCP host initialised.\n");
 }
 
-/**************************************************************************/ /**
+void app_init(void)
+{
+  /////////////////////////////////////////////////////////////////////////////
+  // Put your additional application init code here!                         //
+  // This is called once during start-up.                                    //
+  /////////////////////////////////////////////////////////////////////////////
+}
+
+/******************************************************************************
  * Application Process Action.
  *****************************************************************************/
 void app_process_action(void)
@@ -263,29 +258,52 @@ void app_process_action(void)
   // This is called infinitely.                                              //
   // Do not call blocking functions from here!                               //
   /////////////////////////////////////////////////////////////////////////////
+}
 
-  sl_bt_msg_t evt;
-  sl_bt_msg_t *p = &evt;
+/******************************************************************************
+ * Application Deinit.
+ *****************************************************************************/
+void app_deinit(void)
+{
+  fclose(dfu_file);
 
-  sl_bt_wait_event(&evt);
+  /////////////////////////////////////////////////////////////////////////////
+  // Put your additional application deinit code here!                       //
+  // This is called once during termination.                                 //
+  /////////////////////////////////////////////////////////////////////////////
+}
 
-  if (p && SL_BT_MSG_ID(p->header) == sl_bt_evt_gatt_mtu_exchanged_id) {
-    mtu = p->data.evt_gatt_mtu_exchanged.mtu;
-    app_log("ATT MTU exchanged: %d\n", mtu);
-    return;
+/******************************************************************************
+ * Bluetooth stack event handler.
+ * This overrides the default weak implementation.
+ *
+ * @param[in] evt Event coming from the Bluetooth stack.
+ *****************************************************************************/
+void sl_bt_on_event(sl_bt_msg_t* evt)
+{
+  // Handle Bluetooth stack events independent from application state.
+  switch (SL_BT_MSG_ID(evt->header)) {
+    case sl_bt_evt_system_boot_id:
+      ota_change_state(OTA_INIT);
+      return;
+    case sl_bt_evt_gatt_mtu_exchanged_id:
+      mtu = evt->data.evt_gatt_mtu_exchanged.mtu;
+      app_log("ATT MTU exchanged: %d\n", mtu);
+      return;
   }
 
+  // Handle Bluetooth stack events dependent on application state.
   switch (ota_state) {
     case OTA_END:
-      switch (SL_BT_MSG_ID(p->header)) {
+      switch (SL_BT_MSG_ID(evt->header)) {
         case sl_bt_evt_connection_closed_id:
           app_log("OK\n");
           exit(EXIT_SUCCESS);
           break;
 
         case sl_bt_evt_gatt_procedure_completed_id:
-          if (p->data.evt_gatt_procedure_completed.result) {
-            ERROR_EXIT("Error, OTA DFU failed,0x%x", p->data.evt_gatt_procedure_completed.result);
+          if (evt->data.evt_gatt_procedure_completed.result) {
+            ERROR_EXIT("Error, OTA DFU failed,0x%x", evt->data.evt_gatt_procedure_completed.result);
           }
           app_log("OK\n");
           app_log("Closing connection...");
@@ -305,16 +323,16 @@ void app_process_action(void)
       break;
 
     case OTA_UPLOAD_WITHOUT_RSP:
-      switch (SL_BT_MSG_ID(p->header)) {
+      switch (SL_BT_MSG_ID(evt->header)) {
         case sl_bt_evt_gatt_procedure_completed_id:
-          if (p->data.evt_gatt_procedure_completed.result) {
-            ERROR_EXIT("procedure failed:0x%x\r\n", p->data.evt_gatt_procedure_completed.result);
+          if (evt->data.evt_gatt_procedure_completed.result) {
+            ERROR_EXIT("procedure failed:0x%x\r\n", evt->data.evt_gatt_procedure_completed.result);
           }
           send_dfu_block();
           break;
 
         case sl_bt_evt_connection_closed_id:
-          ERROR_EXIT("\nError, Connection closed, reason 0x%x", p->data.evt_connection_closed.reason);
+          ERROR_EXIT("\nError, Connection closed, reason 0x%x", evt->data.evt_connection_closed.reason);
           break;
 
         default:
@@ -323,16 +341,16 @@ void app_process_action(void)
       break;
 
     case OTA_UPLOAD_WITH_RSP:
-      switch (SL_BT_MSG_ID(p->header)) {
+      switch (SL_BT_MSG_ID(evt->header)) {
         case sl_bt_evt_gatt_procedure_completed_id:
-          if (p->data.evt_gatt_procedure_completed.result) {
-            ERROR_EXIT("procedure failed:0x%x\r\n", p->data.evt_gatt_procedure_completed.result);
+          if (evt->data.evt_gatt_procedure_completed.result) {
+            ERROR_EXIT("procedure failed:0x%x\r\n", evt->data.evt_gatt_procedure_completed.result);
           }
           send_dfu_packet_with_confirmation();
           break;
 
         case sl_bt_evt_connection_closed_id:
-          ERROR_EXIT("\nError, Connection closed, reason 0x%x", p->data.evt_connection_closed.reason);
+          ERROR_EXIT("\nError, Connection closed, reason 0x%x", evt->data.evt_connection_closed.reason);
           break;
 
         default:
@@ -341,7 +359,7 @@ void app_process_action(void)
       break;
 
     case OTA_BEGIN:
-      switch (SL_BT_MSG_ID(p->header)) {
+      switch (SL_BT_MSG_ID(evt->header)) {
         case sl_bt_evt_gatt_procedure_completed_id:
           app_log("OK\n");
           if ((ota_data_properties & 0x0C) == 0) {
@@ -358,7 +376,7 @@ void app_process_action(void)
           break;
 
         case sl_bt_evt_connection_closed_id:
-          ERROR_EXIT("\nError, Connection closed, reason 0x%x", p->data.evt_connection_closed.reason);
+          ERROR_EXIT("\nError, Connection closed, reason 0x%x", evt->data.evt_connection_closed.reason);
           break;
 
         default:
@@ -367,14 +385,14 @@ void app_process_action(void)
       break;
 
     case OTA_CONNECT:
-      switch (SL_BT_MSG_ID(p->header)) {
+      switch (SL_BT_MSG_ID(evt->header)) {
         case sl_bt_evt_connection_opened_id:
           app_log("OK\n");
           ota_change_state(OTA_FIND_SERVICES);
           break;
 
         case sl_bt_evt_connection_closed_id:
-          ERROR_EXIT("\nError, Connection closed, reason 0x%x", p->data.evt_connection_closed.reason);
+          ERROR_EXIT("\nError, Connection closed, reason 0x%x", evt->data.evt_connection_closed.reason);
           break;
 
         default:
@@ -383,7 +401,7 @@ void app_process_action(void)
       break;
 
     case OTA_FIND_SERVICES:
-      switch (SL_BT_MSG_ID(p->header)) {
+      switch (SL_BT_MSG_ID(evt->header)) {
         case sl_bt_evt_gatt_procedure_completed_id:
           if (ota_gatt_service_handle == 0xFFFFFFFF) {
             ERROR_EXIT("Error, no valid OTA service found");
@@ -394,11 +412,11 @@ void app_process_action(void)
           break;
 
         case sl_bt_evt_gatt_service_id:
-          ota_gatt_service_handle = p->data.evt_gatt_service.service;
+          ota_gatt_service_handle = evt->data.evt_gatt_service.service;
           break;
 
         case sl_bt_evt_connection_closed_id:
-          ERROR_EXIT("\nError, Connection closed, reason 0x%x", p->data.evt_connection_closed.reason);
+          ERROR_EXIT("\nError, Connection closed, reason 0x%x", evt->data.evt_connection_closed.reason);
           break;
 
         default:
@@ -407,7 +425,7 @@ void app_process_action(void)
       break;
 
     case OTA_FIND_CHARACTERISTICS:
-      switch (SL_BT_MSG_ID(p->header)) {
+      switch (SL_BT_MSG_ID(evt->header)) {
         case sl_bt_evt_gatt_procedure_completed_id:
           if (ota_control_characteristic == 0xFFFF) {
             ERROR_EXIT("Error, no valid OTA characteristics found");
@@ -426,23 +444,23 @@ void app_process_action(void)
           break;
 
         case sl_bt_evt_gatt_characteristic_id:
-          if (p->data.evt_gatt_characteristic.uuid.len == sizeof(uuid_ota_control) && !memcmp(p->data.evt_gatt_characteristic.uuid.data, uuid_ota_control, sizeof(uuid_ota_control))) {
-            ota_control_characteristic = p->data.evt_gatt_characteristic.characteristic;
-          } else if (p->data.evt_gatt_characteristic.uuid.len == sizeof(uuid_ota_data) && !memcmp(p->data.evt_gatt_characteristic.uuid.data, uuid_ota_data, sizeof(uuid_ota_data))) {
-            ota_data_characteristic = p->data.evt_gatt_characteristic.characteristic;
-          } else if (p->data.evt_gatt_characteristic.uuid.len == sizeof(uuid_bootloader_version) && !memcmp(p->data.evt_gatt_characteristic.uuid.data, uuid_bootloader_version, sizeof(uuid_bootloader_version))) {
-            bootloader_version_characteristic = p->data.evt_gatt_characteristic.characteristic;
-          } else if (p->data.evt_gatt_characteristic.uuid.len == sizeof(uuid_apploader_version) && !memcmp(p->data.evt_gatt_characteristic.uuid.data, uuid_apploader_version, sizeof(uuid_apploader_version))) {
-            apploader_version_characteristic = p->data.evt_gatt_characteristic.characteristic;
-          } else if (p->data.evt_gatt_characteristic.uuid.len == sizeof(uuid_ota_version) && !memcmp(p->data.evt_gatt_characteristic.uuid.data, uuid_ota_version, sizeof(uuid_ota_version))) {
-            ota_version_characteristic = p->data.evt_gatt_characteristic.characteristic;
-          } else if (p->data.evt_gatt_characteristic.uuid.len == sizeof(uuid_application_version) && !memcmp(p->data.evt_gatt_characteristic.uuid.data, uuid_application_version, sizeof(uuid_bootloader_version))) {
-            application_version_characteristic = p->data.evt_gatt_characteristic.characteristic;
+          if (evt->data.evt_gatt_characteristic.uuid.len == sizeof(uuid_ota_control) && !memcmp(evt->data.evt_gatt_characteristic.uuid.data, uuid_ota_control, sizeof(uuid_ota_control))) {
+            ota_control_characteristic = evt->data.evt_gatt_characteristic.characteristic;
+          } else if (evt->data.evt_gatt_characteristic.uuid.len == sizeof(uuid_ota_data) && !memcmp(evt->data.evt_gatt_characteristic.uuid.data, uuid_ota_data, sizeof(uuid_ota_data))) {
+            ota_data_characteristic = evt->data.evt_gatt_characteristic.characteristic;
+          } else if (evt->data.evt_gatt_characteristic.uuid.len == sizeof(uuid_bootloader_version) && !memcmp(evt->data.evt_gatt_characteristic.uuid.data, uuid_bootloader_version, sizeof(uuid_bootloader_version))) {
+            bootloader_version_characteristic = evt->data.evt_gatt_characteristic.characteristic;
+          } else if (evt->data.evt_gatt_characteristic.uuid.len == sizeof(uuid_apploader_version) && !memcmp(evt->data.evt_gatt_characteristic.uuid.data, uuid_apploader_version, sizeof(uuid_apploader_version))) {
+            apploader_version_characteristic = evt->data.evt_gatt_characteristic.characteristic;
+          } else if (evt->data.evt_gatt_characteristic.uuid.len == sizeof(uuid_ota_version) && !memcmp(evt->data.evt_gatt_characteristic.uuid.data, uuid_ota_version, sizeof(uuid_ota_version))) {
+            ota_version_characteristic = evt->data.evt_gatt_characteristic.characteristic;
+          } else if (evt->data.evt_gatt_characteristic.uuid.len == sizeof(uuid_application_version) && !memcmp(evt->data.evt_gatt_characteristic.uuid.data, uuid_application_version, sizeof(uuid_bootloader_version))) {
+            application_version_characteristic = evt->data.evt_gatt_characteristic.characteristic;
           }
           break;
 
         case sl_bt_evt_connection_closed_id:
-          ERROR_EXIT("\nError, Connection closed, reason 0x%x", p->data.evt_connection_closed.reason);
+          ERROR_EXIT("\nError, Connection closed, reason 0x%x", evt->data.evt_connection_closed.reason);
           break;
 
         default:
@@ -451,10 +469,10 @@ void app_process_action(void)
       break;
 
     case OTA_READ_OTA_DATA_PROPERTIES:
-      switch (SL_BT_MSG_ID(p->header)) {
+      switch (SL_BT_MSG_ID(evt->header)) {
         case sl_bt_evt_gatt_characteristic_value_id:
-          if (p->data.evt_gatt_characteristic_value.value.len == 1) {
-            ota_data_properties = p->data.evt_gatt_characteristic_value.value.data[0];
+          if (evt->data.evt_gatt_characteristic_value.value.len == 1) {
+            ota_data_properties = evt->data.evt_gatt_characteristic_value.value.data[0];
           }
           app_log("    OTA Data characteristic properties:0x%02x\n", ota_data_properties);
           break;
@@ -464,7 +482,7 @@ void app_process_action(void)
           break;
 
         case sl_bt_evt_connection_closed_id:
-          ERROR_EXIT("\nError, Connection closed, reason 0x%x", p->data.evt_connection_closed.reason);
+          ERROR_EXIT("\nError, Connection closed, reason 0x%x", evt->data.evt_connection_closed.reason);
           break;
 
         default:
@@ -473,7 +491,7 @@ void app_process_action(void)
       break;
 
     case OTA_RESET_TO_DFU:
-      switch (SL_BT_MSG_ID(p->header)) {
+      switch (SL_BT_MSG_ID(evt->header)) {
         case sl_bt_evt_connection_closed_id:
           app_log("\nConnection closed, retrying. (Remote device booting in DFU mode)\n");
           ota_change_state(OTA_SCAN);
@@ -484,21 +502,21 @@ void app_process_action(void)
       break;
 
     case OTA_SCAN:
-      switch (SL_BT_MSG_ID(p->header)) {
+      switch (SL_BT_MSG_ID(evt->header)) {
         case sl_bt_evt_scanner_legacy_advertisement_report_id:
-          if (p->data.evt_scanner_legacy_advertisement_report.event_flags & SL_BT_SCANNER_EVENT_FLAG_CONNECTABLE) {
-            handle_scan_event(p->data.evt_scanner_legacy_advertisement_report.address.addr,
-                              p->data.evt_scanner_legacy_advertisement_report.address_type,
-                              p->data.evt_scanner_legacy_advertisement_report.data.data,
-                              p->data.evt_scanner_legacy_advertisement_report.data.len);
+          if (evt->data.evt_scanner_legacy_advertisement_report.event_flags & SL_BT_SCANNER_EVENT_FLAG_CONNECTABLE) {
+            handle_scan_event(evt->data.evt_scanner_legacy_advertisement_report.address.addr,
+                              evt->data.evt_scanner_legacy_advertisement_report.address_type,
+                              evt->data.evt_scanner_legacy_advertisement_report.data.data,
+                              evt->data.evt_scanner_legacy_advertisement_report.data.len);
           }
           break;
         case sl_bt_evt_scanner_extended_advertisement_report_id:
-          if ((p->data.evt_scanner_extended_advertisement_report.event_flags & SL_BT_SCANNER_EVENT_FLAG_CONNECTABLE) && (p->data.evt_scanner_extended_advertisement_report.data_completeness == sl_bt_scanner_data_status_complete)) {
-            handle_scan_event(p->data.evt_scanner_extended_advertisement_report.address.addr,
-                              p->data.evt_scanner_extended_advertisement_report.address_type,
-                              p->data.evt_scanner_extended_advertisement_report.data.data,
-                              p->data.evt_scanner_extended_advertisement_report.data.len);
+          if ((evt->data.evt_scanner_extended_advertisement_report.event_flags & SL_BT_SCANNER_EVENT_FLAG_CONNECTABLE) && (evt->data.evt_scanner_extended_advertisement_report.data_completeness == sl_bt_scanner_data_status_complete)) {
+            handle_scan_event(evt->data.evt_scanner_extended_advertisement_report.address.addr,
+                              evt->data.evt_scanner_extended_advertisement_report.address_type,
+                              evt->data.evt_scanner_extended_advertisement_report.data.data,
+                              evt->data.evt_scanner_extended_advertisement_report.data.len);
           }
           break;
         default:
@@ -507,10 +525,10 @@ void app_process_action(void)
       break;
 
     case OTA_READ_OTA_VERSION:
-      switch (SL_BT_MSG_ID(p->header)) {
+      switch (SL_BT_MSG_ID(evt->header)) {
         case sl_bt_evt_gatt_characteristic_value_id:
-          if (p->data.evt_gatt_characteristic_value.value.len == 1) {
-            memcpy(&ota_version, p->data.evt_gatt_characteristic_value.value.data, p->data.evt_gatt_characteristic_value.value.len);
+          if (evt->data.evt_gatt_characteristic_value.value.len == 1) {
+            memcpy(&ota_version, evt->data.evt_gatt_characteristic_value.value.data, evt->data.evt_gatt_characteristic_value.value.len);
             app_log("    OTA protocol version:0x%02x\n", ota_version);
           }
           break;
@@ -518,7 +536,7 @@ void app_process_action(void)
           ota_change_state(OTA_READ_APPLOADER_VERSION);
           break;
         case sl_bt_evt_connection_closed_id:
-          ERROR_EXIT("\nError, Connection closed, reason 0x%x", p->data.evt_connection_closed.reason);
+          ERROR_EXIT("\nError, Connection closed, reason 0x%x", evt->data.evt_connection_closed.reason);
           break;
         default:
           break;
@@ -526,10 +544,10 @@ void app_process_action(void)
       break;
 
     case OTA_READ_APPLOADER_VERSION:
-      switch (SL_BT_MSG_ID(p->header)) {
+      switch (SL_BT_MSG_ID(evt->header)) {
         case sl_bt_evt_gatt_characteristic_value_id:
-          if (p->data.evt_gatt_characteristic_value.value.len == 8) {
-            memcpy(&apploader_version, p->data.evt_gatt_characteristic_value.value.data, p->data.evt_gatt_characteristic_value.value.len);
+          if (evt->data.evt_gatt_characteristic_value.value.len == 8) {
+            memcpy(&apploader_version, evt->data.evt_gatt_characteristic_value.value.data, evt->data.evt_gatt_characteristic_value.value.len);
             if (ota_version >= 3) {
               app_log("    Apploader version:%d.%d.%d.%d\n", apploader_version[0], apploader_version[1], apploader_version[2], apploader_version[3]);
             } else {
@@ -545,7 +563,7 @@ void app_process_action(void)
           }
           break;
         case sl_bt_evt_connection_closed_id:
-          ERROR_EXIT("\nError, Connection closed, reason 0x%x", p->data.evt_connection_closed.reason);
+          ERROR_EXIT("\nError, Connection closed, reason 0x%x", evt->data.evt_connection_closed.reason);
           break;
         default:
           break;
@@ -553,10 +571,10 @@ void app_process_action(void)
       break;
 
     case OTA_READ_BOOTLOADER_VERSION:
-      switch (SL_BT_MSG_ID(p->header)) {
+      switch (SL_BT_MSG_ID(evt->header)) {
         case sl_bt_evt_gatt_characteristic_value_id:
-          if (p->data.evt_gatt_characteristic_value.value.len == 4) {
-            memcpy(&bootloader_version, p->data.evt_gatt_characteristic_value.value.data, p->data.evt_gatt_characteristic_value.value.len);
+          if (evt->data.evt_gatt_characteristic_value.value.len == 4) {
+            memcpy(&bootloader_version, evt->data.evt_gatt_characteristic_value.value.data, evt->data.evt_gatt_characteristic_value.value.len);
             app_log("    Bootloader version:0x%08x\n", bootloader_version);
           }
           break;
@@ -567,7 +585,7 @@ void app_process_action(void)
           ota_change_state(OTA_READ_APPLICATION_VERSION);
           break;
         case sl_bt_evt_connection_closed_id:
-          ERROR_EXIT("\nError, Connection closed, reason 0x%x", p->data.evt_connection_closed.reason);
+          ERROR_EXIT("\nError, Connection closed, reason 0x%x", evt->data.evt_connection_closed.reason);
           break;
         default:
           break;
@@ -575,10 +593,10 @@ void app_process_action(void)
       break;
 
     case OTA_READ_APPLICATION_VERSION:
-      switch (SL_BT_MSG_ID(p->header)) {
+      switch (SL_BT_MSG_ID(evt->header)) {
         case sl_bt_evt_gatt_characteristic_value_id:
-          if (p->data.evt_gatt_characteristic_value.value.len == 4) {
-            memcpy(&application_version, p->data.evt_gatt_characteristic_value.value.data, p->data.evt_gatt_characteristic_value.value.len);
+          if (evt->data.evt_gatt_characteristic_value.value.len == 4) {
+            memcpy(&application_version, evt->data.evt_gatt_characteristic_value.value.data, evt->data.evt_gatt_characteristic_value.value.len);
             app_log("    Application version:0x%08x\n", application_version);
           }
           break;
@@ -586,7 +604,7 @@ void app_process_action(void)
           ota_change_state(OTA_READ_OTA_DATA_PROPERTIES);
           break;
         case sl_bt_evt_connection_closed_id:
-          ERROR_EXIT("\nError, Connection closed, reason 0x%x", p->data.evt_connection_closed.reason);
+          ERROR_EXIT("\nError, Connection closed, reason 0x%x", evt->data.evt_connection_closed.reason);
           break;
         default:
           break;
@@ -598,20 +616,7 @@ void app_process_action(void)
   }
 }
 
-/**************************************************************************/ /**
- * Application Deinit.
- *****************************************************************************/
-void app_deinit(void)
-{
-  fclose(dfu_file);
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Put your additional application deinit code here!                       //
-  // This is called once during termination.                                 //
-  /////////////////////////////////////////////////////////////////////////////
-}
-
-int dfu_read_size()
+static int dfu_read_size(void)
 {
   if (fseek(dfu_file, 0L, SEEK_END)) {
     return -1;
@@ -704,33 +709,6 @@ static void send_dfu_packet_with_confirmation(void)
     app_log("\n");
     ota_change_state(OTA_END);
   }
-}
-
-static void sync_boot()
-{
-  sl_status_t sc;
-  sl_bt_msg_t evt;
-
-  // Reset NCP to ensure it gets into a defined state.
-  // Once the chip successfully boots, boot event should be received.
-  sl_bt_system_reboot();
-  do {
-    sc = sl_bt_pop_event(&evt);
-    if (!sc) {
-      switch (SL_BT_MSG_ID(evt.header)) {
-        case sl_bt_evt_system_boot_id:
-          app_log("System rebooted\n");
-          sl_bt_evt_system_boot_t *p =
-            &evt.data.evt_system_boot;
-          app_log("NCP version: v%d.%d.%d+%08" PRIx32 "\n",
-                  p->major,
-                  p->minor,
-                  p->patch,
-                  p->hash);
-          return;
-      }
-    }
-  } while (1);
 }
 
 static void ota_change_state(enum ota_states new_state)
@@ -843,29 +821,28 @@ static void ota_change_state(enum ota_states new_state)
     break;
 
     case OTA_INIT:
-      sync_boot();
-      {
-        sl_status_t sc;
-        bd_addr address;
-        uint8_t address_type;
-        sc = sl_bt_gap_get_identity_address(&address, &address_type);
-        if (sc) {
-          ERROR_EXIT("Error, failed to get Bluetooth address,0x%x", sc);
-        }
-        app_log("Local %s address: %02x:%02x:%02x:%02x:%02x:%02x\n",
-                address_type ? "static random" : "public device",
-                address.addr[5],
-                address.addr[4],
-                address.addr[3],
-                address.addr[2],
-                address.addr[1],
-                address.addr[0]);
+    {
+      sl_status_t sc;
+      bd_addr address;
+      uint8_t address_type;
+      sc = sl_bt_gap_get_identity_address(&address, &address_type);
+      if (sc) {
+        ERROR_EXIT("Error, failed to get Bluetooth address,0x%x", sc);
       }
+      app_log("Local %s address: %02x:%02x:%02x:%02x:%02x:%02x\n",
+              address_type ? "static random" : "public device",
+              address.addr[5],
+              address.addr[4],
+              address.addr[3],
+              address.addr[2],
+              address.addr[1],
+              address.addr[0]);
       if (dfu_read_size()) {
         ERROR_EXIT("Error, DFU file read failed\n");
       }
       ota_change_state(OTA_SCAN);
       break;
+    }
 
     case OTA_RESET_TO_DFU:
     {
@@ -919,16 +896,6 @@ static void ota_change_state(enum ota_states new_state)
 
     default:
       break;
-  }
-}
-
-void print_address(bd_addr address)
-{
-  for (int i = 5; i >= 0; i--) {
-    app_log("%02x", address.addr[i]);
-    if (i > 0) {
-      app_log(":");
-    }
   }
 }
 

@@ -73,39 +73,39 @@ sl_status_t sl_wisun_set_trace_level(uint8_t group_count, const sl_wisun_trace_g
 sl_status_t sl_wisun_set_trace_filter(const uint8_t filter[SL_WISUN_FILTER_BITFIELD_SIZE]);
 
 /**************************************************************************//**
-* Generate application logs using Wi-SUN stack trace mechanism with ERROR level.
-*
-* @param[in] fmt Format string (same syntax as printf)
-* @param[in] ... Variable arguments related to fmt
-* @return SL_STATUS_NOT_AVAILABLE if using the release library, SL_STATUS_OK otherwise
-*****************************************************************************/
+ * Generate application logs using Wi-SUN stack trace mechanism with ERROR level.
+ *
+ * @param[in] fmt Format string (same syntax as printf)
+ * @param[in] ... Variable arguments related to fmt
+ * @return SL_STATUS_NOT_AVAILABLE if using the release library, SL_STATUS_OK otherwise
+ *****************************************************************************/
 sl_status_t sl_wisun_trace_error(const char *fmt, ...);
 
 /**************************************************************************//**
-* Generate application logs using Wi-SUN stack trace mechanism with WARN level.
-*
-* @param[in] fmt Format string (same syntax as printf)
-* @param[in] ... Variable arguments related to fmt
-* @return SL_STATUS_NOT_AVAILABLE if using the release library, SL_STATUS_OK otherwise
-*****************************************************************************/
+ * Generate application logs using Wi-SUN stack trace mechanism with WARN level.
+ *
+ * @param[in] fmt Format string (same syntax as printf)
+ * @param[in] ... Variable arguments related to fmt
+ * @return SL_STATUS_NOT_AVAILABLE if using the release library, SL_STATUS_OK otherwise
+ *****************************************************************************/
 sl_status_t sl_wisun_trace_warn(const char *fmt, ...);
 
 /**************************************************************************//**
-* Generate application logs using Wi-SUN stack trace mechanism with INFO level.
-*
-* @param[in] fmt Format string (same syntax as printf)
-* @param[in] ... Variable arguments related to fmt
-* @return SL_STATUS_NOT_AVAILABLE if using the release library, SL_STATUS_OK otherwise
-*****************************************************************************/
+ * Generate application logs using Wi-SUN stack trace mechanism with INFO level.
+ *
+ * @param[in] fmt Format string (same syntax as printf)
+ * @param[in] ... Variable arguments related to fmt
+ * @return SL_STATUS_NOT_AVAILABLE if using the release library, SL_STATUS_OK otherwise
+ *****************************************************************************/
 sl_status_t sl_wisun_trace_info(const char *fmt, ...);
 
 /**************************************************************************//**
-* Generate application logs using Wi-SUN stack trace mechanism with DEBUG level.
-*
-* @param[in] fmt Format string (same syntax as printf)
-* @param[in] ... Variable arguments related to fmt
-* @return SL_STATUS_NOT_AVAILABLE if using the release library, SL_STATUS_OK otherwise
-*****************************************************************************/
+ * Generate application logs using Wi-SUN stack trace mechanism with DEBUG level.
+ *
+ * @param[in] fmt Format string (same syntax as printf)
+ * @param[in] ... Variable arguments related to fmt
+ * @return SL_STATUS_NOT_AVAILABLE if using the release library, SL_STATUS_OK otherwise
+ *****************************************************************************/
 sl_status_t sl_wisun_trace_debug(const char *fmt, ...);
 
 /** @} (end SL_WISUN_TRACE_API) */

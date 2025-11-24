@@ -301,11 +301,11 @@ sl_rail_status_t sli_ot_radio_interface_rail_config_sleep(const sl_rail_timer_sy
 sl_rail_status_t sli_ot_radio_interface_rail_config_rx_options(sl_rail_rx_options_t options, sl_rail_rx_options_t mask);
 
 // Additional RAIL power management functions
-sl_rail_status_t   sli_ot_radio_interface_rail_set_tx_power_dbm(sl_rail_tx_power_t powerDbm);
-sl_rail_tx_power_t sli_ot_radio_interface_rail_get_tx_power(void);
-sl_rail_tx_power_t sli_ot_radio_interface_rail_get_tx_power_dbm(void);
-sl_rail_status_t   sli_ot_radio_interface_rail_config_tx_power(const sl_rail_tx_power_config_t *config);
-void               sli_ot_radio_interface_rail_get_channel_ptr(uint16_t *channel);
+sl_rail_status_t     sli_ot_radio_interface_rail_set_tx_power_dbm(sl_rail_tx_power_t powerDbm);
+sl_rail_tx_pa_mode_t sli_ot_radio_interface_rail_get_tx_pa_mode(void);
+sl_rail_tx_power_t   sli_ot_radio_interface_rail_get_tx_power_dbm(void);
+sl_rail_status_t     sli_ot_radio_interface_rail_config_tx_power(sl_rail_tx_pa_mode_t pa_mode);
+void                 sli_ot_radio_interface_rail_get_channel_ptr(uint16_t *channel);
 
 // Additional RAIL functions needed for radio.cpp
 sl_rail_status_t sli_ot_radio_interface_rail_get_rx_incoming_packet_info(sl_rail_rx_packet_info_t *packetInfo);

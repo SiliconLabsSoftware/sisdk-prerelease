@@ -7,7 +7,10 @@ description: >
   throughput. It provides comprehensive UDP support and implements both server
   and client modes, enabling the exchange of packets to assess bandwidth
   performance, inter-arrival jitter, and packet loss.
-  The component relies on various functions, to configure and execute your iPerf test.  Parameters such as the server and client ports, preferred bandwidth, packet count, and remote peer address can be customized.  Upon completion of each iPerf test, an iPerf report is generated.   To integrate the iPerf component into the application, simply add it to the project and initialize it using sl_iperf_service_init().
+  The component relies on various functions, to configure and execute your iPerf test.
+  Parameters such as the server and client ports, preferred bandwidth, packet count, and remote peer address can be customized.
+  Upon completion of each iPerf test, an iPerf report is generated.
+  To integrate the iPerf component into the application, simply add it to the project and initialize it using sl_iperf_service_init().
 
 category: "Wi-SUN|Wi-SUN Services"
 quality: "production"

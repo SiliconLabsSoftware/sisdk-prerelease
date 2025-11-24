@@ -7,8 +7,8 @@
     "tick_events": "cluster-endpoint-tick-events.json",
     "generator": {
       "enabled": "true",
-      "postProcessConditionalFile": "../../../../../tool/script/uncrustify/uncrustify.cfg",
-      "postProcessMulti": "uncrustify --no-backup -c ../../../../../tool/script/uncrustify/uncrustify.cfg -l C --replace",
+      "postProcessConditionalFile": "../../../tool/script/uncrustify/uncrustify.cfg",
+      "postProcessMulti": "uncrustify --no-backup -c ../../../tool/script/uncrustify/uncrustify.cfg -l C --replace",
       "shareClusterStatesAcrossEndpoints": "true"
     }
   },

@@ -45,7 +45,6 @@
 #include "sl_rail_sdk_packet_asm.h"
 #include "sl_sleeptimer.h"
 #include "sl_rail_sdk_mode_switch.h"
-#include "sl_rail_util_pa_conversions.h"
 #include "sl_status.h"
 #include "sl_rail_sdk_fifo_size_config.h"
 #include "sl_rail_ieee802154.h"

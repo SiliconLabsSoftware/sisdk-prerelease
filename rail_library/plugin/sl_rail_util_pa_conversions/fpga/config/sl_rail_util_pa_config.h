@@ -47,24 +47,6 @@
 // <0-65535:1>
 // <i> Default: 1800
 #define SL_RAIL_UTIL_PA_VOLTAGE_MV          1800
-
-// <o SL_RAIL_UTIL_PA_SELECTION_2P4GHZ> 2.4 GHz PA Selection
-// <RAIL_TX_POWER_MODE_2P4GIG_HIGHEST=> Highest Possible
-// <RAIL_TX_POWER_MODE_2P4GIG_HP=> High Power (chip-specific)
-// <RAIL_TX_POWER_MODE_2P4GIG_MP=> Medium Power (chip-specific)
-// <RAIL_TX_POWER_MODE_2P4GIG_LP=> Low Power
-// <RAIL_TX_POWER_MODE_NONE=> Disable
-// <i> Default: RAIL_TX_POWER_MODE_2P4GIG_HP
-#define SL_RAIL_UTIL_PA_SELECTION_2P4GHZ    RAIL_TX_POWER_MODE_2P4GIG_HP
-
-// <o SL_RAIL_UTIL_PA_SELECTION_SUBGHZ> Sub-GHz PA Selection
-// <RAIL_TX_POWER_MODE_SUBGIG_HIGHEST=> Highest Possible
-// <RAIL_TX_POWER_MODE_SUBGIG_HP=> High Power (chip-specific)
-// <RAIL_TX_POWER_MODE_SUBGIG_MP=> Medium Power (chip-specific)
-// <RAIL_TX_POWER_MODE_SUBGIG_LP=> Low Power
-// <RAIL_TX_POWER_MODE_NONE=> Disable
-// <i> Default: RAIL_TX_POWER_MODE_NONE
-#define SL_RAIL_UTIL_PA_SELECTION_SUBGHZ    RAIL_TX_POWER_MODE_NONE
 // </h>
 
 // <h> PA Calibration Configuration

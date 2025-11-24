@@ -250,6 +250,12 @@ static IEEE802154_2p4GHzConfig_t ieee802154Configs[] = {
 #endif
 };
 
+static bool isCoexPhyConfig(uint8_t config)
+{
+  // Coex PHYs are at indices 2, 3, 6, and 7
+  return ((config == 2U) || (config == 3U) || (config == 6U) || (config == 7U));
+}
+
 void list2p4Ghz802154Configs(sl_cli_command_arg_t *args)
 {
   uint8_t i;
@@ -315,6 +321,13 @@ void config2p4Ghz802154(sl_cli_command_arg_t *args)
                        "Unsupported ieee802154 config");
     return;
   }
+#ifndef _SILICON_LABS_32B_SERIES_1
+  if (isCoexPhyConfig(ieee802154Config)) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 1,
+                       "Coex PHYs are only supported on series 1 devices");
+    return;
+  }
+#endif
   status = (*ieee802154Configs[ieee802154Config].config)(railHandle);
   if (status == SL_RAIL_STATUS_NO_ERROR) {
     ieee802154PhrLen = 1U;

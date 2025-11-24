@@ -2,8 +2,8 @@
  * @file
  * @brief PA power conversion functions provided to the customer as source for
  *   highest level of customization.
- * @details This file contains the curves and logic that convert PA power
- *   levels to dBm powers.
+ * @details This file contains the logic that converts dBm powers to
+ *   chip-and-PA-specific power levels used by the RAIL library.
  *******************************************************************************
  * # License
  * <b>Copyright 2025 Silicon Laboratories Inc. www.silabs.com</b>
@@ -35,56 +35,31 @@
 #define SL_RAIL_PA_CONVERSIONS_H
 
 #include "sl_rail_types.h"
-
-#include "sl_rail_util_pa_curve_types.h"
+#include "sl_rail_util_pa_types.h"
+#include "sl_rail_util_compatible_pa.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @addtogroup PA_Curve_Conversions PA Curve Conversions
+ * @addtogroup PA_Power_Conversions PA Power Conversions
  * @ingroup PA
  * @{
  */
 
-/// The PA curves to be used for transmission
+/// The PA table to be used for transmission
 extern const sl_rail_tx_power_table_config_t sl_rail_util_pa_tx_power_table;
+
 /**
- * Initialize Transmit power curves.
+ * Initialize Transmit power tables.
  *
  * @param[in] radio_handle A radio-generic RAIL handle.
- * @param[in] p_tx_power_table_config A pointer to the TX power curves to use.
+ * @param[in] p_tx_power_table_config A pointer to the TX power table to use.
  * @return Status code indicating success of the function call.
  */
 sl_rail_status_t sl_rail_util_pa_init_tx_power_table(sl_rail_handle_t radio_handle,
                                                      const sl_rail_tx_power_table_config_t *p_tx_power_table_config);
-
-/**
- * Initialize PA TX Curves.
- */
-void sl_rail_util_pa_init(void);
-
-/**
- * Get a pointer to the TX Power Config 2.4 GHz structure.
- *
- * @return A pointer to the TX Power Config stucture.
- */
-sl_rail_tx_power_config_t *sl_rail_util_pa_get_tx_power_config_2p4ghz(void);
-
-/**
- * Get a pointer to the TX Power Config Sub-GHz structure.
- *
- * @return A pointer to the TX Power Config stucture.
- */
-sl_rail_tx_power_config_t *sl_rail_util_pa_get_tx_power_config_subghz(void);
-
-/**
- * Get a pointer to the TX Power Config OFDM structure.
- *
- * @return A pointer to the TX Power Config stucture.
- */
-sl_rail_tx_power_config_t *sl_rail_util_pa_get_tx_power_config_ofdm(void);
 
 /**
  * Provide a channel config change callback capable of configuring the PA
@@ -104,7 +79,7 @@ void sl_rail_util_pa_on_channel_config_change(sl_rail_handle_t rail_handle,
  * @param[in] mode PA mode for which to get the powersetting table.
  * @param[out] p_min_ddbm A pointer to a \ref sl_rail_tx_power_t.
  * @param[out] p_max_ddbm A pointer to a \ref sl_rail_tx_power_t.
- * @param[out] p_step_ddbm A pointer to a \ref sl_rail_tx_power_level_t, but in deci-dBm units.
+ * @param[out] p_step_ddbm A pointer to a \ref sl_rail_tx_power_t.
  * @return Power setting table start address. When NULL is returned all out params
  *   above won't be set.
  *
@@ -118,25 +93,9 @@ const sl_rail_pa_power_setting_t *sl_rail_util_pa_get_power_setting_table(sl_rai
                                                                           sl_rail_tx_power_mode_t mode,
                                                                           sl_rail_tx_power_t *p_min_ddbm,
                                                                           sl_rail_tx_power_t *p_max_ddbm,
-                                                                          sl_rail_tx_power_level_t *p_step_ddbm);
+                                                                          sl_rail_tx_power_t *p_step_ddbm);
 
-/**
- * Get the TX PA power setting table max and step values
- *
- * @param[in] rail_handle A real RAIL instance handle.
- * @param[out] p_max_ddbm A pointer to a \ref sl_rail_tx_power_t.
- * @param[out] p_min_ddbm A pointer to a \ref sl_rail_tx_power_t.
- * @param[out] p_step_ddbm A pointer to a \ref sl_rail_tx_power_t.
- * @return RAIL Status
- *
- * Provides the max power value and the step value of the respective PA setting
- * table
- */
-sl_rail_status_t sl_rail_get_tx_pa_table_limits(sl_rail_handle_t rail_handle,
-                                                sl_rail_tx_power_t *p_max_ddbm,
-                                                sl_rail_tx_power_t *p_min_ddbm,
-                                                sl_rail_tx_power_t *p_step_ddbm);
-/** @} */ // PA_Curve_Conversions
+/** @} */ // PA_Power_Conversions
 
 #ifdef __cplusplus
 }

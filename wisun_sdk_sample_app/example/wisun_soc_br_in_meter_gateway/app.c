@@ -48,7 +48,7 @@
 #include "sl_wisun_config.h"
 #include "sl_wisun_br_config.h"
 #include "app.h"
-#include "sl_wisun_app_setting.h"
+#include "sl_wisun_app_setting_br.h"
 #include "sl_wisun_app_core_util.h"
 #include "sl_wisun_event_mgr.h"
 #include "sl_wisun_br_dhcpv6_server.h"

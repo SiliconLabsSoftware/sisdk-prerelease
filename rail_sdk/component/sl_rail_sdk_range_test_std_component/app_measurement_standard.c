@@ -47,9 +47,7 @@
 #include "sl_rail_chip_specific.h"
 #include "app_assert.h"
 #include "app_log.h"
-#include "sl_rail_util_pa_config.h"
-#include "sl_rail_util_pa_curve_types.h"
-#include "sl_rail_util_pa_conversions.h"
+#include "sl_rail_util_compatible_pa.h"
 #ifdef SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
 #include "sl_rail_util_ant_div.h"
 #endif
@@ -353,10 +351,11 @@ void init_range_test_standard_phys(uint8_t* number_of_phys)
     sl_rail_tx_power_t min_power_ddbm = SL_RAIL_TX_POWER_MIN;
     sl_rail_tx_power_t step_ddbm = SL_RAIL_TX_POWER_MIN;
 
-    status = sl_rail_get_tx_pa_table_limits(rail_handles[i],
-                                            &max_power_ddbm,
-                                            &min_power_ddbm,
-                                            &step_ddbm);
+    status = sl_rail_util_pa_get_tx_power_limits(rail_handles[i],
+                                                 SL_RAIL_TX_PA_MODE_INVALID,
+                                                 &min_power_ddbm,
+                                                 &max_power_ddbm,
+                                                 &step_ddbm);
     if (status != SL_RAIL_STATUS_NO_ERROR) {
       status = sl_rail_set_tx_power_dbm(rail_handles[i], 100);
     } else {

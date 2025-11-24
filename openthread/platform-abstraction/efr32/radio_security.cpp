@@ -47,7 +47,6 @@
 #include "radio_instance.h"
 #include "sl_core.h"
 #include "sl_packet_utils.h"
-#include "sl_rail_util_pa_conversions.h"
 
 // Note: INVALID_INTERFACE_INDEX is defined in radio_instance.h
 

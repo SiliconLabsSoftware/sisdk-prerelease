@@ -41,6 +41,13 @@
 #define CS_RESULT_LOG                              (1)
 #endif
 
+// <e CS_RESULT_DEBUG_LOG> Enable debug log
+// <i> Enable CS result component debug logs
+// <i> Default: 0
+#ifndef CS_RESULT_DEBUG_LOG
+#define CS_RESULT_DEBUG_LOG                        (0)
+#endif
+
 // <s CS_RESULT_LOG_PREFIX> Log prefix
 // <i> Default: "[result]"
 #ifndef CS_RESULT_LOG_PREFIX

@@ -28,12 +28,6 @@
 
 uint32_t sli_zigbee_stack_get_memory_usage_data(sl_zigbee_memory_usage_data_t memory_usage_data_type);
 
-// Public Zigbee API
-uint32_t sl_zigbee_get_memory_usage_data(sl_zigbee_memory_usage_data_t memory_usage_data_type)
-{
-  return sli_zigbee_stack_get_memory_usage_data(memory_usage_data_type);
-}
-
 // IPC redirection function
 uint32_t sli_zigbee_stack_get_memory_usage_data(sl_zigbee_memory_usage_data_t memory_usage_data_type)
 {

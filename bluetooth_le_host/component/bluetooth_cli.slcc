@@ -4,7 +4,7 @@ package: "bluetooth_le_host"
 description: >
   This component provides a Command Line Interface (CLI) that enables
   applications running on external hosts to interact with the Bluetooth
-  host stack running on EFR devices in SoC mode.
+  stack running on EFR devices in SoC mode.
   This component is intended for system testing purposes only.
   Do not use this component in production environments.
 category: "Bluetooth|CLI"
@@ -248,6 +248,8 @@ template_contribution:
     - type: uint32
     - type: uint8
     - type: hex
+  condition:
+  - bluetooth_feature_linklayer_interface
 - name: cli_command
   value:
     group: bt_resource
@@ -2095,14 +2097,14 @@ template_contribution:
     - type: uint8
     - type: hex
   condition:
-  - device_supports_bluetooth_cte
+  - bluetooth_feature_cte_transmitter
 - name: cli_command
   value:
     group: bt_cte_transmitter
     name: clear_dtm_parameters
     handler: sli_bt_cli_cte_transmitter_clear_dtm_parameters
   condition:
-  - device_supports_bluetooth_cte
+  - bluetooth_feature_cte_transmitter
 - name: cli_command
   value:
     group: bt_cte_transmitter
@@ -2113,7 +2115,7 @@ template_contribution:
     - type: uint8
     - type: hex
   condition:
-  - device_supports_bluetooth_cte
+  - bluetooth_feature_cte_transmitter
 - name: cli_command
   value:
     group: bt_cte_transmitter
@@ -2122,7 +2124,7 @@ template_contribution:
     argument:
     - type: uint8
   condition:
-  - device_supports_bluetooth_cte
+  - bluetooth_feature_cte_transmitter
 - name: cli_command
   value:
     group: bt_cte_transmitter
@@ -2135,7 +2137,7 @@ template_contribution:
     - type: uint8
     - type: hex
   condition:
-  - device_supports_bluetooth_cte
+  - bluetooth_feature_cte_transmitter
 - name: cli_command
   value:
     group: bt_cte_transmitter
@@ -2144,7 +2146,7 @@ template_contribution:
     argument:
     - type: uint8
   condition:
-  - device_supports_bluetooth_cte
+  - bluetooth_feature_cte_transmitter
 - name: cli_command
   value:
     group: bt_cte_transmitter
@@ -2157,7 +2159,7 @@ template_contribution:
     - type: uint8
     - type: hex
   condition:
-  - device_supports_bluetooth_cte
+  - bluetooth_feature_cte_transmitter
 - name: cli_command
   value:
     group: bt_cte_transmitter
@@ -2166,7 +2168,7 @@ template_contribution:
     argument:
     - type: uint8
   condition:
-  - device_supports_bluetooth_cte
+  - bluetooth_feature_cte_transmitter
 - name: cli_command
   value:
     group: bt_cte_receiver
@@ -2178,14 +2180,14 @@ template_contribution:
     - type: uint8
     - type: hex
   condition:
-  - device_supports_bluetooth_cte
+  - bluetooth_feature_cte_receiver
 - name: cli_command
   value:
     group: bt_cte_receiver
     name: clear_dtm_parameters
     handler: sli_bt_cli_cte_receiver_clear_dtm_parameters
   condition:
-  - device_supports_bluetooth_cte
+  - bluetooth_feature_cte_receiver
 - name: cli_command
   value:
     group: bt_cte_receiver
@@ -2194,7 +2196,7 @@ template_contribution:
     argument:
     - type: uint8
   condition:
-  - device_supports_bluetooth_cte
+  - bluetooth_feature_cte_receiver
 - name: cli_command
   value:
     group: bt_cte_receiver
@@ -2207,7 +2209,7 @@ template_contribution:
     - type: uint8
     - type: uint8
   condition:
-  - device_supports_bluetooth_cte
+  - bluetooth_feature_cte_receiver
 - name: cli_command
   value:
     group: bt_cte_receiver
@@ -2221,7 +2223,7 @@ template_contribution:
     - type: uint8
     - type: uint8
   condition:
-  - device_supports_bluetooth_cte
+  - bluetooth_feature_cte_receiver
 - name: cli_command
   value:
     group: bt_cte_receiver
@@ -2230,7 +2232,7 @@ template_contribution:
     argument:
     - type: uint8
   condition:
-  - device_supports_bluetooth_cte
+  - bluetooth_feature_cte_receiver
 - name: cli_command
   value:
     group: bt_cte_receiver
@@ -2244,7 +2246,7 @@ template_contribution:
     - type: uint8
     - type: hex
   condition:
-  - device_supports_bluetooth_cte
+  - bluetooth_feature_cte_receiver
 - name: cli_command
   value:
     group: bt_cte_receiver
@@ -2253,7 +2255,7 @@ template_contribution:
     argument:
     - type: uint8
   condition:
-  - device_supports_bluetooth_cte
+  - bluetooth_feature_cte_receiver
 - name: cli_command
   value:
     group: bt_cte_receiver
@@ -2265,7 +2267,7 @@ template_contribution:
     - type: uint8
     - type: hex
   condition:
-  - device_supports_bluetooth_cte
+  - bluetooth_feature_cte_receiver
 - name: cli_command
   value:
     group: bt_cte_receiver
@@ -2274,7 +2276,7 @@ template_contribution:
     argument:
     - type: uint16
   condition:
-  - device_supports_bluetooth_cte
+  - bluetooth_feature_cte_receiver
 - name: cli_command
   value:
     group: bt_cte_receiver
@@ -2285,14 +2287,14 @@ template_contribution:
     - type: uint8
     - type: hex
   condition:
-  - device_supports_bluetooth_cte
+  - bluetooth_feature_cte_receiver
 - name: cli_command
   value:
     group: bt_cte_receiver
     name: disable_silabs_cte
     handler: sli_bt_cli_cte_receiver_disable_silabs_cte
   condition:
-  - device_supports_bluetooth_cte
+  - bluetooth_feature_cte_receiver
 - name: cli_command
   value:
     group: bt_connection_analyzer

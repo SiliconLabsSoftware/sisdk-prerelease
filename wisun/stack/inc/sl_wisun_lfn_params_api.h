@@ -40,10 +40,10 @@
 /// API version used to check compatibility (do not edit when using this header)
 #define SL_WISUN_LFN_PARAMS_API_VERSION  4
 
-/***************************************************************************//**
+/**************************************************************************//**
  * @addtogroup SL_WISUN_TYPES
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// LFN connection parameters
 SL_PACK_START(1)
@@ -170,7 +170,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_lfn_params_t;
 SL_PACK_END()
 
-/***************************************************************************//**
+/**************************************************************************//**
  * @addtogroup SL_WISUN_LFN_PARAMETER_SETS Predefined LFN parameter sets
  *
  * Predefined LFN parameter sets for sl_wisun_set_lfn_parameters().
@@ -179,7 +179,7 @@ SL_PACK_END()
  * for an application-specific parameter set.
  *
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Profile for test usage, best performance but highest power consumption
 static const sl_wisun_lfn_params_t SL_WISUN_PARAMS_LFN_TEST = {

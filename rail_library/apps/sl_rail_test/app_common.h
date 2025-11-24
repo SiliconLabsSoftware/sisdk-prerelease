@@ -239,6 +239,15 @@ typedef struct PhySwitchToRx{
   sl_rail_ble_state_t params;
 } PhySwitchToRx_t;
 
+/**
+ * @enum RailTxType
+ * @brief Enumeration of the types of tx available in RAIL
+ *
+ * These are used to decide which type of tx to do, based on
+ * what's been configured in sl_rail_test. Scheduled is not included
+ * as sl_rail_test handles it somewhat separately.
+ */
+
 typedef enum RailTxType {
   TX_TYPE_NORMAL,
   TX_TYPE_CSMA,
@@ -625,15 +634,6 @@ typedef enum AppMode{
   RX_SCHEDULED = 14,  /**< Enable receive at a time scheduled in the future */
   TX_SCHEDULED_N_PACKETS = 15, /**< Schedule a TX for a specific number of packets */
 } AppMode_t;
-
-/**
- * @enum RailTxType
- * @brief Enumeration of the types of tx available in RAIL
- *
- * These are used to decide which type of tx to do, based on
- * what's been configured in sl_rail_test. Scheduled is not included
- * as sl_rail_test handles it somewhat separately.
- */
 
 void sl_rail_test_internal_app_init(void);
 void sl_rail_test_internal_app_process_action(void);

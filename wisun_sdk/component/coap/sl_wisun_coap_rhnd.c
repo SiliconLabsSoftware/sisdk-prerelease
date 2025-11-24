@@ -476,8 +476,10 @@ static void _rhnd_thr_fnc(void * args)
   (void) args;
 
   SL_COAP_SERVICE_LOOP() {
+    #if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
     // waiting for network connected state
     sl_wisun_app_core_util_wait_for_connection();
+    #endif
 
     // creating socket
     sockid = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);

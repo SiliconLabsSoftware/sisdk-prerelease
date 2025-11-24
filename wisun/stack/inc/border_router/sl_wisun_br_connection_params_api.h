@@ -237,7 +237,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_br_connection_params_t;
 SL_PACK_END()
 
-/***************************************************************************//**
+/**************************************************************************//**
  * @addtogroup SL_WISUN_BR_PARAMETER_SETS Predefined BR parameter sets
  *
  * Predefined BR parameter sets for sl_wisun_br_set_connection_parameters().
@@ -247,7 +247,7 @@ SL_PACK_END()
  * application-specific parameter set.
  *
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Profile for development (shorter connection time)
 static const sl_wisun_br_connection_params_t SL_WISUN_BR_PARAMS_PROFILE_TEST = {

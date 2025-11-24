@@ -43,40 +43,12 @@
 #include "sl_wisun_api.h"
 #include "sl_wisun_cli_settings.h"
 #include "sl_wisun_app_setting.h"
-#include "sl_component_catalog.h"
-#include "sl_wisun_config.h"
-
-#include "sl_wisun_types.h"
-#include "sl_wisun_keychain.h"
-
-#if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
-#include "sl_wisun_br_config.h"
-#endif
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
 
-/// Settings notification error bit
-#define APP_SETTINGS_NOTIFICATION_ERROR_FLAG_BIT    31U
-
-/// Settings notification error flag mask
-#define APP_SETTINGS_NOTIFICATION_ERROR_FLAG_MSK    (1U << APP_SETTINGS_NOTIFICATION_ERROR_FLAG_BIT)
-
 /// Default Network name for initialization
 #define APP_SETTINGS_DEFAULT_NETWORK_NAME           "Wi-SUN Network"
-
-/// Setting notification descriptor
-typedef struct app_setting_notif_dsc {
-  /// Event ID
-  osEventFlagsId_t evt_id;
-  /// Notification type
-  app_setting_notification_t type;
-  /// Subscribed channels
-  uint32_t subscribed_chs;
-} app_setting_notif_dsc_t;
-
-/// Count of available notifications
-#define APP_SETTINGS_NOTIFICATION_COUNT             4UL
 
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
@@ -101,33 +73,7 @@ __STATIC_INLINE void _app_wisun_mutex_release(void);
  * @return char* const char pointer that points to checked name or to the default
  *          one if the checked one is incorrect.
  *****************************************************************************/
-static const char* _app_check_nw_name(const char *name, size_t *const name_len);
-
-/**************************************************************************//**
- * @brief Get notification entry from table
- * @details Helper function
- * @param[in] type Notification type
- * @return app_setting_notif_dsc_t* Notification entry on success or NULL on error
- *****************************************************************************/
-static app_setting_notif_dsc_t *_get_notification_entry(app_setting_notification_t type);
-
-/**************************************************************************//**
- * @brief App setting notify
- * @details Notify subscribed channels about settings calls
- * @param[in] notif Notification type
- * @return sl_status_t SL_STATUS_OK on success, otherwise SL_STATUS_FAIL
- *****************************************************************************/
-static sl_status_t _setting_notify(app_setting_notification_t notif);
-
-/**************************************************************************//**
- * @brief Convert ranges to mask
- * @details Convert ranges to mask
- * @param[in] str String containing ranges
- * @param[out] mask Pointer to the mask to be filled
- * @param[in] size Size of the mask
- * @return sl_status_t SL_STATUS_OK on success, otherwise SL_STATUS_FAIL
- *****************************************************************************/
-static sl_status_t _app_ranges_to_mask(const char *str, uint8_t *mask, uint32_t size);
+static const char *_app_check_nw_name(const char *name, size_t *const name_len);
 // -----------------------------------------------------------------------------
 //                                Static Variables
 // -----------------------------------------------------------------------------
@@ -143,21 +89,8 @@ static const osMutexAttr_t _app_wisun_setting_mtx_attr = {
   .cb_size   = 0
 };
 
-/// Settings event flags attributes
-static const osEventFlagsAttr_t _wisun_setting_evt_attr = {
-  .name      = "AppWisunSettingEvtFlags",
-  .attr_bits = 0,
-  .cb_mem    = NULL,
-  .cb_size   = 0
-};
-
 /// Wi-SUN application settings
 static app_setting_wisun_t _wisun_app_settings = { 0 };
-
-#if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
-/// Wi-SUN border router settings
-static app_setting_br_t _wisun_br_settings = { 0 };
-#endif
 
 /// Default app settings structure
 static const app_setting_wisun_t _wisun_app_settings_default = {
@@ -205,102 +138,6 @@ static const app_setting_wisun_t _wisun_app_settings_default = {
   .phy = { 0 },
 #endif
 };
-
-#if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
-/// Default br settings structure
-static app_setting_br_t _wisun_br_settings_default = {
-#if defined(WISUN_CONFIG_NETWORK_NAME)
-  .network_name = WISUN_CONFIG_NETWORK_NAME,
-#else
-  .network_name = APP_SETTINGS_DEFAULT_NETWORK_NAME,
-#endif
-#if defined(WISUN_CONFIG_DEFAULT_PHY_FAN10)
-  .phy = {
-    .type = SL_WISUN_PHY_CONFIG_FAN10,
-    .config.fan10.reg_domain = WISUN_CONFIG_REGULATORY_DOMAIN,
-    .config.fan10.op_class = WISUN_CONFIG_OPERATING_CLASS,
-    .config.fan10.op_mode = WISUN_CONFIG_OPERATING_MODE,
-  },
-#elif defined(WISUN_CONFIG_DEFAULT_PHY_FAN11)
-  .phy = {
-    .type = SL_WISUN_PHY_CONFIG_FAN11,
-    .config.fan11.reg_domain = WISUN_CONFIG_REGULATORY_DOMAIN,
-    .config.fan11.chan_plan_id = WISUN_CONFIG_CHANNEL_PLAN_ID,
-    .config.fan11.phy_mode_id = WISUN_CONFIG_PHY_MODE_ID,
-  },
-#else
-  .phy = { 0 },
-#endif
-#if defined(WISUN_CONFIG_NETWORK_SIZE)
-  .network_size = WISUN_CONFIG_NETWORK_SIZE,
-#else
-  .network_size = SL_WISUN_NETWORK_SIZE_SMALL,
-#endif
-#if defined(WISUN_CONFIG_TX_POWER)
-  .tx_power_ddbm = WISUN_CONFIG_TX_POWER,
-#else
-  .tx_power_ddbm = 200,
-#endif
-#if defined(WISUN_CONFIG_MODE_SWITCH_PHYS)
-  .rx_phy_mode_ids = WISUN_CONFIG_MODE_SWITCH_PHYS,
-#else
-  .rx_phy_mode_ids = { 0 },
-#endif
-#if defined(WISUN_CONFIG_MODE_SWITCH_PHYS_NUMBER)
-  .rx_phy_mode_ids_count = WISUN_CONFIG_MODE_SWITCH_PHYS_NUMBER,
-#else
-  .rx_phy_mode_ids_count = 0,
-#endif
-#if defined(WISUN_CONFIG_DEVICE_PROFILE)
-  .lfn_profile = WISUN_CONFIG_DEVICE_PROFILE,
-#else
-  .lfn_profile = SL_WISUN_LFN_PROFILE_TEST,
-#endif
-#if defined(WISUN_CONFIG_ALLOWED_CHANNELS)
-  .allowed_channels = WISUN_CONFIG_ALLOWED_CHANNELS,
-#else
-  .allowed_channels = "0-255",
-#endif
-  .uc_dwell_interval_ms = SL_WISUN_BR_CONFIG_UC_DWELL_INTERVAL,
-  .bc_interval_ms = SL_WISUN_BR_CONFIG_BC_INTERVAL,
-  .bc_dwell_interval_ms = SL_WISUN_BR_CONFIG_BC_DWELL_INTERVAL,
-  .ipv6_prefix = SL_WISUN_BR_CONFIG_IPV6_PREFIX,
-  .max_neighbor_count = SL_WISUN_BR_CONFIG_MAX_NEIGHBOR_COUNT,
-  .max_child_count = SL_WISUN_BR_CONFIG_MAX_CHILD_COUNT,
-  .max_security_neighbor_count = SL_WISUN_BR_CONFIG_MAX_SECURITY_NEIGHBOR_COUNT,
-  .keychain = SL_WISUN_BR_CONFIG_KEYCHAIN,
-  .keychain_index = SL_WISUN_BR_CONFIG_KEYCHAIN_INDEX,
-  .socket_rx_buffer_size = SL_WISUN_BR_CONFIG_SOCKET_RX_BUFFER_SIZE,
-  .fec = 0,
-  .state = SL_WISUN_BR_STATE_INITIALIZED,
-  .is_default_phy = true
-};
-#endif
-
-/// Notifications
-static app_setting_notif_dsc_t _notifications[APP_SETTINGS_NOTIFICATION_COUNT] = {
-  {
-    .type = APP_SETTING_NOTIFICATION_SET_NETWORK_NAME,
-    .evt_id = NULL,
-    .subscribed_chs = (1U << APP_SETTING_DEFAULT_SUBSCRIPT_CH),
-  },
-  {
-    .type = APP_SETTING_NOTIFICATION_SET_NETWORK_SIZE,
-    .evt_id = NULL,
-    .subscribed_chs = (1U << APP_SETTING_DEFAULT_SUBSCRIPT_CH),
-  },
-  {
-    .type = APP_SETTING_NOTIFICATION_SET_TX_POWER,
-    .evt_id = NULL,
-    .subscribed_chs = (1U << APP_SETTING_DEFAULT_SUBSCRIPT_CH),
-  },
-  {
-    .type = APP_SETTING_NOTIFICATION_SET_PHY_CFG,
-    .evt_id = NULL,
-    .subscribed_chs = (1U << APP_SETTING_DEFAULT_SUBSCRIPT_CH),
-  }
-};
-
 // -----------------------------------------------------------------------------
 //                                Global Variables
 // -----------------------------------------------------------------------------
@@ -311,21 +148,9 @@ const app_saving_item_t network_saving_settings = {
   .default_val = &_wisun_app_settings_default
 };
 
-#if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
-/// Wi-SUN border router network saving settings
-const app_saving_item_t br_saving_settings = {
-  .data = &_wisun_br_settings,
-  .data_size = sizeof(_wisun_br_settings),
-  .default_val = &_wisun_br_settings_default
-};
-#endif
-
 /// Wi-SUN application all saved data
 const app_saving_item_t *saving_settings[] = {
   &network_saving_settings,
-#if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
-  &br_saving_settings,
-#endif
   NULL
 };
 // -----------------------------------------------------------------------------
@@ -338,12 +163,6 @@ void app_wisun_setting_init(void)
   // init wisun settings mutex
   _app_wisun_setting_mtx = osMutexNew(&_app_wisun_setting_mtx_attr);
   EFM_ASSERT(_app_wisun_setting_mtx != NULL);
-
-  // init wisun settings event flags
-  for (size_t idx = 0; idx < APP_SETTINGS_NOTIFICATION_COUNT; ++idx) {
-    _notifications[idx].evt_id = osEventFlagsNew(&_wisun_setting_evt_attr);
-    EFM_ASSERT(_notifications[idx].evt_id != NULL);
-  }
 }
 
 /* Get app setting */
@@ -384,7 +203,7 @@ sl_status_t app_wisun_setting_set_network_name(const char *const name)
     return SL_STATUS_FAIL;
   }
 
-  stat = _setting_notify(APP_SETTING_NOTIFICATION_SET_NETWORK_NAME);
+  stat = app_wisun_setting_notify(APP_SETTING_NOTIFICATION_SET_NETWORK_NAME);
   _app_wisun_mutex_release();
 
   return stat;
@@ -400,7 +219,7 @@ sl_status_t app_wisun_setting_set_network_size(const uint8_t *const size)
   }
   _app_wisun_mutex_acquire();
   _wisun_app_settings.network_size = *size;
-  stat = _setting_notify(APP_SETTING_NOTIFICATION_SET_NETWORK_SIZE);
+  stat = app_wisun_setting_notify(APP_SETTING_NOTIFICATION_SET_NETWORK_SIZE);
   _app_wisun_mutex_release();
 
   return stat;
@@ -416,11 +235,8 @@ sl_status_t app_wisun_setting_set_tx_power(const int16_t * const tx_power)
   }
 
   _app_wisun_mutex_acquire();
-
   _wisun_app_settings.tx_power_ddbm = *tx_power;
-
-  stat = _setting_notify(APP_SETTING_NOTIFICATION_SET_TX_POWER);
-
+  stat = app_wisun_setting_notify(APP_SETTING_NOTIFICATION_SET_TX_POWER);
   _app_wisun_mutex_release();
 
   return stat;
@@ -438,10 +254,7 @@ sl_status_t app_wisun_setting_set_phy(const sl_wisun_phy_config_t *const phy)
   _app_wisun_mutex_acquire();
   _wisun_app_settings.is_default_phy = false;
   memcpy(&_wisun_app_settings.phy, phy, sizeof(sl_wisun_phy_config_t));
-
-  // Set notification
-  stat = _setting_notify(APP_SETTING_NOTIFICATION_SET_PHY_CFG);
-
+  stat = app_wisun_setting_notify(APP_SETTING_NOTIFICATION_SET_PHY_CFG);
   _app_wisun_mutex_release();
 
   return stat;
@@ -464,6 +277,7 @@ sl_status_t app_wisun_setting_get_network_name(char *const name, uint8_t size)
     memset(name, 0U, APP_SETTING_NETWORK_NAME_MAX_SIZE);
     memcpy(name, _wisun_app_settings.network_name, name_len);
   } else {
+    _app_wisun_mutex_release();
     return SL_STATUS_FAIL;
   }
 
@@ -517,90 +331,15 @@ sl_status_t app_wisun_setting_init_phy_cfg(void)
 {
   sl_status_t stat = SL_STATUS_OK;
 
+  // Full radio config: create a copy of already prepared phy config with default settings
   if (_wisun_app_settings.is_default_phy) {
-    // Full radio config: create a copy of already prepared phy config with default settings
     memcpy(&_wisun_app_settings.phy, &_wisun_app_settings_default.phy, sizeof(sl_wisun_phy_config_t));
   }
 
   // Set notifications
-  stat = _setting_notify(APP_SETTING_NOTIFICATION_SET_PHY_CFG);
+  stat = app_wisun_setting_notify(APP_SETTING_NOTIFICATION_SET_PHY_CFG);
 
   return stat;
-}
-
-sl_status_t app_wisun_setting_subscribe_notification(const app_setting_notification_t type,
-                                                     uint8_t * const channel)
-{
-  app_setting_notif_dsc_t *notif = NULL;
-  uint32_t mask = 0UL;
-
-  notif = _get_notification_entry(type);
-  if (notif == NULL || channel == NULL) {
-    return SL_STATUS_FAIL;
-  }
-
-  _app_wisun_mutex_acquire();
-  for (uint8_t i = 0U; i < sizeof(notif->subscribed_chs) * 8U; ++i) {
-    mask = (1U << i);
-    if (i != APP_SETTINGS_NOTIFICATION_ERROR_FLAG_BIT
-        && !(notif->subscribed_chs & mask)) {
-      *channel = i;
-      notif->subscribed_chs |= mask;
-      break;
-    }
-  }
-  _app_wisun_mutex_release();
-
-  return SL_STATUS_OK;
-}
-
-bool app_wisun_setting_is_notified(const app_setting_notification_t type,
-                                   const uint8_t channel)
-{
-  uint32_t flags = 0UL;
-  app_setting_notif_dsc_t *notif = NULL;
-
-  notif = _get_notification_entry(type);
-  if (notif == NULL) {
-    return false;
-  }
-  flags = osEventFlagsWait(notif->evt_id, (1U << channel), osFlagsNoClear, 0UL);
-
-  return (flags & APP_SETTINGS_NOTIFICATION_ERROR_FLAG_MSK)
-         ? false : (bool) (flags & (1U << channel));
-}
-
-void app_wisun_setting_unsubscribe(const app_setting_notification_t type,
-                                   const uint8_t channel)
-{
-  app_setting_notif_dsc_t *notif = NULL;
-
-  notif = _get_notification_entry(type);
-  if (notif == NULL) {
-    return;
-  }
-
-  _app_wisun_mutex_acquire();
-  notif->subscribed_chs &= ~(1U << channel);
-  _app_wisun_mutex_release();
-}
-
-void app_wisun_setting_ack_notification(const app_setting_notification_t type,
-                                        const uint8_t channel)
-{
-  app_setting_notif_dsc_t *notif = NULL;
-
-  notif = _get_notification_entry(type);
-  if (notif == NULL) {
-    return;
-  }
-
-  (void) osEventFlagsClear(notif->evt_id, 1U << channel);
-}
-
-sl_status_t app_settings_get_channel_mask(const char *str, sl_wisun_channel_mask_t *channel_mask)
-{
-  return _app_ranges_to_mask(str, channel_mask->mask, SL_WISUN_CHANNEL_MASK_SIZE);
 }
 // -----------------------------------------------------------------------------
 //                          Static Function Definitions
@@ -632,70 +371,4 @@ static const char* _app_check_nw_name(const char *name, size_t *const name_len)
   }
 
   return ret_name;
-}
-
-static app_setting_notif_dsc_t *_get_notification_entry(app_setting_notification_t type)
-{
-  for (size_t idx = 0; idx < APP_SETTINGS_NOTIFICATION_COUNT; ++idx) {
-    if (_notifications[idx].type == type) {
-      return &_notifications[idx];
-    }
-  }
-  return NULL;
-}
-
-static sl_status_t _setting_notify(const app_setting_notification_t type)
-{
-  app_setting_notif_dsc_t *notif = NULL;
-  uint32_t flags = 0UL;
-
-  notif = _get_notification_entry(type);
-  if (notif == NULL) {
-    return SL_STATUS_FAIL;
-  }
-  flags = osEventFlagsSet(notif->evt_id, notif->subscribed_chs);
-  if (flags & APP_SETTINGS_NOTIFICATION_ERROR_FLAG_MSK) {
-    return SL_STATUS_FAIL;
-  }
-  return SL_STATUS_OK;
-}
-
-static sl_status_t _app_ranges_to_mask(const char *str, uint8_t *mask, uint32_t size)
-{
-  char *endptr = NULL;
-  uint32_t cur = 0U;
-  uint32_t end = 0U;
-  uint32_t index = 0U;
-
-  memset(mask, 0U, size * sizeof(uint8_t));
-
-  do {
-    if (*str == '\0') {
-      return SL_STATUS_FAIL;
-    }
-    cur = strtoul(str, &endptr, 0);
-    if (*endptr == '-') {
-      str = endptr + 1;
-      end = strtoul(str, &endptr, 0);
-    } else {
-      end = cur;
-    }
-    if (*endptr != '\0' && *endptr != ',') {
-      return SL_STATUS_FAIL;
-    }
-    if (cur > end) {
-      return SL_STATUS_FAIL;
-    }
-    for (; cur <= end; cur++) {
-      index = cur / 8;
-      if (index < size) {
-        mask[index] |= 1 << (cur % 8);
-      } else {
-        return SL_STATUS_FAIL;
-      }
-    }
-    str = endptr + 1;
-  } while (*endptr != '\0');
-
-  return SL_STATUS_OK;
 }

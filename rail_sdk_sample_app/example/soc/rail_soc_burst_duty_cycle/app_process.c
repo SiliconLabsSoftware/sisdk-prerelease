@@ -147,8 +147,13 @@ static uint8_t rx_buffer[RX_BUFFER_LENGTH];
 static uint16_t packet_transmitted = 0U;              // TX packets count
 static uint16_t packet_received = 0U;                 // RX packets count
 
+#if DUTY_CYCLE_USE_LCD_BUTTON == 1
 /// Flag to refresh LCD with new values
 static bool refresh_display = true;
+#endif
+
+/// Flag to indicate that app is ready for sleep
+static volatile bool app_ready_to_sleep = true;
 
 /// Flags to know is the interrupt was useful
 static bool button_interrupt = false;
@@ -285,6 +290,8 @@ SL_CODE_RAM void sl_rail_util_on_event(sl_rail_handle_t rail_handle, sl_rail_eve
     if (events & SL_RAIL_EVENT_RX_PACKET_RECEIVED) {
       // Keep the packet in the radio buffer, download it later at the state machine
       rx_packet_handle = sl_rail_hold_rx_packet(rail_handle);
+      // Prevent app from sleeping before processing received packet
+      app_ready_to_sleep = false;
       rail_packet_received = true;
     } else {
       rail_error = true;
@@ -325,6 +332,16 @@ SL_CODE_RAM void sl_button_on_change(const sl_button_t *handle)
 }
 #endif
 
+/*******************************************************************************
+ * This app-level function overrides a weak power manager implementation and
+ * gets called in sl_power_manager_handler.c preventing the MCU from going
+ * to sleep if app is not ready for it.
+ *******************************************************************************/
+bool app_is_ok_to_sleep(void)
+{
+  return app_ready_to_sleep;
+}
+
 // -----------------------------------------------------------------------------
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
@@ -355,6 +372,8 @@ static void handle_idle_state(sl_rail_handle_t rail_handle)
     radio_interrupt = true;
     rail_packet_sent = true;
     state = S_BURST_SENDING;
+    // Prevent app from going to sleep until the burst tx is over
+    app_ready_to_sleep = false;
 #if defined(SL_CATALOG_KERNEL_PRESENT)
     app_task_notify();
 #endif
@@ -394,6 +413,8 @@ static void handle_receive_state(sl_rail_handle_t rail_handle)
     } else {
       packet_size = unpack_packet(rail_handle, rx_buffer, &packet_info, &start_of_packet);
     }
+    // Packet processed, app is now ready to sleep
+    app_ready_to_sleep = true;
     rail_status = sl_rail_release_rx_packet(rail_handle, rx_packet_handle);
     if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
       app_log_warning("sl_rail_release_rx_packet() result: %lu", rail_status);
@@ -408,7 +429,9 @@ static void handle_receive_state(sl_rail_handle_t rail_handle)
       // RX bookkeeping & update LCD
       toggle_receive_led();
       packet_received++;
+#if DUTY_CYCLE_USE_LCD_BUTTON == 1
       refresh_display = true;
+#endif
       // Rx of one packet done, going back to listen
       duty_cycle_end = true;
       state = S_IDLE;
@@ -433,7 +456,9 @@ static void handle_send_state(sl_rail_handle_t rail_handle)
     rail_packet_sent = false;
     toggle_send_led();
     packet_transmitted++;
+#if DUTY_CYCLE_USE_LCD_BUTTON == 1
     refresh_display = true;
+#endif
     app_log_info("Burst of %lu packets sent.\n", master_burst_packets_count);
     // Run-time check if the listener had no chance to receive the burst
     if ((BURST_TIME / master_burst_packets_count) > DUTY_CYCLE_ON_TIME) {
@@ -447,6 +472,8 @@ static void handle_send_state(sl_rail_handle_t rail_handle)
     sl_rail_enable_rx_duty_cycle(rail_handle, true);
     duty_cycle_end = true;
     state = S_IDLE;
+    // Burst tx is done, app is now ready to sleep
+    app_ready_to_sleep = true;
 #if defined(SL_CATALOG_KERNEL_PRESENT)
     app_task_notify();
 #endif

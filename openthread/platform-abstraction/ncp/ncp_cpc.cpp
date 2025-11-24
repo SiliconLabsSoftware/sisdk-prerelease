@@ -192,6 +192,11 @@ void NcpCPC::SendToCPC(void)
 
     VerifyOrExit(mIsReady && !mIsWriting && !txFrameBuffer.IsEmpty());
 
+    if (super_t::ShouldWakeHost())
+    {
+        otPlatWakeHost();
+    }
+
     mIsWriting = true;
 
     // Concatenate multiple spinel buffers for efficiency over CPC.

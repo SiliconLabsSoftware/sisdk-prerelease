@@ -505,13 +505,13 @@ void sweepPower(sl_cli_command_arg_t *args)
   while (expired > sl_rail_get_time(railHandle)) {
     sl_rail_stop_tx_stream(railHandle);
     sl_rail_idle(railHandle, SL_RAIL_IDLE_ABORT, false);
-    sl_rail_set_tx_power(railHandle, lowPower);
+    sli_rail_set_tx_power(railHandle, lowPower);
     sl_rail_start_tx_stream(railHandle, channel, SL_RAIL_STREAM_CARRIER_WAVE,
                             SL_RAIL_TX_OPTIONS_DEFAULT);
     usDelay(halfPeriodStepUs);
     sl_rail_stop_tx_stream(railHandle);
     sl_rail_idle(railHandle, SL_RAIL_IDLE_ABORT, false);
-    sl_rail_set_tx_power(railHandle, hiPower);
+    sli_rail_set_tx_power(railHandle, hiPower);
     sl_rail_start_tx_stream(railHandle, channel, SL_RAIL_STREAM_CARRIER_WAVE,
                             SL_RAIL_TX_OPTIONS_DEFAULT);
     usDelay(halfPeriodStepUs);
@@ -600,7 +600,7 @@ static const uint32_t compileTimePowerModes
 
 void printChipFeatures(sl_cli_command_arg_t *args)
 {
-  sl_rail_tx_power_level_t maxPowerLevel;
+  sli_rail_tx_power_level_t maxPowerLevel;
   responsePrintHeader(sl_cli_get_command_string(args, 0), "Feature:%s,CompileTime:%s,RunTime:%s");
   responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
                      "SL_RAIL_SUPPORTS_DUAL_BAND",
@@ -669,8 +669,8 @@ void printChipFeatures(sl_cli_command_arg_t *args)
   uint32_t compileTimeMask = compileTimePowerModes;
   for (sl_rail_tx_power_mode_t mode = 0U; mode < SL_RAIL_TX_POWER_MODE_NONE; mode++) {
     sl_rail_tx_power_mode_t altMode = mode;
-    if (sl_rail_supports_tx_power_mode(railHandle, &altMode, &maxPowerLevel, NULL)
-        && (maxPowerLevel != SL_RAIL_TX_POWER_LEVEL_INVALID)) {
+    if (sli_rail_supports_tx_power_mode(railHandle, &altMode, &maxPowerLevel, NULL)
+        && (maxPowerLevel != SLI_RAIL_TX_POWER_LEVEL_INVALID)) {
       responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
                          paStrings[mode],
                          (compileTimeMask & 1U) ? "Yes" : "N/A",

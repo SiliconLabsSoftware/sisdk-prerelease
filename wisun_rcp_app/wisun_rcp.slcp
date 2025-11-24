@@ -34,6 +34,18 @@ configuration:
   - name: SL_CPC_DRV_UART_VCOM_TX_QUEUE_SIZE
     value: 2
     condition: [cpc_secondary]
+  - name: SL_CPC_DRV_UART_EXP_RX_QUEUE_SIZE
+    value: 2
+    condition: [cpc_secondary]
+  - name: SL_CPC_DRV_UART_EXP_TX_QUEUE_SIZE
+    value: 2
+    condition: [cpc_secondary]
+  - name: SL_CPC_DRV_UART_MIKROE_RX_QUEUE_SIZE
+    value: 2
+    condition: [cpc_secondary]
+  - name: SL_CPC_DRV_UART_MIKROE_TX_QUEUE_SIZE
+    value: 2
+    condition: [cpc_secondary]
   - name: SL_CPC_RX_BUFFER_MAX_COUNT
     value: 3
     condition: [cpc_secondary, cpc_secondary_driver_spi]
@@ -41,6 +53,12 @@ configuration:
     value: 3
     condition: [cpc_secondary]
   - name: SL_CPC_DRV_SPI_EXP_TX_QUEUE_SIZE
+    value: 2
+    condition: [cpc_secondary]
+  - name: SL_CPC_DRV_SPI_MIKROE_RX_QUEUE_SIZE
+    value: 3
+    condition: [cpc_secondary]
+  - name: SL_CPC_DRV_SPI_MIKROE_TX_QUEUE_SIZE
     value: 2
     condition: [cpc_secondary]
   - name: SL_BOARD_ENABLE_VCOM

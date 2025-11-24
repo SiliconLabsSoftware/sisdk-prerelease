@@ -105,7 +105,7 @@ dhcpv6_vendor_data_t *libdhcpv6_vendor_data_allocate(uint32_t enterprise_number)
             sl_free(cur->vendor_data);
             cur->vendor_data = NULL;
             cur->vendor_data_length = 0;
-            return entry;
+            return cur;
         }
     }
     entry = sl_malloc(sizeof(dhcpv6_vendor_data_t));

@@ -18,7 +18,7 @@ component:
   - id: device_init
   - id: board_control
     condition: [hardware_board]
-  - id: sl_rail_util_pa
+  - id: sl_rail_util_compatible_pa
   - id: sl_rail_util_init
     instance:
       - inst0

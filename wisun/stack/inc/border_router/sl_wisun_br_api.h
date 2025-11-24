@@ -31,7 +31,9 @@ extern "C" {
  * @ingroup SL_WISUN_API
  *
  * Wi-SUN Border Router API contains functions for Border Router specific
- * functionality. This API is an extension, not a replacement of @ref SL_WISUN_API.
+ * functionality.
+ *
+ * The API is an extension, not a replacement of @ref SL_WISUN_API.
  * An application implementing Border Router capability may utilize functions
  * from both APIs. See @ref API_AVAILABILITY for further information.
  *
@@ -60,7 +62,7 @@ sl_status_t sl_wisun_br_stop(void);
  * @param[in] gtk Group Transient Key
  * @param[in] index Index of the key from 0 to 3 for GTKs and 4 to 6 for LGTKs
  * @note This API is provided for test and debug purposes: setting a specific
- *       key in production is not recommended. 
+ *       key in production is not recommended.
  *       The keys set using this API are saved to NVM, and subsequent calls to
  *       this API are ignored until the NVM is cleared using
  *       @ref sl_wisun_clear_credential_cache.
@@ -339,10 +341,9 @@ sl_status_t sl_wisun_br_get_routing_table_entry_count(uint16_t *entry_count);
  * @note This function should be called after sl_wisun_br_get_routing_table_entry_count()
  *      to get the number of entries in the routing table.
  *****************************************************************************/
-
 sl_status_t sl_wisun_br_get_routing_table(uint16_t *entry_count, sl_wisun_br_routing_table_entry_t *table);
 
-/************************************************************************//**
+/**************************************************************************//**
  * Get the Routing Table starting from a specific index.
  *
  * @param[in] start_index Index to start reading the routing table from
@@ -352,7 +353,7 @@ sl_status_t sl_wisun_br_get_routing_table(uint16_t *entry_count, sl_wisun_br_rou
  *                       the routing table is written
  * @return SL_STATUS_OK if successful, an error code otherwise
  *
- * This function retrieves @ref entry_count entries from the routing table,
+ * This function retrieves @a entry_count entries from the routing table,
  * starting from a specific index. This allows the caller to get any number of
  * entries from the routing table without having to allocate a large buffer.
  * The allocated memory should be at least equal to:
@@ -363,7 +364,6 @@ sl_status_t sl_wisun_br_get_routing_table(uint16_t *entry_count, sl_wisun_br_rou
  * @warning If the application does not retrieve the entire routing table in a single read,
  *          it may miss updates or changes in the network topology.
  *****************************************************************************/
-
 sl_status_t sl_wisun_br_get_routing_table_from_index(uint16_t start_index,
                                                      uint16_t *entry_count,
                                                      sl_wisun_br_routing_table_entry_t *entries);

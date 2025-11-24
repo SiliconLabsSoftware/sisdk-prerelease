@@ -41,10 +41,10 @@
 /// API version used to check compatibility (do not edit when using this header)
 #define SL_WISUN_BR_LFN_PARAMS_API_VERSION 0x0002
 
-/***************************************************************************//**
+/**************************************************************************//**
  * @addtogroup SL_WISUN_TYPES
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// BR LFN parenting parameter set
 SL_PACK_START(1)
@@ -66,7 +66,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_br_lfn_params_t;
 SL_PACK_END()
 
-/***************************************************************************//**
+/**************************************************************************//**
  * @addtogroup SL_WISUN_BR_LFN_PARAMETER_SETS Predefined BR LFN-parenting parameter sets
  *
  * Predefined LFN parameter sets for sl_wisun_br_set_lfn_parameters().
@@ -75,7 +75,7 @@ SL_PACK_END()
  * for an application-specific parameter set.
  *
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Profile for use during tests
 static const sl_wisun_br_lfn_params_t SL_WISUN_BR_PARAMS_LFN_TEST = {

@@ -2344,10 +2344,9 @@ typedef struct sl_rail_config {
  */
 
 /**
- * The transmit power in deci-dBm units (e.g., 4.5 dBm -> 45 deci-dBm). These
- * values are used by the conversion functions to convert a \ref
- * sl_rail_tx_power_level_t to deci-dBm for the application consumption. On EFR32,
- * they can range from \ref SL_RAIL_TX_POWER_MIN to \ref SL_RAIL_TX_POWER_MAX.
+ * The transmit power in deci-dBm units (e.g., 4.5 dBm -> 45 deci-dBm).
+ * On EFR32 they can range from \ref SL_RAIL_TX_POWER_MIN to
+ * \ref SL_RAIL_TX_POWER_MAX.
  */
 typedef int16_t sl_rail_tx_power_t;
 
@@ -2381,41 +2380,44 @@ typedef int16_t sl_rail_tx_power_t;
  */
 #define SL_RAIL_TX_POWER_DBM_SCALING_FACTOR 10
 
+#ifndef DOXYGEN_UNDOCUMENTED
+
 /**
- * Raw power levels used directly by \ref sl_rail_get_tx_power() and \ref sl_rail_set_tx_power() where a higher
+ * Raw power levels used directly by \ref sli_rail_get_tx_power() and \ref sli_rail_set_tx_power() where a higher
  * numerical value corresponds to a higher output power. These are referred to
  * as 'raw (values/units)'. On EFR32, they can range from one of \ref
- * SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN, \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN, or
- * \ref SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_HP_MIN to one of \ref
- * SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX, \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX, and \ref
- * SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_HP_MAX, respectively, depending on the selected \ref
+ * SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN, \ref SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN, or
+ * \ref SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_HP_MIN to one of \ref
+ * SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX, \ref SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX, and \ref
+ * SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_HP_MAX, respectively, depending on the selected \ref
  * sl_rail_tx_power_mode_t.
  */
-typedef uint8_t sl_rail_tx_power_level_t;
+typedef uint8_t sli_rail_tx_power_level_t;
 
 /**
- * Invalid \ref sl_rail_tx_power_level_t value returned when an error occurs
- * with \ref sl_rail_get_tx_power().
+ * Invalid \ref sli_rail_tx_power_level_t value returned when an error occurs
+ * with \ref sli_rail_get_tx_power().
  */
-#define SL_RAIL_TX_POWER_LEVEL_INVALID (255U)
+#define SLI_RAIL_TX_POWER_LEVEL_INVALID (255U)
 
 /**
- * Sentinel value that can be passed to \ref sl_rail_set_tx_power() to set
+ * Sentinel value that can be passed to \ref sli_rail_set_tx_power() to set
  * the highest power level available on the current PA, regardless
  * of which one is selected.
  */
-#define SL_RAIL_TX_POWER_LEVEL_MAX (254U)
+#define SLI_RAIL_TX_POWER_LEVEL_MAX (254U)
+
+#endif//DOXYGEN_UNDOCUMENTED
 
 /**
- * PA power setting used directly by \ref sl_rail_get_pa_power_setting() and
- * \ref sl_rail_set_pa_power_setting() which is decoded to the actual
- * hardware register value(s).
+ * PA power setting type used directly by the \ref PA_Power_Conversions
+ * component which is decoded to the actual hardware register value(s).
  */
 typedef uint32_t sl_rail_pa_power_setting_t;
 
 /**
- * Returned by \ref sl_rail_get_pa_power_setting() when the device does
- * not support the dBm to power setting mapping table.
+ * An unsupported power setting used with the \ref PA_Power_Conversions component.
+ * when the device does not support the dBm to power setting mapping table.
  */
 #define SL_RAIL_TX_PA_POWER_SETTING_UNSUPPORTED     (0U)
 
@@ -2436,29 +2438,45 @@ typedef struct sl_rail_tx_power_setting_entry {
 } sl_rail_tx_power_setting_entry_t;
 
 /**
- * @typedef sl_rail_tx_pa_mode_t
- * @brief Suitable type for the supported power modes.
+ * @enum sl_rail_tx_pa_mode_t
+ * @brief Suitable type for the supported PA modes.
  *
- * The power modes correspond to the different on-chip PAs that
- * are physically available. For more information about the power and performance
+ * The PA modes correspond to the different on-chip PAs that are
+ * physically available. For more information about the power and performance
  * characteristics of a given amplifier, see the data sheet.
  *
- * @note On a platform the valid values are in range 0 to
- *   \ref SL_RAIL_TX_PA_MODES_COUNT - 1 and \ref SL_RAIL_TX_PA_MODE_INVALID
- *   gives invalid PA mode in use.
+ * @note Some platforms support only a subset of these PAs.
  */
-typedef uint8_t sl_rail_tx_pa_mode_t;
+SLI_RAIL_ENUM(sl_rail_tx_pa_mode_t) {
+  /**
+   * PA for 2.4 GHz.
+   */
+  SL_RAIL_TX_PA_MODE_2P4_GHZ = 0U,
+  /**
+   * PA for Sub-GHz.
+   */
+  SL_RAIL_TX_PA_MODE_SUB_GHZ = 1U,
+  /**
+   * PA for Sub-GHz OFDM.
+   */
+  SL_RAIL_TX_PA_MODE_SUB_GHZ_OFDM = 2U,
+  /**
+   * An invalid Power Amplifier (PA) mode in the RAIL TX configuration.
+   *
+   * This constant is used to indicate an invalid or uninitialized state for the
+   * TX Power Amplifier mode. It can be used as a placeholder or error value
+   * when a valid PA mode is not set or recognized.
+   *
+   * @note Ensure that this value is not used in actual transmission configurations.
+   */
+  SL_RAIL_TX_PA_MODE_INVALID = 3U,
+};
 
-/**
- * @brief Represents an invalid Power Amplifier (PA) mode in the RAIL TX configuration.
- *
- * This constant is used to indicate an invalid or uninitialized state for the
- * TX Power Amplifier mode. It can be used as a placeholder or error value
- * when a valid PA mode is not set or recognized.
- *
- * @note Ensure that this value is not used in actual transmission configurations.
- */
-#define SL_RAIL_TX_PA_MODE_INVALID ((sl_rail_tx_pa_mode_t)255U)
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// Self-referencing defines minimize compiler complaints when using SLI_RAIL_ENUM
+// Refer to rail_chip_specific.h for per-platform defines of supported ones.
+#define SL_RAIL_TX_PA_MODE_INVALID      ((sl_rail_tx_pa_mode_t)(SL_RAIL_TX_PA_MODE_INVALID))
+#endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /**
  * @enum sl_rail_tx_power_mode_t
@@ -2593,7 +2611,7 @@ SLI_RAIL_ENUM(sl_rail_tx_power_mode_t) {
  *
  * @brief A structure containing values used to initialize the power amplifiers.
  */
-typedef struct sl_rail_tx_power_config {
+typedef struct sli_rail_tx_power_config {
   /**
    * TX power mode.
    */
@@ -3796,7 +3814,7 @@ typedef uint32_t sl_rail_transition_time_t;
  * timing value cannot be below the platform-specific \ref SL_RAIL_MINIMUM_TRANSITION_US.
  *
  * For idle_to_tx, rx_to_tx, and tx_to_tx setting a longer \ref
- * sl_rail_tx_power_config_t::ramp_time_us may result in a larger minimum value.
+ * sl_rail_set_tx_pa_ramp_time() may result in a larger minimum value.
  *
  * For rxsearch_timeout and tx_to_rxsearch_timeout, there is no minimum value.
  * A value of 0 disables the feature, functioning as an infinite timeout.

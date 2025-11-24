@@ -2601,7 +2601,8 @@ typedef int16_t RAIL_TxPower_t;
  * RAIL_TX_POWER_LEVEL_SUBGIG_HP_MAX, respectively, depending on the selected \ref
  * RAIL_TxPowerMode_t.
  *
- * @deprecated RAIL 2.x synonym for \ref sl_rail_tx_power_level_t.
+ * @deprecated This RAIL 2.x tpye has been eliminated in RAIL 3,
+ *   temporarily a synonym of sli_rail_tx_power_level_t.
  */
 typedef uint8_t RAIL_TxPowerLevel_t;
 
@@ -2609,7 +2610,8 @@ typedef uint8_t RAIL_TxPowerLevel_t;
  * Invalid \ref RAIL_TxPowerLevel_t value returned when an error occurs
  * with \ref RAIL_GetTxPower().
  *
- * @deprecated RAIL 2.x synonym for \ref SL_RAIL_TX_POWER_LEVEL_INVALID.
+ * @deprecated This RAIL 2.x define has been eliminated in RAIL 3,
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_INVALID.
  */
 #define RAIL_TX_POWER_LEVEL_INVALID (255U)
 
@@ -2618,7 +2620,8 @@ typedef uint8_t RAIL_TxPowerLevel_t;
  * the highest power level available on the current PA, regardless
  * of which one is selected.
  *
- * @deprecated RAIL 2.x synonym for \ref SL_RAIL_TX_POWER_LEVEL_MAX.
+ * @deprecated This RAIL 2.x define has been eliminated in RAIL 3,
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_MAX.
  */
 #define RAIL_TX_POWER_LEVEL_MAX (254U)
 

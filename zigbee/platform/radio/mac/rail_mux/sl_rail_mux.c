@@ -37,6 +37,7 @@
 #include SL_RAIL_UTIL_PA_CONFIG_HEADER
 #endif
 #include "sl_common.h" // for SL_WEAK
+#include "sl_rail_util_compatible_pa.h"
 
 #include "sl_rail_mux.h"
 #include "mac-flat-header.h"
@@ -95,9 +96,9 @@ static inline void SET_CHANNEL_SWITCHING_CFG_CH(uint8_t context_index, uint16_t 
 static inline void CONFIGURE_RX_CHANNEL_SWITCHING(sl_rail_handle_t mux_rail_handle, sl_rail_ieee802154_rx_channel_switching_cfg_t channel_switching_cfg)
 {
   sl_rail_idle(mux_rail_handle, SL_RAIL_IDLE, true);
-      sl_rail_status_t status = sl_rail_util_ieee802154_config_radio(mux_rail_handle);
-    assert(status == SL_RAIL_STATUS_NO_ERROR);
-    //this checks if stacks are actually on 2 different channels regardless of fcs being enabled
+  sl_rail_status_t status = sl_rail_util_ieee802154_config_radio(mux_rail_handle);
+  assert(status == SL_RAIL_STATUS_NO_ERROR);
+  //this checks if stacks are actually on 2 different channels regardless of fcs being enabled
   if (sli_is_multi_channel_enabled()) {
     status = sl_rail_ieee802154_config_rx_channel_switching(mux_rail_handle, &channel_switching_cfg);
     assert(status == SL_RAIL_STATUS_NO_ERROR);
@@ -847,7 +848,6 @@ sl_rail_status_t sl_rail_mux_ieee802154_config_2p4_ghz_radio_rx_duty_cycling(sl_
   #endif
 }
 
-
 sl_rail_status_t sl_rail_mux_ConfigChannels(sl_rail_handle_t railHandle,
                                             const sl_rail_channel_config_t *config,
                                             sl_rail_radio_config_changed_callback_t cb)
@@ -1065,12 +1065,12 @@ bool sl_rail_mux_IsRxAutoAckPaused(sl_rail_handle_t railHandle)
   return sl_rail_is_rx_auto_ack_paused(mux_rail_handle);
 }
 
-sl_rail_status_t sl_rail_mux_GetTxPowerConfig(sl_rail_handle_t railHandle,
-                                              sl_rail_tx_power_config_t *config)
+sl_rail_status_t sli_rail_mux_GetTxPowerConfig(sl_rail_handle_t railHandle,
+                                               sl_rail_tx_power_config_t *config)
 {
   (void)railHandle;
 
-  return sl_rail_get_tx_power_config(mux_rail_handle, config);
+  return sli_rail_get_tx_power_config(mux_rail_handle, config);
 }
 
 sl_rail_tx_power_t sl_rail_mux_GetTxPowerDbm(sl_rail_handle_t railHandle)
@@ -1087,14 +1087,14 @@ sl_rail_status_t sl_rail_mux_GetChannel(sl_rail_handle_t railHandle, uint16_t *c
   return sl_rail_get_channel(mux_rail_handle, channel);
 }
 
-sl_rail_tx_power_t sl_rail_mux_GetTxPower(sl_rail_handle_t railHandle)
+sl_rail_tx_power_t sli_rail_mux_GetTxPower(sl_rail_handle_t railHandle)
 {
   (void) railHandle;
-  return sl_rail_get_tx_power(mux_rail_handle);
+  return sli_rail_get_tx_power(mux_rail_handle);
 }
 
-sl_rail_status_t sl_rail_mux_ConfigTxPower(sl_rail_handle_t railHandle,
-                                           const sl_rail_tx_power_config_t *config)
+sl_rail_status_t sl_rail_mux_util_pa_post_init(sl_rail_handle_t railHandle,
+                                               sl_rail_tx_pa_mode_t pa_mode)
 {
   RAIL_MUX_DECLARE_IRQ_STATE;
   uint16_t status = SL_RAIL_STATUS_NO_ERROR;
@@ -1103,22 +1103,25 @@ sl_rail_status_t sl_rail_mux_ConfigTxPower(sl_rail_handle_t railHandle,
   RAIL_MUX_ENTER_CRITICAL();
 
   if (!fn_get_global_flag(RAIL_MUX_FLAGS_RAIL_CONFIG_TX_POWER_DONE)) {
-#ifdef SL_RAIL_UTIL_PA_CONFIG_HEADER
-    (void)config;
-    sl_rail_tx_power_config_t txPowerConfig = { SL_RAIL_UTIL_PA_SELECTION_2P4GHZ,
-                                                SL_RAIL_UTIL_PA_VOLTAGE_MV,
-                                                SL_RAIL_UTIL_PA_RAMP_TIME_US };
-    status = sl_rail_config_tx_power(mux_rail_handle, &txPowerConfig);
-#else // !SL_RAIL_UTIL_PA_CONFIG_HEADER
-    status = sl_rail_config_tx_power(mux_rail_handle, config);
-#endif // SL_RAIL_UTIL_PA_CONFIG_HEADER
-
+    status = sl_rail_util_pa_post_init(mux_rail_handle, pa_mode);
     fn_set_global_flag(RAIL_MUX_FLAGS_RAIL_CONFIG_TX_POWER_DONE, true);
   }
 
   RAIL_MUX_EXIT_CRITICAL();
 
   return status;
+}
+
+sl_rail_tx_pa_mode_t sl_rail_mux_get_pa_mode(sl_rail_handle_t *railHandle)
+{
+  (void)railHandle;
+  return sl_rail_get_pa_mode(mux_rail_handle);
+}
+
+sl_rail_status_t sl_rail_mux_ConfigTxPower(sl_rail_handle_t railHandle,
+                                           const sl_rail_tx_power_config_t *config)
+{
+  return sl_rail_mux_util_pa_post_init(railHandle, SL_RAIL_TX_PA_MODE_2P4_GHZ);
 }
 
 sl_rail_status_t sl_rail_mux_SetTxPowerDbm(sl_rail_handle_t railHandle,
@@ -2525,6 +2528,14 @@ bool sl_rail_mux_IsNextCcaNow(sl_rail_handle_t railHandle)
   (void)railHandle;
   return sl_rail_is_next_cca_now(mux_rail_handle);
 }
+
+#if !defined(SL_CATALOG_RAIL_UTIL_IEEE802154_PHY_SELECT_PRESENT)
+sl_rail_status_t sl_rail_mux_util_ieee802154_config_radio(sl_rail_handle_t railHandle)
+{
+   (void)railHandle;
+   return sl_rail_util_ieee802154_config_radio(mux_rail_handle);
+}
+#endif
 
 #ifdef SL_CATALOG_SL_RAIL_UTIL_IEEE802154_RX_DUTY_CYCLING_PRESENT
 sl_rail_ieee802154_phy_features_t duty_cycling_phy_features = SL_RAIL_IEEE802154_PHY_FEATURE_2P4_GHZ_RX_DUTY_CYCLING;

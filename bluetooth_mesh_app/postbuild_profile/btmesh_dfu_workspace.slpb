@@ -1,0 +1,14 @@
+parameters: []
+constants:
+  - name: workspace_name
+    value: btmesh_dfu_workspace
+steps:
+  - task: convert
+    input:
+      - "{{btmesh_bootloader_binary}}"
+      - "{{btmesh_application_binary}}"
+    output: artifact/{{workspace_name}}.s37
+  - task: create_gbl
+    app: "{{btmesh_application_binary}}"
+    bootloader: "{{btmesh_bootloader_binary}}"
+    output: artifact/{{workspace_name}}.gbl

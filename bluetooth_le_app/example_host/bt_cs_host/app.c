@@ -395,8 +395,8 @@ void app_cli_init(int argc, char *argv[])
         // Device name
         size_t device_name_len = strlen(optarg);
         if (device_name_len > SL_BT_CS_DEVICE_NAME_MAX_LEN) {
-          app_log_error(APP_PREFIX "Device name too long (%zu), maximum length is %d characters!" APP_LOG_NL,
-                        device_name_len,
+          app_log_error(APP_PREFIX "Device name too long (%llu), maximum length is %d characters!" APP_LOG_NL,
+                        ((unsigned long long)device_name_len),
                         SL_BT_CS_DEVICE_NAME_MAX_LEN);
           exit(EXIT_FAILURE);
         }

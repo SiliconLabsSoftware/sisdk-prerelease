@@ -10,6 +10,7 @@ description: >
   This component features a configuration interface, allowing each CLI related to a component to be enabled or disabled individually.
   Additionally, there is a configuration option to enable or disable all CLI functionalities related to components with a single switch.
   The CLI commands are organized into logical groups, making it easy for users to find and use the commands they need.
+  SoC Border Router specific commands are included and compiled only if the Border Router stack is selected.
 category: "Wi-SUN|Wi-SUN Services"
 quality: "production"
 metadata:
@@ -97,7 +98,6 @@ source:
 - path: "sl_wisun_cli.c"
   condition:
   - "cli"
-  - "wisun_stack"
   - "sl_wisun_cli_util"
   - "sl_wisun_trace_util"
   - "sl_wisun_app_core"
@@ -229,6 +229,8 @@ template_contribution:
   - "cli"
   - "sl_wisun_app_core"
   - "sl_wisun_app_setting"
+  unless:
+  - "wisun_br_stack"
 
 - name: "cli_command"
   value:
@@ -242,6 +244,22 @@ template_contribution:
   - "cli"
   - "sl_wisun_app_core"
   - "sl_wisun_app_setting"
+  unless:
+  - "wisun_br_stack"
+
+- name: "cli_command"
+  value:
+    group: "wisun"
+    name: "start_fan11"
+    handler: "app_cli_handler"
+    help: "Start the border router using FAN1.1 settings: w st11"
+    shortcuts:
+    - name: "st11"
+  condition:
+  - "cli"
+  - "sl_wisun_app_core"
+  - "sl_wisun_app_setting"
+  - "wisun_br_stack"
 
 - name: "cli_command"
   value:
@@ -255,6 +273,8 @@ template_contribution:
   - "cli"
   - "sl_wisun_app_core"
   - "sl_wisun_app_setting"
+  unless:
+  - "wisun_br_stack"
 
 - name: "cli_command"
   value:
@@ -268,6 +288,22 @@ template_contribution:
   - "cli"
   - "sl_wisun_app_core"
   - "sl_wisun_app_setting"
+  unless:
+  - "wisun_br_stack"
+
+- name: "cli_command"
+  value:
+    group: "wisun"
+    name: "stop"
+    handler: "app_cli_handler"
+    help: "Stop the border router"
+    shortcuts:
+    - name: "sp"
+  condition:
+  - "cli"
+  - "sl_wisun_app_core"
+  - "sl_wisun_app_setting"
+  - "wisun_br_stack"
 
 - name: "cli_command"
   value:
@@ -311,6 +347,17 @@ template_contribution:
   condition:
   - "cli"
   - "app_project_info"
+
+- name: "cli_command"
+  value:
+    name: "reboot"
+    handler: "app_cli_handler"
+    help: "Reboot board"
+    shortcuts:
+    - name: "r"
+  condition:
+  - "cli"
+  - "wisun_br_stack"
 
 - name: "cli_command"
   value:
@@ -945,6 +992,30 @@ template_contribution:
       help: "Note: this command is disabled by default, to enable it check Wi-SUN CLI component configuration. List of ID,level; such as 1,none;4,info to configure group ID 1 with no log and group ID 4 with INFO level. Can also use all,info to set all groups to INFO level."
   condition:
   - "wisun_stack_debug"
+
+- name: cli_group
+  value:
+    name: wifi
+    help: Wi-Fi commands
+  condition: [wisun_br_wifi]
+- name: cli_command
+  value:
+    group: wifi
+    name: connect
+    handler: app_cli_handler
+    help: Connect to Wi-FI AP
+    shortcuts:
+    - name: "cw"
+  condition: [wisun_br_wifi]
+- name: cli_command
+  value:
+    group: wifi
+    name: disconnect
+    handler: app_cli_handler
+    help: Disconnect from Wi-FI AP
+    shortcuts:
+    - name: "dw"
+  condition: [wisun_br_wifi]
 
 #---------------- Component Catalog ------------------
 - name: component_catalog

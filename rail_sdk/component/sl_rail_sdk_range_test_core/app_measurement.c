@@ -48,10 +48,8 @@
 #include "app_menu.h"
 #include "app_log.h"
 #include "app_assert.h"
-#include "sl_rail_util_pa_config.h"
 #include "sl_common.h"
-#include "sl_rail_util_pa_curve_types.h"
-#include "sl_rail_util_pa_conversions.h"
+#include "sl_rail_util_compatible_pa.h"
 #include "printf.h"
 #include "sl_rail_sdk_fifo_size_config.h"
 #include "sl_code_classification.h"
@@ -450,8 +448,6 @@ void get_tx_power_deci_dbm_range(int16_t *min_power_deci_dbm, int16_t *max_power
   sl_rail_handle_t rail_handle;
   sl_rail_tx_power_t min_power_ddbm = SL_RAIL_TX_POWER_MIN;
   sl_rail_tx_power_t max_power_ddbm = SL_RAIL_TX_POWER_MIN;
-  sl_rail_tx_power_level_t p_step_ddbm = 0;
-  sl_rail_tx_pa_mode_t tx_pa_mode = 0; // Default PA mode
   bool rail_init_ready = true;
 
 #ifdef  SL_CATALOG_RANGE_TEST_STD_COMPONENT_PRESENT
@@ -460,9 +456,11 @@ void get_tx_power_deci_dbm_range(int16_t *min_power_deci_dbm, int16_t *max_power
 
   if (rail_init_ready) {
     rail_handle = get_current_rail_handler();
-    tx_pa_mode = sl_rail_get_pa_mode_from_channel_entry(rail_handle); // Get's the PA mode from the current channel entry
-    // Use sl_rail_util_pa_get_power_setting_table to get min/max power in deci-dBm
-    sl_rail_util_pa_get_power_setting_table(rail_handle, tx_pa_mode, &min_power_ddbm, &max_power_ddbm, &p_step_ddbm);
+    sl_rail_util_pa_get_tx_power_limits(rail_handle,
+                                        SL_RAIL_TX_PA_MODE_INVALID,
+                                        &min_power_ddbm,
+                                        &max_power_ddbm,
+                                        NULL);
   }
   if (min_power_deci_dbm != NULL) {
     *min_power_deci_dbm = min_power_ddbm;

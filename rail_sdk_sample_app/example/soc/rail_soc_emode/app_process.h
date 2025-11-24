@@ -59,7 +59,7 @@ typedef enum {
 extern volatile uint8_t sleep_mode;
 
 /// TX power settings
-extern volatile sl_rail_tx_power_level_t power_raw;
+extern volatile sli_rail_tx_power_level_t power_raw;
 extern volatile sl_rail_tx_power_t power_deci_dbm;
 extern volatile bool is_raw;
 

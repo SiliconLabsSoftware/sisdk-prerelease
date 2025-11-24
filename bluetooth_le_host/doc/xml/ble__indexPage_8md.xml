@@ -29,12 +29,16 @@
 <codeline></codeline>
 <codeline><highlight class="normal">##<sp/>API<sp/>Payload<sp/>Size</highlight></codeline>
 <codeline></codeline>
-<codeline><highlight class="normal">The<sp/>maximum<sp/>API<sp/>payload<sp/>size<sp/>is<sp/>256<sp/>bytes<sp/>for<sp/>both<sp/>NCP<sp/>and<sp/>SoC<sp/>modes.<sp/>When<sp/>an</highlight></codeline>
-<codeline><highlight class="normal">application<sp/>calls<sp/>a<sp/>command,<sp/>the<sp/>API<sp/>library<sp/>checks<sp/>the<sp/>payload<sp/>length<sp/>and</highlight></codeline>
-<codeline><highlight class="normal">returns<sp/>error<sp/>code<sp/>SL_STATUS_COMMAND_TOO_LONG<sp/>(0x49)<sp/>if<sp/>the<sp/>payload<sp/>of<sp/>input</highlight></codeline>
-<codeline><highlight class="normal">parameters<sp/>will<sp/>cause<sp/>an<sp/>overflow.<sp/>Error<sp/>code<sp/>SL_STATUS_WOULD_OVERFLOW<sp/>(0x1d)</highlight></codeline>
-<codeline><highlight class="normal">is<sp/>returned<sp/>if<sp/>the<sp/>given<sp/>size<sp/>of<sp/>an<sp/>output<sp/>parameter<sp/>is<sp/>too<sp/>small<sp/>for<sp/>response</highlight></codeline>
-<codeline><highlight class="normal">data.</highlight></codeline>
+<codeline><highlight class="normal">The<sp/>payload<sp/>size<sp/>is<sp/>configurable<sp/>using<sp/>SL_BGAPI_MAX_PAYLOAD_SIZE.<sp/>The</highlight></codeline>
+<codeline><highlight class="normal">configurable<sp/>range<sp/>is<sp/>from<sp/>256<sp/>bytes<sp/>(minimum)<sp/>to<sp/>2047<sp/>bytes<sp/>(maximum).</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">The<sp/>API<sp/>library<sp/>validates<sp/>payload<sp/>sizes<sp/>when<sp/>commands<sp/>are<sp/>called:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>**SL_STATUS_COMMAND_TOO_LONG<sp/>(0x49)**:<sp/>Returned<sp/>when<sp/>the<sp/>combined<sp/>size<sp/>of</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>input<sp/>parameters<sp/>exceeds<sp/>the<sp/>configured<sp/>payload<sp/>size<sp/>limit.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>**SL_STATUS_WOULD_OVERFLOW<sp/>(0x1d)**:<sp/>Returned<sp/>when<sp/>the<sp/>buffer<sp/>size<sp/>provided</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>for<sp/>an<sp/>output<sp/>parameter<sp/>is<sp/>insufficient<sp/>to<sp/>hold<sp/>the<sp/>response<sp/>data.</highlight></codeline>
 <codeline></codeline>
 <codeline><highlight class="normal">##<sp/>Decode<sp/>API<sp/>Binary<sp/>Data</highlight></codeline>
 <codeline></codeline>

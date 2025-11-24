@@ -65,6 +65,10 @@ typedef int ssize_t;
 /**************************************************************************//**
  * @addtogroup SL_WISUN_SOCKET_API Socket API
  * @ingroup SL_WISUN_API
+ *
+ * Socket API provides socket-based networking functions for IPv6 connectivity,
+ * closely aligning with the POSIX.1-2024 specification.
+ *
  * @{
  *****************************************************************************/
 

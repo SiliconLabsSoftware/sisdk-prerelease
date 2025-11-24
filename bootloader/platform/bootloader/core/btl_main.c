@@ -17,6 +17,7 @@
 
 #include "config/btl_config.h"
 #include "api/btl_interface.h"
+#include "btl_core_cfg.h"  
 
 #include "core/btl_core.h"
 #include "core/btl_helper.h"
@@ -52,6 +53,9 @@
 #include "em_cmu.h"
 #include "em_gpio.h"
 #include "em_chip.h"
+#if BOOTLOADER_UPGRADE_WATCHDOG
+#include "em_wdog.h"
+#endif
 #if defined(_SILICON_LABS_32B_SERIES_2)
 #include "fih.h"
 #endif
@@ -197,6 +201,24 @@ void HardFault_Handler(void)
 #endif
 }
 
+#if BOOTLOADER_UPGRADE_WATCHDOG
+static void initWDOG(void)
+{
+  CMU_ClockEnable(cmuClock_WDOG0, true);
+  WDOG_Init_TypeDef wdogInit = WDOG_INIT_DEFAULT;
+  CMU_ClockSelectSet(cmuClock_WDOG0, cmuSelect_ULFRCO);
+  wdogInit.debugRun = false;
+  wdogInit.perSel = BOOTLOADER_UPGRADE_WATCHDOG_PERIOD;
+
+  WDOGn_Init(WDOG0, &wdogInit);
+}
+
+static void disable_watchdog(void) {
+  WDOGn_Enable(WDOG0, false);   // disable WDOG0
+  WDOGn_SyncWait(WDOG0);        // wait for LF domain sync
+}
+#endif
+
 // Main Bootloader implementation
 
 int main(void)
@@ -229,9 +251,20 @@ int main(void)
 #endif
 
 #ifdef BOOTLOADER_SUPPORT_STORAGE
+#if BOOTLOADER_UPGRADE_WATCHDOG
+  // Initialize the upgrade watchdog timer before proceeding to apply a FW upgrade
+  initWDOG();                          
+#endif
+
   // If the bootloader supports storage, first attempt to apply an existing
   // image from storage.
   ret = storage_main();
+#if BOOTLOADER_UPGRADE_WATCHDOG
+  // Disable the upgrade watchdog after storage processing to prevent
+  // unintended resets during EM4/reset handoff or during extended
+  // communication/download operations.
+  disable_watchdog();
+#endif
 
   if (ret == BOOTLOADER_OK) {
 #if defined(BTL_EM4_GPIO_RETENTION)

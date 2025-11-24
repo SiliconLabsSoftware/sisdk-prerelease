@@ -115,7 +115,7 @@ static void handle_received_packet(sl_rail_handle_t rail_handle);
 volatile uint8_t sleep_mode = 1;
 
 /// TX power settings
-volatile sl_rail_tx_power_level_t power_raw = 0;
+volatile sli_rail_tx_power_level_t power_raw = 0;
 volatile sl_rail_tx_power_t power_deci_dbm = 0;
 volatile bool is_raw = false;
 
@@ -217,14 +217,14 @@ void app_process_action(void)
     case S_SET_POWER_LEVEL:
       set_radio_to_idle_state(rail_handle);
       if (is_raw) {
-        rail_status = sl_rail_set_tx_power(rail_handle, power_raw);
+        rail_status = sli_rail_set_tx_power(rail_handle, power_raw);
         power_deci_dbm = sl_rail_get_tx_power_dbm(rail_handle);
         if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
-          app_log_warning("sl_rail_set_tx_power() result: %lu", rail_status);
+          app_log_warning("sli_rail_set_tx_power() result: %lu", rail_status);
         }
       } else {
         rail_status = sl_rail_set_tx_power_dbm(rail_handle, power_deci_dbm);
-        power_raw = sl_rail_get_tx_power(rail_handle);
+        power_raw = sli_rail_get_tx_power(rail_handle);
         if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
           app_log_warning("sl_rail_set_tx_power_dbm() result: %lu", rail_status);
         }
@@ -317,7 +317,7 @@ static void print_current_power_levels(sl_rail_handle_t rail_handle)
   if (is_raw) {
     app_log_info("Power            %d/%d\n",
                  power_raw,
-                 (sl_rail_get_tx_power(rail_handle)));
+                 (sli_rail_get_tx_power(rail_handle)));
   } else {
 #if defined(__IAR_SYSTEMS_ICC__)
   #pragma diag_suppress=Pa205

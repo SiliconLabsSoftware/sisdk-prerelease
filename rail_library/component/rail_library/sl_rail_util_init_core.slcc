@@ -13,6 +13,8 @@ ui_hints:
   visibility: never
 provides:
 - name: sl_rail_util_init_core
+conflicts:
+- name: rail_util_init_core
 requires:
 - name: rail_lib
 - name: sl_rail_util_init

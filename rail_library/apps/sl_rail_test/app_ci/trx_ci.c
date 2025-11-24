@@ -44,6 +44,7 @@
 
 #include "app_common.h"
 #include "app_trx.h"
+
 #include "sl_power_manager.h"
 #include "../src/sleep_loop/sli_power_manager_private.h"
 
@@ -1121,5 +1122,23 @@ void enableAutoLnaBypass(sl_cli_command_arg_t *args)
   sl_rail_status_t status = sl_rail_enable_prs_lna_bypass(railHandle, enable, &prsLnaBypassConfig);
   responsePrint(sl_cli_get_command_string(args, 0), "Result:%s",
                 ((status == SL_RAIL_STATUS_NO_ERROR) ? "Success" : "Failure"));
+#endif
+}
+
+void cancelScheduledTrx(sl_cli_command_arg_t *args)
+{
+#ifdef SL_RAIL_SUPPORTS_HARDWARE_SCHEDULER
+  // Turn off ScheduledRx if we were in it
+  if (currentAppMode() == RX_SCHEDULED) {
+    (void) enableAppModeSync(RX_SCHEDULED, false, NULL);
+  }
+  // Turn off ScheduledTx if we were in it
+  if (currentAppMode() == TX_SCHEDULED) {
+    (void) enableAppModeSync(TX_SCHEDULED, false, NULL);
+  }
+  sl_rail_status_t result = sl_rail_cancel_scheduled_trx(railHandle);
+  responsePrint(sl_cli_get_command_string(args, 0), "Result:%d", result);
+#else
+  responsePrintError(sl_cli_get_command_string(args, 0), 0x11, "This command is not supported on this platform");
 #endif
 }

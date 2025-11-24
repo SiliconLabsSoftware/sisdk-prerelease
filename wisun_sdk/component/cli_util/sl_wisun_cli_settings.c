@@ -39,6 +39,10 @@
 #include "sl_wisun_cli_settings.h"
 #include "sl_wisun_ip6string.h"
 #include "nvm3.h"
+
+#if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
+#include "border_router/sl_wisun_br_api.h"
+#endif
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -406,6 +410,7 @@ sl_status_t app_settings_get_ip_address(char *value_str,
                                         const char *key_str,
                                         const app_settings_entry_t *entry)
 {
+#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
   sl_status_t ret;
   in6_addr_t address;
   sl_wisun_ip_address_type_t address_type = SL_WISUN_IP_ADDRESS_TYPE_GLOBAL;
@@ -432,6 +437,33 @@ sl_status_t app_settings_get_ip_address(char *value_str,
     memcpy(value_str, APP_SETTINGS_NONE_VALUE_STR,
            sl_strlen(APP_SETTINGS_NONE_VALUE_STR) + 1);
   }
+#else
+  uint8_t addr_ll[16] = { 0U };
+  uint8_t addr_gua[16] = { 0U };
+  uint8_t addr_dodagid[16] = { 0U };
+  char str_ll[40] = { 0 };
+  char str_gua[40] = { 0 };
+  char str_dodagid[40] = { 0 };
+
+  int count = 0;
+
+  (void)key_str;
+  (void)entry;
+
+  count = sprintf(value_str, "[");
+  value_str += count;
+
+  sl_wisun_br_get_ip_addresses(addr_ll, addr_gua, addr_dodagid);
+  ip6tos(addr_ll, str_ll);
+  ip6tos(addr_gua, str_gua);
+  ip6tos(addr_dodagid, str_dodagid);
+
+  count = sprintf(value_str,"ll: %s gua: %s dodagid: %s", str_ll, str_gua, str_dodagid);
+  value_str += count;
+
+  count = sprintf(value_str, "]");
+  value_str += count;
+#endif
 
   return SL_STATUS_OK;
 }

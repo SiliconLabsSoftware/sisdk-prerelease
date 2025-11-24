@@ -487,8 +487,10 @@ static void _notify_thr_fnc(void * args)
   (void) args;
 
   SL_COAP_SERVICE_LOOP() {
+    #if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
     // wait for network connected state
     sl_wisun_app_core_util_wait_for_connection();
+    #endif
 
     if (_schd.tick_evt_enable) {
       (void) osEventFlagsWait(_schd.evt, _schd.evt_msk, osFlagsWaitAny, osWaitForever);

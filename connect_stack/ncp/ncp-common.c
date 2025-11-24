@@ -13,8 +13,8 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
-#include <stdlib.h>
 #include "stack/include/ember.h"
+#include "sl_memory_manager.h"
 #include "csp-format.h"
 #include "csp-command-utils.h"
 #include "ncp-cpc-interface.h"
@@ -39,12 +39,12 @@ void sendCallbackCommand(uint8_t *callbackCommandBuffer, uint16_t commandLength)
 
 uint8_t *getApiCommandPointer()
 {
-  return (uint8_t *)malloc(MAX_STACK_API_COMMAND_SIZE);
+  return (uint8_t *)sl_malloc(MAX_STACK_API_COMMAND_SIZE);
 }
 
 uint8_t *allocateCallbackCommandPointer()
 {
-  return (uint8_t *)malloc(MAX_STACK_CALLBACK_COMMAND_SIZE);
+  return (uint8_t *)sl_malloc(MAX_STACK_CALLBACK_COMMAND_SIZE);
 }
 
 void acquireCommandMutex(void)

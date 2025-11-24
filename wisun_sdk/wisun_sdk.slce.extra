@@ -59,6 +59,7 @@ components:
   - sl_display
   - sl_iostream_ble_spp
   - sl_wisun_cli_util
+  - sl_wisun_br_agent_service
 extra_files:
   - app/wisun/component/wisun_config/default/sl_wisun_config.c
   - app/wisun/component/wisun_config/default/sl_wisun_config.h
@@ -115,6 +116,7 @@ git_extra_files:
   - app/wisun/example/wisun_soc_socket/pkg.slt
   - app/wisun/example/wisun_soc_throughput_measurement/pkg.slt
   - app/wisun/example/wisun_soc_br_empty/pkg.slt
+  - app/wisun/example/wisun_soc_br_agent/pkg.slt
   - app/wisun/example/wisun_soc_br_in_meter_gateway/pkg.slt
   - app/wisun/example_config.yml
   - app/wisun/jenkins/wisun-sdk-ci-conan.jenkinsfile

@@ -105,6 +105,12 @@ toolchain_settings:
     value: size
     unless: [wisun_stack_debug]
 
+readme:
+  - path: doc/readme.md
+
+other_file:
+  - path: doc/readme_img0.png
+
 template_contribution:
   - name: event_handler
     value:

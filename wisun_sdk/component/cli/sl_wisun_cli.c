@@ -40,7 +40,6 @@
 #include "sl_string.h"
 #include "sl_wisun_api.h"
 #include "sl_wisun_trace_util.h"
-#include "sl_wisun_app_setting.h"
 #include "sl_wisun_cli_util.h"
 #include "sl_wisun_cli_core.h"
 #include "sl_wisun_cli_config.h"
@@ -49,6 +48,24 @@
 #if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
 #include "sl_wisun_app_core_util.h"
 #include "sl_wisun_app_core_config.h"
+  #if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
+  #include "sl_wisun_app_br_core.h"
+  #endif
+#endif
+
+#if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
+#include "border_router/sl_wisun_br_api.h"
+#include "sl_wisun_app_setting_br.h"
+#else
+#include "sl_wisun_app_setting.h"
+#endif
+
+#if defined(SL_CATALOG_WISUN_BR_DHCPV6_SERVER_PRESENT)
+#include "sl_wisun_br_dhcpv6_server.h"
+#endif
+
+#if defined(SL_CATALOG_WISUN_BR_WIFI_PRESENT)
+#include "sl_wisun_br_wifi.h"
 #endif
 
 #if SL_WISUN_CLI_ENABLED
@@ -125,6 +142,9 @@
 
 /// Wisun CLI domain ID
 #define APP_CLI_WISUN_DOMAIN_ID             (0U)
+
+/// Wisun Wifi CLI domain ID
+#define APP_CLI_WISUN_WIFI_DOMAIN_ID        (1U)
 
 /// App CLI input flag: None
 #define APP_CLI_INPUT_FLAG_NONE             APP_SETTINGS_INPUT_FLAG_NONE
@@ -258,6 +278,8 @@ typedef struct sl_wisun_cli_handler_property {
  *****************************************************************************/
 static sl_status_t _load_common_params_from_phy_cfg(void);
 
+#if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
+#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
 /**************************************************************************//**
  * @brief Store CLI common PHY parameters to PHY config
  * @details Synchronization is required because of common parameters,
@@ -265,7 +287,10 @@ static sl_status_t _load_common_params_from_phy_cfg(void);
  * @return sl_status_t SL_STATUS_OK on success, SL_STATUS_FAIL otherwise
  *****************************************************************************/
 static sl_status_t _store_common_params_to_phy_cfg(void);
+#endif
+#endif
 
+#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
 /**************************************************************************//**
  * @brief Helper to get connection status for getter
  * @param[out] *value_str is the desired value string
@@ -277,6 +302,7 @@ static sl_status_t _store_common_params_to_phy_cfg(void);
 static sl_status_t _app_cli_get_connection(char *value_str,
                                            const char *key_str,
                                            const app_cli_entry_t *entry);
+#endif
 
 /**************************************************************************//**
  * @brief Helper to set network name for setter
@@ -350,6 +376,115 @@ static sl_status_t _app_cli_get_tx_power(char *value_str,
                                          const char *key_str,
                                          const app_cli_entry_t *entry);
 
+#if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
+/**************************************************************************//**
+ * @brief Helper to get state for getter
+ * @param[out] *value_str is the desired value string
+ * @param[in] *key_str is the key string of the set command
+ * @param[in] *entry is the settings entry
+ * @return SL_STATUS_OK if the setting is success.
+ * @return SL_STATUS_FAIL if setting failed.
+ *****************************************************************************/
+static sl_status_t _app_cli_get_state(char *value_str,
+                                      const char *key_str,
+                                      const app_cli_entry_t *entry);
+#endif
+
+#if defined(SL_CATALOG_WISUN_BR_WIFI_PRESENT)
+/**************************************************************************//**
+ * @brief Helper to get MAC address string from byte array
+ * @param[out] *value_str is the desired value string
+ * @param[in] *value is the byte array of MAC address
+ * @return SL_STATUS_OK if the setting is success.
+ * @return SL_STATUS_FAIL if setting failed.
+ *****************************************************************************/
+static sl_status_t _get_mac_address_string(char *value_str,
+                                           const uint8_t *value);
+
+/**************************************************************************//**
+ * @brief Helper to get WiFi info for getter
+ * @param[out] *value_str is the desired value string
+ * @param[in] *key_str is the key string of the set command
+ * @param[in] *entry is the settings entry
+ * @return SL_STATUS_OK if the setting is success.
+ * @return SL_STATUS_FAIL if setting failed.
+ *****************************************************************************/
+static sl_status_t _app_cli_get_wifi_info(char *value_str,
+                                          const char *key_str,
+                                          const app_cli_entry_t *entry);
+
+/**************************************************************************//**
+ * @brief Helper to set Wifi SSID
+ * @param[out] *value_str is the desired value string
+ * @param[in] *key_str is the key string of the set command
+ * @param[in] *entry is the settings entry
+ * @return SL_STATUS_OK if the setting is success.
+ * @return SL_STATUS_FAIL if setting failed.
+ *****************************************************************************/
+static sl_status_t _app_cli_set_ssid(const char *value_str,
+                                     const char *key_str,
+                                     const app_cli_entry_t *entry);
+
+/**************************************************************************//**
+ * @brief Helper to get Wifi SSID
+ * @param[out] *value_str is the desired value string
+ * @param[in] *key_str is the key string of the set command
+ * @param[in] *entry is the settings entry
+ * @return SL_STATUS_OK if the setting is success.
+ * @return SL_STATUS_FAIL if setting failed.
+ *****************************************************************************/
+static sl_status_t _app_cli_get_ssid(char *value_str,
+                                     const char *key_str,
+                                     const app_cli_entry_t *entry);
+
+/**************************************************************************//**
+ * @brief Helper to set Wifi Security
+ * @param[out] *value_str is the desired value string
+ * @param[in] *key_str is the key string of the set command
+ * @param[in] *entry is the settings entry
+ * @return SL_STATUS_OK if the setting is success.
+ * @return SL_STATUS_FAIL if setting failed.
+ *****************************************************************************/
+static sl_status_t _app_cli_set_security(const char *value_str,
+                                         const char *key_str,
+                                         const app_cli_entry_t *entry);
+
+/**************************************************************************//**
+ * @brief Helper to get Wifi Security
+ * @param[out] *value_str is the desired value string
+ * @param[in] *key_str is the key string of the set command
+ * @param[in] *entry is the settings entry
+ * @return SL_STATUS_OK if the setting is success.
+ * @return SL_STATUS_FAIL if setting failed.
+ *****************************************************************************/
+static sl_status_t _app_cli_get_security(char *value_str,
+                                         const char *key_str,
+                                         const app_cli_entry_t *entry);
+
+/**************************************************************************//**
+ * @brief Helper to set Wifi Passphrase
+ * @param[out] *value_str is the desired value string
+ * @param[in] *key_str is the key string of the set command
+ * @param[in] *entry is the settings entry
+ * @return SL_STATUS_OK if the setting is success.
+ * @return SL_STATUS_FAIL if setting failed.
+ *****************************************************************************/
+static sl_status_t _app_cli_set_passphrase(const char *value_str,
+                                           const char *key_str,
+                                           const app_cli_entry_t *entry);
+
+/**************************************************************************//**
+ * @brief Helper to get Wifi Passphrase
+ * @param[out] *value_str is the desired value string
+ * @param[in] *key_str is the key string of the set command
+ * @param[in] *entry is the settings entry
+ * @return SL_STATUS_OK if the setting is success.
+ * @return SL_STATUS_FAIL if setting failed.
+ *****************************************************************************/
+static sl_status_t _app_cli_get_passphrase(char *value_str,
+                                           const char *key_str,
+                                           const app_cli_entry_t *entry);
+#endif
 /**************************************************************************//**
  * @brief Is CLI setting parameter is used.
  * @details It indicates the parameters used in the current setup.
@@ -405,6 +540,7 @@ static sl_status_t _app_cli_set_phy(const char *value_str,
                                     const app_settings_entry_t *entry);
 
 #if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
+#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
 /**************************************************************************//**
  * @brief Helper to set regulation for setter
  * @param[out] *value_str is the desired value string
@@ -476,6 +612,7 @@ static sl_status_t _app_get_regulation_warning_threshold(char *value_str,
 static sl_status_t _app_get_regulation_alert_threshold(char *value_str,
                                                        const char *key_str,
                                                        const app_cli_entry_t *entry);
+#endif
 
 /**************************************************************************//**
  * @brief Helper to set MAC address
@@ -546,12 +683,23 @@ static sl_status_t _app_get_lfn_profile(char *value_str,
                                         const app_cli_entry_t *entry);
 #endif
 
+#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
 /**************************************************************************//**
  * @brief Connect to Wi-SUN network by PHY configuration type
  * @details CLI callback helper function
  * @param config_type PHY Configuration type
  *****************************************************************************/
 static void _app_connect(const sl_wisun_phy_config_type_t config_type);
+#endif
+
+#if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT) \
+  && defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
+/**************************************************************************//**
+ * @brief Start Wi-SUN border router
+ * @details CLI callback helper function
+ *****************************************************************************/
+static void _app_start(void);
+#endif
 
 /**************************************************************************//**
  * @brief Helper function to iterate through CLI handlers
@@ -569,8 +717,10 @@ static void _cli_handler_iterator(const sl_cli_command_arg_t *args,
 // -----------------------------------------------------------------------------
 
 #if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
+#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
 /// Wi-SUN application regulation
 static sl_wisun_regulation_t _app_regulation = (sl_wisun_regulation_t)SL_WISUN_APP_CORE_REGULATION;
+#endif
 #endif
 
 /// Common PHY parameters for CLI setter/getter
@@ -580,21 +730,21 @@ static app_cli_phy_common_params_t _phy_common_params = { 0U };
 static const app_enum_t _phy_cfg_map[] = {
   // FAN 1.0 parameters
   { APP_CLI_PHY_PARAM_REG_DOMAIN_STR, SL_WISUN_PHY_CONFIG_FAN10 },
-  { APP_CLI_PHY_PARAM_OP_CLASS_STR, SL_WISUN_PHY_CONFIG_FAN10 },
-  { APP_CLI_PHY_PARAM_OP_MODE_STR, SL_WISUN_PHY_CONFIG_FAN10 },
+  { APP_CLI_PHY_PARAM_OP_CLASS_STR,   SL_WISUN_PHY_CONFIG_FAN10 },
+  { APP_CLI_PHY_PARAM_OP_MODE_STR,    SL_WISUN_PHY_CONFIG_FAN10 },
 
   // FAN 1.1 parameters
 #if APP_CLI_ENABLE_FAN11_CONFIG
-  { APP_CLI_PHY_PARAM_REG_DOMAIN_STR, SL_WISUN_PHY_CONFIG_FAN11 },
-  { APP_CLI_PHY_PARAM_CH_PLAN_ID_STR, SL_WISUN_PHY_CONFIG_FAN11 },
+  { APP_CLI_PHY_PARAM_REG_DOMAIN_STR,  SL_WISUN_PHY_CONFIG_FAN11 },
+  { APP_CLI_PHY_PARAM_CH_PLAN_ID_STR,  SL_WISUN_PHY_CONFIG_FAN11 },
   { APP_CLI_PHY_PARAM_PHY_MODE_ID_STR, SL_WISUN_PHY_CONFIG_FAN11 },
 #endif
 
   // Explicit parameters
 #if APP_CLI_ENABLE_EXPLICIT_CONFIG
-  { APP_CLI_PHY_PARAM_CH0_FREQ_STR, SL_WISUN_PHY_CONFIG_EXPLICIT },
-  { APP_CLI_PHY_PARAM_NUM_OF_CH_STR, SL_WISUN_PHY_CONFIG_EXPLICIT },
-  { APP_CLI_PHY_PARAM_CH_SPACING_STR, SL_WISUN_PHY_CONFIG_EXPLICIT },
+  { APP_CLI_PHY_PARAM_CH0_FREQ_STR,    SL_WISUN_PHY_CONFIG_EXPLICIT },
+  { APP_CLI_PHY_PARAM_NUM_OF_CH_STR,   SL_WISUN_PHY_CONFIG_EXPLICIT },
+  { APP_CLI_PHY_PARAM_CH_SPACING_STR,  SL_WISUN_PHY_CONFIG_EXPLICIT },
   { APP_CLI_PHY_PARAM_PHY_MODE_ID_STR, SL_WISUN_PHY_CONFIG_EXPLICIT },
 #endif
   // End list
@@ -607,20 +757,20 @@ static const app_enum_t _phy_cfg_map[] = {
 static const app_enum_t _app_trace_level_type_enum[] =
 {
   { "all", 0xFF },
-  { NULL, 0 }
+  { NULL,     0 }
 };
 
 static const app_enum_t _app_trace_level_enum[] =
 {
-  { "none", 0 },
-  { "error", 1 },
-  { "err", 1 },
+  { "none",    0 },
+  { "error",   1 },
+  { "err",     1 },
   { "warning", 2 },
-  { "warn", 2 },
-  { "info", 3 },
-  { "debug", 4 },
-  { "dbg", 4 },
-  { NULL, 0 }
+  { "warn",    2 },
+  { "info",    3 },
+  { "debug",   4 },
+  { "dbg",     4 },
+  { NULL,      0 }
 };
 #endif
 
@@ -628,7 +778,7 @@ static const app_enum_t _app_trace_level_enum[] =
   && SL_WISUN_CLI_ENABLED             \
   && SL_WISUN_IPERF_CLI_ENABLED
 /// iPerf CLI handler properties
-static sl_wisun_cli_handler_property_t _iperf_cli_handler_properties[] = {
+static sl_wisun_cli_handler_property_t _iperf_cli_hnd_prop[] = {
   {
     .cli_group = "iperf",
     .cli_group_shortcut = "i",
@@ -667,14 +817,14 @@ static sl_wisun_cli_handler_property_t _iperf_cli_handler_properties[] = {
 };
 
 /// iPerf CLI handler properties size
-static const size_t _iperf_cli_handler_properties_size = sizeof(_iperf_cli_handler_properties) / sizeof(sl_wisun_cli_handler_property_t);
+static const size_t _iperf_cli_hnd_prop_size = sizeof(_iperf_cli_hnd_prop) / sizeof(sl_wisun_cli_handler_property_t);
 #endif
 
 #if defined(SL_CATALOG_WISUN_OTA_DFU_PRESENT) \
   && SL_WISUN_CLI_ENABLED                     \
   && SL_WISUN_OTA_DFU_CLI_ENABLED
 /// OTA DFU CLI handler properties
-static sl_wisun_cli_handler_property_t _ota_dfu_cli_handler_properties[] = {
+static sl_wisun_cli_handler_property_t _ota_dfu_cli_hnd_prop[] = {
   {
     .cli_group = "ota-dfu",
     .cli_group_shortcut = "od",
@@ -799,11 +949,12 @@ static sl_wisun_cli_handler_property_t _ota_dfu_cli_handler_properties[] = {
 };
 
 /// OTA DFU CLI handler properties size
-static const size_t _ota_dfu_cli_handler_properties_size = sizeof(_ota_dfu_cli_handler_properties) / sizeof(sl_wisun_cli_handler_property_t);
+static const size_t _ota_dfu_cli_hnd_prop_size = sizeof(_ota_dfu_cli_hnd_prop) / sizeof(sl_wisun_cli_handler_property_t);
 #endif
 
 /// Wi-SUN app CLI handler properties
-static sl_wisun_cli_handler_property_t _wisun_app_cli_handler_properties[] = {
+static sl_wisun_cli_handler_property_t _wisun_app_cli_hnd_prop[] = {
+#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
   {
     .cli_group = "wisun",
     .cli_group_shortcut = "w",
@@ -832,6 +983,38 @@ static sl_wisun_cli_handler_property_t _wisun_app_cli_handler_properties[] = {
     .cli_command_shortcut = "d",
     .cli_handler_fnc = &app_disconnect
   },
+#else
+  {
+    .cli_group = "wisun",
+    .cli_group_shortcut = "w",
+    .cli_command = "start_fan11",
+    .cli_command_shortcut = "st11",
+    .cli_handler_fnc = &app_start_fan11
+  },
+  {
+    .cli_group = "wisun",
+    .cli_group_shortcut = "w",
+    .cli_command = "stop",
+    .cli_command_shortcut = "sp",
+    .cli_handler_fnc = &app_stop
+  },
+#endif
+#if defined(SL_CATALOG_WISUN_BR_WIFI_PRESENT)
+  {
+    .cli_group = "wifi",
+    .cli_group_shortcut = "wi",
+    .cli_command = "connect",
+    .cli_command_shortcut = "cw",
+    .cli_handler_fnc = &app_wifi_connect
+  },
+    {
+    .cli_group = "wifi",
+    .cli_group_shortcut = "wi",
+    .cli_command = "disconnect",
+    .cli_command_shortcut = "dw",
+    .cli_handler_fnc = &app_wifi_disconnect
+  },
+#endif
   {
     .cli_group = "wisun",
     .cli_group_shortcut = "w",
@@ -1090,7 +1273,7 @@ static sl_wisun_cli_handler_property_t _wisun_app_cli_handler_properties[] = {
 };
 
 /// iPerf CLI handler properties size
-static const size_t _wisun_app_cli_handler_properties_size = sizeof(_wisun_app_cli_handler_properties) / sizeof(sl_wisun_cli_handler_property_t);
+static const size_t _wisun_app_cli_hnd_prop_size = sizeof(_wisun_app_cli_hnd_prop) / sizeof(sl_wisun_cli_handler_property_t);
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -1099,6 +1282,9 @@ static const size_t _wisun_app_cli_handler_properties_size = sizeof(_wisun_app_c
 /// Wi-SUN application settings domain string
 const char *app_settings_domain_str[] = {
   "wisun",
+#if defined(SL_CATALOG_WISUN_BR_WIFI_PRESENT)
+  "wifi",
+#endif
   NULL,
 };
 
@@ -1280,6 +1466,7 @@ const app_cli_entry_t app_settings_entries[] =
     .description = "Channel spacing [string] (100kHz|200kHz|400kHz|600kHz)"
   },
 #endif
+#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
   {
     .key = "join_state",
     .domain = APP_CLI_WISUN_DOMAIN_ID,
@@ -1345,6 +1532,7 @@ const app_cli_entry_t app_settings_entries[] =
     .get_handler = app_settings_get_ip_address,
     .description = "Primary Parent IPv6 address"
   },
+#endif
 #if defined(SL_CATALOG_WISUN_MODE_SWITCH_PRESENT)
   {
     .key = "mode_switch_tx_counter",
@@ -1400,6 +1588,7 @@ const app_cli_entry_t app_settings_entries[] =
   },
 #endif
 #if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
+#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
   {
     .key = "regulation",
     .domain = APP_CLI_WISUN_DOMAIN_ID,
@@ -1439,6 +1628,7 @@ const app_cli_entry_t app_settings_entries[] =
     .get_handler = _app_get_regulation_alert_threshold,
     .description = "Transmission alert threshold in percent (-1 to disable) [int8]"
   },
+#endif
   {
     .key = "mac_address",
     .domain = APP_CLI_WISUN_DOMAIN_ID,
@@ -1481,6 +1671,88 @@ const app_cli_entry_t app_settings_entries[] =
     .description = "Wi-SUN LFN profile"
   },
 #endif
+#if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
+  {
+    .key = "state",
+    .domain = APP_CLI_WISUN_DOMAIN_ID,
+    .value_size = APP_CLI_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = NULL,
+    .input_enum_list = NULL,
+    .output_enum_list = app_wisun_state_enum,
+    .set_handler = NULL,
+    .get_handler = _app_cli_get_state,
+    .description = "Border router state"
+  },
+  {
+    .key = "ip_addresses",
+    .domain = APP_CLI_WISUN_DOMAIN_ID,
+    .value_size = APP_CLI_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = NULL,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_ip_address,
+    .description = "IPv6 addresses"
+  },
+#endif
+#if defined(SL_CATALOG_WISUN_BR_WIFI_PRESENT)
+  {
+    .key = "ssid",
+    .domain = APP_CLI_WISUN_WIFI_DOMAIN_ID,
+    .value_size = SL_WISUN_WIFI_SSID_SIZE + 1,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = NULL,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = _app_cli_set_ssid,
+    .get_handler = _app_cli_get_ssid,
+    .description = "Wi-Fi SSID [string] max 32"
+  },
+  {
+    .key = "security",
+    .domain = APP_CLI_WISUN_WIFI_DOMAIN_ID,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8 + 1,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = NULL,
+    .input_enum_list = app_wisun_wifi_security_type_enum,
+    .output_enum_list = app_wisun_wifi_security_type_enum,
+    .set_handler = _app_cli_set_security,
+    .get_handler = _app_cli_get_security,
+    .description = "Wi-Fi security type [uint8] (WPA2_TKIP|WPA2_CCMP)"
+  },
+  {
+    .key = "passphrase",
+    .domain = APP_CLI_WISUN_WIFI_DOMAIN_ID,
+    .value_size = SL_WISUN_WIFI_PASSPHRASE_SIZE + 1,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = NULL,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = _app_cli_set_passphrase,
+    .get_handler = _app_cli_get_passphrase,
+    .description = "Wi-Fi passphrase [string] max 32"
+  },
+  {
+    .key = "ipv6_address",
+    .domain = APP_CLI_WISUN_WIFI_DOMAIN_ID,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = NULL,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = _app_cli_get_wifi_info,
+    .description = "IPv6 address"
+  },
+#endif
   {
     .key = NULL,
     .domain = 0,
@@ -1508,7 +1780,16 @@ void app_about(void)
 }
 #endif
 
+#if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
+/* CLI app reboot handler */
+void app_reboot(void)
+{
+  NVIC_SystemReset();
+}
+#endif
+
 #if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
+#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
 /* CLI app connect to FAN 1.0 handler */
 void app_join_fan10(const sl_cli_command_arg_t *arguments)
 {
@@ -1562,6 +1843,7 @@ void app_disconnect(const sl_cli_command_arg_t *arguments)
     printf("[Disconnection failed: %lu]\n", ret);
   }
 }
+#endif
 
 void app_mac_allow(const sl_cli_command_arg_t *arguments)
 {
@@ -1623,6 +1905,79 @@ void app_mac_deny(const sl_cli_command_arg_t *arguments)
   }
 
   printf("[MAC address added to the deny list]\n");
+}
+#endif
+
+#if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
+#if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
+/* CLI app start FAN 1.1 handler */
+void app_start_fan11(const sl_cli_command_arg_t *arguments)
+{
+  (void)arguments;
+  _app_start();
+}
+#endif
+
+/* CLI app stop handler */
+void app_stop(const sl_cli_command_arg_t *arguments)
+{
+  (void)arguments;
+  sl_status_t ret = SL_STATUS_OK;
+
+  ret = sl_wisun_br_stop();
+  if (ret != SL_STATUS_OK) {
+    printf("[Failed: unable to stop Border Router: %lu]\n", ret);
+    return;
+  }
+
+#if defined(SL_CATALOG_WISUN_BR_DHCPV6_SERVER_PRESENT)
+  (void)sl_wisun_br_dhcpv6_server_stop();
+#endif
+}
+#endif
+
+#if defined(SL_CATALOG_WISUN_BR_WIFI_PRESENT)
+void app_wifi_connect(const sl_cli_command_arg_t *arguments)
+{
+  (void)arguments;
+
+  sl_status_t status = SL_STATUS_OK;
+  static uint8_t ssid_buffer[SL_WISUN_WIFI_SSID_SIZE + 1] = { 0U };
+  static uint8_t passphrase_buffer[SL_WISUN_WIFI_PASSPHRASE_SIZE + 1] = { 0U };
+  uint8_t security_type = 0U;
+
+  status = app_wisun_setting_get_ssid(ssid_buffer, sizeof(ssid_buffer));
+  if (status != SL_STATUS_OK) {
+    printf("[wifi: SSID failure %lu]\n", status);
+    return;
+  }
+
+  printf("[wifi: connecting to %s]\n", ssid_buffer);
+
+  status = app_wisun_setting_get_security(&security_type);
+  if (status != SL_STATUS_OK) {
+    printf("[wifi: Security failure %lu]\n", status);
+  }
+
+  status = app_wisun_setting_get_passphrase(passphrase_buffer, sizeof(passphrase_buffer));
+  if (status != SL_STATUS_OK) {
+    printf("[wifi: Passphrase failure %lu]\n", status);
+    return;
+  }
+
+  status = sl_wisun_br_wifi_connect(ssid_buffer,
+                                    sizeof(ssid_buffer),
+                                    (wifi_security_type_t)security_type,
+                                    passphrase_buffer);
+  if (status != SL_STATUS_OK) {
+    printf("[wifi: connection failure %lu]\n", status);
+  }
+}
+
+void app_wifi_disconnect(const sl_cli_command_arg_t *arguments)
+{
+  (void)arguments;
+  (void)sl_wisun_br_wifi_disconnect();
 }
 #endif
 
@@ -1728,14 +2083,20 @@ void app_set_trace_level(const sl_cli_command_arg_t *arguments)
 void app_cli_handler(const sl_cli_command_arg_t *args)
 {
 #if defined(SL_CATALOG_APP_PROJECT_INFO_PRESENT)
-  if ((sl_strcasecmp(args->argv[0], "about") == 0) || (sl_strcasecmp(args->argv[0], "a") == 0)) {
+  if ((sl_strcasecmp(args->argv[0], "about") == 0)
+      || (sl_strcasecmp(args->argv[0], "a") == 0)) {
     app_about();
   }
 #endif
-
+#if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
+  if ((sl_strcasecmp(args->argv[0], "reboot") == 0)
+      || (sl_strcasecmp(args->argv[0], "r") == 0)) {
+    app_reboot();
+  }
+#endif
   _cli_handler_iterator(args,
-                        _wisun_app_cli_handler_properties_size,
-                        _wisun_app_cli_handler_properties);
+                        _wisun_app_cli_hnd_prop_size,
+                        _wisun_app_cli_hnd_prop);
 }
 
 /* OTA DFU CLI handler */
@@ -1745,8 +2106,8 @@ void sl_wisun_ota_dfu_cli_handler(const sl_cli_command_arg_t *args)
   && SL_WISUN_CLI_ENABLED                     \
   && SL_WISUN_OTA_DFU_CLI_ENABLED
   _cli_handler_iterator(args,
-                        _ota_dfu_cli_handler_properties_size,
-                        _ota_dfu_cli_handler_properties);
+                        _ota_dfu_cli_hnd_prop_size,
+                        _ota_dfu_cli_hnd_prop);
 #else
   (void) args;
 #endif
@@ -1759,8 +2120,8 @@ void sl_iperf_cli_handler(const sl_cli_command_arg_t *args)
   && SL_WISUN_CLI_ENABLED             \
   && SL_WISUN_IPERF_CLI_ENABLED
   _cli_handler_iterator(args,
-                        _iperf_cli_handler_properties_size,
-                        _iperf_cli_handler_properties);
+                        _iperf_cli_hnd_prop_size,
+                        _iperf_cli_hnd_prop);
 #else
   (void) args;
 #endif
@@ -1771,6 +2132,7 @@ void sl_iperf_cli_handler(const sl_cli_command_arg_t *args)
 // -----------------------------------------------------------------------------
 
 #if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
+#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
 static void _app_connect(const sl_wisun_phy_config_type_t config_type)
 {
   sl_status_t stat = SL_STATUS_FAIL;
@@ -1793,6 +2155,22 @@ static void _app_connect(const sl_wisun_phy_config_type_t config_type)
   }
   // call connect API
   sl_wisun_app_core_network_connect();
+}
+#endif
+#endif
+
+#if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT) \
+  && defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
+static void _app_start(void)
+{
+  sl_wisun_br_state_t br_state = SL_WISUN_BR_STATE_INITIALIZED;
+  if ((sl_wisun_br_get_state(&br_state) == SL_STATUS_OK)
+      && (br_state == SL_WISUN_BR_STATE_OPERATIONAL)) {
+    printf("[Failed: Border Router already started]\n");
+    return;
+  }
+  // call BR start API
+  sl_wisun_app_br_core_start();
 }
 #endif
 
@@ -1843,6 +2221,8 @@ static sl_status_t _load_common_params_from_phy_cfg(void)
   return SL_STATUS_OK;
 }
 
+#if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
+#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
 static sl_status_t _store_common_params_to_phy_cfg(void)
 {
   static sl_wisun_phy_config_t phy_cfg = { 0U };
@@ -1883,7 +2263,10 @@ static sl_status_t _store_common_params_to_phy_cfg(void)
 
   return SL_STATUS_OK;
 }
+#endif
+#endif
 
+#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
 /* App CLI getting connection state (join state) */
 static sl_status_t _app_cli_get_connection(char *value_str,
                                            const char *key_str,
@@ -1926,6 +2309,7 @@ static sl_status_t _app_cli_get_connection(char *value_str,
 
   return SL_STATUS_OK;
 }
+#endif
 
 /* App CLI setting network name */
 static sl_status_t _app_cli_set_network_name(const char *value_str,
@@ -1953,7 +2337,7 @@ static sl_status_t _app_cli_set_network_size(const char *value_str,
                              entry->input_enum_list,
                              entry->input & APP_CLI_INPUT_FLAG_SIGNED);
   if (res == SL_STATUS_OK) {
-    // sets the network name
+    // sets the network size
     res = app_wisun_setting_set_network_size((uint8_t*)&value);
   }
 
@@ -2281,6 +2665,7 @@ static sl_status_t _app_ms_get_counters(char *value_str,
 #endif
 
 #if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
+#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
 static sl_status_t _app_set_regulation(const char *value_str,
                                        const char *key_str,
                                        const app_settings_entry_t *entry)
@@ -2289,6 +2674,7 @@ static sl_status_t _app_set_regulation(const char *value_str,
   uint32_t value = 0U;
   sl_wisun_app_core_reg_thresholds_t thresholds = { 0U };
   sl_wisun_join_state_t join_state = SL_WISUN_JOIN_STATE_DISCONNECTED;
+  const sl_wisun_regulation_params_t *regulation_params = NULL;
   (void)key_str;
   (void)entry;
 
@@ -2328,7 +2714,25 @@ static sl_status_t _app_set_regulation(const char *value_str,
     }
 
     // sets regulation
-    res = sl_wisun_set_regulation((sl_wisun_regulation_t)value);
+    switch((sl_wisun_regulation_t)value) {
+      case SL_WISUN_APP_CORE_REGULATION_NONE:
+        regulation_params = &SL_WISUN_REGULATION_PARAMS_NONE;
+        break;
+
+      case SL_WISUN_APP_CORE_REGULATION_ARIB:
+        regulation_params = &SL_WISUN_REGULATION_PARAMS_ARIB;
+        break;
+
+      case SL_WISUN_APP_CORE_REGULATION_WPC:
+        regulation_params = &SL_WISUN_REGULATION_PARAMS_WPC;
+        break;
+
+      default:
+        printf("[Failed: unsupported regulation]\n");
+        return SL_STATUS_FAIL;
+    }
+
+    res = sl_wisun_set_regulation_parameters(regulation_params);
     if (res != SL_STATUS_OK) {
       printf("[Regulation not valid]\n");
       return res;
@@ -2520,12 +2924,13 @@ static sl_status_t _app_get_regulation_alert_threshold(char *value_str,
 
   return SL_STATUS_OK;
 }
+#endif
 
 static sl_status_t _app_settings_set_mac_address(const char *value_str,
                                                  const char *key_str,
                                                  const app_settings_entry_t *entry)
 {
-  sl_status_t ret;
+  sl_status_t ret = SL_STATUS_FAIL;
   sl_wisun_mac_address_t address;
   (void)key_str;
   (void)entry;
@@ -2542,7 +2947,7 @@ static sl_status_t _app_settings_get_mac_address(char *value_str,
                                                  const char *key_str,
                                                  const app_settings_entry_t *entry)
 {
-  sl_status_t ret;
+  sl_status_t ret = SL_STATUS_FAIL;
   sl_wisun_mac_address_t address;
   (void)key_str;
   (void)entry;
@@ -2627,6 +3032,192 @@ static sl_status_t _app_get_lfn_profile(char *value_str,
 
   (void) snprintf(value_str, APP_CLI_STR_VALUE_LENGTH, "%s (%lu)", lfn_profile_str, (uint32_t) lfn_profile);
   return SL_STATUS_OK;
+}
+#endif
+
+#if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
+static sl_status_t _app_cli_get_state(char *value_str,
+                                      const char *key_str,
+                                      const app_cli_entry_t *entry)
+{
+  (void)key_str;
+
+  sl_wisun_br_state_t state = SL_WISUN_BR_STATE_INITIALIZED;
+  uint8_t value_length = sizeof(sl_wisun_br_state_t);
+
+  if (sl_wisun_br_get_state(&state) != SL_STATUS_OK) {
+    return SL_STATUS_FAIL;
+  }
+
+  return app_util_get_string(value_str,
+                            state,
+                            entry->output_enum_list,
+                            false,
+                            false,
+                            value_length);
+}
+#endif
+
+#if defined(SL_CATALOG_WISUN_BR_WIFI_PRESENT)
+/* Convert MAC address to string */
+static sl_status_t _get_mac_address_string(char *value_str,
+                                           const uint8_t *value)
+{
+  for (uint8_t i = 0U; i < 6U; ++i) {
+    sprintf(value_str, "%02x:", value[i]);
+    value_str += 3;
+  }
+
+  // Remove the last colon
+  *(value_str - 1) = '\0';
+
+  return SL_STATUS_OK;
+}
+/* App CLI getting Wi-Fi information */
+static sl_status_t _app_cli_get_wifi_info(char *value_str,
+                                          const char *key_str,
+                                          const app_cli_entry_t *entry)
+{
+  sl_status_t status = SL_STATUS_OK;
+  bool connected = false;
+  uint16_t channel_number = 0U;
+  uint8_t mac_address[6] = { 0U };
+  uint8_t ipv6_address[16] = { 0U };
+  char str[40] = { 0 };
+
+  (void)value_str;
+  (void)key_str;
+
+  status = sl_wisun_br_wifi_get_info(&connected, &channel_number, mac_address, ipv6_address);
+  if (status != SL_STATUS_OK) {
+    printf("[Failed to retrieve Wi-Fi information: %lu]\n", status);
+    return SL_STATUS_FAIL;
+  }
+
+  if (strcmp(entry->key, "wlan_state") == 0) {
+    printf("%s.%s = %s\n", app_settings_domain_str[entry->domain], entry->key, connected ? "connected" : "disconnected");
+  } else if (strcmp(entry->key, "channel_number") == 0) {
+    printf("%s.%s = %d\n", app_settings_domain_str[entry->domain], entry->key, channel_number);
+  } else if (strcmp(entry->key, "mac_address") == 0) {
+    _get_mac_address_string(str, mac_address);
+    printf("%s.%s = %s\n", app_settings_domain_str[entry->domain], entry->key, str);
+  } else if (strcmp(entry->key, "ipv6_address") == 0) {
+    ip6tos(ipv6_address, str);
+    printf("%s.%s = %s\n", app_settings_domain_str[entry->domain], entry->key, str);
+  }
+
+  // Prevent parent from printing anything
+  return SL_STATUS_FAIL;
+}
+
+static sl_status_t _app_cli_set_ssid(const char *value_str,
+                                     const char *key_str,
+                                     const app_cli_entry_t *entry)
+{
+  (void)key_str;
+  (void)entry;
+
+  return app_wisun_setting_set_ssid((const uint8_t *)value_str);
+}
+
+static sl_status_t _app_cli_get_ssid(char *value_str,
+                                     const char *key_str,
+                                     const app_cli_entry_t *entry)
+{
+  sl_status_t res = SL_STATUS_FAIL;
+  uint8_t ssid_buffer[SL_WISUN_WIFI_SSID_SIZE + 1] = { 0U };
+  (void)key_str;
+  (void)entry;
+
+  // gets the wifi ssid
+  res = app_wisun_setting_get_ssid(ssid_buffer, sizeof(ssid_buffer));
+
+  if (res == SL_STATUS_OK) {
+    snprintf(value_str, APP_CLI_STR_VALUE_LENGTH, "%s", ssid_buffer);
+  }
+
+  return res;
+}
+
+static sl_status_t _app_cli_set_security(const char *value_str,
+                                         const char *key_str,
+                                         const app_cli_entry_t *entry)
+{
+  sl_status_t res = SL_STATUS_FAIL;
+  uint32_t value = 0U;
+  (void)key_str;
+  (void)entry;
+
+  res = app_util_get_integer(&value,
+                             value_str,
+                             entry->input_enum_list,
+                             entry->input & APP_CLI_INPUT_FLAG_SIGNED);
+  if (res == SL_STATUS_OK) {
+    // sets the security
+    res = app_wisun_setting_set_security((uint8_t*)&value);
+  }
+
+  return res;
+}
+
+static sl_status_t _app_cli_get_security(char *value_str,
+                                         const char *key_str,
+                                         const app_cli_entry_t *entry)
+{
+  sl_status_t res = SL_STATUS_FAIL;
+  const app_enum_t *value_enum;
+  uint8_t value = 0U;
+  (void)key_str;
+
+  res = app_wisun_setting_get_security(&value);
+  // finds the proper string for the value
+  value_enum = entry->output_enum_list;
+
+  if (res != SL_STATUS_OK || value_enum->value_str == NULL) {
+    return SL_STATUS_FAIL;
+  }
+
+  while (value_enum) {
+    if (value_enum->value == value) {
+      // Matching enumeration found
+      break;
+    }
+    value_enum++;
+  }
+
+  // creates the value string
+  snprintf(value_str, APP_CLI_STR_VALUE_LENGTH, "%s (%d)", value_enum->value_str, (uint8_t)value_enum->value);
+
+  return res;
+}
+
+static sl_status_t _app_cli_set_passphrase(const char *value_str,
+                                           const char *key_str,
+                                           const app_cli_entry_t *entry)
+{
+  (void)key_str;
+  (void)entry;
+
+  return app_wisun_setting_set_passphrase((const uint8_t *)value_str);
+}
+
+static sl_status_t _app_cli_get_passphrase(char *value_str,
+                                           const char *key_str,
+                                           const app_cli_entry_t *entry)
+{
+  sl_status_t res = SL_STATUS_FAIL;
+  uint8_t passphrase_buffer[SL_WISUN_WIFI_PASSPHRASE_SIZE + 1] = { 0U };
+  (void)key_str;
+  (void)entry;
+
+  // gets the wifi passphrase
+  res = app_wisun_setting_get_passphrase(passphrase_buffer, sizeof(passphrase_buffer));
+
+  if (res == SL_STATUS_OK) {
+    snprintf(value_str, APP_CLI_STR_VALUE_LENGTH, "%s", passphrase_buffer);
+  }
+
+  return res;
 }
 #endif
 

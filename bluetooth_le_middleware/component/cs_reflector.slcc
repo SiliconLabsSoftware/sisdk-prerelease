@@ -21,11 +21,7 @@ config_file:
 - path: config/cs_reflector_config.h
 source:
 - path: cs_reflector.c
-  condition:
-  - device_cortexm
 - path: cs_reflector_connmanager.c
-  condition:
-  - device_cortexm
 requires:
 - name: app_log
 - name: app_assert
@@ -53,8 +49,6 @@ requires:
   condition:
   - device_cortexm
 - name: cs_ras_server
-  condition:
-  - device_cortexm
 provides:
 - name: cs_reflector
 template_contribution:
@@ -74,7 +68,6 @@ template_contribution:
     function: cs_reflector_on_bt_event
   unless:
   - ncp
-  - device_host
 documentation:
   docset: bluetooth
   document: bluetooth-service-api/cs-reflector

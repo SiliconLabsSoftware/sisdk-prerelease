@@ -15,7 +15,13 @@
 </sect1>
 <sect1 id="index_1autotoc_md7">
 <title>API Payload Size</title>
-<para>The maximum API payload size is 256 bytes for both NCP and SoC modes. When an application calls a command, the API library checks the payload length and returns error code SL_STATUS_COMMAND_TOO_LONG (0x49) if the payload of input parameters will cause an overflow. Error code SL_STATUS_WOULD_OVERFLOW (0x1d) is returned if the given size of an output parameter is too small for response data.</para>
+<para>The payload size is configurable using SL_BGAPI_MAX_PAYLOAD_SIZE. The configurable range is from 256 bytes (minimum) to 2047 bytes (maximum).</para>
+<para>The API library validates payload sizes when commands are called:</para>
+<para><itemizedlist>
+<listitem><para><bold>SL_STATUS_COMMAND_TOO_LONG (0x49)</bold>: Returned when the combined size of input parameters exceeds the configured payload size limit.</para>
+</listitem><listitem><para><bold>SL_STATUS_WOULD_OVERFLOW (0x1d)</bold>: Returned when the buffer size provided for an output parameter is insufficient to hold the response data.</para>
+</listitem></itemizedlist>
+</para>
 </sect1>
 <sect1 id="index_1autotoc_md8">
 <title>Decode API Binary Data</title>

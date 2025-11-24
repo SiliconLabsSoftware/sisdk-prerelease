@@ -136,7 +136,8 @@ extern "C" {
 /// See also runtime refinement \ref RAIL_SupportsAlternateTxPower().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_SUPPORTS_ALTERNATE_TX_POWER.
 #if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 3) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8))
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
 #define RAIL_SUPPORTS_ALTERNATE_TX_POWER 1
 #else
 #define RAIL_SUPPORTS_ALTERNATE_TX_POWER 0
@@ -162,7 +163,8 @@ extern "C" {
 /// See also runtime refinement \ref RAIL_SupportsPathDiversity().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_SUPPORTS_PATH_DIVERSITY.
 #if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 3) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8))
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
 #define RAIL_SUPPORTS_PATH_DIVERSITY 1
 #else
 #define RAIL_SUPPORTS_PATH_DIVERSITY 0
@@ -213,7 +215,8 @@ extern "C" {
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 5) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9))
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
 #define RAIL_SUPPORTS_EXTERNAL_THERMISTOR 1
 #else
 #define RAIL_SUPPORTS_EXTERNAL_THERMISTOR 0
@@ -239,7 +242,8 @@ extern "C" {
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 5) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9))
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
 #define RAIL_SUPPORTS_AUXADC 1
 #else
 #define RAIL_SUPPORTS_AUXADC 0
@@ -252,7 +256,8 @@ extern "C" {
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_SUPPORTS_PRECISION_LFRCO.
 #if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9))
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
 #define RAIL_SUPPORTS_PRECISION_LFRCO 1
 #else
 #define RAIL_SUPPORTS_PRECISION_LFRCO 0
@@ -514,7 +519,8 @@ extern "C" {
 /// the IEEE 802.15.4 2.4 GHz band variant.
 /// See also runtime refinement \ref RAIL_SupportsIEEE802154Band2P4().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_IEEE802154_SUPPORTS_2P4_GHZ_BAND.
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG != 3)
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG != 3) \
+  && (_SILICON_LABS_32B_SERIES_2_CONFIG != 13))
 #define RAIL_SUPPORTS_IEEE802154_BAND_2P4 (RAIL_SUPPORTS_PROTOCOL_IEEE802154 && RAIL_SUPPORTS_2P4GHZ_BAND)
 #else
 #define RAIL_SUPPORTS_IEEE802154_BAND_2P4 0
@@ -591,7 +597,8 @@ extern "C" {
 /// See also runtime refinement \ref
 /// RAIL_IEEE802154_SupportsGSubsetGB868().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_IEEE802154_SUPPORTS_G_SUBSET_GB868.
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG != 3)
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG != 3) \
+  &&  (_SILICON_LABS_32B_SERIES_2_CONFIG != 13))
 #define RAIL_IEEE802154_SUPPORTS_G_SUBSET_GB868 \
   ((RAIL_SUPPORTS_PROTOCOL_IEEE802154 != 0) && (RAIL_SUPPORTS_SUBGHZ_BAND != 0))
 #else
@@ -777,7 +784,8 @@ extern "C" {
 /// RAIL_SupportsProtocolWiSUN().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_SUPPORTS_PROTOCOL_WI_SUN.
 #if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 5) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8))
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
 #define RAIL_SUPPORTS_PROTOCOL_WI_SUN 1
 #else
 #define RAIL_SUPPORTS_PROTOCOL_WI_SUN 0
@@ -790,7 +798,8 @@ extern "C" {
 /// See also runtime refinement \ref RAIL_WMBUS_SupportsSimultaneousTCRx().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_WMBUS_SUPPORTS_SIMULTANEOUS_T_C_RX.
 #if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 3) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8))
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
 #define RAIL_WMBUS_SUPPORTS_SIMULTANEOUS_T_C_RX 1
 #else
 #define RAIL_WMBUS_SUPPORTS_SIMULTANEOUS_T_C_RX 0
@@ -871,7 +880,8 @@ extern "C" {
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_SUPPORTS_DIRECT_MODE.
 #if ((_SILICON_LABS_32B_SERIES == 1)          \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 3) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8))
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
 #define RAIL_SUPPORTS_DIRECT_MODE 1
 #else
 #define RAIL_SUPPORTS_DIRECT_MODE 0
@@ -882,7 +892,8 @@ extern "C" {
 /// See also runtime refinement \ref RAIL_SupportsRxDirectModeDataToFifo().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_SUPPORTS_RX_DIRECT_MODE_DATA_TO_FIFO.
 #if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 3) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8))
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
 #define RAIL_SUPPORTS_RX_DIRECT_MODE_DATA_TO_FIFO 1
 #else
 #define RAIL_SUPPORTS_RX_DIRECT_MODE_DATA_TO_FIFO 0
@@ -893,7 +904,8 @@ extern "C" {
 /// See also runtime refinement \ref RAIL_SupportsMfm().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_SUPPORTS_MFM.
 #if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 3) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8))
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
 #define RAIL_SUPPORTS_MFM 1
 #else
 #define RAIL_SUPPORTS_MFM 0
@@ -937,7 +949,8 @@ extern "C" {
 /// See also runtime refinement \ref RAIL_SupportsRssiDetectThreshold().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_SUPPORTS_RSSI_DETECT_THRESHOLD.
 #if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 3) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 5))
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 5) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
 #define RAIL_SUPPORTS_RSSI_DETECT_THRESHOLD (1U)
 #else
 #define RAIL_SUPPORTS_RSSI_DETECT_THRESHOLD (0U)
@@ -977,7 +990,8 @@ extern "C" {
 /// See also runtime refinement \ref RAIL_SupportsProtocolSidewalk().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_SUPPORTS_PROTOCOL_SIDEWALK.
 #if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 3) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8))
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
   #define RAIL_SUPPORTS_PROTOCOL_SIDEWALK (1U)
 #else
   #define RAIL_SUPPORTS_PROTOCOL_SIDEWALK (0U)
@@ -987,8 +1001,9 @@ extern "C" {
 /// configuration of peripherals used by RAIL.
 /// See also runtime refinement \ref RAIL_SupportsTrustZoneSecurePeripherals().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_SUPPORTS_TRUSTZONE_SECURE_PERIPHERALS.
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 3) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8)
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 3) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
   #define RAIL_SUPPORTS_TRUSTZONE_SECURE_PERIPHERALS (1U)
 #else
   #define RAIL_SUPPORTS_TRUSTZONE_SECURE_PERIPHERALS (0U)

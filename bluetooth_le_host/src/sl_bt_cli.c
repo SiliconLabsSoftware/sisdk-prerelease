@@ -348,6 +348,7 @@ void sli_bt_cli_system_set_lazy_soft_timer(sl_cli_command_arg_t *arguments)
     printf("rsp_system_set_lazy_soft_timer 0x%lx ",status);
     printf("\n");
 }
+#ifdef SL_CATALOG_BLUETOOTH_FEATURE_LINKLAYER_INTERFACE_PRESENT
 void sli_bt_cli_linklayer_event_info_reporting_enable(sl_cli_command_arg_t *arguments)
 {
 
@@ -371,6 +372,7 @@ void sli_bt_cli_linklayer_event_info_reporting_enable(sl_cli_command_arg_t *argu
     printf("rsp_linklayer_event_info_reporting_enable 0x%lx ",status);
     printf("\n");
 }
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_LINKLAYER_INTERFACE_PRESENT
 void sli_bt_cli_resource_get_status(sl_cli_command_arg_t *arguments)
 {
 
@@ -4635,7 +4637,7 @@ void sli_bt_cli_l2cap_close_channel(sl_cli_command_arg_t *arguments)
     printf("rsp_l2cap_close_channel 0x%lx ",status);
     printf("\n");
 }
-#ifdef SL_CATALOG_BLUETOOTH_CTE_SUPPORT_PRESENT
+#ifdef SL_CATALOG_BLUETOOTH_FEATURE_CTE_TRANSMITTER_PRESENT
 void sli_bt_cli_cte_transmitter_set_dtm_parameters(sl_cli_command_arg_t *arguments)
 {
 
@@ -4786,8 +4788,8 @@ void sli_bt_cli_cte_transmitter_disable_silabs_cte(sl_cli_command_arg_t *argumen
     printf("rsp_cte_transmitter_disable_silabs_cte 0x%lx ",status);
     printf("\n");
 }
-#endif // SL_CATALOG_BLUETOOTH_CTE_SUPPORT_PRESENT
-#ifdef SL_CATALOG_BLUETOOTH_CTE_SUPPORT_PRESENT
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_CTE_TRANSMITTER_PRESENT
+#ifdef SL_CATALOG_BLUETOOTH_FEATURE_CTE_RECEIVER_PRESENT
 void sli_bt_cli_cte_receiver_set_dtm_parameters(sl_cli_command_arg_t *arguments)
 {
 
@@ -5016,7 +5018,7 @@ void sli_bt_cli_cte_receiver_disable_silabs_cte(sl_cli_command_arg_t *arguments)
     printf("rsp_cte_receiver_disable_silabs_cte 0x%lx ",status);
     printf("\n");
 }
-#endif // SL_CATALOG_BLUETOOTH_CTE_SUPPORT_PRESENT
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_CTE_RECEIVER_PRESENT
 void sli_bt_cli_connection_analyzer_start(sl_cli_command_arg_t *arguments)
 {
 

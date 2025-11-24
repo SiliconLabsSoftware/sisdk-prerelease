@@ -61,7 +61,17 @@ extern "C" {
 void app_about(void);
 #endif
 
+#if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
+/**************************************************************************//**
+ * @brief CLI app reboot handler
+ * @details CLI function
+ * @param[in] void
+ *****************************************************************************/
+void app_reboot(void);
+#endif
+
 #if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
+#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
 /**************************************************************************//**
  * @brief CLI app connect to FAN 1.0 handler
  * @details CLI function
@@ -89,6 +99,7 @@ void app_join_explicit(const sl_cli_command_arg_t *arguments);
  * @param[in] arguments Arguments
  *****************************************************************************/
 void app_disconnect(const sl_cli_command_arg_t *arguments);
+#endif
 
 /**************************************************************************//**
  * @brief CLI app MAC allow handler
@@ -134,6 +145,40 @@ void sl_wisun_ota_dfu_cli_handler(const sl_cli_command_arg_t *args);
  * @param[in] args Arguments
  *****************************************************************************/
 void sl_iperf_cli_handler(const sl_cli_command_arg_t *args);
+
+#if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
+#if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
+/**************************************************************************//**
+ * @brief CLI app connect to FAN 1.0 handler
+ * @details CLI function
+ * @param[in] arguments Arguments
+ *****************************************************************************/
+void app_start_fan11(const sl_cli_command_arg_t *arguments);
+#endif
+
+/**************************************************************************//**
+ * @brief CLI app connect to FAN 1.0 handler
+ * @details CLI function
+ * @param[in] arguments Arguments
+ *****************************************************************************/
+void app_stop(const sl_cli_command_arg_t *arguments);
+#endif
+
+#if defined(SL_CATALOG_WISUN_BR_WIFI_PRESENT)
+/**************************************************************************//**
+ * @brief CLI app connect to Wi-Fi handler
+ * @details CLI function
+ * @param[in] arguments Arguments
+ *****************************************************************************/
+void app_wifi_connect(const sl_cli_command_arg_t *arguments);
+
+/**************************************************************************//**
+ * @brief CLI app disconnect from Wi-Fi handler
+ * @details CLI function
+ * @param[in] arguments Arguments
+ *****************************************************************************/
+void app_wifi_disconnect(const sl_cli_command_arg_t *arguments);
+#endif
 
 #ifdef __cplusplus
 }

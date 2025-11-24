@@ -337,35 +337,40 @@ struct RAIL_ChannelConfigEntryAttr {
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_HP or \ref RAIL_TX_POWER_MODE_2P4GIG_LP modes.
  *
- * @deprecated RAIL 2.x. synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_LP_MIN.
+ * @deprecated This RAIL 2.x. define has been eliminated,
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_LP_MIN.
  */
 #define RAIL_TX_POWER_LEVEL_2P4GIG_HP_LP_MIN     (0U)
 /**
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * \ref RAIL_TX_POWER_MODE_2P4GIG_LP mode.
  *
- * @deprecated RAIL 2.x. synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN.
+ * @deprecated This RAIL 2.x. define has been eliminated,
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_LP_MIN        (RAIL_TX_POWER_LEVEL_2P4GIG_HP_LP_MIN)
 /**
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * \ref RAIL_TX_POWER_MODE_2P4GIG_LP mode.
  *
- * @deprecated RAIL 2.x. synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX.
+ * @deprecated This RAIL 2.x. define has been eliminated,
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_LP_MAX        (31U)
 /**
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * \ref RAIL_TX_POWER_MODE_2P4GIG_HP mode.
  *
- * @deprecated RAIL 2.x. synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN.
+ * @deprecated This RAIL 2.x. define has been eliminated,
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_HP_MIN        (RAIL_TX_POWER_LEVEL_2P4GIG_HP_LP_MIN)
 /**
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * \ref RAIL_TX_POWER_MODE_2P4GIG_HP mode.
  *
- * @deprecated RAIL 2.x. synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX.
+ * @deprecated This RAIL 2.x. define has been eliminated,
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_HP_MAX        (95U)
 #else

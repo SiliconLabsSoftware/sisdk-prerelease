@@ -21,6 +21,7 @@
 #include "stack/include/stack-info.h"
 
 #include "sl_rail_ieee802154.h"
+#include "sl_rail_util_compatible_pa.h"
 
 #include "multirail-demo.h"
 
@@ -155,7 +156,7 @@ sl_rail_handle_t sl_zigbee_af_multirail_demo_init(sl_rail_config_t *railCfg,
                                                   const uint8_t *ieeeAddr)
 {
   UNUSED_VAR(paAutoMode);
-  sl_rail_tx_power_config_t txPowerConfigLocal;
+  UNUSED_VAR(txPowerConfig);
 
   // Sanity check
   if (rail2Handle) {
@@ -178,22 +179,8 @@ sl_rail_handle_t sl_zigbee_af_multirail_demo_init(sl_rail_config_t *railCfg,
     return NULL;
   }
 
-  if (!txPowerConfig) {
-    // Read the current power config from RAIL to reuse in the second instance
-    if (sl_rail_get_tx_power_config(sl_zigbee_get_rail_handle(), &txPowerConfigLocal) != SL_RAIL_STATUS_NO_ERROR) {
-      // The new RAIL instance has been initialized by this point and we merely
-      // failed to set up parameters (power, Tx FIFO, radio calibrations...).
-      // Simply returning NULL will undoubtedly result in a resource leak, but
-      // there is no API to de-initialize RAIL. Thus this code is only useful
-      // as a demo and/or during debugging. The production code needs a bit more
-      // sophisticated error handling.
-      return NULL;
-    }
-    txPowerConfig = &txPowerConfigLocal;
-  }
-
   // Initialise the PA now that the HFXO is up and the timing is correct
-  if (sl_rail_config_tx_power(handle, txPowerConfig) != SL_RAIL_STATUS_NO_ERROR) {
+  if (sl_rail_util_pa_post_init(handle, SL_RAIL_TX_PA_MODE_2P4_GHZ) != SL_RAIL_STATUS_NO_ERROR) {
     // Error: The PA could not be initialised due to an improper configuration.
     // Please ensure your configuration is valid for the selected part.
     return NULL;

@@ -4,9 +4,9 @@
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="app.projects.z3.zigbee_z3_gateway_cpc.zigbee_z3_gateway_cpc.slcp"/>
-    <properties key="projectFilePaths" value="app/projects/z3/zigbee_z3_gateway_cpc/zigbee_z3_gateway_cpc.slcp"/>
-    <properties key="readmeFiles" value="app/projects/z3/zigbee_z3_gateway_cpc/readme.md"/>
+    <properties key="solutionReferenceId" value="z3.zigbee_z3_gateway_cpc.zigbee_z3_gateway_cpc.slcp"/>
+    <properties key="projectFilePaths" value="z3/zigbee_z3_gateway_cpc/zigbee_z3_gateway_cpc.slcp"/>
+    <properties key="readmeFiles" value="z3/zigbee_z3_gateway_cpc/readme.md"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*linux.* .*macos.* .*win32.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>

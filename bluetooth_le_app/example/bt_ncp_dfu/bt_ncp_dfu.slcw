@@ -9,9 +9,9 @@ description: >
   Combined solution with application and bootloader projects.
 quality: evaluation
 project:
-  - path: ../../bootloader/bootloader-uart-bgapi-s2.slcp
-    id: bootloader
   - path: bt_ncp_dfu.slcp
     id: application
+  - path: ../../bootloader/bootloader-uart-bgapi-s2.slcp
+    id: bootloader
 post_build:
   path: ../../postbuild_profile/bt_dfu_ws.slpb

@@ -4,7 +4,7 @@ The Wi-SUN CLI (Command-Line Interface) sample application allows developers to 
 
 ## Getting Started
 
-To get started with Wi-SUN and Simplicity Studio, see [QSG181: Wi-SUN SDK Quick Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg181-wi-sun-sdk-quick-start-guide.pdf).
+To get started with Wi-SUN and Simplicity Studio, see [Developing with Wi-SUN](https://docs.silabs.com/wisun/latest/wisun-start/).
 
 > NB: The Wi-SUN CLI application, as opposed to most other Wi-SUN sample applications, is not in 'auto-connect' mode by default. This means that the user has to set the network parameters and trigger the connection manually following a reset. This is visible when calling `wisun get wisun.join_state` in the console (the result will be `wisun.join_state = Disconnected (0)`). To change this behavior, use `wisun set app.autoconnect 1` followed by `wisun save` (when 'auto-connect' is active, a `Connecting...` message will be visible following a reset, with `Join_state: Select PAN...`).
 
@@ -14,8 +14,6 @@ This example exposes a command-line interface to interact with the Wi-SUN stack.
 * Create and build the Wi-SUN CLI project.
 * Flash the Wi-SUN CLI project to a second device.
 * Using Simplicity Studio, open a console on the device running the Wi-SUN CLI project.
-
-See the associated sections in [QSG181: Wi-SUN SDK Quick Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg181-wi-sun-sdk-quick-start-guide.pdf) for step-by-step guidelines for each operation. To fully evaluate the Wi-SUN CLI features, another device running the Wi-SUN CLI application might be required. The Wi-SUN CLI application can also interact with the other Wi-SUN examples (Wi-SUN Ping, Wi-SUN TCP/UDP Server/Client...).
 
 > The Wi-SUN CLI example can be used to evaluate and test the Wi-SUN stack but should not be used to create production applications (due to its large footprint related to all PHYs being allowed). Developers should implement their own C application running in the EFR32 and using the Wi-SUN stack API, starting from simpler example applications.
 
@@ -262,15 +260,6 @@ Example: to set 'Network' to 'Debug' and 'IPV6' to 'Warning', use:
 Before programming the radio board mounted on the WSTK, ensure the power supply switch is in the AEM position (right side), as shown.
 
 ![Radio Board Power Supply Switch](readme_img0.png)
-
-## Resources
-
-* [Wi-SUN Stack API documentation](https://docs.silabs.com/wisun/latest)
-* [AN1330: Wi-SUN Mesh Network Performance](https://www.silabs.com/documents/public/application-notes/an1330-wi-sun-network-performance.pdf)
-* [AN1332: Wi-SUN Network Setup and Configuration](https://www.silabs.com/documents/public/application-notes/an1332-wi-sun-network-configuration.pdf)
-* [AN1364: Wi-SUN Network Performance Measurement Application](https://www.silabs.com/documents/public/application-notes/an1364-wi-sun-network-performance-measurement-app.pdf)
-* [QSG181: Wi-SUN Quick-Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg181-wi-sun-sdk-quick-start-guide.pdf)
-* [UG495: Wi-SUN Developer's Guide](https://www.silabs.com/documents/public/user-guides/ug495-wi-sun-developers-guide.pdf)
 
 ## Report Bugs & Get Support
 

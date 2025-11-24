@@ -19,6 +19,7 @@
 #include <time.h>
 #include "sl-connect-assert.h"
 #include "stack/include/ember.h"
+#include "sl_memory_manager.h"
 #include "ncp-cpc-interface.h"
 #include "csp-format.h"
 #include "csp-command-utils.h"
@@ -51,7 +52,7 @@ static void on_write_completed(sl_cpc_user_endpoint_id_t endpoint_id, void *buff
     NVIC_SystemReset();
   }
   //CPC is done using the buffer, free it as it is not used anymore
-  free(buffer);
+  sl_free(buffer);
 }
 
 void sli_connect_ncp_process_incoming_api_command(uint8_t *apiCommandData)

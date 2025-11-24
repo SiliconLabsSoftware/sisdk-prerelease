@@ -853,42 +853,6 @@ sl_rail_status_t sl_rail_zwave_get_rx_beam_details(sl_rail_handle_t rail_handle,
                                                    sl_rail_zwave_beam_details_t *p_beam_details);
 
 /**
- * Set the Raw Low Power settings.
- *
- * @param[in] rail_handle A real RAIL instance handle.
- * @param[in] power_level Desired low power raw level.
- * @return Status code indicating success of the function call.
- *
- * Low Power settings are required during Ack transmissions when
- * the Low Power Bit is set. This setting is only valid for one
- * subsequent transmission, after which all transmissions will be
- * at the nominal power setting, until re-invoked.
- */
-sl_rail_status_t sl_rail_zwave_set_tx_low_power(sl_rail_handle_t rail_handle,
-                                                uint8_t power_level);
-
-/**
- * Get the TX low power in raw units (see \ref sl_rail_chip_specific.h for
- * value ranges).
- *
- * @param[in] rail_handle A real RAIL instance handle.
- * @return The chip-specific \ref sl_rail_tx_power_level_t raw value of the low
- *   transmit power.
- *
- * This API returns the low raw power value that was set by
- * \ref sl_rail_zwave_set_tx_low_power().
- *
- * Calling this function before configuring the Low Power PA
- * (i.e., before a successful
- * call to \ref sl_rail_zwave_set_tx_low_power_dbm() or \ref sl_rail_zwave_set_tx_low_power())
- * will return a low power value that is the same as the nominal power.
- * Also, calling this function before configuring the PA
- * (i.e., before a successful call to \ref sl_rail_config_tx_power()) will return
- * \ref SL_RAIL_TX_POWER_LEVEL_INVALID.
- */
-sl_rail_tx_power_level_t sl_rail_zwave_get_tx_low_power(sl_rail_handle_t rail_handle);
-
-/**
  * Set the Low Power settings in deci-dBm.
  *
  * @param[in] rail_handle A real RAIL instance handle.
@@ -1144,22 +1108,13 @@ extern const sl_rail_zwave_region_config_t sl_rail_zwave_region_invalid;
  */
 extern const sl_rail_zwave_region_config_t * const sl_rail_zwave_region_cfg[SL_RAIL_ZWAVE_REGION_ID_COUNT];
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-
-// Temporary RAIL 3.x API mappings to RAIL 2.x APIs
-
-#include "rail_zwave.h"
-#define sl_rail_zwave_set_tx_low_power(a, b) \
-  ((sl_rail_status_t)RAIL_ZWAVE_SetTxLowPower((RAIL_Handle_t)(a), (b)))
-#define sl_rail_zwave_get_tx_low_power(a) \
-  ((sl_rail_tx_power_level_t)RAIL_ZWAVE_GetTxLowPower((RAIL_Handle_t)(a)))
-
-#endif//DOXYGEN_SHOULD_SKIP_THIS
-
 /// @} // end of Z_Wave
 
 #ifdef __cplusplus
 }
 #endif
+
+// Temporarily include RAIL 2.x APIs
+#include "rail_zwave.h"
 
 #endif // SL_RAIL_ZWAVE_H

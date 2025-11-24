@@ -94,7 +94,7 @@ typedef struct chan_params {
   const char *chan_allowed;   // Regulatory channel mask, 1 if allowed (e.g. "0-3,13,42-255")
 } sl_wisun_chan_params_t;
 
-/***************************************************************************//**
+/**************************************************************************//**
  * Check if PHY and Channel Plan parameters are compatible.
  *
  * @param[in] phy_params Pointer to PHY parameters
@@ -102,30 +102,30 @@ typedef struct chan_params {
  * @return true if the PHY is valid for the channel plan, false otherwise
  *
  * Available in libraries: Full, FFN, LFN (see @ref API_AVAILABILITY)
- ******************************************************************************/
+ *****************************************************************************/
 bool ws_regdb_check_phy_chan_compat(const sl_wisun_phy_params_t *phy_params, const sl_wisun_chan_params_t *chan_params);
 
-/***************************************************************************//**
+/**************************************************************************//**
  * Get the PHY parameters associated to an Operating Mode.
  *
  * @param[in] operating_mode Operating Mode
  * @return Pointer to the PHY parameters, or NULL if not found
  *
  * Available in libraries: Full, FFN, LFN (see @ref API_AVAILABILITY)
- ******************************************************************************/
+ *****************************************************************************/
 const sl_wisun_phy_params_t *ws_regdb_phy_params_from_mode(uint8_t operating_mode);
 
-/***************************************************************************//**
+/**************************************************************************//**
  * Get the PHY parameters associated to a PHY Mode ID.
  *
  * @param[in] operating_mode PHY Mode ID
  * @return Pointer to the PHY parameters, or NULL if not found
  *
  * Available in libraries: Full, FFN, LFN (see @ref API_AVAILABILITY)
- ******************************************************************************/
+ *****************************************************************************/
 const sl_wisun_phy_params_t *ws_regdb_phy_params_from_id(uint8_t phy_mode_id);
 
-/***************************************************************************//**
+/**************************************************************************//**
  * Retrieve the PHY parameters based on the PHY Mode ID or the Operating Mode.
  *
  * @param[in] operating_mode PHY Mode ID
@@ -133,10 +133,10 @@ const sl_wisun_phy_params_t *ws_regdb_phy_params_from_id(uint8_t phy_mode_id);
  * @return Pointer to the PHY parameters, or NULL if not found
  *
  * Available in libraries: Full, FFN, LFN (see @ref API_AVAILABILITY)
- ******************************************************************************/
+ *****************************************************************************/
 const sl_wisun_phy_params_t *ws_regdb_phy_params(uint8_t phy_mode_id, uint8_t operating_mode);
 
-/***************************************************************************//**
+/**************************************************************************//**
  * Retrieve the Channel Plan parameters based on Regulatory Domain, and the
  * ChanPlanID / Operating Class.
  *
@@ -146,27 +146,27 @@ const sl_wisun_phy_params_t *ws_regdb_phy_params(uint8_t phy_mode_id, uint8_t op
  * @return Pointer to the Channel Plan parameters, or NULL if not found
  *
  * Available in libraries: Full, FFN, LFN (see @ref API_AVAILABILITY)
- ******************************************************************************/
+ *****************************************************************************/
 const sl_wisun_chan_params_t *ws_regdb_chan_params(uint8_t reg_domain, uint8_t chan_plan_id, uint8_t operating_class);
 
-/***************************************************************************//**
+/**************************************************************************//**
  * Retrieve the ID as defined in Wi-SUN specification for the given channel spacing.
  *
  * @param[in] val Channel spacing in Hz
  * @return Channel spacing ID, or CHANNEL_SPACING_UNDEF if not found
  *
  * Available in libraries: Full, FFN, LFN (see @ref API_AVAILABILITY)
- ******************************************************************************/
+ *****************************************************************************/
 uint8_t ws_regdb_chan_spacing_id(uint32_t val);
 
-/***************************************************************************//**
+/**************************************************************************//**
  * Retrieve the channel spacing value in Hz for the given channel spacing ID.
  *
  * @param[in] id Channel Spacing ID
  * @return Channel Spacing in Hz, or 0 if not found
  *
  * Available in libraries: Full, FFN, LFN (see @ref API_AVAILABILITY)
- ******************************************************************************/
+ *****************************************************************************/
 uint32_t ws_regdb_chan_spacing_value(uint8_t id);
 
 #endif /* SL_WISUN_REGDB_H */

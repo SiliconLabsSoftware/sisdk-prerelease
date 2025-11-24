@@ -9,9 +9,9 @@ description: >
   Combined solution with application and bootloader projects.
 quality: experimental
 project:
-  - path: ../../bootloader/bootloader-storage-single.slcp
-    id: bootloader
   - path: bt_soc_iop_test_freertos.slcp
     id: application
+  - path: ../../bootloader/bootloader-storage-single.slcp
+    id: bootloader
 post_build:
   path: ../../postbuild_profile/bt_dfu_ws.slpb

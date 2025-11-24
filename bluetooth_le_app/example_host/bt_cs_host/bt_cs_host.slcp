@@ -15,11 +15,12 @@ filter:
     value: ["Beginner"]
 
 component:
+  - id: host_bluetooth_connection_config
   - id: ble_peer_manager_common
   - id: ble_peer_manager_central
   - id: ble_peer_manager_peripheral
   - id: cs_initiator_client
-  - id: cs_reflector
+  - id: cs_reflector_acp
   - id: cs_acp
   - id: rtllib_api
   - id: cs_antenna

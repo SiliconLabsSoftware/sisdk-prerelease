@@ -22,12 +22,7 @@
 #include "sl_rail_mux.h"
 #include "coexistence/protocol/ieee802154_uc/coexistence-802154.h"
 
-#undef sl_rail_get_tx_power_config
-#undef sl_rail_config_tx_power
-#undef sl_rail_set_tx_power_dbm
-#undef sl_rail_get_tx_power_dbm
-#undef sl_rail_get_tx_power
-
+#define sl_rail_util_ieee802154_config_radio sl_rail_mux_util_ieee802154_config_radio
 #define sl_rail_set_state_timing  sl_rail_mux_SetStateTiming
 #define sl_rail_ieee802154_set_rx_to_enh_ack_tx   sl_rail_mux_IEEE802154_SetRxToEnhAckTx
 #define sl_rail_config_rx_options   sl_rail_mux_ConfigRxOptions
@@ -68,7 +63,9 @@
 #define sl_rail_ieee802154_toggle_frame_pending   sl_rail_mux_IEEE802154_SetFramePending
 #define sl_rail_get_scheduler_status   sl_rail_mux_GetSchedulerStatus
 #define sl_rail_is_rx_auto_ack_paused sl_rail_mux_IsRxAutoAckPaused
-#define sl_rail_get_tx_power_config   sl_rail_mux_GetTxPowerConfig
+#define sli_rail_get_tx_power_config   sli_rail_mux_GetTxPowerConfig
+#define sl_rail_util_pa_post_init   sl_rail_mux_util_pa_post_init
+#define sl_rail_get_pa_mode sl_rail_mux_get_pa_mode
 #define sl_rail_config_tx_power   sl_rail_mux_ConfigTxPower
 #define sl_rail_set_tx_power_dbm   sl_rail_mux_SetTxPowerDbm
 #define sl_rail_yield_radio   sl_rail_mux_YieldRadio
@@ -101,7 +98,7 @@
 #define sl_rail_start_average_rssi   sl_rail_mux_StartAverageRssi
 
 #define sl_rail_get_tx_power_dbm   sl_rail_mux_GetTxPowerDbm
-#define sl_rail_get_tx_power   sl_rail_mux_GetTxPower
+#define sli_rail_get_tx_power   sli_rail_mux_GetTxPower
 
 #define sl_rail_ieee802154_write_enh_ack   sl_rail_mux_IEEE802154_WriteEnhAck
 

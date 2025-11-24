@@ -553,6 +553,9 @@ void COEX_HAL_Init(void)
   COEX_HAL_ConfigRxActive();
   #endif //SL_RAIL_UTIL_COEX_RX_ACTIVE_PORT
   #ifdef SL_RAIL_UTIL_COEX_PHY_SELECT_PORT
+  #ifndef _SILICON_LABS_32B_SERIES_1
+  #error "Coex PHY select is only supported on series 1 devices"
+  #endif
   COEX_HAL_ConfigPhySelect(&sli_coex_phySelectCfg);
   #endif //SL_RAIL_UTIL_COEX_PHY_ENABLE_PORT
   #ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT

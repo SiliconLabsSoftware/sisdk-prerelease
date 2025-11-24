@@ -8374,7 +8374,7 @@ typedef struct sl_bt_evt_gatt_procedure_completed_s sl_bt_evt_gatt_procedure_com
  *
  * @param[in] max_mtu @parblock
  *   Maximum size of MTU in the host stack for GATT client and server
- *     - <b>Range:</b> 23 to 250
+ *     - <b>Range:</b> 23 to SL_BGAPI_MAX_PAYLOAD_SIZE - 7
  *
  *     - <b>Default</b> : 247
  *   @endparblock
@@ -10143,7 +10143,7 @@ typedef struct sl_bt_evt_gatt_server_notification_tx_completed_s sl_bt_evt_gatt_
  *
  * @param[in] max_mtu @parblock
  *   Maximum size of MTU in the host stack for GATT client and server
- *     - <b>Range:</b> 23 to 250
+ *     - <b>Range:</b> 23 to SL_BGAPI_MAX_PAYLOAD_SIZE - 7
  *
  *     - <b>Default</b> : 247
  *   @endparblock

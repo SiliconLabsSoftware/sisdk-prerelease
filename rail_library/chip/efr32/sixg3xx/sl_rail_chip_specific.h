@@ -292,46 +292,73 @@ struct sl_rail_channel_config_entry_attr {
  * @brief Types specific to the SIxx3xx for dealing with the on-chip PAs.
  */
 
-#ifndef SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX
-#if (_SILICON_LABS_32B_SERIES_3_CONFIG == 301) || (_SILICON_LABS_32B_SERIES_3_CONFIG == 300)
-/**
- * The minimum valid value for the \ref sl_rail_tx_power_level_t when in \ref
- * SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP or \ref SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP modes.
- */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_LP_MIN     (0U)
-/**
- * The minimum valid value for the \ref sl_rail_tx_power_level_t when in \ref
- * \ref SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP mode.
- */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN (SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_LP_MIN)
-/**
- * The maximum valid value for the \ref sl_rail_tx_power_level_t when in \ref
- * \ref SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP mode.
- */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX (31U)
-/**
- * The minimum valid value for the \ref sl_rail_tx_power_level_t when in \ref
- * \ref SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP mode.
- */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN (SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_LP_MIN)
-/**
- * The maximum valid value for the \ref sl_rail_tx_power_level_t when in \ref
- * \ref SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP mode.
- */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX (95U)
-#else
-#error "SL_RAIL_TX_POWER_LEVEL not defined for this device"
-#endif
-#endif
-
 #ifndef DOXYGEN_UNDOCUMENTED
 
+#ifndef SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX
+#if (_SILICON_LABS_32B_SERIES_3_CONFIG == 301) || (_SILICON_LABS_32B_SERIES_3_CONFIG == 300)
 /**
- * PA for 2.4 GHz.
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when in \ref
+ * SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP or \ref SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP modes.
  */
-#define SL_RAIL_TX_PA_MODE_2P4_GHZ (sl_rail_tx_pa_mode_t)(0U)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_LP_MIN     (0U)
+/**
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when in \ref
+ * \ref SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP mode.
+ */
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN (SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_LP_MIN)
+/**
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
+ * \ref SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP mode.
+ */
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX (31U)
+/**
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when in \ref
+ * \ref SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP mode.
+ */
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN (SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_LP_MIN)
+/**
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
+ * \ref SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP mode.
+ */
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX (95U)
+#else
+#error "SLI_RAIL_TX_POWER_LEVEL not defined for this device"
+#endif
+#endif
 
 #endif//DOXYGEN_UNDOCUMENTED
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// Self-referencing defines minimize compiler complaints when using SLI_RAIL_ENUM
+// Only those supported per-platform are defined, for use with #ifdef in
+// apps or librail code.
+#if     SL_RAIL_SUPPORTS_2P4_GHZ_BAND
+#define SL_RAIL_TX_PA_MODE_2P4_GHZ      ((sl_rail_tx_pa_mode_t)(SL_RAIL_TX_PA_MODE_2P4_GHZ))
+#define SLI_RAIL_HAS_PA_MODE_2P4_GHZ 1
+#else
+#define SLI_RAIL_HAS_PA_MODE_2P4_GHZ 0
+#endif
+#if     SL_RAIL_SUPPORTS_SUB_GHZ_BAND
+#define SL_RAIL_TX_PA_MODE_SUB_GHZ      ((sl_rail_tx_pa_mode_t)(SL_RAIL_TX_PA_MODE_SUB_GHZ))
+#define SLI_RAIL_HAS_PA_MODE_SUB_GHZ 1
+#else
+#define SLI_RAIL_HAS_PA_MODE_SUB_GHZ 0
+#endif
+#if     SL_RAIL_SUPPORTS_OFDM_PA
+#define SL_RAIL_TX_PA_MODE_SUB_GHZ_OFDM ((sl_rail_tx_pa_mode_t)(SL_RAIL_TX_PA_MODE_SUB_GHZ_OFDM))
+#define SLI_RAIL_HAS_PA_MODE_SUB_GHZ_OFDM 1
+#else
+#define SLI_RAIL_HAS_PA_MODE_SUB_GHZ_OFDM 0
+#endif
+#endif//DOXYGEN_SHOULD_SKIP_THIS
+
+/**
+ * Indicates on number of PA modes present on a chip.
+ */
+#define SL_RAIL_TX_PA_MODES_COUNT \
+  (SLI_RAIL_HAS_PA_MODE_2P4_GHZ   \
+   + SLI_RAIL_HAS_PA_MODE_SUB_GHZ \
+   + SLI_RAIL_HAS_PA_MODE_SUB_GHZ_OFDM)
 
 /**
  * The number of PA's on this chip (including Virtual PAs).
@@ -343,11 +370,6 @@ struct sl_rail_channel_config_entry_attr {
 #error "SL_RAIL_NUM_PA undefined for platform"
 #endif
 #endif
-
-/**
- * Boolean to indicate on number of PA modes present on a chip.
- */
-#define SL_RAIL_TX_PA_MODES_COUNT (1U)
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // Self-referencing defines minimize compiler complaints when using SLI_RAIL_ENUM
@@ -433,7 +455,7 @@ struct sl_rail_channel_config_entry_attr {
  * @def SL_RAIL_MINIMUM_TRANSITION_US
  * @brief The minimum value for a consistent RAIL transition
  * @note Transitions may need to be slower than this when using longer
- *   \ref sl_rail_tx_power_config_t::ramp_time_us values
+ *   \ref sl_rail_set_tx_pa_ramp_time() values
  */
 #define SL_RAIL_MINIMUM_TRANSITION_US (75U)
 

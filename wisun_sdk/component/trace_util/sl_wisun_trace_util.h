@@ -160,6 +160,14 @@ extern const app_enum_t app_mac_enum[];
 /// Broadcast MAC address
 extern const sl_wisun_mac_address_t APP_BROADCAST_MAC;
 
+/// Wi-SUN state enum
+extern const app_enum_t app_wisun_state_enum[];
+
+#if defined(SL_CATALOG_WISUN_BR_WIFI_PRESENT)
+/// Wi-SUN WiFi security type enum
+extern const app_enum_t app_wisun_wifi_security_type_enum[];
+#endif
+
 // -----------------------------------------------------------------------------
 //                          Public Function Declarations
 // -----------------------------------------------------------------------------
@@ -196,7 +204,9 @@ const char* app_wisun_trace_util_get_ip_str(const void *const addr);
  *****************************************************************************/
 __STATIC_INLINE void app_wisun_trace_util_destroy_ip_str(const char * const str)
 {
-  sl_free((void *) str);
+  if (str != NULL) {
+    sl_free((void *) str);
+  }
 }
 
 /**************************************************************************//**

@@ -37,13 +37,12 @@
 
 sl_status_t cs_antenna_configure(bool wired)
 {
-  uint8_t cmd_buf[ANTENNA_CONFIGURE_MSG_LEN];
-  cs_acp_cmd_t *acp_cmd = (cs_acp_cmd_t *)cmd_buf;
-  acp_cmd->cmd_id = CS_ACP_CMD_ANTENNA_CONFIGURE;
-  acp_cmd->data.antenna_config_wired = (uint8_t)wired;
+  cs_acp_cmd_t acp_cmd;
+  acp_cmd.cmd_id = CS_ACP_CMD_ANTENNA_CONFIGURE;
+  acp_cmd.data.antenna_config_wired = (uint8_t)wired;
 
   return sl_bt_user_cs_service_message_to_target(ANTENNA_CONFIGURE_MSG_LEN,
-                                                 cmd_buf,
+                                                 (uint8_t *)&acp_cmd,
                                                  0,
                                                  NULL,
                                                  NULL);

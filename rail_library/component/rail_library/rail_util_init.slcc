@@ -19,6 +19,8 @@ requires:
 provides:
 - name: rail_util_init
   allow_multiple: true
+conflicts:
+- name: sl_rail_util_init
 documentation:
   docset: rail
   document: rail-api/rail-util-init
@@ -59,6 +61,10 @@ config_file:
   condition:
   - device_series_2
   - device_sdid_240
+- path: plugin/rail_util_init/config/efr32xg2d/sl_rail_util_init_{{instance}}_config.h
+  condition:
+  - device_series_2
+  - device_sdid_260
 - path: plugin/rail_util_init/config/sixg301/sl_rail_util_init_{{instance}}_config.h
   condition:
   - device_series_3

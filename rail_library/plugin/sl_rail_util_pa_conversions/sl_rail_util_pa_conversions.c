@@ -2,8 +2,8 @@
  * @file
  * @brief PA power conversion functions provided to the customer as source for
  *   highest level of customization.
- * @details This file contains the curves and logic that convert PA power
- *   levels to dBm powers.
+ * @details This file contains the logic that converts dBm powers to
+ *   chip-and-PA-specific power levels used by the RAIL library.
  *******************************************************************************
  * # License
  * <b>Copyright 2025 Silicon Laboratories Inc. www.silabs.com</b>
@@ -39,12 +39,14 @@
 #else
 #include "sl_clock_manager.h"
 #endif
-#include "sl_rail_util_pa_config.h"
-#include "sl_rail_util_pa_conversions.h"
 #include "sl_rail.h"
 #include "rail.h"
+#include "sl_rail_util_pa_conversions.h"
+#include "sl_rail_util_pa_config.h"
 
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#if     SL_RAIL_UTIL_PA_NVM_ENABLED
+#error  NVM PA configuration is not yet supported by the sl_rail_util_pa component
+#endif//SL_RAIL_UTIL_PA_NVM_ENABLED
 
 static sl_rail_tx_power_table_config_t sli_rail_util_pa_power_table;
 
@@ -61,52 +63,18 @@ sl_rail_status_t sl_rail_util_pa_init_tx_power_table(sl_rail_handle_t radio_hand
                                                      const sl_rail_tx_power_table_config_t *p_tx_power_table_config)
 {
   (void) radio_handle;
-  sl_rail_status_t status = sl_rail_verify_tx_power_curves(p_tx_power_table_config);
+  sl_rail_status_t status = sl_rail_verify_tx_power_conversion(p_tx_power_table_config);
   if (status == RAIL_STATUS_NO_ERROR) {
     sli_rail_util_pa_power_table = *p_tx_power_table_config;
   }
   return status;
 }
 
-RAIL_TxPowerLevel_t RAIL_ConvertDbmToRaw(RAIL_Handle_t railHandle,
-                                         RAIL_TxPowerMode_t mode,
-                                         RAIL_TxPower_t power)
-{
-  // TODO stub, this will go as we change calls in the lib to use new cb
-  (void)railHandle;
-  (void)mode;
-  (void)power;
-  return SL_RAIL_TX_POWER_LEVEL_INVALID;
-}
-
-RAIL_Status_t RAIL_ConvertDbmToPowerSettingEntry(RAIL_Handle_t railHandle,
-                                                 RAIL_TxPowerMode_t mode,
-                                                 RAIL_TxPower_t power,
-                                                 RAIL_TxPowerSettingEntry_t *powerSettingInfo)
-{
-  (void) railHandle;
-  (void)mode;
-  (void)power;
-  (void)powerSettingInfo;
-  return RAIL_STATUS_INVALID_CALL;
-}
-
-RAIL_TxPower_t RAIL_ConvertRawToDbm(RAIL_Handle_t railHandle,
-                                    RAIL_TxPowerMode_t mode,
-                                    RAIL_TxPowerLevel_t powerLevel)
-{
-  // TODO stub, this will go as we change calls in the lib to use new cb
-  (void)railHandle;
-  (void)mode;
-  (void) powerLevel;
-  return SL_RAIL_TX_POWER_MIN;
-}
-
 const sl_rail_pa_power_setting_t *sl_rail_util_pa_get_power_setting_table(sl_rail_handle_t rail_handle,
                                                                           sl_rail_tx_pa_mode_t pa_mode,
                                                                           sl_rail_tx_power_t *p_min_ddbm,
                                                                           sl_rail_tx_power_t *p_max_ddbm,
-                                                                          sl_rail_tx_power_level_t *p_step_ddbm)
+                                                                          sl_rail_tx_power_t *p_step_ddbm)
 {
   (void)rail_handle;
   sl_rail_pa_descriptor_t *p_pa_descriptor = &(sli_rail_util_pa_power_table.p_pa_table_descriptor[pa_mode]);
@@ -116,22 +84,61 @@ const sl_rail_pa_power_setting_t *sl_rail_util_pa_get_power_setting_table(sl_rai
   return (sl_rail_pa_power_setting_t*)(p_pa_descriptor->p_power_setting_table); //This includes sl_rail_pa_power_setting_t and curr_pa_power_ddbm
 }
 
-sl_rail_status_t sl_rail_get_tx_pa_table_limits(sl_rail_handle_t rail_handle,
-                                                sl_rail_tx_power_t *p_max_ddbm,
-                                                sl_rail_tx_power_t *p_min_ddbm,
-                                                sl_rail_tx_power_t *p_step_ddbm)
+sl_rail_status_t sl_rail_util_pa_get_tx_power_limits(sl_rail_handle_t rail_handle,
+                                                     sl_rail_tx_pa_mode_t pa_mode,
+                                                     sl_rail_tx_power_t *p_min_ddbm,
+                                                     sl_rail_tx_power_t *p_max_ddbm,
+                                                     sl_rail_tx_power_t *p_step_ddbm)
 {
   (void) rail_handle;
-  sl_rail_tx_power_table_config_t const *p_power_table_config = &sli_rail_util_pa_power_table;
-  sl_rail_tx_pa_mode_t pa_mode = sl_rail_get_pa_mode_from_channel_entry(rail_handle);
-
-  if (pa_mode > p_power_table_config->num_of_tables) {
-    return SL_RAIL_STATUS_INVALID_CALL;
+  if (pa_mode > SL_RAIL_TX_PA_MODE_INVALID) {
+    return SL_RAIL_STATUS_INVALID_PARAMETER;
   }
-  sl_rail_pa_descriptor_t *p_pa_descriptor = &(p_power_table_config->p_pa_table_descriptor[pa_mode]);
-  *p_max_ddbm = p_pa_descriptor->max_power_ddbm;
-  *p_min_ddbm = p_pa_descriptor->min_power_ddbm;
-  *p_step_ddbm = p_pa_descriptor->step_power_ddbm;
+  if (pa_mode == SL_RAIL_TX_PA_MODE_INVALID) {
+    pa_mode = sl_rail_get_pa_mode_from_channel_entry(rail_handle);
+  }
+  // Turn pa_mode into PA table index
+#if (!SL_RAIL_SUPPORTS_2P4_GHZ_BAND)
+  pa_mode -= 1U; // Underflow to 255 will be caught in next if condition
+#endif
+  if (pa_mode > sli_rail_util_pa_power_table.num_of_tables) {
+    return SL_RAIL_STATUS_INVALID_PARAMETER;
+  }
+  const sl_rail_pa_descriptor_t *p_pa_descriptor = &(sli_rail_util_pa_power_table.p_pa_table_descriptor[pa_mode]);
+  if (p_min_ddbm != NULL) {
+    *p_min_ddbm = p_pa_descriptor->min_power_ddbm;
+  }
+  if (p_max_ddbm != NULL) {
+    *p_max_ddbm = p_pa_descriptor->max_power_ddbm;
+  }
+  if (p_step_ddbm != NULL) {
+    *p_step_ddbm = p_pa_descriptor->step_power_ddbm;
+  }
+  return SL_RAIL_STATUS_NO_ERROR;
+}
+
+sl_rail_status_t sl_rail_util_pa_convert_power_to_actual(sl_rail_handle_t rail_handle,
+                                                         sl_rail_tx_pa_mode_t pa_mode,
+                                                         sl_rail_tx_power_t *p_ddbm)
+{
+  if ((p_ddbm == NULL)
+      || (pa_mode > SL_RAIL_TX_PA_MODE_INVALID)) {
+    return SL_RAIL_STATUS_INVALID_PARAMETER;
+  }
+  if (pa_mode == SL_RAIL_TX_PA_MODE_INVALID) {
+    pa_mode = sl_rail_get_pa_mode_from_channel_entry(rail_handle);
+  }
+  sl_rail_tx_power_setting_entry_t power_entry;
+  sl_rail_status_t status
+    = sl_railcb_convert_ddbm_to_power_setting_entry(rail_handle,
+                                                    *p_ddbm,
+                                                    pa_mode,
+                                                    SL_RAIL_TX_POWER_MAX,
+                                                    &power_entry);
+  if (status != SL_RAIL_STATUS_NO_ERROR) {
+    return status;
+  }
+  *p_ddbm = power_entry.curr_pa_power_ddbm;
   return SL_RAIL_STATUS_NO_ERROR;
 }
 
@@ -145,10 +152,19 @@ sl_rail_status_t sl_railcb_convert_ddbm_to_power_setting_entry(sl_rail_handle_t 
   // Initialize the powersetting config from the table in a init fn()
   // Choose the table based on pa_mode
   sl_rail_tx_power_table_config_t const *p_power_table_config = &sli_rail_util_pa_power_table;
+  // Turn pa_mode into PA table index
+#if (!SL_RAIL_SUPPORTS_2P4_GHZ_BAND)
+  pa_mode -= 1U; // Underflow to 255 will be caught in next if condition
+#endif
   if (pa_mode > p_power_table_config->num_of_tables) {
     return SL_RAIL_STATUS_INVALID_CALL;
   }
   sl_rail_pa_descriptor_t *p_pa_descriptor = &(p_power_table_config->p_pa_table_descriptor[pa_mode]);
+  if ((p_pa_descriptor == NULL)
+      || (p_pa_descriptor->num_of_values == 0U)) {
+    // Seems no power table was configured?!
+    return SL_RAIL_STATUS_INVALID_STATE;
+  }
 
   sl_rail_tx_power_t min_power_ddbm = p_pa_descriptor->min_power_ddbm;
   sl_rail_tx_power_t max_power_ddbm = p_pa_descriptor->max_power_ddbm;
@@ -163,13 +179,13 @@ sl_rail_status_t sl_railcb_convert_ddbm_to_power_setting_entry(sl_rail_handle_t 
     // Power level is within bounds (MISRA required else)
   }
 
-  // Calculate indices
-  uint16_t max_index = p_pa_descriptor->num_of_values == 0U ? 0U : (p_pa_descriptor->num_of_values - 1U);
-  uint16_t power_index = (uint16_t)((power_ddbm - min_power_ddbm) / table_step_ddbm);
-
   if (table_step_ddbm == 0U) {
     return SL_RAIL_STATUS_INVALID_STATE;
   }
+  // Calculate indices
+  uint16_t max_index =  (p_pa_descriptor->num_of_values - 1U);
+  uint16_t power_index = (uint16_t)((power_ddbm - min_power_ddbm) / table_step_ddbm);
+
   // Adjust the index if our estimated max power is less than max power provided
   // in the table because an extra entry is added in table in this case.
   if (max_power_ddbm > (min_power_ddbm + max_index * table_step_ddbm)) {
@@ -234,42 +250,9 @@ sl_rail_status_t sl_railcb_convert_ddbm_to_power_setting_entry(sl_rail_handle_t 
   return SL_RAIL_STATUS_NO_ERROR;
 }
 
-#include "sl_rail_util_pa_config.h"
-
-#if     SL_RAIL_UTIL_PA_NVM_ENABLED
-#include "sl_rail_util_pa_nvm_configs.h"
-#endif//SL_RAIL_UTIL_PA_NVM_ENABLED
-
-#if RAIL_SUPPORTS_2P4GHZ_BAND
-static RAIL_TxPowerConfig_t txPowerConfig2p4Ghz = {
-  .mode = SL_RAIL_UTIL_PA_SELECTION_2P4GHZ,
-  .voltage = SL_RAIL_UTIL_PA_VOLTAGE_MV,
-  .rampTime = SL_RAIL_UTIL_PA_RAMP_TIME_US,
-};
-#endif
-#if RAIL_SUPPORTS_SUBGHZ_BAND
-static RAIL_TxPowerConfig_t txPowerConfigSubGhz = {
-  .mode = SL_RAIL_UTIL_PA_SELECTION_SUBGHZ,
-  .voltage = SL_RAIL_UTIL_PA_VOLTAGE_MV,
-  .rampTime = SL_RAIL_UTIL_PA_RAMP_TIME_US,
-};
-#endif
-#if RAIL_SUPPORTS_OFDM_PA
-#ifndef SL_RAIL_UTIL_PA_SELECTION_OFDM
-#define SL_RAIL_UTIL_PA_SELECTION_OFDM RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE
-#endif
-static RAIL_TxPowerConfig_t txPowerConfigOFDM = {
-  .mode = SL_RAIL_UTIL_PA_SELECTION_OFDM,
-  .voltage = SL_RAIL_UTIL_PA_VOLTAGE_MV,
-};
-#endif // RAIL_SUPPORTS_OFDM_PA
-
 void sl_rail_util_pa_init(void)
 {
-  const sl_rail_tx_power_table_config_t *tx_power_tables;
-  tx_power_tables = &sl_rail_util_pa_tx_power_table;
-
-  (void)sl_rail_util_pa_init_tx_power_table(SL_RAIL_EFR32_HANDLE, tx_power_tables);
+  (void) sl_rail_util_pa_init_tx_power_table(SL_RAIL_EFR32_HANDLE, &sl_rail_util_pa_tx_power_table);
   // Configure default config power
 #if SL_RAIL_UTIL_PA_CALIBRATION_ENABLE
   sl_rail_enable_pa_cal(SL_RAIL_EFR32_HANDLE, true);
@@ -278,31 +261,13 @@ void sl_rail_util_pa_init(void)
 #endif
 }
 
-sl_rail_tx_power_config_t *sl_rail_util_pa_get_tx_power_config_2p4ghz(void)
+sl_rail_status_t sl_rail_util_pa_post_init(sl_rail_handle_t rail_handle,
+                                           sl_rail_tx_pa_mode_t pa_mode)
 {
-#if SL_RAIL_SUPPORTS_2P4_GHZ_BAND
-  return (sl_rail_tx_power_config_t *)&txPowerConfig2p4Ghz;
-#else
-  return NULL;
-#endif
-}
-
-sl_rail_tx_power_config_t *sl_rail_util_pa_get_tx_power_config_subghz(void)
-{
-#if SL_RAIL_SUPPORTS_SUB_GHZ_BAND
-  return (sl_rail_tx_power_config_t *)&txPowerConfigSubGhz;
-#else
-  return NULL;
-#endif
-}
-
-sl_rail_tx_power_config_t *sl_rail_util_pa_get_tx_power_config_ofdm(void)
-{
-#if SL_RAIL_SUPPORTS_OFDM_PA
-  return (sl_rail_tx_power_config_t *)&txPowerConfigOFDM;
-#else
-  return NULL;
-#endif // RAIL_SUPPORTS_OFDM_PA
+  (void) pa_mode; // may be used in the future
+  sl_rail_set_tx_pa_ramp_time(rail_handle, SL_RAIL_UTIL_PA_RAMP_TIME_US);
+  sl_rail_set_tx_pa_voltage(rail_handle, SL_RAIL_UTIL_PA_VOLTAGE_MV);
+  return SL_RAIL_STATUS_NO_ERROR;
 }
 
 void sl_rail_util_pa_on_channel_config_change(sl_rail_handle_t rail_handle,
@@ -312,8 +277,7 @@ void sl_rail_util_pa_on_channel_config_change(sl_rail_handle_t rail_handle,
   sl_rail_tx_pa_mode_t current_pa_mode = sl_rail_get_pa_mode(rail_handle); //from state
   sl_rail_tx_pa_mode_t new_pa_mode = sl_rail_get_pa_mode_from_channel_entry(rail_handle); //from configs
   if ((current_pa_mode != SL_RAIL_TX_PA_MODE_INVALID) || (current_pa_mode != new_pa_mode)) {
-    sl_rail_set_tx_pa_ramp_time(rail_handle, SL_RAIL_UTIL_PA_RAMP_TIME_US);
-    sl_rail_set_tx_pa_voltage(rail_handle, SL_RAIL_UTIL_PA_VOLTAGE_MV);
+    (void) sl_rail_util_pa_post_init(rail_handle, new_pa_mode);
   }
   if (current_pa_mode != new_pa_mode) {
     sl_rail_tx_power_t tx_power_ddbm = SL_RAIL_UTIL_PA_POWER_DECI_DBM;
@@ -327,3 +291,90 @@ void sl_rail_util_pa_on_channel_config_change(sl_rail_handle_t rail_handle,
     }
   }
 }
+
+// Begin RAIL 2.x compatibility APIs
+
+#if SL_RAIL_SUPPORTS_2P4_GHZ_BAND
+static RAIL_TxPowerConfig_t txPowerConfig2p4Ghz = {
+  .mode = SL_RAIL_TX_POWER_MODE_2P4_GHZ_HIGHEST,
+  .voltage = SL_RAIL_UTIL_PA_VOLTAGE_MV,
+  .rampTime = SL_RAIL_UTIL_PA_RAMP_TIME_US,
+};
+#endif
+#if SL_RAIL_SUPPORTS_SUB_GHZ_BAND
+static RAIL_TxPowerConfig_t txPowerConfigSubGhz = {
+  .mode = SL_RAIL_TX_POWER_MODE_SUB_GHZ_HIGHEST,
+  .voltage = SL_RAIL_UTIL_PA_VOLTAGE_MV,
+  .rampTime = SL_RAIL_UTIL_PA_RAMP_TIME_US,
+};
+#endif
+#if SL_RAIL_SUPPORTS_OFDM_PA
+static RAIL_TxPowerConfig_t txPowerConfigOFDM = {
+  .mode = SL_RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE,
+  .voltage = SL_RAIL_UTIL_PA_VOLTAGE_MV,
+  // rampTime is irrelevant for OFDM PA
+};
+#endif
+
+RAIL_TxPowerConfig_t *sl_rail_util_pa_get_tx_power_config_2p4ghz(void)
+{
+#if SL_RAIL_SUPPORTS_2P4_GHZ_BAND
+  return &txPowerConfig2p4Ghz;
+#else
+  return NULL;
+#endif
+}
+
+RAIL_TxPowerConfig_t *sl_rail_util_pa_get_tx_power_config_subghz(void)
+{
+#if SL_RAIL_SUPPORTS_SUB_GHZ_BAND
+  return &txPowerConfigSubGhz;
+#else
+  return NULL;
+#endif
+}
+
+RAIL_TxPowerConfig_t *sl_rail_util_pa_get_tx_power_config_ofdm(void)
+{
+#if SL_RAIL_SUPPORTS_OFDM_PA
+  return &txPowerConfigOFDM;
+#else
+  return NULL;
+#endif
+}
+
+RAIL_TxPowerLevel_t RAIL_ConvertDbmToRaw(RAIL_Handle_t railHandle,
+                                         RAIL_TxPowerMode_t mode,
+                                         RAIL_TxPower_t power)
+{
+  // TODO stub, this will go as we change calls in the lib to use new cb
+  (void)railHandle;
+  (void)mode;
+  (void)power;
+  return RAIL_TX_POWER_LEVEL_INVALID;
+}
+
+RAIL_Status_t RAIL_ConvertDbmToPowerSettingEntry(RAIL_Handle_t railHandle,
+                                                 RAIL_TxPowerMode_t mode,
+                                                 RAIL_TxPower_t power,
+                                                 RAIL_TxPowerSettingEntry_t *powerSettingInfo)
+{
+  (void) railHandle;
+  (void)mode;
+  (void)power;
+  (void)powerSettingInfo;
+  return RAIL_STATUS_INVALID_CALL;
+}
+
+RAIL_TxPower_t RAIL_ConvertRawToDbm(RAIL_Handle_t railHandle,
+                                    RAIL_TxPowerMode_t mode,
+                                    RAIL_TxPowerLevel_t powerLevel)
+{
+  // TODO stub, this will go as we change calls in the lib to use new cb
+  (void)railHandle;
+  (void)mode;
+  (void) powerLevel;
+  return SL_RAIL_TX_POWER_MIN;
+}
+
+// End RAIL 2.x compatibility APIs

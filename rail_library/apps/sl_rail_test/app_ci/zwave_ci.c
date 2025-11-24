@@ -334,21 +334,15 @@ void zwaveSetLowPowerLevel(sl_cli_command_arg_t *args)
                        "Need to enable Z-Wave for this command.");
     return;
   }
-  if (sl_cli_get_argument_count(args) >= 2 && strcmp(sl_cli_get_argument_string(args, 1), "raw") == 0) {
-    sl_rail_tx_power_level_t powerLevelRaw = (sl_rail_tx_power_level_t)sl_cli_get_argument_uint32(args, 0);
-    status = sl_rail_zwave_set_tx_low_power(railHandle, powerLevelRaw);
-  } else {
-    sl_rail_tx_power_t powerLevelDbm = (sl_rail_tx_power_t)sl_cli_get_argument_uint32(args, 0);
-    status = sl_rail_zwave_set_tx_low_power_dbm(railHandle, powerLevelDbm);
-  }
+  sl_rail_tx_power_t powerLevelDbm = (sl_rail_tx_power_t)sl_cli_get_argument_int32(args, 0);
+  status = sl_rail_zwave_set_tx_low_power_dbm(railHandle, powerLevelDbm);
   responsePrint(sl_cli_get_command_string(args, 0), "LowPowerLevel:%s", status ? "Error" : "Set");
 }
 
 void zwaveGetLowPowerLevel(sl_cli_command_arg_t *args)
 {
   responsePrint(sl_cli_get_command_string(args, 0),
-                "powerLevelRaw:%d,powerLeveldBm:%d",
-                sl_rail_zwave_get_tx_low_power(railHandle),
+                "powerLeveldBm:%d",
                 sl_rail_zwave_get_tx_low_power_dbm(railHandle));
 }
 

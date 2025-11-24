@@ -43,9 +43,9 @@ extern "C" {
 #include "sl_status.h"
 #include "sl_wisun_api.h"
 #include "sl_wisun_config.h"
-#include "sl_component_catalog.h"
 
-#include "sl_wisun_types.h"
+#include "sl_wisun_app_setting_common.h"
+
 /**************************************************************************//**
  * @addtogroup SL_WISUN_APP_SETTING
  * @{
@@ -58,31 +58,11 @@ extern "C" {
 ///  Wi-SUN default network name size
 #define APP_SETTING_NETWORK_NAME_MAX_SIZE   (SL_WISUN_NETWORK_NAME_SIZE + 1)
 
-/// Wi-SUN settings default subscription channel
-#define APP_SETTING_DEFAULT_SUBSCRIPT_CH    (0U)
-
-/// Size of the printable data buffer
-#define APP_UTIL_PRINTABLE_DATA_MAX_LENGTH  (64)
-
-/// Size of the IPv6 prefix
-#define APP_IPV6_PREFIX_SIZE                (43)
-
 /**************************************************************************//**
  * @addtogroup APP_SETTING_TYPES Type definitions
  * @ingroup SL_WISUN_APP_SETTING
  * @{
  *****************************************************************************/
-/// App settings notification channels
-typedef enum app_setting_notification {
-  /// Set Network Name notification
-  APP_SETTING_NOTIFICATION_SET_NETWORK_NAME = 0UL,
-  /// Set Network Size notification
-  APP_SETTING_NOTIFICATION_SET_NETWORK_SIZE,
-  /// Set TX Power notification
-  APP_SETTING_NOTIFICATION_SET_TX_POWER,
-  /// Set TX Power notification
-  APP_SETTING_NOTIFICATION_SET_PHY_CFG
-} app_setting_notification_t;
 
 /// Wisun setting structure
 typedef struct app_setting_wisun {
@@ -105,54 +85,6 @@ typedef struct app_setting_wisun {
   /// Key chain index
   uint8_t keychain_index;
 } app_setting_wisun_t;
-
-/// Wisun BR setting structure
-typedef struct app_setting_br {
-  /// Network Name
-  char network_name[APP_SETTING_NETWORK_NAME_MAX_SIZE];
-  /// Network size
-  uint8_t network_size;
-  /// TX Power
-  int16_t tx_power_ddbm;
-  /// UC Dwell interval in ms
-  uint8_t uc_dwell_interval_ms;
-  /// BC interval in ms
-  uint32_t bc_interval_ms;
-  /// BC Dwell interval in ms
-  uint8_t bc_dwell_interval_ms;
-  /// State
-  uint8_t state;
-  /// Allowed channels
-  char allowed_channels[APP_UTIL_PRINTABLE_DATA_MAX_LENGTH + 1];
-  /// IPv6 prefix
-  char ipv6_prefix[APP_IPV6_PREFIX_SIZE + 1];
-  /// Regulation
-  uint8_t regulation;
-  /// FEC
-  uint8_t fec;
-  /// RX PHY mode IDs
-  uint8_t rx_phy_mode_ids[SL_WISUN_MAX_PHY_MODE_ID_COUNT];
-  /// RX PHY mode IDs count
-  uint8_t rx_phy_mode_ids_count;
-  /// LFN profile
-  uint8_t lfn_profile;
-  /// Maximum neighbor count
-  uint8_t max_neighbor_count;
-  /// Maximum child count
-  uint8_t max_child_count;
-  /// Maximum security neighbor count
-  uint16_t max_security_neighbor_count;
-  /// Key chain
-  uint8_t keychain;
-  /// Key chain index
-  uint8_t keychain_index;
-  /// Socket RX buffer size
-  uint16_t socket_rx_buffer_size;
-  /// PHY configuration type
-  sl_wisun_phy_config_t phy;
-  /// Default PHY
-  bool is_default_phy;
-} app_setting_br_t;
 
 /** @} (end APP_SETTING_TYPES) */
 
@@ -250,55 +182,6 @@ sl_status_t app_wisun_setting_get_phy(sl_wisun_phy_config_t *const phy);
  *         it is not.
  *****************************************************************************/
 sl_status_t app_wisun_setting_init_phy_cfg(void);
-
-/**************************************************************************//**
- * @brief Subscribe to setting notification channel
- * @details Notifications are received on the channel (output) about notification type
- * @param[in] notif Type of the notification 'app_setting_notification_t'
- * @param[out] channel Provided channel number, this is the output of the subscription
- * @return sl_status_t SL_STATUS_OK on success, otherwise SL_STATUS_FAIL
- *****************************************************************************/
-sl_status_t app_wisun_setting_subscribe_notification(const app_setting_notification_t notif,
-                                                     uint8_t * const channel);
-
-/**************************************************************************//**
- * @brief Is setting notified getter
- * @details Polling notification flag
- * @param[in] notif Type of the notification 'app_setting_notification_t'
- * @param[in] channel channel number, this is the output of the subscription
- * @return bool true if channel is notified by setting, otherwise false
- *****************************************************************************/
-bool app_wisun_setting_is_notified(const app_setting_notification_t notif,
-                                   const uint8_t channel);
-
-/**************************************************************************//**
- * @brief Unsubscribe from setting notification
- * @details Delete notification channel flag from subscripted channel flags
- * @param[in] notif Type of the notification 'app_setting_notification_t'
- * @param[in] channel channel number, this is the output of the subscription
- *****************************************************************************/
-void app_wisun_setting_unsubscribe(const app_setting_notification_t notif,
-                                   const uint8_t channel);
-
-/**************************************************************************//**
- * @brief Acknowledge notification
- * @details Delete notification channel flag
- * @param[in] notif ype of the notification 'app_setting_notification_t'
- * @param[in] channel channel number, this is the output of the subscription
- *****************************************************************************/
-void app_wisun_setting_ack_notification(const app_setting_notification_t notif,
-                                        const uint8_t channel);
-
-/**************************************************************************//**
- * @brief Convert a string representation of channels to channel mask
- * @details This function converts a string containing channel information to
- *          a Wi-SUN channel mask structure
- * @param[in] str String representation of the channel list
- * @param[out] channel_mask Pointer to the channel mask to be populated
- * @return sl_status_t SL_STATUS_OK on success or appropriate error code
- *****************************************************************************/
-sl_status_t app_settings_get_channel_mask(const char *str,
-                                          sl_wisun_channel_mask_t *channel_mask);
 
 /** @}*/
 

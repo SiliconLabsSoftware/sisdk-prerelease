@@ -101,6 +101,10 @@ source:
   condition:
   - zigbee_use_ipc
   - zigbee_memory_usage
+- path: stack/internal/src/baremetal/sl_zigbee_memory_usage_baremetal_wrapper.c
+  unless:
+  - zigbee_use_ipc
+  - native_host
 define:
 - name: SL_ZIGBEE_AF_NCP
   value: 1

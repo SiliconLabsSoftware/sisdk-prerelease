@@ -33,6 +33,11 @@ config_file:
   condition:
   - device_series_2
   - device_sdid_235
+- path: plugin/rail_util_rf_path/config/efr32xg2d/sl_rail_util_rf_path_config.h
+  file_id: rail_util_rf_path_config
+  condition:
+  - device_series_2
+  - device_sdid_260
 include:
 - path: plugin/rail_util_rf_path
   file_list:

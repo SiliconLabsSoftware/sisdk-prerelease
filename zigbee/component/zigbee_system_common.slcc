@@ -310,7 +310,7 @@ template_contribution:
 - name: cli_command
   value:
     name: radio-rx-duty-cycle
-    handler: sl_zigbee_af_radio_rx_duty_cycle
+    handler: sl_zigbee_af_radio_rx_duty_cycle_command
     help: Start radio duty cycling on rx.
   condition:
   - sl_rail_util_ieee802154_rx_duty_cycling

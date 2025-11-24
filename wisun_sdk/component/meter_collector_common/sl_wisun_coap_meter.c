@@ -45,6 +45,10 @@
 #include "sl_sleeptimer.h"
 #include "sl_wisun_event_mgr.h"
 #include "sl_wisun_app_core.h"
+#if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
+#include "sl_wisun_app_br_core.h"
+#include "border_router/sl_wisun_br_api.h"
+#endif
 #include "sl_wisun_coap.h"
 #include "sl_wisun_coap_rhnd.h"
 #if SL_WISUN_COAP_NOTIFY_SERVICE_ENABLE
@@ -518,10 +522,11 @@ static const char *_meter_packet2json(const sl_wisun_meter_packet_t * const pack
                                       const char *ip_str_global)
 {
   static char buff[SL_WISUN_COAP_METER_JSON_MEAS_DATA_SIZE] = { 0 };
+  const char *ip_str = (ip_str_global != NULL) ? ip_str_global : "unknown";
   snprintf(buff,
            SL_WISUN_COAP_METER_JSON_MEAS_DATA_SIZE,
            SL_WISUN_COAP_METER_JSON_MEAS_FORMAT_STR,
-           ip_str_global,
+           ip_str,
            packet->id,
            packet->temperature / 1000,
            (packet->temperature % 1000) / 10,
@@ -779,10 +784,14 @@ static sl_wisun_coap_packet_t *_prepare_measurement_resp(const sl_wisun_coap_pac
   sl_wisun_coap_packet_t * resp_packet = NULL;
   sn_coap_content_format_e ct_format = COAP_CT_JSON;
   size_t max_content_size = 0U;
-  static sl_wisun_app_core_current_addr_t addresses = { 0 };
   const char *ip_str_global = NULL;
   char *content = NULL;
   static sl_wisun_meter_packet_t packet = { 0 };
+  #if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
+  static sl_wisun_app_core_current_addr_t addresses = { 0 };
+  #else
+  static sl_wisun_app_br_core_current_addr_t br_addresses = { 0 };
+  #endif
 
   // Init packet
   resp_packet = sl_wisun_coap_build_response(req_packet, COAP_MSG_CODE_RESPONSE_BAD_REQUEST);
@@ -795,8 +804,16 @@ static sl_wisun_coap_packet_t *_prepare_measurement_resp(const sl_wisun_coap_pac
     max_content_size = SL_WISUN_COAP_METER_JSON_MEAS_DATA_SIZE;
 
     // Get IP address
+    #if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
     sl_wisun_app_core_get_current_addresses(&addresses);
     ip_str_global = app_wisun_trace_util_get_ip_str(&addresses.global);
+    #else
+    if (sl_wisun_br_get_ip_addresses(br_addresses.addr_ll.address,
+                                     br_addresses.addr_gua.address,
+                                     br_addresses.addr_dodagid.address) == SL_STATUS_OK) {
+      ip_str_global = app_wisun_trace_util_get_ip_str(&br_addresses.addr_gua);
+    }
+    #endif
   } else {
     ct_format = COAP_CT_TEXT_PLAIN;
     max_content_size = SL_WISUN_COAP_METER_MEAS_PLAIN_TXT_DATA_SIZE;
@@ -885,7 +902,11 @@ static sl_wisun_coap_packet_t * _notify_hnd_cb(const sl_wisun_coap_notify_t *not
   const char *ip_str_global = NULL;
   uint32_t cnt = 0U;
 
+  #if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
   static sl_wisun_app_core_current_addr_t addresses = { 0 };
+  #else
+  static sl_wisun_app_br_core_current_addr_t br_addresses = { 0 };
+  #endif
   static sl_wisun_coap_packet_t notify_coap_pkt = {
     .msg_code = COAP_MSG_CODE_REQUEST_PUT,
     .msg_id = SL_WISUN_COAP_METER_COLLECTOR_DEFAULT_MESSAGE_ID,
@@ -924,8 +945,16 @@ static sl_wisun_coap_packet_t * _notify_hnd_cb(const sl_wisun_coap_notify_t *not
   // Build JSON payload
   tmp_buff = (char *) notify_coap_pkt.payload_ptr;
   pkt_ptr = &notify_coap_pkt;
+  #if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
   sl_wisun_app_core_get_current_addresses(&addresses);
   ip_str_global = app_wisun_trace_util_get_ip_str(&addresses.global);
+  #else
+  if (sl_wisun_br_get_ip_addresses(br_addresses.addr_ll.address,
+                                   br_addresses.addr_gua.address,
+                                   br_addresses.addr_dodagid.address) == SL_STATUS_OK) {
+    ip_str_global = app_wisun_trace_util_get_ip_str(&br_addresses.addr_gua);
+  }
+  #endif
   if (ip_str_global == NULL) {
     return NULL;
   }

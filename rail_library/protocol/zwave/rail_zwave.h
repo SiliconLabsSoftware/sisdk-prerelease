@@ -1117,7 +1117,7 @@ RAIL_Status_t RAIL_ZWAVE_GetBeamRssi(RAIL_Handle_t railHandle,
  * subsequent transmission, after which all transmissions will be
  * at the nominal power setting, until re-invoked.
  *
- * @deprecated RAIL 2.x synonym of \ref sl_rail_zwave_set_tx_low_power().
+ * @deprecated This RAIL 2.x function has been eliminated.
  */
 RAIL_Status_t RAIL_ZWAVE_SetTxLowPower(RAIL_Handle_t railHandle,
                                        uint8_t powerLevel);
@@ -1141,7 +1141,7 @@ RAIL_Status_t RAIL_ZWAVE_SetTxLowPower(RAIL_Handle_t railHandle,
  * (i.e., before a successful call to \ref RAIL_ConfigTxPower()) will return
  * \ref RAIL_TX_POWER_LEVEL_INVALID.
  *
- * @deprecated RAIL 2.x synonym of \ref sl_rail_zwave_get_tx_low_power().
+ * @deprecated This RAIL 2.x function has been eliminated.
  */
 RAIL_TxPowerLevel_t RAIL_ZWAVE_GetTxLowPower(RAIL_Handle_t railHandle);
 

@@ -155,7 +155,7 @@ void getPowerConfig(sl_cli_command_arg_t *args)
 {
   CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   sl_rail_tx_power_config_t config;
-  sl_rail_status_t status = sl_rail_get_tx_power_config(railHandle, &config);
+  sl_rail_status_t status = sli_rail_get_tx_power_config(railHandle, &config);
 
   responsePrint(sl_cli_get_command_string(args, 0), "success:%s,mode:%s,modeIndex:%d,voltage:%d,rampTime:%d",
                 status == SL_RAIL_STATUS_NO_ERROR ? "true" : "false",
@@ -172,7 +172,7 @@ void getPowerLimits(sl_cli_command_arg_t *args)
     powerMode = sl_cli_get_argument_uint8(args, 0);
   } else {
     sl_rail_tx_power_config_t config;
-    status = sl_rail_get_tx_power_config(railHandle, &config);
+    status = sli_rail_get_tx_power_config(railHandle, &config);
     powerMode = config.mode;
   }
 
@@ -181,10 +181,10 @@ void getPowerLimits(sl_cli_command_arg_t *args)
                        "Invalid PA enum value selected: %d", powerMode);
     return;
   }
-  sl_rail_tx_power_level_t maxPowerlevel = SL_RAIL_TX_POWER_LEVEL_INVALID;
-  sl_rail_tx_power_level_t minPowerlevel = SL_RAIL_TX_POWER_LEVEL_INVALID;
-  bool success = sl_rail_supports_tx_power_mode(railHandle, &powerMode,
-                                                &maxPowerlevel, &minPowerlevel);
+  sli_rail_tx_power_level_t maxPowerlevel = SLI_RAIL_TX_POWER_LEVEL_INVALID;
+  sli_rail_tx_power_level_t minPowerlevel = SLI_RAIL_TX_POWER_LEVEL_INVALID;
+  bool success = sli_rail_supports_tx_power_mode(railHandle, &powerMode,
+                                                 &maxPowerlevel, &minPowerlevel);
   responsePrint(sl_cli_get_command_string(args, 0),
                 "success:%s,powerMode:%s,minPowerLevel:%d,maxPowerLevel:%d",
                 success ? "Success" : "Failure",
@@ -258,7 +258,7 @@ void getPower(sl_cli_command_arg_t *args)
   CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   responsePrint(sl_cli_get_command_string(args, 0),
                 "powerLevel:%d,power:%d",
-                sl_rail_get_tx_power(railHandle),
+                sli_rail_get_tx_power(railHandle),
                 sl_rail_get_tx_power_dbm(railHandle));
 }
 
@@ -271,11 +271,11 @@ void setPower(sl_cli_command_arg_t *args)
   bool setPowerError = false;
 
   if (sl_cli_get_argument_count(args) >= 2 && strcmp(sl_cli_get_argument_string(args, 1), "raw") == 0) {
-    sl_rail_tx_power_level_t rawLevel = sl_cli_get_argument_uint8(args, 0);
+    sli_rail_tx_power_level_t rawLevel = sl_cli_get_argument_uint8(args, 0);
 
 #if SL_RAIL_SUPPORTS_DBM_POWERSETTING_MAPPING_TABLE
     sl_rail_tx_power_config_t tempCfg;
-    sl_rail_get_tx_power_config(railHandle, &tempCfg);
+    sli_rail_get_tx_power_config(railHandle, &tempCfg);
 #ifdef _SILICON_LABS_32B_SERIES_2
     if (SL_RAIL_POWER_MODE_IS_ANY_DBM_POWERSETTING_MAPPING_TABLE(tempCfg.mode)) {
       // dBm-to-powerSetting mode does not support raw power setting
@@ -286,7 +286,7 @@ void setPower(sl_cli_command_arg_t *args)
 #endif
 
     // Set the power and update the RAW level global
-    if (sl_rail_set_tx_power(railHandle, rawLevel) != SL_RAIL_STATUS_NO_ERROR) {
+    if (sli_rail_set_tx_power(railHandle, rawLevel) != SL_RAIL_STATUS_NO_ERROR) {
       setPowerError = true;
     }
   } else {
@@ -297,7 +297,7 @@ void setPower(sl_cli_command_arg_t *args)
     // was requested NOT what is actually applied to the hardware after limits.
     if ((sl_rail_set_tx_power_dbm(railHandle, powerDbm)
          != SL_RAIL_STATUS_NO_ERROR)
-        || (sl_rail_get_tx_power_config(railHandle, &tempCfg)
+        || (sli_rail_get_tx_power_config(railHandle, &tempCfg)
             != SL_RAIL_STATUS_NO_ERROR)) {
       setPowerError = true;
     }
@@ -312,76 +312,107 @@ void setPower(sl_cli_command_arg_t *args)
   }
 }
 
+void setPowerWithPaMode(sl_cli_command_arg_t *args)
+{
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  if (!inRadioState(SL_RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
+    return;
+  }
+
+  sl_rail_tx_power_t powerDbm = sl_cli_get_argument_int16(args, 0);
+  sl_rail_tx_pa_mode_t pa_mode = (sl_rail_tx_pa_mode_t)sl_cli_get_argument_uint8(args, 1);
+
+  // Validate PA mode (check against invalid value)
+  if (pa_mode >= SL_RAIL_TX_PA_MODE_INVALID) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x13, "Invalid PA mode: %d", pa_mode);
+    return;
+  }
+
+  sl_rail_status_t status = sl_rail_set_tx_power_dbm_with_pa_mode(railHandle, powerDbm, pa_mode);
+
+  if (status != SL_RAIL_STATUS_NO_ERROR) {
+    responsePrintError(sl_cli_get_command_string(args, 0), status, "Could not set power %d with PA mode %d", powerDbm, pa_mode);
+  } else {
+    // Get and print out the actual applied power and power level
+    args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+    responsePrint(sl_cli_get_command_string(args, 0),
+                  "powerLevel:%d,power:%d,pa_mode:%d",
+                  sli_rail_get_tx_power(railHandle),
+                  sl_rail_get_tx_power_dbm(railHandle),
+                  pa_mode);
+  }
+}
+
 void sweepTxPower(sl_cli_command_arg_t *args)
 {
   CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   responsePrint(sl_cli_get_command_string(args, 0), "Sweeping:Started,Instructions:'q' to quit or 'enter' to continue.");
   sl_rail_tx_power_config_t txPowerConfig;
 
-  sl_rail_get_tx_power_config(railHandle, &txPowerConfig);
+  sli_rail_get_tx_power_config(railHandle, &txPowerConfig);
 
-  sl_rail_tx_power_level_t start = 1;
-  sl_rail_tx_power_level_t end = 255;
+  sli_rail_tx_power_level_t start = 1;
+  sli_rail_tx_power_level_t end = 255;
 
   switch (txPowerConfig.mode) {
 #ifdef SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP
     case SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP:
-      start = SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN;
-      end = SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX;
+      start = SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN;
+      end = SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX;
       break;
 #endif
 #ifdef SL_RAIL_TX_POWER_MODE_2P4_GHZ_MP
     case SL_RAIL_TX_POWER_MODE_2P4_GHZ_MP:
-      start = SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MIN;
-      end = SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MAX;
+      start = SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MIN;
+      end = SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MAX;
       break;
 #endif
 #ifdef SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP
     case SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP:
-      start = SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN;
-      end = SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX;
+      start = SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN;
+      end = SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX;
       break;
 #endif
 #ifdef SL_RAIL_TX_POWER_MODE_2P4_GHZ_LLP
     case SL_RAIL_TX_POWER_MODE_2P4_GHZ_LLP:
-      start = SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LLP_MIN;
-      end = SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LLP_MAX;
+      start = SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LLP_MIN;
+      end = SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LLP_MAX;
       break;
 #endif
 #ifdef SL_RAIL_TX_POWER_MODE_SUB_GHZ_HP
     case SL_RAIL_TX_POWER_MODE_SUB_GHZ_HP:
-      start = SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_HP_MIN;
-      end = SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_HP_MAX;
+      start = SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_HP_MIN;
+      end = SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_HP_MAX;
       break;
 #endif
 #ifdef SL_RAIL_TX_POWER_MODE_SUB_GHZ_MP
     case SL_RAIL_TX_POWER_MODE_SUB_GHZ_MP:
-      start = SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MP_MIN;
-      end = SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MP_MAX;
+      start = SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MP_MIN;
+      end = SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MP_MAX;
       break;
 #endif
 #ifdef SL_RAIL_TX_POWER_MODE_SUB_GHZ_LP
     case SL_RAIL_TX_POWER_MODE_SUB_GHZ_LP:
-      start = SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_LP_MIN;
-      end = SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_LP_MAX;
+      start = SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_LP_MIN;
+      end = SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_LP_MAX;
       break;
 #endif
 #ifdef SL_RAIL_TX_POWER_MODE_SUB_GHZ_LLP
     case SL_RAIL_TX_POWER_MODE_SUB_GHZ_LLP:
-      start = SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_LLP_MIN;
-      end = SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_LLP_MAX;
+      start = SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_LLP_MIN;
+      end = SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_LLP_MAX;
       break;
 #endif
 #ifdef SL_RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE
     case SL_RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE:
-      start = SL_RAIL_TX_POWER_LEVEL_OFDM_PA_MIN;
-      end = SL_RAIL_TX_POWER_LEVEL_OFDM_PA_MAX;
+      start = SLI_RAIL_TX_POWER_LEVEL_OFDM_PA_MIN;
+      end = SLI_RAIL_TX_POWER_LEVEL_OFDM_PA_MAX;
       break;
 #endif
 #ifdef SL_RAIL_TX_POWER_MODE_SUB_GHZ_POWERSETTING_TABLE
     case SL_RAIL_TX_POWER_MODE_SUB_GHZ_POWERSETTING_TABLE:
-      start = SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MIN;
-      end = SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MAX;
+      start = SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MIN;
+      end = SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MAX;
       break;
 #endif
     default:
@@ -389,14 +420,14 @@ void sweepTxPower(sl_cli_command_arg_t *args)
       return;
   }
 
-  sl_rail_tx_power_level_t i;
+  sli_rail_tx_power_level_t i;
   char input = ((args->handle->last_input_type == SL_CLI_INPUT_RETURN) ? '\r' : '\0');
   char lastChar;
 
   for (i = start; i <= end; i++) {
     responsePrint(sl_cli_get_command_string(args, 0), "PowerLevel:%u", i);
     sl_rail_idle(railHandle, SL_RAIL_IDLE_FORCE_SHUTDOWN_CLEAR_FLAGS, true);
-    sl_rail_set_tx_power(railHandle, i);
+    sli_rail_set_tx_power(railHandle, i);
     sl_rail_start_tx_stream(railHandle, channel, SL_RAIL_STREAM_CARRIER_WAVE,
                             SL_RAIL_TX_OPTIONS_DEFAULT);
 

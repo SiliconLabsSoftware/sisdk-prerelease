@@ -57,6 +57,15 @@ struct timeval {
 /**************************************************************************//**
  * @addtogroup SL_WISUN_SELECT_API Select API
  * @ingroup SL_WISUN_API
+ *
+ * Select API provides an implementation of select() function, modeled
+ * after POSIX.1-2024 specification.
+ *
+ * In order to utilize the function, the application must utilize
+ * \a wisun_select component, and call the componen callbacks
+ * sl_wisun_check_read_sockfd_set() an sl_wisun_check_write_sockfd_set()
+ * from its event handler.
+ *
  * @{
  *****************************************************************************/
 

@@ -105,6 +105,21 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN"/>
     </descriptors>
+    <descriptors name="wisun_soc_br_agent" label="Wi-SUN - SoC Border Router Agent" description="The Wi-SUN Border Router Agent sample application is a bare-bones application. It can be used as a template to develop a Wi-SUN border router application with custom application logics.">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="app.wisun.example.wisun_soc_br_agent.wisun_soc_br_agent.slcp"/>
+    <properties key="projectFilePaths" value="example/wisun_soc_br_agent/wisun_soc_br_agent.slcp"/>
+    <properties key="readmeFiles" value="documentation/example/wisun_soc_br_agent/readme.md"/>
+    <properties key="boardCompatibility" value="brd2705a brd4270a brd4270b brd4271a brd4272a brd4276a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32fg25.* .*efr32fg28.* .*efr32zg28.*"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Wi-SUN Examples"/>
+    <properties key="quality" value="EVALUATION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN"/>
+    </descriptors>
     <descriptors name="wisun_soc_br_in_meter_gateway" label="Wi-SUN - SoC Border Router In-Meter Gateway" description="The Wi-SUN Border Router In-Meter Gateway sample application is a meter application running on the border router SoC.">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>

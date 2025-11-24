@@ -26,7 +26,7 @@ component:
   - id: sl_rail_util_init
     instance:
       - inst0
-  - id: sl_rail_util_pa
+  - id: sl_rail_util_compatible_pa
   - id: radio_config_simple_rail_singlephy
   - id: sl_rail_sdk_packet_assistant
   - id: sl_rail_sdk_packet_asm

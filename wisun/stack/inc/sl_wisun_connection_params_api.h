@@ -260,6 +260,7 @@ typedef struct sl_wisun_params_mpl_s sl_wisun_params_mpl_t;
 /// DHCP parameter set
 SL_PACK_START(1)
 struct sl_wisun_params_dhcp_s {
+  /// RFC8415 TX algorithm parameters for DHCP solicitation
   sl_wisun_rfc8415_txalg_params_t sol_txalg;
 } SL_ATTRIBUTE_PACKED;
 SL_PACK_END()
@@ -272,17 +273,12 @@ typedef struct sl_wisun_params_dhcp_s sl_wisun_params_dhcp_t;
 /// LFN parent parameter set
 SL_PACK_START(1)
 struct sl_wisun_params_lfn_parent_s {
-  /// Interval after which an FFN parent must disable LFN broadcast messaging
-  /// if the FFN parent is unable communicate with its Border Router.
+  /// Deprecated
   uint16_t lfn_pan_timeout_m;
   /// Number of broadcast LFN Pan Config retries when LFN Version is incremented
   /// Referred to as LFN_MAINTAIN_PARENT_TIME in FAN TPS 1.1
   uint8_t lfn_lpc_retry_count;
-  /// Duration for which an FFN retransmits DAO on behalf of a registering LFN (minutes).
-  /// This value is administratively configured and should be consistent throughout
-  /// the network.
-  /// Make sure that the value is equal to or less than the corresponding field on LFNs.
-  /// Specification range [30, 120] (set lower for test purposes)
+  /// Deprecated
   uint8_t lfn_na_wait_duration_m;
 } SL_ATTRIBUTE_PACKED;
 SL_PACK_END()
@@ -358,7 +354,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_connection_params_t;
 SL_PACK_END()
 
-/***************************************************************************//**
+/**************************************************************************//**
  * @addtogroup SL_WISUN_FFN_PARAMETER_SETS Predefined FFN parameter sets
  *
  * Predefined FFN parameter sets for sl_wisun_set_connection_parameters().
@@ -367,7 +363,7 @@ SL_PACK_END()
  * value for an application-specific parameter set.
  *
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Profile for development (shorter connection time)
 static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_TEST = {
@@ -461,9 +457,9 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_TEST = {
     },
   },
   .lfn_parent = {
-    .lfn_pan_timeout_m = 60,
+    .lfn_pan_timeout_m = 0,
     .lfn_lpc_retry_count = 5,
-    .lfn_na_wait_duration_m = 1,
+    .lfn_na_wait_duration_m = 0,
   },
   .misc = {
     .temp_link_min_timeout_s = 260,
@@ -590,9 +586,9 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_CERTIF = {
     },
   },
   .lfn_parent = {
-    .lfn_pan_timeout_m = 60,
+    .lfn_pan_timeout_m = 0,
     .lfn_lpc_retry_count = 5,
-    .lfn_na_wait_duration_m = 30,
+    .lfn_na_wait_duration_m = 0,
   },
   .misc = {
     .temp_link_min_timeout_s = 260,
@@ -719,9 +715,9 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_SMALL = {
     },
   },
   .lfn_parent = {
-    .lfn_pan_timeout_m = 60,
+    .lfn_pan_timeout_m = 0,
     .lfn_lpc_retry_count = 5,
-    .lfn_na_wait_duration_m = 30,
+    .lfn_na_wait_duration_m = 0,
   },
   .misc = {
     .temp_link_min_timeout_s = 260,
@@ -848,9 +844,9 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_MEDIUM = {
     },
   },
   .lfn_parent = {
-    .lfn_pan_timeout_m = 120,
+    .lfn_pan_timeout_m = 0,
     .lfn_lpc_retry_count = 20,
-    .lfn_na_wait_duration_m = 30,
+    .lfn_na_wait_duration_m = 0,
   },
   .misc = {
     .temp_link_min_timeout_s = 260,
@@ -977,9 +973,9 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_LARGE = {
     },
   },
   .lfn_parent = {
-    .lfn_pan_timeout_m = 180,
+    .lfn_pan_timeout_m = 0,
     .lfn_lpc_retry_count = 60,
-    .lfn_na_wait_duration_m = 30,
+    .lfn_na_wait_duration_m = 0,
   },
   .misc = {
     .temp_link_min_timeout_s = 520,

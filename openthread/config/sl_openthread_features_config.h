@@ -309,13 +309,11 @@
 #ifndef OPENTHREAD_CONFIG_PING_SENDER_ENABLE
 #define OPENTHREAD_CONFIG_PING_SENDER_ENABLE        1
 #endif
-
 // </e>
 // <e>  Power Calibration Module  (RCP only configuration)
 #ifndef OPENTHREAD_CONFIG_POWER_CALIBRATION_ENABLE
 #define OPENTHREAD_CONFIG_POWER_CALIBRATION_ENABLE  0
 #endif
-
 // </e>
 // <e>  Platform UDP
 #ifndef OPENTHREAD_CONFIG_PLATFORM_UDP_ENABLE

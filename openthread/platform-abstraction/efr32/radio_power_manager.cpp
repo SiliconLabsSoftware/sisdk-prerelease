@@ -164,23 +164,23 @@ void sli_init_power_manager(void)
 #endif //! OPENTHREAD_CONFIG_POWER_CALIBRATION_ENABLE
 }
 
-void sli_update_tx_power_after_config_update(const sl_rail_tx_power_config_t *tx_pwr_config, int8_t tx_power)
+void sli_update_tx_power_after_config_update(sl_rail_tx_pa_mode_t pa_mode, int8_t tx_power)
 {
     sl_rail_status_t         status;
-    sl_rail_tx_power_level_t tx_power_lvl;
+    sl_rail_tx_pa_mode_t     current_pa_mode;
     sl_rail_tx_power_t       tx_power_dbm = tx_power * 10;
 
-    tx_power_lvl = sli_ot_radio_interface_rail_get_tx_power();
+    current_pa_mode = sli_ot_radio_interface_rail_get_tx_pa_mode();
 
-    // Always need to call sl_rail_config_tx_power after sl_rail_config_tx_power
+    // Always need to re-establish tx power dbm after rail_config_tx_power
     // First need to get existing power setting and reassert value after config
 
-    if (tx_power_lvl != SL_RAIL_TX_POWER_LEVEL_INVALID)
+    if (current_pa_mode != SL_RAIL_TX_PA_MODE_INVALID)
     {
         tx_power_dbm = sli_ot_radio_interface_rail_get_tx_power_dbm();
     }
 
-    status = sli_ot_radio_interface_rail_config_tx_power(tx_pwr_config);
+    status = sli_ot_radio_interface_rail_config_tx_power(pa_mode);
     OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
 
     status = sli_ot_radio_interface_rail_set_tx_power_dbm(tx_power_dbm);

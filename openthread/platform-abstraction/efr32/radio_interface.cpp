@@ -55,6 +55,7 @@
 #include "sl_openthread_radio_config.h"
 #include "sl_rail.h"
 #include "sl_rail_ieee802154.h"
+#include "sl_rail_util_compatible_pa.h"
 
 // Additional includes for moved functions
 #include "soft_source_match_table.h"
@@ -143,12 +144,8 @@ const sl_rail_ieee802154_config_t sRailIeee802154Config = {
     .default_frame_pending_in_outgoing_acks = false,
 };
 
-// Forward declarations for PA functions (mocked in test environment)
-extern "C" void *sl_rail_util_pa_get_tx_power_config_subghz(void);
-extern "C" void *sl_rail_util_pa_get_tx_power_config_2p4ghz(void);
-
 // External function declarations
-extern void sli_update_tx_power_after_config_update(const sl_rail_tx_power_config_t *txPowerConfig, int8_t aTxPower);
+extern void sli_update_tx_power_after_config_update(sl_rail_tx_pa_mode_t pa_mode, int8_t aTxPower);
 extern void sli_set_tx_power_in_rail(int8_t aTxPower);
 
 // External functions from radio.cpp
@@ -372,7 +369,7 @@ efr32BandConfig *sli_ot_radio_interface_get_band_config(uint8_t aChannel)
 void sli_ot_radio_interface_load_rail_config(efr32BandConfig *aBandConfig, int8_t aTxPower)
 {
     sl_rail_status_t                 status;
-    const sl_rail_tx_power_config_t *txPowerConfig = nullptr;
+    sl_rail_tx_pa_mode_t pa_mode = SL_RAIL_TX_PA_MODE_INVALID;
 
     if (aBandConfig->mChannelConfig != nullptr)
     {
@@ -389,7 +386,7 @@ void sli_ot_radio_interface_load_rail_config(efr32BandConfig *aBandConfig, int8_
                                                      SL_RAIL_IEEE802154_G_OPTION_GB868);
         OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
 
-        txPowerConfig = (sl_rail_tx_power_config_t *)sl_rail_util_pa_get_tx_power_config_subghz();
+        pa_mode = SL_RAIL_TX_PA_MODE_SUB_GHZ;
     }
     else
     {
@@ -400,7 +397,7 @@ void sli_ot_radio_interface_load_rail_config(efr32BandConfig *aBandConfig, int8_
 #endif // SL_CATALOG_RAIL_UTIL_IEEE802154_PHY_SELECT_PRESENT
         OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
 
-        txPowerConfig = (sl_rail_tx_power_config_t *)sl_rail_util_pa_get_tx_power_config_2p4ghz();
+        pa_mode = SL_RAIL_TX_PA_MODE_2P4_GHZ;
     }
 
 #if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
@@ -414,7 +411,7 @@ void sli_ot_radio_interface_load_rail_config(efr32BandConfig *aBandConfig, int8_
 
     if (aTxPower != SL_INVALID_TX_POWER)
     {
-        sli_update_tx_power_after_config_update(txPowerConfig, aTxPower);
+        sli_update_tx_power_after_config_update(pa_mode, aTxPower);
     }
 
     // Set the current band config
@@ -646,9 +643,9 @@ sl_rail_status_t sli_ot_radio_interface_rail_set_tx_power_dbm(sl_rail_tx_power_t
     return sl_rail_set_tx_power_dbm(gRailHandle, aPowerDbm);
 }
 
-sl_rail_tx_power_t sli_ot_radio_interface_rail_get_tx_power(void)
+sl_rail_tx_pa_mode_t sli_ot_radio_interface_rail_get_tx_pa_mode(void)
 {
-    return sl_rail_get_tx_power(gRailHandle);
+    return sl_rail_get_pa_mode(gRailHandle);
 }
 
 sl_rail_tx_power_t sli_ot_radio_interface_rail_get_tx_power_dbm(void)
@@ -656,9 +653,9 @@ sl_rail_tx_power_t sli_ot_radio_interface_rail_get_tx_power_dbm(void)
     return sl_rail_get_tx_power_dbm(gRailHandle);
 }
 
-sl_rail_status_t sli_ot_radio_interface_rail_config_tx_power(const sl_rail_tx_power_config_t *aConfig)
+sl_rail_status_t sli_ot_radio_interface_rail_config_tx_power(sl_rail_tx_pa_mode_t pa_mode)
 {
-    return sl_rail_config_tx_power(gRailHandle, aConfig);
+    return sl_rail_util_pa_post_init(gRailHandle, pa_mode);
 }
 
 void sli_ot_radio_interface_rail_get_channel_ptr(uint16_t *aChannel)

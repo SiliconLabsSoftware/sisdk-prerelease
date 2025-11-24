@@ -28,7 +28,7 @@ component:
   - id: app_log
   - id: app_assert
 
-  - id: sl_rail_util_pa
+  - id: sl_rail_util_compatible_pa
   - id: sl_rail_util_pti
   - id: sl_rail_util_rssi
   - id: sl_rail_util_dma

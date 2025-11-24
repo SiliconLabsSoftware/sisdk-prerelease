@@ -30,6 +30,12 @@
 #ifndef SL_WISUN_BR_CONFIG_H
 #define SL_WISUN_BR_CONFIG_H
 
+#include "sl_component_catalog.h"
+
+#if defined(SL_CATALOG_WISUN_BR_WIFI_PRESENT)
+#include "sl_wisun_br_wifi.h"
+#endif
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <h> Wi-SUN BR configuration
@@ -85,7 +91,24 @@
 // <s SL_WISUN_BR_CONFIG_IPV6_PREFIX> IPv6 Prefix
 // <i> Default: "fd12:3456::/64"
 // <i> IPv6 prefix for DODAG.
-#define SL_WISUN_BR_CONFIG_IPV6_PREFIX  "fd12:3456::/64"
+#define SL_WISUN_BR_CONFIG_IPV6_PREFIX "fd12:3456::/64"
+
+#if defined(SL_CATALOG_WISUN_BR_WIFI_PRESENT)
+// <s SL_WISUN_BR_CONFIG_WIFI_DEFAULT_SSID> Wi-Fi SSID
+// <i> Default: "DEFAULT_SSID"
+// <i> Wi-Fi SSID for the border router.
+#define SL_WISUN_BR_CONFIG_WIFI_DEFAULT_SSID "DEFAULT_SSID"
+
+// <s SL_WISUN_BR_CONFIG_WIFI_DEFAULT_PASSPHRASE> Wi-Fi Passphrase
+// <i> Default: "DEFAULT_PASSPHRASE"
+// <i> Wi-Fi passphrase for the border router.
+#define SL_WISUN_BR_CONFIG_WIFI_DEFAULT_PASSPHRASE "DEFAULT_PASSPHRASE"
+
+// <s SL_WISUN_BR_CONFIG_WIFI_DEFAULT_SECURITY_TYPE> Wi-Fi Security Type
+// <i> Default: "WPA2-CCMP"
+// <i> Wi-Fi security type for the border router.
+#define SL_WISUN_BR_CONFIG_WIFI_DEFAULT_SECURITY_TYPE WIFI_SECURITY_TYPE_WPA2_CCMP
+#endif
 
 // </h>
 

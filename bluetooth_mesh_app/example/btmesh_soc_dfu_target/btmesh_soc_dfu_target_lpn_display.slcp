@@ -135,6 +135,7 @@ post_build:
     condition: [device_series_2, bootloader_app_properties]
 
 tag:
+  - companion:bootloader-storage-internal-single-btmesh-dfu
   - hardware:board_only
   - hardware:component:button:1+
   - hardware:component:display:ls013b7dh03

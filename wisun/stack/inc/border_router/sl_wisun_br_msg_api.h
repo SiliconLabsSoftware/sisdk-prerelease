@@ -26,7 +26,7 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- ******************************************************************************/
+ *****************************************************************************/
 
 #ifndef SL_WISUN_BR_MSG_API_H
 #define SL_WISUN_BR_MSG_API_H
@@ -36,7 +36,17 @@
 #include "border_router/sl_wisun_br_lfn_params_api.h"
 
 /**************************************************************************//**
- * @addtogroup SL_WISUN_BR_MSG_API Wi-SUN Message API
+ * @addtogroup SL_WISUN_BR_MSG_API Border Router Message API
+ * @ingroup SL_WISUN_API
+ *
+ * Wi-SUN Border Router Message API contains messages for Border Router
+ * specific functionality for Network Co-Processor (NCP) use-cases.
+ *
+ * The API is functionally equivalent of @ref SL_WISUN_BR_API. It's an
+ * extension, not a replacement of @ref SL_WISUN_MSG_API. An application
+ * implementing Border Router capability may utilize functions from both APIs.
+ * See @ref API_AVAILABILITY for further information.
+ *
  * @{
  *****************************************************************************/
 
@@ -102,11 +112,12 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_br_msg_header_t;
 SL_PACK_END()
 
-/******************************************************************************
- * @defgroup SL_WISUN_MSG_GENERIC sl_wisun_br_msg_generic
+/**************************************************************************//**
+ * @defgroup SL_WISUN_BR_MSG_GENERIC sl_wisun_br_msg_generic
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
+/// Confirmation message body
 SL_PACK_START(1)
 typedef struct {
   /// Status of the request
@@ -114,6 +125,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_br_msg_generic_body_t;
 SL_PACK_END()
 
+/// Confirmation message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -123,10 +135,12 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_br_msg_generic_cnf_t;
 SL_PACK_END()
 
+/** @} (end SL_WISUN_BR_MSG_GENERIC) */
+
 /**************************************************************************//**
  * @defgroup SL_WISUN_BR_MSG_START sl_wisun_br_msg_start
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -168,11 +182,12 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_BR_MSG_START) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_BR_MSG_STOP sl_wisun_br_msg_stop
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
+/// Request message body
 SL_PACK_START(1)
 typedef struct {
   /// 1 for non-graceful stop
@@ -180,6 +195,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_br_msg_stop_req_body_t;
 SL_PACK_END()
 
+/// Request message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -189,12 +205,15 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_br_msg_stop_req_t;
 SL_PACK_END()
 
+/// Confirmation message body
 SL_PACK_START(1)
 typedef struct {
+  /// Status of the request
   uint32_t status;
 } SL_ATTRIBUTE_PACKED sl_wisun_br_msg_stop_cnf_body_t;
 SL_PACK_END()
 
+/// Confirmation message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -206,11 +225,12 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_BR_MSG_STOP) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_BR_MSG_SET_GTK sl_wisun_br_msg_set_get
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
+/// Request message body
 SL_PACK_START(1)
 typedef struct {
   /// GTK
@@ -222,6 +242,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_br_msg_set_gtk_req_body_t;
 SL_PACK_END()
 
+/// Request message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -231,6 +252,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_br_msg_set_gtk_req_t;
 SL_PACK_END()
 
+/// Confirmation message body
 SL_PACK_START(1)
 typedef struct {
   /// Status of the request
@@ -238,6 +260,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_br_msg_set_gtk_cnf_body_t;
 SL_PACK_END()
 
+/// Confirmation message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -249,11 +272,12 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_BR_MSG_SET_GTK) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_BR_MSG_SET_NETWORK_SIZE sl_wisun_br_msg_set_network_size
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
+/// Request message body
 SL_PACK_START(1)
 typedef struct {
   /// Network size
@@ -263,6 +287,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_br_msg_set_network_size_req_body_t;
 SL_PACK_END()
 
+/// Request message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -272,6 +297,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_br_msg_set_network_size_req_t;
 SL_PACK_END()
 
+/// Confirmation message body
 SL_PACK_START(1)
 typedef struct {
   /// Status of the request
@@ -279,6 +305,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_br_msg_set_network_size_cnf_body_t;
 SL_PACK_END()
 
+/// Confirmation message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -290,11 +317,12 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_BR_MSG_SET_NETWORK_SIZE) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_BR_MSG_GET_IP_ADDRESS sl_wisun_br_msg_get_ip_address
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
+/// Request message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -302,6 +330,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_br_msg_get_ip_addr_req_t;
 SL_PACK_END()
 
+/// Confirmation message body
 SL_PACK_START(1)
 typedef struct {
   /// Status of the request
@@ -315,6 +344,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_br_msg_ip_addr_cnf_body_t;
 SL_PACK_END()
 
+/// Confirmation message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -326,11 +356,12 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_BR_MSG_GET_IP_ADDRESS) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_BR_MSG_GET_GAK sl_wisun_br_msg_get_gak
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
+/// Request message body
 SL_PACK_START(1)
 typedef struct {
   /// Index
@@ -340,7 +371,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_br_msg_get_gak_req_body_t;
 SL_PACK_END()
 
-
+/// Request message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -350,6 +381,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_br_msg_get_gak_req_t;
 SL_PACK_END()
 
+/// Confirmation message body
 SL_PACK_START(1)
 typedef struct {
   /// Status of the request
@@ -359,6 +391,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_br_msg_get_gak_cnf_body_t;
 SL_PACK_END()
 
+/// Confirmation message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -370,11 +403,12 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_BR_MSG_GET_GAK) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_BR_MSG_GET_STATE sl_wisun_br_msg_get_state
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
+ /// Request message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -382,6 +416,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_br_msg_get_state_req_t;
 SL_PACK_END()
 
+/// Confirmation message body
 SL_PACK_START(1)
 typedef struct {
   /// Status of the request
@@ -391,6 +426,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_br_msg_get_state_cnf_body_t;
 SL_PACK_END()
 
+/// Confirmation message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -402,10 +438,10 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_BR_MSG_GET_STATE) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_BR_MSG_SET_DEVICE_CERTIFICATE sl_wisun_br_msg_set_device_certificate
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -452,7 +488,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_BR_MSG_SET_BROADCAST_SETTINGS sl_wisun_br_msg_set_broadcast_settings
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -499,7 +535,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_BR_MSG_SET_CONNECTION_PARAMS sl_wisun_br_msg_set_connection_params
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -539,7 +575,7 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_BR_MSG_SET_CONNECTION_PARAMS) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_BR_MSG_SET_LFN_PARAMS sl_wisun_br_msg_set_lfn_params
  * @{
  *****************************************************************************/
@@ -582,7 +618,7 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_BR_MSG_SET_LFN_PARAMS) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_BR_MSG_SET_LFN_SUPPORT sl_wisun_br_msg_set_lfn_support
  * @{
  *****************************************************************************/
@@ -629,10 +665,10 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_BR_MSG_SET_LFN_SUPPORT) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_BR_MSG_SET_DHCP_VENDOR_DATA sl_wisun_br_msg_set_dhcp_vendor_data
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -676,7 +712,7 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_BR_MSG_SET_DHCP_VENDOR_DATA) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_BR_MSG_PAN_DEFECT_ADVERTISE sl_wisun_br_msg_pan_defect_advertise
  * @{
  *****************************************************************************/
@@ -727,10 +763,10 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_BR_MSG_PAN_DEFECT_ADVERTISE) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_BR_MSG_SET_IPV6_PREFIX sl_wisun_br_msg_set_ipv6_prefix
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -774,10 +810,10 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_BR_MSG_SET_IPV6_PREFIX) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_BR_TRIGGER_GLOBAL_REPAIR sl_wisun_br_trigger_global_repair
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message
 SL_PACK_START(1)
@@ -807,10 +843,10 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_BR_TRIGGER_GLOBAL_REPAIR) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_BR_MSG_GET_ROUTING_TABLE_ENTRY_COUNT sl_wisun_br_msg_get_routing_table_entry_count
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message
 SL_PACK_START(1)
@@ -844,10 +880,10 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_BR_MSG_GET_ROUTING_TABLE_ENTRY_COUNT) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_BR_MSG_GET_ROUTING_TABLE sl_wisun_br_msg_get_routing_table
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -895,10 +931,10 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_BR_MSG_GET_ROUTING_TABLE) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_BR_MSG_GET_ROUTING_TABLE_FROM_INDEX sl_wisun_br_msg_get_routing_table_from_index
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -946,10 +982,10 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_BR_MSG_GET_ROUTING_TABLE_FROM_INDEX) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_BR_MSG_REVOKE_PAIRWISE_KEYS sl_wisun_br_msg_revoke_pairwise_keys
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -989,10 +1025,10 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_BR_MSG_REVOKE_PAIRWISE_KEYS) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_BR_MSG_REVOKE_GTKS sl_wisun_br_msg_revoke_gtks
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)

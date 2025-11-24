@@ -48,20 +48,26 @@ requires:
 toolchain_settings:
 - option: gcc_c++_compiler_option
   condition: [toolchain_lto, device_series_3]
+  unless: [ot_skip_code_classification]
   value: "-include sl_ot_code_classification_factory_diags.hpp"
 - option: gcc_c++_compiler_option
   condition: [toolchain_lto, device_series_3]
+  unless: [ot_skip_code_classification]
   value: "-include sl_ot_code_classification_link_metrics.hpp"
 - option: gcc_c++_compiler_option
   condition: [toolchain_lto, device_series_3]
+  unless: [ot_skip_code_classification]
   value: "-include sl_ot_code_classification_mac.hpp"
 - option: llvm_c++_compiler_option
   condition: [toolchain_lto, device_series_3]
+  unless: [ot_skip_code_classification]
   value: "-include sl_ot_code_classification_factory_diags.hpp"
 - option: llvm_c++_compiler_option
   condition: [toolchain_lto, device_series_3]
+  unless: [ot_skip_code_classification]
   value: "-include sl_ot_code_classification_link_metrics.hpp"
 - option: llvm_c++_compiler_option
   condition: [toolchain_lto, device_series_3]
+  unless: [ot_skip_code_classification]
   value: "-include sl_ot_code_classification_mac.hpp"
 root_path: openthread_stack

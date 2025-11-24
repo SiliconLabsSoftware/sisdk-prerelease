@@ -2938,6 +2938,8 @@ RAIL_RadioStateDetail_t RAIL_GetRadioStateDetail(RAIL_Handle_t railHandle);
  */
 RAIL_Status_t RAIL_EnableCacheSynthCal(RAIL_Handle_t railHandle, bool enable);
 
+#endif//SLI_LIBRAIL_ALIAS
+
 /** @} */ // end of group State_Transitions
 
 /******************************************************************************
@@ -3102,8 +3104,6 @@ RAIL_Status_t RAIL_EnableCacheSynthCal(RAIL_Handle_t railHandle, bool enable);
 RAIL_Status_t RAIL_ConfigTxPower(RAIL_Handle_t railHandle,
                                  const RAIL_TxPowerConfig_t *config);
 
-#endif//SLI_LIBRAIL_ALIAS
-
 /**
  * Get the TX power settings currently used in the amplifier.
  *
@@ -3117,7 +3117,8 @@ RAIL_Status_t RAIL_ConfigTxPower(RAIL_Handle_t railHandle,
  * to determine which values were set as a result of
  * \ref RAIL_ConfigTxPower().
  *
- * @deprecated RAIL 2.x synonym of \ref sl_rail_get_tx_power_config().
+ * @deprecated This RAIL 2.x function has been eliminated in RAIL 3,
+ *   temporarily a synonym of sli_rail_get_tx_power_config().
  */
 RAIL_Status_t RAIL_GetTxPowerConfig(RAIL_Handle_t railHandle,
                                     RAIL_TxPowerConfig_t *config);
@@ -3147,7 +3148,8 @@ RAIL_Status_t RAIL_GetTxPowerConfig(RAIL_Handle_t railHandle,
  * Calling this function before configuring the PA (i.e., before a successful
  * call to \ref RAIL_ConfigTxPower()) will return an error.
  *
- * @deprecated RAIL 2.x synonym of \ref sl_rail_set_tx_power().
+ * @deprecated This RAIL 2.x function has been eliminated in RAIL 3,
+ *   temporarily a synonym of sli_rail_set_tx_power().
  */
 RAIL_Status_t RAIL_SetTxPower(RAIL_Handle_t railHandle,
                               RAIL_TxPowerLevel_t powerLevel);
@@ -3170,7 +3172,8 @@ RAIL_Status_t RAIL_SetTxPower(RAIL_Handle_t railHandle,
  * call to \ref RAIL_ConfigTxPower()) will return error \ref
  * RAIL_TX_POWER_LEVEL_INVALID.
  *
- * @deprecated RAIL 2.x synonym of \ref sl_rail_get_tx_power().
+ * @deprecated This RAIL 2.x function has been eliminated in RAIL 3,
+ *   temporarily a synonym of sli_rail_get_tx_power().
  */
 RAIL_TxPowerLevel_t RAIL_GetTxPower(RAIL_Handle_t railHandle);
 
@@ -3291,7 +3294,7 @@ struct RAIL_TxPowerCurvesConfigAlt;
  * This function only needs to be called when using a module and has no
  * effect otherwise. Transmit will not work before this function is called.
  *
- * @deprecated RAIL 2.x synonym of \ref sl_rail_verify_tx_power_curves().
+ * @deprecated RAIL 2.x synonym of \ref sl_rail_verify_tx_power_conversion().
  */
 RAIL_Status_t RAIL_VerifyTxPowerCurves(const struct RAIL_TxPowerCurvesConfigAlt *config);
 
@@ -3382,7 +3385,8 @@ const RAIL_PaPowerSetting_t *RAIL_GetPowerSettingTable(RAIL_Handle_t railHandle,
  * @param[in] currentPowerDbm The corresponding output power in dBm for this power setting.
  * @return Status code indicating success of the function call.
  *
- * @deprecated RAIL 2.x synonym of \ref sl_rail_set_pa_power_setting().
+ * @deprecated This RAIL 2.x function has been eliminated in RAIL 3 with
+ *   the use of PA power tables.
  */
 RAIL_Status_t RAIL_SetPaPowerSetting(RAIL_Handle_t railHandle,
                                      RAIL_PaPowerSetting_t paPowerSetting,
@@ -3397,7 +3401,8 @@ RAIL_Status_t RAIL_SetPaPowerSetting(RAIL_Handle_t railHandle,
  * @param[in] railHandle A RAIL instance handle.
  * @return The current PA power setting.
  *
- * @deprecated RAIL 2.x synonym of \ref sl_rail_get_pa_power_setting().
+ * @deprecated This RAIL 2.x function has been eliminated in RAIL 3,
+ *   temporarily a synonym of sli_rail_get_pa_power_setting().
  */
 RAIL_PaPowerSetting_t RAIL_GetPaPowerSetting(RAIL_Handle_t railHandle);
 
@@ -8111,8 +8116,9 @@ bool RAIL_SupportsSQPhy(RAIL_Handle_t railHandle);
  * @note Consider using \ref RAIL_SupportsTxPowerModeAlt to also get the power
  *   mode's lowest allowed power level.
  *
- * @deprecated This RAIL 2.x function has been replaced in RAIL 3 by
- *   \ref sl_rail_supports_tx_power_mode() with its additional parameter.
+ * @deprecated This RAIL 2.x function has been eliminated in RAIL 3,
+ *   temporarily replaced with sli_rail_supports_tx_power_mode()
+ *   with its additional parameter.
  */
 bool RAIL_SupportsTxPowerMode(RAIL_Handle_t railHandle,
                               RAIL_TxPowerMode_t powerMode,
@@ -8138,7 +8144,8 @@ bool RAIL_SupportsTxPowerMode(RAIL_Handle_t railHandle,
  *
  * This function has no compile-time equivalent.
  *
- * @deprecated RAIL 2.x synonym of \ref sl_rail_supports_tx_power_mode().
+ * @deprecated This RAIL 2.x function has been eliminated in RAIL 3,
+ *   temporarily a synonym of sli_rail_supports_tx_power_mode().
  */
 bool RAIL_SupportsTxPowerModeAlt(RAIL_Handle_t railHandle,
                                  RAIL_TxPowerMode_t *powerMode,

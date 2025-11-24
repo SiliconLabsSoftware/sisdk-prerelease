@@ -55,8 +55,6 @@
 #include "sl_rail_ieee802154.h"
 #include "sl_status.h"
 
-#include "sl_rail_util_pa_conversions.h"
-
 // Include platform-specific types and constants
 #include "platform-band.h"
 

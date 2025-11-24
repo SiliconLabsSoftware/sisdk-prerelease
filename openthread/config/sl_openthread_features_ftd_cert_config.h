@@ -325,6 +325,11 @@
 #define OPENTHREAD_CONFIG_MAC_STAY_AWAKE_BETWEEN_FRAGMENTS 1
 #endif
 // </e>
+// <i> The maximum number of RX buffers to use in the radio driver.
+// <d> 16
+#ifndef SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT
+#define SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT       16
+#endif
 // </h>
 // <h>  Logging
 // <o   OPENTHREAD_CONFIG_LOG_OUTPUT> LOG_OUTPUT
@@ -339,12 +344,6 @@
 // <q>  DYNAMIC_LOG_LEVEL
 #ifndef OPENTHREAD_CONFIG_LOG_LEVEL_DYNAMIC_ENABLE
 #define OPENTHREAD_CONFIG_LOG_LEVEL_DYNAMIC_ENABLE  0
-#endif
-
-// <i> The maximum number of RX buffers to use in the radio driver.
-// <d> 16
-#ifndef SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT
-#define SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT       16
 #endif
 
 // <e>  Enable Logging

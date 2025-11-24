@@ -8,9 +8,9 @@ description: >
   Combined solution with application and bootloader projects.
 quality: production
 project:
-  - path: ../../bootloader/bootloader-storage-internal-single.slcp
-    id: bootloader
   - path: bt_soc_app_ota_dfu.slcp
     id: application
+  - path: ../../bootloader/bootloader-storage-internal-single.slcp
+    id: bootloader
 post_build:
   path: ../../postbuild_profile/bt_dfu_ws.slpb

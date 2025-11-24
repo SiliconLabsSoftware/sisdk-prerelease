@@ -94,11 +94,11 @@ void sli_set_tx_power_in_rail(int8_t tx_power);
 /**
  * Update the Tx power following a RAIL config change.
  *
- * @param[in]   tx_power_config    Tx power configuration
+ * @param[in]   pa_mode            RAIL PA mode configuration
  * @param[in]   tx_power           Desired tx power in dbm.
  *
  */
-void sli_update_tx_power_after_config_update(const sl_rail_tx_power_config_t *tx_power_config, int8_t tx_power);
+void sli_update_tx_power_after_config_update(sl_rail_tx_pa_mode_t pa_mode, int8_t tx_power);
 
 /**
  * Initialize the power manager.

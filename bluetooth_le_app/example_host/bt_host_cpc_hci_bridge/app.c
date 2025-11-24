@@ -76,7 +76,6 @@ static int transfer_data_from_cpc_to_pty(void);
 static int parse_hci_packet(const uint8_t *hci_buffer, const ssize_t hci_buffer_len);
 static void debug_log_buffer(const char *name, const uint8_t *buf, const ssize_t size);
 
-
 /**************************************************************************//**
  * Application Init.
  *****************************************************************************/
@@ -128,8 +127,6 @@ void app_process_action(void)
   // Do not call blocking functions from here!                               //
   /////////////////////////////////////////////////////////////////////////////
 }
-
-
 
 /**************************************************************************//**
  * Initializes the bridge by opening the CPC connection and

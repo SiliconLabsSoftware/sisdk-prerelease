@@ -38,6 +38,10 @@
 #include "sl_wisun_types.h"
 #include "rail_config.h"
 #include "cmsis_os2.h"
+
+#if defined(SL_CATALOG_WISUN_BR_WIFI_PRESENT)
+#include "sl_wisun_br_wifi.h"
+#endif
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -327,6 +331,23 @@ const sl_wisun_mac_address_t APP_BROADCAST_MAC =
 {
   { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }
 };
+
+const app_enum_t app_wisun_state_enum[] =
+{
+  { "initialized", SL_WISUN_BR_STATE_INITIALIZED },
+  { "operational", SL_WISUN_BR_STATE_OPERATIONAL },
+  { NULL, 0 }
+};
+
+#if defined(SL_CATALOG_WISUN_BR_WIFI_PRESENT)
+const app_enum_t app_wisun_wifi_security_type_enum[] = {
+  { "NONE",      WIFI_SECURITY_TYPE_NONE },
+  { "WPA_PSK",   WIFI_SECURITY_TYPE_WPA_PSK },
+  { "WPA2_TKIP", WIFI_SECURITY_TYPE_WPA2_TKIP },
+  { "WPA2_CCMP", WIFI_SECURITY_TYPE_WPA2_CCMP },
+  { NULL, 0 }
+};
+#endif
 
 // -----------------------------------------------------------------------------
 //                                Static Variables

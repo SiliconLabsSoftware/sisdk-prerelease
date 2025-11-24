@@ -123,8 +123,8 @@ SLI_RAIL_ENUM_GENERIC(sl_rail_assert_error_codes_t, uint32_t)
   SL_RAIL_ASSERT_UNUSED_35 = 35,
   /** Invalid assert, no longer used. */
   SL_RAIL_ASSERT_UNUSED_36 = 36,
-  /** Invalid assert, no longer used. */
-  SL_RAIL_ASSERT_UNUSED_37 = 37,
+  /** Sequencer protocol stack running too long. */
+  SL_RAIL_ASSERT_SEQ_USER_SEQUENCER_PROTOCOL_TAKE_TOO_LONG = 37,
   /** Failed to enable synth for transmit. */
   SL_RAIL_ASSERT_FAILED_TX_SYNTH_ENABLE = 38,
   /** This function is deprecated and must not be called. */
@@ -264,7 +264,7 @@ SLI_RAIL_ENUM_GENERIC(sl_rail_assert_error_codes_t, uint32_t)
 #define SL_RAIL_ASSERT_UNUSED_34                                  ((sl_rail_assert_error_codes_t) SL_RAIL_ASSERT_UNUSED_34)
 #define SL_RAIL_ASSERT_UNUSED_35                                  ((sl_rail_assert_error_codes_t) SL_RAIL_ASSERT_UNUSED_35)
 #define SL_RAIL_ASSERT_UNUSED_36                                  ((sl_rail_assert_error_codes_t) SL_RAIL_ASSERT_UNUSED_36)
-#define SL_RAIL_ASSERT_UNUSED_37                                  ((sl_rail_assert_error_codes_t) SL_RAIL_ASSERT_UNUSED_37)
+#define SL_RAIL_ASSERT_SEQ_USER_SEQUENCER_PROTOCOL_TAKE_TOO_LONG  ((sl_rail_assert_error_codes_t) SL_RAIL_ASSERT_SEQ_USER_SEQUENCER_PROTOCOL_TAKE_TOO_LONG)
 #define SL_RAIL_ASSERT_FAILED_TX_SYNTH_ENABLE                     ((sl_rail_assert_error_codes_t) SL_RAIL_ASSERT_FAILED_TX_SYNTH_ENABLE)
 #define SL_RAIL_ASSERT_DEPRECATED_FUNCTION                        ((sl_rail_assert_error_codes_t) SL_RAIL_ASSERT_DEPRECATED_FUNCTION)
 #define SL_RAIL_ASSERT_MULTIPROTOCOL_NO_EVENT                     ((sl_rail_assert_error_codes_t) SL_RAIL_ASSERT_MULTIPROTOCOL_NO_EVENT)
@@ -377,7 +377,7 @@ SLI_RAIL_ENUM_GENERIC(sl_rail_assert_error_codes_t, uint32_t)
     /*34*/ "Invalid assert, no longer used",                                           \
     /*35*/ "Invalid assert, no longer used",                                           \
     /*36*/ "Invalid assert, no longer used",                                           \
-    /*37*/ "Invalid assert, no longer used",                                           \
+    /*37*/ "Sequencer protocol stack running too long",                                \
     /*38*/ "Failed to enable synth for transmit.",                                     \
     /*39*/ "This function is deprecated and must not be called",                       \
     /*40*/ "Multiprotocol task started with no event to run",                          \

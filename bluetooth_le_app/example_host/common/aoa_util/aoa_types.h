@@ -35,7 +35,7 @@
 
 #define AOA_ID_MAX_SIZE    65
 
-#define AOA_ID_T_DEFAULT_VALUE {0x00}
+#define AOA_ID_T_DEFAULT_VALUE { 0x00 }
 typedef char aoa_id_t[AOA_ID_MAX_SIZE];
 
 typedef struct aoa_iq_report_s {

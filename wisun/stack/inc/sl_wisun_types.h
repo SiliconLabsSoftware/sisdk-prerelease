@@ -37,7 +37,7 @@
 #include "socket/socket.h"
 
 /**************************************************************************//**
- * @defgroup SL_WISUN_TYPES Wi-SUN API type definitions
+ * @defgroup SL_WISUN_TYPES API type definitions
  * @ingroup SL_WISUN_API
  * @{
  *****************************************************************************/
@@ -1330,6 +1330,7 @@ typedef struct {
   uint64_t type;
   /// Address of the node
   sl_wisun_mac_address_t address;
+  /// Event specific data
   union {
     /// Neighbor lifetime change information
     sl_wisun_logger_event_neighbor_lifetime_changed_t neighbor_lifetime_changed;

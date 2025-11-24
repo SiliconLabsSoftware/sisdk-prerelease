@@ -24,7 +24,7 @@ The Wi-SUN Border Router demonstration provides a Wi-SUN Border Router implement
 
 ## Getting Started
 
-To get started with Wi-SUN and Simplicity Studio, see [QSG181: Wi-SUN SDK Quick Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg181-wi-sun-sdk-quick-start-guide.pdf).
+To get started with Wi-SUN and Simplicity Studio, see [Developing with Wi-SUN](https://docs.silabs.com/wisun/latest/wisun-start/).
 
 The Wi-SUN Border Router demonstration is required to use the other Wi-SUN sample applications. The Wi-SUN Border Router creates a Wi-SUN network the Wi-SUN nodes can join. When part of the same network, the Wi-SUN nodes are able to exchange IP packets.
 
@@ -33,8 +33,6 @@ To get started with the demo, follow these steps:
 * Flash the "Wi-SUN Border Router" demonstration to a compatible device.
 * In Simplicity Studio, open a console on the device.
 * Start the Border Router using the CLI command `wisun start_fan11` when using FAN-1.1 PHY configuration type and `wisun start_fan10` in order to use FAN-1.0 Phy configuration type.
-
-See the associated sections in [QSG181: Wi-SUN SDK Quick Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg181-wi-sun-sdk-quick-start-guide.pdf) if you want step-by-step guidelines for each operation.
 
 ## Wi-SUN Border Router Commands
 
@@ -279,15 +277,6 @@ Example: to set 'Network' to 'Debug' and 'IPV6' to 'Warning', use:
 Before programming the radio board mounted on the WSTK, ensure the power supply switch is in the AEM position (right side), as shown.
 
 ![Radio Board Power Supply Switch](readme_img0.png)
-
-## Resources
-
-* [Wi-SUN Stack API documentation](https://docs.silabs.com/wisun/latest)
-* [AN1330: Wi-SUN Mesh Network Performance](https://www.silabs.com/documents/public/application-notes/an1330-wi-sun-network-performance.pdf)
-* [AN1332: Wi-SUN Network Setup and Configuration](https://www.silabs.com/documents/public/application-notes/an1332-wi-sun-network-configuration.pdf)
-* [AN1364: Wi-SUN Network Performance Measurement Application](https://www.silabs.com/documents/public/application-notes/an1364-wi-sun-network-performance-measurement-app.pdf)
-* [QSG181: Wi-SUN Quick-Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg181-wi-sun-sdk-quick-start-guide.pdf)
-* [UG495: Wi-SUN Developer's Guide](https://www.silabs.com/documents/public/user-guides/ug495-wi-sun-developers-guide.pdf)
 
 ## Report Bugs & Get Support
 

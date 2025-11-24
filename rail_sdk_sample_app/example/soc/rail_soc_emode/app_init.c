@@ -85,7 +85,7 @@ void rail_app_init(void)
   // Get RAIL handle, used later by the application
   sl_rail_handle_t rail_handle = sl_rail_util_get_handle(SL_RAIL_UTIL_HANDLE_INST0);
 
-  power_raw = sl_rail_get_tx_power(rail_handle);
+  power_raw = sli_rail_get_tx_power(rail_handle);
   power_deci_dbm = sl_rail_get_tx_power_dbm(rail_handle);
 
   // CLI info message

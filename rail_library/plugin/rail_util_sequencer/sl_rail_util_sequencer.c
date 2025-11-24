@@ -29,6 +29,7 @@
  ******************************************************************************/
 #include "sl_rail.h"
 #include "sl_rail_util_sequencer_config.h"
+#include "rail_types.h" // For RAIL 2.x defines used in SL_RAIL_UTIL_SEQUENCER_IMAGE
 
 #if !SL_RAIL_UTIL_SEQUENCER_RUNTIME_IMAGE_SELECTION \
   && defined(SL_RAIL_UTIL_SEQUENCER_IMAGE)

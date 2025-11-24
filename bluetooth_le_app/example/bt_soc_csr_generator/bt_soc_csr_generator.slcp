@@ -21,7 +21,6 @@ filter:
 
 component:
   - id: bluetooth_stack
-  - id: bootloader_interface
   - id: apploader
   - id: app_assert
   - id: app_log

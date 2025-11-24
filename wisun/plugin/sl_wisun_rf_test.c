@@ -52,7 +52,7 @@ do {\
 
 #define RF_TEST_NOT_RUNNING (SL_RAIL_STREAM_MODES_COUNT)
 static sl_rail_stream_mode_t rf_test_running = RF_TEST_NOT_RUNNING;
-static sl_rail_tx_power_level_t stack_tx_power;
+static sl_rail_tx_power_t stack_tx_power;
 static int8_t test_tx_power;
 
 
@@ -110,7 +110,7 @@ static sl_status_t start_rf_test(uint16_t channel, sl_rail_stream_mode_t mode)
   SLI_WISUN_ERROR_CHECK_SET_STATUS(SL_WISUN_JOIN_STATE_DISCONNECTED == join_state, SL_STATUS_NETWORK_UP);
 
   // Backup stack Tx Power
-  stack_tx_power = sl_rail_get_tx_power(rail_handle);
+  stack_tx_power = sl_rail_get_tx_power_dbm(rail_handle);
 
   rail_status = sl_rail_set_tx_power_dbm(rail_handle, 10*test_tx_power);
   SLI_WISUN_ERROR_CHECK_SET_STATUS(SL_RAIL_STATUS_NO_ERROR == rail_status, SL_STATUS_FAIL);

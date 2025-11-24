@@ -36,12 +36,7 @@
  * @{
  **************************************************************************************************/
 
-#include "sl_component_catalog.h"
-#ifdef SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_PRESENT
 #include "sl_bluetooth_connection_config.h"
-#else
-#define SL_BT_CONFIG_MAX_CONNECTIONS 4
-#endif
 #include "sl_enum.h"
 #include "cs_sync_antenna.h"
 

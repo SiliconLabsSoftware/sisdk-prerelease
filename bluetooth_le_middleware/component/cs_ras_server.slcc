@@ -43,17 +43,30 @@ config_file:
   condition:
   - gatt_configuration
 requires:
-- name: bluetooth_stack
+- name: bluetooth_api
 - name: bluetooth_feature_gatt_server
+  condition:
+  - device_cortexm
 - name: bluetooth_feature_connection
+  condition:
+  - device_cortexm
+- name: host_bluetooth_connection_config
+  condition:
+  - device_host
 - name: bluetooth_feature_sm
+  condition:
+  - device_cortexm
 - name: bluetooth_feature_system
+  condition:
+  - device_cortexm
 - name: sl_core
 - name: sl_common
 - name: slist
 - name: app_queue
 - name: app_timer
 - name: power_manager
+  condition:
+  - device_cortexm
 provides:
 - name: cs_ras_server
 template_contribution:
@@ -84,6 +97,8 @@ template_contribution:
     event: is_ok_to_sleep
     include: cs_ras_server_internal.h
     handler: cs_ras_server_is_ok_to_sleep
+  condition:
+  - power_manager
   unless:
   - kernel
 - name: power_manager_handler
@@ -91,6 +106,8 @@ template_contribution:
     event: sleep_on_isr_exit
     include: cs_ras_server_internal.h
     handler: cs_ras_server_sleep_on_isr_exit
+  condition:
+  - power_manager
   unless:
   - kernel
 documentation:

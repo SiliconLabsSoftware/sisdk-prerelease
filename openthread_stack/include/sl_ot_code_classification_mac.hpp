@@ -39,6 +39,7 @@
 
 #include "common/clearable.hpp"
 #include "common/locator.hpp"
+#include "common/log.hpp"
 #include "common/non_copyable.hpp"
 #include "common/tasklet.hpp"
 #include "common/time.hpp"
@@ -53,7 +54,8 @@
 #include "thread/key_manager.hpp"
 #include "thread/link_quality.hpp"
 
- #include "sl_code_classification.h"
+#include "sl_code_classification.h"
+
 namespace ot {
 
 class Neighbor;

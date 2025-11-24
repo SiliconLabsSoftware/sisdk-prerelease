@@ -259,11 +259,14 @@ sl_rail_status_t sl_rail_mux_GetSchedulerStatus(sl_rail_handle_t rail_handle,
                                                 sl_rail_scheduler_status_t *p_scheduler_status,
                                                 sl_rail_status_t *p_rail_status);
 
-sl_rail_status_t sl_rail_mux_GetTxPowerConfig(sl_rail_handle_t railHandle,
-                                              sl_rail_tx_power_config_t *config);
+sl_rail_status_t sli_rail_mux_GetTxPowerConfig(sl_rail_handle_t railHandle,
+                                               sl_rail_tx_power_config_t *config);
 
 sl_rail_tx_power_t sl_rail_mux_GetTxPowerDbm(sl_rail_handle_t railHandle);
-sl_rail_tx_power_t sl_rail_mux_GetTxPower(sl_rail_handle_t railHandle);
+sl_rail_tx_power_t sli_rail_mux_GetTxPower(sl_rail_handle_t railHandle);
+sl_rail_status_t sl_rail_mux_util_pa_post_init(sl_rail_handle_t railHandle,
+                                               sl_rail_tx_pa_mode_t pa_mode);
+sl_rail_tx_pa_mode_t sl_rail_mux_get_pa_mode(sl_rail_handle_t *railHandle);
 sl_rail_status_t sl_rail_mux_ConfigTxPower(sl_rail_handle_t railHandle,
                                            const sl_rail_tx_power_config_t *config);
 
@@ -459,7 +462,7 @@ sl_rail_status_t sl_rail_mux_EnableRxDutyCycle(sl_rail_handle_t railHandle,
 uint16_t sl_rail_mux_GetTxFifoSpaceAvailable(sl_rail_handle_t railHandle);
 sl_rail_status_t sl_rail_mux_IEEE802154_AcceptFrames(sl_rail_handle_t railHandle,
                                                      uint8_t framesMask);
-
+sl_rail_status_t sl_rail_mux_util_ieee802154_config_radio(sl_rail_handle_t railHandle);
 sl_rail_status_t sl_rail_mux_ieee802154_config_2_mbps_rx_channel(sl_rail_handle_t railHandle,
                                                                  uint16_t channel);
 sl_rail_status_t sl_rail_mux_IEEE802154_Config2p4GHzRadioAntDivCoex(sl_rail_handle_t railHandle);

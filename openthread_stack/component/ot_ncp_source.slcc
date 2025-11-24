@@ -3,15 +3,18 @@ label: NCP
 package: openthread_stack
 category: OpenThread
 quality: production
-description: This component provides both the NCP and RCP support for the OpenThread stack. It requires that an OpenThread stack component be included with the project. If no OpenThread stack component is chosen, it will default to using the OpenThread stack for a Full Thread Device (FTD). Currently, the NCP suport is experimental and the RCP support is production quaility.
+description: This component provides support for both NCP and RCP implementations of the OpenThread stack. It requires that an OpenThread stack component be included with the project. If no OpenThread stack component is chosen, it will default to using the OpenThread stack for a Full Thread Device (FTD).
 provides:
 - name: ot_ncp
 requires:
 - name: ot_stack
+- name: ot_ncp_spinel
 recommends:
 - id: ot_stack_ftd
   vendor: silabs
+
 root_path: openthread_stack/util/third_party/openthread/src
+
 include:
 - path: .
 - path: cli
@@ -24,25 +27,6 @@ include:
   - path: ncp_config.h
   - path: ncp_hdlc.hpp
   - path: ncp_spi.hpp
-- path: lib/spinel
-  file_list:
-  - path: coprocessor_type.h
-  - path: logger.hpp
-  - path: multi_frame_buffer.hpp
-  - path: radio_spinel.hpp
-  - path: radio_spinel_metrics.h
-  - path: spi_frame.hpp
-  - path: spinel.h
-  - path: spinel_buffer.hpp
-  - path: spinel_decoder.hpp
-  - path: spinel_driver.hpp
-  - path: spinel_encoder.hpp
-  - path: spinel_encrypter.hpp
-  - path: spinel_helper.hpp
-  - path: spinel_interface.hpp
-  - path: spinel_platform.h
-  - path: spinel_prop_codec.hpp
-  - path: openthread-spinel-config.h
 - path: lib/hdlc
   file_list:
   - path: hdlc.hpp
@@ -50,6 +34,7 @@ include:
   file_list:
   - path: endian.hpp
   - path: math.hpp
+
 source:
 - path: ../examples/apps/ncp/ncp.c
   unless:
@@ -65,19 +50,10 @@ source:
 - path: ncp/ncp_spi.cpp
 - path: ncp/platform/dnssd.cpp
 - path: ncp/platform/infra_if.cpp
-- path: lib/spinel/logger.cpp
-- path: lib/spinel/radio_spinel.cpp
-- path: lib/spinel/spinel.c
-- path: lib/spinel/spinel_buffer.cpp
-- path: lib/spinel/spinel_decoder.cpp
-- path: lib/spinel/spinel_driver.cpp
-- path: lib/spinel/spinel_encoder.cpp
-- path: lib/spinel/spinel_helper.cpp
-- path: lib/spinel/spinel_prop_codec.cpp
+- path: ncp/platform/trel.cpp
 - path: lib/hdlc/hdlc.cpp
+
 define:
-- name: SPINEL_PLATFORM_HEADER
-  value: '"spinel_platform.h"'
 - name: OPENTHREAD_PROJECT_LIB_CONFIG_FILE
   value: '"sl_openthread_features_config.h"'
   unless: [ot_stack_full]
@@ -85,6 +61,7 @@ define:
   value: '"sl_openthread_features_ncp_config.h"'
   condition: [ot_stack_full]
 - name: _GNU_SOURCE
+
 toolchain_settings:
 - option: gcc_compiler_option
   value: -fno-strict-aliasing
@@ -94,12 +71,14 @@ toolchain_settings:
   value: -fno-strict-aliasing
   condition:
   - toolchain_lto
+
 template_contribution:
 - name: component_catalog
   value: openthread_ncp
 - name: ot_init
   value: sl_ot_ncp_init
   priority: 5
+
 metadata:
   sbom:
     reference: ot_sbom_openthread

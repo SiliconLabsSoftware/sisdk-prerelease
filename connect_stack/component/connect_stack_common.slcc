@@ -22,7 +22,7 @@ requires:
   - "hardware_board"
 - name: "token_manager"
 - name: "rail_lib"
-- name: "sl_rail_util_pa"
+- name: "sl_rail_util_compatible_pa"
 - name: "a_radio_config"
 - name: "component_catalog"
 - name: "connect_cmsis_stack_ipc"
@@ -31,7 +31,7 @@ requires:
 - name: "connect_cmsis_stack_ipc"
   condition:
   - "bluetooth_stack"
-- name: "rail_lib_multiprotocol"
+- name: "rail_lib_multiprotocol_secure"
   condition:
   - "bluetooth_stack"
 - name: "platform_version"

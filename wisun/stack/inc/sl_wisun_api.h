@@ -45,14 +45,19 @@ extern "C" {
 /**************************************************************************//**
  * @addtogroup SL_WISUN_API Wi-SUN Stack API
  *
- * Wi-SUN Stack API is based on requests from the application to the stack and
- * events from the stack to the application. Requests are made using function
- * calls, where a function call either performs the required action immediately
- * or initiates an internal operation within the stack, which terminates with an
- * event. All events contain a status code, indicating the result of the
- * requested operation. Events are also used by the stack to notify the
- * application of any important information, such as the state of the
- * connection.
+ * Wi-SUN Stack API provides functions for managing and configuring the Wi-SUN
+ * protocol stack.
+ *
+ * The API allows applications to initiate and manage network connections,
+ * set security credentials, configure PHY and MAC parameters, and retrieve
+ * network statistics and information. It's based on requests from the
+ * application to the stack and events from the stack to the application.
+ * Requests are made using function calls, where a function call either
+ * performs the required action immediately or initiates an internal operation
+ * within the stack, which terminates with an event. All events contain
+ * a status code, indicating the result of the requested operation. Events
+ * are also used by the stack to notify the application of any important
+ * information, such as the state of the connection.
  *
  * The application is expected to override sl_wisun_on_event() to handle events
  * from the stack. Because all events share a common header, the function may be
@@ -740,7 +745,7 @@ sl_status_t sl_wisun_get_stack_version(uint8_t *major,
  * The function must be called before initiating a connection.
  *
  * Available in libraries: Full, LFN (see @ref API_AVAILABILITY)
- ******************************************************************************/
+ *****************************************************************************/
 sl_status_t sl_wisun_set_lfn_parameters(const sl_wisun_lfn_params_t *params);
 
 /**************************************************************************//**
@@ -755,7 +760,7 @@ sl_status_t sl_wisun_set_lfn_parameters(const sl_wisun_lfn_params_t *params);
  * parent. Set @ref sl_wisun_config_neighbor_table accordingly.
  *
  * Available in libraries: Full, FFN (see @ref API_AVAILABILITY)
- ******************************************************************************/
+ *****************************************************************************/
 sl_status_t sl_wisun_set_lfn_support(uint8_t lfn_limit);
 
 /**************************************************************************//**

@@ -40,7 +40,7 @@
 // old names.
 static const sl_rail_tx_power_config_t paInit2p4 =
 {
-  .mode = SL_RAIL_UTIL_PA_SELECTION_2P4GHZ,
+  .mode = SL_RAIL_TX_POWER_MODE_2P4_GHZ_HIGHEST,
   .voltage_mv = SL_RAIL_UTIL_PA_VOLTAGE_MV,
   .ramp_time_us = SL_RAIL_UTIL_PA_RAMP_TIME_US,
 };
@@ -49,7 +49,7 @@ const sl_rail_tx_power_config_t* halInternalPa2p4GHzInit = &paInit2p4;
 #if RAIL_FEAT_SUBGIG_RADIO
 static const sl_rail_tx_power_config_t paInitSub =
 {
-  .mode = SL_RAIL_UTIL_PA_SELECTION_SUBGHZ,
+  .mode = SL_RAIL_TX_POWER_MODE_SUB_GHZ_HIGHEST,
   .voltage_mv = SL_RAIL_UTIL_PA_VOLTAGE_MV,
   .ramp_time_us = SL_RAIL_UTIL_PA_RAMP_TIME_US,
 };

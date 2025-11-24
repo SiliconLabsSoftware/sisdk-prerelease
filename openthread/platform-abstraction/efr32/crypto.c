@@ -543,6 +543,35 @@ otError otPlatCryptoHmacSha256Finish(otCryptoContext *aContext, uint8_t *aBuf, s
 
 // HKDF platform implementations
 // As the HKDF does not actually use mbedTLS APIs but uses HMAC module, this feature is not implemented.
+otError otPlatCryptoHkdfInit(otCryptoContext *aContext)
+{
+    otError error = OT_ERROR_NONE;
+    otEXPECT_ACTION((aContext != NULL), error = OT_ERROR_INVALID_ARGS);
+    psa_key_derivation_operation_t *ctx = (psa_key_derivation_operation_t *)aContext->mContext;
+
+    otEXPECT_ACTION((ctx != NULL), error = OT_ERROR_INVALID_ARGS);
+
+    *ctx = psa_key_derivation_operation_init();
+
+exit:
+    return error;
+}
+
+otError otPlatCryptoHkdfDeinit(otCryptoContext *aContext)
+{
+    otError      error = OT_ERROR_NONE;
+    psa_status_t status;
+    otEXPECT_ACTION((aContext != NULL), error = OT_ERROR_INVALID_ARGS);
+    psa_key_derivation_operation_t *ctx = (psa_key_derivation_operation_t *)aContext->mContext;
+
+    otEXPECT_ACTION((ctx != NULL), error = OT_ERROR_INVALID_ARGS);
+    status = psa_key_derivation_abort(ctx);
+    error  = mapPsaStatusToOtError(status);
+
+exit:
+    return error;
+}
+
 otError otPlatCryptoHkdfExpand(otCryptoContext *aContext,
                                const uint8_t   *aInfo,
                                uint16_t         aInfoLength,

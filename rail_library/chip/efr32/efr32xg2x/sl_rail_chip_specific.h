@@ -127,6 +127,13 @@ extern "C" {
  */
 #define SL_RAIL_EFR32XG29_STATE_BUFFER_BYTES 616U  // DO NOT HAND-EDIT THESE VALUES
 
+/**
+ * @def SL_RAIL_EFR32XG2D_STATE_BUFFER_BYTES
+ * @brief The EFR32xG2D series size needed for
+ *   \ref sl_rail_state_buffer_entry_t::buffer_bytes.
+ */
+#define SL_RAIL_EFR32XG2D_STATE_BUFFER_BYTES 632U  // DO NOT HAND-EDIT THESE VALUES
+
 #ifndef SL_RAIL_STATE_BUFFER_BYTES
 /**
  * @def SL_RAIL_STATE_BUFFER_BYTES
@@ -152,6 +159,8 @@ extern "C" {
 #define SL_RAIL_STATE_BUFFER_BYTES SL_RAIL_EFR32XG28_STATE_BUFFER_BYTES
 #elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)
 #define SL_RAIL_STATE_BUFFER_BYTES SL_RAIL_EFR32XG29_STATE_BUFFER_BYTES
+#elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 13)
+#define SL_RAIL_STATE_BUFFER_BYTES SL_RAIL_EFR32XG2D_STATE_BUFFER_BYTES
 #else
 #define SL_RAIL_STATE_BUFFER_BYTES 0 // Sate Doxygen
 #error "Unsupported platform!"
@@ -395,6 +404,8 @@ sl_rail_timer_tick_t sl_rail_us_to_timer_ticks(sl_rail_time_t microseconds);
 #define SL_RAIL_RF_PATHS_SUB_GHZ 2
 #elif _SILICON_LABS_32B_SERIES_2_CONFIG == 8
 #define SL_RAIL_RF_PATHS_SUB_GHZ 1
+#elif  _SILICON_LABS_32B_SERIES_2_CONFIG == 13
+#define SL_RAIL_RF_PATHS_SUB_GHZ 2
 #else
 #define SL_RAIL_RF_PATHS_SUB_GHZ 0
 #endif
@@ -451,41 +462,43 @@ struct sl_rail_channel_config_entry_attr {
  * @brief Types specific to the EFR32xG2x for dealing with the on-chip PAs.
  */
 
-#ifndef SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX
+#ifndef DOXYGEN_UNDOCUMENTED
+
+#ifndef SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX
 #if _SILICON_LABS_32B_SERIES_2_CONFIG == 1
 /**
- * The maximum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX  (180U)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX  (180U)
 /**
- * The minimum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN  (1U)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN  (1U)
 /**
- * The maximum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_MP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MAX  (90U)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MAX  (90U)
 /**
- * The maximum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_MP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MIN  (1U)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MIN  (1U)
 /**
- * The maximum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX  (64U)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX  (64U)
 /**
- * The minimum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN  (0U)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN  (0U)
 #elif ((_SILICON_LABS_32B_SERIES_2_CONFIG == 4) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 6))
 /**
- * The maximum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP mode.
  *  EFR32xG24: capable of 20dBm max output power has max powerlevel:180
  *  EFR32xG24: capable of 10dBm max output power has max powerlevel:90
@@ -494,171 +507,173 @@ struct sl_rail_channel_config_entry_attr {
  */
 #if defined (_SILICON_LABS_EFR32_2G4HZ_HP_PA_PRESENT) \
   && (_SILICON_LABS_EFR32_2G4HZ_HP_PA_MAX_OUTPUT_DBM > 10)
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX  (180U)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX  (180U)
 #else
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX  (90U)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX  (90U)
 #endif
 /**
- * The minimum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN  (0U)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN  (0U)
 /**
- * The maximum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX  (15U)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX  (15U)
 /**
- * The minimum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN  (0U)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN  (0U)
 #elif ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7)   \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9))
 /**
- * The maximum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX  (127U)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX  (127U)
 /**
- * The minimum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN  (0U)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN  (0U)
 /**
- * The maximum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX  (15U)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX  (15U)
 /**
- * The minimum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN  (0U)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN  (0U)
 #elif _SILICON_LABS_32B_SERIES_2_CONFIG == 8
 /**
- * The maximum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX  (240)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX  (240)
 /**
- * The minimum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN  (1U)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN  (1U)
 #else //EFR32xG23
 /**
- * The maximum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX  (240)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX  (240)
 /**
- * The minimum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN  (1U)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN  (1U)
 /**
- * The maximum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_MP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MAX  (SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MAX  (SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX)
 /**
- * The maximum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_MP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MIN  (SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MIN  (SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN)
 /**
- * The maximum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX  (SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX  (SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX)
 /**
- * The minimum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN  (SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN  (SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN)
 /**
- * The maximum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_LLP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LLP_MAX  (SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LLP_MAX  (SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX)
 /**
- * The minimum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_LLP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LLP_MIN  (SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN)
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LLP_MIN  (SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN)
 #endif //_SILICON_LABS_32B_SERIES_2_CONFIG
-#endif //SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX
+#endif //SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX
 
 #if SL_RAIL_SUPPORTS_SUB_GHZ_BAND
 /**
- * The maximum valid value for the \ref sl_rail_tx_power_level_t when using
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when using
  * a Sub-GHz PA mode.
  */
-#ifndef SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MAX
-#if _SILICON_LABS_32B_SERIES_2_CONFIG == 3 || _SILICON_LABS_32B_SERIES_2_CONFIG == 8
-#define SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MAX 240U
+#ifndef SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MAX
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 3) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
+#define SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MAX 240U
 #elif _SILICON_LABS_32B_SERIES_2_CONFIG == 5
-#define SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MAX 79U
+#define SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MAX 79U
 #else
-#define SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MAX 0U
+#define SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MAX 0U
 #endif
-#endif//SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MAX
+#endif//SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MAX
 
 /**
- * The minimum valid value for the \ref sl_rail_tx_power_level_t when using
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when using
  * a Sub-GHz PA mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MIN 1U
+#define SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MIN 1U
 
 /**
- * The maximum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_SUB_GHZ_HP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_HP_MAX (SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MAX)
+#define SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_HP_MAX (SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MAX)
 
 /**
- * The minimum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_SUB_GHZ_HP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_HP_MIN (SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MIN)
+#define SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_HP_MIN (SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MIN)
 
 /**
- * The maximum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_SUB_GHZ_MP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MP_MAX (SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MAX)
+#define SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MP_MAX (SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MAX)
 
 /**
- * The minimum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_SUB_GHZ_MP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MP_MIN (SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MIN)
+#define SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MP_MIN (SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MIN)
 
 /**
- * The maximum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_SUB_GHZ_LP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_LP_MAX (SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MAX)
+#define SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_LP_MAX (SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MAX)
 
 /**
- * The minimum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_SUB_GHZ_LP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_LP_MIN (SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MIN)
+#define SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_LP_MIN (SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MIN)
 
 /**
- * The maximum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_SUB_GHZ_LLP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_LLP_MAX (SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MAX)
+#define SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_LLP_MAX (SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MAX)
 
 /**
- * The minimum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_SUB_GHZ_LLP mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_LLP_MIN (SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MIN)
+#define SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_LLP_MIN (SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MIN)
 #endif //SL_RAIL_SUPPORTS_SUB_GHZ_BAND
 
 #if SL_RAIL_SUPPORTS_OFDM_PA
@@ -667,61 +682,64 @@ struct sl_rail_channel_config_entry_attr {
  * The maximum valid value for the \ref sl_rail_txpower_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE mode on EFR32xG25.
  */
-#define SL_RAIL_OFDM_PA_MAX      204U
+#define SLI_RAIL_OFDM_PA_MAX      204U
 /**
  * The PA multiplier for PA control on EFR32xG25.
  */
-#define SL_RAIL_OFDM_PA_MULT     5U
+#define SLI_RAIL_OFDM_PA_MULT     5U
 /**
  * The minimum valid value for the \ref sl_rail_txpower_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE mode on EFR32xG25.
  */
-#define SL_RAIL_OFDM_PA_MIN      0U
+#define SLI_RAIL_OFDM_PA_MIN      0U
 #endif
 
 /**
- * The maximum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_OFDM_PA mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_OFDM_PA_MAX (SL_RAIL_OFDM_PA_MAX)
+#define SLI_RAIL_TX_POWER_LEVEL_OFDM_PA_MAX (SLI_RAIL_OFDM_PA_MAX)
 
 /**
- * The minimum valid value for the \ref sl_rail_tx_power_level_t when in \ref
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_OFDM_PA mode.
  */
-#define SL_RAIL_TX_POWER_LEVEL_OFDM_PA_MIN (SL_RAIL_OFDM_PA_MIN)
+#define SLI_RAIL_TX_POWER_LEVEL_OFDM_PA_MIN (SLI_RAIL_OFDM_PA_MIN)
 #endif //SL_RAIL_SUPPORTS_OFDM_PA
 
-#ifndef DOXYGEN_UNDOCUMENTED
-
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 3) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)
-/**
- * PA for Sub-GHz.
- */
-#define SL_RAIL_TX_PA_MODE_SUB_GHZ (sl_rail_tx_pa_mode_t)(0U)
-#else
-/**
- * PA for 2.4 GHz.
- */
-#define SL_RAIL_TX_PA_MODE_2P4_GHZ (sl_rail_tx_pa_mode_t)(0U)
-#endif
-
-#if _SILICON_LABS_32B_SERIES_2_CONFIG == 5
-/**
- * PA for Sub-GHz OFDM.
- */
-#define SL_RAIL_TX_PA_MODE_SUB_GHZ_OFDM (sl_rail_tx_pa_mode_t)(1U)
-#elif _SILICON_LABS_32B_SERIES_2_CONFIG == 8
-/**
- * PA for Sub-GHz.
- */
-#define SL_RAIL_TX_PA_MODE_SUB_GHZ (sl_rail_tx_pa_mode_t)(1U)
-#else
-// No PA index 1.
-#endif
-
 #endif//DOXYGEN_UNDOCUMENTED
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// Self-referencing defines minimize compiler complaints when using SLI_RAIL_ENUM
+// Only those supported per-platform are defined, for use with #ifdef in
+// apps or librail code.
+#if     SL_RAIL_SUPPORTS_2P4_GHZ_BAND
+#define SL_RAIL_TX_PA_MODE_2P4_GHZ      ((sl_rail_tx_pa_mode_t)(SL_RAIL_TX_PA_MODE_2P4_GHZ))
+#define SLI_RAIL_HAS_PA_MODE_2P4_GHZ 1
+#else
+#define SLI_RAIL_HAS_PA_MODE_2P4_GHZ 0
+#endif
+#if     SL_RAIL_SUPPORTS_SUB_GHZ_BAND
+#define SL_RAIL_TX_PA_MODE_SUB_GHZ      ((sl_rail_tx_pa_mode_t)(SL_RAIL_TX_PA_MODE_SUB_GHZ))
+#define SLI_RAIL_HAS_PA_MODE_SUB_GHZ 1
+#else
+#define SLI_RAIL_HAS_PA_MODE_SUB_GHZ 0
+#endif
+#if     SL_RAIL_SUPPORTS_OFDM_PA
+#define SL_RAIL_TX_PA_MODE_SUB_GHZ_OFDM ((sl_rail_tx_pa_mode_t)(SL_RAIL_TX_PA_MODE_SUB_GHZ_OFDM))
+#define SLI_RAIL_HAS_PA_MODE_SUB_GHZ_OFDM 1
+#else
+#define SLI_RAIL_HAS_PA_MODE_SUB_GHZ_OFDM 0
+#endif
+#endif//DOXYGEN_SHOULD_SKIP_THIS
+
+/**
+ * Indicates on number of PA modes present on a chip.
+ */
+#define SL_RAIL_TX_PA_MODES_COUNT \
+  (SLI_RAIL_HAS_PA_MODE_2P4_GHZ   \
+   + SLI_RAIL_HAS_PA_MODE_SUB_GHZ \
+   + SLI_RAIL_HAS_PA_MODE_SUB_GHZ_OFDM)
 
 /**
  * The number of PA's on this chip (including Virtual PAs).
@@ -733,7 +751,8 @@ struct sl_rail_channel_config_entry_attr {
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9))
 #define SL_RAIL_NUM_PA (2U)
-#elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 3)
+#elif ((_SILICON_LABS_32B_SERIES_2_CONFIG == 3) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
 #define SL_RAIL_NUM_PA (4U)
 #elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 8)
 #define SL_RAIL_NUM_PA (5U)
@@ -743,16 +762,6 @@ struct sl_rail_channel_config_entry_attr {
 #define SL_RAIL_NUM_PA (3U)
 #endif
 #endif //#ifndef SL_RAIL_NUM_PA
-
-/**
- * Boolean to indicate on number of PA modes present on a chip.
- */
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 5) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8))
-#define SL_RAIL_TX_PA_MODES_COUNT 2U
-#else
-#define SL_RAIL_TX_PA_MODES_COUNT 1U
-#endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // Self-referencing defines minimize compiler complaints when using SLI_RAIL_ENUM
@@ -873,7 +882,7 @@ struct sl_rail_channel_config_entry_attr {
  * @def SL_RAIL_MINIMUM_TRANSITION_US
  * @brief The minimum value for a consistent RAIL transition.
  * @note Transitions may need to be slower than this when using longer
- *   \ref sl_rail_tx_power_config_t::ramp_time_us values.
+ *   \ref sl_rail_set_tx_pa_ramp_time() values.
  */
 #define SL_RAIL_MINIMUM_TRANSITION_US (100U)
 

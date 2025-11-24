@@ -21,10 +21,7 @@ documentation:
 requires:
   # rail support
 - name: device_supports_rail_stack   # device must support "RAIL Stacks" (e.g., RAIL Test)
-- name: rail_util_compatible_pa
-- name: rail_util_pa
-  condition:
-  - device_is_module
+- name: sl_rail_util_compatible_pa
 - name: sl_railapp_malloc
 
   # silabs_core
@@ -53,9 +50,6 @@ requires:
   # sl_component
 - name: component_catalog
 
-recommends:
-- id: sl_rail_util_pa
-  vendor: silabs
 define:
 - name: SL_RAIL_TEST
   value: '1'   # Identify sl_rail_test builds
@@ -369,6 +363,17 @@ template_contribution:
       help: "power: deci-dBm unless 'raw' is added"
     - type: stringopt
       help: "'raw'=units are raw power level"
+
+- name: cli_command
+  value:
+    name: setPowerWithPaMode
+    handler: setPowerWithPaMode
+    help: Set the transmit power with explicit PA mode.
+    argument:
+    - type: int32
+      help: "power: deci-dBm"
+    - type: uint8
+      help: "pa_mode: platform-specific PA mode value"
 
 - name: cli_command
   value:
@@ -1641,15 +1646,13 @@ template_contribution:
     help: Set the transmit power for low-power ACKing.
     argument:
     - type: int32
-      help: "power: deci-dBm unless 'raw' is added"
-    - type: stringopt
-      help: "'raw'=units are raw power level"
+      help: "power: deci-dBm"
 
 - name: cli_command
   value:
     name: getZWaveLowPower
     handler: zwaveGetLowPowerLevel
-    help: Get the low power values (deci-dBm and raw).
+    help: Get the low power value (deci-dBm).
 
 - name: cli_command
   value:
@@ -2689,4 +2692,12 @@ template_contribution:
     name: resetCrcInitVal
     handler: resetCrcInitVal
     help: Reset the CRC initialization value to it's\n                    original setting from the Radio Configurator.
+
+- name: cli_command
+  value:
+    name: cancelScheduledTrx
+    handler: cancelScheduledTrx
+    help: Cancel any scheduled Tx or Rx using the Host
+  condition:
+  - device_series_3
 root_path: rail_library

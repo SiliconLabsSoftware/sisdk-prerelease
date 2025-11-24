@@ -38,7 +38,6 @@
 #include "sl_rail_sdk_packet_asm.h"
 #include "sl_rail_util_init_inst0_config.h"
 #include "sl_rail_util_protocol_types.h"
-#include "sl_rail_util_pa_config.h"
 #include "sl_rail.h"
 
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
@@ -49,8 +48,6 @@
 #endif
 
 #include "rail_config.h"
-#include "sl_rail_chip_specific.h"
-#include "sl_rail_util_pa_config.h"
 
 /**
  * \addtogroup rail_sdk_utility

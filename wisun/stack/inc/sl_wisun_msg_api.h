@@ -26,7 +26,7 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- ******************************************************************************/
+ *****************************************************************************/
 
 #ifndef SL_WISUN_MSG_API_H
 #define SL_WISUN_MSG_API_H
@@ -37,7 +37,25 @@
 #include "sl_wisun_regulation_api.h"
 
 /**************************************************************************//**
- * @addtogroup SL_WISUN_MSG_API Wi-SUN Message API
+ * @addtogroup SL_WISUN_MSG_API Message API
+ * @ingroup SL_WISUN_API
+ *
+ * Wi-SUN Message API provides a message-based API for managing and configuring
+ * the Wi-SUN protocol stack for Network Co-Processor (NCP) use-cases.
+ *
+ * The API is functionally equivalent of @ref SL_WISUN_API. It is based on
+ * requests from the host application to the NCP application running on the
+ * device, which sends the requests to the stack using sl_wisun_send_request().
+ * Depending on the request, the required action is either performed
+ * immediately or an internal stack operation is started, terminating with an
+ * event once the operation finishes. All events contain a status code,
+ * indicating the result of the requested operation. Events are also used by
+ * the stack to notify the application of any important information, such as
+ * the state of the connection.
+ *
+ * The NCP application is expected to override sl_wisun_on_event() to handle
+ * events from the stack.
+ *
  * @{
  *****************************************************************************/
 
@@ -214,7 +232,7 @@ typedef enum {
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_GENERIC sl_wisun_msg_generic
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Confirmation message body
 SL_PACK_START(1)
@@ -239,7 +257,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_NETWORK_SIZE sl_wisun_msg_set_network_size
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -284,7 +302,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_GET_IP_ADDRESS sl_wisun_msg_get_ip_address
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -329,13 +347,16 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_OPEN_SOCKET sl_wisun_msg_open_socket
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
 typedef struct {
+  /// Communication domain
   uint32_t domain;
+  /// Communication semantics
   uint32_t type;
+  /// Protocol to be used
   uint32_t protocol;
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_open_socket_req_body_t;
 SL_PACK_END()
@@ -377,7 +398,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_CLOSE_SOCKET sl_wisun_msg_close_socket
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -422,7 +443,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SENDTO_ON_SOCKET sl_wisun_msg_sendto_on_socket
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -478,7 +499,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SOCKET_SENDMSG sl_wisun_msg_socket_sendmsg
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -528,7 +549,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_LISTEN_ON_SOCKET sl_wisun_msg_listen_on_socket
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -573,7 +594,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_ACCEPT_ON_SOCKET sl_wisun_msg_accept_on_socket
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -626,7 +647,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_CONNECT_SOCKET sl_wisun_msg_connect_socket
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -677,7 +698,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_BIND_SOCKET sl_wisun_msg_bind_socket
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -728,7 +749,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SEND_ON_SOCKET sl_wisun_msg_send_on_socket
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -782,7 +803,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_RECEIVE_ON_SOCKET sl_wisun_msg_receive_on_socket
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -841,7 +862,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SOCKET_RECVMSG sl_wisun_msg_socket_recvmsg
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -892,7 +913,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SOCKET_GETSOCKNAME sl_wisun_msg_socket_getsockname
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -943,7 +964,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SOCKET_GETPEERNAME sl_wisun_msg_socket_getpeername
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -994,7 +1015,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_DISCONNECT sl_wisun_msg_disconnect
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -1037,7 +1058,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_TRUSTED_CERTIFICATE sl_wisun_msg_set_trusted_certificate
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -1084,7 +1105,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_DEVICE_CERTIFICATE sl_wisun_msg_set_device_certificate
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -1131,7 +1152,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_DEVICE_PRIVATE_KEY sl_wisun_msg_set_device_private_key
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -1178,7 +1199,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_GET_STATISTICS sl_wisun_msg_get_statistics
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -1203,6 +1224,7 @@ SL_PACK_START(1)
 typedef struct {
   /// Status of the request
   uint32_t status;
+  /// Statistics
   sl_wisun_statistics_t statistics;
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_get_statistics_cnf_body_t;
 SL_PACK_END()
@@ -1222,7 +1244,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_SOCKET_OPTION sl_wisun_msg_set_socket_option
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -1275,7 +1297,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_TX_POWER sl_wisun_msg_set_tx_power
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -1320,7 +1342,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_CHANNEL_MASK sl_wisun_msg_set_channel_mask
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -1363,7 +1385,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_ALLOW_MAC_ADDRESS sl_wisun_msg_allow_mac_address
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -1406,7 +1428,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_DENY_MAC_ADDRESS sl_wisun_msg_deny_mac_address
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -1449,7 +1471,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_GET_SOCKET_OPTION sl_wisun_msg_get_socket_option
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -1506,7 +1528,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_GET_JOIN_STATE sl_wisun_msg_get_join_state
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message
 SL_PACK_START(1)
@@ -1541,7 +1563,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_CLEAR_CREDENTIAL_CACHE sl_wisun_msg_clear_credential_cache
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message
 SL_PACK_START(1)
@@ -1574,7 +1596,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_GET_MAC_ADDRESS sl_wisun_msg_get_mac_address
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message
 SL_PACK_START(1)
@@ -1609,7 +1631,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_MAC_ADDRESS sl_wisun_msg_set_mac_address
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -1652,7 +1674,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_RESET_STATISTICS sl_wisun_msg_reset_statistics
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -1695,7 +1717,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_GET_NEIGHBOR_COUNT sl_wisun_msg_get_neighbor_count
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message
 SL_PACK_START(1)
@@ -1732,7 +1754,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_GET_NEIGHBORS sl_wisun_msg_get_neighbors
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -1783,7 +1805,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_GET_NEIGHBOR_INFO sl_wisun_msg_get_neighbor_info
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -1828,7 +1850,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_UNICAST_SETTINGS sl_wisun_msg_set_unicast_settings
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -1873,7 +1895,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_TRACE_LEVEL sl_wisun_msg_set_trace_level
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -1920,7 +1942,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_TRACE_FILTER sl_wisun_msg_set_trace_filter
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -1967,7 +1989,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_REGULATION sl_wisun_set_regulation
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -2010,7 +2032,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_DEVICE_PRIVATE_KEY_ID sl_wisun_msg_set_device_private_key_id
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -2053,7 +2075,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_ASYNC_FRAGMENTATION sl_wisun_set_advert_fragment_duration
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -2095,7 +2117,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_RATE_ALGORITHM sl_wisun_msg_set_rate_algorithm
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -2141,7 +2163,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_GET_RATE_ALGORITHM_STATS sl_wisun_msg_get_rate_algorithm_stats
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -2168,7 +2190,7 @@ SL_PACK_END()
 /// Confirmation message body
 SL_PACK_START(1)
 typedef struct {
-  //number of rates copied
+  /// Number of rates copied
   uint16_t rate_count;
   /// Status of the request
   uint32_t status;
@@ -2194,7 +2216,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_MODE_SWITCH sl_wisun_msg_set_mode_switch
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -2243,7 +2265,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_REGULATION_TX_THRESHOLDS sl_wisun_set_regulation_tx_thresholds
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -2290,7 +2312,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_DEVICE_TYPE sl_wisun_set_device_type
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -2332,7 +2354,7 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_MSG_SET_DEVICE_TYPE) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_CONNECTION_PARAMS sl_wisun_msg_set_connection_params
  * @{
  *****************************************************************************/
@@ -2378,7 +2400,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_JOIN sl_wisun_msg_join
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -2423,7 +2445,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_POM_IE sl_wisun_msg_set_pom_ie
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -2473,7 +2495,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_GET_POM_IE sl_wisun_msg_get_pom_ie
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message
 SL_PACK_START(1)
@@ -2515,7 +2537,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_GET_STACK_VERSION sl_wisun_msg_get_stack_version
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message
 SL_PACK_START(1)
@@ -2555,7 +2577,7 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_MSG_GET_STACK_VERSION) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_LFN_PARAMS sl_wisun_msg_set_lfn_params
  * @{
  *****************************************************************************/
@@ -2598,7 +2620,7 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_MSG_SET_LFN_PARAMS) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_LFN_SUPPORT sl_wisun_msg_set_lfn_support
  * @{
  *****************************************************************************/
@@ -2641,11 +2663,12 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_MSG_SET_LFN_SUPPORT) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_PTI_STATE sl_wisun_msg_set_pti_state
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
+/// Request message body
 SL_PACK_START(1)
 typedef struct {
   /// Is pti enabled ?
@@ -2655,6 +2678,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_set_pti_state_req_body_t;
 SL_PACK_END()
 
+/// Request message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -2664,6 +2688,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_set_pti_state_req_t;
 SL_PACK_END()
 
+/// Confirmation message body
 SL_PACK_START(1)
 typedef struct {
   /// Status of the request
@@ -2671,6 +2696,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_set_pti_state_cnf_body_t;
 SL_PACK_END()
 
+/// Confirmation message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -2685,7 +2711,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_TBU_SETTINGS sl_wisun_set_tbu_settings
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -2732,7 +2758,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_GET_GTKS sl_wisun_get_gtks
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message
 SL_PACK_START(1)
@@ -2766,11 +2792,12 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_MSG_GET_GTKS) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_MSG_TRIGGER_FRAME sl_wisun_msg_trigger_frame
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
+/// Request message body
 SL_PACK_START(1)
 typedef struct {
   /// Frame type
@@ -2778,6 +2805,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_trigger_frame_req_body_t;
 SL_PACK_END()
 
+/// Request message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -2787,6 +2815,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_trigger_frame_req_t;
 SL_PACK_END()
 
+/// Confirmation message body
 SL_PACK_START(1)
 typedef struct {
   /// Status of the request
@@ -2794,6 +2823,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_trigger_frame_cnf_body_t;
 SL_PACK_END()
 
+/// Confirmation message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -2805,11 +2835,12 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_MSG_TRIGGER_FRAME) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_SECURITY_STATE sl_wisun_msg_set_security_state
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
+/// Request message body
 SL_PACK_START(1)
 typedef struct {
   /// Security state
@@ -2817,6 +2848,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_set_security_state_req_body_t;
 SL_PACK_END()
 
+/// Request message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -2826,6 +2858,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_set_security_state_req_t;
 SL_PACK_END()
 
+/// Confirmation message body
 SL_PACK_START(1)
 typedef struct {
   /// Status of the request
@@ -2833,6 +2866,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_set_security_state_cnf_body_t;
 SL_PACK_END()
 
+/// Confirmation message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -2847,7 +2881,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_NETWORK_INFO sl_wisun_msg_get_network_info
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message
 SL_PACK_START(1)
@@ -2882,7 +2916,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_RPL_INFO sl_wisun_msg_get_rpl_info
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message
 SL_PACK_START(1)
@@ -2917,7 +2951,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_GET_EXCLUDED_CHANNEL_MASK sl_wisun_msg_get_excluded_channel_mask
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -2964,7 +2998,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_NEIGHBOR_TABLE_SIZE sl_wisun_msg_set_neighbor_table_size
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -3009,7 +3043,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_CONFIG_NEIGHBOR_TABLE_SIZE sl_wisun_msg_config_neighbor_table_size
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -3056,8 +3090,9 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_ENABLE_NEIGHBOUR_SOLICITATIONS sl_wisun_msg_enable_neighbour_solicitations
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
+/// Request message body
 SL_PACK_START(1)
 typedef struct {
   /// true to enable neighbour solicitations
@@ -3067,6 +3102,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_enable_neighbour_solicitations_req_body_t;
 SL_PACK_END()
 
+/// Request message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -3076,6 +3112,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_enable_neighbour_solicitations_req_t;
 SL_PACK_END()
 
+/// Confirmation message body
 SL_PACK_START(1)
 typedef struct {
   /// Status of the request
@@ -3083,6 +3120,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_enable_neighbour_solicitations_cnf_body_t;
 SL_PACK_END()
 
+/// Confirmation message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -3097,8 +3135,9 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_TRIGGER_NEIGHBOR_CACHE_REFRESH sl_wisun_msg_trigger_neighbor_cache_refresh
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
+/// Request message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -3106,6 +3145,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_trigger_neighbor_cache_refresh_req_t;
 SL_PACK_END()
 
+/// Confirmation message body
 SL_PACK_START(1)
 typedef struct {
   /// Status of the request
@@ -3113,6 +3153,7 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_trigger_neighbor_cache_refresh_cnf_body_t;
 SL_PACK_END()
 
+/// Confirmation message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -3127,7 +3168,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_TX_POWER_DDBM sl_wisun_msg_set_tx_power_ddbm
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -3172,7 +3213,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_LEAF sl_wisun_msg_set_leaf
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -3217,7 +3258,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_EVENT_FILTER sl_wisun_msg_set_event_filter
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -3262,7 +3303,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_CLEAR_EVENT_FILTERS sl_wisun_msg_clear_event_filters
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 
 /// Request message body
@@ -3306,7 +3347,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_DIRECT_CONNECT_STATE sl_wisun_msg_set_direct_connect_state
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -3351,7 +3392,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_ACCEPT_DIRECT_CONNECT_LINK sl_wisun_msg_accept_direct_connect_link
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -3394,7 +3435,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_SET_PHY_SENSITIVITY sl_wisun_set_phy_sensitivity
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -3441,7 +3482,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_DIRECT_CONNECT_PMK_ID sl_wisun_msg_set_direct_connect_pmk_id
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -3484,7 +3525,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_PREFERRED_PAN sl_wisun_msg_set_preferred_pan
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -3526,7 +3567,7 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_MSG_SET_PREFERRED_PAN) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_LFN_TIMINGS sl_wisun_msg_set_lfn_timings
  * @{
  *****************************************************************************/
@@ -3576,7 +3617,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_CONFIG_CONCURRENT_DETECTION sl_wisun_msg_config_concurrent_detection
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -3618,7 +3659,7 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_MSG_CONFIG_CONCURRENT_DETECTION) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_REGULATION_PARAMS sl_wisun_msg_set_regulation_params
  * @{
  *****************************************************************************/
@@ -3661,7 +3702,7 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_MSG_SET_REGULATION_PARAMS) */
 
-/******************************************************************************
+/**************************************************************************//**
  * @defgroup SL_WISUN_MSG_RESET_REGULATION_DUTY_CYCLE sl_wisun_msg_reset_regulation_duty_cycle
  * @{
  *****************************************************************************/
@@ -3697,7 +3738,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_EAP_IDENTITY sl_wisun_msg_set_eap_identity
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -3744,7 +3785,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_FAN_TPS_VERSION sl_wisun_msg_set_fan_tps_version
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -3789,7 +3830,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_RX_FIFO_SIZE sl_wisun_msg_set_rx_fifo_size
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -3834,7 +3875,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_REGISTER_ADDRESS sl_wisun_msg_register_address
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -3883,40 +3924,40 @@ SL_PACK_END()
  * @brief Send a request to the Wi-SUN stack
  *
  * This function provides an interface for sending requests to the Wi-SUN
- * stack and receiving confirmations. When using blocking requests, the function 
+ * stack and receiving confirmations. When using blocking requests, the function
  * blocks until the request is processed and a confirmation is available.
- * 
+ *
  * REQ/CNF buffer layout:
  * request:      | Header (4B) | Request body (varies)       | Trailing data (if any) |
  * confirmation: | Header (4B) | Confirmation body (varies)  | Trailing data (if any) |
- * 
+ *
  * Header structure:
  * - length: uint16_t - Total message length including header and trailing data
  * - id: uint8_t - Message identifier
  * - info: uint8_t - Message flags and metadata
- * 
+ *
  * @pre req != NULL && cnf != NULL
  * @pre req_len >= sizeof(sl_wisun_msg_header_t)
  * @pre cnf_len >= sizeof(sl_wisun_msg_header_t) + sizeof(uint32_t) (header + status)
  * @pre req->header.length == req_len (length consistency check)
- * 
+ *
  * @param[in] req Pointer to the request message buffer
  * @param[in] req_len Length of the request message in bytes (must match req->header.length)
  * @param[out] cnf Pointer to confirmation message buffer
  * @param[in] cnf_len Length of the confirmation message buffer in bytes
- * 
+ *
  * @return SL_STATUS_OK Request processed successfully
  * @return SL_STATUS_INVALID_PARAMETER Invalid parameters or buffer size mismatch
  * @return SL_STATUS_NULL_POINTER NULL pointer parameter
  * @return SL_STATUS_FAIL Internal processing error or handler failure
- * 
+ *
  * @note Blocking behavior: When using blocking requests, this function blocks the calling thread until the
  *       request is processed.
- * 
+ *
  * @see sl_wisun_msg_header_t for header structure details
  *****************************************************************************/
  sl_status_t sl_wisun_send_request(const void *req,
-                                   uint16_t req_len, 
+                                   uint16_t req_len,
                                    void *cnf,
                                    uint16_t cnf_len);
 

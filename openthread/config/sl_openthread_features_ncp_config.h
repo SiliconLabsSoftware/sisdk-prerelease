@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @file
- * @brief OpenThread stack configuration file.
+ * @brief OpenThread NCP stack configuration file.
  *******************************************************************************
  * # License
  * <b>Copyright 2025 Silicon Laboratories Inc. www.silabs.com</b>
@@ -32,7 +32,7 @@
 #define _SL_OPENTHREAD_FEATURES_NCP_CONFIG_H
 //-------- <<< Use Configuration Wizard in Context Menu >>> -----------------
 //
-// <h> Default OpenThread Stack Configuration
+// <h> Default OpenThread NCP stack Configuration
 
 // <h>  Thread Stack Protocol Version
 // <o   OPENTHREAD_CONFIG_THREAD_VERSION>
@@ -159,7 +159,7 @@
 #endif
 // <q>  Thread over Infrastructure
 #ifndef OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
-#define OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE       0
+#define OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE       OPENTHREAD_FTD
 #endif
 // </h>
 
@@ -183,6 +183,7 @@
 #define OPENTHREAD_CONFIG_CHANNEL_MONITOR_ENABLE    0
 #endif
 // </e>
+
 // <e OPENTHREAD_CONFIG_COMMISSIONER_ENABLE>  Commissioner
 #ifndef OPENTHREAD_CONFIG_COMMISSIONER_ENABLE
 #define OPENTHREAD_CONFIG_COMMISSIONER_ENABLE       0
@@ -485,6 +486,7 @@
 #define OPENTHREAD_CONFIG_PLATFORM_LOG_CRASH_DUMP_ENABLE 0
 #endif
 // </e>
+
 // </h>
 // </e>
 // </h>

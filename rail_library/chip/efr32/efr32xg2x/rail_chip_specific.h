@@ -145,6 +145,15 @@ extern "C" {
  */
 #define RAIL_EFR32XG29_STATE_BUFFER_BYTES 616U  // DO NOT HAND-EDIT THESE VALUES
 
+/**
+ * @def RAIL_EFR32XG2D_STATE_BUFFER_BYTES
+ * @brief The EFR32XG2D series size needed for
+ *   \ref RAIL_StateBufferEntry_t::bufferBytes.
+ *
+ * @deprecated RAIL 2.x synonym of \ref SL_RAIL_EFR32XG2D_STATE_BUFFER_BYTES.
+ */
+#define RAIL_EFR32XG2D_STATE_BUFFER_BYTES 632U  // DO NOT HAND-EDIT THESE VALUES
+
 #ifndef RAIL_STATE_BUFFER_BYTES
 /**
  * @def RAIL_STATE_BUFFER_BYTES
@@ -172,6 +181,8 @@ extern "C" {
 #define RAIL_STATE_BUFFER_BYTES RAIL_EFR32XG28_STATE_BUFFER_BYTES
 #elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)
 #define RAIL_STATE_BUFFER_BYTES RAIL_EFR32XG29_STATE_BUFFER_BYTES
+#elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 13)
+#define RAIL_STATE_BUFFER_BYTES RAIL_EFR32XG2D_STATE_BUFFER_BYTES
 #else
 #define RAIL_STATE_BUFFER_BYTES 0 // Sate Doxygen
 #error "Unsupported platform!"
@@ -472,6 +483,8 @@ RAIL_TimerTick_t RAIL_UsToTimerTicks(RAIL_Time_t microseconds);
 #define RAIL_RF_PATHS_SUBGIG 2
 #elif _SILICON_LABS_32B_SERIES_2_CONFIG == 8
 #define RAIL_RF_PATHS_SUBGIG 1
+#elif  _SILICON_LABS_32B_SERIES_2_CONFIG == 13
+#define RAIL_RF_PATHS_SUBGIG 2
 #else
 #define RAIL_RF_PATHS_SUBGIG 0
 #endif
@@ -543,42 +556,48 @@ struct RAIL_ChannelConfigEntryAttr {
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_HP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_HP_MAX     (180U)
 /**
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_HP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_HP_MIN     (1U)
 /**
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_MP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MAX.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MAX.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_MP_MAX     (90U)
 /**
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_MP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MIN.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MIN.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_MP_MIN     (1U)
 /**
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_LP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_LP_MAX     (64U)
 /**
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_LP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_LP_MIN     (0U)
 #elif ((_SILICON_LABS_32B_SERIES_2_CONFIG == 4) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 6))
@@ -590,7 +609,8 @@ struct RAIL_ChannelConfigEntryAttr {
  *  EFR32xG26: capable of 20dBm max output power has max powerlevel:180
  *  EFR32xG26: capable of 10dBm max output power has max powerlevel:90
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX.
  */
 #if defined (_SILICON_LABS_EFR32_2G4HZ_HP_PA_PRESENT) \
   && (_SILICON_LABS_EFR32_2G4HZ_HP_PA_MAX_OUTPUT_DBM > 10)
@@ -602,21 +622,24 @@ struct RAIL_ChannelConfigEntryAttr {
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_HP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_HP_MIN     (0U)
 /**
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_LP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_LP_MAX     (15U)
 /**
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_LP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_LP_MIN     (0U)
 #elif ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \
@@ -626,28 +649,32 @@ struct RAIL_ChannelConfigEntryAttr {
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_HP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_HP_MAX     (127U)
 /**
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_HP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_HP_MIN     (0U)
 /**
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_LP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_LP_MAX     (15U)
 /**
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_LP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_LP_MIN     (0U)
 #elif _SILICON_LABS_32B_SERIES_2_CONFIG == 8
@@ -655,14 +682,16 @@ struct RAIL_ChannelConfigEntryAttr {
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_HP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_HP_MAX     (240)
 /**
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_HP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_HP_MIN     (1U)
 #else //EFR32xG23
@@ -670,56 +699,64 @@ struct RAIL_ChannelConfigEntryAttr {
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_HP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_HP_MAX     (240)
 /**
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_HP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_HP_MIN     (1U)
 /**
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_MP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MAX.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MAX.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_MP_MAX     (RAIL_TX_POWER_LEVEL_2P4_HP_MAX)
 /**
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_MP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MIN.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MIN.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_MP_MIN     (RAIL_TX_POWER_LEVEL_2P4_HP_MIN)
 /**
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_LP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_LP_MAX     (RAIL_TX_POWER_LEVEL_2P4_HP_MAX)
 /**
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_LP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_LP_MIN     (RAIL_TX_POWER_LEVEL_2P4_HP_MIN)
 /**
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_LLP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LLP_MAX.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LLP_MAX.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_LLP_MAX     (RAIL_TX_POWER_LEVEL_2P4_HP_MAX)
 /**
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4GIG_LLP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_2P4_GHZ_LLP_MIN.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LLP_MIN.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_LLP_MIN     (RAIL_TX_POWER_LEVEL_2P4_HP_MIN)
 #endif //_SILICON_LABS_32B_SERIES_2_CONFIG
@@ -730,10 +767,13 @@ struct RAIL_ChannelConfigEntryAttr {
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when using
  * a Sub-GHz PA mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MAX.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MAX.
  */
 #ifndef RAIL_SUBGIG_MAX
-#if _SILICON_LABS_32B_SERIES_2_CONFIG == 3 || _SILICON_LABS_32B_SERIES_2_CONFIG == 8
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 3) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
 #define RAIL_SUBGIG_MAX 240U
 #elif _SILICON_LABS_32B_SERIES_2_CONFIG == 5
 #define RAIL_SUBGIG_MAX 79U
@@ -746,7 +786,8 @@ struct RAIL_ChannelConfigEntryAttr {
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when using
  * a Sub-GHz PA mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MIN.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MIN.
  */
 #define RAIL_SUBGIG_MIN 1U
 
@@ -754,7 +795,8 @@ struct RAIL_ChannelConfigEntryAttr {
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_SUBGIG_HP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_HP_MAX.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_HP_MAX.
  */
 #define RAIL_TX_POWER_LEVEL_SUBGIG_HP_MAX (RAIL_SUBGIG_MAX)
 
@@ -762,7 +804,8 @@ struct RAIL_ChannelConfigEntryAttr {
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_SUBGIG_HP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_HP_MIN.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_HP_MIN.
  */
 #define RAIL_TX_POWER_LEVEL_SUBGIG_HP_MIN (RAIL_SUBGIG_MIN)
 
@@ -770,7 +813,8 @@ struct RAIL_ChannelConfigEntryAttr {
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_SUBGIG_MP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MP_MAX.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MP_MAX.
  */
 #define RAIL_TX_POWER_LEVEL_SUBGIG_MP_MAX (RAIL_SUBGIG_MAX)
 
@@ -778,7 +822,8 @@ struct RAIL_ChannelConfigEntryAttr {
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_SUBGIG_MP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_MP_MIN.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_MP_MIN.
  */
 #define RAIL_TX_POWER_LEVEL_SUBGIG_MP_MIN (RAIL_SUBGIG_MIN)
 
@@ -786,7 +831,8 @@ struct RAIL_ChannelConfigEntryAttr {
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_SUBGIG_LP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_LP_MAX.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_LP_MAX.
  */
 #define RAIL_TX_POWER_LEVEL_SUBGIG_LP_MAX (RAIL_SUBGIG_MAX)
 
@@ -794,7 +840,8 @@ struct RAIL_ChannelConfigEntryAttr {
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_SUBGIG_LP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_LP_MIN.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_LP_MIN.
  */
 #define RAIL_TX_POWER_LEVEL_SUBGIG_LP_MIN (RAIL_SUBGIG_MIN)
 
@@ -802,7 +849,8 @@ struct RAIL_ChannelConfigEntryAttr {
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_SUBGIG_LLP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_LLP_MAX.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_LLP_MAX.
  */
 #define RAIL_TX_POWER_LEVEL_SUBGIG_LLP_MAX (RAIL_SUBGIG_MAX)
 
@@ -810,7 +858,8 @@ struct RAIL_ChannelConfigEntryAttr {
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_SUBGIG_LLP mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_SUB_GHZ_LLP_MIN.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_SUB_GHZ_LLP_MIN.
  */
 #define RAIL_TX_POWER_LEVEL_SUBGIG_LLP_MIN (RAIL_SUBGIG_MIN)
 #endif //RAIL_SUPPORTS_SUBGHZ_BAND
@@ -821,20 +870,23 @@ struct RAIL_ChannelConfigEntryAttr {
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE mode on EFR32xG25.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_OFDM_PA_MAX.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_OFDM_PA_MAX.
  */
 #define RAIL_OFDM_PA_MAX      204U
 /**
  * The PA multiplier for PA control on EFR32xG25.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_OFDM_PA_MULT.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_OFDM_PA_MULT.
  */
 #define RAIL_OFDM_PA_MULT     5U
 /**
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE mode on EFR32xG25.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_OFDM_PA_MIN.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_OFDM_PA_MIN.
  */
 #define RAIL_OFDM_PA_MIN      0U
 #endif
@@ -843,7 +895,8 @@ struct RAIL_ChannelConfigEntryAttr {
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_OFDM_PA_MAX.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_OFDM_PA_MAX.
  */
 #define RAIL_TX_POWER_LEVEL_OFDM_PA_MAX (RAIL_OFDM_PA_MAX)
 
@@ -851,7 +904,8 @@ struct RAIL_ChannelConfigEntryAttr {
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE mode.
  *
- * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TX_POWER_LEVEL_OFDM_PA_MIN.
+ * @deprecated This RAIL 2.x define has been eliminated
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_OFDM_PA_MIN.
  */
 #define RAIL_TX_POWER_LEVEL_OFDM_PA_MIN (RAIL_OFDM_PA_MIN)
 #endif //RAIL_SUPPORTS_OFDM_PA
@@ -885,7 +939,8 @@ struct RAIL_ChannelConfigEntryAttr {
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9))
 #define RAIL_NUM_PA (2U)
-#elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 3)
+#elif ((_SILICON_LABS_32B_SERIES_2_CONFIG == 3) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
 #define RAIL_NUM_PA (4U)
 #elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 8)
 #define RAIL_NUM_PA (5U)

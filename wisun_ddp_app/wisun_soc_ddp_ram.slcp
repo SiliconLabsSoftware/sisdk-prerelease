@@ -17,6 +17,7 @@ component:
   - id: wisun_ddp_inject_key
   - id: sl_main
   - id: device_init
+  - id: toolchain_gcc
 configuration:
   - name: SL_STACK_SIZE
     value: 4096

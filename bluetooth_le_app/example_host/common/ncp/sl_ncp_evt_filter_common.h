@@ -48,4 +48,3 @@
 
 /** @} (end addtogroup ncp_evt_filter) */
 #endif // SL_NCP_EVT_FILTER_COMMON_H
-

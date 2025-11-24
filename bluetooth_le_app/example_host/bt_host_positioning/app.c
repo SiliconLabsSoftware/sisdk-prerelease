@@ -730,7 +730,7 @@ static void angle_queue_on_angles_ready(aoa_id_t tag_id,
  *****************************************************************************/
 void aoa_loc_on_position_ready(aoa_asset_tag_t *tag)
 {
-    sl_status_t sc;
+  sl_status_t sc;
   char *payload;
   const char topic_template[] = AOA_TOPIC_POSITION_PRINT;
   char topic[sizeof(topic_template) + sizeof(aoa_id_t) + sizeof(aoa_id_t)];

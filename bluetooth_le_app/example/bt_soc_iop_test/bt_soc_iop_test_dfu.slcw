@@ -9,9 +9,9 @@ description: >
   Combined solution with application and bootloader projects.
 quality: production
 project:
-  - path: ../../bootloader/bootloader-apploader.slcp
-    id: bootloader
   - path: bt_soc_iop_test.slcp
     id: application
+  - path: ../../bootloader/bootloader-apploader.slcp
+    id: bootloader
 post_build:
   path: ../../postbuild_profile/bt_dfu_ws.slpb

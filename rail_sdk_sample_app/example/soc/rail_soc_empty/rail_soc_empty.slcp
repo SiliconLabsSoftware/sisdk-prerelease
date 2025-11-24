@@ -22,7 +22,7 @@ component:
   - id: sl_rail_util_init
     instance:
       - inst0
-  - id: sl_rail_util_pa
+  - id: sl_rail_util_compatible_pa
 #------------Memory Protection Unit-------------------
   - id: mpu
 #-----------------Series 3 OS-------------------------

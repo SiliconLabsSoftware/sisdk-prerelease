@@ -26,8 +26,8 @@ recommends:
 - id: rail_lib_multiprotocol_internal_chips
   vendor: silabs
 provides:
-- name: rail_lib_multiprotocol   # specific tag
-- name: rail_lib_Xprotocol   # generic tag
+- name: rail_lib_multiprotocol_secure   # specific tag
+- name: rail_lib_Xprotocol_secure   # generic tag
 documentation:
   docset: rail
   document: rail-api/rail-lib
@@ -366,6 +366,43 @@ library:
   condition:
   - toolchain_llvm
   - device_sdid_240
+  - device_is_module
+
+- path: autogen/librail_release/librail_multiprotocol_efr32xg2d_iar_secure.a
+  condition:
+  - toolchain_iar
+  - device_sdid_260
+  unless:
+  - device_is_module
+- path: autogen/librail_release/librail_multiprotocol_efr32xg2d_gcc_secure.a
+  condition:
+  - toolchain_gcc
+  - device_sdid_260
+  unless:
+  - device_is_module
+  - toolchain_llvm
+- path: autogen/librail_release/librail_multiprotocol_efr32xg2d_llvm_secure.a
+  condition:
+  - toolchain_llvm
+  - device_sdid_260
+  unless:
+  - device_is_module
+- path: autogen/librail_release/librail_multiprotocol_module_efr32xg2d_iar_secure.a
+  condition:
+  - toolchain_iar
+  - device_sdid_260
+  - device_is_module
+- path: autogen/librail_release/librail_multiprotocol_module_efr32xg2d_gcc_secure.a
+  condition:
+  - toolchain_gcc
+  - device_sdid_260
+  - device_is_module
+  unless:
+  - toolchain_llvm
+- path: autogen/librail_release/librail_multiprotocol_module_efr32xg2d_llvm_secure.a
+  condition:
+  - toolchain_llvm
+  - device_sdid_260
   - device_is_module
 
 - path: autogen/librail_release/librail_multiprotocol_sixg301_iar_secure.a
