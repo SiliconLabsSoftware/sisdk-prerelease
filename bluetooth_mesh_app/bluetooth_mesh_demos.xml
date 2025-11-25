@@ -484,6 +484,160 @@
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
+  <demo name="brd4176a.demo.btmesh_soc_dfu_distributor" label="Bluetooth Mesh - SoC DFU Distributor">
+    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4176a"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4176a/btmesh_soc_dfu_distributor-brd4176a.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_distributor/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4180a.demo.btmesh_soc_dfu_distributor" label="Bluetooth Mesh - SoC DFU Distributor">
+    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4180a"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4180a/btmesh_soc_dfu_distributor-brd4180a.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_distributor/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4180b.demo.btmesh_soc_dfu_distributor" label="Bluetooth Mesh - SoC DFU Distributor">
+    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4180b"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4180b/btmesh_soc_dfu_distributor-brd4180b.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_distributor/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4181a.demo.btmesh_soc_dfu_distributor" label="Bluetooth Mesh - SoC DFU Distributor">
+    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4181a"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4181a/btmesh_soc_dfu_distributor-brd4181a.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_distributor/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4181b.demo.btmesh_soc_dfu_distributor" label="Bluetooth Mesh - SoC DFU Distributor">
+    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4181b"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4181b/btmesh_soc_dfu_distributor-brd4181b.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_distributor/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4181c.demo.btmesh_soc_dfu_distributor" label="Bluetooth Mesh - SoC DFU Distributor">
+    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4181c"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4181c/btmesh_soc_dfu_distributor-brd4181c.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_distributor/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4186c.demo.btmesh_soc_dfu_distributor" label="Bluetooth Mesh - SoC DFU Distributor">
+    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4186c"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4186c/btmesh_soc_dfu_distributor-brd4186c.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_distributor/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4187c.demo.btmesh_soc_dfu_distributor" label="Bluetooth Mesh - SoC DFU Distributor">
+    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4187c"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4187c/btmesh_soc_dfu_distributor-brd4187c.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_distributor/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4188b.demo.btmesh_soc_dfu_distributor" label="Bluetooth Mesh - SoC DFU Distributor">
+    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4188b"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4188b/btmesh_soc_dfu_distributor-brd4188b.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_distributor/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4195a.demo.btmesh_soc_dfu_distributor" label="Bluetooth Mesh - SoC DFU Distributor">
+    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4195a"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4195a/btmesh_soc_dfu_distributor-brd4195a.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_distributor/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4195b.demo.btmesh_soc_dfu_distributor" label="Bluetooth Mesh - SoC DFU Distributor">
+    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4195b"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4195b/btmesh_soc_dfu_distributor-brd4195b.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_distributor/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4196a.demo.btmesh_soc_dfu_distributor" label="Bluetooth Mesh - SoC DFU Distributor">
+    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4196a"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4196a/btmesh_soc_dfu_distributor-brd4196a.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_distributor/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4196b.demo.btmesh_soc_dfu_distributor" label="Bluetooth Mesh - SoC DFU Distributor">
+    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4196b"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4196b/btmesh_soc_dfu_distributor-brd4196b.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_distributor/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4198a.demo.btmesh_soc_dfu_distributor" label="Bluetooth Mesh - SoC DFU Distributor">
+    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4198a"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4198a/btmesh_soc_dfu_distributor-brd4198a.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_distributor/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
   <demo name="brd4176a.demo.btmesh_soc_dfu_distributor_workspace" label="Bluetooth Mesh - SoC DFU Distributor with Internal Storage Bootloader">
     <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Distributor into a single binary.
 </model:description>
@@ -638,58 +792,245 @@
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd2601b.demo.btmesh_soc_dfu_distributor_workspace" label="Bluetooth Mesh - SoC DFU Distributor with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Distributor into a single binary.
+  <demo name="brd2601b.demo.btmesh_soc_dfu_distributor" label="Bluetooth Mesh - SoC DFU Distributor">
+    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd2601b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd2601b/btmesh_soc_dfu_distributor_workspace-brd2601b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd2601b/btmesh_soc_dfu_distributor-brd2601b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_distributor/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd2703a.demo.btmesh_soc_dfu_distributor_workspace" label="Bluetooth Mesh - SoC DFU Distributor with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Distributor into a single binary.
+  <demo name="brd2703a.demo.btmesh_soc_dfu_distributor" label="Bluetooth Mesh - SoC DFU Distributor">
+    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd2703a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd2703a/btmesh_soc_dfu_distributor_workspace-brd2703a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd2703a/btmesh_soc_dfu_distributor-brd2703a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_distributor/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4115a.demo.btmesh_soc_dfu_distributor_workspace" label="Bluetooth Mesh - SoC DFU Distributor with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Distributor into a single binary.
+  <demo name="brd4115a.demo.btmesh_soc_dfu_distributor" label="Bluetooth Mesh - SoC DFU Distributor">
+    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4115a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4115a/btmesh_soc_dfu_distributor_workspace-brd4115a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4115a/btmesh_soc_dfu_distributor-brd4115a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_distributor/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4179b.demo.btmesh_soc_dfu_distributor_workspace" label="Bluetooth Mesh - SoC DFU Distributor with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Distributor into a single binary.
+  <demo name="brd4179b.demo.btmesh_soc_dfu_distributor" label="Bluetooth Mesh - SoC DFU Distributor">
+    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4179b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4179b/btmesh_soc_dfu_distributor_workspace-brd4179b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4179b/btmesh_soc_dfu_distributor-brd4179b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_distributor/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4332a.demo.btmesh_soc_dfu_distributor_workspace" label="Bluetooth Mesh - SoC DFU Distributor with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Distributor into a single binary.
+  <demo name="brd4332a.demo.btmesh_soc_dfu_distributor" label="Bluetooth Mesh - SoC DFU Distributor">
+    <model:description>Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Distributor"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4332a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4332a/btmesh_soc_dfu_distributor_workspace-brd4332a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4332a/btmesh_soc_dfu_distributor-brd4332a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_distributor/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4176a.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4176a"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4176a/btmesh_soc_dfu_target-brd4176a.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4180a.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4180a"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4180a/btmesh_soc_dfu_target-brd4180a.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4180b.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4180b"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4180b/btmesh_soc_dfu_target-brd4180b.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4181a.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4181a"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4181a/btmesh_soc_dfu_target-brd4181a.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4181b.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4181b"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4181b/btmesh_soc_dfu_target-brd4181b.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4181c.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4181c"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4181c/btmesh_soc_dfu_target-brd4181c.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4182a.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4182a"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4182a/btmesh_soc_dfu_target-brd4182a.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4186c.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4186c"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4186c/btmesh_soc_dfu_target-brd4186c.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4187c.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4187c"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4187c/btmesh_soc_dfu_target-brd4187c.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4188b.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4188b"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4188b/btmesh_soc_dfu_target-brd4188b.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4194a.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4194a"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4194a/btmesh_soc_dfu_target-brd4194a.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4195a.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4195a"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4195a/btmesh_soc_dfu_target-brd4195a.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4195b.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4195b"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4195b/btmesh_soc_dfu_target-brd4195b.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4196a.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4196a"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4196a/btmesh_soc_dfu_target-brd4196a.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4196b.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4196b"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4196b/btmesh_soc_dfu_target-brd4196b.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4198a.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4198a"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4198a/btmesh_soc_dfu_target-brd4198a.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <property key="core.quality" value="PRODUCTION"/>
+  </demo>
+  <demo name="brd4402a.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
+</model:description>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
+    <property key="core.partCompatibility" value=".*"/>
+    <property key="core.boardCompatibility" value="brd4402a"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4402a/btmesh_soc_dfu_target-brd4402a.s37"/>
+    <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
@@ -880,684 +1221,684 @@
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd2601b.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd2601b.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd2601b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd2601b/btmesh_soc_dfu_target_workspace-brd2601b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd2601b/btmesh_soc_dfu_target-brd2601b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd2602a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd2602a.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd2602a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd2602a/btmesh_soc_dfu_target_workspace-brd2602a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd2602a/btmesh_soc_dfu_target-brd2602a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd2703a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd2703a.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd2703a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd2703a/btmesh_soc_dfu_target_workspace-brd2703a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd2703a/btmesh_soc_dfu_target-brd2703a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4108a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4108a.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4108a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4108a/btmesh_soc_dfu_target_workspace-brd4108a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4108a/btmesh_soc_dfu_target-brd4108a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4110b.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4110b.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4110b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4110b/btmesh_soc_dfu_target_workspace-brd4110b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4110b/btmesh_soc_dfu_target-brd4110b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4111b.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4111b.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4111b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4111b/btmesh_soc_dfu_target_workspace-brd4111b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4111b/btmesh_soc_dfu_target-brd4111b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4115a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4115a.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4115a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4115a/btmesh_soc_dfu_target_workspace-brd4115a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4115a/btmesh_soc_dfu_target-brd4115a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4179b.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4179b.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4179b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4179b/btmesh_soc_dfu_target_workspace-brd4179b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4179b/btmesh_soc_dfu_target-brd4179b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4183a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4183a.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4183a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4183a/btmesh_soc_dfu_target_workspace-brd4183a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4183a/btmesh_soc_dfu_target-brd4183a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4183c.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4183c.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4183c"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4183c/btmesh_soc_dfu_target_workspace-brd4183c.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4183c/btmesh_soc_dfu_target-brd4183c.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4184a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4184a.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4184a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4184a/btmesh_soc_dfu_target_workspace-brd4184a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4184a/btmesh_soc_dfu_target-brd4184a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4184b.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4184b.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4184b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4184b/btmesh_soc_dfu_target_workspace-brd4184b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4184b/btmesh_soc_dfu_target-brd4184b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4332a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4332a.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4332a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4332a/btmesh_soc_dfu_target_workspace-brd4332a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4332a/btmesh_soc_dfu_target-brd4332a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4403a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4403a.demo.btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4403a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4403a/btmesh_soc_dfu_target_workspace-brd4403a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4403a/btmesh_soc_dfu_target-brd4403a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4176a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4176a.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4176a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4176a/btmesh_soc_dfu_target_workspace-brd4176a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4176a/btmesh_soc_dfu_target_lpn-brd4176a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4180a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4180a.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4180a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4180a/btmesh_soc_dfu_target_workspace-brd4180a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4180a/btmesh_soc_dfu_target_lpn-brd4180a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4180b.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4180b.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4180b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4180b/btmesh_soc_dfu_target_workspace-brd4180b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4180b/btmesh_soc_dfu_target_lpn-brd4180b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4181a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4181a.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4181a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4181a/btmesh_soc_dfu_target_workspace-brd4181a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4181a/btmesh_soc_dfu_target_lpn-brd4181a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4181b.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4181b.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4181b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4181b/btmesh_soc_dfu_target_workspace-brd4181b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4181b/btmesh_soc_dfu_target_lpn-brd4181b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4181c.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4181c.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4181c"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4181c/btmesh_soc_dfu_target_workspace-brd4181c.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4181c/btmesh_soc_dfu_target_lpn-brd4181c.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4182a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4182a.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4182a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4182a/btmesh_soc_dfu_target_workspace-brd4182a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4182a/btmesh_soc_dfu_target_lpn-brd4182a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4186c.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4186c.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4186c"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4186c/btmesh_soc_dfu_target_workspace-brd4186c.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4186c/btmesh_soc_dfu_target_lpn-brd4186c.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4187c.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4187c.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4187c"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4187c/btmesh_soc_dfu_target_workspace-brd4187c.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4187c/btmesh_soc_dfu_target_lpn-brd4187c.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4188b.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4188b.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4188b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4188b/btmesh_soc_dfu_target_workspace-brd4188b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4188b/btmesh_soc_dfu_target_lpn-brd4188b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4194a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4194a.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4194a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4194a/btmesh_soc_dfu_target_workspace-brd4194a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4194a/btmesh_soc_dfu_target_lpn-brd4194a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4195a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4195a.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4195a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4195a/btmesh_soc_dfu_target_workspace-brd4195a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4195a/btmesh_soc_dfu_target_lpn-brd4195a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4195b.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4195b.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4195b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4195b/btmesh_soc_dfu_target_workspace-brd4195b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4195b/btmesh_soc_dfu_target_lpn-brd4195b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4196a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4196a.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4196a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4196a/btmesh_soc_dfu_target_workspace-brd4196a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4196a/btmesh_soc_dfu_target_lpn-brd4196a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4196b.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4196b.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4196b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4196b/btmesh_soc_dfu_target_workspace-brd4196b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4196b/btmesh_soc_dfu_target_lpn-brd4196b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4198a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4198a.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4198a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4198a/btmesh_soc_dfu_target_workspace-brd4198a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4198a/btmesh_soc_dfu_target_lpn-brd4198a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4402a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4402a.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4402a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4402a/btmesh_soc_dfu_target_workspace-brd4402a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4402a/btmesh_soc_dfu_target_lpn-brd4402a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd2601b.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd2601b.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd2601b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd2601b/btmesh_soc_dfu_target_workspace-brd2601b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd2601b/btmesh_soc_dfu_target_lpn-brd2601b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd2602a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd2602a.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd2602a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd2602a/btmesh_soc_dfu_target_workspace-brd2602a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd2602a/btmesh_soc_dfu_target_lpn-brd2602a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd2703a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd2703a.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd2703a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd2703a/btmesh_soc_dfu_target_workspace-brd2703a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd2703a/btmesh_soc_dfu_target_lpn-brd2703a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4108a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4108a.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4108a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4108a/btmesh_soc_dfu_target_workspace-brd4108a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4108a/btmesh_soc_dfu_target_lpn-brd4108a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4110b.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4110b.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4110b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4110b/btmesh_soc_dfu_target_workspace-brd4110b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4110b/btmesh_soc_dfu_target_lpn-brd4110b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4111b.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4111b.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4111b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4111b/btmesh_soc_dfu_target_workspace-brd4111b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4111b/btmesh_soc_dfu_target_lpn-brd4111b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4115a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4115a.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4115a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4115a/btmesh_soc_dfu_target_workspace-brd4115a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4115a/btmesh_soc_dfu_target_lpn-brd4115a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4179b.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4179b.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4179b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4179b/btmesh_soc_dfu_target_workspace-brd4179b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4179b/btmesh_soc_dfu_target_lpn-brd4179b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4183a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4183a.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4183a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4183a/btmesh_soc_dfu_target_workspace-brd4183a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4183a/btmesh_soc_dfu_target_lpn-brd4183a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4183c.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4183c.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4183c"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4183c/btmesh_soc_dfu_target_workspace-brd4183c.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4183c/btmesh_soc_dfu_target_lpn-brd4183c.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4184a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4184a.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4184a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4184a/btmesh_soc_dfu_target_workspace-brd4184a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4184a/btmesh_soc_dfu_target_lpn-brd4184a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4184b.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4184b.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4184b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4184b/btmesh_soc_dfu_target_workspace-brd4184b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4184b/btmesh_soc_dfu_target_lpn-brd4184b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4332a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4332a.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4332a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4332a/btmesh_soc_dfu_target_workspace-brd4332a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4332a/btmesh_soc_dfu_target_lpn-brd4332a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4403a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4403a.demo.btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4403a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4403a/btmesh_soc_dfu_target_workspace-brd4403a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4403a/btmesh_soc_dfu_target_lpn-brd4403a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4176a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4176a.demo.btmesh_soc_dfu_target_lpn_low_power" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only. This example variant is optimized for ultra low current consumption with 2 minutes poll timeout and disabled CLI, logging, and LCD.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4176a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4176a/btmesh_soc_dfu_target_workspace-brd4176a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4176a/btmesh_soc_dfu_target_lpn_low_power-brd4176a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4180a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4180a.demo.btmesh_soc_dfu_target_lpn_low_power" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only. This example variant is optimized for ultra low current consumption with 2 minutes poll timeout and disabled CLI, logging, and LCD.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4180a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4180a/btmesh_soc_dfu_target_workspace-brd4180a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4180a/btmesh_soc_dfu_target_lpn_low_power-brd4180a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4180b.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4180b.demo.btmesh_soc_dfu_target_lpn_low_power" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only. This example variant is optimized for ultra low current consumption with 2 minutes poll timeout and disabled CLI, logging, and LCD.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4180b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4180b/btmesh_soc_dfu_target_workspace-brd4180b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4180b/btmesh_soc_dfu_target_lpn_low_power-brd4180b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4181a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4181a.demo.btmesh_soc_dfu_target_lpn_low_power" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only. This example variant is optimized for ultra low current consumption with 2 minutes poll timeout and disabled CLI, logging, and LCD.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4181a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4181a/btmesh_soc_dfu_target_workspace-brd4181a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4181a/btmesh_soc_dfu_target_lpn_low_power-brd4181a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4181b.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4181b.demo.btmesh_soc_dfu_target_lpn_low_power" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only. This example variant is optimized for ultra low current consumption with 2 minutes poll timeout and disabled CLI, logging, and LCD.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4181b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4181b/btmesh_soc_dfu_target_workspace-brd4181b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4181b/btmesh_soc_dfu_target_lpn_low_power-brd4181b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4181c.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4181c.demo.btmesh_soc_dfu_target_lpn_low_power" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only. This example variant is optimized for ultra low current consumption with 2 minutes poll timeout and disabled CLI, logging, and LCD.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4181c"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4181c/btmesh_soc_dfu_target_workspace-brd4181c.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4181c/btmesh_soc_dfu_target_lpn_low_power-brd4181c.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4182a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4182a.demo.btmesh_soc_dfu_target_lpn_low_power" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only. This example variant is optimized for ultra low current consumption with 2 minutes poll timeout and disabled CLI, logging, and LCD.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4182a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4182a/btmesh_soc_dfu_target_workspace-brd4182a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4182a/btmesh_soc_dfu_target_lpn_low_power-brd4182a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4186c.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4186c.demo.btmesh_soc_dfu_target_lpn_low_power" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only. This example variant is optimized for ultra low current consumption with 2 minutes poll timeout and disabled CLI, logging, and LCD.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4186c"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4186c/btmesh_soc_dfu_target_workspace-brd4186c.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4186c/btmesh_soc_dfu_target_lpn_low_power-brd4186c.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4187c.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4187c.demo.btmesh_soc_dfu_target_lpn_low_power" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only. This example variant is optimized for ultra low current consumption with 2 minutes poll timeout and disabled CLI, logging, and LCD.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4187c"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4187c/btmesh_soc_dfu_target_workspace-brd4187c.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4187c/btmesh_soc_dfu_target_lpn_low_power-brd4187c.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4188b.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4188b.demo.btmesh_soc_dfu_target_lpn_low_power" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only. This example variant is optimized for ultra low current consumption with 2 minutes poll timeout and disabled CLI, logging, and LCD.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4188b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4188b/btmesh_soc_dfu_target_workspace-brd4188b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4188b/btmesh_soc_dfu_target_lpn_low_power-brd4188b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4194a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4194a.demo.btmesh_soc_dfu_target_lpn_low_power" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only. This example variant is optimized for ultra low current consumption with 2 minutes poll timeout and disabled CLI, logging, and LCD.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4194a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4194a/btmesh_soc_dfu_target_workspace-brd4194a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4194a/btmesh_soc_dfu_target_lpn_low_power-brd4194a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4195a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4195a.demo.btmesh_soc_dfu_target_lpn_low_power" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only. This example variant is optimized for ultra low current consumption with 2 minutes poll timeout and disabled CLI, logging, and LCD.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4195a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4195a/btmesh_soc_dfu_target_workspace-brd4195a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4195a/btmesh_soc_dfu_target_lpn_low_power-brd4195a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4195b.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4195b.demo.btmesh_soc_dfu_target_lpn_low_power" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only. This example variant is optimized for ultra low current consumption with 2 minutes poll timeout and disabled CLI, logging, and LCD.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4195b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4195b/btmesh_soc_dfu_target_workspace-brd4195b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4195b/btmesh_soc_dfu_target_lpn_low_power-brd4195b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4196a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4196a.demo.btmesh_soc_dfu_target_lpn_low_power" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only. This example variant is optimized for ultra low current consumption with 2 minutes poll timeout and disabled CLI, logging, and LCD.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4196a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4196a/btmesh_soc_dfu_target_workspace-brd4196a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4196a/btmesh_soc_dfu_target_lpn_low_power-brd4196a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4196b.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4196b.demo.btmesh_soc_dfu_target_lpn_low_power" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only. This example variant is optimized for ultra low current consumption with 2 minutes poll timeout and disabled CLI, logging, and LCD.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4196b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4196b/btmesh_soc_dfu_target_workspace-brd4196b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4196b/btmesh_soc_dfu_target_lpn_low_power-brd4196b.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4198a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4198a.demo.btmesh_soc_dfu_target_lpn_low_power" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only. This example variant is optimized for ultra low current consumption with 2 minutes poll timeout and disabled CLI, logging, and LCD.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4198a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4198a/btmesh_soc_dfu_target_workspace-brd4198a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4198a/btmesh_soc_dfu_target_lpn_low_power-brd4198a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4402a.demo.btmesh_soc_dfu_target_workspace" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader">
-    <model:description>Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
+  <demo name="brd4402a.demo.btmesh_soc_dfu_target_lpn_low_power" label="Bluetooth Mesh - SoC DFU Target">
+    <model:description>Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only. This example variant is optimized for ultra low current consumption with 2 minutes poll timeout and disabled CLI, logging, and LCD.
 </model:description>
-    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader"/>
+    <property key="demos.blurb" value="Bluetooth Mesh - SoC DFU Target"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4402a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4402a/btmesh_soc_dfu_target_workspace-brd4402a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4402a/btmesh_soc_dfu_target_lpn_low_power-brd4402a.s37"/>
     <property key="core.readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="PRODUCTION"/>

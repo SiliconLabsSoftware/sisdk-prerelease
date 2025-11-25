@@ -4,7 +4,7 @@ id=com.silabs.sdk.wisun_cli_app
 
 version=2.10.0
 
-label=wisun_cli_app
+label=wisun_soc_cli_app
 description=Wi-SUN CLI Application
 
 prop.subLabel=Wi-SUN\\ CLI\\ Application

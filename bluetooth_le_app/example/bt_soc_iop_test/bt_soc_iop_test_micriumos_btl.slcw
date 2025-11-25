@@ -1,5 +1,5 @@
-workspace_name: bt_soc_iop_test_freertos_s2_dfu
-label: Bluetooth - SoC Interoperability Test FreeRTOS + AppLoader OTA DFU
+workspace_name: bt_soc_iop_test_micriumos_btl
+label: Bluetooth - SoC Interoperability Test Micrium OS + AppLoader OTA DFU
 package: bluetooth_le_app
 description: >
   This is a test procedure containing several test cases for Bluetooth Low
@@ -9,7 +9,7 @@ description: >
   Combined solution with application and bootloader projects.
 quality: experimental
 project:
-  - path: bt_soc_iop_test_freertos.slcp
+  - path: bt_soc_iop_test_micriumos.slcp
     id: application
   - path: ../../bootloader/bootloader-apploader.slcp
     id: bootloader

@@ -123,7 +123,6 @@ template_contribution:
     value: 0x8000
 
 tag:
-  - companion:bootloader-apploader-secure
   - hardware:device:flash:512
   - hardware:device:ram:32
   - hardware:rf:band:2400

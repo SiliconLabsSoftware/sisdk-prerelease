@@ -1,4 +1,4 @@
-workspace_name: bt_ncp_dfu_freertos_s2
+workspace_name: bt_ncp_dfu_freertos_s2_btl
 label: Bluetooth - NCP DFU FreeRTOS (Series 2)
 package: bluetooth_le_app
 description: >

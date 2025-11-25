@@ -15,3 +15,5 @@ prop.file.docsFile=documentation/slBtMesh_docContent.xml
 prop.file.demosFile= bluetooth_mesh_demos.xml
 #prop.file.modulesFile=modules.xml
 #prop.file.docsFile=docs.xml
+
+prop.file.adapterPacks=script/generator

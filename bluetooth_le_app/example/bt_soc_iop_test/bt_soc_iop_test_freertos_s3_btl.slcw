@@ -1,4 +1,4 @@
-workspace_name: bt_soc_iop_test_freertos_s3_dfu
+workspace_name: bt_soc_iop_test_freertos_s3_btl
 label: Bluetooth - SoC Interoperability Test FreeRTOS + OTA DFU
 package: bluetooth_le_app
 description: >

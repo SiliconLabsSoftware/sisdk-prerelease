@@ -1,5 +1,5 @@
-workspace_name: bt_soc_iop_test_micriumos_dfu
-label: Bluetooth - SoC Interoperability Test Micrium OS + AppLoader OTA DFU
+workspace_name: bt_soc_iop_test_btl
+label: Bluetooth - SoC Interoperability Test + AppLoader OTA DFU
 package: bluetooth_le_app
 description: >
   This is a test procedure containing several test cases for Bluetooth Low
@@ -7,9 +7,9 @@ description: >
   Connect mobile app, through the "Interoperability Test" tile on the Develop
   view of the app.
   Combined solution with application and bootloader projects.
-quality: experimental
+quality: production
 project:
-  - path: bt_soc_iop_test_micriumos.slcp
+  - path: bt_soc_iop_test.slcp
     id: application
   - path: ../../bootloader/bootloader-apploader.slcp
     id: bootloader

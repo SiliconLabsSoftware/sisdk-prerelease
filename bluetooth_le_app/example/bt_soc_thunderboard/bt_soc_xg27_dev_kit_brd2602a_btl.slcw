@@ -1,4 +1,4 @@
-workspace_name: bt_soc_xg27_dev_kit_brd2602a_dfu
+workspace_name: bt_soc_xg27_dev_kit_brd2602a_btl
 label: Bluetooth - SoC EFR32xG27 Dev Kit (BRD2602A) + AppLoader OTA DFU
 package: bluetooth_le_app
 description: >

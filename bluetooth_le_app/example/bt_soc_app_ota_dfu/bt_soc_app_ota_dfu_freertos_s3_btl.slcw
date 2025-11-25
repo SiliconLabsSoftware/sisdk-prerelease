@@ -1,5 +1,5 @@
-workspace_name: bt_soc_app_ota_dfu_freertos_s2
-label: Bluetooth - SoC Application OTA DFU FreeRTOS (Series 2)
+workspace_name: bt_soc_app_ota_dfu_freertos_s3_btl
+label: Bluetooth - SoC Application OTA DFU FreeRTOS (Series 3)
 package: bluetooth_le_app
 description: >
   A minimal project structure, that serves as a starting point for custom
@@ -10,7 +10,7 @@ quality: production
 project:
   - path: bt_soc_app_ota_dfu_freertos.slcp
     id: application
-  - path: ../../bootloader/bootloader-storage-internal-single.slcp
+  - path: ../../bootloader/bootloader-storage-single.slcp
     id: bootloader
 post_build:
   path: ../../postbuild_profile/bt_dfu_ws.slpb

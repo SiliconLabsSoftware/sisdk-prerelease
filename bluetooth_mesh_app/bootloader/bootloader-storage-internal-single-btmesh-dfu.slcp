@@ -1,5 +1,5 @@
 project_name: bootloader-storage-internal-single-btmesh-dfu
-package: bluetooth_mesh_app
+package: Btmesh
 label: Bootloader - SoC Internal Storage (Bluetooth Mesh)
 description: >
   This sample configuration of the Gecko bootloader configures the bootloader to use the internal main flash to store
@@ -34,6 +34,3 @@ configuration:
 
 post_build:
   path: ../postbuild_profile/btmesh_dfu_bootloader.slpb
-
-tag:
-  - companion:btmesh_soc_dfu_target

@@ -1,13 +1,13 @@
-workspace_name: bt_soc_xg26_dev_kit_brd2608a_dfu
-label: Bluetooth - SoC EFR32xG26 Dev Kit (BRD2608A) + AppLoader OTA DFU
+workspace_name: bt_soc_thunderboard_brd4184b_btl
+label: Bluetooth - SoC Thunderboard EFR32BG22 (BRD4184B) + AppLoader OTA DFU
 package: bluetooth_le_app
 description: >
-  Demonstrates the features of the EFR32xG26 Dev Kit Board.
+  Demonstrates the features of the Thunderboard EFR32BG22 Kit.
   This can be tested with the Simplicity Connect mobile app.
   Combined solution with application and bootloader projects.
 quality: production
 project:
-  - path: bt_soc_xg26_dev_kit_brd2608a.slcp
+  - path: bt_soc_thunderboard_brd4184b.slcp
     id: application
   - path: ../../bootloader/bootloader-apploader.slcp
     id: bootloader

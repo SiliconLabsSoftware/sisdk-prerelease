@@ -11,8 +11,8 @@ component_path:
 - path: bluetooth_mesh_middleware/component
 - path: bluetooth_apploader/component
 - path: bluetooth_mesh/component
-- path: bluetooth_mesh_srtest/component
 - path: bluetooth_le_middleware/component
+- path: bluetooth_mesh_srtest/component
 - path: bluetooth_common/component
 - path: board_drivers/hardware/driver/component
 - path: boards/hardware/board/config/component

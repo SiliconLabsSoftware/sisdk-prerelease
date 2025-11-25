@@ -1,5 +1,5 @@
-workspace_name: bt_soc_in_place_ota_dfu_micriumos
-label: Bluetooth - SoC In-Place OTA DFU Micrium OS
+workspace_name: bt_soc_in_place_ota_dfu_freertos_btl
+label: Bluetooth - SoC In-Place OTA DFU FreeRTOS
 package: bluetooth_le_app
 description: >
   A minimal project structure, that serves as a starting point for custom
@@ -8,7 +8,7 @@ description: >
   Combined solution with application and bootloader projects.
 quality: experimental
 project:
-  - path: bt_soc_in_place_ota_dfu_micriumos.slcp
+  - path: bt_soc_in_place_ota_dfu_freertos.slcp
     id: application
   - path: ../../bootloader/bootloader-apploader.slcp
     id: bootloader

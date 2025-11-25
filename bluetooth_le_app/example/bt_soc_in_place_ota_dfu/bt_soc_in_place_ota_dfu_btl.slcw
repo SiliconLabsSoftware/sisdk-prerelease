@@ -1,14 +1,14 @@
-workspace_name: bt_soc_in_place_ota_dfu_freertos
-label: Bluetooth - SoC In-Place OTA DFU FreeRTOS
+workspace_name: bt_soc_in_place_ota_dfu_btl
+label: Bluetooth - SoC In-Place OTA DFU
 package: bluetooth_le_app
 description: >
   A minimal project structure, that serves as a starting point for custom
   Bluetooth applications that provides Over-The-Air device firmware update
   using an apploader.
   Combined solution with application and bootloader projects.
-quality: experimental
+quality: evaluation
 project:
-  - path: bt_soc_in_place_ota_dfu_freertos.slcp
+  - path: bt_soc_in_place_ota_dfu.slcp
     id: application
   - path: ../../bootloader/bootloader-apploader.slcp
     id: bootloader

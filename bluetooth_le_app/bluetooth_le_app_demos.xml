@@ -5181,57 +5181,57 @@
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4184a.demo.bt_soc_thunderboard_brd4184a_dfu" label="Bluetooth - SoC Thunderboard EFR32BG22 (BRD4184A) + AppLoader OTA DFU">
+  <demo name="brd4184a.demo.bt_soc_thunderboard_brd4184a_btl" label="Bluetooth - SoC Thunderboard EFR32BG22 (BRD4184A) + AppLoader OTA DFU">
     <model:description>Demonstrates the features of the Thunderboard EFR32BG22 Kit. This can be tested with the Simplicity Connect mobile app. Combined solution with application and bootloader projects.
 </model:description>
     <property key="demos.blurb" value="Bluetooth - SoC Thunderboard EFR32BG22 (BRD4184A) + AppLoader OTA DFU"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4184a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4184a/bt_soc_thunderboard_brd4184a_dfu-brd4184a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4184a/bt_soc_thunderboard_brd4184a_btl-brd4184a.s37"/>
     <property key="core.readmeFiles" value="example/bt_soc_thunderboard/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd4184b.demo.bt_soc_thunderboard_brd4184b_dfu" label="Bluetooth - SoC Thunderboard EFR32BG22 (BRD4184B) + AppLoader OTA DFU">
+  <demo name="brd4184b.demo.bt_soc_thunderboard_brd4184b_btl" label="Bluetooth - SoC Thunderboard EFR32BG22 (BRD4184B) + AppLoader OTA DFU">
     <model:description>Demonstrates the features of the Thunderboard EFR32BG22 Kit. This can be tested with the Simplicity Connect mobile app. Combined solution with application and bootloader projects.
 </model:description>
     <property key="demos.blurb" value="Bluetooth - SoC Thunderboard EFR32BG22 (BRD4184B) + AppLoader OTA DFU"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd4184b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd4184b/bt_soc_thunderboard_brd4184b_dfu-brd4184b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd4184b/bt_soc_thunderboard_brd4184b_btl-brd4184b.s37"/>
     <property key="core.readmeFiles" value="example/bt_soc_thunderboard/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd2601b.demo.bt_soc_xg24_dev_kit_brd2601b_dfu" label="Bluetooth - SoC EFR32xG24 Dev Kit (BRD2601B) + AppLoader OTA DFU">
+  <demo name="brd2601b.demo.bt_soc_xg24_dev_kit_brd2601b_btl" label="Bluetooth - SoC EFR32xG24 Dev Kit (BRD2601B) + AppLoader OTA DFU">
     <model:description>Demonstrates the features of the EFR32xG24 Dev Kit Board. This can be tested with the Simplicity Connect mobile app. Combined solution with application and bootloader projects.
 </model:description>
     <property key="demos.blurb" value="Bluetooth - SoC EFR32xG24 Dev Kit (BRD2601B) + AppLoader OTA DFU"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd2601b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd2601b/bt_soc_xg24_dev_kit_brd2601b_dfu-brd2601b.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd2601b/bt_soc_xg24_dev_kit_brd2601b_btl-brd2601b.s37"/>
     <property key="core.readmeFiles" value="example/bt_soc_thunderboard/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd2608a.demo.bt_soc_xg26_dev_kit_brd2608a_dfu" label="Bluetooth - SoC EFR32xG26 Dev Kit (BRD2608A) + AppLoader OTA DFU">
+  <demo name="brd2608a.demo.bt_soc_xg26_dev_kit_brd2608a_btl" label="Bluetooth - SoC EFR32xG26 Dev Kit (BRD2608A) + AppLoader OTA DFU">
     <model:description>Demonstrates the features of the EFR32xG26 Dev Kit Board. This can be tested with the Simplicity Connect mobile app. Combined solution with application and bootloader projects.
 </model:description>
     <property key="demos.blurb" value="Bluetooth - SoC EFR32xG26 Dev Kit (BRD2608A) + AppLoader OTA DFU"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd2608a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd2608a/bt_soc_xg26_dev_kit_brd2608a_dfu-brd2608a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd2608a/bt_soc_xg26_dev_kit_brd2608a_btl-brd2608a.s37"/>
     <property key="core.readmeFiles" value="example/bt_soc_thunderboard/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd2602a.demo.bt_soc_xg27_dev_kit_brd2602a_dfu" label="Bluetooth - SoC EFR32xG27 Dev Kit (BRD2602A) + AppLoader OTA DFU">
+  <demo name="brd2602a.demo.bt_soc_xg27_dev_kit_brd2602a_btl" label="Bluetooth - SoC EFR32xG27 Dev Kit (BRD2602A) + AppLoader OTA DFU">
     <model:description>Demonstrates the features of the EFR32xG27 Dev Kit Board. Features can be evaluated with the Simplicity Connect mobile app. Combined solution with application and bootloader projects.
 </model:description>
     <property key="demos.blurb" value="Bluetooth - SoC EFR32xG27 Dev Kit (BRD2602A) + AppLoader OTA DFU"/>
     <property key="core.partCompatibility" value=".*"/>
     <property key="core.boardCompatibility" value="brd2602a"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd2602a/bt_soc_xg27_dev_kit_brd2602a_dfu-brd2602a.s37"/>
+    <property key="demos.imageFile" value="studio/demo_files/brd2602a/bt_soc_xg27_dev_kit_brd2602a_btl-brd2602a.s37"/>
     <property key="core.readmeFiles" value="example/bt_soc_thunderboard/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="PRODUCTION"/>

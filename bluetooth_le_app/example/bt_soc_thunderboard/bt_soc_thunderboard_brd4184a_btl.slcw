@@ -1,5 +1,5 @@
-workspace_name: bt_soc_thunderboard_brd4184b_dfu
-label: Bluetooth - SoC Thunderboard EFR32BG22 (BRD4184B) + AppLoader OTA DFU
+workspace_name: bt_soc_thunderboard_brd4184a_btl
+label: Bluetooth - SoC Thunderboard EFR32BG22 (BRD4184A) + AppLoader OTA DFU
 package: bluetooth_le_app
 description: >
   Demonstrates the features of the Thunderboard EFR32BG22 Kit.
@@ -7,7 +7,7 @@ description: >
   Combined solution with application and bootloader projects.
 quality: production
 project:
-  - path: bt_soc_thunderboard_brd4184b.slcp
+  - path: bt_soc_thunderboard_brd4184a.slcp
     id: application
   - path: ../../bootloader/bootloader-apploader.slcp
     id: bootloader
