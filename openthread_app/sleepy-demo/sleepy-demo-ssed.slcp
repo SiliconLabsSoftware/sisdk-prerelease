@@ -109,6 +109,8 @@ tag:
   - hardware:component:button:2+
   - hwfilter:device:device_supports_thread
   - hwfilter:!device:device_family_efr32mr21
+  - hwfilter:board:simple_button:btn0
+  - hwfilter:board:simple_button:btn1
 readme:
   - path: ./README.md
 

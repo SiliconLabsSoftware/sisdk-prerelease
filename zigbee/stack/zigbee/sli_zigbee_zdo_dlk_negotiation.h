@@ -48,13 +48,6 @@ sli_zigbee_zdo_dlk_selected_key_negotiation_parameters_tlv_t;
 typedef CONCRETE_TLV_DEFINE (SLI_ZIGBEE_ZDO_DLK_TLV_PUBLIC_KEY_C25519_MAX_LEN)
 sli_zigbee_zdo_dlk_public_key_c25519_tlv_t;
 
-/**
- * @brief toggle to allow for dlk to be enabled/disabled
- * @note not for production use. enables special behavior only to be used in
- * platform certification
- */
-void slx_zigbee_gu_zdo_toggle_dlk(bool);
-
 // internal apis, no state checks, generates and handles zdo frames
 // ZDO start key update service handlers
 sl_status_t sli_zigbee_zdo_dlk_generate_start_key_update_req(sl_zigbee_address_info *target,

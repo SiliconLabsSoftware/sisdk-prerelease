@@ -26,3 +26,34 @@ SL_WEAK uint32_t sli_zigbee_stack_get_token_count(void)
 
   return 0;
 }
+
+SL_WEAK sl_status_t sli_zigbee_stack_get_token_data(uint32_t token,
+                                                    uint32_t index,
+                                                    sl_zigbee_token_data_t *tokenData)
+{
+  // NOTE stub definition
+  (void) token;
+  (void) index;
+  (void) tokenData;
+  return SL_STATUS_NOT_AVAILABLE;
+}
+
+SL_WEAK sl_status_t sli_zigbee_stack_get_token_info(uint8_t index,
+                                                    sl_zigbee_token_info_t *tokenInfo)
+{
+  // NOTE stub definition
+  (void) index;
+  (void) tokenInfo;
+  return SL_STATUS_NOT_AVAILABLE;
+}
+
+SL_WEAK sl_status_t sli_zigbee_stack_set_token_data(uint32_t token,
+                                                    uint32_t index,
+                                                    sl_zigbee_token_data_t *tokenData)
+{
+  // NOTE stub definition
+  (void) token;
+  (void) index;
+  (void) tokenData;
+  return SL_STATUS_NOT_AVAILABLE;
+}

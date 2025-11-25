@@ -162,7 +162,8 @@ sl_status_t sl_zigbee_test_zdo_generate_security_decommission_req(sl_802154_shor
                                                                   bool encrypt,
                                                                   uint8_t* eui64_list,
                                                                   uint8_t counts);
-void sl_zigbee_gu_zdo_toggle_dlk(bool do_dlk);
+
+void slx_zigbee_gu_zdo_toggle_dlk(bool do_dlk, bool allow_anon_psk);
 
 void sl_zigbee_set_eui64(sl_802154_long_addr_t eui64);
 

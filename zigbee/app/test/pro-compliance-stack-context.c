@@ -919,10 +919,6 @@ sl_status_t sli_mac_stack_test_associate_command(sl_802154_short_addr_t parentId
   }
   return status;
 }
-void sli_zigbee_stack_gu_zdo_toggle_dlk(bool do_dlk)
-{
-  slx_zigbee_gu_zdo_toggle_dlk(do_dlk);
-}
 
 void sli_zigbee_stack_set_eui64(sl_802154_long_addr_t eui64)
 {

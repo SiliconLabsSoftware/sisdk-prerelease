@@ -51,18 +51,18 @@
 #include "radio_power_manager.h"
 #include "radio_security.h"
 #include "radio_state.h"
-#include "rail_config.h"
-#include "sl_openthread_radio_config.h"
-#include "sl_rail.h"
-#include "sl_rail_ieee802154.h"
-#include "sl_rail_util_compatible_pa.h"
 
-// Additional includes for moved functions
 #include "soft_source_match_table.h"
 #include <openthread/link.h>
 #include "utils/code_utils.h"
 #include "utils/mac_frame.h"
 
+extern "C" {
+#include "rail_config.h"
+#include "sl_openthread_radio_config.h"
+#include "sl_rail.h"
+#include "sl_rail_ieee802154.h"
+#include "sl_rail_util_compatible_pa.h"
 #if defined(_SILICON_LABS_32B_SERIES_2)
 #include "em_system.h"
 #else
@@ -75,9 +75,7 @@
 #endif
 
 #ifdef SL_CATALOG_RAIL_MULTIPLEXER_PRESENT
-extern "C" {
 #include "sl_rail_mux_rename.h"
-}
 #endif
 
 #ifdef SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
@@ -88,6 +86,7 @@ extern "C" {
 #ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_PHY_SELECT_PRESENT
 #include "sl_rail_util_ieee802154_phy_select.h"
 #endif // SL_CATALOG_RAIL_UTIL_IEEE802154_PHY_SELECT_PRESENT
+} // extern "C"
 
 #ifdef SL_CATALOG_RAIL_MULTIPLEXER_PRESENT
 sl_rail_handle_t gRailHandle;

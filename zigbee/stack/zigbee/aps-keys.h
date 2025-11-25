@@ -34,6 +34,12 @@ extern uint8_t sli_zigbee_request_key_timeout;
 // NOTE this technically comes before verify key in the sequence
 #define UPDATE_TC_LINK_KEY_STATE_DLK_NEGOTIATION  (0x04)
 
+#define UPDATE_APP_LINK_KEY_STATE_NONE                      (0x00)
+#define UPDATE_APP_LINK_KEY_STATE_SECURITY_LEVEL_INITIATOR  (0x01)
+#define UPDATE_APP_LINK_KEY_STATE_SECURITY_LEVEL_TARGET     (0x02)
+#define UPDATE_APP_LINK_KEY_STATE_REQUEST_KEY               (0x03)
+#define UPDATE_APP_LINK_KEY_STATE_VERIFY_KEY                (0x04)
+
 // This key is "ZigBeeAlliance09"
 #define ZIGBEE_DEFAULT_LINK_KEY                        \
   {                                                    \
@@ -100,5 +106,6 @@ uint8_t sli_zigbee_get_update_tc_link_key_state(void);
 void sli_zigbee_set_update_tc_link_key_state(uint8_t state);
 void sli_zigbee_request_key_process_node_descriptor_response(sl_802154_short_addr_t sender,
                                                              sli_zigbee_packet_header_t header);
-
+uint8_t sli_zigbee_get_update_app_link_key_state();
+void sli_zigbee_set_update_app_link_key_state(uint8_t state);
 #endif // SILABS_APS_KEYS_H

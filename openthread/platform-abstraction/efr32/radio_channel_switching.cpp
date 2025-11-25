@@ -46,9 +46,12 @@
 #include "platform-efr32.h"
 #include "radio_instance.h"
 #include "radio_interface.h"
+
+extern "C" {
 #include "sl_rail.h"
 #include "sl_rail_ieee802154.h"
 #include "sl_status.h"
+}
 
 // Channel value used to indicate an uninitialized channel slot
 #define UNINITIALIZED_CHANNEL 0xFF

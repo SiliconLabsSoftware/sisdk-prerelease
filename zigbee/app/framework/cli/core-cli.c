@@ -398,7 +398,8 @@ void sli_zigbee_cli_factory_reset_command(sl_cli_command_arg_t *arguments)
   (void)arguments;
   (void)sl_zigbee_clear_key_table();
   (void)sl_zigbee_clear_binding_table();
-  (void)sl_zigbee_leave_network(SL_ZIGBEE_LEAVE_NWK_SILENTLY);
+  (void)sl_zigbee_write_node_data(true); // clear network token
+
   halReboot();
 }
 

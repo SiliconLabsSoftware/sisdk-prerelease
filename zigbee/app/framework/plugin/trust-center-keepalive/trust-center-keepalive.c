@@ -30,6 +30,13 @@
 #include "config/trust-center-keepalive-config.h"
 #endif
 
+// #define PLUGIN_DEBUG
+#if defined(PLUGIN_DEBUG)
+  #define debug_print(...) sl_zigbee_af_core_println(__VA_ARGS__)
+#else
+  #define debug_print(...)
+#endif
+
 //------------------------------------------------------------------------------
 // Globals
 
@@ -120,7 +127,7 @@ void sl_zigbee_af_trust_center_keepalive_abort_cb(void)
   if (keepaliveIsEnabled(currentStatusStruct)) {
     currentStatusStruct->state = STATE_NONE;
   }
-  sl_zigbee_af_core_println("Setting trust center keepalive inactive.");
+  debug_print("Setting trust center keepalive inactive.");
   sl_zigbee_af_event_set_inactive(sl_zigbee_af_trust_center_keepalive_tick_network_events);
 }
 
@@ -196,6 +203,14 @@ static void trustCenterKeepaliveStart(void)
   }
 
   if (currentStatusStruct->state != STATE_NONE) {
+    return;
+  }
+
+  sl_zigbee_current_security_state_t securityState;
+  memset(&securityState, 0, sizeof(securityState));
+  (void)sl_zigbee_get_current_security_state(&securityState);
+  bool in_distributed_network = (securityState.bitmask & SL_ZIGBEE_DISTRIBUTED_TRUST_CENTER_MODE);
+  if (in_distributed_network) {
     return;
   }
 
@@ -311,7 +326,7 @@ static void messageTimeout(void)
     param.beaconClassificationMask &= ~TC_CONNECTIVITY;   //there is no TC connectivity
     sl_zigbee_set_beacon_classification_params(&param);
 
-    // The WWAH plugin wants to implement its own rejoin algorithm, so see if
+    // Another plugin may want to implement its own rejoin algorithm, so see if
     // the callback is consumed
     if (false == sl_zigbee_af_trust_center_keepalive_timeout_cb()) {
       initiateSearchForNewNetworkWithTrustCenter();

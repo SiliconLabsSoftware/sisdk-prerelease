@@ -198,14 +198,6 @@ typedef struct {
 } sli_zigbee_stack_bdb_tclk_max_exchange_attempts_ipc_msg_t;
 
 typedef struct {
-  bool do_dlk;
-} sli_zigbee_stack_gu_zdo_toggle_dlk_ipc_req_t;
-
-typedef struct {
-  sli_zigbee_stack_gu_zdo_toggle_dlk_ipc_req_t request;
-} sli_zigbee_stack_gu_zdo_toggle_dlk_ipc_msg_t;
-
-typedef struct {
   sl_802154_long_addr_t partner;
   uint8_t option;
 } sli_zigbee_stack_request_link_key_with_option_encrypt_ipc_req_t;
@@ -637,6 +629,15 @@ typedef struct {
   sli_zigbee_stack_zigbee_remove_child_ipc_req_t request;
   sli_zigbee_stack_zigbee_remove_child_ipc_rsp_t response;
 } sli_zigbee_stack_zigbee_remove_child_ipc_msg_t;
+
+typedef struct {
+  bool do_dlk;
+  bool allow_anon_psk;
+} slxi_zigbee_stack_gu_zdo_toggle_dlk_ipc_req_t;
+
+typedef struct {
+  slxi_zigbee_stack_gu_zdo_toggle_dlk_ipc_req_t request;
+} slxi_zigbee_stack_gu_zdo_toggle_dlk_ipc_msg_t;
 
 typedef struct {
   bool ignore;

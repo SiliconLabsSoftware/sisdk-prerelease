@@ -331,26 +331,6 @@ SL_WEAK uint8_t sli_zigbee_stack_get_supported_networks(void)
   return 0;
 }
 
-SL_WEAK sl_status_t sli_zigbee_stack_get_token_data(uint32_t token,
-                                                    uint32_t index,
-                                                    sl_zigbee_token_data_t *tokenData)
-{
-  // NOTE stub definition
-  (void) token;
-  (void) index;
-  (void) tokenData;
-  return SL_STATUS_NOT_AVAILABLE;
-}
-
-SL_WEAK sl_status_t sli_zigbee_stack_get_token_info(uint8_t index,
-                                                    sl_zigbee_token_info_t *tokenInfo)
-{
-  // NOTE stub definition
-  (void) index;
-  (void) tokenInfo;
-  return SL_STATUS_NOT_AVAILABLE;
-}
-
 SL_WEAK uint8_t sli_zigbee_stack_get_zc_and_zr_count(void)
 {
   // NOTE stub definition
@@ -564,17 +544,6 @@ SL_WEAK void sli_zigbee_stack_set_stack_profile(uint8_t stackProfile)
 {
   // NOTE stub definition
   (void) stackProfile;
-}
-
-SL_WEAK sl_status_t sli_zigbee_stack_set_token_data(uint32_t token,
-                                                    uint32_t index,
-                                                    sl_zigbee_token_data_t *tokenData)
-{
-  // NOTE stub definition
-  (void) token;
-  (void) index;
-  (void) tokenData;
-  return SL_STATUS_NOT_AVAILABLE;
 }
 
 SL_WEAK bool sli_zigbee_stack_stack_is_up(void)

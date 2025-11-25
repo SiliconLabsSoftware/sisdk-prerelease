@@ -12,7 +12,7 @@
 #include "cc_user_credential_io_config.h"
 #include "cc_user_credential_io.h"
 #include "cc_user_credential_tx.h"
-#include "CRC.h" // CC:0083.01.15.11.000 & CC:0083.01.17.11.000 & CC:0083.01.19.11.001
+#include "zw_crc.h" // CC:0083.01.15.11.000 & CC:0083.01.17.11.000 & CC:0083.01.19.11.001
 
 /****************************************************************************/
 /*                             PRIVATE FUNCTIONS                            */
@@ -51,11 +51,11 @@ static void calculate_credentials_checksum_for_uuid(
      * Credential Length (8 bits) | Credential Data (Credential Length bytes)
      * CC:0083.01.17.11.002
      */
-    *checksum = CRC_CheckCrc16(*checksum, (uint8_t *)&type, 1);
-    *checksum = CRC_CheckCrc16(*checksum, &slot_msb, 1);
-    *checksum = CRC_CheckCrc16(*checksum, &slot_lsb, 1);
-    *checksum = CRC_CheckCrc16(*checksum, &existing_metadata.length, 1);
-    *checksum = CRC_CheckCrc16(*checksum, e_data, existing_metadata.length);
+    *checksum = zw_crc_check_crc16(*checksum, (uint8_t *)&type, 1);
+    *checksum = zw_crc_check_crc16(*checksum, &slot_msb, 1);
+    *checksum = zw_crc_check_crc16(*checksum, &slot_lsb, 1);
+    *checksum = zw_crc_check_crc16(*checksum, &existing_metadata.length, 1);
+    *checksum = zw_crc_check_crc16(*checksum, e_data, existing_metadata.length);
   }
 }
 
@@ -80,7 +80,7 @@ ZW_WEAK received_frame_status_t CC_UserCredential_AllUsersChecksumGet_handler(co
   uint8_t uuid_lsb = 0;
   bool user_is_available = false;
 
-  uint16_t checksum = CRC_INITAL_VALUE; // CC:0083.01.15.11.000
+  uint16_t checksum = ZW_CRC_INITIAL_VALUE; // CC:0083.01.15.11.000
   uint16_t user_uid = CC_UserCredential_get_next_user(0);
 
   while (user_uid) {
@@ -98,14 +98,14 @@ ZW_WEAK received_frame_status_t CC_UserCredential_AllUsersChecksumGet_handler(co
        */
       uuid_msb = (user_uid >> 8);
       uuid_lsb = user_uid & 0xFF;
-      checksum = CRC_CheckCrc16(checksum, &uuid_msb, 1);
-      checksum = CRC_CheckCrc16(checksum, &uuid_lsb, 1);
-      checksum = CRC_CheckCrc16(checksum, (uint8_t*)&user.type, 1);
-      checksum = CRC_CheckCrc16(checksum, (uint8_t*)&user.active, 1);
-      checksum = CRC_CheckCrc16(checksum, (uint8_t*)&user.credential_rule, 1);
-      checksum = CRC_CheckCrc16(checksum, (uint8_t*)&user.name_encoding, 1);
-      checksum = CRC_CheckCrc16(checksum, &user.name_length, 1);
-      checksum = CRC_CheckCrc16(checksum, name, user.name_length);
+      checksum = zw_crc_check_crc16(checksum, &uuid_msb, 1);
+      checksum = zw_crc_check_crc16(checksum, &uuid_lsb, 1);
+      checksum = zw_crc_check_crc16(checksum, (uint8_t*)&user.type, 1);
+      checksum = zw_crc_check_crc16(checksum, (uint8_t*)&user.active, 1);
+      checksum = zw_crc_check_crc16(checksum, (uint8_t*)&user.credential_rule, 1);
+      checksum = zw_crc_check_crc16(checksum, (uint8_t*)&user.name_encoding, 1);
+      checksum = zw_crc_check_crc16(checksum, &user.name_length, 1);
+      checksum = zw_crc_check_crc16(checksum, name, user.name_length);
 
       calculate_credentials_checksum_for_uuid(user_uid, &checksum);
     }
@@ -145,7 +145,7 @@ ZW_WEAK received_frame_status_t CC_UserCredential_UserChecksumGet_handler(const 
   uint16_t uuid = (uint16_t)(input->frame->ZW_UserChecksumGetFrame.userUniqueIdentifier1 << 8
                              | input->frame->ZW_UserChecksumGetFrame.userUniqueIdentifier2);
 
-  uint16_t checksum = CRC_INITAL_VALUE; // CC:0083.01.17.11.000
+  uint16_t checksum = ZW_CRC_INITIAL_VALUE; // CC:0083.01.17.11.000
 
   u3c_db_operation_result result = CC_UserCredential_get_user(uuid, &user, name);
 
@@ -156,12 +156,12 @@ ZW_WEAK received_frame_status_t CC_UserCredential_UserChecksumGet_handler(const 
      * CC:0083.01.17.11.001
      * CC:0083.01.17.11.002
      */
-    checksum = CRC_CheckCrc16(checksum, (uint8_t*)&user.type, 1);
-    checksum = CRC_CheckCrc16(checksum, (uint8_t*)&user.active, 1);
-    checksum = CRC_CheckCrc16(checksum, (uint8_t*)&user.credential_rule, 1);
-    checksum = CRC_CheckCrc16(checksum, (uint8_t*)&user.name_encoding, 1);
-    checksum = CRC_CheckCrc16(checksum, &user.name_length, 1); // CC:0083.01.17.11.004
-    checksum = CRC_CheckCrc16(checksum, name, user.name_length);
+    checksum = zw_crc_check_crc16(checksum, (uint8_t*)&user.type, 1);
+    checksum = zw_crc_check_crc16(checksum, (uint8_t*)&user.active, 1);
+    checksum = zw_crc_check_crc16(checksum, (uint8_t*)&user.credential_rule, 1);
+    checksum = zw_crc_check_crc16(checksum, (uint8_t*)&user.name_encoding, 1);
+    checksum = zw_crc_check_crc16(checksum, &user.name_length, 1); // CC:0083.01.17.11.004
+    checksum = zw_crc_check_crc16(checksum, name, user.name_length);
 
     calculate_credentials_checksum_for_uuid(uuid, &checksum);
   } else if (result == U3C_DB_OPERATION_RESULT_FAIL_DNE) {
@@ -201,7 +201,7 @@ ZW_WEAK received_frame_status_t CC_UserCredential_CredentialChecksumGet_handler(
   uint8_t next_slot_msb = 0;
   uint8_t next_slot_lsb = 0;
   u3c_credential_type next_type = CREDENTIAL_TYPE_NONE;
-  uint16_t checksum = CRC_INITAL_VALUE; // CC:0083.01.19.11.001
+  uint16_t checksum = ZW_CRC_INITIAL_VALUE; // CC:0083.01.19.11.001
   bool credential_is_available = false;
 
   u3c_credential_metadata_t metadata = { 0 };
@@ -223,10 +223,10 @@ ZW_WEAK received_frame_status_t CC_UserCredential_CredentialChecksumGet_handler(
       next_slot_msb = next_slot >> 8;
       next_slot_lsb = next_slot & 0xFF;
 
-      checksum = CRC_CheckCrc16(checksum, &next_slot_msb, 1);
-      checksum = CRC_CheckCrc16(checksum, &next_slot_lsb, 1);
-      checksum = CRC_CheckCrc16(checksum, &metadata.length, 1);
-      checksum = CRC_CheckCrc16(checksum, (uint8_t*)e_data, metadata.length);
+      checksum = zw_crc_check_crc16(checksum, &next_slot_msb, 1);
+      checksum = zw_crc_check_crc16(checksum, &next_slot_lsb, 1);
+      checksum = zw_crc_check_crc16(checksum, &metadata.length, 1);
+      checksum = zw_crc_check_crc16(checksum, (uint8_t*)e_data, metadata.length);
     } else {
       // Driver error or database corruption
       return RECEIVED_FRAME_STATUS_FAIL;

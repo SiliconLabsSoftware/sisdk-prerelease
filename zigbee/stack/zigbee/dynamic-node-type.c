@@ -16,6 +16,17 @@
  ******************************************************************************/
 
 #include "stack/zigbee/dynamic-node-type.h"
+#include "stack/core/sl_zigbee_stack.h"
+#include "stack/include/stack-info.h"
+#include "stack/internal/inc/stack-info-internal-def.h"
+#include "stack/internal/inc/network-formation-internal-def.h"
+#include "stack/routing/zigbee/leave.h"
+#include "stack/routing/zigbee/child.h"
+#include "stack/routing/zigbee/association.h"
+#include "stack/include/network-formation.h"
+
+// External declaration for internal configuration function
+extern void sli_zigbee_set_end_device_configuration(uint8_t end_device_configuration);
 
 /**
  * @brief Switches the Zigbee node type to Sleepy End Device if currently a Router.
@@ -40,10 +51,10 @@ sl_status_t sli_zigbee_stack_switch_role_sleepy_end_device(uint8_t end_device_co
 
     sli_zigbee_set_node_type(SL_ZIGBEE_SLEEPY_END_DEVICE);
 
-    sli_zigbee_find_and_rejoin_network(true, // secure rejoin
-                                       SL_ZIGBEE_ALL_802_15_4_CHANNELS_MASK,
-                                       SL_ZIGBEE_REJOIN_REASON_NONE,
-                                       SL_ZIGBEE_SLEEPY_END_DEVICE);
+    sli_zigbee_stack_find_and_rejoin_network(true, // secure rejoin
+                                             SL_ZIGBEE_ALL_802_15_4_CHANNELS_MASK,
+                                             SL_ZIGBEE_REJOIN_REASON_NONE,
+                                             SL_ZIGBEE_SLEEPY_END_DEVICE);
     status = SL_STATUS_OK;
   } else {
     status = SL_STATUS_FAIL;

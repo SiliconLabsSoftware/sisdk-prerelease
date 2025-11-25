@@ -45,10 +45,11 @@
 
 #include "platform-efr32.h"
 #include "radio_instance.h"
+
+extern "C" {
 #include "sl_core.h"
 #include "sl_packet_utils.h"
-
-// Note: INVALID_INTERFACE_INDEX is defined in radio_instance.h
+}
 
 #if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
 

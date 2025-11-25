@@ -15,6 +15,13 @@ source:
 - path: app/framework/plugin/dynamic-node-type-cli/dynamic-node-type-cli.c
   condition:
   - cli
+- path: stack/internal/src/ipc/zigbee-dynamic-node-type-ipc-command-messages.c
+  condition:
+  - zigbee_use_ipc
+- path: stack/internal/src/baremetal/zigbee-dynamic-node-type-baremetal-wrapper.c
+  unless:
+  - zigbee_use_ipc
+  - native_host
 
 include:
 - path: stack/include
@@ -23,6 +30,14 @@ include:
 - path: stack/zigbee
   file_list:
   - path: dynamic-node-type.h
+- path: stack/internal/src/ipc
+  file_list:
+  - path: zigbee-dynamic-node-type-ipc-command-messages.h
+  condition:
+  - zigbee_use_ipc
+- path: stack/internal/inc
+  file_list:
+  - path: zigbee-dynamic-node-type-internal-def.h
 
 template_contribution:
 - name: component_catalog

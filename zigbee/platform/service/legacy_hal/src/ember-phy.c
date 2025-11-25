@@ -32,7 +32,7 @@
 #include PLATFORM_HEADER
 #include "../inc/hal.h"
 #include "rail_types.h"
-#include "sl_rail_util_pa_conversions.h"
+#include "sl_rail_util_compatible_pa.h"
 #include "sl_rail_util_pa_config.h"
 
 // In newer SDKs this content should come from the rail_util_pa component. For

@@ -285,6 +285,19 @@ typedef struct {
 } sli_zigbee_stack_stop_writing_stack_tokens_ipc_msg_t;
 
 typedef struct {
+  sl_802154_long_addr_t partnerEui64;
+} sli_zigbee_stack_update_app_link_key_ipc_req_t;
+
+typedef struct {
+  sl_status_t result;
+} sli_zigbee_stack_update_app_link_key_ipc_rsp_t;
+
+typedef struct {
+  sli_zigbee_stack_update_app_link_key_ipc_req_t request;
+  sli_zigbee_stack_update_app_link_key_ipc_rsp_t response;
+} sli_zigbee_stack_update_app_link_key_ipc_msg_t;
+
+typedef struct {
   uint8_t maxAttempts;
 } sli_zigbee_stack_update_tc_link_key_ipc_req_t;
 

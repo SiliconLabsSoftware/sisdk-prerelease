@@ -133,6 +133,7 @@ tag:
   - hardware:device:flash:768
   - hwfilter:device:device_supports_thread
   - hwfilter:device:device_supports_bluetooth
+  - hwfilter:flash:768k
 
 readme:
   - path: ./README.md

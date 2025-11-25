@@ -72,7 +72,8 @@ class ZwaveCcConfiguratorRecipe(ConanFile):
             "apack.info",
             "README.md",
             "*.jinja",
-            "*.py"
+            "*.py",
+            "z-wave_cc_configurator.slsdk"
         }
 
         # Copy the files to the package folder

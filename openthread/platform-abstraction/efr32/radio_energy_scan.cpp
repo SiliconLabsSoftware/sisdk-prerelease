@@ -51,15 +51,15 @@
 #include "radio_interface.h"
 #include "radio_power_manager.h"
 #include "radio_state.h"
+
+extern "C" {
 #include "sl_rail.h"
 #include "sl_rail_ieee802154.h"
-#include "sl_status.h"
-
-// Include platform-specific types and constants
-#include "platform-band.h"
-
-// Additional RAIL includes for external functions
 #include "sl_rail_types.h"
+#include "sl_status.h"
+}
+
+#include "platform-band.h"
 
 // Constants
 static constexpr int8_t  ENERGY_SCAN_INVALID_RESULT = -128; // Invalid/uninitialized scan result

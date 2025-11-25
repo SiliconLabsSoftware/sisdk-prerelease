@@ -303,6 +303,7 @@ void sl_button_on_change(const sl_button_t *handle)
 #if defined(SL_ZIGBEE_TEST)
 void sl_zigbee_af_hal_button_isr_cb(uint8_t button, uint8_t state)
 {
+  (void)button;
   if (state == BUTTON_RELEASED) {
     sl_zigbee_af_event_set_active(&finding_and_binding_event);
   }

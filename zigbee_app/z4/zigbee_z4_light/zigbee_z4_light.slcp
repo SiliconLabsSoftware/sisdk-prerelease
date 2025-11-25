@@ -47,11 +47,13 @@ component:
   - id: zigbee_zll_utility_server
   - id: zigbee_scan_dispatch
   - id: zigbee_update_tc_link_key
+  - id: zigbee_update_app_link_key
   - id: zigbee_security_link_keys
   - id: clock_manager
   - id: zigbee_dynamic_commissioning
   - id: zigbee_trust_center_keepalive
   - id: zigbee_poll_control_client
+  - id: zigbee_bdb_3dot1_rejoin_algorithm
   # -- LEDs and Buttons GPIO Conflcit Note --
   # Some of the development boards (and modules) have limited GPIO to be used by
   # appplication and share the exact same port/pin definition between leds and
@@ -85,7 +87,7 @@ configuration:
   - name: SL_CLI_MAX_INPUT_ARGUMENTS
     value: 16
   - name: SLI_ZIGBEE_PRIMARY_NETWORK_DEVICE_TYPE
-    value: SLI_ZIGBEE_NETWORK_DEVICE_TYPE_ROUTER
+    value: SLI_ZIGBEE_NETWORK_DEVICE_TYPE_COORDINATOR_OR_ROUTER
   - name: SLI_ZIGBEE_PRIMARY_NETWORK_SECURITY_TYPE
     value: SLI_ZIGBEE_NETWORK_SECURITY_TYPE_4_0
   - name: SL_CLI_PROMPT_STRING
@@ -167,6 +169,10 @@ configuration:
       - device_series_3
   - name: SL_ZIGBEE_AF_PLUGIN_NETWORK_STEERING_ENABLE_AUTOSTART
     value: 0
+  - name: SL_ZIGBEE_AF_PLUGIN_TRUST_CENTER_KEEPALIVE_DEFAULT_BASE_PERIOD_MINUTES
+    value: 1
+  - name: SL_ZIGBEE_AF_PLUGIN_TRUST_CENTER_KEEPALIVE_DEFAULT_JITTER_PERIOD_SECONDS
+    value: 30
 
 source:
   - path: main.c

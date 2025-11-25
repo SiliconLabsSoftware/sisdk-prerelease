@@ -115,11 +115,6 @@ uint8_t sl_zigbee_bdb_tclk_max_exchange_attempts(void)
   return sli_zigbee_stack_bdb_tclk_max_exchange_attempts();
 }
 
-void sl_zigbee_gu_zdo_toggle_dlk(bool do_dlk)
-{
-  sli_zigbee_stack_gu_zdo_toggle_dlk(do_dlk);
-}
-
 sl_status_t sl_zigbee_request_link_key_with_option_encrypt(sl_802154_long_addr_t partner,
                                                            uint8_t option)
 {
@@ -429,6 +424,13 @@ sl_status_t sl_zigbee_zigbee_remove_child(sl_802154_short_addr_t childId,
 {
   return sli_zigbee_stack_zigbee_remove_child(childId,
                                               options);
+}
+
+void slx_zigbee_gu_zdo_toggle_dlk(bool do_dlk,
+                                  bool allow_anon_psk)
+{
+  slxi_zigbee_stack_gu_zdo_toggle_dlk(do_dlk,
+                                      allow_anon_psk);
 }
 
 void slx_zigbee_ignore_incoming_aps_acks(bool ignore)

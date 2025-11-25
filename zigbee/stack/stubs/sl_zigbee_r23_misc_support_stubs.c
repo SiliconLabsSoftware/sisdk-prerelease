@@ -268,3 +268,13 @@ SL_WEAK bool  sli_zigbee_zdo_check_and_handle_fragmented_messages(uint8_t* apsFr
   (void)header;
   return false;
 }
+
+SL_WEAK sl_status_t sli_zigbee_zdo_generate_get_authentication_level_req(sl_802154_short_addr_t dest,
+                                                                         sl_zigbee_aps_option_t aps_options,
+                                                                         sl_802154_long_addr_t target)
+{
+  (void)dest;
+  (void)aps_options;
+  (void)target;
+  return SL_STATUS_NOT_SUPPORTED;
+}

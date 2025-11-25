@@ -55,6 +55,7 @@
 #include "utils/link_metrics.h"
 #include "utils/mac_frame.h"
 
+extern "C" {
 #include "em_device.h"
 #include "sl_core.h"
 #if defined _SILICON_LABS_32B_SERIES_2
@@ -66,7 +67,6 @@
 #include "platform-band.h"
 #include "platform-efr32.h"
 #include "radio_coex.h"
-#include "radio_instance.h"
 #include "radio_multi_channel.h"
 #include "rail_config.h"
 #include "sl_memory_manager.h"
@@ -83,9 +83,7 @@
 #endif // SL_COMPONENT_CATALOG_PRESENT
 
 #ifdef SL_CATALOG_RAIL_MULTIPLEXER_PRESENT
-extern "C" {
 #include "sl_rail_mux_rename.h"
-}
 #endif
 
 #ifdef SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
@@ -110,7 +108,6 @@ extern "C" {
 #include "sl_rail_util_ieee802154_fast_channel_switching_config.h"
 #endif // SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
 
-extern "C" {
 #include "circular_queue.h"
 #include "radio_power_manager.h"
 #include "sl_gp_interface.h"

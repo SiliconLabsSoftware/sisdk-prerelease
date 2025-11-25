@@ -342,7 +342,9 @@
     #error "Custom options cannot be used with the standard network init"
   #endif
 #else
-  #ifdef SL_ZIGBEE_AF_HAS_SECURITY_PROFILE_Z3 // Z3 Compliant end devices must send a rejoin request on reboot
+// Z3 Compliant end devices must send a rejoin request on reboot
+// In Z4, the behavior is optional for end devices, and we don't do it
+  #ifdef SL_ZIGBEE_AF_HAS_SECURITY_PROFILE_Z3
     #define Z3_NETWORK_INIT_BEHAVIOR SL_ZIGBEE_NETWORK_INIT_END_DEVICE_REJOIN_ON_REBOOT
   #else // SL_ZIGBEE_AF_HAS_SECURITY_PROFILE_Z3
     #define Z3_NETWORK_INIT_BEHAVIOR SL_ZIGBEE_NETWORK_INIT_NO_OPTIONS

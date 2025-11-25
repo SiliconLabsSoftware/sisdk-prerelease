@@ -1112,7 +1112,7 @@ sl_rail_status_t sl_rail_mux_util_pa_post_init(sl_rail_handle_t railHandle,
   return status;
 }
 
-sl_rail_tx_pa_mode_t sl_rail_mux_get_pa_mode(sl_rail_handle_t *railHandle)
+sl_rail_tx_pa_mode_t sl_rail_mux_get_pa_mode(sl_rail_handle_t railHandle)
 {
   (void)railHandle;
   return sl_rail_get_pa_mode(mux_rail_handle);

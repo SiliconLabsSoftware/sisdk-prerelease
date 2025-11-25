@@ -55,7 +55,7 @@
 #include <ZW_TransportLayer.h>
 #include "ZW_classcmd.h"
 
-#include <CRC.h>
+#include "zw_crc.h"
 
 #include <AppTimer.h>
 #include <SwTimer.h>
@@ -743,7 +743,7 @@ handleCmdClassFirmwareUpdateMdReport(uint16_t crc16Result,
   myOta.firmwareUpdateReportNumberPrevious = firmwareUpdateReportNumber;
 
   // Do CRC calculation incrementally as the fragments are being received.
-  myOta.fw_crcrunning = CRC_CheckCrc16(myOta.fw_crcrunning, pData, fw_actualFrameSize);
+  myOta.fw_crcrunning = zw_crc_check_crc16(myOta.fw_crcrunning, pData, fw_actualFrameSize);
 
   /**
    * Make use of the fragment that was received by storing it in buffer or flash.
@@ -1016,7 +1016,7 @@ ZCB_CmdClassFwUpdateMdGet(__attribute__((unused)) TRANSMISSION_RESULT * pTransmi
 static void initOTAState(void)
 {
   myOta.currentState = FW_STATE_IDLE;
-  myOta.fw_crcrunning = CRC_INITAL_VALUE;
+  myOta.fw_crcrunning = ZW_CRC_INITIAL_VALUE;
   myOta.firmwareUpdateReportNumberPrevious = 0;
   myOta.fw_numOfRetries = 0;
   myOta.firmwareCrc = 0;
@@ -1308,7 +1308,7 @@ static void fw_action_send_req_report(void)
   ZPAL_LOG_DEBUG(ZPAL_LOG_CC_FIRMWARE_UPDATE, ">> %s(), requestReport status: %d\n", __func__, myOta.requestReport);
 
   if (FIRMWARE_UPDATE_MD_REQUEST_REPORT_VALID_COMBINATION_V5 == myOta.requestReport) {
-    myOta.fw_crcrunning = CRC_INITAL_VALUE;
+    myOta.fw_crcrunning = ZW_CRC_INITIAL_VALUE;
     myOta.firmwareUpdateReportNumberPrevious = 0;
     TimerCancelFwUpdateFrameGet();
   }

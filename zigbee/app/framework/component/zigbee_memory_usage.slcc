@@ -30,6 +30,9 @@ source:
   unless: [zigbee_use_ipc]
 - path: stack/internal/src/ipc/sl_zigbee_memory_usage_ipc_command_messages.c
   condition: [zigbee_use_ipc]
+template_contribution:
+- name: component_catalog
+  value: zigbee_memory_usage
 metadata:
   sbom:
     license: MSLA

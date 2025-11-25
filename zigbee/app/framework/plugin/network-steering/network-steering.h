@@ -197,6 +197,14 @@ sl_status_t sl_zigbee_af_network_steering_start(void);
  */
 sl_status_t sl_zigbee_af_network_steering_stop(void);
 
+/** @brief Returns the primary or secondary channel mask value.
+ *
+ * @param[in] true for primary mask, false for secondary mask
+ *
+ * @return The 32-bit channel mask representing the channels to scan.
+ */
+uint32_t sl_zigbee_af_network_steering_get_channel_mask(bool primary_mask);
+
 /** @} */ // end of name API
 
 /**

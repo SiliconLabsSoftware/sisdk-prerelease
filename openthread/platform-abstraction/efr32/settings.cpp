@@ -39,7 +39,10 @@
 
 #if defined(SL_CATALOG_NVM3_PRESENT)
 
+extern "C" {
 #include "nvm3_default.h"
+}
+
 #include "platform-efr32.h"
 #include "radio_instance.h"
 #include "sl_memory_manager.h"

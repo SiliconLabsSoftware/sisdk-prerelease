@@ -115,6 +115,12 @@ void sl_zigbee_af_update_tc_link_key_set_delay(uint32_t delayMs);
  */
 void sl_zigbee_af_update_tc_link_key_set_inactive(void);
 
+/* @brief Returns true if the trust center link key (TCLK) on the device is either
+ * the install-code derived key or the well-known key. This function is used to
+ * detect whether the local device has updated its TCLK at least once.
+ */
+bool sl_zigbee_af_update_tc_link_key_is_tclk_key_default(void);
+
 /** @} */ // end of name API
 
 /**

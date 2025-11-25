@@ -59,6 +59,12 @@ Controller & end device manage their power independently to be able to adapt to 
 To reduce latency, the third transmission always uses maximum output power.
 This standard algorithm can be overloaded by customer to suit specific usages.
 
+## Tx Power in LR ACK frame
+The Tx Power in LR ACK frame is now the tx power used to send the ACK frame instead of the tx power of
+the singlecast frame. It might be different especially when the singlecast frame was sent with a higher
+power than the capability of the device (e.g. The singlecast frame was sent at 19dBm, but the ACK frame
+is sent at the device's maximum output: 14dBm).
+
 ## Improve frame transmission validation
 Nodes won't be able to send frame with their own node ID as destination node ID anymore.
 

@@ -266,7 +266,7 @@ sl_rail_tx_power_t sl_rail_mux_GetTxPowerDbm(sl_rail_handle_t railHandle);
 sl_rail_tx_power_t sli_rail_mux_GetTxPower(sl_rail_handle_t railHandle);
 sl_rail_status_t sl_rail_mux_util_pa_post_init(sl_rail_handle_t railHandle,
                                                sl_rail_tx_pa_mode_t pa_mode);
-sl_rail_tx_pa_mode_t sl_rail_mux_get_pa_mode(sl_rail_handle_t *railHandle);
+sl_rail_tx_pa_mode_t sl_rail_mux_get_pa_mode(sl_rail_handle_t railHandle);
 sl_rail_status_t sl_rail_mux_ConfigTxPower(sl_rail_handle_t railHandle,
                                            const sl_rail_tx_power_config_t *config);
 

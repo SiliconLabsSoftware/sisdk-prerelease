@@ -44,8 +44,7 @@ SL_ENUM(sl_zigbee_dlk_negotiation_method) {
   DLK_PROTOCOL_ENUM_STATIC_KEY    = 0,
   DLK_PROTOCOL_ENUM_SPEKE_C25519_AES128 = 1,
   DLK_PROTOCOL_ENUM_SPEKE_C25519_SHA256 = 2,
-  // TODO where is P-256?
-  DLK_PROTOCOL_ENUM_RESERVED,
+  DLK_PROTOCOL_ENUM_RESERVED, // 3-7 reserved
 };
 
 SL_ENUM(sl_zigbee_dlk_supported_negotiation_method) {

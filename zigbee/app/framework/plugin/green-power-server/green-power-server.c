@@ -1295,6 +1295,10 @@ static uint8_t getMatchedSinkFunctionality(sli_zigbee_supported_gpd_command_clus
       // Add the Tunneling as an implicit to adding reporting A0/A1
       gpdCommandList[commandIndex++] = SL_ZIGBEE_ZCL_GP_GPDF_ZCL_TUNNELING_WITH_PAYLOAD;
     }
+    if (applicationInfo->applInfoBitmap & SL_ZIGBEE_AF_GP_APPLICATION_INFORMATION_SWITCH_INFORMATION_PRESENT) {
+      gpdCommandList[commandIndex++] = SL_ZIGBEE_ZCL_GP_GPDF_8BITS_VECTOR_PRESS;
+      gpdCommandList[commandIndex++] = SL_ZIGBEE_ZCL_GP_GPDF_8BITS_VECTOR_RELEASE;
+    }
     gpdCommandListLength = commandIndex;
   }
 

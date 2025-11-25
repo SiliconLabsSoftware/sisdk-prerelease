@@ -217,6 +217,22 @@ sl_status_t sl_zigbee_request_link_key(sl_802154_long_addr_t partner);
  */
 sl_status_t sl_zigbee_update_tc_link_key(uint8_t maxAttempts);
 
+/** @brief Request a new application link key with a partner from the Trust Center. This
+ * function starts by sending a Security Get Authentication Level Request to the Trust Center to
+ * verify the target security level compliance. A Request Key message will then be
+ * sent, followed by a Verify Key Confirm message.
+ *
+ * @param partnerEui64 The partner EUI64.
+ *
+ * @return SL_STATUS_FAIL is the Security Core Library is not included.
+ * SL_STATUS_INVALID_STATE if already requesting a key from TC, not on network, or if
+ * local node is Trust Center.
+ * SL_STATUS_INVALID_CONFIGURATION if the Partner's EUI is unknown.
+ * Otherwise, the return status from sending the initial Security Get Authentication Level Request is
+ * returned.
+ */
+sl_status_t sl_zigbee_update_app_link_key(sl_802154_long_addr_t partnerEui64);
+
 /** @brief Notify the application about the status
  *  of the request for a Link Key.  The application should define
  *  SL_ZIGBEE_APPLICATION_HAS_ZIGBEE_KEY_ESTABLISHMENT_HANDLER to implement

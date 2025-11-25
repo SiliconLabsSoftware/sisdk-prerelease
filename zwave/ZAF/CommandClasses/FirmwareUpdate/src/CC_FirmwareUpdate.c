@@ -21,7 +21,7 @@
 #include "CC_FirmwareUpdate.h"
 #include <ZW_TransportLayer.h>
 #include "ota_util.h"
-#include <CRC.h>
+#include "zw_crc.h"
 #include <string.h>
 #include <zaf_config_api.h>
 #include <cc_firmware_update_config.h>
@@ -101,7 +101,7 @@ CC_FirmwareUpdate_handler(
     {
       ZPAL_LOG_DEBUG(ZPAL_LOG_CC_FIRMWARE_UPDATE, "FIRMWARE_UPDATE_MD_REPORT_V5 - Report received!\n");
 
-      uint16_t crc16Result = CRC_CheckCrc16(CRC_INITAL_VALUE, &(pCmd->ZW_Common.cmdClass), cmdLength);
+      uint16_t crc16Result = zw_crc_check_crc16(ZW_CRC_INITIAL_VALUE, &(pCmd->ZW_Common.cmdClass), cmdLength);
       ZPAL_LOG_DEBUG(ZPAL_LOG_CC_FIRMWARE_UPDATE, "crc16Result = 0x%04x (valid CRC = %s)\n", crc16Result, (crc16Result == 0) ? "true" : "false");
 
       uint16_t  firmwareUpdateReportNumber = (uint16_t)((uint16_t)(pCmd->ZW_FirmwareUpdateMdReport1byteV5Frame.properties1

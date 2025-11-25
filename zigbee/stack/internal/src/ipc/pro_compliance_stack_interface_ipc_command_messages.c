@@ -115,11 +115,6 @@ void sli_zigbee_stack_bdb_tclk_max_exchange_attempts_process_ipc_command(sli_zig
   msg->data.bdb_tclk_max_exchange_attempts.response.result = sli_zigbee_stack_bdb_tclk_max_exchange_attempts();
 }
 
-void sli_zigbee_stack_gu_zdo_toggle_dlk_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
-{
-  sli_zigbee_stack_gu_zdo_toggle_dlk(msg->data.gu_zdo_toggle_dlk.request.do_dlk);
-}
-
 void sli_zigbee_stack_request_link_key_with_option_encrypt_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
 {
   msg->data.request_link_key_with_option_encrypt.response.result = sli_zigbee_stack_request_link_key_with_option_encrypt(msg->data.request_link_key_with_option_encrypt.request.partner,
@@ -370,6 +365,12 @@ void sli_zigbee_stack_zigbee_remove_child_process_ipc_command(sli_zigbee_ipc_cmd
                                                                                        msg->data.zigbee_remove_child.request.options);
 }
 
+void slxi_zigbee_stack_gu_zdo_toggle_dlk_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
+{
+  slxi_zigbee_stack_gu_zdo_toggle_dlk(msg->data.gu_zdo_toggle_dlk.request.do_dlk,
+                                      msg->data.gu_zdo_toggle_dlk.request.allow_anon_psk);
+}
+
 void slxi_zigbee_stack_ignore_incoming_aps_acks_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
 {
   slxi_zigbee_stack_ignore_incoming_aps_acks(msg->data.ignore_incoming_aps_acks.request.ignore);
@@ -555,13 +556,6 @@ uint8_t sl_zigbee_bdb_tclk_max_exchange_attempts(void)
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_bdb_tclk_max_exchange_attempts_process_ipc_command, &msg);
 
   return msg.data.bdb_tclk_max_exchange_attempts.response.result;
-}
-
-void sl_zigbee_gu_zdo_toggle_dlk(bool do_dlk)
-{
-  sli_zigbee_ipc_cmd_t msg = { 0, };
-  msg.data.gu_zdo_toggle_dlk.request.do_dlk = do_dlk;
-  sli_zigbee_send_ipc_cmd(sli_zigbee_stack_gu_zdo_toggle_dlk_process_ipc_command, &msg);
 }
 
 sl_status_t sl_zigbee_request_link_key_with_option_encrypt(sl_802154_long_addr_t partner,
@@ -1172,6 +1166,15 @@ sl_status_t sl_zigbee_zigbee_remove_child(sl_802154_short_addr_t childId,
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_zigbee_remove_child_process_ipc_command, &msg);
 
   return msg.data.zigbee_remove_child.response.result;
+}
+
+void slx_zigbee_gu_zdo_toggle_dlk(bool do_dlk,
+                                  bool allow_anon_psk)
+{
+  sli_zigbee_ipc_cmd_t msg = { 0, };
+  msg.data.gu_zdo_toggle_dlk.request.do_dlk = do_dlk;
+  msg.data.gu_zdo_toggle_dlk.request.allow_anon_psk = allow_anon_psk;
+  sli_zigbee_send_ipc_cmd(slxi_zigbee_stack_gu_zdo_toggle_dlk_process_ipc_command, &msg);
 }
 
 void slx_zigbee_ignore_incoming_aps_acks(bool ignore)

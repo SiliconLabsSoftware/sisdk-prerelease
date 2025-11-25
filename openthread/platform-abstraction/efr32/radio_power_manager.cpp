@@ -39,6 +39,8 @@
 #include "radio_interface.h"
 #include "radio_multi_channel.h"
 #include "radio_power_manager.h"
+
+extern "C" {
 #include "rail_config.h"
 #include "sl_rail_ieee802154.h"
 
@@ -49,6 +51,8 @@
 #ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
 #include "sl_rail_util_ieee802154_fast_channel_switching_config.h"
 #endif // SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
+
+} // extern "C"
 
 constexpr size_t RADIO_POWER_MANAGER_MAX_INSTANCES = RADIO_INTERFACE_COUNT;
 

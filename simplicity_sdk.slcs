@@ -7,8 +7,8 @@ supplier: Silicon Laboratories, Inc.
 component_path:
 - path: bgapi_protocol/component
 - path: bluetooth_le_host/component
-- path: bluetooth_le_controller/component
 - path: bluetooth_mesh_middleware/component
+- path: bluetooth_le_controller/component
 - path: bluetooth_apploader/component
 - path: bluetooth_mesh/component
 - path: bluetooth_le_middleware/component
@@ -120,17 +120,6 @@ component_path:
 - path: wisun_sdk/component
 - path: wisun_config_generator/component
 - path: wisun/component
-- path: zigbee_smart_energy/component
-- path: zigbee/platform/radio/mac/component
-- path: zigbee/platform/radio/rail_lib/plugin/component
-- path: zigbee/component
-- path: zigbee/util/plugin/component
-- path: zigbee/util/silicon_labs/silabs_core/component
-- path: zigbee/app/framework/component
-- path: zigbee/platform/service/component
-- path: zigbee_wwah/app/framework/component
-- path: zigbee_sleepy_to_sleepy/component
-- path: zigbee_sleepy_to_sleepy/app/framework/component
 - path: zigbee_internal/platform/radio/mac/component
 - path: zigbee_internal/platform/radio/rail_lib/plugin/component
 - path: zigbee_internal/component
@@ -138,6 +127,17 @@ component_path:
 - path: zigbee_internal/util/silicon_labs/silabs_core/component
 - path: zigbee_internal/app/framework/component
 - path: zigbee_internal/platform/service/component
+- path: zigbee_sleepy_to_sleepy/component
+- path: zigbee_sleepy_to_sleepy/app/framework/component
+- path: zigbee/platform/radio/mac/component
+- path: zigbee/platform/radio/rail_lib/plugin/component
+- path: zigbee/component
+- path: zigbee/util/plugin/component
+- path: zigbee/util/silicon_labs/silabs_core/component
+- path: zigbee/app/framework/component
+- path: zigbee/platform/service/component
+- path: zigbee_smart_energy/component
+- path: zigbee_wwah/app/framework/component
 - path: zwave/component
 - path: zwave/component/CommandClasses
 - path: zwave/component-internal
@@ -147,7 +147,7 @@ documentation:
 - docset: machine-learning
   version: 2.2.0
 - docset: bluetooth_le_siwx91x
-  version: 4.0.0-beta.3
+  version: 4.0.0
 - docset: mcu-bootloader
   version: 3.1.0
 - docset: mcu-bootloader
@@ -158,10 +158,10 @@ documentation:
   version: 2.7.0
 - docset: openthread
   version: 2.7.0
-- docset: platform_siwx91x
-  version: 4.0.0-beta.3
 - docset: platform_nwp_siwx91x
-  version: 4.0.0-beta.3
+  version: 4.0.0
+- docset: platform_siwx91x
+  version: 4.0.0
 - docset: rail
   version: 3.0.0
 - docset: sidewalk
@@ -169,15 +169,15 @@ documentation:
 - docset: protocol-usb
   version: 1.5.0
 - docset: wifi
-  version: 4.0.0-beta.3
+  version: 4.0.0
 - docset: wifi_sqa_internal
   version: 4.0.0
 - docset: wisun
   version: 2.10.0
 - docset: zigbee
-  version: 8.2.0
-- docset: zigbee
   version: 9.0.0
+- docset: zigbee
+  version: 8.2.0
 upgrade_manifest:
 - path: bluetooth_le_middleware/upgrade.slcu
 - path: openthread/component/upgrade.slcu

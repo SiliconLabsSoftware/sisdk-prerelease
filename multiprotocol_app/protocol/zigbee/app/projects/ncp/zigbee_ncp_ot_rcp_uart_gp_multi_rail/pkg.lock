@@ -30,7 +30,7 @@ version = "0"
   platform_core = [{ installer = "conan", ref = "platform_core/1.0.0@silabs#2c1e9abd072a0dc03cb460fa83d5ed59", type = "sdk", version = "1.0.0" }]
   printf = [{ installer = "conan", ref = "printf/1.0.0@silabs#271eb7b8622d329a952f23063eab689f", type = "sdk", version = "1.0.0" }]
   python = [{ installer = "archive", type = "apack", version = "3.10.1" }]
-  rail_library = [{ installer = "conan", ref = "rail_library/3.0.0-alpha.33@silabs#633ad235904886dbbcc96707751983b17d86988b", type = "sdk", version = "3.0.0-alpha.33" }]
+  rail_library = [{ installer = "conan", ref = "rail_library/3.0.0-alpha.35@silabs#f30c58a9df790845114d3f5c2a21e91a36e8eb7f", type = "sdk", version = "3.0.0-alpha.35" }]
   realtime_locationing = [{ installer = "conan", ref = "realtime_locationing/11.0.0-alpha.5@silabs#73cbbc20334f480d8ebfdf5fe978a10cd8c17e50", type = "sdk", version = "11.0.0-alpha.5" }]
   security_libcryptosoc = [{ installer = "conan", ref = "security_libcryptosoc/1.0.0@silabs#fbbdc5618b5a3f0c764fe7188e0d0ff7", type = "sdk", version = "1.0.0" }]
   security_mbedtls = [{ installer = "conan", ref = "security_mbedtls/1.0.0@silabs#75ca2844567dc5f1754b824bb6ea5c57", type = "sdk", version = "1.0.0" }]

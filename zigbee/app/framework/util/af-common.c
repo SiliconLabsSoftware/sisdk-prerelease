@@ -431,6 +431,10 @@ WEAK(void sli_zigbee_af_stack_status_callback(sl_status_t status))
       return;
     #endif
 
+    case SL_STATUS_ZIGBEE_REJOIN_FAILED_BUT_NETWORK_RESTORED:
+      sl_zigbee_af_app_println("SL_STATUS_ZIGBEE_REJOIN_FAILED_BUT_NETWORK_RESTORED");
+      return;
+
     default:
       sl_zigbee_af_debug_println("EVENT: stackStatus 0x%08X", status);
   }

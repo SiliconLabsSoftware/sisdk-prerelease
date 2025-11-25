@@ -19,10 +19,16 @@
 
 #include "app/framework/include/af.h"
 #include "update-tc-link-key.h"
-
 #include "update-tc-link-key-config.h"
-
 #include "app/framework/plugin/network-steering/network-steering-internal.h"
+#include "stack/include/zigbee-security-manager.h"
+
+#ifdef SL_CATALOG_ZIGBEE_DYNAMIC_COMMISSIONING_PRESENT
+#include "stack/include/sl_zigbee_zdo_dlk_negotiation.h"
+#include "stack/include/sl_zigbee_zdo_security.h"
+#include "stack/zigbee/aps-keys-full.h"
+#endif
+
 #define R21_COMPLIANCE_REVISION 21
 static bool inRequest = false;
 
@@ -35,6 +41,14 @@ static uint8_t TCLKUpdateMaxIteration = SL_ZIGBEE_AF_PLUGIN_UPDATE_TC_LINK_KEY_M
 static uint8_t TCLKUpdateIteration = 1;
 static uint8_t TCLKUpdateMaxAttemptsPerIteration = SL_ZIGBEE_AF_PLUGIN_UPDATE_TC_LINK_KEY_MAX_ATTEMPTS;
 extern uint8_t sl_zigbee_get_stack_compliance_revision(void);
+static void update_auth_token(void);
+
+// #define PLUGIN_DEBUG
+#if defined(PLUGIN_DEBUG)
+  #define debug_print(...) sl_zigbee_af_core_println(__VA_ARGS__)
+#else
+  #define debug_print(...)
+#endif
 // -----------------------------------------------------------------------------
 // Public API
 
@@ -97,6 +111,12 @@ void sl_zigbee_af_update_tc_link_key_zigbee_key_establishment_cb(sl_802154_long_
       inRequest = false;
     }
 
+    // Upon a verify key success, try to get an authentication token
+    // if we haven't gotten one already
+    if (status == SL_ZIGBEE_VERIFY_LINK_KEY_SUCCESS) {
+      update_auth_token();
+    }
+
     if (status == SL_ZIGBEE_TRUST_CENTER_LINK_KEY_ESTABLISHED) {
       sl_zigbee_af_update_tc_link_key_status_cb(status);
       return;
@@ -120,6 +140,42 @@ void sl_zigbee_af_update_tc_link_key_zigbee_key_establishment_cb(sl_802154_long_
       }
     }
   }
+}
+
+bool sl_zigbee_af_update_tc_link_key_is_tclk_key_default(void)
+{
+  sl_status_t status;
+  sl_zigbee_key_data_t install_code_key;
+
+  sl_zigbee_sec_man_context_t context;
+  sl_zigbee_sec_man_init_context(&context);
+
+  context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK;
+
+  // Get our current APS key
+  status = sl_zigbee_sec_man_check_key_context(&context);
+  if (status != SL_STATUS_OK) {
+    return false;
+  }
+
+  // Does it match the default key, ZA09?
+  const sl_zigbee_key_data_t default_link_key = {
+    { 0x5A, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6C,
+      0x6C, 0x69, 0x61, 0x6E, 0x63, 0x65, 0x30, 0x39 }
+  };
+
+  if (sl_zigbee_sec_man_compare_key_to_value(&context, (const sl_zigbee_sec_man_key_t*)&default_link_key)) {
+    return true;
+  }
+
+  status = sl_zigbee_get_key_from_install_code(&install_code_key);
+
+  // Does it match our install code derived key?
+  if (status == SL_STATUS_OK && sl_zigbee_sec_man_compare_key_to_value(&context, (const sl_zigbee_sec_man_key_t*)&install_code_key)) {
+    return true;
+  }
+
+  return false;
 }
 
 // =============================================================================
@@ -185,6 +241,14 @@ void sli_zigbee_af_update_tc_link_key_begin_tc_link_key_update_init(uint8_t init
                                   beginTcLinkKeyUpdateEventHandler);
 }
 
+void sli_zigbee_af_update_tc_link_key_stack_status_callback(sl_status_t status)
+{
+  if (status == SL_STATUS_NETWORK_UP) {
+    // If we are network up, go check if we need to request an authentication token
+    update_auth_token();
+  }
+}
+
 sl_status_t sl_zigbee_af_tc_link_key_update_now(void)
 {
   // If the stack is pre-R21, we cannot update the TC link key.
@@ -200,4 +264,37 @@ sl_status_t sl_zigbee_af_tc_link_key_update_now(void)
   }
   sl_zigbee_af_event_set_active(beginTcLinkKeyUpdateEvents);
   return SL_STATUS_OK;
+}
+
+static void update_auth_token(void)
+{
+#ifdef SL_CATALOG_ZIGBEE_DYNAMIC_COMMISSIONING_PRESENT
+  // Fetch an authentication token if we haven't already
+  sl_zigbee_key_data_t auth_token;
+  sl_802154_long_addr_t tc_eui;
+  sl_status_t status;
+  uint32_t tok;
+
+  status = slx_zigbee_get_trust_center_additional_info(&tok);
+  bool dlk_key_established = ((status == SL_STATUS_OK) && (tok & EXTENDED_BIT_MASK_DERIVED_KEY_DLK));
+
+  status = sl_zigbee_lookup_eui64_by_node_id(SL_ZIGBEE_ZIGBEE_COORDINATOR_ADDRESS, tc_eui);
+  if ((status == SL_STATUS_OK)
+      && sl_zigbee_get_stack_compliance_revision() == R23_COMPLIANCE_REVISION
+      && sl_zigbee_zdo_dlk_enabled()
+      && dlk_key_established) {
+    status = sl_zigbee_sec_man_export_symmetric_passphrase(tc_eui, &auth_token);
+    if (status != SL_STATUS_OK) {
+      sl_zigbee_af_core_println("%s: retrieving authentication token for DLK", SL_ZIGBEE_AF_PLUGIN_UPDATE_TC_LINK_KEY_PLUGIN_NAME);
+      sl_zigbee_retrieve_authentication_token(SL_ZIGBEE_TRUST_CENTER_NODE_ID, (SL_ZIGBEE_APS_OPTION_ENCRYPTION | SL_ZIGBEE_APS_OPTION_RETRY));
+    }
+  } else {
+    debug_print("%s: not fetching auth token (DLK: done:%d enabled:%d, EUI: %d, rev:%d)",
+                SL_ZIGBEE_AF_PLUGIN_UPDATE_TC_LINK_KEY_PLUGIN_NAME,
+                dlk_key_established,
+                sl_zigbee_zdo_dlk_enabled(),
+                status,
+                sl_zigbee_get_stack_compliance_revision());
+  }
+#endif // SL_CATALOG_ZIGBEE_DYNAMIC_COMMISSIONING_PRESENT
 }

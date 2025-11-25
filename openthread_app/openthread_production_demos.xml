@@ -8,9 +8,7 @@
 		<property key="readmeFiles" value="ot-ble-dmp/README.md"/>
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS.
-It is identical to the ot-ble-dmp application with the exception that support for buttons has been removed. This application is meant to be used for boards which don't have buttons.
-</description>
+		<description>This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS. It is identical to the ot-ble-dmp application with the exception that support for buttons has been removed. This application is meant to be used for boards which don't have buttons. </description>
 	</demo>
 	<demo name="brd4186c.demo.ot-ble-dmp-no-buttons" label="OpenThread BLE DMP (No buttons) - SoC FreeRTOS">
 		<property key="blurb" value="OpenThread BLE DMP (No buttons) - SoC FreeRTOS"/>
@@ -20,9 +18,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ble-dmp/README.md"/>
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS.
-It is identical to the ot-ble-dmp application with the exception that support for buttons has been removed. This application is meant to be used for boards which don't have buttons.
-</description>
+		<description>This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS. It is identical to the ot-ble-dmp application with the exception that support for buttons has been removed. This application is meant to be used for boards which don't have buttons. </description>
 	</demo>
 	<demo name="brd2703a.demo.ot-ble-dmp-no-buttons" label="OpenThread BLE DMP (No buttons) - SoC FreeRTOS">
 		<property key="blurb" value="OpenThread BLE DMP (No buttons) - SoC FreeRTOS"/>
@@ -32,9 +28,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ble-dmp/README.md"/>
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS.
-It is identical to the ot-ble-dmp application with the exception that support for buttons has been removed. This application is meant to be used for boards which don't have buttons.
-</description>
+		<description>This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS. It is identical to the ot-ble-dmp application with the exception that support for buttons has been removed. This application is meant to be used for boards which don't have buttons. </description>
 	</demo>
 	<demo name="brd4116a.demo.ot-ble-dmp-no-buttons" label="OpenThread BLE DMP (No buttons) - SoC FreeRTOS">
 		<property key="blurb" value="OpenThread BLE DMP (No buttons) - SoC FreeRTOS"/>
@@ -44,9 +38,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ble-dmp/README.md"/>
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS.
-It is identical to the ot-ble-dmp application with the exception that support for buttons has been removed. This application is meant to be used for boards which don't have buttons.
-</description>
+		<description>This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS. It is identical to the ot-ble-dmp application with the exception that support for buttons has been removed. This application is meant to be used for boards which don't have buttons. </description>
 	</demo>
 	<demo name="brd4407a.demo.ot-ble-dmp-no-buttons" label="OpenThread BLE DMP (No buttons) - SoC FreeRTOS">
 		<property key="blurb" value="OpenThread BLE DMP (No buttons) - SoC FreeRTOS"/>
@@ -56,9 +48,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ble-dmp/README.md"/>
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS.
-It is identical to the ot-ble-dmp application with the exception that support for buttons has been removed. This application is meant to be used for boards which don't have buttons.
-</description>
+		<description>This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS. It is identical to the ot-ble-dmp application with the exception that support for buttons has been removed. This application is meant to be used for boards which don't have buttons. </description>
 	</demo>
 	<demo name="brd4180a.demo.ot-ble-dmp" label="OpenThread BLE DMP - SoC FreeRTOS">
 		<property key="blurb" value="OpenThread BLE DMP - SoC FreeRTOS"/>
@@ -68,8 +58,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ble-dmp/README.md"/>
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS.
-</description>
+		<description>This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS. </description>
 	</demo>
 	<demo name="brd4186c.demo.ot-ble-dmp" label="OpenThread BLE DMP - SoC FreeRTOS">
 		<property key="blurb" value="OpenThread BLE DMP - SoC FreeRTOS"/>
@@ -79,8 +68,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ble-dmp/README.md"/>
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS.
-</description>
+		<description>This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS. </description>
 	</demo>
 	<demo name="brd2703a.demo.ot-ble-dmp" label="OpenThread BLE DMP - SoC FreeRTOS">
 		<property key="blurb" value="OpenThread BLE DMP - SoC FreeRTOS"/>
@@ -90,8 +78,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ble-dmp/README.md"/>
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS.
-</description>
+		<description>This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS. </description>
 	</demo>
 	<demo name="brd4116a.demo.ot-ble-dmp" label="OpenThread BLE DMP - SoC FreeRTOS">
 		<property key="blurb" value="OpenThread BLE DMP - SoC FreeRTOS"/>
@@ -101,8 +88,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ble-dmp/README.md"/>
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS.
-</description>
+		<description>This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS. </description>
 	</demo>
 	<demo name="brd4407a.demo.ot-ble-dmp" label="OpenThread BLE DMP - SoC FreeRTOS">
 		<property key="blurb" value="OpenThread BLE DMP - SoC FreeRTOS"/>
@@ -112,8 +98,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ble-dmp/README.md"/>
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS.
-</description>
+		<description>This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS. </description>
 	</demo>
 	<demo name="brd4180a.demo.ot-cli-ftd" label="OpenThread - SoC CLI (FTD)">
 		<property key="blurb" value="OpenThread - SoC CLI (FTD)"/>
@@ -123,8 +108,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-cli/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a very simple CLI application to test the OpenThread stack on a Full Thread Device. This is equivalent to the ot-cli-ftd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a very simple CLI application to test the OpenThread stack on a Full Thread Device. This is equivalent to the ot-cli-ftd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4186c.demo.ot-cli-ftd" label="OpenThread - SoC CLI (FTD)">
 		<property key="blurb" value="OpenThread - SoC CLI (FTD)"/>
@@ -134,8 +118,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-cli/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a very simple CLI application to test the OpenThread stack on a Full Thread Device. This is equivalent to the ot-cli-ftd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a very simple CLI application to test the OpenThread stack on a Full Thread Device. This is equivalent to the ot-cli-ftd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd2703a.demo.ot-cli-ftd" label="OpenThread - SoC CLI (FTD)">
 		<property key="blurb" value="OpenThread - SoC CLI (FTD)"/>
@@ -145,8 +128,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-cli/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a very simple CLI application to test the OpenThread stack on a Full Thread Device. This is equivalent to the ot-cli-ftd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a very simple CLI application to test the OpenThread stack on a Full Thread Device. This is equivalent to the ot-cli-ftd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4116a.demo.ot-cli-ftd" label="OpenThread - SoC CLI (FTD)">
 		<property key="blurb" value="OpenThread - SoC CLI (FTD)"/>
@@ -156,8 +138,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-cli/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a very simple CLI application to test the OpenThread stack on a Full Thread Device. This is equivalent to the ot-cli-ftd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a very simple CLI application to test the OpenThread stack on a Full Thread Device. This is equivalent to the ot-cli-ftd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4407a.demo.ot-cli-ftd" label="OpenThread - SoC CLI (FTD)">
 		<property key="blurb" value="OpenThread - SoC CLI (FTD)"/>
@@ -167,8 +148,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-cli/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a very simple CLI application to test the OpenThread stack on a Full Thread Device. This is equivalent to the ot-cli-ftd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a very simple CLI application to test the OpenThread stack on a Full Thread Device. This is equivalent to the ot-cli-ftd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4180a.demo.ot-cli-mtd" label="OpenThread - SoC CLI (MTD)">
 		<property key="blurb" value="OpenThread - SoC CLI (MTD)"/>
@@ -178,8 +158,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-cli/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a very simple CLI application to test the OpenThread stack on a Minimal Thread Device. This is equivalent to the ot-cli-mtd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a very simple CLI application to test the OpenThread stack on a Minimal Thread Device. This is equivalent to the ot-cli-mtd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4186c.demo.ot-cli-mtd" label="OpenThread - SoC CLI (MTD)">
 		<property key="blurb" value="OpenThread - SoC CLI (MTD)"/>
@@ -189,8 +168,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-cli/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a very simple CLI application to test the OpenThread stack on a Minimal Thread Device. This is equivalent to the ot-cli-mtd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a very simple CLI application to test the OpenThread stack on a Minimal Thread Device. This is equivalent to the ot-cli-mtd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd2703a.demo.ot-cli-mtd" label="OpenThread - SoC CLI (MTD)">
 		<property key="blurb" value="OpenThread - SoC CLI (MTD)"/>
@@ -200,8 +178,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-cli/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a very simple CLI application to test the OpenThread stack on a Minimal Thread Device. This is equivalent to the ot-cli-mtd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a very simple CLI application to test the OpenThread stack on a Minimal Thread Device. This is equivalent to the ot-cli-mtd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4116a.demo.ot-cli-mtd" label="OpenThread - SoC CLI (MTD)">
 		<property key="blurb" value="OpenThread - SoC CLI (MTD)"/>
@@ -211,8 +188,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-cli/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a very simple CLI application to test the OpenThread stack on a Minimal Thread Device. This is equivalent to the ot-cli-mtd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a very simple CLI application to test the OpenThread stack on a Minimal Thread Device. This is equivalent to the ot-cli-mtd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4407a.demo.ot-cli-mtd" label="OpenThread - SoC CLI (MTD)">
 		<property key="blurb" value="OpenThread - SoC CLI (MTD)"/>
@@ -222,8 +198,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-cli/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a very simple CLI application to test the OpenThread stack on a Minimal Thread Device. This is equivalent to the ot-cli-mtd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a very simple CLI application to test the OpenThread stack on a Minimal Thread Device. This is equivalent to the ot-cli-mtd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4180a.demo.ot-ncp-ftd-cpc" label="OpenThread - NCP (FTD) with CPC">
 		<property key="blurb" value="OpenThread - NCP (FTD) with CPC"/>
@@ -233,8 +208,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/cpc/README-OT-NCP.md"/>
 		<property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread Full Thread Device NCP application with CPC. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread Full Thread Device NCP application with CPC. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4186c.demo.ot-ncp-ftd-cpc" label="OpenThread - NCP (FTD) with CPC">
 		<property key="blurb" value="OpenThread - NCP (FTD) with CPC"/>
@@ -244,8 +218,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/cpc/README-OT-NCP.md"/>
 		<property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread Full Thread Device NCP application with CPC. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread Full Thread Device NCP application with CPC. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd2703a.demo.ot-ncp-ftd-cpc" label="OpenThread - NCP (FTD) with CPC">
 		<property key="blurb" value="OpenThread - NCP (FTD) with CPC"/>
@@ -255,8 +228,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/cpc/README-OT-NCP.md"/>
 		<property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread Full Thread Device NCP application with CPC. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread Full Thread Device NCP application with CPC. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4116a.demo.ot-ncp-ftd-cpc" label="OpenThread - NCP (FTD) with CPC">
 		<property key="blurb" value="OpenThread - NCP (FTD) with CPC"/>
@@ -266,8 +238,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/cpc/README-OT-NCP.md"/>
 		<property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread Full Thread Device NCP application with CPC. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread Full Thread Device NCP application with CPC. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4407a.demo.ot-ncp-ftd-cpc" label="OpenThread - NCP (FTD) with CPC">
 		<property key="blurb" value="OpenThread - NCP (FTD) with CPC"/>
@@ -277,8 +248,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/cpc/README-OT-NCP.md"/>
 		<property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread Full Thread Device NCP application with CPC. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread Full Thread Device NCP application with CPC. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4180a.demo.ot-ncp-mtd-cpc" label="OpenThread - NCP (MTD) with CPC">
 		<property key="blurb" value="OpenThread - NCP (MTD) with CPC"/>
@@ -288,8 +258,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/cpc/README-OT-NCP.md"/>
 		<property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4186c.demo.ot-ncp-mtd-cpc" label="OpenThread - NCP (MTD) with CPC">
 		<property key="blurb" value="OpenThread - NCP (MTD) with CPC"/>
@@ -299,8 +268,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/cpc/README-OT-NCP.md"/>
 		<property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd2703a.demo.ot-ncp-mtd-cpc" label="OpenThread - NCP (MTD) with CPC">
 		<property key="blurb" value="OpenThread - NCP (MTD) with CPC"/>
@@ -310,8 +278,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/cpc/README-OT-NCP.md"/>
 		<property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4116a.demo.ot-ncp-mtd-cpc" label="OpenThread - NCP (MTD) with CPC">
 		<property key="blurb" value="OpenThread - NCP (MTD) with CPC"/>
@@ -321,8 +288,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/cpc/README-OT-NCP.md"/>
 		<property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4407a.demo.ot-ncp-mtd-cpc" label="OpenThread - NCP (MTD) with CPC">
 		<property key="blurb" value="OpenThread - NCP (MTD) with CPC"/>
@@ -332,8 +298,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/cpc/README-OT-NCP.md"/>
 		<property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4180a.demo.rcp-spi-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (SPI)">
 		<property key="blurb" value="Multiprotocol (OpenThread+Zigbee) - RCP (SPI)"/>
@@ -343,8 +308,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md"/>
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a SPI link. Refer to *docs.silabs.com Multiprotocol section- Multiprotocol on Linux Solution: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications.
-</description>
+		<description>This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a SPI link. Refer to *docs.silabs.com Multiprotocol section- Multiprotocol on Linux Solution: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications. </description>
 	</demo>
 	<demo name="brd4180b.demo.rcp-spi-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (SPI)">
 		<property key="blurb" value="Multiprotocol (OpenThread+Zigbee) - RCP (SPI)"/>
@@ -354,8 +318,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md"/>
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a SPI link. Refer to *docs.silabs.com Multiprotocol section- Multiprotocol on Linux Solution: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications.
-</description>
+		<description>This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a SPI link. Refer to *docs.silabs.com Multiprotocol section- Multiprotocol on Linux Solution: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications. </description>
 	</demo>
 	<demo name="brd4186c.demo.rcp-spi-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (SPI)">
 		<property key="blurb" value="Multiprotocol (OpenThread+Zigbee) - RCP (SPI)"/>
@@ -365,8 +328,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md"/>
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a SPI link. Refer to *docs.silabs.com Multiprotocol section- Multiprotocol on Linux Solution: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications.
-</description>
+		<description>This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a SPI link. Refer to *docs.silabs.com Multiprotocol section- Multiprotocol on Linux Solution: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications. </description>
 	</demo>
 	<demo name="brd4116a.demo.rcp-spi-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (SPI)">
 		<property key="blurb" value="Multiprotocol (OpenThread+Zigbee) - RCP (SPI)"/>
@@ -376,8 +338,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md"/>
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a SPI link. Refer to *docs.silabs.com Multiprotocol section- Multiprotocol on Linux Solution: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications.
-</description>
+		<description>This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a SPI link. Refer to *docs.silabs.com Multiprotocol section- Multiprotocol on Linux Solution: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications. </description>
 	</demo>
 	<demo name="brd4407a.demo.rcp-spi-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (SPI)">
 		<property key="blurb" value="Multiprotocol (OpenThread+Zigbee) - RCP (SPI)"/>
@@ -387,8 +348,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md"/>
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a SPI link. Refer to *docs.silabs.com Multiprotocol section- Multiprotocol on Linux Solution: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications.
-</description>
+		<description>This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a SPI link. Refer to *docs.silabs.com Multiprotocol section- Multiprotocol on Linux Solution: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications. </description>
 	</demo>
 	<demo name="brd4180a.demo.rcp-uart-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (UART)">
 		<property key="blurb" value="Multiprotocol (OpenThread+Zigbee) - RCP (UART)"/>
@@ -398,8 +358,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md"/>
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a UART link. Refer to *docs.silabs.com Multiprotocol section- Multiprotocol on Linux Solution: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications.
-</description>
+		<description>This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a UART link. Refer to *docs.silabs.com Multiprotocol section- Multiprotocol on Linux Solution: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications. </description>
 	</demo>
 	<demo name="brd4180b.demo.rcp-uart-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (UART)">
 		<property key="blurb" value="Multiprotocol (OpenThread+Zigbee) - RCP (UART)"/>
@@ -409,8 +368,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md"/>
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a UART link. Refer to *docs.silabs.com Multiprotocol section- Multiprotocol on Linux Solution: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications.
-</description>
+		<description>This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a UART link. Refer to *docs.silabs.com Multiprotocol section- Multiprotocol on Linux Solution: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications. </description>
 	</demo>
 	<demo name="brd4186c.demo.rcp-uart-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (UART)">
 		<property key="blurb" value="Multiprotocol (OpenThread+Zigbee) - RCP (UART)"/>
@@ -420,8 +378,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md"/>
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a UART link. Refer to *docs.silabs.com Multiprotocol section- Multiprotocol on Linux Solution: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications.
-</description>
+		<description>This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a UART link. Refer to *docs.silabs.com Multiprotocol section- Multiprotocol on Linux Solution: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications. </description>
 	</demo>
 	<demo name="brd2703a.demo.rcp-uart-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (UART)">
 		<property key="blurb" value="Multiprotocol (OpenThread+Zigbee) - RCP (UART)"/>
@@ -431,8 +388,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md"/>
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a UART link. Refer to *docs.silabs.com Multiprotocol section- Multiprotocol on Linux Solution: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications.
-</description>
+		<description>This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a UART link. Refer to *docs.silabs.com Multiprotocol section- Multiprotocol on Linux Solution: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications. </description>
 	</demo>
 	<demo name="brd4116a.demo.rcp-uart-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (UART)">
 		<property key="blurb" value="Multiprotocol (OpenThread+Zigbee) - RCP (UART)"/>
@@ -442,8 +398,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md"/>
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a UART link. Refer to *docs.silabs.com Multiprotocol section- Multiprotocol on Linux Solution: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications.
-</description>
+		<description>This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a UART link. Refer to *docs.silabs.com Multiprotocol section- Multiprotocol on Linux Solution: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications. </description>
 	</demo>
 	<demo name="brd4407a.demo.rcp-uart-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (UART)">
 		<property key="blurb" value="Multiprotocol (OpenThread+Zigbee) - RCP (UART)"/>
@@ -453,8 +408,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md"/>
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a UART link. Refer to *docs.silabs.com Multiprotocol section- Multiprotocol on Linux Solution: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications.
-</description>
+		<description>This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a UART link. Refer to *docs.silabs.com Multiprotocol section- Multiprotocol on Linux Solution: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications. </description>
 	</demo>
 	<demo name="brd4180a.demo.ot-ncp-ftd" label="OpenThread - NCP (FTD)">
 		<property key="blurb" value="OpenThread - NCP (FTD)"/>
@@ -464,8 +418,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/ot/README-OT-NCP.md"/>
 		<property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread Full Thread Device NCP application. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread Full Thread Device NCP application. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4186c.demo.ot-ncp-ftd" label="OpenThread - NCP (FTD)">
 		<property key="blurb" value="OpenThread - NCP (FTD)"/>
@@ -475,8 +428,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/ot/README-OT-NCP.md"/>
 		<property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread Full Thread Device NCP application. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread Full Thread Device NCP application. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd2703a.demo.ot-ncp-ftd" label="OpenThread - NCP (FTD)">
 		<property key="blurb" value="OpenThread - NCP (FTD)"/>
@@ -486,8 +438,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/ot/README-OT-NCP.md"/>
 		<property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread Full Thread Device NCP application. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread Full Thread Device NCP application. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4116a.demo.ot-ncp-ftd" label="OpenThread - NCP (FTD)">
 		<property key="blurb" value="OpenThread - NCP (FTD)"/>
@@ -497,8 +448,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/ot/README-OT-NCP.md"/>
 		<property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread Full Thread Device NCP application. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread Full Thread Device NCP application. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4407a.demo.ot-ncp-ftd" label="OpenThread - NCP (FTD)">
 		<property key="blurb" value="OpenThread - NCP (FTD)"/>
@@ -508,8 +458,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/ot/README-OT-NCP.md"/>
 		<property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread Full Thread Device NCP application. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread Full Thread Device NCP application. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4180a.demo.ot-ncp-mtd" label="OpenThread - NCP (MTD)">
 		<property key="blurb" value="OpenThread - NCP (MTD)"/>
@@ -519,8 +468,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/ot/README-OT-NCP.md"/>
 		<property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4186c.demo.ot-ncp-mtd" label="OpenThread - NCP (MTD)">
 		<property key="blurb" value="OpenThread - NCP (MTD)"/>
@@ -530,8 +478,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/ot/README-OT-NCP.md"/>
 		<property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd2703a.demo.ot-ncp-mtd" label="OpenThread - NCP (MTD)">
 		<property key="blurb" value="OpenThread - NCP (MTD)"/>
@@ -541,8 +488,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/ot/README-OT-NCP.md"/>
 		<property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4116a.demo.ot-ncp-mtd" label="OpenThread - NCP (MTD)">
 		<property key="blurb" value="OpenThread - NCP (MTD)"/>
@@ -552,8 +498,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/ot/README-OT-NCP.md"/>
 		<property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4407a.demo.ot-ncp-mtd" label="OpenThread - NCP (MTD)">
 		<property key="blurb" value="OpenThread - NCP (MTD)"/>
@@ -563,8 +508,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/ot/README-OT-NCP.md"/>
 		<property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4180a.demo.ot-rcp" label="OpenThread - RCP">
 		<property key="blurb" value="OpenThread - RCP"/>
@@ -574,8 +518,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/ot/README-OT-RCP.md"/>
 		<property key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread RCP application. This is equivalent to the ot-rcp application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread RCP application. This is equivalent to the ot-rcp application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4180b.demo.ot-rcp" label="OpenThread - RCP">
 		<property key="blurb" value="OpenThread - RCP"/>
@@ -585,8 +528,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/ot/README-OT-RCP.md"/>
 		<property key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread RCP application. This is equivalent to the ot-rcp application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread RCP application. This is equivalent to the ot-rcp application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4186c.demo.ot-rcp" label="OpenThread - RCP">
 		<property key="blurb" value="OpenThread - RCP"/>
@@ -596,8 +538,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/ot/README-OT-RCP.md"/>
 		<property key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread RCP application. This is equivalent to the ot-rcp application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread RCP application. This is equivalent to the ot-rcp application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd2703a.demo.ot-rcp" label="OpenThread - RCP">
 		<property key="blurb" value="OpenThread - RCP"/>
@@ -607,8 +548,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/ot/README-OT-RCP.md"/>
 		<property key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread RCP application. This is equivalent to the ot-rcp application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread RCP application. This is equivalent to the ot-rcp application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4116a.demo.ot-rcp" label="OpenThread - RCP">
 		<property key="blurb" value="OpenThread - RCP"/>
@@ -618,8 +558,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/ot/README-OT-RCP.md"/>
 		<property key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread RCP application. This is equivalent to the ot-rcp application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread RCP application. This is equivalent to the ot-rcp application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4407a.demo.ot-rcp" label="OpenThread - RCP">
 		<property key="blurb" value="OpenThread - RCP"/>
@@ -629,8 +568,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="ot-ncp/ot/README-OT-RCP.md"/>
 		<property key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a simple OpenThread RCP application. This is equivalent to the ot-rcp application in the OpenThread GitHub repo.
-</description>
+		<description>This is a simple OpenThread RCP application. This is equivalent to the ot-rcp application in the OpenThread GitHub repo. </description>
 	</demo>
 	<demo name="brd4180a.demo.sleepy-demo-ftd" label="OpenThread - SoC Sleepy Demo (FTD)">
 		<property key="blurb" value="OpenThread - SoC Sleepy Demo (FTD)"/>
@@ -640,8 +578,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="sleepy-demo/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a sample application to start and form a Thread network on an FTD for the sleepy-demo.
-</description>
+		<description>This is a sample application to start and form a Thread network on an FTD for the sleepy-demo. </description>
 	</demo>
 	<demo name="brd4186c.demo.sleepy-demo-ftd" label="OpenThread - SoC Sleepy Demo (FTD)">
 		<property key="blurb" value="OpenThread - SoC Sleepy Demo (FTD)"/>
@@ -651,8 +588,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="sleepy-demo/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a sample application to start and form a Thread network on an FTD for the sleepy-demo.
-</description>
+		<description>This is a sample application to start and form a Thread network on an FTD for the sleepy-demo. </description>
 	</demo>
 	<demo name="brd2703a.demo.sleepy-demo-ftd" label="OpenThread - SoC Sleepy Demo (FTD)">
 		<property key="blurb" value="OpenThread - SoC Sleepy Demo (FTD)"/>
@@ -662,8 +598,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="sleepy-demo/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a sample application to start and form a Thread network on an FTD for the sleepy-demo.
-</description>
+		<description>This is a sample application to start and form a Thread network on an FTD for the sleepy-demo. </description>
 	</demo>
 	<demo name="brd4116a.demo.sleepy-demo-ftd" label="OpenThread - SoC Sleepy Demo (FTD)">
 		<property key="blurb" value="OpenThread - SoC Sleepy Demo (FTD)"/>
@@ -673,8 +608,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="sleepy-demo/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a sample application to start and form a Thread network on an FTD for the sleepy-demo.
-</description>
+		<description>This is a sample application to start and form a Thread network on an FTD for the sleepy-demo. </description>
 	</demo>
 	<demo name="brd4407a.demo.sleepy-demo-ftd" label="OpenThread - SoC Sleepy Demo (FTD)">
 		<property key="blurb" value="OpenThread - SoC Sleepy Demo (FTD)"/>
@@ -684,8 +618,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="sleepy-demo/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a sample application to start and form a Thread network on an FTD for the sleepy-demo.
-</description>
+		<description>This is a sample application to start and form a Thread network on an FTD for the sleepy-demo. </description>
 	</demo>
 	<demo name="brd4180a.demo.sleepy-demo-mtd" label="OpenThread - SoC Sleepy Demo (MTD)">
 		<property key="blurb" value="OpenThread - SoC Sleepy Demo (MTD)"/>
@@ -695,8 +628,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="sleepy-demo/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a sample application to demonstrate Sleepy End Device (SED) behaviour with polling, using the EFR32's low power EM2 mode.
-</description>
+		<description>This is a sample application to demonstrate Sleepy End Device (SED) behaviour with polling, using the EFR32's low power EM2 mode. </description>
 	</demo>
 	<demo name="brd4186c.demo.sleepy-demo-mtd" label="OpenThread - SoC Sleepy Demo (MTD)">
 		<property key="blurb" value="OpenThread - SoC Sleepy Demo (MTD)"/>
@@ -706,8 +638,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="sleepy-demo/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a sample application to demonstrate Sleepy End Device (SED) behaviour with polling, using the EFR32's low power EM2 mode.
-</description>
+		<description>This is a sample application to demonstrate Sleepy End Device (SED) behaviour with polling, using the EFR32's low power EM2 mode. </description>
 	</demo>
 	<demo name="brd2703a.demo.sleepy-demo-mtd" label="OpenThread - SoC Sleepy Demo (MTD)">
 		<property key="blurb" value="OpenThread - SoC Sleepy Demo (MTD)"/>
@@ -717,8 +648,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="sleepy-demo/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a sample application to demonstrate Sleepy End Device (SED) behaviour with polling, using the EFR32's low power EM2 mode.
-</description>
+		<description>This is a sample application to demonstrate Sleepy End Device (SED) behaviour with polling, using the EFR32's low power EM2 mode. </description>
 	</demo>
 	<demo name="brd4116a.demo.sleepy-demo-mtd" label="OpenThread - SoC Sleepy Demo (MTD)">
 		<property key="blurb" value="OpenThread - SoC Sleepy Demo (MTD)"/>
@@ -728,8 +658,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="sleepy-demo/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a sample application to demonstrate Sleepy End Device (SED) behaviour with polling, using the EFR32's low power EM2 mode.
-</description>
+		<description>This is a sample application to demonstrate Sleepy End Device (SED) behaviour with polling, using the EFR32's low power EM2 mode. </description>
 	</demo>
 	<demo name="brd4407a.demo.sleepy-demo-mtd" label="OpenThread - SoC Sleepy Demo (MTD)">
 		<property key="blurb" value="OpenThread - SoC Sleepy Demo (MTD)"/>
@@ -739,8 +668,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="sleepy-demo/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a sample application to demonstrate Sleepy End Device (SED) behaviour with polling, using the EFR32's low power EM2 mode.
-</description>
+		<description>This is a sample application to demonstrate Sleepy End Device (SED) behaviour with polling, using the EFR32's low power EM2 mode. </description>
 	</demo>
 	<demo name="brd4180a.demo.sleepy-demo-ssed" label="OpenThread - SoC Sleepy Demo (SSED)">
 		<property key="blurb" value="OpenThread - SoC Sleepy Demo (SSED)"/>
@@ -750,8 +678,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="sleepy-demo/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a sample application to demonstrate Synchronous Sleepy End Device (SSED) behaviour with CSL, using the EFR32's low power EM2 mode.
-</description>
+		<description>This is a sample application to demonstrate Synchronous Sleepy End Device (SSED) behaviour with CSL, using the EFR32's low power EM2 mode. </description>
 	</demo>
 	<demo name="brd4186c.demo.sleepy-demo-ssed" label="OpenThread - SoC Sleepy Demo (SSED)">
 		<property key="blurb" value="OpenThread - SoC Sleepy Demo (SSED)"/>
@@ -761,8 +688,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="sleepy-demo/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a sample application to demonstrate Synchronous Sleepy End Device (SSED) behaviour with CSL, using the EFR32's low power EM2 mode.
-</description>
+		<description>This is a sample application to demonstrate Synchronous Sleepy End Device (SSED) behaviour with CSL, using the EFR32's low power EM2 mode. </description>
 	</demo>
 	<demo name="brd2703a.demo.sleepy-demo-ssed" label="OpenThread - SoC Sleepy Demo (SSED)">
 		<property key="blurb" value="OpenThread - SoC Sleepy Demo (SSED)"/>
@@ -772,8 +698,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="sleepy-demo/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a sample application to demonstrate Synchronous Sleepy End Device (SSED) behaviour with CSL, using the EFR32's low power EM2 mode.
-</description>
+		<description>This is a sample application to demonstrate Synchronous Sleepy End Device (SSED) behaviour with CSL, using the EFR32's low power EM2 mode. </description>
 	</demo>
 	<demo name="brd4116a.demo.sleepy-demo-ssed" label="OpenThread - SoC Sleepy Demo (SSED)">
 		<property key="blurb" value="OpenThread - SoC Sleepy Demo (SSED)"/>
@@ -783,8 +708,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="sleepy-demo/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a sample application to demonstrate Synchronous Sleepy End Device (SSED) behaviour with CSL, using the EFR32's low power EM2 mode.
-</description>
+		<description>This is a sample application to demonstrate Synchronous Sleepy End Device (SSED) behaviour with CSL, using the EFR32's low power EM2 mode. </description>
 	</demo>
 	<demo name="brd4407a.demo.sleepy-demo-ssed" label="OpenThread - SoC Sleepy Demo (SSED)">
 		<property key="blurb" value="OpenThread - SoC Sleepy Demo (SSED)"/>
@@ -794,7 +718,6 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 		<property key="readmeFiles" value="sleepy-demo/README.md"/>
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
 		<property key="quality" value="PRODUCTION"/>
-		<description>This is a sample application to demonstrate Synchronous Sleepy End Device (SSED) behaviour with CSL, using the EFR32's low power EM2 mode.
-</description>
+		<description>This is a sample application to demonstrate Synchronous Sleepy End Device (SSED) behaviour with CSL, using the EFR32's low power EM2 mode. </description>
 	</demo>
 </demos>

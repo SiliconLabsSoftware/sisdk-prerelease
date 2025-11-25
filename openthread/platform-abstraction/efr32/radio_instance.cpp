@@ -32,11 +32,8 @@
  *   including instance accessors, transmit queueing, and energy scan deferral.
  */
 
-#include <openthread-core-config.h>
 #include "radio_instance.h"
-#include "sl_core.h"
-#include "sl_rail.h"
-#include "sl_rail_ieee802154.h"
+#include <openthread-core-config.h>
 
 #include <assert.h>
 #include "common/code_utils.hpp"
@@ -50,7 +47,11 @@
 
 extern "C" {
 #include "circular_queue.h"
+#include "sl_core.h"
+#include "sl_rail.h"
+#include "sl_rail_ieee802154.h"
 }
+
 #include "radio_channel_switching.h"
 #include "radio_energy_scan.h"
 #include "radio_interface.h"

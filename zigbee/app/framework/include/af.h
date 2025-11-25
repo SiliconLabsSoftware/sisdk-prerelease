@@ -1140,9 +1140,10 @@ sl_status_t sl_zigbee_af_get_node_type(sl_zigbee_node_type_t *nodeType);
 #define SL_ZIGBEE_AF_REJOIN_DUE_TO_TC_KEEPALIVE_FAILURE       0xA1u
 #define SL_ZIGBEE_AF_REJOIN_DUE_TO_CLI_COMMAND                0xA2u
 #define SL_ZIGBEE_AF_REJOIN_DUE_TO_WWAH_CONNECTIVITY_MANAGER  0xA3u
+#define SL_ZIGBEE_AF_REJOIN_DUE_TO_BDB_3DOT1_REJOIN_ALGORITHM 0xA4u
 
 #define SL_ZIGBEE_AF_REJOIN_FIRST_REASON                SL_ZIGBEE_AF_REJOIN_DUE_TO_END_DEVICE_MOVE
-#define SL_ZIGBEE_AF_REJOIN_LAST_REASON                 SL_ZIGBEE_AF_REJOIN_DUE_TO_END_DEVICE_MOVE
+#define SL_ZIGBEE_AF_REJOIN_LAST_REASON                 SL_ZIGBEE_AF_REJOIN_DUE_TO_BDB_3DOT1_REJOIN_ALGORITHM
 
 /**
  * @brief Enable local permit join and optionally broadcast the ZDO

@@ -2443,6 +2443,9 @@ enum
   SL_ZIGBEE_TC_FAILED_TO_GENERATE_NEW_KEY      = 0x12,
   SL_ZIGBEE_TC_FAILED_TO_SEND_TC_KEY           = 0x13,
 
+  SL_ZIGBEE_INITIATOR_FAILED_GET_AUTH_SECURITY = 0x14,
+  SL_ZIGBEE_TARGET_FAILED_GET_AUTH_SECURITY    = 0x15,
+
   // These are generic status values for a key requester.
   SL_ZIGBEE_TRUST_CENTER_IS_PRE_R21            = 0x1E,
 

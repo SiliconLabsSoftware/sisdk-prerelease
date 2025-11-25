@@ -355,44 +355,11 @@ static sl_zigbee_af_plugin_network_steering_joining_state_t getFirstSecondarySta
 #endif
 }
 
-static bool is_current_tclk_key_default(void)
-{
-  sl_status_t status;
-  sl_zigbee_key_data_t install_code_key;
-
-  sl_zigbee_sec_man_context_t context;
-  sl_zigbee_sec_man_init_context(&context);
-
-  context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK;
-
-  // Get our current APS key
-  status = sl_zigbee_sec_man_check_key_context(&context);
-  if (status != SL_STATUS_OK) {
-    return false;
-  }
-
-  // Does it match the default key, ZA09?
-  if (sl_zigbee_sec_man_compare_key_to_value(&context, (const sl_zigbee_sec_man_key_t*)&defaultLinkKey)) {
-    return true;
-  }
-
-  status = sl_zigbee_get_key_from_install_code(&install_code_key);
-
-  // Does it match the our install code derived key?
-  if (status == SL_STATUS_OK && sl_zigbee_sec_man_compare_key_to_value(&context, (sl_zigbee_sec_man_key_t*)&install_code_key)) {
-    return true;
-  }
-
-  return false;
-}
-
 void sli_zigbee_af_network_steering_stack_status_callback(sl_status_t status)
 {
-  sl_zigbee_af_core_println("%s stack status 0x%02X", PLUGIN_NAME, status);
-
   if (sli_zigbee_af_network_steering_state
       == SL_ZIGBEE_AF_PLUGIN_NETWORK_STEERING_STATE_NONE) {
-    if (status == SL_STATUS_NETWORK_UP && is_current_tclk_key_default()) {
+    if (status == SL_STATUS_NETWORK_UP && sl_zigbee_af_update_tc_link_key_is_tclk_key_default()) {
       sl_zigbee_af_update_tc_link_key_set_delay(jitterTimeDelayMs());
     } else if (status == SL_STATUS_NETWORK_DOWN) {
       sl_zigbee_af_update_tc_link_key_set_inactive();
@@ -408,8 +375,6 @@ void sli_zigbee_af_network_steering_stack_status_callback(sl_status_t status)
       if (sl_zigbee_get_stack_compliance_revision() == R23_COMPLIANCE_REVISION && sl_zigbee_zdo_dlk_enabled()) {
         uint32_t tok;
         if (SL_STATUS_OK == slx_zigbee_get_trust_center_additional_info(&tok) && (tok & EXTENDED_BIT_MASK_DERIVED_KEY_DLK)) {
-          sl_zigbee_af_core_println("%s: Retrieving authentication token for DLK", PLUGIN_NAME);
-          sl_zigbee_retrieve_authentication_token(SL_ZIGBEE_TRUST_CENTER_NODE_ID, (SL_ZIGBEE_APS_OPTION_ENCRYPTION | SL_ZIGBEE_APS_OPTION_RETRY));
           sl_zigbee_af_event_set_delay_ms(finishSteeringEvent, randomJitterMS());
           return;
         }
@@ -789,6 +754,12 @@ sl_status_t sl_zigbee_af_network_steering_stop(void)
   }
   cleanupAndStop(SL_STATUS_NOT_JOINED);
   return SL_STATUS_OK;
+}
+
+uint32_t sl_zigbee_af_network_steering_get_channel_mask(bool primary_mask)
+{
+  return primary_mask ? sli_zigbee_af_network_steering_primary_channel_mask
+         : sli_zigbee_af_network_steering_secondary_channel_mask;
 }
 
 void sli_zigbee_af_network_steering_set_configured_key(const uint8_t *key,

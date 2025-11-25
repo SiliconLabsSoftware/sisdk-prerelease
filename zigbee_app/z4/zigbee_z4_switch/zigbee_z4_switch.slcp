@@ -40,6 +40,7 @@ component:
   - id: zigbee_dynamic_commissioning
   - id: zigbee_security_link_keys
   - id: zigbee_trust_center_keepalive
+  - id: zigbee_bdb_3dot1_rejoin_algorithm
   # TODO: enable poll control server once rejoin algorithm is in place
   #- id: zigbee_poll_control_server
   # -- LEDs and Buttons GPIO Conflict Note --

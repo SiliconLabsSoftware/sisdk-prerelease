@@ -357,7 +357,7 @@ static void toggle_r23_feature_support(bool r23_enabled)
     sl_zigbee_set_stack_compliance_revision(R22_COMPLIANCE_REVISION);
   }
   sl_disable_beacon_tlvs((r23_enabled ? false : true));
-  sl_zigbee_gu_zdo_toggle_dlk(r23_enabled);
+  slx_zigbee_gu_zdo_toggle_dlk(r23_enabled, r23_enabled);
   for (i = 0; i < SL_ZIGBEE_SUPPORTED_NETWORKS; i++) {
     sl_zigbee_set_pan_id_conflict_report((r23_enabled ? false : true), i);
   }
@@ -477,7 +477,7 @@ void toggle_dlk_enabled(sl_cli_command_arg_t *arguments)
   } else {
     do_enable = (bool) sl_cli_get_argument_uint8(arguments, 0);
   }
-  sl_zigbee_gu_zdo_toggle_dlk(do_enable);
+  slx_zigbee_gu_zdo_toggle_dlk(do_enable, do_enable);
   sl_zigbee_core_debug_println("dlk %s-abled", do_enable ? "en" : "dis");
 }
 

@@ -67,7 +67,7 @@
 #ifdef SL_CATALOG_ZIGBEE_R23_SUPPORT_PRESENT
 #include "stack/internal/src/ipc/sl_zigbee_dynamic_commissioning_ipc_command_messages.h"
 #endif
-#ifdef SL_CATALOG_ZIGBEE_MEMORY_USAGE_API_PRESENT
+#ifdef SL_CATALOG_ZIGBEE_MEMORY_USAGE_PRESENT
 #include "stack/internal/src/ipc/sl_zigbee_memory_usage_ipc_command_messages.h"
 #endif
 #include "stack/internal/src/ipc/sl_zigbee_random_api_ipc_command_messages.h"
@@ -315,7 +315,6 @@ typedef struct {
     sli_mac_stack_test_set_nwk_radio_params_eui_ipc_msg_t test_set_nwk_radio_params_eui;
     sli_mac_stack_test_set_tx_power_ipc_msg_t test_set_tx_power;
     sli_zigbee_stack_bdb_tclk_max_exchange_attempts_ipc_msg_t bdb_tclk_max_exchange_attempts;
-    sli_zigbee_stack_gu_zdo_toggle_dlk_ipc_msg_t gu_zdo_toggle_dlk;
     sli_zigbee_stack_request_link_key_with_option_encrypt_ipc_msg_t request_link_key_with_option_encrypt;
     sli_zigbee_stack_send_aps_ack_ipc_msg_t send_aps_ack;
     sli_zigbee_stack_set_end_device_poll_timeout_ipc_msg_t set_end_device_poll_timeout;
@@ -351,6 +350,7 @@ typedef struct {
     sli_zigbee_stack_test_zdo_generate_get_authentication_level_req_ipc_msg_t test_zdo_generate_get_authentication_level_req;
     sli_zigbee_stack_test_zdo_generate_security_decommission_req_ipc_msg_t test_zdo_generate_security_decommission_req;
     sli_zigbee_stack_zigbee_remove_child_ipc_msg_t zigbee_remove_child;
+    slxi_zigbee_stack_gu_zdo_toggle_dlk_ipc_msg_t gu_zdo_toggle_dlk;
     slxi_zigbee_stack_ignore_incoming_aps_acks_ipc_msg_t ignore_incoming_aps_acks;
     #endif
     sli_zigbee_stack_get_embernet_passthrough_source_address_ipc_msg_t get_embernet_passthrough_source_address;
@@ -384,6 +384,7 @@ typedef struct {
     sli_zigbee_stack_set_transient_key_timeout_s_ipc_msg_t set_transient_key_timeout_s;
     sli_zigbee_stack_start_writing_stack_tokens_ipc_msg_t start_writing_stack_tokens;
     sli_zigbee_stack_stop_writing_stack_tokens_ipc_msg_t stop_writing_stack_tokens;
+    sli_zigbee_stack_update_app_link_key_ipc_msg_t update_app_link_key;
     sli_zigbee_stack_update_tc_link_key_ipc_msg_t update_tc_link_key;
     sli_zigbee_stack_verify_partner_link_key_ipc_msg_t verify_partner_link_key;
     sli_zigbee_stack_writing_stack_tokens_enabled_ipc_msg_t writing_stack_tokens_enabled;
@@ -407,7 +408,7 @@ typedef struct {
     sli_zigbee_stack_dynamic_commissioning_is_open_for_interview_ipc_msg_t dynamic_commissioning_is_open_for_interview;
     sli_zigbee_stack_dynamic_commissioning_set_open_for_interview_ipc_msg_t dynamic_commissioning_set_open_for_interview;
     #endif
-    #ifdef SL_CATALOG_ZIGBEE_MEMORY_USAGE_API_PRESENT
+    #ifdef SL_CATALOG_ZIGBEE_MEMORY_USAGE_PRESENT
     sli_zigbee_stack_get_memory_usage_data_ipc_msg_t get_memory_usage_data;
     #endif
     sli_zigbee_stack_get_pseudo_random_number_ipc_msg_t get_pseudo_random_number;

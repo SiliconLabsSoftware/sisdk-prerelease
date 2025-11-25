@@ -23,6 +23,7 @@
 #include "hal/hal.h"
 #include "internal/inc/internal-defs-patch.h"
 #include "aps-keys-full.h"
+#include "aps-keys.h"
 #if !defined(SL_CATALOG_TOKEN_MANAGER_PRESENT)
 #define DEFINETYPES
 #endif
@@ -306,6 +307,18 @@ bool sli_zigbee_process_application_link_key(sl_802154_long_addr_t partnerEui64,
     if (sec_status != SL_STATUS_OK) {
       return false;
     }
+#if !defined(SL_ZIGBEE_GOLDEN_UNIT)
+    // Golden Unit does not use the app link key state machine, it has CLIs to separately send the messages
+    // (Get Authen Sec Level, Request Key, Verify Key Req)
+    if (sli_zigbee_get_update_app_link_key_state() == UPDATE_APP_LINK_KEY_STATE_REQUEST_KEY) {
+      // Initiator: wait for Verify Key
+      sli_zigbee_set_update_app_link_key_state(UPDATE_APP_LINK_KEY_STATE_VERIFY_KEY);
+    } else {
+      // Target: Start Security Get Auth Level
+      (void)sli_zigbee_stack_update_app_link_key(partnerEui64);
+      sli_zigbee_set_update_app_link_key_state(UPDATE_APP_LINK_KEY_STATE_SECURITY_LEVEL_TARGET);
+    }
+#endif
   } else {
     sl_zigbee_sec_man_context_t context;
     sli_zigbee_stack_sec_man_init_context(&context);
