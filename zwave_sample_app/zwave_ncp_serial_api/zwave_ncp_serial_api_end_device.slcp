@@ -36,10 +36,8 @@ component:
   - id: simple_led
     instance: [led0, led1]
   - id: clock_manager
-  - id: common_token_manager
-  - id: common_token_manager_compatibility
-    condition: [device_series_2]
   - id: rail_util_pti
+
 source:
   - path: app_node_info.c
   - path: cmd_handlers_invoker.c

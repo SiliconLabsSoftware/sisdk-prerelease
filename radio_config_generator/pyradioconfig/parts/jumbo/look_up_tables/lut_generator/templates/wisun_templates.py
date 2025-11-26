@@ -58,18 +58,6 @@ class Wisun1v0Luts:
             freq_band_end={freq_band_end}
         ),"""
 
-    legacy_frequency_channel: str = """
-        'CN_2': FrequencyChannel1v0(  # TODO: unnecessary only here, because broke etest on tools side
-            total_nb_channel=42,
-            freq_band_start=42,
-            freq_band_end=42
-        ),
-        'CN_3': FrequencyChannel1v0(  # TODO: unnecessary only here, because broke etest on tools side
-            total_nb_channel=42,
-            freq_band_start=42,
-            freq_band_end=42
-        ),"""
-
 class Wisun1v1Templates:
     """
     This class contains the templates for Wisun 1.1 look-up table generation.
@@ -144,7 +132,6 @@ if __name__ == "__main__":
     print(Wisun1v0Templates.close)
     print(Wisun1v0Templates.frequency_channel_start)
     print(Wisun1v0Templates.frequency_channel("channel_example", 10, 2400.0, 2483.5))
-    print(Wisun1v0Templates.legacy_frequency_channel)
     print(Wisun1v0Templates.close)
     # Example usage 1v1
     print(Wisun1v1Templates.import_and_class)

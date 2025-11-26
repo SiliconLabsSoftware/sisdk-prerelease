@@ -47,6 +47,9 @@ class ProfileIEEE802154BPSKOcelot(IProfile):
                                  value_limit_max=956_000_000, units_multiplier=UnitsMultiplier.MEGA)
         self.make_required_input(profile, model.vars.bitrate, category="modem", readable_name="Bitrate",
                                  value_limit_min=100, value_limit_max=2000_000, units_multiplier=UnitsMultiplier.KILO)
+        self.make_required_input(profile, model.vars.xtal_frequency_hz, "crystal",
+                                 readable_name="Crystal Frequency", value_limit_min=38000000,
+                                 value_limit_max=40000000, units_multiplier=UnitsMultiplier.MEGA)
 
     def build_optional_profile_inputs(self, model: ModelRoot, profile: ModelProfile):
         pass
@@ -182,9 +185,9 @@ class ProfileIEEE802154BPSKOcelot(IProfile):
         bpsk_feature = model.profile.inputs.bpsk_feature.var_value
 
         if bpsk_feature == model.vars.bpsk_feature.var_enum.STANDARD_20KBPS:
-            self._copy_model_variables_from_phy(model, 'PHY_IEEE802154_868MHz_BPSK')
+            self._copy_model_variables_from_phy(model, 'PHY_IEEE802154_868MHz_BPSK_20kbps_coh')
         elif bpsk_feature == model.vars.bpsk_feature.var_enum.STANDARD_40KBPS:
-            self._copy_model_variables_from_phy(model, 'PHY_IEEE802154_915MHz_BPSK_40kbps')
+            self._copy_model_variables_from_phy(model, 'PHY_IEEE802154_915MHz_BPSK_40kbps_coh')
 
     def _build_delay_settings(self, model: ModelRoot):
         bpsk_feature = model.profile.inputs.bpsk_feature.var_value

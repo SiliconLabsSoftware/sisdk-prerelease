@@ -353,10 +353,19 @@ class ProfileWisunFan1v1Sol(ProfileWisunFan1v1Ocelot):
                 if_frequency_hz = max(fsk_if_frequency, ofdm_if_frequency)
                 model.vars.if_frequency_hz.value_forced = if_frequency_hz #Force the FSK IF freq
 
+                if conc_ofdm_option == model.vars.conc_ofdm_option.var_enum.OPT4:
+                    wisun_phy_mode_id = 0x54
+                elif conc_ofdm_option == model.vars.conc_ofdm_option.var_enum.OPT3:
+                    wisun_phy_mode_id = 0x44
+                elif conc_ofdm_option == model.vars.conc_ofdm_option.var_enum.OPT2:
+                    wisun_phy_mode_id = 0x33
+                else:
+                    wisun_phy_mode_id = 0x22
+
                 # Calculate the OFDM PHY
                 input_dict = {
                     'wisun_reg_domain': wisun_reg_domain,
-                    'wisun_phy_mode_id_select': (1 + int(conc_ofdm_option)) << 4,  # Corresponds to MCS0, the MCS is really a don't care
+                    'wisun_phy_mode_id_select': wisun_phy_mode_id,  # Corresponds to MCS0, the MCS is really a don't care
                     'wisun_channel_plan_id': wisun_channel_plan_id,
                     'xtal_frequency_hz': xtal_frequency_hz,
                     'base_frequency_hz': base_frequency_hz,  # Set base frequency to be co-located with FSK by default

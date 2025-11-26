@@ -36,7 +36,7 @@
 // Macros
 
 #if defined(SL_TRUSTZONE_SECURE)
-  #define SLI_TZ_CMSE_NONSECURE_ENTRY __attribute__((cmse_nonsecure_entry))
+  #define SLI_TZ_CMSE_NONSECURE_ENTRY __attribute__((cmse_nonsecure_entry, __used__))
 #elif defined(SL_TRUSTZONE_NONSECURE)
   #define SLI_TZ_CMSE_NONSECURE_ENTRY
 #else

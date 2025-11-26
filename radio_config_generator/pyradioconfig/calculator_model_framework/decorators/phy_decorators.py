@@ -1,4 +1,5 @@
 import re
+from enum import Enum
 from functools import wraps
 from pyradioconfig.calculator_model_framework.CalcManager import CalcManager
 from pycalcmodel.core.output import ModelOutputType
@@ -67,6 +68,8 @@ def _phypass(self, model, phy_name=None):
     pass
 
 def concurrent_phy(phy_name,reg_field_list,override_dict=None): #decorator maker
+    if override_dict is None:
+        override_dict = {}
     def inner_decorator(f):
         @wraps(f)
         def wrapped(*args, **kwargs):
@@ -97,6 +100,15 @@ def concurrent_phy(phy_name,reg_field_list,override_dict=None): #decorator maker
                         original_phy_profile_output = getattr(phy.profile_outputs, profile_output.var_name)
                         if original_phy_profile_output.override is None: #If already forced then use that value
                             original_phy_profile_output.override = profile_output.var_value
+            # Set this just in case to ensure consistency
+            for override_name, override_value in override_dict.items():
+                if hasattr(phy.profile_inputs, override_name):
+                    profile_input = getattr(phy.profile_inputs, override_name)
+                    if profile_input._var.var_type == Enum:
+                        enum_val = getattr(profile_input._var.var_enum, override_value)
+                        profile_input.value = enum_val
+                    else:
+                        profile_input.value = override_value
 
             return phy
         return wrapped

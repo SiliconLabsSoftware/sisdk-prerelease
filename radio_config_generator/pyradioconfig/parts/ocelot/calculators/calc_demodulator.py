@@ -92,6 +92,7 @@ class CALC_Demodulator_ocelot(ICalculator):
             member_data
         )
 
+
     def calc_default_feature_mode(self, model):
         model.vars.zigbee_feature.value = model.vars.zigbee_feature.var_enum.NONE
         model.vars.ble_feature.value = model.vars.ble_feature.var_enum.NONE
@@ -1512,24 +1513,27 @@ class CALC_Demodulator_ocelot(ICalculator):
     def calc_phasedemod_reg(self, model):
         #This function writes the phase demod register
 
-        #Load model variables into local variables
         length = model.vars.dsss_len.value
         modulation = model.vars.modulation_type.value
         demod_sel = model.vars.demod_select.value
 
-        if modulation == model.vars.modulation_type.var_enum.OQPSK:
-            if demod_sel == model.vars.demod_select.var_enum.COHERENT:
-                phasedemod = 2
+        if demod_sel == model.vars.demod_select.var_enum.COHERENT:
+            if modulation in (model.vars.modulation_type.var_enum.OQPSK,
+                              model.vars.modulation_type.var_enum.DBPSK,
+                              model.vars.modulation_type.var_enum.BPSK):
+                phasedemod = 2  # COH
             else:
-                phasedemod = 1
+                phasedemod = 0  # Coherent is only used for PSK mod
+        elif modulation == model.vars.modulation_type.var_enum.OQPSK:
+            phasedemod = 1  # MBDD
         elif modulation == model.vars.modulation_type.var_enum.BPSK or \
             modulation == model.vars.modulation_type.var_enum.DBPSK:
-            if length > 0:
-                phasedemod = 2
+            if length == 0:
+                phasedemod = 1  # MBDD
             else:
-                phasedemod = 1
+                phasedemod = 0 # BDD
         else:
-            phasedemod = 0
+            phasedemod = 0  # BDD
 
         #Load local variables back into model variables
         self._reg_write(model.vars.MODEM_CTRL1_PHASEDEMOD, phasedemod)

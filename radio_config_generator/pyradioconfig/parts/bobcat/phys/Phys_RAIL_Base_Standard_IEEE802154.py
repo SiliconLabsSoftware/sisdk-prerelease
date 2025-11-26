@@ -45,7 +45,7 @@ class PhysRAILBaseStandardIEEE802154Bobcat(PhysInternalBaseStandardIEEE802154Oce
     def PHY_IEEE802154_915MHz_BPSK_40kbps(self, model, phy_name=None):
         pass
 
-    def PHY_IEEE802154_868MHz_BPSK_coh(self, model):
+    def PHY_IEEE802154_868MHz_BPSK_20kbps_coh(self, model):
         pass
 
     def PHY_IEEE802154_868MHz_OQPSK(self, model):
@@ -58,6 +58,9 @@ class PhysRAILBaseStandardIEEE802154Bobcat(PhysInternalBaseStandardIEEE802154Oce
         pass
 
     def PHY_IEEE802154_915MHz_OQPSK_coh(self, model):
+        pass
+
+    def PHY_IEEE802154_915MHz_BPSK_40kbps_coh(self, model):
         pass
 
     def PHY_IEEE802154_RSGFSK_868MHz_500kbps_mi0p76(self, model):
@@ -75,15 +78,16 @@ class PhysRAILBaseStandardIEEE802154Bobcat(PhysInternalBaseStandardIEEE802154Oce
     def PHY_IEEE802154_2p4GHz_diversity_fem(self, model, phy_name=None):
         phy = self.PHY_IEEE802154_2p4GHz_diversity(model, phy_name)
         phy.profile_inputs.antdiv_adpcsigampthr.value = 704
+        model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.ANTDIV_FEM
 
     # Owner     : Young-Joon Choi
     # Desc      : Antenna Diversity PHY
     # Jira Link : https://jira.silabs.com/browse/PGBOBCATVALTEST-207
     def PHY_IEEE802154_2p4GHz_diversity(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='802154 2p4GHz diversity', phy_name=phy_name)
-
         # : Start with IEEE802154 legacy demod phy. Then add antenna diversity settings
         self.IEEE802154_2p4GHz_base(phy, model)
+        model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.ANTDIV
 
         # : Disable phase demod path in order to improve frequency offset tolerance
         phy.profile_outputs.MODEM_CTRL1_PHASEDEMOD.override = 0
@@ -170,6 +174,7 @@ class PhysRAILBaseStandardIEEE802154Bobcat(PhysInternalBaseStandardIEEE802154Oce
     # Jira Link : https://jira.silabs.com/browse/PGBOBCATVALTEST-1
     def PHY_IEEE802154_2p4GHz_cohdsa(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='802154 2p4GHz cohdsa', phy_name=phy_name)
+        model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.COHERENT
         self.IEEE802154_2p4GHz_cohdsa_base(phy, model)
 
         # : Change PN gain step for improved WiFi blocker performance
@@ -192,6 +197,7 @@ class PhysRAILBaseStandardIEEE802154Bobcat(PhysInternalBaseStandardIEEE802154Oce
     # Description : IEEE802154 PHY optimized for FEM with 10 dB gain and 2 dB NF
     def PHY_IEEE802154_2p4GHz_cohdsa_fem(self, model, phy_name=None):
         phy = self.PHY_IEEE802154_2p4GHz_cohdsa(model, phy_name)
+        model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.FEM
 
         fem_chpwr_adjustment = 6
 
@@ -229,6 +235,7 @@ class PhysRAILBaseStandardIEEE802154Bobcat(PhysInternalBaseStandardIEEE802154Oce
     # Description : IEEE802154 PHY with "fast switching" feature intended to be exposed to customer by RAIL
     def PHY_IEEE802154_2p4GHz_antdiv_fastswitch(self, model, phy_name=None):
         phy = self.PHY_IEEE802154_2p4GHz_diversity(model, phy_name='PHY_IEEE802154_2p4GHz_antdiv_fastswitch')
+        model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.FCS
 
         # : RAIL will set the following regs fields
         # 'RAC.RX.SYCHPBIASTRIMBUFRX' 1,

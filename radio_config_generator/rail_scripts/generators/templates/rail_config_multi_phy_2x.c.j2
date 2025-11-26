@@ -64,7 +64,7 @@ static const uint8_t {{irCalConfigEntryName}}[] = {
 };
 {% endfor %}
 {%- for txIrCalConfigEntryName, txIrCalConfigEntry in multiPhyConfig.commonStructures.txIrCalConfigEntries.items() %}
-static const uint8_t {{txIrCalConfigEntryName}}[{{txIrCalConfigEntry|length + 1}}] = {
+__ALIGNED(4) static const uint8_t {{txIrCalConfigEntryName}}[{{txIrCalConfigEntry|length + 1}}] = {
   {{ "0x{0[0]:02x}, 0x{0[1]:02x}, ".format( txIrCalConfigEntry[0] | int | split16 )-}}
   {% for value in txIrCalConfigEntry[1:-1] -%}
     {{value|int}}{{", "}}
@@ -117,7 +117,7 @@ static const int32_t {{timingConfigEntryName}}[] = {
 {% endfor %}
 {%- for newHfxoRetimingConfigEntryName, newHfxoRetimingConfigEntry in multiPhyConfig.commonStructures.hfxoRetimingTableEntries.items() -%}
 {# comment newHfxoRetimingConfigEntryName #}
-static const uint8_t {{newHfxoRetimingConfigEntryName}}[] = {
+__ALIGNED(4) static const uint8_t {{newHfxoRetimingConfigEntryName}}[] = {
   {{((newHfxoRetimingConfigEntry.hfxoRetimingInfoConfigEntries | length) | int )}}{{", 0, 0, 0, "}}
   {%- for hfxoRetimingInfoConfigEntryName, hfxoRetimingInfoConfigEntry in newHfxoRetimingConfigEntry.hfxoRetimingInfoConfigEntries.items() %}
     {%- for key, value in hfxoRetimingInfoConfigEntry.items() %}
@@ -148,7 +148,7 @@ static const uint8_t {{newHfxoRetimingConfigEntryName}}[] = {
 {%- if multiPhyConfig.commonStructures.stackInfoEntries.items() %}
 #ifdef RADIO_CONFIG_ENABLE_STACK_INFO
 {%- for stackInfoName, stackInfoEntry in multiPhyConfig.commonStructures.stackInfoEntries.items() %}
-static const uint8_t {{stackInfoName}}[{{stackInfoEntry|length}}] = {
+__ALIGNED(4) static const uint8_t {{stackInfoName}}[{{stackInfoEntry|length}}] = {
 {%- for element in stackInfoEntry[:-1] -%}
   {{" 0x{0[0]:02x}, ".format(element | split32)}}
 {%- endfor -%}
@@ -263,14 +263,6 @@ static const uint32_t {{phyInfoEntryName}}[] = {
   (uint32_t) {{phyInfoEntry.phyInfoData.trecsPreBitsToSync}}UL,
 };
 {% endfor %}
-{%- for dynamicSlicerTableEntryName, dynamicSlicerTableEntry in multiPhyConfig.commonStructures.dynamicSlicerTableEntries.items() %}
-{%- for dynamicSlicerConfigEntryName, dynamicSlicerConfigEntry in dynamicSlicerTableEntry.items() %}
-uint32_t {{dynamicSlicerConfigEntryName}}[] = {
-  {{"0x{:04X}{:04X}UL".format(dynamicSlicerConfigEntry.level, dynamicSlicerConfigEntry.threshold)}},
-  (uint32_t) {{"&%s"|format(dynamicSlicerConfigEntry.next.name) if dynamicSlicerConfigEntry.next.name else "0UL"}},
-};
-{% endfor %}
-{%- endfor %}
 {%- for modemConfigName, modemConfig in multiPhyConfig.commonStructures.modemConfigEntriesBase.items() %}
 const uint32_t {{modemConfigName}}[] = {
 {%- for entryName, entry in modemConfig.items() %}

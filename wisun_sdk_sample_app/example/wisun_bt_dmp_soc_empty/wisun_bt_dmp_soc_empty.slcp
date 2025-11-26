@@ -6,7 +6,7 @@ description: >
   Can be tested with the Simplicity Connect mobile app.
 package: "wisun_sdk_sample_app"
 category: "Wi-SUN Examples"
-quality: "evaluation"
+quality: "production"
 
 component:
 # for wisun stack and default components
@@ -255,6 +255,13 @@ ui_hints:
     - path: "config/btconf/gatt_configuration.btconf"
     - path: "readme.md"
       focus: true
+
+#--------------------- HWFILTER ------------------------
+tag:
+  - hwfilter:board:hardware:has:pti
+  - hwfilter:ram:95k
+  - hwfilter:flash:711k
+  - hwfilter:!device:device_generic_family_efr32xg25
 
 #-------------- Template Contribution ----------------
 

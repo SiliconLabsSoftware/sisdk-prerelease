@@ -144,7 +144,7 @@ static int parse_tls_zkp(const uint8_t **ibuf, size_t *ilen, size_t *rlen,
     return MBEDTLS_ERR_ECP_BAD_INPUT_DATA;
   }
 
-  if (field_length == 0) {
+  if ((field_length == 0) || (field_length > 32)) {
     // scalar cannot be zero
     return MBEDTLS_ERR_ECP_BAD_INPUT_DATA;
   }

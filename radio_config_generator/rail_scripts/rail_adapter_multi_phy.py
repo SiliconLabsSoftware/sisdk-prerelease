@@ -23,7 +23,8 @@ class ConcPhyEnum(IntEnum):
   CONC_PHY_NONE = 0
   CONC_PHY_BASE = 1
   CONC_PHY_VT = 2
-  CONC_PHY_FAST_SWITCH = 3
+  CONC_PHY_9_6_NON_HOP = 3      # DEPRECATED - Leave for regression purpose
+  CONC_PHY_FAST_SWITCH = 4
 
 class ProtocolIDEnum(IntEnum):
   CUSTOM = 0
@@ -76,6 +77,8 @@ class RAILAdapter_MultiPhy(RAILAdapter):
     setattr(self, "version", __version__)
     self.mphyConfig = kwargs["mphyConfig"]
     self.pte_script = kwargs["pte_script"] if "pte_script" in kwargs else False
+    self.wifi_script = kwargs["wifi_script"] if "wifi_script" in kwargs else False
+    self.wifi_script_seqacc = kwargs["wifi_script_seqacc"] if "wifi_script_seqacc" in kwargs else False
     regex = re.compile(r'rail_api_(\d+).x')
     # Captures RAIL major version into an int
     # We use "get", to avoid raising "KeyError"; default to "rail_api_2.x"
@@ -307,31 +310,6 @@ class RAILAdapter_MultiPhy(RAILAdapter):
           print("chunkWrite[0]: {}".format(chunkWrite[0]))
         prevAddress = chunkWrite[0]
         for i, register in enumerate(chunkWrite):
-          if ((self.partFamily in ["ocelot", "margay", "serval"]) and (j != 0) and ((base_info["add"][j - 1][1][1].entryType.value == ConcPhyEnum.CONC_PHY_VT))):
-            # apply calculator workaround for ZWave concurrent PHY
-            # need to make sure  BCR demod is enable and viterbi demod is disabled for virtual concurrent PHY (i.e. Zwave 9.6K concurrent PHY)
-            if (register[0] == self._getRegAddressWithPolarity("MODEM", "BCRDEMODCTRL")):
-              # Enable BCR demod
-              # reg[1] = ((reg[1] | MODEM_BCRDEMODCTRL_BCRDEMODEN) & ~MODEM_BCRDEMODCTRL_BBPMDETEN)
-              bcrdemoctrlReg.io = register[1]
-              bcrdemoctrlReg.BCRDEMODEN.io = 1
-              #bcrdemoctrlReg.BBPMDETEN.io = 0 #Calculator should be calculating the right value now
-              if (do_print):
-                print("Found BCRDEMODCTRL Addr: {}, Value: {}".format(bcrdemoctrlReg.baseAddress + bcrdemoctrlReg.addressOffset, hex(bcrdemoctrlReg.io)))
-              chunkWrite[i] = (register[0], bcrdemoctrlReg.io, "MODEM.BCRDEMODCTRL")
-              if (do_print):
-                print("New BCRDEMODCTRL {}".format(chunkWrite[i]))
-            elif (register[0] == self._getRegAddressWithPolarity("MODEM", "VITERBIDEMOD")):
-              # Disable Viterbi demod
-              # reg[1] = (reg[1] & ~_MODEM_VITERBIDEMOD_VTDEMODEN_MASK)
-              viterbidemodReg.io = register[1]
-              viterbidemodReg.VTDEMODEN.io = 0
-              if (do_print):
-                print("Found VITERBIDEMOD Addr: {}, Value: {}".format(viterbidemodReg.baseAddress + viterbidemodReg.addressOffset, hex(viterbidemodReg.io)))
-              chunkWrite[i] = (register[0], viterbidemodReg.io, "MODEM.VITERBIDEMOD")
-              if (do_print):
-                print("New VITERBIDEMOD {}".format(chunkWrite[i]))
-
           if (i != 0):
             if (prevAddress[0] == register[0]):
               print("Found duplicate address {} @ {}".format(register, i))
@@ -419,10 +397,16 @@ class RAILAdapter_MultiPhy(RAILAdapter):
       # Create a new modemConfig element, and grab appropriate references based on
       # the mode.
       if base == True:
-        if self.rail_version >= 3:
-          newModemConfig = self.railModel.multiPhyConfig.commonStructures.modemConfigEntriesBase.newElement(configName + "_modem_config_base")
-        else:
-          newModemConfig = self.railModel.multiPhyConfig.commonStructures.modemConfigEntriesBase.newElement(configName + "_modemConfigBase")
+        if self.wifi_script is False and self.wifi_script_seqacc is False:
+          if self.rail_version >= 3:
+            newModemConfig = self.railModel.multiPhyConfig.commonStructures.modemConfigEntriesBase.newElement(configName + "_modem_config_base")
+          else:
+            newModemConfig = self.railModel.multiPhyConfig.commonStructures.modemConfigEntriesBase.newElement(configName + "_modemConfigBase")
+        else :
+          if self.rail_version >= 3:
+            newModemConfig = self.railModel.multiPhyConfig.commonStructures.modemConfigEntriesBase.newElement(configName)
+          else:
+            newModemConfig = self.railModel.multiPhyConfig.commonStructures.modemConfigEntriesBase.newElement(configName)
         currentModemConfigs = self.railModel.multiPhyConfig.commonStructures.modemConfigEntriesBase
         currentPhyConfigEntryModemConfigEntry = phyConfigEntry.modemConfigEntryBase
       elif subtract == True:
@@ -451,7 +435,7 @@ class RAILAdapter_MultiPhy(RAILAdapter):
 
       for registerAddress, registerValue, registerName in registerEntries:
 
-        if (self.pte_script is False):
+        if self.pte_script is False and self.wifi_script is False:
           if (registerAddress - currentAddress) == (4 * length):
             length += 1
             values.append(registerValue)
@@ -469,7 +453,7 @@ class RAILAdapter_MultiPhy(RAILAdapter):
             # Do not print out the duplicated address
             pass
           else:
-            if (registerAddress > 0xB0000000) and (registerValue == 0):
+            if (registerAddress > 0xB0000000) and (registerValue == 0) and self.wifi_script is False:
               # For dummy register that ZERO is written into RAM, we will not print out entries
               # ATE program needs to take care of memory intialization before loading phy
               pass
@@ -584,7 +568,7 @@ class RAILAdapter_MultiPhy(RAILAdapter):
   def _generateModemConfigEntries(self, phyConfigEntry, model, regs):
     if len(regs) > 0:
 
-      if self.pte_script is False:
+      if self.pte_script is False and self.wifi_script is False and self.wifi_script_seqacc is False:
         if self.rail_version < 3:
           # Write the address of the phyInfo structure to SEQ.PHYINFO.ADDRESS
           address = self._getRegAddressWithPolarity("SEQ","PHYINFO")
@@ -649,6 +633,20 @@ class RAILAdapter_MultiPhy(RAILAdapter):
         if (x != None) and debug_print:
           print("Protected register found in register set, removing.")
           print(x)
+
+    # : remove register if the value from calculator is same as reset
+    if self.wifi_script is True or self.wifi_script_seqacc is True:
+      for register_set in [registers_base, registers_channel]:
+        remove_list = []
+        for register_name in register_set.keys():
+          reset_val = register_set[register_name].resetValue
+          io_val = register_set[register_name].io
+          if reset_val == io_val:
+            remove_list.append(register_name)
+        for register_name in remove_list:
+          # Let's keep LUT values even though value is the same as reset
+          if 'WIFILUTGAINLNA' not in register_name:
+            register_set.pop(register_name, None)
 
     self.registers_base = registers_base
     if self.rail_version >= 3:
@@ -1483,6 +1481,69 @@ class RAILAdapter_MultiPhy(RAILAdapter):
               newLookupTableEntry.values.values = lookupValues
               newLookupTableEntry._uniqueName = tableName
 
+  # This method is used to extract ordered indices from a data dictionary for the purpose
+  # of generating comments for the lookup table entries in the RAIL configuration.
+  def _extract_ordered_indices(self, data_dict, register_name):
+    meta_key = next(
+        (k for k in data_dict if register_name in k and '_metadata' in k),
+        None
+    )
+    if not meta_key:
+        return []
+
+    metadata = data_dict[meta_key]
+    if 'table_names' not in metadata or register_name not in metadata['table_names']:
+        return []
+
+    # Extract and sort _index_* keys numerically
+    indices = [
+        (int(k.split('_')[-1]), k, v)
+        for k, v in metadata.items()
+        if k.startswith('_index_')
+    ]
+    indices.sort(key=lambda x: x[0])
+
+    # Build the result list
+    result = [f"index_{idx}: {values}" for idx, key, values in indices]
+    return result
+
+  def _generateLookupTable(self, model):
+    # Check if the model has the generic lookup tables variable
+    if hasattr(model.vars, 'generic_lookup_tables') and model.vars.generic_lookup_tables.value:
+      lookupTablesDict = model.vars.generic_lookup_tables.value
+
+      # Ensure lookupTablesDict is a dictionary
+      if lookupTablesDict and isinstance(lookupTablesDict, dict):
+        commonStructures = self.railModel.multiPhyConfig.commonStructures
+
+        # Iterate through each lookup table in the dictionary
+        for tableName, tableValues in lookupTablesDict.items():
+          if tableValues and isinstance(tableValues, list):
+            # Ensure all values are integers
+            lookupValues = [int(x) for x in tableValues]
+
+            # Traverse existing lookupTableEntries and check for duplicates
+            entryFound = False
+            for i, lookupTableEntry in enumerate(commonStructures.lookupTableEntries._elements):
+              if (hasattr(lookupTableEntry, 'tableName') and
+                      hasattr(lookupTableEntry, 'values') and
+                      lookupTableEntry.tableName.value == tableName and
+                      lookupTableEntry.values.values == lookupValues):
+                entryFound = True
+                break
+
+            if not entryFound:
+              # Create a new lookupTable entry in common structures
+              newLookupTableEntry = commonStructures.lookupTableEntries.addNewElement(
+                "genericLookupTable")
+              newLookupTableEntry.tableName.value = tableName
+              newLookupTableEntry.values.values = lookupValues
+              result = self._extract_ordered_indices(lookupTablesDict, tableName)
+              newLookupTableEntry.tableInputs.values = result
+              newLookupTableEntry._uniqueName = tableName
+
+
+
   def _loadBchLookupTable(self, model, regs, regAddress, codingArray):
 
     convRamAddress = model.vars.FRC_CONVRAMADDR_CONVRAMADDR.value << 2
@@ -1841,83 +1902,87 @@ class RAILAdapter_MultiPhy(RAILAdapter):
           # Write model instance to RM device
           self._writeModelToRmDevice(isBaseConfig, baseChannelConfig, channelConfigEntry, phyConfigEntry, self.rm)
 
-          #Handle Frame Type Configurations
-          self._generateFrameTypeStructures(phyConfigEntry, radioConfigModel)
-
-          #Handle IR Cal Settings
-          baseConfigAttr = self._generateIrCalStructure(phyConfigEntry, radioConfigModel, isBaseConfig, baseConfigAttr)
-
-          #Handle DCDC Retiming Settings
-          self._generateDcdcRetimingStructure(phyConfigEntry, radioConfigModel)
-
-          #Handle timing structures
-          self._generateTimingStructure(phyConfigEntry, radioConfigModel)
-
-          #Handle HFXO Retiming Settings
-          self._generateHfxoRetimingStructure(phyConfigEntry, radioConfigModel)
-
-          #Handle RFFPLL Settings
-          self._generateRffpllStructure(phyConfigEntry, radioConfigModel)
-
-          # Handle TX IR Cal Settings
-          self._generateTxIrCalStructure(phyConfigEntry, radioConfigModel)
-
-          # Handle modem compensation
-          self._generateHardModemTxCompensation(radioConfigModel, phyConfigEntry)
-
-          self._generatePhyInfoStructure(phyConfigEntry, baseConfigOptions, channelConfigOptions, radioConfigModel)
-
-          #Handle Frame Coding tables
-          self._generateFrameCodingTable(phyConfigEntry, radioConfigModel)
-
-          # Handle generic lookup tables
+          # Handle Generic Lookup Tables
           self._generateLookupTable(radioConfigModel)
 
-          # Handle Dynamic Slicer Configuration (for OOK PHYs)
-          self._generateDynamicSlicerConfiguration(phyConfigEntry, baseConfigOptions, radioConfigModel)
+          if self.wifi_script is False and self.wifi_script_seqacc is False:
+            #Handle Frame Type Configurations
+            self._generateFrameTypeStructures(phyConfigEntry, radioConfigModel)
 
-          # Generic Model Info
-          phyConfigEntry.xtalFrequency.value = radioConfigModel.vars.xtal_frequency_hz.value
-          phyConfigEntry.baseFrequency.value = radioConfigModel.vars.base_frequency_hz.value
-          phyConfigEntry.bitrate.value = radioConfigModel.vars.bitrate.value
-          phyConfigEntry.modType.value = radioConfigModel.vars.modulation_type.value
-          phyConfigEntry.deviation.value = radioConfigModel.vars.deviation.value
-          phyConfigEntry.synthResolution.value = radioConfigModel.vars.synth_res_actual.value
-          phyConfigEntry.fecEnabled.value = bool(radioConfigModel.profile.outputs.get_output('fec_enabled').var_value)
-          phyConfigEntry.convDecodeBufferSize.value = radioConfigModel.profile.outputs.get_output('frc_conv_decoder_buffer_size').var_value
-          phyConfigEntry.arrayTable = None
+            #Handle IR Cal Settings
+            baseConfigAttr = self._generateIrCalStructure(phyConfigEntry, radioConfigModel, isBaseConfig, baseConfigAttr)
+
+            #Handle DCDC Retiming Settings
+            self._generateDcdcRetimingStructure(phyConfigEntry, radioConfigModel)
+
+            #Handle timing structures
+            self._generateTimingStructure(phyConfigEntry, radioConfigModel)
+
+            #Handle HFXO Retiming Settings
+            self._generateHfxoRetimingStructure(phyConfigEntry, radioConfigModel)
+
+            #Handle RFFPLL Settings
+            self._generateRffpllStructure(phyConfigEntry, radioConfigModel)
+
+            # Handle TX IR Cal Settings
+            self._generateTxIrCalStructure(phyConfigEntry, radioConfigModel)
+
+            # Handle modem compensation
+            self._generateHardModemTxCompensation(radioConfigModel, phyConfigEntry)
+
+            self._generatePhyInfoStructure(phyConfigEntry, baseConfigOptions, channelConfigOptions, radioConfigModel)
+
+            #Handle Frame Coding tables
+            self._generateFrameCodingTable(phyConfigEntry, radioConfigModel)
+
+            # Handle generic lookup tables
+            self._generateLookupTable(radioConfigModel)
+
+            # Handle Dynamic Slicer Configuration (for OOK PHYs)
+            self._generateDynamicSlicerConfiguration(phyConfigEntry, baseConfigOptions, radioConfigModel)
+
+            # Generic Model Info
+            phyConfigEntry.xtalFrequency.value = radioConfigModel.vars.xtal_frequency_hz.value
+            phyConfigEntry.baseFrequency.value = radioConfigModel.vars.base_frequency_hz.value
+            phyConfigEntry.bitrate.value = radioConfigModel.vars.bitrate.value
+            phyConfigEntry.modType.value = radioConfigModel.vars.modulation_type.value
+            phyConfigEntry.deviation.value = radioConfigModel.vars.deviation.value
+            phyConfigEntry.synthResolution.value = radioConfigModel.vars.synth_res_actual.value
+            phyConfigEntry.fecEnabled.value = bool(radioConfigModel.profile.outputs.get_output('fec_enabled').var_value)
+            phyConfigEntry.convDecodeBufferSize.value = radioConfigModel.profile.outputs.get_output('frc_conv_decoder_buffer_size').var_value
+            phyConfigEntry.arrayTable = None
 
 
-          generic_lut = getattr(radioConfigModel.profile.outputs, 'generic_lookup_tables', None)
+            generic_lut = getattr(radioConfigModel.profile.outputs, 'generic_lookup_tables', None)
 
-          try:
-            var_value = getattr(generic_lut, 'var_value', None)
-            if var_value and 'frameCodingTable' in var_value:
-              phyConfigEntry.arrayTable = generic_lut.var_value['frameCodingTable']
-          except (AttributeError, TypeError):
-            pass
-          phyConfigEntry.bchArray = None
-          if getattr(radioConfigModel.profile.outputs, 'bch_lut_data', None):
-            phyConfigEntry.bchArray = radioConfigModel.profile.outputs.get_output('bch_lut_data').var_value
+            try:
+              var_value = getattr(generic_lut, 'var_value', None)
+              if var_value and 'frameCodingTable' in var_value:
+                phyConfigEntry.arrayTable = generic_lut.var_value['frameCodingTable']
+            except (AttributeError, TypeError):
+              pass
+            phyConfigEntry.bchArray = None
+            if getattr(radioConfigModel.profile.outputs, 'bch_lut_data', None):
+              phyConfigEntry.bchArray = radioConfigModel.profile.outputs.get_output('bch_lut_data').var_value
 
-          self._generateStackInfo(phyConfigEntry, radioConfigModel)
+            self._generateStackInfo(phyConfigEntry, radioConfigModel)
 
-          # Handle alternate phy for Concurrent mode
-          self._generateAlternatePhy(phyConfigEntry, radioConfigModel, channelConfigEntry)
+            # Handle alternate phy for Concurrent mode
+            self._generateAlternatePhy(phyConfigEntry, radioConfigModel, channelConfigEntry)
 
-          # Populate modeSwitchPhyModeIds
-          self._genModeSwitchPhrs(radioConfigModel, phyConfigEntry)
+            # Populate modeSwitchPhyModeIds
+            self._genModeSwitchPhrs(radioConfigModel, phyConfigEntry)
 
-          # Extract the concurrent PHY optional argument marker
-          phyConfigEntry.entryType.value = 0 # initialize as non-concurrent PHY
-          for optional_argument in baseChannelConfig.optional_arguments.argument:
-            if (optional_argument.key == 'conc_phy_opt_hop'):
-              phyConfigEntry.entryType.value = int(optional_argument.value)
-              break
+            # Extract the concurrent PHY optional argument marker
+            phyConfigEntry.entryType.value = 0 # initialize as non-concurrent PHY
+            for optional_argument in baseChannelConfig.optional_arguments.argument:
+              if (optional_argument.key == 'conc_phy_opt_hop'):
+                phyConfigEntry.entryType.value = int(optional_argument.value)
+                break
 
-          # Check fecEnabled flag and convDecodeBufferSize are correctly configured
-          if phyConfigEntry.fecEnabled.value:
-            assert phyConfigEntry.convDecodeBufferSize.value > 0, "Incorrect configuration for FEC Enabled"
+            # Check fecEnabled flag and convDecodeBufferSize are correctly configured
+            if phyConfigEntry.fecEnabled.value:
+              assert phyConfigEntry.convDecodeBufferSize.value > 0, "Incorrect configuration for FEC Enabled"
 
           regs_channel = self._convertRmToRegisterList(self.registers_channel)
           regs_base = self._convertRmToRegisterList(self.registers_base)
@@ -1944,11 +2009,13 @@ class RAILAdapter_MultiPhy(RAILAdapter):
           reference = baseChannelConfig.base_channel_reference
           reference = configName if reference is None else reference
 
-          # Update regs for RAIL owned registers like FRC.CONVRAMADDR (series 1) & FRC.BLOCKRAMADDR
-          regs_base, regs_channel = self._addRailOwnedRegsToConfigEntries(reference, phyConfigEntry, radioConfigModel, regs_base, regs_channel)
-          if self.rail_version >= 3:
-            for reg_group in regs_group_dict:
-              _, regs_group_dict[reg_group] = self._addRailOwnedRegsToConfigEntries(reference, phyConfigEntry, radioConfigModel, regs_base, regs_group_dict[reg_group])
+          if self.wifi_script is False and self.wifi_script_seqacc is False:
+            # Update regs for RAIL owned registers like FRC.CONVRAMADDR (series 1) & FRC.BLOCKRAMADDR
+            regs_base, regs_channel = self._addRailOwnedRegsToConfigEntries(reference, phyConfigEntry, radioConfigModel, regs_base, regs_channel)
+            if self.rail_version >= 3:
+              for reg_group in regs_group_dict:
+                _, regs_group_dict[reg_group] = self._addRailOwnedRegsToConfigEntries(reference, phyConfigEntry, radioConfigModel, regs_base, regs_group_dict[reg_group])
+
           if not reference in radio_configs:
             if self.rail_version >= 3:
               radio_configs[reference] = {

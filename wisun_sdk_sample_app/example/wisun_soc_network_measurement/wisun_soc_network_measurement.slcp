@@ -170,13 +170,21 @@ ui_hints:
     - path: readme.md
       focus: true
 
+#--------------------- HWFILTER ------------------------
+
+tag:
+  - hwfilter:board:hardware:has:pti
+  - hwfilter:board:hardware:has:vcom
+  - hwfilter:board:simple_button:btn0
+  - hwfilter:board:simple_button:btn1
+  - hwfilter:ram:172k
+  - hwfilter:flash:837k
+  - prebuilt_demo
+
 #--------------------- Toolchain ------------------------
 toolchain_settings:
   - option: optimize
     value: debug
-
-tag:
-  - prebuilt_demo
 
 filter:
   - name: "Wireless Technology"

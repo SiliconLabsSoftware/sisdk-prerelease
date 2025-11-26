@@ -1168,7 +1168,7 @@ __WEAK void start_ns_app(void)
   // the stack seal starts. The existing stack frames on the secure stack can
   // be dismissed, and veneer functions will generate new frames starting from
   // the top of stack.
-  extern uint32_t __STACK_SEAL;
+  extern uint64_t __STACK_SEAL;
   __set_MSP((uint32_t) &__STACK_SEAL);
 
   // NOTE:

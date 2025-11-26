@@ -94,7 +94,7 @@ other_file:
 
 configuration:
   - name: EMDRV_DMADRV_DMA_CH_COUNT
-    value: 2
+    value: 4
   - name: APP_LOG_LEVEL
     value: "APP_LOG_LEVEL_INFO"
   - name: APP_BUTTON_PRESS_CONFIG_QUEUE_SIZE

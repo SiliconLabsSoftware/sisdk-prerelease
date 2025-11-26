@@ -55,8 +55,8 @@ class TargetSimRainier(Target_Sim_Bobcat):
         # force lms value for target sim, since no TDC modelled.
         self.SYNTH_OVERRIDE(model)
 
-        # Fast switching overrides
-        if any(word in model.phy.name.lower() for word in ['hop', 'scan']):
+        # Fast switching / mode switching overrides
+        if any(word in model.phy.name.lower() for word in ['hop', 'scan', 'modeswitch']):
             # For fast switching simulation, since we will be changing the channel we can not use
             # divided down VCO clocking (FPGA requires integer mult of HFXO)
             model.vars.adc_clock_mode.value_forced = model.vars.adc_clock_mode.var_enum.HFXOMULT

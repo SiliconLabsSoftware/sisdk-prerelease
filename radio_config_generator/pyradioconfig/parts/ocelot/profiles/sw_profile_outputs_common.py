@@ -6,6 +6,8 @@ class sw_profile_outputs_common_ocelot(object):
         'base_frequency_actual': 'Actual Carrier Frequency [Hz]',
         'if_frequency_hz_actual': 'Actual Intermediate Frequency [Hz]',
         'synth_res_actual': 'Synthesizer Resolution [Hz]',
+        'synth_tuning_rx_step_size': 'Synthesizer RX Tuning Step Size [Hz]',
+        'synth_tuning_tx_step_size': 'Synthesizer TX Tuning Step Size [Hz]',
         'baudrate': 'Desired Bitrate [bps]',
         'tx_baud_rate_actual': 'Actual TX Baudrate [baud]',
         'rx_baud_rate_actual': 'Actual RX Baudrate [baud]',

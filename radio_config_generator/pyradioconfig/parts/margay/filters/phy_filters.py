@@ -2,43 +2,26 @@ from pyradioconfig.calculator_model_framework.interfaces.iphy_filter import IPhy
 
 
 class PhyFilters(IPhyFilter):
+    # Studio black list (files removed before Studio distribution)
+    customer_phy_groups = []
 
-    #Studio black list (files removed before Studio distribution)
-    customer_phy_groups = [
-                            'secret15',
-                            'secret2',
-                            'secret10',
-                            'secret5',
-                            'secret11',
-                            'secret8',
-                            'Phys_Internal_Base_Experimental',
-                            'Phys_Internal_Base_Utility',
-                            'Phys_Internal_Base_ValOnly',
-                            'Phys_Internal_Connect',
-                            'Phys_Internal_Longrange',
-                            'Phys_Internal_RAIL_Base_Standard_BLE',
-                            'Phys_Internal_WiSUN',
-                            'Phys_RAIL_Base_Standard_ZWave',
-                            'Phys_Studio_IEEE802154_BPSK',
-                        ]
-
-    #Studio white list (these PHYs show in Studio as proprietary starting points)
+    # Studio white list (these PHYs show in Studio as proprietary starting points)
     simplicity_studio_phy_groups = [
-                            'Phys_Studio_Base',
-                            'Phys_Studio_Base_Standard_SUNFSK',
-                            'Phys_Studio_Sidewalk',
-                            'Phys_Studio_Connect',
-                            'Phys_Studio_LongRange',
-                            'Phys_Studio_MBus',
-                            'Phys_Studio_Base_Sigfox',
-                            'phys_studio_wisun_fan_1_0',
-                            'phys_studio_wisun_fan_1_1',
-                            'phys_studio_wisun_fan_1_1_virtual',
-                            'phys_studio_wisun_han',
-                            'Phys_Studio_IEEE802154',
-                            'Phys_Studio_BLE',
-                            'Phys_Studio_Sigfox_TX',
-                            'Phys_Internal_Base_ValOnly_aliases'
+        'Phys_Default',
+        'Phys_Studio_Base',
+        'Phys_Studio_Base_Standard_SUNFSK',
+        'Phys_Studio_Sidewalk',
+        'Phys_Studio_Connect',
+        'Phys_Studio_LongRange',
+        'Phys_Studio_MBus',
+        'Phys_Studio_Base_Sigfox',
+        'phys_studio_wisun_fan_1_0',
+        'phys_studio_wisun_fan_1_1',
+        'phys_studio_wisun_fan_1_1_virtual',
+        'phys_studio_wisun_han',
+        'Phys_Studio_IEEE802154',
+        'Phys_Studio_BLE',
+        'Phys_Studio_Sigfox_TX',
     ]
 
     # Special designation for simulation PHYs

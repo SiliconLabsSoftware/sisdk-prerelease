@@ -38,6 +38,7 @@
 
 #include "sli_tz_iovec_check.h"
 #include "sli_tz_s_interface.h"
+#include "sli_tz_util.h"
 
 #include "sl_assert.h"
 
@@ -99,6 +100,7 @@
 // Global secure dispatch functions
 
 #if defined(TZ_SERVICE_PSA_CRYPTO_PRESENT)
+SLI_TZ_CMSE_NONSECURE_ENTRY
 int32_t sli_tz_s_interface_dispatch_crypto(psa_invec in_vec[],
                                            size_t in_len,
                                            psa_outvec out_vec[],
@@ -138,6 +140,7 @@ int32_t sli_tz_s_interface_dispatch_crypto(psa_invec in_vec[],
 #endif // TZ_SERVICE_PSA_CRYPTO_PRESENT
 
 #if defined(TZ_SERVICE_PSA_ITS_PRESENT) || defined(TZ_SERVICE_NVM3_PRESENT)
+SLI_TZ_CMSE_NONSECURE_ENTRY
 int32_t sli_tz_s_interface_dispatch_nvm3(sli_tz_invec in_vec[],
                                          size_t in_len,
                                          sli_tz_outvec out_vec[],
@@ -232,6 +235,7 @@ int32_t sli_tz_s_interface_dispatch_nvm3(sli_tz_invec in_vec[],
 #endif // TZ_SERVICE_PSA_ITS_PRESENT || TZ_SERVICE_NVM3_PRESENT
 
 #if defined(TZ_SERVICE_PSA_ITS_PRESENT)
+SLI_TZ_CMSE_NONSECURE_ENTRY
 int32_t sli_tz_s_interface_dispatch_its(psa_invec in_vec[],
                                         size_t in_len,
                                         psa_outvec out_vec[],
@@ -264,6 +268,7 @@ int32_t sli_tz_s_interface_dispatch_its(psa_invec in_vec[],
 #endif // TZ_SERVICE_PSA_ITS_PRESENT
 
 #if defined(TZ_SERVICE_SE_MANAGER_PRESENT)
+SLI_TZ_CMSE_NONSECURE_ENTRY
 int32_t sli_tz_s_interface_dispatch_se_manager(sli_tz_invec in_vec[],
                                                size_t in_len,
                                                sli_tz_outvec out_vec[],
@@ -307,6 +312,7 @@ int32_t sli_tz_s_interface_dispatch_se_manager(sli_tz_invec in_vec[],
 #endif // TZ_SERVICE_SE_MANAGER_PRESENT
 
 #if defined(TZ_SERVICE_ATTESTATION_PRESENT)
+SLI_TZ_CMSE_NONSECURE_ENTRY
 int32_t sli_tz_s_interface_dispatch_attestation(psa_invec in_vec[],
                                                 size_t in_len,
                                                 psa_outvec out_vec[],
@@ -339,6 +345,7 @@ int32_t sli_tz_s_interface_dispatch_attestation(psa_invec in_vec[],
 #endif // TZ_SERVICE_ATTESTATION_PRESENT
 
 #if defined(TZ_SERVICE_SYSCFG_PRESENT) || defined(TZ_SERVICE_MSC_PRESENT)
+SLI_TZ_CMSE_NONSECURE_ENTRY
 int32_t sli_tz_s_interface_dispatch_simple(uint32_t sid,
                                            uint32_t arg)
 {
@@ -352,6 +359,7 @@ int32_t sli_tz_s_interface_dispatch_simple(uint32_t sid,
   return simple_function_table[sid](arg);
 }
 
+SLI_TZ_CMSE_NONSECURE_ENTRY
 int32_t sli_tz_s_interface_dispatch_simple_no_args(uint32_t sid)
 {
   EFM_ASSERT(sizeof(simple_function_table_no_args) / sizeof(simple_function_table_no_args[0])

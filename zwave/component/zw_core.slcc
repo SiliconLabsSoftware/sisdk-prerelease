@@ -50,6 +50,10 @@ requires:
 - name: rail_lib
 - name: sl_rail_util_compatible_pa
 - name: component_catalog
+- name: common_token_manager
+- name: common_token_manager_compatibility
+  condition: [device_series_2]
+
 recommends:
 - id: zw_release
   vendor: silabs

@@ -50,6 +50,22 @@ class RAILAdapter(object):
     0xA6040000
   )
 
+  # NOT AN OPTIMAL SOLUTION:
+  # Placeholder for sequence cfg setting in rail_scripts for wifi generation.
+  # This is duplicated from YAML sequences.
+  _SEQUENCE_CFG_DEFAULT = {
+    "MOVSWAP": 0,
+    "DISABSRST": 0,
+    "HWSTTRIG": 0,
+    "HWSTSEL": 0,
+    "CNTWRPOS": 16
+  }
+
+  _BASEADDR_CFG_DEFAULT = {
+    "Name": "BaseAddrCfgDefault",
+    "Access": "BaseAddrCfgDefault"
+  }
+
   import os
   current_dir =  os.path.dirname(os.path.abspath(__file__))
 
@@ -72,6 +88,12 @@ class RAILAdapter(object):
   def pte_script_flag(self):
     return self.pte_script
 
+  def wifi_script_seqacc_flag(self):
+    return self.wifi_script_seqacc
+
+  def wifi_script_flag(self):
+    return self.wifi_script
+
   def generateRailModelContext(self):
     modelContext = {}
     for element in self.railModel._elements:
@@ -85,17 +107,17 @@ class RAILAdapter(object):
   # // TODO: Rename if we ever support anything other than writes
   def _encodeWriteAddress(self, reg_address, write_length=1, radio_action=0):
 
-    if self.pte_script is False:
+    if self.pte_script is False and self.wifi_script is False:
       try:
-        reg_base = self._regBases[int(reg_address) & 0xFFFF0000]
+        reg_base = self._regBases[int(reg_address) & self._baseAddrMask]
       except:
         # Toggle the address in the event of trustzone mismatch.
-        reg_base = self._regBases[int((reg_address ^ 0x10000000)) & 0xFFFF0000]
-      reg_offset = int(reg_address) & 0x0000FFFF
+        reg_base = self._regBases[int((reg_address ^ 0x10000000)) & self._baseAddrMask]
+      reg_offset = int(reg_address) & self._offsetAddrMask
 
       encodedAddress = (radio_action << 28) \
                        | (reg_base << 24) \
-                       | (write_length << 16) \
+                       | (write_length << self._contWrPos) \
                        | reg_offset
     else:
       # Don't encrypt register address for PTE output
@@ -141,6 +163,7 @@ class RAILAdapter(object):
     # Bit positions for base address and opcode
     basePos = 25
     opCodePos = 28
+    contWrPos = 16
 
     if self.series == 1:
       regBases = self._REG_BASES
@@ -170,11 +193,27 @@ class RAILAdapter(object):
         raise Exception("YAML source file {} not found.".format(ymlSource))
 
       try:
-        regBases = ymlRegBase[family.upper()]['BaseAddrCfgDefault']['BaseAddr']
-        basePos = ymlRegBase[family.upper()]['BaseAddrCfgDefault']['BasePos']
+        yml_family = ymlRegBase[family.upper()]
       except KeyError:
         raise Exception("Family part {} not found in {}. Please verify that this part is mentioned in it and it"
                         "contains base addresses.".format(family.upper(), ymlSource))
+
+      try:
+        basePos = yml_family['BaseAddrCfgDefault'].get('BasePos', 24)  # get default (24) if parameter not found
+        contWrPos = yml_family['BaseAddrCfgDefault'].get('ContWrPos', 16)  # get default (16) if parameter not found
+        regBases = yml_family['BaseAddrCfgDefault']['BaseAddr']
+      except KeyError:
+        raise Exception("Missing base addresses for family part {} in {}.".format(family.upper(), ymlSource))
+
+      if self.wifi_script_seqacc is True:
+        config = self._SEQUENCE_CFG_DEFAULT
+        self.sequenceCfg = (config.get('MOVSWAP', 0) << 14) | (config.get('DISABSRST', 0) << 13) | (config.get('HWSTTRIG', 0) << 10)\
+                | (config.get('HWSTSEL', 0)) << 5 | config.get('CNTWRPOS', 16)
+        config = self._BASEADDR_CFG_DEFAULT
+        self.baseAddrAccess = config.get('Access', config)
+      else:
+        self.sequenceCfg = None
+        self.baseAddrAccess = None
 
     maxNumRegBases = 2 ** (opCodePos - basePos)
 
@@ -189,6 +228,9 @@ class RAILAdapter(object):
                          "value ({}) for {}").format(len(regBases) - 1, maxNumRegBases, family))
 
     self._regBases = regBases
+    self._contWrPos = contWrPos
+    self._offsetAddrMask = (2 ** (self._contWrPos) - 1)
+    self._baseAddrMask = self._offsetAddrMask ^ 0xFFFFFFFF
 
   @staticmethod
   def _getSeriesFromFamily(family):

@@ -87,6 +87,7 @@ class PHYS_IEEE802154_GB868_Ocelot(IPhy):
 
         phy = self._makePhy(model, model.profiles.Base, readable_name='PHY_IEEE802154_GB868_863MHz_PHR2',
                             phy_name=phy_name)
+        model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.GB868_863
         self.IEEE802154_GB868_Base(phy, model)
         self.IEEE802154_GB868_154G_PHR(phy, model)
         phy.profile_inputs.base_frequency_hz.value = long(863250000)
@@ -100,6 +101,7 @@ class PHYS_IEEE802154_GB868_Ocelot(IPhy):
 
         phy = self._makePhy(model, model.profiles.Base, readable_name='PHY_IEEE802154_GB868_915MHz_PHR2',
                             phy_name=phy_name)
+        model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.GB868_915
         self.IEEE802154_GB868_Base(phy, model)
         self.IEEE802154_GB868_154G_PHR(phy, model)
 
@@ -109,6 +111,7 @@ class PHYS_IEEE802154_GB868_Ocelot(IPhy):
         # refer to spec: Zigbee Pro R23 Spec 0.5 PDF.pdf
         phy = self._makePhy(model, model.profiles.Base, readable_name='IEEE 802.15.4 915MHz 2GFSK R23 North America',
                             phy_name=phy_name)
+        model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.NA915_R23
 
         # Start with base settings
         self.IEEE802154_GB868_Base(phy, model)

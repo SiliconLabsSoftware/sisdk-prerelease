@@ -134,6 +134,7 @@ tag:
   - hwfilter:device:device_supports_thread
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:flash:768k
+  - toolchain:gcc
 
 readme:
   - path: ./README.md

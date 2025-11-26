@@ -133,7 +133,7 @@ class ProfileIEEE802154BPSKServal(ProfileIEEE802154OQPSKLynx):
         model.vars.AGC_RSSISTEPTHR_DEMODRESTARTPER.value_forced = 6
         model.vars.MODEM_AFCADJLIM_AFCADJLIM.value_forced = 2000
         model.vars.MODEM_CTRL0_DUALCORROPTDIS.value_forced = 1
-        model.vars.MODEM_CTRL1_PHASEDEMOD.value_forced = 3
+        model.vars.MODEM_CTRL1_PHASEDEMOD.value_forced = 2
         model.vars.MODEM_CTRL1_RESYNCPER.value_forced = 4
         model.vars.MODEM_CTRL3_TSAMPDEL.value_forced = 2
         model.vars.MODEM_CTRL5_TDEDGE.value_forced = 0

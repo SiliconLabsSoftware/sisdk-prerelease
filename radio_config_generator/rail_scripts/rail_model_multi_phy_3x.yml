@@ -50,6 +50,8 @@ RAILModel:
                               - RAILModelInfo:
                                   name: frameCodingTableEntry
                               - RAILModelInfo:
+                                  name: lookupTableEntry
+                              - RAILModelInfo:
                                   name: dynamicSlicerTableEntry
                               - RAILModelInfo:
                                   name: irCalConfigEntry
@@ -238,6 +240,21 @@ RAILModel:
                   - RAILModelSimpleArray:
                       name: frameCodingTable
                       dataType: FieldDataType.UINT32_T
+
+            - RAILModelObjectArray:
+                name: lookupTableEntries
+                _elements:
+                  - RAILModelObjectCollection:
+                      name: genericLookupTable
+                      _elements:
+                        - RAILModelInfo:
+                            name: tableName
+                        - RAILModelSimpleArray:
+                            name: tableInputs
+                            dataType: FieldDataType.STRING
+                        - RAILModelSimpleArray:
+                            name: values
+                            dataType: FieldDataType.UINT32_T
 
             - RAILModelObjectArray:
                 name: dynamicSlicerTableEntries

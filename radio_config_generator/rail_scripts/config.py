@@ -275,8 +275,9 @@ PROTECTED_FIELDS = {
     'curl': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_LION),
     'serval': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_OCELOT),
     'rainier': ProtectedFieldsRainier().get_rail_protected_field_dict(),
-    'lpwh72000': ProtectedFieldsRainier().get_rail_protected_field_dict(),
     'lpwh74000': ProtectedFieldsRainier().get_rail_protected_field_dict(),
+    'everest': ProtectedFieldsRainier().get_rail_protected_field_dict(),
+    'wifi74000': ProtectedFieldsRainier().get_rail_protected_field_dict(),
 }
 
 # Radio config action "enum"

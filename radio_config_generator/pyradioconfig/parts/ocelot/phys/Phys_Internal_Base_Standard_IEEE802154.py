@@ -423,98 +423,229 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
 
         return phy
 
-    def PHY_IEEE802154_868MHz_BPSK_coh(self, model, phy_name=None):
+    # Jira Link: https://jira.silabs.com/browse/MCUW_RADIO_CFG-2755
+    def PHY_IEEE802154_868MHz_BPSK_20kbps_coh(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Coherent IEEE 802.15.4 868MHz BPSK PHY for Dumbo', phy_name=phy_name)
 
         self.IEEE802154_Base(phy, model)
         phy.profile_inputs.demod_select.value = model.vars.demod_select.var_enum.COHERENT
-        phy.profile_inputs.agc_period.value = 3
-        phy.profile_inputs.agc_power_target.value = -17
-        phy.profile_inputs.base_frequency_hz.value =  long(868000000)
+        phy.profile_inputs.base_frequency_hz.value = long(868000000)
         phy.profile_inputs.baudrate_tol_ppm.value = 0
         phy.profile_inputs.bitrate.value = 20000
         phy.profile_inputs.channel_spacing_hz.value = 0
         phy.profile_inputs.deviation.value = 150000
         phy.profile_inputs.diff_encoding_mode.value = model.vars.diff_encoding_mode.var_enum.RE0
-        phy.profile_inputs.dsss_chipping_code.value =  long(0x9AF)
+        phy.profile_inputs.dsss_chipping_code.value = long(0x9AF)
         phy.profile_inputs.dsss_len.value = 15
         phy.profile_inputs.dsss_spreading_factor.value = 15
         phy.profile_inputs.if_frequency_hz.value = 600000
-        phy.profile_inputs.frequency_comp_mode.value = model.vars.frequency_comp_mode.var_enum.DISABLED
         phy.profile_inputs.modulation_type.value = model.vars.modulation_type.var_enum.BPSK
-        phy.profile_inputs.number_of_timing_windows.value = 11
         phy.profile_inputs.pll_bandwidth_tx.value = model.vars.pll_bandwidth_tx.var_enum.BW_2000KHz
         phy.profile_inputs.preamble_length.value = 32
-        phy.profile_inputs.rssi_period.value = 7
         phy.profile_inputs.shaping_filter.value = model.vars.shaping_filter.var_enum.Raised_Cosine
         phy.profile_inputs.shaping_filter_param.value = 1.0
-        phy.profile_inputs.timing_detection_threshold.value = 28
-        phy.profile_inputs.agc_power_target.value = -27
-        phy.profile_inputs.bandwidth_hz.value = 525000
+        phy.profile_inputs.rx_xtal_error_ppm.value = 20
+        phy.profile_inputs.tx_xtal_error_ppm.value = 20
+        phy.profile_inputs.preamble_pattern_len.value = 1
 
-        phy.profile_outputs.MODEM_COH3_COHDSAEN.override = 0
+        # : Enable/Disable and select static sync threshold
+        # : IF COHDYNAMICSYNCTHRESH = 0, then this sync threshold is used.
+        phy.profile_outputs.MODEM_SYNCPROPERTIES_STATICSYNCTHRESHEN.override = 0  # Remove static sync threadhold
+        phy.profile_outputs.MODEM_SYNCPROPERTIES_STATICSYNCTHRESH.override = 0  # Static sync threshold = STATICSYNCTHRESH *2^TIMTHRESHGAIN
 
-        phy.profile_outputs.AGC_CTRL7_SUBDEN.override = 4
-        phy.profile_outputs.AGC_CTRL7_SUBINT.override = 3
-        phy.profile_outputs.AGC_CTRL7_SUBNUM.override = 3
-        phy.profile_outputs.AGC_CTRL7_SUBPERIOD.override = 1
-        # Not present in Series 2
-        # phy.profile_outputs.AGC_CTRL2_ADCRSTSTARTUP.override = 0
-        # phy.profile_outputs.AGC_CTRL2_FASTLOOPDEL.override = 5
-        # phy.profile_outputs.AGC_GAINSTEPLIM0_SLOWDECAYCNT.override = 10
-        phy.profile_outputs.AGC_GAINSTEPLIM0_CFLOOPSTEPMAX.override = 5
-        # Not present in Series 2
-        # phy.profile_outputs.AGC_LOOPDEL_IFPGADEL.override = 7
-        # phy.profile_outputs.AGC_LOOPDEL_LNASLICESDEL.override = 7
-        # phy.profile_outputs.AGC_LOOPDEL_PKDWAIT.override = 15
+        """ Channel Power Accumulator Setting """
+        # : Average and delay
+        # phy.profile_outputs.MODEM_LONGRANGE1_PREFILTEN.override = 1 # DSA prefilter length
+        # phy.profile_outputs.MODEM_LONGRANGE1_LRSPIKETHADD.override = 0  # DSA
+        phy.profile_outputs.MODEM_LONGRANGE1_AVGWIN.override = 4  # Average window for channel power estimation
+        phy.profile_outputs.MODEM_LONGRANGE1_CHPWRACCUDEL.override = 0  # Use accumulated channel power value, 0 -> DEL0 (no delay) floor(timing_window_actual*2/(2^(AVGWIN+2+PWRPERIOD)))
+        phy.profile_outputs.MODEM_LONGRANGE1_HYSVAL.override = 3  # Hysteresis Value for BBSS
 
-        phy.profile_outputs.AGC_RSSISTEPTHR_POSSTEPTHR.override = 3
-        phy.profile_outputs.AGC_RSSISTEPTHR_DEMODRESTARTPER.override = 6
+        """ BBSS """
+        # : BBSS Channel Power Thresholds
+        starting_LRCHPWRTH = 16  # BEST VALUE
+        shifting_LRCHPWRTH = 8
+        # Threshold for LRCHPWRSH
+        phy.profile_outputs.MODEM_LONGRANGE2_LRCHPWRTH1.override = starting_LRCHPWRTH + (shifting_LRCHPWRTH * 2)  # 32 -> -105 dBm
+        phy.profile_outputs.MODEM_LONGRANGE2_LRCHPWRTH2.override = starting_LRCHPWRTH + (shifting_LRCHPWRTH * 3)  # 40 -> -97 dBm
+        phy.profile_outputs.MODEM_LONGRANGE2_LRCHPWRTH3.override = starting_LRCHPWRTH + (shifting_LRCHPWRTH * 4)  # 48 -> -89 dBm
+        phy.profile_outputs.MODEM_LONGRANGE2_LRCHPWRTH4.override = starting_LRCHPWRTH + (shifting_LRCHPWRTH * 5)  # 56 -> -81 dBm
+        phy.profile_outputs.MODEM_LONGRANGE3_LRCHPWRTH5.override = starting_LRCHPWRTH + (shifting_LRCHPWRTH * 6)  # 64 -> -73 dBm
+        phy.profile_outputs.MODEM_LONGRANGE3_LRCHPWRTH6.override = starting_LRCHPWRTH + (shifting_LRCHPWRTH * 7)  # 72 -> -65 dBm
+        phy.profile_outputs.MODEM_LONGRANGE3_LRCHPWRTH7.override = starting_LRCHPWRTH + (shifting_LRCHPWRTH * 8)  # 80 -> -57 dBm
+        phy.profile_outputs.MODEM_LONGRANGE3_LRCHPWRTH8.override = starting_LRCHPWRTH + (shifting_LRCHPWRTH * 9)  # 88 -> -49 dBm
+        phy.profile_outputs.MODEM_LONGRANGE4_LRCHPWRTH9.override = starting_LRCHPWRTH + (shifting_LRCHPWRTH * 10) + 2 # 96 -> -41 dBm
+        phy.profile_outputs.MODEM_LONGRANGE4_LRCHPWRTH10.override = starting_LRCHPWRTH + (shifting_LRCHPWRTH * 11) + 4 # 104 -> -33 dBm
+        phy.profile_outputs.MODEM_LONGRANGE6_LRCHPWRTH11.override = starting_LRCHPWRTH + (shifting_LRCHPWRTH * 12)  # 112-> -27 dBm
 
-        phy.profile_outputs.MODEM_AFCADJLIM_AFCADJLIM.override = 2000
-        phy.profile_outputs.MODEM_CTRL0_DUALCORROPTDIS.override = 1
-        phy.profile_outputs.MODEM_CTRL1_PHASEDEMOD.override = 3
-        phy.profile_outputs.MODEM_CTRL1_RESYNCPER.override = 4
-        phy.profile_outputs.MODEM_CTRL3_TSAMPDEL.override = 2
-        # Not present in Series 2
-        # phy.profile_outputs.MODEM_CTRL5_BBSS.override = 4
-        # phy.profile_outputs.MODEM_CTRL5_DSSSCTD.override = 1
-        # phy.profile_outputs.MODEM_CTRL5_FOEPREAVG.override = 7
-        # phy.profile_outputs.MODEM_CTRL5_LINCORR.override = 1
-        # phy.profile_outputs.MODEM_CTRL5_POEPER.override = 4
-        phy.profile_outputs.MODEM_CTRL5_TDEDGE.override = 0
-        phy.profile_outputs.MODEM_CTRL5_TREDGE.override = 0
-        # Not present in Series 2
-        # phy.profile_outputs.MODEM_CTRL6_CPLXCORREN.override = 1
-        # phy.profile_outputs.MODEM_CTRL6_PREBASES.override = 8
-        # phy.profile_outputs.MODEM_CTRL6_PSTIMABORT0.override = 1
-        # phy.profile_outputs.MODEM_CTRL6_PSTIMABORT1.override = 1
-        # phy.profile_outputs.MODEM_CTRL6_PSTIMABORT2.override = 1
-        phy.profile_outputs.MODEM_CTRL6_RXBRCALCDIS.override = 1
-        # Not present in Series 2
-        # phy.profile_outputs.MODEM_CTRL6_TDREW.override = 60
-        # phy.profile_outputs.MODEM_CTRL6_TIMTHRESHGAIN.override = 1
-        phy.profile_outputs.MODEM_MODINDEX_MODINDEXE.override = 29
-        phy.profile_outputs.MODEM_MODINDEX_MODINDEXM.override = 15
-        phy.profile_outputs.MODEM_PRE_PREERRORS.override = 15
-        phy.profile_outputs.MODEM_TIMING_ADDTIMSEQ.override = 8
-        phy.profile_outputs.MODEM_TIMING_FASTRESYNC.override = 1
-        phy.profile_outputs.MODEM_TIMING_TIMINGBASES.override = 8
-        phy.profile_outputs.MODEM_TIMING_TIMTHRESH.override = 50
-        phy.profile_outputs.MODEM_TXBR_TXBRDEN.override = 1
-        phy.profile_outputs.MODEM_TXBR_TXBRNUM.override = 16
-        # Not present in Series 2
-        # phy.profile_outputs.RAC_IFFILTCTRL_BANDWIDTH.override = 3
+        # : BBSS lookup table
+        starting_LRCHPWRSH = 3  # BEST VALUE, add one to increase sensibility
+        phy.profile_outputs.MODEM_LONGRANGE4_LRCHPWRSH1.override = starting_LRCHPWRSH + 2  # Take this value if LRCHPWRTH1 > CHPWR
+        phy.profile_outputs.MODEM_LONGRANGE4_LRCHPWRSH2.override = starting_LRCHPWRSH + 3  # Take this value if LRCHPWRTH2 > CHPWR > LRCHPWRTH1
+        phy.profile_outputs.MODEM_LONGRANGE4_LRCHPWRSH3.override = starting_LRCHPWRSH + 5  # Take this value if LRCHPWRTH3 > CHPWR > LRCHPWRTH2
+        phy.profile_outputs.MODEM_LONGRANGE4_LRCHPWRSH4.override = starting_LRCHPWRSH + 6  # Take this value if LRCHPWRTH4 > CHPWR > LRCHPWRTH3
+        phy.profile_outputs.MODEM_LONGRANGE5_LRCHPWRSH5.override = starting_LRCHPWRSH + 8  # Take this value if LRCHPWRTH5 > CHPWR > LRCHPWRTH4
+        phy.profile_outputs.MODEM_LONGRANGE5_LRCHPWRSH6.override = starting_LRCHPWRSH + 9  # Take this value if LRCHPWRTH6 > CHPWR > LRCHPWRTH5
+        phy.profile_outputs.MODEM_LONGRANGE5_LRCHPWRSH7.override = starting_LRCHPWRSH + 10  # Take this value if LRCHPWRTH7 > CHPWR > LRCHPWRTH6
+        phy.profile_outputs.MODEM_LONGRANGE5_LRCHPWRSH8.override = starting_LRCHPWRSH + 11  # Take this value if LRCHPWRTH8 > CHPWR > LRCHPWRTH7
+        phy.profile_outputs.MODEM_LONGRANGE5_LRCHPWRSH9.override = starting_LRCHPWRSH + 12  # Take this value if LRCHPWRTH9 > CHPWR > LRCHPWRTH8
+        phy.profile_outputs.MODEM_LONGRANGE5_LRCHPWRSH10.override = starting_LRCHPWRSH + 12  # Take this value if LRCHPWRTH10 > CHPWR > LRCHPWRTH9
+        phy.profile_outputs.MODEM_LONGRANGE5_LRCHPWRSH11.override = starting_LRCHPWRSH + 12  # Take this value if LRCHPWRTH11 > CHPWR > LRCHPWRTH10
+        phy.profile_outputs.MODEM_LONGRANGE6_LRCHPWRSH12.override = starting_LRCHPWRSH + 12  # : removes floor issue at high power max 15
 
-        # values mismatching from PHY in RTL
-        # Not present in Series 2
-        # phy.profile_outputs.MODEM_INTAFC_FOEPREAVG1.override = 1
-        # phy.profile_outputs.MODEM_INTAFC_FOEPREAVG2.override = 3
-        # phy.profile_outputs.MODEM_INTAFC_FOEPREAVG3.override = 4
-        #phy.profile_outputs.MODEM_CF_DEC1.override = 3
-        #phy.profile_outputs.MODEM_CF_DEC0.override = 2
-        #phy.profile_outputs.MODEM_CF_CFOSR.override = 3
-        # MEAWAN phy.profile_outputs.MODEM_SRCCHF_BWSEL.override = 1
+        # : This threshold determines whether to use fixed or dynamic threshold based on channel power.
+        phy.profile_outputs.MODEM_LONGRANGE6_LRCHPWRSPIKETH.override = 70  # DSA setting
+        # : For FIXED DSA mode, this is the correlation threshold
+        phy.profile_outputs.MODEM_LONGRANGE6_LRSPIKETHD.override = 40  # Below 130, floor issues DSA setting
+
+        # base_value = -138dBm
+        phy.profile_outputs.MODEM_COH0_COHCHPWRTH0.override = 25  # Channel power boundary between SYNCTHRESH 0 and 1
+        phy.profile_outputs.MODEM_COH0_COHCHPWRTH1.override = 64  # Channel power boundary between SYNCTHRESH 1 and 2
+        phy.profile_outputs.MODEM_COH0_COHCHPWRTH2.override = 127  # Channel power boundary between SYNCTHRESH 2 and 3
+
+        phy.profile_outputs.MODEM_COH0_COHDYNAMICBBSSEN.override = 1  # SHOULD BE ENABLED, Set to enable the dynamic BBSS based on average channel power for coherent demodulator.
+        phy.profile_outputs.MODEM_COH0_COHDYNAMICPRETHRESH.override = 1  # SHOULD BE ENABLED, Set to enable the dynamic preamble threshold based on average channel power for coherent demodulator and BBSS
+        phy.profile_outputs.MODEM_COH0_COHDYNAMICPRETHRESHSEL.override = 0  # SHOULD BE DISABLED, Select the dynamic preamble threshold 0 -> 1x sync coeff
+        phy.profile_outputs.MODEM_COH0_COHDYNAMICSYNCTHRESH.override = 0  # SHOULD BE DISABLED because COHDYNAMICPRETHRES enable
+        phy.profile_outputs.MODEM_COH0_COHCHPWRLOCK.override = 0  # Set to TIMDET (0) or DSADET (1) when timing is detected
+        phy.profile_outputs.MODEM_COH0_COHCHPWRRESTART.override = 0 # Set to enable automatic restart of Channel Power whenever a frame is received
+
+        phy.profile_outputs.MODEM_COH1_SYNCTHRESH0.override = 17  # Minimum threshold syncword when CHPWR < COHCHPWRTH0
+        phy.profile_outputs.MODEM_COH1_SYNCTHRESH1.override = 18  # Minimum threshold syncword when COHCHPWRTH0 < CHPWR < COHCHPWRTH1
+        phy.profile_outputs.MODEM_COH1_SYNCTHRESH2.override = 24  # Minimum threshold syncword when COHCHPWRTH1 < CHPWR < COHCHPWRTH2
+        phy.profile_outputs.MODEM_COH1_SYNCTHRESH3.override = 127  # Minimum threshold syncword when CHPWR > COHCHPWRTH2
+
+        phy.profile_outputs.MODEM_COH2_SYNCTHRESHDELTA0.override = 1  # < COHCHPWRTH0
+        phy.profile_outputs.MODEM_COH2_SYNCTHRESHDELTA1.override = 1  # COHCHPWRTH0 < x < COHCHPWRTH1
+        phy.profile_outputs.MODEM_COH2_SYNCTHRESHDELTA2.override = 1  # COHCHPWRTH1 < x < COHCHPWRTH2
+        phy.profile_outputs.MODEM_COH2_SYNCTHRESHDELTA3.override = 1  # > COHCHPWRTH2
+        # : For dynamic DSA threshold, this is the baseline threshold. Threshold will increase in addition to this
+        # : baseline value dependent on the channel power.
+        phy.profile_outputs.MODEM_COH2_FIXEDCDTHFORIIR.override = 70  # Above 120, blocking degradation Coherent DSA Settings
+
+        phy.profile_outputs.MODEM_COH3_COHDSAEN.override = 0  # Coherent DSA Settings
+        phy.profile_outputs.MODEM_COH3_PEAKCHKTIMOUT.override = 18  # Coherent DSA Settings
+        phy.profile_outputs.MODEM_COH3_COHDSAADDWNDSIZE.override = 80  # Coherent DSA Settings  OSR * no_of_chips_per_sym*m
+        phy.profile_outputs.MODEM_COH3_CDSS.override = 4  # Coherent DSA Settings
+        phy.profile_outputs.MODEM_COH3_COHDSACMPLX.override = 0  # Coherent DSA Settings SHOULD BE DISABLED BECAUSE Complex correlation PAGE 2009
+        phy.profile_outputs.MODEM_COH3_DYNIIRCOEFOPTION.override = 3  # Coherent DSA Settings
+
+        phy.profile_outputs.MODEM_CTRL0_DUALCORROPTDIS.override = 1  # # Disables default optimization for Fixed Window Timing Search when using dual correlation passes
+
+        phy.profile_outputs.MODEM_CTRL1_PHASEDEMOD.override = 2  # : 2 - COH detection
+        phy.profile_outputs.MODEM_CTRL1_FREQOFFESTLIM.override = 0  # Limit for frequency offset compensation
+        phy.profile_outputs.MODEM_CTRL1_FREQOFFESTPER.override = 0  # Frequency offset estimation/compensation update period is 2^FREQOFFESTPER windows
+        phy.profile_outputs.MODEM_CTRL1_COMPMODE.override = 1  # Enable compensation
+        # Defines the timing resynchronization period. The timing update interval is RESYNCPER times the length of the timing sequence defined by TIMINGBASES
+        phy.profile_outputs.MODEM_CTRL1_RESYNCPER.override = 2  # Defines the timing resynchronization period
+
+        phy.profile_outputs.MODEM_CTRL2_DATAFILTER.override = 4  # Coherent detection is enabled
+
+        phy.profile_outputs.MODEM_CTRL3_TSAMPDEL.override = 0  # Delay from detection of strong signals to enabling of timing search is 2^TSAMPDEL+1 samples
+        phy.profile_outputs.MODEM_CTRL3_TIMINGBASESGAIN.override = 0  # Increase timing window to be TIMINGBASES * 2^TIMINGBASESGAIN
+
+        phy.profile_outputs.MODEM_CTRL4_OFFSETPHASEMASKING.override = 1  # SHOULD BE ENABLED CHECK PAGE 2085, Enables masking of differentiated phase used to measure frequency offset during Timing Search and for AFC
+        phy.profile_outputs.MODEM_CTRL4_ADCSATLEVEL.override = 6  # Define ADC Saturation Level to be used before indicating saturation to AGC
+        phy.profile_outputs.MODEM_CTRL4_ADCSATDENS.override = 0  # The counter values increase the ADCSATDENS+1
+        phy.profile_outputs.MODEM_CTRL4_PHASECLICKFILT.override = 1  # Phase click thresholds for phase click filter. Filter is disabled for PHASECLICKFILT=0.
+
+        phy.profile_outputs.MODEM_CTRL5_DSSSCTD.override = 1  # After preamble detection, only detected symbol is used to qualify a valid preamble 4/bits-per-symbol
+        phy.profile_outputs.MODEM_CTRL5_POEPER.override = 4  # Controls the POE period in number of DSSS symbols
+        # Calibration baud rate during the preamble (earn many of tolerance)
+        phy.profile_outputs.MODEM_CTRL5_BRCALEN.override = 0  # Loop BR enable
+        phy.profile_outputs.MODEM_CTRL5_BRCALMODE.override = 0  # slopes et zeros (robustness)
+        phy.profile_outputs.MODEM_CTRL5_BRCALAVG.override = 0  # Moderate average
+        phy.profile_outputs.MODEM_CTRL5_TDEDGE.override = 1  # Increase timing robustness
+        phy.profile_outputs.MODEM_CTRL5_TREDGE.override = 1  # Increase timing robustness
+        phy.profile_outputs.MODEM_CTRL5_RESYNCBAUDTRANS.override = 0  # Allows resync timing during payload
+        phy.profile_outputs.MODEM_CTRL5_RESYNCLIMIT.override = 1  # Limit unwanted resyncs at low SNR
+        phy.profile_outputs.MODEM_CTRL5_LINCORR.override = 1  # Avoid timing detections where only part of the window is occupied by a valid signal
+        phy.profile_outputs.MODEM_CTRL5_BBSS.override = 4  # Low BBSS values reduces quantization noise, but results in more limitation
+
+        phy.profile_outputs.MODEM_CTRL6_ARW.override = 1  # If the difference between the end of next window and the current write address is less than half the RAM size
+        phy.profile_outputs.MODEM_CTRL6_TDREW.override = 60  # Controls number of bauds to rewind after Fixed Window Timing Detection = timingbases*dsss_len*2/3
+        phy.profile_outputs.MODEM_CTRL6_CPLXCORREN.override = 0  # Set if freq_limit > baudrate/8
+        # Timing threshold = TIMTHRESH * 2^TIMTHRESHGAIN && sync threshold = STATICSYNCTHRESH * 2^TIMTHRESHGAIN
+        phy.profile_outputs.MODEM_CTRL6_PSTIMABORT0.override = 1  # Timing is aborted during preamble search if maximum correlation is much higher than preamble correlation used for timing detection
+        phy.profile_outputs.MODEM_CTRL6_PSTIMABORT1.override = 1  # Timing is aborted during preamble search if maximum correlation is not equal to current preamble correlation
+        phy.profile_outputs.MODEM_CTRL6_PSTIMABORT2.override = 1  # Timing is aborted during preamble search if current preamble correlation is much higher than preamble correlation used for timing detection
+        # Disable RX baudrate calculation used by AGC. Instead, assume OSR = 2 * RXBRFRAC
+        phy.profile_outputs.MODEM_CTRL6_RXBRCALCDIS.override = 1  # DO NOT TOUCH
+        phy.profile_outputs.MODEM_CTRL6_PREBASES.override = 8  # The window size can be set differently during Preamble Search than during Timing Search
+
+        # Remove the slope between -40 to -26 dBm
+        phy.profile_outputs.AGC_CTRL1_PWRPERIOD.override = 4  # This value controls the AGC power measure period. The period is 2^AGCPERIOD subperiods
+        phy.profile_outputs.AGC_CTRL0_PWRTARGET.override = 188  # This value controls the AGC power measure period. The period is 2^AGCPERIOD subperiods
+        phy.profile_outputs.AGC_CTRL1_RSSIPERIOD.override = 3  # The period is defined as 2^RSSIPERIOD subperiods
+        phy.profile_outputs.AGC_AGCPERIOD1_PERIODLOW.override = 165  # 3 times AGC_AGCPERIOD0_PERIODHI
+        phy.profile_outputs.AGC_AGCPERIOD0_PERIODHI.override = 55  #
+
+        phy.profile_outputs.AGC_RSSISTEPTHR_POSSTEPTHR.override = 6  # When RSSIINT increases with more than POSSTEPTHR dB between two update periods
+        phy.profile_outputs.AGC_RSSISTEPTHR_DEMODRESTARTPER.override = 6  # When this value is set differently from 0, a separate RSSI measurement is made based on 2^DEMODRESTARTPER subperiods
+
+        phy.profile_outputs.AGC_GAINSTEPLIM0_CFLOOPSTEPMAX.override = 8  # Set max gain step for gain change using channel filter slow loop
+        phy.profile_outputs.AGC_GAINSTEPLIM0_CFLOOPDEL.override = 45  # Sets the delay used in the channel filter loop
+
+        phy.profile_outputs.MODEM_PRE_PREERRORS.override = 15  # Defines the maximum number of errors allowed within a timing sequence
+
+        phy.profile_outputs.MODEM_MODINDEX_MODINDEXE.override = 29  # Modulation output is scaled by MODINDEXM * 2^MODINDEXE to ensure proper modulation characteristics
+        phy.profile_outputs.MODEM_MODINDEX_MODINDEXM.override = 19  # Modulation output is scaled by MODINDEXM * 2^MODINDEXE to ensure proper modulation characteristics
+
+        phy.profile_outputs.MODEM_AFC_AFCGEAR.override = 3  # The slow AFC gain applies after gear switching occurs
+
+        phy.profile_outputs.MODEM_CTRL5_FOEPREAVG.override = 7  # If FOEPREAVG = 7, the averaging is set dynamically as given by MODEM_INTAFC
+        phy.profile_outputs.MODEM_INTAFC_FOEPREAVG0.override = 1  # Frequency Offset Estimate Pre-Averaging for first estimate
+        phy.profile_outputs.MODEM_INTAFC_FOEPREAVG1.override = 2  # Frequency Offset Estimate Pre-Averaging for second estimate
+        phy.profile_outputs.MODEM_INTAFC_FOEPREAVG2.override = 4  # Frequency Offset Estimate Pre-Averaging for third estimate
+        phy.profile_outputs.MODEM_INTAFC_FOEPREAVG3.override = 4  # Frequency Offset Estimate Pre-Averaging for fourth estimate
+
+        # This is the maximum limit for AFC adjustment in RX and TX. The limit in Hz is AFCADJLIM * Synthesizer resolution.
+        # If the register is set to 0, the limit is disabled.
+        phy.profile_outputs.MODEM_AFCADJLIM_AFCADJLIM.override = 0  # Set to freq_limit*baudrate/2^13 with freq_limit=freq_offset_hz
+
+        # : Controls additional offset averaging state for timing search and AFC.
+        # : Additional windows averages over OFFSUBNUM/OFFSUBDEN samples to avoid DC balance issue
+        # : MUST BE SET MANUALLY! NO CALCULATOR SUPPORT AVAILABLE FOR COH PHY
+        # AFC update period = 2^AFCAVGPER × (OFFSUBNUM/OFFSUBDEN)
+        phy.profile_outputs.MODEM_TIMING_OFFSUBNUM.override = 8
+        phy.profile_outputs.MODEM_TIMING_OFFSUBDEN.override = 8
+
+        # this is the number of times the first aligned window is processed during Preamble Search. Number of FOC updates is ADDTIMSEQ/2
+        phy.profile_outputs.MODEM_TIMING_ADDTIMSEQ.override = 8  # Number of additional timing sequences to detect a valid preamble. Number of FOC updates is ADDTIMSEQ/2
+        phy.profile_outputs.MODEM_TIMING_FASTRESYNC.override = 1  # Allow fast timing resynchronization (RESYNCPER = 1) in first part of frame
+        phy.profile_outputs.MODEM_TIMING_TIMINGBASES.override = 9  # Defines the timing sequence used for Timing Search
+        phy.profile_outputs.MODEM_TIMING_TIMTHRESH.override = 105  # Timing threshold = TIMTHRESH * 2^TIMTHRESHGAIN
+        phy.profile_outputs.MODEM_CTRL6_TIMTHRESHGAIN.override = 0  # Timing threshold = TIMTHRESH * 2^TIMTHRESHGAIN
+
+        # Tx override with digital ramping to be compliant on ACPR
+        phy.profile_outputs.MODEM_CTRL4_PREDISTDEB.override = 1
+        phy.profile_outputs.MODEM_CTRL4_PREDISTGAIN.override = 3
+        phy.profile_outputs.SEQ_MISC_DIG_RAMP_EN.override = 1
+
+        return phy
+
+    # Jira Link: https://jira.silabs.com/browse/MCUW_RADIO_CFG-2755
+    def PHY_IEEE802154_915MHz_BPSK_40kbps_coh(self, model, phy_name=None):
+        phy = self.PHY_IEEE802154_868MHz_BPSK_20kbps_coh(model, phy_name=phy_name)
+
+        phy.profile_inputs.base_frequency_hz.value = 915_000_000
+        phy.profile_inputs.bitrate.value = 40_000
+        phy.profile_inputs.rx_xtal_error_ppm.value = 20
+        phy.profile_inputs.tx_xtal_error_ppm.value = 20
+
+
+        """ Fix for waterfall and frequency offset tolerance """
+        phy.profile_outputs.MODEM_TIMING_TIMINGBASES.override = 5
+        phy.profile_outputs.AGC_CTRL1_RSSIPERIOD.override = 2
+        phy.profile_outputs.AGC_CTRL1_PWRPERIOD.override = 4
+        phy.profile_outputs.MODEM_TIMING_ADDTIMSEQ.override = 4
+        phy.profile_outputs.AGC_GAINSTEPLIM0_CFLOOPDEL.override = 51
+        phy.profile_outputs.MODEM_COH1_SYNCTHRESH0.override = 16
+        phy.profile_outputs.MODEM_COH1_SYNCTHRESH1.override = 18
+        phy.profile_outputs.MODEM_COH1_SYNCTHRESH2.override = 24
+        phy.profile_outputs.MODEM_COH0_COHCHPWRTH0.override = 26
+        phy.profile_outputs.MODEM_COH0_COHCHPWRTH1.override = 80
+        phy.profile_outputs.MODEM_COH2_SYNCTHRESHDELTA1.override = 2
 
         return phy
 
@@ -716,6 +847,7 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
 
     def PHY_IEEE802154_2p4GHz_cohdsa(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='802154 2p4GHz cohdsa', phy_name=phy_name)
+        model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.COHERENT
 
         self.IEEE802154_2p4GHz_cohdsa_base(phy, model)
         phy.profile_outputs.MODEM_TXBR_TXBRDEN.override = 105
@@ -725,6 +857,7 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
 
     def PHY_IEEE802154_2p4GHz_cohdsa_diversity(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='802154 2p4GHz cohdsa', phy_name=phy_name)
+        model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.ANTDIV
 
         self.IEEE802154_2p4GHz_cohdsa_base(phy, model)
         phy.profile_outputs.MODEM_TXBR_TXBRDEN.override = 105
@@ -745,6 +878,7 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
     def PHY_IEEE802154_2p4GHz_diversity(self, model,phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Legacy IEEE 802.15.4 2p4GHz PHY from Jumbo',phy_name=phy_name)
         self.IEEE802154_2p4GHz_base(phy, model)
+        model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.ANTDIV
 
         phy.profile_outputs.AGC_CTRL2_DISRFPKD.override = 1
         phy.profile_outputs.AGC_CTRL4_RFPKDCNTEN.override = 0

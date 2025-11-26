@@ -30,6 +30,7 @@
 
 #include "sli_tz_ns_interface.h"
 #include "sl_status.h"
+#include "sli_tz_util.h"
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
   #include "sl_component_catalog.h"
@@ -71,6 +72,7 @@ sl_status_t sli_tz_ns_interface_init(void)
   return sl_status;
 }
 
+SLI_TZ_CMSE_NONSECURE_ENTRY
 int32_t sli_tz_ns_interface_dispatch(sli_tz_veneer_fn fn,
                                      uint32_t arg0,
                                      uint32_t arg1,
@@ -96,6 +98,7 @@ int32_t sli_tz_ns_interface_dispatch(sli_tz_veneer_fn fn,
   return result;
 }
 
+SLI_TZ_CMSE_NONSECURE_ENTRY
 uint32_t sli_tz_ns_interface_dispatch_simple(sli_tz_veneer_simple_fn fn,
                                              uint32_t sid,
                                              uint32_t arg)
@@ -119,6 +122,7 @@ uint32_t sli_tz_ns_interface_dispatch_simple(sli_tz_veneer_simple_fn fn,
   return result;
 }
 
+SLI_TZ_CMSE_NONSECURE_ENTRY
 int32_t sli_tz_ns_interface_dispatch_noarg(sli_tz_veneer_noarg_fn fn)
 {
   #if defined(RTOS_KERNEL_PRESENT)
@@ -140,6 +144,7 @@ int32_t sli_tz_ns_interface_dispatch_noarg(sli_tz_veneer_noarg_fn fn)
   return result;
 }
 
+SLI_TZ_CMSE_NONSECURE_ENTRY
 int32_t sli_tz_ns_interface_dispatch_simple_noarg(sli_tz_veneer_simple_noarg_fn fn,
                                                   uint32_t sid)
 {

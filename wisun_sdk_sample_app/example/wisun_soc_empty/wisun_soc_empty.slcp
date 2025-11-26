@@ -153,6 +153,13 @@ ui_hints:
     - path: readme.md
       focus: true
 
+#--------------------- HWFILTER ------------------------
+tag:
+  - hwfilter:board:hardware:has:pti
+  - hwfilter:ram:64k
+  - hwfilter:flash:499k
+
+
 #--------------------- Toolchain ------------------------
 toolchain_settings:
   - option: optimize

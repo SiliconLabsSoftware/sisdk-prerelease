@@ -464,3 +464,7 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
 
             self._reg_write_default(model.vars.RAC_CLKMULTCTRL_CLKMULTENRESYNC)
             self._reg_write_default(model.vars.RAC_CLKMULTCTRL_CLKMULTVALID)
+
+    # Need to recall this function from Ocelot otherwise not properly inherited
+    def calc_synth_tx_tuning_step_actual(self, model):
+        pass

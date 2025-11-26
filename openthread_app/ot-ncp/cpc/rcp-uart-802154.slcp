@@ -88,6 +88,8 @@ configuration:
 tag:
   - prebuilt_demo
   - hwfilter:device:device_supports_thread
+  - toolchain:gcc
+
 readme:
   - path: ./README-MP-RCP.md
 

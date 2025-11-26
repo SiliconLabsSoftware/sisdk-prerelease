@@ -50,7 +50,7 @@
 #include "sl_component_catalog.h"
 #endif
 
-#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
+#if defined(SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT) || defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT)
 #include "sl_rail_util_ieee802154_fast_channel_switching_config.h"
 #endif // SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
 
@@ -652,7 +652,7 @@ sl_rail_status_t sl_rail_mux_StartRx(sl_rail_handle_t railHandle,
 
   // Check to ensure lock is not active before acting on startRx
   if ( check_lock_permissions(context_index) ) {
-    #ifndef SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
+    #if !defined(SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT) && !defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT)
     if (!fn_get_context_flag_by_index(context_index, RAIL_MUX_PROTOCOL_FLAGS_LOCK_ACTIVE)) {
       if (rx_channel != INVALID_CHANNEL && rx_channel != channel) {
         // this protocol context rx channel is different from the other protocol context rx channel
@@ -1121,6 +1121,7 @@ sl_rail_tx_pa_mode_t sl_rail_mux_get_pa_mode(sl_rail_handle_t railHandle)
 sl_rail_status_t sl_rail_mux_ConfigTxPower(sl_rail_handle_t railHandle,
                                            const sl_rail_tx_power_config_t *config)
 {
+  (void)config;
   return sl_rail_mux_util_pa_post_init(railHandle, SL_RAIL_TX_PA_MODE_2P4_GHZ);
 }
 
@@ -1592,7 +1593,7 @@ sl_rail_status_t sl_rail_mux_RAIL_ScheduleRx(sl_rail_handle_t railHandle,
                                              const sl_rail_scheduled_rx_config_t *cfg,
                                              const sl_rail_scheduler_info_t *schedulerInfo)
 {
-  #ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
+  #if defined(SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT) || defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT)
   // UID 1327639: Schedule Rx and Concurrent listening when used together
   // will cause undefined behavior. Therefore it was decided to assert upon detecting
   // this condition
@@ -2367,7 +2368,7 @@ void fn_print_flags(void)
 void sl_rail_mux_update_active_radio_config(void)
 {
   sl_rail_idle(mux_rail_handle, SL_RAIL_IDLE_ABORT, true);
-  sl_rail_util_ieee802154_config_radio(mux_rail_handle);
+  sl_rail_mux_util_ieee802154_config_radio(mux_rail_handle);
   if (rx_channel != INVALID_CHANNEL) {
     CONFIGURE_RX_CHANNEL_SWITCHING(mux_rail_handle, channel_switching_cfg);
     sl_rail_start_rx(mux_rail_handle, rx_channel, NULL);
@@ -2529,7 +2530,7 @@ bool sl_rail_mux_IsNextCcaNow(sl_rail_handle_t railHandle)
   return sl_rail_is_next_cca_now(mux_rail_handle);
 }
 
-#if !defined(SL_CATALOG_RAIL_UTIL_IEEE802154_PHY_SELECT_PRESENT)
+#if !defined(SL_CATALOG_RAIL_UTIL_IEEE802154_PHY_SELECT_PRESENT) && !defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_PHY_SELECT_PRESENT)
 sl_rail_status_t sl_rail_mux_util_ieee802154_config_radio(sl_rail_handle_t railHandle)
 {
    (void)railHandle;
@@ -2537,7 +2538,7 @@ sl_rail_status_t sl_rail_mux_util_ieee802154_config_radio(sl_rail_handle_t railH
 }
 #endif
 
-#ifdef SL_CATALOG_SL_RAIL_UTIL_IEEE802154_RX_DUTY_CYCLING_PRESENT
+#if defined(SL_CATALOG_RAIL_UTIL_IEEE802154_RX_DUTY_CYCLING_PRESENT) || defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_RX_DUTY_CYCLING_PRESENT)
 sl_rail_ieee802154_phy_features_t duty_cycling_phy_features = SL_RAIL_IEEE802154_PHY_FEATURE_2P4_GHZ_RX_DUTY_CYCLING;
 #else
 sl_rail_ieee802154_phy_features_t duty_cycling_phy_features = SL_RAIL_IEEE802154_PHY_FEATURE_2P4_GHZ;
@@ -2549,7 +2550,7 @@ sl_rail_ieee802154_phy_features_t sl_rail_util_ieee802154_get_fast_channel_switc
 sl_rail_ieee802154_phy_features_t sl_rail_util_ieee802154_get_rx_duty_cycling_phy_features(void)
 {
   // if fast channel switching is enabled, we don't want to load duty cycling phy
-  #ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
+  #if defined(SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT) || defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT)
   return SL_RAIL_IEEE802154_PHY_FEATURE_2P4_GHZ;
   #else
   return duty_cycling_phy_features;

@@ -2,21 +2,16 @@ from pyradioconfig.calculator_model_framework.interfaces.iphy_filter import IPhy
 
 
 class PhyFiltersRainier(IPhyFilter):
-
     # Studio black list (files removed before Studio distribution)
-    customer_phy_groups = ['secret6',
-                           'Phys_Internal_Base_Experimental',
-                           'Phys_Internal_Base_Utility',
-                           'Phys_Internal_Base_ValOnly',
-                           'Phys_Internal_Connect',
-                           'secret1',
-                           'Phys_Internal_Base_FastSw',
-                           'Phys_Internal_Base_DutyCycle'
-                           ]
+    customer_phy_groups = []
 
     # Studio white list (these PHYs show in Studio as proprietary starting points)
-    simplicity_studio_phy_groups = ['Phys_Studio_IEEE802154', 'Phys_Studio_BLE','Phys_Studio_Connect',
-                                    'Phys_Studio_Base']
+    simplicity_studio_phy_groups = [
+        'Phys_Studio_BLE',
+        'Phys_Studio_Connect',
+        'Phys_Studio_IEEE802154',
+        'Phys_Studio_Base',
+    ]
 
     # Special designation for simulation PHYs
     sim_tests_phy_groups = []

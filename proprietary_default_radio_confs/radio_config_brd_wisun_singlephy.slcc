@@ -17,103 +17,42 @@ template_contribution:
   value: radio_config_simple_wisun_singlephy
 config_file:
 
-#EU_1_1a/radio_settings based on boards
+
+# xG23 NA_1_1b
+- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
+  directory: rail
+  condition: [device_sdid_210, hardware_board_default_rf_band_915]
+
+# xG23 EU_1_1a
+- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/EU_1_1a/radio_settings.radioconf
+  directory: rail
+  condition: [device_sdid_210, hardware_board_default_rf_band_868]
+
+# xG23 CN_1_1b
+- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/CN_1_1b/radio_settings.radioconf
+  directory: rail
+  condition: [device_sdid_210, hardware_board_default_rf_band_470]
+
+
+# xG25 NA_1_1b
+- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg25/NA_1_1b/radio_settings.radioconf
+  directory: rail
+  condition: [device_sdid_220, hardware_board_default_rf_band_915]
+
+# xG25 EU_1_1a
 - path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg25/EU_1_1a/radio_settings.radioconf
   directory: rail
-  condition:
-  - brd4271a
+  condition: [device_sdid_220, hardware_board_default_rf_band_868]
 
-#NA_1_1b/radio_settings based on boards
-- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg25/NA_1_1b/radio_settings.radioconf
-  directory: rail
-  condition:
-  - brd4270a
-- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg25/NA_1_1b/radio_settings.radioconf
-  directory: rail
-  condition:
-  - brd4270b
-- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg25/NA_1_1b/radio_settings.radioconf
-  directory: rail
-  condition:
-  - brd4276a
-- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg28/NA_1_1b/radio_settings.radioconf
-  directory: rail
-  condition:
-  - brd4400a
-- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg28/NA_1_1b/radio_settings.radioconf
-  directory: rail
-  condition:
-  - brd4401a
-- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg28/NA_1_1b/radio_settings.radioconf
-  directory: rail
-  condition:
-  - brd4400b
-- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg28/NA_1_1b/radio_settings.radioconf
-  directory: rail
-  condition:
-  - brd4401b
-- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg28/NA_1_1b/radio_settings.radioconf
-  directory: rail
-  condition:
-  - brd4400c
-- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg28/NA_1_1b/radio_settings.radioconf
-  directory: rail
-  condition:
-  - brd4401c
-- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg28/NA_1_1b/radio_settings.radioconf
-  directory: rail
-  condition:
-  - brd2705a
-- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
-  directory: rail
-  condition:
-  - brd4204a
-- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
-  directory: rail
-  condition:
-  - brd4204b
-- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
-  directory: rail
-  condition:
-  - brd4204c
-- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
-  directory: rail
-  condition:
-  - brd4204d
-- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
-  directory: rail
-  condition:
-  - brd4210a
-- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
-  directory: rail
-  condition:
-  - brd4263a
-- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
-  directory: rail
-  condition:
-  - brd4263b
-- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
-  directory: rail
-  condition:
-  - brd4263c
-- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
-  directory: rail
-  condition:
-  - brd4264a
-- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
-  directory: rail
-  condition:
-  - brd4264b
-- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg23/NA_1_1b/radio_settings.radioconf
-  directory: rail
-  condition:
-  - brd4264c
-
-#CN_1_1b/radio_settings based on boards
+# xG25 CN_1_1b
 - path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg25/CN_1_1b/radio_settings.radioconf
   directory: rail
-  condition:
-  - brd4272a
+  condition: [device_sdid_220, hardware_board_default_rf_band_470]
+
+# xG28 NA_1_1b
+- path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg28/NA_1_1b/radio_settings.radioconf
+  directory: rail
+  condition: [device_sdid_235]
 
 # radio settings based on IC chips
 - path: WiSUN/brd_wisun_singlephy/device_generic_family_efr32xg25/NA_1_1b/radio_settings.radioconf

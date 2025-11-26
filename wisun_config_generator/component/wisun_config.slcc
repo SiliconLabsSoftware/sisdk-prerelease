@@ -37,23 +37,42 @@ config_file:
   - "wisun_br_stack"
 
 #------------------------------------------------ default full configuration
-# EU_1_1a
-- path: config/EU_1_1a/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-  - hardware_board_default_rf_band_868
 
-# NA_1_1b
+# xG23 NA_1_1b
 - path: config/NA_1_1b/wisun_settings.wisunconf
   directory: wisun
-  condition:
-  - hardware_board_default_rf_band_915
+  condition: [device_sdid_210, hardware_board_default_rf_band_915]
 
-# CN_1_1b
+# xG23 EU_1_1a
+- path: config/EU_1_1a/wisun_settings.wisunconf
+  directory: wisun
+  condition: [device_sdid_210, hardware_board_default_rf_band_868]
+
+# xG23 CN_1_1b
 - path: config/CN_1_1b/wisun_settings.wisunconf
   directory: wisun
-  condition:
-  - hardware_board_default_rf_band_470
+  condition: [device_sdid_210, hardware_board_default_rf_band_470]
+
+
+# xG25 NA_1_1b
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition: [device_sdid_220, hardware_board_default_rf_band_915]
+
+# xG25 EU_1_1a
+- path: config/EU_1_1a/wisun_settings.wisunconf
+  directory: wisun
+  condition: [device_sdid_220, hardware_board_default_rf_band_868]
+
+# xG25 CN_1_1b
+- path: config/CN_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition: [device_sdid_220, hardware_board_default_rf_band_470]
+
+# xG28 NA_1_1b
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition: [device_sdid_235]
 
 # based on IC all NA_1_1b
 - path: config/NA_1_1b/wisun_settings.wisunconf

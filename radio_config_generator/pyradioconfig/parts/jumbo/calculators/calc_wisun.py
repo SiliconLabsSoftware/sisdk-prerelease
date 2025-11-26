@@ -45,7 +45,7 @@ class CALC_WiSUN_Jumbo(ICalculator):
             ['IN', 0x05, 'India'],
             ['MX', 0x06, 'Mexico'],
             ['BZ', 0x07, 'Brazil'],
-            ['AU_NZ', 0x08, 'Australia and New Zealand'],
+            ['AZ_NZ', 0x08, 'Australia and New Zealand'],
             ['KR', 0x09, 'Korea'],
             ['PH', 0x0A, 'Philippines'],
             ['MY', 0x0B, 'Malaysia'],
@@ -137,7 +137,7 @@ class CALC_WiSUN_Jumbo(ICalculator):
         var = self._addModelVariable(model, 'meta_group', Enum, ModelVariableFormat.DECIMAL,
                                      desc='WiSUN Grouping')
         member_data = [
-            ["AU_NZ", 0x00, "Group AU_NZ"],
+            ["AZ_NZ", 0x00, "Group AZ_NZ"],
             ["BZ", 0x01, "Group BZ"],
             ["CN1", 0x02, "Group CN1"],
             ["CN2", 0x03, "Group CN2"],
@@ -280,7 +280,7 @@ class CALC_WiSUN_Jumbo(ICalculator):
                     error = True
                     base_frequency_hz = 902.2e6
                     channel_spacing_hz = 200e3
-            elif wisun_reg_domain == reg_domain_enum.AU_NZ:
+            elif wisun_reg_domain == reg_domain_enum.AZ_NZ:
                 if wisun_operating_class == 1:
                     base_frequency_hz = 915.2e6
                     channel_spacing_hz = 200e3

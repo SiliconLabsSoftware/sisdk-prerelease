@@ -199,35 +199,6 @@ class PhysStudioWisunFanJumbo(IPhy):
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
-    # Operating Class 2
-
-    def PHY_IEEE802154_WISUN_780MHz_2GFSK_50kbps_1b_CN(self, model, phy_name=None):
-        params = WisunFanChannelParams('CN',2,'Mode1b',200000, 779200000, 'CN-780MHz')
-        phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
-        return phy
-
-    def PHY_IEEE802154_WISUN_780MHz_2GFSK_100kbps_2a_CN(self, model, phy_name=None):
-        params = WisunFanChannelParams('CN',2,'Mode2a',200000, 779200000, 'CN-780MHz')
-        phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
-        return phy
-
-    # Operating Class 3
-
-    def PHY_IEEE802154_WISUN_780MHz_2GFSK_150kbps_3_CN(self, model, phy_name=None):
-        params = WisunFanChannelParams('CN', 3, 'Mode3', 400000, 779400000, 'CN-780MHz')
-        phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
-        return phy
-
-    def PHY_IEEE802154_WISUN_780MHz_2GFSK_200kbps_4a_CN(self, model, phy_name=None):
-        params = WisunFanChannelParams('CN', 3, 'Mode4a', 400000, 779400000, 'CN-780MHz')
-        phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
-        return phy
-
-    def PHY_IEEE802154_WISUN_780MHz_2GFSK_300kbps_5_CN(self, model, phy_name=None):
-        params = WisunFanChannelParams('CN', 3, 'Mode5', 400000, 779400000, 'CN-780MHz')
-        phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
-        return phy
-
     # Operating Class 4
 
     def PHY_IEEE802154_WISUN_920MHz_2GFSK_50kbps_1b_CN(self, model, phy_name=None):
@@ -342,29 +313,29 @@ class PhysStudioWisunFanJumbo(IPhy):
     # Operating Class 4
 
     def PHY_IEEE802154_WISUN_920MHz_2GFSK_50kbps_1b_SG(self, model, phy_name=None):
-        params = WisunFanChannelParams('SG', 4, 'Mode1b', 200000, 920200000, 'SG-920MHz')
+        params = WisunFanChannelParams('SG', 4, 'Mode1b', 200000, 917200000, 'SG-917MHz')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
     def PHY_IEEE802154_WISUN_920MHz_2GFSK_100kbps_2a_SG(self, model, phy_name=None):
-        params = WisunFanChannelParams('SG', 4, 'Mode2a', 200000, 920200000, 'SG-920MHz')
+        params = WisunFanChannelParams('SG', 4, 'Mode2a', 200000, 917200000, 'SG-917MHz')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
     # Operating Class 5
 
     def PHY_IEEE802154_WISUN_920MHz_2GFSK_150kbps_3_SG(self, model, phy_name=None):
-        params = WisunFanChannelParams('SG', 5, 'Mode3', 400000, 920400000, 'SG-920MHz')
+        params = WisunFanChannelParams('SG', 5, 'Mode3', 400000, 917400000, 'SG-917MHz')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
     def PHY_IEEE802154_WISUN_920MHz_2GFSK_200kbps_4a_SG(self, model, phy_name=None):
-        params = WisunFanChannelParams('SG', 5, 'Mode4a', 400000, 920400000, 'SG-920MHz')
+        params = WisunFanChannelParams('SG', 5, 'Mode4a', 400000, 917400000, 'SG-917MHz')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
     def PHY_IEEE802154_WISUN_920MHz_2GFSK_300kbps_5_SG(self, model, phy_name=None):
-        params = WisunFanChannelParams('SG', 5, 'Mode5', 400000, 920400000, 'SG-920MHz')
+        params = WisunFanChannelParams('SG', 5, 'Mode5', 400000, 917400000, 'SG-917MHz')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
@@ -465,34 +436,34 @@ class PhysStudioWisunFanJumbo(IPhy):
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
-    ### AU_NZ Region PHYs From Wi-SUN FAN 1.0 Spec###
+    ### AZ_NZ Region PHYs From Wi-SUN FAN 1.0 Spec###
 
     # Operating Class 1
 
-    def PHY_IEEE802154_WISUN_915MHz_2GFSK_50kbps_1b_AU_NZ(self, model, phy_name=None):
-        params = WisunFanChannelParams('AU_NZ', 1, 'Mode1b', 200000, 915200000, 'AU_NZ-915MHz')
+    def PHY_IEEE802154_WISUN_915MHz_2GFSK_50kbps_1b_AZ_NZ(self, model, phy_name=None):
+        params = WisunFanChannelParams('AZ_NZ', 1, 'Mode1b', 200000, 915200000, 'AZ_NZ-915MHz')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
-    def PHY_IEEE802154_WISUN_915MHz_2GFSK_100kbps_2a_AU_NZ(self, model, phy_name=None):
-        params = WisunFanChannelParams('AU_NZ', 1, 'Mode2a', 200000, 915200000, 'AU_NZ-915MHz')
+    def PHY_IEEE802154_WISUN_915MHz_2GFSK_100kbps_2a_AZ_NZ(self, model, phy_name=None):
+        params = WisunFanChannelParams('AZ_NZ', 1, 'Mode2a', 200000, 915200000, 'AZ_NZ-915MHz')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
     # Operating Class 2
 
-    def PHY_IEEE802154_WISUN_915MHz_2GFSK_150kbps_3_AU_NZ(self, model, phy_name=None):
-        params = WisunFanChannelParams('AU_NZ', 2, 'Mode3', 400000, 915400000, 'AU_NZ-915MHz')
+    def PHY_IEEE802154_WISUN_915MHz_2GFSK_150kbps_3_AZ_NZ(self, model, phy_name=None):
+        params = WisunFanChannelParams('AZ_NZ', 2, 'Mode3', 400000, 915400000, 'AZ_NZ-915MHz')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
-    def PHY_IEEE802154_WISUN_915MHz_2GFSK_200kbps_4a_AU_NZ(self, model, phy_name=None):
-        params = WisunFanChannelParams('AU_NZ', 2, 'Mode4a', 400000, 915400000, 'AU_NZ-915MHz')
+    def PHY_IEEE802154_WISUN_915MHz_2GFSK_200kbps_4a_AZ_NZ(self, model, phy_name=None):
+        params = WisunFanChannelParams('AZ_NZ', 2, 'Mode4a', 400000, 915400000, 'AZ_NZ-915MHz')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
-    def PHY_IEEE802154_WISUN_915MHz_2GFSK_300kbps_5_AU_NZ(self, model, phy_name=None):
-        params = WisunFanChannelParams('AU_NZ', 2, 'Mode5', 400000, 915400000, 'AU_NZ-915MHz')
+    def PHY_IEEE802154_WISUN_915MHz_2GFSK_300kbps_5_AZ_NZ(self, model, phy_name=None):
+        params = WisunFanChannelParams('AZ_NZ', 2, 'Mode5', 400000, 915400000, 'AZ_NZ-915MHz')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 

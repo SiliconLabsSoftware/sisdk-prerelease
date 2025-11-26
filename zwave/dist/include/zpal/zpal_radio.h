@@ -336,6 +336,7 @@ typedef struct {
   uint32_t rx_crc_errors;      ///< CRC16 Errors.
   uint32_t rx_foreign_home_id; ///< Foreign Home ID.
   uint32_t tx_time_channel[ZPAL_RADIO_ZWAVE_CHANNEL_NUM];  ///< Accumulated transmission time in ms for channel 0.
+  uint32_t tx_recoveries;      ///< Transmit recoveries - frame that were suposed to be aborted that were succesfully transmited.
 } zpal_radio_network_stats_t;
 
 typedef enum {

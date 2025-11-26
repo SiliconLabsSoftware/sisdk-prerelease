@@ -6,9 +6,12 @@
   {{"\n"}}writeRmrStructure {{ rmr_structs.phyInfo }} 20 8{% for byte in (phyInfoEntry.phyInfoData.antDivRxAutoConfig|uint32ToBytes) %} {{byte}}{% endfor -%}
   {% for byte in (phyInfoEntry.phyInfoData.src1Denominator|uint32ToBytes) %} {{byte}}{% endfor -%}
   {{"\n"}}writeRmrStructure {{ rmr_structs.phyInfo }} 28 8{% for byte in (phyInfoEntry.phyInfoData.src2Denominator|uint32ToBytes) %} {{byte}}{% endfor -%}
-  {% for byte in ((phyInfoEntry.phyInfoData.txBaudRate)|uint32ToBytes) %} {{byte}}{% endfor -%}
+  {% for byte in (phyInfoEntry.phyInfoData.txBaudRate|uint32ToBytes) %} {{byte}}{% endfor -%}
   {{"\n"}}writeRmrStructure {{ rmr_structs.phyInfo }} 36 8{% for byte in ((phyInfoEntry.phyInfoData.baudPerSymbol|baudsBits(phyInfoEntry.phyInfoData.bitsPerSymbol))|uint32ToBytes) %} {{byte}}{% endfor -%}
   {% for byte in ((phyInfoEntry.phyInfoData.synthCache|int)|uint32ToBytes) %} {{byte}}{% endfor -%}
+  {{"\n"}}writeRmrStructure {{ rmr_structs.phyInfo }} 56 8{% for byte in (phyInfoEntry.phyInfoData.paParams|uint32ToBytes) %} {{byte}}{% endfor -%}
+  {% for byte in (phyInfoEntry.phyInfoData.psmMaxSleepUs|uint32ToBytes) %} {{byte}}{% endfor -%}
+  {{"\n"}}writeRmrStructure {{ rmr_structs.phyInfo }} 64 4{% for byte in (phyInfoEntry.phyInfoData.rxBaudRate|uint32ToBytes) %} {{byte}}{% endfor -%}
   {#- Update the pointers in the phyInfoStructure -#}
   {{"\n"}}updateConfigurationPointer {{ rmr_structs.phyInfo }} 2 {{ rmr_structs.null }}
   {%- if phyInfoEntry.phyInfoData.irCalConfig|length > 0 -%}
@@ -145,14 +148,14 @@
   {#- Do the channel configuration next -#}
   {%- set multiPhyConfigEntry = firstDictValue(multiPhyConfig.multiPhyConfigEntries) -%}
   {%- set entry = firstDictValue(multiPhyConfigEntry.channelConfigEntries) -%}
-  writeRmrStructure {{ rmr_structs.channelConfigEntry }} 4 8
+  writeRmrStructure {{ rmr_structs.channelConfigEntry }} 20 8
   {%- for byte in (entry.baseFrequency|uint32ToBytes) -%}
     {{" "}}{{byte|int}}
   {%- endfor -%}
   {%- for byte in (entry.channelSpacing|uint32ToBytes) -%}
     {{" "}}{{byte|int}}
   {%- endfor -%}
-  {{"\n"}}writeRmrStructure {{ rmr_structs.channelConfigEntry }} 12 8
+  {{"\n"}}writeRmrStructure {{ rmr_structs.channelConfigEntry }} 28 8
   {%- if entry.physicalChannelOffset == "SAME_AS_FIRST_CHANNEL" -%}
   {%- for byte in (entry.channelNumberStart|uint16ToBytes) -%}
     {{" "}}{{byte|int}}
@@ -171,7 +174,7 @@
   {%- for byte in (entry.maxPower|uint16ToBytes) -%}
     {{" "}}{{byte|int}}
   {%- endfor -%}
-{{"\n"}}writeRmrStructure {{ rmr_structs.channelConfigEntry }} 24 4 {{entry.entryType|int}} 0 0 0{{"\n"}}
+{{"\n"}}writeRmrStructure {{ rmr_structs.channelConfigEntry }} 40 4 {{entry.entryType|int}} 0 0 0{{"\n"}}
   {%- if len(modemConfigRefs) > 0 -%}
     {%- for reference in modemConfigRefs -%}
       updateConfigurationPointer

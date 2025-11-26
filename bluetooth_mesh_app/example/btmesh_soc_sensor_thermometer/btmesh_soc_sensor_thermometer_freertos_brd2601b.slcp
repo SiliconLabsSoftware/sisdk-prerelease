@@ -92,8 +92,6 @@ other_file:
   - path: ../../documentation/example/btmesh_soc_sensor_thermometer/readme_img8.png
 
 configuration:
-  - name: EMDRV_DMADRV_DMA_CH_COUNT
-    value: 2
   - name: APP_LOG_LEVEL
     value: "APP_LOG_LEVEL_INFO"
   - name: APP_BUTTON_PRESS_CONFIG_QUEUE_SIZE

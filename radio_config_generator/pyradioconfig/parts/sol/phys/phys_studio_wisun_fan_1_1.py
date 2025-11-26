@@ -141,6 +141,6 @@ class PhysStudioWisunFan1v1Sol(PhysStudioWisunFan1v1Ocelot):
     # ChanPlanID 33
     def PHY_WISUN_FAN_1v1_867MHz_Plan42_OFDM_OPT4_SG(self, model, phy_name=None):
         params = WisunFan1v1ChannelParamsSol('SG', 84, 42, 200000, 866100000,
-                                             'Wi-SUN FAN, SG 865-867 MHz, OFDM OPTION 4')
+                                             'Wi-SUN FAN, SG 866-869 MHz, OFDM OPTION 4')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy

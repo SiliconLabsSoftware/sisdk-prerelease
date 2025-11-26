@@ -232,6 +232,7 @@ class PhysRAILBaseStandardIEEE802154Panther(IPhy):
         phy = self._makePhy(model, model.profiles.Base, readable_name='802154 2p4GHz cohdsa', phy_name=phy_name)
 
         self.IEEE802154_2p4GHz_cohdsa_base(phy, model)
+        model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.COHERENT
 
         phy.profile_outputs.rx_sync_delay_ns.override = 6625
         phy.profile_outputs.rx_eof_delay_ns.override = 6625
@@ -240,12 +241,14 @@ class PhysRAILBaseStandardIEEE802154Panther(IPhy):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Legacy IEEE 802.15.4 2p4GHz PHY from Jumbo', phy_name=phy_name)
 
         self.IEEE802154_2p4GHz_base(phy, model)
+        model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.LEGACY
 
     def PHY_IEEE802154_2p4GHz_antdiv(self, model, phy_name=None):
         #  PHY_IEEE802154_2p4GHz legacy, plus RSSI-based select best with antdiv repeat = NOREPEATFIRST
         phy = self._makePhy(model, model.profiles.Base, readable_name='IEEE802.15.4 2p4GHz antenna diversity PHY for Panther', phy_name=phy_name)
 
         self.IEEE802154_2p4GHz_base(phy, model)
+        model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.ANTDIV
 
         phy.profile_inputs.antdivmode.value = model.vars.antdivmode.var_enum.ANTSELRSSI
         phy.profile_inputs.antdivrepeatdis.value = model.vars.antdivrepeatdis.var_enum.NOREPEATFIRST
@@ -259,6 +262,7 @@ class PhysRAILBaseStandardIEEE802154Panther(IPhy):
 
         ### same settings as PHY_IEEE802154_2p4GHz_antdiv_prod below
         self.IEEE802154_2p4GHz_base(phy, model)
+        model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.FCS
 
         phy.profile_inputs.antdivmode.value = model.vars.antdivmode.var_enum.ANTSELRSSI
         phy.profile_inputs.antdivrepeatdis.value = model.vars.antdivrepeatdis.var_enum.NOREPEATFIRST

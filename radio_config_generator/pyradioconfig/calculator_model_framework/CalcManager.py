@@ -4,6 +4,7 @@ Radio Configurator
 import copy
 import os
 import re
+import sys
 import traceback
 import types
 from enum import Enum
@@ -1368,13 +1369,35 @@ class CalcManager(object):
 
         return filterList
 
+    def _get_all_phy_groups(self):
+        """Gets list of all PHY groups
+
+        Returns:
+            all_phys (list) : List of all PHY groups
+        """
+        part_family = self.__part_family
+
+        import_path = self.getPartFamilyImportPath(part_family, "phys")
+        class_list = ClassManager.getClassListFromImportPath(import_path, object)
+        all_groups = []
+        for phy in class_list:
+            module = sys.modules[phy.__module__]
+            file_name = os.path.basename(module.__file__)
+            all_groups.append(os.path.splitext(file_name)[0])
+
+        return all_groups
+
     def get_customer_phy_groups(self):
         """Gets list customer PHYs
 
         Returns:
             filterList (list) : List of PHYs of group type
         """
-        return self._get_phy_groups(PhyFilterGroupTypes.customer_phys)
+        all_groups = self._get_all_phy_groups()
+        non_customer = self._get_phy_groups(PhyFilterGroupTypes.simplicity_studio_phys)
+        customer = list(set(all_groups) - set(non_customer))
+
+        return customer
 
     def get_sim_tests_phy_groups(self):
         """Gets list simulation PHYs

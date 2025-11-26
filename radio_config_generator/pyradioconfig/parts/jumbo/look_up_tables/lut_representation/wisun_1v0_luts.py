@@ -50,12 +50,12 @@ class Wisun1v0Luts:
         ),
     }
     frequency_channel_lut: dict[str, FrequencyChannel1v0] = {
-        'AU_NZ_1': FrequencyChannel1v0(
+        'AZ_NZ_1': FrequencyChannel1v0(
             total_nb_channel=64,
             freq_band_start=915.0,
             freq_band_end=928.0
         ),
-        'AU_NZ_2': FrequencyChannel1v0(
+        'AZ_NZ_2': FrequencyChannel1v0(
             total_nb_channel=32,
             freq_band_start=915.0,
             freq_band_end=928.0
@@ -211,13 +211,13 @@ class Wisun1v0Luts:
             freq_band_end=869.0
         ),
         'SG_4': FrequencyChannel1v0(
-            total_nb_channel=24,
-            freq_band_start=920.0,
+            total_nb_channel=39,
+            freq_band_start=917.0,
             freq_band_end=925.0
         ),
         'SG_5': FrequencyChannel1v0(
-            total_nb_channel=12,
-            freq_band_start=920.0,
+            total_nb_channel=19,
+            freq_band_start=917.0,
             freq_band_end=925.0
         ),
         'TH_1': FrequencyChannel1v0(
@@ -249,15 +249,5 @@ class Wisun1v0Luts:
             total_nb_channel=207,
             freq_band_start=2400.0,
             freq_band_end=2483.5
-        ),
-        'CN_2': FrequencyChannel1v0(  # TODO: unnecessary only here, because broke etest on tools side
-            total_nb_channel=42,
-            freq_band_start=42,
-            freq_band_end=42
-        ),
-        'CN_3': FrequencyChannel1v0(  # TODO: unnecessary only here, because broke etest on tools side
-            total_nb_channel=42,
-            freq_band_start=42,
-            freq_band_end=42
         ),
     }

@@ -105,6 +105,7 @@ tag:
   - prebuilt_demo
   - hwfilter:device:device_supports_thread
   - hwfilter:!device:device_family_efr32mr21
+  - toolchain:gcc
 readme:
   - path: ./README.md
 

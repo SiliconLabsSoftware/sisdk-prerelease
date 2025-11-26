@@ -96,7 +96,7 @@ static fih_int bl_assert_tz_iovecs_in_ns(sli_tz_invec *in_vec, size_t in_len,
 // -----------------------------------------------------------------------------
 // NSC functions
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 uint32_t bootloader_nsc_getResetReason(void)
 {
   BootloaderResetCause_t resetReason = { 0 };
@@ -104,7 +104,7 @@ uint32_t bootloader_nsc_getResetReason(void)
   return (resetReason.reason << 16) | resetReason.signature;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_getInfo(sli_tz_invec *in_vec, size_t in_len,
                                sli_tz_outvec *out_vec, size_t out_len)
 {

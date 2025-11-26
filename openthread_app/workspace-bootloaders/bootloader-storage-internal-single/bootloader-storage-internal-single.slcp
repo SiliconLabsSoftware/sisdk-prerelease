@@ -86,6 +86,7 @@ tag:
   - "companion:workspace_application"
   - hwfilter:device:device_supports_thread
   - hwfilter:flash:1024k
+  - toolchain:gcc
 
 import:
   - id: application

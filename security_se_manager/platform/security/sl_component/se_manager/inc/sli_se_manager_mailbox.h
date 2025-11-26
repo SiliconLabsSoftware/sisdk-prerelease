@@ -409,8 +409,8 @@ typedef struct {
  ******************************************************************************/
 typedef struct {
   uint32_t command;                                   /**< SE Command */
-  sli_se_datatransfer_t* data_in;                     /**< Input data */
-  sli_se_datatransfer_t* data_out;                    /**< Output data */
+  volatile sli_se_datatransfer_t* data_in;            /**< Input data */
+  volatile sli_se_datatransfer_t* data_out;           /**< Output data */
   uint32_t parameters[SLI_SE_COMMAND_MAX_PARAMETERS]; /**< Parameters */
   size_t num_parameters;                              /**< Number of parameters */
 } sli_se_mailbox_command_t;
@@ -452,7 +452,7 @@ typedef uint32_t sli_se_mailbox_response_t;
  * @param[in]  data
  *   Pointer to a data transfer structure.
  ******************************************************************************/
-void sli_se_mailbox_command_add_input(sli_se_mailbox_command_t *command, sli_se_datatransfer_t *data);
+void sli_se_mailbox_command_add_input(sli_se_mailbox_command_t *command, volatile sli_se_datatransfer_t *data);
 
 /***************************************************************************//**
  * @brief
@@ -474,7 +474,7 @@ void sli_se_mailbox_command_add_input(sli_se_mailbox_command_t *command, sli_se_
  * @param[in]  data
  *   Pointer to a data transfer structure.
  ******************************************************************************/
-void sli_se_mailbox_command_add_output(sli_se_mailbox_command_t *command, sli_se_datatransfer_t *data);
+void sli_se_mailbox_command_add_output(sli_se_mailbox_command_t *command, volatile sli_se_datatransfer_t *data);
 
 /***************************************************************************//**
  * @brief

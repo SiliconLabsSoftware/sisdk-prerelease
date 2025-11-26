@@ -22,6 +22,54 @@ class CalcDemodulatorRainier(Calc_Demodulator_Bobcat):
         self._build_rxdc_variables(model)
         self._addModelVariable(model, 'synchronous_ifadc_clk', bool, ModelVariableFormat.DECIMAL,
                                desc='Flag used treat ifadc_clk as synchronous to clk_demod and bypass afifo')
+        member_data = [
+            ['NONE', 0xFF, 'None'],
+            ['STANDARD', 0, 'Standard'],
+            ['ANTDIV', 1, 'Antenna Diversity'],
+            ['COEX', 2, 'Antenna Diversity'],
+            ['ANTDIV_COEX', 3, 'Antenna Diversity'],
+            ['FEM', 8, 'External LNA'],
+            ['ANTDIV_FEM', 9, 'Antenna Diversity with External LNA'],
+            ['COEX_FEM', 10, 'External LNA'],
+            ['ANTDIV_COEX_FEM', 11, 'External LNA'],
+            ['HDR_2M', 13, 'Mode Switch to 2M'],
+            ['FCS', 14, 'Fast channel switch'],
+            ['HDR_1M_FEC', 15, 'Mode Switch to 1M with FEC'],
+            ['FCS_HDR_2M', 16, 'Fast Channel Switching and 2M'],
+            ['FCS_HDR_1M_FEC', 17, 'Fast Channel Switching and 1M with FEC'],
+            ['RXDC', 18, 'Rx Duty Cycling'],
+            ['GB868_863', 133, 'UK Metering 863 MHz Band'],
+            ['GB868_915', 134, 'UK Metering 915 MHz Band'],
+            ['NA915_R23', 135, 'NA R23 915 MHz Band'],
+            # We use the thousands place (decimal) to indicate different PHY (different demod) for same feature
+            # See https://jira.silabs.com/browse/MCUW_RADIO_CFG-2862
+            ['LEGACY', 1000, 'Legacy Demod'],
+            ['COHERENT', 2000, 'Coherent Demod'],
+            ['ENHANCED', 3000, 'Enhanced Demod'],
+        ]
+        model.vars.zigbee_feature.var_enum = CreateModelVariableEnum(
+            'ZigbeeFeatureEnum',
+            'List of supported zigbee PHY features',
+            member_data)
+
+        member_data = [
+            ['NONE', 0xFF, 'None'],
+            ['LE_1M', 0, 'Bluetooth LE 1Mbps'],
+            ['LE_2M', 1, 'Bluetooth LE 2Mbps'],
+            ['CODED_125K', 2, 'Bluetooth LE Coded 125Kbps'],
+            ['CODED_500K', 3, 'Bluetooth LE Coded 500Kbps'],
+            ['CONCURRENT', 4, 'Bluetooth Concurrent'],
+            ['AOX_2M', 5, 'Bluetooth LE AoX 2Mbps'],
+            ['HADM_1M', 7, 'Bluetooth LE HADM (Channel Sounding) 1Mbps'],
+            ['HADM_2M', 8, 'Bluetooth LE HADM (Channel Sounding) 2Mbps'],
+            ['AOX_1M', 9, 'Bluetooth LE AoX 1Mbps'],
+            ['HADM_2M_2BT', 10, 'Bluetooth LE AoX 2Mbps 2BT'],
+            ['FASTSW', 12, 'Fast switching'],
+        ]
+        model.vars.ble_feature.var_enum = CreateModelVariableEnum(
+            'BleFeatureEnum',
+            'List of supported Bluetooth LE PHY features',
+            member_data)
 
     def _build_rxdc_variables(self, model):
         """Build Rx Duty Cycle variables:

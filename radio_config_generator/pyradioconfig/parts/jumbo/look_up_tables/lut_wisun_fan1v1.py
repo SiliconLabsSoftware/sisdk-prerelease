@@ -142,8 +142,8 @@ class LutWisunFan1v1:
         if key is None:
             return None
 
-        if reg_domain == 'AU_NZ':
-            return model.vars.meta_group.var_enum.AU_NZ
+        if reg_domain == 'AZ_NZ':
+            return model.vars.meta_group.var_enum.AZ_NZ
         if reg_domain == 'BZ':
             return model.vars.meta_group.var_enum.BZ
         if reg_domain == 'HK':
@@ -186,7 +186,7 @@ class LutWisunFan1v1:
         if reg_domain == 'SG':
             if channel_plan_id in [41,42,43]:
                 return model.vars.meta_group.var_enum.SG1
-            if channel_plan_id in [64,65]:
+            if channel_plan_id in [98,99]:
                 return model.vars.meta_group.var_enum.SG2
 
-        return None
+        raise ValueError(f"{reg_domain=} is not an acceptable value")

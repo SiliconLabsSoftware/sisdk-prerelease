@@ -247,6 +247,7 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
     def PHY_Bluetooth_LE(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Official BLE 1Mbps Legacy PHY for Panther',
                             phy_name=phy_name)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
         self.Bluetooth_LE_base(phy, model)
         return phy
 
@@ -307,6 +308,7 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
     def PHY_Bluetooth_LE_Viterbi(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Bluetooth LE Viterbi phase-DSA',
                             phy_name=phy_name)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
         self.Bluetooth_LE_Viterbi_base(phy, model)
         return phy
 
@@ -366,6 +368,7 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
     def PHY_Bluetooth_LE_2M_Viterbi(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Official 2Mbps BLE phase-DSA PHY for Panther',
                             phy_name=phy_name)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_2M
         self.Bluetooth_LE_2M_Viterbi_base(phy, model)
         return phy
 
@@ -474,6 +477,7 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
                             phy_name=phy_name)
         self.Bluetooth_LE_Viterbi_noDSA_halfrate_base(phy, model)
         phy.profile_inputs.baudrate_tol_ppm.value = 5000
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
         return phy
 
     def PHY_Bluetooth_LE_Viterbi_noDSA_EnPkd(self, model, phy_name=None):
@@ -481,6 +485,7 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
                             readable_name='BLE Viterbi No DSA PHY for Lynx with Peak Detector Enabled',
                             phy_name=phy_name)
         self.Bluetooth_LE_Viterbi_noDSA_halfrate_base(phy, model)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
 
         phy.profile_outputs.AGC_CTRL2_DISRFPKD.override = 0
         phy.profile_outputs.AGC_CTRL4_RFPKDCNTEN.override = 1
@@ -493,6 +498,7 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
         phy = self._makePhy(model, model.profiles.Base, readable_name='PHY_Bluetooth_LE_1M_Viterbi_917M_noDSA',
                             phy_name=phy_name)
         self.Bluetooth_LE_Viterbi_noDSA_halfrate_base(phy, model)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
 
         phy.profile_inputs.if_frequency_hz.value = 1066666
         phy.profile_inputs.base_frequency_hz.value = long(917000000)
@@ -504,6 +510,7 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
         phy = self._makePhy(model, model.profiles.Base, readable_name='BLE Viterbi No DSA Fullrate PHY for Lynx',
                             phy_name=phy_name)
         self.Bluetooth_LE_Viterbi_noDSA_base(phy, model)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
 
         # default bandwidth will cause halfrate unless forced
         phy.profile_inputs.adc_rate_mode.value = model.vars.adc_rate_mode.var_enum.FULLRATE
@@ -515,6 +522,7 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
                             readable_name='BLE Viterbi No DSA Fullrate PHY for Lynx with Peak Detector Enabled',
                             phy_name=phy_name)
         self.Bluetooth_LE_Viterbi_noDSA_base(phy, model)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
 
         # default bandwidth will cause halfrate unless forced
         phy.profile_inputs.adc_rate_mode.value = model.vars.adc_rate_mode.var_enum.FULLRATE
@@ -560,6 +568,7 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
                             phy_name=phy_name)
         self.Bluetooth_LE_2M_Viterbi_noDSA_base(phy, model)
         phy.profile_inputs.baudrate_tol_ppm.value = 5000
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_2M
 
         phy.profile_inputs.adc_rate_mode.value = model.vars.adc_rate_mode.var_enum.FULLRATE
         return phy
@@ -569,6 +578,7 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
                             readable_name='BLE Viterbi 2M No DSA Fullrate PHY for Lynx with Peak Detector Enabled',
                             phy_name=phy_name)
         self.Bluetooth_LE_2M_Viterbi_noDSA_base(phy, model)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_2M
 
         phy.profile_inputs.adc_rate_mode.value = model.vars.adc_rate_mode.var_enum.FULLRATE
 
@@ -581,6 +591,7 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
 
     def PHY_Bluetooth_1M_AOX(self, model, phy_name=None):
         phy = self.PHY_Bluetooth_LE_Viterbi_noDSA_fullrate(model, phy_name='PHY_Bluetooth_1M_AOX')
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.AOX_1M
 
         # force fullrate and dec1 = 1 to match LYNX AOX config (which uses DEC1 switching)
         model.vars.adc_clock_mode.value_forced = model.vars.adc_clock_mode.var_enum.VCODIV
@@ -593,4 +604,5 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
         phy = self.PHY_Bluetooth_LE_2M_Viterbi_noDSA_fullrate(model, phy_name='PHY_Bluetooth_2M_AOX')
         self.BLE_2M_AOX_TX_Shaping_Coeffs(phy, model)
         phy.profile_inputs.synth_tx_mode.value = model.vars.synth_tx_mode.var_enum.MODE8
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.AOX_2M
         return phy

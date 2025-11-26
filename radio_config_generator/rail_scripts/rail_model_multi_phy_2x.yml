@@ -217,6 +217,9 @@ RAILModel:
                         - RAILModelInfo:
                             name: tableName
                         - RAILModelSimpleArray:
+                            name: tableInputs
+                            dataType: FieldDataType.STRING
+                        - RAILModelSimpleArray:
                             name: values
                             dataType: FieldDataType.UINT32_T
 

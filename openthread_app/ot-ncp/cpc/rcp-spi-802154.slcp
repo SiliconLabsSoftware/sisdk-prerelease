@@ -82,6 +82,8 @@ tag:
   - hardware:component:exp_header:spi
   - hwfilter:device:device_supports_thread
   - hwfilter:board:hardware_board_has_spi
+  - toolchain:gcc
+
 readme:
   - path: ./README-MP-RCP.md
 

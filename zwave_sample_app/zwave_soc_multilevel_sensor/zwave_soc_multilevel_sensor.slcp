@@ -57,9 +57,6 @@ component:
   - id: imu_driver
     condition: [brd2603a]
   - id: clock_manager
-  - id: common_token_manager
-  - id: common_token_manager_compatibility
-    condition: [device_series_2]
 
 source:
   - path: app.c
@@ -178,7 +175,7 @@ configuration:
   - name: SL_IOSTREAM_EUSART_VCOM_BAUDRATE
     value: 9600 # In EM2 the eusart is working only with 9600 baud
   - name: SL_IOSTREAM_EUSART_VCOM_ENABLE_HIGH_FREQUENCY # Disable high frequency mode for EUSART to work in EM2
-    value: 0 
+    value: 0
 define:
   - name: APP_PROPERTIES_CONFIG_FILE
     value: <application_properties_config.h>

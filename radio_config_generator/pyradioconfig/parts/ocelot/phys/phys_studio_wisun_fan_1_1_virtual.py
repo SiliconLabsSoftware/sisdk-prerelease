@@ -8,28 +8,28 @@ class PhysStudioWisunFan1v1VirtualOcelot(PhysStudioWisunFan1v1VirtualJumbo):
     def _set_xtal_frequency(self, model, phy):
         phy.profile_inputs.xtal_frequency_hz.value = 39000000
 
-    def PHY_WISUN_FAN_1v1_915MHz_Plan48_2FSK_1b_AU_NZ_FEC(self, model, phy_name=None):
-        params = WisunFan1v1ChannelParamsOcelot('AU_NZ', 0x12, 48, 200000, 915200000, 'Wi-SUN FAN, AU_NZ 915-928 MHz, Mode1b (2FSK 50kbps mi=1.0), FEC')
+    def PHY_WISUN_FAN_1v1_915MHz_Plan48_2FSK_1b_AZ_NZ_FEC(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsOcelot('AZ_NZ', 0x12, 48, 200000, 915200000, 'Wi-SUN FAN, AZ_NZ 915-928 MHz, Mode1b (2FSK 50kbps mi=1.0), FEC')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
     
-    def PHY_WISUN_FAN_1v1_915MHz_Plan48_2FSK_2a_AU_NZ_FEC(self, model, phy_name=None):
-        params = WisunFan1v1ChannelParamsOcelot('AU_NZ', 0x13, 48, 200000, 915200000, 'Wi-SUN FAN, AU_NZ 915-928 MHz, Mode2a (2FSK 100kbps mi=0.5), FEC')
+    def PHY_WISUN_FAN_1v1_915MHz_Plan48_2FSK_2a_AZ_NZ_FEC(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsOcelot('AZ_NZ', 0x13, 48, 200000, 915200000, 'Wi-SUN FAN, AZ_NZ 915-928 MHz, Mode2a (2FSK 100kbps mi=0.5), FEC')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
     
-    def PHY_WISUN_FAN_1v1_915MHz_Plan49_2FSK_3_AU_NZ_FEC(self, model, phy_name=None):
-        params = WisunFan1v1ChannelParamsOcelot('AU_NZ', 0x15, 49, 400000, 915400000, 'Wi-SUN FAN, AU_NZ 915-928 MHz, Mode3 (2FSK 150kbps mi=0.5), FEC')
+    def PHY_WISUN_FAN_1v1_915MHz_Plan49_2FSK_3_AZ_NZ_FEC(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsOcelot('AZ_NZ', 0x15, 49, 400000, 915400000, 'Wi-SUN FAN, AZ_NZ 915-928 MHz, Mode3 (2FSK 150kbps mi=0.5), FEC')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
     
-    def PHY_WISUN_FAN_1v1_915MHz_Plan49_2FSK_4a_AU_NZ_FEC(self, model, phy_name=None):
-        params = WisunFan1v1ChannelParamsOcelot('AU_NZ', 0x16, 49, 400000, 915400000, 'Wi-SUN FAN, AU_NZ 915-928 MHz, Mode4a (2FSK 200kbps mi=0.5), FEC')
+    def PHY_WISUN_FAN_1v1_915MHz_Plan49_2FSK_4a_AZ_NZ_FEC(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsOcelot('AZ_NZ', 0x16, 49, 400000, 915400000, 'Wi-SUN FAN, AZ_NZ 915-928 MHz, Mode4a (2FSK 200kbps mi=0.5), FEC')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
     
-    def PHY_WISUN_FAN_1v1_915MHz_Plan49_2FSK_5_AU_NZ_FEC(self, model, phy_name=None):
-        params = WisunFan1v1ChannelParamsOcelot('AU_NZ', 0x18, 49, 400000, 915400000, 'Wi-SUN FAN, AU_NZ 915-928 MHz, Mode5 (2FSK 300kbps mi=0.5), FEC')
+    def PHY_WISUN_FAN_1v1_915MHz_Plan49_2FSK_5_AZ_NZ_FEC(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsOcelot('AZ_NZ', 0x18, 49, 400000, 915400000, 'Wi-SUN FAN, AZ_NZ 915-928 MHz, Mode5 (2FSK 300kbps mi=0.5), FEC')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
     
@@ -203,28 +203,28 @@ class PhysStudioWisunFan1v1VirtualOcelot(PhysStudioWisunFan1v1VirtualJumbo):
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
     
-    def PHY_WISUN_FAN_1v1_920MHz_Plan64_2FSK_1b_SG_FEC(self, model, phy_name=None):
-        params = WisunFan1v1ChannelParamsOcelot('SG', 0x12, 64, 200000, 920200000, 'Wi-SUN FAN, SG 920-925 MHz, Mode1b (2FSK 50kbps mi=1.0), FEC')
+    def PHY_WISUN_FAN_1v1_920MHz_Plan98_2FSK_1b_SG_FEC(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsOcelot('SG', 0x12, 98, 200000, 917200000, 'Wi-SUN FAN, SG 917-925 MHz, Mode1b (2FSK 50kbps mi=1.0), FEC')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
     
-    def PHY_WISUN_FAN_1v1_920MHz_Plan64_2FSK_2a_SG_FEC(self, model, phy_name=None):
-        params = WisunFan1v1ChannelParamsOcelot('SG', 0x13, 64, 200000, 920200000, 'Wi-SUN FAN, SG 920-925 MHz, Mode2a (2FSK 100kbps mi=0.5), FEC')
+    def PHY_WISUN_FAN_1v1_920MHz_Plan98_2FSK_2a_SG_FEC(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsOcelot('SG', 0x13, 98, 200000, 917200000, 'Wi-SUN FAN, SG 917-925 MHz, Mode2a (2FSK 100kbps mi=0.5), FEC')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
     
-    def PHY_WISUN_FAN_1v1_920MHz_Plan65_2FSK_3_SG_FEC(self, model, phy_name=None):
-        params = WisunFan1v1ChannelParamsOcelot('SG', 0x15, 65, 400000, 920400000, 'Wi-SUN FAN, SG 920-925 MHz, Mode3 (2FSK 150kbps mi=0.5), FEC')
+    def PHY_WISUN_FAN_1v1_920MHz_Plan99_2FSK_3_SG_FEC(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsOcelot('SG', 0x15, 99, 400000, 917400000, 'Wi-SUN FAN, SG 917-925 MHz, Mode3 (2FSK 150kbps mi=0.5), FEC')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
     
-    def PHY_WISUN_FAN_1v1_920MHz_Plan65_2FSK_4a_SG_FEC(self, model, phy_name=None):
-        params = WisunFan1v1ChannelParamsOcelot('SG', 0x16, 65, 400000, 920400000, 'Wi-SUN FAN, SG 920-925 MHz, Mode4a (2FSK 200kbps mi=0.5), FEC')
+    def PHY_WISUN_FAN_1v1_920MHz_Plan99_2FSK_4a_SG_FEC(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsOcelot('SG', 0x16, 99, 400000, 917400000, 'Wi-SUN FAN, SG 917-925 MHz, Mode4a (2FSK 200kbps mi=0.5), FEC')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
     
-    def PHY_WISUN_FAN_1v1_920MHz_Plan65_2FSK_5_SG_FEC(self, model, phy_name=None):
-        params = WisunFan1v1ChannelParamsOcelot('SG', 0x18, 65, 400000, 920400000, 'Wi-SUN FAN, SG 920-925 MHz, Mode5 (2FSK 300kbps mi=0.5), FEC')
+    def PHY_WISUN_FAN_1v1_920MHz_Plan99_2FSK_5_SG_FEC(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsOcelot('SG', 0x18, 99, 400000, 917400000, 'Wi-SUN FAN, SG 917-925 MHz, Mode5 (2FSK 300kbps mi=0.5), FEC')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
     

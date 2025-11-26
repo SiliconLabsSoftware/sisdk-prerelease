@@ -1,0 +1,50 @@
+id: cpc_nvm3_test
+label: CPC NVM3 Target Tests
+package: cpc_nvm3
+description: >
+  Target tests for the Co-Processor Communication (CPC) NVM3 software component.
+category: Services|Co-Processor Communication|NVM3
+quality: internal
+metadata:
+  sbom:
+    license: Zlib
+ui_hints:
+  visibility: never
+source:
+- path: tests/cpc_nvm3_test_cmd.c
+
+provides:
+- name: cpc_nvm3_test
+
+requires:
+- name: cpc_nvm3
+- name: cli_core
+- name: iostream_rtt
+define:
+- name: DEBUG_EFM
+- name: SLI_CPC_NVM3_DEVICE_UNDER_TEST
+template_contribution:
+- name: cli_command
+  value:
+    name: cpc_nvm3_erase
+    handler: cpc_nvm3_erase_cmd_handler
+    help: Erase the contents of the default NVM3 instance
+- name: cli_command
+  value:
+    name: cpc_nvm3_reset
+    handler: cpc_nvm3_reset_cmd_handler
+    help: Reset the MCU
+- name: cli_command
+  value:
+    name: cpc_nvm3_restart_endpoint
+    handler: cpc_nvm3_restart_endpoint_cmd_handler
+    help: Restart the NVM3 endpoint
+- name: cli_command
+  value:
+    name: cpc_nvm3_halt_mcu
+    handler: cpc_nvm3_halt_mcu_cmd_handler
+    help: Restart the NVM3 endpoint
+    argument:
+    - type: uint32
+      help: Delay in ms
+root_path: cpc_nvm3

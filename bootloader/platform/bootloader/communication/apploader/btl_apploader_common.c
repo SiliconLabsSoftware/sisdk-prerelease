@@ -32,7 +32,6 @@
 #include "sl_device_init_dcdc.h"
 #endif
 #endif
-#include "sl_rail_util_pa_conversions.h"
 
 #if defined(BOOTLOADER_NONSECURE)
 // NS headers
@@ -215,7 +214,6 @@ void bootloader_apploader_communication_init(void)
   sl_device_init_dcdc();
 #endif
 #endif
-  sl_rail_util_pa_init();
 
   // Configure Bluetooth
   static sl_apploader_config_t btConfig = {

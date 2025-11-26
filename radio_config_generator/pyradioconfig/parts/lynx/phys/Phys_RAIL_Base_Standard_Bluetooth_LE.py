@@ -234,6 +234,7 @@ class PhysRAILBaseStandardBluetoothLELynx(PhysRAILBaseStandardBluetoothLEPanther
     def PHY_Bluetooth_LE_Viterbi_noDSA_fullrate(self, model,phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='BLE Viterbi No DSA Fullrate PHY for Lynx',phy_name=phy_name)
         self.Bluetooth_LE_Viterbi_noDSA_base(phy,model)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
 
         phy.profile_outputs.AGC_CTRL2_DISRFPKD.override = 1
         phy.profile_outputs.AGC_CTRL4_RFPKDCNTEN.override = 0
@@ -244,6 +245,7 @@ class PhysRAILBaseStandardBluetoothLELynx(PhysRAILBaseStandardBluetoothLEPanther
         #Start with the BLE LR 125k PHY
         phy = self.PHY_Bluetooth_LongRange_dsa_125kbps(model, phy_name='PHY_Bluetooth_1M_Concurrent')
         phy.profile_inputs.preamble_pattern.value = 0b10
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.CONCURRENT
 
         #The concurrent PHY needs to have:
         #Enable concurrent mode
@@ -328,6 +330,7 @@ class PhysRAILBaseStandardBluetoothLELynx(PhysRAILBaseStandardBluetoothLEPanther
     def PHY_Bluetooth_LE_2M_Viterbi_noDSA_fullrate(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='BLE Viterbi 2M No DSA Fullrate PHY for Lynx',phy_name=phy_name)
         self.Bluetooth_LE_2M_Viterbi_noDSA_base(phy,model)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_2M
 
         phy.profile_inputs.pll_bandwidth_tx.value = model.vars.pll_bandwidth_tx.var_enum.BW_3000KHz
         self.BLE_2M_TX_Shaping_Coeffs(phy, model)
@@ -339,6 +342,7 @@ class PhysRAILBaseStandardBluetoothLELynx(PhysRAILBaseStandardBluetoothLEPanther
     def PHY_Bluetooth_LE_Viterbi_noDSA(self, model,phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='BLE Viterbi No DSA PHY for Lynx',phy_name=phy_name)
         self.Bluetooth_LE_Viterbi_noDSA_halfrate_base(phy, model)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
 
         phy.profile_outputs.AGC_CTRL2_DISRFPKD.override = 1
         phy.profile_outputs.AGC_CTRL4_RFPKDCNTEN.override = 0
@@ -354,6 +358,8 @@ class PhysRAILBaseStandardBluetoothLELynx(PhysRAILBaseStandardBluetoothLEPanther
 
         #Use BLE 1M shaping coeffs
         self.BLE_TX_Shaping_Coeffs(phy,model)
+
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.CODED_125K
 
         phy.profile_outputs.AGC_CTRL2_DISRFPKD.override = 1
         phy.profile_outputs.AGC_CTRL4_RFPKDCNTEN.override = 0
@@ -374,6 +380,7 @@ class PhysRAILBaseStandardBluetoothLELynx(PhysRAILBaseStandardBluetoothLEPanther
 
         # Use BLE 1M shaping coeffs
         self.BLE_TX_Shaping_Coeffs(phy, model)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.CODED_500K
 
         phy.profile_outputs.AGC_CTRL2_DISRFPKD.override = 1
         phy.profile_outputs.AGC_CTRL4_RFPKDCNTEN.override = 0

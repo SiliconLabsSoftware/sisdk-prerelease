@@ -18,6 +18,7 @@ class PhysRAILBaseStandardIEEE802154Lynx(IPhy):
 
         # Use the commmon ZB frame definition and override min length for 802.15.4E Seq# Suppression
         PHY_COMMON_FRAME_154(phy, model)
+        model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.LEGACY
         phy.profile_inputs.var_length_minlength.value = 4
 
         # Configure non-framing Profile Inputs

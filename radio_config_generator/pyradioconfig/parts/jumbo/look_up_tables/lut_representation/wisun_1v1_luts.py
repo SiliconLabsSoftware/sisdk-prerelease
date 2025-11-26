@@ -82,12 +82,12 @@ class Wisun1v1Luts:
         ),
     }
     frequency_channel_lut: dict[str, FrequencyChannel1v1] = {
-        'AU_NZ_48': FrequencyChannel1v1(
+        'AZ_NZ_48': FrequencyChannel1v1(
             total_nb_channel=64,
             freq_band_start=915.0,
             freq_band_end=928.0
         ),
-        'AU_NZ_49': FrequencyChannel1v1(
+        'AZ_NZ_49': FrequencyChannel1v1(
             total_nb_channel=32,
             freq_band_start=915.0,
             freq_band_end=928.0
@@ -277,14 +277,14 @@ class Wisun1v1Luts:
             freq_band_start=866.0,
             freq_band_end=869.0
         ),
-        'SG_64': FrequencyChannel1v1(
-            total_nb_channel=24,
-            freq_band_start=920.0,
+        'SG_98': FrequencyChannel1v1(
+            total_nb_channel=39,
+            freq_band_start=917.0,
             freq_band_end=925.0
         ),
-        'SG_65': FrequencyChannel1v1(
-            total_nb_channel=12,
-            freq_band_start=920.0,
+        'SG_99': FrequencyChannel1v1(
+            total_nb_channel=19,
+            freq_band_start=917.0,
             freq_band_end=925.0
         ),
         'TH_64': FrequencyChannel1v1(

@@ -3,6 +3,7 @@ from pycalcmodel.core.variable import ModelVariableFormat, CreateModelVariableEn
 from enum import Enum
 import math
 import itertools
+from math import floor, log, ceil
 
 from py_2_and_3_compatibility import *
 
@@ -316,3 +317,40 @@ class CALC_Demodulator_panther(CALC_Demodulator_nixi):
             if_frequency = fxo / (dec0 * cfosr)
 
         model.vars.if_center_digital_hz_actual.value = int(if_frequency)
+
+    # Add this function to modify the behavior of interpolation_gain provided to Ocelot (see MCUW_RADIO_CFG-3149)
+    def calc_interpolation_gain_actual(self, model):
+        #This function calculates the actual interpolation gain
+
+        #Load model variables into local variables
+        txbrnum = model.vars.MODEM_TXBR_TXBRNUM.value
+        modformat = model.vars.modulation_type.value
+
+        if txbrnum < 256:
+            interpolation_gain = txbrnum / 1.0
+        elif modformat == model.vars.modulation_type.var_enum.BPSK or \
+             modformat == model.vars.modulation_type.var_enum.DBPSK:
+            interpolation_gain = 16 * txbrnum * 2 ** (3-floor(log(txbrnum, 2)))
+        elif txbrnum < 512:
+            interpolation_gain = txbrnum / 2.0
+        elif txbrnum < 1024:
+            interpolation_gain = txbrnum / 4.0
+        elif txbrnum < 2048:
+            interpolation_gain = txbrnum / 8.0
+        elif txbrnum < 4096:
+            interpolation_gain = txbrnum / 16.0
+        elif txbrnum < 8192:
+            interpolation_gain = txbrnum / 32.0
+        elif txbrnum < 16384:
+            interpolation_gain = txbrnum / 64.0
+        elif txbrnum < 32768:
+            interpolation_gain = txbrnum / 128.0
+        else:
+            interpolation_gain = txbrnum / 256.0
+
+        # calculate phase interpolation gain for OQPSK cases
+        if modformat == model.vars.modulation_type.var_enum.OQPSK:
+            interpolation_gain = 2 ** (ceil(log(interpolation_gain, 2)))
+
+        #Load local variables back into model variables
+        model.vars.interpolation_gain_actual.value = float(interpolation_gain)

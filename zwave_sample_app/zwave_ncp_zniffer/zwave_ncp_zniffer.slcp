@@ -26,10 +26,8 @@ component:
   - id: simple_led
     instance: [led0, led1]
   - id: clock_manager
-  - id: common_token_manager
-  - id: common_token_manager_compatibility
-    condition: [device_series_2]
   - id: rail_util_pti
+
 requires:
   - name: iostream_swo
     condition: [zw_debug]

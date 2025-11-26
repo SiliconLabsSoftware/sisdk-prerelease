@@ -41,6 +41,9 @@ ACTION_USING_REG_ADDR = [
     'MOVBLOCK', 'MOV', 'SAVE_AND_RESTORE'
 ]
 
+# SEQACC argument fields that are hard-coded
+ARG_OFFSET_POS = 0
+ARG_OPCODE_POS = 28
 
 class Sequences(object):
     def __init__(self, chip, regBaseYml, dataYml, isInternal=False):
@@ -87,10 +90,25 @@ class Sequences(object):
             if sequence.baseAddrConfigName not in self.regBases:
                 self.regBases[sequence.baseAddrConfigName] = {}
                 self.regBases[sequence.baseAddrConfigName]['BaseAddr'] = sequence.baseAddrConfig['BaseAddr']
-                self.regBases[sequence.baseAddrConfigName]['BasePos'] = sequence.basePos << 4
                 self.regBases[sequence.baseAddrConfigName]['Define'] = sequence.baseAddrConfig.get('Define', 'SEQACC_BASE_ADDR_CFG_DFLT_ARRAY_SZ')
-                self.regBases[sequence.baseAddrConfigName]['RegBasesMask'] = (((1 << (28 - sequence.basePos)) - 1) << sequence.basePos)
 
+                # Get the positions of the fields in the SEQACC argument
+                self.regBases[sequence.baseAddrConfigName]['OpcodePos'] = ARG_OPCODE_POS
+                self.regBases[sequence.baseAddrConfigName]['BasePos'] = sequence.basePos
+                self.regBases[sequence.baseAddrConfigName]['BasePosRegField'] = sequence.basePos << 4
+                self.regBases[sequence.baseAddrConfigName]['ContWrPos'] = sequence.contWrPos
+                self.regBases[sequence.baseAddrConfigName]['OffsetPos'] = ARG_OFFSET_POS
+
+                # Get the masks to each field in the SEQACC argument
+                self.regBases[sequence.baseAddrConfigName]['OpcodeMask'] = ((1 << ARG_OPCODE_POS) - 1) ^ 0xFFFFFFFF
+                self.regBases[sequence.baseAddrConfigName]['BaseMask'] = ((1 << (ARG_OPCODE_POS - sequence.basePos)) - 1) << sequence.basePos
+                self.regBases[sequence.baseAddrConfigName]['OffsetAddrMask'] = (2 ** (sequence.contWrPos) - 1)
+                self.regBases[sequence.baseAddrConfigName]['ContWrMask'] = ((self.regBases[sequence.baseAddrConfigName]['OpcodeMask']
+                                                                             | self.regBases[sequence.baseAddrConfigName]['BaseMask']
+                                                                             | self.regBases[sequence.baseAddrConfigName]['OffsetAddrMask'])
+                                                                            ^ 0xFFFFFFFF)
+                # Mask to get the base address from a 32-bit address
+                self.regBases[sequence.baseAddrConfigName]['BaseAddrMask'] = self.regBases[sequence.baseAddrConfigName]['OffsetAddrMask'] ^ 0xFFFFFFFF
                 self.regBases[sequence.baseAddrConfigName]['BitOpMask'] = 0
                 for i, addr in enumerate(list(sequence.baseAddrConfig['BaseAddr'].keys())[:-1]):
                     if addr != 0xB0000000 and addr != 0xA0000000:
@@ -163,8 +181,14 @@ class Sequence(Sequences):
             # Try with the part name
             self.alias = self.getConfig(regBaseYml, self.part, self.baseAddrConfigName, 'Alias', default={})
 
+        self.contWrPos = self.getConfig(regBaseYml, chip, self.baseAddrConfigName, 'ContWrPos')
+        if self.contWrPos is None:
+            # Try with the part name
+            self.contWrPos = self.getConfig(regBaseYml, self.part, self.baseAddrConfigName, 'ContWrPos')
+            if self.contWrPos is None:
+                raise Exception("ContWrPos field not found in {}".format(self.baseAddrConfigName))
+
         self.sequenceCfg = self._encodeCfg()
-        self.contWrPos = seqData.get('SequenceCfg', {}).get('CNTWRPOS', 16)
         self.value = []
         self.lengthWord = 0
         self.condition = seqData.get('Condition')  # used in template
@@ -248,7 +272,7 @@ class Sequence(Sequences):
     def _encodeCfg(self):
         config = self.data.get('SequenceCfg', {})
         return (config.get('MOVSWAP', 0) << 14) | (config.get('DISABSRST', 0) << 13) | (config.get('HWSTTRIG', 0) << 10)\
-                | (config.get('HWSTSEL', 0)) << 5 | config.get('CNTWRPOS', 16)
+                | (config.get('HWSTSEL', 0)) << 5 | self.contWrPos
 
     def getLength(self):
         length = 0
@@ -660,19 +684,22 @@ class Action(object):
             regInfo = re.split("[(_\-> )]+", block_register)
             regInfo = list(filter(lambda x: (x != '' and x != ' '), regInfo))  # remove empty str ''
 
-            address = eval('rm.' + regInfo[0] + suffix + '.' + regInfo[1] + '.address')
+            reg = regInfo[0]
 
-            if 'SET' in regInfo:
-                offset = 'setOffset'
-            elif 'CLR' in regInfo:
-                offset = 'clrOffset'
-            elif 'TGL' in regInfo:
-                offset = 'tglOffset'
+            # Some register fields may have underscores in their names (e.g. BTCLMAC->ENC_CTRL).
+            # The register field name is all the underscore-separated strings between
+            # the register name and the register type ('SET', 'CLR', 'TGL').
+            if regInfo[-1] in ('SET', 'CLR', 'TGL'):
+                regField = '_'.join(regInfo[1:-1])
+                offset = f"{regInfo[-1].lower()}Offset"
             else:
+                regField = '_'.join(regInfo[1:])
                 offset = None
 
+            address = eval('rm.' + reg + suffix + '.' + regField + '.address')
+
             if offset is not None:
-                address += eval('rm.' + regInfo[0] + suffix + '.' + regInfo[1] + '.' + offset)
+                address += eval('rm.' + reg + suffix + '.' + regField + '.' + offset)
 
             return address
         else:
@@ -819,6 +846,11 @@ class Action(object):
 
 
 class SequenceGenerator(object):
+    REG_TYPE_OFFSETS = {'': 0x0000,
+                        '_SET': 0x1000,
+                        '_CLR': 0x2000,
+                        '_TGL': 0x4000 }
+
     def __init__(self, outputDir, regbaseOutputDir, fileName, rm, template=None):
         self.rm = rm
         self.source = open(os.path.join(outputDir, fileName + '.c'), "w+", newline='\n')
@@ -909,7 +941,7 @@ class SequenceGenerator(object):
                 returnStr += self.printAction(action, value[0][1])
 
                 # Print comment
-                returnStr += self.getAddrFromInst(action, instruction)
+                returnStr += self.getAddrFromInst(action, instruction, value[0][1])
 
                 # Print continuous write if any
                 for offsetAndValue in value[1:]:
@@ -927,7 +959,7 @@ class SequenceGenerator(object):
 
         return returnStr
 
-    def getAddrFromInst(self, action, instruction):
+    def getAddrFromInst(self, action, instruction, value):
         offsetMask = 2**action.contWrPos - 1
         offset = instruction & offsetMask
         baseAddrMask = 2**(28 - action.basePos) - 1  # 28: opCode bit position
@@ -935,14 +967,18 @@ class SequenceGenerator(object):
 
         if action.isSimpleArg:
             return " /* {} */".format(action.name)
+        elif action.addOffset != None:
+            return " /* {} at {}, regBaseIdx: {} */".format(action.name, value['OFFSET'], baseAddrId)
         else:
             baseAddr = [addr for addr, Id in action.baseAddrDict.items() if Id == baseAddrId][0]
             regAddr = baseAddr + offset
-            try:
-                # Retrieve the register name by its address
-                register = self.rm.zz_reg_addr_to_name[regAddr]
-                strPattern = " /* {} at {}, regBaseIdx: {} */".format(action.name, register, baseAddrId)
-            except KeyError:
+            for regType, regOffset in self.REG_TYPE_OFFSETS.items():
+                baseRegAddr = regAddr & ~regOffset
+                if baseRegAddr in self.rm.zz_reg_addr_to_name:
+                    register = self.rm.zz_reg_addr_to_name[baseRegAddr] + regType
+                    strPattern = " /* {} at {}, regBaseIdx: {} */".format(action.name, register, baseAddrId)
+                    break
+            else:
                 register = regAddr
                 strPattern = " /* {0} at 0x{1:08X}, regBaseIdx: {2} */".format(action.name, register, baseAddrId)
             return strPattern

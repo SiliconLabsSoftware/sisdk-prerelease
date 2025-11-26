@@ -6,28 +6,28 @@ from pyradioconfig.parts.ocelot.phys.phys_studio_wisun_fan_1_1 import PhysStudio
 @do_not_inherit_phys
 class PhysStudioWisunFan1v1VirtualJumbo(PhysStudioWisunFan1v1Jumbo):
 
-    def PHY_WISUN_FAN_1v1_915MHz_Plan48_2FSK_1b_AU_NZ(self, model, phy_name=None):
-        params = WisunFan1v1ChannelParamsJumbo('AU_NZ', 0x02, 48, 200000, 915200000, 'Wi-SUN FAN, AU_NZ 915-928 MHz, Mode1b (2FSK 50kbps mi=1.0)')
+    def PHY_WISUN_FAN_1v1_915MHz_Plan48_2FSK_1b_AZ_NZ(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsJumbo('AZ_NZ', 0x02, 48, 200000, 915200000, 'Wi-SUN FAN, AZ_NZ 915-928 MHz, Mode1b (2FSK 50kbps mi=1.0)')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
     
-    def PHY_WISUN_FAN_1v1_915MHz_Plan48_2FSK_2a_AU_NZ(self, model, phy_name=None):
-        params = WisunFan1v1ChannelParamsJumbo('AU_NZ', 0x03, 48, 200000, 915200000, 'Wi-SUN FAN, AU_NZ 915-928 MHz, Mode2a (2FSK 100kbps mi=0.5)')
+    def PHY_WISUN_FAN_1v1_915MHz_Plan48_2FSK_2a_AZ_NZ(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsJumbo('AZ_NZ', 0x03, 48, 200000, 915200000, 'Wi-SUN FAN, AZ_NZ 915-928 MHz, Mode2a (2FSK 100kbps mi=0.5)')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
     
-    def PHY_WISUN_FAN_1v1_915MHz_Plan49_2FSK_3_AU_NZ(self, model, phy_name=None):
-        params = WisunFan1v1ChannelParamsJumbo('AU_NZ', 0x05, 49, 400000, 915400000, 'Wi-SUN FAN, AU_NZ 915-928 MHz, Mode3 (2FSK 150kbps mi=0.5)')
+    def PHY_WISUN_FAN_1v1_915MHz_Plan49_2FSK_3_AZ_NZ(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsJumbo('AZ_NZ', 0x05, 49, 400000, 915400000, 'Wi-SUN FAN, AZ_NZ 915-928 MHz, Mode3 (2FSK 150kbps mi=0.5)')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
     
-    def PHY_WISUN_FAN_1v1_915MHz_Plan49_2FSK_4a_AU_NZ(self, model, phy_name=None):
-        params = WisunFan1v1ChannelParamsJumbo('AU_NZ', 0x06, 49, 400000, 915400000, 'Wi-SUN FAN, AU_NZ 915-928 MHz, Mode4a (2FSK 200kbps mi=0.5)')
+    def PHY_WISUN_FAN_1v1_915MHz_Plan49_2FSK_4a_AZ_NZ(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsJumbo('AZ_NZ', 0x06, 49, 400000, 915400000, 'Wi-SUN FAN, AZ_NZ 915-928 MHz, Mode4a (2FSK 200kbps mi=0.5)')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
     
-    def PHY_WISUN_FAN_1v1_915MHz_Plan49_2FSK_5_AU_NZ(self, model, phy_name=None):
-        params = WisunFan1v1ChannelParamsJumbo('AU_NZ', 0x08, 49, 400000, 915400000, 'Wi-SUN FAN, AU_NZ 915-928 MHz, Mode5 (2FSK 300kbps mi=0.5)')
+    def PHY_WISUN_FAN_1v1_915MHz_Plan49_2FSK_5_AZ_NZ(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsJumbo('AZ_NZ', 0x08, 49, 400000, 915400000, 'Wi-SUN FAN, AZ_NZ 915-928 MHz, Mode5 (2FSK 300kbps mi=0.5)')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
     
@@ -201,28 +201,28 @@ class PhysStudioWisunFan1v1VirtualJumbo(PhysStudioWisunFan1v1Jumbo):
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
     
-    def PHY_WISUN_FAN_1v1_920MHz_Plan64_2FSK_1b_SG(self, model, phy_name=None):
-        params = WisunFan1v1ChannelParamsJumbo('SG', 0x02, 64, 200000, 920200000, 'Wi-SUN FAN, SG 920-925 MHz, Mode1b (2FSK 50kbps mi=1.0)')
+    def PHY_WISUN_FAN_1v1_920MHz_Plan98_2FSK_1b_SG(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsJumbo('SG', 0x02, 98, 200000, 917200000, 'Wi-SUN FAN, SG 917-925 MHz, Mode1b (2FSK 50kbps mi=1.0)')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
     
-    def PHY_WISUN_FAN_1v1_920MHz_Plan64_2FSK_2a_SG(self, model, phy_name=None):
-        params = WisunFan1v1ChannelParamsJumbo('SG', 0x03, 64, 200000, 920200000, 'Wi-SUN FAN, SG 920-925 MHz, Mode2a (2FSK 100kbps mi=0.5)')
+    def PHY_WISUN_FAN_1v1_920MHz_Plan98_2FSK_2a_SG(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsJumbo('SG', 0x03, 98, 200000, 917200000, 'Wi-SUN FAN, SG 917-925 MHz, Mode2a (2FSK 100kbps mi=0.5)')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
     
-    def PHY_WISUN_FAN_1v1_920MHz_Plan65_2FSK_3_SG(self, model, phy_name=None):
-        params = WisunFan1v1ChannelParamsJumbo('SG', 0x05, 65, 400000, 920400000, 'Wi-SUN FAN, SG 920-925 MHz, Mode3 (2FSK 150kbps mi=0.5)')
+    def PHY_WISUN_FAN_1v1_920MHz_Plan99_2FSK_3_SG(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsJumbo('SG', 0x05, 99, 400000, 917400000, 'Wi-SUN FAN, SG 917-925 MHz, Mode3 (2FSK 150kbps mi=0.5)')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
     
-    def PHY_WISUN_FAN_1v1_920MHz_Plan65_2FSK_4a_SG(self, model, phy_name=None):
-        params = WisunFan1v1ChannelParamsJumbo('SG', 0x06, 65, 400000, 920400000, 'Wi-SUN FAN, SG 920-925 MHz, Mode4a (2FSK 200kbps mi=0.5)')
+    def PHY_WISUN_FAN_1v1_920MHz_Plan99_2FSK_4a_SG(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsJumbo('SG', 0x06, 99, 400000, 917400000, 'Wi-SUN FAN, SG 917-925 MHz, Mode4a (2FSK 200kbps mi=0.5)')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
     
-    def PHY_WISUN_FAN_1v1_920MHz_Plan65_2FSK_5_SG(self, model, phy_name=None):
-        params = WisunFan1v1ChannelParamsJumbo('SG', 0x08, 65, 400000, 920400000, 'Wi-SUN FAN, SG 920-925 MHz, Mode5 (2FSK 300kbps mi=0.5)')
+    def PHY_WISUN_FAN_1v1_920MHz_Plan99_2FSK_5_SG(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsJumbo('SG', 0x08, 99, 400000, 917400000, 'Wi-SUN FAN, SG 917-925 MHz, Mode5 (2FSK 300kbps mi=0.5)')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
     

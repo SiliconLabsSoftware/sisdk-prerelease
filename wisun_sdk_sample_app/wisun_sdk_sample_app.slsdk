@@ -6,7 +6,5 @@ version=1.0.0
 prop.subLabel=WISUN SDK Applications
 
 # General properties are prepended with "prop."
-prop.file.templatesFile=templates.xml
-prop.file.demosFile=
-prop.file.adapterPacks=
-prop.file.hkconfAdkModels=adk_models
+prop.file.templatesFile=wisun_sdk_sample_app_templates.xml
+prop.file.demosFile=wisun_sdk_sample_app_demos.xml

@@ -59,9 +59,6 @@ component:
   - id: zw_cli_common
     condition: [zw_stack_release_libraries]
   - id: clock_manager
-  - id: common_token_manager
-  - id: common_token_manager_compatibility
-    condition: [device_series_2]
 
 source:
   - path: app.c

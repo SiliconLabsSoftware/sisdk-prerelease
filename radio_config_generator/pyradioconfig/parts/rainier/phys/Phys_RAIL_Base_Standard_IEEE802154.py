@@ -44,6 +44,7 @@ class PhysRailBaseStandardIeee802154Rainier(PhysRAILBaseStandardIEEE802154Bobcat
     def PHY_IEEE802154_2p4GHz_cohdsa(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='802154 2p4GHz cohdsa', phy_name=phy_name)
         self.IEEE802154_2p4GHz_cohdsa_base(phy, model)
+        model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.COHERENT
 
         phy.profile_outputs.AGC_GAINRANGE_PNGAINSTEP.override = 3
         phy.profile_outputs.MODEM_LONGRANGE1_AVGWIN.override = 2
@@ -290,6 +291,8 @@ class PhysRailBaseStandardIeee802154Rainier(PhysRAILBaseStandardIEEE802154Bobcat
         phy = self._makePhy(model, model.profiles.Base, readable_name='IEEE 802.15.4 2p4GHz Enhanced Demod PHY',
                             phy_name=phy_name)
         self.IEEE802154_2p4GHz_base(phy, model)
+        model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.ENHANCED
+
         # Use Enhanced demod and HFXOMULT clocking (avoid recalculation on channel change)
         phy.profile_inputs.demod_select.value = model.vars.demod_select.var_enum.ENHANCED_DSSS
 
@@ -366,6 +369,7 @@ class PhysRailBaseStandardIeee802154Rainier(PhysRAILBaseStandardIEEE802154Bobcat
     def PHY_IEEE802154_2p4GHz_Enhanced_Scan(self, model, phy_name='PHY_IEEE802154_2p4GHz_Enhanced_Scan'):
         # Start with the ZB Enhanced PHY
         phy = self.PHY_IEEE802154_2p4GHz_Enhanced(model, phy_name=phy_name)
+        model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.FCS
 
         self.fast_detection_ehdsss_settings(phy, model)
         ## Port overrides from ModeSwitch work as these give better sensitivity and freqoffset for all 2ZB
@@ -588,6 +592,7 @@ class PhysRailBaseStandardIeee802154Rainier(PhysRAILBaseStandardIEEE802154Bobcat
     def PHY_IEEE802154_2p4GHz_Enhanced_DutyCycling(self, model, phy_name='PHY_IEEE802154_2p4GHz_Enhanced_DutyCycling'):
         # Start with the Enhanced PHY
         phy = self.PHY_IEEE802154_2p4GHz_Enhanced(model, phy_name=phy_name)
+        model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.RXDC
 
         self.fast_detection_ehdsss_settings(phy, model)
 
@@ -615,6 +620,7 @@ class PhysRailBaseStandardIeee802154Rainier(PhysRAILBaseStandardIEEE802154Bobcat
 
     def PHY_IEEE802154_2p4GHz_Enhanced_ANTDIV(self, model, phy_name=None):
         phy = self.PHY_IEEE802154_2p4GHz_Enhanced_Scan(model, phy_name=phy_name)
+        model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.ANTDIV
         phy.profile_inputs.hop_enable.value = model.vars.hop_enable.var_enum.DISABLED
         phy.profile_inputs.synth_settling_mode.value = model.vars.synth_settling_mode.var_enum.FAST
         phy.profile_inputs.bandwidth_hz.value = 2200000
@@ -673,6 +679,7 @@ class PhysRailBaseStandardIeee802154Rainier(PhysRAILBaseStandardIEEE802154Bobcat
     def PHY_IEEE802154_2p4GHz_Enhanced_ANTDIV_Scan(self, model, phy_name=None):
         phy = self.PHY_IEEE802154_2p4GHz_Enhanced_ANTDIV(model, phy_name=None)
         phy.profile_inputs.hop_enable.value = model.vars.hop_enable.var_enum.ENABLED
+        model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.NONE #ANTDIV +FCS is not yet supported
 
         phy.profile_outputs.MODEM_EHDSSSCTRL_DUALDSA.override = 1
         ### enable CFE to qualify DSSS DSA detection

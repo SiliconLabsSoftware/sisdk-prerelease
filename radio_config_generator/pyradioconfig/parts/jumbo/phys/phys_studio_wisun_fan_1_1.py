@@ -369,11 +369,11 @@ class PhysStudioWisunFan1v1Jumbo(IPhy):
 
     # ChanPlanID 43
     def PHY_WISUN_FAN_1v1_867MHz_Plan43_2FSK_4a_SG(self, model, phy_name=None):
-        params = WisunFan1v1ChannelParamsJumbo('SG', 6, 43, 400000, 866300000, 'Wi-SUN FAN, SG 865-867 MHz, Mode4a (2FSK 200kbps mi=0.5)')
+        params = WisunFan1v1ChannelParamsJumbo('SG', 6, 43, 400000, 866300000, 'Wi-SUN FAN, SG 866-869 MHz, Mode4a (2FSK 200kbps mi=0.5)')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
     def PHY_WISUN_FAN_1v1_867MHz_Plan43_2FSK_5_SG(self, model, phy_name=None):
-        params = WisunFan1v1ChannelParamsJumbo('SG', 8, 43, 400000, 866300000, 'Wi-SUN FAN, SG 865-867 MHz, Mode5 (2FSK 300kbps mi=0.5)')
+        params = WisunFan1v1ChannelParamsJumbo('SG', 8, 43, 400000, 866300000, 'Wi-SUN FAN, SG 866-869 MHz, Mode5 (2FSK 300kbps mi=0.5)')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy

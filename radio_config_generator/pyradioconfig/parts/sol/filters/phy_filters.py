@@ -2,42 +2,24 @@ from pyradioconfig.calculator_model_framework.interfaces.iphy_filter import IPhy
 
 
 class PhyFilters_Sol(IPhyFilter):
-
     # Studio black list (files removed before Studio distribution)
-    customer_phy_groups = ['secret10',
-                           'secret7',
-                           'secret18',
-                           'secret19',
-                           'secret20',
-                           'Phys_Internal_Base_Experimental',
-                           'Phys_Internal_Base_Standard_SUNFSK',
-                           'Phys_Internal_Base_Utility',
-                           'Phys_Internal_Base_ValOnly',
-                           'Phys_Internal_Connect',
-                           'Phys_Internal_SUN_OQPSK',
-                           'Phys_Internal_WiSUN_Concurrent',
-                           'Phys_Internal_WiSUN_Concurrent_ValOnly',
-                           'Phys_Internal_WiSUN_FSK',
-                           'Phys_Internal_WiSUN_OFDM',
-                           'Phys_Internal_WiSUN_OFDM_MCSx',
-                           'Phys_Internal_Base_Standard_IEEE802154',
-                           'Phys_RAIL_Base_Standard_ZWave',
-                        ]
+    customer_phy_groups = []
 
     # Studio white list (these PHYs show in Studio as proprietary starting points)
-    simplicity_studio_phy_groups = ['Phys_Studio_Base',
-                                    'Phys_Studio_Base_Standard_SUNFSK',
-                                    'Phys_Studio_Sidewalk',
-                                    'Phys_Studio_Connect',
-                                    'Phys_Studio_Connect_OFDM',
-                                    'Phys_Studio_SUN_OQPSK',
-                                    'phys_studio_wisun_fan_1_0',
-                                    'phys_studio_wisun_fan_1_1',
-                                    'phys_studio_wisun_fan_1_1_virtual',
-                                    'phys_studio_wisun_han',
-                                    'Phys_Studio_LongRange',
-                                    'Phys_Studio_IEEE802154'
-                                    ]
+    simplicity_studio_phy_groups = [
+        'Phys_Studio_IEEE802154',
+        'Phys_Studio_SUN_OQPSK',
+        'Phys_Studio_Base',
+        'Phys_Studio_Sidewalk',
+        'Phys_Studio_Connect',
+        'phys_studio_wisun_han',
+        'Phys_Studio_LongRange',
+        'Phys_Studio_Base_Standard_SUNFSK',
+        'phys_studio_wisun_fan_1_0',
+        'phys_studio_wisun_fan_1_1',
+        'phys_studio_wisun_fan_1_1_virtual',
+        'Phys_Studio_Connect_OFDM',
+    ]
 
     # Special designation for simulation PHYs
     sim_tests_phy_groups = []

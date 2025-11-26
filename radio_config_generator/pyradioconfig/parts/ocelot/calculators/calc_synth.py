@@ -91,6 +91,12 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
         self._addModelVariable(model, 'max_tx_power_dbm', int, ModelVariableFormat.DECIMAL,
                                desc='Maximum transmit power expected from this device (DEPRECATED)')
 
+        # https://jira.silabs.com/browse/MCUW_RADIO_CFG-2273
+        self._addModelVariable(model, 'synth_tuning_rx_step_size', float, ModelVariableFormat.FLOAT,
+                               desc="Syntheziser RX Tuning Step [Hz]")
+        self._addModelVariable(model, 'synth_tuning_tx_step_size', float, ModelVariableFormat.FLOAT,
+                               desc="Syntheziser TX Tuning Step [Hz]")
+
     def calc_rf_band(self, model):
        ### revised to include BAND_315
         rf_freq = model.vars.base_frequency_hz.value
@@ -661,10 +667,34 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
         lodiv = model.vars.lodiv_actual.value
 
         # Calculate frequency resolution
-        # Correct reference clock to use here is the xtal
         res = xtal_frequency_hz / lodiv / pow(2, 19)
 
         model.vars.synth_res_actual.value = res
+
+
+    def calc_synth_rx_tuning_step_actual(self, model):
+        res = model.vars.synth_res_actual.value
+        lsbforce_rx = model.vars.SYNTH_DSMCTRLRX_LSBFORCERX.value
+
+        # Correct reported frequency resolution based on LSBFORCERX register
+        if lsbforce_rx == 1:
+            frequency_res_log = res * 2
+        else:
+            frequency_res_log = res
+
+        model.vars.synth_tuning_rx_step_size.value = frequency_res_log
+
+    def calc_synth_tx_tuning_step_actual(self, model):
+        res = model.vars.synth_res_actual.value
+        lsbforce_tx = model.vars.SYNTH_DSMCTRLTX_LSBFORCETX.value
+
+        # Correct reported frequency resolution based on LSBFORCETX register
+        if lsbforce_tx == 1:
+            frequency_res_log = res * 2
+        else:
+            frequency_res_log = res
+
+        model.vars.synth_tuning_tx_step_size.value = frequency_res_log
 
     def calc_check_synth_limits(self,model):
         #Overriding limit check from Common

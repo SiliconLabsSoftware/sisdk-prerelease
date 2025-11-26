@@ -1,0 +1,19 @@
+workspace_name: btmesh_soc_dfu_target_workspace
+package: bluetooth_mesh_app
+label: Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader
+description: >
+  Demonstrates the Firmware Update Target role.
+  A Distributor node is responsible for delivering new firmware images
+  to the Target nodes.
+  This workspace combines Internal Storage Bootloader and Bluetooth Mesh
+  Firmware Target into a single binary.
+quality: production
+project:
+  - path: btmesh_soc_dfu_target_lpn_low_power.slcp
+    id: btmesh_soc_dfu_target_lpn_low_power
+    output: btmesh_soc_dfu_target_lpn_low_power
+  - path: ../../bootloader/bootloader-storage-internal-single-btmesh-dfu.slcp
+    id: bootloader-storage-internal-single-btmesh-dfu
+    output: bootloader-storage-internal-single-btmesh-dfu
+post_build:
+  path: ../../postbuild_profile/btmesh_dfu_workspace.slpb

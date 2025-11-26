@@ -294,6 +294,7 @@ class PHYS_Bluetooth_LE_Bobcat(IPhy):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Official BLE 1Mbps Legacy PHY for Panther',
                             phy_name=phy_name)
         self.Bluetooth_LE_base(phy, model)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
         return phy
 
     # BLE 1M Viterbi
@@ -358,6 +359,7 @@ class PHYS_Bluetooth_LE_Bobcat(IPhy):
     def PHY_Bluetooth_LE_Viterbi(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Bluetooth LE Viterbi phase-DSA',
                             phy_name=phy_name)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
         self.Bluetooth_LE_Viterbi_base(phy, model)
         return phy
 
@@ -434,6 +436,7 @@ class PHYS_Bluetooth_LE_Bobcat(IPhy):
     def PHY_Bluetooth_LE_2M_Viterbi(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Official 2Mbps BLE phase-DSA PHY for Panther',
                             phy_name=phy_name)
+        model.vars.ble_feature.value_forced= model.vars.ble_feature.var_enum.LE_2M
         self.Bluetooth_LE_2M_Viterbi_base(phy, model)
         return phy
 
@@ -527,6 +530,7 @@ class PHYS_Bluetooth_LE_Bobcat(IPhy):
     def PHY_Bluetooth_LE_Viterbi_noDSA(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='BLE Viterbi No DSA PHY for Lynx',
                             phy_name=phy_name)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
         self.Bluetooth_LE_Viterbi_noDSA_halfrate_base(phy, model)
 
         # PGBOBCATVALTEST-2122: 1 MHz BW, 1 dB df2 boost to deal with PA-VCO coupling for 20 dBm PA
@@ -538,6 +542,7 @@ class PHYS_Bluetooth_LE_Bobcat(IPhy):
     def PHY_Bluetooth_LE_1M_Viterbi_917M_noDSA(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='PHY_Bluetooth_LE_1M_Viterbi_917M_noDSA',
                             phy_name=phy_name)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
         self.Bluetooth_LE_Viterbi_noDSA_halfrate_base(phy, model)
 
         phy.profile_inputs.if_frequency_hz.value = 1066666
@@ -551,6 +556,7 @@ class PHYS_Bluetooth_LE_Bobcat(IPhy):
     def PHY_Bluetooth_LE_Viterbi_noDSA_fullrate(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='BLE Viterbi No DSA Fullrate PHY for Lynx',
                             phy_name=phy_name)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
         self.Bluetooth_LE_Viterbi_noDSA_base(phy, model)
 
         # default bandwidth will cause halfrate unless forced
@@ -579,6 +585,7 @@ class PHYS_Bluetooth_LE_Bobcat(IPhy):
     def PHY_Bluetooth_LE_2M_Viterbi_noDSA_fullrate(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='BLE Viterbi 2M No DSA Fullrate PHY for Lynx',
                             phy_name=phy_name)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_2M
         self.Bluetooth_LE_2M_Viterbi_noDSA_base(phy, model)
 
         phy.profile_inputs.adc_rate_mode.value = model.vars.adc_rate_mode.var_enum.FULLRATE
@@ -600,7 +607,7 @@ class PHYS_Bluetooth_LE_Bobcat(IPhy):
 
     def PHY_Bluetooth_2M_38M4Hz_prod(self, model, phy_name=None):
         phy = self.PHY_Bluetooth_LE_2M_Viterbi_noDSA_fullrate(model, phy_name='PHY_Bluetooth_2M_38M4Hz_prod')
-
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_2M
         phy.profile_inputs.xtal_frequency_hz.value = 38400000
         phy.profile_outputs.rx_eof_delay_ns.override = 7000
         return phy
@@ -750,12 +757,14 @@ class PHYS_Bluetooth_LE_Bobcat(IPhy):
     def PHY_Bluetooth_LongRange_dsa_125kbps(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Bluetooth LongRange DSA 125kbps PHY for Lynx',
                             phy_name=phy_name)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.CODED_125K
         self.Bluetooth_LongRange_base(phy, model)
         return phy
 
     def PHY_Bluetooth_LongRange_NOdsa_125kbps(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Bluetooth LongRange No DSA 125kbps',
                             phy_name=phy_name)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.CODED_125K
         self.Bluetooth_LongRange_base(phy, model)
         phy.profile_outputs.AGC_GAINRANGE_PNGAINSTEP.override = 4
         phy.profile_outputs.MODEM_LONGRANGE_LRBLEDSA.override = 0
@@ -788,12 +797,14 @@ class PHYS_Bluetooth_LE_Bobcat(IPhy):
     def PHY_Bluetooth_LongRange_dsa_500kbps(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Bluetooth LongRange DSA 500kbps PHY for Lynx',
                             phy_name=phy_name)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.CODED_500K
         self.Bluetooth_LongRange_500kbps_base(phy, model)
         return phy
 
     def PHY_Bluetooth_LongRange_NOdsa_500kbps(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Bluetooth LongRange DSA 500kbps',
                             phy_name=phy_name)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.CODED_500K
         self.Bluetooth_LongRange_500kbps_base(phy, model)
         phy.profile_outputs.AGC_GAINRANGE_PNGAINSTEP.override = 4
         phy.profile_outputs.MODEM_LONGRANGE_LRBLEDSA.override = 0
@@ -805,6 +816,7 @@ class PHYS_Bluetooth_LE_Bobcat(IPhy):
         # Start with the BLE LR 125k PHY
         phy = self.PHY_Bluetooth_LongRange_dsa_125kbps(model, phy_name)
         phy.profile_inputs.preamble_pattern.value = 0b10
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.CONCURRENT
 
         # The concurrent PHY needs to have:
         # Enable concurrent mode
@@ -865,6 +877,7 @@ class PHYS_Bluetooth_LE_Bobcat(IPhy):
         # For Bobcat BLE 1M, use PHY_Bluetooth_1M_AOX_prod as there is no difference in TX SYNTH PLL BW
         phy = self.PHY_Bluetooth_LE_Viterbi_noDSA(model, phy_name='PHY_Bluetooth_1M_AOX')
         phy.profile_inputs.aox_enable.value = model.vars.aox_enable.var_enum.ENABLED
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.AOX_1M
         self.BLE_RX_AOX_CHF_Coeffs(phy, model)
 
         # Override for AoX
@@ -886,6 +899,7 @@ class PHYS_Bluetooth_LE_Bobcat(IPhy):
         # Both PHYs must support AoX RX, the difference is in the SYNTH PLL setting + shaping filter for TX
         phy = self.PHY_Bluetooth_LE_2M_Viterbi_noDSA_fullrate(model, phy_name)
         phy.profile_inputs.aox_enable.value = model.vars.aox_enable.var_enum.ENABLED
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.AOX_2M
         self.BLE_RX_AOX_CHF_Coeffs(phy, model)
 
         # Override for AoX
@@ -940,6 +954,7 @@ class PHYS_Bluetooth_LE_Bobcat(IPhy):
         # Only valid for 40 MHz
         phy = self.PHY_Bluetooth_LE_Viterbi_noDSA_fullrate(model, phy_name=phy_name)
         phy.profile_inputs.xtal_frequency_hz.value = 40000000
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.HADM_1M
         model.vars.adc_clock_mode.value_forced = model.vars.adc_clock_mode.var_enum.HFXOMULT
 
         phy.profile_inputs.target_osr.value = 5
@@ -979,6 +994,7 @@ class PHYS_Bluetooth_LE_Bobcat(IPhy):
         # Only valid for 40 MHz
         phy = self.PHY_Bluetooth_LE_2M_Viterbi_noDSA_fullrate(model, phy_name=phy_name)
         phy.profile_inputs.xtal_frequency_hz.value = 40000000
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.HADM_2M
         model.vars.adc_clock_mode.value_forced = model.vars.adc_clock_mode.var_enum.HFXOMULT
 
         phy.profile_inputs.target_osr.value = 5

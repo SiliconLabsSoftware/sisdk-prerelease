@@ -7,7 +7,7 @@ description: "The Wi-SUN SoC Border Router Agent sample application demonstrates
  The CLI supports various commands to interact with the Border Router and retrieve information about its status and configuration."
 package: "wisun_sdk_sample_app"
 category: "Wi-SUN Examples"
-quality: "evaluation"
+quality: "production"
 
 component:
   - id: "wisun_br_stack"
@@ -148,6 +148,12 @@ ui_hints:
     - path: "config/wisun/wisun_settings.wisunconf"
     - path: readme.md
       focus: true
+
+#--------------------- HWFILTER ------------------------
+tag:
+  - hwfilter:board:hardware:has:pti
+  - hwfilter:ram:91k
+  - hwfilter:flash:716k
 
 #--------------------- Toolchain ------------------------
 toolchain_settings:

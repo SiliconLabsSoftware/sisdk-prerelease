@@ -38,6 +38,7 @@ include:
 - path: stack/zigbee/
   file_list:
   - path: aps-keys-full.h
+  - path: aps-keys.h
 
 - path: stack/internal/src/ipc
   file_list:

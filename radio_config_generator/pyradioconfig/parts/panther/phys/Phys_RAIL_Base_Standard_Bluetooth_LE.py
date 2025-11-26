@@ -716,6 +716,7 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Official BLE 1Mbps PHY for Panther', phy_name=phy_name)
 
         self.Bluetooth_LE_Viterbi_BLEIQDSA_base(phy, model)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
 
         phy.profile_outputs.rx_sync_delay_ns.override = 50000
         phy.profile_outputs.rx_eof_delay_ns.override = 9500
@@ -728,6 +729,7 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Official 2Mbps BLE IQ-DSA PHY for Panther', phy_name=phy_name)
 
         self.Bluetooth_LE_2M_Viterbi_BLEIQDSA_base(phy, model)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_2M
 
         phy.profile_outputs.rx_sync_delay_ns.override = 50000
         phy.profile_outputs.rx_eof_delay_ns.override = 5500
@@ -738,18 +740,21 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Bluetooth LE Viterbi phase-DSA', phy_name=phy_name)
 
         self.Bluetooth_LE_Viterbi_base(phy, model)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
         return phy
 
     def PHY_Bluetooth_LE_2M_Viterbi(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Official 2Mbps BLE phase-DSA PHY for Panther', phy_name=phy_name)
 
         self.Bluetooth_LE_2M_Viterbi_base(phy, model)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_2M
         return phy
 
     def PHY_Bluetooth_LE(self, model,phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Official BLE 1Mbps Legacy PHY for Panther',phy_name=phy_name)
 
         self.Bluetooth_LE_base(phy, model)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
 
         return phy
 
@@ -757,6 +762,7 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Bluetooth LongRange DSA 125kbps', phy_name=phy_name)
 
         self.Bluetooth_LongRange_base(phy, model)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.CODED_125K
 
         phy.profile_outputs.rx_sync_delay_ns.override = 187125
         phy.profile_outputs.rx_eof_delay_ns.override = 9500
@@ -767,6 +773,7 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Bluetooth LongRange DSA 500kbps', phy_name=phy_name)
 
         self.Bluetooth_LongRange_500kbps_base(phy, model)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.CODED_500K
 
         phy.profile_outputs.rx_sync_delay_ns.override = 49125
         phy.profile_outputs.rx_eof_delay_ns.override = 9500
@@ -777,6 +784,7 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Bluetooth LongRange DSA 125kbps', phy_name=phy_name)
 
         self.Bluetooth_LongRange_base(phy, model)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.CODED_125K
         phy.profile_outputs.MODEM_LONGRANGE_LRBLEDSA.override = 0
         return phy
 
@@ -784,6 +792,7 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Bluetooth LongRange DSA 500kbps', phy_name=phy_name)
 
         self.Bluetooth_LongRange_500kbps_base(phy, model)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.CODED_500K
         phy.profile_outputs.MODEM_LONGRANGE_LRBLEDSA.override = 0
         return phy
 
@@ -792,6 +801,7 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy = self._makePhy(model, model.profiles.Base, readable_name='BLE 1Mbps AOX PHY for Panther', phy_name=phy_name)
 
         self.Bluetooth_LE_base(phy, model)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.AOX_1M
 
     def PHY_Bluetooth_1M(self, model, phy_name=None):
         # PHY_Bluetooth_LE_Viterbi phase DSA
@@ -799,6 +809,7 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy = self._makePhy(model, model.profiles.Base, readable_name='BLE 1Mbps PHY for Panther', phy_name=phy_name)
 
         self.Bluetooth_LE_Viterbi_base(phy, model)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
 
         return phy
 
@@ -807,6 +818,7 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Production BLE LongRange 125kbps PHY for Panther', phy_name=phy_name)
 
         self.Bluetooth_LongRange_base(phy, model)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.CODED_125K
 
 
     def PHY_Bluetooth_LR_500k(self, model, phy_name=None):
@@ -814,6 +826,7 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Production BLE LongRange 500kbps PHY for Panther', phy_name=phy_name)
 
         self.Bluetooth_LongRange_500kbps_base(phy, model)
+        model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.CODED_500K
 
     @staticmethod
     def BLE_TX_Shaping_Coeffs(phy, model):

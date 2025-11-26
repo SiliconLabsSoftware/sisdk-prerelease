@@ -1,4 +1,5 @@
 from pyradioconfig.parts.bobcat.calculators.calc_misc import Calc_Misc_Bobcat
+from pycalcmodel.core.variable import ModelVariableFormat, CreateModelVariableEnum
 
 
 class CalcMiscRainier(Calc_Misc_Bobcat):
@@ -211,3 +212,33 @@ class CalcMiscRainier(Calc_Misc_Bobcat):
 
     def calc_adc_sidetone_amp_reg(self, model):
         pass
+
+    def buildVariables(self, model):
+        """Populates a list of needed variables for this calculator
+
+        Args:
+            model (ModelRoot) : Builds the variables specific to this calculator
+        """
+        # : Build variables using base
+        super().buildVariables(model)
+        model.vars.protocol_id.var_enum = CreateModelVariableEnum(
+            enum_name='ProtocolIDEnum',
+            enum_desc='List of supported protocols',
+            member_data=[
+                ['Custom', 0, 'Custom stack'],
+                # ['Reserved', 1, 'Reserved'],
+                ['Thread', 2, 'Thread on RAIL'],
+                ['BLE', 3, 'BLE on RAIL'],
+                ['Connect', 4, 'Connect on RAIL'],
+                ['Zigbee', 5, 'Zigbee on RAIL'],
+                ['ZWave', 6, 'ZWave on RAIL'],
+                ['WiSUN', 7, 'WiSUN on RAIL'],
+                ['Custom_802154', 8, 'Custom 802.15.4 on RAIL'],
+                ['Sidewalk', 9, 'Sidewalk on RAIL'],
+                ['BTC', 10, 'Bluetooth Classic on RAIL'],
+                ['ANT', 11, 'ANT on RAIL'],
+                ['Longrange', 12, 'Longrange'],
+                ['Mbus', 13, 'Mbus'],
+                ['Sigfox', 14, 'Sigfox'],
+                ['HDT', 15, 'BLE High Data Throughput'],
+            ])

@@ -7,7 +7,9 @@ description: >
 
 label: CPC Secondary - SPI Hardware CRC Acceleration
 category: Services|Co-Processor Communication|Secondary Device|Driver
-quality: internal
+quality: experimental
+ui_hints:
+  visibility: never
 metadata:
   sbom:
     license: Zlib

@@ -41,9 +41,9 @@ class ProfileWisunFan1v1Jumbo(IProfile):
         38:  chplan_id_params('Plan38_863M_870M_400k', 863.5e6, 400e3),
         39:  chplan_id_params('Plan39_865M_868M_100k', 865.1e6, 100e3),
         40:  chplan_id_params('Plan40_865M_868M_200k', 865.1e6, 200e3),
-        41:  chplan_id_params('Plan41_863M_870M_100k', 866.1e6, 100e3),
-        42:  chplan_id_params('Plan42_863M_870M_200k', 866.1e6, 200e3),
-        43:  chplan_id_params('Plan43_863M_876M_400k', 866.3e6, 400e3),
+        41:  chplan_id_params('Plan41_866M_869M_100k', 866.1e6, 100e3),
+        42:  chplan_id_params('Plan42_866M_869M_200k', 866.1e6, 200e3),
+        43:  chplan_id_params('Plan43_866M_869M_400k', 866.3e6, 400e3),
         48:  chplan_id_params('Plan48_915M_928M_200k', 915.2e6, 200e3),
         49:  chplan_id_params('Plan49_915M_928M_400k', 915.4e6, 400e3),
         64:  chplan_id_params('Plan64_920M_925M_200k', 920.2e6, 200e3),
@@ -52,6 +52,8 @@ class ProfileWisunFan1v1Jumbo(IProfile):
         81:  chplan_id_params('Plan81_919M_923M_400k', 919.2e6, 400e3),
         96:  chplan_id_params('Plan96_917M_923M_200k', 917.1e6, 200e3),
         97:  chplan_id_params('Plan97_917M_923M_400k', 917.3e6, 400e3),
+        98: chplan_id_params('Plan98_917M_925M_200k', 917.2e6, 200e3),
+        99: chplan_id_params('Plan99_917M_925M_400k', 917.4e6, 400e3),
 
         # WW chplan definition conflict - see https://jira.silabs.com/browse/MCUW_RADIO_CFG-2183
         # We will stick to what's coherent throughout calculator
@@ -59,8 +61,6 @@ class ProfileWisunFan1v1Jumbo(IProfile):
         113: chplan_id_params('Plan113_2400M_2483M_400k', 2400.2e6, 400e3),
 
         128: chplan_id_params('Plan128_920M_925M_250k', 920.625e6, 250e3),
-        144: chplan_id_params('Plan144_779M_787M_200k', 779.2e6, 200e3),
-        145: chplan_id_params('Plan145_779M_787M_400k', 779.4e6, 400e3),
         160: chplan_id_params('Plan160_470M_510M_200k', 470.2e6, 200e3),
 
     }

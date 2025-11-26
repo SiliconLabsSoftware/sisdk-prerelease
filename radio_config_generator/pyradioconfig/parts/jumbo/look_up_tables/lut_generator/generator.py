@@ -12,7 +12,7 @@ class Generator:
     coordinates the use of supporting classes for data fetching and template rendering.
     """
     def __init__(self):
-        self.TAG = "v1.1.2"
+        self.TAG = "v1.2.0"
         self.PATH = Generator._create_path()
         self.lut_wisun_fan1v0: str = ""
         self.lut_wisun_fan1v1: str = ""
@@ -83,7 +83,6 @@ class Generator:
                 freq_band_start=params['freq_band_start'],
                 freq_band_end=params['freq_band_end']
             )
-        lut += Wisun1v0Templates.legacy_frequency_channel
         lut += Wisun1v0Templates.close
         self.lut_wisun_fan1v0 = lut
 

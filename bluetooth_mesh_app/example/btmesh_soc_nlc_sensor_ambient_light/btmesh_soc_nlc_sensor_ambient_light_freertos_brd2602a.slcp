@@ -94,6 +94,8 @@ other_file:
   - path: ../../documentation/example/btmesh_soc_nlc_sensor_ambient_light/readme_img10.png
 
 configuration:
+  - name: EMDRV_DMADRV_DMA_CH_COUNT
+    value: 4
   - name: APP_LOG_LEVEL
     value: "APP_LOG_LEVEL_INFO"
   - name: APP_BUTTON_PRESS_CONFIG_QUEUE_SIZE

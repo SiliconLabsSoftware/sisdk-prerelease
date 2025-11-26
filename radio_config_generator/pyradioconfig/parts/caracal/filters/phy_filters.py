@@ -2,22 +2,15 @@ from pyradioconfig.calculator_model_framework.interfaces.iphy_filter import IPhy
 
 
 class PhyFilters_Caracal(IPhyFilter):
-
     # Studio black list (files removed before Studio distribution)
-    customer_phy_groups = ['Phys_Internal_Base_Experimental',
-                           'Phys_Internal_Base_Utility',
-                           'Phys_Internal_Base_ValOnly',
-                           'Phys_Internal_Connect',
-                           'Phys_Internal_MBus',
-                           'Phys_Internal_Base_Standard_IEEE802154',
-                           'Phys_RAIL_Base_Standard_ZWave',
-                           'secret1',
-                           'Phys_Studio_IEEE802154',
-                           'Phys_Internal_Base_ValOnly_aliases'
-                        ]
+    customer_phy_groups = []
 
     # Studio white list (these PHYs show in Studio as proprietary starting points)
-    simplicity_studio_phy_groups = ['Phys_Studio_Base', 'Phys_Studio_Connect', 'Phys_Studio_IEEE802154', 'Phys_Studio_BLE']
+    simplicity_studio_phy_groups = [
+        'Phys_Studio_Connect',
+        'Phys_Studio_BLE',
+        'Phys_Studio_Base'
+    ]
 
     # Special designation for simulation PHYs
     sim_tests_phy_groups = []

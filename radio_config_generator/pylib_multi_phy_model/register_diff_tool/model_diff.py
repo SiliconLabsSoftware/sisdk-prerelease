@@ -214,6 +214,7 @@ class ModelDiff(object):
 
                 if base_channel_configuration.prune_aliases_in_deltas:
                     ## Now prune registers not chosen for aliasing
+
                     for chcfg_num, chcfg_entry in enumerate(
                             base_channel_configuration.channel_config_entries.channel_config_entry):
                         phy_config_delta_add_copy = copy.deepcopy(chcfg_entry.phy_config_delta_add)
@@ -244,6 +245,29 @@ class ModelDiff(object):
                             # Now remove registers from phy_config_delta_add
                             for register_name in phy_config_delta_grouped_add:
                                 phy_config_delta_add.pop(register_name, None)
+
+            # Check if z-wave concurrent PHYs exists. If not, skip dont-care optimizations on base phys
+            conc_phy_exists = False
+            for base_channel_configuration in multi_phy_model.base_channel_configurations.base_channel_configuration:
+                conc_phy_opt_hop_found = False if len(base_channel_configuration.optional_arguments.argument) == 0 else \
+                    RAIL_ConcPhy.RAIL_IsConcPhyVt(base_channel_configuration.optional_arguments.argument)
+                if conc_phy_opt_hop_found:
+                    conc_phy_exists = True
+                    break
+
+            if not conc_phy_exists:
+                # No concurrent PHYs found, proceed with pruning base PHY configs with dont-cares
+                for base_channel_configuration in multi_phy_model.base_channel_configurations.base_channel_configuration:
+                    if base_channel_configuration.prune_aliases_in_deltas:
+                        chosen_aliases = set()
+                        for channel_config_entry in base_channel_configuration.channel_config_entries.channel_config_entry:
+                            for _, regname in channel_config_entry.phy_config_chosen_aliases.items():
+                                chosen_aliases.add(regname)
+                        phy_config_base_copy = copy.deepcopy(base_channel_configuration.phy_config_base)
+                        for regname in base_channel_configuration.phy_config_base:
+                            if regname not in chosen_aliases:
+                                del phy_config_base_copy[regname]
+                        base_channel_configuration.phy_config_base = phy_config_base_copy
 
             # Now that we've gone through and calculated all the base channel configs, let's ee if we need to do optimize any base_channel_references
             base_channel_diffs = dict()
@@ -298,7 +322,12 @@ class ModelDiff(object):
                                 for channel_config_entry in base_channel_configuration.channel_config_entries.channel_config_entry:
                                     phy_config_delta_add = channel_config_entry.phy_config_delta_add
                                     if not list_diff_reg in phy_config_delta_add:       # If reg not in ref_ch1_delta, add from ref_base_delta
-                                        phy_config_delta_add[list_diff_reg] = phy_config_base[list_diff_reg]
+                                        # list_diff_reg (item of ind_base_channel_diffs) contains all registers that are different between base phy and base reference phys
+                                        # Due to don't-care and alias regs pruning, some registers in list_diff_reg may not exist in base phy
+                                        # This means that the reg is either don't-care for whole channel configuration, or already in phy deltas
+                                        # In both cases, it is safe to skip adding this register to phy delta
+                                        if list_diff_reg in phy_config_base:
+                                            phy_config_delta_add[list_diff_reg] = phy_config_base[list_diff_reg]
                                 if list_diff_reg in phy_config_base:                    # If reg in ref_base_delta, delete (since they are all now in ref_chx_deltas)
                                     del phy_config_base[list_diff_reg]
 

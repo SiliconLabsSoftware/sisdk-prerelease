@@ -23,6 +23,12 @@ class RAILConfig_generator:
     self.rail_version = railAdapter.rail_version
     self.rc_version = railAdapter.rc_version
     self.pte_script = railAdapter.pte_script_flag()
+    self.wifi_script_seqacc = railAdapter.wifi_script_seqacc_flag()
+    self.wifi_script = railAdapter.wifi_script_flag()
+
+    if self.wifi_script_seqacc is True:
+      self.sequenceCfg = railAdapter.sequenceCfg
+      self.baseAddrAccess = railAdapter.baseAddrAccess
     # Instantiate jinja environment and register template path with FileSystemLoader
     self.jinja_env = jinja2.Environment(extensions=[jinja2.ext.do],loader=jinja2.FileSystemLoader(RAILConfig_generator._TEMPLATE_PATH or './'))
 
@@ -40,10 +46,13 @@ class RAILConfig_generator:
 
     # Register the templates
     self.template_path_h = "rail_config_multi_phy_{}x.h.j2".format(self.rail_version)
-    if self.pte_script is False:
-      self.template_path_c = "rail_config_multi_phy_{}x.c.j2".format(self.rail_version)
-    else:
+
+    if self.pte_script is True:
       self.template_path_c = "rail_config_multi_phy_pte_{}x.c.j2".format(self.rail_version)
+    elif self.wifi_script_seqacc is True or self.wifi_script is True:
+      self.template_path_c = "rail_config_multi_phy_wifi.c.j2".format(self.rail_version)
+    else:
+      self.template_path_c = "rail_config_multi_phy_{}x.c.j2".format(self.rail_version)
 
     # We need the railAdapter object to be populated before we can generate the
     # context. If the railAdapter object is not populated by the caller, we can
@@ -61,6 +70,10 @@ class RAILConfig_generator:
     self.context['rail_version'] = self.rail_version
     self.context['rc_version'] = self.rc_version
     self.context['ra_version'] = self.version
+
+    if self.wifi_script_seqacc is True:
+      self.context['sequenceCfg'] = self.sequenceCfg
+      self.context['baseAddrAccess'] = self.baseAddrAccess
     try:
       multiPhyConfigEntriesBase = self.context['multiPhyConfig']['commonStructures']['modemConfigEntriesBase']
       maxAccelerationBufferSize = 0
