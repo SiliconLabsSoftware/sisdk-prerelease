@@ -11188,6 +11188,12 @@ void CMU_LFXOInit(const CMU_LFXOInit_TypeDef *lfxoInit)
  * @note
  *   LFXO precision should be obtained from a crystal datasheet.
  *
+ * @details
+ *   This function does not affect the hardware, it only stores the precision
+ *   in a variable that can be retrieved later using CMU_LFXOPrecisionGet().
+ *   This is used by certain wireless stacks to optimize wakeup time for scheduled
+ *   events (such as Bluetooth advertising).
+ *
  * @param[in] precision
  *    LFXO's crystal precision, in PPM.
  *****************************************************************************/
@@ -11214,6 +11220,10 @@ uint16_t CMU_LFXOPrecisionGet(void)
  *
  * @note
  *   HFXO precision should be obtained from a crystal datasheet.
+ *
+ * @details
+ *   This function does not affect the hardware, it only stores the precision
+ *   in a variable that can be retrieved later using CMU_HFXOPrecisionGet().
  *
  * @param[in] precision
  *    HFXO's crystal precision, in PPM.

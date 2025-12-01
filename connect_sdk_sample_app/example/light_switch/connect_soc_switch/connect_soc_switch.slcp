@@ -9,7 +9,7 @@ description: >
   Upon power-up, the Light (acting as the network coordinator) creates its own
   local network. The Switch modules (low-power end-nodes) can then join this
   network and control the Light node. If a local network is established using
-  the CLI command, the Switch nodes can join using the “join” CLI command.
+  the CLI command, the Switch nodes can join using the join CLI command.
   From that point onward, the Light can be controlled by pressing the PB1 button
   on any connected Switch node.
 category: Connect Examples
@@ -217,6 +217,35 @@ configuration:
 #----------------- Watchdog  -------------------------
 define:
   - name: SL_CONNECT_DISABLE_WATCHDOG
+
+#--------------------- HWFILTER ------------------------
+tag:
+  - hwfilter:board:hardware:has:vcom
+  - hwfilter:board:hardware:has:pti
+  - hwfilter:ram:33k
+  - hwfilter:flash:245k
+  - hwfilter:board:hardware_board_supports_rf_band_2400
+  - hwfilter:board:simple_button:btn0
+  - hwfilter:board:simple_button:btn1
+  - hwfilter:!board:brd4171a
+  - hwfilter:!board:brd4176a
+  - hwfilter:!board:brd4179b
+  - hwfilter:!board:brd4180a
+  - hwfilter:!board:brd4180b
+  - hwfilter:!board:brd4181a
+  - hwfilter:!board:brd4181b
+  - hwfilter:!board:brd4181c
+  - hwfilter:!board:brd4195a
+  - hwfilter:!board:brd4195b
+  - hwfilter:!board:brd4196a
+  - hwfilter:!board:brd4196b
+  - hwfilter:!board:brd4308c
+  - hwfilter:!board:brd4309a
+  - hwfilter:!board:brd4328a
+  - hwfilter:!board:brd4328b
+  - hwfilter:!board:brd4329a
+  - hwfilter:!board:brd4332a
+
 #-------------- Template Contribution ----------------
 template_contribution:
 #------------------ CLI commands ---------------------

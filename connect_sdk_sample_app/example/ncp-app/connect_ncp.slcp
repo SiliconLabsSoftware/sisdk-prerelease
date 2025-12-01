@@ -56,6 +56,13 @@ define:
 readme:
   - path: readme.md
 
+#--------------------- HWFILTER ------------------------
+tag:
+  - hwfilter:board:hardware:has:vcom
+  - hwfilter:board:hardware:has:pti
+  - hwfilter:ram:23k
+  - hwfilter:flash:165k
+  - hwfilter:!board:brd4421a
 
 filter:
   - name: "Wireless Technology"

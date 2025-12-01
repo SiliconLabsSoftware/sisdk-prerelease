@@ -34,6 +34,9 @@
 // Auto-generated DDP command table
 extern const sl_ddp_command_entry_t sl_ddp_default_command_table[];
 
+// -----------------------------------------------------------------------------
+// Public functions
+
 /******************************************************************************
  * Handle a DDP command.
  *****************************************************************************/
@@ -59,5 +62,5 @@ int sl_ddp_handle_command(uint16_t id,
   }
 
   // No matching command ID found
-  return 1;
+  return SL_DDP_ERROR_COMMAND;
 }

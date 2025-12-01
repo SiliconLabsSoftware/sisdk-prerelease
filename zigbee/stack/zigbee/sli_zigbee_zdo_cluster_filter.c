@@ -17,6 +17,7 @@
 
 #include "stack/zigbee/sli_zigbee_zdo_cluster_filter.h"
 #include "stack/include/zigbee-device-stack.h"
+#include "stack-info-internal-def.h"
 
 /// Forward declarations
 // NOTE from zigbee-device.h
@@ -80,9 +81,17 @@ bool sli_zigbee_zdo_cluster_command_is_authorized(sl_802154_short_addr_t sender,
                                                   sl_zigbee_aps_option_t options,
                                                   uint8_t sequence_number)
 {
-  if ((!sli_zigbee_get_zdo_configuration_mode() || sli_zigbee_aps_relay_frame_required(sender))
-      && !was_encrypted
-      && zdo_in_restricted_cluster_list(cluster_id)) {
+  // not authorized when...
+  //   a) restricted_mode && restricted_cluster && (sender != TC_ADDR || !was_encrypted)
+  //   b?) device_interview_subject && (sender != TC_ADDR || !was_encrypted)
+  //   c) device_interview_msg && restricted_cluster
+  bool restricted_cluster = zdo_in_restricted_cluster_list(cluster_id);
+  bool restricted_mode = !sli_zigbee_get_zdo_configuration_mode();
+  bool in_device_interview = sli_zigbee_aps_relay_frame_required(sender);
+  bool tc_sender = (sender == SL_ZIGBEE_TRUST_CENTER_NODE_ID);
+  if (restricted_cluster
+      && ((restricted_mode && !(tc_sender && was_encrypted))
+          || in_device_interview)) {
     if (!was_broadcast) {
       sl_zigbee_aps_frame_t shortcutResponseFrame;
       sli_zigbee_zig_dev_prepare_zdo_message(&shortcutResponseFrame,

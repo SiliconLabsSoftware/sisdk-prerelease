@@ -135,9 +135,9 @@ include:
 - path: stack/zigbee
   file_list:
   - path: aps-keys.h
+  - path: aps-retry.h
   - path: aps-security-policy.h
   - path: sli_zigbee_zdo_security.h
-  - path: sli_zigbee_zdo_dlk_negotiation.h
   - path: aps-security.h
   - path: zigbee-device.h
   - path: trust-center-util.h
@@ -842,9 +842,15 @@ template_contribution:
     help: Send a Match Descriptor Request
     argument:
     - type: uint16
+      help: target short id
     - type: uint16
+      help: profile id
     - type: hex
+      help: supported incoming cluster list
     - type: hex
+      help: supported outgoing cluster list
+    - type: uint16opt
+      help: aps options
 - name: cli_command
   value:
     name: modify_network_timeout_internal
@@ -1071,7 +1077,7 @@ template_contribution:
     handler: pollCommand
     help: Set MAC data polling interval
     argument:
-    - type: uint16
+    - type: uint32
 - name: cli_command
   value:
     name: poll_all_once
@@ -1647,6 +1653,18 @@ template_contribution:
     - type: uint16
 - name: cli_command
   value:
+    name: set_silent_end_device_timeout
+    handler: setSilentEndDeviceTiemout
+    help: sets end device timeout values but does not send the timeout request over the air
+    argument:
+    - type: uint8
+      help: end device timeout values
+    - type: uint8
+      help: end device timeout shift
+    - type: uint8
+      help: end device configuration
+- name: cli_command
+  value:
     name: set_end_device_timeout
     handler: setEndDeviceTimeout
     help: sets end device timeout values
@@ -1814,9 +1832,13 @@ template_contribution:
     help: Set the security parameters
     argument:
     - type: uint32
+      help: security settings bitmask (see sl_zigbee_initial_security_bitmask_t)
     - type: hex
+      help: preconfigured key setting
     - type: hex
+      help: network key setting
     - type: uint8
+      help: network sequence number
 - name: cli_command
   value:
     name: show_src_routes

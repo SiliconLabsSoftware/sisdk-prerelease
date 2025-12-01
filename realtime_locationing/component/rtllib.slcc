@@ -18,8 +18,7 @@ library:
 - path: lib/gcc/linux/x86-64/release/librtl_static.a
   condition:
   - toolchain_gcc
-  - linux_arch_64
-  - x86-64
+  - linux_arch_x86_64
 - path: lib/gcc/darwin/x86-64/release/librtl_static.a
   condition:
   - toolchain_gcc
@@ -31,13 +30,20 @@ library:
 - path: lib/gcc/linux/aarch64/release/librtl_static.a
   condition:
   - toolchain_gcc
-  - linux_arch_64
-  - aarch64
+  - linux_arch_aarch64
 - path: lib/gcc/linux/armv7l/release/librtl_static.a
   condition:
   - toolchain_gcc
-  - linux_arch_32
-  - armv7l
+  - linux_arch_arm32v7
+- system: m
+  condition:
+  - device_host
+- system: pthread
+  condition:
+  - device_host
+- system: stdc++
+  condition:
+  - device_host
 
 requires:
 - name: rtllib_api
@@ -52,6 +58,10 @@ requires:
 - name: rtllib_eigen
 - name: rtllib_cmsis_dsp
 - name: rtllib_printf
+
+template_contribution:
+- name: component_catalog
+  value: rtl_lib
 
 documentation:
   docset: rtl-lib

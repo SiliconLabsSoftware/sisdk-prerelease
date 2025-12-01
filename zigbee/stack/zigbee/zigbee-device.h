@@ -322,5 +322,4 @@ sl_status_t sli_zigbee_ieee_address_request_to_target(sl_802154_short_addr_t dis
                                                       sl_802154_short_addr_t targetNodeIdOfRequest);
 
 uint8_t sli_zigbee_next_stack_zdo_sequence_number(void);
-
 #endif // SILABS_ZIGBEE_DEVICE_H

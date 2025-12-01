@@ -90,6 +90,9 @@ psa_status_t sli_psa_set_ksu_key_attributes(sli_psa_ksu_key_attributes_t ksu_att
              );
 
   // Set KSU-specific flags from KSU attributes into PSA usage flags (vendor extension bits)
+  if (ksu_attributes & SLI_PSA_KSU_KEY_ATTR_DISALLOW_KSU) {
+    usage |= SLI_PSA_KSU_KEY_ATTR_DISALLOW_KSU;
+  }
 #if defined(SL_PSA_KEY_LOCATION_KSU_1)
   if (ksu_attributes & SLI_PSA_KSU_KEY_ATTR_ALLOW_LPWAES) {
     usage |= SLI_PSA_KSU_KEY_ATTR_ALLOW_LPWAES;
@@ -98,10 +101,6 @@ psa_status_t sli_psa_set_ksu_key_attributes(sli_psa_ksu_key_attributes_t ksu_att
     usage |= SLI_PSA_KSU_KEY_ATTR_ALLOW_HOSTCRYPTO;
   }
 #endif // SL_PSA_KEY_LOCATION_KSU_1
-  if (ksu_attributes & SLI_PSA_KSU_KEY_ATTR_DISALLOW_KSU) {
-    usage |= SLI_PSA_KSU_KEY_ATTR_DISALLOW_KSU;
-  }
-
   // Update the PSA attributes with the modified usage flags
   psa_set_key_usage_flags(attributes, usage);
 
@@ -1191,7 +1190,7 @@ psa_status_t sli_hostcrypto_load_key(struct sxkeyref *sx_key_ref,
                                      const psa_key_attributes_t *attributes,
                                      const uint8_t *key_buffer)
 {
-  if (key_buffer == NULL) {
+  if ((sx_key_ref == NULL) || (key_buffer == NULL)) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
   psa_key_location_t location =
@@ -1377,16 +1376,11 @@ psa_status_t sli_se_ksu_import_key(const psa_key_attributes_t *attributes,
     return PSA_ERROR_NOT_SUPPORTED;
   }
 
-  // Validate key usage flags for KSU requirements (work directly with PSA attributes)
-  psa_key_usage_t usage = psa_get_key_usage_flags(attributes);
-
-  // Check for disallow KSU flag
-  if (usage & SLI_PSA_KSU_KEY_ATTR_DISALLOW_KSU) {
-    return PSA_ERROR_NOT_PERMITTED;
-  }
-
 #if defined(SL_PSA_KEY_LOCATION_KSU_1)
   if (location != PSA_KEY_LOCATION_SLI_SE_OPAQUE) {
+    // Validate key usage flags for KSU requirements (work directly with PSA attributes)
+    psa_key_usage_t usage = psa_get_key_usage_flags(attributes);
+
     // For non-wrapped keys, require ALLOW_HOSTCRYPTO or ALLOW_LPWAES
     bool has_allowed_users = ((usage & SLI_PSA_KSU_KEY_ATTR_ALLOW_LPWAES) || (usage & SLI_PSA_KSU_KEY_ATTR_ALLOW_HOSTCRYPTO));
     if (!has_allowed_users) {
@@ -1548,15 +1542,11 @@ psa_status_t sli_se_ksu_generate_key(const psa_key_attributes_t *attributes,
     return PSA_ERROR_NOT_SUPPORTED;
   }
 
-  // Validate key usage flags for KSU requirements (work directly with PSA attributes)
-  psa_key_usage_t usage = psa_get_key_usage_flags(attributes);
-
-  // Check for disallow KSU flag
-  if (usage & SLI_PSA_KSU_KEY_ATTR_DISALLOW_KSU) {
-    return PSA_ERROR_NOT_PERMITTED;
-  }
 #if defined(SL_PSA_KEY_LOCATION_KSU_1)
   if (location != PSA_KEY_LOCATION_SLI_SE_OPAQUE) {
+    // Validate key usage flags for KSU requirements (work directly with PSA attributes)
+    psa_key_usage_t usage = psa_get_key_usage_flags(attributes);
+
     // For non-wrapped keys, require ALLOW_HOSTCRYPTO or ALLOW_LPWAES
     bool has_allowed_users = ((usage & SLI_PSA_KSU_KEY_ATTR_ALLOW_LPWAES) || (usage & SLI_PSA_KSU_KEY_ATTR_ALLOW_HOSTCRYPTO));
     if (!has_allowed_users) {
@@ -2337,6 +2327,12 @@ psa_status_t sli_ksu_opaque_copy_key(const psa_key_attributes_t *source_attribut
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
+  // Check if source key has the DISALLOW_KSU flag set
+  psa_key_usage_t source_usage = psa_get_key_usage_flags(source_attributes);
+  if (source_usage & SLI_PSA_KSU_KEY_ATTR_DISALLOW_KSU) {
+    return PSA_ERROR_NOT_PERMITTED;
+  }
+
   size_t key_size = psa_get_key_bits(target_attributes) / 8;
 
   // Extract key information from the wrapped key context
@@ -2378,14 +2374,6 @@ psa_status_t sli_ksu_opaque_copy_key(const psa_key_attributes_t *source_attribut
     target_key_desc.storage.location.ksu.crypto_engine_id = SLI_CRYPTOMASTER_HASH;
   } else {
     return PSA_ERROR_INVALID_ARGUMENT;
-  }
-
-  // Validate key usage flags for KSU requirements (work directly with PSA attributes)
-  psa_key_usage_t target_usage = psa_get_key_usage_flags(target_attributes);
-
-  // Check for disallow KSU flag
-  if (target_usage & SLI_PSA_KSU_KEY_ATTR_DISALLOW_KSU) {
-    return PSA_ERROR_NOT_PERMITTED;
   }
 
   psa_key_id_t target_key_id = psa_get_key_id(target_attributes);

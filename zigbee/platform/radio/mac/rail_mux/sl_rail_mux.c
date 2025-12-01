@@ -52,9 +52,6 @@
 
 #if defined(SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT) || defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT)
 #include "sl_rail_util_ieee802154_fast_channel_switching_config.h"
-#endif // SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
-
-#if SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_ENABLED
 
 // This file supports 2 instances of stacks (ZB, OT). Similar configuration is expected on RAIL side
 // when concurrent Rx feature is enabled
@@ -114,7 +111,8 @@ static inline void CONFIGURE_RX_CHANNEL_SWITCHING(sl_rail_handle_t mux_rail_hand
 #define CONFIGURE_RX_CHANNEL_SWITCHING(mux_rail_handle, channel_switching_cfg)
 #define SET_CHANNEL_SWITCHING_CFG_CH(context_index, channel)
 #define sli_is_multi_channel_enabled() false
-#endif //SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_ENABLED
+#endif //#if defined(SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT) || defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT)
+
 
 //------------------------------------------------------------------------------
 // Forward declarations
@@ -239,13 +237,15 @@ void sli_rail_mux_local_init(void)
   rx_channel = INVALID_CHANNEL;
   fn_init_802154_address_config(&rail_addresses_802154);
 
-#if SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_ENABLED
+#if defined(SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT) || defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT)
+
   channel_switching_cfg.buffer_bytes = SL_RAIL_IEEE802154_RX_CHANNEL_SWITCHING_BUF_BYTES;
   channel_switching_cfg.p_buffer      = channel_switching_buf;
   for (uint8_t i = 0U; i < SUPPORTED_PROTOCOL_COUNT; i++) {
     channel_switching_cfg.channels[i] = INVALID_CHANNEL;
   }
-#endif //SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_ENABLED
+#endif //#if defined(SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT) || defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT)
+
 
   // TODO: for now we assume all protocols to be 802.15.4 and use the 2.4 OQPSK
   // standard PHY. In order to support SubGHz PHY, we will need to modify the
@@ -831,7 +831,7 @@ sl_rail_status_t sl_rail_mux_IEEE802154_Config2p4GHzRadioAntDiv(sl_rail_handle_t
 sl_rail_status_t sl_rail_mux_ieee802154_config_2p4_ghz_radio_fast_channel_switching(sl_rail_handle_t railHandle)
 {
   (void)railHandle;
-  #ifdef SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
+  #if defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT) || defined(SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT)
   return sl_rail_ieee802154_config_2p4_ghz_radio_fast_channel_switching(mux_rail_handle);
   #else
   return SL_STATUS_NOT_SUPPORTED;
@@ -841,7 +841,7 @@ sl_rail_status_t sl_rail_mux_ieee802154_config_2p4_ghz_radio_fast_channel_switch
 sl_rail_status_t sl_rail_mux_ieee802154_config_2p4_ghz_radio_rx_duty_cycling(sl_rail_handle_t railHandle)
 {
   (void)railHandle;
-  #ifdef SL_CATALOG_SL_RAIL_UTIL_IEEE802154_RX_DUTY_CYCLING_PRESENT
+  #if defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_RX_DUTY_CYCLING_PRESENT) || defined(SL_CATALOG_RAIL_UTIL_IEEE802154_RX_DUTY_CYCLING_PRESENT)
   return sl_rail_ieee802154_config_2p4_ghz_radio_rx_duty_cycling(mux_rail_handle);
   #else
   return SL_STATUS_NOT_SUPPORTED;
@@ -2368,7 +2368,7 @@ void fn_print_flags(void)
 void sl_rail_mux_update_active_radio_config(void)
 {
   sl_rail_idle(mux_rail_handle, SL_RAIL_IDLE_ABORT, true);
-  sl_rail_mux_util_ieee802154_config_radio(mux_rail_handle);
+  sl_rail_util_ieee802154_config_radio(mux_rail_handle);
   if (rx_channel != INVALID_CHANNEL) {
     CONFIGURE_RX_CHANNEL_SWITCHING(mux_rail_handle, channel_switching_cfg);
     sl_rail_start_rx(mux_rail_handle, rx_channel, NULL);
@@ -2530,13 +2530,11 @@ bool sl_rail_mux_IsNextCcaNow(sl_rail_handle_t railHandle)
   return sl_rail_is_next_cca_now(mux_rail_handle);
 }
 
-#if !defined(SL_CATALOG_RAIL_UTIL_IEEE802154_PHY_SELECT_PRESENT) && !defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_PHY_SELECT_PRESENT)
 sl_rail_status_t sl_rail_mux_util_ieee802154_config_radio(sl_rail_handle_t railHandle)
 {
    (void)railHandle;
    return sl_rail_util_ieee802154_config_radio(mux_rail_handle);
 }
-#endif
 
 #if defined(SL_CATALOG_RAIL_UTIL_IEEE802154_RX_DUTY_CYCLING_PRESENT) || defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_RX_DUTY_CYCLING_PRESENT)
 sl_rail_ieee802154_phy_features_t duty_cycling_phy_features = SL_RAIL_IEEE802154_PHY_FEATURE_2P4_GHZ_RX_DUTY_CYCLING;

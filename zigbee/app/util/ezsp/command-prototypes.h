@@ -232,6 +232,17 @@ void sl_zigbee_ezsp_set_pending_network_update_pan_id(
   // PAN ID to be accepted in a network update.
   uint16_t panId);
 
+// Set the channel number the device will accept in ZDO Mgmt Network Update
+// command to change channel. If a ZDO Mgmt Network Update command is received
+// by the device specifying a channel that does not match with the given
+// channel, the ZDO Mgmt Network Update command will be ignored by the device. A
+// value of 0xFF indicates that any channel received in a ZDO Mgmt Network
+// Update command will be accepted which is also the default value set by the
+// stack.
+void sl_zigbee_ezsp_set_pending_network_update_channel(
+  // A pending network update channel number.
+  uint8_t channel);
+
 // Retrieve the endpoint number located at the specified index.
 // Return: Endpoint number at the index.
 uint8_t sl_zigbee_ezsp_get_endpoint(

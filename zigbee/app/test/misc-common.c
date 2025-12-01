@@ -56,7 +56,7 @@
 // Globals
 
 // A poll delay for each network
-uint16_t pollDelay[4] = { 0, 0, 0, 0 };
+uint32_t pollDelay[4] = { 0, 0, 0, 0 };
 
 // A poll event for each network
 sl_zigbee_af_event_t realPollEvent[4];
@@ -84,7 +84,7 @@ void printFailedToErrorMessage(const char * message)
 void pollCommand(SL_CLI_COMMAND_ARG)
 {
   uint8_t nwkIndex = sl_zigbee_get_current_network();
-  pollDelay[nwkIndex] = sl_cli_get_argument_uint16(arguments, 0);
+  pollDelay[nwkIndex] = sl_cli_get_argument_uint32(arguments, 0);
   pollEventHandler(nwkIndex);
 }
 

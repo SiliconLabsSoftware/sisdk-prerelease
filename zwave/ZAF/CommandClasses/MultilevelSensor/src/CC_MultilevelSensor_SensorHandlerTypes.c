@@ -35,20 +35,6 @@
 // -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
-//                Static Variables
-// -----------------------------------------------------------------------------
-/**< Configuration table of the possible sensor types. This table is filled based on SDS13812 table */
-static const sensor_type_t sensor_types[] = {
-  [SENSOR_NAME_AIR_TEMPERATURE] = { .value = 0x01, .byte_offset = 1, .bit_mask = 0, .max_scale_value = 0x01 },
-  [SENSOR_NAME_GENERAL_PURPOSE] = { .value = 0x02, .byte_offset = 1, .bit_mask = 1, .max_scale_value = 0x01 },
-  [SENSOR_NAME_ILLUMINANCE]     = { .value = 0x03, .byte_offset = 1, .bit_mask = 2, .max_scale_value = 0x01 },
-  [SENSOR_NAME_POWER]           = { .value = 0x04, .byte_offset = 1, .bit_mask = 3, .max_scale_value = 0x01 },
-  [SENSOR_NAME_HUMIDITY]        = { .value = 0x05, .byte_offset = 1, .bit_mask = 4, .max_scale_value = 0x01 },
-  [SENSOR_NAME_ACCELERATION_X]  = { .value = 0x34, .byte_offset = 7, .bit_mask = 3, .max_scale_value = 0x00 },
-  [SENSOR_NAME_ACCELERATION_Y]  = { .value = 0x35, .byte_offset = 7, .bit_mask = 4, .max_scale_value = 0x00 },
-  [SENSOR_NAME_ACCELERATION_Z]  = { .value = 0x36, .byte_offset = 7, .bit_mask = 5, .max_scale_value = 0x00 },
-};
-// -----------------------------------------------------------------------------
 //              Public Function Definitions
 // -----------------------------------------------------------------------------
 const sensor_type_t* cc_multilevel_sensor_get_sensor_type(sensor_name_t i_sensor_name)
@@ -64,7 +50,10 @@ const sensor_type_t* cc_multilevel_sensor_get_sensor_type(sensor_name_t i_sensor
 #pragma GCC diagnostic pop
 #endif
   {
-    return &sensor_types[i_sensor_name];
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+    return SENSOR_TYPE_FROM_NAME(i_sensor_name);
+#pragma GCC diagnostic pop
   }
   return NULL;
 }

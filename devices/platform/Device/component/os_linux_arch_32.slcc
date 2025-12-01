@@ -1,7 +1,7 @@
 id: linux_arch_32
-label: Linux OS (32 bit)
+label: Linux OS (x86 32-bit)
 package: devices
-description: OS component for 32 bit Linux build targets.
+description: OS component for x86 32-bit Linux build targets.
 category: Platform|Device|Native
 quality: production
 metadata:
@@ -12,6 +12,8 @@ requires:
 provides:
 - name: linux_arch
 - name: linux_arch_32
+- name: linux_arch_x86
 tag:
 - device:opn:linux_32
+- device:opn:linux_x86_32
 root_path: devices

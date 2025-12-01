@@ -323,6 +323,21 @@ ui_hints:
     - path: "config/rail/radio_settings.radioconf"
       focus: true
 
+#--------------------- HWFILTER ------------------------
+tag:
+  - hwfilter:board:hardware:has:vcom
+  - hwfilter:ram:29k
+  - hwfilter:flash:253k
+  - hwfilter:device:device_series_2
+  - hwfilter:!board:brd2900a
+  - hwfilter:!board:brd2901a
+  - hwfilter:!board:brd4319a
+  - hwfilter:!board:brd4337a
+  - hwfilter:!device:device_family_bgm24
+  - hwfilter:!device:device_family_mgm21
+  - hwfilter:!device:device_family_mgm22
+  
+
 filter:
   - name: "Wireless Technology"
     value: ["RAIL"]

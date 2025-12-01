@@ -1,0 +1,43 @@
+---
+template:
+  connect_toolchains: &connect_toolchains
+    - gcc
+    - iar
+    - segger
+  connect_ides: &connect_ides
+    - generic-template
+    - iar-embedded-workbench
+    - makefile-ide
+    - simplicity-ide
+    - visual-studio-code
+    - visual-studio-code-cmake
+#example specific settings
+hwfilter:
+  board_excludes:
+    - brd1021a
+    - brd2606a
+    - brd2902a
+    - brd2903a
+    - brd2904a
+    - brd2905a
+    - brd4183b
+    - brd4205a
+    - brd4277a
+    - brd4310a
+    - brd4311a
+    - brd4312a
+    - brd4314a
+    - brd4330a
+    - brd4331a
+    - brd4335a
+    - brd4356z
+  device_excludes:
+    - device_generic_family_sixx301
+    - efm32pg22c200f512im40
+    - zgm230sb27hgn
+example:
+#connect examples
+  - path: example/connect_bt_dmp_soc_empty/connect_bt_dmp_soc_empty.slcp
+    hardware_filter:
+      board_excludes:
+        - brd2704a

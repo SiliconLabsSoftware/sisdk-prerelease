@@ -663,9 +663,9 @@ bool zpal_radio_get_long_range_channel_auto_mode(void);
  *
  * @param[in] enable  true to enable the automatically channel selection mode,
  *                    false to enable the manual channel selection mode
- *
+ * @return @ref ZPAL_STATUS_OK if the mode was successfully set, @ref ZPAL_STATUS_FAIL otherwise.
  */
-void zpal_radio_set_long_range_channel_auto_mode(bool enable);
+zpal_status_t zpal_radio_set_long_range_channel_auto_mode(bool enable);
 
 /**
  * @brief Function to check if the stack implementation supports a given region

@@ -31,8 +31,10 @@ import re
 import pylink
 import socket
 
+_MSG_MAX_SIZE = 1200
+
 class RTT:
-    def __init__(self, chip_name: str, serial_no: int = None, hostname: str = None):
+    def __init__(self, chip_name: str, serial_no: int = None, hostname: str = None, msg_max_size: int = _MSG_MAX_SIZE):
         """Communication interface to device.
 
         :param chip_name: Chip name
@@ -43,6 +45,7 @@ class RTT:
         self.chip_name = self.get_device_jlink_name(chip_name)
         self.serial_no = serial_no
         self.hostname = hostname
+        self.msg_max_size = msg_max_size
 
     @property
     def is_connected(self) -> bool:
@@ -91,7 +94,7 @@ class RTT:
         """Stops RTT."""
         self.jlink.rtt_stop()
 
-    def rtt_send(self, data: bytes, timeout: float = 10, msg_max_size: int = 1200):
+    def rtt_send(self, data: bytes, timeout: float = 10):
         """Send data to RTT buffer.
 
         :param data: Bytes to write to RTT buffer.
@@ -100,10 +103,10 @@ class RTT:
         remaining = data
 
         while remaining:
-            if len(remaining) <= msg_max_size:
+            if len(remaining) <= self.msg_max_size:
                 chunk = remaining
             else:
-                chunk = remaining[:msg_max_size]
+                chunk = remaining[:self.msg_max_size]
 
             nb_sent = 0
             start = now = time.time()
@@ -117,7 +120,7 @@ class RTT:
 
             remaining = remaining[nb_sent:]
 
-    def rtt_receive(self, timeout: float = 10, msg_max_size: int = 1200) -> bytes:
+    def rtt_receive(self, timeout: float = 10) -> bytes:
         """Read data from RTT buffer.
 
         :param timeout: Maximum time to wait for data to be received in seconds
@@ -126,7 +129,7 @@ class RTT:
         data = bytes()
         start = now = time.time()
         while len(data) == 0 and now < start + timeout:
-            data = self.jlink.rtt_read(0, msg_max_size)
+            data = self.jlink.rtt_read(0, self.msg_max_size)
             now = time.time()
         if len(data) == 0:
             raise TimeoutError

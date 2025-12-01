@@ -101,7 +101,7 @@ sl_rail_status_t sl_rail_util_pa_get_tx_power_limits(sl_rail_handle_t rail_handl
 #if (!SL_RAIL_SUPPORTS_2P4_GHZ_BAND)
   pa_mode -= 1U; // Underflow to 255 will be caught in next if condition
 #endif
-  if (pa_mode > sli_rail_util_pa_power_table.num_of_tables) {
+  if (pa_mode >= sli_rail_util_pa_power_table.num_of_tables) {
     return SL_RAIL_STATUS_INVALID_PARAMETER;
   }
   const sl_rail_pa_descriptor_t *p_pa_descriptor = &(sli_rail_util_pa_power_table.p_pa_table_descriptor[pa_mode]);
@@ -156,7 +156,7 @@ sl_rail_status_t sl_railcb_convert_ddbm_to_power_setting_entry(sl_rail_handle_t 
 #if (!SL_RAIL_SUPPORTS_2P4_GHZ_BAND)
   pa_mode -= 1U; // Underflow to 255 will be caught in next if condition
 #endif
-  if (pa_mode > p_power_table_config->num_of_tables) {
+  if (pa_mode >= p_power_table_config->num_of_tables) {
     return SL_RAIL_STATUS_INVALID_CALL;
   }
   sl_rail_pa_descriptor_t *p_pa_descriptor = &(p_power_table_config->p_pa_table_descriptor[pa_mode]);

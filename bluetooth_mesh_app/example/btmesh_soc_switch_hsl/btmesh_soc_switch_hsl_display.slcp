@@ -120,6 +120,10 @@ template_contribution:
     condition:
       - cli
 
+post_build:
+  - path: "../../postbuild_profile/btmesh_common_s2.slpb"
+    condition: [device_series_2, bootloader_app_properties]
+
 tag:
   - hardware:device:sdid:!205
   - hardware:board_only

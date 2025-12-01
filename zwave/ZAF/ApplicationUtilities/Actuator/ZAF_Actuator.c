@@ -220,6 +220,11 @@ uint8_t ZAF_Actuator_GetTargetValue(s_Actuator *pActuator)
   return (uint8_t)CONVERT_FROM_INTERNAL(pActuator->valueTarget);
 }
 
+bool ZAF_Actuator_IsTargetReached(s_Actuator *pActuator)
+{
+  return pActuator->valueCurrent == pActuator->valueTarget;
+}
+
 uint8_t ZAF_Actuator_GetDurationRemaining(s_Actuator *pActuator)
 {
   uint32_t duration = 0;

@@ -200,6 +200,14 @@ sl_status_t sl_zigbee_aes_mmo_hash_final(sl_zigbee_aes_mmo_hash_context_t *conte
                     data);
 }
 
+uint8_t sl_zigbee_get_max_nwk_retries(void)
+{
+  uint8_t valueLength = 1;
+  uint8_t data;
+  sl_zigbee_ezsp_get_value(SL_ZIGBEE_EZSP_VALUE_MAX_NWK_RETRIES, &valueLength, &data);
+  return data;
+}
+
 // This is a convenience routine for hashing short blocks of data,
 // less than 255 bytes.
 sl_status_t sl_zigbee_aes_hash_simple(uint8_t totalLength,

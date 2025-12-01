@@ -103,6 +103,10 @@ configuration:
   - name: SL_SIMPLE_BUTTON_ALLOW_LED_CONFLICT
     value: "1"
 
+post_build:
+  - path: "../../postbuild_profile/btmesh_common_s2.slpb"
+    condition: [device_series_2, bootloader_app_properties]
+
 tag:
   - hardware:board_only
   - hardware:component:button:1+

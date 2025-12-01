@@ -27,6 +27,7 @@ library:
   unless:
   - ot_coap_cert_libs
   - ot_multi_instance_cert_libs
+  - ot_multicast_cert_libs
 - path: libs/libsl_ot_stack_mtd_efr32mg21_gcc.a
   condition:
   - toolchain_gcc
@@ -35,6 +36,7 @@ library:
   unless:
   - ot_coap_cert_libs
   - ot_multi_instance_cert_libs
+  - ot_multicast_cert_libs
 - path: libs/libsl_ot_stack_tcp_efr32mg21_gcc.a
   condition:
   - toolchain_gcc
@@ -49,6 +51,7 @@ library:
   unless:
   - ot_coap_cert_libs
   - ot_multi_instance_cert_libs
+  - ot_multicast_cert_libs
 - path: libs/libsl_ot_stack_mtd_efr32mg24_gcc.a
   condition:
   - toolchain_gcc
@@ -57,6 +60,7 @@ library:
   unless:
   - ot_coap_cert_libs
   - ot_multi_instance_cert_libs
+  - ot_multicast_cert_libs
 - path: libs/libsl_ot_stack_tcp_efr32mg24_gcc.a
   condition:
   - toolchain_gcc
@@ -71,6 +75,7 @@ library:
   unless:
   - ot_coap_cert_libs
   - ot_multi_instance_cert_libs
+  - ot_multicast_cert_libs
 - path: libs/libsl_ot_stack_mtd_efr32mg26_gcc.a
   condition:
   - toolchain_gcc
@@ -79,6 +84,7 @@ library:
   unless:
   - ot_coap_cert_libs
   - ot_multi_instance_cert_libs
+  - ot_multicast_cert_libs
 - path: libs/libsl_ot_stack_tcp_efr32mg26_gcc.a
   condition:
   - toolchain_gcc
@@ -93,6 +99,7 @@ library:
   unless:
   - ot_coap_cert_libs
   - ot_multi_instance_cert_libs
+  - ot_multicast_cert_libs
 - path: libs/libsl_ot_stack_mtd_simg301_gcc.a
   condition:
   - toolchain_gcc
@@ -101,6 +108,7 @@ library:
   unless:
   - ot_coap_cert_libs
   - ot_multi_instance_cert_libs
+  - ot_multicast_cert_libs
 - path: libs/libsl_ot_stack_tcp_simg301_gcc.a
   condition:
   - toolchain_gcc

@@ -124,6 +124,8 @@ configuration:
       - esl_tag_sensor
   - name: APP_ASSERT_LOG_ENABLE
     value: "0"
+  - name: APP_LOG_LEVEL_FILTER_THRESHOLD
+    value: "APP_LOG_LEVEL_INFO"
   - name: CIRCULAR_QUEUE_LEN_MAX
     value: "48"
   - name: APP_SCHEDULER_MAX_DATA_SIZE

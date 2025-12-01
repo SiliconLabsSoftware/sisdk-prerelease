@@ -847,7 +847,8 @@ void testProfileMessageSentHandler(sl_zigbee_outgoing_message_type_t type,
       }
     }
 
-    if (status == SL_STATUS_OK && ongoingSendingPackets) {
+    if (((apsFrame->options & SL_ZIGBEE_APS_OPTION_FRAGMENT) !=  SL_ZIGBEE_APS_OPTION_FRAGMENT)
+        && status == SL_STATUS_OK && ongoingSendingPackets) {
       totalBytesSent[nwkIndex] += pktLength[nwkIndex];
       pktSuccessCount[nwkIndex]++;
 
@@ -907,6 +908,7 @@ static void sendEventHandler(uint8_t nwkIndex)
     message[i + 3] = i;
   }
   (void) sl_zigbee_set_current_network(nwkIndex);
+
   success = (SL_STATUS_OK
              == transmitMessage(pktDestination[nwkIndex],
                                 pktLength[nwkIndex] + 4,

@@ -263,18 +263,10 @@ otError sli_ot_radio_interface_set_rx(uint8_t aChannel)
 {
     otError          error = OT_ERROR_NONE;
     sl_rail_status_t status;
-    int8_t           txPower;
 
     sl_rail_scheduler_info_t bgRxSchedulerInfo = {.priority         = SL_802154_RADIO_PRIO_BACKGROUND_RX_VALUE,
                                                   .slip_time        = 0,
                                                   .transaction_time = 0};
-
-    txPower = sl_get_tx_power_for_current_channel(nullptr);
-    error   = sli_ot_radio_interface_load_channel_config(aChannel, txPower);
-    if (error != OT_ERROR_NONE)
-    {
-        return error;
-    }
 
 #if FAST_CHANNEL_SWITCHING_SUPPORT && OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
     if (sli_ot_radio_channel_switching_is_multi_channel_enabled())

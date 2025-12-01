@@ -105,6 +105,51 @@ define:
     value: "1"
 #----------------- Watchdog  -------------------------
   - name: SL_CONNECT_DISABLE_WATCHDOG
+
+#--------------------- HWFILTER ------------------------
+tag:
+  - hwfilter:board:hardware:has:vcom
+  - hwfilter:board:hardware:has:pti
+  - hwfilter:ram:33k
+  - hwfilter:flash:256k
+  - hwfilter:board:simple_led:led0
+  - hwfilter:board:simple_button:btn0
+  - hwfilter:!board:brd4109a
+  - hwfilter:!board:brd4110a
+  - hwfilter:!board:brd4110b
+  - hwfilter:!board:brd4111a
+  - hwfilter:!board:brd4111b
+  - hwfilter:!board:brd4113a
+  - hwfilter:!board:brd4115a
+  - hwfilter:!board:brd4115b
+  - hwfilter:!board:brd4180a
+  - hwfilter:!board:brd4180b
+  - hwfilter:!board:brd4181a
+  - hwfilter:!board:brd4181b
+  - hwfilter:!board:brd4181c
+  - hwfilter:!board:brd4188a
+  - hwfilter:!board:brd4188b
+  - hwfilter:!board:brd4191a
+  - hwfilter:!board:brd4194a
+  - hwfilter:!board:brd4308a
+  - hwfilter:!board:brd4308b
+  - hwfilter:!board:brd4308c
+  - hwfilter:!board:brd4308d
+  - hwfilter:!board:brd4309a
+  - hwfilter:!board:brd4309b
+  - hwfilter:!board:brd4316a
+  - hwfilter:!board:brd4317a
+  - hwfilter:!board:brd4319a
+  - hwfilter:!board:brd4329a
+  - hwfilter:!board:brd4332a
+  - hwfilter:!board:brd4337a
+  - hwfilter:!board:brd4356a
+  - hwfilter:!board:brd4412a
+  - hwfilter:!board:brd4413a
+  - hwfilter:!board:brd4414a
+  - hwfilter:!board:brd4420a
+  - hwfilter:!board:brd4421a
+
 #------------ Configuration overrides ----------------
 configuration:
 #------------ RAIL init, Channel Config --------------

@@ -1,4 +1,4 @@
-project_name: btmesh_nlc_energy_monitor
+project_name: btmesh_soc_nlc_energy_monitor
 package: bluetooth_mesh_app
 label: Bluetooth Mesh - NLC Energy Monitor
 description: >
@@ -114,6 +114,10 @@ template_contribution:
       help: "Prints info about BT address and mesh UUID"
     condition:
       - cli
+
+post_build:
+  - path: "../../postbuild_profile/btmesh_common_s2.slpb"
+    condition: [device_series_2, bootloader_app_properties]
 
 tag:
   - hardware:board_only

@@ -126,11 +126,11 @@ template_contribution:
       - cli
 
 post_build:
-  - path: "../../postbuild_profile/btmesh_common.slpb"
+  - path: "../../postbuild_profile/btmesh_common_s2.slpb"
     condition: [device_series_2, bootloader_app_properties]
 
 tag:
-  - companion:bootloader-storage-internal-single-btmesh-dfu
+  - companion:bootloader
   - hardware:board_only
   - hardware:component:button:2+
   - hardware:component:display:ls013b7dh03

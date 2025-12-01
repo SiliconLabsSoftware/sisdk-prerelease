@@ -314,6 +314,18 @@ void sl_zigbee_ezsp_set_pending_network_update_pan_id(
   }
 }
 
+void sl_zigbee_ezsp_set_pending_network_update_channel(
+  uint8_t channel)
+{
+  startCommand(SL_ZIGBEE_EZSP_SET_PENDING_NETWORK_UPDATE_CHANNEL);
+  appendInt8u(channel);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    EZSP_ASH_TRACE("%s(): sendCommand() error: 0x%02X", __func__, sendStatus);
+  }
+}
+
 uint8_t sl_zigbee_ezsp_get_endpoint(
   uint8_t index)
 {

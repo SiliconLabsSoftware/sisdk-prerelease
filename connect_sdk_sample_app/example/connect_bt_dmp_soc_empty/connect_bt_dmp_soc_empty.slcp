@@ -100,6 +100,15 @@ configuration:
 #----------------- Watchdog  -------------------------
 define:
   - name: SL_CONNECT_DISABLE_WATCHDOG
+
+#--------------------- HWFILTER ------------------------
+tag:
+  - hwfilter:board:hardware:has:vcom
+  - hwfilter:board:hardware:has:pti
+  - hwfilter:ram:53k
+  - hwfilter:flash:321k
+  - hwfilter:board:hardware_board_supports_rf_band_2400
+
 #--------------------- Toolchain ------------------------
 toolchain_settings:
   - option: optimize

@@ -99,7 +99,7 @@ include:
 config_file:
 - path: platform/service/legacy_hal/config/legacy_hal_config.h
 define:
-- name: "PLATFORM_HEADER"
+- name: PLATFORM_HEADER
   value: "\"platform-header.h\""
   unless:
   - zigbee_host_simulation

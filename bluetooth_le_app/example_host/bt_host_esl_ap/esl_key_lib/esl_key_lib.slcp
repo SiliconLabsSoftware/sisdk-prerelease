@@ -61,6 +61,18 @@ library:
     unless:
       - win32
 
+post_build:
+  - path: post_build/esl_lib_linux.slpb
+    condition:
+      - linux
+  - path: post_build/esl_lib_win32.slpb
+    condition:
+      - win32
+  - path: post_build/esl_lib_macos.slpb
+    condition:
+      - macos
+
 tag:
+  - companion:esl_ap
   - toolchain:gcc
   - hwfilter:device:device_family_host

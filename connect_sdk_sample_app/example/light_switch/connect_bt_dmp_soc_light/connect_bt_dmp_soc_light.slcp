@@ -9,7 +9,7 @@ description: >
   Upon power-up, the Light (acting as the network coordinator) creates its own
   local network. The Switch modules (low-power end-nodes) can then join this
   network and control the Light node. If a local network is established using
-  the “form” CLI command, the Switch nodes can join using the “join” CLI command.
+  the form CLI command, the Switch nodes can join using the join CLI command.
   From that point onward, the Light can be controlled by pressing the PB1 button
   on any connected Switch node.
 category: Connect Examples
@@ -242,6 +242,49 @@ configuration:
 #----------------- Watchdog  -------------------------
 define:
   - name: SL_CONNECT_DISABLE_WATCHDOG
+
+#--------------------- HWFILTER ------------------------
+tag:
+  - hwfilter:board:hardware:has:vcom
+  - hwfilter:board:hardware:has:pti
+  - hwfilter:ram:55k
+  - hwfilter:flash:402k
+  - hwfilter:board:hardware_board_supports_rf_band_2400
+  - hwfilter:board:simple_led:led0
+  - hwfilter:!board:brd2704a
+  - hwfilter:!board:brd2713a
+  - hwfilter:!board:brd2715a
+  - hwfilter:!board:brd4171a
+  - hwfilter:!board:brd4176a
+  - hwfilter:!board:brd4179b
+  - hwfilter:!board:brd4180a
+  - hwfilter:!board:brd4180b
+  - hwfilter:!board:brd4181a
+  - hwfilter:!board:brd4181b
+  - hwfilter:!board:brd4181c
+  - hwfilter:!board:brd4195a
+  - hwfilter:!board:brd4195b
+  - hwfilter:!board:brd4196a
+  - hwfilter:!board:brd4196b
+  - hwfilter:!board:brd4308a
+  - hwfilter:!board:brd4308b
+  - hwfilter:!board:brd4308c
+  - hwfilter:!board:brd4308d
+  - hwfilter:!board:brd4309a
+  - hwfilter:!board:brd4309b
+  - hwfilter:!board:brd4316a
+  - hwfilter:!board:brd4317a
+  - hwfilter:!board:brd4318a
+  - hwfilter:!board:brd4319a
+  - hwfilter:!board:brd4328a
+  - hwfilter:!board:brd4328b
+  - hwfilter:!board:brd4329a
+  - hwfilter:!board:brd4332a
+  - hwfilter:!board:brd4337a
+  - hwfilter:!board:brd4350a
+  - hwfilter:!board:brd4351a
+  - hwfilter:!board:brd4356a
+
 #-------------- Template Contribution ----------------
 template_contribution:
 #------------------ CLI commands ---------------------

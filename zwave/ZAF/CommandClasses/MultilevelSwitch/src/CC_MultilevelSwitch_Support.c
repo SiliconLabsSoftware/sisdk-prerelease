@@ -95,7 +95,7 @@ static void actuator_callback(s_Actuator * p_actuator)
   p_switch = &mp_switches[multilevel_component_id];
 
   cc_multilevel_switch_support_cb(p_switch);
-  if (ZAF_Actuator_GetCurrentValue(p_actuator) == ZAF_Actuator_GetTargetValue(p_actuator)) {
+  if (ZAF_Actuator_IsTargetReached(p_actuator)) {
     cc_multilevel_switch_write((uint8_t) multilevel_component_id, p_switch);
     ZPAL_LOG_DEBUG(ZPAL_LOG_CC_MULTILEVEL_SWITCH, "\nCurrent value == Target value");
     // Reached the final value => Trigger True Status

@@ -135,6 +135,13 @@ uint8_t ZAF_Actuator_GetCurrentValue(s_Actuator *pActuator);
 uint8_t ZAF_Actuator_GetTargetValue(s_Actuator *pActuator);
 
 /**
+ * Checks if target value has been reached.
+ * @param pActuator Pointer to Actuator struct to check
+ * @return true if current value equals target value, false otherwise
+ */
+bool ZAF_Actuator_IsTargetReached(s_Actuator *pActuator);
+
+/**
  * Returns estimated time until target value is reached
  * @param pActuator Pointer to Actuator struct for which remaining duration was requested
  * @return Remaining duration in format described by requirement CC:0000.00.00.11.015 or 0 if already at target value

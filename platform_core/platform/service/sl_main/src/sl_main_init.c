@@ -163,6 +163,7 @@ SL_WEAK void app_init_early(void)
   // User defined.
 }
 
+#if !defined(SL_CATALOG_SL_SYSTEM_COMPATIBILITY_PRESENT)
 /******************************************************************************
  * @brief User-defined function for app initialization.
  *
@@ -177,7 +178,9 @@ SL_WEAK void app_init(void)
 {
   // User defined.
 }
+#endif
 
+#if !defined(SL_CATALOG_SL_SYSTEM_COMPATIBILITY_PRESENT)
 /******************************************************************************
  * @brief User-defined function to process a baremetal action periodically.
  *
@@ -188,6 +191,7 @@ SL_WEAK void app_process_action(void)
 {
   // User defined.
 }
+#endif
 
 /******************************************************************************
  * @brief Internal function used to aggregate driver, services stacks and internal apps

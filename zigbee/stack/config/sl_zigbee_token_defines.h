@@ -260,21 +260,6 @@ typedef uint8_t tokTypeStackAdditionalChildData;
 typedef uint8_t tokTypeStackCertificateTable[TOKEN_CERTIFICATE_TABLE_ENTRY_SIZE];
 #endif
 
-// The following application tokens are required by the stack, but are sized by
-//  the application via its CONFIGURATION_HEADER, which is why they are present
-//  within the application data section. Any special application-defined
-//  tokens will follow.
-// NOTE: changing the size of these tokens within the CONFIGURATION_HEADER
-//  WILL automatically move any custom application tokens that are defined
-//  in the APPLICATION_TOKEN_HEADER.
-#if SL_ZIGBEE_KEY_TABLE_SIZE < 0x80
-#define SL_ZIGBEE_ORIGINAL_KEY_TABLE_MAX_SIZE SL_ZIGBEE_KEY_TABLE_SIZE
-#define SL_ZIGBEE_EXTENDED_KEY_TABLE_MAX_SIZE 0
-#else
-#define SL_ZIGBEE_ORIGINAL_KEY_TABLE_MAX_SIZE 0x7F
-#define SL_ZIGBEE_EXTENDED_KEY_TABLE_MAX_SIZE (SL_ZIGBEE_KEY_TABLE_SIZE - SL_ZIGBEE_ORIGINAL_KEY_TABLE_MAX_SIZE)
-#endif // SL_ZIGBEE_KEY_TABLE_SIZE < 0x80
-
 // These must appear before the application header so that the token
 // numbering is consistent regardless of whether application tokens are
 // defined.

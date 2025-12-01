@@ -34,6 +34,7 @@
 #include "sl_status.h"
 #include "aoa_types.h"
 #include "aoa_util.h"
+#include "sl_component_catalog.h"
 #ifdef SL_CATALOG_RTL_LIB_PRESENT
 #include "sl_rtl_clib_api.h"
 #endif // SL_CATALOG_RTL_LIB_PRESENT

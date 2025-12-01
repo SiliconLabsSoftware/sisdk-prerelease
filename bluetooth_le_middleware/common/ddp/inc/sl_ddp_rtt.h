@@ -56,27 +56,21 @@ extern "C" {
  * @{
  *****************************************************************************/
 
-/// DDP RTT command request
+// DDP RTT command request
 SL_PACK_START(1)
 typedef struct {
-  ///< DDP Command ID
-  uint16_t id;
-  ///< Length of command specific input structure in bytes
-  uint16_t data_len;
-  ///< Command specific input structure
-  uint8_t data[];
+  uint16_t id; // DDP Command ID
+  uint16_t data_len; // Length of command specific input structure in bytes
+  uint8_t data[]; // Command specific input structure
 } SL_ATTRIBUTE_PACKED sl_ddp_rtt_req_t;
 SL_PACK_END()
 
-/// DDP RTT command response
+// DDP RTT command response
 SL_PACK_START(1)
 typedef struct {
-  ///< Status of the corresponding command request
-  uint32_t status;
-  ///< Length of command specific output structure in bytes
-  uint16_t data_len;
-  ///< Command specific output structure
-  uint8_t data[];
+  uint32_t status; // Status of the corresponding command request
+  uint16_t data_len; // Length of command specific output structure in bytes
+  uint8_t data[]; // Command specific output structure
 } SL_ATTRIBUTE_PACKED sl_ddp_rtt_rsp_t;
 SL_PACK_END()
 

@@ -241,6 +241,16 @@ ui_hints:
 
 tag:
   - prebuilt_demo
+  - hwfilter:board:hardware:has:vcom
+  - hwfilter:board:hardware:has:pti
+  - hwfilter:board:hardware_board_supports_rf_band_2400
+  - hwfilter:ram:55k
+  - hwfilter:flash:324k
+  - hwfilter:!device:device_generic_family_efr32xg21
+  - hwfilter:!device:device_family_mgm24
+  - hwfilter:!device:device_family_bgm24
+  - hwfilter:!device:device_family_mgm26
+  - hwfilter:!device:device_family_mgm27
 
 filter:
   - name: "Wireless Technology"

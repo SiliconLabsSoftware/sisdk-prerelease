@@ -132,11 +132,11 @@ otInstance *sli_ot_radio_instance_get(uint8_t aIndex)
 #endif
 }
 
-bool sli_ot_radio_instance_is_filter_mask_broadcast(uint8_t aFilterMask)
+bool sli_ot_radio_instance_is_filter_mask_broadcast_pan(uint8_t aFilterMask)
 {
-    // Check if broadcast PAN ID bit (bit 0) or broadcast address bit (bit 4) is set
+    // Check if broadcast PAN ID bit (bit 0) is set
     // This indicates the packet should be delivered to all instances
-    return ((aFilterMask & RADIO_BCAST_PANID_FILTER_MASK) != 0) || ((aFilterMask & RADIO_BCAST_ADDR_FILTER_MASK) != 0);
+    return ((aFilterMask & RADIO_BCAST_PANID_FILTER_MASK) != 0);
 }
 
 otInstance *sli_ot_radio_instance_from_filter_mask(uint8_t aFilterMask)
@@ -154,7 +154,7 @@ otInstance *sli_ot_radio_instance_from_filter_mask(uint8_t aFilterMask)
 #endif
 
     // Check if this is a broadcast packet
-    otEXPECT(!sli_ot_radio_instance_is_filter_mask_broadcast(aFilterMask));
+    otEXPECT(!sli_ot_radio_instance_is_filter_mask_broadcast_pan(aFilterMask));
 
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
     // We need only the Pan Id masks here, as we are not matching the addresses.

@@ -59,7 +59,7 @@ instanceIndex_t sli_ot_radio_instance_get_index(otInstance *aInstance);
 panIndex_t      sli_ot_radio_instance_get_pan_index(otInstance *aInstance);
 otInstance     *sli_ot_radio_instance_get(uint8_t aIndex);
 otInstance     *sli_ot_radio_instance_from_filter_mask(uint8_t aFilterMask);
-bool            sli_ot_radio_instance_is_filter_mask_broadcast(uint8_t aFilterMask);
+bool            sli_ot_radio_instance_is_filter_mask_broadcast_pan(uint8_t aFilterMask);
 
 #ifndef RADIO_REQUEST_BUFFER_COUNT
 #define RADIO_REQUEST_BUFFER_COUNT RADIO_INTERFACE_COUNT

@@ -655,7 +655,7 @@ static sl_status_t search_image(image_transfer_t *image_transfer,
 static image_transfer_t *find_image_transfer_by_client(sl_bt_ots_client_handle_t client)
 {
   image_transfer_t *image_transfer;
-  // Check init needs
+
   SL_SLIST_FOR_EACH_ENTRY(image_transfer_list, image_transfer, image_transfer_t, node) {
     if (client == &image_transfer->ots_client) {
       return image_transfer;
@@ -667,7 +667,7 @@ static image_transfer_t *find_image_transfer_by_client(sl_bt_ots_client_handle_t
 static image_transfer_t *find_image_transfer_by_handle(esl_lib_image_transfer_handle_t handle)
 {
   image_transfer_t *image_transfer;
-  // Check init needs
+
   SL_SLIST_FOR_EACH_ENTRY(image_transfer_list, image_transfer, image_transfer_t, node) {
     if ((image_transfer_t *)handle == image_transfer) {
       return image_transfer;
@@ -854,7 +854,7 @@ static void remove_transfer(image_transfer_t **image_transfer,
                            ESL_LIB_LOG_PTR(*image_transfer),
                            status);
     }
-    finish_transfer = false;
+    finish_transfer = false; // override input parameter
   }
 
   if (finish_transfer) {

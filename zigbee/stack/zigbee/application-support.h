@@ -84,5 +84,6 @@ sli_zigbee_packet_header_t sli_zigbee_make_aps_unicast(sl_802154_short_addr_t de
 // SL_ZIGBEE_APS_OPTION_SOURCE_EUI64 and SL_ZIGBEE_APS_OPTION_DESTINATION_EUI64.
 
 uint8_t sli_zigbee_maximum_aps_payload_with_options(uint16_t options);
+void sli_zigbee_stack_zdo_aps_ack_received(uint16_t cluster_id, uint16_t short_address);
 
 #endif // SILABS_APPLICATION_SUPPORT_H

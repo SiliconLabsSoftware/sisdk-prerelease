@@ -32,6 +32,7 @@
 #define APP_H
 
 #include <stdint.h>
+#include "sl_component_catalog.h"
 
 #ifndef SL_CATALOG_APP_LOG_PRESENT
 #define app_log(...)

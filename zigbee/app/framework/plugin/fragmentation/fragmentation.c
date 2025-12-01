@@ -382,6 +382,14 @@ bool sli_zigbee_af_fragmentation_incoming_message(sl_zigbee_incoming_message_typ
   if (artificiallyDropBlock(fragment)) {
     artificiallyDropBlockPrintln("Artificially dropping block %d", fragment);
     clearArtificiallyDropBlock();
+    if (sl_zigbee_fragment_window_size == 1) {
+      // Create a fake rxPacket structure to send proper enhanced APS ACK
+      sli_zigbee_rx_fragmented_packet_t dropResponse;
+      dropResponse.fragmentMask = 0xFE;  // Indicate dropped fragment
+      dropResponse.fragmentBase = fragment;
+      sli_zigbee_af_fragmentation_send_reply(sender, apsFrame, &dropResponse);
+    }
+
     return true;
   }
 

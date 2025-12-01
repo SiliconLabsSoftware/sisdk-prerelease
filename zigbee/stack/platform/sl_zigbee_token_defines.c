@@ -143,7 +143,7 @@ sl_status_t halStackInitTokens(void)
   status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_KEY_TABLE_EXTENDED, &tokTypeStackKeyTableExtendedDefault, sizeof(tokTypeStackKeyTable), extended_key_table_max_size);
   assert(status == SL_STATUS_OK);
   tokStackKeyTableAdditionalInfo tokStackKeyTableAdditionalInfoDefault = TOKEN_STACK_KEY_TABLE_ADDITIONAL_INFO_DEFAULT;
-  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_KEY_TABLE_ADDITIONAL_INFO, &tokStackKeyTableAdditionalInfoDefault, sizeof(tokStackKeyTableAdditionalInfoDefault), SL_ZIGBEE_ORIGINAL_KEY_TABLE_MAX_SIZE);
+  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_KEY_TABLE_ADDITIONAL_INFO, &tokStackKeyTableAdditionalInfoDefault, sizeof(tokStackKeyTableAdditionalInfoDefault), sl_zigbee_get_key_table_size());
   assert(status == SL_STATUS_OK);
 #endif // !defined(EZSP_HOST
   tokTypeStackCertificateTable tokTypeStackCertificateTableDefault = TOKEN_STACK_CERTIFICATE_TABLE_DEFAULT;

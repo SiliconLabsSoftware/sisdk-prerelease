@@ -1361,18 +1361,7 @@ static sl_status_t send(sl_zigbee_outgoing_message_type_t type,
 
 static sl_status_t broadcastPermitJoin(uint8_t duration)
 {
-  sl_status_t status;
-  uint8_t data[3] = { 0,   // sequence number (filled in later)
-                      0,   // duration (filled in below)
-                      1 };   // TC significance (always 1)
-
-  data[1] = duration;
-  status = sl_zigbee_send_zig_dev_request(SL_ZIGBEE_BROADCAST_ADDRESS,
-                                          PERMIT_JOINING_REQUEST,
-                                          0, // APS options
-                                          data,
-                                          3); // length
-  return status;
+  return sl_zigbee_permit_joining_request(SL_ZIGBEE_BROADCAST_ADDRESS, duration, 1, 0);
 }
 
 static void printMessage(sl_zigbee_incoming_message_type_t type,

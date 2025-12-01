@@ -35,7 +35,7 @@
 // <q SLX_ZIGBEE_INSECURE_DEBUG_TRANSPORT_KEY_PACKET> Insecure Debug Transport key trace enable
 // <i> Default: TRUE
 // <i> Enables insecure debug aps transport key tracing.  This format is understood by Network Analyzer decoders
-#define SLX_ZIGBEE_INSECURE_DEBUG_TRANSPORT_KEY_PACKET   1
+#define SLX_ZIGBEE_INSECURE_DEBUG_TRANSPORT_KEY_PACKET_ENABLED   1
 
 #endif // SLX_ZIGBEE_INSECURE_DEBUG_KEY_TRACE_CONFIG_H
 // </h>

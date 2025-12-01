@@ -312,6 +312,8 @@ void sendNetworkTimeoutRequest(SL_CLI_COMMAND_ARG);
 void modifyNetworkTimeoutInternally(SL_CLI_COMMAND_ARG);
 //Sets end device timeout values
 void setEndDeviceTimeout(SL_CLI_COMMAND_ARG);
+//sets the end device tiemout without sending the timeout request over the air
+void setSilentEndDeviceTiemout(sl_cli_command_arg_t *arguments);
 //Sets keep alive mechanism
 void setKeepAliveSupport(SL_CLI_COMMAND_ARG);
 //Use legacy end device timeout method

@@ -30,8 +30,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include "app.h"
-
 #include "app_assert.h"
 #include "app_btmesh_util.h"
 #include "app_timer.h"
@@ -49,6 +47,7 @@
 #include "sl_simple_led_instances.h"
 
 #include "sl_component_catalog.h"
+#include "app.h"
 
 #ifdef SL_CATALOG_APP_LOG_PRESENT
 #include "app_log.h"

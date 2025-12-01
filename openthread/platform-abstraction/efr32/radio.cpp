@@ -2264,7 +2264,7 @@ void packetReceivedCallback(void)
         // Set instance to nullptr for broadcast packets in multi-instance mode, specific instance otherwise
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
         rxPacketBuf->packetInfo.instance =
-            sli_ot_radio_instance_is_filter_mask_broadcast(packetInfo.filter_mask) ? nullptr : instance;
+            sli_ot_radio_instance_is_filter_mask_broadcast_pan(packetInfo.filter_mask) ? nullptr : instance;
 #else
         rxPacketBuf->packetInfo.instance = instance;
 #endif

@@ -95,6 +95,7 @@ sl_status_t sl_zigbee_stop_writing_stack_tokens(void);
 sl_status_t sl_zigbee_set_extended_security_bitmask(sl_zigbee_extended_security_bitmask_t mask);
 sl_status_t sl_zigbee_get_extended_security_bitmask(sl_zigbee_extended_security_bitmask_t* mask);
 sl_status_t sl_zigbee_set_node_id(sl_802154_short_addr_t nodeId);
+uint8_t sl_zigbee_get_max_nwk_retries(void);
 uint8_t sl_zigbee_get_last_stack_zig_dev_request_sequence(void);
 sl_status_t sl_zigbee_send_unicast_network_key_update(sl_802154_short_addr_t targetShort,
                                                       sl_802154_long_addr_t  targetLong,

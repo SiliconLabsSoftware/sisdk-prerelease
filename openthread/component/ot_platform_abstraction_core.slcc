@@ -130,6 +130,16 @@ template_contribution:
   - power_manager
 - name: code_classification_components
   value: ot_platform_abstraction
+- name: rail_util_ieee802154_phy_select_callbacks
+  value:
+    include: sl_ot_phy_select.h
+    runtime_phy_select_stack_support: SL_OPENTHREAD_PHY_SELECT_STACK_SUPPORT
+    update_active_radio_config: sl_ot_update_active_radio_config
+  priority: -9020
+  unless:
+  - rail_mux
+  condition:
+  - rail_util_ieee802154_phy_select
 metadata:
   sbom:
     license: BSD-3-Clause

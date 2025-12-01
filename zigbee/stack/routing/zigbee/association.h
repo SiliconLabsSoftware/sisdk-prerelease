@@ -66,9 +66,6 @@ uint8_t sli_zigbee_get_local_capabilities(void);
 void sli_zigbee_process_incoming_beacon(sli_zigbee_packet_header_t header);
 void sli_zigbee_association_handler(uint8_t mac_index, sli_zigbee_packet_header_t header);
 
-// Callback declaration
-void sli_zigbee_child_join_notify(sl_802154_short_addr_t newId, sli_zigbee_packet_header_t joinResponse);
-
 void sli_zigbee_note_joining_change(void);
 
 void sli_zigbee_note_join_authenticated(void);
@@ -148,8 +145,7 @@ void sli_zigbee_common_join_handler(uint8_t mac_index,
                                     uint8_t capabilities,
                                     sli_zigbee_packet_header_t header,
                                     uint8_t *network_frame,
-                                    bool callSecurityHandler,
-                                    sl_zigbee_device_update_t updateStatus,
-                                    void* appendedtlvs);
+                                    sl_zigbee_join_method_t join_method,
+                                    void *auxJoinerTlvData);
 
 #endif // SILABS_ASSOCIATION_H

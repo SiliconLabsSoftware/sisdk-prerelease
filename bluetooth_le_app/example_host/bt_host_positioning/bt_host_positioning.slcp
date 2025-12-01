@@ -16,9 +16,6 @@ filter:
   - name: "Project Difficulty"
     value: ["Beginner"]
 
-provides:
-  - name: x86-64
-
 component:
   - id: toolchain_gcc
   - id: native_host
@@ -28,16 +25,11 @@ component:
   - id: iostream_stdio
   - id: app_assert
   - id: rtllib
+  - id: component_catalog
 
 library:
   - system: libcjson
   - system: libmosquitto
-  - system: m
-  - system: pthread
-  - system: stdc++
-
-define:
-  - name: SL_CATALOG_RTL_LIB_PRESENT
 
 config_file:
   - path: config/positioning_config.json

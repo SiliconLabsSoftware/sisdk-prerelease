@@ -39,6 +39,7 @@ source:
 - path: app/framework/util/global-callback.c
 - path: app/framework/security/crypto-state.c
 - path: app/framework/util/af-common.c
+- path: app/util/zigbee-framework/zigbee-device-common.c
 - path: app/framework/util/client-api.c
 - path: app/framework/util/multi-network.c
 - path: app/framework/util/time-util.c

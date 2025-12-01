@@ -21,7 +21,7 @@
 #include "stack/include/sl_zigbee_zdo_dlk_negotiation.h"
 
 // Command Indirection
-
+void sli_zdo_dlk_aps_ack_received_for_key_update_req(uint16_t short_address);
 bool sli_zigbee_stack_zdo_dlk_enabled(void);
 
 void sli_zigbee_stack_zdo_dlk_get_supported_negotiation_parameters(sl_zigbee_dlk_supported_negotiation_method *method_mask,

@@ -83,8 +83,6 @@ void sl_zigbee_zdo_get_config_response_handler(uint8_t response_length,
 {
   UNUSED_VAR(source);
   uint8_t *payload = &(response[payload_index]);
-  // NOTE transaction sequence number
-  payload++;
   sl_zigbee_zdo_status_t response_status = payload[0];
   sl_zigbee_core_debug_println("ZDO Get Config Response %02x", response_status);
   if (response_status != SL_ZIGBEE_ZDP_SUCCESS) {
@@ -259,8 +257,11 @@ void sl_zigbee_set_authenticaion_level_callback(sl_802154_long_addr_t target,
 
 void set_override_auth_level_methods(sl_cli_command_arg_t *arguments)
 {
-  gu_override_initial_join_method = sl_cli_get_argument_uint8(arguments, 0);
-  gu_override_active_link_key_type = sl_cli_get_argument_uint8(arguments, 1);
+  uint8_t join = sl_cli_get_argument_uint8(arguments, 0);
+  uint8_t update = sl_cli_get_argument_uint8(arguments, 1);
+  gu_override_initial_join_method = join;
+  gu_override_active_link_key_type = update;
+  sl_zigbee_core_debug_println("auth lvl set: join %x - update %x", join, update);
   sl_zigbee_core_debug_println("override selection set");
 }
 
@@ -688,6 +689,9 @@ sl_status_t sli_zigbee_stack_test_zdo_generate_clear_all_bindings_req(sl_802154_
   return sli_zigbee_zdo_generate_clear_all_bindings_req(target, encrypt, (void*)eui64_list, counts);
 }
 
+// NOTE for over the air key dumps
+#include "stack/framework/slx_zigbee_insecure_debug_key_trace.h"
+
 // The following CLI in pro-compliance on a TC node simulates a TC back up and restore.
 // It looks for the link keys and reloads the hash of the current link keys, leaves the
 // auth token for the joined devices in the key slot, changes the EUI64 of the TC
@@ -727,6 +731,10 @@ void tc_backup_restore(sl_cli_command_arg_t *arguments)
       (void) sl_zigbee_sec_man_import_link_key(i,
                                                context.eui64,
                                                &hashed_key);        // Set the hash key in the key slot for the same device
+      slx_zigbee_insecure_debug_generate_trace(
+        SLX_ZIGBEE_INSECURE_DEBUG_NWK_REPORT_KEY_PACKET,
+        (void *) hashed_key.key
+        );
     }
   }
   // This part of the code is making the same node as a new TC by changing the EUI64 for ZCP TCSO test.
@@ -738,6 +746,7 @@ void tc_backup_restore(sl_cli_command_arg_t *arguments)
 
   //change the extended address
   sl_zigbee_set_eui64(newEui64);
+  sli_zigbee_set_trust_center_data(0, 0, newEui64, NULL);
   // Set a new network key
   sli_zigbee_set_network_key(&keyNew, 0, true);
 
@@ -1081,13 +1090,11 @@ bool slx_gu_do_relay_dual_submit(void)
 // device interview
 struct interview_context {
   sl_zigbee_address_info id;
-  bool valid;
 };
 
 static struct interview_context g_interview_ctx = {
   .id = { .device_long = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, },
-          .device_short = 0xFFFF },
-  false
+          .device_short = 0xFFFF }
 };
 
 //static uint8_t challeng_rsp_tlv_options = 0;
@@ -1120,7 +1127,6 @@ void sl_zigbee_dynamic_commissioning_alert_callback(sl_zigbee_address_info *ids,
   if (event == SL_ZIGBEE_DYNAMIC_COMMISSIONING_EVENT_ERROR) {
     sl_zigbee_dynamic_commissioning_set_open_for_interview(false);     // stop application timer
     sl_zigbee_core_debug_println("interview failed %02X \n", event);
-    g_interview_ctx.valid = false;
   }
 }
 
@@ -1152,7 +1158,210 @@ void sl_device_interview_control_command(sl_cli_command_arg_t *arguments)
                                                SL_ZIGBEE_DYNAMIC_COMMISSIONING_EVENT_ACCEPTED);
     }
   }
-  if (!enableInterview) {
-    g_interview_ctx.valid = false;
+}
+
+// duplicate / compatibility commands
+
+#define MACRO_FMT_HEX_EIGHT "%02x %02x %02x %02x %02x %02x %02x %02x"
+void exportTcBackupData(sl_cli_command_arg_t *arguments)
+{
+  UNUSED_VAR(arguments);
+  // This command is used to export the TC backup data
+  // It is used in the ZCP test to simulate a TC backup and restore
+  // In reality now the majority of the work is done by the restore function
+  sl_zigbee_core_debug_println("Backup TC Data", 0);
+  sl_zigbee_network_parameters_t params = { 0, };
+  sl_zigbee_node_type_t node_kind = { 0, };
+  sl_status_t status = sl_zigbee_get_network_parameters(&node_kind, &params);
+  if (status != SL_STATUS_OK) {
+    sl_zigbee_core_debug_println("[Error %0X] during network parameter fetching", status);
+    return;
   }
+  sl_zigbee_core_debug_print("Ext-PAN ");
+  sl_zigbee_core_debug_println(
+    MACRO_FMT_HEX_EIGHT,
+    params.extendedPanId[0],
+    params.extendedPanId[1],
+    params.extendedPanId[2],
+    params.extendedPanId[3],
+    params.extendedPanId[4],
+    params.extendedPanId[5],
+    params.extendedPanId[6],
+    params.extendedPanId[7]
+    );
+  sl_zigbee_core_debug_println("Key Digests");
+  sl_zigbee_sec_man_context_t context;
+  sl_zigbee_sec_man_key_t plaintext_key;
+  sl_zigbee_sec_man_key_t hashed_key; // The hash of the key, that will be used for next joining for the same device.
+  sl_zigbee_sec_man_aps_key_metadata_t aps_key_data;
+  for (uint8_t i = 0; i < SL_ZIGBEE_KEY_TABLE_SIZE; i++) {
+    sl_status_t status = sl_zigbee_sec_man_export_link_key_by_index(i,
+                                                                    &context,
+                                                                    &plaintext_key,
+                                                                    &aps_key_data);
+    // The link key and the auth token are stored in the same key table and returned
+    // by the above api with their respective bit mask.
+    // So,find the key, not the authentication token, that needs to be hshed and backed up.
+    if (status != SL_STATUS_OK) {
+      sl_zigbee_core_debug_println("[Error %0X] exporting key table entry %d", status, i);
+      continue;
+    }
+    sl_zigbee_core_debug_print("EUI ");
+    sl_zigbee_core_debug_println(
+      MACRO_FMT_HEX_EIGHT,
+      context.eui64[0],
+      context.eui64[1],
+      context.eui64[2],
+      context.eui64[3],
+      context.eui64[4],
+      context.eui64[5],
+      context.eui64[6],
+      context.eui64[7]
+      );
+    sl_zigbee_sec_man_key_t *key_data = NULL;
+    char *type_str;
+    if (aps_key_data.bitmask & SL_ZIGBEE_KEY_IS_AUTHENTICATION_TOKEN) {
+      key_data = &plaintext_key;
+      type_str = "pass";
+    } else {
+      type_str = "hash";
+      (void) sl_zigbee_aes_hash_simple(16,
+                                       (const uint8_t *)plaintext_key.key,
+                                       (uint8_t *)hashed_key.key);
+
+      key_data = &hashed_key;
+    }
+    sl_zigbee_core_debug_print("%s Key Data ", type_str);
+    sl_zigbee_core_debug_print(
+      MACRO_FMT_HEX_EIGHT,
+      key_data[0], key_data[1],
+      key_data[2], key_data[3],
+      key_data[4], key_data[5],
+      key_data[6], key_data[7]
+      );
+    sl_zigbee_core_debug_print(
+      MACRO_FMT_HEX_EIGHT,
+      key_data[8], key_data[9],
+      key_data[10], key_data[11],
+      key_data[12], key_data[13],
+      key_data[14], key_data[15]
+      );
+    sl_zigbee_core_debug_println("");
+  }
+}
+
+void sendZdoGetAuthTokenCommand(sl_cli_command_arg_t *arguments)
+{
+  // This command sends a ZDO Get Authentication Token request
+  // Used in R23 compliance testing for authentication token management
+  sl_802154_short_addr_t device_short = sl_cli_get_argument_uint16(arguments, 0);
+  bool use_encrypt = (bool) sl_cli_get_argument_uint8(arguments, 1);
+  sl_zigbee_aps_option_t options = SL_ZIGBEE_APS_OPTION_NONE;
+  if (use_encrypt) {
+    // If encryption is requested, set the option
+    options |= SL_ZIGBEE_APS_OPTION_ENCRYPTION;
+  }
+  sl_zigbee_retrieve_authentication_token(device_short, options);
+}
+
+void setAuthenticationLevel(sl_cli_command_arg_t *arguments)
+{
+  // This command sets the authentication level for join and update operations
+  // Used in R23 compliance testing for authentication level configuration
+  uint8_t join = (uint8_t) sl_cli_get_argument_uint8(arguments, 0);
+  uint8_t update = (uint8_t) sl_cli_get_argument_uint8(arguments, 1);
+  gu_override_initial_join_method = join;
+  gu_override_active_link_key_type = update;
+  sl_zigbee_core_debug_println("auth lvl set: join %x - update %x", join, update);
+}
+
+void setDlkPskSecretValue(sl_cli_command_arg_t *arguments)
+{
+  // This command sets the Device Link Key Pre-Shared Key secret value
+  // Used in R23 compliance testing for DLK PSK configuration
+  if (sl_cli_get_argument_count(arguments) == 0) {
+    sl_zigbee_core_debug_print("psk - ");
+    for (uint8_t i = 0; i < SL_ZIGBEE_ENCRYPTION_KEY_SIZE; i++) {
+      sl_zigbee_core_debug_print(" %x", gu_dlk_override_psk_data.key[i]);
+    }
+    sl_zigbee_core_debug_println("");
+    return;
+  }
+  size_t psk_arg_len = 0;
+  uint8_t *psk_arg = sl_cli_get_argument_hex(arguments, 0, &psk_arg_len);
+  memcpy(gu_dlk_override_psk_data.key, psk_arg, psk_arg_len);
+  if (psk_arg_len < SL_ZIGBEE_ENCRYPTION_KEY_SIZE) {
+    memset(&gu_dlk_override_psk_data.key[psk_arg_len], 0, SL_ZIGBEE_ENCRYPTION_KEY_SIZE - psk_arg_len);
+  }
+  gu_dlk_override_psk = true;
+  sl_zigbee_core_debug_println("psk set %02X", 0);
+}
+
+void setBeaconParameters(sl_cli_command_arg_t *arguments)
+{
+  // This command sets beacon classification parameters
+  // Used in R23 compliance testing for beacon parameter configuration
+  sl_zigbee_beacon_classification_params_t params;
+  sl_status_t status = sl_zigbee_get_beacon_classification_params(&params);
+  if (status != SL_STATUS_OK) {
+    sl_zigbee_core_debug_println("[Error %0x] getting beacon classification parameters", status);
+    return;
+  }
+  if (sl_cli_get_argument_count(arguments) == 0) {
+    sl_zigbee_core_debug_println("beacon params:");
+    sl_zigbee_core_debug_println(
+      "hub? %c - uptime? %c - prefer? %c  - update id %d",
+      params.beaconClassificationMask & TC_CONNECTIVITY ? 'y' : 'n',
+      params.beaconClassificationMask & LONG_UPTIME ? 'y' : 'n',
+      params.beaconClassificationMask & PREFERRED_PARENT ? 'y' : 'n',
+      sli_zigbee_stack_get_nwk_update_id()
+      );
+  } else {
+    bool hasHubConnectivity = (bool) sl_cli_get_argument_uint8(arguments, 0);
+    params.beaconClassificationMask |= hasHubConnectivity ? TC_CONNECTIVITY : 0;
+    bool hasLongUptime = (bool) sl_cli_get_argument_uint8(arguments, 1);
+    params.beaconClassificationMask |= hasLongUptime ? LONG_UPTIME : 0;
+    bool hasPreferredParent = (bool) sl_cli_get_argument_uint8(arguments, 2);
+    params.beaconClassificationMask |= hasPreferredParent ? PREFERRED_PARENT : 0;
+    status = sl_zigbee_set_beacon_classification_params(&params);
+    if (status != SL_STATUS_OK) {
+      sl_zigbee_core_debug_println("[Error %0x] setting beacon classification params");
+    }
+    uint8_t nwkUpdateId = (uint8_t) sl_cli_get_argument_uint8(arguments, 3);
+    status = sl_zigbee_set_nwk_update_id(nwkUpdateId, true);
+    if (status != SL_STATUS_OK) {
+      sl_zigbee_core_debug_println("[Error %0x] setting network update id");
+    }
+  }
+}
+
+void sendZdoBeaconSurveyCommand(sl_cli_command_arg_t *arguments)
+{
+  // This command sends a ZDO Management Beacon Survey request
+  // Used in R23 compliance testing for beacon survey operations
+  sl_802154_short_addr_t device_short = (sl_802154_short_addr_t) sl_cli_get_argument_uint16(arguments, 0);
+  uint8_t scan_config_mask = (uint8_t) sl_cli_get_argument_uint8(arguments, 1);
+  uint32_t masks[CHANNEL_PAGE_COUNT] = { 0, };  // NOTE only works with one channel mask
+  uint32_t *channel_masks = (uint32_t*)masks;
+  channel_masks[0] = sl_cli_get_argument_uint32(arguments, 2);
+  sl_zigbee_core_debug_println("survey beacon config %x %4x", scan_config_mask, channel_masks[0]);
+  sl_status_t status = sl_zigbee_request_beacon_survey(device_short,
+                                                       CHANNEL_PAGE_COUNT,
+                                                       channel_masks,
+                                                       scan_config_mask);
+  sl_zigbee_core_debug_println("request sent %s!", status == SL_STATUS_OK ? "done" : "fail");
+}
+void disableBeaconTlvsCommand(sl_cli_command_arg_t *arguments)
+{
+  bool tlvs_disable = (bool) sl_cli_get_argument_uint8(arguments, 0);
+  sl_disable_beacon_tlvs(tlvs_disable);
+}
+
+void disableDlkBehaviors(sl_cli_command_arg_t *arguments)
+{
+  bool dlk_disable = (bool) sl_cli_get_argument_uint8(arguments, 0);
+  slx_zigbee_gu_zdo_toggle_dlk(dlk_disable, dlk_disable);
+  sl_disable_beacon_tlvs(dlk_disable);
+  sl_zigbee_set_stack_compliance_revision(dlk_disable ? R22_COMPLIANCE_REVISION : R23_COMPLIANCE_REVISION);
+  sl_zigbee_core_debug_println("%sable dlk", (dlk_disable ? "dis" : "en"));
 }

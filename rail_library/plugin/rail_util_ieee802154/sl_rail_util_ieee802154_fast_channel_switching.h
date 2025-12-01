@@ -32,13 +32,6 @@
 #define SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_H
 
 #include "sl_rail_ieee802154.h"
-#ifdef SL_COMPONENT_CATALOG_PRESENT
-#include "sl_component_catalog.h"
-#endif
-
-#ifdef SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
-#include "sl_rail_util_ieee802154_fast_channel_switching_config.h"
-#endif
 
 #ifdef __cplusplus
 extern "C" {

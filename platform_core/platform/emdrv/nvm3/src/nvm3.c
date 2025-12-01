@@ -2299,9 +2299,12 @@ static bool repackFirstPageScanCacheCallback(nvm3_Cache_t* cache_h, nvm3_ObjectK
     parameters->status = findObj(parameters->h, key, pObjB, &objFindGroup);
     if ((parameters->status == SL_STATUS_OK) && samePage(parameters->h, pObjB->objAdr, parameters->h->fifoFirstObj)) {
 #if defined(NVM3_SECURITY)
-      size_t overhead = pObjB->frag.idx * NVM3_GCM_SIZE_OVERHEAD;
-      size_t adjustedLen = (pObjB->totalLen >= overhead) ? (pObjB->totalLen - overhead) : 0;
-      if ((parameters->copyMode == repackCopySome) && ((adjustedLen + parameters->copyAccumulated) > h->maxObjectSize)) {
+      size_t objLen = pObjB->totalLen;
+      if ((pObjB->totalLen > 0U) && (objFindGroup == objGroupData)) {
+        size_t overhead = pObjB->frag.idx * NVM3_GCM_SIZE_OVERHEAD;
+        objLen = (pObjB->totalLen >= overhead) ? (pObjB->totalLen - overhead) : 0;
+      }
+      if ((parameters->copyMode == repackCopySome) && ((objLen + parameters->copyAccumulated) > h->maxObjectSize)) {
 #else
       if ((parameters->copyMode == repackCopySome) && ((pObjB->totalLen + parameters->copyAccumulated) > h->maxObjectSize)) {
 #endif
@@ -2312,11 +2315,7 @@ static bool repackFirstPageScanCacheCallback(nvm3_Cache_t* cache_h, nvm3_ObjectK
           h->unusedNvmSize -= diff;
           parameters->h->fifoNextObj = getFirstObjAdrInNextGoodPage(parameters->h, parameters->h->fifoFirstObj);
         }
-#if defined(NVM3_SECURITY)
-        parameters->copyAccumulated += (adjustedLen + NVM3_OBJ_HEADER_SIZE_LARGE);
-#else
         parameters->copyAccumulated += (pObjB->totalLen + NVM3_OBJ_HEADER_SIZE_LARGE);
-#endif
         parameters->status = fifoWriteObj(parameters->h, pObjB, COPY_OBJ_TRUE, group);
         if (parameters->status != SL_STATUS_OK) {
           objEnd(pObjB);
@@ -2349,19 +2348,18 @@ static bool repackFirstPageCallback(nvm3_Handle_t *h, nvm3_ObjPtr_t obj, nvm3_Ob
     if ((parameters->status == SL_STATUS_OK) && (objFindGroup != objGroupDeleted) && (pObjB->objAdr == obj->objAdr)) {
       objEnd(pObjB);
 #if defined(NVM3_SECURITY)
-      size_t overhead = obj->frag.idx * NVM3_GCM_SIZE_OVERHEAD;
-      size_t adjustedLen = (obj->totalLen >= overhead) ? (obj->totalLen - overhead) : 0;
-      if ((parameters->copyMode == repackCopySome) && ((adjustedLen + parameters->copyAccumulated) > h->maxObjectSize)) {
+      size_t objLen = obj->totalLen;
+      if ((obj->totalLen > 0U) && (objFindGroup == objGroupData)) {
+        size_t overhead = obj->frag.idx * NVM3_GCM_SIZE_OVERHEAD;
+        objLen = (obj->totalLen >= overhead) ? (obj->totalLen - overhead) : 0;
+      }
+      if ((parameters->copyMode == repackCopySome) && ((objLen + parameters->copyAccumulated) > h->maxObjectSize)) {
 #else
       if ((parameters->copyMode == repackCopySome) && ((obj->totalLen + parameters->copyAccumulated) > h->maxObjectSize)) {
 #endif
         parameters->copyAllDone = false;
       } else {
-#if defined(NVM3_SECURITY)
-        parameters->copyAccumulated += (adjustedLen + NVM3_OBJ_HEADER_SIZE_LARGE);
-#else
         parameters->copyAccumulated += (obj->totalLen + NVM3_OBJ_HEADER_SIZE_LARGE);
-#endif
         parameters->status = fifoWriteObj(h, obj, COPY_OBJ_TRUE, group);
         if (parameters->status != SL_STATUS_OK) {
           nvm3_tracePrint(NVM3_TRACE_LEVEL_WARNING, "NVM3 ERROR - repackFirstPageCallback: Write error, sta=0x%lx.\n", parameters->status);

@@ -42,7 +42,7 @@ void printNotSupported(void);
 
 //------------------------------------------------------------------------------
 
-extern uint16_t pollDelay[4];
+extern uint32_t pollDelay[4];
 extern sl_zigbee_af_event_t *pollEvent[4];
 
 #define POLL_EVENT_DEFINITION           \

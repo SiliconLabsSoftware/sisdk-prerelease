@@ -416,6 +416,26 @@ ui_hints:
     - path: "readme.md"
       focus: true
 
+#--------------------- HWFILTER ------------------------
+tag:
+  - hwfilter:board:hardware:has:vcom
+  - hwfilter:board:hardware:has:pti
+  - hwfilter:board:simple_led:led0
+  - hwfilter:board:simple_button:btn0
+  - hwfilter:!board:hardware:shares:button:led
+  - hwfilter:ram:10k
+  - hwfilter:flash:112k
+  - hwfilter:!device:device_no_rail_api
+  - hwfilter:!board:brd2600a
+  - hwfilter:!board:brd4272a
+  - hwfilter:!board:brd4277a
+  - hwfilter:!device:device_family_mgm26
+  - hwfilter:!device:device_family_mgm27
+  - hwfilter:!device:device_family_efr32zg23
+  - hwfilter:!device:device_family_efr32fg23
+  - hwfilter:!device:device_family_mgm24
+  - hwfilter:!device:device_family_fgm23
+
 filter:
   - name: "Wireless Technology"
     value: ["RAIL"]

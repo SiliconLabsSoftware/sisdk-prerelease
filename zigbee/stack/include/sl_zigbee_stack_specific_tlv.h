@@ -271,7 +271,7 @@ sl_status_t sl_zigbee_global_tlv_joiner_encapsulation(sl_zigbee_global_tlv_joine
  */
 #define SL_ZIGBEE_GLOBAL_TLV_BEACON_APPENDIX_ENCAP_TAG_ID 73
 #define SL_ZIGBEE_GLOBAL_TLV_BEACON_APPENDIX_ENCAP_MIN_LEN TLV_ENCAP_MIN_LENGTH
-#define SL_ZIGBEE_GLOBAL_TLV_BEACON_APPENDIX_ENCAP_MAX_LEN 255
+#define SL_ZIGBEE_GLOBAL_TLV_BEACON_APPENDIX_ENCAP_MAX_LEN 127
 typedef CONCRETE_TLV_DEFINE (SL_ZIGBEE_GLOBAL_TLV_BEACON_APPENDIX_ENCAP_MAX_LEN) sl_zigbee_global_tlv_beacon_appendix_encap_t;
 
 /// Helpers

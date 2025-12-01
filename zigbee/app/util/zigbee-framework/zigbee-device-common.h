@@ -468,5 +468,4 @@ uint8_t sl_zigbee_next_zig_dev_request_sequence(void);
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 /** @} END addtogroup */
-
 #endif // SILABS_ZIGBEE_DEVICE_COMMON_H

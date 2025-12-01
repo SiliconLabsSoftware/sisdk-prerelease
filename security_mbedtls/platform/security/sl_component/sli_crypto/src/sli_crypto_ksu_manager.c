@@ -29,7 +29,6 @@
  ******************************************************************************/
 
 #include "em_device.h"
-#if defined(KSU_PRESENT)
 #include "sli_crypto_ksu_manager.h"
 #include "sl_se_manager.h"
 
@@ -40,8 +39,8 @@
 // -----------------------------------------------------------------------------
 // Static variable Declarations
 
-// Create KSU slots for NWP and HOST.
-static sli_ksu_slot_t ksu_slots[SLI_KSU_MAX_KEY_SLOTS] = { 0 }; // If we want to use this in PSA driver then will need to remove the static
+// Create KSU slots.
+static sli_ksu_slot_t ksu_slots[SLI_KSU_MAX_KEY_SLOTS] = { 0 };
 
 #if defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT) || defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
 // Threading support (as opposed to API calls only from a single thread)
@@ -128,7 +127,7 @@ static inline sl_status_t sli_ksu_lock_release(void)
  * @brief
  *   Find available key KSU slot in key descriptor
  */
-static inline sl_status_t sli_ksu_find_free_slot(sl_se_key_descriptor_t *key_desc,
+static inline sl_status_t sli_ksu_find_free_user_slot(sl_se_key_descriptor_t *key_desc,
                                                  void *user_ref)
 {
   if (key_desc == NULL || user_ref == NULL) {
@@ -170,7 +169,7 @@ sl_status_t sli_ksu_allocate_key_slot(sl_se_key_descriptor_t *key_desc,
   }
 
   // Find available slot in KSU and set up descriptor
-  sl_status = sli_ksu_find_free_slot(key_desc, user_ref);
+  sl_status = sli_ksu_find_free_user_slot(key_desc, user_ref);
   if (sl_status != SL_STATUS_OK) {
     sli_ksu_lock_release();
     return sl_status;
@@ -220,7 +219,7 @@ sl_status_t sli_ksu_key_slot_import(sl_se_key_descriptor_t *key_desc,
   sl_se_command_context_t cmd_ctx = SL_SE_COMMAND_CONTEXT_INIT;
 
   // Find available slot in KSU
-  sl_status = sli_ksu_find_free_slot(key_desc, user_ref);
+  sl_status = sli_ksu_find_free_user_slot(key_desc, user_ref);
   if (sl_status != SL_STATUS_OK) {
     goto exit;
   }
@@ -290,7 +289,7 @@ sl_status_t sli_ksu_key_slot_generate(sl_se_key_descriptor_t *key_desc,
   sl_se_command_context_t cmd_ctx = SL_SE_COMMAND_CONTEXT_INIT;
 
   // Find available slot in KSU
-  sl_status = sli_ksu_find_free_slot(key_desc, user_ref);
+  sl_status = sli_ksu_find_free_user_slot(key_desc, user_ref);
   if (sl_status != SL_STATUS_OK) {
     goto exit;
   }
@@ -443,7 +442,7 @@ sl_status_t sli_ksu_key_slot_copy(sl_se_key_descriptor_t *source_key_desc,
   // Check if space is available in the KSU (must be inside mutex for thread safety)
 
   // Find available slot in KSU
-  sl_status = sli_ksu_find_free_slot(target_key_desc, user_ref);
+  sl_status = sli_ksu_find_free_user_slot(target_key_desc, user_ref);
   if (sl_status != SL_STATUS_OK) {
     goto exit;
   }
@@ -494,5 +493,3 @@ sl_status_t sli_ksu_key_slot_copy(sl_se_key_descriptor_t *source_key_desc,
   sli_ksu_lock_release();
   return sl_status;
 }
-
-#endif // KSU_PRESENT

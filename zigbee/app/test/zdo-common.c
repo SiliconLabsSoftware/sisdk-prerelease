@@ -87,7 +87,6 @@ void sendBindUnbindCommand(sl_cli_command_arg_t *arguments)
     // A.k.a. Group Bind/Unbind request
     type = MULTICAST_BINDING;
   }
-
   if (command[5] == 'b'
       || (command[5] == 'g' && command[7] == 'b')) {
     sl_zigbee_bind_request(target,
@@ -102,7 +101,8 @@ void sendBindUnbindCommand(sl_cli_command_arg_t *arguments)
                            (type == UNICAST_BINDING
                             ? ((uint8_t)destEpOrGroupAddr)
                             : 0),
-                           useEncryption ? SL_ZIGBEE_APS_OPTION_ENCRYPTION : SL_ZIGBEE_APS_OPTION_NONE);
+                           SL_ZIGBEE_APS_OPTION_RETRY
+                           | (useEncryption ? SL_ZIGBEE_APS_OPTION_ENCRYPTION : SL_ZIGBEE_APS_OPTION_NONE));
   } else {
     sl_zigbee_unbind_request(target,
                              sourceEui64,
@@ -116,7 +116,8 @@ void sendBindUnbindCommand(sl_cli_command_arg_t *arguments)
                              (type == UNICAST_BINDING
                               ? ((uint8_t)destEpOrGroupAddr)
                               : 0),
-                             useEncryption ? SL_ZIGBEE_APS_OPTION_ENCRYPTION : SL_ZIGBEE_APS_OPTION_NONE);
+                             SL_ZIGBEE_APS_OPTION_RETRY
+                             | (useEncryption ? SL_ZIGBEE_APS_OPTION_ENCRYPTION : SL_ZIGBEE_APS_OPTION_NONE));
   }
 }
 
@@ -506,6 +507,10 @@ void sendMatchRequestCommand(sl_cli_command_arg_t *arguments)
   uint8_t outClusterList[ZDO_MAX_PAYLOAD_LEN] = { 0 };
   inLength = sl_zigbee_copy_hex_arg(arguments, 2, inClusterList, ZDO_MAX_PAYLOAD_LEN, false);
   outLength = sl_zigbee_copy_hex_arg(arguments, 3, outClusterList, ZDO_MAX_PAYLOAD_LEN, false);
+  sl_zigbee_aps_option_t opts = 0;
+  if (sl_cli_get_argument_count(arguments) > 4) {
+    opts = sl_cli_get_argument_uint16(arguments, 4);
+  }
   uint8_t inCount = inLength >> 1;
   uint8_t outCount = outLength >> 1;
   prepareClusterList(inClusterList, inLength);
@@ -517,7 +522,7 @@ void sendMatchRequestCommand(sl_cli_command_arg_t *arguments)
                                       (uint16_t*)inClusterList,
                                       outCount,
                                       (uint16_t*)outClusterList,
-                                      0);
+                                      opts);
 }
 
 void rtgRequestCommand(sl_cli_command_arg_t *arguments)

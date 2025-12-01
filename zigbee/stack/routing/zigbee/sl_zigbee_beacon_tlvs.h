@@ -84,9 +84,8 @@ uint16_t sli_zigbee_stack_get_router_info_bitmask(void);
  * @brief given a buffer containing permit joining request
  * parse and cache the beacon appendix tlvs
  */
-bool sli_zigbee_stack_parse_permit_joining_beacon_appendix(sli_buffer_manager_buffer_t payloadBuffer,
-                                                           uint8_t payloadIndex,
-                                                           uint8_t length);
+void sli_zigbee_stack_parse_permit_joining_beacon_appendix(uint8_t *payload,
+                                                           uint8_t payload_len);
 
 /**
  * @brief set whether to advertise the "prefer parent" bit

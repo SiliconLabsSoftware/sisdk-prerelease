@@ -171,6 +171,11 @@
 #define OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE    0
 #endif
 // </e>
+// <e>  COAP Blockwise Transfer
+#ifndef OPENTHREAD_CONFIG_COAP_BLOCKWISE_TRANSFER_ENABLE
+#define OPENTHREAD_CONFIG_COAP_BLOCKWISE_TRANSFER_ENABLE    0
+#endif
+// </e>
 // <e>  DHCP6 Client
 #ifndef OPENTHREAD_CONFIG_DHCP6_CLIENT_ENABLE
 #define OPENTHREAD_CONFIG_DHCP6_CLIENT_ENABLE       1
@@ -204,6 +209,11 @@
 // <e>  Maximum number of IPv6 multicast addresses allowed to be externally added
 #ifndef OPENTHREAD_CONFIG_IP6_MAX_EXT_MCAST_ADDRS
 #define OPENTHREAD_CONFIG_IP6_MAX_EXT_MCAST_ADDRS   4
+#endif
+// </e>
+// <e>  The maximum number of IPv6 address registrations for MTD
+#ifndef OPENTHREAD_CONFIG_MLE_IP_ADDRS_TO_REGISTER
+#define OPENTHREAD_CONFIG_MLE_IP_ADDRS_TO_REGISTER (OPENTHREAD_CONFIG_MLE_IP_ADDRS_PER_CHILD)
 #endif
 // </e>
 // <e>  Jam Detection
@@ -317,12 +327,6 @@
 // <e>  Enable Mac beacon payload parsing support
 #ifndef OPENTHREAD_CONFIG_MAC_BEACON_PAYLOAD_PARSING_ENABLE
 #define OPENTHREAD_CONFIG_MAC_BEACON_PAYLOAD_PARSING_ENABLE      1
-#endif
-// </e>
-// <e>  Stay awake between fragments
-// <i>  Required for Matter SVE use cases
-#ifndef OPENTHREAD_CONFIG_MAC_STAY_AWAKE_BETWEEN_FRAGMENTS
-#define OPENTHREAD_CONFIG_MAC_STAY_AWAKE_BETWEEN_FRAGMENTS 1
 #endif
 // </e>
 // <i> The maximum number of RX buffers to use in the radio driver.

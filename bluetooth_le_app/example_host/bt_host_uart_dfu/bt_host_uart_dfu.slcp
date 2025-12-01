@@ -40,6 +40,10 @@ include:
     file_list:
       - path: app_log_cli.h
 
+configuration:
+  - name: ACCEPT_DFU_BOOT
+    value: 1
+
 tag:
   - toolchain:gcc
   - hwfilter:device:device_family_host

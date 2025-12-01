@@ -72,6 +72,10 @@ tag:
   - prebuilt_demo
   - hardware:component:exp_header:spi
   - hwfilter:device:device_supports_zigbee
+  - hwfilter:board:hardware_board_has_spi
+  - hwfilter:!board:zb_boards_spi_incompatible
+
+
 readme:
   - path: ./readme.md
 

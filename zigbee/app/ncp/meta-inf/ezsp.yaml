@@ -4935,6 +4935,27 @@
       responseArguments: [
       ],
     },
+    ##SET_PENDING_NETWORK_UPDATE_CHANNEL
+    {
+      value: "0x003D",
+      needGeneratedHandler: "yes",
+      commandName: "setPendingNetworkUpdateChannel",
+      description: "Set the channel number the device will accept in ZDO Mgmt Network
+                    Update command to change channel. If a ZDO Mgmt Network Update command 
+                    is received by the device specifying a channel that does not match with 
+                    the given channel, the ZDO Mgmt Network Update command will be ignored by the device. 
+                    A value of 0xFF indicates that any channel received in a ZDO Mgmt Network Update 
+                    command will be accepted which is also the default value set by the stack.",
+      commandArguments: [
+        {
+          type: "uint8_t",
+          name: "channel",
+          description: "A pending network update channel number.",
+        },
+      ],
+      responseArguments: [
+      ],
+    },
     ##GET_ENDPOINT
     {
       value: "0x012E",

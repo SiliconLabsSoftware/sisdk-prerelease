@@ -225,6 +225,10 @@
 #define sl_zigbee_get_security_level sl_zigbee_af_get_security_level
 #define sl_zigbee_get_route_table_size sl_zigbee_af_get_route_table_size
 
+#define sl_zigbee_get_max_mac_retries sl_zigbee_ezsp_get_max_mac_retries
+#define sl_zigbee_set_pending_network_update_pan_id sl_zigbee_ezsp_set_pending_network_update_pan_id
+#define sl_zigbee_set_pending_network_update_channel sl_zigbee_ezsp_set_pending_network_update_channel
+
 #define sl_zigbee_set_stack_profile(stackProfile) \
   sl_zigbee_af_set_ezsp_config_value(SL_ZIGBEE_EZSP_CONFIG_STACK_PROFILE, stackProfile, "stack profile")
 #define sl_zigbee_set_security_level(securityLevel) \

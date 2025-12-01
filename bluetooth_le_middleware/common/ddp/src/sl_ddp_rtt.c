@@ -35,14 +35,24 @@
 #include "sl_ddp_common.h"
 #include "sl_ddp_rtt.h"
 
+// -----------------------------------------------------------------------------
+// Definitions
+
 #define SL_DDP_RTT_INPUT_BUF_SIZE   (BUFFER_SIZE_DOWN)
 #define SL_DDP_RTT_OUTPUT_BUF_SIZE  (BUFFER_SIZE_UP)
+
+// -----------------------------------------------------------------------------
+// Private variables
+
 // DPP RTT output buffer
 static uint8_t rtt_output[SL_DDP_RTT_OUTPUT_BUF_SIZE];
 // DPP RTT input buffer
 static uint8_t rtt_input[SL_DDP_RTT_INPUT_BUF_SIZE];
 // DPP RTT input buffer index
 static uint16_t rtt_input_idx;
+
+// -----------------------------------------------------------------------------
+// Public functions
 
 /******************************************************************************
  * Initialize DPP RTT interface.
@@ -61,7 +71,7 @@ void sl_ddp_rtt_process_action(void)
   sl_status_t status;
   sl_ddp_rtt_req_t *req;
   sl_ddp_rtt_rsp_t *rsp;
-  uint16_t output_len;
+  uint16_t output_len = 0;
 
   status = sl_iostream_read(sl_iostream_rtt_handle,
                             &rtt_input[rtt_input_idx],
@@ -91,7 +101,7 @@ void sl_ddp_rtt_process_action(void)
                           rsp,
                           sizeof(*rsp));
         // Write the RTT response body if any
-        if (output_len) {
+        if ((rsp->status == 0) && output_len) {
           sl_iostream_write(sl_iostream_rtt_handle,
                             rsp->data,
                             output_len);

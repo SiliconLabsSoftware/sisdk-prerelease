@@ -32,7 +32,6 @@
 #ifndef SLI_CRYPTO_KSU_MANAGER_H
 #define SLI_CRYPTO_KSU_MANAGER_H
 
-#if defined (KSU_PRESENT)
 #include "sl_se_manager_internal_keys.h"
 #include "sl_se_manager_util.h"
 #include "sl_se_manager_types.h"
@@ -158,7 +157,5 @@ sl_status_t sli_ksu_allocate_key_slot(sl_se_key_descriptor_t *key_desc,
  ******************************************************************************/
 sl_status_t sli_ksu_key_slot_generate(sl_se_key_descriptor_t *key_desc,
                                       void *user_ref);
-
-#endif // KSU_PRESENT
 
 #endif // SLI_CRYPTO_KSU_MANAGER_H

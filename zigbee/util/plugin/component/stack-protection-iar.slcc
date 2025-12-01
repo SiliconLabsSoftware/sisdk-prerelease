@@ -18,17 +18,17 @@ requires:
 - name: legacy_hal
 
 source:
-- path: "util/plugin/plugin-common/stack-protection-iar/stack-protection.c"
+- path: util/plugin/plugin-common/stack-protection-iar/stack-protection.c
 
 define:
 - name: STACK_PROTECTION
 
 include:
-- path: "platform/service"
+- path: platform/service
 
 toolchain_settings:
 - option: iar_compiler_option
-  value: "--stack_protection"
+  value: --stack_protection
 
 template_contribution:
 - name: component_catalog

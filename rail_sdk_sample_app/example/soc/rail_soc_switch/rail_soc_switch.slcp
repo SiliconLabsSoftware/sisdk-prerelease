@@ -270,6 +270,20 @@ ui_hints:
 
 tag:
   - prebuilt_demo
+  - hwfilter:board:hardware:has:vcom
+  - hwfilter:board:hardware:has:pti
+  - hwfilter:board:simple_led:led0
+  - hwfilter:board:simple_button:btn0
+  - hwfilter:board:simple_button:btn1
+  - hwfilter:board:hardware_board_supports_wstk_lcd
+  - hwfilter:!board:hardware:shares:button:led
+  - hwfilter:ram:19k
+  - hwfilter:flash:109k
+  - hwfilter:!device:device_generic_family_efr32xg21
+  - hwfilter:!device:device_family_zgm23
+  - hwfilter:!device:device_family_mgm24
+  - hwfilter:!device:device_family_mgm26
+  - hwfilter:!device:device_family_bgm24
 
 filter:
   - name: "Wireless Technology"

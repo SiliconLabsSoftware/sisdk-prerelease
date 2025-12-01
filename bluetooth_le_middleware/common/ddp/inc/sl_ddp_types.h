@@ -43,6 +43,12 @@ extern "C" {
  * @{
  *****************************************************************************/
 
+// -----------------------------------------------------------------------------
+// Definitions
+#define SL_DDP_ERROR_COMMAND   ((int)1)
+#define SL_DDP_ERROR_ARG       ((int)2)
+#define SL_DDP_ERROR_LENGTH    ((int)3)
+
 /******************************************************************************
  * DDP command handler prototype.
  *
@@ -64,12 +70,10 @@ typedef int (*sl_ddp_command_func_t)(const uint8_t *input,
                                      uint16_t output_size,
                                      uint16_t *output_len);
 
-/// DDP command table entry
+// DDP command table entry
 typedef struct {
-  ///< DDP command ID
-  uint16_t id;
-  ///< Pointer to DDP command handler
-  sl_ddp_command_func_t handler;
+  uint16_t id; // DDP command ID
+  sl_ddp_command_func_t handler; // Pointer to DDP command handler
 } sl_ddp_command_entry_t;
 
 /** @} (end SL_DDP_COMMON_API) */

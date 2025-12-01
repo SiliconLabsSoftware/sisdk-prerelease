@@ -165,6 +165,10 @@ tag:
   - hwfilter:flash:512k
   - hwfilter:ram:64k
 
+post_build:
+  - path: "../../postbuild_profile/btmesh_common_s2.slpb"
+    condition: [device_series_2, bootloader_app_properties]
+
 ui_hints:
   highlight:
     - path: config/btconf/gatt_configuration.btconf

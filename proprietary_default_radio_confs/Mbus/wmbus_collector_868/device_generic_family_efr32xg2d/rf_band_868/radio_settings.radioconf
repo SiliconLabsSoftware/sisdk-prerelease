@@ -8,11 +8,11 @@
           <channel_number_end>20</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
           <max_power>RAIL_TX_POWER_MAX</max_power>
-          <metadata>{"selectedPhy":"PHY_wMbus_ModeT_M2O_100k_no_postamble_frameA"}</metadata>
+          <metadata>{"selectedPhy":"PHY_wMbus_ModeT_M2O_100k_frameA"}</metadata>
         </channel_config_entry>
       </channel_config_entries>
-      <metadata>{"selectedPhy":"PHY_wMbus_ModeT_M2O_100k_no_postamble_frameA"}</metadata>
-      <phy name="PHY_wMbus_ModeT_M2O_100k_no_postamble_frameA"/>
+      <metadata>{"selectedPhy":"PHY_wMbus_ModeT_M2O_100k_frameA"}</metadata>
+      <phy name="PHY_wMbus_ModeT_M2O_100k_frameA"/>
     </base_channel_configuration>
   </base_channel_configurations>
 </multi_phy_configuration>

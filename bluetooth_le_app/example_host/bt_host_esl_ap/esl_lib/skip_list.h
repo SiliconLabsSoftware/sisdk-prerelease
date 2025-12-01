@@ -159,7 +159,7 @@ const void *skip_list_get_node_data(skip_node_p node);
  *
  * @note Since the ownership of the node data, to which the input data is
  *       compared, has been taken over by the Skip List, the memory reserved
- *       for the node data is returned on succesful removal.
+ *       for the node data is returned on successful removal.
  *       In the event that the function is invoked with data that is not
  *       present within the specified list, it will return a NULL value.
  *       However, this should be regarded as an idempotent operation, analogous

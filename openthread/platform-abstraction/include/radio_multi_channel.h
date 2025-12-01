@@ -36,28 +36,32 @@
 #define RADIO_MULTI_CHANNEL_H_
 
 #include <openthread-core-config.h>
+#include <openthread/error.h>
 
 #include <stdbool.h>
 
-#include <openthread/error.h>
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include "sl_rail_ieee802154.h"
+#include "sl_component_catalog.h"
 
-#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
+#if defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT) || \
+    defined(SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT)
 #include "sl_rail_util_ieee802154_fast_channel_switching_config.h"
-#endif // SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
+#endif // SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT || SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
 
-#if SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_ENABLED && !defined(SL_CATALOG_RAIL_MULTIPLEXER_PRESENT)
+#if ((defined(SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_DEFAULT_ENABLED) && \
+      SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_DEFAULT_ENABLED) || \
+     (defined(SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_ENABLED) && \
+      SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_ENABLED)) && \
+    !defined(SL_CATALOG_RAIL_MULTIPLEXER_PRESENT)
 // When RAIL multiplexer is present, we handle fast channel switching in the multiplexer code
 // turn off the feature here since OT lower mac is unaware of the goings on in the zigbee stack
 #define FAST_CHANNEL_SWITCHING_SUPPORT 1
 #else
 #define FAST_CHANNEL_SWITCHING_SUPPORT 0
-#endif // SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_ENABLED && !defined(SL_CATALOG_RAIL_MULTIPLEXER_PRESENT)
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#endif // ((SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_DEFAULT_ENABLED || SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_ENABLED) && !SL_CATALOG_RAIL_MULTIPLEXER_PRESENT)
 
 /**
  * Check if the multi-channel feature is enabled.

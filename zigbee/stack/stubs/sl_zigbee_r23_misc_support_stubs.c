@@ -20,6 +20,7 @@
 #include "sl_zigbee_tlv_core.h"
 #include "sl_zigbee_types_internal.h"
 #include "sl_zigbee_address_info.h"
+#include "sl_zigbee_stack_specific_tlv.h"
 
 // refer to sl_router_info_bitmask_fields in sl_zigbee_stack_specific_tlvs.h
 SL_WEAK uint16_t sli_zigbee_stack_get_router_info_bitmask(void)
@@ -277,4 +278,23 @@ SL_WEAK sl_status_t sli_zigbee_zdo_generate_get_authentication_level_req(sl_8021
   (void)aps_options;
   (void)target;
   return SL_STATUS_NOT_SUPPORTED;
+}
+
+SL_WEAK sl_zigbee_global_tlv_fragmentation_param_t sli_zigbee_stack_global_tlv_fragmentation_param(void)
+{
+  sl_zigbee_global_tlv_fragmentation_param_t tlv;
+  memset(&tlv, 0xAB, sizeof(tlv));
+  return tlv;
+}
+
+SL_WEAK void sli_zdo_dlk_aps_ack_received_for_key_update_req(uint16_t short_address)
+{
+  (void) short_address;
+}
+
+void sli_zigbee_stack_parse_permit_joining_beacon_appendix(uint8_t *payload,
+                                                           uint8_t payload_len)
+{
+  (void) payload;
+  (void) payload_len;
 }

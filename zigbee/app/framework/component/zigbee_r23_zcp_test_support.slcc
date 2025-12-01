@@ -314,6 +314,118 @@ template_contribution:
     argument:
     - type: uint8
       help: boolean to enable(1) or disable(0) sending duplicate relay frames
+  # duplicate / compatibility commands
+- name: cli_command
+  value:
+    name: export_tc_backup_data
+    handler: exportTcBackupData
+    help: prints the TC backup data in a format that can be used to restore the TC node
+- name: cli_command
+  value:
+    name: get_auth_token
+    handler: sendZdoGetAuthTokenCommand
+    argument:
+    - type: uint16
+      help: target short ID
+    - type: uint8
+      help: use aps encryption
+- name: cli_command
+  value:
+    name: set_auth_level
+    handler: set_override_auth_level_methods
+    help: sets the manual override for authentication level
+    argument:
+    - type: uint8
+      help: join method
+    - type: uint8
+      help: update method
+- name: cli_command
+  value:
+    name: dlk_psk
+    handler: setDlkPskSecretValue
+    help: sets the pre-shared secret for authenticated dlk
+    argument:
+    - type: hexopt
+- name: cli_command
+  value:
+    name: negative_dlk
+    handler: setup_dlk_negative_testcase
+    help: enables different negative test case scenarios for dlk
+    argument:
+    - type: uint8
+      help: enumerated value of negative testcase (refer to 'DlkTestCaseScenario')
+- name: cli_command
+  value:
+    name: set_beacon_params
+    handler: setBeaconParameters
+    help: sets various beacon parameters
+    argument:
+    - type: uint8opt
+      help: hub connectivity, long uptime, preferred parent, network update id
+- name: cli_command
+  value:
+    name: survey_beacons
+    handler: sendZdoBeaconSurveyCommand
+    help: sends a beacon survey request to the given node using a 1-byte config mask and a 4-byte scan config
+    argument:
+    - type: uint16
+      help: destination short id
+    - type: uint8
+      help: config mask
+    - type: uint32
+      help: channel mask
+- name: cli_command
+  value:
+    name: relay_dups
+    handler: enable_aps_relay_duplication_command
+    help: enable or disable gu behavior to test duplicate rejection of relay frames
+    argument:
+    - type: uint8
+      help: boolean indicating whether or not duplicate relay frames should be generated
+- name: cli_command
+  value:
+    name: tx_power_rel
+    handler: set_relative_tx_power
+    help: sets the transmit power by a relative offset in db
+    argument:
+    - type: int8
+      help: increments the tx power by that many db
+- name: cli_command
+  value:
+    name: tx_power_fix
+    handler: set_tx_power
+    help: sets the transmit power to a specified value in db
+    argument:
+    - type: int32
+      help: the tx power in decibels
+- name: cli_command
+  value:
+    name: beacon_tlvs_disable
+    handler: disableBeaconTlvsCommand
+    help: toggles whether tlvs are included in beacons
+    argument:
+    - type: uint8
+      help: boolean (0 = false)
+- name: cli_command
+  value:
+    name: disable_dlk
+    handler: disableDlkBehaviors
+    help: toggles a number of features related to performing dynamic link key negotiation
+    argument:
+    - type: uint8
+      help: boolean (0 = false)
+- name: cli_command
+  value:
+    name: send_decommission
+    handler: start_zdo_decommission_device_command
+    help: Sends a Security Decommission command from the TC
+    argument:
+    - type: uint16
+      help: short id destination
+    - type: uint8
+      help: determines whether or not the zdo command is sent with encryption
+    - type: hexopt
+      help: one or more eui64s to send in 'decomission' notification
 metadata:
   sbom:
     license: MSLA

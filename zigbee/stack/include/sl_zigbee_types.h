@@ -646,6 +646,8 @@ enum
   SL_ZIGBEE_NETWORK_INIT_PARENT_INFO_IN_TOKEN = 0x0001,
   /** Z3 compliant end devices on a network must send a rejoin request on reboot. */
   SL_ZIGBEE_NETWORK_INIT_END_DEVICE_REJOIN_ON_REBOOT = 0x0002,
+  /** Option for routers to automatically send a rejoin request on reboot. */
+  SL_ZIGBEE_NETWORK_INIT_ROUTER_REJOIN_ON_REBOOT = 0x0004,
 };
 
 /**

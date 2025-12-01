@@ -19,6 +19,15 @@
 #include "stack/include/sl_zigbee_types.h"
 #include "hal/hal.h"
 #include "zigbee-device-common.h"
+#include "stack/include/stack-info.h"
+
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
+
+#ifdef SL_CATALOG_ZIGBEE_R23_SUPPORT_PRESENT
+#include "sl_zigbee_stack_specific_tlv.h"
+#endif // SL_CATALOG_ZIGBEE_R23_SUPPORT_PRESENT
 
 static uint8_t zigDevRequestSequence = 0;
 uint8_t zigDevRequestRadius = 255;
@@ -146,19 +155,45 @@ sl_status_t sl_zigbee_leave_request(sl_802154_short_addr_t target,
                                         sizeof(contents));
 }
 
+#define PERMIT_JOIN_REQUEST_MIN_LENGTH ZDO_MESSAGE_OVERHEAD + 2 // sequence number, duration, tc significance
+#ifdef SL_CATALOG_ZIGBEE_R23_SUPPORT_PRESENT
+#define PERMIT_JOIN_REQUEST_SIZE (PERMIT_JOIN_REQUEST_MIN_LENGTH + SL_ZIGBEE_GLOBAL_TLV_BEACON_APPENDIX_ENCAP_MAX_LEN) // sequence number, duration, tc significance, beacon appendix
+#else
+#define PERMIT_JOIN_REQUEST_SIZE (PERMIT_JOIN_REQUEST_MIN_LENGTH) // sequence number, duration, tc significance
+#endif // SL_CATALOG_ZIGBEE_R23_SUPPORT_PRESENT
+
 sl_status_t sl_zigbee_permit_joining_request(sl_802154_short_addr_t target,
                                              uint8_t duration,
                                              uint8_t authentication,
                                              sl_zigbee_aps_option_t options)
 {
-  uint8_t contents[ZDO_MESSAGE_OVERHEAD + 2];
+  uint8_t contents[PERMIT_JOIN_REQUEST_SIZE] = { 0, };
+  uint8_t length = PERMIT_JOIN_REQUEST_MIN_LENGTH;
   contents[ZDO_MESSAGE_OVERHEAD] = duration;
   contents[ZDO_MESSAGE_OVERHEAD + 1] = authentication;
+  #ifdef SL_CATALOG_ZIGBEE_R23_SUPPORT_PRESENT
+  if (sl_zigbee_get_stack_compliance_revision() >= R23_COMPLIANCE_REVISION) {
+    // add the beacon appendix
+    sl_zigbee_global_tlv_beacon_appendix_encap_t appendix_tlv = { 0 };
+    sl_status_t status = sl_zigbee_global_tlv_beacon_appendix_encapsulation(&appendix_tlv);
+    if (status != SL_STATUS_OK) {
+      return status;
+    }
+    // update the length
+    sl_zigbee_tlv_chain chain = { 0, };
+    sl_zigbee_tlv_initialize_empty_chain(&chain, contents + length, sizeof(contents) - length);
+    status = sl_zigbee_tlv_chain_add_tlv(&chain, (sl_zigbee_tlv_t *) &appendix_tlv);
+    if (status != SL_STATUS_OK) {
+      return status;
+    }
+    length += chain.length;
+  }
+  #endif // SL_CATALOG_ZIGBEE_R23_SUPPORT_PRESENT
   return sl_zigbee_send_zig_dev_request(target,
                                         PERMIT_JOINING_REQUEST,
                                         options,
                                         contents,
-                                        sizeof(contents));
+                                        length);
 }
 
 sl_802154_short_addr_t sl_zigbee_decode_address_response(uint8_t responseLength,

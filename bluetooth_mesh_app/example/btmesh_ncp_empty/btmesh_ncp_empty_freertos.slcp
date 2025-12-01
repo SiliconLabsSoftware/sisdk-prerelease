@@ -168,7 +168,7 @@ configuration:
       - hardware_board_tb
 
 post_build:
-  - path: "../../postbuild_profile/btmesh_common.slpb"
+  - path: "../../postbuild_profile/btmesh_common_s2.slpb"
     condition: [device_series_2, bootloader_app_properties]
 
 tag:

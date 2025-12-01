@@ -15,7 +15,7 @@ library:
 - system: "cpc"
 
 include:
-- path: "platform/service/cpc/daemon/lib"
+- path: "submodules/cpc-daemon/lib"
   file_list:
   - path: sl_cpc.h
 

@@ -332,6 +332,10 @@ void sendNetworkTimeoutRequest(sl_cli_command_arg_t *arguments);
 void modifyNetworkTimeoutInternally(sl_cli_command_arg_t *arguments);
 //Sets end device timeout values
 void setEndDeviceTimeout(sl_cli_command_arg_t *arguments);
+
+//sets the end device tiemout without sending the timeout request over the air
+void setSilentEndDeviceTiemout(sl_cli_command_arg_t *arguments);
+
 //Sets keep alive mechanism
 void setKeepAliveSupport(sl_cli_command_arg_t *arguments);
 //Use legacy end device timeout method
@@ -1665,11 +1669,9 @@ static uint8_t mapTimeoutToIndex(uint32_t actualValue)
   return SL_ZIGBEE_POLL_TIMEOUT_16384_MINUTES;
 }
 
-void setEndDeviceTimeout(sl_cli_command_arg_t *arguments)
+void CommonEndDeviceTimeout(uint8_t endDeviceTimeout, uint8_t endDeviceTimeoutShift, uint8_t endDeviceConfiguration)
 {
-  uint8_t endDeviceTimeout = sl_cli_get_argument_uint8(arguments, 0);
-  uint8_t endDeviceTimeoutShift = sl_cli_get_argument_uint8(arguments, 1);
-  sli_zigbee_set_end_device_configuration(sl_cli_get_argument_uint8(arguments, 2));
+  sli_zigbee_set_end_device_configuration(endDeviceConfiguration);
   sl_zigbee_set_end_device_poll_timeout(mapTimeoutToIndex(endDeviceTimeout << endDeviceTimeoutShift));
   sl_zigbee_core_debug_println("Set End Device Timeout");
 
@@ -1677,6 +1679,22 @@ void setEndDeviceTimeout(sl_cli_command_arg_t *arguments)
   // to its local timeout to create a mismatch with the parent.  This is useful
   // in negative testing.
   sli_zigbee_note_successful_poll();
+}
+
+void setSilentEndDeviceTiemout(sl_cli_command_arg_t *arguments)
+{
+  uint8_t endDeviceTimeout = sl_cli_get_argument_uint8(arguments, 0);
+  uint8_t endDeviceTimeoutShift = sl_cli_get_argument_uint8(arguments, 1);
+  uint8_t endDeviceConfiguration = sl_cli_get_argument_uint8(arguments, 2);
+  CommonEndDeviceTimeout(endDeviceTimeout, endDeviceTimeoutShift, endDeviceConfiguration);
+}
+
+void setEndDeviceTimeout(sl_cli_command_arg_t *arguments)
+{
+  uint8_t endDeviceTimeout = sl_cli_get_argument_uint8(arguments, 0);
+  uint8_t endDeviceTimeoutShift = sl_cli_get_argument_uint8(arguments, 1);
+  uint8_t endDeviceConfiguration = sl_cli_get_argument_uint8(arguments, 2);
+  CommonEndDeviceTimeout(endDeviceTimeout, endDeviceTimeoutShift, endDeviceConfiguration);
   //This will send EndDeviceTimeout request if sli_zigbee_enable_r21_stack_behavior enable.
   sl_zigbee_test_send_timeout_request();
 }

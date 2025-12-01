@@ -200,6 +200,16 @@ ui_hints:
 
 tag:
   - prebuilt_demo
+  - hwfilter:board:hardware:has:vcom
+  - hwfilter:board:hardware:has:pti
+  - hwfilter:ram:56k
+  - hwfilter:flash:308k
+  - hwfilter:device:device_family_mgm21
+  - hwfilter:!board:brd4308a
+  - hwfilter:!board:brd4308d
+  - hwfilter:!board:brd4309a
+  - hwfilter:!board:brd4309b
+  - hwfilter:!board:brd4329a
 
 filter:
   - name: "Wireless Technology"

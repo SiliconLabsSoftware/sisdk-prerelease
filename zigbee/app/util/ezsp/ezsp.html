@@ -1271,6 +1271,18 @@
 
     <table class="outline"><col width="300"><col width="200"><col width="200">
     <tr class="heading">
+    <td><b>Name:</b> setPendingNetworkUpdateChannel</td><td><b>ID:</b> 0x003D</td><td></td></tr>
+<tr><td colspan="3" style="border-top: solid black 1px;"><b>Description:</b> Set the channel number the device will accept in ZDO Mgmt Network Update command to change channel. If a ZDO Mgmt Network Update command is received by the device specifying a channel that does not match with the given channel, the ZDO Mgmt Network Update command will be ignored by the device. A value of 0xFF indicates that any channel received in a ZDO Mgmt Network Update command will be accepted which is also the default value set by the stack.</td></tr>
+
+    <tr><td colspan="3" style="border-top: solid black 1px;"><b>Command Parameters:</b></td></tr>
+
+    <tr><td>uint8_t channel</td><td colspan="2">A pending network update channel number.</td></tr>
+
+    <tr><td colspan="3" style="border-top: solid black 1px;"><b>Response Parameters:</b> None</td></tr>
+</table><br>
+
+    <table class="outline"><col width="300"><col width="200"><col width="200">
+    <tr class="heading">
     <td><b>Name:</b> getEndpoint</td><td><b>ID:</b> 0x012E</td><td></td></tr>
 <tr><td colspan="3" style="border-top: solid black 1px;"><b>Description:</b> Retrieve the endpoint number located at the specified index.</td></tr>
 
@@ -6063,6 +6075,7 @@ source route at <i>index</i>.</td></tr>
 <tr><td>setNwkUpdateId</td><td>0x011D</td></tr>
 <tr><td>setParentIncomingNwkFrameCounter</td><td>0x013F</td></tr>
 <tr><td>setPassiveAckConfig</td><td>0x0105</td></tr>
+<tr><td>setPendingNetworkUpdateChannel</td><td>0x003D</td></tr>
 <tr><td>setPendingNetworkUpdatePanId</td><td>0x011E</td></tr>
 <tr><td>setPolicy</td><td>0x0055</td></tr>
 <tr><td>setPowerDescriptor</td><td>0x0016</td></tr>
@@ -6184,7 +6197,7 @@ source route at <i>index</i>.</td></tr>
 <tr><td>0x003A</td><td bgcolor="white">setupDelayedJoin</td></tr>
 <tr><td>0x003B</td><td bgcolor="white">joinNetworkDirectly</td></tr>
 <tr><td>0x003C</td><td bgcolor="white">clearStoredBeacons</td></tr>
-<tr><td>0x003D</td><td bgcolor="lightgray">-- unassigned --</td></tr>
+<tr><td>0x003D</td><td bgcolor="white">setPendingNetworkUpdateChannel</td></tr>
 <tr><td>0x003E</td><td bgcolor="white">getNeighborFrameCounter</td></tr>
 <tr><td>0x003F</td><td bgcolor="white">messageSentHandler</td></tr>
 <tr><td>0x0040</td><td bgcolor="white">setDutyCycleLimitsInStack</td></tr>

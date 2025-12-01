@@ -37,9 +37,8 @@ void slx_zigbee_insecure_debug_generate_trace(slx_zigbee_insecure_debug_message_
   if (debug_data == NULL || !insecure_debug_trace_enabled) {
     return;
   }
-  sl_802154_long_addr_t dummy_long = { 0xFF, 0xEE, 0xFF, 0x11, 0xFF, 0x00, 0xFF, 0x6d };
   switch (msg_type) {
-#ifdef SLX_ZIGBEE_INSECURE_DEBUG_NWK_REPORT_KEY_PACKET_ENABLED
+#if SLX_ZIGBEE_INSECURE_DEBUG_NWK_REPORT_KEY_PACKET_ENABLED == 1
     case SLX_ZIGBEE_INSECURE_DEBUG_NWK_REPORT_KEY_PACKET: {
       sli_buffer_manager_buffer_t payload = sli_legacy_buffer_manager_allocate_buffer(WIRESHARK_NWK_REPORT_FRAME_LENGTH);
       if (payload == NULL_BUFFER) {
@@ -74,17 +73,18 @@ void slx_zigbee_insecure_debug_generate_trace(slx_zigbee_insecure_debug_message_
       (void) sli_zigbee_retry_submit(header, 1, 0, SLI_ZIGBEE_RETRY_FLAG_NONE);
     } break;
 #endif // SLX_ZIGBEE_INSECURE_DEBUG_NWK_REPORT_KEY_PACKET_ENABLED
-#ifdef SLX_ZIGBEE_INSECURE_DEBUG_TRANSPORT_KEY_PACKET
-    case SLX_ZIGBEE_INSECURE_DEBUG_TRANSPORT_KEY_PACKET:
+#if SLX_ZIGBEE_INSECURE_DEBUG_TRANSPORT_KEY_PACKET_ENABLED == 1
+    case SLX_ZIGBEE_INSECURE_DEBUG_TRANSPORT_KEY_PACKET: {
       // data is a key
+      sl_802154_long_addr_t dummy_long = { 0xFF, 0xEE, 0xFF, 0x11, 0xFF, 0x00, 0xFF, 0x6d };
       (void) sli_zigbee_send_key(SL_ZIGBEE_BROADCAST_ADDRESS,
                                  dummy_long,
                                  dummy_long,
                                  KEY_TRANSPORT_INVALID_KEY,
                                  (sl_zigbee_key_data_t *) debug_data,
                                  SL_ZIGBEE_APS_OPTION_NONE);
-      break;
-#endif // SLX_ZIGBEE_INSECURE_DEBUG_TRANSPORT_KEY_PACKET
+    } break;
+#endif // SLX_ZIGBEE_INSECURE_DEBUG_TRANSPORT_KEY_PACKET_ENABLED
     default:
       sl_zigbee_core_debug_println("unsupported msg type %d", msg_type);
   }
