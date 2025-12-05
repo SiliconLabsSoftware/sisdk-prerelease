@@ -34,11 +34,8 @@
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif
-#ifdef  SL_CATALOG_SL_RAIL_UTIL_CALLBACKS_PRESENT
 #include "sl_rail.h"
-#else//!SL_CATALOG_SL_RAIL_UTIL_CALLBACKS_PRESENT
 #include "rail.h"
-#endif//SL_CATALOG_SL_RAIL_UTIL_CALLBACKS_PRESENT
 
 #ifdef __cplusplus
 extern "C" {

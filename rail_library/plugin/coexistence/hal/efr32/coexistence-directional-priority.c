@@ -394,7 +394,8 @@ bool COEX_HAL_ConfigDp(uint8_t pulseWidthUs)
   }
   // Common PRS wrap-up (enable PRIORITY GPIO, route PRS output to GPIO)
   // enable PRIORITY output pin with initial value of 0
-  sl_gpio_set_pin_mode(&(sl_gpio_t){SL_RAIL_UTIL_COEX_DP_OUT_PORT, SL_RAIL_UTIL_COEX_DP_OUT_PIN }, SL_RAIL_UTIL_COEX_DP_MODE, false);
+  sl_gpio_t gpio_pin = { .port = SL_RAIL_UTIL_COEX_DP_OUT_PORT, .pin = SL_RAIL_UTIL_COEX_DP_OUT_PIN };
+  sl_gpio_set_pin_mode(&gpio_pin, SL_RAIL_UTIL_COEX_DP_MODE, false);
   sl_hal_prs_pin_output(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL, SL_HAL_PRS_TYPE_ASYNC, SL_RAIL_UTIL_COEX_DP_OUT_PORT, SL_RAIL_UTIL_COEX_DP_OUT_PIN);
   return COEX_HAL_SetDpPulseWidth(pulseWidthUs);
 }

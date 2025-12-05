@@ -334,7 +334,8 @@ extern COEX_HAL_GpioConfig_t sli_coex_wifiTxCfg;
 __STATIC_INLINE bool COEX_HAL_ReadGpio(uint32_t port, uint32_t pin, bool polarity)
 {
   bool pin_value;
-  sl_gpio_get_pin_input(&(sl_gpio_t){port, pin }, &pin_value);
+  sl_gpio_t gpio = { .port = (uint8_t) port, .pin = (uint8_t) pin };
+  sl_gpio_get_pin_input(&gpio, &pin_value);
   return (pin_value == polarity);
 }
 #endif

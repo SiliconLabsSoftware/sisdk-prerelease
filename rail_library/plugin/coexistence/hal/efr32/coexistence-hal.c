@@ -172,8 +172,9 @@ static void setGpioConfig(COEX_GpioHandle_t gpioHandle)
   if (gpioHandle != NULL) {
     COEX_HAL_GpioConfig_t *gpio = (COEX_HAL_GpioConfig_t*)gpioHandle;
 
-    bool pin_value = sl_hal_gpio_get_pin_output(&(sl_gpio_t){gpio->port, gpio->pin });
-    sl_hal_gpio_set_pin_mode(&(sl_gpio_t){gpio->port, gpio->pin }, gpio->mode, pin_value);
+    sl_gpio_t gpio_pin = { .port = gpio->port, .pin = gpio->pin };
+    bool pin_value = sl_hal_gpio_get_pin_output(&gpio_pin);
+    sl_hal_gpio_set_pin_mode(&gpio_pin, gpio->mode, pin_value);
   }
 }
 
@@ -201,7 +202,8 @@ void sli_coex_enableGpioInt(COEX_GpioHandle_t gpioHandle,
       flags = SL_GPIO_INTERRUPT_NO_EDGE;
     }
     if (enabled) {
-      sl_gpio_configure_external_interrupt(&(sl_gpio_t){gpio->port, gpio->pin },
+      sl_gpio_t gpio_pin = { .port = gpio->port, .pin = gpio->pin };
+      sl_gpio_configure_external_interrupt(&gpio_pin,
                                            &gpio->intNo,
                                            flags,
                                            gpio->isr,
@@ -232,10 +234,11 @@ static void setGpio(COEX_GpioHandle_t gpioHandle, bool enabled)
       COEX_SetGpioInputOverride(COEX_GPIO_INDEX_INTERNAL_REQ, enabled);
     }
 #endif
+    sl_gpio_t gpio_pin = { .port = gpio->port, .pin = gpio->pin };
     if (enabled == gpio->polarity) {
-      sl_gpio_set_pin(&(sl_gpio_t){.port = gpio->port, .pin = gpio->pin });
+      sl_gpio_set_pin(&gpio_pin);
     } else {
-      sl_gpio_clear_pin(&(sl_gpio_t){.port = gpio->port, .pin = gpio->pin });
+      sl_gpio_clear_pin(&gpio_pin);
     }
   }
 }
@@ -300,7 +303,8 @@ static bool isGpioOutSet(COEX_GpioHandle_t gpioHandle, bool defaultValue)
     }
 #endif
     bool pinValue;
-    sl_gpio_get_pin_output(&(sl_gpio_t){gpio->port, gpio->pin }, &pinValue);
+    sl_gpio_t gpio_pin = { .port = gpio->port, .pin = gpio->pin };
+    sl_gpio_get_pin_output(&gpio_pin, &pinValue);
     return !!pinValue == !!gpio->polarity;
   } else {
     return defaultValue;
@@ -315,7 +319,8 @@ static bool isGpioInSet(COEX_GpioHandle_t gpioHandle, bool defaultValue)
     return COEX_GetGpioInputOverride(gpio->config.index);
 #else //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
     bool pinValue;
-    sl_gpio_get_pin_input(&(sl_gpio_t){gpio->port, gpio->pin }, &pinValue);
+    sl_gpio_t gpio_pin = { .port = gpio->port, .pin = gpio->pin };
+    sl_gpio_get_pin_input(&gpio_pin, &pinValue);
     return !!pinValue == !!gpio->polarity;
 #endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   } else {
@@ -440,7 +445,8 @@ bool COEX_HAL_ConfigRxActive(void)
                 SL_RAIL_UTIL_COEX_RX_ACTIVE_PORT,
                 SL_RAIL_UTIL_COEX_RX_ACTIVE_PIN);
 #endif //_SILICON_LABS_32B_SERIES_3
-  sl_gpio_set_pin_mode(&(sl_gpio_t){SL_RAIL_UTIL_COEX_RX_ACTIVE_PORT, SL_RAIL_UTIL_COEX_RX_ACTIVE_PIN }, SL_GPIO_MODE_PUSH_PULL, false);
+  sl_gpio_t gpio_pin = { .port = SL_RAIL_UTIL_COEX_RX_ACTIVE_PORT, .pin = SL_RAIL_UTIL_COEX_RX_ACTIVE_PIN };
+  sl_gpio_set_pin_mode(&gpio_pin, SL_GPIO_MODE_PUSH_PULL, false);
   return true;
 }
 #endif //SL_RAIL_UTIL_COEX_RX_ACTIVE_PORT
