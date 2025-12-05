@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief L2CAP transfer - SoC configuration file
+ * @brief L2CAP transfer configuration file
  *******************************************************************************
  * # License
  * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>

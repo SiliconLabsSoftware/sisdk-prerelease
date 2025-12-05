@@ -357,6 +357,7 @@ static sl_zigbee_af_plugin_network_steering_joining_state_t getFirstSecondarySta
 
 void sli_zigbee_af_network_steering_stack_status_callback(sl_status_t status)
 {
+  sl_zigbee_af_core_println("%s stack status 0x%02X", PLUGIN_NAME, status);
   if (sli_zigbee_af_network_steering_state
       == SL_ZIGBEE_AF_PLUGIN_NETWORK_STEERING_STATE_NONE) {
     if (status == SL_STATUS_NETWORK_UP && sl_zigbee_af_update_tc_link_key_is_tclk_key_default()) {

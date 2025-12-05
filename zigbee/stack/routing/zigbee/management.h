@@ -37,7 +37,7 @@ void sli_zigbee_send_pan_id_conflict_report(void);
 
 bool sli_zigbee_am_network_manager(void);
 void sli_zigbee_decrement_pan_conflict_meter(void);
-void sli_zigbee_change_pan_id_now(sl_802154_pan_id_t panId);
+void slxi_zigbee_stack_change_pan_id_now(sl_802154_pan_id_t panId);
 
 // Exported for internal testing
 bool sli_zigbee_send_report_or_update(uint8_t command,

@@ -60,7 +60,7 @@ library:
   - zigbee_ncp
   - zigbee_stack_unix
   - zigbee_multi_network
-  - linux_arch_32
+  - linux_arch_arm32v7
   unless:
   - zigbee_i386
 - path: build/gcc/arm32v7/zigbee-ncp-uart/release_singlenetwork/libzigbee-ncp-uart.a
@@ -69,7 +69,7 @@ library:
   - arm32v7
   - zigbee_ncp
   - zigbee_stack_unix
-  - linux_arch_32
+  - linux_arch_arm32v7
   unless:
   - zigbee_multi_network
   - zigbee_i386
@@ -80,7 +80,7 @@ library:
   - zigbee_ncp
   - zigbee_stack_unix
   - zigbee_multi_network
-  - linux_arch_64
+  - linux_arch_aarch64
   unless:
   - zigbee_x86_64
   - zigbee_aarch64_cortex_a72_gcc_12_3_0_musl
@@ -90,7 +90,7 @@ library:
   - arm64v8
   - zigbee_ncp
   - zigbee_stack_unix
-  - linux_arch_64
+  - linux_arch_aarch64
   unless:
   - zigbee_multi_network
   - zigbee_x86_64

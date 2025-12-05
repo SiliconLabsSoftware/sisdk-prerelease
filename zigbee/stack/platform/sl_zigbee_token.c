@@ -292,6 +292,9 @@ sl_status_t sli_zigbee_stack_get_token_data(uint32_t token,
   // sl_token_get_data needs the size to be passed.
   for (uint8_t i = 0; i < sli_zigbee_stack_get_token_count(); i++) {
     if (token == tokenNvm3Keys[i]) {
+      if (tokenIsCnt[i]) {
+        token |= SL_TOKEN_NVM3_OBJ_TYPE_BIT_MASK;
+      }
       tokenData->size = tokenSize[i];
       return sl_token_manager_get_data(token + index,
                                        tokenData->data,
@@ -306,6 +309,12 @@ sl_status_t sli_zigbee_stack_set_token_data(uint32_t token,
                                             uint32_t index,
                                             sl_zigbee_token_data_t *tokenData)
 {
+  for (uint8_t i = 0; i < sli_zigbee_stack_get_token_count(); i++) {
+    if ((token == tokenNvm3Keys[i]) && (tokenIsCnt[i])) {
+      token |= SL_TOKEN_NVM3_OBJ_TYPE_BIT_MASK;
+      break;
+    }
+  }
   sl_status_t status = sl_token_manager_set_data(token + index,
                                                  tokenData->data,
                                                  tokenData->size);

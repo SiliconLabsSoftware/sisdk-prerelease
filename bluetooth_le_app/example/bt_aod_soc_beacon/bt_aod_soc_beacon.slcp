@@ -65,6 +65,7 @@ tag:
   - hwfilter:device:device_supports_bluetooth_cte
   - hwfilter:device:device_supports_bluetooth_antenna_switching
   - hwfilter:board:hardware_board_has_rfswitch_aox
+  - hwfilter:ram:32k
 
 ui_hints:
   highlight:

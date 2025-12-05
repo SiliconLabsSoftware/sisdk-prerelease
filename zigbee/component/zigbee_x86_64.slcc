@@ -10,7 +10,7 @@ provides:
 - name: zigbee_x86_64
 
 requires:
-- name: linux_arch_64
+- name: linux_arch_x86_64
 
 validation_helper:
 - path: component/scripts/zigbee_linux_arch_validation.lua

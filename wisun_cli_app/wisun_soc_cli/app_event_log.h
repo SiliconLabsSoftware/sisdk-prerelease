@@ -24,4 +24,6 @@ sl_status_t app_event_log_init(void);
 
 void app_event_log_print(const sl_wisun_mac_address_t *address);
 
+void app_handle_event_logger_ind(sl_wisun_evt_t *evt);
+
 #endif  // APP_EVENT_LOG_H

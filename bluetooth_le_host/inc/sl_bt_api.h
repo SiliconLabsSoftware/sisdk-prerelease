@@ -1504,10 +1504,11 @@ sl_status_t sl_bt_system_linklayer_configure(uint8_t key,
  * Bluetooth connections, the maximum radiated TX power is limited to 10 dBm if
  * Adaptive Frequency Hopping (AFH) is not enabled.
  *
- * The minimum TX power setting is used by LE power control. It has no effect in
- * Bluetooth stack if the LE power control feature is not enabled. However, the
- * application may still use this setting for other purposes, e.g., setting the
- * minimum TX power for DTM transmitter test.
+ * The minimum TX power setting is applied to connections only. The LE power
+ * control and application-controlled TX Power features will not use smaller
+ * than configured minimum TX power. The TX power setting for other
+ * functionalities, such as advertising, is not limited by the minimum
+ * configured TX power.
  *
  * The minimum and maximum radiated TX power levels can also be configured in
  * the Bluetooth configuration and passed into the Bluetooth stack
@@ -6845,7 +6846,7 @@ PACKSTRUCT( struct sl_bt_evt_connection_statistics_s
                                                   recognized as belonging to
                                                   this connection. */
   uint32_t num_successful_connection_events; /**< The number of connection
-                                                  events that have occured on
+                                                  events that have occurred on
                                                   this connection without
                                                   errors. */
   uint32_t num_crc_errors;                   /**< The number of packets that
@@ -7672,8 +7673,8 @@ sl_status_t sl_bt_connection_get_remote_tx_power(uint8_t connection,
  * application.
  *
  * The actual selected power level is returned from this command. The value may
- * be different than the requested one because of Bluetooth feature restrictions
- * or radio characteristics.
+ * be different than the requested one because of system-wide TX power setting
+ * by the application, Bluetooth feature restrictions, or radio characteristics.
  *
  * @param[in] connection The connection handle
  * @param[in] tx_power The requested TX power. Unit: 0.1 dBm
@@ -13313,7 +13314,7 @@ typedef struct sl_bt_evt_cs_config_complete_s sl_bt_evt_cs_config_complete_t;
  * @{
  * @brief Indicates the controller has scheduled a new CS procedure measurement,
  * as a result of @ref sl_bt_cs_procedure_enable command or disabled an ongoing,
- * as a result of @ref sl_bt_cs_procedure_enable command.
+ * as a result of @ref sl_bt_cs_procedure_enable command
  */
 
 /** @brief Identifier of the procedure_enable_complete event */

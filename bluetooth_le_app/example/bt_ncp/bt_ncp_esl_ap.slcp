@@ -194,6 +194,8 @@ tag:
   - prebuilt_demo
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_series_2
+  - hwfilter:!board:hardware:vcom:no:rts:cts
+  - hwfilter:ram:32k
 
 ui_hints:
   highlight:

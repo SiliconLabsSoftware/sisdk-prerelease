@@ -534,6 +534,10 @@ void set_power_level_to_max(bool init)
     uint16_t channel_first = sl_rail_get_first_channel(rail_handle,
                                                        (const sl_rail_channel_config_t *)channelConfigs[range_test_settings.current_phy]);
     sl_rail_prepare_channel(rail_handle, channel_first);
+
+    sl_rail_tx_pa_mode_t new_pa_mode = sl_rail_get_pa_mode_from_channel_entry(rail_handle); //from configs
+    (void) sl_rail_util_pa_post_init(rail_handle, new_pa_mode);
+
     uint16_t channel = range_test_settings.channel;
     if ((channel
          > channelConfigs[range_test_settings.current_phy]->configs[0U].channelNumberEnd)

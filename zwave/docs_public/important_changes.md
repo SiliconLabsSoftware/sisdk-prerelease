@@ -44,6 +44,11 @@ The ADJUST_RAIL_TX_POWER (1.4 dBm) empirical offset in the zpal_radio layer has 
 
 Moreover, the zpal_radio layer has been refactored to comply strictly with regulatory rules, including TX power levels for EU and US regions, and LBT and duty cycle rules for JP and KR regions.
 
+## TX Power types and definition
+ZPAL and Z-Wave stack manipulate RSSI level and Tx Power in 3 different unit (enum, dbm, deci-debm). To avoid confusion, clarify some type and definitions.
+zpal_tx_power_t > zpal_tx_power_decidbm_t
+ZW_TX_POWER_xxDBM  > ZW_TX_POWER_xx0DDBM
+
 ## ENTROPY GENERATOR
 The zpal_entropy API is now based entirely on the RNG generator, and radio is no longer used to generate random data.
 

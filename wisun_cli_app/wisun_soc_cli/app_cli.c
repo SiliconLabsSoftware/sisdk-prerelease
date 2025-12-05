@@ -45,6 +45,7 @@
 #include "arpa/inet.h"
 #include "common/endian.h"
 #include "app_event_log.h"
+#include "sl_wisun_crash_handler.h"
 
 #ifdef SL_CATALOG_POWER_MANAGER_PRESENT
 #include "sl_power_manager.h"
@@ -281,6 +282,7 @@ static uint32_t app_connection_tick_count;
 
 static bool app_direct_connect_state = false;
 static uint32_t app_direct_connect_pmk_key_id = MBEDTLS_SVC_KEY_ID_INIT;
+static char crash_buff[300] = { 0 };
 
 #if defined (SL_CATALOG_WISUN_CLI_DMP_PRESENT)
 static uint8_t app_ble_advertising_set_handle = 0xff;
@@ -288,6 +290,47 @@ static bool app_ble_is_advertising;
 static bool app_ble_is_advertiser_enabled;
 static bool app_ble_is_scanning;
 #endif
+
+static void app_check_crash(void)
+{
+  const sl_wisun_crash_t *crash = sl_wisun_crash_handler_read();
+
+  if (crash) {
+    switch (crash->type) {
+      case SL_WISUN_CRASH_TYPE_ASSERT:
+        sprintf(crash_buff, "ASSERT in %s on line %u", crash->u.assert.file, crash->u.assert.line);
+        break;
+      case SL_WISUN_CRASH_TYPE_RAIL_ASSERT:
+        sprintf(crash_buff, "RAIL ASSERT %lu", crash->u.rail_assert.error_code);
+        break;
+      case SL_WISUN_CRASH_TYPE_STACK_OVERFLOW:
+        sprintf(crash_buff, "STACK OVERFLOW failure in task \"%s\"", crash->u.stack_overflow.task);
+        break;
+      case SL_WISUN_CRASH_TYPE_STACK_PROTECTOR:
+        sprintf(crash_buff, "STACK PROTECTOR failure in 0x%08lx", crash->u.stack_protector.lr);
+        break;
+      case SL_WISUN_CRASH_TYPE_FAULT:
+        sprintf(crash_buff, "FAULT CFSR: 0x%08lx, R0: 0x%08lx, R1: 0x%08lx, R2: 0x%08lx, R3: 0x%08lx "
+                            "R12: 0x%08lx, LR: 0x%08lx, RET: 0x%08lx, XPSR: 0x%08lx "
+                            "HFSR: 0x%08lx, MMFAR: 0x%08lx, BFAR: 0x%08lx, AFSR: 0x%08lx",
+                            crash->u.fault.cfsr, crash->u.fault.r0, crash->u.fault.r1, crash->u.fault.r2, crash->u.fault.r3,
+                            crash->u.fault.r12, crash->u.fault.lr, crash->u.fault.return_address, crash->u.fault.xpsr,
+                            crash->u.fault.hfsr, crash->u.fault.mmfar, crash->u.fault.bfar, crash->u.fault.afsr);
+        break;
+      case SL_WISUN_CRASH_TYPE_CRUN_ERROR:
+        sprintf(crash_buff, "C-RUN error 0x%08lx", crash->u.crun_error.error_code);
+        break;
+      case SL_WISUN_CRASH_TYPE_EXIT:
+        sprintf(crash_buff, "EXIT status %d", crash->u.exit.status);
+        break;
+      default:
+        break;
+    }
+    printf("%s", crash_buff);
+    sl_wisun_trace_error("%s", crash_buff);
+  }
+  sl_wisun_crash_handler_clear();
+}
 
 #ifdef SL_CATALOG_POWER_MANAGER_PRESENT
 #define EM_EVENT_MASK_ALL  (SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM0   \
@@ -364,6 +407,7 @@ static void app_cli_task(void *argument)
 {
   (void)argument;
 
+  app_check_crash();
   if (app_settings_app.autoconnect) {
     app_join((sl_wisun_phy_config_type_t)app_settings_wisun.phy_config_type);
   }
@@ -381,6 +425,8 @@ void app_cli_init(void)
 #else
   printf("Wi-SUN CLI Application\r\n");
 #endif
+
+  sl_wisun_crash_handler_init();
 
   // Initialize socket entry lists
   sl_slist_init(&app_socket_entry_list_free);
@@ -855,6 +901,9 @@ void sl_wisun_on_event(sl_wisun_evt_t *evt)
       break;
     case SL_WISUN_MSG_DIRECT_CONNECT_LINK_STATUS_IND_ID:
       app_handle_direct_connect_link_status_ind(evt);
+      break;
+    case SL_WISUN_MSG_LOGGER_EVENT_IND_ID:
+      app_handle_event_logger_ind(evt);
       break;
     default:
       printf("[Unknown event: %d]\r\n", evt->header.id);

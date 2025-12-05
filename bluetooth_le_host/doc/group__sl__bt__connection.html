@@ -1303,7 +1303,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p >Set the transmit power of a connection. The application must include component bluetooth_feature_user_power_control in order to use this command for controlling the transmit power of the connection at application level. This command is unavailable if the standard Bluetooth feature LE power control (component bluetooth_feature_power_control) is used by the application.</p>
-<p >The actual selected power level is returned from this command. The value may be different than the requested one because of Bluetooth feature restrictions or radio characteristics.</p>
+<p >The actual selected power level is returned from this command. The value may be different than the requested one because of system-wide TX power setting by the application, Bluetooth feature restrictions, or radio characteristics.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">connection</td><td>The connection handle </td></tr>

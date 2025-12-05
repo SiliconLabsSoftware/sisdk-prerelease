@@ -1,6 +1,6 @@
 {
   "fileFormat": 2,
-  "featureLevel": 103,
+  "featureLevel": 106,
   "creator": "zap",
   "keyValuePairs": [
     {
@@ -31,18 +31,11 @@
   "package": [
     {
       "pathRelativity": "relativeToZap",
-      "path": "../../../../../../../../../app/zcl/zcl-zap.json",
+      "path": "../../../../../../../../../../../Downloads/zap-mac-arm64/zap.app/Contents/Resources/app.asar/zcl-builtin/silabs/zcl.json",
       "type": "zcl-properties",
       "category": "zigbee",
       "version": 1,
-      "description": "Zigbee Silabs ZCL data"
-    },
-    {
-      "pathRelativity": "relativeToZap",
-      "path": "../../../../../gen-template/gen-templates.json",
-      "type": "gen-templates-json",
-      "category": "zigbee",
-      "version": "zigbee-v0"
+      "description": "ZigbeePro test data"
     }
   ],
   "endpointTypes": [
@@ -53,14 +46,16 @@
         "code": 260,
         "profileId": 260,
         "label": "LO-dimmerswitch",
-        "name": "LO-dimmerswitch"
+        "name": "LO-dimmerswitch",
+        "deviceTypeOrder": 0
       },
       "deviceTypes": [
         {
           "code": 260,
           "profileId": 260,
           "label": "LO-dimmerswitch",
-          "name": "LO-dimmerswitch"
+          "name": "LO-dimmerswitch",
+          "deviceTypeOrder": 0
         }
       ],
       "deviceVersions": [
@@ -832,7 +827,6 @@
               "isEnabled": 1
             }
           ],
-
           "attributes": [
             {
               "name": "cluster revision",
@@ -967,6 +961,148 @@
               "reportableChange": 0
             }
           ]
+        },
+        {
+          "name": "Poll Control",
+          "code": 32,
+          "mfgCode": null,
+          "define": "POLL_CONTROL_CLUSTER",
+          "side": "server",
+          "enabled": 1,
+          "commands": [
+            {
+              "name": "CheckIn",
+              "code": 0,
+              "mfgCode": null,
+              "source": "server",
+              "isIncoming": 0,
+              "isEnabled": 1
+            },
+            {
+              "name": "CheckInResponse",
+              "code": 0,
+              "mfgCode": null,
+              "source": "client",
+              "isIncoming": 1,
+              "isEnabled": 1
+            },
+            {
+              "name": "FastPollStop",
+              "code": 1,
+              "mfgCode": null,
+              "source": "client",
+              "isIncoming": 1,
+              "isEnabled": 1
+            }
+          ],
+          "attributes": [
+            {
+              "name": "check-in interval",
+              "code": 0,
+              "mfgCode": null,
+              "side": "server",
+              "type": "int32u",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x00003840",
+              "reportable": 0,
+              "minInterval": 1,
+              "maxInterval": 65534,
+              "reportableChange": 0
+            },
+            {
+              "name": "long poll interval",
+              "code": 1,
+              "mfgCode": null,
+              "side": "server",
+              "type": "int32u",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x00000014",
+              "reportable": 0,
+              "minInterval": 1,
+              "maxInterval": 65534,
+              "reportableChange": 0
+            },
+            {
+              "name": "short poll interval",
+              "code": 2,
+              "mfgCode": null,
+              "side": "server",
+              "type": "int16u",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x0002",
+              "reportable": 0,
+              "minInterval": 1,
+              "maxInterval": 65534,
+              "reportableChange": 0
+            },
+            {
+              "name": "fast poll timeout",
+              "code": 3,
+              "mfgCode": null,
+              "side": "server",
+              "type": "int16u",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x0028",
+              "reportable": 0,
+              "minInterval": 1,
+              "maxInterval": 65534,
+              "reportableChange": 0
+            },
+            {
+              "name": "cluster revision",
+              "code": 65533,
+              "mfgCode": null,
+              "side": "server",
+              "type": "int16u",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "3",
+              "reportable": 0,
+              "minInterval": 1,
+              "maxInterval": 65534,
+              "reportableChange": 0
+            }
+          ]
+        },
+        {
+          "name": "Keep-Alive",
+          "code": 37,
+          "mfgCode": null,
+          "define": "KEEPALIVE_CLUSTER",
+          "side": "client",
+          "enabled": 1,
+          "attributes": [
+            {
+              "name": "cluster revision",
+              "code": 65533,
+              "mfgCode": null,
+              "side": "client",
+              "type": "int16u",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 1,
+              "bounded": 0,
+              "defaultValue": "0x0001",
+              "reportable": 0,
+              "minInterval": 1,
+              "maxInterval": 65534,
+              "reportableChange": 0
+            }
+          ]
         }
       ]
     },
@@ -977,14 +1113,16 @@
         "code": 2064,
         "profileId": 260,
         "label": "ZLL-colorsceneremote",
-        "name": "ZLL-colorsceneremote"
+        "name": "ZLL-colorsceneremote",
+        "deviceTypeOrder": 0
       },
       "deviceTypes": [
         {
           "code": 2064,
           "profileId": 260,
           "label": "ZLL-colorsceneremote",
-          "name": "ZLL-colorsceneremote"
+          "name": "ZLL-colorsceneremote",
+          "deviceTypeOrder": 0
         }
       ],
       "deviceVersions": [
@@ -1325,7 +1463,7 @@
           "side": "client",
           "enabled": 1,
           "commands": [
-        {
+            {
               "name": "AddGroup",
               "code": 0,
               "mfgCode": null,
@@ -1777,7 +1915,7 @@
           "side": "client",
           "enabled": 1,
           "commands": [
-        {
+            {
               "name": "MoveToColor",
               "code": 7,
               "mfgCode": null,

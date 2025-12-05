@@ -55,7 +55,7 @@ library:
   - arm32v7
   - zigbee_stack_unix
   - zigbee_multi_network
-  - linux_arch_32
+  - linux_arch_arm32v7
   unless:
   - zigbee_i386
 - path: build/gcc/arm32v7/zigbee-xncp/release_singlenetwork/libzigbee-xncp.a
@@ -63,7 +63,7 @@ library:
   - toolchain_gcc
   - arm32v7
   - zigbee_stack_unix
-  - linux_arch_32
+  - linux_arch_arm32v7
   unless:
   - zigbee_multi_network
   - zigbee_i386
@@ -73,7 +73,7 @@ library:
   - arm64v8
   - zigbee_stack_unix
   - zigbee_multi_network
-  - linux_arch_64
+  - linux_arch_aarch64
   unless:
   - zigbee_x86_64
   - zigbee_aarch64_cortex_a72_gcc_12_3_0_musl
@@ -82,7 +82,7 @@ library:
   - toolchain_gcc
   - arm64v8
   - zigbee_stack_unix
-  - linux_arch_64
+  - linux_arch_aarch64
   unless:
   - zigbee_multi_network
   - zigbee_x86_64

@@ -167,7 +167,6 @@ void esl_lib_deinit(void)
 
   esl_lib_memory_free(ap_state);
 
-  ncp_host_deinit();
   send_shutdown_ready_event();
 }
 

@@ -10,4 +10,4 @@ description=Wi-SUN RCP Application
 prop.subLabel=Wi-SUN\\ RCP\\ Application
 
 # List of relative file paths to template xml files in this extension
-prop.file.templatesFile=wisun_production_templates.xml
+prop.file.templatesFile=wisun_rcp_templates.xml

@@ -163,6 +163,7 @@ tag:
   - hwfilter:board:hardware:has:microphone
   - hwfilter:!board:hardware:shares:button:led
   - hwfilter:!board:brd4184a
+  - hwfilter:ram:32k
 
 ui_hints:
   highlight:

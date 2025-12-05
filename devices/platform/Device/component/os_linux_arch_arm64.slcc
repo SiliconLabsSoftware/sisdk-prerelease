@@ -11,7 +11,6 @@ requires:
 - name: linux
 provides:
 - name: linux_arch
-- name: linux_arch_64
 - name: linux_arch_aarch64
 - name: aarch64
 tag:

@@ -119,6 +119,7 @@ tag:
   - hwfilter:board:simple_led:led0
   - hwfilter:!board:simple_button:btn1
   - hwfilter:!board:hardware_board_supports_wstk_lcd
+  - hwfilter:ram:32k
 
 ui_hints:
   highlight:

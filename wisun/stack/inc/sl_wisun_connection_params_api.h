@@ -544,7 +544,7 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_CERTIF = {
     .lgtk_max_mismatch_m = 60,
     .sec_prot_trickle_expirations = 0,
     .initial_key_retry_limit = 3,
-    .allow_skip = false
+    .allow_skip = true
   },
   .rpl = {
     .dao_txalg = {

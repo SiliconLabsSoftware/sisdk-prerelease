@@ -81,7 +81,7 @@ typedef enum {
   ZIGBEE = 5, /*!< Zigbee protocol */
   ZWAVE = 6, /*!< Z-Wave protocol */
   WISUN = 7, /*!< Wi-SUN protocol, FAN 1.0 and FAN 1.1 with OFDM */
-  BTC = 8, /*!< BTC protocol */
+  BPSK = 8, /*!< BPSK protocol */
   SIDEWALK = 9, /*!< Sidewalk protocol */
   LONGRANGE = 10, /*!< Long-range protocol */
   MBUS = 11, /*!< Wireless M-Bus protocol */

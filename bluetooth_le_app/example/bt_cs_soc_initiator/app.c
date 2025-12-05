@@ -848,7 +848,7 @@ static void cs_on_error(uint8_t conn_handle, cs_error_event_t err_evt, sl_status
                  (unsigned long)sc);
       }
       break;
-    
+
     case CS_ERROR_EVENT_RAS_CLIENT_REALTIME_RECEIVE_FAILED:
       log_error(APP_INSTANCE_PREFIX "RAS reception error!"
                                     "[E: 0x%x sc: 0x%lx]" NL,
@@ -876,7 +876,8 @@ static void cs_on_error(uint8_t conn_handle, cs_error_event_t err_evt, sl_status
       // If closing the connection fails no connnection_closed event will be received
       // so we need to restart scanning here if needed
       if (status != SL_STATUS_OK) {
-        (void)ble_peer_manager_central_create_connection();
+        sc = ble_peer_manager_central_create_connection();
+        app_assert_status(sc);
         app_log_info(APP_PREFIX "Scanning restarted for new reflector connections..." NL);
       }
       break;
@@ -1114,7 +1115,8 @@ void ble_peer_manager_on_event_initiator(ble_peer_manager_evt_type_t * event)
       }
       delete_initiator_instance(event->connection_id);
       // Restart scanning for new reflector connections
-      (void)ble_peer_manager_central_create_connection();
+      sc = ble_peer_manager_central_create_connection();
+      app_assert_status(sc);
       cs_initiator_display_start_scanning();
       log_info(APP_PREFIX "Scanning started for reflector connections..." NL);
       break;

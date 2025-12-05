@@ -54,6 +54,19 @@ extern "C" {
 #define ZW_TX_POWER_140_DDBM  140
 #define ZW_TX_POWER_200_DDBM  200
 
+/**
+ * @deprecated use ZW_TX_POWER_100_DDBM instead
+ */
+#define ZWAVE_TX_POWER_10DBM  ZW_TX_POWER_100_DDBM
+/**
+ * @deprecated use ZW_TX_POWER_140_DDBM instead
+ */
+#define ZWAVE_TX_POWER_14DBM  ZW_TX_POWER_140_DDBM
+/**
+ * @deprecated use ZW_TX_POWER_200_DDBM instead
+ */
+#define ZWAVE_TX_POWER_20DBM  ZW_TX_POWER_200_DDBM
+
 #define ZPAL_RADIO_STAY_AWAKE_ALWAYS UINT32_MAX
 
 /**
@@ -78,6 +91,10 @@ typedef uint16_t node_id_t;
 typedef int16_t zpal_tx_power_decidbm_t;
 /// definition for maximum output power to use with zpal_tx_power_decidbm_t.
 #define ZPAL_TX_POWER_DECIDBM_MAX   0x7FFF
+/**
+ * @deprecated use zpal_tx_power_decidbm_t instead
+ */
+typedef zpal_tx_power_decidbm_t zpal_tx_power_t;
 
 /**
  * @brief Parameter type to store stay awake ids.
@@ -201,7 +218,6 @@ typedef enum {
 
 /**
  * @brief Enumeration containing Tx power settings.
- * WARNING: this enum is converted into decidbm as it is a dbm integer instead of enum.
  *
  */
 typedef enum {

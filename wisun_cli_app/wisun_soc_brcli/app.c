@@ -41,6 +41,7 @@
 #include "sl_select_util.h"
 #include "select.h"
 #include "sl_main_init.h"
+#include "sl_wisun_crash_handler.h"
 
 #if defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT)
 #include "os.h"
@@ -282,6 +283,48 @@ static app_socket_entry_t app_socket_entries[APP_MAX_SOCKET_ENTRIES];
 
 static bool app_started;
 static int app_dhcpv6_socket = SOCKET_INVALID_ID;
+static char crash_buff[300] = { 0 };
+
+static void app_check_crash(void)
+{
+  const sl_wisun_crash_t *crash = sl_wisun_crash_handler_read();
+
+  if (crash) {
+    switch (crash->type) {
+      case SL_WISUN_CRASH_TYPE_ASSERT:
+        sprintf(crash_buff, "ASSERT in %s on line %u", crash->u.assert.file, crash->u.assert.line);
+        break;
+      case SL_WISUN_CRASH_TYPE_RAIL_ASSERT:
+        sprintf(crash_buff, "RAIL ASSERT %lu", crash->u.rail_assert.error_code);
+        break;
+      case SL_WISUN_CRASH_TYPE_STACK_OVERFLOW:
+        sprintf(crash_buff, "STACK OVERFLOW failure in task \"%s\"", crash->u.stack_overflow.task);
+        break;
+      case SL_WISUN_CRASH_TYPE_STACK_PROTECTOR:
+        sprintf(crash_buff, "STACK PROTECTOR failure in 0x%08lx", crash->u.stack_protector.lr);
+        break;
+      case SL_WISUN_CRASH_TYPE_FAULT:
+        sprintf(crash_buff, "FAULT CFSR: 0x%08lx, R0: 0x%08lx, R1: 0x%08lx, R2: 0x%08lx, R3: 0x%08lx "
+                            "R12: 0x%08lx, LR: 0x%08lx, RET: 0x%08lx, XPSR: 0x%08lx "
+                            "HFSR: 0x%08lx, MMFAR: 0x%08lx, BFAR: 0x%08lx, AFSR: 0x%08lx",
+                            crash->u.fault.cfsr, crash->u.fault.r0, crash->u.fault.r1, crash->u.fault.r2, crash->u.fault.r3,
+                            crash->u.fault.r12, crash->u.fault.lr, crash->u.fault.return_address, crash->u.fault.xpsr,
+                            crash->u.fault.hfsr, crash->u.fault.mmfar, crash->u.fault.bfar, crash->u.fault.afsr);
+        break;
+      case SL_WISUN_CRASH_TYPE_CRUN_ERROR:
+        sprintf(crash_buff, "C-RUN error 0x%08lx", crash->u.crun_error.error_code);
+        break;
+      case SL_WISUN_CRASH_TYPE_EXIT:
+        sprintf(crash_buff, "EXIT status %d", crash->u.exit.status);
+        break;
+      default:
+        break;
+    }
+    printf("%s", crash_buff);
+    sl_wisun_trace_error("%s", crash_buff);
+  }
+  sl_wisun_crash_handler_clear();
+}
 
 static void app_handle_join_state_ind(sl_wisun_evt_t *evt)
 {
@@ -1662,6 +1705,8 @@ static void app_task(void *argument)
 
   printf("%s\r\n", app_name);
 
+  app_check_crash();
+
 #ifdef SL_CATALOG_WISUN_BR_LWIP_PRESENT
   sl_wisun_br_set_ipv6_up_handler(sl_wisun_br_lwip_pan_input);
   sl_wisun_br_lwip_init();
@@ -1727,6 +1772,8 @@ void app_init(void)
     0
   };
   int i;
+
+  sl_wisun_crash_handler_init();
 
   // Initialize socket entry lists
   sl_slist_init(&app_socket_entry_list_free);

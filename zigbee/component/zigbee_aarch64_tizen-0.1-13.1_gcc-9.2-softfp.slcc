@@ -11,7 +11,7 @@ provides:
 - name: zigbee_aarch64_tizen-0.1-13.1_gcc-9.2-softfp
 
 requires:
-- name: linux_arch_64
+- name: linux_arch_aarch64
 
 template_contribution:
 - name: component_catalog

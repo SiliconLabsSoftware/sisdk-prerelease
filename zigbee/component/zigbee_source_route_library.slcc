@@ -92,7 +92,7 @@ library:
   - zigbee_ncp
   - zigbee_stack_unix
   - zigbee_multi_network
-  - linux_arch_32
+  - linux_arch_arm32v7
   unless:
   - zigbee_i386
 - path: build/gcc/arm32v7/ncp-source-route-library/release_singlenetwork/libncp-source-route-library.a
@@ -101,7 +101,7 @@ library:
   - arm32v7
   - zigbee_ncp
   - zigbee_stack_unix
-  - linux_arch_32
+  - linux_arch_arm32v7
   unless:
   - zigbee_multi_network
   - zigbee_i386
@@ -111,7 +111,7 @@ library:
   - arm32v7
   - zigbee_stack_unix
   - zigbee_multi_network
-  - linux_arch_32
+  - linux_arch_arm32v7
   unless:
   - zigbee_i386
 - path: build/gcc/arm32v7/zigbee-source-route/release_singlenetwork/libzigbee-source-route.a
@@ -119,7 +119,7 @@ library:
   - toolchain_gcc
   - arm32v7
   - zigbee_stack_unix
-  - linux_arch_32
+  - linux_arch_arm32v7
   unless:
   - zigbee_multi_network
   - zigbee_i386
@@ -130,7 +130,7 @@ library:
   - zigbee_ncp
   - zigbee_stack_unix
   - zigbee_multi_network
-  - linux_arch_64
+  - linux_arch_aarch64
   unless:
   - zigbee_x86_64
   - zigbee_aarch64_cortex_a72_gcc_12_3_0_musl
@@ -140,7 +140,7 @@ library:
   - arm64v8
   - zigbee_ncp
   - zigbee_stack_unix
-  - linux_arch_64
+  - linux_arch_aarch64
   unless:
   - zigbee_multi_network
   - zigbee_x86_64
@@ -151,7 +151,7 @@ library:
   - arm64v8
   - zigbee_stack_unix
   - zigbee_multi_network
-  - linux_arch_64
+  - linux_arch_aarch64
   unless:
   - zigbee_x86_64
   - zigbee_aarch64_cortex_a72_gcc_12_3_0_musl
@@ -160,7 +160,7 @@ library:
   - toolchain_gcc
   - arm64v8
   - zigbee_stack_unix
-  - linux_arch_64
+  - linux_arch_aarch64
   unless:
   - zigbee_multi_network
   - zigbee_x86_64

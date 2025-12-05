@@ -74,3 +74,4 @@ tag:
   - hwfilter:device:device_series_2
   - hwfilter:device:device_supports_bluetooth_cte
   - hwfilter:device:device_supports_bluetooth_iq_sampling
+  - hwfilter:ram:32k

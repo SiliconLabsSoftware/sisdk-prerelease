@@ -35,6 +35,10 @@
 #include <openthread/cli.h>
 #include <openthread/instance.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+  
 #if SL_OPENTHREAD_MULTI_INSTANCE_CLI_ENABLE
 
 /**
@@ -80,4 +84,9 @@ void sl_ot_switch_to_instance_index(uint8_t aInstanceIndex);
 bool sl_ot_should_change_instance(void);
 
 #endif // SL_OPENTHREAD_MULTI_INSTANCE_CLI_ENABLE
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
+
 #endif // MULTI_INSTANCE_CLI_H

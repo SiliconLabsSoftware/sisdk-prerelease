@@ -241,3 +241,6 @@ filter:
     value: [Host]
   - name: Project Difficulty
     value: [Advanced]
+
+tag:
+  - hwfilter:device:device_family_host

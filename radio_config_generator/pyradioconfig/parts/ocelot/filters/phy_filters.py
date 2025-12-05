@@ -11,6 +11,7 @@ class PhyFilters(IPhyFilter):
     # Studio white list (these PHYs show in Studio as proprietary starting points)
     simplicity_studio_phy_groups = [
         'Phys_Studio_IEEE802154',
+        'Phys_Studio_IEEE802154_BPSK',
         'phys_studio_wisun_han',
         'Phys_Studio_Sidewalk',
         'Phys_Studio_Sigfox_TX',

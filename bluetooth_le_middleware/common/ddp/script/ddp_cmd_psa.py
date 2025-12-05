@@ -40,10 +40,6 @@ class CommandList:
 
 @dataclass
 class KeyAtt:
-    # Lifetime of the key as psa_key_type_t
-    lifetime: int
-    # Location of the key as psa_key_location_t
-    location: int
     # Permitted usage of the key as psa_key_usage_t
     usage_flags: int
     # Length of key in bits
@@ -92,7 +88,7 @@ class CommandPsaKeyGen(Command):
         return super().__new__(
             cls,
             CommandList.SL_DDP_CMD_PSA_KEY_GEN,
-            struct.pack('<LLLLLHL', att.lifetime, att.location, att.usage_flags, att.bits, att.algo, att.key_type, att.key_id)
+            struct.pack('<LLLHL', att.usage_flags, att.bits, att.algo, att.key_type, att.key_id)
         )
 
 class ResponsePsaKeyGen(Response):
@@ -117,7 +113,7 @@ class CommandPsaKeyInj(Command):
         return super().__new__(
             cls,
             CommandList.SL_DDP_CMD_PSA_KEY_INJ,
-            struct.pack('<LLLLLHLL', att.lifetime, att.location, att.usage_flags, att.bits, att.algo, att.key_type, att.key_id, len(key)) + key
+            struct.pack('<LLLHLL', att.usage_flags, att.bits, att.algo, att.key_type, att.key_id, len(key)) + key
         )
 
 class ResponsePsaKeyInj(Response):
@@ -143,5 +139,5 @@ class ResponsePsaGetAtt(Response):
         super().__init__(data)
         self.key_att = None
         if self.status == 0:
-            format = '<LLLLLHL'
+            format = '<LLLHL'
             self.key_att = KeyAtt(*struct.unpack(format, self.body[:struct.calcsize(format)]))

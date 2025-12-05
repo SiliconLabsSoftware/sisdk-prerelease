@@ -45,25 +45,25 @@ config_file:
   condition:
   - device_series_2
   - device_sdid_215
-  file_id: sl_rail_util_coex_config
+  file_id: rail_util_coex_config
 - path: plugin/coexistence/config/efr32xg26/sl_rail_util_coex_config.h
   condition:
   - device_series_2
   - device_sdid_225
-  file_id: sl_rail_util_coex_config
+  file_id: rail_util_coex_config
 - path: plugin/coexistence/config/efr32xg2x/sl_rail_util_coex_config.h
   condition:
   - device_series_2
   unless:
   - device_sdid_215
   - device_sdid_225
-  file_id: sl_rail_util_coex_config
+  file_id: rail_util_coex_config
 - path: plugin/coexistence/config/sixg301/sl_rail_util_coex_config.h
   condition:
   - device_generic_family_sixx301
-  file_id: sl_rail_util_coex_config
+  file_id: rail_util_coex_config
 - path: plugin/coexistence/config/sl_rail_util_coex_common_config.h
-  file_id: sl_rail_util_coex_common_config
+  file_id: rail_util_coex_common_config
 include:
 - path: plugin
 - path: plugin/coexistence/common

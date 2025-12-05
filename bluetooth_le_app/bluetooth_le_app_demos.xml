@@ -1430,17 +1430,6 @@
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
-  <demo name="brd2601b.demo.bt_ncp_esl_ap" label="Bluetooth - NCP ESL Access Point">
-    <model:description>Network Co-Processor (NCP) target application with additional features to support the Electronic Shelf Label Profile ESL Access Point role. Note: Some BLE features unused by the ESL Access Point are removed compared to the NCP target application.
-</model:description>
-    <property key="demos.blurb" value="Bluetooth - NCP ESL Access Point"/>
-    <property key="core.partCompatibility" value=".*"/>
-    <property key="core.boardCompatibility" value="brd2601b"/>
-    <property key="demos.imageFile" value="studio/demo_files/brd2601b/bt_ncp_esl_ap-brd2601b.s37"/>
-    <property key="core.readmeFiles" value="example/bt_ncp/readme.md"/>
-    <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
-    <property key="core.quality" value="PRODUCTION"/>
-  </demo>
   <demo name="brd2602a.demo.bt_ncp_esl_ap" label="Bluetooth - NCP ESL Access Point">
     <model:description>Network Co-Processor (NCP) target application with additional features to support the Electronic Shelf Label Profile ESL Access Point role. Note: Some BLE features unused by the ESL Access Point are removed compared to the NCP target application.
 </model:description>

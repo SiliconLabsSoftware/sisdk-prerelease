@@ -22,6 +22,7 @@ class PhyFilters(IPhyFilter):
         'Phys_Studio_IEEE802154',
         'Phys_Studio_BLE',
         'Phys_Studio_Sigfox_TX',
+        'Phys_Studio_IEEE802154_BPSK',
     ]
 
     # Special designation for simulation PHYs

@@ -40,7 +40,8 @@
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif
-#ifdef SL_CATALOG_NVM3_DEFAULT_PRESENT
+#if (SL_RAIL_UTIL_RSSI_SUPPORTS_NVM_DATA \
+     && defined(SL_CATALOG_NVM3_DEFAULT_PRESENT))
 #include "nvm3_default.h"
 #endif
 
@@ -376,7 +377,8 @@ void getRssiOffset(sl_cli_command_arg_t *args)
   // NVM RSSI offset
   int8_t nvmRssiOffset = sl_rail_util_read_nvm_rssi();
   char *nvmToken;
-#ifdef SL_CATALOG_NVM3_DEFAULT_PRESENT
+#if (SL_RAIL_UTIL_RSSI_SUPPORTS_NVM_DATA \
+     && defined(SL_CATALOG_NVM3_DEFAULT_PRESENT))
   char nvmTokenContent[sizeof("invalid_0xffffffff\0")];
   uint32_t obj_type;
   size_t obj_size;
@@ -436,7 +438,8 @@ void setRssiOffset(sl_cli_command_arg_t *args)
       break;
     case 'n': // nvm
       if (rssiOffset == -128) { // erase the token
-#ifdef SL_CATALOG_NVM3_DEFAULT_PRESENT
+#if (SL_RAIL_UTIL_RSSI_SUPPORTS_NVM_DATA \
+     && defined(SL_CATALOG_NVM3_DEFAULT_PRESENT))
         // No API for this, so use native NVM3 APIs
         status = (RAIL_Status_t)nvm3_deleteObject(nvm3_defaultHandle,
                                                   SL_RAIL_UTIL_RSSI_NVM_DATA_TAG);

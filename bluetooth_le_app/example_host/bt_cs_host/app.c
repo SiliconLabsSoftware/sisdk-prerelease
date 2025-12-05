@@ -1260,7 +1260,8 @@ static void on_connection_closed(uint8_t conn_handle)
       }
 
       // Restart scanning for new reflector connections
-      (void)ble_peer_manager_central_create_connection();
+      sc = ble_peer_manager_central_create_connection();
+      app_assert_status(sc);
       app_log_info(APP_PREFIX "Scanning restarted for new reflector connections..." APP_LOG_NL);
 
       cs_host_state.num_reflector_connections--;
@@ -1672,7 +1673,8 @@ static void cs_on_error(uint8_t conn_handle, cs_error_event_t err_evt, sl_status
       // If closing the connection fails no connnection_closed event will be received
       // so we need to restart scanning here if needed
       if (status != SL_STATUS_OK) {
-        (void)ble_peer_manager_central_create_connection();
+        sc = ble_peer_manager_central_create_connection();
+        app_assert_status(sc);
         app_log_info(APP_PREFIX "Scanning restarted for new reflector connections..." APP_LOG_NL);
       }
       break;

@@ -31,11 +31,17 @@
 #include <string.h>
 #include "sl_common.h"
 #include "psa/crypto.h"
+#include "psa/crypto_types.h"
 #include "psa_crypto_its.h"
 #include "sl_ddp_types.h"
 
 // -----------------------------------------------------------------------------
 // Definitions
+
+#define PSA_KEY_LIFETIME                                              \
+  PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(                     \
+    PSA_KEY_LIFETIME_PERSISTENT,                                      \
+    KEY_LOCATION)
 
 // Input structure of DDP PSA ITS set command
 SL_PACK_START(1)
@@ -56,8 +62,6 @@ SL_PACK_END()
 // Input structure of DDP command for generating a PSA Crypto key
 SL_PACK_START(1)
 typedef struct {
-  uint32_t lifetime; // Lifetime of the key as psa_key_lifetime_t
-  uint32_t location; // Location of the key as psa_key_location_t
   uint32_t usage_flags; // Permitted usage of the key as psa_key_usage_t
   uint32_t bits; // Length of key in bits
   uint32_t algo; // Permitted algorithms of the key as psa_algorithm_t
@@ -79,8 +83,6 @@ SL_PACK_END()
 // Input structure of DDP command for injecting a PSA Crypto key
 SL_PACK_START(1)
 typedef struct {
-  uint32_t lifetime; // Lifetime of the key as psa_key_lifetime_t
-  uint32_t location; // Location of the key as psa_key_location_t
   uint32_t usage_flags; // Permitted usage of the key as psa_key_usage_t
   uint32_t bits; // Length of key in bits
   uint32_t algo; // Permitted algorithms of the key as psa_algorithm_t
@@ -101,8 +103,6 @@ SL_PACK_END()
 // Output structure of DDP command PSA key get attribute
 SL_PACK_START(1)
 typedef struct {
-  uint32_t lifetime; // Lifetime of the key as psa_key_lifetime_t
-  uint32_t location; // Location of the key as psa_key_location_t
   uint32_t usage_flags; // Permitted usage of the key as psa_key_usage_t
   uint32_t bits; // Length of key in bits
   uint32_t algo; // Permitted algorithms of the key as psa_algorithm_t
@@ -209,8 +209,7 @@ int sl_ddp_cmd_psa_key_gen(const uint8_t *input,
   }
 
   key_attr = psa_key_attributes_init();
-  psa_set_key_lifetime(&key_attr, PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION((psa_key_lifetime_t)(req->lifetime),
-                                                                                 (psa_key_location_t)(req->location)));
+  psa_set_key_lifetime(&key_attr, PSA_KEY_LIFETIME);
   psa_set_key_usage_flags(&key_attr, (psa_key_usage_t)(req->usage_flags));
   psa_set_key_bits(&key_attr, (size_t)(req->bits));
   psa_set_key_algorithm(&key_attr, (psa_algorithm_t)(req->algo));
@@ -272,8 +271,7 @@ int sl_ddp_cmd_psa_key_inj(const uint8_t *input,
   }
 
   key_attr = psa_key_attributes_init();
-  psa_set_key_lifetime(&key_attr, PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION((psa_key_lifetime_t)(req->lifetime),
-                                                                                 (psa_key_location_t)(req->location)));
+  psa_set_key_lifetime(&key_attr, PSA_KEY_LIFETIME);
   psa_set_key_usage_flags(&key_attr, (psa_key_usage_t)(req->usage_flags));
   psa_set_key_bits(&key_attr, (size_t)(req->bits));
   psa_set_key_algorithm(&key_attr, (psa_algorithm_t)(req->algo));
@@ -323,8 +321,6 @@ int sl_ddp_cmd_psa_key_get_att(const uint8_t *input,
     return (int)status;
   }
 
-  rsp->lifetime =     (uint32_t)psa_get_key_lifetime(&key_attr);
-  rsp->location =     (uint32_t)PSA_KEY_LIFETIME_GET_LOCATION(key_attr.MBEDTLS_PRIVATE(lifetime));
   rsp->usage_flags =  (uint32_t)psa_get_key_usage_flags(&key_attr);
   rsp->bits =         (uint32_t)psa_get_key_bits(&key_attr);
   rsp->algo =         (uint32_t)psa_get_key_algorithm(&key_attr);

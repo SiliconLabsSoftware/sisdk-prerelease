@@ -10,4 +10,4 @@ description=Wi-SUN CLI Application
 prop.subLabel=Wi-SUN\\ CLI\\ Application
 
 # List of relative file paths to template xml files in this extension
-prop.file.templatesFile=wisun_production_templates.xml
+prop.file.templatesFile=wisun_cli_templates.xml

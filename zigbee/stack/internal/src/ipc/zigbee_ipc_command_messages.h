@@ -315,6 +315,8 @@ typedef struct {
     sli_mac_stack_test_set_nwk_radio_params_eui_ipc_msg_t test_set_nwk_radio_params_eui;
     sli_mac_stack_test_set_tx_power_ipc_msg_t test_set_tx_power;
     sli_zigbee_stack_bdb_tclk_max_exchange_attempts_ipc_msg_t bdb_tclk_max_exchange_attempts;
+    slxi_zigbee_stack_change_pan_id_now_ipc_msg_t change_pan_id_now;
+    slxi_zigbee_stack_network_send_command_ipc_msg_t network_send_command;
     sli_zigbee_stack_request_link_key_with_option_encrypt_ipc_msg_t request_link_key_with_option_encrypt;
     sli_zigbee_stack_send_aps_ack_ipc_msg_t send_aps_ack;
     sli_zigbee_stack_set_end_device_poll_timeout_ipc_msg_t set_end_device_poll_timeout;

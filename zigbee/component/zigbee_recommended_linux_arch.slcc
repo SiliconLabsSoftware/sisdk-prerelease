@@ -9,10 +9,10 @@ provides:
 requires:
 - name: zigbee_arm32
   condition:
-  - linux_arch_32
+  - linux_arch_arm32v7
 - name: zigbee_arm64
   condition:
-  - linux_arch_64
+  - linux_arch_aarch64
 metadata:
   sbom:
     license: MSLA

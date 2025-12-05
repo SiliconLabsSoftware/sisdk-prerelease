@@ -46,8 +46,6 @@ recommends:
 template_contribution:
 - name: psa_crypto_config
   value: MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG
-    # PLATFORM_HYD-5151
-  unless: [device_generic_family_sixx353, device_family_sixg300xiwifi74000]
 
 metadata:
   sbom:

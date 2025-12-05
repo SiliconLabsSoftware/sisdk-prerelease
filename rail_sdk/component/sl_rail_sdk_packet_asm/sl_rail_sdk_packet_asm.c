@@ -851,6 +851,73 @@ uint8_t *sl_rail_sdk_802154_packet_unpack_longrange_data_frame(const sl_rail_rx_
   return tmp;
 }
 
+int16_t sl_rail_sdk_802154_packet_pack_bpsk_data_frame(uint16_t payload_size,
+                                                       const uint8_t *payload,
+                                                       uint16_t *frame_size,
+                                                       uint8_t *frame_buffer)
+{
+  uint16_t frameLength = 0;
+  uint8_t fcsSizeByte = 2;
+  uint32_t phr = 0;
+  uint8_t phr_size = 1;
+
+  // Checking input parameters
+  if ((payload_size == 0)
+      || (payload == NULL)
+      || (frame_size == NULL)
+      || (frame_buffer == NULL)
+      || (payload_size > 127)) {
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
+    app_log_warning("sl_rail_sdk_802154_packet_pack_bpsk_data_frame ERR: parameter\r\n");
+#endif
+    return SL_RAIL_SDK_802154_PACKET_ERROR;
+  }
+
+  *frame_size = payload_size + phr_size;
+  frameLength = (*frame_size - phr_size + fcsSizeByte) & 0x7F;
+  phr = frameLength & 0x7F;
+
+  *frame_size = payload_size + phr_size;
+
+  // Write the phr in the payload
+  for (uint8_t index = 0; index < phr_size; index++) {
+    frame_buffer[index] = (uint8_t)((phr & (0xFF << index * 8)) >> index * 8);
+  }
+
+  for (uint8_t index = phr_size; index < *frame_size; index++) {
+    frame_buffer[index] = payload[index - phr_size];
+  }
+
+  // return SL_RAIL_SDK_802154_PACKET_OK if the frame is ready
+  return SL_RAIL_SDK_802154_PACKET_OK;
+}
+
+uint8_t *sl_rail_sdk_802154_packet_unpack_bpsk_data_frame(const sl_rail_rx_packet_info_t *packet_information,
+                                                          uint16_t *payload_size,
+                                                          uint8_t *frame_buffer)
+{
+  uint32_t phr = 0U;
+  uint8_t *tmp = frame_buffer;
+  uint8_t phr_size = 1U;
+  uint8_t fcsSizeByte = 2U;
+
+  if ((packet_information == NULL) || (frame_buffer == NULL) || (payload_size == NULL)) {
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
+    app_log_warning("sl_rail_sdk_802154_packet_unpack_bpsk_data_frame ERR: parameter\r\n");
+#endif
+    return NULL;
+  }
+
+  for (uint8_t index = 0; index < phr_size; index++) {
+    phr |= frame_buffer[index] << (index * 8);
+  }
+
+  *payload_size = (phr & 0x7F) - fcsSizeByte;
+  tmp += phr_size;
+
+  return tmp;
+}
+
 // -----------------------------------------------------------------------------
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------

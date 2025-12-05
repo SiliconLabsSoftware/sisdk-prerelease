@@ -37,6 +37,15 @@ source:
 define:
   # ITS should be encrypted
 - name: SLI_PSA_ITS_ENCRYPTED
+- name: KEY_LOCATION
+  value: "PSA_KEY_LOCATION_SLI_SE_OPAQUE"
+  condition:
+  - device_security_vault
+- name: KEY_LOCATION
+  value: "PSA_KEY_LOCATION_LOCAL_STORAGE"
+  unless:
+  - device_security_vault
+
 - name: SL_DDP_CMD_PSA_ITS_SET
   value: 2
 - name: SL_DDP_CMD_PSA_ITS_GET

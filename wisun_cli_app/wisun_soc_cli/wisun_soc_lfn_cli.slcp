@@ -39,6 +39,7 @@ source:
   - path: "app_cli.c"
   - path: "app_settings.c"
   - path: "app_event_log.c"
+  - path: "app_custom_cli_tick.c"
 
 include:
   - path: "."

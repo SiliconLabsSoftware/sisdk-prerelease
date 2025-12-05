@@ -20,6 +20,12 @@ APIs of this new module are:
 - `zw_shutdown_manager_release_lock` to release a lock
 - `zw_shutdown_manager_take_temporary_lock` to take a temporary lock for a given duration
 
+## TxPower type and definitions clarification
+Some type and definitions have been renamed to avoid confusion:
+pal_tx_power_t > zpal_tx_power_decidbm_t
+ZW_TX_POWER_xxDBM  > ZW_TX_POWER_xx0DDBM (10, 14 & 20)
+
+
 # 7.24.1 {#migrate-section-7-24-1}
 
 ## How to migrate the Wall Controller sample application

@@ -195,7 +195,6 @@ void app_deinit(void)
 {
   sl_status_t sc;
   app_log("Shutting down." APP_LOG_NL);
-  ncp_host_deinit();
   sc = mqtt_deinit(&mqtt_handle);
   app_assert_status(sc);
 

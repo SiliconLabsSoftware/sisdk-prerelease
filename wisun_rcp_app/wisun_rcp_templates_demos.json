@@ -1,0 +1,114 @@
+[
+    {
+        "build": true,
+        "name": "wisun_rcp-brd2705a",
+        "out": "demos/wisun_rcp-brd2705a",
+        "project-path": "wisun_rcp.slcp",
+        "slc-with": "brd2705a"
+    },
+    {
+        "build": true,
+        "name": "wisun_rcp-brd4204d",
+        "out": "demos/wisun_rcp-brd4204d",
+        "project-path": "wisun_rcp.slcp",
+        "slc-with": "brd4204d"
+    },
+    {
+        "build": true,
+        "name": "wisun_rcp-brd4210a",
+        "out": "demos/wisun_rcp-brd4210a",
+        "project-path": "wisun_rcp.slcp",
+        "slc-with": "brd4210a"
+    },
+    {
+        "build": true,
+        "name": "wisun_rcp-brd4263c",
+        "out": "demos/wisun_rcp-brd4263c",
+        "project-path": "wisun_rcp.slcp",
+        "slc-with": "brd4263c"
+    },
+    {
+        "build": true,
+        "name": "wisun_rcp-brd4264c",
+        "out": "demos/wisun_rcp-brd4264c",
+        "project-path": "wisun_rcp.slcp",
+        "slc-with": "brd4264c"
+    },
+    {
+        "build": true,
+        "name": "wisun_rcp-brd4270a",
+        "out": "demos/wisun_rcp-brd4270a",
+        "project-path": "wisun_rcp.slcp",
+        "slc-with": "brd4270a"
+    },
+    {
+        "build": true,
+        "name": "wisun_rcp-brd4270b",
+        "out": "demos/wisun_rcp-brd4270b",
+        "project-path": "wisun_rcp.slcp",
+        "slc-with": "brd4270b"
+    },
+    {
+        "build": true,
+        "name": "wisun_rcp-brd4271a",
+        "out": "demos/wisun_rcp-brd4271a",
+        "project-path": "wisun_rcp.slcp",
+        "slc-with": "brd4271a"
+    },
+    {
+        "build": true,
+        "name": "wisun_rcp-brd4272a",
+        "out": "demos/wisun_rcp-brd4272a",
+        "project-path": "wisun_rcp.slcp",
+        "slc-with": "brd4272a"
+    },
+    {
+        "build": true,
+        "name": "wisun_rcp-brd4276a",
+        "out": "demos/wisun_rcp-brd4276a",
+        "project-path": "wisun_rcp.slcp",
+        "slc-with": "brd4276a"
+    },
+    {
+        "build": true,
+        "name": "wisun_rcp-brd4400a",
+        "out": "demos/wisun_rcp-brd4400a",
+        "project-path": "wisun_rcp.slcp",
+        "slc-with": "brd4400a"
+    },
+    {
+        "build": true,
+        "name": "wisun_rcp-brd4400b",
+        "out": "demos/wisun_rcp-brd4400b",
+        "project-path": "wisun_rcp.slcp",
+        "slc-with": "brd4400b"
+    },
+    {
+        "build": true,
+        "name": "wisun_rcp-brd4400c",
+        "out": "demos/wisun_rcp-brd4400c",
+        "project-path": "wisun_rcp.slcp",
+        "slc-with": "brd4400c"
+    },
+    {
+        "build": true,
+        "name": "wisun_rcp-brd4401a",
+        "out": "demos/wisun_rcp-brd4401a",
+        "project-path": "wisun_rcp.slcp",
+        "slc-with": "brd4401a"
+    },
+    {
+        "build": true,
+        "name": "wisun_rcp-brd4401b",
+        "out": "demos/wisun_rcp-brd4401b",
+        "project-path": "wisun_rcp.slcp",
+        "slc-with": "brd4401b"
+    },
+    {
+        "build": true,
+        "name": "wisun_rcp-brd4401c",
+        "out": "demos/wisun_rcp-brd4401c",
+        "project-path": "wisun_rcp.slcp",
+        "slc-with": "brd4401c"
+    }
+]

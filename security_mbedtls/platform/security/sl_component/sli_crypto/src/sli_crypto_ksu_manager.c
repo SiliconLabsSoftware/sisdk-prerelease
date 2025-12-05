@@ -346,18 +346,28 @@ sl_status_t sli_ksu_delete_key(sl_se_key_descriptor_t *key_desc)
     return SL_STATUS_INVALID_PARAMETER;
   }
 
+  if (ksu_slots[key_slot_id].state == SLI_KSU_SLOT_STATUS_AVAILABLE) {
+    return SL_STATUS_DELETED;
+  }
+
   if (ksu_slots[key_slot_id].state == SLI_KSU_SLOT_STATUS_RESERVED) {
     return SL_STATUS_PERMISSION;
   }
-
-  // Take mutex here
-  // This is a placeholder for mutex acquisition logic.
 
   // Acquire the KSU manager lock (mutex) to protect KSU slot operations
   sl_status_t sl_status = sli_ksu_lock_acquire();
   if (sl_status != SL_STATUS_OK) {
     return sl_status;
   }
+
+  // Mark the KSU slot as free regardless of whether the subsequent call to
+  // sl_se_delete_key fails or not, because by now we know the key has been
+  // loaded to the KSU and all error conditions returned by sl_se_delete_key
+  // should indicate we should assume the key is removed or lost,
+  // e.g. the KSU may have been disabled.
+  ksu_slots[key_slot_id].user_ref = NULL;
+  ksu_slots[key_slot_id].state = SLI_KSU_SLOT_STATUS_AVAILABLE;
+  ksu_slots[key_slot_id].crypto_engine_id = 0;
 
   sl_se_command_context_t cmd_ctx = SL_SE_COMMAND_CONTEXT_INIT;
 
@@ -376,11 +386,6 @@ sl_status_t sli_ksu_delete_key(sl_se_key_descriptor_t *key_desc)
   if (sl_status != SL_STATUS_OK) {
     goto exit;
   }
-
-  // Update the KSU slot to mark it as free
-  ksu_slots[key_slot_id].user_ref = NULL;
-  ksu_slots[key_slot_id].state = SLI_KSU_SLOT_STATUS_AVAILABLE;
-  ksu_slots[key_slot_id].crypto_engine_id = 0;
 
   exit:
   // Release the KSU manager lock (mutex)

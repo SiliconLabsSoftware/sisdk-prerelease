@@ -5,7 +5,7 @@ The Wi-SUN command line interface provides a serial interface to a number of the
 For example, it can be used to create a Wi-SUN network and then to connect and exchange IP packets with Wi-SUN devices."
 package: "wisun"
 category: "Wi-SUN Examples"
-quality: "evaluation"
+quality: "production"
 
 
 component:

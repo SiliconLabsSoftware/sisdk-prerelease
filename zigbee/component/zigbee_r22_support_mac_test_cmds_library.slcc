@@ -59,7 +59,7 @@ library:
   - arm32v7
   - zigbee_stack_unix
   - zigbee_multi_network
-  - linux_arch_32
+  - linux_arch_arm32v7
   - zigbee_mac_test_commands_support
   unless:
   - zigbee_i386
@@ -68,7 +68,7 @@ library:
   - toolchain_gcc
   - arm32v7
   - zigbee_stack_unix
-  - linux_arch_32
+  - linux_arch_arm32v7
   - zigbee_mac_test_commands_support
   unless:
   - zigbee_multi_network
@@ -79,7 +79,7 @@ library:
   - arm64v8
   - zigbee_stack_unix
   - zigbee_multi_network
-  - linux_arch_64
+  - linux_arch_aarch64
   - zigbee_mac_test_commands_support
   unless:
   - zigbee_x86_64
@@ -89,7 +89,7 @@ library:
   - toolchain_gcc
   - arm64v8
   - zigbee_stack_unix
-  - linux_arch_64
+  - linux_arch_aarch64
   - zigbee_mac_test_commands_support
   unless:
   - zigbee_multi_network

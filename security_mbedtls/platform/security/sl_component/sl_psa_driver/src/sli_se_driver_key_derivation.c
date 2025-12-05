@@ -58,13 +58,24 @@ psa_status_t sli_se_driver_setup_ksu_output(const psa_key_attributes_t *key_out_
   // Handle KSU output key setup for KDF
   output_location = PSA_KEY_LIFETIME_GET_LOCATION(psa_get_key_lifetime(key_out_attributes));
   if (output_location == SL_PSA_KEY_LOCATION_KSU_0) {
+    // Make sure KSU key persistence is volatile
+    psa_key_persistence_t persistence =
+      PSA_KEY_LIFETIME_GET_PERSISTENCE(psa_get_key_lifetime(key_out_attributes));
+    if (persistence != PSA_KEY_PERSISTENCE_VOLATILE) {
+      return PSA_ERROR_INVALID_ARGUMENT;
+    }
+    // Fail if DISALLOW_KSU flag is set (n/a when location is KSU)
+    psa_key_usage_t usage = psa_get_key_usage_flags(key_out_attributes);
+    if (usage & SLI_PSA_KSU_KEY_ATTR_DISALLOW_KSU) {
+      return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
     psa_key_type_t key_type = psa_get_key_type(key_out_attributes);
 
     // Get the key ID from the slot's attributes
     psa_key_id_t key_id = psa_get_key_id(key_out_attributes);
 
 #if defined(SL_PSA_KEY_LOCATION_KSU_1)
-    psa_key_usage_t usage = psa_get_key_usage_flags(key_out_attributes);
     // Check for allowed users
     bool has_allowed_users = ((usage & SLI_PSA_KSU_KEY_ATTR_ALLOW_LPWAES) || (usage & SLI_PSA_KSU_KEY_ATTR_ALLOW_HOSTCRYPTO));
     if (!has_allowed_users) {

@@ -276,7 +276,7 @@ void sl_rail_util_pa_on_channel_config_change(sl_rail_handle_t rail_handle,
   (void) p_entry;
   sl_rail_tx_pa_mode_t current_pa_mode = sl_rail_get_pa_mode(rail_handle); //from state
   sl_rail_tx_pa_mode_t new_pa_mode = sl_rail_get_pa_mode_from_channel_entry(rail_handle); //from configs
-  if ((current_pa_mode != SL_RAIL_TX_PA_MODE_INVALID) || (current_pa_mode != new_pa_mode)) {
+  if (current_pa_mode == SL_RAIL_TX_PA_MODE_INVALID) {
     (void) sl_rail_util_pa_post_init(rail_handle, new_pa_mode);
   }
   if (current_pa_mode != new_pa_mode) {

@@ -606,6 +606,36 @@ uint8_t *sl_rail_sdk_802154_packet_unpack_longrange_data_frame(const sl_rail_rx_
                                                                uint8_t *frame_buffer);
 
 /**************************************************************************//**
+ * This function packs the IEEE 802.15.4 BPSK with 1byte PHR frame.
+ *
+ * @param[in] payload_size        payload size
+ * @param[in] *payload            payload
+ * @param[out] *frame_size        frame_size that is calculated
+ * @param[out] *frame_buffer      buffer of packed frame
+ *
+ * @retval SL_RAIL_SDK_802154_PACKET_OK if the process has been successful.
+ * @retval SL_RAIL_SDK_802154_PACKET_ERROR if the process has been failed.
+ *****************************************************************************/
+int16_t sl_rail_sdk_802154_packet_pack_bpsk_data_frame(uint16_t payload_size,
+                                                       const uint8_t *payload,
+                                                       uint16_t *frame_size,
+                                                       uint8_t *frame_buffer);
+
+/**************************************************************************//**
+ * This function unpacks the received packet to get IEEE 802.15.4 BPSK with 1byte PHR frame.
+ *
+ * @param[in] *packet_information   packet information
+ * @param[out] *payload_size        payload size
+ * @param[in] *frame_buffer         buffer of packed frame
+ *
+ * @return pointer of the payload
+ * @return NULL on error
+ *****************************************************************************/
+uint8_t *sl_rail_sdk_802154_packet_unpack_bpsk_data_frame(const sl_rail_rx_packet_info_t *packet_information,
+                                                          uint16_t *payload_size,
+                                                          uint8_t *frame_buffer);
+
+/**************************************************************************//**
  * Get Payload pointer
  *
  * @param[in] *packet             BLE packet frame

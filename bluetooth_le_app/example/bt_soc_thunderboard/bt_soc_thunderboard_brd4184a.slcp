@@ -125,6 +125,7 @@ tag:
   - hardware:board_only
   - hwfilter:board:brd4184a
   - hwfilter:device:device_family_efr32bg22
+  - hwfilter:ram:32k
 
 ui_hints:
   highlight:

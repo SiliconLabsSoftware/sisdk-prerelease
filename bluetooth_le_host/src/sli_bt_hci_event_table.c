@@ -171,6 +171,7 @@ const sli_bt_hci_event_key_t sli_bt_hci_event_lookup_keys[] = {
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_PERIODIC_ADVERTISER_PRESENT)
   0xffff,
 #endif // defined(SL_CATALOG_BLUETOOTH_FEATURE_PERIODIC_ADVERTISER_PRESENT)
+  0xffff // Unused stub entry to avoid an empty array
 };
 
 // Array of HCI event handler function pointers
@@ -267,7 +268,9 @@ sli_bt_hci_event_handler_func_t * const sli_bt_hci_event_lookup_data[] = {
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_PERIODIC_ADVERTISER_PRESENT)
   sli_bt_periodic_advertiser_handle_hci_event_le_silabs_periodic_advertising_tx,
 #endif // defined(SL_CATALOG_BLUETOOTH_FEATURE_PERIODIC_ADVERTISER_PRESENT)
+  NULL // Unused stub entry to avoid an empty array
 };
 
-// Number of entries in the HCI event lookup table
-const uint8_t sli_bt_hci_event_lookup_num_entries = sizeof(sli_bt_hci_event_lookup_keys) / sizeof(sli_bt_hci_event_lookup_keys[0]);
+// Number of used entries in the HCI event lookup table. The stub entry that we
+// use to avoid an empty array is excluded from the number of entries.
+const uint8_t sli_bt_hci_event_lookup_num_entries = sizeof(sli_bt_hci_event_lookup_keys) / sizeof(sli_bt_hci_event_lookup_keys[0]) - 1;

@@ -57,6 +57,8 @@ uint16_t unpack_packet_sidewalk(sl_rail_handle_t rail_handle, uint8_t *rx_destin
 void prepare_packet_sidewalk(sl_rail_handle_t rail_handle, uint8_t *out_data, uint16_t length);
 uint16_t unpack_packet_longrange(sl_rail_handle_t rail_handle, uint8_t *rx_destination, const sl_rail_rx_packet_info_t *packet_information, uint8_t **start_of_payload);
 void prepare_packet_longrange(sl_rail_handle_t rail_handle, uint8_t *out_data, uint16_t length);
+uint16_t unpack_packet_bpsk(sl_rail_handle_t rail_handle, uint8_t *rx_destination, const sl_rail_rx_packet_info_t *packet_information, uint8_t **start_of_payload);
+void prepare_packet_bpsk(sl_rail_handle_t rail_handle, uint8_t *out_data, uint16_t length);
 uint16_t unpack_packet_base(sl_rail_handle_t rail_handle, uint8_t *rx_destination, const sl_rail_rx_packet_info_t *packet_information, uint8_t **start_of_payload);
 void prepare_packet_base(sl_rail_handle_t rail_handle, uint8_t *out_data, uint16_t length);
 
@@ -163,6 +165,10 @@ void update_assistant_pointers(uint8_t new_phy_index)
     case LONGRANGE:
       unpack_packet_fnc = &unpack_packet_longrange;
       prepare_packet_fnc = &prepare_packet_longrange;
+      break;
+    case BPSK:
+      unpack_packet_fnc = &unpack_packet_bpsk;
+      prepare_packet_fnc = &prepare_packet_bpsk;
       break;
     default:
       unpack_packet_fnc = &unpack_packet_base;
@@ -597,6 +603,64 @@ void prepare_packet_longrange(sl_rail_handle_t rail_handle, uint8_t *out_data, u
   if (print_packet_info) {
     #if defined(SL_CATALOG_APP_LOG_PRESENT)
     app_log_info("Long Range Packet is ready, %d bytes written\n ", bytes_written_in_fifo);
+    #endif
+  }
+
+  #if !defined(SL_CATALOG_APP_ASSERT_PRESENT) && !defined(SL_CATALOG_APP_LOG_PRESENT)
+  // Avoid unused variable warning
+  (void)bytes_written_in_fifo;
+  #endif
+}
+
+/******************************************************************************
+ * The API helps to unpack the received packet, point to the payload and returns the length.
+ *****************************************************************************/
+uint16_t unpack_packet_bpsk(sl_rail_handle_t rail_handle, uint8_t *rx_destination, const sl_rail_rx_packet_info_t *packet_information, uint8_t **start_of_payload)
+{
+  uint16_t payload_size = 0;
+
+  sl_rail_status_t result = sl_rail_copy_rx_packet(rail_handle, rx_destination, packet_information);
+  if (result != SL_RAIL_STATUS_NO_ERROR) {
+    #if defined(SL_CATALOG_APP_LOG_PRESENT)
+    app_log_warning("sl_rail_copy_rx_packet failed with error: %ld\n", result);
+    #endif
+  }
+  *start_of_payload
+    = sl_rail_sdk_802154_packet_unpack_bpsk_data_frame(packet_information,
+                                                       &payload_size,
+                                                       rx_destination);
+  if (print_packet_info) {
+    #if defined(SL_CATALOG_APP_LOG_PRESENT)
+    app_log_info("BPSK Packet is ready, %d bytes payload read\n ", payload_size);
+    #endif
+  }
+  return payload_size;
+}
+
+/******************************************************************************
+ * The API prepares the packet for sending and load it in the RAIL TX FIFO
+ *****************************************************************************/
+void prepare_packet_bpsk(sl_rail_handle_t rail_handle, uint8_t *out_data, uint16_t length)
+{
+  // Check if write fifo has written all bytes
+  uint16_t bytes_written_in_fifo = 0;
+  uint16_t packet_size = 0U;
+  uint8_t tx_frame_buffer[256];
+  sl_rail_sdk_802154_packet_pack_bpsk_data_frame(length,
+                                                 out_data,
+                                                 &packet_size,
+                                                 tx_frame_buffer);
+  bytes_written_in_fifo = sl_rail_write_tx_fifo(rail_handle, tx_frame_buffer, packet_size, true);
+  #if defined(SL_CATALOG_APP_ASSERT_PRESENT)
+  app_assert(bytes_written_in_fifo == packet_size,
+             "sl_rail_write_tx_fifo() failed to write in fifo (%d bytes instead of %d bytes)\n",
+             bytes_written_in_fifo,
+             packet_size);
+  #endif
+
+  if (print_packet_info) {
+    #if defined(SL_CATALOG_APP_LOG_PRESENT)
+    app_log_info("BPSK Packet is ready, %d bytes written\n ", bytes_written_in_fifo);
     #endif
   }
 

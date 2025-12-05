@@ -181,11 +181,11 @@ sl_status_t sl_zigbee_add_child(sl_802154_short_addr_t shortId,
                                 sl_802154_long_addr_t longId,
                                 sl_zigbee_node_type_t nodeType);
 
-extern bool sli_zigbee_network_send_command(sl_802154_short_addr_t destination,
-                                            uint8_t *commandFrame,
-                                            uint8_t length,
-                                            bool tryToInsertLongDest,
-                                            sl_802154_long_addr_t destinationEui);
+extern bool slxi_zigbee_stack_network_send_command(sl_802154_short_addr_t destination,
+                                                   uint8_t *commandFrame,
+                                                   uint8_t length,
+                                                   bool tryToInsertLongDest,
+                                                   sl_802154_long_addr_t destinationEui);
 
 //stack/mac/command.c
 extern bool sli_zigbee_use_parent_long_id;
@@ -735,11 +735,11 @@ bool sli_zigbee_stack_test_network_send_command(sl_802154_short_addr_t destinati
                                                 bool tryToInsertLongDest,
                                                 sl_802154_long_addr_t destinationEui)
 {
-  return sli_zigbee_network_send_command(destination,
-                                         commandFrame,
-                                         length,
-                                         tryToInsertLongDest,
-                                         destinationEui);
+  return slxi_zigbee_stack_network_send_command(destination,
+                                                commandFrame,
+                                                length,
+                                                tryToInsertLongDest,
+                                                destinationEui);
 }
 
 bool sli_mac_stack_lower_mac_radio_is_on(uint8_t mac_index)

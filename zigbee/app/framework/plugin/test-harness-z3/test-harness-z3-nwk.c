@@ -26,22 +26,13 @@
 bool sli_zigbee_af_test_harness_z3_ignore_leave_commands = false;
 bool sli_zigbee_test_harness_z3_ignore_rejoin_commands = false;
 
-// private stack API
-extern void sli_zigbee_change_pan_id_now(sl_802154_pan_id_t panId);
-
 // -----------------------------------------------------------------------------
 // NWK CLI Commands
 
 #ifdef EZSP_HOST
-  #define sli_zigbee_network_send_command(...) false
+  #define slx_zigbee_network_send_command(...) false
 #else
 
-// Internal stack API's.
-extern bool sli_zigbee_network_send_command(sl_802154_short_addr_t destination,
-                                            uint8_t *commandFrame,
-                                            uint8_t length,
-                                            bool tryToInsertLongDest,
-                                            sl_802154_long_addr_t destinationEui);
 extern sl_status_t sl_zigbee_set_nwk_update_id(uint8_t nwkUpdateId, bool set_when_on_network);
 
 #endif /* EZSP_HOST */
@@ -57,7 +48,7 @@ static sl_status_t sendNetworkCommand(sl_802154_short_addr_t destinationShort,
     = (sl_zigbee_lookup_eui64_by_node_id(destinationShort, destinationLong)
        == SL_STATUS_OK);
 
-  return (sli_zigbee_network_send_command(destinationShort,
+  return (slx_zigbee_network_send_command(destinationShort,
                                           commandFrame,
                                           length,
                                           haveDestinationLong,
@@ -160,7 +151,7 @@ void sli_zigbee_af_test_harness_z3_nwk_nwk_leave_command(sl_cli_command_arg_t *a
 
   switch (options) {
     case BIT(0): // no ieee addr field
-      status = (sli_zigbee_network_send_command(destinationShort,
+      status = (slx_zigbee_network_send_command(destinationShort,
                                                 frame,
                                                 sizeof(frame),
                                                 false,
@@ -290,7 +281,7 @@ void sli_zigbee_af_test_harness_z3_change_pan_id(sl_cli_command_arg_t *arguments
   sl_zigbee_af_core_println("New PAN: %04X", newPanId);
 
   // Just do it, no delays.
-  sli_zigbee_change_pan_id_now(newPanId);
+  slx_zigbee_change_pan_id_now(newPanId);
 }
 
 // plugin test-harness z3 nwk set-long-up-time <longUpTime:1>

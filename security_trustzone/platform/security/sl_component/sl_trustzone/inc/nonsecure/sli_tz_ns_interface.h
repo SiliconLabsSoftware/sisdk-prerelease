@@ -32,7 +32,6 @@
 #define __SLI_TZ_NS_INTERFACE_H__
 
 #include "sli_tz_iovec.h"
-#include "sli_tz_util.h"
 #include "sl_status.h"
 #include <stdint.h>
 
@@ -58,20 +57,20 @@ typedef int32_t (*sli_tz_veneer_simple_noarg_fn) (uint32_t sid);
 
 sl_status_t sli_tz_ns_interface_init(void);
 
-SLI_TZ_CMSE_NONSECURE_ENTRY
+__attribute__((__used__))
 int32_t sli_tz_ns_interface_dispatch(sli_tz_veneer_fn fn,
                                      uint32_t arg0, uint32_t arg1,
                                      uint32_t arg2, uint32_t arg3);
 
-SLI_TZ_CMSE_NONSECURE_ENTRY
+__attribute__((__used__))
 uint32_t sli_tz_ns_interface_dispatch_simple(sli_tz_veneer_simple_fn fn,
                                              uint32_t sid,
                                              uint32_t arg);
 
-SLI_TZ_CMSE_NONSECURE_ENTRY
+__attribute__((__used__))
 int32_t sli_tz_ns_interface_dispatch_noarg(sli_tz_veneer_noarg_fn fn);
 
-SLI_TZ_CMSE_NONSECURE_ENTRY
+__attribute__((__used__))
 int32_t sli_tz_ns_interface_dispatch_simple_noarg(sli_tz_veneer_simple_noarg_fn fn,
                                                   uint32_t sid);
 

@@ -1105,12 +1105,12 @@ typedef uint32_t sl_rail_ieee802154_phy_features_t;
 /**
  * Mode switch feature for 2Mbps 2.4 GHz operation with fast channel switching.
  */
-#define SL_RAIL_IEEE802154_PHY_FEATURE_2P4_GHZ_FCS_2_MBPS (1UL << SL_RAIL_IEEE802154_PHY_FEATURE_2P4_GHZ_FCS_2_MBPS_SHIFT)
+#define SL_RAIL_IEEE802154_PHY_FEATURE_2P4_GHZ_FCS_2_MBPS (SL_RAIL_IEEE802154_PHY_FEATURE_2P4_GHZ_2_MBPS | SL_RAIL_IEEE802154_PHY_FEATURE_2P4_GHZ_RX_CH_SWITCHING)
 /**
  * Mode switch feature for 1Mbps 2.4 GHz operation with forward error correction (1-byte PHR)
  * and fast channel switching.
  */
-#define SL_RAIL_IEEE802154_PHY_FEATURE_2P4_GHZ_FCS_1_MBPS_FEC (1UL << SL_RAIL_IEEE802154_PHY_FEATURE_2P4_GHZ_FCS_1_MBPS_FEC_SHIFT)
+#define SL_RAIL_IEEE802154_PHY_FEATURE_2P4_GHZ_FCS_1_MBPS_FEC (SL_RAIL_IEEE802154_PHY_FEATURE_2P4_GHZ_1_MBPS_FEC | SL_RAIL_IEEE802154_PHY_FEATURE_2P4_GHZ_RX_CH_SWITCHING)
 /**
  * RX antenna diversity and WiFi coex features.
  */

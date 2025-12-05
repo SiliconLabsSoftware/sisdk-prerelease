@@ -1362,10 +1362,17 @@ psa_status_t sli_se_ksu_import_key(const psa_key_attributes_t *attributes,
   *key_buffer_length = 0;
   *bits = 8 * data_length;
 
+  // Make sure location is KSU
   psa_key_location_t location =
     PSA_KEY_LIFETIME_GET_LOCATION(psa_get_key_lifetime(attributes));
-
   if (location != SL_PSA_KEY_LOCATION_KSU_0) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  // Make sure key is volatile
+  psa_key_persistence_t persistence =
+    PSA_KEY_LIFETIME_GET_PERSISTENCE(psa_get_key_lifetime(attributes));
+  if (persistence != PSA_KEY_PERSISTENCE_VOLATILE) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
@@ -1376,11 +1383,15 @@ psa_status_t sli_se_ksu_import_key(const psa_key_attributes_t *attributes,
     return PSA_ERROR_NOT_SUPPORTED;
   }
 
+  // Validate key usage flags for KSU requirements (work directly with PSA attributes)
+  psa_key_usage_t usage = psa_get_key_usage_flags(attributes);
+  // Check if key usage attributes has the DISALLOW_KSU flag set
+  if (usage & SLI_PSA_KSU_KEY_ATTR_DISALLOW_KSU) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
 #if defined(SL_PSA_KEY_LOCATION_KSU_1)
   if (location != PSA_KEY_LOCATION_SLI_SE_OPAQUE) {
-    // Validate key usage flags for KSU requirements (work directly with PSA attributes)
-    psa_key_usage_t usage = psa_get_key_usage_flags(attributes);
-
     // For non-wrapped keys, require ALLOW_HOSTCRYPTO or ALLOW_LPWAES
     bool has_allowed_users = ((usage & SLI_PSA_KSU_KEY_ATTR_ALLOW_LPWAES) || (usage & SLI_PSA_KSU_KEY_ATTR_ALLOW_HOSTCRYPTO));
     if (!has_allowed_users) {
@@ -1468,6 +1479,18 @@ psa_status_t sli_se_ksu_copy_key(const psa_key_attributes_t *source_attributes,
   if (!(source_usage & PSA_KEY_USAGE_COPY)) {
     return PSA_ERROR_NOT_PERMITTED;
   }
+  // Check if target key attributes has the DISALLOW_KSU flag set
+  psa_key_usage_t target_usage = psa_get_key_usage_flags(target_attributes);
+  if (target_usage & SLI_PSA_KSU_KEY_ATTR_DISALLOW_KSU) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  // Make sure KSU key persistence is volatile
+  psa_key_persistence_t persistence =
+    PSA_KEY_LIFETIME_GET_PERSISTENCE(psa_get_key_lifetime(target_attributes));
+  if (persistence != PSA_KEY_PERSISTENCE_VOLATILE) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
 
   switch (source_location) {
     case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
@@ -1532,6 +1555,13 @@ psa_status_t sli_se_ksu_generate_key(const psa_key_attributes_t *attributes,
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
+  // Make sure key persistenve is volatile
+  psa_key_persistence_t persistence =
+    PSA_KEY_LIFETIME_GET_PERSISTENCE(psa_get_key_lifetime(attributes));
+  if (persistence != PSA_KEY_PERSISTENCE_VOLATILE) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
   size_t key_bits = psa_get_key_bits(attributes);
   size_t key_size = PSA_BITS_TO_BYTES(key_bits);
 
@@ -1542,11 +1572,14 @@ psa_status_t sli_se_ksu_generate_key(const psa_key_attributes_t *attributes,
     return PSA_ERROR_NOT_SUPPORTED;
   }
 
+  // Validate key usage flags for KSU requirements (work directly with PSA attributes)
+  psa_key_usage_t usage = psa_get_key_usage_flags(attributes);
+  // Check if key usage attributes has the DISALLOW_KSU flag set
+  if (usage & SLI_PSA_KSU_KEY_ATTR_DISALLOW_KSU) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
 #if defined(SL_PSA_KEY_LOCATION_KSU_1)
   if (location != PSA_KEY_LOCATION_SLI_SE_OPAQUE) {
-    // Validate key usage flags for KSU requirements (work directly with PSA attributes)
-    psa_key_usage_t usage = psa_get_key_usage_flags(attributes);
-
     // For non-wrapped keys, require ALLOW_HOSTCRYPTO or ALLOW_LPWAES
     bool has_allowed_users = ((usage & SLI_PSA_KSU_KEY_ATTR_ALLOW_LPWAES) || (usage & SLI_PSA_KSU_KEY_ATTR_ALLOW_HOSTCRYPTO));
     if (!has_allowed_users) {
@@ -2297,6 +2330,12 @@ psa_status_t sli_se_ksu_destroy_key(const psa_key_attributes_t *attributes)
     switch (sl_status) {
       case SL_STATUS_INVALID_PARAMETER:
         psa_status = PSA_ERROR_INVALID_ARGUMENT;
+        break;
+      case SL_STATUS_DELETED:
+        psa_status = PSA_ERROR_DOES_NOT_EXIST;
+        break;
+      case SL_STATUS_PERMISSION:
+        psa_status = PSA_ERROR_NOT_PERMITTED ;
         break;
       default:
         psa_status = PSA_ERROR_HARDWARE_FAILURE;

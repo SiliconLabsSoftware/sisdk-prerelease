@@ -38,9 +38,10 @@
 // <"sl_rail_util_pa_dbm_powersetting_mapping_table_20dbm.h"=> 20dBm PA powersetting mapping table
 // <"sl_rail_util_pa_dbm_powersetting_mapping_table_10dbm.h"=> 10dBm PA powersetting mapping table
 // <"sl_rail_util_pa_dbm_powersetting_mapping_table_0dbm.h"=> 0dBm PA powersetting mapping table
+// <"sl_rail_util_pa_dbm_powersetting_mapping_table_automode_10_20dbm.h"=> 10dBm-20dBm automode PA powersetting mapping table
 // <"sl_rail_util_pa_dbm_powersetting_mapping_table_automode_0_10_20dbm.h"=> 0dBm-10dBm-20dBm automode PA powersetting mapping table
-// <i> Default: "sl_rail_util_pa_dbm_powersetting_mapping_table_automode_0_10_20dbm.h"
-#define SL_RAIL_UTIL_PA_TABLE_HEADER    "sl_rail_util_pa_dbm_powersetting_mapping_table_automode_0_10_20dbm.h"
+// <i> Default: "sl_rail_util_pa_dbm_powersetting_mapping_table_20dbm.h"
+#define SL_RAIL_UTIL_PA_TABLE_HEADER    "sl_rail_util_pa_dbm_powersetting_mapping_table_20dbm.h"
 // </h>
 
 // <<< end of configuration section >>>

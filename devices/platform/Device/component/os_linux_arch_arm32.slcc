@@ -11,7 +11,6 @@ requires:
 - name: linux
 provides:
 - name: linux_arch
-- name: linux_arch_32
 - name: linux_arch_arm32v7
 - name: arm32v7
 tag:

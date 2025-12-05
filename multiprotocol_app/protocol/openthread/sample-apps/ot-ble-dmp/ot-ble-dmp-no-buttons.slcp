@@ -131,7 +131,8 @@ config_file:
     directory: btconf
 
 tag:
-  - prebuilt_demo
+  # Skipping demo builds for any MP app currently duplicated in thread
+  #- prebuilt_demo
   - hardware:device:flash:768
   - hwfilter:device:device_supports_thread
   - hwfilter:!device:device_family_efr32mr21

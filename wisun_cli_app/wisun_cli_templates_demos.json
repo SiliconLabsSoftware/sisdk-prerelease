@@ -1,0 +1,254 @@
+[
+    {
+        "build": true,
+        "name": "wisun_soc_brcli-brd2705a",
+        "out": "demos/wisun_soc_brcli-brd2705a",
+        "project-path": "wisun_soc_brcli/wisun_soc_brcli.slcp",
+        "slc-with": "brd2705a"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_brcli-brd4270a",
+        "out": "demos/wisun_soc_brcli-brd4270a",
+        "project-path": "wisun_soc_brcli/wisun_soc_brcli.slcp",
+        "slc-with": "brd4270a"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_brcli-brd4270b",
+        "out": "demos/wisun_soc_brcli-brd4270b",
+        "project-path": "wisun_soc_brcli/wisun_soc_brcli.slcp",
+        "slc-with": "brd4270b"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_brcli-brd4271a",
+        "out": "demos/wisun_soc_brcli-brd4271a",
+        "project-path": "wisun_soc_brcli/wisun_soc_brcli.slcp",
+        "slc-with": "brd4271a"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_brcli-brd4272a",
+        "out": "demos/wisun_soc_brcli-brd4272a",
+        "project-path": "wisun_soc_brcli/wisun_soc_brcli.slcp",
+        "slc-with": "brd4272a"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_brcli-brd4400a",
+        "out": "demos/wisun_soc_brcli-brd4400a",
+        "project-path": "wisun_soc_brcli/wisun_soc_brcli.slcp",
+        "slc-with": "brd4400a"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_brcli-brd4400b",
+        "out": "demos/wisun_soc_brcli-brd4400b",
+        "project-path": "wisun_soc_brcli/wisun_soc_brcli.slcp",
+        "slc-with": "brd4400b"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_brcli-brd4400c",
+        "out": "demos/wisun_soc_brcli-brd4400c",
+        "project-path": "wisun_soc_brcli/wisun_soc_brcli.slcp",
+        "slc-with": "brd4400c"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_brcli-brd4401a",
+        "out": "demos/wisun_soc_brcli-brd4401a",
+        "project-path": "wisun_soc_brcli/wisun_soc_brcli.slcp",
+        "slc-with": "brd4401a"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_brcli-brd4401b",
+        "out": "demos/wisun_soc_brcli-brd4401b",
+        "project-path": "wisun_soc_brcli/wisun_soc_brcli.slcp",
+        "slc-with": "brd4401b"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_brcli-brd4401c",
+        "out": "demos/wisun_soc_brcli-brd4401c",
+        "project-path": "wisun_soc_brcli/wisun_soc_brcli.slcp",
+        "slc-with": "brd4401c"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_brcli_wifi-brd4270a",
+        "out": "demos/wisun_soc_brcli_wifi-brd4270a",
+        "project-path": "wisun_soc_brcli/wisun_soc_brcli_wifi.slcp",
+        "slc-with": "brd4270a"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_brcli_wifi-brd4271a",
+        "out": "demos/wisun_soc_brcli_wifi-brd4271a",
+        "project-path": "wisun_soc_brcli/wisun_soc_brcli_wifi.slcp",
+        "slc-with": "brd4271a"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_cli-brd2705a",
+        "out": "demos/wisun_soc_cli-brd2705a",
+        "project-path": "wisun_soc_cli/wisun_soc_cli.slcp",
+        "slc-with": "brd2705a"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_cli-brd4270a",
+        "out": "demos/wisun_soc_cli-brd4270a",
+        "project-path": "wisun_soc_cli/wisun_soc_cli.slcp",
+        "slc-with": "brd4270a"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_cli-brd4270b",
+        "out": "demos/wisun_soc_cli-brd4270b",
+        "project-path": "wisun_soc_cli/wisun_soc_cli.slcp",
+        "slc-with": "brd4270b"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_cli-brd4271a",
+        "out": "demos/wisun_soc_cli-brd4271a",
+        "project-path": "wisun_soc_cli/wisun_soc_cli.slcp",
+        "slc-with": "brd4271a"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_cli-brd4272a",
+        "out": "demos/wisun_soc_cli-brd4272a",
+        "project-path": "wisun_soc_cli/wisun_soc_cli.slcp",
+        "slc-with": "brd4272a"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_cli-brd4276a",
+        "out": "demos/wisun_soc_cli-brd4276a",
+        "project-path": "wisun_soc_cli/wisun_soc_cli.slcp",
+        "slc-with": "brd4276a"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_cli-brd4400a",
+        "out": "demos/wisun_soc_cli-brd4400a",
+        "project-path": "wisun_soc_cli/wisun_soc_cli.slcp",
+        "slc-with": "brd4400a"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_cli-brd4400b",
+        "out": "demos/wisun_soc_cli-brd4400b",
+        "project-path": "wisun_soc_cli/wisun_soc_cli.slcp",
+        "slc-with": "brd4400b"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_cli-brd4400c",
+        "out": "demos/wisun_soc_cli-brd4400c",
+        "project-path": "wisun_soc_cli/wisun_soc_cli.slcp",
+        "slc-with": "brd4400c"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_cli-brd4401a",
+        "out": "demos/wisun_soc_cli-brd4401a",
+        "project-path": "wisun_soc_cli/wisun_soc_cli.slcp",
+        "slc-with": "brd4401a"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_cli-brd4401b",
+        "out": "demos/wisun_soc_cli-brd4401b",
+        "project-path": "wisun_soc_cli/wisun_soc_cli.slcp",
+        "slc-with": "brd4401b"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_cli-brd4401c",
+        "out": "demos/wisun_soc_cli-brd4401c",
+        "project-path": "wisun_soc_cli/wisun_soc_cli.slcp",
+        "slc-with": "brd4401c"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_lfn_cli-brd2705a",
+        "out": "demos/wisun_soc_lfn_cli-brd2705a",
+        "project-path": "wisun_soc_cli/wisun_soc_lfn_cli.slcp",
+        "slc-with": "brd2705a"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_lfn_cli-brd4270a",
+        "out": "demos/wisun_soc_lfn_cli-brd4270a",
+        "project-path": "wisun_soc_cli/wisun_soc_lfn_cli.slcp",
+        "slc-with": "brd4270a"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_lfn_cli-brd4270b",
+        "out": "demos/wisun_soc_lfn_cli-brd4270b",
+        "project-path": "wisun_soc_cli/wisun_soc_lfn_cli.slcp",
+        "slc-with": "brd4270b"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_lfn_cli-brd4271a",
+        "out": "demos/wisun_soc_lfn_cli-brd4271a",
+        "project-path": "wisun_soc_cli/wisun_soc_lfn_cli.slcp",
+        "slc-with": "brd4271a"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_lfn_cli-brd4272a",
+        "out": "demos/wisun_soc_lfn_cli-brd4272a",
+        "project-path": "wisun_soc_cli/wisun_soc_lfn_cli.slcp",
+        "slc-with": "brd4272a"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_lfn_cli-brd4400a",
+        "out": "demos/wisun_soc_lfn_cli-brd4400a",
+        "project-path": "wisun_soc_cli/wisun_soc_lfn_cli.slcp",
+        "slc-with": "brd4400a"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_lfn_cli-brd4400b",
+        "out": "demos/wisun_soc_lfn_cli-brd4400b",
+        "project-path": "wisun_soc_cli/wisun_soc_lfn_cli.slcp",
+        "slc-with": "brd4400b"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_lfn_cli-brd4400c",
+        "out": "demos/wisun_soc_lfn_cli-brd4400c",
+        "project-path": "wisun_soc_cli/wisun_soc_lfn_cli.slcp",
+        "slc-with": "brd4400c"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_lfn_cli-brd4401a",
+        "out": "demos/wisun_soc_lfn_cli-brd4401a",
+        "project-path": "wisun_soc_cli/wisun_soc_lfn_cli.slcp",
+        "slc-with": "brd4401a"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_lfn_cli-brd4401b",
+        "out": "demos/wisun_soc_lfn_cli-brd4401b",
+        "project-path": "wisun_soc_cli/wisun_soc_lfn_cli.slcp",
+        "slc-with": "brd4401b"
+    },
+    {
+        "build": true,
+        "name": "wisun_soc_lfn_cli-brd4401c",
+        "out": "demos/wisun_soc_lfn_cli-brd4401c",
+        "project-path": "wisun_soc_cli/wisun_soc_lfn_cli.slcp",
+        "slc-with": "brd4401c"
+    }
+]

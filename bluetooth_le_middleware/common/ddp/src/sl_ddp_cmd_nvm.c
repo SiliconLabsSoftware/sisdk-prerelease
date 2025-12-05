@@ -79,6 +79,15 @@ int sl_ddp_cmd_nvm_set(const uint8_t *input,
                       (nvm3_ObjectKey_t)(req->object_key),
                       req->data,
                       (size_t)req->data_len);
+  if (sc != SL_STATUS_OK) {
+    return (int)sc;
+  }
+
+  // Do repacking if needed
+  if (nvm3_repackNeeded(NVM3_HANDLE)) {
+    sc = nvm3_repack(NVM3_HANDLE);
+  }
+
   return (int)sc;
 }
 

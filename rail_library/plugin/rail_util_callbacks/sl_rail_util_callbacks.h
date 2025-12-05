@@ -79,13 +79,13 @@ void sl_rail_util_on_rf_ready(RAIL_Handle_t rail_handle);
  *   change notification.
  * @param[in] p_entry A pointer to the channel configuration being changed to.
  */
-#ifdef  SL_CATALOG_SL_RAIL_UTIL_CALLBACKS_PRESENT
+#ifdef  SL_CATALOG_SL_RAIL_UTIL_PA_PRESENT
 void sl_rail_util_on_channel_config_change(sl_rail_handle_t rail_handle,
                                            const sl_rail_channel_config_entry_t *p_entry);
-#else//!SL_CATALOG_SL_RAIL_UTIL_CALLBACKS_PRESENT
+#else//!SL_CATALOG_SL_RAIL_UTIL_PA_PRESENT
 void sl_rail_util_on_channel_config_change(RAIL_Handle_t rail_handle,
                                            const RAIL_ChannelConfigEntry_t *p_entry);
-#endif//SL_CATALOG_SL_RAIL_UTIL_CALLBACKS_PRESENT
+#endif//SL_CATALOG_SL_RAIL_UTIL_PA_PRESENT
 
 /**
  * A callback available to the application, called on registered RAIL events.

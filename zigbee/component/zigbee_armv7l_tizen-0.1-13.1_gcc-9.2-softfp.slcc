@@ -11,7 +11,7 @@ provides:
 - name: zigbee_armv7l_tizen-0.1-13.1_gcc-9.2-softfp
 
 requires:
-- name: linux_arch_32
+- name: linux_arch_arm32v7
 
 template_contribution:
 - name: component_catalog

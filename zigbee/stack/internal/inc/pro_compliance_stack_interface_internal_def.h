@@ -62,6 +62,14 @@ sl_status_t sli_mac_stack_test_set_tx_power(int8_t power);
 
 uint8_t sli_zigbee_stack_bdb_tclk_max_exchange_attempts(void);
 
+void slxi_zigbee_stack_change_pan_id_now(sl_802154_pan_id_t panId);
+
+bool slxi_zigbee_stack_network_send_command(sl_802154_short_addr_t destination,
+                                            uint8_t *commandFrame,
+                                            uint8_t length,
+                                            bool tryToInsertLongDest,
+                                            sl_802154_long_addr_t destinationEui);
+
 sl_status_t sli_zigbee_stack_request_link_key_with_option_encrypt(sl_802154_long_addr_t partner,
                                                                   uint8_t option);
 

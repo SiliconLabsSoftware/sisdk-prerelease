@@ -10,7 +10,7 @@ provides:
 - name: zigbee_aarch64_cortex_a72_gcc_12_3_0_musl
 
 requires:
-- name: linux_arch_64
+- name: linux_arch_aarch64
 
 template_contribution:
 - name: component_catalog
