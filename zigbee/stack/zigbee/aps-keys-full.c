@@ -20,6 +20,7 @@
 
 #include "core/sl_zigbee_multi_network.h"
 #include "stack/include/sl_zigbee_types.h"
+#include "stack/include/sl_zigbee_zdo_security.h"
 #include "hal/hal.h"
 #include "internal/inc/internal-defs-patch.h"
 #include "aps-keys-full.h"
@@ -46,7 +47,8 @@ const sl_zigbee_library_status_t sli_zigbee_security_link_keys_library_status =
 
 extern void sli_zigbee_stack_fetch_key_table_entry_at_index(uint8_t index, tokTypeStackKeyTable *tok);
 extern void sli_zigbee_stack_set_key_table_entry_at_index(uint8_t index, tokTypeStackKeyTable* tok);
-
+extern sl_status_t sli_zigbee_stack_get_authentication_level(sl_802154_short_addr_t dest,
+                                                             sl_802154_long_addr_t target);
 //------------------------------------------------------------------------------
 // The link key table.
 
@@ -298,25 +300,46 @@ bool sli_zigbee_process_application_link_key(sl_802154_long_addr_t partnerEui64,
                                              bool amInitiator,
                                              sl_zigbee_key_data_t* keyData)
 {
+  sl_status_t status;
+  bool store_key = false;
+  sl_802154_long_addr_t partner_link_key_partner;
+  sli_zigbee_partner_link_key_get_device(partner_link_key_partner);
+
   (void) amInitiator;
   // In BDB 3.1/R23 partner link keys, keys must be verified before they can be used, hence we mark them as unconfirmed and place them in the transient key table.
   // In prior versions of the app/stack, partner link keys were valid as soon as they were received from the TC
   if (sli_zigbee_stack_get_stack_compliance_revision() >= R23_COMPLIANCE_REVISION) {
-    sl_zigbee_sec_man_flags_t flags = ZB_SEC_MAN_FLAG_EUI_IS_VALID | ZB_SEC_MAN_FLAG_UNCONFIRMED_TRANSIENT_KEY;
-    sl_status_t sec_status = zb_sec_man_import_transient_key(partnerEui64, (sl_zigbee_sec_man_key_t *) keyData, flags);
-    if (sec_status != SL_STATUS_OK) {
-      return false;
-    }
+    // We only accept partner link keys if we are either an initiator who started a partner link key update
+    // or a target who is free to service a partner link key update session
 #if !defined(SL_ZIGBEE_GOLDEN_UNIT)
     // Golden Unit does not use the app link key state machine, it has CLIs to separately send the messages
     // (Get Authen Sec Level, Request Key, Verify Key Req)
-    if (sli_zigbee_get_update_app_link_key_state() == UPDATE_APP_LINK_KEY_STATE_REQUEST_KEY) {
+    if ((sli_zigbee_get_update_app_link_key_state() == UPDATE_APP_LINK_KEY_STATE_REQUEST_KEY_INITIATOR)
+        && (memcmp(partner_link_key_partner, partnerEui64, EUI64_SIZE) == 0)) {
       // Initiator: wait for Verify Key
-      sli_zigbee_set_update_app_link_key_state(UPDATE_APP_LINK_KEY_STATE_VERIFY_KEY);
-    } else {
-      // Target: Start Security Get Auth Level
-      (void)sli_zigbee_stack_update_app_link_key(partnerEui64);
-      sli_zigbee_set_update_app_link_key_state(UPDATE_APP_LINK_KEY_STATE_SECURITY_LEVEL_TARGET);
+      sli_zigbee_set_update_app_link_key_state(UPDATE_APP_LINK_KEY_STATE_AWAIT_VERIFY_KEY_INITIATOR);
+      sli_zigbee_set_partner_key_update_timer(true, BDBC_TC_LINK_KEY_EXCHANGE_TIMEOUT_MS * 2);
+      store_key = true;
+    } else if (sli_zigbee_get_update_app_link_key_state() == UPDATE_APP_LINK_KEY_STATE_NONE) {
+      // We are now a target. Send the Start Security Get Auth Level
+      status = sli_zigbee_stack_get_authentication_level(SL_ZIGBEE_TRUST_CENTER_NODE_ID, partnerEui64);
+      if (status == SL_STATUS_OK) {
+        sli_zigbee_partner_link_key_set_device(partnerEui64);
+        sli_zigbee_set_update_app_link_key_state(UPDATE_APP_LINK_KEY_STATE_SECURITY_LEVEL_TARGET);
+        sli_zigbee_set_partner_key_update_timer(true, BDBC_TC_LINK_KEY_EXCHANGE_TIMEOUT_MS);
+        store_key = true;
+      } else {
+        (void)sli_zigbee_stack_terminate_app_link_key_request();
+        sli_zigbee_stack_zigbee_key_establishment_handler(partnerEui64, SL_ZIGBEE_FAILED_GET_AUTH_SECURITY);
+      }
+    }
+
+    if (store_key) {
+      sl_zigbee_sec_man_flags_t flags = ZB_SEC_MAN_FLAG_EUI_IS_VALID | ZB_SEC_MAN_FLAG_UNCONFIRMED_TRANSIENT_KEY;
+      sl_status_t sec_status = zb_sec_man_import_transient_key(partnerEui64, (sl_zigbee_sec_man_key_t *) keyData, flags);
+      if (sec_status != SL_STATUS_OK) {
+        return false;
+      }
     }
 #endif
   } else {

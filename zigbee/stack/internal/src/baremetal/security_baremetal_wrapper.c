@@ -155,6 +155,11 @@ sl_status_t sl_zigbee_stop_writing_stack_tokens(void)
   return sli_zigbee_stack_stop_writing_stack_tokens();
 }
 
+sl_status_t sl_zigbee_terminate_app_link_key_request(void)
+{
+  return sli_zigbee_stack_terminate_app_link_key_request();
+}
+
 sl_status_t sl_zigbee_update_app_link_key(sl_802154_long_addr_t partnerEui64)
 {
   return sli_zigbee_stack_update_app_link_key(partnerEui64);

@@ -44,7 +44,7 @@ include:
   - path: ncp_ant_div.hpp
 source:
 - path: src/cli/antenna_diversity_cli.c
-  unless: [ot_ncp]
+  unless: [ot_rcp]
 - path: platform-abstraction/ncp/ncp_ant_div.cpp
   condition: [ot_ncp]
 metadata:

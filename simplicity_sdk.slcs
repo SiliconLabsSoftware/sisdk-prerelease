@@ -6,9 +6,9 @@ specification_version: 14
 supplier: Silicon Laboratories, Inc.
 component_path:
 - path: bgapi_protocol/component
+- path: bluetooth_le_middleware/component
 - path: bluetooth_mesh/component
 - path: bluetooth_le_controller/component
-- path: bluetooth_le_middleware/component
 - path: bluetooth_mesh_middleware/component
 - path: bluetooth_mesh_srtest/component
 - path: bluetooth_common/component
@@ -31,9 +31,9 @@ component_path:
 - path: bootloader_internal/platform/bootloader/component
 - path: bootloader_internal/platform/bootloader/series3/component
 - path: bootloader_interface/platform/bootloader/component
-- path: cmsis_dsp/component
 - path: cmsis_common_internal/platform/common/component
 - path: cmsis_common/platform/common/component
+- path: cmsis_dsp/component
 - path: cmsis_nn/component
 - path: cmsis_internal/component
 - path: cmsis/component
@@ -68,10 +68,10 @@ component_path:
 - path: multiprotocol/protocol/zigbee/component
 - path: multiprotocol/platform/radio/mac/component
 - path: multiprotocol/protocol/openthread/component
+- path: openthread_stack/component
+- path: openthread/component
 - path: openthread_internal/component
 - path: openthread_internal/component/internal
-- path: openthread/component
-- path: openthread_stack/component
 - path: platform_core_internal/platform/common/component
 - path: platform_core_internal/platform/service/component
 - path: platform_core_internal/platform/emlib/component
@@ -98,11 +98,11 @@ component_path:
 - path: printf/component
 - path: proprietary_default_radio_confs/.
 - path: protocol_user_sequencer_internal/component/protocol_user_sequencer_internal
-- path: rail_library_alpha_chips/component/rail_library_alpha_chips
 - path: rail_sdk/component
-- path: rail_library_internal_chips/component/rail_library_internal_chips
-- path: rail_internal/component/rail_internal
 - path: rail_library/component/rail_library
+- path: rail_internal/component/rail_internal
+- path: rail_library_internal_chips/component/rail_library_internal_chips
+- path: rail_library_alpha_chips/component/rail_library_alpha_chips
 - path: realtime_locationing/component
 - path: rv2_framework_internal/component
 - path: security_libcryptosoc/component
@@ -131,6 +131,8 @@ component_path:
 - path: zigbee_internal/util/silicon_labs/silabs_core/component
 - path: zigbee_internal/app/framework/component
 - path: zigbee_internal/platform/service/component
+- path: zigbee_wwah/app/framework/component
+- path: zigbee_smart_energy/component
 - path: zigbee/platform/radio/mac/component
 - path: zigbee/platform/radio/rail_lib/plugin/component
 - path: zigbee/component
@@ -138,8 +140,6 @@ component_path:
 - path: zigbee/util/silicon_labs/silabs_core/component
 - path: zigbee/app/framework/component
 - path: zigbee/platform/service/component
-- path: zigbee_wwah/app/framework/component
-- path: zigbee_smart_energy/component
 - path: zwave/component
 - path: zwave/component/CommandClasses
 - path: zwave/component-internal
@@ -186,6 +186,8 @@ documentation:
   version: 3.0.0
 - docset: rtl-lib
   version: 11.0.0
+- docset: sidewalk
+  version: 2.7.0
 - docset: sidewalk
   version: 2.7.0
 - docset: protocol-usb

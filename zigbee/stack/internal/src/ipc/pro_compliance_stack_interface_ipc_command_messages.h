@@ -198,31 +198,6 @@ typedef struct {
 } sli_zigbee_stack_bdb_tclk_max_exchange_attempts_ipc_msg_t;
 
 typedef struct {
-  sl_802154_pan_id_t panId;
-} slxi_zigbee_stack_change_pan_id_now_ipc_req_t;
-
-typedef struct {
-  slxi_zigbee_stack_change_pan_id_now_ipc_req_t request;
-} slxi_zigbee_stack_change_pan_id_now_ipc_msg_t;
-
-typedef struct {
-  sl_802154_short_addr_t destination;
-  uint8_t commandFrame;
-  uint8_t length;
-  bool tryToInsertLongDest;
-  sl_802154_long_addr_t destinationEui;
-} slxi_zigbee_stack_network_send_command_ipc_req_t;
-
-typedef struct {
-  bool result;
-} slxi_zigbee_stack_network_send_command_ipc_rsp_t;
-
-typedef struct {
-  slxi_zigbee_stack_network_send_command_ipc_req_t request;
-  slxi_zigbee_stack_network_send_command_ipc_rsp_t response;
-} slxi_zigbee_stack_network_send_command_ipc_msg_t;
-
-typedef struct {
   sl_802154_long_addr_t partner;
   uint8_t option;
 } sli_zigbee_stack_request_link_key_with_option_encrypt_ipc_req_t;
@@ -656,6 +631,14 @@ typedef struct {
 } sli_zigbee_stack_zigbee_remove_child_ipc_msg_t;
 
 typedef struct {
+  sl_802154_pan_id_t panId;
+} slxi_zigbee_stack_change_pan_id_now_ipc_req_t;
+
+typedef struct {
+  slxi_zigbee_stack_change_pan_id_now_ipc_req_t request;
+} slxi_zigbee_stack_change_pan_id_now_ipc_msg_t;
+
+typedef struct {
   bool do_dlk;
   bool allow_anon_psk;
 } slxi_zigbee_stack_gu_zdo_toggle_dlk_ipc_req_t;
@@ -671,5 +654,22 @@ typedef struct {
 typedef struct {
   slxi_zigbee_stack_ignore_incoming_aps_acks_ipc_req_t request;
 } slxi_zigbee_stack_ignore_incoming_aps_acks_ipc_msg_t;
+
+typedef struct {
+  sl_802154_short_addr_t destination;
+  uint8_t commandFrame;
+  uint8_t length;
+  bool tryToInsertLongDest;
+  sl_802154_long_addr_t destinationEui;
+} slxi_zigbee_stack_network_send_command_ipc_req_t;
+
+typedef struct {
+  bool result;
+} slxi_zigbee_stack_network_send_command_ipc_rsp_t;
+
+typedef struct {
+  slxi_zigbee_stack_network_send_command_ipc_req_t request;
+  slxi_zigbee_stack_network_send_command_ipc_rsp_t response;
+} slxi_zigbee_stack_network_send_command_ipc_msg_t;
 
 #endif // PRO_COMPLIANCE_STACK_INTERFACE_IPC_COMMAND_MESSAGES_H

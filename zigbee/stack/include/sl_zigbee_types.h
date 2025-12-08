@@ -2445,9 +2445,6 @@ enum
   SL_ZIGBEE_TC_FAILED_TO_GENERATE_NEW_KEY      = 0x12,
   SL_ZIGBEE_TC_FAILED_TO_SEND_TC_KEY           = 0x13,
 
-  SL_ZIGBEE_INITIATOR_FAILED_GET_AUTH_SECURITY = 0x14,
-  SL_ZIGBEE_TARGET_FAILED_GET_AUTH_SECURITY    = 0x15,
-
   // These are generic status values for a key requester.
   SL_ZIGBEE_TRUST_CENTER_IS_PRE_R21            = 0x1E,
 
@@ -2456,6 +2453,15 @@ enum
   SL_ZIGBEE_TC_REQUESTER_VERIFY_KEY_TIMEOUT    = 0x32,
   SL_ZIGBEE_TC_REQUESTER_VERIFY_KEY_FAILURE    = 0x33,
   SL_ZIGBEE_TC_REQUESTER_VERIFY_KEY_SUCCESS    = 0x34,
+
+  // The following statuses deal with outcomes of the
+  // Zigbee 4.0 partner key update routine
+  SL_ZIGBEE_PARTNER_KEY_UPDATE_TIMEOUT         = 0x40,  // Device timed out waiting for authentication level response, transport key, or verify key confirm
+  SL_ZIGBEE_FAILED_GET_AUTH_SECURITY           = 0x41,  // The initiator or target failed to retrieve the authentication level of the partner from the TC
+  SL_ZIGBEE_BAD_AUTH_SECURITY_RSP              = 0x42,  // Initiator or target received an incorrect Security_Authentication_Level_rsp (e.g. missing fields, incorrectly formatted TLV, or bad ZDO status)
+  SL_ZIGBEE_INITIATOR_FAILED_REQUEST_KEY       = 0x43,  // Initiator failed to send Request Key to TC
+  SL_ZIGBEE_TARGET_PARTNER_DEVICE_UNKNOWN      = 0x44,  // The target received an Security_Authentication_Level_rsp from the TC, but does not have the short address mapping for this device
+  SL_ZIGBEE_TARGET_FAILED_VERIFY_KEY           = 0x45,  // Target failed to send Verify Key to partner
 
   // These are status values applying only to the key requester
   // verifying link keys.

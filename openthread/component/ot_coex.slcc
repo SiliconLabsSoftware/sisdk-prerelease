@@ -47,7 +47,7 @@ include:
   - path: ncp_coex.hpp
 source:
 - path: src/cli/coexistence_cli.c
-  unless: [ot_ncp]
+  unless: [ot_rcp]
 - path: platform-abstraction/ncp/ncp_coex.cpp
   condition: [ot_ncp]
 define:

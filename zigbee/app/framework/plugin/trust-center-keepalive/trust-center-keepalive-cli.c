@@ -24,3 +24,9 @@ void sl_zigbee_af_send_keepalive_now_command(sl_cli_command_arg_t *arguments)
   (void)arguments;
   (void)sli_zigbee_af_send_keepalive_now();
 }
+
+void sl_zigbee_af_send_keepalive_halt_command(sl_cli_command_arg_t *arguments)
+{
+  (void)arguments;
+  sl_zigbee_af_trust_center_keepalive_disable();
+}

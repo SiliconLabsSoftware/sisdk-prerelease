@@ -208,6 +208,7 @@ static void sl_rail_util_init_{{ inst | lower }}(void)
   }
   status = sl_rail_config_channels(sli_rail_handle_{{ inst | lower }},
                                    channel_config,
+                                   (sl_rail_radio_config_changed_callback_t)(void *)
                                    &sli_rail_util_on_channel_config_change);
   APP_ASSERT((SL_RAIL_STATUS_NO_ERROR == status),
              "sl_rail_config_channels failed, return value: 0x%04" PRIX32,

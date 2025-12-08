@@ -71,6 +71,7 @@ static buf_ncp_host_t buf_ncp_in = { 0 };
 static bool wait_for_boot;
 static uint8_t boot_retry_count;
 static app_timer_t boot_timer;
+static bool accept_dfu_boot;
 
 #if defined(SECURITY) && SECURITY == 1
 static buf_ncp_host_t buf_ncp_out = { 0 };
@@ -109,6 +110,8 @@ sl_status_t ncp_host_init(void)
     sc = security_init();
   }
 #endif // defined(SECURITY) && SECURITY == 1
+
+  accept_dfu_boot = ACCEPT_DFU_BOOT;
 
 #if defined(WAIT_FOR_SYSTEM_BOOT) && WAIT_FOR_SYSTEM_BOOT == 1
   if (sc == SL_STATUS_OK) {
@@ -221,6 +224,19 @@ void ncp_host_reboot(void)
   wait_for_boot = true;
   boot_retry_count = 0;
   on_boot_timer_expire(&boot_timer, NULL);
+}
+
+/******************************************************************************
+ * Reboot the NCP target into DFU mode.
+ *****************************************************************************/
+void ncp_host_reboot_dfu(void)
+{
+  wait_for_boot = true;
+  accept_dfu_boot = true;
+
+  // This command is equivalent with sl_bt_user_reset_to_dfu
+  uint8_t reboot_dfu_command[] = { 0x20, 0x00, 0xff, 0x02 };
+  (void)host_comm_tx(sizeof(reboot_dfu_command), reboot_dfu_command);
 }
 
 /******************************************************************************
@@ -337,11 +353,9 @@ static int32_t ncp_host_get_boot_event(void)
   }
   // Read bytes one by one until a valid boot event header is received.
   while (buf_ncp_in.header != boot_event_header) {
-#if ACCEPT_DFU_BOOT
-    if (buf_ncp_in.header == 0x000004a0) {
+    if (accept_dfu_boot && buf_ncp_in.header == 0x000004a0) {
       break;                                    // DFU boot header - keep it as is, exit before further shifting
     }
-#endif
 
     if (shift_counter > SL_BGAPI_MAX_PAYLOAD_SIZE) {
       // Abort reception if the target sends data continuously.
@@ -370,6 +384,7 @@ static int32_t ncp_host_get_boot_event(void)
   }
   buf_ncp_in.len = SL_BGAPI_MSG_HEADER_LEN + msg_len;
   wait_for_boot = false;
+  accept_dfu_boot = false;
   (void)app_timer_stop(&boot_timer);
 
 #if defined(SECURITY) && SECURITY == 1
@@ -393,6 +408,7 @@ static void on_boot_timer_expire(app_timer_t *timer, void *data)
   if (boot_retry_count < NCP_REBOOT_RETRY_COUNT) {
     app_log_info("Rebooting NCP target (%d)..." APP_LOG_NL, boot_retry_count);
     boot_retry_count++;
+    accept_dfu_boot = ACCEPT_DFU_BOOT;
     (void)host_comm_tx(sizeof(reboot_command), reboot_command);
     sl_status_t sc = app_timer_start(timer,
                                      NCP_REBOOT_TIMEOUT_RETRY_MS,

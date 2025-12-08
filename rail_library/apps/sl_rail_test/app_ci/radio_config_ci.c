@@ -96,6 +96,7 @@ void setConfigIndex(sl_cli_command_arg_t *args)
   sl_rail_status_t status
     = sl_rail_config_channels(railHandle,
                               (const sl_rail_channel_config_t *)channelConfigs[proposedIndex],
+                              (sl_rail_radio_config_changed_callback_t)(void *)
                               &sli_rail_util_on_channel_config_change);
   if (status != SL_RAIL_STATUS_NO_ERROR) {
     responsePrintError(sl_cli_get_command_string(args, 0), status,
@@ -110,6 +111,7 @@ void setConfigIndex(sl_cli_command_arg_t *args)
         != SL_RAIL_STATUS_NO_ERROR) {
       (void) sl_rail_config_channels((sl_rail_handle_t)railHandle,
                                      (const sl_rail_channel_config_t *)channelConfigs[configIndex],
+                                     (sl_rail_radio_config_changed_callback_t)(void *)
                                      &sli_rail_util_on_channel_config_change);
       responsePrintError(sl_cli_get_command_string(args, 0), 0x11, "Invalid channel '%d'", proposedChannel);
       return;

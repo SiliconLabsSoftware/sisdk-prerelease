@@ -23,7 +23,7 @@ recommends:
   vendor: silabs
 provides:
 - name: rail_lib_singleprotocol_secure   # specific tag
-- name: rail_lib_Xprotocol   # generic tag
+- name: rail_lib_Xprotocol_secure   # generic tag
 documentation:
   docset: rail
   document: rail-api/rail-lib

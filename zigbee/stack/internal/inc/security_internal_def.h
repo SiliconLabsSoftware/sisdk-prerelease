@@ -78,6 +78,8 @@ sl_status_t sli_zigbee_stack_start_writing_stack_tokens(void);
 
 sl_status_t sli_zigbee_stack_stop_writing_stack_tokens(void);
 
+sl_status_t sli_zigbee_stack_terminate_app_link_key_request(void);
+
 sl_status_t sli_zigbee_stack_update_app_link_key(sl_802154_long_addr_t partnerEui64);
 
 sl_status_t sli_zigbee_stack_update_tc_link_key(uint8_t maxAttempts);

@@ -154,6 +154,11 @@ void sli_zigbee_stack_stop_writing_stack_tokens_process_ipc_command(sli_zigbee_i
   msg->data.stop_writing_stack_tokens.response.result = sli_zigbee_stack_stop_writing_stack_tokens();
 }
 
+void sli_zigbee_stack_terminate_app_link_key_request_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
+{
+  msg->data.terminate_app_link_key_request.response.result = sli_zigbee_stack_terminate_app_link_key_request();
+}
+
 void sli_zigbee_stack_update_app_link_key_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
 {
   msg->data.update_app_link_key.response.result = sli_zigbee_stack_update_app_link_key(msg->data.update_app_link_key.request.partnerEui64);
@@ -477,6 +482,15 @@ sl_status_t sl_zigbee_stop_writing_stack_tokens(void)
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_stop_writing_stack_tokens_process_ipc_command, &msg);
 
   return msg.data.stop_writing_stack_tokens.response.result;
+}
+
+sl_status_t sl_zigbee_terminate_app_link_key_request(void)
+{
+  sli_zigbee_ipc_cmd_t msg = { 0, };
+
+  sli_zigbee_send_ipc_cmd(sli_zigbee_stack_terminate_app_link_key_request_process_ipc_command, &msg);
+
+  return msg.data.terminate_app_link_key_request.response.result;
 }
 
 sl_status_t sl_zigbee_update_app_link_key(sl_802154_long_addr_t partnerEui64)

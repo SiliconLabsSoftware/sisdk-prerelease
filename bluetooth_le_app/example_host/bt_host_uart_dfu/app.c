@@ -211,12 +211,6 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     // -------------------------------
     // This event indicates the device has started and the radio is ready.
     case sl_bt_evt_system_boot_id:
-      // Print boot message.
-      app_log_info("Bluetooth stack booted: v%d.%d.%d+%08" PRIx32 APP_LOG_NL,
-                   evt->data.evt_system_boot.major,
-                   evt->data.evt_system_boot.minor,
-                   evt->data.evt_system_boot.patch,
-                   evt->data.evt_system_boot.hash);
       if (dfu_state == DFU_DONE) {
         app_deinit();
         // The new application has started.
@@ -225,7 +219,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
         // This is the first boot event for the clean start from known NCP state
         app_log_info("NCP host initialised." APP_LOG_NL);
         app_log_info("Reset NCP target in bootloader mode..." APP_LOG_NL);
-        sl_bt_user_reset_to_dfu();
+        ncp_host_reboot_dfu();
         dfu_state = DFU_BOOT;
       } else {
         app_deinit();

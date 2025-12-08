@@ -462,6 +462,9 @@ source:
 - path: stack/stubs/sl_zigbee_dynamic_commissioning_stubs.c
   unless:
   - zigbee_dynamic_commissioning
+- path: stack/internal/src/stubs/sl_zigbee_zdo_security_internal_weak_stubs.c
+  unless:
+  - zigbee_dynamic_commissioning
 - path: stack/stubs/sl_zigbee_r23_misc_support_stubs.c
   unless:
   - zigbee_r23_support

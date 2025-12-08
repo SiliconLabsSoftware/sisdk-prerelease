@@ -53,7 +53,7 @@ typedef void (*uart_dfu_progress_t)(size_t uploaded_size, size_t total_size);
  * @retval SL_STATUS_IO Failure during file I/O operation, e.g. missing file.
  * @retval SL_STATUS_ABORT Update process aborted by user.
  *
- * @pre Call `sl_bt_user_reset_to_dfu()` to put the target device in DFU mode.
+ * @pre Call `ncp_host_reboot_dfu()` to put the target device in DFU mode.
  *      The DFU mode is indicated by the `sl_bt_evt_dfu_boot_id` event.
  ******************************************************************************/
 sl_status_t uart_dfu_run(const char *filename, uart_dfu_progress_t progress);

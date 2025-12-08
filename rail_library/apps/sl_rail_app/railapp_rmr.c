@@ -175,6 +175,7 @@ sl_rail_status_t Rmr_reconfigureModem(sl_rail_handle_t railHandle)
   // Configure with the downloaded channel configuration.
   sl_rail_config_channels((sl_rail_handle_t)railHandle,
                           (const sl_rail_channel_config_t *)&rmrState->channelConfig,
+                          (sl_rail_radio_config_changed_callback_t)(void *)
                           &sli_rail_util_on_channel_config_change);
 
   // Make sure that we stay in idle after the reconfiguration.

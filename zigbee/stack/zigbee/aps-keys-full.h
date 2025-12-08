@@ -64,11 +64,8 @@ extern uint32_t sli_zigbee_incoming_aps_frame_counters[];
 // This bit indicates if entry in the key table is a Symmetric Passphrase
 #define KEY_TABLE_SYMMETRIC_PASSPHRASE      (BIT(7))
 
-// This bit indicates the link key was derived from DLK
+// This bit indicates the preconfigured link key was derived from DLK. This is useful if a non-TC node wants to know whether it has performed DLK or not
 #define EXTENDED_BIT_MASK_DERIVED_KEY_DLK      (BIT(0))
-
-// This bit indicates that the entry is an authentication token
-#define EXTENDED_BIT_MASK_AUTHENTICATION_TOKEN      (BIT(1))
 
 void sli_zigbee_aps_security_read_frame_counters(void);
 

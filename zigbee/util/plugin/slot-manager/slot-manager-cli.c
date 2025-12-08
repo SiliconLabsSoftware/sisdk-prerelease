@@ -29,6 +29,7 @@ void sli_slot_manager_cli_erase_slot(sl_cli_command_arg_t *arguments)
 
 void sli_slot_manager_cli_print_external_flash_info(sl_cli_command_arg_t *arguments)
 {
+  (void)arguments;
   sl_util_af_slot_manager_print_external_flash_info();
 }
 
@@ -56,6 +57,7 @@ void sli_slot_manager_cli_read_ext_flash(sl_cli_command_arg_t *arguments)
 
 void sli_slot_manager_cli_print_slots_info(sl_cli_command_arg_t *arguments)
 {
+  (void)arguments;
   uint32_t slotId = 0;
   SlotManagerSlotInfo_t slotInfo;
   bool imagePresentInSlot;

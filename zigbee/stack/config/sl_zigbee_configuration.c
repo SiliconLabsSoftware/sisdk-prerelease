@@ -90,6 +90,7 @@ sli_zigbee_event_t sli_zigbee_permit_joining_events[NUM_MULTI_PAN_FORKS];
 sli_zigbee_event_t sli_zigbee_network_management_events[NUM_MULTI_PAN_FORKS];
 sli_zigbee_event_t sli_zigbee_neighbor_exchange_events[NUM_MULTI_PAN_FORKS];
 sli_zigbee_event_t sli_zigbee_request_key_events[SL_ZIGBEE_SUPPORTED_NETWORKS];
+sli_zigbee_event_t sli_zigbee_partner_key_update_event;
 
 #if !defined(SL_ZIGBEE_LEAF_STACK) || defined (CSL_SUPPORT)
 sli_zigbee_event_t sli_zigbee_send_parent_announce_events[NUM_MULTI_PAN_FORKS];

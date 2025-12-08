@@ -1,5 +1,69 @@
 <?xml version="1.0" encoding="ASCII"?>
 <model:MDescriptors xmlns:model="http://www.silabs.com/ss/Studio.ecore">
+  <descriptors name="btmesh-bootloader-apploader-nonsecure" label="Bootloader - SoC Bluetooth AppLoader OTA DFU Non-Secure part of Bootloader using TrustZone" description="TrustZone is used to split into a Secure and Non-Secure bootloader. This is the non-secure part of the bootloader. The secure part of the bootloader, which contains the core functionalities needs to be built separately and used together with the non-secure part of the bootloader.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="bootloader.bootloader-apploader-nonsecure.slcp"/>
+    <properties key="projectFilePaths" value="bootloader/bootloader-apploader-nonsecure.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Example|Bootloader"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
+  </descriptors>
+  <descriptors name="btmesh-bootloader-apploader-secure" label="Bootloader - SoC Bluetooth AppLoader OTA DFU Secure part of Bootloader using TrustZone" description="TrustZone is used to split into a Secure and Non-Secure bootloader. This is the secure part of the bootloader. The non-secure part of the bootloader, which contains the communication interfaces needs to be built separately and used together with the secure part of the bootloader.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="bootloader.bootloader-apploader-secure.slcp"/>
+    <properties key="projectFilePaths" value="bootloader/bootloader-apploader-secure.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Example|Bootloader"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
+  </descriptors>
+  <descriptors name="bootloader-storage-internal-single-btmesh" label="Bootloader - SoC Internal Storage (Bluetooth Mesh)" description="This sample configuration of the Gecko bootloader configures the bootloader to use the internal main flash to store firmware update images. The storage configuration is set up to store a single firmware update image at a time, in a single storage slot. This can be configured on the &#34;Storage&#34; tab.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="bootloader.bootloader-storage-internal-single-btmesh.slcp"/>
+    <properties key="projectFilePaths" value="bootloader/bootloader-storage-internal-single-btmesh.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Mesh Examples|Bootloader"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+  </descriptors>
+  <descriptors name="bootloader-storage-spiflash-single-btmesh" label="Bootloader - SoC SPI Flash Storage (single image for Bluetooth Mesh)" description="This sample configuration of the Gecko bootloader configures the bootloader to use an external SPI flash to store firmware update images. The storage configuration is set up to store a single firmware update image at a time, in a single storage slot. The storage slot is configured to start at address 0x0 of the SPI flash, and have a size of 1 MB. This can be configured on the &#34;Storage&#34; tab.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="bootloader.bootloader-storage-spiflash-single-btmesh.slcp"/>
+    <properties key="projectFilePaths" value="bootloader/bootloader-storage-spiflash-single-btmesh.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Example|Bootloader"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
+  </descriptors>
   <descriptors name="btmesh_ncp_empty" label="Bluetooth Mesh - NCP Empty" description="An NCP Target C application that makes it possible for the NCP Host Controller to access the Bluetooth Mesh stack via UART. It provides access to the host layer via BGAPI and not to the link layer via HCI.
 ">
     <properties key="namespace" value="template.uc"/>
@@ -80,9 +144,25 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
-  <descriptors name="btmesh_soc_csr_generator_tz" label="Bluetooth Mesh - SoC CSR Generator (TrustZone)" description="Certificate generating firmware workspace. Software is generating the device EC key pair, the signing request for the device certificate, and other related data. The generated data can be read out by the Central Authority. This example utilizes TrustZone for storing keys.
+  <descriptors name="btmesh_soc_csr_generator_tz" label="Bluetooth Mesh - SoC CSR Generator (TrustZone)" description="Certificate generating firmware example. Software is generating the device EC key pair, the signing request for the device certificate, and other related data. The generated data can be read out by the Central Authority. This example utilizes TrustZone for storing keys.
 ">
     <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.btmesh_soc_csr_generator.btmesh_soc_csr_generator_tz.slcp"/>
+    <properties key="projectFilePaths" value="example/btmesh_soc_csr_generator/btmesh_soc_csr_generator_tz.slcp"/>
+    <properties key="readmeFiles" value="documentation/example/btmesh_soc_csr_generator/readme.md"/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+  </descriptors>
+  <descriptors name="btmesh_soc_csr_generator_tz" label="Bluetooth Mesh - SoC CSR Generator (TrustZone)" description="Certificate generating firmware workspace. Software is generating the device EC key pair, the signing request for the device certificate, and other related data. The generated data can be read out by the Central Authority. This example utilizes TrustZone for storing keys.
+">
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.btmesh_soc_csr_generator.btmesh_soc_csr_generator_tz.slcw"/>
     <properties key="projectFilePaths" value="example/btmesh_soc_csr_generator/btmesh_soc_csr_generator_tz.slcw"/>
@@ -95,10 +175,27 @@
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-apploader-nonsecure.slcp bootloader.bootloader-apploader-secure.slcp example.btmesh_soc_csr_generator.btmesh_soc_csr_generator_tz.slcp example.btmesh_soc_tz_secure_application.btmesh_soc_tz_secure_application.slcp"/>
+  </descriptors>
+  <descriptors name="btmesh_soc_dfu_distributor" label="Bluetooth Mesh - SoC DFU Distributor" description="Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.btmesh_soc_dfu_distributor.btmesh_soc_dfu_distributor_display.slcp"/>
+    <properties key="projectFilePaths" value="example/btmesh_soc_dfu_distributor/btmesh_soc_dfu_distributor_display.slcp"/>
+    <properties key="readmeFiles" value="documentation/example/btmesh_soc_dfu_distributor/readme.md"/>
+    <properties key="boardCompatibility" value=""/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_dfu_distributor_s2_ext_btl" label="Bluetooth Mesh - SoC DFU Distributor with External Storage Bootloader" description="Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update. This workspace combines External Storage Bootloader and Bluetooth Mesh Firmware Distributor into a single binary.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.btmesh_soc_dfu_distributor.btmesh_soc_dfu_distributor_display_s2_ext_btl.slcw"/>
     <properties key="projectFilePaths" value="example/btmesh_soc_dfu_distributor/btmesh_soc_dfu_distributor_display_s2_ext_btl.slcw"/>
@@ -111,10 +208,11 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-storage-spiflash-single-btmesh.slcp example.btmesh_soc_dfu_distributor.btmesh_soc_dfu_distributor_display.slcp"/>
   </descriptors>
   <descriptors name="btmesh_soc_dfu_distributor_s2_int_btl" label="Bluetooth Mesh - SoC DFU Distributor with Internal Storage Bootloader" description="Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Distributor into a single binary.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.btmesh_soc_dfu_distributor.btmesh_soc_dfu_distributor_display_s2_int_btl.slcw"/>
     <properties key="projectFilePaths" value="example/btmesh_soc_dfu_distributor/btmesh_soc_dfu_distributor_display_s2_int_btl.slcw"/>
@@ -127,10 +225,27 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-storage-internal-single-btmesh.slcp example.btmesh_soc_dfu_distributor.btmesh_soc_dfu_distributor_display.slcp"/>
+  </descriptors>
+  <descriptors name="btmesh_soc_dfu_distributor" label="Bluetooth Mesh - SoC DFU Distributor" description="Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.btmesh_soc_dfu_distributor.btmesh_soc_dfu_distributor_log.slcp"/>
+    <properties key="projectFilePaths" value="example/btmesh_soc_dfu_distributor/btmesh_soc_dfu_distributor_log.slcp"/>
+    <properties key="readmeFiles" value="documentation/example/btmesh_soc_dfu_distributor/readme.md"/>
+    <properties key="boardCompatibility" value=""/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_dfu_distributor_s2_ext_btl" label="Bluetooth Mesh - SoC DFU Distributor with External Storage Bootloader" description="Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update. This workspace combines External Storage Bootloader and Bluetooth Mesh Firmware Distributor into a single binary.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.btmesh_soc_dfu_distributor.btmesh_soc_dfu_distributor_log_s2_ext_btl.slcw"/>
     <properties key="projectFilePaths" value="example/btmesh_soc_dfu_distributor/btmesh_soc_dfu_distributor_log_s2_ext_btl.slcw"/>
@@ -143,10 +258,11 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-storage-spiflash-single-btmesh.slcp example.btmesh_soc_dfu_distributor.btmesh_soc_dfu_distributor_log.slcp"/>
   </descriptors>
   <descriptors name="btmesh_soc_dfu_distributor_s2_int_btl" label="Bluetooth Mesh - SoC DFU Distributor with Internal Storage Bootloader" description="Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Distributor into a single binary.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.btmesh_soc_dfu_distributor.btmesh_soc_dfu_distributor_log_s2_int_btl.slcw"/>
     <properties key="projectFilePaths" value="example/btmesh_soc_dfu_distributor/btmesh_soc_dfu_distributor_log_s2_int_btl.slcw"/>
@@ -159,10 +275,27 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-storage-internal-single-btmesh.slcp example.btmesh_soc_dfu_distributor.btmesh_soc_dfu_distributor_log.slcp"/>
+  </descriptors>
+  <descriptors name="btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target" description="Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_display.slcp"/>
+    <properties key="projectFilePaths" value="example/btmesh_soc_dfu_target/btmesh_soc_dfu_target_display.slcp"/>
+    <properties key="readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
+    <properties key="boardCompatibility" value=""/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_dfu_target_s2_ext_btl" label="Bluetooth Mesh - SoC DFU Target with External Storage Bootloader" description="Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines External Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_display_s2_ext_btl.slcw"/>
     <properties key="projectFilePaths" value="example/btmesh_soc_dfu_target/btmesh_soc_dfu_target_display_s2_ext_btl.slcw"/>
@@ -175,10 +308,11 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-storage-spiflash-single-btmesh.slcp example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_display.slcp"/>
   </descriptors>
   <descriptors name="btmesh_soc_dfu_target_s2_int_btl" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader" description="Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_display_s2_int_btl.slcw"/>
     <properties key="projectFilePaths" value="example/btmesh_soc_dfu_target/btmesh_soc_dfu_target_display_s2_int_btl.slcw"/>
@@ -191,10 +325,27 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-storage-internal-single-btmesh.slcp example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_display.slcp"/>
+  </descriptors>
+  <descriptors name="btmesh_soc_dfu_target" label="Bluetooth Mesh - SoC DFU Target" description="Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_log.slcp"/>
+    <properties key="projectFilePaths" value="example/btmesh_soc_dfu_target/btmesh_soc_dfu_target_log.slcp"/>
+    <properties key="readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
+    <properties key="boardCompatibility" value=""/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_dfu_target_s2_ext_btl" label="Bluetooth Mesh - SoC DFU Target with External Storage Bootloader" description="Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines External Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_log_s2_ext_btl.slcw"/>
     <properties key="projectFilePaths" value="example/btmesh_soc_dfu_target/btmesh_soc_dfu_target_log_s2_ext_btl.slcw"/>
@@ -207,10 +358,11 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-storage-spiflash-single-btmesh.slcp example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_log.slcp"/>
   </descriptors>
   <descriptors name="btmesh_soc_dfu_target_s2_int_btl" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader" description="Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_log_s2_int_btl.slcw"/>
     <properties key="projectFilePaths" value="example/btmesh_soc_dfu_target/btmesh_soc_dfu_target_log_s2_int_btl.slcw"/>
@@ -223,10 +375,27 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-storage-internal-single-btmesh.slcp example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_log.slcp"/>
+  </descriptors>
+  <descriptors name="btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target" description="Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_lpn_display.slcp"/>
+    <properties key="projectFilePaths" value="example/btmesh_soc_dfu_target/btmesh_soc_dfu_target_lpn_display.slcp"/>
+    <properties key="readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
+    <properties key="boardCompatibility" value=""/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_dfu_target_s2_ext_btl" label="Bluetooth Mesh - SoC DFU Target with External Storage Bootloader" description="Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines External Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_lpn_display_s2_ext_btl.slcw"/>
     <properties key="projectFilePaths" value="example/btmesh_soc_dfu_target/btmesh_soc_dfu_target_lpn_display_s2_ext_btl.slcw"/>
@@ -239,10 +408,11 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-storage-spiflash-single-btmesh.slcp example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_lpn_display.slcp"/>
   </descriptors>
   <descriptors name="btmesh_soc_dfu_target_s2_int_btl" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader" description="Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_lpn_display_s2_int_btl.slcw"/>
     <properties key="projectFilePaths" value="example/btmesh_soc_dfu_target/btmesh_soc_dfu_target_lpn_display_s2_int_btl.slcw"/>
@@ -255,10 +425,27 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-storage-internal-single-btmesh.slcp example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_lpn_display.slcp"/>
+  </descriptors>
+  <descriptors name="btmesh_soc_dfu_target_lpn" label="Bluetooth Mesh - SoC DFU Target" description="Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_lpn_log.slcp"/>
+    <properties key="projectFilePaths" value="example/btmesh_soc_dfu_target/btmesh_soc_dfu_target_lpn_log.slcp"/>
+    <properties key="readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
+    <properties key="boardCompatibility" value=""/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_dfu_target_s2_ext_btl" label="Bluetooth Mesh - SoC DFU Target with External Storage Bootloader" description="Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines External Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_lpn_log_s2_ext_btl.slcw"/>
     <properties key="projectFilePaths" value="example/btmesh_soc_dfu_target/btmesh_soc_dfu_target_lpn_log_s2_ext_btl.slcw"/>
@@ -271,10 +458,11 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-storage-spiflash-single-btmesh.slcp example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_lpn_log.slcp"/>
   </descriptors>
   <descriptors name="btmesh_soc_dfu_target_s2_int_btl" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader" description="Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_lpn_log_s2_int_btl.slcw"/>
     <properties key="projectFilePaths" value="example/btmesh_soc_dfu_target/btmesh_soc_dfu_target_lpn_log_s2_int_btl.slcw"/>
@@ -287,10 +475,27 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-storage-internal-single-btmesh.slcp example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_lpn_log.slcp"/>
+  </descriptors>
+  <descriptors name="btmesh_soc_dfu_target_lpn_low_power" label="Bluetooth Mesh - SoC DFU Target" description="Demonstrates the Firmware Update Target role defined in Mesh Device Firmware Update Model specification. Target node receives firmware image from a Standalone Updater or Distributor node and applies the firmware image. The node acts as a LPN node which supports pull transfer mode only. This example variant is optimized for ultra low current consumption with 2 minutes poll timeout and disabled CLI, logging, and LCD.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_lpn_low_power.slcp"/>
+    <properties key="projectFilePaths" value="example/btmesh_soc_dfu_target/btmesh_soc_dfu_target_lpn_low_power.slcp"/>
+    <properties key="readmeFiles" value="documentation/example/btmesh_soc_dfu_target/readme.md"/>
+    <properties key="boardCompatibility" value=""/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_dfu_target_s2_ext_btl" label="Bluetooth Mesh - SoC DFU Target with External Storage Bootloader" description="Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines External Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_lpn_low_power_s2_ext_btl.slcw"/>
     <properties key="projectFilePaths" value="example/btmesh_soc_dfu_target/btmesh_soc_dfu_target_lpn_low_power_s2_ext_btl.slcw"/>
@@ -303,10 +508,11 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-storage-spiflash-single-btmesh.slcp example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_lpn_low_power.slcp"/>
   </descriptors>
   <descriptors name="btmesh_soc_dfu_target_s2_int_btl" label="Bluetooth Mesh - SoC DFU Target with Internal Storage Bootloader" description="Demonstrates the Firmware Update Target role. A Distributor node is responsible for delivering new firmware images to the Target nodes. This workspace combines Internal Storage Bootloader and Bluetooth Mesh Firmware Target into a single binary.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_lpn_low_power_s2_int_btl.slcw"/>
     <properties key="projectFilePaths" value="example/btmesh_soc_dfu_target/btmesh_soc_dfu_target_lpn_low_power_s2_int_btl.slcw"/>
@@ -319,6 +525,7 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-storage-internal-single-btmesh.slcp example.btmesh_soc_dfu_target.btmesh_soc_dfu_target_lpn_low_power.slcp"/>
   </descriptors>
   <descriptors name="btmesh_soc_empty" label="Bluetooth Mesh - SoC Empty" description="Demonstrates the bare minimum needed for a Bluetooth Mesh C application. The application starts Unprovisioned Device Beaconing after booting, and then waits to be provisioned.
 ">
@@ -384,9 +591,25 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
-  <descriptors name="btmesh_soc_empty_cbp_tz_workspace" label="Bluetooth Mesh - SoC Empty with Certificate-Based Provisioning support (TrustZone)" description="Certificate-based provisioning firmware workspace. Demonstrates the bare minimum needed for a Bluetooth Mesh C application that allows Certificate-Based Provisioning (CBP). The application starts Unprovisioned Device Beaconing after boot waiting to be provisioned to a Mesh Network. This example utilizes TrustZone for storing keys.
+  <descriptors name="btmesh_soc_empty_cbp_tz" label="Bluetooth Mesh - SoC Empty with Certificate-Based Provisioning support" description="Demonstrates the bare minimum needed for a Bluetooth Mesh C application that allows Certificate-Based Provisioning (CBP). The application starts Unprovisioned Device Beaconing after boot waiting to be provisioned to a Mesh Network.
 ">
     <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.btmesh_soc_empty_cbp.btmesh_soc_empty_cbp_tz.slcp"/>
+    <properties key="projectFilePaths" value="example/btmesh_soc_empty_cbp/btmesh_soc_empty_cbp_tz.slcp"/>
+    <properties key="readmeFiles" value="documentation/example/btmesh_soc_empty_cbp/readme.md"/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth\ Mesh"/>
+  </descriptors>
+  <descriptors name="btmesh_soc_empty_cbp_tz_workspace" label="Bluetooth Mesh - SoC Empty with Certificate-Based Provisioning support (TrustZone)" description="Certificate-based provisioning firmware workspace. Demonstrates the bare minimum needed for a Bluetooth Mesh C application that allows Certificate-Based Provisioning (CBP). The application starts Unprovisioned Device Beaconing after boot waiting to be provisioned to a Mesh Network. This example utilizes TrustZone for storing keys.
+">
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.btmesh_soc_empty_cbp.btmesh_soc_empty_cbp_tz.slcw"/>
     <properties key="projectFilePaths" value="example/btmesh_soc_empty_cbp/btmesh_soc_empty_cbp_tz.slcw"/>
@@ -399,6 +622,7 @@
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-apploader-nonsecure.slcp bootloader.bootloader-apploader-secure.slcp example.btmesh_soc_empty_cbp.btmesh_soc_empty_cbp_tz.slcp example.btmesh_soc_tz_secure_application.btmesh_soc_tz_secure_application.slcp"/>
   </descriptors>
   <descriptors name="btmesh_soc_empty_cmt" label="Bluetooth Mesh - SoC Empty with Common Manufacturing Token Support" description="Demonstrates the bare minimum needed for a Bluetooth Mesh C application. The application sets its UUID and OOB provisioning capabilities depending on the manufacturing token used. The application also demonstrates how to use PSA crypto to validate the token signature.
 ">
@@ -2068,6 +2292,22 @@ Note - this example is not compatible with the Dimming Control NLC Profile.
     <properties key="readmeFiles" value="documentation/example/btmesh_soc_switch_hsl/readme_low_power_rtos.md"/>
     <properties key="boardCompatibility" value="brd2601b brd2602a brd2703a brd4110b brd4111b brd4115a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186c brd4187c brd4188b brd4194a brd4195a brd4195b brd4196a brd4196b brd4198a brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4329a brd4332a brd4335a"/>
     <properties key="partCompatibility" value=".*bgm210la22jif.* .*bgm210la22jnf.* .*bgm210p022jia.* .*bgm210p032jia.* .*bgm210pa22jia.* .*bgm210pa32jia.* .*bgm210pb22jia.* .*bgm210pb32jia.* .*bgm240pa22vna.* .*bgm240pa32vna.* .*bgm240pa32vnn.* .*bgm240pb22vna.* .*bgm240pb32vna.* .*bgm240pb32vnn.* .*bgm240sa22vna.* .*bgm240sb22vna.* .*bgm241sb22vna.* .*bgm241sd22vna.* .*bgm270sc22sna.* .*efr32bg21a010f1024im32.* .*efr32bg21a010f512im32.* .*efr32bg21a010f768im32.* .*efr32bg21a020f1024im32.* .*efr32bg21a020f512im32.* .*efr32bg21a020f768im32.* .*efr32bg21b010f1024im32.* .*efr32bg21b010f512im32.* .*efr32bg21b010f768im32.* .*efr32bg21b020f1024im32.* .*efr32bg21b020f512im32.* .*efr32bg21b020f768im32.* .*efr32bg24a010f1024gj42.* .*efr32bg24a010f1024im40.* .*efr32bg24a010f1024im48.* .*efr32bg24a010f1536im40.* .*efr32bg24a010f1536im48.* .*efr32bg24a020f1024im40.* .*efr32bg24a020f1024im48.* .*efr32bg24a020f1536im40.* .*efr32bg24a610f1536im40.* .*efr32bg24a620f1536im40.* .*efr32bg24b010f1024gj42.* .*efr32bg24b010f1536im40.* .*efr32bg24b010f1536im48.* .*efr32bg24b020f1536im40.* .*efr32bg24b110f1536im48.* .*efr32bg24b210f1024im48.* .*efr32bg24b210f1536im48.* .*efr32bg24b220f1024im48.* .*efr32bg24b310f1536ij42.* .*efr32bg24b410f1536ij42.* .*efr32bg24b610f1536im40.* .*efr32bg24b620f1536im40.* .*efr32bg24l010f768im40.* .*efr32bg24l210f768im40.* .*efr32bg27c140f768im32.* .*efr32bg27c140f768im40.* .*efr32bg27c230f768im32.* .*efr32bg27c230f768im40.* .*efr32bg27c320f768gj39.* .*efr32bg27c320f768ij39.* .*efr32mg21a010f1024im32.* .*efr32mg21a010f512im32.* .*efr32mg21a010f768im32.* .*efr32mg21a020f1024im32.* .*efr32mg21a020f512im32.* .*efr32mg21a020f768im32.* .*efr32mg21b010f1024im32.* .*efr32mg21b010f512im32.* .*efr32mg21b010f768im32.* .*efr32mg21b020f1024im32.* .*efr32mg21b020f512im32.* .*efr32mg21b020f768im32.* .*efr32mg24a010f1024im40.* .*efr32mg24a010f1024im48.* .*efr32mg24a010f1536gm40.* .*efr32mg24a010f1536gm48.* .*efr32mg24a010f1536im40.* .*efr32mg24a010f1536im48.* .*efr32mg24a010f768im40.* .*efr32mg24a010f768im48.* .*efr32mg24a020f1024im40.* .*efr32mg24a020f1024im48.* .*efr32mg24a020f1536gm40.* .*efr32mg24a020f1536gm48.* .*efr32mg24a020f1536im40.* .*efr32mg24a020f1536im48.* .*efr32mg24a020f768im40.* .*efr32mg24a021f1024im40.* .*efr32mg24a110f1024im48.* .*efr32mg24a110f1536gm48.* .*efr32mg24a111f1536gm48.* .*efr32mg24a120f1536gm48.* .*efr32mg24a121f1536gm48.* .*efr32mg24a410f1536im40.* .*efr32mg24a410f1536im48.* .*efr32mg24a420f1536im40.* .*efr32mg24a420f1536im48.* .*efr32mg24a610f1536im40.* .*efr32mg24a620f1536im40.* .*efr32mg24b010f1024im48.* .*efr32mg24b010f1536im40.* .*efr32mg24b010f1536im48.* .*efr32mg24b020f1024im48.* .*efr32mg24b020f1536im40.* .*efr32mg24b020f1536im48.* .*efr32mg24b110f1536gm48.* .*efr32mg24b110f1536im48.* .*efr32mg24b120f1536im48.* .*efr32mg24b210f1536im40.* .*efr32mg24b210f1536im48.* .*efr32mg24b220f1536im48.* .*efr32mg24b310f1536im48.* .*efr32mg24b610f1536im40.* .*efr32mg27c140f768im32.* .*efr32mg27c140f768im40.* .*efr32mg27c230f768im32.* .*efr32mg27c230f768im40.* .*efr32mr21a020f512im32.* .*mgm210l022jif.* .*mgm210l022jnf.* .*mgm210la22jif.* .*mgm210la22jnf.* .*mgm210p022jia.* .*mgm210p032jia.* .*mgm210pa22jia.* .*mgm210pa32jia.* .*mgm210pb22jia.* .*mgm210pb32jia.* .*mgm211la02jnf.* .*mgm240l022rnf.* .*mgm240l022vif.* .*mgm240l022vnf.* .*mgm240la22uif.* .*mgm240la22vif.* .*mgm240ld22vif.* .*mgm240pa22vna.* .*mgm240pa32vna.* .*mgm240pa32vnn.* .*mgm240pb22vna.* .*mgm240pb32vna.* .*mgm240pb32vnn.* .*mgm240sa22vna.* .*mgm240sb22vna.* .*mgm240sd22vna.* .*mgm270sc22sna.* .*mgm270sc32sna.*"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Mesh Examples"/>
+    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
+  </descriptors>
+  <descriptors name="btmesh_soc_tz_secure_application" label="Sample project for TrustZone Secure Key Library" description="This is a Silabs production project and can be used as a reference implementation for creating secure applications with Trust Zone for Bluetooth Mesh products.
+This project makes a TrustZone secure library for running PSA libraries in the secure world.">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.btmesh_soc_tz_secure_application.btmesh_soc_tz_secure_application.slcp"/>
+    <properties key="projectFilePaths" value="example/btmesh_soc_tz_secure_application/btmesh_soc_tz_secure_application.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar"/>
     <properties key="category" value="Bluetooth Mesh Examples"/>

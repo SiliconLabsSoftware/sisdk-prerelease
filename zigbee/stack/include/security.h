@@ -220,7 +220,7 @@ sl_status_t sl_zigbee_update_tc_link_key(uint8_t maxAttempts);
 /** @brief Request a new application link key with a partner from the Trust Center. This
  * function starts by sending a Security Get Authentication Level Request to the Trust Center to
  * verify the target security level compliance. A Request Key message will then be
- * sent, followed by a Verify Key Confirm message.
+ * sent, followed by a Verify Key Confirm message once the partner sends the Verify Key message.
  *
  * @param partnerEui64 The partner EUI64.
  *
@@ -232,6 +232,19 @@ sl_status_t sl_zigbee_update_tc_link_key(uint8_t maxAttempts);
  * returned.
  */
 sl_status_t sl_zigbee_update_app_link_key(sl_802154_long_addr_t partnerEui64);
+
+/** @brief Stops the current application link key update with the partner. This routine
+ * may be called at any point to terminate any started application link key request. This API
+ * may also be called in the sl_zigbee_get_authentication_level_callback handler if the
+ * application determines that the security level of the target has an insufficient level.
+ *
+ * @return None
+ *
+ * @note This function does not take an EUI argument. The EUI partner is cached in the stack
+ * when the sl_zigbee_update_app_link_key() routine is called. Only one partner link key update
+ * session is supported by the stack at one time.
+ */
+sl_status_t sl_zigbee_terminate_app_link_key_request(void);
 
 /** @brief Notify the application about the status
  *  of the request for a Link Key.  The application should define

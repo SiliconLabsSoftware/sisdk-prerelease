@@ -7,7 +7,5 @@ version=2.10.0
 label=wisun_ddp_app
 description=Wi-SUN DDP Application
 
-prop.subLabel=Wi-SUN\\ DDP\\ Application
-
 # List of relative file paths to template xml files in this extension
 prop.file.templatesFile=wisun_ddp_templates.xml

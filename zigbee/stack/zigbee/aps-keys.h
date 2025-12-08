@@ -26,6 +26,10 @@
 
 extern sli_zigbee_event_t sli_zigbee_request_key_events[];
 extern uint8_t sli_zigbee_request_key_timeout;
+extern sli_zigbee_event_t sli_zigbee_partner_key_update_event;
+
+// From Table 1 of the BDB spec
+#define BDBC_TC_LINK_KEY_EXCHANGE_TIMEOUT_MS (5 * 1000)
 
 #define UPDATE_TC_LINK_KEY_STATE_NONE             (0x00)
 #define UPDATE_TC_LINK_KEY_STATE_NODE_DESCRIPTOR  (0x01)
@@ -34,11 +38,12 @@ extern uint8_t sli_zigbee_request_key_timeout;
 // NOTE this technically comes before verify key in the sequence
 #define UPDATE_TC_LINK_KEY_STATE_DLK_NEGOTIATION  (0x04)
 
-#define UPDATE_APP_LINK_KEY_STATE_NONE                      (0x00)
-#define UPDATE_APP_LINK_KEY_STATE_SECURITY_LEVEL_INITIATOR  (0x01)
-#define UPDATE_APP_LINK_KEY_STATE_SECURITY_LEVEL_TARGET     (0x02)
-#define UPDATE_APP_LINK_KEY_STATE_REQUEST_KEY               (0x03)
-#define UPDATE_APP_LINK_KEY_STATE_VERIFY_KEY                (0x04)
+#define UPDATE_APP_LINK_KEY_STATE_NONE                        (0x00)
+#define UPDATE_APP_LINK_KEY_STATE_SECURITY_LEVEL_INITIATOR    (0x01) // Initiator has sent Get Auth Level to TC about target
+#define UPDATE_APP_LINK_KEY_STATE_REQUEST_KEY_INITIATOR       (0x02) // Target has sent Request Key to TC for link key with target
+#define UPDATE_APP_LINK_KEY_STATE_SECURITY_LEVEL_TARGET       (0x03) // Target has sent Get Auth Level to TC about initiator
+#define UPDATE_APP_LINK_KEY_STATE_AWAIT_VERIFY_KEY_INITIATOR  (0x04) // Initiator waits for Verify Key from target
+#define UPDATE_APP_LINK_KEY_STATE_VERIFY_KEY_TARGET           (0x05) // Target has sent Verify Key to initiator
 
 // This key is "ZigBeeAlliance09"
 #define ZIGBEE_DEFAULT_LINK_KEY                        \
@@ -63,7 +68,12 @@ void sli_zigbee_request_key_timeout_control(bool start, bool useBdbTimeoutValues
 #define sli_zigbee_reset_incoming_tc_frame_counter() \
   (sli_zigbee_incoming_tc_link_key_frame_counter = 0)
 
+void sli_zigbee_set_partner_key_update_timer(bool start, uint32_t timeout_ms);
+sl_status_t sli_zigbee_stack_terminate_app_link_key_request(void);
+
 //----------------------------------------------------------------
+
+void sli_zigbee_aps_keys_init(void);
 
 sl_status_t sli_zigbee_set_trust_center_link_key(sl_zigbee_key_data_t* keyData);
 
@@ -108,4 +118,8 @@ void sli_zigbee_request_key_process_node_descriptor_response(sl_802154_short_add
                                                              sli_zigbee_packet_header_t header);
 uint8_t sli_zigbee_get_update_app_link_key_state();
 void sli_zigbee_set_update_app_link_key_state(uint8_t state);
+
+void sli_zigbee_partner_key_update_event_handler(sli_zigbee_event_t *event);
+void sli_zigbee_partner_link_key_get_device(sl_802154_long_addr_t partner);
+void sli_zigbee_partner_link_key_set_device(sl_802154_long_addr_t partner);
 #endif // SILABS_APS_KEYS_H

@@ -594,7 +594,6 @@ RAIL_Status_t RAIL_GetTxPowerCurveLimits(RAIL_Handle_t railHandle,
 // should *not* be defined in a customer build.
 #if !defined(RAIL_PA_CONVERSIONS_WEAK) && !defined(HAL_CONFIG)
 
-#include "sl_rail_util_pa_config.h"
 #if     SL_RAIL_UTIL_PA_NVM_ENABLED
 #include "sl_rail_util_pa_nvm_configs.h"
 #endif//SL_RAIL_UTIL_PA_NVM_ENABLED
@@ -614,9 +613,6 @@ static RAIL_TxPowerConfig_t txPowerConfigSubGhz = {
 };
 #endif
 #if RAIL_SUPPORTS_OFDM_PA
-#ifndef SL_RAIL_UTIL_PA_SELECTION_OFDM
-#define SL_RAIL_UTIL_PA_SELECTION_OFDM RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE
-#endif
 static RAIL_TxPowerConfig_t txPowerConfigOFDM = {
   .mode = SL_RAIL_UTIL_PA_SELECTION_OFDM,
   .voltage = SL_RAIL_UTIL_PA_VOLTAGE_MV,

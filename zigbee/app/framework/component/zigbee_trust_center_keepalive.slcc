@@ -51,6 +51,12 @@ template_contribution:
     name: now
     handler: sl_zigbee_af_send_keepalive_now_command
     help: Send a TC Keepalive now. If the TC Keepalive server hasn't been discovered yet, a Match Descriptor is sent first
+- name: cli_command
+  value:
+    group: tc-keepalive
+    name: halt
+    handler: sl_zigbee_af_send_keepalive_halt_command
+    help: Halts the TC Keepalive mechanism
 
 documentation:
   docset: zigbee

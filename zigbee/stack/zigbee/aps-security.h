@@ -230,7 +230,8 @@ void sli_zigbee_set_network_key(sl_zigbee_key_data_t* key,
 void sli_zigbee_application_security_message_handler(sli_zigbee_packet_header_t header,
                                                      sl_802154_short_addr_t source,
                                                      bool wasEncrypted,
-                                                     bool isTcKeyUnconfirmed);
+                                                     bool isTcKeyUnconfirmed,
+                                                     bool isAppKeyUnconfirmed);
 
 // The long destination is only needed for key transport messages.
 bool sli_zigbee_send_aps_command(sl_802154_short_addr_t destination,

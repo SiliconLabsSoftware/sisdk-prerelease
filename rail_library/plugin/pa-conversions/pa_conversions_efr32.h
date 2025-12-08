@@ -70,6 +70,19 @@
 #include "pa_curves_efr32.h"
 #endif
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// Tolerate a sl_rail_util_pa config file lacking these PA_SELECTION define(s)
+#ifndef SL_RAIL_UTIL_PA_SELECTION_2P4GHZ
+#define SL_RAIL_UTIL_PA_SELECTION_2P4GHZ RAIL_TX_POWER_MODE_2P4GIG_HIGHEST
+#endif
+#ifndef SL_RAIL_UTIL_PA_SELECTION_SUBGHZ
+#define SL_RAIL_UTIL_PA_SELECTION_SUBGHZ RAIL_TX_POWER_MODE_SUBGIG_HIGHEST
+#endif
+#ifndef SL_RAIL_UTIL_PA_SELECTION_OFDM
+#define SL_RAIL_UTIL_PA_SELECTION_OFDM RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE
+#endif
+#endif//DOXYGEN_SHOULD_SKIP_THIS
+
 #ifdef __cplusplus
 extern "C" {
 #endif

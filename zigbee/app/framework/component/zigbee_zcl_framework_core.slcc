@@ -9,7 +9,6 @@ provides:
 - name: zigbee_zcl_framework_core
 
 requires:
-- name: zigbee_default_lcd_config
 - name: zigbee_device_config
 - name: zigbee_cluster_service
 - name: zigbee_signature_decode

@@ -1,5 +1,117 @@
 <?xml version="1.0" encoding="ASCII"?>
 <model:MDescriptors xmlns:model="http://www.silabs.com/ss/Studio.ecore">
+  <descriptors name="bt-bootloader-apploader-nonsecure" label="Bootloader - SoC Bluetooth AppLoader OTA DFU Non-Secure part of Bootloader using TrustZone" description="TrustZone is used to split into a Secure and Non-Secure bootloader. This is the non-secure part of the bootloader. The secure part of the bootloader, which contains the core functionalities needs to be built separately and used together with the non-secure part of the bootloader.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="bootloader.bootloader-apploader-nonsecure.slcp"/>
+    <properties key="projectFilePaths" value="bootloader/bootloader-apploader-nonsecure.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Example|Bootloader"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
+  </descriptors>
+  <descriptors name="bt-bootloader-apploader-secure" label="Bootloader - SoC Bluetooth AppLoader OTA DFU Secure part of Bootloader using TrustZone" description="TrustZone is used to split into a Secure and Non-Secure bootloader. This is the secure part of the bootloader. The non-secure part of the bootloader, which contains the communication interfaces needs to be built separately and used together with the secure part of the bootloader.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="bootloader.bootloader-apploader-secure.slcp"/>
+    <properties key="projectFilePaths" value="bootloader/bootloader-apploader-secure.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Example|Bootloader"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
+  </descriptors>
+  <descriptors name="bt-bootloader-apploader" label="Bootloader - SoC Bluetooth AppLoader OTA DFU" description="Standalone Bootloader using the Bluetooth AppLoader OTA DFU. This implements in-place application updates using Bluetooth connection.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="bootloader.bootloader-apploader.slcp"/>
+    <properties key="projectFilePaths" value="bootloader/bootloader-apploader.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Example|Bootloader"/>
+    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
+  </descriptors>
+  <descriptors name="bt-bootloader-storage-internal-single" label="Bootloader - SoC Internal Storage" description="This sample configuration of the Gecko bootloader configures the bootloader to use the internal main flash to store firmware update images. The storage configuration is set up to store a single firmware update image at a time, in a single storage slot. The storage slot start address and size is calculated automatically based on the flash size and flash start address. The SLOT_CUSTOM_CONFIG configuration option can be enabled to customize the slot configuration.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="bootloader.bootloader-storage-internal-single.slcp"/>
+    <properties key="projectFilePaths" value="bootloader/bootloader-storage-internal-single.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Example|Bootloader"/>
+    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
+  </descriptors>
+  <descriptors name="bt-bootloader-storage-single" label="Bootloader - SoC Storage" description="This sample configuration of the Gecko bootloader configures the bootloader to use the flash to store firmware update images. The storage configuration is set up to store a single firmware update image at a time, in a single storage slot. The storage slot start address and size is calculated automatically based on the flash size and flash start address. The SLOT_CUSTOM_CONFIG configuration option can be enabled to customize the slot configuration.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="bootloader.bootloader-storage-single.slcp"/>
+    <properties key="projectFilePaths" value="bootloader/bootloader-storage-single.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Example|Bootloader"/>
+    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
+  </descriptors>
+  <descriptors name="bt-bootloader-uart-bgapi-s2" label="Bootloader - NCP BGAPI UART DFU (Series 2)" description="Standalone Bootloader using the BGAPI protocol for UART DFU. This is the recommended UART bootloader for the BLE protocol stack.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="bootloader.bootloader-uart-bgapi-s2.slcp"/>
+    <properties key="projectFilePaths" value="bootloader/bootloader-uart-bgapi-s2.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Example|Bootloader"/>
+    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced"/>
+  </descriptors>
+  <descriptors name="bt-bootloader-uart-bgapi-s3" label="Bootloader - NCP BGAPI UART DFU (Series 3)" description="Standalone Bootloader using the BGAPI protocol for UART DFU. This is the recommended UART bootloader for the BLE protocol stack.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="bootloader.bootloader-uart-bgapi-s3.slcp"/>
+    <properties key="projectFilePaths" value="bootloader/bootloader-uart-bgapi-s3.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Example|Bootloader"/>
+    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced"/>
+  </descriptors>
   <descriptors name="bt_aoa_ncp_locator" label="Bluetooth AoA - NCP locator" description="Network Co-Processor (NCP) target application extended with CTE Receiver support. It enables Angle of Arrival (AoA) calculation. Use this application with Direction Finding host examples.
 ">
     <properties key="namespace" value="template.uc"/>
@@ -240,9 +352,25 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
   </descriptors>
-  <descriptors name="bt_ncp_dfu_btl" label="Bluetooth - NCP DFU" description="Network Co-Processor (NCP) target application with device firmware update. Runs the Bluetooth stack dynamically and provides access to it via Bluetooth API (BGAPI) using UART connection. NCP mode makes it possible to run your application on a host controller or PC. Combined solution with application and bootloader projects.
+  <descriptors name="bt_ncp_dfu" label="Bluetooth - NCP DFU" description="Network Co-Processor (NCP) target application with device firmware update. Runs the Bluetooth stack dynamically and provides access to it via Bluetooth API (BGAPI) using UART connection. NCP mode makes it possible to run your application on a host controller or PC.
 ">
     <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.bt_ncp_dfu.bt_ncp_dfu.slcp"/>
+    <properties key="projectFilePaths" value="example/bt_ncp_dfu/bt_ncp_dfu.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="EVALUATION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
+  </descriptors>
+  <descriptors name="bt_ncp_dfu_btl" label="Bluetooth - NCP DFU" description="Network Co-Processor (NCP) target application with device firmware update. Runs the Bluetooth stack dynamically and provides access to it via Bluetooth API (BGAPI) using UART connection. NCP mode makes it possible to run your application on a host controller or PC. Combined solution with application and bootloader projects.
+">
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.bt_ncp_dfu.bt_ncp_dfu_btl.slcw"/>
     <properties key="projectFilePaths" value="example/bt_ncp_dfu/bt_ncp_dfu_btl.slcw"/>
@@ -255,10 +383,27 @@
     <properties key="quality" value="EVALUATION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-uart-bgapi-s2.slcp example.bt_ncp_dfu.bt_ncp_dfu.slcp"/>
+  </descriptors>
+  <descriptors name="bt_ncp_dfu_freertos" label="Bluetooth - NCP DFU FreeRTOS" description="Network Co-Processor (NCP) target application with device firmware update. Runs the Bluetooth stack dynamically and provides access to it via Bluetooth API (BGAPI) using UART connection. NCP mode makes it possible to run your application on a host controller or PC.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.bt_ncp_dfu.bt_ncp_dfu_freertos.slcp"/>
+    <properties key="projectFilePaths" value="example/bt_ncp_dfu/bt_ncp_dfu_freertos.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
   </descriptors>
   <descriptors name="bt_ncp_dfu_freertos_s2_btl" label="Bluetooth - NCP DFU FreeRTOS (Series 2)" description="Network Co-Processor (NCP) target application with device firmware update. Runs the Bluetooth stack dynamically and provides access to it via Bluetooth API (BGAPI) using UART connection. NCP mode makes it possible to run your application on a host controller or PC. Combined solution with application and bootloader projects.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.bt_ncp_dfu.bt_ncp_dfu_freertos_s2_btl.slcw"/>
     <properties key="projectFilePaths" value="example/bt_ncp_dfu/bt_ncp_dfu_freertos_s2_btl.slcw"/>
@@ -271,10 +416,27 @@
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-uart-bgapi-s2.slcp example.bt_ncp_dfu.bt_ncp_dfu_freertos.slcp"/>
+  </descriptors>
+  <descriptors name="bt_ncp_dfu_micriumos" label="Bluetooth - NCP DFU Micrium OS" description="Network Co-Processor (NCP) target application with device firmware update. Runs the Bluetooth stack dynamically and provides access to it via Bluetooth API (BGAPI) using UART connection. NCP mode makes it possible to run your application on a host controller or PC.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.bt_ncp_dfu.bt_ncp_dfu_micriumos.slcp"/>
+    <properties key="projectFilePaths" value="example/bt_ncp_dfu/bt_ncp_dfu_micriumos.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
   </descriptors>
   <descriptors name="bt_ncp_dfu_micriumos_btl" label="Bluetooth - NCP DFU Micrium OS" description="Network Co-Processor (NCP) target application with device firmware update. Runs the Bluetooth stack dynamically and provides access to it via Bluetooth API (BGAPI) using UART connection. NCP mode makes it possible to run your application on a host controller or PC. Combined solution with application and bootloader projects.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.bt_ncp_dfu.bt_ncp_dfu_micriumos_btl.slcw"/>
     <properties key="projectFilePaths" value="example/bt_ncp_dfu/bt_ncp_dfu_micriumos_btl.slcw"/>
@@ -287,6 +449,7 @@
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-uart-bgapi-s2.slcp example.bt_ncp_dfu.bt_ncp_dfu_micriumos.slcp"/>
   </descriptors>
   <descriptors name="bt_ncp_host" label="Bluetooth - NCP Host" description="Reference implementation of an NCP (Network Co-Processor) host, which typically runs on a central MCU without radio. It can connect to an NCP target running the NCP Example via UART to access the Bluetooth stack on the target and to control it using BGAPI.
 ">
@@ -480,9 +643,25 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>
-  <descriptors name="bt_soc_app_ota_dfu_btl" label="Bluetooth - SoC Application OTA DFU" description="A minimal project structure, that serves as a starting point for custom Bluetooth applications that provides Over-The-Air device firmware update in user application runtime. Combined solution with application and bootloader projects.
+  <descriptors name="bt_soc_app_ota_dfu" label="Bluetooth - SoC Application OTA DFU" description="A minimal project structure, that serves as a starting point for custom Bluetooth applications that provides Over-The-Air device firmware update in user application runtime.
 ">
     <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.bt_soc_app_ota_dfu.bt_soc_app_ota_dfu.slcp"/>
+    <properties key="projectFilePaths" value="example/bt_soc_app_ota_dfu/bt_soc_app_ota_dfu.slcp"/>
+    <properties key="readmeFiles" value="example/bt_soc_app_ota_dfu/readme.md"/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
+  </descriptors>
+  <descriptors name="bt_soc_app_ota_dfu_btl" label="Bluetooth - SoC Application OTA DFU" description="A minimal project structure, that serves as a starting point for custom Bluetooth applications that provides Over-The-Air device firmware update in user application runtime. Combined solution with application and bootloader projects.
+">
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.bt_soc_app_ota_dfu.bt_soc_app_ota_dfu_btl.slcw"/>
     <properties key="projectFilePaths" value="example/bt_soc_app_ota_dfu/bt_soc_app_ota_dfu_btl.slcw"/>
@@ -495,10 +674,27 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-storage-internal-single.slcp example.bt_soc_app_ota_dfu.bt_soc_app_ota_dfu.slcp"/>
+  </descriptors>
+  <descriptors name="bt_soc_app_ota_dfu_freertos" label="Bluetooth - SoC Application OTA DFU FreeRTOS" description="A minimal project structure, that serves as a starting point for custom Bluetooth applications that provides Over-The-Air device firmware update in user application runtime.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.bt_soc_app_ota_dfu.bt_soc_app_ota_dfu_freertos.slcp"/>
+    <properties key="projectFilePaths" value="example/bt_soc_app_ota_dfu/bt_soc_app_ota_dfu_freertos.slcp"/>
+    <properties key="readmeFiles" value="example/bt_soc_app_ota_dfu/readme.md"/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
   </descriptors>
   <descriptors name="bt_soc_app_ota_dfu_freertos_s2_btl" label="Bluetooth - SoC Application OTA DFU FreeRTOS (Series 2)" description="A minimal project structure, that serves as a starting point for custom Bluetooth applications that provides Over-The-Air device firmware update in user application runtime. Combined solution with application and bootloader projects.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.bt_soc_app_ota_dfu.bt_soc_app_ota_dfu_freertos_s2_btl.slcw"/>
     <properties key="projectFilePaths" value="example/bt_soc_app_ota_dfu/bt_soc_app_ota_dfu_freertos_s2_btl.slcw"/>
@@ -511,10 +707,11 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-storage-internal-single.slcp example.bt_soc_app_ota_dfu.bt_soc_app_ota_dfu_freertos.slcp"/>
   </descriptors>
   <descriptors name="bt_soc_app_ota_dfu_freertos_s3_btl" label="Bluetooth - SoC Application OTA DFU FreeRTOS (Series 3)" description="A minimal project structure, that serves as a starting point for custom Bluetooth applications that provides Over-The-Air device firmware update in user application runtime. Combined solution with application and bootloader projects.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.bt_soc_app_ota_dfu.bt_soc_app_ota_dfu_freertos_s3_btl.slcw"/>
     <properties key="projectFilePaths" value="example/bt_soc_app_ota_dfu/bt_soc_app_ota_dfu_freertos_s3_btl.slcw"/>
@@ -527,10 +724,27 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-storage-single.slcp example.bt_soc_app_ota_dfu.bt_soc_app_ota_dfu_freertos.slcp"/>
+  </descriptors>
+  <descriptors name="bt_soc_app_ota_dfu_micriumos" label="Bluetooth - SoC Application OTA DFU MicriumOS" description="A minimal project structure, that serves as a starting point for custom Bluetooth applications that provides Over-The-Air device firmware update in user application runtime.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.bt_soc_app_ota_dfu.bt_soc_app_ota_dfu_micriumos.slcp"/>
+    <properties key="projectFilePaths" value="example/bt_soc_app_ota_dfu/bt_soc_app_ota_dfu_micriumos.slcp"/>
+    <properties key="readmeFiles" value="example/bt_soc_app_ota_dfu/readme.md"/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
   </descriptors>
   <descriptors name="bt_soc_app_ota_dfu_micriumos_btl" label="Bluetooth - SoC Application OTA DFU MicriumOS" description="A minimal project structure, that serves as a starting point for custom Bluetooth applications that provides Over-The-Air device firmware update in user application runtime. Combined solution with application and bootloader projects.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.bt_soc_app_ota_dfu.bt_soc_app_ota_dfu_micriumos_btl.slcw"/>
     <properties key="projectFilePaths" value="example/bt_soc_app_ota_dfu/bt_soc_app_ota_dfu_micriumos_btl.slcw"/>
@@ -543,6 +757,7 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-storage-internal-single.slcp example.bt_soc_app_ota_dfu.bt_soc_app_ota_dfu_micriumos.slcp"/>
   </descriptors>
   <descriptors name="bt_soc_blinky" label="Bluetooth - SoC Blinky" description="The classic blinky example using Bluetooth communication. Demonstrates a simple two-way data exchange over GATT. This can be tested with the Simplicity Connect mobile app.
 ">
@@ -659,13 +874,31 @@
   </descriptors>
   <descriptors name="bt_soc_cbap_tz_workspace" label="Bluetooth - SoC Certificate Based Authentication and Pairing (TrustZone)" description="Demonstrates Certificate Based Authentication and Pairing over BLE. This example utilizes TrustZone for storing keys.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.bt_soc_cbap.bt_soc_cbap_tz.slcw"/>
     <properties key="projectFilePaths" value="example/bt_soc_cbap/bt_soc_cbap_tz.slcw"/>
     <properties key="readmeFiles" value=""/>
     <properties key="boardCompatibility" value="brd2602a brd2710a brd2715a brd4108a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4182a brd4183a brd4183c brd4184a brd4184b brd4185a brd4186a brd4187a brd4194a brd4308a brd4308b brd4309a brd4309b brd4311a brd4311b brd4312a brd4314a brd4330a brd4331a brd4356a brd4402a brd4402b brd4402c brd4403a brd4403b brd4403c brd4415a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm210la22jif.* .*bgm210la22jnf.* .*bgm210p022jia.* .*bgm210p032jia.* .*bgm210pa22jia.* .*bgm210pa32jia.* .*bgm220pc22hna.* .*bgm220sc22hna.* .*bgm220sc23hna.* .*bgm240pa22vna.* .*bgm240pa32vna.* .*bgm240pa32vnn.* .*bgm240sa22vna.* .*bgm270sc22sna.* .*efr32bg21a010f1024im32.* .*efr32bg21a010f512im32.* .*efr32bg21a010f768im32.* .*efr32bg21a020f1024im32.* .*efr32bg21a020f512im32.* .*efr32bg21a020f768im32.* .*efr32bg22c224f512gm32.* .*efr32bg22c224f512gm40.* .*efr32bg22c224f512gn32.* .*efr32bg22c224f512im32.* .*efr32bg22c224f512im40.* .*efr32bg22e224f512im32.* .*efr32bg22e224f512im40.* .*efr32bg24a010f1024gj42.* .*efr32bg24a010f1024im40.* .*efr32bg24a010f1024im48.* .*efr32bg24a010f1536im40.* .*efr32bg24a010f1536im48.* .*efr32bg24a020f1024im40.* .*efr32bg24a020f1024im48.* .*efr32bg24a020f1536im40.* .*efr32bg24a610f1536im40.* .*efr32bg24a620f1536im40.* .*efr32bg24l010f768im40.* .*efr32bg24l210f768im40.* .*efr32bg27c140f768im32.* .*efr32bg27c140f768im40.* .*efr32bg27c230f768im32.* .*efr32bg27c230f768im40.* .*efr32bg27c320f768gj39.* .*efr32bg27c320f768ij39.* .*efr32fg28a112f1024gm48.* .*efr32fg28a112f1024gm68.* .*efr32fg28a122f1024gm48.* .*efr32fg28a122f1024gm68.* .*efr32mg21a010f1024im32.* .*efr32mg21a010f512im32.* .*efr32mg21a010f768im32.* .*efr32mg21a020f1024im32.* .*efr32mg21a020f512im32.* .*efr32mg21a020f768im32.* .*efr32mg22a224f512im40.* .*efr32mg22c224f512gn32.* .*efr32mg22c224f512im32.* .*efr32mg22c224f512im40.* .*efr32mg22e224f512im32.* .*efr32mg22e224f512im40.* .*efr32mg24a010f1024im40.* .*efr32mg24a010f1024im48.* .*efr32mg24a010f1536gm40.* .*efr32mg24a010f1536gm48.* .*efr32mg24a010f1536im40.* .*efr32mg24a010f1536im48.* .*efr32mg24a010f768im40.* .*efr32mg24a010f768im48.* .*efr32mg24a020f1024im40.* .*efr32mg24a020f1024im48.* .*efr32mg24a020f1536gm40.* .*efr32mg24a020f1536gm48.* .*efr32mg24a020f1536im40.* .*efr32mg24a020f1536im48.* .*efr32mg24a020f768im40.* .*efr32mg24a021f1024im40.* .*efr32mg24a110f1024im48.* .*efr32mg24a110f1536gm48.* .*efr32mg24a111f1536gm48.* .*efr32mg24a120f1536gm48.* .*efr32mg24a121f1536gm48.* .*efr32mg24a410f1536im40.* .*efr32mg24a410f1536im48.* .*efr32mg24a420f1536im40.* .*efr32mg24a420f1536im48.* .*efr32mg24a610f1536im40.* .*efr32mg24a620f1536im40.* .*efr32mg27c140f768im32.* .*efr32mg27c140f768im40.* .*efr32mg27c230f768im32.* .*efr32mg27c230f768im40.* .*efr32mr21a020f512im32.* .*efr32zg28a112f1024gm48.* .*efr32zg28a112f1024gm68.* .*efr32zg28a122f1024gm48.* .*efr32zg28a122f1024gm68.* .*mgm210l022jif.* .*mgm210l022jnf.* .*mgm210la22jif.* .*mgm210la22jnf.* .*mgm210p022jia.* .*mgm210p032jia.* .*mgm210pa22jia.* .*mgm210pa32jia.* .*mgm211la02jnf.* .*mgm220pc22hna.* .*mgm240la22uif.* .*mgm240la22vif.* .*mgm240pa22vna.* .*mgm240pa32vna.* .*mgm240pa32vnn.* .*mgm240sa22vna.* .*mgm270sc22sna.* .*mgm270sc32sna.* .*rm21z000f1024im32.*"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-apploader-nonsecure.slcp bootloader.bootloader-apploader-secure.slcp example.bt_soc_cbap.bt_soc_cbap_tz_ns.slcp example.bt_soc_tz_secure_application.bt_soc_tz_secure_application.slcp"/>
+  </descriptors>
+  <descriptors name="bt_soc_cbap_tz_ns" label="Bluetooth - SoC Certificate Based Authentication and Pairing (TrustZone)
+" description="Demonstrates Certificate Based Authentication and Pairing over BLE. This example utilizes TrustZone for storing keys.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.bt_soc_cbap.bt_soc_cbap_tz_ns.slcp"/>
+    <properties key="projectFilePaths" value="example/bt_soc_cbap/bt_soc_cbap_tz_ns.slcp"/>
+    <properties key="readmeFiles" value="example/bt_soc_cbap/readme.md"/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar"/>
     <properties key="category" value="Bluetooth Examples"/>
@@ -692,13 +925,31 @@
   </descriptors>
   <descriptors name="bt_soc_csr_generator_tz_workspace" label="Bluetooth - SoC Certificate Signing Request Generator (TrustZone)" description="Certificate generating firmware workspace. Software is generating the device EC key pair, the signing request for the device certificate, and other related data. The generated data can be read out by the Central Authority. This example utilizes TrustZone for storing keys.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.bt_soc_csr_generator.bt_soc_csr_generator_tz.slcw"/>
     <properties key="projectFilePaths" value="example/bt_soc_csr_generator/bt_soc_csr_generator_tz.slcw"/>
     <properties key="readmeFiles" value=""/>
     <properties key="boardCompatibility" value="brd2602a brd2710a brd2715a brd4108a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4182a brd4183a brd4183c brd4184a brd4184b brd4185a brd4186a brd4187a brd4191a brd4194a brd4308a brd4308b brd4309a brd4309b brd4311a brd4311b brd4312a brd4314a brd4330a brd4331a brd4356a brd4402a brd4402b brd4402c brd4403a brd4403b brd4403c brd4415a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm210la22jif.* .*bgm210la22jnf.* .*bgm210p022jia.* .*bgm210p032jia.* .*bgm210pa22jia.* .*bgm210pa32jia.* .*bgm220pc22hna.* .*bgm220sc22hna.* .*bgm220sc23hna.* .*bgm240pa22vna.* .*bgm240pa32vna.* .*bgm240pa32vnn.* .*bgm240sa22vna.* .*bgm270sc22sna.* .*efr32bg21a010f1024im32.* .*efr32bg21a010f512im32.* .*efr32bg21a010f768im32.* .*efr32bg21a020f1024im32.* .*efr32bg21a020f512im32.* .*efr32bg21a020f768im32.* .*efr32bg22c224f512gm32.* .*efr32bg22c224f512gm40.* .*efr32bg22c224f512gn32.* .*efr32bg22c224f512im32.* .*efr32bg22c224f512im40.* .*efr32bg22e224f512im32.* .*efr32bg22e224f512im40.* .*efr32bg24a010f1024gj42.* .*efr32bg24a010f1024im40.* .*efr32bg24a010f1024im48.* .*efr32bg24a010f1536im40.* .*efr32bg24a010f1536im48.* .*efr32bg24a020f1024im40.* .*efr32bg24a020f1024im48.* .*efr32bg24a020f1536im40.* .*efr32bg24a610f1536im40.* .*efr32bg24a620f1536im40.* .*efr32bg24l010f768im40.* .*efr32bg24l210f768im40.* .*efr32bg27c140f768im32.* .*efr32bg27c140f768im40.* .*efr32bg27c230f768im32.* .*efr32bg27c230f768im40.* .*efr32bg27c320f768gj39.* .*efr32bg27c320f768ij39.* .*efr32fg28a112f1024gm48.* .*efr32fg28a112f1024gm68.* .*efr32fg28a122f1024gm48.* .*efr32fg28a122f1024gm68.* .*efr32mg21a010f1024im32.* .*efr32mg21a010f512im32.* .*efr32mg21a010f768im32.* .*efr32mg21a020f1024im32.* .*efr32mg21a020f512im32.* .*efr32mg21a020f768im32.* .*efr32mg22a224f512im40.* .*efr32mg22c224f512gn32.* .*efr32mg22c224f512im32.* .*efr32mg22c224f512im40.* .*efr32mg22e224f512im32.* .*efr32mg22e224f512im40.* .*efr32mg24a010f1024im40.* .*efr32mg24a010f1024im48.* .*efr32mg24a010f1536gm40.* .*efr32mg24a010f1536gm48.* .*efr32mg24a010f1536im40.* .*efr32mg24a010f1536im48.* .*efr32mg24a010f768im40.* .*efr32mg24a010f768im48.* .*efr32mg24a020f1024im40.* .*efr32mg24a020f1024im48.* .*efr32mg24a020f1536gm40.* .*efr32mg24a020f1536gm48.* .*efr32mg24a020f1536im40.* .*efr32mg24a020f1536im48.* .*efr32mg24a020f768im40.* .*efr32mg24a021f1024im40.* .*efr32mg24a110f1024im48.* .*efr32mg24a110f1536gm48.* .*efr32mg24a111f1536gm48.* .*efr32mg24a120f1536gm48.* .*efr32mg24a121f1536gm48.* .*efr32mg24a410f1536im40.* .*efr32mg24a410f1536im48.* .*efr32mg24a420f1536im40.* .*efr32mg24a420f1536im48.* .*efr32mg24a610f1536im40.* .*efr32mg24a620f1536im40.* .*efr32mg27c140f768im32.* .*efr32mg27c140f768im40.* .*efr32mg27c230f768im32.* .*efr32mg27c230f768im40.* .*efr32mr21a020f512im32.* .*efr32zg28a112f1024gm48.* .*efr32zg28a112f1024gm68.* .*efr32zg28a122f1024gm48.* .*efr32zg28a122f1024gm68.* .*mgm210l022jif.* .*mgm210l022jnf.* .*mgm210la22jif.* .*mgm210la22jnf.* .*mgm210p022jia.* .*mgm210p032jia.* .*mgm210pa22jia.* .*mgm210pa32jia.* .*mgm211la02jnf.* .*mgm220pc22hna.* .*mgm240la22uif.* .*mgm240la22vif.* .*mgm240pa22vna.* .*mgm240pa32vna.* .*mgm240pa32vnn.* .*mgm240sa22vna.* .*mgm270sc22sna.* .*mgm270sc32sna.* .*rm21z000f1024im32.*"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-apploader-nonsecure.slcp bootloader.bootloader-apploader-secure.slcp example.bt_soc_csr_generator.bt_soc_csr_generator_tz_ns.slcp example.bt_soc_tz_secure_application.bt_soc_tz_secure_application.slcp"/>
+  </descriptors>
+  <descriptors name="bt_soc_csr_generator_tz_ns" label="Bluetooth - SoC Certificate Signing Request Generator (TrustZone)
+" description="Certificate generating firmware example. Software is generating the device EC key pair, the signing request for the device certificate, and other related data. The generated data can be read out by the Central Authority. This example utilizes TrustZone for storing keys.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.bt_soc_csr_generator.bt_soc_csr_generator_tz_ns.slcp"/>
+    <properties key="projectFilePaths" value="example/bt_soc_csr_generator/bt_soc_csr_generator_tz_ns.slcp"/>
+    <properties key="readmeFiles" value="example/bt_soc_csr_generator/readme.md"/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar"/>
     <properties key="category" value="Bluetooth Examples"/>
@@ -866,9 +1117,25 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
   </descriptors>
-  <descriptors name="bt_soc_in_place_ota_dfu_btl" label="Bluetooth - SoC In-Place OTA DFU" description="A minimal project structure, that serves as a starting point for custom Bluetooth applications that provides Over-The-Air device firmware update using an apploader. Combined solution with application and bootloader projects.
+  <descriptors name="bt_soc_in_place_ota_dfu" label="Bluetooth - SoC In-Place OTA DFU" description="A minimal project structure, that serves as a starting point for custom Bluetooth applications that provides Over-The-Air device firmware update using an apploader.
 ">
     <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.bt_soc_in_place_ota_dfu.bt_soc_in_place_ota_dfu.slcp"/>
+    <properties key="projectFilePaths" value="example/bt_soc_in_place_ota_dfu/bt_soc_in_place_ota_dfu.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="EVALUATION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
+  </descriptors>
+  <descriptors name="bt_soc_in_place_ota_dfu_btl" label="Bluetooth - SoC In-Place OTA DFU" description="A minimal project structure, that serves as a starting point for custom Bluetooth applications that provides Over-The-Air device firmware update using an apploader. Combined solution with application and bootloader projects.
+">
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.bt_soc_in_place_ota_dfu.bt_soc_in_place_ota_dfu_btl.slcw"/>
     <properties key="projectFilePaths" value="example/bt_soc_in_place_ota_dfu/bt_soc_in_place_ota_dfu_btl.slcw"/>
@@ -881,10 +1148,27 @@
     <properties key="quality" value="EVALUATION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-apploader.slcp example.bt_soc_in_place_ota_dfu.bt_soc_in_place_ota_dfu.slcp"/>
+  </descriptors>
+  <descriptors name="bt_soc_in_place_ota_dfu_freertos" label="Bluetooth - SoC In-Place OTA DFU FreeRTOS" description="A minimal project structure, that serves as a starting point for custom Bluetooth applications that provides Over-The-Air device firmware update using an apploader.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.bt_soc_in_place_ota_dfu.bt_soc_in_place_ota_dfu_freertos.slcp"/>
+    <properties key="projectFilePaths" value="example/bt_soc_in_place_ota_dfu/bt_soc_in_place_ota_dfu_freertos.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
   </descriptors>
   <descriptors name="bt_soc_in_place_ota_dfu_freertos_btl" label="Bluetooth - SoC In-Place OTA DFU FreeRTOS" description="A minimal project structure, that serves as a starting point for custom Bluetooth applications that provides Over-The-Air device firmware update using an apploader. Combined solution with application and bootloader projects.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.bt_soc_in_place_ota_dfu.bt_soc_in_place_ota_dfu_freertos_btl.slcw"/>
     <properties key="projectFilePaths" value="example/bt_soc_in_place_ota_dfu/bt_soc_in_place_ota_dfu_freertos_btl.slcw"/>
@@ -897,10 +1181,27 @@
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-apploader.slcp example.bt_soc_in_place_ota_dfu.bt_soc_in_place_ota_dfu_freertos.slcp"/>
+  </descriptors>
+  <descriptors name="bt_soc_in_place_ota_dfu_micriumos" label="Bluetooth - SoC In-Place OTA DFU Micrium OS" description="A minimal project structure, that serves as a starting point for custom Bluetooth applications that provides Over-The-Air device firmware update using an apploader.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.bt_soc_in_place_ota_dfu.bt_soc_in_place_ota_dfu_micriumos.slcp"/>
+    <properties key="projectFilePaths" value="example/bt_soc_in_place_ota_dfu/bt_soc_in_place_ota_dfu_micriumos.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
   </descriptors>
   <descriptors name="bt_soc_in_place_ota_dfu_micriumos_btl" label="Bluetooth - SoC In-Place OTA DFU Micrium OS" description="A minimal project structure, that serves as a starting point for custom Bluetooth applications that provides Over-The-Air device firmware update using an apploader. Combined solution with application and bootloader projects.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.bt_soc_in_place_ota_dfu.bt_soc_in_place_ota_dfu_micriumos_btl.slcw"/>
     <properties key="projectFilePaths" value="example/bt_soc_in_place_ota_dfu/bt_soc_in_place_ota_dfu_micriumos_btl.slcw"/>
@@ -913,10 +1214,27 @@
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-apploader.slcp example.bt_soc_in_place_ota_dfu.bt_soc_in_place_ota_dfu_micriumos.slcp"/>
+  </descriptors>
+  <descriptors name="bt_soc_iop_test" label="Bluetooth - SoC Interoperability Test" description="This is a test procedure containing several test cases for Bluetooth Low Energy communication. This demo is meant to be used with the Simplicity Connect mobile app, through the &#34;Interoperability Test&#34; tile on the Develop view of the app.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.bt_soc_iop_test.bt_soc_iop_test.slcp"/>
+    <properties key="projectFilePaths" value="example/bt_soc_iop_test/bt_soc_iop_test.slcp"/>
+    <properties key="readmeFiles" value="example/bt_soc_iop_test/readme.md"/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
   </descriptors>
   <descriptors name="bt_soc_iop_test_btl" label="Bluetooth - SoC Interoperability Test + AppLoader OTA DFU" description="This is a test procedure containing several test cases for Bluetooth Low Energy communication. This demo is meant to be used with the Simplicity Connect mobile app, through the &#34;Interoperability Test&#34; tile on the Develop view of the app. Combined solution with application and bootloader projects.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.bt_soc_iop_test.bt_soc_iop_test_btl.slcw"/>
     <properties key="projectFilePaths" value="example/bt_soc_iop_test/bt_soc_iop_test_btl.slcw"/>
@@ -929,10 +1247,27 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-apploader.slcp example.bt_soc_iop_test.bt_soc_iop_test.slcp"/>
+  </descriptors>
+  <descriptors name="bt_soc_iop_test_freertos" label="Bluetooth - SoC Interoperability Test FreeRTOS" description="This is a test procedure containing several test cases for Bluetooth Low Energy communication. This demo is meant to be used with the Simplicity Connect mobile app, through the &#34;Interoperability Test&#34; tile on the Develop view of the app.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.bt_soc_iop_test.bt_soc_iop_test_freertos.slcp"/>
+    <properties key="projectFilePaths" value="example/bt_soc_iop_test/bt_soc_iop_test_freertos.slcp"/>
+    <properties key="readmeFiles" value="example/bt_soc_iop_test/readme.md"/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
   </descriptors>
   <descriptors name="bt_soc_iop_test_freertos_s2_btl" label="Bluetooth - SoC Interoperability Test FreeRTOS + AppLoader OTA DFU" description="This is a test procedure containing several test cases for Bluetooth Low Energy communication. This demo is meant to be used with the Simplicity Connect mobile app, through the &#34;Interoperability Test&#34; tile on the Develop view of the app. Combined solution with application and bootloader projects.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.bt_soc_iop_test.bt_soc_iop_test_freertos_s2_btl.slcw"/>
     <properties key="projectFilePaths" value="example/bt_soc_iop_test/bt_soc_iop_test_freertos_s2_btl.slcw"/>
@@ -945,10 +1280,11 @@
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-apploader.slcp example.bt_soc_iop_test.bt_soc_iop_test_freertos.slcp"/>
   </descriptors>
   <descriptors name="bt_soc_iop_test_freertos_s3_btl" label="Bluetooth - SoC Interoperability Test FreeRTOS + OTA DFU" description="This is a test procedure containing several test cases for Bluetooth Low Energy communication. This demo is meant to be used with the Simplicity Connect mobile app, through the &#34;Interoperability Test&#34; tile on the Develop view of the app. Combined solution with application and bootloader projects.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.bt_soc_iop_test.bt_soc_iop_test_freertos_s3_btl.slcw"/>
     <properties key="projectFilePaths" value="example/bt_soc_iop_test/bt_soc_iop_test_freertos_s3_btl.slcw"/>
@@ -961,10 +1297,27 @@
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-storage-single.slcp example.bt_soc_iop_test.bt_soc_iop_test_freertos.slcp"/>
+  </descriptors>
+  <descriptors name="bt_soc_iop_test_micriumos" label="Bluetooth - SoC Interoperability Test Micrium OS" description="This is a test procedure containing several test cases for Bluetooth Low Energy communication. This demo is meant to be used with the Simplicity Connect mobile app, through the &#34;Interoperability Test&#34; tile on the Develop view of the app.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.bt_soc_iop_test.bt_soc_iop_test_micriumos.slcp"/>
+    <properties key="projectFilePaths" value="example/bt_soc_iop_test/bt_soc_iop_test_micriumos.slcp"/>
+    <properties key="readmeFiles" value="example/bt_soc_iop_test/readme.md"/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
   </descriptors>
   <descriptors name="bt_soc_iop_test_micriumos_btl" label="Bluetooth - SoC Interoperability Test Micrium OS + AppLoader OTA DFU" description="This is a test procedure containing several test cases for Bluetooth Low Energy communication. This demo is meant to be used with the Simplicity Connect mobile app, through the &#34;Interoperability Test&#34; tile on the Develop view of the app. Combined solution with application and bootloader projects.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.bt_soc_iop_test.bt_soc_iop_test_micriumos_btl.slcw"/>
     <properties key="projectFilePaths" value="example/bt_soc_iop_test/bt_soc_iop_test_micriumos_btl.slcw"/>
@@ -977,6 +1330,7 @@
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-apploader.slcp example.bt_soc_iop_test.bt_soc_iop_test_micriumos.slcp"/>
   </descriptors>
   <descriptors name="bt_soc_thermometer" label="Bluetooth - SoC Thermometer" description="Implements a GATT Server with the Health Thermometer Profile, which enables a Client device to connect and get temperature data. Temperature is read from the Si7021 digital relative humidity and temperature sensor of the WSTK or of the Thunderboard.
 ">
@@ -1186,9 +1540,25 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>
-  <descriptors name="bt_soc_thunderboard_brd4184a_btl" label="Bluetooth - SoC Thunderboard EFR32BG22 (BRD4184A) + AppLoader OTA DFU" description="Demonstrates the features of the Thunderboard EFR32BG22 Kit. This can be tested with the Simplicity Connect mobile app. Combined solution with application and bootloader projects.
+  <descriptors name="bt_soc_thunderboard_brd4184a" label="Bluetooth - SoC Thunderboard EFR32BG22 (BRD4184A)" description="Demonstrates the features of the Thunderboard EFR32BG22 Kit. This can be tested with the Simplicity Connect mobile app.
 ">
     <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.bt_soc_thunderboard.bt_soc_thunderboard_brd4184a.slcp"/>
+    <properties key="projectFilePaths" value="example/bt_soc_thunderboard/bt_soc_thunderboard_brd4184a.slcp"/>
+    <properties key="readmeFiles" value="example/bt_soc_thunderboard/readme.md"/>
+    <properties key="boardCompatibility" value=""/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
+  </descriptors>
+  <descriptors name="bt_soc_thunderboard_brd4184a_btl" label="Bluetooth - SoC Thunderboard EFR32BG22 (BRD4184A) + AppLoader OTA DFU" description="Demonstrates the features of the Thunderboard EFR32BG22 Kit. This can be tested with the Simplicity Connect mobile app. Combined solution with application and bootloader projects.
+">
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.bt_soc_thunderboard.bt_soc_thunderboard_brd4184a_btl.slcw"/>
     <properties key="projectFilePaths" value="example/bt_soc_thunderboard/bt_soc_thunderboard_brd4184a_btl.slcw"/>
@@ -1201,10 +1571,27 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-apploader.slcp example.bt_soc_thunderboard.bt_soc_thunderboard_brd4184a.slcp"/>
+  </descriptors>
+  <descriptors name="bt_soc_thunderboard_brd4184b" label="Bluetooth - SoC Thunderboard EFR32BG22 (BRD4184B)" description="Demonstrates the features of the Thunderboard EFR32BG22 Kit. This can be tested with the Simplicity Connect mobile app.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.bt_soc_thunderboard.bt_soc_thunderboard_brd4184b.slcp"/>
+    <properties key="projectFilePaths" value="example/bt_soc_thunderboard/bt_soc_thunderboard_brd4184b.slcp"/>
+    <properties key="readmeFiles" value="example/bt_soc_thunderboard/readme.md"/>
+    <properties key="boardCompatibility" value=""/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>
   <descriptors name="bt_soc_thunderboard_brd4184b_btl" label="Bluetooth - SoC Thunderboard EFR32BG22 (BRD4184B) + AppLoader OTA DFU" description="Demonstrates the features of the Thunderboard EFR32BG22 Kit. This can be tested with the Simplicity Connect mobile app. Combined solution with application and bootloader projects.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.bt_soc_thunderboard.bt_soc_thunderboard_brd4184b_btl.slcw"/>
     <properties key="projectFilePaths" value="example/bt_soc_thunderboard/bt_soc_thunderboard_brd4184b_btl.slcw"/>
@@ -1217,10 +1604,27 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-apploader.slcp example.bt_soc_thunderboard.bt_soc_thunderboard_brd4184b.slcp"/>
+  </descriptors>
+  <descriptors name="bt_soc_xg24_dev_kit_brd2601b" label="Bluetooth - SoC EFR32xG24 Dev Kit (BRD2601B)" description="Demonstrates the features of the EFR32xG24 Dev Kit Board. This can be tested with the Simplicity Connect mobile app.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.bt_soc_thunderboard.bt_soc_xg24_dev_kit_brd2601b.slcp"/>
+    <properties key="projectFilePaths" value="example/bt_soc_thunderboard/bt_soc_xg24_dev_kit_brd2601b.slcp"/>
+    <properties key="readmeFiles" value="example/bt_soc_thunderboard/readme.md"/>
+    <properties key="boardCompatibility" value=""/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>
   <descriptors name="bt_soc_xg24_dev_kit_brd2601b_btl" label="Bluetooth - SoC EFR32xG24 Dev Kit (BRD2601B) + AppLoader OTA DFU" description="Demonstrates the features of the EFR32xG24 Dev Kit Board. This can be tested with the Simplicity Connect mobile app. Combined solution with application and bootloader projects.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.bt_soc_thunderboard.bt_soc_xg24_dev_kit_brd2601b_btl.slcw"/>
     <properties key="projectFilePaths" value="example/bt_soc_thunderboard/bt_soc_xg24_dev_kit_brd2601b_btl.slcw"/>
@@ -1233,10 +1637,27 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-apploader.slcp example.bt_soc_thunderboard.bt_soc_xg24_dev_kit_brd2601b.slcp"/>
+  </descriptors>
+  <descriptors name="bt_soc_xg26_dev_kit_brd2608a" label="Bluetooth - SoC EFR32xG26 Dev Kit (BRD2608A)" description="Demonstrates the features of the EFR32xG26 Dev Kit Board. This can be tested with the Simplicity Connect mobile app.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.bt_soc_thunderboard.bt_soc_xg26_dev_kit_brd2608a.slcp"/>
+    <properties key="projectFilePaths" value="example/bt_soc_thunderboard/bt_soc_xg26_dev_kit_brd2608a.slcp"/>
+    <properties key="readmeFiles" value="example/bt_soc_thunderboard/readme.md"/>
+    <properties key="boardCompatibility" value=""/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>
   <descriptors name="bt_soc_xg26_dev_kit_brd2608a_btl" label="Bluetooth - SoC EFR32xG26 Dev Kit (BRD2608A) + AppLoader OTA DFU" description="Demonstrates the features of the EFR32xG26 Dev Kit Board. This can be tested with the Simplicity Connect mobile app. Combined solution with application and bootloader projects.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.bt_soc_thunderboard.bt_soc_xg26_dev_kit_brd2608a_btl.slcw"/>
     <properties key="projectFilePaths" value="example/bt_soc_thunderboard/bt_soc_xg26_dev_kit_brd2608a_btl.slcw"/>
@@ -1249,10 +1670,27 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-apploader.slcp example.bt_soc_thunderboard.bt_soc_xg26_dev_kit_brd2608a.slcp"/>
+  </descriptors>
+  <descriptors name="bt_soc_xg27_dev_kit_brd2602a" label="Bluetooth - SoC EFR32xG27 DevKit (BRD2602A)" description="Demonstrates the features of the EFR32xG27 DevKit board. Features can be evaluated with the Simplicity Connect mobile app.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.bt_soc_thunderboard.bt_soc_xg27_dev_kit_brd2602a.slcp"/>
+    <properties key="projectFilePaths" value="example/bt_soc_thunderboard/bt_soc_xg27_dev_kit_brd2602a.slcp"/>
+    <properties key="readmeFiles" value="example/bt_soc_thunderboard/readme.md"/>
+    <properties key="boardCompatibility" value=""/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>
   <descriptors name="bt_soc_xg27_dev_kit_brd2602a_btl" label="Bluetooth - SoC EFR32xG27 Dev Kit (BRD2602A) + AppLoader OTA DFU" description="Demonstrates the features of the EFR32xG27 Dev Kit Board. Features can be evaluated with the Simplicity Connect mobile app. Combined solution with application and bootloader projects.
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example.bt_soc_thunderboard.bt_soc_xg27_dev_kit_brd2602a_btl.slcw"/>
     <properties key="projectFilePaths" value="example/bt_soc_thunderboard/bt_soc_xg27_dev_kit_brd2602a_btl.slcw"/>
@@ -1263,6 +1701,23 @@
     <properties key="toolchainCompatibility" value="gcc iar"/>
     <properties key="category" value="Bluetooth Examples"/>
     <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
+    <properties key="solutionProjects" value="bootloader.bootloader-apploader.slcp example.bt_soc_thunderboard.bt_soc_xg27_dev_kit_brd2602a.slcp"/>
+  </descriptors>
+  <descriptors name="bt_soc_tz_secure_application" label="Sample project for TrustZone Secure Key Library" description="This project can be used as a reference implementation for creating secure applications with TrustZone for bluetooth products.
+This project makes a TrustZone secure library for running PSA libraries in the secure world.">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example.bt_soc_tz_secure_application.bt_soc_tz_secure_application.slcp"/>
+    <properties key="projectFilePaths" value="example/bt_soc_tz_secure_application/bt_soc_tz_secure_application.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>
@@ -1348,13 +1803,62 @@
   </descriptors>
   <descriptors name="bt_host_esl_ap" label="Bluetooth - Host ESL Access Point" description="Bluetooth - Host ESL Access Point
 ">
-    <properties key="namespace" value="template.uc"/>
+    <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="example_host.bt_host_esl_ap.bt_host_esl_ap.slcw"/>
     <properties key="projectFilePaths" value="example_host/bt_host_esl_ap/bt_host_esl_ap.slcw"/>
     <properties key="readmeFiles" value="example_host/bt_host_esl_ap/readme/readme.md"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*linux.* .*macos.* .*win32.*"/>
+    <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|Host Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
+    <properties key="solutionProjects" value="example_host.bt_host_esl_ap.esl_ap.slcp example_host.bt_host_esl_ap.esl_key_lib.esl_key_lib.slcp example_host.bt_host_esl_ap.esl_lib.esl_lib.slcp"/>
+  </descriptors>
+  <descriptors name="esl_ap" label="Bluetooth - ESL Access Point" description="Bluetooth - ESL Access Point
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example_host.bt_host_esl_ap.esl_ap.slcp"/>
+    <properties key="projectFilePaths" value="example_host/bt_host_esl_ap/esl_ap.slcp"/>
+    <properties key="readmeFiles" value="example_host/bt_host_esl_ap/readme/readme.md"/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|Host Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
+  </descriptors>
+  <descriptors name="esl_key_lib.pdx" label="Bluetooth - ESL Key Library" description="A cross-platform shared library designed for host integration in Bluetooth LE Electronic Shelf Label systems. This project delivers a position- independent dynamic extension that offering security key management through a simple API, ensuring consistent behavior across Windows, Linux, and macOS host environments.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example_host.bt_host_esl_ap.esl_key_lib.esl_key_lib.slcp"/>
+    <properties key="projectFilePaths" value="example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|Host Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
+  </descriptors>
+  <descriptors name="esl_lib.pdx" label="Bluetooth - ESL Library" description="A cross-platform shared library designed for host integration in Bluetooth LE Electronic Shelf Label systems. This project delivers a position- independent dynamic extension that offers ESL operations through a profile-level API, ensuring consistent behavior across Windows, Linux, and macOS host environments.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="example_host.bt_host_esl_ap.esl_lib.esl_lib.slcp"/>
+    <properties key="projectFilePaths" value="example_host/bt_host_esl_ap/esl_lib/esl_lib.slcp"/>
+    <properties key="readmeFiles" value=""/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
     <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Bluetooth Examples"/>

@@ -58,22 +58,36 @@ void sl_zigbee_af_update_app_link_key_zigbee_key_establishment_cb(sl_802154_long
   if (inRequest) {
     sl_zigbee_af_core_print("%s:", SL_ZIGBEE_AF_PLUGIN_UPDATE_APP_LINK_KEY_PLUGIN_NAME);
 
-    if (status == SL_ZIGBEE_VERIFY_LINK_KEY_SUCCESS) {
-      sl_zigbee_af_core_print(" New key established:");
-    } else if (status != SL_ZIGBEE_APP_LINK_KEY_ESTABLISHED) {
-      sl_zigbee_af_core_print(" Error:");
+    switch (status) {
+      case SL_ZIGBEE_VERIFY_LINK_KEY_SUCCESS:
+        sl_zigbee_af_core_print(" New key established:");
+      case SL_ZIGBEE_APP_LINK_KEY_ESTABLISHED: // not an error condition. Should be followed by SL_ZIGBEE_VERIFY_LINK_KEY_SUCCESS
+      case SL_ZIGBEE_PARTNER_KEY_UPDATE_TIMEOUT:
+      case SL_ZIGBEE_FAILED_GET_AUTH_SECURITY:
+      case SL_ZIGBEE_BAD_AUTH_SECURITY_RSP:
+      case SL_ZIGBEE_INITIATOR_FAILED_REQUEST_KEY:
+      case SL_ZIGBEE_VERIFY_LINK_KEY_FAILURE:
+        sl_zigbee_af_core_println(" status: 0x%02X", status);
+        sl_zigbee_af_core_print("Partner: ");
+        sl_zigbee_af_print_big_endian_eui64(partner);
+        sl_zigbee_af_core_println("");
+        // Anything other than SL_ZIGBEE_APP_LINK_KEY_ESTABLISHED is a final state
+        inRequest = (status == SL_ZIGBEE_APP_LINK_KEY_ESTABLISHED);
+        sl_zigbee_af_update_app_link_key_status_cb(status);
+        break;
+      default:
+        break;
     }
-    sl_zigbee_af_core_println(" 0x%02X", status);
-    sl_zigbee_af_core_print("Partner: ");
-    sl_zigbee_af_core_print_buffer(partner, EUI64_SIZE, true); // withSpace?
-    sl_zigbee_af_core_println("");
-
-    if ((status == SL_ZIGBEE_APP_LINK_KEY_ESTABLISHED)
-        || (status == SL_ZIGBEE_INITIATOR_FAILED_GET_AUTH_SECURITY)
-        || (status == SL_ZIGBEE_VERIFY_LINK_KEY_SUCCESS)
-        || (status == SL_ZIGBEE_VERIFY_LINK_KEY_FAILURE)) {
-      inRequest = false;
-      sl_zigbee_af_update_app_link_key_status_cb(status);
+  } else {
+    // We're not in request, which likely means that another node must have performed partner
+    // link key update with us. Log a message on the console so long as the partner is not the
+    // TC, since the update-tc-link-key component will handle that
+    sl_802154_long_addr_t tc_eui = { 0 };
+    (void)sl_zigbee_lookup_eui64_by_node_id(SL_ZIGBEE_ZIGBEE_COORDINATOR_ADDRESS, tc_eui);
+    if ((status == SL_ZIGBEE_VERIFY_LINK_KEY_SUCCESS) && memcmp(tc_eui, partner, EUI64_SIZE)) {
+      sl_zigbee_af_core_print("Partner link key established with: ");
+      sl_zigbee_af_print_big_endian_eui64(partner);
+      sl_zigbee_af_core_println("");
     }
   }
 }

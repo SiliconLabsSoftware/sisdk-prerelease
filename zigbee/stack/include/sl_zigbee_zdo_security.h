@@ -51,7 +51,24 @@ extern void sl_zigbee_set_authenticaion_level_callback(sl_802154_long_addr_t tar
                                                        sl_zigbee_initial_join_method *initial_join_method,
                                                        sl_zigbee_active_link_key_type *active_link_key_type);
 
-extern void sl_zigbee_get_authentication_level_callback(sl_zigbee_zdo_status_t rsp_status, sl_802154_long_addr_t target, uint8_t join_method, uint8_t link_key_update);
+/** @brief A callback fired when a Security_Get_Authentication_Level_rsp is received.
+ *
+ * @param rsp_status The ZDO status code in the response
+ * @param target EUI64 of the queried device
+ * @param join_method The initial join method, as described in the R23 specification, Device Authentication TLV format
+ * @param link_key_update The active link key type, as described in the R23 specification, Device Authentication TLV format
+ *
+ * @return None, but the user may issue sl_zigbee_terminate_app_link_key_request() to terminate any ongoing partner
+ * link key update if desired. A common reason for termination includes an insufficient security level
+ * as reported by the partner.
+ *
+ * @note In multi-threaded (RTOS) images, this callback is run in the context of the stack task, and thus care
+ * must be taken to not invoke any thread-unsafe routines.
+ */
+extern void sl_zigbee_get_authentication_level_callback(sl_zigbee_zdo_status_t rsp_status,
+                                                        sl_802154_long_addr_t target,
+                                                        uint8_t join_method,
+                                                        uint8_t link_key_update);
 
 /** @brief Get the Symmetric Passphrase for a device.
  * This function will return the Symmetric Passphrase for a device if one exists.

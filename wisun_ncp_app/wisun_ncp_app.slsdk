@@ -7,7 +7,5 @@ version=2.10.0
 label=wisun_ncp_app
 description=Wi-SUN NCP Application
 
-prop.subLabel=Wi-SUN\\ NCP\\ Application
-
 # List of relative file paths to template xml files in this extension
 prop.file.templatesFile=wisun_ncp_templates.xml

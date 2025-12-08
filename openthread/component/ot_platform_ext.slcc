@@ -30,7 +30,7 @@ include:
   - path: ncp_efr32.hpp
 source:
 - path: src/cli/efr32_cli.c
-  unless: [ot_ncp]
+  unless: [ot_rcp]
 - path: platform-abstraction/ncp/ncp_efr32.cpp
   condition: [ot_ncp]
 define:
