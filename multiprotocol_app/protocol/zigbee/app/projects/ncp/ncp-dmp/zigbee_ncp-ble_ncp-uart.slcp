@@ -147,5 +147,6 @@ filter:
 
 tag:
   - hardware:device:ram:96
+  - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_supports_zigbee
   - hwfilter:ram:64k

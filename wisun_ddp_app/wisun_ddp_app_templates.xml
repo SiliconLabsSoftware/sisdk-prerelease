@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='ASCII'?>
+<?xml version="1.0" encoding="ASCII"?>
 <model:MDescriptors xmlns:model="http://www.silabs.com/ss/Studio.ecore">
   <descriptors name="wisun_soc_ddp_ram" label="Wi-SUN - DDP" description="Wi-SUN RAM application for Dynamic Data Provisioning (DDP) framework. It can generate and import key pairs and import certificates">
     <properties key="namespace" value="template.uc"/>

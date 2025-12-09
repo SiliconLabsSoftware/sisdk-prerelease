@@ -41,6 +41,7 @@ extern "C" {
 #include <stdint.h>
 
 #include "sl_status.h"
+#include "sl_wisun_api.h"
 
 /**************************************************************************//**
  * @addtogroup SL_WISUN_APP_SETTING
@@ -50,6 +51,9 @@ extern "C" {
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
+
+///  Wi-SUN default network name size
+#define APP_SETTING_NETWORK_NAME_MAX_SIZE   (SL_WISUN_NETWORK_NAME_SIZE + 1)
 
 /// Wi-SUN settings default subscription channel
 #define APP_SETTING_DEFAULT_SUBSCRIPT_CH    (0U)
@@ -78,6 +82,29 @@ typedef enum app_setting_notification {
   /// Set BR settings
   APP_SETTING_NOTIFICATION_SET_BR_SETTINGS
 } app_setting_notification_t;
+
+
+/// Wisun setting structure
+typedef struct app_setting_wisun {
+  /// Network Name
+  char network_name[APP_SETTING_NETWORK_NAME_MAX_SIZE];
+  /// Network size
+  uint8_t network_size;
+  /// TX Power
+  int16_t tx_power_ddbm;
+  /// Device type
+  uint8_t device_type;
+  /// LFN profile
+  uint8_t lfn_profile;
+  /// default flag
+  bool is_default_phy;
+  /// PHY settings
+  sl_wisun_phy_config_t phy;
+  /// Key chain
+  uint8_t keychain;
+  /// Key chain index
+  uint8_t keychain_index;
+} app_setting_wisun_t;
 
 /** @} (end APP_SETTING_TYPES) */
 

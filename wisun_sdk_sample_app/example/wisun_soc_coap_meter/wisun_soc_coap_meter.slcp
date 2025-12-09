@@ -164,6 +164,9 @@ configuration:
   - name: "SL_CLOCK_MANAGER_EUSART0CLK_SOURCE"
     value: "CMU_EUSART0CLKCTRL_CLKSEL_LFXO"
     condition: [iostream_eusart,power_manager]
+  - name: "SL_CLOCK_MANAGER_LFXO_EN"
+    value: "CMU_EUSART0CLKCTRL_CLKSEL_LFXO"
+    condition: [iostream_eusart,power_manager]
   - name: "OS_CFG_SCHED_ROUND_ROBIN_EN"
     value: "0"
     condition: [micriumos_kernel,power_manager]

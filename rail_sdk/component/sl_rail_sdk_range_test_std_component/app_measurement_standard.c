@@ -347,6 +347,12 @@ void init_range_test_standard_phys(uint8_t* number_of_phys)
 #endif
     }
 
+    uint16_t channel_first = sl_rail_get_first_channel(rail_handles[i], NULL);
+    sl_rail_prepare_channel(rail_handles[i], channel_first);
+
+    sl_rail_tx_pa_mode_t new_pa_mode = sl_rail_get_pa_mode_from_channel_entry(rail_handles[i]); //from configs
+    (void) sl_rail_util_pa_post_init(rail_handles[i], new_pa_mode);
+
     sl_rail_tx_power_t max_power_ddbm = SL_RAIL_TX_POWER_MIN;
     sl_rail_tx_power_t min_power_ddbm = SL_RAIL_TX_POWER_MIN;
     sl_rail_tx_power_t step_ddbm = SL_RAIL_TX_POWER_MIN;

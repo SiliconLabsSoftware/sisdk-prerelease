@@ -6,7 +6,7 @@ description: >
   Can be tested with the Serial Bluetooth Terminal mobile app.
 package: "wisun_sdk_sample_app"
 category: "Wi-SUN Examples"
-quality: "production"
+quality: "evaluation"
 
 component:
 # for wisun stack and default components

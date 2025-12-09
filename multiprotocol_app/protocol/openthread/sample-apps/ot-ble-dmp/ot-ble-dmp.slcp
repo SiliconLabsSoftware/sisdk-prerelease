@@ -132,6 +132,7 @@ tag:
   # have thread build these demos for now
   #- prebuilt_demo
   - hardware:device:flash:768
+  - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_supports_thread
   - hwfilter:!device:device_family_efr32mr21
 readme:

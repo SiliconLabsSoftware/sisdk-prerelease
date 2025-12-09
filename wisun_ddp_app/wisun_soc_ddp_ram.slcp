@@ -32,6 +32,7 @@ readme:
   - path: doc/readme.md
 tag:
   - prebuilt_demo
+  - hwfilter:device:device_supports_wisun
 
 filter:
   - name: Wireless Technology

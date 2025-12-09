@@ -211,6 +211,7 @@ tag:
   - hardware:!shared:button:led
   - hardware:device:flash:512
   - hardware:device:ram:64
+  - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_supports_zigbee
   - hwfilter:!device:device_is_module
   - hwfilter:!device:rm21z000f1024im32

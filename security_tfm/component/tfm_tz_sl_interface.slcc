@@ -23,11 +23,5 @@ include:
   - path: psa/error.h
 metadata:
   sbom:
-    license: BSD-3-Clause
-    upstream:
-      name: TrustedFirmware-M (TF-M)
-      version: v1.5
-      supplier: Trusted Firmware
-      url: https://review.trustedfirmware.org/TF-M/trusted-firmware-m.git
-      comment: Trusted Firmware for M profile Arm CPUs
+    reference: tfm_sbom
 root_path: security_tfm

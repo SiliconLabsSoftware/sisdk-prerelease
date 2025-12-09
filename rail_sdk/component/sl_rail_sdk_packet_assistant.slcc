@@ -24,6 +24,7 @@ requires:
 - name: restrictions_profile_wisun_han
 - name: restrictions_profile_wisun_ofdm
 - name: restrictions_profile_sun
+- name: restrictions_profile_ieee802154_bpsk
 
 # according to standards the packet assembler is chosen.
 source:

@@ -606,6 +606,7 @@ ui_hints:
 
 tag:
   - prebuilt_demo
+  - hwfilter:device:device_supports_wisun
 
 filter:
   - name: "Wireless Technology"

@@ -31,6 +31,11 @@
 #ifndef BTMESH_APP_PROV_CBP_H
 #define BTMESH_APP_PROV_CBP_H
 
+/***********************************************************************************************//**
+ * @addtogroup btmesh_host_app_prov_cbp
+ * @{
+ **************************************************************************************************/
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -53,4 +58,5 @@ extern "C"
 };
 #endif
 
+/** @} (end addtogroup btmesh_host_app_prov_cbp) */
 #endif // BTMESH_APP_PROV_CBP_H

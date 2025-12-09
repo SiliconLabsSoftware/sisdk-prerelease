@@ -104,6 +104,11 @@
       vendor: silabs
     path: brd2704a/sl_rail_util_pti_config.h
   - override:
+      component: sl_rail_util_pti
+      file_id: rail_util_pti_config
+      vendor: silabs
+    path: brd2704a/sl_rail_util_pti_config.h
+  - override:
       component: simple_led
       file_id: simple_led_config
       instance: led0

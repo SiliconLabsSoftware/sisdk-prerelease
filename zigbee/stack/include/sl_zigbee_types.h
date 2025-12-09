@@ -2464,7 +2464,8 @@ enum
   SL_ZIGBEE_TARGET_FAILED_VERIFY_KEY           = 0x45,  // Target failed to send Verify Key to partner
 
   // These are status values applying only to the key requester
-  // verifying link keys.
+  // verifying a Trust Center link key, as well as on both
+  // initiator and target sides of the partner link key routine
   SL_ZIGBEE_VERIFY_LINK_KEY_FAILURE            = 0x64,
   SL_ZIGBEE_VERIFY_LINK_KEY_SUCCESS            = 0x65,
 };

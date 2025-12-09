@@ -405,7 +405,10 @@ void sl_wisun_regulation_tx_level_hnd(sl_wisun_evt_t *evt)
 void sl_wisun_br_routing_table_update_hnd(sl_wisun_evt_t *evt)
 {
 #if defined(SL_CATALOG_WISUN_BR_AGENT_SERVICE_PRESENT)
-  sl_wisun_br_agent_service_send_graph_info(evt);
+if (evt->evt.br_routing_table_update.event 
+    == SL_WISUN_ROUTING_TABLE_UPDATE_ROUTE_CHANGED) {
+    (void) sl_wisun_br_agent_service_send_graph_info();
+}
 #endif
   printf("[Routing table update: route changed]\n");
   __CHECK_FOR_STATUS(evt->evt.error.status);
@@ -621,7 +624,9 @@ void sl_wisun_app_br_core_start(void)
 #endif
 
 #if defined(SL_CATALOG_WISUN_BR_AGENT_SERVICE_PRESENT)
-  sl_wisun_br_agent_service_send_reg();
+  if (sl_wisun_br_agent_service_send_reg() != SL_STATUS_OK) {
+    printf("[Failed: unable to send registration to the Agent Service]\n");
+  }
 #endif
 
   _app_wisun_mutex_release();

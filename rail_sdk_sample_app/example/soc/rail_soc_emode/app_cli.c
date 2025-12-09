@@ -131,6 +131,9 @@ void cli_rx(sl_cli_command_arg_t *arguments)
   if (sleep_mode > 1) {
     app_log_info(SLEEP_WARNING);
   }
+  init_needed = true;
+  periodic_rx_ended = true;
+  periodic_receive = false;
   set_next_state(S_RX);
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   app_task_notify();
@@ -191,7 +194,8 @@ void cli_periodic_rx(sl_cli_command_arg_t *arguments)
   }
 
   init_needed = true;
-  rx_ended = true;
+  periodic_rx_ended = true;
+  periodic_receive = true;
   set_next_state(S_PERIODIC_RX);
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   app_task_notify();

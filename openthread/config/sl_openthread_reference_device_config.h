@@ -97,14 +97,17 @@
 #ifndef OPENTHREAD_CONFIG_DNSSD_SERVER_ENABLE
 #define OPENTHREAD_CONFIG_DNSSD_SERVER_ENABLE       1
 #endif
-// <q>  Service Registration Protocol (SRP) Client
+// <e>  Service Registration Protocol (SRP) Client
 #ifndef OPENTHREAD_CONFIG_SRP_CLIENT_ENABLE
 #define OPENTHREAD_CONFIG_SRP_CLIENT_ENABLE         1
 #endif
-// <q>  Number of SRP Client Buffers
+// <o OPENTHREAD_CONFIG_SRP_CLIENT_BUFFERS_MAX_SERVICES> SRP Client Buffers
+// <i> The number of SRP Client Buffers
+// <d> 10
 #ifndef OPENTHREAD_CONFIG_SRP_CLIENT_BUFFERS_MAX_SERVICES
 #define OPENTHREAD_CONFIG_SRP_CLIENT_BUFFERS_MAX_SERVICES 10
 #endif
+// </e>
 // <q>  Service Registration Protocol (SRP) Server
 #ifndef OPENTHREAD_CONFIG_SRP_SERVER_ENABLE
 #define OPENTHREAD_CONFIG_SRP_SERVER_ENABLE         1
@@ -144,16 +147,20 @@
 #define OPENTHREAD_CONFIG_CHANNEL_MONITOR_ENABLE    0
 #endif
 // </e>
-// <e>  Maximum size of the CLI line (in bytes), including null terminator
+// <h>  CLI Limits
+// <o OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH>  Maximum CLI Line Length
+// <i>  Maximum size of the CLI line (in bytes), including null terminator.
+// <d>  640
 #ifndef OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH
 #define OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH       640
 #endif
-// </e>
-// <e>  CLI UART RX Buffer size in bytes (should be atleast maximum size of the CLI line)
+// <o OPENTHREAD_CONFIG_CLI_UART_RX_BUFFER_SIZE>  CLI UART RX Buffer size
+// <i>  CLI UART RX Buffer size in bytes (should be atleast maximum size of the CLI line).
+// <d>  640
 #ifndef OPENTHREAD_CONFIG_CLI_UART_RX_BUFFER_SIZE
 #define OPENTHREAD_CONFIG_CLI_UART_RX_BUFFER_SIZE   640
 #endif
-// </e>
+// </h>
 // <e>  Commissioner
 #ifndef OPENTHREAD_CONFIG_COMMISSIONER_ENABLE
 #define OPENTHREAD_CONFIG_COMMISSIONER_ENABLE       1
@@ -204,21 +211,27 @@
 #define OPENTHREAD_CONFIG_IP6_FRAGMENTATION_ENABLE  0
 #endif
 // </e>
-// <e>  Maximum number of IPv6 unicast addresses allowed to be externally added
+// <h>  IPv6 Limits
+// <o OPENTHREAD_CONFIG_IP6_MAX_EXT_UCAST_ADDRS>  Maximum IPv6 external unicast addresses
+// <i>  Maximum number of IPv6 unicast addresses allowed to be externally added
+// <d>  4
 #ifndef OPENTHREAD_CONFIG_IP6_MAX_EXT_UCAST_ADDRS
 #define OPENTHREAD_CONFIG_IP6_MAX_EXT_UCAST_ADDRS   4
 #endif
-// </e>
-// <e>  Maximum number of IPv6 multicast addresses allowed to be externally added
+// <o OPENTHREAD_CONFIG_IP6_MAX_EXT_MCAST_ADDRS>  Maximum IPv6 external multicast addresses
+// <i>  Maximum number of IPv6 multicast addresses allowed to be externally added
+// <d>  4
 #ifndef OPENTHREAD_CONFIG_IP6_MAX_EXT_MCAST_ADDRS
 #define OPENTHREAD_CONFIG_IP6_MAX_EXT_MCAST_ADDRS   4
 #endif
-// </e>
-// <e>  The maximum number of IPv6 address registrations for MTD
+// <o OPENTHREAD_CONFIG_MLE_IP_ADDRS_TO_REGISTER>  Maximum IPv6 address registrations for MTD
+// <i>  The maximum number of IPv6 address registrations for MTD.
+// <i>  If left unchanged will default to the value of OPENTHREAD_CONFIG_MLE_IP_ADDRS_PER_CHILD
+// <d>  4
 #ifndef OPENTHREAD_CONFIG_MLE_IP_ADDRS_TO_REGISTER
 #define OPENTHREAD_CONFIG_MLE_IP_ADDRS_TO_REGISTER (OPENTHREAD_CONFIG_MLE_IP_ADDRS_PER_CHILD)
 #endif
-// </e>
+// </h>
 // <e>  Jam Detection
 #ifndef OPENTHREAD_CONFIG_JAM_DETECTION_ENABLE
 #define OPENTHREAD_CONFIG_JAM_DETECTION_ENABLE      0
@@ -253,16 +266,17 @@
 #ifndef OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
 #define OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE      0
 #endif
-// </e>
 // <e>  Multiple Static Instance Support
 #ifndef OPENTHREAD_CONFIG_MULTIPLE_STATIC_INSTANCE_ENABLE
 #define OPENTHREAD_CONFIG_MULTIPLE_STATIC_INSTANCE_ENABLE      0
 #endif
-// </e>
-// <e>  Number of OpenThread Instances For Static Buffer Allocation
+// <o OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM>  Number of OpenThread Instances
+// <i>  Default is 2. Number of OpenThread Instances For Static Buffer Allocation.
+// <d>  2
 #ifndef OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM
 #define OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM      2
 #endif
+// </e>
 // </e>
 // <e>  OTNS (OpenThread Network Simulator)
 #ifndef OPENTHREAD_CONFIG_OTNS_ENABLE
@@ -289,11 +303,6 @@
 #define OPENTHREAD_CONFIG_TMF_NETDATA_SERVICE_ENABLE    1
 #endif
 // </e>
-// <e>  Uptime of OpenThread instance
-#ifndef OPENTHREAD_CONFIG_UPTIME_ENABLE
-#define OPENTHREAD_CONFIG_UPTIME_ENABLE             1
-#endif
-// </e>
 // <e>  RAM (volatile-only storage)
 #ifndef OPENTHREAD_SETTINGS_RAM
 #define OPENTHREAD_SETTINGS_RAM                     0
@@ -315,7 +324,14 @@
 #endif
 // </e>
 // <e>  Time Synchronization Service
+#ifndef OPENTHREAD_CONFIG_TIME_SYNC_ENABLE
 #define OPENTHREAD_CONFIG_TIME_SYNC_ENABLE          0
+#endif
+// </e>
+// <e>  Uptime of OpenThread instance
+#ifndef OPENTHREAD_CONFIG_UPTIME_ENABLE
+#define OPENTHREAD_CONFIG_UPTIME_ENABLE             1
+#endif
 // </e>
 // <e>  UDP Forward
 #ifndef OPENTHREAD_CONFIG_UDP_FORWARD_ENABLE
@@ -327,13 +343,22 @@
 #define OPENTHREAD_CONFIG_MAC_BEACON_PAYLOAD_PARSING_ENABLE      1
 #endif
 // </e>
+// <h>  Radio Driver RX buffers
+// <o SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT>  Maximum number of RX buffers
+// <i>  The maximum number of RX buffers to use in the radio driver.
+// <d>  16
+#ifndef SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT
+#define SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT       16
+#endif
+// </h>
 // </h>
 // <h>  Logging
 // <o   OPENTHREAD_CONFIG_LOG_OUTPUT> LOG_OUTPUT
 //      <OPENTHREAD_CONFIG_LOG_OUTPUT_NONE             => NONE
 //      <OPENTHREAD_CONFIG_LOG_OUTPUT_APP              => APP
 //      <OPENTHREAD_CONFIG_LOG_OUTPUT_PLATFORM_DEFINED => PLATFORM_DEFINED
-// <i>  Default: OPENTHREAD_CONFIG_LOG_OUTPUT_PLATFORM_DEFINED
+// <i>  Default: OPENTHREAD_CONFIG_LOG_OUTPUT_APP
+// <d>  OPENTHREAD_CONFIG_LOG_OUTPUT_APP
 #ifndef OPENTHREAD_CONFIG_LOG_OUTPUT
 #define OPENTHREAD_CONFIG_LOG_OUTPUT OPENTHREAD_CONFIG_LOG_OUTPUT_APP
 #endif
@@ -341,12 +366,6 @@
 // <q>  DYNAMIC_LOG_LEVEL
 #ifndef OPENTHREAD_CONFIG_LOG_LEVEL_DYNAMIC_ENABLE
 #define OPENTHREAD_CONFIG_LOG_LEVEL_DYNAMIC_ENABLE  1
-#endif
-
-// <i> The maximum number of RX buffers to use in the radio driver.
-// <d> 16
-#ifndef SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT
-#define SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT       16
 #endif
 
 // <e>  Enable Logging
@@ -361,7 +380,8 @@
 //      <OT_LOG_LEVEL_NOTE       => NOTE
 //      <OT_LOG_LEVEL_INFO       => INFO
 //      <OT_LOG_LEVEL_DEBG       => DEBG
-// <i>  Default: OT_LOG_LEVEL_DEBG
+// <i>  Default: OT_LOG_LEVEL_NOTE
+// <d>  OT_LOG_LEVEL_NOTE
 #ifndef OPENTHREAD_CONFIG_LOG_LEVEL
 #define OPENTHREAD_CONFIG_LOG_LEVEL OT_LOG_LEVEL_NOTE
 #endif
@@ -382,7 +402,8 @@
 #define OPENTHREAD_CONFIG_LOG_PREPEND_LEVEL         1
 #endif
 
-#endif
+#endif // OPENTHREAD_FULL_LOGS_ENABLE
+
 // </h>
 // </e>
 // </h>

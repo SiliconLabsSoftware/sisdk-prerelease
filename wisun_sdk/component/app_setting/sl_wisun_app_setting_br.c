@@ -122,6 +122,7 @@ static const uint8_t *_app_check_passphrase(const uint8_t *passphrase, size_t *c
  * @return sl_status_t SL_STATUS_OK on success, otherwise SL_STATUS_FAIL
  *****************************************************************************/
 static sl_status_t _app_ranges_to_mask(const char *str, uint8_t *mask, uint32_t size);
+
 // -----------------------------------------------------------------------------
 //                                Static Variables
 // -----------------------------------------------------------------------------
@@ -226,6 +227,59 @@ static const app_setting_wifi_t _wisun_wifi_settings_default = {
 // -----------------------------------------------------------------------------
 //                                Global Variables
 // -----------------------------------------------------------------------------
+/// Dummy Wi-SUN application settings for keep nvm space when BR settings are used
+app_setting_wisun_t dummy_wisun_app_settings = {
+  #if defined(WISUN_CONFIG_NETWORK_NAME)
+  .network_name = WISUN_CONFIG_NETWORK_NAME,
+#else
+  .network_name = APP_SETTINGS_DEFAULT_NETWORK_NAME,
+#endif
+#if defined(WISUN_CONFIG_NETWORK_SIZE)
+  .network_size = WISUN_CONFIG_NETWORK_SIZE,
+#else
+  .network_size = SL_WISUN_NETWORK_SIZE_SMALL,
+#endif
+#if defined(WISUN_CONFIG_TX_POWER)
+  .tx_power_ddbm = WISUN_CONFIG_TX_POWER,
+#else
+  .tx_power_ddbm = 200,
+#endif
+  .is_default_phy = true,
+#if defined(WISUN_CONFIG_DEVICE_TYPE)
+  .device_type = WISUN_CONFIG_DEVICE_TYPE,
+#else
+  .device_type = SL_WISUN_ROUTER,
+#endif
+#if defined(WISUN_CONFIG_DEVICE_PROFILE)
+  .lfn_profile = WISUN_CONFIG_DEVICE_PROFILE,
+#else
+  .lfn_profile = SL_WISUN_LFN_PROFILE_TEST,
+#endif
+#if defined(WISUN_CONFIG_DEFAULT_PHY_FAN10)
+  .phy = {
+    .type = SL_WISUN_PHY_CONFIG_FAN10,
+    .config.fan10.reg_domain = WISUN_CONFIG_REGULATORY_DOMAIN,
+    .config.fan10.op_class = WISUN_CONFIG_OPERATING_CLASS,
+    .config.fan10.op_mode = WISUN_CONFIG_OPERATING_MODE,
+  },
+#elif defined(WISUN_CONFIG_DEFAULT_PHY_FAN11)
+  .phy = {
+    .type = SL_WISUN_PHY_CONFIG_FAN11,
+    .config.fan11.reg_domain = WISUN_CONFIG_REGULATORY_DOMAIN,
+    .config.fan11.chan_plan_id = WISUN_CONFIG_CHANNEL_PLAN_ID,
+    .config.fan11.phy_mode_id = WISUN_CONFIG_PHY_MODE_ID,
+  },
+#else
+  .phy = { 0 },
+#endif
+};
+
+/// Wi-SUN application network saving settings
+const app_saving_item_t dummy_network_saving_settings = {
+  .data = &dummy_wisun_app_settings,
+  .data_size = sizeof(dummy_wisun_app_settings),
+  .default_val = &dummy_wisun_app_settings
+};
 
 /// Wi-SUN border router network saving settings
 const app_saving_item_t br_saving_settings = {
@@ -245,6 +299,7 @@ const app_saving_item_t wifi_saving_settings = {
 
 /// Wi-SUN application all saved data
 const app_saving_item_t *saving_settings[] = {
+  &dummy_network_saving_settings,
   &br_saving_settings,
 #if defined(SL_CATALOG_WISUN_BR_WIFI_PRESENT)
   &wifi_saving_settings,
@@ -520,7 +575,7 @@ sl_status_t app_wisun_setting_set_pan_id(const uint16_t *const pan_id)
 /* Setting Wi-SUN PHY */
 sl_status_t app_wisun_setting_set_phy(const sl_wisun_phy_config_t *const phy)
 {
-  sl_status_t stat = SL_STATUS_FAIL;
+  sl_status_t stat = SL_STATUS_OK;
 
   if (phy == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
@@ -529,8 +584,17 @@ sl_status_t app_wisun_setting_set_phy(const sl_wisun_phy_config_t *const phy)
   _wisun_mutex_br_acquire();
   _wisun_br_settings.is_default_phy = false;
   memcpy(&_wisun_br_settings.phy, phy, sizeof(sl_wisun_phy_config_t));
-  stat = app_wisun_setting_notify(APP_SETTING_NOTIFICATION_SET_PHY_CFG);
   _wisun_mutex_br_release();
+
+  if (app_wisun_setting_notify(APP_SETTING_NOTIFICATION_SET_PHY_CFG) != SL_STATUS_OK) {
+    printf("[Failed: unable to set PHY config\n");
+    stat = SL_STATUS_FAIL;
+  }
+
+  if (app_wisun_setting_notify(APP_SETTING_NOTIFICATION_SET_BR_SETTINGS) !=  SL_STATUS_OK) {
+    printf("[Failed: unable to set BR settings\n");
+    stat = SL_STATUS_FAIL;
+  }
 
   return stat;
 }
@@ -605,14 +669,22 @@ sl_status_t app_wisun_setting_get_phy(sl_wisun_phy_config_t *const phy)
 sl_status_t app_wisun_setting_init_phy_cfg(void)
 {
   sl_status_t stat = SL_STATUS_OK;
-
+  
   // Full radio config: create a copy of already prepared phy config with default settings
   if (_wisun_br_settings.is_default_phy) {
     memcpy(&_wisun_br_settings.phy, &_wisun_br_settings_default.phy, sizeof(sl_wisun_phy_config_t));
   }
 
   // Set notifications
-  stat = app_wisun_setting_notify(APP_SETTING_NOTIFICATION_SET_PHY_CFG);
+  if (app_wisun_setting_notify(APP_SETTING_NOTIFICATION_SET_PHY_CFG) != SL_STATUS_OK) {
+    printf("[Failed: unable to init PHY config\n");
+    stat = SL_STATUS_FAIL;
+  }
+
+  if (app_wisun_setting_notify(APP_SETTING_NOTIFICATION_SET_BR_SETTINGS) !=  SL_STATUS_OK) {
+    printf("[Failed: unable to init BR settings\n");
+    stat = SL_STATUS_FAIL;
+  }
 
   return stat;
 }

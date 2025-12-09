@@ -6,6 +6,9 @@ description: >
   cryptographic keys from the Bluetooth Mesh network.
 category: Bluetooth Mesh|Host
 quality: production
+metadata:
+  sbom:
+    license: Zlib
 root_path: bluetooth_mesh_middleware/common/btmesh_host_key_export
 include:
 - path: .

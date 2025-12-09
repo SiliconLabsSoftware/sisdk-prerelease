@@ -31,6 +31,11 @@
 #ifndef BTMESH_APP_REMOTE_PROV_UI_H
 #define BTMESH_APP_REMOTE_PROV_UI_H
 
+/***********************************************************************************************//**
+ * @addtogroup btmesh_host_app_remote_prov_ui
+ * @{
+ **************************************************************************************************/
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -57,4 +62,5 @@ extern "C" {
 };
 #endif
 
+/** @} (end addtogroup btmesh_host_app_remote_prov_ui) */
 #endif // BTMESH_APP_REMOTE_PROV_UI_H

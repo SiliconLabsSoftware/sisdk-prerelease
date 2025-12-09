@@ -43,7 +43,7 @@ const char unknownStatus[] = "???";
 
 //============================================================================
 
-const char* sl_zigbee_af_device_database_get_status_string(sl_zigbee_af_device_discovery_status_t status)
+const char* device_database_get_status_string(sl_zigbee_af_device_discovery_status_t status)
 {
   uint8_t i;
   for (i = 0; i < sizeof(statusToString) / sizeof(sli_zigbee_discovery_status_code_to_string_t); i++) {
@@ -71,7 +71,7 @@ void sli_zigbee_af_device_database_print_all(sl_cli_command_arg_t *arguments)
     sl_zigbee_af_core_println(" - Capabilities: 0x%02X - EPs: %d - Status: %s - Failures:%d - Stack Revision: %d",
                               device->capabilities,
                               device->endpointCount,
-                              sl_zigbee_af_device_database_get_status_string(device->status),
+                              device_database_get_status_string(device->status),
                               device->discoveryFailures,
                               device->stackRevision);
   }
@@ -161,7 +161,7 @@ void sli_zigbee_af_device_database_add_dummy_device(sl_cli_command_arg_t *argume
     }
   }
 
-  if (NULL == sl_zigbee_af_device_database_add_device_with_all_info(&dummy)) {
+  if (SL_STATUS_OK != sl_zigbee_af_device_database_add_device_with_all_info(&dummy)) {
     sl_zigbee_af_core_println("Error: Could not add device to database.");
   }
 }

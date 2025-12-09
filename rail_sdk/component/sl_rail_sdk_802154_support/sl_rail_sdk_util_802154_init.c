@@ -129,6 +129,7 @@ void sl_rail_sdk_util_init(void)
   const sl_rail_channel_config_t *channel_config = NULL;
   (void) sl_rail_config_channels(sl_rail_sdk_handle,
                                  channel_config,
+                                 (sl_rail_radio_config_changed_callback_t)(void *)
                                  &sli_rail_util_on_channel_config_change);
   if (channel_config != NULL) {
     // Establish first channel by default

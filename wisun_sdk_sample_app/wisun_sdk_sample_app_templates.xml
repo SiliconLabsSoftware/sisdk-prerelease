@@ -12,7 +12,7 @@
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar"/>
     <properties key="category" value="Wi-SUN Examples"/>
-    <properties key="quality" value="PRODUCTION"/>
+    <properties key="quality" value="EVALUATION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Wi-SUN"/>
   </descriptors>
@@ -28,7 +28,7 @@
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar"/>
     <properties key="category" value="Wi-SUN Examples"/>
-    <properties key="quality" value="PRODUCTION"/>
+    <properties key="quality" value="EVALUATION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Wi-SUN"/>
   </descriptors>
@@ -38,12 +38,12 @@
     <properties key="solutionReferenceId" value="example.wisun_soc_br_agent.wisun_soc_br_agent.slcp"/>
     <properties key="projectFilePaths" value="example/wisun_soc_br_agent/wisun_soc_br_agent.slcp"/>
     <properties key="readmeFiles" value="documentation/example/wisun_soc_br_agent/readme.md"/>
-    <properties key="boardCompatibility" value="brd2705a brd4270a brd4270b brd4271a brd4272a brd4276a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efm32pg26b301f1024il136.* .*efm32pg26b301f1024im68.* .*efm32pg26b301f2048il136.* .*efm32pg26b301f2048im68.* .*efm32pg26b500f3200il136.* .*efm32pg26b500f3200im48.* .*efm32pg26b500f3200im68.* .*efm32pg26b501f3200il136.* .*efm32pg26b501f3200im48.* .*efm32pg26b501f3200im68.* .*efm32pg28b210f1024im68.* .*efm32pg28b310f1024im68.* .*efr32fg25a111f1152im56.* .*efr32fg25a121f1152im56.* .*efr32fg25a211f1152im56.* .*efr32fg25a211f1920im56.* .*efr32fg25a221f1152im56.* .*efr32fg25a221f1920im56.* .*efr32fg25b111f1152im56.* .*efr32fg25b121f1152im56.* .*efr32fg25b211f1920im56.* .*efr32fg25b212f1920im56.* .*efr32fg25b221f1920im56.* .*efr32fg25b222f1920im56.* .*efr32fg28a010f1024gm48.* .*efr32fg28a010f1024gm68.* .*efr32fg28a110f1024gm48.* .*efr32fg28a110f1024gm68.* .*efr32fg28a112f1024gm48.* .*efr32fg28a112f1024gm68.* .*efr32fg28a120f1024gm48.* .*efr32fg28a120f1024gm68.* .*efr32fg28a122f1024gm48.* .*efr32fg28a122f1024gm68.* .*efr32fg28b310f1024im48.* .*efr32fg28b310f1024im68.* .*efr32fg28b312f1024im48.* .*efr32fg28b312f1024im68.* .*efr32fg28b320f1024im48.* .*efr32fg28b320f1024im68.* .*efr32fg28b322f1024im48.* .*efr32fg28b322f1024im68.* .*efr32sg28b320f1024im48.* .*efr32sg28b320f1024im68.* .*efr32sg28b322f1024im48.* .*efr32sg28b322f1024im68.* .*efr32zg28a110f1024gm48.* .*efr32zg28a110f1024gm68.* .*efr32zg28a112f1024gm48.* .*efr32zg28a112f1024gm68.* .*efr32zg28a120f1024gm48.* .*efr32zg28a120f1024gm68.* .*efr32zg28a122f1024gm48.* .*efr32zg28a122f1024gm68.* .*efr32zg28b310f1024im48.* .*efr32zg28b310f1024im68.* .*efr32zg28b312f1024im48.* .*efr32zg28b312f1024im68.* .*efr32zg28b320f1024im48.* .*efr32zg28b320f1024im68.* .*efr32zg28b322f1024im48.* .*efr32zg28b322f1024im68.*"/>
+    <properties key="boardCompatibility" value="brd4270a brd4271a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efm32pg26b301f1024il136.* .*efm32pg26b301f1024im68.* .*efm32pg26b301f2048il136.* .*efm32pg26b301f2048im68.* .*efm32pg26b500f3200il136.* .*efm32pg26b500f3200im48.* .*efm32pg26b500f3200im68.* .*efm32pg26b501f3200il136.* .*efm32pg26b501f3200im48.* .*efm32pg26b501f3200im68.* .*efm32pg28b210f1024im68.* .*efm32pg28b310f1024im68.* .*efr32fg25a111f1152im56.* .*efr32fg25a121f1152im56.* .*efr32fg25a211f1152im56.* .*efr32fg25a211f1920im56.* .*efr32fg25a221f1152im56.* .*efr32fg25a221f1920im56.* .*efr32fg25b111f1152im56.* .*efr32fg25b121f1152im56.* .*efr32fg25b211f1920im56.* .*efr32fg25b212f1920im56.* .*efr32fg25b221f1920im56.* .*efr32fg25b222f1920im56.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar"/>
     <properties key="category" value="Wi-SUN Examples"/>
-    <properties key="quality" value="PRODUCTION"/>
+    <properties key="quality" value="EVALUATION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN"/>
   </descriptors>

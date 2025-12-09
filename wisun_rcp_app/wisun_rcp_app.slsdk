@@ -8,4 +8,5 @@ label=wisun_rcp_app
 description=Wi-SUN RCP Application
 
 # List of relative file paths to template xml files in this extension
-prop.file.templatesFile=wisun_rcp_templates.xml
+prop.file.templatesFile=wisun_rcp_app_templates.xml
+prop.file.demosFile=wisun_rcp_app_demos.xml

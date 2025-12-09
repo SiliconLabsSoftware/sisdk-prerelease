@@ -371,7 +371,21 @@
   - condition:
     - brd4001a
     override:
+      component: sl_rail_util_pti
+      file_id: rail_util_pti_config
+      vendor: silabs
+    path: brd4276a_brd4001a/sl_rail_util_pti_config.h
+  - condition:
+    - brd4001a
+    override:
       component: rail_util_rssi
+      file_id: rail_util_rssi_config
+      vendor: silabs
+    path: brd4276a_brd4001a/sl_rail_util_rssi_config.h
+  - condition:
+    - brd4001a
+    override:
+      component: sl_rail_util_rssi
       file_id: rail_util_rssi_config
       vendor: silabs
     path: brd4276a_brd4001a/sl_rail_util_rssi_config.h
@@ -779,7 +793,21 @@
   - condition:
     - brd4002a
     override:
+      component: sl_rail_util_pti
+      file_id: rail_util_pti_config
+      vendor: silabs
+    path: brd4276a_brd4002a/sl_rail_util_pti_config.h
+  - condition:
+    - brd4002a
+    override:
       component: rail_util_rssi
+      file_id: rail_util_rssi_config
+      vendor: silabs
+    path: brd4276a_brd4002a/sl_rail_util_rssi_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: sl_rail_util_rssi
       file_id: rail_util_rssi_config
       vendor: silabs
     path: brd4276a_brd4002a/sl_rail_util_rssi_config.h

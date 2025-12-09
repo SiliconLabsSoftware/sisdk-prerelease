@@ -131,20 +131,6 @@ sl_rail_util_ieee802154_stack_event_t sli_ot_radio_events_handle_phy_stack_event
 #endif
 
 /**
- * @brief Check if PHY stack events are enabled
- *
- * @return true if PHY stack events are enabled, false otherwise
- */
-bool sli_ot_radio_events_is_phy_stack_enabled(void);
-
-/**
- * @brief Enable PHY stack events
- *
- * @param enabled true to enable, false to disable
- */
-void sli_ot_radio_events_set_phy_stack_enabled(bool enabled);
-
-/**
  * @brief Process TX-related events
  *
  * Handles transmission events including packet sent, channel busy, blocked, etc.

@@ -5,12 +5,12 @@ existing application. The description serves the purpose of helping to fix the f
 
 # 8.0.0 {#section-8-0-0}
 
-Version has been bumped to 8.0.0 to reflect the major changes in the stack. In the future the stack version will follow semver.
+Version has been bumped to 8.0.0 to reflect the major changes in the stack. In the future the stack version will follow the semantic versioning convention.
 
 
 ## Power Management Commands - Lock Behavior
 
-- The permanent IO lock can only be acquired once. Subsequent requests with timeout=0 will be ignored if the lock is already held.
+- The permanent I/O lock can only be acquired once. Subsequent requests with timeout=0 will be ignored if the lock is already held.
 - Only one temporary lock can be held at a time. Requesting a second temporary lock will cancel and replace the first one.
 - Temporary locks cannot be revoked using `FUNC_ID_POWER_MANAGEMENT_CANCEL`. They can only expire naturally after their timeout period.
 - If a permanent lock is already held, requesting a temporary lock will not prevent the temporary lock mechanism from working - they operate independently.
@@ -18,15 +18,12 @@ Version has been bumped to 8.0.0 to reflect the major changes in the stack. In t
 ## PTI Configuration
 - Starting with this version, the PTI feature is mainly configured in sl_rail_util_pti component.
 - The whole PTI configuration is loaded from rail_util_pti component. 
-- PTI is disabled by default in all sample_apps except zniffer. It can be overloaded using the ENABLE_RADIO_DEBUG param in zw_config_rf.h.
-- It's not possible to deactivate PTI on Zniffer app.
-- The user is now free to align PTI pins with the pinout of his board.
-
-## Removal of enterPowerDown() and exitPowerDown() hooks
-FreeRTOS power down hooks (`configPRE_SLEEP_PROCESSING` and `configPOST_SLEEP_PROCESSING`) related to the zpal_power_manager module have been removed. With the removal of zpal_power_manager, applications should now use the Silicon Labs `sl_power_manager` API directly to manage power states, or use `zw_shutdown_manager` for controlling entry into shutdown mode.
+- PTI is disabled by default in all sample applications, except for the Zniffer. It can be overridden using the ENABLE_RADIO_DEBUG param in zw_config_rf.h.
+- It's not possible to disable PTI on the Zniffer application.
+- The user is now free to align PTI pins with the pinout of their board.
 
 ## Removal of zpal_power_manager module
-- The zpal_power_manager module is removed from Z-Wave. To handle the power manager state of the platform, refer to the Silicon Labs [`sl_power_manager`](https://docs.silabs.com/gecko-platform/3.0/service/api/group-power-manager) module APIs.
+- The zpal_power_manager module is removed from Z-Wave. To handle the power management state of the platform, refer to the Silicon Labs [`sl_power_manager`](https://docs.silabs.com/gecko-platform/3.0/service/api/group-power-manager) module APIs.
 
 - The Z-Wave stack is now independent from the EM state of the platform, meaning that using `sl_power_manager` APIs will not interfere with Z-Wave stack logic.
 
@@ -35,6 +32,9 @@ FreeRTOS power down hooks (`configPRE_SLEEP_PROCESSING` and `configPOST_SLEEP_PR
 - A new `zw_shutdown_manager` component module has been introduced to manage shutdown mode (EM4) locks, replacing the deep sleep functionality previously provided by zpal_power_manager.
 
 - New radio stay awake APIs have been introduced: `zpal_radio_request_stay_awake`, `zpal_radio_update_stay_awake`, and `zpal_radio_revoke_stay_awake` replace the previous `zpal_pm_lock(ZPAL_PM_TYPE_USE_RADIO)` mechanism for keeping the radio in receive mode.
+
+## Removal of enterPowerDown() and exitPowerDown() hooks
+FreeRTOS power down hooks (`configPRE_SLEEP_PROCESSING` and `configPOST_SLEEP_PROCESSING`) related to the zpal_power_manager module have been removed. With the removal of zpal_power_manager, applications should now use the Silicon Labs `sl_power_manager` API directly to manage power states, or use `zw_shutdown_manager` for controlling entry into shutdown mode.
 
 ## CLI
 - Now that all applications can make use of EM1P, the CLI has been configured to rely on the LFRCO clock (which implies a lower baud rate of 9600) for SoC applications. Therefore, the CLI will remain active in EM1P.
@@ -50,19 +50,19 @@ zpal_tx_power_t > zpal_tx_power_decidbm_t
 ZW_TX_POWER_xxDBM  > ZW_TX_POWER_xx0DDBM
 
 ## ENTROPY GENERATOR
-The zpal_entropy API is now based entirely on the RNG generator, and radio is no longer used to generate random data.
+The zpal_entropy API is now based entirely on the RNG, and radio is no longer used to generate random data.
 
 ## ZPAL Zniffer API
-The zpal_radio_get_last_beam_info API has been added to allow beam management from the stack side in the Zniffer application.
+The zpal_radio_get_last_beam_info API has been added to allow beam management from the stack layer in the Zniffer application.
 
 ## Noise Detection Module Refactoring
 Noise detection management has been moved from the Z-Wave stack layer (`ZW_noise_detect`) to the ZPAL layer (`zpal_noise`). This refactoring improves modularity and allows for better platform-specific implementations.
 
 ## New Dynamic Tx Power algorithm
 The new algorithm stores the output power for all LR nodes. Output power is stored in RAM only.
-Controller & end device manage their power independently to be able to adapt to different noise levels.
+The controller and end device manage their power independently to be able to adapt to different noise levels.
 To reduce latency, the third transmission always uses maximum output power.
-This standard algorithm can be overloaded by customer to suit specific usages.
+This standard algorithm can be overridden by the customer to suit their specific use case.
 
 ## Tx Power in LR ACK frame
 The Tx Power in LR ACK frame is now the tx power used to send the ACK frame instead of the tx power of
@@ -71,7 +71,7 @@ power than the capability of the device (e.g. The singlecast frame was sent at 1
 is sent at the device's maximum output: 14dBm).
 
 ## Improve frame transmission validation
-Nodes won't be able to send frame with their own node ID as destination node ID anymore.
+Nodes won't be able to send frames with their own node ID as the destination node ID anymore.
 
 # 7.24.1 {#section-7-24-1}
 

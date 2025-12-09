@@ -144,6 +144,7 @@ template_contribution:
 
 tag:
   - prebuilt_demo
+  - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_supports_thread
   - hwfilter:!device:device_family_efr32mr21
 

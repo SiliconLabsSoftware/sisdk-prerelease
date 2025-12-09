@@ -1,10 +1,10 @@
 project_name: wisun_ncp
 label: Wi-SUN - NCP
 description: >
-  The Wi-SUN Network Co-Processor (NCP) application provides a complete Wi-SUN 
-  network interface implementation for embedded devices. This project implements 
-  a Network Co-Processor architecture where the Wi-SUN stack runs on a dedicated 
-  radio microcontroller, communicating with a host processor through UART or CPC 
+  The Wi-SUN Network Co-Processor (NCP) application provides a complete Wi-SUN
+  network interface implementation for embedded devices. This project implements
+  a Network Co-Processor architecture where the Wi-SUN stack runs on a dedicated
+  radio microcontroller, communicating with a host processor through UART or CPC
   (Co-Processor Communication) interfaces.
 quality: production
 package: wisun_ncp_app
@@ -125,3 +125,7 @@ filter:
     value: [NCP]
   - name: Project Difficulty
     value: [Advanced]
+
+tag:
+  - prebuilt_demo
+  - hwfilter:device:device_supports_wisun

@@ -1,5 +1,5 @@
 package: zigbee
-description: This component queries new devices for their endpoints and clusters to record information in the Device Database component.
+description: This component queries new devices for their endpoints and clusters to record information in the Device Database component. Devices are queried when they complete key negotiation, complete a trust center link key update, or send a Device Announce message.
 label: Device Query Service
 quality: production
 id: zigbee_device_query_service
@@ -23,6 +23,10 @@ include:
 template_contribution:
 - name: component_catalog
   value: zigbee_device_query_service
+- name: zigbee_stack_callback
+  value:
+    callback_type: zigbee_key_establishment
+    function_name: sli_zigbee_af_device_query_service_key_establishment_cb
 - name: zigbee_af_callback
   value:
     callback_type: event_init

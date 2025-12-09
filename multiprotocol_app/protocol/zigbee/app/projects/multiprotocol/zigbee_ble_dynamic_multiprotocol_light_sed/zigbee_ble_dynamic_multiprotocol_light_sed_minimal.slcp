@@ -182,6 +182,7 @@ include:
 tag:
   - hardware:device:flash:512
   - hardware:device:ram:64
+  - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_supports_zigbee
   - hwfilter:ram:64k
   - hwfilter:!device:device_is_module

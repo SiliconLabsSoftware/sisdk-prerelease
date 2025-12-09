@@ -31,6 +31,11 @@
 #ifndef BTMESH_APP_REMOTE_PROV_H
 #define BTMESH_APP_REMOTE_PROV_H
 
+/***********************************************************************************************//**
+ * @addtogroup btmesh_host_app_remote_prov
+ * @{
+ **************************************************************************************************/
+
 #include <getopt.h>
 #include "sl_status.h"
 #include "btmesh_app_prov.h"
@@ -177,4 +182,5 @@ bool btmesh_app_remote_prov_get_prov_data(uint16_t *remote_prov_server_addr,
 };
 #endif
 
+/** @} (end addtogroup btmesh_host_app_remote_prov) */
 #endif // BTMESH_APP_REMOTE_PROV_H

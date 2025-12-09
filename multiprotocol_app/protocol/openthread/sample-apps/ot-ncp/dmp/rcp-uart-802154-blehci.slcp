@@ -117,6 +117,7 @@ template_contribution:
 
 tag:
   - prebuilt_demo
+  - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_supports_thread
   - hwfilter:board:hardware_board_has_uart
 

@@ -38,10 +38,14 @@
 #include "sl_string.h"
 #include "cmsis_os2.h"
 #include "sl_cmsis_os2_common.h"
-#include "socket/socket.h"
+#include "lwip/opt.h"
+#include "lwip/api.h"
+#include "lwip/sys.h"
+#include "lwip/ip_addr.h"
 #include "sl_memory_manager.h"
 #include "sl_wisun_types.h"
 #include "border_router/sl_wisun_br_api.h"
+#include "sl_wisun_br_wifi.h"
 #include "sl_wisun_br_agent_service_config.h"
 #include "sl_wisun_br_agent_service.h"
 #include "sl_wisun_app_core.h"
@@ -55,19 +59,6 @@
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
-// Free a pointer allocated via sl_malloc
-#define __cleanup(ptr)                                                          \
-  do {                                                                          \
-    if ((ptr) != NULL) {                                                        \
-      sl_memory_region_t __heap = sl_memory_get_heap_region();                  \
-      void *__p = (void *)(ptr);                                                \
-      if (__p >= __heap.addr &&                                                 \
-          (uintptr_t)__p < ((uintptr_t)__heap.addr + (uintptr_t)__heap.size)) { \
-        sl_free(__p);                                                           \
-      }                                                                         \
-      (ptr) = NULL;                                                             \
-    }                                                                           \
-  } while (0)
 
 // Agent Service Thread stack size in words
 #define SL_WISUN_BR_AGENT_SERVICE_STACK_SIZE_WORD         (256UL)
@@ -81,6 +72,9 @@
 #define SL_WISUN_BR_AGENT_SERVICE_CODE_SET_CONFIG_PARAMS  (0x03U)
 #define SL_WISUN_BR_AGENT_SERVICE_CODE_RESTART_BR         (0x04U)
 #define SL_WISUN_BR_AGENT_SERVICE_CODE_STOP_BR            (0x05U)
+
+// Agent Service event flags
+#define SL_WISUN_BR_AGENT_WIFI_CONNECTED_EVT_FLAG         (1U << 0U)
 
 // Agent Service message type
 typedef struct sl_wisun_br_agent_service_msg {
@@ -120,21 +114,21 @@ static sl_status_t _parse_received_msg(const uint8_t * const buff,
  * @details This function creates and sends the response message based on the request type
  *
  * @param[in] parsed_msg Pointer to the parsed message structure
- * @param[in] sockid Socket ID
+ * @param[in] clnt_conn Client connection
  * @return SL_STATUS_OK on success, error code otherwise
  *****************************************************************************/
 static sl_status_t _create_and_send_resp_msg(const sl_wisun_br_agent_service_msg_t * const parsed_msg,
-                                             int32_t sockid);
+                                             struct netconn *clnt_conn);
 
 /**************************************************************************//**
  * @brief Send message
  * @details This function sends a message to the specified socket
  *
- * @param[in] sockid Socket ID
+ * @param[in] clnt_conn Client connection
  * @param[in] resp_msg Pointer to the response message structure
  * @return SL_STATUS_OK on success, error code otherwise
  *****************************************************************************/
-static sl_status_t _send_msg(int32_t sockid,
+static sl_status_t _send_msg(struct netconn *clnt_conn,
                              const sl_wisun_br_agent_service_msg_t * const resp_msg);
 
 /**************************************************************************//**
@@ -194,6 +188,7 @@ __STATIC_INLINE void _agent_service_mutex_release(void);
 // -----------------------------------------------------------------------------
 //                                Static Variables
 // -----------------------------------------------------------------------------
+
 // Agent Service task ID
 static osThreadId_t _agent_service_task = NULL;
 
@@ -211,10 +206,7 @@ static const osThreadAttr_t _agent_service_task_attr = {
 };
 
 // Remote address of the host Agent Service
-static sockaddr_in6_t _remote_addr = {
-  .sin6_family = AF_INET6,
-  .sin6_addr = { .address = { 0U } }
-};
+static ip_addr_t _remote_addr = { 0 };
 
 // Agent Service mutex
 static osMutexId_t _agent_service_mtx = NULL;
@@ -226,6 +218,9 @@ static const osMutexAttr_t _agent_service_mtx_attr = {
   .cb_mem    = NULL,
   .cb_size   = 0UL
 };
+
+static osEventFlagsId_t agent_evt_flags;
+
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
@@ -241,75 +236,59 @@ void sl_wisun_br_agent_service_init(void)
                                     &_agent_service_task_attr);
   EFM_ASSERT(_agent_service_task != NULL);
 
-  // Initialize remote address port
-  _remote_addr.sin6_port = htons(SL_WISUN_BR_AGENT_SERVICE_REMOTE_HOST_PORT);
+  agent_evt_flags = osEventFlagsNew(NULL);
+  EFM_ASSERT(agent_evt_flags != NULL);
+
+  // Init remote address to default value
+  (void) ipaddr_aton(SL_WISUN_BR_AGENT_SERVICE_DEFAULT_REMOTE_ADDR, &_remote_addr);
 }
 
-void sl_wisun_br_agent_service_send_graph_info(sl_wisun_evt_t *evt)
+sl_status_t sl_wisun_br_agent_service_send_graph_info(void)
 {
   sl_wisun_br_agent_service_msg_t resp_msg = { 0 };
-  int32_t sockid = SOCKET_INVALID_ID;
+  struct netconn *conn = NULL;
 
-  switch (evt->evt.br_routing_table_update.event) {
-    case SL_WISUN_ROUTING_TABLE_UPDATE_ROUTE_CHANGED:
-      // get new network topology
-      if (_get_network_topology(&resp_msg) != SL_STATUS_OK) {
-        return;
-      }
-      break;
-    default:
-      return;
+  if (_get_network_topology(&resp_msg) != SL_STATUS_OK) {
+    return SL_STATUS_FAIL;
   }
 
-  // send updated network topology to the remote Agent Service host
-  // create client socket
-  sockid = socket(AF_INET6, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP);
-  if (sockid == SOCKET_INVALID_ID) {
-    __cleanup(resp_msg.payload);
-    return;
+  conn = netconn_new(NETCONN_TCP_IPV6);
+  if (conn == NULL) {
+    sl_free(resp_msg.payload);
+    return SL_STATUS_FAIL;
   }
-  // setting the server address
-  if (inet_pton(AF_INET6,
-                SL_WISUN_BR_AGENT_SERVICE_DEFAULT_REMOTE_ADDR,
-                &_remote_addr.sin6_addr) != 1) {
-    __cleanup(resp_msg.payload);
-    close(sockid);
-    return;
-  }
+
   // connect to the server
-  if (connect(sockid, (const struct sockaddr *)&_remote_addr,
-              sizeof(_remote_addr)) == SOCKET_RETVAL_ERROR && errno != EINPROGRESS) {
-    __cleanup(resp_msg.payload);
-    close(sockid);
-    return;
+  if (netconn_connect(conn, &_remote_addr, 
+                      SL_WISUN_BR_AGENT_SERVICE_REMOTE_HOST_PORT) != ERR_OK) {
+    sl_free(resp_msg.payload);
+    netconn_close(conn);
+    netconn_delete(conn);
+    return SL_STATUS_FAIL;
   }
 
   // wait for connection to be established
   osDelay(1000U);
 
   // send the response message and cleanup
-  (void)_send_msg(sockid, &resp_msg);
-  __cleanup(resp_msg.payload);
-  close(sockid);
+  (void)_send_msg(conn, &resp_msg);
+  sl_free(resp_msg.payload);
+  netconn_close(conn);
+  netconn_delete(conn);
+
+  return SL_STATUS_OK;
 }
 
-sl_status_t sl_wisun_br_agent_service_set_remote_addr(const char *remote_address,
-                                                      const uint16_t port)
+sl_status_t sl_wisun_br_agent_service_set_remote_addr(const char *remote_address)
 {
   sl_status_t result = SL_STATUS_OK;
-  int32_t ip_result = 0;
 
   _agent_service_mutex_acquire();
   if (remote_address == NULL) {
     result =  SL_STATUS_NULL_POINTER;
   } else {
-    ip_result = inet_pton(AF_INET6,
-                          remote_address,
-                          &_remote_addr.sin6_addr);
-    if (ip_result != 1) {
+    if (ipaddr_aton(remote_address, &_remote_addr) == 0) {
       result = SL_STATUS_FAIL;
-    } else {
-      _remote_addr.sin6_port = htons(port);
     }
   }
   _agent_service_mutex_release();
@@ -317,116 +296,176 @@ sl_status_t sl_wisun_br_agent_service_set_remote_addr(const char *remote_address
   return result;
 }
 
-void sl_wisun_br_agent_service_send_reg(void)
+const char *sl_wisun_br_agent_service_get_remote_addr(void)
 {
+  static char *addr_str = NULL;
+  const size_t buf_size = 40U;
+  addr_str = sl_malloc(buf_size);
+  if (addr_str == NULL) {
+    return NULL;
+  }
+
+  _agent_service_mutex_acquire();
+  if (ipaddr_ntoa_r(&_remote_addr, addr_str, buf_size) == NULL) {
+    addr_str[0] = '\0';
+  }
+  _agent_service_mutex_release();
+
+  return addr_str;
+}
+
+sl_status_t sl_wisun_br_agent_service_send_reg(void)
+{
+
+  struct netconn *conn = NULL;
+  err_t err = ERR_OK;
   sl_wisun_br_agent_service_msg_t resp_msg = { 0 };
-  int32_t sockid = SOCKET_INVALID_ID;
+  sl_status_t status = SL_STATUS_OK;
 
  // get new network topology
  if (_get_config_params(&resp_msg) != SL_STATUS_OK) {
-    return;
+    return SL_STATUS_FAIL;
  }
 
   // change message code to set config params
   resp_msg.msg_code = SL_WISUN_BR_AGENT_SERVICE_CODE_SET_CONFIG_PARAMS;
   // create client socket
-  sockid = socket(AF_INET6, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP);
-  if (sockid == SOCKET_INVALID_ID) {
-    return;
+  conn = netconn_new(NETCONN_TCP_IPV6);
+  if (conn == NULL) {
+    sl_free(resp_msg.payload);
+    return SL_STATUS_FAIL;
   }
-  // setting the server address
-  if (inet_pton(AF_INET6,
-                SL_WISUN_BR_AGENT_SERVICE_DEFAULT_REMOTE_ADDR,
-                &_remote_addr.sin6_addr) != 1) {
-    close(sockid);
-    return;
-  }
+
   // connect to the server
-  if (connect(sockid, (const struct sockaddr *)&_remote_addr,
-              sizeof(_remote_addr)) == SOCKET_RETVAL_ERROR && errno != EINPROGRESS) {
-    close(sockid);
-    return;
+  err = netconn_connect(conn, &_remote_addr, SL_WISUN_BR_AGENT_SERVICE_REMOTE_HOST_PORT);
+  if (err != ERR_OK) {
+    sl_free(resp_msg.payload);
+    netconn_close(conn);
+    netconn_delete(conn);
+    return SL_STATUS_FAIL;
   }
 
   // wait for connection to be established
   osDelay(1000U);
 
   // send the response message and cleanup
-  (void)_send_msg(sockid, &resp_msg);
-  __cleanup(resp_msg.payload);
-  close(sockid);
+  if (_send_msg(conn, &resp_msg) != SL_STATUS_OK) {
+    sl_free(resp_msg.payload);
+    netconn_close(conn);
+    netconn_delete(conn);
+    return SL_STATUS_FAIL;
+  }
+
+  sl_free(resp_msg.payload);
+  netconn_close(conn);
+  netconn_delete(conn);
+  
+  // Send the graph info too
+  status = sl_wisun_br_agent_service_send_graph_info();
+
+  return status;
 }
+
+void sl_wisun_agent_start_service(void)
+{
+  (void) osEventFlagsSet(agent_evt_flags, SL_WISUN_BR_AGENT_WIFI_CONNECTED_EVT_FLAG);
+}
+
 // -----------------------------------------------------------------------------
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
 static void _agent_service_task_fnc(void *args)
 {
-  static uint8_t buff[SL_WISUN_BR_AGENT_SERVICE_BUFF_SIZE] = { 0U };
-  static sockaddr_in6_t srv_addr = { 0 };
-  static sockaddr_in6_t clnt_addr = { 0 };
-  int32_t srv_sockid = SOCKET_INVALID_ID;
-  int32_t clnt_sockid = SOCKET_INVALID_ID;
-  int32_t r = SOCKET_RETVAL_ERROR;
-  socklen_t clnt_addr_len = sizeof(clnt_addr);
+  uint8_t *data = NULL;
+  struct netbuf *buf = NULL;
+  struct netconn *conn = NULL;
+  struct netconn *newconn = NULL;
   sl_wisun_br_agent_service_msg_t recv_msg = { 0 };
+  ip_addr_t srv_ipaddr = { 0U };
+  uint16_t len = 0U;
+  err_t err = ERR_OK;
+
+  // Wi-Fi related params
+  bool wifi_connected = false;
+  uint16_t wifi_channel_number = 0U;
+  uint8_t wifi_mac_address[6] = { 0U };
 
   (void) args;
+  (void) osEventFlagsWait(agent_evt_flags,
+                          SL_WISUN_BR_AGENT_WIFI_CONNECTED_EVT_FLAG,
+                          osFlagsWaitAny,
+                          osWaitForever);
+  sl_wisun_br_wifi_get_info(&wifi_connected, &wifi_channel_number, 
+                            wifi_mac_address, (uint8_t *)&srv_ipaddr.addr);
+  if (!wifi_connected) {
+    ip_addr_set_any(IPADDR_TYPE_V6, &srv_ipaddr);
+  }
+
+#if LWIP_IPV6_SCOPES
+  srv_ipaddr.zone = 0;
+#endif
 
   // create TCP socket
-  srv_sockid = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
-  EFM_ASSERT(srv_sockid != SOCKET_INVALID_ID);
-
-  // fill the server address structure
-  srv_addr.sin6_family = AF_INET6;
-  srv_addr.sin6_addr = in6addr_any;
-  srv_addr.sin6_port = htons(SL_WISUN_BR_AGENT_SERVICE_SERVER_PORT);
+  conn = netconn_new(NETCONN_TCP_IPV6);
+  EFM_ASSERT(conn != NULL);
 
   // bind address to the socket
-  r = bind(srv_sockid,
-           (const struct sockaddr *) &srv_addr,
-           sizeof(sockaddr_in6_t));
-  EFM_ASSERT(r != SOCKET_RETVAL_ERROR);
+  err = netconn_bind(conn, &srv_ipaddr, SL_WISUN_BR_AGENT_SERVICE_SERVER_PORT);
+  EFM_ASSERT(err == ERR_OK);
 
   // listen on socket
-  r = listen(srv_sockid, 0);
-  EFM_ASSERT(r != SOCKET_RETVAL_ERROR);
-
+   err = netconn_listen(conn);
+  EFM_ASSERT(err == ERR_OK);
+  
+  printf("[Border Router Agent Service started. Listen on port %u]\n", 
+         SL_WISUN_BR_AGENT_SERVICE_SERVER_PORT);
+  
   // waiting for connection request
   SL_WISUN_BR_AGENT_SERVICE_LOOP {
-    // accept incoming connections
-    clnt_sockid = accept(srv_sockid,
-                         (struct sockaddr *) &clnt_addr,
-                         &clnt_addr_len);
-    if (clnt_sockid == SOCKET_INVALID_ID) {
+    err = netconn_accept(conn, &newconn);
+    if (err != ERR_OK) {
+      osDelay(1000UL);
       continue;
     }
-    // receiver loop
-    r = recv(clnt_sockid, buff, sizeof(buff) - 1U, 0);
-    switch (r) {
-      case SOCKET_RETVAL_ERROR: // error
-        break;
 
+    // receiver loop
+    err = netconn_recv(newconn, &buf);
+    if (err != ERR_OK) {
+      netconn_close(newconn);
+      netconn_delete(newconn);
+      continue;
+    }
+
+    netbuf_data(buf, (void**)&data, &len);
+    switch (len) {
       case 0L: // socket closed, EOF
         break;
 
       default: // default: data received
-        buff[r] = '\0';
+        data[len] = '\0';
         // parse the received message
-        if (_parse_received_msg(buff,
-                                (size_t)r,
+        if (_parse_received_msg(data,
+                                (size_t)len,
                                 &recv_msg) != SL_STATUS_OK) {
           break;
         }
+        
         // create and send response message
         if (_create_and_send_resp_msg(&recv_msg,
-                                      clnt_sockid) != SL_STATUS_OK) {
+                                      newconn) != SL_STATUS_OK) {
           break;
         }
         break;
     }
-    close(clnt_sockid);
+
+    netbuf_delete(buf);
+    netconn_close(newconn);
+    netconn_delete(newconn);
     osDelay(1UL);
   }
+
+  netconn_close(conn);
+  netconn_delete(conn);
 }
 
 static sl_status_t _parse_received_msg(const uint8_t * const buff,
@@ -459,12 +498,11 @@ static sl_status_t _parse_received_msg(const uint8_t * const buff,
     }
     parsed_msg->payload = (uint8_t *)ptr;
   }
-
   return SL_STATUS_OK;
 }
 
 static sl_status_t _create_and_send_resp_msg(const sl_wisun_br_agent_service_msg_t * const parsed_msg,
-                                             int32_t sockid)
+                                             struct netconn *clnt_conn)
 {
   sl_status_t ret = SL_STATUS_OK;
   sl_wisun_br_agent_service_msg_t resp_msg = { 0 };
@@ -480,26 +518,26 @@ static sl_status_t _create_and_send_resp_msg(const sl_wisun_br_agent_service_msg
       if (_get_network_topology(&resp_msg) != SL_STATUS_OK) {
         return SL_STATUS_FAIL;
       }
+      printf("[Border Router Agent: Topology requested]\n");
       break;
 
     case SL_WISUN_BR_AGENT_SERVICE_CODE_GET_CONFIG_PARAMS:
       if (_get_config_params(&resp_msg) != SL_STATUS_OK) {
         return SL_STATUS_FAIL;
       }
+      printf("[Border Router Agent: Configuration requested]\n");
       break;
 
     case SL_WISUN_BR_AGENT_SERVICE_CODE_SET_CONFIG_PARAMS:
-      if (_set_config_params(parsed_msg) != SL_STATUS_OK) {
-        return SL_STATUS_FAIL;
-      }
-      return SL_STATUS_OK;
+      ret = _set_config_params(parsed_msg);
+      printf("[Border Router Agent: Configuration %s]\n",
+             (ret == SL_STATUS_OK) ? "updated" : "update failed");
+      return ret;
 
     case SL_WISUN_BR_AGENT_SERVICE_CODE_RESTART_BR:
-      if (sl_wisun_br_stop() != SL_STATUS_OK) {
-        return SL_STATUS_FAIL;
-      }
+      (void) sl_wisun_br_stop();
     #ifdef SL_CATALOG_WISUN_BR_DHCPV6_SERVER_PRESENT
-      (void)sl_wisun_br_dhcpv6_server_stop();
+      (void) sl_wisun_br_dhcpv6_server_stop();
     #endif
       osDelay(1000U);
       if ((sl_wisun_br_get_state(&br_state) == SL_STATUS_OK)
@@ -525,21 +563,21 @@ static sl_status_t _create_and_send_resp_msg(const sl_wisun_br_agent_service_msg
   }
 
   // send the response message
-  ret = _send_msg(sockid, &resp_msg);
+  ret = _send_msg(clnt_conn, &resp_msg);
 
   // cleanup
-  __cleanup(resp_msg.payload);
+  sl_free(resp_msg.payload);
 
   return ret;
 }
 
-static sl_status_t _send_msg(int32_t sockid,
+static sl_status_t _send_msg(struct netconn *clnt_conn,
                              const sl_wisun_br_agent_service_msg_t * const resp_msg)
 {
-  sl_status_t ret = SL_STATUS_OK;
   uint8_t *buff = NULL;
   uint8_t *ptr = NULL;
   uint32_t total_msg_size = 0U;
+  err_t err = ERR_OK;
 
   if (resp_msg == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
@@ -576,14 +614,17 @@ static sl_status_t _send_msg(int32_t sockid,
   }
 
   // send the response message
-  if (send(sockid, buff, total_msg_size, 0) == SOCKET_RETVAL_ERROR) {
-    ret = SL_STATUS_FAIL;
+  err = netconn_write(clnt_conn, buff, total_msg_size, NETCONN_COPY);
+  if (err != ERR_OK) {
+    sl_free(buff);
+    return SL_STATUS_FAIL;
   }
 
   // cleanup buffer
-  __cleanup(buff);
+  sl_free(buff);
 
-  return ret;
+  
+  return SL_STATUS_OK;
 }
 
 static sl_status_t _get_network_topology(sl_wisun_br_agent_service_msg_t * const resp_msg)
@@ -633,7 +674,7 @@ static sl_status_t _get_network_topology(sl_wisun_br_agent_service_msg_t * const
     routing_table_size -= 1U;
     if (sl_wisun_br_get_routing_table(&routing_table_size,
                                       &routing_table[1]) != SL_STATUS_OK) {
-      __cleanup(routing_table);
+      sl_free(routing_table);
       return SL_STATUS_FAIL;
     }
   }
@@ -646,19 +687,23 @@ static sl_status_t _get_network_topology(sl_wisun_br_agent_service_msg_t * const
 
 static sl_status_t _get_config_params(sl_wisun_br_agent_service_msg_t * const resp_msg)
 {
-  static app_setting_br_t br_settings = { 0 };
-
   if (resp_msg == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
+  resp_msg->payload = (uint8_t *)sl_malloc(sizeof(app_setting_br_t));
+ 
+  if (!resp_msg->payload) {
+    return SL_STATUS_ALLOCATION_FAILED;
+  }
+
   // get current BR settings
-  if (app_wisun_setting_br_get(&br_settings) != SL_STATUS_OK) {
+  if (app_wisun_setting_br_get((app_setting_br_t *)resp_msg->payload) != SL_STATUS_OK) {
+    sl_free(resp_msg->payload);
     return SL_STATUS_FAIL;
   }
 
   resp_msg->msg_code = SL_WISUN_BR_AGENT_SERVICE_CODE_GET_CONFIG_PARAMS;
-  resp_msg->payload = (uint8_t *)&br_settings;
   resp_msg->payload_len = sizeof(app_setting_br_t);
 
   return SL_STATUS_OK;
@@ -668,22 +713,30 @@ static sl_status_t _set_config_params(const sl_wisun_br_agent_service_msg_t * co
 {
   sl_status_t ret = SL_STATUS_OK;
   app_setting_br_t *new_settings = NULL;
-  static app_setting_br_t br_settings = { 0 };
+  app_setting_br_t *br_settings = NULL;
 
   if (!parsed_msg || !parsed_msg->payload) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
+  br_settings = (app_setting_br_t *)sl_malloc(sizeof(app_setting_br_t));
+  if (!br_settings) {
+    return SL_STATUS_ALLOCATION_FAILED;
+  }
+
   // get current BR settings
-  if (app_wisun_setting_br_get(&br_settings) != SL_STATUS_OK) {
+  if (app_wisun_setting_br_get(br_settings) != SL_STATUS_OK) {
+    sl_free(br_settings);
     return SL_STATUS_FAIL;
   }
 
   // preserve PAN ID
   new_settings = (app_setting_br_t *)parsed_msg->payload;
-  new_settings->pan_id = br_settings.pan_id;
+  new_settings->pan_id = br_settings->pan_id;
 
   ret = app_wisun_setting_br_set(new_settings);
+
+  sl_free(br_settings);
 
   return ret;
 }

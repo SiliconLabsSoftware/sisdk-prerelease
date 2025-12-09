@@ -333,10 +333,10 @@ SL_CODE_RAM void sl_button_on_change(const sl_button_t *handle)
 #endif
 
 /*******************************************************************************
- * This app-level function overrides a weak power manager implementation and
- * gets called in sl_power_manager_handler.c preventing the MCU from going
- * to sleep if app is not ready for it.
- *******************************************************************************/
+* This app-level function overrides a weak power manager implementation and
+* gets called in sl_power_manager_handler.c preventing the MCU from going
+* to sleep if app is not ready for it.
+*******************************************************************************/
 bool app_is_ok_to_sleep(void)
 {
   return app_ready_to_sleep;
@@ -406,7 +406,7 @@ static void handle_receive_state(sl_rail_handle_t rail_handle)
     if (rx_packet_handle == SL_RAIL_RX_PACKET_HANDLE_INVALID) {
       app_log_error("sl_rail_get_rx_packet_info() error: SL_RAIL_RX_PACKET_HANDLE_INVALID\n");
     }
-    uint8_t *start_of_packet = 0;
+    uint8_t *start_of_packet = rx_buffer;
     if (packet_info.packet_bytes > RX_BUFFER_LENGTH) {
       app_log_error("sl_rail_get_rx_packet_info() error: packet too long\n");
       packet_size = RX_BUFFER_LENGTH;

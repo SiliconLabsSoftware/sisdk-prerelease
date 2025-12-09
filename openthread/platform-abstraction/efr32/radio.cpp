@@ -133,6 +133,9 @@ void schedulerEventCallback(sl_rail_handle_t aRailHandle);
 
 // Static inline helper - forward declaration
 static inline bool txWaitingForAck(void);
+#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+static bool phyStackEventIsEnabled(void);
+#endif // SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
 
 using rxPacketDetails = struct
 {
@@ -646,7 +649,6 @@ void sli_ot_radio_state_deinit(void)
 
 // Internal event state
 static sl_rail_events_t sCurrentEventConfig   = SL_RAIL_EVENTS_NONE;
-static bool             sPhyStackEventEnabled = false;
 
 // Forward declarations for internal event processing functions
 static void processTxPacketSentEvent(void);
@@ -678,13 +680,11 @@ static void processDataRequestCommandEvent(sl_rail_handle_t aRailHandle);
 void sli_ot_radio_events_init(void)
 {
     sCurrentEventConfig   = SL_RAIL_EVENTS_NONE;
-    sPhyStackEventEnabled = false;
 }
 
 void sli_ot_radio_events_deinit(void)
 {
     sCurrentEventConfig   = SL_RAIL_EVENTS_NONE;
-    sPhyStackEventEnabled = false;
 }
 
 void sli_ot_radio_events_update_config(sl_rail_events_t mask, sl_rail_events_t values)
@@ -709,26 +709,28 @@ void sli_ot_radio_events_update_config(sl_rail_events_t mask, sl_rail_events_t v
 }
 
 #ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
 sl_rail_util_ieee802154_stack_event_t sli_ot_radio_events_handle_phy_stack_event_with_status(
     sl_rail_util_ieee802154_stack_event_t stackEvent,
     uint32_t                              supplement)
 {
-    if (!sPhyStackEventEnabled)
+    sl_rail_util_ieee802154_stack_event_t status = SL_RAIL_UTIL_IEEE802154_STACK_STATUS_SUCCESS;
+
+    if (phyStackEventIsEnabled())
     {
-        return SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_IDLED;
+#ifdef SL_CATALOG_RAIL_MULTIPLEXER_PRESENT
+        sl_rail_handle_t railHandle = sli_ot_radio_interface_get_rail_handle();
+        otEXPECT_ACTION(railHandle != nullptr, status = SL_RAIL_UTIL_IEEE802154_STACK_STATUS_HOLDOFF);
+        status = sl_rail_mux_ieee802154_on_event(railHandle, stackEvent, supplement);
+#else
+        status = sl_rail_util_ieee802154_on_event(stackEvent, supplement);
+#endif
     }
 
 #ifdef SL_CATALOG_RAIL_MULTIPLEXER_PRESENT
-    sl_rail_handle_t railHandle = sli_ot_radio_interface_get_rail_handle();
-    if (railHandle != nullptr)
-    {
-        return sl_rail_mux_ieee802154_on_event(railHandle, stackEvent, supplement);
-    }
-#else
-    OT_UNUSED_VARIABLE(stackEvent);
-    OT_UNUSED_VARIABLE(supplement);
+exit:
 #endif
-    return SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_IDLED;
+    return status;
 }
 
 void sli_ot_radio_events_handle_phy_stack_event(sl_rail_util_ieee802154_stack_event_t stackEvent, uint32_t supplement)
@@ -736,16 +738,6 @@ void sli_ot_radio_events_handle_phy_stack_event(sl_rail_util_ieee802154_stack_ev
     sli_ot_radio_events_handle_phy_stack_event_with_status(stackEvent, supplement);
 }
 #endif // SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
-
-bool sli_ot_radio_events_is_phy_stack_enabled(void)
-{
-    return sPhyStackEventEnabled;
-}
-
-void sli_ot_radio_events_set_phy_stack_enabled(bool enabled)
-{
-    sPhyStackEventEnabled = enabled;
-}
 
 void sli_ot_radio_events_process_callback(sl_rail_handle_t aRailHandle, sl_rail_events_t aEvents)
 {

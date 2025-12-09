@@ -65,6 +65,7 @@
 #define OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE   1
 #endif
 // <o SL_OPENTHREAD_CSL_TX_UNCERTAINTY> CSL Scheduling Uncertainty (±10 us units) <12..999:1>
+// <i> Left unchanged the value will be set to 175 for RCPs, 20 for FTDs, and 12 for MTDs
 #ifndef SL_OPENTHREAD_CSL_TX_UNCERTAINTY
 #if OPENTHREAD_RADIO
   #define SL_OPENTHREAD_CSL_TX_UNCERTAINTY 175
@@ -142,12 +143,10 @@
 #define OPENTHREAD_CONFIG_CHANNEL_MONITOR_ENABLE    0
 #endif
 // </e>
-
-// <e OPENTHREAD_CONFIG_COMMISSIONER_ENABLE>  Commissioner
+// <e>  Commissioner
 #ifndef OPENTHREAD_CONFIG_COMMISSIONER_ENABLE
 #define OPENTHREAD_CONFIG_COMMISSIONER_ENABLE       0
 #endif
-
 // <o OPENTHREAD_CONFIG_COMMISSIONER_MAX_JOINER_ENTRIES> Max Joiner Entries
 // <i> The maximum number of Joiner entries maintained by the Commissioner.
 // <d> 2
@@ -155,7 +154,6 @@
 #define OPENTHREAD_CONFIG_COMMISSIONER_MAX_JOINER_ENTRIES       2
 #endif
 // </e>
-
 // <e>  COAP API
 #ifndef OPENTHREAD_CONFIG_COAP_API_ENABLE
 #define OPENTHREAD_CONFIG_COAP_API_ENABLE           0
@@ -201,21 +199,27 @@
 #define OPENTHREAD_CONFIG_IP6_FRAGMENTATION_ENABLE  0
 #endif
 // </e>
-// <e>  Maximum number of IPv6 unicast addresses allowed to be externally added
+// <h>  IPv6 Limits
+// <o OPENTHREAD_CONFIG_IP6_MAX_EXT_UCAST_ADDRS>  Maximum IPv6 external unicast addresses
+// <i>  Maximum number of IPv6 unicast addresses allowed to be externally added
+// <d>  4
 #ifndef OPENTHREAD_CONFIG_IP6_MAX_EXT_UCAST_ADDRS
 #define OPENTHREAD_CONFIG_IP6_MAX_EXT_UCAST_ADDRS   4
 #endif
-// </e>
-// <e>  Maximum number of IPv6 multicast addresses allowed to be externally added
+// <o OPENTHREAD_CONFIG_IP6_MAX_EXT_MCAST_ADDRS>  Maximum IPv6 external multicast addresses
+// <i>  Maximum number of IPv6 multicast addresses allowed to be externally added
+// <d>  4
 #ifndef OPENTHREAD_CONFIG_IP6_MAX_EXT_MCAST_ADDRS
 #define OPENTHREAD_CONFIG_IP6_MAX_EXT_MCAST_ADDRS   4
 #endif
-// </e>
-// <e>  The maximum number of IPv6 address registrations for MTD
+// <o OPENTHREAD_CONFIG_MLE_IP_ADDRS_TO_REGISTER>  Maximum IPv6 address registrations for MTD
+// <i>  The maximum number of IPv6 address registrations for MTD.
+// <i>  If left unchanged will default to the value of OPENTHREAD_CONFIG_MLE_IP_ADDRS_PER_CHILD
+// <d>  4
 #ifndef OPENTHREAD_CONFIG_MLE_IP_ADDRS_TO_REGISTER
 #define OPENTHREAD_CONFIG_MLE_IP_ADDRS_TO_REGISTER (OPENTHREAD_CONFIG_MLE_IP_ADDRS_PER_CHILD)
 #endif
-// </e>
+// </h>
 // <e>  Jam Detection
 #ifndef OPENTHREAD_CONFIG_JAM_DETECTION_ENABLE
 #define OPENTHREAD_CONFIG_JAM_DETECTION_ENABLE      0
@@ -236,6 +240,14 @@
 #define OPENTHREAD_CONFIG_MAC_FILTER_ENABLE         0
 #endif
 // </e>
+// <h> MLE Children
+// <o OPENTHREAD_CONFIG_MLE_MAX_CHILDREN>  Maximum number of Thread children supported by the device
+// <i>  Default is 10. Used by the Thread stack to configure the size of child table.
+// <d>  10
+#ifndef OPENTHREAD_CONFIG_MLE_MAX_CHILDREN
+#define OPENTHREAD_CONFIG_MLE_MAX_CHILDREN         10
+#endif
+// </h>
 // <e>  MLE Long Routes extension (experimental)
 #ifndef OPENTHREAD_CONFIG_MLE_LONG_ROUTES_ENABLE
 #define OPENTHREAD_CONFIG_MLE_LONG_ROUTES_ENABLE    0
@@ -245,47 +257,42 @@
 #ifndef OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE
 #define OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE       0
 #endif
+// <o OPENTHREAD_SPINEL_CONFIG_BROADCAST_IID>  Broadcast IID for spinel frames
+// <i>  Define broadcast IID for spinel frames dedicated to all hosts in multipan configuration
+// <d>  0
+#ifndef OPENTHREAD_SPINEL_CONFIG_BROADCAST_IID
+#define OPENTHREAD_SPINEL_CONFIG_BROADCAST_IID      0
+#endif
+#if OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE
+// <o SL_ZIGBEE_MAX_END_DEVICE_CHILDREN>  Maximum number of Zigbee children for multiprotocol (DMP) builds
+// <i>  Ensures correct table sizing for Zigbee when DMP/multipan is enabled.
+// <d>  6
+#ifndef SL_ZIGBEE_MAX_END_DEVICE_CHILDREN
+#define SL_ZIGBEE_MAX_END_DEVICE_CHILDREN           6
+#endif
+#endif
 // </e>
 // <e>  Multiple OpenThread Instances
 #ifndef OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
 #define OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE      0
 #endif
-// </e>
 // <e>  Multiple Static Instance Support
 #ifndef OPENTHREAD_CONFIG_MULTIPLE_STATIC_INSTANCE_ENABLE
 #define OPENTHREAD_CONFIG_MULTIPLE_STATIC_INSTANCE_ENABLE      0
 #endif
-// </e>
-// <e>  Number of OpenThread Instances For Static Buffer Allocation
+// <o OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM>  Number of OpenThread Instances
+// <i>  Default is 2. Number of OpenThread Instances For Static Buffer Allocation.
+// <d>  2
 #ifndef OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM
 #define OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM      2
 #endif
 // </e>
-// <e>  Define broadcast IID for spinel frames dedicated to all hosts in multipan configuration
-#ifndef OPENTHREAD_SPINEL_CONFIG_BROADCAST_IID
-#define OPENTHREAD_SPINEL_CONFIG_BROADCAST_IID      0
-#endif
 // </e>
-// <o> Define maximum number of children supported by the device
-// <i> Default is 10. Used by the Thread stack to configure the size of child table.
-#ifndef OPENTHREAD_CONFIG_MLE_MAX_CHILDREN
-#define OPENTHREAD_CONFIG_MLE_MAX_CHILDREN         10
-#endif
-// </o>
-// <e> Define Sets the maximum number of Zigbee children for multiprotocol (DMP) builds
-// <i> Ensures correct table sizing for Zigbee when DMP/multipan is enabled.
-#ifndef SL_ZIGBEE_MAX_END_DEVICE_CHILDREN
-#if OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE
-#define SL_ZIGBEE_MAX_END_DEVICE_CHILDREN           6
-#else
-#define SL_ZIGBEE_MAX_END_DEVICE_CHILDREN           0
-#endif
-#endif
-// </e>
-// <e> Define maximum total source match table entries for both OT and Zigbee.
-// <i> In multi-instance builds (SoC or RCP/host), table must support all OT instances + Zigbee.
-// <i> For single instance (default), table sized to just OT children.
-// <i> This value is used to size all source match tables in both OT and Zigbee code.
+// Define maximum total source match table entries for both OT and Zigbee.
+// In multi-instance builds (SoC or RCP/host), table must support all OT instances + Zigbee.
+// For single instance (default), table sized to just OT children.
+// This value is used to size all source match tables in both OT and Zigbee code.
+// Note: this is purposedly not being setup with CMSIS annotations.
 #ifndef RADIO_CONFIG_MAX_SRC_MATCH_ENTRIES
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
 #if SL_ZIGBEE_MAX_END_DEVICE_CHILDREN
@@ -303,13 +310,13 @@
 #define RADIO_CONFIG_MAX_SRC_MATCH_ENTRIES OPENTHREAD_CONFIG_MLE_MAX_CHILDREN
 #endif
 #endif
-// </e>
-// <e> Make spinel tables in OT match total source match table entries.
-// <i> Ensures host/rcp and SoC builds size all tables consistently.
+// <h>  Spinel Match Table
+// <o OPENTHREAD_SPINEL_CONFIG_MAX_SRC_MATCH_ENTRIES>  Maximum number of spinel source match table entries
+// <i> Ensure that this value is the total of the number of openthread children times the number of openthread instances plus the number of Zigbee children.
 #ifndef OPENTHREAD_SPINEL_CONFIG_MAX_SRC_MATCH_ENTRIES
 #define OPENTHREAD_SPINEL_CONFIG_MAX_SRC_MATCH_ENTRIES RADIO_CONFIG_MAX_SRC_MATCH_ENTRIES
 #endif
-// </e>
+// </h>
 // <e>  OTNS (OpenThread Network Simulator)
 #ifndef OPENTHREAD_CONFIG_OTNS_ENABLE
 #define OPENTHREAD_CONFIG_OTNS_ENABLE               0
@@ -323,6 +330,18 @@
 // <e>  Power Calibration Module  (RCP only configuration)
 #ifndef OPENTHREAD_CONFIG_POWER_CALIBRATION_ENABLE
 #define OPENTHREAD_CONFIG_POWER_CALIBRATION_ENABLE  0
+#endif
+// <o SL_OPENTHREAD_RAW_POWER_CALIBRATION_LENGTH>  Maximum raw power calibration length
+// <i> Max raw power calibration length
+// <d> 4
+#ifndef SL_OPENTHREAD_RAW_POWER_CALIBRATION_LENGTH
+#define SL_OPENTHREAD_RAW_POWER_CALIBRATION_LENGTH  4
+#endif
+// <o SL_OPENTHREAD_FEM_SETTING_LENGTH>  Maximum FEM config setting length
+// <i>  Max FEM config setting length
+// <d>  4
+#ifndef SL_OPENTHREAD_FEM_SETTING_LENGTH
+#define SL_OPENTHREAD_FEM_SETTING_LENGTH            4
 #endif
 // </e>
 // <e>  Platform UDP
@@ -361,7 +380,9 @@
 #endif
 // </e>
 // <e>  Time Synchronization Service
+#ifndef OPENTHREAD_CONFIG_TIME_SYNC_ENABLE
 #define OPENTHREAD_CONFIG_TIME_SYNC_ENABLE          0
+#endif
 // </e>
 // <e>  Uptime of OpenThread instance
 #ifndef OPENTHREAD_CONFIG_UPTIME_ENABLE
@@ -378,28 +399,22 @@
 #define OPENTHREAD_CONFIG_MAC_BEACON_PAYLOAD_PARSING_ENABLE      1
 #endif
 // </e>
-// <e>  Max raw power calibration length.
-#ifndef SL_OPENTHREAD_RAW_POWER_CALIBRATION_LENGTH
-#define SL_OPENTHREAD_RAW_POWER_CALIBRATION_LENGTH  4
-#endif
-// </e>
-// <e>  Max FEM config setting length.
-#ifndef SL_OPENTHREAD_FEM_SETTING_LENGTH
-#define SL_OPENTHREAD_FEM_SETTING_LENGTH            4
-#endif
-// </e>
-// <i> The maximum number of RX buffers to use in the radio driver.
-// <d> 16
+// <h>  Radio Driver RX buffers
+// <o SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT>  Maximum number of RX buffers
+// <i>  The maximum number of RX buffers to use in the radio driver.
+// <d>  16
 #ifndef SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT
 #define SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT       16
 #endif
+// </h>
 // </h>
 // <h>  Logging
 // <o   OPENTHREAD_CONFIG_LOG_OUTPUT> LOG_OUTPUT
 //      <OPENTHREAD_CONFIG_LOG_OUTPUT_NONE             => NONE
 //      <OPENTHREAD_CONFIG_LOG_OUTPUT_APP              => APP
 //      <OPENTHREAD_CONFIG_LOG_OUTPUT_PLATFORM_DEFINED => PLATFORM_DEFINED
-// <i>  Default: OPENTHREAD_CONFIG_LOG_OUTPUT_PLATFORM_DEFINED
+// <i>  Default: OPENTHREAD_CONFIG_LOG_OUTPUT_APP
+// <d>  OPENTHREAD_CONFIG_LOG_OUTPUT_APP
 #ifndef OPENTHREAD_CONFIG_LOG_OUTPUT
 #define OPENTHREAD_CONFIG_LOG_OUTPUT OPENTHREAD_CONFIG_LOG_OUTPUT_APP
 #endif
@@ -422,6 +437,7 @@
 //      <OT_LOG_LEVEL_INFO       => INFO
 //      <OT_LOG_LEVEL_DEBG       => DEBG
 // <i>  Default: OT_LOG_LEVEL_DEBG
+// <d>  OT_LOG_LEVEL_DEBG
 #ifndef OPENTHREAD_CONFIG_LOG_LEVEL
 #define OPENTHREAD_CONFIG_LOG_LEVEL OT_LOG_LEVEL_DEBG
 #endif
@@ -444,11 +460,10 @@
 
 #endif // OPENTHREAD_FULL_LOGS_ENABLE
 
-// <e> Log crash dump after initialization
+// <q> Log crash dump after initialization
 #ifndef OPENTHREAD_CONFIG_PLATFORM_LOG_CRASH_DUMP_ENABLE
 #define OPENTHREAD_CONFIG_PLATFORM_LOG_CRASH_DUMP_ENABLE 0
 #endif
-// </e>
 
 // </h>
 // </e>

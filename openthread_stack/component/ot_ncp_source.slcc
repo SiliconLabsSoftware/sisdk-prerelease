@@ -56,10 +56,13 @@ source:
 define:
 - name: OPENTHREAD_PROJECT_LIB_CONFIG_FILE
   value: '"sl_openthread_features_config.h"'
-  unless: [ot_stack_full]
+  unless: [ot_stack_ftd, ot_stack_mtd]
 - name: OPENTHREAD_PROJECT_LIB_CONFIG_FILE
-  value: '"sl_openthread_features_ncp_config.h"'
-  condition: [ot_stack_full]
+  value: '"sl_openthread_features_ncp_ftd_config.h"'
+  condition: [ot_stack_ftd]
+- name: OPENTHREAD_PROJECT_LIB_CONFIG_FILE
+  value: '"sl_openthread_features_ncp_mtd_config.h"'
+  condition: [ot_stack_mtd]
 - name: _GNU_SOURCE
 
 toolchain_settings:

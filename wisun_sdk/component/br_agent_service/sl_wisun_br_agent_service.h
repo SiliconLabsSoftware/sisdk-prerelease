@@ -64,26 +64,41 @@ void sl_wisun_br_agent_service_init(void);
 /**************************************************************************//**
  * @brief Send graph topology information to the host Agent Service.
  * @details This function sends the graph topology information to the host Agent Service.
- * @param[in] evt Pointer to the Wi-SUN event
+ * @return SL_STATUS_OK on success, error code otherwise
  *****************************************************************************/
-void sl_wisun_br_agent_service_send_graph_info(sl_wisun_evt_t *evt);
+sl_status_t sl_wisun_br_agent_service_send_graph_info(void);
 
 /**************************************************************************//**
  * @brief Set the remote address and port of the host Agent Service.
  * @details This function sets the remote address and port of the host Agent Service.
  *
  * @param[in] remote_address Pointer to the remote address string
- * @param[in] port Remote port number
  * @return SL_STATUS_OK on success, error code otherwise
  *****************************************************************************/
-sl_status_t sl_wisun_br_agent_service_set_remote_addr(const char *remote_address,
-                                                      const uint16_t port);
+sl_status_t sl_wisun_br_agent_service_set_remote_addr(const char *remote_address);
+
+/**************************************************************************//**
+ * @brief Get the remote address of the host Agent Service.
+ * @details This function gets the remote address of the host Agent Service.
+ *          The returned pointer must be freed by the caller using sl_free().
+ *
+ * @return Pointer to the remote address string
+ *****************************************************************************/
+const char *sl_wisun_br_agent_service_get_remote_addr(void);
+
+/**************************************************************************//**
+ * @brief Start the Agent Service.
+ * @details This function starts the Agent Service. 
+ *          Should be called after Wi-Fi connection is established.
+ *****************************************************************************/
+void sl_wisun_agent_start_service(void);
 
 /**************************************************************************//**
  * @brief Send registration (config) information to the host Agent Service.
  * @details This function sends the current BR config information to the host Agent Service.
+ * @return SL_STATUS_OK on success, error code otherwise
  *****************************************************************************/
-void sl_wisun_br_agent_service_send_reg(void);
+sl_status_t sl_wisun_br_agent_service_send_reg(void);
 
 #ifdef __cplusplus
 }

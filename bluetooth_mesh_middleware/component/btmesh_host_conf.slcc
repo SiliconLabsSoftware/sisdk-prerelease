@@ -6,6 +6,9 @@ description: >
   managing Bluetooth Mesh network configuration.
 category: Bluetooth Mesh|Host
 quality: production
+metadata:
+  sbom:
+    license: Zlib
 root_path: bluetooth_mesh_middleware/common/btmesh_host_conf
 include:
 - path: .

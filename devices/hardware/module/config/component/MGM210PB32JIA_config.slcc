@@ -43,7 +43,17 @@
       vendor: silabs
     path: MGM210PB32JIA/sl_rail_util_pa_config.h
   - override:
+      component: sl_rail_util_pa
+      file_id: sl_rail_util_pa_config
+      vendor: silabs
+    path: MGM210PB32JIA/sl_rail_util_pa_config.h
+  - override:
       component: rail_util_rf_path
+      file_id: rail_util_rf_path_config
+      vendor: silabs
+    path: MGM210PB32JIA/sl_rail_util_rf_path_config.h
+  - override:
+      component: sl_rail_util_rf_path
       file_id: rail_util_rf_path_config
       vendor: silabs
     path: MGM210PB32JIA/sl_rail_util_rf_path_config.h

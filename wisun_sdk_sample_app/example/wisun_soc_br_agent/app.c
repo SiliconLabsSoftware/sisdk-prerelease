@@ -196,4 +196,7 @@ static sl_status_t app_init_dhcpv6_socket(void)
 static void app_wifi_on_join(bool connected)
 {
   printf("[wifi: connection %s]\n", connected ? "successful" : "failure");
+  if (connected) {
+    sl_wisun_agent_start_service();
+  }
 }

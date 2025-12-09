@@ -191,65 +191,6 @@ sl_status_t sl_se_code_region_apply_config(sl_se_command_context_t *cmd_ctx,
 }
 
 /***************************************************************************//**
- * @brief
- *   Deprecated function. Use sl_se_code_region_apply_config instead.
- *   Enable or disable bank swapping between two consecutive code regions
- *
- * @details
- *   When bank swapping is enabled, the logical flash addresses are mapped to
- *   the opposing code regions phyiscal address space. I.e. if active banked region
- *   is set to 1, the logical code region 0 accesses the physical code region 1.
- *   This functionality allows for selecting between different physical code regions
- *   to be the "active" address space while executing from the same logical region.
- *   An application can be flashed to the unused/shadow region, while still executing.
- *   Once the new application has been written, bank swapping can be enabled to switch
- *   the physical code region that is active.
- *   Once this API has been called, a system reset is required for the changes to
- *   take place.
- *
- * @note
- *   Bank swapping can only be enabled for one set of code regions at a time.
- *
- * @param[in] cmd_ctx
- *   Pointer to an SE command context object.
- *
- * @param[in] region_idx
- *   Region to set as active.
- *   Value  Behaviour
- *     0    No Banks swapped
- *     1    Bank0 and Bank1 swapped
- *     2    Bank1 and Bank2 swapped
- *     3    Bank2 and Bank3 swapped
- *     4    Bank3 and Bank4 swapped
- *     5    Bank4 and Bank5 swapped
- *     6    Bank5 and Bank6 swapped
- *     7    Bank6 and Bank7 swapped
- *
- * @return
- *   SL_STATUS_OK when the function was successfully, or else, a status code
- *   of type sl_status_t that indicates why the command was not successful,
- *   ref sl_status.h.
- ******************************************************************************/
-sl_status_t sl_se_code_region_set_active_banked(sl_se_command_context_t *cmd_ctx,
-                                                unsigned int region_idx)
-{
-  sli_se_mailbox_command_t *se_cmd;
-
-  if (cmd_ctx == NULL || region_idx >= SL_SE_MAX_CODE_REGIONS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  se_cmd = &cmd_ctx->command;
-
-  sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_SET_ACTIVE_BANKED_CODE_REGION);
-
-  sli_se_mailbox_command_add_parameter(se_cmd, region_idx);
-
-  // Execute and wait
-  return sli_se_execute_and_wait(cmd_ctx);
-}
-
-/***************************************************************************//**
  * Erase a host code region.
  ******************************************************************************/
 sl_status_t sl_se_code_region_erase(sl_se_command_context_t *cmd_ctx,

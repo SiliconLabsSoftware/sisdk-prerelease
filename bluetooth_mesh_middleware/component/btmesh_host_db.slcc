@@ -6,6 +6,9 @@ description: >
   Bluetooth Mesh network information.
 category: Bluetooth Mesh|Host
 quality: production
+metadata:
+  sbom:
+    license: Zlib
 root_path: bluetooth_mesh_middleware/common/btmesh_host_db
 include:
 - path: .

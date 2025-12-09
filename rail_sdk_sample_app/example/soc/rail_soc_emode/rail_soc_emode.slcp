@@ -45,6 +45,7 @@ component:
   - id: restrictions_profile_base
   - id: restrictions_profile_connect
   - id: restrictions_profile_long_range
+  - id: restrictions_profile_ieee802154_bpsk
 #-----------------Series 3 OS-------------------------
   - id: freertos
     condition: [device_series_3]

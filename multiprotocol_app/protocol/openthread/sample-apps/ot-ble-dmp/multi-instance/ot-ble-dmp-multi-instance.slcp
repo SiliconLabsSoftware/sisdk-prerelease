@@ -138,6 +138,7 @@ config_file:
 
 tag:
   - hardware:device:flash:768
+  - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_supports_thread
   - hwfilter:!device:device_family_efr32mr21
 

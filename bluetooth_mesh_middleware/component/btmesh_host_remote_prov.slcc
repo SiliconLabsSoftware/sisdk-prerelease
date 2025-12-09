@@ -6,6 +6,9 @@ description: >
   provisioning of devices into a Bluetooth Mesh network.
 category: Bluetooth Mesh|Host
 quality: production
+metadata:
+  sbom:
+    license: Zlib
 root_path: bluetooth_mesh_middleware/common/btmesh_host_remote_prov
 include:
 - path: .

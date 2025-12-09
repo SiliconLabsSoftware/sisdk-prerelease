@@ -188,6 +188,11 @@
       vendor: silabs
     path: brd2705a/sl_rail_util_ant_div_config.h
   - override:
+      component: sl_rail_util_ant_div
+      file_id: rail_util_ant_div_config
+      vendor: silabs
+    path: brd2705a/sl_rail_util_ant_div_config.h
+  - override:
       component: rail_util_pa
       file_id: rail_util_pa_config
       vendor: silabs
@@ -203,7 +208,17 @@
       vendor: silabs
     path: brd2705a/sl_rail_util_pti_config.h
   - override:
+      component: sl_rail_util_pti
+      file_id: rail_util_pti_config
+      vendor: silabs
+    path: brd2705a/sl_rail_util_pti_config.h
+  - override:
       component: rail_util_rf_path_switch
+      file_id: rail_util_rf_path_switch_config
+      vendor: silabs
+    path: brd2705a/sl_rail_util_rf_path_switch_config.h
+  - override:
+      component: sl_rail_util_rf_path_switch
       file_id: rail_util_rf_path_switch_config
       vendor: silabs
     path: brd2705a/sl_rail_util_rf_path_switch_config.h

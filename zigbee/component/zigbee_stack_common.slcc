@@ -213,6 +213,7 @@ include:
   - path: mfglib_internal_def.h
   - path: internal-callbacks-patch.h
   - path: sl_zigbee_token_internal_def.h
+  - path: sl_zigbee_zdo_security_internal_def.h
 - path: app/em260/
   file_list:
   - path: command-handlers-zll.h

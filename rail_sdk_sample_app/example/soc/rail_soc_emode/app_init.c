@@ -96,6 +96,8 @@ void rail_app_init(void)
   sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
 #endif
 
+  sl_rail_idle(rail_handle, SL_RAIL_IDLE, true);
+
   // add restriction in app_process to be able to control via terminal
   init_em1_mode();
 }

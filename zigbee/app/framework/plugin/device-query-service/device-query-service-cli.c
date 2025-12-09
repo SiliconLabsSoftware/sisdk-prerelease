@@ -26,6 +26,8 @@
 //============================================================================
 // Forward declarations
 
+extern const char* device_database_get_status_string(sl_zigbee_af_device_discovery_status_t status);
+
 //============================================================================
 void sli_zigbee_af_device_query_service_enable_disable_command(sl_cli_command_arg_t *arguments)
 {
@@ -47,5 +49,5 @@ void sli_zigbee_af_device_query_service_status_command(sl_cli_command_arg_t *arg
   sl_zigbee_af_core_println("Status: %s",
                             (device == NULL
                              ? ""
-                             : sl_zigbee_af_device_database_get_status_string(device->status)));
+                             : device_database_get_status_string(device->status)));
 }

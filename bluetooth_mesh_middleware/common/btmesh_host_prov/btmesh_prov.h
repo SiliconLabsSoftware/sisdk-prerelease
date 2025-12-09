@@ -30,6 +30,11 @@
 #ifndef BTMESH_PROV_H
 #define BTMESH_PROV_H
 
+/***********************************************************************************************//**
+ * @addtogroup btmesh_host_prov
+ * @{
+ **************************************************************************************************/
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -308,4 +313,5 @@ void btmesh_cbp_on_event(sl_btmesh_msg_t *evt);
 }
 #endif
 
+/** @} (end addtogroup btmesh_host_prov) */
 #endif // BTMESH_PROV_H

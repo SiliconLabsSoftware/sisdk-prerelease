@@ -201,21 +201,27 @@
 #define OPENTHREAD_CONFIG_IP6_FRAGMENTATION_ENABLE  0
 #endif
 // </e>
-// <e>  Maximum number of IPv6 unicast addresses allowed to be externally added
+// <h>  IPv6 Limits
+// <o OPENTHREAD_CONFIG_IP6_MAX_EXT_UCAST_ADDRS>  Maximum IPv6 external unicast addresses
+// <i>  Maximum number of IPv6 unicast addresses allowed to be externally added
+// <d>  4
 #ifndef OPENTHREAD_CONFIG_IP6_MAX_EXT_UCAST_ADDRS
 #define OPENTHREAD_CONFIG_IP6_MAX_EXT_UCAST_ADDRS   4
 #endif
-// </e>
-// <e>  Maximum number of IPv6 multicast addresses allowed to be externally added
+// <o OPENTHREAD_CONFIG_IP6_MAX_EXT_MCAST_ADDRS>  Maximum IPv6 external multicast addresses
+// <i>  Maximum number of IPv6 multicast addresses allowed to be externally added
+// <d>  4
 #ifndef OPENTHREAD_CONFIG_IP6_MAX_EXT_MCAST_ADDRS
 #define OPENTHREAD_CONFIG_IP6_MAX_EXT_MCAST_ADDRS   4
 #endif
-// </e>
-// <e>  The maximum number of IPv6 address registrations for MTD
+// <o OPENTHREAD_CONFIG_MLE_IP_ADDRS_TO_REGISTER>  Maximum IPv6 address registrations for MTD
+// <i>  The maximum number of IPv6 address registrations for MTD.
+// <i>  If left unchanged will default to the value of OPENTHREAD_CONFIG_MLE_IP_ADDRS_PER_CHILD
+// <d>  4
 #ifndef OPENTHREAD_CONFIG_MLE_IP_ADDRS_TO_REGISTER
 #define OPENTHREAD_CONFIG_MLE_IP_ADDRS_TO_REGISTER (OPENTHREAD_CONFIG_MLE_IP_ADDRS_PER_CHILD)
 #endif
-// </e>
+// </h>
 // <e>  Jam Detection
 #ifndef OPENTHREAD_CONFIG_JAM_DETECTION_ENABLE
 #define OPENTHREAD_CONFIG_JAM_DETECTION_ENABLE      0
@@ -250,16 +256,17 @@
 #ifndef OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
 #define OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE      0
 #endif
-// </e>
 // <e>  Multiple Static Instance Support
 #ifndef OPENTHREAD_CONFIG_MULTIPLE_STATIC_INSTANCE_ENABLE
 #define OPENTHREAD_CONFIG_MULTIPLE_STATIC_INSTANCE_ENABLE      0
 #endif
-// </e>
-// <e>  Number of OpenThread Instances For Static Buffer Allocation
+// <o OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM>  Number of OpenThread Instances
+// <i>  Default is 2. Number of OpenThread Instances For Static Buffer Allocation.
+// <d>  2
 #ifndef OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM
 #define OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM      2
 #endif
+// </e>
 // </e>
 // <e>  OTNS (OpenThread Network Simulator)
 #ifndef OPENTHREAD_CONFIG_OTNS_ENABLE
@@ -311,13 +318,15 @@
 #define OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE   1
 #endif
 // </e>
+// <e>  Time Synchronization Service
+#ifndef OPENTHREAD_CONFIG_TIME_SYNC_ENABLE
+#define OPENTHREAD_CONFIG_TIME_SYNC_ENABLE          0
+#endif
+// </e>
 // <e>  Uptime of OpenThread instance
 #ifndef OPENTHREAD_CONFIG_UPTIME_ENABLE
 #define OPENTHREAD_CONFIG_UPTIME_ENABLE             1
 #endif
-// </e>
-// <e>  Time Synchronization Service
-#define OPENTHREAD_CONFIG_TIME_SYNC_ENABLE          0
 // </e>
 // <e>  UDP Forward
 #ifndef OPENTHREAD_CONFIG_UDP_FORWARD_ENABLE
@@ -329,18 +338,22 @@
 #define OPENTHREAD_CONFIG_MAC_BEACON_PAYLOAD_PARSING_ENABLE      1
 #endif
 // </e>
-// <i> The maximum number of RX buffers to use in the radio driver.
-// <d> 16
+// <h>  Radio Driver RX buffers
+// <o SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT>  Maximum number of RX buffers
+// <i>  The maximum number of RX buffers to use in the radio driver.
+// <d>  16
 #ifndef SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT
 #define SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT       16
 #endif
+// </h>
 // </h>
 // <h>  Logging
 // <o   OPENTHREAD_CONFIG_LOG_OUTPUT> LOG_OUTPUT
 //      <OPENTHREAD_CONFIG_LOG_OUTPUT_NONE             => NONE
 //      <OPENTHREAD_CONFIG_LOG_OUTPUT_APP              => APP
 //      <OPENTHREAD_CONFIG_LOG_OUTPUT_PLATFORM_DEFINED => PLATFORM_DEFINED
-// <i>  Default: OPENTHREAD_CONFIG_LOG_OUTPUT_PLATFORM_DEFINED
+// <i>  Default: OPENTHREAD_CONFIG_LOG_OUTPUT_APP
+// <d>  OPENTHREAD_CONFIG_LOG_OUTPUT_APP
 #ifndef OPENTHREAD_CONFIG_LOG_OUTPUT
 #define OPENTHREAD_CONFIG_LOG_OUTPUT OPENTHREAD_CONFIG_LOG_OUTPUT_APP
 #endif
@@ -363,6 +376,7 @@
 //      <OT_LOG_LEVEL_INFO       => INFO
 //      <OT_LOG_LEVEL_DEBG       => DEBG
 // <i>  Default: OT_LOG_LEVEL_DEBG
+// <d>  OT_LOG_LEVEL_DEBG
 #ifndef OPENTHREAD_CONFIG_LOG_LEVEL
 #define OPENTHREAD_CONFIG_LOG_LEVEL OT_LOG_LEVEL_DEBG
 #endif
@@ -383,7 +397,8 @@
 #define OPENTHREAD_CONFIG_LOG_PREPEND_LEVEL         1
 #endif
 
-#endif
+#endif // OPENTHREAD_FULL_LOGS_ENABLE
+
 // </h>
 // </e>
 // </h>

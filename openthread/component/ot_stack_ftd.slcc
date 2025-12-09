@@ -31,7 +31,7 @@ config_file:
 - path: config/sl_openthread_reference_device_config.h
   file_id: openthread_features
   condition: [ot_reference_device]
-- path: config/sl_openthread_features_ncp_config.h
+- path: config/sl_openthread_features_ncp_ftd_config.h
   file_id: openthread_features
   condition: [ot_ncp]
 include:
@@ -51,7 +51,7 @@ define:
   value: '"sl_openthread_reference_device_config.h"'
   condition: [ot_reference_device]
 - name: SL_OPENTHREAD_STACK_FEATURES_CONFIG_FILE
-  value: '"sl_openthread_features_ncp_config.h"'
+  value: '"sl_openthread_features_ncp_ftd_config.h"'
   condition: [ot_ncp]
 - name: OPENTHREAD_CONFIG_FILE
   value: '"sl_openthread_package_info.h"'

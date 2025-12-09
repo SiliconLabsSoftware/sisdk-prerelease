@@ -36,57 +36,58 @@
  */
 /** @brief  Get device by index.
  *
- * @param index Ver.: always
+ * @param index[in] The index into the database.
  *
- * @return sl_zigbee_af_device_info_t Device Information struct
+ * @return sl_zigbee_af_device_info_t* NULL if no device matches status, else a valid pointer to the entry.
  *
  */
 const sl_zigbee_af_device_info_t* sl_zigbee_af_device_database_get_device_by_index(uint16_t index);
 
-/** @brief Find device by status.
+/** @brief Find the first device that matches input status.
  *
- * @param status Ver.: always
+ * @param status[in] The status to look for.
  *
- * @return sl_zigbee_af_device_info_t Device Information struct
+ * @return sl_zigbee_af_device_info_t* NULL if no device matches status, else a valid pointer to the entry.
  *
  */
 const sl_zigbee_af_device_info_t* sl_zigbee_af_device_database_find_device_by_status(sl_zigbee_af_device_discovery_status_t status);
 
 /** @brief Find device by EUI64.
  *
- * @param eui64
+ * @param eui64[in] The EUI to search for.
  *
- * @return sl_zigbee_af_device_info_t Device Information struct
+ * @return sl_zigbee_af_device_info_t* NULL if device is not found, else a valid pointer to the entry.
  *
  */
 const sl_zigbee_af_device_info_t* sl_zigbee_af_device_database_find_device_by_eui64(sl_802154_long_addr_t eui64);
 
 /** @brief Add to the device database.
  *
- * @param eui64 Ver.: always
- * @param zigbeeCapabilities Ver.: always
+ * @param eui64[in] The EUI to add.
+ * @param macCapabilities[in] The MAC capabilities for the device.
  *
- * @return sl_zigbee_device_info_t
+ * @return sl_status_t SL_STATUS_OK upon success, SL_STATUS_ALREADY_EXISTS if device is already in table, else
+ * SL_STATUS_FULL if table is full.
  *
  */
-const sl_zigbee_af_device_info_t* sl_zigbee_af_device_database_add(sl_802154_long_addr_t eui64, uint8_t zigbeeCapabilities);
+sl_status_t sl_zigbee_af_device_database_add(sl_802154_long_addr_t eui64, uint8_t macCapabilities);
 
 /** @brief Erase device from device database.
  *
- * @param eui64 Ver.: always
+ * @param eui64[in] The EUI to search for.
  *
- * @return bool true is success
+ * @return bool True if the device is found, else false.
  *
  */
 bool sl_zigbee_af_device_database_erase_device(sl_802154_long_addr_t eui64);
 
 /** @brief Set device endpoints.
  *
- * @param eui64
- * @param endpointList
- * @param endpointCount
+ * @param eui64[in] The EUI to search for.
+ * @param endpointList[in] A list of endpoints to add in the database entry for ::eui64.
+ * @param endpointCount[in] The length of endpointList.
  *
- * @return bool true is success
+ * @return bool True if the device is found, else false.
  *
  */
 bool sl_zigbee_af_device_database_set_endpoints(const sl_802154_long_addr_t eui64,
@@ -95,10 +96,10 @@ bool sl_zigbee_af_device_database_set_endpoints(const sl_802154_long_addr_t eui6
 
 /** @brief Get device endpoint from index.
  *
- * @param eui64
- * @param index
+ * @param eui64[in] The EUI to search for.
+ * @param index[in] The endpoint index to retrieve.
  *
- * @return uint8_t
+ * @return uint8_t The endpoint value from the entry and index.
  *
  */
 uint8_t sl_zigbee_af_device_database_get_device_endpoint_from_index(const sl_802154_long_addr_t eui64,
@@ -106,70 +107,75 @@ uint8_t sl_zigbee_af_device_database_get_device_endpoint_from_index(const sl_802
 
 /** @brief Get index from endpoint.
  *
- * @param endpoint
- * @param eui64
+ * @param endpoint[in] The endpoint relevant to ::eui64
+ * @param eui64[in] The EUI to search for.
  *
- * @note Explicitly made the eui64 the second argument to prevent confusion between
- * this function and the emberAfPluginDeviceDatabaseGetDeviceEndpointsFromIndex()
- *
+ * @return uint8_t The index that ::endpoint is stored in the entry for ::eui64, else 0xFF is device or endpoint
+ * are not found.
  */
 uint8_t sl_zigbee_af_device_database_get_index_from_endpoint(uint8_t endpoint,
                                                              const sl_802154_long_addr_t eui64);
 
 /** @brief Set clusters from endpoint.
  *
- * @param eui64
- * @param clusterList
+ * @param deviceEui64[in] The EUI to search for.
+ * @param clusterList[in] Cluster and endpoint information from ::deviceEui64.
  *
- * @return bool true is success
+ * @return bool True upon successful update, else false if device or endpoint on device not found.
  *
+ * @note The endpoint specified in ::clusterList must be previously be written to the entry using
+ * ::sl_zigbee_af_device_database_set_endpoints.
  */
 bool sl_zigbee_af_device_database_set_clusters_for_endpoint(const sl_802154_long_addr_t eui64,
                                                             const sl_zigbee_af_cluster_list_t* clusterList);
-/** @brief Clear the failed DB discovery count.
+
+/** @brief Searches for any entries that have a failed discovery state (SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_FAILED) and
+ * whose number of failures is less than ::maxFailureCount. Clears those entries statuses by setting said
+ * statuses to SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_NEW.
  *
- * @param maxFailureCount
+ * @param maxFailureCount[in] The number of max failures to filter for when looking for entries in the SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_FAILED state. If an entry
+ * has a failure count greater than or equal to ::maxFailureCount, then its status won't be cleared.
  *
- * @return bool true is success
+ * @return bool True if at least one entry was cleared, false otherwise.
+ *
+ * @note This component works alongside the Device Query Service component, which manages device status in this Device
+ * Database component. The user is not expected to call these APIs to update device status.
  */
 bool sl_zigbee_af_device_database_clear_all_failed_discovery_status(uint8_t maxFailureCount);
 
-/** @brief Get device database status string.
+/** @brief Set device database status for a given device. This API is used by other components to handle device state
+ * when probing the device, for instance. The generic device state is stored in this Device Database component, but this
+ * component performs no action based on that state.
  *
- * @param status
+ * @param deviceEui64[in] The EUI to search for.
+ * @param newStatus[in] The status to set.
  *
- * @return const char* status string
+ * @return bool True if the device is found, else false.
  *
- */
-const char* sl_zigbee_af_device_database_get_status_string(sl_zigbee_af_device_discovery_status_t status);
-
-/** @brief Set device database status.
- *
- * @param deviceEui64
- * @param newStatus
- *
- * @return bool true is success.
+ * @note This component works alongside the Device Query Service component, which manages device status in this Device
+ * Database component. The user is not expected to call these APIs to update device status.
  *
  */
 bool sl_zigbee_af_device_database_set_status(const sl_802154_long_addr_t deviceEui64, sl_zigbee_af_device_discovery_status_t newStatus);
 
-/** @brief Add device to database with all information.
+/** @brief Add device to database with all information filled out.
  *
- * @param newDevice Struct pointer to device infor
+ * @param newDevice[in] Pointer with complete device entry information.
  *
- * @return sl_zigbee_device_info_t
- *
+ * @return sl_status_t SL_STATUS_OK upon success, SL_STATUS_ALREADY_EXISTS if device is already in table, else
+ * SL_STATUS_FULL if table is full.
  */
-const sl_zigbee_af_device_info_t* sl_zigbee_af_device_database_add_device_with_all_info(const sl_zigbee_af_device_info_t* newDevice);
+sl_status_t sl_zigbee_af_device_database_add_device_with_all_info(const sl_zigbee_af_device_info_t* newDevice);
 
 /** @brief Check if a device has cluster.
  *
- * @param deviceEui64
- * @param clusterToFind
- * @param server
- * @param returnEndpoint
+ * @param deviceEui64[in] The EUI to search for.
+ * @param[in] clusterToFind Cluster to search for.
+ * @param[in] server True to find server side cluster, false for client side.
+ * @param[out] returnEndpoint Upon success, is filled in with endpoint matching input cluster.
  *
- * @return sl_status_t status code
+ * @return sl_status_t SL_STATUS_OK if found, SL_STATUS_INVALID_PARAMETER if device not in database, else SL_STATUS_NOT_FOUND
+ * if device found but no match on cluster.
  *
  */
 sl_status_t sl_zigbee_af_device_database_does_device_have_cluster(sl_802154_long_addr_t deviceEui64,
@@ -177,21 +183,30 @@ sl_status_t sl_zigbee_af_device_database_does_device_have_cluster(sl_802154_long
                                                                   bool server,
                                                                   uint8_t* returnEndpoint);
 
-/** @brief Create a new search.
+/** @brief Create a new search. Resets iterator starting index to 0.
  *
- * @param iterator
+ * @param iterator[out] Param to update. Essentially has its deviceIndex set to 0.
+ *
+ * @note This function is typically called before calling ::sl_zigbee_af_device_database_find_device_supporting_cluster,
+ * which is done to find the entry index of a device matching an input cluster.
+ *
+ * @return None
+ *
+ * @note This function is used when a caller wants to know which index in the database matches
+ * a given search criterion.
  *
  */
 void sl_zigbee_af_device_database_create_new_search(sl_zigbee_af_device_database_iterator_t* iterator);
 
 /** @brief Find device supporting cluster.
  *
- * @param iterator
- * @param clusterToFind
- * @param server
- * @param returnEndpoint
+ * @param[in, out] iterator Upon success, deviceIndex field is updated with index of device matching cluster.
+ * @param[in] clusterToFind Cluster to search for.
+ * @param[in] server True to find server side cluster, false for client side.
+ * @param[out] returnEndpoint Upon success, is filled in with endpoint matching input cluster.
  *
- * @return sl_status_t status code
+ * @return sl_status_t SL_STATUS_OK if found, SL_STATUS_INVALID_INDEX if iterator index is beyond max table size,
+ * else SL_STATUS_NOT_FOUND if no device in the database supports desired cluster.
  */
 sl_status_t sl_zigbee_af_device_database_find_device_supporting_cluster(sl_zigbee_af_device_database_iterator_t* iterator,
                                                                         sl_zigbee_af_cluster_id_t clusterToFind,
@@ -202,4 +217,5 @@ sl_status_t sl_zigbee_af_device_database_find_device_supporting_cluster(sl_zigbe
 /** @} */ // end of device-database
 
 void sli_zigbee_af_device_database_update_node_stack_revision(sl_802154_long_addr_t eui64,
-                                                              uint8_t stackRevision);
+                                                              uint8_t stackRevision,
+                                                              uint8_t macCapabilities); // 0xFF doesn't update the device's capabilities

@@ -85,13 +85,13 @@ const sl_zigbee_af_device_info_t* sl_zigbee_af_device_database_find_device_by_eu
   return findDeviceByEui64(eui64);
 }
 
-const sl_zigbee_af_device_info_t* sl_zigbee_af_device_database_add_device_with_all_info(const sl_zigbee_af_device_info_t* newDevice)
+sl_status_t sl_zigbee_af_device_database_add_device_with_all_info(const sl_zigbee_af_device_info_t* newDevice)
 {
   if (NULL != findDeviceByEui64(newDevice->eui64)) {
-    sl_zigbee_af_core_print("Error: %s cannot add device that already exists: ", PLUGIN_NAME);
+    sl_zigbee_af_core_print("%s: device already exists: ", PLUGIN_NAME);
     sl_zigbee_af_print_big_endian_eui64(newDevice->eui64);
     sl_zigbee_af_core_println("");
-    return NULL;
+    return SL_STATUS_ALREADY_EXISTS;
   }
   sl_802154_long_addr_t nullEui64;
   memset(nullEui64, 0xFF, EUI64_SIZE);
@@ -100,25 +100,29 @@ const sl_zigbee_af_device_info_t* sl_zigbee_af_device_database_add_device_with_a
     memmove(device, newDevice, sizeof(sl_zigbee_af_device_info_t));
     sl_zigbee_af_device_database_discovery_complete_cb(device);
   }
-  return device;
+  return device ? SL_STATUS_OK : SL_STATUS_FULL;
 }
 
-const sl_zigbee_af_device_info_t* sl_zigbee_af_device_database_add(sl_802154_long_addr_t eui64, uint8_t zigbeeCapabalities)
+sl_status_t sl_zigbee_af_device_database_add(sl_802154_long_addr_t eui64, uint8_t macCapabilities)
 {
   sl_zigbee_af_device_info_t* device = findDeviceByEui64(eui64);
-  if (device == NULL) {
-    sl_802154_long_addr_t nullEui64;
-    memset(nullEui64, 0xFF, EUI64_SIZE);
-    device = findDeviceByEui64(nullEui64);
-    if (device != NULL) {
-      memmove(device->eui64, eui64, EUI64_SIZE);
-      device->status = SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_NEW;
-      device->discoveryFailures = 0;
-      device->capabilities = zigbeeCapabalities;
-      device->endpointCount = 0;
-    }
+  if (device != NULL) {
+    return SL_STATUS_ALREADY_EXISTS;
   }
-  return device;
+
+  sl_802154_long_addr_t nullEui64;
+  memset(nullEui64, 0xFF, EUI64_SIZE);
+  device = findDeviceByEui64(nullEui64);
+  if (device != NULL) {
+    memmove(device->eui64, eui64, EUI64_SIZE);
+    device->status = SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_NEW;
+    device->discoveryFailures = 0;
+    // device->capabilities can be updated later if not known right now
+    // See sli_zigbee_af_device_database_update_node_stack_revision
+    device->capabilities = macCapabilities;
+    device->endpointCount = 0;
+  }
+  return device ? SL_STATUS_OK : SL_STATUS_FULL;
 }
 
 bool sl_zigbee_af_device_database_erase_device(sl_802154_long_addr_t eui64)
@@ -242,7 +246,7 @@ bool sl_zigbee_af_device_database_clear_all_failed_discovery_status(uint8_t maxF
     }
     if (SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_FAILED == deviceDatabase[i].status
         && deviceDatabase[i].discoveryFailures < maxFailureCount) {
-      deviceDatabase[i].status = SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_FIND_ENDPOINTS;
+      deviceDatabase[i].status = SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_NEW;
       atLeastOneCleared = true;
     }
   }
@@ -264,7 +268,7 @@ bool sl_zigbee_af_device_database_set_status(const sl_802154_long_addr_t deviceE
   return false;
 }
 
-static void doesDeviceHaveCluster(const sl_zigbee_af_device_info_t* device,
+static bool doesDeviceHaveCluster(const sl_zigbee_af_device_info_t* device,
                                   sl_zigbee_af_cluster_id_t clusterToFind,
                                   bool server,
                                   uint8_t* returnEndpoint)
@@ -277,10 +281,11 @@ static void doesDeviceHaveCluster(const sl_zigbee_af_device_info_t* device,
       if (device->endpoints[i].clusters[j].clusterId == clusterToFind
           && device->endpoints[i].clusters[j].server == server) {
         *returnEndpoint = device->endpoints[i].endpoint;
-        return;
+        return true;
       }
     }
   }
+  return false;
 }
 
 sl_status_t sl_zigbee_af_device_database_does_device_have_cluster(sl_802154_long_addr_t deviceEui64,
@@ -290,10 +295,10 @@ sl_status_t sl_zigbee_af_device_database_does_device_have_cluster(sl_802154_long
 {
   sl_zigbee_af_device_info_t* device = findDeviceByEui64(deviceEui64);
   if (device == NULL) {
-    return SL_STATUS_INVALID_STATE;
+    return SL_STATUS_INVALID_PARAMETER;
   }
-  doesDeviceHaveCluster(device, clusterToFind, server, returnEndpoint);
-  return SL_STATUS_OK;
+  bool found = doesDeviceHaveCluster(device, clusterToFind, server, returnEndpoint);
+  return found ? SL_STATUS_OK : SL_STATUS_NOT_FOUND;
 }
 
 void sl_zigbee_af_device_database_create_new_search(sl_zigbee_af_device_database_iterator_t* iterator)
@@ -307,20 +312,30 @@ sl_status_t sl_zigbee_af_device_database_find_device_supporting_cluster(sl_zigbe
                                                                         uint8_t* returnEndpoint)
 {
   if (iterator->deviceIndex >= SL_ZIGBEE_AF_PLUGIN_DEVICE_DATABASE_MAX_DEVICES) {
-    // This was the most appropriate error code I could come up with to say, "Search Complete".
     return SL_STATUS_INVALID_INDEX;
   }
 
-  doesDeviceHaveCluster(&(deviceDatabase[iterator->deviceIndex]), clusterToFind, server, returnEndpoint);
-  iterator->deviceIndex++;
-  return SL_STATUS_OK;
+  bool found = false;
+  while (iterator->deviceIndex < SL_ZIGBEE_AF_PLUGIN_DEVICE_DATABASE_MAX_DEVICES) {
+    found = doesDeviceHaveCluster(&(deviceDatabase[iterator->deviceIndex]), clusterToFind, server, returnEndpoint);
+    if (found) {
+      return SL_STATUS_OK;
+    }
+    iterator->deviceIndex++;
+  }
+
+  return SL_STATUS_NOT_FOUND;
 }
 
 void sli_zigbee_af_device_database_update_node_stack_revision(sl_802154_long_addr_t eui64,
-                                                              uint8_t stackRevision)
+                                                              uint8_t stackRevision,
+                                                              uint8_t macCapabilities)
 {
   sl_zigbee_af_device_info_t *device = findDeviceByEui64(eui64);
   if (device != NULL) {
     device->stackRevision = stackRevision;
+    if (macCapabilities != 0xFF) {
+      device->capabilities = macCapabilities;
+    }
   }
 }

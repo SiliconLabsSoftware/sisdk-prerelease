@@ -128,7 +128,7 @@ volatile bool init_needed = false;
 
 /// Schedule TX/RX flags to not run again accidentally
 volatile bool packet_sending = false;
-volatile bool rx_ended = true;
+volatile bool periodic_rx_ended = true;
 // -----------------------------------------------------------------------------
 //                                Static Variables
 // -----------------------------------------------------------------------------
@@ -147,8 +147,8 @@ static bool em1_is_enabled = false;
 static bool allow_to_sleep = true;
 
 /// State machine state variable and buffer
-static state_t app_state = S_IDLE;
-static bool periodic_receive = false;
+static volatile state_t app_state = S_IDLE;
+bool volatile periodic_receive = false;
 
 /// config for the TX schedule option
 static sl_rail_scheduled_tx_config_t schedule_tx_config = {
@@ -239,6 +239,23 @@ void app_process_action(void)
     case S_PACKET_RECEIVED:
       handle_received_packet(rail_handle);
       break;
+    case S_RX_ERROR:
+      app_log_error("RX error\n");
+      if (periodic_receive) {
+        periodic_rx_ended = false;
+        rail_status = sl_rail_start_scheduled_rx(rail_handle, get_selected_channel(), &schedule_rx_config, NULL);
+        if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
+          app_log_warning("sl_rail_start_scheduled_rx() result: %lu", rail_status);
+        }
+        app_state = S_PERIODIC_RX;
+      } else {
+        rail_status = sl_rail_start_rx(rail_handle, get_selected_channel(), NULL);
+        if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
+          app_log_warning("sl_rail_start_rx() result: %lu", rail_status);
+        }
+        app_state = S_IDLE;
+      }
+      break;
     default:
       break;
   }
@@ -282,12 +299,9 @@ SL_CODE_RAM void sl_rail_util_on_event(sl_rail_handle_t rail_handle, sl_rail_eve
     if (events & SL_RAIL_EVENT_RX_PACKET_RECEIVED) {
       // Keep the packet in the radio buffer, download it later at the state machine
       rx_packet_handle = sl_rail_hold_rx_packet(rail_handle);
-      if (app_state == S_PERIODIC_RX) {
-        periodic_receive = true;
-      } else {
-        periodic_receive = false;
-      }
       app_state = S_PACKET_RECEIVED;
+    } else {
+      app_state = S_RX_ERROR;
     }
   }
   // Handle Tx events
@@ -298,7 +312,7 @@ SL_CODE_RAM void sl_rail_util_on_event(sl_rail_handle_t rail_handle, sl_rail_eve
   }
 
   if (events & SL_RAIL_EVENT_RX_SCHEDULED_RX_END) {
-    rx_ended = true;
+    periodic_rx_ended = true;
   }
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   app_task_notify();
@@ -357,8 +371,8 @@ static void handle_periodic_rx(sl_rail_handle_t rail_handle)
       schedule_rx_config.start, schedule_rx_config.end, sleep_mode,
       0);
   }
-  if (rx_ended) {
-    rx_ended = false;
+  if (periodic_rx_ended) {
+    periodic_rx_ended = false;
     rail_status = sl_rail_start_scheduled_rx(rail_handle, get_selected_channel(), &schedule_rx_config, NULL);
     if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
       app_log_warning("sl_rail_start_scheduled_rx() result: %lu", rail_status);
@@ -410,21 +424,21 @@ static void handle_received_packet(sl_rail_handle_t rail_handle)
                   "No such RAIL rx packet yet exists or rail_handle is not active");
   }
   rx_packet_handle = sl_rail_get_rx_packet_info(rail_handle, SL_RAIL_RX_PACKET_HANDLE_OLDEST_COMPLETE, &packet_info);
-  if (rx_packet_handle == SL_RAIL_RX_PACKET_HANDLE_INVALID) {
-    app_log_error("sl_rail_get_rx_packet_info() error: SL_RAIL_RX_PACKET_HANDLE_INVALID\n");
-  }
-  uint8_t *start_of_packet = 0;
-  if (packet_info.packet_bytes <= SL_RAIL_SDK_RX_FIFO_SIZE) {
-    uint16_t packet_size = unpack_packet(rail_handle, rx_buffer, &packet_info, &start_of_packet);
-    rail_status = sl_rail_release_rx_packet(rail_handle, rx_packet_handle);
-    if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
-      app_log_warning("sl_rail_release_rx_packet() result: %lu", rail_status);
+  while (rx_packet_handle != SL_RAIL_RX_PACKET_HANDLE_INVALID) {
+    uint8_t *start_of_packet = 0;
+    if (packet_info.packet_bytes <= SL_RAIL_SDK_RX_FIFO_SIZE) {
+      uint16_t packet_size = unpack_packet(rail_handle, rx_buffer, &packet_info, &start_of_packet);
+      rail_status = sl_rail_release_rx_packet(rail_handle, rx_packet_handle);
+      if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
+        app_log_warning("sl_rail_release_rx_packet() result: %lu", rail_status);
+      }
+      printf_rx_packet(start_of_packet, packet_size);
     }
-    printf_rx_packet(start_of_packet, packet_size);
+    rx_packet_handle = sl_rail_get_rx_packet_info(rail_handle, SL_RAIL_RX_PACKET_HANDLE_OLDEST_COMPLETE, &packet_info);
   }
 
   if (periodic_receive) {
-    rx_ended = false;
+    periodic_rx_ended = false;
     rail_status = sl_rail_start_scheduled_rx(rail_handle, get_selected_channel(), &schedule_rx_config, NULL);
     if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
       app_log_warning("sl_rail_start_scheduled_rx() result: %lu", rail_status);

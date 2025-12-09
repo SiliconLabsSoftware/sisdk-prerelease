@@ -138,7 +138,9 @@ filter:
 tag:
   - hardware:component:exp_header:spi
   - hardware:device:ram:96
+  - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_supports_zigbee
   - hwfilter:ram:64k
   - hwfilter:board:hardware_board_has_spi
   - hwfilter:!board:zb_boards_spi_incompatible
+  - hwfilter:!board:zb_boards_ncp_spi_incompatible

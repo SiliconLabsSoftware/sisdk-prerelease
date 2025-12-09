@@ -341,6 +341,9 @@ bool sli_zigbee_process_application_link_key(sl_802154_long_addr_t partnerEui64,
         return false;
       }
     }
+#else
+    (void) status;
+    (void) store_key;
 #endif
   } else {
     sl_zigbee_sec_man_context_t context;

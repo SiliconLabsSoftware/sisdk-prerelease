@@ -25,13 +25,13 @@
 
 // <o SL_ZIGBEE_AF_MAX_ENDPOINTS_PER_DEVICE> Max Endpoints <1-10>
 // <i> Default: 5
-// <i> The maximum number of endpoints per device that can be recorded in the database.
+// <i> The maximum number of endpoints per device that can be recorded in the database. Increasing this number increases total RAM usage.
 #define SL_ZIGBEE_AF_MAX_ENDPOINTS_PER_DEVICE   5
 
-// <o SL_ZIGBEE_AF_MAX_CLUSTERS_PER_ENDPOINT> Max Clusters <1-20>
-// <i> Default: 10
-// <i> The maximum number of clusters per endpoint that can be recorded in the database.
-#define SL_ZIGBEE_AF_MAX_CLUSTERS_PER_ENDPOINT   10
+// <o SL_ZIGBEE_AF_MAX_CLUSTERS_PER_ENDPOINT> Max Clusters <1-50>
+// <i> Default: 15
+// <i> The maximum number of clusters per endpoint that can be recorded in the database. Increasing this number increases total RAM usage.
+#define SL_ZIGBEE_AF_MAX_CLUSTERS_PER_ENDPOINT   15
 
 // </h>
 

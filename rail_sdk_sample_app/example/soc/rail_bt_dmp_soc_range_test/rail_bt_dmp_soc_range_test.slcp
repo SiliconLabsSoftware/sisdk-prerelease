@@ -71,6 +71,7 @@ component:
   - id: restrictions_profile_wisun_han
   - id: restrictions_profile_wisun_ofdm
   - id: restrictions_profile_connect_ofdm
+  - id: restrictions_profile_ieee802154_bpsk
 #---------------Code Classification------------------
   - id: code_classification
 

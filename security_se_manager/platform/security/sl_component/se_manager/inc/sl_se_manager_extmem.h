@@ -224,14 +224,6 @@ sl_status_t sl_se_code_region_apply_config(sl_se_command_context_t *cmd_ctx,
 
 /***************************************************************************//**
  * @brief
- *   Deprecated function. Use sl_se_code_region_apply_config instead.
- *   Enable or disable bank swapping between two consecutive code regions
- ******************************************************************************/
-sl_status_t sl_se_code_region_set_active_banked(sl_se_command_context_t *cmd_ctx,
-                                                unsigned int region_idx) SL_DEPRECATED_API_SDK_2025_6;
-
-/***************************************************************************//**
- * @brief
  *   Erase a host code region.
  *
  * @details

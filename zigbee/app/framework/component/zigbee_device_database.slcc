@@ -1,5 +1,5 @@
 package: zigbee
-description: This component provides an API to add/remove a device from a list of known devices, and to record their list of endpoints and clusters.
+description: This component provides an API to add/remove a device from a list of known devices, and to record their list of endpoints and clusters. The list of devices is not persisted across reboots.
 label: Device Database
 quality: production
 id: zigbee_device_database

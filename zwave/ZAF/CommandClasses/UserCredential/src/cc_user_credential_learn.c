@@ -271,7 +271,7 @@ ZW_WEAK void CC_UserCredential_learn_event_handler(
        * Keep device awake for the duration of this step.
        * This is necessary to ensure that the final reports will be sent out correctly.
        */
-      zpal_radio_update_stay_awake(&credential_learn_stay_awake_id, cl_state.data.timeout_seconds);
+      zpal_radio_update_stay_awake(&credential_learn_stay_awake_id, cl_state.data.timeout_seconds * S_TO_MS);
       CC_UserCredential_CredentialLearnStatusReport_tx(
         CL_STATUS_STARTED, &cl_state.data.target, *remaining_steps, &cl_state.rx_options
         );

@@ -17,8 +17,7 @@
 
 The Wi-SUN SoC Border Router Agent sample application extends the Wi-SUN SoC Border Router by adding an Agent Service capable of:
 
-- Exposing the current network topology and the active Border Router configuration parameters to a remote host agent via Wi-Fi backhaul.
-- Receiving new configuration parameters from a remote host and applying them at runtime.
+- Exposing the current network topology and the active Border Router configuration parameters to a remote host agent via Wi-Fi.
 - Stopping and restarting the Border Router operation remotely.
 
 A limited CLI (Command-Line Interface) is exposed to facilitate the Wi-SUN / WiFi configuration.
@@ -36,7 +35,7 @@ This sample application is the counterpart to the external Linux "Wi-SUN SoC Bor
 - Translating device topology & configuration into D-Bus properties.
 - Relaying control operations (Restart BR / Stop BR / Set config) originating from UI or scripts to the SoC via the TCP protocol described above.
 
-For prerequisites and complete setup see, [Wi-SUN SoC Border Router Agent Linux Host](https://github.com/foobar/wisun-soc-br-agent).
+For prerequisites and complete setup see, [Wi-SUN Border Router Bridge Agent](https://github.com/SiliconLabs/wisun-br-gui/tree/main/wisun-br-bridge-agent).
 
 Wi-Fi Backhaul Connectivity is based on the SiWx91x™ chipset and the WiSeConnect™ SDK v3.x.
 Follow the [Getting Started with WiSeConnect™ SDK v3.x and EFR32™ Host in NCP Mode](https://docs.silabs.com/wiseconnect/3.5.1/wiseconnect-getting-started/getting-started-with-ncp-mode-with-efr32) to configure the SiWN917 as a Network Co-Processor (NCP). This document is limited to additional commands and settings, a more detailed documentation can be found here [SoC Border Router with Wi-Fi Backhaul](https://docs.silabs.com/wisun/latest/wisun-network-configuration/06-wisun-soc-border-router-backhaul).
@@ -48,6 +47,7 @@ Follow the [Getting Started with WiSeConnect™ SDK v3.x and EFR32™ Host in NC
   - Updated network topology when routing changes occur.
   - Configuration parameters.
 - DHCPv6 server integration.
+- Wi-Fi adapter is directly used to communicate with the [Wi-SUN Border Router Bridge Agent](https://github.com/SiliconLabs/wisun-br-gui/tree/main/wisun-br-bridge-agent).
 - Wi-Fi support for backhaul connectivity.
 - Thread-safe remote address runtime reconfiguration.
 
@@ -74,60 +74,17 @@ The application follows an event-driven architecture with the following data flo
   - Interpreting message headers and payloads
   - Executing requested actions, runtime configuration updates or returning data
 
-- Border Router startup automatically sends current configuration parameters to the remote host agent as part of the initialization sequence.
+- Border Router startup automatically sends current configuration parameters and Wi-SUN FAN global address to the remote host agent as part of the initialization sequence.
 
-## Message Protocol
+### Command Line Interface (CLI) example
+Set the remote Linux host address that executes the **Wi-SUN Border Router Bridge Agent** service.
 
-### Message Frame Format
+```bash
+> wisun set_br_agent_remote_addr 2001:db8::dda5:4582:bc9:2287
+[Remote address is set to: 2001:db8::dda5:4582:bc9:2287]
 
-Each message (request or response) has the following binary layout (network byte order / big-endian for multi-byte fields):
-
-| Offset | Size (bytes) | Field | Description |
-|--------|--------------|-------|-------------|
-| 0 | 4 | msg_code | 32-bit unsigned request/response code. |
-| 4 | 4 | payload_len | 32-bit unsigned payload length in bytes. |
-| 8 | payload_len | payload | Omitted if length = 0. |
-
-Alignment: The structure is tightly packed when transmitted (1 byte alignment).
-
-### Request / Response Codes
-
-| Code Macro | Value | Description |
-|------------|-------|-------------|
-| `SL_WISUN_BR_AGENT_SERVICE_CODE_GET_TOPOLOGY` | 0x01 | Retrieve current topology. |
-| `SL_WISUN_BR_AGENT_SERVICE_CODE_GET_CONFIG_PARAMS` | 0x02 | Retrieve current BR configuration parameters. |
-| `SL_WISUN_BR_AGENT_SERVICE_CODE_SET_CONFIG_PARAMS` | 0x03 | Apply new BR configuration parameters. No response payload on success. |
-| `SL_WISUN_BR_AGENT_SERVICE_CODE_RESTART_BR` | 0x04 | Restart the Border Router. |
-| `SL_WISUN_BR_AGENT_SERVICE_CODE_STOP_BR` | 0x05 | Stop the Border Router. |
-
-### Configuration Payload Structure
-
-For GET / SET config operations the payload is a packed structure containing:
-
-```c
-char     network_name[APP_SETTING_NETWORK_NAME_MAX_SIZE];
-uint8_t  network_size;
-int16_t  tx_power_ddbm;
-uint8_t  uc_dwell_interval_ms;
-uint32_t bc_interval_ms;
-uint8_t  bc_dwell_interval_ms;
-uint8_t  state;
-char     allowed_channels[APP_UTIL_PRINTABLE_DATA_MAX_LENGTH + 1];
-char     ipv6_prefix[APP_IPV6_PREFIX_SIZE + 1];
-uint8_t  regulation;
-uint8_t  fec;
-uint8_t  rx_phy_mode_ids[SL_WISUN_MAX_PHY_MODE_ID_COUNT];
-uint8_t  rx_phy_mode_ids_count;
-uint8_t  lfn_profile;
-uint8_t  max_neighbor_count;
-uint8_t  max_child_count;
-uint16_t max_security_neighbor_count;
-uint8_t  keychain;
-uint8_t  keychain_index;
-uint16_t socket_rx_buffer_size;
-sl_wisun_phy_config_t phy;
-bool     is_default_phy;
-uint16_t pan_id;
+> wisun get_br_agent_remote_addr
+[2001:DB8::DDA5:4582:BC9:2287]
 ```
 
 ## Troubleshooting
@@ -142,7 +99,7 @@ Before programming the radio board mounted on the WSTK, ensure the power supply 
 - [Wi-SUN Stack API documentation](https://docs.silabs.com/wisun/latest)
 - [Wi-SUN Border Router GUI](https://docs.silabs.com/wisun/latest/wisun-border-router-gui/)
 - [Getting Started with WiSeConnect™ SDK v3.x and EFR32™ Host in NCP Mode](https://docs.silabs.com/wiseconnect/3.5.1/wiseconnect-getting-started/getting-started-with-ncp-mode-with-efr32)
-- [Wi-SUN SoC Border Router Agent Linux Host](https://github.com/foobar/wisun-soc-br-agent)
+- [Wi-SUN Border Router Bridge Agent](https://github.com/SiliconLabs/wisun-br-gui/tree/main/wisun-br-bridge-agent).
 - [SoC Border Router with Wi-Fi Backhaul](https://docs.silabs.com/wisun/latest/wisun-network-configuration/06-wisun-soc-border-router-backhaul)
 
 ## Report Bugs & Get Support

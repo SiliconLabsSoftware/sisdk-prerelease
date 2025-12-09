@@ -22,7 +22,7 @@ requires:
   - device_series_3
 - name: rail_lib
 - name: sl_rail_util_compatible_pa
-- name: rail_util_built_in_phys
+- name: sl_rail_util_built_in_phys
 - name: sli_crypto
 
 library:

@@ -23,6 +23,12 @@ provides:
 config_file:
 - path: profile_ieee802154_bpsk.restriction
   directory: rail
+  condition:
+  - device_generic_family_efr32xg23
+- path: profile_ieee802154_bpsk.restriction
+  directory: rail
+  condition:
+  - device_generic_family_efr32xg28
 
 #-------- Hides Component for user in Studio ---------
 ui_hints:

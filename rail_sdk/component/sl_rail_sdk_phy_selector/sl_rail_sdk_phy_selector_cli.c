@@ -130,8 +130,8 @@ void cli_get_phy_list(sl_cli_command_arg_t *arguments)
             app_log_info("Phy index:%d with stackInfo: WISUN\n", i);
           }
           break;
-        case BTC:
-          app_log_info("Phy index:%d with stackInfo: BTC\n", i);
+        case BPSK:
+          app_log_info("Phy index:%d with stackInfo: BPSK\n", i);
           break;
         case LONGRANGE:
           app_log_info("Phy index:%d with stackInfo: LONGRANGE\n", i);

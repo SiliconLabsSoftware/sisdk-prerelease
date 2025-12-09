@@ -229,7 +229,7 @@ static uint8_t *start_of_packet = &rx_buffer[0];
 /// App_name used in LCD functions
 static uint8_t app_name[7] = "Switch";
 // Increase value if packet has received, decrease after process it
-static uint8_t packet_received = 0;
+static volatile bool packet_received = false;
 // It shows if there was a transition between the state machine states
 static bool state_changed = true;
 // Light bulb toggle required from PB0 button push
@@ -280,9 +280,7 @@ SL_CODE_RAM void sl_rail_util_on_event(sl_rail_handle_t rail_handle, sl_rail_eve
     if (events & SL_RAIL_EVENT_RX_PACKET_RECEIVED) {
       // Keep the packet in the radio buffer, download it later at the state machine
       sl_rail_hold_rx_packet(rail_handle);
-      CORE_ATOMIC_SECTION(
-        packet_received++;
-        )
+      packet_received = true;
     } else {
       // Handle Rx error
       current_rail_err |= (events & SL_RAIL_EVENTS_RX_COMPLETION);
@@ -346,10 +344,8 @@ static void handle_scan_state(sl_rail_handle_t rail_handle)
     state_changed = false;
   }
 
-  if (packet_received != 0) {
-    CORE_ATOMIC_SECTION(
-      packet_received--;
-      )
+  if (packet_received) {
+    packet_received = false;
     save_received_packet(rail_handle);
     // Get the highest Light node based on the  Received Signal Strength Indicator
     update_light_RSSI();
@@ -392,10 +388,8 @@ static void handle_linked_state(sl_rail_handle_t rail_handle)
     state_changed = false;
   }
   // If there is any received message, process it
-  if (packet_received != 0) {
-    CORE_ATOMIC_SECTION(
-      packet_received--;
-      )
+  if (packet_received) {
+    packet_received = false;
     save_received_packet(rail_handle);
     get_light_state_from_rx_fifo();
     check_paired_state();
@@ -404,11 +398,11 @@ static void handle_linked_state(sl_rail_handle_t rail_handle)
       cli_switch_side_light_bulb_toggle();
       // If not, but according to the incoming message,
       // light bulb should toggle
-    } else if (light_module.light_state != get_light_mode(rx_buffer)) {
+    } else if (light_module.light_state != get_light_mode(start_of_packet)) {
       cli_light_side_light_bulb_toggle();
     }
     button_was_pushed = false;
-    light_module.light_state = get_light_mode(rx_buffer);
+    light_module.light_state = get_light_mode(start_of_packet);
     display_all_information();
   }
 
@@ -548,22 +542,22 @@ static void save_received_packet(sl_rail_handle_t rail_handle)
 {
   sl_rail_rx_packet_handle_t rx_packet_handle;
   rx_packet_handle = sl_rail_get_rx_packet_info(rail_handle, SL_RAIL_RX_PACKET_HANDLE_OLDEST_COMPLETE, &packet_info);
-  if (rx_packet_handle == SL_RAIL_RX_PACKET_HANDLE_INVALID) {
-    app_log_error("sl_rail_get_rx_packet_info() error: SL_RAIL_RX_PACKET_HANDLE_INVALID\n");
-  }
-  sl_rail_get_rx_packet_details(rail_handle, SL_RAIL_RX_PACKET_HANDLE_OLDEST_COMPLETE, &rxPacketDetails);
-  if (packet_info.packet_bytes <= SL_RAIL_SDK_RX_FIFO_SIZE) {
-    uint16_t packet_size = unpack_packet(rail_handle, rx_buffer, &packet_info, &start_of_packet);
-    if (packet_size == 0) {
-      app_log_warning("Packet size is:%d", packet_size);
+  while (rx_packet_handle != SL_RAIL_RX_PACKET_HANDLE_INVALID) {
+    sl_rail_get_rx_packet_details(rail_handle, SL_RAIL_RX_PACKET_HANDLE_OLDEST_COMPLETE, &rxPacketDetails);
+    if (packet_info.packet_bytes <= SL_RAIL_SDK_RX_FIFO_SIZE) {
+      uint16_t packet_size = unpack_packet(rail_handle, rx_buffer, &packet_info, &start_of_packet);
+      if (packet_size == 0) {
+        app_log_warning("Packet size is:%d", packet_size);
+      }
     }
-  }
-  rail_status = sl_rail_release_rx_packet(rail_handle, SL_RAIL_RX_PACKET_HANDLE_OLDEST_COMPLETE);
-  if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
-    app_log_warning("sl_rail_release_rx_packet() result: %lu\n", rail_status);
-  }
-  if (packet_info.packet_bytes <= SL_RAIL_SDK_RX_FIFO_SIZE) {
-    light_module.light_mode = get_light_response_type(rx_buffer);
+    rail_status = sl_rail_release_rx_packet(rail_handle, SL_RAIL_RX_PACKET_HANDLE_OLDEST_COMPLETE);
+    if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
+      app_log_warning("sl_rail_release_rx_packet() result: %lu\n", rail_status);
+    }
+    if (packet_info.packet_bytes <= SL_RAIL_SDK_RX_FIFO_SIZE) {
+      light_module.light_mode = get_light_response_type(start_of_packet);
+    }
+    rx_packet_handle = sl_rail_get_rx_packet_info(rail_handle, SL_RAIL_RX_PACKET_HANDLE_OLDEST_COMPLETE, &packet_info);
   }
 }
 

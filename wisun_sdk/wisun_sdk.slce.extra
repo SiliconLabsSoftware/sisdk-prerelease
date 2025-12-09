@@ -92,8 +92,7 @@ extra_files:
   - app/wisun/documentation/release-highlights.txt
   - app/wisun/esf.properties
   - app/wisun/upgrade.slcu
-  - app/wisun/wisun_evaluation_templates.xml
-  - app/wisun/wisun_production_templates.xml
+  - app/wisun/wisun_sdk_sample_app_templates.xml
 git_extra_files:
   - app/wisun/.gitattributes
   - app/wisun/.gitignore

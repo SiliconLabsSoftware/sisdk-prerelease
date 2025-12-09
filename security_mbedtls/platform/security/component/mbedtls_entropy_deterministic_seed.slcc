@@ -28,5 +28,5 @@ template_contribution:
   value: MBEDTLS_PLATFORM_STD_NV_SEED_WRITE sli_nv_seed_write
 metadata:
   sbom:
-    license: Zlib
+    reference: Zlib
 root_path: security_mbedtls/platform/security

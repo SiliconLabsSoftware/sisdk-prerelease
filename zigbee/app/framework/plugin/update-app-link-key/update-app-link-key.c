@@ -61,6 +61,7 @@ void sl_zigbee_af_update_app_link_key_zigbee_key_establishment_cb(sl_802154_long
     switch (status) {
       case SL_ZIGBEE_VERIFY_LINK_KEY_SUCCESS:
         sl_zigbee_af_core_print(" New key established:");
+      // fall through
       case SL_ZIGBEE_APP_LINK_KEY_ESTABLISHED: // not an error condition. Should be followed by SL_ZIGBEE_VERIFY_LINK_KEY_SUCCESS
       case SL_ZIGBEE_PARTNER_KEY_UPDATE_TIMEOUT:
       case SL_ZIGBEE_FAILED_GET_AUTH_SECURITY:

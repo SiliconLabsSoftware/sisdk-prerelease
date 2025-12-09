@@ -57,15 +57,15 @@ extern "C" {
 /**
  * @deprecated use ZW_TX_POWER_100_DDBM instead
  */
-#define ZWAVE_TX_POWER_10DBM  ZW_TX_POWER_100_DDBM
+#define ZW_TX_POWER_10DBM  ZW_TX_POWER_100_DDBM
 /**
  * @deprecated use ZW_TX_POWER_140_DDBM instead
  */
-#define ZWAVE_TX_POWER_14DBM  ZW_TX_POWER_140_DDBM
+#define ZW_TX_POWER_14DBM  ZW_TX_POWER_140_DDBM
 /**
  * @deprecated use ZW_TX_POWER_200_DDBM instead
  */
-#define ZWAVE_TX_POWER_20DBM  ZW_TX_POWER_200_DDBM
+#define ZW_TX_POWER_20DBM  ZW_TX_POWER_200_DDBM
 
 #define ZPAL_RADIO_STAY_AWAKE_ALWAYS UINT32_MAX
 

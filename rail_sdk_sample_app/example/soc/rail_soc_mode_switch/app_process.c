@@ -412,7 +412,7 @@ static void handle_state_packet_sent(sl_rail_handle_t rail_handle)
   if (ms_state == MS_SENDING_MS_END_PACKET) {
     rail_status = return_to_base_channel();
     if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
-      app_log_warning("ERROR return_to_base_channel: %d\n",
+      app_log_warning("ERROR return_to_base_channel: %lu\n",
                       rail_status);
     }
   }
@@ -472,7 +472,7 @@ static void handle_state_calibration_error(sl_rail_handle_t rail_handle)
 
   calibration_status_buff = calibration_status;
   app_log_error("Radio Calibration Error occurred\nEvents: 0x%llX\n"
-                "sl_rail_calibrate() result: %d\n",
+                "sl_rail_calibrate() result: %lu\n",
                 error_code,
                 calibration_status_buff);
   state = S_IDLE;

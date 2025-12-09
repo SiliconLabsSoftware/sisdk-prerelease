@@ -8,4 +8,5 @@ label=wisun_ncp_app
 description=Wi-SUN NCP Application
 
 # List of relative file paths to template xml files in this extension
-prop.file.templatesFile=wisun_ncp_templates.xml
+prop.file.templatesFile=wisun_ncp_app_templates.xml
+prop.file.demosFile=wisun_ncp_app_demos.xml

@@ -71,6 +71,8 @@ static bool enabled = AUTO_START_BOOLEAN;
 
 #define RECEIVER_ON_WHEN_IDLE 0x08
 
+#define NODE_DESCRIPTOR_RESPONSE_CAPABILITY_OFFSET          6
+#define NODE_DESCRIPTOR_RESPONSE_SERVER_MASK_OFFSET         12
 // Bit mask in Node Descriptor response signifying which bits convey the
 // compliance revision (bits 9-15)
 #define SERVER_MASK_STACK_COMPLIANCE_REVISION_MASK          0xFE00
@@ -142,6 +144,40 @@ static void scheduleEvent(bool withDelay)
   }
 }
 
+sl_status_t add_device_to_device_database(sl_802154_long_addr_t eui, uint8_t macCapabilities)
+{
+  sl_status_t status = sl_zigbee_af_device_database_add(eui, macCapabilities);
+  if (status == SL_STATUS_FULL) {
+    sl_zigbee_af_core_print("%s: WARNING: Device Database at maximum capacity, cannot add device", PLUGIN_NAME);
+  } else if (status == SL_STATUS_ALREADY_EXISTS) {
+    debugPrintln("%s: %02X%02X%02X%02X%02X%02X%02X%02X already registered\n",
+      PLUGIN_NAME,
+      eui[0], eui[1], eui[2], eui[3], eui[4], eui[5], eui[6], eui[7]);
+  } else {
+    const sl_zigbee_af_device_info_t* device = sl_zigbee_af_device_database_find_device_by_eui64(eui);
+    if (device && device->status == SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_NEW) {
+      sl_zigbee_af_core_print("%s added device to database: ", PLUGIN_NAME);
+      sl_zigbee_af_print_big_endian_eui64(eui);
+      sl_zigbee_af_core_println(", capabilities: 0x%02X", device->capabilities);
+      sl_zigbee_af_device_database_set_status(device->eui64, SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_FIND_STACK_REVISION);
+      gNodeDescriptorAttempts = 0;
+      scheduleEvent(WITH_DELAY);
+    }
+  }
+  return status;
+}
+
+void sli_zigbee_af_device_query_service_key_establishment_cb(sl_802154_long_addr_t partner,
+                                                             sl_zigbee_key_status_t key_status)
+{
+  // We act only when a key is established. Intermediate states are ignored.
+  if (key_status != SL_ZIGBEE_TC_REQUESTER_VERIFY_KEY_SUCCESS) {
+    return;
+  }
+
+  (void)add_device_to_device_database(partner, 0xFF);  // Node Descriptor response will update capabilities
+}
+
 bool sli_zigbee_af_device_query_pre_zdo_message_received(sl_802154_short_addr_t sender,
                                                          sl_zigbee_aps_frame_t* apsFrame,
                                                          uint8_t* message,
@@ -153,6 +189,7 @@ bool sli_zigbee_af_device_query_pre_zdo_message_received(sl_802154_short_addr_t 
   const sl_zigbee_af_device_info_t *device;
   uint16_t serverMask;
   uint8_t stackRevision;
+  uint8_t capabilities;
 
   if (!enabled) {
     return false;
@@ -160,26 +197,8 @@ bool sli_zigbee_af_device_query_pre_zdo_message_received(sl_802154_short_addr_t 
 
   if (apsFrame->clusterId == END_DEVICE_ANNOUNCE) {
     memmove(tempEui64, &(message[DEVICE_ANNOUNCE_EUI64_OFFSET]), EUI64_SIZE);
-    // If the device already exists, this call won't overwrite it and will
-    // leave its status alone.  Maybe it rejoined and we already know about,
-    // in which case we won't bother re-interrogating it.
-    device = sl_zigbee_af_device_database_add(tempEui64,
-                                              message[DEVICE_ANNOUNCE_CAPABILITIES_OFFSET]);
-    if (device == NULL) {
-      sl_zigbee_af_core_print("Error: %s failed to add device to database: ",
-                              PLUGIN_NAME);
-      sl_zigbee_af_print_big_endian_eui64(tempEui64);
-      sl_zigbee_af_core_println("");
-    } else {
-      if (device->status == SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_NEW) {
-        sl_zigbee_af_core_print("%s added device to database: ", PLUGIN_NAME);
-        sl_zigbee_af_print_big_endian_eui64(tempEui64);
-        sl_zigbee_af_core_println(", capabilities: 0x%02X", device->capabilities);
-        scheduleEvent(WITH_DELAY);
-      }
-    }
-
-    // returning true here will break the ias-zone-client.
+    (void)add_device_to_device_database(tempEui64, message[DEVICE_ANNOUNCE_CAPABILITIES_OFFSET]);
+    // returning true here will break the iaszoneclient.
     return false;
   } else if (apsFrame->clusterId == NODE_DESCRIPTOR_RESPONSE) {
     device = sl_zigbee_af_device_database_find_device_by_eui64(currentEui64);
@@ -188,7 +207,8 @@ bool sli_zigbee_af_device_query_pre_zdo_message_received(sl_802154_short_addr_t 
     if (device
         && (currentNodeId == sender)
         && (SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_FIND_STACK_REVISION == device->status)) {
-      serverMask = message[12] | (message[13] << 8);
+      capabilities = message[NODE_DESCRIPTOR_RESPONSE_CAPABILITY_OFFSET];
+      serverMask = message[NODE_DESCRIPTOR_RESPONSE_SERVER_MASK_OFFSET] | (message[NODE_DESCRIPTOR_RESPONSE_SERVER_MASK_OFFSET + 1] << 8);
       serverMask &= SERVER_MASK_STACK_COMPLIANCE_REVISION_MASK;
       stackRevision = (serverMask
                        >> SERVER_MASK_STACK_COMPLIANCE_REVISION_BIT_POSITION);
@@ -198,13 +218,11 @@ bool sli_zigbee_af_device_query_pre_zdo_message_received(sl_802154_short_addr_t 
                    currentNodeId);
 
       sli_zigbee_af_device_database_update_node_stack_revision(currentEui64,
-                                                               stackRevision);
+                                                               stackRevision,
+                                                               capabilities);
 
-      // This is the last state - we're done
-      sl_zigbee_af_device_database_set_status(currentEui64,
-                                              SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_DONE);
+      sl_zigbee_af_device_database_set_status(device->eui64, SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_FIND_ENDPOINTS);
       scheduleEvent(WITH_DELAY);
-      clearCurrentDevice();
     }
   }
   return false;
@@ -243,7 +261,8 @@ static void serviceDiscoveryCallback(const sl_zigbee_af_service_discovery_result
     return;
   } else if (result->zdoRequestClusterId == NETWORK_ADDRESS_REQUEST) {
     currentNodeId = result->matchAddress;
-    sl_zigbee_af_device_database_set_status(device->eui64, SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_FIND_ENDPOINTS);
+    sl_zigbee_af_device_database_set_status(device->eui64, SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_FIND_STACK_REVISION);
+    gNodeDescriptorAttempts = 0;
     scheduleEvent(RIGHT_NOW);
   } else if (result->zdoRequestClusterId == ACTIVE_ENDPOINTS_REQUEST) {
     const sl_zigbee_af_endpoint_list_t* listStruct = (const sl_zigbee_af_endpoint_list_t*)(result->responseData);
@@ -299,9 +318,10 @@ static void sendSimpleDescriptorRequest(const sl_zigbee_af_device_info_t* device
   uint8_t endpoint = sl_zigbee_af_device_database_get_device_endpoint_from_index(device->eui64, currentEndpointIndex);
   if (endpoint == 0xFF) {
     sl_zigbee_af_core_println("%s All endpoints discovered for 0x%04X", PLUGIN_NAME, currentNodeId);
-    sl_zigbee_af_device_database_set_status(device->eui64,
-                                            SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_FIND_STACK_REVISION);
-    gNodeDescriptorAttempts = 0;
+    // This is the last state - we're done
+    sl_zigbee_af_device_database_set_status(currentEui64,
+                                            SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_DONE);
+    clearCurrentDevice();
     scheduleEvent(RIGHT_NOW);
     return;
   }
@@ -402,7 +422,7 @@ static void myEventHandler(sl_zigbee_af_event_t * event)
   }
 
   // Although we could consult our local tables for addresses, we perform a broadcast
-  // lookup here to insure that we have a current source route back to the destination.
+  // lookup here to ensure that we have a current source route back to the destination.
   // The target of the discovery will unicast the result, along with a route record.
   if (currentNodeId == SL_ZIGBEE_NULL_NODE_ID) {
     debugPrint("%s initiating node ID discovery for: ", PLUGIN_NAME);
@@ -421,16 +441,16 @@ static void myEventHandler(sl_zigbee_af_event_t * event)
 
   switch (device->status) {
     case SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_NEW:
+    case SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_FIND_STACK_REVISION:
+      sendNodeDescriptorRequest(device);
+      break;
+
     case SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_FIND_ENDPOINTS:
       sendActiveEndpointRequest(device);
       break;
 
     case SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_FIND_CLUSTERS:
       sendSimpleDescriptorRequest(device);
-      break;
-
-    case SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_FIND_STACK_REVISION:
-      sendNodeDescriptorRequest(device);
       break;
 
     default:

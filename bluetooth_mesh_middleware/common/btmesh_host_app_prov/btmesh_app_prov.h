@@ -31,6 +31,11 @@
 #ifndef BTMESH_APP_PROV_H
 #define BTMESH_APP_PROV_H
 
+/***********************************************************************************************//**
+ * @addtogroup btmesh_host_app_prov
+ * @{
+ **************************************************************************************************/
+
 #include <stdint.h>
 #include <getopt.h>
 #include "sl_status.h"
@@ -262,4 +267,5 @@ bool btmesh_app_prov_get_cbp_status(void);
 };
 #endif
 
+/** @} (end addtogroup btmesh_host_app_prov) */
 #endif // BTMESH_APP_PROV_H

@@ -74,6 +74,10 @@
 // <i> If enabled, RTT Logger CLI functions are available
 #define SL_WISUN_RTT_LOGGER_CLI_ENABLED           1
 
+// <q SL_WISUN_BR_AGENT_SERVICE_CLI_ENABLED> Enable Border Router Agent Service component specific CLI functions
+// <i> If enabled, Border Router Agent Service CLI functions are available
+#define SL_WISUN_BR_AGENT_SERVICE_CLI_ENABLED     1
+
 // <q SL_WISUN_TRACE_LEVEL_CONTROL_CLI_ENABLED> Enable Wi-SUN trace level control specific CLI functions
 // <i> If enabled, trace level control CLI functions are available
 #define SL_WISUN_TRACE_LEVEL_CONTROL_CLI_ENABLED  0

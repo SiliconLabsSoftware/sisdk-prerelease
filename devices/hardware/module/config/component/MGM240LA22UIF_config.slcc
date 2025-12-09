@@ -42,3 +42,8 @@
       file_id: rail_util_pa_config
       vendor: silabs
     path: MGM240LA22UIF/sl_rail_util_pa_config.h
+  - override:
+      component: sl_rail_util_pa
+      file_id: sl_rail_util_pa_config
+      vendor: silabs
+    path: MGM240LA22UIF/sl_rail_util_pa_config.h

@@ -8,4 +8,5 @@ label=wisun_soc_cli_app
 description=Wi-SUN CLI Application
 
 # List of relative file paths to template xml files in this extension
-prop.file.templatesFile=wisun_cli_templates.xml
+prop.file.templatesFile=wisun_cli_app_templates.xml
+prop.file.demosFile=wisun_cli_app_demos.xml

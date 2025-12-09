@@ -31,6 +31,11 @@
 #ifndef BTMESH_APP_PROV_UI_H
 #define BTMESH_APP_PROV_UI_H
 
+/***********************************************************************************************//**
+ * @addtogroup btmesh_host_app_prov_ui
+ * @{
+ **************************************************************************************************/
+
 #include "sl_status.h"
 
 #ifdef __cplusplus
@@ -100,4 +105,5 @@ bool btmesh_app_prov_ui_get_input_buffer(char **ui_input_buffer);
 };
 #endif
 
+/** @} (end addtogroup btmesh_host_app_prov_ui) */
 #endif // BTMESH_APP_PROV_UI_H

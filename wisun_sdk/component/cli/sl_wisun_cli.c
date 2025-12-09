@@ -56,6 +56,10 @@
 #if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
 #include "border_router/sl_wisun_br_api.h"
 #include "sl_wisun_app_setting_br.h"
+  #if defined(SL_CATALOG_WISUN_BR_AGENT_SERVICE_PRESENT) \
+      && SL_WISUN_BR_AGENT_SERVICE_CLI_ENABLED
+  #include "sl_wisun_br_agent_cli.h"
+  #endif
 #else
 #include "sl_wisun_app_setting.h"
 #endif
@@ -279,7 +283,6 @@ typedef struct sl_wisun_cli_handler_property {
 static sl_status_t _load_common_params_from_phy_cfg(void);
 
 #if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
-#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
 /**************************************************************************//**
  * @brief Store CLI common PHY parameters to PHY config
  * @details Synchronization is required because of common parameters,
@@ -287,7 +290,6 @@ static sl_status_t _load_common_params_from_phy_cfg(void);
  * @return sl_status_t SL_STATUS_OK on success, SL_STATUS_FAIL otherwise
  *****************************************************************************/
 static sl_status_t _store_common_params_to_phy_cfg(void);
-#endif
 #endif
 
 #if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
@@ -1263,6 +1265,23 @@ static sl_wisun_cli_handler_property_t _wisun_app_cli_hnd_prop[] = {
     .cli_handler_fnc = &app_async_request
   },
 #endif
+#if defined(SL_CATALOG_WISUN_BR_AGENT_SERVICE_PRESENT) \
+  && SL_WISUN_BR_AGENT_SERVICE_CLI_ENABLED
+  {
+    .cli_group = "wisun",
+    .cli_group_shortcut = "w",
+    .cli_command = "set_br_agent_remote_addr",
+    .cli_command_shortcut = "sbra",
+    .cli_handler_fnc = &app_set_br_agent_remote_address
+  },
+  {
+    .cli_group = "wisun",
+    .cli_group_shortcut = "w",
+    .cli_command = "get_br_agent_remote_addr",
+    .cli_command_shortcut = "gbra",
+    .cli_handler_fnc = &app_get_br_agent_remote_address
+  },
+#endif
   {
     .cli_group = "N/A",
     .cli_group_shortcut = "N/A",
@@ -2177,11 +2196,12 @@ static void _app_start(void)
 static sl_status_t _load_common_params_from_phy_cfg(void)
 {
   static sl_wisun_phy_config_t phy_cfg = { 0U };
-
+#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
   if (!app_wisun_setting_is_notified(APP_SETTING_NOTIFICATION_SET_PHY_CFG,
                                      APP_SETTING_DEFAULT_SUBSCRIPT_CH)) {
     return SL_STATUS_OK;
   }
+#endif
 
   (void) app_wisun_setting_get_phy(&phy_cfg);
 
@@ -2222,7 +2242,6 @@ static sl_status_t _load_common_params_from_phy_cfg(void)
 }
 
 #if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
-#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
 static sl_status_t _store_common_params_to_phy_cfg(void)
 {
   static sl_wisun_phy_config_t phy_cfg = { 0U };
@@ -2263,7 +2282,6 @@ static sl_status_t _store_common_params_to_phy_cfg(void)
 
   return SL_STATUS_OK;
 }
-#endif
 #endif
 
 #if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
@@ -2623,6 +2641,10 @@ static sl_status_t _app_cli_set_phy(const char *value_str,
   } else {
     return SL_STATUS_FAIL;
   }
+
+#if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
+  _store_common_params_to_phy_cfg();
+#endif
 
   return SL_STATUS_OK;
 }

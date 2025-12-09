@@ -49,7 +49,8 @@ typedef enum {
   S_GET_POWER_LEVEL, //!< Print out the power level of the radio
   S_PERIODIC_RX,     //!< Periodic RX state
   S_PERIODIC_TX,     //!< Periodic TX state
-  S_PACKET_RECEIVED  //!< Packet print out state
+  S_PACKET_RECEIVED, //!< Packet print out state
+  S_RX_ERROR         //!< RX error state
 } state_t;
 
 // -----------------------------------------------------------------------------
@@ -70,9 +71,11 @@ extern volatile uint32_t rx_on_period;
 /// Schedule state first run
 extern volatile bool init_needed;
 
+/// Periodic RX flag
+extern volatile bool periodic_receive;
 /// Schedule TX/RX flags to not run again accidentally
 extern volatile bool packet_sending;
-extern volatile bool rx_ended;
+extern volatile bool periodic_rx_ended;
 // -----------------------------------------------------------------------------
 //                          Public Function Declarations
 // -----------------------------------------------------------------------------

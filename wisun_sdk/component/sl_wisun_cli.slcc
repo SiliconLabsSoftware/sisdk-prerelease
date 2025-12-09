@@ -93,6 +93,13 @@ include:
     - "sl_wisun_collector"
     unless:
     - "sl_wisun_coap"
+  - path: "sl_wisun_br_agent_cli.h"
+    condition:
+    - "cli"
+    - "sl_wisun_app_core"
+    - "sl_wisun_app_setting"
+    - "wisun_br_stack"
+    - "sl_wisun_br_agent_service"
 
 source:
 - path: "sl_wisun_cli.c"
@@ -165,6 +172,13 @@ source:
   condition:
   - "cli"
   - "sl_wisun_cli_util"
+- path: "sl_wisun_br_agent_cli.c"
+  condition:
+  - "cli"
+  - "sl_wisun_app_core"
+  - "sl_wisun_app_setting"
+  - "wisun_br_stack"
+  - "sl_wisun_br_agent_service"
 
 config_file:
 - path: "config/sl_wisun_cli_config.h"
@@ -260,6 +274,39 @@ template_contribution:
   - "sl_wisun_app_core"
   - "sl_wisun_app_setting"
   - "wisun_br_stack"
+
+- name: "cli_command"
+  value:
+    group: "wisun"
+    name: "set_br_agent_remote_addr"
+    handler: "app_cli_handler"
+    help: "Set the border router agent remote address"
+    argument:
+    - type: string
+      help: "Remote address"
+    shortcuts:
+    - name: "sbra"
+  condition:
+  - "cli"
+  - "sl_wisun_app_core"
+  - "sl_wisun_app_setting"
+  - "wisun_br_stack"
+  - "sl_wisun_br_agent_service"
+
+- name: "cli_command"
+  value:
+    group: "wisun"
+    name: "get_br_agent_remote_addr"
+    handler: "app_cli_handler"
+    help: "Get the border router agent remote address"
+    shortcuts:
+    - name: "gbra"
+  condition:
+  - "cli"
+  - "sl_wisun_app_core"
+  - "sl_wisun_app_setting"
+  - "wisun_br_stack"
+  - "sl_wisun_br_agent_service"
 
 - name: "cli_command"
   value:

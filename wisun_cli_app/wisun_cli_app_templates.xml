@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='ASCII'?>
+<?xml version="1.0" encoding="ASCII"?>
 <model:MDescriptors xmlns:model="http://www.silabs.com/ss/Studio.ecore">
   <descriptors name="wisun_soc_brcli" label="Wi-SUN - SoC Border Router" description="This demo is an out-of-the-box Wi-SUN border router application. It provides a command-line interface to control basic configurations.">
     <properties key="namespace" value="template.uc"/>

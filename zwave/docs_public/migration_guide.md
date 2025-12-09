@@ -22,8 +22,15 @@ APIs of this new module are:
 
 ## TxPower type and definitions clarification
 Some type and definitions have been renamed to avoid confusion:
-pal_tx_power_t > zpal_tx_power_decidbm_t
-ZW_TX_POWER_xxDBM  > ZW_TX_POWER_xx0DDBM (10, 14 & 20)
+
+| Old name            | New name                  |
+|---------------------|---------------------------|
+| `zpal_tx_power_t`   | `zpal_tx_power_decidbm_t` |
+| `ZW_TX_POWER_10DBM` | `ZW_TX_POWER_100_DDBM`    |
+| `ZW_TX_POWER_14DBM` | `ZW_TX_POWER_140_DDBM`    |
+| `ZW_TX_POWER_20DBM` | `ZW_TX_POWER_200_DDBM`    |
+
+If your application uses these definitions, you need to replace them with the new names.
 
 
 # 7.24.1 {#migrate-section-7-24-1}

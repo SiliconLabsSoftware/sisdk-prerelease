@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='ASCII'?>
+<?xml version="1.0" encoding="ASCII"?>
 <model:MDescriptors xmlns:model="http://www.silabs.com/ss/Studio.ecore">
   <descriptors name="wisun_ncp" label="Wi-SUN - NCP" description="The Wi-SUN Network Co-Processor (NCP) application provides a complete Wi-SUN network interface implementation for embedded devices. This project implements a Network Co-Processor architecture where the Wi-SUN stack runs on a dedicated radio microcontroller, communicating with a host processor through UART or CPC (Co-Processor Communication) interfaces.">
     <properties key="namespace" value="template.uc"/>

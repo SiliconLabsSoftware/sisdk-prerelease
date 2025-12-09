@@ -220,6 +220,7 @@ ui_hints:
     - path: readme.md
       focus: false
 tag:
+  - hwfilter:device:device_supports_thread
   - hwfilter:device:device_supports_zigbee
   - hwfilter:ram:64k
   - hwfilter:!device:device_is_module
