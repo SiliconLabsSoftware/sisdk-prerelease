@@ -37,6 +37,10 @@
 #include "common/code_utils.hpp"
 #include "common/debug.hpp"
 
+#ifdef SL_CATALOG_KERNEL_PRESENT
+#include "sl_ot_rtos_adaptation.h"
+#endif // SL_CATALOG_KERNEL_PRESENT
+
 /**
  * This function initializes the CLI app.
  *
@@ -147,6 +151,11 @@ static otError instanceSetCommand(void *aContext, uint8_t argc, char *argv[])
     VerifyOrExit(instanceIndex < OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM, error = OT_ERROR_INVALID_ARGS);
 
     sl_ot_set_new_instance_index(instanceIndex);
+
+#ifdef SL_CATALOG_KERNEL_PRESENT
+    // Signal the app task to wake up and process the instance switch in RTOS mode
+    sl_ot_rtos_set_pending_event(SL_OT_RTOS_EVENT_APP);
+#endif // SL_CATALOG_KERNEL_PRESENT
 
 exit:
     return error;

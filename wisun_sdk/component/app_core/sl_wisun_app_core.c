@@ -357,7 +357,6 @@ void sl_wisun_disconnected_event_hnd(sl_wisun_evt_t *evt)
 /* Connection lost event handler */
 void sl_wisun_connection_lost_event_hnd(sl_wisun_evt_t *evt)
 {
-
   printf("[Connection lost, connecting to \"%s\"]\n", _setting.network_name);
 
   _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_NETWORK_CONNECTION_LOST);
@@ -930,7 +929,7 @@ static sl_status_t _app_wisun_regulation_setting(void)
   ret = sl_wisun_set_regulation_tx_thresholds(thresholds.warning_threshold,
                                               thresholds.alert_threshold);
   if (ret == SL_STATUS_OK) {
-    switch(SL_WISUN_APP_CORE_REGULATION) {
+    switch (SL_WISUN_APP_CORE_REGULATION) {
       case SL_WISUN_APP_CORE_REGULATION_ARIB:
         regulation_params = &SL_WISUN_REGULATION_PARAMS_ARIB;
         break;

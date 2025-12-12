@@ -1,19 +1,19 @@
 /*******************************************************************************
-* @file  lwipopts.h
-* @brief
-*******************************************************************************
-* # License
-* <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
-*******************************************************************************
-*
-* The licensor of this software is Silicon Laboratories Inc. Your use of this
-* software is governed by the terms of Silicon Labs Master Software License
-* Agreement (MSLA) available at
-* www.silabs.com/about-us/legal/master-software-license-agreement. This
-* software is distributed to you in Source Code format and is governed by the
-* sections of the MSLA applicable to Source Code.
-*
-******************************************************************************/
+ * @file  lwipopts.h
+ * @brief
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * The licensor of this software is Silicon Laboratories Inc. Your use of this
+ * software is governed by the terms of Silicon Labs Master Software License
+ * Agreement (MSLA) available at
+ * www.silabs.com/about-us/legal/master-software-license-agreement. This
+ * software is distributed to you in Source Code format and is governed by the
+ * sections of the MSLA applicable to Source Code.
+ *
+ ******************************************************************************/
 #ifndef __LWIPOPTS_H__
 #define __LWIPOPTS_H__
 
@@ -21,7 +21,7 @@
    ------------------------------------
    -------------- NO SYS --------------
    ------------------------------------
-*/
+ */
 
 /**
  * NO_SYS==1: Use lwIP without OS-awareness (no thread, semaphores, mutexes or
@@ -65,7 +65,7 @@
    ------------------------------------
    ----------- Core locking -----------
    ------------------------------------
-*/
+ */
 
 /**
  * LWIP_MPU_COMPATIBLE: enables special memory management mechanism
@@ -128,7 +128,7 @@
    ------------------------------------
    ---------- Memory options ----------
    ------------------------------------
-*/
+ */
 
 /**
  * MEM_LIBC_MALLOC==1: Use malloc/free/realloc provided by your C-library
@@ -248,7 +248,7 @@
    ------------------------------------------------
    ---------- Internal Memory Pool Sizes ----------
    ------------------------------------------------
-*/
+ */
 
 /**
  * MEMP_NUM_PBUF: the number of memp struct pbufs (used for PBUF_ROM and PBUF_REF).
@@ -407,7 +407,7 @@
    ---------------------------------
    ---------- ARP options ----------
    ---------------------------------
-*/
+ */
 
 /**
  * LWIP_ARP==1: Enable ARP functionality.
@@ -478,7 +478,7 @@
    --------------------------------
    ---------- IP options ----------
    --------------------------------
-*/
+ */
 
 /**
  * LWIP_IPV4==1: Enable IPv4
@@ -561,7 +561,7 @@
    ----------------------------------
    ---------- ICMP options ----------
    ----------------------------------
-*/
+ */
 
 /**
  * LWIP_ICMP==1: Enable ICMP module inside the IP stack.
@@ -588,7 +588,7 @@
    ---------------------------------
    ---------- RAW options ----------
    ---------------------------------
-*/
+ */
 
 /**
  * LWIP_RAW==1: Enable application layer to hook into the IP layer itself.
@@ -604,7 +604,7 @@
    ----------------------------------
    ---------- DHCP options ----------
    ----------------------------------
-*/
+ */
 
 /**
  * LWIP_DHCP==1: Enable DHCP module.
@@ -625,7 +625,7 @@
  * LWIP_DHCP_GETS_NTP==1: Request NTP servers with discover/select. For each
  * response packet, an callback is called, which has to be provided by the port:
  * void dhcp_set_ntp_servers(u8_t num_ntp_servers, ip_addr_t* ntp_server_addrs);
-*/
+ */
 //#define LWIP_DHCP_GET_NTP_SRV           0
 
 /**
@@ -644,7 +644,7 @@
    ------------------------------------
    ---------- AUTOIP options ----------
    ------------------------------------
-*/
+ */
 
 /**
  * LWIP_AUTOIP==1: Enable AUTOIP module.
@@ -670,7 +670,7 @@
    ----------------------------------
    ----- SNMP MIB2 support      -----
    ----------------------------------
-*/
+ */
 
 /**
  * LWIP_MIB2_CALLBACKS==1: Turn on SNMP MIB2 callbacks.
@@ -683,7 +683,7 @@
    ----------------------------------
    -------- Multicast options -------
    ----------------------------------
-*/
+ */
 
 /**
  * LWIP_MULTICAST_TX_OPTIONS==1: Enable multicast TX support like the socket options
@@ -696,7 +696,7 @@
    ----------------------------------
    ---------- IGMP options ----------
    ----------------------------------
-*/
+ */
 
 /**
  * LWIP_IGMP==1: Turn on IGMP module.
@@ -707,7 +707,7 @@
    ----------------------------------
    ---------- DNS options -----------
    ----------------------------------
-*/
+ */
 
 /**
  * LWIP_DNS==1: Turn on DNS module. UDP must be available for DNS
@@ -761,7 +761,7 @@
    ---------------------------------
    ---------- UDP options ----------
    ---------------------------------
-*/
+ */
 
 /**
  * LWIP_UDP==1: Turn on UDP.
@@ -787,7 +787,7 @@
    ---------------------------------
    ---------- TCP options ----------
    ---------------------------------
-*/
+ */
 
 /**
  * LWIP_TCP==1: Turn on TCP.
@@ -1011,7 +1011,7 @@
    ----------------------------------
    ---------- Pbuf options ----------
    ----------------------------------
-*/
+ */
 
 /**
  * PBUF_LINK_HLEN: the number of bytes that should be allocated for a
@@ -1043,7 +1043,7 @@
    ------------------------------------------------
    ---------- Network Interfaces options ----------
    ------------------------------------------------
-*/
+ */
 
 /**
  * LWIP_SINGLE_NETIF==1: use a single netif only. This is the common case for
@@ -1126,7 +1126,7 @@
    ------------------------------------
    ---------- LOOPIF options ----------
    ------------------------------------
-*/
+ */
 
 /**
  * LWIP_HAVE_LOOPIF==1: Support loop interface (127.0.0.1).
@@ -1171,7 +1171,7 @@
    ------------------------------------
    ---------- Thread options ----------
    ------------------------------------
-*/
+ */
 
 /**
  * TCPIP_THREAD_NAME: The name assigned to the main tcpip thread.
@@ -1275,7 +1275,7 @@
    ----------------------------------------------
    ---------- Sequential layer options ----------
    ----------------------------------------------
-*/
+ */
 
 /**
  * LWIP_NETCONN==1: Enable Netconn API (require to use api_lib.c)
@@ -1313,7 +1313,7 @@
    ------------------------------------
    ---------- Socket options ----------
    ------------------------------------
-*/
+ */
 
 /**
  * LWIP_SOCKET==1: Enable Socket API (require to use sockets.c)
@@ -1429,7 +1429,7 @@
    ----------------------------------------
    ---------- Statistics options ----------
    ----------------------------------------
-*/
+ */
 
 /**
  * LWIP_STATS==1: Enable statistics collection in lwip_stats.
@@ -1533,7 +1533,7 @@
    --------------------------------------
    ---------- Checksum options ----------
    --------------------------------------
-*/
+ */
 
 /**
  * LWIP_CHECKSUM_CTRL_PER_NETIF==1: Checksum generation/check can be enabled/disabled
@@ -1602,7 +1602,7 @@
    ---------------------------------------
    ---------- IPv6 options ---------------
    ---------------------------------------
-*/
+ */
 
 /**
  * LWIP_IPV6==1: Enable IPv6
@@ -1834,7 +1834,7 @@
  * LWIP_DHCP6_GETS_NTP==1: Request NTP servers via DHCPv6. For each
  * response packet, a callback is called, which has to be provided by the port:
  * void dhcp6_set_ntp_servers(u8_t num_ntp_servers, ip_addr_t* ntp_server_addrs);
-*/
+ */
 //#define LWIP_DHCP6_GET_NTP_SRV          0
 
 /**
@@ -1853,7 +1853,7 @@
    ---------------------------------------
    ---------- Hook options ---------------
    ---------------------------------------
-*/
+ */
 
 /**
  * LWIP_HOOK_FILENAME: Custom filename to \#include in files that provide hooks.
@@ -2037,7 +2037,7 @@
  * This function is meant to implement advanced IPv4 routing together with
  * LWIP_HOOK_IP4_ROUTE(). The actual routing/gateway table implementation is
  * not part of lwIP but can e.g. be hidden in the netif's state argument.
-*/
+ */
 //#define LWIP_HOOK_ETHARP_GET_GW(netif, dest)
 
 /**
@@ -2089,7 +2089,7 @@
  * This function is meant to implement advanced IPv6 routing together with
  * LWIP_HOOK_IP6_ROUTE(). The actual routing/gateway table implementation is
  * not part of lwIP but can e.g. be hidden in the netif's state argument.
-*/
+ */
 //#define LWIP_HOOK_ND6_GET_GW(netif, dest)
 
 /**
@@ -2302,7 +2302,7 @@
    ---------------------------------------
    ---------- Debugging options ----------
    ---------------------------------------
-*/
+ */
 
 /**
  * LWIP_DBG_MIN_LEVEL: After masking, the value of the debug is
@@ -2494,7 +2494,7 @@
    --------------------------------------------------
    ---------- Performance tracking options ----------
    --------------------------------------------------
-*/
+ */
 
 /**
  * LWIP_PERF: Enable performance testing for lwIP

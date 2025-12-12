@@ -241,3 +241,8 @@ bool sl_zigbee_tc_rejoins_using_well_known_key_allowed(void)
 {
   return sli_zigbee_stack_tc_rejoins_using_well_known_key_allowed();
 }
+
+void slx_zigbee_change_pan_id_now(sl_802154_pan_id_t panId)
+{
+  slxi_zigbee_stack_change_pan_id_now(panId);
+}

@@ -44,10 +44,10 @@
 #include "named_socket.h"
 #include "host_comm_ringbuf.h"
 #include "host_comm_common.h"
-
-#if defined (CPC) && CPC == 1
+#include "sl_component_catalog.h"
+#ifdef SL_CATALOG_HOST_NCP_CPC_PRESENT
 #include "cpc_bt.h"
-#endif // defined (CPC) && CPC == 1
+#endif // SL_CATALOG_HOST_NCP_CPC_PRESENT
 
 // Default parameter values.
 #define DEFAULT_UART_PORT             ""
@@ -83,13 +83,13 @@ static char tcp_address[MAX_OPT_LEN] = DEFAULT_TCP_ADDRESS;
 
 // AF socket descriptor path
 static char named_socket_target_address[MAX_OPT_LEN];
-#if defined (CPC) && CPC == 1
+#ifdef SL_CATALOG_HOST_NCP_CPC_PRESENT
 // CPCd instance name.
 static char cpc_instance_name[MAX_OPT_LEN] = DEFAULT_CPC_INST_NAME;
 
 // CPC connection
 static bool cpc_conn = false;
-#endif // defined (CPC) && CPC == 1
+#endif // SL_CATALOG_HOST_NCP_CPC_PRESENT
 
 int32_t handle = -1;
 void *handle_ptr;
@@ -146,7 +146,7 @@ sl_status_t host_comm_init(void)
       app_log_critical("Connection to domain socket unsuccessful. Exiting.." APP_LOG_NL);
       exit(EXIT_FAILURE);
     }
-#if defined (CPC) && CPC == 1
+#ifdef SL_CATALOG_HOST_NCP_CPC_PRESENT
   } else if (cpc_conn) {
     handle_ptr = &handle;
     HOST_COMM_API_INITIALIZE_NONBLOCK(cpc_bt_tx, cpc_bt_rx, cpc_bt_rx_peek);
@@ -154,7 +154,7 @@ sl_status_t host_comm_init(void)
       app_log_critical("Connection to CPCd unsuccessful. Exiting.." APP_LOG_NL);
       exit(EXIT_FAILURE);
     }
-#endif // defined (CPC) && CPC == 1
+#endif // SL_CATALOG_HOST_NCP_CPC_PRESENT
   } else {
     return SL_STATUS_INVALID_PARAMETER;
   }
@@ -225,7 +225,7 @@ sl_status_t host_comm_set_option(char option, char *value)
         sc = SL_STATUS_INVALID_PARAMETER;
       }
       break;
-#if defined (CPC) && CPC == 1
+#ifdef SL_CATALOG_HOST_NCP_CPC_PRESENT
     // CPC connection
     case 'C':
       if (!comm_channel_selected) {
@@ -243,7 +243,7 @@ sl_status_t host_comm_set_option(char option, char *value)
       }
 
       break;
-#endif // defined (CPC) && CPC == 1
+#endif // SL_CATALOG_HOST_NCP_CPC_PRESENT
     // Unknown option.
     default:
       sc = SL_STATUS_NOT_FOUND;

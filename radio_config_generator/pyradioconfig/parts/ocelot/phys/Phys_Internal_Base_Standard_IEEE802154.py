@@ -438,6 +438,7 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
         phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        phy.profile_inputs.channel_spacing_hz.value = 2_000_000
 
         # Add 15.4 Packet Configuration
         PHY_COMMON_FRAME_154(phy, model)
@@ -467,10 +468,9 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_inputs.tx_xtal_error_ppm.value = 20
         phy.profile_inputs.preamble_pattern_len.value = 1
 
-        # : Enable/Disable and select static sync threshold
-        # : IF COHDYNAMICSYNCTHRESH = 0, then this sync threshold is used.
-        model.vars.MODEM_SYNCPROPERTIES_STATICSYNCTHRESHEN.value_forced = 0  # Remove static sync threadhold
-        model.vars.MODEM_SYNCPROPERTIES_STATICSYNCTHRESH.value_forced = 0  # Static sync threshold = STATICSYNCTHRESH *2^TIMTHRESHGAIN
+        # Mandatory to enable static threshold to avoid false detection after the sync word
+        model.vars.MODEM_SYNCPROPERTIES_STATICSYNCTHRESHEN.value_forced = 1  # Add static sync threadhold
+        model.vars.MODEM_SYNCPROPERTIES_STATICSYNCTHRESH.value_forced = 40  # Static sync threshold = STATICSYNCTHRESH *2^TIMTHRESHGAIN
 
         """ Channel Power Accumulator Setting """
         # : Average and delay

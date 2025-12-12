@@ -1,5 +1,5 @@
 project_name: bootloader-uart-xmodem-zwave-otw
-package: zwave_bootloader # Do not change, this is part of the bootloader package
+package: zwave_sample_app
 quality: production
 label: Bootloader - NCP UART XMODEM (OTW for Z-Wave Applications)
 description: >
@@ -69,3 +69,4 @@ post_build:
 tag:
   - prebuilt_demo
   - hwfilter:device:device_supports_zwave
+  - toolchain:gcc

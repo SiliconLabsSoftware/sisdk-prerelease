@@ -64,6 +64,10 @@ extra_files:
   # - LICENSE
   - lib/gcc/cortex-m4/libCMSISDSP.a
   - lib/gcc/cortex-m33/libCMSISDSP.a
+  - lib/iar/cortex-m4/libCMSISDSP.a
+  - lib/iar/cortex-m33/libCMSISDSP.a
+  - lib/llvm/cortex-m4/libCMSISDSP.a
+  - lib/llvm/cortex-m33/libCMSISDSP.a
   - MANIFEST.in
   - PrivateInclude/arm_sorting.h
   - PrivateInclude/arm_vec_fft.h

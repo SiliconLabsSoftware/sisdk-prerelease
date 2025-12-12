@@ -6,7 +6,7 @@ category: Bluetooth|Application|Firmware Update
 metadata:
   sbom:
     license: Zlib
-quality: production
+quality: deprecated
 root_path: bluetooth_le_middleware/script
 tag:
 - No-Code

@@ -229,6 +229,11 @@ void sli_zigbee_stack_tc_rejoins_using_well_known_key_allowed_process_ipc_comman
   msg->data.tc_rejoins_using_well_known_key_allowed.response.result = sli_zigbee_stack_tc_rejoins_using_well_known_key_allowed();
 }
 
+void slxi_zigbee_stack_change_pan_id_now_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
+{
+  slxi_zigbee_stack_change_pan_id_now(msg->data.change_pan_id_now.request.panId);
+}
+
 // public entrypoints
 
 sl_status_t sl_zigbee_clear_stored_beacons(void)
@@ -671,4 +676,11 @@ bool sl_zigbee_tc_rejoins_using_well_known_key_allowed(void)
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_tc_rejoins_using_well_known_key_allowed_process_ipc_command, &msg);
 
   return msg.data.tc_rejoins_using_well_known_key_allowed.response.result;
+}
+
+void slx_zigbee_change_pan_id_now(sl_802154_pan_id_t panId)
+{
+  sli_zigbee_ipc_cmd_t msg = { 0, };
+  msg.data.change_pan_id_now.request.panId = panId;
+  sli_zigbee_send_ipc_cmd(slxi_zigbee_stack_change_pan_id_now_process_ipc_command, &msg);
 }

@@ -36,8 +36,6 @@
 #include "sl_wisun_br_agent_cli.h"
 #include "sl_wisun_br_agent_service.h"
 
-
-
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -58,32 +56,32 @@
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
 
-void app_set_br_agent_remote_address(const sl_cli_command_arg_t *arguments)
+void app_set_br_agent_bridge_remote_addr(const sl_cli_command_arg_t *arguments)
 {
   const char *bridge_address = NULL;
-  
+
   bridge_address = sl_cli_get_argument_string(arguments, 0);
   if (bridge_address == NULL) {
-    printf("[Failed: remote address is invalid]\n");
+    printf("[Failed: BR Bridge Agent address is invalid]\n");
     return;
   }
-  if (sl_wisun_br_agent_service_set_remote_addr(bridge_address) != SL_STATUS_OK) {
-    printf("[Failed: unable to set the bridge address: %s]\n", bridge_address);
+  if (sl_wisun_br_agent_service_set_bridge_agent_addr(bridge_address) != SL_STATUS_OK) {
+    printf("[Failed: unable to set the BR Bridge Agent address: %s]\n", bridge_address);
     return;
   }
 
-  printf("[Remote address is set to: %s]\n", bridge_address);
+  printf("[BR Bridge Agent address is set to: %s]\n", bridge_address);
 }
 
-void app_get_br_agent_remote_address(const sl_cli_command_arg_t *arguments)
+void app_get_br_agent_bridge_addr(const sl_cli_command_arg_t *arguments)
 {
   const char *remote_address = NULL;
-  
+
   (void) arguments;
 
-  remote_address = sl_wisun_br_agent_service_get_remote_addr();
+  remote_address = sl_wisun_br_agent_service_get_bridge_agent_addr();
   if (remote_address == NULL) {
-    printf("[Failed: unable to get the remote address]\n");
+    printf("[Failed: unable to get the BR Bridge Agent address]\n");
     return;
   }
   printf("[%s]\n", remote_address);

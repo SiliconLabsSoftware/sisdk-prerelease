@@ -28,7 +28,6 @@ component:
   - id: cpc_secondary
   - id: cpc_security_secondary
   - id: cpc_secondary_recommended_spi_interface
-  - id: toolchain_gcc_warnings_undef
 define:
   - name: DEBUG_EFM
 configuration:

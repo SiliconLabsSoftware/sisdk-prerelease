@@ -426,11 +426,6 @@ sl_status_t sl_zigbee_zigbee_remove_child(sl_802154_short_addr_t childId,
                                               options);
 }
 
-void slx_zigbee_change_pan_id_now(sl_802154_pan_id_t panId)
-{
-  slxi_zigbee_stack_change_pan_id_now(panId);
-}
-
 void slx_zigbee_gu_zdo_toggle_dlk(bool do_dlk,
                                   bool allow_anon_psk)
 {
@@ -441,17 +436,4 @@ void slx_zigbee_gu_zdo_toggle_dlk(bool do_dlk,
 void slx_zigbee_ignore_incoming_aps_acks(bool ignore)
 {
   slxi_zigbee_stack_ignore_incoming_aps_acks(ignore);
-}
-
-bool slx_zigbee_network_send_command(sl_802154_short_addr_t destination,
-                                     uint8_t *commandFrame,
-                                     uint8_t length,
-                                     bool tryToInsertLongDest,
-                                     sl_802154_long_addr_t destinationEui)
-{
-  return slxi_zigbee_stack_network_send_command(destination,
-                                                commandFrame,
-                                                length,
-                                                tryToInsertLongDest,
-                                                destinationEui);
 }

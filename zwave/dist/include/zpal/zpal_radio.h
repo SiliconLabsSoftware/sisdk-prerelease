@@ -763,8 +763,13 @@ void zpal_radio_rf_channel_statistic_store_background_rssi_average(zpal_radio_zw
  * @param id    Pointer to a variable where the identifier for the stay-awake request will be stored.
  *              This identifier is used to revoke the request later. NULL value is accepted, but it won't be
  *              possible to revoke the request later.
- * @return @ref ZPAL_STATUS_OK if the request was successful, @ref ZPAL_STATUS_FAIL otherwise.
+ * @return @ref ZPAL_STATUS_OK if the request was successful, @ref ZPAL_STATUS_INVALID_ARGUMENT if the duration
+ *         exceeds the maximum supported value or another error occurs.
  *
+ * @note **Duration Limit**: Maximum duration is limited by INT32_MAX ticks in the underlying sleeptimer.
+ *       The actual maximum milliseconds depends on the platform's sleeptimer frequency. At the default
+ *       32768 Hz, this is approximately 18.2 hours (1,092,266 ms). Requests exceeding this limit will fail.
+ *       For indefinite duration, use ZPAL_RADIO_STAY_AWAKE_ALWAYS instead.
  * @note **Timer Synchronization**: This API uses platform-specific timers (hardware-based on Silicon Labs).
  *       When combining with OS-level timers (e.g., FreeRTOS ctimer), ensure stay_awake duration exceeds
  *       the OS timeout to account for scheduler latency. Example: if ctimer fires at 240ms, set stay_awake
@@ -789,8 +794,11 @@ zpal_status_t zpal_radio_revoke_stay_awake(zpal_radio_stay_awake_id_t *id);
  *
  * @param id Pointer to the identifier of the stay-awake request to update.
  * @param new_msecs The new length (in millisecs) to request from now.
- * @return @ref ZPAL_STATUS_OK if the request was successful, @ref ZPAL_STATUS_FAIL otherwise.
+ * @return @ref ZPAL_STATUS_OK if the request was successful, @ref ZPAL_STATUS_INVALID_ARGUMENT if the duration
+ *         exceeds the maximum supported value or another error occurs.
  *
+ * @note **Duration Limit**: Maximum duration is limited by INT32_MAX ticks in the underlying sleeptimer.
+ *       See zpal_radio_request_stay_awake() for details.
  * @note This function is equivalent to revoking the previous request and creating a new one.
  */
 zpal_status_t zpal_radio_update_stay_awake(zpal_radio_stay_awake_id_t *id, uint32_t new_msecs);

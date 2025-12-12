@@ -27,7 +27,7 @@
  *           |                                                               |
  *   Request 40min stay-awake                                        Update to 100ms
  *   (OTA_AWAKE_PERIOD_LONG_TERM)                              (OTA_AWAKE_PERIOD_GRACEFUL_OFF)
- *   zpal_radio_request_stay_awake()                           zpal_radio_update_stay_awake()
+ *   zpal_radio_update_stay_awake()                           zpal_radio_update_stay_awake()
  *           |                                                               |
  *           |<-------------- OTA Transfer Process ------------->|           |
  *           |                                                   |           |
@@ -37,7 +37,7 @@
  * @endverbatim
  *
  * - **Initial Request (40 minutes)**: When OTA starts, we request a long stay-awake period
- *   using zpal_radio_request_stay_awake() with OTA_AWAKE_PERIOD_LONG_TERM (40 minutes).
+ *   using zpal_radio_update_stay_awake() with OTA_AWAKE_PERIOD_LONG_TERM (40 minutes).
  *   This ensures the device remains awake during the entire firmware transfer process.
  *
  * - **Final Update (100ms)**: At the end of OTA (success or failure), we update the
@@ -944,7 +944,7 @@ void handleCmdClassFirmwareUpdateMdReqGet(
   }
 
   // Keep awake for a long time, but not forever.
-  zpal_radio_request_stay_awake(OTA_AWAKE_PERIOD_LONG_TERM, &myOta.stay_awake_id);
+  zpal_radio_update_stay_awake(&myOta.stay_awake_id, OTA_AWAKE_PERIOD_LONG_TERM);
   zpal_bootloader_erase_storage_slot();
   initOTAState();
   memcpy( (uint8_t*) &myOta.rxOpt, (uint8_t*)rxOpt, sizeof(RECEIVE_OPTIONS_TYPE_EX));

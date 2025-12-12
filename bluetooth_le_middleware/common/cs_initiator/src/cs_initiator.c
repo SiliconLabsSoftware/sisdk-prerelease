@@ -1356,6 +1356,8 @@ bool cs_ras_client_on_timeout(uint8_t connection,
                       connection,
                       timeout,
                       action);
+  (void)timeout;
+  (void)action;
   on_error(initiator,
            CS_ERROR_EVENT_RAS_CLIENT_REALTIME_RECEIVE_FAILED,
            SL_STATUS_TIMEOUT);

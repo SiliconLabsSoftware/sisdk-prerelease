@@ -269,7 +269,7 @@ static const app_setting_br_t _br_default_settings = {
 static const app_setting_wifi_t _wifi_default_settings = {
   .ssid = SL_WISUN_BR_CONFIG_WIFI_DEFAULT_SSID,
   .passphrase = SL_WISUN_BR_CONFIG_WIFI_DEFAULT_PASSPHRASE
-  .security_type = SL_WISUN_BR_CONFIG_WIFI_DEFAULT_SECURITY_TYPE
+                .security_type = SL_WISUN_BR_CONFIG_WIFI_DEFAULT_SECURITY_TYPE
 };
 #endif
 
@@ -405,10 +405,10 @@ void sl_wisun_regulation_tx_level_hnd(sl_wisun_evt_t *evt)
 void sl_wisun_br_routing_table_update_hnd(sl_wisun_evt_t *evt)
 {
 #if defined(SL_CATALOG_WISUN_BR_AGENT_SERVICE_PRESENT)
-if (evt->evt.br_routing_table_update.event 
-    == SL_WISUN_ROUTING_TABLE_UPDATE_ROUTE_CHANGED) {
+  if (evt->evt.br_routing_table_update.event
+      == SL_WISUN_ROUTING_TABLE_UPDATE_ROUTE_CHANGED) {
     (void) sl_wisun_br_agent_service_send_graph_info();
-}
+  }
 #endif
   printf("[Routing table update: route changed]\n");
   __CHECK_FOR_STATUS(evt->evt.error.status);

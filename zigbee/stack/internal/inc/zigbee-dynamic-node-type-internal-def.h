@@ -22,8 +22,8 @@
 
 // Command Indirection
 
-sl_status_t sli_zigbee_stack_switch_role_router(void);
+sl_status_t slxi_zigbee_stack_switch_role_router(void);
 
-sl_status_t sli_zigbee_stack_switch_role_sleepy_end_device(uint8_t end_device_configuration);
+sl_status_t slxi_zigbee_stack_switch_role_sleepy_end_device(uint8_t end_device_configuration);
 
 #endif // ZIGBEE_DYNAMIC_NODE_TYPE_INTERNAL_DEF_H

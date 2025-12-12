@@ -8,7 +8,7 @@ metadata:
   sbom:
     license: Zlib
 quality: production
-root_path: bluetooth_le_middleware/common/host_bluetooth_connection_config
+root_path: bluetooth_le_middleware/common_host/host_bluetooth_connection_config
 config_file:
 - path: config/sl_bluetooth_connection_config.h
 provides:

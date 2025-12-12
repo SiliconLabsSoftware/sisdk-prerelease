@@ -2,7 +2,7 @@ id: host_ncp
 label: Threaded NCP solution for host projects
 package: bluetooth_le_middleware
 description: >
-  TBD
+  Threaded NCP solution for host projects
 category: Bluetooth|Application|Miscellaneous
 metadata:
   sbom:
@@ -66,13 +66,12 @@ source:
 requires:
 - name: bluetooth_api_ncp_host
 - name: app_timer
+- name: component_catalog
 provides:
 - name: host_ncp
 
 library:
+- system: pthread
 - system: ws2_32
   condition:
   - win32
-toolchain_settings:
-- option: gcc_linker_option
-  value: -lpthread

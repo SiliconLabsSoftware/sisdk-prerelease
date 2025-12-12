@@ -57,7 +57,7 @@
 #include "border_router/sl_wisun_br_api.h"
 #include "sl_wisun_app_setting_br.h"
   #if defined(SL_CATALOG_WISUN_BR_AGENT_SERVICE_PRESENT) \
-      && SL_WISUN_BR_AGENT_SERVICE_CLI_ENABLED
+  && SL_WISUN_BR_AGENT_SERVICE_CLI_ENABLED
   #include "sl_wisun_br_agent_cli.h"
   #endif
 #else
@@ -732,21 +732,21 @@ static app_cli_phy_common_params_t _phy_common_params = { 0U };
 static const app_enum_t _phy_cfg_map[] = {
   // FAN 1.0 parameters
   { APP_CLI_PHY_PARAM_REG_DOMAIN_STR, SL_WISUN_PHY_CONFIG_FAN10 },
-  { APP_CLI_PHY_PARAM_OP_CLASS_STR,   SL_WISUN_PHY_CONFIG_FAN10 },
-  { APP_CLI_PHY_PARAM_OP_MODE_STR,    SL_WISUN_PHY_CONFIG_FAN10 },
+  { APP_CLI_PHY_PARAM_OP_CLASS_STR, SL_WISUN_PHY_CONFIG_FAN10 },
+  { APP_CLI_PHY_PARAM_OP_MODE_STR, SL_WISUN_PHY_CONFIG_FAN10 },
 
   // FAN 1.1 parameters
 #if APP_CLI_ENABLE_FAN11_CONFIG
-  { APP_CLI_PHY_PARAM_REG_DOMAIN_STR,  SL_WISUN_PHY_CONFIG_FAN11 },
-  { APP_CLI_PHY_PARAM_CH_PLAN_ID_STR,  SL_WISUN_PHY_CONFIG_FAN11 },
+  { APP_CLI_PHY_PARAM_REG_DOMAIN_STR, SL_WISUN_PHY_CONFIG_FAN11 },
+  { APP_CLI_PHY_PARAM_CH_PLAN_ID_STR, SL_WISUN_PHY_CONFIG_FAN11 },
   { APP_CLI_PHY_PARAM_PHY_MODE_ID_STR, SL_WISUN_PHY_CONFIG_FAN11 },
 #endif
 
   // Explicit parameters
 #if APP_CLI_ENABLE_EXPLICIT_CONFIG
-  { APP_CLI_PHY_PARAM_CH0_FREQ_STR,    SL_WISUN_PHY_CONFIG_EXPLICIT },
-  { APP_CLI_PHY_PARAM_NUM_OF_CH_STR,   SL_WISUN_PHY_CONFIG_EXPLICIT },
-  { APP_CLI_PHY_PARAM_CH_SPACING_STR,  SL_WISUN_PHY_CONFIG_EXPLICIT },
+  { APP_CLI_PHY_PARAM_CH0_FREQ_STR, SL_WISUN_PHY_CONFIG_EXPLICIT },
+  { APP_CLI_PHY_PARAM_NUM_OF_CH_STR, SL_WISUN_PHY_CONFIG_EXPLICIT },
+  { APP_CLI_PHY_PARAM_CH_SPACING_STR, SL_WISUN_PHY_CONFIG_EXPLICIT },
   { APP_CLI_PHY_PARAM_PHY_MODE_ID_STR, SL_WISUN_PHY_CONFIG_EXPLICIT },
 #endif
   // End list
@@ -759,20 +759,20 @@ static const app_enum_t _phy_cfg_map[] = {
 static const app_enum_t _app_trace_level_type_enum[] =
 {
   { "all", 0xFF },
-  { NULL,     0 }
+  { NULL, 0 }
 };
 
 static const app_enum_t _app_trace_level_enum[] =
 {
-  { "none",    0 },
-  { "error",   1 },
-  { "err",     1 },
+  { "none", 0 },
+  { "error", 1 },
+  { "err", 1 },
   { "warning", 2 },
-  { "warn",    2 },
-  { "info",    3 },
-  { "debug",   4 },
-  { "dbg",     4 },
-  { NULL,      0 }
+  { "warn", 2 },
+  { "info", 3 },
+  { "debug", 4 },
+  { "dbg", 4 },
+  { NULL, 0 }
 };
 #endif
 
@@ -1009,7 +1009,7 @@ static sl_wisun_cli_handler_property_t _wisun_app_cli_hnd_prop[] = {
     .cli_command_shortcut = "cw",
     .cli_handler_fnc = &app_wifi_connect
   },
-    {
+  {
     .cli_group = "wifi",
     .cli_group_shortcut = "wi",
     .cli_command = "disconnect",
@@ -1270,16 +1270,16 @@ static sl_wisun_cli_handler_property_t _wisun_app_cli_hnd_prop[] = {
   {
     .cli_group = "wisun",
     .cli_group_shortcut = "w",
-    .cli_command = "set_br_agent_remote_addr",
+    .cli_command = "set_br_bridge_agent_addr",
     .cli_command_shortcut = "sbra",
-    .cli_handler_fnc = &app_set_br_agent_remote_address
+    .cli_handler_fnc = &app_set_br_agent_bridge_remote_addr
   },
   {
     .cli_group = "wisun",
     .cli_group_shortcut = "w",
-    .cli_command = "get_br_agent_remote_addr",
+    .cli_command = "get_br_bridge_agent_addr",
     .cli_command_shortcut = "gbra",
-    .cli_handler_fnc = &app_get_br_agent_remote_address
+    .cli_handler_fnc = &app_get_br_agent_bridge_addr
   },
 #endif
   {
@@ -2736,7 +2736,7 @@ static sl_status_t _app_set_regulation(const char *value_str,
     }
 
     // sets regulation
-    switch((sl_wisun_regulation_t)value) {
+    switch ((sl_wisun_regulation_t)value) {
       case SL_WISUN_APP_CORE_REGULATION_NONE:
         regulation_params = &SL_WISUN_REGULATION_PARAMS_NONE;
         break;
@@ -3072,11 +3072,11 @@ static sl_status_t _app_cli_get_state(char *value_str,
   }
 
   return app_util_get_string(value_str,
-                            state,
-                            entry->output_enum_list,
-                            false,
-                            false,
-                            value_length);
+                             state,
+                             entry->output_enum_list,
+                             false,
+                             false,
+                             value_length);
 }
 #endif
 

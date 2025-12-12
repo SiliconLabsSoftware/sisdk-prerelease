@@ -289,9 +289,8 @@ tag:
   - hwfilter:!device:device_family_mgm26
   - hwfilter:!device:device_family_mgm27
   - hwfilter:!device:device_family_bgm24
-  - hwfilter:!board:brd4183b
   - hwfilter:!device:device_family_mgm24
-
+  - hwfilter:!board:brd4183b
 
 filter:
   - name: "Wireless Technology"

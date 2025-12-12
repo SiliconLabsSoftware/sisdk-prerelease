@@ -157,6 +157,7 @@ static void sl_rail_util_init_{{ inst | lower }}(void)
   }
   (void) RAIL_ConfigChannels(sl_rail_handle_{{ inst | lower }},
                              channel_config,
+                             (RAIL_RadioConfigChangedCallback_t)(void *)
                              &sli_rail_util_on_channel_config_change);
   status = sl_rail_util_protocol_config(sl_rail_handle_{{ inst | lower }},
                                         SL_RAIL_UTIL_INIT_PROTOCOL_{{ inst | upper }}_DEFAULT);

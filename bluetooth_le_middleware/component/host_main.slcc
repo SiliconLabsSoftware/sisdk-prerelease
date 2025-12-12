@@ -18,7 +18,7 @@ include:
   file_list:
   - path: app_signal.h
 source:
-- path: common/host_main/main.c
+- path: common_host/host_main/main.c
 - path: common_host/app_signal/app_signal_win.c
   condition:
   - win32

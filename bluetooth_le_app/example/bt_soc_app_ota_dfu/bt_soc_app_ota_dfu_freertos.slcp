@@ -93,7 +93,11 @@ post_build:
 tag:
   - companion:bootloader
   - hwfilter:device:device_supports_bluetooth
+  - hwfilter:!device:device_generic_family_efr32xg21
   - hwfilter:!device:device_generic_family_efr32xg22
+  - hwfilter:!device:device_generic_family_efr32xg24
+  - hwfilter:!device:device_generic_family_efr32xg26
+  - hwfilter:!device:device_generic_family_efr32xg28
   - hwfilter:board:simple_button:btn0
   - hwfilter:flash:768k
 

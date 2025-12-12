@@ -118,6 +118,7 @@ typedef struct {
   bool measurement_arrived;
   bool measurement_progress_changed;
   bool read_remote_capabilities;
+  bool security_increased;
   uint8_t number_of_measurements;
 } cs_initiator_instances_t;
 
@@ -139,6 +140,7 @@ static void cs_on_error(uint8_t conn_handle,
                         cs_error_event_t err_evt,
                         sl_status_t sc);
 static sl_status_t get_instance_number(uint8_t conn_handle, uint8_t *instance_num);
+static sl_status_t save_connection(uint8_t conn_handle);
 static void check_cli_values(void);
 static sl_status_t create_new_initiator_instance(uint8_t conn_handle);
 static void delete_initiator_instance(uint8_t conn_handle);
@@ -177,6 +179,7 @@ void app_init(void)
     cs_initiator_instances[i].measurement_arrived = false;
     cs_initiator_instances[i].measurement_progress_changed = false;
     cs_initiator_instances[i].read_remote_capabilities = false;
+    cs_initiator_instances[i].security_increased = false;
     cs_initiator_instances[i].number_of_measurements = 0u;
   }
   security_set_config_flags();
@@ -448,6 +451,20 @@ static sl_status_t get_instance_number(uint8_t conn_handle, uint8_t *instance_nu
 }
 
 /******************************************************************************
+ * Save connection
+ *****************************************************************************/
+static sl_status_t save_connection(uint8_t conn_handle)
+{
+  for (uint8_t i = 0u; i < CS_INITIATOR_MAX_CONNECTIONS; i++) {
+    if (cs_initiator_instances[i].conn_handle == SL_BT_INVALID_CONNECTION_HANDLE) {
+      cs_initiator_instances[i].conn_handle = conn_handle;
+      return SL_STATUS_OK;
+    }
+  }
+  return SL_STATUS_FULL;
+}
+
+/******************************************************************************
  * Extract measurement results
  *****************************************************************************/
 static void cs_on_result(const uint8_t conn_handle,
@@ -637,6 +654,7 @@ static sl_status_t create_new_initiator_instance(uint8_t conn_handle)
 {
   sl_status_t sc;
   cs_intermediate_result_t measurement_progress;
+  log_info(APP_INSTANCE_PREFIX "Creating new initiator instance" NL, conn_handle);
   // Check if we can accept one more reflector connection
   if (num_reflector_connections >= CS_INITIATOR_MAX_CONNECTIONS) {
     log_error(APP_PREFIX "Maximum number of initiator instances (%u) reached, "
@@ -644,18 +662,19 @@ static sl_status_t create_new_initiator_instance(uint8_t conn_handle)
               CS_INITIATOR_MAX_CONNECTIONS);
     return SL_STATUS_FULL;
   }
-  // Store the new initiator instance
-  for (uint32_t i = 0u; i < CS_INITIATOR_MAX_CONNECTIONS; i++) {
-    if (cs_initiator_instances[i].conn_handle == SL_BT_INVALID_CONNECTION_HANDLE) {
-      cs_initiator_instances[i].conn_handle = conn_handle;
-      cs_initiator_instances[i].measurement_cnt = 0u;
-      memset(&cs_initiator_instances[i].measurement_mainmode, 0u, sizeof(cs_measurement_data_t));
-      memset(&cs_initiator_instances[i].measurement_submode, 0u, sizeof(cs_measurement_data_t));
-      memset(&cs_initiator_instances[i].measurement_progress, 0u, sizeof(measurement_progress));
-      num_reflector_connections++;
-      break;
-    }
+  uint8_t i;
+  sc = get_instance_number(conn_handle, &i);
+  if (sc != SL_STATUS_OK) {
+    log_error(APP_PREFIX "Failed to get instance number for new connection! [sc: 0x%lx]" NL,
+              sc);
+    return sc;
   }
+  // Store the new initiator instance
+  cs_initiator_instances[i].measurement_cnt = 0u;
+  memset(&cs_initiator_instances[i].measurement_mainmode, 0u, sizeof(cs_measurement_data_t));
+  memset(&cs_initiator_instances[i].measurement_submode, 0u, sizeof(cs_measurement_data_t));
+  memset(&cs_initiator_instances[i].measurement_progress, 0u, sizeof(measurement_progress));
+  num_reflector_connections++;
 
   sc = cs_initiator_create(conn_handle,
                            &initiator_config,
@@ -774,6 +793,7 @@ static void delete_initiator_instance(uint8_t conn_handle)
       cs_initiator_instances[i].measurement_arrived = false;
       cs_initiator_instances[i].measurement_progress_changed = false;
       cs_initiator_instances[i].read_remote_capabilities = false;
+      cs_initiator_instances[i].security_increased = false;
       num_reflector_connections--;
       break;
     }
@@ -971,15 +991,23 @@ void sl_bt_on_event(sl_bt_msg_t * evt)
       sc = get_instance_number(evt->data.evt_connection_parameters.connection, &instance_num);
       // Initiator instance not created yet
       if (sc != SL_STATUS_OK) {
-        if (evt->data.evt_connection_parameters.security_mode != sl_bt_connection_mode1_level1) {
-          if (!cs_initiator_instances[instance_num].read_remote_capabilities) {
-            sc = sl_bt_cs_read_remote_supported_capabilities(evt->data.evt_connection_parameters.connection);
-            app_assert_status(sc);
-            cs_initiator_instances[instance_num].read_remote_capabilities = true;
-          }
-        } else {
+        break;
+      }
+      if (evt->data.evt_connection_parameters.security_mode != sl_bt_connection_mode1_level1) {
+        if (!cs_initiator_instances[instance_num].read_remote_capabilities) {
+          sc = sl_bt_cs_read_remote_supported_capabilities(evt->data.evt_connection_parameters.connection);
+          app_assert_status(sc);
+          cs_initiator_instances[instance_num].read_remote_capabilities = true;
+          log_info(APP_INSTANCE_PREFIX "Reading capabilities..." NL,
+                   evt->data.evt_connection_parameters.connection);
+        }
+      } else {
+        if (!cs_initiator_instances[instance_num].security_increased) {
+          log_info(APP_INSTANCE_PREFIX "Increasing security..." NL,
+                   evt->data.evt_connection_parameters.connection);
           sc = sl_bt_sm_increase_security(evt->data.evt_connection_parameters.connection);
           app_assert_status(sc);
+          cs_initiator_instances[instance_num].security_increased = true;
         }
       }
       break;
@@ -1061,6 +1089,15 @@ void sl_bt_on_event(sl_bt_msg_t * evt)
       }
       break;
     }
+    // -------------------------------
+    // This event indicates that the BT stack buffer resources were exhausted
+    case sl_bt_evt_system_resource_exhausted_id:
+      log_error(APP_PREFIX "BT stack buffers exhausted, data loss may have occurred! "
+                           "buf_discarded='%u' buf_alloc_fail='%u' heap_alloc_fail='%u'" APP_LOG_NL,
+                evt->data.evt_system_resource_exhausted.num_buffers_discarded,
+                evt->data.evt_system_resource_exhausted.num_buffer_allocation_failures,
+                evt->data.evt_system_resource_exhausted.num_heap_allocation_failures);
+      break;
     default:
       break;
   }
@@ -1091,6 +1128,14 @@ void ble_peer_manager_on_event_initiator(ble_peer_manager_evt_type_t * event)
 
   switch (event->evt_id) {
     case BLE_PEER_MANAGER_ON_CONN_OPENED_CENTRAL:
+      sc = save_connection(event->connection_id);
+      if (sc != SL_STATUS_OK) {
+        log_error(APP_INSTANCE_PREFIX "Error finding a slot for connection: "
+                                      "dropping connection..." NL,
+                  event->connection_id);
+        (void)ble_peer_manager_central_close_connection(event->connection_id);
+        break;
+      }
       address = ble_peer_manager_get_bt_address(event->connection_id);
       log_info(APP_INSTANCE_PREFIX "Connection opened as central with CS Reflector"
                                    " '%02X:%02X:%02X:%02X:%02X:%02X'" NL,
@@ -1103,6 +1148,7 @@ void ble_peer_manager_on_event_initiator(ble_peer_manager_evt_type_t * event)
                address->addr[0]);
       check_cli_values();
       cs_initiator_display_set_measurement_mode(initiator_config.cs_main_mode, rtl_config.algo_mode);
+
       break;
     case BLE_PEER_MANAGER_ON_CONN_CLOSED:
       log_info(APP_INSTANCE_PREFIX "Connection closed" NL, event->connection_id);

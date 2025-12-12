@@ -36,7 +36,7 @@ config_file:
 
 source:
   - path: app.c
-  - path: ../../common_host/app_log/app_log_cli.c
+  - path: ../common/app_log/app_log_cli.c
   - path: ../common/mqtt/mqtt.c
   - path: ../common/aoa_parse/aoa_parse.c
   - path: ../common/aoa_parse/aoa_parse_enum.c
@@ -49,7 +49,7 @@ source:
   - path: ./aoa_loc/aoa_loc.c
 
 include:
-  - path: ../../common_host/app_log
+  - path: ../common/app_log
     file_list:
       - path: app_log_cli.h
   - path: ../common/ncp

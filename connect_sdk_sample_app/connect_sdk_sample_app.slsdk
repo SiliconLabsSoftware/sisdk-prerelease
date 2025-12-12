@@ -5,3 +5,4 @@ label=Connect SDK Sample Applications
 description=Connect SDK Applications
 
 prop.file.templatesFile=connect_sdk_sample_app_templates.xml
+prop.file.docsFile=documentation/slConnect_docContent.xml

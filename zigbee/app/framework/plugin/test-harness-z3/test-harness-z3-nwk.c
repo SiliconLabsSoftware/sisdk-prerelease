@@ -19,6 +19,8 @@
 
 #include "test-harness-z3-core.h"
 #include "test-harness-z3-nwk.h"
+#include "stack/include/message.h"
+#include "stack/include/network-formation.h"
 
 // -----------------------------------------------------------------------------
 // Globals

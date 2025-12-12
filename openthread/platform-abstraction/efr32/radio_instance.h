@@ -81,16 +81,20 @@ bool            sli_ot_radio_instance_is_filter_mask_broadcast_pan(uint8_t aFilt
 #define RADIO_INDEX1_PANID_FILTER_MASK RADIO_GET_FILTER_MASK(2)
 #define RADIO_INDEX2_PANID_FILTER_MASK RADIO_GET_FILTER_MASK(3)
 
-#define RADIO_GET_PANID_FILTER_MASK(filter) \
-    (filter << RADIO_PANID_FILTER_SHIFT) // For use only with RADIO_INDEXx_PANID_FILTER_MASK and not the BCAST
+#define RADIO_GET_PANID_FILTER_MASK(filter)                                                             \
+    (filter                                                                                             \
+     & (RADIO_BCAST_PANID_FILTER_MASK | RADIO_INDEX0_PANID_FILTER_MASK | RADIO_INDEX1_PANID_FILTER_MASK \
+        | RADIO_INDEX2_PANID_FILTER_MASK))
 
 #define RADIO_BCAST_ADDR_FILTER_MASK (RADIO_GET_FILTER_MASK(0) << RADIO_ADDR_FILTER_SHIFT)
 #define RADIO_INDEX0_ADDR_FILTER_MASK (RADIO_GET_FILTER_MASK(1) << RADIO_ADDR_FILTER_SHIFT)
 #define RADIO_INDEX1_ADDR_FILTER_MASK (RADIO_GET_FILTER_MASK(2) << RADIO_ADDR_FILTER_SHIFT)
 #define RADIO_INDEX2_ADDR_FILTER_MASK (RADIO_GET_FILTER_MASK(3) << RADIO_ADDR_FILTER_SHIFT)
 
-#define RADIO_GET_ADDR_FILTER_MASK(filter) \
-    (filter << RADIO_ADDR_FILTER_SHIFT) // For use only with RADIO_INDEXx_ADDR_FILTER_MASK and not the BCAST
+#define RADIO_GET_ADDR_FILTER_MASK(filter)                                                           \
+    (filter                                                                                          \
+     & (RADIO_BCAST_ADDR_FILTER_MASK | RADIO_INDEX0_ADDR_FILTER_MASK | RADIO_INDEX1_ADDR_FILTER_MASK \
+        | RADIO_INDEX2_ADDR_FILTER_MASK))
 
 #define RADIO_BCAST_PANID (0xFFFF)
 

@@ -22,7 +22,7 @@ requires:
   condition:
   - kernel
 recommends:
-- name: bgapi_protocol_libraries_release
+- id: bgapi_protocol_libraries_release
   vendor: silabs
 provides:
 - name: bgapi_protocol

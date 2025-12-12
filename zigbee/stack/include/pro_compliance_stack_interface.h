@@ -221,12 +221,4 @@ sl_status_t sl_zigbee_request_link_key_with_option_encrypt(sl_802154_long_addr_t
 sl_status_t sl_zigbee_send_aps_ack(sl_zigbee_aps_frame_t apsStruct, sl_802154_short_addr_t dest);
 
 void slx_zigbee_ignore_incoming_aps_acks(bool ignore);
-
-bool slx_zigbee_network_send_command(sl_802154_short_addr_t destination,
-                                     uint8_t *commandFrame,
-                                     uint8_t length,
-                                     bool tryToInsertLongDest,
-                                     sl_802154_long_addr_t destinationEui);
-
-void slx_zigbee_change_pan_id_now(sl_802154_pan_id_t panId);
 #endif //PRO_COMPLIANCE_STACK_INTERFACE_H

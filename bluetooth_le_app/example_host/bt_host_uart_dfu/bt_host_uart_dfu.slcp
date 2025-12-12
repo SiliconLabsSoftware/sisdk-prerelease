@@ -1,6 +1,6 @@
 project_name: bt_host_uart_dfu
 package: bluetooth_le_app
-label: Bluetooth - UART DFU
+label: Bluetooth - Host UART DFU
 description: >
   NCP (Network Co-Processor) host example to perform firmware update of
   NCP target devices over UART. It can connect to an NCP target running
@@ -29,14 +29,14 @@ component:
 source:
   - path: app.c
   - path: uart_dfu.c
-  - path: ../../common_host/app_log/app_log_cli.c
+  - path: ../common/app_log/app_log_cli.c
 
 include:
   - path: ./
     file_list:
       - path: app.h
       - path: uart_dfu.h
-  - path: ../../common_host/app_log
+  - path: ../common/app_log
     file_list:
       - path: app_log_cli.h
 

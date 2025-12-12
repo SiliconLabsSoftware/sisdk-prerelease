@@ -1,6 +1,6 @@
 project_name: bt_host_ota_dfu
 package: bluetooth_le_app
-label: Bluetooth - OTA DFU
+label: Bluetooth - Host OTA DFU
 description: >
   OTA DFU utility. This program performs Over The Air (OTA) Device Firmware
   Update (DFU). A path to a Gecko Bootloader (GBL) file and the address of

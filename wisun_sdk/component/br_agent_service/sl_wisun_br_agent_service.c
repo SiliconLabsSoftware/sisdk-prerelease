@@ -226,7 +226,7 @@ static osEventFlagsId_t agent_evt_flags;
 // -----------------------------------------------------------------------------
 void sl_wisun_br_agent_service_init(void)
 {
-   // Create mutex
+  // Create mutex
   _agent_service_mtx = osMutexNew(&_agent_service_mtx_attr);
   EFM_ASSERT(_agent_service_mtx != NULL);
 
@@ -240,7 +240,7 @@ void sl_wisun_br_agent_service_init(void)
   EFM_ASSERT(agent_evt_flags != NULL);
 
   // Init remote address to default value
-  (void) ipaddr_aton(SL_WISUN_BR_AGENT_SERVICE_DEFAULT_REMOTE_ADDR, &_remote_addr);
+  (void) ipaddr_aton(SL_WISUN_BR_BRIDGE_AGENT_DEFAULT_ADDR, &_remote_addr);
 }
 
 sl_status_t sl_wisun_br_agent_service_send_graph_info(void)
@@ -259,8 +259,8 @@ sl_status_t sl_wisun_br_agent_service_send_graph_info(void)
   }
 
   // connect to the server
-  if (netconn_connect(conn, &_remote_addr, 
-                      SL_WISUN_BR_AGENT_SERVICE_REMOTE_HOST_PORT) != ERR_OK) {
+  if (netconn_connect(conn, &_remote_addr,
+                      SL_WISUN_BR_BRIDGE_AGENT_DEFAULT_PORT) != ERR_OK) {
     sl_free(resp_msg.payload);
     netconn_close(conn);
     netconn_delete(conn);
@@ -279,7 +279,7 @@ sl_status_t sl_wisun_br_agent_service_send_graph_info(void)
   return SL_STATUS_OK;
 }
 
-sl_status_t sl_wisun_br_agent_service_set_remote_addr(const char *remote_address)
+sl_status_t sl_wisun_br_agent_service_set_bridge_agent_addr(const char *remote_address)
 {
   sl_status_t result = SL_STATUS_OK;
 
@@ -296,7 +296,7 @@ sl_status_t sl_wisun_br_agent_service_set_remote_addr(const char *remote_address
   return result;
 }
 
-const char *sl_wisun_br_agent_service_get_remote_addr(void)
+const char *sl_wisun_br_agent_service_get_bridge_agent_addr(void)
 {
   static char *addr_str = NULL;
   const size_t buf_size = 40U;
@@ -316,16 +316,15 @@ const char *sl_wisun_br_agent_service_get_remote_addr(void)
 
 sl_status_t sl_wisun_br_agent_service_send_reg(void)
 {
-
   struct netconn *conn = NULL;
   err_t err = ERR_OK;
   sl_wisun_br_agent_service_msg_t resp_msg = { 0 };
   sl_status_t status = SL_STATUS_OK;
 
- // get new network topology
- if (_get_config_params(&resp_msg) != SL_STATUS_OK) {
+  // get new network topology
+  if (_get_config_params(&resp_msg) != SL_STATUS_OK) {
     return SL_STATUS_FAIL;
- }
+  }
 
   // change message code to set config params
   resp_msg.msg_code = SL_WISUN_BR_AGENT_SERVICE_CODE_SET_CONFIG_PARAMS;
@@ -337,7 +336,7 @@ sl_status_t sl_wisun_br_agent_service_send_reg(void)
   }
 
   // connect to the server
-  err = netconn_connect(conn, &_remote_addr, SL_WISUN_BR_AGENT_SERVICE_REMOTE_HOST_PORT);
+  err = netconn_connect(conn, &_remote_addr, SL_WISUN_BR_BRIDGE_AGENT_DEFAULT_PORT);
   if (err != ERR_OK) {
     sl_free(resp_msg.payload);
     netconn_close(conn);
@@ -359,7 +358,7 @@ sl_status_t sl_wisun_br_agent_service_send_reg(void)
   sl_free(resp_msg.payload);
   netconn_close(conn);
   netconn_delete(conn);
-  
+
   // Send the graph info too
   status = sl_wisun_br_agent_service_send_graph_info();
 
@@ -395,7 +394,7 @@ static void _agent_service_task_fnc(void *args)
                           SL_WISUN_BR_AGENT_WIFI_CONNECTED_EVT_FLAG,
                           osFlagsWaitAny,
                           osWaitForever);
-  sl_wisun_br_wifi_get_info(&wifi_connected, &wifi_channel_number, 
+  sl_wisun_br_wifi_get_info(&wifi_connected, &wifi_channel_number,
                             wifi_mac_address, (uint8_t *)&srv_ipaddr.addr);
   if (!wifi_connected) {
     ip_addr_set_any(IPADDR_TYPE_V6, &srv_ipaddr);
@@ -414,12 +413,12 @@ static void _agent_service_task_fnc(void *args)
   EFM_ASSERT(err == ERR_OK);
 
   // listen on socket
-   err = netconn_listen(conn);
+  err = netconn_listen(conn);
   EFM_ASSERT(err == ERR_OK);
-  
-  printf("[Border Router Agent Service started. Listen on port %u]\n", 
+
+  printf("[Border Router Agent Service started. Listen on port %u]\n",
          SL_WISUN_BR_AGENT_SERVICE_SERVER_PORT);
-  
+
   // waiting for connection request
   SL_WISUN_BR_AGENT_SERVICE_LOOP {
     err = netconn_accept(conn, &newconn);
@@ -449,7 +448,7 @@ static void _agent_service_task_fnc(void *args)
                                 &recv_msg) != SL_STATUS_OK) {
           break;
         }
-        
+
         // create and send response message
         if (_create_and_send_resp_msg(&recv_msg,
                                       newconn) != SL_STATUS_OK) {
@@ -585,8 +584,8 @@ static sl_status_t _send_msg(struct netconn *clnt_conn,
 
   // calculate total message size
   total_msg_size = sizeof(resp_msg->msg_code)
-                          + sizeof(resp_msg->payload_len)
-                          + resp_msg->payload_len;
+                   + sizeof(resp_msg->payload_len)
+                   + resp_msg->payload_len;
 
   // allocate buffer for response message
   buff = (uint8_t *)sl_malloc(total_msg_size);
@@ -623,7 +622,6 @@ static sl_status_t _send_msg(struct netconn *clnt_conn,
   // cleanup buffer
   sl_free(buff);
 
-  
   return SL_STATUS_OK;
 }
 
@@ -692,7 +690,7 @@ static sl_status_t _get_config_params(sl_wisun_br_agent_service_msg_t * const re
   }
 
   resp_msg->payload = (uint8_t *)sl_malloc(sizeof(app_setting_br_t));
- 
+
   if (!resp_msg->payload) {
     return SL_STATUS_ALLOCATION_FAILED;
   }

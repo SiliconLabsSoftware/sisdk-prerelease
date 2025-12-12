@@ -39,15 +39,15 @@
 // <1-65536>
 #define SL_WISUN_BR_AGENT_SERVICE_SERVER_PORT               11501U ///< Default listening port of the local agent service server
 
-// <o SL_WISUN_BR_AGENT_SERVICE_REMOTE_HOST_PORT> Default port of the remote host to send messages
+// <o SL_WISUN_BR_BRIDGE_AGENT_DEFAULT_PORT> Default port of the Border Router Bridge Agent to send messages
 // <i> Default: 11500
 // <1-65536>
-#define SL_WISUN_BR_AGENT_SERVICE_REMOTE_HOST_PORT          11500U ///< Default port of the remote host to send messages
+#define SL_WISUN_BR_BRIDGE_AGENT_DEFAULT_PORT               11500U ///< Default port of the remote host to send messages
 
-// <s SL_WISUN_BR_AGENT_SERVICE_DEFAULT_REMOTE_ADDR> Default address of the remote host to send messages
+// <s SL_WISUN_BR_BRIDGE_AGENT_DEFAULT_ADDR> Default address of the Border Router Bridge Agent to send messages
 // <i> This address is used by default as the destination address of the remote host to send messages
 // <i> Default: 2001:db8::1
-#define SL_WISUN_BR_AGENT_SERVICE_DEFAULT_REMOTE_ADDR       "2001:db8::1" ///< Default address of the remote host to send messages
+#define SL_WISUN_BR_BRIDGE_AGENT_DEFAULT_ADDR                "2001:db8::1" ///< Default address of the remote host to send messages
 
 // </h>
 

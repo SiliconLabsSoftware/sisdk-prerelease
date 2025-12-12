@@ -80,10 +80,10 @@ The application follows an event-driven architecture with the following data flo
 Set the remote Linux host address that executes the **Wi-SUN Border Router Bridge Agent** service.
 
 ```bash
-> wisun set_br_agent_remote_addr 2001:db8::dda5:4582:bc9:2287
+> wisun set_br_bridge_agent_addr 2001:db8::dda5:4582:bc9:2287
 [Remote address is set to: 2001:db8::dda5:4582:bc9:2287]
 
-> wisun get_br_agent_remote_addr
+> wisun get_br_bridge_agent_addr
 [2001:DB8::DDA5:4582:BC9:2287]
 ```
 

@@ -31,7 +31,7 @@
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
-#include "em_chip.h"
+#include "em_system.h"
 #include "app_log.h"
 #include "app_common.h"
 #include "app_framework_callback.h"

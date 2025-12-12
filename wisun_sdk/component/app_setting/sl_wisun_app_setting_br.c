@@ -669,7 +669,7 @@ sl_status_t app_wisun_setting_get_phy(sl_wisun_phy_config_t *const phy)
 sl_status_t app_wisun_setting_init_phy_cfg(void)
 {
   sl_status_t stat = SL_STATUS_OK;
-  
+
   // Full radio config: create a copy of already prepared phy config with default settings
   if (_wisun_br_settings.is_default_phy) {
     memcpy(&_wisun_br_settings.phy, &_wisun_br_settings_default.phy, sizeof(sl_wisun_phy_config_t));

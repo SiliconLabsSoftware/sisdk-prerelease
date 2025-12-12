@@ -136,7 +136,6 @@ tag:
   - hwfilter:device:device_series_2
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_generic_family_efr32xg22
-  - hwfilter:!board:hardware_board_supports_wstk_lcd
   - hwfilter:!board:hardware:has:sensor:si1133
   - hwfilter:!board:hardware:has:sensor:veml6035
   - hwfilter:board:simple_button:btn0

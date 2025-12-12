@@ -91,6 +91,11 @@ void sl_button_on_change(const sl_button_t *handle)
 
 void sl_ot_rtos_application_tick(void)
 {
+    if (sl_ot_should_change_instance())
+    {
+        sl_ot_switch_to_instance_index(sl_ot_get_new_instance_index());
+    }
+
     if (sButtonPressed)
     {
         sButtonPressed = false;

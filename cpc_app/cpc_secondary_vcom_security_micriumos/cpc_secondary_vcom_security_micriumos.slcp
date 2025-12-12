@@ -33,7 +33,6 @@ component:
   - id: memory_manager
   - id: simple_button
     instance: [btn0]
-  - id: toolchain_gcc_warnings_undef
 define:
   - name: DEBUG_EFM
 configuration:

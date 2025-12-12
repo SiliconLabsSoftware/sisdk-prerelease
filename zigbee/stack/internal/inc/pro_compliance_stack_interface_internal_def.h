@@ -199,17 +199,9 @@ sl_status_t sli_zigbee_stack_test_zdo_generate_security_decommission_req(sl_8021
 sl_status_t sli_zigbee_stack_zigbee_remove_child(sl_802154_short_addr_t childId,
                                                  uint8_t options);
 
-void slxi_zigbee_stack_change_pan_id_now(sl_802154_pan_id_t panId);
-
 void slxi_zigbee_stack_gu_zdo_toggle_dlk(bool do_dlk,
                                          bool allow_anon_psk);
 
 void slxi_zigbee_stack_ignore_incoming_aps_acks(bool ignore);
-
-bool slxi_zigbee_stack_network_send_command(sl_802154_short_addr_t destination,
-                                            uint8_t *commandFrame,
-                                            uint8_t length,
-                                            bool tryToInsertLongDest,
-                                            sl_802154_long_addr_t destinationEui);
 
 #endif // PRO_COMPLIANCE_STACK_INTERFACE_INTERNAL_DEF_H

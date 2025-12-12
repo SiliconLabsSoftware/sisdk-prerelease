@@ -21,37 +21,8 @@
 #include "sl_status.h"
 #include "sl_zigbee_types.h"
 
-/**
- * @addtogroup dynamic_node_type
- *
- * This file describes APIs for Zigbee Dynamic Node Type functionality,
- * allowing a device to switch between the Router and Sleepy End Device
- * node types during runtime.
- *
- * @{
- */
+// Internal APIs - not meant to be called. See Zigbee Dynamic Node Type plugin APIs
+sl_status_t slx_zigbee_switch_role_sleepy_end_device(uint8_t end_device_configuration);
+sl_status_t slx_zigbee_switch_role_router(void);
 
-/**
- * @brief Switches the Zigbee node type to Sleepy End Device if currently a Router.
- *
- * This function checks if the current node type is SL_ZIGBEE_ROUTER. If so, it leaves the network quietly,
- * erases the child table, sets the end device poll timeout and configuration, changes the node type to
- * SL_ZIGBEE_SLEEPY_END_DEVICE, and attempts to rejoin the network as a sleepy end device.
- *
- * @param end_device_configuration End device configuration flags to set.
- * @return SL_STATUS_OK if the operation was successful, or an error status otherwise.
- */
-sl_status_t sl_zigbee_switch_role_sleepy_end_device(uint8_t end_device_configuration);
-
-/**
- * @brief Switches the Zigbee node type to Router if currently a Sleepy End Device.
- *
- * This function checks if the current node type is SL_ZIGBEE_SLEEPY_END_DEVICE. If so, it leaves the network quietly,
- * sets the node type to SL_ZIGBEE_ROUTER, and attempts to rejoin the network as a router.
- *
- * @return SL_STATUS_OK if the operation was successful, or SL_STATUS_FAIL otherwise.
- */
-sl_status_t sl_zigbee_switch_role_router(void);
-
-/** @} END addtogroup */
 #endif

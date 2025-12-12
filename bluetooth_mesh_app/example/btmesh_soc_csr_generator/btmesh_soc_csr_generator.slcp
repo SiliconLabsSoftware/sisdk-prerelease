@@ -20,7 +20,6 @@ filter:
 component:
   - id: app_assert
   - id: app_log
-  - id: bootloader_interface
   - id: clock_manager
   - id: device_init
   - id: iostream_usart

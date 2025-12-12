@@ -197,6 +197,7 @@ typedef struct {
   uint8_t initiator_conn_handles[MAX_INITIATOR_INSTANCES];
   bool trace;
   bool read_remote_capabilities;
+  bool security_increased;
 } cs_host_state_t;
 
 cs_host_config_t cs_host_config = {
@@ -666,6 +667,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       cs_host_state.num_reflector_connections = 0u;
       cs_host_state.num_initiator_connections = 0u;
       cs_host_state.read_remote_capabilities = false;
+      cs_host_state.security_increased = false;
 
       // Initialize the list of reflector connection handles
       for (uint32_t i = 0u; i < cs_host_config.max_initiator_instances; i++) {
@@ -741,6 +743,8 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       for (uint32_t i = 0u; i < cs_host_config.max_initiator_instances; i++) {
         if (cs_host_state.reflector_conn_handles[i] == evt->data.evt_connection_parameters.connection) {
           if (evt->data.evt_connection_parameters.security_mode != sl_bt_connection_mode1_level1) {
+            app_log_info(APP_PREFIX "Increasing security completed for connection %u." APP_LOG_NL,
+                         evt->data.evt_connection_parameters.connection);
             if (!cs_host_state.read_remote_capabilities) {
               sc = sl_bt_cs_read_remote_supported_capabilities(evt->data.evt_connection_parameters.connection);
               if (sc == SL_STATUS_INVALID_PARAMETER) {
@@ -754,14 +758,19 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
               }
             }
           } else {
-            sc = sl_bt_sm_increase_security(evt->data.evt_connection_parameters.connection);
-            if (sc == SL_STATUS_INVALID_PARAMETER) {
-              app_log_error(APP_PREFIX "Connection not found." APP_LOG_NL);
-              sc = ble_peer_manager_central_create_connection();
-              app_assert_status(sc);
-              app_log_info(APP_PREFIX "Scanning restarted for new reflector connections..." APP_LOG_NL);
-            } else {
-              app_assert_status(sc);
+            if (!cs_host_state.security_increased) {
+              sc = sl_bt_sm_increase_security(evt->data.evt_connection_parameters.connection);
+              if (sc == SL_STATUS_INVALID_PARAMETER) {
+                app_log_error(APP_PREFIX "Connection not found." APP_LOG_NL);
+                sc = ble_peer_manager_central_create_connection();
+                app_assert_status(sc);
+                app_log_info(APP_PREFIX "Scanning restarted for new reflector connections..." APP_LOG_NL);
+              } else {
+                app_assert_status(sc);
+                cs_host_state.security_increased = true;
+                app_log_info(APP_PREFIX "Increasing security for connection %u" APP_LOG_NL,
+                             evt->data.evt_connection_parameters.connection);
+              }
             }
           }
           break;
@@ -871,7 +880,19 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
           security_set_confirmation(SECURITY_DENY_CONFIRMATION);
         }
       }
+      break;
     }
+    // -------------------------------
+    // This event indicates that the BT stack buffer resources were exhausted
+    case sl_bt_evt_system_resource_exhausted_id:
+      app_log_error(APP_PREFIX "BT stack buffers exhausted, data loss may have occurred! "
+                               "buf_discarded='%u' buf_alloc_fail='%u' heap_alloc_fail='%u'" APP_LOG_NL,
+                    evt->data.evt_system_resource_exhausted.num_buffers_discarded,
+                    evt->data.evt_system_resource_exhausted.num_buffer_allocation_failures,
+                    evt->data.evt_system_resource_exhausted.num_heap_allocation_failures);
+      break;
+    default:
+      break;
   }
 }
 
@@ -1320,6 +1341,7 @@ void app_ble_peer_manager_on_event(ble_peer_manager_evt_type_t *event)
     case BLE_PEER_MANAGER_ON_CONN_OPENED_CENTRAL:
       address = ble_peer_manager_get_bt_address(event->connection_id);
       cs_host_state.read_remote_capabilities = false;
+      cs_host_state.security_increased = false;
       app_log_info(APP_INSTANCE_PREFIX "Connection opened as central with CS Reflector"
                                        " '%02X:%02X:%02X:%02X:%02X:%02X'" APP_LOG_NL,
                    event->connection_id,

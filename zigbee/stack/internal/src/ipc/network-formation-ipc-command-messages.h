@@ -457,4 +457,12 @@ typedef struct {
   sli_zigbee_stack_tc_rejoins_using_well_known_key_allowed_ipc_rsp_t response;
 } sli_zigbee_stack_tc_rejoins_using_well_known_key_allowed_ipc_msg_t;
 
+typedef struct {
+  sl_802154_pan_id_t panId;
+} slxi_zigbee_stack_change_pan_id_now_ipc_req_t;
+
+typedef struct {
+  slxi_zigbee_stack_change_pan_id_now_ipc_req_t request;
+} slxi_zigbee_stack_change_pan_id_now_ipc_msg_t;
+
 #endif // NETWORK_FORMATION_IPC_COMMAND_MESSAGES_H

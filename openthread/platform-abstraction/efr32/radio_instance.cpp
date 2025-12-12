@@ -145,6 +145,7 @@ otInstance *sli_ot_radio_instance_from_filter_mask(uint8_t aFilterMask)
     uint8_t     instanceIndex = 0;
     bool        foundInstance = false;
     uint8_t     panFilterMask;
+    uint8_t     addressFiltermask;
 
 #if !OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
     // Single-instance mode: Always return the single instance for security processing
@@ -156,23 +157,26 @@ otInstance *sli_ot_radio_instance_from_filter_mask(uint8_t aFilterMask)
     // Check if this is a broadcast packet
     otEXPECT(!sli_ot_radio_instance_is_filter_mask_broadcast_pan(aFilterMask));
 
-#if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
-    // We need only the Pan Id masks here, as we are not matching the addresses.
-    // Also mask all the unused indices.
-    aFilterMask &= sRailFilterMask;
-#endif
-
-    // Extract the PAN ID filter bits (bits 0-3) from the filter mask
+    // Extract the PAN ID (bits 0-3)and Address filter bits (bits 4-7) from the filter mask.
     // The filter mask structure:
     // | Bit:7 | Bit:6 | Bit:5 | Bit:4 | Bit:3 | Bit:2 | Bit:1 | Bit:0 |
     // | Addr2 | Addr1 | Addr0 | Bcast | Pan2  | Pan1  | Pan0  | Bcast |
-    panFilterMask = (uint8_t)(aFilterMask & 0x0F);
+    panFilterMask = (uint8_t)(RADIO_GET_PANID_FILTER_MASK(aFilterMask) >> RADIO_PANID_FILTER_SHIFT);
+    // For packets that have the address bit set but do not include a PAN ID.
+    // Typically, these packets have the PAN ID compression bit set.
+    addressFiltermask = (uint8_t)(RADIO_GET_ADDR_FILTER_MASK(aFilterMask) >> RADIO_ADDR_FILTER_SHIFT);
 
-    // Find the first set bit in the PAN filter mask
+#if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
+    // Mask all the unused indices.
+    panFilterMask &= sRailFilterMask;
+    addressFiltermask &= sRailFilterMask;
+#endif
+
+    // Find the first set bit in the PAN or address filter mask,
     // Skip bit 0 (broadcast) and look for instance-specific matches
     for (uint8_t i = 1; i <= RADIO_INTERFACE_COUNT && i < 8; i++)
     {
-        if (panFilterMask & (1 << i))
+        if ((panFilterMask & (1 << i)) || (addressFiltermask & (1 << i)))
         {
             instanceIndex = i - 1; // Convert to 0-based index
             foundInstance = true;

@@ -34,7 +34,7 @@
 #include PLATFORM_HEADER
 
 #include "stack/include/ember.h"
-#include "em_chip.h"
+#include "em_system.h"
 #include "app_log.h"
 #include "app_framework_common.h"
 #include "sl_connect_config.h"

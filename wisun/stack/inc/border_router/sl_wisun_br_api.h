@@ -234,7 +234,7 @@ sl_status_t sl_wisun_br_pan_defect_advertise(bool defect_advertise,
                                              uint32_t max_scan_duration_s);
 
 /**************************************************************************//**
- * Set IPv6 prefix for DODAG.
+ * Set IPv6 prefix for the Wi-SUN network.
  *
  * @param[in] ipv6_prefix IPv6 prefix
  * @param[in] prefix_length Prefix length. Currently, only 64 bit prefixes are

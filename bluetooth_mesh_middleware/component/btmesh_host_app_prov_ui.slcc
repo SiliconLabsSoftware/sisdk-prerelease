@@ -21,6 +21,9 @@ provides:
 requires:
 - name: btmesh_stack_api_ncp_host
 - name: btmesh_host_app_prov
+- name: btmesh_host_app_remote_prov_ui
+  condition:
+  - btmesh_host_app_remote_prov
 - name: component_catalog
 - name: host_ncp
 template_contribution:

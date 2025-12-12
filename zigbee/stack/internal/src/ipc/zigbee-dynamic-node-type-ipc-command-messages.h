@@ -23,23 +23,23 @@
 
 typedef struct {
   sl_status_t result;
-} sli_zigbee_stack_switch_role_router_ipc_rsp_t;
+} slxi_zigbee_stack_switch_role_router_ipc_rsp_t;
 
 typedef struct {
-  sli_zigbee_stack_switch_role_router_ipc_rsp_t response;
-} sli_zigbee_stack_switch_role_router_ipc_msg_t;
+  slxi_zigbee_stack_switch_role_router_ipc_rsp_t response;
+} slxi_zigbee_stack_switch_role_router_ipc_msg_t;
 
 typedef struct {
   uint8_t end_device_configuration;
-} sli_zigbee_stack_switch_role_sleepy_end_device_ipc_req_t;
+} slxi_zigbee_stack_switch_role_sleepy_end_device_ipc_req_t;
 
 typedef struct {
   sl_status_t result;
-} sli_zigbee_stack_switch_role_sleepy_end_device_ipc_rsp_t;
+} slxi_zigbee_stack_switch_role_sleepy_end_device_ipc_rsp_t;
 
 typedef struct {
-  sli_zigbee_stack_switch_role_sleepy_end_device_ipc_req_t request;
-  sli_zigbee_stack_switch_role_sleepy_end_device_ipc_rsp_t response;
-} sli_zigbee_stack_switch_role_sleepy_end_device_ipc_msg_t;
+  slxi_zigbee_stack_switch_role_sleepy_end_device_ipc_req_t request;
+  slxi_zigbee_stack_switch_role_sleepy_end_device_ipc_rsp_t response;
+} slxi_zigbee_stack_switch_role_sleepy_end_device_ipc_msg_t;
 
 #endif // ZIGBEE_DYNAMIC_NODE_TYPE_IPC_COMMAND_MESSAGES_H

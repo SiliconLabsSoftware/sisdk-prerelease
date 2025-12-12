@@ -102,7 +102,6 @@ post_build:
 tag:
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_series_2
-  - hwfilter:ram:32k
 
 ui_hints:
   highlight:

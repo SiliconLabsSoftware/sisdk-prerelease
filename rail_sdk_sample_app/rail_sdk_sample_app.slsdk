@@ -7,3 +7,4 @@ version=1.0.0
 # General properties are prepended with "prop."
 prop.file.templatesFile=rail_sdk_sample_app_templates.xml
 prop.file.demosFile=rail_sdk_sample_app_demos.xml
+prop.file.docsFile=documentation/slrail_docContent.xml

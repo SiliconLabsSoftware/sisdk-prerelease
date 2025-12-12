@@ -160,6 +160,15 @@ void slxi_zigbee_stack_add_to_incoming_network_queue_process_ipc_command(sli_zig
                                                                                                             &msg->data.add_to_incoming_network_queue.request.nwk_packet);
 }
 
+void slxi_zigbee_stack_network_send_command_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
+{
+  msg->data.network_send_command.response.result = slxi_zigbee_stack_network_send_command(msg->data.network_send_command.request.destination,
+                                                                                          &msg->data.network_send_command.request.commandFrame,
+                                                                                          msg->data.network_send_command.request.length,
+                                                                                          msg->data.network_send_command.request.tryToInsertLongDest,
+                                                                                          msg->data.network_send_command.request.destinationEui);
+}
+
 // public entrypoints
 
 bool sl_zigbee_address_table_entry_is_active(uint8_t addressTableIndex)
@@ -543,4 +552,37 @@ sl_status_t slx_zigbee_add_to_incoming_network_queue(int8_t rssi,
   sli_zigbee_send_ipc_cmd(slxi_zigbee_stack_add_to_incoming_network_queue_process_ipc_command, &msg);
 
   return msg.data.add_to_incoming_network_queue.response.result;
+}
+
+bool slx_zigbee_network_send_command(sl_802154_short_addr_t destination,
+                                     uint8_t *commandFrame,
+                                     uint8_t length,
+                                     bool tryToInsertLongDest,
+                                     sl_802154_long_addr_t destinationEui)
+{
+  sli_zigbee_ipc_cmd_t msg = { 0, };
+  msg.data.network_send_command.request.destination = destination;
+
+  if (commandFrame != NULL) {
+    msg.data.network_send_command.request.commandFrame = *commandFrame;
+  }
+
+  msg.data.network_send_command.request.length = length;
+  msg.data.network_send_command.request.tryToInsertLongDest = tryToInsertLongDest;
+
+  if (destinationEui != NULL) {
+    memmove(msg.data.network_send_command.request.destinationEui, destinationEui, sizeof(sl_802154_long_addr_t));
+  }
+
+  sli_zigbee_send_ipc_cmd(slxi_zigbee_stack_network_send_command_process_ipc_command, &msg);
+
+  if (commandFrame != NULL) {
+    *commandFrame = msg.data.network_send_command.request.commandFrame;
+  }
+
+  if (destinationEui != NULL) {
+    memmove(destinationEui, msg.data.network_send_command.request.destinationEui, sizeof(sl_802154_long_addr_t));
+  }
+
+  return msg.data.network_send_command.response.result;
 }

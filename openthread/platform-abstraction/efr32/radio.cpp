@@ -129,6 +129,7 @@ void txFailedCallback(bool isAck, uint32_t status);
 void ackTimeoutCallback(void);
 void dataRequestCommandCallback(sl_rail_handle_t aRailHandle);
 void schedulerEventCallback(sl_rail_handle_t aRailHandle);
+void sl_ot_update_active_radio_config(void);
 }
 
 // Static inline helper - forward declaration
@@ -648,7 +649,7 @@ void sli_ot_radio_state_deinit(void)
 //==============================================================================
 
 // Internal event state
-static sl_rail_events_t sCurrentEventConfig   = SL_RAIL_EVENTS_NONE;
+static sl_rail_events_t sCurrentEventConfig = SL_RAIL_EVENTS_NONE;
 
 // Forward declarations for internal event processing functions
 static void processTxPacketSentEvent(void);
@@ -679,12 +680,12 @@ static void processDataRequestCommandEvent(sl_rail_handle_t aRailHandle);
 
 void sli_ot_radio_events_init(void)
 {
-    sCurrentEventConfig   = SL_RAIL_EVENTS_NONE;
+    sCurrentEventConfig = SL_RAIL_EVENTS_NONE;
 }
 
 void sli_ot_radio_events_deinit(void)
 {
-    sCurrentEventConfig   = SL_RAIL_EVENTS_NONE;
+    sCurrentEventConfig = SL_RAIL_EVENTS_NONE;
 }
 
 void sli_ot_radio_events_update_config(sl_rail_events_t mask, sl_rail_events_t values)

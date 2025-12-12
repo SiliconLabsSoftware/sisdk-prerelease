@@ -94,6 +94,7 @@ void setConfigIndex(sl_cli_command_arg_t *args)
     // A channel is provided, try to use it.
     if (RAIL_ConfigChannelsAlt(railHandle,
                                channelConfigs[proposedIndex],
+                               (RAIL_RadioConfigChangedCallback_t)(void *)
                                &sli_rail_util_on_channel_config_change)
         != RAIL_STATUS_NO_ERROR) {
       responsePrintError(sl_cli_get_command_string(args, 0), 0x11, "Could not set radio config index '%d'", configIndex);
@@ -105,6 +106,7 @@ void setConfigIndex(sl_cli_command_arg_t *args)
         != RAIL_STATUS_NO_ERROR) {
       (void) RAIL_ConfigChannelsAlt(railHandle,
                                     channelConfigs[configIndex],
+                                    (RAIL_RadioConfigChangedCallback_t)(void *)
                                     &sli_rail_util_on_channel_config_change);
       responsePrintError(sl_cli_get_command_string(args, 0), 0x11, "Invalid channel '%d'", proposedChannel);
       return;
@@ -114,6 +116,7 @@ void setConfigIndex(sl_cli_command_arg_t *args)
     // No channel is provided, use the first available one.
     channel = RAIL_ConfigChannels(railHandle,
                                   channelConfigs[proposedIndex],
+                                  (RAIL_RadioConfigChangedCallback_t)(void *)
                                   &sli_rail_util_on_channel_config_change);
   }
   configIndex = proposedIndex;

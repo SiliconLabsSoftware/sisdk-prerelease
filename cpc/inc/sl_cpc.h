@@ -140,6 +140,14 @@ SL_ENUM(sl_cpc_endpoint_option_t){
  * Typedef for the user - supplied callback function which is called when
  * CPC is done with the provided buffer.
  *
+ * The callback must be non-blocking and efficient: it should return quickly
+ * and must not perform long-running operations, busy-waiting, or blocking
+ * on RTOS primitives or slow I/O. In general, application code must not
+ * invoke CPC API functions from within this callback, unless an API is
+ * explicitly documented as safe to use from callbacks. Any substantial work,
+ * including further CPC operations, should be deferred to another execution
+ * context (for example by posting to a queue or signaling a task).
+ *
  * @param endpoint_id   Endpoint ID
  *
  * @param buffer  Pointer to data buffer.
@@ -159,6 +167,14 @@ typedef void (*sl_cpc_on_write_completed_t)(sl_cpc_user_endpoint_id_t endpoint_i
  * Typedef for the user - supplied callback function which is called when
  * CPC receive data on an endpoint.
  *
+ * The callback must be non-blocking and efficient: it should return quickly
+ * and must not perform long-running operations, busy-waiting, or blocking
+ * on RTOS primitives or slow I/O. In general, application code must not
+ * invoke CPC API functions from within this callback, unless an API is
+ * explicitly documented as safe to use from callbacks. Any substantial work,
+ * including further CPC operations, should be deferred to another execution
+ * context (for example by posting to a queue or signaling a task).
+ *
  * @param endpoint_id   Endpoint ID
  *
  * @param arg   User-specific argument .
@@ -169,6 +185,14 @@ typedef void (*sl_cpc_on_data_reception_t)(uint8_t endpoint_id, void *arg);
  * Typedef for the user-supplied callback function which is called when
  * CPC detects a fatal error on an endpoint.
  *
+ * The callback must be non-blocking and efficient: it should return quickly
+ * and must not perform long-running operations, busy-waiting, or blocking
+ * on RTOS primitives or slow I/O. In general, application code must not
+ * invoke CPC API functions from within this callback, unless an API is
+ * explicitly documented as safe to use from callbacks. Any substantial work,
+ * including further CPC operations, should be deferred to another execution
+ * context (for example by posting to a queue or signaling a task).
+ *
  * @param endpoint_id   Endpoint ID
  *
  * @param arg   User-specific argument .
@@ -178,6 +202,14 @@ typedef void (*sl_cpc_on_error_callback_t)(uint8_t endpoint_id, void *arg);
 /***************************************************************************//**
  * Typedef for the user-supplied callback function which is called when
  * CPC connection to a secondary completes, successfully or not.
+ *
+ * The callback must be non-blocking and efficient: it should return quickly
+ * and must not perform long-running operations, busy-waiting, or blocking
+ * on RTOS primitives or slow I/O. In general, application code must not
+ * invoke CPC API functions from within this callback, unless an API is
+ * explicitly documented as safe to use from callbacks. Any substantial work,
+ * including further CPC operations, should be deferred to another execution
+ * context (for example by posting to a queue or signaling a task).
  *
  * @note  If several users connect to the same endpoint on the host side, this
  *        callback will only be called only when the first connection occurs.

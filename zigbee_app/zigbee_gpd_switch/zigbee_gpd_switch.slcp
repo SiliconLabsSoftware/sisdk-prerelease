@@ -20,8 +20,8 @@ component:
   - id: sl_main
   - id: device_init
   - id: sleeptimer
-  - id: rail_util_recommended
-  - id: rail_util_init
+  - id: sl_rail_util_recommended
+  - id: sl_rail_util_init
     instance:
       - gpdrail
 #---------------- User Buttons -----------------------

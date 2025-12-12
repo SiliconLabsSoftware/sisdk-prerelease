@@ -163,6 +163,7 @@ tag:
   - hardware:device:ram:32
   - hardware:!shared:button:led
   - hwfilter:board:simple_button:btn1
+  - hwfilter:device:device_supports_zigbee
 
 readme:
   - path: ./readme.md

@@ -60,6 +60,7 @@
 #include "stack/zigbee/zigbee-device.h"
 #include "stack/include/zigbee-security-manager.h"
 #include "stack/include/zigbee_packet_types.h"
+#include "stack/include/message.h"
 #include "stack/config/token-cache.h"
 #include "stack/config/sl_zigbee_token_defines.h"
 #include "stack/mac/mac-info-element-parsing.h"
@@ -201,12 +202,6 @@ extern uint8_t sli_zigbee_new_broadcast_entry_threshold;
 sl_status_t sl_zigbee_add_child(sl_802154_short_addr_t shortId,
                                 sl_802154_long_addr_t longId,
                                 sl_zigbee_node_type_t nodeType);
-
-extern bool sli_zigbee_network_send_command(sl_802154_short_addr_t destination,
-                                            uint8_t *commandFrame,
-                                            uint8_t length,
-                                            bool tryToInsertLongDest,
-                                            sl_802154_long_addr_t destinationEui);
 
 //stack/mac/command.c
 extern bool sli_zigbee_use_parent_long_id;
@@ -1948,7 +1943,7 @@ void sendMalformedLPD(sl_cli_command_arg_t *arguments)
   sl_802154_long_addr_t testSubjectEUID;
   sl_zigbee_lookup_eui64_by_node_id(node_id, testSubjectEUID);
 
-  sli_zigbee_network_send_command(node_id,
+  slx_zigbee_network_send_command(node_id,
                                   commandFrame,
                                   len,
                                   false,

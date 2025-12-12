@@ -265,7 +265,7 @@ sl_status_t sl_wisun_get_statistics(sl_wisun_statistics_type_t statistics_type,
 sl_status_t sl_wisun_set_tx_power(int8_t tx_power) SL_DEPRECATED_API_SDK_2024_6;
 
 /**************************************************************************//**
- * Set a mask of operating channels.
+ * Restrict channel use to a subset of allowed channels in the current channel plan.
  *
  * @param[in] channel_mask Mask of operating channels
  * @return SL_STATUS_OK if successful, an error code otherwise
@@ -285,7 +285,7 @@ sl_status_t sl_wisun_set_tx_power(int8_t tx_power) SL_DEPRECATED_API_SDK_2024_6;
 sl_status_t sl_wisun_set_allowed_channel_mask(const sl_wisun_channel_mask_t *channel_mask);
 
 /**************************************************************************//**
- * Set a mask of operating channels.
+ * Restrict channel use to a subset of allowed channels in the current channel plan.
 *
  * @param[in] channel_mask Mask of operating channels
  * @return SL_STATUS_OK if successful, an error code otherwise
@@ -295,6 +295,9 @@ sl_status_t sl_wisun_set_allowed_channel_mask(const sl_wisun_channel_mask_t *cha
  * are allowed. The mask can only be used to further restrict the channels.
  * Channels outside the channel plan or channels internally excluded are
  * ignored. This mask will be used in the following connections.
+ *
+ * @deprecated This function is an alias for sl_wisun_set_allowed_channel_mask().
+ *             It is maintained for backward compatibility.
  *
  * Available in libraries: Full, FFN, LFN, BR (see @ref API_AVAILABILITY)
  *****************************************************************************/
@@ -443,7 +446,7 @@ sl_status_t sl_wisun_get_neighbor_info(const sl_wisun_mac_address_t *neighbor_ma
                                        sl_wisun_neighbor_info_t *neighbor_info);
 
 /**************************************************************************//**
- * Set unicast settings.
+ * Set the unicast dwell interval (ms) used for channel hopping.
  *
  * @param[in] dwell_interval_ms Unicast Dwell Interval (15-255 ms)
  * @return SL_STATUS_OK if successful, an error code otherwise
@@ -508,7 +511,7 @@ sl_status_t sl_wisun_set_regulation(sl_wisun_regulation_t regulation) SL_DEPRECA
 sl_status_t sl_wisun_set_regulation_parameters(const sl_wisun_regulation_params_t *params);
 
 /**************************************************************************//**
- * Reset all the the past hour transmissions counters.
+ * Reset all the past hour transmissions counters.
  *
  * @return SL_STATUS_OK if successful, an error code otherwise
  *
@@ -601,7 +604,7 @@ sl_status_t sl_wisun_set_regulation_tx_thresholds(int8_t warning_threshold,
 sl_status_t sl_wisun_set_advert_fragment_duration(uint32_t fragment_duration_ms);
 
 /**************************************************************************//**
- * Set the device type.
+ * Set the device type (FFN/LFN/BR).
  *
  * @param[in] device_type Type of the device
  * @return SL_STATUS_OK if successful, an error code otherwise
@@ -615,7 +618,7 @@ sl_status_t sl_wisun_set_advert_fragment_duration(uint32_t fragment_duration_ms)
 sl_status_t sl_wisun_set_device_type(sl_wisun_device_type_t device_type);
 
 /**************************************************************************//**
- * Set the mode switch configuration.
+ * Configure per‑neighbor mode switch behavior.
  *
  * @param[in] mode Mode switch configuration of the neighbor. If set to
  *                 #SL_WISUN_MODE_SWITCH_DEFAULT, the configuration of
@@ -675,7 +678,7 @@ sl_status_t sl_wisun_set_mode_switch(uint8_t mode,
 sl_status_t sl_wisun_set_connection_parameters(const sl_wisun_connection_params_t *params);
 
 /**************************************************************************//**
- * Set the POM-IE configuration.
+ * Configure the list of PHY operating modes the device will use for mode switch operations.
  *
  * @param[in] phy_mode_id_count Number of PhyModeId to configure. If set to 0,
  *                              it removes POM-IE and disables mode switch feature.
@@ -697,7 +700,7 @@ sl_status_t sl_wisun_set_pom_ie(uint8_t phy_mode_id_count,
                                 uint8_t is_mdr_command_capable);
 
 /**************************************************************************//**
- * Get the POM-IE configuration.
+ * Get the list of PHY operating modes the device will use for mode switch operations.
  *
  * @param[out] phy_mode_id_count Number of PhyModeId retrieved
  * @param[out] phy_mode_ids List of phy_mode_id_count PhyModeId. Caller must allocate
@@ -764,7 +767,7 @@ sl_status_t sl_wisun_set_lfn_parameters(const sl_wisun_lfn_params_t *params);
 sl_status_t sl_wisun_set_lfn_support(uint8_t lfn_limit);
 
 /**************************************************************************//**
- * Set the PTI state.
+ * Enable or disable the Packet Trace Interface (PTI).
  *
  * @param[in] pti_state PTI state
  *   - **true**: PTI is enabled
@@ -800,7 +803,7 @@ sl_status_t sl_wisun_set_pti_state(bool pti_state);
 sl_status_t sl_wisun_trigger_frame(sl_wisun_frame_type_t frame_type);
 
 /**************************************************************************//**
- * Set the connection security state.
+ * Enable or disable authentication and link encryption.
  *
  * @param[in] security_state Connection security state
  *   - **0**: Authentication and link encryption are disabled
@@ -870,7 +873,7 @@ sl_status_t sl_wisun_get_excluded_channel_mask(sl_wisun_channel_mask_type_t type
 sl_status_t sl_wisun_set_tx_power_ddbm(int16_t tx_power_ddbm);
 
 /**************************************************************************//**
- * Set the RPL leaf mode.
+ * Allow or prevent the node from parenting other nodes.
  *
  * @param[in] is_leaf RPL leaf mode
  *   - **true**: RPL leaf mode is enabled
@@ -1003,7 +1006,7 @@ sl_status_t sl_wisun_set_eap_identity(uint8_t identity_length,
                                       const uint8_t *identity);
 
 /**************************************************************************//**
- * Set Filter for event logger.
+ * Set filters for event logger.
  *
  * @param[in] address MAC address to filter events
  *   - **unicast address**: set the filter for the given MAC address
@@ -1026,7 +1029,7 @@ sl_status_t sl_wisun_set_event_filter(const sl_wisun_mac_address_t *address,
                                       uint64_t events);
 
 /**************************************************************************//**
- * Set Filter for event logger.
+ * Clear filters for event logger.
  *
  * @return SL_STATUS_OK if successful, an error code otherwise
  *
@@ -1054,7 +1057,7 @@ sl_status_t sl_wisun_clear_event_filters(void);
 sl_status_t sl_wisun_set_fan_tps_version(uint8_t fan_tps_version);
 
 /**************************************************************************//**
- * Set the RX FIFO size.
+ * Set the radio RX FIFO size.
  *
  * @param[in] size Size of the RX FIFO in bytes.
  * @return SL_STATUS_OK if successful, an error code otherwise

@@ -83,6 +83,8 @@ void sli_zigbee_association_request_not_sent(void);
 // changed.
 void sli_zigbee_write_radio_and_network_tokens(uint8_t *extendedPanId, uint8_t nwkUpdateId);
 
+void sli_zigbee_write_node_type_token(sl_zigbee_node_type_t nodeType);
+
 void sli_zigbee_process_legacy_join_request(uint8_t mac_index,
                                             bool rejoin,
                                             sli_zigbee_packet_header_t header,

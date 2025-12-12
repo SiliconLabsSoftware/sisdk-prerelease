@@ -275,6 +275,7 @@ ui_hints:
 
 #--------------------- HWFILTER ------------------------
 tag:
+
   - hwfilter:board:hardware:has:vcom
   - hwfilter:board:hardware:has:pti
   - hwfilter:board:simple_led:led0
@@ -288,8 +289,28 @@ tag:
   - hwfilter:!device:device_family_mgm26
   - hwfilter:!device:device_family_mgm27
   - hwfilter:!device:device_family_bgm24
-  - hwfilter:!board:brd4183b
   - hwfilter:!device:device_family_mgm24
+  - hwfilter:!board:brd4183b
+  - hwfilter:!board:brd2608a
+  - hwfilter:!board:brd2703a
+  - hwfilter:!board:brd2705a
+  - hwfilter:!board:brd2709a
+  - hwfilter:!board:brd2710a
+  - hwfilter:!board:brd4108a
+  - hwfilter:!board:brd4118a
+  - hwfilter:!board:brd4120a
+  - hwfilter:!board:brd4121a
+  - hwfilter:!board:brd4183a
+  - hwfilter:!board:brd4183c
+  - hwfilter:!board:brd4400a
+  - hwfilter:!board:brd4400b
+  - hwfilter:!board:brd4400c
+  - hwfilter:!board:brd4401a
+  - hwfilter:!board:brd4401b
+  - hwfilter:!board:brd4401c
+  - hwfilter:!board:brd4403a
+  - hwfilter:!board:brd4403b
+  - hwfilter:!board:brd4403c
 
 
 filter:

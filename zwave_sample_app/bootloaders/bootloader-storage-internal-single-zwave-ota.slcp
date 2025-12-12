@@ -1,5 +1,5 @@
 project_name: bootloader-storage-internal-single-zwave-ota
-package: zwave_bootloader # Do not change, this is part of the bootloader package
+package: zwave_sample_app
 quality: production
 label: Bootloader - SoC Internal Storage (OTA for Z-Wave Applications)
 description: >
@@ -88,3 +88,4 @@ post_build:
 tag:
   - prebuilt_demo
   - hwfilter:device:device_supports_zwave
+  - toolchain:gcc

@@ -83,7 +83,6 @@ typedef enum app_setting_notification {
   APP_SETTING_NOTIFICATION_SET_BR_SETTINGS
 } app_setting_notification_t;
 
-
 /// Wisun setting structure
 typedef struct app_setting_wisun {
   /// Network Name

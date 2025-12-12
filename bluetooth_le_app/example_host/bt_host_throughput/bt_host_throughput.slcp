@@ -31,7 +31,7 @@ source:
   - path: app.c
   - path: cf_parse.c
   - path: host_platform.c
-  - path: ../../common_host/app_log/app_log_cli.c
+  - path: ../common/app_log/app_log_cli.c
 
 include:
   - path: .
@@ -39,7 +39,7 @@ include:
       - path: app.h
       - path: cf_parse.h
       - path: throughput_central_rta.h
-  - path: ../../common_host/app_log
+  - path: ../common/app_log
     file_list:
       - path: app_log_cli.h
 

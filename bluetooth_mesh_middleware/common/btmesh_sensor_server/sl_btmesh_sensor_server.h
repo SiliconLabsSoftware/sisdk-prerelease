@@ -37,6 +37,7 @@
  ******************************************************************************/
 
 #include "sl_btmesh_device_properties.h"
+#include "sl_btmesh_api.h"
 
 /// Represents an unknown value for power consumption sensor data
 #define SL_BTMESH_SENSOR_POWER_CONSUMPTION_VALUE_UNKNOWN  (0xFFFFFFFF)

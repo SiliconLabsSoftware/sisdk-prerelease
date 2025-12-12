@@ -292,4 +292,21 @@ typedef struct {
   slxi_zigbee_stack_add_to_incoming_network_queue_ipc_rsp_t response;
 } slxi_zigbee_stack_add_to_incoming_network_queue_ipc_msg_t;
 
+typedef struct {
+  sl_802154_short_addr_t destination;
+  uint8_t commandFrame;
+  uint8_t length;
+  bool tryToInsertLongDest;
+  sl_802154_long_addr_t destinationEui;
+} slxi_zigbee_stack_network_send_command_ipc_req_t;
+
+typedef struct {
+  bool result;
+} slxi_zigbee_stack_network_send_command_ipc_rsp_t;
+
+typedef struct {
+  slxi_zigbee_stack_network_send_command_ipc_req_t request;
+  slxi_zigbee_stack_network_send_command_ipc_rsp_t response;
+} slxi_zigbee_stack_network_send_command_ipc_msg_t;
+
 #endif // MESSAGE_IPC_COMMAND_MESSAGES_H

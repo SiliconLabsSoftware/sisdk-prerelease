@@ -194,6 +194,7 @@ post_build:
 tag:
   - prebuilt_demo
   - hwfilter:device:device_supports_zwave
+  - toolchain:gcc
 
 filter:
   - name: "Wireless Technology"

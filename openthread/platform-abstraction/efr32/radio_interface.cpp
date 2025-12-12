@@ -359,7 +359,7 @@ efr32BandConfig *sli_ot_radio_interface_get_band_config(uint8_t aChannel)
 
 void sli_ot_radio_interface_load_rail_config(efr32BandConfig *aBandConfig, int8_t aTxPower)
 {
-    sl_rail_status_t                 status;
+    sl_rail_status_t     status;
     sl_rail_tx_pa_mode_t pa_mode = SL_RAIL_TX_PA_MODE_INVALID;
 
     if (aBandConfig->mChannelConfig != nullptr)

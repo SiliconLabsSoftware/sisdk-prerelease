@@ -218,11 +218,9 @@ template_contribution:
 tag:
   - prebuilt_demo
   - hwfilter:device:device_supports_zigbee
-  - hwfilter:device:device_series_2
-  - hwfilter:!device:device_is_module
-  - hwfilter:!device:rm21z000f1024im32
-  - hwfilter:!device:device_family_efr32mg27
-  - hwfilter:!device:device_family_efr32mg29
+  - hwfilter:board:zb_zuth_supported_boards
+  - hwfilter:device:zb_zuth_supported_parts
+
 readme:
   - path: ./readme.md
 

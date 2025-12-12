@@ -22,32 +22,32 @@
 
 // ipc command dispatch
 
-void sli_zigbee_stack_switch_role_router_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
+void slxi_zigbee_stack_switch_role_router_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
 {
-  msg->data.switch_role_router.response.result = sli_zigbee_stack_switch_role_router();
+  msg->data.switch_role_router.response.result = slxi_zigbee_stack_switch_role_router();
 }
 
-void sli_zigbee_stack_switch_role_sleepy_end_device_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
+void slxi_zigbee_stack_switch_role_sleepy_end_device_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
 {
-  msg->data.switch_role_sleepy_end_device.response.result = sli_zigbee_stack_switch_role_sleepy_end_device(msg->data.switch_role_sleepy_end_device.request.end_device_configuration);
+  msg->data.switch_role_sleepy_end_device.response.result = slxi_zigbee_stack_switch_role_sleepy_end_device(msg->data.switch_role_sleepy_end_device.request.end_device_configuration);
 }
 
 // public entrypoints
 
-sl_status_t sl_zigbee_switch_role_router(void)
+sl_status_t slx_zigbee_switch_role_router(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
 
-  sli_zigbee_send_ipc_cmd(sli_zigbee_stack_switch_role_router_process_ipc_command, &msg);
+  sli_zigbee_send_ipc_cmd(slxi_zigbee_stack_switch_role_router_process_ipc_command, &msg);
 
   return msg.data.switch_role_router.response.result;
 }
 
-sl_status_t sl_zigbee_switch_role_sleepy_end_device(uint8_t end_device_configuration)
+sl_status_t slx_zigbee_switch_role_sleepy_end_device(uint8_t end_device_configuration)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
   msg.data.switch_role_sleepy_end_device.request.end_device_configuration = end_device_configuration;
-  sli_zigbee_send_ipc_cmd(sli_zigbee_stack_switch_role_sleepy_end_device_process_ipc_command, &msg);
+  sli_zigbee_send_ipc_cmd(slxi_zigbee_stack_switch_role_sleepy_end_device_process_ipc_command, &msg);
 
   return msg.data.switch_role_sleepy_end_device.response.result;
 }

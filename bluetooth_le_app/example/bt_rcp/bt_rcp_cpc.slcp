@@ -81,6 +81,8 @@ configuration:
 tag:
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_series_2
+  - hwfilter:ram:32k
+  - hwfilter:+device:efr32mr21a020f512im32
 
 ui_hints:
   highlight:

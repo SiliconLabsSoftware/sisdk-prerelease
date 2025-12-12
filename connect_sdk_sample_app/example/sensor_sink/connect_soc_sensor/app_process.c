@@ -34,7 +34,7 @@
 #include PLATFORM_HEADER
 #include "sl_component_catalog.h"
 #include "stack/include/ember.h"
-#include "em_chip.h"
+#include "em_system.h"
 #include "app_log.h"
 #ifdef SL_CATALOG_SI70XX_DRIVER_PRESENT
 #include "sl_si70xx.h"

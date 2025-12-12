@@ -32,8 +32,10 @@
  *
  */
 
-#include "ieee802154-packet-utils.hpp"
+#include <openthread-core-config.h>
+
 #include "em_device.h"
+#include "ieee802154-packet-utils.hpp"
 #include "sl_core.h"
 #include "sl_packet_utils.h"
 #if defined(RADIOAES_PRESENT)
@@ -51,8 +53,12 @@
 #include <assert.h>
 #include "common/code_utils.hpp"
 #include "common/debug.hpp"
+#include "common/new.hpp"
 #include "crypto/aes_ccm.hpp"
+#include "crypto/hmac_sha256.hpp"
+#include "crypto/storage.hpp"
 #include "mac/mac_frame.hpp"
+#include "openthread/platform/crypto.h"
 
 using namespace ot;
 using namespace Crypto;
@@ -401,3 +407,149 @@ uint16_t efr32GetFrameVersion(otRadioFrame *aFrame)
 {
     return static_cast<Mac::RxFrame *>(aFrame)->GetVersion();
 }
+
+otError otPlatCryptoHkdfInit(otCryptoContext *aContext)
+{
+    Error error = kErrorNone;
+
+    VerifyOrExit(aContext != nullptr, error = kErrorInvalidArgs);
+    VerifyOrExit(aContext->mContextSize >= sizeof(HmacSha256::Hash), error = kErrorFailed);
+
+    new (aContext->mContext) HmacSha256::Hash();
+
+exit:
+    return error;
+}
+
+#if OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA
+otError otPlatCryptoHkdfExpand(otCryptoContext *aContext,
+                               const uint8_t   *aInfo,
+                               uint16_t         aInfoLength,
+                               uint8_t         *aOutputKey,
+                               uint16_t         aOutputKeyLength)
+{
+    Error                   error = kErrorNone;
+    HmacSha256              hmac;
+    HmacSha256::Hash        hash;
+    uint8_t                 iter = 0;
+    uint16_t                copyLength;
+    HmacSha256::Hash       *prk;
+    Crypto::Storage::KeyRef keyRef = 0;
+
+    VerifyOrExit(aContext != nullptr, error = kErrorInvalidArgs);
+    VerifyOrExit(aContext->mContextSize >= sizeof(HmacSha256::Hash), error = kErrorFailed);
+    VerifyOrExit(aOutputKey != nullptr, error = kErrorInvalidArgs);
+    VerifyOrExit(aInfo != nullptr || aInfoLength == 0, error = kErrorInvalidArgs);
+
+    prk = static_cast<HmacSha256::Hash *>(aContext->mContext);
+
+    // The aOutputKey is calculated as follows [RFC5889]:
+    //
+    //   N = ceil( aOutputKeyLength / HashSize)
+    //   T = T(1) | T(2) | T(3) | ... | T(N)
+    //   aOutputKey is first aOutputKeyLength of T
+    //
+    // Where:
+    //   T(0) = empty string (zero length)
+    //   T(1) = HMAC-Hash(PRK, T(0) | info | 0x01)
+    //   T(2) = HMAC-Hash(PRK, T(1) | info | 0x02)
+    //   T(3) = HMAC-Hash(PRK, T(2) | info | 0x03)
+    //   ...
+
+    SuccessOrExit(Crypto::Storage::ImportKey(keyRef,
+                                             Crypto::Storage::kKeyTypeHmac,
+                                             Crypto::Storage::kKeyAlgorithmHmacSha256,
+                                             Crypto::Storage::kUsageSignHash | Crypto::Storage::kUsageExport,
+                                             Crypto::Storage::kTypeVolatile,
+                                             prk->GetBytes(),
+                                             sizeof(HmacSha256::Hash)));
+
+    while (aOutputKeyLength > 0)
+    {
+        Key cryptoKey;
+
+        cryptoKey.SetAsKeyRef(keyRef);
+        hmac.Start(cryptoKey);
+
+        if (iter != 0)
+        {
+            hmac.Update(hash);
+        }
+
+        hmac.Update(aInfo, aInfoLength);
+
+        iter++;
+        hmac.Update(iter);
+        hmac.Finish(hash);
+
+        copyLength = Min(aOutputKeyLength, static_cast<uint16_t>(sizeof(hash)));
+
+        memcpy(aOutputKey, hash.GetBytes(), copyLength);
+        aOutputKey += copyLength;
+        aOutputKeyLength -= copyLength;
+    }
+
+exit:
+    memset(&hash, 0, sizeof(hash));
+    Crypto::Storage::DestroyKey(keyRef);
+    return error;
+}
+
+otError otPlatCryptoHkdfExtract(otCryptoContext   *aContext,
+                                const uint8_t     *aSalt,
+                                uint16_t           aSaltLength,
+                                const otCryptoKey *aInputKey)
+{
+    Error                   error = kErrorNone;
+    HmacSha256              hmac;
+    Key                     cryptoKey;
+    HmacSha256::Hash       *prk;
+    uint8_t                 inputKeyBuffer[OT_CRYPTO_SHA256_HASH_SIZE];
+    size_t                  inputKeyLength;
+    Crypto::Storage::KeyRef keyRef = 0;
+
+    VerifyOrExit(aContext != nullptr, error = kErrorInvalidArgs);
+    VerifyOrExit(aContext->mContextSize >= sizeof(HmacSha256::Hash), error = kErrorFailed);
+    VerifyOrExit(aInputKey != nullptr, error = kErrorInvalidArgs);
+
+    SuccessOrExit(
+        Crypto::Storage::ExportKey(aInputKey->mKeyRef, inputKeyBuffer, sizeof(inputKeyBuffer), inputKeyLength));
+    SuccessOrExit(Crypto::Storage::ImportKey(keyRef,
+                                             Crypto::Storage::kKeyTypeHmac,
+                                             Crypto::Storage::kKeyAlgorithmHmacSha256,
+                                             Crypto::Storage::kUsageSignHash | Crypto::Storage::kUsageExport,
+                                             Crypto::Storage::kTypeVolatile,
+                                             aSalt,
+                                             aSaltLength));
+
+    prk = static_cast<HmacSha256::Hash *>(aContext->mContext);
+
+    cryptoKey.SetAsKeyRef(keyRef);
+    // PRK is calculated as HMAC-Hash(aSalt, aInputKey)
+    hmac.Start(cryptoKey);
+    hmac.Update(inputKeyBuffer, inputKeyLength);
+    hmac.Finish(*prk);
+
+exit:
+    memset(inputKeyBuffer, 0, sizeof(inputKeyBuffer));
+    Crypto::Storage::DestroyKey(keyRef);
+    return error;
+}
+
+otError otPlatCryptoHkdfDeinit(otCryptoContext *aContext)
+{
+    Error             error = kErrorNone;
+    HmacSha256::Hash *prk;
+
+    VerifyOrExit(aContext != nullptr, error = kErrorInvalidArgs);
+    VerifyOrExit(aContext->mContextSize >= sizeof(HmacSha256::Hash), error = kErrorFailed);
+
+    prk = static_cast<HmacSha256::Hash *>(aContext->mContext);
+    prk->~Hash();
+    aContext->mContext     = nullptr;
+    aContext->mContextSize = 0;
+
+exit:
+    return error;
+}
+#endif // OPENTHREAD_CONFIG_CRYPTO_LIB_PSA

@@ -173,8 +173,9 @@ RAIL_Status_t Rmr_reconfigureModem(RAIL_Handle_t railHandle)
   RAIL_IncludeFrameTypeLength(railHandle);
 
   // Configure with the downloaded channel configuration.
-  RAIL_ConfigChannels(railHandle, &rmrState->channelConfig, &sli_rail_util_on_channel_config_change);
-
+  RAIL_ConfigChannels(railHandle, &rmrState->channelConfig,
+                      (RAIL_RadioConfigChangedCallback_t)(void *)
+                      &sli_rail_util_on_channel_config_change);
   // Make sure that we stay in idle after the reconfiguration.
   RAIL_Idle(railHandle, RAIL_IDLE_FORCE_SHUTDOWN_CLEAR_FLAGS, false);
 

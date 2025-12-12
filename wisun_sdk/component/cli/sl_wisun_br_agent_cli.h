@@ -56,14 +56,14 @@ extern "C" {
  * @details CLI function
  * @param[in] arguments Arguments
  *****************************************************************************/
-void app_set_br_agent_remote_address(const sl_cli_command_arg_t *arguments);
+void app_set_br_agent_bridge_remote_addr(const sl_cli_command_arg_t *arguments);
 
 /**************************************************************************//**
  * @brief App get BR Agent remote address
  * @details CLI function
  * @param[in] arguments Arguments
  *****************************************************************************/
-void app_get_br_agent_remote_address(const sl_cli_command_arg_t *arguments);
+void app_get_br_agent_bridge_addr(const sl_cli_command_arg_t *arguments);
 
 #ifdef __cplusplus
 }

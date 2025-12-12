@@ -341,8 +341,8 @@ const app_enum_t app_wisun_state_enum[] =
 
 #if defined(SL_CATALOG_WISUN_BR_WIFI_PRESENT)
 const app_enum_t app_wisun_wifi_security_type_enum[] = {
-  { "NONE",      WIFI_SECURITY_TYPE_NONE },
-  { "WPA_PSK",   WIFI_SECURITY_TYPE_WPA_PSK },
+  { "NONE", WIFI_SECURITY_TYPE_NONE },
+  { "WPA_PSK", WIFI_SECURITY_TYPE_WPA_PSK },
   { "WPA2_TKIP", WIFI_SECURITY_TYPE_WPA2_TKIP },
   { "WPA2_CCMP", WIFI_SECURITY_TYPE_WPA2_CCMP },
   { NULL, 0 }

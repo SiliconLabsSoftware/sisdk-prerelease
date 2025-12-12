@@ -237,6 +237,7 @@ typedef struct {
     sli_zigbee_stack_set_passive_ack_config_ipc_msg_t set_passive_ack_config;
     sli_zigbee_stack_set_reply_fragment_data_ipc_msg_t set_reply_fragment_data;
     slxi_zigbee_stack_add_to_incoming_network_queue_ipc_msg_t add_to_incoming_network_queue;
+    slxi_zigbee_stack_network_send_command_ipc_msg_t network_send_command;
     mfglibInternalEnd_ipc_msg_t mfgEnd;
     mfglibInternalGetChannel_ipc_msg_t mfgGetChannel;
     mfglibInternalGetCtune_ipc_msg_t mfgGetCtune;
@@ -299,6 +300,7 @@ typedef struct {
     sli_zigbee_stack_stop_scan_ipc_msg_t stop_scan;
     sli_zigbee_stack_survey_beacons_ipc_msg_t survey_beacons;
     sli_zigbee_stack_tc_rejoins_using_well_known_key_allowed_ipc_msg_t tc_rejoins_using_well_known_key_allowed;
+    slxi_zigbee_stack_change_pan_id_now_ipc_msg_t change_pan_id_now;
     #ifdef SL_CATALOG_ZIGBEE_PRO_COMPLIANCE_PRESENT
     sli_mac_stack_find_child_short_id_ipc_msg_t find_child_short_id;
     sli_mac_stack_get_child_info_flags_ipc_msg_t get_child_info_flags;
@@ -350,10 +352,8 @@ typedef struct {
     sli_zigbee_stack_test_zdo_generate_get_authentication_level_req_ipc_msg_t test_zdo_generate_get_authentication_level_req;
     sli_zigbee_stack_test_zdo_generate_security_decommission_req_ipc_msg_t test_zdo_generate_security_decommission_req;
     sli_zigbee_stack_zigbee_remove_child_ipc_msg_t zigbee_remove_child;
-    slxi_zigbee_stack_change_pan_id_now_ipc_msg_t change_pan_id_now;
     slxi_zigbee_stack_gu_zdo_toggle_dlk_ipc_msg_t gu_zdo_toggle_dlk;
     slxi_zigbee_stack_ignore_incoming_aps_acks_ipc_msg_t ignore_incoming_aps_acks;
-    slxi_zigbee_stack_network_send_command_ipc_msg_t network_send_command;
     #endif
     sli_zigbee_stack_get_embernet_passthrough_source_address_ipc_msg_t get_embernet_passthrough_source_address;
     sli_zigbee_stack_get_mac_passthrough_flags_ipc_msg_t get_mac_passthrough_flags;
@@ -591,8 +591,8 @@ typedef struct {
     sli_zigbee_stack_set_pending_network_update_channel_ipc_msg_t set_pending_network_update_channel;
     sli_zigbee_stack_set_zdo_configuration_mode_ipc_msg_t set_zdo_configuration_mode;
     #ifdef SL_CATALOG_ZIGBEE_DYNAMIC_NODE_TYPE_PRESENT
-    sli_zigbee_stack_switch_role_router_ipc_msg_t switch_role_router;
-    sli_zigbee_stack_switch_role_sleepy_end_device_ipc_msg_t switch_role_sleepy_end_device;
+    slxi_zigbee_stack_switch_role_router_ipc_msg_t switch_role_router;
+    slxi_zigbee_stack_switch_role_sleepy_end_device_ipc_msg_t switch_role_sleepy_end_device;
     #endif
     sli_zigbee_stack_get_key_from_install_code_ipc_msg_t get_key_from_install_code;
     sli_zigbee_stack_sec_man_aes_128_crypt_block_ipc_msg_t sec_man_aes_128_crypt_block;

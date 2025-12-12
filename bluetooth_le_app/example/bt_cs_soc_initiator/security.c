@@ -82,7 +82,7 @@ sl_status_t on_event_security(const sl_bt_msg_t *evt)
         return sc;
       }
       // Set bondable mode
-      sl_bt_sm_set_bondable_mode(1);
+      sl_bt_sm_set_bondable_mode(ALLOW_BONDING);
       #if defined(NEW_BOND_REQUIRES_PASSKEY) && (NEW_BOND_REQUIRES_PASSKEY == 1)
       sc = sl_bt_sm_set_passkey(CS_APP_PASSKEY);
       if (sc != SL_STATUS_OK) {
@@ -138,7 +138,7 @@ void security_set_config_flags()
   #if defined(NEW_BOND_REQUIRES_PASSKEY) && (NEW_BOND_REQUIRES_PASSKEY == 1)
   sm_config_flags = sm_config_flags | SL_BT_SM_CONFIGURATION_CONNECTIONS_FROM_BONDED_DEVICES_ONLY;
   #endif
-  #if defined(ALLOW_DEBUG_KEYS) && (ALLOW_DEBUG_KEYS == 1)
+  #if !defined(ALLOW_DEBUG_KEYS) || (ALLOW_DEBUG_KEYS == 0)
   sm_config_flags = sm_config_flags | SL_BT_SM_CONFIGURATION_REJECT_DEBUG_KEYS;
   #endif
 }

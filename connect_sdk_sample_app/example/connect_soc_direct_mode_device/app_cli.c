@@ -35,7 +35,7 @@
 
 #include PLATFORM_HEADER
 #include "sl_component_catalog.h"
-#include "em_chip.h"
+#include "em_system.h"
 #include "em_cmu.h"
 #include "ember.h"
 #include "em_cmu.h"

@@ -18,7 +18,7 @@
 #include "app/framework/include/af.h"
 #include "sl_code_classification.h"
 
-#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+#if defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT) || defined(SL_CATALOG_ZIGBEE_DYNAMIC_NODE_TYPE_PRESENT)
 // This is now non-const, so that the node type may be changed at run-time.
 sli_zigbee_af_zigbee_pro_network *sli_zigbee_af_current_zigbee_pro_network = NULL;
 #else

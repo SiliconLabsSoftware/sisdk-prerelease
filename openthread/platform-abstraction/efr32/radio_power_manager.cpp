@@ -170,9 +170,9 @@ void sli_init_power_manager(void)
 
 void sli_update_tx_power_after_config_update(sl_rail_tx_pa_mode_t pa_mode, int8_t tx_power)
 {
-    sl_rail_status_t         status;
-    sl_rail_tx_pa_mode_t     current_pa_mode;
-    sl_rail_tx_power_t       tx_power_dbm = tx_power * 10;
+    sl_rail_status_t     status;
+    sl_rail_tx_pa_mode_t current_pa_mode;
+    sl_rail_tx_power_t   tx_power_dbm = tx_power * 10;
 
     current_pa_mode = sli_ot_radio_interface_rail_get_tx_pa_mode();
 

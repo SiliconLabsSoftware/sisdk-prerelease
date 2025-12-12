@@ -18,12 +18,12 @@
 #include "stack/include/zigbee-dynamic-node-type.h"
 #include "stack/internal/inc/zigbee-dynamic-node-type-internal-def.h"
 
-sl_status_t sl_zigbee_switch_role_router(void)
+sl_status_t slx_zigbee_switch_role_router(void)
 {
-  return sli_zigbee_stack_switch_role_router();
+  return slxi_zigbee_stack_switch_role_router();
 }
 
-sl_status_t sl_zigbee_switch_role_sleepy_end_device(uint8_t end_device_configuration)
+sl_status_t slx_zigbee_switch_role_sleepy_end_device(uint8_t end_device_configuration)
 {
-  return sli_zigbee_stack_switch_role_sleepy_end_device(end_device_configuration);
+  return slxi_zigbee_stack_switch_role_sleepy_end_device(end_device_configuration);
 }

@@ -31,7 +31,6 @@ component:
   - id: cpc_security_secondary_none
   - id: cpc_secondary_recommended_uart_interface
   - id: memory_manager
-  - id: toolchain_gcc_warnings_undef
 define:
   - name: DEBUG_EFM
 configuration:

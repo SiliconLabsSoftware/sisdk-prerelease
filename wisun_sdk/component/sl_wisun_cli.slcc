@@ -278,12 +278,12 @@ template_contribution:
 - name: "cli_command"
   value:
     group: "wisun"
-    name: "set_br_agent_remote_addr"
+    name: "set_br_bridge_agent_addr"
     handler: "app_cli_handler"
-    help: "Set the border router agent remote address"
+    help: "Set the Border Router Bridge Agent address"
     argument:
     - type: string
-      help: "Remote address"
+      help: "BR Bridge Agent address"
     shortcuts:
     - name: "sbra"
   condition:
@@ -296,9 +296,9 @@ template_contribution:
 - name: "cli_command"
   value:
     group: "wisun"
-    name: "get_br_agent_remote_addr"
+    name: "get_br_bridge_agent_addr"
     handler: "app_cli_handler"
-    help: "Get the border router agent remote address"
+    help: "Get the Border Router Bridge Agent address"
     shortcuts:
     - name: "gbra"
   condition:

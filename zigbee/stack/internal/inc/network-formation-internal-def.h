@@ -115,6 +115,8 @@ sl_status_t sli_zigbee_stack_survey_beacons(bool useStandardBeacons,
 
 bool sli_zigbee_stack_tc_rejoins_using_well_known_key_allowed(void);
 
+void slxi_zigbee_stack_change_pan_id_now(sl_802154_pan_id_t panId);
+
 // Callback Indirection
 
 void sli_zigbee_stack_energy_scan_result_handler(uint8_t channel,

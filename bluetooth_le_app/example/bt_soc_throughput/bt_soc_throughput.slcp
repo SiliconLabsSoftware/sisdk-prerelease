@@ -119,6 +119,7 @@ tag:
   - hwfilter:board:simple_button:btn1
   - hwfilter:flash:257k
   - hwfilter:ram:32k
+  - hwfilter:!board:brd4310a
 
 ui_hints:
   highlight:

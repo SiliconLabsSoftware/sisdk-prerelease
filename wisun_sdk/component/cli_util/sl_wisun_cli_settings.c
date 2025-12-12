@@ -458,7 +458,7 @@ sl_status_t app_settings_get_ip_address(char *value_str,
   ip6tos(addr_gua, str_gua);
   ip6tos(addr_dodagid, str_dodagid);
 
-  count = sprintf(value_str,"ll: %s gua: %s dodagid: %s", str_ll, str_gua, str_dodagid);
+  count = sprintf(value_str, "ll: %s gua: %s dodagid: %s", str_ll, str_gua, str_dodagid);
   value_str += count;
 
   count = sprintf(value_str, "]");

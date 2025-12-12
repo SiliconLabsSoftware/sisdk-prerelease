@@ -26,3 +26,7 @@ requires:
 template_contribution:
 - name: component_catalog
   value: btmesh_host_remote_prov
+- name: "btmesh_on_event"
+  value:
+    include: "btmesh_app_remote_prov.h"
+    function: "btmesh_app_remote_prov_on_event"

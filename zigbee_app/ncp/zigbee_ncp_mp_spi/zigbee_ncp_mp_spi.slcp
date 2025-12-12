@@ -90,3 +90,4 @@ tag:
   - hwfilter:device:device_supports_zigbee
   - hwfilter:!board:zb_boards_spi_incompatible
   - hwfilter:board:hardware_board_has_spi
+  - hwfilter:!board:zb_boards_ncp_spi_incompatible

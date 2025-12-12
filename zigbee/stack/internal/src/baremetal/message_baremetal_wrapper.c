@@ -188,3 +188,16 @@ sl_status_t slx_zigbee_add_to_incoming_network_queue(int8_t rssi,
                                                          lqi,
                                                          nwk_packet);
 }
+
+bool slx_zigbee_network_send_command(sl_802154_short_addr_t destination,
+                                     uint8_t *commandFrame,
+                                     uint8_t length,
+                                     bool tryToInsertLongDest,
+                                     sl_802154_long_addr_t destinationEui)
+{
+  return slxi_zigbee_stack_network_send_command(destination,
+                                                commandFrame,
+                                                length,
+                                                tryToInsertLongDest,
+                                                destinationEui);
+}

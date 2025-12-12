@@ -38,7 +38,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-  
+
 #if SL_OPENTHREAD_MULTI_INSTANCE_CLI_ENABLE
 
 /**

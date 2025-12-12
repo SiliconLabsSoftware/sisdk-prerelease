@@ -646,7 +646,7 @@ uint8_t sl_zigbee_af_get_open_network_duration_sec(void);
 // master array of all defined endpoints
 extern sl_zigbee_af_defined_endpoint_t sli_zigbee_af_endpoints[];
 
-#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+#if defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT) || defined(SL_CATALOG_ZIGBEE_DYNAMIC_NODE_TYPE_PRESENT)
 // Master array of all zigbee PRO networks - not 'const', since the
 // node type may be changed at run-time.
 extern sli_zigbee_af_zigbee_pro_network sli_zigbee_af_zigbee_pro_networks[];

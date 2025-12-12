@@ -140,12 +140,12 @@ sl_status_t app_wisun_em_add_condition_evt_notification(const sl_wisun_msg_ind_i
                                                         wisun_event_notify_cond_callback_t cond_cb);
 
 /**************************************************************************//**
-* @brief Remove condition event notification
-* @details Remove condition event notification for the particular event flag
-*          described by notification channel
-* @param[in] id event ID
-* @param[in] evt_ch Destination event channel
-*****************************************************************************/
+ * @brief Remove condition event notification
+ * @details Remove condition event notification for the particular event flag
+ *          described by notification channel
+ * @param[in] id event ID
+ * @param[in] evt_ch Destination event channel
+ *****************************************************************************/
 sl_status_t app_wisun_em_rm_condition_evt_notification(const sl_wisun_msg_ind_id_t id,
                                                        const uint8_t evt_ch);
 

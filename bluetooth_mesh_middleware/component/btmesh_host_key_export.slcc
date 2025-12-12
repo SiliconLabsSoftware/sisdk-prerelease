@@ -26,3 +26,8 @@ requires:
 template_contribution:
 - name: component_catalog
   value: btmesh_host_key_export
+- name: btmesh_on_event
+  value:
+    include: btmesh_key_export.h
+    function: btmesh_key_export_on_event
+    priority: -9000

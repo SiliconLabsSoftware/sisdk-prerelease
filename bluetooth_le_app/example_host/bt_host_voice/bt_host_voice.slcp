@@ -34,7 +34,7 @@ component:
 
 source:
   - path: app.c
-  - path: ../../common_host/app_log/app_log_cli.c
+  - path: ../common/app_log/app_log_cli.c
   - path: config.c
   - path: parse.c
 
@@ -50,7 +50,7 @@ include:
       - path: app.h
       - path: config.h
       - path: parse.h
-  - path: ../../common_host/app_log
+  - path: ../common/app_log
     file_list:
       - path: app_log_cli.h
 

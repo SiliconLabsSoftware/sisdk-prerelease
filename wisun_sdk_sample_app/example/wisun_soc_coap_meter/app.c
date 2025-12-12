@@ -73,9 +73,9 @@ void app_task(void *args)
 
   // connect to the wisun network
   sl_wisun_app_core_util_connect_and_wait();
-  
+
   dev_type = sl_wisun_app_core_get_device_type();
-  
+
   if (dev_type == SL_WISUN_LFN) {
     EFM_ASSERT(app_wisun_em_subscribe_evt_notification(SL_WISUN_MSG_LFN_WAKE_UP_IND_ID,
                                                        &lfn_evt_ch) != SL_STATUS_FAIL);

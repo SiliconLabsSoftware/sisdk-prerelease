@@ -30,10 +30,10 @@ component:
 source:
   - path: app.c
   - path: test.c
-  - path: ../../common_host/app_log/app_log_cli.c
+  - path: ../common/app_log/app_log_cli.c
 
 include:
-  - path: ../../common_host/app_log
+  - path: ../common/app_log
     file_list:
       - path: app_log_cli.h
   - path: ../common/ncp

@@ -4,10 +4,8 @@ label=RAIL SDK
 description=RAIL Software Development Kit
 
 version=3.0.0
-prop.subLabel=RAIL SDK
 
 # General properties are prepended with "prop."
 prop.file.templatesFile=
 prop.file.adapterPacks=
-prop.file.docsFile=documentation/slrail_docContent.xml
 prop.file.demosFile=

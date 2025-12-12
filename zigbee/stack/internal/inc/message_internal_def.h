@@ -97,6 +97,12 @@ sl_status_t slxi_zigbee_stack_add_to_incoming_network_queue(int8_t rssi,
                                                             uint8_t lqi,
                                                             const sl_nwk_packet_exchange_t *nwk_packet);
 
+bool slxi_zigbee_stack_network_send_command(sl_802154_short_addr_t destination,
+                                            uint8_t *commandFrame,
+                                            uint8_t length,
+                                            bool tryToInsertLongDest,
+                                            sl_802154_long_addr_t destinationEui);
+
 // Callback Indirection
 
 void sli_zigbee_stack_gpep_incoming_message_handler(sl_zigbee_gp_params_t *params);

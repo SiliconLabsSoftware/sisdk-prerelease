@@ -32,9 +32,10 @@
 #define HOST_COMM_H
 
 #include "sl_status.h"
+#include "sl_component_catalog.h"
 
 // Macros used by CPC
-#if !defined(_WIN32) && defined (CPC) && CPC == 1
+#ifdef SL_CATALOG_HOST_NCP_CPC_PRESENT
 #define HOST_COMM_CPC_OPTSTRING  "C:"
 
 // Usage info.

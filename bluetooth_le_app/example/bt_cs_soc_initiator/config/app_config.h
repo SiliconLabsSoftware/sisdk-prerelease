@@ -77,6 +77,12 @@
 #define NEW_BOND_REQUIRES_PASSKEY            0
 #endif // NEW_BOND_REQUIRES_PASSKEY
 
+// <q ALLOW_BONDING> Allow bonding
+// <i> Default: 0
+#ifndef ALLOW_BONDING
+#define ALLOW_BONDING                        0
+#endif // ALLOW_BONDING
+
 // <q DELETE_BONDINGS_ON_STARTUP> Deletes all bondings on startup
 // <i> Default: 0
 #ifndef DELETE_BONDINGS_ON_STARTUP

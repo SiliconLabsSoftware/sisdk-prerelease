@@ -109,6 +109,21 @@ void sl_ot_cli_init(void)
                       OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM - 1);
 }
 
+#ifdef SL_CATALOG_KERNEL_PRESENT
+/******************************************************************************
+ * RTOS Application Tick.
+ * This function is called by the RTOS app task to handle application-level
+ * processing, including instance switching.
+ *****************************************************************************/
+void sl_ot_rtos_application_tick(void)
+{
+    if (sl_ot_should_change_instance())
+    {
+        sl_ot_switch_to_instance_index(sl_ot_get_new_instance_index());
+    }
+}
+#endif // SL_CATALOG_KERNEL_PRESENT
+
 /******************************************************************************
  * Application Init.
  *****************************************************************************/

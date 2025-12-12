@@ -365,11 +365,6 @@ void sli_zigbee_stack_zigbee_remove_child_process_ipc_command(sli_zigbee_ipc_cmd
                                                                                        msg->data.zigbee_remove_child.request.options);
 }
 
-void slxi_zigbee_stack_change_pan_id_now_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
-{
-  slxi_zigbee_stack_change_pan_id_now(msg->data.change_pan_id_now.request.panId);
-}
-
 void slxi_zigbee_stack_gu_zdo_toggle_dlk_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
 {
   slxi_zigbee_stack_gu_zdo_toggle_dlk(msg->data.gu_zdo_toggle_dlk.request.do_dlk,
@@ -379,15 +374,6 @@ void slxi_zigbee_stack_gu_zdo_toggle_dlk_process_ipc_command(sli_zigbee_ipc_cmd_
 void slxi_zigbee_stack_ignore_incoming_aps_acks_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
 {
   slxi_zigbee_stack_ignore_incoming_aps_acks(msg->data.ignore_incoming_aps_acks.request.ignore);
-}
-
-void slxi_zigbee_stack_network_send_command_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
-{
-  msg->data.network_send_command.response.result = slxi_zigbee_stack_network_send_command(msg->data.network_send_command.request.destination,
-                                                                                          &msg->data.network_send_command.request.commandFrame,
-                                                                                          msg->data.network_send_command.request.length,
-                                                                                          msg->data.network_send_command.request.tryToInsertLongDest,
-                                                                                          msg->data.network_send_command.request.destinationEui);
 }
 
 // public entrypoints
@@ -1182,13 +1168,6 @@ sl_status_t sl_zigbee_zigbee_remove_child(sl_802154_short_addr_t childId,
   return msg.data.zigbee_remove_child.response.result;
 }
 
-void slx_zigbee_change_pan_id_now(sl_802154_pan_id_t panId)
-{
-  sli_zigbee_ipc_cmd_t msg = { 0, };
-  msg.data.change_pan_id_now.request.panId = panId;
-  sli_zigbee_send_ipc_cmd(slxi_zigbee_stack_change_pan_id_now_process_ipc_command, &msg);
-}
-
 void slx_zigbee_gu_zdo_toggle_dlk(bool do_dlk,
                                   bool allow_anon_psk)
 {
@@ -1203,37 +1182,4 @@ void slx_zigbee_ignore_incoming_aps_acks(bool ignore)
   sli_zigbee_ipc_cmd_t msg = { 0, };
   msg.data.ignore_incoming_aps_acks.request.ignore = ignore;
   sli_zigbee_send_ipc_cmd(slxi_zigbee_stack_ignore_incoming_aps_acks_process_ipc_command, &msg);
-}
-
-bool slx_zigbee_network_send_command(sl_802154_short_addr_t destination,
-                                     uint8_t *commandFrame,
-                                     uint8_t length,
-                                     bool tryToInsertLongDest,
-                                     sl_802154_long_addr_t destinationEui)
-{
-  sli_zigbee_ipc_cmd_t msg = { 0, };
-  msg.data.network_send_command.request.destination = destination;
-
-  if (commandFrame != NULL) {
-    msg.data.network_send_command.request.commandFrame = *commandFrame;
-  }
-
-  msg.data.network_send_command.request.length = length;
-  msg.data.network_send_command.request.tryToInsertLongDest = tryToInsertLongDest;
-
-  if (destinationEui != NULL) {
-    memmove(msg.data.network_send_command.request.destinationEui, destinationEui, sizeof(sl_802154_long_addr_t));
-  }
-
-  sli_zigbee_send_ipc_cmd(slxi_zigbee_stack_network_send_command_process_ipc_command, &msg);
-
-  if (commandFrame != NULL) {
-    *commandFrame = msg.data.network_send_command.request.commandFrame;
-  }
-
-  if (destinationEui != NULL) {
-    memmove(destinationEui, msg.data.network_send_command.request.destinationEui, sizeof(sl_802154_long_addr_t));
-  }
-
-  return msg.data.network_send_command.response.result;
 }

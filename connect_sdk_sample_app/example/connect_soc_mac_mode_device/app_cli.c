@@ -31,7 +31,7 @@
 //                                   Includes
 // -----------------------------------------------------------------------------
 #include "sl_component_catalog.h"
-#include "em_chip.h"
+#include "em_system.h"
 #include "em_cmu.h"
 #include "app_log.h"
 #include "app_common.h"

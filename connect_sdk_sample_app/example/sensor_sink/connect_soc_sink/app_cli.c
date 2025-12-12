@@ -32,7 +32,7 @@
 // -----------------------------------------------------------------------------
 #include <string.h>
 #include PLATFORM_HEADER
-#include "em_chip.h"
+#include "em_system.h"
 #include "em_cmu.h"
 #include "stack/include/ember.h"
 #include "sl_cli.h"

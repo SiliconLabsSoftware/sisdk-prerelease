@@ -69,26 +69,28 @@ void sl_wisun_br_agent_service_init(void);
 sl_status_t sl_wisun_br_agent_service_send_graph_info(void);
 
 /**************************************************************************//**
- * @brief Set the remote address and port of the host Agent Service.
- * @details This function sets the remote address and port of the host Agent Service.
+ * @brief Set the remote address of the host Border Router Bridge Agent Service.
+ * @details This function sets the remote address of the
+ *          host Border Router Bridge Agent Service.
+ *          The port is set to the default value.
  *
  * @param[in] remote_address Pointer to the remote address string
  * @return SL_STATUS_OK on success, error code otherwise
  *****************************************************************************/
-sl_status_t sl_wisun_br_agent_service_set_remote_addr(const char *remote_address);
+sl_status_t sl_wisun_br_agent_service_set_bridge_agent_addr(const char *remote_address);
 
 /**************************************************************************//**
- * @brief Get the remote address of the host Agent Service.
- * @details This function gets the remote address of the host Agent Service.
+ * @brief Get the remote address of the host Border Router Bridge Agent Service.
+ * @details This function gets the remote address of the host Border Router Bridge Agent Service.
  *          The returned pointer must be freed by the caller using sl_free().
  *
  * @return Pointer to the remote address string
  *****************************************************************************/
-const char *sl_wisun_br_agent_service_get_remote_addr(void);
+const char *sl_wisun_br_agent_service_get_bridge_agent_addr(void);
 
 /**************************************************************************//**
  * @brief Start the Agent Service.
- * @details This function starts the Agent Service. 
+ * @details This function starts the Agent Service.
  *          Should be called after Wi-Fi connection is established.
  *****************************************************************************/
 void sl_wisun_agent_start_service(void);

@@ -1,6 +1,6 @@
 project_name: bt_aoa_host_locator
 package: bluetooth_le_app
-label: Bluetooth - AoA Host Locator
+label: Bluetooth AoA - Host Locator
 description: >
   Host application that performs real-time Angle of Arrival (AoA) calculations
   for Bluetooth direction finding. It connects to an NCP target with an antenna
@@ -40,7 +40,7 @@ config_file:
 
 source:
   - path: app.c
-  - path: ../../common_host/app_log/app_log_cli.c
+  - path: ../common/app_log/app_log_cli.c
   - path: ./aoa_cte/aoa_cte.c
   - path: ./aoa_cte/cte_conn_less.c
   - path: ./aoa_cte/cte_conn.c
@@ -56,7 +56,7 @@ source:
   - path: ../common/aoa_util/aoa_serdes.c
 
 include:
-  - path: ../../common_host/app_log
+  - path: ../common/app_log
     file_list:
       - path: app_log_cli.h
   - path: ./aoa_cte
