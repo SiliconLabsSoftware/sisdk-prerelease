@@ -40,7 +40,7 @@ template_contribution:
     function_name: sli_zigbee_af_zdd_tunneling_init
 
 documentation:
-  docset: zigbee
+  docset: multiprotocol
   document: zigbee-af-api/zigbee-direct-tunneling
 metadata:
   sbom:

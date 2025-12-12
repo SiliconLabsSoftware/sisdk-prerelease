@@ -1,9 +1,9 @@
 id: sl_railapp_malloc
-label: SL RAILAPP Malloc
+label: RAILAPP Malloc (RAIL 3)
 package: rail_library
-description: Memory allocation component for SL RAILAPP debug buffer capture
+description: Memory allocation component for RAILAPP debug buffer capture
 category: Platform|Radio
-quality: evaluation
+quality: production
 metadata:
   sbom:
     license: Zlib

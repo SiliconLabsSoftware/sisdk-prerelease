@@ -1,13 +1,13 @@
 id: rail_util_init
-label: RAIL Utility, Initialization
+label: RAIL Utility, Initialization (RAIL 2.x)
 description: Utility to aid with RAIL Initialization Support
 package: rail_library
-category: Platform|Radio
-quality: production
+category: Platform|Radio|RAIL 2.x
+quality: deprecated
 metadata:
   sbom:
     id: rail_util_init
-    name: RAIL Utility, Initialization
+    name: RAIL Utility, Initialization (RAIL 2.x)
     license: Zlib
 instantiable:
   prefix: inst

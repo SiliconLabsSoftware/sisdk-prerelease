@@ -113,6 +113,7 @@ tag:
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_supports_thread
   - hwfilter:board:hardware_board_has_spi
+  - toolchain:gcc
 
 readme:
   - path: ./README-MP-DMP-RCP.md

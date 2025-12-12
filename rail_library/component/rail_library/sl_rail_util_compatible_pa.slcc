@@ -9,6 +9,9 @@ metadata:
     id: sl_rail_util_compatible_pa
     name: RAIL Utility, PA compatibility
     license: Zlib
+documentation:
+  docset: rail
+  document: rail-api/rail-util-pa
 provides:
 - name: sl_rail_util_compatible_pa
 requires:
@@ -23,9 +26,6 @@ requires:
 recommends:
 - id: sl_rail_util_pa
   vendor: silabs
-documentation:
-  docset: rail
-  document: rail-api/rail-util-pa
 include:
 - path: plugin/sl_rail_util_compatible_pa
   file_list:

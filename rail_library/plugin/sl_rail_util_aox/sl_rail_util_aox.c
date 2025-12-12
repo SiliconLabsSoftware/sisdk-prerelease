@@ -36,7 +36,7 @@
 #include "sl_component_catalog.h"
 
 #if    SL_RAIL_UTIL_AOX_ANTENNA_PIN_COUNT == 0
-#if    (!RAILTEST && !defined(SL_CATALOG_RAIL_UTIL_BLE_CS_PRESENT))
+#if    (!RAILTEST && !defined(SL_CATALOG_SL_RAIL_UTIL_BLE_CS_PRESENT))
 #warning "The AoX component is only needed to configure multiple AoX antennas!"
 #endif
 #else//SL_RAIL_UTIL_AOX_ANTENNA_PIN_COUNT != 0

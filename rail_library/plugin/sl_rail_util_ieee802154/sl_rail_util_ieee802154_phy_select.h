@@ -86,7 +86,7 @@
 #define SL_RAIL_UTIL_IEEE802154_RADIO_CONFIG_2P4_1MBPS_FEC \
   SL_RAIL_IEEE802154_PHY_2P4_GHZ_1_MBPS_FEC
 
-#ifdef  SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
+#ifdef  SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
 #define SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_ENABLED    \
   (SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_DEFAULT_ENABLED \
    | SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_RUNTIME_ENABLED)
@@ -139,11 +139,7 @@ sl_rail_util_radio_config_t sl_rail_util_ieee802154_get_active_radio_config(void
  * @param[in] railHandle A RAIL instance handle.
  * @return Status code indicating success of the function call.
  */
-#ifdef  SL_CATALOG_SL_RAIL_UTIL_IEEE802154_PHY_SELECT_PRESENT
 sl_rail_status_t sl_rail_util_ieee802154_config_radio(sl_rail_handle_t railHandle);
-#else
-RAIL_Status_t sl_rail_util_ieee802154_config_radio(RAIL_Handle_t railHandle);
-#endif
 /**
  * @}
  * end of IEEE802154_PHY_SELECT_API

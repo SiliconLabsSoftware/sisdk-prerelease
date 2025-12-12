@@ -1,13 +1,13 @@
 id: rail_util_pa
-label: RAIL Utility, PA
+label: RAIL Utility, PA (RAIL 2.x)
 description: Utility to aid with RAIL RF Power Amplifier (PA) Support
 package: rail_library
-category: Platform|Radio
-quality: production
+category: Platform|Radio|RAIL 2.x
+quality: deprecated
 metadata:
   sbom:
     id: rail_util_pa
-    name: RAIL Utility, PA
+    name: RAIL Utility, PA (RAIL 2.x)
     license: Zlib
 requires:
 - name: rail_lib

@@ -1,13 +1,13 @@
 id: rail_util_recommended
-label: RAIL Utility, Recommended
+label: RAIL Utility, Recommended (RAIL 2.x)
 description: Recommended selection of common RAIL utilities using RAIL 2.x APIs
 package: rail_library
-category: Platform|Radio
+category: Platform|Radio|RAIL 2.x
 quality: deprecated
 metadata:
   sbom:
     id: rail_util_recommended
-    name: RAIL Utility, Recommended
+    name: RAIL Utility, Recommended (RAIL 2.x)
     license: Zlib
 documentation:
   docset: rail

@@ -40,7 +40,7 @@
 #include "sl_rail_zwave.h"
 #include "sl_rail_util_init.h"
 #include "sl_rail_util_protocol.h"
-#if defined(SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT)
+#if defined(SL_CATALOG_SL_RAIL_UTIL_ANT_DIV_PRESENT)
   #include "sl_rail_util_ant_div.h"
 #endif
 
@@ -97,9 +97,9 @@
 #define RAILTEST_SKIP_CALIBRATIONS_BOOL false
 #endif
 
-#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+#ifdef SL_CATALOG_SL_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
 extern void sl_rail_util_ieee801254_on_rail_event(sl_rail_handle_t railHandle, sl_rail_events_t events);
-#endif // SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+#endif // SL_CATALOG_SL_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
 #ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
 extern void sl_bt_ll_coex_handle_events(sl_rail_events_t events);
 #endif //SL_CATALOG_RAIL_UTIL_COEX_PRESENT
@@ -232,7 +232,7 @@ sl_rail_rx_data_config_t railRxDataConfig = {
   .rx_method = SL_RAIL_UTIL_INIT_RX_DATA_FORMAT_INST0_MODE,
 };
 
-#if defined(SL_CATALOG_RAIL_UTIL_THERMISTOR_PRESENT)
+#if defined(SL_CATALOG_SL_RAIL_UTIL_THERMISTOR_PRESENT)
 sl_rail_hfxo_compensation_config_t compensationConfig = {
   .enable_compensation = false,
   .zone_temperature_celsius = 85,
@@ -350,7 +350,7 @@ void sl_rail_test_internal_app_init(void)
   appHalInit();
 
   // Initialize txOptions & rxOptions
-#if defined(SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT)
+#if defined(SL_CATALOG_SL_RAIL_UTIL_ANT_DIV_PRESENT)
   sl_rail_util_ant_div_init_tx_options(&txOptions);
   sl_rail_util_ant_div_init_rx_options(&rxOptions);
 #endif
@@ -387,7 +387,7 @@ void sl_rail_test_internal_app_init(void)
     txData[i] = i;
   }
 
-#if defined(SL_CATALOG_RAIL_UTIL_THERMISTOR_PRESENT)
+#if defined(SL_CATALOG_SL_RAIL_UTIL_THERMISTOR_PRESENT)
   sl_rail_config_hfxo_compensation(railHandle, &compensationConfig);
 #endif
 
@@ -1006,11 +1006,11 @@ void sl_rail_util_on_event(sl_rail_handle_t railHandle, sl_rail_events_t events)
     modeSwitchNewChannel = 0xFFFFU;
   }
 #endif
-#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+#ifdef SL_CATALOG_SL_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
   if (sl_rail_ieee802154_is_enabled(railHandle)) {
     sl_rail_util_ieee801254_on_rail_event(railHandle, events);
   }
-#endif //SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+#endif //SL_CATALOG_SL_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
 #ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
   if (sl_rail_ble_is_enabled(railHandle)) {
     sl_bt_ll_coex_handle_events(events);

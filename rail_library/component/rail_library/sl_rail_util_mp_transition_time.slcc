@@ -9,19 +9,16 @@ metadata:
     id: sl_rail_util_mp_transition_time
     name: RAIL Utility, Initialize MP library switch time.
     license: Zlib
+documentation:
+  docset: rail
+  document: rail-api/sl-rail-util-mp-transition-time
+provides:
+- name: sl_rail_util_mp_transition_time
 requires:
 - name: device
 - name: rail_lib
 - name: clock_manager_runtime
 - name: component_catalog
-provides:
-- name: sl_rail_util_mp_transition_time
-define:
-- name: SL_RAIL_3_API
-  value: '1'
-documentation:
-  docset: rail
-  document: rail-api/sl-rail-util-mp-transition-time
 include:
 - path: plugin/sl_rail_util_mp_transition_time/
   file_list:

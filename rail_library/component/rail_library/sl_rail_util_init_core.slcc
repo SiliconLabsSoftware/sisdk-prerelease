@@ -1,13 +1,13 @@
 id: sl_rail_util_init_core
-label: SL RAIL Utility, Initialization Core
+label: RAIL Utility, Initialization Core (RAIL 3)
 description: Utility to aid with RAIL Initialization Core Support
 package: rail_library
 category: Platform|Radio
-quality: evaluation
+quality: production
 metadata:
   sbom:
     id: sl_rail_util_init_core
-    name: SL RAIL Utility, Initialization Core
+    name: RAIL Utility, Initialization Core (RAIL 3)
     license: Zlib
 ui_hints:
   visibility: never

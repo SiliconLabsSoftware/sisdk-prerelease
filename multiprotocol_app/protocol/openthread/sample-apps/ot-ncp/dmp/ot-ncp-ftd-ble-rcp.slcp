@@ -129,6 +129,8 @@ configuration:
   - name: configTOTAL_HEAP_SIZE
     value: 16384
     condition: [toolchain_lto, freertos]
+  - name: SL_BT_CONTROLLER_BUFFER_MEMORY
+    value: 4096
 
 define:
   - name: OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE

@@ -3,19 +3,19 @@ label: RAIL Utility, PA Tables
 description: Utility to aid with RAIL RF PA tables
 package: rail_library
 category: Platform|Radio
-quality: evaluation
+quality: production
 metadata:
   sbom:
     id: sl_rail_util_pa_tables
     name: RAIL Utility, PA Tables
     license: Zlib
+documentation:
+  docset: rail
+  document: rail-api/sl-rail-util-pa-tables
 provides:
 - name: sl_rail_util_pa_tables
 requires:
 - name: rail_lib
-documentation:
-  docset: rail
-  document: rail-api/sl-rail-util-pa-tables
 define:
 - name: SL_RAIL_UTIL_PA_TABLES_CONFIG_HEADER
   value: '<sl_rail_util_pa_tables_config.h>'

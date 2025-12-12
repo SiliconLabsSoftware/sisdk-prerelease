@@ -1,13 +1,13 @@
 id: sl_rail_test_core
-label: RAIL Test Application, Core
+label: RAIL Test Application, Core (RAIL 3)
 description: RAIL Test Application Core Support
 package: rail_library
 category: Platform|Radio
-quality: evaluation
+quality: production
 metadata:
   sbom:
     id: sl_rail_test_core
-    name: RAIL Test Application, Core
+    name: RAIL Test Application, Core (RAIL 3)
     license: Zlib
 provides:
 - name: sl_rail_test_core
@@ -107,7 +107,7 @@ include:
   file_list:
   - path: railapp_antenna.h
   - path: railapp_rmr.h
-- path: plugin/rail_util_thermistor
+- path: plugin/sl_rail_util_thermistor
   file_list:
   - path: sl_rail_util_thermistor.h
   condition:

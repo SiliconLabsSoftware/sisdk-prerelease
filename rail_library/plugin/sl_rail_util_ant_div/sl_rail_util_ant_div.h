@@ -28,11 +28,8 @@
 #endif
 
 #if !defined(SL_ZIGBEE_TEST) && !defined(ZIGBEE_STACK_ON_HOST)
-#ifdef  SL_CATALOG_SL_RAIL_UTIL_ANT_DIV_PRESENT
 #include "sl_rail.h"
-#else//!SL_CATALOG_SL_RAIL_UTIL_ANT_DIV_PRESENT
 #include "rail.h"
-#endif//SL_CATALOG_SL_RAIL_UTIL_ANT_DIV_PRESENT
 #endif
 
 #include "sl_status.h"

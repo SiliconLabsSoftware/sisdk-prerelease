@@ -390,7 +390,7 @@ template_contribution:
       help: TX power to be set in 0.1dBm steps
 
 documentation:
-  docset: zigbee
+  docset: multiprotocol
   document: zigbee-af-api/ble-dmp-cli
 metadata:
   sbom:

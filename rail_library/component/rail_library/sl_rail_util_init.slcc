@@ -1,14 +1,17 @@
 id: sl_rail_util_init
-label: SL RAIL Utility, Initialization
+label: RAIL Utility, Initialization (RAIL 3)
 description: Utility to aid with RAIL Initialization Support
 package: rail_library
 category: Platform|Radio
-quality: evaluation
+quality: production
 metadata:
   sbom:
     id: sl_rail_util_init
-    name: SL RAIL Utility, Initialization
+    name: RAIL Utility, Initialization (RAIL 3)
     license: Zlib
+documentation:
+  docset: rail
+  document: rail-api/rail-util-init
 provides:
 - name: sl_rail_util_init
   allow_multiple: true
@@ -20,9 +23,6 @@ requires:
 - name: sl_rail_util_protocol
 - name: sl_rail_util_init_core
 - name: sl_rail_util_callbacks
-documentation:
-  docset: rail
-  document: rail-api/rail-util-init
 config_file:
 - path: plugin/sl_rail_util_init/config/efr32xg21/sl_rail_util_init_{{instance}}_config.h
   condition:

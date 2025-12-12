@@ -1,5 +1,5 @@
 id: sl_rail_util_recommended
-label: RAIL 3 Utility, Recommended
+label: RAIL Utility, Recommended (RAIL 3)
 description: Recommended selection of common RAIL utilities using RAIL 3 APIs
 package: rail_library
 category: Platform|Radio
@@ -7,7 +7,7 @@ quality: production
 metadata:
   sbom:
     id: sl_rail_util_recommended
-    name: RAIL 3 Utility, Recommended
+    name: RAIL Utility, Recommended (RAIL 3)
     license: Zlib
 documentation:
   docset: rail

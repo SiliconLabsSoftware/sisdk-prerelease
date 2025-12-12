@@ -1,5 +1,5 @@
 id: sl_rail_util_standard_phys
-label: SL RAIL Utility, Standards based PHYs
+label: RAIL Utility, Standards based PHYs
 package: rail_library
 description: Radio configurations for standards based PHYs.
 category: Platform|Radio
@@ -9,12 +9,11 @@ metadata:
     id: sl_rail_util_standard_phys
     name: RAIL Utility, Standards based PHYs
     license: Zlib
-requires:
-- name: rail_lib
 provides:
 - name: sl_rail_util_standard_phys
 - name: a_radio_config
-
+requires:
+- name: rail_lib
 include:
 - path: chip/efr32/protocol_config/efr32xg21
   condition: [device_sdid_200]

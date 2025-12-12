@@ -1,13 +1,13 @@
 id: rail_test_core
-label: RAILtest Application, Core
+label: RAILtest Application, Core (RAIL 2.x)
 description: RAILtest Application Core Support
 package: rail_library
-category: Platform|Radio
-quality: production
+category: Platform|Radio|RAIL 2.x
+quality: deprecated
 metadata:
   sbom:
     id: rail_test_core
-    name: RAILtest Application, Core
+    name: RAILtest Application, Core (RAIL 2.x)
     license: Zlib
 provides:
 - name: rail_test_core

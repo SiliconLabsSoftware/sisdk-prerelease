@@ -9,6 +9,9 @@ metadata:
     id: sl_rail_util_mp_transition_time_override
     name: RAIL Utility, Overrides the template_contributions in the sl_rail_util_mp_transition_time component
     license: Zlib
+documentation:
+  docset: rail
+  document: rail-api/sl-rail-util-mp-transition-time
 provides:
 - name: sl_rail_util_mp_transition_time_override
 requires:
@@ -19,7 +22,4 @@ requires:
 template_contribution:
 - name: component_catalog
   value: sl_rail_util_mp_transition_time_override
-documentation:
-  docset: rail
-  document: rail-api/sl-rail-util-mp-transition-time
 root_path: rail_library

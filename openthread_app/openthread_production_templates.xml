@@ -4,7 +4,7 @@
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="ot-ble-dmp.multi-instance.ot-ble-dmp-multi-instance.slcp"/>
+    <properties key="solutionReferenceId" value="openthread.ot-ble-dmp.multi-instance.ot-ble-dmp-multi-instance.slcp"/>
     <properties key="projectFilePaths" value="ot-ble-dmp/multi-instance/ot-ble-dmp-multi-instance.slcp"/>
     <properties key="readmeFiles" value="ot-ble-dmp/README.md ot-ble-dmp/multi-instance/README.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2704a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4406a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -21,7 +21,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="ot-ble-dmp.ot-ble-dmp-no-buttons.slcp"/>
+    <properties key="solutionReferenceId" value="openthread.ot-ble-dmp.ot-ble-dmp-no-buttons.slcp"/>
     <properties key="projectFilePaths" value="ot-ble-dmp/ot-ble-dmp-no-buttons.slcp"/>
     <properties key="readmeFiles" value="ot-ble-dmp/README.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2704a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4406a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -37,7 +37,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="ot-ble-dmp.ot-ble-dmp.slcp"/>
+    <properties key="solutionReferenceId" value="openthread.ot-ble-dmp.ot-ble-dmp.slcp"/>
     <properties key="projectFilePaths" value="ot-ble-dmp/ot-ble-dmp.slcp"/>
     <properties key="readmeFiles" value="ot-ble-dmp/README.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2704a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4406a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -53,7 +53,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="ot-ble-dmp.trustzone.ot-ble-dmp-tz-ns.slcp"/>
+    <properties key="solutionReferenceId" value="openthread.ot-ble-dmp.trustzone.ot-ble-dmp-tz-ns.slcp"/>
     <properties key="projectFilePaths" value="ot-ble-dmp/trustzone/ot-ble-dmp-tz-ns.slcp"/>
     <properties key="readmeFiles" value="ot-ble-dmp/README.md ot-ble-dmp/trustzone/README.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2704a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4406a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -70,7 +70,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 ">
     <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="ot-ble-dmp.trustzone.ot-ble-dmp-tz.slcw"/>
+    <properties key="solutionReferenceId" value="openthread.ot-ble-dmp.trustzone.ot-ble-dmp-tz.slcw"/>
     <properties key="projectFilePaths" value="ot-ble-dmp/trustzone/ot-ble-dmp-tz.slcw"/>
     <properties key="readmeFiles" value="ot-tz-secure-app/README.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2704a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4406a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -81,13 +81,13 @@ It is identical to the ot-ble-dmp application with the exception that support fo
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
-    <properties key="solutionProjects" value="ot-ble-dmp.trustzone.ot-ble-dmp-tz-ns.slcp ot-tz-secure-app.ot-tz-secure-application.slcp workspace-bootloaders.bootloader-storage-internal-single.bootloader-storage-internal-single.slcp"/>
+    <properties key="solutionProjects" value="openthread.ot-ble-dmp.trustzone.ot-ble-dmp-tz-ns.slcp openthread.ot-tz-secure-app.ot-tz-secure-application.slcp openthread.workspace-bootloaders.bootloader-storage-internal-single.bootloader-storage-internal-single.slcp"/>
   </descriptors>
   <descriptors name="ot-cli-ftd-multi-instance" label="OpenThread - SoC CLI (FTD multi-instance)" description="This is a very simple CLI application to test the OpenThread stack on a Full Thread Device using openthread&#39;s multi-instance support.
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="ot-cli.multi-instance.ot-cli-ftd-multi-instance.slcp"/>
+    <properties key="solutionReferenceId" value="openthread.ot-cli.multi-instance.ot-cli-ftd-multi-instance.slcp"/>
     <properties key="projectFilePaths" value="ot-cli/multi-instance/ot-cli-ftd-multi-instance.slcp"/>
     <properties key="readmeFiles" value="ot-cli/README.md ot-cli/multi-instance/README.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2704a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4406a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -103,7 +103,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="ot-cli.multi-instance.ot-cli-mtd-multi-instance.slcp"/>
+    <properties key="solutionReferenceId" value="openthread.ot-cli.multi-instance.ot-cli-mtd-multi-instance.slcp"/>
     <properties key="projectFilePaths" value="ot-cli/multi-instance/ot-cli-mtd-multi-instance.slcp"/>
     <properties key="readmeFiles" value="ot-cli/README.md ot-cli/multi-instance/README.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2704a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4406a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -119,7 +119,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="ot-cli.ot-cli-ftd.slcp"/>
+    <properties key="solutionReferenceId" value="openthread.ot-cli.ot-cli-ftd.slcp"/>
     <properties key="projectFilePaths" value="ot-cli/ot-cli-ftd.slcp"/>
     <properties key="readmeFiles" value="ot-cli/README.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2704a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4406a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -135,7 +135,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="ot-cli.ot-cli-mtd.slcp"/>
+    <properties key="solutionReferenceId" value="openthread.ot-cli.ot-cli-mtd.slcp"/>
     <properties key="projectFilePaths" value="ot-cli/ot-cli-mtd.slcp"/>
     <properties key="readmeFiles" value="ot-cli/README.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2704a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4406a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -151,7 +151,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="ot-cli.trustzone.ot-cli-ftd-tz-ns.slcp"/>
+    <properties key="solutionReferenceId" value="openthread.ot-cli.trustzone.ot-cli-ftd-tz-ns.slcp"/>
     <properties key="projectFilePaths" value="ot-cli/trustzone/ot-cli-ftd-tz-ns.slcp"/>
     <properties key="readmeFiles" value="ot-cli/README.md ot-cli/trustzone/README.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2704a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4406a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -168,7 +168,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 ">
     <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="ot-cli.trustzone.ot-cli-ftd-tz.slcw"/>
+    <properties key="solutionReferenceId" value="openthread.ot-cli.trustzone.ot-cli-ftd-tz.slcw"/>
     <properties key="projectFilePaths" value="ot-cli/trustzone/ot-cli-ftd-tz.slcw"/>
     <properties key="readmeFiles" value="ot-tz-secure-app/README.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2704a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4406a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -179,13 +179,13 @@ It is identical to the ot-ble-dmp application with the exception that support fo
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
-    <properties key="solutionProjects" value="ot-cli.trustzone.ot-cli-ftd-tz-ns.slcp ot-tz-secure-app.ot-tz-secure-application.slcp workspace-bootloaders.bootloader-storage-internal-single.bootloader-storage-internal-single.slcp"/>
+    <properties key="solutionProjects" value="openthread.ot-cli.trustzone.ot-cli-ftd-tz-ns.slcp openthread.ot-tz-secure-app.ot-tz-secure-application.slcp openthread.workspace-bootloaders.bootloader-storage-internal-single.bootloader-storage-internal-single.slcp"/>
   </descriptors>
   <descriptors name="ot-cli-mtd-tz-ns" label="OpenThread - SoC CLI (MTD) (TrustZone)" description="This is a variant of the openthread MTD CLI application with trustzone awareness enabled.
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="ot-cli.trustzone.ot-cli-mtd-tz-ns.slcp"/>
+    <properties key="solutionReferenceId" value="openthread.ot-cli.trustzone.ot-cli-mtd-tz-ns.slcp"/>
     <properties key="projectFilePaths" value="ot-cli/trustzone/ot-cli-mtd-tz-ns.slcp"/>
     <properties key="readmeFiles" value="ot-cli/README.md ot-cli/trustzone/README.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2704a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4406a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -202,7 +202,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 ">
     <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="ot-cli.trustzone.ot-cli-mtd-tz.slcw"/>
+    <properties key="solutionReferenceId" value="openthread.ot-cli.trustzone.ot-cli-mtd-tz.slcw"/>
     <properties key="projectFilePaths" value="ot-cli/trustzone/ot-cli-mtd-tz.slcw"/>
     <properties key="readmeFiles" value="ot-tz-secure-app/README.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2704a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4406a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -213,13 +213,13 @@ It is identical to the ot-ble-dmp application with the exception that support fo
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
-    <properties key="solutionProjects" value="ot-cli.trustzone.ot-cli-mtd-tz-ns.slcp ot-tz-secure-app.ot-tz-secure-application.slcp workspace-bootloaders.bootloader-storage-internal-single.bootloader-storage-internal-single.slcp"/>
+    <properties key="solutionProjects" value="openthread.ot-cli.trustzone.ot-cli-mtd-tz-ns.slcp openthread.ot-tz-secure-app.ot-tz-secure-application.slcp openthread.workspace-bootloaders.bootloader-storage-internal-single.bootloader-storage-internal-single.slcp"/>
   </descriptors>
   <descriptors name="ot-ncp-ftd-cpc" label="OpenThread - NCP (FTD) with CPC" description="This is a simple OpenThread Full Thread Device NCP application with CPC. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo.
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="ot-ncp.cpc.ot-ncp-ftd-cpc.slcp"/>
+    <properties key="solutionReferenceId" value="openthread.ot-ncp.cpc.ot-ncp-ftd-cpc.slcp"/>
     <properties key="projectFilePaths" value="ot-ncp/cpc/ot-ncp-ftd-cpc.slcp"/>
     <properties key="readmeFiles" value="ot-ncp/cpc/README-OT-NCP.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2704a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4406a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -235,7 +235,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="ot-ncp.cpc.ot-ncp-mtd-cpc.slcp"/>
+    <properties key="solutionReferenceId" value="openthread.ot-ncp.cpc.ot-ncp-mtd-cpc.slcp"/>
     <properties key="projectFilePaths" value="ot-ncp/cpc/ot-ncp-mtd-cpc.slcp"/>
     <properties key="readmeFiles" value="ot-ncp/cpc/README-OT-NCP.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2704a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4406a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -251,7 +251,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="ot-ncp.cpc.rcp-spi-802154.slcp"/>
+    <properties key="solutionReferenceId" value="openthread.ot-ncp.cpc.rcp-spi-802154.slcp"/>
     <properties key="projectFilePaths" value="ot-ncp/cpc/rcp-spi-802154.slcp"/>
     <properties key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4308a brd4308b brd4308c brd4308d brd4316a brd4317a brd4318a brd4350a brd4351a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -267,7 +267,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="ot-ncp.cpc.rcp-uart-802154.slcp"/>
+    <properties key="solutionReferenceId" value="openthread.ot-ncp.cpc.rcp-uart-802154.slcp"/>
     <properties key="projectFilePaths" value="ot-ncp/cpc/rcp-uart-802154.slcp"/>
     <properties key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2704a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4406a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -283,7 +283,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="ot-ncp.ot.ot-ncp-ftd.slcp"/>
+    <properties key="solutionReferenceId" value="openthread.ot-ncp.ot.ot-ncp-ftd.slcp"/>
     <properties key="projectFilePaths" value="ot-ncp/ot/ot-ncp-ftd.slcp"/>
     <properties key="readmeFiles" value="ot-ncp/ot/README-OT-NCP.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2704a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4406a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -299,7 +299,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="ot-ncp.ot.ot-ncp-mtd.slcp"/>
+    <properties key="solutionReferenceId" value="openthread.ot-ncp.ot.ot-ncp-mtd.slcp"/>
     <properties key="projectFilePaths" value="ot-ncp/ot/ot-ncp-mtd.slcp"/>
     <properties key="readmeFiles" value="ot-ncp/ot/README-OT-NCP.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2704a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4406a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -315,7 +315,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="ot-ncp.ot.ot-rcp.slcp"/>
+    <properties key="solutionReferenceId" value="openthread.ot-ncp.ot.ot-rcp.slcp"/>
     <properties key="projectFilePaths" value="ot-ncp/ot/ot-rcp.slcp"/>
     <properties key="readmeFiles" value="ot-ncp/ot/README-OT-RCP.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2704a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4406a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -331,7 +331,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="ot-tz-secure-app.ot-tz-secure-application.slcp"/>
+    <properties key="solutionReferenceId" value="openthread.ot-tz-secure-app.ot-tz-secure-application.slcp"/>
     <properties key="projectFilePaths" value="ot-tz-secure-app/ot-tz-secure-application.slcp"/>
     <properties key="readmeFiles" value="ot-tz-secure-app/README.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2704a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4406a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -348,7 +348,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="sleepy-demo.sleepy-demo-ftd.slcp"/>
+    <properties key="solutionReferenceId" value="openthread.sleepy-demo.sleepy-demo-ftd.slcp"/>
     <properties key="projectFilePaths" value="sleepy-demo/sleepy-demo-ftd.slcp"/>
     <properties key="readmeFiles" value="sleepy-demo/README.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -364,7 +364,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="sleepy-demo.sleepy-demo-mtd.slcp"/>
+    <properties key="solutionReferenceId" value="openthread.sleepy-demo.sleepy-demo-mtd.slcp"/>
     <properties key="projectFilePaths" value="sleepy-demo/sleepy-demo-mtd.slcp"/>
     <properties key="readmeFiles" value="sleepy-demo/README.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -380,7 +380,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="sleepy-demo.sleepy-demo-ssed.slcp"/>
+    <properties key="solutionReferenceId" value="openthread.sleepy-demo.sleepy-demo-ssed.slcp"/>
     <properties key="projectFilePaths" value="sleepy-demo/sleepy-demo-ssed.slcp"/>
     <properties key="readmeFiles" value="sleepy-demo/README.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4407a brd4408a brd4411a com.silabs.board.none"/>
@@ -396,7 +396,7 @@ It is identical to the ot-ble-dmp application with the exception that support fo
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="workspace-bootloaders.bootloader-storage-internal-single.bootloader-storage-internal-single.slcp"/>
+    <properties key="solutionReferenceId" value="openthread.workspace-bootloaders.bootloader-storage-internal-single.bootloader-storage-internal-single.slcp"/>
     <properties key="projectFilePaths" value="workspace-bootloaders/bootloader-storage-internal-single/bootloader-storage-internal-single.slcp"/>
     <properties key="readmeFiles" value="workspace-bootloaders/bootloader-storage-internal-single/readme.md"/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2606a brd2608a brd2703a brd2704a brd2709a brd2713a brd2719a brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4350a brd4351a brd4406a brd4407a brd4408a brd4411a com.silabs.board.none"/>

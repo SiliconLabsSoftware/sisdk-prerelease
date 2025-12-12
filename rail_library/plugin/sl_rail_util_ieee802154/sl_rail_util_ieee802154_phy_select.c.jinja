@@ -186,18 +186,6 @@ sl_rail_ieee802154_phy_t sl_rail_util_ieee802154_get_active_radio_config(void)
   return active_radio_config;
 }
 
-// Compatibility aliases for deprecated RAIL 2x definitions
-#ifndef SL_CATALOG_SL_RAIL_UTIL_IEEE802154_PHY_SELECT_PRESENT
-typedef RAIL_Status_t sl_rail_status_t;
-typedef RAIL_Handle_t sl_rail_handle_t;
-#ifndef SL_RAIL_STATUS_INVALID_STATE
-#define SL_RAIL_STATUS_INVALID_STATE RAIL_STATUS_INVALID_STATE
-#endif
-#ifndef SL_RAIL_STATUS_NO_ERROR
-#define SL_RAIL_STATUS_NO_ERROR RAIL_STATUS_NO_ERROR
-#endif
-#endif
-
 typedef struct sl_rail_util_ieee802154_config {
   sl_rail_ieee802154_phy_t phy_id;
   sl_rail_ieee802154_phy_features_t phy_features;

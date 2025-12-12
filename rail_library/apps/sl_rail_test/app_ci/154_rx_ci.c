@@ -50,7 +50,7 @@ uint32_t dataReqLatencyUs = 0U;
 
 sl_rail_handle_t emPhyRailHandle;
 
-#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+#ifdef SL_CATALOG_SL_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
 extern sl_rail_status_t sl_rail_util_ieee802154_config_radio(sl_rail_handle_t railHandle);
 #endif
 
@@ -94,7 +94,7 @@ void emRadioHoldOffIsr(bool active)
 
 void sl_railtest_update_154_radio_config(void)
 {
-#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+#ifdef SL_CATALOG_SL_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
   if (sl_rail_ieee802154_is_enabled(railHandle)) {
     sl_rail_radio_state_t currentState = sl_rail_get_radio_state(railHandle);
     sl_rail_idle(railHandle, SL_RAIL_IDLE_ABORT, false);
@@ -103,7 +103,7 @@ void sl_railtest_update_154_radio_config(void)
       sl_rail_start_rx(railHandle, channel, NULL);
     }
   }
-#endif //SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+#endif //SL_CATALOG_SL_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
 }
 
 void ieee802154Enable(sl_cli_command_arg_t *args)

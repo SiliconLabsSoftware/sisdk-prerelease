@@ -34,7 +34,7 @@
 #include "sl_rail_util_coex_config.h"
 #endif // SL_CATALOG_RAIL_UTIL_COEX_PRESENT
 #if (!defined(PHY_NULL) && !defined(ZIGBEE_STACK_ON_HOST))
-#include "rail_util_ieee802154/sl_rail_util_ieee802154_stack_event.h"
+#include "sl_rail_util_ieee802154/sl_rail_util_ieee802154_stack_event.h"
 #endif
 #ifdef __cplusplus
 extern "C" {
