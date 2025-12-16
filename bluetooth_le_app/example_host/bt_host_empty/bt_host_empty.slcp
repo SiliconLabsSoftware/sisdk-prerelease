@@ -45,9 +45,13 @@ config_file:
     path: gatt_configuration.btconf
     directory: btconf
 
+readme:
+  - path: readme.md
+
 ui_hints:
   highlight:
     - path: config/btconf/gatt_configuration.btconf
+    - path: readme.md
       focus: true
 
 tag:

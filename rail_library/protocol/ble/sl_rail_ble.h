@@ -420,12 +420,12 @@ bool sl_rail_ble_is_enabled(sl_rail_handle_t rail_handle);
  * Load BLE channel config.
  *
  * @param[in] rail_handle A real RAIL instance handle.
- * @param[in] channel_config Pointer to the channel configuration structure.
+ * @param[in] p_channel_config A pointer to the channel configuration structure.
  * @param[in] phy_id The PHY ID to configure.
  * @return Status code indicating success of the function call.
  */
 sl_rail_status_t sl_rail_ble_config_channels(sl_rail_handle_t rail_handle,
-                                             const sl_rail_channel_config_t * channel_config,
+                                             const sl_rail_channel_config_t *p_channel_config,
                                              sl_rail_ble_phy_t phy_id);
 
 /**

@@ -4,7 +4,7 @@
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="z3.zigbee_z3_gateway_cpc.zigbee_z3_gateway_cpc.slcp"/>
+    <properties key="solutionReferenceId" value="zigbee.z3.zigbee_z3_gateway_cpc.zigbee_z3_gateway_cpc.slcp"/>
     <properties key="projectFilePaths" value="z3/zigbee_z3_gateway_cpc/zigbee_z3_gateway_cpc.slcp"/>
     <properties key="readmeFiles" value="z3/zigbee_z3_gateway_cpc/readme.md"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>

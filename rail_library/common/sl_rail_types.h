@@ -3116,14 +3116,15 @@ typedef struct sl_rail_hfxo_retiming_info {
    */
   uint32_t dpll_clock;
   /**
-   * Number of frequency band (RAIL_HfxoRetimingBand_t[]) element for this
-   * configuration. The offset field below point to the start of
-   * RAIL_HfxoRetimingBand_t for this configuration
+   * The number of \ref sl_rail_hfxo_retiming_band_t elements in an array
+   * of such appended to the \ref sl_rail_hfxo_retiming_config_t structure
+   * by the radio calculator.
    */
   uint8_t number_of_frequency_bands;
   /**
-   * byte offset from start of RAIL_HfxoRetimingConfig_t to start of
-   * RAIL_HfxoRetimingBand_t.
+   * The byte offset from the start of the \ref sl_rail_hfxo_retiming_config_t
+   * encompassing this structure to the first element of the corresponding \ref
+   * sl_rail_hfxo_retiming_band_t structure for this retiming info element.
    */
   uint8_t offset;
   /**
@@ -3144,7 +3145,8 @@ typedef struct sl_rail_hfxo_retiming_info {
  */
 typedef struct sl_rail_hfxo_retiming_config {
   /**
-   * Number of retiming info (RAIL_HfxoRetimingInfo_t[]) elements.
+   * The number of \ref sl_rail_hfxo_retiming_info_t elements in the
+   * hfxo_retiming_info array.
    */
   uint8_t number_of_elements;
   /**
@@ -3152,7 +3154,7 @@ typedef struct sl_rail_hfxo_retiming_config {
    */
   uint8_t reserved[3];
   /**
-   * Retiming frequency band Info.
+   * Retiming frequency band info.
    */
   sl_rail_hfxo_retiming_info_t hfxo_retiming_info[1];
 } sl_rail_hfxo_retiming_config_t;
@@ -5577,9 +5579,11 @@ typedef struct sl_rail_rx_packet_details {
    */
   sl_rail_packet_time_stamp_t time_received;
   /**
-   * Indicates whether the CRC passed or failed for the received packet.
+   * Indicates whether the received packet successfully passed CRC checks
+   * or failed (not just CRC failure).
    * It is true for \ref SL_RAIL_RX_PACKET_READY_SUCCESS packets and false
-   * for all others.
+   * for all other \ref sl_rail_rx_packet_status_t values reported in \ref
+   * sl_rail_rx_packet_info_t::packet_status.
    *
    * It is always available.
    */
@@ -5722,7 +5726,7 @@ typedef struct sl_rail_prs_lna_bypass_config {
    * The table below shows EFR32XG25 treshold corresponding to received power
    * level without the LNA gain.
    *
-   * |  Level dB  | FSK_1a | FSK_1b | FSK_2a | FSK_2b | FSK_3 | FSK_4a | FSK_4b | FSK_5 | OFDM1 | OFDM2 | OFDM3 | OFDM4 |
+   * |  Level dBm | FSK_1a | FSK_1b | FSK_2a | FSK_2b | FSK_3 | FSK_4a | FSK_4b | FSK_5 | OFDM1 | OFDM2 | OFDM3 | OFDM4 |
    * |------------|--------|--------|--------|--------|-------|--------|--------|-------|-------|-------|-------|-------|
    * |   __-25__  |        |        |        |        |       |        |        |       |   9   |   9   |   9   |   10  |
    * |   __-20__  |        |    7   |    7   |    7   |   8   |    8   |    7   |   8   |   11  |   12  |   12  |   12  |
@@ -5732,16 +5736,16 @@ typedef struct sl_rail_prs_lna_bypass_config {
    * |    __0__   |    14  |    17  |    18  |    17  |   17  |    18  |    18  |   18  |       |       |       |       |
    *
    * For example, with OFDM1 PHY, setting the threshold to 11 will turn on the
-   * bypass when the power level at EFR32XG25 input is greater than -20 dB.
+   * bypass when the power level at EFR32XG25 input is greater than -20 dBm.
    */
   uint8_t threshold;
   /**
-   * Compensation in dBm applied by RAIL to RSSI during LNA bypass. The RSSI
+   * Compensation in dB applied by RAIL to RSSI during LNA bypass. The RSSI
    * offset set using \ref sl_rail_set_rssi_offset() must corespond to the case
-   * with FEM LNA not bypassed. delta_rssi_dbm is typically the FEM LNA gain
+   * with FEM LNA not bypassed. delta_rssi_db is typically the FEM LNA gain
    * value.
    */
-  uint8_t delta_rssi_dbm;
+  uint8_t delta_rssi_db;
   /**
    * PRS Channel used for the bypass.
    * PRS_GetFreeChannel() can be use to find a free channel. Then the signal

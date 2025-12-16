@@ -16,13 +16,6 @@ component:
   - id: bootloader_interface
   - id: clock_manager
   - id: ot_reset_utils
-## Disabling RTOS by default
-# - id: freertos
-# - id: freertos_heap_3
-# - id: simple_button
-  # instance:
-    # - btn0
-    # - btn1
   # Platform - Enable LTO for gcc by installing the following component
   - id: toolchain_gcc_lto
 

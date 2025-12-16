@@ -1,7 +1,8 @@
 /*
  * @copyright Copyright 2023 Secure-IC S.A.S.
  * This file relies on Secure-IC S.A.S. software and patent portfolio.
- * This file cannot be used nor duplicated without prior approval from Secure-IC S.A.S.
+ *
+ * SPDX-License-Identifier: Zlib
  */
 #ifndef INTERNAL_HEADER_FILE
 #define INTERNAL_HEADER_FILE

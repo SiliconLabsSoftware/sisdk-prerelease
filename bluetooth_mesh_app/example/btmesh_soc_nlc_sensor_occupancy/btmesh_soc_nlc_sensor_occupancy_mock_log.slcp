@@ -1,7 +1,7 @@
 project_name: btmesh_soc_nlc_sensor_occupancy
 package: bluetooth_mesh_app
 label: Bluetooth Mesh - NLC Occupancy Sensor
-description: >
+description: >-
   An out-of-the-box Software Demo where the device acts as an Occupancy Sensor
   in a Networked Lighting Control (NLC) system.
   Push Button presses imitate people count changes which can control a properly

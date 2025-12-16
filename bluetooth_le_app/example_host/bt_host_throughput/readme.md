@@ -27,44 +27,10 @@ The host application supports only the central role.
 - libcjson host library with headers installed by the user
 
 
-## Configuration
-
-
-### Command Line Arguments
-
-The program supports the following command line options for flexible configuration:
-
-- `-t <tcp_address>`: Use TCP/IP connection. Specify the dev board's TCP/IP address.
-- `-u <serial_port>`: Use UART serial connection. Specify the serial port (e.g., COM# on Windows, /dev/tty# on POSIX).
-- `-n <server_socket>`: Use AF socket connection. Specify the path to the AF socket file descriptor.
-- `-b <baud_rate>`: Set UART baud rate (default: 115200).
-- `-f`: Disable flow control (RTS/CTS). By default, flow control is enabled.
-- `-l <level>`: Set application log level filter (default: 4).
-    - 0: Critical
-    - 1: Critical, error
-    - 2: Critical, error, warning
-    - 3: Critical, error, warning, info
-    - 4: Critical, error, warning, info, debug
-- `-T <time>`: Fixed time mode. Specify measurement duration in seconds.
-- `-D <data_length>`: Fixed data length mode. Specify measurement data length in bytes.
-- `-p <phy>`: Select PHY type:
-    - 1: 1M (default)
-    - 2: 2M
-    - 4: Coded, 125k
-    - 8: Coded, 500k
-- `-i <interval>`: Set connection interval (in 1.25 ms steps).
-- `-M <mtu>`: Set Maximum Transmission Unit (MTU) size in bytes.
-- `-N <type>`: Select test type:
-    - 1: Notification
-    - 2: Indication
-- `-c <config>`: Specify path to configuration file.
-- `-o <log>`: Specify path to log file.
-- `-h`: Print help message.
-
-
 ## Usage
 
 1. Build and flash a Bluetooth - SoC Throughput example or demo onto your Bluetooth LE device.
+    Refer to the bt_soc_throughput documentation for details.
 2. Generate a Bluetooth - NCP application.
     - Add the bluetooth_feature_power_control.
     - Build and flash to the target.
@@ -72,6 +38,17 @@ The program supports the following command line options for flexible configurati
 4. Start the host application.
 5. If no time or data length was specified, press Button 0
     on the board with the Bluetooth - SoC Throughput application.
+6. For complete option list, use the -h option for help.
+
+### Example invocation
+
+```bash
+bt_host_throughput -u /dev/tty.usbmodem0004403482281
+```
+
+This will create a connection to the Bluetooth - SoC Throughput application. To start a measurement,
+press button 0 on the target. The result will be printed on the screen.
+
 
 
 ## Output
@@ -82,7 +59,26 @@ The script displays:
 - Test duration
 - Status
 
-## References
+```
+__________________
+|ROLE: CENTRAL   |
+|ST: Subscribed  |
+|TX:  +10 dBm    |
+|RSSI:  -42 dBm  |
+|PHY: 1M         |
+|INTERVAL: 0040  |
+|PDU: 251        |
+|MTU: 247        |
+|DATA: 244       |
+|NOTIFY: Yes     |
+|INDICATE: Yes   |
+|TH: 0024400 bps |
+|CNT: 000000017  |
+__________________
+```
+
+
+## Resources
 
 - [Bluetooth LE SDK Documentation](https://docs.silabs.com/bluetooth/latest/)
 - [Using the Silicon Labs Bluetooth® Stack v3.x and Higher in Network

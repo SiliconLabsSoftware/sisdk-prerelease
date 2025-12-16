@@ -1,7 +1,7 @@
 project_name: btmesh_ncp_empty
 package: bluetooth_mesh_app
 label: Bluetooth Mesh - NCP Empty
-description: >
+description: >-
   An NCP Target C application that makes it possible for the NCP Host Controller to access
   the Bluetooth Mesh stack via UART. It provides access to the host layer via BGAPI and not
   to the link layer via HCI.

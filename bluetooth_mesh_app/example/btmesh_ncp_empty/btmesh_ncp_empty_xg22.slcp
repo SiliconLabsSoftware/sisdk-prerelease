@@ -1,7 +1,7 @@
 project_name: btmesh_ncp_empty
 package: bluetooth_mesh_app
 label: Bluetooth Mesh - NCP Empty
-description: >
+description: >-
   Demonstrates the bare minimum needed for an NCP Target C application.
   This example is recommended for EFR32xG22, which has limited RAM and flash,
   and therefore some of the stack classes are disabled by default.

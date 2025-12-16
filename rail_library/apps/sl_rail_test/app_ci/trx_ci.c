@@ -1115,7 +1115,7 @@ void enableAutoLnaBypass(sl_cli_command_arg_t *args)
   sl_rail_prs_lna_bypass_config_t prsLnaBypassConfig = {
     .timeout_us = (sl_rail_time_t)sl_cli_get_argument_uint32(args, 1),
     .threshold = sl_cli_get_argument_uint8(args, 2),
-    .delta_rssi_dbm = sl_cli_get_argument_uint8(args, 3),
+    .delta_rssi_db = sl_cli_get_argument_uint8(args, 3),
     .prs_channel = prsLnaBypassChannel,
     .polarity = (bool)sl_cli_get_argument_uint8(args, 6)
   };

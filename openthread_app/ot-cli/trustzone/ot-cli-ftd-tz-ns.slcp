@@ -20,14 +20,6 @@ component:
   # Platform - Enable LTO for gcc by installing the following component
   - id: toolchain_gcc_lto
 
-## Disabling RTOS by default
-# - id: freertos
-# - id: freertos_heap_3
-# - id: simple_button
-  # instance:
-    # - btn0
-    # - btn1
-
 include:
   - path: ../
     file_list:
@@ -138,6 +130,7 @@ tag:
   - companion:secure_app
   - hwfilter:device:device_supports_thread
   - hwfilter:!device:device_family_efr32mr21
+  - hwfilter:!device:device_series_3
   - toolchain:gcc
 
 readme:

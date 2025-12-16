@@ -6,4 +6,5 @@ description=Z-Wave Sample Apps for EFR32 devices
 prop.subLabel=Z-Wave\\ SDK\\ 8.0.0.0
 
 prop.file.templatesFile=z-wave_application_templates.xml
+prop.file.docsFile=docs_public/docs.xml
 prop.file.demosFile=z-wave_application_demos.xml

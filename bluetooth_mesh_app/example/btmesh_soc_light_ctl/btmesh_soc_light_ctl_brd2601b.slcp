@@ -1,7 +1,7 @@
 project_name: btmesh_soc_light_ctl
 package: bluetooth_mesh_app
 label: Bluetooth Mesh - SoC Light CTL
-description: >
+description: >-
   An out-of-the-box software demo where the LEDs of the mainboard can be
   switched on and off, and their lighting intensity, color temperature,
   and delta UV can be set.

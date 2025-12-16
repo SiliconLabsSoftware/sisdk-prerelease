@@ -32,6 +32,19 @@ Some type and definitions have been renamed to avoid confusion:
 
 If your application uses these definitions, you need to replace them with the new names.
 
+## Energy modes
+
+Some peripherals may not work in the newly introduced [EM1P](https://docs.silabs.com/rail/latest/efr32-migration-guide-for-proprietary-apps/04-em1p-on-efr32xg22) energy mode (for example, TIMER0). To address this, an EM1 requirement may be added to the power manager module by the application.
+
+To add an EM1 lock to the application, include the power manager header, and call the following function during initialization.
+
+```C
+#include "sl_power_manager.h"
+
+sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
+```
+
+Timers used by the PWM component in Led Bulb and Power Strip applications only work in EM1 mode, therefore, updating these applications require the above manual changes to be made.
 
 # 7.24.1 {#migrate-section-7-24-1}
 

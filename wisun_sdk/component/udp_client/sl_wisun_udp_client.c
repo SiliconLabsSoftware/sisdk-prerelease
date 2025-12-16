@@ -54,7 +54,9 @@
 // -----------------------------------------------------------------------------
 //                                Static Variables
 // -----------------------------------------------------------------------------
-static uint16_t _socket_buff_length = 0U;
+
+#define SL_WISUN_UDP_CLIENT_SOCKET_BUFF_LENGTH    1024U
+
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
@@ -119,9 +121,6 @@ void sl_wisun_udp_client_write(const int32_t sockid,
   if (res == SOCKET_RETVAL_ERROR) {
     printf("[Failed to send on socket: %ld]\n", sockid);
   }
-
-  // Save socket buffer length for read
-  _socket_buff_length += sl_strlen(str);
 }
 
 /* read on udp client socket */
@@ -132,30 +131,23 @@ void sl_wisun_udp_client_read(const int32_t sockid)
   static sockaddr_in6_t server_addr = { 0 };
   socklen_t len = sizeof(server_addr);
 
-  // Socket is empty
-  if (_socket_buff_length == 0U) {
+  // Allocate memory for socket buffer
+  socket_buff = (char *)sl_malloc(SL_WISUN_UDP_CLIENT_SOCKET_BUFF_LENGTH);
+  if (socket_buff == NULL) {
+    printf("[Failed to allocate memory for socket buffer]\n");
     return;
   }
-
-  // Allocate memory for socket buffer
-  socket_buff = (char *)sl_malloc(_socket_buff_length + 1);
-  memset(socket_buff, 0U, _socket_buff_length + 1);
 
   // Read from socket
-  res = recvfrom(sockid, socket_buff, _socket_buff_length, 0, (struct sockaddr *)&server_addr, &len);
-  if (res <= 0L) {
-    sl_free(socket_buff);
-    // Reset socket buffer length
-    _socket_buff_length = 0U;
-    return;
-  }
+  res = recvfrom(sockid, socket_buff, SL_WISUN_UDP_CLIENT_SOCKET_BUFF_LENGTH - 1, 
+                 0, (struct sockaddr *)&server_addr, &len);
 
   // Print received data
-  printf("%s\n", socket_buff);
+  if (res > 0)  {
+    socket_buff[res] = 0;
+    printf("%s\n", socket_buff);
+  }
   sl_free(socket_buff);
-
-  // Update socket buffer length
-  _socket_buff_length -= res;
 }
 
 // -----------------------------------------------------------------------------

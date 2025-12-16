@@ -195,6 +195,11 @@
 // <i> Default: 0
 #define ZW_LOG_ENABLE_ZAF_TSE  0
 
+// <q ZW_LOG_ENABLE_SHUTDOWN_MANAGER> shutdown manager
+// <i> If enabled, log messages from the shutdown manager will be displayed
+// <i> Default: 0
+#define ZW_LOG_ENABLE_SHUTDOWN_MANAGER  0
+
 // </h>
 
 // <<< end of configuration section >>>

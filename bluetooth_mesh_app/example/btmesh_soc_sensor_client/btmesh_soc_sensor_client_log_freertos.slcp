@@ -1,7 +1,7 @@
 project_name: btmesh_soc_sensor_client_freertos
 package: bluetooth_mesh_app
 label: Bluetooth Mesh - SoC Sensor Client FreeRTOS
-description: >
+description: >-
   This example demonstrates the Bluetooth Mesh Sensor Client Model. It
   collects and displays sensor measurement data from remote device(s)
   (e.g., btmesh_soc_sensor_server). This example runs on top of FreeRTOS.

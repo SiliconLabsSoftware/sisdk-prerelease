@@ -60,8 +60,8 @@ Table of content:
       - [exit](#exit)
 
 ## Features
-- Full support of ESL Profile and Service specification v1.0
-- Built-in auto conversion for Silabs ESL example devices with image storage and display for any size. 
+- Full support of ESL Profile and Service specification v1.0.1
+- Built-in auto conversion for Silabs ESL example devices with image storage and display for any size.
 - Multiple connections in parallel up to the limits of the Bluetooth stack on the attached ESL Network Co-Processor embedded target.
 - Encrypted communication between the AP script and the embedded target, which can be optionally disabled or completely removed. For more information on building prerequisites of the secure components for the NCP, see chapter 4.2 of the SiLabs application note [AN-1259](https://www.silabs.com/documents/public/application-notes/an1259-bt-ncp-mode-sdk-v3x.pdf).
 - Leverage the Filter Accept List and Initiator Filter Policy Core features for improved ESL network initialization performance compared to traditional connection initiation method.
@@ -73,10 +73,9 @@ Table of content:
 - In some cases, particularly if there are many BLE devices advertising nearby while the AP is scanning for long periods, the AP script may become unresponsive. In this case, it may help to limit the scanning window or reduce the number of nearby advertising devices. If neither of these is possible, it is best to increase the throughput of the NCP VCOM as described in [this article](https://community.silabs.com/s/article/wstk-virtual-com-port-baudrate-setting?language=en_US). After changing the WSTK VCOM speed, please don't forget to update the VCOM Baud rate configuration of the ESL NCP Access Point example also accordingly, then re-build and re-flash the target with the new firmware.
 - On Windows, there is also a known issue when running the AP where the debugging trace and command line input can interfere with each other on some terminals if Python's pyreadline3 module is installed, so it is strongly recommended to uninstall it using the command `pip uninstall pyreadline3` before running the AP. To find out if it is installed or not, the command `pip freeze` can be used.
 - MSYS2 MinGW bash is not recommended for running ESL Access Point Python example application due to various compatibility issues between the native Windows Python environment and that of MSYS2. Still, the ESL C library has to be build with it.
-- Sometimes, especially on systems where Python 2 and 3 environments are installed together, the ESL AP script cannot run due to the way these systems handle the default Python environments. If you experience import problems with Python modules that you are sure are installed for the correct Python version, you may need to modify the PATH environment variable.
-- The PAwR response delay shall not be set to less than 30 ms when the memory LCD of the WSTK is used as display by the ESL Tag, as its platform driver does not support non-blocking mode during the image display procedure. As a result, for a PAwR train required to serve networks of up to 7000 ESLs, it is not possible to set the PAwR interval below 1.54 seconds in our default example settings. For any shorter response delays than 30ms, please write a custom display driver based on the ESL Display implementation recommendations using non-blocking code.
+- Sometimes, especially on systems where Python 2 and 3 environments are installed together, the ESL AP script cannot run due to the way these systems handle the default Python environments. If you experience import problems with Python modules that you are sure are installed for the correct Python version, you may need to modify the PATH environment variable or use a properly set virtual environment for Python 3.
 - Using the "Filter Accept List" and "Initiator Filter Policy" significantly increases the connection utilization of the ESL AP NCP, and consequently its memory requirements. For this reason, some supported controllers can only be used up to a limited network size of a few hundred ESL devices, larger networks may require an MCU with more memory and a proportional increase of `SL_BT_CONFIG_BUFFER_SIZE` in the ESL AP NCP project configuration.
- 
+
 ## Project structure
 ---
 The Access Point Python application consists of the following files:
@@ -95,6 +94,7 @@ The Access Point Python application consists of the following files:
 - esl\_lib.py
 - esl\_tag.py
 - image\_converter.py
+- qrcode\_generator.py
 
 You can see the logical structure on the following diagram:
 
@@ -115,9 +115,9 @@ _Note: Shall any unsolicited error occur during the automated process, the autom
 
 ## Getting started
 ---
-The NCP Host side application requires Python 3. Run `pip install -r requirements.txt` to install all other requirements for the application. Make sure to run this command before running `make`. See [Pre-steps before building](#pre-steps-before-building) on how to get a working build environment.
+The NCP Host side application requires Python 3. Run `pip install -r requirements.txt` to install all other requirements for the application. Make sure to run this command before creating the project and running `make`. See [Pre-steps before building](#pre-steps-before-building) on how to get a working build environment.
 
-On the target side an EFR device is needed, programmed with the *Bluetooth - NCP ESL Access Point* sample application along with an appropriate bootloader project called *Bootloader - NCP BGAPI UART DFU*.
+On the target side an EFR device is needed, programmed with the *Bluetooth - NCP ESL Access Point* sample application.
 
 To run the ESL AP Python host example, a preliminary step is required to build the necessary ESL shared libraries which are written in C. As for the build environment and build process, three main operating systems are supported: Windows, Linux and macOS, all of which can be used on any machine architecture.
 
@@ -126,14 +126,14 @@ For Windows only, the first thing we need is a UNIX-like utility environment, fo
 
 Please note that if you already have Cygwin installed, installing MSYS2 and MingW may cause problems, so installation in such an environment is not recommended. Instead, we recommend that you keep your regular environment, but you will need to find out what additional components may need to be installed via your package manager, and what configuration may need to be changed,  as we do not provide direct support for Cygwin.
 
-As for the Python version, version 3.9 is recommended - but later versions may work as well. On Windows, it is also recommended to install it into a custom directory to avoid unexpected errors later. It is essential that the installed executable environment is not placed in the read-only '*Program Files*' folders, and that the installer is allowed to set the necessary PATH variables. Furtunatelly, no such complications are known to exist with Linux and macOS.
+As for the Python version, 3.9 is the oldest supported - but later versions should work as well. On Windows, it is also recommended to install it into a custom directory to avoid unexpected errors later. It is essential that the installed executable environment is not placed in the read-only '*Program Files*' folders, and that the installer is allowed to set the necessary PATH variables. Furtunatelly, no such complications are known to exist with Linux and macOS.
 
 Some possible pitfalls of a Windows installation may happen: the MSYS2 MinGW environment can have a built-in Python interpreter installed in the */usr/bin* or */mingw/bin* folder (`which Python` can be used to find out). Although advanced users will be definitely able to compile with this Python if they know how to fix various errors that may come during the build execution, it is strongly discouraged due to the many potential sources of trouble.
 In addition, as it was mentioned earlier, if the native Windows Python is located in Program Files, advanced manual configuration of the PATH environment variable may be also required, without which the build process can stall at the final stage. That's why it's heavily recommended to install it in location that isn't write-protected, as shown in the image below.
 
 ![](images/python_install_windows.png)
 
-Installing the proper GCC version is also essential. For example, if our Python is 32-bit, but the ESL key library and ESL C library are compiled with GCC for MinGW64, the import will fail and the AP example code will not start. This means either issuing `pacman -S make pkgconf mingw-w64-x86_64-gcc`, or `pacman -S make pkgconf mingw-w64-i686-gcc` in the MinGW32 or MinGW64 bash terminal, depending on Python interpreter architecture.
+Installing the proper GCC version is also essential. For example, if our Python is 32-bit, but the ESL key library and ESL C library are compiled with GCC for MinGW64, the import will fail and the AP example code will not start. This means either issuing `pacman -S make pkgconf mingw-w64-x86_64-gcc`, or `pacman -S make pkgconf mingw-w64-i686-gcc` in the MinGW32 or MinGW64 bash terminal, depending on Python interpreter architecture. While compilation for 32‑bit architectures - and thus, using 32-bit Python interpreter - is still supported, using 64‑bit architectures is strongly recommended.
 
 Finally, as we're about to use the systems' native Python environment, the MSYS2 MinGW environment should be started with the `-use-full-path` option. Without this, the compilation will fail as well. That is, start either with `msys2_shell.cmd -mingw32 -use-full-path` or `msys2_shell.cmd -mingw64 -use-full-path` depending on Python.
 
@@ -141,15 +141,47 @@ Finally, as we're about to use the systems' native Python environment, the MSYS2
 
 Once you have your favourite UNIX environment up and running, the procedure for building our ESL C library is pretty much the same on all supported systems, except that you will need to obtain the library requirements as follows. Before you can build, you'll of course need the build essentials for your system. You'll also need the `sqlite3` and `openssl` libraries with development headers (the latter is often called `libssl-dev` or `openssl-devel`). Due to the existence of many package managers on different systems and distros, this last step may also vary and can't be listed exactly here.
 
-Run the `make` command in the project's root folder (*example\_host/bt\_host\_esl\_ap*). It will generate the *esl\_lib\_wrapper.py* and the *esl\_key\_lib\_wrapper.py*. These files are responsible for the communication between the Python script and the C library.
+To build the required shared libraries for the Python ESL Access Point, please follow these steps using Simplicity Studio v6:
+
+1. **Open Simplicity Studio and start creating the workspace.**
+   - Choose `Bluetooth LE` from the Wireless Technology list on the _Home_ page. This will open the _Project_ on the left and a new _Examples and Demos_ tab on the top.
+   - Use the search field to filter with the keyword `esl`.
+   - Select `Blutooth` checkbox in the _Wireless Technology_ list and the `Host` option from the _Device Type_ list for better filtering. This will narrow down the list on the right to four elements: three ESL AP related projects and the workspace that combines them.
+   - Select the `Bluetooth - Host ESL Access Point` workspace, which groups the three ESL AP host projects together.
+     (If you are unsure which one is the workspace, you can hide individual projects for clarity by disabling the visibility of _Example Projects_.)
+
+   ![](images/05_Select_host_AP_workspace.png)
+
+2. **Select your target OS for the ESL Access point.**
+   - In the 'Target Device' dropdown, select your target operating system: `linux`, `macos`, or `win32`.
+     (Tip: Start typing the OS name to filter the list. Ensure that the _Part_ checkbox on the right is selected.)
+   - Once you selected the proper target, press the _Next_ button.
+
+   ![](images/05_Prepare_host_AP_workspace.png)
+
+
+3. **Finalize workspace generation.**
+   - On the last page, it is recommended to leave the fields unchanged and keep the default values.
+   - At the bottom of this page, select `Makefile (GCC)` from the _Target IDE_ list, then click the _Finish_ button.
+
+   ![](images/05_Create_host_AP_workspace.png)
+
+4. **Build the solution.**
+   - The workspace will be generated in your chosen directory.
+   - Open a terminal and navigate to this directory. On Windows, be sure to use the MinGW terminal that matches your selected target architecture; otherwise, the make process will not complete successfully.
+   - Run the following command to build all required shared libraries:
+     ```
+     make -f bt_host_esl_ap.solution.Makefile
+     ```
+   - After a successful build, the ESL AP script will be ready to use in the  `esl_ap` project subfolder within the workspace.
 
 ### Starting AP application
 
 On Windows, the PowerShell is the preferred running environment, but it can also run under the basic command line. However, using the MSYS2 MinGW bash is not recommended for this purpose due to known compatibility issues between the native Windows Python running environment and that of MSYS2. On other systems like Linux and macOS any terminal can be used.
- 
+
 AP can be run in manual, demo or automatic mode. Without using the [`--cmd`](#m---cmd) or the [`--demo`](#d---demo) command line parameter, automatic mode is started.
 
-For example to start AP on Windows system where an NCP is connected to COM4, type `python .\app.py COM4` in terminal. If the AP is the only Silabs board connected to the PC via USB there is no need to specify the COM port. Mode can also be set later runtime using the [`mode`](#mode) command.
+For example to start AP on Windows system where an NCP is connected to COM4, type `python3 .\app.py COM4` in terminal. If the AP is the only Silabs board connected to the PC via USB there is no need to specify the COM port. Mode can also be set later runtime using the [`mode`](#mode) command.
 
 ![](images/ap_start.png)
 
@@ -189,9 +221,9 @@ There are a number of command line arguments that can be used to customize the w
 
 #### r, --stdout
     Redirect logging output from default stderr to stdout
-  
+
   This might be useful for test systems that can't handle `stderr` but can handle `stdout`. Otherwise, it is recommended to omit this option, in which case the logging will use `stderr` as its default output, while the built-in CLI will use `stdio` for command processing and result feedback.
-  
+
 #### u, --unsecure
     Disable encryption for NCP communication
 
@@ -266,7 +298,7 @@ _Notes:_
 
 Examples:
 -  `config --full --absolute 0`
-  
+
    Will configure everything plus overrides the ESL Absolute Time epoch value for the given tag (e.g. for testing purposes)
 -  `config -i 2 -g 3`
 
@@ -336,7 +368,7 @@ _Notes:_
 - _To close more existing connections at once, you can use the `disconnect all` command._
 - _If the group ID is specified with the keyword `all`, then only the devices in the group will be disconnected._
 
-Examples: 
+Examples:
 - `disconnect bc:33:ac:fa:57:d0`
 
   Disconnect from the addressed device.
@@ -354,21 +386,21 @@ Examples:
 Usage: `display_image [-h] [--group_id <u7>] [--time <hh:mm:ss> | --absolute <u32>] [--delay <u32>] [--date <YYYY-MM-DD>] esl_id image_index display_index`
 
 Parameters:
-- `esl_id`:                    ESL ID of the Tag. 
+- `esl_id`:                    ESL ID of the Tag.
                                _Note: `all` also can be used as a broadcast address (0xff)._
 - `image_index`:               Image index.
 - `display_idx`:               Display index.
 - `[--group_id, -g <u7>]`:     ESL group ID (optional, default is group 0).
-- `[--time, -t <hh:mm:ss>]`:   Execution time of the command in hour:min:sec format. (optional) 
+- `[--time, -t <hh:mm:ss>]`:   Execution time of the command in hour:min:sec format. (optional)
                                _Note: If <--delay> is specified then it is also added to the calculated value as an additional delay._
 - `[--absolute, -a <u32>]`:    Execution time of the command in ESL Absolute Time epoch value. Mutually exclusive with timed delay.
 - `[--date, -d <YYYY-MM-DD>]`: Execution date of the command in ISO-8601 format (optional to time, only).
 - `[--delay, -dy <u32>]`:      Delay in milliseconds (optional).
 
-_Note:_ 
+_Note:_
 - _Timed display commands with a delay shorter than the actual periodic advertisement interval may be rejected on receive by Implausible Absolute Time (0x0C) ESL error response._
 
-Example: 
+Example:
 - `display_image 17 1 0 --delay=5000`
 
 ![](images/03_imageupdate.png)
@@ -394,7 +426,7 @@ Optional arguments:
 - `[--flip, -f]`:               Turn the image upside down
                                 _Note: cw, ccw and flip are mutually exclusive_
 
-_Notes:_ 
+_Notes:_
 - _ESL Tag must be connected to the AP before running this command._
 - _The ESL won't display any change after the image upload is complete unless a `display image` command is also sent with the same image index - or a `refresh display` command to a display already showing the same image that has changed. Please refer to the `display_image` and `refresh_display` commands' examples._
 - _To use space or backslash in the filename or other special characters, such as line break escape sequences in the text caption, please enclose these strings in quotes._
@@ -486,13 +518,13 @@ Parameters:
 Example: `unassociate 17 -g 2`
 
 #### factory\_reset
-    Reset ESL to a state when it was not associated with the AP. 
+    Reset ESL to a state when it was not associated with the AP.
     It means ESL deletes all configuration value set by the AP including image data.
 
 Usage: `factory_reset [-h] [--group_id <u7>] [--pawr] address`
 
 Parameters:
-- `address`:                Bluetooth address in case insensitive format or ESL ID of the Tag. 
+- `address`:                Bluetooth address in case insensitive format or ESL ID of the Tag.
                             _Note: `all` also can be used as a broadcast address (0xff)._
 - `[--group_id, -g <u7>]`:  ESL group ID (optional, default is group 0).
 - `[--pawr]`:               Force command through PAwR sync train even if the addressed ESL is currently connected.
@@ -533,7 +565,7 @@ Examples:
 - `vendor_opcode 3 --data 0x0004`
 
   2 bytes payload, the resulting ESL TLV is 2F030004 for default group 0
-- `vendor_opcode 1 --data 12233` 
+- `vendor_opcode 1 --data 12233`
 
   3 bytes payload, the resulting ESL TLV is 3F01012233
 - `vendor_opcode 5 -d 0012233`
@@ -587,7 +619,7 @@ Examples:
 
 #### network
     Execute commands related to the network control.
-  
+
   Usage: `network [-h] [--save [FILE]] [--load [FILE]] [--exclusive {no,yes}]`
 
   Parameters:
@@ -629,7 +661,7 @@ _Notes:_
 Usage: `list [-h] [--verbose | --number] [--group_id <u7>] state [state ...]`
 
 Parameters:
-- `state`:                   {advertising, a, blocked, b, connected, c, initiating, i, synchronized, s, unsynchronized, u} 
+- `state`:                   {advertising, a, blocked, b, connected, c, initiating, i, synchronized, s, unsynchronized, u}
     - `[advertising, a]`:    List devices that are advertising ESL Service UUID.
     - `[blocked, b]`:        List blocked devices, see reasoning by adding `-v`.
     - `[connected, c]`:      List connected ESL information.
@@ -683,7 +715,7 @@ Examples:
   Configure PAwR train with given parameters - please note that the new config will be active after sync is re-started.
 - `sync config`
 
-  Get current config and doesn't change any sync status. That is, the PAwR train will continue running if it was already enabled.  
+  Get current config and doesn't change any sync status. That is, the PAwR train will continue running if it was already enabled.
 - `sync start [-min 2000] -max 2100`
 
   Start sync with current PAwR parameters, but temporarily override the interval to a value between 2.0 and 2.1 seconds. Please note that this short form is only for convenience to quickly change the interval, but its effect on the current configuration is not permanent and the value is always interpreted in milliseconds - so it may also introduce rounding errors.

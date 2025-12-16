@@ -33,46 +33,6 @@ The EFR32 on the samples the analog microphone using the ADC with the sampling r
 ![](image/readme_img2.png)
 
 
-### NCP Host part
-The PC part of the example can be found under *<SDK-installation-location>\app\bluetooth\example_host\bt_host_voice*. 
-To build the project into an executable, you also need a make-tool, which is part of GNU developer tools. On Windows MinGW is recommended. More details can be found in [AN1259: Using the v3.x Silicon Labs Bluetooth Stack in Network CoProcessor Mode](https://www.silabs.com/documents/public/application-notes/an1259-bt-ncp-mode-sdk-v3x.pdf).
-
-To compile the NCP application:
-
-1. Open your terminal and navigate to the above mentioned folder.
-2. Run mingw32-make
-3. The build output is created in a new "exe" folder
-
-Running the exe without any parameters will give you this help response:
-
-![](image/readme_img3.png)
-
-The program can be configured using the flags shown in the above image. When giving the parameters to the program, all units must be omitted.
-
-Some notes about the parameters:
-1. **COM Port**: This is the serial port to be used. It should point to the port used by the NCP target. You can check the correct port number with BGTool or Device Manager, the mainboard lists as a “JLink CDC UART Port”. (If you are having problems identifying the port, you should unplug all WSTKs except the one you wish to use as the NCP.)
-2. **Baud Rate**: The baud rate used for communication, default: 115200
-3. **Output file name**: Filename for the audio data output (without the file extension).
-4. **Bluetooth address**: Bluetooth address of the board that you want to connect to. If left out, the application tries to search devices that match the default UUID of the application.
-5. **Enable/Disable filtering**: Toggles whether filtering is used. See filter types in the previous section for options. The filter is disabled by default.
-6. **Enable/Disable encoding**: Toggles whether the audio data should be encoded, enabled by default. If encoding is disabled, the output filetype will be either “.s8” or “.s16” depending on the sample rate. Encoded filetype is always “.ima” (Dialogic ADPCM -format).
-
-#### Saving the audio to a file
-To record audio into an audio file using this ncp-host-application, you must provide at least the following parameters (examples in parenthesis):
-
-* Serial port for the ncp-target ( -p COM6 )
-* output filename ( -o my_audio_file )
-
-The following example uses the verbose mode with the default settings for both sampling rate and resolution (16kHz and 12 bits, respectively) and saves the audio data to a file called *audio_file*.
-
-![](image/readme_img4.png)
-
-If you have selected debug log level (-l4), as in the above image, you will get status messages from the GATT client application. The application will stop printing status messages after is has written all the configurations, which in the above image happens after transfer status has successfully been enabled. When the initialization is done, the GATT client (ncp-host) is ready to receive data from the board.
-
-To start recording and streaming audio data over the BLE link, press and hold BTN0. Once the button is pressed, you should see activity on the terminal window that summarizes the transmission progress. All the audio data will be saved to a file defined by the output filename -parameter (audio_file.ima in this example). If a file with a same name already exists, the audio data is appended to the end of that file.
-
-When BTN0 is released, the transmission is paused and can be resumed by pressing BTN0 again. If the SoC board is reset, the connection will be terminated and the application will be closed. Without resetting the SoC board the application can be terminated with an interrupt signal on the keyboard.
-
 ## SoC project structure
 The example project contains the GATT database with the necessary Voice-over-Bluetooth Low Energy Service. GATT definitions can be extended using the GATT Configurator, which can be found under Advanced Configurators in the Software Components tab of the Project Configurator. To open the Project Configurator open the .slcp file of the project.
 
@@ -102,11 +62,11 @@ Note that Example Projects do not include a bootloader. However, Bluetooth-based
   - for NCP and RCP projects create a *BGAPI UART DFU* type bootloader
   - for SoC projects on Series 2 devices create a *Bluetooth Apploader OTA DFU* type bootloader
 
-- or run a precompiled Demo on your device from the Launcher view before flashing your application. Precompiled demos flash both bootloader and application images to the device. Flashing your own application image after the demo will overwrite the demo application but leave the bootloader in place. 
+- or run a precompiled Demo on your device from the Launcher view before flashing your application. Precompiled demos flash both bootloader and application images to the device. Flashing your own application image after the demo will overwrite the demo application but leave the bootloader in place.
   - For NCP and RCP projects, flash the *Bluetooth - NCP* demo.
   - For SoC projects, flash the *Bluetooth - SoC Thermometer* demo.
 
-**Important Notes:** 
+**Important Notes:**
 - when you flash your application image to the device, use the *.hex* or *.s37* output file. Flashing *.bin* files may overwrite (erase) the bootloader.
 
 - On Series 2 devices SoC example projects require a *Bluetooth Apploader OTA DFU* type bootloader by default. This bootloader needs a lot of flash space and does not fit into the regular bootloader area, hence the application start address must be shifted. This shift is automatically done by the *Apploader Support for Applications* software component, which is installed by default. If you want to use any other bootloader type, you should remove this software component in order to shift the application start address back to the end of the regular bootloader area. Note, that in this case you cannot do OTA DFU with Apploader, but you can still implement application-level OTA DFU by installing the *Application OTA DFU* software component instead of *In-place OTA DFU*.

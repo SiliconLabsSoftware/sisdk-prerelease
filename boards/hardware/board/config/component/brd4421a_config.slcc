@@ -534,3 +534,67 @@
       instance: vcom
       vendor: silabs
     path: brd4421a_brd4002a/sl_uartdrv_usart_vcom_config.h
+  - condition:
+    - brd4001a
+    override:
+      component: hal_gpio_simple_init
+      file_id: hal_gpio_simple_init_config_file_id
+      instance: exp_7
+      vendor: silabs
+    path: brd4421a_brd4001a/sl_hal_gpio_init_exp_7_config.h
+  - condition:
+    - brd4001a
+    override:
+      component: hal_gpio_simple_init
+      file_id: hal_gpio_simple_init_config_file_id
+      instance: exp_11
+      vendor: silabs
+    path: brd4421a_brd4001a/sl_hal_gpio_init_exp_11_config.h
+  - condition:
+    - brd4001a
+    override:
+      component: hal_gpio_simple_init
+      file_id: hal_gpio_simple_init_config_file_id
+      instance: exp_12
+      vendor: silabs
+    path: brd4421a_brd4001a/sl_hal_gpio_init_exp_12_config.h
+  - condition:
+    - brd4001a
+    override:
+      component: hal_gpio_simple_init
+      file_id: hal_gpio_simple_init_config_file_id
+      instance: exp_14
+      vendor: silabs
+    path: brd4421a_brd4001a/sl_hal_gpio_init_exp_14_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: hal_gpio_simple_init
+      file_id: hal_gpio_simple_init_config_file_id
+      instance: exp_7
+      vendor: silabs
+    path: brd4421a_brd4002a/sl_hal_gpio_init_exp_7_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: hal_gpio_simple_init
+      file_id: hal_gpio_simple_init_config_file_id
+      instance: exp_11
+      vendor: silabs
+    path: brd4421a_brd4002a/sl_hal_gpio_init_exp_11_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: hal_gpio_simple_init
+      file_id: hal_gpio_simple_init_config_file_id
+      instance: exp_12
+      vendor: silabs
+    path: brd4421a_brd4002a/sl_hal_gpio_init_exp_12_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: hal_gpio_simple_init
+      file_id: hal_gpio_simple_init_config_file_id
+      instance: exp_14
+      vendor: silabs
+    path: brd4421a_brd4002a/sl_hal_gpio_init_exp_14_config.h

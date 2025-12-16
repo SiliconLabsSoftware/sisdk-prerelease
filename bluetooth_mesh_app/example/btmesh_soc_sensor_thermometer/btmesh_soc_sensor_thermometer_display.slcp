@@ -1,7 +1,7 @@
 project_name: btmesh_soc_sensor_thermometer
 package: bluetooth_mesh_app
 label: Bluetooth Mesh - SoC Sensor Thermometer
-description: >
+description: >-
   This example demonstrates the Bluetooth Mesh Sensor Server Model and Sensor
   Setup Server Model. It measures temperature and sends the measurement data
   to a remote device (e.g., btmesh_soc_sensor_client).

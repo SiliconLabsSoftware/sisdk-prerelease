@@ -686,12 +686,13 @@ sl_rail_status_t sl_rail_ieee802154_config_2p4_ghz_radio_ant_div_coex_fem(sl_rai
  * @param[in] rail_handle Handle to a valid RAIL instance.
  *
  * @return
- *   - \ref SL_RAIL_STATUS_NO_ERROR: The operation completed successfully.
- *   - \ref SL_RAIL_STATUS_INVALID_PARAMETER: The rail_handle is invalid or a suitable
+ *   - \ref SL_RAIL_STATUS_NO_ERROR The operation completed successfully.
+ *   - \ref SL_RAIL_STATUS_INVALID_PARAMETER The rail_handle is invalid or a suitable
  *     channel configuration has not been loaded.
  *   - Other status codes as defined by sl_rail_status_t.
  *
- * \ref sl_rail_ieee802154_config_channel_switch() for channel config loading.
+ * See \ref sl_rail_ieee802154_config_rx_channel_switching() for configuring
+ * switching between the normal 802.15.4 PHY and the high data rate PHY.
  */
 sl_rail_status_t sl_rail_ieee802154_enable_2p4_ghz_high_data_rate(sl_rail_handle_t rail_handle);
 
@@ -990,7 +991,7 @@ SLI_RAIL_ENUM(sl_rail_ieee802154_phy_t) {
  * Load an 802.15.4 channel config.
  *
  * @param[in] rail_handle A real RAIL instance handle.
- * @param channelConfig A pointer to a channel configuration.
+ * @param p_channel_config A pointer to a channel configuration.
  * @param phy_id PTI config ID.
  * @return Status code indicating success of the function call.
  *
@@ -1004,7 +1005,7 @@ SLI_RAIL_ENUM(sl_rail_ieee802154_phy_t) {
  * @note This call implicitly disables all \ref sl_rail_ieee802154_g_options_t.
  */
 sl_rail_status_t sl_rail_ieee802154_config_channels(sl_rail_handle_t rail_handle,
-                                                    const sl_rail_channel_config_t * channelConfig,
+                                                    const sl_rail_channel_config_t *p_channel_config,
                                                     sl_rail_ieee802154_phy_t phy_id);
 
 /**
@@ -2083,11 +2084,11 @@ sl_rail_status_t sl_rail_ieee802154_calibrate_ir_2p4_ghz(sl_rail_handle_t rail_h
 #include "rail_ieee802154.h"
 #define sl_rail_ieee802154_phy_2p4_ghz \
   ((const RAIL_ChannelConfig_t *const)RAIL_IEEE802154_Phy2p4GHz)
-#define sl_rail_ieee802154_phy2p4_ghz_1_mbps_fec \
+#define sl_rail_ieee802154_phy_2p4_ghz_1_mbps_fec \
   ((const RAIL_ChannelConfig_t *const)RAIL_IEEE802154_Phy2p4GHz1MbpsFec)
 #define  sl_rail_ieee802154_phy_2p4_ghz_2_mbps \
   ((const RAIL_ChannelConfig_t *const)RAIL_IEEE802154_Phy2p4GHz2Mbps)
-#define sl_rail_ieee802154_phy2p4_ghz_fcs_1_mbps_fec \
+#define sl_rail_ieee802154_phy_2p4_ghz_fcs_1_mbps_fec \
   ((const RAIL_ChannelConfig_t *const)RAIL_IEEE802154_Phy2p4GHzFcs1MbpsFec)
 #define  sl_rail_ieee802154_phy_2p4_ghz_fcs_2_mbps \
   ((const RAIL_ChannelConfig_t *const)RAIL_IEEE802154_Phy2p4GHzFcs2Mbps)

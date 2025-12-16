@@ -231,3 +231,5 @@ filter:
 tag:
   - hwfilter:device:device_supports_zigbee
   - hwfilter:ram:64k
+  - hwfilter:board:simple_led:led0
+  

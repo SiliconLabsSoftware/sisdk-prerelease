@@ -71,6 +71,7 @@ template_contribution:
 tag:
   - companion:nonsecure_app # Needs a companion app and cannot be built alone
   - hwfilter:device:device_supports_thread
+  - hwfilter:!device:device_series_3
   - toolchain:gcc
 
 import:

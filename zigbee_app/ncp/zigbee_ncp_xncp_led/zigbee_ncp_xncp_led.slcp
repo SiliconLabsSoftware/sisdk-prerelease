@@ -105,3 +105,4 @@ filter:
 
 tag:
   - hwfilter:device:device_supports_zigbee
+  - hwfilter:board:simple_led:led0

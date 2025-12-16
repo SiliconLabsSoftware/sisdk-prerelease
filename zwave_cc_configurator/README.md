@@ -24,6 +24,21 @@ Where CC_n, is the component (`slcc`) id.
 
 Each command class defines it's properties based on the requirements for it.
 
+## Usage
+
+If your project is based on CMake, source files based on `.cc_config` files will be generated upon project generation, but will not be automatically regenerated when you modify a `.cc_config` file afterwards.
+You will need to either manually regenerate the source files before building, or force regeneration of the project via Simplicity Studio.
+
+### How to Regenerate the Source Files
+
+From the cc_configurator directory, run:
+
+```bash
+python3 cc_configurator.py -i <project_directory>/config/cc_config -o <project_directory>/autogen generate
+```
+
+The generated source files will be written to `<project_directory>/autogen/`.
+
 ## Command Classes - Specification
 
 Below each Command Class properties are defined

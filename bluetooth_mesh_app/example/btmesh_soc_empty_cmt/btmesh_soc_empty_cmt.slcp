@@ -1,7 +1,7 @@
 project_name: btmesh_soc_empty_cmt
 package: bluetooth_mesh_app
 label: Bluetooth Mesh - SoC Empty with Common Manufacturing Token Support
-description: >
+description: >-
   Demonstrates the bare minimum needed for a Bluetooth Mesh C application.
   The application sets its UUID and OOB provisioning capabilities depending
   on the manufacturing token used. The application also demonstrates how to

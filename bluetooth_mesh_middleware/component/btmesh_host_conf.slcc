@@ -41,8 +41,3 @@ template_contribution:
     include: btmesh_conf.h
     handler: btmesh_conf_step
     priority: -9000
-- name: btmesh_on_event
-  value:
-    include: btmesh_conf.h
-    function: btmesh_conf_on_event
-    priority: -9000

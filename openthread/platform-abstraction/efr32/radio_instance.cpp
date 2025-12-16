@@ -53,7 +53,7 @@ extern "C" {
 }
 
 #include "radio_channel_switching.h"
-#include "radio_energy_scan.h"
+#include "radio_energy_scan.hpp"
 #include "radio_interface.h"
 #include "radio_state.h"
 #include "sl_memory_manager.h"

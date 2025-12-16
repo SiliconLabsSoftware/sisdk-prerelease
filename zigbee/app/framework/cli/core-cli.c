@@ -368,15 +368,15 @@ void sli_zigbee_af_cli_info_command(sl_cli_command_arg_t *arguments)
       sl_zigbee_af_pop_network_index();
     }
   }
-#ifdef SL_COMPONENT_CATALOG_KERNEL_PRESENT
-#ifdef SL_COMPONENT_CATALOG_MICRIUMOS_KERNEL_PRESENT
+#ifdef SL_CATALOG_KERNEL_PRESENT
+#ifdef SL_CATALOG_MICRIUMOS_KERNEL_PRESENT
   sl_zigbee_core_debug_println("RTOS [Micrium]");
-#elif defined(SL_COMPONENT_CATALOG_FREERTOS_KERNEL_PRESENT)
+#elif defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
   sl_zigbee_core_debug_println("RTOS [FreeRTOS]");
 #endif // MICRIUMOS_KERNEL || FREERTOS_KERNEL
-#else // SL_COMPONENT_CATALOG_KERNEL_PRESENT
+#else // SL_CATALOG_KERNEL_PRESENT
   sl_zigbee_core_debug_println("RTOS [No]");
-#endif // SL_COMPONENT_CATALOG_KERNEL_PRESENT
+#endif // SL_CATALOG_KERNEL_PRESENT
 }
 
 void sli_zigbee_cli_version_command(sl_cli_command_arg_t *arguments)

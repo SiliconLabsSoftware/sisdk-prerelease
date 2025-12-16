@@ -1,7 +1,7 @@
 r"""Wrapper for esl_key_lib.h
 
 Generated with:
-C:\SiliconLabs\Python313\Scripts\ctypesgen --no-gnu-types --no-macro-warnings -IC:/SiliconLabs/gsdk/app/common/util/app_log -IC:/SiliconLabs/gsdk/app/bluetooth/common_host/iostream_mock -IC:/SiliconLabs/gsdk/app/bluetooth/common_host/app_log -IC:/SiliconLabs/gsdk/app/bluetooth/common_host/app_log/config -IC:/SiliconLabs/gsdk/app/bluetooth/common_host/esl_key_lib -IC:/SiliconLabs/gsdk/util/third_party/sqlite -IC:/SiliconLabs/gsdk/util/third_party/mbedtls/include -IC:/SiliconLabs/gsdk/app/bluetooth/common_host/system -IC:/SiliconLabs/gsdk/platform/common/inc -IC:/SiliconLabs/gsdk/protocol/bluetooth/inc -IC:/SiliconLabs/gsdk/protocol/bluetooth/config -IC:/SiliconLabs/gsdk/app/bluetooth/common/esl_tag_core/inc -IC:/SiliconLabs/gsdk/app/bluetooth/common/esl_tag_core/config -IC:/SiliconLabs/gsdk/app/bluetooth/common_host/ncp_host -IC:/SiliconLabs/gsdk/app/bluetooth/common/ead_core ./esl_key_lib/esl_key_lib.h C:/SiliconLabs/gsdk/platform/common/inc/sl_status.h -o esl_key_lib_wrapper.py
+C:\SiliconLabs\Python313\Scripts\ctypesgen --no-gnu-types --no-macro-warnings -IC:/SiliconLabs/bluetooth-le-sdk/bluetooth_le_middleware/common/ead_core -IC:/SiliconLabs/bluetooth-le-sdk/bluetooth_le_middleware/common/esl_tag_core/inc -IC:/SiliconLabs/bluetooth-le-sdk/bluetooth_le_middleware/common/esl_tag_core/config -I./esl_key_lib -Iplatform/common/inc -Iprotocol/bluetooth/inc -Iutil/third_party/mbedtls/include ./esl_key_lib/esl_key_lib.h platform/common/inc/sl_status.h -o esl_key_lib_wrapper.py
 
 Do not modify this file.
 """
@@ -929,19 +929,19 @@ struct_anon_6._fields_ = [
 
 aes_key_128 = struct_anon_6# protocol/bluetooth/inc/sl_bgapi.h: 108
 
-psa_key_id_t = uint32_t# util/third_party/mbedtls/include/psa/crypto_types.h: 287
+psa_key_id_t = uint32_t# util/third_party/mbedtls/include/psa/crypto_types.h: 235
 
-sl_bt_ead_session_key_t = uint8_t * int(16)# ./common/ead_core/sl_bt_ead_core.h: 48
+sl_bt_ead_session_key_t = uint8_t * int(16)# bluetooth_le_middleware/common/ead_core/sl_bt_ead_core.h: 48
 
-sl_bt_ead_iv_t = uint8_t * int(8)# ./common/ead_core/sl_bt_ead_core.h: 51
+sl_bt_ead_iv_t = uint8_t * int(8)# bluetooth_le_middleware/common/ead_core/sl_bt_ead_core.h: 51
 
-# ./common/ead_core/sl_bt_ead_core.h: 70
+# bluetooth_le_middleware/common/ead_core/sl_bt_ead_core.h: 70
 class struct_sl_bt_ead_key_material_s(Structure):
     pass
 
-sl_bt_ead_key_material_p = POINTER(struct_sl_bt_ead_key_material_s)# ./common/ead_core/sl_bt_ead_core.h: 60
+sl_bt_ead_key_material_p = POINTER(struct_sl_bt_ead_key_material_s)# bluetooth_le_middleware/common/ead_core/sl_bt_ead_core.h: 60
 
-# ./common/ead_core/sl_bt_ead_core.h: 70
+# bluetooth_le_middleware/common/ead_core/sl_bt_ead_core.h: 70
 class union_anon_73(Union):
     pass
 
@@ -966,31 +966,31 @@ struct_sl_bt_ead_key_material_s._fields_ = [
     ('iv', sl_bt_ead_iv_t),
 ]
 
-esl_address_t = uint16_t# ./common/esl_tag_core/inc/esl_tag_core.h: 45
+esl_address_t = uint16_t# bluetooth_le_middleware/common/esl_tag_core/inc/esl_tag_core.h: 45
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 53
+# esl_key_lib/esl_key_lib.h: 53
 class struct_db_handle_s(Structure):
     pass
 
-db_handle_p = POINTER(struct_db_handle_s)# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 53
+db_handle_p = POINTER(struct_db_handle_s)# esl_key_lib/esl_key_lib.h: 53
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 56
+# esl_key_lib/esl_key_lib.h: 56
 class struct_db_record_s(Structure):
     pass
 
-db_record_p = POINTER(struct_db_record_s)# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 56
+db_record_p = POINTER(struct_db_record_s)# esl_key_lib/esl_key_lib.h: 56
 
-enum_anon_75 = c_int# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 63
+enum_anon_75 = c_int# esl_key_lib/esl_key_lib.h: 63
 
-ESL_KEY_LIB_INVALID_RECORD = 0# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 63
+ESL_KEY_LIB_INVALID_RECORD = 0# esl_key_lib/esl_key_lib.h: 63
 
-ESL_KEY_LIB_AP_RECORD = (ESL_KEY_LIB_INVALID_RECORD + 1)# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 63
+ESL_KEY_LIB_AP_RECORD = (ESL_KEY_LIB_INVALID_RECORD + 1)# esl_key_lib/esl_key_lib.h: 63
 
-ESL_KEY_LIB_TAG_RECORD = (ESL_KEY_LIB_AP_RECORD + 1)# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 63
+ESL_KEY_LIB_TAG_RECORD = (ESL_KEY_LIB_AP_RECORD + 1)# esl_key_lib/esl_key_lib.h: 63
 
-esl_key_lib_record_type_t = enum_anon_75# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 63
+esl_key_lib_record_type_t = enum_anon_75# esl_key_lib/esl_key_lib.h: 63
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 81
+# esl_key_lib/esl_key_lib.h: 81
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_init_database", "cdecl"):
         continue
@@ -999,7 +999,7 @@ for _lib in _libs.values():
     esl_key_lib_init_database.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 94
+# esl_key_lib/esl_key_lib.h: 94
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_deinit_database", "cdecl"):
         continue
@@ -1008,7 +1008,7 @@ for _lib in _libs.values():
     esl_key_lib_deinit_database.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 111
+# esl_key_lib/esl_key_lib.h: 111
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_split_threadsafe_handle", "cdecl"):
         continue
@@ -1017,7 +1017,7 @@ for _lib in _libs.values():
     esl_key_lib_split_threadsafe_handle.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 125
+# esl_key_lib/esl_key_lib.h: 125
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_free_threadsafe_handle", "cdecl"):
         continue
@@ -1026,7 +1026,7 @@ for _lib in _libs.values():
     esl_key_lib_free_threadsafe_handle.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 142
+# esl_key_lib/esl_key_lib.h: 142
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_alloc_record", "cdecl"):
         continue
@@ -1035,7 +1035,7 @@ for _lib in _libs.values():
     esl_key_lib_alloc_record.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 150
+# esl_key_lib/esl_key_lib.h: 150
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_free_record", "cdecl"):
         continue
@@ -1044,7 +1044,7 @@ for _lib in _libs.values():
     esl_key_lib_free_record.restype = None
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 165
+# esl_key_lib/esl_key_lib.h: 165
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_store_record", "cdecl"):
         continue
@@ -1053,7 +1053,7 @@ for _lib in _libs.values():
     esl_key_lib_store_record.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 183
+# esl_key_lib/esl_key_lib.h: 183
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_store_record_and_bind", "cdecl"):
         continue
@@ -1062,7 +1062,7 @@ for _lib in _libs.values():
     esl_key_lib_store_record_and_bind.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 198
+# esl_key_lib/esl_key_lib.h: 198
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_delete_record", "cdecl"):
         continue
@@ -1071,7 +1071,7 @@ for _lib in _libs.values():
     esl_key_lib_delete_record.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 209
+# esl_key_lib/esl_key_lib.h: 209
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_clear_database", "cdecl"):
         continue
@@ -1080,7 +1080,7 @@ for _lib in _libs.values():
     esl_key_lib_clear_database.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 231
+# esl_key_lib/esl_key_lib.h: 231
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_get_record_by_ble_address", "cdecl"):
         continue
@@ -1089,7 +1089,7 @@ for _lib in _libs.values():
     esl_key_lib_get_record_by_ble_address.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 254
+# esl_key_lib/esl_key_lib.h: 254
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_get_record_by_esl_address", "cdecl"):
         continue
@@ -1098,7 +1098,7 @@ for _lib in _libs.values():
     esl_key_lib_get_record_by_esl_address.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 270
+# esl_key_lib/esl_key_lib.h: 270
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_set_ble_address", "cdecl"):
         continue
@@ -1107,7 +1107,7 @@ for _lib in _libs.values():
     esl_key_lib_set_ble_address.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 285
+# esl_key_lib/esl_key_lib.h: 285
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_set_esl_address", "cdecl"):
         continue
@@ -1116,7 +1116,7 @@ for _lib in _libs.values():
     esl_key_lib_set_esl_address.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 298
+# esl_key_lib/esl_key_lib.h: 298
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_set_long_term_key", "cdecl"):
         continue
@@ -1125,7 +1125,7 @@ for _lib in _libs.values():
     esl_key_lib_set_long_term_key.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 311
+# esl_key_lib/esl_key_lib.h: 311
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_set_identity_key", "cdecl"):
         continue
@@ -1134,7 +1134,7 @@ for _lib in _libs.values():
     esl_key_lib_set_identity_key.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 324
+# esl_key_lib/esl_key_lib.h: 324
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_set_ap_key_material", "cdecl"):
         continue
@@ -1143,7 +1143,7 @@ for _lib in _libs.values():
     esl_key_lib_set_ap_key_material.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 337
+# esl_key_lib/esl_key_lib.h: 337
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_set_response_key_material", "cdecl"):
         continue
@@ -1152,7 +1152,7 @@ for _lib in _libs.values():
     esl_key_lib_set_response_key_material.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 351
+# esl_key_lib/esl_key_lib.h: 351
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_get_record_type", "cdecl"):
         continue
@@ -1161,7 +1161,7 @@ for _lib in _libs.values():
     esl_key_lib_get_record_type.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 363
+# esl_key_lib/esl_key_lib.h: 363
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_get_ble_address", "cdecl"):
         continue
@@ -1170,7 +1170,7 @@ for _lib in _libs.values():
     esl_key_lib_get_ble_address.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 376
+# esl_key_lib/esl_key_lib.h: 376
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_get_esl_address", "cdecl"):
         continue
@@ -1179,7 +1179,7 @@ for _lib in _libs.values():
     esl_key_lib_get_esl_address.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 391
+# esl_key_lib/esl_key_lib.h: 391
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_get_bind_address", "cdecl"):
         continue
@@ -1188,7 +1188,7 @@ for _lib in _libs.values():
     esl_key_lib_get_bind_address.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 406
+# esl_key_lib/esl_key_lib.h: 406
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_get_long_term_key", "cdecl"):
         continue
@@ -1197,7 +1197,7 @@ for _lib in _libs.values():
     esl_key_lib_get_long_term_key.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 420
+# esl_key_lib/esl_key_lib.h: 420
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_get_identity_key", "cdecl"):
         continue
@@ -1206,7 +1206,7 @@ for _lib in _libs.values():
     esl_key_lib_get_identity_key.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 433
+# esl_key_lib/esl_key_lib.h: 433
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_get_ap_key_material", "cdecl"):
         continue
@@ -1215,7 +1215,7 @@ for _lib in _libs.values():
     esl_key_lib_get_ap_key_material.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 447
+# esl_key_lib/esl_key_lib.h: 447
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_get_response_key_material", "cdecl"):
         continue
@@ -1224,7 +1224,7 @@ for _lib in _libs.values():
     esl_key_lib_get_response_key_material.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 466
+# esl_key_lib/esl_key_lib.h: 466
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_delete_record_by_ble_address", "cdecl"):
         continue
@@ -1233,7 +1233,7 @@ for _lib in _libs.values():
     esl_key_lib_delete_record_by_ble_address.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 482
+# esl_key_lib/esl_key_lib.h: 482
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_delete_record_by_esl_address", "cdecl"):
         continue
@@ -1242,7 +1242,7 @@ for _lib in _libs.values():
     esl_key_lib_delete_record_by_esl_address.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 495
+# esl_key_lib/esl_key_lib.h: 495
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_get_bind_address_by_ble_address", "cdecl"):
         continue
@@ -1251,7 +1251,7 @@ for _lib in _libs.values():
     esl_key_lib_get_bind_address_by_ble_address.restype = sl_status_t
     break
 
-# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 509
+# esl_key_lib/esl_key_lib.h: 509
 for _lib in _libs.values():
     if not _lib.has("esl_key_lib_get_bind_address_by_esl_address", "cdecl"):
         continue
@@ -3408,9 +3408,9 @@ try:
 except:
     pass
 
-db_handle_s = struct_db_handle_s# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 53
+db_handle_s = struct_db_handle_s# esl_key_lib/esl_key_lib.h: 53
 
-db_record_s = struct_db_record_s# bluetooth-le-sdk/example_host/bt_host_esl_ap/esl_key_lib/esl_key_lib.h: 56
+db_record_s = struct_db_record_s# esl_key_lib/esl_key_lib.h: 56
 
 # No inserted files
 

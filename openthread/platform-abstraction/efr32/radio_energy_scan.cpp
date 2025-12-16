@@ -31,7 +31,7 @@
  *   This file implements the energy scan functionality for the EFR32 radio platform.
  */
 
-#include "radio_energy_scan.h"
+#include "radio_energy_scan.hpp"
 
 #include <assert.h>
 #include <string.h>
@@ -52,12 +52,10 @@
 #include "radio_power_manager.h"
 #include "radio_state.h"
 
-extern "C" {
 #include "sl_rail.h"
 #include "sl_rail_ieee802154.h"
 #include "sl_rail_types.h"
 #include "sl_status.h"
-}
 
 #include "platform-band.h"
 
@@ -66,16 +64,6 @@ static constexpr int8_t  ENERGY_SCAN_INVALID_RESULT = -128; // Invalid/uninitial
 static constexpr int8_t  ENERGY_SCAN_MIN_RSSI       = -128; // Minimum possible RSSI value
 static constexpr uint8_t SYMBOLS_PER_ENERGY_READING = 8;    // we take a reading every 8 symbols
 static constexpr uint8_t QUARTER_DBM_IN_DBM         = 4;
-
-#ifdef TESTING
-namespace Testing {
-namespace Radio {
-namespace EnergyScan {
-void AdvanceToTimerEvent();
-}
-} // namespace Radio
-} // namespace Testing
-#endif
 
 /**
  * Energy scan status enumeration
@@ -89,6 +77,7 @@ enum class EnergyScanStatus
 
 // Timer for energy scan operations
 static sl_rail_multi_timer_t rail_timer;
+
 /**
  * Multi-instance state for energy scan operations.
  * Tracks which instance is active and the scan result.
@@ -97,7 +86,8 @@ struct InstanceState
 {
     volatile EnergyScanStatus status;
     volatile int8_t           resultDbm;
-    otInstance               *activeInstance;
+    instanceIndex_t           instanceIndex;
+    bool                      isAsync;
 };
 
 /**
@@ -124,8 +114,7 @@ private:
 
 public:
     // Constructors
-    EnergyScan(uint16_t channel, sl_rail_time_t duration);
-    EnergyScan(otInstance *instance, uint16_t channel, sl_rail_time_t duration);
+    EnergyScan(otInstance *instance, uint16_t channel, sl_rail_time_t duration, bool isAsync);
     ~EnergyScan();
 
     // State queries
@@ -134,8 +123,9 @@ public:
     bool isBlockingReceive() const;
 
     // Instance management
-    otInstance *getInstance() const;
-    bool        isAsynchronous() const;
+    otInstance     *getInstance() const;
+    instanceIndex_t getInstanceIndex() const;
+    bool            isAsynchronous() const;
 
     // Result management
     int8_t getResult() const;
@@ -152,8 +142,8 @@ public:
     void        completeScan();
 };
 
-// Global scan instance (nullptr when no scan ongoing)
-static EnergyScan *sEnergyScan = nullptr;
+// Per-instance scan storage
+static EnergyScan *sEnergyScans[RADIO_INTERFACE_COUNT] = {nullptr};
 
 //------------------------------------------------------------------------------
 // Energy Scan Management Functions
@@ -173,6 +163,25 @@ void        processCompletion(EnergyScan *scan);
 uint16_t         getSymbolDurationUs(void);
 sl_rail_status_t scheduleNextReading(EnergyScan *scan, uint16_t symbols);
 void             timer_handler(struct sl_rail_multi_timer *tmr, sl_rail_time_t expectedTimeOfEvent, void *cbArg);
+
+// Clear a single scan slot and reset pointer
+void clearScan(EnergyScan *&scan)
+{
+    if (scan != nullptr)
+    {
+        delete scan;
+        scan = nullptr;
+    }
+}
+
+// Clear all scan slots
+void clearAllScans()
+{
+    for (auto &scan : sEnergyScans)
+    {
+        clearScan(scan);
+    }
+}
 
 // Check if a scan is in progress
 bool isScanInProgress(EnergyScan *scan)
@@ -195,22 +204,14 @@ sl_status_t waitForSyncScanCompletion(EnergyScan *scan, int8_t *result)
     otEXPECT_ACTION(scan != nullptr, status = SL_STATUS_FAIL);
 
     // Wait for scan to complete naturally based on scan duration
-    while (scan != nullptr && scan->isInProgress())
+    while (scan->isInProgress())
     {
 #ifdef TESTING
-        Testing::Radio::EnergyScan::AdvanceToTimerEvent();
+        Testing::Radio::EnergyScanTest::AdvanceToTimerEvent(scan);
 #endif
     }
 
-    if (scan != nullptr)
-    {
-        *result = scan->getResult();
-    }
-    else
-    {
-        // Scan was destroyed without completion - this indicates an error
-        status = SL_STATUS_FAIL;
-    }
+    *result = scan->getResult();
 
 exit:
     return status;
@@ -219,22 +220,29 @@ exit:
 // Process scan completion
 void processCompletion(EnergyScan *scan)
 {
+    otInstance     *instance = nullptr;
+    instanceIndex_t index;
+
     otEXPECT(scan != nullptr);
     otEXPECT(scan->isCompleted());
 
+    index = scan->getInstanceIndex();
+
     if (scan->isAsynchronous())
     {
-        otInstance *instance = scan->getInstance();
-        int8_t      result   = scan->getResult();
-        // Async: report result, then signal pending events
-        sli_ot_energy_scan_deinit();
+        // Async: get result first, then cleanup and report
+        instance      = scan->getInstance();
+        int8_t result = scan->getResult();
+
+        clearScan(sEnergyScans[index]);
+
         otPlatRadioEnergyScanDone(instance, result);
         otSysEventSignalPending();
     }
     else
     {
         // Sync: nothing to notify; result already stored for caller
-        sli_ot_energy_scan_deinit();
+        clearScan(sEnergyScans[index]);
     }
 
 exit:
@@ -287,6 +295,13 @@ void finalizeEnergyScan(EnergyScan *scan)
     // Energy scan complete, report RSSI value
     scan->completeScan();
 
+    // Report completion for async scans only
+    // Sync scans will call this after extracting the result
+    if (scan->isAsynchronous())
+    {
+        processCompletion(scan);
+    }
+
     // Re-enable frame detection
     status =
         sli_ot_radio_interface_config_rx_options(SL_RAIL_RX_OPTION_DISABLE_FRAME_DETECTION, SL_RAIL_RX_OPTIONS_NONE);
@@ -335,20 +350,15 @@ exit:
 //------------------------------------------------------------------------------
 // EnergyScan Method Implementations
 
-// Synchronous constructor - delegates to async constructor with nullptr
-EnergyScan::EnergyScan(uint16_t channel, sl_rail_time_t duration)
-    : EnergyScan(nullptr, channel, duration)
-{
-}
-
-// Asynchronous constructor - instance required (primary constructor)
-EnergyScan::EnergyScan(otInstance *instance, uint16_t channel, sl_rail_time_t duration)
+EnergyScan::EnergyScan(otInstance *instance, uint16_t channel, sl_rail_time_t duration, bool isAsync)
     : mChannel(channel)
 {
     // Initialize instance state
-    mInstance.status         = EnergyScanStatus::InProgress;
-    mInstance.resultDbm      = ENERGY_SCAN_INVALID_RESULT;
-    mInstance.activeInstance = instance;
+    mInstance.status        = EnergyScanStatus::Idle;
+    mInstance.resultDbm     = ENERGY_SCAN_INVALID_RESULT;
+    mInstance.instanceIndex = sli_ot_radio_instance_get_index(instance);
+    mInstance.isAsync       = isAsync;
+    OT_ASSERT(mInstance.instanceIndex < RADIO_INTERFACE_COUNT);
 
     // Initialize execution state
     mExecution.frameCounter    = 0;
@@ -390,12 +400,17 @@ bool EnergyScan::isBlockingReceive() const
 // Instance management
 otInstance *EnergyScan::getInstance() const
 {
-    return mInstance.activeInstance;
+    return sli_ot_radio_instance_get(mInstance.instanceIndex);
+}
+
+instanceIndex_t EnergyScan::getInstanceIndex() const
+{
+    return mInstance.instanceIndex;
 }
 
 bool EnergyScan::isAsynchronous() const
 {
-    return mInstance.activeInstance != nullptr;
+    return mInstance.isAsync;
 }
 
 // Result management
@@ -453,6 +468,9 @@ sl_status_t EnergyScan::start()
     // async scan reschedules in timer_handler
     status = scheduleNextReading(this, SYMBOLS_PER_ENERGY_READING);
     otEXPECT_ACTION(status == SL_RAIL_STATUS_NO_ERROR, result = SL_STATUS_FAIL);
+
+    // Mark scan as in progress only after successful initialization
+    mInstance.status = EnergyScanStatus::InProgress;
 
 exit:
     if (result != SL_STATUS_OK)
@@ -519,6 +537,9 @@ void sli_ot_energy_scan_init(void)
 {
     // Initialize the timer to zero
     memset(&rail_timer, 0, sizeof(rail_timer));
+
+    // Clean up any ongoing energy scans
+    clearAllScans();
 }
 
 /**
@@ -527,46 +548,74 @@ void sli_ot_energy_scan_init(void)
  */
 void sli_ot_energy_scan_deinit(void)
 {
-    otEXPECT(sEnergyScan != nullptr);
-    delete sEnergyScan;
-    sEnergyScan = nullptr;
-exit:
-    return;
+    // Clean up any ongoing energy scans
+    clearAllScans();
+}
+
+/**
+ * Deinitialize energy scan for a specific instance.
+ * Cancels the scan and cleans up.
+ */
+void sli_ot_energy_scan_deinit_instance(otInstance *instance)
+{
+    instanceIndex_t index = sli_ot_radio_instance_get_index(instance);
+    OT_ASSERT(index < RADIO_INTERFACE_COUNT);
+
+    clearScan(sEnergyScans[index]);
 }
 
 bool sli_ot_energy_scan_is_in_progress(void)
 {
-    return isScanInProgress(sEnergyScan);
+    // Check if any instance has a scan in progress
+    for (instanceIndex_t i = 0; i < RADIO_INTERFACE_COUNT; i++)
+    {
+        if (isScanInProgress(sEnergyScans[i]))
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool sli_ot_energy_scan_is_blocking_receive(otInstance *aInstance)
 {
-    OT_UNUSED_VARIABLE(aInstance);
-    return isBlockingReceive(sEnergyScan);
+    instanceIndex_t index = sli_ot_radio_instance_get_index(aInstance);
+    OT_ASSERT(index < RADIO_INTERFACE_COUNT);
+
+    return isBlockingReceive(sEnergyScans[index]);
 }
 
-sl_status_t sli_ot_energy_scan(uint16_t aChannel, sl_rail_time_t aAveragingTimeUs, int8_t *aResult)
+sl_status_t sli_ot_energy_scan(otInstance    *aInstance,
+                               uint16_t       aChannel,
+                               sl_rail_time_t aAveragingTimeUs,
+                               int8_t        *aResult)
 {
-    sl_status_t status;
+    sl_status_t     status;
+    EnergyScan     *scan  = nullptr;
+    instanceIndex_t index = sli_ot_radio_instance_get_index(aInstance);
+    OT_ASSERT(index < RADIO_INTERFACE_COUNT);
 
     otEXPECT_ACTION(aResult != nullptr, status = SL_STATUS_NULL_POINTER);
-    otEXPECT_ACTION(sEnergyScan == nullptr, status = SL_STATUS_BUSY);
+    otEXPECT_ACTION(sEnergyScans[index] == nullptr, status = SL_STATUS_BUSY);
 
-    // Create and start synchronous scan
-    sEnergyScan = new EnergyScan(nullptr, aChannel, aAveragingTimeUs);
-    status      = startEnergyScan(sEnergyScan);
+    // Create and start synchronous scan for the specified instance
+    scan   = new EnergyScan(aInstance, aChannel, aAveragingTimeUs, false);
+    status = startEnergyScan(scan);
     otEXPECT(status == SL_STATUS_OK);
+
+    sEnergyScans[index] = scan;
 
     // Wait for completion and get the result
-    status = waitForSyncScanCompletion(sEnergyScan, aResult);
-
+    status = waitForSyncScanCompletion(scan, aResult);
     otEXPECT(status == SL_STATUS_OK);
-    processCompletion(sEnergyScan);
+
+    // Report completion
+    processCompletion(scan);
 
 exit:
     if (status != SL_STATUS_OK)
     {
-        sli_ot_energy_scan_deinit();
+        sli_ot_energy_scan_deinit_instance(aInstance);
     }
 
     return status;
@@ -574,18 +623,25 @@ exit:
 
 sl_status_t sli_ot_energy_scan_async(otInstance *aInstance, uint16_t aChannel, sl_rail_time_t aAveragingTimeUs)
 {
-    sl_status_t status;
+    sl_status_t     status;
+    EnergyScan     *scan  = nullptr;
+    instanceIndex_t index = sli_ot_radio_instance_get_index(aInstance);
+    OT_ASSERT(index < RADIO_INTERFACE_COUNT);
 
-    otEXPECT_ACTION(sEnergyScan == nullptr, status = SL_STATUS_BUSY);
+    otEXPECT_ACTION(sEnergyScans[index] == nullptr, status = SL_STATUS_BUSY);
 
-    // Create and start async scan
-    sEnergyScan = new EnergyScan(aInstance, aChannel, aAveragingTimeUs);
-    status      = startEnergyScan(sEnergyScan);
+    // Create and start asynchronous scan
+    // Only set per-instance pointer when start is successful
+    scan   = new EnergyScan(aInstance, aChannel, aAveragingTimeUs, true);
+    status = startEnergyScan(scan);
+    otEXPECT(status == SL_STATUS_OK);
+
+    sEnergyScans[index] = scan;
 
 exit:
     if (status != SL_STATUS_OK)
     {
-        sli_ot_energy_scan_deinit();
+        sli_ot_energy_scan_deinit_instance(aInstance);
     }
 
     return status;
@@ -593,8 +649,16 @@ exit:
 
 void sli_ot_energy_scan_process(otInstance *aInstance)
 {
-    otEXPECT(sEnergyScan != nullptr && sEnergyScan->getInstance() == aInstance);
-    processCompletion(sEnergyScan);
+    instanceIndex_t index = sli_ot_radio_instance_get_index(aInstance);
+    OT_ASSERT(index < RADIO_INTERFACE_COUNT);
+
+    EnergyScan *scan = sEnergyScans[index];
+
+    otEXPECT(scan != nullptr);
+    otEXPECT(scan->isCompleted());
+
+    // Report completion
+    processCompletion(scan);
 
 exit:
     return;
@@ -632,12 +696,19 @@ otError sli_ot_energy_scan_status_to_ot_error(sl_status_t status)
 #ifdef TESTING
 namespace Testing {
 namespace Radio {
-namespace EnergyScan {
-void AdvanceToTimerEvent()
+namespace EnergyScanTest {
+void AdvanceToTimerEvent(EnergyScan *scan)
 {
-    timer_handler(nullptr, 0, sEnergyScan);
+    // Test helper: advances timer for the specified scan
+    timer_handler(nullptr, 0, scan);
 }
-} // namespace EnergyScan
+
+EnergyScan *GetScanForInstance(otInstance *instance)
+{
+    instanceIndex_t index = sli_ot_radio_instance_get_index(instance);
+    return sEnergyScans[index];
+}
+} // namespace EnergyScanTest
 } // namespace Radio
 } // namespace Testing
 #endif

@@ -1,7 +1,0 @@
-id=com.silabs.sdk.zwave_bootloader
-version=1.0.0.0
-label=Z-Wave Bootloaders
-description=Z-Wave Bootloaders for Z-Wave Apps
-
-prop.file.templatesFile=z-wave_bootloader_templates.xml
-prop.file.demosFile=z-wave_bootloader_demos.xml

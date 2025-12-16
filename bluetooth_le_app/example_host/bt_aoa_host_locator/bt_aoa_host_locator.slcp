@@ -99,3 +99,11 @@ include:
 
 tag:
   - hwfilter:device:device_family_host
+
+readme:
+  - path: readme.md
+
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true

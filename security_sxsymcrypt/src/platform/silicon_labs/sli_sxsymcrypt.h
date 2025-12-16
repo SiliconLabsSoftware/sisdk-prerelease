@@ -114,3 +114,10 @@ void sli_crypto_lpwaes_save_state(sli_cryptomaster_state_t *state);
  */
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SXSYMCRYPT, SL_CODE_CLASS_TIME_CRITICAL)
 void sli_crypto_lpwaes_restore_state(sli_cryptomaster_state_t *state);
+
+/*
+ * \brief
+ *   Release the cryptomaster instance associated with regs
+ */
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SXSYMCRYPT, SL_CODE_CLASS_TIME_CRITICAL)
+void sli_cmdma_release_hw(struct sx_regs *regs);

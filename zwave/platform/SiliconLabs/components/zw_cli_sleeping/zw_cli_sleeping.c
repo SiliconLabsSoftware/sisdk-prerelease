@@ -44,6 +44,7 @@
 #include "sl_cli.h"
 #include "app_log.h"
 #include "zw_cli_sleeping.h"
+#include "zw_cli_sleeping_config.h"
 #include "ev_man.h"
 #include "events.h"
 #include "sl_sleeptimer.h"
@@ -79,16 +80,30 @@ void zw_cli_sleeping_util_prevent_sleeping(bool is_prevent)
   } else {
     zw_shutdown_manager_release_lock();
   }
+  #if defined(ZW_CLI_SLEEPING_WAKEUP_EM1) && 0 != ZW_CLI_SLEEPING_WAKEUP_EM1
+  if ((true == is_prevent)) {
+    sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
+  } else {
+    sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
+  }
+#endif
 }
 
 static void zw_cli_sleeping_sleeptimer_callback(__attribute__((unused)) sl_sleeptimer_timer_handle_t *handle, __attribute__((unused)) void *contextData)
 {
   zw_shutdown_manager_release_lock();
+#if defined(ZW_CLI_SLEEPING_WAKEUP_EM1) && 0 != ZW_CLI_SLEEPING_WAKEUP_EM1
+  sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
+#endif
 }
 
 void zw_cli_sleeping_util_prevent_sleeping_timeout(uint8_t seconds)
 {
   zw_shutdown_manager_add_lock();
+#if defined(ZW_CLI_SLEEPING_WAKEUP_EM1) && 0 != ZW_CLI_SLEEPING_WAKEUP_EM1
+  sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
+#endif
+
   sl_sleeptimer_start_timer_ms(&cli_sleeptimer_handle, seconds * 1000, zw_cli_sleeping_sleeptimer_callback, NULL, 0, 0);
 }
 

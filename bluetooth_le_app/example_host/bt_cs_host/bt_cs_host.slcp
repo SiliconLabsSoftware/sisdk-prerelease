@@ -67,9 +67,13 @@ configuration:
   - name: BLE_PEER_MANAGER_CENTRAL_CONFIG_DEFAULT_SCAN_WINDOW
     value: 21
 
+readme:
+  - path: readme.md
+
 ui_hints:
   highlight:
     - path: config/btconf/gatt_configuration.btconf
+    - path: readme.md
       focus: true
 
 template_contribution:

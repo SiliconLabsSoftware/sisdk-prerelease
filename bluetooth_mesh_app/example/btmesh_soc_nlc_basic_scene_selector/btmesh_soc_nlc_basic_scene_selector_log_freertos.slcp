@@ -1,7 +1,7 @@
 project_name: btmesh_soc_nlc_basic_scene_selector_freertos
 package: bluetooth_mesh_app
 label: Bluetooth Mesh - NLC Basic Scene Selector FreeRTOS
-description: >
+description: >-
   An out-of-the-box Software Demo where the device acts as a Basic Scene Selector
   in a Networked Lighting Control (NLC) system.
   Push Button presses control Basic Lightness Controllers in the network by

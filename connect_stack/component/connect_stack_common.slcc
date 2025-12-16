@@ -31,7 +31,7 @@ requires:
 - name: "connect_cmsis_stack_ipc"
   condition:
   - "bluetooth_stack"
-- name: "rail_lib_multiprotocol_secure"
+- name: "rail_lib_multiprotocol"
   condition:
   - "bluetooth_stack"
 - name: "platform_version"

@@ -11,6 +11,39 @@ Version has been bumped to 8.0.0 to reflect the major changes in the stack. In t
 
 Fixed a bug where the controller would not store beam routes during inclusion, which could cause frequently listening nodes to become unjoinable if they stopped the inclusion process early. The controller now stores beam routes immediately during inclusion. As a result, the controller may beam the frequently listening node during inclusion even when not strictly necessary, potentially adding a slight delay to the inclusion process.
 
+## Firmware Update - Storage Slot Erase at OTA Start
+
+Starting with this version, when receiving the first **COMMAND_CLASS_FIRMWARE_UPDATE_MD (0x7A) / FIRMWARE_UPDATE_MD_REQUEST_GET (0x03)** command at the beginning of an OTA update, the device will immediately erase the firmware storage slot to prepare for the new firmware image. This operation ensures a clean storage area before writing the new firmware data.
+
+**Impact on Response Time**: The storage erase operation can introduce a noticeable delay in the device's response time, which varies significantly depending on the type of memory used:
+
+- **Internal SRAM/Flash storage**: Erase time is typically very fast (~300 ms per erase operation). With this configuration, the delay should be negligible for most applications.
+
+- **External Flash storage**: Erase time is significantly longer (~6000 ms for erasing a full slot, ~8000 ms for erasing an empty/already erased slot). This can result in a delay of several seconds before the device responds to the first MD GET command.
+
+**Benchmark Results** (256 KB storage slot):
+- Internal storage (BRD4401C with bootloader v3.3.2): 302-305 ms (full or empty)
+- External storage (BRD4401C with bootloader v3.3.0): 5848-5994 ms (full), 8034-8229 ms (empty)
+
+Controllers initiating OTA updates should be prepared to handle longer response times, especially when updating devices using external flash storage.
+
+## Radio Layer Regulatory Compliance Update
+
+The radio layer has been refactored to enforce strict compliance with regional regulatory requirements. Clear Channel Assessment (CCA) thresholds and procedures have been updated to meet the specifications defined by regulatory bodies in all supported regions:
+
+- **EU regions**: CCA threshold set to -77 dBm (-69 dBm for LR), with 160 µs duration, in accordance with ETSI EN 300.220-2
+- **Japan**: CCA threshold aligned with ARIB T-108 requirements
+- **Korea**: CCA threshold and duration configured per local regulations
+- **Other regions**: Compliance with Z-Wave PHY Layer specifications (-80 dBm for classic channels, -60 dBm for LR channels)
+
+These stricter regulatory requirements impact the radio transmission characteristics and may affect fragmented beam transmission performance in high-interference environments.
+
+## Fragmented Beam Transmission - Robustness Limitations
+
+The fragmented beam transmission feature in this release has been implemented with basic functionality but has known limitations regarding robustness to RF interference. The stricter regulatory compliance requirements applied to the radio layer (see Radio Layer Regulatory Compliance Update above) contribute to these limitations. In environments with high interference levels, devices may experience transmission failures where the Beam ACK frame is not successfully sent, potentially resulting in the device being unable to complete the beam transmission sequence.
+
+An enhanced solution addressing these robustness limitations is under validation. Improvements are expected to be integrated in a future release to provide more reliable fragmented beam transmission in challenging RF conditions.
+
 ## Power Management Commands - Lock Behavior
 
 - The permanent I/O lock can only be acquired once. Subsequent requests with timeout=0 will be ignored if the lock is already held.
@@ -30,7 +63,9 @@ Fixed a bug where the controller would not store beam routes during inclusion, w
 
 - The Z-Wave stack is now independent from the EM state of the platform, meaning that using `sl_power_manager` APIs will not interfere with Z-Wave stack logic.
 
-- Previous to this release, the EM1 state was required during radio operations (RX). Now, the [EM1P](https://docs.silabs.com/rail/latest/efr32-migration-guide-for-proprietary-apps/04-em1p-on-efr32xg22) energy mode is maintained during radio RX operations. This improves the overall power consumption of the application.
+- Previous to this release, the EM1 state was required during radio operations (RX). Now, the [EM1P](https://docs.silabs.com/rail/latest/efr32-migration-guide-for-proprietary-apps/04-em1p-on-efr32xg22) energy mode may be maintained during radio RX operations. This could improve the overall power consumption of the application.
+
+  - Note: there may be peripherals that do not work in EM1P mode. For example, timers used by the PWM component in Led Bulb and Power Strip applications only work in EM1 mode. Due to this, an EM1 requirement was added to all always-on applications (see `app.c` of these apps). This may require manual steps during migration of old projects, or it can be removed to reduce power consumption if EM1P mode is sufficient and no peipherals are affected. See also at the [migration guide](migration_guide.md#energy-modes).
 
 - A new `zw_shutdown_manager` component module has been introduced to manage shutdown mode (EM4) locks, replacing the deep sleep functionality previously provided by zpal_power_manager.
 
@@ -41,6 +76,11 @@ FreeRTOS power down hooks (`configPRE_SLEEP_PROCESSING` and `configPOST_SLEEP_PR
 
 ## CLI
 - Now that all applications can make use of EM1P, the CLI has been configured to rely on the LFRCO clock (which implies a lower baud rate of 9600) for SoC applications. Therefore, the CLI will remain active in EM1P.
+  - Exceptions are the sample applications for BRD4204A board. The EUSART pins used for VCOM on this board don't operate in low-energy mode. Therefore, on this board, the default configuration of sample applications is the following:
+    - Always-on apps stay in EM1 (as stated in [Removal of zpal_power_manager module](#removal-of-zpal_power_manager-module)).
+    - Frequently listening app's CLI is configured to use a high frequency clock by default, which will keep the app in EM1.
+    - Sleeping reporting apps enable the newly added ZW_CLI_SLEEPING_WAKEUP_EM1 configuration.
+- New configuration value was added in zw_cli_sleeping component. When ZW_CLI_SLEEPING_WAKEUP_EM1 is enabled, the application will stay in EM1 during wakeup or when sleeping is disabled through CLI command.
 
 ## TX POWER
 The ADJUST_RAIL_TX_POWER (1.4 dBm) empirical offset in the zpal_radio layer has been removed. In the case of OTA updates from versions prior to 8.0 to higher versions, TX power values need to be adjusted.

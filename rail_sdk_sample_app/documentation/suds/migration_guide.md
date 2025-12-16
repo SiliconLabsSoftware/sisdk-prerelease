@@ -1,6 +1,52 @@
 Migration Guide
 ===============
 
+# RAIL SDK 3.0.0
+
+> **Highlights:**
+>
+> - Uses RAIL LIB 3.0.0
+> - PA configuration APIs updated to use RAIL handle parameter
+> - Protocol enum `BTC` renamed to `BPSK`
+
+## Breaking Changes in Version 3.0.0
+
+### PA Configuration API Changes
+
+The mode switch PA configuration functions now require or have modified parameters:
+
+```c
+// Version 2.19.0 (OLD)
+void init_rail_pa_settings(void);
+void update_rail_pa_settings(sl_rail_handle_t rail_handle, uint16_t channel);
+
+// Version 3.0.0 (NEW)
+void init_rail_pa_settings(sl_rail_handle_t rail_handle);
+void update_rail_pa_settings(sl_rail_handle_t rail_handle);
+```
+
+**Migration Steps:**
+- Update calls to `init_rail_pa_settings()` to pass the RAIL handle
+- Remove the `channel` parameter from calls to `update_rail_pa_settings()`
+
+### Protocol Enum Rename
+
+The protocol enum value `BTC` has been renamed to `BPSK`:
+
+```c
+// Version 2.19.0 (OLD)
+RAIL_SDK_Protocol_t protocol = BTC;
+
+// Version 3.0.0 (NEW)
+RAIL_SDK_Protocol_t protocol = BPSK;
+```
+
+### Removed Function
+
+The function `sl_rail_sdk_wmbus_phy_software()` has been removed as software-based PHY processing is no longer required.
+
+---
+
 # RAIL SDK 2.19.0
 
 > **Highlights:**

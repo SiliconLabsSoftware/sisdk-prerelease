@@ -1,7 +1,7 @@
 project_name: btmesh_soc_empty
 package: bluetooth_mesh_app
 label: Bluetooth Mesh - SoC Empty
-description: >
+description: >-
   Demonstrates the bare minimum needed for a Bluetooth Mesh C application.
   The application starts Unprovisioned Device Beaconing after booting, and
   then waits to be provisioned.

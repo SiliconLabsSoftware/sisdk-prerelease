@@ -25,7 +25,12 @@ requires:
 - name: btmesh_host_app_prov
 - name: component_catalog
 library:
+- system: crypto
+  unless:
+  - macos
 - system: openssl
+  condition:
+  - macos
 template_contribution:
 - name: component_catalog
   value: btmesh_host_app_prov_cbp

@@ -1,7 +1,7 @@
 project_name: btmesh_soc_nlc_basic_lightness_controller
 package: bluetooth_mesh_app
 label: Bluetooth Mesh - NLC Basic Lightness Controller
-description: >
+description: >-
   An out-of-the-box software demo where the device acts as a Basic Lightness
   Controller in a Networked Lighting Control (NLC) system.
   The device listens to messages from other NLC devices, namely Occupancy Sensor,

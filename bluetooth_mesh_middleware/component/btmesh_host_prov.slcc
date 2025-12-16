@@ -26,13 +26,3 @@ requires:
 template_contribution:
 - name: component_catalog
   value: btmesh_host_prov
-- name: btmesh_on_event
-  value:
-    include: btmesh_prov.h
-    function: btmesh_prov_on_event
-    priority: -9000
-- name: btmesh_on_event
-  value:
-    include: btmesh_prov.h
-    function: btmesh_cbp_on_event
-    priority: -9000

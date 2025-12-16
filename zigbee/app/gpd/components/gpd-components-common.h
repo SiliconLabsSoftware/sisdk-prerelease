@@ -22,7 +22,6 @@
 #include "gpd-apps-config.h"
 #include "sl_rail.h"
 #include "rail_types.h"
-#include "em_chip.h"
 #include "sl_clock_manager.h"
 #include "sl_gpio.h"
 #include "em_emu.h"

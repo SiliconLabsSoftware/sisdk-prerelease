@@ -123,7 +123,8 @@ configuration:
     value: CMU_WDOG0CLKCTRL_CLKSEL_LFRCO
   - name: SL_CLOCK_MANAGER_EUSART0CLK_SOURCE
     value: CMU_EUSART0CLKCTRL_CLKSEL_LFRCO
-    # USART configuration
+    unless: [brd4204a]
+  # USART configuration
   - name: SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
     value: 1
   - name: SL_IOSTREAM_USART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
@@ -133,12 +134,24 @@ configuration:
     value: 1
   - name: SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
     value: 0    # EUSART RX shouldn't prevent EM2
+    unless: [brd4204a]
   - name: SL_IOSTREAM_EUSART_INSTANCE_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
     value: 0
   - name: SL_IOSTREAM_EUSART_VCOM_BAUDRATE
     value: 9600 # In EM2 the eusart is working only with 9600 baud
   - name: SL_IOSTREAM_EUSART_VCOM_ENABLE_HIGH_FREQUENCY # Disable high frequency mode for EUSART to work in EM2
     value: 0
+    unless: [brd4204a]
+  # BRD4204A uses PORTD for EUSART that cannot work in EM2, so we configure EUSART to apply lock for EM1
+  - name: SL_CLOCK_MANAGER_EUSART0CLK_SOURCE
+    value: CMU_EUSART0CLKCTRL_CLKSEL_EM01GRPCCLK
+    condition: [brd4204a]
+  - name: SL_IOSTREAM_EUSART_VCOM_ENABLE_HIGH_FREQUENCY
+    value: 1
+    condition: [brd4204a]
+  - name: SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: 1
+    condition: [brd4204a]
 define:
   - name: APP_PROPERTIES_CONFIG_FILE
     value: <application_properties_config.h>

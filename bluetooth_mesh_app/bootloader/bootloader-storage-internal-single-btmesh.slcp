@@ -1,7 +1,7 @@
 project_name: bootloader-storage-internal-single-btmesh
 package: bluetooth_mesh_app
 label: Bootloader - SoC Internal Storage (Bluetooth Mesh)
-description: >
+description: >-
   This sample configuration of the Gecko bootloader configures the bootloader to use the internal main flash to store
   firmware update images. The storage configuration is set up to store a single firmware update image at a time, in a
   single storage slot. This can be configured on the "Storage" tab.

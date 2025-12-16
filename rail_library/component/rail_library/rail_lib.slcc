@@ -83,6 +83,9 @@ requires:
 - name: emlib_ldma
   condition:
   - device_sdid_235     # Needed for TrustZone
+- name: emlib_ldma
+  condition:
+  - device_sdid_260     # Needed for TrustZone
 - name: se_manager
   condition:
   - device_generic_family_sixx301

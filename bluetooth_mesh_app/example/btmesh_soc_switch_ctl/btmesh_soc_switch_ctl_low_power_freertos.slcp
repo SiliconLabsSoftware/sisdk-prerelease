@@ -1,7 +1,7 @@
 project_name: btmesh_soc_switch_ctl_low_power_freertos
 package: bluetooth_mesh_app
 label: Bluetooth Mesh - SoC Switch CTL Low Power FreeRTOS
-description: >
+description: >-
   An out-of-the-box Software Demo where the device acts as a switch using
   the Light CTL Client Model. It is optimized for low current consumption
   with disabled CLI, logging, and LCD. Push Button presses or CLI commands

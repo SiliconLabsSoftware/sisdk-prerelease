@@ -1,7 +1,7 @@
 project_name: btmesh_soc_switch_hsl
 package: bluetooth_mesh_app
 label: Bluetooth Mesh - SoC Switch HSL
-description: >
+description: >-
   An out-of-the-box Software Demo where the device acts as a switch using
   the Light HSL Client Model. Push Button presses or CLI commands can control
   the lightness, hue and saturation of the LEDs on a remote device.

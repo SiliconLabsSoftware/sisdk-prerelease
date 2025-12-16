@@ -65,7 +65,7 @@ void connect_ble_cli_set_adv_params_command(sl_cli_command_arg_t *arguments)
   if (status == SL_STATUS_OK) {
     connect_core_debug_print("success\n");
   } else {
-    connect_core_debug_print("error: 0x%04X\n", status);
+    connect_core_debug_print("error: 0x%04lX\n", status);
   }
 }
 
@@ -85,7 +85,7 @@ void connect_ble_cli_start_adv_command(sl_cli_command_arg_t *arguments)
   if (status == SL_STATUS_OK) {
     connect_core_debug_print("success\n");
   } else {
-    connect_core_debug_print("error: 0x%04X\n", status);
+    connect_core_debug_print("error: 0x%04lX\n", status);
   }
 
   status = sl_bt_legacy_advertiser_start(adv_handle,
@@ -94,7 +94,7 @@ void connect_ble_cli_start_adv_command(sl_cli_command_arg_t *arguments)
   if (status == SL_STATUS_OK) {
     connect_core_debug_print("success\n");
   } else {
-    connect_core_debug_print("error: 0x%04X\n", status);
+    connect_core_debug_print("error: 0x%04lX\n", status);
   }
 }
 
@@ -124,7 +124,7 @@ void connect_ble_cli_open_connection_command(sl_cli_command_arg_t *arguments)
   if (status == SL_STATUS_OK) {
     connect_core_debug_print("success, handle=0x%02X\n", connection_handle);
   } else {
-    connect_core_debug_print("error: 0x%04X\n", status);
+    connect_core_debug_print("error: 0x%04lX\n", status);
   }
 }
 
@@ -137,7 +137,7 @@ void connect_ble_cli_close_connection_command(sl_cli_command_arg_t *arguments)
   if (status == SL_STATUS_OK) {
     connect_core_debug_print("success\n");
   } else {
-    connect_core_debug_print("error: 0x%04X\n", status);
+    connect_core_debug_print("error: 0x%04lX\n", status);
   }
 }
 
@@ -157,6 +157,6 @@ void connect_ble_cli_set_connection_params_command(sl_cli_command_arg_t *argumen
   if (status == SL_STATUS_OK) {
     connect_core_debug_print("success\n");
   } else {
-    connect_core_debug_print("error: 0x%04X\n", status);
+    connect_core_debug_print("error: 0x%04lX\n", status);
   }
 }

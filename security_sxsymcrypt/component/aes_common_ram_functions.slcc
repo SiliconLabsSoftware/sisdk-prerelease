@@ -28,4 +28,8 @@ template_contribution:
   value:
     component: aes_common
     class: security
+
+metadata:
+  sbom:
+    license: Zlib
 root_path: security_sxsymcrypt

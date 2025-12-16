@@ -47,7 +47,6 @@
 #include "em_device.h"
 #include "sl_core.h"
 #ifdef _SILICON_LABS_32B_SERIES_2
-#include "em_chip.h"
 #include "em_rmu.h"
 #endif
 

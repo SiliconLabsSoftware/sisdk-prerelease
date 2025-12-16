@@ -1,7 +1,7 @@
 project_name: btmesh_soc_switch_ctl_micriumos
 package: bluetooth_mesh_app
 label: Bluetooth Mesh - SoC Switch CTL Micrium OS
-description: >
+description: >-
   An out-of-the-box Software Demo where the device acts as a switch using
   the Light CTL Client Model. Push Button presses or CLI commands can control
   the lightness and color temperature of the LEDs on a remote device. This example

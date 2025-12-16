@@ -316,9 +316,9 @@ sl_rail_status_t sl_rail_copy_device_info(sl_rail_handle_t radio_handle);
 /**
  * Initialize RAIL.
  *
- * @param[in,out] p_rail_handle A pointer to a radio-generic RAIL handle that
- *   on success, RAIL will overwrite with the real RAIL instance handle for
- *   the initialized RAIL protocol instance.
+ * @param[in,out] p_rail_handle A non-NULL pointer to a non-zero radio-generic
+ *   RAIL handle (e.g., \ref SL_RAIL_EFR32_HANDLE) that RAIL will overwrite
+ *   with the real RAIL instance handle when returning a success status code.
  * @param[in] p_rail_config The configuration for setting up the protocol.
  * @param[in] init_complete_callback A callback that notifies the application when the radio is
  *   finished initializing and is ready for further configuration. This
@@ -582,7 +582,7 @@ sl_rail_status_t sl_rail_get_rf_path(sl_rail_handle_t rail_handle,
 /// the radio from this calculator output looks like the example below.
 /// @code{.c}
 /// // Associate a specific channel configuration with a particular RAIL instance.
-/// sl_rail_config_channels(rail_handle, channel_configs[0]);
+/// sl_rail_config_channels(rail_handle, channel_configs[0], NULL);
 /// // If want RAIL 2.x behavior where the first channel is prepared by default
 /// // then do:
 /// sl_rail_prepare_channel(rail_handle,
@@ -2695,153 +2695,46 @@ sl_rail_status_t sl_rail_enable_cache_synth_cal(sl_rail_handle_t rail_handle,
 /// @addtogroup PA Power Amplifier (PA)
 /// @brief APIs for interacting with one of the on chip PAs.
 ///
-/// These APIs let you configure the on-chip PA to get the appropriate output
-/// power.
+/// These APIs let you configure the on-chip PA to get the desired deci-dBm
+/// output power. Applications should only interact with RAIL using dBm power
+/// units (or fraction thereof). The RAIL library requires an implementation
+/// of \ref sl_railcb_convert_ddbm_to_power_setting_entry() for performing the
+/// conversion of dBm to a chip-supported PA (\ref sl_rail_tx_power_mode_t)
+/// and raw power level.
 ///
-/// These are the function types:
-///   1) Configuration functions: These functions set and get configuration
-///      for the PA. In this case, "configuration" refers to a) indicating
-///      which PA to use, b) the voltage supplied by your board to the PA,
-///      and c) the ramp time over which to ramp the PA up to its full
-///      power.
-///   2) Power-setting functions: These functions consume the actual
-///      values written to the PA registers and write them appropriately.
-///      These values are referred to as "(raw) power levels". The range of
-///      acceptable values for these functions depends on which PA is
-///      currently active. The higher the power level set, the higher
-///      the dBm power output by the radio. However, the mapping
-///      between dBm and these power levels can vary greatly between
-///      modules/boards.
-///   3) Conversion functions: These functions convert
-///      between the "power levels" discussed previously and the
-///      dBm values output by the radio. Continue reading for more information
-///      about unit conversion.
-///
-/// The accuracy of the radio output power is application-specific.
-/// For some protocols or channels, the protocol itself or
-/// legal limitations require applications to know exactly what power
-/// they're transmitting at, in dBm. Other applications do not have
-/// these restrictions, and users determine power level(s)
-/// that fit their criteria for the trade-off between radio range and
-/// power savings, regardless of what dBm power that maps to.
-///
-/// >>> TODO --- REWRITE FOR RAIL 3 <<<
-/// .ref sl_rail_util_pa_convert_raw_to_dbm() and .ref sl_rail_util_pa_convert_dbm_to_raw(),
-/// which convert between the dBm power and the raw power levels,
-/// provide a solution that fits all these applications.
-/// The levels of customization are outlined below:
-///  1) No customization needed: for a given dBm value, the result
-///     of .ref sl_rail_util_pa_convert_dbm_to_raw() provides an appropriate
-///     raw power level that, when written to the registers via
-///     sli_rail_set_tx_power(), causes the radio to output at that
-///     dBm power. In this case, no action is needed by the user,
-///     the WEAK versions of the conversion functions can be used
-///     and the default include paths in pa_conversions_efr32.h can
-///     be used.
-///  2) The mapping of power level to dBm is not ideal, but the
-///     level of precision is sufficient: In pa_conversions_efr32.c,
-///     the WEAK versions of the conversion functions work by using
-///     8-segment piecewise linear curves to convert between dBm
-///     and power levels for PA's with hundreds of power levels
-///     and simple mapping tables for use with PA's with only a few
-///     levels. If this method is sufficiently precise, but the mapping
-///     between power levels and dBm is incorrect,
-///     copy pa_curves_efr32.h into a new file, updating the segments
-///     to form a better fit (_DCDC_CURVES or _VBAT_CURVES defines) and
-///     then add the SL_RAIL_PA_CURVES define to your build with the path
-///     to the new file.
-///  3) A different level of precision is needed and the fit is bad:
-///     If the piecewise-linear line segment fit is not appropriate for
-///     your solution, the functions in pa_conversions_efr32.c can be
-///     totally rewritten, as long as .ref sl_rail_util_pa_convert_dbm_to_raw() and
-///     .ref sl_rail_util_pa_convert_raw_to_dbm() have the same signatures. It is completely
-///     acceptable to re-write these in a way that makes the
-///     pa_curves_efr32.h and pa_curve_types_efr32.h files referenced in
-///     pa_conversions_efr32.h unnecessary. Those files are needed solely
-///     for the provided conversion methods.
-///  4) dBm values are not necessary: If the application does not require
-///     dBm values at all, overwrite .ref
-///     sl_rail_util_pa_convert_dbm_to_raw() and .ref sl_rail_util_pa_convert_raw_to_dbm() with smaller functions
-///     (i.e., return 0 or whatever was input). These functions are called
-///     from within the RAIL library, so they can never be deadstripped,
-///     but making them as small as possible is the best way to reduce code
-///     size. From there, call sli_rail_set_tx_power(), without
-///     converting from a dBm value. To stop the library from coercing the
-///     power based on channels, overwrite .ref sl_rail_util_pa_convert_raw_to_dbm()
-///     to always return 0 and overwrite .ref sl_rail_util_pa_convert_dbm_to_raw() to
-///     always return 255.
-///
-/// The following is example code that shows how to initialize your PA
-/// @code{.c}
-/// #include "sl_pa_conversions_efr32.h"
-///
-/// // A macro SL_RAIL_TX_POWER_CURVES_CONFIG is used as the curve
-/// // structures used by the provided conversion functions.
-/// sl_rail_tx_power_curves_config_t tx_power_curves_config = SL_RAIL_TX_POWER_CURVES_CONFIG;
-/// // Saves those curves
-/// // to be referenced when the conversion functions are called.
-/// sl_rail_init_tx_power_curves(rail_handle, &tx_power_curves_config);
-///
-/// // Declares the structure used to configure the PA.
-/// sl_rail_tx_power_config_t tx_power_config = {
-///   .mode         = SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP,
-///   .voltage_mv   = 3300,
-///   .ramp_time_us = 10,
-/// };
-///
-/// // Initializes the PA. Here, it is assumed that 'rail_handle' is a valid sl_rail_handle_t
-/// // that has already been initialized.
-/// sl_rail_config_tx_power(rail_handle, &tx_power_config);
-///
-/// // Picks a dBm power to use: 100 deci-dBm = 10 dBm. See docs on sl_rail_tx_power_t.
-/// sl_rail_tx_power_t power = 100;
-///
-/// // Gets the config written by sl_rail_config_tx_power() to confirm what was actually set.
-/// sli_rail_get_tx_power_config(rail_handle, &tx_power_config);
-///
-/// // sl_rail_util_pa_convert_dbm_to_raw() is the default weak version,
-/// // or the customer version, if overwritten.
-/// sli_rail_tx_power_level_t power_level
-///   = sl_rail_util_pa_convert_dbm_to_raw(rail_handle, tx_power_config.mode, power);
-///
-/// // Writes the result of the conversion to the PA power registers in terms
-/// // of raw power levels.
-/// sli_rail_set_tx_power(rail_handle, power_level);
-/// @endcode
-///
-/// @note All lines following "sl_rail_tx_power_t power = 100;" can be
-///   replaced with the provided utility function, \ref sl_rail_set_tx_power_dbm().
-///   However, the full example here was provided for clarity. See the
-///   documentation on \ref sl_rail_set_tx_power_dbm() for more details.
+/// Refer to the \ref sl_rail_util_pa plugin for an implementation of that
+/// callback and information on how PA conversion tables/curves are
+/// established to support such conversion.
 ///
 /// @{
 
 #ifndef SLI_LIBRAIL_ALIAS
 
 /**
- * Initialize TX power settings.
+ * Initialize TX power settings (provided primarily for compatibility with
+ * the older RAIL 2.x \ref rail_util_pa power curve plugin).
  *
  * @param[in] rail_handle A real RAIL instance handle.
  * @param[in] p_config A pointer to a power config with the desired initial settings
  *   for the TX amplifier.
  * @return Status code indicating success of the function call.
  *
- * These settings include the selection between the multiple TX amplifiers,
- * voltage supplied to the TX power amplifier, and ramp times. This must
- * be called before any transmit occurs or \ref sl_rail_set_tx_power_dbm() is called.
- * While this function should always be called during initialization,
- * it can also be called any time if these settings need to change to adapt
- * to a different application/protocol. This API also resets TX power
- * so \ref sl_rail_set_tx_power_dbm() must be called afterwards.
+ * This function is generally unnecessary when using the \ref sl_rail_util_pa
+ * plugin. It is primarily for backwards compatibility usage with the older
+ * \ref rail_util_pa plugin, or possibly of use for performing PA RF path
+ * characterization to generate or adjust the power conversion tables/curves
+ * provided by Silicon Labs in \ref sl_rail_util_pa / \ref rail_util_pa
+ * plugins.
  *
- * PA ramp time can be set separately using \ref sl_rail_set_tx_pa_ramp_time().
- * PA voltage can be set separately using \ref sl_rail_set_tx_pa_voltage().
- * At times, certain combinations of configurations cannot be achieved.
- * This API attempts to get as close as possible to the requested settings.
- * A change in \ref sl_rail_tx_power_config_t::ramp_time_us may affect the minimum timings
- * that can be achieved in \ref sl_rail_state_timing_t::idle_to_tx and
- * \ref sl_rail_state_timing_t::rx_to_tx. Call \ref sl_rail_set_state_timing() again to
- * check whether these times have changed.
+ * When using \ref sl_rail_util_pa, the PA ramp time and voltage can be set
+ * via \ref sl_rail_set_tx_pa_ramp_time() and \ref sl_rail_set_tx_pa_voltage(),
+ * respectively.
+ *
+ * @note A change in \ref sl_rail_tx_power_config_t::ramp_time_us may affect
+ *   the minimum timings that can be achieved in \ref
+ *   sl_rail_state_timing_t::idle_to_tx and \ref
+ *   sl_rail_state_timing_t::rx_to_tx. Call \ref sl_rail_set_state_timing()
+ *   again to check whether these times have changed.
  */
 sl_rail_status_t sl_rail_config_tx_power(sl_rail_handle_t rail_handle,
                                          const sl_rail_tx_power_config_t *p_config);
@@ -2857,58 +2750,35 @@ sl_rail_status_t sl_rail_config_tx_power(sl_rail_handle_t rail_handle,
  * @return Status code indicating success of the function call.
  *
  * Note that this API does not return the current TX power, which is separately
- * managed by the \ref sli_rail_get_tx_power() / \ref sli_rail_set_tx_power() APIs. Use this API
- * to determine which values were set as a result of
+ * managed by the \ref sl_rail_get_tx_power_dbm() / \ref sl_rail_set_tx_power_dbm()
+ * APIs. Use this API to determine which values were set as a result of
  * \ref sl_rail_config_tx_power().
+ *
+ * @warning This function is for PA RF path characterization use only.
  */
 sl_rail_status_t sli_rail_get_tx_power_config(sl_rail_handle_t rail_handle,
                                               sl_rail_tx_power_config_t *p_config);
 
 /**
- * Set the TX power in units of raw units (see \ref sl_rail_chip_specific.h for
- * value ranges).
+ * Set the platform-and-PA-specific raw power level in the current PA.
  *
  * @param[in] rail_handle A real RAIL instance handle.
  * @param[in] power_level Power in radio-specific \ref sli_rail_tx_power_level_t units.
  * @return Status code indicating success of the function call.
  *
- * >>> TODO --- REWRITE FOR RAIL 3 <<<
- * To convert between decibels and the integer values that the
- * registers take, call .ref sl_rail_util_pa_convert_dbm_to_raw().
- * A weak version of this function, which works well with our boards is provided. However,
- * customers using a custom board need to characterize
- * radio operation on that board and override the function to convert
- * appropriately from the desired dB values to raw integer values.
- *
- * Depending on the configuration used in \ref sl_rail_config_tx_power(), not all
- * power levels are achievable. This API will get as close as possible to
- * the desired power without exceeding it, and calling \ref sli_rail_get_tx_power() is
- * the only way to know the exact value written.
- *
- * Calling this function before configuring the PA (i.e., before a successful
- * call to \ref sl_rail_config_tx_power()) will return an error.
+ * @warning This function is for PA RF path characterization use only.
  */
 sl_rail_status_t sli_rail_set_tx_power(sl_rail_handle_t rail_handle,
                                        sli_rail_tx_power_level_t power_level);
 
 /**
- * Return the current power setting of the PA.
+ * Return the current platform-and-PA-specific raw power level of the PA.
  *
  * @param[in] rail_handle A real RAIL instance handle.
  * @return The radio-specific \ref sli_rail_tx_power_level_t value of the current
  *   transmit power.
  *
- * >>> TODO --- REWRITE FOR RAIL 3 <<<
- * This API returns the raw value that was set by sli_rail_set_tx_power().
- * A weak version of .ref sl_rail_util_pa_convert_raw_to_dbm() that works
- * with Silicon Labs boards to convert the raw values into actual output dBm values is provided.
- * However, customers using a custom board need to
- * re-characterize the relationship between raw and decibel values and rewrite
- * the provided function.
- *
- * Calling this function before configuring the PA (i.e., before a successful
- * call to \ref sl_rail_config_tx_power()) will return error \ref
- * SLI_RAIL_TX_POWER_LEVEL_INVALID.
+ * @warning This function is for PA RF path characterization use only.
  */
 sli_rail_tx_power_level_t sli_rail_get_tx_power(sl_rail_handle_t rail_handle);
 
@@ -2949,28 +2819,24 @@ bool sli_rail_supports_tx_power_mode(sl_rail_handle_t rail_handle,
 #endif//DOXYGEN_UNDOCUMENTED
 
 ///
-/// Set the TX power in terms of deci-dBm instead of raw power level.
+/// Set the TX power in deci-dBm for all supported PA modes.
 ///
 /// @param[in] rail_handle A real RAIL instance handle.
 /// @param[in] power_ddbm A desired deci-dBm power to be set.
 /// @return Status code indicating success of the function call.
 ///
-/// >>> TODO --- REWRITE FOR RAIL 3 <<<
-/// This is a utility function for user convenience. Normally, to set TX
-/// power in dBm, do the following:
-/// @code{.c}
-/// sl_rail_tx_power_t power = 100; // 100 deci-dBm, 10 dBm
-/// sl_rail_tx_power_config_t tx_power_config;
-/// sli_rail_get_tx_power_config(rail_handle, &tx_power_config);
-/// // sl_rail_util_pa_convert_dbm_to_raw() will be the weak version provided by Silicon Labs
-/// // by default, or the customer version, if overwritten.
-/// sli_rail_tx_power_level_t power_level
-///   = sl_rail_util_pa_convert_dbm_to_raw(rail_handle, tx_power_config.mode, power);
-/// sli_rail_set_tx_power(rail_handle, power_level);
-/// @endcode
+/// This function sets the TX power for use with all supported PA modes.
+/// If you want different power settings for any particular PA mode(s)
+/// use \ref sl_rail_set_tx_power_dbm_with_pa_mode() instead.
 ///
-/// This function wraps all those calls in a single function with power passed in
-/// as a parameter.
+/// @note RAIL will try its best to effect the requested TX power but it
+///   may end up being truncated, rounded, or limited based on the PA mode's
+///   PA power conversion tables/curves limits or granularity. One can use
+///   \ref sl_rail_util_pa_convert_power_to_actual() to find the actual
+///   power utilized, however that power is further subject to any channel
+///   power limit specified in the channel configuration (\ref
+///   sl_rail_channel_config_entry_t::max_power_ddbm).
+///
 ///
 sl_rail_status_t sl_rail_set_tx_power_dbm(sl_rail_handle_t rail_handle,
                                           sl_rail_tx_power_t power_ddbm);
@@ -2985,34 +2851,25 @@ sl_rail_status_t sl_rail_set_tx_power_dbm(sl_rail_handle_t rail_handle,
 //  SL_RAIL_TX_PA_MODE_2P4_GHZ).
 /// @return Status code indicating result of the function call.
 ///
-/// This function sets the TX power with an explicit PA mode.
+/// This function sets the TX power for use with an explicit PA mode.
+///
+/// @note RAIL will try its best to effect the requested TX power but it
+///   may end up being truncated, rounded, or limited based on the PA mode's
+///   PA power conversion tables/curves limits or granularity. One can use
+///   \ref sl_rail_util_pa_convert_power_to_actual() to find the actual
+///   power utilized, however that power is further subject to any channel
+///   power limit specified in the channel configuration (\ref
+///   sl_rail_channel_config_entry_t::max_power_ddbm).
 ///
 sl_rail_status_t sl_rail_set_tx_power_dbm_with_pa_mode(sl_rail_handle_t rail_handle,
                                                        sl_rail_tx_power_t power_ddbm,
                                                        sl_rail_tx_pa_mode_t pa_mode);
 
 ///
-/// Get the TX power in terms of deci-dBm instead of raw power level.
+/// Get the TX power in deci-dBm.
 ///
 /// @param[in] rail_handle A real RAIL instance handle.
-/// @return The current output power in deci-dBm.
-///
-/// >>> TODO --- REWRITE FOR RAIL 3 <<<
-/// This is a utility function for user convenience. Normally, to get TX
-/// power in dBm, do the following:
-/// @code{.c}
-/// sli_rail_tx_power_level_t power_level = sli_rail_get_tx_power(rail_handle);
-/// sl_rail_tx_power_config_t tx_power_config;
-/// sli_rail_get_tx_power_config(rail_handle, &tx_power_config);
-/// // sl_rail_util_pa_convert_raw_to_dbm() will be the weak version provided by Silicon Labs
-/// // by default, or the customer version, if overwritten.
-/// sl_rail_tx_power_t power
-///   = sl_rail_util_pa_convert_raw_to_dbm(rail_handle, tx_power_config.mode, power_level);
-/// return power;
-/// @endcode
-///
-/// This function wraps all those calls in a single function with power returned
-/// as the result.
+/// @return The actual current output power in deci-dBm.
 ///
 sl_rail_tx_power_t sl_rail_get_tx_power_dbm(sl_rail_handle_t rail_handle);
 
@@ -3057,6 +2914,11 @@ sl_rail_tx_pa_mode_t sl_rail_get_pa_mode_from_channel_entry(sl_rail_handle_t rai
  * @param[in] rail_handle A real RAIL instance handle.
  * @param[in] ramp_time_us Desired ramp time in units of microseconds.
  * @return Status code indicating success of the function call.
+ *
+ * @note The ramp_time_us may affect the minimum timings that can be achieved
+ *   in \ref sl_rail_state_timing_t::idle_to_tx and \ref
+ *   sl_rail_state_timing_t::rx_to_tx. Call \ref sl_rail_set_state_timing()
+ *   again to check whether these times have changed.
  */
 sl_rail_status_t sl_rail_set_tx_pa_ramp_time(sl_rail_handle_t rail_handle,
                                              uint16_t ramp_time_us);

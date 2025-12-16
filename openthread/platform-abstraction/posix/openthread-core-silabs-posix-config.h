@@ -50,21 +50,27 @@
 /*
 sudo ./script/bootstrap
 
+// For PD-client functionality (if you have an infrastructure device offering PD prefixes)
+// add `DHCPV6_PD_REF=1` before `INFRA_IF_NAME=eth0` below.
+
 sudo INFRA_IF_NAME=eth0 \
      OTBR_OPTIONS="-DOT_THREAD_VERSION=1.4 \
                    -DOT_PLATFORM_CONFIG=openthread-core-silabs-posix-config.h \
+                   -DOTBR_DUA_ROUTING=ON \
                    -DOTBR_DHCP6_PD=ON \
                    -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.0.0.0_GitHub-ab0c1351e -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.0.0.0_GitHub-61e43cffb" \
      ./script/setup
 
 */
-
 /****************************
  * CPC OTBR
  ****************************/
 
 /*
 sudo ./script/bootstrap
+
+// For PD-client functionality (if you have an infrastructure device offering PD prefixes)
+// add `DHCPV6_PD_REF=1` before `INFRA_IF_NAME=eth0` below.
 
 sudo INFRA_IF_NAME=eth0 \
      OTBR_OPTIONS="-DOT_THREAD_VERSION=1.4 \
@@ -77,6 +83,7 @@ sudo INFRA_IF_NAME=eth0 \
                    -DOT_POSIX_CONFIG_RCP_VENDOR_INTERFACE=platform-abstraction/posix/cpc_interface.cpp \
                    -DOT_CLI_VENDOR_EXTENSION=platform-abstraction/posix/posix_vendor_cli.cmake \
                    -DOT_PLATFORM_CONFIG=openthread-core-silabs-posix-config.h \
+                   -DOTBR_DUA_ROUTING=ON \
                    -DOTBR_DHCP6_PD=ON \
                    -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.0.0.0_GitHub-ab0c1351e -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.0.0.0_GitHub-61e43cffb" \
      ./script/setup
@@ -298,10 +305,12 @@ sudo INFRA_IF_NAME=eth0 RELEASE=1 BACKBONE_ROUTER=1 BORDER_ROUTING=0 NAT64=0 \
  *
  * Define to 1 to enable the Border Router's built-in OpenThread DHCPv6 Prefix Delegation (PD) client feature.
  *
+ * This should work in theory, but there are some certification flows that are yet to be fixed with this
+ * implementation.
+ *
  */
 #undef OPENTHREAD_CONFIG_BORDER_ROUTING_DHCP6_PD_CLIENT_ENABLE
-#define OPENTHREAD_CONFIG_BORDER_ROUTING_DHCP6_PD_CLIENT_ENABLE \
-    (OPENTHREAD_FTD && OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_3)
+#define OPENTHREAD_CONFIG_BORDER_ROUTING_DHCP6_PD_CLIENT_ENABLE 0
 
 /**
  * @def OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE

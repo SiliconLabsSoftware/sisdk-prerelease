@@ -1,7 +1,7 @@
 r"""Wrapper for esl_lib.h
 
 Generated with:
-C:\SiliconLabs\Python313\Scripts\ctypesgen --no-gnu-types --allow-gnu-c --no-macro-warnings -IC:/SiliconLabs/gsdk/platform/common/inc C:/SiliconLabs/gsdk/app/bluetooth/common_host/esl_lib/esl_lib.h C:/SiliconLabs/gsdk/platform/common/inc/sl_status.h C:/SiliconLabs/gsdk/app/bluetooth/common/otf_decompressor/otf_compressor_config.h -x sl_status_get_string_n -x sl_status_print -o esl_lib_wrapper.py
+C:\SiliconLabs\Python313\Scripts\ctypesgen --no-gnu-types --allow-gnu-c --no-macro-warnings -IC:/SiliconLabs/bluetooth-le-sdk/bluetooth_le_middleware/common/ead_core -IC:/SiliconLabs/bluetooth-le-sdk/bluetooth_le_middleware/common/esl_tag_core/inc -IC:/SiliconLabs/bluetooth-le-sdk/bluetooth_le_middleware/common/esl_tag_core/config -I./esl_lib -Iplatform/common/inc -Iprotocol/bluetooth/inc -Iutil/third_party/mbedtls/include ./esl_lib/esl_lib.h platform/common/inc/sl_status.h C:/SiliconLabs/bluetooth-le-sdk/bluetooth_le_middleware/common/otf_decompressor/otf_compressor_config.h -x sl_status_get_string_n -x sl_status_print -o esl_lib_wrapper.py
 
 Do not modify this file.
 """
@@ -887,103 +887,103 @@ uint64_t = c_ulonglong# msys64/mingw64/include/stdint.h: 42
 
 sl_status_t = uint32_t# platform/common/inc/sl_status.h: 478
 
-enum_esl_lib_bool_e = c_int# ./common_host/esl_lib/esl_lib.h: 137
+enum_esl_lib_bool_e = c_int# esl_lib/esl_lib.h: 137
 
-ESL_LIB_FALSE = 0# ./common_host/esl_lib/esl_lib.h: 137
+ESL_LIB_FALSE = 0# esl_lib/esl_lib.h: 137
 
-ESL_LIB_TRUE = 1# ./common_host/esl_lib/esl_lib.h: 137
+ESL_LIB_TRUE = 1# esl_lib/esl_lib.h: 137
 
-esl_lib_bool_t = enum_esl_lib_bool_e# ./common_host/esl_lib/esl_lib.h: 137
+esl_lib_bool_t = enum_esl_lib_bool_e# esl_lib/esl_lib.h: 137
 
-enum_esl_lib_node_id_type_e = c_int# ./common_host/esl_lib/esl_lib.h: 145
+enum_esl_lib_node_id_type_e = c_int# esl_lib/esl_lib.h: 145
 
-ESL_LIB_NODE_ID_TYPE_NONE = 0# ./common_host/esl_lib/esl_lib.h: 145
+ESL_LIB_NODE_ID_TYPE_NONE = 0# esl_lib/esl_lib.h: 145
 
-ESL_LIB_NODE_ID_TYPE_ADDRESS = (ESL_LIB_NODE_ID_TYPE_NONE + 1)# ./common_host/esl_lib/esl_lib.h: 145
+ESL_LIB_NODE_ID_TYPE_ADDRESS = (ESL_LIB_NODE_ID_TYPE_NONE + 1)# esl_lib/esl_lib.h: 145
 
-ESL_LIB_NODE_ID_TYPE_CONNECTION = (ESL_LIB_NODE_ID_TYPE_ADDRESS + 1)# ./common_host/esl_lib/esl_lib.h: 145
+ESL_LIB_NODE_ID_TYPE_CONNECTION = (ESL_LIB_NODE_ID_TYPE_ADDRESS + 1)# esl_lib/esl_lib.h: 145
 
-ESL_LIB_NODE_ID_TYPE_PAWR = (ESL_LIB_NODE_ID_TYPE_CONNECTION + 1)# ./common_host/esl_lib/esl_lib.h: 145
+ESL_LIB_NODE_ID_TYPE_PAWR = (ESL_LIB_NODE_ID_TYPE_CONNECTION + 1)# esl_lib/esl_lib.h: 145
 
-esl_lib_node_id_type_t = enum_esl_lib_node_id_type_e# ./common_host/esl_lib/esl_lib.h: 145
+esl_lib_node_id_type_t = enum_esl_lib_node_id_type_e# esl_lib/esl_lib.h: 145
 
-enum_esl_lib_connection_mode_e = c_int# ./common_host/esl_lib/esl_lib.h: 151
+enum_esl_lib_connection_mode_e = c_int# esl_lib/esl_lib.h: 151
 
-ESL_LIB_CONNECTION_MODE_SINGLE = 0# ./common_host/esl_lib/esl_lib.h: 151
+ESL_LIB_CONNECTION_MODE_SINGLE = 0# esl_lib/esl_lib.h: 151
 
-ESL_LIB_CONNECTION_MODE_LIST = (ESL_LIB_CONNECTION_MODE_SINGLE + 1)# ./common_host/esl_lib/esl_lib.h: 151
+ESL_LIB_CONNECTION_MODE_LIST = (ESL_LIB_CONNECTION_MODE_SINGLE + 1)# esl_lib/esl_lib.h: 151
 
-esl_lib_connection_mode_t = enum_esl_lib_connection_mode_e# ./common_host/esl_lib/esl_lib.h: 151
+esl_lib_connection_mode_t = enum_esl_lib_connection_mode_e# esl_lib/esl_lib.h: 151
 
-enum_esl_lib_connection_state_e = c_int# ./common_host/esl_lib/esl_lib.h: 175
+enum_esl_lib_connection_state_e = c_int# esl_lib/esl_lib.h: 175
 
-ESL_LIB_CONNECTION_STATE_OFF = 0# ./common_host/esl_lib/esl_lib.h: 175
+ESL_LIB_CONNECTION_STATE_OFF = 0# esl_lib/esl_lib.h: 175
 
-ESL_LIB_CONNECTION_STATE_CONNECTING = (ESL_LIB_CONNECTION_STATE_OFF + 1)# ./common_host/esl_lib/esl_lib.h: 175
+ESL_LIB_CONNECTION_STATE_CONNECTING = (ESL_LIB_CONNECTION_STATE_OFF + 1)# esl_lib/esl_lib.h: 175
 
-ESL_LIB_CONNECTION_STATE_CONNECTION_OPENED = (ESL_LIB_CONNECTION_STATE_CONNECTING + 1)# ./common_host/esl_lib/esl_lib.h: 175
+ESL_LIB_CONNECTION_STATE_CONNECTION_OPENED = (ESL_LIB_CONNECTION_STATE_CONNECTING + 1)# esl_lib/esl_lib.h: 175
 
-ESL_LIB_CONNECTION_STATE_APPLYING_LTK = (ESL_LIB_CONNECTION_STATE_CONNECTION_OPENED + 1)# ./common_host/esl_lib/esl_lib.h: 175
+ESL_LIB_CONNECTION_STATE_APPLYING_LTK = (ESL_LIB_CONNECTION_STATE_CONNECTION_OPENED + 1)# esl_lib/esl_lib.h: 175
 
-ESL_LIB_CONNECTION_STATE_NEW_BOND_REQUIRED = (ESL_LIB_CONNECTION_STATE_APPLYING_LTK + 1)# ./common_host/esl_lib/esl_lib.h: 175
+ESL_LIB_CONNECTION_STATE_NEW_BOND_REQUIRED = (ESL_LIB_CONNECTION_STATE_APPLYING_LTK + 1)# esl_lib/esl_lib.h: 175
 
-ESL_LIB_CONNECTION_STATE_BONDING = (ESL_LIB_CONNECTION_STATE_NEW_BOND_REQUIRED + 1)# ./common_host/esl_lib/esl_lib.h: 175
+ESL_LIB_CONNECTION_STATE_BONDING = (ESL_LIB_CONNECTION_STATE_NEW_BOND_REQUIRED + 1)# esl_lib/esl_lib.h: 175
 
-ESL_LIB_CONNECTION_STATE_BONDING_RECOVERY = (ESL_LIB_CONNECTION_STATE_BONDING + 1)# ./common_host/esl_lib/esl_lib.h: 175
+ESL_LIB_CONNECTION_STATE_BONDING_RECOVERY = (ESL_LIB_CONNECTION_STATE_BONDING + 1)# esl_lib/esl_lib.h: 175
 
-ESL_LIB_CONNECTION_STATE_SERVICE_DISCOVERY = (ESL_LIB_CONNECTION_STATE_BONDING_RECOVERY + 1)# ./common_host/esl_lib/esl_lib.h: 175
+ESL_LIB_CONNECTION_STATE_SERVICE_DISCOVERY = (ESL_LIB_CONNECTION_STATE_BONDING_RECOVERY + 1)# esl_lib/esl_lib.h: 175
 
-ESL_LIB_CONNECTION_STATE_DIS_DISCOVERY = (ESL_LIB_CONNECTION_STATE_SERVICE_DISCOVERY + 1)# ./common_host/esl_lib/esl_lib.h: 175
+ESL_LIB_CONNECTION_STATE_DIS_DISCOVERY = (ESL_LIB_CONNECTION_STATE_SERVICE_DISCOVERY + 1)# esl_lib/esl_lib.h: 175
 
-ESL_LIB_CONNECTION_STATE_ESL_DISCOVERY = (ESL_LIB_CONNECTION_STATE_DIS_DISCOVERY + 1)# ./common_host/esl_lib/esl_lib.h: 175
+ESL_LIB_CONNECTION_STATE_ESL_DISCOVERY = (ESL_LIB_CONNECTION_STATE_DIS_DISCOVERY + 1)# esl_lib/esl_lib.h: 175
 
-ESL_LIB_CONNECTION_STATE_ESL_SUBSCRIBE = (ESL_LIB_CONNECTION_STATE_ESL_DISCOVERY + 1)# ./common_host/esl_lib/esl_lib.h: 175
+ESL_LIB_CONNECTION_STATE_ESL_SUBSCRIBE = (ESL_LIB_CONNECTION_STATE_ESL_DISCOVERY + 1)# esl_lib/esl_lib.h: 175
 
-ESL_LIB_CONNECTION_STATE_OTS_INIT = (ESL_LIB_CONNECTION_STATE_ESL_SUBSCRIBE + 1)# ./common_host/esl_lib/esl_lib.h: 175
+ESL_LIB_CONNECTION_STATE_OTS_INIT = (ESL_LIB_CONNECTION_STATE_ESL_SUBSCRIBE + 1)# esl_lib/esl_lib.h: 175
 
-ESL_LIB_CONNECTION_STATE_CONNECTED = (ESL_LIB_CONNECTION_STATE_OTS_INIT + 1)# ./common_host/esl_lib/esl_lib.h: 175
+ESL_LIB_CONNECTION_STATE_CONNECTED = (ESL_LIB_CONNECTION_STATE_OTS_INIT + 1)# esl_lib/esl_lib.h: 175
 
-ESL_LIB_CONNECTION_STATE_GET_TAG_INFO = (ESL_LIB_CONNECTION_STATE_CONNECTED + 1)# ./common_host/esl_lib/esl_lib.h: 175
+ESL_LIB_CONNECTION_STATE_GET_TAG_INFO = (ESL_LIB_CONNECTION_STATE_CONNECTED + 1)# esl_lib/esl_lib.h: 175
 
-ESL_LIB_CONNECTION_STATE_OTS_IMAGE_TRANSFER = (ESL_LIB_CONNECTION_STATE_GET_TAG_INFO + 1)# ./common_host/esl_lib/esl_lib.h: 175
+ESL_LIB_CONNECTION_STATE_OTS_IMAGE_TRANSFER = (ESL_LIB_CONNECTION_STATE_GET_TAG_INFO + 1)# esl_lib/esl_lib.h: 175
 
-ESL_LIB_CONNECTION_STATE_OTS_GET_TYPE = (ESL_LIB_CONNECTION_STATE_OTS_IMAGE_TRANSFER + 1)# ./common_host/esl_lib/esl_lib.h: 175
+ESL_LIB_CONNECTION_STATE_OTS_GET_TYPE = (ESL_LIB_CONNECTION_STATE_OTS_IMAGE_TRANSFER + 1)# esl_lib/esl_lib.h: 175
 
-ESL_LIB_CONNECTION_STATE_PAST_INIT = (ESL_LIB_CONNECTION_STATE_OTS_GET_TYPE + 1)# ./common_host/esl_lib/esl_lib.h: 175
+ESL_LIB_CONNECTION_STATE_PAST_INIT = (ESL_LIB_CONNECTION_STATE_OTS_GET_TYPE + 1)# esl_lib/esl_lib.h: 175
 
-ESL_LIB_CONNECTION_STATE_PAST_CLOSE_CONNECTION = (ESL_LIB_CONNECTION_STATE_PAST_INIT + 1)# ./common_host/esl_lib/esl_lib.h: 175
+ESL_LIB_CONNECTION_STATE_PAST_CLOSE_CONNECTION = (ESL_LIB_CONNECTION_STATE_PAST_INIT + 1)# esl_lib/esl_lib.h: 175
 
-ESL_LIB_CONNECTION_STATE_WRITE_CONTROL_POINT = (ESL_LIB_CONNECTION_STATE_PAST_CLOSE_CONNECTION + 1)# ./common_host/esl_lib/esl_lib.h: 175
+ESL_LIB_CONNECTION_STATE_WRITE_CONTROL_POINT = (ESL_LIB_CONNECTION_STATE_PAST_CLOSE_CONNECTION + 1)# esl_lib/esl_lib.h: 175
 
-ESL_LIB_CONNECTION_STATE_CONFIGURE_TAG = (ESL_LIB_CONNECTION_STATE_WRITE_CONTROL_POINT + 1)# ./common_host/esl_lib/esl_lib.h: 175
+ESL_LIB_CONNECTION_STATE_CONFIGURE_TAG = (ESL_LIB_CONNECTION_STATE_WRITE_CONTROL_POINT + 1)# esl_lib/esl_lib.h: 175
 
-esl_lib_connection_state_t = enum_esl_lib_connection_state_e# ./common_host/esl_lib/esl_lib.h: 175
+esl_lib_connection_state_t = enum_esl_lib_connection_state_e# esl_lib/esl_lib.h: 175
 
-enum_esl_lib_pawr_state_e = c_int# ./common_host/esl_lib/esl_lib.h: 183
+enum_esl_lib_pawr_state_e = c_int# esl_lib/esl_lib.h: 183
 
-ESL_LIB_PAWR_STATE_INIT = 0# ./common_host/esl_lib/esl_lib.h: 183
+ESL_LIB_PAWR_STATE_INIT = 0# esl_lib/esl_lib.h: 183
 
-ESL_LIB_PAWR_STATE_IDLE = (ESL_LIB_PAWR_STATE_INIT + 1)# ./common_host/esl_lib/esl_lib.h: 183
+ESL_LIB_PAWR_STATE_IDLE = (ESL_LIB_PAWR_STATE_INIT + 1)# esl_lib/esl_lib.h: 183
 
-ESL_LIB_PAWR_STATE_RUNNING = (ESL_LIB_PAWR_STATE_IDLE + 1)# ./common_host/esl_lib/esl_lib.h: 183
+ESL_LIB_PAWR_STATE_RUNNING = (ESL_LIB_PAWR_STATE_IDLE + 1)# esl_lib/esl_lib.h: 183
 
-ESL_LIB_PAWR_STATE_RUNNING_ADVERTISING = (ESL_LIB_PAWR_STATE_RUNNING + 1)# ./common_host/esl_lib/esl_lib.h: 183
+ESL_LIB_PAWR_STATE_RUNNING_ADVERTISING = (ESL_LIB_PAWR_STATE_RUNNING + 1)# esl_lib/esl_lib.h: 183
 
-esl_lib_pawr_state_t = enum_esl_lib_pawr_state_e# ./common_host/esl_lib/esl_lib.h: 183
+esl_lib_pawr_state_t = enum_esl_lib_pawr_state_e# esl_lib/esl_lib.h: 183
 
-enum_esl_lib_core_state_e = c_int# ./common_host/esl_lib/esl_lib.h: 189
+enum_esl_lib_core_state_e = c_int# esl_lib/esl_lib.h: 189
 
-ESL_LIB_CORE_STATE_IDLE = 0# ./common_host/esl_lib/esl_lib.h: 189
+ESL_LIB_CORE_STATE_IDLE = 0# esl_lib/esl_lib.h: 189
 
-ESL_LIB_CORE_STATE_CONNECTING = (ESL_LIB_CORE_STATE_IDLE + 1)# ./common_host/esl_lib/esl_lib.h: 189
+ESL_LIB_CORE_STATE_CONNECTING = (ESL_LIB_CORE_STATE_IDLE + 1)# esl_lib/esl_lib.h: 189
 
-esl_lib_core_state_t = enum_esl_lib_core_state_e# ./common_host/esl_lib/esl_lib.h: 189
+esl_lib_core_state_t = enum_esl_lib_core_state_e# esl_lib/esl_lib.h: 189
 
-esl_lib_pawr_handle_t = POINTER(None)# ./common_host/esl_lib/esl_lib.h: 192
+esl_lib_pawr_handle_t = POINTER(None)# esl_lib/esl_lib.h: 192
 
-esl_lib_connection_handle_t = POINTER(None)# ./common_host/esl_lib/esl_lib.h: 195
+esl_lib_connection_handle_t = POINTER(None)# esl_lib/esl_lib.h: 195
 
-# ./common_host/esl_lib/esl_lib.h: 202
+# esl_lib/esl_lib.h: 202
 class struct_anon_9(Structure):
     pass
 
@@ -994,7 +994,7 @@ struct_anon_9._fields_ = [
     ('addr', uint8_t * int(6)),
 ]
 
-# ./common_host/esl_lib/esl_lib.h: 201
+# esl_lib/esl_lib.h: 201
 class union_anon_10(Union):
     pass
 
@@ -1007,7 +1007,7 @@ union_anon_10._fields_ = [
     ('addr', uint8_t * int(6)),
 ]
 
-# ./common_host/esl_lib/esl_lib.h: 200
+# esl_lib/esl_lib.h: 200
 class struct_anon_11(Structure):
     pass
 
@@ -1023,7 +1023,7 @@ struct_anon_11._fields_ = [
     ('address_type', uint8_t),
 ]
 
-# ./common_host/esl_lib/esl_lib.h: 199
+# esl_lib/esl_lib.h: 199
 class union_anon_12(Union):
     pass
 
@@ -1041,7 +1041,7 @@ union_anon_12._fields_ = [
     ('bytes', uint8_t * int(sizeof(uint64_t))),
 ]
 
-# ./common_host/esl_lib/esl_lib.h: 212
+# esl_lib/esl_lib.h: 212
 class struct_esl_lib_address_s(Structure):
     pass
 
@@ -1055,9 +1055,9 @@ struct_esl_lib_address_s._fields_ = [
     ('unnamed_1', union_anon_12),
 ]
 
-esl_lib_address_t = struct_esl_lib_address_s# ./common_host/esl_lib/esl_lib.h: 212
+esl_lib_address_t = struct_esl_lib_address_s# esl_lib/esl_lib.h: 212
 
-# ./common_host/esl_lib/esl_lib.h: 217
+# esl_lib/esl_lib.h: 217
 class struct_esl_lib_pawr_subevent_s(Structure):
     pass
 
@@ -1070,9 +1070,9 @@ struct_esl_lib_pawr_subevent_s._fields_ = [
     ('subevent', uint8_t),
 ]
 
-esl_lib_pawr_subevent_t = struct_esl_lib_pawr_subevent_s# ./common_host/esl_lib/esl_lib.h: 217
+esl_lib_pawr_subevent_t = struct_esl_lib_pawr_subevent_s# esl_lib/esl_lib.h: 217
 
-# ./common_host/esl_lib/esl_lib.h: 222
+# esl_lib/esl_lib.h: 222
 class union_esl_lib_node_id_id_u(Union):
     pass
 
@@ -1087,7 +1087,7 @@ union_esl_lib_node_id_id_u._fields_ = [
     ('address', esl_lib_address_t),
 ]
 
-# ./common_host/esl_lib/esl_lib.h: 227
+# esl_lib/esl_lib.h: 227
 class struct_esl_lib_node_id_s(Structure):
     pass
 
@@ -1100,9 +1100,9 @@ struct_esl_lib_node_id_s._fields_ = [
     ('id', union_esl_lib_node_id_id_u),
 ]
 
-esl_lib_node_id_t = struct_esl_lib_node_id_s# ./common_host/esl_lib/esl_lib.h: 227
+esl_lib_node_id_t = struct_esl_lib_node_id_s# esl_lib/esl_lib.h: 227
 
-# ./common_host/esl_lib/esl_lib.h: 233
+# esl_lib/esl_lib.h: 233
 class struct_esl_lib_array_s(Structure):
     pass
 
@@ -1115,9 +1115,9 @@ struct_esl_lib_array_s._fields_ = [
     ('data', uint8_t * int(0)),
 ]
 
-esl_lib_array_t = struct_esl_lib_array_s# ./common_host/esl_lib/esl_lib.h: 233
+esl_lib_array_t = struct_esl_lib_array_s# esl_lib/esl_lib.h: 233
 
-# ./common_host/esl_lib/esl_lib.h: 239
+# esl_lib/esl_lib.h: 239
 class struct_esl_lib_long_array_s(Structure):
     pass
 
@@ -1130,9 +1130,9 @@ struct_esl_lib_long_array_s._fields_ = [
     ('data', uint8_t * int(0)),
 ]
 
-esl_lib_long_array_t = struct_esl_lib_long_array_s# ./common_host/esl_lib/esl_lib.h: 239
+esl_lib_long_array_t = struct_esl_lib_long_array_s# esl_lib/esl_lib.h: 239
 
-# ./common_host/esl_lib/esl_lib.h: 243
+# esl_lib/esl_lib.h: 243
 class struct_esl_lib_pawr_config_adv_interval_s(Structure):
     pass
 
@@ -1145,7 +1145,7 @@ struct_esl_lib_pawr_config_adv_interval_s._fields_ = [
     ('max', uint16_t),
 ]
 
-# ./common_host/esl_lib/esl_lib.h: 247
+# esl_lib/esl_lib.h: 247
 class struct_esl_lib_pawr_config_subevent_s(Structure):
     pass
 
@@ -1158,7 +1158,7 @@ struct_esl_lib_pawr_config_subevent_s._fields_ = [
     ('interval', uint8_t),
 ]
 
-# ./common_host/esl_lib/esl_lib.h: 251
+# esl_lib/esl_lib.h: 251
 class struct_esl_lib_pawr_config_response_slot_s(Structure):
     pass
 
@@ -1173,7 +1173,7 @@ struct_esl_lib_pawr_config_response_slot_s._fields_ = [
     ('count', uint8_t),
 ]
 
-# ./common_host/esl_lib/esl_lib.h: 257
+# esl_lib/esl_lib.h: 257
 class struct_esl_lib_pawr_config_s(Structure):
     pass
 
@@ -1190,9 +1190,9 @@ struct_esl_lib_pawr_config_s._fields_ = [
     ('advertise', esl_lib_bool_t),
 ]
 
-esl_lib_pawr_config_t = struct_esl_lib_pawr_config_s# ./common_host/esl_lib/esl_lib.h: 257
+esl_lib_pawr_config_t = struct_esl_lib_pawr_config_s# esl_lib/esl_lib.h: 257
 
-# ./common_host/esl_lib/esl_lib.h: 275
+# esl_lib/esl_lib.h: 275
 class struct_esl_lib_scan_parameters_s(Structure):
     pass
 
@@ -1211,197 +1211,197 @@ struct_esl_lib_scan_parameters_s._fields_ = [
     ('discover_mode', uint8_t),
 ]
 
-esl_lib_scan_parameters_t = struct_esl_lib_scan_parameters_s# ./common_host/esl_lib/esl_lib.h: 275
+esl_lib_scan_parameters_t = struct_esl_lib_scan_parameters_s# esl_lib/esl_lib.h: 275
 
-enum_esl_lib_evt_type_e = c_int# ./common_host/esl_lib/esl_lib.h: 301
+enum_esl_lib_evt_type_e = c_int# esl_lib/esl_lib.h: 301
 
-ESL_LIB_EVT_SYSTEM_BOOT = 0# ./common_host/esl_lib/esl_lib.h: 301
+ESL_LIB_EVT_SYSTEM_BOOT = 0# esl_lib/esl_lib.h: 301
 
-ESL_LIB_EVT_CONNECTION_MODE = (ESL_LIB_EVT_SYSTEM_BOOT + 1)# ./common_host/esl_lib/esl_lib.h: 301
+ESL_LIB_EVT_CONNECTION_MODE = (ESL_LIB_EVT_SYSTEM_BOOT + 1)# esl_lib/esl_lib.h: 301
 
-ESL_LIB_EVT_SCAN_STATUS = (ESL_LIB_EVT_CONNECTION_MODE + 1)# ./common_host/esl_lib/esl_lib.h: 301
+ESL_LIB_EVT_SCAN_STATUS = (ESL_LIB_EVT_CONNECTION_MODE + 1)# esl_lib/esl_lib.h: 301
 
-ESL_LIB_EVT_TAG_FOUND = (ESL_LIB_EVT_SCAN_STATUS + 1)# ./common_host/esl_lib/esl_lib.h: 301
+ESL_LIB_EVT_TAG_FOUND = (ESL_LIB_EVT_SCAN_STATUS + 1)# esl_lib/esl_lib.h: 301
 
-ESL_LIB_EVT_TAG_INFO = (ESL_LIB_EVT_TAG_FOUND + 1)# ./common_host/esl_lib/esl_lib.h: 301
+ESL_LIB_EVT_TAG_INFO = (ESL_LIB_EVT_TAG_FOUND + 1)# esl_lib/esl_lib.h: 301
 
-ESL_LIB_EVT_CONFIGURE_TAG_RESPONSE = (ESL_LIB_EVT_TAG_INFO + 1)# ./common_host/esl_lib/esl_lib.h: 301
+ESL_LIB_EVT_CONFIGURE_TAG_RESPONSE = (ESL_LIB_EVT_TAG_INFO + 1)# esl_lib/esl_lib.h: 301
 
-ESL_LIB_EVT_CONNECTION_RETRY = (ESL_LIB_EVT_CONFIGURE_TAG_RESPONSE + 1)# ./common_host/esl_lib/esl_lib.h: 301
+ESL_LIB_EVT_CONNECTION_RETRY = (ESL_LIB_EVT_CONFIGURE_TAG_RESPONSE + 1)# esl_lib/esl_lib.h: 301
 
-ESL_LIB_EVT_CONNECTION_CLOSED = (ESL_LIB_EVT_CONNECTION_RETRY + 1)# ./common_host/esl_lib/esl_lib.h: 301
+ESL_LIB_EVT_CONNECTION_CLOSED = (ESL_LIB_EVT_CONNECTION_RETRY + 1)# esl_lib/esl_lib.h: 301
 
-ESL_LIB_EVT_CONNECTION_OPENED = (ESL_LIB_EVT_CONNECTION_CLOSED + 1)# ./common_host/esl_lib/esl_lib.h: 301
+ESL_LIB_EVT_CONNECTION_OPENED = (ESL_LIB_EVT_CONNECTION_CLOSED + 1)# esl_lib/esl_lib.h: 301
 
-ESL_LIB_EVT_BONDING_DATA = (ESL_LIB_EVT_CONNECTION_OPENED + 1)# ./common_host/esl_lib/esl_lib.h: 301
+ESL_LIB_EVT_BONDING_DATA = (ESL_LIB_EVT_CONNECTION_OPENED + 1)# esl_lib/esl_lib.h: 301
 
-ESL_LIB_EVT_BONDING_FINISHED = (ESL_LIB_EVT_BONDING_DATA + 1)# ./common_host/esl_lib/esl_lib.h: 301
+ESL_LIB_EVT_BONDING_FINISHED = (ESL_LIB_EVT_BONDING_DATA + 1)# esl_lib/esl_lib.h: 301
 
-ESL_LIB_EVT_PAWR_CONFIG = (ESL_LIB_EVT_BONDING_FINISHED + 1)# ./common_host/esl_lib/esl_lib.h: 301
+ESL_LIB_EVT_PAWR_CONFIG = (ESL_LIB_EVT_BONDING_FINISHED + 1)# esl_lib/esl_lib.h: 301
 
-ESL_LIB_EVT_PAWR_STATUS = (ESL_LIB_EVT_PAWR_CONFIG + 1)# ./common_host/esl_lib/esl_lib.h: 301
+ESL_LIB_EVT_PAWR_STATUS = (ESL_LIB_EVT_PAWR_CONFIG + 1)# esl_lib/esl_lib.h: 301
 
-ESL_LIB_EVT_PAWR_RESPONSE = (ESL_LIB_EVT_PAWR_STATUS + 1)# ./common_host/esl_lib/esl_lib.h: 301
+ESL_LIB_EVT_PAWR_RESPONSE = (ESL_LIB_EVT_PAWR_STATUS + 1)# esl_lib/esl_lib.h: 301
 
-ESL_LIB_EVT_PAWR_DATA_REQUEST = (ESL_LIB_EVT_PAWR_RESPONSE + 1)# ./common_host/esl_lib/esl_lib.h: 301
+ESL_LIB_EVT_PAWR_DATA_REQUEST = (ESL_LIB_EVT_PAWR_RESPONSE + 1)# esl_lib/esl_lib.h: 301
 
-ESL_LIB_EVT_SHUTDOWN_READY = (ESL_LIB_EVT_PAWR_DATA_REQUEST + 1)# ./common_host/esl_lib/esl_lib.h: 301
+ESL_LIB_EVT_SHUTDOWN_READY = (ESL_LIB_EVT_PAWR_DATA_REQUEST + 1)# esl_lib/esl_lib.h: 301
 
-ESL_LIB_EVT_ERROR = (ESL_LIB_EVT_SHUTDOWN_READY + 1)# ./common_host/esl_lib/esl_lib.h: 301
+ESL_LIB_EVT_ERROR = (ESL_LIB_EVT_SHUTDOWN_READY + 1)# esl_lib/esl_lib.h: 301
 
-ESL_LIB_EVT_IMAGE_TRANSFER_FINISHED = (ESL_LIB_EVT_ERROR + 1)# ./common_host/esl_lib/esl_lib.h: 301
+ESL_LIB_EVT_IMAGE_TRANSFER_FINISHED = (ESL_LIB_EVT_ERROR + 1)# esl_lib/esl_lib.h: 301
 
-ESL_LIB_EVT_IMAGE_TYPE = (ESL_LIB_EVT_IMAGE_TRANSFER_FINISHED + 1)# ./common_host/esl_lib/esl_lib.h: 301
+ESL_LIB_EVT_IMAGE_TYPE = (ESL_LIB_EVT_IMAGE_TRANSFER_FINISHED + 1)# esl_lib/esl_lib.h: 301
 
-ESL_LIB_EVT_CONTROL_POINT_RESPONSE = (ESL_LIB_EVT_IMAGE_TYPE + 1)# ./common_host/esl_lib/esl_lib.h: 301
+ESL_LIB_EVT_CONTROL_POINT_RESPONSE = (ESL_LIB_EVT_IMAGE_TYPE + 1)# esl_lib/esl_lib.h: 301
 
-ESL_LIB_EVT_CONTROL_POINT_NOTIFICATION = (ESL_LIB_EVT_CONTROL_POINT_RESPONSE + 1)# ./common_host/esl_lib/esl_lib.h: 301
+ESL_LIB_EVT_CONTROL_POINT_NOTIFICATION = (ESL_LIB_EVT_CONTROL_POINT_RESPONSE + 1)# esl_lib/esl_lib.h: 301
 
-ESL_LIB_EVT_GENERAL = (ESL_LIB_EVT_CONTROL_POINT_NOTIFICATION + 1)# ./common_host/esl_lib/esl_lib.h: 301
+ESL_LIB_EVT_GENERAL = (ESL_LIB_EVT_CONTROL_POINT_NOTIFICATION + 1)# esl_lib/esl_lib.h: 301
 
-esl_lib_evt_type_t = enum_esl_lib_evt_type_e# ./common_host/esl_lib/esl_lib.h: 301
+esl_lib_evt_type_t = enum_esl_lib_evt_type_e# esl_lib/esl_lib.h: 301
 
-enum_esl_lib_status_e = c_int# ./common_host/esl_lib/esl_lib.h: 352
+enum_esl_lib_status_e = c_int# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_NO_ERROR = 0# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_NO_ERROR = 0# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_UNSPECIFIED_ERROR = (ESL_LIB_STATUS_NO_ERROR + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_UNSPECIFIED_ERROR = (ESL_LIB_STATUS_NO_ERROR + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_UNASSOCIATED = (ESL_LIB_STATUS_UNSPECIFIED_ERROR + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_UNASSOCIATED = (ESL_LIB_STATUS_UNSPECIFIED_ERROR + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_GATT_TIMEOUT = (ESL_LIB_STATUS_UNASSOCIATED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_GATT_TIMEOUT = (ESL_LIB_STATUS_UNASSOCIATED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_BONDING_FAILED = (ESL_LIB_STATUS_GATT_TIMEOUT + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_BONDING_FAILED = (ESL_LIB_STATUS_GATT_TIMEOUT + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_FEATURE_NOT_SUPPORTED = (ESL_LIB_STATUS_BONDING_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_FEATURE_NOT_SUPPORTED = (ESL_LIB_STATUS_BONDING_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_INVALID_STATE = (ESL_LIB_STATUS_FEATURE_NOT_SUPPORTED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_INVALID_STATE = (ESL_LIB_STATUS_FEATURE_NOT_SUPPORTED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_INVALID_PARAMETERS = (ESL_LIB_STATUS_INVALID_STATE + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_INVALID_PARAMETERS = (ESL_LIB_STATUS_INVALID_STATE + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_UNEXPECTED_RESET = (ESL_LIB_STATUS_INVALID_PARAMETERS + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_UNEXPECTED_RESET = (ESL_LIB_STATUS_INVALID_PARAMETERS + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_GATT_ERROR = (ESL_LIB_STATUS_UNEXPECTED_RESET + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_GATT_ERROR = (ESL_LIB_STATUS_UNEXPECTED_RESET + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_CONN_TIMEOUT = (ESL_LIB_STATUS_GATT_ERROR + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_CONN_TIMEOUT = (ESL_LIB_STATUS_GATT_ERROR + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_CONN_LOST = (ESL_LIB_STATUS_CONN_TIMEOUT + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_CONN_LOST = (ESL_LIB_STATUS_CONN_TIMEOUT + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_CONN_FAILED = (ESL_LIB_STATUS_CONN_LOST + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_CONN_FAILED = (ESL_LIB_STATUS_CONN_LOST + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_CONN_CLOSE_FAILED = (ESL_LIB_STATUS_CONN_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_CONN_CLOSE_FAILED = (ESL_LIB_STATUS_CONN_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_CONN_DISCOVERY_FAILED = (ESL_LIB_STATUS_CONN_CLOSE_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_CONN_DISCOVERY_FAILED = (ESL_LIB_STATUS_CONN_CLOSE_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_CONN_ESL_SERVICE_VIOLATION = (ESL_LIB_STATUS_CONN_DISCOVERY_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_CONN_ESL_SERVICE_VIOLATION = (ESL_LIB_STATUS_CONN_DISCOVERY_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_CONN_SUBSCRIBE_FAILED = (ESL_LIB_STATUS_CONN_ESL_SERVICE_VIOLATION + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_CONN_SUBSCRIBE_FAILED = (ESL_LIB_STATUS_CONN_ESL_SERVICE_VIOLATION + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_CONN_READ_FAILED = (ESL_LIB_STATUS_CONN_SUBSCRIBE_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_CONN_READ_FAILED = (ESL_LIB_STATUS_CONN_SUBSCRIBE_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_CONN_CONFIG_FAILED = (ESL_LIB_STATUS_CONN_READ_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_CONN_CONFIG_FAILED = (ESL_LIB_STATUS_CONN_READ_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_CONN_SET_MODE_FAILED = (ESL_LIB_STATUS_CONN_CONFIG_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_CONN_SET_MODE_FAILED = (ESL_LIB_STATUS_CONN_CONFIG_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_LINK_LAYER = (ESL_LIB_STATUS_CONN_SET_MODE_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_LINK_LAYER = (ESL_LIB_STATUS_CONN_SET_MODE_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_NO_PAWR_SYNC = (ESL_LIB_STATUS_LINK_LAYER + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_NO_PAWR_SYNC = (ESL_LIB_STATUS_LINK_LAYER + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_OTS_ERROR = (ESL_LIB_STATUS_NO_PAWR_SYNC + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_OTS_ERROR = (ESL_LIB_STATUS_NO_PAWR_SYNC + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_OTS_GOTO_FAILED = (ESL_LIB_STATUS_OTS_ERROR + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_OTS_GOTO_FAILED = (ESL_LIB_STATUS_OTS_ERROR + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_OTS_INIT_FAILED = (ESL_LIB_STATUS_OTS_GOTO_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_OTS_INIT_FAILED = (ESL_LIB_STATUS_OTS_GOTO_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_OTS_WRITE_RESP_FAILED = (ESL_LIB_STATUS_OTS_INIT_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_OTS_WRITE_RESP_FAILED = (ESL_LIB_STATUS_OTS_INIT_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_OTS_UNEXPECTED_OFFSET = (ESL_LIB_STATUS_OTS_WRITE_RESP_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_OTS_UNEXPECTED_OFFSET = (ESL_LIB_STATUS_OTS_WRITE_RESP_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_OTS_TRANSFER_FAILED = (ESL_LIB_STATUS_OTS_UNEXPECTED_OFFSET + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_OTS_TRANSFER_FAILED = (ESL_LIB_STATUS_OTS_UNEXPECTED_OFFSET + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_OTS_META_READ_FAILED = (ESL_LIB_STATUS_OTS_TRANSFER_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_OTS_META_READ_FAILED = (ESL_LIB_STATUS_OTS_TRANSFER_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_SCAN_START_FAILED = (ESL_LIB_STATUS_OTS_META_READ_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_SCAN_START_FAILED = (ESL_LIB_STATUS_OTS_META_READ_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_SCAN_STOP_FAILED = (ESL_LIB_STATUS_SCAN_START_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_SCAN_STOP_FAILED = (ESL_LIB_STATUS_SCAN_START_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_SCAN_CONFIG_FAILED = (ESL_LIB_STATUS_SCAN_STOP_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_SCAN_CONFIG_FAILED = (ESL_LIB_STATUS_SCAN_STOP_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_INIT_FAILED = (ESL_LIB_STATUS_SCAN_CONFIG_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_INIT_FAILED = (ESL_LIB_STATUS_SCAN_CONFIG_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_PAWR_START_FAILED = (ESL_LIB_STATUS_INIT_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_PAWR_START_FAILED = (ESL_LIB_STATUS_INIT_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_PAWR_STOP_FAILED = (ESL_LIB_STATUS_PAWR_START_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_PAWR_STOP_FAILED = (ESL_LIB_STATUS_PAWR_START_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_PAWR_CONFIG_FAILED = (ESL_LIB_STATUS_PAWR_STOP_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_PAWR_CONFIG_FAILED = (ESL_LIB_STATUS_PAWR_STOP_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_PAWR_SET_DATA_FAILED = (ESL_LIB_STATUS_PAWR_CONFIG_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_PAWR_SET_DATA_FAILED = (ESL_LIB_STATUS_PAWR_CONFIG_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_RESOURCE_EXCEEDED = (ESL_LIB_STATUS_PAWR_SET_DATA_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_RESOURCE_EXCEEDED = (ESL_LIB_STATUS_PAWR_SET_DATA_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_PAST_INIT_FAILED = (ESL_LIB_STATUS_RESOURCE_EXCEEDED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_PAST_INIT_FAILED = (ESL_LIB_STATUS_RESOURCE_EXCEEDED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_CONN_WRITE_CP_FAILED = (ESL_LIB_STATUS_PAST_INIT_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_CONN_WRITE_CP_FAILED = (ESL_LIB_STATUS_PAST_INIT_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_CONN_TAG_CONFIG_FAILED = (ESL_LIB_STATUS_CONN_WRITE_CP_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_CONN_TAG_CONFIG_FAILED = (ESL_LIB_STATUS_CONN_WRITE_CP_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_CONN_INIT_POLICY_FAILED = (ESL_LIB_STATUS_CONN_TAG_CONFIG_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_CONN_INIT_POLICY_FAILED = (ESL_LIB_STATUS_CONN_TAG_CONFIG_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_CONTROL_FAILED = (ESL_LIB_STATUS_CONN_INIT_POLICY_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_CONTROL_FAILED = (ESL_LIB_STATUS_CONN_INIT_POLICY_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_UNKNOWN_COMMAND = (ESL_LIB_STATUS_CONTROL_FAILED + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_UNKNOWN_COMMAND = (ESL_LIB_STATUS_CONTROL_FAILED + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_SYSTEM_ERROR = (ESL_LIB_STATUS_UNKNOWN_COMMAND + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_SYSTEM_ERROR = (ESL_LIB_STATUS_UNKNOWN_COMMAND + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_DATABASE_ERROR = (ESL_LIB_STATUS_SYSTEM_ERROR + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_DATABASE_ERROR = (ESL_LIB_STATUS_SYSTEM_ERROR + 1)# esl_lib/esl_lib.h: 352
 
-ESL_LIB_STATUS_DATABASE_PERMISSION = (ESL_LIB_STATUS_DATABASE_ERROR + 1)# ./common_host/esl_lib/esl_lib.h: 352
+ESL_LIB_STATUS_DATABASE_PERMISSION = (ESL_LIB_STATUS_DATABASE_ERROR + 1)# esl_lib/esl_lib.h: 352
 
-esl_lib_status_t = enum_esl_lib_status_e# ./common_host/esl_lib/esl_lib.h: 352
+esl_lib_status_t = enum_esl_lib_status_e# esl_lib/esl_lib.h: 352
 
-enum_esl_lib_data_type_e = c_int# ./common_host/esl_lib/esl_lib.h: 380
+enum_esl_lib_data_type_e = c_int# esl_lib/esl_lib.h: 380
 
-ESL_LIB_DATA_TYPE_UNINITIALIZED = 0# ./common_host/esl_lib/esl_lib.h: 380
+ESL_LIB_DATA_TYPE_UNINITIALIZED = 0# esl_lib/esl_lib.h: 380
 
-ESL_LIB_DATA_TYPE_GATT_ESL_ADDRESS = (ESL_LIB_DATA_TYPE_UNINITIALIZED + 1)# ./common_host/esl_lib/esl_lib.h: 380
+ESL_LIB_DATA_TYPE_GATT_ESL_ADDRESS = (ESL_LIB_DATA_TYPE_UNINITIALIZED + 1)# esl_lib/esl_lib.h: 380
 
-ESL_LIB_DATA_TYPE_GATT_AP_SYNC_KEY = (ESL_LIB_DATA_TYPE_GATT_ESL_ADDRESS + 1)# ./common_host/esl_lib/esl_lib.h: 380
+ESL_LIB_DATA_TYPE_GATT_AP_SYNC_KEY = (ESL_LIB_DATA_TYPE_GATT_ESL_ADDRESS + 1)# esl_lib/esl_lib.h: 380
 
-ESL_LIB_DATA_TYPE_GATT_RESPONSE_KEY = (ESL_LIB_DATA_TYPE_GATT_AP_SYNC_KEY + 1)# ./common_host/esl_lib/esl_lib.h: 380
+ESL_LIB_DATA_TYPE_GATT_RESPONSE_KEY = (ESL_LIB_DATA_TYPE_GATT_AP_SYNC_KEY + 1)# esl_lib/esl_lib.h: 380
 
-ESL_LIB_DATA_TYPE_GATT_CONTROL_POINT = (ESL_LIB_DATA_TYPE_GATT_RESPONSE_KEY + 1)# ./common_host/esl_lib/esl_lib.h: 380
+ESL_LIB_DATA_TYPE_GATT_CONTROL_POINT = (ESL_LIB_DATA_TYPE_GATT_RESPONSE_KEY + 1)# esl_lib/esl_lib.h: 380
 
-ESL_LIB_DATA_TYPE_GATT_CURRENT_TIME = (ESL_LIB_DATA_TYPE_GATT_CONTROL_POINT + 1)# ./common_host/esl_lib/esl_lib.h: 380
+ESL_LIB_DATA_TYPE_GATT_CURRENT_TIME = (ESL_LIB_DATA_TYPE_GATT_CONTROL_POINT + 1)# esl_lib/esl_lib.h: 380
 
-ESL_LIB_DATA_TYPE_GATT_DISPLAY_INFO = (ESL_LIB_DATA_TYPE_GATT_CURRENT_TIME + 1)# ./common_host/esl_lib/esl_lib.h: 380
+ESL_LIB_DATA_TYPE_GATT_DISPLAY_INFO = (ESL_LIB_DATA_TYPE_GATT_CURRENT_TIME + 1)# esl_lib/esl_lib.h: 380
 
-ESL_LIB_DATA_TYPE_GATT_IMAGE_INFO = (ESL_LIB_DATA_TYPE_GATT_DISPLAY_INFO + 1)# ./common_host/esl_lib/esl_lib.h: 380
+ESL_LIB_DATA_TYPE_GATT_IMAGE_INFO = (ESL_LIB_DATA_TYPE_GATT_DISPLAY_INFO + 1)# esl_lib/esl_lib.h: 380
 
-ESL_LIB_DATA_TYPE_GATT_SENSOR_INFO = (ESL_LIB_DATA_TYPE_GATT_IMAGE_INFO + 1)# ./common_host/esl_lib/esl_lib.h: 380
+ESL_LIB_DATA_TYPE_GATT_SENSOR_INFO = (ESL_LIB_DATA_TYPE_GATT_IMAGE_INFO + 1)# esl_lib/esl_lib.h: 380
 
-ESL_LIB_DATA_TYPE_GATT_LED_INFO = (ESL_LIB_DATA_TYPE_GATT_SENSOR_INFO + 1)# ./common_host/esl_lib/esl_lib.h: 380
+ESL_LIB_DATA_TYPE_GATT_LED_INFO = (ESL_LIB_DATA_TYPE_GATT_SENSOR_INFO + 1)# esl_lib/esl_lib.h: 380
 
-ESL_LIB_DATA_TYPE_GATT_PNP_ID = (ESL_LIB_DATA_TYPE_GATT_LED_INFO + 1)# ./common_host/esl_lib/esl_lib.h: 380
+ESL_LIB_DATA_TYPE_GATT_PNP_ID = (ESL_LIB_DATA_TYPE_GATT_LED_INFO + 1)# esl_lib/esl_lib.h: 380
 
-ESL_LIB_DATA_TYPE_GATT_SERIAL_NUMBER = (ESL_LIB_DATA_TYPE_GATT_PNP_ID + 1)# ./common_host/esl_lib/esl_lib.h: 380
+ESL_LIB_DATA_TYPE_GATT_SERIAL_NUMBER = (ESL_LIB_DATA_TYPE_GATT_PNP_ID + 1)# esl_lib/esl_lib.h: 380
 
-ESL_LIB_DATA_TYPE_GATT_OTS_FEATURE = (ESL_LIB_DATA_TYPE_GATT_SERIAL_NUMBER + 1)# ./common_host/esl_lib/esl_lib.h: 380
+ESL_LIB_DATA_TYPE_GATT_OTS_FEATURE = (ESL_LIB_DATA_TYPE_GATT_SERIAL_NUMBER + 1)# esl_lib/esl_lib.h: 380
 
-ESL_LIB_DATA_TYPE_GATT_OTS_OBJECT_TYPE = (ESL_LIB_DATA_TYPE_GATT_OTS_FEATURE + 1)# ./common_host/esl_lib/esl_lib.h: 380
+ESL_LIB_DATA_TYPE_GATT_OTS_OBJECT_TYPE = (ESL_LIB_DATA_TYPE_GATT_OTS_FEATURE + 1)# esl_lib/esl_lib.h: 380
 
-ESL_LIB_DATA_TYPE_PAWR_DATA = (ESL_LIB_DATA_TYPE_GATT_OTS_OBJECT_TYPE + 1)# ./common_host/esl_lib/esl_lib.h: 380
+ESL_LIB_DATA_TYPE_PAWR_DATA = (ESL_LIB_DATA_TYPE_GATT_OTS_OBJECT_TYPE + 1)# esl_lib/esl_lib.h: 380
 
-ESL_LIB_DATA_TYPE_PAWR_RESP_SLOT = (ESL_LIB_DATA_TYPE_PAWR_DATA + 1)# ./common_host/esl_lib/esl_lib.h: 380
+ESL_LIB_DATA_TYPE_PAWR_RESP_SLOT = (ESL_LIB_DATA_TYPE_PAWR_DATA + 1)# esl_lib/esl_lib.h: 380
 
-ESL_LIB_DATA_TYPE_PAWR_SUBEVENT = (ESL_LIB_DATA_TYPE_PAWR_RESP_SLOT + 1)# ./common_host/esl_lib/esl_lib.h: 380
+ESL_LIB_DATA_TYPE_PAWR_SUBEVENT = (ESL_LIB_DATA_TYPE_PAWR_RESP_SLOT + 1)# esl_lib/esl_lib.h: 380
 
-ESL_LIB_DATA_TYPE_SUBEVENT_START = (ESL_LIB_DATA_TYPE_PAWR_SUBEVENT + 1)# ./common_host/esl_lib/esl_lib.h: 380
+ESL_LIB_DATA_TYPE_SUBEVENT_START = (ESL_LIB_DATA_TYPE_PAWR_SUBEVENT + 1)# esl_lib/esl_lib.h: 380
 
-ESL_LIB_DATA_TYPE_SUBEVENT_DATA_COUNT = (ESL_LIB_DATA_TYPE_SUBEVENT_START + 1)# ./common_host/esl_lib/esl_lib.h: 380
+ESL_LIB_DATA_TYPE_SUBEVENT_DATA_COUNT = (ESL_LIB_DATA_TYPE_SUBEVENT_START + 1)# esl_lib/esl_lib.h: 380
 
-esl_lib_data_type_t = enum_esl_lib_data_type_e# ./common_host/esl_lib/esl_lib.h: 380
+esl_lib_data_type_t = enum_esl_lib_data_type_e# esl_lib/esl_lib.h: 380
 
-# ./common_host/esl_lib/esl_lib.h: 386
+# esl_lib/esl_lib.h: 386
 class struct_esl_lib_tlv_s(Structure):
     pass
 
@@ -1414,9 +1414,9 @@ struct_esl_lib_tlv_s._fields_ = [
     ('data', esl_lib_long_array_t),
 ]
 
-esl_lib_tlv_t = struct_esl_lib_tlv_s# ./common_host/esl_lib/esl_lib.h: 386
+esl_lib_tlv_t = struct_esl_lib_tlv_s# esl_lib/esl_lib.h: 386
 
-# ./common_host/esl_lib/esl_lib.h: 392
+# esl_lib/esl_lib.h: 392
 class struct_esl_lib_ots_features_s(Structure):
     pass
 
@@ -1429,45 +1429,45 @@ struct_esl_lib_ots_features_s._fields_ = [
     ('olcp_features', uint32_t),
 ]
 
-esl_lib_ots_features_t = struct_esl_lib_ots_features_s# ./common_host/esl_lib/esl_lib.h: 392
+esl_lib_ots_features_t = struct_esl_lib_ots_features_s# esl_lib/esl_lib.h: 392
 
-enum_esl_lib_characteristic_index_e = c_int# ./common_host/esl_lib/esl_lib.h: 406
+enum_esl_lib_characteristic_index_e = c_int# esl_lib/esl_lib.h: 406
 
-ESL_LIB_CHARACTERISTIC_INDEX_ESL_ADDRESS = 0# ./common_host/esl_lib/esl_lib.h: 406
+ESL_LIB_CHARACTERISTIC_INDEX_ESL_ADDRESS = 0# esl_lib/esl_lib.h: 406
 
-ESL_LIB_CHARACTERISTIC_INDEX_AP_SYNC_KEY_MATERIAL = 1# ./common_host/esl_lib/esl_lib.h: 406
+ESL_LIB_CHARACTERISTIC_INDEX_AP_SYNC_KEY_MATERIAL = 1# esl_lib/esl_lib.h: 406
 
-ESL_LIB_CHARACTERISTIC_INDEX_ESL_RESPONSE_KEY_MATERIAL = 2# ./common_host/esl_lib/esl_lib.h: 406
+ESL_LIB_CHARACTERISTIC_INDEX_ESL_RESPONSE_KEY_MATERIAL = 2# esl_lib/esl_lib.h: 406
 
-ESL_LIB_CHARACTERISTIC_INDEX_ESL_CURRENT_ABSOLUTE_TIME = 3# ./common_host/esl_lib/esl_lib.h: 406
+ESL_LIB_CHARACTERISTIC_INDEX_ESL_CURRENT_ABSOLUTE_TIME = 3# esl_lib/esl_lib.h: 406
 
-ESL_LIB_CHARACTERISTIC_INDEX_ESL_DISPLAY_INFORMATION = 4# ./common_host/esl_lib/esl_lib.h: 406
+ESL_LIB_CHARACTERISTIC_INDEX_ESL_DISPLAY_INFORMATION = 4# esl_lib/esl_lib.h: 406
 
-ESL_LIB_CHARACTERISTIC_INDEX_ESL_IMAGE_INFORMATION = 5# ./common_host/esl_lib/esl_lib.h: 406
+ESL_LIB_CHARACTERISTIC_INDEX_ESL_IMAGE_INFORMATION = 5# esl_lib/esl_lib.h: 406
 
-ESL_LIB_CHARACTERISTIC_INDEX_ESL_SENSOR_INFORMATION = 6# ./common_host/esl_lib/esl_lib.h: 406
+ESL_LIB_CHARACTERISTIC_INDEX_ESL_SENSOR_INFORMATION = 6# esl_lib/esl_lib.h: 406
 
-ESL_LIB_CHARACTERISTIC_INDEX_ESL_LED_INFORMATION = 7# ./common_host/esl_lib/esl_lib.h: 406
+ESL_LIB_CHARACTERISTIC_INDEX_ESL_LED_INFORMATION = 7# esl_lib/esl_lib.h: 406
 
-ESL_LIB_CHARACTERISTIC_INDEX_ESL_CONTROL_POINT = 8# ./common_host/esl_lib/esl_lib.h: 406
+ESL_LIB_CHARACTERISTIC_INDEX_ESL_CONTROL_POINT = 8# esl_lib/esl_lib.h: 406
 
-ESL_LIB_CHARACTERISTIC_INDEX_SIZE = 9# ./common_host/esl_lib/esl_lib.h: 406
+ESL_LIB_CHARACTERISTIC_INDEX_SIZE = 9# esl_lib/esl_lib.h: 406
 
-esl_lib_characteristic_index_t = enum_esl_lib_characteristic_index_e# ./common_host/esl_lib/esl_lib.h: 406
+esl_lib_characteristic_index_t = enum_esl_lib_characteristic_index_e# esl_lib/esl_lib.h: 406
 
-enum_esl_lib_characteristic_index_dis_e = c_int# ./common_host/esl_lib/esl_lib.h: 412
+enum_esl_lib_characteristic_index_dis_e = c_int# esl_lib/esl_lib.h: 412
 
-ESL_LIB_CHARACTERISTIC_INDEX_DIS_PNP_ID = 0# ./common_host/esl_lib/esl_lib.h: 412
+ESL_LIB_CHARACTERISTIC_INDEX_DIS_PNP_ID = 0# esl_lib/esl_lib.h: 412
 
-ESL_LIB_CHARACTERISTIC_INDEX_DIS_SN = 1# ./common_host/esl_lib/esl_lib.h: 412
+ESL_LIB_CHARACTERISTIC_INDEX_DIS_SN = 1# esl_lib/esl_lib.h: 412
 
-ESL_LIB_CHARACTERISTIC_INDEX_DIS_SIZE = 2# ./common_host/esl_lib/esl_lib.h: 412
+ESL_LIB_CHARACTERISTIC_INDEX_DIS_SIZE = 2# esl_lib/esl_lib.h: 412
 
-esl_lib_characteristic_index_dis_t = enum_esl_lib_characteristic_index_dis_e# ./common_host/esl_lib/esl_lib.h: 412
+esl_lib_characteristic_index_dis_t = enum_esl_lib_characteristic_index_dis_e# esl_lib/esl_lib.h: 412
 
-esl_lib_ots_gattdb_handles_t = uint16_t * int(12)# ./common_host/esl_lib/esl_lib.h: 415
+esl_lib_ots_gattdb_handles_t = uint16_t * int(12)# esl_lib/esl_lib.h: 415
 
-# ./common_host/esl_lib/esl_lib.h: 419
+# esl_lib/esl_lib.h: 419
 class struct_esl_lib_gattdb_handles_services_s(Structure):
     pass
 
@@ -1482,7 +1482,7 @@ struct_esl_lib_gattdb_handles_services_s._fields_ = [
     ('dis', uint32_t),
 ]
 
-# ./common_host/esl_lib/esl_lib.h: 427
+# esl_lib/esl_lib.h: 427
 class struct_esl_lib_gattdb_handles_s(Structure):
     pass
 
@@ -1499,9 +1499,9 @@ struct_esl_lib_gattdb_handles_s._fields_ = [
     ('ots_characteristics', esl_lib_ots_gattdb_handles_t),
 ]
 
-esl_lib_gattdb_handles_t = struct_esl_lib_gattdb_handles_s# ./common_host/esl_lib/esl_lib.h: 427
+esl_lib_gattdb_handles_t = struct_esl_lib_gattdb_handles_s# esl_lib/esl_lib.h: 427
 
-# ./common_host/esl_lib/esl_lib.h: 437
+# esl_lib/esl_lib.h: 437
 class struct_esl_lib_evt_system_boot_s(Structure):
     pass
 
@@ -1516,9 +1516,9 @@ struct_esl_lib_evt_system_boot_s._fields_ = [
     ('status', sl_status_t),
 ]
 
-esl_lib_evt_system_boot_t = struct_esl_lib_evt_system_boot_s# ./common_host/esl_lib/esl_lib.h: 437
+esl_lib_evt_system_boot_t = struct_esl_lib_evt_system_boot_s# esl_lib/esl_lib.h: 437
 
-# ./common_host/esl_lib/esl_lib.h: 445
+# esl_lib/esl_lib.h: 445
 class struct_esl_lib_evt_connection_mode_s(Structure):
     pass
 
@@ -1535,9 +1535,9 @@ struct_esl_lib_evt_connection_mode_s._fields_ = [
     ('connections', uint8_t),
 ]
 
-esl_lib_evt_connection_mode_t = struct_esl_lib_evt_connection_mode_s# ./common_host/esl_lib/esl_lib.h: 445
+esl_lib_evt_connection_mode_t = struct_esl_lib_evt_connection_mode_s# esl_lib/esl_lib.h: 445
 
-# ./common_host/esl_lib/esl_lib.h: 452
+# esl_lib/esl_lib.h: 452
 class struct_esl_lib_evt_scan_status_s(Structure):
     pass
 
@@ -1552,9 +1552,9 @@ struct_esl_lib_evt_scan_status_s._fields_ = [
     ('parameters', esl_lib_scan_parameters_t),
 ]
 
-esl_lib_evt_scan_status_t = struct_esl_lib_evt_scan_status_s# ./common_host/esl_lib/esl_lib.h: 452
+esl_lib_evt_scan_status_t = struct_esl_lib_evt_scan_status_s# esl_lib/esl_lib.h: 452
 
-# ./common_host/esl_lib/esl_lib.h: 458
+# esl_lib/esl_lib.h: 458
 class struct_esl_lib_evt_tag_found_s(Structure):
     pass
 
@@ -1567,9 +1567,9 @@ struct_esl_lib_evt_tag_found_s._fields_ = [
     ('rssi', c_int8),
 ]
 
-esl_lib_evt_tag_found_t = struct_esl_lib_evt_tag_found_s# ./common_host/esl_lib/esl_lib.h: 458
+esl_lib_evt_tag_found_t = struct_esl_lib_evt_tag_found_s# esl_lib/esl_lib.h: 458
 
-# ./common_host/esl_lib/esl_lib.h: 464
+# esl_lib/esl_lib.h: 464
 class struct_esl_lib_evt_tag_info_s(Structure):
     pass
 
@@ -1582,9 +1582,9 @@ struct_esl_lib_evt_tag_info_s._fields_ = [
     ('tlv_data', esl_lib_long_array_t),
 ]
 
-esl_lib_evt_tag_info_t = struct_esl_lib_evt_tag_info_s# ./common_host/esl_lib/esl_lib.h: 464
+esl_lib_evt_tag_info_t = struct_esl_lib_evt_tag_info_s# esl_lib/esl_lib.h: 464
 
-# ./common_host/esl_lib/esl_lib.h: 471
+# esl_lib/esl_lib.h: 471
 class struct_esl_lib_evt_tag_config_response_s(Structure):
     pass
 
@@ -1599,9 +1599,9 @@ struct_esl_lib_evt_tag_config_response_s._fields_ = [
     ('status', sl_status_t),
 ]
 
-esl_lib_evt_configure_tag_response_t = struct_esl_lib_evt_tag_config_response_s# ./common_host/esl_lib/esl_lib.h: 471
+esl_lib_evt_configure_tag_response_t = struct_esl_lib_evt_tag_config_response_s# esl_lib/esl_lib.h: 471
 
-# ./common_host/esl_lib/esl_lib.h: 478
+# esl_lib/esl_lib.h: 478
 class struct_esl_lib_evt_control_point_response_s(Structure):
     pass
 
@@ -1616,9 +1616,9 @@ struct_esl_lib_evt_control_point_response_s._fields_ = [
     ('data_sent', esl_lib_array_t),
 ]
 
-esl_lib_evt_control_point_response_t = struct_esl_lib_evt_control_point_response_s# ./common_host/esl_lib/esl_lib.h: 478
+esl_lib_evt_control_point_response_t = struct_esl_lib_evt_control_point_response_s# esl_lib/esl_lib.h: 478
 
-# ./common_host/esl_lib/esl_lib.h: 484
+# esl_lib/esl_lib.h: 484
 class struct_esl_lib_evt_control_point_notification_s(Structure):
     pass
 
@@ -1631,9 +1631,9 @@ struct_esl_lib_evt_control_point_notification_s._fields_ = [
     ('data', esl_lib_array_t),
 ]
 
-esl_lib_evt_control_point_notification_t = struct_esl_lib_evt_control_point_notification_s# ./common_host/esl_lib/esl_lib.h: 484
+esl_lib_evt_control_point_notification_t = struct_esl_lib_evt_control_point_notification_s# esl_lib/esl_lib.h: 484
 
-# ./common_host/esl_lib/esl_lib.h: 493
+# esl_lib/esl_lib.h: 493
 class struct_esl_lib_evt_connection_retry_s(Structure):
     pass
 
@@ -1652,9 +1652,9 @@ struct_esl_lib_evt_connection_retry_s._fields_ = [
     ('retries_left', uint8_t),
 ]
 
-esl_lib_evt_connection_retry_t = struct_esl_lib_evt_connection_retry_s# ./common_host/esl_lib/esl_lib.h: 493
+esl_lib_evt_connection_retry_t = struct_esl_lib_evt_connection_retry_s# esl_lib/esl_lib.h: 493
 
-# ./common_host/esl_lib/esl_lib.h: 500
+# esl_lib/esl_lib.h: 500
 class struct_esl_lib_evt_connection_closed_s(Structure):
     pass
 
@@ -1669,9 +1669,9 @@ struct_esl_lib_evt_connection_closed_s._fields_ = [
     ('reason', sl_status_t),
 ]
 
-esl_lib_evt_connection_closed_t = struct_esl_lib_evt_connection_closed_s# ./common_host/esl_lib/esl_lib.h: 500
+esl_lib_evt_connection_closed_t = struct_esl_lib_evt_connection_closed_s# esl_lib/esl_lib.h: 500
 
-# ./common_host/esl_lib/esl_lib.h: 508
+# esl_lib/esl_lib.h: 508
 class struct_esl_lib_evt_connection_opened_s(Structure):
     pass
 
@@ -1688,9 +1688,9 @@ struct_esl_lib_evt_connection_opened_s._fields_ = [
     ('status', sl_status_t),
 ]
 
-esl_lib_evt_connection_opened_t = struct_esl_lib_evt_connection_opened_s# ./common_host/esl_lib/esl_lib.h: 508
+esl_lib_evt_connection_opened_t = struct_esl_lib_evt_connection_opened_s# esl_lib/esl_lib.h: 508
 
-# ./common_host/esl_lib/esl_lib.h: 515
+# esl_lib/esl_lib.h: 515
 class struct_esl_lib_evt_bonding_data_s(Structure):
     pass
 
@@ -1705,9 +1705,9 @@ struct_esl_lib_evt_bonding_data_s._fields_ = [
     ('ltk', uint8_t * int(16)),
 ]
 
-esl_lib_evt_bonding_data_t = struct_esl_lib_evt_bonding_data_s# ./common_host/esl_lib/esl_lib.h: 515
+esl_lib_evt_bonding_data_t = struct_esl_lib_evt_bonding_data_s# esl_lib/esl_lib.h: 515
 
-# ./common_host/esl_lib/esl_lib.h: 521
+# esl_lib/esl_lib.h: 521
 class struct_esl_lib_evt_bonding_finished_s(Structure):
     pass
 
@@ -1720,9 +1720,9 @@ struct_esl_lib_evt_bonding_finished_s._fields_ = [
     ('address', esl_lib_address_t),
 ]
 
-esl_lib_evt_bonding_finished_t = struct_esl_lib_evt_bonding_finished_s# ./common_host/esl_lib/esl_lib.h: 521
+esl_lib_evt_bonding_finished_t = struct_esl_lib_evt_bonding_finished_s# esl_lib/esl_lib.h: 521
 
-# ./common_host/esl_lib/esl_lib.h: 529
+# esl_lib/esl_lib.h: 529
 class struct_esl_lib_evt_pawr_status_s(Structure):
     pass
 
@@ -1739,9 +1739,9 @@ struct_esl_lib_evt_pawr_status_s._fields_ = [
     ('config', esl_lib_pawr_config_t),
 ]
 
-esl_lib_evt_pawr_status_t = struct_esl_lib_evt_pawr_status_s# ./common_host/esl_lib/esl_lib.h: 529
+esl_lib_evt_pawr_status_t = struct_esl_lib_evt_pawr_status_s# esl_lib/esl_lib.h: 529
 
-# ./common_host/esl_lib/esl_lib.h: 536
+# esl_lib/esl_lib.h: 536
 class struct_esl_lib_evt_image_transfer_finished_s(Structure):
     pass
 
@@ -1756,9 +1756,9 @@ struct_esl_lib_evt_image_transfer_finished_s._fields_ = [
     ('status', sl_status_t),
 ]
 
-esl_lib_evt_image_transfer_finished_t = struct_esl_lib_evt_image_transfer_finished_s# ./common_host/esl_lib/esl_lib.h: 536
+esl_lib_evt_image_transfer_finished_t = struct_esl_lib_evt_image_transfer_finished_s# esl_lib/esl_lib.h: 536
 
-# ./common_host/esl_lib/esl_lib.h: 543
+# esl_lib/esl_lib.h: 543
 class struct_esl_lib_evt_image_type_s(Structure):
     pass
 
@@ -1773,9 +1773,9 @@ struct_esl_lib_evt_image_type_s._fields_ = [
     ('type_data', esl_lib_long_array_t),
 ]
 
-esl_lib_evt_image_type_t = struct_esl_lib_evt_image_type_s# ./common_host/esl_lib/esl_lib.h: 543
+esl_lib_evt_image_type_t = struct_esl_lib_evt_image_type_s# esl_lib/esl_lib.h: 543
 
-# ./common_host/esl_lib/esl_lib.h: 551
+# esl_lib/esl_lib.h: 551
 class struct_esl_lib_evt_pawr_response_s(Structure):
     pass
 
@@ -1792,9 +1792,9 @@ struct_esl_lib_evt_pawr_response_s._fields_ = [
     ('data', esl_lib_long_array_t),
 ]
 
-esl_lib_evt_pawr_response_t = struct_esl_lib_evt_pawr_response_s# ./common_host/esl_lib/esl_lib.h: 551
+esl_lib_evt_pawr_response_t = struct_esl_lib_evt_pawr_response_s# esl_lib/esl_lib.h: 551
 
-# ./common_host/esl_lib/esl_lib.h: 558
+# esl_lib/esl_lib.h: 558
 class struct_esl_lib_evt_pawr_data_request_s(Structure):
     pass
 
@@ -1809,9 +1809,9 @@ struct_esl_lib_evt_pawr_data_request_s._fields_ = [
     ('subevent_data_count', uint8_t),
 ]
 
-esl_lib_evt_pawr_data_request_t = struct_esl_lib_evt_pawr_data_request_s# ./common_host/esl_lib/esl_lib.h: 558
+esl_lib_evt_pawr_data_request_t = struct_esl_lib_evt_pawr_data_request_s# esl_lib/esl_lib.h: 558
 
-# ./common_host/esl_lib/esl_lib.h: 566
+# esl_lib/esl_lib.h: 566
 class struct_esl_lib_evt_ots_return_type_s(Structure):
     pass
 
@@ -1828,9 +1828,9 @@ struct_esl_lib_evt_ots_return_type_s._fields_ = [
     ('gatt_status', uint16_t),
 ]
 
-esl_lib_evt_ots_return_type_t = struct_esl_lib_evt_ots_return_type_s# ./common_host/esl_lib/esl_lib.h: 566
+esl_lib_evt_ots_return_type_t = struct_esl_lib_evt_ots_return_type_s# esl_lib/esl_lib.h: 566
 
-# ./common_host/esl_lib/esl_lib.h: 572
+# esl_lib/esl_lib.h: 572
 class union_esl_lib_status_data_u(Union):
     pass
 
@@ -1845,9 +1845,9 @@ union_esl_lib_status_data_u._fields_ = [
     ('pawr_state', esl_lib_pawr_state_t),
 ]
 
-esl_lib_status_data_t = union_esl_lib_status_data_u# ./common_host/esl_lib/esl_lib.h: 572
+esl_lib_status_data_t = union_esl_lib_status_data_u# esl_lib/esl_lib.h: 572
 
-# ./common_host/esl_lib/esl_lib.h: 580
+# esl_lib/esl_lib.h: 580
 class struct_esl_lib_evt_error_s(Structure):
     pass
 
@@ -1864,9 +1864,9 @@ struct_esl_lib_evt_error_s._fields_ = [
     ('data', esl_lib_status_data_t),
 ]
 
-esl_lib_evt_error_t = struct_esl_lib_evt_error_s# ./common_host/esl_lib/esl_lib.h: 580
+esl_lib_evt_error_t = struct_esl_lib_evt_error_s# esl_lib/esl_lib.h: 580
 
-# ./common_host/esl_lib/esl_lib.h: 604
+# esl_lib/esl_lib.h: 604
 class union_esl_lib_evt_data_u(Union):
     pass
 
@@ -1915,39 +1915,39 @@ union_esl_lib_evt_data_u._fields_ = [
     ('evt_general', esl_lib_long_array_t),
 ]
 
-esl_lib_evt_data_t = union_esl_lib_evt_data_u# ./common_host/esl_lib/esl_lib.h: 604
+esl_lib_evt_data_t = union_esl_lib_evt_data_u# esl_lib/esl_lib.h: 604
 
-enum_esl_lib_key_type_e = c_int# ./common_host/esl_lib/esl_lib.h: 612
+enum_esl_lib_key_type_e = c_int# esl_lib/esl_lib.h: 612
 
-ESL_LIB_KEY_TYPE_NO_KEY = 0# ./common_host/esl_lib/esl_lib.h: 612
+ESL_LIB_KEY_TYPE_NO_KEY = 0# esl_lib/esl_lib.h: 612
 
-ESL_LIB_KEY_TYPE_LTK = (ESL_LIB_KEY_TYPE_NO_KEY + 1)# ./common_host/esl_lib/esl_lib.h: 612
+ESL_LIB_KEY_TYPE_LTK = (ESL_LIB_KEY_TYPE_NO_KEY + 1)# esl_lib/esl_lib.h: 612
 
-ESL_LIB_KEY_TYPE_PASSKEY = (ESL_LIB_KEY_TYPE_LTK + 1)# ./common_host/esl_lib/esl_lib.h: 612
+ESL_LIB_KEY_TYPE_PASSKEY = (ESL_LIB_KEY_TYPE_LTK + 1)# esl_lib/esl_lib.h: 612
 
-ESL_LIB_KEY_TYPE_OOB_DATA = (ESL_LIB_KEY_TYPE_PASSKEY + 1)# ./common_host/esl_lib/esl_lib.h: 612
+ESL_LIB_KEY_TYPE_OOB_DATA = (ESL_LIB_KEY_TYPE_PASSKEY + 1)# esl_lib/esl_lib.h: 612
 
-esl_lib_key_type_t = enum_esl_lib_key_type_e# ./common_host/esl_lib/esl_lib.h: 612
+esl_lib_key_type_t = enum_esl_lib_key_type_e# esl_lib/esl_lib.h: 612
 
-esl_lib_on_event_t = CFUNCTYPE(UNCHECKED(None), esl_lib_evt_type_t, POINTER(esl_lib_evt_data_t))# ./common_host/esl_lib/esl_lib.h: 622
+esl_lib_on_event_t = CFUNCTYPE(UNCHECKED(None), esl_lib_evt_type_t, POINTER(esl_lib_evt_data_t))# esl_lib/esl_lib.h: 622
 
-enum_esl_lib_log_level_e = c_int# ./common_host/esl_lib/esl_lib.h: 635
+enum_esl_lib_log_level_e = c_int# esl_lib/esl_lib.h: 635
 
-ESL_LIB_LOG_LEVEL_DEBUG = 0# ./common_host/esl_lib/esl_lib.h: 635
+ESL_LIB_LOG_LEVEL_DEBUG = 0# esl_lib/esl_lib.h: 635
 
-ESL_LIB_LOG_LEVEL_INFO = (ESL_LIB_LOG_LEVEL_DEBUG + 1)# ./common_host/esl_lib/esl_lib.h: 635
+ESL_LIB_LOG_LEVEL_INFO = (ESL_LIB_LOG_LEVEL_DEBUG + 1)# esl_lib/esl_lib.h: 635
 
-ESL_LIB_LOG_LEVEL_WARNING = (ESL_LIB_LOG_LEVEL_INFO + 1)# ./common_host/esl_lib/esl_lib.h: 635
+ESL_LIB_LOG_LEVEL_WARNING = (ESL_LIB_LOG_LEVEL_INFO + 1)# esl_lib/esl_lib.h: 635
 
-ESL_LIB_LOG_LEVEL_ERROR = (ESL_LIB_LOG_LEVEL_WARNING + 1)# ./common_host/esl_lib/esl_lib.h: 635
+ESL_LIB_LOG_LEVEL_ERROR = (ESL_LIB_LOG_LEVEL_WARNING + 1)# esl_lib/esl_lib.h: 635
 
-ESL_LIB_LOG_LEVEL_CRITICAL = (ESL_LIB_LOG_LEVEL_ERROR + 1)# ./common_host/esl_lib/esl_lib.h: 635
+ESL_LIB_LOG_LEVEL_CRITICAL = (ESL_LIB_LOG_LEVEL_ERROR + 1)# esl_lib/esl_lib.h: 635
 
-esl_lib_log_level_t = enum_esl_lib_log_level_e# ./common_host/esl_lib/esl_lib.h: 635
+esl_lib_log_level_t = enum_esl_lib_log_level_e# esl_lib/esl_lib.h: 635
 
-esl_lib_log_callback_t = CFUNCTYPE(UNCHECKED(None), esl_lib_log_level_t, String, String, String, c_int, String)# ./common_host/esl_lib/esl_lib.h: 646
+esl_lib_log_callback_t = CFUNCTYPE(UNCHECKED(None), esl_lib_log_level_t, String, String, String, c_int, String)# esl_lib/esl_lib.h: 646
 
-# ./common_host/esl_lib/esl_lib.h: 670
+# esl_lib/esl_lib.h: 670
 for _lib in _libs.values():
     if not _lib.has("esl_lib_start", "cdecl"):
         continue
@@ -1956,7 +1956,7 @@ for _lib in _libs.values():
     esl_lib_start.restype = sl_status_t
     break
 
-# ./common_host/esl_lib/esl_lib.h: 679
+# esl_lib/esl_lib.h: 679
 for _lib in _libs.values():
     if not _lib.has("esl_lib_stop", "cdecl"):
         continue
@@ -1965,7 +1965,7 @@ for _lib in _libs.values():
     esl_lib_stop.restype = sl_status_t
     break
 
-# ./common_host/esl_lib/esl_lib.h: 700
+# esl_lib/esl_lib.h: 700
 for _lib in _libs.values():
     if not _lib.has("esl_lib_connect", "cdecl"):
         continue
@@ -1974,7 +1974,7 @@ for _lib in _libs.values():
     esl_lib_connect.restype = sl_status_t
     break
 
-# ./common_host/esl_lib/esl_lib.h: 713
+# esl_lib/esl_lib.h: 713
 for _lib in _libs.values():
     if not _lib.has("esl_lib_close_connection", "cdecl"):
         continue
@@ -1983,7 +1983,7 @@ for _lib in _libs.values():
     esl_lib_close_connection.restype = sl_status_t
     break
 
-# ./common_host/esl_lib/esl_lib.h: 722
+# esl_lib/esl_lib.h: 722
 for _lib in _libs.values():
     if not _lib.has("esl_lib_set_connection_mode", "cdecl"):
         continue
@@ -1992,7 +1992,7 @@ for _lib in _libs.values():
     esl_lib_set_connection_mode.restype = sl_status_t
     break
 
-# ./common_host/esl_lib/esl_lib.h: 729
+# esl_lib/esl_lib.h: 729
 for _lib in _libs.values():
     if not _lib.has("esl_lib_get_connection_mode", "cdecl"):
         continue
@@ -2001,7 +2001,7 @@ for _lib in _libs.values():
     esl_lib_get_connection_mode.restype = sl_status_t
     break
 
-# ./common_host/esl_lib/esl_lib.h: 740
+# esl_lib/esl_lib.h: 740
 for _lib in _libs.values():
     if not _lib.has("esl_lib_get_tag_info", "cdecl"):
         continue
@@ -2010,7 +2010,7 @@ for _lib in _libs.values():
     esl_lib_get_tag_info.restype = sl_status_t
     break
 
-# ./common_host/esl_lib/esl_lib.h: 749
+# esl_lib/esl_lib.h: 749
 for _lib in _libs.values():
     if not _lib.has("esl_lib_configure_tag", "cdecl"):
         continue
@@ -2019,7 +2019,7 @@ for _lib in _libs.values():
     esl_lib_configure_tag.restype = sl_status_t
     break
 
-# ./common_host/esl_lib/esl_lib.h: 760
+# esl_lib/esl_lib.h: 760
 for _lib in _libs.values():
     if not _lib.has("esl_lib_write_control_point", "cdecl"):
         continue
@@ -2028,7 +2028,7 @@ for _lib in _libs.values():
     esl_lib_write_control_point.restype = sl_status_t
     break
 
-# ./common_host/esl_lib/esl_lib.h: 773
+# esl_lib/esl_lib.h: 773
 for _lib in _libs.values():
     if not _lib.has("esl_lib_pawr_create", "cdecl"):
         continue
@@ -2037,7 +2037,7 @@ for _lib in _libs.values():
     esl_lib_pawr_create.restype = sl_status_t
     break
 
-# ./common_host/esl_lib/esl_lib.h: 782
+# esl_lib/esl_lib.h: 782
 for _lib in _libs.values():
     if not _lib.has("esl_lib_pawr_remove", "cdecl"):
         continue
@@ -2046,7 +2046,7 @@ for _lib in _libs.values():
     esl_lib_pawr_remove.restype = sl_status_t
     break
 
-# ./common_host/esl_lib/esl_lib.h: 793
+# esl_lib/esl_lib.h: 793
 for _lib in _libs.values():
     if not _lib.has("esl_lib_pawr_enable", "cdecl"):
         continue
@@ -2055,7 +2055,7 @@ for _lib in _libs.values():
     esl_lib_pawr_enable.restype = sl_status_t
     break
 
-# ./common_host/esl_lib/esl_lib.h: 805
+# esl_lib/esl_lib.h: 805
 for _lib in _libs.values():
     if not _lib.has("esl_lib_pawr_set_data", "cdecl"):
         continue
@@ -2064,7 +2064,7 @@ for _lib in _libs.values():
     esl_lib_pawr_set_data.restype = sl_status_t
     break
 
-# ./common_host/esl_lib/esl_lib.h: 819
+# esl_lib/esl_lib.h: 819
 for _lib in _libs.values():
     if not _lib.has("esl_lib_pawr_configure", "cdecl"):
         continue
@@ -2073,7 +2073,7 @@ for _lib in _libs.values():
     esl_lib_pawr_configure.restype = sl_status_t
     break
 
-# ./common_host/esl_lib/esl_lib.h: 828
+# esl_lib/esl_lib.h: 828
 for _lib in _libs.values():
     if not _lib.has("esl_lib_get_pawr_status", "cdecl"):
         continue
@@ -2082,7 +2082,7 @@ for _lib in _libs.values():
     esl_lib_get_pawr_status.restype = sl_status_t
     break
 
-# ./common_host/esl_lib/esl_lib.h: 837
+# esl_lib/esl_lib.h: 837
 for _lib in _libs.values():
     if not _lib.has("esl_lib_initiate_past", "cdecl"):
         continue
@@ -2091,7 +2091,7 @@ for _lib in _libs.values():
     esl_lib_initiate_past.restype = sl_status_t
     break
 
-# ./common_host/esl_lib/esl_lib.h: 852
+# esl_lib/esl_lib.h: 852
 for _lib in _libs.values():
     if not _lib.has("esl_lib_write_image", "cdecl"):
         continue
@@ -2100,7 +2100,7 @@ for _lib in _libs.values():
     esl_lib_write_image.restype = sl_status_t
     break
 
-# ./common_host/esl_lib/esl_lib.h: 864
+# esl_lib/esl_lib.h: 864
 for _lib in _libs.values():
     if not _lib.has("esl_lib_get_image_type", "cdecl"):
         continue
@@ -2109,7 +2109,7 @@ for _lib in _libs.values():
     esl_lib_get_image_type.restype = sl_status_t
     break
 
-# ./common_host/esl_lib/esl_lib.h: 876
+# esl_lib/esl_lib.h: 876
 for _lib in _libs.values():
     if not _lib.has("esl_lib_scan_configure", "cdecl"):
         continue
@@ -2118,7 +2118,7 @@ for _lib in _libs.values():
     esl_lib_scan_configure.restype = sl_status_t
     break
 
-# ./common_host/esl_lib/esl_lib.h: 884
+# esl_lib/esl_lib.h: 884
 for _lib in _libs.values():
     if not _lib.has("esl_lib_scan_enable", "cdecl"):
         continue
@@ -2127,7 +2127,7 @@ for _lib in _libs.values():
     esl_lib_scan_enable.restype = sl_status_t
     break
 
-# ./common_host/esl_lib/esl_lib.h: 891
+# esl_lib/esl_lib.h: 891
 for _lib in _libs.values():
     if not _lib.has("esl_lib_get_scan_status", "cdecl"):
         continue
@@ -2136,7 +2136,7 @@ for _lib in _libs.values():
     esl_lib_get_scan_status.restype = sl_status_t
     break
 
-# ./common_host/esl_lib/esl_lib.h: 902
+# esl_lib/esl_lib.h: 902
 for _lib in _libs.values():
     if not _lib.has("esl_lib_general_cmd", "cdecl"):
         continue
@@ -4305,385 +4305,385 @@ try:
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 48
+# esl_lib/esl_lib.h: 48
 try:
     ESL_LIB_INVALID_SERVICE_HANDLE = UINT32_MAX
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 49
+# esl_lib/esl_lib.h: 49
 try:
     ESL_LIB_INVALID_CHARACTERISTIC_HANDLE = UINT16_MAX
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 52
+# esl_lib/esl_lib.h: 52
 try:
     ESL_LIB_LTK_SIZE = 16
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 53
+# esl_lib/esl_lib.h: 53
 try:
     ESL_LIB_OOB_SIZE = 32
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 54
+# esl_lib/esl_lib.h: 54
 try:
     ESL_LIB_PASSKEY_SIZE = 4
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 56
+# esl_lib/esl_lib.h: 56
 try:
     ESL_LIB_ARRAY_HEADER_SIZE = sizeof(uint8_t)
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 57
+# esl_lib/esl_lib.h: 57
 try:
     ESL_LIB_LONG_ARRAY_HEADER_SIZE = sizeof(uint32_t)
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 59
+# esl_lib/esl_lib.h: 59
 try:
     ESL_LIB_TLV_HEADER_LEN = sizeof(esl_lib_tlv_t)
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 66
+# esl_lib/esl_lib.h: 66
 try:
-    ESL_LIB_PAWR_MIN_INTERVAL_DEFAULT = 1210
+    ESL_LIB_PAWR_MIN_INTERVAL_DEFAULT = 1197
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 69
+# esl_lib/esl_lib.h: 69
 try:
     ESL_LIB_PAWR_MAX_INTERVAL_DEFAULT = ESL_LIB_PAWR_MIN_INTERVAL_DEFAULT
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 71
+# esl_lib/esl_lib.h: 71
 try:
-    ESL_LIB_PAWR_SUBEVENT_COUNT_DEFAULT = 55
+    ESL_LIB_PAWR_SUBEVENT_COUNT_DEFAULT = 57
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 73
+# esl_lib/esl_lib.h: 73
 try:
-    ESL_LIB_PAWR_SUBEVENT_INTERVAL_DEFAULT = 22
+    ESL_LIB_PAWR_SUBEVENT_INTERVAL_DEFAULT = 21
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 76
+# esl_lib/esl_lib.h: 76
 try:
-    ESL_LIB_PAWR_RESPONSE_SLOT_DELAY_DEFAULT = 8
+    ESL_LIB_PAWR_RESPONSE_SLOT_DELAY_DEFAULT = 7
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 80
+# esl_lib/esl_lib.h: 80
 try:
     ESL_LIB_PAWR_RESPONSE_SLOT_SPACING_DEFAULT = 6
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 83
+# esl_lib/esl_lib.h: 83
 try:
     ESL_LIB_PAWR_RESPONSE_SLOT_COUNT_DEFAULT = 23
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 87
+# esl_lib/esl_lib.h: 87
 try:
     ESL_LIB_CONN_INTERVAL_MIN = 0x0006
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 88
+# esl_lib/esl_lib.h: 88
 try:
     ESL_LIB_CONN_INTERVAL_MAX = 0x0c80
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 89
+# esl_lib/esl_lib.h: 89
 try:
     ESL_LIB_CONN_MIN_TIMEOUT = 0x000a
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 90
+# esl_lib/esl_lib.h: 90
 try:
     ESL_LIB_CONN_MAX_TIMEOUT = 0x0c80
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 91
+# esl_lib/esl_lib.h: 91
 try:
     ESL_LIB_CONN_PERIPHERAL_MIN_LATENCY = 0
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 92
+# esl_lib/esl_lib.h: 92
 try:
     ESL_LIB_CONN_PERIPHERAL_MAX_LATENCY = 0x1f3
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 93
+# esl_lib/esl_lib.h: 93
 try:
     ESL_LIB_CONN_MIN_CE_LENGTH = 0
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 94
+# esl_lib/esl_lib.h: 94
 try:
     ESL_LIB_CONN_MAX_CE_LENGTH = 0xffff
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 98
+# esl_lib/esl_lib.h: 98
 try:
     ESL_LIB_PAWR_MIN_PA_INTERVAL = 0x6
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 99
+# esl_lib/esl_lib.h: 99
 try:
     ESL_LIB_PAWR_MAX_PA_INTERVAL = 0xffff
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 100
+# esl_lib/esl_lib.h: 100
 try:
     ESL_LIB_PAWR_MIN_NUM_SUBEVENTS = 0x01
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 101
+# esl_lib/esl_lib.h: 101
 try:
     ESL_LIB_PAWR_MAX_NUM_SUBEVENTS = 0x80
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 102
+# esl_lib/esl_lib.h: 102
 try:
     ESL_LIB_PAWR_MIN_SUBEVENT_INTERVAL = 0x6
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 103
+# esl_lib/esl_lib.h: 103
 try:
     ESL_LIB_PAWR_MAX_SUBEVENT_INTERVAL = 0xff
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 104
+# esl_lib/esl_lib.h: 104
 try:
     ESL_LIB_PAWR_MIN_RESPONSE_SLOT_DELAY = 0x1
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 105
+# esl_lib/esl_lib.h: 105
 try:
     ESL_LIB_PAWR_MAX_RESPONSE_SLOT_DELAY = 0xfe
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 106
+# esl_lib/esl_lib.h: 106
 try:
     ESL_LIB_PAWR_MIN_RESPONSE_SLOT_SPACING = 0x2
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 107
+# esl_lib/esl_lib.h: 107
 try:
     ESL_LIB_PAWR_MAX_RESPONSE_SLOT_SPACING = 0xff
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 108
+# esl_lib/esl_lib.h: 108
 try:
     ESL_LIB_PAWR_MIN_NUM_RESPONSE_SLOTS = 0x01
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 109
+# esl_lib/esl_lib.h: 109
 try:
     ESL_LIB_PAWR_MAX_NUM_RESPONSE_SLOTS = 0xff
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 112
+# esl_lib/esl_lib.h: 112
 try:
     ESL_LIB_PAWR_UNSPECIFIED_SUBEVENT = 0xff
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 119
+# esl_lib/esl_lib.h: 119
 try:
-    ESL_LIB_CONN_INTERVAL_MIN_DEFAULT = (ESL_LIB_PAWR_SUBEVENT_INTERVAL_DEFAULT / 2)
+    ESL_LIB_CONN_INTERVAL_MIN_DEFAULT = (ESL_LIB_PAWR_SUBEVENT_INTERVAL_DEFAULT / 3)
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 121
+# esl_lib/esl_lib.h: 121
 try:
     ESL_LIB_CONN_INTERVAL_MAX_DEFAULT = ESL_LIB_CONN_INTERVAL_MIN_DEFAULT
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 125
+# esl_lib/esl_lib.h: 125
 try:
     ESL_LIB_CONN_PERIPHERAL_LATENCY_DEFAULT = 0
 except:
     pass
 
-# ./common_host/esl_lib/esl_lib.h: 128
+# esl_lib/esl_lib.h: 128
 try:
     ESL_LIB_CONN_TIMEOUT_DEFAULT = (((1 + ESL_LIB_CONN_PERIPHERAL_LATENCY_DEFAULT) * ESL_LIB_CONN_INTERVAL_MAX_DEFAULT) * 8)
 except:
     pass
 
-# ./common/otf_decompressor/otf_compressor_config.h: 45
+# bluetooth_le_middleware/common/otf_decompressor/otf_compressor_config.h: 45
 try:
     OTF_CFG_COMPRESSION_LEVEL = 12
 except:
     pass
 
-# ./common/otf_decompressor/otf_compressor_config.h: 54
+# bluetooth_le_middleware/common/otf_decompressor/otf_compressor_config.h: 54
 try:
     OTF_CFG_BYTE_WIDTH = 8
 except:
     pass
 
-# ./common/otf_decompressor/otf_compressor_config.h: 56
+# bluetooth_le_middleware/common/otf_decompressor/otf_compressor_config.h: 56
 try:
     OTF_CFG_WORD_WIDTH = (2 * OTF_CFG_BYTE_WIDTH)
 except:
     pass
 
-# ./common/otf_decompressor/otf_compressor_config.h: 62
+# bluetooth_le_middleware/common/otf_decompressor/otf_compressor_config.h: 62
 try:
     OTF_CFG_PEER_BITS = (OTF_CFG_BYTE_WIDTH - 3)
 except:
     pass
 
-# ./common/otf_decompressor/otf_compressor_config.h: 63
+# bluetooth_le_middleware/common/otf_decompressor/otf_compressor_config.h: 63
 try:
     OTF_CFG_PEER_MIN = (OTF_CFG_BYTE_WIDTH - 5)
 except:
     pass
 
-# ./common/otf_decompressor/otf_compressor_config.h: 64
+# bluetooth_le_middleware/common/otf_decompressor/otf_compressor_config.h: 64
 try:
     OTF_CFG_PEER_MAX = ((1 << OTF_CFG_PEER_BITS) + (OTF_CFG_PEER_MIN - 1))
 except:
     pass
 
-# ./common/otf_decompressor/otf_compressor_config.h: 65
+# bluetooth_le_middleware/common/otf_decompressor/otf_compressor_config.h: 65
 try:
     OTF_CFG_OFFSET_MASK = ((1 << (OTF_CFG_WORD_WIDTH - OTF_CFG_PEER_BITS)) - 1)
 except:
     pass
 
-# ./common/otf_decompressor/otf_compressor_config.h: 66
+# bluetooth_le_middleware/common/otf_decompressor/otf_compressor_config.h: 66
 try:
     OTF_CFG_PATTERN_MASK_INIT = (1 << (OTF_CFG_BYTE_WIDTH - 1))
 except:
     pass
 
-# ./common/otf_decompressor/otf_compressor_config.h: 67
+# bluetooth_le_middleware/common/otf_decompressor/otf_compressor_config.h: 67
 try:
     OTF_CFG_PATTERN_MASK_LIMIT = (1 << OTF_CFG_BYTE_WIDTH)
 except:
     pass
 
-# ./common/otf_decompressor/otf_compressor_config.h: 68
+# bluetooth_le_middleware/common/otf_decompressor/otf_compressor_config.h: 68
 try:
     OTF_CFG_PATTERN_SHIFT_COUNT = (OTF_CFG_BYTE_WIDTH - OTF_CFG_PEER_BITS)
 except:
     pass
 
-# ./common/otf_decompressor/otf_compressor_config.h: 69
+# bluetooth_le_middleware/common/otf_decompressor/otf_compressor_config.h: 69
 try:
     OTF_CFG_HASH_WINDOW_SIZE = (1 << OTF_CFG_COMPRESSION_LEVEL)
 except:
     pass
 
-esl_lib_address_s = struct_esl_lib_address_s# ./common_host/esl_lib/esl_lib.h: 212
+esl_lib_address_s = struct_esl_lib_address_s# esl_lib/esl_lib.h: 212
 
-esl_lib_pawr_subevent_s = struct_esl_lib_pawr_subevent_s# ./common_host/esl_lib/esl_lib.h: 217
+esl_lib_pawr_subevent_s = struct_esl_lib_pawr_subevent_s# esl_lib/esl_lib.h: 217
 
-esl_lib_node_id_id_u = union_esl_lib_node_id_id_u# ./common_host/esl_lib/esl_lib.h: 222
+esl_lib_node_id_id_u = union_esl_lib_node_id_id_u# esl_lib/esl_lib.h: 222
 
-esl_lib_node_id_s = struct_esl_lib_node_id_s# ./common_host/esl_lib/esl_lib.h: 227
+esl_lib_node_id_s = struct_esl_lib_node_id_s# esl_lib/esl_lib.h: 227
 
-esl_lib_array_s = struct_esl_lib_array_s# ./common_host/esl_lib/esl_lib.h: 233
+esl_lib_array_s = struct_esl_lib_array_s# esl_lib/esl_lib.h: 233
 
-esl_lib_long_array_s = struct_esl_lib_long_array_s# ./common_host/esl_lib/esl_lib.h: 239
+esl_lib_long_array_s = struct_esl_lib_long_array_s# esl_lib/esl_lib.h: 239
 
-esl_lib_pawr_config_adv_interval_s = struct_esl_lib_pawr_config_adv_interval_s# ./common_host/esl_lib/esl_lib.h: 243
+esl_lib_pawr_config_adv_interval_s = struct_esl_lib_pawr_config_adv_interval_s# esl_lib/esl_lib.h: 243
 
-esl_lib_pawr_config_subevent_s = struct_esl_lib_pawr_config_subevent_s# ./common_host/esl_lib/esl_lib.h: 247
+esl_lib_pawr_config_subevent_s = struct_esl_lib_pawr_config_subevent_s# esl_lib/esl_lib.h: 247
 
-esl_lib_pawr_config_response_slot_s = struct_esl_lib_pawr_config_response_slot_s# ./common_host/esl_lib/esl_lib.h: 251
+esl_lib_pawr_config_response_slot_s = struct_esl_lib_pawr_config_response_slot_s# esl_lib/esl_lib.h: 251
 
-esl_lib_pawr_config_s = struct_esl_lib_pawr_config_s# ./common_host/esl_lib/esl_lib.h: 257
+esl_lib_pawr_config_s = struct_esl_lib_pawr_config_s# esl_lib/esl_lib.h: 257
 
-esl_lib_scan_parameters_s = struct_esl_lib_scan_parameters_s# ./common_host/esl_lib/esl_lib.h: 275
+esl_lib_scan_parameters_s = struct_esl_lib_scan_parameters_s# esl_lib/esl_lib.h: 275
 
-esl_lib_tlv_s = struct_esl_lib_tlv_s# ./common_host/esl_lib/esl_lib.h: 386
+esl_lib_tlv_s = struct_esl_lib_tlv_s# esl_lib/esl_lib.h: 386
 
-esl_lib_ots_features_s = struct_esl_lib_ots_features_s# ./common_host/esl_lib/esl_lib.h: 392
+esl_lib_ots_features_s = struct_esl_lib_ots_features_s# esl_lib/esl_lib.h: 392
 
-esl_lib_gattdb_handles_services_s = struct_esl_lib_gattdb_handles_services_s# ./common_host/esl_lib/esl_lib.h: 419
+esl_lib_gattdb_handles_services_s = struct_esl_lib_gattdb_handles_services_s# esl_lib/esl_lib.h: 419
 
-esl_lib_gattdb_handles_s = struct_esl_lib_gattdb_handles_s# ./common_host/esl_lib/esl_lib.h: 427
+esl_lib_gattdb_handles_s = struct_esl_lib_gattdb_handles_s# esl_lib/esl_lib.h: 427
 
-esl_lib_evt_system_boot_s = struct_esl_lib_evt_system_boot_s# ./common_host/esl_lib/esl_lib.h: 437
+esl_lib_evt_system_boot_s = struct_esl_lib_evt_system_boot_s# esl_lib/esl_lib.h: 437
 
-esl_lib_evt_connection_mode_s = struct_esl_lib_evt_connection_mode_s# ./common_host/esl_lib/esl_lib.h: 445
+esl_lib_evt_connection_mode_s = struct_esl_lib_evt_connection_mode_s# esl_lib/esl_lib.h: 445
 
-esl_lib_evt_scan_status_s = struct_esl_lib_evt_scan_status_s# ./common_host/esl_lib/esl_lib.h: 452
+esl_lib_evt_scan_status_s = struct_esl_lib_evt_scan_status_s# esl_lib/esl_lib.h: 452
 
-esl_lib_evt_tag_found_s = struct_esl_lib_evt_tag_found_s# ./common_host/esl_lib/esl_lib.h: 458
+esl_lib_evt_tag_found_s = struct_esl_lib_evt_tag_found_s# esl_lib/esl_lib.h: 458
 
-esl_lib_evt_tag_info_s = struct_esl_lib_evt_tag_info_s# ./common_host/esl_lib/esl_lib.h: 464
+esl_lib_evt_tag_info_s = struct_esl_lib_evt_tag_info_s# esl_lib/esl_lib.h: 464
 
-esl_lib_evt_tag_config_response_s = struct_esl_lib_evt_tag_config_response_s# ./common_host/esl_lib/esl_lib.h: 471
+esl_lib_evt_tag_config_response_s = struct_esl_lib_evt_tag_config_response_s# esl_lib/esl_lib.h: 471
 
-esl_lib_evt_control_point_response_s = struct_esl_lib_evt_control_point_response_s# ./common_host/esl_lib/esl_lib.h: 478
+esl_lib_evt_control_point_response_s = struct_esl_lib_evt_control_point_response_s# esl_lib/esl_lib.h: 478
 
-esl_lib_evt_control_point_notification_s = struct_esl_lib_evt_control_point_notification_s# ./common_host/esl_lib/esl_lib.h: 484
+esl_lib_evt_control_point_notification_s = struct_esl_lib_evt_control_point_notification_s# esl_lib/esl_lib.h: 484
 
-esl_lib_evt_connection_retry_s = struct_esl_lib_evt_connection_retry_s# ./common_host/esl_lib/esl_lib.h: 493
+esl_lib_evt_connection_retry_s = struct_esl_lib_evt_connection_retry_s# esl_lib/esl_lib.h: 493
 
-esl_lib_evt_connection_closed_s = struct_esl_lib_evt_connection_closed_s# ./common_host/esl_lib/esl_lib.h: 500
+esl_lib_evt_connection_closed_s = struct_esl_lib_evt_connection_closed_s# esl_lib/esl_lib.h: 500
 
-esl_lib_evt_connection_opened_s = struct_esl_lib_evt_connection_opened_s# ./common_host/esl_lib/esl_lib.h: 508
+esl_lib_evt_connection_opened_s = struct_esl_lib_evt_connection_opened_s# esl_lib/esl_lib.h: 508
 
-esl_lib_evt_bonding_data_s = struct_esl_lib_evt_bonding_data_s# ./common_host/esl_lib/esl_lib.h: 515
+esl_lib_evt_bonding_data_s = struct_esl_lib_evt_bonding_data_s# esl_lib/esl_lib.h: 515
 
-esl_lib_evt_bonding_finished_s = struct_esl_lib_evt_bonding_finished_s# ./common_host/esl_lib/esl_lib.h: 521
+esl_lib_evt_bonding_finished_s = struct_esl_lib_evt_bonding_finished_s# esl_lib/esl_lib.h: 521
 
-esl_lib_evt_pawr_status_s = struct_esl_lib_evt_pawr_status_s# ./common_host/esl_lib/esl_lib.h: 529
+esl_lib_evt_pawr_status_s = struct_esl_lib_evt_pawr_status_s# esl_lib/esl_lib.h: 529
 
-esl_lib_evt_image_transfer_finished_s = struct_esl_lib_evt_image_transfer_finished_s# ./common_host/esl_lib/esl_lib.h: 536
+esl_lib_evt_image_transfer_finished_s = struct_esl_lib_evt_image_transfer_finished_s# esl_lib/esl_lib.h: 536
 
-esl_lib_evt_image_type_s = struct_esl_lib_evt_image_type_s# ./common_host/esl_lib/esl_lib.h: 543
+esl_lib_evt_image_type_s = struct_esl_lib_evt_image_type_s# esl_lib/esl_lib.h: 543
 
-esl_lib_evt_pawr_response_s = struct_esl_lib_evt_pawr_response_s# ./common_host/esl_lib/esl_lib.h: 551
+esl_lib_evt_pawr_response_s = struct_esl_lib_evt_pawr_response_s# esl_lib/esl_lib.h: 551
 
-esl_lib_evt_pawr_data_request_s = struct_esl_lib_evt_pawr_data_request_s# ./common_host/esl_lib/esl_lib.h: 558
+esl_lib_evt_pawr_data_request_s = struct_esl_lib_evt_pawr_data_request_s# esl_lib/esl_lib.h: 558
 
-esl_lib_evt_ots_return_type_s = struct_esl_lib_evt_ots_return_type_s# ./common_host/esl_lib/esl_lib.h: 566
+esl_lib_evt_ots_return_type_s = struct_esl_lib_evt_ots_return_type_s# esl_lib/esl_lib.h: 566
 
-esl_lib_status_data_u = union_esl_lib_status_data_u# ./common_host/esl_lib/esl_lib.h: 572
+esl_lib_status_data_u = union_esl_lib_status_data_u# esl_lib/esl_lib.h: 572
 
-esl_lib_evt_error_s = struct_esl_lib_evt_error_s# ./common_host/esl_lib/esl_lib.h: 580
+esl_lib_evt_error_s = struct_esl_lib_evt_error_s# esl_lib/esl_lib.h: 580
 
-esl_lib_evt_data_u = union_esl_lib_evt_data_u# ./common_host/esl_lib/esl_lib.h: 604
+esl_lib_evt_data_u = union_esl_lib_evt_data_u# esl_lib/esl_lib.h: 604
 
 # No inserted files
 

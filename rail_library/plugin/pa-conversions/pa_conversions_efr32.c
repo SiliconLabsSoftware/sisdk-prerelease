@@ -890,6 +890,66 @@ sl_rail_status_t sl_rail_util_pa_post_init(sl_rail_handle_t rail_handle,
   return (sl_rail_status_t)status;
 }
 
+sl_rail_status_t sli_rail_util_pa_get_mode_limits(RAIL_TxPowerMode_t mode,
+                                                  sl_rail_tx_power_t *p_min_ddbm,
+                                                  sl_rail_tx_power_t *p_max_ddbm,
+                                                  sl_rail_tx_power_t *p_step_ddbm)
+{
+  if ((mode == RAIL_TX_POWER_MODE_NONE)
+      || (sli_rail_supportedPaIndices[mode] >= RAIL_NUM_PA)) {
+    return SL_RAIL_STATUS_INVALID_PARAMETER;
+  }
+  const RAIL_PaDescriptor_t *modeInfo = &powerCurvesState.curves[sli_rail_supportedPaIndices[mode]];
+  sl_rail_tx_power_t min, max, step;
+#if RAIL_SUPPORTS_DBM_POWERSETTING_MAPPING_TABLE
+  if (modeInfo->algorithm == RAIL_PA_ALGORITHM_DBM_POWERSETTING_MAPPING_TABLE) {
+    min = modeInfo->minPowerDbm;
+    max = modeInfo->maxPowerDbm;
+    step = (sl_rail_tx_power_t) modeInfo->step;
+  } else
+#endif
+  if (modeInfo->algorithm == RAIL_PA_ALGORITHM_MAPPING_TABLE) {
+    if (modeInfo->conversion.mappingTable == NULL) {
+      return SL_RAIL_STATUS_INVALID_CALL;
+    }
+    // modeinfo->segments is often annoying 0 rather than # elements in table
+    // but # elements should always be modeInfo->max - modeInfo->min + 1.
+    min = modeInfo->conversion.mappingTable[0];
+    max = modeInfo->conversion.mappingTable[modeInfo->max - modeInfo->min];
+    step = SL_MIN(RAIL_TX_POWER_CURVE_DEFAULT_INCREMENT, max - min); // Best guess
+  } else
+  if (modeInfo->algorithm == RAIL_PA_ALGORITHM_PIECEWISE_LINEAR) {
+    // Use code from RAIL_GetTxPowerCurve() for min and max and default step
+    // unless (per RAIL_GetTxPowerCurveLimits()) the 1st curve element's
+    // maxPowerLevel is 'INVALID' which flags that element as overriding the
+    // curve's max and step.
+    RAIL_TxPowerCurveAlt_t const *curve = modeInfo->conversion.powerCurve;
+    if (curve == NULL) {
+      return SL_RAIL_STATUS_INVALID_CALL;
+    }
+    min = curve->minPower;
+    if (curve->powerParams[0].maxPowerLevel == RAIL_TX_POWER_LEVEL_INVALID) {
+      max = (sl_rail_tx_power_t) curve->powerParams[0].slope;
+      step = (sl_rail_tx_power_t) curve->powerParams[0].intercept;
+    } else {
+      max = curve->maxPower;
+      step = SL_MIN(RAIL_TX_POWER_CURVE_DEFAULT_INCREMENT, max - min); // Best guess
+    }
+  } else {
+    return SL_RAIL_STATUS_INVALID_PARAMETER;
+  }
+  if (p_min_ddbm != NULL) {
+    *p_min_ddbm = min;
+  }
+  if (p_max_ddbm != NULL) {
+    *p_max_ddbm = max;
+  }
+  if (p_step_ddbm != NULL) {
+    *p_step_ddbm = step;
+  }
+  return SL_RAIL_STATUS_NO_ERROR;
+}
+
 sl_rail_status_t sl_rail_util_pa_get_tx_power_limits(sl_rail_handle_t rail_handle,
                                                      sl_rail_tx_pa_mode_t pa_mode,
                                                      sl_rail_tx_power_t *p_min_ddbm,
@@ -897,38 +957,19 @@ sl_rail_status_t sl_rail_util_pa_get_tx_power_limits(sl_rail_handle_t rail_handl
                                                      sl_rail_tx_power_t *p_step_ddbm)
 {
   // Map pa_mode to a RAIL_TxPowerMode_t
-  RAIL_TxPowerMode_t mode = map_pa_mode_to_power_mode(rail_handle, pa_mode,
-                                                      RAIL_TX_POWER_MIN);
-  if (mode == RAIL_TX_POWER_MODE_NONE) {
-    return SL_RAIL_STATUS_INVALID_PARAMETER;
-  }
-  const RAIL_TxPowerCurves_t *p_curve = RAIL_GetTxPowerCurve(mode);
-  if (p_curve == NULL) {
-    return SL_RAIL_STATUS_INVALID_CALL;
-  }
-  if (p_step_ddbm != NULL) {
-    RAIL_TxPower_t dummyMax;
-    RAIL_Status_t status = RAIL_GetTxPowerCurveLimits(rail_handle, mode,
-                                                      &dummyMax, p_step_ddbm);
-    if (status != RAIL_STATUS_NO_ERROR) {
-      return (sl_rail_status_t)status;
+  RAIL_TxPowerMode_t min_mode = map_pa_mode_to_power_mode(rail_handle, pa_mode,
+                                                          RAIL_TX_POWER_MIN);
+  sl_rail_status_t status = sli_rail_util_pa_get_mode_limits(min_mode, p_min_ddbm, p_max_ddbm, p_step_ddbm);
+  if ((status == SL_RAIL_STATUS_NO_ERROR)
+      && (p_max_ddbm != NULL)
+      && RAIL_IsPaAutoModeEnabled(rail_handle)) {
+    RAIL_TxPowerMode_t max_mode = map_pa_mode_to_power_mode(rail_handle, pa_mode,
+                                                            RAIL_TX_POWER_MAX);
+    if (max_mode != min_mode) {
+      status = sli_rail_util_pa_get_mode_limits(max_mode, NULL, p_max_ddbm, NULL);
     }
   }
-  if (p_min_ddbm != NULL) {
-    *p_min_ddbm = p_curve->minPower;
-  }
-  if (p_max_ddbm != NULL) {
-    if (RAIL_IsPaAutoModeEnabled(rail_handle)) {
-      mode = map_pa_mode_to_power_mode(rail_handle, pa_mode,
-                                       RAIL_TX_POWER_MAX);
-      if (mode == RAIL_TX_POWER_MODE_NONE) {
-        return SL_RAIL_STATUS_INVALID_PARAMETER;
-      }
-      p_curve = RAIL_GetTxPowerCurve(mode);
-    }
-    *p_max_ddbm = p_curve->maxPower;
-  }
-  return SL_RAIL_STATUS_NO_ERROR;
+  return status;
 }
 
 sl_rail_status_t sl_rail_util_pa_convert_power_to_actual(sl_rail_handle_t rail_handle,

@@ -157,6 +157,11 @@ configuration:
     value: 9600 # In EM2 the eusart is working only with 9600 baud
   - name: SL_IOSTREAM_EUSART_VCOM_ENABLE_HIGH_FREQUENCY # Disable high frequency mode for EUSART to work in EM2
     value: 0
+  # BRD4204A uses PORTD for EUSART that cannot work in EM2, so we use sl_power_manager to keep the device awake in EM1
+  # when Reset button is used or when sleeping is disabled through CLI command.
+  - name: ZW_CLI_SLEEPING_WAKEUP_EM1
+    value: 1
+    condition: [brd4204a]
 define:
   - name: APP_PROPERTIES_CONFIG_FILE
     value: <application_properties_config.h>

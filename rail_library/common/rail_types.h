@@ -6217,9 +6217,11 @@ typedef struct RAIL_RxPacketDetails {
    */
   RAIL_PacketTimeStamp_t timeReceived;
   /**
-   * Indicates whether the CRC passed or failed for the received packet.
+   * Indicates whether the received packet successfully passed CRC checks
+   * or failed (not just CRC failure).
    * It is true for \ref RAIL_RX_PACKET_READY_SUCCESS packets and false
-   * for all others.
+   * for all other \ref RAIL_RxPacketStatus_t values reported in \ref
+   * RAIL_RxPacketInfo_t::packetStatus.
    *
    * It is always available.
    *
@@ -6386,7 +6388,7 @@ typedef struct RAIL_PrsLnaBypassConfig {
    * The table below shows EFR32XG25 thresholds corresponding to received power
    * level without the LNA gain.
    *
-   * |  Level dB  | FSK_1a | FSK_1b | FSK_2a | FSK_2b | FSK_3 | FSK_4a | FSK_4b | FSK_5 | OFDM1 | OFDM2 | OFDM3 | OFDM4 |
+   * |  Level dBm | FSK_1a | FSK_1b | FSK_2a | FSK_2b | FSK_3 | FSK_4a | FSK_4b | FSK_5 | OFDM1 | OFDM2 | OFDM3 | OFDM4 |
    * |------------|--------|--------|--------|--------|-------|--------|--------|-------|-------|-------|-------|-------|
    * |   __-25__  |        |        |        |        |       |        |        |       |   9   |   9   |   9   |   10  |
    * |   __-20__  |        |    7   |    7   |    7   |   8   |    8   |    7   |   8   |   11  |   12  |   12  |   12  |
@@ -6396,18 +6398,21 @@ typedef struct RAIL_PrsLnaBypassConfig {
    * |    __0__   |    14  |    17  |    18  |    17  |   17  |    18  |    18  |   18  |       |       |       |       |
    *
    * For example, with OFDM1 PHY, setting the threshold to 11 will turn on the
-   * bypass when the power level at EFR32XG25 input is greater than -20 dB.
+   * bypass when the power level at EFR32XG25 input is greater than -20 dBm.
    *
    * @deprecated RAIL 2.x synonym of \ref sl_rail_prs_lna_bypass_config_t::threshold.
    */
   uint8_t threshold;
   /**
-   * Compensation in dBm applied by RAIL to RSSI during LNA bypass. The RSSI
+   * Compensation in dB applied by RAIL to RSSI during LNA bypass. The RSSI
    * offset set using \ref RAIL_SetRssiOffset() must corespond to the case
    * with FEM LNA not bypassed. deltaRssiDbm is typically the FEM LNA gain
    * value.
    *
-   * @deprecated RAIL 2.x synonym of \ref sl_rail_prs_lna_bypass_config_t::delta_rssi_dbm.
+   * @note This field's units are dB not dBm; it was misnamed and retains
+   *   Dbm suffix for backward compatibility.
+   *
+   * @deprecated RAIL 2.x synonym of \ref sl_rail_prs_lna_bypass_config_t::delta_rssi_db.
    */
   uint8_t deltaRssiDbm;
   /**

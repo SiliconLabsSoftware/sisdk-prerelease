@@ -19,7 +19,6 @@
 //                                   Includes
 // -----------------------------------------------------------------------------
 #include <stdint.h>
-#include "em_chip.h"
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif

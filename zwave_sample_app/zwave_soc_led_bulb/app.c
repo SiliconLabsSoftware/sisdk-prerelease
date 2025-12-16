@@ -28,6 +28,10 @@
 #include "sl_component_catalog.h"
 #endif
 
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#include "sl_power_manager.h"
+#endif
+
 #ifdef SL_CATALOG_ZW_CLI_COMMON_PRESENT
 #include "zw_cli_common.h"
 #endif
@@ -90,6 +94,12 @@ static void ApplicationTask(SApplicationHandles* pAppHandles)
   ZAF_PrintAppInfo();
 
   app_hw_init();
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  // Add EM1 requirement to prevent application from entering EM2 sleep mode
+  // The Timer peripheral used by the pwm or simple_rgb_pwm_led module is only available in EM1.
+  sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
+#endif
 
   /* Enter SmartStart*/
   /* Protocol will commence SmartStart only if the node is NOT already included in the network */

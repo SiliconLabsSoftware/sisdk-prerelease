@@ -1,7 +1,7 @@
 project_name: btmesh_host_provisioner
 package: bluetooth_mesh_app
 label: Bluetooth Mesh - Host Provisioner
-description: >
+description: >-
   Demonstrates a Bluetooth Mesh host provisioner application. This application can
   provision devices into a Bluetooth Mesh network, configure them, and manage network
   operations. It supports optional features like Certificate-Based Provisioning (CBP),

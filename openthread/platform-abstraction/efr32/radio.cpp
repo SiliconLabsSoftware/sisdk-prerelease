@@ -34,7 +34,7 @@
 
 #include "radio_channel_switching.h"
 #include "radio_csl.h"
-#include "radio_energy_scan.h"
+#include "radio_energy_scan.hpp"
 #include "radio_events.h"
 #include "radio_instance.h"
 #include "radio_interface.h"
@@ -1839,11 +1839,9 @@ int8_t otPlatRadioGetRssi(otInstance *aInstance)
 
 #if (FAST_CHANNEL_SWITCHING_SUPPORT && OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE)
     channel = sli_ot_radio_channel_switching_get_channel(aInstance);
-#else
-    OT_UNUSED_VARIABLE(aInstance);
 #endif
 
-    sli_ot_energy_scan(channel, SL_OPENTHREAD_RSSI_AVERAGING_TIME, &rssi);
+    sli_ot_energy_scan(aInstance, channel, SL_OPENTHREAD_RSSI_AVERAGING_TIME, &rssi);
 
 exit:
     return rssi;

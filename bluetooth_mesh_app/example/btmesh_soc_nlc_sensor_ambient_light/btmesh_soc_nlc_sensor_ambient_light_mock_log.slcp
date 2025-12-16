@@ -1,7 +1,7 @@
 project_name: btmesh_soc_nlc_sensor_ambient_light
 package: bluetooth_mesh_app
 label: Bluetooth Mesh - NLC Ambient Light Sensor (Mock)
-description: >
+description: >-
   An out-of-the-box Software Demo where the device acts as an ambient light
   sensor in a Networked Lighting Control (NLC) system.
   The device simulates ambient light measurements and sends these to the network.

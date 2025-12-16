@@ -1,7 +1,7 @@
 project_name: btmesh_soc_dfu_target_lpn_low_power
 package: bluetooth_mesh_app
 label: Bluetooth Mesh - SoC DFU Target
-description: >
+description: >-
   Demonstrates the Firmware Update Target role defined in Mesh Device Firmware
   Update Model specification. Target node receives firmware image from a
   Standalone Updater or Distributor node and applies the firmware image.

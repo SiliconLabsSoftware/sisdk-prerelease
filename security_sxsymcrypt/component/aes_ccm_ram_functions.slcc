@@ -27,4 +27,8 @@ template_contribution:
   value:
     component: aes_ccm
     class: security
+
+metadata:
+  sbom:
+    license: Zlib
 root_path: security_sxsymcrypt

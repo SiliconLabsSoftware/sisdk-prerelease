@@ -42,19 +42,9 @@
 #include <openthread/instance.h>
 #include <openthread/platform/radio.h>
 
+#include "radio_instance.h"
 #include "sl_rail_types.h"
 #include "sl_status.h"
-
-// Energy scan parameters structure (needed for external API compatibility)
-typedef struct EnergyScanParams
-{
-    uint8_t  scanChannel;  ///< Energy scan channel
-    uint16_t scanDuration; ///< Energy scan duration
-} EnergyScanParams;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /**
  * Initialize the energy scan module.
@@ -63,14 +53,24 @@ void sli_ot_energy_scan_init(void);
 
 /**
  * Deinitialize the energy scan module.
+ *
+ * Cancels ongoing scans if any and cleans up resources.
  */
 void sli_ot_energy_scan_deinit(void);
+
+/**
+ * Deinitialize energy scan for a specific instance.
+ *
+ * @param[in] aInstance  The OpenThread instance.
+ */
+void sli_ot_energy_scan_deinit_instance(otInstance *aInstance);
 
 /**
  * Perform a synchronous energy scan on the specified channel.
  * This function blocks until the scan is complete and returns the result.
  * The scan will run for exactly the specified averaging time.
  *
+ * @param[in] aInstance       The OpenThread instance.
  * @param[in] aChannel        The channel to scan.
  * @param[in] aAveragingTimeUs The averaging time in microseconds.
  * @param[out] aResult        Pointer to store the energy scan result in dBm.
@@ -80,7 +80,10 @@ void sli_ot_energy_scan_deinit(void);
  * @retval SL_STATUS_FAIL            Failed to start or complete energy scan.
  * @retval SL_STATUS_NULL_POINTER    aResult is nullptr.
  */
-sl_status_t sli_ot_energy_scan(uint16_t aChannel, sl_rail_time_t aAveragingTimeUs, int8_t *aResult);
+sl_status_t sli_ot_energy_scan(otInstance    *aInstance,
+                               uint16_t       aChannel,
+                               sl_rail_time_t aAveragingTimeUs,
+                               int8_t        *aResult);
 
 /**
  * Start an asynchronous energy scan on the specified channel.
@@ -129,8 +132,25 @@ bool sli_ot_energy_scan_is_blocking_receive(otInstance *aInstance);
  */
 otError sli_ot_energy_scan_status_to_ot_error(sl_status_t status);
 
-#ifdef __cplusplus
-}
+class EnergyScan;
+
+// Energy scan parameters structure (needed for external API compatibility)
+typedef struct EnergyScanParams
+{
+    uint8_t  scanChannel;  ///< Energy scan channel
+    uint16_t scanDuration; ///< Energy scan duration
+} EnergyScanParams;
+
+// Testing helper functions
+#ifdef TESTING
+namespace Testing {
+namespace Radio {
+namespace EnergyScanTest {
+void        AdvanceToTimerEvent(EnergyScan *scan);
+EnergyScan *GetScanForInstance(otInstance *instance);
+} // namespace EnergyScanTest
+} // namespace Radio
+} // namespace Testing
 #endif
 
 #endif // RADIO_ENERGY_SCAN_H

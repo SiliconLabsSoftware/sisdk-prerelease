@@ -1,7 +1,7 @@
 project_name: btmesh_soc_sensor_thermometer_freertos
 package: bluetooth_mesh_app
 label: Bluetooth Mesh - SoC Sensor Thermometer FreeRTOS
-description: >
+description: >-
   This example demonstrates the Bluetooth Mesh Sensor Server Model and Sensor
   Setup Server Model. If available, it measures CPU temperature and uses that
   data as temperature reading, otherwise it sends mocked temperature data to

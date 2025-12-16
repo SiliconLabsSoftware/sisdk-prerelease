@@ -48,7 +48,6 @@
 #ifdef _SILICON_LABS_32B_SERIES_2
 #include "em_emu.h"
 #include "em_prs.h"
-#include "em_chip.h"
 #else
 #include "sl_hal_emu.h"
 #include "sl_hal_prs.h"

@@ -215,7 +215,7 @@ void sl_fem_util_init(void)
   sl_rail_prs_lna_bypass_config_t PrsLnaBypassConfig = {
     .timeout_us = SL_FEM_UTIL_AUTO_PRS_LNA_BYPASS_TIMEOUT_US,
     .threshold = SL_FEM_UTIL_AUTO_PRS_LNA_BYPASS_THRESHOLD,
-    .delta_rssi_dbm = SL_FEM_UTIL_AUTO_PRS_LNA_BYPASS_DELTA_RSSI_DBM,
+    .delta_rssi_db = SL_FEM_UTIL_AUTO_PRS_LNA_BYPASS_DELTA_RSSI_DBM,
     .prs_channel = SL_FEM_UTIL_AUTO_PRS_LNA_BYPASS_CHANNEL,
     .polarity = SL_FEM_UTIL_AUTO_PRS_LNA_BYPASS_POLARITY
   };

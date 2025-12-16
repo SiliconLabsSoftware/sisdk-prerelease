@@ -39,6 +39,7 @@ source:
 - path: src/sx_primitives.c
 - path: src/sx_rng.c
 - path: src/sx_trng.c
+- path: src/platform/silicon_labs/sli_libcryptosoc.c
 
 include:
 - path: include
@@ -74,12 +75,18 @@ include:
   - path: sx_blk_cipher.h
   - path: sxregs.h
 
+- path: src/platform/silicon_labs
+  file_list:
+  - path: sli_libcryptosoc.h
+
 other_file:
-- path: LICENSE-Secure-IC.txt
+- path: REUSE.toml
+- path: LICENSES/Zlib.txt
+- path: LICENSES/LicenseRef-SecureIC.txt
 
 metadata:
   sbom:
-    license: LicenseRef-SecureIC
+    license: Zlib AND LicenseRef-SecureIC
     upstream:
       name: Secure-IC Crypto Offload C Library
       version: v20210503_s29p0p0

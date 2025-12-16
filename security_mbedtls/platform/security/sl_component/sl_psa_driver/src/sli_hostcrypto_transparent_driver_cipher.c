@@ -41,7 +41,6 @@
 #include "sl_psa_values.h"
 
 #include "sli_sxsymcrypt.h"
-#include "hw.h"
 #include "sxsymcrypt/aes.h"
 #include "sxsymcrypt/blkcipher.h"
 #include "sxsymcrypt/keyref.h"
@@ -1318,7 +1317,7 @@ psa_status_t sli_hostcrypto_transparent_cipher_finish(
         psa_status = PSA_ERROR_INVALID_ARGUMENT;
       } else {
         if (operation->cipher.dma.regs) {
-          sx_cmdma_release_hw(operation->cipher.dma.regs);
+          sli_cmdma_release_hw(operation->cipher.dma.regs);
           operation->cipher.dma.regs = NULL;
         }
         psa_status = PSA_SUCCESS;

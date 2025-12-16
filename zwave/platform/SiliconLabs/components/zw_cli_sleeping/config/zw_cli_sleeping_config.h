@@ -24,6 +24,11 @@
 // <d> 10
 #define ZW_CLI_SLEEPING_WAKEUP_TIME_AFTER_RESET 10
 
+// <e ZW_CLI_SLEEPING_WAKEUP_EM1> Add EM1 lock during wakeup time<f.d>
+// <i> If enabled, the component will add an EM1 lock during wakeup time and when sleeping is disabled through CLI command.
+// <d> 0
+#define ZW_CLI_SLEEPING_WAKEUP_EM1 0
+
 // </h>
 
 // <<< end of configuration section >>>

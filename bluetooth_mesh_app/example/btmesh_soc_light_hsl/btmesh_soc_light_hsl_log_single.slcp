@@ -1,7 +1,7 @@
 project_name: btmesh_soc_light_hsl
 package: bluetooth_mesh_app
 label: Bluetooth Mesh - SoC Light HSL
-description: >
+description: >-
   An out-of-the-box software demo where the LEDs of the mainboard can be
   switched on and off, and their lighting intensity, hue, and saturation
   can be set. The example also tries to establish friendship as a Friend node.

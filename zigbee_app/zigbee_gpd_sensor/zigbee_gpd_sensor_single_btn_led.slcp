@@ -206,8 +206,8 @@ filter:
     value: [Advanced]
 
 tag:
-  - hardware:component:led:1
-  - hardware:component:button:1
+  - hwfilter:board:simple_button:btn0
+  - hwfilter:board:simple_led:led0
   - hardware:component:pti
   - hwfilter:device:device_supports_zigbee
   - hwfilter:!device:device_is_module

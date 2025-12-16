@@ -1,7 +1,7 @@
 project_name: btmesh_soc_empty_cbp
 package: bluetooth_mesh_app
 label: Bluetooth Mesh - SoC Empty with Certificate-Based Provisioning support
-description: >
+description: >-
   Demonstrates the bare minimum needed for a Bluetooth Mesh C application that
   allows Certificate-Based Provisioning (CBP). The application starts Unprovisioned
   Device Beaconing after boot waiting to be provisioned to a Mesh Network.

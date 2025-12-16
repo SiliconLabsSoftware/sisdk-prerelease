@@ -74,6 +74,7 @@ tag:
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_series_2
   - hwfilter:+device:efr32mr21a020f512im32
+  - hwfilter:!board:hardware:vcom:no:rts:cts
 
 ui_hints:
   highlight:

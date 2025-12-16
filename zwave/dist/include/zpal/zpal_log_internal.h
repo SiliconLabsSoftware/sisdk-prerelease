@@ -220,6 +220,13 @@
 #define ZW_LOG_ZAF_TSE_ENABLED 0
 #endif
 
+// Helper macro to determine if logging of component zw_shutdown_manager is enabled
+#if defined(ZW_LOG_ENABLE_SHUTDOWN_MANAGER) && (ZW_LOG_ENABLE_SHUTDOWN_MANAGER != 0)
+#define ZW_LOG_SHUTDOWN_MANAGER_ENABLED 1
+#else
+#define ZW_LOG_SHUTDOWN_MANAGER_ENABLED 0
+#endif
+
 #define ZPAL_LOG_COMPILE_CONDITIONALLY(COMPONENT, LEVEL, PFORMAT, ...)                                 \
   do {                                                                                                 \
     if (ZPAL_LOG_FILTER_LEVEL(LEVEL)                                                                   \
@@ -250,6 +257,7 @@
           || ((COMPONENT == ZPAL_LOG_ZAF_NVM) && (ZW_LOG_ZAF_NVM_ENABLED))                             \
           || ((COMPONENT == ZPAL_LOG_ZAF_TRANSPORT) && (ZW_LOG_ZAF_TRANSPORT_ENABLED))                 \
           || ((COMPONENT == ZPAL_LOG_ZAF_TSE) && (ZW_LOG_ZAF_TSE_ENABLED))                             \
+          || ((COMPONENT == ZPAL_LOG_SHUTDOWN_MANAGER) && (ZW_LOG_SHUTDOWN_MANAGER_ENABLED))           \
           )) {                                                                                         \
       zpal_log(COMPONENT, LEVEL, PFORMAT, ##__VA_ARGS__);                                              \
     }                                                                                                  \
