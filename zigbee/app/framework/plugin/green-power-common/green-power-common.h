@@ -25,7 +25,6 @@
  *
  * A component that provides common functionalities between client
  * and server sides of the Green Power components.
- *
  */
 
 /**
@@ -66,7 +65,6 @@
 
 #define SL_ZIGBEE_AF_GP_PAIRING_CONFIGURATION_ACTIONS_MASK          (0x0F)
 #define SL_ZIGBEE_AF_GP_PAIRING_CONFIGURATION_OPTION_MASK           (0x07FF)
-#define SL_ZIGBEE_AF_GP_PAIRING_CONFIGURATION_OPTION_MASK           (0x07FF)
 
 #define SL_ZIGBEE_AF_GP_APPLICATION_INFORMATION_CLUSTER_LIST_NUMBER_OF_SERVER_CLUSTER_MASK (0x0F)
 #define SL_ZIGBEE_AF_GP_APPLICATION_INFORMATION_CLUSTER_LIST_NUMBER_OF_CLIENT_CLUSTER_MASK (0xF0)
@@ -88,78 +86,84 @@
 
 #define GP_DEVICE_ANNOUNCE_SPOOF_MSG_SIZE 12
 
-// Reserved GPD addresses
+/** @brief If GPD source ID is reserved */
 #define IS_RESERVED_GPD_SRC_ID(srcId)       (((srcId) >=  GP_GPD_SRC_ID_RESERVED_FFFFFF9) \
                                              && ((srcId) <= GP_GPD_SRC_ID_RESERVED_FFFFFFE))
-
-// If the GPD Src Id is 0
+/** @brief If GPD source ID is 0 */
 #define IS_GPD_SRC_ID_ZERO(appId, srcId) (((appId) == SL_ZIGBEE_GP_APPLICATION_SOURCE_ID) \
                                           && ((srcId) == GP_GPD_SRC_ID_RESERVED_0))
 
-// TT, Option byte : additional information block present or not
+/** @brief Translation Table command - Options field: "Additional information block present" flag */
 #define sl_zigbee_af_green_power_t_t_get_additional_info_block_present(options) ((uint8_t) (options & 0x08))
-// TT update cmd, Option byte :
+/** @brief Translation Table Update command - Options field: "Additional information block present" flag */
 #define sl_zigbee_af_green_power_t_t_update_get_additional_info_block_present(options) ((uint16_t) (options & 0x0100))
-// Pairing config cmd, Option byte :
+/** @brief Pairing Configuration command - Options field: "Application information present" flag */
 #define sl_zigbee_af_green_power_pairing_config_get_application_info_present(options) ((uint16_t) (options & 0x0400))
+/** @brief Pairing command - Options field: "Communication Mode" value */
 #define sl_zigbee_af_green_power_pairing_options_get_comm_mode(options) (((options) & SL_ZIGBEE_AF_GP_PAIRING_OPTION_COMMUNICATION_MODE) >> 5)
+/** @brief Pairing command - Options field: "Add Sink" value */
 #define sl_zigbee_af_green_power_pairing_options_get_add_sink(options) (((options) & SL_ZIGBEE_AF_GP_PAIRING_OPTION_ADD_SINK) >> 3)
+/** @brief Any command - Options field: "Application ID" value */
 #define sl_zigbee_af_green_power_get_application_id(options) ((sl_zigbee_gp_application_id_t) ((options) & 0x07))
+
+/** @brief Proxy table entry - Sequence number capability */
 #define sl_zigbee_af_green_power_gpd_seq_num_cap(entry)      ((entry->options >> 8) & 0x01)
+/** @brief Proxy table entry - Security level */
 #define sl_zigbee_af_green_power_security_level(entry)     ((entry->options >> 9) & 0x03)
+
 // If the value of this sub-field is 0b1, then the GPD is not expected to change
 // its position during its operation in the network.
+/** @brief If GPD has a fixed location during operation */
 #define sl_zigbee_af_green_power_fixed_during_operation(options) ((((options) & GP_PAIRING_OPTIONS_GPD_FIXED) >> SL_ZIGBEE_AF_GP_PAIRING_OPTION_GPD_FIXED_OFFSET) & 0x01)
+/** @brief If GPD does not have a fixed location during operation */
 #define sl_zigbee_af_green_power_mobile_cap(options)          (!((((options) & GP_PAIRING_OPTIONS_GPD_FIXED) >> SL_ZIGBEE_AF_GP_PAIRING_OPTION_GPD_FIXED_OFFSET) & 0x01))
+/** @brief If GPD has a fixed location during operation */
 #define sl_zigbee_af_green_power_portable_cap(options)     ((((options) & GP_PAIRING_OPTIONS_GPD_FIXED) >> 7) & 0x01)
+/** @brief Any command - Options field: "Security key type" value */
 #define sl_zigbee_af_green_power_security_key_type(options) ((((options) & GP_PAIRING_OPTIONS_SECURITY_KEY_TYPE) >> 11) & 0x07)
+
 #define sl_zigbee_af_green_power_check_return_of_put_data_in_response(ret) \
   ({  if ((ret) == NULL) {                                                 \
         return 0;                                                          \
       }                                                                    \
    })                                                                      \
-/** @brief as the proxy table response status present in enum.h, this is for the sink
- *
- */
+
+/** @brief Green Power link quality */
 typedef enum {
-  SL_ZIGBEE_ZCL_GP_GPD_GPP_LINK_QUALITY_POOR       = 0x00,
-  SL_ZIGBEE_ZCL_GP_GPD_GPP_LINK_QUALITY_MODERATE   = 0x01,
-  SL_ZIGBEE_ZCL_GP_GPD_GPP_LINK_QUALITY_HIGH       = 0x02,
-  SL_ZIGBEE_ZCL_GP_GPD_GPP_LINK_QUALITY_EXCELLENT  = 0x03,
+  SL_ZIGBEE_ZCL_GP_GPD_GPP_LINK_QUALITY_POOR       = 0x00, /**< Poor link quality */
+  SL_ZIGBEE_ZCL_GP_GPD_GPP_LINK_QUALITY_MODERATE   = 0x01, /**< Moderate link quality */
+  SL_ZIGBEE_ZCL_GP_GPD_GPP_LINK_QUALITY_HIGH       = 0x02, /**< High link quality */
+  SL_ZIGBEE_ZCL_GP_GPD_GPP_LINK_QUALITY_EXCELLENT  = 0x03, /**< Excellent link quality */
 }sl_zigbee_af_g_p_gpd_gpp_link_quality_t;
 
-/** @brief new enum for enum.h
- *
- */
+/** @brief Green Power switch type */
 typedef enum {
-  SL_ZIGBEE_ZCL_GP_UNKNOWN_SWITCH_TYPE        = 0x00,
-  SL_ZIGBEE_ZCL_GP_BUTTON_SWITCH_TYPE         = 0x01,
-  SL_ZIGBEE_ZCL_GP_ROCKER_SWITCH_TYPE         = 0x02,
-  SL_ZIGBEE_ZCL_GP_RESERVED_SWITCH_TYPE       = 0x03,
+  SL_ZIGBEE_ZCL_GP_UNKNOWN_SWITCH_TYPE        = 0x00, /**< Unknown switch */
+  SL_ZIGBEE_ZCL_GP_BUTTON_SWITCH_TYPE         = 0x01, /**< Button switch */
+  SL_ZIGBEE_ZCL_GP_ROCKER_SWITCH_TYPE         = 0x02, /**< Rocker switch */
+  SL_ZIGBEE_ZCL_GP_RESERVED_SWITCH_TYPE       = 0x03, /**< Reserved switch */
 } sl_zigbee_af_g_p_generic_sw_switch_type_t;
 
-/** @brief enum: sl_zigbee_af_gp_gpd_device_id_t
- *
- */
+/** @brief Green Power device ID */
 typedef enum {
-  SL_ZIGBEE_GP_DEVICE_ID_GPD_SIMPLE_GENERIC_ONE_STATE_SWITCH   = 0x00,
-  SL_ZIGBEE_GP_DEVICE_ID_GPD_SIMPLE_GENERIC_TWO_STATE_SWITCH   = 0x01,
-  SL_ZIGBEE_GP_DEVICE_ID_GPD_ON_OFF_SWITCH                     = 0x02,
-  SL_ZIGBEE_GP_DEVICE_ID_GPD_LEVEL_CONTROL_SWITCH              = 0x03,
-  SL_ZIGBEE_GP_DEVICE_ID_GPD_SIMPLE_SENSOR_SWITCH              = 0x04,
-  SL_ZIGBEE_GP_DEVICE_ID_GPD_ADVANCED_GENERIC_ONE_STATE_SWITCH = 0x05,
-  SL_ZIGBEE_GP_DEVICE_ID_GPD_ADVANCED_GENERIC_TWO_STATE_SWITCH = 0x06,
-  SL_ZIGBEE_GP_DEVICE_ID_GPD_GENERIC_SWITCH                    = 0x07,
-  SL_ZIGBEE_GP_DEVICE_ID_GPD_COLOR_DIMMER_SWITCH               = 0x10,
-  SL_ZIGBEE_GP_DEVICE_ID_GPD_LIGHT_SENSOR_SWITCH               = 0x11,
-  SL_ZIGBEE_GP_DEVICE_ID_GPD_OCCUPANCY_SENSOR_SWITCH           = 0x12,
-  SL_ZIGBEE_GP_DEVICE_ID_GPD_DOOR_LOCK_CONTROLLER_SWITCH       = 0x20,
-  SL_ZIGBEE_GP_DEVICE_ID_GPD_TEMPERATURE_SENSOR_SWITCH         = 0x30,
-  SL_ZIGBEE_GP_DEVICE_ID_GPD_PRESSURE_SENSOR_SWITCH            = 0x31,
-  SL_ZIGBEE_GP_DEVICE_ID_GPD_FLOW_SENSOR_SWITCH                = 0x32,
-  SL_ZIGBEE_GP_DEVICE_ID_GPD_INDOOR_ENVIRONMENT_SENSOR         = 0x33,
-  SL_ZIGBEE_GP_DEVICE_ID_GPD_SCENCES                           = 0xFE,
-  SL_ZIGBEE_GP_DEVICE_ID_GPD_UNDEFINED                         = 0xFE,
+  SL_ZIGBEE_GP_DEVICE_ID_GPD_SIMPLE_GENERIC_ONE_STATE_SWITCH   = 0x00, /**< Simple generic one-state switch */
+  SL_ZIGBEE_GP_DEVICE_ID_GPD_SIMPLE_GENERIC_TWO_STATE_SWITCH   = 0x01, /**< Simple generic two-state switch */
+  SL_ZIGBEE_GP_DEVICE_ID_GPD_ON_OFF_SWITCH                     = 0x02, /**< On-off switch */
+  SL_ZIGBEE_GP_DEVICE_ID_GPD_LEVEL_CONTROL_SWITCH              = 0x03, /**< Level control switch */
+  SL_ZIGBEE_GP_DEVICE_ID_GPD_SIMPLE_SENSOR_SWITCH              = 0x04, /**< Simple sensor switch */
+  SL_ZIGBEE_GP_DEVICE_ID_GPD_ADVANCED_GENERIC_ONE_STATE_SWITCH = 0x05, /**< Advanced generic one-state switch */
+  SL_ZIGBEE_GP_DEVICE_ID_GPD_ADVANCED_GENERIC_TWO_STATE_SWITCH = 0x06, /**< Advanced generic two-state switch */
+  SL_ZIGBEE_GP_DEVICE_ID_GPD_GENERIC_SWITCH                    = 0x07, /**< Generic switch */
+  SL_ZIGBEE_GP_DEVICE_ID_GPD_COLOR_DIMMER_SWITCH               = 0x10, /**< Color dimmer switch */
+  SL_ZIGBEE_GP_DEVICE_ID_GPD_LIGHT_SENSOR_SWITCH               = 0x11, /**< Light sensor switch */
+  SL_ZIGBEE_GP_DEVICE_ID_GPD_OCCUPANCY_SENSOR_SWITCH           = 0x12, /**< Occupancy sensor switch */
+  SL_ZIGBEE_GP_DEVICE_ID_GPD_DOOR_LOCK_CONTROLLER_SWITCH       = 0x20, /**< Door lock controller switch */
+  SL_ZIGBEE_GP_DEVICE_ID_GPD_TEMPERATURE_SENSOR_SWITCH         = 0x30, /**< Temperature sensor switch */
+  SL_ZIGBEE_GP_DEVICE_ID_GPD_PRESSURE_SENSOR_SWITCH            = 0x31, /**< Pressure sensor switch */
+  SL_ZIGBEE_GP_DEVICE_ID_GPD_FLOW_SENSOR_SWITCH                = 0x32, /**< Flow sensor switch */
+  SL_ZIGBEE_GP_DEVICE_ID_GPD_INDOOR_ENVIRONMENT_SENSOR         = 0x33, /**< Indoor environment sensor */
+  SL_ZIGBEE_GP_DEVICE_ID_GPD_SCENCES                           = 0xFE, /**< Scenes */
+  SL_ZIGBEE_GP_DEVICE_ID_GPD_UNDEFINED                         = 0xFE, /**< Undefined */
 } sl_zigbee_af_gp_device_id_gpd_t;
 
 /**
@@ -170,11 +174,12 @@ typedef enum {
 /** @brief Prepare a GP proxy commissioning mode command buffer.
  *
  * This function prepares an application framework ZCL command buffer for the GP
- * proxy commissioning mode command with supplied arguments and returns the buffer length.
+ * proxy table response command with supplied arguments and returns the buffer length.
  *
- * @param options Options Ver.: always
- * @param commissioningWindow Commissioning window in seconds Ver.: always
- * @param channel Proxy channel field Ver.: always
+ * @param[in] status Status of the GP table response
+ * @param[in] totalNumberOfNonEmptyProxyTableEntries Total number of entries in the proxy table
+ * @param[in] startIndex Start index in the response
+ * @param[in] entriesCount Number of entries in the response
  *
  * @returns Length of the constructed command buffer
  */
@@ -198,10 +203,10 @@ typedef enum {
  * This function prepares an application framework ZCL command buffer for the GP
  * sink table response command with supplied arguments and returns the buffer length.
  *
- * @param status Sink table response status Ver.: always
- * @param totalNumberofNonEmptySinkTableEntries Total number of entires in the sink table Ver.: always
- * @param startIndex Start index in the response Ver.: always
- * @param sinkTableEntriesCount Number of entries in the response Ver.: always
+ * @param[in] status Sink table response status
+ * @param[in] totalNumberofNonEmptySinkTableEntries Total number of entries in the sink table
+ * @param[in] startIndex Start index in the response
+ * @param[in] sinkTableEntriesCount Number of entries in the response
  *
  * @returns Length of the constructed command buffer
  */
@@ -224,13 +229,13 @@ typedef enum {
  *
  * Cluster: Green Power, The Green Power cluster defines the format of the commands exchanged when handling GPDs.
  * Command: GpTranslationTableResponse
- * @param status uint8_t
- * @param options uint8_t
- * @param totalNumberOfEntries uint8_t
- * @param startIndex uint8_t
- * @param entriesCount uint8_t
- * @param translationTableList uint8_t*
- * @param translationTableListLen uint16_t
+ * @param[in] status GPD Command Translation Table status
+ * @param[in] options Options
+ * @param[in] totalNumberOfEntries Total number of entries
+ * @param[in] startIndex Start index
+ * @param[in] entriesCount Number of entries
+ * @param[in] translationTableList Translation table list
+ * @param[in] translationTableListLen  Translation table length
  */
 #define sl_zigbee_af_fill_command_green_power_cluster_gp_translation_table_response_smart(status,                  \
                                                                                           options,                 \
@@ -258,16 +263,16 @@ typedef enum {
  * This function prepares an application framework ZCL command buffer for the GP
  * notification command with supplied arguments and returns the buffer length.
  *
- * @param options Options Ver.: always
- * @param gpdSrcId GPD Source Id Ver.: always
- * @param gpdIeee GPD IEEE address Ver.: always
- * @param gpdEndpoint GPD endpoint Ver.: always
- * @param gpdSecurityFrameCounter GPD security frame counter Ver.: always
- * @param gpdCommandId GPD command Id Ver.: always
- * @param gpdCommandPayloadLength Command payload length Ver.: always
- * @param gpdCommandPayload GPD command payload Ver.: always
- * @param gppShortAddress GP Proxy short address Ver.: always
- * @param gppDistance GP Proxy distance Ver.: always
+ * @param[in] options Options
+ * @param[in] gpdSrcId GPD Source Id
+ * @param[in] gpdIeee GPD IEEE address
+ * @param[in] gpdEndpoint GPD endpoint
+ * @param[in] gpdSecurityFrameCounter GPD security frame counter
+ * @param[in] gpdCommandId GPD command Id
+ * @param[in] gpdCommandPayloadLength Command payload length
+ * @param[in] gpdCommandPayload GPD command payload
+ * @param[in] gppShortAddress GP Proxy short address
+ * @param[in] gppDistance GP Proxy distance
  *
  * @returns Length of the constructed command buffer
  */
@@ -286,10 +291,10 @@ uint16_t sl_zigbee_af_fill_command_green_power_cluster_gp_notification_smart(uin
  * This function prepares an application framework ZCL command buffer for the GP
  * pairing search command with supplied arguments and returns the buffer length.
  *
- * @param options Options Ver.: always
- * @param gpdSrcId GPD Source Id Ver.: always
- * @param gpdIeee GPD IEEE address Ver.: always
- * @param gpdEndpoint GPD endpoint Ver.: always
+ * @param[in] options Options
+ * @param[in] gpdSrcId GPD Source Id
+ * @param[in] gpdIeee GPD IEEE address
+ * @param[in] gpdEndpoint GPD endpoint
  *
  * @returns Length of the constructed command buffer
  */
@@ -302,13 +307,13 @@ uint16_t sl_zigbee_af_fill_command_green_power_cluster_gp_pairing_search_smart(u
  * This function prepares an application framework ZCL command buffer for the GP
  * tunneling stop command with supplied arguments and returns the buffer length.
  *
- * @param options Options Ver.: always
- * @param gpdSrcId GPD Source Id Ver.: always
- * @param gpdIeee GPD IEEE address Ver.: always
- * @param gpdEndpoint GPD endpoint Ver.: always
- * @param gpdSecurityFrameCounter GPD security frame counter Ver.: always
- * @param gppShortAddress GP Proxy short address Ver.: always
- * @param gppDistance GP Proxy distance Ver.: always
+ * @param[in] options Options
+ * @param[in] gpdSrcId GPD Source Id
+ * @param[in] gpdIeee GPD IEEE address
+ * @param[in] gpdEndpoint GPD endpoint
+ * @param[in] gpdSecurityFrameCounter GPD security frame counter
+ * @param[in] gppShortAddress GP Proxy short address
+ * @param[in] gppDistance GP Proxy distance
  *
  * @returns Length of the constructed command buffer
  */
@@ -325,19 +330,19 @@ uint16_t sl_zigbee_af_fill_command_green_power_cluster_gp_tunneling_stop_smart(u
  * commissioning notification command with supplied arguments and returns the
  * buffer length.
  *
- * @param options Options Ver.: always
- * @param gpdSrcId GPD Source Id Ver.: always
- * @param gpdIeee GPD IEEE address Ver.: always
- * @param gpdEndpoint GPD endpoint Ver.: always
- * @param sequenceNumber MAC Sequence to be used in security counter field for GPD security level 0 Ver.: always
- * @param gpdfSecurityLevel GPD security level Ver.: always
- * @param gpdSecurityFrameCounter GPD security frame counter Ver.: always
- * @param gpdCommandId GPD command Id Ver.: always
- * @param gpdCommandPayloadLength Command payload length Ver.: always
- * @param gpdCommandPayload GPD command payload Ver.: always
- * @param gppShortAddress GP Proxy short address Ver.: always
- * @param gppLink GPD-GP Proxy link Ver.: always
- * @param mic Message Integrity Code when security level is 2 or 3 Ver.: always
+ * @param[in] options Options
+ * @param[in] gpdSrcId GPD Source Id
+ * @param[in] gpdIeee GPD IEEE address
+ * @param[in] gpdEndpoint GPD endpoint
+ * @param[in] sequenceNumber MAC Sequence to be used in security counter field for GPD security level 0
+ * @param[in] gpdfSecurityLevel GPD security level
+ * @param[in] gpdSecurityFrameCounter GPD security frame counter
+ * @param[in] gpdCommandId GPD command Id
+ * @param[in] gpdCommandPayloadLength Command payload length
+ * @param[in] gpdCommandPayload GPD command payload
+ * @param[in] gppShortAddress GP Proxy short address
+ * @param[in] gppLink GPD-GP Proxy link
+ * @param[in] mic Message Integrity Code when security level is 2 or 3
  *
  * @returns Length of the constructed command buffer
  */
@@ -360,13 +365,13 @@ uint16_t sl_zigbee_af_fill_command_green_power_cluster_gp_commissioning_notifica
  * translation table update command with supplied arguments and returns the
  * buffer length.
  *
- * @param options Options Ver.: always
- * @param gpdSrcId GPD Source Id Ver.: always
- * @param gpdIeee GPD IEEE address Ver.: always
- * @param gpdEndpoint GPD endpoint Ver.: always
- * @param translationsLength Length of the translations packet Ver.: always
- * @param translations On or more number of translations Ver.: always
- * @param additionnalInfoBlock Additional Information block used along with the translations Ver.: always
+ * @param[in] options Options
+ * @param[in] gpdSrcId GPD Source Id
+ * @param[in] gpdIeee GPD IEEE address
+ * @param[in] gpdEndpoint GPD endpoint
+ * @param[in] translationsLength Length of the translations packet
+ * @param[in] translations One or more number of translations
+ * @param[in] additionnalInfoBlock Additional Information block used along with the translations
  *
  * @returns Length of the constructed command buffer
  */
@@ -383,35 +388,35 @@ uint16_t sl_zigbee_af_fill_command_green_power_cluster_gp_translation_table_upda
  * pairing configuration command with supplied arguments and returns the
  * buffer length.
  *
- * @param actions GP Pairing actions field Ver.: always
- * @param options Options Ver.: always
- * @param gpdSrcId GPD Source Id Ver.: always
- * @param gpdIeee GPD IEEE address Ver.: always
- * @param gpdEndpoint GPD endpoint Ver.: always
- * @param gpdDeviceId GPD Device Id Ver.: always
- * @param groupListCount Group list count Ver.: always
- * @param groupList Group list Ver.: always
- * @param gpdAssignedAlias GPD assigned alias Ver.: always
- * @param groupcastRadius Group cast radius Ver.: always
- * @param securityOptions Security options Ver.: always
- * @param gpdSecurityFrameCounter Security frame counter Ver.: always
- * @param gpdSecurityKey Security key Ver.: always
- * @param numberOfPairedEndpoints Number of paired endpoints Ver.: always
- * @param pairedEndpoints Paired endpoint list Ver.: always
- * @param applicationInformation Application information field Ver.: always
- * @param manufacturerId GPD Manufacture Id Ver.: always
- * @param modeId GPD Model Id Ver.: always
- * @param numberOfGpdCommands Number of GPD commands Ver.: always
- * @param gpdCommandIdList GPD commands list Ver.: always
- * @param clusterIdListCount Cluster List count Ver.: always
- * @param clusterListServer Server cluster list Ver.: always
- * @param clusterListClient Client cluster list Ver.: always
- * @param switchInformationLength Generic switch information length Ver.: always
- * @param genericSwitchConfiguration GGeneric switch configuration Ver.: always
- * @param currentContactStatus Current contact status Ver.: always
- * @param totalNumberOfReports Total number of reports configured Ver.: always
- * @param numberOfReports Number of reports in the report present in descriptor Ver.: always
- * @param reportDescriptor Report descriptors list Ver.: always
+ * @param[in] actions GP Pairing actions field
+ * @param[in] options Options
+ * @param[in] gpdSrcId GPD Source Id
+ * @param[in] gpdIeee GPD IEEE address
+ * @param[in] gpdEndpoint GPD endpoint
+ * @param[in] gpdDeviceId GPD Device Id
+ * @param[in] groupListCount Group list count
+ * @param[in] groupList Group list
+ * @param[in] gpdAssignedAlias GPD assigned alias
+ * @param[in] groupcastRadius Group cast radius
+ * @param[in] securityOptions Security options
+ * @param[in] gpdSecurityFrameCounter Security frame counter
+ * @param[in] gpdSecurityKey Security key
+ * @param[in] numberOfPairedEndpoints Number of paired endpoints
+ * @param[in] pairedEndpoints Paired endpoint list
+ * @param[in] applicationInformation Application information field
+ * @param[in] manufacturerId GPD Manufacture Id
+ * @param[in] modeId GPD Model Id
+ * @param[in] numberOfGpdCommands Number of GPD commands
+ * @param[in] gpdCommandIdList GPD commands list
+ * @param[in] clusterIdListCount Cluster List count
+ * @param[in] clusterListServer Server cluster list
+ * @param[in] clusterListClient Client cluster list
+ * @param[in] switchInformationLength Generic switch information length
+ * @param[in] genericSwitchConfiguration Generic switch configuration
+ * @param[in] currentContactStatus Current contact status
+ * @param[in] totalNumberOfReports Total number of reports configured
+ * @param[in] numberOfReports Number of reports in the report present in descriptor
+ * @param[in] reportDescriptor Report descriptors list
  *
  * @returns Length of the constructed command buffer
  */
@@ -450,11 +455,11 @@ uint16_t sl_zigbee_af_fill_command_green_power_cluster_gp_pairing_configuration_
  * sink table request command with supplied arguments and returns the
  * buffer length.
  *
- * @param options Options Ver.: always
- * @param gpdSrcId GPD Source Id Ver.: always
- * @param gpdIeee GPD IEEE address Ver.: always
- * @param gpdEndpoint GPD endpoint Ver.: always
- * @param index Requested table index to start Ver.: always
+ * @param[in] options Options
+ * @param[in] gpdSrcId GPD Source Id
+ * @param[in] gpdIeee GPD IEEE address
+ * @param[in] gpdEndpoint GPD endpoint
+ * @param[in] index Requested table index to start
  *
  * @returns Length of the constructed command buffer
  */
@@ -469,11 +474,11 @@ uint16_t sl_zigbee_af_fill_command_green_power_cluster_gp_sink_table_request_sma
  * notification response command with supplied arguments and returns the
  * buffer length.
  *
- * @param options Options Ver.: always
- * @param gpdSrcId GPD Source Id Ver.: always
- * @param gpdIeee GPD IEEE address Ver.: always
- * @param gpdEndpoint GPD endpoint Ver.: always
- * @param gpdSecurityFrameCounter GPD security frame counter Ver.: always
+ * @param[in] options Options
+ * @param[in] gpdSrcId GPD Source Id
+ * @param[in] gpdIeee GPD IEEE address
+ * @param[in] gpdEndpoint GPD endpoint
+ * @param[in] gpdSecurityFrameCounter GPD security frame counter
  *
  * @returns Length of the constructed command buffer
  */
@@ -487,18 +492,18 @@ uint32_t sl_zigbee_af_fill_command_green_power_cluster_gp_notification_response_
  * This function prepares an application framework ZCL command buffer for the GP
  * pairing command with supplied arguments and returns the buffer length.
  *
- * @param options Options Ver.: always
- * @param gpdSrcId GPD Source Id Ver.: always
- * @param gpdIeee GPD IEEE address Ver.: always
- * @param gpdEndpoint GPD endpoint Ver.: always
- * @param sinkIeeeAddress Sink IEEE address Ver.: always
- * @param sinkNwkAddress Sink network address Ver.: always
- * @param sinkGroupId Sink group Id Ver.: always
- * @param deviceId GPD Device Id Ver.: always
- * @param gpdSecurityFrameCounter GPD security frame counter Ver.: always
- * @param gpdKey GPD security key Ver.: always
- * @param assignedAlias GPD assigned alias Ver.: always
- * @param groupcastRadius Group cast radius of this message Ver.: always
+ * @param[in] options Options
+ * @param[in] gpdSrcId GPD Source Id
+ * @param[in] gpdIeee GPD IEEE address
+ * @param[in] gpdEndpoint GPD endpoint
+ * @param[in] sinkIeeeAddress Sink IEEE address
+ * @param[in] sinkNwkAddress Sink network address
+ * @param[in] sinkGroupId Sink group Id
+ * @param[in] deviceId GPD Device Id
+ * @param[in] gpdSecurityFrameCounter GPD security frame counter
+ * @param[in] gpdKey GPD security key
+ * @param[in] assignedAlias GPD assigned alias
+ * @param[in] groupcastRadius Group cast radius of this message
  *
  * @returns Length of the constructed command buffer
  */
@@ -519,9 +524,9 @@ uint16_t sl_zigbee_af_fill_command_green_power_cluster_gp_pairing_smart(uint32_t
  * This function prepares an application framework ZCL command buffer for the GP
  * proxy commissioning mode command with supplied arguments and returns the buffer length.
  *
- * @param options Options Ver.: always
- * @param commissioningWindow Commissioning window in seconds Ver.: always
- * @param channel Proxy channel field Ver.: always
+ * @param[in] options Options
+ * @param[in] commissioningWindow Commissioning window in seconds
+ * @param[in] channel Proxy channel field
  *
  * @returns Length of the constructed command buffer
  */
@@ -533,15 +538,15 @@ uint16_t sl_zigbee_af_fill_command_green_power_cluster_gp_proxy_commissioning_mo
  * This function prepares an application framework ZCL command buffer for the GP
  * response command with supplied arguments and returns the buffer length.
  *
- * @param options Options Ver.: always
- * @param tempMasterShortAddress Proxy Temp Master short address Ver.: always
- * @param tempMasterTxChannel Proxy Temp Master transmit channel Ver.: always
- * @param gpdSrcId GPD Source Id Ver.: always
- * @param gpdIeee GPD IEEE address Ver.: always
- * @param gpdEndpoint GPD endpoint Ver.: always
- * @param gpdCommandId GPD command id Ver.: always
- * @param gpdCommandPayloadLength GPD command length Ver.: always
- * @param gpdCommandPayload GPD command payload Ver.: always
+ * @param[in] options Options
+ * @param[in] tempMasterShortAddress Proxy Temp Master short address
+ * @param[in] tempMasterTxChannel Proxy Temp Master transmit channel
+ * @param[in] gpdSrcId GPD Source Id
+ * @param[in] gpdIeee GPD IEEE address
+ * @param[in] gpdEndpoint GPD endpoint
+ * @param[in] gpdCommandId GPD command id
+ * @param[in] gpdCommandPayloadLength GPD command length
+ * @param[in] gpdCommandPayload GPD command payload
  *
  * @returns Length of the constructed command buffer
  */
@@ -559,11 +564,11 @@ uint16_t sl_zigbee_af_fill_command_green_power_cluster_gp_response_smart(uint8_t
  * This function prepares an application framework ZCL command buffer for the GP
  * proxy table request command with supplied arguments and returns the buffer length.
  *
- * @param options Options Ver.: always
- * @param gpdSrcId GPD Source Id Ver.: always
- * @param gpdIeee GPD IEEE address Ver.: always
- * @param gpdEndpoint GPD endpoint Ver.: always
- * @param index Requested table index to start Ver.: always
+ * @param[in] options Options
+ * @param[in] gpdSrcId GPD Source Id
+ * @param[in] gpdIeee GPD IEEE address
+ * @param[in] gpdEndpoint GPD endpoint
+ * @param[in] index Requested table index to start
  *
  * @returns Length of the constructed command buffer
  */
@@ -576,8 +581,8 @@ uint16_t sl_zigbee_af_fill_command_green_power_cluster_gp_proxy_table_request_sm
  *
  * This function compares two GP Addresses and returns true if they are the same.
  *
- * @param a1 First address to compare Ver.: always
- * @param a2 Second address to compare Ver.: always
+ * @param[in] a1 First address to compare
+ * @param[in] a2 Second address to compare
  *
  * @returns True if the address are same
  */

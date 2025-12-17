@@ -19,12 +19,12 @@ requires:
 provides:
 - name: zigbee_phy_select_cli
 include:
-- path: plugin/rail_util_ieee802154
+- path: plugin/sl_rail_util_ieee802154
   file_list:
   - path: sl_rail_util_ieee802154_phy_select.h
   - path: sl_rail_util_ieee802154_stack_event.h
 source:
-- path: plugin/rail_util_ieee802154/sl_zigbee_phy_select_cli.c
+- path: plugin/sl_rail_util_ieee802154/sl_zigbee_phy_select_cli.c
 template_contribution:
 # CLI Commands < plugin phy-select >
 - name: cli_group

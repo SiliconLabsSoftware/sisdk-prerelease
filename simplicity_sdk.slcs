@@ -124,6 +124,9 @@ component_path:
 - path: wisun_config_generator/component
 - path: wisun_sdk/component
 - path: zigbee_wwah/app/framework/component
+- path: zigbee_smart_energy/component
+- path: zigbee_sleepy_to_sleepy/component
+- path: zigbee_sleepy_to_sleepy/app/framework/component
 - path: zigbee_internal/platform/radio/mac/component
 - path: zigbee_internal/platform/radio/rail_lib/plugin/component
 - path: zigbee_internal/component
@@ -131,8 +134,6 @@ component_path:
 - path: zigbee_internal/util/silicon_labs/silabs_core/component
 - path: zigbee_internal/app/framework/component
 - path: zigbee_internal/platform/service/component
-- path: zigbee_sleepy_to_sleepy/component
-- path: zigbee_sleepy_to_sleepy/app/framework/component
 - path: zigbee/platform/radio/mac/component
 - path: zigbee/platform/radio/rail_lib/plugin/component
 - path: zigbee/component
@@ -140,7 +141,6 @@ component_path:
 - path: zigbee/util/silicon_labs/silabs_core/component
 - path: zigbee/app/framework/component
 - path: zigbee/platform/service/component
-- path: zigbee_smart_energy/component
 - path: zwave/component
 - path: zwave/component/CommandClasses
 - path: zwave/component-internal
@@ -149,10 +149,10 @@ toolchain_mapping: toolchains.slct
 documentation:
 - docset: machine-learning
   version: 2.2.0
-- docset: btmesh
-  version: 10.0.0
 - docset: bluetooth_le_siwx91x
   version: 4.0.0
+- docset: btmesh
+  version: 10.0.0
 - docset: bluetooth
   version: 11.0.0
 - docset: btmesh-service-api
@@ -163,9 +163,9 @@ documentation:
   version: 4.2.0
 - docset: openthread
   version: 3.0.0
-- docset: platform_siwx91x
-  version: 4.0.0
 - docset: platform_nwp_siwx91x
+  version: 4.0.0
+- docset: platform_siwx91x
   version: 4.0.0
 - docset: rail
   version: 3.0.0

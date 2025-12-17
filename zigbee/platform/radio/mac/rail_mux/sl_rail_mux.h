@@ -70,7 +70,7 @@
 
 #include "sl_rail_types.h"
 #include "sl_rail_ieee802154.h"
-#include "rail_util_ieee802154/sl_rail_util_ieee802154_stack_event.h"
+#include "sl_rail_util_ieee802154/sl_rail_util_ieee802154_stack_event.h"
 #include "coexistence/protocol/ieee802154_uc/coexistence-802154.h"
 
 typedef enum {

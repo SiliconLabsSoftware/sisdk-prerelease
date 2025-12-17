@@ -32,7 +32,7 @@
 #include "sl_rail.h"
 #include "sl_rail_ieee802154.h"
 
-#include "rail_util_ieee802154/sl_rail_util_ieee802154_phy_select.h"
+#include "sl_rail_util_ieee802154/sl_rail_util_ieee802154_phy_select.h"
 #ifdef SL_RAIL_UTIL_PA_CONFIG_HEADER
 #include SL_RAIL_UTIL_PA_CONFIG_HEADER
 #endif

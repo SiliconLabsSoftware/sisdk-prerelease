@@ -2463,6 +2463,10 @@ enum
   SL_ZIGBEE_TARGET_PARTNER_DEVICE_UNKNOWN      = 0x44,  // The target received an Security_Authentication_Level_rsp from the TC, but does not have the short address mapping for this device
   SL_ZIGBEE_TARGET_FAILED_VERIFY_KEY           = 0x45,  // Target failed to send Verify Key to partner
 
+  // The following status is issued on a R23 Trust Center whenever
+  // a joining device requests and establishes an authentication token
+  SL_ZIGBEE_TC_AUTHENTICATION_TOKEN_ESTABLISHED = 0x50,
+
   // These are status values applying only to the key requester
   // verifying a Trust Center link key, as well as on both
   // initiator and target sides of the partner link key routine

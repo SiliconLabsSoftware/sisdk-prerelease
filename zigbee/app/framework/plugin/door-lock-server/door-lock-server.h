@@ -18,7 +18,7 @@
 /**
  * @defgroup door-lock-server Door Lock Server
  * @ingroup component cluster
- * @brief API and Callbacks for the Door Lock Cluster Server Component
+ * @brief API and Callbacks for the Door Lock Cluster Server Component.
  *
  * Silicon Labs implementation of the Door Lock server cluster.
  * This is an incomplete component implementation. It does all
@@ -45,11 +45,14 @@ typedef struct {
   uint16_t value;
 } sli_zigbee_af_door_lock_server_attribute_data;
 
-/** @brief Activate Door Lock
+/** @brief Activate Door Lock.
  *
  *
- * @param activate True if the lock should move to the locked position, false
- * if it should move to the unlocked position  Ver.: always
+ * @param[in] activate True if the lock should move to the locked position, false
+ * if it should move to the unlocked position.
+ * 
+ * @return bool true if the command was handled by the application; false otherwise.
+
  */
 bool sl_zigbee_af_door_lock_server_activate_door_lock_cb(bool activate);
 
@@ -76,8 +79,7 @@ sl_zigbee_af_status_t sli_zigbee_af_door_lock_server_note_door_state_changed(sl_
   #define SL_ZIGBEE_AF_PLUGIN_DOOR_LOCK_SERVER_PIN_USER_TABLE_SIZE 8
 #endif
 
-// At boot, the NumberOfRFIDUsersSupported attribute will be written to this
-// value.
+/** @brief At boot, the NumberOfRFIDUsersSupported attribute will be written to this value. */
 #define SL_ZIGBEE_AF_PLUGIN_DOOR_LOCK_SERVER_RFID_USER_TABLE_SIZE 8
 
 // This value should reflect the value of the MaxPINCodeLength attribute.
@@ -89,7 +91,7 @@ sl_zigbee_af_status_t sli_zigbee_af_door_lock_server_note_door_state_changed(sl_
   #define SL_ZIGBEE_AF_PLUGIN_DOOR_LOCK_SERVER_MAX_PIN_LENGTH 8
 #endif
 
-// This value should reflect the value of the MaxRFIDCodeLength attribute.
+/** @brief This value should reflect the value of the MaxRFIDCodeLength attribute. */
 #define SL_ZIGBEE_AF_PLUGIN_DOOR_LOCK_SERVER_MAX_RFID_LENGTH 8
 
 // At boot, the NumberOfWeekDaySchedulesSupportedPerUser attribute will be written
@@ -104,14 +106,11 @@ sl_zigbee_af_status_t sli_zigbee_af_door_lock_server_note_door_state_changed(sl_
   #define SL_ZIGBEE_AF_PLUGIN_DOOR_LOCK_SERVER_WEEKDAY_SCHEDULE_TABLE_SIZE 4
 #endif
 
-// At boot, the NumberOfYearDaySchedulesSupportedPerUser attribute will be
-// written to this value.
-// Note: technically, this is the _total_ number of yearday schedules that can be
-// stored across all users.
-#define SL_ZIGBEE_AF_PLUGIN_DOOR_LOCK_SERVER_YEARDAY_SCHEDULE_TABLE_SIZE 8
+/** @brief At boot, the NumberOfYearDaySchedulesSupportedPerUser attribute will be written to this value. */
+/** @note Technically, this is the _total_ number of year day schedules that can be stored across all users. */
+ #define SL_ZIGBEE_AF_PLUGIN_DOOR_LOCK_SERVER_YEARDAY_SCHEDULE_TABLE_SIZE 8
 
-// At boot, the NumberOfHolidaySchedulesSupported attribute will be written to
-// this value.
+/** @brief At boot, the NumberOfHolidaySchedulesSupported attribute will be written to this value. */
 #define SL_ZIGBEE_AF_PLUGIN_DOOR_LOCK_SERVER_HOLIDAY_SCHEDULE_TABLE_SIZE 8
 
 #ifndef DOOR_LOCK_SERVER_ENDPOINT
@@ -121,8 +120,7 @@ sl_zigbee_af_status_t sli_zigbee_af_door_lock_server_note_door_state_changed(sl_
 // ------------------------------------------------------------------------------
 // Logging
 
-// This value should reflect the value of the NumberOfLogRecordsSupported
-// attribute.
+/** @brief This value should reflect the value of the NumberOfLogRecordsSupported attribute. */
 #define SL_ZIGBEE_AF_PLUGIN_DOOR_LOCK_SERVER_MAX_LOG_ENTRIES 16
 
 typedef struct {
@@ -151,14 +149,14 @@ typedef struct {
  * parameter should be of type sl_zigbee_af_door_lock_operation_event_code_t or
  * sl_zigbee_af_door_lock_programming_event_code_t.
  *
- * @param eventType Event type Ver.: always
- * @param source Event source Ver.: always
- * @param eventID Ver.: always
- * @param userId Ver.: always
- * @param pinLength Ver.: always
- * @param pin Ver.: always
+ * @param[in] eventType event type
+ * @param[in] source event source
+ * @param[in] eventId event ID
+ * @param[in] userId user ID
+ * @param[in] pinLength pin length
+ * @param[in] pin pin
  *
- * @return bool true if success
+ * @return bool True if the log entry was added.
  */
 bool sl_zigbee_af_door_lock_server_add_log_entry(sl_zigbee_af_door_lock_event_type_t eventType,
                                                  sl_zigbee_af_door_lock_event_source_t source,
@@ -173,10 +171,10 @@ bool sl_zigbee_af_door_lock_server_add_log_entry(sl_zigbee_af_door_lock_event_ty
  * GetLogRecord ZCL command. This will return true if the entry was successfully
  * returned.
  *
- * @param entryId Ver.: always
- * @param entry pointer to log entry struct Ver.: always
+ * @param[in,out] entryId pointer to the entry ID
+ * @param[out] entry pointer to log entry struct
  *
- * @return bool true if success
+ * @return bool True if the command was successfully handled.
  */
 
 bool sl_zigbee_af_door_lock_server_get_log_entry(uint16_t *entryId,
@@ -205,28 +203,27 @@ typedef struct {
   // This field is a Zigbee string, so the first byte is the length of the
   // remaining bytes.
   union {
-    uint8_t pin[SL_ZIGBEE_AF_PLUGIN_DOOR_LOCK_SERVER_MAX_PIN_LENGTH + 1];
-    uint8_t rfid[SL_ZIGBEE_AF_PLUGIN_DOOR_LOCK_SERVER_MAX_RFID_LENGTH + 1];
+    uint8_t pin[SL_ZIGBEE_AF_PLUGIN_DOOR_LOCK_SERVER_MAX_PIN_LENGTH + 1]; /**< String (length-prefixed) containing PIN code. */
+    uint8_t rfid[SL_ZIGBEE_AF_PLUGIN_DOOR_LOCK_SERVER_MAX_RFID_LENGTH + 1]; /**< String (length-prefixed) containing RFID code. */
   } code;
 } sl_zigbee_af_plugin_door_lock_server_user_t;
 
 /** @brief Unlock the door with a pin.
  *
- * @param pin Ver.: always
- * @param pinLength Ver.: always
+ * @param[in] pin pin to attempt
+ * @param[in] pinLength pin length
  *
- * @return sl_zigbee_af_status_t status code
- *
+ * @return An ::sl_status_t value that indicates the success or failure of the API call. See ::sl_zigbee_af_write_server_attribute.
  */
 sl_zigbee_af_status_t sl_zigbee_af_door_lock_server_apply_pin(uint8_t *pin,
                                                               uint8_t pinLength);
 
 /** @brief Unlock the door with RFID.
  *
- * @param rfid Ver.: always
- * @param rfidLength Ver.: always
+ * @param[in] rfid RFID to attempt
+ * @param[in] rfidLength RFID length
  *
- * @return sl_zigbee_af_status_t status code
+ * @return An ::sl_status_t value that indicates the success or failure of the API call. See ::sl_zigbee_af_write_server_attribute.
  *
  */
 sl_zigbee_af_status_t sl_zigbee_af_door_lock_server_apply_rfid(uint8_t *rfid,
@@ -300,8 +297,9 @@ bool sli_zigbee_af_door_lock_server_check_for_sufficient_space(uint8_t spaceReq,
 
 // The following preprocessor logic serves as a conversion layer from the old
 // names for the symbols used by this plugin.
-
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 #define sl_zigbee_af_door_lock_schedule_entry_t sl_zigbee_af_plugin_door_lock_server_weekday_schedule_entry_t
 #define sl_zigbee_af_door_lock_user_t sl_zigbee_af_plugin_door_lock_server_user_t
+#endif
 
 /** @} */ // end of door-lock-server

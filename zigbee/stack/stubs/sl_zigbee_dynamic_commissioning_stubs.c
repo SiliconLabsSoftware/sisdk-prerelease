@@ -109,8 +109,8 @@ SL_WEAK void slx_zigbee_gu_zdo_stack_toggle_dlk(bool do_dlk)
 {
   (void) do_dlk;
 }
-SL_WEAK void sl_zigbee_dynamic_commissioning_alert_callback(sl_zigbee_address_info *ids,
-                                                            sl_zigbee_dynamic_commissioning_event_t event)
+SL_WEAK void sli_zigbee_stack_dynamic_commissioning_alert_callback(sl_zigbee_address_info *ids,
+                                                                   sl_zigbee_dynamic_commissioning_event_t event)
 {
   (void) ids;
   (void) event;

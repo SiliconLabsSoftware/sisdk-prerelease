@@ -85,21 +85,23 @@ enum sl_zigbee_debug_print_type {
  * @name API
  * @{
  */
-/** Enable groups in debug prints.
+/** @brief Enable or disable groups in debug prints.
  *
- * @param group_type Ver.: always
- * @param enabled value Ver.: always
+ * @param[in] group_type An ::sl_zigbee_debug_print_type debug print group.
+ * @param[in] enable Enable or disable group.
  *
- * @return sl_status_t status code
+ * @return An ::sl_status_t value that indicates the success or failure of the API call.
+ * - ::SL_STATUS_OK if the call is successful.
+ * - ::SL_STATUS_INVALID_PARAMETER if the group_type is not valid or defined.
  *
  */
 sl_status_t sl_zigbee_debug_print_enable_group(uint32_t group_type, bool enable);
 
 /**
- * @brief Check if debug print is enabled
+ * @brief Check if debug print is enabled.
  *
- * @param group_type group to verify
- * @return true debugging print are enabled, else false.
+ * @param[in] group_type Group to verify (see ::sl_zigbee_debug_print_type).
+ * @return True if debugging print are enabled, else false.
  */
 bool sl_zigbee_debug_print_enabled(uint32_t group_type);
 

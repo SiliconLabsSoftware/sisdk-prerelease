@@ -17,15 +17,12 @@
 
 #include "green-power-client-config.h"
 
-// TODO: properly doxygenate this file
-
 /**
  * @defgroup green-power-client Green Power Client
  * @ingroup component cluster
  * @brief API and Callbacks for the Green Power Cluster Client Component
  *
  * A component implementing the client-side functionality of the Green Power cluster.
- *
  */
 
 /**
@@ -33,36 +30,51 @@
  * @{
  */
 
+/** @brief Shows if we are on transmit channel (1) or on operational channel (0) */
 #define GP_CLIENT_ON_TRANSMIT_CHANNEL_MASK BIT(0)
+/** @brief Shows if operational channel is same as transmit channel */
 #define GP_CLIENT_TRANSMIT_SAME_AS_OPERATIONAL_CHANNEL_MASK BIT(1)
+/** @brief Shows if there is a channel request pending */
 #define GP_CLIENT_ADDITIONAL_CHANNEL_REQUEST_PENDING BIT(2)
 
+/**
+ * @brief Options for MAC Sequence Number Capability
+ */
 typedef enum  {
-  SL_ZIGBEE_GP_GPD_MAC_SEQ_NUM_CAP_SEQUENTIAL  = 0x00,
-  SL_ZIGBEE_GP_GPD_MAC_SEQ_NUM_CAP_RANDOM      = 0x01,
+  SL_ZIGBEE_GP_GPD_MAC_SEQ_NUM_CAP_SEQUENTIAL  = 0x00, /**< Sequence Number is sequential */
+  SL_ZIGBEE_GP_GPD_MAC_SEQ_NUM_CAP_RANDOM      = 0x01, /**< Sequence Number is random */
 } sl_zigbee_gp_gpd_mac_seq_num_cap_t;
 
+/**
+ * @brief GP Client Commissioning Mode exit flags
+ */
 typedef enum {
-  SL_ZIGBEE_AF_GPC_COMMISSIONING_EXIT_ON_COMMISSIONING_WINDOW_EXP = 0x1,
-  SL_ZIGBEE_AF_GPC_COMMISSIONING_EXIT_ON_FIRST_PAIRING_SUCCESS = 0x2,
-  SL_ZIGBEE_AF_GPC_COMMISSIONING_EXIT_ON_GP_PROXY_COMMISSIONING_MODE_EXIT = 0x4,
-  SL_ZIGBEE_AF_GPC_COMMISSIONING_EXIT_MODE_MAX = 0xFF,
+  SL_ZIGBEE_AF_GPC_COMMISSIONING_EXIT_ON_COMMISSIONING_WINDOW_EXP = 0x1, /**< On Commissioning Window expiration */
+  SL_ZIGBEE_AF_GPC_COMMISSIONING_EXIT_ON_FIRST_PAIRING_SUCCESS = 0x2, /**< On first Pairing success */
+  SL_ZIGBEE_AF_GPC_COMMISSIONING_EXIT_ON_GP_PROXY_COMMISSIONING_MODE_EXIT = 0x4, /**< On GP Proxy Commissioning Mode (exit) */
+  SL_ZIGBEE_AF_GPC_COMMISSIONING_EXIT_MODE_MAX = 0xFF, /**< Upper bound for exit mode mask; not used as an actual exit condition */
 } sl_zigbee_af_green_power_client_commissioning_exit_mode_t;
 
+/**
+ * @brief GP Client Commissioning State
+ */
 typedef struct {
-  bool inCommissioningMode;
-  sl_zigbee_af_green_power_client_commissioning_exit_mode_t exitMode;
-  uint16_t gppCommissioningWindow;
-  uint8_t channel;
-  bool unicastCommunication;
-  sl_802154_short_addr_t commissioningSink;
-  uint8_t channelStatus;  //bit 0 shows if we are on transmit channel(1) or on operational channel(0). bit 1 shows if operational channel is same as transmit channel (1).
+  bool inCommissioningMode; /**< If GP Client is in Commissioning Mode */
+  sl_zigbee_af_green_power_client_commissioning_exit_mode_t exitMode; /**< GP Client Commissioning Mode exit flag */
+  uint16_t gppCommissioningWindow; /**< GP Proxy Commissioning Window */
+  uint8_t channel; /**< GP Client current channel */
+  bool unicastCommunication; /**< If Commissioning is unicast or broadcast */
+  sl_802154_short_addr_t commissioningSink; /**< Address of GP Commissioning Sink */
+  uint8_t channelStatus; /**< GP Client status flags. Bit 0 shows if we are on transmit channel(1) or on operational channel(0). bit 1 shows if operational channel is same as transmit channel (1) */
 } sl_zigbee_af_green_power_client_commissioning_state_t;
 
+/**
+ * @brief GP address duplicate filters
+ */
 typedef struct {
-  sl_zigbee_gp_address_t addrs[SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_CLIENT_MAX_ADDR_ENTRIES];
-  uint8_t randomSeqNums[SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_CLIENT_MAX_ADDR_ENTRIES][SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_CLIENT_MAX_SEQ_NUM_ENTRIES_PER_ADDR];
-  uint32_t expirationTimes[SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_CLIENT_MAX_ADDR_ENTRIES][SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_CLIENT_MAX_SEQ_NUM_ENTRIES_PER_ADDR];
+  sl_zigbee_gp_address_t addrs[SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_CLIENT_MAX_ADDR_ENTRIES]; /**< GP address entries */
+  uint8_t randomSeqNums[SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_CLIENT_MAX_ADDR_ENTRIES][SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_CLIENT_MAX_SEQ_NUM_ENTRIES_PER_ADDR]; /**< Sequence Numbers per address entries */
+  uint32_t expirationTimes[SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_CLIENT_MAX_ADDR_ENTRIES][SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_CLIENT_MAX_SEQ_NUM_ENTRIES_PER_ADDR]; /**< Sequence Number expiration times */
 } sl_zigbee_af_green_power_duplicate_filter_t;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -102,14 +114,14 @@ void sl_zigbee_af_green_power_client_clear_proxy_table(void);
 
 /** @brief Green power client Sink table based forward callback.
  *
- * This function is called by the Green Power client before forwarding the gp notification.
+ * This function is called by the Green Power client before forwarding the GP notification.
  * This callback provides the pointer to the group list for the paired gpd.
  * In case of a combo application, where the green power server is also present, this callback
  * is consumed by the green power server to update the sinklist from the sink table.
  *
- * @param addr gpd address Ver.: always
- * @param sinkList sink list pointer , that can be used to update the sink list  Ver.: always
- * @param maxNumberEntries maximum number of sink list entires Ver.: always
+ * @param[in] addr gpd address
+ * @param[in] sinkList sink list pointer that can be used to update the sink list
+ * @param[in] maxNumberEntries maximum number of sink list entries
  */
 void sl_zigbee_af_green_power_client_gpdf_sink_table_based_forward_cb(sl_zigbee_gp_address_t *addr,
                                                                       sl_zigbee_gp_sink_list_entry_t *sinkList,

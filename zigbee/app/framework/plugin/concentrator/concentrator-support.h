@@ -77,23 +77,25 @@ void sli_zigbee_af_concentrator_stop_discovery(void);
  * @{
  */
 
-/** @brief Concentrator change router behavior
+/** @brief Enable/disable the node concentrator behavior.
  *
- * @param behavior concentrator router behavior Ver.: always
+ * @param[in] behavior concentrator router behavior.
  *
- * @return sl_status_t status
+ * @return An ::sl_status_t value that indicates the success or failure of the API call.
+ * - ::SL_STATUS_OK if successful.
+ * - ::SL_STATUS_NOT_AVAILABLE if the node is coordinator and behavior is switched to a non-concentrator.
+ * - ::SL_STATUS_INVALID_STATE if the behavior argument is invalid.
  */
 sl_status_t sl_zigbee_af_concentrator_change_router_behavior(sl_zigbee_af_plugin_concentrator_router_behavior_t behavior);
 
-/** @brief Concentrator source route discovery
+/** @brief Schedule a concentrator source route discovery.
  *
- * @return uint32_t
+ * @return Delay till the source route discovery is transmitted in quarter seconds.
  *
  */
 uint32_t sl_zigbee_af_concentrator_queue_discovery(void);
 
-/** @brief Concentrator stop source route discover
- *
+/** @brief Stop a concentrator source route discovery request.
  *
  */
 void sl_zigbee_af_concentrator_stop_discovery(void);

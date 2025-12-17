@@ -70,7 +70,7 @@ include:
   - path: coexistence/protocol/ieee802154_uc/coexistence-802154.h
   - path: coexistence/protocol/ieee802154_uc/coexistence-common-802154.h
   - path: rail_util_ant_div/sl_rail_util_ant_div.h
-- path: platform/radio/rail_lib/plugin/rail_util_ieee802154
+- path: platform/radio/rail_lib/plugin/sl_rail_util_ieee802154
   file_list:
   - path: sl_rail_util_ieee802154_stack_event.h
   condition:

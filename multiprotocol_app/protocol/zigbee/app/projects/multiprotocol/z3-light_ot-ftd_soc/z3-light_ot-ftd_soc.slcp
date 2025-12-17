@@ -225,3 +225,5 @@ tag:
   - hwfilter:ram:64k
   - hwfilter:!device:device_is_module
   - toolchain:gcc
+  - hwfilter:board:simple_button:btn1
+  - hwfilter:board:simple_led:led0

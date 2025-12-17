@@ -1,12 +1,10 @@
 /***************************************************************************//**
  * @file
- * @brief Device Query Service
+ * @brief Routines and definitions for the Device Query Service component,
+ *  which works in conjunction with the Device Database component to store
+ *  discovered devices. The Device Query Service component probes discovered
+ *  devices about their endpoint, descriptor, and cluster information.
  *
- * 1. After each device announce, add the device to a list of knonwn devices.
- * 2. Query the device for all Active Endpoints (Active Endpoint Request)
- * 3. Query each endpoint for its list of clusters and device information.
- *
- * Also periodically map the network to find all devices.
  *******************************************************************************
  * # License
  * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
@@ -42,6 +40,12 @@ static uint8_t currentEndpointIndex;
 
 #define PLUGIN_NAME "Device-Query-Service"
 
+#if (SL_ZIGBEE_AF_PLUGIN_DEVICE_QUERY_SERVICE_IGNORE_RX_OFF_WHEN_IDLE_DEVICES == 1)
+#define IGNORE_SLEEPIES true
+#else // (SL_ZIGBEE_AF_PLUGIN_DEVICE_QUERY_SERVICE_IGNORE_RX_OFF_WHEN_IDLE_DEVICES == 1)
+#define IGNORE_SLEEPIES false
+#endif // (SL_ZIGBEE_AF_PLUGIN_DEVICE_QUERY_SERVICE_IGNORE_RX_OFF_WHEN_IDLE_DEVICES == 1)
+
 #ifdef AUTO_START
   #define AUTO_START_BOOLEAN true
 #else
@@ -51,6 +55,7 @@ static bool enabled = AUTO_START_BOOLEAN;
 
 //#define DEBUG_ON
 #if defined(DEBUG_ON)
+extern const char* device_database_get_status_string(sl_zigbee_af_device_discovery_status_t status);
   #define debugPrintln(...) sl_zigbee_af_core_println(__VA_ARGS__)
   #define debugPrint(...) sl_zigbee_af_core_print(__VA_ARGS__)
   #define debugPrintEui64(eui64ToPrint) sl_zigbee_af_print_big_endian_eui64(eui64ToPrint)
@@ -144,15 +149,20 @@ static void scheduleEvent(bool withDelay)
   }
 }
 
-sl_status_t add_device_to_device_database(sl_802154_long_addr_t eui, uint8_t macCapabilities)
+sl_status_t sl_zigbee_af_device_query_service_discover_target(sl_802154_long_addr_t eui, uint8_t macCapabilities)
 {
+  if (IGNORE_SLEEPIES && (macCapabilities & RECEIVER_ON_WHEN_IDLE) == 0) {
+    sl_zigbee_af_core_println("%s ignoring addition of rx-off-when-idle device.", PLUGIN_NAME);
+    return SL_STATUS_INVALID_CONFIGURATION;
+  }
+
   sl_status_t status = sl_zigbee_af_device_database_add(eui, macCapabilities);
   if (status == SL_STATUS_FULL) {
     sl_zigbee_af_core_print("%s: WARNING: Device Database at maximum capacity, cannot add device", PLUGIN_NAME);
   } else if (status == SL_STATUS_ALREADY_EXISTS) {
     debugPrintln("%s: %02X%02X%02X%02X%02X%02X%02X%02X already registered\n",
-      PLUGIN_NAME,
-      eui[0], eui[1], eui[2], eui[3], eui[4], eui[5], eui[6], eui[7]);
+                 PLUGIN_NAME,
+                 eui[0], eui[1], eui[2], eui[3], eui[4], eui[5], eui[6], eui[7]);
   } else {
     const sl_zigbee_af_device_info_t* device = sl_zigbee_af_device_database_find_device_by_eui64(eui);
     if (device && device->status == SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_NEW) {
@@ -165,17 +175,6 @@ sl_status_t add_device_to_device_database(sl_802154_long_addr_t eui, uint8_t mac
     }
   }
   return status;
-}
-
-void sli_zigbee_af_device_query_service_key_establishment_cb(sl_802154_long_addr_t partner,
-                                                             sl_zigbee_key_status_t key_status)
-{
-  // We act only when a key is established. Intermediate states are ignored.
-  if (key_status != SL_ZIGBEE_TC_REQUESTER_VERIFY_KEY_SUCCESS) {
-    return;
-  }
-
-  (void)add_device_to_device_database(partner, 0xFF);  // Node Descriptor response will update capabilities
 }
 
 bool sli_zigbee_af_device_query_pre_zdo_message_received(sl_802154_short_addr_t sender,
@@ -197,7 +196,7 @@ bool sli_zigbee_af_device_query_pre_zdo_message_received(sl_802154_short_addr_t 
 
   if (apsFrame->clusterId == END_DEVICE_ANNOUNCE) {
     memmove(tempEui64, &(message[DEVICE_ANNOUNCE_EUI64_OFFSET]), EUI64_SIZE);
-    (void)add_device_to_device_database(tempEui64, message[DEVICE_ANNOUNCE_CAPABILITIES_OFFSET]);
+    (void)sl_zigbee_af_device_query_service_discover_target(tempEui64, message[DEVICE_ANNOUNCE_CAPABILITIES_OFFSET]);
     // returning true here will break the iaszoneclient.
     return false;
   } else if (apsFrame->clusterId == NODE_DESCRIPTOR_RESPONSE) {
@@ -221,8 +220,18 @@ bool sli_zigbee_af_device_query_pre_zdo_message_received(sl_802154_short_addr_t 
                                                                stackRevision,
                                                                capabilities);
 
+      if (IGNORE_SLEEPIES && (device->capabilities & RECEIVER_ON_WHEN_IDLE) == 0) {
+        sl_zigbee_af_core_print("%s device ", PLUGIN_NAME);
+        sl_zigbee_af_print_big_endian_eui64(currentEui64);
+        sl_zigbee_af_core_println(" is rx-off-when-idle. Skipping device.");
+        sl_zigbee_af_device_database_set_status(device->eui64, SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_DONE);
+        clearCurrentDevice();
+        scheduleEvent(RIGHT_NOW);
+        return false;
+      }
+
       sl_zigbee_af_device_database_set_status(device->eui64, SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_FIND_ENDPOINTS);
-      scheduleEvent(WITH_DELAY);
+      scheduleEvent(RIGHT_NOW);
     }
   }
   return false;
@@ -386,11 +395,12 @@ static void myEventHandler(sl_zigbee_af_event_t * event)
       debugPrintln("%s found device with status (0x%02X): %s",
                    PLUGIN_NAME,
                    device->status,
-                   sl_zigbee_af_device_database_get_status_string(device->status));
+                   device_database_get_status_string(device->status));
 
-      if ((device->capabilities & RECEIVER_ON_WHEN_IDLE) == 0) {
+      if (IGNORE_SLEEPIES && (device->capabilities & RECEIVER_ON_WHEN_IDLE) == 0) {
         sl_zigbee_af_device_database_set_status(device->eui64, SL_ZIGBEE_AF_DEVICE_DISCOVERY_STATUS_DONE);
         debugPrintln("%s ignoring sleepy device.", PLUGIN_NAME);
+        clearCurrentDevice();
         scheduleEvent(RIGHT_NOW);
         return;
       } else {
@@ -421,22 +431,23 @@ static void myEventHandler(sl_zigbee_af_event_t * event)
     return;
   }
 
-  // Although we could consult our local tables for addresses, we perform a broadcast
-  // lookup here to ensure that we have a current source route back to the destination.
-  // The target of the discovery will unicast the result, along with a route record.
   if (currentNodeId == SL_ZIGBEE_NULL_NODE_ID) {
-    debugPrint("%s initiating node ID discovery for: ", PLUGIN_NAME);
-    debugPrintEui64(currentEui64);
-    debugPrintln("");
-    sl_status_t status = sl_zigbee_af_find_node_id(currentEui64, serviceDiscoveryCallback);
+    sl_status_t status = sl_zigbee_lookup_node_id_by_eui64(currentEui64, &currentNodeId);
+    // If we're not able to tell who this is, send a broadcast node discovery
     if (status != SL_STATUS_OK) {
-      sl_zigbee_af_core_println("%s failed to initiate node ID discovery.", PLUGIN_NAME);
-      noteFailedDiscovery(device);
-      scheduleEvent(WITH_DELAY);
+      debugPrint("%s initiating node ID discovery for: ", PLUGIN_NAME);
+      debugPrintEui64(currentEui64);
+      debugPrintln("");
+      sl_status_t status = sl_zigbee_af_find_node_id(currentEui64, serviceDiscoveryCallback);
+      if (status != SL_STATUS_OK) {
+        sl_zigbee_af_core_println("%s failed to initiate node ID discovery.", PLUGIN_NAME);
+        noteFailedDiscovery(device);
+        scheduleEvent(WITH_DELAY);
+      }
+      // Else
+      //   Don't schedule event, since service discovery callback returns the results.
+      return;
     }
-    // Else
-    //   Don't schedule event, since service discovery callback returns the results.
-    return;
   }
 
   switch (device->status) {

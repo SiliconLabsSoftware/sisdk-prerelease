@@ -25,7 +25,7 @@ include:
   # TODO: temporary, clean this up
 - path: platform/radio/rail_lib/plugin
 - path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc
-- path: platform/radio/rail_lib/plugin/rail_util_ieee802154
+- path: platform/radio/rail_lib/plugin/sl_rail_util_ieee802154
   file_list:
   - path: sl_rail_util_ieee802154_phy_select.h
 

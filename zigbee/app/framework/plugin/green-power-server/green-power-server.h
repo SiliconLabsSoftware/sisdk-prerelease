@@ -26,7 +26,6 @@
  * @brief API and Callbacks for the Green Power Cluster Server Component
  *
  * A component implementing the server-side functionality of the Green Power cluster.
- *
  */
 
 /**
@@ -58,17 +57,20 @@
 #define CAR_DATA_POINT_OFFSET 1
 #define GP_DEFAULT_LINK_KEY { 0x5A, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6C, 0x6C, 0x69, 0x61, 0x6E, 0x63, 0x65, 0x30, 0x39 }
 
+/** @brief GP Server network state */
 typedef uint8_t sli_zigbee_gps_network_state_t;
+
 #ifdef DOXYGEN_SHOULD_SKIP_THIS
 enum GreenPowerServerGPSNodeState
 #else
 enum
 #endif
 {
-  GREEN_POWER_SERVER_GPS_NODE_STATE_NOT_IN_NETWORK,
-  GREEN_POWER_SERVER_GPS_NODE_STATE_IN_NETWORK
+  GREEN_POWER_SERVER_GPS_NODE_STATE_NOT_IN_NETWORK, /**< Node not in network */
+  GREEN_POWER_SERVER_GPS_NODE_STATE_IN_NETWORK /**< Node in network */
 };
 
+/** @brief Describes how the GP server accesses or updates the sink table. */
 typedef uint8_t sl_zigbee_af_gp_server_sink_table_access_type_t;
 #ifdef DOXYGEN_SHOULD_SKIP_THIS
 enum GreenPowerServerSinkTableAccessType
@@ -76,12 +78,13 @@ enum GreenPowerServerSinkTableAccessType
 enum
 #endif
 {
-  GREEN_POWER_SERVER_SINK_TABLE_ACCESS_TYPE_REMOVE_GPD, // 0 : Remove GPD from Sink Table
-  GREEN_POWER_SERVER_SINK_TABLE_ACCESS_TYPE_ADD_GPD,    // 1 : Add GPD in Sink Table
+  GREEN_POWER_SERVER_SINK_TABLE_ACCESS_TYPE_REMOVE_GPD, /**< Remove GPD from Sink Table */
+  GREEN_POWER_SERVER_SINK_TABLE_ACCESS_TYPE_ADD_GPD, /**< Add GPD in Sink Table */
 
-  GREEN_POWER_SERVER_SINK_TABLE_ACCESS_TYPE_UNKNOWN,
+  GREEN_POWER_SERVER_SINK_TABLE_ACCESS_TYPE_UNKNOWN, /**< Access type unknown */
 };
 
+/** @brief Represents the current state of GP sink commissioning. */
 typedef uint8_t sl_zigbee_sink_commission_state_t;
 #ifdef DOXYGEN_SHOULD_SKIP_THIS
 enum GPSinkCommState
@@ -89,14 +92,15 @@ enum GPSinkCommState
 enum
 #endif
 {
-  GP_SINK_COMM_STATE_IDLE,
-  GP_SINK_COMM_STATE_COLLECT_REPORTS,
-  GP_SINK_COMM_STATE_SEND_COMM_REPLY,
-  GP_SINK_COMM_STATE_WAIT_FOR_SUCCESS,
-  GP_SINK_COMM_STATE_FINALISE_PAIRING,
-  GP_SINK_COMM_STATE_PAIRING_DONE,
+  GP_SINK_COMM_STATE_IDLE, /**< Idle */
+  GP_SINK_COMM_STATE_COLLECT_REPORTS, /**< Collect reports */
+  GP_SINK_COMM_STATE_SEND_COMM_REPLY, /**< Send commissioning reply */
+  GP_SINK_COMM_STATE_WAIT_FOR_SUCCESS, /**< Wait for success */
+  GP_SINK_COMM_STATE_FINALISE_PAIRING, /**< Finalize pairing */
+  GP_SINK_COMM_STATE_PAIRING_DONE, /**< Pairing done */
 };
 
+/** @brief Specifies the type of timeout used during GP sink commissioning. */
 typedef uint8_t sl_zigbee_sink_commissioning_timeout_type_t;
 #ifdef DOXYGEN_SHOULD_SKIP_THIS
 enum CommissioningTimeoutType
@@ -104,11 +108,12 @@ enum CommissioningTimeoutType
 enum
 #endif
 {
-  COMMISSIONING_TIMEOUT_TYPE_GENERIC_SWITCH = 0,
-  COMMISSIONING_TIMEOUT_TYPE_MULTI_SENSOR = 1,
-  COMMISSIONING_TIMEOUT_TYPE_COMMISSIONING_WINDOW_TIMEOUT = 2
-}; // The commissioning timeout type.
+  COMMISSIONING_TIMEOUT_TYPE_GENERIC_SWITCH = 0, /**< Generic switch */
+  COMMISSIONING_TIMEOUT_TYPE_MULTI_SENSOR = 1, /**< Multi-sensor */
+  COMMISSIONING_TIMEOUT_TYPE_COMMISSIONING_WINDOW_TIMEOUT = 2 /**< Commissioning window timeout */
+};  // The commissioning timeout type.
 
+/** @brief Indicates the result or status of a GP sink pairing attempt. */
 typedef uint8_t sl_zigbee_sink_pairing_status_t;
 #ifdef DOXYGEN_SHOULD_SKIP_THIS
 enum PairingStatus
@@ -116,15 +121,16 @@ enum PairingStatus
 enum
 #endif
 {
-  SINK_PAIRING_STATUS_SUCCESS = 0,
-  SINK_PAIRING_STATUS_FAILURE = 1,
-  SINK_PAIRING_STATUS_IN_PROGRESS = 2,
-  SINK_PAIRING_STATUS_FAIL_NO_MATCHING_FUNCTIONALITY = 3,
-  SINK_PAIRING_STATUS_FAIL_ADDING_TRANSLATION = 4,
-  SINK_PAIRING_STATUS_FAIL_NO_SPACE_IN_SINK_TABLE = 5,
-  SINK_PAIRING_STATUS_FAIL_ENTRY_CORRUPTED = 6,
+  SINK_PAIRING_STATUS_SUCCESS = 0, /**< Success */
+  SINK_PAIRING_STATUS_FAILURE = 1, /**< Failure */
+  SINK_PAIRING_STATUS_IN_PROGRESS = 2, /**< In progress */
+  SINK_PAIRING_STATUS_FAIL_NO_MATCHING_FUNCTIONALITY = 3, /**< Failure (No matching functionality) */
+  SINK_PAIRING_STATUS_FAIL_ADDING_TRANSLATION = 4, /**< Failure (Adding translation) */
+  SINK_PAIRING_STATUS_FAIL_NO_SPACE_IN_SINK_TABLE = 5, /**< Failure (No space in sink table) */
+  SINK_PAIRING_STATUS_FAIL_ENTRY_CORRUPTED = 6, /**< Failure (Entry corrupted) */
 }; // The pairing status.
 
+/** @brief Identifies the source that triggered the pre-sink-pairing callback. */
 typedef uint8_t sl_zigbee_pre_sink_pairing_callback_source_t;
 #ifdef DOXYGEN_SHOULD_SKIP_THIS
 enum PreSinkPairingCallbackSource
@@ -132,33 +138,45 @@ enum PreSinkPairingCallbackSource
 enum
 #endif
 {
-  GP_PRE_SINK_PAIRING_CALLBACK_SOURCE_UNKNOWN = 0,
-  GP_PRE_SINK_PAIRING_CALLBACK_COMMISSONING_FINALIZE = 1,
-  GP_PRE_SINK_PAIRING_CALLBACK_PAIRING_CONFIGURATION = 2,
+  GP_PRE_SINK_PAIRING_CALLBACK_SOURCE_UNKNOWN = 0, /**< Unknown */
+  GP_PRE_SINK_PAIRING_CALLBACK_COMMISSONING_FINALIZE = 1, /**< Commissioning finalize */
+  GP_PRE_SINK_PAIRING_CALLBACK_PAIRING_CONFIGURATION = 2, /**< Pairing configuration */
 }; // The source of presink callback.
 
+/**
+ * @brief GP Server Commissioning State
+ */
 typedef struct {
-  bool sendGpPairingInUnicastMode;
-  bool unicastCommunication;
-  bool inCommissioningMode;
-  bool proxiesInvolved;
-  uint8_t endpoint;
+  bool sendGpPairingInUnicastMode;  /**< If GP Pairing shall be sent as unicast or broadcast */
+  bool unicastCommunication; /**< If Commissioning is unicast or broadcast */
+  bool inCommissioningMode; /**< If GP Server is in Commissioning Mode */
+  bool proxiesInvolved; /**< If GP Proxies are involved */
+  uint8_t endpoint; /**< GP endpoint ID */
 } sl_zigbee_af_green_power_server_commissioning_state_t;
 
+/** 
+ * @brief GPD Device-Command map entry
+ */
 typedef struct {
-  uint8_t deviceId;
-  const uint8_t * cmd;
+  uint8_t deviceId; /**< Device ID */
+  const uint8_t * cmd; /**< Pointer to command */
 }sli_zigbee_gp_device_id_and_command_map_t;
 
+/** 
+ * @brief GPD Device-Cluster map entry
+ */
 typedef struct {
-  uint8_t deviceId;
-  uint8_t numberOfClusters;
-  const uint16_t * cluster;
+  uint8_t deviceId; /**< Device ID */
+  uint8_t numberOfClusters; /**< Number of clusters */
+  const uint16_t * cluster; /**< Pointer to clusters */
 }sli_zigbee_gp_device_id_and_cluster_map_t;
 
+/** 
+ * @brief Zigbee cluster list entry
+ */
 typedef struct {
-  uint16_t clusterId;
-  bool serverClient;
+  uint16_t clusterId; /**< Cluster ID */
+  bool serverClient; /**< If cluster in server or client */
 }sli_zigbee_zigbee_cluster_t;
 
 // Structure to hold the information from commissioning command when received
@@ -200,6 +218,7 @@ typedef struct {
   sl_zigbee_pre_sink_pairing_callback_source_t preSinkCbSource;
 } sli_zigbee_gp_comm_data_saved_t;
 
+/** @brief Cached commissioning information for a Green Power Device (GPD). */
 typedef sli_zigbee_gp_comm_data_saved_t sl_zigbee_commissioning_gpd_t;
 
 extern sl_zigbee_af_event_t sl_zigbee_af_green_power_server_generic_switch_commissioning_timeout_event;
@@ -226,12 +245,13 @@ void sl_zigbee_af_green_power_server_commissioning_window_timeout_event_handler(
  * This is a helpful indicator of the commissioning progress
  * of a given GPD when multi GPDS are commissioning in a commissioning window.
  *
- * @param gpdAddr GPD address Ver.: always
+ * @param[in] gpdAddr GPD address
  *
- * @returns Information on the commissioning pointed by a structure
+ * @return Information on the commissioning pointed by a structure
  * sli_zigbee_gp_comm_data_saved_t type about the GPD.
  */
 sl_zigbee_commissioning_gpd_t * sl_zigbee_af_green_power_server_find_commissioning_gpd_instance(sl_zigbee_gp_address_t * gpdAddr);
+
 /** @brief Delete a GPD commissioning instance in a multiple GPD commissioning
  * session.
  *
@@ -241,10 +261,10 @@ sl_zigbee_commissioning_gpd_t * sl_zigbee_af_green_power_server_find_commissioni
  * This is a helpful way to remove unwanted GPD
  * instances in a multiple GPD commissioning session.
  *
- * @param gpdAddr GPD address Ver.: always
- *
+ * @param[in] gpdAddr GPD address
  */
 void sl_zigbee_af_green_power_server_delete_commissioning_gpd_instance(sl_zigbee_gp_address_t * gpdAddr);
+
 /** @brief Extend the commissioning window of a commissioning session.
  *
  * This is a helper function that sends out a proxy commissioning mode from the
@@ -252,19 +272,18 @@ void sl_zigbee_af_green_power_server_delete_commissioning_gpd_instance(sl_zigbee
  * parameters used previously in the proxy commissioning mode with action =
  * enter.
  *
- * @param commissioningWindow Commissioning window to be extended from this
- * point in time in seconds Ver.: always
- *
+ * @param[in] commissioningWindow Commissioning window to be extended from this
+ * point in time in seconds
  */
 void sl_zigbee_af_green_power_cluster_gp_sink_commissioning_window_extend(uint16_t commissioningWindow);
+
 /** @brief Get the commissioning state of the green power server.
  *
  * This function gets the commissioning state of the
  * green power server.
  *
- * @returns Server commissioning state and related parameters pointed by structure
- * sl_zigbee_af_green_power_server_commissioning_state_t Ver.: always
- *
+ * @return Server commissioning state and related parameters pointed by structure
+ * sl_zigbee_af_green_power_server_commissioning_state_t
  */
 sl_zigbee_af_green_power_server_commissioning_state_t *sl_zigbee_af_green_power_cluster_get_server_commissioning_sate(void);
 
@@ -273,16 +292,16 @@ sl_zigbee_af_green_power_server_commissioning_state_t *sl_zigbee_af_green_power_
  * This function derives the shared key used in green
  * power server side using the respective security attribute values.
  *
- * @param gpsSecurityKeyTypeAtrribute Security key type attribute as input
- * @param gpSharedKeyAttribute Security key attribute as output
- * @param gpdAddr GPD address
+ * @param[in] gpsSecurityKeyTypeAtrribute Security key type attribute
+ * @param[out] gpSharedKeyAttribute Security key attribute
+ * @param[in] gpdAddr GPD address
  *
- * @returns Status of the key derivation Ver.: always
- *
+ * @return Status of the key derivation
  */
 sl_zigbee_af_status_t sl_zigbee_af_green_power_server_derive_shared_key_from_sink_attribute(uint8_t * gpsSecurityKeyTypeAtrribute,
                                                                                             sl_zigbee_key_data_t * gpSharedKeyAttribute,
                                                                                             sl_zigbee_gp_address_t * gpdAddr);
+
 /** @brief Clears the entry for a GPD in sink table.
  *
  * This function clears the entries in the sink table for a given gpd.
@@ -294,9 +313,7 @@ sl_zigbee_af_status_t sl_zigbee_af_green_power_server_derive_shared_key_from_sin
  * it clears all the entry for that GPD with supplied EUI64.
  * With clear up the gpd from sink table it also clears the translation table for that GPD.
  *
- * @param gpdAddr GPD address Ver.: always
- *
- *
+ * @param[in] gpdAddr GPD address
  */
 void sl_zigbee_af_green_power_server_remove_sink_entry(sl_zigbee_gp_address_t *gpdAddr);
 
@@ -308,11 +325,12 @@ void sl_zigbee_af_green_power_server_remove_sink_entry(sl_zigbee_gp_address_t *g
  * from the server side to all proxies in the network. It internally uses the same
  * parameters used previously in the proxy commissioning mode entered but with action as "exit".
  *
- *  @returns Status of the command as true when success or there is no open commissioning window.
- *           Returns false for failure of the command for any reason or there is any GPD that is still
- *           undergoing commissioning process or a failure. Ver.: always
+ * @return Status of the command as true when success or there is no open commissioning window.
+ * Returns false for failure of the command for any reason or there is any GPD that is still
+ * undergoing commissioning process or a failure.
  */
 bool sl_zigbee_af_green_power_cluster_gp_sink_close_commissioning_window(void);
+
 /** @} */ // end of name API
 
 /**
@@ -332,99 +350,100 @@ bool sl_zigbee_af_green_power_cluster_gp_sink_close_commissioning_window(void);
  * @{
  */
 
-/** @brief Green power server commissioning timeout callback.
+/** @brief Green Power Server commissioning timeout callback.
  *
  * This function is called by the Green Power Server upon expiration of any of the
  * commissioning timers, which can be server commissioning window, generic
  * switch commissioning, or multi-sensor commissioning timer expiration.
  *
- * @param commissioningTimeoutType one of the types
+ * @param[in] commissioningTimeoutType one of the types
  *                     COMMISSIONING_TIMEOUT_TYPE_COMMISSIONING_WINDOW_TIMEOUT,
  *                     COMMISSIONING_TIMEOUT_TYPE_GENERIC_SWITCH
- *                     or COMMISSIONING_TIMEOUT_TYPE_MULTI_SENSOR Ver.: always
- * @param numberOfEndpoints Number of sink endpoints participated in the commissioning Ver.: always
- * @param endpoints list of sink endpoints Ver.: always
+ *                     or COMMISSIONING_TIMEOUT_TYPE_MULTI_SENSOR
+ * @param[in] numberOfEndpoints Number of sink endpoints participated in the commissioning
+ * @param[in] endpoint List of sink endpoints
  */
 void sl_zigbee_af_green_power_server_commissioning_timeout_cb(uint8_t commissioningTimeoutType,
                                                               uint8_t numberOfEndpoints,
                                                               uint8_t * endpoint);
 
-/** @brief Green power server pairing complete callback.
+/** @brief Green Power Server pairing complete callback.
  *
  * This function is called by the Green Power Server upon the completion of the pairing
  * to indicate the closure of the pairing session.
  *
- * @param numberOfEndpoints number of sink endpoints participated in the pairing Ver.: always
- * @param endpoints list of sink endpoints Ver.: always
+ * @param[in] numberOfEndpoints Number of sink endpoints participated in the pairing
+ * @param[in] endpoints List of sink endpoints
  */
 void sl_zigbee_af_green_power_server_pairing_complete_cb(uint8_t numberOfEndpoints,
                                                          uint8_t * endpoint);
 
 /** @brief Sink table access notification callback.
  *
- * This function is called by the green power server plugin to notify the
+ * This function is called by the Green Power Server plugin to notify the
  * application about Green Power Device addition or removal by the green power
  * server to the Sink Table. If returned false, the sink table remains un-accessed.
  *
- * @param data void pointer to the data Ver.: always
- * @param accessType accessType         Ver.: always
+ * @param[in] data Pointer to data
+ * @param[in] accessType Access type        
  *
- * @returns true if the access is granted.
+ * @return true if the access is granted.
  */
 bool  sl_zigbee_af_green_power_server_sink_table_access_notification_cb(void* data,
                                                                         sl_zigbee_af_gp_server_sink_table_access_type_t accessType);
-/** @brief Green power server commissioning callback.
+
+/** @brief Green Power Server commissioning callback.
  *
- * This function is called by the green power server plugin to notify the
+ * This function is called by the Green Power Server plugin to notify the
  * application of a Green Power Device that has requested commissioning with
  * this sink. Returns false if callback is not handled, true if callback is handled.
  * When the callback is handled, it must set the matchFound argument appropriately
  * to indicate if the matching functionality is found on the sink or not.
  *
- * @param appInfo   Application information of the commissioning GPD. Ver.: always
- * @param matchFound Output flag to notify matching functionality. Ver.: always
+ * @param[in] appInfo Application information of the commissioning GPD.
+ * @param[out] matchFound Output flag to notify matching functionality.
  *
- * @returns true if application handled it Ver.: always
+ * @return True if application handled it
  */
 bool sl_zigbee_af_green_power_server_gpd_commissioning_cb(sl_zigbee_gp_application_info_t * appInfo,
                                                           bool* matchFound);
 
-/** @brief Green power server security failure callback.
+/** @brief Green Power Server security failure callback.
  *
- * This function is called by the green power server plugin to notify the
+ * This function is called by the Green Power Server plugin to notify the
  * application of a Green Power Security Processing failed for an incoming notification.
  *
- * @param gpdAddr   Ver.: always
+ * @param[in] gpdAddr  
  */
 void sl_zigbee_af_green_power_server_gpd_security_failure_cb(sl_zigbee_gp_address_t *gpdAddr);
 
-/** @brief Green power server update involved TC callback.
+/** @brief Green Power Server update involved TC callback.
  *
  * This function is called by the Green Power Server to proceed with updating the InvolveTC bit
  * of the security level attribute.
  *
- * @param status   Ver.: always
+ * @param[in] status  
  *
- * @returns true if application handled it and plugin will not process it  Ver.: always
+ * @return True if application handled it and plugin will not process it 
  */
 bool sl_zigbee_af_green_power_server_update_involve_t_c_cb(sl_status_t status);
 
-/** @brief Green power server notification forward callback.
+/** @brief Green Power Server notification forward callback.
  *
- * This function is called by the green power server plugin to notify the
- * application of a Green Power Gp Notification of an incoming gpd command.
+ * This function is called by the Green Power Server plugin to notify the
+ * application of a Green Power Gp Notification of an incoming GPD command.
  * Return true to handle in application.
  *
- * @param options from the incoming Gp Notification Command Ver.: always
- * @param addr GPD address        Ver.: always
- * @param gpdSecurityFrameCounter Ver.: always
- * @param gpdCommandId            Ver.: always
- * @param gpdCommandPayload first byte is length of the payload Ver.: always
- * @param gppShortAddress         Ver.: always
- * @param gppDistance             Ver.: always
+ * @param[in] options from the incoming Gp Notification Command
+ * @param[in] addr GPD address
+ * @param[in] gpdSecurityFrameCounter GPD Security Frame Counter
+ * @param[in] gpdCommandId GPD Command ID
+ * @param[in] gpdCommandPayload GPD Command payload (first byte is length of the payload)
+ * @param[in] gppShortAddress GPP Short Address
+ * @param[in] gppDistance GPP Distance
  *
- * @returns true if application handled it and plugin will not process it anymore.
- * else return false to process the notification by the plugin  Ver.: always
+ * @return True if application handled it and plugin will not process it anymore, 
+ * else return False to process the notification by the plugin 
  */
 bool sl_zigbee_af_green_power_cluster_gp_notification_forward_cb(uint16_t options,
                                                                  sl_zigbee_gp_address_t * addr,
@@ -434,28 +453,28 @@ bool sl_zigbee_af_green_power_cluster_gp_notification_forward_cb(uint16_t option
                                                                  uint16_t gppShortAddress,
                                                                  uint8_t  gppDistance);
 
-/** @brief Green power commissioning notification callback.
+/** @brief Green Power Commissioning notification callback.
  *
- * This function is called by the green power server plugin to notify the
- * application about gp commissioning notification received by the sink.
- * If the this function returns false indicating application does not handle
+ * This function is called by the Green Power Server plugin to notify the
+ * application about Gp Commissioning notification received by the sink.
+ * If this function returns false indicating application does not handle
  * the notification, the plugin will handle. If this returns true, the plugin
  * will skip processing of the commissioning notification.
  *
- * @param commandId                    Ver.: always
- * @param commNotificationOptions      Ver.: always
- * @param gpdAddr                      Ver.: always
- * @param gpdSecurityFrameCounte       Ver.: always
- * @param gpdCommandId                 Ver.: always
- * @param gpdCommandPayload            Ver.: always
- * @param gppShortAddress              Ver.: always
- * @param rssi                         Ver.: always
- * @param linkQuality                  Ver.: always
- * @param gppDistance                  Ver.: always
- * @param commissioningNotificationMic Ver.: always
+ * @param[in] commandId Command ID
+ * @param[in] commNotificationOptions Commissioning notification options
+ * @param[in] gpdAddr GPD address
+ * @param[in] gpdSecurityFrameCounter GPD Security Frame Counter
+ * @param[in] gpdCommandId GPD Command ID
+ * @param[in] gpdCommandPayload GPD Command payload (first byte is length of the payload)
+ * @param[in] gppShortAddress GPP Short Address
+ * @param[in] rssi RSSI
+ * @param[in] linkQuality Link quality
+ * @param[in] gppDistance GPP Distance
+ * @param[in] commissioningNotificationMic MIC of commissioning notification
  *
- * @returns true if application handles it and plugin will not process it anymore.
- * else return false to process the notification by the plugin  Ver.: always
+ * @return True if the user application wishes to consume the message and have the stack ignore 
+ * the message, false otherwise, meaning the stack will process the GP Commissioning notification.
  */
 bool sl_zigbee_af_green_power_server_gpd_commissioning_notification_cb(uint8_t commandId,
                                                                        uint16_t commNotificationOptions,
@@ -471,16 +490,15 @@ bool sl_zigbee_af_green_power_server_gpd_commissioning_notification_cb(uint8_t c
 
 /** @brief Sink commissioning enter call status notification callback.
  *
- * This function is called by the green power server plugin from the sink
+ * This function is called by the Green Power Server plugin from the sink
  * commissioning enter command to notify the application of the status of the
  * proxy commissioning enter message submission to network layer.
  *
- * @param commissioningState Sink commissioning state Ver.: always
- * @param apsFrame aps frame header        Ver.: always
- * @param messageType unicast or broadcast Ver.: always
- * @param destination destination node     Ver.: always
- * @param status status of the network submission Ver.: always
- *
+ * @param[in] commissioningState Sink commissioning state
+ * @param[in] apsFrame APS frame header       
+ * @param[in] messageType Unicast or broadcast
+ * @param[in] destination Destination node    
+ * @param[in] status Status of the network submission
  */
 void sl_zigbee_af_green_power_cluster_commissioning_message_status_notification_cb(sl_zigbee_af_green_power_server_commissioning_state_t *commissioningState,
                                                                                    sl_zigbee_aps_frame_t *apsFrame,
@@ -493,43 +511,44 @@ void sl_zigbee_af_green_power_cluster_commissioning_message_status_notification_
  * This function is called by the green power server plugin during
  * commissioning to update alias information from user.
  *
- * @param gpdAddr GPD address Ver.: always
- * @param alias        Ver.: always
+ * @param[in] gpdAddr GPD address
+ * @param[in,out] alias Alias
  *
- * @returns true if the alias is updated by the caller.
+ * @return True if the alias is updated by the caller
  */
 bool sl_zigbee_af_green_power_server_update_alias_cb(sl_zigbee_gp_address_t *gpdAddr,
                                                      uint16_t *alias);
-/** @brief Green power server pairing complete callback
+
+/** @brief Green Power Server pairing complete callback.
  *
  * This function is called by the Green Power Server plugin during the pairing
  * process to indicate the status. This may be called multiple times for a single
  * pairing session. This provides the status as well as the current GPD context.
  * This callback can be monitored to get information in case a GPD commissioning
  * that has started ended up in success or failure. This callback does not give
- * any information about a commissioning GPDF that gets filtered out ealier in the
+ * any information about a commissioning GPDF that gets filtered out earlier in the
  * commissioning processing.
  *
- * @param status status of the pairing Ver.: always
- * @param commissioningGpd context of the GPD that is currently commissioning Ver.: always
+ * @param[in] status Status of the pairing
+ * @param[in] commissioningGpd Context of the GPD that is currently commissioning
  */
 void sl_zigbee_af_green_power_server_pairing_status_cb(sl_zigbee_sink_pairing_status_t status,
                                                        sl_zigbee_commissioning_gpd_t *commissioningGpd);
 
-/** @brief Green power server update sink list callback
+/** @brief Green power server update sink list callback.
  *
- * This callback is called by the green power server at a final stagee during pairing process.
+ * This callback is called by the green power server at a final stage during pairing process.
  * At this point the commissioning sink is ready to be saved or updated into the sink table
  * and GpPairing announcement. This callback is helpful to supply or update the associated
  * parameters to the sink entry.
- * For example, a sink application can update a group list groupcast comminication.
+ * For example, a sink application can update a group list groupcast communication.
  *
- *
- * @param commissioningGpd context of the GPD that is currently commissioning Ver.: always
+ * @param[in] commissioningGpd Context of the GPD that is currently commissioning
  */
 void sl_zigbee_af_green_power_server_pre_sink_pairing_cb(sl_zigbee_commissioning_gpd_t *commissioningGpd);
 
 /** @} */ // end of gp_server_cb
+
 /** @} */ // end of name Callbacks
 
 /** @} */ // end of green-power-server
@@ -538,6 +557,8 @@ void sl_zigbee_af_green_power_server_pre_sink_pairing_cb(sl_zigbee_commissioning
  * Disable default response bit should be set per GP Spec 14-0563-08
  */
 extern bool sl_zigbee_af_green_power_cluster_gp_proxy_commissioning_mode_cb(sl_zigbee_af_cluster_command_t *cmd);
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 // security function prototypes
 bool sli_zigbee_af_gp_key_tc_lk_derivation(sl_zigbee_gp_address_t * gpdAddr,
@@ -589,5 +610,7 @@ void sli_zigbee_af_gp_forward_gpd_command_default(sl_zigbee_gp_address_t *addr,
 void sl_zigbee_af_green_power_server_sink_table_init(void);
 
 bool isCommissioningAppEndpoint(uint8_t endpoint);
+
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 #endif //_GREEN_POWER_SERVER_H_

@@ -51,3 +51,12 @@ void sli_zigbee_af_device_query_service_status_command(sl_cli_command_arg_t *arg
                              ? ""
                              : device_database_get_status_string(device->status)));
 }
+
+void sli_zigbee_af_device_query_service_discover_command(sl_cli_command_arg_t *arguments)
+{
+  sl_802154_long_addr_t eui64;
+  sl_zigbee_copy_eui64_arg(arguments, 0, eui64, true);
+  (void)sl_zigbee_af_device_database_erase_device(eui64);
+  sl_status_t status = sl_zigbee_af_device_query_service_discover_target(eui64, 0xFF); // Node Descriptor will update device capabilities
+  sl_zigbee_af_core_println("Discover device: 0x%02X", status);
+}
