@@ -99,11 +99,11 @@ component_path:
 - path: printf/component
 - path: proprietary_default_radio_confs/.
 - path: protocol_user_sequencer_internal/component/protocol_user_sequencer_internal
-- path: rail_sdk/component
-- path: rail_internal/component/rail_internal
-- path: rail_library_internal_chips/component/rail_library_internal_chips
-- path: rail_library_alpha_chips/component/rail_library_alpha_chips
 - path: rail_library/component/rail_library
+- path: rail_library_alpha_chips/component/rail_library_alpha_chips
+- path: rail_sdk/component
+- path: rail_library_internal_chips/component/rail_library_internal_chips
+- path: rail_internal/component/rail_internal
 - path: realtime_locationing/component
 - path: rv2_framework_internal/component
 - path: security_mbedtls_source/component
@@ -127,13 +127,6 @@ component_path:
 - path: zigbee_smart_energy/component
 - path: zigbee_sleepy_to_sleepy/component
 - path: zigbee_sleepy_to_sleepy/app/framework/component
-- path: zigbee_internal/platform/radio/mac/component
-- path: zigbee_internal/platform/radio/rail_lib/plugin/component
-- path: zigbee_internal/component
-- path: zigbee_internal/util/plugin/component
-- path: zigbee_internal/util/silicon_labs/silabs_core/component
-- path: zigbee_internal/app/framework/component
-- path: zigbee_internal/platform/service/component
 - path: zigbee/platform/radio/mac/component
 - path: zigbee/platform/radio/rail_lib/plugin/component
 - path: zigbee/component
@@ -141,6 +134,13 @@ component_path:
 - path: zigbee/util/silicon_labs/silabs_core/component
 - path: zigbee/app/framework/component
 - path: zigbee/platform/service/component
+- path: zigbee_internal/platform/radio/mac/component
+- path: zigbee_internal/platform/radio/rail_lib/plugin/component
+- path: zigbee_internal/component
+- path: zigbee_internal/util/plugin/component
+- path: zigbee_internal/util/silicon_labs/silabs_core/component
+- path: zigbee_internal/app/framework/component
+- path: zigbee_internal/platform/service/component
 - path: zwave/component
 - path: zwave/component/CommandClasses
 - path: zwave/component-internal
@@ -163,9 +163,9 @@ documentation:
   version: 4.2.0
 - docset: openthread
   version: 3.0.0
-- docset: platform_nwp_siwx91x
-  version: 4.0.0
 - docset: platform_siwx91x
+  version: 4.0.0
+- docset: platform_nwp_siwx91x
   version: 4.0.0
 - docset: rail
   version: 3.0.0
@@ -175,9 +175,9 @@ documentation:
   version: 2.7.0
 - docset: protocol-usb
   version: 1.6.0
-- docset: wifi_sqa_internal
-  version: 4.0.0
 - docset: wifi
+  version: 4.0.0
+- docset: wifi_sqa_internal
   version: 4.0.0
 - docset: wisun
   version: 2.10.0
