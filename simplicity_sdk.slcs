@@ -149,12 +149,12 @@ toolchain_mapping: toolchains.slct
 documentation:
 - docset: machine-learning
   version: 2.2.0
-- docset: bluetooth_le_siwx91x
-  version: 4.0.0
 - docset: btmesh
   version: 10.0.0
 - docset: btmesh-service-api
   version: 10.0.0
+- docset: bluetooth_le_siwx91x
+  version: 4.0.0
 - docset: bluetooth
   version: 11.0.0
 - docset: mcu-bootloader
@@ -163,9 +163,9 @@ documentation:
   version: 4.2.0
 - docset: openthread
   version: 3.0.0
-- docset: platform_siwx91x
-  version: 4.0.0
 - docset: platform_nwp_siwx91x
+  version: 4.0.0
+- docset: platform_siwx91x
   version: 4.0.0
 - docset: rail
   version: 3.0.0
