@@ -150,6 +150,7 @@ tag:
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_supports_thread
   - hwfilter:!device:device_family_efr32mr21
+  - toolchain:gcc
 
 readme:
   - path: ./README-OT-NCP-BLE-RCP.md

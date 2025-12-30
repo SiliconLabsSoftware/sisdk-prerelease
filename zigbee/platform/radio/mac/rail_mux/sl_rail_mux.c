@@ -640,9 +640,6 @@ sl_rail_status_t sl_rail_mux_StartRx(sl_rail_handle_t railHandle,
   uint8_t context_index = fn_get_context_index(railHandle);
   EFM_ASSERT(context_index < SUPPORTED_PROTOCOL_COUNT);
   sl_rail_status_t ret_status = SL_RAIL_STATUS_NO_ERROR;
-  if (tx_in_progress()) {
-    return ret_status;
-  }
 
   RAIL_MUX_ENTER_CRITICAL();
 
@@ -655,7 +652,7 @@ sl_rail_status_t sl_rail_mux_StartRx(sl_rail_handle_t railHandle,
   SET_CHANNEL_SWITCHING_CFG_CH(context_index, channel);
 
   // Check to ensure lock is not active before acting on startRx
-  if ( check_lock_permissions(context_index)) {
+  if ( check_lock_permissions(context_index) && !tx_in_progress()) {
     #if !defined(SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT) && !defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT)
     if (!fn_get_context_flag_by_index(context_index, RAIL_MUX_PROTOCOL_FLAGS_LOCK_ACTIVE)) {
       if (rx_channel != INVALID_CHANNEL && rx_channel != channel) {
