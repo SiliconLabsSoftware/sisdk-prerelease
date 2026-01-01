@@ -3,6 +3,8 @@
 
 ![](image/esltag.png)
 
+> Note: this example does not include Device Firmware Update (DFU) functionality by default. For details see the Device Firmware Update section.
+
 This sample application is a reference implementation of the recently released Bluetooth SIG Electronic Shelf Label specification for prototype hardware designed by Silicon Labs.
 The example is a showcase of the ESL specification, tested on BRD4182A radio board, but recommended for any BG22 devices. It provides optional, configurable components to customize the project according to your product requirements.
 
@@ -158,9 +160,9 @@ These newly added sensors then need to be handled by the *esl\_sensor\_custom\_r
 
 ### Using application-level over-the-air device firmware update method
 
-By default, the *Bluetooth - SoC ESL Tag* example utilizes the *In-Place OTA DFU* component to provide OTA firmware upgrade capability. Please refer to the [Troubleshooting](#troubleshooting) section for details on which bootloader to use in that case. This OTA method has a drawback that an unsuccessful upgrade attempt may render the device inoperable while it is simpler to use, overall. For more robust operation, though, the so called *Application OTA DFU* component is also provided. However, this component will require a different bootloader type that has to be carefully configured.
+The *Bluetooth - SoC ESL Tag* example does not include OTA DFU functionality by default. For basic OTA firmware upgrade capability, you can add the *In-Place OTA DFU* component (see the Device Firmware Update section). This OTA method has a drawback that an unsuccessful upgrade attempt may render the device inoperable while it is simpler to use, overall. For more robust operation, though, the *Application OTA DFU* component is also provided. However, this component will require a different bootloader type that has to be carefully configured.
 
-You must first remove the *In-Place OTA DFU* component from the project before adding the *Application OTA DFU* and then rebuilding in order to use the new method. After the new firmware has been successfully flashed, the device won't function properly until the bootloader has been also updated appropriately.
+To use the *Application OTA DFU* component, add it to your project and then rebuild. If you previously added the *In-Place OTA DFU* component, remove it first before adding *Application OTA DFU*. After the new firmware has been successfully flashed, the device won't function properly until the bootloader has been also updated appropriately.
 
 To have a proper bootloader for the **Bluetooth - SoC ESL Tag** example with *Application OTA DFU* component on a BG22 MCU based device as an example, you have to create a bootloader project first in Simplicity Studio, then configure it as follows:
 - Create a **Bootloader - SoC Internal Storage (single image on 512kB device)** project.
@@ -175,13 +177,29 @@ After successfully flashing the new bootloader that supports LZMA compression an
 
 As for the OTA upgrading process, please refer to [UG435.06: Bootloading and OTA with Silicon Labs Connect v3.x](https://www.silabs.com/documents/public/user-guides/ug435-06-bootloading-and-ota-with-connect-v3x.pdf).
 
+## Device Firmware Update
+
+This example project does not include Device Firmware Update (DFU) functionality by default.
+
+To add DFU to an existing project:
+- Add the `Bootloader Interface` component to your project using Simplicity Studio's Software Component browser.
+- Add a post-build step to generate the GBL (Gecko Bootloader) file using Simplicity Studio's Post Build Editor.
+- Rebuild the project.
+- Flash the `Bootloader - SoC Apploader OTA DFU` bootloader to the device (for Series 2 devices).
+
+See the example solution for reference.
+
+For application-level OTA DFU, see the "Using application-level over-the-air device firmware update method" section above.
+
+For more information on bootloaders, see [UG103.6: Bootloader Fundamentals](https://www.silabs.com/documents/public/user-guides/ug103-06-fundamentals-bootloading.pdf) and [UG489: Silicon Labs Gecko Bootloader User's Guide for GSDK 4.0 and Higher](https://www.silabs.com/documents/public/user-guides/ug489-gecko-bootloader-user-guide-gsdk-4.pdf).
+
 ## Troubleshooting
 
-Note that __NO__ Bootloader is included in any Software Example projects, but they are configured so, that they expect a bootloader to be present on the device. To get your application to work, you should either
-- flash a bootloader (*Bootloader - SoC Bluetooth AppLoader OTA DFU* project, in case of the default *In-place OTA DFU* component) to the device or
-- uninstall the **In-place OTA DFU** and **Bootloader Application Interface** software components.
-- When you flash your application image to the device, use the *.hex* or *.s37* output file. Flashing *.bin* files may overwrite (erase) the bootloader!
-- For more information, see *[UG103: Bootloading fundamentals](https://www.silabs.com/documents/public/user-guides/ug103-06-fundamentals-bootloading.pdf)* and *[UG266: Silicon Labs Gecko Bootloader User's Guide](https://www.silabs.com/documents/public/user-guides/ug266-gecko-bootloader-user-guide.pdf)*.
+Note that __NO__ Bootloader is included in this example project by default. The application works without a bootloader, but if you wish to enable OTA firmware update capability, refer to the Device Firmware Update section above for instructions on adding the necessary components and bootloader.
+
+Important notes:
+- When you flash your application image to the device, use the *.hex* or *.s37* output file. Flashing *.bin* files may overwrite (erase) the bootloader if one is present!
+- For more information on bootloaders, see *[UG103: Bootloading fundamentals](https://www.silabs.com/documents/public/user-guides/ug103-06-fundamentals-bootloading.pdf)* and *[UG489: Silicon Labs Gecko Bootloader User's Guide for GSDK 4.0 and Higher](https://www.silabs.com/documents/public/user-guides/ug489-gecko-bootloader-user-guide-gsdk-4.pdf)*.
 
 Before programming the radio board mounted on the WSTK, make sure the power supply switch the AEM position (right side) as shown below.
 
