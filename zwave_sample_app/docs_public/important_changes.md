@@ -7,6 +7,10 @@ existing application. The description serves the purpose of helping to fix the f
 
 Version has been bumped to 8.0.0 to reflect the major changes in the stack. In the future the stack version will follow the semantic versioning convention.
 
+## v255 firmware images
+
+From this release v255 firmware images are no longer available in Simplicity Studio. Manual generation of v255 firmware images is still possible from the example projects.
+
 ## Frequently Listening Node Inclusion
 
 Fixed a bug where the controller would not store beam routes during inclusion, which could cause frequently listening nodes to become unjoinable if they stopped the inclusion process early. The controller now stores beam routes immediately during inclusion. As a result, the controller may beam the frequently listening node during inclusion even when not strictly necessary, potentially adding a slight delay to the inclusion process.

@@ -46,6 +46,7 @@ Alternatively, you can follow the steps below instead of steps 3-5 to use the He
 ![Alternative 3](image/readme_img9.png)
 
 ## Device Firmware Update
+
 This example project does not include Device Firmware Update (DFU) functionality by default, but it can be added easily.
 SoC applications can use one of Silicon Labs' Over-the-Air (OTA) DFU implementations. The table below summarizes the options:
 

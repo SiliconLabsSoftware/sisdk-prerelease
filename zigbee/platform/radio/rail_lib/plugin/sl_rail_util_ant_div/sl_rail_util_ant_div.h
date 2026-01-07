@@ -28,62 +28,15 @@
 #endif
 
 #if !defined(SL_ZIGBEE_TEST) && !defined(ZIGBEE_STACK_ON_HOST)
-#ifdef  SL_CATALOG_SL_RAIL_UTIL_ANT_DIV_PRESENT
 #include "sl_rail.h"
-#else//!SL_CATALOG_SL_RAIL_UTIL_ANT_DIV_PRESENT
 #include "rail.h"
-#endif//SL_CATALOG_SL_RAIL_UTIL_ANT_DIV_PRESENT
 #endif
 
 #include "sl_status.h"
 
-#ifdef SL_COMPONENT_CATALOG_PRESENT
-#include "sl_component_catalog.h"
-#endif // SL_COMPONENT_CATALOG_PRESENT
-
-#ifdef SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
-#include "sl_rail_util_ant_div_config.h"
-#endif // SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/**
- * @brief Determines if the default antenna diversity PHY should be enabled.
- *
- * This macro evaluates whether antenna diversity PHY should be considered enabled by default.
- * It checks if the default antenna receive mode is not disabled or if IEEE802.15.4 fast channel
- * switching is enabled. If either condition is true, antenna diversity PHY is enabled by default.
- */
-#define ANT_DIV_PHY_DEFAULT_ENABLED                                             \
-  ((SL_RAIL_UTIL_ANTENNA_RX_DEFAULT_MODE != SL_RAIL_UTIL_ANTENNA_MODE_DISABLED) \
-   || SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_ENABLED)
-
-/**
- * @brief Provides the default PHY features for IEEE802.15.4 with antenna diversity.
- *
- * This macro selects the appropriate PHY feature set for 2.4 GHz based on whether
- * antenna diversity PHY is enabled by default. If antenna diversity PHY is enabled,
- * it returns the feature set for 2.4 GHz with antenna diversity support; otherwise,
- * it returns the standard 2.4 GHz PHY feature set.
- */
-#define SL_RAIL_IEEE802154_DEFAULT_PHY_FEATURES_ANT_DIV \
-  (ANT_DIV_PHY_DEFAULT_ENABLED                          \
-   ? SL_RAIL_IEEE802154_PHY_FEATURE_2P4_GHZ_ANT_DIV     \
-   : SL_RAIL_IEEE802154_PHY_FEATURE_2P4)
-
-/**
- * @brief Retrieves the runtime PHY features for IEEE802.15.4 with antenna diversity.
- *
- * This macro checks if the antenna diversity receive runtime PHY selection is active.
- * If it is active, it returns the 2.4 GHz PHY feature set with antenna diversity support;
- * otherwise, it returns the standard 2.4 GHz PHY feature set.
- */
-#define SL_RAIL_IEEE802154_RUNTIME_PHY_FEATURES_ANT_DIV \
-  (SL_RAIL_UTIL_ANT_DIV_RX_RUNTIME_PHY_SELECT           \
-   ? SL_RAIL_IEEE802154_PHY_FEATURE_2P4_GHZ_ANT_DIV     \
-   : SL_RAIL_IEEE802154_PHY_FEATURE_2P4)
 
 /**
  * @brief Retrieves the PHY features configuration based on the antenna diversity setting.
@@ -124,20 +77,6 @@ typedef int8_t sl_rail_util_antenna_selection_t;
 #define SL_RAIL_UTIL_ANTENNA_SELECT_ANTENNA1 1 /**< Select antenna 1 */
 #define SL_RAIL_UTIL_ANTENNA_SELECT_ANTENNA2 2 /**< Select antenna 2 */
 //@} //END OF ANTENNA SELECTION
-
-// Establish Tx default mode
-#ifdef  SL_RAIL_UTIL_ANT_DIV_TX_MODE
-  #define SL_RAIL_UTIL_ANTENNA_TX_DEFAULT_MODE SL_RAIL_UTIL_ANT_DIV_TX_MODE
-#else//!SL_RAIL_UTIL_ANT_DIV_TX_MODE
-  #define SL_RAIL_UTIL_ANTENNA_TX_DEFAULT_MODE SL_RAIL_UTIL_ANTENNA_MODE_DIVERSITY
-#endif//SL_RAIL_UTIL_ANT_DIV_TX_MODE
-
-// Establish Rx default mode
-#ifdef  SL_RAIL_UTIL_ANT_DIV_RX_MODE
-  #define SL_RAIL_UTIL_ANTENNA_RX_DEFAULT_MODE SL_RAIL_UTIL_ANT_DIV_RX_MODE
-#else//!SL_RAIL_UTIL_ANT_DIV_RX_MODE
-  #define SL_RAIL_UTIL_ANTENNA_RX_DEFAULT_MODE SL_RAIL_UTIL_ANTENNA_MODE_DISABLED
-#endif//SL_RAIL_UTIL_ANT_DIV_RX_MODE
 
 // Backwards compatibility macros
 #define sl_rail_util_ant_div_set_antenna_mode(mode) \

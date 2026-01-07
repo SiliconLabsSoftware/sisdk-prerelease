@@ -3,10 +3,10 @@
 
 ![](image/esltag.png)
 
-> Note: this example does not include Device Firmware Update (DFU) functionality by default. For details see the Device Firmware Update section.
-
 This sample application is a reference implementation of the recently released Bluetooth SIG Electronic Shelf Label specification for prototype hardware designed by Silicon Labs.
 The example is a showcase of the ESL specification, tested on BRD4182A radio board, but recommended for any BG22 devices. It provides optional, configurable components to customize the project according to your product requirements.
+
+> Note: This example does not include Device Firmware Update (DFU) functionality by default. For details see the [Device Firmware Update](#device-firmware-update) section.
 
 ## ESL components
 The ESL specification includes both mandatory and optional functionalities. In the reference implementation these are provided as components, as follows:
@@ -179,27 +179,27 @@ As for the OTA upgrading process, please refer to [UG435.06: Bootloading and OTA
 
 ## Device Firmware Update
 
-This example project does not include Device Firmware Update (DFU) functionality by default.
+This example project does not include Device Firmware Update (DFU) functionality by default, but it can be added easily.
+SoC applications can use one of Silicon Labs' Over-the-Air (OTA) DFU implementations. The table below summarizes the options:
+
+|                           | In-place OTA DFU                 | Application OTA DFU                 |
+|---------------------------|----------------------------------|-------------------------------------|
+| **Component to add**      | In-place OTA DFU                 | Application OTA DFU                 |
+| **Compatible bootloader** | Bluetooth Apploader OTA DFU      | Bootloader - SoC Internal Storage (Series 2) <br> Bootloader - SoC Storage (Series 3) |
+| **Reference solution**    | Bluetooth - SoC In-Place OTA DFU | Bluetooth - SoC Application OTA DFU |
+| **Supported devices**     | Supports Series 2 devices only and requires a smaller flash size | Supports Series 2 and Series 3 devices with enough flash to store firmware images in 2 instances |
 
 To add DFU to an existing project:
-- Add the `Bootloader Interface` component to your project using Simplicity Studio's Software Component browser.
-- Add a post-build step to generate the GBL (Gecko Bootloader) file using Simplicity Studio's Post Build Editor.
+- Add the appropriate DFU component to your project using Simplicity Studio’s Software Component browser.
+- Add a post-build step to generate the GBL (Gecko Bootloader) file using Simplicity Studio’s Post Build Editor.
 - Rebuild the project.
-- Flash the `Bootloader - SoC Apploader OTA DFU` bootloader to the device (for Series 2 devices).
-
-See the example solution for reference.
-
-For application-level OTA DFU, see the "Using application-level over-the-air device firmware update method" section above.
+- Flash a compatible bootloader to the device.
 
 For more information on bootloaders, see [UG103.6: Bootloader Fundamentals](https://www.silabs.com/documents/public/user-guides/ug103-06-fundamentals-bootloading.pdf) and [UG489: Silicon Labs Gecko Bootloader User's Guide for GSDK 4.0 and Higher](https://www.silabs.com/documents/public/user-guides/ug489-gecko-bootloader-user-guide-gsdk-4.pdf).
 
 ## Troubleshooting
 
-Note that __NO__ Bootloader is included in this example project by default. The application works without a bootloader, but if you wish to enable OTA firmware update capability, refer to the Device Firmware Update section above for instructions on adding the necessary components and bootloader.
-
-Important notes:
-- When you flash your application image to the device, use the *.hex* or *.s37* output file. Flashing *.bin* files may overwrite (erase) the bootloader if one is present!
-- For more information on bootloaders, see *[UG103: Bootloading fundamentals](https://www.silabs.com/documents/public/user-guides/ug103-06-fundamentals-bootloading.pdf)* and *[UG489: Silicon Labs Gecko Bootloader User's Guide for GSDK 4.0 and Higher](https://www.silabs.com/documents/public/user-guides/ug489-gecko-bootloader-user-guide-gsdk-4.pdf)*.
+### Programming the Radio Board
 
 Before programming the radio board mounted on the WSTK, make sure the power supply switch the AEM position (right side) as shown below.
 

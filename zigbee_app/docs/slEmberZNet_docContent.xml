@@ -110,13 +110,6 @@
     <property key="core.partCompatibility" value=".*host.* .*rm21.* .*efr32m[gr]2.* .*mgm2.* .*simg301.*"/>
     <property key="core.boardCompatibility" value=""/>
   </contentItemData>
-  <contentItemData name="" label="Documentation Index" itemURI="asset://com.silabs.sdk.stack.sisdk_2025.6.2/protocol/zigbee/documentation/slEmberZNet-index.html" category="Application Notes" priority="9">
-    <description>Provides an overview and hyperlinks to all packaged documentation.</description>
-    <property key="core.category" value="Application Notes"/>
-    <property key="core.priority" value="9"/>
-    <property key="core.partCompatibility" value=".*host.* .*rm21.* .*efr32m[gr]2.* .*mgm2.* .*simg301.*"/>
-    <property key="core.boardCompatibility" value=""/>
-  </contentItemData>
   <contentItemData name="" label="AN1222: Production Programming of Series 2 Devices" itemURI="https://docs.silabs.com/zigbee/latest/prod-programming-series2-and-series3/index.html" category="Application Notes" priority="13">
     <description>Demonstrates how to properly program, provision, and configure Series 2 and Series 3 devices in a production environment.    </description>
     <property key="core.category" value="Application Notes"/>
@@ -306,14 +299,14 @@
     <property key="core.partCompatibility" value=".*host.* .*rm21.* .*efr32m[gr]2.* .*mgm2.* .*simg301.*"/>
     <property key="core.boardCompatibility" value=""/>
   </contentItemData>
-  <contentItemData name="" label="API Reference for the EmberZNet SOC Platform" itemURI="asset://com.silabs.sdk.stack.sisdk_2025.6.2/protocol/zigbee/documentation/120-3022-000_API_SoC/index.html" category="Reference Manuals" priority="2">
+  <contentItemData name="" label="API Reference for the EmberZNet SOC Platform" itemURI="https://docs.silabs.com/zigbee/latest/zigbee-stack-api/index.html" category="Reference Manuals" priority="2">
     <description>Lists SoC Platform APIs used to interface to the EmberZNet PRO stack, HAL, and status of  the application-controlled network. These APIs concern network management, device and stack management,  messaging, fragmentation, serial communication, token access, peripheral access, bootload utilities, and  others. They are independent of the Application Framework and therefore can be used to develop applications  that do not rely on the Zigbee Cluster Library. </description>
     <property key="core.category" value="Reference Manuals"/>
     <property key="core.priority" value="2"/>
     <property key="core.partCompatibility" value=".*host.* .*rm21.* .*efr32m[gr]2.* .*mgm2.* .*simg301.*"/>
     <property key="core.boardCompatibility" value=""/>
   </contentItemData>
-  <contentItemData name="" label="Zigbee Application Framework API Reference" itemURI="asset://com.silabs.sdk.stack.sisdk_2025.6.2/protocol/zigbee/documentation/120-3023-000_AF_API/index.html" category="Reference Manuals" priority="1">
+  <contentItemData name="" label="Zigbee Application Framework API Reference" itemURI="https://docs.silabs.com/zigbee/latest/zigbee-af-api/" category="Reference Manuals" priority="1">
     <description>Describes Zigbee Application Framework APIs, the CLI interface, and callbacks.  </description>
     <property key="core.category" value="Reference Manuals"/>
     <property key="core.priority" value="1"/>

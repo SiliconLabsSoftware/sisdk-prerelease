@@ -4,8 +4,6 @@ This is a reference implementation of an NCP (Network Co-Processor) host, which 
 
 This  example uses the Dynamic GATT feature, and it must be used together with the **Bluetooth - NCP** target app.
 
-> Note: This example does not include Device Firmware Update (DFU) functionality by default. For details see the [Device Firmware Update](#device-firmware-update) section.
-
 ## Getting Started
 
 To get started with Silicon Labs Bluetooth software and Simplicity Studio, see [QSG169: Bluetooth SDK v3.x Quick-Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg169-bluetooth-sdk-v3x-quick-start-guide.pdf).
@@ -69,19 +67,6 @@ The Dynamic GATT Database APIs can be used for:
 This example demonstrates building a minimal GATT database. This can be extended by adding further services using the dynamic GATT API.
 
 See the Bluetooth API reference manual section "GATT Database" for more details.
-
-## Device Firmware Update
-
-This example project does not include Device Firmware Update (DFU) functionality by default.
-To add DFU to an existing project:
-- Add the `Bootloader Interface` component to your project using Simplicity Studio’s Software Component browser.
-- Add a post-build step to generate the GBL (Gecko Bootloader) file using Simplicity Studio’s Post Build Editor.
-- Rebuild the project.
-- Flash the `Bootloader - NCP BGAPI UART DFU` bootloader to the device.
-
-See the `Bluetooth - NCP DFU` example solution for reference.
-
-For more information on bootloaders, see [UG103.6: Bootloader Fundamentals](https://www.silabs.com/documents/public/user-guides/ug103-06-fundamentals-bootloading.pdf) and [UG489: Silicon Labs Gecko Bootloader User's Guide for GSDK 4.0 and Higher](https://www.silabs.com/documents/public/user-guides/ug489-gecko-bootloader-user-guide-gsdk-4.pdf).
 
 ## Troubleshooting
 

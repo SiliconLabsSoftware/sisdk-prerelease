@@ -2,7 +2,7 @@
 
 The RCP (Radio Co-Processor) example application runs the Bluetooth Controller (radio + Link Layer) and implements the controller part of the HCI, as defined in the *Bluetooth Core Specification, Vol 4: Host Controller Interface*. The HCI is a standardized way for Bluetooth host and controller to communicate with each other. Because the interface is standard, the host and controller can be from different vendors. Currently, Silicon Labs Bluetooth Controller supports UART (Universal Asynchronous Receiver-Transmitter) as the HCI transport layer. In this project Silicon Labs’ proprietary CPC (Co-Processor Communication) protocol is used as the transport protocol over UART.
 
-> Note: This example does not include Device Firmware Update (DFU) functionality by default. For details see the [Device Firmware Update](#device-firmware-update) section.
+> Note: This example does not include Device Firmware Update (DFU) functionality by default. For details see the [CPC Firmware Upgrade](https://github.com/SiliconLabs/cpc-daemon/blob/main/doc/firmware_upgrade.md) document.
 
 ## Getting Started
 
@@ -35,17 +35,6 @@ This project uses Silicon Labs’ proprietary CPC (Co-Processor Communication) p
 ![](image/readme_cpc_img0.png)
 
 For more information on CPC, refer to [AN1351: Using the Co-Processor Communication Daemon (CPCd)](https://www.silabs.com/documents/public/application-notes/an1351-using-co-processor-communication_daemon.pdf). To learn more about the DMP use case, see [Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol RCP](https://docs.silabs.com/multiprotocol/latest/multiprotocol-solution-linux/).
-
-## Device Firmware Update
-This example project does not include Device Firmware Update (DFU) functionality by default.
-To add DFU to an existing project:
-- Add the `Bootloader Interface` component to your project using Simplicity Studio’s Software Component browser.
-- Add a post-build step to generate the GBL (Gecko Bootloader) file using Simplicity Studio’s Post Build Editor.
-- Flash the `Bootloader - NCP BGAPI UART DFU` bootloader to the device.
-
-See the `Bluetooth - NCP DFU` example solution for reference.
-
-For more information on bootloaders, see [UG103.6: Bootloader Fundamentals](https://www.silabs.com/documents/public/user-guides/ug103-06-fundamentals-bootloading.pdf) and [UG489: Silicon Labs Gecko Bootloader User's Guide for GSDK 4.0 and Higher](https://www.silabs.com/documents/public/user-guides/ug489-gecko-bootloader-user-guide-gsdk-4.pdf).
 
 ## Troubleshooting
 

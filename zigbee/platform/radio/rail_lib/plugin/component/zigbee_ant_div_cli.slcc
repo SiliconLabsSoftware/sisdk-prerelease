@@ -23,7 +23,7 @@ include:
   file_list:
   - path: sl_rail_util_ant_div.h
 source:
-- path: plugin/rail_util_ant_div/sl_zigbee_ant_div_cli.c
+- path: plugin/sl_rail_util_ant_div/sl_zigbee_ant_div_cli.c
 template_contribution:
 # CLI Commands < plugin antenna >
 - name: cli_group

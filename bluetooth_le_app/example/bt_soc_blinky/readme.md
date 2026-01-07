@@ -2,7 +2,7 @@
 
 This example application is the "Hello World" of Bluetooth Low Energy (BLE). It allows a BLE central device to control the LED on the mainboard and receive button press notifications.
 
-> Note: this example does not include Device Firmware Update (DFU) functionality by default. For details see the Device Firmware Update section.
+> Note: this example does not include Device Firmware Update (DFU) functionality by default. For details see the [Device Firmware Update](#device-firmware-update) section.
 
 ## Getting started
 
@@ -26,15 +26,21 @@ The animation below showcases the demo running on an EFR32xG21 Wireless Starter 
 
 ## Device Firmware Update
 
-This example project does not include Device Firmware Update (DFU) functionality by default.
+This example project does not include Device Firmware Update (DFU) functionality by default, but it can be added easily.
+SoC applications can use one of Silicon Labs' Over-the-Air (OTA) DFU implementations. The table below summarizes the options:
+
+|                           | In-place OTA DFU                 | Application OTA DFU                 |
+|---------------------------|----------------------------------|-------------------------------------|
+| **Component to add**      | In-place OTA DFU                 | Application OTA DFU                 |
+| **Compatible bootloader** | Bluetooth Apploader OTA DFU      | Bootloader - SoC Internal Storage (Series 2) <br> Bootloader - SoC Storage (Series 3) |
+| **Reference solution**    | Bluetooth - SoC In-Place OTA DFU | Bluetooth - SoC Application OTA DFU |
+| **Supported devices**     | Supports Series 2 devices only and requires a smaller flash size | Supports Series 2 and Series 3 devices with enough flash to store firmware images in 2 instances |
 
 To add DFU to an existing project:
-- Add the `Bootloader Interface` component to your project using Simplicity Studio's Software Component browser.
-- Add a post-build step to generate the GBL (Gecko Bootloader) file using Simplicity Studio's Post Build Editor.
+- Add the appropriate DFU component to your project using Simplicity Studio’s Software Component browser.
+- Add a post-build step to generate the GBL (Gecko Bootloader) file using Simplicity Studio’s Post Build Editor.
 - Rebuild the project.
-- Flash the `Bootloader - SoC Apploader OTA DFU` bootloader to the device (for Series 2 devices).
-
-See the example solution for reference.
+- Flash a compatible bootloader to the device.
 
 For more information on bootloaders, see [UG103.6: Bootloader Fundamentals](https://www.silabs.com/documents/public/user-guides/ug103-06-fundamentals-bootloading.pdf) and [UG489: Silicon Labs Gecko Bootloader User's Guide for GSDK 4.0 and Higher](https://www.silabs.com/documents/public/user-guides/ug489-gecko-bootloader-user-guide-gsdk-4.pdf).
 

@@ -46,6 +46,33 @@ sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
 
 Timers used by the PWM component in Led Bulb and Power Strip applications only work in EM1 mode, therefore, updating these applications require the above manual changes to be made.
 
+## Hardware Configuration
+
+A new hardware configuration API has been introduced, allowing to control the Energy Management Unit (EMU).  
+The following configuration values, previously defined in the SLC project files (.slcp)
+had been hard-coded to specific values in prior releases, regardless of the user-configured values.  
+These values can now be set via the Z-Wave Core Component (if using the GUI) or via the configuration header `zw_hardware_config.h`:
+
+| Old configuration name                      | New configuration name        |
+|---------------------------------------------|-------------------------------|
+| -                                           | `ZW_DCDC_CONFIG`\*            |
+| `SL_DEVICE_INIT_EMU_EM4_PIN_RETENTION_MODE` | `ZW_EM4_PIN_RETENTION_MODE`   |
+| `SL_DEVICE_INIT_EMU_EM4_STATE`              | `ZW_EM4_INITIAL_STATE`        |
+| -                                           | `ZW_EM23_VOLTAGE_SCALE`       |
+| `SL_DEVICE_INIT_EMU_EM4_RETAIN_LFXO`        | `ZW_EM4_RETAIN_LFXO`          |
+| `SL_DEVICE_INIT_EMU_EM4_RETAIN_LFRCO`       | `ZW_EM4_RETAIN_LFRCO`         |
+| `SL_DEVICE_INIT_EMU_EM4_RETAIN_ULFRCO`      | `ZW_EM4_RETAIN_ULFRCO`        |
+
+\* The `ZW_DCDC_CONFIG` configuration value is still hard-coded to `EDCDCMODE_AUTO`, regardless of the value of this setting. A workaround is currently not available.
+
+## RAIL Power Manager Initialization
+
+FLiRS applications (e.g. the Door Lock Keypad application) require the RAIL Power Manager Initialization configuration to be enabled. To do this on an upgraded project, set the value to 1 in the `config/sl_rail_util_power_manager_init_config.h` file:
+
+```
+#define SL_RAIL_UTIL_RAIL_POWER_MANAGER_INIT 1
+```
+
 # 7.24.1 {#migrate-section-7-24-1}
 
 ## How to migrate the Wall Controller sample application
