@@ -108,13 +108,13 @@
     <property key="core.priority" value="31"/>
     <property key="core.partCompatibility" value=".*efr32zg23.* .*zgm230.* .*efr32zg28.*"/>
   </contentItemData>
-  <contentItemData name="" label="Z-Wave Plus V2 Application Framework GSDK" itemURI="https://docs.silabs.com/z-wave/latest/z-wave-plus-v2-app-framework-sdk7/">
+  <contentItemData name="" label="Z-Wave Plus V2 Application Framework GSDK" itemURI="https://docs.silabs.com/z-wave/latest/z-wave-plus-v2-app-framework/">
     <description>Describes the Z-Wave Plus V2 Application Framework (ZAF) versions distributed on Z-Wave SDKs. The purpose of the ZAF is to facilitate the implementation of robust Z-Wave Plus V2 compliant products.</description>
     <property key="core.category" value="User's Guides"/>
     <property key="core.priority" value="4"/>
     <property key="core.partCompatibility" value=".*efr32zg23.* .*zgm230.* .*efr32zg28.*"/>
   </contentItemData>
-  <contentItemData name="" label="How to Use Certified Apps in Z-Wave" itemURI="https://docs.silabs.com/z-wave/latest/how-to-use-certified-apps-in-z-wave-700/">
+  <contentItemData name="" label="How to Use Certified Apps in Z-Wave" itemURI="https://docs.silabs.com/z-wave/latest/how-to-use-certified-apps-in-z-wave/">
     <description>Describes how to use the Z-Wave certified applications, which come as part of the Z-Wave SDK.</description>
     <property key="core.category" value="User's Guides"/>
     <property key="core.priority" value="2"/>

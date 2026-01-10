@@ -1,4 +1,4 @@
 upgrade:
-  - sdk:
-    configuration:
-    component:
+- sdk:
+  configuration:
+  component:

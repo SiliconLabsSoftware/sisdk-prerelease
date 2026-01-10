@@ -19,7 +19,7 @@ requires:
 provides:
 - name: zigbee_ant_div_cli
 include:
-- path: plugin/rail_util_ant_div
+- path: plugin/sl_rail_util_ant_div
   file_list:
   - path: sl_rail_util_ant_div.h
 source:
