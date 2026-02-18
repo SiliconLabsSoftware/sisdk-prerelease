@@ -17,6 +17,7 @@
 #else // SL_COMPONENT_CATALOG_PRESENT
  #include "app/framework/test/headers/zap-type.h"
 #endif // SL_COMPONENT_CATALOG_PRESENT
+#include "stack/include/sl_zigbee_dhc.h"
 
 //------------------------------------------------------------------------------
 // Configuration Frames
@@ -500,11 +501,6 @@ sl_status_t sl_zigbee_ezsp_setup_delayed_join(
 // Get the current scheduler priorities for radio operations
 void sl_zigbee_ezsp_radio_get_scheduler_priorities(
   // Return: The current priorities.
-  sl_802154_radio_priorities_t *priorities);
-
-// Set the current scheduler priorities for radio operations
-void sl_zigbee_ezsp_radio_set_scheduler_priorities(
-  // The current priorities.
   sl_802154_radio_priorities_t *priorities);
 
 // Get the current multiprotocol sliptime
@@ -3207,3 +3203,171 @@ void sl_zigbee_ezsp_token_factory_reset(
   bool excludeOutgoingFC,
   // Exclude stack boot counter token.
   bool excludeBootCounter);
+
+//------------------------------------------------------------------------------
+// Dynamic Hardware Configuration Frames
+//------------------------------------------------------------------------------
+
+// Read descriptor at index.
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_read_pa_descriptor(
+  // The PA index.
+  uint8_t index,
+  // Return: The PA descriptor.
+  sl_zigbee_dhc_pa_descriptor_t *descriptor);
+
+// Write descriptor at index.
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_write_pa_descriptor(
+  // The PA index.
+  uint8_t index,
+  // The PA descriptor.
+  sl_zigbee_dhc_pa_descriptor_t *descriptor);
+
+// Read one curve segment (algorithm=0).
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_read_pa_curve_segment(
+  // The PA index.
+  uint8_t index,
+  // The segment index.
+  uint8_t segment_index,
+  // Return: Read PA Curve segment.
+  sl_zigbee_dhc_pa_curve_segment_t *segment);
+
+// Write one curve segment (algorithm=0).
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_write_pa_curve_segment(
+  // The PA index.
+  uint8_t index,
+  // The segment index.
+  uint8_t segment_index,
+  // Write PA Curve segment.
+  sl_zigbee_dhc_pa_curve_segment_t *segment);
+
+// Read full curve for descriptor index (algorithm=0).
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_read_pa_curve(
+  // The PA index.
+  uint8_t index,
+  // Return: Read PA Curve.
+  sl_zigbee_dhc_pa_curve_t *curve);
+
+// Write full curve (algorithm=0).
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_write_pa_curve(
+  // The PA index.
+  uint8_t index,
+  // Write PA Curve.
+  sl_zigbee_dhc_pa_curve_t *curve);
+
+// Read table for descriptor index (algorithm=1).
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_read_pa_table(
+  // The PA index.
+  uint8_t index,
+  // Return: Read PA Table.
+  sl_zigbee_dhc_pa_table_t *table);
+
+// Write table (algorithm=1).
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_write_pa_table(
+  // The PA index.
+  uint8_t index,
+  // Write PA Table.
+  sl_zigbee_dhc_pa_table_t *table);
+
+// Read RSSI offset.
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_read_rssi_offset(
+  // Return: Read RSSI offset.
+  sl_zigbee_dhc_rssi_offset_t *rssi_offset);
+
+// Write RSSI offset.
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_write_rssi_offset(
+  // Write RSSI offset.
+  sl_zigbee_dhc_rssi_offset_t *rssi_offset);
+
+// Read PA voltage.
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_read_pa_voltage(
+  // Return: Read PA voltage.
+  uint16_t *pa_voltage);
+
+// Write PA voltage (keep consistent with metadata).
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_write_pa_voltage(
+  // Write PA voltage.
+  uint16_t pa_voltage);
+
+// Read PA mode.
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_read_pa_mode(
+  // Return: Read PA mode.
+  sl_zigbee_dhc_pa_mode_t *pa_mode);
+
+// Write PA mode.
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_write_pa_mode(
+  // PA mode value to write.
+  sl_zigbee_dhc_pa_mode_t *pa_mode);
+
+// Read CTUNE value.
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_read_ctune(
+  // Return: Read CTUNE value.
+  sl_zigbee_dhc_ctune_t *ctune);
+
+// Write CTUNE value.
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_write_ctune(
+  // Write CTUNE value.
+  sl_zigbee_dhc_ctune_t *ctune);
+
+// Read DHC top-level version.
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_read_dhc_version(
+  // Return: Read DHC top-level version.
+  uint8_t *dhc_version);
+
+// Write DHC top-level version.
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_write_dhc_version(
+  // Write DHC top-level version.
+  uint8_t dhc_version);
+
+// Read PA dataset version.
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_read_pa_version(
+  // Return: Read PA dataset version.
+  sl_zigbee_dhc_pa_version_t *pa_version);
+
+// Write PA dataset version.
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_write_pa_version(
+  // Write PA dataset version.
+  sl_zigbee_dhc_pa_version_t *pa_version);
+
+// Read PA signature (metadata.signature mirror).
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_read_pa_signature(
+  // Return: Read PA signature (metadata.signature mirror).
+  sl_zigbee_dhc_pa_signature_t *pa_signature);
+
+// Write PA signature (updates metadata signature).
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_write_pa_signature(
+  // Write PA signature (updates metadata signature).
+  sl_zigbee_dhc_pa_signature_t *pa_signature);
+
+// Read PA calibration metadata.
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_read_pa_metadata(
+  // Return: Read PA calibration metadata block.
+  sl_zigbee_dhc_pa_metadata_t *metadata);
+
+// Write PA calibration metadata (must precede descriptor/data writes).
+// Return: An sl_status_t value indicating success or the reason for failure.
+sl_status_t sl_zigbee_ezsp_write_pa_metadata(
+  // The PA metadata.
+  sl_zigbee_dhc_pa_metadata_t *metadata);

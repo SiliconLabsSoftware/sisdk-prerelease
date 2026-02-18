@@ -244,10 +244,35 @@
 #define sl_zigbee_get_endpoint_cluster sl_zigbee_ezsp_get_endpoint_cluster
 
 #define sl_zigbee_radio_get_scheduler_priorities sl_zigbee_ezsp_radio_get_scheduler_priorities
-#define sl_zigbee_radio_set_scheduler_priorities sl_zigbee_ezsp_radio_set_scheduler_priorities
 #define sl_zigbee_radio_get_scheduler_sliptime sl_zigbee_ezsp_radio_get_scheduler_sliptime
 #define sl_zigbee_radio_set_scheduler_sliptime sl_zigbee_ezsp_radio_set_scheduler_sliptime
 #define sl_zigbee_counter_requires_phy_index sl_zigbee_ezsp_counter_requires_phy_index
 #define sl_zigbee_counter_requires_destination_node_id sl_zigbee_ezsp_counter_requires_destination_node_id
 
 #define sl_zigbee_get_memory_usage_data sl_zigbee_ezsp_get_memory_usage_data
+
+// Dynamic Hardware Configuration (DHC)
+#define sl_zigbee_dhc_read_pa_metadata          sl_zigbee_ezsp_read_pa_metadata
+#define sl_zigbee_dhc_write_pa_metadata         sl_zigbee_ezsp_write_pa_metadata
+#define sl_zigbee_dhc_read_pa_descriptor        sl_zigbee_ezsp_read_pa_descriptor
+#define sl_zigbee_dhc_write_pa_descriptor       sl_zigbee_ezsp_write_pa_descriptor
+#define sl_zigbee_dhc_read_pa_curve             sl_zigbee_ezsp_read_pa_curve
+#define sl_zigbee_dhc_write_pa_curve            sl_zigbee_ezsp_write_pa_curve
+#define sl_zigbee_dhc_read_pa_curve_segment     sl_zigbee_ezsp_read_pa_curve_segment
+#define sl_zigbee_dhc_write_pa_curve_segment    sl_zigbee_ezsp_write_pa_curve_segment
+#define sl_zigbee_dhc_read_pa_table             sl_zigbee_ezsp_read_pa_table
+#define sl_zigbee_dhc_write_pa_table            sl_zigbee_ezsp_write_pa_table
+#define sl_zigbee_dhc_read_rssi_offset          sl_zigbee_ezsp_read_rssi_offset
+#define sl_zigbee_dhc_write_rssi_offset         sl_zigbee_ezsp_write_rssi_offset
+#define sl_zigbee_dhc_read_pa_voltage           sl_zigbee_ezsp_read_pa_voltage
+#define sl_zigbee_dhc_write_pa_voltage          sl_zigbee_ezsp_write_pa_voltage
+#define sl_zigbee_dhc_read_pa_mode              sl_zigbee_ezsp_read_pa_mode
+#define sl_zigbee_dhc_write_pa_mode             sl_zigbee_ezsp_write_pa_mode
+#define sl_zigbee_dhc_read_ctune                sl_zigbee_ezsp_read_ctune
+#define sl_zigbee_dhc_write_ctune               sl_zigbee_ezsp_write_ctune
+#define sl_zigbee_dhc_read_dhc_version          sl_zigbee_ezsp_read_dhc_version
+#define sl_zigbee_dhc_write_dhc_version         sl_zigbee_ezsp_write_dhc_version
+#define sl_zigbee_dhc_read_pa_version           sl_zigbee_ezsp_read_pa_version
+#define sl_zigbee_dhc_write_pa_version          sl_zigbee_ezsp_write_pa_version
+#define sl_zigbee_dhc_read_pa_signature         sl_zigbee_ezsp_read_pa_signature
+#define sl_zigbee_dhc_write_pa_signature        sl_zigbee_ezsp_write_pa_signature

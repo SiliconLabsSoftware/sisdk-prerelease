@@ -40,6 +40,7 @@
 #include "stack/include/gp-proxy-table.h"
 #include "stack/include/source-route.h"
 #include "stack/include/multi-network.h"
+#include "stack/include/sl_zigbee_dhc.h"
 
 bool sli_zigbee_af_process_ezsp_command_certificate_based_key_exchange_cbke(uint16_t commandId)
 {

@@ -590,6 +590,10 @@ typedef struct {
   uint8_t channel_spacing;
   /// PHY mode ID
   uint8_t phy_mode_id;
+  /// Specifies the set of channels on which the device is permitted to transmit.
+  /// This mask applies to asynchronous (PAS, PA, ...), unicast and broadcast frames.
+  /// The channel mask is advertised in both US-IE and BS-IE elements.
+  uint8_t channel_mask[SL_WISUN_CHANNEL_MASK_SIZE];
 } sl_wisun_phy_config_explicit_t;
 
 /// Explicit RAIL configuration
@@ -1248,6 +1252,8 @@ typedef enum {
   SL_WISUN_LOGGER_EVENT_TYPE_FRAME_COUNTER_FAILURE = 4,
   /// Event published when a tx fails
   SL_WISUN_LOGGER_EVENT_TYPE_TX_FAILURE = 8,
+  /// Event published when RF test receives a packet or completes a TX
+  SL_WISUN_LOGGER_EVENT_TYPE_RF_TEST = 16,
 } sl_wisun_logger_event_type_t;
 
 /// Enumeration for event log frame types
@@ -1323,6 +1329,16 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_logger_event_tx_failure_t;
 SL_PACK_END()
 
+/// RF test event information
+SL_PACK_START(1)
+typedef struct {
+  /// RAIL events associated with the RF test event
+  uint64_t events;
+  /// Reserved for future use
+  uint8_t reserved[4];
+} SL_ATTRIBUTE_PACKED sl_wisun_logger_event_rf_test_t;
+SL_PACK_END()
+
 /// Wisun Event information
 SL_PACK_START(1)
 typedef struct {
@@ -1338,6 +1354,8 @@ typedef struct {
     sl_wisun_logger_event_frame_received_t frame_received;
     /// TX failure information
     sl_wisun_logger_event_tx_failure_t tx_failure;
+    /// RF test event information
+    sl_wisun_logger_event_rf_test_t rf_test;
   } u;
 } SL_ATTRIBUTE_PACKED sl_wisun_logger_event_t;
 SL_PACK_END()

@@ -43,11 +43,6 @@ extern "C"
 #endif
 
 // -----------------------------------------------------------------------------
-// Macros
-#define PRINT_HEAD_AND_DATA(counter, is_data) \
-  for (uint8_t is_data = ((measurement_counter % CS_INITIATOR_HEADER_LOG) > 0); is_data <= 1; is_data++)
-
-// -----------------------------------------------------------------------------
 // Enums, structs, typedefs
 
 /// Field type values

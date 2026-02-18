@@ -1343,25 +1343,6 @@ void EMU_DCDCSetDualIpkEnable(bool enable);
 bool EMU_DCDCGetDualIpkEnable(void);
 #endif
 
-#if defined(_DCDC_DOCTRL_TOFFMINDVDD_MASK) && defined(_DCDC_DOCTRL_TOFFMINDEC_MASK)
-/***************************************************************************//**
- * @brief
- *   Set minimum off-time for DCDC dual outputs.
- *
- * @details
- *   Configure the minimum off-time for DVDD and DEC switching outputs.
- *   This affects switching timing and efficiency. Values are masked to
- *   2 bits each. This function controls DOCTRL.TOFFMINDVDD and
- *   DOCTRL.TOFFMINDEC bitfields.
- *
- * @param[in] toffMinDvdd
- *   Minimum off-time for DVDD output (0-3, masked to 2 bits).
- * @param[in] toffMinDec
- *   Minimum off-time for DEC output (0-3, masked to 2 bits).
- ******************************************************************************/
-void EMU_DCDCSetToffMin(uint8_t toffMinDvdd, uint8_t toffMinDec);
-#endif
-
 #if defined(EMU_SERIES1_DCDC_BUCK_PRESENT)
 #if defined(EMU_DCDCCTRL_DCDCMODEEM23)
 void EMU_DCDCModeEM23Set(EMU_DcdcModeEM23_TypeDef dcdcModeEM23);

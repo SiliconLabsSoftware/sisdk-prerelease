@@ -16,6 +16,7 @@
 #else // SL_COMPONENT_CATALOG_PRESENT
  #include "app/framework/test/headers/zap-type.h"
 #endif // SL_COMPONENT_CATALOG_PRESENT
+#include "stack/include/sl_zigbee_dhc.h"
 
 //------------------------------------------------------------------------------
 // Configuration Frames
@@ -780,18 +781,6 @@ void sl_zigbee_ezsp_radio_get_scheduler_priorities(
   sli_zigbee_ezsp_set_last_status(sendStatus);
   if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
     fetch_sl_802154_radio_priorities_t(priorities);
-  }
-}
-
-void sl_zigbee_ezsp_radio_set_scheduler_priorities(
-  sl_802154_radio_priorities_t *priorities)
-{
-  startCommand(SL_ZIGBEE_EZSP_RADIO_SET_SCHEDULER_PRIORITIES);
-  append_sl_802154_radio_priorities_t(priorities);
-  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
-  sli_zigbee_ezsp_set_last_status(sendStatus);
-  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
-    EZSP_ASH_TRACE("%s(): sendCommand() error: 0x%02X", __func__, sendStatus);
   }
 }
 
@@ -4430,6 +4419,390 @@ void sl_zigbee_ezsp_token_factory_reset(
   if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
     EZSP_ASH_TRACE("%s(): sendCommand() error: 0x%02X", __func__, sendStatus);
   }
+}
+
+//------------------------------------------------------------------------------
+// Dynamic Hardware Configuration Frames
+//------------------------------------------------------------------------------
+
+sl_status_t sl_zigbee_ezsp_read_pa_descriptor(
+  uint8_t index,
+  sl_zigbee_dhc_pa_descriptor_t *descriptor)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_READ_PA_DESCRIPTOR);
+  appendInt8u(index);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    fetch_sl_zigbee_dhc_pa_descriptor_t(descriptor);
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
+}
+
+sl_status_t sl_zigbee_ezsp_write_pa_descriptor(
+  uint8_t index,
+  sl_zigbee_dhc_pa_descriptor_t *descriptor)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_WRITE_PA_DESCRIPTOR);
+  appendInt8u(index);
+  append_sl_zigbee_dhc_pa_descriptor_t(descriptor);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
+}
+
+sl_status_t sl_zigbee_ezsp_read_pa_curve_segment(
+  uint8_t index,
+  uint8_t segment_index,
+  sl_zigbee_dhc_pa_curve_segment_t *segment)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_READ_PA_CURVE_SEGMENT);
+  appendInt8u(index);
+  appendInt8u(segment_index);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    fetch_sl_zigbee_dhc_pa_curve_segment_t(segment);
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
+}
+
+sl_status_t sl_zigbee_ezsp_write_pa_curve_segment(
+  uint8_t index,
+  uint8_t segment_index,
+  sl_zigbee_dhc_pa_curve_segment_t *segment)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_WRITE_PA_CURVE_SEGMENT);
+  appendInt8u(index);
+  appendInt8u(segment_index);
+  append_sl_zigbee_dhc_pa_curve_segment_t(segment);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
+}
+
+sl_status_t sl_zigbee_ezsp_read_pa_curve(
+  uint8_t index,
+  sl_zigbee_dhc_pa_curve_t *curve)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_READ_PA_CURVE);
+  appendInt8u(index);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    fetch_sl_zigbee_dhc_pa_curve_t(curve);
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
+}
+
+sl_status_t sl_zigbee_ezsp_write_pa_curve(
+  uint8_t index,
+  sl_zigbee_dhc_pa_curve_t *curve)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_WRITE_PA_CURVE);
+  appendInt8u(index);
+  append_sl_zigbee_dhc_pa_curve_t(curve);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
+}
+
+sl_status_t sl_zigbee_ezsp_read_pa_table(
+  uint8_t index,
+  sl_zigbee_dhc_pa_table_t *table)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_READ_PA_TABLE);
+  appendInt8u(index);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    fetch_sl_zigbee_dhc_pa_table_t(table);
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
+}
+
+sl_status_t sl_zigbee_ezsp_write_pa_table(
+  uint8_t index,
+  sl_zigbee_dhc_pa_table_t *table)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_WRITE_PA_TABLE);
+  appendInt8u(index);
+  append_sl_zigbee_dhc_pa_table_t(table);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
+}
+
+sl_status_t sl_zigbee_ezsp_read_rssi_offset(
+  sl_zigbee_dhc_rssi_offset_t *rssi_offset)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_READ_RSSI_OFFSET);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    fetch_sl_zigbee_dhc_rssi_offset_t(rssi_offset);
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
+}
+
+sl_status_t sl_zigbee_ezsp_write_rssi_offset(
+  sl_zigbee_dhc_rssi_offset_t *rssi_offset)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_WRITE_RSSI_OFFSET);
+  append_sl_zigbee_dhc_rssi_offset_t(rssi_offset);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
+}
+
+sl_status_t sl_zigbee_ezsp_read_pa_voltage(
+  uint16_t *pa_voltage)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_READ_PA_VOLTAGE);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    *pa_voltage = fetchInt16u();
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
+}
+
+sl_status_t sl_zigbee_ezsp_write_pa_voltage(
+  uint16_t pa_voltage)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_WRITE_PA_VOLTAGE);
+  appendInt16u(pa_voltage);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
+}
+
+sl_status_t sl_zigbee_ezsp_read_pa_mode(
+  sl_zigbee_dhc_pa_mode_t *pa_mode)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_READ_PA_MODE);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    fetch_sl_zigbee_dhc_pa_mode_t(pa_mode);
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
+}
+
+sl_status_t sl_zigbee_ezsp_write_pa_mode(
+  sl_zigbee_dhc_pa_mode_t *pa_mode)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_WRITE_PA_MODE);
+  append_sl_zigbee_dhc_pa_mode_t(pa_mode);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
+}
+
+sl_status_t sl_zigbee_ezsp_read_ctune(
+  sl_zigbee_dhc_ctune_t *ctune)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_READ_CTUNE);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    fetch_sl_zigbee_dhc_ctune_t(ctune);
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
+}
+
+sl_status_t sl_zigbee_ezsp_write_ctune(
+  sl_zigbee_dhc_ctune_t *ctune)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_WRITE_CTUNE);
+  append_sl_zigbee_dhc_ctune_t(ctune);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
+}
+
+sl_status_t sl_zigbee_ezsp_read_dhc_version(
+  uint8_t *dhc_version)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_READ_DHC_VERSION);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    *dhc_version = fetchInt8u();
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
+}
+
+sl_status_t sl_zigbee_ezsp_write_dhc_version(
+  uint8_t dhc_version)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_WRITE_DHC_VERSION);
+  appendInt8u(dhc_version);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
+}
+
+sl_status_t sl_zigbee_ezsp_read_pa_version(
+  sl_zigbee_dhc_pa_version_t *pa_version)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_READ_PA_VERSION);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    fetch_sl_zigbee_dhc_pa_version_t(pa_version);
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
+}
+
+sl_status_t sl_zigbee_ezsp_write_pa_version(
+  sl_zigbee_dhc_pa_version_t *pa_version)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_WRITE_PA_VERSION);
+  append_sl_zigbee_dhc_pa_version_t(pa_version);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
+}
+
+sl_status_t sl_zigbee_ezsp_read_pa_signature(
+  sl_zigbee_dhc_pa_signature_t *pa_signature)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_READ_PA_SIGNATURE);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    fetch_sl_zigbee_dhc_pa_signature_t(pa_signature);
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
+}
+
+sl_status_t sl_zigbee_ezsp_write_pa_signature(
+  sl_zigbee_dhc_pa_signature_t *pa_signature)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_WRITE_PA_SIGNATURE);
+  append_sl_zigbee_dhc_pa_signature_t(pa_signature);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
+}
+
+sl_status_t sl_zigbee_ezsp_read_pa_metadata(
+  sl_zigbee_dhc_pa_metadata_t *metadata)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_READ_PA_METADATA);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    fetch_sl_zigbee_dhc_pa_metadata_t(metadata);
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
+}
+
+sl_status_t sl_zigbee_ezsp_write_pa_metadata(
+  sl_zigbee_dhc_pa_metadata_t *metadata)
+{
+  sl_status_t status;
+  startCommand(SL_ZIGBEE_EZSP_WRITE_PA_METADATA);
+  append_sl_zigbee_dhc_pa_metadata_t(metadata);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    status = fetchInt32u();
+    return status;
+  }
+  return SL_STATUS_ZIGBEE_EZSP_ERROR;
 }
 
 static void callbackDispatch(void)

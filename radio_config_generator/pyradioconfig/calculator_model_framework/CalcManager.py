@@ -3,11 +3,11 @@ Radio Configurator
 """
 import copy
 import os
-import re
-import sys
 import traceback
 import types
 from enum import Enum
+import inspect
+import re
 
 from pyradioconfig._version import __version__
 from pyradioconfig.calculator_model_framework.Utils.CalcStatus import CalcStatus
@@ -501,16 +501,73 @@ class CalcManager(object):
         return result, error_message
 
     def _getCalculatorFunctionList(self):
-        """Returns a list of all calculator functions for part family and part revision
+        """
+        Returns a list of all calculator functions for part family and part revision
 
-        Returns:
-           list (list): List of calculation function references
+        With the new IP based architecture, the calclist is generated from calculations from two places
+        1. pyradioconfig/modules/...
+        2. pyradioconfig/parts/....
+
+        There can be a scenario where a part is inheriting IP based calculations from pyradioconfig/modules/ but need to
+        override some calculations as they are part specific. In that scenario, we neeed to make sure that any
+        calculation (or method calc_XXXX) defined in pyradioconfig/parts/.... takes precedence over a calc_XXXX defined
+        in pyradioconfig/modules/...
+
+        An example of how to do this can be found at this confluence page..
+        TODO: add confluence page link here
+
+        :return:
+            list (list): List of unique calculation function references
         """
         calculators = self._getCalculatorsList()
-        calc_list = []
+        calc_name_function_dict = dict()
         for calculator in calculators:
-            calc_list.extend(calculator().getCalculationList())
+            for calc in calculator().getCalculationList():
+                calc_name = calc.__name__
+                if calc_name not in list(calc_name_function_dict.keys()):
+                    # add to the dict
+                    calc_name_function_dict[calc_name] = calc
+                else:
+                    # if a calc name duplicate is found, definition in pyradioconfig/parts/.... takes precedence
+                    # check the file path name of calc in calc_name_function_dict
+                    old_calc_file_path = os.path.normpath(inspect.getfile(calc_name_function_dict[calc_name].__self__.__class__))
+                    new_calc_file_path = os.path.normpath(inspect.getfile(calc.__self__.__class__))
 
+                    if f"pyradioconfig{os.path.sep}modules" in old_calc_file_path:
+                        # replace or override the calc implementation defined in pyradioconfig/parts/
+                        if f"pyradioconfig{os.path.sep}parts" in new_calc_file_path:
+                            calc_name_function_dict[calc_name] = calc
+                        # flag duplicate calc methods defined in pyradioconfig/modules or elsewhere
+                        else:
+                            calc_error_message = (f"calculation with same name {calc_name} found at \n"
+                                                  f"{old_calc_file_path}\n"
+                                                  f"{new_calc_file_path}")
+                            LogMgr.Error(calc_error_message)
+                            raise LookupError(calc_error_message)
+
+                    elif f"pyradioconfig{os.path.sep}parts" in old_calc_file_path:
+                        if f"pyradioconfig{os.path.sep}modules" in new_calc_file_path:
+                            # do nothing as pyradioconfig\parts takes precedence
+                            pass
+                        elif f"pyradioconfig{os.path.sep}parts" in new_calc_file_path:
+                            # add the duplicate calculation. In older parts, calculations with same name are defined,
+                            # but do not edit same model variables. If they do, that is caught when the model builds.
+
+                            # Since calc_name_function_dict can't store duplicates, we will store the calc method with
+                            # different calc_name in the dict. calc_name here does not matter here because eventually
+                            # we will extract all the methods. calc_name is only to handle the duplicates generated
+                            # by pyradioconfig\module.
+                            calc_name = calc_name + "_" + new_calc_file_path.split("\\calculators\\")[-1]
+                            calc_name_function_dict[calc_name] = calc
+                        else:
+                            # found a calc_ method neither in pyradioconfig/parts/ nor in pyradioconfig/lpw.
+                            # shtewari: a remote possibility but wanted else to execute something in 'else'
+                            calc_error_message = (f"calculation with name {calc_name} found at \n"
+                                                  f"{new_calc_file_path}")
+                            LogMgr.Error(calc_error_message)
+                            raise LookupError(calc_error_message)
+
+        calc_list = list(calc_name_function_dict.values())
         return calc_list
 
     def _getCalculatorsList(self):
@@ -523,7 +580,24 @@ class CalcManager(object):
         part_family = self.__part_family
         part_revision = self.__part_revision
 
-        # Find all part rev specific calculator .py files for this family
+        calclist = []
+
+        '''this needs to be handled in a different way for a part based on IP-based calculator vs legacy/part-based 
+        calculator. for ip-based calculator, we need to get calc methods in classes defined at both pyradioconfig/parts 
+        and pyradioconfig/modules. '''
+
+        if self._verify_ip_based_part():
+            calclist.extend(self.getCalculatorListIPBased())
+            calclist.extend(self.getCalculatorListLegacy())
+        else:
+            calclist.extend(self.getCalculatorListLegacy())
+
+        return calclist
+
+    def getCalculatorListLegacy(self):
+        self.__verifyPartFamilyPartRevisionIsSet()
+        part_family = self.__part_family
+        part_revision = self.__part_revision
         try:
             calclist = []
             class_type = ICalculator
@@ -549,7 +623,24 @@ class CalcManager(object):
         except Exception:
             LogMgr.Error(traceback.print_exc())
 
-        return calclist
+    def getCalculatorListIPBased(self):
+        self.__verifyPartFamilyPartRevisionIsSet()
+        part_family = self.__part_family
+        part_revision = self.__part_revision
+
+        calcList = []
+
+        if self._verify_ip_based_part():
+            # call buildVariable in pyradioconfig/modules
+            part_family = self.__part_family
+            import_path = self.getPartFamilyImportPath(part_family, "ip_collector")
+            part_rev = self.__part_revision
+            peripheral_calcs_list = ClassManager.get_calc_ips(import_path, part_family, part_rev, return_ip_obj=True)
+            # when building model, we need to make sure that duplicate instances are not called
+            for (ip_obj, calculator) in peripheral_calcs_list:
+                calcList.append(calculator)
+
+        return calcList
 
     def calculateOverList(self, calc_routine_list, modem_model):
         """Loop through all function pointers and execute calculators on model
@@ -877,6 +968,13 @@ class CalcManager(object):
         #self._buildDefaultPhys(modem_model_instance)
 
         return modem_model_instance
+
+    def _verify_ip_based_part(self):
+
+        part_family = self.__part_family
+        import_path = self.getPartFamilyImportPath(part_family, "ip_collector")
+        return ClassManager.verify_ip_based_part(import_path)
+
 
     def create_modem_model_type(self):
         """Creates a type model for current part family and revision
@@ -1741,6 +1839,7 @@ class CalcManager(object):
 
     def getPartFamilyImportPath(self, part_family, import_type):
         return "pyradioconfig.parts.{}.{}".format(part_family.lower(), import_type)
+
 
     def get_register_groups(self, part_family):
         reg_groups = {}

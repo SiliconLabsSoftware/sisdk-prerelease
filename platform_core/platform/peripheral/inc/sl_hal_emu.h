@@ -733,31 +733,6 @@ void sl_hal_emu_dcdc_dual_ipk_disable(void);
 bool sl_hal_emu_dcdc_get_dual_ipk_enable(void);
 #endif /* defined(_DCDC_DOCTRL_DUALIPKEN_MASK)*/
 
-#if defined(_DCDC_DOCTRL_TOFFMINDVDD_MASK) && defined(_DCDC_DOCTRL_TOFFMINDEC_MASK)
-/***************************************************************************//**
- * @brief
- *   Set minimum off-time for DCDC dual outputs.
- *
- * @details
- *   Configure the minimum off-time for DVDD and DEC switching outputs.
- *   This affects switching timing and efficiency. Values are masked to
- *   2 bits each. This function controls DOCTRL.TOFFMINDVDD and
- *   DOCTRL.TOFFMINDEC bitfields.
- *
- * @note
- *   The DCDC bus clock must be enabled before calling this function.
- *   Call sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_DCDC) first.
- *
- * @param[in] toff_min_dvdd
- *   Minimum off-time for DVDD output (0-3, masked to 2 bits).
- *
- * @param[in] toff_min_dec
- *   Minimum off-time for DEC output (0-3, masked to 2 bits).
- ******************************************************************************/
-void sl_hal_emu_dcdc_set_toff_min(uint8_t toff_min_dvdd,
-                                  uint8_t toff_min_dec);
-#endif /* defined(_DCDC_DOCTRL_TOFFMINDVDD_MASK) && defined(_DCDC_DOCTRL_TOFFMINDEC_MASK) */
-
 /***************************************************************************//**
  * @brief
  *   Lock EMU registers in order to protect them against unintended modification.

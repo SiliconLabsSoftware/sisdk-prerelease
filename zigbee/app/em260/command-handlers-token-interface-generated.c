@@ -40,6 +40,7 @@
 #include "stack/include/gp-proxy-table.h"
 #include "stack/include/source-route.h"
 #include "stack/include/multi-network.h"
+#include "stack/include/sl_zigbee_dhc.h"
 
 bool sli_zigbee_af_process_ezsp_command_token_interface(uint16_t commandId)
 {
@@ -63,6 +64,8 @@ bool sli_zigbee_af_process_ezsp_command_token_interface(uint16_t commandId)
       append_sl_zigbee_token_info_t(&tokenInfo);
       break;
     }
+
+//------------------------------------------------------------------------------
 
     default: {
       return false;

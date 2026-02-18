@@ -40,6 +40,7 @@
 #include "stack/include/gp-proxy-table.h"
 #include "stack/include/source-route.h"
 #include "stack/include/multi-network.h"
+#include "stack/include/sl_zigbee_dhc.h"
 
 bool sli_zigbee_af_process_ezsp_command_messaging(uint16_t commandId)
 {

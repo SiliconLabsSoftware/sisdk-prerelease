@@ -23,6 +23,8 @@
 #ifndef SILABS_EZSP_UTILS_H
 #define SILABS_EZSP_UTILS_H
 
+#include "sl_zigbee_dhc.h"
+
 //----------------------------------------------------------------
 // Zigbee Simple Descriptor:
 

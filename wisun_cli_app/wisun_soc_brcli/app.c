@@ -1053,6 +1053,7 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
         }
         phy_config.config.explicit_plan.channel_spacing = channel_spacing_id;
         phy_config.config.explicit_plan.phy_mode_id = app_settings_wisun.phy_mode_id;
+        memcpy(phy_config.config.explicit_plan.channel_mask, channel_mask.mask, SL_WISUN_CHANNEL_MASK_SIZE);
         break;
       case SL_WISUN_PHY_CONFIG_IDS:
         phy_config.config.ids.protocol_id  = app_settings_wisun.protocol_id;

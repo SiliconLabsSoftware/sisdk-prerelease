@@ -38,6 +38,7 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/select.h>
+#include <sys/signal.h>
 
 #include "uart.h"
 
@@ -55,6 +56,7 @@
 
 // -----------------------------------------------------------------------------
 // Local Variables
+static sigset_t uart_blockmask;
 
 static struct {
   uint32_t cbaud;
@@ -99,6 +101,13 @@ int32_t uartOpen(void *handle, int8_t *port, uint32_t baudRate,
   }
 
   *(int32_t *)handle = serialHandle;
+
+  // Prepare a signal mask to block signals that should not interrupt select() during UART I/O
+  sigemptyset(&uart_blockmask);
+  sigaddset(&uart_blockmask, SIGUSR1);
+  sigaddset(&uart_blockmask, SIGUSR2);
+  sigaddset(&uart_blockmask, SIGCHLD);
+  sigaddset(&uart_blockmask, SIGALRM);
 
   return serialHandle;
 }
@@ -158,26 +167,33 @@ int32_t uartRxPeek(void *handle)
 {
   int32_t bytesInBuf = -1, fd_num;
   fd_set read_fds;
-  struct timeval timeout;
+  struct timeval timeout = { 0 };
+  sigset_t prev_mask;
 
-  if (*(int32_t *)handle == -1) {
+  if (!handle) {
     return -1;
   }
 
   // Clear set to initialize
   FD_ZERO(&read_fds);
 
-  // Add uart file descriptor to the fd set +1 because this is the usage of select()
-  // This is necessary always becaus after select the descriptor state will be changed
-  fd_num = *(int32_t *)handle + 1;
+  fd_num = *(int32_t *)handle;
+
+  if (fd_num == -1) {
+    return -1;
+  }
 
   // Add uart file descriptor to the selected set
-  FD_SET(*(int32_t *)handle, &read_fds);
+  FD_SET(fd_num, &read_fds);
+  timeout.tv_usec = 20000;
 
-  timeout.tv_sec = 0;
-  timeout.tv_usec = 5000;
-  // Select read file descriptors for 5ms blocking
-  if (-1 == select(fd_num, &read_fds, NULL, NULL, &timeout)) {
+  // Prevent non-critical signals from interrupting select while waiting for UART data
+  pthread_sigmask(SIG_BLOCK, &uart_blockmask, &prev_mask);
+  // Select read file descriptors for 20ms blocking
+  int retval = select(fd_num + 1, &read_fds, NULL, NULL, &timeout);
+  pthread_sigmask(SIG_SETMASK, &prev_mask, NULL);
+
+  if (retval == -1) {
     // During application init phase system calls could interrupt select() this would cause a return with -1.
     // This is not a valid issue here, thus it shall be bypassed
     if (EINTR == errno) {
@@ -185,10 +201,10 @@ int32_t uartRxPeek(void *handle)
     }
     return -1;
   } else {
-    // Check if select really took the target file descriptor from the set
-    if (!FD_ISSET(fd_num, &read_fds)) {
+    // Check whether the UART file descriptor is marked as readable by select()
+    if (FD_ISSET(fd_num, &read_fds)) {
       // Detected data rate, the read bytes has to be checked
-      if (-1 == ioctl(*(int32_t *)handle, FIONREAD, (int *)&bytesInBuf)) {
+      if (-1 == ioctl(fd_num, FIONREAD, (int *)&bytesInBuf)) {
         return -1;
       }
     }

@@ -582,6 +582,8 @@ template_contribution:
       argument:
         - type: uint16
           help: "Channel Id"
+        - type: uint8opt
+          help: "phy config type (optional, FAN 1.1 by default)"
       shortcuts:
         - name: "[strs] "
   - name: "cli_command"
@@ -601,6 +603,8 @@ template_contribution:
       argument:
         - type: uint16
           help: "Channel Id"
+        - type: uint8opt
+          help: "phy config type (optional, FAN 1.1 by default)"
       shortcuts:
         - name: "strt"
   - name: "cli_command"
@@ -611,6 +615,50 @@ template_contribution:
       help: "Stop an RF test tone: rft stpt"
       shortcuts:
         - name: "stpt"
+  - name: "cli_command"
+    value:
+      group: "rftest"
+      name: "start_tx"
+      handler: "app_rftest_start_tx"
+      help: "Start RF test TX: rft stx <channel> <count> <data_length> <interval> <cca>"
+      argument:
+        - type: uint16
+          help: "Channel Id"
+        - type: uint16
+          help: "Number of packets to transmit"
+        - type: uint16
+          help: "Data length per packet"
+        - type: uint32
+          help: "Interval between transmissions (ms)"
+        - type: uint8
+          help: "CCA enable (0=off, 1=on)"
+        - type: uint8opt
+          help: "phy config type (optional, FAN 1.1 by default)"
+      shortcuts:
+        - name: "stx"
+  - name: "cli_command"
+    value:
+      group: "rftest"
+      name: "start_rx"
+      handler: "app_rftest_start_rx"
+      help: "Start RF test RX: rft srx <channel> <duration>"
+      argument:
+        - type: uint16
+          help: "Channel Id"
+        - type: uint32
+          help: "Duration (ms)"
+        - type: uint8opt
+          help: "phy config type (optional, FAN 1.1 by default)"
+      shortcuts:
+        - name: "srx"
+  - name: "cli_command"
+    value:
+      group: "rftest"
+      name: "stop_rx"
+      handler: "app_rftest_stop_rx"
+      help: "Stop RF test RX: rft stprx"
+      shortcuts:
+        - name: "stprx"
   - name: "cli_command"
     value:
       group: "rftest"

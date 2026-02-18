@@ -111,10 +111,6 @@
 #define CS_INITIATOR_VELOCITY_LOG              1
 #endif
 
-// <o CS_INITIATOR_HEADER_LOG> Header log of measurements results <1..20>
-// <i> Sets how many measurements are written between header logs
-// <i> Default: 5
-#define CS_INITIATOR_HEADER_LOG                5
 // </h>
 
 // <<< end of configuration section >>>

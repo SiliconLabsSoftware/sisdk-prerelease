@@ -3,6 +3,8 @@
 The changes described in this file will possibly break the build and/or functionality of an
 existing application. The description serves the purpose of helping to fix the failing build.
 
+# 8.0.1 {#section-8-0-1}
+
 # 8.0.0 {#section-8-0-0}
 
 Version has been bumped to 8.0.0 to reflect the major changes in the stack. In the future the stack version will follow the semantic versioning convention.

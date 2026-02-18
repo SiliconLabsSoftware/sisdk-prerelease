@@ -31,6 +31,8 @@
 #ifndef SL_WISUN_RF_TEST_H
 #define SL_WISUN_RF_TEST_H
 
+#include "sl_status.h"
+
 /**************************************************************************//**
  * @addtogroup SL_WISUN_RF_TEST RF Test
  * @{
@@ -104,6 +106,21 @@ sl_status_t sl_wisun_stop_tone();
 sl_status_t sl_wisun_set_test_tx_power(int8_t tx_power);
 
 /**************************************************************************//**
+ * Must be called before sl_wisun_rf_test_start_tx(), sl_wisun_rf_test_start_rx(),
+ * sl_wisun_start_stream() and sl_wisun_start_tone().
+ * Sets the phy configuration for the subsequent RF test operations.
+ *
+ * @param[in] phy_config Pointer to PHY configuration structure
+ * @return One of the following:
+ *  - SL_STATUS_OK if the PHY configuration was set successfully.
+ *  - SL_STATUS_NOT_READY if called before the stack initialization.
+ *  - SL_STATUS_BUSY if a test is already running.
+ *  - SL_STATUS_NETWORK_UP if a connection is already established or in progress.
+ *  - SL_STATUS_NOT_FOUND if the PHY configuration was not found.
+ *****************************************************************************/
+sl_status_t sl_wisun_rf_test_set_phy_config(sl_wisun_phy_config_t *phy_config);
+
+/**************************************************************************//**
  * Return the current status of the RF test plugin.
  *
  * @return One of the following:
@@ -112,6 +129,77 @@ sl_status_t sl_wisun_set_test_tx_power(int8_t tx_power);
  *****************************************************************************/
 bool sl_wisun_is_running_rf_test();
 
+/**************************************************************************//**
+ * Start an RF test packet transmission sequence.
+ *
+ * This API schedules repeated packet transmissions on a fixed channel using
+ * the currently configured RF test PHY (see sl_wisun_rf_test_set_phy_config()).
+ * The packets are sent at a constant interval until the total number of
+ * transmissions is reached.
+ * If @p cca_enabled is true, a single CCA check is performed before the
+ * initial transmit using the default single-CCA CSMA settings.
+ * To receive the packets, another application can use sl_wisun_rf_test_start_rx() on the same channel.
+ *
+ * @param[in] channel Channel ID to transmit on
+ * @param[in] count Number of packets to transmit (must be > 0)
+ * @param[in] data_length Length of data in each packet (must be > 0)
+ * @param[in] data Pointer to data to transmit; if NULL a default ramp pattern is used
+ * @param[in] interval Interval between transmissions in milliseconds (must be > 0)
+ * @param[in] cca_enabled Set true to perform a single CCA check before the initial transmit
+ * @return One of the following:
+ *  - SL_STATUS_OK if the transmission started successfully.
+ *  - SL_STATUS_NOT_READY if called before the stack initialization.
+ *  - SL_STATUS_BUSY if a test is already running.
+ *  - SL_STATUS_NETWORK_UP if a connection is already established or in progress.
+ *  - SL_STATUS_INVALID_PARAMETER if an invalid parameter is provided.
+ *  - SL_STATUS_NOT_SUPPORTED if the feature is not implemented.
+ *****************************************************************************/
+sl_status_t sl_wisun_rf_test_start_tx(uint16_t channel,
+                                uint16_t count,
+                                uint16_t data_length,
+                                uint8_t *data,
+                                uint32_t interval,
+                                bool cca_enabled);
+
+/**************************************************************************//**
+ * Start RF test RX reception on a fixed channel.
+ *
+ * This API puts the radio into continuous RX on the given channel for the
+ * requested duration. If duration is 0, RX continues until explicitly stopped.
+ *
+ * @param[in] channel Channel ID to receive on
+ * @param[in] duration Duration in milliseconds (0 = run until stopped)
+ * @return One of the following:
+ *  - SL_STATUS_OK if the RX test started successfully.
+ *  - SL_STATUS_NOT_READY if called before the stack initialization.
+ *  - SL_STATUS_BUSY if a test is already running.
+ *  - SL_STATUS_NETWORK_UP if a connection is already established or in progress.
+ *  - SL_STATUS_INVALID_PARAMETER if an invalid parameter is provided.
+ *  - SL_STATUS_NOT_SUPPORTED if the feature is not implemented.
+ *****************************************************************************/
+sl_status_t sl_wisun_rf_test_start_rx(uint16_t channel, uint32_t duration);
+
+/**************************************************************************//**
+ * Stop RF test RX reception.
+ *
+ * This API ends an active RF test RX session started with sl_wisun_rf_test_start_rx().
+ *
+ * @return One of the following:
+ *  - SL_STATUS_OK if the RX test stopped successfully.
+ *  - SL_STATUS_INVALID_STATE if not currently receiving.
+ *  - SL_STATUS_NOT_SUPPORTED if the feature is not implemented.
+ *****************************************************************************/
+sl_status_t sl_wisun_rf_test_rx_stop(void);
+
+/**************************************************************************//**
+ * Handles RF events generated during RF tests.
+ *
+ * This callback updates the RF test state based on the RAIL event and should
+ * be called when an event of type SL_WISUN_LOGGER_EVENT_TYPE_RF_TEST is received by the application.
+ *
+ * @param[in] events RAIL event mask associated with the RF test event
+ *****************************************************************************/
+void sl_wisun_rf_test_event_callback(uint64_t events);
 /** @} (end addtogroup SL_WISUN_RF_TEST) */
 
 #endif // SL_WISUN_RF_TEST_H
