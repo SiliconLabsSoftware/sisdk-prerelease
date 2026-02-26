@@ -61,7 +61,7 @@ upgrade:
       id: simplicity_sdk
       version: "2025.12.2"
     configuration:
-      - script: openthread/openthread/component/script/upgrade_serial_task_stack_size.lua
+      - script: openthread/component/script/upgrade_serial_task_stack_size.lua
         description: >
           Ensure SL_OPENTHREAD_SERIAL_TASK_MEM_SIZE is at least the required minimum in RTOS applications;
           upgrade if less, leave unchanged if greater than or equal.

@@ -43,7 +43,7 @@
  * Start transmitting a random stream of characters to enable
  * the measurement of radio modulation.
  *
- * @param[in] channel Name of the Wi-SUN network as a zero-terminated string
+ * @param[in] channel Index of the physical channel to transmit on
  * @return One of the following:
  *  - SL_STATUS_OK if the stream transmission started successfully.
  *  - SL_STATUS_NOT_READY if called before the stack initialization.
@@ -60,7 +60,6 @@ sl_status_t sl_wisun_start_stream(uint16_t channel);
 /**************************************************************************//**
  * Stop a previously started stream of characters.
  *
- * @param[in] channel Name of the Wi-SUN network as a zero-terminated string
  * @return One of the following:
  *  - SL_STATUS_OK if the stream transmission stopped successfully.
  *  - SL_STATUS_INVALID_STATE if while not transmitting a stream.
@@ -72,7 +71,7 @@ sl_status_t sl_wisun_stop_stream();
 /**************************************************************************//**
  * Start transmitting an unmodulated tone.
  *
- * @param[in] channel Name of the Wi-SUN network as a zero-terminated string
+ * @param[in] channel Index of the physical channel to transmit on
  * @return One of the following:
  *  - SL_STATUS_OK if the stream transmission started successfully.
  *  - SL_STATUS_NOT_READY if called before the stack initialization.
@@ -88,7 +87,6 @@ sl_status_t sl_wisun_start_tone(uint16_t channel);
 /**************************************************************************//**
  * Stop a previously started tone.
  *
- * @param[in] channel Name of the Wi-SUN network as a zero-terminated string
  * @return One of the following:
  *  - SL_STATUS_OK if the tone stopped successfully.
  *  - SL_STATUS_INVALID_STATE if while not transmitting a tone.
@@ -140,7 +138,7 @@ bool sl_wisun_is_running_rf_test();
  * initial transmit using the default single-CCA CSMA settings.
  * To receive the packets, another application can use sl_wisun_rf_test_start_rx() on the same channel.
  *
- * @param[in] channel Channel ID to transmit on
+ * @param[in] channel Index of the physical channel to transmit on
  * @param[in] count Number of packets to transmit (must be > 0)
  * @param[in] data_length Length of data in each packet (must be > 0)
  * @param[in] data Pointer to data to transmit; if NULL a default ramp pattern is used
@@ -167,7 +165,7 @@ sl_status_t sl_wisun_rf_test_start_tx(uint16_t channel,
  * This API puts the radio into continuous RX on the given channel for the
  * requested duration. If duration is 0, RX continues until explicitly stopped.
  *
- * @param[in] channel Channel ID to receive on
+ * @param[in] channel Index of the physical channel to transmit on
  * @param[in] duration Duration in milliseconds (0 = run until stopped)
  * @return One of the following:
  *  - SL_STATUS_OK if the RX test started successfully.

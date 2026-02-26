@@ -8,6 +8,7 @@ quality: production
 ui_hints:
   visibility: never
 source:
+- path: src/sl_crypto.c
 - path: src/sl_crypto_s3.c
 include:
 - path: inc

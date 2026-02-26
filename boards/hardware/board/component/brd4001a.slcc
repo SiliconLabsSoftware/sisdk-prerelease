@@ -15,6 +15,7 @@
   - name: hardware_board_mainboard
   - name: hardware_board_from_wmb
   - name: hardware_board_from_slwmb4001a
+  - name: hardware_board_has_si70xx
 - recommends: []
 - template_contribution: []
 - define:
@@ -26,4 +27,5 @@
   - board:pn:BRD4001
   - board:variant:A
   - board:revision:A02
+  - hardware:has:sensor:si7021
 - root_path: boards

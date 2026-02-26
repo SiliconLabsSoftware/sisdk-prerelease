@@ -45,15 +45,15 @@ During `sli_zigbee_af_init_cb`, `af-host.c` calls `sl_zigbee_dhc_init_from_json(
 ## Typical Workflow
 
 1. Provide or capture a calibration JSON file (see `configuration_sample.json`).
-2. Launch the host with `-j <file>` or run the CLI command `dhc apply file <file>`.
+2. Launch the host with `-j <file>` or run the CLI command `plugin dhc apply file <file>`.
 3. Verify the result:
-   - `dhc read all` for a full dump.
-   - `dhc export` for a metadata summary.
-4. Save or adjust individual values with the `dhc set ...` commands.
+   - `plugin dhc read all` for a full dump.
+   - `plugin dhc export` for a metadata summary.
+4. Save or adjust individual values with the `plugin dhc set ...` commands.
 
 ### Apply versus Validate
 
-`dhc apply file <json>` writes values to the NCP. `dhc validate file <json>` parses the document with `DHC_PARSE_FLAG_DRY_RUN`, confirming schema correctness without touching hardware.
+`plugin dhc apply file <json>` writes values to the NCP. `plugin dhc validate file <json>` parses the document with `DHC_PARSE_FLAG_DRY_RUN`, confirming schema correctness without touching hardware.
 
 ## CLI Reference
 
@@ -61,113 +61,113 @@ The following commands are registered in `dhc-cli.c`. All commands return a stat
 
 ### File Operations
 
-#### `dhc apply file <json_path>`
+#### `plugin dhc apply file <json_path>`
 Parse and write a JSON configuration document to the NCP.
 
 **Example:**
 ```bash
-dhc apply file /path/to/configuration_sample.json
+plugin dhc apply file /path/to/configuration_sample.json
 # Output: apply /path/to/configuration_sample.json -> 0x00000000
 ```
 
-#### `dhc validate file <json_path>`
+#### `plugin dhc validate file <json_path>`
 Parse and validate a JSON document without writing to hardware (dry-run mode).
 
 **Example:**
 ```bash
-dhc validate file /path/to/configuration_sample.json
+plugin dhc validate file /path/to/configuration_sample.json
 # Output: validate /path/to/configuration_sample.json -> 0x00000000
 ```
 
-#### `dhc export`
+#### `plugin dhc export`
 Print a compact JSON summary with current metadata values.
 
 **Example:**
 ```bash
-dhc export
+plugin dhc export
 # Output: {"silabs_dhc":{"version":5,"metadata":{"num_descriptors":2,"pa_voltage":3300,"signature":305419896}}}
 ```
 
 ### Read Operations
 
-#### `dhc read-metadata`
+#### `plugin dhc read-metadata`
 Display PA metadata including version, number of descriptors, voltage, and signature.
 
 **Example:**
 ```bash
-dhc read-metadata
+plugin dhc read-metadata
 # Output: metadata: status=0x00000000 version=5 num_desc=2 pa_voltage=3300 signature=0x12345678
 ```
 
-#### `dhc read-scalars`
+#### `plugin dhc read-scalars`
 Display all scalar values: RSSI offset, PA mode, CTUNE, voltage, signature, and versions.
 
 **Example:**
 ```bash
-dhc read-scalars
+plugin dhc read-scalars
 # Output: scalars: rssi_offset=0 pa_mode=4 ctune=87 pa_voltage=3300 pa_signature=0x12345678 pa_version=1 dhc_version=5
 ```
 
-#### `dhc read-versions`
+#### `pluign dhc read-versions`
 Display DHC and PA version information (alias for version fields from `read-scalars`).
 
 **Example:**
 ```bash
-dhc read-versions
+plugin dhc read-versions
 # Output: versions: pa_version=1 dhc_version=5
 ```
 
-#### `dhc read-all`
+#### `plugin dhc read-all`
 Comprehensive dump of all DHC data: metadata, all descriptors, curves/tables, and scalars.
 
 **Example:**
 ```bash
-dhc read-all
+plugin dhc read-all
 # Output: [Full dump of all DHC configuration]
 ```
 
-#### `dhc read-descriptor <index>`
+#### `plugin dhc read-descriptor <index>`
 Display a single PA descriptor by index.
 
 **Example:**
 ```bash
-dhc read-descriptor 0
+plugin dhc read-descriptor 0
 # Output: descriptor[0]: status=0x00000000 algo=0 n=9 min_ddbm=0 max_ddbm=90
 ```
 
-#### `dhc read-curve <index>`
+#### `plugin dhc read-curve <index>`
 Display curve segments for a curve-based descriptor (algorithm 0).
 
 **Example:**
 ```bash
-dhc read-curve 0
+plugin dhc read-curve 0
 # Output: curve[0]: status=0x00000000 min=-300 max=100
 #         seg[0]: mpl=255 slope=100 intercept=22
 #         seg[1]: mpl=90 slope=1960 intercept=-116460
 #         ...
 ```
 
-#### `dhc read-table <index>`
+#### `plugin dhc read-table <index>`
 Display table entries for a table-based descriptor (algorithm 1).
 
 **Example:**
 ```bash
-dhc read-table 1
+plugin dhc read-table 1
 # Output: table[1]: status=0x00000000 -252 -149 -97 -69 -52 -40 -32 -26 -22 -18 -15 -13 -11 -9 -8 -7
 ```
 
-#### `dhc read-segment <pa_index> <segment_index>`
+#### `plugin dhc read-segment <pa_index> <segment_index>`
 Display a single curve segment from a specific PA descriptor.
 
 **Example:**
 ```bash
-dhc read-segment 0 2
+plugin dhc read-segment 0 2
 # Output: segment[0][2]: status=0x00000000 mpl=36 slope=567 intercept=-7935
 ```
 
 ### Write Operations
 
-#### `dhc set-descriptor <index> <algorithm> <count> <min_ddbm> <max_ddbm>`
+#### `plugin dhc set-descriptor <index> <algorithm> <count> <min_ddbm> <max_ddbm>`
 Update a PA descriptor's parameters.
 
 **Parameters:**
@@ -179,11 +179,11 @@ Update a PA descriptor's parameters.
 
 **Example:**
 ```bash
-dhc set-descriptor 0 0 9 0 90
+plugin dhc set-descriptor 0 0 9 0 90
 # Output: set-descriptor -> 0x00000000
 ```
 
-#### `dhc set-segment <pa_index> <segment_index> <mpl> <slope> <intercept>`
+#### `plugin dhc set-segment <pa_index> <segment_index> <mpl> <slope> <intercept>`
 Update a single curve segment.
 
 **Parameters:**
@@ -195,11 +195,11 @@ Update a single curve segment.
 
 **Example:**
 ```bash
-dhc set-segment 0 2 36 567 -7935
+plugin dhc set-segment 0 2 36 567 -7935
 # Output: set-segment -> 0x00000000
 ```
 
-#### `dhc set-table <pa_index> <entry_index> <ddbm>`
+#### `plugin dhc set-table <pa_index> <entry_index> <ddbm>`
 Update a single table entry.
 
 **Parameters:**
@@ -209,73 +209,73 @@ Update a single table entry.
 
 **Example:**
 ```bash
-dhc set-table 1 0 -252
+plugin dhc set-table 1 0 -252
 # Output: set-table -> 0x00000000
 ```
 
-#### `dhc set-scalar <type> <value>`
+#### `plugin dhc set-scalar <type> <value>`
 Update a scalar value. Valid types: `rssi_offset`, `pa_mode`, or `ctune`.
 
 **Example:**
 ```bash
-dhc set-scalar pa_mode 5
+plugin dhc set-scalar pa_mode 5
 # Output: set-scalar -> 0x00000000
 
-dhc set-scalar rssi_offset -2
+plugin dhc set-scalar rssi_offset -2
 # Output: set-scalar -> 0x00000000
 
-dhc set-scalar ctune 175
+plugin dhc set-scalar ctune 175
 # Output: set-scalar -> 0x00000000
 ```
 
-#### `dhc set-voltage <millivolts>`
+#### `plugin dhc set-voltage <millivolts>`
 Update PA voltage in millivolts.
 
 **Example:**
 ```bash
-dhc set-voltage 3300
+plugin dhc set-voltage 3300
 # Output: set-voltage -> 0x00000000
 ```
 
-#### `dhc set-signature <hex32>`
+#### `plugin dhc set-signature <hex32>`
 Update PA signature (32-bit hex value).
 
 **Example:**
 ```bash
-dhc set-signature 0x12345678
+plugin dhc set-signature 0x12345678
 # Output: set-signature -> 0x00000000
 ```
 
-#### `dhc set-dhc-version <version>`
+#### `plugin dhc set-dhc-version <version>`
 Update DHC protocol version (volatile, not persisted).
 
 **Example:**
 ```bash
-dhc set-dhc-version 5
+plugin dhc set-dhc-version 5
 # Output: set-dhc-version -> 0x00000000
 ```
 
-#### `dhc set-pa-version <version>`
+#### `plugin dhc set-pa-version <version>`
 Update PA dataset version.
 
 **Example:**
 ```bash
-dhc set-pa-version 1
+plugin dhc set-pa-version 1
 # Output: set-pa-version -> 0x00000000
 ```
 
-#### `dhc recompute signature`
+#### `plugin dhc recompute signature`
 Regenerate the PA signature by computing a checksum of all descriptor and curve/table data.
 
 **Example:**
 ```bash
-dhc recompute signature
+plugin dhc recompute signature
 # Output: recompute signature -> 0x00000000
 ```
 
 ### Raw Binary Protocol
 
-#### `dhc raw <bytes...>`
+#### `plugin dhc raw <bytes...>`
 Send a raw binary frame to the DHC protocol. This low-level interface provides direct access to the binary protocol for debugging, testing, or integration with external tools.
 
 **Frame Format:**
@@ -307,22 +307,22 @@ The response includes both hex output and a human-readable interpretation.
 **Read Examples:**
 ```bash
 # Read PA mode
-dhc raw "DC 00 02"
+plugin dhc raw "DC 00 02"
 # Output: RESP: DC 00 02 04
 #         PA Mode: 4
 
 # Read CTUNE (4-byte value)
-dhc raw "DC 00 03"
+plugin dhc raw "DC 00 03"
 # Output: RESP: DC 00 03 57 00 00 00
 #         CTUNE: 87 (0x00000057)
 
 # Read voltage (2-byte value, little-endian)
-dhc raw "DC 00 04"
+plugin dhc raw "DC 00 04"
 # Output: RESP: DC 00 04 E4 0C
 #         Voltage: 3300 mV
 
 # Read full metadata
-dhc raw "DC 00 06"
+plugin dhc raw "DC 00 06"
 # Output: RESP: DC 00 06 05 02 D0 0C 12 34 56 78
 #         Metadata: version=5 num_desc=2 voltage=3280 mV signature=0x78563412
 ```
@@ -330,16 +330,16 @@ dhc raw "DC 00 06"
 **Write Examples:**
 ```bash
 # Write PA mode to 5
-dhc raw "DC 01 02 05"
+plugin dhc raw "DC 01 02 05"
 # Output: RESP: DC 00 02 00
 #         PA Mode: 0
 
 # Write CTUNE = 175 (0xAF) as 4 bytes little-endian
-dhc raw "DC 01 03 AF 00 00 00"
+plugin dhc raw "DC 01 03 AF 00 00 00"
 # Output: RESP: DC 00 03 00
 
 # Write voltage = 3300mV (0x0CE4) as 2 bytes little-endian
-dhc raw "DC 01 04 E4 0C"
+plugin dhc raw "DC 01 04 E4 0C"
 # Output: RESP: DC 00 04 00
 ```
 
@@ -354,9 +354,9 @@ dhc raw "DC 01 04 E4 0C"
 
 
 **Note:** The raw command accepts hex bytes in multiple formats:
-- Space-separated: `dhc raw DC 00 02`
-- With 0x prefix: `dhc raw 0xDC 0x00 0x02`
-- Single quoted string: `dhc raw "DC 00 02"`
+- Space-separated: `plugin dhc raw DC 00 02`
+- With 0x prefix: `plugin dhc raw 0xDC 0x00 0x02`
+- Single quoted string: `plugin dhc raw "DC 00 02"`
 
 ## JSON Schema
 
@@ -423,7 +423,7 @@ The `dhc raw` command returns both hex and interpreted output:
 
 **Example:**
 ```bash
-dhc raw "DC 00 02"
+plugin dhc raw "DC 00 02"
 RESP: DC 00 02 04
 PA Mode: 4
 ```
@@ -442,7 +442,7 @@ PA Mode: 4
 **Error Responses:**
 When an error occurs, the status byte is non-zero and no value bytes are returned:
 ```bash
-dhc raw "DC 00 99"
+plugin dhc raw "DC 00 99"
 RESP: DC 21 99
 Status: 0x21 (ERROR)
 ```
@@ -481,41 +481,41 @@ Enable verbose host logging or EZSP tracing if calibration writes appear to succ
 
 **Apply configuration from file:**
 ```bash
-dhc apply file configuration_sample.json
+plugin dhc apply file configuration_sample.json
 ```
 
 **Read all current values:**
 ```bash
-dhc read-all
+plugin dhc read-all
 ```
 
 **Read specific scalar values:**
 ```bash
-dhc read-scalars
+plugin dhc read-scalars
 ```
 
 **Update PA mode:**
 ```bash
-dhc set-scalar pa_mode 4
+plugin dhc set-scalar pa_mode 4
 ```
 
 **Update CTUNE:**
 ```bash
-dhc set-scalar ctune 87
+plugin dhc set-scalar ctune 87
 ```
 
 **Read using raw protocol:**
 ```bash
-dhc raw "DC 00 02"    # Read PA mode
-dhc raw "DC 00 03"    # Read CTUNE
-dhc raw "DC 00 04"    # Read voltage
+plugin dhc raw "DC 00 02"    # Read PA mode
+plugin dhc raw "DC 00 03"    # Read CTUNE
+plugin dhc raw "DC 00 04"    # Read voltage
 ```
 
 **Write using raw protocol:**
 ```bash
-dhc raw "DC 01 02 04"           # Write PA mode = 4
-dhc raw "DC 01 03 57 00 00 00"  # Write CTUNE = 87
-dhc raw "DC 01 04 E4 0C"        # Write voltage = 3300mV
+plugin dhc raw "DC 01 02 04"           # Write PA mode = 4
+plugin dhc raw "DC 01 03 57 00 00 00"  # Write CTUNE = 87
+plugin dhc raw "DC 01 04 E4 0C"        # Write voltage = 3300mV
 ```
 
 ### Status Code Reference

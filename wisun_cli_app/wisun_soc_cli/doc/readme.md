@@ -67,8 +67,8 @@ The list of available commands is output on the console with the associated help
 | wisun accept_direct_connect_link \<remote address> | Accept a Direct Connect link request | wisun accept_direct_connect_link fe80::b6e3:f9ff:fec5:83df |
 | wisun concurrent_detection \<state> | Configure concurrent detection <br> - [uint8] state: 0=disabled, 1=enabled <br> | > wisun concurrent_detection 1 |
 | wisun reset_duty_cycle | Reset the duty cycle counters | > wisun reset_duty_cycle |
-| wisun set_event_filter \<mac_address> \<events> | Configure event logger filters <br> - [string] neighbor MAC address - [uint8] state: 0=disabled, 1=enabled <br> | > wisun concurrent_detection 1 |
-| wisun clear_event_filter | Clear event logger filters | > wisun wisun clear_event_filter |
+| wisun set_event_filter \<mac_address> \<events> | Configure event logger filters <br> - [string] neighbor MAC address - [hex] events: events from sl_wisun_types.h/sl_wisun_logger_event_frame_type_t | > wisun set_event_filter ff:ff:ff:ff:ff:ff:ff:ff {02} |
+| wisun clear_event_filter | Clear event logger filters | > wisun clear_event_filter |
 
 ## Wi-SUN Settings
 
@@ -217,6 +217,7 @@ The list of available commands is output on the console with the associated help
 | rftest start_tone \<channel ID>| Start an RF test tone on a specific channel | > rftest start_tone 5<br>RF Test tone started 21|
 | rftest stop_tone | Stop RF test tone | > rftest stop_tone<br>RF Test tone stopped 2|
 | rftest set_tx_power \<value> | Set Tx power for the RF test in dBm |> rftest set_tx_power 17<br>RF Test tx Power set to  17|
+
 
 ## RTT traces
 

@@ -896,7 +896,7 @@ typedef struct {
   uint32_t sample_count;
   /// Estimated chance of success
   float success_probability;
-  /// Estimated troughput in kb/s
+  /// Estimated throughput in kb/s
   float throughput;
   /// Number of successful transmissions
   uint16_t success_count;
@@ -914,7 +914,7 @@ SL_PACK_END()
 /// Adaptive rate algorithm rates
 SL_PACK_START(1)
 typedef struct {
-  /// Struct containig the rate's tx statistics
+  /// Struct containing the rate's tx statistics
   sl_wisun_rate_stats_t stats;
   /// Rate in kb/s
   uint32_t rate;
@@ -1050,7 +1050,7 @@ typedef enum {
 /// Broadcast MAC address
 extern const sl_wisun_mac_address_t sl_wisun_broadcast_mac;
 
-/// Enumeration for channel exlusion modes.
+/// Enumeration for channel exclusion modes.
 typedef enum {
   /// Channels are excluded by range if possible (3 ranges maximum),
   /// otherwise channels will be excluded by mask

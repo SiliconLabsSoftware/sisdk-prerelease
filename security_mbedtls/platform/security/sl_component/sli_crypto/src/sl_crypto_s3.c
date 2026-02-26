@@ -46,44 +46,62 @@
 #include "sxsymcrypt/keyref.h"
 #include "sxsymcrypt/statuscodes.h"
 
-#define MASKBITS 128
-typedef union _hostcrypto_seed {
-  uint8_t  u8[MASKBITS / 8];
-  uint32_t u32[MASKBITS / 32];
-} sli_crypto_seed_t;
-
-typedef enum _sli_engine_idx {
-  SLI_CRYPTO_HOSTSYMCRYPTO_IDX = 0,
-  SLI_CRYPTO_LPWAES_IDX,
-  SLI_CRYPTO_ENGINE_COUNT
-} sli_engine_id_t;
-
-#define INVALID_ENGINE(engine) \
-  (((engine) != SLI_CRYPTO_LPWAES) && ((engine) != SLI_CRYPTO_HOSTSYMCRYPTO))
-
-sl_status_t sli_crypto_countermeasure_reseed(sli_crypto_engine_t engine, sli_crypto_seed_t *seed)
+// In test the "trng" is mocked to provide predictable values
+#if !defined(SLI_CRYPTO_TRNG_MOCK)
+sl_status_t sli_crypto_trng_get(uint8_t *dest, size_t nbytes)
 {
-  if (INVALID_ENGINE(engine)) {
+  if ((NULL == dest) || (0 == nbytes)) {
     return SL_STATUS_INVALID_PARAMETER;
   }
+  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_status_t rc = sl_se_init_command_context(&cmd_ctx);
+  /// Initialize Secure Element command context
+  if ( rc != SL_STATUS_OK) {
+    return rc;
+  }
+  rc = sl_se_get_random(&cmd_ctx, dest, nbytes);
 
-  sl_status_t rc;
-  struct sxcmmask ctx = { 0 };
-  for (uint16_t i = 0; i < sizeof(seed->u32) / sizeof(seed->u32[0]); i++) {
-    rc = sli_sxsymcrypt_lock_cryptomaster_selection(engine, false);
-    if (rc != SL_STATUS_OK) {
-      break;
-    }
-    if ((SX_OK != sx_cm_load_mask(&ctx, seed->u32[i]))) {
-      rc =  SL_STATUS_FAIL;
-      break;
-    }
+  sl_se_deinit_command_context(&cmd_ctx);
+  return rc;
+}
+#endif
 
-    if (SX_OK != sx_cm_load_mask_wait(&ctx)) {
-      rc = SL_STATUS_FAIL;
+sl_status_t sli_crypto_engine_cm_reseed(sli_crypto_engine_t engine, sli_crypto_seed_t *seed)
+{
+  if (NULL == seed) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  sl_status_t rc = SL_STATUS_FAIL;
+  switch (engine) {
+    case SLI_CRYPTO_HOSTSYMCRYPTO: // Intentional fall-through
+    case SLI_CRYPTO_LPWAES: // Intentional fall-through
+      for (uint16_t i = 0; i < sizeof(seed->u32) / sizeof(seed->u32[0]); i++) {
+        rc = sli_sxsymcrypt_lock_cryptomaster_selection(engine, false);
+        if (rc != SL_STATUS_OK) {
+          break;
+        }
+        struct sxcmmask ctx = { 0 };
+        if ((SX_OK != sx_cm_load_mask(&ctx, seed->u32[i]))) {
+          sli_sxsymcrypt_unlock_cryptomaster_selection();
+          rc =  SL_STATUS_FAIL;
+          break;
+        }
+
+        if (SX_OK != sx_cm_load_mask_wait(&ctx)) {
+          sli_sxsymcrypt_unlock_cryptomaster_selection();
+          rc = SL_STATUS_FAIL;
+          break;
+        }
+
+        rc = sli_sxsymcrypt_unlock_cryptomaster_selection();
+        if (rc != SL_STATUS_OK) {
+          break;
+        }
+      }
       break;
-    }
-    sli_sxsymcrypt_unlock_cryptomaster_selection();
+    default:
+      return SL_STATUS_INVALID_PARAMETER;
   }
 
   return rc;
@@ -91,45 +109,47 @@ sl_status_t sli_crypto_countermeasure_reseed(sli_crypto_engine_t engine, sli_cry
 
 sl_status_t sli_crypto_init(void)
 {
-  sl_se_command_context_t cmd_ctx = { 0 };
-  sl_status_t rc;
+  // Initialize crypto lock (no-op on bare-metal systems)
+  sl_status_t rc = sli_crypto_init_lock();
+  #if defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT) || defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
+  // this code path results in warning-is-error "dead code" path on baremetal
+  if (rc != SL_STATUS_OK) {
+    return rc;
+  }
+  #endif
 
   sli_crypto_seed_t seeds[SLI_CRYPTO_ENGINE_COUNT] = { 0 };
 
   struct {
-    sli_engine_id_t index;
-    sli_crypto_engine_t descriptor;
-    sli_crypto_seed_t *seed;
+    const sli_crypto_engine_t descriptor;
+    sli_crypto_seed_t * const seed;
   } engines[SLI_CRYPTO_ENGINE_COUNT] = {
-    { SLI_CRYPTO_HOSTSYMCRYPTO_IDX,
+    [SLI_CRYPTO_HOSTSYMCRYPTO_IDX] = {
       SLI_CRYPTO_HOSTSYMCRYPTO,
-      &seeds[SLI_CRYPTO_HOSTSYMCRYPTO_IDX] },
-    { SLI_CRYPTO_LPWAES_IDX,
+      &seeds[SLI_CRYPTO_HOSTSYMCRYPTO_IDX]
+    },
+    [SLI_CRYPTO_LPWAES_IDX] = {
       SLI_CRYPTO_LPWAES,
-      &seeds[SLI_CRYPTO_LPWAES_IDX] }
+      &seeds[SLI_CRYPTO_LPWAES_IDX]
+    }
   };
 
-  rc = sl_se_init_command_context(&cmd_ctx);
-  if (rc != SL_STATUS_OK) {
-    return rc;
+  #if defined(SL_CRYPTO_USE_HOST_ENTROPY) && (SL_CRYPTO_USE_HOST_ENTROPY != 0)
+  // If using the host entropy pool, accumulate host entropy now
+  rc = sli_crypto_entropy_pool_accumulate();
+  #endif
+
+  if (rc == SL_STATUS_OK) {
+    // If not using pool, or acquisition of pool fails, failover to immediate TRNG read.
+    rc = sli_crypto_trng_get((uint8_t*)seeds, sizeof(seeds));
   }
 
-  rc = sl_se_get_random(&cmd_ctx, seeds, sizeof(seeds));
-
-  if (rc != SL_STATUS_OK) {
-    return rc;
-  }
-
-  rc = sl_se_deinit_command_context(&cmd_ctx);
-
-  if (rc != SL_STATUS_OK) {
-    return rc;
-  }
-
-  for (int i = 0; i < SLI_CRYPTO_ENGINE_COUNT; i++) {
-    rc = sli_crypto_countermeasure_reseed(engines[i].descriptor, engines[i].seed);
-    if (rc != SL_STATUS_OK) {
-      return rc;
+  if (rc == SL_STATUS_OK) {
+    for (int i = 0; i < SLI_CRYPTO_ENGINE_COUNT; i++) {
+      rc = sli_crypto_countermeasure_reseed(engines[i].descriptor, engines[i].seed);
+      if (rc != SL_STATUS_OK) {
+        return rc;
+      }
     }
   }
 
@@ -198,6 +218,23 @@ sl_status_t sli_crypto_gcm(sli_crypto_descriptor_t  *key_descriptor,
                                           (const char *)iv);
   }
   status = sli_sxsymcrypt_unlock_cryptomaster_selection();
+  
+  #if (SLI_CM_COUNTERS_ENABLED)
+  // One operation per AES block (ceiling division) plus one for tag
+  uint32_t n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_GCM, data_len);
+  sl_status_t cm_status = sli_crypto_cm_check_threshold(key_descriptor->engine,
+                                                         n_ops,
+                                                         SLI_CM_AUTO_RESEED_ENABLED);
+  #if (SLI_CM_AUTO_RESEED_ENABLED)
+  // Automatic mode: block at security threshold
+  if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
+    return cm_status;
+  }
+  #else
+  (void)cm_status;  // Unused in manual mode
+  #endif
+  #endif
+
   if (status != SL_STATUS_OK) {
     return status;
   }
@@ -224,6 +261,23 @@ sl_status_t sli_crypto_gcm(sli_crypto_descriptor_t  *key_descriptor,
   if (sx_status != SX_OK) {
     return SL_STATUS_FAIL;
   }
+  
+  #if (SLI_CM_COUNTERS_ENABLED)
+  uint32_t new_count = sli_crypto_inc_engine_aes_op_count(key_descriptor->engine, n_ops);
+  if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
+    return SL_STATUS_SECURITY_AES_CM_FAIL;
+  }
+  #endif
+  
+  #if defined(SL_CRYPTO_USE_HOST_ENTROPY) && (SL_CRYPTO_USE_HOST_ENTROPY != 0)
+  // If using the host entropy pool, waiting on long transactions
+  // may be a good opportunity accumulate entropy
+  if ((data_len >= HOST_ENTROPY_ACCUMULATE_ON_LONG_TRANSACTIONS)
+      && (sli_crypto_entropy_pool_bytes_remaining() < SLI_CRYPTO_HOST_ENTROPY_POOL_DEFAULT_FILL_THRESH)) {
+    sli_crypto_entropy_pool_accumulate();
+  }
+  #endif
+  
   sx_status = sx_aead_wait(&aead);
   if (sx_status != SX_OK) {
     if (encrypt) {
@@ -361,6 +415,24 @@ sl_status_t sli_crypto_ccm(sli_crypto_descriptor_t  *key_descriptor,
   if (sx_status != SX_OK) {
     return sli_crypto_exit(SL_STATUS_FAIL, is_isr, &lpwaes_state);
   }
+
+  #if (SLI_CM_COUNTERS_ENABLED)
+  // Data blocks (ceiling division, min 1) + AAD blocks (ceiling) + keystream + tag
+  uint32_t n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_CCM, data_len)
+                 + ((aad_len + 15) / 16) + 1;
+  sl_status_t cm_status = sli_crypto_cm_check_threshold(key_descriptor->engine,
+                                                         n_ops,
+                                                         !is_isr && SLI_CM_AUTO_RESEED_ENABLED);
+  #if (SLI_CM_AUTO_RESEED_ENABLED)
+  // Automatic mode: block at security threshold (but not in ISR)
+  if (!is_isr && (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL)) {
+    return sli_crypto_exit(cm_status, is_isr, &lpwaes_state);
+  }
+  #else
+  (void)cm_status;  // Unused in manual mode
+  #endif
+  #endif
+  
   sx_status = sx_aead_feed_aad(&aead, (const char *)aad, aad_len);
   if (sx_status != SX_OK) {
     return sli_crypto_exit(SL_STATUS_FAIL, is_isr, &lpwaes_state);
@@ -383,6 +455,23 @@ sl_status_t sli_crypto_ccm(sli_crypto_descriptor_t  *key_descriptor,
   if (sx_status != SX_OK) {
     return sli_crypto_exit(SL_STATUS_FAIL, is_isr, &lpwaes_state);
   }
+  
+  #if (SLI_CM_COUNTERS_ENABLED)
+  uint32_t new_count = sli_crypto_inc_engine_aes_op_count(key_descriptor->engine, n_ops);
+  if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
+    return sli_crypto_exit(SL_STATUS_SECURITY_AES_CM_FAIL, is_isr, &lpwaes_state);
+  }
+  #endif
+  
+  #if defined(SL_CRYPTO_USE_HOST_ENTROPY) && (SL_CRYPTO_USE_HOST_ENTROPY != 0)
+  // If using the host entropy pool, waiting on long transactions
+  // may be a good opportunity accumulate entropy
+  if (!is_isr && (data_len >= HOST_ENTROPY_ACCUMULATE_ON_LONG_TRANSACTIONS)
+      && (sli_crypto_entropy_pool_bytes_remaining() < SLI_CRYPTO_HOST_ENTROPY_POOL_DEFAULT_FILL_THRESH)) {
+    sli_crypto_entropy_pool_accumulate();
+  }
+  #endif
+  
   sx_status = sx_aead_wait(&aead);
   if (sx_status != SX_OK) {
     if (encrypt) {
@@ -444,6 +533,23 @@ sl_status_t sli_crypto_ecb(sli_crypto_descriptor_t *key_descriptor,
   if (sx_status != SX_OK) {
     return sli_crypto_exit(SL_STATUS_FAIL, is_isr, &lpwaes_state);
   }
+  
+  #if (SLI_CM_COUNTERS_ENABLED)
+  // one block per 128 bits
+  uint32_t n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_BLOCK, SLI_CRYPTO_AES_BLOCK_SIZE);
+  sl_status_t cm_status = sli_crypto_cm_check_threshold(key_descriptor->engine,
+                                                         n_ops,
+                                                         !is_isr && SLI_CM_AUTO_RESEED_ENABLED);
+  #if (SLI_CM_AUTO_RESEED_ENABLED)
+  // Automatic mode: block at security threshold (but not in ISR)
+  if (!is_isr && (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL)) {
+    return sli_crypto_exit(cm_status, is_isr, &lpwaes_state);
+  }
+  #else
+  (void)cm_status;  // Unused in manual mode
+  #endif
+  #endif
+  
   sx_status = sx_blkcipher_crypt(&aes_ecb, (const char *)input, SLI_CRYPTO_AES_BLOCK_SIZE, (char *)output);
   if (sx_status != SX_OK) {
     return sli_crypto_exit(SL_STATUS_FAIL, is_isr, &lpwaes_state);
@@ -452,6 +558,13 @@ sl_status_t sli_crypto_ecb(sli_crypto_descriptor_t *key_descriptor,
   if (sx_status != SX_OK) {
     return sli_crypto_exit(SL_STATUS_FAIL, is_isr, &lpwaes_state);
   }
+
+  #if (SLI_CM_COUNTERS_ENABLED)
+  uint32_t new_count = sli_crypto_inc_engine_aes_op_count(key_descriptor->engine, n_ops);
+  if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
+    return sli_crypto_exit(SL_STATUS_SECURITY_AES_CM_FAIL, is_isr, &lpwaes_state);
+  }
+  #endif
 
   sx_status = sx_blkcipher_wait(&aes_ecb);
   if (sx_status != SX_OK) {
@@ -507,6 +620,23 @@ sl_status_t sli_crypto_cmac(sli_crypto_descriptor_t    *key_descriptor,
   if (sx_status != SX_OK) {
     return sli_crypto_exit(SL_STATUS_FAIL, is_isr, &lpwaes_state);
   }
+  
+  #if (SLI_CM_COUNTERS_ENABLED)
+  // One block for subkey generation plus one per 16 bytes (minimum 1 data block)
+  uint32_t n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_CMAC, length);
+  sl_status_t cm_status = sli_crypto_cm_check_threshold(key_descriptor->engine,
+                                                         n_ops,
+                                                         !is_isr && SLI_CM_AUTO_RESEED_ENABLED);
+  #if (SLI_CM_AUTO_RESEED_ENABLED)
+  // Automatic mode: block at security threshold (but not in ISR)
+  if (!is_isr && (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL)) {
+    return sli_crypto_exit(cm_status, is_isr, &lpwaes_state);
+  }
+  #else
+  (void)cm_status;  // Unused in manual mode
+  #endif
+  #endif
+
   sx_status = sx_mac_feed(&aes_cmac, (const char *)input, length);
   if (sx_status != SX_OK) {
     return sli_crypto_exit(SL_STATUS_FAIL, is_isr, &lpwaes_state);
@@ -515,6 +645,23 @@ sl_status_t sli_crypto_cmac(sli_crypto_descriptor_t    *key_descriptor,
   if (sx_status != SX_OK) {
     return sli_crypto_exit(SL_STATUS_FAIL, is_isr, &lpwaes_state);
   }
+
+  #if (SLI_CM_COUNTERS_ENABLED)
+  uint32_t new_count = sli_crypto_inc_engine_aes_op_count(key_descriptor->engine, n_ops);
+  if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
+    return sli_crypto_exit(SL_STATUS_SECURITY_AES_CM_FAIL, is_isr, &lpwaes_state);
+  }
+  #endif
+
+  #if defined(SL_CRYPTO_USE_HOST_ENTROPY) && (SL_CRYPTO_USE_HOST_ENTROPY != 0)
+  // If using the host entropy pool, waiting on long transactions
+  // may be a good opportunity accumulate entropy
+  if (!is_isr && (length >= HOST_ENTROPY_ACCUMULATE_ON_LONG_TRANSACTIONS)
+      && (sli_crypto_entropy_pool_bytes_remaining() < SLI_CRYPTO_HOST_ENTROPY_POOL_DEFAULT_FILL_THRESH)) {
+    sli_crypto_entropy_pool_accumulate();
+  }
+  #endif
+
   sx_status = sx_mac_wait(&aes_cmac);
   if (sx_status != SX_OK) {
     return sli_crypto_exit(SL_STATUS_FAIL, is_isr, &lpwaes_state);
@@ -536,7 +683,7 @@ sl_status_t sli_crypto_ctr(sli_crypto_descriptor_t *key_descriptor,
 
   struct sxblkcipher aes_ctr;
   struct sxkeyref key_ref;
-  bool is_isr;
+  bool is_isr = false;
   sli_cryptomaster_state_t lpwaes_state;
 
   if (key_descriptor->location == SLI_CRYPTO_KEY_LOCATION_PLAINTEXT) {
@@ -548,8 +695,7 @@ sl_status_t sli_crypto_ctr(sli_crypto_descriptor_t *key_descriptor,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  sl_status_t status;
-  status = sli_sxsymcrypt_lock_cryptomaster_selection(key_descriptor->engine, key_descriptor->yield);
+  sl_status_t status = sli_sxsymcrypt_lock_cryptomaster_selection(key_descriptor->engine, key_descriptor->yield);
   if (status != SL_STATUS_OK) {
     if (status == SL_STATUS_ISR && key_descriptor->engine == SLI_CRYPTO_LPWAES) {
       sli_crypto_lpwaes_save_state(&lpwaes_state);
@@ -571,6 +717,23 @@ sl_status_t sli_crypto_ctr(sli_crypto_descriptor_t *key_descriptor,
   if (sx_status != SX_OK) {
     return sli_crypto_exit(SL_STATUS_FAIL, is_isr, &lpwaes_state);
   }
+  
+  #if (SLI_CM_COUNTERS_ENABLED)
+  // One per 128 bits
+  uint32_t n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_BLOCK, SLI_CRYPTO_AES_BLOCK_SIZE);
+  sl_status_t cm_status = sli_crypto_cm_check_threshold(key_descriptor->engine,
+                                                         n_ops,
+                                                         !is_isr && SLI_CM_AUTO_RESEED_ENABLED);
+  #if (SLI_CM_AUTO_RESEED_ENABLED)
+  // Automatic mode: block at security threshold (but not in ISR)
+  if (!is_isr && (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL)) {
+    return sli_crypto_exit(cm_status, is_isr, &lpwaes_state);
+  }
+  #else
+  (void)cm_status;  // Unused in manual mode
+  #endif
+  #endif
+
   sx_status = sx_blkcipher_crypt(&aes_ctr, (const char *)input, SLI_CRYPTO_AES_BLOCK_SIZE, (char *)output);
   if (sx_status != SX_OK) {
     return sli_crypto_exit(SL_STATUS_FAIL, is_isr, &lpwaes_state);
@@ -579,6 +742,14 @@ sl_status_t sli_crypto_ctr(sli_crypto_descriptor_t *key_descriptor,
   if (sx_status != SX_OK) {
     return sli_crypto_exit(SL_STATUS_FAIL, is_isr, &lpwaes_state);
   }
+
+  #if (SLI_CM_COUNTERS_ENABLED)
+  uint32_t new_count = sli_crypto_inc_engine_aes_op_count(key_descriptor->engine, n_ops);
+  if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
+    return sli_crypto_exit(SL_STATUS_SECURITY_AES_CM_FAIL, is_isr, &lpwaes_state);
+  }
+  #endif
+
   sx_status = sx_blkcipher_wait(&aes_ctr);
   if (sx_status != SX_OK) {
     return sli_crypto_exit(SL_STATUS_FAIL, is_isr, &lpwaes_state);

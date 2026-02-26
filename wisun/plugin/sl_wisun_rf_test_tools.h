@@ -48,6 +48,7 @@
 #define PHY_TYPE_OQPSK_2000 0x8
 
 #define GET_PHY_TYPE(_phy_mode_id) (((_phy_mode_id) >> 4) & 0xf)
+#define GET_PHY_MODE(_phy_mode_id) ((_phy_mode_id) & 0xf)
 #define IS_OFDM(_phy_mode_id) ((GET_PHY_TYPE(_phy_mode_id) >= PHY_TYPE_OFDM1) && (GET_PHY_TYPE(_phy_mode_id) <= PHY_TYPE_OFDM4))
 #define IS_OQPSK(_phy_mode_id) ((GET_PHY_TYPE(_phy_mode_id) >= PHY_TYPE_OQPSK_100) && (GET_PHY_TYPE(_phy_mode_id) <= PHY_TYPE_OQPSK_2000))
 
@@ -58,6 +59,11 @@
 #define STACK_INFO_FIELD_CHAN_PLAN_ID  3  // If version == 1
 #define STACK_INFO_FIELD_OP_CLASS      3  // If version == 0
 #define STACK_INFO_FIELD_REG_DOMAIN    4
+
+#define STACK_INFO_VERSION_FAN10       0
+#define STACK_INFO_VERSION_FAN11       1
+#define STACK_INFO_VERSION_UNUSED    255
+#define STACK_INFO_PROTOCOL_WISUN      7
 
 #define STACK_INFO_REG_DOMAIN_UNUSED 255
 
@@ -92,12 +98,25 @@ typedef enum {
 uint8_t rf_test_op_mode_to_phy_mode(uint8_t op_mode, uint8_t fec);
 
 bool rf_test_entry_matches_phy(const sl_rail_channel_config_entry_t *entry,
+                               uint32_t channel_0_center_frequency_hz,
+                               uint32_t channel_spacing_hz,
+                               uint16_t number_of_channels,
                                uint8_t phy_mode_id,
-                               uint8_t reg_domain);
+                               uint8_t reg_domain,
+                               uint8_t phy_version);
 
 uint16_t rf_test_get_buffer_len(uint16_t length);
 
 uint8_t rf_test_build_fsk_phr(uint8_t *dst, uint16_t frame_length, uint8_t crc_length);
+
+uint8_t rf_test_build_ofdm_phr(uint8_t *dst,
+                               uint16_t frame_length,
+                               uint8_t mcs,
+                               uint8_t scrambler);
+
+uint8_t rf_test_build_oqpsk_phr(uint8_t *dst,
+                                uint16_t frame_length,
+                                uint8_t phy_mode_id);
 
 bool rf_test_prepare_tx_buffer(uint8_t phy_mode_id,
                                uint16_t data_length,
@@ -113,6 +132,7 @@ bool rf_test_prepare_tx_buffer(uint8_t phy_mode_id,
 sl_status_t rf_test_phy_config_to_chan_config(sl_wisun_phy_config_t *phy_config,
                                               sl_rail_channel_config_entry_t *chan_config,
                                               uint8_t *phy_mode_id,
-                                              uint8_t *reg_domain);
+                                              uint8_t *reg_domain,
+                                              uint16_t *physical_channel_offset);
 
 #endif // SL_WISUN_RF_TEST_TOOLS_H

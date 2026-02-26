@@ -16,6 +16,7 @@ requires:
 - name: enum
 - name: psa_driver_common
 - name: sl_assert
+- name: sli_crypto
 
 conflicts:
 - name: tz_secure_key_library_ns

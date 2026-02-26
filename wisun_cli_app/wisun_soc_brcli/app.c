@@ -2826,7 +2826,11 @@ void app_mac_allow(sl_cli_command_arg_t *arguments)
     goto cleanup;
   }
 
-  printf("[MAC address added to the access list]\r\n");
+  if (!memcmp(&address, &APP_BROADCAST_MAC, sizeof(sl_wisun_mac_address_t))) {
+    printf("[Access list cleared]\r\n");
+  } else {
+    printf("[MAC address added to the access list]\r\n");
+  }
 
 cleanup:
 
@@ -2863,7 +2867,11 @@ void app_mac_deny(sl_cli_command_arg_t *arguments)
     goto cleanup;
   }
 
-  printf("[MAC address added to the deny list]\r\n");
+  if (!memcmp(&address, &APP_BROADCAST_MAC, sizeof(sl_wisun_mac_address_t))) {
+    printf("[Access list cleared]\r\n");
+  } else {
+    printf("[MAC address added to the deny list]\r\n");
+  }
 
 cleanup:
 

@@ -48,6 +48,7 @@
 #include "sxsymcrypt/mac.h"
 #include "sxsymcrypt/keyref.h"
 #include "sxsymcrypt/statuscodes.h"
+#include "sli_crypto.h"
 
 #include "string.h"
 
@@ -250,6 +251,10 @@ psa_status_t sli_hostcrypto_transparent_mac_compute(
   int sx_status = SX_ERR_UNITIALIZED_OBJ;
   struct sxmac mac_ctx;
   size_t output_len = 0;
+  #if (SLI_CM_COUNTERS_ENABLED)
+  bool is_cmac = false;
+  uint32_t n_ops = 0;
+  #endif
 
   struct sxkeyref key_ref;
   psa_status = sli_hostcrypto_load_key(&key_ref, attributes, key_buffer);
@@ -327,6 +332,23 @@ psa_status_t sli_hostcrypto_transparent_mac_compute(
       return PSA_ERROR_BUFFER_TOO_SMALL;
     }
 
+    #if (SLI_CM_COUNTERS_ENABLED)
+    // CMAC is AES-based, so we need to track counter
+    is_cmac = true;
+    n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_CMAC, input_length);
+    #if (SLI_CM_AUTO_RESEED_ENABLED)
+    sl_status_t cm_status =
+    #endif
+    sli_crypto_cm_check_threshold(SLI_CRYPTO_HOSTSYMCRYPTO,
+                                  n_ops,
+                                  SLI_CM_AUTO_RESEED_ENABLED);
+    #if (SLI_CM_AUTO_RESEED_ENABLED)
+    if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
+      return PSA_ERROR_INSUFFICIENT_ENTROPY;
+    }
+    #endif
+    #endif
+
     if (sli_sxsymcrypt_lock_cryptomaster_selection(
           SLI_SXSYMCRYPT_CRYPTOMASTER_HOSTSYMCRYPTO, false)) {
       return PSA_ERROR_SERVICE_FAILURE;
@@ -367,6 +389,15 @@ psa_status_t sli_hostcrypto_transparent_mac_compute(
   *mac_length = output_len;
 
   memset(output, 0, sizeof(output));
+
+  #if (SLI_CM_COUNTERS_ENABLED)
+  if (is_cmac) {
+    uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_HOSTSYMCRYPTO, n_ops);
+    if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
+      return PSA_ERROR_INSUFFICIENT_ENTROPY;
+    }
+  }
+  #endif
 
   return PSA_SUCCESS;
 

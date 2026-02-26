@@ -15,6 +15,7 @@ requires:
 - name: mbedtls_core
 - name: sxsymcrypt
 - name: sli_crypto_ksu_manager
+- name: sli_crypto
 
 source:
   # Common drivers

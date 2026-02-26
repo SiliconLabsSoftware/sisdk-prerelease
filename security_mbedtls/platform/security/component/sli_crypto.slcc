@@ -14,8 +14,13 @@ requires:
 - name: code_classification
 - name: sli_crypto_s2
   condition: [device_series_2]
+- name: psa_crypto_config
+  condition: [device_has_cryptoacc]
+- name: psa_crypto_config
+  condition: [device_series_3]
 - name: sli_crypto_s3
   condition: [device_series_3]
+
 
 define:
 - name: SL_CODE_COMPONENT_SLI_CRYPTO

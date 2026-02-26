@@ -152,6 +152,39 @@
 
 // </h>
 
+// <h> Countermeasure Reseed Configuration
+
+// <o SL_USE_CM_RESEED> Countermeasure reseed mode
+// <i> Controls how AES countermeasure reseeding is handled:
+// <i>   0 - Disabled: No reseed code compiled - less secure, but smaller code size
+// <i>   1 - Manual: Incrementers track AES ops, user must call reseed explicitly
+// <i>   2 - Automatic: Incrementers + automatic reseed when threshold reached
+// <i> Manual mode (1) is intended for hard real-time systems where reseed
+// <i> timing must be controlled explicitly to avoid jitter.
+// <i> Automatic mode (2) provides the best security with minimal user effort.
+// <0=> Disabled
+// <1=> Manual (incrementers only + user must call reseed manually)
+// <2=> Automatic (incrementers + auto reseed)
+// <i> Default: 2
+#ifndef SL_USE_CM_RESEED
+#define SL_USE_CM_RESEED (2)
+#endif // SL_USE_CM_RESEED
+
+// </h>
+
+// <h> Host Entropy Configuration
+
+// <o SL_CRYPTO_USE_HOST_ENTROPY> Use host entropy
+// <i> Controls whether to use host entropy for countermeasure reseeding.
+// <i>   0 - Disabled: No host entropy used
+// <i>   1 - Enabled: Host entropy used for countermeasure reseeding
+// <i> Default: 0
+#ifndef SL_CRYPTO_USE_HOST_ENTROPY
+#define SL_CRYPTO_USE_HOST_ENTROPY (0)
+#endif // SL_CRYPTO_USE_HOST_ENTROPY
+
+// </h>
+
 // <<< end of configuration section >>>
 
 // -----------------------------------------------------------------------------
@@ -167,7 +200,7 @@
   #include "sli_psa_tfm_translation.h"
 #endif
 
-#if SL_MBEDTLS_DRIVERS_ENABLED
+#if defined(SL_MBEDTLS_DRIVERS_ENABLED) && SL_MBEDTLS_DRIVERS_ENABLED
   #include "sli_psa_acceleration.h"
 #endif
 

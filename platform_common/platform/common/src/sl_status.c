@@ -253,6 +253,8 @@ static const char *sli_status_group_generic[] =
   "SECURITY_ENCRYPT_ERROR",
   "SECURITY_KEY_ERROR",
   "SECURITY_RANDOM_NUM_GEN_ERROR",
+  "SECURITY_AES_CM_RESEED_NEEDED", 
+  "SECURITY_AES_CM_FAIL"
 };
 #endif
 
