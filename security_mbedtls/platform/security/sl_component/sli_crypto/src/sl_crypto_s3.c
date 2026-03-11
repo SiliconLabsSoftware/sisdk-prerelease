@@ -30,12 +30,14 @@
 #include "em_device.h"
 #include "sli_crypto.h"
 #include "sl_assert.h"
-#include "sl_clock_manager.h"
 #include "sl_code_classification.h"
+#include "string.h"
+
+#if (!defined(SL_TRUSTZONE_NONSECURE))
 #include "sl_se_manager.h"
 #include "sl_se_manager_entropy.h"
 #include "sl_se_manager_types.h"
-#include "string.h"
+#endif
 
 #include "sli_sxsymcrypt.h"
 #include "sxsymcrypt/aes.h"
@@ -46,6 +48,7 @@
 #include "sxsymcrypt/keyref.h"
 #include "sxsymcrypt/statuscodes.h"
 
+#if (!defined(SL_TRUSTZONE_NONSECURE))
 // In test the "trng" is mocked to provide predictable values
 #if !defined(SLI_CRYPTO_TRNG_MOCK)
 sl_status_t sli_crypto_trng_get(uint8_t *dest, size_t nbytes)
@@ -64,6 +67,8 @@ sl_status_t sli_crypto_trng_get(uint8_t *dest, size_t nbytes)
   sl_se_deinit_command_context(&cmd_ctx);
   return rc;
 }
+#else
+extern sl_status_t sli_crypto_trng_get(uint8_t *dest, size_t nbytes);
 #endif
 
 sl_status_t sli_crypto_engine_cm_reseed(sli_crypto_engine_t engine, sli_crypto_seed_t *seed)
@@ -106,17 +111,23 @@ sl_status_t sli_crypto_engine_cm_reseed(sli_crypto_engine_t engine, sli_crypto_s
 
   return rc;
 }
+#endif // (!defined(SL_TRUSTZONE_NONSECURE))
 
 sl_status_t sli_crypto_init(void)
 {
   // Initialize crypto lock (no-op on bare-metal systems)
+  #if (defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT) || defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)) \
+  && (SLI_CRYPTO_USE_HOST_ENTROPY || SLI_CM_COUNTERS_ENABLED)
   sl_status_t rc = sli_crypto_init_lock();
-  #if defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT) || defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
   // this code path results in warning-is-error "dead code" path on baremetal
   if (rc != SL_STATUS_OK) {
     return rc;
   }
+  #else
+  sl_status_t rc = SL_STATUS_OK;
   #endif
+
+  #if (!defined(SL_TRUSTZONE_NONSECURE))
 
   sli_crypto_seed_t seeds[SLI_CRYPTO_ENGINE_COUNT] = { 0 };
 
@@ -134,7 +145,7 @@ sl_status_t sli_crypto_init(void)
     }
   };
 
-  #if defined(SL_CRYPTO_USE_HOST_ENTROPY) && (SL_CRYPTO_USE_HOST_ENTROPY != 0)
+  #if (SLI_CRYPTO_USE_HOST_ENTROPY)
   // If using the host entropy pool, accumulate host entropy now
   rc = sli_crypto_entropy_pool_accumulate();
   #endif
@@ -153,6 +164,7 @@ sl_status_t sli_crypto_init(void)
     }
   }
 
+  #endif
   return rc;
 }
 
@@ -269,7 +281,7 @@ sl_status_t sli_crypto_gcm(sli_crypto_descriptor_t  *key_descriptor,
   }
   #endif
   
-  #if defined(SL_CRYPTO_USE_HOST_ENTROPY) && (SL_CRYPTO_USE_HOST_ENTROPY != 0)
+  #if (SLI_CRYPTO_USE_HOST_ENTROPY)
   // If using the host entropy pool, waiting on long transactions
   // may be a good opportunity accumulate entropy
   if ((data_len >= HOST_ENTROPY_ACCUMULATE_ON_LONG_TRANSACTIONS)
@@ -463,7 +475,7 @@ sl_status_t sli_crypto_ccm(sli_crypto_descriptor_t  *key_descriptor,
   }
   #endif
   
-  #if defined(SL_CRYPTO_USE_HOST_ENTROPY) && (SL_CRYPTO_USE_HOST_ENTROPY != 0)
+  #if (SLI_CRYPTO_USE_HOST_ENTROPY)
   // If using the host entropy pool, waiting on long transactions
   // may be a good opportunity accumulate entropy
   if (!is_isr && (data_len >= HOST_ENTROPY_ACCUMULATE_ON_LONG_TRANSACTIONS)
@@ -653,7 +665,7 @@ sl_status_t sli_crypto_cmac(sli_crypto_descriptor_t    *key_descriptor,
   }
   #endif
 
-  #if defined(SL_CRYPTO_USE_HOST_ENTROPY) && (SL_CRYPTO_USE_HOST_ENTROPY != 0)
+  #if (SLI_CRYPTO_USE_HOST_ENTROPY)
   // If using the host entropy pool, waiting on long transactions
   // may be a good opportunity accumulate entropy
   if (!is_isr && (length >= HOST_ENTROPY_ACCUMULATE_ON_LONG_TRANSACTIONS)

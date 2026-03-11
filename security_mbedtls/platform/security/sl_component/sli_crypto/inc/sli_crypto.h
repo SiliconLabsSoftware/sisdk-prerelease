@@ -43,15 +43,47 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
-#if defined(_SILICON_LABS_32B_SERIES_2) || defined(_SILICON_LABS_32B_SERIES_3)
+#include "sli_mbedtls_omnipresent.h"
+#if ((defined(CRYPTOACC_PRESENT) && defined(SLI_MBEDTLS_DEVICE_VSE_V2)) || defined(_SILICON_LABS_32B_SERIES_3)) && (!defined(SL_TRUSTZONE_NONSECURE))
 // Required for SL_CRYPTO_USE_HOST_ENTROPY and SL_USE_CM_RESEED
 #include "psa_crypto_config.h"
+#endif
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
 #endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+// Helper macros to reduce boilerplate in driver files
+// VSE_V1 lacks countermeasures.
+#if ((defined(CRYPTOACC_PRESENT) && defined(SLI_MBEDTLS_DEVICE_VSE_V2))) || defined(_SILICON_LABS_32B_SERIES_3)
+#define SLI_AES_COUNTERMEASURES_PRESENT 1
+#else
+#define SLI_AES_COUNTERMEASURES_PRESENT 0
+#endif
+// SLI_CM_COUNTERS_ENABLED: true if op counters should be compiled (mode 1 or 2)
+// SLI_CM_AUTO_RESEED_ENABLED: true if automatic reseed should be compiled (mode 2 only)
+#if defined(SL_USE_CM_RESEED) \
+    && SLI_AES_COUNTERMEASURES_PRESENT \
+    && (!defined(SL_TRUSTZONE_NONSECURE))
+  #define SLI_CM_COUNTERS_ENABLED      (SL_USE_CM_RESEED != 0)
+  #define SLI_CM_AUTO_RESEED_ENABLED   (SL_USE_CM_RESEED >= 2)
+#else
+  #define SLI_CM_COUNTERS_ENABLED      0
+  #define SLI_CM_AUTO_RESEED_ENABLED   0
+  #undef SL_USE_CM_RESEED
+#endif
+
+#if defined(SL_CRYPTO_USE_HOST_ENTROPY) && (!defined(SL_TRUSTZONE_NONSECURE))
+  #define SLI_CRYPTO_USE_HOST_ENTROPY (SL_CRYPTO_USE_HOST_ENTROPY != 0)
+#else
+  #define SLI_CRYPTO_USE_HOST_ENTROPY 0
+  #undef SL_CRYPTO_USE_HOST_ENTROPY
+#endif
+
+#if (SLI_CRYPTO_USE_HOST_ENTROPY || SLI_CM_COUNTERS_ENABLED)
 /// Defines the physical dimensions of the entropy pool
 typedef enum _sli_entropy_pool_counts {
   /// The number of bytes in a single seed word
@@ -60,7 +92,7 @@ typedef enum _sli_entropy_pool_counts {
   CRYPTO_CM_SEED_BYTES_MAX = CRYPTO_CM_MASKBITS / (8 * sizeof(uint8_t)),
   /// The number of seed words in the complete countermeasure mask
   CRYPTO_CM_SEED_WORDS_MAX = CRYPTO_CM_MASKBITS / (8 * CRYPTO_CM_SEED_WORD_BYTES),
-  #if defined(SL_CRYPTO_USE_HOST_ENTROPY) && (SL_CRYPTO_USE_HOST_ENTROPY != 0)
+  #if (SLI_CRYPTO_USE_HOST_ENTROPY)
   /// The number of complete countermeasure masks to store in the host entropy pool
   CRYPTO_CM_SEED_POOL_SIZE = 8,
   /// The size of the host entropy pool
@@ -70,12 +102,6 @@ typedef enum _sli_entropy_pool_counts {
   CRYPTO_CM_HOST_ENTROPY_POOL_BYTES = 0,
   #endif
 } sli_crypto_cm_count_t;
-
-/// Structure for a single countermeasure seed
-typedef union _hostcrypto_seed {
-  uint8_t  u8[CRYPTO_CM_SEED_BYTES_MAX];
-  uint32_t u32[CRYPTO_CM_SEED_WORDS_MAX];
-} sli_crypto_seed_t;
 
 // Countermeasure reseed threshold (AES block operations before reseed recommended)
 // DPA countermeasures may become predictable after 2^30 operations
@@ -96,19 +122,9 @@ typedef enum {
   SLI_CM_AES_MODE_CCM,        ///< CCM - blocks + 1 for tag (AAD handled separately)
   SLI_CM_AES_MODE_CMAC,       ///< CMAC - blocks + 1 for subkey generation
 } sli_cm_aes_mode_t;
+#endif // (SLI_CRYPTO_USE_HOST_ENTROPY || SLI_CM_COUNTERS_ENABLED)
 
-// Helper macros to reduce boilerplate in driver files
-// SLI_CM_COUNTERS_ENABLED: true if op counters should be compiled (mode 1 or 2)
-// SLI_CM_AUTO_RESEED_ENABLED: true if automatic reseed should be compiled (mode 2 only)
-#if defined(SL_USE_CM_RESEED) && (defined(CRYPTOACC_PRESENT) || defined(_SILICON_LABS_32B_SERIES_3))
-  #define SLI_CM_COUNTERS_ENABLED      (SL_USE_CM_RESEED != 0)
-  #define SLI_CM_AUTO_RESEED_ENABLED   (SL_USE_CM_RESEED >= 2)
-#else
-  #define SLI_CM_COUNTERS_ENABLED      0
-  #define SLI_CM_AUTO_RESEED_ENABLED   0
-#endif
-
-#if defined(SL_CRYPTO_USE_HOST_ENTROPY) && (SL_CRYPTO_USE_HOST_ENTROPY != 0)
+#if (SLI_CRYPTO_USE_HOST_ENTROPY)
 
 /// If nonzero, this will cause the host entropy pool to accumulate trng while waiting
 /// for "long" transactions to finish. Default to transactions of 1kb or larger
@@ -147,25 +163,13 @@ sl_status_t sli_crypto_entropy_pool_consume(uint8_t *out, size_t *nbytes);
  * @return               Number of bytes remaining in the host entropy pool.
  ******************************************************************************/
 uint16_t sli_crypto_entropy_pool_bytes_remaining(void);
-
-#endif // defined(SL_CRYPTO_USE_HOST_ENTROPY) && (SL_CRYPTO_USE_HOST_ENTROPY != 0)
-/***************************************************************************//**
- * @brief                TRNG get random bytes wrapper
- *
- * @param dest           Pointer to the destination buffer
- * @param nbytes         Number of bytes to get
- *
- * @return               SL_STATUS_OK if successful, relevant status code on error
- ******************************************************************************/
-sl_status_t sli_crypto_trng_get(uint8_t *dest, size_t nbytes);
-
 #if defined(UNITY_TEST)
 /***************************************************************************//**
  * @brief                Test-only function to zero the host entropy pool
  ******************************************************************************/
 void host_entropy_pool_flush(void);
 #endif // defined(UNITY_TEST)
-
+#endif // defined(SLI_CRYPTO_USE_HOST_ENTROPY)
 /***************************************************************************//**
  * @brief                seeds the AES countermeasures for the first time
  *                       fills host entropy buffer and resets AES opcount, when they are present
@@ -174,7 +178,12 @@ void host_entropy_pool_flush(void);
  ******************************************************************************/
 sl_status_t sli_crypto_init(void);
 
-#if defined(CRYPTOACC_PRESENT) || defined(_SILICON_LABS_32B_SERIES_3)
+#if SLI_AES_COUNTERMEASURES_PRESENT && (!defined(SL_TRUSTZONE_NONSECURE))
+/// Structure for a single countermeasure seed
+typedef union _hostcrypto_seed {
+  uint8_t  u8[CRYPTO_CM_SEED_BYTES_MAX];
+  uint32_t u32[CRYPTO_CM_SEED_WORDS_MAX];
+} sli_crypto_seed_t;
 /***************************************************************************//**
  * @brief                Reseeds the AES countermeasures and resets the AES op counter
  * @param engine         The crypto engine to reseed
@@ -242,7 +251,7 @@ sl_status_t sli_crypto_cm_check_threshold(sli_crypto_engine_t engine,
                                           uint32_t n_ops,
                                           bool reseed);
 #endif // (SLI_CM_COUNTERS_ENABLED)
-#endif // defined(CRYPTOACC_PRESENT) || defined(_SILICON_LABS_32B_SERIES_3)
+#endif // SLI_AES_COUNTERMEASURES_PRESENT && (!defined(SL_TRUSTZONE_NONSECURE))
 
 /***************************************************************************//**
  * @brief                CCM buffer authenticated decryption optimized for BLE
@@ -460,10 +469,8 @@ sl_status_t sli_crypto_aes_cmac_radio(sli_crypto_descriptor_t *key_descriptor,
  * @return               SL_STATUS_OK if successful, error code otherwise.
  ******************************************************************************/
 #if (defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT) || defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)) \
-    && ((defined(SL_CRYPTO_USE_HOST_ENTROPY) && (SL_CRYPTO_USE_HOST_ENTROPY != 0)) || (SLI_CM_COUNTERS_ENABLED))
+    && (SLI_CRYPTO_USE_HOST_ENTROPY || SLI_CM_COUNTERS_ENABLED)
 sl_status_t sli_crypto_init_lock(void);
-#else
-#define sli_crypto_init_lock() (SL_STATUS_OK)
 #endif
 
 #ifdef __cplusplus

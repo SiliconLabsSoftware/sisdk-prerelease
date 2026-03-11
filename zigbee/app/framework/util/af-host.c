@@ -270,6 +270,16 @@ sl_status_t sl_zigbee_af_set_ezsp_config_value(sl_zigbee_ezsp_config_id_t config
   return status;
 }
 
+void sl_zigbee_ezsp_set_stack_profile(uint8_t stackProfile)
+{
+  (void) sl_zigbee_af_set_ezsp_config_value(SL_ZIGBEE_EZSP_CONFIG_STACK_PROFILE, stackProfile, "stack profile");
+}
+
+void sl_zigbee_ezsp_set_security_level(uint8_t securityLevel)
+{
+  (void) sl_zigbee_af_set_ezsp_config_value(SL_ZIGBEE_EZSP_CONFIG_SECURITY_LEVEL, securityLevel, "security level");
+}
+
 // this function sets an EZSP policy and
 // prints out the results to the serial output
 sl_status_t sl_zigbee_af_set_ezsp_policy(sl_zigbee_ezsp_policy_id_t policyId,

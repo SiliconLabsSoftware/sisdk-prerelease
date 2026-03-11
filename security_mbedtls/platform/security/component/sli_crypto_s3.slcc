@@ -23,6 +23,11 @@ requires:
 - name: status
 - name: sl_assert
 - name: sxsymcrypt
+- name: se_manager
+  condition: [trustzone_unaware]
+- name: se_manager
+  condition: [trustzone_secure]
+- name: code_classification
 metadata:
   sbom:
     license: Zlib

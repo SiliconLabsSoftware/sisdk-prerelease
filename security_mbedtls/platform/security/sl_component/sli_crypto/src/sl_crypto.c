@@ -27,21 +27,26 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
+#include "em_device.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#if defined(CRYPTOACC_PRESENT) || defined(_SILICON_LABS_32B_SERIES_3)
+// Must be before sli_crypto.h so SLI_MBEDTLS_DEVICE_VSE_V2 is defined for SLI_AES_COUNTERMEASURES_PRESENT
+#if defined(_SILICON_LABS_32B_SERIES_2) && defined(CRYPTOACC_PRESENT) && !defined(SL_TRUSTZONE_NONSECURE)
+#include "sli_mbedtls_omnipresent.h"
+#endif
+#include "sli_crypto.h"
+#if SLI_AES_COUNTERMEASURES_PRESENT && (!defined(SL_TRUSTZONE_NONSECURE))
 // required for SL_CRYPTO_USE_HOST_ENTROPY and SL_USE_CM_RESEED
 #include "psa_crypto_config.h"
 #endif
-#include "sli_crypto.h"
 #include "sl_assert.h"
 
 // Locks are only needed when using RTOS and at least one of:
 // - Host entropy pool
 // - CM counters
 #if (defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT) || defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)) \
-    && ((defined(SL_CRYPTO_USE_HOST_ENTROPY) && (SL_CRYPTO_USE_HOST_ENTROPY != 0)) || (SLI_CM_COUNTERS_ENABLED))
+    && (SLI_CRYPTO_USE_HOST_ENTROPY || SLI_CM_COUNTERS_ENABLED)
 #include "sli_psec_osal.h"
 // Lock mutex for synchronizing multiple threads calling into the sl_crypto API.
 static sli_psec_osal_lock_t sli_crypto_lock = { 0 };
@@ -89,6 +94,11 @@ static inline sl_status_t sli_crypto_lock_release(void)
 #define sli_crypto_lock_release() (SL_STATUS_OK)
 #endif
 
+#if (!defined(SL_TRUSTZONE_NONSECURE))
+#if (SLI_AES_COUNTERMEASURES_PRESENT || SLI_CRYPTO_USE_HOST_ENTROPY)
+extern sl_status_t sli_crypto_trng_get(uint8_t *dest, size_t nbytes);
+#endif
+#if SLI_AES_COUNTERMEASURES_PRESENT
 /***************************************************************************//**
  * @brief                Hardware-specific access to AES countermeasure reseed register
  *                       don't call this directly - use sli_crypto_countermeasure_reseed
@@ -97,6 +107,7 @@ static inline sl_status_t sli_crypto_lock_release(void)
  * @param seed           Pointer to the entropy to use for reseeding.
  ******************************************************************************/
 extern sl_status_t sli_crypto_engine_cm_reseed(sli_crypto_engine_t engine, sli_crypto_seed_t *seed);
+#endif // SLI_AES_COUNTERMEASURES_PRESENT
 
 #if defined(_SILICON_LABS_32B_SERIES_3) && (SLI_CM_COUNTERS_ENABLED)
 // AES opcounters
@@ -112,7 +123,7 @@ static volatile uint32_t _aes_op_count[SLI_CRYPTO_ENGINE_COUNT] = { 0 };
 #define ENGINE_IDX(e) (SLI_CRYPTO_INVALID_ENGINE_IDX)
 #endif // unsupported
 
-#if defined(SL_CRYPTO_USE_HOST_ENTROPY) && (SL_CRYPTO_USE_HOST_ENTROPY != 0)
+#if (SLI_CRYPTO_USE_HOST_ENTROPY)
 #if (CRYPTO_CM_HOST_ENTROPY_POOL_BYTES > UINT16_MAX)
   #error "CRYPTO_CM_HOST_ENTROPY_POOL_BYTES is too large for uint16_t, update sl_crypto.c:sli_crypto_entropy_pool_t"
 #endif
@@ -285,9 +296,9 @@ sl_status_t sli_crypto_entropy_pool_consume(uint8_t *out, size_t *nbytes)
     return SL_STATUS_NO_MORE_RESOURCE;
   }
 }
-#endif // defined(SL_CRYPTO_USE_HOST_ENTROPY) && (SL_CRYPTO_USE_HOST_ENTROPY != 0)
+#endif // (SLI_CRYPTO_USE_HOST_ENTROPY)
 
-#if defined(CRYPTOACC_PRESENT) || defined(_SILICON_LABS_32B_SERIES_3)
+#if SLI_AES_COUNTERMEASURES_PRESENT && (!defined(SL_TRUSTZONE_NONSECURE))
 sl_status_t sli_crypto_countermeasure_reseed(sli_crypto_engine_t engine, sli_crypto_seed_t *opt_seed)
 {
   sli_engine_id_t e = ENGINE_IDX(engine);
@@ -302,7 +313,7 @@ sl_status_t sli_crypto_countermeasure_reseed(sli_crypto_engine_t engine, sli_cry
     size_t bytes_consumed = 0;
 
     // If the host entropy pool is enabled, try to use it first
-    #if defined(SL_CRYPTO_USE_HOST_ENTROPY) && (SL_CRYPTO_USE_HOST_ENTROPY != 0)
+    #if (SLI_CRYPTO_USE_HOST_ENTROPY)
     // If the host entropy pool is enabled and has entropy ready, use it
     uint16_t old_count = entropy_pool.count;
     if (old_count > 0) {
@@ -473,4 +484,5 @@ sl_status_t sli_crypto_cm_check_threshold(sli_crypto_engine_t engine,
   return SL_STATUS_OK;
 }
 #endif // (SLI_CM_COUNTERS_ENABLED)
-#endif // defined(CRYPTOACC_PRESENT) || defined(_SILICON_LABS_32B_SERIES_3)
+#endif // SLI_AES_COUNTERMEASURES_PRESENT && (!defined(SL_TRUSTZONE_NONSECURE))
+#endif // (!defined(SL_TRUSTZONE_NONSECURE))

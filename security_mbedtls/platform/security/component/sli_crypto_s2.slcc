@@ -24,7 +24,17 @@ requires:
 - name: sl_assert
 - name: sli_protocol_crypto
 - name: mbedtls_config
-  condition: [device_has_cryptoacc]
+  condition: [trustzone_unaware, device_has_cryptoacc]
+- name: mbedtls_config
+  condition: [trustzone_secure, device_has_cryptoacc]
+- name: psa_vse_driver
+  condition: [trustzone_unaware, device_has_cryptoacc]
+- name: psa_vse_driver
+  condition: [trustzone_secure, device_has_cryptoacc]
+- name: se_manager
+  condition: [trustzone_unaware]
+- name: se_manager
+  condition: [trustzone_secure]
 metadata:
   sbom:
     license: Zlib

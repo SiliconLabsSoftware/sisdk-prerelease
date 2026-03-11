@@ -648,7 +648,8 @@ psa_status_t sli_cryptoacc_transparent_aead_encrypt_tag(const psa_key_attributes
       #endif
       if (sx_ret != CRYPTOLIB_SUCCESS
           || status != PSA_SUCCESS) {
-        return PSA_ERROR_HARDWARE_FAILURE;
+        return_status = PSA_ERROR_HARDWARE_FAILURE;
+        goto exit;
       }
 
       return_status = PSA_SUCCESS;
@@ -678,7 +679,8 @@ psa_status_t sli_cryptoacc_transparent_aead_encrypt_tag(const psa_key_attributes
         #endif
         status = cryptoacc_management_acquire();
         if (status != PSA_SUCCESS) {
-          return status;
+          return_status = status;
+          goto exit;
         }
         sx_ret = sx_aes_gcm_encrypt(&key,
                                     &data_in,
@@ -695,7 +697,8 @@ psa_status_t sli_cryptoacc_transparent_aead_encrypt_tag(const psa_key_attributes
         #endif
         if (sx_ret != CRYPTOLIB_SUCCESS
             || status != PSA_SUCCESS) {
-          return PSA_ERROR_HARDWARE_FAILURE;
+          return_status = PSA_ERROR_HARDWARE_FAILURE;
+          goto exit;
         }
         // Copy only requested part of computed tag to user output buffer.
         memcpy(tag, tagbuf, *tag_length);
@@ -726,6 +729,8 @@ exit:
   if (return_status == PSA_SUCCESS) {
     *ciphertext_length = plaintext_length;
   } else {
+    sli_psa_zeroize(tag, tag_size);
+    sli_psa_zeroize(ciphertext, ciphertext_size);
     *ciphertext_length = 0;
     *tag_length = 0;
   }

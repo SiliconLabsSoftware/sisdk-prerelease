@@ -182,12 +182,6 @@ SL_WEAK sl_status_t sli_zigbee_stack_read_pa_version(sl_zigbee_dhc_pa_version_t 
   return dhc_stack_stub_status();
 }
 
-SL_WEAK sl_status_t sli_zigbee_stack_write_pa_version(sl_zigbee_dhc_pa_version_t *pa_version)
-{
-  (void)pa_version;
-  return dhc_stack_stub_status();
-}
-
 SL_WEAK sl_status_t sli_zigbee_stack_read_pa_signature(sl_zigbee_dhc_pa_signature_t *pa_signature)
 {
   dhc_stack_stub_zero(pa_signature, sizeof(*pa_signature));

@@ -18,7 +18,6 @@
  ******************************************************************************/
 
 #include <stdint.h>
-#include <string.h>
 #include "sl_status.h"
 #include "sl_rail.h"
 #include "sl_rail_types.h"
@@ -27,19 +26,10 @@
 #include "dhc-ncp.h"
 #include "sl_zigbee_dhc.h"
 #include "sl_clock_manager.h"
+#include "sl_clock_manager_oscillator_calibration_override.h"
 
-// Helper function to initialize default NVM config if it doesn't exist
-static void init_default_nvm_config(sl_rail_nvm_pa_config_t *cfg)
-{
-  if (!cfg) {
-    return;
-  }
-  memset(cfg, 0, sizeof(sl_rail_nvm_pa_config_t));
-  cfg->version = 0;
-  cfg->num_descriptors = 0;
-  cfg->pa_voltage = 0;
-  cfg->signature = 0;
-}
+// NVM read returns NOT_FOUND when no PA config exists; status determines "no config", not version.
+// Write path when NOT_FOUND uses a zero-initialized config (compound literal) to avoid memset bloat.
 
 // Metadata
 sl_status_t sli_zigbee_stack_read_pa_metadata(sl_zigbee_dhc_pa_metadata_t *metadata)
@@ -66,8 +56,7 @@ sl_status_t sli_zigbee_stack_write_pa_metadata(sl_zigbee_dhc_pa_metadata_t *meta
   sl_rail_nvm_pa_config_t cfg;
   sl_status_t st = sl_rail_util_pa_nvm_read_config(&cfg);
   if (st == SL_STATUS_NOT_FOUND) {
-    // Initialize default config if NVM doesn't exist
-    init_default_nvm_config(&cfg);
+    cfg = (sl_rail_nvm_pa_config_t){ 0 };
   } else if (st != SL_STATUS_OK) {
     return st;
   }
@@ -107,8 +96,7 @@ sl_status_t sli_zigbee_stack_write_pa_descriptor(uint8_t index, sl_zigbee_dhc_pa
   sl_rail_nvm_pa_config_t cfg;
   sl_status_t st = sl_rail_util_pa_nvm_read_config(&cfg);
   if (st == SL_STATUS_NOT_FOUND) {
-    // Initialize default config if NVM doesn't exist
-    init_default_nvm_config(&cfg);
+    cfg = (sl_rail_nvm_pa_config_t){ 0 };
   } else if (st != SL_STATUS_OK) {
     return st;
   }
@@ -158,8 +146,7 @@ sl_status_t sli_zigbee_stack_write_pa_curve(uint8_t index, sl_zigbee_dhc_pa_curv
   sl_rail_nvm_pa_config_t cfg;
   sl_status_t st = sl_rail_util_pa_nvm_read_config(&cfg);
   if (st == SL_STATUS_NOT_FOUND) {
-    // Initialize default config if NVM doesn't exist
-    init_default_nvm_config(&cfg);
+    cfg = (sl_rail_nvm_pa_config_t){ 0 };
   } else if (st != SL_STATUS_OK) {
     return st;
   }
@@ -210,8 +197,7 @@ sl_status_t sli_zigbee_stack_write_pa_curve_segment(uint8_t index, uint8_t segme
   sl_rail_nvm_pa_config_t cfg;
   sl_status_t st = sl_rail_util_pa_nvm_read_config(&cfg);
   if (st == SL_STATUS_NOT_FOUND) {
-    // Initialize default config if NVM doesn't exist
-    init_default_nvm_config(&cfg);
+    cfg = (sl_rail_nvm_pa_config_t){ 0 };
   } else if (st != SL_STATUS_OK) {
     return st;
   }
@@ -253,8 +239,7 @@ sl_status_t sli_zigbee_stack_write_pa_table(uint8_t index, sl_zigbee_dhc_pa_tabl
   sl_rail_nvm_pa_config_t cfg;
   sl_status_t st = sl_rail_util_pa_nvm_read_config(&cfg);
   if (st == SL_STATUS_NOT_FOUND) {
-    // Initialize default config if NVM doesn't exist
-    init_default_nvm_config(&cfg);
+    cfg = (sl_rail_nvm_pa_config_t){ 0 };
   } else if (st != SL_STATUS_OK) {
     return st;
   }
@@ -303,8 +288,7 @@ sl_status_t sli_zigbee_stack_write_pa_voltage(uint16_t pa_voltage)
   sl_rail_nvm_pa_config_t cfg;
   sl_status_t st = sl_rail_util_pa_nvm_read_config(&cfg);
   if (st == SL_STATUS_NOT_FOUND) {
-    // Initialize default config if NVM doesn't exist
-    init_default_nvm_config(&cfg);
+    cfg = (sl_rail_nvm_pa_config_t){ 0 };
   } else if (st != SL_STATUS_OK) {
     return st;
   }
@@ -347,7 +331,12 @@ sl_status_t sli_zigbee_stack_write_ctune(sl_zigbee_dhc_ctune_t *ctune)
     return SL_STATUS_NULL_POINTER;
   }
   uint32_t val = ctune->ctune;
-  return slx_clock_manager_hfxo_set_ctune(val);
+  sl_status_t st = slx_clock_manager_hfxo_set_ctune(val);
+  if (st != SL_STATUS_OK) {
+    return st;
+  }
+  /* Persist to NVM3 so ctune survives gateway restart and NCP reset. */
+  return sl_clock_manager_write_hfxo_calibration_override(val);
 }
 
 // DHC version separate from metadata.version (store locally in signature field upper bits for now)
@@ -380,22 +369,6 @@ sl_status_t sli_zigbee_stack_read_pa_version(sl_zigbee_dhc_pa_version_t *pa_vers
   pa_version->pa_version = cfg.version;
   return SL_STATUS_OK;
 }
-sl_status_t sli_zigbee_stack_write_pa_version(sl_zigbee_dhc_pa_version_t *pa_version)
-{
-  if (!pa_version) {
-    return SL_STATUS_NULL_POINTER;
-  }
-  sl_rail_nvm_pa_config_t cfg;
-  sl_status_t st = sl_rail_util_pa_nvm_read_config(&cfg);
-  if (st == SL_STATUS_NOT_FOUND) {
-    // Initialize default config if NVM doesn't exist
-    init_default_nvm_config(&cfg);
-  } else if (st != SL_STATUS_OK) {
-    return st;
-  }
-  cfg.version = pa_version->pa_version;
-  return sl_rail_util_pa_nvm_write_config(&cfg);
-}
 
 // PA signature wrapper
 sl_status_t sli_zigbee_stack_read_pa_signature(sl_zigbee_dhc_pa_signature_t *pa_signature)
@@ -419,8 +392,7 @@ sl_status_t sli_zigbee_stack_write_pa_signature(sl_zigbee_dhc_pa_signature_t *pa
   sl_rail_nvm_pa_config_t cfg;
   sl_status_t st = sl_rail_util_pa_nvm_read_config(&cfg);
   if (st == SL_STATUS_NOT_FOUND) {
-    // Initialize default config if NVM doesn't exist
-    init_default_nvm_config(&cfg);
+    cfg = (sl_rail_nvm_pa_config_t){ 0 };
   } else if (st != SL_STATUS_OK) {
     return st;
   }

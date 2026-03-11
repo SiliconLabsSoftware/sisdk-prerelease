@@ -5008,6 +5008,11 @@
       ],
       responseArguments: [
         {
+          type: "bool",
+          name: "success",
+          description: "true if the endpoint description was retrieved successfully, false otherwise.",
+        },
+        {
           type: "sl_zigbee_endpoint_description_t",
           name: "result",
           description: "Description of this endpoint."
@@ -14319,27 +14324,6 @@
           type: "sl_zigbee_dhc_pa_version_t", 
           name: "pa_version",
           description: "Read PA dataset version.",
-        },
-      ],
-    },
-    ## WRITE_PA_VERSION
-    {
-      value: "0x0165",
-      needGeneratedHandler: "yes",
-      commandName: "writePaVersion",
-      description: "Write PA dataset version.",
-      commandArguments: [
-        { 
-          type: "sl_zigbee_dhc_pa_version_t", 
-          name: "pa_version",
-          description: "Write PA dataset version.",
-        },
-      ],
-      responseArguments: [
-        { 
-          type: "sl_status_t", 
-          name: "status",
-          description: "An sl_status_t value indicating success or the reason for failure.",
         },
       ],
     },

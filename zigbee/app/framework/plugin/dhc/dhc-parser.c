@@ -412,7 +412,10 @@ static sl_status_t parse_legacy_document(const cJSON *silabs_dhc, uint32_t flags
     }
   }
 
-  // Curves or tables (paired with descriptors by positional index)
+  // Curves or tables (paired with descriptors by positional index).
+  // Validate (dry run) must not depend on NCP state: use algorithm from JSON
+  // (pa_descriptors[i]), not sl_zigbee_dhc_read_pa_descriptor(), so validate
+  // works before any apply when num_descriptors is 0 on the NCP.
   const cJSON *pa_curve_or_table = cJSON_GetObjectItemCaseSensitive(pa_curves, "pa_curve_or_table");
   if (!cJSON_IsArray(pa_curve_or_table)) {
     return SL_STATUS_INVALID_PARAMETER;
@@ -425,13 +428,19 @@ static sl_status_t parse_legacy_document(const cJSON *silabs_dhc, uint32_t flags
     if (!cJSON_IsObject(obj)) {
       return SL_STATUS_INVALID_PARAMETER;
     }
-    // Retrieve descriptor again to know algorithm
-    sl_zigbee_dhc_pa_descriptor_t d;
-    sl_status_t st_rd = sl_zigbee_dhc_read_pa_descriptor((uint8_t)i, &d);
-    if (st_rd != SL_STATUS_OK) {
-      return st_rd;
+    // Use descriptor from JSON so validate (dry run) does not depend on NCP state
+    const cJSON *desc_obj = cJSON_GetArrayItem(pa_descriptors, i);
+    if (!cJSON_IsObject(desc_obj)) {
+      return SL_STATUS_INVALID_PARAMETER;
     }
-    if (d.algorithm == SL_ZIGBEE_DHC_ALGO_CURVE) {
+    int algorithm = 0;
+    if (!json_get_int(desc_obj, "algorithm", &algorithm)) {
+      return SL_STATUS_INVALID_PARAMETER;
+    }
+    if (algorithm != SL_ZIGBEE_DHC_ALGO_CURVE && algorithm != SL_ZIGBEE_DHC_ALGO_TABLE) {
+      return SL_STATUS_INVALID_PARAMETER;
+    }
+    if (algorithm == SL_ZIGBEE_DHC_ALGO_CURVE) {
       int cmin = 0;
       int cmax = 0;
       if (!json_get_int(obj, "curve_min_ddbm", &cmin) || !json_get_int(obj, "curve_max_ddbm", &cmax)) {

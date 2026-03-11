@@ -28,14 +28,18 @@
  *
  ******************************************************************************/
 #include "em_device.h"
+#if (!defined(SL_TRUSTZONE_NONSECURE)) && defined(CRYPTOACC_PRESENT)
+#include "sli_mbedtls_omnipresent.h"
+#endif
 #include "sli_crypto.h"
 #include "sl_assert.h"
 #include "sli_protocol_crypto.h"
+#if !defined(SL_TRUSTZONE_NONSECURE)
 #if defined(CRYPTOACC_PRESENT)
-#include "cryptoacc_management.h"
 #include "sli_cryptoacc_driver_trng.h"
-// for !defined(SLI_MBEDTLS_DEVICE_VSE2)
-#include "sli_mbedtls_omnipresent.h"
+#if defined(SLI_MBEDTLS_DEVICE_VSE_V2)
+#include "cryptoacc_management.h"
+#endif
 #else
 #include "sl_se_manager.h"
 #include "sl_se_manager_types.h"
@@ -65,16 +69,13 @@ sl_status_t sli_crypto_trng_get(uint8_t *dest, size_t nbytes)
   return rc;
 }
 #endif
-
+#if defined(CRYPTOACC_PRESENT) && defined(SLI_MBEDTLS_DEVICE_VSE_V2) 
 sl_status_t sli_crypto_engine_cm_reseed(sli_crypto_engine_t engine, sli_crypto_seed_t *seed)
 {
-  (void)engine;  // Unused on S2 - only CRYPTOACC exists
-  #if !defined(CRYPTOACC_PRESENT) || !defined(SLI_MBEDTLS_DEVICE_VSE_V2)
-  (void)seed;
-  return SL_STATUS_NOT_SUPPORTED;
-  #else
   if (NULL == seed) {
     return SL_STATUS_NULL_POINTER;
+  } else if (engine != SLI_CRYPTO_ENGINE_CRYPTOACC) {
+    return SL_STATUS_INVALID_PARAMETER;
   }
 
   // Reseed the cryptoacc...
@@ -84,36 +85,48 @@ sl_status_t sli_crypto_engine_cm_reseed(sli_crypto_engine_t engine, sli_crypto_s
   } else {
     return SL_STATUS_OK;
   }
-  #endif
 }
-
+#endif // defined(CRYPTOACC_PRESENT) && defined(SLI_MBEDTLS_DEVICE_VSE_V2)
+#endif // (!defined(SL_TRUSTZONE_NONSECURE))
 sl_status_t sli_crypto_init(void)
 {
   #if defined(SLI_RADIOAES_REQUIRES_MASKING)
   sli_aes_seed_mask();
   #endif
+  
+  #if (!defined(SL_TRUSTZONE_NONSECURE))
   sl_status_t rc = SL_STATUS_FAIL;
   #if defined(CRYPTOACC_PRESENT) && defined(SLI_MBEDTLS_DEVICE_VSE_V2)
-  if ((rc = cryptoacc_initialize_countermeasures()) != PSA_SUCCESS) {
-    return rc;
+  if (cryptoacc_initialize_countermeasures() != PSA_SUCCESS) {
+    return SL_STATUS_SECURITY_AES_CM_FAIL;
   }
   #endif
 
-  // Initialize crypto lock (no-op on bare-metal systems)
+  #if (defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT) || defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)) \
+  && (SLI_CRYPTO_USE_HOST_ENTROPY || SLI_CM_COUNTERS_ENABLED)
   rc = sli_crypto_init_lock();
-  #if defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT) || defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
-  // this code path results in warning-is-error "dead code" path on baremetal
   if (rc != SL_STATUS_OK) {
     return rc;
   }
   #endif
 
-  #if defined(SL_CRYPTO_USE_HOST_ENTROPY) && (SL_CRYPTO_USE_HOST_ENTROPY != 0)
+  #if (SLI_CRYPTO_USE_HOST_ENTROPY)
   // If using the host entropy pool, accumulate host entropy now
   rc = sli_crypto_entropy_pool_accumulate();
+  if (rc != SL_STATUS_OK) {
+    return rc;
+  }
   #endif
-
+  // If countermeasures were already initialized a reseed didn't occur
+  // during cryptoacc_initialize_countermeasures(), reseed just-in-case;
+  // additionally this resets the AES countermeasure counters, if present.
+  #if defined(CRYPTOACC_PRESENT) && defined(SLI_MBEDTLS_DEVICE_VSE_V2) 
+  rc = sli_crypto_countermeasure_reseed(SLI_CRYPTO_ENGINE_CRYPTOACC, NULL);
+  #endif
   return rc;
+  #else
+  return SL_STATUS_OK;
+  #endif // (!defined(SL_TRUSTZONE_NONSECURE))
 }
 
 /***************************************************************************//**

@@ -1,4 +1,4 @@
-# Release Notes - Rainier SE Firmware
+# Release Notes - X301 SE Firmware
 
 ## v3.3.7
 

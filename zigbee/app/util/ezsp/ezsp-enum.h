@@ -1,9 +1,9 @@
 // File: ezsp-enum.h
 //
 // *** Generated file. Do not edit! ***
-//
+// 
 // Description: Enumerations for EZSP.
-//
+// 
 // Copyright 2007 by Ember Corporation. All rights reserved.                *80*
 
 #ifndef __EZSP_ENUM_H__
@@ -751,6 +751,7 @@ enum {
 // Frame IDs
 
 enum {
+
 // Configuration Frames
   SL_ZIGBEE_EZSP_VERSION                        = 0x0000,
   SL_ZIGBEE_EZSP_GET_CONFIGURATION_VALUE        = 0x0052,
@@ -1116,7 +1117,6 @@ enum {
   SL_ZIGBEE_EZSP_READ_DHC_VERSION               = 0x0162,
   SL_ZIGBEE_EZSP_WRITE_DHC_VERSION              = 0x0163,
   SL_ZIGBEE_EZSP_READ_PA_VERSION                = 0x0164,
-  SL_ZIGBEE_EZSP_WRITE_PA_VERSION               = 0x0165,
   SL_ZIGBEE_EZSP_READ_PA_SIGNATURE              = 0x0166,
   SL_ZIGBEE_EZSP_WRITE_PA_SIGNATURE             = 0x0167,
   SL_ZIGBEE_EZSP_READ_PA_METADATA               = 0x0168,
@@ -1124,3 +1124,4 @@ enum {
 };
 
 #endif // __EZSP_ENUM_H__
+

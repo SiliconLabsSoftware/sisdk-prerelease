@@ -229,10 +229,8 @@
 #define sl_zigbee_set_pending_network_update_pan_id sl_zigbee_ezsp_set_pending_network_update_pan_id
 #define sl_zigbee_set_pending_network_update_channel sl_zigbee_ezsp_set_pending_network_update_channel
 
-#define sl_zigbee_set_stack_profile(stackProfile) \
-  sl_zigbee_af_set_ezsp_config_value(SL_ZIGBEE_EZSP_CONFIG_STACK_PROFILE, stackProfile, "stack profile")
-#define sl_zigbee_set_security_level(securityLevel) \
-  sl_zigbee_af_set_ezsp_config_value(SL_ZIGBEE_EZSP_CONFIG_SECURITY_LEVEL, securityLevel, "security level")
+#define sl_zigbee_set_stack_profile(stackProfile) sl_zigbee_ezsp_set_stack_profile(stackProfile)
+#define sl_zigbee_set_security_level(securityLevel) sl_zigbee_ezsp_set_security_level(securityLevel)
 
 //Have GP server use its own implementations of these for now
 #ifndef SL_CATALOG_ZIGBEE_GREEN_POWER_SERVER_PRESENT
@@ -273,6 +271,5 @@
 #define sl_zigbee_dhc_read_dhc_version          sl_zigbee_ezsp_read_dhc_version
 #define sl_zigbee_dhc_write_dhc_version         sl_zigbee_ezsp_write_dhc_version
 #define sl_zigbee_dhc_read_pa_version           sl_zigbee_ezsp_read_pa_version
-#define sl_zigbee_dhc_write_pa_version          sl_zigbee_ezsp_write_pa_version
 #define sl_zigbee_dhc_read_pa_signature         sl_zigbee_ezsp_read_pa_signature
 #define sl_zigbee_dhc_write_pa_signature        sl_zigbee_ezsp_write_pa_signature

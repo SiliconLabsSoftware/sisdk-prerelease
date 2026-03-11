@@ -201,12 +201,6 @@ sl_status_t sl_zigbee_dhc_read_pa_version(sl_zigbee_dhc_pa_version_t *pa_version
   return dhc_stub_status();
 }
 
-sl_status_t sl_zigbee_dhc_write_pa_version(sl_zigbee_dhc_pa_version_t *pa_version)
-{
-  (void)pa_version;
-  return dhc_stub_status();
-}
-
 // PA signature
 sl_status_t sl_zigbee_dhc_read_pa_signature(sl_zigbee_dhc_pa_signature_t *pa_signature)
 {

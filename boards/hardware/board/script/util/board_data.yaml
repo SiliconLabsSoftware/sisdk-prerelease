@@ -448,11 +448,11 @@ brd4276a:
   hfxo_ctune: 103
   lfxo_ctune: 38
 brd4277a:
-  hfxo_ctune: 140
-  lfxo_ctune: 63
+  hfxo_ctune: 120
+  lfxo_ctune: 40
 brd4278a:
-  hfxo_ctune: 140
-  lfxo_ctune: 63
+  hfxo_ctune: 120
+  lfxo_ctune: 40
 brd4329a:
   hfxo_ctune: 137
 brd4332a:
