@@ -77,9 +77,9 @@ void sli_zigbee_af_interpan_fragment_test_command(sl_cli_command_arg_t *args)
     testMessage[i] = (sl_zigbee_get_pseudo_random_number() & 0xFF);
   }
 
-  sl_zigbee_af_core_print("Sending inter-PAN message of len %d to ", messageLen);
+  sl_zigbee_af_cli_print("Sending inter-PAN message of len %d to ", messageLen);
   //sl_zigbee_af_core_debug_exec(sl_zigbee_af_print_big_endian_eui64(eui64));
-  sl_zigbee_af_core_print(" with random values: ");
+  sl_zigbee_af_cli_print(" with random values: ");
 
   sl_status_t status = sl_zigbee_af_send_inter_pan(panId,
                                                    eui64,
@@ -90,10 +90,10 @@ void sli_zigbee_af_interpan_fragment_test_command(sl_cli_command_arg_t *args)
                                                    messageLen,
                                                    testMessage);
 
-  sl_zigbee_af_core_println("%s (0x%02X)",
-                            (SL_STATUS_OK == status) ? "success" : "failure",
-                            status);
-  sl_zigbee_af_core_flush();
+  sl_zigbee_af_cli_println("%s (0x%02X)",
+                           (SL_STATUS_OK == status) ? "success" : "failure",
+                           status);
+  sl_zigbee_af_cli_flush();
 }
 
 // Set the timeout for inter-PAN fragment transmissions
@@ -102,14 +102,14 @@ void sli_zigbee_af_interpan_set_message_timeout_command(sl_cli_command_arg_t *ar
 #if defined(ALLOW_FRAGMENTATION)
   uint16_t timeout = sl_cli_get_argument_uint16(args, 0);
   if (0 == timeout) {
-    sl_zigbee_af_core_println("ERR: inter-PAN message timeout of 0 not allowed");
-    sl_zigbee_af_core_flush();
+    sl_zigbee_af_cli_println("ERR: inter-PAN message timeout of 0 not allowed");
+    sl_zigbee_af_cli_flush();
     return;
   }
   interpanPluginSetFragmentMessageTimeout(timeout);
 #else
   (void)args;
-  sl_zigbee_af_core_println("ERR: inter-PAN fragmentation feature missing");
+  sl_zigbee_af_cli_println("ERR: inter-PAN fragmentation feature missing");
 #endif //ALLOW_FRAGMENTATION
 }
 
@@ -122,7 +122,7 @@ void sli_zigbee_af_interpan_group_short_command(sl_cli_command_arg_t *args)
   uint16_t shortOrGroupId;
 
   if (zclCmdIsBuilt == false) {
-    sl_zigbee_af_core_println("no cmd");
+    sl_zigbee_af_cli_println("no cmd");
     return;
   }
 
@@ -134,17 +134,17 @@ void sli_zigbee_af_interpan_group_short_command(sl_cli_command_arg_t *args)
 
   if (sl_cli_get_command_string(args, 2)[0] == 'g') {
     header.groupId = shortOrGroupId;
-    sl_zigbee_af_debug_println("interpan %s %04x", "group", header.groupId);
+    sl_zigbee_af_cli_println("interpan %s %04x", "group", header.groupId);
   } else {
     header.shortAddress = shortOrGroupId;
-    sl_zigbee_af_debug_println("interpan %s %04x", "short", shortOrGroupId);
+    sl_zigbee_af_cli_println("interpan %s %04x", "short", shortOrGroupId);
   }
 
   status = sl_zigbee_af_interpan_send_message_cb(&header,
                                                  appZclBufferLen,
                                                  appZclBuffer);
   if (status != SL_STATUS_OK) {
-    sl_zigbee_af_debug_println("ERR: Inter-PAN send failed: 0x%08X", status);
+    sl_zigbee_af_cli_println("ERR: Inter-PAN send failed: 0x%08X", status);
   }
 }
 
@@ -157,7 +157,7 @@ void sli_zigbee_af_interpan_long_command(sl_cli_command_arg_t *args)
   sl_zigbee_af_interpan_header_t header;
 
   if (zclCmdIsBuilt == false) {
-    sl_zigbee_af_core_println("no cmd");
+    sl_zigbee_af_cli_println("no cmd");
     return;
   }
 
@@ -174,6 +174,6 @@ void sli_zigbee_af_interpan_long_command(sl_cli_command_arg_t *args)
                                                  appZclBufferLen,
                                                  appZclBuffer);
   if (status != SL_STATUS_OK) {
-    sl_zigbee_af_debug_println("ERR: Inter-PAN send failed: 0x%08X", status);
+    sl_zigbee_af_cli_println("ERR: Inter-PAN send failed: 0x%08X", status);
   }
 }

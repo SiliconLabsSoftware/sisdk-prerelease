@@ -425,7 +425,7 @@ void sl_hal_emu_init_dcdc(const sl_hal_emu_dcdc_init_t *init)
 #endif
   ;
 
-#if defined(_DCDC_DOCTRL_MASK)
+#if defined(_DCDC_DOCTRL_MASK) && defined(_DCDC_EM01CTRL0_IPKDECVAL_MASK)
   /* Reduce IPKDECVAL to 1 before transition. */
   sl_hal_emu_dcdc_sync(DCDC_SYNCBUSY_EM01CTRL0);
   DCDC->EM01CTRL0 = (DCDC->EM01CTRL0 & ~_DCDC_EM01CTRL0_IPKDECVAL_MASK)
@@ -435,7 +435,7 @@ void sl_hal_emu_init_dcdc(const sl_hal_emu_dcdc_init_t *init)
 
   sl_hal_emu_set_dcdc_mode(init->mode);
 
-#if defined(_DCDC_DOCTRL_MASK)
+#if defined(_DCDC_DOCTRL_MASK) && defined(_DCDC_EM01CTRL0_IPKDECVAL_MASK)
   /* Restore IPKDECVAL to default value after transition */
   sl_hal_emu_dcdc_sync(DCDC_SYNCBUSY_EM01CTRL0);
   DCDC->EM01CTRL0 = (DCDC->EM01CTRL0 & ~_DCDC_EM01CTRL0_IPKDECVAL_MASK)
@@ -594,5 +594,6 @@ bool sl_hal_emu_dcdc_get_dual_ipk_enable(void)
   return result;
 }
 #endif
+
 
 #endif /* defined(EMU_PRESENT) */

@@ -945,7 +945,8 @@ void sli_legacy_buffer_manager_reclaim_unused_buffers(const BufferMarker *marker
       bufferTest(testFree(emMallocedContents[finger - emHeapBase]);
                  emMallocedContents[finger - emHeapBase] = NULL; );
       if (isIndirect(finger)) {
-        void* objectRef = *((void **) (finger + INDIRECT_BUFFER_OBJ_REF_INDEX));
+        void *objectRef;
+        memcpy(&objectRef, (char *)(finger + INDIRECT_BUFFER_OBJ_REF_INDEX), sizeof(objectRef));
         if (objectRef != NULL) {
           sl_legacy_buffer_manager_free_memory_for_packet_handler(objectRef);
         }
@@ -1231,7 +1232,9 @@ uint8_t * sli_legacy_buffer_manager_get_buffer_pointer(sli_buffer_manager_buffer
 
   if (bufferPointer != NULL) {
     if (isIndirect(bufferPointer)) {
-      return *((uint8_t **) (bufferPointer + INDIRECT_BUFFER_POINTER_INDEX));
+      uint8_t *ptr;
+      memcpy(&ptr, (char *)(bufferPointer + INDIRECT_BUFFER_POINTER_INDEX), sizeof(ptr));
+      return ptr;
 
   #ifdef SL_ZIGBEE_TEST
     } else if (sli_legacy_buffer_manager_use_malloc) {
@@ -1326,8 +1329,10 @@ void sli_legacy_buffer_manager_set_buffer_length_from_end(sli_buffer_manager_buf
 
   if (bufferPointer != NULL) {
     if (isIndirect(bufferPointer)) {
-      *((const uint8_t **) (bufferPointer + INDIRECT_BUFFER_POINTER_INDEX))
-        += remove;
+      const uint8_t *ptr;
+      memcpy(&ptr, (char *)(bufferPointer + INDIRECT_BUFFER_POINTER_INDEX), sizeof(ptr));
+      ptr += remove;
+      memcpy((char *)(bufferPointer + INDIRECT_BUFFER_POINTER_INDEX), &ptr, sizeof(ptr));
       bufferPointer[INDIRECT_BUFFER_LENGTH_INDEX] = newLength;
     } else {
       uint8_t *contents = sli_legacy_buffer_manager_get_buffer_pointer(buffer);
@@ -1493,10 +1498,9 @@ sli_buffer_manager_buffer_t sli_legacy_buffer_manager_allocate_indirect_buffer(u
   uint16_t *bufferPointer = expandPointer(buffer);
   if (bufferPointer != NULL) {
     bufferPointer[INDIRECT_BUFFER_LENGTH_INDEX] = length;
-    *((uint8_t **) (bufferPointer + INDIRECT_BUFFER_POINTER_INDEX))
-      = contents;
+    memcpy((char *)(bufferPointer + INDIRECT_BUFFER_POINTER_INDEX), &contents, sizeof(contents));
     bufferPointer[NEW_LOCATION_INDEX] |= INDIRECT_BIT;
-    *((void **) (bufferPointer + INDIRECT_BUFFER_OBJ_REF_INDEX)) = freePtr;
+    memcpy((char *)(bufferPointer + INDIRECT_BUFFER_OBJ_REF_INDEX), &freePtr, sizeof(freePtr));
     return buffer;
   } else {
     return NULL_BUFFER;
@@ -1511,7 +1515,9 @@ void* sl_legacy_buffer_manager_get_object_ref_from_buffer(sli_buffer_manager_buf
     if (!isIndirect(bufferPointer)) {
       return NULL;
     }
-    return *((void **) (bufferPointer + INDIRECT_BUFFER_OBJ_REF_INDEX));
+    void *objRef;
+    memcpy(&objRef, (char *)(bufferPointer + INDIRECT_BUFFER_OBJ_REF_INDEX), sizeof(objRef));
+    return objRef;
   }
   return NULL;
 }

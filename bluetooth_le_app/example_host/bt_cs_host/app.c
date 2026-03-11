@@ -137,7 +137,6 @@
   "        2 : moving object tracking fast (REAL_TIME_FAST)\n"                     \
   "    -p  Pre-set parameters for channel map selection, default: 2\n"             \
   "        Used only for initiator instances\n"                                    \
-  "        0 : low (channel spacing: 1, number of channels: 20)\n"                 \
   "        1 : medium (channel spacing: 2, number of channels: 38)\n"              \
   "        2 : high (channel spacing: 1, number of channels: 72)\n"                \
   "        3 : load custom from configuration macro CS_CUSTOM_CHANNEL_MAP\n"       \
@@ -363,8 +362,7 @@ void app_cli_init(int argc, char *argv[])
       case 'p':
       {
         int preset = atoi(optarg);
-        if (preset != CS_CHANNEL_MAP_PRESET_LOW
-            && preset != CS_CHANNEL_MAP_PRESET_MEDIUM
+        if (preset != CS_CHANNEL_MAP_PRESET_MEDIUM
             && preset != CS_CHANNEL_MAP_PRESET_HIGH
             && preset != CS_CHANNEL_MAP_PRESET_CUSTOM) {
           app_log_error(APP_PREFIX "Unsupported preset (%d) provided!" APP_LOG_NL, preset);

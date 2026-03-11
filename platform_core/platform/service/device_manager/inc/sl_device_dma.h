@@ -131,6 +131,14 @@ SL_ENUM(sl_dma_ctrl_block_size_t) {
 #define SL_DMA_SIGNAL_TIMER0_CC2 (&SL_DMA_SIGNAL_TIMER0_CC2_VALUE)
 /// Define for TIMER0 UFOF DMA Signal.
 #define SL_DMA_SIGNAL_TIMER0_UFOF (&SL_DMA_SIGNAL_TIMER0_UFOF_VALUE)
+/// Define for TIMER0 CC3 DMA Signal.
+#define SL_DMA_SIGNAL_TIMER0_CC3 (&SL_DMA_SIGNAL_TIMER0_CC3_VALUE)
+/// Define for TIMER0 CC4 DMA Signal.
+#define SL_DMA_SIGNAL_TIMER0_CC4 (&SL_DMA_SIGNAL_TIMER0_CC4_VALUE)
+/// Define for TIMER0 CC5 DMA Signal.
+#define SL_DMA_SIGNAL_TIMER0_CC5 (&SL_DMA_SIGNAL_TIMER0_CC5_VALUE)
+/// Define for TIMER0 CC6 DMA Signal.
+#define SL_DMA_SIGNAL_TIMER0_CC6 (&SL_DMA_SIGNAL_TIMER0_CC6_VALUE)
 
 /// Define for TIMER1 CC0 DMA Signal.
 #define SL_DMA_SIGNAL_TIMER1_CC0 (&SL_DMA_SIGNAL_TIMER1_CC0_VALUE)
@@ -140,6 +148,14 @@ SL_ENUM(sl_dma_ctrl_block_size_t) {
 #define SL_DMA_SIGNAL_TIMER1_CC2 (&SL_DMA_SIGNAL_TIMER1_CC2_VALUE)
 /// Define for TIMER1 UFOF DMA Signal.
 #define SL_DMA_SIGNAL_TIMER1_UFOF (&SL_DMA_SIGNAL_TIMER1_UFOF_VALUE)
+/// Define for TIMER1 CC3 DMA Signal.
+#define SL_DMA_SIGNAL_TIMER1_CC3 (&SL_DMA_SIGNAL_TIMER1_CC3_VALUE)
+/// Define for TIMER1 CC4 DMA Signal.
+#define SL_DMA_SIGNAL_TIMER1_CC4 (&SL_DMA_SIGNAL_TIMER1_CC4_VALUE)
+/// Define for TIMER1 CC5 DMA Signal.
+#define SL_DMA_SIGNAL_TIMER1_CC5 (&SL_DMA_SIGNAL_TIMER1_CC5_VALUE)
+/// Define for TIMER1 CC6 DMA Signal.
+#define SL_DMA_SIGNAL_TIMER1_CC6 (&SL_DMA_SIGNAL_TIMER1_CC6_VALUE)
 
 /// Define for TIMER2 CC0 DMA Signal.
 #define SL_DMA_SIGNAL_TIMER2_CC0 (&SL_DMA_SIGNAL_TIMER2_CC0_VALUE)
@@ -372,6 +388,17 @@ SL_ENUM(sl_dma_ctrl_block_size_t) {
 /// Define for VDAC1 CH1 REQ Signal.
 #define SL_DMA_SIGNAL_VDAC1_CH1REQ (&SL_DMA_SIGNAL_VDAC1_CH1REQ_VALUE)
 
+/// Define for CAN0 DBG DMA Signal.
+#define SL_DMA_SIGNAL_CAN0_DBG (&SL_DMA_SIGNAL_CAN0_DBG_VALUE)
+/// Define for CAN0 RXFL0 DMA Signal.
+#define SL_DMA_SIGNAL_CAN0_RXFL0 (&SL_DMA_SIGNAL_CAN0_RXFL0_VALUE)
+/// Define for CAN0 RXFL1 DMA Signal.
+#define SL_DMA_SIGNAL_CAN0_RXFL1 (&SL_DMA_SIGNAL_CAN0_RXFL1_VALUE)
+/// Define for CAN0 TXFL0 DMA Signal.
+#define SL_DMA_SIGNAL_CAN0_TXFL0 (&SL_DMA_SIGNAL_CAN0_TXFL0_VALUE)
+/// Define for CAN0 TXFL1 DMA Signal.
+#define SL_DMA_SIGNAL_CAN0_TXFL1 (&SL_DMA_SIGNAL_CAN0_TXFL1_VALUE)
+
 /// @} (end dma_signal_defines)
 
 // ----------------------------------------------------------------------------
@@ -398,6 +425,14 @@ extern const uint32_t SL_DMA_SIGNAL_TIMER0_CC1_VALUE;
 extern const uint32_t SL_DMA_SIGNAL_TIMER0_CC2_VALUE;
 // External declaration for TIMER0 UFOF DMA Signal
 extern const uint32_t SL_DMA_SIGNAL_TIMER0_UFOF_VALUE;
+// External declaration for TIMER0 CC3 DMA Signal
+extern const uint32_t SL_DMA_SIGNAL_TIMER0_CC3_VALUE;
+// External declaration for TIMER0 CC4 DMA Signal
+extern const uint32_t SL_DMA_SIGNAL_TIMER0_CC4_VALUE;
+// External declaration for TIMER0 CC5 DMA Signal
+extern const uint32_t SL_DMA_SIGNAL_TIMER0_CC5_VALUE;
+// External declaration for TIMER0 CC6 DMA Signal
+extern const uint32_t SL_DMA_SIGNAL_TIMER0_CC6_VALUE;
 
 // External declaration for TIMER1 CC0 DMA Signal
 extern const uint32_t SL_DMA_SIGNAL_TIMER1_CC0_VALUE;
@@ -407,6 +442,14 @@ extern const uint32_t SL_DMA_SIGNAL_TIMER1_CC1_VALUE;
 extern const uint32_t SL_DMA_SIGNAL_TIMER1_CC2_VALUE;
 // External declaration for TIMER1 UFOF DMA Signal
 extern const uint32_t SL_DMA_SIGNAL_TIMER1_UFOF_VALUE;
+// External declaration for TIMER1 CC3 DMA Signal
+extern const uint32_t SL_DMA_SIGNAL_TIMER1_CC3_VALUE;
+// External declaration for TIMER1 CC4 DMA Signal
+extern const uint32_t SL_DMA_SIGNAL_TIMER1_CC4_VALUE;
+// External declaration for TIMER1 CC5 DMA Signal
+extern const uint32_t SL_DMA_SIGNAL_TIMER1_CC5_VALUE;
+// External declaration for TIMER1 CC6 DMA Signal
+extern const uint32_t SL_DMA_SIGNAL_TIMER1_CC6_VALUE;
 
 // External declaration for TIMER2 CC0 DMA Signal
 extern const uint32_t SL_DMA_SIGNAL_TIMER2_CC0_VALUE;
@@ -632,6 +675,17 @@ extern const uint32_t SL_DMA_SIGNAL_VDAC0_CH1REQ_VALUE;
 extern const uint32_t SL_DMA_SIGNAL_VDAC1_CH0REQ_VALUE;
 // External declaration for VDAC1 CH1 REQ DMA Signal
 extern const uint32_t SL_DMA_SIGNAL_VDAC1_CH1REQ_VALUE;
+
+// External declaration for CAN0 DBG DMA Signal
+extern const uint32_t SL_DMA_SIGNAL_CAN0_DBG_VALUE;
+// External declaration for CAN0 RXFL0 DMA Signal
+extern const uint32_t SL_DMA_SIGNAL_CAN0_RXFL0_VALUE;
+// External declaration for CAN0 RXFL1 DMA Signal
+extern const uint32_t SL_DMA_SIGNAL_CAN0_RXFL1_VALUE;
+// External declaration for CAN0 TXFL0 DMA Signal
+extern const uint32_t SL_DMA_SIGNAL_CAN0_TXFL0_VALUE;
+// External declaration for CAN0 TXFL1 DMA Signal
+extern const uint32_t SL_DMA_SIGNAL_CAN0_TXFL1_VALUE;
 
 // External declaration for PIXELRZ0REQ TXF DMA Signal
 extern const uint32_t SL_DMA_SIGNAL_PIXELRZ0REQ_TXF_VALUE;

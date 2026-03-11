@@ -872,6 +872,16 @@ static void evaluate_wakeup(sl_power_manager_em_t to)
             if (sli_power_manager_is_high_freq_accuracy_clk_used()) {
               hf_accuracy_clk_flag = SLI_SLEEPTIMER_POWER_MANAGER_HF_ACCURACY_CLK_FLAG;
             }
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT) \
+  && (SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_SYSRTC) \
+  && defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
+            uint32_t hfxo_startup_time;
+            sli_clock_manager_get_hfxo_average_startup_time(&hfxo_startup_time);
+            wakeup_delay -= hfxo_startup_time;
+            if (wakeup_delay < 0) {
+              wakeup_delay = 0;
+            }
+#endif
             // Start internal sleeptimer to do the early wake-up.
             sl_sleeptimer_restart_timer(&clock_wakeup_timer_handle,
                                         (tick_remaining - (uint32_t)wakeup_delay),
@@ -1086,6 +1096,22 @@ void sli_hfxo_notify_ready_for_power_manager_from_prs(void)
   }
 #endif
 }
+
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT) && defined(_SILICON_LABS_32B_SERIES_3)
+void sli_clock_manager_notify_hfxo_ready(void)
+{
+  // Complete HF restore and change current Energy mode
+  // The notification will be done once back in the sleep loop
+  if (current_em != SL_POWER_MANAGER_EM0
+    && (is_sleeping_waiting_for_clock_restore == true)) {
+  sli_power_manager_restore_states();
+  is_sleeping_waiting_for_clock_restore = false;
+  is_states_saved = false;
+  is_restored_from_hfxo_isr = true;
+  is_restored_from_hfxo_isr_internal = true;
+}
+}
+#endif
 
 /***************************************************************************//**
  * Returns current energy mode.

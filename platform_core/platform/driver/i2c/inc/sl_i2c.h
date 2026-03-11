@@ -126,7 +126,7 @@ typedef struct sl_i2c_handle_t sl_i2c_handle_t;  ///< Forward declaration of I2C
 /***************************************************************************//**
  * @brief Transfer Complete Callback
  *
- * @note  Invoked exactly once when an asynchronous I²C operation completes
+ * @note  Invoked exactly once when an asynchronous I2C operation completes
  *        successfully (no errors). This applies to:
  *          - Transmit (TX)
  *          - Receive  (RX)

@@ -186,11 +186,12 @@ SECTIONS
   .stack (NOLOAD):
   {
     . = ALIGN(8);
+    __stack_limit = .;
     __StackLimit = .;
     KEEP(*(.stack*))
     . = ALIGN(4);
+    __stack = .;
     __StackTop = .;
-    PROVIDE(__stack = __StackTop);
   } > RAM
 
 
@@ -274,9 +275,17 @@ SECTIONS
 
     *(.rodata*)
     *(.eh_frame*)
+
+    {%- if trustzone_secure and llvm %}
+    . = ALIGN(32);
+    linker_sg_begin = .;
+    KEEP(*(.gnu.sgstubs*))
+    . = ALIGN(32);
+    linker_sg_end = .;
+    {%- endif %}
   } > FLASH
 
-{%- if trustzone_secure %}
+{%- if trustzone_secure and not llvm %}
   .gnu.sgstubs : ALIGN(32)
   {
     . = ALIGN(32);
@@ -371,6 +380,15 @@ SECTIONS
 
   } > RAM AT > FLASH
 
+{#-
+  Don't remove this section. It is necessary to avoid the NOLOAD sections
+  from having a LMA in FLASH because the difference between VMA and LMA is reused.
+  Full explanation at page 83: https://sourceware.org/binutils/docs/ld.pdf
+#}
+  /* Sets the difference between VMA and LMA to 0 for the next NOLOAD sections */
+  .empty :
+  {
+  } > FLASH
 
 /* Calculate heap size based on RAM limits. */
 heap_limit = ORIGIN(RAM) + LENGTH(RAM);  /* End of RAM */

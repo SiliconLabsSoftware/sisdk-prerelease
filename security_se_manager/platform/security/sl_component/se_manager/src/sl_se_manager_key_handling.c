@@ -186,7 +186,7 @@ sl_status_t sli_key_get_storage_size(const sl_se_key_descriptor_t* key,
   bool has_custom_curve = false;
   #endif
 
-  if ((key_type == KEYSPEC_TYPE_ECC_WEIERSTRASS_PRIME)) {
+  if (key_type == KEYSPEC_TYPE_ECC_WEIERSTRASS_PRIME) {
     *storage_size = key_size * (1 * has_private_key + 2 * has_public_key + 6 * has_custom_curve);
   } else if (key_type == KEYSPEC_TYPE_ECC_EDWARDS) {
     *storage_size = key_size * (has_private_key + has_public_key + 5 * has_custom_curve);

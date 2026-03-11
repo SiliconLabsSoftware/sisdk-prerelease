@@ -1,11 +1,11 @@
 var NAVTREEINDEX6 =
 {
-"group__sl__bt__utility__functions.html#ga6662f56ac1b8ba5051b1cbb5f0031aa0":[2,40,16],
 "group__sl__bt__utility__functions.html#ga840b2449b01c063776d48203138f2115":[2,40,4],
 "group__sl__bt__utility__functions.html#ga90eef151525addf229cf984e779814db":[2,40,14],
 "group__sl__bt__utility__functions.html#ga932da482b285833a9df22c36f389d8bb":[2,40,9],
 "group__sl__bt__utility__functions.html#ga9d60c2be2d9ba65176820c7430017e12":[2,40,2],
 "group__sl__bt__utility__functions.html#gaae30388f753bb22a4cbd25677fd76288":[2,40,13],
+"group__sl__bt__utility__functions.html#gac6f32b6803eb0102a133a1f8f9cc5024":[2,40,8],
 "group__sl__bt__utility__functions.html#gaca4c91c504be0d4ad392c5fdbb111ee6":[2,40,6],
 "group__sl__bt__utility__functions.html#gaf34d7a4f48d238971575e45e9103b03f":[2,40,7],
 "group__sl__bt__utility__functions.html#gafe95b5828a4899cb3eb200d20bd50f2d":[2,40,12],

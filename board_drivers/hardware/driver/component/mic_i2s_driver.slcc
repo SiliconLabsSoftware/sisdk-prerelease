@@ -18,10 +18,7 @@ requires:
 - name: hal_usart
 - name: gpio
 - name: dmadrv
-include:
-- path: inc
-  file_list:
-  - path: sl_mic.h
+- name: mic_driver
 source:
 - path: src/sl_mic_i2s.c
 config_file:

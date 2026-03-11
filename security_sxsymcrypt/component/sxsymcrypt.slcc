@@ -16,6 +16,8 @@ requires:
 - name: code_classification
 - name: device
 - name: device_has_lpwaes
+  # PLATFORM_HYD-5152
+  condition: [device_generic_family_sixx301]
 - name: device_has_symcrypto
 - name: sli_psec_osal
 
@@ -27,6 +29,10 @@ source:
 - path: src/keyref.c
 - path: src/aead.c
 - path: src/cmac.c
+- path: src/chachapoly.c
+  condition: [device_generic_family_sixx353]
+- path: src/chachapoly.c
+  condition: [device_family_sixg300xiwifi74000]
 - path: src/hmac.c
 - path: src/mac.c
 - path: src/hash.c
@@ -42,6 +48,10 @@ include:
   - path: sxsymcrypt/channel.h
   - path: sxsymcrypt/cmac.h
   - path: sxsymcrypt/cmmask.h
+  - path: sxsymcrypt/chachapoly.h
+    condition: [device_generic_family_sixx353]
+  - path: sxsymcrypt/chachapoly.h
+    condition: [device_family_sixg300xiwifi74000]
   - path: sxsymcrypt/hmac.h
   - path: sxsymcrypt/mac.h
   - path: sxsymcrypt/blkcipher.h

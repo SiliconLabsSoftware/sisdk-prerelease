@@ -177,4 +177,12 @@ static inline uint32_t add32sat(uint32_t a, uint32_t b)
     return sum < a ? UINT32_MAX : sum;
 }
 
+// 8bit addition with saturation
+static inline uint8_t add8sat(uint8_t a, uint8_t b)
+{
+    uint8_t sum = a + b;
+
+    return sum < a ? UINT8_MAX : sum;
+}
+
 #endif

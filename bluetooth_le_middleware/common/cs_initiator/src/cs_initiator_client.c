@@ -82,15 +82,6 @@ static const cs_initiator_values_t initiator_values_optimized[] = {
     .output = { .conn_interval = 6u, .proc_interval = 10u } },
   { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_MEDIUM, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC, .antenna_path = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY, .use_real_time_ras_mode = 1 },
     .output = { .conn_interval = 6u, .proc_interval = 9u } },
-  // LOW CHANNEL MAP
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC, .antenna_path = CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY, .use_real_time_ras_mode = 1 },
-    .output = { .conn_interval = 6u, .proc_interval = 9u } },
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC, .antenna_path = CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R, .use_real_time_ras_mode = 1 },
-    .output = { .conn_interval = 6u, .proc_interval = 8u } },
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC, .antenna_path = CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R, .use_real_time_ras_mode = 1 },
-    .output = { .conn_interval = 6u, .proc_interval = 8u } },
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC, .antenna_path = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY, .use_real_time_ras_mode = 1 },
-    .output = { .conn_interval = 6u, .proc_interval = 7u } },
 
   // Frequency optimized values - RAS real-time - ALGO real-time-fast
   // HIGH CHANNEL MAP
@@ -111,15 +102,6 @@ static const cs_initiator_values_t initiator_values_optimized[] = {
     .output = { .conn_interval = 6u, .proc_interval = 8u } },
   { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_MEDIUM, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST, .antenna_path = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY, .use_real_time_ras_mode = 1 },
     .output = { .conn_interval = 6u, .proc_interval = 6u } },
-  // LOW CHANNEL MAP
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST, .antenna_path = CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY, .use_real_time_ras_mode = 1 },
-    .output = { .conn_interval = 6u, .proc_interval = 6u } },
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST, .antenna_path = CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R, .use_real_time_ras_mode = 1 },
-    .output = { .conn_interval = 6u, .proc_interval = 5u } },
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST, .antenna_path = CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R, .use_real_time_ras_mode = 1 },
-    .output = { .conn_interval = 6u, .proc_interval = 5u } },
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST, .antenna_path = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY, .use_real_time_ras_mode = 1 },
-    .output = { .conn_interval = 6u, .proc_interval = 4u } },
 
   // Energy optimized values - RAS real-time
   // HIGH CHANNEL MAP
@@ -140,15 +122,6 @@ static const cs_initiator_values_t initiator_values_optimized[] = {
     .output = { .conn_interval = 13u, .proc_interval = 6u } },
   { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_ENERGY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_MEDIUM, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC, .antenna_path = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY, .use_real_time_ras_mode = 1 },
     .output = { .conn_interval = 12u, .proc_interval = 6u } },
-  // LOW CHANNEL MAP
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_ENERGY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC, .antenna_path = CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY, .use_real_time_ras_mode = 1 },
-    .output = { .conn_interval = 10u, .proc_interval = 7u } },
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_ENERGY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC, .antenna_path = CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R, .use_real_time_ras_mode = 1 },
-    .output = { .conn_interval = 9u, .proc_interval = 6u } },
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_ENERGY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC, .antenna_path = CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R, .use_real_time_ras_mode = 1 },
-    .output = { .conn_interval = 9u, .proc_interval = 6u } },
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_ENERGY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC, .antenna_path = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY, .use_real_time_ras_mode = 1 },
-    .output = { .conn_interval = 8u, .proc_interval = 6u } },
 
 #endif
 
@@ -172,15 +145,6 @@ static const cs_initiator_values_t initiator_values_optimized[] = {
     .output = { .conn_interval = 8u, .proc_interval = 15u } },
   { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_MEDIUM, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC, .antenna_path = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY, .use_real_time_ras_mode = 0 },
     .output = { .conn_interval = 7u, .proc_interval = 13u } },
-  // LOW CHANNEL MAP
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC, .antenna_path = CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY, .use_real_time_ras_mode = 0 },
-    .output = { .conn_interval = 8u, .proc_interval = 11u } },
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC, .antenna_path = CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R, .use_real_time_ras_mode = 0 },
-    .output = { .conn_interval = 7u, .proc_interval = 12u } },
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC, .antenna_path = CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R, .use_real_time_ras_mode = 0 },
-    .output = { .conn_interval = 7u, .proc_interval = 12u } },
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC, .antenna_path = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY, .use_real_time_ras_mode = 0 },
-    .output = { .conn_interval = 7u, .proc_interval = 10u } },
 
   // Frequency optimized values - RAS on-demand - ALGO real-time-fast
   // HIGH CHANNEL MAP
@@ -201,15 +165,6 @@ static const cs_initiator_values_t initiator_values_optimized[] = {
     .output = { .conn_interval = 6u, .proc_interval = 135u } },
   { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_MEDIUM, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST, .antenna_path = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY, .use_real_time_ras_mode = 0 },
     .output = { .conn_interval = 6u, .proc_interval = 12u } },
-  // LOW CHANNEL MAP
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST, .antenna_path = CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY, .use_real_time_ras_mode = 0 },
-    .output = { .conn_interval = 6u, .proc_interval = 12u } },
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST, .antenna_path = CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R, .use_real_time_ras_mode = 0 },
-    .output = { .conn_interval = 6u, .proc_interval = 11u } },
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST, .antenna_path = CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R, .use_real_time_ras_mode = 0 },
-    .output = { .conn_interval = 6u, .proc_interval = 11u } },
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST, .antenna_path = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY, .use_real_time_ras_mode = 0 },
-    .output = { .conn_interval = 6u, .proc_interval = 10u } },
 
   // Energy optimized values - RAS on-demand
   // HIGH CHANNEL MAP
@@ -230,15 +185,6 @@ static const cs_initiator_values_t initiator_values_optimized[] = {
     .output = { .conn_interval = 17u, .proc_interval = 10u } },
   { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_ENERGY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_MEDIUM, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC, .antenna_path = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY, .use_real_time_ras_mode = 0 },
     .output = { .conn_interval = 16u, .proc_interval = 10u } },
-  // LOW CHANNEL MAP
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_ENERGY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC, .antenna_path = CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY, .use_real_time_ras_mode = 0 },
-    .output = { .conn_interval = 16u, .proc_interval = 10u } },
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_ENERGY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC, .antenna_path = CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R, .use_real_time_ras_mode = 0 },
-    .output = { .conn_interval = 16u, .proc_interval = 9u } },
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_ENERGY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC, .antenna_path = CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R, .use_real_time_ras_mode = 0 },
-    .output = { .conn_interval = 16u, .proc_interval = 9u } },
-  { .input = { .procedure_scheduling = CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_ENERGY, .channel_map_preset = CS_CHANNEL_MAP_PRESET_LOW, .algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC, .antenna_path = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY, .use_real_time_ras_mode = 0 },
-    .output = { .conn_interval = 16u, .proc_interval = 8u } }
 #endif
 };
 
@@ -251,12 +197,6 @@ static const cs_initiator_values_t initiator_values_optimized[] = {
 void cs_initiator_apply_channel_map_preset(cs_channel_map_preset_t preset, uint8_t *channel_map)
 {
   switch (preset) {
-    case CS_CHANNEL_MAP_PRESET_LOW:
-    {
-      uint8_t channel_map_low[10] = { 0x00, 0x00, 0x00, 0xC0, 0xFF, 0xFF, 0x03, 0x00, 0x00, 0x00 };
-      memcpy(channel_map, channel_map_low, sizeof(channel_map_low));
-    }
-    break;
     case CS_CHANNEL_MAP_PRESET_MEDIUM:
     {
       uint8_t channel_map_medium[10] = { 0x54, 0x55, 0x55, 0x54, 0x55, 0x55, 0x55, 0x55, 0x55, 0x15 };

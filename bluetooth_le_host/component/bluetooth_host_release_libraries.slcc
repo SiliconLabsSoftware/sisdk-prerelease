@@ -74,6 +74,11 @@ library:
   condition:
   - toolchain_gcc
   - cortexm33
+- path: build/gcc/cortex-m33/cte_receiver/release/libble_host_cte_receiver.a
+  condition:
+  - toolchain_gcc
+  - cortexm33
+  - bluetooth_feature_cte_receiver
 - path: build/gcc/cortex-m33/cte_transmitter/release/libble_host_cte_transmitter.a
   condition:
   - toolchain_gcc
@@ -158,6 +163,11 @@ library:
   condition:
   - toolchain_iar
   - cortexm33
+- path: build/iar/cortex-m33/cte_receiver/release/libble_host_cte_receiver.a
+  condition:
+  - toolchain_iar
+  - cortexm33
+  - bluetooth_feature_cte_receiver
 - path: build/iar/cortex-m33/cte_transmitter/release/libble_host_cte_transmitter.a
   condition:
   - toolchain_iar
@@ -242,6 +252,11 @@ library:
   condition:
   - toolchain_llvm
   - cortexm33
+- path: build/llvm/cortex-m33/cte_receiver/release/libble_host_cte_receiver.a
+  condition:
+  - toolchain_llvm
+  - cortexm33
+  - bluetooth_feature_cte_receiver
 - path: build/llvm/cortex-m33/cte_transmitter/release/libble_host_cte_transmitter.a
   condition:
   - toolchain_llvm

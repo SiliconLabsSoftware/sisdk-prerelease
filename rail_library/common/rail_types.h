@@ -4399,6 +4399,14 @@ RAIL_ENUM(RAIL_IdleMode_t) {
    * receive or transmit operations. It does not abort a receive or
    * transmit in progress.
    *
+   * @note For an in-progress \ref RAIL_TX_OPTION_WAIT_FOR_ACK transmit
+   *   this will prevent reentering receive after the transmit completes,
+   *   hence thwarting ACK reception or timeout so neither \ref
+   *   RAIL_EVENT_RX_PACKET_RECEIVED nor \ref RAIL_EVENT_RX_ACK_TIMEOUT
+   *   will occur. Conversely for an in-progress receive, if RX Auto-Acking
+   *   is enabled and the packet is to be acknowledged, the ACK will be
+   *   transmitted before the radio is idled.
+   *
    * @deprecated RAIL 2.x synonym of \ref SL_RAIL_IDLE.
    */
   RAIL_IDLE = 0u,

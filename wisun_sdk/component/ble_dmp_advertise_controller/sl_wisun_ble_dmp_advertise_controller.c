@@ -103,8 +103,7 @@ static const osThreadAttr_t _adv_controller_task_attr = {
   .stack_mem  = NULL,
   .stack_size = (SL_WISUN_BLE_DMP_ADVERTISE_CONTROLLER_STACK_SIZE_WORD * sizeof(void *)) & 0xFFFFFFF8U,
   .priority   = osPriorityNormal1,
-  .tz_module  = 0UL,
-  .reserved   = 0UL
+  .tz_module  = 0UL
 };
 
 // BLE advertising event flags

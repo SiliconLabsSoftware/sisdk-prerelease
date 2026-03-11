@@ -36,7 +36,7 @@ requires:
   condition: [device_sdid_205]
 - name: udelay
 - name: clock_manager_runtime
-  condition: [device_generic_family_sixx301]
+  condition: [device_series_3]
 recommends:
 - id: power_manager_deepsleep
   condition: [device_series_2, device_has_sysrtc]

@@ -115,6 +115,9 @@ SL_ENUM(sl_clock_branch_t) {
   SL_CLOCK_BRANCH_USB0CLK,       ///< USB0CLK Clock Branch
   SL_CLOCK_BRANCH_FLPLLREFCLK,   ///< FLPLLREFCLK Clock Branch
   SL_CLOCK_BRANCH_PDM0CLK,       ///< PDM0CLK Clock Branch
+  SL_CLOCK_BRANCH_CAN0CLK,       ///< CAN0CLK Clock Branch
+  SL_CLOCK_BRANCH_HCLKDIVN,      ///< HCLKDIVN Clock Branch
+  SL_CLOCK_BRANCH_CPUCLK,        ///< CPUCLK Clock Branch
   SL_CLOCK_BRANCH_INVALID        ///< INVALID Clock Branch
 };
 #endif
@@ -180,6 +183,9 @@ SL_ENUM(sl_clock_branch_t) {
 /// Define for AMUXCP0 peripheral bus clock pointer.
 #define SL_BUS_CLOCK_AMUXCP0 (&SL_BUS_CLOCK_AMUXCP0_VALUE)
 
+/// Define for AMUXCP1 peripheral bus clock pointer.
+#define SL_BUS_CLOCK_AMUXCP1 (&SL_BUS_CLOCK_AMUXCP1_VALUE)
+
 /// Define for BUFC peripheral bus clock pointer.
 #define SL_BUS_CLOCK_BUFC (&SL_BUS_CLOCK_BUFC_VALUE)
 
@@ -188,6 +194,9 @@ SL_ENUM(sl_clock_branch_t) {
 
 /// Define for BURTC peripheral bus clock pointer.
 #define SL_BUS_CLOCK_BURTC (&SL_BUS_CLOCK_BURTC_VALUE)
+
+/// Define for CAN0 peripheral bus clock pointer.
+#define SL_BUS_CLOCK_CAN0 (&SL_BUS_CLOCK_CAN0_VALUE)
 
 /// Define for CRYPTOACC peripheral bus clock pointer.
 #define SL_BUS_CLOCK_CRYPTOACC (&SL_BUS_CLOCK_CRYPTOACC_VALUE)
@@ -282,6 +291,9 @@ SL_ENUM(sl_clock_branch_t) {
 /// Define for KSU peripheral bus clock pointer.
 #define SL_BUS_CLOCK_KSU (&SL_BUS_CLOCK_KSU_VALUE)
 
+/// Define for L1ICACHE0 peripheral bus clock pointer.
+#define SL_BUS_CLOCK_L1ICACHE0 (&SL_BUS_CLOCK_L1ICACHE0_VALUE)
+
 /// Define for L2ICACHE0 peripheral bus clock pointer.
 #define SL_BUS_CLOCK_L2ICACHE0 (&SL_BUS_CLOCK_L2ICACHE0_VALUE)
 
@@ -338,6 +350,9 @@ SL_ENUM(sl_clock_branch_t) {
 
 /// Define for PIXELRZ1 peripheral bus clock pointer.
 #define SL_BUS_CLOCK_PIXELRZ1 (&SL_BUS_CLOCK_PIXELRZ1_VALUE)
+
+/// Define for PORTAL peripheral bus clock pointer.
+#define SL_BUS_CLOCK_PORTAL (&SL_BUS_CLOCK_PORTAL_VALUE)
 
 /// Define for PRORTC peripheral bus clock pointer.
 #define SL_BUS_CLOCK_PRORTC (&SL_BUS_CLOCK_PRORTC_VALUE)
@@ -514,6 +529,9 @@ extern const uint32_t SL_BUS_CLOCK_AGC_VALUE;
 // External declaration for AMUXCP0 peripheral bus clock value.
 extern const uint32_t SL_BUS_CLOCK_AMUXCP0_VALUE;
 
+// External declaration for AMUXCP1 peripheral bus clock value.
+extern const uint32_t SL_BUS_CLOCK_AMUXCP1_VALUE;
+
 // External declaration for BUFC peripheral bus clock value.
 extern const uint32_t SL_BUS_CLOCK_BUFC_VALUE;
 
@@ -522,6 +540,9 @@ extern const uint32_t SL_BUS_CLOCK_BURAM_VALUE;
 
 // External declaration for BURTC peripheral bus clock value.
 extern const uint32_t SL_BUS_CLOCK_BURTC_VALUE;
+
+// External declaration for CAN0 peripheral bus clock value.
+extern const uint32_t SL_BUS_CLOCK_CAN0_VALUE;
 
 // External declaration for CRYPTOACC peripheral bus clock value.
 extern const uint32_t SL_BUS_CLOCK_CRYPTOACC_VALUE;
@@ -616,6 +637,9 @@ extern const uint32_t SL_BUS_CLOCK_KEYSCAN_VALUE;
 // External declaration for KSU peripheral bus clock value.
 extern const uint32_t SL_BUS_CLOCK_KSU_VALUE;
 
+// External declaration for L1ICACHE0 peripheral bus clock value.
+extern const uint32_t SL_BUS_CLOCK_L1ICACHE0_VALUE;
+
 // External declaration for L2ICACHE0 peripheral bus clock value.
 extern const uint32_t SL_BUS_CLOCK_L2ICACHE0_VALUE;
 
@@ -672,6 +696,9 @@ extern const uint32_t SL_BUS_CLOCK_PIXELRZ0_VALUE;
 
 // External declaration for PIXELRZ1 peripheral bus clock value.
 extern const uint32_t SL_BUS_CLOCK_PIXELRZ1_VALUE;
+
+// External declaration for PORTAL peripheral bus clock value.
+extern const uint32_t SL_BUS_CLOCK_PORTAL_VALUE;
 
 // External declaration for PRORTC peripheral bus clock value.
 extern const uint32_t SL_BUS_CLOCK_PRORTC_VALUE;

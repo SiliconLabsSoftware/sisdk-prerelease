@@ -92,7 +92,7 @@ sl_status_t sl_memory_release_block(sl_memory_reservation_t *handle)
   sli_block_metadata_t *free_lt_list_head;
   sli_block_metadata_t *free_st_list_head;
   sli_block_metadata_t *current_metadata;
-  uint16_t reserved_block_offset;
+  uint32_t reserved_block_offset;
 
   // Verify that the handle isn't NULL.
   if (handle == NULL) {
@@ -126,12 +126,12 @@ sl_status_t sl_memory_release_block(sl_memory_reservation_t *handle)
   next_block = ((uintptr_t)current_metadata >= (uintptr_t)handle->block_address) ? current_metadata : NULL;
 
   new_free_block = (sli_block_metadata_t *)handle->block_address;
-  new_free_block_length = (uint16_t)SLI_BLOCK_LEN_BYTE_TO_DWORD(handle->block_size) - SLI_BLOCK_METADATA_SIZE_DWORD;
+  new_free_block_length = (uint32_t)SLI_BLOCK_LEN_BYTE_TO_DWORD(handle->block_size) - SLI_BLOCK_METADATA_SIZE_DWORD;
 
   // Create a new free block while trying to merge it with the previous and next free blocks if possible.
   if (prev_block != NULL) {
     // Calculate offset between the reserved block and the previous block's payload address.
-    reserved_block_offset = (uint16_t)((uint64_t *)handle->block_address - (uint64_t *)prev_block - SLI_BLOCK_METADATA_SIZE_DWORD);
+    reserved_block_offset = (uint32_t)((uint64_t *)handle->block_address - (uint64_t *)prev_block - SLI_BLOCK_METADATA_SIZE_DWORD);
     // Then calculate the difference between the above offset and the length of the previous block.
     reserved_block_offset -= sli_block_len_dword_decode(prev_block);
 
@@ -157,7 +157,7 @@ sl_status_t sl_memory_release_block(sl_memory_reservation_t *handle)
 
   if (next_block != NULL) {
     // Calculate offset between the reserved block and the next block.
-    reserved_block_offset = (uint16_t)((uint64_t *)next_block - (uint64_t *)handle->block_address);
+    reserved_block_offset = (uint32_t)((uint64_t *)next_block - (uint64_t *)handle->block_address);
     // Then calculate the difference between the above offset and the size of the block being released.
     reserved_block_offset -= SLI_BLOCK_LEN_BYTE_TO_DWORD(handle->block_size);
 
@@ -236,12 +236,20 @@ sl_status_t sl_memory_release_block(sl_memory_reservation_t *handle)
  ******************************************************************************/
 sl_status_t sl_memory_reservation_handle_alloc(sl_memory_reservation_t **handle)
 {
+  return sl_memory_heap_reservation_handle_alloc(&sli_general_purpose_heap, handle);
+}
+
+/***************************************************************************//**
+ * Dynamically allocates a block reservation handle from a specific heap instance.
+ ******************************************************************************/
+sl_status_t sl_memory_heap_reservation_handle_alloc(sl_memory_heap_t *heap, sl_memory_reservation_t **handle)
+{
 #if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
   void * volatile return_address = sli_memory_profiler_get_return_address();
 #endif
   sl_status_t status;
 
-  status = sl_memory_alloc(sizeof(sl_memory_reservation_t), BLOCK_TYPE_LONG_TERM, (void**)handle);
+  status = sl_memory_heap_alloc(heap, sizeof(sl_memory_reservation_t), BLOCK_TYPE_LONG_TERM, (void**)handle);
 #if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
   sli_memory_profiler_track_ownership(SLI_INVALID_MEMORY_TRACKER_HANDLE, *handle, return_address);
 #endif

@@ -167,7 +167,11 @@ typedef struct {
   int32_t (*deinit)(void);
   // ------------------------------
   /// Verify application
+#if defined(BTL_ENFORCE_GLITCH_MITIGATION) && (BTL_ENFORCE_GLITCH_MITIGATION == 1)
+  int32_t (*verifyApplication)(uint32_t startAddress);
+#else
   bool (*verifyApplication)(uint32_t startAddress);
+#endif
   // ------------------------------
   /// Initialize parser
   int32_t (*initParser)(BootloaderParserContext_t *context, size_t contextSize);

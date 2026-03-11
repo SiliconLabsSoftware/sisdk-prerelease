@@ -18,6 +18,7 @@
   - name: hardware_board_rb
   - name: hardware_board_from_stk
   - name: hardware_board_from_xg28-rb4401b
+  - name: hardware_board_has_si70xx
   - name: hardware_board_has_tempsensor
   - name: hardware_board_supports_wstk_lcd
   - name: hardware_board_has_vcom
@@ -53,7 +54,7 @@
   - name: hardware_board_default_rf_band
   - name: hardware_board_default_rf_band_868
 - recommends:
-  - id: brd4002b
+  - id: brd4002a
     vendor: silabs
   - id: iostream_eusart
     instance:
@@ -73,6 +74,8 @@
     instance:
     - led0
     - led1
+    vendor: silabs
+  - id: joystick
     vendor: silabs
   - id: simple_button
     instance:
@@ -106,8 +109,10 @@
   - hardware:has:vcom
   - hardware:has:vcom:vcom_hardware_flowcontrol
   - hardware:has:pti
+  - hardware:has:sensor:si7021
   - hardware:has:display:ls013b7dh03
   - hardware:has:led:2
+  - hardware:has:joystick:skrhaae010
   - hardware:has:button:2
   - hardware:has:memory:spi:mx25r8035f
   - hardware:has:exp_header:spi

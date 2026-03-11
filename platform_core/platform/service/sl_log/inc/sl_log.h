@@ -68,16 +68,10 @@ extern "C" {
 /** @brief Maximum number of events that can be configured in the system */
 #define SL_LOG_MAX_NO_OF_EVENTS 255
 
-/** @brief Threshold for automatic buffer flushing (80% of buffer capacity) */
-#define SL_LOG_THRESHOLD_PERCENTAGE 80
-
-/** @brief Threshold event count */
-#define SL_LOG_THRESHOLD (SL_LOG_NUMBER_OF_EVENTS*SL_LOG_THRESHOLD_PERCENTAGE)/100
-
 /** @brief Core ID of Host*/
 #define SL_LOG_HOST_CORE_ID 0
 
-#define SL_LOG_OVERFLOW_EVENT_ID 0xFFFFFFFF
+
 
 /** @} (end addtogroup sl_log_constants) */
 
@@ -200,21 +194,10 @@ typedef struct {
   /** @brief Number of available event slots left in the buffer */
   int32_t available_event_slots;
   /** @brief Pointer to the actual ring buffer storage array */
-  sl_log_event_t *sl_log_buffer;
+  sl_log_event_t *buffer;
 } sl_log_ring_buffer_t;
 
 /** @} (end addtogroup sl_log_types) */
-
-/**
- * @defgroup sl_log_globals Global Variables
- * @brief Global variables used by the logging system
- * @{
- */
-
-/** @brief Global logging system configuration */
-extern sl_log_config_t sl_log_config;
-
-/** @} (end addtogroup sl_log_globals) */
 
 /**
  * @defgroup sl_log_api_common Common API Functions
@@ -627,7 +610,7 @@ sl_status_t sl_log_get_configurations(void *args, uint8_t core_id);
  *   external synchronization to avoid data races.
  *
  */
-sl_log_ring_buffer_t *sl_log_get_ring_buffer_config();
+sl_log_ring_buffer_t *sl_log_get_ring_buffer_config(void);
 
 /** @} (end addtogroup sl_log_api_platform) */
 

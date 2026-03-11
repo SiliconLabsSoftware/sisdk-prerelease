@@ -33,6 +33,7 @@ requires:
 - name: hal_generic_prs
 - name: hal_generic_system
 
+- name: sl_rail_util_built_in_phys
 - name: fem_util
   condition: [device_is_module]
 - name: fem_util

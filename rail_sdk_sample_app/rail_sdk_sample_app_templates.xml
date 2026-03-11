@@ -96,7 +96,8 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|RAIL"/>
   </descriptors>
-  <descriptors name="rail_soc_light" label="RAIL - SoC Light" description="The purpose of the application is to demonstrate a simple wireless communication between two or more boards. In combination with the Switch sample application it creates a basic light functionality, where the light can be toggled in the Light node. After power up, the node is in ADVERTISE state. It means broadcast messages are sent periodically. After pushing PB1 button, the node is connected, and ready for toggling the light. This is called the READY state. If the Switch module has done the same procedure, light can be toggled from all the boards with pushing BP0 button.">
+  <descriptors name="rail_soc_light" label="RAIL - SoC Light" description="The purpose of the application is to demonstrate a simple wireless communication between two or more boards. In combination with the Switch sample application it creates a basic light functionality, where the light can be toggled in the Light node. After power up, the node is in ADVERTISE state. It means broadcast messages are sent periodically. After pushing PB1 button, the node is connected, and ready for toggling the light. This is called the READY state. If the Switch module has done the same procedure, light can be toggled from all the boards with pushing BP0 button.
+">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="rail_sdk_sample_app.example.soc.rail_soc_light.rail_soc_light.slcp"/>
@@ -335,7 +336,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|RAIL"/>
   </descriptors>
-  <descriptors name="rail_soc_wmbus_meter" label="RAIL - SoC Wireless M-Bus Meter " description="Implements a Wireless M-Bus collector application. Uses the multi-PHY configurator and is capable of limited multi-PHY features, like asymmetric bidirectional modes. For details, see AN1119. With one click, this bare-metal sample app can be run on an OS; currently, MicriumOS and FreeRTOS are supported. NOTE: Due to the higher current consumption of continuous radio usage (especially in Rx Mode), it is not recommended to power the boards from a coin cell. Instead, a USB power bank can be used if portability is needed.
+  <descriptors name="rail_soc_wmbus_meter" label="RAIL - SoC Wireless M-Bus Meter" description="Implements a Wireless M-Bus collector application. Uses the multi-PHY configurator and is capable of limited multi-PHY features, like asymmetric bidirectional modes. For details, see AN1119. With one click, this bare-metal sample app can be run on an OS; currently, MicriumOS and FreeRTOS are supported. NOTE: Due to the higher current consumption of continuous radio usage (especially in Rx Mode), it is not recommended to power the boards from a coin cell. Instead, a USB power bank can be used if portability is needed.
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>

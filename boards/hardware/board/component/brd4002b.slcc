@@ -14,7 +14,6 @@
   - name: hardware_board_mainboard_wstk
   - name: hardware_board_mainboard
   - name: hardware_board_from_wmb
-  - name: hardware_board_has_sht4x
 - recommends: []
 - template_contribution: []
 - define:
@@ -26,5 +25,4 @@
   - board:pn:BRD4002
   - board:variant:B
   - board:revision:A01
-  - hardware:has:sensor:sht40-ad1f-r2
 - root_path: boards

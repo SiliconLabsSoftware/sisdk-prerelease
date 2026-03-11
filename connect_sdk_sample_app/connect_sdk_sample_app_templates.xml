@@ -112,7 +112,8 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Connect"/>
   </descriptors>
-  <descriptors name="connect_ncp" label="Connect - NCP" description="Connect: NCP Application for the SoC">
+  <descriptors name="connect_ncp" label="Connect - NCP" description="Connect NCP Application for the SoC
+">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="connect_sdk_sample_app.example.ncp-app.connect_ncp.slcp"/>

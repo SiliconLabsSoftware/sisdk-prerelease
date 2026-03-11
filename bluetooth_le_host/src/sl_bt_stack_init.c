@@ -100,16 +100,6 @@ SLI_BT_DECLARE_BGAPI_CLASS(bt, resource);
 SLI_BT_DECLARE_BGAPI_CLASS(bt, connection_analyzer);
 SLI_BT_DECLARE_BGAPI_CLASS(bt, linklayer);
 
-// Some features do not correspond directly to a particular component but are
-// needed depending on a specific combination of components. Decide the derived
-// feature selections here to simplify the feature inclusion rules below.
-
-// CTE receiver is present if either AoA or AoD receiver is present
-#if defined(SL_CATALOG_BLUETOOTH_FEATURE_AOA_RECEIVER_PRESENT) \
-  || defined(SL_CATALOG_BLUETOOTH_FEATURE_AOD_RECEIVER_PRESENT)
-#define SLI_BT_CTE_RECEIVER_PRESENT
-#endif
-
 // Advertiser requires selection of legacy and/or extended advertiser
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_ADVERTISER_PRESENT) \
   && !defined(SL_CATALOG_BLUETOOTH_FEATURE_LEGACY_ADVERTISER_PRESENT) \
@@ -191,8 +181,6 @@ extern sli_bgapi_component_init_func_t sli_bt_connection_statistics_init;
 extern sli_bgapi_component_start_func_t sli_bt_connection_subrating_start;
 extern sli_bgapi_component_start_func_t sli_bt_dynamic_gattdb_start;
 extern sli_bgapi_component_deinit_func_t sli_bt_dynamic_gattdb_deinit;
-extern sli_bgapi_component_init_func_t sli_bt_cte_receiver_init;
-extern sli_bgapi_component_deinit_func_t sli_bt_cte_receiver_deinit;
 extern sli_bgapi_component_init_func_t sli_bt_test_init;
 extern sli_bgapi_component_deinit_func_t sli_bt_test_deinit;
 extern sli_bgapi_component_init_func_t sli_bt_power_control_init;
@@ -276,9 +264,6 @@ static const sli_bgapi_component_init_info_t bt_component_init_info[] = {
 #endif
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_STATISTICS_PRESENT)
   { sli_bt_connection_statistics_init, NULL },
-#endif
-#if defined(SLI_BT_CTE_RECEIVER_PRESENT)
-  { sli_bt_cte_receiver_init, NULL },
 #endif
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_TEST_PRESENT)
   { sli_bt_test_init, NULL },
@@ -365,9 +350,6 @@ static sli_bgapi_component_deinit_func_t * const bt_component_deinit_functions[]
 #endif
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_TEST_PRESENT)
   sli_bt_test_deinit,
-#endif
-#if defined(SLI_BT_CTE_RECEIVER_PRESENT)
-  sli_bt_cte_receiver_deinit,
 #endif
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_DYNAMIC_GATTDB_PRESENT)
   sli_bt_dynamic_gattdb_deinit,
@@ -574,7 +556,7 @@ static sli_bgapi_component_deinit_func_t * const bt_component_deinit_functions[]
 #define SLI_BT_BGAPI_GATT_SERVER
 #endif
 
-#if defined(SLI_BT_CTE_RECEIVER_PRESENT)
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CTE_RECEIVER_PRESENT)
 #define SLI_BT_BGAPI_CTE_RECEIVER SLI_BT_USE_BGAPI_CLASS(bt, cte_receiver),
 #else
 #define SLI_BT_BGAPI_CTE_RECEIVER
@@ -724,7 +706,7 @@ static const sli_bgapi_device_info_t bgapi_service_device_info = {
 // Initialization entry points used with `sl_system`
 
 // Initialize the Bluetooth stack.
-sl_status_t sl_bt_stack_init()
+sl_status_t sl_bt_stack_init(void)
 {
   // This initialization entry point is used in the single-stage `sl_system`
   // initialization. We implement the single-stage initialization by performing

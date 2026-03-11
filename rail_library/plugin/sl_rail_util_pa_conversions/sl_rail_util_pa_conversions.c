@@ -77,11 +77,39 @@ const sl_rail_pa_power_setting_t *sl_rail_util_pa_get_power_setting_table(sl_rai
                                                                           sl_rail_tx_power_t *p_step_ddbm)
 {
   (void)rail_handle;
+  if (pa_mode == SL_RAIL_TX_PA_MODE_INVALID) {
+    pa_mode = sl_rail_get_pa_mode_from_channel_entry(rail_handle);
+  }
+  // Turn pa_mode into PA table index
+#if (!SL_RAIL_SUPPORTS_2P4_GHZ_BAND)
+  pa_mode -= 1U; // Underflow to 255 will be caught in next if condition
+#endif
+  if (pa_mode >= sli_rail_util_pa_power_table.num_of_tables) {
+    return NULL;
+  }
   sl_rail_pa_descriptor_t *p_pa_descriptor = &(sli_rail_util_pa_power_table.p_pa_table_descriptor[pa_mode]);
   *p_min_ddbm = p_pa_descriptor->min_power_ddbm;
   *p_max_ddbm = p_pa_descriptor->max_power_ddbm;
   *p_step_ddbm = p_pa_descriptor->step_power_ddbm;
   return (sl_rail_pa_power_setting_t*)(p_pa_descriptor->p_power_setting_table); //This includes sl_rail_pa_power_setting_t and curr_pa_power_ddbm
+}
+
+const sl_rail_pa_descriptor_t *sl_rail_util_pa_get_power_table_info(sl_rail_handle_t rail_handle,
+                                                                    sl_rail_tx_pa_mode_t pa_mode)
+{
+  (void)rail_handle;
+  if (pa_mode == SL_RAIL_TX_PA_MODE_INVALID) {
+    pa_mode = sl_rail_get_pa_mode_from_channel_entry(rail_handle);
+  }
+  // Turn pa_mode into PA table index
+#if (!SL_RAIL_SUPPORTS_2P4_GHZ_BAND)
+  pa_mode -= 1U; // Underflow to 255 will be caught in next if condition
+#endif
+  if (pa_mode >= sli_rail_util_pa_power_table.num_of_tables) {
+    return NULL;
+  }
+  sl_rail_pa_descriptor_t *p_pa_descriptor = &(sli_rail_util_pa_power_table.p_pa_table_descriptor[pa_mode]);
+  return p_pa_descriptor;
 }
 
 sl_rail_status_t sl_rail_util_pa_get_tx_power_limits(sl_rail_handle_t rail_handle,

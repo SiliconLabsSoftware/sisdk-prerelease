@@ -69,7 +69,6 @@ where
 - channels value means the number of channels from the channel mask that can be derived from the "Channel map preset" settings:
   - "High"   - 72 (default),
   - "Medium" - 37,
-  - "Low"    - 20,
   - "Custom" - Number of 1s in channel mask,
 - antenna_paths value is controlled by the "Antenna configuration", and limited by number of antennas presented on each board (capabilities). Maximum can be calculated using the product of used Initiator and Reflector antennae. The default maximum value for antenna_paths is 4.
 

@@ -19,6 +19,11 @@ requires:
   condition: [device_series_2]
 - name: mbedtls_entropy_hardware
   condition: [device_generic_family_sixx301]
+  # PLATFORM_HYD-5151
+- name: mbedtls_entropy_deterministic_seed
+  condition: [device_generic_family_sixx353]
+- name: mbedtls_entropy_deterministic_seed
+  condition: [device_family_sixg300xiwifi74000]
 recommends:
   # recommend NV seed for resolution instead of ADC, since ADC
   # requires taking ownership of the ADC peripheral

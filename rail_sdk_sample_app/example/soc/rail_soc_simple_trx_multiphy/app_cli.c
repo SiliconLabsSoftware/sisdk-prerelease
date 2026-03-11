@@ -87,12 +87,12 @@ void cli_info(sl_cli_command_arg_t *arguments)
   if (mode == M_ENDPOINT) {
     active_channel = get_active_channel();
     app_log_info("  Device mode:     endpoint\n");
-    app_log_info("  Active channel:  %d\n", active_channel);
+    app_log_info("  Active channel:  %u\n", active_channel);
   } else {
     src = get_rx_channel();
     dest = get_tx_channel();
     app_log_info("  Device mode:     relay\n");
-    app_log_info("  Direction:       ch%d -> ch%d\n", src, dest);
+    app_log_info("  Direction:       ch%u -> ch%u\n", src, dest);
   }
 }
 
@@ -144,7 +144,7 @@ void cli_send(sl_cli_command_arg_t *arguments)
   if (mode == M_ENDPOINT) {
     request_tx();
     set_next_state(S_IDLE);
-    app_log_info("Send packet request on channel %d\n", active_channel);
+    app_log_info("Send packet request on channel %u\n", active_channel);
   } else {
     app_log_info("This command has no effect on relay devices\n");
     return;

@@ -1171,12 +1171,12 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced" />
   </descriptors>
-  <descriptors name="spidrv_master_baremetal" label="Platform - SPIDRV Master Bare-metal" description="This example project demonstrates how to use the master mode of the Serial Peripheral Interface driver in a bare-metal configuration.&#10;">
+  <descriptors name="spidrv_usart_master_baremetal" label="Platform - SPIDRV Master Bare-metal" description="This example project demonstrates how to use the master mode of the Serial Peripheral Interface driver in a bare-metal configuration.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
-    <properties key="solutionReferenceId" value="app.common.example.spidrv_master_baremetal.spidrv_master_baremetal.slcp" />
-    <properties key="projectFilePaths" value="example/spidrv_master_baremetal/spidrv_master_baremetal.slcp" />
-    <properties key="readmeFiles" value="example/spidrv_master_baremetal/readme.md" />
+    <properties key="solutionReferenceId" value="app.common.example.spidrv_usart_master_baremetal.spidrv_usart_master_baremetal.slcp" />
+    <properties key="projectFilePaths" value="example/spidrv_usart_master_baremetal/spidrv_usart_master_baremetal.slcp" />
+    <properties key="readmeFiles" value="example/spidrv_usart_master_baremetal/readme.md" />
     <properties key="boardCompatibility" value="brd2503a brd2503b brd2505a brd2506a brd2601a brd2601b brd2602a brd2603a brd4109a brd4110b brd4111b brd4115a brd4115b brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4194a brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4277a brd4278a brd4308a brd4308b brd4308c brd4308d brd4310a brd4311a brd4311b brd4312a brd4316a brd4317a brd4318a brd4328a brd4328b brd4335a brd4350a brd4351a brd4356a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4402c brd4411a brd4412a brd4413a brd4415a brd4420a com.silabs.board.none" />
     <properties key="partCompatibility" value=".*bgm21.* .*bgm22.* .*bgm24.* .*efm32pg22.* .*efm32pg23.* .*efm32pg26.* .*efm32pg28.* .*efr32bg21.* .*efr32bg22.* .*efr32bg24.* .*efr32bg27.* .*efr32bg29.* .*efr32fg22.* .*efr32fg23.* .*efr32fg25.* .*efr32fg28.* .*efr32fg2d.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg26.* .*efr32mg27.* .*efr32mg29.* .*efr32mr21.* .*efr32sg23.* .*efr32sg28.* .*efr32zg23.* .*efr32zg28.* .*fgm23.* .*mgm21.* .*mgm22.* .*mgm24.* .*mgm26.* .*mgm27.* .*zgm23.*" />
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code" />
@@ -1186,12 +1186,12 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced" />
   </descriptors>
-  <descriptors name="spidrv_master_baremetal_s3" label="Platform - SPIDRV Master Bare-metal" description="This example project demonstrates how to use the master mode of the Serial Peripheral Interface driver in a bare-metal configuration.&#10;">
+  <descriptors name="spidrv_usart_master_baremetal_s3" label="Platform - SPIDRV Master Bare-metal" description="This example project demonstrates how to use the master mode of the Serial Peripheral Interface driver in a bare-metal configuration.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
-    <properties key="solutionReferenceId" value="app.common.example.spidrv_master_baremetal.spidrv_master_baremetal.slcp" />
-    <properties key="projectFilePaths" value="example/spidrv_master_baremetal/spidrv_master_baremetal.slcp" />
-    <properties key="readmeFiles" value="example/spidrv_master_baremetal/readme.md" />
+    <properties key="solutionReferenceId" value="app.common.example.spidrv_usart_master_baremetal.spidrv_usart_master_baremetal.slcp" />
+    <properties key="projectFilePaths" value="example/spidrv_usart_master_baremetal/spidrv_usart_master_baremetal.slcp" />
+    <properties key="readmeFiles" value="example/spidrv_usart_master_baremetal/readme.md" />
     <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code" />
     <properties key="toolchainCompatibility" value="gcc llvm" />
     <properties key="category" value="Example|Platform" />
@@ -1199,12 +1199,12 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced" />
   <properties key="partCompatibility" value=".*sibg301.*" /></descriptors>
-  <descriptors name="spidrv_master_kernel_micriumos" label="Platform - SPIDRV Master on Micrium OS kernel" description="This example project demonstrates how to use the master mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#10;">
+  <descriptors name="spidrv_usart_master_kernel_micriumos" label="Platform - SPIDRV Master on Micrium OS kernel" description="This example project demonstrates how to use the master mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
-    <properties key="solutionReferenceId" value="app.common.example.spidrv_master_kernel_micriumos.spidrv_master_kernel_micriumos.slcp" />
-    <properties key="projectFilePaths" value="example/spidrv_master_kernel_micriumos/spidrv_master_kernel_micriumos.slcp" />
-    <properties key="readmeFiles" value="example/spidrv_master_kernel_micriumos/readme.md" />
+    <properties key="solutionReferenceId" value="app.common.example.spidrv_usart_master_kernel_micriumos.spidrv_usart_master_kernel_micriumos.slcp" />
+    <properties key="projectFilePaths" value="example/spidrv_usart_master_kernel_micriumos/spidrv_usart_master_kernel_micriumos.slcp" />
+    <properties key="readmeFiles" value="example/spidrv_usart_master_kernel_micriumos/readme.md" />
     <properties key="boardCompatibility" value="brd2503a brd2503b brd2505a brd2506a brd2601a brd2601b brd2602a brd2603a brd4109a brd4110b brd4111b brd4115a brd4115b brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4194a brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4277a brd4278a brd4308a brd4308b brd4308c brd4308d brd4310a brd4311a brd4311b brd4312a brd4316a brd4317a brd4318a brd4328a brd4328b brd4335a brd4350a brd4351a brd4356a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4402c brd4411a brd4412a brd4413a brd4415a brd4420a com.silabs.board.none" />
     <properties key="partCompatibility" value=".*bgm21.* .*bgm22.* .*bgm24.* .*efm32pg22.* .*efm32pg23.* .*efm32pg26.* .*efm32pg28.* .*efr32bg21.* .*efr32bg22.* .*efr32bg24.* .*efr32bg27.* .*efr32bg29.* .*efr32fg22.* .*efr32fg23.* .*efr32fg25.* .*efr32fg28.* .*efr32fg2d.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg26.* .*efr32mg27.* .*efr32mg29.* .*efr32mr21.* .*efr32sg23.* .*efr32sg28.* .*efr32zg23.* .*efr32zg28.* .*fgm23.* .*mgm21.* .*mgm22.* .*mgm24.* .*mgm26.* .*mgm27.* .*zgm23.*" />
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code" />
@@ -1214,12 +1214,12 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced" />
   </descriptors>
-  <descriptors name="spidrv_master_kernel_micriumos_s3" label="Platform - SPIDRV Master on Micrium OS kernel" description="This example project demonstrates how to use the master mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#10;">
+  <descriptors name="spidrv_usart_master_kernel_micriumos_s3" label="Platform - SPIDRV Master on Micrium OS kernel" description="This example project demonstrates how to use the master mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
-    <properties key="solutionReferenceId" value="app.common.example.spidrv_master_kernel_micriumos.spidrv_master_kernel_micriumos.slcp" />
-    <properties key="projectFilePaths" value="example/spidrv_master_kernel_micriumos/spidrv_master_kernel_micriumos.slcp" />
-    <properties key="readmeFiles" value="example/spidrv_master_kernel_micriumos/readme.md" />
+    <properties key="solutionReferenceId" value="app.common.example.spidrv_usart_master_kernel_micriumos.spidrv_usart_master_kernel_micriumos.slcp" />
+    <properties key="projectFilePaths" value="example/spidrv_usart_master_kernel_micriumos/spidrv_usart_master_kernel_micriumos.slcp" />
+    <properties key="readmeFiles" value="example/spidrv_usart_master_kernel_micriumos/readme.md" />
     <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code" />
     <properties key="toolchainCompatibility" value="gcc llvm" />
     <properties key="category" value="Example|Platform" />
@@ -1227,12 +1227,12 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced" />
   <properties key="partCompatibility" value=".*sibg301.*" /></descriptors>
-  <descriptors name="spidrv_slave_baremetal" label="Platform - SPIDRV Slave Bare-metal" description="This example project demonstrates how to use the slave mode of the Serial Peripheral Interface driver in a bare-metal configuration.&#10;">
+  <descriptors name="spidrv_usart_slave_baremetal" label="Platform - SPIDRV Slave Bare-metal" description="This example project demonstrates how to use the slave mode of the Serial Peripheral Interface driver in a bare-metal configuration.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
-    <properties key="solutionReferenceId" value="app.common.example.spidrv_slave_baremetal.spidrv_slave_baremetal.slcp" />
-    <properties key="projectFilePaths" value="example/spidrv_slave_baremetal/spidrv_slave_baremetal.slcp" />
-    <properties key="readmeFiles" value="example/spidrv_slave_baremetal/readme.md" />
+    <properties key="solutionReferenceId" value="app.common.example.spidrv_usart_slave_baremetal.spidrv_usart_slave_baremetal.slcp" />
+    <properties key="projectFilePaths" value="example/spidrv_usart_slave_baremetal/spidrv_usart_slave_baremetal.slcp" />
+    <properties key="readmeFiles" value="example/spidrv_usart_slave_baremetal/readme.md" />
     <properties key="boardCompatibility" value="brd2503a brd2503b brd2505a brd2506a brd2601a brd2601b brd2602a brd2603a brd4109a brd4110b brd4111b brd4115a brd4115b brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4194a brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4277a brd4278a brd4308a brd4308b brd4308c brd4308d brd4310a brd4311a brd4311b brd4312a brd4316a brd4317a brd4318a brd4328a brd4328b brd4335a brd4350a brd4351a brd4356a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4402c brd4411a brd4412a brd4413a brd4415a brd4420a com.silabs.board.none" />
     <properties key="partCompatibility" value=".*bgm21.* .*bgm22.* .*bgm24.* .*efm32pg22.* .*efm32pg23.* .*efm32pg26.* .*efm32pg28.* .*efr32bg21.* .*efr32bg22.* .*efr32bg24.* .*efr32bg27.* .*efr32bg29.* .*efr32fg22.* .*efr32fg23.* .*efr32fg25.* .*efr32fg28.* .*efr32fg2d.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg26.* .*efr32mg27.* .*efr32mg29.* .*efr32mr21.* .*efr32sg23.* .*efr32sg28.* .*efr32zg23.* .*efr32zg28.* .*fgm23.* .*mgm21.* .*mgm22.* .*mgm24.* .*mgm26.* .*mgm27.* .*zgm23.*" />
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code" />
@@ -1242,12 +1242,12 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced" />
   </descriptors>
-  <descriptors name="spidrv_slave_baremetal_s3" label="Platform - SPIDRV Slave Bare-metal" description="This example project demonstrates how to use the slave mode of the Serial Peripheral Interface driver in a bare-metal configuration.&#10;">
+  <descriptors name="spidrv_usart_slave_baremetal_s3" label="Platform - SPIDRV Slave Bare-metal" description="This example project demonstrates how to use the slave mode of the Serial Peripheral Interface driver in a bare-metal configuration.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
-    <properties key="solutionReferenceId" value="app.common.example.spidrv_slave_baremetal.spidrv_slave_baremetal.slcp" />
-    <properties key="projectFilePaths" value="example/spidrv_slave_baremetal/spidrv_slave_baremetal.slcp" />
-    <properties key="readmeFiles" value="example/spidrv_slave_baremetal/readme.md" />
+    <properties key="solutionReferenceId" value="app.common.example.spidrv_usart_slave_baremetal.spidrv_usart_slave_baremetal.slcp" />
+    <properties key="projectFilePaths" value="example/spidrv_usart_slave_baremetal/spidrv_usart_slave_baremetal.slcp" />
+    <properties key="readmeFiles" value="example/spidrv_usart_slave_baremetal/readme.md" />
     <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code" />
     <properties key="toolchainCompatibility" value="gcc llvm" />
     <properties key="category" value="Example|Platform" />
@@ -1255,12 +1255,12 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced" />
   <properties key="partCompatibility" value=".*sibg301.*" /></descriptors>
-  <descriptors name="spidrv_slave_kernel_micriumos" label="Platform - SPIDRV Slave on Micrium OS kernel" description="This example project demonstrates how to use the slave mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#10;">
+  <descriptors name="spidrv_usart_slave_kernel_micriumos" label="Platform - SPIDRV Slave on Micrium OS kernel" description="This example project demonstrates how to use the slave mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
-    <properties key="solutionReferenceId" value="app.common.example.spidrv_slave_kernel_micriumos.spidrv_slave_kernel_micriumos.slcp" />
-    <properties key="projectFilePaths" value="example/spidrv_slave_kernel_micriumos/spidrv_slave_kernel_micriumos.slcp" />
-    <properties key="readmeFiles" value="example/spidrv_slave_kernel_micriumos/readme.md" />
+    <properties key="solutionReferenceId" value="app.common.example.spidrv_usart_slave_kernel_micriumos.spidrv_usart_slave_kernel_micriumos.slcp" />
+    <properties key="projectFilePaths" value="example/spidrv_usart_slave_kernel_micriumos/spidrv_usart_slave_kernel_micriumos.slcp" />
+    <properties key="readmeFiles" value="example/spidrv_usart_slave_kernel_micriumos/readme.md" />
     <properties key="boardCompatibility" value="brd2503a brd2503b brd2505a brd2506a brd2601a brd2601b brd2602a brd2603a brd4109a brd4110b brd4111b brd4115a brd4115b brd4116a brd4117a brd4118a brd4120a brd4121a brd4171a brd4176a brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4194a brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4277a brd4278a brd4308a brd4308b brd4308c brd4308d brd4310a brd4311a brd4311b brd4312a brd4316a brd4317a brd4318a brd4328a brd4328b brd4335a brd4350a brd4351a brd4356a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4402c brd4411a brd4412a brd4413a brd4415a brd4420a com.silabs.board.none" />
     <properties key="partCompatibility" value=".*bgm21.* .*bgm22.* .*bgm24.* .*efm32pg22.* .*efm32pg23.* .*efm32pg26.* .*efm32pg28.* .*efr32bg21.* .*efr32bg22.* .*efr32bg24.* .*efr32bg27.* .*efr32bg29.* .*efr32fg22.* .*efr32fg23.* .*efr32fg25.* .*efr32fg28.* .*efr32fg2d.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg26.* .*efr32mg27.* .*efr32mg29.* .*efr32mr21.* .*efr32sg23.* .*efr32sg28.* .*efr32zg23.* .*efr32zg28.* .*fgm23.* .*mgm21.* .*mgm22.* .*mgm24.* .*mgm26.* .*mgm27.* .*zgm23.*" />
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code" />
@@ -1270,12 +1270,12 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced" />
   </descriptors>
-  <descriptors name="spidrv_slave_kernel_micriumos_s3" label="Platform - SPIDRV Slave on Micrium OS kernel" description="This example project demonstrates how to use the slave mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#10;">
+  <descriptors name="spidrv_usart_slave_kernel_micriumos_s3" label="Platform - SPIDRV Slave on Micrium OS kernel" description="This example project demonstrates how to use the slave mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
-    <properties key="solutionReferenceId" value="app.common.example.spidrv_slave_kernel_micriumos.spidrv_slave_kernel_micriumos.slcp" />
-    <properties key="projectFilePaths" value="example/spidrv_slave_kernel_micriumos/spidrv_slave_kernel_micriumos.slcp" />
-    <properties key="readmeFiles" value="example/spidrv_slave_kernel_micriumos/readme.md" />
+    <properties key="solutionReferenceId" value="app.common.example.spidrv_usart_slave_kernel_micriumos.spidrv_usart_slave_kernel_micriumos.slcp" />
+    <properties key="projectFilePaths" value="example/spidrv_usart_slave_kernel_micriumos/spidrv_usart_slave_kernel_micriumos.slcp" />
+    <properties key="readmeFiles" value="example/spidrv_usart_slave_kernel_micriumos/readme.md" />
     <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code" />
     <properties key="toolchainCompatibility" value="gcc llvm" />
     <properties key="category" value="Example|Platform" />

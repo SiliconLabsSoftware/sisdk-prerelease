@@ -223,6 +223,8 @@ SLI_RAIL_ENUM_GENERIC(sl_rail_assert_error_codes_t, uint32_t)
   SL_RAIL_ASSERT_INVALID_OR_MISSING_SOFTWARE_MODEM_IMAGE = 85,
   /** The sequencer user generated error. */
   SL_RAIL_ASSERT_SEQ_USER_SEQUENCER_GENERIC_ERROR = 86,
+  /** The sequence timed out. */
+  SL_RAIL_ASSERT_SEQUENCE_TIMEOUT = 87,
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -314,6 +316,7 @@ SLI_RAIL_ENUM_GENERIC(sl_rail_assert_error_codes_t, uint32_t)
 #define SL_RAIL_ASSERT_MISSING_SEQUENCER_IMAGE                    ((sl_rail_assert_error_codes_t) SL_RAIL_ASSERT_MISSING_SEQUENCER_IMAGE)
 #define SL_RAIL_ASSERT_INVALID_OR_MISSING_SOFTWARE_MODEM_IMAGE    ((sl_rail_assert_error_codes_t) SL_RAIL_ASSERT_INVALID_OR_MISSING_SOFTWARE_MODEM_IMAGE)
 #define SL_RAIL_ASSERT_SEQ_USER_SEQUENCER_GENERIC_ERROR           ((sl_rail_assert_error_codes_t) SL_RAIL_ASSERT_SEQ_USER_SEQUENCER_GENERIC_ERROR)
+#define SL_RAIL_ASSERT_SEQUENCE_TIMEOUT                           ((sl_rail_assert_error_codes_t) SL_RAIL_ASSERT_SEQUENCE_TIMEOUT)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /// Use this define to create an array of error messages that map to the codes
@@ -427,6 +430,7 @@ SLI_RAIL_ENUM_GENERIC(sl_rail_assert_error_codes_t, uint32_t)
     /*84*/ "No common or protocol image selected to be loaded onto the sequencer",     \
     /*85*/ "Software modem image invalid or missing",                                  \
     /*86*/ "The sequencer user generated error",                                       \
+    /*87*/ "The sequence timed out",                                                   \
 }
 
 /** @} */ // end of Assertions

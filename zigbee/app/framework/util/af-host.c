@@ -131,8 +131,16 @@ void sl_zigbee_af_get_mfg_string(uint8_t* returnData)
   static bool mfgStringRetrieved = false;
 
   if (mfgStringRetrieved == false) {
-    sl_zigbee_ezsp_get_mfg_token(SL_ZIGBEE_EZSP_MFG_STRING, mfgString);
-    mfgStringRetrieved = true;
+    uint8_t len = sl_zigbee_ezsp_get_mfg_token(SL_ZIGBEE_EZSP_MFG_STRING, mfgString);
+    if (len != 255) {
+      mfgStringRetrieved = true;
+    } else {
+      // Deprecated token (e.g. Series 3 NCP): use placeholder to match SOC behavior.
+      static const char placeholder[] = "(deprecated)";
+      memcpy(mfgString, placeholder, sizeof(placeholder) - 1);
+      memset(mfgString + sizeof(placeholder) - 1, 0, MFG_STRING_MAX_LENGTH - (sizeof(placeholder) - 1));
+      mfgStringRetrieved = true;
+    }
   }
   // NOTE:  The MFG string is not NULL terminated.
   memmove(returnData, mfgString, MFG_STRING_MAX_LENGTH);
@@ -268,6 +276,16 @@ sl_status_t sl_zigbee_af_set_ezsp_config_value(sl_zigbee_ezsp_config_id_t config
   // ZLL where not all NCPs need or support it.
   SL_ZIGBEE_TEST_ASSERT((ezspStatus == SL_ZIGBEE_EZSP_SUCCESS) || (ezspStatus == SL_ZIGBEE_EZSP_ERROR_INVALID_ID));
   return status;
+}
+
+void sl_zigbee_ezsp_set_stack_profile(uint8_t stackProfile)
+{
+  (void) sl_zigbee_af_set_ezsp_config_value(SL_ZIGBEE_EZSP_CONFIG_STACK_PROFILE, stackProfile, "stack profile");
+}
+
+void sl_zigbee_ezsp_set_security_level(uint8_t securityLevel)
+{
+  (void) sl_zigbee_af_set_ezsp_config_value(SL_ZIGBEE_EZSP_CONFIG_SECURITY_LEVEL, securityLevel, "security level");
 }
 
 // this function sets an EZSP policy and

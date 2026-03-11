@@ -136,16 +136,6 @@
 #define SL_BT_CONTROLLER_USE_LEGACY_VENDOR_SPECIFIC_EVENT_CODE     (0)
 #endif
 
-// <o SL_BT_CONTROLLER_ADAPTIVITY_MODE> Adaptive Frequency Hopping operation mode
-//   <SL_BTCTRL_CHANNELMAP_FLAG_ACTIVE_ADAPTIVITY=> Active AFH
-//   <SL_BTCTRL_CHANNELMAP_FLAG_PASSIVE_ADAPTIVITY=> Passive AFH
-// <i> Choose between active AFH and passive AFH
-// <i> Default: Active AFH
-// <d> SL_BTCTRL_CHANNELMAP_FLAG_ACTIVE_ADAPTIVITY
-#ifndef SL_BT_CONTROLLER_ADAPTIVITY_MODE
-#define SL_BT_CONTROLLER_ADAPTIVITY_MODE     (SL_BTCTRL_CHANNELMAP_FLAG_ACTIVE_ADAPTIVITY)
-#endif
-
 // <h> Advertising Configuration
 // <e SL_BT_CONTROLLER_PRIMARY_EXT_PACKET_INCLUDE_TX_POWER> Include TX Power in the extended header of primary extended advertising packets
 // <i> This is default setting to all advertising sets unless it is specifically overridden by VS_SiliconLabs_Set_Advertising_Config_Bits.

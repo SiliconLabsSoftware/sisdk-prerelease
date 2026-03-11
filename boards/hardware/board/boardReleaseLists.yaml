@@ -205,11 +205,14 @@ board_release_whitelist:
     - BRD4406A
     - BRD4407A
     - BRD4408A
+    - BRD4410A
     - BRD4411A
     - BRD4412A
     - BRD4413A
     - BRD4414A
     - BRD4415A
+    - BRD4418A
+    - BRD4419A
     - BRD4420A
     - BRD4421A
     - BRD8016A

@@ -88,7 +88,7 @@
 #define QSPI_FUNCTION_SCOPE static
 #endif
 
-#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)
+#if defined(SOCPLL_COUNT) && (SOCPLL_COUNT == 1)
 // Bus Clock macros for SOCPLL instances.
 #define SOCPLL_BUS_CLOCK(n)                         (((n) == 0) ? SL_BUS_CLOCK_SOCPLL0 \
                                                      : 0x0UL)
@@ -135,11 +135,6 @@ extern uint32_t clock_manager_se_version;
 extern sl_oscillator_t initial_qspi_reference_clock;
 #endif
 
-#if defined(SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN) \
-  && SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN
-extern uint16_t clock_manager_hfxo_startup_time;
-#endif
-
 #if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION)
 uint32_t SLI_CLOCK_MANAGER_HFXO_MODE = SL_CLOCK_MANAGER_HFXO_MODE;
 uint32_t SLI_CLOCK_MANAGER_HFXO_FREQ = SL_CLOCK_MANAGER_HFXO_FREQ;
@@ -151,7 +146,7 @@ uint32_t SLI_CLOCK_MANAGER_DPLL_FREQ      = SL_CLOCK_MANAGER_DPLL_FREQ;
 uint32_t SLI_CLOCK_MANAGER_DPLL_N         = SL_CLOCK_MANAGER_DPLL_N;
 uint32_t SLI_CLOCK_MANAGER_DPLL_M         = SL_CLOCK_MANAGER_DPLL_M;
 
-#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)
+#if defined(SOCPLL_COUNT) && (SOCPLL_COUNT == 1)
 bool     SLI_CLOCK_MANAGER_SOCPLL_EN            = SL_CLOCK_MANAGER_SOCPLL_EN;
 uint32_t SLI_CLOCK_MANAGER_SOCPLL_FREQ          = SL_CLOCK_MANAGER_SOCPLL_FREQ;
 uint32_t SLI_CLOCK_MANAGER_SOCPLL_REFCLK        = SL_CLOCK_MANAGER_SOCPLL_REFCLK;
@@ -666,7 +661,7 @@ FUNCTION_SCOPE void init_hfrcodpll(void)
 
     // Retrieve HFRCO calibration from DEVINFO data.
     switch (SLI_CLOCK_MANAGER_HFRCO_BAND) {
-#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)
+#if defined (_SILICON_LABS_32B_SERIES_3_CONFIG_301) || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_302)
       case 38000000:
         freq_cal = sl_hal_system_get_hfrco_default_calibration();
         break;
@@ -766,7 +761,7 @@ FUNCTION_SCOPE void init_socpll(uint8_t socpll_num)
                  | (divf << _SOCPLL_CTRL_DIVF_SHIFT);
 #endif
 
-#if defined(_SOCPLL_SOCCLK0_MASK)
+#if defined(_SOCPLL_SOCCLK0_MASK) && defined(CLOCK_MANAGER_SOCPLL_OUT0_DIV)
   // Set the output dividers.
   socpll->SOCCLK0 = (socpll->SOCCLK0 & ~(_SOCPLL_SOCCLK0_SOCCLK0OUTDIV_MASK | _SOCPLL_SOCCLK0_ENSOCCLK0_MASK))
                     | (CLOCK_MANAGER_SOCPLL_OUT0_DIV(socpll_num) << _SOCPLL_SOCCLK0_SOCCLK0OUTDIV_SHIFT)
@@ -784,7 +779,7 @@ FUNCTION_SCOPE void init_socpll(uint8_t socpll_num)
                    | (CLOCK_MANAGER_SOCPLL_OUTDIVIN(socpll_num) << _SOCPLL_DCOCFG_OUTDIVINSEL_SHIFT);
 #endif
 
-#if defined(_SOCPLL_AUTO_MASK)
+#if defined(_SOCPLL_AUTO_MASK) && defined(FREQPLAN_BASE)
   // Load FREQPLAN if available and start AUTO mode.
   const sl_clock_manager_freqplan_data_t *freqplan_data = CLOCK_MANAGER_SOCPLL_FREQPLAN_DATA(socpll_num);
   if (freqplan_data != NULL) {
@@ -803,14 +798,14 @@ FUNCTION_SCOPE void init_socpll(uint8_t socpll_num)
     // Wait for SOCPLL lock and ready.
   }
 
-#if defined(_SOCPLL_CTRL1_ENOPENLOOP_MASK)
+#if defined(_SOCPLL_CTRL1_ENOPENLOOP_MASK) && defined(CLOCK_MANAGER_SOCPLL_EN_OPEN_LOOP)
   socpll->CTRL1 = (socpll->CTRL1 & ~(_SOCPLL_CTRL1_ENOPENLOOP_MASK)) | (CLOCK_MANAGER_SOCPLL_EN_OPEN_LOOP(socpll_num) << _SOCPLL_CTRL1_ENOPENLOOP_SHIFT);
 #elif defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION)
   socpll->CTRL = (socpll->CTRL & ~(_SOCPLL_CTRL_ENOPENLOOP_MASK)) | (CLOCK_MANAGER_SOCPLL_EN_OPEN_LOOP(socpll_num) << _SOCPLL_CTRL_ENOPENLOOP_SHIFT);
 #endif
 
   // Update CMSIS SOCPLL frequency.
-#if defined(_SOCPLL_SOCCLK0_MASK)
+#if defined(SOCPLL_COUNT) && (SOCPLL_COUNT == 3)
   SystemSOCPLLClockSet(socpll_num, 0, CLOCK_MANAGER_SOCPLL_FREQ0(socpll_num));
   SystemSOCPLLClockSet(socpll_num, 1, CLOCK_MANAGER_SOCPLL_FREQ1(socpll_num));
   SystemSOCPLLClockSet(socpll_num, 2, CLOCK_MANAGER_SOCPLL_FREQ2(socpll_num));
@@ -935,14 +930,33 @@ FUNCTION_SCOPE void init_clock_branches(void)
 #else
   CLOCK_MANAGER_CLOCK_SELECT_SET(SYSCLK, SL_CLOCK_MANAGER_SYSCLK_SOURCE);
 #endif
-  CMU->SYSCLKCTRL = (CMU->SYSCLKCTRL & ~(_CMU_SYSCLKCTRL_HCLKPRESC_MASK | _CMU_SYSCLKCTRL_PCLKPRESC_MASK))
-                    | SL_CLOCK_MANAGER_HCLK_DIVIDER
-                    | SL_CLOCK_MANAGER_PCLK_DIVIDER;
+  CMU->SYSCLKCTRL = (CMU->SYSCLKCTRL & ~(_CMU_SYSCLKCTRL_HCLKPRESC_MASK | _CMU_SYSCLKCTRL_PCLKPRESC_MASK
+#if defined(_CMU_SYSCLKCTRL_CPUCLKPRESC_MASK)
+    | _CMU_SYSCLKCTRL_CPUCLKPRESC_MASK
+#endif
+#if defined(_CMU_SYSCLKCTRL_HCLKDIVNPRESC_MASK)
+    | _CMU_SYSCLKCTRL_HCLKDIVNPRESC_MASK
+#endif
+    ))
+    | SL_CLOCK_MANAGER_HCLK_DIVIDER
+    | SL_CLOCK_MANAGER_PCLK_DIVIDER
+#if defined(_CMU_SYSCLKCTRL_CPUCLKPRESC_MASK)
+    | SL_CLOCK_MANAGER_CPUCLK_DIVIDER
+#endif
+#if defined(_CMU_SYSCLKCTRL_HCLKDIVNPRESC_MASK)
+    | SL_CLOCK_MANAGER_HCLKDIVN_DIVIDER
+#endif
+  ;
 
-  SystemHCLKGet();     // Update SystemCoreClock
 #else
   EFM_ASSERT(false);
 #endif
+
+#if defined(CLOCK_MANAGER_INIT_HAL_INTERNAL_PRESENT)
+  sli_clock_manager_hal_init_sysclk_internal();
+#endif
+
+  SystemCoreClockUpdate();
 
   // Initialize TRACECLK clock branch.
 #if defined(CoreDebug_DEMCR_TRCENA_Msk)
@@ -1063,6 +1077,7 @@ FUNCTION_SCOPE void init_clock_branches(void)
 #endif
 
   // Initialize WDOG0 clock branch.
+#if defined(WDOG_PRESENT)
 #if defined(SL_CLOCK_MANAGER_WDOG0CLK_SOURCE)
 #if (SL_CLOCK_MANAGER_WDOG0CLK_SOURCE == SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE)
   CLOCK_MANAGER_CLOCK_SELECT_SET(WDOG0CLK, CLOCK_MANAGER_GET_DEFAULT_CLOCK_SOURCE(WDOG0CLK, SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE_CONCATENATION));
@@ -1071,6 +1086,20 @@ FUNCTION_SCOPE void init_clock_branches(void)
 #endif
 #else
   EFM_ASSERT(false);
+#endif
+
+#if defined(_CMU_WDOG1CLKCTRL_MASK)
+  // Initialize WDOG1 clock branch.
+#if defined(SL_CLOCK_MANAGER_WDOG1CLK_SOURCE)
+#if (SL_CLOCK_MANAGER_WDOG1CLK_SOURCE == SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE)
+  CLOCK_MANAGER_CLOCK_SELECT_SET(WDOG1CLK, CLOCK_MANAGER_GET_DEFAULT_CLOCK_SOURCE(WDOG1CLK, SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE_CONCATENATION));
+#else
+  CLOCK_MANAGER_CLOCK_SELECT_SET(WDOG1CLK, SL_CLOCK_MANAGER_WDOG1CLK_SOURCE);
+#endif
+#else
+  EFM_ASSERT(false);
+#endif
+#endif
 #endif
 
   // Initialize PCNT0 clock branch.
@@ -1100,6 +1129,15 @@ FUNCTION_SCOPE void init_clock_branches(void)
 #endif
 #endif
 
+  // Initialize EUSART1
+#if defined(_CMU_EUSART1CLKCTRL_MASK)
+#if defined(SL_CLOCK_MANAGER_EUSART1CLK_SOURCE)
+  CLOCK_MANAGER_CLOCK_SELECT_SET(EUSART1CLK, SL_CLOCK_MANAGER_EUSART1CLK_SOURCE);
+#else
+  EFM_ASSERT(false);
+#endif
+#endif
+
   // Initialize I2C0
 #if defined(_CMU_I2C0CLKCTRL_MASK)
 #if defined(SL_CLOCK_MANAGER_I2C0CLK_SOURCE)
@@ -1122,6 +1160,15 @@ FUNCTION_SCOPE void init_clock_branches(void)
 #endif
 #else
   EFM_ASSERT(false);
+#endif
+
+  // Initialize VDAC0CLK clock branch.
+#if defined(_CMU_VDAC0CLKCTRL_MASK)
+#if defined(SL_CLOCK_MANAGER_VDAC0CLK_SOURCE)
+  CLOCK_MANAGER_CLOCK_SELECT_SET(VDAC0CLK, SL_CLOCK_MANAGER_VDAC0CLK_SOURCE);
+#else
+  EFM_ASSERT(false);
+#endif
 #endif
 
 #if defined(CLOCK_MANAGER_INIT_HAL_INTERNAL_PRESENT)

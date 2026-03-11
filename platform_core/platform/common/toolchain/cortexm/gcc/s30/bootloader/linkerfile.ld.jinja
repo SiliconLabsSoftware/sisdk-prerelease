@@ -355,9 +355,9 @@ SECTIONS
     *(text_{{selection['component']}}_*{{selection['class']}}*)
 {%-     endif %}
 {%-   endfor %}
-{%-   if "timecritical" in code_classification_standard_selections %}
-    *(text_{{component}}_*timecritical*)
-{%-   endif %}
+{%-   for selection in code_classification_standard_selections %}
+    *(text_{{component}}_*{{selection}}*)
+{%-   endfor %}
 
     . = ALIGN(4);
     __text_{{component}}_ram_end__ = .;
@@ -484,9 +484,16 @@ SECTIONS
     *(.dtors)
     *(.rodata*)
     *(.eh_frame*)
+    {%- if trustzone_secure and llvm %}
+    . = ALIGN(32);
+    linker_sg_begin = .;
+    KEEP(*(.gnu.sgstubs*))
+    . = ALIGN(32);
+    linker_sg_end = .;
+    {%- endif %}
   } > FLASH
 
-{%- if trustzone_secure %}
+{%- if trustzone_secure and not llvm %}
   .gnu.sgstubs : ALIGN(32)
   {
     . = ALIGN(32);
@@ -559,11 +566,12 @@ SECTIONS
   .stack (NOLOAD):
   {
     . = ALIGN(8);
+    __stack_limit = .;
     __StackLimit = .;
     KEEP(*(.stack*))
     . = ALIGN(4);
+    __stack = .;
     __StackTop = .;
-    PROVIDE(__stack = __StackTop);
   } > RAM
 
 {%- if trustzone_secure %}

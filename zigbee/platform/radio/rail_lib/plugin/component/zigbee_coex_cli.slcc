@@ -18,16 +18,6 @@ requires:
 - name: zigbee_counters
 provides:
 - name: zigbee_coex_cli
-include:
-- path: plugin
-  file_list:
-  - path: coexistence/common/coexistence.h
-- path: plugin/coexistence/protocol/ieee802154_uc
-  file_list:
-  - path: coexistence-802154.h
-- path: plugin/coexistence/protocol/ieee802154_uc
-  file_list:
-  - path: coexistence-common-802154.h
 source:
 - path: plugin/coexistence/protocol/ieee802154_uc/sl_zigbee_coexistence_cli.c
 template_contribution:

@@ -156,10 +156,10 @@ static psa_status_t sli_hostcrypto_hmac_validate_key(
 {
   // Check key type and output size
   psa_key_type_t key_type = psa_get_key_type(attributes);
-  psa_key_location_t location =
-    PSA_KEY_LIFETIME_GET_LOCATION(psa_get_key_lifetime(attributes));
 
 #if defined(SLI_PSA_DRIVER_FEATURE_KSU)
+psa_key_location_t location =
+    PSA_KEY_LIFETIME_GET_LOCATION(psa_get_key_lifetime(attributes));
   if (location == SL_PSA_KEY_LOCATION_KSU_0) {
     // For KSU, allow raw data key type for HMAC
     if (key_type != PSA_KEY_TYPE_RAW_DATA && key_type != PSA_KEY_TYPE_HMAC) {

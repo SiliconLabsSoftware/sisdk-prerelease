@@ -48,7 +48,7 @@
 #define get_name(var)  #var
 
 /// CLI warning for not proper value settings
-#define PARAM_WARNING "%s value was out of limit, value will be set to %d\n"
+#define PARAM_WARNING "%s value was out of limit, value will be set to %u\n"
 
 /// CLI warning for setting energy mode under EM1 level
 #define SLEEP_WARNING "CLI won't work under EM1 level, restart will be needed\n"

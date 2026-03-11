@@ -30,8 +30,8 @@
  *   This file contains definitions of spinel.
  */
 
-#ifndef SPINEL_HEADER_INCLUDED
-#define SPINEL_HEADER_INCLUDED 1
+#ifndef OT_LIB_SPINEL_SPINEL_H_
+#define OT_LIB_SPINEL_SPINEL_H_
 
 /*
  *   Spinel is a host-controller protocol designed to enable
@@ -5040,40 +5040,6 @@ enum
 
     SPINEL_PROP_BORDER_ROUTER__END = 0x9A0,
 
-    SPINEL_PROP_TREL__BEGIN = 0x9A0,
-
-    /// TREL UDP Port (publish selected local UDP port used by NCP for TREL)
-    /** Format `S` (read-only)
-     *
-     *  Provides the 16-bit UDP port number bound locally for TREL packets.
-     *  Only present when OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE is true.
-     */
-    SPINEL_PROP_TREL_UDP_PORT = SPINEL_PROP_TREL__BEGIN + 1,
-
-    /// TREL Peer Info (discovery insert/remove events)
-    /** Format (struct): E6SCSd
-     *   E : Extended Address (peer EUI-64)
-     *   6 : Peer IPv6 address (if known, otherwise all zeros)
-     *   S : Peer UDP port
-     *   C : Flags (bit 0 = removed (VALUE_REMOVED), other bits reserved)
-     *   S : TXT-DATA length
-     *   d : TXT-DATA bytes
-     * Emitted as VALUE_INSERTED when a peer is discovered, VALUE_REMOVED when peer disappears.
-     * Only present when OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE && NCP build.
-     */
-    SPINEL_PROP_TREL_PEER_INFO = SPINEL_PROP_TREL__BEGIN + 2,
-
-    /// TREL service state.
-    /**
-     * Format: `bS`: Get and Unsolicited notifications.
-     *
-     * `b`: Whether the TREL service is running or not.
-     * `S`: The UDP port that is being used by the TREL service. If the TREL is not active, the port MUST be 0.
-     */
-    SPINEL_PROP_TREL_STATE = SPINEL_PROP_TREL__BEGIN + 3,
-
-    SPINEL_PROP_TREL__END = 0x9C0,
-
     SPINEL_PROP_NEST__BEGIN = 0x3BC0,
 
     SPINEL_PROP_NEST_STREAM_MFG = SPINEL_PROP_NEST__BEGIN + 0,
@@ -5352,4 +5318,4 @@ SPINEL_API_EXTERN const char *spinel_link_metrics_status_to_cstr(uint8_t status)
 }
 #endif
 
-#endif /* defined(SPINEL_HEADER_INCLUDED) */
+#endif // OT_LIB_SPINEL_SPINEL_H_

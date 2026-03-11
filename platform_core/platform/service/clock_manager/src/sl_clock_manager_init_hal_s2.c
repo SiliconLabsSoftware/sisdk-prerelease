@@ -201,7 +201,7 @@ FUNCTION_SCOPE void init_hfxo(void)
     } else if (ctune > ((int)(_HFXO_XTALCTRL_CTUNEXOANA_MASK >> _HFXO_XTALCTRL_CTUNEXOANA_SHIFT))) {
       ctune = (int)(_HFXO_XTALCTRL_CTUNEXOANA_MASK >> _HFXO_XTALCTRL_CTUNEXOANA_SHIFT);
     }
-    clock_manager_hfxo_init.ctuneXoAna = ctune;
+    clock_manager_hfxo_init.ctuneXoAna = (uint8_t)ctune;
   }
 
 #if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION)

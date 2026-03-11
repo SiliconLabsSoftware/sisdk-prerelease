@@ -40,6 +40,8 @@
 #define SL_OPENTHREAD_RSSI_AVERAGING_TIME 16     // us
 // <o SL_OPENTHREAD_RSSI_AVERAGING_TIMEOUT> RSSI Average Timeout [us]
 #define SL_OPENTHREAD_RSSI_AVERAGING_TIMEOUT 300 // us
+// <o RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT> Debug Counters Support
+#define RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT 0 // Set to 1 to enable debug counters in radio.c
 // </h>
 // <<< end of configuration section >>>
 #endif // _SL_OPENTHREAD_RADIO_CONFIG_H

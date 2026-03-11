@@ -125,8 +125,7 @@ void cli_receive_packet(sl_cli_command_arg_t *arguments)
     rail_status = sl_rail_start_rx(rail_handle, get_selected_channel(), NULL);
   }
   if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
-    app_log_warning("sl_rail_start_rx() or sl_rail_idle result: %lu\n",
-                    rail_status);
+    app_log_warning("sl_rail_start_rx() or sl_rail_idle result: 0x%08lX\n", rail_status);
   }
   app_log_info("Received packets: %s\n", str_rx_fw);
 }

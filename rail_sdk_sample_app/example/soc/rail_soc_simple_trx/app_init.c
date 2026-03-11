@@ -94,7 +94,7 @@ void rail_app_init(void)
   // Start reception
   sl_rail_status_t status = sl_rail_start_rx(rail_handle, get_selected_channel(), NULL);
   if (status != SL_RAIL_STATUS_NO_ERROR) {
-    app_log_warning("After initialization sl_rail_start_rx() result: %lu\n ", status);
+    app_log_warning("After initialization sl_rail_start_rx() result: 0x%08lX\n ", status);
   }
 
   // CLI info message

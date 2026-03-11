@@ -31,6 +31,7 @@
 #include "sl_interrupt_manager.h"
 #include "sl_log_platform_specific.h"
 #include "sl_log_common_config.h"
+#include "sl_log_platform_core_config.h"
 #include "sl_log_helper.h"
 #include "em_device.h"
 #include "sl_hal_timer.h"

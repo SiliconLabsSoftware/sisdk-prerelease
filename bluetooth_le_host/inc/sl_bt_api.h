@@ -16633,7 +16633,7 @@ uint32_t sl_bt_event_pending_len(void);
  * Run the Bluetooth stack to process scheduled tasks. Events for user
  * application may be generated as a result of this operation.
  */
-void sl_bt_run();
+void sl_bt_run(void);
 
 /**
  * Handle an API command in binary format.
@@ -16732,7 +16732,7 @@ sl_status_t sl_bt_external_signal(uint32_t signals);
  * Signals stack to send system_awake event when application received wakeup
  * signal.
  */
-void sl_bt_send_system_awake();
+void sl_bt_send_system_awake(void);
 
 /**
  * Signals stack to send system_error event when in case of an error.

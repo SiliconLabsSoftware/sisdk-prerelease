@@ -608,6 +608,25 @@ sl_status_t sl_se_data_region_erase(sl_se_command_context_t *cmd_ctx,
 
 /***************************************************************************//**
  * @brief
+ *   Query the SE Manager to determine if a command that modifies the L1CACHE
+ *   enabled/disabled state is in progress.
+ *
+ * @details
+ *   This function returns immediately. It is used to determine if a command
+ *   that modifies the L1CACHE enabled/disabled state is in progress. Note that
+ *   in a multi-threaded context, another thread might start a command that
+ *   modifies the L1CACHE enabled/disabled state just after/while this function
+ *   returns.
+ *
+ * @return
+ *   true if a command that modifies the L1CACHE enabled/disabled state is in
+ *   progress, false otherwise.
+ ******************************************************************************/
+ SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SE_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
+ bool sli_se_extmem_command_with_cachedis_in_progress(void);
+
+/***************************************************************************//**
+ * @brief
  *   Erase flash sector in the data region. This is a non-blocking (asynchronous)
  *   version of @ref sl_se_data_region_erase().
  *

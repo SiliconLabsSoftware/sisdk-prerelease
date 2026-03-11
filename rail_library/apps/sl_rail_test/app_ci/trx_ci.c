@@ -594,6 +594,11 @@ static uint32_t rfUs = 0;
 static const char * const rfSensitivity[] = { "High", "Low" };
 #endif
 
+// This CLI test function is used to force the device into a specific EM state,
+// bypassing the normal power manager sleep function. It only handles radio-related
+// interactions and the UART/RFSense wakeup mechanisms. It is not intended to be an
+// example of how to use the power manager correctly - customer code should use the
+// sl_power_manager_sleep() function to properly manage energy modes.
 void sleep(sl_cli_command_arg_t *args)
 {
 #if defined(_SILICON_LABS_32B_SERIES_2) || defined(_SILICON_LABS_32B_SERIES_3)
@@ -1127,7 +1132,7 @@ void enableAutoLnaBypass(sl_cli_command_arg_t *args)
 
 void cancelScheduledTrx(sl_cli_command_arg_t *args)
 {
-#ifdef SL_RAIL_SUPPORTS_HARDWARE_SCHEDULER
+#if SL_RAIL_SUPPORTS_HARDWARE_SCHEDULER
   // Turn off ScheduledRx if we were in it
   if (currentAppMode() == RX_SCHEDULED) {
     (void) enableAppModeSync(RX_SCHEDULED, false, NULL);

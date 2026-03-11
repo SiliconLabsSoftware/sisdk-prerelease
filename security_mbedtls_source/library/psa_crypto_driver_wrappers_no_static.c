@@ -51,6 +51,10 @@
 #ifndef PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT
 #define PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT
 #endif
+#if defined(SLI_PSA_DRIVER_FEATURE_KSU)
+#include "sl_psa_values.h"
+#include "sli_se_driver_key_management.h"
+#endif
 #include "sli_se_transparent_types.h"
 #include "sli_se_transparent_functions.h"
 #endif

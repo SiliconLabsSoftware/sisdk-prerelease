@@ -633,6 +633,7 @@ typedef enum AppMode{
   BER = 13,           /**< Bit Error Rate test mode */
   RX_SCHEDULED = 14,  /**< Enable receive at a time scheduled in the future */
   TX_SCHEDULED_N_PACKETS = 15, /**< Schedule a TX for a specific number of packets */
+  BER_PACKET = 16,    /**< Bit Error Rate in packet mode test mode */
 } AppMode_t;
 
 void sl_rail_test_internal_app_init(void);

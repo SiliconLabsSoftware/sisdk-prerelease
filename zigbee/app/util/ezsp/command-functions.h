@@ -355,17 +355,21 @@ uint8_t sl_zigbee_ezsp_get_endpoint_count(void)
   return 255;
 }
 
-void sl_zigbee_ezsp_get_endpoint_description(
+bool sl_zigbee_ezsp_get_endpoint_description(
   uint8_t endpoint,
   sl_zigbee_endpoint_description_t *result)
 {
+  bool success;
   startCommand(SL_ZIGBEE_EZSP_GET_ENDPOINT_DESCRIPTION);
   appendInt8u(endpoint);
   sl_zigbee_ezsp_status_t sendStatus = sendCommand();
   sli_zigbee_ezsp_set_last_status(sendStatus);
   if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    success = fetchInt8u();
     fetch_sl_zigbee_endpoint_description_t(result);
+    return success;
   }
+  return false;
 }
 
 uint16_t sl_zigbee_ezsp_get_endpoint_cluster(
@@ -482,40 +486,45 @@ uint8_t sl_zigbee_ezsp_get_mfg_token(
     // the size of corresponding the EZSP Mfg token,
     // please refer to app/util/ezsp/ezsp-enum.h
     switch (tokenId) {
-      // 2 bytes
+      case SL_ZIGBEE_EZSP_MFG_BOOTLOAD_AES_KEY:
+        expectedTokenDataLength = 255;
+        break;
+      case SL_ZIGBEE_EZSP_MFG_SL_ZIGBEE_EZSP_STORAGE:
+        expectedTokenDataLength = 255;
+        break;
+      case SL_ZIGBEE_EZSP_MFG_STRING:
+        expectedTokenDataLength = 255;
+        break;
       case SL_ZIGBEE_EZSP_MFG_CUSTOM_VERSION:
       case SL_ZIGBEE_EZSP_MFG_MANUF_ID:
       case SL_ZIGBEE_EZSP_MFG_PHY_CONFIG:
       case SL_ZIGBEE_EZSP_MFG_CTUNE:
         expectedTokenDataLength = 2;
         break;
-      // 8 bytes
-      case SL_ZIGBEE_EZSP_MFG_SL_ZIGBEE_EZSP_STORAGE:
       case SL_ZIGBEE_EZSP_MFG_CUSTOM_EUI_64:
         expectedTokenDataLength = 8;
         break;
-      // 16 bytes
-      case SL_ZIGBEE_EZSP_MFG_STRING:
       case SL_ZIGBEE_EZSP_MFG_BOARD_NAME:
-      case SL_ZIGBEE_EZSP_MFG_BOOTLOAD_AES_KEY:
         expectedTokenDataLength = 16;
         break;
-      // 20 bytes
       case SL_ZIGBEE_EZSP_MFG_INSTALLATION_CODE:
         expectedTokenDataLength = 20;
         break;
-      // 40 bytes
       case SL_ZIGBEE_EZSP_MFG_ASH_CONFIG:
         expectedTokenDataLength = 40;
         break;
-      // 92 bytes
       case SL_ZIGBEE_EZSP_MFG_CBKE_DATA:
         expectedTokenDataLength = 92;
         break;
       default:
         break;
     }
+    if (expectedTokenDataLength == 255) {
+      (void)fetchInt8uPointer(tokenDataLength);
+      return 255;
+    }
     if (tokenDataLength != expectedTokenDataLength) {
+      (void)fetchInt8uPointer(tokenDataLength);
       return 255;
     }
     fetchInt8uArray(tokenDataLength, tokenData);
@@ -781,6 +790,18 @@ void sl_zigbee_ezsp_radio_get_scheduler_priorities(
   sli_zigbee_ezsp_set_last_status(sendStatus);
   if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
     fetch_sl_802154_radio_priorities_t(priorities);
+  }
+}
+
+void sl_zigbee_ezsp_radio_set_scheduler_priorities(
+  sl_802154_radio_priorities_t *priorities)
+{
+  startCommand(SL_ZIGBEE_EZSP_RADIO_SET_SCHEDULER_PRIORITIES);
+  append_sl_802154_radio_priorities_t(priorities);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    EZSP_ASH_TRACE("%s(): sendCommand() error: 0x%02X", __func__, sendStatus);
   }
 }
 

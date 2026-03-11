@@ -43,11 +43,11 @@
 
 /// State machine states
 typedef enum {
-  S_INIT,             //!< Initialization before communication
-  S_IDLE,             //!< Idle state waiting for TX or RX
-  S_TRANSMIT,         //!< Request to TX a packet
-  S_RECEIVE,          //!< Receiving a packet
-  S_ERROR             //!< An error occurred
+  S_INIT = 0,             //!< Initialization before communication
+  S_IDLE = 1,             //!< Idle state waiting for TX or RX
+  S_TRANSMIT = 2,         //!< Request to TX a packet
+  S_RECEIVE = 3,          //!< Receiving a packet
+  S_ERROR = 4             //!< An error occurred
 } state_t;
 
 // -----------------------------------------------------------------------------

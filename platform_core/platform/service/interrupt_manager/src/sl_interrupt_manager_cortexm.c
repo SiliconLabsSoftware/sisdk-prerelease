@@ -32,6 +32,7 @@
 #include "sl_core.h"
 #include "sl_assert.h"
 #include "sli_interrupt_manager.h"
+#include "sl_memory_manager_region.h"
 
 #if defined (SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
@@ -127,7 +128,7 @@ static void sli_interrupt_manager_isr_wrapper(void);
 static bool is_interrupt_manager_initialized = false;
 
 #if defined(SL_INTERRUPT_MANAGER_ENABLE_HOOKS)
-static volatile uint32_t interrupt_nesting_counter = 0U;
+static volatile uint32_t interrupt_nesting_counter SL_FAST_DATA = 0U ;
 #endif
 
 /*******************************************************************************
@@ -185,15 +186,17 @@ sl_interrupt_manager_irq_handler_t *sli_interrupt_manager_set_irq_table(sl_inter
               & ((1UL << (32UL - __CLZ((handler_count * 4UL) - 1UL))) - 1UL))
              == 0UL);
 
-  // Disable all interrupts while updating the vector table
+  // Disable all interrupts while updating the vector table.
   sl_interrupt_manager_disable_interrupts();
 
   current = (sl_interrupt_manager_irq_handler_t*)SCB->VTOR;
 
   SCB->VTOR = (uint32_t)table;
 
-  // Make sure all explicit memory access are complete before proceding.
+  // DSB and ISB are required after VTOR updates to ensure
+  // the new vector table is used by subsequent instruction fetches.
   __DSB();
+  __ISB();
 
   sl_interrupt_manager_enable_interrupts();
 

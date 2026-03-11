@@ -7321,6 +7321,16 @@ bool sl_rail_supports_prs_lna_bypass(sl_rail_handle_t rail_handle);
  */
 bool sl_rail_supports_rx_duty_cycling(sl_rail_handle_t rail_handle);
 
+/**
+ * Indicate whether this chip supports RFSENSE OOK PHY.
+ *
+ * @param[in] rail_handle A radio-generic or real RAIL instance handle.
+ * @return true if RFSENSE OOK PHY is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref SL_RAIL_SUPPORTS_RF_SENSE_OOK_PHY.
+ */
+bool sl_rail_supports_rf_sense_ook_phy(sl_rail_handle_t rail_handle);
+
 #ifndef DOXYGEN_UNDOCUMENTED
 /**
  * Indicate whether RAIL supports the BTC protocol on this chip.

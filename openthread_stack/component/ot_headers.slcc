@@ -19,6 +19,7 @@ include:
   - path: backbone_router_ftd.h
   - path: ble_secure.h
   - path: border_agent.h
+  - path: border_agent_ephemeral_key.h
   - path: border_agent_tracker.h
   - path: border_agent_txt_data.h
   - path: border_router.h
@@ -55,6 +56,7 @@ include:
   - path: mesh_diag.h
   - path: message.h
   - path: multi_radio.h
+  - path: multi_ail_detection.h
   - path: nat64.h
   - path: ncp.h
   - path: netdata.h
@@ -66,10 +68,12 @@ include:
   - path: random_crypto.h
   - path: random_noncrypto.h
   - path: server.h
+  - path: seeker.h
   - path: sntp.h
   - path: srp_client.h
   - path: srp_client_buffers.h
   - path: srp_server.h
+  - path: steering_data.h
   - path: tasklet.h
   - path: tcat.h
   - path: tcp.h
@@ -146,6 +150,7 @@ include:
   - path: common/data.hpp
   - path: common/debug.hpp
   - path: common/encoding.hpp
+  - path: common/enum_to_string.hpp
   - path: common/equatable.hpp
   - path: common/error.hpp
   - path: common/frame_builder.hpp
@@ -260,6 +265,7 @@ include:
   - path: mac/wakeup_tx_scheduler.hpp
   - path: meshcop/announce_begin_client.hpp
   - path: meshcop/border_agent.hpp
+  - path: meshcop/border_agent_ephemeral_key.hpp
   - path: meshcop/border_agent_tracker.hpp
   - path: meshcop/border_agent_txt_data.hpp
   - path: meshcop/commissioner.hpp
@@ -274,8 +280,11 @@ include:
   - path: meshcop/meshcop_leader.hpp
   - path: meshcop/meshcop_tlvs.hpp
   - path: meshcop/network_name.hpp
+  - path: meshcop/network_identity.hpp
   - path: meshcop/panid_query_client.hpp
   - path: meshcop/secure_transport.hpp
+  - path: meshcop/seeker.hpp
+  - path: meshcop/steering_data.hpp
   - path: meshcop/tcat_agent.hpp
   - path: meshcop/timestamp.hpp
   - path: net/checksum.hpp
@@ -369,12 +378,16 @@ include:
   - path: thread/time_sync_service.hpp
   - path: thread/tmf.hpp
   - path: thread/uri_paths.hpp
+  - path: thread/vendor_info.hpp
   - path: thread/version.hpp
   - path: utils/channel_manager.hpp
   - path: utils/channel_monitor.hpp
   - path: utils/flash.hpp
   - path: utils/heap.hpp
   - path: utils/history_tracker.hpp
+  - path: utils/history_tracker_client.hpp
+  - path: utils/history_tracker_server.hpp
+  - path: utils/history_tracker_tlvs.hpp
   - path: utils/jam_detector.hpp
   - path: utils/link_metrics_manager.hpp
   - path: utils/mesh_diag.hpp
@@ -390,6 +403,7 @@ include:
   - path: platform/exit_code.h
 - path: ../../examples/platforms
   file_list:
+  - path: openthread-select.h
   - path: openthread-system.h
   - path: utils/code_utils.h
   - path: utils/link_metrics.h

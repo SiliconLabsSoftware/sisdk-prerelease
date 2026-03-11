@@ -800,23 +800,23 @@ void sl_zigbee_af_wwah_app_event_retry_manager_set_backoff_params_to_default(voi
 
 void sl_zigbee_af_ias_zone_server_print_queue(void)
 {
-  sl_zigbee_af_ias_zone_cluster_println("%d/%d entries", messageQueue.entriesInQueue, NUM_QUEUE_ENTRIES);
+  sl_zigbee_af_cli_println("%d/%d entries", messageQueue.entriesInQueue, NUM_QUEUE_ENTRIES);
   for (int i = 0; i < messageQueue.entriesInQueue; i++) {
-    sl_zigbee_af_ias_zone_cluster_println("Entry %d: Endpoint: %d Status: %d EventTimeMs: %d",
-                                          i,
-                                          messageQueue.buffer[i].endpoint,
-                                          messageQueue.buffer[i].status,
-                                          messageQueue.buffer[i].eventTimeMs
-                                          );
+    sl_zigbee_af_cli_println("Entry %d: Endpoint: %d Status: %d EventTimeMs: %d",
+                             i,
+                             messageQueue.buffer[i].endpoint,
+                             messageQueue.buffer[i].status,
+                             messageQueue.buffer[i].eventTimeMs
+                             );
   }
 }
 
 void sl_zigbee_af_ias_zone_server_print_queue_config(void)
 {
-  sl_zigbee_af_core_println("First backoff time (sec): %d", queueRetryParams.config.firstBackoffTimeSec);
-  sl_zigbee_af_core_println("Backoff sequence common ratio: %d", queueRetryParams.config.backoffSeqCommonRatio);
-  sl_zigbee_af_core_println("Max backoff time (sec): %d", queueRetryParams.config.maxBackoffTimeSec);
-  sl_zigbee_af_core_println("Max redelivery attempts: %d", queueRetryParams.config.maxRetryAttempts);
+  sl_zigbee_af_cli_println("First backoff time (sec): %d", queueRetryParams.config.firstBackoffTimeSec);
+  sl_zigbee_af_cli_println("Backoff sequence common ratio: %d", queueRetryParams.config.backoffSeqCommonRatio);
+  sl_zigbee_af_cli_println("Max backoff time (sec): %d", queueRetryParams.config.maxBackoffTimeSec);
+  sl_zigbee_af_cli_println("Max redelivery attempts: %d", queueRetryParams.config.maxRetryAttempts);
 }
 
 #endif // ENABLE_QUEUE

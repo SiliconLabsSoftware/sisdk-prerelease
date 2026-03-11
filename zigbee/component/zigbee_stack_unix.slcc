@@ -94,8 +94,6 @@ include:
 - path: ./
   file_list:
   - path: platform/common/inc/sl_enum.h
-  - path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc/coexistence-802154.h
-  - path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc/coexistence-common-802154.h
   - path: platform/service/iostream/inc/sl_iostream_swo_itm_8.h
   - path: platform/service/iostream/inc/sl_iostream.h
   - path: platform/service/legacy_hal/inc/button.h
@@ -152,9 +150,6 @@ include:
   - path: security_unix.h
   - path: platform-header.h
   - path: random.h
-
-# used by zigbeed/simulator_stubs.c
-- path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc
 
 - path: platform/common/inc
 

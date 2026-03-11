@@ -2,7 +2,7 @@ objectType: docLeaf
 id: protocol-usb-api
 access: public
 status: active
-version: "1.6.0"
+version: "1.5.0"
 docSpaceParent: ../../../../protocol/usb/_docspace-protocol-usb.yml
 authors:
   - sobimana@silabs.com

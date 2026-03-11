@@ -921,7 +921,7 @@ sl_status_t sl_memory_release_block(sl_memory_reservation_t *handle);
 /***************************************************************************//**
  * Dynamically allocates a block reservation handle.
  *
- * @param[out] handle  Handle to the reserved block.
+ * @param[out] handle  Pointer to a reservation handle.
  *
  * @return  SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
@@ -961,6 +961,37 @@ sl_status_t sl_memory_create_pool(size_t block_size,
                                   sl_memory_pool_t *pool_handle);
 
 /***************************************************************************//**
+ * Creates a memory pool.
+ * Advanced version that allows to specify reservation handle and block alignment.
+ *
+ * @param[in] reservation_handle  Handle to the reservation block used for pool.
+ *                                If NULL, a memory reservation in the
+ *                                general-purpose heap will be done.
+ * @param[in] block_size          Size of each block, in bytes.
+ * @param[in] block_count         Number of blocks in the pool.
+ * @param[in] align               Alignment of each block, in bytes.
+ * @param[in] pool_handle         Handle to the memory pool.
+ *
+ * @note  This function assumes the 'pool_handle' is provided by the caller:
+ *        - either statically (e.g. as a global variable)
+ *        - or dynamically by calling sl_memory_pool_handle_alloc().
+ *
+ * @note  If the reservation_handle is NULL, a reservation will be done in the
+ *        general-purpose heap.
+ *
+ * @note  The custom reservation is only available on the power-aware version
+ *        of the pool. On the lightweight version of the pool, the
+ *        reservation_handle parameter  must be NULL.
+ *
+ * @return  SL_STATUS_OK if successful. Error code otherwise.
+ ******************************************************************************/
+sl_status_t sl_memory_create_pool_advanced(sl_memory_reservation_t *reservation_handle,
+                                           size_t block_size,
+                                           uint32_t block_count,
+                                           size_t align,
+                                           sl_memory_pool_t *pool_handle);
+
+/***************************************************************************//**
  * Deletes a memory pool.
  *
  * @param[in] pool_handle Handle to the memory pool.
@@ -971,9 +1002,31 @@ sl_status_t sl_memory_create_pool(size_t block_size,
  *       on each block before calling sl_memory_delete_pool().
  *
  * @note The pool_handle provided is neither freed or invalidated. It can be
- *       reused in a new call to sl_memory_create_pool() to create another pool.
+ *       reused in a new call to sl_memory_create_pool() or
+ *       to sl_memory_create_pool_advanced() to create another pool.
  ******************************************************************************/
 sl_status_t sl_memory_delete_pool(sl_memory_pool_t *pool_handle);
+
+/***************************************************************************//**
+ * Deletes a memory pool, but keeps the reservation.
+ *
+ * @param[in] pool_handle Handle to the memory pool.
+ *
+ * @return  SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @note This function is only available on the power-aware version of the pool.
+ *
+ * @note All pool allocations need to be freed by calling sl_memory_pool_free()
+ *       on each block before calling sl_memory_delete_pool().
+ *
+ * @note A reference to the reservation must be kept before calling this function
+ *       as the reservation will not be freed, thus creating a potential memory leak.
+ *
+ * @note The pool_handle provided is neither freed or invalidated. It can be
+ *       reused in a new call to sl_memory_create_pool() or
+ *       to sl_memory_create_pool_advanced() to create another pool.
+ ******************************************************************************/
+sl_status_t sl_memory_delete_pool_no_unreserve(sl_memory_pool_t *pool_handle);
 
 /***************************************************************************//**
  * Allocates a block from a memory pool.
@@ -1247,6 +1300,17 @@ sl_status_t sl_memory_heap_reserve_block(sl_memory_heap_t *heap,
                                          void **block);
 
 /***************************************************************************//**
+ * Dynamically allocates a block reservation handle from a specific heap instance.
+ *
+ * @param[in] heap    Handle to the heap instance.
+ * @param[out] handle Pointer to a reservation handle.
+ *
+ * @return  SL_STATUS_OK if successful. Error code otherwise.
+ ******************************************************************************/
+sl_status_t sl_memory_heap_reservation_handle_alloc(sl_memory_heap_t *heap,
+                                                    sl_memory_reservation_t **handle);
+
+/***************************************************************************//**
  * Creates a memory pool from a specific heap instance.
  *
  * @param[in] heap          Handle to the heap instance.
@@ -1264,6 +1328,39 @@ sl_status_t sl_memory_heap_create_pool(sl_memory_heap_t *heap,
                                        size_t block_size,
                                        uint32_t block_count,
                                        sl_memory_pool_t *pool_handle);
+
+/***************************************************************************//**
+ * Creates a memory pool from a specific heap instance.
+ * Advanced version that allows to specify block alignment
+ *
+ * @param[in] heap          Handle to the heap instance.
+ * @param[in] block_size    Size of each block, in bytes.
+ * @param[in] block_count   Number of blocks in the pool.
+ * @param[in] align         Required alignment for each block, in bytes.
+ * @param[in] pool_handle   Handle to the memory pool.
+ *
+ * @note  This function assumes the 'pool_handle' is provided by the caller:
+ *        - either statically (e.g. as a global variable)
+ *        - or dynamically by calling sl_memory_pool_handle_alloc().
+ *
+ * @return  SL_STATUS_OK if successful. Error code otherwise.
+ ******************************************************************************/
+sl_status_t sl_memory_heap_create_pool_advanced(sl_memory_heap_t *heap,
+                                                size_t block_size,
+                                                uint32_t block_count,
+                                                size_t align,
+                                                sl_memory_pool_t *pool_handle);
+
+/***************************************************************************//**
+ * Dynamically allocates a memory pool handle from a specific heap instance.
+ *
+ * @param[in]  heap        Handle to the heap instance.
+ * @param[out] pool_handle Pointer to the memory pool handle.
+ *
+ * @return  SL_STATUS_OK if successful. Error code otherwise.
+ ******************************************************************************/
+sl_status_t sl_memory_heap_pool_handle_alloc(sl_memory_heap_t *heap,
+                                             sl_memory_pool_t **pool_handle);
 
 /***************************************************************************//**
  * Populates an sl_memory_heap_info_t{} structure with the current status of

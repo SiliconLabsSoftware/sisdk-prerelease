@@ -80,6 +80,9 @@ extern "C" {
 /// Define pointer to AMUXCP0 peripheral structure.
 #define SL_PERIPHERAL_AMUXCP0 (&sl_peripheral_val_amuxcp0)
 
+/// Define pointer to AMUXCP1 peripheral structure.
+#define SL_PERIPHERAL_AMUXCP1 (&sl_peripheral_val_amuxcp1)
+
 /// Define pointer to BUFC peripheral structure.
 #define SL_PERIPHERAL_BUFC (&sl_peripheral_val_bufc)
 
@@ -88,6 +91,9 @@ extern "C" {
 
 /// Define pointer to BURTC peripheral structure.
 #define SL_PERIPHERAL_BURTC (&sl_peripheral_val_burtc)
+
+/// Define pointer to CAN0 peripheral structure.
+#define SL_PERIPHERAL_CAN0 ((sl_peripheral_t)(&sl_peripheral_val_can0))
 
 /// Define pointer to CMU peripheral structure.
 #define SL_PERIPHERAL_CMU (&sl_peripheral_val_cmu)
@@ -641,6 +647,9 @@ extern const sl_peripheral_val_t sl_peripheral_val_aes;
 // External declaration for AMUXCP0 peripheral structure.
 extern const sl_peripheral_val_t sl_peripheral_val_amuxcp0;
 
+// External declaration for AMUXCP1 peripheral structure.
+extern const sl_peripheral_val_t sl_peripheral_val_amuxcp1;
+
 // External declaration for BUFC peripheral structure.
 extern const sl_peripheral_val_t sl_peripheral_val_bufc;
 
@@ -649,6 +658,9 @@ extern const sl_peripheral_val_t sl_peripheral_val_buram;
 
 // External declaration for BURTC peripheral structure.
 extern const sl_peripheral_val_t sl_peripheral_val_burtc;
+
+// External declaration for CAN0 peripheral structure.
+extern const sl_peripheral_can_val_t sl_peripheral_val_can0;
 
 // External declaration for CMU peripheral structure.
 extern const sl_peripheral_val_t sl_peripheral_val_cmu;
@@ -1321,6 +1333,7 @@ inline LCDRF_TypeDef *sl_device_peripheral_lcdrf_get_base_addr(const sl_peripher
  *
  * @return  The base address of the peripheral.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DEVICE_PERIPHERAL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
 inline LDMA_TypeDef *sl_device_peripheral_ldma_get_base_addr(const sl_peripheral_t peripheral)
 {
   return (LDMA_TypeDef *)peripheral->base;

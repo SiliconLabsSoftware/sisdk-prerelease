@@ -11,7 +11,7 @@
 {%- if 'psa_key_slots_btmesh_stack' in key_slot_names %}
 #include "sl_btmesh_config.h"
 {%- endif %}
-#if defined(KSU_MAX_KEY_SLOTS)
+#if defined(KSU_MAX_KEY_SLOTS) && defined(SEMAILBOX_PRESENT)
 #include "sli_ksu_keyslots_config.h"
 #define MBEDTLS_PSA_KEY_SLOT_COUNT ({{ psa_key_slots | join(' + ', attribute='count')}} + SL_PSA_KEY_USER_SLOT_COUNT + SLI_KSU_MAX_KEY_SLOTS - SLI_KSU_KEY_SLOT_USER_START + 1)
 #else

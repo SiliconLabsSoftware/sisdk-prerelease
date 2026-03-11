@@ -32,6 +32,7 @@ source:
 include:
 - path: .
   file_list:
+  - path: aesni.h
   - path: check_crypto_config.h
   - path: cipher_wrap.h
   - path: md_wrap.h

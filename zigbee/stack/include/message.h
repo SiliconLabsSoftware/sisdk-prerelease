@@ -1048,7 +1048,7 @@ sl_status_t slx_zigbee_add_to_incoming_network_queue(int8_t rssi,
 //retrieve packet info from stack globals for callbacks
 void sli_zigbee_fill_rx_packet_info(sl_zigbee_rx_packet_info_t* packetInfo);
 
-// Sending broadcsts and unicasts.
+// An internal utility to send frames. Not to be called by the user application
 bool slx_zigbee_network_send_command(sl_802154_short_addr_t destination,
                                      uint8_t *commandFrame,
                                      uint8_t length,

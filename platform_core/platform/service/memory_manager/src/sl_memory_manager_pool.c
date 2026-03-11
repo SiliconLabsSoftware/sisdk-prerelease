@@ -34,6 +34,7 @@
 
 #include "sl_assert.h"
 #include "sl_core.h"
+#include "sl_bit.h"
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
@@ -48,78 +49,48 @@
  ******************************************************************************/
 
 #define SLI_MEM_POOL_OUT_OF_MEMORY     UINTPTR_MAX
-#define SLI_MEM_POOL_REQUIRED_PADDING(obj_size) (((sizeof(size_t) - ((obj_size) % sizeof(size_t))) % sizeof(size_t)))
+
+/*******************************************************************************
+ ***************************   LOCAL FUNCTIONS   *******************************
+ ******************************************************************************/
 
 #if (defined(SL_MEMORY_MANAGER_POOL_DOUBLE_FREE_PROTECTION_ENABLE) && (SL_MEMORY_MANAGER_POOL_DOUBLE_FREE_PROTECTION_ENABLE == 1))
-/***************************************************************************//**
- * Checks if a value looks like a valid free list pointer.
- * Used as a quick O(1) pre-check for double-free detection.
- *
- * A value looks like a free list pointer if it's either:
- * - The end-of-list marker (SLI_MEM_POOL_OUT_OF_MEMORY), OR
- * - A block-aligned address within the pool's memory range
- *
- * @param[in] pool_handle  Pointer to the memory pool handle.
- * @param[in] value        The value to check.
- *
- * @return true if value looks like it could be a free list pointer.
- ******************************************************************************/
-static inline bool sli_looks_like_free_list_ptr(const sl_memory_pool_t *pool_handle,
-                                                size_t value)
-{
-  // Check for end-of-list marker.
-  if (value == SLI_MEM_POOL_OUT_OF_MEMORY) {
-    return true;
-  }
-
-  // Check if it points within the pool's block range.
-  size_t pool_start = (size_t)pool_handle->block_address;
-  size_t pool_end = pool_start + (pool_handle->block_size * pool_handle->block_count);
-
-  if ((value >= pool_start) && (value < pool_end)) {
-    // Must be aligned to a block boundary.
-    size_t offset = value - pool_start;
-    return (offset % pool_handle->block_size) == 0;
-  }
-
-  return false;
-}
-
-/***************************************************************************//**
- * Checks if a block is in the free list by walking the list.
- * Used as O(n) verification when the quick check is suspicious.
- *
- * @param[in] pool_handle  Pointer to the memory pool handle.
- * @param[in] block        The block address to search for.
- *
- * @return true if block is found in the free list (already freed).
- *
- * @note Must be called within an atomic section.
- ******************************************************************************/
-static bool sli_block_is_in_free_list(const sl_memory_pool_t *pool_handle,
-                                      const void *block)
-{
-  void *current = pool_handle->block_free;
-
-  while ((size_t)current != SLI_MEM_POOL_OUT_OF_MEMORY) {
-    if (current == block) {
-      return true;
-    }
-    // Follow the free list to the next block.
-    current = (void *)*(size_t *)current;
-  }
-
-  return false;
-}
+static inline bool value_looks_like_free_list_ptr(const sl_memory_pool_t *pool_handle,
+                                                  size_t value);
+static bool block_is_in_free_list(const sl_memory_pool_t *pool_handle,
+                                  const void *block);
 #endif // (defined(SL_MEMORY_MANAGER_POOL_DOUBLE_FREE_PROTECTION_ENABLE) && (SL_MEMORY_MANAGER_POOL_DOUBLE_FREE_PROTECTION_ENABLE == 1))
+
+/*******************************************************************************
+ **************************   GLOBAL FUNCTIONS   *******************************
+ ******************************************************************************/
+
 /***************************************************************************//**
- * Creates a memory pool.
+ * Creates a memory pool in the general-purpose heap.
  ******************************************************************************/
 sl_status_t sl_memory_create_pool(size_t block_size,
                                   uint32_t block_count,
                                   sl_memory_pool_t *pool_handle)
 {
-  return sl_memory_heap_create_pool(&sli_general_purpose_heap, block_size, block_count, pool_handle);
+  return sl_memory_heap_create_pool_advanced(&sli_general_purpose_heap, block_size, block_count, SL_MEMORY_BLOCK_ALIGN_DEFAULT, pool_handle);
+}
+
+/***************************************************************************//**
+ * Creates a memory pool.
+ * Advanced version that allows to specify reservation handle and block alignment.
+ *
+ * @note Custom reservation is not supported in this implementation,
+ *       use the power aware version.
+ ******************************************************************************/
+sl_status_t sl_memory_create_pool_advanced(sl_memory_reservation_t *reservation,
+                                           size_t block_size,
+                                           uint32_t block_count,
+                                           size_t align,
+                                           sl_memory_pool_t *pool_handle)
+{
+  // Reservations are not supported in this implementation.
+  EFM_ASSERT(reservation == NULL);
+  return sl_memory_heap_create_pool_advanced(&sli_general_purpose_heap, block_size, block_count, align, pool_handle);
 }
 
 /***************************************************************************//**
@@ -149,7 +120,7 @@ sl_status_t sl_memory_delete_pool(sl_memory_pool_t *pool_handle)
   }
 
 #if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  // Delete the memory tracker
+  // Delete the memory tracker.
   sli_memory_profiler_delete_tracker(pool_handle);
 #endif
 
@@ -157,6 +128,20 @@ sl_status_t sl_memory_delete_pool(sl_memory_pool_t *pool_handle)
   status = sl_memory_free(pool_handle->block_address);
 
   return status;
+}
+
+/***************************************************************************//**
+ * Deletes a memory pool, but keeps the reservation.
+ *
+ * @note Not supported in this implementation. Use the power aware version for
+ *       reservations support.
+ ******************************************************************************/
+sl_status_t sl_memory_delete_pool_no_unreserve(sl_memory_pool_t *pool_handle)
+{
+  (void) pool_handle;
+  EFM_ASSERT(false); // This is not supported in this implementation.
+                     // In the case that asserts are disabled, return an error.
+  return SL_STATUS_NOT_SUPPORTED;
 }
 
 /***************************************************************************//**
@@ -243,9 +228,9 @@ sl_status_t sl_memory_pool_free(sl_memory_pool_t *pool_handle,
   // user didn't overwrite the first word with a valid block address (rare), the
   // content will be 0 and this check will pass quickly.
   size_t stored_value = *(size_t *)block;
-  if (sli_looks_like_free_list_ptr(pool_handle, stored_value)) {
+  if (value_looks_like_free_list_ptr(pool_handle, stored_value)) {
     // Content looks suspicious - verify by walking the free list.
-    if (sli_block_is_in_free_list(pool_handle, block)) {
+    if (block_is_in_free_list(pool_handle, block)) {
       // Block is actually in the free list - this is a double-free.
       CORE_EXIT_ATOMIC();
       return SL_STATUS_INVALID_PARAMETER;
@@ -304,33 +289,52 @@ sl_status_t sl_memory_heap_create_pool(sl_memory_heap_t *heap,
                                        uint32_t block_count,
                                        sl_memory_pool_t *pool_handle)
 {
+  return sl_memory_heap_create_pool_advanced(heap, block_size, block_count, SL_MEMORY_BLOCK_ALIGN_DEFAULT, pool_handle);
+}
+
+/***************************************************************************//**
+ * Creates a memory pool from a specific heap instance.
+ * Advanced version that allows to specify block alignment
+ ******************************************************************************/
+sl_status_t sl_memory_heap_create_pool_advanced(sl_memory_heap_t *heap,
+                                                size_t block_size,
+                                                uint32_t block_count,
+                                                size_t align,
+                                                sl_memory_pool_t *pool_handle)
+{
 #if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
   void * volatile return_address = sli_memory_profiler_get_return_address();
 #endif
+
+  // Check proper alignment characteristics.
+  EFM_ASSERT((align == SL_MEMORY_BLOCK_ALIGN_DEFAULT)
+             || (SL_MATH_IS_PWR2(align)
+                 && (align <= SL_MEMORY_BLOCK_ALIGN_512_BYTES)));
+
+  // Check that the parameters are valid.
+  EFM_ASSERT(heap != NULL);
+  EFM_ASSERT(block_count > 0);
+  EFM_ASSERT(block_size > 0);
+
   sl_status_t status = SL_STATUS_OK;
   uint8_t *block = NULL;
   size_t block_addr;
   size_t pool_size;
-
-  // Make sure the heap handle isn't NULL.
-  EFM_ASSERT(heap != NULL);
-
-  EFM_ASSERT(block_count > 0);
-  EFM_ASSERT(block_size > 0);
+  size_t block_align = (align == SL_MEMORY_BLOCK_ALIGN_DEFAULT) ? SLI_BLOCK_ALLOC_MIN_ALIGN : align;
 
   if (pool_handle == NULL) {
     return SL_STATUS_NULL_POINTER;
   }
 
-  // SLI_MEM_POOL_REQUIRED_PADDING Rounds up to the nearest platform-dependant size. On a 32-bit processor,
-  // it will be rounded-up to 4 bytes. E.g. 101 bytes will be rounded up to 104 bytes.
-  pool_handle->block_size = block_size + (uint16_t)SLI_MEM_POOL_REQUIRED_PADDING(block_size);
+  // SLI_ALIGN_ROUND_UP Rounds up to the nearest alignment boundary.
+  // E.g. with align=8, 60 bytes will be rounded up to 64 bytes.
+  pool_handle->block_size = SLI_ALIGN_ROUND_UP(block_size, block_align);
   pool_handle->block_count = block_count;
 
   // Reserve a block in which the entire pool will reside. Uses a long term allocation to keep
   // behavior similar to dynamic reservation.
   pool_size = pool_handle->block_size * pool_handle->block_count;
-  status = sl_memory_heap_alloc(heap, pool_size, BLOCK_TYPE_LONG_TERM, (void **)&block);
+  status = sl_memory_heap_alloc_advanced(heap, pool_size, align, BLOCK_TYPE_LONG_TERM, (void **)&block);
 
 #if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
   sli_memory_profiler_track_ownership(SLI_INVALID_MEMORY_TRACKER_HANDLE, block, return_address);
@@ -366,3 +370,67 @@ sl_status_t sl_memory_heap_create_pool(sl_memory_heap_t *heap,
 
   return status;
 }
+
+#if (defined(SL_MEMORY_MANAGER_POOL_DOUBLE_FREE_PROTECTION_ENABLE) && (SL_MEMORY_MANAGER_POOL_DOUBLE_FREE_PROTECTION_ENABLE == 1))
+/***************************************************************************//**
+ * Checks if a value looks like a valid free list pointer.
+ * Used as a quick O(1) pre-check for double-free detection.
+ *
+ * A value looks like a free list pointer if it's either:
+ * - The end-of-list marker (SLI_MEM_POOL_OUT_OF_MEMORY), OR
+ * - A block-aligned address within the pool's memory range
+ *
+ * @param[in] pool_handle  Pointer to the memory pool handle.
+ * @param[in] value        The value to check.
+ *
+ * @return true if value looks like it could be a free list pointer.
+ ******************************************************************************/
+static inline bool value_looks_like_free_list_ptr(const sl_memory_pool_t *pool_handle,
+                                                  size_t value)
+{
+  // Check for end-of-list marker.
+  if (value == SLI_MEM_POOL_OUT_OF_MEMORY) {
+    return true;
+  }
+
+  // Check if it points within the pool's block range.
+  size_t pool_start = (size_t)pool_handle->block_address;
+  size_t pool_end = pool_start + (pool_handle->block_size * pool_handle->block_count);
+
+  if ((value >= pool_start) && (value < pool_end)) {
+    // Must be aligned to a block boundary.
+    size_t offset = value - pool_start;
+    return (offset % pool_handle->block_size) == 0;
+  }
+
+  return false;
+}
+
+/***************************************************************************//**
+ * Checks if a block is in the free list by walking the list.
+ * Used as O(n) verification when the quick check is suspicious.
+ *
+ * @param[in] pool_handle  Pointer to the memory pool handle.
+ * @param[in] block        The block address to search for.
+ *
+ * @return true if block is found in the free list (already freed).
+ *
+ * @note Must be called within an atomic section.
+ ******************************************************************************/
+static bool block_is_in_free_list(const sl_memory_pool_t *pool_handle,
+                                  const void *block)
+{
+  void *current = pool_handle->block_free;
+
+  while ((size_t)current != SLI_MEM_POOL_OUT_OF_MEMORY) {
+    if (current == block) {
+      return true;
+    }
+
+    // Follow the free list to the next block.
+    current = (void *)*(size_t *)current;
+  }
+
+  return false;
+}
+#endif // (defined(SL_MEMORY_MANAGER_POOL_DOUBLE_FREE_PROTECTION_ENABLE) && (SL_MEMORY_MANAGER_POOL_DOUBLE_FREE_PROTECTION_ENABLE == 1))

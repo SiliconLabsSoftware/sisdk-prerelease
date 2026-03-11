@@ -3,7 +3,7 @@ package: bootloader
 quality: production
 label: Bootloader - SoC Internal Storage (single image on 768kB device)
 description: >
-  This sample configuration of the Gecko bootloader configures the bootloader to use the internal main flash to store firmware update images. The storage configuration is set up to store a single firmware update image at a time, in a single storage slot. The storage slot is configured to start at address 0x5C000 (or 0x805C000 for device with 0x8000000 flash base), and have a size of 368 kB. This can be configured on the "Storage" tab.
+  This sample configuration of the Gecko bootloader configures the bootloader to use the internal main flash to store firmware update images. The storage configuration is set up to store a single firmware update image at a time, in a single storage slot. The storage slot is configured to start at address 0x5C000 (or 0x805C000 for device with 0x8000000 flash base), and have a size of 352 kB. This can be configured on the "Storage" tab.
 
 category: Example|Bootloader
 filter:
@@ -30,7 +30,7 @@ configuration:
   - name: SLOT0_ENABLE
     value: 1
   - name: SLOT0_SIZE
-    value: 376832
+    value: 360448
   ## device_sdid_200 ##
   - name: BTL_STORAGE_BASE_ADDRESS
     value: 376832

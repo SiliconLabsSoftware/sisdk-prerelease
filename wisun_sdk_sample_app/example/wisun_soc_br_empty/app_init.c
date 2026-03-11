@@ -69,8 +69,7 @@ void app_init(void)
     .stack_mem  = NULL,
     .stack_size = (APP_TASK_STACK_SIZE * sizeof(void *)) & 0xFFFFFFF8u,
     .priority   = osPriorityNormal,
-    .tz_module  = 0,
-    .reserved   = 0
+    .tz_module  = 0
   };
 
   osThreadId_t app_thr_id = osThreadNew(app_task,
@@ -90,8 +89,7 @@ void app_service_task_init(void)
     .stack_mem  = NULL,
     .stack_size = (APP_SERVICE_TASK_STACK_SIZE * sizeof(void *)) & 0xFFFFFFF8u,
     .priority   = osPriorityBelowNormal1,
-    .tz_module  = 0,
-    .reserved   = 0
+    .tz_module  = 0
   };
 
   osThreadId_t service_thr_id = osThreadNew(app_service_task,

@@ -75,6 +75,15 @@ sl_status_t sli_bt_start_bgapi_device(void);
  */
 void sli_bt_deinit_bgapi_device(void);
 
+/**
+ * @brief Calculate how long the host stack can sleep.
+ *
+ * @return 0 if the host cannot sleep, UINT32_MAX if the host has no task
+ *   scheduled to process, otherwise the number of sleeptimer ticks the host can
+ *   sleep for.
+ * */
+uint32_t sli_bt_can_sleep_ticks(void);
+
 // -----------------------------------------------------------------------------
 // Forward declarations of internal data structures
 

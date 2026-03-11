@@ -144,10 +144,14 @@
 #}
 {%- if memory_ram_start is defined %}
   {%- set app_ram_start = memory_ram_start | first %}
+  {%- if sram_alias_addr is defined %}
   {%- set app_ram_alias_start = memory_ram_alias_start | first %}
+  {%- endif %}
 {%- else %}
   {%- set app_ram_start = sram_addr %}
+  {%- if sram_alias_addr is defined %}
   {%- set app_ram_alias_start = sram_alias_addr %}
+  {%- endif %}
 {%- endif %}
 
 {%- if memory_ram_size is defined %}
@@ -159,7 +163,9 @@
 {%- if bootloader_enable or bootloader_interface_enable %}
   {%- set bootloader_reset_region_start = app_ram_start %}
   {%- set app_ram_start = app_ram_start + bootloader_reset_cause_size %}
+  {%- if sram_alias_addr is defined %}
   {%- set app_ram_alias_start = app_ram_alias_start + bootloader_reset_cause_size %}
+  {%- endif %}
   {%- set app_ram_size = app_ram_size - bootloader_reset_cause_size %}
 {%- endif %}
 
@@ -221,7 +227,9 @@
   {%- endif %}
    FLASH      (rx)  : ORIGIN = 0x{{ '%0x' % app_flash_start }}, LENGTH = 0x{{ '%0x' % app_flash_size }}
    RAM        (rwx) : ORIGIN = 0x{{ '%0x' % app_ram_start }}, LENGTH = 0x{{ '%0x' % app_ram_size }}
+   {%- if sram_alias_addr is defined %}
    RAM_ALIAS  (x)   : ORIGIN = 0x{{ '%0x' % app_ram_alias_start }}, LENGTH = 0x{{ '%0x' % app_ram_size }}
+   {%- endif %}
    {%- if bootloader_interface_enable %}
    BOOTLOADER_RESET_REGION (rwx) : ORIGIN = 0x{{ '%0x' % bootloader_reset_region_start }}, LENGTH = 0x{{ '%0x' % bootloader_reset_cause_size }}
    {%- endif %}
@@ -321,9 +329,9 @@ SECTIONS
     *(text_{{selection['component']}}_*{{selection['class']}}*)
 {%-     endif %}
 {%-   endfor %}
-{%-   if "timecritical" in code_classification_standard_selections %}
-    *(text_{{component}}_*timecritical*)
-{%-   endif %}
+{%-   for selection in code_classification_standard_selections %}
+    *(text_{{component}}_*{{selection}}*)
+{%-   endfor %}
 
     . = ALIGN(4);
     __text_{{component}}_ram_end__ = .;
@@ -398,7 +406,11 @@ SECTIONS
 
     . = ALIGN({{ram_code_alignment}});
     __vma_ramfuncs_end__ = .;
+{%- if sram_alias_addr is defined %}
   } > RAM_ALIAS AT > FLASH
+{%- else %}
+  } > RAM AT > FLASH
+{%- endif %}
 
   __lma_ramfuncs_start__ = LOADADDR(text_ram);
   __lma_ramfuncs_end__ = LOADADDR(text_ram) + SIZEOF(text_ram);
@@ -439,9 +451,16 @@ SECTIONS
     *(.dtors)
     *(.rodata*)
     *(.eh_frame*)
+    {%- if trustzone_secure and llvm %}
+    . = ALIGN(32);
+    linker_sg_begin = .;
+    KEEP(*(.gnu.sgstubs*))
+    . = ALIGN(32);
+    linker_sg_end = .;
+    {%- endif %}
   } > FLASH
 
-{%- if trustzone_secure %}
+{%- if trustzone_secure and not llvm %}
   .gnu.sgstubs : ALIGN(32)
   {
     . = ALIGN(32);
@@ -516,11 +535,12 @@ SECTIONS
   .stack (NOLOAD):
   {
     . = ALIGN(8);
+    __stack_limit = .;
     __StackLimit = .;
     KEEP(*(.stack*))
     . = ALIGN(4);
+    __stack = .;
     __StackTop = .;
-    PROVIDE(__stack = __StackTop);
   } > RAM
 
 {%- if trustzone_secure %}
@@ -598,6 +618,11 @@ SECTIONS
 
   } > RAM AT > FLASH
 
+{#-
+  Don't remove this section. It is necessary to avoid the NOLOAD sections
+  from having a LMA in FLASH because the difference between VMA and LMA is reused.
+  Full explanation at page 83: https://sourceware.org/binutils/docs/ld.pdf
+#}
 .code_flash_end : {
   code_flash_end = .;
 } > FLASH
@@ -663,8 +688,13 @@ heap_size = heap_limit - __HeapBase;
 {%- endif %}
 
 {%- if not bootloader_enable %}
+{%- if sram_alias_addr is defined %}
   __ramfuncs_start__ = ORIGIN(RAM) + (__vma_ramfuncs_start__ - ORIGIN(RAM_ALIAS));
   __ramfuncs_end__ = ORIGIN(RAM) + (__vma_ramfuncs_end__ - ORIGIN(RAM_ALIAS));
+{%- else %}
+  __ramfuncs_start__ = __vma_ramfuncs_start__;
+  __ramfuncs_end__ = __vma_ramfuncs_end__;
+{%- endif %}
 {%- endif %}
 
   /* Static secure tokens reserve flash memory at the end of the flash */

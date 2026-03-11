@@ -108,10 +108,6 @@ config_file:
   unless:
   - fpga
   file_id: sl_rail_util_pa_config
-- path: plugin/sl_rail_util_pa_conversions/fpga/config/sl_rail_util_pa_config.h
-  condition:
-  - fpga
-  file_id: sl_rail_util_pa_config
 include:
 - path: plugin/sl_rail_util_compatible_pa
   file_list:

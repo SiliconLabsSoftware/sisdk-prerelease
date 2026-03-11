@@ -20,10 +20,7 @@ requires:
 - name: dmadrv
 - name: device_manager
 - name: sleeptimer
-include:
-- path: inc
-  file_list:
-  - path: sl_mic.h
+- name: mic_driver
 source:
 - path: src/sl_mic_pdm.c
 config_file:

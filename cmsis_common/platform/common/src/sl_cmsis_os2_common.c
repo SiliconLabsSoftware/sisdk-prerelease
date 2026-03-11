@@ -53,6 +53,8 @@ sl_status_t sl_cmsis_os_convert_status(osStatus_t os_status)
       return SL_STATUS_NO_MORE_RESOURCE;
     case osErrorISR:
       return SL_STATUS_ISR;
+    case osErrorSafetyClass:
+      return SL_STATUS_PERMISSION;
     case osStatusReserved:
     default:
       EFM_ASSERT(0);

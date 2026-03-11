@@ -1,0 +1,38 @@
+id: btl_euart
+label: Bootloader EUART Extension Component
+package: bootloader
+description: >
+  Extension component providing EUART functionality for bootloader.
+category: Platform|Bootloader|Utils
+quality: production
+source:
+- path: "platform/bootloader/driver/btl_driver_util.c"
+include:
+- path: platform/bootloader
+  file_list:
+  - path: api/btl_interface.h
+  - path: api/btl_errorcode.h
+  - path: api/btl_reset_info.h
+  - path: api/application_properties.h
+  - path: api/btl_interface_parser.h
+  - path: api/btl_interface_storage.h
+requires:
+- name: test_btl_core
+- name: unity
+- name: emlib
+- name: bootloader_debug
+- name: bootloader_euart_driver
+- name: memory_manager
+provides:
+- name: btl_euart
+config_file:
+- path: platform/bootloader/config/btl_uart_driver_cfg.h
+  file_id: btl_uart_driver_cfg
+- path: "platform/bootloader/config/device_series_2/btl_core_cfg.h"
+metadata:
+  sbom:
+    license: MSLA
+ui_hints:
+  visibility: never
+
+root_path: bootloader

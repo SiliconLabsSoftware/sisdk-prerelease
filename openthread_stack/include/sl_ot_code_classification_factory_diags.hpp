@@ -29,8 +29,8 @@
  *
  ******************************************************************************/
 
-#ifndef FACTORY_DIAGS_HPP_
-#define FACTORY_DIAGS_HPP_
+#ifndef OT_CORE_DIAGS_FACTORY_DIAGS_HPP_
+#define OT_CORE_DIAGS_FACTORY_DIAGS_HPP_
  
 #include "sl_code_classification.h"
 #include "openthread-core-config.h"
@@ -318,4 +318,4 @@ private:
 
 #endif // #if OPENTHREAD_CONFIG_DIAG_ENABLE
 
-#endif // FACTORY_DIAGS_HPP_
+#endif // OT_CORE_DIAGS_FACTORY_DIAGS_HPP_

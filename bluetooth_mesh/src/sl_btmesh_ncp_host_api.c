@@ -1783,6 +1783,62 @@ sl_status_t sl_btmesh_prov_init_provisioning_records(void)
     return rsp->data.rsp_prov_init_provisioning_records.result;
 }
 
+sl_status_t sl_btmesh_prov_get_ddb_entry_count(uint16_t *count)
+{
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+    size_t cmd_payload_len = 0;
+
+    cmd->header = SLI_BGAPI_MSG_HEADER(sli_btmesh_prov_class_id,
+                                       sli_btmesh_prov_get_ddb_entry_count_command_id,
+                                       (uint8_t) sl_bgapi_msg_type_cmd | (uint8_t) sl_bgapi_dev_type_btmesh,
+                                       cmd_payload_len);
+    sl_btmesh_host_handle_command();
+
+    if (count) {
+        *count = rsp->data.rsp_prov_get_ddb_entry_count.count;
+    }
+
+    return rsp->data.rsp_prov_get_ddb_entry_count.result;
+}
+
+sl_status_t sl_btmesh_prov_get_ddb_entry_by_count(uint16_t which,
+                                                  uuid_128 *uuid,
+                                                  aes_key_128 *device_key,
+                                                  uint16_t *netkey_index,
+                                                  uint16_t *address,
+                                                  uint8_t *elements)
+{
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+    size_t cmd_payload_len = sizeof(sl_btmesh_cmd_prov_get_ddb_entry_by_count_t);
+
+    cmd->header = SLI_BGAPI_MSG_HEADER(sli_btmesh_prov_class_id,
+                                       sli_btmesh_prov_get_ddb_entry_by_count_command_id,
+                                       (uint8_t) sl_bgapi_msg_type_cmd | (uint8_t) sl_bgapi_dev_type_btmesh,
+                                       cmd_payload_len);
+    cmd->data.cmd_prov_get_ddb_entry_by_count.which = which;
+    sl_btmesh_host_handle_command();
+
+    if (uuid) {
+        *uuid = rsp->data.rsp_prov_get_ddb_entry_by_count.uuid;
+    }
+    if (device_key) {
+        memcpy(device_key, &rsp->data.rsp_prov_get_ddb_entry_by_count.device_key, sizeof(aes_key_128));
+    }
+    if (netkey_index) {
+        *netkey_index = rsp->data.rsp_prov_get_ddb_entry_by_count.netkey_index;
+    }
+    if (address) {
+        *address = rsp->data.rsp_prov_get_ddb_entry_by_count.address;
+    }
+    if (elements) {
+        *elements = rsp->data.rsp_prov_get_ddb_entry_by_count.elements;
+    }
+
+    return rsp->data.rsp_prov_get_ddb_entry_by_count.result;
+}
+
 sl_status_t sl_btmesh_proxy_connect(uint8_t connection, uint32_t *handle)
 {
     struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
@@ -5885,6 +5941,22 @@ sl_status_t sl_btmesh_mbt_client_init(uint16_t elem_index,
     return rsp->data.rsp_mbt_client_init.result;
 }
 
+sl_status_t sl_btmesh_mbt_client_deinit(uint16_t elem_index)
+{
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+    size_t cmd_payload_len = sizeof(sl_btmesh_cmd_mbt_client_deinit_t);
+
+    cmd->header = SLI_BGAPI_MSG_HEADER(sli_btmesh_mbt_client_class_id,
+                                       sli_btmesh_mbt_client_deinit_command_id,
+                                       (uint8_t) sl_bgapi_msg_type_cmd | (uint8_t) sl_bgapi_dev_type_btmesh,
+                                       cmd_payload_len);
+    cmd->data.cmd_mbt_client_deinit.elem_index = elem_index;
+    sl_btmesh_host_handle_command();
+
+    return rsp->data.rsp_mbt_client_deinit.result;
+}
+
 sl_status_t sl_btmesh_mbt_client_setup(uint16_t elem_index,
                                        sl_bt_uuid_64_t blob_id,
                                        uint32_t blob_size,
@@ -6218,6 +6290,22 @@ sl_status_t sl_btmesh_mbt_server_init(uint16_t elem_index,
     sl_btmesh_host_handle_command();
 
     return rsp->data.rsp_mbt_server_init.result;
+}
+
+sl_status_t sl_btmesh_mbt_server_deinit(uint16_t elem_index)
+{
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+    size_t cmd_payload_len = sizeof(sl_btmesh_cmd_mbt_server_deinit_t);
+
+    cmd->header = SLI_BGAPI_MSG_HEADER(sli_btmesh_mbt_server_class_id,
+                                       sli_btmesh_mbt_server_deinit_command_id,
+                                       (uint8_t) sl_bgapi_msg_type_cmd | (uint8_t) sl_bgapi_dev_type_btmesh,
+                                       cmd_payload_len);
+    cmd->data.cmd_mbt_server_deinit.elem_index = elem_index;
+    sl_btmesh_host_handle_command();
+
+    return rsp->data.rsp_mbt_server_deinit.result;
 }
 
 sl_status_t sl_btmesh_mbt_server_start(uint16_t elem_index,
@@ -9269,7 +9357,7 @@ sl_status_t sl_btmesh_fw_dist_client_get(uint16_t elem_index, uint16_t dst)
 
 sl_status_t sl_btmesh_fw_dist_client_start_distribution(uint16_t elem_index,
                                                         uint16_t dst,
-                                                        uint8_t dist_appkey_index,
+                                                        uint16_t dist_appkey_index,
                                                         uint8_t dist_ttl,
                                                         uint16_t dist_timeout_base,
                                                         uint8_t transfer_mode,

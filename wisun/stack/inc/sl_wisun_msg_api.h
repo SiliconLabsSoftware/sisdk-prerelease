@@ -142,6 +142,14 @@ typedef enum {
   SL_WISUN_MSG_SET_RX_FIFO_SIZE_REQ_ID                    = 0x53,
   SL_WISUN_MSG_REGISTER_ADDRESS_REQ_ID                    = 0x54,
   SL_WISUN_MSG_CLEAR_EVENT_FILTERS_REQ_ID                 = 0x55,
+  SL_WISUN_MSG_START_DIRECT_CONNECT_CLIENT_REQ_ID         = 0x56,
+  SL_WISUN_MSG_START_DIRECT_CONNECT_SCAN_REQ_ID           = 0x57,
+  SL_WISUN_MSG_STOP_DIRECT_CONNECT_SCAN_REQ_ID            = 0x58,
+  SL_WISUN_MSG_ADVERT_DIRECT_CONNECT_SERVER_ID_REQ_ID     = 0x59,
+  SL_WISUN_MSG_CONNECT_TO_DIRECT_CONNECT_SERVER_REQ_ID    = 0x5A,
+  SL_WISUN_MSG_STOP_DIRECT_CONNECT_CLIENT_REQ_ID          = 0x5B,
+  SL_WISUN_MSG_SET_DHCPV6_VENDOR_DATA_REQ_ID              = 0x5C,
+  SL_WISUN_MSG_SET_TRICKLE_PARAMETERS_REQ_ID              = 0x5D,
 } sl_wisun_msg_req_id_t;
 
 /// Wi-SUN Message API confirmation IDs
@@ -227,6 +235,14 @@ typedef enum {
   SL_WISUN_MSG_SET_RX_FIFO_SIZE_CNF_ID                    = 0x53,
   SL_WISUN_MSG_REGISTER_ADDRESS_CNF_ID                    = 0x54,
   SL_WISUN_MSG_CLEAR_EVENT_FILTERS_CNF_ID                 = 0x55,
+  SL_WISUN_MSG_START_DIRECT_CONNECT_CLIENT_CNF_ID         = 0x56,
+  SL_WISUN_MSG_START_DIRECT_CONNECT_SCAN_CNF_ID           = 0x57,
+  SL_WISUN_MSG_STOP_DIRECT_CONNECT_SCAN_CNF_ID            = 0x58,
+  SL_WISUN_MSG_ADVERT_DIRECT_CONNECT_SERVER_ID_CNF_ID     = 0x59,
+  SL_WISUN_MSG_CONNECT_TO_DIRECT_CONNECT_SERVER_CNF_ID    = 0x5A,
+  SL_WISUN_MSG_STOP_DIRECT_CONNECT_CLIENT_CNF_ID          = 0x5B,
+  SL_WISUN_MSG_SET_DHCPV6_VENDOR_DATA_CNF_ID              = 0x5C,
+  SL_WISUN_MSG_SET_TRICKLE_PARAMETERS_CNF_ID              = 0x5D,
 } sl_wisun_msg_cnf_id_t;
 
 /**************************************************************************//**
@@ -3397,7 +3413,7 @@ SL_PACK_END()
 /// Request message body
 SL_PACK_START(1)
 typedef struct {
-  /// LinkLocal IPv6 address of the client
+  /// Link Local IPv6 address of the client
   in6_addr_t link_local_ipv6;
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_accept_direct_connect_link_req_body_t;
 SL_PACK_END()
@@ -3431,6 +3447,251 @@ typedef struct {
 SL_PACK_END()
 
 /** @} (end SL_WISUN_MSG_ACCEPT_DIRECT_CONNECT_LINK) */
+
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_ADVERT_DIRECT_CONNECT_SERVER_ID sl_wisun_msg_advert_direct_connect_server_id
+ * @{
+ ******************************************************************************/
+/// Request message body
+SL_PACK_START(1)
+typedef struct {
+  /// Link Local IPv6 address of the client that requested the server ID
+  in6_addr_t link_local_ipv6;
+  /// Direct Connect server's ID
+  sl_wisun_dc_id_t dc_id;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_advert_direct_connect_server_id_req_body_t;
+SL_PACK_END()
+
+/// Request message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Request message body
+  sl_wisun_msg_advert_direct_connect_server_id_req_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_advert_direct_connect_server_id_req_t;
+SL_PACK_END()
+
+/// Confirmation message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the request
+  uint32_t status;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_advert_direct_connect_server_id_cnf_body_t;
+SL_PACK_END()
+
+/// Confirmation message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Confirmation message body
+  sl_wisun_msg_advert_direct_connect_server_id_cnf_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_advert_direct_connect_server_id_cnf_t;
+SL_PACK_END()
+
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_START_DIRECT_CONNECT_CLIENT sl_wisun_msg_start_direct_connect_client
+ * @{
+ ******************************************************************************/
+/// Request message body
+SL_PACK_START(1)
+typedef struct {
+  /// PHY configuration
+  sl_wisun_phy_config_t phy;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_start_direct_connect_client_req_body_t;
+SL_PACK_END()
+
+/// Request message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Request message body
+  sl_wisun_msg_start_direct_connect_client_req_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_start_direct_connect_client_req_t;
+SL_PACK_END()
+
+/// Confirmation message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the request
+  uint32_t status;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_start_direct_connect_client_cnf_body_t;
+SL_PACK_END()
+
+/// Confirmation message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Confirmation message body
+  sl_wisun_msg_start_direct_connect_client_cnf_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_start_direct_connect_client_cnf_t;
+SL_PACK_END()
+
+/** @} (end SL_WISUN_MSG_START_DIRECT_CONNECT_CLIENT) */
+
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_START_DIRECT_CONNECT_SCAN sl_wisun_msg_start_direct_connect_scan
+ * @{
+ ******************************************************************************/
+
+/// Request message body
+SL_PACK_START(1)
+typedef struct {
+  /// Direct Connect ID
+  sl_wisun_dc_id_t dc_id;
+  /// Maximum number of asynchronous solicitation sequences
+  uint8_t max_solicits_count;
+  /// Reserved, set to zero
+  uint8_t reserved[3];
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_start_direct_connect_scan_req_body_t;
+SL_PACK_END()
+
+/// Request message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Request message body
+  sl_wisun_msg_start_direct_connect_scan_req_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_start_direct_connect_scan_req_t;
+SL_PACK_END()
+
+/// Confirmation message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the request
+  uint32_t status;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_start_direct_connect_scan_cnf_body_t;
+SL_PACK_END()
+
+/// Confirmation message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Confirmation message body
+  sl_wisun_msg_start_direct_connect_scan_cnf_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_start_direct_connect_scan_cnf_t;
+SL_PACK_END()
+
+/** @} (end SL_WISUN_MSG_DIRECT_CONNECT_SCAN) */
+
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_STOP_DIRECT_CONNECT_SCAN sl_wisun_msg_stop_direct_connect_scan
+ * @{
+ ******************************************************************************/
+/// Request message body
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_stop_direct_connect_scan_req_t;
+SL_PACK_END()
+ 
+/// Confirmation message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the request
+  uint32_t status;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_stop_direct_connect_scan_cnf_body_t;
+SL_PACK_END()
+ 
+/// Confirmation message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Confirmation message body
+  sl_wisun_msg_stop_direct_connect_scan_cnf_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_stop_direct_connect_scan_cnf_t;
+SL_PACK_END()
+ 
+/** @} (end SL_WISUN_MSG_STOP_DIRECT_CONNECT_SCAN) */
+ 
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_CONNECT_TO_DIRECT_CONNECT_SERVER sl_wisun_msg_connect_to_direct_connect_server
+ * @{
+ ******************************************************************************/
+ 
+/// Request message body
+SL_PACK_START(1)
+typedef struct {
+  /// Server MAC address
+  sl_wisun_mac_address_t mac_address;
+  /// Pairwise Master Key (PMK) ID
+  uint32_t pmk_id;
+  /// Maximum number of asynchronous solicitation sequences
+  uint8_t max_solicits_count;
+  /// Reserved, set to zero
+  uint8_t reserved[3];
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_connect_to_direct_connect_server_req_body_t;
+SL_PACK_END()
+
+/// Request message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Request message body
+  sl_wisun_msg_connect_to_direct_connect_server_req_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_connect_to_direct_connect_server_req_t;
+SL_PACK_END()
+
+/// Confirmation message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the request
+  uint32_t status;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_connect_to_direct_connect_server_cnf_body_t;
+SL_PACK_END()
+
+/// Confirmation message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Confirmation message body
+  sl_wisun_msg_connect_to_direct_connect_server_cnf_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_connect_to_direct_connect_server_cnf_t;
+SL_PACK_END()
+ 
+/** @} (end SL_WISUN_MSG_CONNECT_TO_DIRECT_CONNECT_SERVER) */
+
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_STOP_DIRECT_CONNECT_CLIENT sl_wisun_msg_stop_direct_connect_client
+ * @{
+ ******************************************************************************/
+ 
+/// Request message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_stop_direct_connect_client_req_t;
+SL_PACK_END()
+
+/// Confirmation message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the request
+  uint32_t status;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_stop_direct_connect_client_cnf_body_t;
+SL_PACK_END()
+
+/// Confirmation message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Confirmation message body
+  sl_wisun_msg_stop_direct_connect_client_cnf_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_stop_direct_connect_client_cnf_t;
+SL_PACK_END()
+ 
+/** @} (end SL_WISUN_MSG_STOP_DIRECT_CONNECT_CLIENT) */
 
 /**************************************************************************//**
  * @defgroup SL_WISUN_SET_PHY_SENSITIVITY sl_wisun_set_phy_sensitivity
@@ -3919,6 +4180,106 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_MSG_REGISTER_ADDRESS) */
 
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_SET_DHCPV6_VENDOR_DATA sl_wisun_msg_set_dhcpv6_vendor_data
+ * @{
+ *****************************************************************************/
+
+/// Request message body
+SL_PACK_START(1)
+typedef struct {
+  /// IANA enterprise number
+  uint32_t enterprise_number;
+  /// Vendor-specific data length
+  uint16_t data_length;
+  /// Reserved, set to zero
+  uint16_t reserved;
+  /// Vendor-specific data
+  uint8_t vendor_data[];
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_dhcpv6_vendor_data_req_body_t;
+SL_PACK_END()
+
+/// Request message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Request message body
+  sl_wisun_msg_set_dhcpv6_vendor_data_req_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_dhcpv6_vendor_data_req_t;
+SL_PACK_END()
+
+/// Confirmation message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the request
+  uint32_t status;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_dhcpv6_vendor_data_cnf_body_t;
+SL_PACK_END()
+
+/// Confirmation message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Confirmation message body
+  sl_wisun_msg_set_dhcpv6_vendor_data_cnf_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_dhcpv6_vendor_data_cnf_t;
+SL_PACK_END()
+
+/** @} (end SL_WISUN_MSG_SET_DHCPV6_VENDOR_DATA) */
+
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_SET_TRICKLE_PARAMETERS sl_wisun_msg_set_trickle_parameters
+ * @{
+ *****************************************************************************/
+/// Request message body
+SL_PACK_START(1)
+typedef struct {
+  /// Trickle type
+  uint32_t type;
+  /// I min in seconds
+  uint16_t i_min_s;
+  /// I max in seconds
+  uint16_t i_max_s;
+  /// Redundancy constant
+  uint8_t k;
+  /// Timer expirations
+  uint8_t expirations;
+  /// Reserved, set to zero
+  uint8_t reserved[2];
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_trickle_parameters_req_body_t;
+SL_PACK_END()
+
+/// Request message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Request message body
+  sl_wisun_msg_set_trickle_parameters_req_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_trickle_parameters_req_t;
+SL_PACK_END()
+
+/// Confirmation message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the request
+  uint32_t status;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_trickle_parameters_cnf_body_t;
+SL_PACK_END()
+
+/// Confirmation message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Confirmation message body
+  sl_wisun_msg_set_trickle_parameters_cnf_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_trickle_parameters_cnf_t;
+SL_PACK_END()
+
+/** @} (end SL_WISUN_MSG_SET_TRICKLE_PARAMETERS) */
 
 /**************************************************************************//**
  * @brief Send a request to the Wi-SUN stack

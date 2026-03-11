@@ -145,7 +145,17 @@ template_contribution:
       help: Frame type 0 = Data frame, 1 = Maintenance frame.
     - type: hex
       help: Command payload
-
+- name: cli_command
+  value:
+    name: set-next-channel
+    group: node
+    handler: sl_zigbee_gpd_af_cli_set_next_channel
+    help: Set the next RX channel that the GPD node will use to send out the bi-directional channel request GPDF, auto-commissioning off
+    argument:
+    - type: uint8
+      help: next RX channel
+    - type: uint8opt
+      help: second next RX channel
 metadata:
   sbom:
     license: MSLA

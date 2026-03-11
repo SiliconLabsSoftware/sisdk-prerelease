@@ -174,6 +174,8 @@ enum sli_btmesh_command_id
     sli_btmesh_prov_get_provisioning_records_list_command_id = 0x1c,
     sli_btmesh_prov_get_provisioning_record_data_command_id = 0x1d,
     sli_btmesh_prov_init_provisioning_records_command_id = 0x1e,
+    sli_btmesh_prov_get_ddb_entry_count_command_id = 0x49,
+    sli_btmesh_prov_get_ddb_entry_by_count_command_id = 0x4a,
     sli_btmesh_proxy_connect_command_id = 0x00,
     sli_btmesh_proxy_disconnect_command_id = 0x01,
     sli_btmesh_proxy_set_filter_type_command_id = 0x02,
@@ -356,6 +358,7 @@ enum sli_btmesh_command_id
     sli_btmesh_config_client_set_request_timeout_for_node_command_id = 0x30,
     sli_btmesh_config_client_prepare_key_refresh_command_id = 0x31,
     sli_btmesh_mbt_client_init_command_id = 0x09,
+    sli_btmesh_mbt_client_deinit_command_id = 0x07,
     sli_btmesh_mbt_client_setup_command_id = 0x00,
     sli_btmesh_mbt_client_query_information_command_id = 0x01,
     sli_btmesh_mbt_client_get_server_status_command_id = 0x0d,
@@ -370,6 +373,7 @@ enum sli_btmesh_command_id
     sli_btmesh_mbt_client_cancel_transfer_command_id = 0x0b,
     sli_btmesh_mbt_client_abort_command_id = 0x0c,
     sli_btmesh_mbt_server_init_command_id = 0x02,
+    sli_btmesh_mbt_server_deinit_command_id = 0x09,
     sli_btmesh_mbt_server_start_command_id = 0x00,
     sli_btmesh_mbt_server_get_transfer_status_command_id = 0x01,
     sli_btmesh_mbt_server_transfer_complete_command_id = 0x03,
@@ -705,6 +709,8 @@ enum sli_btmesh_response_id
     sli_btmesh_prov_get_provisioning_records_list_response_id = 0x1c,
     sli_btmesh_prov_get_provisioning_record_data_response_id = 0x1d,
     sli_btmesh_prov_init_provisioning_records_response_id = 0x1e,
+    sli_btmesh_prov_get_ddb_entry_count_response_id = 0x49,
+    sli_btmesh_prov_get_ddb_entry_by_count_response_id = 0x4a,
     sli_btmesh_proxy_connect_response_id = 0x00,
     sli_btmesh_proxy_disconnect_response_id = 0x01,
     sli_btmesh_proxy_set_filter_type_response_id = 0x02,
@@ -887,6 +893,7 @@ enum sli_btmesh_response_id
     sli_btmesh_config_client_set_request_timeout_for_node_response_id = 0x30,
     sli_btmesh_config_client_prepare_key_refresh_response_id = 0x31,
     sli_btmesh_mbt_client_init_response_id = 0x09,
+    sli_btmesh_mbt_client_deinit_response_id = 0x07,
     sli_btmesh_mbt_client_setup_response_id = 0x00,
     sli_btmesh_mbt_client_query_information_response_id = 0x01,
     sli_btmesh_mbt_client_get_server_status_response_id = 0x0d,
@@ -901,6 +908,7 @@ enum sli_btmesh_response_id
     sli_btmesh_mbt_client_cancel_transfer_response_id = 0x0b,
     sli_btmesh_mbt_client_abort_response_id = 0x0c,
     sli_btmesh_mbt_server_init_response_id = 0x02,
+    sli_btmesh_mbt_server_deinit_response_id = 0x09,
     sli_btmesh_mbt_server_start_response_id = 0x00,
     sli_btmesh_mbt_server_get_transfer_status_response_id = 0x01,
     sli_btmesh_mbt_server_transfer_complete_response_id = 0x03,
@@ -1903,6 +1911,13 @@ PACKSTRUCT( struct sl_btmesh_cmd_prov_get_provisioning_record_data_s
 });
 
 typedef struct sl_btmesh_cmd_prov_get_provisioning_record_data_s sl_btmesh_cmd_prov_get_provisioning_record_data_t;
+
+PACKSTRUCT( struct sl_btmesh_cmd_prov_get_ddb_entry_by_count_s
+{
+    uint16_t which;
+});
+
+typedef struct sl_btmesh_cmd_prov_get_ddb_entry_by_count_s sl_btmesh_cmd_prov_get_ddb_entry_by_count_t;
 
 PACKSTRUCT( struct sl_btmesh_cmd_proxy_connect_s
 {
@@ -3207,6 +3222,13 @@ PACKSTRUCT( struct sl_btmesh_cmd_mbt_client_init_s
 
 typedef struct sl_btmesh_cmd_mbt_client_init_s sl_btmesh_cmd_mbt_client_init_t;
 
+PACKSTRUCT( struct sl_btmesh_cmd_mbt_client_deinit_s
+{
+    uint16_t elem_index;
+});
+
+typedef struct sl_btmesh_cmd_mbt_client_deinit_s sl_btmesh_cmd_mbt_client_deinit_t;
+
 PACKSTRUCT( struct sl_btmesh_cmd_mbt_client_setup_s
 {
     uint16_t elem_index;
@@ -3335,6 +3357,13 @@ PACKSTRUCT( struct sl_btmesh_cmd_mbt_server_init_s
 });
 
 typedef struct sl_btmesh_cmd_mbt_server_init_s sl_btmesh_cmd_mbt_server_init_t;
+
+PACKSTRUCT( struct sl_btmesh_cmd_mbt_server_deinit_s
+{
+    uint16_t elem_index;
+});
+
+typedef struct sl_btmesh_cmd_mbt_server_deinit_s sl_btmesh_cmd_mbt_server_deinit_t;
 
 PACKSTRUCT( struct sl_btmesh_cmd_mbt_server_start_s
 {
@@ -4545,7 +4574,7 @@ PACKSTRUCT( struct sl_btmesh_cmd_fw_dist_client_start_distribution_s
 {
     uint16_t elem_index;
     uint16_t dst;
-    uint8_t dist_appkey_index;
+    uint16_t dist_appkey_index;
     uint8_t dist_ttl;
     uint16_t dist_timeout_base;
     uint8_t transfer_mode;
@@ -5838,6 +5867,26 @@ PACKSTRUCT( struct sl_btmesh_rsp_prov_init_provisioning_records_s
 });
 
 typedef struct sl_btmesh_rsp_prov_init_provisioning_records_s sl_btmesh_rsp_prov_init_provisioning_records_t;
+
+PACKSTRUCT( struct sl_btmesh_rsp_prov_get_ddb_entry_count_s
+{
+    uint16_t result;
+    uint16_t count;
+});
+
+typedef struct sl_btmesh_rsp_prov_get_ddb_entry_count_s sl_btmesh_rsp_prov_get_ddb_entry_count_t;
+
+PACKSTRUCT( struct sl_btmesh_rsp_prov_get_ddb_entry_by_count_s
+{
+    uint16_t result;
+    uuid_128 uuid;
+    aes_key_128 device_key;
+    uint16_t netkey_index;
+    uint16_t address;
+    uint8_t elements;
+});
+
+typedef struct sl_btmesh_rsp_prov_get_ddb_entry_by_count_s sl_btmesh_rsp_prov_get_ddb_entry_by_count_t;
 
 PACKSTRUCT( struct sl_btmesh_rsp_proxy_connect_s
 {
@@ -7211,6 +7260,13 @@ PACKSTRUCT( struct sl_btmesh_rsp_mbt_client_init_s
 
 typedef struct sl_btmesh_rsp_mbt_client_init_s sl_btmesh_rsp_mbt_client_init_t;
 
+PACKSTRUCT( struct sl_btmesh_rsp_mbt_client_deinit_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_btmesh_rsp_mbt_client_deinit_s sl_btmesh_rsp_mbt_client_deinit_t;
+
 PACKSTRUCT( struct sl_btmesh_rsp_mbt_client_setup_s
 {
     uint16_t result;
@@ -7317,6 +7373,13 @@ PACKSTRUCT( struct sl_btmesh_rsp_mbt_server_init_s
 });
 
 typedef struct sl_btmesh_rsp_mbt_server_init_s sl_btmesh_rsp_mbt_server_init_t;
+
+PACKSTRUCT( struct sl_btmesh_rsp_mbt_server_deinit_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_btmesh_rsp_mbt_server_deinit_s sl_btmesh_rsp_mbt_server_deinit_t;
 
 PACKSTRUCT( struct sl_btmesh_rsp_mbt_server_start_s
 {
@@ -9195,6 +9258,7 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_cmd_prov_flush_key_refresh_state_t                 cmd_prov_flush_key_refresh_state;
     sl_btmesh_cmd_prov_get_provisioning_records_list_t           cmd_prov_get_provisioning_records_list;
     sl_btmesh_cmd_prov_get_provisioning_record_data_t            cmd_prov_get_provisioning_record_data;
+    sl_btmesh_cmd_prov_get_ddb_entry_by_count_t                  cmd_prov_get_ddb_entry_by_count;
     sl_btmesh_cmd_proxy_connect_t                                cmd_proxy_connect;
     sl_btmesh_cmd_proxy_disconnect_t                             cmd_proxy_disconnect;
     sl_btmesh_cmd_proxy_set_filter_type_t                        cmd_proxy_set_filter_type;
@@ -9331,6 +9395,7 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_cmd_config_client_set_request_timeout_for_node_t   cmd_config_client_set_request_timeout_for_node;
     sl_btmesh_cmd_config_client_prepare_key_refresh_t            cmd_config_client_prepare_key_refresh;
     sl_btmesh_cmd_mbt_client_init_t                              cmd_mbt_client_init;
+    sl_btmesh_cmd_mbt_client_deinit_t                            cmd_mbt_client_deinit;
     sl_btmesh_cmd_mbt_client_setup_t                             cmd_mbt_client_setup;
     sl_btmesh_cmd_mbt_client_query_information_t                 cmd_mbt_client_query_information;
     sl_btmesh_cmd_mbt_client_get_server_status_t                 cmd_mbt_client_get_server_status;
@@ -9345,6 +9410,7 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_cmd_mbt_client_cancel_transfer_t                   cmd_mbt_client_cancel_transfer;
     sl_btmesh_cmd_mbt_client_abort_t                             cmd_mbt_client_abort;
     sl_btmesh_cmd_mbt_server_init_t                              cmd_mbt_server_init;
+    sl_btmesh_cmd_mbt_server_deinit_t                            cmd_mbt_server_deinit;
     sl_btmesh_cmd_mbt_server_start_t                             cmd_mbt_server_start;
     sl_btmesh_cmd_mbt_server_get_transfer_status_t               cmd_mbt_server_get_transfer_status;
     sl_btmesh_cmd_mbt_server_transfer_complete_t                 cmd_mbt_server_transfer_complete;
@@ -9635,6 +9701,8 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_rsp_prov_get_provisioning_records_list_t           rsp_prov_get_provisioning_records_list;
     sl_btmesh_rsp_prov_get_provisioning_record_data_t            rsp_prov_get_provisioning_record_data;
     sl_btmesh_rsp_prov_init_provisioning_records_t               rsp_prov_init_provisioning_records;
+    sl_btmesh_rsp_prov_get_ddb_entry_count_t                     rsp_prov_get_ddb_entry_count;
+    sl_btmesh_rsp_prov_get_ddb_entry_by_count_t                  rsp_prov_get_ddb_entry_by_count;
     sl_btmesh_rsp_proxy_connect_t                                rsp_proxy_connect;
     sl_btmesh_rsp_proxy_disconnect_t                             rsp_proxy_disconnect;
     sl_btmesh_rsp_proxy_set_filter_type_t                        rsp_proxy_set_filter_type;
@@ -9817,6 +9885,7 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_rsp_config_client_set_request_timeout_for_node_t   rsp_config_client_set_request_timeout_for_node;
     sl_btmesh_rsp_config_client_prepare_key_refresh_t            rsp_config_client_prepare_key_refresh;
     sl_btmesh_rsp_mbt_client_init_t                              rsp_mbt_client_init;
+    sl_btmesh_rsp_mbt_client_deinit_t                            rsp_mbt_client_deinit;
     sl_btmesh_rsp_mbt_client_setup_t                             rsp_mbt_client_setup;
     sl_btmesh_rsp_mbt_client_query_information_t                 rsp_mbt_client_query_information;
     sl_btmesh_rsp_mbt_client_get_server_status_t                 rsp_mbt_client_get_server_status;
@@ -9831,6 +9900,7 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_rsp_mbt_client_cancel_transfer_t                   rsp_mbt_client_cancel_transfer;
     sl_btmesh_rsp_mbt_client_abort_t                             rsp_mbt_client_abort;
     sl_btmesh_rsp_mbt_server_init_t                              rsp_mbt_server_init;
+    sl_btmesh_rsp_mbt_server_deinit_t                            rsp_mbt_server_deinit;
     sl_btmesh_rsp_mbt_server_start_t                             rsp_mbt_server_start;
     sl_btmesh_rsp_mbt_server_get_transfer_status_t               rsp_mbt_server_get_transfer_status;
     sl_btmesh_rsp_mbt_server_transfer_complete_t                 rsp_mbt_server_transfer_complete;

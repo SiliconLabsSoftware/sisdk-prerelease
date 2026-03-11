@@ -19,6 +19,7 @@ include:
 - path: util/third_party/openthread/src/cli
   file_list:
   - path: cli.hpp
+  - path: cli_ba.hpp
   - path: cli_bbr.hpp
   - path: cli_br.hpp
   - path: cli_coap.hpp
@@ -47,6 +48,7 @@ source:
   unless:
   - ot_ncp
 - path: util/third_party/openthread/src/cli/cli.cpp
+- path: util/third_party/openthread/src/cli/cli_ba.cpp
 - path: util/third_party/openthread/src/cli/cli_bbr.cpp
 - path: util/third_party/openthread/src/cli/cli_br.cpp
 - path: util/third_party/openthread/src/cli/cli_coap.cpp
@@ -57,6 +59,7 @@ source:
 - path: util/third_party/openthread/src/cli/cli_history.cpp
 - path: util/third_party/openthread/src/cli/cli_joiner.cpp
 - path: util/third_party/openthread/src/cli/cli_link_metrics.cpp
+- path: util/third_party/openthread/src/cli/cli_logging.cpp
 - path: util/third_party/openthread/src/cli/cli_mac_filter.cpp
 - path: util/third_party/openthread/src/cli/cli_mdns.cpp
 - path: util/third_party/openthread/src/cli/cli_mesh_diag.cpp

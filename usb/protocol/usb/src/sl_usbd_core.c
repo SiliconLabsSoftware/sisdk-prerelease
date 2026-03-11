@@ -525,12 +525,20 @@ sl_status_t sl_usbd_core_init(void)
 }
 
 /****************************************************************************************************//**
+ * Default weak implementation of device event hook (no-op).
+ * Applications may override with a strong definition.
+ *******************************************************************************************************/
+__WEAK void sl_usbd_on_device_event(sl_usbd_device_event_t event)
+{
+  (void)event;
+}
+
+/****************************************************************************************************//**
  * Starts the device stack
  *******************************************************************************************************/
 sl_status_t sl_usbd_core_start_device(void)
 {
   sli_usbd_device_t     *p_dev;
-  bool   init;
   sl_status_t     status;
   CORE_DECLARE_IRQ_STATE;
 
@@ -543,8 +551,6 @@ sl_status_t sl_usbd_core_start_device(void)
     return SL_STATUS_INVALID_STATE;
   }
 
-  init = false;
-
   // If dev not initialized, call dev drv 'Init()' function.
   if (p_dev->state == SL_USBD_DEVICE_STATE_NONE) {
     status = sli_usbd_driver_init();
@@ -552,17 +558,22 @@ sl_status_t sl_usbd_core_start_device(void)
       return status;
     }
 
-    init = true;
+    CORE_ENTER_ATOMIC();
+    p_dev->state = SL_USBD_DEVICE_STATE_INIT;
+    CORE_EXIT_ATOMIC();
+
+    sl_usbd_on_device_event(SL_USBD_EVENT_DEVICE_INIT);
+    // Return after INIT so that an override calling sl_usbd_core_start_device() from
+    // the INIT handler performs the start once. Otherwise duplicate start and
+    // unstable state occur when the handler reenters start_device().
+    return SL_STATUS_OK;
   }
 
   status = sli_usbd_driver_start();
 
-  if (init == true) {
-    CORE_ENTER_ATOMIC();
-    p_dev->state = SL_USBD_DEVICE_STATE_INIT;
-    CORE_EXIT_ATOMIC();
+  if (status == SL_STATUS_OK) {
+    sl_usbd_on_device_event(SL_USBD_EVENT_DEVICE_START);
   }
-
   return status;
 }
 
@@ -592,6 +603,8 @@ sl_status_t sl_usbd_core_stop_device(void)
   p_dev->state_prev = SL_USBD_DEVICE_STATE_INIT;
   p_dev->conn_status = false;
   CORE_EXIT_ATOMIC();
+
+  sl_usbd_on_device_event(SL_USBD_EVENT_DEVICE_STOP);
 
   return status;
 }

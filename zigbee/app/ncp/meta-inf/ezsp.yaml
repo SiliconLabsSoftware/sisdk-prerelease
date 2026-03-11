@@ -2420,6 +2420,7 @@
           name: "SL_ZIGBEE_EZSP_MFG_STRING",
           value: "0x01",
           description: "Manufacturing string (16 bytes).",
+          deprecated: true,
         },
         {
           name: "SL_ZIGBEE_EZSP_MFG_BOARD_NAME",
@@ -2440,6 +2441,7 @@
           name: "SL_ZIGBEE_EZSP_MFG_BOOTLOAD_AES_KEY",
           value: "0x05",
           description: "Bootload AES key (16 bytes).",
+          deprecated: true,
         },
         {
           name: "SL_ZIGBEE_EZSP_MFG_ASH_CONFIG",
@@ -2450,6 +2452,7 @@
           name: "SL_ZIGBEE_EZSP_MFG_SL_ZIGBEE_EZSP_STORAGE",
           value: "0x07",
           description: "EZSP storage (8 bytes).",
+          deprecated: true,
         },
         {
           name: "SL_ZIGBEE_EZSP_STACK_CAL_DATA",
@@ -5008,6 +5011,11 @@
       ],
       responseArguments: [
         {
+          type: "bool",
+          name: "success",
+          description: "true if the endpoint description was retrieved successfully, false otherwise.",
+        },
+        {
           type: "sl_zigbee_endpoint_description_t",
           name: "result",
           description: "Description of this endpoint."
@@ -5750,6 +5758,22 @@
           name: "priorities",
           description: "The current priorities."
         }
+      ],
+    },
+    ##RADIO_SET_SCHEDULER_PRIORITIES
+    {
+      value: "0x012B",
+      needGeneratedHandler: "yes",
+      commandName: "radioSetSchedulerPriorities",
+      description: "Set the current scheduler priorities for radio operations",
+      commandArguments: [
+        {
+          type: "sl_802154_radio_priorities_t",
+          name: "priorities",
+          description: "The current priorities."
+        }
+      ],
+      responseArguments: [
       ],
     },
     ##RADIO_GET_SCHEDULER_SLIPTIME

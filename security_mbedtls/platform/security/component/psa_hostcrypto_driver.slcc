@@ -15,6 +15,7 @@ requires:
 - name: mbedtls_core
 - name: sxsymcrypt
 - name: sli_crypto_ksu_manager
+  condition: [device_has_semailbox, device_has_ksu]
 - name: sli_crypto
 
 source:
@@ -29,8 +30,10 @@ source:
   condition: [device_has_symcrypto]
 - path: src/sli_hostcrypto_transparent_driver_mac.c
   condition: [device_has_symcrypto]
-- path: src/sli_hostcrypto_opaque_driver.c
+- path: src/sli_hostcrypto_driver_key_management.c
   condition: [device_has_symcrypto]
+- path: src/sli_hostcrypto_opaque_driver.c
+  condition: [device_has_symcrypto, device_has_semailbox, device_has_ksu]
 
 include:
 - path: inc
@@ -40,7 +43,7 @@ include:
   - path: sli_hostcrypto_transparent_functions.h
     condition: [device_has_symcrypto]
   - path: sli_hostcrypto_opaque_functions.h
-    condition: [device_has_symcrypto]
+    condition: [device_has_symcrypto, device_has_semailbox, device_has_ksu]
   - path: sli_hostcrypto_transparent_types.h
     condition: [device_has_symcrypto]
 metadata:

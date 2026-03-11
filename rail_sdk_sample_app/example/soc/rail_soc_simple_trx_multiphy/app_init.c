@@ -101,7 +101,7 @@ void rail_app_init(void)
 
   status = sl_rail_start_rx(rail_handle, DEFAULT_CHANNEL, NULL);
   if (status != SL_RAIL_STATUS_NO_ERROR) {
-    app_log_warning("After initialization sl_rail_start_rx() result: %lu\n ", status);
+    app_log_warning("After initialization sl_rail_start_rx() result: 0x%08lX\n ", status);
   }
 
   // CLI info message

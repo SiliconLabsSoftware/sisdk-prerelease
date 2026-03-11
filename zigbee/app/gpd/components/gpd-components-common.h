@@ -265,8 +265,6 @@ enum {
   EMEBER_GPD_AF_CALLBACK_STORE_GPD_TO_NVM,
 };
 
-#define SL_ZIGBEE_AP_PLUGIN_APPS_APP_NEXT_RX_CHANNEL 11
-#define SL_ZIGBEE_AP_PLUGIN_APPS_APP_SECOND_NEXT_RX_CHANNEL 11
 #define SL_ZIGBEE_AF_PLUGIN_APPS_CMD_RESEND_NUMBER 1
 
 // GPD address structure
@@ -414,4 +412,5 @@ void sl_zigbee_gpd_incoming_message_handler(uint8_t * buffer,
 
 void sl_zigbee_gpd_af_plugin_commission(sl_zigbee_gpd_t_t * gpd);
 void sl_zigbee_gpd_af_plugin_de_commission(sl_zigbee_gpd_t_t * gpd);
+void sl_zigbee_gpd_af_plugin_set_next_channel(uint8_t nextChannel, uint8_t secondNextChannel);
 #endif

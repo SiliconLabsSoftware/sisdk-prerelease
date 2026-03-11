@@ -281,30 +281,31 @@ typedef sl_rail_status_t (*IEEE802154_2p4GHzRadioConfig_t)(sl_rail_handle_t rail
 
 typedef struct IEEE802154_2p4GHzConfig {
   const char *name;
+  const RAIL_ChannelConfig_t *const *channel_config;
   IEEE802154_2p4GHzRadioConfig_t config;
 } IEEE802154_2p4GHzConfig_t;
 
 static IEEE802154_2p4GHzConfig_t ieee802154Configs[] = {
-  { "IEEE802154_2P4_MODE_DEFAULT", &sl_rail_ieee802154_config_2p4_ghz_radio },
-  { "IEEE802154_2P4_MODE_ANT_DIV", &sl_rail_ieee802154_config_2p4_ghz_radio_ant_div, },
-  { "IEEE802154_2P4_MODE_COEX", &sl_rail_ieee802154_config_2p4_ghz_radio_coex },
-  { "IEEE802154_2P4_MODE_ANT_DIV_COEX", &sl_rail_ieee802154_config_2p4_ghz_radio_ant_div_coex },
-  { "IEEE802154_2P4_MODE_FEM", &sl_rail_ieee802154_config_2p4_ghz_radio_fem },
-  { "IEEE802154_2P4_MODE_ANT_DIV_FEM", &sl_rail_ieee802154_config_2p4_ghz_radio_ant_div_fem },
-  { "IEEE802154_2P4_MODE_COEX_FEM", &sl_rail_ieee802154_config_2p4_ghz_radio_coex_fem },
-  { "IEEE802154_2P4_MODE_ANT_DIV_COEX_FEM", &sl_rail_ieee802154_config_2p4_ghz_radio_ant_div_coex_fem },
-  { "UNSUPPORTED", NULL, },
+  { "IEEE802154_2P4_MODE_DEFAULT", &RAIL_IEEE802154_Phy2p4GHz, NULL },
+  { "IEEE802154_2P4_MODE_ANT_DIV", &RAIL_IEEE802154_Phy2p4GHzAntDiv, NULL },
+  { "IEEE802154_2P4_MODE_COEX", &RAIL_IEEE802154_Phy2p4GHzCoex, NULL },
+  { "IEEE802154_2P4_MODE_ANT_DIV_COEX", &RAIL_IEEE802154_Phy2p4GHzAntDivCoex, NULL },
+  { "IEEE802154_2P4_MODE_FEM", &RAIL_IEEE802154_Phy2p4GHzFem, NULL },
+  { "IEEE802154_2P4_MODE_ANT_DIV_FEM", &RAIL_IEEE802154_Phy2p4GHzAntDivFem, NULL },
+  { "IEEE802154_2P4_MODE_COEX_FEM", &RAIL_IEEE802154_Phy2p4GHzCoexFem, NULL },
+  { "IEEE802154_2P4_MODE_ANT_DIV_COEX_FEM", &RAIL_IEEE802154_Phy2p4GHzAntDivCoexFem, NULL },
+  { "UNSUPPORTED", NULL, NULL },
 #if SL_RAIL_IEEE802154_SUPPORTS_2_MBPS_PHY
-  { "IEEE802154_2P4_MODE_2MBPS", &sl_rail_ieee802154_config_2p4_ghz_radio_2_mbps },
-  { "IEEE802154_2P4_MODE_1MBPS_FEC", &sl_rail_ieee802154_config_2p4_ghz_radio_1_mbps_fec },
-  { "IEEE802154_2P4_MODE_FCS_2MBPS", &sl_rail_ieee802154_config_2p4_ghz_radio_fcs_2_mbps },
-  { "IEEE802154_2P4_MODE_FCS_1MBPS_FEC", &sl_rail_ieee802154_config_2p4_ghz_radio_fcs_1_mbps_fec },
+  { "IEEE802154_2P4_MODE_2MBPS", &RAIL_IEEE802154_Phy2p4GHz2Mbps, &sl_rail_ieee802154_enable_2p4_ghz_high_data_rate },
+  { "IEEE802154_2P4_MODE_1MBPS_FEC", &RAIL_IEEE802154_Phy2p4GHz1MbpsFec, &sl_rail_ieee802154_enable_2p4_ghz_high_data_rate },
+  { "IEEE802154_2P4_MODE_FCS_2MBPS", &RAIL_IEEE802154_Phy2p4GHzFcs2Mbps, &sl_rail_ieee802154_enable_2p4_ghz_high_data_rate },
+  { "IEEE802154_2P4_MODE_FCS_1MBPS_FEC", &RAIL_IEEE802154_Phy2p4GHzFcs1MbpsFec, &sl_rail_ieee802154_enable_2p4_ghz_high_data_rate },
 #endif
 #ifdef SL_CATALOG_SL_RAIL_UTIL_IEEE802154_RX_DUTY_CYCLING_PRESENT
-  { "IEEE802154_2P4_MODE_RX_DUTY_CYCLING", &sl_rail_ieee802154_config_2p4_ghz_radio_rx_duty_cycling },
+  { "IEEE802154_2P4_MODE_RX_DUTY_CYCLING", NULL, &sl_rail_ieee802154_config_2p4_ghz_radio_rx_duty_cycling },
 #endif
 #ifdef SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
-  { "IEEE802154_2P4_MODE_FAST_CHANNEL_SWITCHING", &sl_rail_ieee802154_config_2p4_ghz_radio_fast_channel_switching },
+  { "IEEE802154_2P4_MODE_FAST_CHANNEL_SWITCHING", NULL, &sl_rail_ieee802154_config_2p4_ghz_radio_fast_channel_switching },
 #endif
 };
 
@@ -394,7 +395,9 @@ void config2p4Ghz802154(sl_cli_command_arg_t *args)
 #endif //SL_RAIL_IEEE802154_SUPPORTS_2_MBPS_PHY
   uint8_t numConfigs = COUNTOF(ieee802154Configs);
 
-  if ((ieee802154Config >= numConfigs) || (ieee802154Configs[ieee802154Config].config == NULL)) {
+  if ((ieee802154Config >= numConfigs)
+      || ((ieee802154Configs[ieee802154Config].config == NULL)
+          && (ieee802154Configs[ieee802154Config].channel_config == NULL))) {
     responsePrintError(sl_cli_get_command_string(args, 0), 1,
                        "Unsupported ieee802154 config");
     return;
@@ -406,7 +409,22 @@ void config2p4Ghz802154(sl_cli_command_arg_t *args)
     return;
   }
 #endif
-  status = (*ieee802154Configs[ieee802154Config].config)(railHandle);
+  // Configure channel config first if present
+  if (ieee802154Configs[ieee802154Config].channel_config != NULL) {
+    status = sl_rail_ieee802154_config_channels(
+      railHandle,
+      (const sl_rail_channel_config_t *)*(ieee802154Configs[ieee802154Config].channel_config),
+      SL_RAIL_IEEE802154_PHY_2P4_GHZ);
+    if (status != SL_RAIL_STATUS_NO_ERROR) {
+      responsePrint(sl_cli_get_command_string(args, 0), "802.15.4:%s",
+                    "Disabled");
+      return;
+    }
+  }
+  // Then call additional config callback if present
+  if (ieee802154Configs[ieee802154Config].config != NULL) {
+    status = (*ieee802154Configs[ieee802154Config].config)(railHandle);
+  }
   if (status == SL_RAIL_STATUS_NO_ERROR) {
     ieee802154PhrLen = 1U;
     changeChannel(11);

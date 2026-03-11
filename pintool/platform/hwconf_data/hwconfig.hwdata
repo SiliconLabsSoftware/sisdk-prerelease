@@ -164,4 +164,12 @@
     <properties key="hardwareConfigData" value="pin_tool/bgm27"/>
     <properties key="partCompatibility" value="mcu.arm.efr32.bg27.bgm.*"/>
   </descriptors>
+  <descriptors>
+    <properties key="hardwareConfigData" value="pin_tool/efr32bg2b"/>
+    <properties key="partCompatibility" value="mcu.arm.efr32.bg2b.efr32.*"/>
+  </descriptors>
+  <descriptors>
+    <properties key="hardwareConfigData" value="pin_tool/efr32mg2b"/>
+    <properties key="partCompatibility" value="mcu.arm.efr32.mg2b.efr32.*"/>
+  </descriptors>
 </model:MDescriptors>

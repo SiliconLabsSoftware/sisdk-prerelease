@@ -35,6 +35,8 @@ component:
   - id: "wisun_cli_util"
   - id: "errno"
   - id: "wisun_crash_handler"
+  - id: "wisun_direct_connect_client_cli"
+    condition: [wisun_direct_connect_client_library]
 
 source:
   - path: "app.c"
@@ -518,6 +520,17 @@ template_contribution:
   - name: "cli_command"
     value:
       group: "wisun"
+      name: "advert_direct_connect_server_id"
+      handler: "app_advert_direct_connect_server_id"
+      help: "Advertise DC server's DC ID"
+      argument:
+        - type: string
+          help: "Client link local address"
+        - type: string
+          help: "DC ID"
+  - name: "cli_command"
+    value:
+      group: "wisun"
       name: "set_phy_sens"
       handler: "app_set_phy_sensitivity"
       help: "Set the sensitivity for the given PHY mode ID"
@@ -565,6 +578,38 @@ template_contribution:
       help: "Read the eventlog: w cf"
       shortcuts:
         - name: "cf"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "set_dhcp_vendor_data"
+      handler: "app_set_dhcpv6_vendor_data"
+      help: "Set the vendor data for the given enterprise number"
+      shortcuts:
+        - name: "sdvd"
+      argument:
+        - type: uint32
+          help: "Enterprise number"
+        - type: hex
+          help: "Vendor data written in hex format (id: uint16, length: uint16, data) (for example {00020001ff})"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "set_trickle_params"
+      handler: "app_set_trickle_params"
+      help: "Dynamically set the trickle parameters for a certain trickle type"
+      shortcuts:
+        - name: "stp"
+      argument:
+        - type: uint8
+          help: "Trickle type"
+        - type: uint16
+          help: "i_min_s"
+        - type: uint16
+          help: "i_max_s"
+        - type: uint8
+          help: "k"
+        - type: uint8
+          help: "expirations"
 
 # -------------------------------
   - name: "cli_group"

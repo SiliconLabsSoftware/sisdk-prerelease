@@ -1203,8 +1203,8 @@ static psa_status_t transparent_aead_encrypt_decrypt_setup(
   if (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg,
                                       0)
       == PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CHACHA20_POLY1305, 0)) {
-    if (key_size != 32
-        && (PSA_AEAD_TAG_LENGTH(psa_get_key_type(attributes), key_bits, alg) != 16)) {
+    if (PSA_BITS_TO_BYTES(key_bits) != 32
+        || (PSA_AEAD_TAG_LENGTH(psa_get_key_type(attributes), key_bits, alg) != 16)) {
       return PSA_ERROR_INVALID_ARGUMENT;
     }
   }

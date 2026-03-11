@@ -111,7 +111,7 @@ void rail_app_init(void)
   // Set to IDLE (channel select automatically start RX)
   rail_status = sl_rail_idle(rail_handle, SL_RAIL_IDLE, true);
   if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
-    app_log_warning("Couldn't enter into IDLE, error code %lu\n", rail_status);
+    app_log_warning("Couldn't enter into IDLE, error code 0x%08lX\n", rail_status);
   }
 
   // Get current bitrate

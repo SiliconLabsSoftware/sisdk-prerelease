@@ -31,6 +31,7 @@
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
+#include <inttypes.h>
 #include "sl_rail_sdk_wmbus_sensor_core.h"
 #include "sl_rail_sdk_wmbus_sensor_thermometer.h"
 #include "sl_rail_sdk_wmbus_sensor_thermometer_config.h"
@@ -143,8 +144,8 @@ sl_status_t sl_rail_sdk_wmbus_sensor_thermometer_init(void)
                                                  SL_RAIL_SDK_WMBUS_SENSOR_THERMOMETER_SLEEPTIMER_PRIORITY,
                                                  0);
   app_assert_status_f(status,
-                      "[E: 0x%04x]: Failed to start periodic sleeptimer\n",
-                      (int)status);
+                      "[E: 0x%08" PRIX32 "]: Failed to start periodic sleeptimer\n",
+                      status);
   status = sl_rail_sdk_wmbus_sensor_thermometer_measure();
   return status;
 }

@@ -119,13 +119,13 @@ void btl_debugInit(void)
   DWT->CTRL = 0x400003FFUL;
 
   // Set TPIU Prescaler
-  TPI->ACPR = tpiu_prescaler_val;
+  TPIU->ACPR = tpiu_prescaler_val;
 
   // Set protocol to NRZ
-  TPI->SPPR = 2;
+  TPIU->SPPR = 2;
 
   // Disable continuous formatting
-  TPI->FFCR = 0x100;
+  TPIU->FFCR = 0x100;
 
   // Unlock ITM and output data
   ITM->LAR = 0xC5ACCE55UL;

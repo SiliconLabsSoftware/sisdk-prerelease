@@ -458,6 +458,9 @@ __INLINE void sl_hal_lcd_reset(void)
  ******************************************************************************/
 __INLINE void sl_hal_lcd_animation_enable(void)
 {
+  // Ensure no internal sync is in progress.
+  sl_hal_lcd_wait_load_busy();
+
   LCD->BACTRL_SET = LCD_BACTRL_AEN;
 }
 
@@ -466,6 +469,9 @@ __INLINE void sl_hal_lcd_animation_enable(void)
  ******************************************************************************/
 __INLINE void sl_hal_lcd_animation_disable(void)
 {
+  // Ensure no internal sync is in progress.
+  sl_hal_lcd_wait_load_busy();
+
   LCD->BACTRL_CLR = LCD_BACTRL_AEN;
 }
 
@@ -484,6 +490,9 @@ __INLINE uint32_t sl_hal_lcd_animation_get_state(void)
  ******************************************************************************/
 __INLINE void sl_hal_lcd_blink_enable(void)
 {
+  // Ensure no internal sync is in progress.
+  sl_hal_lcd_wait_load_busy();
+
   LCD->BACTRL_SET = LCD_BACTRL_BLINKEN;
 }
 
@@ -492,6 +501,9 @@ __INLINE void sl_hal_lcd_blink_enable(void)
  ******************************************************************************/
 __INLINE void sl_hal_lcd_blink_disable(void)
 {
+  // Ensure no internal sync is in progress.
+  sl_hal_lcd_wait_load_busy();
+
   LCD->BACTRL_CLR = LCD_BACTRL_BLINKEN;
 }
 
@@ -510,6 +522,9 @@ __INLINE uint32_t sl_hal_lcd_blink_get_state(void)
  ******************************************************************************/
 __INLINE void sl_hal_lcd_enable_blank(void)
 {
+  // Ensure no internal sync is in progress.
+  sl_hal_lcd_wait_load_busy();
+
   LCD->BACTRL_SET = LCD_BACTRL_BLANK;
 }
 
@@ -518,6 +533,9 @@ __INLINE void sl_hal_lcd_enable_blank(void)
  ******************************************************************************/
 __INLINE void sl_hal_lcd_disable_blank(void)
 {
+  // Ensure no internal sync is in progress.
+  sl_hal_lcd_wait_load_busy();
+
   LCD->BACTRL_CLR = LCD_BACTRL_BLANK;
 }
 

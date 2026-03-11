@@ -40,21 +40,23 @@ requires:
   condition: [trustzone_nonsecure, device_has_semailbox]
 
 include:
-  # These complicated conditions are required in order to avoid conflicts with
-  # TF-M, which also contains these exact header files (with slightly different
-  # content).
-  # Silicon Labs PSA driver headers
+  # sli_internal_trusted_storage.h is SL-only (no TF-M counterpart), so it can
+  # be included unconditionally.
+- path: sl_component/sl_psa_driver/inc
+  file_list:
+  - path: psa/sli_internal_trusted_storage.h
+  # The remaining headers conflict with TF-M's own versions of the same files
+  # (with slightly different content), so they must be conditioned to avoid
+  # duplicate inclusion.
 - path: sl_component/sl_psa_driver/inc
   condition: [trustzone_unaware]
   file_list:
   - path: psa/internal_trusted_storage.h
-  - path: psa/sli_internal_trusted_storage.h
   - path: psa/error.h
 - path: sl_component/sl_psa_driver/inc
-  condition: [trustzone_secure]
-  unless: [tz_service_psa_its]
+  condition: [trustzone_nonsecure]
   file_list:
-  - path: psa/sli_internal_trusted_storage.h
+  - path: psa/internal_trusted_storage.h
 
 source:
 - path: sl_component/sl_psa_driver/src/sl_psa_its_nvm3.c

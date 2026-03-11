@@ -908,7 +908,7 @@ sl_status_t sl_se_write_user_data(sl_se_command_context_t *cmd_ctx,
 
   // Setup SE command structures
   sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
-  sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(data, num_bytes);
+  volatile sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(data, num_bytes);
 
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_WRITE_USER_DATA);
   sli_se_mailbox_command_add_input(se_cmd, &in_data);
@@ -967,7 +967,7 @@ sl_status_t sl_se_write_user_data(sl_se_command_context_t *cmd_ctx,
 
   // Setup SE command structures
   sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
-  sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(data, num_bytes);
+  volatile sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(data, num_bytes);
 
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_WRITE_USER_DATA);
   sli_se_mailbox_command_add_input(se_cmd, &in_data);

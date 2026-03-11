@@ -324,10 +324,10 @@ typedef int ssize_t;
 /// 0 (fragment to path MTU). 1 (no fragmentation, TX fails if bigger than PMTU).
 #define IPV6_DONTFRAG                6
 
-/// Experimental: Enable Extended Directed Frame Exchange mode.
+/// Enable Extended Directed Frame Exchange mode.
 /// When set, optval must point to an uint32_t.
-/// When set, all data from the socket will be sent using the EDFE mode
-/// even if there is a single fragment
+/// When set, EDFE mode is used to transmit fragmented packets from the socket.
+/// Enabled by default.
 #define SO_EDFE_MODE              0xfb
 #define SOCKET_EDFE_MODE          SO_EDFE_MODE
 ///@}

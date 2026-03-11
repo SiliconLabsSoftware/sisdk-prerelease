@@ -29,151 +29,116 @@
 *
 ******************************************************************************/
 
-/**
- * @addtogroup sl_log
- * @{
- */
-
 #include "sl_log.h"
 #include "sl_log_platform_specific.h"
-#include <stdbool.h>
-#if defined (__GNUC__)
+#include "sl_log_common_config.h"
+#include "sl_component_catalog.h"
+#if defined (__clang__)
+#include "cmsis_clang.h"
+#elif defined (__GNUC__)
 #include "cmsis_gcc.h"
 #elif defined(__ICCARM__)
 #include "cmsis_iccarm.h"
 #endif
 #include <stddef.h>
-#include "sl_component_catalog.h"
+#include <stdbool.h>
+#include "sl_log_helper.h"
 
+/*******************************************************************************
+ ***************************  DEFINE MACROS ********************************
+ ******************************************************************************/
+#define SL_LOG_FLAGS_POS 1  // Position of the log level in the event structure
 
-/** 
-* @brief Null pointer check
-*/
-#define sl_log_check_null(p) (!(p))
+#define SL_LOG_OVERFLOW_EVENT_ID 0xFFFFFFFF // Event ID for overflow events
 
+#define SL_LOG_FLAGS_LEVEL_MASK 0x7
 
-/** @} (end addtogroup sl_log_constants_local) */
+#define EVENT_COUNT_DEFAULT 1
 
-/**
- * @defgroup sl_log_variables_global Global Variables
- * @brief Global variables used throughout the logging system
- * @{
- */
-#ifdef SL_CATALOG_LOGGER_BACKEND_SYSTEMVIEW_PRESENT
-/** @brief External global timestamp variable (temporary workaround) */
+#define READ_INDEX_DEFAULT 0
+
+/*******************************************************************************
+ ***************************  GLOBAL VARIABLES   ********************************
+ ******************************************************************************/
+
+#ifdef SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT
+/* External global timestamp variable (temporary workaround) */
 extern uint32_t timestamp_global;
 #endif
-/** @brief Static timestamp delta for multi-core synchronization */
-static int sl_log_timestamp_delta = 0;
 
-/** @} (end addtogroup sl_log_variables_global) */
+/* Global backend status variable to track the backend transfer status */
+ sl_log_backend_status_t sl_log_backend_status;
 
-/**
- * @defgroup sl_log_config_instances Configuration Instances
- * @brief Global configuration instances for different build modes
- * @{
- */
+/*******************************************************************************
+ ***************************  LOCAL VARIABLES   ********************************
+ ******************************************************************************/
 
-/**
- * @brief Default logging system configuration
- *
- * This configuration is used when Universal Configurator is disabled.
- * It uses compile-time constants to define the logging behavior, buffer
- * size, backend selection, and argument limits.
- */
-sl_log_config_t sl_log_config = {
-    .no_of_events = SL_LOG_NUMBER_OF_EVENTS,       ///< Buffer size from config
-    .log_level = (sl_log_level_t)SL_LOG_CONFIG_LEVEL_COMPILE_TIME, ///< Compile-time log level
-    .max_no_args = (sl_log_args_t)SL_LOG_CONFIG_ARG,         ///< Maximum arguments per log
-};
+static sl_log_level_t current_log_level;
 
-/**
- * @brief Universal Configurator logging configuration
- *
- * This configuration is used when Universal Configurator is enabled.
- */
-sl_log_config_t sl_log_uc_config = {
-    .no_of_events = SL_LOG_NUMBER_OF_EVENTS,       ///< Configurable buffer size
-    .log_level = (sl_log_level_t)SL_LOG_CONFIG_LEVEL_COMPILE_TIME, ///< Configurable log level
-    .max_no_args = (sl_log_args_t)SL_LOG_CONFIG_ARG, ///< Configurable argument count
-};
+#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE!=SL_LOG_CONFIG_MODE_CONSOLE)
 
-/** @} (end addtogroup sl_log_config_instances) */
-
-/**
- * @defgroup sl_log_buffer_instances Buffer Management Instances
- * @brief Global instances for ring buffer and event management
- * @{
- */
-
-/**
- * @brief Static storage array for log events
- *
+/*
  * Pre-allocated array that provides the actual storage space for log events
  * in the ring buffer. The size is determined at compile time to ensure
  * predictable memory usage in embedded systems.
  */
-sl_log_event_t sl_log_buffer[SL_LOG_NUMBER_OF_EVENTS];
+static sl_log_event_t buffer[SL_LOG_NUMBER_OF_EVENTS];
 
-/**
- * @brief Ring buffer control structure instance
- *
+/*
  * Global instance of the ring buffer that manages the circular storage
  * of log events. Initialized with zero indices and points to the static
  * storage array for actual event data.
  */
-sl_log_ring_buffer_t sl_log_ring_buffer = {
-    .write_index = 0,               ///< Initialize write index to start
-    .read_index = 0,                ///< Initialize read index to start
-    .event_count = 0,               ///< Buffer starts empty
-    .sl_log_buffer = sl_log_buffer, ///< Point to static storage array
-    .available_event_slots=SL_LOG_NUMBER_OF_EVENTS, ///< number of avaialble slots
-};
+static sl_log_ring_buffer_t ring_buffer;
 
-/**
- * @brief Temporary event structure for local operations
- *
- * Global temporary event structure used for building log events before
- * they are written to the ring buffer. This avoids stack allocation
- * in interrupt contexts and provides a consistent memory location.
- *
- * @note This variable is reused across multiple log operations and should
- *       not be accessed concurrently.
- */
-sl_log_event_t sl_log_event;
+static sl_log_event_t overflow_event;
 
-sl_log_api_core_t *sli_log_api_core;
-
-sl_log_backend_status_t sl_log_backend_status;
-
-sl_log_event_t sl_log_overflow_event;
+/*******************************************************************************
+ ***************************   LOCAL FUNCTIONS   *******************************
+ ******************************************************************************/
 
 /**
  * @brief Update the overflow event
  * 
- * Updates the overflow event with the current timestamp, core ID, flags, argument count, event ID, and version.
+ * Updates the overflow event with the current timestamp, core ID, flags,
+ * argument count, event ID, and version.
  * 
  * @param[in] overflow_count The number of overflow events
  */
-static inline void update_over_flow_event(uint32_t overflow_count); 
+static inline void update_over_flow_event(uint32_t overflow_count)
+{
+  sl_log_event_t overflow_event_local;
+
+  overflow_event_local.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+  overflow_event_local.core_id = 0;
+  overflow_event_local.flags = (SL_LOG_CONFIG_LEVEL_WARN<<1)|1;
+  overflow_event_local.arg_count = 1;
+  overflow_event_local.event_id = SL_LOG_OVERFLOW_EVENT_ID;
+  overflow_event_local.args[0] = overflow_count;
+  overflow_event_local.version = 1;
+  overflow_event=overflow_event_local;
+}
 
 /**
  * @brief atomic check of the backend transfer status
  * 
- * Checks the backend transfer status atomically by disabling interrupts and checking the backend transfer status.
+ * Checks the backend transfer status atomically by disabling interrupts
+ * and checking the backend transfer status.
  * 
- * @return uint8_t True if the backend transfer is available, false otherwise
+ * @return bool True if the backend transfer is done, false otherwise
  */
-static inline uint8_t sl_log_get_backend_status(void);
-
-/** @} (end addtogroup sl_log_buffer_instances) */
-
-/**
- * @defgroup sl_log_static_functions Static Helper Functions
- * @brief Internal helper functions for ring buffer management
- * @{
- */
-
+static inline bool log_is_backend_flush_done(void)
+{
+  bool is_done = false;
+  __disable_irq();
+  if (sl_log_backend_status.backend_transfer_done) {
+    sl_log_backend_status.backend_transfer_done = 0;  // claim
+    is_done = true;
+  }
+  __enable_irq();
+  return is_done;
+}
+#endif
 /**
  * @brief Write a log event to the ring buffer
  *
@@ -197,16 +162,44 @@ static inline uint8_t sl_log_get_backend_status(void);
  * @note Automatic flushing occurs when buffer reaches SL_LOG_THRESHOLD
  * capacity.
  */
-static inline sl_status_t sl_log_write_to_ring_buffer(sl_log_event_t *buffer,
-                                                      uint32_t buffer_size);
+static inline sl_status_t log_write_to_ring_buffer(sl_log_event_t *event_buffer,
+                                                      uint32_t event_size)
+{
+  (void)event_size;
+#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE!=SL_LOG_CONFIG_MODE_CONSOLE)
+  sl_log_ring_buffer_t *ring_buffer_ptr = &ring_buffer;
+  __disable_irq();
+  ring_buffer_ptr->available_event_slots--;
+  if (ring_buffer_ptr->available_event_slots<0 &&
+      sl_log_backend_status.backend_transfer_done==0) {
+      __enable_irq();
+      return SL_STATUS_NOT_AVAILABLE;
+  }
+  uint32_t write_index = ring_buffer_ptr->write_index;
+  ring_buffer_ptr->write_index =
+      (write_index + 1u >= SL_LOG_NUMBER_OF_EVENTS) ? 0u : (write_index + 1u);
+  __enable_irq();
 
-/** @} (end addtogroup sl_log_static_functions) */
+  ring_buffer_ptr->buffer[write_index] = *event_buffer;
 
-/**
- * @defgroup sl_log_api_implementation API Implementation Functions
- * @brief Implementation of the public logging API functions
- * @{
- */
+  __disable_irq();
+  if (++ring_buffer_ptr->event_count > SL_LOG_NUMBER_OF_EVENTS) {
+    ring_buffer_ptr->event_count = SL_LOG_NUMBER_OF_EVENTS;
+    if (++ring_buffer_ptr->read_index == SL_LOG_NUMBER_OF_EVENTS) {
+      ring_buffer_ptr->read_index = 0;
+    }
+  }
+  __enable_irq();
+#else
+  (void)event_buffer;
+#endif
+  return SL_STATUS_OK;
+}
+
+/*******************************************************************************
+ **************************   GLOBAL FUNCTIONS   *******************************
+ ******************************************************************************/
+
 /**
  * @brief Initialize the Silicon Labs debug logger system
  *
@@ -236,34 +229,27 @@ static inline sl_status_t sl_log_write_to_ring_buffer(sl_log_event_t *buffer,
  * @note This function must be called before any logging operations.
  * @note Ring buffer is reset to empty state during initialization.
  */
-sl_status_t sl_log_init(void) {
-#if (SL_LOG_ENABLE_UC_CONFIG == 1)
-  sl_log_config_t *config = &sl_log_uc_config;
-#else
-  sl_log_config_t *config = &sl_log_config;
-#endif
+sl_status_t sl_log_init(void)
+{
 
-  if (config == NULL) {
-    return SL_STATUS_NULL_POINTER;
+
+  if (sl_log_get_api_core() == NULL) {
+    return SL_STATUS_NOT_INITIALIZED;
   }
-  if (config->log_level > SL_LOG_ENUM_CONFIG_INVALID) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-  if (config->no_of_events > SL_LOG_MAX_NO_OF_EVENTS) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-  if (config->max_no_args > SL_LOG_ENUM_CONFIG_ARG_INVALID) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-  sl_log_config = *config;
-  sl_log_ring_buffer.write_index = 0;
-  sl_log_ring_buffer.read_index = 0;
-  sl_log_ring_buffer.event_count = 0;
-  sl_log_ring_buffer.available_event_slots=SL_LOG_NUMBER_OF_EVENTS; 
+
+  current_log_level = (sl_log_level_t)SL_LOG_CONFIG_LEVEL_COMPILE_TIME;
+#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE!=SL_LOG_CONFIG_MODE_CONSOLE)
+  ring_buffer.write_index = 0;
+  ring_buffer.read_index = 0;
+  ring_buffer.event_count = 0;
+  ring_buffer.buffer = buffer;
+  ring_buffer.available_event_slots=SL_LOG_NUMBER_OF_EVENTS;
+
   sl_log_backend_status.backend_transfer_done=1;
-  sli_log_api_core = sl_log_get_api_core();
+#endif
   sl_log_platform_core_init();
   sl_log_backend_init();
+
   return SL_STATUS_OK;
 }
 
@@ -291,17 +277,26 @@ sl_status_t sl_log_init(void) {
  * @note Function does not return status - logging is fire-and-forget for
  * performance.
  */
-void sl_log_send_no_args(uint32_t event_id, uint8_t flags) {
+void sl_log_send_no_args(uint32_t event_id, uint8_t flags)
+{
+  if(((flags >> SL_LOG_FLAGS_POS)&SL_LOG_FLAGS_LEVEL_MASK) >= current_log_level){
+    sl_log_event_t event;
 
-  sl_log_event_t sl_log_event;
-  sl_log_event.timestamp = sli_log_api_core ? sli_log_api_core->get_timestamp(SL_LOG_HOST_CORE_ID): 0;
-  sl_log_event.core_id = 0;
-  sl_log_event.flags = flags;
-  sl_log_event.arg_count = 0;
-  sl_log_event.event_id = event_id;
-  sl_log_event.version = 1;
-
-  sl_log_write_to_ring_buffer(&sl_log_event, sizeof(sl_log_event));
+    event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    event.core_id = 0;
+    event.flags = flags;
+    event.arg_count = 0;
+    event.event_id = event_id;
+    event.args[0] = 0;
+    event.args[1] = 0;
+    event.args[2] = 0;
+    event.version = 1;
+#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_CONSOLE)
+    sl_log_backend_write(&event,READ_INDEX_DEFAULT,EVENT_COUNT_DEFAULT);
+#else
+    log_write_to_ring_buffer(&event, sizeof(event));
+#endif
+  }
 }
 
 /**
@@ -322,16 +317,27 @@ void sl_log_send_no_args(uint32_t event_id, uint8_t flags) {
  * @note Arguments are stored as 32-bit values. Larger data types should
  *       be cast appropriately or split across multiple arguments.
  */
-void sl_log_send_arg1(uint32_t event_id, uint8_t flags, uint32_t arg1) {
-  sl_log_event_t sl_log_event;
-  sl_log_event.timestamp = sli_log_api_core ? sli_log_api_core->get_timestamp(SL_LOG_HOST_CORE_ID): 0;
-  sl_log_event.core_id = 0;
-  sl_log_event.flags = flags;
-  sl_log_event.arg_count = 1;
-  sl_log_event.event_id = event_id;
-  sl_log_event.args[0] = arg1;
-  sl_log_event.version = 1;
-  sl_log_write_to_ring_buffer(&sl_log_event, sizeof(sl_log_event));
+void sl_log_send_arg1(uint32_t event_id, uint8_t flags, uint32_t arg1)
+{
+  if(((flags >> SL_LOG_FLAGS_POS)&SL_LOG_FLAGS_LEVEL_MASK) >= current_log_level){
+    sl_log_event_t event;
+
+    event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    event.core_id = 0;
+    event.flags = flags;
+    event.arg_count = 1;
+    event.event_id = event_id;
+    event.args[0] = arg1;
+    event.args[1] = 0;
+    event.args[2] = 0;
+    event.version = 1;
+
+#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_CONSOLE)
+    sl_log_backend_write(&event,READ_INDEX_DEFAULT,EVENT_COUNT_DEFAULT);
+#else
+    log_write_to_ring_buffer(&event, sizeof(event));
+#endif
+  }
 }
 
 /**
@@ -350,18 +356,27 @@ void sl_log_send_arg1(uint32_t event_id, uint8_t flags, uint32_t arg1) {
  * @note Both arguments are stored as 32-bit values in the args[] array.
  */
 void sl_log_send_arg2(uint32_t event_id, uint8_t flags, uint32_t arg1,
-                      uint32_t arg2) {
-  sl_log_event_t sl_log_event;
-  sl_log_event.timestamp = sli_log_api_core ? sli_log_api_core->get_timestamp(SL_LOG_HOST_CORE_ID): 0;
-  sl_log_event.core_id = 0;
-  sl_log_event.flags = flags;
-  sl_log_event.arg_count = 2;
-  sl_log_event.event_id = event_id;
-  sl_log_event.args[0] = arg1;
-  sl_log_event.args[1] = arg2;
-  sl_log_event.version = 1;
+                      uint32_t arg2)
+{
+  if(((flags >> SL_LOG_FLAGS_POS)&SL_LOG_FLAGS_LEVEL_MASK) >= current_log_level){   
+    sl_log_event_t event;
 
-  sl_log_write_to_ring_buffer(&sl_log_event, sizeof(sl_log_event));
+    event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    event.core_id = 0;
+    event.flags = flags;
+    event.arg_count = 2;
+    event.event_id = event_id;
+    event.args[0] = arg1;
+    event.args[1] = arg2;
+    event.args[2] = 0;
+    event.version = 1;
+
+#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_CONSOLE)
+    sl_log_backend_write(&event,READ_INDEX_DEFAULT,EVENT_COUNT_DEFAULT);
+#else
+    log_write_to_ring_buffer(&event, sizeof(event));
+#endif
+  }
 }
 
 /**
@@ -385,19 +400,27 @@ void sl_log_send_arg2(uint32_t event_id, uint8_t flags, uint32_t arg1,
  *       3 arguments, consider using multiple log events or structured logging.
  */
 void sl_log_send_arg3(uint32_t event_id, uint8_t flags, uint32_t arg1,
-                      uint32_t arg2, uint32_t arg3) {
-  sl_log_event_t sl_log_event;
-  sl_log_event.timestamp = sli_log_api_core ? sli_log_api_core->get_timestamp(SL_LOG_HOST_CORE_ID): 0;
-  sl_log_event.core_id = 0;
-  sl_log_event.flags = flags;
-  sl_log_event.arg_count = 3;
-  sl_log_event.event_id = event_id;
-  sl_log_event.args[0] = arg1;
-  sl_log_event.args[1] = arg2;
-  sl_log_event.args[2] = arg3;
-  sl_log_event.version = 1;
+                      uint32_t arg2, uint32_t arg3)
+{
+  if(((flags >> SL_LOG_FLAGS_POS)&SL_LOG_FLAGS_LEVEL_MASK) >= current_log_level){      
+    sl_log_event_t event;
 
-  sl_log_write_to_ring_buffer(&sl_log_event, sizeof(sl_log_event));
+    event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    event.core_id = 0;
+    event.flags = flags;
+    event.arg_count = 3;
+    event.event_id = event_id;
+    event.args[0] = arg1;
+    event.args[1] = arg2;
+    event.args[2] = arg3;
+    event.version = 1;
+
+#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_CONSOLE)
+    sl_log_backend_write(&event,READ_INDEX_DEFAULT,EVENT_COUNT_DEFAULT);
+#else
+    log_write_to_ring_buffer(&event, sizeof(event));
+#endif
+  }
 }
 /**
  * @brief Flush all pending log events to the backend
@@ -426,51 +449,54 @@ void sl_log_send_arg3(uint32_t event_id, uint8_t flags, uint32_t arg1,
  * @note Automatic flushing occurs at SL_LOG_THRESHOLD, but this function
  *       can be called manually for immediate transmission.
  */
- sl_status_t sl_log_flush(void) {
+sl_status_t sl_log_flush(void)
+{
+#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_HOST)
+  if (log_is_backend_flush_done()) {
+    uint32_t new_read_index = 0;
 
-  if(sl_log_get_backend_status()){
-  uint32_t new_read_index = 0;
-  __disable_irq();
-  // Check if the ring buffer is empty
-  if (sl_log_is_ring_buffer_empty(&sl_log_ring_buffer)) {
-    sl_log_backend_status.backend_transfer_done=1;  
-  __enable_irq();
-    return SL_STATUS_EMPTY; // No data to send
-  }
-  uint32_t read_index = sl_log_ring_buffer.read_index;
-  uint32_t event_count = sl_log_ring_buffer.event_count;
+    __disable_irq();
+    if (sl_log_is_ring_buffer_empty(&ring_buffer)) {
+      sl_log_backend_status.backend_transfer_done = 1;
+      __enable_irq();
+      return SL_STATUS_EMPTY;
+    }
 
-  __enable_irq();
-  sl_log_backend_write(sl_log_ring_buffer.sl_log_buffer, read_index,
-                       event_count);
-  new_read_index = event_count + read_index;
- __disable_irq();
-  if (new_read_index >= SL_LOG_NUMBER_OF_EVENTS) {
-    sl_log_ring_buffer.read_index = new_read_index - SL_LOG_NUMBER_OF_EVENTS;
+    uint32_t read_index = ring_buffer.read_index;
+    uint32_t event_count = ring_buffer.event_count;
+    __enable_irq();
+
+    sl_log_backend_write(ring_buffer.buffer, read_index,
+                         event_count);
+    new_read_index = event_count + read_index;
+    if (new_read_index >= SL_LOG_NUMBER_OF_EVENTS) {
+      new_read_index -= SL_LOG_NUMBER_OF_EVENTS;
+    }
+
+    __disable_irq();
+    ring_buffer.read_index = new_read_index;
+    ring_buffer.event_count -= event_count;
+
+    int available_event_slots = ring_buffer.available_event_slots;
+    if (ring_buffer.available_event_slots < 0) {
+      ring_buffer.available_event_slots = 0;
+    }
+    ring_buffer.available_event_slots += event_count;
+    __enable_irq();
+
+    if (available_event_slots < 0) {
+      update_over_flow_event(-available_event_slots);
+      sl_log_backend_write(&overflow_event, READ_INDEX_DEFAULT, EVENT_COUNT_DEFAULT);
+    }
+
+    __disable_irq();
+    sl_log_backend_status.backend_transfer_done = 1;
+    __enable_irq();
   } else {
-    sl_log_ring_buffer.read_index = new_read_index;
-  }
-  sl_log_ring_buffer.event_count-=event_count;
-  int available_event_slots=sl_log_ring_buffer.available_event_slots;
-
-      if(sl_log_ring_buffer.available_event_slots<0){
-      sl_log_ring_buffer.available_event_slots=0;
-  }
-  sl_log_ring_buffer.available_event_slots+=event_count;
-  __enable_irq();
-  if(available_event_slots<0){
-      update_over_flow_event(0-available_event_slots);
-      sl_log_backend_write(&sl_log_overflow_event,0,1);
-  }
-  __disable_irq();
-    sl_log_backend_status.backend_transfer_done=1;
-  __enable_irq();  
-  }
-  else{
     return SL_STATUS_BUSY;
   }
-
-  return SL_STATUS_OK; // Data successfully sent
+#endif
+  return SL_STATUS_OK;
 }
 /**
  * @brief Set the runtime log level filter
@@ -496,11 +522,13 @@ void sl_log_send_arg3(uint32_t event_id, uint8_t flags, uint32_t arg1,
  * @note Changes take effect immediately for new log messages.
  * @note This setting works in conjunction with compile-time level filtering.
  */
-sl_status_t sl_log_set_loglevel(sl_log_level_t level) {
+sl_status_t sl_log_set_loglevel(sl_log_level_t level)
+{
   if (level >= SL_LOG_ENUM_CONFIG_INVALID) {
     return SL_STATUS_INVALID_PARAMETER; // Invalid log level parameter
   }
-  sl_log_config.log_level = level;
+
+  current_log_level = level;
   return SL_STATUS_OK;
 }
 /**
@@ -515,7 +543,10 @@ sl_status_t sl_log_set_loglevel(sl_log_level_t level) {
  * @note The returned value reflects the runtime setting, which may differ
  *       from compile-time settings if modified via sl_log_set_loglevel().
  */
-sl_log_level_t sl_log_get_loglevel(void) { return sl_log_config.log_level; }
+sl_log_level_t sl_log_get_loglevel(void)
+{
+  return current_log_level;
+}
 
 /**
  * @brief Get the current multi-core timestamp delta
@@ -529,69 +560,11 @@ sl_log_level_t sl_log_get_loglevel(void) { return sl_log_config.log_level; }
  * @note This value is used internally for multi-core timestamp alignment.
  * @note A delta of 0 indicates no correction is being applied.
  */
-int sl_log_get_timestamp_delta(void) { return sl_log_timestamp_delta; }
-
-/**
- * @brief Write an event to the circular ring buffer (Internal Implementation)
- *
- * Core ring buffer insertion function that handles the low-level mechanics
- * of storing log events in the circular buffer. This function implements
- * the producer side of the ring buffer with the following key features:
- *
- * - Atomic index updates using interrupt disable/enable
- * - Automatic buffer wraparound when reaching buffer end
- * - Threshold-based automatic flushing for flow control
- * - Thread-safe operation in interrupt-driven environments
- *
- * The function uses a critical section (interrupt disable) around index
- * updates to ensure atomicity, but keeps the actual data copy outside
- * the critical section to minimize interrupt latency.
- *
- * Automatic flushing occurs when the buffer reaches SL_LOG_THRESHOLD
- * capacity (approximately 80% full), helping prevent buffer overruns
- * while maintaining good performance.
- *
- * @param[in] event_buffer Pointer to the log event to write to the buffer
- * @param[in] event_size Size of the event data (parameter for consistency,
- * typically unused)
- * @return sl_status_t Write operation result:
- *         - SL_STATUS_OK: Event successfully written to ring buffer
- *
- * @note This is an internal function called by the public logging APIs.
- * @note Critical sections are kept minimal to reduce interrupt latency.
- * @note Buffer overflow is handled by overwriting oldest events (circular
- * behavior).
- */
-sl_status_t sl_log_write_to_ring_buffer(sl_log_event_t *event_buffer,
-                                        uint32_t event_size) {
-  (void)event_size;
-
-  sl_log_ring_buffer_t *sl_log_ring_buffer_ptr = &sl_log_ring_buffer;
-  __disable_irq();
-  sl_log_ring_buffer_ptr->available_event_slots--;
-  if(sl_log_ring_buffer_ptr->available_event_slots<0 && sl_log_backend_status.backend_transfer_done==0)
-    {
-      __enable_irq();
-      return SL_STATUS_NOT_AVAILABLE;
-    }
-  uint32_t write_index = sl_log_ring_buffer_ptr->write_index;
-  sl_log_ring_buffer_ptr->write_index =
-      (write_index + 1u >= SL_LOG_NUMBER_OF_EVENTS) ? 0u : (write_index + 1u);
-  __enable_irq();
-
-  sl_log_ring_buffer_ptr->sl_log_buffer[write_index] = *event_buffer;
-
-  __disable_irq();
-  if (++sl_log_ring_buffer_ptr->event_count > SL_LOG_NUMBER_OF_EVENTS) {
-    sl_log_ring_buffer_ptr->event_count = SL_LOG_NUMBER_OF_EVENTS;
-    if (++sl_log_ring_buffer_ptr->read_index == SL_LOG_NUMBER_OF_EVENTS) {
-      sl_log_ring_buffer_ptr->read_index = 0;
-    }
-  }
-  __enable_irq();
-
-  return SL_STATUS_OK;
+int sl_log_get_timestamp_delta(void)
+{
+  return 0;
 }
+
 /**
  * @brief Initializes the core platform logging infrastructure.
  *
@@ -604,9 +577,13 @@ sl_status_t sl_log_write_to_ring_buffer(sl_log_event_t *event_buffer,
  *       any other platform specific error codes on failure.
  *
  */
-sl_status_t sl_log_platform_core_init(void) {
-  sli_log_api_core = sl_log_get_api_core();
- return sli_log_api_core ? sli_log_api_core->platform_core_init(): SL_STATUS_NULL_POINTER;
+sl_status_t sl_log_platform_core_init(void)
+{
+  if (sl_log_get_api_core() == NULL) {
+    return SL_STATUS_NOT_INITIALIZED;
+  }
+
+  return sl_log_get_api_core()->platform_core_init();
 }
 
 /**
@@ -633,8 +610,9 @@ sl_status_t sl_log_platform_core_init(void) {
  * @note Timestamp resolution and range depend on platform-specific
  * implementation.
  */
-uint32_t sl_log_get_timestamp_count(uint8_t core_id) {
-#ifdef SL_CATALOG_LOGGER_BACKEND_SYSTEMVIEW_PRESENT
+uint32_t sl_log_get_timestamp_count(uint8_t core_id)
+{
+#ifdef SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT
   //@TODO remove global timestamp variable after getting api from systemview
   if (timestamp_global != 0) {
     volatile uint32_t timestamp_val = timestamp_global;
@@ -642,7 +620,11 @@ uint32_t sl_log_get_timestamp_count(uint8_t core_id) {
     return timestamp_val;
   }
 #endif  
-    return sli_log_api_core ? sli_log_api_core->get_timestamp(core_id): 0;
+  if (sl_log_get_api_core() == NULL) {
+    return 0;
+  }
+
+  return sl_log_get_api_core()->get_timestamp(core_id);
 }
 /**
  * @brief De-initializes the core platform logging infrastructure.
@@ -654,8 +636,13 @@ uint32_t sl_log_get_timestamp_count(uint8_t core_id) {
  *       any other platform specific error codes on failure.
  *
  */
-sl_status_t sl_log_platform_core_deinit(void) {
- return sli_log_api_core ? sli_log_api_core->platform_core_deinit(): SL_STATUS_NULL_POINTER;
+sl_status_t sl_log_platform_core_deinit(void)
+{
+  if (sl_log_get_api_core() == NULL) {
+    return SL_STATUS_NOT_INITIALIZED;
+  }
+
+  return sl_log_get_api_core()->platform_core_deinit();
 }
 /**
  * @brief Initialize the specified logging backend interface
@@ -682,9 +669,10 @@ sl_status_t sl_log_platform_core_deinit(void) {
  * @note Backend availability depends on compile-time configuration macros.
  * @note Some backends may require additional hardware or software setup.
  */
-sl_status_t sl_log_backend_init() {
+sl_status_t sl_log_backend_init(void)
+{
   sl_log_api_backend_t * sl_log_backend_api=sl_log_get_api_backend();
-  return sl_log_backend_api ? sl_log_backend_api->backend_init(): SL_STATUS_NULL_POINTER;
+  return sl_log_backend_api ? sl_log_backend_api->backend_init(): SL_STATUS_NOT_INITIALIZED;
 }
 
 /**
@@ -713,11 +701,13 @@ sl_status_t sl_log_backend_init() {
  * @note This function should be called before entering any sleep mode.
  * @note Must be paired with sl_log_post_sleep_process() after wake-up.
  */
-sl_status_t sl_log_pre_sleep_process(void * args) {
-  if(sli_log_api_core == NULL){
+sl_status_t sl_log_pre_sleep_process(void * args)
+{
+  if(sl_log_get_api_core() == NULL) {
     return SL_STATUS_NOT_INITIALIZED;
   }
-   return sli_log_api_core->pre_sleep_process(args);
+
+  return sl_log_get_api_core()->pre_sleep_process(args);
 }
 /**
  * @brief Reinitialize logging system after sleep mode wake-up
@@ -745,11 +735,13 @@ sl_status_t sl_log_pre_sleep_process(void * args) {
  * @note Must be paired with sl_log_pre_sleep_process() before sleep entry.
  * @note Logging functionality may be impaired until this function completes.
  */
-sl_status_t sl_log_post_sleep_process(void * args) {
-    if(sli_log_api_core == NULL){
+sl_status_t sl_log_post_sleep_process(void * args)
+{
+  if(sl_log_get_api_core() == NULL) {
     return SL_STATUS_NOT_INITIALIZED;
   }
- return sli_log_api_core->post_sleep_process(args);
+
+  return sl_log_get_api_core()->post_sleep_process(args);
 }
 /**
  * @brief Set the logger configurations for host or captive core.
@@ -759,11 +751,13 @@ sl_status_t sl_log_post_sleep_process(void * args) {
  * @return sl_status_t SL_STATUS_OK if successful, or an error code if
  * initialization fails.
  */
-sl_status_t sl_log_set_configurations(void *args, uint8_t core_id) {
-    if(sli_log_api_core == NULL){
+sl_status_t sl_log_set_configurations(void *args, uint8_t core_id)
+{
+  if(sl_log_get_api_core() == NULL) {
     return SL_STATUS_NOT_INITIALIZED;
   }
-return sli_log_api_core->set_configuration(args, core_id);
+
+  return sl_log_get_api_core()->set_configuration(args, core_id);
 }
 
 /**
@@ -774,11 +768,13 @@ return sli_log_api_core->set_configuration(args, core_id);
  * @return sl_status_t SL_STATUS_OK if successful, or an error code if
  * initialization fails.
  */
-sl_status_t sl_log_get_configurations(void *args, uint8_t core_id) {
-    if(sli_log_api_core == NULL){
+sl_status_t sl_log_get_configurations(void *args, uint8_t core_id)
+{
+  if(sl_log_get_api_core() == NULL){
     return SL_STATUS_NOT_INITIALIZED;
   }
- return sli_log_api_core->get_configuration(args, core_id);
+
+  return sl_log_get_api_core()->get_configuration(args, core_id);
 }
 
 /**
@@ -815,14 +811,17 @@ sl_status_t sl_log_get_configurations(void *args, uint8_t core_id) {
  * analysis.
  */
 sl_status_t sl_log_backend_write(sl_log_event_t *buffer, uint32_t read_index,
-                                 uint32_t event_count) {
+                                 uint32_t event_count)
+{
   sl_log_api_backend_t * sl_log_backend_api=sl_log_get_api_backend();
-  if (buffer == NULL) {
+
+  if (buffer == NULL || sl_log_backend_api == NULL) {
     return SL_STATUS_NULL_POINTER; // Invalid parameters
   }
-  if(read_index >= SL_LOG_NUMBER_OF_EVENTS || event_count > SL_LOG_NUMBER_OF_EVENTS){
+  if(read_index >= SL_LOG_NUMBER_OF_EVENTS || event_count > SL_LOG_NUMBER_OF_EVENTS) {
     return SL_STATUS_INVALID_PARAMETER;
   }
+
   return sl_log_backend_api->backend_write(buffer,read_index,event_count);
 }
 
@@ -841,11 +840,13 @@ sl_status_t sl_log_backend_write(sl_log_event_t *buffer, uint32_t read_index,
  *       in a multi-core system.
  */
  
-uint32_t sl_log_get_timestamp_timer_frequency(uint8_t core_id){
-    if(sli_log_api_core == NULL){
+uint32_t sl_log_get_timestamp_timer_frequency(uint8_t core_id)
+{
+  if(sl_log_get_api_core() == NULL) {
     return 0;
   }
-  return sli_log_api_core->get_timestamp_timer_frequency(core_id);
+
+  return sl_log_get_api_core()->get_timestamp_timer_frequency(core_id);
 }
 
 /**
@@ -878,42 +879,22 @@ uint32_t sl_log_get_timestamp_timer_frequency(uint8_t core_id){
  * @note Should be called periodically to maintain synchronization accuracy.
  * @note Platform-specific implementation determines synchronization method.
  */
-sl_status_t sl_log_sync_timestamp(uint8_t core_id, void *args) {
-    if(sli_log_api_core == NULL){
+sl_status_t sl_log_sync_timestamp(uint8_t core_id, void *args)
+{
+  if(sl_log_get_api_core() == NULL) {
     return SL_STATUS_NOT_INITIALIZED;
   }
-  return sli_log_api_core->time_sync(args,core_id);
-   
+
+  return sl_log_get_api_core()->time_sync(args,core_id);
 }
 
-sl_log_ring_buffer_t *sl_log_get_ring_buffer_config(){
-  return &sl_log_ring_buffer;
-}
-
-void update_over_flow_event(uint32_t overflow_count){
-  sl_log_event_t sl_log_overflow_event_local;
-  sl_log_overflow_event_local.timestamp = sli_log_api_core->get_timestamp(SL_LOG_HOST_CORE_ID);
-  sl_log_overflow_event_local.core_id = 0;
-  sl_log_overflow_event_local.flags = SL_LOG_CONFIG_LEVEL_WARN << 1 | 1;
-  sl_log_overflow_event_local.arg_count = 1;
-  sl_log_overflow_event_local.event_id = SL_LOG_OVERFLOW_EVENT_ID;
-  sl_log_overflow_event_local.args[0] = overflow_count;
-  sl_log_overflow_event_local.version = 1;
-  sl_log_overflow_event=sl_log_overflow_event_local;
-}
-
-uint8_t sl_log_get_backend_status(void)
+sl_log_ring_buffer_t *sl_log_get_ring_buffer_config(void)
 {
-  uint8_t ok = false;
-  __disable_irq();
-  if (sl_log_backend_status.backend_transfer_done) {
-    sl_log_backend_status.backend_transfer_done = 0;  // claim
-    ok = true;
-  }
-  __enable_irq();
-  return ok;
+#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE!=SL_LOG_CONFIG_MODE_CONSOLE)
+  return &ring_buffer;
+#else
+  return NULL;
+#endif
 }
 
-/** @} (end addtogroup sl_log_api_implementation) */
 
-/** @} (end addtogroup sl_log) */

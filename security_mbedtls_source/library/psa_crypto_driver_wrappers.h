@@ -53,6 +53,10 @@
 #ifndef PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT
 #define PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT
 #endif
+#if defined(SLI_PSA_DRIVER_FEATURE_KSU)
+#include "sl_psa_values.h"
+#include "sli_se_driver_key_management.h"
+#endif
 #include "sli_se_transparent_types.h"
 #include "sli_se_transparent_functions.h"
 #endif
@@ -91,7 +95,9 @@
 #endif
 #include "sli_hostcrypto_transparent_functions.h"
 #include "sli_hostcrypto_transparent_types.h"
+#if defined(SLI_PSA_DRIVER_FEATURE_KSU)
 #include "sli_hostcrypto_opaque_functions.h"
+#endif
 #endif
 
 #if defined(SLI_MBEDTLS_DEVICE_SI91X)
@@ -1689,7 +1695,7 @@ static inline psa_status_t psa_driver_wrapper_cipher_encrypt(
                 return( status );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
 #if defined(SLI_MBEDTLS_DEVICE_HC)
-            status = sli_hostcrypto_opaque_cipher_encrypt(
+            status = sli_hostcrypto_transparent_cipher_encrypt(
                         attributes,
                         key_buffer,
                         key_buffer_size,
@@ -1787,7 +1793,7 @@ static inline psa_status_t psa_driver_wrapper_cipher_encrypt(
 #if defined(PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT)
 #if defined(SLI_MBEDTLS_DEVICE_HC)
         case PSA_KEY_LOCATION_SLI_HOSTCRYPTO_TRANSPARENT:
-            status = sli_hostcrypto_opaque_cipher_encrypt(
+            status = sli_hostcrypto_transparent_cipher_encrypt(
                         attributes,
                         key_buffer,
                         key_buffer_size,

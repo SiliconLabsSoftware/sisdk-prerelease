@@ -3272,3 +3272,27 @@ cleanup:
 
   app_wisun_cli_mutex_unlock();
 }
+
+void app_set_trickle_params(sl_cli_command_arg_t *arguments)
+{
+  sl_status_t ret;
+  sl_wisun_trickle_type_t type;
+  uint16_t i_min_s, i_max_s;
+  uint8_t k, expirations;
+
+  app_wisun_cli_mutex_lock();
+
+  type = (sl_wisun_trickle_type_t)sl_cli_get_argument_uint8(arguments, 0);
+  i_min_s = sl_cli_get_argument_uint16(arguments, 1);
+  i_max_s = sl_cli_get_argument_uint16(arguments, 2);
+  k = sl_cli_get_argument_uint8(arguments, 3);
+  expirations = sl_cli_get_argument_uint8(arguments, 4);
+  ret = sl_wisun_set_trickle_parameters(type, i_min_s, i_max_s, k, expirations);
+  if (ret != SL_STATUS_OK) {
+    printf("[Failed: unable to set Trickle parameters: %lu]\r\n", ret);
+  } else {
+    printf("[Trickle parameters set]\r\n");
+  }
+
+  app_wisun_cli_mutex_unlock();
+}

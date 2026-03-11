@@ -19,22 +19,13 @@ requires:
   condition: [trustzone_secure]
 - name: psa_its
   condition: [trustzone_secure]
+- name: psa_its
+  condition: [trustzone_nonsecure]
 
 include:
-- path: sl_psa_driver/inc
-  condition: [trustzone_secure]
-  file_list:
-  - path: psa/sli_internal_trusted_storage.h
-
 - path: sl_trustzone/inc/common
   file_list:
   - path: sli_tz_service_its.h
-
-- path: sl_psa_driver/inc
-  condition: [trustzone_nonsecure]
-  file_list:
-  - path: psa/internal_trusted_storage.h
-  - path: psa/sli_internal_trusted_storage.h
 
 source:
 - path: sl_trustzone/src/sli_tz_service_its_s.c

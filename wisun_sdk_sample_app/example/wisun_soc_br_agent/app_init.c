@@ -71,8 +71,7 @@ void app_init(void)
     .stack_mem  = NULL,
     .stack_size = app_stack_size_word_to_byte(SL_WISUN_APP_CORE_MAIN_STACK_SIZE_WORD),
     .priority   = osPriorityNormal,
-    .tz_module  = 0,
-    .reserved   = 0
+    .tz_module  = 0
   };
 
   osThreadId_t app_thr_id = osThreadNew(app_task,
@@ -92,8 +91,7 @@ void app_service_task_init(void)
     .stack_mem  = NULL,
     .stack_size = app_stack_size_word_to_byte(SL_WISUN_APP_CORE_MAIN_STACK_SIZE_WORD),
     .priority   = osPriorityBelowNormal1,
-    .tz_module  = 0,
-    .reserved   = 0
+    .tz_module  = 0
   };
 
   osThreadId_t service_thr_id = osThreadNew(app_service_task,

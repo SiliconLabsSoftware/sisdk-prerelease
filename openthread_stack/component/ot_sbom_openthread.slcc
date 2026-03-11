@@ -14,9 +14,9 @@ metadata:
     license: BSD-3-Clause
     upstream:
       name: OpenThread
-      version: "61e43cffb"
+      version: "3f11074f1"
       supplier: Google
       url: https://openthread.io/
-      package_url: pkg:github/openthread/openthread@61e43cffb
+      package_url: pkg:github/openthread/openthread@3f11074f1
       comment: OpenThread released by Google is an open-source implementation of the Thread networking protocol.
 root_path: openthread_stack

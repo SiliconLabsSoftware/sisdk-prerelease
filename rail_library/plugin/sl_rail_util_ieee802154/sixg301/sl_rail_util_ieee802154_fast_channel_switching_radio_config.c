@@ -1,6 +1,10 @@
 /***************************************************************************//**
- * @file
- * @brief
+ * @brief RAIL Configuration
+ * @details
+ *   WARNING: Auto-Generated Radio Config  -  DO NOT EDIT
+ *   Radio Configurator Version: 2504.4.8
+ *   RAIL Adapter Version: 2.4.33
+ *   RAIL Compatibility: 2.x
  *******************************************************************************
  * # License
  * <b>Copyright 2025 Silicon Laboratories Inc. www.silabs.com</b>
@@ -29,28 +33,29 @@
  ******************************************************************************/
 #include "em_device.h"
 #include "sl_rail_util_ieee802154_fast_channel_switching_radio_config.h"
+#include "sl_code_classification.h"
 
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_RAIL_UTIL_IEEE802154_PHY_SELECT, SL_CODE_CLASS_TIME_CRITICAL)
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static const uint8_t irCalConfig[] = {
   25, 63, 1, 6, 4, 16, 1, 0, 0, 1, 1, 6, 0, 16, 39, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_RAIL_UTIL_IEEE802154_PHY_SELECT, SL_CODE_CLASS_TIME_CRITICAL)
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static const int32_t timingConfig[] = {
   6625, 6625, 500, 0
 };
 
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_RAIL_UTIL_IEEE802154_PHY_SELECT, SL_CODE_CLASS_TIME_CRITICAL)
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 __ALIGNED(4) static const uint8_t hfxoRetimingConfigEntries[] = {
   2, 0, 0, 0, 0x00, 0xf0, 0x49, 0x02, 6, 20, 0, 0, 0x00, 0xe0, 0x93, 0x04, 5, 56, 0, 0, 0xa0, 0x08, 0, 0, 0, 0, 0x58, 0x09, 1, 4, 7, 6, 0x10, 0x0a, 1, 4, 7, 7, 0xc8, 0x0a, 0, 4, 8, 7, 0x80, 0x0b, 0, 4, 8, 8, 0x38, 0x0c, 0, 4, 9, 8, 0x61, 0x08, 0, 0, 0, 0, 0x68, 0x08, 0, 0, 0, 0, 0xc7, 0x09, 1, 4, 4, 3, 0x2c, 0x0b, 1, 4, 4, 4, 0x92, 0x0c, 1, 4, 5, 4
 };
 
 #ifdef RADIO_CONFIG_ENABLE_STACK_INFO
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_RAIL_UTIL_IEEE802154_PHY_SELECT, SL_CODE_CLASS_TIME_CRITICAL)
-__ALIGNED(4) static const uint8_t stackInfo_0[2] = { 0x05, 0x00 };
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
+__ALIGNED(4) static const uint8_t stackInfo_0[2] = { 0x05, 0x0e };
 #endif // RADIO_CONFIG_ENABLE_STACK_INFO
 
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_RAIL_UTIL_IEEE802154_PHY_SELECT, SL_CODE_CLASS_TIME_CRITICAL)
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static RAIL_ChannelConfigEntryAttr_t channelConfigEntryAttr = {
 #if RAIL_SUPPORTS_OFDM_PA
   {
@@ -70,7 +75,7 @@ static RAIL_ChannelConfigEntryAttr_t channelConfigEntryAttr = {
 #endif // RAIL_SUPPORTS_OFDM_PA
 };
 
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_RAIL_UTIL_IEEE802154_PHY_SELECT, SL_CODE_CLASS_TIME_CRITICAL)
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static const uint32_t phyInfo[] = {
   20UL,
   0x00800000UL, // 128.0
@@ -95,7 +100,7 @@ static const uint32_t phyInfo[] = {
   (uint32_t) 0UL,
 };
 
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_RAIL_UTIL_IEEE802154_PHY_SELECT, SL_CODE_CLASS_TIME_CRITICAL)
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 const uint32_t RAIL_IEEE802154_Phy2ChFs_modemConfigBase[] = {
   0x03080000UL, 0x0000803FUL,
   /*    0004 */ 0x0001007EUL,
@@ -265,9 +270,8 @@ const uint32_t RAIL_IEEE802154_Phy2ChFs_modemConfigBase[] = {
   /*    4230 */ 0x00600001UL,
   /*    4234 */ 0x002C0000UL,
   0x0101423CUL, 0x00000000UL,
-  0x01064244UL, 0x00000014UL,
-  /*    4248 */ 0x00000000UL,
-  /*    424C */ 0x04080003UL,
+  0x01014244UL, 0x00000014UL,
+  0x0104424CUL, 0x04080003UL,
   /*    4250 */ 0x00000000UL,
   /*    4254 */ 0x00000000UL,
   /*    4258 */ 0x00000000UL,
@@ -354,7 +358,7 @@ const uint32_t RAIL_IEEE802154_Phy2ChFs_modemConfigBase[] = {
   0xFFFFFFFFUL,
 };
 
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_RAIL_UTIL_IEEE802154_PHY_SELECT, SL_CODE_CLASS_TIME_CRITICAL)
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 const RAIL_ChannelConfigEntry_t RAIL_IEEE802154_Phy2ChFs_channels[] = {
   {
     .phyConfigDeltaAdd = NULL,
@@ -375,7 +379,7 @@ const RAIL_ChannelConfigEntry_t RAIL_IEEE802154_Phy2ChFs_channels[] = {
   },
 };
 
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_RAIL_UTIL_IEEE802154_PHY_SELECT, SL_CODE_CLASS_TIME_CRITICAL)
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 const RAIL_ChannelConfig_t RAIL_IEEE802154_Phy2ChFs_channelConfig = {
   .phyConfigBase = RAIL_IEEE802154_Phy2ChFs_modemConfigBase,
   .phyConfigDeltaSubtract = NULL,
@@ -384,7 +388,3 @@ const RAIL_ChannelConfig_t RAIL_IEEE802154_Phy2ChFs_channelConfig = {
   .signature = 0UL,
   .xtalFrequencyHz = 38400000UL,
 };
-
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_RAIL_UTIL_IEEE802154_PHY_SELECT, SL_CODE_CLASS_TIME_CRITICAL)
-const RAIL_ChannelConfig_t * const RAIL_IEEE802154_Phy2p4GHzRxChSwitching =
-  &RAIL_IEEE802154_Phy2ChFs_channelConfig;

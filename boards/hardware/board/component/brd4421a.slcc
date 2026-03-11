@@ -34,7 +34,7 @@
   - name: hardware_board_default_rf_band
   - name: hardware_board_default_rf_band_2400
 - recommends:
-  - id: brd4002b
+  - id: brd4001a
     vendor: silabs
   - id: iostream_eusart
     instance:
@@ -61,7 +61,7 @@
   - name: SL_BOARD_NAME
     value: '"BRD4421A"'
   - name: SL_BOARD_REV
-    value: '"A01"'
+    value: '"A00"'
   - name: HFXO_FREQ
     value: 38400000
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
@@ -70,7 +70,7 @@
 - tag:
   - board:pn:BRD4421
   - board:variant:A
-  - board:revision:A01
+  - board:revision:A00
   - board:device:efr32bg22l122f352gm32
   - hardware:has:vcom
   - hardware:has:vcom:vcom_hardware_flowcontrol

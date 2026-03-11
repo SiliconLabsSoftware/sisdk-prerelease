@@ -723,6 +723,9 @@ void sl_rail_util_on_event(sl_rail_handle_t railHandle, sl_rail_events_t events)
   }
   if (events & (SL_RAIL_EVENT_RX_SYNC_0_DETECT | SL_RAIL_EVENT_RX_SYNC_1_DETECT)) {
     counters.syncDetect++;
+    if (inAppMode(BER_PACKET, NULL)) {
+      berPacketStats.syncWordsReceived++;
+    }
     if (events & SL_RAIL_EVENT_RX_SYNC_0_DETECT) {
       counters.syncDetect0++;
     }

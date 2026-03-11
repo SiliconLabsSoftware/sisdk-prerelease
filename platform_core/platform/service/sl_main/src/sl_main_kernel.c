@@ -81,7 +81,7 @@ void sli_main_kernel_start_task_initialize(void)
     .stack_size = SL_MAIN_START_TASK_STACK_SIZE_BYTES,
     .priority = osPriorityRealtime7,
     .tz_module = 0U,
-    .reserved = 0U,
+    .affinity_mask = 0U,
   };
 
   start_task_id = osThreadNew(&start_task_handler, NULL, &thread_attribute);

@@ -32,7 +32,7 @@
 #include "sl_rail.h"
 #include "sl_rail_ieee802154.h"
 
-#include "sl_rail_util_ieee802154/sl_rail_util_ieee802154_phy_select.h"
+#include "sl_rail_util_ieee802154_phy_select.h"
 #ifdef SL_RAIL_UTIL_PA_CONFIG_HEADER
 #include SL_RAIL_UTIL_PA_CONFIG_HEADER
 #endif
@@ -51,7 +51,6 @@
 #endif
 
 #if defined(SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT) || defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT)
-#include "sl_rail_util_ieee802154_fast_channel_switching.h"
 #include "sl_rail_util_ieee802154_fast_channel_switching_config.h"
 
 // This file supports 2 instances of stacks (ZB, OT). Similar configuration is expected on RAIL side
@@ -114,18 +113,17 @@ static inline void CONFIGURE_RX_CHANNEL_SWITCHING(sl_rail_handle_t mux_rail_hand
 #define sli_is_multi_channel_enabled() false
 #endif //#if defined(SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT) || defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT)
 
-
 //------------------------------------------------------------------------------
 // Forward declarations
 extern uint8_t sli_legacy_mfglib_mode;
 
-static void fn_update_current_tx_power(void);
+static void fn_set_tx_power_for_context(uint8_t context_index);
+static void fn_set_tx_power_for_context(uint8_t context_index);
 static void fn_set_global_flag(uint16_t flag, bool val);
 static bool fn_get_global_flag(uint16_t flag);
 static uint8_t fn_get_context_index(sl_rail_handle_t handle);
 static void fn_set_context_flag_by_index(uint8_t index, uint16_t flag, bool val);
 static bool fn_get_context_flag_by_index(uint8_t index, uint16_t flag);
-static uint8_t fn_get_context_index(sl_rail_handle_t handle);
 static void fn_init_802154_address_config(sl_rail_ieee802154_addr_config_t *addr_config);
 static void fn_update_802154_address_filtering_table(void);
 static sl_rail_status_t fn_start_pending_tx(void);
@@ -154,6 +152,7 @@ sl_rail_handle_t emPhyRailHandle = NULL;
 
 static volatile uint16_t internal_flags = 0;
 static sl_rail_tx_power_t current_tx_power = SL_RAIL_TX_POWER_MIN;
+static uint8_t pending_power_context = INVALID_CONTEXT_INDEX;
 static uint16_t rx_channel = INVALID_CHANNEL;
 static sl_rail_ieee802154_addr_config_t rail_addresses_802154;
 
@@ -235,6 +234,8 @@ void sli_rail_mux_local_init(void)
   }
 
   internal_flags = 0;
+  current_tx_power = SL_RAIL_TX_POWER_MIN;
+  pending_power_context = INVALID_CONTEXT_INDEX;
   rx_channel = INVALID_CHANNEL;
   fn_init_802154_address_config(&rail_addresses_802154);
 
@@ -246,7 +247,6 @@ void sli_rail_mux_local_init(void)
     channel_switching_cfg.channels[i] = INVALID_CHANNEL;
   }
 #endif //#if defined(SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT) || defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT)
-
 
   // TODO: for now we assume all protocols to be 802.15.4 and use the 2.4 OQPSK
   // standard PHY. In order to support SubGHz PHY, we will need to modify the
@@ -652,7 +652,7 @@ sl_rail_status_t sl_rail_mux_StartRx(sl_rail_handle_t railHandle,
   SET_CHANNEL_SWITCHING_CFG_CH(context_index, channel);
 
   // Check to ensure lock is not active before acting on startRx
-  if ( check_lock_permissions(context_index) && !tx_in_progress()) {
+  if ( check_lock_permissions(context_index) ) {
     #if !defined(SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT) && !defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT)
     if (!fn_get_context_flag_by_index(context_index, RAIL_MUX_PROTOCOL_FLAGS_LOCK_ACTIVE)) {
       if (rx_channel != INVALID_CHANNEL && rx_channel != channel) {
@@ -678,10 +678,6 @@ sl_rail_status_t sl_rail_mux_Idle(sl_rail_handle_t railHandle,
                                   bool wait)
 {
   uint8_t i;
- 
-  if (tx_in_progress()) {
-    return SL_RAIL_STATUS_INVALID_CALL;
-  }
 
   uint8_t context_index = fn_get_context_index(railHandle);
   EFM_ASSERT(context_index < SUPPORTED_PROTOCOL_COUNT);
@@ -1080,8 +1076,12 @@ sl_rail_status_t sli_rail_mux_GetTxPowerConfig(sl_rail_handle_t railHandle,
 
 sl_rail_tx_power_t sl_rail_mux_GetTxPowerDbm(sl_rail_handle_t railHandle)
 {
-  (void)railHandle;
-
+  uint8_t context_index = fn_get_context_index(railHandle);
+  if (context_index < SUPPORTED_PROTOCOL_COUNT) {
+    // Return the protocol-specific power setting, not the aggregated RAIL power
+    return protocol_context[context_index].tx_power;
+  }
+  // Fallback to RAIL power if context not found
   return sl_rail_get_tx_power_dbm(mux_rail_handle);
 }
 
@@ -1134,13 +1134,33 @@ sl_rail_status_t sl_rail_mux_SetTxPowerDbm(sl_rail_handle_t railHandle,
                                            sl_rail_tx_power_t power)
 {
   RAIL_MUX_DECLARE_IRQ_STATE;
+  uint8_t active_tx_index;
 
   uint8_t context_index = fn_get_context_index(railHandle);
   EFM_ASSERT(context_index < SUPPORTED_PROTOCOL_COUNT);
 
   RAIL_MUX_ENTER_CRITICAL();
   protocol_context[context_index].tx_power = power;
-  fn_update_current_tx_power();
+
+  // Determine if we should update hardware immediately
+  active_tx_index = fn_get_active_tx_context_index();
+  if (active_tx_index == INVALID_CONTEXT_INDEX) {
+    // No TX in progress - only update hardware if this is initial power configuration
+    if (current_tx_power == SL_RAIL_TX_POWER_MIN) {
+      RAIL_SetTxPowerDbm(mux_rail_handle, power);
+      current_tx_power = power;
+    }
+    pending_power_context = INVALID_CONTEXT_INDEX;
+  } else if (active_tx_index == context_index) {
+    // This context is currently transmitting, update its power immediately
+    RAIL_SetTxPowerDbm(mux_rail_handle, power);
+    current_tx_power = power;
+    pending_power_context = INVALID_CONTEXT_INDEX;
+  } else {
+    // Another context is transmitting, defer hardware update
+    pending_power_context = context_index;
+  }
+
   RAIL_MUX_EXIT_CRITICAL();
 
   return SL_RAIL_STATUS_NO_ERROR;
@@ -2080,6 +2100,13 @@ HIDDEN void fn_mux_rail_events_callback(sl_rail_handle_t railHandle, sl_rail_eve
     }
   }
 
+  // After all protocol callbacks, if TX completed and there's a pending power change, apply it
+  if ((events & SL_RAIL_EVENTS_TX_COMPLETION) && !tx_in_progress() && pending_power_context != INVALID_CONTEXT_INDEX) {
+    RAIL_SetTxPowerDbm(mux_rail_handle, protocol_context[pending_power_context].tx_power);
+    current_tx_power = protocol_context[pending_power_context].tx_power;
+    pending_power_context = INVALID_CONTEXT_INDEX;
+  }
+
   if (start_pending_tx) {
     fn_start_pending_tx();
   }
@@ -2096,9 +2123,6 @@ static sl_rail_status_t fn_start_pending_tx(void)
   if (tx_in_progress()) {
     return SL_RAIL_STATUS_NO_ERROR;
   }
-  // Set the TX power before starting a new transmission if there is a pending
-  // setTXpower to be done.
-  fn_update_current_tx_power();
 
   for (i = 0; i < SUPPORTED_PROTOCOL_COUNT; i++) {
     // Pending scheduled TX
@@ -2113,6 +2137,10 @@ static sl_rail_status_t fn_start_pending_tx(void)
         sl_rail_set_next_tx_repeat(mux_rail_handle, &protocol_context[i].tx_repeat_config);
         fn_set_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_CONFIG_REPEATED_TX, false);
       }
+
+      // Set TX power for this specific protocol context before setting up TX FIFO
+      fn_set_tx_power_for_context(i);
+
       //TODO: we might need to check if there is already scheduled TX, and it is by somebody with higher priority?
       // a new scheduled TX can overwrite the existing one with no priority considerataions
       if (fn_get_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_SETUP_TX_FIFO)) {
@@ -2120,6 +2148,8 @@ static sl_rail_status_t fn_start_pending_tx(void)
                             protocol_context[i].fifo_tx_info.tx_init_length,
                             0);
       }
+      // Set TX power for this specific protocol context before starting TX
+      fn_set_tx_power_for_context(i);
 
       fn_set_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_TX_SCHEDULED, true);
 
@@ -2168,6 +2198,9 @@ static sl_rail_status_t fn_start_pending_tx(void)
         fn_set_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_CONFIG_REPEATED_TX, false);
       }
 
+      // Set TX power for this specific protocol context before setting up TX FIFO
+      fn_set_tx_power_for_context(i);
+
       if (fn_get_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_SETUP_TX_FIFO)) {
         // We have to keep calling the setTxFifo() before each call to
         // sl_rail_write_tx_fifo() since  protocol B might have reset/recreated its
@@ -2177,6 +2210,8 @@ static sl_rail_status_t fn_start_pending_tx(void)
                             protocol_context[i].fifo_tx_info.tx_init_length,
                             0);
       }
+      // Set TX power for this specific protocol context before starting TX
+      fn_set_tx_power_for_context(i);
 
       fn_set_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_TX_IN_PROGRESS, true);
 
@@ -2215,22 +2250,17 @@ static sl_rail_status_t fn_start_pending_tx(void)
   return SL_RAIL_STATUS_NO_ERROR;
 }
 
+// Set TX power for a specific protocol context
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_RAIL_MUX_15_4, SL_CODE_CLASS_TIME_CRITICAL)
-static void fn_update_current_tx_power(void)
+static void fn_set_tx_power_for_context(uint8_t context_index)
 {
-  sl_rail_tx_power_t min_power = SL_RAIL_TX_POWER_MIN;
-  uint8_t i;
-
-  for (i = 0; i < SUPPORTED_PROTOCOL_COUNT; i++) {
-    if (protocol_context[i].tx_power != SL_RAIL_TX_POWER_MIN
-        && ((protocol_context[i].tx_power < min_power) || (min_power == SL_RAIL_TX_POWER_MIN))) {
-      min_power = protocol_context[i].tx_power;
+  if (protocol_context[context_index].tx_power != current_tx_power) {
+    current_tx_power = protocol_context[context_index].tx_power;
+    RAIL_SetTxPowerDbm(mux_rail_handle, current_tx_power);
+    // Clear pending power if we just applied it
+    if (pending_power_context == context_index) {
+      pending_power_context = INVALID_CONTEXT_INDEX;
     }
-  }
-
-  if (min_power != current_tx_power && !tx_in_progress()) {
-    current_tx_power = min_power;
-    sl_rail_set_tx_power_dbm(mux_rail_handle, current_tx_power);
   }
 }
 
@@ -2511,6 +2541,13 @@ sl_rail_status_t sl_rail_mux_StartTxStreamAlt(sl_rail_handle_t railHandle,
 
   RAIL_MUX_ENTER_CRITICAL();
   bool is_ok_to_proceed = check_lock_permissions(context_index);
+
+  if ( is_ok_to_proceed ) {
+    // Set TX power for this specific protocol context before starting TX stream
+    // Must be done inside critical section to avoid race conditions
+    fn_set_tx_power_for_context(context_index);
+  }
+
   RAIL_MUX_EXIT_CRITICAL();
 
   if ( is_ok_to_proceed ) {
@@ -2537,8 +2574,8 @@ bool sl_rail_mux_IsNextCcaNow(sl_rail_handle_t railHandle)
 
 sl_rail_status_t sl_rail_mux_util_ieee802154_config_radio(sl_rail_handle_t railHandle)
 {
-   (void)railHandle;
-   return sl_rail_util_ieee802154_config_radio(mux_rail_handle);
+  (void)railHandle;
+  return sl_rail_util_ieee802154_config_radio(mux_rail_handle);
 }
 
 #if defined(SL_CATALOG_RAIL_UTIL_IEEE802154_RX_DUTY_CYCLING_PRESENT) || defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_RX_DUTY_CYCLING_PRESENT)

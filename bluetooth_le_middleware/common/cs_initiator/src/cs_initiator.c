@@ -178,13 +178,7 @@ static bool cs_initiator_check_connection_parameters(cs_initiator_t *initiator,
                           initiator->config.min_connection_interval,
                           initiator->config.max_connection_interval,
                           parameters->interval);
-  } else if (initiator->config.latency != parameters->latency) {
-    initiator_log_warning(INSTANCE_PREFIX "CS - latency mismatch!"
-                                          " [expected: %u, actual: %u]" LOG_NL,
-                          initiator->conn_handle,
-                          initiator->config.latency,
-                          parameters->latency);
-  } else if (initiator->config.timeout != parameters->timeout) {
+  } else if (initiator->config.timeout > parameters->timeout) {
     initiator_log_warning(INSTANCE_PREFIX "CS - supervision timeout mismatch!"
                                           " [expected: %u, actual: %u]" LOG_NL,
                           initiator->conn_handle,

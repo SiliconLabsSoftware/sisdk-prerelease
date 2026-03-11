@@ -591,7 +591,7 @@ void SystemInit2(void)
 #if defined(__clang__)
 // Clang does not support naked functions which aren't fully inline asm.
 // Todo: rewrite function in assembly.
-__attribute__ ((noreturn)) static void bootToApp(uint32_t startOfAppSpace)
+__attribute__ ((noreturn)) static void boot_to_app(uint32_t startOfAppSpace)
 #else
 __attribute__ ((noreturn, naked)) static void boot_to_app(uint32_t startOfAppSpace)
 #endif

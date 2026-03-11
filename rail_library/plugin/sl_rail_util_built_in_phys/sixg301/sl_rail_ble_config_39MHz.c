@@ -2,7 +2,7 @@
  * @brief RAIL Configuration
  * @details
  *   WARNING: Auto-Generated Radio Config  -  DO NOT EDIT
- *   Radio Configurator Version: 2504.4.6
+ *   Radio Configurator Version: 2504.4.8
  *   RAIL Adapter Version: 2.4.33
  *   RAIL Compatibility: 2.x
  *******************************************************************************
@@ -33,47 +33,62 @@
  ******************************************************************************/
 #include "em_device.h"
 #include "sl_rail_ble_config_39MHz.h"
+#include "sl_code_classification.h"
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static const uint8_t irCalConfig_0[] = {
   25, 63, 1, 6, 4, 16, 1, 0, 0, 1, 1, 6, 0, 16, 39, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static const uint8_t irCalConfig_1[] = {
   25, 63, 1, 6, 4, 16, 1, 0, 0, 1, 1, 6, 0, 16, 39, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static const int32_t timingConfig_0[] = {
   50000, 9980, 3210, 1106
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static const int32_t timingConfig_1[] = {
   12492, 5460, 1520, 416
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static const int32_t timingConfig_2[] = {
   7000, 7930, 3182, 1058
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static const int32_t timingConfig_3[] = {
   6750, 7930, 3182, 1058
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static const int32_t timingConfig_4[] = {
   50000, 10700, 2000, 2000
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 __ALIGNED(4) static const uint8_t hfxoRetimingConfigEntries[] = {
   2, 0, 0, 0, 0xc0, 0x17, 0x53, 0x02, 6, 20, 0, 0, 0x80, 0x2f, 0xa6, 0x04, 5, 56, 0, 0, 0xa0, 0x08, 0, 0, 0, 0, 0x58, 0x09, 1, 4, 7, 6, 0x10, 0x0a, 1, 4, 7, 7, 0xc8, 0x0a, 0, 4, 8, 7, 0x80, 0x0b, 0, 4, 8, 8, 0x38, 0x0c, 0, 4, 9, 8, 0x61, 0x08, 0, 0, 0, 0, 0x8a, 0x08, 0, 0, 0, 0, 0xc7, 0x09, 1, 4, 4, 3, 0x2c, 0x0b, 1, 4, 4, 4, 0x92, 0x0c, 1, 4, 5, 4
 };
 
 #ifdef RADIO_CONFIG_ENABLE_STACK_INFO
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 __ALIGNED(4) static const uint8_t stackInfo_0[2] = { 0x03, 0x09 };
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 __ALIGNED(4) static const uint8_t stackInfo_1[2] = { 0x03, 0x01 };
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 __ALIGNED(4) static const uint8_t stackInfo_2[2] = { 0x03, 0x02 };
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 __ALIGNED(4) static const uint8_t stackInfo_3[2] = { 0x03, 0x03 };
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 __ALIGNED(4) static const uint8_t stackInfo_4[2] = { 0x03, 0x04 };
 #endif // RADIO_CONFIG_ENABLE_STACK_INFO
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static RAIL_ChannelConfigEntryAttr_t channelConfigEntryAttr_0 = {
 #if RAIL_SUPPORTS_OFDM_PA
   {
@@ -93,6 +108,7 @@ static RAIL_ChannelConfigEntryAttr_t channelConfigEntryAttr_0 = {
 #endif // RAIL_SUPPORTS_OFDM_PA
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static RAIL_ChannelConfigEntryAttr_t channelConfigEntryAttr_1 = {
 #if RAIL_SUPPORTS_OFDM_PA
   {
@@ -112,6 +128,7 @@ static RAIL_ChannelConfigEntryAttr_t channelConfigEntryAttr_1 = {
 #endif // RAIL_SUPPORTS_OFDM_PA
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static const uint32_t phyInfo_0[] = {
   20UL,
   0x00924924UL, // 146.28571428571428
@@ -136,6 +153,7 @@ static const uint32_t phyInfo_0[] = {
   (uint32_t) 0UL,
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static const uint32_t phyInfo_1[] = {
   20UL,
   0x00666666UL, // 102.39999999999999
@@ -160,6 +178,7 @@ static const uint32_t phyInfo_1[] = {
   (uint32_t) 0UL,
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static const uint32_t phyInfo_2[] = {
   20UL,
   0x0071C71CUL, // 113.77777777777776
@@ -184,6 +203,7 @@ static const uint32_t phyInfo_2[] = {
   (uint32_t) 0UL,
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static const uint32_t phyInfo_3[] = {
   20UL,
   0x0071C71CUL, // 113.77777777777776
@@ -208,6 +228,7 @@ static const uint32_t phyInfo_3[] = {
   (uint32_t) 0UL,
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static const uint32_t phyInfo_4[] = {
   20UL,
   0x0071C71CUL, // 113.77777777777776
@@ -232,6 +253,7 @@ static const uint32_t phyInfo_4[] = {
   (uint32_t) 0UL,
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 const uint32_t sl_rail_ble_phy_1Mbps_viterbi_39MHz_modemConfigBase[] = {
   0x03020000UL, 0x0000803FUL,
   /*    0004 */ 0x0001007EUL,
@@ -391,6 +413,7 @@ const uint32_t sl_rail_ble_phy_1Mbps_viterbi_39MHz_modemConfigBase[] = {
   0xFFFFFFFFUL,
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 const uint32_t sl_rail_ble_phy_1Mbps_viterbi_39MHz_modemConfig[] = {
   0x0301001CUL, (uint32_t) &phyInfo_0,
   0x03050008UL, 0x000779C5UL,
@@ -486,6 +509,7 @@ const uint32_t sl_rail_ble_phy_1Mbps_viterbi_39MHz_modemConfig[] = {
   0xFFFFFFFFUL,
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 const uint32_t sl_rail_ble_phy_2Mbps_viterbi_39MHz_0_34_modemConfig[] = {
   0x0301001CUL, (uint32_t) &phyInfo_1,
   0x03050008UL, 0x00055C2DUL,
@@ -581,6 +605,7 @@ const uint32_t sl_rail_ble_phy_2Mbps_viterbi_39MHz_0_34_modemConfig[] = {
   0xFFFFFFFFUL,
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 const uint32_t sl_rail_ble_phy_125kbps_39MHz_modemConfig[] = {
   0x0301001CUL, (uint32_t) &phyInfo_2,
   0x03050008UL, 0x000259C5UL,
@@ -676,7 +701,8 @@ const uint32_t sl_rail_ble_phy_125kbps_39MHz_modemConfig[] = {
   0xFFFFFFFFUL,
 };
 
-const uint32_t sl_rail_ble_phy_500kbps_39MHz_modemConfig[] = {
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
+const uint32_t sl_rail_ble_lr_dsa_500kb_39MHz_modemConfig[] = {
   0x0301001CUL, (uint32_t) &phyInfo_3,
   0x03050008UL, 0x000259C5UL,
   /*    000C */ 0x00025AC5UL,
@@ -771,6 +797,7 @@ const uint32_t sl_rail_ble_phy_500kbps_39MHz_modemConfig[] = {
   0xFFFFFFFFUL,
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 const uint32_t sl_rail_ble_phy_simulscan_39MHz_modemConfig[] = {
   0x0301001CUL, (uint32_t) &phyInfo_4,
   0x03050008UL, 0x000259C5UL,
@@ -866,6 +893,7 @@ const uint32_t sl_rail_ble_phy_simulscan_39MHz_modemConfig[] = {
   0xFFFFFFFFUL,
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_1Mbps_viterbi_39MHz_channels[] = {
   {
     .phyConfigDeltaAdd = sl_rail_ble_phy_1Mbps_viterbi_39MHz_modemConfig,
@@ -886,6 +914,7 @@ const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_1Mbps_viterbi_39MHz_channels[] =
   },
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_2Mbps_viterbi_39MHz_channels[] = {
   {
     .phyConfigDeltaAdd = sl_rail_ble_phy_2Mbps_viterbi_39MHz_0_34_modemConfig,
@@ -991,6 +1020,7 @@ const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_2Mbps_viterbi_39MHz_channels[] =
   },
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_125kbps_39MHz_channels[] = {
   {
     .phyConfigDeltaAdd = sl_rail_ble_phy_125kbps_39MHz_modemConfig,
@@ -1011,9 +1041,10 @@ const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_125kbps_39MHz_channels[] = {
   },
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_500kbps_39MHz_channels[] = {
   {
-    .phyConfigDeltaAdd = sl_rail_ble_phy_500kbps_39MHz_modemConfig,
+    .phyConfigDeltaAdd = sl_rail_ble_lr_dsa_500kb_39MHz_modemConfig,
     .baseFrequency = 2402000000,
     .channelSpacing = 2000000,
     .physicalChannelOffset = 0,
@@ -1031,6 +1062,7 @@ const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_500kbps_39MHz_channels[] = {
   },
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_simulscan_39MHz_channels[] = {
   {
     .phyConfigDeltaAdd = sl_rail_ble_phy_simulscan_39MHz_modemConfig,
@@ -1051,6 +1083,7 @@ const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_simulscan_39MHz_channels[] = {
   },
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 const RAIL_ChannelConfig_t sl_rail_ble_phy_1Mbps_viterbi_39MHz_channelConfig = {
   .phyConfigBase = sl_rail_ble_phy_1Mbps_viterbi_39MHz_modemConfigBase,
   .phyConfigDeltaSubtract = NULL,
@@ -1060,6 +1093,7 @@ const RAIL_ChannelConfig_t sl_rail_ble_phy_1Mbps_viterbi_39MHz_channelConfig = {
   .xtalFrequencyHz = 39000000UL,
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 const RAIL_ChannelConfig_t sl_rail_ble_phy_2Mbps_viterbi_39MHz_channelConfig = {
   .phyConfigBase = sl_rail_ble_phy_1Mbps_viterbi_39MHz_modemConfigBase,
   .phyConfigDeltaSubtract = NULL,
@@ -1069,6 +1103,7 @@ const RAIL_ChannelConfig_t sl_rail_ble_phy_2Mbps_viterbi_39MHz_channelConfig = {
   .xtalFrequencyHz = 39000000UL,
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 const RAIL_ChannelConfig_t sl_rail_ble_phy_125kbps_39MHz_channelConfig = {
   .phyConfigBase = sl_rail_ble_phy_1Mbps_viterbi_39MHz_modemConfigBase,
   .phyConfigDeltaSubtract = NULL,
@@ -1078,6 +1113,7 @@ const RAIL_ChannelConfig_t sl_rail_ble_phy_125kbps_39MHz_channelConfig = {
   .xtalFrequencyHz = 39000000UL,
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 const RAIL_ChannelConfig_t sl_rail_ble_phy_500kbps_39MHz_channelConfig = {
   .phyConfigBase = sl_rail_ble_phy_1Mbps_viterbi_39MHz_modemConfigBase,
   .phyConfigDeltaSubtract = NULL,
@@ -1087,6 +1123,7 @@ const RAIL_ChannelConfig_t sl_rail_ble_phy_500kbps_39MHz_channelConfig = {
   .xtalFrequencyHz = 39000000UL,
 };
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 const RAIL_ChannelConfig_t sl_rail_ble_phy_simulscan_39MHz_channelConfig = {
   .phyConfigBase = sl_rail_ble_phy_1Mbps_viterbi_39MHz_modemConfigBase,
   .phyConfigDeltaSubtract = NULL,

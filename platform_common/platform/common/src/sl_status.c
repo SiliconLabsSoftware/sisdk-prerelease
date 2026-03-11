@@ -42,9 +42,9 @@
 #define  SL_MAX_STATUS_STRING  100u
 
 // Status code prefix
-static const char *sli_status_prefix = "SL_STATUS_";
+static const char * const sli_status_prefix = "SL_STATUS_";
 
-static const char *sli_status_group_name[] =
+static const char * const sli_status_group_name[] =
 {
   "",
 #if SL_STATUS_STRING_ENABLE_PLATFORM == 1
@@ -134,7 +134,7 @@ static const char *sli_status_group_name[] =
 
 // Status code names (generic group)
 #if SL_STATUS_STRING_ENABLE_GENERIC == 1
-static const char *sli_status_group_generic[] =
+static const char * const sli_status_group_generic[] =
 {
   "OK",
   "FAIL",
@@ -260,7 +260,7 @@ static const char *sli_status_group_generic[] =
 
 // Status code names (zigbee group)
 #if SL_STATUS_STRING_ENABLE_ZIGBEE == 1
-static const char *sli_status_group_zigbee[] =
+static const char * const sli_status_group_zigbee[] =
 {
   "",
   "PACKET_HANDOFF_DROPPED",
@@ -309,7 +309,7 @@ static const char *sli_status_group_zigbee[] =
 
 // Status code names (bluetooth group)
 #if SL_STATUS_STRING_ENABLE_BLUETOOTH == 1
-static const char *sli_status_group_bluetooth[] =
+static const char * const sli_status_group_bluetooth[] =
 {
   "",
   "",
@@ -347,7 +347,7 @@ static const char *sli_status_group_bluetooth[] =
 
 // Status code names (bluetooth ctrl group)
 #if SL_STATUS_STRING_ENABLE_BLUETOOTH == 1
-static const char *sli_status_group_bluetooth_ctrl[] =
+static const char * const sli_status_group_bluetooth_ctrl[] =
 {
   "",
   "UNKNOWN_HCI_COMMAND",
@@ -427,7 +427,7 @@ static const char *sli_status_group_bluetooth_ctrl[] =
 
 // Status code names (bluetooth att group)
 #if SL_STATUS_STRING_ENABLE_BLUETOOTH == 1
-static const char *sli_status_group_bluetooth_att[] =
+static const char * const sli_status_group_bluetooth_att[] =
 {
   "",
   "INVALID_HANDLE",
@@ -690,7 +690,7 @@ static const char *sli_status_group_bluetooth_att[] =
 
 // Status code names (bluetooth smp group)
 #if SL_STATUS_STRING_ENABLE_BLUETOOTH == 1
-static const char *sli_status_group_bluetooth_smp[] =
+static const char * const sli_status_group_bluetooth_smp[] =
 {
   "",
   "PASSKEY_ENTRY_FAILED",
@@ -714,7 +714,7 @@ static const char *sli_status_group_bluetooth_smp[] =
 
 // Status code names (bluetooth mesh group)
 #if SL_STATUS_STRING_ENABLE_BLUETOOTH == 1
-static const char *sli_status_group_bluetooth_mesh[] =
+static const char * const sli_status_group_bluetooth_mesh[] =
 {
   "",
   "ALREADY_EXISTS",
@@ -743,7 +743,7 @@ static const char *sli_status_group_bluetooth_mesh[] =
 
 // Status code names (bluetooth mesh foundation group)
 #if SL_STATUS_STRING_ENABLE_BLUETOOTH == 1
-static const char *sli_status_group_bluetooth_mesh_foundation[] =
+static const char * const sli_status_group_bluetooth_mesh_foundation[] =
 {
   "",
   "INVALID_ADDRESS",
@@ -768,7 +768,7 @@ static const char *sli_status_group_bluetooth_mesh_foundation[] =
 
 // Status code names (wifi group)
 #if SL_STATUS_STRING_ENABLE_WIFI == 1
-static const char *sli_status_group_wifi[] =
+static const char * const sli_status_group_wifi[] =
 {
   "",
   "INVALID_KEY",
@@ -808,7 +808,7 @@ static const char *sli_status_group_wifi[] =
 
 // Status code names for MVP driver and MVP Math library
 #if SL_STATUS_STRING_ENABLE_COMPUTE == 1
-static const char *sli_status_group_compute[] =
+static const char * const sli_status_group_compute[] =
 {
   "",
   "DRIVER_FAULT",
@@ -836,7 +836,7 @@ static const char *sli_status_group_compute[] =
 #endif
 
 // Table of pointers to groups status codes
-static const char **sli_status_group[] =
+static const char *const * const sli_status_group[] =
 {
 #if SL_STATUS_STRING_ENABLE_GENERIC == 1
   sli_status_group_generic,
@@ -1023,3 +1023,4 @@ void sl_status_print(sl_status_t status)
     }
   }
 }
+

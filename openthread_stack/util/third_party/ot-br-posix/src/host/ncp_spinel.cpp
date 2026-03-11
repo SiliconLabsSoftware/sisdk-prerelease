@@ -41,6 +41,7 @@
 
 #include "common/code_utils.hpp"
 #include "common/logging.hpp"
+#include "host/posix/dnssd.hpp"
 #include "lib/spinel/spinel.h"
 #include "lib/spinel/spinel_decoder.hpp"
 #include "lib/spinel/spinel_driver.hpp"
@@ -63,6 +64,9 @@ NcpSpinel::NcpSpinel(void)
     , mPropsObserver(nullptr)
 #if OTBR_ENABLE_SRP_ADVERTISING_PROXY
     , mPublisher(nullptr)
+#endif
+#if OTBR_ENABLE_DNSSD_PLAT
+    , mDiscoveryProxyId(0)
 #endif
 {
     std::fill_n(mWaitingKeyTable, SPINEL_PROP_LAST_STATUS, sizeof(mWaitingKeyTable));
@@ -438,6 +442,12 @@ void NcpSpinel::HandleValueIs(spinel_prop_key_t aKey, const uint8_t *aBuffer, ui
 
         SuccessOrExit(error = SpinelDataUnpack(aBuffer, aLength, SPINEL_DATATYPE_UINT_PACKED_S, &status));
 
+        if (status >= SPINEL_STATUS_RESET__BEGIN && status <= SPINEL_STATUS_RESET__END)
+        {
+            HandleNcpUnexpectedReset(status);
+            ExitNow();
+        }
+
         otbrLogInfo("NCP last status: %s", spinel_status_to_cstr(status));
         break;
     }
@@ -604,19 +614,6 @@ void NcpSpinel::HandleValueIs(spinel_prop_key_t aKey, const uint8_t *aBuffer, ui
         break;
     }
 
-    case SPINEL_PROP_TREL_UDP_PORT:
-    {
-        uint16_t port;
-        SuccessOrExit(error = SpinelDataUnpack(aBuffer, aLength, SPINEL_DATATYPE_UINT16_S, &port));
-        if (port != mTrelPort)
-        {
-            mTrelPort = port;
-            SafeInvoke(mTrelPortChangedCallback, mTrelPort);
-        }
-        otbrLogInfo("TREL UDP port updated: %u", port);
-        break;
-    }
-
     default:
         otbrLogWarning("Received unrecognized key: %u", aKey);
         break;
@@ -626,68 +623,6 @@ exit:
     otbrLogResult(error, "%s, Property:%s", __FUNCTION__, spinel_prop_key_to_cstr(aKey));
     return;
 }
-
-void ParseTrelPeerInfo(ot::Spinel::Decoder &aDecoder, NcpSpinel::TrelPeerInfo &aPeerInfo, otbrError &aError)
-{
-    const otExtAddress *extAddr;
-    const otIp6Address *ip6;
-    uint16_t            port;
-    uint8_t             flags;
-    const uint8_t      *txtData;
-    uint16_t            txtLen;
-    SuccessOrExit(aDecoder.ReadEui64(extAddr), aError = OTBR_ERROR_PARSE);
-    memcpy(aPeerInfo.mExtAddr, extAddr->m8, sizeof(aPeerInfo.mExtAddr));
-    SuccessOrExit(aDecoder.ReadIp6Address(ip6), aError = OTBR_ERROR_PARSE);
-    memcpy(&aPeerInfo.mIp6Addr, ip6->mFields.m8, sizeof(aPeerInfo.mIp6Addr.mFields.m8));
-    SuccessOrExit(aDecoder.ReadUint16(port), aError = OTBR_ERROR_PARSE);
-    aPeerInfo.mPort = port;
-    SuccessOrExit(aDecoder.ReadUint8(flags), aError = OTBR_ERROR_PARSE);
-    aPeerInfo.mFlags = flags;
-    SuccessOrExit(aDecoder.ReadUint16(txtLen), aError = OTBR_ERROR_PARSE);
-    SuccessOrExit(aDecoder.ReadData(txtData, txtLen), aError = OTBR_ERROR_PARSE);
-    aPeerInfo.mTxtData.assign(txtData, txtData + txtLen);
-exit:
-    return;
-}
-
-otError NcpSpinel::EncodeTrelPeerInfo(const TrelPeerInfo &aPeerInfo, ot::Spinel::Encoder &aEncoder)
-{
-    otError      error = OT_ERROR_NONE;
-    otExtAddress ext;
-    memcpy(ext.m8, aPeerInfo.mExtAddr, sizeof(ext.m8));
-    SuccessOrExit(error = aEncoder.WriteEui64(ext));
-    SuccessOrExit(error = aEncoder.WriteIp6Address(aPeerInfo.mIp6Addr));
-    SuccessOrExit(error = aEncoder.WriteUint16(aPeerInfo.mPort));
-    SuccessOrExit(error = aEncoder.WriteUint8(aPeerInfo.mFlags));
-    SuccessOrExit(error = aEncoder.WriteUint16(static_cast<uint16_t>(aPeerInfo.mTxtData.size())));
-    if (!aPeerInfo.mTxtData.empty())
-    {
-        SuccessOrExit(
-            error = aEncoder.WriteData(aPeerInfo.mTxtData.data(), static_cast<uint16_t>(aPeerInfo.mTxtData.size())));
-    }
-exit:
-    return error;
-}
-
-#if OTBR_ENABLE_TREL
-otError NcpSpinel::InsertTrelPeer(const TrelPeerInfo &aPeerInfo)
-{
-    EncodingFunc encodingFunc = [this, &aPeerInfo](ot::Spinel::Encoder &aEncoder) {
-        return EncodeTrelPeerInfo(aPeerInfo, aEncoder);
-    };
-    return InsertProperty(SPINEL_PROP_TREL_PEER_INFO, encodingFunc);
-}
-
-otError NcpSpinel::RemoveTrelPeer(const TrelPeerInfo &aPeerInfo)
-{
-    TrelPeerInfo tmp = aPeerInfo;
-    tmp.mFlags |= 0x01;
-    EncodingFunc encodingFunc = [this, &tmp](ot::Spinel::Encoder &aEncoder) {
-        return EncodeTrelPeerInfo(tmp, aEncoder);
-    };
-    return RemoveProperty(SPINEL_PROP_TREL_PEER_INFO, encodingFunc);
-}
-#endif // OTBR_ENABLE_TREL
 
 #if OTBR_ENABLE_SRP_ADVERTISING_PROXY
 static std::string KeyNameFor(const otPlatDnssdKey &aKey)
@@ -783,6 +718,26 @@ void NcpSpinel::HandleValueInserted(spinel_prop_key_t aKey, const uint8_t *aBuff
         break;
     }
 #endif // OTBR_ENABLE_SRP_ADVERTISING_PROXY
+#if OTBR_ENABLE_DNSSD_PLAT
+    case SPINEL_PROP_DNSSD_BROWSER:
+    {
+        otPlatDnssdBrowser   browser;
+        const uint8_t       *callbackData;
+        uint16_t             callbackDataSize;
+        std::vector<uint8_t> callbackDataCopy;
+
+        SuccessOrExit(ot::Spinel::DecodeDnssdBrowser(decoder, browser, callbackData, callbackDataSize));
+        callbackDataCopy.assign(callbackData, callbackData + callbackDataSize);
+
+        DnssdPlatform::Get().StartServiceBrowser(browser,
+                                                 std::make_shared<DnssdPlatform::StdBrowseCallback>(
+                                                     [this, callbackDataCopy](const otPlatDnssdBrowseResult &aResult) {
+                                                         SendDnssdBrowseResult(aResult, callbackDataCopy);
+                                                     },
+                                                     mDiscoveryProxyId++));
+        break;
+    }
+#endif // OTBR_ENABLE_DNSSD_PLAT
     case SPINEL_PROP_BACKBONE_ROUTER_MULTICAST_LISTENER:
     {
         const otIp6Address *addr;
@@ -790,33 +745,6 @@ void NcpSpinel::HandleValueInserted(spinel_prop_key_t aKey, const uint8_t *aBuff
         VerifyOrExit(decoder.ReadIp6Address(addr) == OT_ERROR_NONE, error = OTBR_ERROR_PARSE);
         SafeInvoke(mBackboneRouterMulticastListenerCallback, OT_BACKBONE_ROUTER_MULTICAST_LISTENER_ADDED,
                    Ip6Address(*addr));
-        break;
-    }
-    case SPINEL_PROP_MAC_EXTENDED_ADDR:
-    {
-        const otExtAddress *ext;
-        VerifyOrExit(decoder.ReadEui64(ext) == OT_ERROR_NONE, error = OTBR_ERROR_PARSE);
-        SafeInvoke(mExtAddrChangedCallback, ext->m8);
-        break;
-    }
-    case SPINEL_PROP_NET_XPANID:
-    {
-        const uint8_t *xp;
-        uint16_t       xpLen;
-        VerifyOrExit(decoder.ReadData(xp, xpLen) == OT_ERROR_NONE, error = OTBR_ERROR_PARSE);
-        VerifyOrExit(xpLen == OT_EXT_PAN_ID_SIZE, error = OTBR_ERROR_PARSE);
-        SafeInvoke(mExtPanIdChangedCallback, xp);
-        break;
-    }
-    case SPINEL_PROP_TREL_PEER_INFO:
-    {
-        decoder.Init(aBuffer, aLength);
-        TrelPeerInfo peerInfo;
-        ParseTrelPeerInfo(decoder, peerInfo, error);
-        if (error == OTBR_ERROR_NONE)
-        {
-            SafeInvoke(mTrelPeerAddedCallback, peerInfo);
-        }
         break;
     }
     default:
@@ -902,17 +830,6 @@ void NcpSpinel::HandleValueRemoved(spinel_prop_key_t aKey, const uint8_t *aBuffe
                    Ip6Address(*addr));
         break;
     }
-    case SPINEL_PROP_TREL_PEER_INFO:
-    {
-        TrelPeerInfo peerInfo;
-        ParseTrelPeerInfo(decoder, peerInfo, error);
-        if (error == OTBR_ERROR_NONE)
-        {
-            peerInfo.mFlags |= 0x01; // Removed flag
-            SafeInvoke(mTrelPeerRemovedCallback, peerInfo);
-        }
-        break;
-    }
     default:
         error = OTBR_ERROR_DROPPED;
         break;
@@ -946,26 +863,6 @@ otbrError NcpSpinel::HandleResponseForPropGet(spinel_tid_t      aTid,
         SuccessOrExit(decoder.ReadData(data, dataLen), error = OTBR_ERROR_PARSE);
 
         SafeInvoke(mBorderAgentMeshCoPServiceChangedCallback, isActive, port, data, dataLen);
-        break;
-    }
-    case SPINEL_PROP_MAC_EXTENDED_ADDR:
-    {
-        const otExtAddress *ext;
-        ot::Spinel::Decoder decoder;
-        decoder.Init(aData, aLength);
-        SuccessOrExit(decoder.ReadEui64(ext), error = OTBR_ERROR_PARSE);
-        SafeInvoke(mExtAddrChangedCallback, ext->m8);
-        break;
-    }
-    case SPINEL_PROP_NET_XPANID:
-    {
-        const uint8_t      *xp;
-        uint16_t            xpLen;
-        ot::Spinel::Decoder decoder;
-        decoder.Init(aData, aLength);
-        SuccessOrExit(decoder.ReadData(xp, xpLen), error = OTBR_ERROR_PARSE);
-        VerifyOrExit(xpLen == OT_EXT_PAN_ID_SIZE, error = OTBR_ERROR_PARSE);
-        SafeInvoke(mExtPanIdChangedCallback, xp);
         break;
     }
 
@@ -1146,6 +1043,13 @@ otbrError NcpSpinel::HandleResponseForPropRemove(spinel_tid_t      aTid,
 exit:
     otbrLogResult(error, "HandleResponseForPropRemove, key:%u", mWaitingKeyTable[aTid]);
     return error;
+}
+
+void NcpSpinel::HandleNcpUnexpectedReset(spinel_status_t aStatus)
+{
+    otbrLogCrit("Unexpected NCP reset: %s", spinel_status_to_cstr(aStatus));
+
+    DieNow("NCP reset detected!");
 }
 
 otbrError NcpSpinel::Ip6MulAddrUpdateSubscription(const otIp6Address &aAddress, bool aIsAdded)
@@ -1439,6 +1343,25 @@ otError NcpSpinel::SendDnssdResult(otPlatDnssdRequestId        aRequestId,
     return error;
 }
 
+#if OTBR_ENABLE_DNSSD_PLAT
+otError NcpSpinel::SendDnssdBrowseResult(const otPlatDnssdBrowseResult &aResult,
+                                         const std::vector<uint8_t>    &aCallbackData)
+{
+    otError      error        = OT_ERROR_NONE;
+    EncodingFunc encodingFunc = [&aResult, &aCallbackData](ot::Spinel::Encoder &aEncoder) {
+        return EncodeDnssdBrowseResult(aEncoder, aResult, aCallbackData.data(), aCallbackData.size());
+    };
+
+    error = SetProperty(SPINEL_PROP_DNSSD_BROWSE_RESULT, encodingFunc);
+    if (error != OT_ERROR_NONE)
+    {
+        otbrLogWarning("Failed to Send DnssdBrowseResult, %s", otThreadErrorToString(error));
+    }
+
+    return error;
+}
+#endif
+
 otbrError NcpSpinel::SetInfraIf(uint32_t aInfraIfIndex, bool aIsRunning, const std::vector<Ip6Address> &aIp6Addresses)
 {
     otbrError    error        = OTBR_ERROR_NONE;
@@ -1660,9 +1583,9 @@ void NcpSpinel::BorderRoutingSetDhcp6PdEnabled(bool aEnabled)
     }
 }
 
-otError NcpSpinel::BorderRoutingProcessDhcp6PdPrefix(const otBorderRoutingPrefixTableEntry *aPrefixInfo)
+otbrError NcpSpinel::BorderRoutingProcessDhcp6PdPrefix(const otBorderRoutingPrefixTableEntry *aPrefixInfo)
 {
-    otError      error        = OT_ERROR_NONE;
+    otbrError    error        = OTBR_ERROR_NONE;
     EncodingFunc encodingFunc = [aPrefixInfo](ot::Spinel::Encoder &aEncoder) {
         otError error = OT_ERROR_NONE;
 
@@ -1678,12 +1601,9 @@ otError NcpSpinel::BorderRoutingProcessDhcp6PdPrefix(const otBorderRoutingPrefix
         return error;
     };
 
-    error = SetProperty(SPINEL_PROP_BORDER_ROUTER_DHCP6_PD_PREFIX, encodingFunc);
-    if (error != OT_ERROR_NONE)
-    {
-        otbrLogWarning("Failed to send DHCP6 PD prefix to NCP, %s", otThreadErrorToString(error));
-    }
+    SuccessOrExit(SetProperty(SPINEL_PROP_BORDER_ROUTER_DHCP6_PD_PREFIX, encodingFunc), error = OTBR_ERROR_OPENTHREAD);
 
+exit:
     return error;
 }
 #endif // OTBR_ENABLE_DHCP6_PD && OTBR_ENABLE_BORDER_ROUTING

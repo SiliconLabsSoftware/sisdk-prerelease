@@ -101,6 +101,10 @@
 #include "sl_bt_pawr_sync_config.h"
 #endif
 
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_AFH_PRESENT)
+#include "sl_bluetooth_afh_config.h"
+#endif
+
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_ANALYZER_PRESENT)
 #include "sl_bluetooth_connection_analyzer_config.h"
 #endif
@@ -446,16 +450,14 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
 #endif
 #endif
 
-#if defined(SL_CATALOG_BLUETOOTH_FEATURE_AOA_RECEIVER_PRESENT) \
-  || defined(SL_CATALOG_BLUETOOTH_FEATURE_AOD_RECEIVER_PRESENT)
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CTE_RECEIVER_PRESENT)
   status = sl_btctrl_init_cte_receiver();
   if (status != SL_STATUS_OK) {
     return status;
   }
 #endif
 
-#if defined(SL_CATALOG_BLUETOOTH_FEATURE_AOA_TRANSMITTER_PRESENT) \
-  || defined(SL_CATALOG_BLUETOOTH_FEATURE_AOD_TRANSMITTER_PRESENT)
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CTE_TRANSMITTER_PRESENT)
   status = sl_btctrl_init_cte_transmitter();
   if (status != SL_STATUS_OK) {
     return status;

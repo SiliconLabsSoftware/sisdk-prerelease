@@ -307,8 +307,8 @@ static void zigbee_large_network_event_handler(sl_zigbee_af_event_t *event)
                                              messageTag, // tag
                                              zigbee_tx_test_info.message_length,
                                              zigbee_tx_test_info.message_payload,
-                                             NULL)) {
-    out_seq = aps_frame.sequence;
+                                             &apsf.sequence)) {
+    out_seq = apsf.sequence;
   #else
   if (SL_STATUS_OK == sli_zigbee_af_fragmentation_send_unicast(outgoing_type,
                                                                zigbee_tx_test_info.destination,
@@ -376,7 +376,7 @@ static void zigbee_tx_test_event_handler(sl_zigbee_af_event_t *event)
                                              0xFFFF,        // tag
                                              zigbee_tx_test_info.message_length,
                                              zigbee_tx_test_info.message_payload,
-                                             NULL)) {
+                                             &aps_frame.sequence)) {
     zigbee_tx_test_info.message_running_count++;
     zigbee_tx_test_info.current_in_flight++;
     sequence_counter++;

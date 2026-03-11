@@ -227,7 +227,7 @@ void app_process_action(void)
   sl_rail_handle_t rail_handle = sl_rail_util_get_handle(SL_RAIL_UTIL_HANDLE_INST0);
 
   if (current_rail_err != 0) {
-    app_log_error("RAIL Error occurred\nEvents: %lld\n", current_rail_err);
+    app_log_error("RAIL Error occurred\nEvents: 0x%016llX\n", current_rail_err);
     current_rail_err = 0;
   }
 
@@ -428,7 +428,7 @@ void transmit_packet(sl_rail_handle_t rail_handle)
   prepare_packet(rail_handle, out_packet, sizeof(out_packet));
   rail_status = sl_rail_start_tx(rail_handle, get_selected_channel(), SL_RAIL_TX_OPTIONS_DEFAULT, NULL);
   if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
-    app_log_warning("sl_rail_start_tx() result: %lu ", rail_status);
+    app_log_warning("sl_rail_start_tx() result: 0x%08lX ", rail_status);
   }
 }
 
@@ -502,12 +502,12 @@ static void save_received_packet(sl_rail_handle_t rail_handle)
     if (packet_info.packet_bytes <= SL_RAIL_SDK_RX_FIFO_SIZE) {
       uint16_t packet_size = unpack_packet(rail_handle, rx_buffer, &packet_info, &start_of_packet);
       if (packet_size == 0) {
-        app_log_warning("Received packet size is :%d", packet_size);
+        app_log_warning("Received packet size is :%u", packet_size);
       }
     }
     rail_status = sl_rail_release_rx_packet(rail_handle, SL_RAIL_RX_PACKET_HANDLE_OLDEST_COMPLETE);
     if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
-      app_log_warning("sl_rail_release_rx_packet() result: %lu", rail_status);
+      app_log_warning("sl_rail_release_rx_packet() result: 0x%08lX", rail_status);
     }
     rx_packet_handle = sl_rail_get_rx_packet_info(rail_handle, SL_RAIL_RX_PACKET_HANDLE_OLDEST_COMPLETE, &packet_info);
   }

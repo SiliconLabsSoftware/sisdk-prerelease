@@ -34,6 +34,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <inttypes.h>
 #include "sl_component_catalog.h"
 #include "app_menu.h"
 #include "app_measurement.h"
@@ -255,7 +256,7 @@ void init_range_test_standard_phys(uint8_t* number_of_phys)
   // Added 3rd buffer as only 2 buffer is supported by default
   status = sl_rail_add_state_buffer_3(RAIL_EFR32_HANDLE);
   if (status != SL_RAIL_STATUS_NO_ERROR) {
-    app_log_error("sl_rail_add_state_buffer_3 error, 3rd state buffer was previously added or this isn't the RAIL multiprotocol library. Error code: %lX", status);
+    app_log_error("sl_rail_add_state_buffer_3 error, 3rd state buffer was previously added or this isn't the RAIL multiprotocol library. Error code: 0x%08" PRIX32, status);
   }
 #endif
 
@@ -272,7 +273,7 @@ void init_range_test_standard_phys(uint8_t* number_of_phys)
     rail_standard_configs[i].p_tx_fifo_buffer = sli_tx_fifo_buffer;
 
     status =  sl_rail_init(&rail_handles[i], &rail_standard_configs[i], NULL);
-    app_assert(rail_handles[i] != NULL, "Init failed on %s with error code %ld", i == 0 ? "BLE" : "IEEE", status);
+    app_assert(rail_handles[i] != NULL, "Init failed on %s with error code 0x%08" PRIX32, i == 0 ? "BLE" : "IEEE", status);
 
     while (!sl_rail_is_initialized(rail_handles[i])) ;
 
@@ -324,7 +325,7 @@ void init_range_test_standard_phys(uint8_t* number_of_phys)
       // To get the default to switch from
       status = sl_rail_ble_config_phy_1_mbps(rail_handles[PROT_BLE]);
       if (status != SL_RAIL_STATUS_NO_ERROR) {
-        app_log_error("sl_rail_ble_config_phy_1_mbps failed with %lu\n", status);
+        app_log_error("sl_rail_ble_config_phy_1_mbps failed with 0x%08" PRIX32 "\n", status);
       }
 
       sl_rail_idle(rail_handles[i], SL_RAIL_IDLE, true);
@@ -392,7 +393,7 @@ bool ble_protocol_change(void)
         status = sl_rail_ble_config_phy_coded(rail_handles[PROT_BLE],
                                               SL_RAIL_BLE_CODING_125_KBPS);
         if (status != SL_RAIL_STATUS_NO_ERROR) {
-          app_log_error("SL_RAIL_BLE_CODING_125_KBPS failed with %lu\n", status);
+          app_log_error("SL_RAIL_BLE_CODING_125_KBPS failed with 0x%08" PRIX32 "\n", status);
         }
       }
       break;
@@ -401,7 +402,7 @@ bool ble_protocol_change(void)
         status = sl_rail_ble_config_phy_coded(rail_handles[PROT_BLE],
                                               SL_RAIL_BLE_CODING_500_KBPS);
         if (status != SL_RAIL_STATUS_NO_ERROR) {
-          app_log_error("SL_RAIL_BLE_CODING_500_KBPS failed with %lu\n", status);
+          app_log_error("SL_RAIL_BLE_CODING_500_KBPS failed with 0x%08" PRIX32 "\n", status);
         }
       }
       break;
@@ -411,7 +412,7 @@ bool ble_protocol_change(void)
       if (range_test_std_phys[current_phy_standard_value()].is_supported) {
         status = sl_rail_ble_config_phy_1_mbps(rail_handles[PROT_BLE]);
         if (status != SL_RAIL_STATUS_NO_ERROR) {
-          app_log_error("sl_rail_ble_config_phy_1_mbps failed with %lu\n", status);
+          app_log_error("sl_rail_ble_config_phy_1_mbps failed with 0x%08" PRIX32 "\n", status);
         }
       }
       break;
@@ -421,7 +422,7 @@ bool ble_protocol_change(void)
       if (range_test_std_phys[current_phy_standard_value()].is_supported) {
         status = sl_rail_ble_config_phy_2_mbps(rail_handles[PROT_BLE]);
         if (status != SL_RAIL_STATUS_NO_ERROR) {
-          app_log_error("sl_rail_ble_config_phy_2_mbps failed with %lu\n", status);
+          app_log_error("sl_rail_ble_config_phy_2_mbps failed with 0x%08" PRIX32 "\n", status);
         }
       }
       break;
@@ -853,28 +854,28 @@ void std_phy_list_generation(uint8_t phy_index, uint8_t *buffer, uint8_t *length
     switch (std_phy_index) {
 #if SL_RAIL_SUPPORTS_PROTOCOL_IEEE802154
       case IEEE802154_250KBPS:
-        snprintf((char*)(&buffer[*length]), 255, "%u:IEEE 802.15.4,", phy_index);
+        snprintf((char*)(&buffer[*length]), 255, "%" PRIu8 ":IEEE 802.15.4,", phy_index);
         break;
       case IEEE802154_250KBPS_ANTDIV:
-        snprintf((char*)(&buffer[*length]), 255, "%u:IEEE 802.15.4 ANTDIV,", phy_index);
+        snprintf((char*)(&buffer[*length]), 255, "%" PRIu8 ":IEEE 802.15.4 ANTDIV,", phy_index);
         break;
 #endif
 #if SL_RAIL_BLE_SUPPORTS_CODED_PHY
       case BLE_125KBPS:
-        snprintf((char*)(&buffer[*length]), 255, "%u:BLE 125kbps,", phy_index);
+        snprintf((char*)(&buffer[*length]), 255, "%" PRIu8 ":BLE 125kbps,", phy_index);
         break;
       case BLE_500KBPS:
-        snprintf((char*)(&buffer[*length]), 255, "%u:BLE 500kbps,", phy_index);
+        snprintf((char*)(&buffer[*length]), 255, "%" PRIu8 ":BLE 500kbps,", phy_index);
         break;
 #endif
 #if SL_RAIL_BLE_SUPPORTS_1_MBPS
       case BLE_1MBPS:
-        snprintf((char*)(&buffer[*length]), 255, "%u:BLE 1Mbps,", phy_index);
+        snprintf((char*)(&buffer[*length]), 255, "%" PRIu8 ":BLE 1Mbps,", phy_index);
         break;
 #endif
 #if SL_RAIL_BLE_SUPPORTS_2_MBPS
       case BLE_2MBPS:
-        snprintf((char*)(&buffer[*length]), 255, "%u:BLE 2Mbps,", phy_index);
+        snprintf((char*)(&buffer[*length]), 255, "%" PRIu8 ":BLE 2Mbps,", phy_index);
         break;
 #endif
     }

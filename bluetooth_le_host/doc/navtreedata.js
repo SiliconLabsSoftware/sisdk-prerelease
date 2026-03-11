@@ -64,7 +64,7 @@ var NAVTREEINDEX =
 "group__sl__bt__evt__gatt__server__user__read__request.html#a979a5ffec478f170aba16021ab2eeece",
 "group__sl__bt__evt__system__boot.html",
 "group__sl__bt__l2cap.html#ga04c047b6f61188f5b77de18e9402ba5e",
-"group__sl__bt__utility__functions.html#ga6662f56ac1b8ba5051b1cbb5f0031aa0"
+"group__sl__bt__utility__functions.html#ga840b2449b01c063776d48203138f2115"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

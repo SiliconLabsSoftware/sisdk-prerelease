@@ -338,9 +338,9 @@ define block text_{{component}}_ram with alignment = {{ram_code_alignment}}
   readwrite code section text_{{selection['component']}}_*{{selection['class']}}*,
 {%- endif %}
 {%- endfor %}
-{%- if "timecritical" in code_classification_standard_selections %}
-  readwrite code section text_{{component}}_*timecritical*,
-{%- endif %}
+{%- for selection in code_classification_standard_selections %}
+  readwrite code section text_{{component}}_*{{selection}}*,
+{%- endfor %}
 };
 
 define block text_{{component}}_ram_init with alignment = {{ram_code_alignment}}
@@ -350,9 +350,9 @@ define block text_{{component}}_ram_init with alignment = {{ram_code_alignment}}
   readonly code section text_{{selection['component']}}_*{{selection['class']}}*_init,
 {%- endif %}
 {%- endfor %}
-{%- if "timecritical" in code_classification_standard_selections %}
-  readonly code section text_{{component}}_*timecritical*_init,
-{%- endif %}
+{%- for selection in code_classification_standard_selections %}
+  readonly code section text_{{component}}_*{{selection}}*_init,
+{%- endfor %}
 };
 
 initialize manually
@@ -362,9 +362,9 @@ initialize manually
   readonly section text_{{selection['component']}}_*{{selection['class']}}*,
 {%- endif %}
 {%- endfor %}
-{%- if "timecritical" in code_classification_standard_selections %}
-  readonly section text_{{component}}_*timecritical*,
-{%- endif %}
+{%- for selection in code_classification_standard_selections %}
+  readonly section text_{{component}}_*{{selection}}*,
+{%- endfor %}
 };
 
 {%- endfor %}

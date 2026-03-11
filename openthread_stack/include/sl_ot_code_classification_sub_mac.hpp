@@ -29,8 +29,8 @@
  *
  ******************************************************************************/
 
-#ifndef SUB_MAC_HPP_
-#define SUB_MAC_HPP_
+#ifndef OT_CORE_MAC_SUB_MAC_HPP_
+#define OT_CORE_MAC_SUB_MAC_HPP_
 
 #include "openthread-core-config.h"
 
@@ -557,6 +557,8 @@ private:
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void        GetCslWindowEdges(uint32_t &aAhead, uint32_t &aAfter);
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+    uint32_t    GetNextCycleDrift(void);
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     uint32_t    GetLocalTime(void);
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     bool        IsCslEnabled(void) const { return mCslPeriod > 0; }
@@ -793,4 +795,4 @@ private:
 } // namespace Mac
 } // namespace ot
 
-#endif // SUB_MAC_HPP_
+#endif // OT_CORE_MAC_SUB_MAC_HPP_

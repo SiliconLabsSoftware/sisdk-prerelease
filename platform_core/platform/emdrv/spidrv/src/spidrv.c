@@ -124,6 +124,7 @@ static Ecode_t SPIDRV_InitUsart(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
 
 #if defined(EUSART_PRESENT)
 static Ecode_t SPIDRV_InitEusart(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData);
+static Ecode_t spidrvCheckDuplicateHandle(SPIDRV_Handle_t handle);
 #endif
 
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SPIDRV, SL_CODE_CLASS_TIME_CRITICAL)
@@ -246,7 +247,14 @@ Ecode_t SPIDRV_Init(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
   Ecode_t result = ECODE_EMDRV_SPIDRV_PARAM_ERROR;
 
   if (EUSART_NUM((EUSART_TypeDef*)initData->port) != -1) {
+    result = spidrvCheckDuplicateHandle(handle);
+    if (result != ECODE_EMDRV_SPIDRV_OK) {
+      return result;
+    }
     result = SPIDRV_InitEusart(handle, initData);
+    if (result != ECODE_EMDRV_SPIDRV_OK) {
+      return result;
+    }
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
     // Subscribe to notification to re-enable eusart after deepsleep.
     if (eusart_handle_list == NULL) {
@@ -2394,7 +2402,9 @@ static void WaitForTransferCompletion(SPIDRV_Handle_t handle)
   if (sl_interrupt_manager_is_irq_blocked(SPI_DMA_IRQ)) {
     // Poll for completion by calling IRQ handler.
     while (handle->blockingCompleted == false) {
-#if defined(DMA_PRESENT) && (DMA_COUNT == 1)
+#if 0 // TODO: Temporary fix after the DMADRV changes to intergrate DMA Manager.
+      // This will need to be updated when updating SPIDRV to change DMADRV to use DMA Manager and DMA Channel Driver.
+ #if defined(DMA_PRESENT) && (DMA_COUNT == 1)
       DMA_IRQHandler();
 #elif defined(LDMA_PRESENT) && (LDMA_COUNT == 1)
 #if defined(_SILICON_LABS_32B_SERIES_2)
@@ -2431,6 +2441,7 @@ static void WaitForTransferCompletion(SPIDRV_Handle_t handle)
 #endif
 #else
 #error "No valid SPIDRV DMA engine defined."
+#endif
 #endif
     }
   } else {
@@ -2528,6 +2539,35 @@ static void on_power_manager_event(sl_power_manager_em_t from,
     }
   }
 }
+#endif
+
+/***************************************************************************//**
+ * @brief Verify if an EUSART handle is already initialized.
+ ******************************************************************************/
+#if defined(EUSART_PRESENT)
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+static Ecode_t spidrvCheckDuplicateHandle(SPIDRV_Handle_t handle)
+{
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_ATOMIC();
+  SPIDRV_Handle_t existing_handle;
+  SL_SLIST_FOR_EACH_ENTRY(eusart_handle_list, existing_handle, SPIDRV_HandleData_t, node) {
+    if (existing_handle == handle) {
+      CORE_EXIT_ATOMIC();
+      return ECODE_EMDRV_SPIDRV_ALREADY_INITIALIZED;
+    }
+  }
+  CORE_EXIT_ATOMIC();
+
+  return ECODE_EMDRV_SPIDRV_OK;
+}
+#else
+static Ecode_t spidrvCheckDuplicateHandle(SPIDRV_Handle_t handle)
+{
+  (void)handle;
+  return ECODE_EMDRV_SPIDRV_OK;
+}
+#endif
 #endif
 
 /// @endcond

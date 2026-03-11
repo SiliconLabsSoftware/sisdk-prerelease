@@ -42,6 +42,8 @@
 #include "sl_core.h"
 #include SL_RAIL_UTIL_PA_PLUGIN_HEADER
 
+const char * const paModeStrings[] = SL_RAIL_TX_PA_MODE_NAMES;
+
 // This function gets the power mode index from a string.
 // Returns 0xFF if the string is not found.
 static uint8_t getPowerModeIndexFromString(char *modeString)
@@ -149,6 +151,15 @@ void setFreqOffset(sl_cli_command_arg_t *args)
     currentFreqOffset = freqOffset;
   }
   responsePrint(sl_cli_get_command_string(args, 0), "freqOffset:%d", currentFreqOffset);
+}
+
+void getPaMode(sl_cli_command_arg_t *args)
+{
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  sl_rail_tx_pa_mode_t pa_mode = sl_rail_get_pa_mode(railHandle);
+
+  responsePrint(sl_cli_get_command_string(args, 0), "success:true,PaMode:%s",
+                pa_mode < (sizeof(paModeStrings) / sizeof(paModeStrings[0])) ? paModeStrings[pa_mode] : "SL_RAIL_TX_PA_MODE_INVALID");
 }
 
 void getPowerConfig(sl_cli_command_arg_t *args)
@@ -970,7 +981,7 @@ void testNvmPowerCurves(sl_cli_command_arg_t *args)
   }
 }
 
-#else// !((!defined(SL_CATALOG_SL_RAIL_UTIL_PA_PRESENT))  &&  SL_RAIL_UTIL_PA_NVM_ENABLED)
+#else // !((!defined(SL_CATALOG_SL_RAIL_UTIL_PA_PRESENT))  &&  SL_RAIL_UTIL_PA_NVM_ENABLED)
 
 void printPowerCurves(sl_cli_command_arg_t *args)
 {
@@ -987,4 +998,4 @@ void testNvmPowerCurves(sl_cli_command_arg_t *args)
   responsePrintError(sl_cli_get_command_string(args, 0), 0x11, "This command is not supported on this platform");
 }
 
-#endif// ((!defined(SL_CATALOG_SL_RAIL_UTIL_PA_PRESENT))  &&  SL_RAIL_UTIL_PA_NVM_ENABLED)
+#endif // ((!defined(SL_CATALOG_SL_RAIL_UTIL_PA_PRESENT))  &&  SL_RAIL_UTIL_PA_NVM_ENABLED)

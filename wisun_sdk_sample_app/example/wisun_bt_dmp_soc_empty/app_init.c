@@ -83,8 +83,7 @@ void app_init(void)
     .stack_mem  = NULL,
     .stack_size = app_stack_size_word_to_byte(SL_WISUN_APP_CORE_MAIN_STACK_SIZE_WORD),
     .priority   = osPriorityNormal,
-    .tz_module  = 0UL,
-    .reserved   = 0UL
+    .tz_module  = 0UL
   };
 
   osThreadId_t app_thr_id = osThreadNew(app_task, NULL, &app_task_attr);

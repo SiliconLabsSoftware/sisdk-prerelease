@@ -18,11 +18,6 @@ requires:
 - name: zigbee_debug_print
 provides:
 - name: zigbee_phy_select_cli
-include:
-- path: plugin/sl_rail_util_ieee802154
-  file_list:
-  - path: sl_rail_util_ieee802154_phy_select.h
-  - path: sl_rail_util_ieee802154_stack_event.h
 source:
 - path: plugin/sl_rail_util_ieee802154/sl_zigbee_phy_select_cli.c
 template_contribution:

@@ -36,6 +36,7 @@
 #include "em_device.h"
 #include "sl_memory_manager.h"
 #include "sl_memory_manager_config.h"
+#include "sli_code_classification.h"
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
@@ -95,9 +96,10 @@ extern "C" {
 // 512KB = 512 * 1024 bytes = 524288 bytes is used as the limit to determine large block.
 #define SLI_LARGE_BLOCK_SIZE_LIMIT_BYTE     524288u
 
-// Internal define for large block support if the device has a large DMEM memory (at least 512KB).
-#if (defined(DMEM_MEM_SIZE) && (DMEM_MEM_SIZE > SLI_LARGE_BLOCK_SIZE_LIMIT_BYTE)) \
-  || (defined(HOSTDMEM_MEM_SIZE) && (HOSTDMEM_MEM_SIZE > SLI_LARGE_BLOCK_SIZE_LIMIT_BYTE))
+// Internal define for large block support if the device has a large memory (at least 512KB).
+#if (defined(DMEM_MEM_SIZE) && (DMEM_MEM_SIZE > SLI_LARGE_BLOCK_SIZE_LIMIT_BYTE))  \
+  || (defined(DTCM_MAX_SIZE) && (DTCM_MAX_SIZE > SLI_LARGE_BLOCK_SIZE_LIMIT_BYTE)) \
+  || (defined(PSRAM_MAX_SIZE) && (PSRAM_MAX_SIZE > SLI_LARGE_BLOCK_SIZE_LIMIT_BYTE))
 #define SLI_LARGE_BLOCK_SUPPORT
 #endif
 
@@ -119,9 +121,16 @@ extern "C" {
 
 #if !defined(_SILICON_LABS_32B_SERIES_2)             \
   && !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301) \
+  && !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_302) \
   && !defined(SL_RAM_LINKER)
 // Internal define to indicate that the memory manager stack is in the heap.
 #define SLI_MEMORY_MANAGER_STACK_IN_HEAP 1
+#endif
+
+#if !defined(DMEMCACHE_PRESENT)
+#define SLI_MEMORY_MANAGER_GLOBAL_VARIABLE_ATTRIBUTES SL_FAST_DATA
+#else
+#define SLI_MEMORY_MANAGER_GLOBAL_VARIABLE_ATTRIBUTES
 #endif
 
 /*******************************************************************************
@@ -227,14 +236,14 @@ struct sli_memory_pool_block {
  ****************************   GLOBAL VARIABLES   *****************************
  ******************************************************************************/
 
-extern sl_memory_heap_t sli_general_purpose_heap SL_FAST_DATA;
+extern sl_memory_heap_t sli_general_purpose_heap SLI_MEMORY_MANAGER_GLOBAL_VARIABLE_ATTRIBUTES;
 
 #if defined(SL_CATALOG_MEMORY_MANAGER_DTCM_PRESENT)
-extern sl_memory_heap_t sli_dtcm_heap SL_FAST_DATA;
+extern sl_memory_heap_t sli_dtcm_heap SLI_MEMORY_MANAGER_GLOBAL_VARIABLE_ATTRIBUTES;
 #endif
 
 #if defined(SL_CATALOG_MEMORY_MANAGER_PSRAM_PRESENT)
-extern sl_memory_heap_t sli_psram_heap SL_FAST_DATA;
+extern sl_memory_heap_t sli_psram_heap SLI_MEMORY_MANAGER_GLOBAL_VARIABLE_ATTRIBUTES;
 #endif
 
 #if defined(DEBUG_EFM) || defined(DEBUG_EFM_USER)
@@ -309,16 +318,20 @@ sli_block_metadata_t *sli_memory_find_head_free_block(sl_memory_heap_t *heap,
 /***************************************************************************//**
  * Gets long-term head pointer to the first free block.
  *
+ * @param[in]  heap               Heap handle.
+ *
  * @return    Pointer to first free long-term block.
  ******************************************************************************/
-void *sli_memory_get_longterm_head_ptr(void);
+void *sli_memory_get_longterm_head_ptr(sl_memory_heap_t *heap);
 
 /***************************************************************************//**
  * Gets short-term head pointer to the first free block.
  *
+ * @param[in]  heap               Heap handle.
+ *
  * @return    Pointer to first free short-term block.
  ******************************************************************************/
-void *sli_memory_get_shortterm_head_ptr(void);
+void *sli_memory_get_shortterm_head_ptr(sl_memory_heap_t *heap);
 
 /***************************************************************************//**
  * Update free lists heads (short and long terms) for a specific heap instance.
@@ -360,6 +373,15 @@ sl_status_t sli_memory_create_heap(void *base_addr,
  * @return     Pointer to the block's Heap Handle.
  ******************************************************************************/
 sl_memory_heap_t *sli_memory_get_heap_handle(const void *block);
+
+/***************************************************************************//**
+ * Gets size and location of the given heap.
+ *
+ * @param[in]  heap  Heap handle.
+ *
+ * @return  description of the region reserved for the given heap.
+ ******************************************************************************/
+sl_memory_region_t sli_memory_heap_get_heap_region(const sl_memory_heap_t *heap);
 
 /***************************************************************************//**
  * Creates the Stack at the end of the Heap.
@@ -500,6 +522,7 @@ bool sli_check_pool_integrity(sl_memory_pool_t *pool_handle,
  * @param[in,out] meta Pointer to memory block metadata.
  * @param[in]     len  Length of the memory block in double words.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_MEMORY_MANAGER, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
 __INLINE void sli_block_len_dword_encode(sli_block_metadata_t *meta,
                                          uint32_t len)
 {
@@ -517,6 +540,7 @@ __INLINE void sli_block_len_dword_encode(sli_block_metadata_t *meta,
  * @param[in,out] meta Pointer to memory block metadata.
  * @param[in]     len  Previous offset in double words.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_MEMORY_MANAGER, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
 __INLINE void sli_block_offset_prev_dword_encode(sli_block_metadata_t *meta,
                                                  uint32_t len)
 {
@@ -534,6 +558,7 @@ __INLINE void sli_block_offset_prev_dword_encode(sli_block_metadata_t *meta,
  * @param[in,out] meta Pointer to memory block metadata.
  * @param[in]     len  Next offset in double words.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_MEMORY_MANAGER, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
 __INLINE void sli_block_offset_next_dword_encode(sli_block_metadata_t *meta,
                                                  uint32_t len)
 {
@@ -552,6 +577,7 @@ __INLINE void sli_block_offset_next_dword_encode(sli_block_metadata_t *meta,
  *
  * @return The length of the memory block in double words.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_MEMORY_MANAGER, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
 __INLINE uint32_t sli_block_len_dword_decode(const sli_block_metadata_t *meta)
 {
 #if defined(SLI_LARGE_BLOCK_SUPPORT)
@@ -568,6 +594,7 @@ __INLINE uint32_t sli_block_len_dword_decode(const sli_block_metadata_t *meta)
  *
  * @return The previous offset of the memory block in double words.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_MEMORY_MANAGER, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
 __INLINE uint32_t sli_block_offset_prev_dword_decode(const sli_block_metadata_t *meta)
 {
 #if defined(SLI_LARGE_BLOCK_SUPPORT)
@@ -584,6 +611,7 @@ __INLINE uint32_t sli_block_offset_prev_dword_decode(const sli_block_metadata_t 
  *
  * @return The next offset of the memory block in double words.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_MEMORY_MANAGER, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
 __INLINE uint32_t sli_block_offset_next_dword_decode(const sli_block_metadata_t *meta)
 {
 #if defined(SLI_LARGE_BLOCK_SUPPORT)

@@ -255,17 +255,22 @@ __ATTRIBUTE_SECURE_RESET_HANDLER __NO_PROLOGUE void sli_tz_secure_reset_handler(
       SMU->MSPUOSPI0CTRL_SET = SMU_MSPUOSPI0CTRL_SECTORSIZE_MSPU_16KB;
 #endif
   }
+#if defined(_SMU_MSPUOSPI1SATD0_MASK)
+  SMU->MSPUOSPI0CTRL_CLR = _SMU_MSPUOSPI0CTRL_SATDN_MASK;
+#endif
 
   // Set all RAM regions to Non-Secure.
 #if defined(_SMU_MSPUDMEMNSREGIONFLAG0_MASK)
   SMU->MSPUDMEMNSREGIONFLAG0_SET = _SMU_MSPUDMEMNSREGIONFLAG0_MASK;
 #elif defined(_SMU_MSPUDMEMSATD0_MASK)
+  SMU->MSPUDMEMCTRL_CLR = _SMU_MSPUDMEMCTRL_SATDN_MASK;
   SMU->MSPUDMEMSATD0_CLR = _SMU_MSPUDMEMSATD0_MASK;
   SMU->MSPUDMEMSATD1_CLR = _SMU_MSPUDMEMSATD1_MASK;
 #endif
 
   // Set all PSRAM regions to Non-Secure.
 #if defined(_SMU_MSPUOSPI1SATD0_MASK)
+  SMU->MSPUOSPI1CTRL_CLR = _SMU_MSPUOSPI1CTRL_SATDN_MASK;
   SMU->MSPUOSPI1SATD0_CLR = _SMU_MSPUOSPI1SATD0_MASK;
   SMU->MSPUOSPI1SATD1_CLR = _SMU_MSPUOSPI1SATD1_MASK;
   SMU->MSPUOSPI1SATD2_CLR = _SMU_MSPUOSPI1SATD2_MASK;
@@ -497,6 +502,7 @@ __ATTRIBUTE_SECURE_RESET_HANDLER __NO_PROLOGUE void sli_tz_secure_reset_handler(
     "MOVS           R11, #0             \n"
     "MOVS           R12, #0             \n"
     "DSB                                \n"
+    "ISB                                \n"
 
     // Jump to Non-Secure Reset Handler (Application).
     "BXNS           R4                  \n"

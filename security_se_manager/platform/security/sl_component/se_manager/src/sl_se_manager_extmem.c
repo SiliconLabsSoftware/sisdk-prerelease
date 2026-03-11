@@ -58,6 +58,85 @@
 #define MTP_QSPI_REGION_METADATA_LOCKED        (0x1UL << 15)
 
 // -----------------------------------------------------------------------------
+// Local variables
+static bool l1_cache_command_in_progress = false;
+
+// -----------------------------------------------------------------------------
+// Local functions
+
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)
+/***************************************************************************//**
+ *   Configure L1 cache enablement and return previous state
+ ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SE_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
+static bool configure_l1_cache(bool enable)
+ {
+  // Disable interrupts while modifying CLKENs
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_CRITICAL();
+
+  // Read state of clock enable for L1 cache
+  bool l1_cache_clock_was_enabled = ((CMU->CLKEN1 & CMU_CLKEN1_ICACHE0) != 0);
+  CMU->CLKEN1_SET = CMU_CLKEN1_ICACHE0;
+
+  // Get CACHEDIS state
+  bool cache_was_enabled = ((L1ICACHE0->CTRL & ICACHE_CTRL_CACHEDIS) == 0);
+
+  if (enable) {
+    L1ICACHE0->CTRL_CLR = ICACHE_CTRL_CACHEDIS;
+  } else {
+    L1ICACHE0->CTRL_SET = ICACHE_CTRL_CACHEDIS;
+  }
+
+  // Restore clock enable for L1 cache
+  if (!l1_cache_clock_was_enabled) {
+    CMU->CLKEN1_CLR = CMU_CLKEN1_ICACHE0;
+  }
+
+  // Restore interrupts
+  CORE_EXIT_CRITICAL();
+
+  return cache_was_enabled;
+}
+
+/***************************************************************************//**
+ *   Clear L1 cache and execute command
+ ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SE_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
+static sl_status_t extmem_execute_command(sl_se_command_context_t *cmd_ctx)
+{
+  // Set flag to indicate that a L1 cache command is in progress
+  l1_cache_command_in_progress = true;
+
+  // Disable L1 cache and track if it was enabled
+  bool cache_was_enabled = configure_l1_cache(false);
+  // Execute command
+  sl_status_t sl_status = sli_se_execute_and_wait(cmd_ctx);
+  if (cache_was_enabled) {
+    // Re-enable L1 cache if it was enabled
+    (void)configure_l1_cache(true);
+  }
+
+  // Clear L1 cache command in progress flag
+  l1_cache_command_in_progress = false;
+
+  // Return command execution status
+  return sl_status;
+}
+
+#else
+/***************************************************************************//**
+ *   Wrapper for sli_se_execute_and_wait
+ ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SE_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
+__STATIC_FORCEINLINE sl_status_t extmem_execute_command(sl_se_command_context_t *cmd_ctx)
+{
+  return sli_se_execute_and_wait(cmd_ctx);
+}
+
+#endif
+
+// -----------------------------------------------------------------------------
 // Global functions
 
 /***************************************************************************//**
@@ -187,7 +266,7 @@ sl_status_t sl_se_code_region_apply_config(sl_se_command_context_t *cmd_ctx,
   sli_se_mailbox_command_add_parameter(se_cmd, region_array_size * sizeof(uint16_t));
 
   // Execute and wait
-  return sli_se_execute_and_wait(cmd_ctx);
+  return extmem_execute_command(cmd_ctx);
 }
 
 /***************************************************************************//**
@@ -209,7 +288,7 @@ sl_status_t sl_se_code_region_erase(sl_se_command_context_t *cmd_ctx,
   sli_se_mailbox_command_add_parameter(se_cmd, region_idx);
 
   // Execute and wait
-  return sli_se_execute_and_wait(cmd_ctx);
+  return extmem_execute_command(cmd_ctx);
 }
 
 /***************************************************************************//**
@@ -239,7 +318,7 @@ sl_status_t sl_se_code_region_partial_erase(sl_se_command_context_t *cmd_ctx,
   sli_se_mailbox_command_add_parameter(se_cmd, num_blocks);
 
   // Execute and wait
-  return sli_se_execute_and_wait(cmd_ctx);
+  return extmem_execute_command(cmd_ctx);
 }
 
 /***************************************************************************//**
@@ -280,7 +359,7 @@ sl_status_t sl_se_code_region_write(sl_se_command_context_t *cmd_ctx,
   sli_se_mailbox_command_add_parameter(se_cmd, num_bytes);
 
   // Execute and wait
-  return sli_se_execute_and_wait(cmd_ctx);
+  return extmem_execute_command(cmd_ctx);
 }
 
 /***************************************************************************//**
@@ -313,7 +392,7 @@ sl_status_t sl_se_code_region_close(sl_se_command_context_t *cmd_ctx,
   sli_se_mailbox_command_add_parameter(se_cmd, version);
 
   // Execute and wait
-  return sli_se_execute_and_wait(cmd_ctx);
+  return extmem_execute_command(cmd_ctx);
 }
 
 /***************************************************************************//**
@@ -433,7 +512,7 @@ sl_status_t sl_se_data_region_erase(sl_se_command_context_t *cmd_ctx,
   sli_se_mailbox_command_add_parameter(se_cmd, num_sectors);
 
   // Execute and wait
-  return sli_se_execute_and_wait(cmd_ctx);
+  return extmem_execute_command(cmd_ctx);
 }
 
 /***************************************************************************//**
@@ -469,7 +548,17 @@ sl_status_t sl_se_data_region_write(sl_se_command_context_t *cmd_ctx,
   sli_se_mailbox_command_add_parameter(se_cmd, num_bytes);
 
   // Execute and wait
-  return sli_se_execute_and_wait(cmd_ctx);
+  return extmem_execute_command(cmd_ctx);
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Query the SE Manager to determine if a command that modifies the L1CACHE
+ *   enabled/disabled state is in progress.
+ ******************************************************************************/
+bool sli_se_extmem_command_with_cachedis_in_progress(void)
+{
+  return l1_cache_command_in_progress;
 }
 
 /***************************************************************************//**
@@ -611,7 +700,7 @@ sl_status_t sli_se_flash_pause(sl_se_command_context_t *cmd_ctx)
   }
 
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_FLASH_PAUSE)
-  return sli_se_execute_and_wait(cmd_ctx);
+  return extmem_execute_command(cmd_ctx);
 }
 
 /***************************************************************************//**
@@ -624,7 +713,7 @@ sl_status_t sli_se_flash_resume(sl_se_command_context_t *cmd_ctx)
   }
 
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_FLASH_RESUME)
-  return sli_se_execute_and_wait(cmd_ctx);
+  return extmem_execute_command(cmd_ctx);
 }
 
 /***************************************************************************//**
@@ -917,7 +1006,7 @@ sl_status_t sli_se_erase_host_region(sl_se_command_context_t *cmd_ctx)
 
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_ERASE_HOST_FLASH);
 
-  return sli_se_execute_and_wait(cmd_ctx);
+  return extmem_execute_command(cmd_ctx);
 }
 
 /***************************************************************************//**

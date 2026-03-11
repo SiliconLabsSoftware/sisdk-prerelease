@@ -73,9 +73,11 @@ extern __NO_RETURN void __PROGRAM_START(void);
 
 #if defined (__START) && defined (__GNUC__)
 extern int  __START(void) __attribute__((noreturn));    /* main entry point */
+#endif // defined(__START) && defined(__GNUC__)
+#if (defined (__START) && defined (__GNUC__)) || defined(__clang__)
 void Copy_Table();
 void Zero_Table();
-#endif // defined(__START) && defined(__GNUC__)
+#endif // (defined (__START) && defined (__GNUC__)) || defined(__clang__)
 
 /*---------------------------------------------------------------------------
  * Internal References
@@ -281,7 +283,7 @@ const tVectorEntry __VECTOR_TABLE[TOTAL_INTERRUPTS] __VECTOR_TABLE_ATTRIBUTE = {
 #pragma GCC diagnostic pop
 #endif
 
-#if defined (__START) && defined (__GNUC__)
+#if (defined (__START) && defined (__GNUC__)) || defined(__clang__)
 void Copy_Table()
 {
   uint32_t        *pSrc, *pDest;
@@ -307,7 +309,7 @@ void Zero_Table()
     *pDest++ = 0UL;
   }
 }
-#endif // defined(__START) && defined(__GNUC__)
+#endif // (defined (__START) && defined (__GNUC__)) || defined(__clang__)
 
 #if !defined(SL_LEGACY_LINKER) \
   && !defined(SL_RAM_LINKER)
@@ -374,10 +376,14 @@ __NO_RETURN void Reset_Handler(void)
   SystemInit2();
 #endif // defined(BOOTLOADER_ENABLE) || defined (USER_SYSTEM_INIT_ENABLE)
 
-#if defined (__GNUC__) && defined (__START)
+#if (defined (__START) && defined (__GNUC__)) || defined(__clang__)
   Copy_Table();
   Zero_Table();
+#if defined (__START)
   __START();
+#elif defined(__clang__)
+  __PROGRAM_START();
+#endif
 #else
   __PROGRAM_START();               /* Enter PreMain (C library entry point) */
 #endif // defined(__GNUC__) && defined(__START)

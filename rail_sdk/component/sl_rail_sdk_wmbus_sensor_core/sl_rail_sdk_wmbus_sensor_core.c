@@ -31,6 +31,7 @@
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
+#include <inttypes.h>
 #include "sl_component_catalog.h"
 #include "sl_rail_sdk_wmbus_support.h"
 #include "sl_rail_sdk_wmbus_sensor_core.h"
@@ -152,7 +153,7 @@ sl_status_t sl_rail_sdk_wmbus_sensor_core_init(void)
   sl_status_t status = SL_STATUS_FAIL;
   active_sensor_id = SL_RAIL_SDK_WMBUS_SENSOR_ACTIVE_SENSOR_ID;
   if (sl_rail_sdk_wmbus_sensor_core_set_active_sensor(active_sensor_id) != SL_STATUS_OK) {
-    app_log_info("Failed to set active sensor with ID: %d", active_sensor_id);
+    app_log_info("Failed to set active sensor with ID: %" PRIu8 "", active_sensor_id);
     return SL_STATUS_FAIL;
   }
 
@@ -164,8 +165,8 @@ sl_status_t sl_rail_sdk_wmbus_sensor_core_init(void)
                                                  10,
                                                  0);
   app_assert_status_f(status,
-                      "[E: 0x%04x]: Failed to start periodic sleeptimer\n",
-                      (int)status);
+                      "[E: 0x%08" PRIX32 "]: Failed to start periodic sleeptimer\n",
+                      status);
 
   return status;
 }

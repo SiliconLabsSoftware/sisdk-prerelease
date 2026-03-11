@@ -26,6 +26,7 @@ requires:
 - name: sl_assert
 - name: sxsymcrypt
 - name: device_has_ksu
+- name: device_has_semailbox
 
 metadata:
   sbom:

@@ -914,6 +914,143 @@ sl_status_t sl_wisun_set_direct_connect_state(bool is_enabled);
 sl_status_t sl_wisun_accept_direct_connect_link(in6_addr_t *link_local_ipv6);
 
 /**************************************************************************//**
+ * Advertise the Direct Connect Server identity in response to a discovery request.
+ *
+ * This function is used by a Direct Connect Server to advertise its identity to a
+ * client that has initiated a discovery scan.
+ *
+ * When a SL_WISUN_MSG_DIRECT_CONNECT_ID_SOLICIT_IND_ID event is received,
+ * the application should inspect the DC ID contained in the event. If the DC ID
+ * is recognized as valid for identification or scanning purposes, this function
+ * should be called to respond to the client.
+ *
+ * The advertisement process stops automatically when:
+ *   - The client acknowledges the DCI (identification frame), or
+ *   - The configured maximum number of Identity Advertisement (max_advert_count) is reached.
+ *
+ * @note
+ *   - This function must only be called upon reception of a SL_WISUN_MSG_DIRECT_CONNECT_ID_SOLICIT_IND_ID event.
+ *   - The DC ID format and matching logic are defined by the application.
+ *
+ * @param[in] link_local_ipv6
+ *   Pointer to the link-local IPv6 address of the client that sent the identification solicitation.
+ *
+ * @param[in] dc_id
+ *   Pointer to the Direct Connect Server Identifier (DC ID).
+ *   The format and length of this identifier are application-defined.
+ *
+ * @return
+ *   SL_STATUS_OK if the advertisement process started successfully.
+ *   Error code otherwise (e.g. invalid parameters or transmission failure).
+ *
+ * Available in libraries: Full, FFN (see @ref API_AVAILABILITY).
+ *****************************************************************************/
+sl_status_t sl_wisun_advert_direct_connect_server_id(const in6_addr_t *link_local_ipv6,
+                                                     const sl_wisun_dc_id_t *dc_id);
+
+/**************************************************************************//**
+ * Initialize the Direct Connect (DC) client.
+ *
+ * @param[in] phy  Pointer to the PHY configuration (#sl_wisun_phy_config_t).
+ *                 Supported types: #SL_WISUN_PHY_CONFIG_FAN10, #SL_WISUN_PHY_CONFIG_FAN11,
+ *                 or #SL_WISUN_PHY_CONFIG_EXPLICIT. Must match the DC server configuration.
+ * @return SL_STATUS_OK if successful, an error code otherwise.
+ *
+ * This function configures and starts the Direct Connect client, enabling
+ * point-to-point communication with a DC server. The DC client provides low-latency,
+ * single-hop connectivity that can operate standalone or alongside a Wi-SUN mesh
+ * network connection.
+ *
+ * Upon success, the DC client enters an idle state, ready to perform discovery scans
+ * via sl_wisun_start_direct_connect_scan() or establish connections via
+ * sl_wisun_connect_to_direct_connect_server(). State changes are reported via
+ * #SL_WISUN_MSG_DIRECT_CONNECT_CLIENT_STATE_CHANGED_IND_ID events.
+ *
+ * Security credentials (PMK) should be configured via sl_wisun_set_direct_connect_pmk().
+ *
+ * @note The behavior depends on when this function is called relative to sl_wisun_join():
+ *   - DC-only mode (called before sl_wisun_join()): The stack operates exclusively in
+ *     DC client mode. sl_wisun_join() is blocked until sl_wisun_stop_direct_connect_client()
+ *     is called.
+ *   - Concurrent mode (called after sl_wisun_join()): The DC client operates alongside
+ *     the Wi-SUN network (whether join is complete or in progress). This enables use cases
+ *     such as debugging devices that cannot join the mesh by reaching them via DC link.
+ *     In this mode, the DC link can only be established with a server that is not a direct
+ *     Wi-SUN neighbor (i.e., not the current parent or child node).
+ *
+ * Available in libraries: Full, FFN (see @ref API_AVAILABILITY).
+ *****************************************************************************/
+sl_status_t sl_wisun_start_direct_connect_client(const sl_wisun_phy_config_t *phy);
+
+/**************************************************************************//**
+ * Stop the Direct Connect client.
+ *
+ * Immediately ends any ongoing scan and aborts any
+ * ongoing or active connection. After return, the client is idle.
+ *
+ * @return SL_STATUS_OK if stopped or already idle; error code otherwise.
+ *
+ * Available in libraries: Full, FFN (see @ref API_AVAILABILITY).
+*****************************************************************************/
+sl_status_t sl_wisun_stop_direct_connect_client(void);
+
+/**************************************************************************//**
+ * Start a Direct Connect client discovery scan.
+ *
+ * Client starts to transmit Direct Connect identity solicitation frames using
+ * \p dc_id up to \p max_solicits_count sequences. Matching servers reply with
+ * Direct Connect identification frames (DCI). Scanning runs independently of
+ * connection state (idle / connecting / connected).
+ *
+ * @param[in] dc_id Pointer to the application-defined Direct Connect ID (see @ref sl_wisun_dc_id_t).
+ * @param[in] max_solicits_count  Max solicitation sequences; if 0, the scan is persistent.
+ * @return SL_STATUS_OK on success; error code otherwise.
+ *
+ * @note The application interprets/validates server identifiers and may call
+ *       sl_wisun_connect_to_direct_connect_server() at any time to switch targets.
+ *       The application must call sl_wisun_stop_direct_connect_scan() to stop the scan
+ *       when the current scan is no longer needed or need to scan for a different DC ID.
+ *
+ * Available in libraries: Full, FFN (see @ref API_AVAILABILITY).
+ *****************************************************************************/
+sl_status_t sl_wisun_start_direct_connect_scan(const sl_wisun_dc_id_t *dc_id,
+                                               uint8_t max_solicits_count);
+
+/**************************************************************************//**
+ * Stop an ongoing Direct Connect client discovery scan.
+ *
+ * Immediately stops the Direct Connect client from transmitting Direct Connect
+ * identity solicitations. This does not affect connection establishment or an already
+ * established Direct Connect link.
+ *
+ * @return SL_STATUS_OK if stopped or not scanning; error code otherwise.
+ *
+ * Available in libraries: Full, FFN (see @ref API_AVAILABILITY).
+ *****************************************************************************/
+sl_status_t sl_wisun_stop_direct_connect_scan(void);
+
+/**************************************************************************//**
+ * Establish or switch a Direct Connect link to a selected server.
+ *
+ * Starts (or restarts) authentication and link establishment with \p mac_address using
+ * \p pmk_id. If a connection is in progress or active, it is aborted and the
+ * new target is attempted. Scanning is not affected by this API.
+ *
+ * @param[in] mac_address MAC address of the target server.
+ * @param[in] pmk_id Pairwise Master Key identifier to use.
+ * @param[in] max_solicits_count  Max solicitation retries for this connection.
+ * @return SL_STATUS_OK on success; error code otherwise.
+ *
+ * @note This API may be called while scanning, connecting, or connected to
+ *       switch the active/attempted connection to a newly discovered target.
+ *
+ * Available in libraries: Full, FFN (see @ref API_AVAILABILITY).
+*****************************************************************************/
+sl_status_t sl_wisun_connect_to_direct_connect_server(const sl_wisun_mac_address_t *mac_address,
+                                                      uint32_t pmk_id,
+                                                      uint8_t max_solicits_count);
+
+/**************************************************************************//**
  * Set the radio sensitivity for the given PHY.
  *
  * @param[in] phy_mode_id PHY mode ID
@@ -1073,6 +1210,59 @@ sl_status_t sl_wisun_set_fan_tps_version(uint8_t fan_tps_version);
  * Available in libraries: Full, FFN, LFN, BR (see @ref API_AVAILABILITY)
  *****************************************************************************/
 sl_status_t sl_wisun_set_rx_fifo_size(uint16_t size);
+
+/**************************************************************************//**
+ * Set DHCPv6 vendor-specific information data to be inserted in DHCPv6 Solicits.
+ *
+ * @param[in] enterprise_number The IANA-assigned Private Enterprise Number
+ *                              identifying the vendor.
+ * @param[in] data Pointer to the vendor-specific data buffer. To clear any
+ *                 previously set vendor-specific data, set length to 0.
+ *                 According to RFC 3315, the vendor-option-data field MUST be encoded
+ *                 as a sequence of code/length/value fields in big endian with format:
+ *                   - Code: 2 bytes, vendor-specific option code
+ *                   - Length: 2 bytes
+ *                   - Value: variable length corresponding to Length field
+ * @param[in] length Length of the vendor-specific data in bytes.
+ *
+ * @return SL_STATUS_OK if successful,
+ *         SL_STATUS_INVALID_PARAMETER if data is NULL while length is non-zero,
+ *         SL_STATUS_ALLOCATION_FAILED if the stack failed to allocate the necessary memory.
+ *
+ * @note This API does not check the integrity or correctness of the provided vendor data.
+ *
+ * Available in libraries: Full, FFN, LFN (see @ref API_AVAILABILITY)
+ ******************************************************************************/
+sl_status_t sl_wisun_set_dhcpv6_vendor_data(uint32_t enterprise_number, const uint8_t *data, uint16_t length);
+
+/**************************************************************************//**
+ * Dynamically configure the trickle parameters.
+ *
+ * @param[in] type Type of trickle parameters to set
+ * @param[in] i_min_s Minimum interval size in seconds
+ * @param[in] i_max_s Maximum interval size in seconds
+ * @param[in] k Redundancy constant
+ * @param[in] expirations Expiration count (used only by MPL)
+ * @return SL_STATUS_OK if successful,
+ *         SL_STATUS_INVALID_PARAMETER if the given Imin is bigger than Imax,
+ *         SL_STATUS_NOT_AVAILABLE if called on a device that is not an FFN or a BR, or if the type is not supported,
+ *         SL_STATUS_FAIL otherwise
+ *
+ * This function sets the trickle parameters for the specified type (PA, PAS, PC, PCS, MPL) and
+ * takes effect immediately.
+ * Only MPL makes use of the timer expiration parameter. It is ignored when not used.
+ * The function MUST be called after starting a connection or the parameters will be overwritten when
+ * initiating a connection.
+ *
+ * @note This is an advanced API, use with caution.
+ *
+ * @warning Having heterogeneous trickle parameters in the network may lead to unpredictable behavior.
+ *          It can lead to some device transmitting significantly more than others and as such, jeopardize
+ *          network stability.
+ *
+ * Available in libraries: Full, FFN, BR (see @ref API_AVAILABILITY)
+ *****************************************************************************/
+sl_status_t sl_wisun_set_trickle_parameters(sl_wisun_trickle_type_t type, uint16_t i_min_s, uint16_t i_max_s, uint8_t k, uint8_t expirations);
 
 /** @} (end SL_WISUN_API) */
 

@@ -51,14 +51,16 @@
 sudo ./script/bootstrap
 
 // For PD-client functionality (if you have an infrastructure device offering PD prefixes)
-// add `DHCPV6_PD_REF=1` before `INFRA_IF_NAME=eth0` below.
+// add one of the following before `INFRA_IF_NAME=eth0` below.
+// OTBR_DHCP6_PD_CLIENT=dhcpcd      // with dhcpcd external utility
+// OTBR_DHCP6_PD_CLIENT=openthread  // with native openthread implementation
 
 sudo INFRA_IF_NAME=eth0 \
      OTBR_OPTIONS="-DOT_THREAD_VERSION=1.4 \
                    -DOT_PLATFORM_CONFIG=openthread-core-silabs-posix-config.h \
                    -DOTBR_DUA_ROUTING=ON \
                    -DOTBR_DHCP6_PD=ON \
-                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.0.1.0_GitHub-ab0c1351e -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.0.1.0_GitHub-61e43cffb" \
+                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.1.0.0_GitHub-d0aee897e -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.1.0.0_GitHub-3f11074f1" \
      ./script/setup
 
 */
@@ -70,7 +72,9 @@ sudo INFRA_IF_NAME=eth0 \
 sudo ./script/bootstrap
 
 // For PD-client functionality (if you have an infrastructure device offering PD prefixes)
-// add `DHCPV6_PD_REF=1` before `INFRA_IF_NAME=eth0` below.
+// add one of the following before `INFRA_IF_NAME=eth0` below.
+// OTBR_DHCP6_PD_CLIENT=dhcpcd      // with dhcpcd external utility
+// OTBR_DHCP6_PD_CLIENT=openthread  // with native openthread implementation
 
 sudo INFRA_IF_NAME=eth0 \
      OTBR_OPTIONS="-DOT_THREAD_VERSION=1.4 \
@@ -85,7 +89,7 @@ sudo INFRA_IF_NAME=eth0 \
                    -DOT_PLATFORM_CONFIG=openthread-core-silabs-posix-config.h \
                    -DOTBR_DUA_ROUTING=ON \
                    -DOTBR_DHCP6_PD=ON \
-                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.0.1.0_GitHub-ab0c1351e -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.0.1.0_GitHub-61e43cffb" \
+                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.1.0.0_GitHub-d0aee897e -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.1.0.0_GitHub-3f11074f1" \
      ./script/setup
 */
 

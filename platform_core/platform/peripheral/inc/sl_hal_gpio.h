@@ -258,7 +258,10 @@ extern "C" {
 /// Validation of port and pin.
 #define SL_HAL_GPIO_PORT_PIN_IS_VALID(port, pin) ((((SL_HAL_GPIO_PORT_MASK(port)) >> (pin)) & 0x1UL) == 0x1UL)
 
-/// Max interrupt lines for external and EM4 interrupts.
+/// Number of external/EM4 interrupt lines for array sizing (0-15 = 16 elements)
+#define SL_HAL_GPIO_NO_OF_EXT_INTERRUPTS 16
+
+/// Maximum valid interrupt index for validation (highest valid index is 15)
 #define SL_HAL_GPIO_INTERRUPT_MAX 15
 
 /// Shift value for EM4WUEN

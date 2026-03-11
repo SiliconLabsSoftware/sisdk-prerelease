@@ -3,7 +3,7 @@
  * @brief struct definitions for zigbee ipc command messages
  *******************************************************************************
  * # License
- * <b>Copyright 2025 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc. Your use of this
@@ -103,7 +103,7 @@
 #include "stack/internal/src/ipc/zigbee-dynamic-node-type-ipc-command-messages.h"
 #endif
 #include "stack/internal/src/ipc/zigbee-security-manager-ipc-command-messages.h"
-#ifdef SL_CATALOG_ZIGBEE_DIRECT_ZDD_PRESENT
+#ifdef SL_CATALOG_ZIGBEE_DIRECT_STACK_INTERFACE_PRESENT
 #include "stack/internal/src/ipc/zigbee_direct_stack_interface_ipc_command_messages.h"
 #endif
 #ifdef SL_CATALOG_ZIGBEE_LIGHT_LINK_PRESENT
@@ -355,6 +355,7 @@ typedef struct {
     sli_zigbee_stack_zigbee_remove_child_ipc_msg_t zigbee_remove_child;
     slxi_zigbee_stack_gu_zdo_toggle_dlk_ipc_msg_t gu_zdo_toggle_dlk;
     slxi_zigbee_stack_ignore_incoming_aps_acks_ipc_msg_t ignore_incoming_aps_acks;
+    slxi_zigbee_stack_insecure_debug_generate_trace_ipc_msg_t insecure_debug_generate_trace;
     #endif
     sli_zigbee_stack_get_embernet_passthrough_source_address_ipc_msg_t get_embernet_passthrough_source_address;
     sli_zigbee_stack_get_mac_passthrough_flags_ipc_msg_t get_mac_passthrough_flags;
@@ -494,6 +495,7 @@ typedef struct {
     sli_802154_stack_get_tx_power_mode_ipc_msg_t get_tx_power_mode;
     sli_802154_stack_radio_get_scheduler_priorities_ipc_msg_t radio_get_scheduler_priorities;
     sli_802154_stack_radio_get_scheduler_sliptime_ipc_msg_t radio_get_scheduler_sliptime;
+    sli_802154_stack_radio_set_scheduler_priorities_ipc_msg_t radio_set_scheduler_priorities;
     sli_802154_stack_radio_set_scheduler_sliptime_ipc_msg_t radio_set_scheduler_sliptime;
     sli_802154_stack_set_tx_power_mode_ipc_msg_t set_tx_power_mode;
     sli_mac_stack_get_csma_params_ipc_msg_t get_csma_params;
@@ -627,7 +629,7 @@ typedef struct {
     slxi_zigbee_stack_get_trust_center_additional_info_ipc_msg_t get_trust_center_additional_info;
     slxi_zigbee_stack_set_key_table_additional_info_ipc_msg_t set_key_table_additional_info;
     slxi_zigbee_stack_set_trust_center_additional_info_ipc_msg_t set_trust_center_additional_info;
-    #ifdef SL_CATALOG_ZIGBEE_DIRECT_ZDD_PRESENT
+    #ifdef SL_CATALOG_ZIGBEE_DIRECT_STACK_INTERFACE_PRESENT
     sli_zigbee_stack_direct_send_commissioning_response_ipc_msg_t direct_send_commissioning_response;
     sli_zigbee_stack_direct_send_ephemeral_key_ipc_msg_t direct_send_ephemeral_key;
     sli_zigbee_stack_get_nwk_update_id_ipc_msg_t get_nwk_update_id;

@@ -2,6 +2,10 @@ id: spidrv
 package: platform_core
 label: SPIDRV
 description: >
+  Deprecated component kept for backward compatibility.
+  For new designs, use spidrv_usart (or spidrv_eusart) instead.
+
+
   The SPI USART driver sets up the USART for SPI communication and supports
   both master and slave roles. Both blocking and interrupt driven asynchrounous
   APIs are provided for transmit and receive operations.
@@ -28,7 +32,7 @@ description: >
   Selecting this component will also include the SPIDRV Core component, which is
   the implementation of the SPI driver itself.
 category: Platform|Driver|SPI
-quality: production
+quality: deprecated
 metadata:
   sbom:
     license: Zlib

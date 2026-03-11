@@ -29,10 +29,29 @@
 // still some code outside of these macros that explicitly references these contants. TODO: This should be
 // cleaned up at some point.
 #define SL_ZIGBEE_AF_PRINT_CORE 0x0001
+#define SL_ZIGBEE_AF_PRINT_CLI  0x0002
 
 // Debug print macros for the application framework and ZCL clusters.
 // We are using area 0x00 in the sl_zigbee_af_print* calls below because with UC we don't (yet) have
 // the per-cluster print granularity, sl_zigbee_af_print_enabled() always returns TRUE.
+
+#if defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT)
+#define sl_zigbee_af_cli_print(...) sl_zigbee_af_print(SL_ZIGBEE_AF_PRINT_CLI, __VA_ARGS__)
+#define sl_zigbee_af_cli_println(...) sl_zigbee_af_println(SL_ZIGBEE_AF_PRINT_CLI, __VA_ARGS__)
+#define sl_zigbee_af_cli_flush()
+#define sl_zigbee_af_cli_exec(x) if ( sl_zigbee_af_print_enabled(SL_ZIGBEE_AF_PRINT_CLI) ) { x; }
+#define sl_zigbee_af_cli_print_buffer(buffer, len, withSpace) sl_zigbee_af_print_buffer(SL_ZIGBEE_AF_PRINT_CLI, (buffer), (len), (withSpace))
+#define sl_zigbee_af_cli_print_string(buffer) sl_zigbee_af_print_string(SL_ZIGBEE_AF_PRINT_CLI, (buffer))
+#define sl_zigbee_af_cli_print_long_string(buffer) sl_zigbee_af_cli_print_buffer((buffer + 2), (LIMIT_ATTR_STR_LENGTH(sl_zigbee_af_long_string_length(buffer))), false)
+#else
+#define sl_zigbee_af_cli_print(...)
+#define sl_zigbee_af_cli_println(...)
+#define sl_zigbee_af_cli_flush()
+#define sl_zigbee_af_cli_exec(x)
+#define sl_zigbee_af_cli_print_buffer(buffer, len, withSpace)
+#define sl_zigbee_af_cli_print_string(buffer)
+#define sl_zigbee_af_cli_print_long_string(buffer)
+#endif
 
 // We have a separate config switch (ZIGBEE_DEBUG_PRINTS_AF_DEBUG) for AF Debug because we want it off by default
 #if (defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT) && (SL_ZIGBEE_DEBUG_ZCL_GROUP_ENABLED == 1) && (SL_ZIGBEE_DEBUG_PRINTS_ZCL_LEGACY_AF_DEBUG_ENABLED == 1))
@@ -43,16 +62,13 @@
 #define sl_zigbee_af_debug_debug_exec(x) if ( sl_zigbee_af_print_enabled(0x00) ) { x; }
 #define sl_zigbee_af_debug_print_buffer(buffer, len, withSpace) sl_zigbee_af_print_buffer(0x00, (buffer), (len), (withSpace))
 #define sl_zigbee_af_debug_print_string(buffer) sl_zigbee_af_print_string(0x00, (buffer))
-
 #else
-
 #define sl_zigbee_af_debug_print(...)
 #define sl_zigbee_af_debug_println(...)
 #define sl_zigbee_af_debug_flush()
 #define sl_zigbee_af_debug_debug_exec(x)
 #define sl_zigbee_af_debug_print_buffer(buffer, len, withSpace)
 #define sl_zigbee_af_debug_print_string(buffer)
-
 #endif // (defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT) && (SL_ZIGBEE_DEBUG_ZCL_GROUP_ENABLED == 1) && (SL_ZIGBEE_DEBUG_PRINTS_ZCL_LEGACY_AF_DEBUG_ENABLED == 1))
 
 #if (defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT) && (SL_ZIGBEE_DEBUG_ZCL_GROUP_ENABLED == 1))

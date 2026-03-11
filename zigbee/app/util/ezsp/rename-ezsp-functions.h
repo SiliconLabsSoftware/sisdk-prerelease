@@ -216,8 +216,7 @@
 #define sl_zigbee_zll_set_rx_on_when_idle sl_zigbee_ezsp_zll_set_rx_on_when_idle
 #define sl_zigbee_zll_scanning_complete sl_zigbee_ezsp_zll_scanning_complete
 
-// Mirror SoC side macro in zll-api.h
-#define sl_zigbee_zll_cancel_rx_on_when_idle() sl_zigbee_ezsp_zll_set_rx_on_when_idle(0)
+
 
 //Other
 #define sl_zigbee_get_pan_id sl_zigbee_af_get_pan_id
@@ -229,10 +228,8 @@
 #define sl_zigbee_set_pending_network_update_pan_id sl_zigbee_ezsp_set_pending_network_update_pan_id
 #define sl_zigbee_set_pending_network_update_channel sl_zigbee_ezsp_set_pending_network_update_channel
 
-#define sl_zigbee_set_stack_profile(stackProfile) \
-  sl_zigbee_af_set_ezsp_config_value(SL_ZIGBEE_EZSP_CONFIG_STACK_PROFILE, stackProfile, "stack profile")
-#define sl_zigbee_set_security_level(securityLevel) \
-  sl_zigbee_af_set_ezsp_config_value(SL_ZIGBEE_EZSP_CONFIG_SECURITY_LEVEL, securityLevel, "security level")
+#define sl_zigbee_set_stack_profile(stackProfile) sl_zigbee_ezsp_set_stack_profile(stackProfile)
+#define sl_zigbee_set_security_level(securityLevel) sl_zigbee_ezsp_set_security_level(securityLevel)
 
 //Have GP server use its own implementations of these for now
 #ifndef SL_CATALOG_ZIGBEE_GREEN_POWER_SERVER_PRESENT
@@ -244,6 +241,7 @@
 #define sl_zigbee_get_endpoint_cluster sl_zigbee_ezsp_get_endpoint_cluster
 
 #define sl_zigbee_radio_get_scheduler_priorities sl_zigbee_ezsp_radio_get_scheduler_priorities
+#define sl_zigbee_radio_set_scheduler_priorities sl_zigbee_ezsp_radio_set_scheduler_priorities
 #define sl_zigbee_radio_get_scheduler_sliptime sl_zigbee_ezsp_radio_get_scheduler_sliptime
 #define sl_zigbee_radio_set_scheduler_sliptime sl_zigbee_ezsp_radio_set_scheduler_sliptime
 #define sl_zigbee_counter_requires_phy_index sl_zigbee_ezsp_counter_requires_phy_index

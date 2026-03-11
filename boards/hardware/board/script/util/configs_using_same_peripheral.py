@@ -25,7 +25,6 @@ ignore_peripherals_per_sdid = {
   230: ['EUSART0'], # Leopard only has 1 EUSART so conflicts are inevitable
   235: ['USART0'],  # Margay only has 1 USART so conflicts are inevitable
   240: [],          # Lion
-  260: ['USART0'],  # EFR32FG2D only has 1 USART so conflicts are inevitable
 }
 
 

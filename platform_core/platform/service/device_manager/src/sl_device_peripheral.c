@@ -69,6 +69,11 @@ __WEAK const sl_peripheral_val_t sl_peripheral_val_amuxcp0 = { .base = 0xFFFFFFF
                                                                .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                .bus_clock = SL_BUS_CLOCK_INVALID };
 
+// Weak definition of peripheral AMUXCP0.
+__WEAK const sl_peripheral_val_t sl_peripheral_val_amuxcp1 = { .base = 0xFFFFFFFF,
+                                                               .clk_branch = SL_CLOCK_BRANCH_INVALID,
+                                                               .bus_clock = SL_BUS_CLOCK_INVALID };
+
 // Weak definition of peripheral BUFC.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_bufc = { .base = 0xFFFFFFFF,
                                                             .clk_branch = SL_CLOCK_BRANCH_INVALID,

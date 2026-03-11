@@ -39,6 +39,10 @@
 #include "btl_reset_info.h"
 #endif
 
+#if defined(BTL_ENFORCE_GLITCH_MITIGATION) && (BTL_ENFORCE_GLITCH_MITIGATION == 1)
+#include "core/btl_glitch_mitigation.h"
+#endif
+
 #if defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
@@ -265,11 +269,19 @@ int32_t storage_initParseSlot(uint32_t                  slotId,
     return retval;
   }
 
+#if defined(BTL_ENFORCE_GLITCH_MITIGATION) && (BTL_ENFORCE_GLITCH_MITIGATION == 1)
+  BTL_SEC_ASSERT_EQUAL(retval, BOOTLOADER_OK);
+#endif
+
   BootloaderStorageSlot_t slot;
   retval = storage_getSlotInfo(slotId, &slot);
   if (retval != BOOTLOADER_OK) {
     return retval;
   }
+
+#if defined(BTL_ENFORCE_GLITCH_MITIGATION) && (BTL_ENFORCE_GLITCH_MITIGATION == 1)
+  BTL_SEC_ASSERT_EQUAL(retval, BOOTLOADER_OK);
+#endif
 
   context->slotId = slotId;
   context->slotSize = slot.length;

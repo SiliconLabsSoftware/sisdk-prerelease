@@ -12,7 +12,7 @@ description: >
   The driver core provides essential functionalities for I2C communication
   such as initialization, configuration, and data transfer management.
 category: Platform|Driver|I2C
-quality: evaluation
+quality: production
 metadata:
   sbom:
     license: Zlib

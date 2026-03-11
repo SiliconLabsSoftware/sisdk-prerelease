@@ -22,6 +22,8 @@ requires:
 - name: zigbee_phy_2_4_subghz_switch_coordinator
   condition:
   - brd4197a
+  # since IPC command for this lives inside pro-compliance's header
+- name: zigbee_insecure_debug_key_trace
 
 define:
 - name: CONFIGURATION_HEADER

@@ -888,9 +888,9 @@ uint16_t = __uint16_t# stdint-uintn.h: 25
 
 uint32_t = __uint32_t# stdint-uintn.h: 26
 
-sl_status_t = uint32_t# sl_status.h: 504
+sl_status_t = uint32_t# sl_status.h: 506
 
-# sl_status.h: 540
+# sl_status.h: 542
 for _lib in _libs.values():
     if not _lib.has("sl_status_get_string_n", "cdecl"):
         continue
@@ -899,7 +899,7 @@ for _lib in _libs.values():
     sl_status_get_string_n.restype = c_int32
     break
 
-# sl_status.h: 553
+# sl_status.h: 555
 for _lib in _libs.values():
     if not _lib.has("sl_status_print", "cdecl"):
         continue
@@ -2069,1471 +2069,1483 @@ try:
 except:
     pass
 
-# sl_status.h: 228
+# sl_status.h: 226
 try:
-    SL_STATUS_BT_OUT_OF_BONDS = (sl_status_t (ord_if_char(0x0402))).value
+    SL_STATUS_SECURITY_AES_CM_RESEED_NEEDED = (sl_status_t (ord_if_char(0x0075))).value
 except:
     pass
 
-# sl_status.h: 229
+# sl_status.h: 227
 try:
-    SL_STATUS_BT_UNSPECIFIED = (sl_status_t (ord_if_char(0x0403))).value
+    SL_STATUS_SECURITY_AES_CM_FAIL = (sl_status_t (ord_if_char(0x0076))).value
 except:
     pass
 
 # sl_status.h: 230
 try:
-    SL_STATUS_BT_HARDWARE = (sl_status_t (ord_if_char(0x0404))).value
+    SL_STATUS_BT_OUT_OF_BONDS = (sl_status_t (ord_if_char(0x0402))).value
 except:
     pass
 
 # sl_status.h: 231
 try:
-    SL_STATUS_BT_NO_BONDING = (sl_status_t (ord_if_char(0x0406))).value
+    SL_STATUS_BT_UNSPECIFIED = (sl_status_t (ord_if_char(0x0403))).value
 except:
     pass
 
 # sl_status.h: 232
 try:
-    SL_STATUS_BT_CRYPTO = (sl_status_t (ord_if_char(0x0407))).value
+    SL_STATUS_BT_HARDWARE = (sl_status_t (ord_if_char(0x0404))).value
 except:
     pass
 
 # sl_status.h: 233
 try:
-    SL_STATUS_BT_DATA_CORRUPTED = (sl_status_t (ord_if_char(0x0408))).value
+    SL_STATUS_BT_NO_BONDING = (sl_status_t (ord_if_char(0x0406))).value
 except:
     pass
 
 # sl_status.h: 234
 try:
-    SL_STATUS_BT_INVALID_SYNC_HANDLE = (sl_status_t (ord_if_char(0x040A))).value
+    SL_STATUS_BT_CRYPTO = (sl_status_t (ord_if_char(0x0407))).value
 except:
     pass
 
 # sl_status.h: 235
 try:
-    SL_STATUS_BT_INVALID_MODULE_ACTION = (sl_status_t (ord_if_char(0x040B))).value
+    SL_STATUS_BT_DATA_CORRUPTED = (sl_status_t (ord_if_char(0x0408))).value
 except:
     pass
 
 # sl_status.h: 236
 try:
-    SL_STATUS_BT_RADIO = (sl_status_t (ord_if_char(0x040C))).value
+    SL_STATUS_BT_INVALID_SYNC_HANDLE = (sl_status_t (ord_if_char(0x040A))).value
 except:
     pass
 
 # sl_status.h: 237
 try:
-    SL_STATUS_BT_L2CAP_REMOTE_DISCONNECTED = (sl_status_t (ord_if_char(0x040D))).value
+    SL_STATUS_BT_INVALID_MODULE_ACTION = (sl_status_t (ord_if_char(0x040B))).value
 except:
     pass
 
 # sl_status.h: 238
 try:
-    SL_STATUS_BT_L2CAP_LOCAL_DISCONNECTED = (sl_status_t (ord_if_char(0x040E))).value
+    SL_STATUS_BT_RADIO = (sl_status_t (ord_if_char(0x040C))).value
 except:
     pass
 
 # sl_status.h: 239
 try:
-    SL_STATUS_BT_L2CAP_CID_NOT_EXIST = (sl_status_t (ord_if_char(0x040F))).value
+    SL_STATUS_BT_L2CAP_REMOTE_DISCONNECTED = (sl_status_t (ord_if_char(0x040D))).value
 except:
     pass
 
 # sl_status.h: 240
 try:
-    SL_STATUS_BT_L2CAP_LE_DISCONNECTED = (sl_status_t (ord_if_char(0x0410))).value
+    SL_STATUS_BT_L2CAP_LOCAL_DISCONNECTED = (sl_status_t (ord_if_char(0x040E))).value
 except:
     pass
 
 # sl_status.h: 241
 try:
-    SL_STATUS_BT_L2CAP_FLOW_CONTROL_VIOLATED = (sl_status_t (ord_if_char(0x0412))).value
+    SL_STATUS_BT_L2CAP_CID_NOT_EXIST = (sl_status_t (ord_if_char(0x040F))).value
 except:
     pass
 
 # sl_status.h: 242
 try:
-    SL_STATUS_BT_L2CAP_FLOW_CONTROL_CREDIT_OVERFLOWED = (sl_status_t (ord_if_char(0x0413))).value
+    SL_STATUS_BT_L2CAP_LE_DISCONNECTED = (sl_status_t (ord_if_char(0x0410))).value
 except:
     pass
 
 # sl_status.h: 243
 try:
-    SL_STATUS_BT_L2CAP_NO_FLOW_CONTROL_CREDIT = (sl_status_t (ord_if_char(0x0414))).value
+    SL_STATUS_BT_L2CAP_FLOW_CONTROL_VIOLATED = (sl_status_t (ord_if_char(0x0412))).value
 except:
     pass
 
 # sl_status.h: 244
 try:
-    SL_STATUS_BT_L2CAP_CONNECTION_REQUEST_TIMEOUT = (sl_status_t (ord_if_char(0x0415))).value
+    SL_STATUS_BT_L2CAP_FLOW_CONTROL_CREDIT_OVERFLOWED = (sl_status_t (ord_if_char(0x0413))).value
 except:
     pass
 
 # sl_status.h: 245
 try:
-    SL_STATUS_BT_L2CAP_INVALID_CID = (sl_status_t (ord_if_char(0x0416))).value
+    SL_STATUS_BT_L2CAP_NO_FLOW_CONTROL_CREDIT = (sl_status_t (ord_if_char(0x0414))).value
 except:
     pass
 
 # sl_status.h: 246
 try:
-    SL_STATUS_BT_L2CAP_WRONG_STATE = (sl_status_t (ord_if_char(0x0417))).value
+    SL_STATUS_BT_L2CAP_CONNECTION_REQUEST_TIMEOUT = (sl_status_t (ord_if_char(0x0415))).value
 except:
     pass
 
 # sl_status.h: 247
 try:
-    SL_STATUS_BT_PS_STORE_FULL = (sl_status_t (ord_if_char(0x041B))).value
+    SL_STATUS_BT_L2CAP_INVALID_CID = (sl_status_t (ord_if_char(0x0416))).value
 except:
     pass
 
 # sl_status.h: 248
 try:
-    SL_STATUS_BT_PS_KEY_NOT_FOUND = (sl_status_t (ord_if_char(0x041C))).value
+    SL_STATUS_BT_L2CAP_WRONG_STATE = (sl_status_t (ord_if_char(0x0417))).value
 except:
     pass
 
 # sl_status.h: 249
 try:
-    SL_STATUS_BT_APPLICATION_MISMATCHED_OR_INSUFFICIENT_SECURITY = (sl_status_t (ord_if_char(0x041D))).value
+    SL_STATUS_BT_PS_STORE_FULL = (sl_status_t (ord_if_char(0x041B))).value
 except:
     pass
 
 # sl_status.h: 250
 try:
+    SL_STATUS_BT_PS_KEY_NOT_FOUND = (sl_status_t (ord_if_char(0x041C))).value
+except:
+    pass
+
+# sl_status.h: 251
+try:
+    SL_STATUS_BT_APPLICATION_MISMATCHED_OR_INSUFFICIENT_SECURITY = (sl_status_t (ord_if_char(0x041D))).value
+except:
+    pass
+
+# sl_status.h: 252
+try:
     SL_STATUS_BT_APPLICATION_ENCRYPTION_DECRYPTION_ERROR = (sl_status_t (ord_if_char(0x041E))).value
-except:
-    pass
-
-# sl_status.h: 253
-try:
-    SL_STATUS_BT_CTRL_UNKNOWN_HCI_COMMAND = (sl_status_t (ord_if_char(0x1001))).value
-except:
-    pass
-
-# sl_status.h: 254
-try:
-    SL_STATUS_BT_CTRL_UNKNOWN_CONNECTION_IDENTIFIER = (sl_status_t (ord_if_char(0x1002))).value
 except:
     pass
 
 # sl_status.h: 255
 try:
-    SL_STATUS_BT_CTRL_HARDWARE_FAILURE = (sl_status_t (ord_if_char(0x1003))).value
+    SL_STATUS_BT_CTRL_UNKNOWN_HCI_COMMAND = (sl_status_t (ord_if_char(0x1001))).value
 except:
     pass
 
 # sl_status.h: 256
 try:
-    SL_STATUS_BT_CTRL_PAGE_TIMEOUT = (sl_status_t (ord_if_char(0x1004))).value
+    SL_STATUS_BT_CTRL_UNKNOWN_CONNECTION_IDENTIFIER = (sl_status_t (ord_if_char(0x1002))).value
 except:
     pass
 
 # sl_status.h: 257
 try:
-    SL_STATUS_BT_CTRL_AUTHENTICATION_FAILURE = (sl_status_t (ord_if_char(0x1005))).value
+    SL_STATUS_BT_CTRL_HARDWARE_FAILURE = (sl_status_t (ord_if_char(0x1003))).value
 except:
     pass
 
 # sl_status.h: 258
 try:
-    SL_STATUS_BT_CTRL_PIN_OR_KEY_MISSING = (sl_status_t (ord_if_char(0x1006))).value
+    SL_STATUS_BT_CTRL_PAGE_TIMEOUT = (sl_status_t (ord_if_char(0x1004))).value
 except:
     pass
 
 # sl_status.h: 259
 try:
-    SL_STATUS_BT_CTRL_MEMORY_CAPACITY_EXCEEDED = (sl_status_t (ord_if_char(0x1007))).value
+    SL_STATUS_BT_CTRL_AUTHENTICATION_FAILURE = (sl_status_t (ord_if_char(0x1005))).value
 except:
     pass
 
 # sl_status.h: 260
 try:
-    SL_STATUS_BT_CTRL_CONNECTION_TIMEOUT = (sl_status_t (ord_if_char(0x1008))).value
+    SL_STATUS_BT_CTRL_PIN_OR_KEY_MISSING = (sl_status_t (ord_if_char(0x1006))).value
 except:
     pass
 
 # sl_status.h: 261
 try:
-    SL_STATUS_BT_CTRL_CONNECTION_LIMIT_EXCEEDED = (sl_status_t (ord_if_char(0x1009))).value
+    SL_STATUS_BT_CTRL_MEMORY_CAPACITY_EXCEEDED = (sl_status_t (ord_if_char(0x1007))).value
 except:
     pass
 
 # sl_status.h: 262
 try:
-    SL_STATUS_BT_CTRL_SYNCHRONOUS_CONNECTION_LIMIT_EXCEEDED = (sl_status_t (ord_if_char(0x100A))).value
+    SL_STATUS_BT_CTRL_CONNECTION_TIMEOUT = (sl_status_t (ord_if_char(0x1008))).value
 except:
     pass
 
 # sl_status.h: 263
 try:
-    SL_STATUS_BT_CTRL_ACL_CONNECTION_ALREADY_EXISTS = (sl_status_t (ord_if_char(0x100B))).value
+    SL_STATUS_BT_CTRL_CONNECTION_LIMIT_EXCEEDED = (sl_status_t (ord_if_char(0x1009))).value
 except:
     pass
 
 # sl_status.h: 264
 try:
-    SL_STATUS_BT_CTRL_COMMAND_DISALLOWED = (sl_status_t (ord_if_char(0x100C))).value
+    SL_STATUS_BT_CTRL_SYNCHRONOUS_CONNECTION_LIMIT_EXCEEDED = (sl_status_t (ord_if_char(0x100A))).value
 except:
     pass
 
 # sl_status.h: 265
 try:
-    SL_STATUS_BT_CTRL_CONNECTION_REJECTED_DUE_TO_LIMITED_RESOURCES = (sl_status_t (ord_if_char(0x100D))).value
+    SL_STATUS_BT_CTRL_ACL_CONNECTION_ALREADY_EXISTS = (sl_status_t (ord_if_char(0x100B))).value
 except:
     pass
 
 # sl_status.h: 266
 try:
-    SL_STATUS_BT_CTRL_CONNECTION_REJECTED_DUE_TO_SECURITY_REASONS = (sl_status_t (ord_if_char(0x100E))).value
+    SL_STATUS_BT_CTRL_COMMAND_DISALLOWED = (sl_status_t (ord_if_char(0x100C))).value
 except:
     pass
 
 # sl_status.h: 267
 try:
-    SL_STATUS_BT_CTRL_CONNECTION_REJECTED_DUE_TO_UNACCEPTABLE_BD_ADDR = (sl_status_t (ord_if_char(0x100F))).value
+    SL_STATUS_BT_CTRL_CONNECTION_REJECTED_DUE_TO_LIMITED_RESOURCES = (sl_status_t (ord_if_char(0x100D))).value
 except:
     pass
 
 # sl_status.h: 268
 try:
-    SL_STATUS_BT_CTRL_CONNECTION_ACCEPT_TIMEOUT_EXCEEDED = (sl_status_t (ord_if_char(0x1010))).value
+    SL_STATUS_BT_CTRL_CONNECTION_REJECTED_DUE_TO_SECURITY_REASONS = (sl_status_t (ord_if_char(0x100E))).value
 except:
     pass
 
 # sl_status.h: 269
 try:
-    SL_STATUS_BT_CTRL_UNSUPPORTED_FEATURE_OR_PARAMETER_VALUE = (sl_status_t (ord_if_char(0x1011))).value
+    SL_STATUS_BT_CTRL_CONNECTION_REJECTED_DUE_TO_UNACCEPTABLE_BD_ADDR = (sl_status_t (ord_if_char(0x100F))).value
 except:
     pass
 
 # sl_status.h: 270
 try:
-    SL_STATUS_BT_CTRL_INVALID_COMMAND_PARAMETERS = (sl_status_t (ord_if_char(0x1012))).value
+    SL_STATUS_BT_CTRL_CONNECTION_ACCEPT_TIMEOUT_EXCEEDED = (sl_status_t (ord_if_char(0x1010))).value
 except:
     pass
 
 # sl_status.h: 271
 try:
-    SL_STATUS_BT_CTRL_REMOTE_USER_TERMINATED = (sl_status_t (ord_if_char(0x1013))).value
+    SL_STATUS_BT_CTRL_UNSUPPORTED_FEATURE_OR_PARAMETER_VALUE = (sl_status_t (ord_if_char(0x1011))).value
 except:
     pass
 
 # sl_status.h: 272
 try:
-    SL_STATUS_BT_CTRL_REMOTE_DEVICE_TERMINATED_CONNECTION_DUE_TO_LOW_RESOURCES = (sl_status_t (ord_if_char(0x1014))).value
+    SL_STATUS_BT_CTRL_INVALID_COMMAND_PARAMETERS = (sl_status_t (ord_if_char(0x1012))).value
 except:
     pass
 
 # sl_status.h: 273
 try:
-    SL_STATUS_BT_CTRL_REMOTE_POWERING_OFF = (sl_status_t (ord_if_char(0x1015))).value
+    SL_STATUS_BT_CTRL_REMOTE_USER_TERMINATED = (sl_status_t (ord_if_char(0x1013))).value
 except:
     pass
 
 # sl_status.h: 274
 try:
-    SL_STATUS_BT_CTRL_CONNECTION_TERMINATED_BY_LOCAL_HOST = (sl_status_t (ord_if_char(0x1016))).value
+    SL_STATUS_BT_CTRL_REMOTE_DEVICE_TERMINATED_CONNECTION_DUE_TO_LOW_RESOURCES = (sl_status_t (ord_if_char(0x1014))).value
 except:
     pass
 
 # sl_status.h: 275
 try:
-    SL_STATUS_BT_CTRL_REPEATED_ATTEMPTS = (sl_status_t (ord_if_char(0x1017))).value
+    SL_STATUS_BT_CTRL_REMOTE_POWERING_OFF = (sl_status_t (ord_if_char(0x1015))).value
 except:
     pass
 
 # sl_status.h: 276
 try:
-    SL_STATUS_BT_CTRL_PAIRING_NOT_ALLOWED = (sl_status_t (ord_if_char(0x1018))).value
+    SL_STATUS_BT_CTRL_CONNECTION_TERMINATED_BY_LOCAL_HOST = (sl_status_t (ord_if_char(0x1016))).value
 except:
     pass
 
 # sl_status.h: 277
 try:
-    SL_STATUS_BT_CTRL_UNKNOWN_LMP_PDU = (sl_status_t (ord_if_char(0x1019))).value
+    SL_STATUS_BT_CTRL_REPEATED_ATTEMPTS = (sl_status_t (ord_if_char(0x1017))).value
 except:
     pass
 
 # sl_status.h: 278
 try:
-    SL_STATUS_BT_CTRL_UNSUPPORTED_REMOTE_FEATURE = (sl_status_t (ord_if_char(0x101A))).value
+    SL_STATUS_BT_CTRL_PAIRING_NOT_ALLOWED = (sl_status_t (ord_if_char(0x1018))).value
 except:
     pass
 
 # sl_status.h: 279
 try:
-    SL_STATUS_BT_CTRL_SCO_OFFSET_REJECTED = (sl_status_t (ord_if_char(0x101B))).value
+    SL_STATUS_BT_CTRL_UNKNOWN_LMP_PDU = (sl_status_t (ord_if_char(0x1019))).value
 except:
     pass
 
 # sl_status.h: 280
 try:
-    SL_STATUS_BT_CTRL_SCO_INTERVAL_REJECTED = (sl_status_t (ord_if_char(0x101C))).value
+    SL_STATUS_BT_CTRL_UNSUPPORTED_REMOTE_FEATURE = (sl_status_t (ord_if_char(0x101A))).value
 except:
     pass
 
 # sl_status.h: 281
 try:
-    SL_STATUS_BT_CTRL_SCO_AIR_MODE_REJECTED = (sl_status_t (ord_if_char(0x101D))).value
+    SL_STATUS_BT_CTRL_SCO_OFFSET_REJECTED = (sl_status_t (ord_if_char(0x101B))).value
 except:
     pass
 
 # sl_status.h: 282
 try:
-    SL_STATUS_BT_CTRL_INVALID_LL_PARAMETERS = (sl_status_t (ord_if_char(0x101E))).value
+    SL_STATUS_BT_CTRL_SCO_INTERVAL_REJECTED = (sl_status_t (ord_if_char(0x101C))).value
 except:
     pass
 
 # sl_status.h: 283
 try:
-    SL_STATUS_BT_CTRL_UNSPECIFIED_ERROR = (sl_status_t (ord_if_char(0x101F))).value
+    SL_STATUS_BT_CTRL_SCO_AIR_MODE_REJECTED = (sl_status_t (ord_if_char(0x101D))).value
 except:
     pass
 
 # sl_status.h: 284
 try:
-    SL_STATUS_BT_CTRL_UNSUPPORTED_LL_PARAMETER_VALUE = (sl_status_t (ord_if_char(0x1020))).value
+    SL_STATUS_BT_CTRL_INVALID_LL_PARAMETERS = (sl_status_t (ord_if_char(0x101E))).value
 except:
     pass
 
 # sl_status.h: 285
 try:
-    SL_STATUS_BT_CTRL_ROLE_CHANGE_NOT_ALLOWED = (sl_status_t (ord_if_char(0x1021))).value
+    SL_STATUS_BT_CTRL_UNSPECIFIED_ERROR = (sl_status_t (ord_if_char(0x101F))).value
 except:
     pass
 
 # sl_status.h: 286
 try:
-    SL_STATUS_BT_CTRL_LL_RESPONSE_TIMEOUT = (sl_status_t (ord_if_char(0x1022))).value
+    SL_STATUS_BT_CTRL_UNSUPPORTED_LL_PARAMETER_VALUE = (sl_status_t (ord_if_char(0x1020))).value
 except:
     pass
 
 # sl_status.h: 287
 try:
-    SL_STATUS_BT_CTRL_LL_PROCEDURE_COLLISION = (sl_status_t (ord_if_char(0x1023))).value
+    SL_STATUS_BT_CTRL_ROLE_CHANGE_NOT_ALLOWED = (sl_status_t (ord_if_char(0x1021))).value
 except:
     pass
 
 # sl_status.h: 288
 try:
-    SL_STATUS_BT_CTRL_LMP_PDU_NOT_ALLOWED = (sl_status_t (ord_if_char(0x1024))).value
+    SL_STATUS_BT_CTRL_LL_RESPONSE_TIMEOUT = (sl_status_t (ord_if_char(0x1022))).value
+except:
+    pass
+
+# sl_status.h: 289
+try:
+    SL_STATUS_BT_CTRL_LL_PROCEDURE_COLLISION = (sl_status_t (ord_if_char(0x1023))).value
 except:
     pass
 
 # sl_status.h: 290
 try:
-    SL_STATUS_BT_CTRL_ENCRYPTION_MODE_NOT_ACCEPTABLE = (sl_status_t (ord_if_char(0x1025))).value
-except:
-    pass
-
-# sl_status.h: 291
-try:
-    SL_STATUS_BT_CTRL_LINK_KEY_CANNOT_BE_CHANGED = (sl_status_t (ord_if_char(0x1026))).value
+    SL_STATUS_BT_CTRL_LMP_PDU_NOT_ALLOWED = (sl_status_t (ord_if_char(0x1024))).value
 except:
     pass
 
 # sl_status.h: 292
 try:
-    SL_STATUS_BT_CTRL_REQUESTED_QOS_NOT_SUPPORTED = (sl_status_t (ord_if_char(0x1027))).value
+    SL_STATUS_BT_CTRL_ENCRYPTION_MODE_NOT_ACCEPTABLE = (sl_status_t (ord_if_char(0x1025))).value
 except:
     pass
 
 # sl_status.h: 293
 try:
-    SL_STATUS_BT_CTRL_INSTANT_PASSED = (sl_status_t (ord_if_char(0x1028))).value
+    SL_STATUS_BT_CTRL_LINK_KEY_CANNOT_BE_CHANGED = (sl_status_t (ord_if_char(0x1026))).value
 except:
     pass
 
 # sl_status.h: 294
 try:
-    SL_STATUS_BT_CTRL_PAIRING_WITH_UNIT_KEY_NOT_SUPPORTED = (sl_status_t (ord_if_char(0x1029))).value
+    SL_STATUS_BT_CTRL_REQUESTED_QOS_NOT_SUPPORTED = (sl_status_t (ord_if_char(0x1027))).value
 except:
     pass
 
 # sl_status.h: 295
 try:
-    SL_STATUS_BT_CTRL_DIFFERENT_TRANSACTION_COLLISION = (sl_status_t (ord_if_char(0x102A))).value
+    SL_STATUS_BT_CTRL_INSTANT_PASSED = (sl_status_t (ord_if_char(0x1028))).value
+except:
+    pass
+
+# sl_status.h: 296
+try:
+    SL_STATUS_BT_CTRL_PAIRING_WITH_UNIT_KEY_NOT_SUPPORTED = (sl_status_t (ord_if_char(0x1029))).value
 except:
     pass
 
 # sl_status.h: 297
 try:
-    SL_STATUS_BT_CTRL_QOS_UNACCEPTABLE_PARAMETER = (sl_status_t (ord_if_char(0x102C))).value
-except:
-    pass
-
-# sl_status.h: 298
-try:
-    SL_STATUS_BT_CTRL_QOS_REJECTED = (sl_status_t (ord_if_char(0x102D))).value
+    SL_STATUS_BT_CTRL_DIFFERENT_TRANSACTION_COLLISION = (sl_status_t (ord_if_char(0x102A))).value
 except:
     pass
 
 # sl_status.h: 299
 try:
-    SL_STATUS_BT_CTRL_CHANNEL_ASSESSMENT_NOT_SUPPORTED = (sl_status_t (ord_if_char(0x102E))).value
+    SL_STATUS_BT_CTRL_QOS_UNACCEPTABLE_PARAMETER = (sl_status_t (ord_if_char(0x102C))).value
 except:
     pass
 
 # sl_status.h: 300
 try:
-    SL_STATUS_BT_CTRL_INSUFFICIENT_SECURITY = (sl_status_t (ord_if_char(0x102F))).value
+    SL_STATUS_BT_CTRL_QOS_REJECTED = (sl_status_t (ord_if_char(0x102D))).value
 except:
     pass
 
 # sl_status.h: 301
 try:
-    SL_STATUS_BT_CTRL_PARAMETER_OUT_OF_MANDATORY_RANGE = (sl_status_t (ord_if_char(0x1030))).value
+    SL_STATUS_BT_CTRL_CHANNEL_ASSESSMENT_NOT_SUPPORTED = (sl_status_t (ord_if_char(0x102E))).value
+except:
+    pass
+
+# sl_status.h: 302
+try:
+    SL_STATUS_BT_CTRL_INSUFFICIENT_SECURITY = (sl_status_t (ord_if_char(0x102F))).value
 except:
     pass
 
 # sl_status.h: 303
 try:
-    SL_STATUS_BT_CTRL_ROLE_SWITCH_PENDING = (sl_status_t (ord_if_char(0x1032))).value
+    SL_STATUS_BT_CTRL_PARAMETER_OUT_OF_MANDATORY_RANGE = (sl_status_t (ord_if_char(0x1030))).value
 except:
     pass
 
 # sl_status.h: 305
 try:
-    SL_STATUS_BT_CTRL_RESERVED_SLOT_VIOLATION = (sl_status_t (ord_if_char(0x1034))).value
-except:
-    pass
-
-# sl_status.h: 306
-try:
-    SL_STATUS_BT_CTRL_ROLE_SWITCH_FAILED = (sl_status_t (ord_if_char(0x1035))).value
+    SL_STATUS_BT_CTRL_ROLE_SWITCH_PENDING = (sl_status_t (ord_if_char(0x1032))).value
 except:
     pass
 
 # sl_status.h: 307
 try:
-    SL_STATUS_BT_CTRL_EXTENDED_INQUIRY_RESPONSE_TOO_LARGE = (sl_status_t (ord_if_char(0x1036))).value
+    SL_STATUS_BT_CTRL_RESERVED_SLOT_VIOLATION = (sl_status_t (ord_if_char(0x1034))).value
+except:
+    pass
+
+# sl_status.h: 308
+try:
+    SL_STATUS_BT_CTRL_ROLE_SWITCH_FAILED = (sl_status_t (ord_if_char(0x1035))).value
 except:
     pass
 
 # sl_status.h: 309
 try:
-    SL_STATUS_BT_CTRL_SIMPLE_PAIRING_NOT_SUPPORTED_BY_HOST = (sl_status_t (ord_if_char(0x1037))).value
-except:
-    pass
-
-# sl_status.h: 310
-try:
-    SL_STATUS_BT_CTRL_HOST_BUSY_PAIRING = (sl_status_t (ord_if_char(0x1038))).value
+    SL_STATUS_BT_CTRL_EXTENDED_INQUIRY_RESPONSE_TOO_LARGE = (sl_status_t (ord_if_char(0x1036))).value
 except:
     pass
 
 # sl_status.h: 311
 try:
-    SL_STATUS_BT_CTRL_CONNECTION_REJECTED_DUE_TO_NO_SUITABLE_CHANNEL_FOUND = (sl_status_t (ord_if_char(0x1039))).value
+    SL_STATUS_BT_CTRL_SIMPLE_PAIRING_NOT_SUPPORTED_BY_HOST = (sl_status_t (ord_if_char(0x1037))).value
 except:
     pass
 
 # sl_status.h: 312
 try:
-    SL_STATUS_BT_CTRL_CONTROLLER_BUSY = (sl_status_t (ord_if_char(0x103A))).value
+    SL_STATUS_BT_CTRL_HOST_BUSY_PAIRING = (sl_status_t (ord_if_char(0x1038))).value
 except:
     pass
 
 # sl_status.h: 313
 try:
-    SL_STATUS_BT_CTRL_UNACCEPTABLE_CONNECTION_INTERVAL = (sl_status_t (ord_if_char(0x103B))).value
+    SL_STATUS_BT_CTRL_CONNECTION_REJECTED_DUE_TO_NO_SUITABLE_CHANNEL_FOUND = (sl_status_t (ord_if_char(0x1039))).value
 except:
     pass
 
 # sl_status.h: 314
 try:
-    SL_STATUS_BT_CTRL_ADVERTISING_TIMEOUT = (sl_status_t (ord_if_char(0x103C))).value
+    SL_STATUS_BT_CTRL_CONTROLLER_BUSY = (sl_status_t (ord_if_char(0x103A))).value
 except:
     pass
 
 # sl_status.h: 315
 try:
-    SL_STATUS_BT_CTRL_CONNECTION_TERMINATED_DUE_TO_MIC_FAILURE = (sl_status_t (ord_if_char(0x103D))).value
+    SL_STATUS_BT_CTRL_UNACCEPTABLE_CONNECTION_INTERVAL = (sl_status_t (ord_if_char(0x103B))).value
 except:
     pass
 
 # sl_status.h: 316
 try:
-    SL_STATUS_BT_CTRL_CONNECTION_FAILED_TO_BE_ESTABLISHED = (sl_status_t (ord_if_char(0x103E))).value
+    SL_STATUS_BT_CTRL_ADVERTISING_TIMEOUT = (sl_status_t (ord_if_char(0x103C))).value
 except:
     pass
 
 # sl_status.h: 317
 try:
-    SL_STATUS_BT_CTRL_MAC_CONNECTION_FAILED = (sl_status_t (ord_if_char(0x103F))).value
+    SL_STATUS_BT_CTRL_CONNECTION_TERMINATED_DUE_TO_MIC_FAILURE = (sl_status_t (ord_if_char(0x103D))).value
 except:
     pass
 
 # sl_status.h: 318
 try:
-    SL_STATUS_BT_CTRL_COARSE_CLOCK_ADJUSTMENT_REJECTED_BUT_WILL_TRY_TO_ADJUST_USING_CLOCK_DRAGGING = (sl_status_t (ord_if_char(0x1040))).value
+    SL_STATUS_BT_CTRL_CONNECTION_FAILED_TO_BE_ESTABLISHED = (sl_status_t (ord_if_char(0x103E))).value
 except:
     pass
 
 # sl_status.h: 319
 try:
-    SL_STATUS_BT_CTRL_TYPE0_SUBMAP_NOT_DEFINED = (sl_status_t (ord_if_char(0x1041))).value
+    SL_STATUS_BT_CTRL_MAC_CONNECTION_FAILED = (sl_status_t (ord_if_char(0x103F))).value
 except:
     pass
 
 # sl_status.h: 320
 try:
-    SL_STATUS_BT_CTRL_UNKNOWN_ADVERTISING_IDENTIFIER = (sl_status_t (ord_if_char(0x1042))).value
+    SL_STATUS_BT_CTRL_COARSE_CLOCK_ADJUSTMENT_REJECTED_BUT_WILL_TRY_TO_ADJUST_USING_CLOCK_DRAGGING = (sl_status_t (ord_if_char(0x1040))).value
 except:
     pass
 
 # sl_status.h: 321
 try:
-    SL_STATUS_BT_CTRL_LIMIT_REACHED = (sl_status_t (ord_if_char(0x1043))).value
+    SL_STATUS_BT_CTRL_TYPE0_SUBMAP_NOT_DEFINED = (sl_status_t (ord_if_char(0x1041))).value
 except:
     pass
 
 # sl_status.h: 322
 try:
-    SL_STATUS_BT_CTRL_OPERATION_CANCELLED_BY_HOST = (sl_status_t (ord_if_char(0x1044))).value
+    SL_STATUS_BT_CTRL_UNKNOWN_ADVERTISING_IDENTIFIER = (sl_status_t (ord_if_char(0x1042))).value
 except:
     pass
 
 # sl_status.h: 323
 try:
-    SL_STATUS_BT_CTRL_PACKET_TOO_LONG = (sl_status_t (ord_if_char(0x1045))).value
+    SL_STATUS_BT_CTRL_LIMIT_REACHED = (sl_status_t (ord_if_char(0x1043))).value
 except:
     pass
 
 # sl_status.h: 324
 try:
-    SL_STATUS_BT_CTRL_TOO_LATE = (sl_status_t (ord_if_char(0x1046))).value
+    SL_STATUS_BT_CTRL_OPERATION_CANCELLED_BY_HOST = (sl_status_t (ord_if_char(0x1044))).value
 except:
     pass
 
 # sl_status.h: 325
 try:
-    SL_STATUS_BT_CTRL_TOO_EARLY = (sl_status_t (ord_if_char(0x1047))).value
+    SL_STATUS_BT_CTRL_PACKET_TOO_LONG = (sl_status_t (ord_if_char(0x1045))).value
 except:
     pass
 
 # sl_status.h: 326
 try:
+    SL_STATUS_BT_CTRL_TOO_LATE = (sl_status_t (ord_if_char(0x1046))).value
+except:
+    pass
+
+# sl_status.h: 327
+try:
+    SL_STATUS_BT_CTRL_TOO_EARLY = (sl_status_t (ord_if_char(0x1047))).value
+except:
+    pass
+
+# sl_status.h: 328
+try:
     SL_STATUS_BT_CTRL_INSUFFICIENT_CHANNELS = (sl_status_t (ord_if_char(0x1048))).value
-except:
-    pass
-
-# sl_status.h: 329
-try:
-    SL_STATUS_BT_ATT_INVALID_HANDLE = (sl_status_t (ord_if_char(0x1101))).value
-except:
-    pass
-
-# sl_status.h: 330
-try:
-    SL_STATUS_BT_ATT_READ_NOT_PERMITTED = (sl_status_t (ord_if_char(0x1102))).value
 except:
     pass
 
 # sl_status.h: 331
 try:
-    SL_STATUS_BT_ATT_WRITE_NOT_PERMITTED = (sl_status_t (ord_if_char(0x1103))).value
+    SL_STATUS_BT_ATT_INVALID_HANDLE = (sl_status_t (ord_if_char(0x1101))).value
 except:
     pass
 
 # sl_status.h: 332
 try:
-    SL_STATUS_BT_ATT_INVALID_PDU = (sl_status_t (ord_if_char(0x1104))).value
+    SL_STATUS_BT_ATT_READ_NOT_PERMITTED = (sl_status_t (ord_if_char(0x1102))).value
 except:
     pass
 
 # sl_status.h: 333
 try:
-    SL_STATUS_BT_ATT_INSUFFICIENT_AUTHENTICATION = (sl_status_t (ord_if_char(0x1105))).value
+    SL_STATUS_BT_ATT_WRITE_NOT_PERMITTED = (sl_status_t (ord_if_char(0x1103))).value
 except:
     pass
 
 # sl_status.h: 334
 try:
-    SL_STATUS_BT_ATT_REQUEST_NOT_SUPPORTED = (sl_status_t (ord_if_char(0x1106))).value
+    SL_STATUS_BT_ATT_INVALID_PDU = (sl_status_t (ord_if_char(0x1104))).value
 except:
     pass
 
 # sl_status.h: 335
 try:
-    SL_STATUS_BT_ATT_INVALID_OFFSET = (sl_status_t (ord_if_char(0x1107))).value
+    SL_STATUS_BT_ATT_INSUFFICIENT_AUTHENTICATION = (sl_status_t (ord_if_char(0x1105))).value
 except:
     pass
 
 # sl_status.h: 336
 try:
-    SL_STATUS_BT_ATT_INSUFFICIENT_AUTHORIZATION = (sl_status_t (ord_if_char(0x1108))).value
+    SL_STATUS_BT_ATT_REQUEST_NOT_SUPPORTED = (sl_status_t (ord_if_char(0x1106))).value
 except:
     pass
 
 # sl_status.h: 337
 try:
-    SL_STATUS_BT_ATT_PREPARE_QUEUE_FULL = (sl_status_t (ord_if_char(0x1109))).value
+    SL_STATUS_BT_ATT_INVALID_OFFSET = (sl_status_t (ord_if_char(0x1107))).value
 except:
     pass
 
 # sl_status.h: 338
 try:
-    SL_STATUS_BT_ATT_ATT_NOT_FOUND = (sl_status_t (ord_if_char(0x110A))).value
+    SL_STATUS_BT_ATT_INSUFFICIENT_AUTHORIZATION = (sl_status_t (ord_if_char(0x1108))).value
 except:
     pass
 
 # sl_status.h: 339
 try:
-    SL_STATUS_BT_ATT_ATT_NOT_LONG = (sl_status_t (ord_if_char(0x110B))).value
+    SL_STATUS_BT_ATT_PREPARE_QUEUE_FULL = (sl_status_t (ord_if_char(0x1109))).value
 except:
     pass
 
 # sl_status.h: 340
 try:
-    SL_STATUS_BT_ATT_ENCRYPTION_KEY_SIZE_TOO_SHORT = (sl_status_t (ord_if_char(0x110C))).value
+    SL_STATUS_BT_ATT_ATT_NOT_FOUND = (sl_status_t (ord_if_char(0x110A))).value
 except:
     pass
 
 # sl_status.h: 341
 try:
-    SL_STATUS_BT_ATT_INSUFFICIENT_ENC_KEY_SIZE = SL_STATUS_BT_ATT_ENCRYPTION_KEY_SIZE_TOO_SHORT
+    SL_STATUS_BT_ATT_ATT_NOT_LONG = (sl_status_t (ord_if_char(0x110B))).value
 except:
     pass
 
 # sl_status.h: 342
 try:
-    SL_STATUS_BT_ATT_INVALID_ATT_LENGTH = (sl_status_t (ord_if_char(0x110D))).value
+    SL_STATUS_BT_ATT_ENCRYPTION_KEY_SIZE_TOO_SHORT = (sl_status_t (ord_if_char(0x110C))).value
 except:
     pass
 
 # sl_status.h: 343
 try:
-    SL_STATUS_BT_ATT_UNLIKELY_ERROR = (sl_status_t (ord_if_char(0x110E))).value
+    SL_STATUS_BT_ATT_INSUFFICIENT_ENC_KEY_SIZE = SL_STATUS_BT_ATT_ENCRYPTION_KEY_SIZE_TOO_SHORT
 except:
     pass
 
 # sl_status.h: 344
 try:
-    SL_STATUS_BT_ATT_INSUFFICIENT_ENCRYPTION = (sl_status_t (ord_if_char(0x110F))).value
+    SL_STATUS_BT_ATT_INVALID_ATT_LENGTH = (sl_status_t (ord_if_char(0x110D))).value
 except:
     pass
 
 # sl_status.h: 345
 try:
-    SL_STATUS_BT_ATT_UNSUPPORTED_GROUP_TYPE = (sl_status_t (ord_if_char(0x1110))).value
+    SL_STATUS_BT_ATT_UNLIKELY_ERROR = (sl_status_t (ord_if_char(0x110E))).value
 except:
     pass
 
 # sl_status.h: 346
 try:
-    SL_STATUS_BT_ATT_INSUFFICIENT_RESOURCES = (sl_status_t (ord_if_char(0x1111))).value
+    SL_STATUS_BT_ATT_INSUFFICIENT_ENCRYPTION = (sl_status_t (ord_if_char(0x110F))).value
 except:
     pass
 
 # sl_status.h: 347
 try:
-    SL_STATUS_BT_ATT_OUT_OF_SYNC = (sl_status_t (ord_if_char(0x1112))).value
+    SL_STATUS_BT_ATT_UNSUPPORTED_GROUP_TYPE = (sl_status_t (ord_if_char(0x1110))).value
 except:
     pass
 
 # sl_status.h: 348
 try:
-    SL_STATUS_BT_ATT_VALUE_NOT_ALLOWED = (sl_status_t (ord_if_char(0x1113))).value
+    SL_STATUS_BT_ATT_INSUFFICIENT_RESOURCES = (sl_status_t (ord_if_char(0x1111))).value
 except:
     pass
 
 # sl_status.h: 349
 try:
-    SL_STATUS_BT_ATT_APPLICATION = (sl_status_t (ord_if_char(0x1180))).value
+    SL_STATUS_BT_ATT_OUT_OF_SYNC = (sl_status_t (ord_if_char(0x1112))).value
 except:
     pass
 
 # sl_status.h: 350
 try:
-    SL_STATUS_BT_ATT_WRITE_REQUEST_REJECTED = (sl_status_t (ord_if_char(0x11FC))).value
+    SL_STATUS_BT_ATT_VALUE_NOT_ALLOWED = (sl_status_t (ord_if_char(0x1113))).value
 except:
     pass
 
 # sl_status.h: 351
 try:
-    SL_STATUS_BT_ATT_CLIENT_CHARACTERISTIC_CONFIGURATION_DESCRIPTOR_IMPROPERLY_CONFIGURED = (sl_status_t (ord_if_char(0x11FD))).value
+    SL_STATUS_BT_ATT_APPLICATION = (sl_status_t (ord_if_char(0x1180))).value
 except:
     pass
 
 # sl_status.h: 352
 try:
-    SL_STATUS_BT_ATT_PROCEDURE_ALREADY_IN_PROGRESS = (sl_status_t (ord_if_char(0x11FE))).value
+    SL_STATUS_BT_ATT_WRITE_REQUEST_REJECTED = (sl_status_t (ord_if_char(0x11FC))).value
 except:
     pass
 
 # sl_status.h: 353
 try:
+    SL_STATUS_BT_ATT_CLIENT_CHARACTERISTIC_CONFIGURATION_DESCRIPTOR_IMPROPERLY_CONFIGURED = (sl_status_t (ord_if_char(0x11FD))).value
+except:
+    pass
+
+# sl_status.h: 354
+try:
+    SL_STATUS_BT_ATT_PROCEDURE_ALREADY_IN_PROGRESS = (sl_status_t (ord_if_char(0x11FE))).value
+except:
+    pass
+
+# sl_status.h: 355
+try:
     SL_STATUS_BT_ATT_OUT_OF_RANGE = (sl_status_t (ord_if_char(0x11FF))).value
-except:
-    pass
-
-# sl_status.h: 356
-try:
-    SL_STATUS_BT_SMP_PASSKEY_ENTRY_FAILED = (sl_status_t (ord_if_char(0x1201))).value
-except:
-    pass
-
-# sl_status.h: 357
-try:
-    SL_STATUS_BT_SMP_OOB_NOT_AVAILABLE = (sl_status_t (ord_if_char(0x1202))).value
 except:
     pass
 
 # sl_status.h: 358
 try:
-    SL_STATUS_BT_SMP_AUTHENTICATION_REQUIREMENTS = (sl_status_t (ord_if_char(0x1203))).value
+    SL_STATUS_BT_SMP_PASSKEY_ENTRY_FAILED = (sl_status_t (ord_if_char(0x1201))).value
 except:
     pass
 
 # sl_status.h: 359
 try:
-    SL_STATUS_BT_SMP_CONFIRM_VALUE_FAILED = (sl_status_t (ord_if_char(0x1204))).value
+    SL_STATUS_BT_SMP_OOB_NOT_AVAILABLE = (sl_status_t (ord_if_char(0x1202))).value
 except:
     pass
 
 # sl_status.h: 360
 try:
-    SL_STATUS_BT_SMP_PAIRING_NOT_SUPPORTED = (sl_status_t (ord_if_char(0x1205))).value
+    SL_STATUS_BT_SMP_AUTHENTICATION_REQUIREMENTS = (sl_status_t (ord_if_char(0x1203))).value
 except:
     pass
 
 # sl_status.h: 361
 try:
-    SL_STATUS_BT_SMP_ENCRYPTION_KEY_SIZE = (sl_status_t (ord_if_char(0x1206))).value
+    SL_STATUS_BT_SMP_CONFIRM_VALUE_FAILED = (sl_status_t (ord_if_char(0x1204))).value
 except:
     pass
 
 # sl_status.h: 362
 try:
-    SL_STATUS_BT_SMP_COMMAND_NOT_SUPPORTED = (sl_status_t (ord_if_char(0x1207))).value
+    SL_STATUS_BT_SMP_PAIRING_NOT_SUPPORTED = (sl_status_t (ord_if_char(0x1205))).value
 except:
     pass
 
 # sl_status.h: 363
 try:
-    SL_STATUS_BT_SMP_UNSPECIFIED_REASON = (sl_status_t (ord_if_char(0x1208))).value
+    SL_STATUS_BT_SMP_ENCRYPTION_KEY_SIZE = (sl_status_t (ord_if_char(0x1206))).value
 except:
     pass
 
 # sl_status.h: 364
 try:
-    SL_STATUS_BT_SMP_REPEATED_ATTEMPTS = (sl_status_t (ord_if_char(0x1209))).value
+    SL_STATUS_BT_SMP_COMMAND_NOT_SUPPORTED = (sl_status_t (ord_if_char(0x1207))).value
 except:
     pass
 
 # sl_status.h: 365
 try:
-    SL_STATUS_BT_SMP_INVALID_PARAMETERS = (sl_status_t (ord_if_char(0x120A))).value
+    SL_STATUS_BT_SMP_UNSPECIFIED_REASON = (sl_status_t (ord_if_char(0x1208))).value
 except:
     pass
 
 # sl_status.h: 366
 try:
-    SL_STATUS_BT_SMP_DHKEY_CHECK_FAILED = (sl_status_t (ord_if_char(0x120B))).value
+    SL_STATUS_BT_SMP_REPEATED_ATTEMPTS = (sl_status_t (ord_if_char(0x1209))).value
 except:
     pass
 
 # sl_status.h: 367
 try:
-    SL_STATUS_BT_SMP_NUMERIC_COMPARISON_FAILED = (sl_status_t (ord_if_char(0x120C))).value
+    SL_STATUS_BT_SMP_INVALID_PARAMETERS = (sl_status_t (ord_if_char(0x120A))).value
 except:
     pass
 
 # sl_status.h: 368
 try:
-    SL_STATUS_BT_SMP_BREDR_PAIRING_IN_PROGRESS = (sl_status_t (ord_if_char(0x120D))).value
+    SL_STATUS_BT_SMP_DHKEY_CHECK_FAILED = (sl_status_t (ord_if_char(0x120B))).value
 except:
     pass
 
 # sl_status.h: 369
 try:
-    SL_STATUS_BT_SMP_CROSS_TRANSPORT_KEY_DERIVATION_GENERATION_NOT_ALLOWED = (sl_status_t (ord_if_char(0x120E))).value
+    SL_STATUS_BT_SMP_NUMERIC_COMPARISON_FAILED = (sl_status_t (ord_if_char(0x120C))).value
 except:
     pass
 
 # sl_status.h: 370
 try:
-    SL_STATUS_BT_SMP_KEY_REJECTED = (sl_status_t (ord_if_char(0x120F))).value
+    SL_STATUS_BT_SMP_BREDR_PAIRING_IN_PROGRESS = (sl_status_t (ord_if_char(0x120D))).value
 except:
     pass
 
 # sl_status.h: 371
 try:
+    SL_STATUS_BT_SMP_CROSS_TRANSPORT_KEY_DERIVATION_GENERATION_NOT_ALLOWED = (sl_status_t (ord_if_char(0x120E))).value
+except:
+    pass
+
+# sl_status.h: 372
+try:
+    SL_STATUS_BT_SMP_KEY_REJECTED = (sl_status_t (ord_if_char(0x120F))).value
+except:
+    pass
+
+# sl_status.h: 373
+try:
     SL_STATUS_BT_SMP_BUSY = (sl_status_t (ord_if_char(0x1210))).value
-except:
-    pass
-
-# sl_status.h: 374
-try:
-    SL_STATUS_BT_MESH_ALREADY_EXISTS = (sl_status_t (ord_if_char(0x0501))).value
-except:
-    pass
-
-# sl_status.h: 375
-try:
-    SL_STATUS_BT_MESH_DOES_NOT_EXIST = (sl_status_t (ord_if_char(0x0502))).value
 except:
     pass
 
 # sl_status.h: 376
 try:
-    SL_STATUS_BT_MESH_LIMIT_REACHED = (sl_status_t (ord_if_char(0x0503))).value
+    SL_STATUS_BT_MESH_ALREADY_EXISTS = (sl_status_t (ord_if_char(0x0501))).value
 except:
     pass
 
 # sl_status.h: 377
 try:
-    SL_STATUS_BT_MESH_INVALID_ADDRESS = (sl_status_t (ord_if_char(0x0504))).value
+    SL_STATUS_BT_MESH_DOES_NOT_EXIST = (sl_status_t (ord_if_char(0x0502))).value
 except:
     pass
 
 # sl_status.h: 378
 try:
-    SL_STATUS_BT_MESH_MALFORMED_DATA = (sl_status_t (ord_if_char(0x0505))).value
+    SL_STATUS_BT_MESH_LIMIT_REACHED = (sl_status_t (ord_if_char(0x0503))).value
 except:
     pass
 
 # sl_status.h: 379
 try:
-    SL_STATUS_BT_MESH_ALREADY_INITIALIZED = (sl_status_t (ord_if_char(0x0506))).value
+    SL_STATUS_BT_MESH_INVALID_ADDRESS = (sl_status_t (ord_if_char(0x0504))).value
 except:
     pass
 
 # sl_status.h: 380
 try:
-    SL_STATUS_BT_MESH_NOT_INITIALIZED = (sl_status_t (ord_if_char(0x0507))).value
+    SL_STATUS_BT_MESH_MALFORMED_DATA = (sl_status_t (ord_if_char(0x0505))).value
 except:
     pass
 
 # sl_status.h: 381
 try:
-    SL_STATUS_BT_MESH_NO_FRIEND_OFFER = (sl_status_t (ord_if_char(0x0508))).value
+    SL_STATUS_BT_MESH_ALREADY_INITIALIZED = (sl_status_t (ord_if_char(0x0506))).value
 except:
     pass
 
 # sl_status.h: 382
 try:
-    SL_STATUS_BT_MESH_PROV_LINK_CLOSED = (sl_status_t (ord_if_char(0x0509))).value
+    SL_STATUS_BT_MESH_NOT_INITIALIZED = (sl_status_t (ord_if_char(0x0507))).value
 except:
     pass
 
 # sl_status.h: 383
 try:
-    SL_STATUS_BT_MESH_PROV_INVALID_PDU = (sl_status_t (ord_if_char(0x050A))).value
+    SL_STATUS_BT_MESH_NO_FRIEND_OFFER = (sl_status_t (ord_if_char(0x0508))).value
 except:
     pass
 
 # sl_status.h: 384
 try:
-    SL_STATUS_BT_MESH_PROV_INVALID_PDU_FORMAT = (sl_status_t (ord_if_char(0x050B))).value
+    SL_STATUS_BT_MESH_PROV_LINK_CLOSED = (sl_status_t (ord_if_char(0x0509))).value
 except:
     pass
 
 # sl_status.h: 385
 try:
-    SL_STATUS_BT_MESH_PROV_UNEXPECTED_PDU = (sl_status_t (ord_if_char(0x050C))).value
+    SL_STATUS_BT_MESH_PROV_INVALID_PDU = (sl_status_t (ord_if_char(0x050A))).value
 except:
     pass
 
 # sl_status.h: 386
 try:
-    SL_STATUS_BT_MESH_PROV_CONFIRMATION_FAILED = (sl_status_t (ord_if_char(0x050D))).value
+    SL_STATUS_BT_MESH_PROV_INVALID_PDU_FORMAT = (sl_status_t (ord_if_char(0x050B))).value
 except:
     pass
 
 # sl_status.h: 387
 try:
-    SL_STATUS_BT_MESH_PROV_OUT_OF_RESOURCES = (sl_status_t (ord_if_char(0x050E))).value
+    SL_STATUS_BT_MESH_PROV_UNEXPECTED_PDU = (sl_status_t (ord_if_char(0x050C))).value
 except:
     pass
 
 # sl_status.h: 388
 try:
-    SL_STATUS_BT_MESH_PROV_DECRYPTION_FAILED = (sl_status_t (ord_if_char(0x050F))).value
+    SL_STATUS_BT_MESH_PROV_CONFIRMATION_FAILED = (sl_status_t (ord_if_char(0x050D))).value
 except:
     pass
 
 # sl_status.h: 389
 try:
-    SL_STATUS_BT_MESH_PROV_UNEXPECTED_ERROR = (sl_status_t (ord_if_char(0x0510))).value
+    SL_STATUS_BT_MESH_PROV_OUT_OF_RESOURCES = (sl_status_t (ord_if_char(0x050E))).value
 except:
     pass
 
 # sl_status.h: 390
 try:
-    SL_STATUS_BT_MESH_PROV_CANNOT_ASSIGN_ADDR = (sl_status_t (ord_if_char(0x0511))).value
+    SL_STATUS_BT_MESH_PROV_DECRYPTION_FAILED = (sl_status_t (ord_if_char(0x050F))).value
 except:
     pass
 
 # sl_status.h: 391
 try:
-    SL_STATUS_BT_MESH_ADDRESS_TEMPORARILY_UNAVAILABLE = (sl_status_t (ord_if_char(0x0512))).value
+    SL_STATUS_BT_MESH_PROV_UNEXPECTED_ERROR = (sl_status_t (ord_if_char(0x0510))).value
 except:
     pass
 
 # sl_status.h: 392
 try:
-    SL_STATUS_BT_MESH_ADDRESS_ALREADY_USED = (sl_status_t (ord_if_char(0x0513))).value
+    SL_STATUS_BT_MESH_PROV_CANNOT_ASSIGN_ADDR = (sl_status_t (ord_if_char(0x0511))).value
 except:
     pass
 
 # sl_status.h: 393
 try:
-    SL_STATUS_BT_MESH_PUBLISH_NOT_CONFIGURED = (sl_status_t (ord_if_char(0x0514))).value
+    SL_STATUS_BT_MESH_ADDRESS_TEMPORARILY_UNAVAILABLE = (sl_status_t (ord_if_char(0x0512))).value
 except:
     pass
 
 # sl_status.h: 394
 try:
+    SL_STATUS_BT_MESH_ADDRESS_ALREADY_USED = (sl_status_t (ord_if_char(0x0513))).value
+except:
+    pass
+
+# sl_status.h: 395
+try:
+    SL_STATUS_BT_MESH_PUBLISH_NOT_CONFIGURED = (sl_status_t (ord_if_char(0x0514))).value
+except:
+    pass
+
+# sl_status.h: 396
+try:
     SL_STATUS_BT_MESH_APP_KEY_NOT_BOUND = (sl_status_t (ord_if_char(0x0515))).value
-except:
-    pass
-
-# sl_status.h: 397
-try:
-    SL_STATUS_BT_MESH_FOUNDATION_INVALID_ADDRESS = (sl_status_t (ord_if_char(0x1301))).value
-except:
-    pass
-
-# sl_status.h: 398
-try:
-    SL_STATUS_BT_MESH_FOUNDATION_INVALID_MODEL = (sl_status_t (ord_if_char(0x1302))).value
 except:
     pass
 
 # sl_status.h: 399
 try:
-    SL_STATUS_BT_MESH_FOUNDATION_INVALID_APP_KEY = (sl_status_t (ord_if_char(0x1303))).value
+    SL_STATUS_BT_MESH_FOUNDATION_INVALID_ADDRESS = (sl_status_t (ord_if_char(0x1301))).value
 except:
     pass
 
 # sl_status.h: 400
 try:
-    SL_STATUS_BT_MESH_FOUNDATION_INVALID_NET_KEY = (sl_status_t (ord_if_char(0x1304))).value
+    SL_STATUS_BT_MESH_FOUNDATION_INVALID_MODEL = (sl_status_t (ord_if_char(0x1302))).value
 except:
     pass
 
 # sl_status.h: 401
 try:
-    SL_STATUS_BT_MESH_FOUNDATION_INSUFFICIENT_RESOURCES = (sl_status_t (ord_if_char(0x1305))).value
+    SL_STATUS_BT_MESH_FOUNDATION_INVALID_APP_KEY = (sl_status_t (ord_if_char(0x1303))).value
 except:
     pass
 
 # sl_status.h: 402
 try:
-    SL_STATUS_BT_MESH_FOUNDATION_KEY_INDEX_EXISTS = (sl_status_t (ord_if_char(0x1306))).value
+    SL_STATUS_BT_MESH_FOUNDATION_INVALID_NET_KEY = (sl_status_t (ord_if_char(0x1304))).value
 except:
     pass
 
 # sl_status.h: 403
 try:
-    SL_STATUS_BT_MESH_FOUNDATION_INVALID_PUBLISH_PARAMS = (sl_status_t (ord_if_char(0x1307))).value
+    SL_STATUS_BT_MESH_FOUNDATION_INSUFFICIENT_RESOURCES = (sl_status_t (ord_if_char(0x1305))).value
 except:
     pass
 
 # sl_status.h: 404
 try:
-    SL_STATUS_BT_MESH_FOUNDATION_NOT_SUBSCRIBE_MODEL = (sl_status_t (ord_if_char(0x1308))).value
+    SL_STATUS_BT_MESH_FOUNDATION_KEY_INDEX_EXISTS = (sl_status_t (ord_if_char(0x1306))).value
 except:
     pass
 
 # sl_status.h: 405
 try:
-    SL_STATUS_BT_MESH_FOUNDATION_STORAGE_FAILURE = (sl_status_t (ord_if_char(0x1309))).value
+    SL_STATUS_BT_MESH_FOUNDATION_INVALID_PUBLISH_PARAMS = (sl_status_t (ord_if_char(0x1307))).value
 except:
     pass
 
 # sl_status.h: 406
 try:
-    SL_STATUS_BT_MESH_FOUNDATION_NOT_SUPPORTED = (sl_status_t (ord_if_char(0x130A))).value
+    SL_STATUS_BT_MESH_FOUNDATION_NOT_SUBSCRIBE_MODEL = (sl_status_t (ord_if_char(0x1308))).value
 except:
     pass
 
 # sl_status.h: 407
 try:
-    SL_STATUS_BT_MESH_FOUNDATION_CANNOT_UPDATE = (sl_status_t (ord_if_char(0x130B))).value
+    SL_STATUS_BT_MESH_FOUNDATION_STORAGE_FAILURE = (sl_status_t (ord_if_char(0x1309))).value
 except:
     pass
 
 # sl_status.h: 408
 try:
-    SL_STATUS_BT_MESH_FOUNDATION_CANNOT_REMOVE = (sl_status_t (ord_if_char(0x130C))).value
+    SL_STATUS_BT_MESH_FOUNDATION_NOT_SUPPORTED = (sl_status_t (ord_if_char(0x130A))).value
 except:
     pass
 
 # sl_status.h: 409
 try:
-    SL_STATUS_BT_MESH_FOUNDATION_CANNOT_BIND = (sl_status_t (ord_if_char(0x130D))).value
+    SL_STATUS_BT_MESH_FOUNDATION_CANNOT_UPDATE = (sl_status_t (ord_if_char(0x130B))).value
 except:
     pass
 
 # sl_status.h: 410
 try:
-    SL_STATUS_BT_MESH_FOUNDATION_TEMPORARILY_UNABLE = (sl_status_t (ord_if_char(0x130E))).value
+    SL_STATUS_BT_MESH_FOUNDATION_CANNOT_REMOVE = (sl_status_t (ord_if_char(0x130C))).value
 except:
     pass
 
 # sl_status.h: 411
 try:
-    SL_STATUS_BT_MESH_FOUNDATION_CANNOT_SET = (sl_status_t (ord_if_char(0x130F))).value
+    SL_STATUS_BT_MESH_FOUNDATION_CANNOT_BIND = (sl_status_t (ord_if_char(0x130D))).value
 except:
     pass
 
 # sl_status.h: 412
 try:
-    SL_STATUS_BT_MESH_FOUNDATION_UNSPECIFIED = (sl_status_t (ord_if_char(0x1310))).value
+    SL_STATUS_BT_MESH_FOUNDATION_TEMPORARILY_UNABLE = (sl_status_t (ord_if_char(0x130E))).value
 except:
     pass
 
 # sl_status.h: 413
 try:
+    SL_STATUS_BT_MESH_FOUNDATION_CANNOT_SET = (sl_status_t (ord_if_char(0x130F))).value
+except:
+    pass
+
+# sl_status.h: 414
+try:
+    SL_STATUS_BT_MESH_FOUNDATION_UNSPECIFIED = (sl_status_t (ord_if_char(0x1310))).value
+except:
+    pass
+
+# sl_status.h: 415
+try:
     SL_STATUS_BT_MESH_FOUNDATION_INVALID_BINDING = (sl_status_t (ord_if_char(0x1311))).value
-except:
-    pass
-
-# sl_status.h: 418
-try:
-    SL_STATUS_WIFI_INVALID_KEY = (sl_status_t (ord_if_char(0x0B01))).value
-except:
-    pass
-
-# sl_status.h: 419
-try:
-    SL_STATUS_WIFI_FIRMWARE_DOWNLOAD_TIMEOUT = (sl_status_t (ord_if_char(0x0B02))).value
 except:
     pass
 
 # sl_status.h: 420
 try:
-    SL_STATUS_WIFI_UNSUPPORTED_MESSAGE_ID = (sl_status_t (ord_if_char(0x0B03))).value
+    SL_STATUS_WIFI_INVALID_KEY = (sl_status_t (ord_if_char(0x0B01))).value
 except:
     pass
 
 # sl_status.h: 421
 try:
-    SL_STATUS_WIFI_WARNING = (sl_status_t (ord_if_char(0x0B04))).value
+    SL_STATUS_WIFI_FIRMWARE_DOWNLOAD_TIMEOUT = (sl_status_t (ord_if_char(0x0B02))).value
 except:
     pass
 
 # sl_status.h: 422
 try:
-    SL_STATUS_WIFI_NO_PACKET_TO_RECEIVE = (sl_status_t (ord_if_char(0x0B05))).value
+    SL_STATUS_WIFI_UNSUPPORTED_MESSAGE_ID = (sl_status_t (ord_if_char(0x0B03))).value
 except:
     pass
 
 # sl_status.h: 423
 try:
-    SL_STATUS_WIFI_SLEEP_GRANTED = (sl_status_t (ord_if_char(0x0B08))).value
+    SL_STATUS_WIFI_WARNING = (sl_status_t (ord_if_char(0x0B04))).value
 except:
     pass
 
 # sl_status.h: 424
 try:
-    SL_STATUS_WIFI_SLEEP_NOT_GRANTED = (sl_status_t (ord_if_char(0x0B09))).value
+    SL_STATUS_WIFI_NO_PACKET_TO_RECEIVE = (sl_status_t (ord_if_char(0x0B05))).value
 except:
     pass
 
 # sl_status.h: 425
 try:
-    SL_STATUS_WIFI_SECURE_LINK_MAC_KEY_ERROR = (sl_status_t (ord_if_char(0x0B10))).value
+    SL_STATUS_WIFI_SLEEP_GRANTED = (sl_status_t (ord_if_char(0x0B08))).value
 except:
     pass
 
 # sl_status.h: 426
 try:
-    SL_STATUS_WIFI_SECURE_LINK_MAC_KEY_ALREADY_BURNED = (sl_status_t (ord_if_char(0x0B11))).value
+    SL_STATUS_WIFI_SLEEP_NOT_GRANTED = (sl_status_t (ord_if_char(0x0B09))).value
 except:
     pass
 
 # sl_status.h: 427
 try:
-    SL_STATUS_WIFI_SECURE_LINK_RAM_MODE_NOT_ALLOWED = (sl_status_t (ord_if_char(0x0B12))).value
+    SL_STATUS_WIFI_SECURE_LINK_MAC_KEY_ERROR = (sl_status_t (ord_if_char(0x0B10))).value
 except:
     pass
 
 # sl_status.h: 428
 try:
-    SL_STATUS_WIFI_SECURE_LINK_FAILED_UNKNOWN_MODE = (sl_status_t (ord_if_char(0x0B13))).value
+    SL_STATUS_WIFI_SECURE_LINK_MAC_KEY_ALREADY_BURNED = (sl_status_t (ord_if_char(0x0B11))).value
 except:
     pass
 
 # sl_status.h: 429
 try:
-    SL_STATUS_WIFI_SECURE_LINK_EXCHANGE_FAILED = (sl_status_t (ord_if_char(0x0B14))).value
+    SL_STATUS_WIFI_SECURE_LINK_RAM_MODE_NOT_ALLOWED = (sl_status_t (ord_if_char(0x0B12))).value
 except:
     pass
 
 # sl_status.h: 430
 try:
-    SL_STATUS_WIFI_WRONG_STATE = (sl_status_t (ord_if_char(0x0B18))).value
+    SL_STATUS_WIFI_SECURE_LINK_FAILED_UNKNOWN_MODE = (sl_status_t (ord_if_char(0x0B13))).value
 except:
     pass
 
 # sl_status.h: 431
 try:
-    SL_STATUS_WIFI_CHANNEL_NOT_ALLOWED = (sl_status_t (ord_if_char(0x0B19))).value
+    SL_STATUS_WIFI_SECURE_LINK_EXCHANGE_FAILED = (sl_status_t (ord_if_char(0x0B14))).value
 except:
     pass
 
 # sl_status.h: 432
 try:
-    SL_STATUS_WIFI_NO_MATCHING_AP = (sl_status_t (ord_if_char(0x0B1A))).value
+    SL_STATUS_WIFI_WRONG_STATE = (sl_status_t (ord_if_char(0x0B18))).value
 except:
     pass
 
 # sl_status.h: 433
 try:
-    SL_STATUS_WIFI_CONNECTION_ABORTED = (sl_status_t (ord_if_char(0x0B1B))).value
+    SL_STATUS_WIFI_CHANNEL_NOT_ALLOWED = (sl_status_t (ord_if_char(0x0B19))).value
 except:
     pass
 
 # sl_status.h: 434
 try:
-    SL_STATUS_WIFI_CONNECTION_TIMEOUT = (sl_status_t (ord_if_char(0x0B1C))).value
+    SL_STATUS_WIFI_NO_MATCHING_AP = (sl_status_t (ord_if_char(0x0B1A))).value
 except:
     pass
 
 # sl_status.h: 435
 try:
-    SL_STATUS_WIFI_CONNECTION_REJECTED_BY_AP = (sl_status_t (ord_if_char(0x0B1D))).value
+    SL_STATUS_WIFI_CONNECTION_ABORTED = (sl_status_t (ord_if_char(0x0B1B))).value
 except:
     pass
 
 # sl_status.h: 436
 try:
-    SL_STATUS_WIFI_CONNECTION_AUTH_FAILURE = (sl_status_t (ord_if_char(0x0B1E))).value
+    SL_STATUS_WIFI_CONNECTION_TIMEOUT = (sl_status_t (ord_if_char(0x0B1C))).value
 except:
     pass
 
 # sl_status.h: 437
 try:
-    SL_STATUS_WIFI_RETRY_EXCEEDED = (sl_status_t (ord_if_char(0x0B1F))).value
+    SL_STATUS_WIFI_CONNECTION_REJECTED_BY_AP = (sl_status_t (ord_if_char(0x0B1D))).value
 except:
     pass
 
 # sl_status.h: 438
 try:
+    SL_STATUS_WIFI_CONNECTION_AUTH_FAILURE = (sl_status_t (ord_if_char(0x0B1E))).value
+except:
+    pass
+
+# sl_status.h: 439
+try:
+    SL_STATUS_WIFI_RETRY_EXCEEDED = (sl_status_t (ord_if_char(0x0B1F))).value
+except:
+    pass
+
+# sl_status.h: 440
+try:
     SL_STATUS_WIFI_TX_LIFETIME_EXCEEDED = (sl_status_t (ord_if_char(0x0B20))).value
-except:
-    pass
-
-# sl_status.h: 443
-try:
-    SL_STATUS_COMPUTE_DRIVER_FAULT = (sl_status_t (ord_if_char(0x1501))).value
-except:
-    pass
-
-# sl_status.h: 444
-try:
-    SL_STATUS_COMPUTE_DRIVER_ALU_NAN = (sl_status_t (ord_if_char(0x1502))).value
 except:
     pass
 
 # sl_status.h: 445
 try:
-    SL_STATUS_COMPUTE_DRIVER_ALU_OVERFLOW = (sl_status_t (ord_if_char(0x1503))).value
+    SL_STATUS_COMPUTE_DRIVER_FAULT = (sl_status_t (ord_if_char(0x1501))).value
 except:
     pass
 
 # sl_status.h: 446
 try:
-    SL_STATUS_COMPUTE_DRIVER_ALU_UNDERFLOW = (sl_status_t (ord_if_char(0x1504))).value
+    SL_STATUS_COMPUTE_DRIVER_ALU_NAN = (sl_status_t (ord_if_char(0x1502))).value
 except:
     pass
 
 # sl_status.h: 447
 try:
-    SL_STATUS_COMPUTE_DRIVER_STORE_CONVERSION_OVERFLOW = (sl_status_t (ord_if_char(0x1505))).value
+    SL_STATUS_COMPUTE_DRIVER_ALU_OVERFLOW = (sl_status_t (ord_if_char(0x1503))).value
 except:
     pass
 
 # sl_status.h: 448
 try:
-    SL_STATUS_COMPUTE_DRIVER_STORE_CONVERSION_UNDERFLOW = (sl_status_t (ord_if_char(0x1506))).value
+    SL_STATUS_COMPUTE_DRIVER_ALU_UNDERFLOW = (sl_status_t (ord_if_char(0x1504))).value
 except:
     pass
 
 # sl_status.h: 449
 try:
-    SL_STATUS_COMPUTE_DRIVER_STORE_CONVERSION_INFINITY = (sl_status_t (ord_if_char(0x1507))).value
+    SL_STATUS_COMPUTE_DRIVER_STORE_CONVERSION_OVERFLOW = (sl_status_t (ord_if_char(0x1505))).value
 except:
     pass
 
 # sl_status.h: 450
 try:
-    SL_STATUS_COMPUTE_DRIVER_STORE_CONVERSION_NAN = (sl_status_t (ord_if_char(0x1508))).value
+    SL_STATUS_COMPUTE_DRIVER_STORE_CONVERSION_UNDERFLOW = (sl_status_t (ord_if_char(0x1506))).value
+except:
+    pass
+
+# sl_status.h: 451
+try:
+    SL_STATUS_COMPUTE_DRIVER_STORE_CONVERSION_INFINITY = (sl_status_t (ord_if_char(0x1507))).value
 except:
     pass
 
 # sl_status.h: 452
 try:
-    SL_STATUS_COMPUTE_MATH_NAN = (sl_status_t (ord_if_char(0x1512))).value
-except:
-    pass
-
-# sl_status.h: 453
-try:
-    SL_STATUS_COMPUTE_MATH_INFINITY = (sl_status_t (ord_if_char(0x1513))).value
+    SL_STATUS_COMPUTE_DRIVER_STORE_CONVERSION_NAN = (sl_status_t (ord_if_char(0x1508))).value
 except:
     pass
 
 # sl_status.h: 454
 try:
-    SL_STATUS_COMPUTE_MATH_OVERFLOW = (sl_status_t (ord_if_char(0x1514))).value
+    SL_STATUS_COMPUTE_MATH_NAN = (sl_status_t (ord_if_char(0x1512))).value
 except:
     pass
 
 # sl_status.h: 455
 try:
+    SL_STATUS_COMPUTE_MATH_INFINITY = (sl_status_t (ord_if_char(0x1513))).value
+except:
+    pass
+
+# sl_status.h: 456
+try:
+    SL_STATUS_COMPUTE_MATH_OVERFLOW = (sl_status_t (ord_if_char(0x1514))).value
+except:
+    pass
+
+# sl_status.h: 457
+try:
     SL_STATUS_COMPUTE_MATH_UNDERFLOW = (sl_status_t (ord_if_char(0x1515))).value
-except:
-    pass
-
-# sl_status.h: 459
-try:
-    SL_STATUS_ZIGBEE_PACKET_HANDOFF_DROPPED = (sl_status_t (ord_if_char(0x0C01))).value
-except:
-    pass
-
-# sl_status.h: 460
-try:
-    SL_STATUS_ZIGBEE_DELIVERY_FAILED = (sl_status_t (ord_if_char(0x0C02))).value
 except:
     pass
 
 # sl_status.h: 461
 try:
-    SL_STATUS_ZIGBEE_MAX_MESSAGE_LIMIT_REACHED = (sl_status_t (ord_if_char(0x0C03))).value
+    SL_STATUS_ZIGBEE_PACKET_HANDOFF_DROPPED = (sl_status_t (ord_if_char(0x0C01))).value
 except:
     pass
 
 # sl_status.h: 462
 try:
-    SL_STATUS_ZIGBEE_BINDING_IS_ACTIVE = (sl_status_t (ord_if_char(0x0C04))).value
+    SL_STATUS_ZIGBEE_DELIVERY_FAILED = (sl_status_t (ord_if_char(0x0C02))).value
 except:
     pass
 
 # sl_status.h: 463
 try:
-    SL_STATUS_ZIGBEE_ADDRESS_TABLE_ENTRY_IS_ACTIVE = (sl_status_t (ord_if_char(0x0C05))).value
+    SL_STATUS_ZIGBEE_MAX_MESSAGE_LIMIT_REACHED = (sl_status_t (ord_if_char(0x0C03))).value
 except:
     pass
 
 # sl_status.h: 464
 try:
-    SL_STATUS_ZIGBEE_MOVE_FAILED = (sl_status_t (ord_if_char(0x0C06))).value
+    SL_STATUS_ZIGBEE_BINDING_IS_ACTIVE = (sl_status_t (ord_if_char(0x0C04))).value
 except:
     pass
 
 # sl_status.h: 465
 try:
-    SL_STATUS_ZIGBEE_NODE_ID_CHANGED = (sl_status_t (ord_if_char(0x0C07))).value
+    SL_STATUS_ZIGBEE_ADDRESS_TABLE_ENTRY_IS_ACTIVE = (sl_status_t (ord_if_char(0x0C05))).value
 except:
     pass
 
 # sl_status.h: 466
 try:
-    SL_STATUS_ZIGBEE_INVALID_SECURITY_LEVEL = (sl_status_t (ord_if_char(0x0C08))).value
+    SL_STATUS_ZIGBEE_MOVE_FAILED = (sl_status_t (ord_if_char(0x0C06))).value
 except:
     pass
 
 # sl_status.h: 467
 try:
-    SL_STATUS_ZIGBEE_IEEE_ADDRESS_DISCOVERY_IN_PROGRESS = (sl_status_t (ord_if_char(0x0C09))).value
+    SL_STATUS_ZIGBEE_NODE_ID_CHANGED = (sl_status_t (ord_if_char(0x0C07))).value
 except:
     pass
 
 # sl_status.h: 468
 try:
-    SL_STATUS_ZIGBEE_APS_ENCRYPTION_ERROR = (sl_status_t (ord_if_char(0x0C0A))).value
+    SL_STATUS_ZIGBEE_INVALID_SECURITY_LEVEL = (sl_status_t (ord_if_char(0x0C08))).value
 except:
     pass
 
 # sl_status.h: 469
 try:
-    SL_STATUS_ZIGBEE_SECURITY_STATE_NOT_SET = (sl_status_t (ord_if_char(0x0C0B))).value
+    SL_STATUS_ZIGBEE_IEEE_ADDRESS_DISCOVERY_IN_PROGRESS = (sl_status_t (ord_if_char(0x0C09))).value
 except:
     pass
 
 # sl_status.h: 470
 try:
-    SL_STATUS_ZIGBEE_TOO_SOON_FOR_SWITCH_KEY = (sl_status_t (ord_if_char(0x0C0C))).value
+    SL_STATUS_ZIGBEE_APS_ENCRYPTION_ERROR = (sl_status_t (ord_if_char(0x0C0A))).value
 except:
     pass
 
 # sl_status.h: 471
 try:
-    SL_STATUS_ZIGBEE_SIGNATURE_VERIFY_FAILURE = (sl_status_t (ord_if_char(0x0C0D))).value
+    SL_STATUS_ZIGBEE_SECURITY_STATE_NOT_SET = (sl_status_t (ord_if_char(0x0C0B))).value
 except:
     pass
 
 # sl_status.h: 472
 try:
-    SL_STATUS_ZIGBEE_KEY_NOT_AUTHORIZED = (sl_status_t (ord_if_char(0x0C0E))).value
+    SL_STATUS_ZIGBEE_TOO_SOON_FOR_SWITCH_KEY = (sl_status_t (ord_if_char(0x0C0C))).value
 except:
     pass
 
 # sl_status.h: 473
 try:
-    SL_STATUS_ZIGBEE_BINDING_HAS_CHANGED = (sl_status_t (ord_if_char(0x0C0F))).value
+    SL_STATUS_ZIGBEE_SIGNATURE_VERIFY_FAILURE = (sl_status_t (ord_if_char(0x0C0D))).value
 except:
     pass
 
 # sl_status.h: 474
 try:
-    SL_STATUS_ZIGBEE_TRUST_CENTER_SWAP_EUI_HAS_CHANGED = (sl_status_t (ord_if_char(0x0C10))).value
+    SL_STATUS_ZIGBEE_KEY_NOT_AUTHORIZED = (sl_status_t (ord_if_char(0x0C0E))).value
 except:
     pass
 
 # sl_status.h: 475
 try:
-    SL_STATUS_ZIGBEE_TRUST_CENTER_SWAP_EUI_HAS_NOT_CHANGED = (sl_status_t (ord_if_char(0x0C11))).value
+    SL_STATUS_ZIGBEE_BINDING_HAS_CHANGED = (sl_status_t (ord_if_char(0x0C0F))).value
 except:
     pass
 
 # sl_status.h: 476
 try:
-    SL_STATUS_ZIGBEE_INSUFFICIENT_RANDOM_DATA = (sl_status_t (ord_if_char(0x0C12))).value
+    SL_STATUS_ZIGBEE_TRUST_CENTER_SWAP_EUI_HAS_CHANGED = (sl_status_t (ord_if_char(0x0C10))).value
 except:
     pass
 
 # sl_status.h: 477
 try:
-    SL_STATUS_ZIGBEE_SOURCE_ROUTE_FAILURE = (sl_status_t (ord_if_char(0x0C13))).value
+    SL_STATUS_ZIGBEE_TRUST_CENTER_SWAP_EUI_HAS_NOT_CHANGED = (sl_status_t (ord_if_char(0x0C11))).value
 except:
     pass
 
 # sl_status.h: 478
 try:
-    SL_STATUS_ZIGBEE_MANY_TO_ONE_ROUTE_FAILURE = (sl_status_t (ord_if_char(0x0C14))).value
+    SL_STATUS_ZIGBEE_INSUFFICIENT_RANDOM_DATA = (sl_status_t (ord_if_char(0x0C12))).value
 except:
     pass
 
 # sl_status.h: 479
 try:
-    SL_STATUS_ZIGBEE_STACK_AND_HARDWARE_MISMATCH = (sl_status_t (ord_if_char(0x0C15))).value
+    SL_STATUS_ZIGBEE_SOURCE_ROUTE_FAILURE = (sl_status_t (ord_if_char(0x0C13))).value
 except:
     pass
 
 # sl_status.h: 480
 try:
-    SL_STATUS_ZIGBEE_PAN_ID_CHANGED = (sl_status_t (ord_if_char(0x0C16))).value
+    SL_STATUS_ZIGBEE_MANY_TO_ONE_ROUTE_FAILURE = (sl_status_t (ord_if_char(0x0C14))).value
 except:
     pass
 
 # sl_status.h: 481
 try:
-    SL_STATUS_ZIGBEE_CHANNEL_CHANGED = (sl_status_t (ord_if_char(0x0C17))).value
+    SL_STATUS_ZIGBEE_STACK_AND_HARDWARE_MISMATCH = (sl_status_t (ord_if_char(0x0C15))).value
 except:
     pass
 
 # sl_status.h: 482
 try:
-    SL_STATUS_ZIGBEE_NETWORK_OPENED = (sl_status_t (ord_if_char(0x0C18))).value
+    SL_STATUS_ZIGBEE_PAN_ID_CHANGED = (sl_status_t (ord_if_char(0x0C16))).value
 except:
     pass
 
 # sl_status.h: 483
 try:
-    SL_STATUS_ZIGBEE_NETWORK_CLOSED = (sl_status_t (ord_if_char(0x0C19))).value
+    SL_STATUS_ZIGBEE_CHANNEL_CHANGED = (sl_status_t (ord_if_char(0x0C17))).value
 except:
     pass
 
 # sl_status.h: 484
 try:
-    SL_STATUS_ZIGBEE_RECEIVED_KEY_IN_THE_CLEAR = (sl_status_t (ord_if_char(0x0C1A))).value
+    SL_STATUS_ZIGBEE_NETWORK_OPENED = (sl_status_t (ord_if_char(0x0C18))).value
 except:
     pass
 
 # sl_status.h: 485
 try:
-    SL_STATUS_ZIGBEE_NO_NETWORK_KEY_RECEIVED = (sl_status_t (ord_if_char(0x0C1B))).value
+    SL_STATUS_ZIGBEE_NETWORK_CLOSED = (sl_status_t (ord_if_char(0x0C19))).value
 except:
     pass
 
 # sl_status.h: 486
 try:
-    SL_STATUS_ZIGBEE_NO_LINK_KEY_RECEIVED = (sl_status_t (ord_if_char(0x0C1C))).value
+    SL_STATUS_ZIGBEE_RECEIVED_KEY_IN_THE_CLEAR = (sl_status_t (ord_if_char(0x0C1A))).value
 except:
     pass
 
 # sl_status.h: 487
 try:
-    SL_STATUS_ZIGBEE_PRECONFIGURED_KEY_REQUIRED = (sl_status_t (ord_if_char(0x0C1D))).value
+    SL_STATUS_ZIGBEE_NO_NETWORK_KEY_RECEIVED = (sl_status_t (ord_if_char(0x0C1B))).value
 except:
     pass
 
 # sl_status.h: 488
 try:
-    SL_STATUS_ZIGBEE_EZSP_ERROR = (sl_status_t (ord_if_char(0x0C1E))).value
+    SL_STATUS_ZIGBEE_NO_LINK_KEY_RECEIVED = (sl_status_t (ord_if_char(0x0C1C))).value
 except:
     pass
 
 # sl_status.h: 489
 try:
-    SL_STATUS_ZIGBEE_ID_DISCOVERY_FAILED = (sl_status_t (ord_if_char(0x0C1F))).value
+    SL_STATUS_ZIGBEE_PRECONFIGURED_KEY_REQUIRED = (sl_status_t (ord_if_char(0x0C1D))).value
 except:
     pass
 
 # sl_status.h: 490
 try:
-    SL_STATUS_ZIGBEE_NO_APS_ACK = (sl_status_t (ord_if_char(0x0C20))).value
+    SL_STATUS_ZIGBEE_EZSP_ERROR = (sl_status_t (ord_if_char(0x0C1E))).value
 except:
     pass
 
 # sl_status.h: 491
 try:
-    SL_STATUS_ZIGBEE_APS_MESSAGE_CANCELED = (sl_status_t (ord_if_char(0x0C21))).value
+    SL_STATUS_ZIGBEE_ID_DISCOVERY_FAILED = (sl_status_t (ord_if_char(0x0C1F))).value
 except:
     pass
 
 # sl_status.h: 492
 try:
-    SL_STATUS_ZIGBEE_ID_DISCOVERY_NOT_ENABLED = (sl_status_t (ord_if_char(0x0C22))).value
+    SL_STATUS_ZIGBEE_NO_APS_ACK = (sl_status_t (ord_if_char(0x0C20))).value
 except:
     pass
 
 # sl_status.h: 493
 try:
-    SL_STATUS_ZIGBEE_ID_DISCOVERY_UNDERWAY = (sl_status_t (ord_if_char(0x0C23))).value
+    SL_STATUS_ZIGBEE_APS_MESSAGE_CANCELED = (sl_status_t (ord_if_char(0x0C21))).value
 except:
     pass
 
 # sl_status.h: 494
 try:
-    SL_STATUS_ZIGBEE_SEND_UNICAST_ROUTE_DISCOVERY_UNDERWAY = (sl_status_t (ord_if_char(0x0C24))).value
+    SL_STATUS_ZIGBEE_ID_DISCOVERY_NOT_ENABLED = (sl_status_t (ord_if_char(0x0C22))).value
 except:
     pass
 
 # sl_status.h: 495
 try:
-    SL_STATUS_ZIGBEE_SEND_UNICAST_FAILURE = (sl_status_t (ord_if_char(0x0C25))).value
+    SL_STATUS_ZIGBEE_ID_DISCOVERY_UNDERWAY = (sl_status_t (ord_if_char(0x0C23))).value
 except:
     pass
 
 # sl_status.h: 496
 try:
-    SL_STATUS_ZIGBEE_SEND_UNICAST_NO_ROUTE = (sl_status_t (ord_if_char(0x0C26))).value
+    SL_STATUS_ZIGBEE_SEND_UNICAST_ROUTE_DISCOVERY_UNDERWAY = (sl_status_t (ord_if_char(0x0C24))).value
 except:
     pass
 
 # sl_status.h: 497
 try:
-    SL_STATUS_ZIGBEE_BROADCAST_TO_SLEEPY_CHILDREN_TIMEOUT = (sl_status_t (ord_if_char(0x0C27))).value
+    SL_STATUS_ZIGBEE_SEND_UNICAST_FAILURE = (sl_status_t (ord_if_char(0x0C25))).value
 except:
     pass
 
 # sl_status.h: 498
 try:
-    SL_STATUS_ZIGBEE_BROADCAST_RELAY_FAILED = (sl_status_t (ord_if_char(0x0C28))).value
+    SL_STATUS_ZIGBEE_SEND_UNICAST_NO_ROUTE = (sl_status_t (ord_if_char(0x0C26))).value
 except:
     pass
 
 # sl_status.h: 499
+try:
+    SL_STATUS_ZIGBEE_BROADCAST_TO_SLEEPY_CHILDREN_TIMEOUT = (sl_status_t (ord_if_char(0x0C27))).value
+except:
+    pass
+
+# sl_status.h: 500
+try:
+    SL_STATUS_ZIGBEE_BROADCAST_RELAY_FAILED = (sl_status_t (ord_if_char(0x0C28))).value
+except:
+    pass
+
+# sl_status.h: 501
 try:
     SL_STATUS_ZIGBEE_REJOIN_FAILED_BUT_NETWORK_RESTORED = (sl_status_t (ord_if_char(0x0C29))).value
 except:

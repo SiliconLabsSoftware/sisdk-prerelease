@@ -29,6 +29,16 @@ requires:
   condition:
   - zigbee_simulation
   - zigbee_phy_2_4
+- name: rail_util_ant_div
+  condition:
+  - device_cortexm
+  #- name: rail_util_ant_div
+  #  condition:
+  #    - zigbee_simulation
+  #    - zigbee_phy_2_4
+- name: rail_util_coex
+  condition:
+  - device_cortexm
 - name: zigbee_system_common
 - name: component_catalog
 - name: common_token_manager
@@ -64,19 +74,6 @@ recommends:
   - zigbee_ncp
 
 include:
-- path: platform/radio/rail_lib/plugin
-  file_list:
-  - path: coexistence/common/coexistence.h
-  - path: coexistence/protocol/ieee802154_uc/coexistence-802154.h
-  - path: coexistence/protocol/ieee802154_uc/coexistence-common-802154.h
-  - path: sl_rail_util_ant_div/sl_rail_util_ant_div.h
-- path: platform/radio/rail_lib/plugin/sl_rail_util_ieee802154
-  file_list:
-  - path: sl_rail_util_ieee802154_stack_event.h
-  condition:
-  - device_cortexm
-  unless:
-  - rail_util_coex
 - path: .
   file_list:
   - path: stack/include/source-route.h
@@ -367,30 +364,6 @@ source:
 - path: stack/internal/src/ipc/zigbee_ipc_callback_event_stub.c
   condition:
   - zigbee_use_ipc
-- path: platform/radio/rail_lib/plugin/sl_rail_util_ant_div/sl_rail_util_ant_div.c
-  condition:
-  - device_cortexm
-  unless:
-  - rail_util_ant_div
-    # Following condition to avoid adding this for subghz simulation which does not
-    # use librail simulation (uses ember PHY) and this source file need 'rail.h'.
-- path: platform/radio/rail_lib/plugin/sl_rail_util_ant_div/sl_rail_util_ant_div.c
-  condition:
-  - rail_lib_simulation
-  unless:
-  - rail_util_ant_div
-- path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc/coexistence-802154.c
-  condition:
-  - device_cortexm
-  unless:
-  - rail_util_coex
-  # Following condition to avoid adding this for subghz simulation which does not
-  # use librail simulation (uses ember PHY) and this source file need 'rail.h'.
-- path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc/coexistence-802154.c
-  condition:
-  - rail_lib_simulation
-  unless:
-  - rail_util_coex
 - path: stack/config/sl_zigbee_configuration.c
 - path: stack/config/sl_zigbee_configuration_access.c
 - path: stack/config/sl_zigbee_callback_stubs.c

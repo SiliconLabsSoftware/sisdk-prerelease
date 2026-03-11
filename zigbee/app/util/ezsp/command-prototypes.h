@@ -39,8 +39,9 @@ uint8_t sl_zigbee_ezsp_version(
 
 // Reads a configuration value from the NCP.
 // Return: SL_STATUS_OK if the value was read successfully,
-// SL_STATUS_ZIGBEE_EZSP_ERROR (for SL_ZIGBEE_EZSP_ERROR_INVALID_ID) if the NCP
-// does not recognize configId.
+// SL_STATUS_ZIGBEE_EZSP_ERROR if send command failed.
+// SL_STATUS_INVALID_PARAMETER is returned if the NCP does not recognize
+// configId.
 sl_status_t sl_zigbee_ezsp_get_configuration_value(
   // Identifies which configuration value to read.
   sl_zigbee_ezsp_config_id_t configId,
@@ -52,12 +53,10 @@ sl_status_t sl_zigbee_ezsp_get_configuration_value(
 // SL_STATUS_NETWORK_UP, configuration values can no longer be modified and this
 // command will respond with SL_ZIGBEE_EZSP_ERROR_INVALID_CALL.
 // Return: SL_STATUS_OK if the configuration value was changed,
-// SL_STATUS_ZIGBEE_EZSP_ERROR if there was an error. Retrievable EZSP errors
-// can be SL_ZIGBEE_EZSP_ERROR_OUT_OF_MEMORY if the new value exceeded the
-// available memory, SL_ZIGBEE_EZSP_ERROR_INVALID_VALUE if the new value was out
-// of bounds, SL_ZIGBEE_EZSP_ERROR_INVALID_ID if the NCP does not recognize
-// configId, SL_ZIGBEE_EZSP_ERROR_INVALID_CALL if configuration values can no
-// longer be modified.
+// SL_STATUS_ZIGBEE_EZSP_ERROR if send command failed. Possible error codes
+// include SL_STATUS_INVALID_STATE if the stack is not in a state where
+// configuration values can be changed, and SL_STATUS_INVALID_PARAMETER if the
+// new value is not valid.
 sl_status_t sl_zigbee_ezsp_set_configuration_value(
   // Identifies which configuration value to change.
   sl_zigbee_ezsp_config_id_t configId,
@@ -117,10 +116,9 @@ sl_zigbee_af_status_t sl_zigbee_ezsp_write_attribute(
 // endpoints can no longer be added and this command will respond with
 // SL_ZIGBEE_EZSP_ERROR_INVALID_CALL.
 // Return: SL_STATUS_OK if the endpoint was added, SL_STATUS_ZIGBEE_EZSP_ERROR
-// if there was an error. Errors could be SL_ZIGBEE_EZSP_ERROR_OUT_OF_MEMORY if
-// there is not enough memory available to add the endpoint,
-// SL_ZIGBEE_EZSP_ERROR_INVALID_VALUE if the endpoint already exists,
-// SL_ZIGBEE_EZSP_ERROR_INVALID_CALL if endpoints can no longer be added.
+// if send command failed. SL_STATUS_ALLOCATION_FAILED is returned if there is
+// not enough memory available to add the endpoint, SL_STATUS_INVALID_PARAMETER
+// if the endpoint already exists.
 sl_status_t sl_zigbee_ezsp_add_endpoint(
   // The application endpoint to be added.
   uint8_t endpoint,
@@ -142,7 +140,8 @@ sl_status_t sl_zigbee_ezsp_add_endpoint(
 // Allows the Host to change the policies used by the NCP to make fast
 // decisions.
 // Return: SL_STATUS_OK if the policy was changed, SL_STATUS_ZIGBEE_EZSP_ERROR
-// (for SL_ZIGBEE_EZSP_ERROR_INVALID_ID) if the NCP does not recognize policyId.
+// if send command failed. SL_STATUS_INVALID_PARAMETER is returned if the NCP
+// does not recognize policyId.
 sl_status_t sl_zigbee_ezsp_set_policy(
   // Identifies which policy to modify.
   sl_zigbee_ezsp_policy_id_t policyId,
@@ -151,8 +150,9 @@ sl_status_t sl_zigbee_ezsp_set_policy(
 
 // Allows the Host to read the policies used by the NCP to make fast decisions.
 // Return: SL_STATUS_OK if the policy was read successfully,
-// SL_STATUS_ZIGBEE_EZSP_ERROR (for SL_ZIGBEE_EZSP_ERROR_INVALID_ID) if the NCP
-// does not recognize policyId.
+// SL_STATUS_ZIGBEE_EZSP_ERROR if send command failed.
+// SL_STATUS_INVALID_PARAMETER is returned if the NCP does not recognize
+// policyId.
 sl_status_t sl_zigbee_ezsp_get_policy(
   // Identifies which policy to read.
   sl_zigbee_ezsp_policy_id_t policyId,
@@ -168,10 +168,9 @@ bool sl_zigbee_ezsp_send_pan_id_update(
 
 // Reads a value from the NCP.
 // Return: SL_STATUS_OK if the value was read successfully,
-// SL_STATUS_ZIGBEE_EZSP_ERROR otherwise.  Errors could be
-// SL_ZIGBEE_EZSP_ERROR_INVALID_ID if the NCP does not recognize valueId,
-// SL_ZIGBEE_EZSP_ERROR_INVALID_VALUE if the length of the returned value
-// exceeds the size of local storage allocated to receive it.
+// SL_STATUS_ZIGBEE_EZSP_ERROR if send command failed.
+// SL_STATUS_INVALID_PARAMETER is returned if the NCP does not recognize
+// valueId.
 sl_status_t sl_zigbee_ezsp_get_value(
   // Identifies which value to read.
   sl_zigbee_ezsp_value_id_t valueId,
@@ -185,10 +184,9 @@ sl_status_t sl_zigbee_ezsp_get_value(
 // Reads a value from the NCP but passes an extra argument specific to the value
 // being retrieved.
 // Return: SL_STATUS_OK if the value was read successfully,
-// SL_STATUS_ZIGBEE_EZSP_ERROR otherwise.  Errors could be
-// SL_ZIGBEE_EZSP_ERROR_INVALID_ID if the NCP does not recognize valueId,
-// SL_ZIGBEE_EZSP_ERROR_INVALID_VALUE if the length of the returned value
-// exceeds the size of local storage allocated to receive it.
+// SL_STATUS_ZIGBEE_EZSP_ERROR if send command failed.
+// SL_STATUS_INVALID_PARAMETER is returned if the NCP does not recognize
+// valueId.
 sl_status_t sl_zigbee_ezsp_get_extended_value(
   // Identifies which extended value ID to read.
   sl_zigbee_ezsp_extended_value_id_t valueId,
@@ -203,11 +201,9 @@ sl_status_t sl_zigbee_ezsp_get_extended_value(
   uint8_t *value);
 
 // Writes a value to the NCP.
-// Return: SL_STATUS_OK if the value was changed, SL_STATUS_ZIGBEE_EZSP_ERROR
-// otherwise.  Errors could be SL_ZIGBEE_EZSP_ERROR_INVALID_VALUE if the new
-// value was out of bounds, SL_ZIGBEE_EZSP_ERROR_INVALID_ID if the NCP does not
-// recognize valueId, SL_ZIGBEE_EZSP_ERROR_INVALID_CALL if the value could not
-// be modified.
+// Return: SL_STATUS_OK if the value was changed, SL_STATUS_ZIGBEE_EZSP_ERROR if
+// send command failed. SL_STATUS_INVALID_PARAMETER is returned if the NCP does
+// not recognize valueId.
 sl_status_t sl_zigbee_ezsp_set_value(
   // Identifies which value to change.
   sl_zigbee_ezsp_value_id_t valueId,
@@ -255,7 +251,9 @@ uint8_t sl_zigbee_ezsp_get_endpoint(
 uint8_t sl_zigbee_ezsp_get_endpoint_count(void);
 
 // Retrieve the endpoint description for the given endpoint number.
-void sl_zigbee_ezsp_get_endpoint_description(
+// Return: true if the endpoint description was retrieved successfully, false
+// otherwise.
+bool sl_zigbee_ezsp_get_endpoint_description(
   // Endpoint number to get the description of.
   uint8_t endpoint,
   // Return: Description of this endpoint.
@@ -501,6 +499,11 @@ sl_status_t sl_zigbee_ezsp_setup_delayed_join(
 // Get the current scheduler priorities for radio operations
 void sl_zigbee_ezsp_radio_get_scheduler_priorities(
   // Return: The current priorities.
+  sl_802154_radio_priorities_t *priorities);
+
+// Set the current scheduler priorities for radio operations
+void sl_zigbee_ezsp_radio_set_scheduler_priorities(
+  // The current priorities.
   sl_802154_radio_priorities_t *priorities);
 
 // Get the current multiprotocol sliptime

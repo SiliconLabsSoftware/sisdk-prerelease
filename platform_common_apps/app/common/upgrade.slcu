@@ -55,7 +55,6 @@ upgrade:
         replacement: APP_BUTTON_PRESS_WAKEUP_DELAY_MS
         description: APP_BUTTON_PRESS_WAKEUP_DELAY was renamed to APP_BUTTON_PRESS_WAKEUP_DELAY_MS.
         status: automatic
-
   - sdk:
       id: simplicity_sdk
       version: 2025.12.0

@@ -103,23 +103,25 @@ enum sl_rtl_error_code{
 
 /// AoX antenna array type
 enum sl_rtl_aox_array_type{
-  SL_RTL_AOX_ARRAY_TYPE_4x4_URA = 0, ///< Silicon Labs Ref. 4x4 Uniform Rectangular Array
-  SL_RTL_AOX_ARRAY_TYPE_3x3_URA,     ///< Silicon Labs Ref. 3x3 Uniform Rectangular Array
-  SL_RTL_AOX_ARRAY_TYPE_1x4_ULA,     ///< Silicon Labs Ref. 1x4 Uniform Linear Array
-  SL_RTL_AOX_ARRAY_TYPE_4x4_DP_URA,  ///< Silicon Labs Ref. 4x4 Uniform Dual Polarized Rectangular Array
+  SL_RTL_AOX_ARRAY_TYPE_4x4_URA = 0,        ///< Silicon Labs Ref. 4x4 Uniform Rectangular Array
+  SL_RTL_AOX_ARRAY_TYPE_3x3_URA,            ///< Silicon Labs Ref. 3x3 Uniform Rectangular Array
+  SL_RTL_AOX_ARRAY_TYPE_1x4_ULA,            ///< Silicon Labs Ref. 1x4 Uniform Linear Array
+  SL_RTL_AOX_ARRAY_TYPE_4x4_DP_URA,         ///< Silicon Labs Ref. 4x4 Uniform Dual Polarized Rectangular Array
   SL_RTL_AOX_ARRAY_TYPE_COREHW_15x15_DP,    ///< CoreHw Ref. 150 mm x 150 mm, 8 Element Dual Polarized Array
   SL_RTL_AOX_ARRAY_TYPE_COREHW_12x12_DP,    ///< CoreHw Ref. 120 mm x 120 mm, 8 Element Dual Polarized Array
   SL_RTL_AOX_ARRAY_TYPE_COREHW_4x4_URA,     ///< CoreHw Ref. 4x4 Uniform Rectangular Array
   SL_RTL_AOX_ARRAY_TYPE_COREHW_2x2_URA,     ///< CoreHw Ref. 2x2 Uniform Rectangular Array
+  SL_RTL_AOX_ARRAY_TYPE_RESERVED,           ///< Reserved for future use
 
-  SL_RTL_AOX_ARRAY_TYPE_LAST ///< Placeholder
+  SL_RTL_AOX_ARRAY_TYPE_LAST = 16 ///< Placeholder
 };
 
 enum sl_rtl_aox_switch_pattern_array{
   SL_RTL_AOX_SWITCH_PATTERN_ARRAY_4x4_CP = 0,
   SL_RTL_AOX_SWITCH_PATTERN_ARRAY_4x4_DP,
+  SL_RTL_AOX_SWITCH_PATTERN_ARRAY_RESERVED,  ///< Reserved for future use
 
-  SL_RTL_AOX_SWITCH_PATTERN_ARRAY_LAST
+  SL_RTL_AOX_SWITCH_PATTERN_ARRAY_LAST = 16 ///< Placeholder
 };
 
 enum sl_rtl_aox_switch_pattern_options{
@@ -731,9 +733,9 @@ enum sl_rtl_error_code sl_rtl_aox_antenna_pattern_deinit(sl_rtl_aox_antenna_patt
  *
  * | CS Algorithm Mode       | Channel Map Preset <br> HIGH | Channel Map Preset <br> MEDIUM | Channel Map Preset <br> LOW |
  * | :---------------------- | :--------------------------: | :----------------------------: | :-------------------------: |
- * | REAL TIME BASIC         |                          yes |                            yes |                         yes |
+ * | REAL TIME BASIC         |                          yes |                            yes |                          no |
  * | STATIC HIGH ACCURACY    |                          yes |                             no |                          no |
- * | REAL TIME FAST          |                    yes + vel |                      yes + vel |                         yes |
+ * | REAL TIME FAST          |                    yes + vel |                      yes + vel |                          no |
  *
  * Main Mode: Round-Trip Time (RTT), Sub Mode: None
  *

@@ -214,6 +214,116 @@
  */
 #define SL_TOKEN_NVM3_REGION_WIFI                 (0xB0000)
 
+/**
+ * @defgroup StaticToken Static Token Key Space Regions
+ * @brief MACRO's for Static Token Key Space Regions. Applicable for both static device and static secure tokens for series 3 devices.
+ *
+ * CTM has reserved dedicated token key ranges for each domain, with a total of 128 token keys allocated per domain.
+ * The token key ranges are defined as follows:
+ * - 0x000 to 0x07F used for defining tokens for the Common domain.
+ * - 0x080 to 0x0FF used for defining tokens for the Zigbee domain.
+ * - 0x100 to 0x17F used for defining tokens for the Thread domain.
+ * - 0x180 to 0x1FF used for defining tokens for the Connect domain.
+ * - 0x200 to 0x27F used for defining tokens for the Bluetooth domain.
+ * - 0x280 to 0x2FF used for defining tokens for the Z-Wave domain.
+ * - 0x300 to 0x37F used for defining tokens for the Bluetooth Mesh domain.
+ * - 0x380 to 0x3FF used for defining tokens for the Matter domain.
+ * - 0x400 to 0x47F used for defining tokens for the Wi-Sun domain.
+ * - 0x480 to 0x4FF used for defining tokens for the Sidewalk domain.
+ * - 0x500 to 0x57F used for defining tokens for the Wi-Fi domain.
+ * - 0x580 to 0x5FF reserved for future use.
+ * - 0x600 to 0x67F used for defining tokens for the User domain.
+ * - 0x680 to 0xFFF reserved for future use.
+ *
+ * A new token added for series 3 devices must follow the domain-specific token Id ranges mentioned above.
+ * And the new tokens must not conflict with the existing tokens. Below is an example of how to define a new token:
+ *       
+ *       @code{.c}
+ *       // Defining a new static device token for the Matter domain:
+ *       #define TOKEN_MFG_MATTER_NEW_STATIC_DEVICE_TOKEN          (SL_TOKEN_STATIC_DEVICE_TOKENS | SL_TOKEN_DOMAIN_STATIC_MATTER | 0x0)
+ *       #define TOKEN_MFG_MATTER_NEW_STATIC_DEVICE_TOKEN_SIZE     (2u)                //   2 bytes
+ *
+ *       // Defining a new static secure token for the Matter domain:
+ *       #define TOKEN_MFG_MATTER_NEW_STATIC_SECURE_TOKEN          (SL_TOKEN_STATIC_SECURE_DATA_TOKENS | SL_TOKEN_DOMAIN_STATIC_MATTER | 0x0)
+ *       #define TOKEN_MFG_MATTER_NEW_STATIC_SECURE_TOKEN_SIZE     (2u)                //   2 bytes
+ *       @endcode
+ *
+ * @note The token IDs listed below are reserved and must not be used to define tokens for any specific domain.
+ *       For example, the token @ref TOKEN_MFG_CTUNE (a static device token) is reserved with Id 0x100 and must not be 
+ *       reused to define a static device token for the Thread domain. Similarly, the token 
+ *       @ref TOKEN_MFG_CBKE_DATA (a static secure token) is reserved with Id 0x204 and must not be reused to define 
+ *       a static secure token for the Bluetooth domain. These reservations exist because there are already deployed 
+ *       devices using these token Id values, which are distributed across the overall token Id space. 
+ *       Reusing these Id's would create compatibility issues with existing devices. 
+ * @note Reserved token IDs by type (do not use below IDs for defining new tokens for the respective domains):
+ *    | Static device token (Domain : Token IDs)                  | Static secure token (Domain : Token IDs)     |
+ *    |-----------------------------------------------------------|----------------------------------------------|
+ *    | Common : 0x002, 0x00C, 0x020, 0x030, 0x034, 0x038, 0x064  | Bluetooth : 0x204, 0x260, 0x270              |
+ *    | Zigbee : 0x09C                                            | Z-Wave : 0x298                               |
+ *    | Thread : 0x100                                            |                                              |
+ *    | Connect : 0x1f0                                           |                                              |
+ * 
+ */
+ /** @ingroup StaticToken
+ *  @brief Static Token Domain for Common tokens. 
+ */
+#define SL_TOKEN_DOMAIN_STATIC_COMMON       (0x000)
+
+ /** @ingroup StaticToken
+ *  @brief Static Token Domain for Zigbee tokens. 
+ */
+#define SL_TOKEN_DOMAIN_STATIC_ZIGBEE       (0x080)
+
+ /** @ingroup StaticToken
+ *  @brief Static Token Domain for Thread tokens. 
+ */
+#define SL_TOKEN_DOMAIN_STATIC_THREAD       (0x100)
+
+ /** @ingroup StaticToken
+ *  @brief Static Token Domain for Connect tokens. 
+ */
+#define SL_TOKEN_DOMAIN_STATIC_CONNECT      (0x180)
+
+ /** @ingroup StaticToken
+ *  @brief Static Token Domain for Bluetooth tokens. 
+ */
+#define SL_TOKEN_DOMAIN_STATIC_BT           (0x200)
+
+ /** @ingroup StaticToken
+ *  @brief Static Token Domain for Z-Wave tokens. 
+ */
+#define SL_TOKEN_DOMAIN_STATIC_ZWAVE        (0x280)
+
+ /** @ingroup StaticToken
+ *  @brief Static Token Domain for Bluetooth Mesh tokens. 
+ */
+#define SL_TOKEN_DOMAIN_STATIC_BT_MESH      (0x300)
+
+ /** @ingroup StaticToken
+ *  @brief Static Token Domain for Matter tokens. 
+ */
+#define SL_TOKEN_DOMAIN_STATIC_MATTER       (0x380)
+
+ /** @ingroup StaticToken
+ *  @brief Static Token Domain for Wi-Sun tokens. 
+ */
+#define SL_TOKEN_DOMAIN_STATIC_WI_SUN       (0x400)
+
+ /** @ingroup StaticToken
+ *  @brief Static Token Domain for Sidewalk tokens. 
+ */
+#define SL_TOKEN_DOMAIN_STATIC_SIDEWALK     (0x480)
+
+ /** @ingroup StaticToken
+ *  @brief Static Token Domain for Wi-Fi tokens. 
+ */
+#define SL_TOKEN_DOMAIN_STATIC_WI_FI        (0x500)
+
+ /** @ingroup StaticToken
+ *  @brief Static Token Domain for User tokens. 
+ */
+#define SL_TOKEN_DOMAIN_STATIC_USER         (0x600)
+
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 #ifndef SL_TOKEN_NVM3_OVERRIDE
 //To store a static token in NVM3 region we shall follow NVM3 key format.

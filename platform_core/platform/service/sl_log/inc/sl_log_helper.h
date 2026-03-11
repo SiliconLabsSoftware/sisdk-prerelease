@@ -36,20 +36,24 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
 #include "sl_log.h"
 #include "sl_log_common_config.h"
-#include "sl_component_catalog.h"
-#ifdef SL_CATALOG_LOGGER_BACKEND_SYSTEMVIEW_PRESENT
+#ifdef SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT
 #include "SEGGER_SYSVIEW.h"
 #endif
+#ifdef SL_CATALOG_LOG_BACKEND_PROPRIETARY_PRESENT
+#include "sl_log_proprietary_config.h"
+#endif
+
 /** @addtogroup sl_log_helper SL Log Helper Functions
  * @brief Helper macros and utilities for the Silicon Labs logging system
  *
- * This module provides the core helper macros and utilities that enable
- * efficient logging with compile-time optimization, argument validation,
- * and backend abstraction.
+ * This module provides the core helper macros that user can use to log messages and
+ * events with various log levels and argument counts. It includes compile-time validation
+ * to ensure correct usage and efficient logging implementations.
  *
  * @{
  */
@@ -109,43 +113,29 @@ extern "C" {
 
 
 
-#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
 
-/** @brief Debug log with no arguments - disabled */
-#define SL_PRINT_ARG0_DBG(EVENT, EVENT_TYPE) (void)EVENT;
-/** @brief Error log with no arguments - disabled */
-#define SL_PRINT_ARG0_ERR(EVENT, EVENT_TYPE) (void)EVENT;
-/** @brief Warning log with no arguments - disabled */
-#define SL_PRINT_ARG0_WRN(EVENT, EVENT_TYPE) (void)EVENT;
-/** @brief Info log with no arguments - disabled */
-#define SL_PRINT_ARG0_INFO(EVENT, EVENT_TYPE) (void)EVENT;
-/** @brief Debug log with 1 argument - disabled */
-#define SL_PRINT_ARG1_DBG(EVENT, EVENT_TYPE, ARG1) (void)EVENT;
-/** @brief Error log with 1 argument - disabled */
-#define SL_PRINT_ARG1_ERR(EVENT, EVENT_TYPE, ARG1) (void)EVENT;
-/** @brief Warning log with 1 argument - disabled */
-#define SL_PRINT_ARG1_WRN(EVENT, EVENT_TYPE, ARG1) (void)EVENT;
-/** @brief Info log with 1 argument - disabled */
-#define SL_PRINT_ARG1_INFO(EVENT, EVENT_TYPE, ARG1) (void)EVENT;
-/** @brief Debug log with 2 arguments - disabled */
-#define SL_PRINT_ARG2_DBG(EVENT, EVENT_TYPE, ARG1, ARG2) (void)EVENT;
-/** @brief Error log with 2 arguments - disabled */
-#define SL_PRINT_ARG2_ERR(EVENT, EVENT_TYPE, ARG1, ARG2) (void)EVENT;
-/** @brief Warning log with 2 arguments - disabled */
-#define SL_PRINT_ARG2_WRN(EVENT, EVENT_TYPE, ARG1, ARG2) (void)EVENT;
-/** @brief Info log with 2 arguments - disabled */
-#define SL_PRINT_ARG2_INFO(EVENT, EVENT_TYPE, ARG1, ARG2) (void)EVENT;
-/** @brief Debug log with 3 arguments - disabled */
-#define SL_PRINT_ARG3_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3) (void)EVENT;
-/** @brief Error log with 3 arguments - disabled */
-#define SL_PRINT_ARG3_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3) (void)EVENT;
-/** @brief Warning log with 3 arguments - disabled */
-#define SL_PRINT_ARG3_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3) (void)EVENT;
-/** @brief Info log with 3 arguments - disabled */
-#define SL_PRINT_ARG3_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3) (void)EVENT;
+#define SL_PRINT_VOID_ARG0_DBG(EVENT, EVENT_TYPE)                           do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); } while (0);
+#define SL_PRINT_VOID_ARG0_ERR(EVENT, EVENT_TYPE)                           do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); } while (0);
+#define SL_PRINT_VOID_ARG0_WRN(EVENT, EVENT_TYPE)                           do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); } while (0);
+#define SL_PRINT_VOID_ARG0_INFO(EVENT, EVENT_TYPE)                          do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); } while (0);
+
+#define SL_PRINT_VOID_ARG1_DBG(EVENT, EVENT_TYPE, ARG1)                     do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); } while (0);
+#define SL_PRINT_VOID_ARG1_ERR(EVENT, EVENT_TYPE, ARG1)                     do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); } while (0);
+#define SL_PRINT_VOID_ARG1_WRN(EVENT, EVENT_TYPE, ARG1)                     do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); } while (0);
+#define SL_PRINT_VOID_ARG1_INFO(EVENT, EVENT_TYPE, ARG1)                    do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); } while (0);
+
+#define SL_PRINT_VOID_ARG2_DBG(EVENT, EVENT_TYPE, ARG1, ARG2)               do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); } while (0);
+#define SL_PRINT_VOID_ARG2_ERR(EVENT, EVENT_TYPE, ARG1, ARG2)               do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); } while (0);
+#define SL_PRINT_VOID_ARG2_WRN(EVENT, EVENT_TYPE, ARG1, ARG2)               do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); } while (0);
+#define SL_PRINT_VOID_ARG2_INFO(EVENT, EVENT_TYPE, ARG1, ARG2)              do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); } while (0);
+
+#define SL_PRINT_VOID_ARG3_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)         do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); } while (0);
+#define SL_PRINT_VOID_ARG3_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)         do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); } while (0);
+#define SL_PRINT_VOID_ARG3_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)         do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); } while (0);
+#define SL_PRINT_VOID_ARG3_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)        do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); } while (0);
 
 /** @} (end addtogroup sl_log_disabled_macros) */
-#elif defined(SL_CATALOG_LOGGER_BACKEND_SYSTEMVIEW_PRESENT)
+#if defined(SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT)
 /** @brief Debug log with no arguments - disabled */
 #define SL_PRINT_ARG0_DBG(EVENT, EVENT_TYPE) SEGGER_SYSVIEW_RecordU32(EVENT, EVENT_TYPE);
 /** @brief Error log with no arguments - disabled */
@@ -190,41 +180,6 @@ extern "C" {
  *
  * @{
  */
-
-/**
- * @brief Send log message with 1 argument
- *
- * @param event_id Unique identifier for the log event
- * @param log_level Log level combined with event type flags
- * @param arg1 First argument value
- */
-extern void sl_log_send_arg1(uint32_t event_id, uint8_t log_level,
-                             uint32_t arg1);
-
-/**
- * @brief Send log message with 2 arguments
- *
- * @param event_id Unique identifier for the log event
- * @param log_level Log level combined with event type flags
- * @param arg1 First argument value
- * @param arg2 Second argument value
- */
-extern void sl_log_send_arg2(uint32_t event_id, uint8_t log_level,
-                             uint32_t arg1, uint32_t arg2);
-
-/**
- * @brief Send log message with 3 arguments
- *
- * @param event_id Unique identifier for the log event
- * @param log_level Log level combined with event type flags
- * @param arg1 First argument value
- * @param arg2 Second argument value
- * @param arg3 Third argument value
- */
-extern void sl_log_send_arg3(uint32_t event_id, uint8_t log_level,
-                             uint32_t arg1, uint32_t arg2, uint32_t arg3);
-
-/** @} (end addtogroup sl_log_backend_functions) */
 
 /**
  * @defgroup sl_log_active_macros Active Logging Macros
@@ -369,6 +324,12 @@ extern void sl_log_send_arg3(uint32_t event_id, uint8_t log_level,
 #define LOG_MACRO_CHOOSER2(count) EXPAND_CONCAT(SL_PRINT_ARG, count##_)
 
 /** @brief Macro dispatcher for selecting appropriate logging function */
+#define LOG_VOID_MACRO_CHOOSER2(count) EXPAND_CONCAT(SL_PRINT_VOID_ARG, count##_)
+
+/** @brief Macro dispatcher for selecting appropriate logging function */
+#define LOG_VOID_MACRO_CHOOSER1(count) LOG_VOID_MACRO_CHOOSER2(count)
+
+/** @brief Macro dispatcher for selecting appropriate logging function */
 #define LOG_MACRO_CHOOSER1(count) LOG_MACRO_CHOOSER2(count)
 
 /** @} (end addtogroup sl_log_macro_helpers) */
@@ -396,7 +357,7 @@ extern void sl_log_send_arg3(uint32_t event_id, uint8_t log_level,
  */
 #define sl_printf_common(level, fmt, ...)                                      \
   static const char UNIQUE_NAME(logstr_)[] SL_COMPACT_STRINGS_SECTION = fmt;               \
-  _Static_assert(COUNT_ARGS(fmt, ##__VA_ARGS__) <= 3, "Too many arguments!");  \
+  _Static_assert(COUNT_ARGS(fmt, ##__VA_ARGS__) <= SL_LOG_CONFIG_ARG, "Too many arguments!");  \
   EXPAND_CONCAT(LOG_MACRO_CHOOSER1(COUNT_ARGS(fmt, ##__VA_ARGS__)), level)     \
   ((uintptr_t)UNIQUE_NAME(logstr_), 0, ##__VA_ARGS__)
 
@@ -411,11 +372,13 @@ extern void sl_log_send_arg3(uint32_t event_id, uint8_t log_level,
  * @param ... Variable arguments (up to 3)
  */
 #define sl_event_common(level, event_id, ...)                                  \
-  _Static_assert(COUNT_ARGS(event_id, ##__VA_ARGS__) <= 3, "Too many arguments!");  \
+  _Static_assert(COUNT_ARGS(event_id, ##__VA_ARGS__) <= SL_LOG_CONFIG_ARG, "Too many arguments!");  \
   EXPAND_CONCAT(LOG_MACRO_CHOOSER1(COUNT_ARGS(event_id, ##__VA_ARGS__)), level)     \
   (event_id, 1, ##__VA_ARGS__)
 
 /** @} (end addtogroup sl_log_common_macros) */
+
+#if defined(LIBRARY_BUILD) || defined(SL_CATALOG_LOG_COMPONENT_PRESENT)
 
 /**
  * @defgroup sl_log_printf_api Printf-Style Logging API
@@ -437,10 +400,11 @@ extern void sl_log_send_arg3(uint32_t event_id, uint8_t log_level,
  * @param fmt Printf-style format string
  * @param ... Variable arguments for format string (up to 3)
  */
-#define SL_PRINT_STRING_INFO(fmt, ...)                                                \
-  if (SL_LOG_LVL_INFO_CHECK(sl_log_config.log_level)) {                        \
-    sl_printf_common(INFO, fmt, ##__VA_ARGS__)                                 \
-  }
+#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
+#define SL_PRINT_STRING_INFO(fmt, ...) do{ }while(0)
+#else
+#define SL_PRINT_STRING_INFO(fmt, ...) do{sl_printf_common(INFO, fmt, ##__VA_ARGS__) }while(0)
+#endif
 
 /**
  * @brief Print debug-level message with printf-style formatting
@@ -451,10 +415,11 @@ extern void sl_log_send_arg3(uint32_t event_id, uint8_t log_level,
  * @param fmt Printf-style format string
  * @param ... Variable arguments for format string (up to 3)
  */
-#define SL_PRINT_STRING_DEBUG(fmt, ...)                                               \
-  if (SL_LOG_LVL_DEBUG_CHECK(sl_log_config.log_level)) {                       \
-    sl_printf_common(DBG, fmt, ##__VA_ARGS__)                                  \
-  }
+#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
+#define SL_PRINT_STRING_DEBUG(fmt, ...) do{ }while(0)
+#else
+#define SL_PRINT_STRING_DEBUG(fmt, ...) do{sl_printf_common(DBG, fmt, ##__VA_ARGS__) }while(0)
+#endif
 
 /**
  * @brief Print warning-level message with printf-style formatting
@@ -465,10 +430,11 @@ extern void sl_log_send_arg3(uint32_t event_id, uint8_t log_level,
  * @param fmt Printf-style format string
  * @param ... Variable arguments for format string (up to 3)
  */
-#define SL_PRINT_STRING_WARN(fmt, ...)                                                \
-  if (SL_LOG_LVL_WARN_CHECK(sl_log_config.log_level)) {                        \
-    sl_printf_common(WRN, fmt, ##__VA_ARGS__)                                  \
-  }
+#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
+#define SL_PRINT_STRING_WARN(fmt, ...) do{ }while(0)
+#else
+#define SL_PRINT_STRING_WARN(fmt, ...) do{sl_printf_common(WRN, fmt, ##__VA_ARGS__) }while(0)
+#endif
 
 /**
  * @brief Print error-level message with printf-style formatting
@@ -479,10 +445,11 @@ extern void sl_log_send_arg3(uint32_t event_id, uint8_t log_level,
  * @param fmt Printf-style format string
  * @param ... Variable arguments for format string (up to 3)
  */
-#define SL_PRINT_STRING_ERROR(fmt, ...)                                               \
-  if (SL_LOG_LVL_ERROR_CHECK(sl_log_config.log_level)) {                       \
-    sl_printf_common(ERR, fmt, ##__VA_ARGS__)                                  \
-  }
+#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
+#define SL_PRINT_STRING_ERROR(fmt, ...) do{ }while(0)
+#else
+#define SL_PRINT_STRING_ERROR(fmt, ...) do{sl_printf_common(ERR, fmt, ##__VA_ARGS__) }while(0)
+#endif
 
 /** @} (end addtogroup sl_log_printf_api) */
 
@@ -506,10 +473,11 @@ extern void sl_log_send_arg3(uint32_t event_id, uint8_t log_level,
  * @param event_id Numeric event identifier
  * @param ... Variable arguments for the event (up to 3)
  */
-#define SL_PRINT_EVENT_INFO(event_id, ...)                                           \
-  if (SL_LOG_LVL_INFO_CHECK(sl_log_config.log_level)) {                        \
-    sl_event_common(INFO, event_id, ##__VA_ARGS__)                             \
-  }
+#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
+#define SL_PRINT_EVENT_INFO(event_id, ...) do{ }while(0)
+#else
+#define SL_PRINT_EVENT_INFO(event_id, ...) do{sl_event_common(INFO, event_id, ##__VA_ARGS__) }while(0)
+#endif
 
 /**
  * @brief Log debug-level event with optional arguments
@@ -520,11 +488,11 @@ extern void sl_log_send_arg3(uint32_t event_id, uint8_t log_level,
  * @param event_id Numeric event identifier
  * @param ... Variable arguments for the event (up to 3)
  */
-#define SL_PRINT_EVENT_DEBUG(event_id, ...)                                          \
-  if (SL_LOG_LVL_DEBUG_CHECK(sl_log_config.log_level)) {                       \
-    sl_event_common(DBG, event_id, ##__VA_ARGS__)                              \
-  }
-
+#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
+#define SL_PRINT_EVENT_DEBUG(event_id, ...) do{ }while(0)
+#else
+#define SL_PRINT_EVENT_DEBUG(event_id, ...) do{sl_event_common(DBG, event_id, ##__VA_ARGS__) }while(0)
+#endif
 /**
  * @brief Log warning-level event with optional arguments
  *
@@ -534,11 +502,11 @@ extern void sl_log_send_arg3(uint32_t event_id, uint8_t log_level,
  * @param event_id Numeric event identifier
  * @param ... Variable arguments for the event (up to 3)
  */
-#define SL_PRINT_EVENT_WARN(event_id, ...)                                           \
-  if (SL_LOG_LVL_WARN_CHECK(sl_log_config.log_level)) {                        \
-    sl_event_common(WRN, event_id, ##__VA_ARGS__)                              \
-  }
-
+#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
+#define SL_PRINT_EVENT_WARN(event_id, ...) do{ }while(0)
+#else
+#define SL_PRINT_EVENT_WARN(event_id, ...) do{sl_event_common(WRN, event_id, ##__VA_ARGS__) }while(0)
+#endif
 /**
  * @brief Log error-level event with optional arguments
  *
@@ -548,14 +516,68 @@ extern void sl_log_send_arg3(uint32_t event_id, uint8_t log_level,
  * @param event_id Numeric event identifier
  * @param ... Variable arguments for the event (up to 3)
  */
-#define SL_PRINT_EVENT_ERROR(event_id, ...)                                          \
-  if (SL_LOG_LVL_ERROR_CHECK(sl_log_config.log_level)) {                       \
-    sl_event_common(ERR, event_id, ##__VA_ARGS__)                              \
-  }
+#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
+#define SL_PRINT_EVENT_ERROR(event_id, ...) do{ }while(0)
+#else
+#define SL_PRINT_EVENT_ERROR(event_id, ...) do{sl_event_common(ERR, event_id, ##__VA_ARGS__) }while(0)
+#endif
 
 /** @} (end addtogroup sl_log_event_api) */
 
-/** @} (end addtogroup sl_log_helper) */
+
+#else // LIBRARY_BUILD
+/**
+ * @defgroup sl_log_common_macros Common Logging Macros
+ * @brief Core macros for printf-style and event-based logging
+ *
+ * These macros provide the foundation for both printf-style string logging
+ * and numeric event-based logging with compile-time argument validation.
+ *
+ * @{
+ */
+
+/**
+ * @brief Common printf-style logging macro
+ *
+ * This apis discards the string provided by the user and and send empty string address magic word
+ *
+ * @param level Log level suffix (INFO, DBG, ERR, WRN)
+ * @param fmt Format string
+ * @param ... Variable arguments (up to 3)
+ */
+
+#define sl_log_common_void(level, event_id, ...)                                  \
+  _Static_assert(COUNT_ARGS(event_id, ##__VA_ARGS__) <= SL_LOG_CONFIG_ARG, "Too many arguments!");  \
+  EXPAND_CONCAT(LOG_VOID_MACRO_CHOOSER1(COUNT_ARGS(event_id, ##__VA_ARGS__)), level)     \
+  (event_id, 1, ##__VA_ARGS__)
+
+/* Compile-time–controlled PRINTF-style macros */
+#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
+#define SL_PRINT_STRING_INFO(fmt, ...) do{ }while(0)
+#define SL_PRINT_STRING_DEBUG(fmt, ...) do{ }while(0)
+#define SL_PRINT_STRING_WARN(fmt, ...) do{ }while(0)
+#define SL_PRINT_STRING_ERROR(fmt, ...) do{ }while(0)
+#else
+#define SL_PRINT_STRING_INFO(fmt, ...)  sl_log_common_void(INFO, fmt, ##__VA_ARGS__)
+#define SL_PRINT_STRING_DEBUG(fmt, ...) sl_log_common_void(DBG, fmt, ##__VA_ARGS__)
+#define SL_PRINT_STRING_WARN(fmt, ...)  sl_log_common_void(WRN, fmt, ##__VA_ARGS__)
+#define SL_PRINT_STRING_ERROR(fmt, ...) sl_log_common_void(ERR, fmt, ##__VA_ARGS__)
+#endif
+
+/* Compile-time–controlled EVENT-style macros */
+#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
+#define SL_PRINT_EVENT_INFO(event_id, ...) do{ }while(0)
+#define SL_PRINT_EVENT_DEBUG(event_id, ...) do{ }while(0)
+#define SL_PRINT_EVENT_WARN(event_id, ...) do{ }while(0)
+#define SL_PRINT_EVENT_ERROR(event_id, ...) do{ }while(0)
+#else
+#define SL_PRINT_EVENT_INFO(event_id, ...)  sl_log_common_void(INFO, event_id, ##__VA_ARGS__)
+#define SL_PRINT_EVENT_DEBUG(event_id, ...) sl_log_common_void(DBG, event_id, ##__VA_ARGS__)
+#define SL_PRINT_EVENT_WARN(event_id, ...)  sl_log_common_void(WRN, event_id, ##__VA_ARGS__)
+#define SL_PRINT_EVENT_ERROR(event_id, ...) sl_log_common_void(ERR, event_id, ##__VA_ARGS__)
+#endif
+
+#endif // LIBRARY_BUILD
 
 #ifdef __cplusplus
 }

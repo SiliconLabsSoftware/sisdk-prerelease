@@ -66,6 +66,8 @@
 #define SL_WISUN_GAK_LEN  16
 /// Maximum size of EAP identity
 #define SL_WISUN_EAP_IDENTITY_SIZE 32
+/// Maximum size of the Direct Connect ID
+#define SL_WISUN_DC_ID_LEN 32
 
 /// Enumerations for device type
 typedef enum {
@@ -334,6 +336,20 @@ typedef enum {
   /// 4 bytes CRC
   SL_WISUN_4_BYTES_CRC = 2
 } sl_wisun_crc_type_t;
+
+/// Enumeration for the state of the Direct Connect client
+typedef enum {
+  /// Connected state
+  SL_WISUN_DC_CLIENT_STATE_CONNECTED = 0,
+  /// Connection lost state
+  SL_WISUN_DC_CLIENT_STATE_CONNECTION_LOST = 1,
+  /// Connection establishment failed
+  SL_WISUN_DC_CLIENT_STATE_CONNECTION_FAILED = 2,
+  /// Stopped state
+  SL_WISUN_DC_CLIENT_STATE_STOPPED = 3,
+  /// Scan complete state
+  SL_WISUN_DC_CLIENT_STATE_SCAN_COMPLETE = 4,
+} sl_wisun_dc_client_state_t;
 
 /// Wi-SUN Message API common header
 SL_PACK_START(1)
@@ -696,6 +712,15 @@ typedef struct {
   ///          byte of the MAC address.
   uint8_t address[SL_WISUN_MAC_ADDRESS_SIZE];
 } SL_ATTRIBUTE_PACKED sl_wisun_mac_address_t;
+SL_PACK_END()
+
+/// Direct Connect ID
+SL_PACK_START(1)
+typedef struct {
+  /// Direct Connect ID
+  /// @note The format of the identifier is application-specific.
+  uint8_t id[SL_WISUN_DC_ID_LEN];
+} sl_wisun_dc_id_t;
 SL_PACK_END()
 
 /// Channel mask
@@ -1359,6 +1384,20 @@ typedef struct {
   } u;
 } SL_ATTRIBUTE_PACKED sl_wisun_logger_event_t;
 SL_PACK_END()
+
+/// Enumeration for trickle message types
+typedef enum {
+  /// PAN advertisement
+  SL_WISUN_TRICKLE_PA = 0,
+  /// PAN advertisement solicit
+  SL_WISUN_TRICKLE_PAS = 1,
+  /// PAN configuration
+  SL_WISUN_TRICKLE_PC = 2,
+  /// PAN configuration solicit
+  SL_WISUN_TRICKLE_PCS = 3,
+  /// MPL messages
+  SL_WISUN_TRICKLE_MPL = 4,
+} sl_wisun_trickle_type_t;
 
 /**************************************************************************//**
  * Handler called for an IPv6 packet from Wi-SUN network.

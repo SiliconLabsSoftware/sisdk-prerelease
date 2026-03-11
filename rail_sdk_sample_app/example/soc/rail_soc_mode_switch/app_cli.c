@@ -98,16 +98,16 @@ void cli_info(sl_cli_command_arg_t *arguments)
 
   app_log_info("Info:\n");
   app_log_info("         MCU Id: 0x%016llX\n", mcu_id);
-  app_log_info("Current channel: %d\n", current_channel);
-  app_log_info("   Base channel: %d\n", base_channel);
-  app_log_info("    PHY mode id: %d\n", phy_mode_id);
+  app_log_info("Current channel: %u\n", current_channel);
+  app_log_info("   Base channel: %u\n", base_channel);
+  app_log_info("    PHY mode id: %u\n", phy_mode_id);
   app_log_info(" PHY modulation: %s\n", phy_modulation_str);
   if (modulation == M_OFDM) {
-    app_log_info("  PHY OFDM rate: %d\n", get_ofdm_rate());
-    app_log_info("  PHY scrambler: %d\n", get_ofdm_scrambler());
+    app_log_info("  PHY OFDM rate: %u\n", get_ofdm_rate());
+    app_log_info("  PHY scrambler: %u\n", get_ofdm_scrambler());
   } else {
-    app_log_info("    PHY fcsType: %d\n", get_fsk_fcs_type());
-    app_log_info("  PHY whitening: %d\n", get_fsk_whitening());
+    app_log_info("    PHY fcsType: %u\n", get_fsk_fcs_type());
+    app_log_info("  PHY whitening: %u\n", get_fsk_whitening());
   }
   app_log_info("       Ms state: %s\n", ms_state_str);
   app_log_info("   Fw RX Packet: %s\n", fw_rf_packet);
@@ -149,7 +149,7 @@ void cli_receive_packet(sl_cli_command_arg_t *arguments)
     rail_status = sl_rail_start_rx(rail_handle, get_channel(), NULL);
   }
   if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
-    app_log_warning("sl_rail_start_rx() or sl_rail_idle result: %lu\n",
+    app_log_warning("sl_rail_start_rx() or sl_rail_idle result: 0x%08lX\n",
                     rail_status);
   }
   app_log_info("Received packets: %s\n", str_rx_fw);

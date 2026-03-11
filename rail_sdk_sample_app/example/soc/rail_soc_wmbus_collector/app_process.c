@@ -100,14 +100,14 @@ void app_process_action(void)
       break;
     case S_RX_PACKET_ERROR:
       // Handle Rx error
-      app_log_error("Radio RX Error occurred\nEvents: %lld\n", current_rail_err_tmp);
+      app_log_error("Radio RX Error occurred\nEvents: 0x%016llX\n", current_rail_err_tmp);
       state = S_IDLE;
 #if defined(SL_CATALOG_KERNEL_PRESENT)
       app_task_notify();
 #endif
       break;
     case S_CALIBRATION_ERROR:
-      app_log_warning("Radio Calibration Error occurred\nEvents: %lld\nsl_rail_calibrate() result:%ld\n",
+      app_log_warning("Radio Calibration Error occurred\nEvents: 0x%016llX\nsl_rail_calibrate() result: 0x%08lX\n",
                       current_rail_err_tmp,
                       calibration_status);
       state = S_IDLE;
@@ -194,7 +194,7 @@ static void print_rx_packets(sl_rail_handle_t rail_handle)
     }
     rail_status = sl_rail_release_rx_packet(rail_handle, rx_packet_handle);
     if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
-      app_log_warning("sl_rail_release_rx_packet() result: %lu\n", rail_status);
+      app_log_warning("sl_rail_release_rx_packet() result: 0x%08lX\n", rail_status);
     }
 
     if (packet_info.packet_bytes <= SL_RAIL_SDK_RX_FIFO_SIZE) {
@@ -204,7 +204,7 @@ static void print_rx_packets(sl_rail_handle_t rail_handle)
       char mField[3];
       sl_rail_sdk_wmbus_frame_mfield_to_chars(dll_header->address.detailed.manufacturer, mField);
       app_log_info("RX:[Time:%lu]\n", packet_details.time_received.packet_time);
-      app_log_info("Block-1:[L:%d,C:0x%02X,M:%c%c%c,ID:%08X,Version:0x%02X,devType:0x%02X]\n",
+      app_log_info("Block-1:[L:%u,C:0x%02X,M:%c%c%c,ID:%08X,Version:0x%02X,devType:0x%02X]\n",
                    dll_header->lField,
                    dll_header->c_field.raw,
                    mField[0], mField[1], mField[2],
@@ -214,7 +214,7 @@ static void print_rx_packets(sl_rail_handle_t rail_handle)
       if (stl_header->ci_field == WMBUS_CI_EN13757_3_APPLICATION_SHORT) {
         uint8_t *payload_start = rx_buffer + sizeof(sl_rail_sdk_wmbus_dll_header_t) + sizeof(sl_rail_sdk_wmbus_stl_header_t);
         uint16_t payload_len = dll_header->lField - sizeof(sl_rail_sdk_wmbus_dll_header_t) - sizeof(sl_rail_sdk_wmbus_stl_header_t) + 1;
-        app_log_info("AppHeader:[CI:0x%02X,AccessNr:%d,Status:0x%02X,encMode:%d,Accessibility:%02X,encBlocks:%d,sync:%d]\n",
+        app_log_info("AppHeader:[CI:0x%02X,AccessNr:%u,Status:0x%02X,encMode:%u,Accessibility:%02X,encBlocks:%u,sync:%u]\n",
                      stl_header->ci_field,
                      stl_header->access_number,
                      stl_header->status,

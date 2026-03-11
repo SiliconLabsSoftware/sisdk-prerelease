@@ -41,14 +41,19 @@ extern "C" {
 #endif
 
 // ----------------------------------------------------------------------------
+// DEFINES
+
+// Registers width in bits.
+#define REGISTER_BIT_WIDTH   32U
+
+// ----------------------------------------------------------------------------
 // DATA TYPES
 
 // Retention Control Structure.
 typedef struct {
-  uint32_t smallest_bank_size;
+  uint32_t bank_size;
   uint16_t *banks_counter;
-  uint32_t (*get_smallest_bank_id)(void *);
-  uint32_t (*smallest_to_real_bank_id)(uint32_t);
+  uint32_t (*get_bank_id)(void *);
   void (*enable_retention)(uint32_t);
   void (*disable_retention)(uint32_t);
   sli_bank_coverage_t (*get_block_bank_coverage)(void *, uint32_t);
@@ -58,11 +63,16 @@ typedef struct {
 // PROTOTYPES
 
 /***************************************************************************//**
+ * Initialize Memory Manager related hardware.
+ ******************************************************************************/
+void sli_memory_manager_hal_init(void);
+
+/***************************************************************************//**
  * Initialize Memory Manager HAL for the given heap.
  *
  * @param[in]  heap  Heap Handle.
  ******************************************************************************/
-void sli_memory_manager_hal_init(sl_memory_heap_t *heap);
+void sli_memory_manager_hal_heap_init(sl_memory_heap_t *heap);
 
 /***************************************************************************//**
  * Gets RAM bank ID from address.

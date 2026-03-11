@@ -635,6 +635,8 @@ void slx_power_manager_update_clock_info(void);
 * - @ref sl_power_manager_remove_performance_mode_requirement() :  Remove a
 *        previously added requirement. If the last requirement is removed, this
 *        will deactivate the Performance mode and reverts to Standard mode.
+* - @ref sl_power_manager_get_performance_mode_requirement() : Get the current
+*        performance mode requirement count.
 *
 * ## Advanced Functionalities
 *

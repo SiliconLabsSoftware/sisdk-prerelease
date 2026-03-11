@@ -202,8 +202,7 @@ static const osThreadAttr_t _spp_task_attr = {
   .stack_mem  = NULL,
   .stack_size = (SL_IOSTREAM_BLE_SPP_STACK_SIZE_WORD * sizeof(void *)) & 0xFFFFFFF8U,
   .priority   = osPriorityNormal1,
-  .tz_module  = 0UL,
-  .reserved   = 0UL
+  .tz_module  = 0UL
 };
 
 // SPP mutex

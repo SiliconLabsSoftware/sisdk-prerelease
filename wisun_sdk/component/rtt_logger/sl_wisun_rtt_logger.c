@@ -120,8 +120,7 @@ static const osThreadAttr_t _rtt_logger_task_attr = {
   .stack_mem  = NULL,
   .stack_size = (SL_WISUN_RTT_LOGGER_STACK_SIZE_WORD * sizeof(void *)) & 0xFFFFFFF8U,
   .priority   = osPriorityNormal1,
-  .tz_module  = 0UL,
-  .reserved   = 0UL
+  .tz_module  = 0UL
 };
 
 // RTT Logger event flags

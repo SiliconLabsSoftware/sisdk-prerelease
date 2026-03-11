@@ -8,6 +8,9 @@ provides:
 - name: zigbee_multirail_demo
 requires:
 - name: rail_lib_multiprotocol
+- name: zigbee_simulation_pa
+  condition:
+  - zigbee_simulation
 
 source:
 - path: app/framework/plugin/multirail-demo/multirail-demo.c

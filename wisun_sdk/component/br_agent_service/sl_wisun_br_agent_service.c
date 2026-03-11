@@ -201,8 +201,7 @@ static const osThreadAttr_t _agent_service_task_attr = {
   .stack_mem  = NULL,
   .stack_size = (SL_WISUN_BR_AGENT_SERVICE_STACK_SIZE_WORD * sizeof(void *)) & 0xFFFFFFF8U,
   .priority   = osPriorityNormal1,
-  .tz_module  = 0UL,
-  .reserved   = 0UL
+  .tz_module  = 0UL
 };
 
 // Remote address of the host Agent Service

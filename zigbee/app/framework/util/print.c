@@ -51,7 +51,7 @@ uint16_t sl_zigbee_af_print_active_area = 0;
 // debug prints
 bool sl_zigbee_af_print_enabled(uint16_t area)
 {
-  (void) area;
+  sl_zigbee_af_print_active_area = area;
   return true;
 }
 
@@ -108,10 +108,10 @@ static void reallyPrintAreaName(uint16_t area)
 #endif //SL_ZIGBEE_AF_PRINT_AREA_NAME
 
 // Prints the trace if trace is enabled
-static void sli_zigbee_af_print_internal_var_arg(uint16_t area,
-                                                 bool newLine,
-                                                 const char * formatString,
-                                                 va_list ap)
+SL_WEAK void sli_zigbee_af_print_internal_var_arg(uint16_t area,
+                                                  bool newLine,
+                                                  const char * formatString,
+                                                  va_list ap)
 {
   if ( !sl_zigbee_af_print_enabled(area) ) {
     return;
@@ -125,7 +125,6 @@ static void sli_zigbee_af_print_internal_var_arg(uint16_t area,
   if (newLine) {
     sl_zigbee_core_debug_println("");
   }
-  sl_zigbee_af_print_active_area = area;
 }
 
 void sl_zigbee_af_println(uint16_t area, const char * formatString, ...)
@@ -134,6 +133,7 @@ void sl_zigbee_af_println(uint16_t area, const char * formatString, ...)
   va_start(ap, formatString);
   sli_zigbee_af_print_internal_var_arg(area, true, formatString, ap);
   va_end(ap);
+  sl_zigbee_af_print_active_area = area;
 }
 
 void sl_zigbee_af_print(uint16_t area, const char * formatString, ...)
@@ -142,6 +142,7 @@ void sl_zigbee_af_print(uint16_t area, const char * formatString, ...)
   va_start(ap, formatString);
   sli_zigbee_af_print_internal_var_arg(area, false, formatString, ap);
   va_end(ap);
+  sl_zigbee_af_print_active_area = area;
 }
 
 void sl_zigbee_af_print_status(void)

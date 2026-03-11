@@ -128,6 +128,12 @@ public:
 #if OTBR_ENABLE_BORDER_AGENT && !OTBR_ENABLE_BORDER_AGENT_MESHCOP_SERVICE
     void SetBorderAgentVendorTxtData(const std::vector<uint8_t> &aVendorTxtData) override;
 #endif
+#ifndef OTBR_VENDOR_NAME
+    otError SetVendorName(const char *aVendorName) override;
+#endif
+#ifndef OTBR_PRODUCT_NAME
+    otError SetVendorModel(const char *aVendorModel) override;
+#endif
 
     CoprocessorType GetCoprocessorType(void) override { return OT_COPROCESSOR_NCP; }
     const char     *GetCoprocessorVersion(void) override;
@@ -177,7 +183,7 @@ private:
                             const uint8_t    *aData,
                             uint16_t          aDataLen) override;
 #if OTBR_ENABLE_DHCP6_PD && OTBR_ENABLE_BORDER_ROUTING
-    otbrError TryProcessIcmp6RaMessage(const uint8_t *aData, uint16_t aLength) override;
+    otbrError BorderRoutingProcessDhcp6PdPrefix(const otBorderRoutingPrefixTableEntry *aPrefixInfo) override;
 #endif
 
     bool                      mIsInitialized;
@@ -186,38 +192,6 @@ private:
     NcpSpinel                 mNcpSpinel;
     TaskRunner                mTaskRunner;
     CliDaemon                 mCliDaemon;
-
-#if OTBR_ENABLE_TREL
-    struct TrelSocket
-    {
-        int      mFd     = -1;    // Socket file descriptor.
-        uint16_t mPort   = 0;     // Bound UDP port (same as NCP advertised port).
-        bool     mActive = false; // True if socket created & bound.
-    } mTrelSocket;
-
-    void                   OpenTrelSocket(uint16_t aPort);
-    void                   CloseTrelSocket(void);
-    void                   ProcessTrelSocket(const MainloopContext &aMainloop);
-    void                   UpdateTrelSocketFdSet(MainloopContext &aMainloop);
-    void                   HandleTrelPortChanged(uint16_t aPort);
-    void                   HandleExtAddrChanged(const uint8_t aExtAddr[OT_EXT_ADDRESS_SIZE]);
-    void                   HandleExtPanIdChanged(const uint8_t aExtPanId[OT_EXT_PAN_ID_SIZE]);
-    void                   MaybePublishTrelService(void);
-    std::string            BuildTrelInstanceName(void) const;
-    std::vector<uint8_t>   BuildTrelTxtData(void) const;
-    bool                   mTrelServicePublished = false;
-    Mdns::Publisher       *mPublisher            = nullptr;
-    Mdns::Publisher::State mPublisherState       = Mdns::Publisher::State::kIdle;
-    uint8_t                mExtAddr[OT_EXT_ADDRESS_SIZE];
-    bool                   mHasExtAddr = false;
-    uint8_t                mExtPanId[OT_EXT_PAN_ID_SIZE];
-    bool                   mHasExtPanId = false;
-
-    bool     mTrelBrowseActive       = false;
-    uint64_t mTrelBrowseSubscriberId = 0;
-    void     StartTrelPeerBrowse(void);
-    void     StopTrelPeerBrowse(void);
-#endif // OTBR_ENABLE_TREL
 };
 
 } // namespace Host

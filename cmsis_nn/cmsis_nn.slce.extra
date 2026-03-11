@@ -38,10 +38,6 @@ extra_files:
   - Include/arm_nnsupportfunctions.h
   - lib/gcc/cortex-m4/libcmsis-nn.a
   - lib/gcc/cortex-m33/libcmsis-nn.a
-  - lib/iar/cortex-m4/libcmsis-nn.a
-  - lib/iar/cortex-m33/libcmsis-nn.a
-  - lib/llvm/cortex-m4/libcmsis-nn.a
-  - lib/llvm/cortex-m33/libcmsis-nn.a
   # - LICENSE.txt
   - README.md
   - Scripts/gen_pack.sh

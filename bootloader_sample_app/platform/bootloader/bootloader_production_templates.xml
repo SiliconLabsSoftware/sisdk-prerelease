@@ -184,7 +184,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced" />
   </descriptors>
-  <descriptors name="bootloader-storage-internal-single-768k" label="Bootloader - SoC Internal Storage (single image on 768kB device)" description="This sample configuration of the Gecko bootloader configures the bootloader to use the internal main flash to store firmware update images. The storage configuration is set up to store a single firmware update image at a time, in a single storage slot. The storage slot is configured to start at address 0x5C000 (or 0x805C000 for device with 0x8000000 flash base), and have a size of 368 kB. This can be configured on the &quot;Storage&quot; tab.&#10;">
+  <descriptors name="bootloader-storage-internal-single-768k" label="Bootloader - SoC Internal Storage (single image on 768kB device)" description="This sample configuration of the Gecko bootloader configures the bootloader to use the internal main flash to store firmware update images. The storage configuration is set up to store a single firmware update image at a time, in a single storage slot. The storage slot is configured to start at address 0x5C000 (or 0x805C000 for device with 0x8000000 flash base), and have a size of 352 kB. This can be configured on the &quot;Storage&quot; tab.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.bootloader-storage-internal-single-768k.bootloader-storage-internal-single-768k.slcp" />
@@ -573,5 +573,35 @@
     <properties key="quality" value="PRODUCTION" />
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced" />
+  </descriptors>
+  <descriptors name="bootloader-storage-internal-single-zwave-ota" label="Bootloader - SoC Internal Storage (OTA for Z-Wave Applications)" description="This sample configuration of the Gecko bootloader configures the bootloader  to use the internal main flash to store firmware update images. The storage  configuration is set up to store a single firmware update image at a time,  in a single storage slot.&#10;">
+    <properties key="namespace" value="template.uc" />
+    <properties key="keywords" value="universal\ configurator" />
+    <properties key="solutionReferenceId" value="protocol.z-wave.bootloaders.bootloader-storage-internal-single-zwave-ota.slcp" />
+    <properties key="projectFilePaths" value="../../protocol/z-wave/bootloaders/bootloader-storage-internal-single-zwave-ota.slcp" />
+    <properties key="readmeFiles" value="" />
+    <properties key="boardCompatibility" value="brd2603a brd2705a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none" />
+    <properties key="partCompatibility" value=".*efr32zg23.* .*efr32zg28.* .*zgm23.*" />
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code generic-template" />
+    <properties key="toolchainCompatibility" value="gcc" />
+    <properties key="category" value="Z-Wave|Bootloaders" />
+    <properties key="quality" value="PRODUCTION" />
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
+    <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced Wireless\ Technology|Z-Wave" />
+  </descriptors>
+  <descriptors name="bootloader-uart-xmodem-zwave-otw" label="Bootloader - NCP UART XMODEM (OTW for Z-Wave Applications)" description="Standalone Bootloader using XMODEM-CRC over UART. The bootloader shows a menu, where an XMODEM transfer can be started by sending ASCII '1', or the application can be started by sending ASCII '2'. This is the recommended UART bootloader for the EmberZNet and Connect protocol stacks. This bootloader was created from the bootloader-uart-xmodem sample. Pay attention to the UART configuration when using a custom board.&#10;">
+    <properties key="namespace" value="template.uc" />
+    <properties key="keywords" value="universal\ configurator" />
+    <properties key="solutionReferenceId" value="protocol.z-wave.bootloaders.bootloader-uart-xmodem-zwave-otw.slcp" />
+    <properties key="projectFilePaths" value="../../protocol/z-wave/bootloaders/bootloader-uart-xmodem-zwave-otw.slcp" />
+    <properties key="readmeFiles" value="" />
+    <properties key="boardCompatibility" value="brd2603a brd2705a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none" />
+    <properties key="partCompatibility" value=".*efr32zg23.* .*efr32zg28.* .*zgm23.*" />
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code generic-template" />
+    <properties key="toolchainCompatibility" value="gcc" />
+    <properties key="category" value="Z-Wave|Bootloaders" />
+    <properties key="quality" value="PRODUCTION" />
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
+    <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced Wireless\ Technology|Z-Wave" />
   </descriptors>
 </ns0:MDescriptors>

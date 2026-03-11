@@ -99,6 +99,10 @@ static psa_key_type_t getPsaKeyType(otCryptoKeyType aKeyType)
     case OT_CRYPTO_KEY_TYPE_ECDSA:
         aPsaKeyType = PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1);
         break;
+
+    case OT_CRYPTO_KEY_TYPE_DERIVE:
+        aPsaKeyType = PSA_KEY_TYPE_DERIVE;
+        break;
     }
 
     return aPsaKeyType;
@@ -125,6 +129,10 @@ static psa_algorithm_t getPsaAlgorithm(otCryptoKeyAlgorithm aKeyAlgorithm)
 
     case OT_CRYPTO_KEY_ALG_ECDSA:
         aPsaKeyAlgorithm = PSA_ALG_ECDSA(PSA_ALG_ANY_HASH);
+        break;
+
+    case OT_CRYPTO_KEY_ALG_HKDF_SHA256:
+        aPsaKeyAlgorithm = PSA_ALG_HKDF(PSA_ALG_SHA_256);
         break;
     }
 
@@ -159,6 +167,11 @@ static psa_key_usage_t getPsaKeyUsage(int aKeyUsage)
     if (aKeyUsage & OT_CRYPTO_KEY_USAGE_VERIFY_HASH)
     {
         aPsaKeyUsage |= PSA_KEY_USAGE_VERIFY_HASH;
+    }
+
+    if (aKeyUsage & OT_CRYPTO_KEY_USAGE_DERIVE)
+    {
+        aPsaKeyUsage |= PSA_KEY_USAGE_DERIVE;
     }
 
     return aPsaKeyUsage;

@@ -4,7 +4,7 @@
 - package: boards
 - description: Board support for BRD4278A.
 - category: Platform|Board|Radio Board
-- quality: evaluation
+- quality: production
 - metadata:
     sbom:
       license: Zlib
@@ -14,7 +14,7 @@
   - name: brd4278a
   - name: hardware_board_from_stk
 - recommends:
-  - id: brd4278a_a05
+  - id: brd4278a_a04
     vendor: silabs
 - ui_hints:
     visibility: never

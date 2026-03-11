@@ -3613,7 +3613,7 @@ bool EMU_DCDCInit(const EMU_DCDCInit_TypeDef *dcdcInit)
 #endif
   ;
 
-#if defined(_DCDC_DOCTRL_MASK)
+#if defined(_DCDC_DOCTRL_MASK) && defined(_DCDC_EM01CTRL0_IPKDECVAL_MASK)
   /* Reduce IPKDECVAL to 1 before transition. */
   EMU_DCDCSync(DCDC_SYNCBUSY_EM01CTRL0);
   DCDC->EM01CTRL0 = (DCDC->EM01CTRL0 & ~_DCDC_EM01CTRL0_IPKDECVAL_MASK)
@@ -3623,7 +3623,7 @@ bool EMU_DCDCInit(const EMU_DCDCInit_TypeDef *dcdcInit)
 
   EMU_DCDCModeSet(dcdcInit->mode);
 
-#if defined(_DCDC_DOCTRL_MASK)
+#if defined(_DCDC_DOCTRL_MASK) && defined(_DCDC_EM01CTRL0_IPKDECVAL_MASK)
   /* Restore IPKDECVAL to default value after transition */
   EMU_DCDCSync(DCDC_SYNCBUSY_EM01CTRL0);
   DCDC->EM01CTRL0 = (DCDC->EM01CTRL0 & ~_DCDC_EM01CTRL0_IPKDECVAL_MASK)

@@ -12,14 +12,17 @@ include:
   file_list:
   - path: sli_se_manager_mailbox.h
 
-source:
-- path: src/sli_se_manager_mailbox.c
 requires:
 - name: device
 - name: cmsis_core
+- name: se_manager_mailbox_source
 
 provides:
 - name: se_manager_mailbox
+
+recommends:
+- id: se_manager_mailbox_default
+  vendor: silabs
 
 metadata:
   sbom:

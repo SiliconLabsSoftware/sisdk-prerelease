@@ -1400,7 +1400,7 @@ SLI_RAIL_ENUM_GENERIC(sl_rail_events_t, uint64_t) {
  * Occurs when the receiver has been blocked due to radio arbitration
  *
  * This event will only occur if the receiver is blocked during packet search and no data has
- * been placed into the FIFO.  After this event the previous receive operation has been cancelled
+ * been placed into the FIFO. After this event the previous receive operation has been cancelled
  * and must be restarted.
  */
 #define SL_RAIL_EVENT_RX_BLOCKED (1ULL << SL_RAIL_EVENT_RX_BLOCKED_SHIFT)
@@ -2419,7 +2419,7 @@ typedef uint32_t sl_rail_pa_power_setting_t;
  * An unsupported power setting used with the \ref PA_Power_Conversions component.
  * when the device does not support the dBm to power setting mapping table.
  */
-#define SL_RAIL_TX_PA_POWER_SETTING_UNSUPPORTED     (0U)
+#define SL_RAIL_TX_PA_POWER_SETTING_UNSUPPORTED     (sl_rail_pa_power_setting_t)(0xFFFFFFFFUL)
 
 /**
  * @struct sl_rail_tx_power_setting_entry_t
@@ -2604,6 +2604,21 @@ SLI_RAIL_ENUM(sl_rail_tx_power_mode_t) {
     "SL_RAIL_TX_POWER_MODE_SUB_GHZ_HIGHEST",            \
     "SL_RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE", \
     "SL_RAIL_TX_POWER_MODE_NONE"                        \
+}
+
+/**
+ * @def SL_RAIL_TX_PA_MODE_NAMES
+ * @brief The names of the TX PA modes.
+ *
+ * A list of the names for the TX PA modes on EFR32 parts. This
+ * macro is useful for test applications and debugging output.
+ */
+
+#define SL_RAIL_TX_PA_MODE_NAMES {     \
+    "SL_RAIL_TX_PA_MODE_2P4_GHZ",      \
+    "SL_RAIL_TX_PA_MODE_SUB_GHZ",      \
+    "SL_RAIL_TX_PA_MODE_SUB_GHZ_OFDM", \
+    "SL_RAIL_TX_PA_MODE_INVALID"       \
 }
 
 /**
@@ -3283,142 +3298,6 @@ typedef struct sl_rail_channel_config_group {
  */
 typedef uint32_t (*sl_rail_packet_duration_t)(uint8_t bit_rate, uint16_t number_of_bytes);
 
-#ifdef SL_RAIL_3_0
-/**
- * @struct sl_rail_channel_config_entry_t
- * @brief A channel configuration entry structure, which defines a channel range
- *   and parameters across which a corresponding radio configuration is valid.
- *
- * operating frequency hz = base_frequency_hz
- *   + channel_spacing_hz * (channel - physical_channel_offset);
- */
-typedef struct sl_rail_channel_config_entry {
-  /**
-   * A pointer to a structure containing PHY specific information.
-   */
-  const sl_rail_phy_info_t *p_phy_info;
-  /**
-   * The minimum radio configuration to apply to the base
-   * configuration for this channel set.
-   */
-  sl_rail_radio_config_t phy_config_delta_add;
-  /**
-   * Length in words of phy_config_delta_add array.
-   */
-  uint32_t phy_config_delta_add_length;
-  /**
-   * A pointer to a structure containing radio configuration groups used for
-   * fast switching between different radio configurations.
-   */
-  sl_rail_channel_config_group_t *p_groups;
-  /* Number of \ref sl_rail_channel_config_group_t groups. */
-  uint32_t number_of_groups;
-  /**
-   * A base frequency in Hz of this channel set.
-   */
-  uint32_t base_frequency_hz;
-  /**
-   * A channel spacing in Hz of this channel set.
-   */
-  uint32_t channel_spacing_hz;
-  /**
-   * The offset to subtract from the logical
-   * channel to align them with the zero based physical channels which are
-   * relative to base_frequency_hz. (i.e., By default ch 0 = base freq, but if
-   * offset = 11, ch 11 = base freq.)
-   */
-  uint16_t physical_channel_offset;
-  /**
-   * The first valid RAIL channel number for this channel set.
-   */
-  uint16_t channel_number_start;
-  /**
-   * The last valid RAIL channel number for this channel set.
-   */
-  uint16_t channel_number_end;
-  /**
-   * The maximum power allowed in this channel set.
-   */
-  sl_rail_tx_power_t max_power_ddbm;
-  /**
-   * A pointer to a structure containing attributes specific to this
-   * channel set.
-   */
-  sl_rail_channel_config_entry_attr_t *p_attr;
-  /**
-   * Indicates channel config type.
-   */
-  sl_rail_channel_config_entry_type_t entry_type;
-  /**
-   * Alignment pad to align to 32-bit boundary.
-   */
-  uint8_t reserved[3];
-  /**
-   * Array containing information according to the \ref sl_rail_pti_protocol_t in
-   * the first byte of this array. The first 2 fields are common to all
-   * protocols and accessible by RAIL, others are ignored by RAIL
-   * and only used by the application. Common fields are listed in
-   * \ref sl_rail_stack_info_common_t.
-   */
-  const uint8_t *p_stack_info;
-  /**
-   * Pointer to alternate PHY.
-   */
-  sl_rail_alternate_phy_t *p_alternate_phy;
-  /**
-   * A pointer to a function that processes packet duration on air.
-   */
-  sl_rail_packet_duration_t packet_duration_on_air;
-} sl_rail_channel_config_entry_t;
-
-/**
- * @struct sl_rail_channel_config_t
- * @brief A channel configuration structure, which defines the channel meaning
- *   when a channel number is passed into a RAIL function, e.g., \ref sl_rail_start_tx()
- *   and \ref sl_rail_start_rx().
- *
- * A \ref sl_rail_channel_config_t structure defines the channel scheme that an
- * application uses when registered in \ref sl_rail_config_channels().
- */
-typedef struct sl_rail_channel_config {
-  /**
-   * Common base radio configuration between two or more protocols.
-   * NULL if there is a single protocol.
-   */
-  sl_rail_radio_config_t phy_config_common_base;
-  /**
-   * Length in words of phy_config_common_base array.
-   */
-  uint32_t phy_config_common_base_length;
-  /**
-   * Base radio configuration for the corresponding
-   * channel configuration entries.
-   */
-  sl_rail_radio_config_t phy_config_base;
-  /**
-   * Length in words of the phy_config_base array.
-   */
-  uint32_t phy_config_base_length;
-  /**
-   * Pointer to an array of \ref sl_rail_channel_config_entry_t entries.
-   */
-  const sl_rail_channel_config_entry_t * p_entries;
-  /**
-   * Number of \ref sl_rail_channel_config_entry_t entries.
-   */
-  uint32_t number_of_entries;
-  /**
-   * Signature for this structure. Only used on modules.
-   */
-  uint32_t signature;
-  /**
-   * Crystal Frequency for the channel config.
-   */
-  uint32_t xtal_frequency_hz;
-} sl_rail_channel_config_t;
-
-#else // !SL_RAIL_3_0
-
 /**
  * @struct sl_rail_channel_config_entry_t
  * @brief A channel configuration entry structure, which defines a channel range
@@ -3725,8 +3604,6 @@ typedef struct sl_rail_channel_config {
    */
   uint32_t xtal_frequency_hz;
 } sl_rail_channel_config_t;
-
-#endif // SL_RAIL_3_0
 
 /**
  * @struct sl_rail_channel_metadata_t
@@ -4113,6 +3990,14 @@ SLI_RAIL_ENUM(sl_rail_idle_mode_t) {
    * Idle the radio by turning off receive and canceling any future scheduled
    * receive or transmit operations. It does not abort a receive or
    * transmit in progress.
+   *
+   * @note For an in-progress \ref SL_RAIL_TX_OPTION_WAIT_FOR_ACK transmit
+   *   this will prevent reentering receive after the transmit completes,
+   *   hence thwarting ACK reception or timeout so neither \ref
+   *   SL_RAIL_EVENT_RX_PACKET_RECEIVED nor \ref SL_RAIL_EVENT_RX_ACK_TIMEOUT
+   *   will occur. Conversely for an in-progress receive, if RX Auto-Acking
+   *   is enabled and the packet is to be acknowledged, the ACK will be
+   *   transmitted before the radio is idled.
    */
   SL_RAIL_IDLE = 0u,
   /**

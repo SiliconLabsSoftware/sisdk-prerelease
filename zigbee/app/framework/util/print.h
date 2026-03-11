@@ -19,6 +19,7 @@
 #define __AF_DEBUG_PRINT__
 
 #include "zcl-debug-print.h"
+#include "mac-types.h" // for sl_802154_long_addr_t
 
 #if !defined(SL_ZIGBEE_AF_PRINT_OUTPUT) && defined(APP_SERIAL)
   #define SL_ZIGBEE_AF_PRINT_OUTPUT APP_SERIAL

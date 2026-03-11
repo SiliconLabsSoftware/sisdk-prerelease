@@ -52,8 +52,11 @@
 #define SL_ZIGBEE_AF_PRINT_CORE 0x0001
 
 void sl_zigbee_af_print_wrapper(uint16_t area, const char * formatString, ...);
+#if !defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT)
 void sl_zigbee_af_print_big_endian_eui64_wrapper(uint8_t * eui, ...);
+#endif // !SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 void sl_zigbee_af_print_buffer_wrapper(uint16_t area, const uint8_t *buffer, uint16_t bufferLen, bool withSpace);
+void sl_zigbee_af_print_string_wrapper(uint16_t area, const uint8_t *buffer);
 void sl_zigbee_af_core_print_wrapper(const char * formatString, ...);
 void sl_zigbee_af_core_println_wrapper(const char * formatString, ...);
 void sl_zigbee_af_app_println_wrapper(const char * formatString, ...);
@@ -72,10 +75,12 @@ void sl_zigbee_af_println_wrapper(uint16_t area, const char * formatString, ...)
 #endif //sl_zigbee_af_core_print
 #define sl_zigbee_af_core_print(...) sl_zigbee_af_core_print_wrapper(__VA_ARGS__)
 
+#if !defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT)
 #ifdef sl_zigbee_af_print_big_endian_eui64
 #undef sl_zigbee_af_print_big_endian_eui64
 #endif //sl_zigbee_af_print_big_endian_eui64
 #define sl_zigbee_af_print_big_endian_eui64(...) sl_zigbee_af_print_big_endian_eui64_wrapper(__VA_ARGS__)
+#endif // !SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 
 #ifdef sl_zigbee_af_core_println
 #undef sl_zigbee_af_core_println

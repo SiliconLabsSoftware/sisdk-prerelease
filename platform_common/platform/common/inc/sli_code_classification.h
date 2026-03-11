@@ -32,7 +32,9 @@
 #define _SLI_CODE_CLASSIFICATION_H_
 
 // Standard Code Classes
-#define SL_CODE_CLASS_TIME_CRITICAL timecritical
+#define SL_CODE_CLASS_TIME_CRITICAL           timecritical
+#define SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE dmachannelperf
+#define SL_CODE_CLASS_WIFI_PERFORMANCE        wifiperf
 
 /******************************************************************************/
 /* Helper Macros                                                              */

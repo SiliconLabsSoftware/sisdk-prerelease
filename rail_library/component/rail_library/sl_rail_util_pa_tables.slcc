@@ -158,11 +158,20 @@ config_file:
   unless:
   - device_pa_4dbm
   file_id: sl_rail_util_pa_tables_config
-- path: plugin/sl_rail_util_pa_tables/efr32xg2d/config/20dbm/sl_rail_util_pa_tables_config.h
+- path: plugin/sl_rail_util_pa_tables/efr32xg2d/config/20dbm/868_915M/sl_rail_util_pa_tables_config.h
   condition:
   - device_series_2
   - device_sdid_260
   - device_pa_20dbm
+  unless:
+  - hardware_board_supports_rf_band_169
+  file_id: sl_rail_util_pa_tables_config
+- path: plugin/sl_rail_util_pa_tables/efr32xg2d/config/20dbm/169M/sl_rail_util_pa_tables_config.h
+  condition:
+  - device_series_2
+  - device_sdid_260
+  - device_pa_20dbm
+  - hardware_board_supports_rf_band_169
   file_id: sl_rail_util_pa_tables_config
 - path: plugin/sl_rail_util_pa_tables/efr32xg2d/config/14dbm/sl_rail_util_pa_tables_config.h
   condition:
@@ -177,14 +186,7 @@ config_file:
   unless:
   - fpga
   file_id: sl_rail_util_pa_tables_config
-- path: plugin/sl_rail_util_pa_tables/fpga/config/sl_rail_util_pa_tables_config.h
-  condition:
-  - fpga
-  file_id: sl_rail_util_pa_tables_config
 include:
-- path: plugin/sl_rail_util_pa_tables
-  file_list:
-  - path: sl_rail_util_pa_tables.h
 - path: plugin/sl_rail_util_pa_tables/efr32xg21
   file_list:
   - path: sl_rail_util_pa_dbm_powersetting_mapping_table_0dbm.h
@@ -298,10 +300,14 @@ include:
   - path: sl_rail_util_pa_dbm_powersetting_mapping_table_14dbm_MP.h
   - path: sl_rail_util_pa_dbm_powersetting_mapping_table_14dbm_LP.h
   - path: sl_rail_util_pa_dbm_powersetting_mapping_table_14dbm_LLP.h
-  - path: sl_rail_util_pa_dbm_powersetting_mapping_table_20dbm_HP.h
-  - path: sl_rail_util_pa_dbm_powersetting_mapping_table_20dbm_MP.h
-  - path: sl_rail_util_pa_dbm_powersetting_mapping_table_20dbm_LP.h
-  - path: sl_rail_util_pa_dbm_powersetting_mapping_table_20dbm_LLP.h
+  - path: sl_rail_util_pa_dbm_powersetting_mapping_table_20dbm_169M_HP.h
+  - path: sl_rail_util_pa_dbm_powersetting_mapping_table_20dbm_169M_MP.h
+  - path: sl_rail_util_pa_dbm_powersetting_mapping_table_20dbm_169M_LP.h
+  - path: sl_rail_util_pa_dbm_powersetting_mapping_table_20dbm_169M_LLP.h
+  - path: sl_rail_util_pa_dbm_powersetting_mapping_table_20dbm_868_915M_HP.h
+  - path: sl_rail_util_pa_dbm_powersetting_mapping_table_20dbm_868_915M_MP.h
+  - path: sl_rail_util_pa_dbm_powersetting_mapping_table_20dbm_868_915M_LP.h
+  - path: sl_rail_util_pa_dbm_powersetting_mapping_table_20dbm_868_915M_LLP.h
   condition:
   - device_series_2
   - device_sdid_260
@@ -313,9 +319,4 @@ include:
   condition:
   - device_series_3
   - device_generic_family_sixx301
-- path: plugin/sl_rail_util_pa_tables/fpga
-  file_list:
-  - path: sl_rail_util_pa_dbm_powersetting_mapping_table.h
-  condition:
-  - fpga
 root_path: rail_library
