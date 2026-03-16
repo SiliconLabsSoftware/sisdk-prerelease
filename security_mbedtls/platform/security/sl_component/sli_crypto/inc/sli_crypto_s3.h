@@ -40,9 +40,6 @@
 extern "C" {
 #endif
 
-/// Defines the physical dimensions of the countermeasure seeds
-#define CRYPTO_CM_MASKBITS 128
-
 /// Standard buffer size in bytes
 #define SLI_CRYPTO_AES_BLOCK_SIZE  16
 /// Location value for keys stored in plaintext
@@ -125,16 +122,6 @@ typedef struct {
     .yield = false,                                       \
   }
 
-typedef enum _sli_engine_idx {
-  SLI_CRYPTO_HOSTSYMCRYPTO_IDX = 0,
-  SLI_CRYPTO_LPWAES_IDX,
-  SLI_CRYPTO_ENGINE_COUNT,
-  SLI_CRYPTO_INVALID_ENGINE_IDX = 0xFF
-} sli_engine_id_t;
-
-#define INVALID_ENGINE(engine) \
-  (((engine) != SLI_CRYPTO_LPWAES) && ((engine) != SLI_CRYPTO_HOSTSYMCRYPTO))
-
 /***************************************************************************//**
  * @brief                Generic AES GCM operation
  *
@@ -149,14 +136,7 @@ typedef enum _sli_engine_idx {
  * @param tag            Tag buffer
  * @param tag_len        length of tag
  *
- * @return               SL_STATUS_OK if successful,
- *                       SL_STATUS_SECURITY_AES_CM_RESEED_NEEDED if the AES
- *                         countermeasure reseed threshold was crossed - call
- *                         sli_crypto_countermeasure_reseed() to maintain DPA resistance,
- *                       SL_STATUS_SECURITY_AES_CM_FAIL if the AES countermeasure
- *                         security threshold was exceeded - operation blocked,
- *                         reseed is mandatory before further AES operations,
- *                       relevant status code on other error
+ * @return               SL_STATUS_OK if successful, relevant status code on error
  ******************************************************************************/
 sl_status_t sli_crypto_gcm(sli_crypto_descriptor_t  *key_descriptor,
                            bool                     encrypt,
@@ -182,14 +162,7 @@ sl_status_t sli_crypto_gcm(sli_crypto_descriptor_t  *key_descriptor,
  * @param tag            Tag buffer
  * @param tag_len        length of tag
  *
- * @return               SL_STATUS_OK if successful,
- *                       SL_STATUS_SECURITY_AES_CM_RESEED_NEEDED if the AES
- *                         countermeasure reseed threshold was crossed - call
- *                         sli_crypto_countermeasure_reseed() to maintain DPA resistance,
- *                       SL_STATUS_SECURITY_AES_CM_FAIL if the AES countermeasure
- *                         security threshold was exceeded - operation blocked,
- *                         reseed is mandatory before further AES operations,
- *                       relevant status code on other error
+ * @return               SL_STATUS_OK if successful, relevant status code on error
  ******************************************************************************/
 sl_status_t sli_crypto_gcm_encrypt(sli_crypto_descriptor_t  *key_descriptor,
                                    const unsigned char      *data_in,
@@ -214,14 +187,7 @@ sl_status_t sli_crypto_gcm_encrypt(sli_crypto_descriptor_t  *key_descriptor,
  * @param tag            Tag buffer
  * @param tag_len        length of tag
  *
- * @return               SL_STATUS_OK if successful,
- *                       SL_STATUS_SECURITY_AES_CM_RESEED_NEEDED if the AES
- *                         countermeasure reseed threshold was crossed - call
- *                         sli_crypto_countermeasure_reseed() to maintain DPA resistance,
- *                       SL_STATUS_SECURITY_AES_CM_FAIL if the AES countermeasure
- *                         security threshold was exceeded - operation blocked,
- *                         reseed is mandatory before further AES operations,
- *                       relevant status code on other error
+ * @return               SL_STATUS_OK if successful, relevant status code on error
  ******************************************************************************/
 sl_status_t sli_crypto_gcm_decrypt(sli_crypto_descriptor_t  *key_descriptor,
                                    const unsigned char      *data_in,
@@ -248,14 +214,7 @@ sl_status_t sli_crypto_gcm_decrypt(sli_crypto_descriptor_t  *key_descriptor,
  * @param tag            Tag buffer
  * @param tag_len        length of tag
  *
- * @return               SL_STATUS_OK if successful,
- *                       SL_STATUS_SECURITY_AES_CM_RESEED_NEEDED if the AES
- *                         countermeasure reseed threshold was crossed - call
- *                         sli_crypto_countermeasure_reseed() to maintain DPA resistance,
- *                       SL_STATUS_SECURITY_AES_CM_FAIL if the AES countermeasure
- *                         security threshold was exceeded - operation blocked,
- *                         reseed is mandatory before further AES operations,
- *                       relevant status code on other error
+ * @return               SL_STATUS_OK if successful, relevant status code on error
  ******************************************************************************/
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLI_CRYPTO, SL_CODE_CLASS_TIME_CRITICAL)
 sl_status_t sli_crypto_ccm(sli_crypto_descriptor_t  *key_descriptor,
@@ -279,14 +238,7 @@ sl_status_t sli_crypto_ccm(sli_crypto_descriptor_t  *key_descriptor,
  * @param iv_out         16-byte counter/IV output after block round
  * @param output         16-byte output block
  *
- * @return               SL_STATUS_OK if successful,
- *                       SL_STATUS_SECURITY_AES_CM_RESEED_NEEDED if the AES
- *                         countermeasure reseed threshold was crossed - call
- *                         sli_crypto_countermeasure_reseed() to maintain DPA resistance,
- *                       SL_STATUS_SECURITY_AES_CM_FAIL if the AES countermeasure
- *                         security threshold was exceeded - operation blocked,
- *                         reseed is mandatory before further AES operations,
- *                       relevant status code on other error
+ * @return               SL_STATUS_OK if successful, relevant status code on error
  ******************************************************************************/
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLI_CRYPTO, SL_CODE_CLASS_TIME_CRITICAL)
 sl_status_t sli_crypto_ctr (sli_crypto_descriptor_t *key_descriptor,
@@ -303,14 +255,7 @@ sl_status_t sli_crypto_ctr (sli_crypto_descriptor_t *key_descriptor,
  * @param input          16-byte input block
  * @param output         16-byte output block
  *
- * @return               SL_STATUS_OK if successful,
- *                       SL_STATUS_SECURITY_AES_CM_RESEED_NEEDED if the AES
- *                         countermeasure reseed threshold was crossed - call
- *                         sli_crypto_countermeasure_reseed() to maintain DPA resistance,
- *                       SL_STATUS_SECURITY_AES_CM_FAIL if the AES countermeasure
- *                         security threshold was exceeded - operation blocked,
- *                         reseed is mandatory before further AES operations,
- *                       relevant status code on other error
+ * @return               SL_STATUS_OK if successful, relevant status code on error
  ******************************************************************************/
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLI_CRYPTO, SL_CODE_CLASS_TIME_CRITICAL)
 sl_status_t sli_crypto_ecb(sli_crypto_descriptor_t *key_descriptor,
@@ -326,14 +271,7 @@ sl_status_t sli_crypto_ecb(sli_crypto_descriptor_t *key_descriptor,
  * @param length         Amount of bytes in the input buffer
  * @param output         16-byte output block for calculated CMAC
  *
- * @return               SL_STATUS_OK if successful,
- *                       SL_STATUS_SECURITY_AES_CM_RESEED_NEEDED if the AES
- *                         countermeasure reseed threshold was crossed - call
- *                         sli_crypto_countermeasure_reseed() to maintain DPA resistance,
- *                       SL_STATUS_SECURITY_AES_CM_FAIL if the AES countermeasure
- *                         security threshold was exceeded - operation blocked,
- *                         reseed is mandatory before further AES operations,
- *                       relevant status code on other error
+ * @return               SL_STATUS_OK if successful, relevant status code on error
  ******************************************************************************/
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLI_CRYPTO, SL_CODE_CLASS_TIME_CRITICAL)
 sl_status_t sli_crypto_cmac(sli_crypto_descriptor_t *key_descriptor,

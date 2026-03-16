@@ -62,7 +62,6 @@
 #include "sx_errors.h"
 #include "cryptolib_def.h"
 #include <string.h>
-#include "sli_crypto.h"
 
 /* Implementation that should never be optimized out by the compiler */
 static void mbedtls_zeroize(void *v, size_t n)
@@ -182,21 +181,6 @@ int mbedtls_gcm_update_ad(mbedtls_gcm_context *ctx,
   aad = block_t_convert(add, add_len);
   hw_ctx = block_t_convert(ctx->sx_ctx, AES_CTX_xCM_SIZE);
 
-  #if (SLI_CM_COUNTERS_ENABLED)
-  // GCM init with AAD: AAD blocks + 1 for hash subkey generation
-  uint32_t n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_GCM, add_len);
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  sl_status_t cm_status =
-  #endif
-  sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                n_ops,
-                                SLI_CM_AUTO_RESEED_ENABLED);
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-    return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
-  }
-  #endif
-  #endif
   status = cryptoacc_management_acquire();
   if (status != 0) {
     return status;
@@ -210,16 +194,6 @@ int mbedtls_gcm_update_ad(mbedtls_gcm_context *ctx,
                                      (const block_t *)&nonce, &hw_ctx, (const block_t *)&aad);
   }
   status = cryptoacc_management_release();
-
-  #if (SLI_CM_COUNTERS_ENABLED)
-  if (sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops) >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-    if (status == PSA_SUCCESS) {
-      return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
-    } else {
-      return status;
-    }
-  }
-  #endif
 
   if (sx_ret == CRYPTOLIB_SUCCESS) {
     return status;
@@ -264,29 +238,12 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
   data_out = block_t_convert(output, input_length);
   hw_ctx = block_t_convert(ctx->sx_ctx, AES_CTX_xCM_SIZE);
 
-  #if (SLI_CM_COUNTERS_ENABLED)
-  uint32_t n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_BLOCK, input_length);
-  #endif
-
   if (ctx->add_len == 0 && ctx->len == 0) {
     /* If there were no additional authentcation data then
        mbedtls_gcm_starts did not 'CTX_BEGIN' the GCM operation
        in the CRYPTOACC, so we need to 'CTX_BEGIN' now. */
     nonce = block_t_convert(ctx->sx_ctx, AES_IV_GCM_SIZE);
-   
-    #if (SLI_CM_COUNTERS_ENABLED)
-    #if (SLI_CM_AUTO_RESEED_ENABLED)
-    sl_status_t cm_status =
-    #endif
-    sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                  n_ops + 1,
-                                  SLI_CM_AUTO_RESEED_ENABLED);
-    #if (SLI_CM_AUTO_RESEED_ENABLED)
-    if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-      return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
-    }
-    #endif
-    #endif
+
     status = cryptoacc_management_acquire();
     if (status != 0) {
       return status;
@@ -300,32 +257,7 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
                                        (const block_t *)&nonce, &hw_ctx, (const block_t *)&dummy);
     }
     status = cryptoacc_management_release();
-
-    #if (SLI_CM_COUNTERS_ENABLED)
-    uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops + 1);
-    if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-      if (status == PSA_SUCCESS) {
-        return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
-      } else {
-        return status;
-      }
-    }
-    #endif
   } else {
-    #if (SLI_CM_COUNTERS_ENABLED)
-    // one per AES block
-    #if (SLI_CM_AUTO_RESEED_ENABLED)
-    sl_status_t cm_status =
-    #endif
-    sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                  n_ops,
-                                  SLI_CM_AUTO_RESEED_ENABLED);
-    #if (SLI_CM_AUTO_RESEED_ENABLED)
-    if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-      return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
-    }
-    #endif
-    #endif
     status = cryptoacc_management_acquire();
     if (status != 0) {
       return status;
@@ -339,17 +271,6 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
                                          (const block_t *)&hw_ctx, &hw_ctx);
     }
     status = cryptoacc_management_release();
-
-    #if (SLI_CM_COUNTERS_ENABLED)
-    uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops);
-    if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-      if (status == PSA_SUCCESS) {
-        return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
-      } else {
-        return status;
-      }
-    }
-    #endif
   }
 
   ctx->len += input_length;
@@ -409,21 +330,6 @@ int mbedtls_gcm_finish(mbedtls_gcm_context *ctx,
     sx_math_u64_to_u8array(ctx->add_len << 3, &lena_lenc[0], sx_big_endian);
     sx_math_u64_to_u8array(ctx->len << 3, &lena_lenc[8], sx_big_endian);
     lena_lenc_blk = block_t_convert(lena_lenc, 16);
-
-    #if (SLI_CM_COUNTERS_ENABLED)
-    // one more block for tag
-    #if (SLI_CM_AUTO_RESEED_ENABLED)
-    sl_status_t cm_status =
-    #endif
-    sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                  1,
-                                  SLI_CM_AUTO_RESEED_ENABLED);
-    #if (SLI_CM_AUTO_RESEED_ENABLED)
-    if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-      return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
-    }
-    #endif
-    #endif
     status = cryptoacc_management_acquire();
     if (status != 0) {
       return status;
@@ -436,17 +342,6 @@ int mbedtls_gcm_finish(mbedtls_gcm_context *ctx,
                                         (const block_t *)&hw_ctx, &_tag, (const block_t *)&lena_lenc_blk);
     }
     status = cryptoacc_management_release();
-
-    #if (SLI_CM_COUNTERS_ENABLED)
-    uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, 1);
-    if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-      if (status == PSA_SUCCESS) {
-        return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
-      } else {
-        return status;
-      }
-    }
-    #endif
 
     if (sx_ret != CRYPTOLIB_SUCCESS) {
       return(MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED);
@@ -492,21 +387,6 @@ int mbedtls_gcm_crypt_and_tag(mbedtls_gcm_context *ctx,
   data_in = block_t_convert(input, length);
   data_out = block_t_convert(output, length);
 
-  #if (SLI_CM_COUNTERS_ENABLED)
-  // one per AES block plus one for tag
-  uint32_t n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_GCM, length);
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  sl_status_t cm_status =
-  #endif
-  sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                n_ops,
-                                SLI_CM_AUTO_RESEED_ENABLED);
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-    return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
-  }
-  #endif
-  #endif
   status = cryptoacc_management_acquire();
   if (status != 0) {
     return status;
@@ -520,18 +400,6 @@ int mbedtls_gcm_crypt_and_tag(mbedtls_gcm_context *ctx,
                                 (const block_t *)&nonce, &_tag, (const block_t *)&aad);
   }
   status = cryptoacc_management_release();
-
-  #if (SLI_CM_COUNTERS_ENABLED)
-  uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops);
-  if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-    mbedtls_zeroize(output, length);
-    if (status == PSA_SUCCESS) {
-      return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
-    } else {
-      return status;
-    }
-  }
-  #endif
 
   if (sx_ret != CRYPTOLIB_SUCCESS) {
     mbedtls_zeroize(output, length);
@@ -575,22 +443,6 @@ int mbedtls_gcm_auth_decrypt(mbedtls_gcm_context *ctx,
   data_in = block_t_convert(input, length);
   data_out = block_t_convert(output, length);
 
-  #if (SLI_CM_COUNTERS_ENABLED)
-  // one per AES block plus one for tag
-  uint32_t n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_GCM, length);
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  sl_status_t cm_status =
-  #endif
-  sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                n_ops,
-                                SLI_CM_AUTO_RESEED_ENABLED);
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-    return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
-  }
-  #endif
-  #endif
-
   status = cryptoacc_management_acquire();
   if (status != 0) {
     return status;
@@ -599,18 +451,6 @@ int mbedtls_gcm_auth_decrypt(mbedtls_gcm_context *ctx,
   sx_ret = sx_aes_gcm_decrypt((const block_t *)&key, (const block_t *)&data_in, &data_out,
                               (const block_t *)&nonce, &_tag, (const block_t *)&aad);
   status = cryptoacc_management_release();
-
-  #if (SLI_CM_COUNTERS_ENABLED)
-  uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops);
-  if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-    mbedtls_zeroize(output, length);
-    if (status == PSA_SUCCESS) {
-      return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
-    } else {
-      return status;
-    }
-  }
-  #endif
 
   if (sx_ret == CRYPTOLIB_SUCCESS) {
     if (memcmp_time_cst((uint8_t*)tag, tagbuf, tag_len) == 0) {

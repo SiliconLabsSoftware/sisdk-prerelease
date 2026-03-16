@@ -223,8 +223,6 @@
 #define SL_STATUS_SECURITY_ENCRYPT_ERROR             ((sl_status_t)0x0072)  ///< Encryption failed
 #define SL_STATUS_SECURITY_KEY_ERROR                 ((sl_status_t)0x0073)  ///< Error in obtaining crypto key
 #define SL_STATUS_SECURITY_RANDOM_NUM_GEN_ERROR      ((sl_status_t)0x0074)  ///< Error in obtaining random number
-#define SL_STATUS_SECURITY_AES_CM_RESEED_NEEDED      ((sl_status_t)0x0075)  ///< AES countermeasure reseed recommended - operation completed but reseed failed or threshold crossed
-#define SL_STATUS_SECURITY_AES_CM_FAIL               ((sl_status_t)0x0076)  ///< AES countermeasure security threshold exceeded - countermeasures may be ineffective
 
 // Bluetooth status codes
 #define SL_STATUS_BT_OUT_OF_BONDS                                                                        ((sl_status_t)0x0402)        ///< Bonding procedure can't be started because device has no space left for bond.

@@ -45,7 +45,6 @@
 #include "sxsymcrypt/blkcipher.h"
 #include "sxsymcrypt/keyref.h"
 #include "sxsymcrypt/statuscodes.h"
-#include "sli_crypto.h"
 
 #include <string.h>
 
@@ -194,22 +193,6 @@ psa_status_t sli_hostcrypto_transparent_cipher_encrypt(
     return psa_status;
   }
 
-  #if (SLI_CM_COUNTERS_ENABLED)
-  // Calculate number of AES operations and check threshold
-  uint32_t n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_BLOCK, input_length);
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  sl_status_t cm_status =
-  #endif
-  sli_crypto_cm_check_threshold(SLI_CRYPTO_HOSTSYMCRYPTO,
-                                n_ops,
-                                SLI_CM_AUTO_RESEED_ENABLED);
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-    return PSA_ERROR_INSUFFICIENT_ENTROPY;
-  }
-  #endif
-  #endif
-
   // Create and configure operation context
   struct sxblkcipher cipher;
   int sx_status = SX_ERR_UNITIALIZED_OBJ;
@@ -238,7 +221,6 @@ psa_status_t sli_hostcrypto_transparent_cipher_encrypt(
 #if defined(SLI_PSA_DRIVER_FEATURE_AES_CTR) \
     || defined(SLI_PSA_DRIVER_FEATURE_AES_CCM_STAR_NO_TAG)
     case PSA_ALG_CTR:
-    {
       uint8_t iv_buf[16] = { 0 };
 #if defined(SLI_PSA_DRIVER_FEATURE_AES_CCM_STAR_NO_TAG)
       if (alg == PSA_ALG_CCM_STAR_NO_TAG) {
@@ -268,7 +250,6 @@ psa_status_t sli_hostcrypto_transparent_cipher_encrypt(
                                                  &key_ref,
                                                  (const char *) iv_buf);
       break;
-    }
 #endif // SLI_PSA_DRIVER_FEATURE_AES_CTR || SLI_PSA_DRIVER_FEATURE_AES_CCM_STAR_NO_TAG
 
 #if defined(SLI_PSA_DRIVER_FEATURE_AES_CBC_NO_PADDING) \
@@ -396,13 +377,6 @@ psa_status_t sli_hostcrypto_transparent_cipher_encrypt(
     *output_length = input_length;
   }
 
-  #if (SLI_CM_COUNTERS_ENABLED)
-  uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_HOSTSYMCRYPTO, n_ops);
-  if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-    return PSA_ERROR_INSUFFICIENT_ENTROPY;
-  }
-  #endif
-
   return PSA_SUCCESS;
 #else // SLI_PSA_DRIVER_FEATURE_AES_* && SLI_PSA_DRIVER_FEATURE_AES
 
@@ -518,22 +492,6 @@ psa_status_t sli_hostcrypto_transparent_cipher_decrypt(
   if (psa_status != PSA_SUCCESS) {
     return psa_status;
   }
-
-  #if (SLI_CM_COUNTERS_ENABLED)
-  // Calculate number of AES operations and check threshold
-  uint32_t n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_BLOCK, input_length);
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  sl_status_t cm_status =
-  #endif
-  sli_crypto_cm_check_threshold(SLI_CRYPTO_HOSTSYMCRYPTO,
-                                n_ops,
-                                SLI_CM_AUTO_RESEED_ENABLED);
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-    return PSA_ERROR_INSUFFICIENT_ENTROPY;
-  }
-  #endif
-  #endif
 
   // Create and configure operation context
   struct sxblkcipher cipher;
@@ -707,15 +665,6 @@ psa_status_t sli_hostcrypto_transparent_cipher_decrypt(
 
     *output_length = input_length;
   }
-
-  #if (SLI_CM_COUNTERS_ENABLED)
-  if (sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_HOSTSYMCRYPTO, n_ops) >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-    *output_length = 0;
-    sli_psa_zeroize(output, output_size);
-    return PSA_ERROR_INSUFFICIENT_ENTROPY;
-  }
-  #endif
-
   return PSA_SUCCESS;
 #else // SLI_PSA_DRIVER_FEATURE_AES_* && SLI_PSA_DRIVER_FEATURE_AES
 

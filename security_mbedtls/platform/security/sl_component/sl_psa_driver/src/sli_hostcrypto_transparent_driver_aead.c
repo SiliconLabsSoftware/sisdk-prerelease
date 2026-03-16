@@ -48,7 +48,6 @@
 #endif
 #include "sxsymcrypt/keyref.h"
 #include "sxsymcrypt/statuscodes.h"
-#include "sli_crypto.h"
 
 #include "string.h"
 
@@ -698,37 +697,6 @@ psa_status_t sli_hostcrypto_transparent_aead_encrypt_tag(
     return psa_status;
   }
 
-  #if (SLI_CM_COUNTERS_ENABLED)
-  // Calculate number of AES operations for CCM/GCM (not ChachaPoly)
-  uint32_t n_ops = 0;
-  bool is_aes_aead = false;
-  #if defined(SLI_PSA_DRIVER_FEATURE_CCM)
-  if (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0) == PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0)) {
-    n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_CCM, plaintext_length);
-    is_aes_aead = true;
-  }
-  #endif
-  #if defined(SLI_PSA_DRIVER_FEATURE_GCM)
-  if (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0) == PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0)) {
-    n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_GCM, plaintext_length);
-    is_aes_aead = true;
-  }
-  #endif
-  if (is_aes_aead) {
-    #if (SLI_CM_AUTO_RESEED_ENABLED)
-    sl_status_t cm_status =
-    #endif
-    sli_crypto_cm_check_threshold(SLI_CRYPTO_HOSTSYMCRYPTO,
-                                  n_ops,
-                                  SLI_CM_AUTO_RESEED_ENABLED);
-    #if (SLI_CM_AUTO_RESEED_ENABLED)
-    if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-      return PSA_ERROR_INSUFFICIENT_ENTROPY;
-    }
-    #endif
-  }
-  #endif
-
 #if defined(SLI_PSA_DRIVER_FEATURE_CCM)
   if (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg,
                                       0) == PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0)) {
@@ -858,15 +826,6 @@ psa_status_t sli_hostcrypto_transparent_aead_encrypt_tag(
 
   *ciphertext_length = plaintext_length;
 
-  #if (SLI_CM_COUNTERS_ENABLED)
-  if (is_aes_aead) {
-    uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_HOSTSYMCRYPTO, n_ops);
-    if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-      return PSA_ERROR_INSUFFICIENT_ENTROPY;
-    }
-  }
-  #endif
-
   return PSA_SUCCESS;
 
 #else // SLI_PSA_DRIVER_FEATURE_CCM || SLI_PSA_DRIVER_FEATURE_GCM || SLI_PSA_DRIVER_FEATURE_CHACHAPOLY
@@ -963,37 +922,6 @@ psa_status_t sli_hostcrypto_transparent_aead_decrypt_tag(
   if (psa_status != PSA_SUCCESS) {
     return psa_status;
   }
-
-  #if (SLI_CM_COUNTERS_ENABLED)
-  // Calculate number of AES operations for CCM/GCM (not ChachaPoly)
-  uint32_t n_ops = 0;
-  bool is_aes_aead = false;
-  #if defined(SLI_PSA_DRIVER_FEATURE_CCM)
-  if (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0) == PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0)) {
-    n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_CCM, ciphertext_length);
-    is_aes_aead = true;
-  }
-  #endif
-  #if defined(SLI_PSA_DRIVER_FEATURE_GCM)
-  if (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0) == PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0)) {
-    n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_GCM, ciphertext_length);
-    is_aes_aead = true;
-  }
-  #endif
-  if (is_aes_aead) {
-    #if (SLI_CM_AUTO_RESEED_ENABLED)
-    sl_status_t cm_status =
-    #endif
-    sli_crypto_cm_check_threshold(SLI_CRYPTO_HOSTSYMCRYPTO,
-                                  n_ops,
-                                  SLI_CM_AUTO_RESEED_ENABLED);
-    #if (SLI_CM_AUTO_RESEED_ENABLED)
-    if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-      return PSA_ERROR_INSUFFICIENT_ENTROPY;
-    }
-    #endif
-  }
-  #endif
 
 #if defined(SLI_PSA_DRIVER_FEATURE_CCM)
   if (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg,
@@ -1110,7 +1038,6 @@ psa_status_t sli_hostcrypto_transparent_aead_decrypt_tag(
                             ciphertext_length,
                             (char *) plaintext);
   if (sx_status != SX_OK) {
-    // Zeroize plaintext buffer - partial data may have been written
     *plaintext_length = 0;
     sli_psa_zeroize(plaintext, plaintext_size);
     return PSA_ERROR_HARDWARE_FAILURE;
@@ -1125,7 +1052,6 @@ psa_status_t sli_hostcrypto_transparent_aead_decrypt_tag(
 
   sx_status = sx_aead_wait(&aead);
   if (sx_status != SX_OK) {
-    // Zeroize plaintext - decryption may have completed but tag is invalid
     *plaintext_length = 0;
     sli_psa_zeroize(plaintext, plaintext_size);
     if (sx_status == SX_ERR_INVALID_TAG) {
@@ -1136,16 +1062,6 @@ psa_status_t sli_hostcrypto_transparent_aead_decrypt_tag(
   }
 
   *plaintext_length = ciphertext_length;
-
-  #if (SLI_CM_COUNTERS_ENABLED)
-  if (is_aes_aead) {
-    if (sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_HOSTSYMCRYPTO, n_ops) >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-      *plaintext_length = 0;
-      sli_psa_zeroize(plaintext, plaintext_size);
-      return PSA_ERROR_INSUFFICIENT_ENTROPY;
-    }
-  }
-  #endif
 
   return PSA_SUCCESS;
 

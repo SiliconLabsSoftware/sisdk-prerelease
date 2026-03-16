@@ -169,6 +169,9 @@ static sl_status_t apply_metadata(const cJSON *parent, uint8_t inferred_num, uin
       md.signature = (uint32_t)sig->valuedouble;
     }
   }
+  if (md.num_descriptors > SL_ZIGBEE_DHC_MAX_PA_DESCRIPTORS) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
   if (!(flags & DHC_PARSE_FLAG_DRY_RUN)) {
     return sl_zigbee_dhc_write_pa_metadata(&md);
   }
@@ -184,7 +187,7 @@ static sl_status_t apply_descriptors(const cJSON *parent, uint8_t *out_count, ui
     return SL_STATUS_OK;
   }
   int n = cJSON_GetArraySize(arr);
-  if (n < 0 || n > 255) {
+  if (n < 0 || n > (int)SL_ZIGBEE_DHC_MAX_PA_DESCRIPTORS) {
     return SL_STATUS_INVALID_PARAMETER;
   }
   if (out_count) {
@@ -367,6 +370,38 @@ static sl_status_t parse_legacy_document(const cJSON *silabs_dhc, uint32_t flags
   if (num_desc_int < 0 || num_desc_int > 255) {
     return SL_STATUS_INVALID_PARAMETER;
   }
+  if (num_desc_int > (int)SL_ZIGBEE_DHC_MAX_PA_DESCRIPTORS) {
+    return SL_STATUS_INVALID_COUNT;
+  }
+  // Validate descriptor count and descriptor fields before writing anything to NCP.
+  const cJSON *pa_descriptors = cJSON_GetObjectItemCaseSensitive(pa_curves, "pa_descriptors");
+  if (!cJSON_IsArray(pa_descriptors)) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  if (cJSON_GetArraySize(pa_descriptors) != num_desc_int) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  const cJSON *pa_curve_or_table = cJSON_GetObjectItemCaseSensitive(pa_curves, "pa_curve_or_table");
+  if (!cJSON_IsArray(pa_curve_or_table)) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  if (cJSON_GetArraySize(pa_curve_or_table) != num_desc_int) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  for (int i = 0; i < num_desc_int; ++i) {
+    const cJSON *obj = cJSON_GetArrayItem(pa_descriptors, i);
+    if (!cJSON_IsObject(obj)) {
+      return SL_STATUS_INVALID_PARAMETER;
+    }
+    int algorithm = 0;
+    if (!json_get_int(obj, "algorithm", &algorithm)) {
+      return SL_STATUS_INVALID_PARAMETER;
+    }
+    if (algorithm != SL_ZIGBEE_DHC_ALGO_CURVE && algorithm != SL_ZIGBEE_DHC_ALGO_TABLE) {
+      return SL_STATUS_INVALID_PARAMETER;
+    }
+  }
+
   if (cJSON_GetObjectItemCaseSensitive(pa_curves, "pa_voltage")) {
     if (!json_get_int(pa_curves, "pa_voltage", &pa_voltage_int)) {
       return SL_STATUS_INVALID_PARAMETER;
@@ -397,14 +432,6 @@ static sl_status_t parse_legacy_document(const cJSON *silabs_dhc, uint32_t flags
     }
   }
 
-  // Descriptors
-  const cJSON *pa_descriptors = cJSON_GetObjectItemCaseSensitive(pa_curves, "pa_descriptors");
-  if (!cJSON_IsArray(pa_descriptors)) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-  if (cJSON_GetArraySize(pa_descriptors) != num_desc_int) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
   for (int i = 0; i < num_desc_int; ++i) {
     const cJSON *obj = cJSON_GetArrayItem(pa_descriptors, i);
     if (!cJSON_IsObject(obj)) {
@@ -439,16 +466,7 @@ static sl_status_t parse_legacy_document(const cJSON *silabs_dhc, uint32_t flags
   }
 
   // Curves or tables (paired with descriptors by positional index).
-  // Validate (dry run) must not depend on NCP state: use algorithm from JSON
-  // (pa_descriptors[i]), not sl_zigbee_dhc_read_pa_descriptor(), so validate
-  // works before any apply when num_descriptors is 0 on the NCP.
-  const cJSON *pa_curve_or_table = cJSON_GetObjectItemCaseSensitive(pa_curves, "pa_curve_or_table");
-  if (!cJSON_IsArray(pa_curve_or_table)) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-  if (cJSON_GetArraySize(pa_curve_or_table) != num_desc_int) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
+  // pa_curve_or_table already validated above.
   for (int i = 0; i < num_desc_int; ++i) {
     const cJSON *obj = cJSON_GetArrayItem(pa_curve_or_table, i);
     if (!cJSON_IsObject(obj)) {

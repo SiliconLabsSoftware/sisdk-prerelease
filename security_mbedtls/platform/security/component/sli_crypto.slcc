@@ -12,17 +12,10 @@ provides:
 requires:
 - name: device
 - name: code_classification
-- name: component_catalog
-- name: mbedtls_config
 - name: sli_crypto_s2
   condition: [device_series_2]
-- name: psa_crypto_config
-  condition: [device_has_cryptoacc]
-- name: psa_crypto_config
-  condition: [device_series_3]
 - name: sli_crypto_s3
   condition: [device_series_3]
-
 
 define:
 - name: SL_CODE_COMPONENT_SLI_CRYPTO
@@ -36,8 +29,6 @@ template_contribution:
     event: service_init
     include: sli_crypto.h
     handler: sli_crypto_init
-  unless:
-  - trustzone_nonsecure
   priority: 2
 metadata:
   sbom:

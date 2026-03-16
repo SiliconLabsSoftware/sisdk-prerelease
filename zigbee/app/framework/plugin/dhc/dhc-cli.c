@@ -74,7 +74,7 @@ static void print_metadata(void)
     return;
   }
   if (st != SL_STATUS_OK) {
-    sl_zigbee_af_core_println("metadata: status=0x%08lX (error)", (unsigned long)st);
+    sl_zigbee_af_core_println("metadata: unset");
     return;
   }
   sl_zigbee_af_core_println("metadata: status=0x%08lX version=%u num_desc=%u pa_voltage=%u signature=0x%08lX",
@@ -156,29 +156,30 @@ static void print_segment(uint8_t pa_idx, uint8_t seg_idx)
 
 static void print_scalars(void)
 {
-  /* If PA config is not present (e.g. NOT_FOUND), metadata read fails; do not print payload. */
-  sl_zigbee_dhc_pa_metadata_t md;
-  sl_status_t st = sl_zigbee_dhc_read_pa_metadata(&md);
-  if (st != SL_STATUS_OK) {
-    sl_zigbee_af_core_println("scalars: status=0x%08lX (error)", (unsigned long)st);
-    return;
-  }
   sl_zigbee_dhc_rssi_offset_t r;
   sl_zigbee_dhc_read_rssi_offset(&r);
   sl_zigbee_dhc_pa_mode_t m;
   sl_zigbee_dhc_read_pa_mode(&m);
   sl_zigbee_dhc_ctune_t c;
   sl_zigbee_dhc_read_ctune(&c);
+  uint8_t dhc_v = 0;
+  sl_zigbee_dhc_read_dhc_version(&dhc_v);
+
+  sl_zigbee_dhc_pa_metadata_t md;
+  sl_status_t st_md = sl_zigbee_dhc_read_pa_metadata(&md);
+  if (st_md != SL_STATUS_OK) {
+    sl_zigbee_af_core_println("scalars: rssi_offset=%d pa_mode=%u ctune=%lu dhc_version=%u pa_voltage=unset pa_signature=unset pa_version=unset",
+                              r.rssi_offset, m.pa_mode, (unsigned long)c.ctune, dhc_v);
+    return;
+  }
   uint16_t mv = 0;
   sl_zigbee_dhc_read_pa_voltage(&mv);
   sl_zigbee_dhc_pa_signature_t sig;
   sl_zigbee_dhc_read_pa_signature(&sig);
   sl_zigbee_dhc_pa_version_t pav;
   sl_zigbee_dhc_read_pa_version(&pav);
-  uint8_t dhc_v = 0;
-  sl_zigbee_dhc_read_dhc_version(&dhc_v);
-  sl_zigbee_af_core_println("scalars: rssi_offset=%d pa_mode=%u ctune=%u pa_voltage=%u pa_signature=0x%08lX pa_version=%u dhc_version=%u",
-                            r.rssi_offset, m.pa_mode, c.ctune, mv, (unsigned long)sig.pa_signature, pav.pa_version, dhc_v);
+  sl_zigbee_af_core_println("scalars: rssi_offset=%d pa_mode=%u ctune=%lu pa_voltage=%u pa_signature=0x%08lX pa_version=%u dhc_version=%u",
+                            r.rssi_offset, m.pa_mode, (unsigned long)c.ctune, mv, (unsigned long)sig.pa_signature, pav.pa_version, dhc_v);
 }
 
 static void print_versions(void)
@@ -492,10 +493,11 @@ void sl_zigbee_af_dhc_cli_read_all(sl_cli_command_arg_t *args)
   sl_status_t st = sl_zigbee_dhc_read_pa_metadata(&md);
   if (st == SL_STATUS_NOT_FOUND) {
     sl_zigbee_af_core_println("DHC: not set (no configuration applied)");
+    print_scalars();
     return;
   }
   if (st != SL_STATUS_OK) {
-    sl_zigbee_af_core_println("metadata: status=0x%08lX (error)", (unsigned long)st);
+    sl_zigbee_af_core_println("metadata: unset");
     print_scalars();
     return;
   }

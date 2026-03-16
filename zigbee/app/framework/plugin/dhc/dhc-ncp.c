@@ -53,6 +53,9 @@ sl_status_t sli_zigbee_stack_write_pa_metadata(sl_zigbee_dhc_pa_metadata_t *meta
   if (!metadata) {
     return SL_STATUS_NULL_POINTER;
   }
+  if (metadata->num_descriptors != SL_RAIL_NVM_PA_COUNT) {
+    return SL_STATUS_INVALID_COUNT;
+  }
   sl_rail_nvm_pa_config_t cfg;
   sl_status_t st = sl_rail_util_pa_nvm_read_config(&cfg);
   if (st == SL_STATUS_NOT_FOUND) {

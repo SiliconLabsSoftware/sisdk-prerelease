@@ -77,8 +77,6 @@ requires:
   condition: [device_series_3]
 - name: enum
   condition: [device_has_cryptoacc]
-- name: sli_crypto
-  condition: [device_has_cryptoacc]
 provides:
 - name: mbedtls_slcrypto_driver
 conflicts:

@@ -46,7 +46,6 @@
 #include "cryptolib_types.h"
 
 #include <string.h>
-#include "sli_crypto.h"
 
 #if defined(PSA_WANT_ALG_CCM) || defined(PSA_WANT_ALG_GCM)
 
@@ -148,41 +147,14 @@ static psa_status_t sli_cryptoacc_software_gcm(const uint8_t* keybuf,
   block_t data_in = block_t_convert(Ek, sizeof(Ek));
   block_t data_out = block_t_convert(Ek, sizeof(Ek));
 
-  #if (SLI_CM_COUNTERS_ENABLED)
-  uint32_t n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_BLOCK, sizeof(Ek));
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  sl_status_t cm_status =
-  #endif
-  sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                n_ops,
-                                SLI_CM_AUTO_RESEED_ENABLED);
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-    return PSA_ERROR_INSUFFICIENT_ENTROPY;
-  }
-  #endif
-  #endif
-
   psa_status_t status = cryptoacc_management_acquire();
   if (status != PSA_SUCCESS) {
     return status;
   }
-
   sx_ret = sx_aes_ecb_encrypt(&key,
                               &data_in,
                               &data_out);
   status = cryptoacc_management_release();
-  
-  #if (SLI_CM_COUNTERS_ENABLED)
-  uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops);
-  if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-    if (status != PSA_SUCCESS) {
-      return status;
-    }
-    return PSA_ERROR_INSUFFICIENT_ENTROPY;
-  }
-  #endif
-
   if (sx_ret != CRYPTOLIB_SUCCESS
       || status != PSA_SUCCESS) {
     return PSA_ERROR_HARDWARE_FAILURE;
@@ -214,41 +186,14 @@ static psa_status_t sli_cryptoacc_software_gcm(const uint8_t* keybuf,
   uint8_t tagbuf[16] = { 0 };
   data_in = block_t_convert(iv, sizeof(iv));
   data_out = block_t_convert(tagbuf, sizeof(tagbuf));
-  #if (SLI_CM_COUNTERS_ENABLED)
-  n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_BLOCK, sizeof(iv));
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  cm_status =
-  #endif
-  sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                n_ops,
-                                SLI_CM_AUTO_RESEED_ENABLED);
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-    return PSA_ERROR_INSUFFICIENT_ENTROPY;
-  }
-  #endif
-  #endif
-
   status = cryptoacc_management_acquire();
   if (status != PSA_SUCCESS) {
     return status;
   }
-
   sx_ret = sx_aes_ecb_encrypt(&key,
                               &data_in,
                               &data_out);
   status = cryptoacc_management_release();
-
-  #if (SLI_CM_COUNTERS_ENABLED)
-  new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops);
-  if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-    if (status != PSA_SUCCESS) {
-      return status;
-    }
-    return PSA_ERROR_INSUFFICIENT_ENTROPY;
-  }
-  #endif
-
   if (sx_ret != CRYPTOLIB_SUCCESS
       || status != PSA_SUCCESS) {
     return PSA_ERROR_HARDWARE_FAILURE;
@@ -303,43 +248,16 @@ static psa_status_t sli_cryptoacc_software_gcm(const uint8_t* keybuf,
     data_out = block_t_convert(output, plaintext_length);
     block_t nonce_internal = block_t_convert(iv, sizeof(iv));
 
-    #if (SLI_CM_COUNTERS_ENABLED)
-    n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_BLOCK, plaintext_length);
-    #if (SLI_CM_AUTO_RESEED_ENABLED)
-    cm_status =
-    #endif
-    sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                  n_ops,
-                                  SLI_CM_AUTO_RESEED_ENABLED);
-    #if (SLI_CM_AUTO_RESEED_ENABLED)
-    if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-      return PSA_ERROR_INSUFFICIENT_ENTROPY;
-    }
-    #endif
-    #endif
-
     status = cryptoacc_management_acquire();
     if (status != PSA_SUCCESS) {
       return status;
     }
-
     sx_ret = sx_aes_ctr_encrypt(&key,
                                 &data_in,
                                 &data_out,
                                 &nonce_internal);
 
     status = cryptoacc_management_release();
-
-    #if (SLI_CM_COUNTERS_ENABLED)
-    new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops);
-    if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-      if (status != PSA_SUCCESS) {
-        return status;
-      }
-      return PSA_ERROR_INSUFFICIENT_ENTROPY;
-    }
-    #endif
-
     if (sx_ret != CRYPTOLIB_SUCCESS
         || status != PSA_SUCCESS) {
       return PSA_ERROR_HARDWARE_FAILURE;
@@ -592,12 +510,7 @@ psa_status_t sli_cryptoacc_transparent_aead_encrypt_tag(const psa_key_attributes
   block_t data_in = block_t_convert(plaintext, plaintext_length);
   block_t data_out = block_t_convert(ciphertext, plaintext_length);
   block_t tag_block = block_t_convert(tag, *tag_length);
-  #if (SLI_CM_COUNTERS_ENABLED)
-  uint32_t n_ops;
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  sl_status_t cm_status;
-  #endif
-  #endif
+
   switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
 #if defined(PSA_WANT_ALG_CCM)
     case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
@@ -611,24 +524,6 @@ psa_status_t sli_cryptoacc_transparent_aead_encrypt_tag(const psa_key_attributes
       }
     }
 
-      #if (SLI_CM_COUNTERS_ENABLED)
-      // number of aes128 blocks plus the additional data tag at next-highest boundary
-      // plus one block for keystream plus one block for tag
-      n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_CCM, plaintext_length)
-            + ((additional_data_length + 15) / 16) + 1;
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      cm_status =
-      #endif
-      sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                    n_ops,
-                                    SLI_CM_AUTO_RESEED_ENABLED);
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-        return_status = PSA_ERROR_INSUFFICIENT_ENTROPY;
-        goto exit;
-      }
-      #endif
-      #endif
       status = cryptoacc_management_acquire();
       if (status != PSA_SUCCESS) {
         return status;
@@ -640,16 +535,9 @@ psa_status_t sli_cryptoacc_transparent_aead_encrypt_tag(const psa_key_attributes
                                   &tag_block,
                                   &aad_block);
       status = cryptoacc_management_release();
-      #if (SLI_CM_COUNTERS_ENABLED)
-      if (sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops) >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-        return_status = (status != PSA_SUCCESS) ? status : PSA_ERROR_INSUFFICIENT_ENTROPY;
-        goto exit;
-      }
-      #endif
       if (sx_ret != CRYPTOLIB_SUCCESS
           || status != PSA_SUCCESS) {
-        return_status = PSA_ERROR_HARDWARE_FAILURE;
-        goto exit;
+        return PSA_ERROR_HARDWARE_FAILURE;
       }
 
       return_status = PSA_SUCCESS;
@@ -661,26 +549,9 @@ psa_status_t sli_cryptoacc_transparent_aead_encrypt_tag(const psa_key_attributes
         uint8_t tagbuf[16];
         tag_block = block_t_convert(tagbuf, sizeof(tagbuf));
 
-        #if (SLI_CM_COUNTERS_ENABLED)
-        // one block per 128bits AES block plus one for tag
-        n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_GCM, plaintext_length);
-        #if (SLI_CM_AUTO_RESEED_ENABLED)
-        cm_status =
-        #endif
-        sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                      n_ops,
-                                      SLI_CM_AUTO_RESEED_ENABLED);
-        #if (SLI_CM_AUTO_RESEED_ENABLED)
-        if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-          return_status = PSA_ERROR_INSUFFICIENT_ENTROPY;
-          goto exit;
-        }
-        #endif
-        #endif
         status = cryptoacc_management_acquire();
         if (status != PSA_SUCCESS) {
-          return_status = status;
-          goto exit;
+          return status;
         }
         sx_ret = sx_aes_gcm_encrypt(&key,
                                     &data_in,
@@ -689,16 +560,9 @@ psa_status_t sli_cryptoacc_transparent_aead_encrypt_tag(const psa_key_attributes
                                     &tag_block,
                                     &aad_block);
         status = cryptoacc_management_release();
-        #if (SLI_CM_COUNTERS_ENABLED)
-        if (sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops) >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-          return_status = (status != PSA_SUCCESS) ? status : PSA_ERROR_INSUFFICIENT_ENTROPY;
-          goto exit;
-        }
-        #endif
         if (sx_ret != CRYPTOLIB_SUCCESS
             || status != PSA_SUCCESS) {
-          return_status = PSA_ERROR_HARDWARE_FAILURE;
-          goto exit;
+          return PSA_ERROR_HARDWARE_FAILURE;
         }
         // Copy only requested part of computed tag to user output buffer.
         memcpy(tag, tagbuf, *tag_length);
@@ -725,12 +589,9 @@ psa_status_t sli_cryptoacc_transparent_aead_encrypt_tag(const psa_key_attributes
 #endif // PSA_WANT_ALG_GCM
   }
 
-exit:
   if (return_status == PSA_SUCCESS) {
     *ciphertext_length = plaintext_length;
   } else {
-    sli_psa_zeroize(tag, tag_size);
-    sli_psa_zeroize(ciphertext, ciphertext_size);
     *ciphertext_length = 0;
     *tag_length = 0;
   }
@@ -823,12 +684,6 @@ psa_status_t sli_cryptoacc_transparent_aead_decrypt_tag(const psa_key_attributes
   block_t nonce_internal = NULL_blk;
   block_t data_in = NULL_blk;
   block_t data_out = NULL_blk;
-  #if (SLI_CM_COUNTERS_ENABLED)
-  uint32_t n_ops;
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  sl_status_t cm_status;
-  #endif
-  #endif
   switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
 #if defined(PSA_WANT_ALG_CCM)
     case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
@@ -849,28 +704,9 @@ psa_status_t sli_cryptoacc_transparent_aead_decrypt_tag(const psa_key_attributes
       data_in = block_t_convert(ciphertext, ciphertext_length);
       data_out = block_t_convert(plaintext, ciphertext_length);
 
-      #if (SLI_CM_COUNTERS_ENABLED)
-      // number of aes128 blocks plus the additional data tag at next-highest boundary
-      // plus one block for keystream plus one block for tag
-      n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_CCM, ciphertext_length)
-            + ((additional_data_length + 15) / 16) + 1;
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      cm_status =
-      #endif
-      sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                    n_ops,
-                                    SLI_CM_AUTO_RESEED_ENABLED);
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-        return_status = PSA_ERROR_INSUFFICIENT_ENTROPY;
-        goto exit;
-      }
-      #endif
-      #endif
       status = cryptoacc_management_acquire();
       if (status != PSA_SUCCESS) {
-        return_status = status;
-        goto exit;
+        return status;
       }
       sx_ret = sx_aes_ccm_decrypt_verify(&key,
                                          &data_in,
@@ -879,12 +715,6 @@ psa_status_t sli_cryptoacc_transparent_aead_decrypt_tag(const psa_key_attributes
                                          &tag_block,
                                          &aad_block);
       status = cryptoacc_management_release();
-      #if (SLI_CM_COUNTERS_ENABLED)
-      if (sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops) >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-        return_status = (status != PSA_SUCCESS) ? status : PSA_ERROR_INSUFFICIENT_ENTROPY;
-        goto exit;
-      }
-      #endif
       if (sx_ret == CRYPTOLIB_INVALID_SIGN_ERR) {
         return_status = PSA_ERROR_INVALID_SIGNATURE;
       } else if (sx_ret != CRYPTOLIB_SUCCESS || status != PSA_SUCCESS) {
@@ -909,26 +739,9 @@ psa_status_t sli_cryptoacc_transparent_aead_decrypt_tag(const psa_key_attributes
         data_in = block_t_convert(ciphertext, ciphertext_length);
         data_out = block_t_convert(plaintext, ciphertext_length);
 
-        #if (SLI_CM_COUNTERS_ENABLED)
-        // one block per 128bits AES block plus one for tag
-        n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_GCM, ciphertext_length);
-        #if (SLI_CM_AUTO_RESEED_ENABLED)
-        cm_status =
-        #endif
-        sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                      n_ops,
-                                      SLI_CM_AUTO_RESEED_ENABLED);
-        #if (SLI_CM_AUTO_RESEED_ENABLED)
-        if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-          return_status = PSA_ERROR_INSUFFICIENT_ENTROPY;
-          goto exit;
-        }
-        #endif
-        #endif
         status = cryptoacc_management_acquire();
         if (status != PSA_SUCCESS) {
-          return_status = status;
-          goto exit;
+          return status;
         }
         sx_ret = sx_aes_gcm_decrypt(&key,
                                     &data_in,
@@ -937,12 +750,6 @@ psa_status_t sli_cryptoacc_transparent_aead_decrypt_tag(const psa_key_attributes
                                     &tag_block,
                                     &aad_block);
         status = cryptoacc_management_release();
-        #if (SLI_CM_COUNTERS_ENABLED)
-        if (sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops) >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-          return_status = (status != PSA_SUCCESS) ? status : PSA_ERROR_INSUFFICIENT_ENTROPY;
-          goto exit;
-        }
-        #endif
         if (sx_ret != CRYPTOLIB_SUCCESS || status != PSA_SUCCESS) {
           return_status = PSA_ERROR_HARDWARE_FAILURE;
         } else {
@@ -989,7 +796,6 @@ psa_status_t sli_cryptoacc_transparent_aead_decrypt_tag(const psa_key_attributes
       return PSA_ERROR_NOT_SUPPORTED;
   }
 
-exit:
   if (return_status != PSA_SUCCESS) {
     *plaintext_length = 0;
     sli_psa_zeroize(plaintext, plaintext_size);
@@ -1241,12 +1047,6 @@ static psa_status_t cryptoacc_aead_start(sli_cryptoacc_transparent_aead_operatio
 {
   psa_status_t return_status = PSA_ERROR_CORRUPTION_DETECTED;
   uint32_t sx_ret = CRYPTOLIB_CRYPTO_ERR;
-  #if (SLI_CM_COUNTERS_ENABLED)
-  uint32_t n_ops = 0;
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  sl_status_t cm_status;
-  #endif
-  #endif
 
   psa_algorithm_t alg = operation->alg;
 
@@ -1258,6 +1058,12 @@ static psa_status_t cryptoacc_aead_start(sli_cryptoacc_transparent_aead_operatio
   block_t data_in = NULL_blk;
   block_t data_out = NULL_blk;
 
+  // Get ownership.
+  return_status = cryptoacc_management_acquire();
+  if (return_status != PSA_SUCCESS) {
+    return return_status;
+  }
+
   switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
 #if defined(PSA_WANT_ALG_CCM)
     case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
@@ -1268,26 +1074,6 @@ static psa_status_t cryptoacc_aead_start(sli_cryptoacc_transparent_aead_operatio
         // need to precompute the tag. (Only needed for encrypt)
         if (operation->total_length == 0 && input_length != 0) {
           block_t tag_block = block_t_convert(operation->ctx.tag_buf, tag_length);
-          #if (SLI_CM_COUNTERS_ENABLED)
-          // CCM: data blocks + tag (from helper) + AAD blocks + keystream
-          n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_CCM, 0)
-                + sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_BLOCK, input_length) + 1;
-          #if (SLI_CM_AUTO_RESEED_ENABLED)
-          cm_status =
-          #endif
-          sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                        n_ops,
-                                        SLI_CM_AUTO_RESEED_ENABLED);
-          #if (SLI_CM_AUTO_RESEED_ENABLED)
-          if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-            return PSA_ERROR_INSUFFICIENT_ENTROPY;
-          }
-          #endif
-          #endif
-          return_status = cryptoacc_management_acquire();
-          if (return_status != PSA_SUCCESS) {
-            return return_status;
-          }
           sx_ret = sx_aes_ccm_encrypt(&key,
                                       &data_in,
                                       &data_out,
@@ -1297,25 +1083,6 @@ static psa_status_t cryptoacc_aead_start(sli_cryptoacc_transparent_aead_operatio
 
           goto exit;
         } else {
-          #if (SLI_CM_COUNTERS_ENABLED)
-          // initialization: one block for setup
-          n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_BLOCK, 0);
-          #if (SLI_CM_AUTO_RESEED_ENABLED)
-          cm_status =
-          #endif
-          sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                        n_ops,
-                                        SLI_CM_AUTO_RESEED_ENABLED);
-          #if (SLI_CM_AUTO_RESEED_ENABLED)
-          if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-            return PSA_ERROR_INSUFFICIENT_ENTROPY;
-          }
-          #endif
-          #endif
-          return_status = cryptoacc_management_acquire();
-          if (return_status != PSA_SUCCESS) {
-            return return_status;
-          }
           sx_ret = sx_aes_ccm_encrypt_init(&key,
                                            &data_in,
                                            &data_out,
@@ -1326,25 +1093,6 @@ static psa_status_t cryptoacc_aead_start(sli_cryptoacc_transparent_aead_operatio
                                            operation->total_length);
         }
       } else {
-        #if (SLI_CM_COUNTERS_ENABLED)
-        // initialization: one block for setup
-        n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_BLOCK, 0);
-        #if (SLI_CM_AUTO_RESEED_ENABLED)
-        cm_status =
-        #endif
-        sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                      n_ops,
-                                      SLI_CM_AUTO_RESEED_ENABLED);
-        #if (SLI_CM_AUTO_RESEED_ENABLED)
-        if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-          return PSA_ERROR_INSUFFICIENT_ENTROPY;
-        }
-        #endif
-        #endif
-        return_status = cryptoacc_management_acquire();
-        if (return_status != PSA_SUCCESS) {
-          return return_status;
-        }
         sx_ret = sx_aes_ccm_decrypt_init(&key,
                                          &data_in,
                                          &data_out,
@@ -1359,25 +1107,6 @@ static psa_status_t cryptoacc_aead_start(sli_cryptoacc_transparent_aead_operatio
 #endif//PSA_WANT_ALG_CCM
 #if defined (PSA_WANT_ALG_GCM)
     case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
-      #if (SLI_CM_COUNTERS_ENABLED)
-      // number of aes128 blocks: AAD blocks plus one for tag
-      n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_GCM, input_length);
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      cm_status =
-      #endif
-      sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                    n_ops,
-                                    SLI_CM_AUTO_RESEED_ENABLED);
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-        return PSA_ERROR_INSUFFICIENT_ENTROPY;
-      }
-      #endif
-      #endif
-      return_status = cryptoacc_management_acquire();
-      if (return_status != PSA_SUCCESS) {
-        return return_status;
-      }
       if (operation->direction == SLI_AES_ENC) {
         sx_ret = sx_aes_gcm_encrypt_init(&key,
                                          &data_in,
@@ -1402,15 +1131,6 @@ static psa_status_t cryptoacc_aead_start(sli_cryptoacc_transparent_aead_operatio
 
   // Release ownership.
   return_status = cryptoacc_management_release();
-  #if (SLI_CM_COUNTERS_ENABLED)
-  uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops);
-  if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-    if (return_status != PSA_SUCCESS) {
-      return return_status;
-    }
-    return PSA_ERROR_INSUFFICIENT_ENTROPY;
-  }
-  #endif
   if (sx_ret != CRYPTOLIB_SUCCESS || return_status != PSA_SUCCESS ) {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
@@ -1462,12 +1182,6 @@ psa_status_t sli_cryptoacc_transparent_aead_update(sli_cryptoacc_transparent_aea
                                                    size_t *output_length)
 {
   #if defined(PSA_WANT_ALG_CCM) || defined(PSA_WANT_ALG_GCM)
-  #if (SLI_CM_COUNTERS_ENABLED)
-  uint32_t opcount = 0;
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  sl_status_t cm_status;
-  #endif
-  #endif
 
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -1570,21 +1284,6 @@ psa_status_t sli_cryptoacc_transparent_aead_update(sli_cryptoacc_transparent_aea
     block_t input_block_final = block_t_convert(operation->final_data, 16);
     block_t output_block_final = block_t_convert(output, 16);
 
-    #if (SLI_CM_COUNTERS_ENABLED)
-    // one block for update operation (processing 16 bytes)
-    #if (SLI_CM_AUTO_RESEED_ENABLED)
-    cm_status =
-    #endif
-    sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                  1,
-                                  SLI_CM_AUTO_RESEED_ENABLED);
-    #if (SLI_CM_AUTO_RESEED_ENABLED)
-    if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-      return PSA_ERROR_INSUFFICIENT_ENTROPY;
-    }
-    #endif
-    #endif
-
     return_status = cryptoacc_management_acquire();
     if (return_status != PSA_SUCCESS) {
       return return_status;
@@ -1647,15 +1346,6 @@ psa_status_t sli_cryptoacc_transparent_aead_update(sli_cryptoacc_transparent_aea
 
     // Release ownership.
     return_status = cryptoacc_management_release();
-    #if (SLI_CM_COUNTERS_ENABLED)
-    uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, 1);
-    if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-      if (return_status != PSA_SUCCESS) {
-        return return_status;
-      }
-      return PSA_ERROR_INSUFFICIENT_ENTROPY;
-    }
-    #endif
     if (sx_ret != CRYPTOLIB_SUCCESS || return_status != PSA_SUCCESS ) {
       return PSA_ERROR_HARDWARE_FAILURE;
     }
@@ -1680,6 +1370,12 @@ psa_status_t sli_cryptoacc_transparent_aead_update(sli_cryptoacc_transparent_aea
   operation->final_data_length = res_data_length;
   input_length -= res_data_length;
 
+  // Get ownership.
+  return_status = cryptoacc_management_acquire();
+  if (return_status != PSA_SUCCESS) {
+    return return_status;
+  }
+
   switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
       #if defined(PSA_WANT_ALG_CCM)
     case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
@@ -1690,32 +1386,14 @@ psa_status_t sli_cryptoacc_transparent_aead_update(sli_cryptoacc_transparent_aea
         operation->final_data_length = 16;
         input_length -= operation->final_data_length;
         if (!input_length) {
-          return PSA_SUCCESS;
+          return_status = cryptoacc_management_release();
+          return return_status;
         }
       }
 
       input_block = block_t_convert(input + input_offset, input_length);
       output_block = block_t_convert(output, input_length);
 
-      #if (SLI_CM_COUNTERS_ENABLED)
-      // number of aes128 blocks for update operation
-      opcount = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_BLOCK, input_length);
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      cm_status =
-      #endif
-      sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                    opcount,
-                                    SLI_CM_AUTO_RESEED_ENABLED);
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-        return PSA_ERROR_INSUFFICIENT_ENTROPY;
-      }
-      #endif
-      #endif
-      return_status = cryptoacc_management_acquire();
-      if (return_status != PSA_SUCCESS) {
-        return return_status;
-      }
       if (operation->direction == SLI_AES_ENC) {
         sx_ret = sx_aes_ccm_encrypt_update(&key,
                                            &input_block,
@@ -1737,30 +1415,6 @@ psa_status_t sli_cryptoacc_transparent_aead_update(sli_cryptoacc_transparent_aea
       input_block = block_t_convert(input + input_offset, input_length);
       output_block = block_t_convert(output, input_length);
 
-      #if (SLI_CM_COUNTERS_ENABLED)
-      if (operation->ad_len == 0 && operation->processed_len == 0) {
-        // initialization: input blocks plus one for tag
-        opcount = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_GCM, input_length);
-      } else {
-        // update: one per AES block
-        opcount = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_BLOCK, input_length);
-      }
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      cm_status =
-      #endif
-      sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                    opcount,
-                                    SLI_CM_AUTO_RESEED_ENABLED);
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-        return PSA_ERROR_INSUFFICIENT_ENTROPY;
-      }
-      #endif
-      #endif
-      return_status = cryptoacc_management_acquire();
-      if (return_status != PSA_SUCCESS) {
-        return return_status;
-      }
       if (operation->ad_len == 0 && operation->processed_len == 0) {
         // Not initialized.
         if (operation->direction == SLI_AES_ENC) {
@@ -1796,19 +1450,11 @@ psa_status_t sli_cryptoacc_transparent_aead_update(sli_cryptoacc_transparent_aea
       break;
       #endif //PSA_WANT_ALG_GCM
     default:
+      (void) cryptoacc_management_release();
       return PSA_ERROR_NOT_SUPPORTED;
   }
   // Release ownership.
   return_status = cryptoacc_management_release();
-  #if (SLI_CM_COUNTERS_ENABLED)
-  uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, opcount);
-  if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-    if (return_status != PSA_SUCCESS) {
-      return return_status;
-    }
-    return PSA_ERROR_INSUFFICIENT_ENTROPY;
-  }
-  #endif
   if (sx_ret != CRYPTOLIB_SUCCESS || return_status != PSA_SUCCESS ) {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
@@ -1837,12 +1483,6 @@ psa_status_t sli_cryptoacc_transparent_aead_finish(sli_cryptoacc_transparent_aea
                                                    size_t *tag_length)
 {
   #if defined(PSA_WANT_ALG_CCM) || defined(PSA_WANT_ALG_GCM)
-  #if (SLI_CM_COUNTERS_ENABLED)
-  uint32_t n_ops = 0;
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  sl_status_t cm_status;
-  #endif
-  #endif
 
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -1879,30 +1519,16 @@ psa_status_t sli_cryptoacc_transparent_aead_finish(sli_cryptoacc_transparent_aea
     block_t data_out = NULL_blk;
     block_t aad_block = NULL_blk;
 
+    // Get ownership.
+    status = cryptoacc_management_acquire();
+    if (status != PSA_SUCCESS) {
+      return status;
+    }
     switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
       #if defined(PSA_WANT_ALG_CCM)
       case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
       {
         tag_block = block_t_convert(tagbuf, tag_len);
-        #if (SLI_CM_COUNTERS_ENABLED)
-        // CCM finish with no data: tag (from helper) + keystream
-        n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_CCM, 0) + 1;
-        #if (SLI_CM_AUTO_RESEED_ENABLED)
-        cm_status =
-        #endif
-        sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                      n_ops,
-                                      SLI_CM_AUTO_RESEED_ENABLED);
-        #if (SLI_CM_AUTO_RESEED_ENABLED)
-        if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-          return PSA_ERROR_INSUFFICIENT_ENTROPY;
-        }
-        #endif
-        #endif
-        status = cryptoacc_management_acquire();
-        if (status != PSA_SUCCESS) {
-          return status;
-        }
         sx_ret = sx_aes_ccm_encrypt(&key,
                                     &data_in,
                                     &data_out,
@@ -1918,25 +1544,6 @@ psa_status_t sli_cryptoacc_transparent_aead_finish(sli_cryptoacc_transparent_aea
       {
         data_in = block_t_convert(operation->final_data, operation->final_data_length);
         data_out = block_t_convert(ciphertext, operation->final_data_length);
-        #if (SLI_CM_COUNTERS_ENABLED)
-        // one block per 128bits AES block plus one for tag
-        n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_GCM, operation->final_data_length);
-        #if (SLI_CM_AUTO_RESEED_ENABLED)
-        cm_status =
-        #endif
-        sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                      n_ops,
-                                      SLI_CM_AUTO_RESEED_ENABLED);
-        #if (SLI_CM_AUTO_RESEED_ENABLED)
-        if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-          return PSA_ERROR_INSUFFICIENT_ENTROPY;
-        }
-        #endif
-        #endif
-        status = cryptoacc_management_acquire();
-        if (status != PSA_SUCCESS) {
-          return status;
-        }
         sx_ret = sx_aes_gcm_encrypt(&key,
                                     &data_in,
                                     &data_out,
@@ -1948,19 +1555,11 @@ psa_status_t sli_cryptoacc_transparent_aead_finish(sli_cryptoacc_transparent_aea
       }
       #endif //PSA_WANT_ALG_GCM
       default:
+        cryptoacc_management_release();
         return PSA_ERROR_NOT_SUPPORTED;
     }
     // Release ownership.
     status = cryptoacc_management_release();
-    #if (SLI_CM_COUNTERS_ENABLED)
-    uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops);
-    if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-      if (status != PSA_SUCCESS) {
-        return status;
-      }
-      return PSA_ERROR_INSUFFICIENT_ENTROPY;
-    }
-    #endif
     if (sx_ret != CRYPTOLIB_SUCCESS || status != PSA_SUCCESS ) {
       *ciphertext_length = 0;
       return PSA_ERROR_HARDWARE_FAILURE;
@@ -1984,35 +1583,24 @@ psa_status_t sli_cryptoacc_transparent_aead_finish(sli_cryptoacc_transparent_aea
   block_t data_in_block = block_t_convert(operation->final_data, operation->final_data_length);
   block_t data_out_block = block_t_convert(ciphertext, operation->final_data_length);
 
+  // Get ownership.
+  status = cryptoacc_management_acquire();
+  if (status != PSA_SUCCESS) {
+    return status;
+  }
   switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
       #if defined(PSA_WANT_ALG_CCM)
     case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
     {
       if (operation->ad_len != 0 && operation->total_length == 0) {
         // Tag is calculated in update_ad.
+        cryptoacc_management_release();
         memcpy(tag, operation->ctx.tag_buf, tag_len);
+        *ciphertext_length = 0;
+        *tag_length = tag_len;
         return PSA_SUCCESS;
       }
 
-      #if (SLI_CM_COUNTERS_ENABLED)
-      // number of aes128 blocks: final data blocks plus one block for tag
-      n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_CCM, operation->final_data_length);
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      cm_status =
-      #endif
-      sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                    n_ops,
-                                    SLI_CM_AUTO_RESEED_ENABLED);
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-        return PSA_ERROR_INSUFFICIENT_ENTROPY;
-      }
-      #endif
-      #endif
-      status = cryptoacc_management_acquire();
-      if (status != PSA_SUCCESS) {
-        return status;
-      }
       sx_ret = sx_aes_ccm_encrypt_final(
         &key,
         &data_in_block,
@@ -2025,25 +1613,6 @@ psa_status_t sli_cryptoacc_transparent_aead_finish(sli_cryptoacc_transparent_aea
       #if defined(PSA_WANT_ALG_GCM)
     case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
     {
-      #if (SLI_CM_COUNTERS_ENABLED)
-      // number of aes128 blocks: final data blocks plus one for tag
-      n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_GCM, operation->final_data_length);
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      cm_status =
-      #endif
-      sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                    n_ops,
-                                    SLI_CM_AUTO_RESEED_ENABLED);
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-        return PSA_ERROR_INSUFFICIENT_ENTROPY;
-      }
-      #endif
-      #endif
-      status = cryptoacc_management_acquire();
-      if (status != PSA_SUCCESS) {
-        return status;
-      }
       sx_ret = sx_aes_gcm_encrypt_final(
         &key,
         &data_in_block,
@@ -2055,19 +1624,11 @@ psa_status_t sli_cryptoacc_transparent_aead_finish(sli_cryptoacc_transparent_aea
     }
       #endif //PSA_WANT_ALG_GCM
     default:
+      cryptoacc_management_release();
       return PSA_ERROR_NOT_SUPPORTED;
   }
   // Release ownership.
   status = cryptoacc_management_release();
-  #if (SLI_CM_COUNTERS_ENABLED)
-  uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops);
-  if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-    if (status != PSA_SUCCESS) {
-      return status;
-    }
-    return PSA_ERROR_INSUFFICIENT_ENTROPY;
-  }
-  #endif
   if (sx_ret != CRYPTOLIB_SUCCESS || status != PSA_SUCCESS) {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
@@ -2096,12 +1657,6 @@ psa_status_t sli_cryptoacc_transparent_aead_verify(sli_cryptoacc_transparent_aea
                                                    size_t tag_length)
 {
   #if defined(PSA_WANT_ALG_CCM) || defined(PSA_WANT_ALG_GCM)
-  #if (SLI_CM_COUNTERS_ENABLED)
-  uint32_t n_ops = 0;
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  sl_status_t cm_status;
-  #endif
-  #endif
 
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -2131,30 +1686,16 @@ psa_status_t sli_cryptoacc_transparent_aead_verify(sli_cryptoacc_transparent_aea
     block_t aad_block = NULL_blk;
     block_t data_in = NULL_blk;
     block_t data_out = NULL_blk;
+    // Get ownership.
+    status = cryptoacc_management_acquire();
+    if (status != PSA_SUCCESS) {
+      return status;
+    }
     switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
       #if defined(PSA_WANT_ALG_CCM)
       case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
       {
         block_t tag_block = block_t_convert(tag, tag_length);
-        #if (SLI_CM_COUNTERS_ENABLED)
-        // CCM verify with no data: tag (from helper) + keystream
-        n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_CCM, 0) + 1;
-        #if (SLI_CM_AUTO_RESEED_ENABLED)
-        cm_status =
-        #endif
-        sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                      n_ops,
-                                      SLI_CM_AUTO_RESEED_ENABLED);
-        #if (SLI_CM_AUTO_RESEED_ENABLED)
-        if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-          return PSA_ERROR_INSUFFICIENT_ENTROPY;
-        }
-        #endif
-        #endif
-        status = cryptoacc_management_acquire();
-        if (status != PSA_SUCCESS) {
-          return status;
-        }
         sx_ret = sx_aes_ccm_decrypt_verify(&key,
                                            &data_in,
                                            &data_out,
@@ -2162,15 +1703,6 @@ psa_status_t sli_cryptoacc_transparent_aead_verify(sli_cryptoacc_transparent_aea
                                            &tag_block,
                                            &aad_block);
         status = cryptoacc_management_release();
-        #if (SLI_CM_COUNTERS_ENABLED)
-        uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops);
-        if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-          if (status != PSA_SUCCESS) {
-            return status;
-          }
-          return PSA_ERROR_INSUFFICIENT_ENTROPY;
-        }
-        #endif
         if (sx_ret != CRYPTOLIB_SUCCESS || status != PSA_SUCCESS) {
           return PSA_ERROR_HARDWARE_FAILURE;
         }
@@ -2186,25 +1718,6 @@ psa_status_t sli_cryptoacc_transparent_aead_verify(sli_cryptoacc_transparent_aea
         data_in = block_t_convert(operation->final_data, operation->final_data_length);
         data_out = block_t_convert(plaintext, operation->final_data_length);
 
-        #if (SLI_CM_COUNTERS_ENABLED)
-        // one block per 128bits AES block plus one for tag
-        n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_GCM, operation->final_data_length);
-        #if (SLI_CM_AUTO_RESEED_ENABLED)
-        cm_status =
-        #endif
-        sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                      n_ops,
-                                      SLI_CM_AUTO_RESEED_ENABLED);
-        #if (SLI_CM_AUTO_RESEED_ENABLED)
-        if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-          return PSA_ERROR_INSUFFICIENT_ENTROPY;
-        }
-        #endif
-        #endif
-        status = cryptoacc_management_acquire();
-        if (status != PSA_SUCCESS) {
-          return status;
-        }
         sx_ret = sx_aes_gcm_decrypt_verify(&key,
                                            &data_in,
                                            &data_out,
@@ -2212,15 +1725,6 @@ psa_status_t sli_cryptoacc_transparent_aead_verify(sli_cryptoacc_transparent_aea
                                            &tag_block,
                                            &aad_block);
         status = cryptoacc_management_release();
-        #if (SLI_CM_COUNTERS_ENABLED)
-        uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops);
-        if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-          if (status != PSA_SUCCESS) {
-            return status;
-          }
-          return PSA_ERROR_INSUFFICIENT_ENTROPY;
-        }
-        #endif
         if (sx_ret == CRYPTOLIB_INVALID_SIGN_ERR) {
           return PSA_ERROR_INVALID_SIGNATURE;
         }
@@ -2233,6 +1737,7 @@ psa_status_t sli_cryptoacc_transparent_aead_verify(sli_cryptoacc_transparent_aea
       }
       #endif//PSA_WANT_ALG_GCM
       default:
+        cryptoacc_management_release();
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
@@ -2254,34 +1759,22 @@ psa_status_t sli_cryptoacc_transparent_aead_verify(sli_cryptoacc_transparent_aea
   block_t data_in_block = block_t_convert(operation->final_data, operation->final_data_length);
   block_t data_out_block = block_t_convert(plaintext, operation->final_data_length);
 
+  // Get ownership.
+  status = cryptoacc_management_acquire();
+  if (status != PSA_SUCCESS) {
+    return PSA_ERROR_HARDWARE_FAILURE;
+  }
+
   switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
       #if defined(PSA_WANT_ALG_CCM)
     case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
     {
       uint32_t tag_len = PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg);
       if (tag_length != tag_len) {
+        cryptoacc_management_release();
         return PSA_ERROR_INVALID_SIGNATURE;
       }
 
-      #if (SLI_CM_COUNTERS_ENABLED)
-      // number of aes128 blocks: final data blocks plus one block for tag
-      n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_CCM, operation->final_data_length);
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      cm_status =
-      #endif
-      sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                    n_ops,
-                                    SLI_CM_AUTO_RESEED_ENABLED);
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-        return PSA_ERROR_INSUFFICIENT_ENTROPY;
-      }
-      #endif
-      #endif
-      status = cryptoacc_management_acquire();
-      if (status != PSA_SUCCESS) {
-        return PSA_ERROR_HARDWARE_FAILURE;
-      }
       sx_ret = sx_aes_ccm_decrypt_verify_final(
         &key,
         &data_in_block,
@@ -2294,25 +1787,6 @@ psa_status_t sli_cryptoacc_transparent_aead_verify(sli_cryptoacc_transparent_aea
       #if defined(PSA_WANT_ALG_GCM)
     case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
     {
-      #if (SLI_CM_COUNTERS_ENABLED)
-      // number of aes128 blocks: final data blocks plus one block for tag
-      n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_GCM, operation->final_data_length);
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      cm_status =
-      #endif
-      sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                    n_ops,
-                                    SLI_CM_AUTO_RESEED_ENABLED);
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-        return PSA_ERROR_INSUFFICIENT_ENTROPY;
-      }
-      #endif
-      #endif
-      status = cryptoacc_management_acquire();
-      if (status != PSA_SUCCESS) {
-        return PSA_ERROR_HARDWARE_FAILURE;
-      }
       sx_ret = sx_aes_gcm_decrypt_verify_final(
         &key,
         &data_in_block,
@@ -2324,20 +1798,12 @@ psa_status_t sli_cryptoacc_transparent_aead_verify(sli_cryptoacc_transparent_aea
     }
       #endif//PSA_WANT_ALG_GCM
     default:
+      cryptoacc_management_release();
       return PSA_ERROR_NOT_SUPPORTED;
   }
 
   // Release ownership.
   status = cryptoacc_management_release();
-  #if (SLI_CM_COUNTERS_ENABLED)
-  uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops);
-  if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-    if (status != PSA_SUCCESS) {
-      return status;
-    }
-    return PSA_ERROR_INSUFFICIENT_ENTROPY;
-  }
-  #endif
 
   if (status != PSA_SUCCESS) {
     return PSA_ERROR_HARDWARE_FAILURE;

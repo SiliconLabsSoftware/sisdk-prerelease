@@ -28,107 +28,18 @@
  *
  ******************************************************************************/
 #include "em_device.h"
-#if (!defined(SL_TRUSTZONE_NONSECURE)) && defined(CRYPTOACC_PRESENT)
-#include "sli_mbedtls_omnipresent.h"
-#endif
 #include "sli_crypto.h"
 #include "sl_assert.h"
 #include "sli_protocol_crypto.h"
-#if !defined(SL_TRUSTZONE_NONSECURE)
-#if defined(CRYPTOACC_PRESENT)
-#include "sli_cryptoacc_driver_trng.h"
-#if defined(SLI_MBEDTLS_DEVICE_VSE_V2)
-#include "cryptoacc_management.h"
-#endif
-#else
-#include "sl_se_manager.h"
-#include "sl_se_manager_types.h"
-#include "sl_se_manager_entropy.h"
-#endif
 
-// In test the "trng" is mocked to provide predictable values
-#if !defined(SLI_CRYPTO_TRNG_MOCK)
-sl_status_t sli_crypto_trng_get(uint8_t *dest, size_t nbytes)
-{
-  if ((NULL == dest) || (0 == nbytes)) {
-    return (NULL == dest ? SL_STATUS_NULL_POINTER : SL_STATUS_INVALID_PARAMETER);
-  }
-  #if defined(CRYPTOACC_PRESENT)
-  psa_status_t rc = sli_cryptoacc_trng_get_random(dest, nbytes);
-  #else
-  sl_se_command_context_t cmd_ctx = { 0 };
-  sl_status_t rc = sl_se_init_command_context(&cmd_ctx);
-  /// Initialize Secure Element command context
-  if ( rc != SL_STATUS_OK) {
-    return rc;
-  }
-  rc = sl_se_get_random(&cmd_ctx, dest, nbytes);
-
-  sl_se_deinit_command_context(&cmd_ctx);
-  #endif
-  return rc;
-}
-#endif
-#if defined(CRYPTOACC_PRESENT) && defined(SLI_MBEDTLS_DEVICE_VSE_V2) 
-sl_status_t sli_crypto_engine_cm_reseed(sli_crypto_engine_t engine, sli_crypto_seed_t *seed)
-{
-  if (NULL == seed) {
-    return SL_STATUS_NULL_POINTER;
-  } else if (engine != SLI_CRYPTO_ENGINE_CRYPTOACC) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  // Reseed the cryptoacc...
-  psa_status_t status = cryptoacc_reseed_countermeasures(seed->u32[0]);
-  if (status != PSA_SUCCESS) {
-    return SL_STATUS_FAIL;
-  } else {
-    return SL_STATUS_OK;
-  }
-}
-#endif // defined(CRYPTOACC_PRESENT) && defined(SLI_MBEDTLS_DEVICE_VSE_V2)
-#endif // (!defined(SL_TRUSTZONE_NONSECURE))
 sl_status_t sli_crypto_init(void)
 {
   #if defined(SLI_RADIOAES_REQUIRES_MASKING)
   sli_aes_seed_mask();
   #endif
-  
-  #if (!defined(SL_TRUSTZONE_NONSECURE))
-  sl_status_t rc = SL_STATUS_FAIL;
-  #if defined(CRYPTOACC_PRESENT) && defined(SLI_MBEDTLS_DEVICE_VSE_V2)
-  if (cryptoacc_initialize_countermeasures() != PSA_SUCCESS) {
-    return SL_STATUS_SECURITY_AES_CM_FAIL;
-  }
-  #endif
 
-  #if (defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT) || defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)) \
-  && (SLI_CRYPTO_USE_HOST_ENTROPY || SLI_CM_COUNTERS_ENABLED)
-  rc = sli_crypto_init_lock();
-  if (rc != SL_STATUS_OK) {
-    return rc;
-  }
-  #endif
-
-  #if (SLI_CRYPTO_USE_HOST_ENTROPY)
-  // If using the host entropy pool, accumulate host entropy now
-  rc = sli_crypto_entropy_pool_accumulate();
-  if (rc != SL_STATUS_OK) {
-    return rc;
-  }
-  #endif
-  // If countermeasures were already initialized a reseed didn't occur
-  // during cryptoacc_initialize_countermeasures(), reseed just-in-case;
-  // additionally this resets the AES countermeasure counters, if present.
-  #if defined(CRYPTOACC_PRESENT) && defined(SLI_MBEDTLS_DEVICE_VSE_V2) 
-  rc = sli_crypto_countermeasure_reseed(SLI_CRYPTO_ENGINE_CRYPTOACC, NULL);
-  #endif
-  return rc;
-  #else
   return SL_STATUS_OK;
-  #endif // (!defined(SL_TRUSTZONE_NONSECURE))
 }
-
 /***************************************************************************//**
  * @brief          CCM buffer authenticated decryption optimized for BLE
  ******************************************************************************/

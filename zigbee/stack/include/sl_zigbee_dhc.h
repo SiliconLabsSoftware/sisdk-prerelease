@@ -39,6 +39,9 @@
 #define SL_ZIGBEE_DHC_CURVE_SEGMENT_COUNT   9u
 #define SL_ZIGBEE_DHC_TABLE_ENTRY_COUNT     16u
 
+// Max PA descriptors (must match NCP SL_RAIL_NVM_PA_COUNT; host validates before write)
+#define SL_ZIGBEE_DHC_MAX_PA_DESCRIPTORS    2u
+
 // Convenience macro: validate descriptor counts at compile time where possible
 #define SL_ZIGBEE_DHC_DESCRIPTOR_IS_CURVE(d) ((d)->algorithm == SL_ZIGBEE_DHC_ALGO_CURVE)
 #define SL_ZIGBEE_DHC_DESCRIPTOR_IS_TABLE(d) ((d)->algorithm == SL_ZIGBEE_DHC_ALGO_TABLE)

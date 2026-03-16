@@ -8,7 +8,6 @@ quality: production
 ui_hints:
   visibility: never
 source:
-- path: src/sl_crypto.c
 - path: src/sl_crypto_s3.c
 include:
 - path: inc
@@ -23,11 +22,6 @@ requires:
 - name: status
 - name: sl_assert
 - name: sxsymcrypt
-- name: se_manager
-  condition: [trustzone_unaware]
-- name: se_manager
-  condition: [trustzone_secure]
-- name: code_classification
 metadata:
   sbom:
     license: Zlib

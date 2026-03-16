@@ -38,7 +38,6 @@
 #include "cryptolib_def.h"
 #include "sx_errors.h"
 #include "sx_aes.h"
-#include "sli_crypto.h"
 
 #if defined(SLI_PSA_DRIVER_FEATURE_PBKDF2)
 
@@ -123,21 +122,6 @@ static psa_status_t derive_key_pbkdf2_aes_cmac_128_prf(
   if (password->len != AES_KEYSIZE_128) {
     block_t internal_password_blk =
       block_t_convert(internal_password_buf, sizeof(internal_password_buf));
-    #if (SLI_CM_COUNTERS_ENABLED)
-    // one for subkey generation plus one per 16 bytes (minimum 1 data block)
-    uint32_t n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_CMAC, sizeof(internal_password_buf));
-    #if (SLI_CM_AUTO_RESEED_ENABLED)
-    sl_status_t cm_status =
-    #endif
-    sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                  n_ops,
-                                  SLI_CM_AUTO_RESEED_ENABLED);
-    #if (SLI_CM_AUTO_RESEED_ENABLED)
-    if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-      return PSA_ERROR_INSUFFICIENT_ENTROPY;
-    }
-    #endif
-    #endif
     uint32_t sx_ret;
     if (password->addr == &aes_hw_key1 || password->addr == &aes_hw_key2) {
       // Hardware keys (e.g. PUF) cannot be read as data by DMA
@@ -156,16 +140,6 @@ static psa_status_t derive_key_pbkdf2_aes_cmac_128_prf(
       status = cryptoacc_management_release();
     }
     
-    #if (SLI_CM_COUNTERS_ENABLED)
-    uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops);
-    if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-      if (status != PSA_SUCCESS) {
-        return status;
-      }
-      return PSA_ERROR_INSUFFICIENT_ENTROPY;
-    }
-    #endif
-
     if (status != PSA_SUCCESS) {
       return status;
     }
@@ -182,43 +156,15 @@ static psa_status_t derive_key_pbkdf2_aes_cmac_128_prf(
     uint32_to_octet_string(i, counter_encoding);
 
     // First Block (U_1).
-    #if (SLI_CM_COUNTERS_ENABLED)
-    // one for subkey generation plus one per 16 bytes (minimum 1 data block)
-    uint32_t n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_CMAC, internal_data_blk.len);
-    #if (SLI_CM_AUTO_RESEED_ENABLED)
-    sl_status_t cm_status =
-    #endif
-    sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                  n_ops,
-                                  SLI_CM_AUTO_RESEED_ENABLED);
-    #if (SLI_CM_AUTO_RESEED_ENABLED)
-    if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-      return PSA_ERROR_INSUFFICIENT_ENTROPY;
-    }
-    #endif
-    #endif
-
     // Acquire hardware lock and execute CMAC operation
     status = cryptoacc_management_acquire();
     if (status != PSA_SUCCESS) {
       return status;
     }
-
     uint32_t sx_ret = sx_aes_cmac_generate(password,
                                            &internal_data_blk,
                                            &temp_blk_1);
     status = cryptoacc_management_release();
-    
-    #if (SLI_CM_COUNTERS_ENABLED)
-    uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops);
-    if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-      if (status != PSA_SUCCESS) {
-        return status;
-      }
-      return PSA_ERROR_INSUFFICIENT_ENTROPY;
-    }
-    #endif
-
     if (status != PSA_SUCCESS) {
       return status;
     }
@@ -229,40 +175,12 @@ static psa_status_t derive_key_pbkdf2_aes_cmac_128_prf(
 
     // Remaining blocks (U_j).
     for (uint32_t j = 1; j < iterations; j++) {
-      #if (SLI_CM_COUNTERS_ENABLED)
-      // one for subkey generation plus one per 16 bytes (minimum 1 data block)
-      n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_CMAC, temp_blk_1.len);
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      cm_status =
-      #endif
-      sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                    n_ops,
-                                    SLI_CM_AUTO_RESEED_ENABLED);
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-        return PSA_ERROR_INSUFFICIENT_ENTROPY;
-      }
-      #endif
-      #endif
-
       status = cryptoacc_management_acquire();
       if (status != PSA_SUCCESS) {
         return status;
       }
-
       sx_ret = sx_aes_cmac_generate(password, &temp_blk_1, &temp_blk_1);
       status = cryptoacc_management_release();
-      
-      #if (SLI_CM_COUNTERS_ENABLED)
-      new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops);
-      if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-        if (status != PSA_SUCCESS) {
-          return status;
-        }
-        return PSA_ERROR_INSUFFICIENT_ENTROPY;
-      }
-      #endif
-      
       if (status != PSA_SUCCESS) {
         return status;
       }

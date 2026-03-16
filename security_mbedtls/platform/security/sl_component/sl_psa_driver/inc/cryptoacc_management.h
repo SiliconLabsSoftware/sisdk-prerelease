@@ -49,7 +49,7 @@
 
 #include "sli_psa_driver_features.h"
 
-#if defined(CRYPTOACC_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
 
 #include "psa/crypto.h"
 
@@ -75,13 +75,6 @@ psa_status_t cryptoacc_management_acquire(void);
 psa_status_t cryptoacc_management_release(void);
 
 /**
- * \brief Loads a seed into the cryptoacc countermeasures register
- *
- * \return PSA_SUCCESS if successful, error on failure
- */
-psa_status_t cryptoacc_reseed_countermeasures(uint32_t seed);
-
-/**
  * \brief Set up hardware SCA countermeasures
  *
  * \return PSA_SUCCESS if successful, PSA_ERROR_HARDWARE_FAILURE on error
@@ -96,7 +89,7 @@ psa_status_t cryptoacc_initialize_countermeasures(void);
 }
 #endif
 
-#endif // CRYPTOACC_PRESENT
+#endif // SLI_MBEDTLS_DEVICE_VSE
 
 /** \} (end addtogroup sl_cryptoacc_management) */
 /** \} (end addtogroup sl_crypto_plugins) */

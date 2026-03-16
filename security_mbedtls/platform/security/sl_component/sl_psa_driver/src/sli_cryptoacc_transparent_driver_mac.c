@@ -44,7 +44,6 @@
 #include "sx_hash.h"
 #include "sx_errors.h"
 #include <string.h>
-#include "sli_crypto.h"
 
 #if defined(PSA_WANT_ALG_HMAC)
 static psa_status_t sli_cryptoacc_hmac_validate_key(
@@ -205,42 +204,18 @@ psa_status_t sli_cryptoacc_transparent_mac_compute(const psa_key_attributes_t *a
       block_t input_sxblk = block_t_convert(input, input_length);
       block_t mac_sxblk = block_t_convert(sx_mac_buf, BLK_CIPHER_MAC_SIZE);
 
-      #if (SLI_CM_COUNTERS_ENABLED)
-      // one block to compute subkey mac plus one block per 128 bits 
-      uint32_t n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_CMAC, input_length);
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      sl_status_t cm_status =
-      #endif
-      sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                    n_ops,
-                                    SLI_CM_AUTO_RESEED_ENABLED);
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-        return PSA_ERROR_INSUFFICIENT_ENTROPY;
-      }
-      #endif
-      #endif
       // Acquire exclusive access to the CRYPTOACC hardware
       status = cryptoacc_management_acquire();
       if (status != PSA_SUCCESS) {
         return status;
       }
+
       // Execute the CMAC operation
       sx_ret = sx_aes_cmac_generate((const block_t *)&key_sxblk,
                                     (const block_t *)&input_sxblk,
                                     &mac_sxblk);
 
       status = cryptoacc_management_release();
-
-      #if (SLI_CM_COUNTERS_ENABLED)
-      uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops);
-      if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-        if (status != PSA_SUCCESS) {
-          return status;
-        }
-        return PSA_ERROR_INSUFFICIENT_ENTROPY;
-      }
-      #endif
 
       if (sx_ret != CRYPTOLIB_SUCCESS) {
         status = PSA_ERROR_HARDWARE_FAILURE;
@@ -449,26 +424,12 @@ static psa_status_t cryptoacc_cmac_update_blk(sli_cryptoacc_transparent_mac_oper
   const block_t input_blk = block_t_convert(input, input_length);
   block_t ctx_blk = block_t_convert(operation->cipher_mac.cmac_ctx, sizeof(operation->cipher_mac.cmac_ctx));
 
-  #if (SLI_CM_COUNTERS_ENABLED)
-  // one block to compute subkey mac plus one block per 128 bits 
-  uint32_t n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_CMAC, input_length);
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  sl_status_t cm_status =
-  #endif
-  sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                n_ops,
-                                SLI_CM_AUTO_RESEED_ENABLED);
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-    return PSA_ERROR_INSUFFICIENT_ENTROPY;
-  }
-  #endif
-  #endif
   // Acquire exclusive access to the CRYPTOACC hardware
   status = cryptoacc_management_acquire();
   if (status != PSA_SUCCESS) {
     return status;
   }
+
   // CMAC state context is already initialized, do update.
   sx_ret = sx_aes_cmac_generate_update(&key_blk,
                                        &input_blk,
@@ -476,16 +437,6 @@ static psa_status_t cryptoacc_cmac_update_blk(sli_cryptoacc_transparent_mac_oper
                                        &ctx_blk);
 
   status = cryptoacc_management_release();
-
-  #if (SLI_CM_COUNTERS_ENABLED)
-  uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops);
-  if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-    if (status != PSA_SUCCESS) {
-      return status;
-    }
-    return PSA_ERROR_INSUFFICIENT_ENTROPY;
-  }
-  #endif
 
   if (sx_ret != CRYPTOLIB_SUCCESS) {
     return PSA_ERROR_HARDWARE_FAILURE;
@@ -681,22 +632,6 @@ psa_status_t sli_cryptoacc_transparent_mac_sign_finish(sli_cryptoacc_transparent
         return PSA_ERROR_BUFFER_TOO_SMALL;
       }
 
-      #if (SLI_CM_COUNTERS_ENABLED)
-      // one block to compute subkey mac plus one block per 128 bits 
-      uint32_t n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_CMAC, operation->cipher_mac.current_block_len);
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      sl_status_t cm_status =
-      #endif
-      sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                    n_ops,
-                                    SLI_CM_AUTO_RESEED_ENABLED);
-      #if (SLI_CM_AUTO_RESEED_ENABLED)
-      if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-        return PSA_ERROR_INSUFFICIENT_ENTROPY;
-      }
-      #endif
-      #endif
-
       // Acquire exclusive access to the CRYPTOACC hardware
       status = cryptoacc_management_acquire();
       if (status != PSA_SUCCESS) {
@@ -718,16 +653,6 @@ psa_status_t sli_cryptoacc_transparent_mac_sign_finish(sli_cryptoacc_transparent
                                                    &ctx_blk);
 
       status = cryptoacc_management_release();
-      
-      #if (SLI_CM_COUNTERS_ENABLED)
-      uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops);
-      if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-        if (status != PSA_SUCCESS) {
-          return status;
-        }
-        return PSA_ERROR_INSUFFICIENT_ENTROPY;
-      }
-      #endif
 
       if (sx_ret != CRYPTOLIB_SUCCESS) {
         return PSA_ERROR_HARDWARE_FAILURE;
