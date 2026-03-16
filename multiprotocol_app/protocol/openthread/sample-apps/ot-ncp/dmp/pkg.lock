@@ -50,9 +50,7 @@ version = "0"
 
 [engine]
   conan-repos = [
-    "https://artifactory.silabs.net/artifactory/api/conan/nwk-15-4-conan-sqa",
     "https://artifactory.silabs.net/artifactory/api/conan/silabs-conan-production",
     "https://artifactory.silabs.net/artifactory/api/conan/nwk-15-4-conan-dev",
-    "https://artifactory-local.silabs.net/artifactory/api/conan/studio-conan-development",
     "https://conan.silabs.net",
   ]

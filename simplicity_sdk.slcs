@@ -81,6 +81,7 @@ component_path:
 - path: platform_core_internal/util/silicon_labs/silabs_core/component
 - path: platform_core_internal/platform/emdrv/component
 - path: platform_core_internal/platform/driver/component
+- path: platform_common_apps/app/common/component
 - path: platform_core/util/plugin/component
 - path: platform_core/hardware/driver/component
 - path: platform_core/platform/peripheral/component
@@ -90,7 +91,6 @@ component_path:
 - path: platform_core/util/silicon_labs/silabs_core/component
 - path: platform_core/platform/service/component
 - path: platform_core/platform/emdrv/component
-- path: platform_common_apps/app/common/component
 - path: platform_riscv_internal/platform/rvlib/component
 - path: platform_riscv_internal/platform/service/component
 - path: platform_riscv_internal/platform/common/component
@@ -123,7 +123,8 @@ component_path:
 - path: wisun_config_generator/component
 - path: wisun/component
 - path: wisun_sdk/component
-- path: zigbee_wwah/app/framework/component
+- path: zigbee_sleepy_to_sleepy/component
+- path: zigbee_sleepy_to_sleepy/app/framework/component
 - path: zigbee/platform/radio/mac/component
 - path: zigbee/platform/radio/rail_lib/plugin/component
 - path: zigbee/component
@@ -131,8 +132,6 @@ component_path:
 - path: zigbee/util/silicon_labs/silabs_core/component
 - path: zigbee/app/framework/component
 - path: zigbee/platform/service/component
-- path: zigbee_sleepy_to_sleepy/component
-- path: zigbee_sleepy_to_sleepy/app/framework/component
 - path: zigbee_internal/platform/radio/mac/component
 - path: zigbee_internal/platform/radio/rail_lib/plugin/component
 - path: zigbee_internal/component
@@ -140,6 +139,7 @@ component_path:
 - path: zigbee_internal/util/silicon_labs/silabs_core/component
 - path: zigbee_internal/app/framework/component
 - path: zigbee_internal/platform/service/component
+- path: zigbee_wwah/app/framework/component
 - path: zigbee_smart_energy/component
 - path: zwave/component
 - path: zwave/component/CommandClasses
@@ -163,9 +163,9 @@ documentation:
   version: 4.2.1
 - docset: openthread
   version: 3.0.1
-- docset: platform_siwx91x
-  version: 4.0.1
 - docset: platform_nwp_siwx91x
+  version: 4.0.1
+- docset: platform_siwx91x
   version: 4.0.1
 - docset: rail
   version: 3.0.1
@@ -191,10 +191,10 @@ upgrade_manifest:
 - path: connect_stack/component/upgrade.slcu
 - path: cpc/upgrade.slcu
 - path: openthread/component/upgrade.slcu
+- path: platform_common_apps/app/common/upgrade.slcu
 - path: platform_core/platform/service/component/upgrade.slcu
 - path: platform_core/platform/upgrade.slcu
 - path: platform_core/hardware/upgrade.slcu
-- path: platform_common_apps/app/common/upgrade.slcu
 - path: proprietary_default_radio_confs/./upgrade.slcu
 - path: rail_sdk/upgrade.slcu
 - path: security_mbedtls/platform/security/component/upgrade.slcu

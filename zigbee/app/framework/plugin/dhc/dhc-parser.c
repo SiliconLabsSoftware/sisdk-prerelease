@@ -88,38 +88,52 @@ static sl_status_t apply_scalars(const cJSON *parent, uint32_t flags)
   const cJSON *node;
   // rssi_offset
   node = cJSON_GetObjectItemCaseSensitive(scalars, "rssi_offset");
-  if (node && cJSON_IsNumber(node)) {
-    int v = node->valueint;
-    if (v < INT8_MIN || v > INT8_MAX) {
+  if (node) {
+    if (!cJSON_IsNumber(node)) {
       return SL_STATUS_INVALID_PARAMETER;
     }
-    sl_zigbee_dhc_rssi_offset_t r = { .rssi_offset = (int8_t)v };
-    sl_status_t st = sl_zigbee_dhc_write_rssi_offset(&r);
-    // Treat NOT_AVAILABLE as non-fatal for rssi_offset (RAIL may not be initialized yet)
-    if (st != SL_STATUS_OK && st != SL_STATUS_NOT_AVAILABLE) {
-      return st;
+    if (!(flags & DHC_PARSE_FLAG_DRY_RUN)) {
+      int v = node->valueint;
+      if (v < INT8_MIN || v > INT8_MAX) {
+        return SL_STATUS_INVALID_PARAMETER;
+      }
+      sl_zigbee_dhc_rssi_offset_t r = { .rssi_offset = (int8_t)v };
+      sl_status_t st = sl_zigbee_dhc_write_rssi_offset(&r);
+      if (st != SL_STATUS_OK && st != SL_STATUS_NOT_AVAILABLE) {
+        return st;
+      }
     }
   }
   // pa_mode
   node = cJSON_GetObjectItemCaseSensitive(scalars, "pa_mode");
-  if (node && cJSON_IsNumber(node)) {
-    sl_zigbee_dhc_pa_mode_t m = { .pa_mode = (uint8_t)node->valueint };
-    sl_status_t st = sl_zigbee_dhc_write_pa_mode(&m);
-    if (st != SL_STATUS_OK) {
-      return st;
+  if (node) {
+    if (!cJSON_IsNumber(node)) {
+      return SL_STATUS_INVALID_PARAMETER;
+    }
+    if (!(flags & DHC_PARSE_FLAG_DRY_RUN)) {
+      sl_zigbee_dhc_pa_mode_t m = { .pa_mode = (uint8_t)node->valueint };
+      sl_status_t st = sl_zigbee_dhc_write_pa_mode(&m);
+      if (st != SL_STATUS_OK) {
+        return st;
+      }
     }
   }
   // ctune
   node = cJSON_GetObjectItemCaseSensitive(scalars, "ctune");
-  if (node && cJSON_IsNumber(node)) {
-    int v = node->valueint;
-    if (v < 0) {
+  if (node) {
+    if (!cJSON_IsNumber(node)) {
       return SL_STATUS_INVALID_PARAMETER;
     }
-    sl_zigbee_dhc_ctune_t c = { .ctune = (uint32_t)v };
-    sl_status_t st = sl_zigbee_dhc_write_ctune(&c);
-    if (st != SL_STATUS_OK) {
-      return st;
+    if (!(flags & DHC_PARSE_FLAG_DRY_RUN)) {
+      int v = node->valueint;
+      if (v < 0) {
+        return SL_STATUS_INVALID_PARAMETER;
+      }
+      sl_zigbee_dhc_ctune_t c = { .ctune = (uint32_t)v };
+      sl_status_t st = sl_zigbee_dhc_write_ctune(&c);
+      if (st != SL_STATUS_OK) {
+        return st;
+      }
     }
   }
   return SL_STATUS_OK;
@@ -136,8 +150,9 @@ static sl_status_t apply_metadata(const cJSON *parent, uint8_t inferred_num, uin
   md.signature = 0;  // placeholder unless provided
   if (cJSON_IsObject(meta)) {
     int tmp;
-    if (json_get_int(meta, "pa_voltage", &tmp)) {
-      if (tmp < 0 || tmp > 0xFFFF) {
+    const cJSON *pv = cJSON_GetObjectItemCaseSensitive(meta, "pa_voltage");
+    if (pv) {
+      if (!json_get_int(meta, "pa_voltage", &tmp) || tmp < 0 || tmp > 0xFFFF) {
         return SL_STATUS_INVALID_PARAMETER;
       }
       md.pa_voltage = (uint16_t)tmp;
@@ -147,7 +162,10 @@ static sl_status_t apply_metadata(const cJSON *parent, uint8_t inferred_num, uin
       md.num_descriptors = (uint8_t)u;
     }
     const cJSON *sig = cJSON_GetObjectItemCaseSensitive(meta, "signature");
-    if (sig && cJSON_IsNumber(sig)) {
+    if (sig) {
+      if (!cJSON_IsNumber(sig)) {
+        return SL_STATUS_INVALID_PARAMETER;
+      }
       md.signature = (uint32_t)sig->valuedouble;
     }
   }
@@ -349,10 +367,18 @@ static sl_status_t parse_legacy_document(const cJSON *silabs_dhc, uint32_t flags
   if (num_desc_int < 0 || num_desc_int > 255) {
     return SL_STATUS_INVALID_PARAMETER;
   }
-  (void)json_get_int(pa_curves, "pa_voltage", &pa_voltage_int);
-  (void)json_get_int(pa_curves, "signature", &signature_int);
+  if (cJSON_GetObjectItemCaseSensitive(pa_curves, "pa_voltage")) {
+    if (!json_get_int(pa_curves, "pa_voltage", &pa_voltage_int)) {
+      return SL_STATUS_INVALID_PARAMETER;
+    }
+  }
+  if (cJSON_GetObjectItemCaseSensitive(pa_curves, "signature")) {
+    if (!json_get_int(pa_curves, "signature", &signature_int)) {
+      return SL_STATUS_INVALID_PARAMETER;
+    }
+  }
 
-  // Write metadata first (mirrors legacy ordering). In legacy format, version field duplicated.
+  // Write metadata first
   if (!(flags & DHC_PARSE_FLAG_DRY_RUN)) {
     sl_zigbee_dhc_pa_metadata_t md = { 0 };
     md.version = (uint8_t)inner_version;
@@ -519,20 +545,25 @@ static sl_status_t parse_legacy_document(const cJSON *silabs_dhc, uint32_t flags
   if (!(flags & DHC_PARSE_FLAG_DRY_RUN)) {
     const cJSON *node;
     node = cJSON_GetObjectItemCaseSensitive(silabs_dhc, "rssi_offset");
-    if (node && cJSON_IsNumber(node)) {
+    if (node) {
+      if (!cJSON_IsNumber(node)) {
+        return SL_STATUS_INVALID_PARAMETER;
+      }
       int v = node->valueint;
       if (v < INT8_MIN || v > INT8_MAX) {
         return SL_STATUS_INVALID_PARAMETER;
       }
       sl_zigbee_dhc_rssi_offset_t r = { .rssi_offset = (int8_t)v };
       sl_status_t st = sl_zigbee_dhc_write_rssi_offset(&r);
-      // Treat NOT_AVAILABLE as non-fatal for rssi_offset (RAIL may not be initialized yet)
       if (st != SL_STATUS_OK && st != SL_STATUS_NOT_AVAILABLE) {
         return st;
       }
     }
     node = cJSON_GetObjectItemCaseSensitive(silabs_dhc, "pa_mode");
-    if (node && cJSON_IsNumber(node)) {
+    if (node) {
+      if (!cJSON_IsNumber(node)) {
+        return SL_STATUS_INVALID_PARAMETER;
+      }
       sl_zigbee_dhc_pa_mode_t m = { .pa_mode = (uint8_t)node->valueint };
       sl_status_t st = sl_zigbee_dhc_write_pa_mode(&m);
       if (st != SL_STATUS_OK) {
@@ -540,7 +571,10 @@ static sl_status_t parse_legacy_document(const cJSON *silabs_dhc, uint32_t flags
       }
     }
     node = cJSON_GetObjectItemCaseSensitive(silabs_dhc, "ctune");
-    if (node && cJSON_IsNumber(node)) {
+    if (node) {
+      if (!cJSON_IsNumber(node)) {
+        return SL_STATUS_INVALID_PARAMETER;
+      }
       int v = node->valueint;
       if (v < 0) {
         return SL_STATUS_INVALID_PARAMETER;

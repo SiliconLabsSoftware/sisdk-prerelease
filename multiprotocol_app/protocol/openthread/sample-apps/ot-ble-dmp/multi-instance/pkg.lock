@@ -27,7 +27,7 @@ version = "0"
   glib = [{ installer = "conan", ref = "glib/1.0.0@silabs#939887fee635ec153f39ef5df3d79a63", type = "sdk", version = "1.0.0" }]
   java21 = [{ installer = "archive", type = "tools", version = "21.0.5" }]
   micriumos = [{ installer = "conan", ref = "micriumos/6.0.0@silabs#e8fc82403d9c4266a3d89bdebb7970ce", type = "sdk", version = "6.0.0" }]
-  multiprotocol = [{ installer = "conan", ref = "multiprotocol/1.0.1-beta.2@silabs#c5f985af2b3e5a6abdc93043024525737c243b18", type = "sdk", version = "1.0.1-beta.2" }]
+  multiprotocol = [{ installer = "conan", ref = "multiprotocol/1.0.1-beta.3@silabs#84c0c8f3bb3771b3d399c816631c8b16c1cd834c", type = "sdk", version = "1.0.1-beta.3" }]
   openthread = [{ installer = "conan", ref = "openthread/3.0.1-alpha.12@silabs#1bceb68f17e351fc3ecee193839cb89349affbe0", type = "sdk", version = "3.0.1-alpha.12" }]
   openthread_stack = [{ installer = "conan", ref = "openthread_stack/3.0.1-alpha.12@silabs#1bceb68f17e351fc3ecee193839cb89349affbe0", type = "sdk", version = "3.0.1-alpha.12" }]
   pintool = [{ installer = "conan", ref = "pintool/1.0.1@silabs#4203e79b2ff611ee4e2f6d0716f1547d", type = "sdk", version = "1.0.1" }]
@@ -54,9 +54,7 @@ version = "0"
 
 [engine]
   conan-repos = [
-    "https://artifactory.silabs.net/artifactory/api/conan/nwk-15-4-conan-sqa",
     "https://artifactory.silabs.net/artifactory/api/conan/silabs-conan-production",
     "https://artifactory.silabs.net/artifactory/api/conan/nwk-15-4-conan-dev",
-    "https://artifactory-local.silabs.net/artifactory/api/conan/studio-conan-development",
     "https://conan.silabs.net",
   ]

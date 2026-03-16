@@ -899,12 +899,13 @@ class CalcManager(object):
         # if not profile.skip_target_calculation:
         self._call_target_calculate(modem_model)
 
-    def create_modem_model_instance(self, phy_name=None, profile_name=None):
+    def create_modem_model_instance(self, phy_name=None, profile_name=None, crystal_frequency=None):
         """Creates an empty model instance for a PHY or Profile
 
         Args:
             phy_name (str) : PHY name to create insance of (Optional, default = None)
             profile_name (str) : Profile name to create insance of (Optional, default = None)
+            crystal_frequency (int) : Crystal frequency in Hz to load into model instance (Optional, default = None)
             Note: You must specify either a PHY name or Profile name.
 
         Returns:
@@ -943,6 +944,9 @@ class CalcManager(object):
                 profile.buildProfileModel(modem_model_instance)
             else:
                 raise UnknownProfileException('Profile %s is not available in the Radio Configurator for this part. Please use an available Profile.' % profile_name)
+
+        if crystal_frequency is not None:
+            self.load_crystal_frequency_into_model_inputs(modem_model_instance, crystal_frequency)
 
         # Find and build phy
         if phy_name is not None:
@@ -1105,16 +1109,17 @@ class CalcManager(object):
 
         return phy_names
 
-    def create_modem_model_instance_and_load_phy(self, phy_name=None):
+    def create_modem_model_instance_and_load_phy(self, phy_name=None, crystal_frequency=None):
         """Creates a modem model instance and loads PHY
 
         Args:
             phy_name (str) : PHY name to load
+            crystal_frequency (int) : Crystal frequency in Hz to load into model instance (Optional, default = None)
 
         Returns:
             model_instance (MOdelRoot) : New instance of data model with single PHY
         """
-        model_instance = self.create_modem_model_instance(phy_name)
+        model_instance = self.create_modem_model_instance(phy_name, crystal_frequency=crystal_frequency)
         self.read_phy_into_profile(model_instance.phy.name, model_instance)
         return model_instance
 
@@ -1164,7 +1169,10 @@ class CalcManager(object):
 
     def calculate_phy(self, phy_name=None, optional_inputs=None):
         if optional_inputs is None: optional_inputs = dict()
-        model_instance = self.create_modem_model_instance_and_load_phy(phy_name)
+
+        ## Get crystal frequency here for early calculation of concurrent PHYs
+        crystal_frequency = optional_inputs.get('xtal_frequency_hz', None)
+        model_instance = self.create_modem_model_instance_and_load_phy(phy_name, crystal_frequency=crystal_frequency)
 
         if not self.check_phy_supported_on_target(phy_name, model=model_instance):
             raise PHYNotSupportedOnTargetException("PHY: {} not supported on target: {}".format(phy_name, self.target))
@@ -1184,6 +1192,25 @@ class CalcManager(object):
                 # TODO: Add hash or checksum generation here
 
             model_instance = self.load_input_dictionary_into_model(model_instance, optional_inputs)
+
+        return model_instance
+
+    def load_crystal_frequency_into_model_inputs(self, model_instance, crystal_frequency_hz):
+        """Loads crystal frequency value into model instance inputs
+
+        Args:
+            model_instance (ModelRoot) : Data model to load inputds into
+            crystal_frequency_hz (int) : Crystal frequency value in Hz
+
+        Returns:
+            model_instance (ModelRoot) : Updated data model
+        """
+        if crystal_frequency_hz is not None:
+            if hasattr(model_instance.profile.inputs, 'xtal_frequency_hz'):
+                input = getattr(model_instance.profile.inputs, 'xtal_frequency_hz')
+                input.var_value = int(crystal_frequency_hz)
+            else:
+                raise InvalidOptionOverride('xtal_frequency_hz is not a valid option input for {} profile.'.format(model_instance.profile.name))
 
         return model_instance
 
@@ -1679,7 +1706,7 @@ class CalcManager(object):
     @staticmethod
     def get_list_of_parts_supported(incl_unit_test_part=False):
         parts_list = []
-        exclude_list = ['common','wifi74000']
+        exclude_list = ['common', 'wifi74000', 'lpw74010']
         if not incl_unit_test_part:
             exclude_list.append('unit_test_part')
         parts_location = os.path.dirname(parts.__file__)
@@ -1706,31 +1733,156 @@ class CalcManager(object):
         return None
 
     def __getTargetList(self):
+        """
+        Get list of target classes for the current part family.
+
+        Returns:
+            list: List of target class objects
+
+        Raises:
+            Various exceptions with detailed error messages for different failure scenarios
+        """
         self.__verifyPartFamilyPartRevisionIsSet()
+
         try:
             targetlist = self.__getTargetListFromImport()
+
+            # Validate that we actually got targets
+            if targetlist is None or len(targetlist) == 0:
+                import_path = self.getPartFamilyImportPath(self.part_family, "targets")
+                raise ValueError(
+                    f"No valid target classes found for part family '{self.part_family}' at '{import_path}'. "
+                    f"Check that the targets directory contains valid target definition files."
+                )
+
             return targetlist
+
+        except AttributeError as ae:
+            import_path = self.getPartFamilyImportPath(self.part_family, "targets")
+            LogMgr.Error(
+                f"Missing or invalid __init__.py in targets directory for '{self.part_family}' at '{import_path}'. "
+                f"Error: {ae}"
+            )
+            raise
+
+        except ValueError as ve:
+            # Empty targets directory or no valid modules
+            LogMgr.Error(str(ve))
+            raise
+
         except ImportError as ie:
-            LogMgr.Error("Unable to import modules at: {}".format(ie))
-        except Exception:
-            LogMgr.Error(traceback.print_exc())
+            import_path = self.getPartFamilyImportPath(self.part_family, "targets")
+            LogMgr.Error(
+                f"Cannot import targets for part family '{self.part_family}' from '{import_path}'. "
+                f"Check that the targets directory exists and contains an __init__.py file. "
+                f"Error: {ie}"
+            )
+            raise
+
+        except Exception as e:
+            import_path = self.getPartFamilyImportPath(self.part_family, "targets")
+            LogMgr.Error(
+                f"Unexpected error loading targets for '{self.part_family}' from '{import_path}': {e}"
+            )
+            LogMgr.Error(traceback.format_exc())
+            raise
 
     def getTargetNameList(self):
+        """
+        Get list of target names for the current part family.
+
+        Returns:
+            list: List of target name strings
+        """
         target_name_list = []
-        target_obj_list = self.__getTargetList()
-        for target in target_obj_list:
-            name = target().getName()
-            if len(name) > 0:
-                target_name_list.append(name)
+
+        try:
+            target_obj_list = self.__getTargetList()
+
+            if target_obj_list is not None:
+                for target in target_obj_list:
+                    name = target().getName()
+                    if len(name) > 0:
+                        target_name_list.append(name)
+        except Exception as e:
+            # Re-raise with context - __getTargetList already logged the error
+            raise RuntimeError(
+                f"Failed to get target list for part family '{self.part_family}'. Make sure the targets module "
+                f"is properly defined and contains valid target classes. Error: {e}"
+            ) from e
 
         return target_name_list
 
     def __getTargetListFromImport(self):
+        """
+        Import target classes from the part family's targets module.
+
+        Returns:
+            list: List of target class objects
+
+        Raises:
+            ImportError: If import fails
+            ValueError: If directory is empty or invalid
+        """
         # Import profile modules and classes
         import_path = self.getPartFamilyImportPath(self.part_family, "targets")
+
+        # Validate directory structure before attempting import
+        self.__validateTargetsDirectory(import_path)
+
         target_list = ClassManager.getClassListFromImportPath(import_path, ITarget)
 
         return target_list
+
+    def __validateTargetsDirectory(self, import_path):
+        """
+        Validate that the targets directory exists and has proper structure.
+
+        Args:
+            import_path: Import path to targets module
+
+        Raises:
+            ImportError: If directory or __init__.py is missing
+            ValueError: If directory is empty
+        """
+
+        # Convert import path to file system path
+        # e.g., 'pyradioconfig.parts.dumbo.targets' -> 'pyradioconfig/parts/dumbo/targets'
+        relative_path = import_path.replace('.', os.sep)
+
+        # Find the base path (where pyradioconfig package is)
+        # parts.__file__ is at pyradioconfig/parts/__init__.py, so go up one level
+        base_path = os.path.dirname(os.path.dirname(parts.__file__))
+
+        # Construct full path
+        targets_dir = os.path.join(os.path.dirname(base_path), relative_path)
+
+        # Check if directory exists
+        if not os.path.exists(targets_dir):
+            raise ImportError(
+                f"Targets directory does not exist for part family '{self.part_family}' at '{targets_dir}'. "
+                f"Expected path: {import_path}"
+            )
+
+        # Check if __init__.py exists
+        init_file = os.path.join(targets_dir, '__init__.py')
+        if not os.path.exists(init_file):
+            raise ImportError(
+                f"Missing __init__.py in targets directory for '{self.part_family}' at '{targets_dir}'. "
+                f"Create an __init__.py file with: "
+                f"'from pyradioconfig.calculator_model_framework.Utils.ClassManager import ClassManager; "
+                f"__all__ = ClassManager.getModuleNamesFromPath(__file__)'"
+            )
+
+        # Check if directory has any .py files besides __init__.py
+        py_files = [f for f in os.listdir(targets_dir)
+                   if f.endswith('.py') and f != '__init__.py' and not f.startswith('__pycache__')]
+
+        if len(py_files) == 0:
+            raise ValueError(
+                f"Targets directory for '{self.part_family}' at '{targets_dir}' exists but contains no target definition files. "
+                f"Add at least one Target_*.py file or remove the empty directory."
+            )
 
     def getTargetCFGInfo(self):
         #Return the CFG output path and whether or not we track config output for this target

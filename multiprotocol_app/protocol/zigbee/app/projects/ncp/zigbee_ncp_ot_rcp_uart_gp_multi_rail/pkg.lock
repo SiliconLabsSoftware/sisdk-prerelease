@@ -44,13 +44,11 @@ version = "0"
   unity_test_framework = [{ installer = "conan", ref = "unity_test_framework/1.0.0@silabs#15ec9106afe49c1e9f9e7d642ff3b005", type = "sdk", version = "1.0.0" }]
   usb = [{ installer = "conan", ref = "usb/1.0.1@silabs#1b53dc9181c7f75d0b6db1105919129c", type = "sdk", version = "1.0.1" }]
   zap = [{ installer = "archive", type = "apack", version = "2025.12.02" }]
-  zigbee = [{ installer = "conan", ref = "zigbee/9.0.1-beta.4@silabs#371fbecc12d3518f285eaa4747bea66fa17d8cf8", type = "sdk", version = "9.0.1-beta.4" }]
+  zigbee = [{ installer = "conan", ref = "zigbee/9.0.1-beta.5@silabs#415b0a15f662985aa003e4377a4133d906abcff8", type = "sdk", version = "9.0.1-beta.5" }]
 
 [engine]
   conan-repos = [
-    "https://artifactory.silabs.net/artifactory/api/conan/nwk-15-4-conan-sqa",
     "https://artifactory.silabs.net/artifactory/api/conan/silabs-conan-production",
     "https://artifactory.silabs.net/artifactory/api/conan/nwk-15-4-conan-dev",
-    "https://artifactory-local.silabs.net/artifactory/api/conan/studio-conan-development",
     "https://conan.silabs.net",
   ]
