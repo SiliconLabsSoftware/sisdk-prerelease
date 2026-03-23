@@ -120,8 +120,8 @@ component_path:
 - path: unity_internal/component
 - path: usb/protocol/usb/component
 - path: usb_internal/protocol/usb/component
-- path: wisun_config_generator/component
 - path: wisun_sdk/component
+- path: wisun_config_generator/component
 - path: wisun/component
 - path: zigbee_smart_energy/component
 - path: zigbee_sleepy_to_sleepy/component
@@ -199,8 +199,8 @@ upgrade_manifest:
 - path: rail_sdk/upgrade.slcu
 - path: security_mbedtls/platform/security/component/upgrade.slcu
 - path: unity_test_framework/component/upgrade.slcu
-- path: wisun_config_generator/wisun_config_generator.slcu
 - path: wisun_sdk/upgrade.slcu
+- path: wisun_config_generator/wisun_config_generator.slcu
 - path: wisun/upgrade.slcu
 - path: zigbee/component/upgrade.slcu
 - path: zwave/component/upgrade.slcu
