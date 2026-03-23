@@ -778,6 +778,9 @@ int32_t parser_parse(void                              *context,
 #if defined (BTL_PARSER_SUPPORT_DELTA_DFU)
       case GblParserStateDelta:
         retval = parser_parseDelta(parserContext, &input, imageProperties);
+        if (retval != BOOTLOADER_ERROR_PARSER_PARSED) {
+          return retval;
+        }
         if (callbacks->applicationCallback != NULL) {
 #if defined(BTL_PARSER_SUPPORT_DELTA_DFU) && (BTL_DELTA_DFU_EXTRACT_TO_RAM == 1)
           // Extract delta patch to RAM instead of storage slot
@@ -798,9 +801,6 @@ int32_t parser_parse(void                              *context,
             parserContext->programmingAddress = parserContext->deltaPatchAddress;
           }
 #endif
-        }
-        if (retval != BOOTLOADER_ERROR_PARSER_PARSED) {
-          return retval;
         }
         break;
 #endif

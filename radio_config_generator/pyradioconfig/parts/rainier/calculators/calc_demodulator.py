@@ -60,7 +60,6 @@ class CalcDemodulatorRainier(Calc_Demodulator_Bobcat):
             ['CODED_500K', 3, 'Bluetooth LE Coded 500Kbps'],
             ['CONCURRENT', 4, 'Bluetooth Concurrent'],
             ['AOX_2M', 5, 'Bluetooth LE AoX 2Mbps'],
-            ['CUSTOM_1M', 6, 'Bluetooth LE Custom 1Mbps'],
             ['HADM_1M', 7, 'Bluetooth LE HADM (Channel Sounding) 1Mbps'],
             ['HADM_2M', 8, 'Bluetooth LE HADM (Channel Sounding) 2Mbps'],
             ['AOX_1M', 9, 'Bluetooth LE AoX 1Mbps'],

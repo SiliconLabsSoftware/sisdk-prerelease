@@ -3517,10 +3517,19 @@ sl_status_t EMU_DCDCModeSet(EMU_DcdcMode_TypeDef dcdcMode)
     if (currentDcdcMode != emuDcdcMode_Bypass) {
       /* Switch to BYPASS mode if it is not the current mode */
       DCDC->CTRL_CLR = DCDC_CTRL_MODE;
-      while (((DCDC->STATUS & DCDC_STATUS_BYPSW) == 0U) && (timeout < EMU_DCDC_MODE_SET_TIMEOUT)) {
-        /* Wait for BYPASS switch enable. */
+#if defined(_DCDC_DOCTRL_MASK)
+      /* Dual-output DCDC: wait for RUNNING clear and BYPSW set (fixes DECOUPLE→bypass). */
+      while ((((DCDC->STATUS & DCDC_STATUS_RUNNING) != 0U)
+              || ((DCDC->STATUS & DCDC_STATUS_BYPSW) == 0U))
+             && (timeout < EMU_DCDC_MODE_SET_TIMEOUT)) {
         timeout++;
       }
+#else
+      /* Single-output DCDC: wait for BYPASS switch to be enabled. */
+      while (((DCDC->STATUS & DCDC_STATUS_BYPSW) == 0U) && (timeout < EMU_DCDC_MODE_SET_TIMEOUT)) {
+        timeout++;
+      }
+#endif
       if (timeout >= EMU_DCDC_MODE_SET_TIMEOUT) {
         error = SL_STATUS_TIMEOUT;
       }

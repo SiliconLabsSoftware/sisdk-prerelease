@@ -2675,6 +2675,11 @@ void app_rftest_start_tx(sl_cli_command_arg_t *arguments)
 
   app_wisun_cli_mutex_lock();
 
+  if (sl_cli_get_argument_count(arguments) > 6) {
+    printf("[Failed: invalid number of arguments]\r\n");
+    goto cleanup;
+  }
+
   channel = sl_cli_get_argument_uint32(arguments, 0);
   count = sl_cli_get_argument_uint32(arguments, 1);
   data_length = sl_cli_get_argument_uint32(arguments, 2);
@@ -2720,6 +2725,11 @@ void app_rftest_start_rx(sl_cli_command_arg_t *arguments)
   uint8_t channel_mask[SL_WISUN_CHANNEL_MASK_SIZE];
 
   app_wisun_cli_mutex_lock();
+
+  if (sl_cli_get_argument_count(arguments) > 3) {
+    printf("[Failed: invalid number of arguments]\r\n");
+    goto cleanup;
+  }
 
   channel = sl_cli_get_argument_uint32(arguments, 0);
   duration_ms = sl_cli_get_argument_uint32(arguments, 1);
@@ -2779,6 +2789,11 @@ void app_rftest_start_stream(sl_cli_command_arg_t *arguments)
   uint8_t channel_mask[SL_WISUN_CHANNEL_MASK_SIZE];
 
   app_wisun_cli_mutex_lock();
+
+  if (sl_cli_get_argument_count(arguments) > 2) {
+    printf("[Failed: invalid number of arguments]\r\n");
+    goto cleanup;
+  }
 
   channel = sl_cli_get_argument_uint32(arguments, 0);
   if (sl_cli_get_argument_count(arguments) > 1) {
@@ -2840,6 +2855,11 @@ void app_rftest_start_tone(sl_cli_command_arg_t *arguments)
   uint8_t channel_mask[SL_WISUN_CHANNEL_MASK_SIZE];
 
   app_wisun_cli_mutex_lock();
+
+  if (sl_cli_get_argument_count(arguments) > 2) {
+    printf("[Failed: invalid number of arguments]\r\n");
+    goto cleanup;
+  }
 
   channel = sl_cli_get_argument_uint32(arguments, 0);
   if (sl_cli_get_argument_count(arguments) > 1) {

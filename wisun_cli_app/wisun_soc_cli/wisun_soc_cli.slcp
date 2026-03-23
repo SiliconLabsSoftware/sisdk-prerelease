@@ -583,7 +583,7 @@ template_contribution:
         - type: uint16
           help: "Channel Id"
         - type: uint8opt
-          help: "phy config type (optional, FAN 1.1 by default)"
+          help: "phy config type (optional, 1=FAN1.1 by default): 0=FAN1.0, 1=FAN1.1, 2=Explicit PHY, 3=Explicit RAIL (IDS), 4=Custom FSK, 5=Custom OFDM, 6=Custom OQPSK"
       shortcuts:
         - name: "[strs] "
   - name: "cli_command"
@@ -604,7 +604,7 @@ template_contribution:
         - type: uint16
           help: "Channel Id"
         - type: uint8opt
-          help: "phy config type (optional, FAN 1.1 by default)"
+          help: "phy config type (optional, 1=FAN1.1 by default): 0=FAN1.0, 1=FAN1.1, 2=Explicit PHY, 3=Explicit RAIL (IDS), 4=Custom FSK, 5=Custom OFDM, 6=Custom OQPSK"
       shortcuts:
         - name: "strt"
   - name: "cli_command"
@@ -631,9 +631,9 @@ template_contribution:
         - type: uint32
           help: "Interval between transmissions (ms)"
         - type: uint8
-          help: "CCA enable (0=off, 1=on)"
+          help: "CCA enable (0=off, else=on)"
         - type: uint8opt
-          help: "phy config type (optional, FAN 1.1 by default)"
+          help: "phy config type (optional, 1=FAN1.1 by default): 0=FAN1.0, 1=FAN1.1, 2=Explicit PHY, 3=Explicit RAIL (IDS), 4=Custom FSK, 5=Custom OFDM, 6=Custom OQPSK"
       shortcuts:
         - name: "stx"
   - name: "cli_command"
@@ -648,7 +648,7 @@ template_contribution:
         - type: uint32
           help: "Duration (ms)"
         - type: uint8opt
-          help: "phy config type (optional, FAN 1.1 by default)"
+          help: "phy config type (optional, 1=FAN1.1 by default): 0=FAN1.0, 1=FAN1.1, 2=Explicit PHY, 3=Explicit RAIL (IDS), 4=Custom FSK, 5=Custom OFDM, 6=Custom OQPSK"
       shortcuts:
         - name: "srx"
   - name: "cli_command"

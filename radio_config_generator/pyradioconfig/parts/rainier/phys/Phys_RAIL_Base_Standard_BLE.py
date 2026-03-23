@@ -227,8 +227,8 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
                     phy_name=phy_name)
         model.vars.adc_clock_mode.value_forced = model.vars.adc_clock_mode.var_enum.HFXOMULT
         self.Bluetooth_LE_Viterbi_noDSA_base(phy, model)
-        phy.profile_inputs.modulator_select.value = model.vars.modulator_select.var_enum.PH_MOD
         model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
+        phy.profile_inputs.modulator_select.value = model.vars.modulator_select.var_enum.PH_MOD
         phy.profile_inputs.base_frequency_hz.value = long(2494630022)
 
         # default bandwidth will cause halfrate unless forced
@@ -712,6 +712,20 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         phy.profile_inputs.modulator_select.value = model.vars.modulator_select.var_enum.IQ_MOD
         self.BLE_2M_TX_Shaping_Coeffs_IQMOD(phy, model)
         model.vars.synth_tx_mode.value_forced = model.vars.synth_tx_mode.var_enum.MODE_IQMOD
+
+        return phy
+
+    def PHY_Bluetooth_LE_HDT(self, model, phy_name=None):
+        phy = self._makePhy(model, model.profiles.Base, readable_name='BLE HDT PHY', phy_name=phy_name)
+        self.Bluetooth_LE_2M_Viterbi_noDSA_base(phy, model)
+        model.vars.protocol_id.value_forced = model.vars.protocol_id.var_enum.HDT
+        phy.profile_inputs.demod_select.value = model.vars.demod_select.var_enum.HDT
+        phy.profile_inputs.shaping_filter.value = model.vars.shaping_filter.var_enum.Root_Raised_Cosine
+        phy.profile_inputs.shaping_filter_param.value = 0.4
+
+        # IFPKD thresholds
+        phy.profile_outputs.RAC_TIACTRL0_TIATHRPKDHISEL.override = 4  #250 mV
+        phy.profile_outputs.RAC_TIACTRL0_TIATHRPKDLOSEL.override = 1  #100 mV
 
         return phy
 

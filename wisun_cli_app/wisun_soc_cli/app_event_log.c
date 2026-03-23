@@ -156,6 +156,6 @@ void app_handle_event_logger_ind(sl_wisun_evt_t *evt) {
   printf("]\r\n");
 
   if (logger_event.type == SL_WISUN_LOGGER_EVENT_TYPE_RF_TEST) {
-    sl_wisun_rf_test_event_callback(logger_event.u.rf_test.events);
+    sl_wisun_rf_test_event_callback(logger_event.u.rf_test.events, logger_event.u.rf_test.u.rx.rssi);
   }
 }

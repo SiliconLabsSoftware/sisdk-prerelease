@@ -1329,13 +1329,29 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_logger_event_tx_failure_t;
 SL_PACK_END()
 
+/// Value for rssi when not applicable (e.g. TX or non-RX events)
+#define SL_WISUN_RF_TEST_RSSI_NOT_AVAILABLE  (-128)
+
+/// RF test RX event information (valid when @ref SL_RAIL_EVENT_RX_PACKET_RECEIVED is set)
+SL_PACK_START(1)
+typedef struct {
+  /// RSSI in dBm; @ref SL_WISUN_RF_TEST_RSSI_NOT_AVAILABLE when not applicable
+  int8_t rssi;
+  /// Reserved for future use
+  uint8_t reserved[3];
+} SL_ATTRIBUTE_PACKED sl_wisun_logger_event_rf_test_rx_t;
+SL_PACK_END()
+
 /// RF test event information
 SL_PACK_START(1)
 typedef struct {
   /// RAIL events associated with the RF test event
   uint64_t events;
-  /// Reserved for future use
-  uint8_t reserved[4];
+  /// Event-specific data
+  union {
+    /// RX packet received information (when @ref SL_RAIL_EVENT_RX_PACKET_RECEIVED is set in events)
+    sl_wisun_logger_event_rf_test_rx_t rx;
+  } u;
 } SL_ATTRIBUTE_PACKED sl_wisun_logger_event_rf_test_t;
 SL_PACK_END()
 

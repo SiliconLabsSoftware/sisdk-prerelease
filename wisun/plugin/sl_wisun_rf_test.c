@@ -60,6 +60,8 @@ static int8_t test_tx_power;
 static uint8_t rf_test_phy_mode_id;
 static uint8_t rf_test_reg_domain;
 static uint16_t rf_test_physical_channel_offset;
+static uint16_t rf_test_channel_start;
+static uint16_t rf_test_channel_end;
 static uint32_t rf_test_rx_packet_count;
 static uint16_t rf_test_tx_remaining_count;
 
@@ -153,7 +155,7 @@ sl_status_t sl_wisun_rf_test_set_phy_config(sl_wisun_phy_config_t *phy_config)
   status = check_rf_test(false);
   SLI_WISUN_ERROR_CHECK_SET_STATUS(SL_STATUS_OK == status, status);
 
-  status = rf_test_phy_config_to_chan_config(phy_config, &chan_config, &phy_mode_id, &reg_domain, &rf_test_physical_channel_offset);
+  status = rf_test_phy_config_to_chan_config(phy_config, &chan_config, &phy_mode_id, &reg_domain, &rf_test_physical_channel_offset, &rf_test_channel_start, &rf_test_channel_end);
   SLI_WISUN_ERROR_CHECK_SET_STATUS(SL_STATUS_OK == status, status);
   if (status != SL_STATUS_OK || chan_config.p_stack_info == NULL) {
     SLI_WISUN_ERROR_SET_STATUS(status);
@@ -201,41 +203,21 @@ static void rf_test_tx_failure_callback(void)
   }
 }
 
-static void rf_test_rx_received_callback(void)
+static void rf_test_rx_received_callback(int8_t rssi)
 {
-  sl_rail_handle_t rail_handle;
-  sl_rail_status_t rail_status;
-  sl_rail_rx_packet_info_t rx_info;
-  sl_rail_rx_packet_details_t rx_details;
-  sl_rail_rx_packet_handle_t rx_handle;
-
-  rail_status = sli_wisun_get_rail_handle(&rail_handle);
-  if (rail_status != SL_STATUS_OK) {
-    sl_wisun_trace_error("rf_test: unable to get rail handle");
-    return;
-  }
-  rx_handle = sl_rail_get_rx_packet_info(rail_handle,
-                                           SL_RAIL_RX_PACKET_HANDLE_NEWEST,
-                                           &rx_info);
-  if (rx_handle == SL_RAIL_RX_PACKET_HANDLE_INVALID) {
-    sl_wisun_trace_error("rf_test: unable to get RX packet info");
-    return;
-  }
-  rail_status = sl_rail_get_rx_packet_details(rail_handle, rx_handle, &rx_details);
-
   rf_test_rx_packet_count++;
   printf("RF test RX rssi=%d dBm, packets since start_rx: %lu\r\n",
-         rx_details.rssi_dbm,
+         rssi,
          (unsigned long)rf_test_rx_packet_count);
 }
 
-void sl_wisun_rf_test_event_callback(uint64_t events)
+void sl_wisun_rf_test_event_callback(uint64_t events, int8_t rssi)
 {
   if (events & SL_RAIL_EVENT_TX_PACKET_SENT) {
     rf_test_tx_sent_callback();
   }
   if (events & SL_RAIL_EVENT_RX_PACKET_RECEIVED) {
-    rf_test_rx_received_callback();
+    rf_test_rx_received_callback(rssi);
   }
   if (events & SL_RAIL_EVENT_TX_UNDERFLOW) {
     rf_test_tx_failure_callback();
@@ -271,7 +253,7 @@ sl_status_t sl_wisun_rf_test_start_tx(uint16_t channel,
   status = check_rf_test(true);
   SLI_WISUN_ERROR_CHECK_SET_STATUS(SL_STATUS_OK == status, status);
 
-  if (count == 0 || data_length == 0 || interval_ms == 0) {
+  if (count == 0 || data_length == 0 || interval_ms == 0 || data_length > MAX_PACKET_LENGTH) {
     SLI_WISUN_ERROR_SET_STATUS(SL_STATUS_INVALID_PARAMETER);
   }
 
@@ -289,6 +271,10 @@ sl_status_t sl_wisun_rf_test_start_tx(uint16_t channel,
 
   rail_status = sl_rail_is_valid_channel(rail_handle, channel);
   SLI_WISUN_ERROR_CHECK_SET_STATUS(SL_RAIL_STATUS_NO_ERROR == rail_status, SL_STATUS_INVALID_PARAMETER);
+  if (channel < rf_test_channel_start || channel > rf_test_channel_end) {
+    sl_wisun_trace_error("rf_test: channel %u is out of range", channel);
+    SLI_WISUN_ERROR_SET_STATUS(SL_STATUS_INVALID_PARAMETER);
+  }
 
   sl_rail_calibrate(rail_handle, &rf_phy_cal_values, SL_RAIL_CAL_ALL_PENDING);
 
@@ -377,7 +363,10 @@ sl_status_t sl_wisun_rf_test_start_rx(uint16_t channel, uint32_t duration)
 
   rail_status = sl_rail_is_valid_channel(rail_handle, channel);
   SLI_WISUN_ERROR_CHECK_SET_STATUS(SL_RAIL_STATUS_NO_ERROR == rail_status, SL_STATUS_INVALID_PARAMETER);
-
+  if (channel < rf_test_channel_start || channel > rf_test_channel_end) {
+    sl_wisun_trace_error("rf_test: channel %u is out of range", channel);
+    SLI_WISUN_ERROR_SET_STATUS(SL_STATUS_INVALID_PARAMETER);
+  }
   rf_test_running = RF_TEST_RX_ACTIVE;
   rf_scheduler_info.priority = RF_PRIORITY_PROTECTED;
   //tx power will be set during the stop proceedure
@@ -422,6 +411,10 @@ static sl_status_t start_rf_test(uint16_t channel, sl_rail_stream_mode_t mode)
 
   rail_status = sl_rail_is_valid_channel(rail_handle, channel);
   SLI_WISUN_ERROR_CHECK_SET_STATUS(SL_RAIL_STATUS_NO_ERROR == rail_status, SL_STATUS_INVALID_PARAMETER);
+  if (channel < rf_test_channel_start || channel > rf_test_channel_end) {
+    sl_wisun_trace_error("rf_test: channel %u is out of range", channel);
+    SLI_WISUN_ERROR_SET_STATUS(SL_STATUS_INVALID_PARAMETER);
+  }
 
   // Backup stack Tx Power
   stack_tx_power = sl_rail_get_tx_power_dbm(rail_handle);
