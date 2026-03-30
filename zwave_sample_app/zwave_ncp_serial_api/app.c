@@ -787,7 +787,7 @@ ApplicationInit(
   zpal_reset_reason_t eResetReason)
 {
 #ifdef SL_CATALOG_ZW_SHUTDOWN_MANAGER_PRESENT
-  zw_shutdown_manager_init();
+  (void) zw_shutdown_manager_init();
 #endif
   // enable the watchdog at init of application
   zpal_watchdog_init();

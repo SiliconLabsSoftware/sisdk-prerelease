@@ -23,7 +23,7 @@ requires:
 - name: "wisun_br_implementation"
 - name: "event_system"
 - name: "errno"
-- name: "wisun_direct_connect_client"
+- name: "wisun_dc_client_stubs"
 - name: "hal_prs"
 - name: "clock_manager_runtime"
 - name: "event_queue_task"
@@ -33,13 +33,11 @@ recommends:
   vendor: silabs
 - id: "rail_lib_singleprotocol"
   vendor: silabs
-- id: "wisun_direct_connect_client_stubs"
-  vendor: silabs
 - id: "wisun_event_task"
 
   vendor: silabs
 conflicts:
-- name: "wisun_direct_connect_client_library"
+- name: "wisun_dc_client_library"
 
 provides:
 - name: "wisun_br_stack"

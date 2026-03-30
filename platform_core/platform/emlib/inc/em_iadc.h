@@ -360,10 +360,14 @@ typedef enum {
 #if defined(_IADC_SCAN_PORTPOS_PADANA0)
   /** Direct connection to Pad_ana_0 input pin */
   iadcPosInputPadAna0   = (_IADC_SCAN_PORTPOS_PADANA0 << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT)),
+  iadcPosInputPadAna1   = (_IADC_SCAN_PORTPOS_PADANA0 << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT))
+                          | 1,
 #endif
 #if defined(_IADC_SCAN_PORTPOS_PADANA2)
   /** Direct connection to Pad_ana_2 input pin */
   iadcPosInputPadAna2   = (_IADC_SCAN_PORTPOS_PADANA2 << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT)),
+  iadcPosInputPadAna3   = (_IADC_SCAN_PORTPOS_PADANA2 << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT))
+                          | 1,
 #endif
 #if defined(_IADC_SCAN_PORTPOS_PADREFPOS)
   /** Positive reference pin 0  */

@@ -15,6 +15,7 @@
  *
  ******************************************************************************/
 #include "gpd-components-common.h"
+#include "gpd-cb.h"
 
 static sl_rail_handle_t railHandle = NULL;
 static bool     rfReady = false;

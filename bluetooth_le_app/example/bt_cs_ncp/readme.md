@@ -58,10 +58,12 @@ Build and flash the application. Use the "bt_cs_host" host sample application to
 ### Calculating the size of "Procedure maximum length" and "Maximum ranging data size"
 The optimal value of "Procedure maximum length" is dependent on several configuration values, and can be calculated by the following equation:
 
-proc_max_len = 4 + (subevents * 8) + (mode0_steps * mode0_size) + channels * ( ( 1 + ( antenna_paths + 1 ) * 4) + 1 )
+proc_max_len = 4 + (subevents * 8) + (subevents * mode0_steps * mode0_size) + channels * ( ( 1 + ( antenna_paths + 1 ) * 4) + 1 )
 
 where
-- subevents value is constant 1 since one subevent per procedure is supported,
+- subevents is the number of CS subevents per procedure (range: 1..32), determined by the
+controller based on CS_INITIATOR_DEFAULT_MIN_SUBEVENT_LEN and CS_INITIATOR_DEFAULT_MAX_SUBEVENT_LEN.
+Shorter subevent lengths allow more subevents per procedure.
 - mode0_size is
   - 4 for Reflector and
   - 6 for Initiator,
@@ -72,7 +74,7 @@ where
   - "Custom" - Number of 1s in channel mask,
 - antenna_paths value is controlled by the "Antenna configuration", and limited by number of antennas presented on each board (capabilities). Maximum can be calculated using the product of used Initiator and Reflector antennae. The default maximum value for antenna_paths is 4.
 
-These settings were selected by assuming that the controller creates only one subevent per procedure, and the measuring mode is PBR. In RTT mode there are far less data is created.
+These settings were selected by assuming that the controller creates the maximum number of subevents (32) per procedure, and the measuring mode is PBR. In RTT mode there are far less data is created.
 
 If you use submode, you should add the following to the sum:
 
@@ -82,7 +84,8 @@ where
 - mode1_size is 6
 - main_mode_steps is the value of min_main_mode_steps ranging from to 2. This can be changed in cs_initiator_client.h.
 
-The default is calculated by using the constants and settings above using the worst case scenario, which gives 1866 bytes.
+The default is calculated by using the constants and settings above using the worst case scenario, including using RTT submode
+which gives 2,672 bytes (default set to 2700).
 RAM consumption can be reduced by changing the affected settings and reducing "Procedure maximum length" accordingly.
 
 ## Device Firmware Update

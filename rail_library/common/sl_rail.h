@@ -3138,7 +3138,7 @@ sl_rail_status_t sl_rail_start_cca_lbt_tx(sl_rail_handle_t rail_handle,
  * @param[in] channel The channel to transmit on.
  * @param[in] tx_options TX options to be applied to this transmit only.
  * @param[in] p_scheduled_tx_config A pointer to the \ref sl_rail_scheduled_tx_config_t
- *   structure describing the CSMA parameters to use for this transmit.
+ *   structure indicating when the CSMA operation should commence.
  * @param[in] p_csma_config A pointer to the \ref sl_rail_csma_config_t structure
  *   describing the CSMA parameters to use for this transmit.
  *   \n In multiprotocol this must point to global or heap storage that remains
@@ -3182,7 +3182,7 @@ sl_rail_status_t sl_rail_start_scheduled_cca_csma_tx(sl_rail_handle_t rail_handl
  * @param[in] channel The channel to transmit on.
  * @param[in] tx_options TX options to be applied to this transmit only.
  * @param[in] p_scheduled_tx_config A pointer to the \ref sl_rail_scheduled_tx_config_t
- *   structure describing the CSMA parameters to use for this transmit.
+ *   structure indicating when the LBT operation should commence.
  * @param[in] p_lbt_config A pointer to the \ref sl_rail_lbt_config_t structure
  *   describing the LBT parameters to use for this transmit.
  *   \n In multiprotocol this must point to global or heap storage that remains

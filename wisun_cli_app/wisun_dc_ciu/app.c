@@ -57,18 +57,20 @@
 /// DC CIU states - simplified automatic flow
 typedef enum {
   STATE_IDLE = 0,       ///< Waiting for BTN0 to start
-  STATE_STARTING,       ///< DC client starting, then auto-scan
   STATE_SCANNING,       ///< Scanning for matching DC ID
   STATE_CONNECTING,     ///< Connecting to discovered server
   STATE_CONNECTED,      ///< Connected, inactivity timer active
-  STATE_STOPPING        ///< Stopping DC client before EM4
+  STATE_STOPPING,       ///< Stopping DC client before EM4
+  STATE_STOPPED         ///< Stopped, about to enter EM4
 } dc_ciu_state_t;
 
 /// Reason for entering STOPPING state
 typedef enum {
-  STOP_REASON_DELIBERATE = 0,  ///< User pressed BTN1
+  STOP_REASON_DELIBERATE = 0,  ///< User pressed BTN0
   STOP_REASON_TIMEOUT,         ///< Inactivity timeout
-  STOP_REASON_ERROR            ///< Scan timeout, connect fail, connection lost
+  STOP_REASON_SCAN_FAILED,     ///< Scan API error or no server found
+  STOP_REASON_CONNECT_FAILED,  ///< PMK import, connect API, or connection failed
+  STOP_REASON_CONNECTION_LOST  ///< Connection lost to server
 } stop_reason_t;
 
 // -----------------------------------------------------------------------------
@@ -78,7 +80,7 @@ typedef enum {
 /// Current state
 static dc_ciu_state_t state = STATE_IDLE;
 
-/// Stop reason (determines EM4 delay)
+/// Stop reason (logged before EM4 entry)
 static stop_reason_t stop_reason = STOP_REASON_DELIBERATE;
 
 /// Idle timer (triggers EM4 after inactivity in any state)
@@ -119,6 +121,12 @@ static osThreadId_t udp_rx_task_id = NULL;
 
 /// Message queue ID
 static osMessageQueueId_t msg_queue = NULL;
+
+// -----------------------------------------------------------------------------
+//                          Forward Declarations
+// -----------------------------------------------------------------------------
+
+static void handle_dc_client_stopped(void);
 
 // -----------------------------------------------------------------------------
 //                          Display Functions
@@ -192,7 +200,6 @@ static void refresh_display(const char *fmt, ...)
       draw_text(3, "BTN1: -");
       break;
 
-    case STATE_STARTING:
     case STATE_SCANNING:
     case STATE_CONNECTING:
       draw_text(2, "BTN0: Stop");
@@ -209,6 +216,11 @@ static void refresh_display(const char *fmt, ...)
       draw_text(3, "BTN1: -");
       break;
 
+    case STATE_STOPPED:
+      draw_text(2, "BTN0: Wakeup");
+      draw_text(3, "BTN1: Wakeup");
+      break;
+
     default:
       break;
   }
@@ -219,11 +231,11 @@ static void refresh_display(const char *fmt, ...)
   // State string
   switch (state) {
     case STATE_IDLE:       state_str = "IDLE";       break;
-    case STATE_STARTING:   state_str = "STARTING";   break;
     case STATE_SCANNING:   state_str = "SCANNING";   break;
     case STATE_CONNECTING: state_str = "CONNECTING"; break;
     case STATE_CONNECTED:  state_str = "CONNECTED";  break;
     case STATE_STOPPING:   state_str = "STOPPING";   break;
+    case STATE_STOPPED:    state_str = "STOPPED";    break;
     default:               state_str = "UNKNOWN";    break;
   }
   draw_text(8, state_str);
@@ -418,6 +430,18 @@ static void send_message_to_server(void)
 //                          State Management
 // -----------------------------------------------------------------------------
 
+static const char *stop_reason_str(stop_reason_t reason)
+{
+  switch (reason) {
+    case STOP_REASON_DELIBERATE: return "user stop";
+    case STOP_REASON_TIMEOUT:    return "idle timeout";
+    case STOP_REASON_SCAN_FAILED:     return "scan failed";
+    case STOP_REASON_CONNECT_FAILED:  return "connect failed";
+    case STOP_REASON_CONNECTION_LOST: return "conn lost";
+    default:                     return "unknown";
+  }
+}
+
 /***************************************************************************//**
  * Stop the DC client.
  *
@@ -426,20 +450,27 @@ static void send_message_to_server(void)
  *
  * @param reason The reason for stopping (deliberate, timeout, or error).
  ******************************************************************************/
-static void start_stop(stop_reason_t reason)
+static void initiate_stop(stop_reason_t reason)
 {
-  stop_reason = reason;
-  state = STATE_STOPPING;
+  sl_status_t status;
+
+  if (state == STATE_STOPPING || state == STATE_STOPPED) {
+    return;
+  }
 
   sl_sleeptimer_stop_timer(&idle_timer);
-
-  // Close socket (UDP RX task will exit on socket error)
   close_udp_socket();
 
-  // Stop DC client (will trigger STOPPED event)
-  sl_wisun_stop_direct_connect_client();
-
+  stop_reason = reason;
+  state = STATE_STOPPING;
   refresh_display("Stopping...");
+
+  status = sl_wisun_stop_direct_connect_client();
+  if (status != SL_STATUS_OK) {
+    // Stop API failed — the client was likely already stopped.
+    // Transition directly since we won't receive a STOPPED event.
+    handle_dc_client_stopped();
+  }
 }
 
 /***************************************************************************//**
@@ -463,8 +494,7 @@ static void start_scan(void)
     refresh_display("Scanning...");
   } else {
     printf("Scan failed: 0x%04x\n", (unsigned)status);
-    refresh_display("Scan err: 0x%04x", (unsigned)status);
-    start_stop(STOP_REASON_ERROR);
+    initiate_stop(STOP_REASON_SCAN_FAILED);
   }
 }
 
@@ -484,8 +514,7 @@ static void start_connect(void)
   status = import_direct_connect_pmk();
   if (status != SL_STATUS_OK) {
     printf("PMK import failed\n");
-    refresh_display("PMK error");
-    start_stop(STOP_REASON_ERROR);
+    initiate_stop(STOP_REASON_CONNECT_FAILED);
     return;
   }
 
@@ -497,8 +526,7 @@ static void start_connect(void)
     refresh_display("Connecting...");
   } else {
     printf("Connect failed: 0x%04x\n", (unsigned)status);
-    refresh_display("Connect err: 0x%04x", (unsigned)status);
-    start_stop(STOP_REASON_ERROR);
+    initiate_stop(STOP_REASON_CONNECT_FAILED);
   }
 }
 
@@ -587,9 +615,10 @@ static void handle_dc_client_stopped(void)
   }
 
   msg_count = 0;
+  state = STATE_STOPPED;
 
-  printf("Entering EM4...\n");
-  refresh_display("Entering EM4...");
+  printf("Entering EM4 (%s)\n", stop_reason_str(stop_reason));
+  refresh_display("EM4: %s", stop_reason_str(stop_reason));
   sl_power_manager_enter_em4();
 }
 
@@ -605,8 +634,7 @@ static void handle_dc_client_connection_failed(void)
   }
 
   printf("Connection failed\n");
-  refresh_display("Connect failed");
-  start_stop(STOP_REASON_ERROR);
+  initiate_stop(STOP_REASON_CONNECT_FAILED);
 }
 
 /***************************************************************************//**
@@ -621,8 +649,7 @@ static void handle_dc_client_connection_lost(void)
   }
 
   printf("Connection lost\n");
-  refresh_display("Connection lost");
-  start_stop(STOP_REASON_ERROR);
+  initiate_stop(STOP_REASON_CONNECTION_LOST);
 }
 
 /***************************************************************************//**
@@ -637,8 +664,7 @@ static void handle_dc_client_scan_complete(void)
   }
 
   printf("No server found\n");
-  refresh_display("No server found");
-  start_stop(STOP_REASON_ERROR);
+  initiate_stop(STOP_REASON_SCAN_FAILED);
 }
 
 /***************************************************************************//**
@@ -759,11 +785,14 @@ static void handle_btn0(void)
 
       status = sl_wisun_start_direct_connect_client(&phy_config);
       if (status == SL_STATUS_OK) {
-        state = STATE_STARTING;
         start_scan();
       } else {
         printf("Start failed: 0x%04x\n", (unsigned)status);
         refresh_display("Start err: 0x%04x", (unsigned)status);
+        sl_sleeptimer_restart_timer_ms(&idle_timer,
+                                       dc_ciu_settings.idle_timeout_ms,
+                                       idle_timer_callback,
+                                       NULL, 0, 0);
       }
       break;
 
@@ -772,7 +801,7 @@ static void handle_btn0(void)
       break;
 
     default:
-      start_stop(STOP_REASON_DELIBERATE);
+      initiate_stop(STOP_REASON_DELIBERATE);
       break;
   }
 }
@@ -835,12 +864,12 @@ static void event_task(void *args)
         case SL_DC_CIU_MSG_IDLE_TIMEOUT:
           if (state == STATE_CONNECTED) {
             // Stop client first, then EM4 will be entered in STOPPED handler
-            start_stop(STOP_REASON_TIMEOUT);
+            initiate_stop(STOP_REASON_TIMEOUT);
           } else if (state == STATE_IDLE) {
-            printf("Entering EM4...\n");
-            refresh_display("Entering EM4...");
+            state = STATE_STOPPED;
+            printf("Entering EM4 (idle timeout)\n");
+            refresh_display("EM4: idle timeout");
             sl_power_manager_enter_em4();
-            // Never returns - wake causes reset
           }
           break;
 
@@ -882,14 +911,14 @@ void app_init(void)
 
   osThreadId_t event_task_id;
 
+  init_display();
+
   printf("\n");
   printf("========================================\n");
   printf("               DC CIU\n");
   printf("========================================\n");
 
   app_cli_init();
-
-  init_display();
 
   app_cli_get_phy_config(&phy_config);
 
@@ -1006,11 +1035,11 @@ const char *app_get_state_name(int state_val)
 {
   switch ((dc_ciu_state_t)state_val) {
     case STATE_IDLE:       return "IDLE";
-    case STATE_STARTING:   return "STARTING";
     case STATE_SCANNING:   return "SCANNING";
     case STATE_CONNECTING: return "CONNECTING";
     case STATE_CONNECTED:  return "CONNECTED";
     case STATE_STOPPING:   return "STOPPING";
+    case STATE_STOPPED:    return "STOPPED";
     default:               return "UNKNOWN";
   }
 }

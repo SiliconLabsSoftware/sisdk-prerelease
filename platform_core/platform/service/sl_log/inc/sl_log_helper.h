@@ -47,6 +47,8 @@ extern "C" {
 #ifdef SL_CATALOG_LOG_BACKEND_PROPRIETARY_PRESENT
 #include "sl_log_proprietary_config.h"
 #endif
+#include "sl_common.h"
+#define SL_STRINGIFY(x) STRINGIZE(x)
 
 /** @addtogroup sl_log_helper SL Log Helper Functions
  * @brief Helper macros and utilities for the Silicon Labs logging system
@@ -96,7 +98,7 @@ extern "C" {
  *
  * IAR-specific pragma for placing log format strings in a dedicated section.
  */
-#define SL_COMPACT_STRINGS_SECTION _Pragma("location=\"log_fmt\"")
+#define SL_COMPACT_STRINGS_SECTION @"log_fmt"
 
 #else
 /**
@@ -377,6 +379,61 @@ extern "C" {
   (event_id, 1, ##__VA_ARGS__)
 
 /** @} (end addtogroup sl_log_common_macros) */
+
+/***************************************************************************//**
+ * @addtogroup assert ASSERT - Assert
+ * @brief Enhanced assert/error checking module with detailed logging
+ * @details
+ * This implementation provides comprehensive assert handling with:
+ * - File name, line number, and expression logging
+ * - Debug session detection and breakpoint triggering
+ * - Conditional debug asserts via SL_LOG_DEBUG_ASSERT_ENABLE flag
+ *
+ * Assert Macros:
+ * - SL_LOG_CRASH_ASSERT: Always active, triggers assert handler
+ * - SL_LOG_DEBUG_ASSERT: Active only when SL_LOG_DEBUG_ASSERT_ENABLE is defined
+ * - assert: Core assert implementation with detailed logging
+ * @{
+ ******************************************************************************/
+
+/***************************************************************************//**
+ * @brief
+ *    Core assert implementation with file, line, and expression logging
+ * @details
+ *    If the condition is false, constructs a detailed error string and
+ *    passes it to sli_assert_implementation for handling.
+ ******************************************************************************/
+#define debug_assert(__e) \
+    ((__e) \
+        ? (void)0 \
+        : sli_log_assert_implementation( \
+            __FILE__ ":" SL_STRINGIFY(__LINE__) " - Assertion failed: " #__e) \
+)
+
+
+/***************************************************************************//**
+* @brief
+*    Crash assert - always enabled regardless of SL_LOG_DEBUG_ASSERT_ENABLE configuration
+******************************************************************************/
+
+#define SL_LOG_CRASH_ASSERT(condition) debug_assert(condition)
+
+/***************************************************************************//**
+* @brief
+*    Debug assert - enabled only when SL_LOG_DEBUG_ASSERT_ENABLE is defined
+* @details
+*    In debug builds, maps to SL_LOG_CRASH_ASSERT for full error handling.
+*    In release builds, this macro is disabled (no-op) to save code space.
+******************************************************************************/
+
+#if SL_LOG_DEBUG_ASSERT_ENABLE
+#define SL_LOG_DEBUG_ASSERT(condition) SL_LOG_CRASH_ASSERT(condition) // If SL_LOG_DEBUG is non-zero, enable debug asserts
+#else
+#define SL_LOG_DEBUG_ASSERT(condition) ((void)0) // If SL_LOG_DEBUG is 0, compile out the assert (no-op)
+#endif
+
+
+/** @} (end addtogroup SL_DEBUG_ASSERT) */
 
 #if defined(LIBRARY_BUILD) || defined(SL_CATALOG_LOG_COMPONENT_PRESENT)
 

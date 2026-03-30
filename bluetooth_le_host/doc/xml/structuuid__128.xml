@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
   <compounddef id="structuuid__128" kind="struct" language="C++" prot="public">
     <compoundname>uuid_128</compoundname>
     <includes refid="sl__bgapi_8h" local="no">sl_bgapi.h</includes>
-      <sectiondef kind="public-attrib">
+    <sectiondef kind="public-attrib">
       <memberdef kind="variable" id="structuuid__128_1a9f76ac637112f3c966050df06d803513" prot="public" static="no" mutable="no">
         <type>uint8_t</type>
         <definition>uint8_t uuid_128::data[16]</definition>
@@ -19,7 +19,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bgapi_protocol/protocol/inc/sl_bgapi.h" line="100" column="11" bodyfile="/var/lib/jenkins/github/bgapi_protocol/protocol/inc/sl_bgapi.h" bodystart="100" bodyend="-1"/>
       </memberdef>
-      </sectiondef>
+    </sectiondef>
     <briefdescription>
 <para>128-bit UUID </para>
     </briefdescription>

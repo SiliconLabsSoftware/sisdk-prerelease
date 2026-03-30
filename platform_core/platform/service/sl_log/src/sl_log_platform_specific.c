@@ -35,6 +35,7 @@
 #include "sl_log_helper.h"
 #include "em_device.h"
 #include "sl_hal_timer.h"
+#include "sl_device_peripheral.h"
 
 /*******************************************************************************
 *******************************   DEFINES   ***********************************
@@ -51,6 +52,7 @@
  */
 #define TIMER_FREQUENCY     1000000
 #define TIMER_TOP_VALUE     0xFFFFFFFF
+#define TIMESTAMP_RESOLUTION 1000000ULL
 
 #define _CONCAT_TWO_TOKENS(token_1, token_2)                     token_1 ## token_2
 #define _CONCAT_THREE_TOKENS(token_1, token_2, token_3)          token_1 ## token_2 ## token_3
@@ -61,6 +63,12 @@
 #define TIMER_BUS_CLOCK     CONCAT_TWO_TOKENS(SL_BUS_CLOCK_TIMER, SL_LOG_CONFIG_TIMER_INSTANCE)
 #define LOGGER_TIMER_IRQ         CONCAT_THREE_TOKENS(TIMER, SL_LOG_CONFIG_TIMER_INSTANCE, _IRQn)
 #define LOGGER_TIMER_IRQHandler  CONCAT_THREE_TOKENS(TIMER, SL_LOG_CONFIG_TIMER_INSTANCE, _IRQHandler)
+#define LOGGER_TIMER_PERIPHERAL  CONCAT_TWO_TOKENS(SL_PERIPHERAL_TIMER, SL_LOG_CONFIG_TIMER_INSTANCE)
+
+/*******************************************************************************
+**************************   LOCAL VARIABLES   ********************************
+*******************************************************************************/
+static uint64_t scale_factor;
 
 /*******************************************************************************
 **************************   LOCAL FUNCTIONS   ********************************
@@ -76,10 +84,14 @@
  */
 sl_status_t sl_log_hal_platform_core_init(void)
 {
+  sl_clock_branch_t clock_branch = sl_device_peripheral_get_clock_branch(LOGGER_TIMER_PERIPHERAL);
+  sl_hal_timer_config_t init_config = SL_HAL_TIMER_CONFIG_DEFAULT;
+  uint32_t sl_log_timer_freq_hz = 0;
+  sl_status_t status;
+
   sl_clock_manager_enable_bus_clock(TIMER_BUS_CLOCK);
 
-  sl_hal_timer_config_t init_config = SL_HAL_TIMER_CONFIG_DEFAULT;
-  init_config.prescaler = SL_HAL_TIMER_PRESCALER_DIV8;
+  init_config.prescaler = SL_HAL_TIMER_PRESCALER_DIV1;
 
   sl_hal_timer_init(TIMER_INSTANCE, &init_config);
   sl_hal_timer_enable(TIMER_INSTANCE);
@@ -87,6 +99,13 @@ sl_status_t sl_log_hal_platform_core_init(void)
   sl_hal_timer_start(TIMER_INSTANCE);
   sl_hal_timer_clear_interrupts(TIMER_INSTANCE, TIMER_IEN_OF);
   sl_hal_timer_enable_interrupts(TIMER_INSTANCE, TIMER_IEN_OF);
+
+  status = sl_clock_manager_get_clock_branch_frequency(clock_branch, &sl_log_timer_freq_hz);
+  if (status) {
+      return status;
+  }
+
+  scale_factor = (TIMESTAMP_RESOLUTION << 32) / sl_log_timer_freq_hz;
 
   sl_interrupt_manager_clear_irq_pending(LOGGER_TIMER_IRQ);
   sl_interrupt_manager_enable_irq(LOGGER_TIMER_IRQ);
@@ -110,20 +129,21 @@ sl_status_t sl_log_hal_core_deinit(void)
 /**
  * @brief Get the current timestamp count for the specified core.
  *
- * For the host (core_id == 0) this reads the local timer and applies the
- * synchronization delta.
+ * @details
+ * Reads the hardware timer counter and converts it to microseconds using a
+ * pre-calculated scale factor (computed during platform_core_init).
  *
- * @param[in] core_id Core identifier (0 = host)
+ * Where scale_factor = (2^32 * 1,000,000) / timer_frequency_hz
+ *
+ * @param[in] core_id Core identifier (0 = host, currently unused)
  * @return Current timestamp in microseconds
  */
 uint32_t sl_log_hal_get_timestamp_count(uint8_t core_id)
 {
   (void)core_id;
 
-  /* Each tick represents 0.1 microseconds.
-   * This function returns the count value converted to microseconds.
-   */
-  return sl_hal_timer_get_counter(TIMER_INSTANCE) / 10;
+  return (uint32_t)(((uint64_t)sl_hal_timer_get_counter(TIMER_INSTANCE) *
+                   (uint64_t)scale_factor) >> 32ULL);
 }
 
 /**

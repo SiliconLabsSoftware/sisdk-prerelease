@@ -52,6 +52,8 @@ requires:
   condition: [device_has_psram]
 - name: memory_manager_dtcm
   condition: [device_has_dtcm]
+- name: memory_manager_itcm
+  condition: [device_has_itcm]
 recommends:
 - id: memory_manager_pool_power_aware
   vendor: silabs

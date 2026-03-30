@@ -1,6 +1,8 @@
 #ifndef SL_BTCTRL_RTOS_CONFIG_H
 #define SL_BTCTRL_RTOS_CONFIG_H
 
+#include <em_device.h>
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <h> Priority Configuration for Bluetooth RTOS Tasks

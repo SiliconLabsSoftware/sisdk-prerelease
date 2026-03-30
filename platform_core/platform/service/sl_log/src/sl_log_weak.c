@@ -153,3 +153,7 @@ SL_WEAK sl_status_t sl_log_sync_timestamp(uint8_t core_id, void *args) {
 SL_WEAK sl_log_ring_buffer_t *sl_log_get_ring_buffer_config(void){
   return (void*)0;
 }
+
+SL_WEAK void sli_log_assert_implementation(const char* string_value){
+  (void)string_value;
+}

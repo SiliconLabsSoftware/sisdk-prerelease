@@ -676,6 +676,14 @@
                 <param datatype="errorcode" name="result" type="uint16"/>
             </returns>
         </command>
+        <command index="4" name="refresh_data_id" >
+            <params>
+                <param datatype="uint8" name="advertising_set" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
         <command index="2" name="start" >
             <params>
                 <param datatype="uint8" name="advertising_set" type="uint8"/>
@@ -705,6 +713,7 @@
         <defines name="flags">
             <define name="include_tx_power" value="0x1"/>
             <define name="auto_start_extended_advertising" value="0x2"/>
+            <define name="include_advertising_data_information" value="0x4"/>
         </defines>
     </class>
     <class index="5" name="scanner">
@@ -850,6 +859,7 @@
         <enums name="reporting_mode">
             <enum name="report_none" value="0x0"/>
             <enum name="report_all" value="0x1"/>
+            <enum name="report_non_duplicate" value="0x2"/>
         </enums>
         <enums name="advertiser_clock_accuracy">
             <enum name="clock_accuracy_500" value="0x1f4"/>
@@ -1183,6 +1193,12 @@
                 <param datatype="uint8array" name="data" type="uint8array"/>
             </params>
         </event>
+        <enums name="response_data_status">
+            <enum name="response_data_status_complete" value="0x0"/>
+            <enum name="response_data_status_incomplete_more" value="0x1"/>
+            <enum name="response_data_status_incomplete_nomore" value="0x2"/>
+            <enum name="response_data_status_not_received" value="0xff"/>
+        </enums>
     </class>
     <class index="6" name="connection">
         <command index="0" name="set_default_parameters" >

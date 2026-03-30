@@ -54,15 +54,15 @@ source:
   condition:
   - toolchain_iar
   - cortexm33
-- path: kernel/portable/IAR/ARM_CM33_NTZ/non_secure/port.c
+- path: kernel/portable/IAR/ARM_CM55_NTZ/non_secure/port.c
   condition:
   - toolchain_iar
   - cortexm55
-- path: kernel/portable/IAR/ARM_CM33_NTZ/non_secure/portasm.s
+- path: kernel/portable/IAR/ARM_CM55_NTZ/non_secure/portasm.s
   condition:
   - toolchain_iar
   - cortexm55
-- path: kernel/portable/IAR/ARM_CM33_NTZ/non_secure/mpu_wrappers_v2_asm.S
+- path: kernel/portable/IAR/ARM_CM55_NTZ/non_secure/mpu_wrappers_v2_asm.S
   condition:
   - toolchain_iar
   - cortexm55
@@ -94,15 +94,15 @@ source:
   condition:
   - toolchain_gcc
   - cortexm33
-- path: kernel/portable/GCC/ARM_CM33_NTZ/non_secure/port.c
+- path: kernel/portable/GCC/ARM_CM55_NTZ/non_secure/port.c
   condition:
   - toolchain_gcc
   - cortexm55
-- path: kernel/portable/GCC/ARM_CM33_NTZ/non_secure/portasm.c
+- path: kernel/portable/GCC/ARM_CM55_NTZ/non_secure/portasm.c
   condition:
   - toolchain_gcc
   - cortexm55
-- path: kernel/portable/GCC/ARM_CM33_NTZ/non_secure/mpu_wrappers_v2_asm.c
+- path: kernel/portable/GCC/ARM_CM55_NTZ/non_secure/mpu_wrappers_v2_asm.c
   condition:
   - toolchain_gcc
   - cortexm55
@@ -134,15 +134,15 @@ source:
   condition:
   - toolchain_llvm
   - cortexm33
-- path: kernel/portable/GCC/ARM_CM33_NTZ/non_secure/port.c
+- path: kernel/portable/GCC/ARM_CM55_NTZ/non_secure/port.c
   condition:
   - toolchain_llvm
   - cortexm55
-- path: kernel/portable/GCC/ARM_CM33_NTZ/non_secure/portasm.c
+- path: kernel/portable/GCC/ARM_CM55_NTZ/non_secure/portasm.c
   condition:
   - toolchain_llvm
   - cortexm55
-- path: kernel/portable/GCC/ARM_CM33_NTZ/non_secure/mpu_wrappers_v2_asm.c
+- path: kernel/portable/GCC/ARM_CM55_NTZ/non_secure/mpu_wrappers_v2_asm.c
   condition:
   - toolchain_llvm
   - cortexm55
@@ -250,7 +250,7 @@ include:
   condition:
   - toolchain_llvm
   - cortexm33
-- path: kernel/portable/IAR/ARM_CM33_NTZ/non_secure
+- path: kernel/portable/IAR/ARM_CM55_NTZ/non_secure
   file_list:
   - path: portmacro.h
   - path: portasm.h
@@ -258,7 +258,7 @@ include:
   condition:
   - toolchain_iar
   - cortexm55
-- path: kernel/portable/GCC/ARM_CM33_NTZ/non_secure
+- path: kernel/portable/GCC/ARM_CM55_NTZ/non_secure
   file_list:
   - path: portmacro.h
   - path: portasm.h
@@ -266,7 +266,7 @@ include:
   condition:
   - toolchain_gcc
   - cortexm55
-- path: kernel/portable/GCC/ARM_CM33_NTZ/non_secure
+- path: kernel/portable/GCC/ARM_CM55_NTZ/non_secure
   file_list:
   - path: portmacro.h
   - path: portasm.h

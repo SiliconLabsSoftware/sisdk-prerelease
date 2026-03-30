@@ -1,5 +1,16 @@
 var NAVTREEINDEX3 =
 {
+"group__sl__bt__evt__gatt__server__indication__timeout.html#ga74b7252c605c8937bf19ad4be5d8ba3d":[2,25,6,1],
+"group__sl__bt__evt__gatt__server__indication__timeout.html#structsl__bt__evt__gatt__server__indication__timeout__s":[2,25,6,0],
+"group__sl__bt__evt__gatt__server__notification__tx__completed.html":[2,25,7],
+"group__sl__bt__evt__gatt__server__notification__tx__completed.html#a0d8a8fe3236e18125bf18ab731ae9127":[2,25,7,0,1],
+"group__sl__bt__evt__gatt__server__notification__tx__completed.html#afc5b4083bb5949a384b28ba9f50c940e":[2,25,7,0,0],
+"group__sl__bt__evt__gatt__server__notification__tx__completed.html#gaaac4706bf8c2310e5e40213a8c40a394":[2,25,7,1],
+"group__sl__bt__evt__gatt__server__notification__tx__completed.html#structsl__bt__evt__gatt__server__notification__tx__completed__s":[2,25,7,0],
+"group__sl__bt__evt__gatt__server__user__read__request.html":[2,25,2],
+"group__sl__bt__evt__gatt__server__user__read__request.html#a139515e57a60740db36aa3e2cf04d35e":[2,25,2,0,0],
+"group__sl__bt__evt__gatt__server__user__read__request.html#a2cf3d881f97984ed4bc9679480b1f786":[2,25,2,0,3],
+"group__sl__bt__evt__gatt__server__user__read__request.html#a4f3379eae08b2c9544a2b1a68b4afab0":[2,25,2,0,1],
 "group__sl__bt__evt__gatt__server__user__read__request.html#a979a5ffec478f170aba16021ab2eeece":[2,25,2,0,2],
 "group__sl__bt__evt__gatt__server__user__read__request.html#ga7557f18f6c87a724f35eae1ab20e1eae":[2,25,2,1],
 "group__sl__bt__evt__gatt__server__user__read__request.html#structsl__bt__evt__gatt__server__user__read__request__s":[2,25,2,0],
@@ -238,16 +249,5 @@ var NAVTREEINDEX3 =
 "group__sl__bt__evt__sm__passkey__display.html#a0b3e4edc45bee3929ad37528b6c1f50d":[2,28,1,0,1],
 "group__sl__bt__evt__sm__passkey__display.html#a4a517f88c341f4dd7bd2b660b9f03aa6":[2,28,1,0,0],
 "group__sl__bt__evt__sm__passkey__display.html#ga8e4c6ca6dfffb594cdae8fe1ee5cdc77":[2,28,1,1],
-"group__sl__bt__evt__sm__passkey__display.html#structsl__bt__evt__sm__passkey__display__s":[2,28,1,0],
-"group__sl__bt__evt__sm__passkey__request.html":[2,28,2],
-"group__sl__bt__evt__sm__passkey__request.html#adb96a57ecaf9d62866c8c003dd68788d":[2,28,2,0,0],
-"group__sl__bt__evt__sm__passkey__request.html#ga018d08886d2e2daf0d5dc479ab412165":[2,28,2,1],
-"group__sl__bt__evt__sm__passkey__request.html#structsl__bt__evt__sm__passkey__request__s":[2,28,2,0],
-"group__sl__bt__evt__sync__closed.html":[2,14,0],
-"group__sl__bt__evt__sync__closed.html#a6b409b8d52fccbb7fe793097646d9548":[2,14,0,0,0],
-"group__sl__bt__evt__sync__closed.html#a9e595d702aa81ec41c05302594952b4b":[2,14,0,0,1],
-"group__sl__bt__evt__sync__closed.html#ga688ef2ac98e910a2388df7017a8d5ea7":[2,14,0,1],
-"group__sl__bt__evt__sync__closed.html#structsl__bt__evt__sync__closed__s":[2,14,0,0],
-"group__sl__bt__evt__system__awake.html":[2,5,5],
-"group__sl__bt__evt__system__awake.html#gac671086d87b33e79d055df0098b40d7b":[2,5,5,0]
+"group__sl__bt__evt__sm__passkey__display.html#structsl__bt__evt__sm__passkey__display__s":[2,28,1,0]
 };

@@ -161,19 +161,14 @@ sl_status_t sli_sxsymcrypt_lock_cryptomaster_selection(unsigned int instance, bo
   if (instance == SLI_SXSYMCRYPT_CRYPTOMASTER_HOSTSYMCRYPTO) {
     EFM_ASSERT(sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_SYMCRYPTO)
                == SL_STATUS_OK);
-  // PLATFORM_HYD-5152
-#if !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353) && !defined(SIXG300XIWIFI74000XFULL_FPGA)
   } else if (instance == SLI_SXSYMCRYPT_CRYPTOMASTER_LPWAES) {
     EFM_ASSERT(sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_LPWAES)
                == SL_STATUS_OK);
-#endif // !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353) && !defined(SIXG300XIWIFI74000XFULL_FPGA)
   }
 
   // Check if called from ISR
   if ((SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) != 0U) {
     // Called from ISR
-    // PLATFORM_HYD-5152
-    #if !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353) && !defined(SIXG300XIWIFI74000XFULL_FPGA)
     if (instance == SLI_SXSYMCRYPT_CRYPTOMASTER_LPWAES) {
       // IRQ: need to store & restore LPWAES registers
       while (LPWAES->STATUS & (SYMCRYPTO_STATUS_FETCHERBSY | SYMCRYPTO_STATUS_PUSHERBSY | SYMCRYPTO_STATUS_SOFTRSTBSY)) {
@@ -188,7 +183,6 @@ sl_status_t sli_sxsymcrypt_lock_cryptomaster_selection(unsigned int instance, bo
       }
       return SL_STATUS_ISR;
     }
-    #endif // !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353) && !defined(SIXG300XIWIFI74000XFULL_FPGA)
     if (instance == SLI_SXSYMCRYPT_CRYPTOMASTER_HOSTSYMCRYPTO) {
       // Accessing Hostcrypto from ISR is not supported
       return SL_STATUS_NOT_SUPPORTED;
@@ -233,8 +227,6 @@ void sx_cmdma_release_hw(struct sx_regs *regs)
       EFM_ASSERT(sl_clock_manager_disable_bus_clock(SL_BUS_CLOCK_SYMCRYPTO)
                  == SL_STATUS_OK);
     }
-// PLATFORM_HYD-5152
-#if !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353) && !defined(SIXG300XIWIFI74000XFULL_FPGA)
     if (regs->instance_index == SLI_SXSYMCRYPT_CRYPTOMASTER_LPWAES) {
       if ((SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) == 0U) {
         // Not in ISR
@@ -245,7 +237,6 @@ void sx_cmdma_release_hw(struct sx_regs *regs)
         }
       }
     }
-#endif // !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353) && !defined(SIXG300XIWIFI74000XFULL_FPGA)
   }
 #if defined(SLI_PSEC_THREADING)
   sli_psec_osal_give_lock(&cryptomaster_locks[regs->instance_index]);
@@ -267,8 +258,6 @@ struct sx_regs *sx_cmdma_find_available(unsigned int compatible)
     return NULL;
   }
   if ((SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) != 0U) {
-    // PLATFORM_HYD-5152
-    #if !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353) && !defined(SIXG300XIWIFI74000XFULL_FPGA)
     // IRQ: need to store & restore LPWAES registers
     while (LPWAES->STATUS & (SYMCRYPTO_STATUS_FETCHERBSY | SYMCRYPTO_STATUS_PUSHERBSY | SYMCRYPTO_STATUS_SOFTRSTBSY)) {
       // Wait for completion of the previous operation, since the LPWAES
@@ -277,37 +266,26 @@ struct sx_regs *sx_cmdma_find_available(unsigned int compatible)
     // This return statement will not actually do anything. It is added only
     // code readability.
     return sx_hw_find_regs(SLI_SXSYMCRYPT_CRYPTOMASTER_LPWAES);
-    #endif // !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353) && !defined(SIXG300XIWIFI74000XFULL_FPGA)
   }
   return sx_hw_find_regs(requested_cryptomaster_index);
 }
 
 void sli_crypto_lpwaes_save_state(sli_cryptomaster_state_t *state)
 {
-  // PLATFORM_HYD-5152
-  #if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353) || defined(SIXG300XIWIFI74000XFULL_FPGA)
-  (void)state;
-  #else
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_CRITICAL();
   state->FETCHADDR = LPWAES->FETCHADDR;
   state->PUSHADDR = LPWAES->PUSHADDR;
   CORE_EXIT_CRITICAL();
-  #endif // !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353) || defined(SIXG300XIWIFI74000XFULL_FPGA)
 }
 
 void sli_crypto_lpwaes_restore_state(sli_cryptomaster_state_t *state)
 {
-  // PLATFORM_HYD-5152
-  #if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353) || defined(SIXG300XIWIFI74000XFULL_FPGA)
-  (void)state;
-  #else
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_CRITICAL();
   LPWAES->FETCHADDR = state->FETCHADDR;
   LPWAES->PUSHADDR = state->PUSHADDR;
   CORE_EXIT_CRITICAL();
-  #endif // !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353) || defined(SIXG300XIWIFI74000XFULL_FPGA)
 }
 
 void sli_cmdma_release_hw(struct sx_regs *regs)

@@ -66,6 +66,70 @@
 #include "em_device.h"
 
 /**
+ * @def OPENTHREAD_CONFIG_NET_DIAG_VENDOR_NAME
+ *
+ * Specifies the default Vendor Name string.
+ *
+ * If `OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE` is enabled, the Vendor Name string MUST start with the "RD:" prefix
+ * to ensure reference devices are identifiable. This is checked and enforced at build-time (`static_assert`).
+ *
+ * Set to a non-empty default to satisfy certification features, but can be changed at run time.
+ * See `OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE`
+ */
+#ifndef OPENTHREAD_CONFIG_NET_DIAG_VENDOR_NAME
+#if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
+#define OPENTHREAD_CONFIG_NET_DIAG_VENDOR_NAME "RD:Silicon Labs"
+#else
+#define OPENTHREAD_CONFIG_NET_DIAG_VENDOR_NAME "Silicon Labs"
+#endif
+#endif
+
+/**
+ * @def OPENTHREAD_CONFIG_NET_DIAG_VENDOR_MODEL
+ *
+ * Specifies the default Vendor Model string.
+ *
+ * Set to a non-empty default to satisfy certification features, but can be changed at run time.
+ * See `OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE`
+ */
+#ifndef OPENTHREAD_CONFIG_NET_DIAG_VENDOR_MODEL
+#define OPENTHREAD_CONFIG_NET_DIAG_VENDOR_MODEL "OpenThread"
+#endif
+
+/**
+ * @def OPENTHREAD_CONFIG_NET_DIAG_VENDOR_SW_VERSION
+ *
+ * Specifies the default Vendor SW Version string.
+ *
+ * Set to a non-empty default to satisfy certification features, but can be changed at run time.
+ * See `OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE`
+ */
+#ifndef OPENTHREAD_CONFIG_NET_DIAG_VENDOR_SW_VERSION
+#define OPENTHREAD_CONFIG_NET_DIAG_VENDOR_SW_VERSION "3.1.0.0"
+#endif
+
+/**
+ * @def OPENTHREAD_CONFIG_NET_DIAG_VENDOR_APP_URL
+ *
+ * Specifies the default Vendor App URL string.
+ *
+ * Set to a non-empty default to satisfy certification features, but can be changed at run time.
+ * See `OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE`
+ */
+#ifndef OPENTHREAD_CONFIG_NET_DIAG_VENDOR_APP_URL
+#define OPENTHREAD_CONFIG_NET_DIAG_VENDOR_APP_URL "www.silabs.com"
+#endif
+
+/**
+ * @def OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE
+ *
+ * Define as 1 to add APIs to allow Vendor Name, Model, SW Version to change at run-time.
+ */
+#ifndef OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE
+#define OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE 1
+#endif
+
+/**
  * @def OPENTHREAD_CONFIG_PLATFORM_BOOTLOADER_MODE_ENABLE
  *
  * Allow triggering a platform reset to bootloader mode, if supported.

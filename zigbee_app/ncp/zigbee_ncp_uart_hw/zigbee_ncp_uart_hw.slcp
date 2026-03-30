@@ -1,9 +1,9 @@
 project_name: zigbee_ncp_uart_hw
-label: Zigbee - NCP UartHw
+label: Zigbee - NCP UART HW
 package: zigbee
 category: Zigbee Application
 quality: production
-description: This network coprocessor (NCP) application supports communication with a host application over a UART interface with hardware flow control. This NCP application can be built as configured, or optionally can be augmented with customized extensions for initialization, main loop processing, event definition/handling, and messaging with the host. To create a ECC-enabled application for the Smart Energy Profile, please download and extract the 'EmberZnet-Smart-Energy.zip' side-package over your installed SDK and add, depending on use-case, one of two new components ('CBKE 163k1'; 'CBKE 283k1') to your application.
+description: NCP for host over UART with hardware flow control. Extensible for init, events, and messaging. For SE ECC, add EmberZnet-Smart-Energy side-package (CBKE 163k1/283k1).
 
 author: Silicon Laboratories, Inc.
 

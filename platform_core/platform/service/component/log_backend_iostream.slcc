@@ -13,7 +13,7 @@ provides:
 - name: log_backend
 - name: log_backend_iostream
 requires:
-- name: iostream
+- name: iostream_recommended_console
 - name: log
 - name: log_platform_core
 root_path: platform_core/platform/service/sl_log

@@ -128,7 +128,7 @@ static void sli_interrupt_manager_isr_wrapper(void);
 static bool is_interrupt_manager_initialized = false;
 
 #if defined(SL_INTERRUPT_MANAGER_ENABLE_HOOKS)
-static volatile uint32_t interrupt_nesting_counter SL_FAST_DATA = 0U ;
+static volatile uint32_t interrupt_nesting_counter SL_FAST_DATA = 0U;
 #endif
 
 /*******************************************************************************
@@ -425,12 +425,11 @@ sl_status_t sl_interrupt_manager_set_irq_handler(int32_t irqn,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
+  if (!is_interrupt_manager_initialized) {
+    return SL_STATUS_NOT_INITIALIZED;
+  }
+
   CORE_ENTER_CRITICAL();
-
-  interrupt_status = (uint32_t)(((NVIC->ISER[((uint32_t)irqn) >> 5UL] & (1UL << (((uint32_t)irqn) & 0x1FUL))) != 0UL) ? 1UL : 0UL);
-
-  // Disable irqn interrupt while updating the handler's address
-  sl_interrupt_manager_disable_irq(irqn);
 
   #if defined(SL_INTERRUPT_MANAGER_ENABLE_HOOKS)
   table = wrapped_vector_table;
@@ -438,15 +437,14 @@ sl_status_t sl_interrupt_manager_set_irq_handler(int32_t irqn,
   table = (sl_interrupt_manager_irq_handler_t*)SCB->VTOR;
   #endif /* SL_INTERRUPT_MANAGER_ENABLE_HOOKS */
 
-  // Make sure the VTOR is initialized and points to a table in RAM.
-  if (!is_interrupt_manager_initialized) {
-    CORE_EXIT_CRITICAL();
-    return SL_STATUS_NOT_INITIALIZED;
-  }
+  interrupt_status = (uint32_t)(((NVIC->ISER[((uint32_t)irqn) >> 5UL] & (1UL << (((uint32_t)irqn) & 0x1FUL))) != 0UL) ? 1UL : 0UL);
+
+  // Disable irqn interrupt while updating the handler's address
+  sl_interrupt_manager_disable_irq(irqn);
 
   table[irqn + 16] = handler;
 
-  // Make sure all explicit memory access are complete before proceding.
+  // Make sure all explicit memory access are complete before proceeding.
   __DSB();
   __ISB();
 
@@ -462,6 +460,47 @@ sl_status_t sl_interrupt_manager_set_irq_handler(int32_t irqn,
   (void) handler;
   return SL_STATUS_INVALID_CONFIGURATION;
 #endif /* VECTOR_TABLE_IN_RAM */
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Set the handler for a core exception.
+ ******************************************************************************/
+sl_status_t sli_interrupt_manager_set_core_exception_handler(int32_t irqn,
+                                                             sl_interrupt_manager_irq_handler_t handler)
+{
+#if defined(VECTOR_TABLE_IN_RAM)
+  sl_interrupt_manager_irq_handler_t *table;
+  CORE_DECLARE_IRQ_STATE;
+
+  if ((irqn >= 0) || (irqn < -CORTEX_INTERRUPTS)) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if (!is_interrupt_manager_initialized) {
+    return SL_STATUS_NOT_INITIALIZED;
+  }
+
+  CORE_ENTER_CRITICAL();
+
+#if defined(SL_INTERRUPT_MANAGER_ENABLE_HOOKS)
+  table = wrapped_vector_table;
+#else
+  table = (sl_interrupt_manager_irq_handler_t*)SCB->VTOR;
+#endif
+
+  table[irqn + CORTEX_INTERRUPTS] = handler;
+
+  __DSB();
+  __ISB();
+
+  CORE_EXIT_CRITICAL();
+  return SL_STATUS_OK;
+#else
+  (void)irqn;
+  (void)handler;
+  return SL_STATUS_INVALID_CONFIGURATION;
+#endif
 }
 
 /***************************************************************************//**

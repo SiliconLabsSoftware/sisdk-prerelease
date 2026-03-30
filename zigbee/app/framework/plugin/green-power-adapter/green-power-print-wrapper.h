@@ -59,6 +59,8 @@ void sl_zigbee_af_print_buffer_wrapper(uint16_t area, const uint8_t *buffer, uin
 void sl_zigbee_af_print_string_wrapper(uint16_t area, const uint8_t *buffer);
 void sl_zigbee_af_core_print_wrapper(const char * formatString, ...);
 void sl_zigbee_af_core_println_wrapper(const char * formatString, ...);
+void sl_zigbee_af_cli_print_wrapper(const char * formatString, ...);
+void sl_zigbee_af_cli_println_wrapper(const char * formatString, ...);
 void sl_zigbee_af_app_println_wrapper(const char * formatString, ...);
 void sl_zigbee_af_app_print_wrapper(const char * formatString, ...);
 void sl_zigbee_af_debug_print_wrapper(const char * formatString, ...);
@@ -86,6 +88,16 @@ void sl_zigbee_af_println_wrapper(uint16_t area, const char * formatString, ...)
 #undef sl_zigbee_af_core_println
 #endif //sl_zigbee_af_core_println
 #define sl_zigbee_af_core_println(...) sl_zigbee_af_core_println_wrapper(__VA_ARGS__)
+
+#ifdef sl_zigbee_af_cli_print
+#undef sl_zigbee_af_cli_print
+#endif //sl_zigbee_af_cli_print
+#define sl_zigbee_af_cli_print(...) sl_zigbee_af_cli_print_wrapper(__VA_ARGS__)
+
+#ifdef sl_zigbee_af_cli_println
+#undef sl_zigbee_af_cli_println
+#endif //sl_zigbee_af_cli_println
+#define sl_zigbee_af_cli_println(...) sl_zigbee_af_cli_println_wrapper(__VA_ARGS__)
 
 #ifdef sl_zigbee_af_green_power_cluster_print
 #undef sl_zigbee_af_green_power_cluster_print

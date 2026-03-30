@@ -23,8 +23,6 @@ include:
 source:
 - path: stack/debug/sl_zigbee_memory_usage.c
   unless: [native_host]
-- path: util/plugin/plugin-common/generic-memory-usage/memory_usage.c
-  unless: [native_host, zigbee_stack_common]   #do not duplicate this file
 - path: stack/internal/src/stubs/sl_zigbee_memory_usage_internal_weak_stubs.c
 - path: stack/internal/src/baremetal/sl_zigbee_memory_usage_baremetal_wrapper.c
   unless: [zigbee_use_ipc]

@@ -129,7 +129,7 @@ class TagCommandsMixin:
 
     def past(self, tag: Tag):
         """Do Periodic Advertisement Sync Transfer over connection"""
-        if tag.past_initiated:
+        if tag.past_initiated and not tag.synchronized:
             return
         elif not self.pawr_active:
             if self.cmd_mode:

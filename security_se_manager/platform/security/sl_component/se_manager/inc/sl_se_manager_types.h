@@ -142,12 +142,16 @@ typedef struct {
  *   sl_se_set_yield().
  ******************************************************************************/
 typedef struct sl_se_command_context_t {
-  sli_se_mailbox_command_t  command; ///< SE mailbox command struct
-  bool                      yield;   ///< If true, yield the CPU core while
-                                     ///< waiting for the SE mailbox command
-                                     ///< to complete. If false, busy-wait, by
-                                     ///< polling the SE mailbox response
-                                     ///< register.
+  sli_se_mailbox_command_t  command;  ///< SE mailbox command struct
+  bool                      yield;    ///< If true, yield the CPU core while
+                                      ///< waiting for the SE mailbox command
+                                      ///< to complete. If false, busy-wait, by
+                                      ///< polling the SE mailbox response
+                                      ///< register.
+  #if defined(_SILICON_LABS_32B_SERIES_3)
+  bool                      flash_wr; ///< If true, the command is a flash write
+                                      ///< or erase command
+  #endif // #if defined(_SILICON_LABS_32B_SERIES_3)
 } sl_se_command_context_t;
 
 /// @} (end addtogroup sl_se_manager_core)
@@ -417,6 +421,14 @@ typedef enum {
   SL_SE_HASH_AES_MMO,   ///< AES MMO
 #endif
 } sl_se_hash_type_t;
+
+#if defined(SLI_SE_SUPPORTS_RSA)
+/// RSA padding schemes for signature operations
+typedef enum {
+  SL_SE_RSA_PADDING_PKCS1V15   = 3,   ///< PKCS#1 v1.5 (EMSA-PKCS1-v1_5)
+  SL_SE_RSA_PADDING_PSS        = 4,   ///< PSS (RSASSA-PSS)
+} sl_se_rsa_padding_t;
+#endif
 
 /// SHA-1 streaming context.
 typedef struct {

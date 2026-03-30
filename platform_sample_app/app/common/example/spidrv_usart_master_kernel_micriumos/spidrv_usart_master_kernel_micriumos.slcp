@@ -1,7 +1,7 @@
 project_name: spidrv_usart_master_kernel_micriumos
 package: platform
 quality: production
-label: Platform - SPIDRV Master on Micrium OS kernel
+label: Platform - SPIDRV Master on Micrium OS Kernel
 description: >
   This example project demonstrates how to use the master mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.
 category: Example|Platform

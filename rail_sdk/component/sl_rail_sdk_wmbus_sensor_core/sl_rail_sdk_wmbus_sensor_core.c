@@ -43,6 +43,10 @@
 #include "app_assert.h"
 #include "sl_code_classification.h"
 
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  #include "app_task_init.h"
+#endif
+
 #if defined(SL_CATALOG_SEGMENT_LCD_DRIVER_PRESENT)
 #include "sl_segmentlcd.h"
 #endif
@@ -50,9 +54,11 @@
 #if defined(SL_CATALOG_WMBUS_SENSOR_VIRTUAL_WATER_METER_PRESENT)
   #include "sl_rail_sdk_wmbus_sensor_virtual_water_meter.h"
 #endif
+
 #if defined(SL_CATALOG_WMBUS_SENSOR_PULSE_COUNTER_PRESENT)
   #include "sl_rail_sdk_wmbus_sensor_pulse_counter.h"
 #endif
+
 #if defined(SL_CATALOG_WMBUS_SENSOR_THERMOMETER_PRESENT)
   #include "sl_rail_sdk_wmbus_sensor_thermometer.h"
 #endif

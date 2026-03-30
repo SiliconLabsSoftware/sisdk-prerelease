@@ -56,6 +56,27 @@ extern "C" {
 #define SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW
 #endif
 
+#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
+#include "SEGGER_SYSVIEW.h"
+extern char __HeapBase[];
+extern char __HeapLimit[];
+
+#define SYSTEMVIEW_HEAP_SIZE (__HeapLimit - __HeapBase)
+
+// Heap ID for SystemView heap definitions.
+// These values are chosen to be bigger than SEGGER_SYSVIEW_ID_BASE.
+#define SYSTEMVIEW_HEAP_LT_ID 0xFFFFFFFF
+#define SYSTEMVIEW_HEAP_ST_ID 0xFFFFFFFE
+
+// Tag values passed to SEGGER_SYSVIEW_HeapAllocEx() to identify the allocation
+// source in SystemView traces.
+typedef enum {
+  SYSTEMVIEW_TAG_ALLOC_LT       = 1,
+  SYSTEMVIEW_TAG_ALLOC_ST       = 2,
+  SYSTEMVIEW_TAG_RESERVED_BLOCK = 10,
+} sli_systemview_heap_tag_t;
+#endif
+
 // Minimum block alignment in bytes. 8 bytes is the minimum alignment to account for largest CPU data type
 // that can be used in some block allocation scenarios. 64-bit data type may be used to manipulate the
 // allocated block. The ARM processor ABI defines data types and byte alignment, and 8-byte alignment
@@ -122,7 +143,7 @@ extern "C" {
 #if !defined(_SILICON_LABS_32B_SERIES_2)             \
   && !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301) \
   && !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_302) \
-  && !defined(SL_RAM_LINKER)
+  && defined(__CORTEXM)
 // Internal define to indicate that the memory manager stack is in the heap.
 #define SLI_MEMORY_MANAGER_STACK_IN_HEAP 1
 #endif

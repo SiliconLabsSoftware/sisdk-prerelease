@@ -100,7 +100,7 @@
  * the application code. Refer application note 'AN1135: Using Third Generation Non-Volatile Memory (NVM3) Data Storage' for more details.
  *
  * @note NVM3 key region 0x8E000-0x8EFFF and 0x8F000-0x8FFFF are used for static tokens, which are stored as override tokens in NVM3.
- * The key region 0xC0000 to 0xF0000 are reserved.
+ * The key region 0xC0000 to 0xFFFFF are reserved.
  */
 
 /** @ingroup NVM3 key space regions
@@ -198,6 +198,11 @@
  *  @brief NVM3 Key Region for Antenna Calibration (RAIL).
  */
 #define SL_TOKEN_NVM3_REGION_ANT_CAL_RAIL         (0x89880)
+
+/** @ingroup NVM3 key space regions
+ *  @brief NVM3 Key Region for Aliro.
+ */
+#define SL_TOKEN_NVM3_REGION_ALIRO                (0x89a00)
 
 /** @ingroup NVM3 key space regions
  *  @brief NVM3 Key Region for Wi-SUN.

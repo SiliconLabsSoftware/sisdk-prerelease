@@ -22,7 +22,7 @@
 void *sl_wisun_calloc(size_t nmemb, size_t size);
 void *sl_wisun_realloc(void *ptr, size_t size);
 void sl_wisun_free(void *ptr);
-bool sl_wisun_is_pool_block(void *ptr);
-void sl_wisun_alloc_get_stats(uint32_t *alloc_size, uint32_t *max_size);
+bool sl_wisun_is_heap_block(void *ptr);
+void sl_wisun_heap_get_stats(uint32_t *used_size, uint32_t *high_watermark);
 
 #endif // SL_WISUN_ALLOC_H

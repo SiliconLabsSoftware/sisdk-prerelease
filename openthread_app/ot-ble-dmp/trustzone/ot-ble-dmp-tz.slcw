@@ -1,6 +1,6 @@
-label: ot-ble-dmp-tz-workspace
+label: OpenThread BLE DMP - SoC TrustZone Workspace
 description: >
-  Workspace to build trustzone enabled ot-ble-dmp application and accompanying bootloader.
+  Workspace to build TrustZone-enabled OpenThread BLE DMP - SoC FreeRTOS application and accompanying bootloader.
 quality: production
 
 project:

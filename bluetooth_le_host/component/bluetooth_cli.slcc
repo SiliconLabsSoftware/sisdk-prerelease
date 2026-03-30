@@ -488,6 +488,8 @@ template_contribution:
     argument:
     - type: uint8
     - type: hex
+  condition:
+  - bluetooth_feature_periodic_advertiser
 - name: cli_command
   value:
     group: bt_periodic_advertiser
@@ -495,6 +497,17 @@ template_contribution:
     handler: sli_bt_cli_periodic_advertiser_set_long_data
     argument:
     - type: uint8
+  condition:
+  - bluetooth_feature_periodic_advertiser
+- name: cli_command
+  value:
+    group: bt_periodic_advertiser
+    name: refresh_data_id
+    handler: sli_bt_cli_periodic_advertiser_refresh_data_id
+    argument:
+    - type: uint8
+  condition:
+  - bluetooth_feature_periodic_advertiser
 - name: cli_command
   value:
     group: bt_periodic_advertiser
@@ -505,6 +518,8 @@ template_contribution:
     - type: uint16
     - type: uint16
     - type: uint32
+  condition:
+  - bluetooth_feature_periodic_advertiser
 - name: cli_command
   value:
     group: bt_periodic_advertiser
@@ -512,6 +527,8 @@ template_contribution:
     handler: sli_bt_cli_periodic_advertiser_stop
     argument:
     - type: uint8
+  condition:
+  - bluetooth_feature_periodic_advertiser
 - name: cli_command
   value:
     group: bt_scanner
@@ -693,6 +710,8 @@ template_contribution:
     - type: uint8
     - type: uint8
     - type: uint8
+  condition:
+  - bluetooth_feature_pawr_advertiser
 - name: cli_command
   value:
     group: bt_pawr_advertiser
@@ -710,6 +729,8 @@ template_contribution:
     - type: uint8
     - type: uint8
     - type: uint8
+  condition:
+  - bluetooth_feature_pawr_advertiser
 - name: cli_command
   value:
     group: bt_pawr_advertiser
@@ -721,6 +742,8 @@ template_contribution:
     - type: uint8
     - type: uint8
     - type: hex
+  condition:
+  - bluetooth_feature_pawr_advertiser
 - name: cli_command
   value:
     group: bt_pawr_advertiser
@@ -731,6 +754,8 @@ template_contribution:
     - type: uint8
     - type: hex
     - type: uint8
+  condition:
+  - bluetooth_feature_pawr_advertiser
 - name: cli_command
   value:
     group: bt_pawr_advertiser
@@ -738,6 +763,8 @@ template_contribution:
     handler: sli_bt_cli_pawr_advertiser_stop
     argument:
     - type: uint8
+  condition:
+  - bluetooth_feature_pawr_advertiser
 - name: cli_command
   value:
     group: bt_connection

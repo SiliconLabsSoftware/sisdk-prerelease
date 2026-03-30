@@ -14,10 +14,10 @@ root_path: "wisun/./stack"
 requires:
 - name: "device_supports_wisun"
 - name: "wisun_stack"
-- name: "wisun_direct_connect_client"
+- name: "wisun_dc_client_stubs"
 
 recommends:
-- id: wisun_direct_connect_client_stubs
+- id: wisun_dc_client_stubs
 
   vendor: silabs
 provides:

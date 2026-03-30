@@ -1,8 +1,8 @@
 project_name: ot-cli-mtd-tz-ns
-label: OpenThread - SoC CLI (MTD) (TrustZone)
+label: OpenThread - SoC CLI MTD (TrustZone)
 package: openthread
 description: >
-    This is a variant of the openthread MTD CLI application with trustzone awareness enabled.
+  Demonstrates CLI application to test the OpenThread stack on a Minimal Thread Device (MTD) with TrustZone awareness enabled.
 category: OpenThread Examples
 quality: production
 

@@ -35,10 +35,10 @@ requires:
 component:
   # Wi-SUN
   - id: wisun_stack
-  - id: wisun_stack_ffn
   - id: wisun_stack_debug
   - id: wisun_default_radioconf
-  - id: wisun_direct_connect_client_library
+  - id: wisun_stack_dc_client
+  - id: wisun_dc_client_library
 
   # platform
   - id: sl_main
@@ -88,9 +88,7 @@ configuration:
                    # to true adds an EM1 requirement to the Power Manager.
     condition: [iostream_eusart]
   - name: SL_IOSTREAM_EUSART_VCOM_RX_BUFFER_SIZE
-    value: "128" # Increase from default 32 to account for automated command
-                 # storage entry and for when long command strings are
-                 # interrupted by chip interrupts.
+    value: "64"  # Minimal for DC CIU CLI; use 128 if long commands or paste.
     condition: [iostream_eusart]
   - name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
     value: "SL_IOSTREAM_EUSART_UART_FLOW_CTRL_CTS_RTS"
@@ -102,9 +100,7 @@ configuration:
     value: 0
     condition: [iostream_leuart]
   - name: SL_IOSTREAM_LEUART_VCOM_RX_BUFFER_SIZE
-    value: "128" # Increase from default 32 to account for automated command
-                 # storage entry and for when long command strings are
-                 # interrupted by chip interrupts.
+    value: "64"  # Minimal for DC CIU CLI; use 128 if long commands or paste.
     condition: [iostream_leuart]
   - name: CPU_CFG_TS_32_EN
     value: "1"
@@ -118,14 +114,14 @@ configuration:
   - name: SL_RAIL_UTIL_PTI_BAUD_RATE_HZ
     value: "3200000"
   - name: SL_MBEDTLS_SSL_IN_CONTENT_LEN
-    value: 1024
+    value: 512
   - name: BUFFER_SIZE_UP
-    value: 8192
+    value: 1024
   - name: SL_CLOCK_MANAGER_EUSART0CLK_SOURCE
     value: CMU_EUSART0CLKCTRL_CLKSEL_LFXO
     condition: [iostream_eusart]
   - name: SL_MAIN_START_TASK_STACK_SIZE_BYTES
-    value: 2048
+    value: 1536
   - name: SL_RAIL_UTIL_SFM_SEQUENCER_SUN_MODULATIONS_SELECTION
     value: "SL_RAIL_UTIL_SFM_SEQUENCER_SUN_MODULATIONS_OFDM"
     condition: [device_sdid_220]
@@ -134,7 +130,7 @@ configuration:
 
 toolchain_settings:
   - option: optimize
-    value: debug
+    value: size
 
 template_contribution:
 # -------------------------------

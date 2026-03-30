@@ -20,6 +20,7 @@ source:
 - path: api/border_agent_api.cpp
 - path: api/border_agent_ephemeral_key_api.cpp
 - path: api/border_agent_tracker_api.cpp
+- path: api/border_agent_admitter_api.cpp
 - path: api/border_agent_txt_data_api.cpp
 - path: api/border_router_api.cpp
 - path: api/border_routing_api.cpp
@@ -123,7 +124,8 @@ source:
 - path: common/uptime.cpp
 - path: crypto/aes_ccm.cpp
 - path: crypto/aes_ecb.cpp
-- path: crypto/crypto_platform.cpp
+- path: crypto/crypto_platform_mbedtls.cpp
+- path: crypto/crypto_platform_psa.cpp
 - path: crypto/hkdf_sha256.cpp
 - path: crypto/hmac_sha256.cpp
 - path: crypto/mbedtls.cpp
@@ -144,10 +146,11 @@ source:
 - path: mac/sub_mac.cpp
 - path: mac/sub_mac_callbacks.cpp
 - path: mac/sub_mac_csl_receiver.cpp
+- path: mac/scan_result.cpp
 - path: mac/sub_mac_wed.cpp
 - path: mac/wakeup_tx_scheduler.cpp
-- path: meshcop/announce_begin_client.cpp
 - path: meshcop/border_agent.cpp
+- path: meshcop/border_agent_admitter.cpp
 - path: meshcop/border_agent_ephemeral_key.cpp
 - path: meshcop/border_agent_tracker.cpp
 - path: meshcop/border_agent_txt_data.cpp
@@ -156,7 +159,6 @@ source:
 - path: meshcop/dataset_manager.cpp
 - path: meshcop/dataset_manager_ftd.cpp
 - path: meshcop/dataset_updater.cpp
-- path: meshcop/energy_scan_client.cpp
 - path: meshcop/extended_panid.cpp
 - path: meshcop/joiner.cpp
 - path: meshcop/joiner_router.cpp
@@ -165,7 +167,6 @@ source:
 - path: meshcop/meshcop_tlvs.cpp
 - path: meshcop/network_name.cpp
 - path: meshcop/network_identity.cpp
-- path: meshcop/panid_query_client.cpp
 - path: meshcop/secure_transport.cpp
 - path: meshcop/seeker.cpp
 - path: meshcop/steering_data.cpp

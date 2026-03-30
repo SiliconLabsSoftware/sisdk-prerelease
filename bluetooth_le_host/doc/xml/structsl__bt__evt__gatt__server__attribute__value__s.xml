@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
   <compounddef id="structsl__bt__evt__gatt__server__attribute__value__s" kind="struct" language="C++" prot="public">
     <compoundname>sl_bt_evt_gatt_server_attribute_value_s</compoundname>
     <includes refid="sl__bt__api_8h" local="no">sl_bt_api.h</includes>
-      <sectiondef kind="public-attrib">
+    <sectiondef kind="public-attrib">
       <memberdef kind="variable" id="structsl__bt__evt__gatt__server__attribute__value__s_1ae48eb4edff8bb04f03962bc3822d5dfd" prot="public" static="no" mutable="no">
         <type>uint8_t</type>
         <definition>uint8_t sl_bt_evt_gatt_server_attribute_value_s::connection</definition>
@@ -17,7 +17,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9902" column="14" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9902" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="10079" column="14" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="10079" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="structsl__bt__evt__gatt__server__attribute__value__s_1a5dd174c49dcf3b86a8fa23e8f59df630" prot="public" static="no" mutable="no">
         <type>uint16_t</type>
@@ -32,7 +32,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9903" column="14" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9903" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="10080" column="14" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="10080" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="structsl__bt__evt__gatt__server__attribute__value__s_1a4eb0cac5e74b4039c1e213daceec0186" prot="public" static="no" mutable="no">
         <type>uint8_t</type>
@@ -47,7 +47,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9904" column="14" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9904" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="10081" column="14" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="10081" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="structsl__bt__evt__gatt__server__attribute__value__s_1a414e3bcde37e36b095adf26eb147c7a1" prot="public" static="no" mutable="no">
         <type>uint16_t</type>
@@ -62,7 +62,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9907" column="14" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9907" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="10084" column="14" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="10084" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="structsl__bt__evt__gatt__server__attribute__value__s_1abf22bdf5747c41ff6359456012ba6686" prot="public" static="no" mutable="no">
         <type><ref refid="structbyte__array__s" kindref="compound">byte_array</ref></type>
@@ -77,9 +77,9 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9908" column="14" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9908" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="10085" column="14" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="10085" bodyend="-1"/>
       </memberdef>
-      </sectiondef>
+    </sectiondef>
     <briefdescription>
 <para>Data structure of the attribute_value event. </para>
     </briefdescription>
@@ -98,7 +98,7 @@
         </childnode>
       </node>
     </collaborationgraph>
-    <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9900" column="1" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9901" bodyend="9909"/>
+    <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="10077" column="1" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="10078" bodyend="10086"/>
     <listofallmembers>
       <member refid="structsl__bt__evt__gatt__server__attribute__value__s_1a4eb0cac5e74b4039c1e213daceec0186" prot="public" virt="non-virtual"><scope>sl_bt_evt_gatt_server_attribute_value_s</scope><name>att_opcode</name></member>
       <member refid="structsl__bt__evt__gatt__server__attribute__value__s_1a5dd174c49dcf3b86a8fa23e8f59df630" prot="public" virt="non-virtual"><scope>sl_bt_evt_gatt_server_attribute_value_s</scope><name>attribute</name></member>

@@ -1,10 +1,8 @@
 project_name: ot-ble-dmp-no-buttons
-label: OpenThread BLE DMP (No buttons) - SoC FreeRTOS
+label: OpenThread BLE DMP - SoC FreeRTOS (no buttons)
 package: openthread
 description: >
-  This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS.
-
-  It is identical to the ot-ble-dmp application with the exception that support for buttons has been removed. This application is meant to be used for boards which don't have buttons.
+  Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth without button UI running on FreeRTOS. For boards without buttons.
 category: OpenThread Examples
 quality: production
 

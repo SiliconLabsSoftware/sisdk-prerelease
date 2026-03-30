@@ -266,7 +266,7 @@ int32_t storage_readRaw(uint32_t address,
  *         @ref BOOTLOADER_ERROR_STORAGE_BASE range
  ******************************************************************************/
 int32_t storage_writeRaw(uint32_t address,
-                         uint8_t  *data,
+                         const uint8_t  *data,
                          size_t   numBytes);
 
 /***************************************************************************//**

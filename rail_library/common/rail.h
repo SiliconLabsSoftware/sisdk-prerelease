@@ -3669,7 +3669,7 @@ RAIL_Status_t RAIL_StartCcaLbtTx(RAIL_Handle_t railHandle,
  * @param[in] channel The channel to transmit on.
  * @param[in] options TX options to be applied to this transmit only.
  * @param[in] scheduleTxConfig A pointer to the \ref RAIL_ScheduleTxConfig_t
- *   structure describing the CSMA parameters to use for this transmit.
+ *   structure indicating when the CSMA operation should commence.
  * @param[in] csmaConfig A pointer to the \ref RAIL_CsmaConfig_t structure
  *   describing the CSMA parameters to use for this transmit.
  *   \n In multiprotocol this must point to global or heap storage that remains
@@ -3714,7 +3714,7 @@ RAIL_Status_t RAIL_StartScheduledCcaCsmaTx(RAIL_Handle_t railHandle,
  * @param[in] channel The channel to transmit on.
  * @param[in] options TX options to be applied to this transmit only.
  * @param[in] scheduleTxConfig A pointer to the \ref RAIL_ScheduleTxConfig_t
- *   structure describing the CSMA parameters to use for this transmit.
+ *   structure indicating when the LBT operation should commence.
  * @param[in] lbtConfig A pointer to the \ref RAIL_LbtConfig_t structure
  *   describing the LBT parameters to use for this transmit.
  *   \n In multiprotocol this must point to global or heap storage that remains

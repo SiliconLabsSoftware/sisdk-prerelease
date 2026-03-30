@@ -11,7 +11,7 @@ metadata:
     license: MSLA
 requires:
 - name: rail_lib
-- name: rail_util_built_in_phys
+- name: sl_rail_util_built_in_phys
   condition:
   - device_init
 provides:

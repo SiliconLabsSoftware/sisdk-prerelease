@@ -299,12 +299,23 @@ __ATTRIBUTE_SECURE_RESET_HANDLER __NO_PROLOGUE void sli_tz_secure_reset_handler(
     );
 
   // Flush both Cache before switching to Non-Secure.
+  // Note: Use device config guards instead of core-based guards because
+  // SMU register locations differ between device families even with the same core.
   __ASM volatile (
-#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301) // There seems to be a bug with the L1ICACHE0 invalidation
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)
     // L1ICACHE0->CMD = ICACHE_CMD_INVALIDATE;
     "MOVS           R2, %[L1icache_flush] \n"
     "MOV            R3, %[L1icache_cmd]   \n"
     "STR            R2, [R3]              \n"
+#else
+    // SCB->ICIALLU = 0 (ARM I-Cache Invalidate All to PoU)
+    "DSB                                  \n"
+    "ISB                                  \n"
+    "MOVS           R2, #0               \n"
+    "MOV            R3, %[scb_iciallu]   \n"
+    "STR            R2, [R3]              \n"
+    "DSB                                  \n"
+    "ISB                                  \n"
 #endif
 
     // L2ICACHE0->FLUSHCMD = L2CACHE_FLUSHCMD_FLUSHALL;
@@ -324,6 +335,8 @@ __ATTRIBUTE_SECURE_RESET_HANDLER __NO_PROLOGUE void sli_tz_secure_reset_handler(
 #if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)
     [L1icache_cmd] "r" (&L1ICACHE0->CMD_SET),
     [L1icache_flush] "r" (ICACHE_CMD_INVALIDATE),
+#else
+    [scb_iciallu] "r" (&SCB->ICIALLU),
 #endif
 #if defined(L2CACHE_FLUSHCMD_FLUSHALL)
     [L2icache_flushcmd] "r" (&L2ICACHE0->FLUSHCMD_SET),
@@ -374,7 +387,7 @@ __ATTRIBUTE_SECURE_RESET_HANDLER __NO_PROLOGUE void sli_tz_secure_reset_handler(
   // Configure all peripherals to Non-Secure except for SMU.
   __ASM volatile (
 
-    // SMU->PPUSATD0_CLR = _SMU_PPUSATD0_MASK;
+    // SMU->PPUSATD0_CLR = _SMU_PPUSATD0_MASK & (~SMU_PPUSATD0_SMU);
     "MOV      R3, %[smu_ppusatd0_clear]   \n"
     "MOV      R2, %[ppusatd0_mask]        \n"
     "STR      R2, [R3]                    \n"
@@ -397,9 +410,17 @@ __ATTRIBUTE_SECURE_RESET_HANDLER __NO_PROLOGUE void sli_tz_secure_reset_handler(
 #endif
     : // No outputs.
     :[smu_ppusatd0_clear] "r" (&SMU->PPUSATD0_CLR),
+#if defined(SMU_PPUSATD0_SMU)
+    [ppusatd0_mask] "r" (_SMU_PPUSATD0_MASK & (~SMU_PPUSATD0_SMU)),
+#else
     [ppusatd0_mask] "r" (_SMU_PPUSATD0_MASK),
+#endif
     [smu_ppusatd1_clear] "r" (&SMU->PPUSATD1_CLR),
+#if defined(SMU_PPUSATD1_SMU)
     [ppusatd1_mask] "r" (_SMU_PPUSATD1_MASK & (~SMU_PPUSATD1_SMU))
+#else
+    [ppusatd1_mask] "r" (_SMU_PPUSATD1_MASK)
+#endif
 #if defined(_SMU_PPUSATD2_MASK)
     ,
     [smu_ppusatd2_clear] "r" (&SMU->PPUSATD2_CLR),

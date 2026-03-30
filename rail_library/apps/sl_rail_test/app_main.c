@@ -369,7 +369,8 @@ void sl_rail_test_internal_app_init(void)
 
 #if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9))
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11))
   if (resetCause & EMU_RSTCAUSE_EM4) {
     responsePrint("sleepWoke", "EM:4s,SerialWakeup:No,RfSensed:%s",
                   sl_rail_is_rf_sensed(railHandle) ? "Yes" : "No");

@@ -12,10 +12,6 @@ include:
 - path: "platform/bootloader"
   file_list:
   - path: "driver/btl_driver_util.h"
-requires:
-- name: test_btl_core
-- name: unity
-- name: emlib
 provides:
 - name: btldriver_util
 ui_hints:

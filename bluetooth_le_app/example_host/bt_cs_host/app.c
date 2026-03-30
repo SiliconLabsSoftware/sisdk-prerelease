@@ -731,6 +731,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       app_assert_status(sc);
       break;
     }
+    // --------------------------------
     case sl_bt_evt_connection_parameters_id:
       for (uint32_t i = 0u; i < cs_host_config.max_initiator_instances; i++) {
         if (cs_host_state.reflector_conn_handles[i] == evt->data.evt_connection_parameters.connection) {
@@ -769,6 +770,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
         }
       }
       break;
+    // --------------------------------
     case sl_bt_evt_cs_read_remote_supported_capabilities_complete_id:
     {
       uint16_t proc_interval;
@@ -861,6 +863,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       }
       break;
     }
+    // --------------------------------
     case sl_bt_evt_user_message_to_host_id:
     {
       // handle button press security confirmation

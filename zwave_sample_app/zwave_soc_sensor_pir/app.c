@@ -102,7 +102,7 @@ ApplicationInit(__attribute__((unused)) zpal_reset_reason_t eResetReason)
   SRadioConfig_t* RadioConfig;
 
 #ifdef SL_CATALOG_ZW_SHUTDOWN_MANAGER_PRESENT
-  zw_shutdown_manager_init();
+  (void) zw_shutdown_manager_init();
 #endif
 
   ZPAL_LOG_DEBUG(ZPAL_LOG_APP, "Enabling watchdog\n");

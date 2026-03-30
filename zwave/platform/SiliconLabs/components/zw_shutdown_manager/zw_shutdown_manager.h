@@ -24,6 +24,8 @@ extern "C" {
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
+#include "zpal_status.h"
+
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -42,8 +44,10 @@ extern "C" {
  * This function sets up any necessary resources or state required for the
  * shutdown manager to operate. It should be called during system startup
  * before using any shutdown-related functionality.
+ *
+ * @return ZPAL_STATUS_OK if initialization was successful, otherwise ZPAL_STATUS_FAIL.
  */
-void zw_shutdown_manager_init(void);
+zpal_status_t zw_shutdown_manager_init(void);
 
 /**
  * @brief Adds a lock to the Z-Wave shutdown manager.

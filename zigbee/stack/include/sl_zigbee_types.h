@@ -3376,6 +3376,17 @@ typedef struct {
   uint32_t last_hop_timestamp;
 } sl_zigbee_rx_packet_info_t;
 
+/** @brief Lightweight link quality information captured at packet reception.
+ *
+ * Used by ::sl_zigbee_post_incoming_packet_filter_with_lqi_and_rssi_cb to
+ * convey radio-level metrics alongside intercepted packets.
+ */
+typedef struct {
+  int8_t rssi;      /**< Received signal strength indicator. */
+  uint8_t lqi;      /**< Link quality indicator. */
+  uint8_t channel;  /**< Radio channel the packet was received on. */
+} sl_zigbee_packet_link_quality_t;
+
 // Note:
 // For single network case:
 //  - sl_zigbee_network_info_t and sli_zigbee_pan_info: Single instance present.

@@ -76,6 +76,13 @@ sl_status_t sli_clock_manager_hal_enable_bus_clock(sl_bus_clock_t module,
                                                    bool enable);
 
 /***************************************************************************//**
+ * Gets the enable status of the given module's bus clock.
+ ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_CLOCK_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
+sl_status_t sli_clock_manager_hal_is_bus_clock_enabled(sl_bus_clock_t module,
+                                                       bool *enabled);
+
+/***************************************************************************//**
  * Configures the exported clock feature on CMU to output user selected
  * clock source specified GPIO pin.
  ******************************************************************************/

@@ -1,7 +1,7 @@
 project_name: memlcd_kernel_micriumos
 package: platform
 quality: production
-label: Platform - MEMLCD Kernel on Micrium OS kernel
+label: Platform - MEMLCD Kernel on Micrium OS Kernel
 description: >
   This example project demonstrates use of the Memory Liquid Crystal Display (LCD)
   module in a Micrium OS kernel task, using Silicon Labs Graphics Library (glib).

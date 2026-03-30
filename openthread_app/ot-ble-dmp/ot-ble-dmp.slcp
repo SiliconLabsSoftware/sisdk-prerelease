@@ -2,7 +2,7 @@ project_name: ot-ble-dmp
 label: OpenThread BLE DMP - SoC FreeRTOS
 package: openthread
 description: >
-  This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS.
+  Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth running on FreeRTOS.
 category: OpenThread Examples
 quality: production
 

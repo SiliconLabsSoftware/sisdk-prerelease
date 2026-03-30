@@ -508,7 +508,7 @@ sl_status_t sl_dma_manager_register_channel_irq_callback(sl_dma_handle_t *dma_ha
 void sli_dma_manager_interrupt_handler(uint32_t peripheral_base_addr, uint8_t channel_nbr)
 {
   CORE_DECLARE_IRQ_STATE;
-  sl_dma_handle_t *dma_handle = NULL;
+  sl_dma_handle_t const *dma_handle = NULL;
   sl_dma_handle_t *handle;
 
   CORE_ENTER_ATOMIC();

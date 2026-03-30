@@ -109,6 +109,9 @@
 
 #if defined(_SILICON_LABS_32B_SERIES_3)
   #define SLI_SE_SUPPORTS_NVM3_INTERNAL_KEY
+  #if defined(_SI_WX_FAMILY)
+  #define SLI_SE_SUPPORTS_RSA
+  #endif
 #endif
 
 #if defined(SLI_SE_MAJOR_VERSION_ONE)

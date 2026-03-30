@@ -899,11 +899,12 @@ int snprintf(char* buffer, size_t count, const char* format, ...)
 #if defined(__GNUC__)
 #if !defined(__clang__)
 int sniprintf (char *, size_t, const char *, ...) __copy(snprintf) __attribute__ ((__alias__("snprintf")));
-#else
-// Clang does not support __copy__, but supports __alias__.
-// Provide sniprintf so that newlib-nano's libc_a-snprintf.o (which bundles
-// both snprintf and sniprintf) is not pulled from the archive when strftime
-// references sniprintf, avoiding a duplicate symbol error with LLVM/LTO.
+#elif !defined(__APPLE__)
+// Clang on non-Apple targets: __alias__ is supported on ELF but not on
+// Darwin (Mach-O).  Provide sniprintf so that newlib-nano's
+// libc_a-snprintf.o (which bundles both snprintf and sniprintf) is not
+// pulled from the archive when strftime references sniprintf, avoiding a
+// duplicate symbol error with LLVM/LTO.
 int sniprintf (char *, size_t, const char *, ...) __attribute__ ((__alias__("snprintf")));
 #endif
 int puts(const char* s)

@@ -44,8 +44,6 @@ provides:
   condition: [device_generic_family_sixx301]
 - name: hal_generic_prs
   condition: [device_generic_family_sixx302]
-- name: hal_generic_prs
-  condition: [device_generic_family_efr32xg2b]
 requires:
 - name: device
 - name: device_has_prs

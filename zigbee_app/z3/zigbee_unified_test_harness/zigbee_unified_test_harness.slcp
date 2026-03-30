@@ -1,5 +1,5 @@
 project_name: zigbee_unified_test_harness
-label: Zigbee - UnifiedTestHarness
+label: Zigbee - SoC Unified Test Harness
 package: zigbee
 category: Zigbee Application
 quality: production

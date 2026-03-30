@@ -53,7 +53,6 @@ requires:
 - name: rtllib_api
 - name: cortexm33
   condition: [device_cortexm]
-- name: toolchain_gcc
 - name: memory_manager_cpp
   condition: [device_cortexm]
 - name: cmsis_dsp

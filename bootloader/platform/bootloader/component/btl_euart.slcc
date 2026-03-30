@@ -16,13 +16,6 @@ include:
   - path: api/application_properties.h
   - path: api/btl_interface_parser.h
   - path: api/btl_interface_storage.h
-requires:
-- name: test_btl_core
-- name: unity
-- name: emlib
-- name: bootloader_debug
-- name: bootloader_euart_driver
-- name: memory_manager
 provides:
 - name: btl_euart
 config_file:

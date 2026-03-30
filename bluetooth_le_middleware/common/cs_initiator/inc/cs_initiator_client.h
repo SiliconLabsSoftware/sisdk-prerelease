@@ -307,6 +307,17 @@ sl_status_t cs_initiator_get_intervals(uint8_t main_mode,
                                        uint16_t *conn_interval,
                                        uint16_t *proc_interval);
 
+/**************************************************************************//**
+ * Calculate the number of CS subevents within one procedure.
+ * @param[in] procedure_interval Negotiated procedure time.
+ * @param[in] subevents_per_event Number of subevents within an event.
+ * @param[in] event_interval Number of connection intervals between consecutive CS event anchor points.
+ * @return Number of subevents per procedure (min. 1)
+ *****************************************************************************/
+uint32_t cs_initiator_get_subevents_per_procedure(uint16_t procedure_interval,
+                                                  uint8_t subevents_per_event,
+                                                  uint16_t event_interval);
+
 #ifdef __cplusplus
 };
 #endif

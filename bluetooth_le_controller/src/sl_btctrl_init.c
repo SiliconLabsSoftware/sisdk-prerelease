@@ -82,7 +82,6 @@
 
 #if defined(SL_CATALOG_BLUETOOTH_PRESENT)
 #include "sl_bluetooth.h"
-#include "sl_bt_host_adaptation_config.h"
 #endif
 
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_PERIODIC_ADVERTISER_PRESENT)
@@ -214,10 +213,6 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
 
 #if !defined(SL_CATALOG_KERNEL_PRESENT)
   config->rtos_enabled = false;
-// Ensure that the radio IRQs have a higher priority than the Link Layer IRQ priority
-#if (SL_BT_CONTROLLER_LINKLAYER_IRQ_PRIORITY <= SL_BT_CONTROLLER_RADIO_IRQ_PRIORITY)
-#error Invalid configuration: SL_BT_CONTROLLER_LINKLAYER_IRQ_PRIORITY <= SL_BT_CONTROLLER_RADIO_IRQ_PRIORITY
-#endif // SL_BT_CONTROLLER_LINKLAYER_IRQ_PRIORITY <= SL_BT_CONTROLLER_RADIO_IRQ_PRIORITY
 #else // SL_CATALOG_KERNEL_PRESENT
   config->rtos_enabled = true;
 #endif // !SL_CATALOG_KERNEL_PRESENT
@@ -233,29 +228,6 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
   config->tx_power_max = SL_BT_CONTROLLER_MAX_POWER_LEVEL;
 #endif
 
-#if !defined(SL_CATALOG_KERNEL_PRESENT)
-// Ensure that the radio IRQs have a higher priority than the Link Layer IRQ priority
-#if (SL_BT_HOST_ADAPTATION_LINKLAYER_IRQ_PRIORITY <= SL_BT_HOST_ADAPTATION_RADIO_IRQ_PRIORITY)
-#error Invalid configuration: SL_BT_HOST_ADAPTATION_LINKLAYER_IRQ_PRIORITY <= SL_BT_HOST_ADAPTATION_RADIO_IRQ_PRIORITY
-#endif // SL_BT_HOST_ADAPTATION_LINKLAYER_IRQ_PRIORITY <= SL_BT_HOST_ADAPTATION_RADIO_IRQ_PRIORITY
-#endif // !SL_CATALOG_KERNEL_PRESENT
-
-  // Use the value from Host Adaptation if it is not set to the default of 5, as the customer has modified the config in this case
-  // and thus intends to use this particular IRQ priority.
-  if (SL_BT_HOST_ADAPTATION_LINKLAYER_IRQ_PRIORITY != 5) {
-    config->linklayer_irq_priority = SL_BT_HOST_ADAPTATION_LINKLAYER_IRQ_PRIORITY;
-  } else {
-    config->linklayer_irq_priority = SL_BT_CONTROLLER_LINKLAYER_IRQ_PRIORITY;
-  }
-
-  // Use the value from Host Adaptation if it is not set to the default of 4, as the customer has modified the config in this case
-  // and thus intends to use this particular IRQ priority.
-  if (SL_BT_HOST_ADAPTATION_RADIO_IRQ_PRIORITY != 4) {
-    config->radio_irq_priority = SL_BT_HOST_ADAPTATION_RADIO_IRQ_PRIORITY;
-  } else {
-    config->radio_irq_priority = SL_BT_CONTROLLER_RADIO_IRQ_PRIORITY;
-  }
-
 #else // SL_CATALOG_BLUETOOTH_PRESENT
 
 #if (SL_BT_CONTROLLER_MIN_POWER_LEVEL_OVERRIDE == 1)
@@ -269,11 +241,16 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
 #else
   config->tx_power_max = SL_BT_USE_MAX_POWER_LEVEL_SUPPORTED_BY_RADIO;
 #endif
-
-  config->linklayer_irq_priority = SL_BT_CONTROLLER_LINKLAYER_IRQ_PRIORITY;
-  config->radio_irq_priority = SL_BT_CONTROLLER_RADIO_IRQ_PRIORITY;
-
 #endif // SL_CATALOG_BLUETOOTH_PRESENT
+
+#if !defined(SL_CATALOG_KERNEL_PRESENT)
+// Ensure that the radio IRQs have a higher priority than the Link Layer IRQ priority
+#if (SL_BT_CONTROLLER_LINKLAYER_IRQ_PRIORITY <= SL_BT_CONTROLLER_RADIO_IRQ_PRIORITY)
+#error Invalid configuration: SL_BT_CONTROLLER_LINKLAYER_IRQ_PRIORITY <= SL_BT_CONTROLLER_RADIO_IRQ_PRIORITY
+#endif // SL_BT_CONTROLLER_LINKLAYER_IRQ_PRIORITY <= SL_BT_CONTROLLER_RADIO_IRQ_PRIORITY
+  config->linklayer_irq_priority = SL_BT_CONTROLLER_LINKLAYER_IRQ_PRIORITY;
+#endif // !SL_CATALOG_KERNEL_PRESENT
+  config->radio_irq_priority = SL_BT_CONTROLLER_RADIO_IRQ_PRIORITY;
 // End of TX Power and IRQ priority initialization section
 
 #if defined(SL_CATALOG_BLUETOOTH_RCP_PRESENT) && !defined(SL_CATALOG_KERNEL_PRESENT)
@@ -301,11 +278,7 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
     return status;
   }
 
-  if (config->priorities != NULL) {
-    sl_btctrl_configure_scheduler_priorities(config->priorities);
-  } else {
-    sl_btctrl_configure_scheduler_priorities(&sli_btctrl_priority_table);
-  }
+  sl_btctrl_configure_scheduler_priorities(&sli_btctrl_priority_table);
 
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_PHY_SUPPORT_CONFIG_PRESENT)
 #if SL_BT_CONTROLLER_2M_PHY_SUPPORT == 0

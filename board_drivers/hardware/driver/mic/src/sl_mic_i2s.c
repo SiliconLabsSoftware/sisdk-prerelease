@@ -144,10 +144,10 @@ sl_status_t sl_mic_init(uint32_t sample_rate, uint8_t n_channels)
   sl_hal_usart_enable_tx(SL_MIC_I2S_PERIPHERAL);
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
-  GPIO->USARTROUTE->ROUTEEN = GPIO_USART_ROUTEEN_RXPEN | GPIO_USART_ROUTEEN_CLKPEN | GPIO_USART_ROUTEEN_CSPEN;
-  GPIO->USARTROUTE->RXROUTE = (SL_MIC_I2S_RX_PORT << _GPIO_USART_RXROUTE_PORT_SHIFT) | (SL_MIC_I2S_RX_PIN << _GPIO_USART_RXROUTE_PIN_SHIFT);
-  GPIO->USARTROUTE->CLKROUTE = (SL_MIC_I2S_CLK_PORT << _GPIO_USART_CLKROUTE_PORT_SHIFT) | (SL_MIC_I2S_CLK_PIN << _GPIO_USART_CLKROUTE_PIN_SHIFT);
-  GPIO->USARTROUTE->CSROUTE = (SL_MIC_I2S_CS_PORT << _GPIO_USART_CSROUTE_PORT_SHIFT) | (SL_MIC_I2S_CS_PIN << _GPIO_USART_CSROUTE_PIN_SHIFT);
+  GPIO->USARTROUTE[SL_MIC_I2S_PERIPHERAL_NO].ROUTEEN = GPIO_USART_ROUTEEN_RXPEN | GPIO_USART_ROUTEEN_CLKPEN | GPIO_USART_ROUTEEN_CSPEN;
+  GPIO->USARTROUTE[SL_MIC_I2S_PERIPHERAL_NO].RXROUTE = (SL_MIC_I2S_RX_PORT << _GPIO_USART_RXROUTE_PORT_SHIFT) | (SL_MIC_I2S_RX_PIN << _GPIO_USART_RXROUTE_PIN_SHIFT);
+  GPIO->USARTROUTE[SL_MIC_I2S_PERIPHERAL_NO].CLKROUTE = (SL_MIC_I2S_CLK_PORT << _GPIO_USART_CLKROUTE_PORT_SHIFT) | (SL_MIC_I2S_CLK_PIN << _GPIO_USART_CLKROUTE_PIN_SHIFT);
+  GPIO->USARTROUTE[SL_MIC_I2S_PERIPHERAL_NO].CSROUTE = (SL_MIC_I2S_CS_PORT << _GPIO_USART_CSROUTE_PORT_SHIFT) | (SL_MIC_I2S_CS_PIN << _GPIO_USART_CSROUTE_PIN_SHIFT);
 #else
   SL_MIC_I2S_PERIPHERAL->ROUTELOC0 = (SL_MIC_I2S_RX_LOC << _USART_ROUTELOC0_RXLOC_SHIFT | SL_MIC_I2S_CLK_LOC << _USART_ROUTELOC0_CLKLOC_SHIFT | SL_MIC_I2S_CS_LOC << _USART_ROUTELOC0_CSLOC_SHIFT);
   SL_MIC_I2S_PERIPHERAL->ROUTEPEN  = (USART_ROUTEPEN_RXPEN | USART_ROUTEPEN_CLKPEN | USART_ROUTEPEN_CSPEN);
@@ -200,6 +200,7 @@ sl_status_t sl_mic_init(uint32_t sample_rate, uint8_t n_channels)
  ******************************************************************************/
 sl_status_t sl_mic_deinit(void)
 {
+  Ecode_t status;
   sl_gpio_t mic_i2s_clk_gpio = {
     .port = SL_MIC_I2S_CLK_PORT,
     .pin = SL_MIC_I2S_CLK_PIN,
@@ -224,9 +225,15 @@ sl_status_t sl_mic_deinit(void)
   sl_gpio_set_pin_mode(&mic_i2s_rx_gpio, SL_GPIO_MODE_DISABLED, 0);
   sl_gpio_set_pin_mode(&mic_i2s_cs_gpio, SL_GPIO_MODE_DISABLED, 0);
 
-  /* Free resources */
-  DMADRV_FreeChannel(dma_channel_left);
-  DMADRV_FreeChannel(dma_channel_right);
+  /* Free resources (mono uses two channels; always attempt right free even if left fails) */
+  status = DMADRV_FreeChannel(dma_channel_left);
+  Ecode_t status_right = ECODE_EMDRV_DMADRV_OK;
+  if (num_channels == 1) {
+    status_right = DMADRV_FreeChannel(dma_channel_right);
+  }
+  if (status != ECODE_EMDRV_DMADRV_OK || status_right != ECODE_EMDRV_DMADRV_OK) {
+    return SL_STATUS_FAIL;
+  }
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   //Remove EM1 request

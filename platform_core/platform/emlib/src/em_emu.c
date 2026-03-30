@@ -3621,6 +3621,11 @@ bool EMU_DCDCInit(const EMU_DCDCInit_TypeDef *dcdcInit)
   EMU_DCDCSync(DCDC_SYNCBUSY_EM01CTRL0);
 #endif
 
+  /* Set DCDC regulation type. */
+#if defined(_DCDC_DOCTRL_REGULATIONTYPE_MASK)
+  EMU_DCDCSetRegulationType(dcdcInit->regulationType);
+#endif
+
   EMU_DCDCModeSet(dcdcInit->mode);
 
 #if defined(_DCDC_DOCTRL_MASK) && defined(_DCDC_EM01CTRL0_IPKDECVAL_MASK)

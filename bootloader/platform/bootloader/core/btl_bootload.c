@@ -446,7 +446,7 @@ SL_WEAK void bootload_bootloaderCallback(uint32_t offset,
 
 bool bootload_checkApplicationPropertiesMagic(void *appProperties)
 {
-  uint32_t flashEnd  = (uint32_t)FLASH_BASE + (uint32_t)FLASH_SIZE; // Physical limit for endOfAppsSpace
+  uint32_t flashEnd  = FLASH_BASE + FLASH_SIZE; // Physical limit for endOfAppsSpace
   uint32_t appEndCfg = (uint32_t)mainBootloaderTable->endOfAppSpace; //endOfAppSpace as configured by the user
 
   // Taking minimum value of appEndCfg and flashEnd, to avoid errors when
@@ -454,7 +454,6 @@ bool bootload_checkApplicationPropertiesMagic(void *appProperties)
   uint32_t appEnd = (appEndCfg <= flashEnd) ? appEndCfg : flashEnd;
 
   if ((appProperties == NULL) || ((uint32_t) appProperties == 0xFFFFFFFFUL)
-      || ((uint32_t)appProperties < ((uint32_t)mainBootloaderTable->startOfAppSpace))
       || ((uint32_t)appProperties + sizeof(appProperties) > appEnd)) {
     return false;
   }

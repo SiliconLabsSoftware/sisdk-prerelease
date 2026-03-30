@@ -2,7 +2,7 @@ project_name: ot-ble-dmp-tz-ns
 label: OpenThread BLE DMP - SoC FreeRTOS (TrustZone)
 package: openthread
 description: >
-    This is a variant of the OpenThread BLE DMP application with trustzone awareness enabled.
+    Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth with TrustZone awareness enabled running on FreeRTOS.
 category: OpenThread Examples
 quality: production
 

@@ -2419,7 +2419,7 @@ typedef uint32_t sl_rail_pa_power_setting_t;
  * An unsupported power setting used with the \ref PA_Power_Conversions component.
  * when the device does not support the dBm to power setting mapping table.
  */
-#define SL_RAIL_TX_PA_POWER_SETTING_UNSUPPORTED     (sl_rail_pa_power_setting_t)(0xFFFFFFFFUL)
+#define SL_RAIL_TX_PA_POWER_SETTING_UNSUPPORTED     ((sl_rail_pa_power_setting_t)(0xFFFFFFFFUL))
 
 /**
  * @struct sl_rail_tx_power_setting_entry_t

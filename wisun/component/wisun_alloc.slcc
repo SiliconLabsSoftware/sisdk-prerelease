@@ -1,9 +1,9 @@
 id: wisun_alloc
 label: Wi-SUN alloc
 description: >
-  Wi-SUN alloc is an optional application component that reserves a memory pool used for critical features needed
+  Wi-SUN alloc is an optional application component that reserves a separate heap used for critical features needed
   to maintain the Wi-SUN network. This includes all cryptographic operations.
-  The size of the pool should be dimensioned for Wi-SUN usage and any other cryptographic calls present in the
+  The size of the heap should be dimensioned for Wi-SUN usage and any other cryptographic calls present in the
   application.
 package: wisun
 category: Wi-SUN|Application
@@ -13,6 +13,9 @@ quality: production
 provides:
 - name: mbedtls_platform_dynamic_memory_allocation_config
 - name: wisun_alloc
+
+requires:
+- name: memory_manager
 
 config_file:
 - path: plugin/config/sl_wisun_alloc_config.h
@@ -31,6 +34,10 @@ template_contribution:
   value: MBEDTLS_PLATFORM_CALLOC_MACRO sl_wisun_calloc
 - name: mbedtls_config
   value: MBEDTLS_PLATFORM_FREE_MACRO   sl_wisun_free
+
+toolchain_settings:
+- option: gcc_linker_option
+  value: "-Wl,--wrap=sli_memory_get_heap_handle"
 
 metadata:
   sbom:

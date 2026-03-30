@@ -18,9 +18,9 @@
 // <<< Use Configuration Wizard in Context Menu >>>
 // <h>Wi-SUN Application Allocator Configuration
 
-// <o SL_WISUN_ALLOC_POOL_SIZE> Allocator pool size <f.h>
+// <o SL_WISUN_ALLOC_HEAP_SIZE> Allocator heap size <f.h>
 // <d> 20kB
-#define SL_WISUN_ALLOC_POOL_SIZE (20 * 1024)
+#define SL_WISUN_ALLOC_HEAP_SIZE (20 * 1024)
 
 // </h>
 // <<< end of configuration section >>>

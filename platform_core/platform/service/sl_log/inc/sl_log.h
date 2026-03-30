@@ -404,6 +404,21 @@ sl_log_is_ring_buffer_full(sl_log_ring_buffer_t *ring_buffer) {
   return ((ring_buffer->event_count == SL_LOG_NUMBER_OF_EVENTS));
 }
 
+
+/***************************************************************************//**
+* @brief
+*    Assert implementation function
+* @param[in] string_value - Formatted error string containing file:line - condition
+* @details
+*    This function should:
+*    1. Log the error string using SL_PRINT_ERR or similar logging API
+*    2. Check if debugger is attached (CoreDebug->DHCSR)
+*    3. If debugger attached: trigger breakpoint (__BKPT(1))
+*    4. If no debugger: enter infinite loop for watchdog reset
+*
+******************************************************************************/
+void sli_log_assert_implementation(const char* string_value);
+
 /** @} (end addtogroup sl_log_api_internal) */
 
 /**

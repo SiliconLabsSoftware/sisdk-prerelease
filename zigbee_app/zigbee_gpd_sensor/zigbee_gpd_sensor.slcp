@@ -1,5 +1,5 @@
 project_name: zigbee_gpd_sensor
-label: Zigbee - GPD Sensor
+label: Zigbee - SoC GPD Sensor
 package: zigbee
 category: Zigbee Application
 quality: production

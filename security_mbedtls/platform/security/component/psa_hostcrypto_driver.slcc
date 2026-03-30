@@ -16,7 +16,6 @@ requires:
 - name: sxsymcrypt
 - name: sli_crypto_ksu_manager
   condition: [device_has_semailbox, device_has_ksu]
-- name: sli_crypto
 
 source:
   # Common drivers

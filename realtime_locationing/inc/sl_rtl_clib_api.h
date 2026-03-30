@@ -2252,13 +2252,15 @@ char *sl_rtl_util_iq_sample_qa_code2string(char *buf, int size, uint32_t code);
  * does not check for any Bluetooth-related constraints (for example skipping
  * of the advertisement channels).
  *
- * @param[in] cs_mode Channel sounding mode (see the CS API)
+ * @param[in] main_mode Channel sounding main mode (see the CS API)
+ * @param[in] sub_mode Channel sounding sub mode (see the CS API)
  * @param[in] algo_mode Channel sounding algorithm mode (see the CS API)
  * @param[in] channel_map Bluetooth channel bitmap to validate
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_util_validate_bluetooth_cs_channel_map(
-  const sl_rtl_cs_mode cs_mode,
+  const sl_rtl_cs_mode main_mode,
+  const sl_rtl_cs_mode sub_mode,
   const sl_rtl_cs_algo_mode algo_mode,
   const uint8_t channel_map[10]);
 

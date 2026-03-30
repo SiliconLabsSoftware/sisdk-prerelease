@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
   <compounddef id="group__sl__bt__dfu" kind="group">
     <compoundname>sl_bt_dfu</compoundname>
     <title>Device Firmware Update</title>
     <innergroup refid="group__sl__bt__evt__dfu__boot">sl_bt_evt_dfu_boot</innergroup>
     <innergroup refid="group__sl__bt__evt__dfu__boot__failure">sl_bt_evt_dfu_boot_failure</innergroup>
-      <sectiondef kind="func">
+    <sectiondef kind="func">
       <memberdef kind="function" id="group__sl__bt__dfu_1ga66fb3a7dc1534699a77d39c0d61454ef" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
         <definition>sl_status_t sl_bt_dfu_flash_set_address</definition>
@@ -98,8 +98,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="246" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="246" declcolumn="13"/>
       </memberdef>
-      </sectiondef>
-      <sectiondef kind="define">
+    </sectiondef>
+    <sectiondef kind="define">
       <memberdef kind="define" id="group__sl__bt__dfu_1gaeedd16b88626954b631a61238adb7480" prot="public" static="no">
         <name>sl_bt_cmd_dfu_flash_set_address_id</name>
         <initializer>0x01000020</initializer>
@@ -166,7 +166,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="161" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="161" bodyend="-1"/>
       </memberdef>
-      </sectiondef>
+    </sectiondef>
     <briefdescription>
 <para>Device Firmware Update. </para>
     </briefdescription>

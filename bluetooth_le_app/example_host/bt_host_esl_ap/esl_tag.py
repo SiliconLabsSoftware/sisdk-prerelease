@@ -28,7 +28,6 @@ from collections import namedtuple
 from datetime import datetime as dt
 from image_converter import XbmConverter
 from ap_constants import (
-    AUX_SYNC_IND_PDU_MAX_SKIP_COUNT,
     BASIC_STATE_FLAG_SERVICE_NEEDED,
     BASIC_STATE_FLAG_SYNCHRONIZED,
     BASIC_STATE_STRINGS,
@@ -1024,6 +1023,7 @@ class Tag:
                         elw.SL_STATUS_BT_CTRL_CONNECTION_LIMIT_EXCEEDED,
                     ]
                     and not self.advertising
+                    and not self.synchronized
                 ):
                     self._advertising = True  # set _advertising back - since it should advertising - to prevent re-report of already known tag
                     self.start_advertising_governor()  # the advertising governor will take care of it if it does not advertise as we expect
@@ -1211,15 +1211,14 @@ class Tag:
                 f"Invalid ESL object state: {self._state} at address {self.ble_address}"
             )
         factory_reset = data[0] == TLV_OPCODE_FACTORY_RST
-        if (data[0] == TLV_OPCODE_UNASSOCIATE or factory_reset) and data[
-            1
-        ] == self.esl_id:
-            self.pending_unassociate = True
         try:
             self.lib.write_control_point(
                 self.connection_handle, data, (att_response or factory_reset)
             )
             self.busy = True
+            if data[1] == self.esl_id:
+                if (data[0] == TLV_OPCODE_UNASSOCIATE or factory_reset):
+                    self.pending_unassociate = True
         except esl_lib.CommandFailedError as e:
             self.log.error(e)
 

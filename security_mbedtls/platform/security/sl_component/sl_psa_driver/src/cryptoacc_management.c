@@ -87,23 +87,6 @@ psa_status_t cryptoacc_management_release(void)
 
 #if defined(SLI_MBEDTLS_DEVICE_VSE_V2)
 
-psa_status_t cryptoacc_reseed_countermeasures(uint32_t seed)
-{
-  // Acquire the CRYPTOACC peripheral
-  psa_status_t status = cryptoacc_management_acquire();
-
-  if (status != PSA_SUCCESS) {
-    return status;
-  }
-  // Load the new mask
-  sx_aes_load_mask(seed | (1U << 31));
-
-  // Release the CRYPTOACC peripheral
-  status = cryptoacc_management_release();
-
-  return status;
-}
-
 psa_status_t cryptoacc_initialize_countermeasures(void)
 {
   // Set to true when CM has been initialized
@@ -127,9 +110,14 @@ psa_status_t cryptoacc_initialize_countermeasures(void)
     if (temp_status != PSA_SUCCESS) {
       final_status = temp_status;
     }
+    mask |= (1U << 31);
 
-    temp_status = cryptoacc_reseed_countermeasures(mask);
-
+    temp_status = cryptoacc_management_acquire();
+    if (temp_status != PSA_SUCCESS) {
+      final_status = temp_status;
+    }
+    sx_aes_load_mask(mask);
+    temp_status = cryptoacc_management_release();
     if ((temp_status != PSA_SUCCESS) && (final_status == PSA_SUCCESS)) {
       final_status = temp_status;
     }

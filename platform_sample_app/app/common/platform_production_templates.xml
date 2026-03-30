@@ -28,7 +28,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   <properties key="partCompatibility" value=".*sibg301.*" /></descriptors>
-  <descriptors name="blink_kernel_freertos" label="Platform - Blink Kernel FreeRTOS" description="This example project shows how to blink an LED using a FreeRTOS kernel task. The blink task can be created using either dynamic or static memory allocation for the task stack and tcb.&#10;">
+  <descriptors name="blink_kernel_freertos" label="Platform - Blink Kernel FreeRTOS" description="Blinks an LED using a FreeRTOS task. Illustrates creating the task with either dynamic or static memory for the task stack and TCB.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.blink_kernel_freertos.blink_kernel_freertos.slcp" />
@@ -43,7 +43,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   </descriptors>
-  <descriptors name="blink_kernel_freertos_s3" label="Platform - Blink Kernel FreeRTOS" description="This example project shows how to blink an LED using a FreeRTOS kernel task. The blink task can be created using either dynamic or static memory allocation for the task stack and tcb.&#10;">
+  <descriptors name="blink_kernel_freertos_s3" label="Platform - Blink Kernel FreeRTOS" description="Blinks an LED using a FreeRTOS task. Illustrates creating the task with either dynamic or static memory for the task stack and TCB.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.blink_kernel_freertos.blink_kernel_freertos.slcp" />
@@ -241,7 +241,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   </descriptors>
-  <descriptors name="common_token_manager_kernel_freertos" label="Platform - Common Token Manager Kernel FreeRtos" description="This example project demonstrates use of the CTM interface. Using the command line interface, the user can write, read and delete tokens.&#10;">
+  <descriptors name="common_token_manager_kernel_freertos" label="Platform - Common Token Manager Kernel FreeRTOS" description="This example project demonstrates use of the CTM interface. Using the command line interface, the user can write, read and delete tokens.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.common_token_manager_kernel_freertos.common_token_manager_kernel_freertos.slcp" />
@@ -301,7 +301,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   </descriptors>
-  <descriptors name="dmadrv_kernel_freertos" label="Platform - DMADRV Kernel FreeRTOS" description="This example project shows how to use DMADRV driver to transfer data between memory and a EUSART peripheral in a freertos configuration.&#10;">
+  <descriptors name="dmadrv_kernel_freertos" label="Platform - DMADRV Kernel FreeRTOS" description="This example project shows how to use DMADRV driver to transfer data between memory and an EUSART peripheral in a FreeRTOS configuration.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.dmadrv_kernel_freertos.dmadrv_kernel_freertos.slcp" />
@@ -316,7 +316,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   </descriptors>
-  <descriptors name="dmadrv_kernel_freertos_s3" label="Platform - DMADRV Kernel FreeRTOS" description="This example project shows how to use DMADRV driver to transfer data between memory and a EUSART peripheral in a freertos configuration.&#10;">
+  <descriptors name="dmadrv_kernel_freertos_s3" label="Platform - DMADRV Kernel FreeRTOS" description="This example project shows how to use DMADRV driver to transfer data between memory and an EUSART peripheral in a FreeRTOS configuration.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.dmadrv_kernel_freertos.dmadrv_kernel_freertos.slcp" />
@@ -404,7 +404,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   </descriptors>
-  <descriptors name="iostream_eusart_baremetal" label="Platform - I/O Stream EUSART Bare-metal" description="This example project uses the I/O Stream service running in a bare-metal configuration to demonstrate the use of EUSART communication over the virtual COM port (VCOM). The application will echo back any characters it receives over the serial connection. The VCOM serial port can be used either over USB or by connecting to port 4902 if the kit is connected via Ethernet.&#10;">
+  <descriptors name="iostream_eusart_baremetal" label="Platform - I/O Stream EUSART Bare-metal" description="Uses the I/O Stream service to demonstrate EUSART over the kit's virtual COM port (VCOM). Characters you send are echoed back; connect via USB or Ethernet port 4902.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.iostream_eusart_baremetal.iostream_eusart_baremetal.slcp" />
@@ -419,7 +419,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   </descriptors>
-  <descriptors name="iostream_eusart_kernel_freertos" label="Platform - I/O Stream EUSART FreeRTOS" description="This example project uses the I/O Stream service running in a FreeRTOS configuration to demonstrate the use of EUSART communication over the virtual COM port (VCOM). The application will echo back any characters it receives over the serial connection. The VCOM serial port can be used either over USB or by connecting to port 4902 if the kit is connected via Ethernet.&#10;">
+  <descriptors name="iostream_eusart_kernel_freertos" label="Platform - I/O Stream EUSART FreeRTOS" description="Uses the I/O Stream service with FreeRTOS to demonstrate EUSART over VCOM. Characters you send are echoed back; connect via USB or Ethernet port 4902.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.iostream_eusart_kernel_freertos.iostream_eusart_kernel_freertos.slcp" />
@@ -434,7 +434,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   </descriptors>
-  <descriptors name="iostream_eusart_kernel_freertos_s3" label="Platform - I/O Stream EUSART FreeRTOS" description="This example project uses the I/O Stream service running in a FreeRTOS configuration to demonstrate the use of EUSART communication over the virtual COM port (VCOM). The application will echo back any characters it receives over the serial connection. The VCOM serial port can be used either over USB or by connecting to port 4902 if the kit is connected via Ethernet.&#10;">
+  <descriptors name="iostream_eusart_kernel_freertos_s3" label="Platform - I/O Stream EUSART FreeRTOS" description="Uses the I/O Stream service with FreeRTOS to demonstrate EUSART over VCOM. Characters you send are echoed back; connect via USB or Ethernet port 4902.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.iostream_eusart_kernel_freertos.iostream_eusart_kernel_freertos.slcp" />
@@ -448,7 +448,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   <properties key="partCompatibility" value=".*simg301.*" /></descriptors>
-  <descriptors name="iostream_eusart_kernel_micriumos" label="Platform - I/O Stream EUSART on Micrium OS kernel" description="This example project uses the I/O Stream service running in a Micrium OS kernel task to demonstrate the use of EUSART communication over the virtual COM port (VCOM). The application will echo back any characters it receives over the serial connection. The VCOM serial port can be used either over USB or by connecting to port 4902 if the kit is connected via Ethernet.&#10;">
+  <descriptors name="iostream_eusart_kernel_micriumos" label="Platform - I/O Stream EUSART on Micrium OS Kernel" description="Uses the I/O Stream service with Micrium OS to demonstrate EUSART over VCOM. Characters you send are echoed back; connect via USB or Ethernet port 4902.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.iostream_eusart_kernel_micriumos.iostream_eusart_kernel_micriumos.slcp" />
@@ -463,7 +463,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   </descriptors>
-  <descriptors name="iostream_usart_baremetal" label="Platform - I/O Stream USART Bare-metal" description="This example project uses the I/O Stream service running in a bare-metal configuration to demonstrate the use of UART communication over the virtual COM port (VCOM). The application will echo back any characters it receives over the serial connection. The VCOM serial port can be used either over USB or by connecting to port 4902 if the kit is connected via Ethernet.&#10;">
+  <descriptors name="iostream_usart_baremetal" label="Platform - I/O Stream USART Bare-metal" description="Uses the I/O Stream service to demonstrate UART over the kit's virtual COM port (VCOM). Characters you send are echoed back; connect via USB or Ethernet port 4902.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.iostream_usart_baremetal.iostream_usart_baremetal.slcp" />
@@ -478,7 +478,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   </descriptors>
-  <descriptors name="iostream_usart_baremetal_s3" label="Platform - I/O Stream USART Bare-metal" description="This example project uses the I/O Stream service running in a bare-metal configuration to demonstrate the use of UART communication over the virtual COM port (VCOM). The application will echo back any characters it receives over the serial connection. The VCOM serial port can be used either over USB or by connecting to port 4902 if the kit is connected via Ethernet.&#10;">
+  <descriptors name="iostream_usart_baremetal_s3" label="Platform - I/O Stream USART Bare-metal" description="Uses the I/O Stream service to demonstrate UART over the kit's virtual COM port (VCOM). Characters you send are echoed back; connect via USB or Ethernet port 4902.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.iostream_usart_baremetal.iostream_usart_baremetal.slcp" />
@@ -491,7 +491,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   <properties key="partCompatibility" value=".*sibg301.*" /></descriptors>
-  <descriptors name="iostream_usart_kernel_micriumos" label="Platform - I/O Stream USART on Micrium OS kernel" description="This example project uses the I/O Stream service running in a Micrium OS kernel task to demonstrate the use of UART communication over the virtual COM port (VCOM). The application will echo back any characters it receives over the serial connection. The VCOM serial port can be used either over USB or by connecting to port 4902 if the kit is connected via Ethernet.&#10;">
+  <descriptors name="iostream_usart_kernel_micriumos" label="Platform - I/O Stream USART on Micrium OS Kernel" description="Uses the I/O Stream service with Micrium OS to demonstrate UART over VCOM. Characters you send are echoed back; connect via USB or Ethernet port 4902.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.iostream_usart_kernel_micriumos.iostream_usart_kernel_micriumos.slcp" />
@@ -506,7 +506,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   </descriptors>
-  <descriptors name="iostream_usart_kernel_micriumos_s3" label="Platform - I/O Stream USART on Micrium OS kernel" description="This example project uses the I/O Stream service running in a Micrium OS kernel task to demonstrate the use of UART communication over the virtual COM port (VCOM). The application will echo back any characters it receives over the serial connection. The VCOM serial port can be used either over USB or by connecting to port 4902 if the kit is connected via Ethernet.&#10;">
+  <descriptors name="iostream_usart_kernel_micriumos_s3" label="Platform - I/O Stream USART on Micrium OS Kernel" description="Uses the I/O Stream service with Micrium OS to demonstrate UART over VCOM. Characters you send are echoed back; connect via USB or Ethernet port 4902.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.iostream_usart_kernel_micriumos.iostream_usart_kernel_micriumos.slcp" />
@@ -519,7 +519,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   <properties key="partCompatibility" value=".*sibg301.*" /></descriptors>
-  <descriptors name="joystick_baremetal" label="Platform - Joystick Bare-metal" description="This example project uses the Joystick Driver running in a bare metal configuration to demonstrate the use of Joystick driver by printing joystick position after every finite interval over the virtual COM port (VCOM). The VCOM serial port can be used either over USB or by connecting to port 4902 if the kit is connected via Internet.&#10;Important Note: This application only works when Wireless Pro Kit (BRD4002A) is used as mainboard to mount and connect the compatible Radio Board.&#10;">
+  <descriptors name="joystick_baremetal" label="Platform - Joystick Bare-metal" description="Prints joystick position at intervals over VCOM so you can view it in a terminal. Requires Wireless Pro Kit (BRD4002A) as the mainboard.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.joystick_baremetal.joystick_baremetal.slcp" />
@@ -534,7 +534,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   </descriptors>
-  <descriptors name="joystick_kernel_freertos" label="Platform - Joystick on FreeRTOS kernel" description="This example project uses the Joystick driver running in a FreeRTOS kernel task to demonstrate the use of Joystick driver by printing joystick position after every finite interval over the virtual COM port (VCOM). The VCOM serial port can be used either over USB or by connecting to port 4902 if the kit is connected via Internet.&#10;Important Note: This application only works when Wireless Pro Kit (BRD4002A) is used as mainboard to mount and connect the compatible Radio Board.&#10;">
+  <descriptors name="joystick_kernel_freertos" label="Platform - Joystick on FreeRTOS kernel" description="Prints joystick position at intervals over VCOM using FreeRTOS. View output in a terminal. Requires Wireless Pro Kit (BRD4002A) as mainboard.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.joystick_kernel_freertos.joystick_kernel_freertos.slcp" />
@@ -549,7 +549,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   </descriptors>
-  <descriptors name="joystick_kernel_micriumos" label="Platform - Joystick on Micrium OS kernel" description="This example project uses the Joystick driver running in a Micrium OS kernel task to demonstrate the use of Joystick driver by printing joystick position after every finite interval over the virtual COM port (VCOM). The VCOM serial port can be used either over USB or by connecting to port 4902 if the kit is connected via Internet.&#10;Important Note: This application only works when Wireless Pro Kit (BRD4002A) is used as mainboard to mount and connect the compatible Radio Board.&#10;">
+  <descriptors name="joystick_kernel_micriumos" label="Platform - Joystick on Micrium OS Kernel" description="Prints joystick position at intervals over VCOM using Micrium OS. View output in a terminal. Requires Wireless Pro Kit (BRD4002A) as mainboard.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.joystick_kernel_micriumos.joystick_kernel_micriumos.slcp" />
@@ -557,21 +557,6 @@
     <properties key="readmeFiles" value="example/joystick_kernel_micriumos/readme.md" />
     <properties key="boardCompatibility" value="brd4109a brd4110a brd4111a brd4113a brd4118a brd4120a brd4121a brd4171a brd4176a brd4180a brd4180b brd4181a brd4181b brd4181c brd4194a brd4195a brd4195b brd4196a brd4196b brd4197a brd4350a brd4351a brd4356a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4412a brd4413a com.silabs.board.none" />
     <properties key="partCompatibility" value=".*bgm21.* .*bgm22.* .*bgm24.* .*efm32pg22.* .*efm32pg23.* .*efm32pg26.* .*efm32pg28.* .*efm32pg29.* .*efr32bg21.* .*efr32bg22.* .*efr32bg24.* .*efr32bg26.* .*efr32bg27.* .*efr32fg22.* .*efr32fg23.* .*efr32fg25.* .*efr32fg28.* .*efr32fg29.* .*efr32fg2d.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg26.* .*efr32mg27.* .*efr32mg29.* .*efr32mr21.* .*efr32sg23.* .*efr32sg28.* .*efr32sg29.* .*efr32zg23.* .*efr32zg28.* .*efr32zg29.* .*fgm23.* .*mgm21.* .*mgm22.* .*mgm24.* .*mgm26.* .*mgm27.* .*zgm23.*" />
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code" />
-    <properties key="toolchainCompatibility" value="gcc iar llvm" />
-    <properties key="category" value="Example|Platform" />
-    <properties key="quality" value="PRODUCTION" />
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
-    <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
-  </descriptors>
-  <descriptors name="math_mvp_demo" label="Platform - Demonstrate the MVP math library" description="This example project shows how to use the MVP math library.&#10;">
-    <properties key="namespace" value="template.uc" />
-    <properties key="keywords" value="universal\ configurator" />
-    <properties key="solutionReferenceId" value="app.common.example.math_mvp_demo.math_mvp_demo.slcp" />
-    <properties key="projectFilePaths" value="example/math_mvp_demo/math_mvp_demo.slcp" />
-    <properties key="readmeFiles" value="example/math_mvp_demo/readme.md" />
-    <properties key="boardCompatibility" value="brd2601b brd4186c brd4187c com.silabs.board.none" />
-    <properties key="partCompatibility" value=".*efr32mg24.*" />
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code" />
     <properties key="toolchainCompatibility" value="gcc iar llvm" />
     <properties key="category" value="Example|Platform" />
@@ -637,7 +622,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   <properties key="partCompatibility" value=".*sibg301.* .*simg301.*" /></descriptors>
-  <descriptors name="memlcd_kernel_micriumos" label="Platform - MEMLCD Kernel on Micrium OS kernel" description="This example project demonstrates use of the Memory Liquid Crystal Display (LCD) module in a Micrium OS kernel task, using Silicon Labs Graphics Library (glib).&#10;">
+  <descriptors name="memlcd_kernel_micriumos" label="Platform - MEMLCD Kernel on Micrium OS Kernel" description="This example project demonstrates use of the Memory Liquid Crystal Display (LCD) module in a Micrium OS kernel task, using Silicon Labs Graphics Library (glib).&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.memlcd_kernel_micriumos.memlcd_kernel_micriumos.slcp" />
@@ -652,7 +637,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   </descriptors>
-  <descriptors name="memlcd_kernel_micriumos_s3" label="Platform - MEMLCD Kernel on Micrium OS kernel" description="This example project demonstrates use of the Memory Liquid Crystal Display (LCD) module in a Micrium OS kernel task, using Silicon Labs Graphics Library (glib).&#10;">
+  <descriptors name="memlcd_kernel_micriumos_s3" label="Platform - MEMLCD Kernel on Micrium OS Kernel" description="This example project demonstrates use of the Memory Liquid Crystal Display (LCD) module in a Micrium OS kernel task, using Silicon Labs Graphics Library (glib).&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.memlcd_kernel_micriumos.memlcd_kernel_micriumos.slcp" />
@@ -665,7 +650,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   <properties key="partCompatibility" value=".*sibg301.*" /></descriptors>
-  <descriptors name="mpu_simple_baremetal" label="Platform - MPU Simple" description="This example project demonstrates the use of the Simple MPU module. Its purpose is to block the execution of code from RAM in order to prevent code injection attacks. In this example, some fake malicious executable code is copied to RAM and executed with the MPU disabled and re-enabled to demonstrate its effectiveness.&#10;">
+  <descriptors name="mpu_simple_baremetal" label="Platform - MPU Simple" description="Shows how the Memory Protection Unit (MPU) blocks code execution from RAM to prevent code injection attacks. Demonstrates enable/disable behavior.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.mpu_simple_baremetal.mpu_simple_baremetal.slcp" />
@@ -680,7 +665,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   </descriptors>
-  <descriptors name="mpu_simple_baremetal_s3" label="Platform - MPU Simple" description="This example project demonstrates the use of the Simple MPU module. Its purpose is to block the execution of code from RAM in order to prevent code injection attacks. In this example, some fake malicious executable code is copied to RAM and executed with the MPU disabled and re-enabled to demonstrate its effectiveness.&#10;">
+  <descriptors name="mpu_simple_baremetal_s3" label="Platform - MPU Simple" description="Shows how the Memory Protection Unit (MPU) blocks code execution from RAM to prevent code injection attacks. Demonstrates enable/disable behavior.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.mpu_simple_baremetal.mpu_simple_baremetal.slcp" />
@@ -693,7 +678,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   <properties key="partCompatibility" value=".*sibg301.*" /></descriptors>
-  <descriptors name="nvm3_baremetal" label="Platform - NVM3 Bare-metal" description="This example project demonstrates use of the NVM3 interface. Using the command line interface, the user can write, read and delete NVM3 data objects through the serial connection. The number of writes and deletes are tracked in counter objects.&#10;">
+  <descriptors name="nvm3_baremetal" label="Platform - NVM3 Bare-metal" description="Demonstrates the NVM3 non-volatile storage API. Use the serial CLI to write, read, and delete data objects; write and delete counts are tracked.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.nvm3_baremetal.nvm3_baremetal.slcp" />
@@ -708,7 +693,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   </descriptors>
-  <descriptors name="nvm3_baremetal_s3" label="Platform - NVM3 Bare-metal" description="This example project demonstrates use of the NVM3 interface. Using the command line interface, the user can write, read and delete NVM3 data objects through the serial connection. The number of writes and deletes are tracked in counter objects.&#10;">
+  <descriptors name="nvm3_baremetal_s3" label="Platform - NVM3 Bare-metal" description="Demonstrates the NVM3 non-volatile storage API. Use the serial CLI to write, read, and delete data objects; write and delete counts are tracked.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.nvm3_baremetal.nvm3_baremetal.slcp" />
@@ -721,7 +706,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   <properties key="partCompatibility" value=".*sibg301.*" /></descriptors>
-  <descriptors name="nvm3_kernel_freertos" label="Platform - NVM3 Kernel FreeRtos" description="This example project demonstrates use of the NVM3 interface. Using the command line interface, the user can write, read, delete and repack NVM3 data objects through the serial connection. The number of writes and deletes are tracked in counter objects.&#10;">
+  <descriptors name="nvm3_kernel_freertos" label="Platform - NVM3 Kernel FreeRTOS" description="Demonstrates the NVM3 non-volatile storage API with FreeRTOS. Use the serial CLI to write, read, delete, and repack objects; counts are tracked.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.nvm3_kernel_freertos.nvm3_kernel_freertos.slcp" />
@@ -736,7 +721,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   </descriptors>
-  <descriptors name="nvm3_kernel_freertos_s3" label="Platform - NVM3 Kernel FreeRtos" description="This example project demonstrates use of the NVM3 interface. Using the command line interface, the user can write, read, delete and repack NVM3 data objects through the serial connection. The number of writes and deletes are tracked in counter objects.&#10;">
+  <descriptors name="nvm3_kernel_freertos_s3" label="Platform - NVM3 Kernel FreeRTOS" description="Demonstrates the NVM3 non-volatile storage API with FreeRTOS. Use the serial CLI to write, read, delete, and repack objects; counts are tracked.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.nvm3_kernel_freertos.nvm3_kernel_freertos.slcp" />
@@ -924,7 +909,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   <properties key="partCompatibility" value=".*sibg301.*" /></descriptors>
-  <descriptors name="simple_button_kernel_micriumos" label="Platform - Simple Button on Micrium OS kernel" description="This example project shows how to toggle LEDs using buttons in a Micrium OS kernel task.&#10;">
+  <descriptors name="simple_button_kernel_micriumos" label="Platform - Simple Button on Micrium OS Kernel" description="This example project shows how to toggle LEDs using buttons in a Micrium OS kernel task.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.simple_button_kernel_micriumos.simple_button_kernel_micriumos.slcp" />
@@ -939,7 +924,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   </descriptors>
-  <descriptors name="simple_button_kernel_micriumos_s3" label="Platform - Simple Button on Micrium OS kernel" description="This example project shows how to toggle LEDs using buttons in a Micrium OS kernel task.&#10;">
+  <descriptors name="simple_button_kernel_micriumos_s3" label="Platform - Simple Button on Micrium OS Kernel" description="This example project shows how to toggle LEDs using buttons in a Micrium OS kernel task.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.simple_button_kernel_micriumos.simple_button_kernel_micriumos.slcp" />
@@ -952,7 +937,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   <properties key="partCompatibility" value=".*sibg301.*" /></descriptors>
-  <descriptors name="sleeptimer_baremetal" label="Platform - Sleeptimer Bare-metal" description="This example project demonstrates periodic and one-shot timers using the low-frequency real-time clock peripheral. Timers can be stopped and restarted using the buttons. Timer status is reported on the virtual COM serial port.&#10;">
+  <descriptors name="sleeptimer_baremetal" label="Platform - Sleeptimer Bare-metal" description="Demonstrates periodic and one-shot timers using the low-frequency RTC. Use buttons to stop or restart timers; status is reported over VCOM.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.sleeptimer_baremetal.sleeptimer_baremetal.slcp" />
@@ -967,7 +952,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   </descriptors>
-  <descriptors name="sleeptimer_baremetal_s3" label="Platform - Sleeptimer Bare-metal" description="This example project demonstrates periodic and one-shot timers using the low-frequency real-time clock peripheral. Timers can be stopped and restarted using the buttons. Timer status is reported on the virtual COM serial port.&#10;">
+  <descriptors name="sleeptimer_baremetal_s3" label="Platform - Sleeptimer Bare-metal" description="Demonstrates periodic and one-shot timers using the low-frequency RTC. Use buttons to stop or restart timers; status is reported over VCOM.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.sleeptimer_baremetal.sleeptimer_baremetal.slcp" />
@@ -980,7 +965,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   <properties key="partCompatibility" value=".*sibg301.*" /></descriptors>
-  <descriptors name="sleeptimer_kernel_freertos" label="Platform - Sleeptimer kernel FreeRTOS" description="This example project demonstrates periodic and one-shot timers using the low-frequency real-time clock peripheral in a freertos configuration. Timers can be stopped and restarted using the buttons. Timer status is reported on the virtual COM serial port.&#10;">
+  <descriptors name="sleeptimer_kernel_freertos" label="Platform - Sleeptimer Kernel FreeRTOS" description="Demonstrates periodic and one-shot RTC timers in a FreeRTOS task. Use buttons to stop or restart timers; status is reported over VCOM.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.sleeptimer_kernel_freertos.sleeptimer_kernel_freertos.slcp" />
@@ -995,7 +980,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   </descriptors>
-  <descriptors name="sleeptimer_kernel_freertos_s3" label="Platform - Sleeptimer kernel FreeRTOS" description="This example project demonstrates periodic and one-shot timers using the low-frequency real-time clock peripheral in a freertos configuration. Timers can be stopped and restarted using the buttons. Timer status is reported on the virtual COM serial port.&#10;">
+  <descriptors name="sleeptimer_kernel_freertos_s3" label="Platform - Sleeptimer Kernel FreeRTOS" description="Demonstrates periodic and one-shot RTC timers in a FreeRTOS task. Use buttons to stop or restart timers; status is reported over VCOM.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.sleeptimer_kernel_freertos.sleeptimer_kernel_freertos.slcp" />
@@ -1097,7 +1082,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced" />
   </descriptors>
-  <descriptors name="spidrv_eusart_master_kernel_micriumos" label="Platform - SPIDRV Master on Micrium OS kernel using EUSART" description="This example project demonstrates how to use the master mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#10;">
+  <descriptors name="spidrv_eusart_master_kernel_micriumos" label="Platform - SPIDRV Master on Micrium OS Kernel using EUSART" description="This example project demonstrates how to use the master mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.spidrv_eusart_master_kernel_micriumos.spidrv_eusart_master_kernel_micriumos.slcp" />
@@ -1141,7 +1126,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced" />
   <properties key="partCompatibility" value=".*simg301.*" /></descriptors>
-  <descriptors name="spidrv_eusart_slave_kernel_freertos" label="Platform - SPIDRV Slave on freeRTOS kernel using EUSART" description="This example project demonstrates how to use the slave mode of the Serial Peripheral Interface driver in a FreeRTOS kernel task.&#10;">
+  <descriptors name="spidrv_eusart_slave_kernel_freertos" label="Platform - SPIDRV Slave on FreeRTOS kernel using EUSART" description="This example project demonstrates how to use the slave mode of the Serial Peripheral Interface driver in a FreeRTOS kernel task.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.spidrv_eusart_slave_kernel_freertos.spidrv_eusart_slave_kernel_freertos.slcp" />
@@ -1156,7 +1141,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced" />
   </descriptors>
-  <descriptors name="spidrv_eusart_slave_kernel_micriumos" label="Platform - SPIDRV Slave on Micrium OS kernel using EUSART" description="This example project demonstrates how to use the slave mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#10;">
+  <descriptors name="spidrv_eusart_slave_kernel_micriumos" label="Platform - SPIDRV Slave on Micrium OS Kernel using EUSART" description="This example project demonstrates how to use the slave mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.spidrv_eusart_slave_kernel_micriumos.spidrv_eusart_slave_kernel_micriumos.slcp" />
@@ -1199,7 +1184,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced" />
   <properties key="partCompatibility" value=".*sibg301.*" /></descriptors>
-  <descriptors name="spidrv_usart_master_kernel_micriumos" label="Platform - SPIDRV Master on Micrium OS kernel" description="This example project demonstrates how to use the master mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#10;">
+  <descriptors name="spidrv_usart_master_kernel_micriumos" label="Platform - SPIDRV Master on Micrium OS Kernel" description="This example project demonstrates how to use the master mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.spidrv_usart_master_kernel_micriumos.spidrv_usart_master_kernel_micriumos.slcp" />
@@ -1214,7 +1199,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced" />
   </descriptors>
-  <descriptors name="spidrv_usart_master_kernel_micriumos_s3" label="Platform - SPIDRV Master on Micrium OS kernel" description="This example project demonstrates how to use the master mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#10;">
+  <descriptors name="spidrv_usart_master_kernel_micriumos_s3" label="Platform - SPIDRV Master on Micrium OS Kernel" description="This example project demonstrates how to use the master mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.spidrv_usart_master_kernel_micriumos.spidrv_usart_master_kernel_micriumos.slcp" />
@@ -1255,7 +1240,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced" />
   <properties key="partCompatibility" value=".*sibg301.*" /></descriptors>
-  <descriptors name="spidrv_usart_slave_kernel_micriumos" label="Platform - SPIDRV Slave on Micrium OS kernel" description="This example project demonstrates how to use the slave mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#10;">
+  <descriptors name="spidrv_usart_slave_kernel_micriumos" label="Platform - SPIDRV Slave on Micrium OS Kernel" description="This example project demonstrates how to use the slave mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.spidrv_usart_slave_kernel_micriumos.spidrv_usart_slave_kernel_micriumos.slcp" />
@@ -1270,7 +1255,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced" />
   </descriptors>
-  <descriptors name="spidrv_usart_slave_kernel_micriumos_s3" label="Platform - SPIDRV Slave on Micrium OS kernel" description="This example project demonstrates how to use the slave mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#10;">
+  <descriptors name="spidrv_usart_slave_kernel_micriumos_s3" label="Platform - SPIDRV Slave on Micrium OS Kernel" description="This example project demonstrates how to use the slave mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.spidrv_usart_slave_kernel_micriumos.spidrv_usart_slave_kernel_micriumos.slcp" />
@@ -1312,7 +1297,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   <properties key="partCompatibility" value=".*sibg301.* .*simg301.*" /></descriptors>
-  <descriptors name="tempdrv_kernel_micriumos" label="Platform - TEMPDRV on Micrium OS kernel" description="This example project demonstrates how to use the internal temperature sensor in a Micrium OS kernel task.&#10;">
+  <descriptors name="tempdrv_kernel_micriumos" label="Platform - TEMPDRV on Micrium OS Kernel" description="This example project demonstrates how to use the internal temperature sensor in a Micrium OS kernel task.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.tempdrv_kernel_micriumos.tempdrv_kernel_micriumos.slcp" />
@@ -1327,7 +1312,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   </descriptors>
-  <descriptors name="tempdrv_kernel_micriumos_s3" label="Platform - TEMPDRV on Micrium OS kernel" description="This example project demonstrates how to use the internal temperature sensor in a Micrium OS kernel task.&#10;">
+  <descriptors name="tempdrv_kernel_micriumos_s3" label="Platform - TEMPDRV on Micrium OS Kernel" description="This example project demonstrates how to use the internal temperature sensor in a Micrium OS kernel task.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.tempdrv_kernel_micriumos.tempdrv_kernel_micriumos.slcp" />
@@ -1355,7 +1340,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced" />
   </descriptors>
-  <descriptors name="usb_device_cdc_acm_micriumos" label="Platform - USB Device CDC ACM with Micrium OS kernel" description="This example uses the USB stack with the Micrium OS kernel to create a COM port on your PC. Once connected on the port using a terminal tool, a menu is displayed and lets you echo any character you typed in.&#10;">
+  <descriptors name="usb_device_cdc_acm_micriumos" label="Platform - USB Device CDC ACM with Micrium OS Kernel" description="This example uses the USB stack with the Micrium OS kernel to create a COM port on your PC. Once connected on the port using a terminal tool, a menu is displayed and lets you echo any character you typed in.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.usb_device_cdc_acm_micriumos.usb_device_cdc_acm_micriumos.slcp" />
@@ -1385,7 +1370,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced" />
   </descriptors>
-  <descriptors name="usb_device_composite_micriumos" label="Platform - USB Composite Device with Micrium OS kernel" description="This example uses the USB stack with the Micrium OS kernel to create a composite device.&#10;">
+  <descriptors name="usb_device_composite_micriumos" label="Platform - USB Composite Device with Micrium OS Kernel" description="This example uses the USB stack with the Micrium OS kernel to create a composite device.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.usb_device_composite_micriumos.usb_device_composite_micriumos.slcp" />
@@ -1415,7 +1400,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced" />
   </descriptors>
-  <descriptors name="usb_device_hid_micriumos" label="Platform - USB Device HID with Micrium OS kernel" description="This example uses the USB stack HID Class with the Micrium OS kernel to emulate a mouse. Once the usb device is connected to a computer, it will trigger continuous mouse movements.&#10;">
+  <descriptors name="usb_device_hid_micriumos" label="Platform - USB Device HID with Micrium OS Kernel" description="This example uses the USB stack HID Class with the Micrium OS kernel to emulate a mouse. Once the usb device is connected to a computer, it will trigger continuous mouse movements.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
     <properties key="solutionReferenceId" value="app.common.example.usb_device_hid_micriumos.usb_device_hid_micriumos.slcp" />

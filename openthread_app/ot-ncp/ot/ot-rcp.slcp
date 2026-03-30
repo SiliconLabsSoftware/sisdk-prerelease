@@ -2,7 +2,7 @@ project_name: ot-rcp
 label: OpenThread - RCP
 package: openthread
 description: >
-  This is a simple OpenThread RCP application. This is equivalent to the ot-rcp application in the OpenThread GitHub repo.
+  Demonstrates OpenThread Radio Co-Processor (RCP) application.
 category: OpenThread Examples
 quality: production
 

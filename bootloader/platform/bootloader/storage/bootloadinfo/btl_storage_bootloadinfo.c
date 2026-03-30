@@ -120,7 +120,7 @@ int32_t storage_getBootloadList(int32_t slotIds[], size_t length)
   return BOOTLOADER_OK;
 }
 
-int32_t storage_setBootloadList(int32_t slotIds[], size_t length)
+int32_t storage_setBootloadList(const int32_t slotIds[], size_t length)
 {
   BootloadInfo_t btlInfo = { 0 };
   btlInfo.magic = BTL_STORAGE_BOOTLOADINFO_MAGIC;

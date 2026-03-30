@@ -18,6 +18,9 @@ config_file:
 - path: config/sl_usbd_driver_config.h
   file_id: usbd_driver_config
   condition: [device_series_2]
+- path: config/sl_usbd_driver_config.h
+  file_id: usbd_driver_config
+  condition: [device_series_3]
 
 source:
 - path: src/sl_usbd_driver_dwc_otg_fs.c

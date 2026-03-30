@@ -3,11 +3,7 @@ package: platform
 quality: production
 label: Platform - Sleeptimer Bare-metal
 description: >
-  This example project demonstrates periodic and
-  one-shot timers using the low-frequency real-time
-  clock peripheral. Timers can be stopped and restarted
-  using the buttons. Timer status is reported on the
-  virtual COM serial port.
+  Demonstrates periodic and one-shot timers using the low-frequency RTC. Use buttons to stop or restart timers; status is reported over VCOM.
 category: Example|Platform
 filter:
   - name: "Device Type"

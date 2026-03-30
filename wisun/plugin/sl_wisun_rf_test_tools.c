@@ -224,6 +224,10 @@ bool rf_test_prepare_tx_buffer(uint8_t phy_mode_id,
   }
 
   uint16_t total_length = (uint16_t)(data_length + local_phr_length);
+  if (total_length > MAX_PACKET_LENGTH) {
+    sl_wisun_trace_error("rf_test: length %u is greater than %u", total_length, MAX_PACKET_LENGTH);
+    return false;
+  }
   uint16_t fifo_size = rf_test_get_buffer_len(total_length);
   if (fifo_size == 0 || fifo_size > fifo_capacity) {
     return false;
@@ -249,7 +253,9 @@ sl_status_t rf_test_phy_config_to_chan_config(sl_wisun_phy_config_t *phy_config,
                                               sl_rail_channel_config_entry_t *chan_config,
                                               uint8_t *phy_mode_id,
                                               uint8_t *reg_domain,
-                                              uint16_t *physical_channel_offset)
+                                              uint16_t *physical_channel_offset,
+                                              uint16_t *channel_start,
+                                              uint16_t *channel_end)
 {
   sl_status_t status = SL_STATUS_OK;
   sl_rail_handle_t rail_handle;
@@ -352,6 +358,8 @@ sl_status_t rf_test_phy_config_to_chan_config(sl_wisun_phy_config_t *phy_config,
         if (entry->p_stack_info) {
           *reg_domain = entry->p_stack_info[STACK_INFO_FIELD_REG_DOMAIN];
           *phy_mode_id = phy_config->config.ids.phy_mode_id;
+          *channel_start = chan_config->channel_number_start;
+          *channel_end = chan_config->channel_number_end;
           *physical_channel_offset = entry->physical_channel_offset;
           if (entry->p_stack_info[STACK_INFO_FIELD_PHY_MODE_ID] == *phy_mode_id) {
             memcpy(chan_config, entry, sizeof(sl_rail_channel_config_entry_t));
@@ -395,6 +403,8 @@ sl_status_t rf_test_phy_config_to_chan_config(sl_wisun_phy_config_t *phy_config,
         *phy_mode_id = entry->p_stack_info[STACK_INFO_FIELD_PHY_MODE_ID];
         *reg_domain = entry->p_stack_info[STACK_INFO_FIELD_REG_DOMAIN];
         *physical_channel_offset = entry->physical_channel_offset;
+        *channel_start = chan_config->channel_number_start;
+        *channel_end = chan_config->channel_number_end;
         found = true;
         break;
       }
@@ -410,6 +420,8 @@ sl_status_t rf_test_phy_config_to_chan_config(sl_wisun_phy_config_t *phy_config,
     *physical_channel_offset = 0;
     *phy_mode_id = 0;
     *reg_domain = 0;
+    *channel_start = 0;
+    *channel_end = 0;
     status = SL_STATUS_NOT_FOUND;
   }
   return status;

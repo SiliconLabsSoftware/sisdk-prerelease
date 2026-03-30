@@ -38,7 +38,6 @@
  * @{
  *****************************************************************************/
 
-
 /**************************************************************************//**
  * Start transmitting a random stream of characters to enable
  * the measurement of radio modulation.
@@ -139,10 +138,10 @@ bool sl_wisun_is_running_rf_test();
  * To receive the packets, another application can use sl_wisun_rf_test_start_rx() on the same channel.
  *
  * @param[in] channel Index of the physical channel to transmit on
- * @param[in] count Number of packets to transmit (must be > 0)
- * @param[in] data_length Length of data in each packet (must be > 0)
+ * @param[in] count Number of packets to transmit (must be greater than 0)
+ * @param[in] data_length Length of data in each packet (must be between 1 and 2047 - CRC length, typically 2045 for FSK, 2043 for OFDM or OQPSK)
  * @param[in] data Pointer to data to transmit; if NULL a default ramp pattern is used
- * @param[in] interval Interval between transmissions in milliseconds (must be > 0)
+ * @param[in] interval Interval between transmissions in milliseconds (must be greater than 0)
  * @param[in] cca_enabled Set true to perform a single CCA check before the initial transmit
  * @return One of the following:
  *  - SL_STATUS_OK if the transmission started successfully.
@@ -196,8 +195,9 @@ sl_status_t sl_wisun_rf_test_rx_stop(void);
  * be called when an event of type SL_WISUN_LOGGER_EVENT_TYPE_RF_TEST is received by the application.
  *
  * @param[in] events RAIL event mask associated with the RF test event
+ * @param[in] rssi   RSSI in dBm; valid when SL_RAIL_EVENT_RX_PACKET_RECEIVED is set in events, otherwise SL_WISUN_RF_TEST_RSSI_NOT_AVAILABLE
  *****************************************************************************/
-void sl_wisun_rf_test_event_callback(uint64_t events);
+void sl_wisun_rf_test_event_callback(uint64_t events, int8_t rssi);
 /** @} (end addtogroup SL_WISUN_RF_TEST) */
 
 #endif // SL_WISUN_RF_TEST_H

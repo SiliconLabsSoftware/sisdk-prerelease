@@ -127,6 +127,11 @@ static const uint8_t hfxo_timeout_steady_cfg_lf_ticks[16] = {
  ***************************   LOCAL FUNCTIONS   *******************************
  ******************************************************************************/
 
+ SL_CODE_CLASSIFY(SL_CODE_COMPONENT_CLOCK_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
+ static sl_status_t bus_clock_get_register_info(sl_bus_clock_t module,
+                                                volatile uint32_t **reg,
+                                                uint32_t *bit);
+
 /*******************************************************************************
  **********************   GLOBAL INTERNAL FUNCTIONS   **************************
  ******************************************************************************/
@@ -334,44 +339,42 @@ sl_status_t sli_clock_manager_hal_get_oscillator_precision(sl_oscillator_t oscil
 /***************************************************************************//**
  * Enables/Disables the given module's bus clock..
  ******************************************************************************/
-sl_status_t sli_clock_manager_hal_enable_bus_clock(sl_bus_clock_t module_bus_clock, bool enable)
+sl_status_t sli_clock_manager_hal_enable_bus_clock(sl_bus_clock_t module, bool enable)
 {
+  sl_status_t status;
   volatile uint32_t *reg = NULL;
   uint32_t bit;
 
-#if defined (_SILICON_LABS_32B_SERIES_3_CONFIG_301)
-  uint32_t clken_index;
-
-  if (module_bus_clock == SL_BUS_CLOCK_INVALID) {
-    return SL_STATUS_NOT_AVAILABLE;
+  // Get the register and bit for the bus clock.
+  status = bus_clock_get_register_info(module, &reg, &bit);
+  if (status != SL_STATUS_OK) {
+    return status;
   }
-
-  bit = (*module_bus_clock & _BUS_CLOCK_CLKEN_BIT_MASK) >> _BUS_CLOCK_CLKEN_BIT_SHIFT;
-  clken_index = (*module_bus_clock & _BUS_CLOCK_CLKENX_MASK) >> _BUS_CLOCK_CLKENX_SHIFT;
-
-  if (clken_index == BUS_CLOCK_CLKEN0) {
-    reg = &CMU->CLKEN0;
-  } else if (clken_index == BUS_CLOCK_CLKEN1) {
-    reg = &CMU->CLKEN1;
-#if defined(_CMU_CLKENHV_MASK)
-  } else if (clken_index == BUS_CLOCK_CLKENHV) {
-    reg = &CMU->CLKENHV;
-#endif
-  } else {
-    return SL_STATUS_NOT_AVAILABLE;
-  }
-#else
-  reg = (uint32_t *)(*module_bus_clock);
-  if (reg == SL_BUS_CLOCK_INVALID || reg == (uint32_t *)0xFFFFFFFF) {
-    return SL_STATUS_NOT_AVAILABLE;
-  }
-
-  // The CLKEN field is always the first bit of the register
-  bit = 0;
-#endif
 
   // Enable/disable bus clock.
   sl_hal_bus_reg_write_bit(reg, bit, (uint32_t)enable);
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Gets the enable status of the given module's bus clock.
+ ******************************************************************************/
+sl_status_t sli_clock_manager_hal_is_bus_clock_enabled(sl_bus_clock_t module,
+                                                       bool *enabled)
+{
+  sl_status_t status;
+  volatile uint32_t *reg = NULL;
+  uint32_t bit;
+
+  // Get the register and bit for the bus clock.
+  status = bus_clock_get_register_info(module, &reg, &bit);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  // Get the enable status of the bus clock.
+  *enabled = (bool)sl_hal_bus_reg_read_bit(reg, bit);
 
   return SL_STATUS_OK;
 }
@@ -2334,3 +2337,45 @@ sl_status_t sli_clock_manager_hal_get_nwp_socpll_freqplan_config(const uint16_t 
   return SL_STATUS_NOT_SUPPORTED;
 #endif
 }
+
+/***************************************************************************//**
+ * Gets the register and bit for the bus clock.
+ ******************************************************************************/
+static sl_status_t bus_clock_get_register_info(sl_bus_clock_t module,
+                                               volatile uint32_t **reg,
+                                               uint32_t *bit)
+{
+#if defined (_SILICON_LABS_32B_SERIES_3_CONFIG_301)
+  uint32_t clken_index;
+
+  if (module == SL_BUS_CLOCK_INVALID) {
+    return SL_STATUS_NOT_AVAILABLE;
+  }
+
+  *bit = (*module & _BUS_CLOCK_CLKEN_BIT_MASK) >> _BUS_CLOCK_CLKEN_BIT_SHIFT;
+  clken_index = (*module & _BUS_CLOCK_CLKENX_MASK) >> _BUS_CLOCK_CLKENX_SHIFT;
+
+  if (clken_index == BUS_CLOCK_CLKEN0) {
+    *reg = &CMU->CLKEN0;
+  } else if (clken_index == BUS_CLOCK_CLKEN1) {
+    *reg = &CMU->CLKEN1;
+#if defined(_CMU_CLKENHV_MASK)
+  } else if (clken_index == BUS_CLOCK_CLKENHV) {
+    *reg = &CMU->CLKENHV;
+#endif
+  } else {
+    return SL_STATUS_NOT_AVAILABLE;
+  }
+#else
+  *reg = (uint32_t *)(*module);
+  if (*reg == SL_BUS_CLOCK_INVALID || *reg == (uint32_t *)0xFFFFFFFF) {
+    return SL_STATUS_NOT_AVAILABLE;
+  }
+
+  // The CLKEN field is always the first bit of the register
+  *bit = 0;
+#endif
+
+  return SL_STATUS_OK;
+}
+

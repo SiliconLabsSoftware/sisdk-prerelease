@@ -118,6 +118,9 @@ SL_ENUM(sl_clock_branch_t) {
   SL_CLOCK_BRANCH_CAN0CLK,       ///< CAN0CLK Clock Branch
   SL_CLOCK_BRANCH_HCLKDIVN,      ///< HCLKDIVN Clock Branch
   SL_CLOCK_BRANCH_CPUCLK,        ///< CPUCLK Clock Branch
+  SL_CLOCK_BRANCH_ADC0CLK,       ///< ADC0CLK Clock Branch
+  SL_CLOCK_BRANCH_ADC1CLK,       ///< ADC1CLK Clock Branch
+  SL_CLOCK_BRANCH_LEDSINK0CLK,   ///< LEDSINK0CLK Clock Branch
   SL_CLOCK_BRANCH_INVALID        ///< INVALID Clock Branch
 };
 #endif

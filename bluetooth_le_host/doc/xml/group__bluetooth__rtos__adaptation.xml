@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
   <compounddef id="group__bluetooth__rtos__adaptation" kind="group">
     <compoundname>bluetooth_rtos_adaptation</compoundname>
     <title>Bluetooth RTOS adaptation</title>
-      <sectiondef kind="var">
+    <sectiondef kind="var">
       <memberdef kind="variable" id="group__bluetooth__rtos__adaptation_1ga10153dd9d6c691b664b879750cb7b0d6" prot="public" static="no" mutable="no">
         <type>sli_bgapi_component_init_func_t</type>
         <definition>sli_bgapi_component_init_func_t sli_bt_rtos_adaptation_init</definition>
@@ -34,8 +34,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/inc/sl_bt_rtos_adaptation.h" line="128" column="35" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/inc/sl_bt_rtos_adaptation.h" bodystart="128" bodyend="-1"/>
       </memberdef>
-      </sectiondef>
-      <sectiondef kind="func">
+    </sectiondef>
+    <sectiondef kind="func">
       <memberdef kind="function" id="group__bluetooth__rtos__adaptation_1gac718122dcb73f19023423387fc9f6751" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
         <definition>sl_status_t sli_bt_rtos_adaptation_permanent_allocation</definition>
@@ -151,7 +151,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/inc/sl_bt_rtos_adaptation.h" line="161" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/inc/sl_bt_rtos_adaptation.h" declline="161" declcolumn="13"/>
       </memberdef>
-      </sectiondef>
+    </sectiondef>
     <briefdescription>
 <para>Bluetooth RTOS adaptation. </para>
     </briefdescription>

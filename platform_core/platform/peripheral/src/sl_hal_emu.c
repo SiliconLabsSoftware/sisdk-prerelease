@@ -433,6 +433,11 @@ void sl_hal_emu_init_dcdc(const sl_hal_emu_dcdc_init_t *init)
   sl_hal_emu_dcdc_sync(DCDC_SYNCBUSY_EM01CTRL0);
 #endif
 
+  /* Set DCDC regulation type. */
+#if defined(_DCDC_DOCTRL_REGULATIONTYPE_MASK)
+  sl_hal_emu_dcdc_set_regulation_type(init->regulation_type);
+#endif
+
   sl_hal_emu_set_dcdc_mode(init->mode);
 
 #if defined(_DCDC_DOCTRL_MASK) && defined(_DCDC_EM01CTRL0_IPKDECVAL_MASK)

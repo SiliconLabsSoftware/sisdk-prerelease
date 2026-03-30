@@ -40,6 +40,7 @@
 #include "sl_enum.h"
 #include "sl_core.h"
 #include "sl_code_classification.h"
+#include "sl_device_peripheral_types.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -416,6 +417,28 @@ void sl_power_manager_em4_presleep_hook(void);
  ******************************************************************************/
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 void slx_power_manager_update_clock_info(void);
+
+/***************************************************************************//**
+ * Gets the retention dirty state for a peripheral.
+ *
+ * @param peripheral  A pointer to peripheral.
+ *
+ * @return true if the peripheral is dirty, false otherwise.
+ *
+ * @note This API is useful when a driver wants to check whether a peripheral
+ *       state needs to be considered for save/restore handling.
+ ******************************************************************************/
+bool sl_power_manager_get_peripheral_dirty_state(const sl_peripheral_t peripheral);
+
+/***************************************************************************//**
+ * Clears the retention dirty state for a peripheral.
+ *
+ * @param peripheral  A pointer to peripheral.
+ *
+ * @note This API is useful when a driver clears its dirty state after a
+ *       successful save/restore sequence.
+ ******************************************************************************/
+void sl_power_manager_clear_peripheral_dirty_state(const sl_peripheral_t peripheral);
 
 /** @} (end addtogroup power_manager) */
 

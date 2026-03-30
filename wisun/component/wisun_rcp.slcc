@@ -51,12 +51,17 @@ library:
   condition: [device_series_2, toolchain_gcc, wisun_stack_debug]
 - path: stack/libwisun_rcp_efr32xg2x_iar_debug.a
   condition: [device_series_2, toolchain_iar, wisun_stack_debug]
+- path: stack/libwisun_rcp_efr32xg2x_llvm_debug.a
+  condition: [device_series_2, toolchain_llvm, wisun_stack_debug]
 
 - path: stack/libwisun_rcp_efr32xg2x_gcc_release.a
   condition: [device_series_2, toolchain_gcc]
   unless: [wisun_stack_debug]
 - path: stack/libwisun_rcp_efr32xg2x_iar_release.a
   condition: [device_series_2, toolchain_iar]
+  unless: [wisun_stack_debug]
+- path: stack/libwisun_rcp_efr32xg2x_llvm_release.a
+  condition: [device_series_2, toolchain_llvm]
   unless: [wisun_stack_debug]
 
 validation_helper:

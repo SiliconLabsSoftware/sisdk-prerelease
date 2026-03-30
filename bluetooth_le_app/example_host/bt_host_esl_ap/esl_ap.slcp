@@ -24,6 +24,9 @@ source:
 other_file:
   - path: air_compressor.py
   - path: ap_cli.py
+  - path: ap_cli_argtypes.py
+  - path: ap_cli_resolvers.py
+  - path: ap_cli_scripting.py
   - path: ap_config.py
   - path: ap_constants.py
   - path: ap_core.py

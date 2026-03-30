@@ -27,10 +27,12 @@ CS mode and object tracking mode is configured on the initiator side.
 ### Calculating the size of "Procedure maximum length"
 The optimal value of "Procedure maximum length" is dependent on several configuration values, and can be calculated by the following equation:
 
-proc_max_len = 4 + (subevents * 8) + (mode0_steps * mode0_size) + channels * ( ( 1 + ( antenna_paths + 1 ) * 4) + 1 )
+proc_max_len = 4 + (subevents * 8) + (subevents * mode0_steps * mode0_size) + channels * ( ( 1 + ( antenna_paths + 1 ) * 4) + 1 )
 
 where
-- subevents value is constant 1 since one subevent per procedure is supported,
+- subevents is the number of CS subevents per procedure (range: 1..32), determined by the
+controller based on CS_INITIATOR_DEFAULT_MIN_SUBEVENT_LEN and CS_INITIATOR_DEFAULT_MAX_SUBEVENT_LEN.
+Shorter subevent lengths allow more subevents per procedure.
 - mode0_size is
   - 4 for Reflector and
   - 6 for Initiator,

@@ -169,6 +169,7 @@ typedef struct sl_cli {
   cli_delay_t cli_delay;                       ///< Instance data for the CLI delay function.
 #endif
 #endif
+  bool buffer_full_shown;                       ///< Track if buffer full message has been shown
 } sl_cli_t;
 
 typedef sl_cli_t *sl_cli_handle_t;             ///< sl cli handle t

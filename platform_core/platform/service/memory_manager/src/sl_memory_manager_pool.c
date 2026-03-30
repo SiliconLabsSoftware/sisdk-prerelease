@@ -44,11 +44,24 @@
 #include "sli_memory_profiler.h"
 #endif
 
+#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
+#include <stdio.h>
+#include "SEGGER_SYSVIEW.h"
+#endif
+
 /*******************************************************************************
  *********************************   DEFINES   *********************************
  ******************************************************************************/
 
 #define SLI_MEM_POOL_OUT_OF_MEMORY     UINTPTR_MAX
+
+/*******************************************************************************
+ ******************************  LOCAL VARIABLES   *****************************
+ ******************************************************************************/
+
+#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
+static uint32_t sli_cmm_pool_id_available = 0;
+#endif
 
 /*******************************************************************************
  ***************************   LOCAL FUNCTIONS   *******************************
@@ -127,6 +140,12 @@ sl_status_t sl_memory_delete_pool(sl_memory_pool_t *pool_handle)
   // Free block.
   status = sl_memory_free(pool_handle->block_address);
 
+#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
+  if (status == SL_STATUS_OK) {
+    SEGGER_SYSVIEW_PrintfHost("Pool @0x%08lX deleted", (unsigned long)(uintptr_t)pool_handle);
+  }
+#endif
+
   return status;
 }
 
@@ -195,6 +214,10 @@ sl_status_t sl_memory_pool_alloc(sl_memory_pool_t *pool_handle,
 
   *block = block_addr;
 
+#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
+  SEGGER_SYSVIEW_HeapAllocEx(pool_handle, *block, pool_handle->block_size, 0);
+#endif
+
   return SL_STATUS_OK;
 }
 
@@ -249,6 +272,10 @@ sl_status_t sl_memory_pool_free(sl_memory_pool_t *pool_handle,
   pool_handle->block_free = block;
 
   CORE_EXIT_ATOMIC();
+
+#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
+  SEGGER_SYSVIEW_HeapFree(pool_handle, block);
+#endif
 
   return SL_STATUS_OK;
 }
@@ -367,6 +394,18 @@ sl_status_t sl_memory_heap_create_pool_advanced(sl_memory_heap_t *heap,
 
   // Last element will indicate out of memory.
   *(size_t *)block_addr = SLI_MEM_POOL_OUT_OF_MEMORY;
+
+#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
+  uint32_t pool_id = __atomic_fetch_add(&sli_cmm_pool_id_available, 1, __ATOMIC_RELAXED);
+  char pool_name[sizeof("Pool 4294967295")];
+  snprintf(pool_name, sizeof(pool_name), "Pool %lu", (unsigned long)pool_id);
+  SEGGER_SYSVIEW_HeapDefine(pool_handle,
+                            pool_handle->block_address,
+                            pool_size,
+                            0);
+  SEGGER_SYSVIEW_NameResource((uint32_t)pool_handle, pool_name);
+  SEGGER_SYSVIEW_PrintfHost("Pool %lu created", (unsigned long)pool_id);
+#endif
 
   return status;
 }

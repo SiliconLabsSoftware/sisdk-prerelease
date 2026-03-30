@@ -19,7 +19,6 @@
 
 #include PLATFORM_HEADER
 #include "hal.h"
-#include "sl_zigbee.h"
 #include "sl_component_catalog.h"
 #include "sl_cli.h"
 #ifdef SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT

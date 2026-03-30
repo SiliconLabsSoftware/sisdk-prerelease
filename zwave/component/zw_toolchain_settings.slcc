@@ -20,6 +20,7 @@ requires:
 toolchain_settings:
 - option: gcc_compiler_option
   value: "-s"
+  unless: [zw_nostrip]
 - option: gcc_compiler_option
   value: "-fmerge-all-constants"
 - option: gcc_compiler_option

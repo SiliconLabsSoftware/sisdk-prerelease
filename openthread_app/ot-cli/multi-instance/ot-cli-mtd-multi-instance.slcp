@@ -1,8 +1,8 @@
 project_name: ot-cli-mtd-multi-instance
-label: OpenThread - SoC CLI (MTD multi-instance)
+label: OpenThread - SoC CLI MTD (multi-instance)
 package: openthread
 description: >
-  This is a very simple CLI application to test the OpenThread stack on a Minimal Thread Device using openthread's multi-instance support.
+  Demonstrates CLI application to test the OpenThread stack on a Minimal Thread Device (MTD) using multi-instance support.
 category: OpenThread Examples
 quality: production
 

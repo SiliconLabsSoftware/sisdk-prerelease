@@ -34,7 +34,9 @@
 #ifndef SLI_LIBRARY_BUILD
 #include "em_device.h"
 #include "sl_device_peripheral.h"
-#include "dmadrv.h"
+#include "sl_dma_channel.h"
+#include "sl_dma_manager.h"
+#include "sl_device_dma.h"
 
 #include "sl_gpio.h"
 #if defined(_SILICON_LABS_32B_SERIES_3)
@@ -191,10 +193,10 @@ typedef struct SPIDRV_HandleData {
     void                    *__reserved_space;
   } peripheral;
   SPIDRV_Init_t             initData;
-  unsigned int              txDMACh;
-  unsigned int              rxDMACh;
-  DMADRV_PeripheralSignal_t txDMASignal;
-  DMADRV_PeripheralSignal_t rxDMASignal;
+  sl_dma_channel_handle_t   txDMACh;
+  sl_dma_channel_handle_t   rxDMACh;
+  sl_dma_signal_t           txDMASignal;
+  sl_dma_signal_t           rxDMASignal;
   SPIDRV_Callback_t         userCallback;
   uint32_t                  dummyRx;
   int                       transferCount;

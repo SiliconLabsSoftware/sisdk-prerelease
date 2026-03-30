@@ -64,6 +64,16 @@ WEAK(void sl_zigbee_af_print_wrapper(uint16_t area, const char * formatString, .
   (void)formatString;
 }
 
+WEAK(void sl_zigbee_af_cli_print_wrapper(const char * formatString, ...))
+{
+  (void)formatString;
+}
+
+WEAK(void sl_zigbee_af_cli_println_wrapper(const char * formatString, ...))
+{
+  (void)formatString;
+}
+
 WEAK(void sl_zigbee_af_core_println_wrapper(const char * formatString, ...))
 {
   (void)formatString;

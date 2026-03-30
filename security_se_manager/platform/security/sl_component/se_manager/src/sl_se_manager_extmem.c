@@ -35,8 +35,8 @@
 #if defined(_SILICON_LABS_32B_SERIES_3) && defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 #include "sl_se_manager_util.h"
-#include "sli_se_manager_internal.h"
 #include "sli_se_manager_mailbox.h"
+#include "sli_se_manager_internal.h"
 #include <string.h>
 
 // TODO: Use offsets from local local flash base (FLASH_BASE for host) instead
@@ -58,83 +58,24 @@
 #define MTP_QSPI_REGION_METADATA_LOCKED        (0x1UL << 15)
 
 // -----------------------------------------------------------------------------
-// Local variables
-static bool l1_cache_command_in_progress = false;
-
-// -----------------------------------------------------------------------------
 // Local functions
 
-#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)
 /***************************************************************************//**
- *   Configure L1 cache enablement and return previous state
- ******************************************************************************/
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SE_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
-static bool configure_l1_cache(bool enable)
- {
-  // Disable interrupts while modifying CLKENs
-  CORE_DECLARE_IRQ_STATE;
-  CORE_ENTER_CRITICAL();
-
-  // Read state of clock enable for L1 cache
-  bool l1_cache_clock_was_enabled = ((CMU->CLKEN1 & CMU_CLKEN1_ICACHE0) != 0);
-  CMU->CLKEN1_SET = CMU_CLKEN1_ICACHE0;
-
-  // Get CACHEDIS state
-  bool cache_was_enabled = ((L1ICACHE0->CTRL & ICACHE_CTRL_CACHEDIS) == 0);
-
-  if (enable) {
-    L1ICACHE0->CTRL_CLR = ICACHE_CTRL_CACHEDIS;
-  } else {
-    L1ICACHE0->CTRL_SET = ICACHE_CTRL_CACHEDIS;
-  }
-
-  // Restore clock enable for L1 cache
-  if (!l1_cache_clock_was_enabled) {
-    CMU->CLKEN1_CLR = CMU_CLKEN1_ICACHE0;
-  }
-
-  // Restore interrupts
-  CORE_EXIT_CRITICAL();
-
-  return cache_was_enabled;
-}
-
-/***************************************************************************//**
- *   Clear L1 cache and execute command
+ *   Execute command with flash write flag set
  ******************************************************************************/
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SE_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 static sl_status_t extmem_execute_command(sl_se_command_context_t *cmd_ctx)
 {
-  // Set flag to indicate that a L1 cache command is in progress
-  l1_cache_command_in_progress = true;
+  // Log flash write in command context
+  cmd_ctx->flash_wr = true;
 
-  // Disable L1 cache and track if it was enabled
-  bool cache_was_enabled = configure_l1_cache(false);
   // Execute command
   sl_status_t sl_status = sli_se_execute_and_wait(cmd_ctx);
-  if (cache_was_enabled) {
-    // Re-enable L1 cache if it was enabled
-    (void)configure_l1_cache(true);
-  }
 
-  // Clear L1 cache command in progress flag
-  l1_cache_command_in_progress = false;
-
-  // Return command execution status
+  // Clear flash write in command context before returning
+  cmd_ctx->flash_wr = false;
   return sl_status;
 }
-
-#else
-/***************************************************************************//**
- *   Wrapper for sli_se_execute_and_wait
- ******************************************************************************/
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SE_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
-__STATIC_FORCEINLINE sl_status_t extmem_execute_command(sl_se_command_context_t *cmd_ctx)
-{
-  return sli_se_execute_and_wait(cmd_ctx);
-}
-
-#endif
 
 // -----------------------------------------------------------------------------
 // Global functions
@@ -558,7 +499,14 @@ sl_status_t sl_se_data_region_write(sl_se_command_context_t *cmd_ctx,
  ******************************************************************************/
 bool sli_se_extmem_command_with_cachedis_in_progress(void)
 {
-  return l1_cache_command_in_progress;
+  // Note on the use of 'extern' here:
+  // The global variable has to live in sl_se_manager.c since it is protected by
+  // the se thread lock implemented there. Using 'extern' prevents the need from
+  // exposing an API in sl_se_manager.c to simply access the variable. The info
+  // is only relevant in the context of extmem functions, and hence it belongs
+  // here in this file.
+  extern bool flash_wr_command_in_progress;
+  return flash_wr_command_in_progress;
 }
 
 /***************************************************************************//**

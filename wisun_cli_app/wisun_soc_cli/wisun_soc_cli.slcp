@@ -35,8 +35,8 @@ component:
   - id: "wisun_cli_util"
   - id: "errno"
   - id: "wisun_crash_handler"
-  - id: "wisun_direct_connect_client_cli"
-    condition: [wisun_direct_connect_client_library]
+  - id: "wisun_dc_client_cli"
+    condition: [wisun_dc_client_plugin]
 
 source:
   - path: "app.c"
@@ -128,6 +128,9 @@ configuration:
     value: 1024
   - name: SL_CLI_INPUT_BUFFER_SIZE
     value: 256
+  - name: SL_CLOCK_MANAGER_EUSART0CLK_SOURCE
+    value: CMU_EUSART0CLKCTRL_CLKSEL_LFXO
+    condition: [iostream_eusart, wisun_low_power]
   - name: SL_MAIN_START_TASK_STACK_SIZE_BYTES
     value: 2048
   - name: SL_RAIL_UTIL_SFM_SEQUENCER_SUN_MODULATIONS_SELECTION
@@ -508,6 +511,10 @@ template_contribution:
       argument:
         - type: uint8
           help: "is_enabled: 1 to enable Direct Connect"
+        - type: uint8
+          help: "mode: 0=manual (user runs advert/accept commands), 1=auto (advertise DC ID + accept link)"
+        - type: stringopt
+          help: "dc_id: DC ID (String) to advertise in auto mode (optional; default:'DC_ID_DEFAULT')"
   - name: "cli_command"
     value:
       group: "wisun"
@@ -628,7 +635,7 @@ template_contribution:
         - type: uint16
           help: "Channel Id"
         - type: uint8opt
-          help: "phy config type (optional, FAN 1.1 by default)"
+          help: "phy config type (optional, FAN1.1 by default): 0=FAN1.0, 1=FAN1.1, 2=Explicit PHY, 3=Explicit RAIL (IDS), 4=Custom FSK, 5=Custom OFDM, 6=Custom OQPSK"
       shortcuts:
         - name: "[strs] "
   - name: "cli_command"
@@ -649,7 +656,7 @@ template_contribution:
         - type: uint16
           help: "Channel Id"
         - type: uint8opt
-          help: "phy config type (optional, FAN 1.1 by default)"
+          help: "phy config type (optional, FAN1.1 by default): 0=FAN1.0, 1=FAN1.1, 2=Explicit PHY, 3=Explicit RAIL (IDS), 4=Custom FSK, 5=Custom OFDM, 6=Custom OQPSK"
       shortcuts:
         - name: "strt"
   - name: "cli_command"
@@ -676,9 +683,9 @@ template_contribution:
         - type: uint32
           help: "Interval between transmissions (ms)"
         - type: uint8
-          help: "CCA enable (0=off, 1=on)"
+          help: "CCA enable (0=off, else=on)"
         - type: uint8opt
-          help: "phy config type (optional, FAN 1.1 by default)"
+          help: "phy config type (optional, FAN1.1 by default): 0=FAN1.0, 1=FAN1.1, 2=Explicit PHY, 3=Explicit RAIL (IDS), 4=Custom FSK, 5=Custom OFDM, 6=Custom OQPSK"
       shortcuts:
         - name: "stx"
   - name: "cli_command"
@@ -693,7 +700,7 @@ template_contribution:
         - type: uint32
           help: "Duration (ms)"
         - type: uint8opt
-          help: "phy config type (optional, FAN 1.1 by default)"
+          help: "phy config type (optional, FAN1.1 by default): 0=FAN1.0, 1=FAN1.1, 2=Explicit PHY, 3=Explicit RAIL (IDS), 4=Custom FSK, 5=Custom OFDM, 6=Custom OQPSK"
       shortcuts:
         - name: "srx"
   - name: "cli_command"

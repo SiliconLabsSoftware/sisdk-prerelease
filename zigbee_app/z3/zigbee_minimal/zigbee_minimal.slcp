@@ -1,5 +1,5 @@
 project_name: zigbee_minimal
-label: Zigbee - Minimal
+label: Zigbee - SoC Minimal
 package: zigbee
 category: Zigbee Application
 quality: production

@@ -69,7 +69,11 @@ extern "C" {
 /// in the SE Manager API. The purpose of these initialization values is to set
 /// the context objects to a known safe state initially when the context object
 /// is declared.
+#if defined(_SILICON_LABS_32B_SERIES_3)
+#define SL_SE_COMMAND_CONTEXT_INIT           { SLI_SE_MAILBOX_COMMAND_DEFAULT(0), false, false }
+#else
 #define SL_SE_COMMAND_CONTEXT_INIT           { SLI_SE_MAILBOX_COMMAND_DEFAULT(0), false }
+#endif // #if defined(_SILICON_LABS_32B_SERIES_3)
 
 /// @} (end addtogroup sl_se_manager_core)
 
@@ -128,6 +132,8 @@ extern "C" {
 /// Flags that can be used with asymmetric keys
 /// Asymmetric key can only be used for signing (not key exchange)
 #define SL_SE_KEY_FLAG_ASYMMETRIC_SIGNING_ONLY (1UL << 10)
+/// RSA public exponent is short (4 bytes, e.g. 3 or 65537)
+#define SL_SE_KEY_FLAG_ASYMMETRIC_SHORT_EXPONENT (1UL << 11)
 /// Described key belongs to a custom ECC domain
 #define SL_SE_KEY_FLAG_ASYMMETRIC_USES_CUSTOM_DOMAIN (1UL << 12)
 /// Storage buffer contains public part of an asymmetric key
@@ -183,6 +189,10 @@ extern "C" {
 /// Symmetric key type for AES-256 (32 byte key)
 #define SL_SE_KEY_TYPE_AES_256      0x00000020
 
+#if defined(SLI_SE_SUPPORTS_RSA)
+/// RSA key type
+#define SL_SE_KEY_TYPE_RSA                              (0x1U << SL_SE_KEY_TYPE_ALGORITHM_OFFSET)
+#endif
 /// ECC Weierstrass Prime key type
 #define SL_SE_KEY_TYPE_ECC_WEIERSTRASS_PRIME_CUSTOM     (0x8U << SL_SE_KEY_TYPE_ALGORITHM_OFFSET)
 /// ECC Montgomery key type
@@ -202,6 +212,15 @@ extern "C" {
 
 /// ECC X25519 key for ECDH
 #define SL_SE_KEY_TYPE_ECC_X25519   (SL_SE_KEY_TYPE_ECC_MONTGOMERY | (0x20))
+
+#if defined(SLI_SE_SUPPORTS_RSA)
+/// RSA-2048 key type. The size attribute encodes byte size / 4.
+  #define SL_SE_KEY_TYPE_RSA_2048     (SL_SE_KEY_TYPE_RSA | (0x40)) // 2048 bits = 256 bytes
+/// RSA-3072 key type
+  #define SL_SE_KEY_TYPE_RSA_3072     (SL_SE_KEY_TYPE_RSA | (0x60))
+/// RSA-4096 key type
+  #define SL_SE_KEY_TYPE_RSA_4096     (SL_SE_KEY_TYPE_RSA | (0x80))
+#endif
 
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /// Symmetric key type for ChaCha20

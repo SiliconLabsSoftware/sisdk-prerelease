@@ -1,7 +1,7 @@
 project_name: tempdrv_kernel_micriumos
 package: platform
 quality: production
-label: Platform - TEMPDRV on Micrium OS kernel
+label: Platform - TEMPDRV on Micrium OS Kernel
 description: >
   This example project demonstrates how to use the internal temperature sensor in a Micrium OS kernel task.
 category: Example|Platform

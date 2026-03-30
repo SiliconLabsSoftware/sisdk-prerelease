@@ -975,8 +975,6 @@ sl_status_t sl_wisun_advert_direct_connect_server_id(const in6_addr_t *link_loca
  *   - Concurrent mode (called after sl_wisun_join()): The DC client operates alongside
  *     the Wi-SUN network (whether join is complete or in progress). This enables use cases
  *     such as debugging devices that cannot join the mesh by reaching them via DC link.
- *     In this mode, the DC link can only be established with a server that is not a direct
- *     Wi-SUN neighbor (i.e., not the current parent or child node).
  *
  * Available in libraries: Full, FFN (see @ref API_AVAILABILITY).
  *****************************************************************************/

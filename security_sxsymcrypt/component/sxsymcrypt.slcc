@@ -16,8 +16,6 @@ requires:
 - name: code_classification
 - name: device
 - name: device_has_lpwaes
-  # PLATFORM_HYD-5152
-  condition: [device_generic_family_sixx301]
 - name: device_has_symcrypto
 - name: sli_psec_osal
 
@@ -93,6 +91,8 @@ define:
 - name: SX_KEYREF_MAX_ID
   value: 32
   condition: [device_generic_family_sixx301]
+  # Silicon Labs defeature list
+- name: _SILICON_LABS_DEFEATURE_SHA3
 
 template_contribution:
 - name: code_classification_components

@@ -4,7 +4,7 @@
 - description: Configuration files for BRD4414A
 - package: boards
 - category: Platform|Board|Config
-- quality: evaluation
+- quality: production
 - metadata:
     sbom:
       license: Zlib

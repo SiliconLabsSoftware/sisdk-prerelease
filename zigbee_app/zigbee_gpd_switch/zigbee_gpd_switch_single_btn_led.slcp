@@ -1,5 +1,5 @@
-project_name: zigbee_gpd_switch
-label: Zigbee - GPD Switch
+project_name: zigbee_gpd_switch_single_btn_led
+label: Zigbee - SoC GPD Switch Single Btn LED
 package: zigbee
 category: Zigbee Application
 quality: production

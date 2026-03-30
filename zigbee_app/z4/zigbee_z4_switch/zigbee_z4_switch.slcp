@@ -1,5 +1,5 @@
 project_name: zigbee_z4_switch
-label: Zigbee - Z4Switch
+label: Zigbee - SoC Z4 Switch
 package: zigbee
 category: Zigbee Application
 quality: production

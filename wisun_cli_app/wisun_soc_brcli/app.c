@@ -631,6 +631,11 @@ static void app_handle_br_routing_table_update_ind(sl_wisun_evt_t *evt)
   }
 }
 
+static void app_handle_error_ind(sl_wisun_evt_t *evt)
+{
+  printf("[Error: %"PRIu32"]\r\n", evt->evt.error.status);
+}
+
 static sl_status_t channel_spacing_khz_to_id(uint32_t channel_spacing_khz, uint8_t *channel_spacing_id)
 {
   sl_status_t result = SL_STATUS_OK;
@@ -1835,6 +1840,9 @@ void sl_wisun_on_event(sl_wisun_evt_t *evt)
       break;
     case SL_WISUN_BR_MSG_ROUTING_TABLE_UPDATE_IND_ID:
       app_handle_br_routing_table_update_ind(evt);
+      break;
+    case SL_WISUN_MSG_ERROR_IND_ID:
+      app_handle_error_ind(evt);
       break;
     default:
       printf("[Unknown event: %d]\r\n", evt->header.id);

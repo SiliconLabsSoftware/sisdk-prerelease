@@ -219,10 +219,16 @@ sl_status_t sl_btctrl_init_cte();
 sl_status_t sl_btctrl_init_cs(const struct sl_btctrl_cs_config *config);
 
 /**
- * Check if event bitmap indicates pending events
- * @return bool pending events
+ * Raise link layer events to be processed by sl_btctrl_process_events().
+ * @param[in] events Event bits to be raised.
  */
-bool sli_pending_btctrl_events(void);
+void sl_btctrl_raise_events(uint32_t events);
+
+/**
+ * Process link layer events. This API should be called with event bits set by sl_btctrl_raise_events().
+ * @param[in] events Event bits to process.
+ */
+void sl_btctrl_process_events(uint32_t events);
 
 /**
  * Check if the controller supports Coded PHY.

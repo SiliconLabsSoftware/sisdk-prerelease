@@ -263,6 +263,18 @@ static void     wdog0ClkGet(uint32_t *freq, CMU_Select_TypeDef *sel);
 static void     wdog1ClkGet(uint32_t *freq, CMU_Select_TypeDef *sel);
 #endif
 static void     sysTickClkGet(uint32_t *freq, CMU_Select_TypeDef *sel);
+#if defined(_CMU_CANCLKCTRL_MASK)
+static void     can0ClkGet(uint32_t *freq, CMU_Select_TypeDef *sel);
+#endif
+#if defined(_CMU_LEDSINK0CLKCTRL_MASK)
+static void     ledSink0ClkGet(uint32_t *freq, CMU_Select_TypeDef *sel);
+#endif
+#if defined(_CMU_ADC0CLKCTRL_MASK)
+static void     adc0ClkGet(uint32_t *freq, CMU_Select_TypeDef *sel);
+#endif
+#if defined(_CMU_ADC1CLKCTRL_MASK)
+static void     adc1ClkGet(uint32_t *freq, CMU_Select_TypeDef *sel);
+#endif
 #if defined(USB_PRESENT)
 static void     usbClkGet(uint32_t *freq, CMU_Select_TypeDef *sel);
 #endif
@@ -679,6 +691,19 @@ CMU_ClkDiv_TypeDef CMU_ClockDivGet(CMU_Clock_TypeDef clock)
             >> _CMU_SYSCLKCTRL_PCLKPRESC_SHIFT;
       break;
 
+#if defined(_CMU_CANCLKCTRL_PRESC_MASK)
+    case cmuClock_CANCLK:
+      ret = (CMU->CANCLKCTRL & _CMU_CANCLKCTRL_PRESC_MASK)
+            >> _CMU_CANCLKCTRL_PRESC_SHIFT;
+      break;
+#endif
+#if defined(_CMU_LEDSINK0CLKCTRL_PRESC_MASK)
+    case cmuClock_LEDSINK0CLK:
+      ret = (CMU->LEDSINK0CLKCTRL & _CMU_LEDSINK0CLKCTRL_PRESC_MASK)
+            >> _CMU_LEDSINK0CLKCTRL_PRESC_SHIFT;
+      break;
+#endif
+
     default:
       break;
   }
@@ -705,6 +730,7 @@ void CMU_ClockDivSet(CMU_Clock_TypeDef clock, CMU_ClkDiv_TypeDef div)
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)   \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)   \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)   \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)) \
   && defined(CoreDebug_DEMCR_TRCENA_Msk)
   bool restoreTrace;
@@ -753,6 +779,7 @@ void CMU_ClockDivSet(CMU_Clock_TypeDef clock, CMU_ClkDiv_TypeDef div)
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)   \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)) \
       && defined(CoreDebug_DEMCR_TRCENA_Msk)
       restoreTrace = CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk;
@@ -773,6 +800,7 @@ void CMU_ClockDivSet(CMU_Clock_TypeDef clock, CMU_ClkDiv_TypeDef div)
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)   \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)) \
       && defined(CoreDebug_DEMCR_TRCENA_Msk)
       if (restoreTrace) {
@@ -793,6 +821,23 @@ void CMU_ClockDivSet(CMU_Clock_TypeDef clock, CMU_ClkDiv_TypeDef div)
       CMU->SYSCLKCTRL = (CMU->SYSCLKCTRL & ~_CMU_SYSCLKCTRL_PCLKPRESC_MASK)
                         | ((div - 1U) << _CMU_SYSCLKCTRL_PCLKPRESC_SHIFT);
       break;
+
+#if defined(_CMU_CANCLKCTRL_PRESC_MASK)
+    case cmuClock_CANCLK:
+      EFM_ASSERT((div == 1U) || (div == 2U) || (div == 3U) || (div == 4U)
+                 || (div == 5U) || (div == 10U));
+      CMU->CANCLKCTRL = (CMU->CANCLKCTRL & ~_CMU_CANCLKCTRL_PRESC_MASK)
+                        | ((div - 1U) << _CMU_CANCLKCTRL_PRESC_SHIFT);
+      break;
+#endif
+
+#if defined(_CMU_LEDSINK0CLKCTRL_PRESC_MASK)
+    case cmuClock_LEDSINK0CLK:
+      EFM_ASSERT((div >= 1U) && (div <= 64U));
+      CMU->LEDSINK0CLKCTRL = (CMU->LEDSINK0CLKCTRL & ~_CMU_LEDSINK0CLKCTRL_PRESC_MASK)
+                             | ((div - 1U) << _CMU_LEDSINK0CLKCTRL_PRESC_SHIFT);
+      break;
+#endif
 
     default:
       EFM_ASSERT(false);
@@ -1190,6 +1235,30 @@ uint32_t CMU_ClockFreqGet(CMU_Clock_TypeDef clock)
       dpllRefClkGet(&ret, NULL);
       break;
 
+#if defined(_CMU_CANCLKCTRL_MASK)
+    case cmuClock_CANCLK:
+      can0ClkGet(&ret, NULL);
+      break;
+#endif
+
+#if defined(_CMU_LEDSINK0CLKCTRL_MASK)
+    case cmuClock_LEDSINK0CLK:
+      ledSink0ClkGet(&ret, NULL);
+      break;
+#endif
+
+#if defined(_CMU_ADC0CLKCTRL_MASK)
+    case cmuClock_ADC0CLK:
+      adc0ClkGet(&ret, NULL);
+      break;
+#endif
+
+#if defined(_CMU_ADC1CLKCTRL_MASK)
+    case cmuClock_ADC1CLK:
+      adc1ClkGet(&ret, NULL);
+      break;
+#endif
+
     default:
       EFM_ASSERT(false);
       break;
@@ -1419,6 +1488,27 @@ CMU_Select_TypeDef CMU_ClockSelectGet(CMU_Clock_TypeDef clock)
       break;
 #endif
 // -----------------------------------------------------------------------------
+#if defined(_CMU_CANCLKCTRL_MASK)
+    case cmuClock_CANCLK:
+      can0ClkGet(NULL, &ret);
+      break;
+#endif
+#if defined(_CMU_ADC0CLKCTRL_MASK)
+    case cmuClock_ADC0CLK:
+      adc0ClkGet(NULL, &ret);
+      break;
+#endif
+#if defined(_CMU_ADC1CLKCTRL_MASK)
+    case cmuClock_ADC1CLK:
+      adc1ClkGet(NULL, &ret);
+      break;
+#endif
+#if defined(_CMU_LEDSINK0CLKCTRL_MASK)
+    case cmuClock_LEDSINK0CLK:
+      ledSink0ClkGet(NULL, &ret);
+      break;
+#endif
+// -----------------------------------------------------------------------------
     default:
       EFM_ASSERT(false);
       break;
@@ -1574,6 +1664,7 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)   \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)   \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)   \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)) \
   && defined(CoreDebug_DEMCR_TRCENA_Msk)
   bool restoreTrace;
@@ -2013,6 +2104,7 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)   \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)) \
       && defined(CoreDebug_DEMCR_TRCENA_Msk)
       restoreTrace = CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk;
@@ -2033,6 +2125,7 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
         || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
         || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8) \
         || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
+        || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)  \
         || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)
         case cmuSelect_SYSCLK:
           tmp = CMU_TRACECLKCTRL_CLKSEL_SYSCLK;
@@ -2061,6 +2154,7 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)   \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)) \
       && defined(CoreDebug_DEMCR_TRCENA_Msk)
       if (restoreTrace) {
@@ -2402,6 +2496,84 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
       }
       CMU->USB0CLKCTRL = (CMU->USB0CLKCTRL & ~_CMU_USB0CLKCTRL_CLKSEL_MASK)
                          | tmp;
+      break;
+#endif
+// -----------------------------------------------------------------------------
+#if defined(_CMU_CANCLKCTRL_MASK)
+    case cmuClock_CANCLK:
+      switch (ref) {
+        case cmuSelect_HFRCODPLL:
+          tmp = CMU_CANCLKCTRL_CLKSEL_HFRCODPLL;
+          break;
+        case cmuSelect_HFXO:
+          tmp = CMU_CANCLKCTRL_CLKSEL_HFXO;
+          break;
+        case cmuSelect_CLKIN0:
+          tmp = CMU_CANCLKCTRL_CLKSEL_CLKIN0;
+          break;
+        default:
+          EFM_ASSERT(false);
+          break;
+      }
+      CMU->CANCLKCTRL = (CMU->CANCLKCTRL & ~_CMU_CANCLKCTRL_CLKSEL_MASK) | tmp;
+      break;
+#endif
+// -----------------------------------------------------------------------------
+#if defined(_CMU_ADC0CLKCTRL_MASK)
+    case cmuClock_ADC0CLK:
+      switch (ref) {
+        case cmuSelect_EM01GRPACLK:
+          tmp = CMU_ADC0CLKCTRL_CLKSEL_EM01GRPACLK;
+          break;
+        case cmuSelect_FSRCO:
+          tmp = CMU_ADC0CLKCTRL_CLKSEL_FSRCO;
+          break;
+        default:
+          EFM_ASSERT(false);
+          break;
+      }
+      CMU->ADC0CLKCTRL = (CMU->ADC0CLKCTRL & ~_CMU_ADC0CLKCTRL_CLKSEL_MASK) | tmp;
+      break;
+#endif
+// -----------------------------------------------------------------------------
+#if defined(_CMU_ADC1CLKCTRL_MASK)
+    case cmuClock_ADC1CLK:
+      switch (ref) {
+        case cmuSelect_EM01GRPACLK:
+          tmp = CMU_ADC1CLKCTRL_CLKSEL_EM01GRPACLK;
+          break;
+        case cmuSelect_FSRCO:
+          tmp = CMU_ADC1CLKCTRL_CLKSEL_FSRCO;
+          break;
+        default:
+          EFM_ASSERT(false);
+          break;
+      }
+      CMU->ADC1CLKCTRL = (CMU->ADC1CLKCTRL & ~_CMU_ADC1CLKCTRL_CLKSEL_MASK) | tmp;
+      break;
+#endif
+// -----------------------------------------------------------------------------
+#if defined(_CMU_LEDSINK0CLKCTRL_MASK)
+    case cmuClock_LEDSINK0CLK:
+      switch (ref) {
+        case cmuSelect_FSRCO:
+          tmp = CMU_LEDSINK0CLKCTRL_CLKSEL_FSRCO;
+          break;
+        case cmuSelect_LFRCO:
+          tmp = CMU_LEDSINK0CLKCTRL_CLKSEL_LFRCO;
+          break;
+        case cmuSelect_LFXO:
+          tmp = CMU_LEDSINK0CLKCTRL_CLKSEL_LFXO;
+          break;
+        case cmuSelect_ULFRCO:
+          tmp = CMU_LEDSINK0CLKCTRL_CLKSEL_ULFRCO;
+          break;
+        default:
+          EFM_ASSERT(false);
+          break;
+      }
+      CMU->LEDSINK0CLKCTRL = (CMU->LEDSINK0CLKCTRL & ~_CMU_LEDSINK0CLKCTRL_CLKSEL_MASK)
+                             | tmp;
       break;
 #endif
 // -----------------------------------------------------------------------------
@@ -5420,6 +5592,180 @@ static void sysTickClkGet(uint32_t *freq, CMU_Select_TypeDef *sel)
     *sel = s;
   }
 }
+
+#if defined(_CMU_CANCLKCTRL_MASK)
+/***************************************************************************//**
+ * @brief
+ *   Get selected oscillator and frequency for @ref cmuClock_CANCLK
+ *   clock tree.
+ *
+ * @param[out] freq
+ *   The frequency.
+ *
+ * @param[out] sel
+ *   The selected oscillator.
+ ******************************************************************************/
+static void can0ClkGet(uint32_t *freq, CMU_Select_TypeDef *sel)
+{
+  uint32_t f = 0U;
+  CMU_Select_TypeDef s = cmuSelect_Error;
+
+  switch (CMU->CANCLKCTRL & _CMU_CANCLKCTRL_CLKSEL_MASK) {
+    case CMU_CANCLKCTRL_CLKSEL_HFRCODPLL:
+      f = SystemHFRCODPLLClockGet();
+      s = cmuSelect_HFRCODPLL;
+      break;
+    case CMU_CANCLKCTRL_CLKSEL_HFXO:
+      f = SystemHFXOClockGet();
+      s = cmuSelect_HFXO;
+      break;
+    case CMU_CANCLKCTRL_CLKSEL_CLKIN0:
+      f = SystemCLKIN0Get();
+      s = cmuSelect_CLKIN0;
+      break;
+    default:
+      s = cmuSelect_Error;
+      break;
+  }
+  f = f / CMU_ClockDivGet(cmuClock_CANCLK);
+
+  if (freq != NULL) {
+    *freq = f;
+  }
+  if (sel != NULL) {
+    *sel = s;
+  }
+}
+#endif
+
+#if defined(_CMU_LEDSINK0CLKCTRL_MASK)
+/***************************************************************************//**
+ * @brief
+ *   Get selected oscillator and frequency for @ref cmuClock_LEDSINK0CLK
+ *   clock tree.
+ *
+ * @param[out] freq
+ *   The frequency.
+ *
+ * @param[out] sel
+ *   The selected oscillator.
+ ******************************************************************************/
+static void ledSink0ClkGet(uint32_t *freq, CMU_Select_TypeDef *sel)
+{
+  uint32_t f = 0U;
+  CMU_Select_TypeDef s = cmuSelect_Error;
+
+  switch (CMU->LEDSINK0CLKCTRL & _CMU_LEDSINK0CLKCTRL_CLKSEL_MASK) {
+    case CMU_LEDSINK0CLKCTRL_CLKSEL_FSRCO:
+      f = SystemFSRCOClockGet();
+      s = cmuSelect_FSRCO;
+      break;
+    case CMU_LEDSINK0CLKCTRL_CLKSEL_LFRCO:
+      f = SystemLFRCOClockGet();
+      s = cmuSelect_LFRCO;
+      break;
+    case CMU_LEDSINK0CLKCTRL_CLKSEL_LFXO:
+      f = SystemLFXOClockGet();
+      s = cmuSelect_LFXO;
+      break;
+    case CMU_LEDSINK0CLKCTRL_CLKSEL_ULFRCO:
+      f = SystemULFRCOClockGet();
+      s = cmuSelect_ULFRCO;
+      break;
+    default:
+      s = cmuSelect_Error;
+      break;
+  }
+  f = f / CMU_ClockDivGet(cmuClock_LEDSINK0CLK);
+
+  if (freq != NULL) {
+    *freq = f;
+  }
+  if (sel != NULL) {
+    *sel = s;
+  }
+}
+#endif
+
+#if defined(_CMU_ADC0CLKCTRL_MASK)
+/***************************************************************************//**
+ * @brief
+ *   Get selected oscillator and frequency for @ref cmuClock_ADC0CLK
+ *   clock tree.
+ *
+ * @param[out] freq
+ *   The frequency.
+ *
+ * @param[out] sel
+ *   The selected oscillator.
+ ******************************************************************************/
+static void adc0ClkGet(uint32_t *freq, CMU_Select_TypeDef *sel)
+{
+  uint32_t f = 0U;
+  CMU_Select_TypeDef s = cmuSelect_Error;
+
+  switch (CMU->ADC0CLKCTRL & _CMU_ADC0CLKCTRL_CLKSEL_MASK) {
+    case CMU_ADC0CLKCTRL_CLKSEL_EM01GRPACLK:
+      em01GrpaClkGet(&f, NULL);
+      s = cmuSelect_EM01GRPACLK;
+      break;
+    case CMU_ADC0CLKCTRL_CLKSEL_FSRCO:
+      f = SystemFSRCOClockGet();
+      s = cmuSelect_FSRCO;
+      break;
+    default:
+      s = cmuSelect_Error;
+      break;
+  }
+
+  if (freq != NULL) {
+    *freq = f;
+  }
+  if (sel != NULL) {
+    *sel = s;
+  }
+}
+#endif
+
+#if defined(_CMU_ADC1CLKCTRL_MASK)
+/***************************************************************************//**
+ * @brief
+ *   Get selected oscillator and frequency for @ref cmuClock_ADC1CLK
+ *   clock tree.
+ *
+ * @param[out] freq
+ *   The frequency.
+ *
+ * @param[out] sel
+ *   The selected oscillator.
+ ******************************************************************************/
+static void adc1ClkGet(uint32_t *freq, CMU_Select_TypeDef *sel)
+{
+  uint32_t f = 0U;
+  CMU_Select_TypeDef s = cmuSelect_Error;
+
+  switch (CMU->ADC1CLKCTRL & _CMU_ADC1CLKCTRL_CLKSEL_MASK) {
+    case CMU_ADC1CLKCTRL_CLKSEL_EM01GRPACLK:
+      em01GrpaClkGet(&f, NULL);
+      s = cmuSelect_EM01GRPACLK;
+      break;
+    case CMU_ADC1CLKCTRL_CLKSEL_FSRCO:
+      f = SystemFSRCOClockGet();
+      s = cmuSelect_FSRCO;
+      break;
+    default:
+      s = cmuSelect_Error;
+      break;
+  }
+
+  if (freq != NULL) {
+    *freq = f;
+  }
+  if (sel != NULL) {
+    *sel = s;
+  }
+}
+#endif
 
 #if defined(USB_PRESENT)
 /***************************************************************************//**

@@ -1,5 +1,16 @@
 var NAVTREEINDEX4 =
 {
+"group__sl__bt__evt__sm__passkey__request.html":[2,28,2],
+"group__sl__bt__evt__sm__passkey__request.html#adb96a57ecaf9d62866c8c003dd68788d":[2,28,2,0,0],
+"group__sl__bt__evt__sm__passkey__request.html#ga018d08886d2e2daf0d5dc479ab412165":[2,28,2,1],
+"group__sl__bt__evt__sm__passkey__request.html#structsl__bt__evt__sm__passkey__request__s":[2,28,2,0],
+"group__sl__bt__evt__sync__closed.html":[2,14,0],
+"group__sl__bt__evt__sync__closed.html#a6b409b8d52fccbb7fe793097646d9548":[2,14,0,0,0],
+"group__sl__bt__evt__sync__closed.html#a9e595d702aa81ec41c05302594952b4b":[2,14,0,0,1],
+"group__sl__bt__evt__sync__closed.html#ga688ef2ac98e910a2388df7017a8d5ea7":[2,14,0,1],
+"group__sl__bt__evt__sync__closed.html#structsl__bt__evt__sync__closed__s":[2,14,0,0],
+"group__sl__bt__evt__system__awake.html":[2,5,5],
+"group__sl__bt__evt__system__awake.html#gac671086d87b33e79d055df0098b40d7b":[2,5,5,0],
 "group__sl__bt__evt__system__boot.html":[2,5,0],
 "group__sl__bt__evt__system__boot.html#a451a5208c22bc5870960ecb2a29e5f6a":[2,5,0,0,4],
 "group__sl__bt__evt__system__boot.html#a4caa6fdba4196ba7096c8b92f2b3f513":[2,5,0,0,5],
@@ -238,16 +249,5 @@ var NAVTREEINDEX4 =
 "group__sl__bt__gattdb__flags.html":[2,24,2],
 "group__sl__bt__gattdb__flags.html#ga3d4d9f581a2e772fd39ead2059fbf3dc":[2,24,2,0],
 "group__sl__bt__gattdb__security__requirements.html":[2,24,1],
-"group__sl__bt__gattdb__security__requirements.html#ga041a4035380438a82a4bdc435fd7951a":[2,24,1,3],
-"group__sl__bt__gattdb__security__requirements.html#ga104d281ac22496d4fa8720ec8ba2739f":[2,24,1,7],
-"group__sl__bt__gattdb__security__requirements.html#ga1f147ed50894097ad7561728870ee008":[2,24,1,8],
-"group__sl__bt__gattdb__security__requirements.html#ga64dca37f0ec774dd073141d2bde4b2c3":[2,24,1,2],
-"group__sl__bt__gattdb__security__requirements.html#ga791de29249e61aa9bf2600d5e2740f2b":[2,24,1,4],
-"group__sl__bt__gattdb__security__requirements.html#ga8e87d8a1130ba5bc94d9162b0375069a":[2,24,1,0],
-"group__sl__bt__gattdb__security__requirements.html#ga8f16fc65f5cbb9062416ebbcf71a8ff2":[2,24,1,5],
-"group__sl__bt__gattdb__security__requirements.html#gab7600656cb4ccdba2b01af8f02818831":[2,24,1,1],
-"group__sl__bt__gattdb__security__requirements.html#gad0230ddf1e1f94d08a9bf39f8c1c21b8":[2,24,1,6],
-"group__sl__bt__gattdb__service__property__flags.html":[2,24,0],
-"group__sl__bt__gattdb__service__property__flags.html#ga0351aafe5e0e3faaae95a1e286acd99b":[2,24,0,0],
-"group__sl__bt__l2cap.html":[2,35]
+"group__sl__bt__gattdb__security__requirements.html#ga041a4035380438a82a4bdc435fd7951a":[2,24,1,3]
 };

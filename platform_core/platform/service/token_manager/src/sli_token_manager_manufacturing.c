@@ -48,7 +48,7 @@
 #endif //SL_TOKEN_MANAGER_BACKEND_EXT_FLASH
 
 #if defined(SL_TOKEN_MANAGER_FORMAT_LEGACY)
-#include "sl_hal_msc.h"
+#include "em_msc.h"
 #endif // (SL_TOKEN_MANAGER_FORMAT_LEGACY)
 
 #if defined(SL_TOKEN_MANAGER_BACKEND_INT_FLASH) || defined(SL_TOKEN_MANAGER_BACKEND_EXT_FLASH)

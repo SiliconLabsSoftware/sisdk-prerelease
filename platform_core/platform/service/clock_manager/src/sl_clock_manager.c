@@ -111,6 +111,18 @@ sl_status_t sl_clock_manager_disable_bus_clock(sl_bus_clock_t module_bus_clock)
 }
 
 /***************************************************************************//**
+ * Gets the enable status of the given module's bus clock.
+ ******************************************************************************/
+ sl_status_t sl_clock_manager_is_bus_clock_enabled(sl_bus_clock_t module_bus_clock, bool *enabled)
+{
+  if (enabled == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  return sli_clock_manager_hal_is_bus_clock_enabled(module_bus_clock, enabled);
+}
+
+/***************************************************************************//**
  * Configures one clock export output with specified clock source.
  ******************************************************************************/
 sl_status_t sl_clock_manager_set_gpio_clock_output(sl_clock_manager_export_clock_source_t export_clock_source,

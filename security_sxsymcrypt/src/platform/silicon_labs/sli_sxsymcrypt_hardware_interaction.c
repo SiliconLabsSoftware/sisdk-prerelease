@@ -48,14 +48,11 @@ struct sx_regs cryptomaster_structs[] = {
     .base_address = (uint8_t *)SYMCRYPTO,
     .yield = false
   },
-  // PLATFORM_HYD-5152
-  #if !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353) && !defined(SIXG300XIWIFI74000XFULL_FPGA)
   {
     .instance_index = SLI_SXSYMCRYPT_CRYPTOMASTER_LPWAES,
     .base_address = (uint8_t *)LPWAES,
     .yield = false
   },
-  #endif // !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353) && !defined(SIXG300XIWIFI74000XFULL_FPGA)
 };
 
 #if defined(SLI_PSEC_THREADING)

@@ -742,7 +742,7 @@ sli_block_metadata_t *sli_memory_check_heap_integrity_backwards(sl_memory_heap_t
     reservation_size = sli_memory_get_reservation_size_by_addr((void *)current_by_prev_len);
 
     while (reservation_size != 0) {
-      current_by_prev_len = (sli_block_metadata_t *)((uint8_t*)current_by_prev_len + reservation_size);
+      current_by_prev_len = (sli_block_metadata_t *)((uint8_t *)current_by_prev_len + reservation_size);
       reservation_size = sli_memory_get_reservation_size_by_addr((void *)current_by_prev_len);
     }
 

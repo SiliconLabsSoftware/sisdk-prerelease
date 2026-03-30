@@ -919,7 +919,7 @@ class CLICommandsMixin:
                     CCMD_DISPLAY_IMAGE, CONTROLLER_COMMAND_SUCCESS, esl_id
                 )
 
-    def ap_ping(self, address, group_id, force_pawr=False):
+    def ap_ping(self, address, group_id=None, force_pawr=False):
         """
         Send ESL ping command.
         input:

@@ -153,6 +153,12 @@ SL_ENUM_GENERIC(sli_se_spi_command_t, uint8_t) {
   SLI_SE_SPI_COMMAND_WRITE = 1,
 };
 
+/// SPI memory instance.
+SL_ENUM(sli_se_spi_memory_instance_t) {
+  SLI_SE_SPI_MEMORY_INSTANCE_0 = 0,  ///< SPI memory instance 0.
+  SLI_SE_SPI_MEMORY_INSTANCE_1 = 1,  ///< SPI memory instance 1.
+};
+
 // -----------------------------------------------------------------------------
 // Prototypes
 
@@ -612,15 +618,20 @@ sl_status_t sl_se_data_region_erase(sl_se_command_context_t *cmd_ctx,
  *   enabled/disabled state is in progress.
  *
  * @details
- *   This function returns immediately. It is used to determine if a command
- *   that modifies the L1CACHE enabled/disabled state is in progress. Note that
- *   in a multi-threaded context, another thread might start a command that
+ *   This is used to determine if a command that modifies the L1CACHE
+ *   enabled/disabled state is in progress.
+ *
+ * @warning
+ *   In a multi-threaded context, another thread might start/end a command that
  *   modifies the L1CACHE enabled/disabled state just after/while this function
- *   returns.
+ *   executes. This function must be executed within a critical section to
+ *   guarantee thread-safe decision-making. Any conditional logic such as
+ *   invoking a function based on the return value must also occur within the
+ *   critical section.
  *
  * @return
- *   true if a command that modifies the L1CACHE enabled/disabled state is in
- *   progress, false otherwise.
+ *   true if a command that modifies the L1CACHE enabled/disabled state is
+ *   in progress, false otherwise.
  ******************************************************************************/
  SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SE_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
  bool sli_se_extmem_command_with_cachedis_in_progress(void);
@@ -1008,6 +1019,7 @@ sl_status_t sli_se_write_spi_registers(sl_se_command_context_t *cmd_ctx,
                                        uint32_t spi_instance,
                                        uint32_t *table,
                                        uint32_t count);
+
 
 #ifdef __cplusplus
 }

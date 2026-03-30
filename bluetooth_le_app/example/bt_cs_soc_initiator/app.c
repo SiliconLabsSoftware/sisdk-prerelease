@@ -625,7 +625,6 @@ static sl_status_t create_new_initiator_instance(uint8_t conn_handle)
   memset(&cs_initiator_instances[i].measurement_mainmode, 0u, sizeof(cs_measurement_data_t));
   memset(&cs_initiator_instances[i].measurement_submode, 0u, sizeof(cs_measurement_data_t));
   memset(&cs_initiator_instances[i].measurement_progress, 0u, sizeof(measurement_progress));
-  num_reflector_connections++;
 
   sc = cs_initiator_create(conn_handle,
                            &initiator_config,
@@ -640,6 +639,8 @@ static sl_status_t create_new_initiator_instance(uint8_t conn_handle)
               conn_handle,
               sc);
     (void)ble_peer_manager_central_close_connection(conn_handle);
+  } else {
+    num_reflector_connections++;
   }
   return sc;
 }
@@ -787,7 +788,7 @@ static void print_head_and_data(cs_initiator_instances_t *initiator)
 }
 
 /******************************************************************************
- * Delete initiator instance
+ * Delete initiator instance.
  *****************************************************************************/
 static void delete_initiator_instance(uint8_t conn_handle)
 {
@@ -802,7 +803,6 @@ static void delete_initiator_instance(uint8_t conn_handle)
       cs_initiator_instances[i].measurement_progress_changed = false;
       cs_initiator_instances[i].read_remote_capabilities = false;
       cs_initiator_instances[i].security_increased = false;
-      num_reflector_connections--;
       break;
     }
   }
@@ -1097,6 +1097,7 @@ void sl_bt_on_event(sl_bt_msg_t * evt)
       }
       break;
     }
+
     // -------------------------------
     // This event indicates that the BT stack buffer resources were exhausted
     case sl_bt_evt_system_resource_exhausted_id:
@@ -1165,6 +1166,7 @@ void ble_peer_manager_on_event_initiator(ble_peer_manager_evt_type_t * event)
         log_info(APP_INSTANCE_PREFIX "Initiator instance not found" NL, event->connection_id);
       } else {
         app_assert_status(sc);
+        num_reflector_connections--;
         log_info(APP_INSTANCE_PREFIX "Initiator instance removed" NL, event->connection_id);
       }
       delete_initiator_instance(event->connection_id);

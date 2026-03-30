@@ -82,13 +82,15 @@
 #define CS_INITIATOR_MAX_CONNECTIONS                  (1)
 #endif
 
-// <o CS_INITIATOR_MAX_RANGING_DATA_SIZE> Maximum ranging data size <32..2500>
+// <o CS_INITIATOR_MAX_RANGING_DATA_SIZE> Maximum ranging data size <32..2700>
 // <i> The optimal value of "Maximum ranging data size" is dependent on several configuration values,
 // <i> and can be calculated by the following equation:
-// <i> ranging_max_size = 4 + (subevents * 8) + (mode0_steps * mode0_size) +
+// <i> ranging_max_size = 4 + (subevents * 8) + (subevents * mode0_steps * mode0_size) +
 // <i> channels * ( ( 1 + ( antenna_paths + 1 ) * 4) + 1 )
 // <i> where
-// <i> - subevents value is constant 1 since one subevent per procedure is supported,
+// <i> - subevents is the number of CS subevents per procedure (range: 1..32), determined by the
+// <i>   controller based on CS_INITIATOR_DEFAULT_MIN_SUBEVENT_LEN and CS_INITIATOR_DEFAULT_MAX_SUBEVENT_LEN.
+// <i>   Shorter subevent lengths allow more subevents per procedure.
 // <i> - mode0_size is
 // <i>   - 4 for Reflector and
 // <i>   - 6 for Initiator,
@@ -102,20 +104,20 @@
 // <i> - antenna_paths value is controlled by the "Antenna configuration", and limited by number of
 // <i> antennas presented on each board (capabilities). Maximum can be calculated using the product
 // <i> of used Initiator and Reflector antennae. The default maximum value for antenna_paths is 4.
-// <i> These settings were selected by assuming that the controller creates only one subevent per procedure,
+// <i> These settings were selected by assuming that the controller creates the maximum number of subevents (32),
 // <i> and the measuring mode is PBR. In RTT mode there are far less data is created.
-// <i> The default is calculated by using the constants and settings above using the worst case scenario,
-// <i> which gives 1614 bytes.
 // <i> Addition to that, if you use RTT as submode, you should add the following equation to calculate the
 // <i> size.
 // <i> (1 + mode1_size) * channels / main_mode_steps
 // <i> where
 // <i> mode1_size is 6, and main_mode_steps is 2. The later can be changed in cs_initiator_client.h.
+// <i> The default is calculated by using the constants and settings above using the worst case scenario, including using RTT submode
+// <i> which gives 2,672 bytes.
 // <i> RAM consumption can be reduced by changing the affected settings and reducing
 // <i> "Procedure maximum length" accordingly.
-// <i> Default: 1866
+// <i> Default: 2700
 #ifndef CS_INITIATOR_MAX_RANGING_DATA_SIZE
-#define CS_INITIATOR_MAX_RANGING_DATA_SIZE            (1866)
+#define CS_INITIATOR_MAX_RANGING_DATA_SIZE            (2700)
 #endif
 
 // <o CS_INITIATOR_MAX_DROP> Maximum dropped procedures <2..10>
@@ -230,6 +232,22 @@
 // <i> Maximum duration in number of connection events between consecutive CS measurement procedures
 #ifndef CS_INITIATOR_DEFAULT_MAX_PROCEDURE_INTERVAL
 #define CS_INITIATOR_DEFAULT_MAX_PROCEDURE_INTERVAL                     (38)
+#endif
+
+// <o CS_INITIATOR_DEFAULT_MIN_SUBEVENT_LEN> Minimum subevent length [us] <1250..3999999>
+// <i> Minimum suggested duration for each CS subevent in microseconds.
+// <i> Increase CS_INITIATOR_MAX_RANGING_DATA_SIZE if a large number of subevents is expected.
+// <i> Default: 1250
+#ifndef CS_INITIATOR_DEFAULT_MIN_SUBEVENT_LEN
+#define CS_INITIATOR_DEFAULT_MIN_SUBEVENT_LEN          1250
+#endif
+
+// <o CS_INITIATOR_DEFAULT_MAX_SUBEVENT_LEN> Maximum subevent length [us] <1250..3999999>
+// <i> Maximum suggested duration for each CS subevent in microseconds.
+// <i> Increase CS_INITIATOR_MAX_RANGING_DATA_SIZE if a large number of subevents is expected.
+// <i> Default: 3999999
+#ifndef CS_INITIATOR_DEFAULT_MAX_SUBEVENT_LEN
+#define CS_INITIATOR_DEFAULT_MAX_SUBEVENT_LEN          3999999
 #endif
 
 // </h>
@@ -359,7 +377,6 @@
 // <sl_bt_cs_chc3_shape_interleaved=> Ch3c shape interleaved
 // <i> Default: sl_bt_cs_ch3c_shape_hat
 #define CS_INITIATOR_DEFAULT_CH3C_SHAPE             sl_bt_cs_ch3c_shape_hat
-
 // </h>
 
 // </h>
@@ -421,16 +438,6 @@
 // Only one channel is supported
 // Default: 1
 #define CS_INITIATOR_DEFAULT_CONFIG_ID      1
-
-// Minimum subevent length. <1250..3999999>
-// Minimum suggested duration for each CS subevent in microseconds.
-// Default: 1250
-#define CS_INITIATOR_DEFAULT_MIN_SUBEVENT_LEN          1250
-
-// Maximum subevent length. <1250..3999999>
-// Maximum suggested duration for each CS subevent in microseconds.
-// Default: 3999999
-#define CS_INITIATOR_DEFAULT_MAX_SUBEVENT_LEN          3999999
 
 // Internal define to skip RTL processing
 #define CS_INITIATOR_INTERNAL_SKIP_RTL_PROCESS         0

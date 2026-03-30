@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
   <compounddef id="structsl__bgapi__rsp__error__s" kind="struct" language="C++" prot="public">
     <compoundname>sl_bgapi_rsp_error_s</compoundname>
     <includes refid="sl__bgapi_8h" local="no">sl_bgapi.h</includes>
-      <sectiondef kind="public-attrib">
+    <sectiondef kind="public-attrib">
       <memberdef kind="variable" id="structsl__bgapi__rsp__error__s_1ae6a7ce3915781833f6a96c345c764173" prot="public" static="no" mutable="no">
         <type>uint16_t</type>
         <definition>uint16_t sl_bgapi_rsp_error_s::result</definition>
@@ -19,7 +19,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bgapi_protocol/protocol/inc/sl_bgapi.h" line="158" column="12" bodyfile="/var/lib/jenkins/github/bgapi_protocol/protocol/inc/sl_bgapi.h" bodystart="158" bodyend="-1"/>
       </memberdef>
-      </sectiondef>
+    </sectiondef>
     <briefdescription>
 <para>BGAPI response structure for generic error responses. </para>
     </briefdescription>

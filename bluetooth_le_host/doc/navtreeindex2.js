@@ -1,5 +1,16 @@
 var NAVTREEINDEX2 =
 {
+"group__sl__bt__evt__connection__subrate__changed.html#structsl__bt__evt__connection__subrate__changed__s":[2,22,13,0],
+"group__sl__bt__evt__connection__tx__power.html":[2,22,7],
+"group__sl__bt__evt__connection__tx__power.html#a640bfc42eac5eef7639e7703e63abea5":[2,22,7,0,2],
+"group__sl__bt__evt__connection__tx__power.html#a7c9f25469127a3aa5319d93a57536ad6":[2,22,7,0,0],
+"group__sl__bt__evt__connection__tx__power.html#a85f3c10ca500faa5773bd15a0416d5c0":[2,22,7,0,4],
+"group__sl__bt__evt__connection__tx__power.html#ac4a270a0f81884222beff2f678baa84f":[2,22,7,0,3],
+"group__sl__bt__evt__connection__tx__power.html#ad2064f1f525400381675c50baebac9ca":[2,22,7,0,1],
+"group__sl__bt__evt__connection__tx__power.html#gafbd46b3012c22552a029305a1b5ec18a":[2,22,7,1],
+"group__sl__bt__evt__connection__tx__power.html#structsl__bt__evt__connection__tx__power__s":[2,22,7,0],
+"group__sl__bt__evt__cs__config__complete.html":[2,33,1],
+"group__sl__bt__evt__cs__config__complete.html#a08368feec576ebf7d4d7b2a59f5e8faf":[2,33,1,0,19],
 "group__sl__bt__evt__cs__config__complete.html#a112ebb35bf97364875faeedf17a377d3":[2,33,1,0,20],
 "group__sl__bt__evt__cs__config__complete.html#a11a04499e4704ffe6730dacdf56cec4f":[2,33,1,0,0],
 "group__sl__bt__evt__cs__config__complete.html#a12548a7c9981eea0b1e2f068d81c064f":[2,33,1,0,12],
@@ -238,16 +249,5 @@ var NAVTREEINDEX2 =
 "group__sl__bt__evt__gatt__server__execute__write__completed.html#ga025eb202f4120d8040611db566c3d6e6":[2,25,5,1],
 "group__sl__bt__evt__gatt__server__execute__write__completed.html#structsl__bt__evt__gatt__server__execute__write__completed__s":[2,25,5,0],
 "group__sl__bt__evt__gatt__server__indication__timeout.html":[2,25,6],
-"group__sl__bt__evt__gatt__server__indication__timeout.html#a63a7916f48c1b7f5242de4e0accf840c":[2,25,6,0,0],
-"group__sl__bt__evt__gatt__server__indication__timeout.html#ga74b7252c605c8937bf19ad4be5d8ba3d":[2,25,6,1],
-"group__sl__bt__evt__gatt__server__indication__timeout.html#structsl__bt__evt__gatt__server__indication__timeout__s":[2,25,6,0],
-"group__sl__bt__evt__gatt__server__notification__tx__completed.html":[2,25,7],
-"group__sl__bt__evt__gatt__server__notification__tx__completed.html#a0d8a8fe3236e18125bf18ab731ae9127":[2,25,7,0,1],
-"group__sl__bt__evt__gatt__server__notification__tx__completed.html#afc5b4083bb5949a384b28ba9f50c940e":[2,25,7,0,0],
-"group__sl__bt__evt__gatt__server__notification__tx__completed.html#gaaac4706bf8c2310e5e40213a8c40a394":[2,25,7,1],
-"group__sl__bt__evt__gatt__server__notification__tx__completed.html#structsl__bt__evt__gatt__server__notification__tx__completed__s":[2,25,7,0],
-"group__sl__bt__evt__gatt__server__user__read__request.html":[2,25,2],
-"group__sl__bt__evt__gatt__server__user__read__request.html#a139515e57a60740db36aa3e2cf04d35e":[2,25,2,0,0],
-"group__sl__bt__evt__gatt__server__user__read__request.html#a2cf3d881f97984ed4bc9679480b1f786":[2,25,2,0,3],
-"group__sl__bt__evt__gatt__server__user__read__request.html#a4f3379eae08b2c9544a2b1a68b4afab0":[2,25,2,0,1]
+"group__sl__bt__evt__gatt__server__indication__timeout.html#a63a7916f48c1b7f5242de4e0accf840c":[2,25,6,0,0]
 };

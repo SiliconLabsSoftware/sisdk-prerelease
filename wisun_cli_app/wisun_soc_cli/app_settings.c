@@ -2554,6 +2554,19 @@ static const app_settings_entry_t app_statistics_entries[] =
     .description = "Number of MPL messages that are deleted and never transmitted"
   },
   {
+    .key = "neighbor_alloc_fail",
+    .domain = app_statistics_domain_network,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT16,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_statistics.network.neighbor_alloc_fail,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "Neighbor allocation failure count"
+  },
+  {
     .key = "tx_duration_ms",
     .domain = app_statistics_domain_regulation,
     .value_size = APP_SETTINGS_VALUE_SIZE_UINT32,

@@ -449,7 +449,7 @@ typedef struct {
 
 /// 6LoWPAN/IP stack statistics
 typedef struct {
-  /// Number of received IP6 packets.
+  /// Number of received IPv6 packets.
   uint32_t ip_rx_count;
   /// Number of transmitted IPv6 packets.
   uint32_t ip_tx_count;
@@ -459,11 +459,11 @@ typedef struct {
   uint32_t ip_cksum_error;
   /// Amount of transmitted IPv6 data in bytes.
   uint32_t ip_tx_bytes;
-  /// Amount received IPv6 data in bytes.
+  /// Amount of received IPv6 data in bytes.
   uint32_t ip_rx_bytes;
   /// Amount of forwarded IPv6 data in bytes.
   uint32_t ip_routed_up;
-  /// Number of discarded IPv6 packets due to lack routing information.
+  /// Number of discarded IPv6 packets due to lack of routing information.
   uint32_t ip_no_route;
   /// Number of fragmentation errors in received IPv6 packets.
   uint32_t frag_rx_errors;
@@ -515,6 +515,8 @@ typedef struct {
   uint16_t mpl_freed_messages_count;
   /// Number of deleted MPL messages that were never sent.
   uint16_t mpl_not_tx_count;
+  /// Number of failed neighbor allocation attempts.
+  uint16_t neighbor_alloc_fail;
 } sl_wisun_statistics_network_t;
 
 /// ARIB regulation statistics
@@ -1354,13 +1356,29 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_logger_event_tx_failure_t;
 SL_PACK_END()
 
+/// Value for rssi when not applicable (e.g. TX or non-RX events)
+#define SL_WISUN_RF_TEST_RSSI_NOT_AVAILABLE  (-128)
+
+/// RF test RX event information (valid when @ref SL_RAIL_EVENT_RX_PACKET_RECEIVED is set)
+SL_PACK_START(1)
+typedef struct {
+  /// RSSI in dBm; @ref SL_WISUN_RF_TEST_RSSI_NOT_AVAILABLE when not applicable
+  int8_t rssi;
+  /// Reserved for future use
+  uint8_t reserved[3];
+} SL_ATTRIBUTE_PACKED sl_wisun_logger_event_rf_test_rx_t;
+SL_PACK_END()
+
 /// RF test event information
 SL_PACK_START(1)
 typedef struct {
   /// RAIL events associated with the RF test event
   uint64_t events;
-  /// Reserved for future use
-  uint8_t reserved[4];
+  /// Event-specific data
+  union {
+    /// RX packet received information (when @ref SL_RAIL_EVENT_RX_PACKET_RECEIVED is set in events)
+    sl_wisun_logger_event_rf_test_rx_t rx;
+  } u;
 } SL_ATTRIBUTE_PACKED sl_wisun_logger_event_rf_test_t;
 SL_PACK_END()
 

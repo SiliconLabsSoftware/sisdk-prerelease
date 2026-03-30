@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
   <compounddef id="structsl__bt__evt__connection__request__subrate__failed__s" kind="struct" language="C++" prot="public">
     <compoundname>sl_bt_evt_connection_request_subrate_failed_s</compoundname>
     <includes refid="sl__bt__api_8h" local="no">sl_bt_api.h</includes>
-      <sectiondef kind="public-attrib">
+    <sectiondef kind="public-attrib">
       <memberdef kind="variable" id="structsl__bt__evt__connection__request__subrate__failed__s_1a47de92df82e4a4352969c45188b85ee0" prot="public" static="no" mutable="no">
         <type>uint8_t</type>
         <definition>uint8_t sl_bt_evt_connection_request_subrate_failed_s::connection</definition>
@@ -17,7 +17,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="6878" column="12" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="6878" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="7055" column="12" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="7055" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="structsl__bt__evt__connection__request__subrate__failed__s_1a9a4568275ceabb900fb5e06421bfd1a3" prot="public" static="no" mutable="no">
         <type>uint16_t</type>
@@ -32,15 +32,15 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="6879" column="12" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="6879" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="7056" column="12" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="7056" bodyend="-1"/>
       </memberdef>
-      </sectiondef>
+    </sectiondef>
     <briefdescription>
 <para>Data structure of the request_subrate_failed event. </para>
     </briefdescription>
     <detaileddescription>
     </detaileddescription>
-    <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="6876" column="1" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="6877" bodyend="6880"/>
+    <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="7053" column="1" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="7054" bodyend="7057"/>
     <listofallmembers>
       <member refid="structsl__bt__evt__connection__request__subrate__failed__s_1a47de92df82e4a4352969c45188b85ee0" prot="public" virt="non-virtual"><scope>sl_bt_evt_connection_request_subrate_failed_s</scope><name>connection</name></member>
       <member refid="structsl__bt__evt__connection__request__subrate__failed__s_1a9a4568275ceabb900fb5e06421bfd1a3" prot="public" virt="non-virtual"><scope>sl_bt_evt_connection_request_subrate_failed_s</scope><name>result</name></member>

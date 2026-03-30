@@ -32,6 +32,7 @@
 #define SL_WISUN_EVENT_H
 
 #include "sl_wisun_types.h"
+#include "sl_status.h"
 
 #define SL_WISUN_EVENT_IND_MASK 1
 
@@ -447,7 +448,7 @@ SL_PACK_END()
 SL_PACK_START(1)
 typedef struct {
   /// Status of the indication
-  uint32_t status;
+  sl_status_t status;
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_error_ind_body_t;
 SL_PACK_END()
 

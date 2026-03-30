@@ -37,9 +37,6 @@
 extern "C" {
 #endif
 
-/// Defines the physical dimensions of the countermeasure seeds
-#define CRYPTO_CM_MASKBITS 32
-
 /// Standard buffer size in bytes
 #define SLI_CRYPTO_AES_BLOCK_SIZE  16
 /// Location value for keys stored in plaintext
@@ -47,28 +44,10 @@ extern "C" {
 /// The SLI Crypto API supports only the RADIOAES crypto engine on Series-2
 #define SLI_CRYPTO_ENGINE_RADIOAES       ((sli_crypto_engine_t)0x00000001UL)
 #define SLI_CRYPTO_ENGINE_DEFAULT        (SLI_CRYPTO_ENGINE_RADIOAES)
-/// Crypto engine selection value for CRYPTOACC (needs manual reseed)
-#define SLI_CRYPTO_ENGINE_CRYPTOACC      ((sli_crypto_engine_t)0x00000000UL)
 
 /// Used to choose a crypto engine.
 /// @ref SLI_CRYPTO_LPWAES.
 typedef uint32_t sli_crypto_engine_t;
-
-typedef enum _sli_engine_idx {
-  #if defined(CRYPTOACC_PRESENT)
-  SLI_CRYPTO_CRYPTOACC_IDX = 0,
-  #endif
-  SLI_CRYPTO_ENGINE_COUNT,
-  SLI_CRYPTO_INVALID_ENGINE_IDX = 0xFF
-} sli_engine_id_t;
-
-// RadioAES is reseeded on every operation
-// only CRYPTOACC needs to be reseeded
-#if defined(CRYPTOACC_PRESENT)
-#define INVALID_ENGINE(e) ((e) != SLI_CRYPTO_ENGINE_CRYPTOACC)
-#else
-#define INVALID_ENGINE(e) (true)
-#endif
 
 /// Key storage location. Can either
 /// @ref SLI_CRYPTO_KEY_LOCATION_PLAINTEXT

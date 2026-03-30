@@ -57,7 +57,7 @@ int32_t storage_eraseRaw(uint32_t address, size_t length);
  *         @ref BOOTLOADER_ERROR_STORAGE_BASE range
  ******************************************************************************/
 int32_t storage_writeRaw(uint32_t address,
-                         uint8_t  *buffer,
+                         const uint8_t  *buffer,
                          size_t   length);
 
 /***************************************************************************//**

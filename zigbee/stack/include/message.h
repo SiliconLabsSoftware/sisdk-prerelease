@@ -886,6 +886,33 @@ void sl_zigbee_post_incoming_packet_filter_cb(sl_zigbee_zigbee_packet_type_t pac
                                               uint8_t size_d,
                                               sl_zigbee_packet_action_t action);
 
+/** @brief Called after the stack has processed an incoming packet that was meant
+ * for one of the protocol layers specified in ::sl_zigbee_zigbee_packet_type_t.
+ * This function is equivalent to ::sl_zigbee_post_incoming_packet_filter_cb, but it
+ * includes radio-level link quality metrics (RSSI, LQI, channel), which are
+ * useful for applications that wish to be informed of the peer link connection
+ * quality.
+ *
+ * @param packetType The type of packet received. See
+ * ::sl_zigbee_zigbee_packet_type_t.
+ * @param linkQuality  Radio-level link quality metrics (RSSI, LQI, channel).
+ * See ::sl_zigbee_packet_link_quality_t.
+ * @param packetData A flat buffer containing the packet contents.
+ * @param size_p The size of the packet data.
+ * @param data Additional auxiliary data associated with the packet.
+ * @param size_d The size of the auxiliary data.
+ * @param action The action that the pre-filter callback took for this packet.
+ * @internal SL_ZIGBEE_IPC_ARGS
+ * {# packetData | length: size_p | max: MAX_IPC_VEC_ARG_CAPACITY #}
+ * {# data | length: size_d | max: MAX_IPC_VEC_ARG_CAPACITY #}
+ */
+void sl_zigbee_post_incoming_packet_filter_with_lqi_and_rssi_cb(sl_zigbee_zigbee_packet_type_t packetType,
+                                                                sl_zigbee_packet_link_quality_t *linkQuality,
+                                                                uint8_t* packetData,
+                                                                uint8_t size_p,
+                                                                uint8_t *data,
+                                                                uint8_t size_d,
+                                                                sl_zigbee_packet_action_t action);
 /** @brief The stack is preparing to send a protocol layer packet
  * and a ::sl_zigbee_packet_action_t action has been decided.
  *

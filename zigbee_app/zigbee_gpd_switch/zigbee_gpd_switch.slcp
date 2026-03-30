@@ -1,5 +1,5 @@
 project_name: zigbee_gpd_switch
-label: Zigbee - GPD Switch
+label: Zigbee - SoC GPD Switch
 package: zigbee
 category: Zigbee Application
 quality: production

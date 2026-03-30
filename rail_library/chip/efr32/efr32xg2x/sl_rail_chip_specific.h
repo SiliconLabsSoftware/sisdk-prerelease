@@ -128,6 +128,13 @@ extern "C" {
 #define SL_RAIL_EFR32XG29_STATE_BUFFER_BYTES 616U  // DO NOT HAND-EDIT THESE VALUES
 
 /**
+ * @def SL_RAIL_EFR32XG2B_STATE_BUFFER_BYTES
+ * @brief The EFR32xG2B series size needed for
+ *   \ref sl_rail_state_buffer_entry_t::buffer_bytes.
+ */
+#define SL_RAIL_EFR32XG2B_STATE_BUFFER_BYTES 616U  // DO NOT HAND-EDIT THESE VALUES
+
+/**
  * @def SL_RAIL_EFR32XG2D_STATE_BUFFER_BYTES
  * @brief The EFR32xG2D series size needed for
  *   \ref sl_rail_state_buffer_entry_t::buffer_bytes.
@@ -159,6 +166,8 @@ extern "C" {
 #define SL_RAIL_STATE_BUFFER_BYTES SL_RAIL_EFR32XG28_STATE_BUFFER_BYTES
 #elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)
 #define SL_RAIL_STATE_BUFFER_BYTES SL_RAIL_EFR32XG29_STATE_BUFFER_BYTES
+#elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 11)
+#define SL_RAIL_STATE_BUFFER_BYTES SL_RAIL_EFR32XG2B_STATE_BUFFER_BYTES
 #elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 13)
 #define SL_RAIL_STATE_BUFFER_BYTES SL_RAIL_EFR32XG2D_STATE_BUFFER_BYTES
 #else
@@ -386,6 +395,7 @@ sl_rail_timer_tick_t sl_rail_us_to_timer_ticks(sl_rail_time_t microseconds);
 #elif ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7)   \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)   \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11)  \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8))
 #define SL_RAIL_RF_PATHS_2P4_GHZ 1
 #else
@@ -528,7 +538,8 @@ struct sl_rail_channel_config_entry_attr {
 #define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN  (0U)
 #elif ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7)   \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9))
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)   \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11))
 /**
  * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP mode.
@@ -749,7 +760,8 @@ struct sl_rail_channel_config_entry_attr {
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 4) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 6) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9))
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11))
 #define SL_RAIL_NUM_PA (2U)
 #elif ((_SILICON_LABS_32B_SERIES_2_CONFIG == 3) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
@@ -859,7 +871,8 @@ struct sl_rail_channel_config_entry_attr {
  */
 #if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9))
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11))
 #define SLI_RAIL_TIMER_SYNC_RTCC_CHANNEL_DEFAULT (1U)
 #else
 #define SLI_RAIL_TIMER_SYNC_RTCC_CHANNEL_DEFAULT (0U)

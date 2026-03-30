@@ -163,10 +163,10 @@ SL_ENUM(sl_hal_iadc_positive_port_input_t) {
   SL_HAL_IADC_POS_PORT_INPUT_DAC_0     = _IADC_SCAN_PORTPOS_DAC0,        ///< Direct connection to DAC_0 input pin.
 #endif
 #if defined(_IADC_SCAN_PORTPOS_PADANA0)
-  SL_HAL_IADC_POS_PORT_INPUT_PAD_ANA_0 = _IADC_SCAN_PORTPOS_PADANA0,    ///< Direct connection to Pad_ana_0 input pin.
+  SL_HAL_IADC_POS_PORT_INPUT_PAD_ANA_0 = _IADC_SCAN_PORTPOS_PADANA0,    ///< Direct connection to Pad_ana_0 input pin if pin_pos is 0, and Pad_ana_1 input pin if pin_pos is 1.
 #endif
 #if defined(_IADC_SCAN_PORTPOS_PADANA2)
-  SL_HAL_IADC_POS_PORT_INPUT_PAD_ANA_2 = _IADC_SCAN_PORTPOS_PADANA2,    ///< Direct connection to Pad_ana_2 input pin.
+  SL_HAL_IADC_POS_PORT_INPUT_PAD_ANA_2 = _IADC_SCAN_PORTPOS_PADANA2,    ///< Direct connection to Pad_ana_2 input pin if pin_pos is 0, and Pad_ana_3 input pin if pin_pos is 1.
 #endif
 #if defined(_IADC_SCAN_PORTPOS_PADREFPOS)
   SL_HAL_IADC_POS_PORT_INPUT_REF       = _IADC_SCAN_PORTPOS_PADREFPOS,   ///< Positive reference pin 0.

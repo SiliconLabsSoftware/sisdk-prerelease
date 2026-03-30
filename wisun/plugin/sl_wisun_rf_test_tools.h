@@ -70,6 +70,8 @@
 #define RF_PRIORITY_PROTECTED 0
 #define RF_PRIORITY_BACKGROUND 255
 
+#define MAX_PACKET_LENGTH 2047
+
 // RAIL events enabled (matching sli_wisun_driver.c definition)
 #define MAC_TASK_RAIL_EVENTS (SL_RAIL_EVENT_RX_PACKET_RECEIVED          \
     | SL_RAIL_EVENT_RX_FRAME_ERROR             \
@@ -133,6 +135,8 @@ sl_status_t rf_test_phy_config_to_chan_config(sl_wisun_phy_config_t *phy_config,
                                               sl_rail_channel_config_entry_t *chan_config,
                                               uint8_t *phy_mode_id,
                                               uint8_t *reg_domain,
-                                              uint16_t *physical_channel_offset);
+                                              uint16_t *physical_channel_offset,
+                                              uint16_t *channel_start,
+                                              uint16_t *channel_end);
 
 #endif // SL_WISUN_RF_TEST_TOOLS_H

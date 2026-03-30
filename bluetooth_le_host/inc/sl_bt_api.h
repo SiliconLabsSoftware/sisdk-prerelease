@@ -1728,7 +1728,9 @@ sl_status_t sl_bt_system_set_lazy_soft_timer(uint32_t time,
  *
  * Commands and events in this class provide access to low-level Bluetooth link
  * layer functionality that is not available via higher-level APIs of the
- * Bluetooth host stack.
+ * Bluetooth host stack. This class is available when the
+ * bluetooth_feature_linklayer_interface component is included in the
+ * application.
  */
 
 /* Command and Response IDs */
@@ -1788,8 +1790,9 @@ typedef struct sl_bt_evt_linklayer_event_info_report_s sl_bt_evt_linklayer_event
  * Enable or disable link layer event info reporting. This command passes the
  * parameters directly to the vendor-specific HCI command
  * HCI_VS_Siliconlabs_Event_Info_Reporting_Enable. This command is only
- * available if the bluetooth_feature_event_info_reporting component is included
- * in the application. See the documentation of the HCI command for detailed
+ * available if the bluetooth_feature_linklayer_interface and
+ * bluetooth_feature_event_info_reporting components are included in the
+ * application. See the documentation of the HCI command for detailed
  * description of each parameter and the behavior of the command.
  *
  * Events that have been succesfully enabled will be reported with the @ref
@@ -2123,7 +2126,7 @@ typedef enum
  * schedule periodic address updates for enhancing the privacy. It is
  * recommended to use different schedules for different advertising sets.
  *
- * Disabling the privacy during active advertising or scanning is not allowed.
+ * Changing the privacy during active advertising or scanning is not allowed.
  *
  * By default, privacy feature is disabled.
  *
@@ -3321,10 +3324,12 @@ sl_status_t sl_bt_extended_advertiser_start_directed(uint8_t advertising_set,
 /* Command and Response IDs */
 #define sl_bt_cmd_periodic_advertiser_set_data_id                    0x00580020
 #define sl_bt_cmd_periodic_advertiser_set_long_data_id               0x01580020
+#define sl_bt_cmd_periodic_advertiser_refresh_data_id_id             0x04580020
 #define sl_bt_cmd_periodic_advertiser_start_id                       0x02580020
 #define sl_bt_cmd_periodic_advertiser_stop_id                        0x03580020
 #define sl_bt_rsp_periodic_advertiser_set_data_id                    0x00580020
 #define sl_bt_rsp_periodic_advertiser_set_long_data_id               0x01580020
+#define sl_bt_rsp_periodic_advertiser_refresh_data_id_id             0x04580020
 #define sl_bt_rsp_periodic_advertiser_start_id                       0x02580020
 #define sl_bt_rsp_periodic_advertiser_stop_id                        0x03580020
 
@@ -3336,11 +3341,15 @@ sl_status_t sl_bt_extended_advertiser_start_directed(uint8_t advertising_set,
  */
 
 /** Include the TX power in advertising packets. */
-#define SL_BT_PERIODIC_ADVERTISER_INCLUDE_TX_POWER                0x1       
+#define SL_BT_PERIODIC_ADVERTISER_INCLUDE_TX_POWER                     0x1       
 
 /** Automatically start the extended advertising on the advertising set. The
  * advertising will be started in non-connectable and non-scannable mode. */
-#define SL_BT_PERIODIC_ADVERTISER_AUTO_START_EXTENDED_ADVERTISING 0x2       
+#define SL_BT_PERIODIC_ADVERTISER_AUTO_START_EXTENDED_ADVERTISING      0x2       
+
+/** Include Advertising Data Information (ADI) field in periodic advertising
+ * PDUs. */
+#define SL_BT_PERIODIC_ADVERTISER_INCLUDE_ADVERTISING_DATA_INFORMATION 0x4       
 
 /** @} */ // end addtogroup sl_bt_periodic_advertiser_flags
 
@@ -3425,6 +3434,26 @@ sl_status_t sl_bt_periodic_advertiser_set_data(uint8_t advertising_set,
  *
  ******************************************************************************/
 sl_status_t sl_bt_periodic_advertiser_set_long_data(uint8_t advertising_set);
+
+/***************************************************************************//**
+ *
+ * Refresh the Advertising Data ID (DID) of periodic advertising data.
+ *
+ * The data that was previously set using @ref
+ * sl_bt_periodic_advertiser_set_data or @ref
+ * sl_bt_periodic_advertiser_set_long_data is unchanged and only the DID
+ * changes. The DID value is transmitted in the Advertising Data Information
+ * (ADI) field of the periodic advertising PDUs if the periodic advertiser is
+ * configured to include it. See @ref
+ * SL_BT_PERIODIC_ADVERTISER_INCLUDE_ADVERTISING_DATA_INFORMATION and the @p
+ * flags parameter in command @ref sl_bt_periodic_advertiser_start.
+ *
+ * @param[in] advertising_set Advertising set handle
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_periodic_advertiser_refresh_data_id(uint8_t advertising_set);
 
 /***************************************************************************//**
  *
@@ -4298,10 +4327,26 @@ sl_status_t sl_bt_scanner_stop(void);
  */
 typedef enum
 {
-  sl_bt_sync_report_none = 0x0, /**< (0x0) Data received in periodic advertising
-                                     trains is not reported to the application. */
-  sl_bt_sync_report_all  = 0x1  /**< (0x1) Data received in periodic advertising
-                                     trains is reported to the application. */
+  sl_bt_sync_report_none          = 0x0, /**< (0x0) Data received in periodic
+                                              advertising trains is not reported
+                                              to the application. */
+  sl_bt_sync_report_all           = 0x1, /**< (0x1) Data received in periodic
+                                              advertising trains is reported to
+                                              the application. */
+  sl_bt_sync_report_non_duplicate = 0x2  /**< (0x2) Data received in periodic
+                                              advertising trains is reported to
+                                              the application, but only if the
+                                              advertisement is not a duplicate
+                                              of an already received periodic
+                                              advertisement. A periodic
+                                              advertisement is considered a
+                                              duplicate if it included
+                                              Advertising Data Information (ADI)
+                                              with the same Advertising Set ID
+                                              (SID) and Advertising Data ID
+                                              (DID) as a previously received
+                                              periodic advertisement on the same
+                                              periodic advertising train. */
 } sl_bt_sync_reporting_mode_t;
 
 /**
@@ -4360,6 +4405,13 @@ typedef struct sl_bt_evt_sync_closed_s sl_bt_evt_sync_closed_t;
  *       advertising trains is not reported to the application.
  *     - <b>sl_bt_sync_report_all (0x1):</b> Data received in periodic
  *       advertising trains is reported to the application.
+ *     - <b>sl_bt_sync_report_non_duplicate (0x2):</b> Data received in periodic
+ *       advertising trains is reported to the application, but only if the
+ *       advertisement is not a duplicate of an already received periodic
+ *       advertisement. A periodic advertisement is considered a duplicate if it
+ *       included Advertising Data Information (ADI) with the same Advertising
+ *       Set ID (SID) and Advertising Data ID (DID) as a previously received
+ *       periodic advertisement on the same periodic advertising train.
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
@@ -4486,6 +4538,13 @@ sl_status_t sl_bt_sync_close(uint16_t sync);
  *       advertising trains is not reported to the application.
  *     - <b>sl_bt_sync_report_all (0x1):</b> Data received in periodic
  *       advertising trains is reported to the application.
+ *     - <b>sl_bt_sync_report_non_duplicate (0x2):</b> Data received in periodic
+ *       advertising trains is reported to the application, but only if the
+ *       advertisement is not a duplicate of an already received periodic
+ *       advertisement. A periodic advertisement is considered a duplicate if it
+ *       included Advertising Data Information (ADI) with the same Advertising
+ *       Set ID (SID) and Advertising Data ID (DID) as a previously received
+ *       periodic advertisement on the same periodic advertising train.
  *
  *   Default: @ref sl_bt_sync_report_all (Data received in periodic advertising
  *   trains is reported to the application)
@@ -4769,6 +4828,13 @@ typedef enum
  *       advertising trains is not reported to the application.
  *     - <b>sl_bt_sync_report_all (0x1):</b> Data received in periodic
  *       advertising trains is reported to the application.
+ *     - <b>sl_bt_sync_report_non_duplicate (0x2):</b> Data received in periodic
+ *       advertising trains is reported to the application, but only if the
+ *       advertisement is not a duplicate of an already received periodic
+ *       advertisement. A periodic advertisement is considered a duplicate if it
+ *       included Advertising Data Information (ADI) with the same Advertising
+ *       Set ID (SID) and Advertising Data ID (DID) as a previously received
+ *       periodic advertisement on the same periodic advertising train.
  *
  *   Default: @ref sl_bt_sync_report_all (Data received in periodic advertising
  *   trains is reported to the application)
@@ -4855,6 +4921,13 @@ sl_status_t sl_bt_past_receiver_set_default_sync_receive_parameters(uint8_t mode
  *       advertising trains is not reported to the application.
  *     - <b>sl_bt_sync_report_all (0x1):</b> Data received in periodic
  *       advertising trains is reported to the application.
+ *     - <b>sl_bt_sync_report_non_duplicate (0x2):</b> Data received in periodic
+ *       advertising trains is reported to the application, but only if the
+ *       advertisement is not a duplicate of an already received periodic
+ *       advertisement. A periodic advertisement is considered a duplicate if it
+ *       included Advertising Data Information (ADI) with the same Advertising
+ *       Set ID (SID) and Advertising Data ID (DID) as a previously received
+ *       periodic advertisement on the same periodic advertising train.
  *
  *   Default: @ref sl_bt_sync_report_all (Data received in periodic advertising
  *   trains is reported to the application)
@@ -4948,6 +5021,13 @@ sl_status_t sl_bt_past_receiver_set_sync_receive_parameters(uint8_t connection,
  *       advertising trains is not reported to the application.
  *     - <b>sl_bt_sync_report_all (0x1):</b> Data received in periodic
  *       advertising trains is reported to the application.
+ *     - <b>sl_bt_sync_report_non_duplicate (0x2):</b> Data received in periodic
+ *       advertising trains is reported to the application, but only if the
+ *       advertisement is not a duplicate of an already received periodic
+ *       advertisement. A periodic advertisement is considered a duplicate if it
+ *       included Advertising Data Information (ADI) with the same Advertising
+ *       Set ID (SID) and Advertising Data ID (DID) as a previously received
+ *       periodic advertisement on the same periodic advertising train.
  *
  *   Default: @ref sl_bt_sync_report_all (Data received in periodic advertising
  *   trains is reported to the application)
@@ -5027,6 +5107,13 @@ sl_status_t sl_bt_past_receiver_set_default_sync_receive_over_sync_parameters(ui
  *       advertising trains is not reported to the application.
  *     - <b>sl_bt_sync_report_all (0x1):</b> Data received in periodic
  *       advertising trains is reported to the application.
+ *     - <b>sl_bt_sync_report_non_duplicate (0x2):</b> Data received in periodic
+ *       advertising trains is reported to the application, but only if the
+ *       advertisement is not a duplicate of an already received periodic
+ *       advertisement. A periodic advertisement is considered a duplicate if it
+ *       included Advertising Data Information (ADI) with the same Advertising
+ *       Set ID (SID) and Advertising Data ID (DID) as a previously received
+ *       periodic advertisement on the same periodic advertising train.
  *
  *   Default: @ref sl_bt_sync_report_all (Data received in periodic advertising
  *   trains is reported to the application)
@@ -5779,6 +5866,82 @@ sl_status_t sl_bt_pawr_sync_set_response_data(uint16_t sync,
 #define sl_bt_rsp_pawr_advertiser_stop_id                            0x03550020
 
 /**
+ * @brief Defines the data completeness status types of a response data reported
+ * by the PAwR advertiser.
+ */
+typedef enum
+{
+  sl_bt_pawr_advertiser_response_data_status_complete          = 0x0,  /**<
+                                                                            (0x0)
+                                                                            All
+                                                                            data
+                                                                            of
+                                                                            the
+                                                                            response
+                                                                            has
+                                                                            been
+                                                                            reported. */
+  sl_bt_pawr_advertiser_response_data_status_incomplete_more   = 0x1,  /**<
+                                                                            (0x1)
+                                                                            Data
+                                                                            of
+                                                                            the
+                                                                            response
+                                                                            is
+                                                                            incomplete
+                                                                            in
+                                                                            this
+                                                                            event,
+                                                                            and
+                                                                            more
+                                                                            data
+                                                                            will
+                                                                            come
+                                                                            in
+                                                                            new
+                                                                            events. */
+  sl_bt_pawr_advertiser_response_data_status_incomplete_nomore = 0x2,  /**<
+                                                                            (0x2)
+                                                                            Data
+                                                                            of
+                                                                            the
+                                                                            response
+                                                                            is
+                                                                            incomplete
+                                                                            in
+                                                                            this
+                                                                            event,
+                                                                            but
+                                                                            no
+                                                                            more
+                                                                            data
+                                                                            will
+                                                                            come,
+                                                                            i.e.,
+                                                                            the
+                                                                            data
+                                                                            of
+                                                                            the
+                                                                            response
+                                                                            is
+                                                                            truncated. */
+  sl_bt_pawr_advertiser_response_data_status_not_received      = 0xff  /**<
+                                                                            (0xff)
+                                                                            Failed
+                                                                            to
+                                                                            listen
+                                                                            to
+                                                                            or
+                                                                            receive
+                                                                            subevent
+                                                                            response
+                                                                            in
+                                                                            this
+                                                                            response
+                                                                            slot. */
+} sl_bt_pawr_advertiser_response_data_status_t;
+
+/**
  * @addtogroup sl_bt_evt_pawr_advertiser_subevent_data_request sl_bt_evt_pawr_advertiser_subevent_data_request
  * @{
  * @brief This event is triggered to indicate that the Bluetooth stack is ready
@@ -5882,14 +6045,25 @@ PACKSTRUCT( struct sl_bt_evt_pawr_advertiser_response_report_s
                                      - <b>0xFF:</b> No CTE */
   uint8_t    response_slot;   /**< The response slot that this report
                                    corresponds to */
-  uint8_t    data_status;     /**< Data completeness:
-                                     - <b>0:</b> Complete
-                                     - <b>1:</b> Incomplete, more data to come
-                                       in new events
-                                     - <b>2:</b> Incomplete, data truncated, no
-                                       more to come
-                                     - <b>255:</b> Failed to receive subevent
-                                       response in this response slot */
+  uint8_t    data_status;     /**< Enum @ref
+                                   sl_bt_pawr_advertiser_response_data_status_t.
+                                   The data completeness status. Values:
+                                     - <b>sl_bt_pawr_advertiser_response_data_status_complete
+                                       (0x0):</b> All data of the response has
+                                       been reported.
+                                     - <b>sl_bt_pawr_advertiser_response_data_status_incomplete_more
+                                       (0x1):</b> Data of the response is
+                                       incomplete in this event, and more data
+                                       will come in new events.
+                                     - <b>sl_bt_pawr_advertiser_response_data_status_incomplete_nomore
+                                       (0x2):</b> Data of the response is
+                                       incomplete in this event, but no more
+                                       data will come, i.e., the data of the
+                                       response is truncated.
+                                     - <b>sl_bt_pawr_advertiser_response_data_status_not_received
+                                       (0xff):</b> Failed to listen to or
+                                       receive subevent response in this
+                                       response slot. */
   uint8_t    counter;         /**< The sequence number of this @ref
                                    sl_bt_evt_pawr_advertiser_response_report
                                    event as a monotonically increasing counter
@@ -6037,6 +6211,9 @@ sl_status_t sl_bt_pawr_advertiser_start(uint8_t advertising_set,
  *   this command:
  *     - <b>@ref SL_BT_PERIODIC_ADVERTISER_INCLUDE_TX_POWER (0x1):</b> Include
  *       the TX power in advertising packets.
+ *     - <b>@ref SL_BT_PERIODIC_ADVERTISER_INCLUDE_ADVERTISING_DATA_INFORMATION
+ *       (0x4):</b> Include Advertising Data Information (ADI) field in periodic
+ *       advertising PDUs.
  * @param[in] num_subevents The new value for the number of subevents.
  *     - <b>Range:</b> 0x01 to 0x80
  * @param[in] subevent_interval @parblock
@@ -15863,6 +16040,13 @@ sl_status_t sl_bt_cte_receiver_set_sync_cte_type(uint8_t sync_cte_type);
  *       advertising trains is not reported to the application.
  *     - <b>sl_bt_sync_report_all (0x1):</b> Data received in periodic
  *       advertising trains is reported to the application.
+ *     - <b>sl_bt_sync_report_non_duplicate (0x2):</b> Data received in periodic
+ *       advertising trains is reported to the application, but only if the
+ *       advertisement is not a duplicate of an already received periodic
+ *       advertisement. A periodic advertisement is considered a duplicate if it
+ *       included Advertising Data Information (ADI) with the same Advertising
+ *       Set ID (SID) and Advertising Data ID (DID) as a previously received
+ *       periodic advertisement on the same periodic advertising train.
  *
  *   Default: @ref sl_bt_sync_report_all (Data received in periodic advertising
  *   trains is reported to the application)
@@ -15964,6 +16148,13 @@ sl_status_t sl_bt_cte_receiver_set_default_sync_receive_parameters(uint8_t mode,
  *       advertising trains is not reported to the application.
  *     - <b>sl_bt_sync_report_all (0x1):</b> Data received in periodic
  *       advertising trains is reported to the application.
+ *     - <b>sl_bt_sync_report_non_duplicate (0x2):</b> Data received in periodic
+ *       advertising trains is reported to the application, but only if the
+ *       advertisement is not a duplicate of an already received periodic
+ *       advertisement. A periodic advertisement is considered a duplicate if it
+ *       included Advertising Data Information (ADI) with the same Advertising
+ *       Set ID (SID) and Advertising Data ID (DID) as a previously received
+ *       periodic advertisement on the same periodic advertising train.
  *
  *   Default: @ref sl_bt_sync_report_all (Data received in periodic advertising
  *   trains is reported to the application)
@@ -16185,7 +16376,7 @@ sl_status_t sl_bt_cte_receiver_disable_silabs_cte(void);
 /**
  * @addtogroup sl_bt_evt_connection_analyzer_report sl_bt_evt_connection_analyzer_report
  * @{
- * @brief Triggered when packets transmitted on a connection are captured.
+ * @brief Triggered at every connection interval
  */
 
 /** @brief Identifier of the report event */
@@ -16198,11 +16389,17 @@ PACKSTRUCT( struct sl_bt_evt_connection_analyzer_report_s
 {
   uint8_t analyzer;        /**< The handle of the connection analyzer */
   int8_t  central_rssi;    /**< RSSI measurement of the packet transmitted by
-                                the Central device. Units: dBm.
-                                  - <b>Range:</b> -127 to +20 */
+                                central in units dBm, or 127 if the packet was
+                                not observed.
+                                  - <b>Range:</b> -127 to +20
+
+                                  - Value 127: RSSI information unavailable */
   int8_t  peripheral_rssi; /**< RSSI measurement of the packet transmitted by
-                                the Peripheral device. Units: dBm.
-                                  - <b>Range:</b> -127 to +20 */
+                                peripheral in units dBm, or 127 if the packet
+                                was not observed.
+                                  - <b>Range:</b> -127 to +20
+
+                                  - Value 127: RSSI information unavailable */
 });
 
 typedef struct sl_bt_evt_connection_analyzer_report_s sl_bt_evt_connection_analyzer_report_t;
@@ -16238,10 +16435,9 @@ typedef struct sl_bt_evt_connection_analyzer_completed_s sl_bt_evt_connection_an
  * measurements. The parameters in this command provide necessary information to
  * identify the connection and schedule operations to follow its transmissions.
  *
- * When this device is in central role, the analyzer generates a report only
- * after the peripheral responds to the central in a connection event. If the
- * peripheral does not respond, the analyzer does not generate a report for that
- * connection event.
+ * The analyzer generates a report at every connection interval. When a central
+ * or peripheral packet could not be observed, the RSSI for the role is reported
+ * as unavailable (127).
  *
  * If the other device uses Silabs' Bluetooth stack, the information of the
  * connection could be retrieved with command @ref
@@ -16301,8 +16497,8 @@ typedef struct sl_bt_evt_connection_analyzer_completed_s sl_bt_evt_connection_an
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  * @b Events
- *   - @ref sl_bt_evt_connection_analyzer_report - Triggered when a packet
- *     transmitted from the given device is captured.
+ *   - @ref sl_bt_evt_connection_analyzer_report - Triggered at every connection
+ *     interval.
  *   - @ref sl_bt_evt_connection_analyzer_completed - Triggered when analyzing a
  *     connection is completed in the Link Layer for some reason.
  *

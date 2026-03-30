@@ -281,6 +281,9 @@ static app_connection_state_t app_connection_state;
 static uint32_t app_connection_tick_count;
 
 static bool app_direct_connect_state = false;
+static bool app_direct_connect_auto_mode = false;  // When true, auto-advertise DC ID and auto-accept link
+#define APP_DIRECT_CONNECT_AUTO_DC_ID_DEFAULT  "DC_ID_DEFAULT"  // Default DC ID when not specified
+static sl_wisun_dc_id_t app_direct_connect_auto_dc_id = { .id = APP_DIRECT_CONNECT_AUTO_DC_ID_DEFAULT };
 static uint32_t app_direct_connect_pmk_key_id = MBEDTLS_SVC_KEY_ID_INIT;
 static char crash_buff[300] = { 0 };
 
@@ -808,10 +811,20 @@ static void app_handle_pan_defect_ind(sl_wisun_evt_t *evt)
 static void app_handle_direct_connect_link_available_ind(sl_wisun_evt_t *evt)
 {
   char ipv6_string[40];
+  sl_status_t status;
 
   ip6tos(&evt->evt.direct_connect_link_available.link_local_ipv6, ipv6_string);
 
   printf("[Direct Connection request from %s]\r\n", ipv6_string);
+
+  if (app_direct_connect_auto_mode) {
+    status = sl_wisun_accept_direct_connect_link(&evt->evt.direct_connect_link_available.link_local_ipv6);
+    if (status == SL_STATUS_OK) {
+      printf("[Accepted connection request from %s]\r\n", ipv6_string);
+    } else {
+      printf("[Failed to accept connection from %s: %"PRIu32"]\r\n", ipv6_string, status);
+    }
+  }
 }
 
 static void app_handle_direct_connect_link_status_ind(sl_wisun_evt_t *evt)
@@ -847,9 +860,23 @@ static void app_handle_direct_connect_id_received_ind(sl_wisun_evt_t *evt)
 static void app_handle_direct_connect_id_solicit_ind(sl_wisun_evt_t *evt)
 {
   char ipv6_string[40];
+  sl_status_t status;
 
   ip6tos(&evt->evt.direct_connect_id_solicit.link_local_ipv6, ipv6_string);
-  printf("[Direct_Connect identity request from client %s with DC_ID %s]\r\n", ipv6_string, (char *) evt->evt.direct_connect_id_solicit.dc_id.id);
+
+  printf("[Direct Connect identity request from client %s with DC_ID:%s]\r\n", ipv6_string, (char *) evt->evt.direct_connect_id_solicit.dc_id.id);
+
+  if (app_direct_connect_auto_mode) {
+    /* Respond if client looks for our DC ID */
+    if (strncmp((const char *) evt->evt.direct_connect_id_solicit.dc_id.id, (const char *) app_direct_connect_auto_dc_id.id, SL_WISUN_DC_ID_LEN) == 0) {
+      status = sl_wisun_advert_direct_connect_server_id(&evt->evt.direct_connect_id_solicit.link_local_ipv6, &app_direct_connect_auto_dc_id);
+      if (status == SL_STATUS_OK) {
+        printf("[Advertised DC_ID:%s to client %s]\r\n", (char *) app_direct_connect_auto_dc_id.id, ipv6_string);
+      } else {
+        printf("[Failed to advertise DC_ID:%s to client %s: %"PRIu32"]\r\n", (char *) app_direct_connect_auto_dc_id.id, ipv6_string, status);
+      }
+    }
+  }
 }
 
 static void app_handle_direct_connect_client_state_changed_ind(sl_wisun_evt_t *evt)
@@ -868,10 +895,21 @@ static void app_handle_direct_connect_client_state_changed_ind(sl_wisun_evt_t *e
     case SL_WISUN_DC_CLIENT_STATE_CONNECTION_FAILED:
       printf("[DC client connection establishment failed with server %s]\r\n", ipv6_string);
       break;
+    case SL_WISUN_DC_CLIENT_STATE_SCAN_COMPLETE:
+      printf("[DC client scan complete]\r\n");
+      break;
+    case SL_WISUN_DC_CLIENT_STATE_STOPPED:
+      printf("[DC client stopped]\r\n");
+      break;
     default:
       printf("[DC client state changed: unknown state %"PRIu32"]\r\n", evt->evt.direct_connect_client_state_changed.state);
       break;
   }
+}
+
+static void app_handle_error_ind(sl_wisun_evt_t *evt)
+{
+  printf("[Error: %"PRIu32"]\r\n", evt->evt.error.status);
 }
 
 void sl_wisun_on_event(sl_wisun_evt_t *evt)
@@ -951,6 +989,9 @@ void sl_wisun_on_event(sl_wisun_evt_t *evt)
       break;
     case SL_WISUN_MSG_DIRECT_CONNECT_CLIENT_STATE_CHANGED_IND_ID:
       app_handle_direct_connect_client_state_changed_ind(evt);
+      break;
+    case SL_WISUN_MSG_ERROR_IND_ID:
+      app_handle_error_ind(evt);
       break;
     default:
       printf("[Unknown event: %d]\r\n", evt->header.id);
@@ -2722,6 +2763,11 @@ void app_rftest_start_tx(sl_cli_command_arg_t *arguments)
 
   app_wisun_cli_mutex_lock();
 
+  if (sl_cli_get_argument_count(arguments) > 6) {
+    printf("[Failed: invalid number of arguments]\r\n");
+    goto cleanup;
+  }
+
   channel = sl_cli_get_argument_uint32(arguments, 0);
   count = sl_cli_get_argument_uint32(arguments, 1);
   data_length = sl_cli_get_argument_uint32(arguments, 2);
@@ -2767,6 +2813,11 @@ void app_rftest_start_rx(sl_cli_command_arg_t *arguments)
   uint8_t channel_mask[SL_WISUN_CHANNEL_MASK_SIZE];
 
   app_wisun_cli_mutex_lock();
+
+  if (sl_cli_get_argument_count(arguments) > 3) {
+    printf("[Failed: invalid number of arguments]\r\n");
+    goto cleanup;
+  }
 
   channel = sl_cli_get_argument_uint32(arguments, 0);
   duration_ms = sl_cli_get_argument_uint32(arguments, 1);
@@ -2826,6 +2877,11 @@ void app_rftest_start_stream(sl_cli_command_arg_t *arguments)
   uint8_t channel_mask[SL_WISUN_CHANNEL_MASK_SIZE];
 
   app_wisun_cli_mutex_lock();
+
+  if (sl_cli_get_argument_count(arguments) > 2) {
+    printf("[Failed: invalid number of arguments]\r\n");
+    goto cleanup;
+  }
 
   channel = sl_cli_get_argument_uint32(arguments, 0);
   if (sl_cli_get_argument_count(arguments) > 1) {
@@ -2887,6 +2943,11 @@ void app_rftest_start_tone(sl_cli_command_arg_t *arguments)
   uint8_t channel_mask[SL_WISUN_CHANNEL_MASK_SIZE];
 
   app_wisun_cli_mutex_lock();
+
+  if (sl_cli_get_argument_count(arguments) > 2) {
+    printf("[Failed: invalid number of arguments]\r\n");
+    goto cleanup;
+  }
 
   channel = sl_cli_get_argument_uint32(arguments, 0);
   if (sl_cli_get_argument_count(arguments) > 1) {
@@ -3292,11 +3353,28 @@ error_handler:
 void app_set_direct_connect_state(sl_cli_command_arg_t *arguments)
 {
   sl_status_t status;
-  bool is_enabled;
+  bool is_enabled = false;
+  bool auto_mode = false;
+  const char *dc_id = NULL;
 
   app_wisun_cli_mutex_lock();
 
   is_enabled = (bool)sl_cli_get_argument_uint8(arguments, 0);
+  if (sl_cli_get_argument_count(arguments) >= 2) {
+    auto_mode = (bool)sl_cli_get_argument_uint8(arguments, 1);
+  }
+  if (sl_cli_get_argument_count(arguments) >= 3) {
+    dc_id = sl_cli_get_argument_string(arguments, 2);
+  }
+
+  if (is_enabled && auto_mode) {
+    memset(&app_direct_connect_auto_dc_id, 0, sizeof(app_direct_connect_auto_dc_id));
+    if (dc_id) {
+      strncpy((char *)app_direct_connect_auto_dc_id.id, dc_id, SL_WISUN_DC_ID_LEN - 1);
+    } else {
+      strncpy((char *)app_direct_connect_auto_dc_id.id, APP_DIRECT_CONNECT_AUTO_DC_ID_DEFAULT, SL_WISUN_DC_ID_LEN - 1);
+    }
+  }
 
   if (is_enabled && !app_direct_connect_state) {
     status = app_import_direct_connect_pmk();
@@ -3309,9 +3387,13 @@ void app_set_direct_connect_state(sl_cli_command_arg_t *arguments)
   if (status != SL_STATUS_OK) {
     printf("[Failed: sl_wisun_set_direct_connect_state: %"PRIu32"]\r\n", status);
   } else {
-    printf("[Direct Connect %s]\r\n", is_enabled ? "enabled" : "disabled");
+    printf("[Direct Connect %s, mode %s, DC ID %s]\r\n",
+           is_enabled ? "enabled" : "disabled",
+           auto_mode && is_enabled ? "auto (advertise/accept)" : "manual",
+           auto_mode && is_enabled ? (const char *)app_direct_connect_auto_dc_id.id : "not used");
+    app_direct_connect_state = is_enabled;
+    app_direct_connect_auto_mode = is_enabled && auto_mode;
   }
-  app_direct_connect_state = is_enabled;
 
 cleanup:
   app_wisun_cli_mutex_unlock();
@@ -3347,8 +3429,9 @@ void app_advert_direct_connect_server_id(sl_cli_command_arg_t *arguments)
 {
   uint32_t ret;
   sl_status_t status;
-  sl_wisun_dc_id_t dc_id;
   in6_addr_t client_address;
+
+  sl_wisun_dc_id_t dc_id = {0};
 
   app_wisun_cli_mutex_lock();
 
@@ -3358,7 +3441,7 @@ void app_advert_direct_connect_server_id(sl_cli_command_arg_t *arguments)
       printf("[Failed: invalid client address: %s]\r\n", sl_cli_get_argument_string(arguments, 0));
       goto cleanup;
     }
-    memcpy(&dc_id.id, sl_cli_get_argument_string(arguments, 1), SL_WISUN_DC_ID_LEN);
+    strncpy((char *)dc_id.id, sl_cli_get_argument_string(arguments, 1), SL_WISUN_DC_ID_LEN - 1);
   } else {
     printf("[Failed: missing parameters]\r\n");
     goto cleanup;
@@ -3835,15 +3918,13 @@ cleanup:
 void app_wisun_direct_connect_scan(sl_cli_command_arg_t *arguments)
 {
   sl_status_t status;
-  sl_wisun_dc_id_t dc_id;
   uint8_t max_solicits_count = 0;
+  sl_wisun_dc_id_t dc_id = {0};
 
   app_wisun_cli_mutex_lock();
 
-  memset(&dc_id, 0, sizeof(dc_id));
-
   if (sl_cli_get_argument_count(arguments) == 2) {
-    memcpy(&dc_id.id, sl_cli_get_argument_string(arguments, 0), SL_WISUN_DC_ID_LEN);
+    strncpy((char *)dc_id.id, sl_cli_get_argument_string(arguments, 0), SL_WISUN_DC_ID_LEN - 1);
     max_solicits_count = sl_cli_get_argument_uint8(arguments, 1);
   } else {
     printf("[Failed: missing parameters]\r\n");

@@ -313,6 +313,30 @@
 #define OPENTHREAD_CONFIG_TMF_NETDIAG_CLIENT_ENABLE   1
 #endif
 // </e>
+// <s.32 OPENTHREAD_CONFIG_NET_DIAG_VENDOR_NAME> Vendor Name string
+// <i> Vendor Name string
+// <i> Default: "Silicon Labs"
+#ifndef OPENTHREAD_CONFIG_NET_DIAG_VENDOR_NAME
+#define OPENTHREAD_CONFIG_NET_DIAG_VENDOR_NAME "Silicon Labs"
+#endif
+// <s.32 OPENTHREAD_CONFIG_NET_DIAG_VENDOR_MODEL> Vendor Model string
+// <i> Vendor Model string
+// <i> Default: "OpenThread"
+#ifndef OPENTHREAD_CONFIG_NET_DIAG_VENDOR_MODEL
+#define OPENTHREAD_CONFIG_NET_DIAG_VENDOR_MODEL "OpenThread"
+#endif
+// <s.16 OPENTHREAD_CONFIG_NET_DIAG_VENDOR_SW_VERSION> Vendor SW Version string
+// <i> Vendor SW Version string
+// <i> Default: "3.1.0.0"
+#ifndef OPENTHREAD_CONFIG_NET_DIAG_VENDOR_SW_VERSION
+#define OPENTHREAD_CONFIG_NET_DIAG_VENDOR_SW_VERSION "3.1.0.0"
+#endif
+// <s.96 OPENTHREAD_CONFIG_NET_DIAG_VENDOR_APP_URL> Vendor App URL string
+// <i> Vendor App URL string
+// <i> Default: "www.silabs.com"
+#ifndef OPENTHREAD_CONFIG_NET_DIAG_VENDOR_APP_URL
+#define OPENTHREAD_CONFIG_NET_DIAG_VENDOR_APP_URL "www.silabs.com"
+#endif
 // <e>  Run-time configuration of Vendor Info
 #ifndef OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE
 #define OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE   1

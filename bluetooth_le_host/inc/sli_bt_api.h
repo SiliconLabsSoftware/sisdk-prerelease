@@ -188,6 +188,7 @@ enum sli_bt_command_id
     sli_bt_extended_advertiser_start_directed_command_id = 0x05,
     sli_bt_periodic_advertiser_set_data_command_id = 0x00,
     sli_bt_periodic_advertiser_set_long_data_command_id = 0x01,
+    sli_bt_periodic_advertiser_refresh_data_id_command_id = 0x04,
     sli_bt_periodic_advertiser_start_command_id = 0x02,
     sli_bt_periodic_advertiser_stop_command_id = 0x03,
     sli_bt_scanner_set_parameters_command_id = 0x06,
@@ -446,6 +447,7 @@ enum sli_bt_response_id
     sli_bt_extended_advertiser_start_directed_response_id = 0x05,
     sli_bt_periodic_advertiser_set_data_response_id = 0x00,
     sli_bt_periodic_advertiser_set_long_data_response_id = 0x01,
+    sli_bt_periodic_advertiser_refresh_data_id_response_id = 0x04,
     sli_bt_periodic_advertiser_start_response_id = 0x02,
     sli_bt_periodic_advertiser_stop_response_id = 0x03,
     sli_bt_scanner_set_parameters_response_id = 0x06,
@@ -1055,6 +1057,13 @@ PACKSTRUCT( struct sl_bt_cmd_periodic_advertiser_set_long_data_s
 });
 
 typedef struct sl_bt_cmd_periodic_advertiser_set_long_data_s sl_bt_cmd_periodic_advertiser_set_long_data_t;
+
+PACKSTRUCT( struct sl_bt_cmd_periodic_advertiser_refresh_data_id_s
+{
+    uint8_t advertising_set;
+});
+
+typedef struct sl_bt_cmd_periodic_advertiser_refresh_data_id_s sl_bt_cmd_periodic_advertiser_refresh_data_id_t;
 
 PACKSTRUCT( struct sl_bt_cmd_periodic_advertiser_start_s
 {
@@ -3104,6 +3113,13 @@ PACKSTRUCT( struct sl_bt_rsp_periodic_advertiser_set_long_data_s
 
 typedef struct sl_bt_rsp_periodic_advertiser_set_long_data_s sl_bt_rsp_periodic_advertiser_set_long_data_t;
 
+PACKSTRUCT( struct sl_bt_rsp_periodic_advertiser_refresh_data_id_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_bt_rsp_periodic_advertiser_refresh_data_id_s sl_bt_rsp_periodic_advertiser_refresh_data_id_t;
+
 PACKSTRUCT( struct sl_bt_rsp_periodic_advertiser_start_s
 {
     uint16_t result;
@@ -4653,6 +4669,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_extended_advertiser_start_directed_t               cmd_extended_advertiser_start_directed;
     sl_bt_cmd_periodic_advertiser_set_data_t                     cmd_periodic_advertiser_set_data;
     sl_bt_cmd_periodic_advertiser_set_long_data_t                cmd_periodic_advertiser_set_long_data;
+    sl_bt_cmd_periodic_advertiser_refresh_data_id_t              cmd_periodic_advertiser_refresh_data_id;
     sl_bt_cmd_periodic_advertiser_start_t                        cmd_periodic_advertiser_start;
     sl_bt_cmd_periodic_advertiser_stop_t                         cmd_periodic_advertiser_stop;
     sl_bt_cmd_scanner_set_parameters_t                           cmd_scanner_set_parameters;
@@ -4890,6 +4907,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_extended_advertiser_start_directed_t               rsp_extended_advertiser_start_directed;
     sl_bt_rsp_periodic_advertiser_set_data_t                     rsp_periodic_advertiser_set_data;
     sl_bt_rsp_periodic_advertiser_set_long_data_t                rsp_periodic_advertiser_set_long_data;
+    sl_bt_rsp_periodic_advertiser_refresh_data_id_t              rsp_periodic_advertiser_refresh_data_id;
     sl_bt_rsp_periodic_advertiser_start_t                        rsp_periodic_advertiser_start;
     sl_bt_rsp_periodic_advertiser_stop_t                         rsp_periodic_advertiser_stop;
     sl_bt_rsp_scanner_set_parameters_t                           rsp_scanner_set_parameters;

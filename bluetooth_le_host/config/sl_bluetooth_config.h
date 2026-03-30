@@ -161,8 +161,6 @@
 #include "sl_bt_stack_config.h"
 #include "sl_bgapi_config.h" // For SL_BGAPI_MAX_PAYLOAD_SIZE
 
-// NOTE: Struct sl_btctrl_ll_priorities is deprecated in Simplicity SDK Suite v2025.6.0 and marked for removal in a future release.
-// The Link Layer scheduler priority configuration is initialized via the Bluetooth Low Energy Controller component.
 #define SL_BT_CONFIG_DEFAULT                                 \
   {                                                          \
     .config_flags = SL_BT_CONFIG_FLAGS,                      \

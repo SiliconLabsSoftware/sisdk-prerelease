@@ -80,6 +80,13 @@
 // <i> Default: 128
 #define SL_LOG_NUMBER_OF_EVENTS 128 // Number of events
 
+// <q SL_LOG_DEBUG_ASSERT_ENABLE> Enable Debug Assertions
+// <i> When enabled, SL_DEBUG_ASSERT will check conditions and trigger asserts on failure.
+// <i> When disabled, SL_DEBUG_ASSERT becomes a no-op to save code space in release builds.
+// <i>during development to catch errors early
+// <i> Default: 0 (disabled)
+#define SL_LOG_DEBUG_ASSERT_ENABLE 0
+
 #endif /* SL_LOG_COMMON_CONFIG_H */
 
 // <<< end of configuration section >>>

@@ -33,7 +33,8 @@ source:
 - path: common/uptime.cpp
 - path: crypto/aes_ccm.cpp
 - path: crypto/aes_ecb.cpp
-- path: crypto/crypto_platform.cpp
+- path: crypto/crypto_platform_mbedtls.cpp
+- path: crypto/crypto_platform_psa.cpp
 - path: crypto/storage.cpp
 - path: diags/factory_diags.cpp
   unless: ["ot_diags_stubs"]

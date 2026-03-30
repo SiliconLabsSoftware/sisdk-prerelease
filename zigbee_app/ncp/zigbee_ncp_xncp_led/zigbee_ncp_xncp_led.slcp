@@ -1,5 +1,5 @@
 project_name: zigbee_ncp_xncp_led
-label: Zigbee - NCP Xncp Led
+label: Zigbee - NCP xNCP LED
 package: zigbee
 category: Zigbee Application
 quality: production

@@ -924,6 +924,7 @@ void sli_bt_cli_extended_advertiser_start_directed(sl_cli_command_arg_t *argumen
     printf("rsp_extended_advertiser_start_directed 0x%lx ",status);
     printf("\n");
 }
+#ifdef SL_CATALOG_BLUETOOTH_FEATURE_PERIODIC_ADVERTISER_PRESENT
 void sli_bt_cli_periodic_advertiser_set_data(sl_cli_command_arg_t *arguments)
 {
 
@@ -956,6 +957,21 @@ void sli_bt_cli_periodic_advertiser_set_long_data(sl_cli_command_arg_t *argument
   );
 
     printf("rsp_periodic_advertiser_set_long_data 0x%lx ",status);
+    printf("\n");
+}
+void sli_bt_cli_periodic_advertiser_refresh_data_id(sl_cli_command_arg_t *arguments)
+{
+
+  sl_status_t status;
+  (void)(arguments);
+  // parameters
+  uint8_t advertising_set=sl_cli_get_argument_uint8(arguments,0);
+  //return values
+  status=sl_bt_periodic_advertiser_refresh_data_id(
+  advertising_set
+  );
+
+    printf("rsp_periodic_advertiser_refresh_data_id 0x%lx ",status);
     printf("\n");
 }
 void sli_bt_cli_periodic_advertiser_start(sl_cli_command_arg_t *arguments)
@@ -994,6 +1010,7 @@ void sli_bt_cli_periodic_advertiser_stop(sl_cli_command_arg_t *arguments)
     printf("rsp_periodic_advertiser_stop 0x%lx ",status);
     printf("\n");
 }
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_PERIODIC_ADVERTISER_PRESENT
 void sli_bt_cli_scanner_set_parameters(sl_cli_command_arg_t *arguments)
 {
 
@@ -1358,6 +1375,7 @@ void sli_bt_cli_pawr_sync_set_response_data(sl_cli_command_arg_t *arguments)
     printf("rsp_pawr_sync_set_response_data 0x%lx ",status);
     printf("\n");
 }
+#ifdef SL_CATALOG_BLUETOOTH_FEATURE_PAWR_ADVERTISER_PRESENT
 void sli_bt_cli_pawr_advertiser_start(sl_cli_command_arg_t *arguments)
 {
 
@@ -1491,6 +1509,7 @@ void sli_bt_cli_pawr_advertiser_stop(sl_cli_command_arg_t *arguments)
     printf("rsp_pawr_advertiser_stop 0x%lx ",status);
     printf("\n");
 }
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_PAWR_ADVERTISER_PRESENT
 void sli_bt_cli_connection_set_default_parameters(sl_cli_command_arg_t *arguments)
 {
 

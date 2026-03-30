@@ -132,7 +132,7 @@ static bool is_transfer_buffer_aligned(const sl_dma_channel_transfer_t *transfer
  * @return false otherwise.
  ******************************************************************************/
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static bool is_active_descriptor(LDMA_TypeDef *ldma,
+static bool is_active_descriptor(const LDMA_TypeDef *ldma,
                                  uint8_t ch,
                                  const sl_dma_channel_xfer_descriptor_t* desc);
 
@@ -923,7 +923,6 @@ sl_status_t sl_dma_channel_get_status(sl_dma_channel_handle_t *handle,
   EFM_ASSERT(status != NULL);
 
   LDMA_TypeDef *ldma_hw_instance = sl_device_peripheral_ldma_get_base_addr((sl_peripheral_t)handle->dma_peripheral);
-  sl_hal_ldma_descriptor_t *active_descriptor = NULL;
   status->bytes_completed = 0U;
 
   CORE_DECLARE_IRQ_STATE;
@@ -957,12 +956,10 @@ sl_status_t sl_dma_channel_get_status(sl_dma_channel_handle_t *handle,
     }
   }
   
-  active_descriptor = (sl_hal_ldma_descriptor_t*)entry;
-
-  uint32_t orig_items = active_descriptor->xfer.xfer_count + 1U;
+  uint32_t orig_items = ((sl_hal_ldma_descriptor_t*)entry)->xfer.xfer_count + 1U;
 
 #if defined(_LDMA_CH_XCTRL_XFERCNT_MASK) && !defined(_LDMA_CH_XCTRL_BUFFERABLE_MASK)
-  orig_items += ((sl_hal_ldma_descriptor_extend_t*)active_descriptor)->xfer_count_high;
+  orig_items += ((sl_hal_ldma_descriptor_extend_t*)entry)->xfer_count_high;
 #endif
 
   uint32_t remaining = sl_hal_ldma_transfer_remaining_count(ldma_hw_instance, handle->channel_number);
@@ -972,7 +969,7 @@ sl_status_t sl_dma_channel_get_status(sl_dma_channel_handle_t *handle,
   uint32_t completed_items = orig_items - remaining;
 
   uint32_t unit_bytes = 1U;
-  switch (active_descriptor->xfer.size) {
+  switch (((sl_hal_ldma_descriptor_t*)entry)->xfer.size) {
     case SL_HAL_LDMA_CTRL_SIZE_WORD: unit_bytes = 4U; break;
     case SL_HAL_LDMA_CTRL_SIZE_HALF: unit_bytes = 2U; break;
     case SL_HAL_LDMA_CTRL_SIZE_BYTE:
@@ -1239,7 +1236,9 @@ sl_status_t sl_dma_channel_submit_ping_pong_transfer_m2p(sl_dma_channel_handle_t
                                                          sl_dma_ctrl_size_t unit_size,
                                                          sl_dma_channel_xfer_descriptor_t *descriptors)
 {
-  sl_dma_channel_transfer_t ping_transfer, pong_transfer;
+  sl_dma_channel_transfer_t ping_transfer;
+  sl_dma_channel_transfer_t pong_transfer;
+
   ping_transfer = (sl_dma_channel_transfer_t) {
     .source = source,
     .destination = destination,
@@ -1284,7 +1283,9 @@ sl_status_t sl_dma_channel_submit_ping_pong_transfer_p2m(sl_dma_channel_handle_t
                                                          sl_dma_ctrl_size_t unit_size,
                                                          sl_dma_channel_xfer_descriptor_t *descriptors)
 {
-  sl_dma_channel_transfer_t ping_transfer, pong_transfer;
+  sl_dma_channel_transfer_t ping_transfer;
+  sl_dma_channel_transfer_t pong_transfer;
+
   ping_transfer = (sl_dma_channel_transfer_t) {
     .source = source,
     .destination = destination,
@@ -1330,7 +1331,10 @@ sl_status_t sl_dma_channel_submit_triple_buffered_transfer_m2p(sl_dma_channel_ha
                                                                sl_dma_ctrl_size_t unit_size,
                                                                sl_dma_channel_xfer_descriptor_t *descriptors)
 {
-  sl_dma_channel_transfer_t buf1_transfer, buf2_transfer, buf3_transfer;
+  sl_dma_channel_transfer_t buf1_transfer;
+  sl_dma_channel_transfer_t buf2_transfer;
+  sl_dma_channel_transfer_t buf3_transfer;
+
   buf1_transfer = (sl_dma_channel_transfer_t) {
     .source = source,
     .destination = destination,
@@ -1390,7 +1394,10 @@ sl_status_t sl_dma_channel_submit_triple_buffered_transfer_p2m(sl_dma_channel_ha
                                                                sl_dma_ctrl_size_t unit_size,
                                                                sl_dma_channel_xfer_descriptor_t *descriptors)
 {
-  sl_dma_channel_transfer_t buf1_transfer, buf2_transfer, buf3_transfer;
+  sl_dma_channel_transfer_t buf1_transfer;
+  sl_dma_channel_transfer_t buf2_transfer;
+  sl_dma_channel_transfer_t buf3_transfer;
+
   buf1_transfer = (sl_dma_channel_transfer_t) {
     .source = source,
     .destination = destination,
@@ -1578,7 +1585,7 @@ static sl_dma_channel_xfer_descriptor_t* find_descriptor_by_link(const sl_dma_ch
   // Cast away const: this function doesn't modify the input, but returns a non-const
   // pointer so the caller can modify the returned descriptor (e.g., via link_descriptors).
   // Cast through non-const intermediate type to explicitly handle const removal.
-  return (sl_dma_channel_xfer_descriptor_t*)(sl_hal_ldma_descriptor_t*)hw_desc_iter;
+  return (sl_dma_channel_xfer_descriptor_t*)hw_desc_iter;
 }
 
 static void link_descriptors(sl_dma_channel_xfer_descriptor_t* from,
@@ -1620,7 +1627,7 @@ static bool is_transfer_buffer_aligned(const sl_dma_channel_transfer_t *transfer
   return true;
 }
 
-static bool is_active_descriptor( LDMA_TypeDef *ldma,
+static bool is_active_descriptor( const LDMA_TypeDef *ldma,
                                   uint8_t ch,
                                   const sl_dma_channel_xfer_descriptor_t* desc)
 {
@@ -1632,7 +1639,7 @@ static bool is_active_descriptor( LDMA_TypeDef *ldma,
   }
 
   const uint32_t active_link_addr = (ldma->CH[ch].LINK & _LDMA_CH_LINK_LINKADDR_MASK);
-  const sl_hal_ldma_descriptor_t* hw = (sl_hal_ldma_descriptor_t*)desc;
+  const sl_hal_ldma_descriptor_t* hw = (const sl_hal_ldma_descriptor_t*)desc;
   const uint32_t desc_link_addr = (uint32_t)SL_HAL_LDMA_DESCRIPTOR_LINKABS_LINKADDR_TO_ADDR(hw->xfer.link_addr);
   if ( desc_link_addr == active_link_addr) {
     is_active = true;
@@ -1819,10 +1826,10 @@ static void cleanup_allocated_descriptors(const sl_dma_channel_handle_t *handle,
 }
 
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static sl_dma_channel_xfer_descriptor_t * process_descriptor(sl_dma_channel_handle_t * handle,
-                                                             sl_dma_channel_xfer_descriptor_t * descriptor,
-                                                             bool error,
-                                                             bool aborted)
+static sl_dma_channel_xfer_descriptor_t* process_descriptor(sl_dma_channel_handle_t * handle,
+                                                            sl_dma_channel_xfer_descriptor_t * descriptor,
+                                                            bool error,
+                                                            bool aborted)
 {
   // Call the user callback if present and if callback was requested for this descriptor.
   if (handle->callback != NULL && descriptor->flags.callback_on_complete) {

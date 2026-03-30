@@ -38,26 +38,26 @@ requires:
   condition: [device_is_module]
 - name: fem_util
   condition: [hardware_board_has_fem]
-- name: rail_util_sequencer
+- name: sl_rail_util_sequencer
   condition: [device_sdid_215]
-- name: rail_util_sequencer
+- name: sl_rail_util_sequencer
   condition: [device_sdid_225]
 - name: rail_util_features
-- name: rail_util_power_manager_init
+- name: sl_rail_util_power_manager_init
   condition: [power_manager]
-- name: rail_util_sfm_sequencer
+- name: sl_rail_util_sfm_sequencer
   condition: [device_sdid_220]
-- name: rail_util_ble_cs
+- name: sl_rail_util_ble_cs
   condition: [hardware_board_supports_cs]
-- name: rail_util_load_devinfo
+- name: sl_rail_util_load_devinfo
   condition: [device_series_3]
 
-  # Note: In the future, this rail_util_rf_path dependency needs to be required by a more generic component.
-- name: rail_util_rf_path
+  # Note: In the future, this sl_rail_util_rf_path dependency needs to be required by a more generic component.
+- name: sl_rail_util_rf_path
   condition:
   - device_sdid_200     # efr32xg21 has a chip-internal rf path selection
   - device_init
-- name: rail_util_rf_path_switch
+- name: sl_rail_util_rf_path_switch
   condition:
   - hardware_board_has_rfswitch_to_ground
 - name: device_init_hfxo

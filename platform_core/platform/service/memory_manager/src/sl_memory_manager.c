@@ -73,19 +73,6 @@ static const char sli_mm_heap_malloc_lt_name[] = "MM malloc LT";
 static const char sli_mm_heap_malloc_st_name[] = "MM malloc ST";
 #endif
 
-#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
-#include "SEGGER_SYSVIEW.h"
-extern char __HeapBase[];
-extern char __HeapLimit[];
-
-#define HEAP_SIZE (__HeapLimit - __HeapBase)
-
-// Heap ID for SystemView heap definitions.
-// These values are chosen to be bigger than SEGGER_SYSVIEW_ID_BASE.
-#define HEAP_LT_ID 0xFFFFFFFF
-#define HEAP_ST_ID 0xFFFFFFFE
-#endif
-
 /*******************************************************************************
  ***************************  LOCAL VARIABLES   ********************************
  ******************************************************************************/
@@ -173,7 +160,7 @@ sl_status_t sl_memory_init(void)
   // Create the pool tracker for the physical RAM
   sli_memory_profiler_create_pool_tracker(sli_mm_ram_name,
                                           sli_mm_ram_name,
-                                          (void*) (uintptr_t) SRAM_BASE,
+                                          (void *) (uintptr_t) SRAM_BASE,
                                           SRAM_SIZE);
 
   // Record the allocation of the stack from the physical RAM
@@ -211,10 +198,10 @@ sl_status_t sl_memory_init(void)
 #endif
 
 #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
-  SEGGER_SYSVIEW_HeapDefine((void*)HEAP_LT_ID, (void*)__HeapBase, HEAP_SIZE, SLI_BLOCK_METADATA_SIZE_BYTE);
-  SEGGER_SYSVIEW_HeapDefine((void*)HEAP_ST_ID, (void*)__HeapBase, HEAP_SIZE, SLI_BLOCK_METADATA_SIZE_BYTE);
-  SEGGER_SYSVIEW_NameResource((uint32_t) HEAP_LT_ID, "HEAP LONG TERM");
-  SEGGER_SYSVIEW_NameResource((uint32_t) HEAP_ST_ID, "HEAP SHORT TERM");
+  SEGGER_SYSVIEW_HeapDefine((void *)SYSTEMVIEW_HEAP_LT_ID, (void *)__HeapBase, SYSTEMVIEW_HEAP_SIZE, SLI_BLOCK_METADATA_SIZE_BYTE);
+  SEGGER_SYSVIEW_HeapDefine((void *)SYSTEMVIEW_HEAP_ST_ID, (void *)__HeapBase, SYSTEMVIEW_HEAP_SIZE, SLI_BLOCK_METADATA_SIZE_BYTE);
+  SEGGER_SYSVIEW_NameResource((uint32_t) SYSTEMVIEW_HEAP_LT_ID, "HEAP LONG TERM");
+  SEGGER_SYSVIEW_NameResource((uint32_t) SYSTEMVIEW_HEAP_ST_ID, "HEAP SHORT TERM");
 #endif
 
   if (status == SL_STATUS_OK) {
@@ -987,12 +974,11 @@ sl_status_t sl_memory_heap_alloc_advanced(sl_memory_heap_t *heap,
 
 #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
   allocated_blk->block_type = type;
-  uint32_t tag = (uint32_t)__builtin_extract_return_addr(__builtin_return_address(0));
-  tag |= type << 31U;
+
   if (block_type == BLOCK_TYPE_LONG_TERM) {
-    SEGGER_SYSVIEW_HeapAllocEx((void*)HEAP_LT_ID, *block, size, tag);
+    SEGGER_SYSVIEW_HeapAllocEx((void *)SYSTEMVIEW_HEAP_LT_ID, *block, size, SYSTEMVIEW_TAG_ALLOC_LT);
   } else if (block_type == BLOCK_TYPE_SHORT_TERM) {
-    SEGGER_SYSVIEW_HeapAllocEx((void*)HEAP_ST_ID, *block, size, tag);
+    SEGGER_SYSVIEW_HeapAllocEx((void *)SYSTEMVIEW_HEAP_ST_ID, *block, size, SYSTEMVIEW_TAG_ALLOC_ST);
   }
 #endif
 
@@ -1117,7 +1103,7 @@ sl_status_t sl_memory_heap_free(sl_memory_heap_t *heap,
 
     if ((!next_block->block_in_use) && (reservations_size_next == 0)) {
       // Remove metadata of next block from bank counter as free block will be merged with adjacent block.
-      DECREMENT_BANK_COUNTER(block_heap, (uint8_t*)next_block, (uint8_t*)next_block + SLI_BLOCK_METADATA_SIZE_BYTE - 1);
+      DECREMENT_BANK_COUNTER(block_heap, (uint8_t *)next_block, (uint8_t *)next_block + SLI_BLOCK_METADATA_SIZE_BYTE - 1);
 
       // Merge block with next adjacent block.
       block_len_dw = sli_block_len_dword_decode(next_block);
@@ -1170,9 +1156,9 @@ sl_status_t sl_memory_heap_free(sl_memory_heap_t *heap,
 
 #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
   if ((current_metadata->block_type & SLI_MEMORY_BLOCK_TYPE_MASK) == BLOCK_TYPE_LONG_TERM) {
-    SEGGER_SYSVIEW_HeapFree((void*)HEAP_LT_ID, block);
+    SEGGER_SYSVIEW_HeapFree((void *)SYSTEMVIEW_HEAP_LT_ID, block);
   } else if ((current_metadata->block_type & SLI_MEMORY_BLOCK_TYPE_MASK) == BLOCK_TYPE_SHORT_TERM) {
-    SEGGER_SYSVIEW_HeapFree((void*)HEAP_ST_ID, block);
+    SEGGER_SYSVIEW_HeapFree((void *)SYSTEMVIEW_HEAP_ST_ID, block);
   }
 #endif
 
@@ -1326,7 +1312,7 @@ sl_status_t sl_memory_heap_realloc(sl_memory_heap_t *heap,
         INCREMENT_BANK_COUNTER(heap, (uint8_t *)current_block, (uint8_t *)ptr + size_real - 1);
 
         // Remove free block metadata from bank counter as free block will be merged with adjacent block or removed.
-        DECREMENT_BANK_COUNTER(heap, (uint8_t*)next_block, (uint8_t*)next_block + SLI_BLOCK_METADATA_SIZE_BYTE - 1);
+        DECREMENT_BANK_COUNTER(heap, (uint8_t *)next_block, (uint8_t *)next_block + SLI_BLOCK_METADATA_SIZE_BYTE - 1);
 
         if (next_block_len_remaining >= SL_MEMORY_MANAGER_BLOCK_ALLOCATION_MIN_SIZE) {
           // Enough space left in next block to leave a smaller free block.
@@ -1485,7 +1471,7 @@ sl_status_t sl_memory_heap_realloc(sl_memory_heap_t *heap,
         sli_block_offset_prev_dword_encode(adjusted_next_block, sli_block_offset_next_dword_decode(current_block));
 
         // Remove free block metadata from bank counter as free block is merged with previous block.
-        DECREMENT_BANK_COUNTER(heap, (uint8_t*)next_block, (uint8_t*)next_block + SLI_BLOCK_METADATA_SIZE_BYTE - 1);
+        DECREMENT_BANK_COUNTER(heap, (uint8_t *)next_block, (uint8_t *)next_block + SLI_BLOCK_METADATA_SIZE_BYTE - 1);
 
         // Increment bank counter for new free block metadata.
         INCREMENT_BANK_COUNTER(heap, (uint8_t *)adjusted_next_block, (uint8_t *)adjusted_next_block + SLI_BLOCK_METADATA_SIZE_BYTE - 1);
@@ -1653,7 +1639,7 @@ sl_status_t sl_memory_heap_get_info(const sl_memory_heap_t *heap,
   } while (compute);
 
 #if defined(SL_CATALOG_BANK_RETENTION_CONTROL_PRESENT)
-  sli_retention_control_t *retention_control = (sli_retention_control_t *)heap->retention_control;
+  const sli_retention_control_t *retention_control = (const sli_retention_control_t *)heap->retention_control;
 
   // Get ID of banks limit.
   uint32_t heap_start_bank_id = sli_memory_manager_get_bank_id_by_addr(heap, heap->base_addr);

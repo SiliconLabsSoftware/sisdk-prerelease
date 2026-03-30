@@ -60,7 +60,7 @@ Table of content:
       - [exit](#exit)
 
 ## Features
-- Full support of ESL Profile and Service specification v1.0.1
+- Full support of ESL Profile and Service specification v1.1
 - Built-in auto conversion for Silabs ESL example devices with image storage and display for any size.
 - Multiple connections in parallel up to the limits of the Bluetooth stack on the attached ESL Network Co-Processor embedded target.
 - Encrypted communication between the AP script and the embedded target, which can be optionally disabled or completely removed. For more information on building prerequisites of the secure components for the NCP, see chapter 4.2 of the SiLabs application note [AN-1259](https://www.silabs.com/documents/public/application-notes/an1259-bt-ncp-mode-sdk-v3x.pdf).
@@ -80,19 +80,38 @@ Table of content:
 ---
 The Access Point Python application consists of the following files:
 
+- app.py _(entry point)_
+- air\_compressor.py
 - ap\_cli.py
 - ap\_config.py
 - ap\_constants.py
 - ap\_core.py
+- ap\_core\_commands.py
+- ap\_core\_event\_handlers\_auto.py
+- ap\_core\_event\_handlers\_cli.py
+- ap\_core\_event\_handlers\_common.py
+- ap\_core\_event\_handlers\_demo.py
+- ap\_core\_helpers.py
+- ap\_core\_pawr.py
+- ap\_core\_pawr\_responses.py
+- ap\_core\_scan.py
+- ap\_core\_tag\_commands.py
+- ap\_core\_utils.py
 - ap\_ead.py
+- ap\_json\_helper.py
 - ap\_logger.py
 - ap\_response\_parser.py
 - ap\_sensor.py
-- app.py
+- ap\_soft_timer.py
+- auto\_importer.py
 - esl\_command.py
 - esl\_key\_lib.py
+- esl\_key\_lib\_wrapper.py
 - esl\_lib.py
+- esl\_lib\_test.py
+- esl\_lib\_wrapper.py
 - esl\_tag.py
+- esl\_tag\_db.py
 - image\_converter.py
 - qrcode\_generator.py
 
@@ -133,7 +152,7 @@ In addition, as it was mentioned earlier, if the native Windows Python is locate
 
 ![](images/python_install_windows.png)
 
-Installing the proper GCC version is also essential. For example, if our Python is 32-bit, but the ESL key library and ESL C library are compiled with GCC for MinGW64, the import will fail and the AP example code will not start. This means either issuing `pacman -S make pkgconf mingw-w64-x86_64-gcc`, or `pacman -S make pkgconf mingw-w64-i686-gcc` in the MinGW32 or MinGW64 bash terminal, depending on Python interpreter architecture. While compilation for 32‑bit architectures - and thus, using 32-bit Python interpreter - is still supported, using 64‑bit architectures is strongly recommended.
+Installing the proper GCC version is also essential. For example, if our Python is 32-bit, but the ESL key library and ESL C library are compiled with GCC for MinGW64, the import will fail and the AP example code will not start. This means either issuing `pacman -S make pkgconf mingw-w64-x86_64-gcc`, or `pacman -S make pkgconf mingw-w64-i686-gcc` in the MinGW32 or MinGW64 bash terminal, depending on Python interpreter architecture. While compilation for 32-bit architectures - and thus, using 32-bit Python interpreter - is still supported, using 64-bit architectures is strongly recommended.
 
 Finally, as we're about to use the systems' native Python environment, the MSYS2 MinGW environment should be started with the `-use-full-path` option. Without this, the compilation will fail as well. That is, start either with `msys2_shell.cmd -mingw32 -use-full-path` or `msys2_shell.cmd -mingw64 -use-full-path` depending on Python.
 
@@ -273,7 +292,7 @@ Unlike the previously described command line arguments that take effect once at 
 Usage: `ping [-h] [--group_id <u7>] esl_id`
 
 Positional argument:
-- `esl_id`:                 ESL ID of the Tag. _Note: `all` also can be used as a broadcast address (0xff) if `IOP_TEST` config is set to `True`. (Although it still makes no sense as broadcast messages doesn't solicit any response by the spec.)_
+- `esl_id`:                 ESL ID or BLE address (e.g. `AA:BB:CC:DD:EE:22`) of the Tag. _Note: `all` also can be used as a broadcast address (0xff) if `IOP_TEST` config is set to `True`. (Although it still makes no sense as broadcast messages doesn't solicit any response by the spec.)_
 
 Option:
 - `[--group_id, -g <u7>]`:  ESL group ID (optional, default is group 0)
@@ -424,7 +443,6 @@ Positional arguments:
 - `[address]`:                  Bluetooth address of the target device or ESL ID or `all` if there are more ESLs connected.
 
 Options:
-- `-h, --help`:                 Show this help message.
 - `[--group_id <u7>, -g <u7>]`: ESL group ID (optional, default is group 0)
 - `[--label, -l <str>]`:        Caption to be written over the image. Use quotation marks if it includes spaces or line breaks.
 - `[--cropfit, -c]`:            Fit the image to the display proportions by cropping.
@@ -762,9 +780,9 @@ Positional arguments:
 _Note: You can obtain the current status of the demo mode by omitting the choice._
 
 #### script
-      Record commands to an output file, execute them from an input file, or wait (optionally for events with address filtering).
+      Record commands to an output file, execute them from an input file, wait (optionally for events with address filtering), register/unregister CLI commands as automatic reactions to ESL events, or list active registrations.
 
-Usage: `script [-h] {record,run,wait} ...`
+Usage: `script [-h] {record,run,wait,registered,register,unregister} ...`
 
 Subcommands:
 - `record <filename>`: Record commands to an output file.
@@ -787,12 +805,43 @@ Subcommands:
     Option:
     - `[--group_id, -g <u7>]`: ESL group ID (optional, default 0 if an address is given, None otherwise); with address `all`, wait for first event from this group.
 
+- `registered {list,clean} [-v|--verbose]`: Inspect or clean up registered event-to-command bindings.
+
+    Positional argument:
+    - `list`: Show all events that have a registered command binding.
+    - `clean`: Remove all registered event-to-command bindings at once.
+
+    Option:
+    - `-v, --verbose`: With `list`, show the full command template alongside each event name (without it, only event names are shown). With `clean`, list each removed binding before the summary count.
+
+- `register <event> <command> [params ...]`: Bind a CLI command to an ESL event so that the command is executed automatically whenever the event occurs. 
+    Positional arguments:
+    - `event`: Event name to react to (e.g. `connection_opened`, `tag_found`).
+    - `command`: CLI command to execute (e.g. `ping`, `disconnect`, `led`).
+    - `[params ...]`: Command parameters. Use `{field_name}` placeholders for event-derived runtime values (e.g. `{address}`, `{rssi}`). Fixed literal values can be mixed with placeholders. In addition to direct event fields, three **virtual placeholders** are available: `{ble_address}`, `{esl_id}`, and `{group_id}`. These are resolved at runtime by looking up the device in the tag database using whatever identifier the event carries (address, connection_handle, or node_id). This allows uniform device addressing regardless of how the event identifies the device.
+
+    _Notes:_
+    - _Only one command can be registered per event. Attempting a duplicate registration will result in an error._
+    - _Placeholder names must match the actual data fields of the target event, or be one of the virtual placeholders listed above. Invalid placeholder names are rejected at registration time._
+    - _Virtual placeholders require the event to carry at least one device identifier field (address, connection\_handle, or node\_id). If the target event has none, registration will fail._
+    - _Virtual placeholders are resolved through the tag database: if the device is not found or not fully configured (e.g. no ESL ID assigned), the command will not execute for that event occurrence._
+    - _The referenced CLI command and its syntax are validated at registration time._
+    - _Internal event handlers always execute before any registered command. The registered command is queued for execution by the CLI pipeline._
+
+- `unregister <event> [<command>]`: Remove a previously registered event-to-command binding. Since only one command can be registered per event, the command name is optional.
+
+    Positional arguments:
+    - `event`: Event name to unregister from (e.g. `connection_opened`, `ESL_LIB_EVENT_TAG_FOUND`).
+
+    _Notes:_
+    - _If the event name does not match any existing registration, an error is shown._
+
 Option:
-- `-h, --help`: Show this help message  - use `<subcommand> -h` for more details.
+- `-h, --help`: Show the help message  - use `<subcommand> -h` for more details.
 
 _Notes:_
 - _With `script record`, using `stop` as the filename stops an ongoing recording and closes the file._
-- _Scripting is an experimental feature only - it also supports basic waiting with timeout and optional device filtering for events, but it lacks any configuration‑dependent and/or conditional execution capabilities._
+- _Scripting is an experimental feature - it also supports basic waiting with timeout and optional device filtering for events, and conditional execution via `{if|…}` and `{case|…}` placeholder syntax._
 - _Recorded script files may contain script commands as well, even recursively. However, it is strongly advised to avoid it, as recursive execution cannot be interrupted and may lead to uncontrolled behavior._
 
 Examples:
@@ -811,6 +860,39 @@ Examples:
 - `connect 0 ; script wait 5 connection_opened 0 -g0 ; image_update 0 *qrcode 0 ; script wait 10 image_transfer_finished ; disconnect`
 
   Example showing an end-to-end flow with command chaining: connect to ESL 0 (_in default group 0_), wait (_up to 5 seconds_) for the connection to be opened, update the image using the built-in QR code generator, wait (_up to 10 seconds_) for the image transfer to be finished (_This time there's no address filtering, so it accepts any `image_transfer_finished` event. Works as long as there's no other ongoing image transfer in parallel._), then disconnect. Please note that there's no error handling possible in these one-liners.
+- `script register connection_closed ping {address}`
+
+  Whenever an ESL disconnects, automatically ping it by its BLE address. The address is taken directly from the event data.
+- `script register connection_opened config -f {ble_address}`
+
+  Whenever a new connection opens, automatically run full configuration on the device. The BLE address is looked up from the tag database at runtime or the AP tries to give an auto-generated ESL address.
+- `script register connection_closed led {esl_id} 0 --group_id {group_id}`
+
+  Whenever a connection closes, turn off LED 0 on the device. The ESL ID and group are looked up from the tag database, so the command can use ESL addressing even though the event itself only carries a connection handle.
+- `script unregister connection_opened`
+
+  Remove whatever command was registered for the `connection_opened` event. The command name is optional since only one command can be bound to each event.
+- `script registered list -v`
+
+  List all events that currently have a registered command. Will show the full command template for each event - helpful when debugging or reviewing complex conditional registrations.
+- `script registered clean`
+
+  Remove all registered event-command bindings at once, returning to a clean state. Logs how many bindings were removed.
+- `script register connection_closed "{if|reason|SL_STATUS_BT_CTRL_REMOTE_USER_TERMINATED|ping {address}|list u}"`
+
+  Register a conditional command for the connection closed event. If the event's status reported no error, the AP executes basic state request (via PAwR) to the device; otherwise it lists unsynchronized devices. Note: the entire conditional placeholder is quoted on the CLI because some commands contain spaces.
+- `script register image_transfer_finished {case|status|SL_STATUS_OK|"display_image {img_index} {esl_id} 0 -g {group_id}"|SL_STATUS_TIMEOUT|"disconnect {ble_address}"|";"}`
+
+  Register a multi-branch reaction to image transfer completion. If the transfer succeeded, the AP immediately displays the transferred image on the tag's first display. If the transfer timed out, the AP disconnects from the device. For any other outcome, nothing happens (`;` as NOP). The image index, ESL address and group are filled in automatically from the event data and the tag database.
+- `script register control_point_response {if|status|SL_STATUS_FAIL|"ping 0 -g 2"|{if|data_sent|000|"disconnect {ble_address} ; script wait 5 connection_closed ; ping {esl_id} -g {group_id}"|";"}}`
+
+  Register a nested conditional reaction to ESL control point responses. If the command failed, the AP pings an arbitrary device. If it succeeded and the sent command was a Ping to ESL ID 0 (raw TLV bytes `0000`), the AP disconnects, waits up to 5 seconds for the connection to close, then re-pings by ESL address. For any other successful command, nothing happens (`;` as NOP). This example demonstrates nesting: the inner condition is only evaluated when the outer one falls through to its "else" branch.
+
+  _Notes on conditional expressions:_
+  - _Nesting is supported but should be used judiciously - deeply nested expressions can become difficult to read and debug. Try keeping the maximum nesting depth around three levels._
+  - _Comparison values accept multiple formats: **symbolic constants** (e.g. `SL_STATUS_OK`, `ESL_LIB_STATUS_IDLE`), **decimal integers** (e.g. `0`, `25`), and **hex strings** for `bytes` fields (e.g. `0000`, `0xff01`). Misspelled constants are caught at registration time._
+  - _For `bytes` fields such as `data_sent`, the comparison value may use upper- or lowercase hex digits, may optionally include a `0x` prefix, and odd-length inputs are interpreted by padding the leading nibble (e.g., `0x0` to `00`, `0fF` to `00ff`). The byte order must still match the event's displayed (i.e., the on-wire, little-endian) representation._
+  - _Branches containing spaces or piped commands (i.e., those separated by semicolons) must be quoted on the CLI (e.g. `"ping 0 -g 2"`), either per branch or for the entire conditional command._
 
 #### verbosity
 

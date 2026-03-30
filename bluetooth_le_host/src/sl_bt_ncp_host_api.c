@@ -1099,6 +1099,22 @@ sl_status_t sl_bt_periodic_advertiser_set_long_data(uint8_t advertising_set)
     return rsp->data.rsp_periodic_advertiser_set_long_data.result;
 }
 
+sl_status_t sl_bt_periodic_advertiser_refresh_data_id(uint8_t advertising_set)
+{
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+    size_t cmd_payload_len = sizeof(sl_bt_cmd_periodic_advertiser_refresh_data_id_t);
+
+    cmd->header = SLI_BGAPI_MSG_HEADER(sli_bt_periodic_advertiser_class_id,
+                                       sli_bt_periodic_advertiser_refresh_data_id_command_id,
+                                       (uint8_t) sl_bgapi_msg_type_cmd | (uint8_t) sl_bgapi_dev_type_bt,
+                                       cmd_payload_len);
+    cmd->data.cmd_periodic_advertiser_refresh_data_id.advertising_set = advertising_set;
+    sl_bt_host_handle_command();
+
+    return rsp->data.rsp_periodic_advertiser_refresh_data_id.result;
+}
+
 sl_status_t sl_bt_periodic_advertiser_start(uint8_t advertising_set,
                                             uint16_t interval_min,
                                             uint16_t interval_max,

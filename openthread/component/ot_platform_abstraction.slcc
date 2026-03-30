@@ -55,13 +55,11 @@ source:
   condition:
   - kernel
 library:
-- path: build/gcc/cortex-m33/cmake/sl-openthread-library/Release/libsl_openthread.a
+- path: libs/build/gcc/cortex-m33/sl-openthread-library/Release/libsl_openthread.a
   condition:
   - toolchain_gcc
   - cortexm33
-  unless:
-  - toolchain_llvm
-- path: build/llvm/cortex-m33/cmake/sl-openthread-library/Release/libsl_openthread.a
+- path: libs/build/llvm/cortex-m33/sl-openthread-library/Release/libsl_openthread.a
   condition:
   - toolchain_llvm
   - cortexm33

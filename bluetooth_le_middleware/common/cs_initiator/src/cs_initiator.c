@@ -728,6 +728,7 @@ sl_status_t cs_initiator_create(const uint8_t               conn_handle,
 
   // Validate the channel map
   rtl_err = sl_rtl_util_validate_bluetooth_cs_channel_map(initiator->config.cs_main_mode,
+                                                          initiator->config.cs_sub_mode,
                                                           initiator->rtl_config.algo_mode,
                                                           initiator->config.channel_map.data);
   if (rtl_err != SL_RTL_ERROR_SUCCESS) {
@@ -1523,7 +1524,6 @@ bool cs_initiator_on_event(sl_bt_msg_t *evt)
         start_error_timer(initiator);
       }
       break;
-
     // --------------------------------
     // CS procedure enable action completed
     case sl_bt_evt_cs_procedure_enable_complete_id:
@@ -1535,7 +1535,24 @@ bool cs_initiator_on_event(sl_bt_msg_t *evt)
                             evt->data.evt_cs_procedure_enable_complete.connection);
         break;
       }
+      else {
+        uint32_t subevents = cs_initiator_get_subevents_per_procedure(evt->data.evt_cs_procedure_enable_complete.procedure_interval,
+                                                                    evt->data.evt_cs_procedure_enable_complete.subevents_per_event,
+                                                                    evt->data.evt_cs_procedure_enable_complete.event_interval);
+        uint32_t procedure_time_us = (uint32_t)evt->data.evt_cs_procedure_enable_complete.procedure_interval * (uint32_t)initiator->conn_interval * 1250u;
 
+        initiator_log_info(INSTANCE_PREFIX 
+                 "CS - New procedure scheduled: "
+                 "Subevents per procedure: %lu  "
+                 "Subevent length: %lu us  "
+                 "Procedure time: %lu us  "
+                 "Subevents per event: %u  " LOG_NL,
+                 initiator->conn_handle,
+                 (unsigned long)subevents,
+                 evt->data.evt_cs_procedure_enable_complete.subevent_len,
+                 (unsigned long)procedure_time_us,
+                 evt->data.evt_cs_procedure_enable_complete.subevents_per_event);
+      }
       handled = true;
       evt_data.evt_procedure_enable_completed = &evt->data.evt_cs_procedure_enable_complete;
       if (initiator->config.cs_main_mode == sl_bt_cs_mode_pbr) {
@@ -1546,6 +1563,7 @@ bool cs_initiator_on_event(sl_bt_msg_t *evt)
       (void)initiator_state_machine_event_handler(initiator,
                                                   INITIATOR_EVT_PROCEDURE_ENABLE_COMPLETED,
                                                   &evt_data);
+
       break;
 
     // --------------------------------

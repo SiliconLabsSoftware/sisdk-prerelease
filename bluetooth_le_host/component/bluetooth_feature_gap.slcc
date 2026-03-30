@@ -12,6 +12,10 @@ category: Bluetooth|Bluetooth Host (Stack)|Features with Commands and Events
 quality: "production"
 requires:
 - name: "bluetooth_stack"
+  # TODO(BG-19956): Remove this temporary dependency after RPA generation and
+  # resolution move fully under bluetooth_feature_local_privacy and
+  # bluetooth_feature_rpa_resolution.
+- name: "bluetooth_crypto"
 provides:
 - name: "bluetooth_feature_gap"
 template_contribution:

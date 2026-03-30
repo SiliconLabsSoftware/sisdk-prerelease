@@ -43,7 +43,10 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include "sl_log_helper.h"
-
+// ARM architecture specific includes for CoreDebug and __BKPT intrinsic
+#if defined(__ARM_ARCH) || defined(__CORTEX_M)
+#include "em_device.h"  // Provides CoreDebug and CoreDebug_DHCSR_C_DEBUGEN_Msk
+#endif
 /*******************************************************************************
  ***************************  DEFINE MACROS ********************************
  ******************************************************************************/
@@ -896,5 +899,41 @@ sl_log_ring_buffer_t *sl_log_get_ring_buffer_config(void)
   return NULL;
 #endif
 }
+
+/***************************************************************************//**
+ * @brief Assert handler implementation - triggers breakpoint in debug mode
+ * if debugger is attached
+ * @param[in] string_value Formatted error string with file:line - condition
+ ******************************************************************************/
+ void sli_log_assert_implementation(const char* string_value)
+{
+  // In current implementation logging is not possible before sl_log_init() is called
+  // so we need to check if the ring buffer is initialized
+  // Logging before sl_log_init will be supported in future versions
+  if (ring_buffer.buffer != NULL) {
+    SL_PRINT_STRING_ERROR("ASSERT: %s", (uintptr_t)string_value);
+  }
+#if (SL_LOG_CONFIG_MODE != SL_LOG_CONFIG_MODE_CONSOLE)
+  // In console mode, flush the log immediately to ensure the assert message is output
+  sl_log_flush();
+#endif
+
+#if defined(__ARM_ARCH) || defined(__CORTEX_M)
+   // Check if there's an active debug session by reading DHCSR register
+   // CoreDebug_DHCSR_C_DEBUGEN_Msk indicates debugger is connected
+   if ((CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk) != 0x0)
+   {
+     // Debugger is attached - trigger a software breakpoint
+     // This allows the developer to inspect the call stack and variables
+     __BKPT(1);
+   }
+   else
+ #endif
+   {
+     // No debugger attached - enter infinite loop for watchdog reset
+     while (true) {
+     }
+   }
+ }
 
 

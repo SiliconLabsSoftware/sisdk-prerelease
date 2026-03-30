@@ -64,6 +64,12 @@
 #define traceTASK_SWITCHED_IN() sli_ccv_task_switched_in()
 #endif
 
+#if defined(SL_CATALOG_WATCHDOG_MANAGER_PRESENT)
+#include "sl_watchdog_manager.h"
+#include "sli_watchdog_manager.h"
+#define portTASK_SWITCH_HOOK(pxTCB) sli_watchdog_manager_platform_feed()
+#endif
+
 //-------- <<< Use Configuration Wizard in Context Menu >>> --------------------
 
 //  <o>Minimal stack size [words] <0-65535>

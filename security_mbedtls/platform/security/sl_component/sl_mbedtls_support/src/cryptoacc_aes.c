@@ -57,7 +57,6 @@
 #include "mbedtls/platform_util.h"
 #include "mbedtls/error.h"
 #include <string.h>
-#include "sli_crypto.h"
 
 /*
  * Initialize AES context
@@ -395,23 +394,7 @@ int mbedtls_aes_crypt_ecb(mbedtls_aes_context *ctx,
   key = block_t_convert(ctx->key, ctx->keybits / 8);
   data_in = block_t_convert(input, 16);
   data_out = block_t_convert(output, 16);
-  #if (SLI_CM_COUNTERS_ENABLED)
-  // ECB: one 16-byte block
-  uint32_t n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_BLOCK, 16);
-  // Check threshold before operation; attempt reseed in auto mode
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  sl_status_t cm_status =
-  #endif
-  sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                n_ops,
-                                SLI_CM_AUTO_RESEED_ENABLED);
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  // In auto mode, block operation if security threshold would be exceeded
-  if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-    return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
-  }
-  #endif
-  #endif
+
   status = cryptoacc_management_acquire();
   if (status != 0) {
     return status;
@@ -425,14 +408,6 @@ int mbedtls_aes_crypt_ecb(mbedtls_aes_context *ctx,
   if (cryptoacc_management_release() != PSA_SUCCESS) {
     return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
   }
-
-  #if (SLI_CM_COUNTERS_ENABLED)
-  // Increment counter after operation
-  uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops);
-  if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-    return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
-  }
-  #endif
 
   if (sx_ret != CRYPTOLIB_SUCCESS) {
     return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
@@ -480,21 +455,7 @@ int mbedtls_aes_crypt_cbc(mbedtls_aes_context *ctx,
   iv_block = block_t_convert(iv, 16);
   data_in = block_t_convert(input, length);
   data_out = block_t_convert(output, length);
-  #if (SLI_CM_COUNTERS_ENABLED)
-  // one block per 16 bytes
-  uint32_t n_ops = sli_crypto_cm_get_opcount(SLI_CM_AES_MODE_BLOCK, length);
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  sl_status_t cm_status =
-  #endif
-  sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                n_ops,
-                                SLI_CM_AUTO_RESEED_ENABLED);
-  #if (SLI_CM_AUTO_RESEED_ENABLED)
-  if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-    return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
-  }
-  #endif
-  #endif
+
   status = cryptoacc_management_acquire();
   if (status != 0) {
     return status;
@@ -508,13 +469,6 @@ int mbedtls_aes_crypt_cbc(mbedtls_aes_context *ctx,
   if (cryptoacc_management_release() != PSA_SUCCESS) {
     return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
   }
-
-  #if (SLI_CM_COUNTERS_ENABLED)
-  uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, n_ops);
-  if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-    return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
-  }
-  #endif
 
   if (sx_ret != CRYPTOLIB_SUCCESS) {
     return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
@@ -581,20 +535,6 @@ int mbedtls_aes_crypt_cfb128(mbedtls_aes_context *ctx,
       if ( iterations > 0 ) {
         data_in = block_t_convert(&input[processed], iterations * 16);
         data_out = block_t_convert(&output[processed], iterations * 16);
-        #if (SLI_CM_COUNTERS_ENABLED)
-        // iterations already represents number of 16-byte blocks
-        #if (SLI_CM_AUTO_RESEED_ENABLED)
-        sl_status_t cm_status =
-        #endif
-        sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                      iterations,
-                                      SLI_CM_AUTO_RESEED_ENABLED);
-        #if (SLI_CM_AUTO_RESEED_ENABLED)
-        if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-          return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
-        }
-        #endif
-        #endif
 
         status = cryptoacc_management_acquire();
         if (status != 0) {
@@ -610,13 +550,6 @@ int mbedtls_aes_crypt_cfb128(mbedtls_aes_context *ctx,
           return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
         }
 
-        #if (SLI_CM_COUNTERS_ENABLED)
-        uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, iterations);
-        if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-          return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
-        }
-        #endif
-
         if (sx_ret != CRYPTOLIB_SUCCESS) {
           return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
         }
@@ -627,7 +560,6 @@ int mbedtls_aes_crypt_cfb128(mbedtls_aes_context *ctx,
       while ( length - processed > 0 ) {
         if ( n == 0 ) {
           // Need to update the IV but don't have a full block of input to pass to the SE
-          // Note: mbedtls_aes_crypt_ecb() already handles threshold check and counter
           int ret = mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_ENCRYPT, iv, iv);
           if (ret != 0) {
             return ret;
@@ -746,20 +678,6 @@ int mbedtls_aes_crypt_ctr(mbedtls_aes_context *ctx,
         data_in = block_t_convert(&input[processed], iterations * 16);
         data_out = block_t_convert(&output[processed], iterations * 16);
 
-        #if (SLI_CM_COUNTERS_ENABLED)
-        #if (SLI_CM_AUTO_RESEED_ENABLED)
-        sl_status_t cm_status =
-        #endif
-        sli_crypto_cm_check_threshold(SLI_CRYPTO_ENGINE_CRYPTOACC,
-                                      iterations,
-                                      SLI_CM_AUTO_RESEED_ENABLED);
-        #if (SLI_CM_AUTO_RESEED_ENABLED)
-        if (cm_status == SL_STATUS_SECURITY_AES_CM_FAIL) {
-          return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
-        }
-        #endif
-        #endif
-
         status = cryptoacc_management_acquire();
         if (status != 0) {
           return status;
@@ -771,13 +689,6 @@ int mbedtls_aes_crypt_ctr(mbedtls_aes_context *ctx,
           return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
         }
 
-        #if (SLI_CM_COUNTERS_ENABLED)
-        uint32_t new_count = sli_crypto_inc_engine_aes_op_count(SLI_CRYPTO_ENGINE_CRYPTOACC, iterations);
-        if (new_count >= SLI_CRYPTO_CM_RESEED_THRESH_MAX) {
-          return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
-        }
-        #endif
-
         if (sx_ret != CRYPTOLIB_SUCCESS) {
           return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
         }
@@ -788,7 +699,6 @@ int mbedtls_aes_crypt_ctr(mbedtls_aes_context *ctx,
       while ( length - processed > 0 ) {
         if ( n == 0 ) {
           // Get a new stream block
-          // Note: mbedtls_aes_crypt_ecb() already handles threshold check and counter
           status = mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_ENCRYPT,
                                          nonce_counter, stream_block);
           if (status != 0) {

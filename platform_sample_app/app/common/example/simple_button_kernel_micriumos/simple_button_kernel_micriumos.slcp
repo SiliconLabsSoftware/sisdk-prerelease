@@ -1,7 +1,7 @@
 project_name: simple_button_kernel_micriumos
 package: platform
 quality: production
-label: Platform - Simple Button on Micrium OS kernel
+label: Platform - Simple Button on Micrium OS Kernel
 description: >
   This example project shows how to toggle LEDs using buttons in a Micrium OS kernel task.
 category: Example|Platform

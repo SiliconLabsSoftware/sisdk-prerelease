@@ -1,8 +1,8 @@
 project_name: ot-ncp-ftd
-label: OpenThread - NCP (FTD)
+label: OpenThread - NCP FTD
 package: openthread
 description: >
-  This is a simple OpenThread Full Thread Device NCP application. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo.
+  Demonstrates OpenThread Full Thread Device (FTD) Network Co-Processor (NCP) application.
 category: OpenThread Examples
 quality: production
 

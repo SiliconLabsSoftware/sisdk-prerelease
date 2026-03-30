@@ -151,7 +151,7 @@ extern "C" {
 
 /* *INDENT-OFF* */
 /** IAR Embedded Workbench: Macro for handling section placement */
-#define SL_ATTRIBUTE_SECTION(X) @ X
+#define SL_ATTRIBUTE_SECTION(X) _Pragma(STRINGIZE(location = X))
 #endif
 /* *INDENT-ON* */
 

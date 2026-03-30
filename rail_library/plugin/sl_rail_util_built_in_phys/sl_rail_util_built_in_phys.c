@@ -245,7 +245,7 @@ const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHz =
   &sl_rail_ieee802154_phy_2G4Hz_coherent_39MHz_channelConfig;
 #elif SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 40000000
 const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHz =
-  &sl_rail_ieee802154_phy_2G4Hz_40MHz_channelConfig;
+  &sl_rail_ieee802154_phy_2G4Hz_coherent_40MHz_channelConfig;
 #else
 const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHz =
   &ieee802154_2p4_coherent_channelConfig;

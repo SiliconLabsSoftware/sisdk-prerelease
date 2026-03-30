@@ -1,8 +1,8 @@
 project_name: sleepy-demo-mtd
-label: OpenThread - SoC Sleepy Demo (MTD)
+label: OpenThread - SoC Sleepy Demo MTD
 package: openthread
 description: >
-  This is a sample application to demonstrate Sleepy End Device (SED) behaviour with polling, using the EFR32's low power EM2 mode.
+  Demonstrates Sleepy End Device (SED) behaviour with polling. Using OpenThread Minimal Thread Device (MTD) and low-power EM2 mode.
 category: OpenThread Examples
 quality: production
 

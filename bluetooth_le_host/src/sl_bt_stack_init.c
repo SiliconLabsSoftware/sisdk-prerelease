@@ -125,7 +125,6 @@ extern const struct sli_bt_component_config sli_bt_external_bondingdb_config;
 extern const struct sli_bt_component_config sli_bt_accept_list_config;
 extern const struct sli_bt_component_config sli_bt_sync_config;
 extern const struct sli_bt_component_config sli_bt_advertiser_config;
-extern const struct sli_bt_component_config sli_bt_periodic_advertiser_config;
 extern const struct sli_bt_component_config sli_bt_l2cap_config;
 extern const struct sli_bt_component_config sli_bt_connection_config;
 extern const struct sli_bt_component_config sli_bt_dynamic_gattdb_config;
@@ -142,6 +141,7 @@ extern sli_bgapi_component_deinit_func_t sli_bt_core_deinit;
 extern sli_bgapi_component_init_func_t sli_bt_system_on_demand_start_init;
 extern sli_bgapi_component_init_func_t sli_bt_system_init;
 extern sli_bgapi_component_deinit_func_t sli_bt_system_deinit;
+extern sli_bgapi_component_start_func_t sli_bt_crypto_lib_psa_start;
 extern sli_bgapi_component_start_func_t sli_bt_builtin_bonding_database_start;
 extern sli_bgapi_component_deinit_func_t sli_bt_builtin_bonding_database_deinit;
 extern sli_bgapi_component_init_func_t sli_bt_external_bondingdb_init;
@@ -242,7 +242,7 @@ static const sli_bgapi_component_init_info_t bt_component_init_info[] = {
   { sli_bt_extended_advertiser_init, NULL },
 #endif
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_PERIODIC_ADVERTISER_PRESENT)
-  { sli_bt_periodic_advertiser_init, &sli_bt_periodic_advertiser_config },
+  { sli_bt_periodic_advertiser_init, NULL },
 #endif
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_PAWR_ADVERTISER_PRESENT)
   { sli_bt_pawr_advertiser_init, NULL },
@@ -292,6 +292,9 @@ static const sli_bgapi_component_init_info_t bt_component_init_info[] = {
 // NULL-terminated array of component start structures
 static const sli_bgapi_component_start_info_t bt_component_start_info[] = {
   { sli_bt_core_start, &bt_config },
+#if defined(SL_CATALOG_BLUETOOTH_CRYPTO_LIB_PSA_PRESENT)
+  { sli_bt_crypto_lib_psa_start, NULL },
+#endif
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_BUILTIN_BONDING_DATABASE_PRESENT)
   { sli_bt_builtin_bonding_database_start, NULL },
 #endif

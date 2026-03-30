@@ -52,6 +52,7 @@
 
 #if defined(SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT) || defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT)
 #include "sl_rail_util_ieee802154_fast_channel_switching_config.h"
+#include "sl_rail_util_ieee802154_fast_channel_switching.h"
 
 // This file supports 2 instances of stacks (ZB, OT). Similar configuration is expected on RAIL side
 // when concurrent Rx feature is enabled
@@ -652,7 +653,7 @@ sl_rail_status_t sl_rail_mux_StartRx(sl_rail_handle_t railHandle,
   SET_CHANNEL_SWITCHING_CFG_CH(context_index, channel);
 
   // Check to ensure lock is not active before acting on startRx
-  if ( check_lock_permissions(context_index) ) {
+  if ( check_lock_permissions(context_index) && !tx_in_progress()) {
     #if !defined(SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT) && !defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT)
     if (!fn_get_context_flag_by_index(context_index, RAIL_MUX_PROTOCOL_FLAGS_LOCK_ACTIVE)) {
       if (rx_channel != INVALID_CHANNEL && rx_channel != channel) {
@@ -678,6 +679,10 @@ sl_rail_status_t sl_rail_mux_Idle(sl_rail_handle_t railHandle,
                                   bool wait)
 {
   uint8_t i;
+  
+  if (tx_in_progress()) {
+      return SL_RAIL_STATUS_INVALID_CALL;
+  }
 
   uint8_t context_index = fn_get_context_index(railHandle);
   EFM_ASSERT(context_index < SUPPORTED_PROTOCOL_COUNT);
@@ -2299,34 +2304,12 @@ SL_CODE_CLASSIFY(SL_CODE_COMPONENT_RAIL_MUX_15_4, SL_CODE_CLASS_TIME_CRITICAL)
 static bool filter_stack_event(uint8_t context_index,
                                sl_rail_util_ieee802154_stack_event_t stack_event)
 {
-  bool filter_event = false;
   switch (stack_event) {
-    case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_STARTED:
-    case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACCEPTED:
-    case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACKING:
-      filter_event = check_event_filter(context_index,
-                                        RAIL_MUX_PROTOCOL_FLAGS_STACK_EVENT_RX_ACTIVE,
-                                        true);
-      break;
-    case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_CORRUPTED:
-    case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACK_BLOCKED:
-    case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACK_ABORTED:
-    case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_FILTERED:
-    case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ENDED:
-    case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACK_SENT:
-    case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_SIGNAL_DETECTED:
-      filter_event = check_event_filter(context_index,
-                                        RAIL_MUX_PROTOCOL_FLAGS_STACK_EVENT_RX_ACTIVE,
-                                        false);
-      break;
-    case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_STARTED:
     case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_PENDED_PHY:
-    case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_CCA_SOON:
     case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_PENDED_MAC:
-      filter_event = check_event_filter(context_index,
-                                        RAIL_MUX_PROTOCOL_FLAGS_STACK_EVENT_TX_ACTIVE,
-                                        true);
-      break;
+      return check_event_filter(context_index,
+                                RAIL_MUX_PROTOCOL_FLAGS_STACK_EVENT_TX_ACTIVE,
+                                true);
     case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ACK_WAITING:
     case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ACK_RECEIVED:
     case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ACK_TIMEDOUT:
@@ -2334,26 +2317,20 @@ static bool filter_stack_event(uint8_t context_index,
     case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ABORTED:
     case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ENDED:
     case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_IDLED:
-    case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_CCA_BUSY:
-      filter_event = check_event_filter(context_index,
-                                        RAIL_MUX_PROTOCOL_FLAGS_STACK_EVENT_TX_ACTIVE,
-                                        false);
-      break;
+      return check_event_filter(context_index,
+                                RAIL_MUX_PROTOCOL_FLAGS_STACK_EVENT_TX_ACTIVE,
+                                false);
     case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_LISTEN:
-      filter_event = check_event_filter(context_index,
-                                        RAIL_MUX_PROTOCOL_FLAGS_STACK_EVENT_RADIO_ACTIVE,
-                                        true);
-      break;
+      return check_event_filter(context_index,
+                                RAIL_MUX_PROTOCOL_FLAGS_STACK_EVENT_RADIO_ACTIVE,
+                                true);
     case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_IDLED:
-      filter_event = check_event_filter(context_index,
-                                        RAIL_MUX_PROTOCOL_FLAGS_STACK_EVENT_RADIO_ACTIVE,
-                                        false);
-      break;
-    case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TICK:
+      return check_event_filter(context_index,
+                                RAIL_MUX_PROTOCOL_FLAGS_STACK_EVENT_RADIO_ACTIVE,
+                                false);
     default:
-      break;
+      return true;
   }
-  return filter_event;
 }
 
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_RAIL_MUX_15_4, SL_CODE_CLASS_TIME_CRITICAL)

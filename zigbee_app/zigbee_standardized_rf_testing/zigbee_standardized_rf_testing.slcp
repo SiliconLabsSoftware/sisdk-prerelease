@@ -1,11 +1,10 @@
 project_name: zigbee_standardized_rf_testing
-label: Zigbee - StandardizedRfTesting
+label: Zigbee - SoC Standardized RF Testing
 package: zigbee
 category: Zigbee Application
 quality: production
 
-description: >
-  This is a pre-standardization implementation of Zigbee's RF testing standard.  It utilizes the TIS (Total Isotropic Sensitivity)/ TRP (Total Radiated Power)  testing interfaces and is optional for Zigbee certifications. This application adheres to the Zigbee RF Performance Test Spec v1.0.
+description: Pre-standardization Zigbee RF testing (TIS/TRP). Adheres to Zigbee RF Performance Test Spec v1.0; optional for certification.
 author: Silicon Laboratories, Inc.
 
 component:

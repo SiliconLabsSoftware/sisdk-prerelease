@@ -216,7 +216,8 @@
 #define sl_zigbee_zll_set_rx_on_when_idle sl_zigbee_ezsp_zll_set_rx_on_when_idle
 #define sl_zigbee_zll_scanning_complete sl_zigbee_ezsp_zll_scanning_complete
 
-
+// Mirror SoC side macro in zll-api.h
+#define sl_zigbee_zll_cancel_rx_on_when_idle() sl_zigbee_ezsp_zll_set_rx_on_when_idle(0)
 
 //Other
 #define sl_zigbee_get_pan_id sl_zigbee_af_get_pan_id

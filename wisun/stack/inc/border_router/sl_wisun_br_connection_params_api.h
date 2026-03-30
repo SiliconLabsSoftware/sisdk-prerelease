@@ -96,7 +96,7 @@ typedef struct sl_wisun_br_params_eapol_s sl_wisun_br_params_eapol_t;
 /// DHCP server parameter set
 SL_PACK_START(1)
 struct sl_wisun_br_params_dhcp_s {
-  /// Lease time (seconds)
+  /// Deprecated
   uint32_t dhcp_address_lifetime_s;
 } SL_ATTRIBUTE_PACKED;
 SL_PACK_END()
@@ -290,7 +290,7 @@ static const sl_wisun_br_connection_params_t SL_WISUN_BR_PARAMS_PROFILE_TEST = {
     .sec_prot_trickle_expirations = 0,
   },
   .dhcp = {
-    .dhcp_address_lifetime_s = HOUR_TO_SEC(12)
+    .dhcp_address_lifetime_s = 0
   },
   .rpl = {
     .rpl_min_hop_rank_increase = 128,
@@ -373,7 +373,7 @@ static const sl_wisun_br_connection_params_t SL_WISUN_BR_PARAMS_PROFILE_SMALL = 
     .sec_prot_trickle_expirations = 0,
   },
   .dhcp = {
-    .dhcp_address_lifetime_s = HOUR_TO_SEC(12)
+    .dhcp_address_lifetime_s = 0
   },
   .rpl = {
     .rpl_min_hop_rank_increase = 128,
@@ -456,7 +456,7 @@ static const sl_wisun_br_connection_params_t SL_WISUN_BR_PARAMS_PROFILE_MEDIUM =
     .sec_prot_trickle_expirations = 0,
   },
   .dhcp = {
-    .dhcp_address_lifetime_s = DAY_TO_SEC(7)
+    .dhcp_address_lifetime_s = 0
   },
   .rpl = {
     .rpl_min_hop_rank_increase = 128,
@@ -539,7 +539,7 @@ static const sl_wisun_br_connection_params_t SL_WISUN_BR_PARAMS_PROFILE_LARGE = 
     .sec_prot_trickle_expirations = 0,
   },
   .dhcp = {
-    .dhcp_address_lifetime_s = DAY_TO_SEC(30)
+    .dhcp_address_lifetime_s = 0
   },
   .rpl = {
     .rpl_min_hop_rank_increase = 128,

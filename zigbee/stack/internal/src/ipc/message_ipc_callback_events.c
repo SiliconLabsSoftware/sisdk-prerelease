@@ -244,6 +244,41 @@ void sli_zigbee_stack_post_incoming_packet_filter_cb(sl_zigbee_zigbee_packet_typ
   sl_zigbee_wakeup_common_task();
 }
 
+void sli_zigbee_stack_post_incoming_packet_filter_with_lqi_and_rssi_cb(sl_zigbee_zigbee_packet_type_t packetType,
+                                                                       sl_zigbee_packet_link_quality_t *linkQuality,
+                                                                       uint8_t *packetData,
+                                                                       uint8_t size_p,
+                                                                       uint8_t *data,
+                                                                       uint8_t size_d,
+                                                                       sl_zigbee_packet_action_t action)
+{
+  sl_zigbee_stack_cb_event_t *cb_event = (sl_zigbee_stack_cb_event_t *) malloc(sizeof(sl_zigbee_stack_cb_event_t));
+  cb_event->data.post_incoming_packet_filter_with_lqi_and_rssi_cb.packetType = packetType;
+
+  if (linkQuality != NULL) {
+    cb_event->data.post_incoming_packet_filter_with_lqi_and_rssi_cb.linkQuality = *linkQuality;
+  }
+
+  if (packetData != NULL) {
+    memmove(cb_event->data.post_incoming_packet_filter_with_lqi_and_rssi_cb.packetData, packetData, sizeof(uint8_t) * size_p);
+  }
+
+  cb_event->data.post_incoming_packet_filter_with_lqi_and_rssi_cb.size_p = size_p;
+
+  if (data != NULL) {
+    memmove(cb_event->data.post_incoming_packet_filter_with_lqi_and_rssi_cb.data, data, sizeof(uint8_t) * size_d);
+  }
+
+  cb_event->data.post_incoming_packet_filter_with_lqi_and_rssi_cb.size_d = size_d;
+  cb_event->data.post_incoming_packet_filter_with_lqi_and_rssi_cb.action = action;
+  cb_event->tag = SLI_ZIGBEE_STACK_POST_INCOMING_PACKET_FILTER_WITH_LQI_AND_RSSI_CB_IPC_EVENT_TYPE;
+  #ifndef SL_ZIGBEE_MULTI_NETWORK_STRIPPED
+  cb_event->network_idx = sl_zigbee_get_callback_network();
+  #endif // !SL_ZIGBEE_MULTI_NETWORK_STRIPPED
+  sl_event_publish(&sli_zigbee_ipc_publisher, SL_EVENT_CLASS_ZIGBEE, 1 /*priority*/, cb_event);
+  sl_zigbee_wakeup_common_task();
+}
+
 void sli_zigbee_stack_post_outgoing_packet_filter_cb(sl_zigbee_zigbee_packet_type_t packetType,
                                                      uint8_t *packetData,
                                                      uint8_t size_p,
@@ -364,6 +399,16 @@ void sli_zigbee_message_process_ipc_event(sl_zigbee_stack_cb_event_t *cb_event)
                                                cb_event->data.post_incoming_packet_filter_cb.data,
                                                cb_event->data.post_incoming_packet_filter_cb.size_d,
                                                cb_event->data.post_incoming_packet_filter_cb.action);
+      break;
+
+    case SLI_ZIGBEE_STACK_POST_INCOMING_PACKET_FILTER_WITH_LQI_AND_RSSI_CB_IPC_EVENT_TYPE:
+      sl_zigbee_post_incoming_packet_filter_with_lqi_and_rssi_cb(cb_event->data.post_incoming_packet_filter_with_lqi_and_rssi_cb.packetType,
+                                                                 &cb_event->data.post_incoming_packet_filter_with_lqi_and_rssi_cb.linkQuality,
+                                                                 cb_event->data.post_incoming_packet_filter_with_lqi_and_rssi_cb.packetData,
+                                                                 cb_event->data.post_incoming_packet_filter_with_lqi_and_rssi_cb.size_p,
+                                                                 cb_event->data.post_incoming_packet_filter_with_lqi_and_rssi_cb.data,
+                                                                 cb_event->data.post_incoming_packet_filter_with_lqi_and_rssi_cb.size_d,
+                                                                 cb_event->data.post_incoming_packet_filter_with_lqi_and_rssi_cb.action);
       break;
 
     case SLI_ZIGBEE_STACK_POST_OUTGOING_PACKET_FILTER_CB_IPC_EVENT_TYPE:
