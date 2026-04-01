@@ -65,6 +65,9 @@ include:
   - path: btl_crc32.h
 provides:
 - name: bootloader
+metadata:
+  sbom:
+    license: MSLA
 ui_hints:
   visibility: never
 root_path: bootloader

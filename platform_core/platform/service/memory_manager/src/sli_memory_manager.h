@@ -50,6 +50,17 @@ extern "C" {
  *********************************   DEFINES   *********************************
  ******************************************************************************/
 
+// 1 when retention statistics are enabled (config and bank retention control present or stubbed).
+// Heap statistics (SL_MEMORY_MANAGER_STATISTICS_API_ENABLE) are not required; retention and heap stats are independent.
+#if defined(SL_MEMORY_MANAGER_STATISTICS_RETENTION_ENABLE) && (SL_MEMORY_MANAGER_STATISTICS_RETENTION_ENABLE == 1) \
+  && defined(SL_CATALOG_BANK_RETENTION_CONTROL_PRESENT)
+#define SLI_MEMORY_MANAGER_RETENTION_STATISTICS_AVAILABLE  1
+// Bank indices storable in uint64_t absolute retained-banks mask (API limit).
+#define SLI_MEMORY_MANAGER_ABSOLUTE_RETAINED_BANKS_MASK_MAX_BITS  64u
+#else
+#define SLI_MEMORY_MANAGER_RETENTION_STATISTICS_AVAILABLE  0
+#endif
+
 // Memory Manager integration to SystemView is enabled on GCC builds of
 // applications that include the SystemView component
 #if defined(SL_CATALOG_SYSTEMVIEW_TRACE_PRESENT) && defined(__GNUC__)
@@ -175,30 +186,40 @@ typedef enum {
 #define SLI_POOL_BITS_TO_BYTE(bits) (((bits) + 7u) / SLI_DEF_INT_08_NBR_BITS)
 
 #if defined(SL_CATALOG_BANK_RETENTION_CONTROL_PRESENT)
-#define INCREMENT_BANK_COUNTER(heap, start_addr, end_addr) sli_memory_manager_increment_bank_counter(heap,                                                     \
-                                                                                                     sli_memory_manager_get_bank_id_by_addr(heap, start_addr), \
-                                                                                                     sli_memory_manager_get_bank_id_by_addr(heap, end_addr))
+// Increment bank counters and retention statistics (if enabled) for the range [start_addr, end_addr].
+#define SLI_MEMORY_INCREMENT_BANK_COUNTER(heap, start_addr, end_addr) do {                                 \
+    sli_memory_manager_increment_bank_counter(heap,                                                        \
+                                              sli_memory_manager_get_bank_id_by_addr(heap, start_addr),    \
+                                              sli_memory_manager_get_bank_id_by_addr(heap, end_addr));     \
+    sli_memory_manager_retention_add_size(heap,                                                            \
+                                          (size_t)((uintptr_t)(end_addr) - (uintptr_t)(start_addr) + 1u)); \
+} while (0)
 
-#define DECREMENT_BANK_COUNTER(heap, start_addr, end_addr) sli_memory_manager_decrement_bank_counter(heap,                                                     \
-                                                                                                     sli_memory_manager_get_bank_id_by_addr(heap, start_addr), \
-                                                                                                     sli_memory_manager_get_bank_id_by_addr(heap, end_addr))
+// Decrement bank counters and retention statistics (if enabled) for the range [start_addr, end_addr].
+#define SLI_MEMORY_DECREMENT_BANK_COUNTER(heap, start_addr, end_addr) do {                                      \
+    sli_memory_manager_decrement_bank_counter(heap,                                                             \
+                                              sli_memory_manager_get_bank_id_by_addr(heap, start_addr),         \
+                                              sli_memory_manager_get_bank_id_by_addr(heap, end_addr));          \
+    sli_memory_manager_retention_subtract_size(heap,                                                            \
+                                               (size_t)((uintptr_t)(end_addr) - (uintptr_t)(start_addr) + 1u)); \
+} while (0)
 #else
-#define INCREMENT_BANK_COUNTER(heap, start_addr, end_addr) (void)heap
-#define DECREMENT_BANK_COUNTER(heap, start_addr, end_addr) (void)heap
+#define SLI_MEMORY_INCREMENT_BANK_COUNTER(heap, start_addr, end_addr) (void)heap
+#define SLI_MEMORY_DECREMENT_BANK_COUNTER(heap, start_addr, end_addr) (void)heap
 #endif
 
 #if defined(SL_MEMORY_MANAGER_STATISTICS_API_ENABLE) && (SL_MEMORY_MANAGER_STATISTICS_API_ENABLE == 1)
-#define SLI_MEMORY_STAT_HEAP_INCREASE(_heap, _inc)          \
-  do {                                                      \
-    (_heap)->used_size += (size_t)(_inc);                   \
-    if ((_heap)->used_size > (_heap)->high_watermark) {     \
-      (_heap)->high_watermark = (_heap)->used_size;         \
-    }                                                       \
+#define SLI_MEMORY_STAT_HEAP_INCREASE(_heap, _inc)      \
+  do {                                                  \
+    (_heap)->used_size += (size_t)(_inc);               \
+    if ((_heap)->used_size > (_heap)->high_watermark) { \
+      (_heap)->high_watermark = (_heap)->used_size;     \
+    }                                                   \
   } while (0)
 
-#define SLI_MEMORY_STAT_HEAP_DECREASE(_heap, _dec)          \
-  do {                                                      \
-    (_heap)->used_size -= (size_t)(_dec);                   \
+#define SLI_MEMORY_STAT_HEAP_DECREASE(_heap, _dec) \
+  do {                                             \
+    (_heap)->used_size -= (size_t)(_dec);          \
   } while (0)
 #else
 #define SLI_MEMORY_STAT_HEAP_INCREASE(_heap, _inc) do { (void)(_heap); (void)(_inc); } while (0)

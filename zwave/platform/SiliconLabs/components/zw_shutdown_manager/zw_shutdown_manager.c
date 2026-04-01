@@ -80,7 +80,7 @@ void zw_shutdown_manager_callback(sl_power_manager_em_t from, sl_power_manager_e
 
   // handle sleep entry
   if (SL_POWER_MANAGER_EM2 == to) {
-    if (0 != em4_locks_counter) {
+    if (0 != em4_locks_counter || ZPAL_RADIO_STATUS_OFF != zpal_radio_get_wakeup_status()) {
       sl_dcdc_setup_em2();
       // there are active locks, stay in EM2/EM1P
       return;

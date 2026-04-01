@@ -317,6 +317,46 @@ sudo INFRA_IF_NAME=eth0 RELEASE=1 BACKBONE_ROUTER=1 BORDER_ROUTING=0 NAT64=0 \
 #define OPENTHREAD_CONFIG_BORDER_ROUTING_DHCP6_PD_CLIENT_ENABLE 0
 
 /**
+ * @def OPENTHREAD_CONFIG_NET_DIAG_VENDOR_NAME
+ *
+ * Set to a non-empty default to satisfy certification features, but can be changed at run time.
+ * See `OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE`
+ */
+#undef OPENTHREAD_CONFIG_NET_DIAG_VENDOR_NAME
+#if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
+#define OPENTHREAD_CONFIG_NET_DIAG_VENDOR_NAME "RD:Silicon Labs"
+#else
+#define OPENTHREAD_CONFIG_NET_DIAG_VENDOR_NAME "Silicon Labs"
+#endif
+
+/**
+ * @def OPENTHREAD_CONFIG_NET_DIAG_VENDOR_MODEL
+ *
+ * Set to a non-empty default to satisfy certification features, but can be changed at run time.
+ * See `OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE`
+ */
+#undef OPENTHREAD_CONFIG_NET_DIAG_VENDOR_MODEL
+#define OPENTHREAD_CONFIG_NET_DIAG_VENDOR_MODEL "OpenThread Border Router"
+
+/**
+ * @def OPENTHREAD_CONFIG_NET_DIAG_VENDOR_SW_VERSION
+ *
+ * Set to a non-empty default to satisfy certification features, but can be changed at run time.
+ * See `OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE`
+ */
+#undef OPENTHREAD_CONFIG_NET_DIAG_VENDOR_SW_VERSION
+#define OPENTHREAD_CONFIG_NET_DIAG_VENDOR_SW_VERSION "3.1.0.0"
+
+/**
+ * @def OPENTHREAD_CONFIG_NET_DIAG_VENDOR_APP_URL
+ *
+ * Set to a non-empty default to satisfy certification features, but can be changed at run time.
+ * See `OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE`
+ */
+#undef OPENTHREAD_CONFIG_NET_DIAG_VENDOR_APP_URL
+#define OPENTHREAD_CONFIG_NET_DIAG_VENDOR_APP_URL "www.silabs.com"
+
+/**
  * @def OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE
  *
  * Set to 1 to add APIs to allow Vendor Name, Model, SW Version to change at run-time.

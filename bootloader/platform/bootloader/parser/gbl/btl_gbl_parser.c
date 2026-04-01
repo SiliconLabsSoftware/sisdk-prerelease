@@ -840,9 +840,9 @@ int32_t parser_parse(void                              *context,
             // Assume that the LZ4 compression ratio won't exceed 20% for safety. Use this to allocate RAM buffer.
             uint32_t patch_length = (uint32_t)(1.25*(parserContext->lengthOfTag - 12));
             patch_length = btl_checkAlignment(patch_length);
-            parserContext->deltaPatchAddress = btl_getRAMSlotAddress(patch_length);
+            parserContext->deltaPatchAddress = (uint32_t)btl_getRAMSlotAddress(patch_length);
             //Check if delta patch address is not NULL
-            if (parserContext->deltaPatchAddress == 0) {
+            if (parserContext->deltaPatchAddress == 0U) {
               return BOOTLOADER_ERROR_PARSER_OOB_WRITE;
             }
             parserContext->programmingAddress = parserContext->deltaPatchAddress;

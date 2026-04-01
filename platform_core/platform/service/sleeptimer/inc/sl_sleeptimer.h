@@ -73,8 +73,13 @@ typedef struct sl_sleeptimer_timer_handle sl_sleeptimer_timer_handle_t;
  ******************************************************************************/
 typedef void (*sl_sleeptimer_timer_callback_t)(sl_sleeptimer_timer_handle_t *handle, void *data);
 
+/// A Sleep Timer instance handle data structure.
+/// Allocated by the application using the Sleep Timer.
+/// Several concurrent timer handles may exist. The application must
+/// not modify the contents of this handle and should not depend on its values.
 /// @brief Timer structure for sleeptimer
 struct sl_sleeptimer_timer_handle {
+  /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
   void *callback_data;                     ///< User data to pass to callback function.
   uint8_t priority;                        ///< Priority of timer.
   uint16_t option_flags;                   ///< Option flags.
@@ -85,6 +90,7 @@ struct sl_sleeptimer_timer_handle {
   uint32_t timeout_expected_tc;            ///< Expected tick count of the next timeout (only used for periodic timer).
   uint16_t conversion_error;               ///< The error when converting ms to ticks (thousandths of ticks)
   uint16_t accumulated_error;              ///< Accumulated conversion error (thousandths of ticks)
+  /// @endcond
 };
 
 /// @brief Month enum.

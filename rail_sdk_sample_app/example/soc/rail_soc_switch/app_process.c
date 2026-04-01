@@ -32,6 +32,7 @@
 //                                   Includes
 // -----------------------------------------------------------------------------
 #include <stdint.h>
+#include <inttypes.h>
 #include "sl_component_catalog.h"
 #include "printf.h"
 #include "app_log.h"
@@ -256,7 +257,7 @@ void app_process_action(void)
   sl_rail_handle_t rail_handle = sl_rail_util_get_handle(SL_RAIL_UTIL_HANDLE_INST0);
 
   if (current_rail_err != 0) {
-    app_log_error("RAIL Error occurred\nEvents: 0x%016llX\n", current_rail_err);
+    app_log_error("RAIL Error occurred\nEvents: 0x%" PRIX64 "\n", current_rail_err);
     current_rail_err = 0;
   }
 
@@ -447,12 +448,10 @@ static void check_paired_state(void)
   bool is_paired = ((start_of_packet[DEVICE_STATUS_PAYLOAD_BYTE] & 0x01) && (switch_module.mode == SWITCH_MODE_LINKED));
   if (switch_module.is_paired != is_paired) {
     switch_module.is_paired = is_paired;
-    char text_tmp[32];
-    snprintf(text_tmp, sizeof(text_tmp), "%s%s%s",
-             "NODES ARE IN ",
-             ((is_paired == true) ? "PAIRED " : "NOT PAIRED "),
-             "STATE\n");
-    app_log_info(text_tmp);
+    app_log_info(
+      "NODES ARE IN %s STATE\n",
+      (is_paired == true) ? "PAIRED " : "NOT PAIRED "
+      );
   }
 }
 /******************************************************************************
@@ -460,18 +459,16 @@ static void check_paired_state(void)
  *****************************************************************************/
 static void cli_state_machine_change(void)
 {
-  char text_tmp[64];
 #if defined(_SILICON_LABS_32B_SERIES_2)
   uint64_t sys_id = SYSTEM_GetUnique();
 #else
   uint64_t sys_id = sl_hal_system_get_unique();
 #endif
-  snprintf(text_tmp, sizeof(text_tmp), "%s%04X%s%s",
-           "State changing event at Switch Node [",
-           ((uint16_t)(sys_id & 0x0000FFFF)),
-           "]. ",
-           ((switch_module.mode == SWITCH_MODE_SCAN) ? "Mode: LINK\n" : "Mode: SCAN\n"));
-  app_log_info(text_tmp);
+  app_log_info(
+    "State changing event at Switch Node [0x%04" PRIX16 "]. %s\n",
+    (uint16_t)(sys_id & 0x0000FFFF),
+    (switch_module.mode == SWITCH_MODE_SCAN) ? "Mode: LINK" : "Mode: SCAN"
+    );
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   app_task_notify();
 #endif
@@ -482,18 +479,16 @@ static void cli_state_machine_change(void)
  *****************************************************************************/
 static void cli_switch_side_light_bulb_toggle(void)
 {
-  char text_tmp[64];
 #if defined(_SILICON_LABS_32B_SERIES_2)
   uint64_t sys_id = SYSTEM_GetUnique();
 #else
   uint64_t sys_id = sl_hal_system_get_unique();
 #endif
-  snprintf(text_tmp, sizeof(text_tmp), "%s%04X%s%s",
-           "Led Toggle event at Switch Node [",
-           ((uint16_t)(sys_id & 0x0000FFFF)),
-           "]. ",
-           ((light_module.light_state == LIGHT_STATE_OFF) ? "Light Bulb is ON\n" : "Light Bulb is OFF\n"));
-  app_log_info(text_tmp);
+  app_log_info(
+    "Led Toggle event at Switch Node [0x%04" PRIX16 "]. %s",
+    (uint16_t)(sys_id & 0x0000FFFF),
+    ((light_module.light_state == LIGHT_STATE_OFF) ? "Light Bulb is ON\n" : "Light Bulb is OFF\n")
+    );
   button_was_pushed = true;
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   app_task_notify();
@@ -505,13 +500,11 @@ static void cli_switch_side_light_bulb_toggle(void)
  *****************************************************************************/
 static void cli_light_side_light_bulb_toggle(void)
 {
-  char text_tmp[64];
-  snprintf(text_tmp, sizeof(text_tmp), "%s%04X%s%s",
-           "Led Toggle event at Light Node [",
-           *((uint16_t*)light_module.addr),
-           "]. ",
-           ((light_module.light_state == LIGHT_STATE_OFF) ? "Light Bulb is ON\n" : "Light Bulb is OFF\n"));
-  app_log_info(text_tmp);
+  app_log_info(
+    "Led Toggle event at Light Node [0x%04" PRIX16 "]. %s",
+    *((uint16_t*)light_module.addr),
+    ((light_module.light_state == LIGHT_STATE_OFF) ? "Light Bulb is ON\n" : "Light Bulb is OFF\n")
+    );
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   app_task_notify();
 #endif
@@ -531,7 +524,7 @@ static void transmit_packet(sl_rail_handle_t rail_handle)
   prepare_packet(rail_handle, out_packet, sizeof(out_packet));
   rail_status = sl_rail_start_tx(rail_handle, get_selected_channel(), SL_RAIL_TX_OPTIONS_DEFAULT, NULL);
   if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
-    app_log_warning("sl_rail_start_tx() result: 0x%08lX\n ", rail_status);
+    app_log_warning("sl_rail_start_tx() result: 0x%08" PRIX32 "\n ", rail_status);
   }
 }
 
@@ -547,12 +540,12 @@ static void save_received_packet(sl_rail_handle_t rail_handle)
     if (packet_info.packet_bytes <= SL_RAIL_SDK_RX_FIFO_SIZE) {
       uint16_t packet_size = unpack_packet(rail_handle, rx_buffer, &packet_info, &start_of_packet);
       if (packet_size == 0) {
-        app_log_warning("Packet size is: %u", packet_size);
+        app_log_warning("Packet size is: %" PRIu16, packet_size);
       }
     }
     rail_status = sl_rail_release_rx_packet(rail_handle, SL_RAIL_RX_PACKET_HANDLE_OLDEST_COMPLETE);
     if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
-      app_log_warning("sl_rail_release_rx_packet() result: 0x%08lX\n", rail_status);
+      app_log_warning("sl_rail_release_rx_packet() result: 0x%08" PRIX32 "\n", rail_status);
     }
     if (packet_info.packet_bytes <= SL_RAIL_SDK_RX_FIFO_SIZE) {
       light_module.light_mode = get_light_response_type(start_of_packet);
@@ -585,12 +578,11 @@ static void get_light_state_from_rx_fifo(void)
 {
   // If the light changed its state
   if (light_module.communication_state != (start_of_packet[DEVICE_STATUS_PAYLOAD_BYTE] & 0x03)) {
-    char text_tmp[64];
-    snprintf(text_tmp, sizeof(text_tmp), "%s%04X%s%s",
-             "State changing event at Light Node [",
-             *(uint16_t*)light_module.addr,
-             "] ",
-             ((light_module.communication_state == LIGHT_MODE_ADVERTISE) ? "Mode: ADVERTISE\n" : "Mode: READY\n"));
+    app_log_info(
+      "State changing event at Light Node [0x%04" PRIX16 "]. %s\n",
+      *(uint16_t*)light_module.addr,
+      (light_module.communication_state == LIGHT_MODE_ADVERTISE) ? "Mode: ADVERTISE" : "Mode: READY"
+      );
     light_module.communication_state = (light_mode_t)(start_of_packet[DEVICE_STATUS_PAYLOAD_BYTE] & 0x03);
   }
 }
@@ -643,7 +635,7 @@ static void write_ID_to_buffer(void)
   int ID_not_null = memcmp((void*)light_module.addr, blankAddr, sizeof(light_module.addr));
   if (ID_not_null) {
     snprintf(switch_module.switch_text_buffer, sizeof(switch_module.switch_text_buffer), \
-             "%s%04X", switch_module.switch_text[switch_module.mode], *((uint16_t*)light_module.addr));
+             "%s%04" PRIX16, switch_module.switch_text[switch_module.mode], *((uint16_t*)light_module.addr));
   } else {
     snprintf(switch_module.switch_text_buffer, sizeof(switch_module.switch_text_buffer), \
              "%s", switch_module.switch_text[switch_module.mode]);

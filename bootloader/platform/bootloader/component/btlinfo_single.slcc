@@ -10,6 +10,9 @@ source:
 - path: "platform/bootloader/storage/bootloadinfo/btl_storage_bootloadinfo_single.c"
 provides:
 - name: btlinfo_single
+metadata:
+  sbom:
+    license: MSLA
 ui_hints:
   visibility: never
 root_path: bootloader

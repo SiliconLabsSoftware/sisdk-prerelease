@@ -2271,24 +2271,34 @@ static uint8_t SetPriorityRoute(uint16_t nodeID, const uint8_t *routeInfo)
 
 ZW_ADD_CMD(FUNC_ID_ZW_SET_PRIORITY_ROUTE)
 {
-  /* HOST->ZW: nodeID | repeater0 | repeater1 | repeater2 | repeater3 | routespeed */
-  /* ZW->HOST: nodeID | routeUpdated */
+  /* HOST->ZW: nodeID (8/16 bits) | repeater0 | repeater1 | repeater2 | repeater3 | routespeed */
+  /* ZW->HOST: nodeID (8/16 bits) | Command Status */
   uint8_t  offset = 0;
   node_id_t nodeId = (node_id_t)GET_NODEID(&frame->payload[0], offset);
+
+  /* According to spec: NodeID + 4 repeaters (4 bytes) + Route Speed (1 byte) = 5 bytes after NodeID */
+  const uint8_t expectedDataLength = 5; /* 4 repeaters + 1 route speed */
+  /* minFrameLength = node ID size (offset+1) + expected data (5 bytes) */
+  const uint8_t minFrameLength = (offset + 1) + expectedDataLength;
+
+  uint8_t commandStatus = 0;
+  if (minFrameLength <= frame_payload_len(frame)) {
+    /* Set Priority Route - routeInfo contains: repeater0, repeater1, repeater2, repeater3, routespeed */
+    commandStatus = SetPriorityRoute(nodeId, &frame->payload[offset + 1]);
+  } else {
+    /* Clear/Release Priority Route - insufficient data provided */
+    commandStatus = SetPriorityRoute(nodeId, NULL);
+  }
+
+  /* Response format per spec Table 4.165 (Set Priority Route Command - Response data frame) : nodeID (8/16 bits) | Command Status (8 bits) */
   if (SERIAL_API_SETUP_NODEID_BASE_TYPE_16_BIT == nodeIdBaseType) {
     compl_workbuf[0] = (uint8_t)(nodeId >> 8);     // MSB
     compl_workbuf[1] = (uint8_t)(nodeId & 0xFF);   // LSB
   } else {
     compl_workbuf[0] = (uint8_t)(nodeId & 0xFF);   // Legacy 8 bit nodeIDs
   }
-  if ((offset + 9) <= frame->len) {
-    /* Set Priority Route Devkit 6.6x */
-    compl_workbuf[offset + 1] = SetPriorityRoute(nodeId, &frame->payload[offset + 1]);
-  } else {
-    /* Clear/Release Golden Route - Devkit 6.6x+ */
-    compl_workbuf[offset + 1] = SetPriorityRoute(nodeId, NULL);
-  }
-  DoRespond_workbuf(2);
+  compl_workbuf[offset + 1] = commandStatus;
+  DoRespond_workbuf(offset + 2);
 }
 #endif
 

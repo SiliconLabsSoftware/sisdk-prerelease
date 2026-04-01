@@ -52,13 +52,6 @@
 #define TRANSFER_BUFFER_IS_ALIGNED(ptr, align) (((uintptr_t)(ptr) & ((align) - 1)) == 0)
 
 /*******************************************************************************
- *****************************   LOCAL VARIABLES   *****************************
- ******************************************************************************/
-
-// Channel handle lookup table for IRQ processing.
-static sl_dma_channel_handle_t *s_channel_handle_table[DMA_CHAN_COUNT] = { 0 };
-
-/*******************************************************************************
  ***************************   LOCAL FUNCTIONS   *******************************
  ******************************************************************************/
 
@@ -82,8 +75,8 @@ static sl_dma_channel_handle_t *s_channel_handle_table[DMA_CHAN_COUNT] = { 0 };
  *       the returned descriptor (e.g., via link_descriptors), even though the
  *       function itself does not modify the descriptors during traversal.
  ******************************************************************************/
-static sl_dma_channel_xfer_descriptor_t* find_descriptor_by_link(const sl_dma_channel_xfer_descriptor_t* list_head,
-                                                                 const sl_dma_channel_xfer_descriptor_t* link);
+static sl_dma_channel_xfer_descriptor_t* find_descriptor_by_link(sl_dma_channel_xfer_descriptor_t* list_head,
+                                                                 sl_dma_channel_xfer_descriptor_t* link);
 
 /***************************************************************************//**
  * @brief Link two DMA channel transfer descriptors together.
@@ -149,15 +142,15 @@ static bool is_active_descriptor(const LDMA_TypeDef *ldma,
  *         successor.
  ******************************************************************************/
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static sl_dma_channel_xfer_descriptor_t* get_next_descriptor(const sl_dma_channel_xfer_descriptor_t* desc);
+static sl_dma_channel_xfer_descriptor_t* get_next_descriptor(sl_dma_channel_xfer_descriptor_t* desc);
 
 /***************************************************************************//**
  * @brief Populate hardware descriptor fields for a DMA transfer.
  *
  * This function configures all hardware-specific fields in a DMA descriptor
- * based on the transfer configuration. The source, destination and 
- * xfer_unit_count, parameters are provided separately to support transfer 
- * segmentation and looping transfers where these values may differ from the 
+ * based on the transfer configuration. The source, destination and
+ * xfer_unit_count, parameters are provided separately to support transfer
+ * segmentation and looping transfers where these values may differ from the
  * transfer struct.
  *
  * @param[in] descriptor Pointer to the descriptor to populate.
@@ -202,8 +195,8 @@ static sl_status_t build_descriptors_for_transfer(sl_dma_channel_transfer_t *cur
  * @brief Clean up internally allocated descriptors on error.
  *
  * This function frees all descriptors that were internally allocated by the
- * DMA Channel driver when an error occurs during descriptor building. The 
- * function iterates through the linked list of descriptors starting from 
+ * DMA Channel driver when an error occurs during descriptor building. The
+ * function iterates through the linked list of descriptors starting from
  * list_head until it reaches a descriptor with no link (link bit = 0).
  *
  * @param[in] handle Pointer to the dma channel handle.
@@ -282,9 +275,11 @@ static sl_status_t sli_dma_channel_submit_transfer_list(sl_dma_channel_handle_t 
                                                         bool begin_looping_mode);
 
 /***************************************************************************//**
- * @brief Internal per-channel interrupt processing routine.
+ * @brief Common DMA channel interrupt handler for all channels.
  *
- * Responsibilities:
+ * Retrieves the active channel and user data (handle) from the DMA Manager via
+ * sl_dma_manager_retrieve_current_channel_user_data(), then processes the
+ * interrupt. Responsibilities:
  *  - Detect channel error (CHERROR) and, if present, abort all queued work
  *    reporting (error=true, aborted=true) for each descriptor.
  *  - Pop and free one or more completed descriptors, invoking the user
@@ -296,156 +291,8 @@ static sl_status_t sli_dma_channel_submit_transfer_list(sl_dma_channel_handle_t 
  * The function intentionally operates without holding a long critical section
  * (hardware has already signalled completion) and relies on single context
  * invocation per hardware channel IRQ.
- *
- * @param[in] ch Channel number whose interrupt is being serviced.
  ******************************************************************************/
-static void sli_dma_channel_irq_process(uint8_t ch);
-
-/***************************************************************************//**
- * @brief DMA Channel 0 IRQ wrapper.
- *
- * Forwards the interrupt to the common per-channel processing routine.
- ******************************************************************************/
-static void sl_dma_channel_irq_wrapper_ch0(void);
-
-/***************************************************************************//**
- * @brief DMA Channel 1 IRQ wrapper.
- *
- * Forwards the interrupt to the common per-channel processing routine.
- ******************************************************************************/
-static void sl_dma_channel_irq_wrapper_ch1(void);
-
-/***************************************************************************//**
- * @brief DMA Channel 2 IRQ wrapper.
- *
- * Forwards the interrupt to the common per-channel processing routine.
- ******************************************************************************/
-static void sl_dma_channel_irq_wrapper_ch2(void);
-
-/***************************************************************************//**
- * @brief DMA Channel 3 IRQ wrapper.
- *
- * Forwards the interrupt to the common per-channel processing routine.
- ******************************************************************************/
-static void sl_dma_channel_irq_wrapper_ch3(void);
-
-/***************************************************************************//**
- * @brief DMA Channel 4 IRQ wrapper.
- *
- * Forwards the interrupt to the common per-channel processing routine.
- ******************************************************************************/
-static void sl_dma_channel_irq_wrapper_ch4(void);
-
-/***************************************************************************//**
- * @brief DMA Channel 5 IRQ wrapper.
- *
- * Forwards the interrupt to the common per-channel processing routine.
- ******************************************************************************/
-static void sl_dma_channel_irq_wrapper_ch5(void);
-
-/***************************************************************************//**
- * @brief DMA Channel 6 IRQ wrapper.
- *
- * Forwards the interrupt to the common per-channel processing routine.
- ******************************************************************************/
-static void sl_dma_channel_irq_wrapper_ch6(void);
-
-/***************************************************************************//**
- * @brief DMA Channel 7 IRQ wrapper.
- *
- * Forwards the interrupt to the common per-channel processing routine.
- ******************************************************************************/
-static void sl_dma_channel_irq_wrapper_ch7(void);
-
-#if (DMA_CHAN_COUNT > 8)
-/***************************************************************************//**
- * @brief DMA Channel 8 IRQ wrapper.
- *
- * Forwards the interrupt to the common per-channel processing routine.
- ******************************************************************************/
-static void sl_dma_channel_irq_wrapper_ch8(void);
-#endif
-
-#if (DMA_CHAN_COUNT > 9)
-/***************************************************************************//**
- * @brief DMA Channel 9 IRQ wrapper.
- *
- * Forwards the interrupt to the common per-channel processing routine.
- ******************************************************************************/
-static void sl_dma_channel_irq_wrapper_ch9(void);
-#endif
-
-#if (DMA_CHAN_COUNT > 10)
-/***************************************************************************//**
- * @brief DMA Channel 10 IRQ wrapper.
- *
- * Forwards the interrupt to the common per-channel processing routine.
- ******************************************************************************/
-static void sl_dma_channel_irq_wrapper_ch10(void);
-#endif
-
-#if (DMA_CHAN_COUNT > 11)
-/***************************************************************************//**
- * @brief DMA Channel 11 IRQ wrapper.
- *
- * Forwards the interrupt to the common per-channel processing routine.
- ******************************************************************************/
-static void sl_dma_channel_irq_wrapper_ch11(void);
-#endif
-
-#if (DMA_CHAN_COUNT > 12)
-/***************************************************************************//**
- * @brief DMA Channel 12 IRQ wrapper.
- *
- * Forwards the interrupt to the common per-channel processing routine.
- ******************************************************************************/
-static void sl_dma_channel_irq_wrapper_ch12(void);
-#endif
-
-#if (DMA_CHAN_COUNT > 13)
-/***************************************************************************//**
- * @brief DMA Channel 13 IRQ wrapper.
- *
- * Forwards the interrupt to the common per-channel processing routine.
- ******************************************************************************/
-static void sl_dma_channel_irq_wrapper_ch13(void);
-#endif
-
-#if (DMA_CHAN_COUNT > 14)
-/***************************************************************************//**
- * @brief DMA Channel 14 IRQ wrapper.
- *
- * Forwards the interrupt to the common per-channel processing routine.
- ******************************************************************************/
-static void sl_dma_channel_irq_wrapper_ch14(void);
-#endif
-
-#if (DMA_CHAN_COUNT > 15)
-/***************************************************************************//**
- * @brief DMA Channel 15 IRQ wrapper.
- *
- * Forwards the interrupt to the common per-channel processing routine.
- ******************************************************************************/
-static void sl_dma_channel_irq_wrapper_ch15(void);
-#endif
-
-#if (DMA_CHAN_COUNT > 16)
-/***************************************************************************//**
- * @brief DMA Channel 16 IRQ wrapper.
- *
- * Forwards the interrupt to the common per-channel processing routine.
- ******************************************************************************/
-static void sl_dma_channel_irq_wrapper_ch16(void);
-#endif
-
-#if (DMA_CHAN_COUNT > 17)
-/***************************************************************************//**
- * @brief DMA Channel 17 IRQ wrapper.
- *
- * Forwards the interrupt to the common per-channel processing routine.
- ******************************************************************************/
-static void sl_dma_channel_irq_wrapper_ch17(void);
-#endif
+static void sl_dma_channel_common_irq_handler(void);
 
 /*******************************************************************************
  ***************************   GLOBAL FUNCTIONS  *******************************
@@ -483,9 +330,9 @@ sl_status_t sl_dma_channel_handle_free(sl_dma_channel_handle_t *handle)
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_ATOMIC();
 
-  // Clear handle table entry before freeing the handle.
-  if (ch < DMA_CHAN_COUNT && s_channel_handle_table[ch] == handle) {
-    s_channel_handle_table[ch] = NULL;
+  // Clear user data from DMA manager before freeing the handle (handle_free may be called without deinit).
+  if (ch < DMA_CHAN_COUNT) {
+    (void)sl_dma_manager_register_channel_user_data(NULL, ch, NULL);
   }
 
   sl_free(handle);
@@ -605,52 +452,12 @@ sl_status_t sl_dma_channel_init(sl_dma_channel_handle_t *handle,
   // Reset peripheral signal
   sl_dma_channel_set_peripheral_signal(handle, NULL);
 
-  // Store handle for IRQ lookup (always register wrapper so we can free internal descriptors)
+  // Register user data and single IRQ handler for this channel (always register so we can free internal descriptors)
   if (channel_number < DMA_CHAN_COUNT) {
-    s_channel_handle_table[channel_number] = handle;
-    switch (channel_number) {
-      case 0: (void)sl_dma_manager_register_channel_irq_callback(NULL, 0, sl_dma_channel_irq_wrapper_ch0); break;
-      case 1: (void)sl_dma_manager_register_channel_irq_callback(NULL, 1, sl_dma_channel_irq_wrapper_ch1); break;
-      case 2: (void)sl_dma_manager_register_channel_irq_callback(NULL, 2, sl_dma_channel_irq_wrapper_ch2); break;
-      case 3: (void)sl_dma_manager_register_channel_irq_callback(NULL, 3, sl_dma_channel_irq_wrapper_ch3); break;
-      case 4: (void)sl_dma_manager_register_channel_irq_callback(NULL, 4, sl_dma_channel_irq_wrapper_ch4); break;
-      case 5: (void)sl_dma_manager_register_channel_irq_callback(NULL, 5, sl_dma_channel_irq_wrapper_ch5); break;
-      case 6: (void)sl_dma_manager_register_channel_irq_callback(NULL, 6, sl_dma_channel_irq_wrapper_ch6); break;
-      case 7: (void)sl_dma_manager_register_channel_irq_callback(NULL, 7, sl_dma_channel_irq_wrapper_ch7); break;
-#if (DMA_CHAN_COUNT > 8)
-      case 8: (void)sl_dma_manager_register_channel_irq_callback(NULL, 8, sl_dma_channel_irq_wrapper_ch8); break;
-#endif
-#if (DMA_CHAN_COUNT > 9)
-      case 9: (void)sl_dma_manager_register_channel_irq_callback(NULL, 9, sl_dma_channel_irq_wrapper_ch9); break;
-#endif
-#if (DMA_CHAN_COUNT > 10)
-      case 10: (void)sl_dma_manager_register_channel_irq_callback(NULL, 10, sl_dma_channel_irq_wrapper_ch10); break;
-#endif
-#if (DMA_CHAN_COUNT > 11)
-      case 11: (void)sl_dma_manager_register_channel_irq_callback(NULL, 11, sl_dma_channel_irq_wrapper_ch11); break;
-#endif
-#if (DMA_CHAN_COUNT > 12)
-      case 12: (void)sl_dma_manager_register_channel_irq_callback(NULL, 12, sl_dma_channel_irq_wrapper_ch12); break;
-#endif
-#if (DMA_CHAN_COUNT > 13)
-      case 13: (void)sl_dma_manager_register_channel_irq_callback(NULL, 13, sl_dma_channel_irq_wrapper_ch13); break;
-#endif
-#if (DMA_CHAN_COUNT > 14)
-      case 14: (void)sl_dma_manager_register_channel_irq_callback(NULL, 14, sl_dma_channel_irq_wrapper_ch14); break;
-#endif
-#if (DMA_CHAN_COUNT > 15)
-      case 15: (void)sl_dma_manager_register_channel_irq_callback(NULL, 15, sl_dma_channel_irq_wrapper_ch15); break;
-#endif
-#if (DMA_CHAN_COUNT > 16)
-      case 16: (void)sl_dma_manager_register_channel_irq_callback(NULL, 16, sl_dma_channel_irq_wrapper_ch16); break;
-#endif
-#if (DMA_CHAN_COUNT > 17)
-      case 17: (void)sl_dma_manager_register_channel_irq_callback(NULL, 17, sl_dma_channel_irq_wrapper_ch17); break;
-#endif
-      default: break; // No wrapper defined beyond 18; extend if needed.
-    }
+    (void)sl_dma_manager_register_channel_user_data(NULL, channel_number, handle);
+    (void)sl_dma_manager_register_channel_irq_callback(NULL, channel_number, sl_dma_channel_common_irq_handler);
 
-    // When initializing, we should ensure that the CHDONE flag is set since 
+    // When initializing, we should ensure that the CHDONE flag is set since
     // this is the state we want to be in when there is nothing left in the DMA
     // channel. We will use this assumption later when submitting transfers.
     ldma->CHDONE_SET = 1UL << channel_number;
@@ -711,11 +518,9 @@ sl_status_t sl_dma_channel_deinit(sl_dma_channel_handle_t *handle)
   // Reset peripheral signal
   sl_dma_channel_set_peripheral_signal(handle, NULL);
 
-  // Unregister IRQ callback by passing NULL callback
+  // Unregister IRQ callback and user data
   (void)sl_dma_manager_register_channel_irq_callback(NULL, channel_number, NULL);
-
-  // Clear handle from internal table
-  s_channel_handle_table[channel_number] = NULL;
+  (void)sl_dma_manager_register_channel_user_data(NULL, channel_number, NULL);
 
   CORE_EXIT_ATOMIC();
 
@@ -797,10 +602,10 @@ sl_status_t sl_dma_channel_abort(sl_dma_channel_handle_t *handle)
   LDMA_TypeDef *ldma = sl_device_peripheral_ldma_get_base_addr((sl_peripheral_t)handle->dma_peripheral);
   uint8_t ch = handle->channel_number;
 
-  // Return an OK status if we are already in the middle of aborting, or the 
+  // Return an OK status if we are already in the middle of aborting, or the
   // channel is already disabled.
-  if ( handle->state == SL_DMA_CHANNEL_STATE_ABORTING 
-      || handle->state == SL_DMA_CHANNEL_STATE_DISABLED ) {
+  if ( handle->state == SL_DMA_CHANNEL_STATE_ABORTING
+       || handle->state == SL_DMA_CHANNEL_STATE_DISABLED ) {
     return SL_STATUS_OK;
   }
 
@@ -829,17 +634,17 @@ sl_status_t sl_dma_channel_abort(sl_dma_channel_handle_t *handle)
       link_descriptors(completed_tail, NULL);
     }
 
-    // Lets process the completed descriptors now if there are any 
+    // Lets process the completed descriptors now if there are any
     // remaining to be processed.
     if ( completed_tail != NULL && !CORE_IN_IRQ_CONTEXT() ) {
-        // If we were in an IRQ context, then we would be aborting from
-        // within `process_completed_descriptors` called by the IRQ 
-        // handler.
-        //
-        // We currently aren't in an IRQ context, so the abort was not 
-        // initiated within `process_completed_descriptors`, so we need 
-        // to manually process the completed descriptors.
-        process_completed_descriptors(handle);
+      // If we were in an IRQ context, then we would be aborting from
+      // within `process_completed_descriptors` called by the IRQ
+      // handler.
+      //
+      // We currently aren't in an IRQ context, so the abort was not
+      // initiated within `process_completed_descriptors`, so we need
+      // to manually process the completed descriptors.
+      process_completed_descriptors(handle);
     }
   }
 
@@ -848,7 +653,7 @@ sl_status_t sl_dma_channel_abort(sl_dma_channel_handle_t *handle)
     aborted_head = process_descriptor(handle, aborted_head, false, true);
   }
 
-  // Reset DMA channel. 
+  // Reset DMA channel.
   handle->mode = SL_DMA_CHANNEL_MODE_NORMAL;
   handle->state = SL_DMA_CHANNEL_STATE_DISABLED;
   handle->descriptor_list = NULL;
@@ -865,7 +670,7 @@ sl_status_t sl_dma_channel_abort(sl_dma_channel_handle_t *handle)
   __DMB();
 
   sl_hal_ldma_enable_channel(ldma, ch);
-  while(sl_hal_ldma_channel_is_active(ldma, ch));
+  while (sl_hal_ldma_channel_is_active(ldma, ch)) ;
   sl_hal_ldma_disable_channel(ldma, ch);
 
   sl_hal_ldma_enable_interrupts(ldma, 1UL << ch);
@@ -951,11 +756,11 @@ sl_status_t sl_dma_channel_get_status(sl_dma_channel_handle_t *handle,
   while ( !is_active_descriptor(ldma_hw_instance, handle->channel_number, entry) ) {
     entry = get_next_descriptor(entry);
     if ( entry == NULL) {
-        CORE_EXIT_ATOMIC();
-        return SL_STATUS_OK;
+      CORE_EXIT_ATOMIC();
+      return SL_STATUS_OK;
     }
   }
-  
+
   uint32_t orig_items = ((sl_hal_ldma_descriptor_t*)entry)->xfer.xfer_count + 1U;
 
 #if defined(_LDMA_CH_XCTRL_XFERCNT_MASK) && !defined(_LDMA_CH_XCTRL_BUFFERABLE_MASK)
@@ -1121,8 +926,8 @@ sl_status_t sl_dma_channel_update_active_transfer(sl_dma_channel_handle_t *handl
   while ( !is_active_descriptor(ldma, ch, active_desc) ) {
     active_desc = get_next_descriptor(active_desc);
     if (active_desc == NULL) {
-        CORE_EXIT_ATOMIC();
-        return SL_STATUS_INVALID_STATE;
+      CORE_EXIT_ATOMIC();
+      return SL_STATUS_INVALID_STATE;
     }
   }
 
@@ -1397,7 +1202,7 @@ sl_status_t sl_dma_channel_submit_triple_buffered_transfer_p2m(sl_dma_channel_ha
   sl_dma_channel_transfer_t buf1_transfer;
   sl_dma_channel_transfer_t buf2_transfer;
   sl_dma_channel_transfer_t buf3_transfer;
-
+  
   buf1_transfer = (sl_dma_channel_transfer_t) {
     .source = source,
     .destination = destination,
@@ -1571,20 +1376,17 @@ static sl_status_t sli_dma_channel_submit_transfer_list(sl_dma_channel_handle_t 
   return status;
 }
 
-static sl_dma_channel_xfer_descriptor_t* find_descriptor_by_link(const sl_dma_channel_xfer_descriptor_t* list_head,
-                                                                 const sl_dma_channel_xfer_descriptor_t* link)
+static sl_dma_channel_xfer_descriptor_t* find_descriptor_by_link(sl_dma_channel_xfer_descriptor_t* list_head,
+                                                                 sl_dma_channel_xfer_descriptor_t* link)
 {
   EFM_ASSERT(list_head != NULL);
 
-  const sl_hal_ldma_descriptor_t* link_hw_desc = (const sl_hal_ldma_descriptor_t*) link;
-  const sl_hal_ldma_descriptor_t* hw_desc_iter = (const sl_hal_ldma_descriptor_t*)list_head;
+  sl_hal_ldma_descriptor_t* link_hw_desc = (sl_hal_ldma_descriptor_t*) link;
+  sl_hal_ldma_descriptor_t* hw_desc_iter = (sl_hal_ldma_descriptor_t*)list_head;
   while ( SL_HAL_LDMA_DESCRIPTOR_LINKABS_LINKADDR_TO_ADDR(hw_desc_iter->xfer.link_addr) != link_hw_desc ) {
     hw_desc_iter = SL_HAL_LDMA_DESCRIPTOR_LINKABS_LINKADDR_TO_ADDR(hw_desc_iter->xfer.link_addr);
   }
 
-  // Cast away const: this function doesn't modify the input, but returns a non-const
-  // pointer so the caller can modify the returned descriptor (e.g., via link_descriptors).
-  // Cast through non-const intermediate type to explicitly handle const removal.
   return (sl_dma_channel_xfer_descriptor_t*)hw_desc_iter;
 }
 
@@ -1648,13 +1450,14 @@ static bool is_active_descriptor( const LDMA_TypeDef *ldma,
   return is_active;
 }
 
-static sl_dma_channel_xfer_descriptor_t* get_next_descriptor(const sl_dma_channel_xfer_descriptor_t* desc)
+static sl_dma_channel_xfer_descriptor_t* get_next_descriptor(sl_dma_channel_xfer_descriptor_t* desc)
 {
-  const sl_hal_ldma_descriptor_t* hw = (const sl_hal_ldma_descriptor_t*)desc;
+  sl_hal_ldma_descriptor_t* hw = (sl_hal_ldma_descriptor_t*)desc;
   sl_dma_channel_xfer_descriptor_t* next = NULL;
   if (hw->xfer.link) {
     next = (sl_dma_channel_xfer_descriptor_t *)(SL_HAL_LDMA_DESCRIPTOR_LINKABS_LINKADDR_TO_ADDR(hw->xfer.link_addr));
   }
+
   return next;
 }
 
@@ -1837,14 +1640,14 @@ static sl_dma_channel_xfer_descriptor_t* process_descriptor(sl_dma_channel_handl
   }
 
   // Get the next descriptor in the chain before potentially freeing the current one.
-  const sl_dma_channel_xfer_descriptor_t* next = get_next_descriptor(descriptor);
+  sl_dma_channel_xfer_descriptor_t* next = get_next_descriptor(descriptor);
 
   // Free the descriptor if it was allocated internally by the DMA Channel driver.
   if (descriptor->flags.driver_allocated) {
     (void)sl_dma_channel_descriptor_free(handle, descriptor);
   }
 
-  return (sl_dma_channel_xfer_descriptor_t*)next;
+  return next;
 }
 
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
@@ -1898,151 +1701,27 @@ static void process_completed_descriptors(sl_dma_channel_handle_t* handle)
 }
 
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void sli_dma_channel_irq_process(uint8_t ch)
+static void sl_dma_channel_common_irq_handler(void)
 {
-  sl_dma_channel_handle_t *handle = s_channel_handle_table[ch];
-  EFM_ASSERT(ch < DMA_CHAN_COUNT);
-  EFM_ASSERT(handle != NULL);
+  uint8_t ch_num;
+  void *user_data;
+
+  EFM_ASSERT(sl_dma_manager_retrieve_current_channel_user_data(&ch_num, &user_data) == SL_STATUS_OK);
+  EFM_ASSERT(ch_num < DMA_CHAN_COUNT);
+  EFM_ASSERT(user_data != NULL);
+
+  sl_dma_channel_handle_t *handle = (sl_dma_channel_handle_t *)user_data;
 
   if ( handle->mode == SL_DMA_CHANNEL_MODE_NORMAL ) {
     // In normal mode, we will process each completed descriptor by consuming
     // the descriptor from the DMA channel's descriptor list and calling the
     // user's callback for each descriptor that requests the callback.
     process_completed_descriptors(handle);
-  } else if ( handle->mode == SL_DMA_CHANNEL_MODE_LOOPING ) {
+  } else if ( handle->mode == SL_DMA_CHANNEL_MODE_LOOPING 
+              && handle->callback != NULL ) {
     // When the channel is in looping mode, we don't want to consume descriptors
     // from the channel's descriptor list, instead we will call the user's
     // callback each time we receive an IRQ.
-    if (handle->callback != NULL) {
-      handle->callback(handle, handle->user_data, false, false);
-    }
+    handle->callback(handle, handle->user_data, false, false);
   }
 }
-
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void sl_dma_channel_irq_wrapper_ch0(void)
-{
-  sli_dma_channel_irq_process(0);
-}
-
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void sl_dma_channel_irq_wrapper_ch1(void)
-{
-  sli_dma_channel_irq_process(1);
-}
-
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void sl_dma_channel_irq_wrapper_ch2(void)
-{
-  sli_dma_channel_irq_process(2);
-}
-
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void sl_dma_channel_irq_wrapper_ch3(void)
-{
-  sli_dma_channel_irq_process(3);
-}
-
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void sl_dma_channel_irq_wrapper_ch4(void)
-{
-  sli_dma_channel_irq_process(4);
-}
-
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void sl_dma_channel_irq_wrapper_ch5(void)
-{
-  sli_dma_channel_irq_process(5);
-}
-
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void sl_dma_channel_irq_wrapper_ch6(void)
-{
-  sli_dma_channel_irq_process(6);
-}
-
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void sl_dma_channel_irq_wrapper_ch7(void)
-{
-  sli_dma_channel_irq_process(7);
-}
-
-#if (DMA_CHAN_COUNT > 8)
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void sl_dma_channel_irq_wrapper_ch8(void)
-{
-  sli_dma_channel_irq_process(8);
-}
-#endif
-
-#if (DMA_CHAN_COUNT > 9)
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void sl_dma_channel_irq_wrapper_ch9(void)
-{
-  sli_dma_channel_irq_process(9);
-}
-#endif
-
-#if (DMA_CHAN_COUNT > 10)
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void sl_dma_channel_irq_wrapper_ch10(void)
-{
-  sli_dma_channel_irq_process(10);
-}
-#endif
-
-#if (DMA_CHAN_COUNT > 11)
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void sl_dma_channel_irq_wrapper_ch11(void)
-{
-  sli_dma_channel_irq_process(11);
-}
-#endif
-
-#if (DMA_CHAN_COUNT > 12)
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void sl_dma_channel_irq_wrapper_ch12(void)
-{
-  sli_dma_channel_irq_process(12);
-}
-#endif
-
-#if (DMA_CHAN_COUNT > 13)
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void sl_dma_channel_irq_wrapper_ch13(void)
-{
-  sli_dma_channel_irq_process(13);
-}
-#endif
-
-#if (DMA_CHAN_COUNT > 14)
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void sl_dma_channel_irq_wrapper_ch14(void)
-{
-  sli_dma_channel_irq_process(14);
-}
-#endif
-
-#if (DMA_CHAN_COUNT > 15)
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void sl_dma_channel_irq_wrapper_ch15(void)
-{
-  sli_dma_channel_irq_process(15);
-}
-#endif
-
-#if (DMA_CHAN_COUNT > 16)
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void sl_dma_channel_irq_wrapper_ch16(void)
-{
-  sli_dma_channel_irq_process(16);
-}
-#endif
-
-#if (DMA_CHAN_COUNT > 17)
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void sl_dma_channel_irq_wrapper_ch17(void)
-{
-  sli_dma_channel_irq_process(17);
-}
-#endif

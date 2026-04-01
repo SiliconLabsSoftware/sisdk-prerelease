@@ -65,7 +65,7 @@
     <properties key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
     <properties key="hidden" value="true"/>
   </descriptors>
-  <descriptors name="OpenThread BLE DMP - SoC TrustZone Workspace" label="OpenThread BLE DMP - SoC TrustZone Workspace" description="Workspace to build TrustZone-enabled OpenThread BLE DMP - SoC FreeRTOS application and accompanying bootloader.
+  <descriptors name="ot-ble-dmp-tz" label="OpenThread BLE DMP - SoC TrustZone Workspace" description="Workspace to build TrustZone-enabled OpenThread BLE DMP - SoC FreeRTOS application and accompanying bootloader.
 ">
     <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
@@ -163,7 +163,7 @@
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <properties key="hidden" value="true"/>
   </descriptors>
-  <descriptors name="OpenThread - SoC CLI FTD TrustZone Workspace" label="OpenThread - SoC CLI FTD TrustZone Workspace" description="Workspace to build TrustZone-enabled OpenThread - SoC CLI FTD application and accompanying bootloader.
+  <descriptors name="ot-cli-ftd-tz" label="OpenThread - SoC CLI FTD TrustZone Workspace" description="Workspace to build TrustZone-enabled OpenThread - SoC CLI FTD application and accompanying bootloader.
 ">
     <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
@@ -197,7 +197,7 @@
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <properties key="hidden" value="true"/>
   </descriptors>
-  <descriptors name="OpenThread - SoC CLI MTD TrustZone Workspace" label="OpenThread - SoC CLI MTD TrustZone Workspace" description="Workspace to build TrustZone-enabled OpenThread - SoC CLI MTD application and accompanying bootloader.
+  <descriptors name="ot-cli-mtd-tz" label="OpenThread - SoC CLI MTD TrustZone Workspace" description="Workspace to build TrustZone-enabled OpenThread - SoC CLI MTD application and accompanying bootloader.
 ">
     <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>

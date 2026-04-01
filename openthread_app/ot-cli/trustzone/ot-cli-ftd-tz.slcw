@@ -1,3 +1,4 @@
+workspace_name: ot-cli-ftd-tz
 label: OpenThread - SoC CLI FTD TrustZone Workspace
 description: >
   Workspace to build TrustZone-enabled OpenThread - SoC CLI FTD application and accompanying bootloader.

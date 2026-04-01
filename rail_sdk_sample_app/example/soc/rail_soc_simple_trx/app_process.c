@@ -32,6 +32,7 @@
 //                                   Includes
 // -----------------------------------------------------------------------------
 #include <stdint.h>
+#include <inttypes.h>
 #include "sl_component_catalog.h"
 #include "sl_rail_sdk_simple_assistance.h"
 #include "sl_rail.h"
@@ -164,7 +165,7 @@ void app_process_action(void)
         uint16_t packet_size = unpack_packet(rail_handle, rx_buffer, &packet_info, &start_of_packet);
         rail_status = sl_rail_release_rx_packet(rail_handle, rx_packet_handle);
         if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
-          app_log_warning("sl_rail_release_rx_packet() result: 0x%08lX\n", rail_status);
+          app_log_warning("sl_rail_release_rx_packet() result: 0x%08" PRIX32 "\n", rail_status);
         }
         if (rx_requested) {
           printf_rx_packet(start_of_packet, packet_size);
@@ -188,12 +189,12 @@ void app_process_action(void)
       break;
     case S_RX_PACKET_ERROR:
       // Handle Rx error
-      app_log_error("Radio RX Error occurred\nEvents: 0x%016llX\n", radio_events);
+      app_log_error("Radio RX Error occurred\nEvents: 0x%" PRIX64 "\n", radio_events);
       state = S_IDLE;
       break;
     case S_TX_PACKET_ERROR:
       // Handle Tx error
-      app_log_error("Radio TX Error occurred\nEvents: 0x%016llX\n", radio_events);
+      app_log_error("Radio TX Error occurred\nEvents: 0x%" PRIX64 "\n", radio_events);
       state = S_IDLE;
       break;
     case S_IDLE:
@@ -201,7 +202,7 @@ void app_process_action(void)
         prepare_packet(rail_handle, out_packet, sizeof(out_packet));
         rail_status = sl_rail_start_tx(rail_handle, get_selected_channel(), SL_RAIL_TX_OPTIONS_DEFAULT, NULL);
         if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
-          app_log_warning("sl_rail_start_tx() result: 0x%08lX\n ", rail_status);
+          app_log_warning("sl_rail_start_tx() result: 0x%08" PRIX32 "\n ", rail_status);
         }
         tx_requested = false;
       }
@@ -209,7 +210,7 @@ void app_process_action(void)
     case S_CALIBRATION_ERROR:
       #if defined(SL_CATALOG_APP_LOG_PRESENT)
       calibration_status_buff = calibration_status;
-      app_log_error("Radio Calibration Error occurred\nEvents: 0x%016llX\nRAIL_Calibrate() result: 0x%08lX\n",
+      app_log_error("Radio Calibration Error occurred\nEvents: 0x%" PRIX64 "\nRAIL_Calibrate() result: 0x%08" PRIX32 "\n",
                     radio_events,
                     calibration_status_buff);
       #endif

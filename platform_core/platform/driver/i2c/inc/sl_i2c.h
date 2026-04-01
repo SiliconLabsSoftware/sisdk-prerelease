@@ -208,6 +208,7 @@ typedef struct {
  *       Follower Mode : Used to set the I2C device's own (self) address.
  */
 typedef struct sl_i2c_handle_t {
+  /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
   // Peripheral and configuration
   sl_peripheral_t                 i2c_peripheral;         ///< I2C Peripheral Instance
   sl_i2c_operating_mode_t         operating_mode;         ///< Operating mode: Leader or Follower
@@ -234,6 +235,7 @@ typedef struct sl_i2c_handle_t {
   sl_i2c_transfer_complete_callback_t transfer_complete_callback;  ///< Transfer complete callback
   sl_i2c_event_callback_t             event_callback;              ///< Event callback
   void*                               user_data;                   ///< User defined data
+  /// @endcond
 } sl_i2c_handle_t;
 
 /*******************************************************************************

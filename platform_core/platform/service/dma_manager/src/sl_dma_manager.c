@@ -48,6 +48,9 @@
 sl_slist_node_t* dma_handle_list = NULL;
 sl_dma_handle_t* default_dma_handle;
 
+static const sl_dma_handle_t *current_irq_dma_handle = NULL;
+static uint8_t current_irq_channel_nbr = 0;
+
 // -----------------------------------------------------------------------------
 // FUNCTION DEFINITIONS
 
@@ -59,7 +62,9 @@ sl_status_t sl_dma_manager_init(sl_dma_handle_t *dma_handle,
 {
   CORE_DECLARE_IRQ_STATE;
   sl_dma_handle_t* handle;
+  sl_dma_handle_t* saved_default_handle;
   sl_status_t status;
+  bool handle_allocated = false;
 
   // If no DMA peripheral is specified, get the default one from the HAL
   if (dma_peripheral == NULL) {
@@ -101,6 +106,8 @@ sl_status_t sl_dma_manager_init(sl_dma_handle_t *dma_handle,
     return SL_STATUS_INVALID_CONFIGURATION;
   }
 
+  saved_default_handle = default_dma_handle;
+
   if (dma_handle == NULL) {
     // Allocate DMA handle if no handle is passed as argument
     status = sl_memory_alloc(sizeof(sl_dma_handle_t), BLOCK_TYPE_LONG_TERM, (void **)&default_dma_handle);
@@ -109,6 +116,7 @@ sl_status_t sl_dma_manager_init(sl_dma_handle_t *dma_handle,
       return status;
     }
     dma_handle = default_dma_handle;
+    handle_allocated = true;
   } else {
     // Set default DMA handle if not already set.
     if (default_dma_handle == NULL) {
@@ -122,9 +130,25 @@ sl_status_t sl_dma_manager_init(sl_dma_handle_t *dma_handle,
                             BLOCK_TYPE_LONG_TERM,
                             (void **)&dma_handle->channel_irq_callbacks_table);
   if (status != SL_STATUS_OK) {
-    // Free the DMA handle if it was previously allocated.
-    sl_memory_free((void *)default_dma_handle);
-    default_dma_handle = NULL;
+    if (handle_allocated) {
+      sl_memory_free((void *)dma_handle);
+    }
+    default_dma_handle = saved_default_handle;
+    CORE_EXIT_ATOMIC();
+    return status;
+  }
+
+  // Allocate the table for the per-channel user data pointers
+  status = sl_memory_calloc(dma_peripheral->nbr_channel,
+                            sizeof(void *),
+                            BLOCK_TYPE_LONG_TERM,
+                            (void **)&dma_handle->channel_user_data_table);
+  if (status != SL_STATUS_OK) {
+    sl_memory_free((void *)dma_handle->channel_irq_callbacks_table);
+    if (handle_allocated) {
+      sl_memory_free((void *)dma_handle);
+    }
+    default_dma_handle = saved_default_handle;
     CORE_EXIT_ATOMIC();
     return status;
   }
@@ -402,6 +426,10 @@ sl_status_t sl_dma_manager_free_channel(sl_dma_handle_t *dma_handle,
   // Mark the channel as free
   dma_handle->dma_channels_bitmap &= ~(1U << channel_nbr);
 
+  // Clear associated callback and user data
+  dma_handle->channel_irq_callbacks_table[channel_nbr] = NULL;
+  dma_handle->channel_user_data_table[channel_nbr] = NULL;
+
   CORE_EXIT_ATOMIC();
   return SL_STATUS_OK;
 }
@@ -503,6 +531,54 @@ sl_status_t sl_dma_manager_register_channel_irq_callback(sl_dma_handle_t *dma_ha
 }
 
 /***************************************************************************//**
+ * Registers user data for a specific DMA channel.
+ ******************************************************************************/
+sl_status_t sl_dma_manager_register_channel_user_data(sl_dma_handle_t *dma_handle,
+                                                      uint8_t channel_nbr,
+                                                      void *user_data)
+{
+  CORE_DECLARE_IRQ_STATE;
+
+  // Fall back on the default DMA instance if no handle is provided
+  if (dma_handle == NULL) {
+    dma_handle = default_dma_handle;
+  }
+
+  if (channel_nbr >= dma_handle->dma_peripheral->nbr_channel) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  CORE_ENTER_ATOMIC();
+
+  dma_handle->channel_user_data_table[channel_nbr] = user_data;
+
+  CORE_EXIT_ATOMIC();
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Retrieves the user data and channel number for the DMA channel currently
+ * being serviced in the interrupt dispatch context.
+ ******************************************************************************/
+sl_status_t sl_dma_manager_retrieve_current_channel_user_data(uint8_t *channel_nbr,
+                                                              void **user_data)
+{
+  if (channel_nbr == NULL || user_data == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if (current_irq_dma_handle == NULL) {
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  *channel_nbr = current_irq_channel_nbr;
+  *user_data = current_irq_dma_handle->channel_user_data_table[current_irq_channel_nbr];
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
  * Interrupt handler to call channel IRQ callbacks.
  ******************************************************************************/
 void sli_dma_manager_interrupt_handler(uint32_t peripheral_base_addr, uint8_t channel_nbr)
@@ -530,11 +606,19 @@ void sli_dma_manager_interrupt_handler(uint32_t peripheral_base_addr, uint8_t ch
   // Validate that the DMA channel number is valid
   EFM_ASSERT(channel_nbr < dma_handle->dma_peripheral->nbr_channel);
 
+  // Set the current IRQ context so that the callback can retrieve
+  // the channel number and user data via
+  // sl_dma_manager_retrieve_current_channel_user_data().
+  current_irq_dma_handle = dma_handle;
+  current_irq_channel_nbr = channel_nbr;
+
   // Check if we have an interrupt callback for this DMA channel
   // and call the function
   if (dma_handle->channel_irq_callbacks_table[channel_nbr] != NULL) {
     dma_handle->channel_irq_callbacks_table[channel_nbr]();
   }
+
+  current_irq_dma_handle = NULL;
 
   CORE_EXIT_ATOMIC();
 }

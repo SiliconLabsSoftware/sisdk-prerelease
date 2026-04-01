@@ -70,14 +70,9 @@ extern bool is_ieee802154_app(void);
  *****************************************************************************/
 extern bool is_ble_app(void);
 
-/**************************************************************************//**
- * The function is used for Application logic.
- *
- * @param[in] rail_handle     Handle to the RAIL context
- *
- * The function is used for Application logic.
- * It is called infinitely.
- *****************************************************************************/
+/*******************************************************************************
+ * Application state machine, called infinitely
+ ******************************************************************************/
 void app_process_action(void);
 
 /**************************************************************************//**

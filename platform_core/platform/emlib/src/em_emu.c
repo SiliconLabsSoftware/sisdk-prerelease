@@ -750,6 +750,7 @@ static void dpllState(dpllState_TypeDef action)
         DPLL0->IF_CLR = DPLL_IF_LOCK | DPLL_IF_LOCKFAILLOW | DPLL_IF_LOCKFAILHIGH;
         DPLL0->EN_SET = DPLL_EN_EN;
         while ((DPLL0->IF & DPLL_IF_LOCK) == 0U) {
+          // Wait for DPLL lock.
         }
 
         /* Restore HCLK prescaler. */
@@ -838,6 +839,7 @@ void EMU_EM23Init(const EMU_EM23Init_TypeDef *em23Init)
  ******************************************************************************/
 SL_WEAK void EMU_EM23PresleepHook(void)
 {
+  // Intentionally empty; SL_WEAK hook, override in application if needed.
 }
 
 /***************************************************************************//**
@@ -856,6 +858,7 @@ SL_WEAK void EMU_EM23PresleepHook(void)
  ******************************************************************************/
 SL_WEAK void EMU_EFPEM23PresleepHook(void)
 {
+  // Intentionally empty; SL_WEAK hook, override in application if needed.
 }
 
 /***************************************************************************//**
@@ -870,6 +873,7 @@ SL_WEAK void EMU_EFPEM23PresleepHook(void)
  ******************************************************************************/
 SL_WEAK void EMU_EM23PostsleepHook(void)
 {
+  // Intentionally empty; SL_WEAK hook, override in application if needed.
 }
 
 /***************************************************************************//**
@@ -888,6 +892,7 @@ SL_WEAK void EMU_EM23PostsleepHook(void)
  ******************************************************************************/
 SL_WEAK void EMU_EFPEM23PostsleepHook(void)
 {
+  // Intentionally empty; SL_WEAK hook, override in application if needed.
 }
 
 /***************************************************************************//**
@@ -1429,6 +1434,7 @@ void EMU_EM4Init(const EMU_EM4Init_TypeDef *em4Init)
  ******************************************************************************/
 SL_WEAK void EMU_EM4PresleepHook(void)
 {
+  // Intentionally empty; SL_WEAK hook, override in application if needed.
 }
 
 /***************************************************************************//**
@@ -1447,6 +1453,7 @@ SL_WEAK void EMU_EM4PresleepHook(void)
  ******************************************************************************/
 SL_WEAK void EMU_EFPEM4PresleepHook(void)
 {
+  // Intentionally empty; SL_WEAK hook, override in application if needed.
 }
 
 /***************************************************************************//**
@@ -1473,8 +1480,6 @@ __NO_RETURN void EMU_EnterEM4(void)
 #if defined(SL_CATALOG_METRIC_EM4_WAKE_PRESENT)
   sli_metric_em4_wake_init();
 #endif
-  int i;
-
 #if defined(_EMU_EM4CTRL_EM4ENTRY_SHIFT)
   uint32_t em4seq2 = (EMU->EM4CTRL & ~_EMU_EM4CTRL_EM4ENTRY_MASK)
                      | (2U << _EMU_EM4CTRL_EM4ENTRY_SHIFT);
@@ -1579,7 +1584,7 @@ __NO_RETURN void EMU_EnterEM4(void)
 #endif // defined(_CMU_CLKEN0_GPIO_SHIFT)
 #endif // defined(_GPIO_IF_EM4WU_MASK)
 
-  for (i = 0; i < 4; i++) {
+  for (int i = 0; i < 4; i++) {
 #if defined(_EMU_EM4CTRL_EM4ENTRY_SHIFT)
     EMU->EM4CTRL = em4seq2;
     EMU->EM4CTRL = em4seq3;
@@ -3478,6 +3483,7 @@ void EMU_DCDCBoostOutputVoltageSet(const EMU_DcdcBoostOutputVoltage_TypeDef boos
  ******************************************************************************/
 SL_WEAK void EMU_DCDCUpdatedHook(void)
 {
+  // Intentionally empty; SL_WEAK hook, override in application if needed.
 }
 
 /***************************************************************************//**
@@ -3597,7 +3603,7 @@ bool EMU_DCDCInit(const EMU_DCDCInit_TypeDef *dcdcInit)
                | ((uint32_t)dcdcInit->tonMax << _DCDC_CTRL_IPKTMAXCTRL_SHIFT)
                | ((uint32_t)(dcdcInit->dcmOnlyEn ? 1U : 0U) << _DCDC_CTRL_DCMONLYEN_SHIFT);
 #else
-  DCDC->CTRL = (DCDC->CTRL & ~(_DCDC_CTRL_IPKTMAXCTRL_MASK))
+  DCDC->CTRL = (DCDC->CTRL & ~_DCDC_CTRL_IPKTMAXCTRL_MASK)
                | ((uint32_t)dcdcInit->tonMax << _DCDC_CTRL_IPKTMAXCTRL_SHIFT);
 #endif
   DCDC->EM01CTRL0 = ((uint32_t)dcdcInit->driveSpeedEM01 << _DCDC_EM01CTRL0_DRVSPEED_SHIFT)

@@ -446,7 +446,7 @@ sl_status_t sli_memory_create_heap(void *base_addr,
   sli_memory_manager_hal_heap_init(heap);
 #endif
 
-  INCREMENT_BANK_COUNTER(heap, base_addr, (void *)((uint8_t *)base_addr + SLI_BLOCK_METADATA_SIZE_BYTE - 1));
+  SLI_MEMORY_INCREMENT_BANK_COUNTER(heap, base_addr, (void *)((uint8_t *)base_addr + SLI_BLOCK_METADATA_SIZE_BYTE - 1));
 
 #if defined(SL_MEMORY_MANAGER_STATISTICS_API_ENABLE) && (SL_MEMORY_MANAGER_STATISTICS_API_ENABLE == 1)
   // Add first free block metadata to heap usage.
@@ -510,7 +510,7 @@ void sli_memory_create_stack(void)
 
 #if !defined(SL_CATALOG_KERNEL_PRESENT)
   // On Baremetal applications, the Stack need to be retained.
-  INCREMENT_BANK_COUNTER(&sli_general_purpose_heap, (uint8_t *)stack, (uint8_t *)((uintptr_t)stack + SL_STACK_SIZE - 1));
+  SLI_MEMORY_INCREMENT_BANK_COUNTER(&sli_general_purpose_heap, (uint8_t *)stack, (uint8_t *)((uintptr_t)stack + SL_STACK_SIZE - 1));
 #endif
 
 #if defined(DEBUG_EFM) || defined(DEBUG_EFM_USER)

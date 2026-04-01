@@ -68,14 +68,9 @@ typedef enum {
 //                          Public Function Declarations
 // -----------------------------------------------------------------------------
 
-/**************************************************************************//**
- * The function is used for Application logic.
- *
- * @param[in] rail_handle A RAIL instance handle
- *
- * The function is used for Application logic.
- * It is called infinitely.
- *****************************************************************************/
+/*******************************************************************************
+ * Application state machine, called infinitely
+ ******************************************************************************/
 void app_process_action(void);
 
 /**************************************************************************//**

@@ -604,6 +604,33 @@ template_contribution:
       help: Disconnect from Wi-FI AP
     condition: [wisun_br_wifi]
 
+# -------------------------------
+  - name: "cli_group"
+    value:
+      name: "util"
+      help: "Utility commands"
+      shortcuts:
+        - name: "u"
+  - name: "cli_command"
+    value:
+      group: "util"
+      name: "fill_heap"
+      handler: "app_util_fill_heap"
+      help: "Fill the heap with fixed-size blocks: u fh <block_size>"
+      argument:
+        - type: uint16
+          help: "block size"
+      shortcuts:
+        - name: "fh"
+  - name: "cli_command"
+    value:
+      group: "util"
+      name: "release_heap"
+      handler: "app_util_release_heap"
+      help: "Release previously filled heap: u rh"
+      shortcuts:
+        - name: "rh"
+
 readme:
   - path: doc/readme.md
 

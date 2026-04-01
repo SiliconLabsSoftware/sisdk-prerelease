@@ -468,6 +468,48 @@ sl_status_t sl_bt_linklayer_event_info_reporting_enable(uint8_t enable,
     return rsp->data.rsp_linklayer_event_info_reporting_enable.result;
 }
 
+sl_status_t sl_bt_linklayer_get_hci_connection_handle(uint8_t connection,
+                                                      uint16_t *hci_connection_handle)
+{
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+    size_t cmd_payload_len = sizeof(sl_bt_cmd_linklayer_get_hci_connection_handle_t);
+
+    cmd->header = SLI_BGAPI_MSG_HEADER(sli_bt_linklayer_class_id,
+                                       sli_bt_linklayer_get_hci_connection_handle_command_id,
+                                       (uint8_t) sl_bgapi_msg_type_cmd | (uint8_t) sl_bgapi_dev_type_bt,
+                                       cmd_payload_len);
+    cmd->data.cmd_linklayer_get_hci_connection_handle.connection = connection;
+    sl_bt_host_handle_command();
+
+    if (hci_connection_handle) {
+        *hci_connection_handle = rsp->data.rsp_linklayer_get_hci_connection_handle.hci_connection_handle;
+    }
+
+    return rsp->data.rsp_linklayer_get_hci_connection_handle.result;
+}
+
+sl_status_t sl_bt_linklayer_get_bgapi_connection_handle(uint16_t hci_connection_handle,
+                                                        uint8_t *connection)
+{
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+    size_t cmd_payload_len = sizeof(sl_bt_cmd_linklayer_get_bgapi_connection_handle_t);
+
+    cmd->header = SLI_BGAPI_MSG_HEADER(sli_bt_linklayer_class_id,
+                                       sli_bt_linklayer_get_bgapi_connection_handle_command_id,
+                                       (uint8_t) sl_bgapi_msg_type_cmd | (uint8_t) sl_bgapi_dev_type_bt,
+                                       cmd_payload_len);
+    cmd->data.cmd_linklayer_get_bgapi_connection_handle.hci_connection_handle = hci_connection_handle;
+    sl_bt_host_handle_command();
+
+    if (connection) {
+        *connection = rsp->data.rsp_linklayer_get_bgapi_connection_handle.connection;
+    }
+
+    return rsp->data.rsp_linklayer_get_bgapi_connection_handle.result;
+}
+
 sl_status_t sl_bt_resource_get_status(uint32_t *total_bytes,
                                       uint32_t *free_bytes)
 {
@@ -5623,6 +5665,29 @@ sl_status_t sl_bt_connection_analyzer_start(uint32_t access_address,
     }
 
     return rsp->data.rsp_connection_analyzer_start.result;
+}
+
+sl_status_t sl_bt_connection_analyzer_process_llcp_event(uint8_t analyzer,
+                                                         size_t llcp_event_info_len,
+                                                         const uint8_t* llcp_event_info)
+{
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+    size_t cmd_payload_len = sizeof(sl_bt_cmd_connection_analyzer_process_llcp_event_t) + llcp_event_info_len;
+    if (cmd_payload_len > SL_BGAPI_MAX_PAYLOAD_SIZE) {
+        return SL_STATUS_COMMAND_TOO_LONG;
+    }
+
+    cmd->header = SLI_BGAPI_MSG_HEADER(sli_bt_connection_analyzer_class_id,
+                                       sli_bt_connection_analyzer_process_llcp_event_command_id,
+                                       (uint8_t) sl_bgapi_msg_type_cmd | (uint8_t) sl_bgapi_dev_type_bt,
+                                       cmd_payload_len);
+    cmd->data.cmd_connection_analyzer_process_llcp_event.analyzer = analyzer;
+    cmd->data.cmd_connection_analyzer_process_llcp_event.llcp_event_info.len = llcp_event_info_len;
+    memcpy(cmd->data.cmd_connection_analyzer_process_llcp_event.llcp_event_info.data, llcp_event_info, llcp_event_info_len);
+    sl_bt_host_handle_command();
+
+    return rsp->data.rsp_connection_analyzer_process_llcp_event.result;
 }
 
 sl_status_t sl_bt_connection_analyzer_stop(uint8_t analyzer)

@@ -818,7 +818,11 @@
     <member refid="group__sl__bt__evt__system__awake_1gac671086d87b33e79d055df0098b40d7b" kind="define"><name>sl_bt_evt_system_awake_id</name></member>
     <member refid="group__sl__bt__evt__system__soft__timer_1gabae9bb31e70cb251e1a7d539416bc127" kind="define"><name>sl_bt_evt_system_soft_timer_id</name></member>
     <member refid="group__sl__bt__linklayer_1gad0b08b8edc5e44c264565d086828f9dc" kind="define"><name>sl_bt_cmd_linklayer_event_info_reporting_enable_id</name></member>
+    <member refid="group__sl__bt__linklayer_1gae3d8ef7983991458904d5c39eb44e126" kind="define"><name>sl_bt_cmd_linklayer_get_hci_connection_handle_id</name></member>
+    <member refid="group__sl__bt__linklayer_1ga5a4dc649a2c75d5e0a21c074b9d35208" kind="define"><name>sl_bt_cmd_linklayer_get_bgapi_connection_handle_id</name></member>
     <member refid="group__sl__bt__linklayer_1ga732050aea39b247cd6b54d16d86363e3" kind="define"><name>sl_bt_rsp_linklayer_event_info_reporting_enable_id</name></member>
+    <member refid="group__sl__bt__linklayer_1ga684d55f5d05adddf47eedbefa284fb69" kind="define"><name>sl_bt_rsp_linklayer_get_hci_connection_handle_id</name></member>
+    <member refid="group__sl__bt__linklayer_1ga67756b3e1b07e4307f7077b29208971e" kind="define"><name>sl_bt_rsp_linklayer_get_bgapi_connection_handle_id</name></member>
     <member refid="group__sl__bt__evt__linklayer__event__info__report_1gaa207a70e32c88d5c5fd239232d13d683" kind="define"><name>sl_bt_evt_linklayer_event_info_report_id</name></member>
     <member refid="group__sl__bt__resource_1ga3e388e1c9065574f6fb3c7139507228f" kind="define"><name>sl_bt_cmd_resource_get_status_id</name></member>
     <member refid="group__sl__bt__resource_1gad3409792229ff38835d0eb0e001a9f8b" kind="define"><name>sl_bt_cmd_resource_set_report_threshold_id</name></member>
@@ -1413,8 +1417,10 @@
     <member refid="group__sl__bt__evt__cte__receiver__connectionless__iq__report_1gab4d5669efcfb608e60075dac17be5888" kind="define"><name>sl_bt_evt_cte_receiver_connectionless_iq_report_id</name></member>
     <member refid="group__sl__bt__evt__cte__receiver__silabs__iq__report_1gaa87b7a96f292a3140aa54ae1dbbd33ce" kind="define"><name>sl_bt_evt_cte_receiver_silabs_iq_report_id</name></member>
     <member refid="group__sl__bt__connection__analyzer_1gad613de875f5a9f34ebe326ef5bf19fbb" kind="define"><name>sl_bt_cmd_connection_analyzer_start_id</name></member>
+    <member refid="group__sl__bt__connection__analyzer_1gab3b33aec86045de39715f0ffc5f7b2e5" kind="define"><name>sl_bt_cmd_connection_analyzer_process_llcp_event_id</name></member>
     <member refid="group__sl__bt__connection__analyzer_1ga618695dcbca10e818491e5d265947fb1" kind="define"><name>sl_bt_cmd_connection_analyzer_stop_id</name></member>
     <member refid="group__sl__bt__connection__analyzer_1ga18155dd5db6b1a10fd59fa78b2aed4c7" kind="define"><name>sl_bt_rsp_connection_analyzer_start_id</name></member>
+    <member refid="group__sl__bt__connection__analyzer_1ga4ee797da04853f351503b718cb3a8dda" kind="define"><name>sl_bt_rsp_connection_analyzer_process_llcp_event_id</name></member>
     <member refid="group__sl__bt__connection__analyzer_1ga0cc18aa2e3b4a210abc6ae45e2e89816" kind="define"><name>sl_bt_rsp_connection_analyzer_stop_id</name></member>
     <member refid="group__sl__bt__connection__analyzer__flags_1ga5fb3032b0d7ed309696cd813846715b9" kind="define"><name>SL_BT_CONNECTION_ANALYZER_RELATIVE_TIME</name></member>
     <member refid="group__sl__bt__evt__connection__analyzer__report_1ga5ae313bd7e1d7c60abdbdcdcc05bedd5" kind="define"><name>sl_bt_evt_connection_analyzer_report_id</name></member>
@@ -1590,6 +1596,8 @@
     <member refid="group__sl__bt__system_1ga6a5b4be087b9cfe14368a848a4414cef" kind="function"><name>sl_bt_system_get_counters</name></member>
     <member refid="group__sl__bt__system_1gaf9557a321d9adb6e96d9feca004a00c3" kind="function"><name>sl_bt_system_set_lazy_soft_timer</name></member>
     <member refid="group__sl__bt__linklayer_1ga7626df3c11d39b180f58b2bf688eff8c" kind="function"><name>sl_bt_linklayer_event_info_reporting_enable</name></member>
+    <member refid="group__sl__bt__linklayer_1ga9a51a04253b62f6b706570b1ef930b8b" kind="function"><name>sl_bt_linklayer_get_hci_connection_handle</name></member>
+    <member refid="group__sl__bt__linklayer_1ga394c7a511b8095400378e895af4d0238" kind="function"><name>sl_bt_linklayer_get_bgapi_connection_handle</name></member>
     <member refid="group__sl__bt__resource_1ga364e6338e65b335e0ebfcbbb600c1757" kind="function"><name>sl_bt_resource_get_status</name></member>
     <member refid="group__sl__bt__resource_1gac43c1de372fd21b3cdacd15fca685caa" kind="function"><name>sl_bt_resource_set_report_threshold</name></member>
     <member refid="group__sl__bt__resource_1gad776c2696303de220282839c6dcbf5f8" kind="function"><name>sl_bt_resource_enable_connection_tx_report</name></member>
@@ -1819,6 +1827,7 @@
     <member refid="group__sl__bt__cte__receiver_1ga25e401e84b119977021a8071f75c532e" kind="function"><name>sl_bt_cte_receiver_enable_silabs_cte</name></member>
     <member refid="group__sl__bt__cte__receiver_1gaa3a17f6e060e7c46fef5ed4abea8690f" kind="function"><name>sl_bt_cte_receiver_disable_silabs_cte</name></member>
     <member refid="group__sl__bt__connection__analyzer_1gaa3898b966e74863f4e2fe159f5f7d183" kind="function"><name>sl_bt_connection_analyzer_start</name></member>
+    <member refid="group__sl__bt__connection__analyzer_1ga5d5990b00a62ef42f034e58c89e0c451" kind="function"><name>sl_bt_connection_analyzer_process_llcp_event</name></member>
     <member refid="group__sl__bt__connection__analyzer_1gadf538d051a2f17718bbe1ca1d6941f20" kind="function"><name>sl_bt_connection_analyzer_stop</name></member>
     <member refid="group__sl__bt__user_1ga9e644f3d526e10e3f6485e675e4e2fd8" kind="function"><name>sl_bt_user_message_to_target</name></member>
     <member refid="group__sl__bt__user_1gaabb7641d170c394f47f12a5d6f7594f3" kind="function"><name>sl_bt_user_manage_event_filter</name></member>
@@ -2039,8 +2048,14 @@
   </compound>
   <compound refid="group__sl__bt__linklayer" kind="group"><name>sl_bt_linklayer</name>
     <member refid="group__sl__bt__linklayer_1ga7626df3c11d39b180f58b2bf688eff8c" kind="function"><name>sl_bt_linklayer_event_info_reporting_enable</name></member>
+    <member refid="group__sl__bt__linklayer_1ga9a51a04253b62f6b706570b1ef930b8b" kind="function"><name>sl_bt_linklayer_get_hci_connection_handle</name></member>
+    <member refid="group__sl__bt__linklayer_1ga394c7a511b8095400378e895af4d0238" kind="function"><name>sl_bt_linklayer_get_bgapi_connection_handle</name></member>
     <member refid="group__sl__bt__linklayer_1gad0b08b8edc5e44c264565d086828f9dc" kind="define"><name>sl_bt_cmd_linklayer_event_info_reporting_enable_id</name></member>
+    <member refid="group__sl__bt__linklayer_1gae3d8ef7983991458904d5c39eb44e126" kind="define"><name>sl_bt_cmd_linklayer_get_hci_connection_handle_id</name></member>
+    <member refid="group__sl__bt__linklayer_1ga5a4dc649a2c75d5e0a21c074b9d35208" kind="define"><name>sl_bt_cmd_linklayer_get_bgapi_connection_handle_id</name></member>
     <member refid="group__sl__bt__linklayer_1ga732050aea39b247cd6b54d16d86363e3" kind="define"><name>sl_bt_rsp_linklayer_event_info_reporting_enable_id</name></member>
+    <member refid="group__sl__bt__linklayer_1ga684d55f5d05adddf47eedbefa284fb69" kind="define"><name>sl_bt_rsp_linklayer_get_hci_connection_handle_id</name></member>
+    <member refid="group__sl__bt__linklayer_1ga67756b3e1b07e4307f7077b29208971e" kind="define"><name>sl_bt_rsp_linklayer_get_bgapi_connection_handle_id</name></member>
   </compound>
   <compound refid="group__sl__bt__evt__linklayer__event__info__report" kind="group"><name>sl_bt_evt_linklayer_event_info_report</name>
     <member refid="group__sl__bt__evt__linklayer__event__info__report_1gaacb3ddce3a15f0296d7820a6cf3a2f9a" kind="typedef"><name>sl_bt_evt_linklayer_event_info_report_t</name></member>
@@ -3442,10 +3457,13 @@
   </compound>
   <compound refid="group__sl__bt__connection__analyzer" kind="group"><name>sl_bt_connection_analyzer</name>
     <member refid="group__sl__bt__connection__analyzer_1gaa3898b966e74863f4e2fe159f5f7d183" kind="function"><name>sl_bt_connection_analyzer_start</name></member>
+    <member refid="group__sl__bt__connection__analyzer_1ga5d5990b00a62ef42f034e58c89e0c451" kind="function"><name>sl_bt_connection_analyzer_process_llcp_event</name></member>
     <member refid="group__sl__bt__connection__analyzer_1gadf538d051a2f17718bbe1ca1d6941f20" kind="function"><name>sl_bt_connection_analyzer_stop</name></member>
     <member refid="group__sl__bt__connection__analyzer_1gad613de875f5a9f34ebe326ef5bf19fbb" kind="define"><name>sl_bt_cmd_connection_analyzer_start_id</name></member>
+    <member refid="group__sl__bt__connection__analyzer_1gab3b33aec86045de39715f0ffc5f7b2e5" kind="define"><name>sl_bt_cmd_connection_analyzer_process_llcp_event_id</name></member>
     <member refid="group__sl__bt__connection__analyzer_1ga618695dcbca10e818491e5d265947fb1" kind="define"><name>sl_bt_cmd_connection_analyzer_stop_id</name></member>
     <member refid="group__sl__bt__connection__analyzer_1ga18155dd5db6b1a10fd59fa78b2aed4c7" kind="define"><name>sl_bt_rsp_connection_analyzer_start_id</name></member>
+    <member refid="group__sl__bt__connection__analyzer_1ga4ee797da04853f351503b718cb3a8dda" kind="define"><name>sl_bt_rsp_connection_analyzer_process_llcp_event_id</name></member>
     <member refid="group__sl__bt__connection__analyzer_1ga0cc18aa2e3b4a210abc6ae45e2e89816" kind="define"><name>sl_bt_rsp_connection_analyzer_stop_id</name></member>
   </compound>
   <compound refid="group__sl__bt__connection__analyzer__flags" kind="group"><name>sl_bt_connection_analyzer_flags</name>

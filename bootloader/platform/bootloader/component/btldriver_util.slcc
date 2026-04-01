@@ -14,6 +14,9 @@ include:
   - path: "driver/btl_driver_util.h"
 provides:
 - name: btldriver_util
+metadata:
+  sbom:
+    license: MSLA
 ui_hints:
   visibility: never
 root_path: bootloader

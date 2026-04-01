@@ -2184,14 +2184,14 @@ static void PrepareDMATransfer(SPIDRV_Handle_t handle,
     handle->peripheral.usartPort->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
 
     if (handle->initData.frameLength > 9) {
-      *outRxPort = (void *)&(handle->peripheral.usartPort->RXDOUBLE);
-      *outTxPort = (void *)&(handle->peripheral.usartPort->TXDOUBLE);
+      *outRxPort = (void *)(uintptr_t)&(handle->peripheral.usartPort->RXDOUBLE);
+      *outTxPort = (void *)(uintptr_t)&(handle->peripheral.usartPort->TXDOUBLE);
     } else if (handle->initData.frameLength == 9) {
-      *outRxPort = (void *)&(handle->peripheral.usartPort->RXDATAX);
-      *outTxPort = (void *)&(handle->peripheral.usartPort->TXDATAX);
+      *outRxPort = (void *)(uintptr_t)&(handle->peripheral.usartPort->RXDATAX);
+      *outTxPort = (void *)(uintptr_t)&(handle->peripheral.usartPort->TXDATAX);
     } else {
-      *outRxPort = (void *)&(handle->peripheral.usartPort->RXDATA);
-      *outTxPort = (void *)&(handle->peripheral.usartPort->TXDATA);
+      *outRxPort = (void *)(uintptr_t)&(handle->peripheral.usartPort->RXDATA);
+      *outTxPort = (void *)(uintptr_t)&(handle->peripheral.usartPort->TXDATA);
     }
   }
 #endif
@@ -2199,8 +2199,8 @@ static void PrepareDMATransfer(SPIDRV_Handle_t handle,
   else if (handle->peripheralType == spidrvPeripheralTypeEusart) {
     clearEusartFifos(handle->peripheral.eusartPort);
 
-    *outRxPort = (void *)&(handle->peripheral.eusartPort->RXDATA);
-    *outTxPort = (void *)&(handle->peripheral.eusartPort->TXDATA);
+    *outRxPort = (void *)(uintptr_t)&(handle->peripheral.eusartPort->RXDATA);
+    *outTxPort = (void *)(uintptr_t)&(handle->peripheral.eusartPort->TXDATA);
   }
 #endif
   else {
@@ -2229,10 +2229,10 @@ static void StartReceiveDMA(SPIDRV_Handle_t handle,
                             int count,
                             SPIDRV_Callback_t callback)
 {
-  void *rxPort;
-  void *txPort;
-  size_t byte_count;
-  sl_dma_ctrl_size_t size;
+  void *rxPort = NULL;
+  void *txPort = NULL;
+  size_t byte_count = 0;
+  sl_dma_ctrl_size_t size = SL_DMA_CTRL_SIZE_BYTE;
 
   PrepareDMATransfer(handle, count, callback, &rxPort, &txPort, &size, &byte_count);
 
@@ -2272,10 +2272,10 @@ static void StartTransferDMA(SPIDRV_Handle_t handle,
                              int count,
                              SPIDRV_Callback_t callback)
 {
-  void *rxPort;
-  void *txPort;
-  size_t byte_count;
-  sl_dma_ctrl_size_t size;
+  void *rxPort = NULL;
+  void *txPort = NULL;
+  size_t byte_count = 0;
+  sl_dma_ctrl_size_t size = SL_DMA_CTRL_SIZE_BYTE;
 
   PrepareDMATransfer(handle, count, callback, &rxPort, &txPort, &size, &byte_count);
 
@@ -2304,10 +2304,10 @@ static void StartTransmitDMA(SPIDRV_Handle_t handle,
                              int count,
                              SPIDRV_Callback_t callback)
 {
-  void *rxPort;
-  void *txPort;
-  size_t byte_count;
-  sl_dma_ctrl_size_t size;
+  void *rxPort = NULL;
+  void *txPort = NULL;
+  size_t byte_count = 0;
+  sl_dma_ctrl_size_t size = SL_DMA_CTRL_SIZE_BYTE;
 
   PrepareDMATransfer(handle, count, callback, &rxPort, &txPort, &size, &byte_count);
 

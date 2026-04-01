@@ -156,6 +156,8 @@ enum sli_bt_command_id
     sli_bt_system_get_counters_command_id = 0x0f,
     sli_bt_system_set_lazy_soft_timer_command_id = 0x1a,
     sli_bt_linklayer_event_info_reporting_enable_command_id = 0x00,
+    sli_bt_linklayer_get_hci_connection_handle_command_id = 0x01,
+    sli_bt_linklayer_get_bgapi_connection_handle_command_id = 0x02,
     sli_bt_resource_get_status_command_id = 0x00,
     sli_bt_resource_set_report_threshold_command_id = 0x01,
     sli_bt_resource_enable_connection_tx_report_command_id = 0x02,
@@ -385,6 +387,7 @@ enum sli_bt_command_id
     sli_bt_cte_receiver_enable_silabs_cte_command_id = 0x07,
     sli_bt_cte_receiver_disable_silabs_cte_command_id = 0x08,
     sli_bt_connection_analyzer_start_command_id = 0x00,
+    sli_bt_connection_analyzer_process_llcp_event_command_id = 0x02,
     sli_bt_connection_analyzer_stop_command_id = 0x01,
     sli_bt_user_message_to_target_command_id = 0x00,
     sli_bt_user_manage_event_filter_command_id = 0x01,
@@ -415,6 +418,8 @@ enum sli_bt_response_id
     sli_bt_system_get_counters_response_id = 0x0f,
     sli_bt_system_set_lazy_soft_timer_response_id = 0x1a,
     sli_bt_linklayer_event_info_reporting_enable_response_id = 0x00,
+    sli_bt_linklayer_get_hci_connection_handle_response_id = 0x01,
+    sli_bt_linklayer_get_bgapi_connection_handle_response_id = 0x02,
     sli_bt_resource_get_status_response_id = 0x00,
     sli_bt_resource_set_report_threshold_response_id = 0x01,
     sli_bt_resource_enable_connection_tx_report_response_id = 0x02,
@@ -644,6 +649,7 @@ enum sli_bt_response_id
     sli_bt_cte_receiver_enable_silabs_cte_response_id = 0x07,
     sli_bt_cte_receiver_disable_silabs_cte_response_id = 0x08,
     sli_bt_connection_analyzer_start_response_id = 0x00,
+    sli_bt_connection_analyzer_process_llcp_event_response_id = 0x02,
     sli_bt_connection_analyzer_stop_response_id = 0x01,
     sli_bt_user_message_to_target_response_id = 0x00,
     sli_bt_user_manage_event_filter_response_id = 0x01,
@@ -837,6 +843,20 @@ PACKSTRUCT( struct sl_bt_cmd_linklayer_event_info_reporting_enable_s
 });
 
 typedef struct sl_bt_cmd_linklayer_event_info_reporting_enable_s sl_bt_cmd_linklayer_event_info_reporting_enable_t;
+
+PACKSTRUCT( struct sl_bt_cmd_linklayer_get_hci_connection_handle_s
+{
+    uint8_t connection;
+});
+
+typedef struct sl_bt_cmd_linklayer_get_hci_connection_handle_s sl_bt_cmd_linklayer_get_hci_connection_handle_t;
+
+PACKSTRUCT( struct sl_bt_cmd_linklayer_get_bgapi_connection_handle_s
+{
+    uint16_t hci_connection_handle;
+});
+
+typedef struct sl_bt_cmd_linklayer_get_bgapi_connection_handle_s sl_bt_cmd_linklayer_get_bgapi_connection_handle_t;
 
 PACKSTRUCT( struct sl_bt_cmd_resource_set_report_threshold_s
 {
@@ -2690,6 +2710,14 @@ PACKSTRUCT( struct sl_bt_cmd_connection_analyzer_start_s
 
 typedef struct sl_bt_cmd_connection_analyzer_start_s sl_bt_cmd_connection_analyzer_start_t;
 
+PACKSTRUCT( struct sl_bt_cmd_connection_analyzer_process_llcp_event_s
+{
+    uint8_t analyzer;
+    uint8array llcp_event_info;
+});
+
+typedef struct sl_bt_cmd_connection_analyzer_process_llcp_event_s sl_bt_cmd_connection_analyzer_process_llcp_event_t;
+
 PACKSTRUCT( struct sl_bt_cmd_connection_analyzer_stop_s
 {
     uint8_t analyzer;
@@ -2877,6 +2905,22 @@ PACKSTRUCT( struct sl_bt_rsp_linklayer_event_info_reporting_enable_s
 });
 
 typedef struct sl_bt_rsp_linklayer_event_info_reporting_enable_s sl_bt_rsp_linklayer_event_info_reporting_enable_t;
+
+PACKSTRUCT( struct sl_bt_rsp_linklayer_get_hci_connection_handle_s
+{
+    uint16_t result;
+    uint16_t hci_connection_handle;
+});
+
+typedef struct sl_bt_rsp_linklayer_get_hci_connection_handle_s sl_bt_rsp_linklayer_get_hci_connection_handle_t;
+
+PACKSTRUCT( struct sl_bt_rsp_linklayer_get_bgapi_connection_handle_s
+{
+    uint16_t result;
+    uint8_t connection;
+});
+
+typedef struct sl_bt_rsp_linklayer_get_bgapi_connection_handle_s sl_bt_rsp_linklayer_get_bgapi_connection_handle_t;
 
 PACKSTRUCT( struct sl_bt_rsp_resource_get_status_s
 {
@@ -4593,6 +4637,13 @@ PACKSTRUCT( struct sl_bt_rsp_connection_analyzer_start_s
 
 typedef struct sl_bt_rsp_connection_analyzer_start_s sl_bt_rsp_connection_analyzer_start_t;
 
+PACKSTRUCT( struct sl_bt_rsp_connection_analyzer_process_llcp_event_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_bt_rsp_connection_analyzer_process_llcp_event_s sl_bt_rsp_connection_analyzer_process_llcp_event_t;
+
 PACKSTRUCT( struct sl_bt_rsp_connection_analyzer_stop_s
 {
     uint16_t result;
@@ -4642,6 +4693,8 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_system_get_counters_t                              cmd_system_get_counters;
     sl_bt_cmd_system_set_lazy_soft_timer_t                       cmd_system_set_lazy_soft_timer;
     sl_bt_cmd_linklayer_event_info_reporting_enable_t            cmd_linklayer_event_info_reporting_enable;
+    sl_bt_cmd_linklayer_get_hci_connection_handle_t              cmd_linklayer_get_hci_connection_handle;
+    sl_bt_cmd_linklayer_get_bgapi_connection_handle_t            cmd_linklayer_get_bgapi_connection_handle;
     sl_bt_cmd_resource_set_report_threshold_t                    cmd_resource_set_report_threshold;
     sl_bt_cmd_resource_enable_connection_tx_report_t             cmd_resource_enable_connection_tx_report;
     sl_bt_cmd_resource_get_connection_tx_status_t                cmd_resource_get_connection_tx_status;
@@ -4851,6 +4904,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_cte_receiver_disable_connectionless_cte_t          cmd_cte_receiver_disable_connectionless_cte;
     sl_bt_cmd_cte_receiver_enable_silabs_cte_t                   cmd_cte_receiver_enable_silabs_cte;
     sl_bt_cmd_connection_analyzer_start_t                        cmd_connection_analyzer_start;
+    sl_bt_cmd_connection_analyzer_process_llcp_event_t           cmd_connection_analyzer_process_llcp_event;
     sl_bt_cmd_connection_analyzer_stop_t                         cmd_connection_analyzer_stop;
     sl_bt_cmd_user_message_to_target_t                           cmd_user_message_to_target;
     sl_bt_cmd_user_manage_event_filter_t                         cmd_user_manage_event_filter;
@@ -4875,6 +4929,8 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_system_get_counters_t                              rsp_system_get_counters;
     sl_bt_rsp_system_set_lazy_soft_timer_t                       rsp_system_set_lazy_soft_timer;
     sl_bt_rsp_linklayer_event_info_reporting_enable_t            rsp_linklayer_event_info_reporting_enable;
+    sl_bt_rsp_linklayer_get_hci_connection_handle_t              rsp_linklayer_get_hci_connection_handle;
+    sl_bt_rsp_linklayer_get_bgapi_connection_handle_t            rsp_linklayer_get_bgapi_connection_handle;
     sl_bt_rsp_resource_get_status_t                              rsp_resource_get_status;
     sl_bt_rsp_resource_set_report_threshold_t                    rsp_resource_set_report_threshold;
     sl_bt_rsp_resource_enable_connection_tx_report_t             rsp_resource_enable_connection_tx_report;
@@ -5104,6 +5160,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_cte_receiver_enable_silabs_cte_t                   rsp_cte_receiver_enable_silabs_cte;
     sl_bt_rsp_cte_receiver_disable_silabs_cte_t                  rsp_cte_receiver_disable_silabs_cte;
     sl_bt_rsp_connection_analyzer_start_t                        rsp_connection_analyzer_start;
+    sl_bt_rsp_connection_analyzer_process_llcp_event_t           rsp_connection_analyzer_process_llcp_event;
     sl_bt_rsp_connection_analyzer_stop_t                         rsp_connection_analyzer_stop;
     sl_bt_rsp_user_message_to_target_t                           rsp_user_message_to_target;
     sl_bt_rsp_user_manage_event_filter_t                         rsp_user_manage_event_filter;

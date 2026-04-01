@@ -252,6 +252,24 @@ template_contribution:
   - bluetooth_feature_linklayer_interface
 - name: cli_command
   value:
+    group: bt_linklayer
+    name: get_hci_connection_handle
+    handler: sli_bt_cli_linklayer_get_hci_connection_handle
+    argument:
+    - type: uint8
+  condition:
+  - bluetooth_feature_linklayer_interface
+- name: cli_command
+  value:
+    group: bt_linklayer
+    name: get_bgapi_connection_handle
+    handler: sli_bt_cli_linklayer_get_bgapi_connection_handle
+    argument:
+    - type: uint16
+  condition:
+  - bluetooth_feature_linklayer_interface
+- name: cli_command
+  value:
     group: bt_resource
     name: get_status
     handler: sli_bt_cli_resource_get_status
@@ -2342,6 +2360,18 @@ template_contribution:
     - type: uint16
     - type: int32
     - type: uint32
+  condition:
+  - bluetooth_feature_connection_analyzer
+- name: cli_command
+  value:
+    group: bt_connection_analyzer
+    name: process_llcp_event
+    handler: sli_bt_cli_connection_analyzer_process_llcp_event
+    argument:
+    - type: uint8
+    - type: hex
+  condition:
+  - bluetooth_feature_connection_analyzer
 - name: cli_command
   value:
     group: bt_connection_analyzer
@@ -2349,4 +2379,6 @@ template_contribution:
     handler: sli_bt_cli_connection_analyzer_stop
     argument:
     - type: uint8
+  condition:
+  - bluetooth_feature_connection_analyzer
 root_path: bluetooth_le_host

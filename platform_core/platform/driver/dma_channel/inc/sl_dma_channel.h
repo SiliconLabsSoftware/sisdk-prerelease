@@ -141,8 +141,12 @@ typedef void (*sl_dma_channel_callback_t)(sl_dma_channel_handle_t *handle,
                                           bool error,
                                           bool aborted);
 
-/// DMA channel context handle.
+/// A DMA channel driver instance handle data structure.
+/// Allocated by the application using the DMA Channel Driver.
+/// Several concurrent channel handles may exist. The application must
+/// not modify the contents of this handle and should not depend on its values.
 struct sl_dma_channel_handle {
+  /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
   uint8_t channel_number;             ///< DMA channel number.
   sl_peripheral_dma_t dma_peripheral; ///< DMA peripheral base instance.
   sl_dma_channel_callback_t callback; ///< Per-descriptor completion/error callback (optional).
@@ -150,6 +154,7 @@ struct sl_dma_channel_handle {
   sl_dma_channel_xfer_descriptor_t *descriptor_list; ///< Head descriptor in current chain (active HW desc or first pending)
   sl_dma_channel_mode_t mode;         ///< Current operating mode (normal or looping)
   sl_dma_channel_state_t state;       ///< Current state (enabled, disabled or aborting)
+  /// @endcond
 };
 
 /***************************************************************************//**

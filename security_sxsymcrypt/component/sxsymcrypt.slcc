@@ -85,11 +85,11 @@ define:
 - name: SL_CODE_COMPONENT_SXSYMCRYPT
   value: sxsymcrypt
 - name: SX_HASH_DIGESTSZ_MAX
-  value: 0
+  value: "0"
 - name: SX_HASH_BLOCKSZ_MAX
-  value: 0
+  value: "0"
 - name: SX_KEYREF_MAX_ID
-  value: 32
+  value: "32"
   condition: [device_generic_family_sixx301]
   # Silicon Labs defeature list
 - name: _SILICON_LABS_DEFEATURE_SHA3

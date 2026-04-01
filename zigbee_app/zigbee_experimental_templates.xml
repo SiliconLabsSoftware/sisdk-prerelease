@@ -3,7 +3,7 @@
   <descriptors name="zigbee_z3_gateway_cpc" label="Zigbee - Host Z3 Gateway CPC" description="Zigbee 3.0 gateway for Unix host using Co-Processor Communication (CPC) to communicate with an NCP configured with CPC.">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="zigbee.z3.zigbee_z3_gateway_cpc.zigbee_z3_gateway_cpc.slcp"/>
+    <properties key="solutionReferenceId" value="zigbee.zigbee_app.z3.zigbee_z3_gateway_cpc.zigbee_z3_gateway_cpc.slcp"/>
     <properties key="projectFilePaths" value="z3/zigbee_z3_gateway_cpc/zigbee_z3_gateway_cpc.slcp"/>
     <properties key="readmeFiles" value="z3/zigbee_z3_gateway_cpc/readme.md"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>

@@ -1,5 +1,6 @@
 var NAVTREEINDEX4 =
 {
+"group__sl__bt__evt__sm__passkey__display.html#structsl__bt__evt__sm__passkey__display__s":[2,28,1,0],
 "group__sl__bt__evt__sm__passkey__request.html":[2,28,2],
 "group__sl__bt__evt__sm__passkey__request.html#adb96a57ecaf9d62866c8c003dd68788d":[2,28,2,0,0],
 "group__sl__bt__evt__sm__passkey__request.html#ga018d08886d2e2daf0d5dc479ab412165":[2,28,2,1],
@@ -248,6 +249,5 @@ var NAVTREEINDEX4 =
 "group__sl__bt__gattdb__descriptor__properties.html#ga9fa472b104567226fc65db01d77b00e3":[2,24,4,3],
 "group__sl__bt__gattdb__flags.html":[2,24,2],
 "group__sl__bt__gattdb__flags.html#ga3d4d9f581a2e772fd39ead2059fbf3dc":[2,24,2,0],
-"group__sl__bt__gattdb__security__requirements.html":[2,24,1],
-"group__sl__bt__gattdb__security__requirements.html#ga041a4035380438a82a4bdc435fd7951a":[2,24,1,3]
+"group__sl__bt__gattdb__security__requirements.html":[2,24,1]
 };

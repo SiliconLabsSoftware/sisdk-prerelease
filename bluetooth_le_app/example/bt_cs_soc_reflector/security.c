@@ -84,7 +84,7 @@ sl_status_t on_event_security(const sl_bt_msg_t *evt)
       // Set bondable mode
       sl_bt_sm_set_bondable_mode(ALLOW_BONDING);
       #if defined(NEW_BOND_REQUIRES_PASSKEY) && (NEW_BOND_REQUIRES_PASSKEY == 1)
-      sc = sl_bt_sm_set_passkey(CS_APP_CAPABILITY);
+      sc = sl_bt_sm_set_passkey(CS_APP_PASSKEY);
       if (sc != SL_STATUS_OK) {
         app_log_error(APP_SEC_PREFIX "Failed to set passkey, sc = %lu" NL_SEC, sc);
         return sc;

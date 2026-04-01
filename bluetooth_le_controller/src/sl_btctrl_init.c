@@ -108,7 +108,7 @@
 #include "sl_bluetooth_connection_analyzer_config.h"
 #endif
 
-#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CIS_PRESENT)
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_ISO_CONN_PRESENT)
 #include "sl_btctrl_iso_conn_config.h"
 #include "sl_btctrl_iso.h"
 #endif
@@ -471,6 +471,13 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
                        SL_BT_CONFIG_USER_ADVERTISERS + SL_BT_COMPONENT_ADVERTISERS,
                        SL_BT_CONFIG_ACCEPT_LIST_SIZE);
 
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_ANALYZER_LLCP_REPORT_PRESENT)
+  status = sl_btctrl_init_connection_analyzer_llcp_report(SL_BT_CONFIG_MAX_CONNECTIONS);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+#endif
+
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_ADVERTISER_PRESENT) || defined(SL_CATALOG_BLUETOOTH_FEATURE_EXTENDED_ADVERTISER_PRESENT)
   struct sl_btctrl_adv_config adv_config = { 0 };
 
@@ -501,13 +508,13 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
   sl_btctrl_configure_max_queued_adv_reports(SL_BT_CONFIG_MAX_QUEUED_ADV_REPORTS);
 #endif // SL_CATALOG_BLUETOOTH_FEATURE_SCANNER_PRESENT
 
-#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CIS_PRESENT)
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_ISO_CONN_PRESENT)
   struct sl_btctrl_iso_conn_config iso_conn_config = {
     .max_cises = SL_BT_CONFIG_MAX_CISES,
     .max_cigs = SL_BT_CONFIG_MAX_CIGS,
   };
   sl_btctrl_configure_iso_conn(&iso_conn_config);
-#endif // SL_CATALOG_BLUETOOTH_FEATURE_CIS_PRESENT
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_ISO_CONN_PRESENT
 
 // Initialize HCI
 
@@ -578,13 +585,13 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
   sl_btctrl_hci_parser_init_channel_classification();
 #endif // SL_CATALOG_BLUETOOTH_FEATURE_CHANNEL_CLASSIFICATION_PRESENT
 
-#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CIS_PRESENT)
-  sl_btctrl_hci_parser_init_iso_cis();
-#endif // SL_CATALOG_BLUETOOTH_FEATURE_CIS_PRESENT
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_ISO_CONN_PRESENT)
+  sl_btctrl_hci_parser_init_iso_conn();
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_ISO_CONN_PRESENT
 
-#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CIS_PRESENT) || defined(SL_CATALOG_BLUETOOTH_FEATURE_BIS_PRESENT)
-  sl_btctrl_hci_parser_init_iso_common();
-#endif // SL_CATALOG_BLUETOOTH_FEATURE_CIS_PRESENT or SL_CATALOG_BLUETOOTH_FEATURE_BIS_PRESENT
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_ISO_CONN_PRESENT) || defined(SL_CATALOG_BLUETOOTH_FEATURE_ISO_BCAST_PRESENT)
+  sl_btctrl_hci_parser_init_iso();
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_ISO_CONN_PRESENT or SL_CATALOG_BLUETOOTH_FEATURE_ISO_BCAST_PRESENT
 
 #if defined(SL_CATALOG_BLUETOOTH_HCI_SLEEP_PRESENT)
   sl_btctrl_hci_sleep_init();
@@ -645,6 +652,10 @@ void sl_btctrl_deinit_functional(void)
   sl_btctrl_deinit_sniff();
 #endif
 
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_ANALYZER_LLCP_REPORT_PRESENT)
+  sl_btctrl_deinit_connection_analyzer_llcp_report();
+#endif
+
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_RESOLVING_LIST_PRESENT)
   sl_btctrl_allocate_resolving_list_memory(0);
 #endif
@@ -674,7 +685,7 @@ void sl_btctrl_deinit_functional(void)
   (void) sl_btctrl_alloc_periodic_adv(0);
 #endif
 
-#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CIS_PRESENT)
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_ISO_CONN_PRESENT)
   struct sl_btctrl_iso_conn_config iso_conn_config = {
     .max_cises = 0,
     .max_cigs = 0,

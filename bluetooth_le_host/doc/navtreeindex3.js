@@ -1,5 +1,6 @@
 var NAVTREEINDEX3 =
 {
+"group__sl__bt__evt__gatt__server__indication__timeout.html#a63a7916f48c1b7f5242de4e0accf840c":[2,25,6,0,0],
 "group__sl__bt__evt__gatt__server__indication__timeout.html#ga74b7252c605c8937bf19ad4be5d8ba3d":[2,25,6,1],
 "group__sl__bt__evt__gatt__server__indication__timeout.html#structsl__bt__evt__gatt__server__indication__timeout__s":[2,25,6,0],
 "group__sl__bt__evt__gatt__server__notification__tx__completed.html":[2,25,7],
@@ -248,6 +249,5 @@ var NAVTREEINDEX3 =
 "group__sl__bt__evt__sm__passkey__display.html":[2,28,1],
 "group__sl__bt__evt__sm__passkey__display.html#a0b3e4edc45bee3929ad37528b6c1f50d":[2,28,1,0,1],
 "group__sl__bt__evt__sm__passkey__display.html#a4a517f88c341f4dd7bd2b660b9f03aa6":[2,28,1,0,0],
-"group__sl__bt__evt__sm__passkey__display.html#ga8e4c6ca6dfffb594cdae8fe1ee5cdc77":[2,28,1,1],
-"group__sl__bt__evt__sm__passkey__display.html#structsl__bt__evt__sm__passkey__display__s":[2,28,1,0]
+"group__sl__bt__evt__sm__passkey__display.html#ga8e4c6ca6dfffb594cdae8fe1ee5cdc77":[2,28,1,1]
 };

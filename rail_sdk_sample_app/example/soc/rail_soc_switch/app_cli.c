@@ -32,6 +32,7 @@
 //                                   Includes
 // -----------------------------------------------------------------------------
 #include <stdint.h>
+#include <inttypes.h>
 #include "sl_component_catalog.h"
 #include "em_device.h"
 #if defined _SILICON_LABS_32B_SERIES_2
@@ -82,9 +83,9 @@ void cli_info(sl_cli_command_arg_t *arguments)
 
   app_log_info("Info:\n");
 #if defined(_SILICON_LABS_32B_SERIES_2)
-  app_log_info("  MCU Id:       0x%016llX\n", SYSTEM_GetUnique());
+  app_log_info("  MCU Id:       0x%" PRIX64 "\n", SYSTEM_GetUnique());
 #else
-  app_log_info("  MCU Id:       0x%016llX\n", sl_hal_system_get_unique());
+  app_log_info("  MCU Id:       0x%" PRIX64 "\n", sl_hal_system_get_unique());
 #endif
 }
 

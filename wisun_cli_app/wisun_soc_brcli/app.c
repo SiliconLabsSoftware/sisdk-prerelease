@@ -285,6 +285,14 @@ static bool app_started;
 static int app_dhcpv6_socket = SOCKET_INVALID_ID;
 static char crash_buff[300] = { 0 };
 
+typedef struct
+{
+  sl_slist_node_t node;
+  void *ptr;
+} app_heap_entry_t;
+
+static sl_slist_node_t *app_heap_entry_list;
+
 static void app_check_crash(void)
 {
   const sl_wisun_crash_t *crash = sl_wisun_crash_handler_read();
@@ -844,6 +852,9 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
   }
 
   switch (app_settings_wisun.network_size) {
+    case SL_WISUN_NETWORK_SIZE_AUTOMATIC:
+      params = SL_WISUN_BR_PARAMS_PROFILE_AUTO;
+      break;
     case SL_WISUN_NETWORK_SIZE_SMALL:
       params = SL_WISUN_BR_PARAMS_PROFILE_SMALL;
       break;
@@ -1784,6 +1795,9 @@ void app_init(void)
   // Initialize socket entry lists
   sl_slist_init(&app_socket_entry_list_free);
   sl_slist_init(&app_socket_entry_list);
+
+  // Initialize heap entry list
+  sl_slist_init(&app_heap_entry_list);
 
   for (i = 0; i < APP_MAX_SOCKET_ENTRIES; ++i) {
     sl_slist_push(&app_socket_entry_list_free, &app_socket_entries[i].node);
@@ -3301,6 +3315,66 @@ void app_set_trickle_params(sl_cli_command_arg_t *arguments)
   } else {
     printf("[Trickle parameters set]\r\n");
   }
+
+  app_wisun_cli_mutex_unlock();
+}
+
+void app_util_fill_heap(sl_cli_command_arg_t *arguments)
+{
+  uint16_t block_size;
+  uint16_t alloc_length = 0;
+  uint16_t count = 0;
+  app_heap_entry_t *entry = NULL;
+
+  app_wisun_cli_mutex_lock();
+
+  block_size = sl_cli_get_argument_uint16(arguments, 0);
+
+  if (block_size > sizeof(app_heap_entry_t)) {
+    alloc_length = block_size - sizeof(app_heap_entry_t);
+  }
+
+  while (1) {
+    entry = sl_malloc(sizeof(app_heap_entry_t));
+    if (entry == NULL) {
+      goto cleanup;
+    }
+    memset(entry, 0, sizeof(app_heap_entry_t));
+
+    if (alloc_length > 0) {
+      entry->ptr = sl_malloc(alloc_length);
+      if (entry->ptr == NULL) {
+        sl_free(entry);
+        goto cleanup;
+      }
+    }
+
+    sl_slist_push(&app_heap_entry_list, &entry->node);
+    count++;
+  }
+
+cleanup:
+  // Does not account for block metadata and alignment overhead
+  printf("[Heap filled with %d blocks of %d bytes each]\r\n", count, block_size);
+  app_wisun_cli_mutex_unlock();
+}
+
+void app_util_release_heap(sl_cli_command_arg_t *arguments)
+{
+  (void)arguments;
+  sl_slist_node_t *node = NULL;
+  app_heap_entry_t *entry = NULL;
+
+  app_wisun_cli_mutex_lock();
+
+  while (!sl_slist_is_empty(app_heap_entry_list)) {
+    node = sl_slist_pop(&app_heap_entry_list);
+    entry = SL_SLIST_ENTRY(node, app_heap_entry_t, node);
+    sl_free(entry->ptr);
+    sl_free(entry);
+  }
+
+  printf("[Heap released]\r\n");
 
   app_wisun_cli_mutex_unlock();
 }

@@ -1502,6 +1502,7 @@ __STATIC_INLINE void EMU_VScaleWait(void)
 #endif
 
   while (BUS_RegBitRead(&EMU->STATUS, _EMU_STATUS_VSCALEBUSY_SHIFT) != 0U) {
+    // Wait for VScale to complete.
   }
 }
 #endif
@@ -1517,9 +1518,8 @@ __STATIC_INLINE void EMU_VScaleWait(void)
 __STATIC_INLINE EMU_VScaleEM01_TypeDef EMU_VScaleGet(void)
 {
   EMU_VScaleWait();
-  return (EMU_VScaleEM01_TypeDef)((uint32_t)
-                                  ((EMU->STATUS & _EMU_STATUS_VSCALE_MASK)
-                                   >> _EMU_STATUS_VSCALE_SHIFT));
+  return (EMU_VScaleEM01_TypeDef)((EMU->STATUS & _EMU_STATUS_VSCALE_MASK)
+                                  >> _EMU_STATUS_VSCALE_SHIFT);
 }
 #endif
 

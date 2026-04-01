@@ -108,88 +108,7 @@ static DmaXfer_t dmaXfer[DMA_CHAN_COUNT];
 static sl_dma_handle_t *dmadrv_dma_manager_handle;
 
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMADRV, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void ldma_channel0_IRQ_handler(void);
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMADRV, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void ldma_channel1_IRQ_handler(void);
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMADRV, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void ldma_channel2_IRQ_handler(void);
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMADRV, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void ldma_channel3_IRQ_handler(void);
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMADRV, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void ldma_channel4_IRQ_handler(void);
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMADRV, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void ldma_channel5_IRQ_handler(void);
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMADRV, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void ldma_channel6_IRQ_handler(void);
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMADRV, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void ldma_channel7_IRQ_handler(void);
-#if DMA_CHAN_COUNT > 8
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMADRV, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void ldma_channel8_IRQ_handler(void);
-#endif
-#if DMA_CHAN_COUNT > 9
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMADRV, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void ldma_channel9_IRQ_handler(void);
-#endif
-#if DMA_CHAN_COUNT > 10
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMADRV, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void ldma_channel10_IRQ_handler(void);
-#endif
-#if DMA_CHAN_COUNT > 11
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMADRV, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void ldma_channel11_IRQ_handler(void);
-#endif
-#if DMA_CHAN_COUNT > 12
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMADRV, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void ldma_channel12_IRQ_handler(void);
-#endif
-#if DMA_CHAN_COUNT > 13
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMADRV, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void ldma_channel13_IRQ_handler(void);
-#endif
-#if DMA_CHAN_COUNT > 14
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMADRV, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void ldma_channel14_IRQ_handler(void);
-#endif
-#if DMA_CHAN_COUNT > 15
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMADRV, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void ldma_channel15_IRQ_handler(void);
-#endif
-
-static sl_dma_manager_channel_irq_callback_t internalCallbacks[DMA_CHAN_COUNT] = {
-  ldma_channel0_IRQ_handler,
-  ldma_channel1_IRQ_handler,
-  ldma_channel2_IRQ_handler,
-  ldma_channel3_IRQ_handler,
-  ldma_channel4_IRQ_handler,
-  ldma_channel5_IRQ_handler,
-  ldma_channel6_IRQ_handler,
-  ldma_channel7_IRQ_handler
-#if DMA_CHAN_COUNT > 8
-  , ldma_channel8_IRQ_handler
-#endif
-#if DMA_CHAN_COUNT > 9
-  , ldma_channel9_IRQ_handler
-#endif
-#if DMA_CHAN_COUNT > 10
-  , ldma_channel10_IRQ_handler
-#endif
-#if DMA_CHAN_COUNT > 11
-  , ldma_channel11_IRQ_handler
-#endif
-#if DMA_CHAN_COUNT > 12
-  , ldma_channel12_IRQ_handler
-#endif
-#if DMA_CHAN_COUNT > 13
-  , ldma_channel13_IRQ_handler
-#endif
-#if DMA_CHAN_COUNT > 14
-  , ldma_channel14_IRQ_handler
-#endif
-#if DMA_CHAN_COUNT > 15
-  , ldma_channel15_IRQ_handler
-#endif
-};
+static void dmadrv_common_irq_handler(void);
 
 static Ecode_t StartTransfer(DmaMode_t                 mode,
                              DmaDirection_t            direction,
@@ -203,9 +122,6 @@ static Ecode_t StartTransfer(DmaMode_t                 mode,
                              DMADRV_DataSize_t         size,
                              DMADRV_Callback_t         callback,
                              void                      *cbUserParam);
-
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMADRV, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static void LDMA_IRQHandlerDefault(uint8_t chnum);
 
 /// @endcond
 
@@ -469,7 +385,8 @@ Ecode_t DMADRV_LdmaStartTransfer(int                channelId,
   ch->userParam     = cbUserParam;
   ch->callbackCount = 0;
 
-  sl_dma_manager_register_channel_irq_callback(dmadrv_dma_manager_handle, (uint8_t)channelId, internalCallbacks[channelId]);
+  sl_dma_manager_register_channel_user_data(dmadrv_dma_manager_handle, (uint8_t)channelId, ch);
+  sl_dma_manager_register_channel_irq_callback(dmadrv_dma_manager_handle, (uint8_t)channelId, dmadrv_common_irq_handler);
 
   LDMA_StartTransfer(channelId, transfer, descriptor);
 
@@ -512,7 +429,8 @@ Ecode_t DMADRV_LdmaStartTransfer(int                            channelId,
   }
   #endif
 
-  sl_dma_manager_register_channel_irq_callback(dmadrv_dma_manager_handle, (uint8_t)channelId, internalCallbacks[channelId]);
+  sl_dma_manager_register_channel_user_data(dmadrv_dma_manager_handle, (uint8_t)channelId, ch);
+  sl_dma_manager_register_channel_irq_callback(dmadrv_dma_manager_handle, (uint8_t)channelId, dmadrv_common_irq_handler);
 
   sl_hal_ldma_start_transfer(LDMA0, channelId);
 
@@ -1110,15 +1028,19 @@ Ecode_t DMADRV_TransferRemainingCount(unsigned int channelId,
 
 /***************************************************************************//**
  * @brief
- *  Default interrupt handler for LDMA common to all interrupt channel lines.
- *
- * @param[in] chnum
- *  The channel ID responsible for the interrupt signal trigger.
+ *  Common interrupt handler for all DMADRV channels.
+ *  Retrieves the active channel number and user data from the DMA Manager.
  ******************************************************************************/
-static void LDMA_IRQHandlerDefault(uint8_t chnum)
+static void dmadrv_common_irq_handler(void)
 {
+  uint8_t chnum;
+  void *user_data;
   bool stop;
   ChTable_t *ch;
+
+  if (sl_dma_manager_retrieve_current_channel_user_data(&chnum, &user_data) != SL_STATUS_OK) {
+    return;
+  }
 
   uint32_t pending_errors = sl_dma_manager_get_pending_errors(chnum);
   if (pending_errors) {
@@ -1128,8 +1050,7 @@ static void LDMA_IRQHandlerDefault(uint8_t chnum)
     }
   }
 
-  /* Callback called if it was provided for the given channel. */
-  ch = &chTable[chnum];
+  ch = (ChTable_t *)user_data;
   if ( ch->callback != NULL ) {
     ch->callbackCount++;
     stop = !ch->callback(chnum, ch->callbackCount, ch->userParam);
@@ -1141,166 +1062,6 @@ static void LDMA_IRQHandlerDefault(uint8_t chnum)
     }
   }
 }
-
-/***************************************************************************//**
- * @brief
- *  Root interrupt handler for LDMA channel 0.
- ******************************************************************************/
-static void ldma_channel0_IRQ_handler(void)
-{
-  LDMA_IRQHandlerDefault(0);
-}
-
-/***************************************************************************//**
- * @brief
- *  Root interrupt handler for LDMA channel 1.
- ******************************************************************************/
-static void ldma_channel1_IRQ_handler(void)
-{
-  LDMA_IRQHandlerDefault(1);
-}
-
-/***************************************************************************//**
- * @brief
- *  Root interrupt handler for LDMA channel 2.
- ******************************************************************************/
-static void ldma_channel2_IRQ_handler(void)
-{
-  LDMA_IRQHandlerDefault(2);
-}
-
-/***************************************************************************//**
- * @brief
- *  Root interrupt handler for LDMA channel 3.
- ******************************************************************************/
-static void ldma_channel3_IRQ_handler(void)
-{
-  LDMA_IRQHandlerDefault(3);
-}
-
-/***************************************************************************//**
- * @brief
- *  Root interrupt handler for LDMA channel 4.
- ******************************************************************************/
-static void ldma_channel4_IRQ_handler(void)
-{
-  LDMA_IRQHandlerDefault(4);
-}
-
-/***************************************************************************//**
- * @brief
- *  Root interrupt handler for LDMA channel 5.
- ******************************************************************************/
-static void ldma_channel5_IRQ_handler(void)
-{
-  LDMA_IRQHandlerDefault(5);
-}
-
-/***************************************************************************//**
- * @brief
- *  Root interrupt handler for LDMA channel 6.
- ******************************************************************************/
-static void ldma_channel6_IRQ_handler(void)
-{
-  LDMA_IRQHandlerDefault(6);
-}
-
-/***************************************************************************//**
- * @brief
- *  Root interrupt handler for LDMA channel 7.
- ******************************************************************************/
-static void ldma_channel7_IRQ_handler(void)
-{
-  LDMA_IRQHandlerDefault(7);
-}
-
-#if (DMA_CHAN_COUNT > 8)
-/***************************************************************************//**
- * @brief
- *  Root interrupt handler for LDMA channel 8.
- ******************************************************************************/
-static void ldma_channel8_IRQ_handler(void)
-{
-  LDMA_IRQHandlerDefault(8);
-}
-#endif
-
-#if (DMA_CHAN_COUNT > 9)
-/***************************************************************************//**
- * @brief
- *  Root interrupt handler for LDMA channel 9.
- ******************************************************************************/
-static void ldma_channel9_IRQ_handler(void)
-{
-  LDMA_IRQHandlerDefault(9);
-}
-#endif
-
-#if (DMA_CHAN_COUNT > 10)
-/***************************************************************************//**
- * @brief
- *  Root interrupt handler for LDMA channel 10.
- ******************************************************************************/
-static void ldma_channel10_IRQ_handler(void)
-{
-  LDMA_IRQHandlerDefault(10);
-}
-#endif
-
-#if (DMA_CHAN_COUNT > 11)
-/***************************************************************************//**
- * @brief
- *  Root interrupt handler for LDMA channel 11.
- ******************************************************************************/
-static void ldma_channel11_IRQ_handler(void)
-{
-  LDMA_IRQHandlerDefault(11);
-}
-#endif
-
-#if (DMA_CHAN_COUNT > 12)
-/***************************************************************************//**
- * @brief
- *  Root interrupt handler for LDMA channel 12.
- ******************************************************************************/
-static void ldma_channel12_IRQ_handler(void)
-{
-  LDMA_IRQHandlerDefault(12);
-}
-#endif
-
-#if (DMA_CHAN_COUNT > 13)
-/***************************************************************************//**
- * @brief
- *  Root interrupt handler for LDMA channel 13.
- ******************************************************************************/
-static void ldma_channel13_IRQ_handler(void)
-{
-  LDMA_IRQHandlerDefault(13);
-}
-#endif
-
-#if (DMA_CHAN_COUNT > 14)
-/***************************************************************************//**
- * @brief
- *  Root interrupt handler for LDMA channel 14.
- ******************************************************************************/
-static void ldma_channel14_IRQ_handler(void)
-{
-  LDMA_IRQHandlerDefault(14);
-}
-#endif
-
-#if (DMA_CHAN_COUNT > 15)
-/***************************************************************************//**
- * @brief
- *  Root interrupt handler for LDMA channel 15.
- ******************************************************************************/
-static void ldma_channel15_IRQ_handler(void)
-{
-  LDMA_IRQHandlerDefault(15);
-}
-#endif
 
 #if defined(EMDRV_DMADRV_UDMA)
 /***************************************************************************//**
@@ -1568,7 +1329,8 @@ static Ecode_t StartTransfer(DmaMode_t             mode,
   ch->callbackCount = 0;
   ch->mode          = mode;
 
-  sl_dma_manager_register_channel_irq_callback(dmadrv_dma_manager_handle, (uint8_t)channelId, internalCallbacks[channelId]);
+  sl_dma_manager_register_channel_user_data(dmadrv_dma_manager_handle, (uint8_t)channelId, ch);
+  sl_dma_manager_register_channel_irq_callback(dmadrv_dma_manager_handle, (uint8_t)channelId, dmadrv_common_irq_handler);
 
   LDMA_StartTransfer(channelId, &xfer, desc);
 
@@ -1664,7 +1426,8 @@ static Ecode_t StartTransfer(DmaMode_t             mode,
   ch->callbackCount = 0;
   ch->mode          = mode;
 
-  sl_dma_manager_register_channel_irq_callback(dmadrv_dma_manager_handle, (uint8_t)channelId, internalCallbacks[channelId]);
+  sl_dma_manager_register_channel_user_data(dmadrv_dma_manager_handle, (uint8_t)channelId, ch);
+  sl_dma_manager_register_channel_irq_callback(dmadrv_dma_manager_handle, (uint8_t)channelId, dmadrv_common_irq_handler);
 
   sl_hal_ldma_init_transfer(LDMA0, channelId, &xfer, desc);
   sl_hal_ldma_start_transfer(LDMA0, channelId);

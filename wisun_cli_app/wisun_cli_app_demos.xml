@@ -360,6 +360,46 @@
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
     <property key="core.quality" value="EVALUATION" />
   </demo>
+  <demo name="brd4204d.demo.wisun_dc_ciu" label="Wi-SUN - SoC DC CIU">
+    <ns1:description>Wi-SUN Direct Connect Control Interface Unit. Simple button-driven interface for DC client operations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC DC CIU" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4204d" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.0/wisun_cli_app/brd4204d/wisun_dc_ciu-brd4204d.s37" />
+    <property key="core.readmeFiles" value="wisun_dc_ciu/doc/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EXPERIMENTAL" />
+  </demo>
+  <demo name="brd4210a.demo.wisun_dc_ciu" label="Wi-SUN - SoC DC CIU">
+    <ns1:description>Wi-SUN Direct Connect Control Interface Unit. Simple button-driven interface for DC client operations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC DC CIU" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4210a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.0/wisun_cli_app/brd4210a/wisun_dc_ciu-brd4210a.s37" />
+    <property key="core.readmeFiles" value="wisun_dc_ciu/doc/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EXPERIMENTAL" />
+  </demo>
+  <demo name="brd4263c.demo.wisun_dc_ciu" label="Wi-SUN - SoC DC CIU">
+    <ns1:description>Wi-SUN Direct Connect Control Interface Unit. Simple button-driven interface for DC client operations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC DC CIU" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4263c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.0/wisun_cli_app/brd4263c/wisun_dc_ciu-brd4263c.s37" />
+    <property key="core.readmeFiles" value="wisun_dc_ciu/doc/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EXPERIMENTAL" />
+  </demo>
+  <demo name="brd4264c.demo.wisun_dc_ciu" label="Wi-SUN - SoC DC CIU">
+    <ns1:description>Wi-SUN Direct Connect Control Interface Unit. Simple button-driven interface for DC client operations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC DC CIU" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4264c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.0/wisun_cli_app/brd4264c/wisun_dc_ciu-brd4264c.s37" />
+    <property key="core.readmeFiles" value="wisun_dc_ciu/doc/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EXPERIMENTAL" />
+  </demo>
   <demo name="brd4270a.demo.wisun_dc_ciu" label="Wi-SUN - SoC DC CIU">
     <ns1:description>Wi-SUN Direct Connect Control Interface Unit. Simple button-driven interface for DC client operations.</ns1:description>
     <property key="demos.blurb" value="Wi-SUN - SoC DC CIU" />

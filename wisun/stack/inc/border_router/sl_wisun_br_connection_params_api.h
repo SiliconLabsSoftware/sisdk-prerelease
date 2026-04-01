@@ -39,7 +39,7 @@
 #include "sl_wisun_types.h"
 
 /// API version used to check compatibility (do not edit when using this header)
-#define SL_WISUN_BR_PARAMS_API_VERSION 6
+#define SL_WISUN_BR_PARAMS_API_VERSION 7
 
 /**************************************************************************//**
  * @addtogroup SL_WISUN_TYPES
@@ -232,8 +232,10 @@ typedef struct {
   uint32_t pan_capacity;
   /// Enable authentication of FAN 1.0 routers
   uint8_t enable_ffn10;
+  /// Automatically adjust connection parameters based on PAN size
+  uint8_t auto_adjust;
   /// Reserved, set to zero
-  uint8_t reserved[3];
+  uint8_t reserved[2];
 } SL_ATTRIBUTE_PACKED sl_wisun_br_connection_params_t;
 SL_PACK_END()
 
@@ -329,7 +331,8 @@ static const sl_wisun_br_connection_params_t SL_WISUN_BR_PARAMS_PROFILE_TEST = {
     .max_frame_retries = 7,
   },
   .pan_capacity = 100,
-  .enable_ffn10 = false
+  .enable_ffn10 = false,
+  .auto_adjust = false,
 };
 
 /// Profile for a small network
@@ -412,7 +415,8 @@ static const sl_wisun_br_connection_params_t SL_WISUN_BR_PARAMS_PROFILE_SMALL = 
     .max_frame_retries = 7,
   },
   .pan_capacity = 100,
-  .enable_ffn10 = false
+  .enable_ffn10 = false,
+  .auto_adjust = false,
 };
 
 /// Profile for a medium network
@@ -495,7 +499,8 @@ static const sl_wisun_br_connection_params_t SL_WISUN_BR_PARAMS_PROFILE_MEDIUM =
     .max_frame_retries = 7,
   },
   .pan_capacity = 1000,
-  .enable_ffn10 = false
+  .enable_ffn10 = false,
+  .auto_adjust = false,
 };
 
 /// Profile for a large network
@@ -578,7 +583,92 @@ static const sl_wisun_br_connection_params_t SL_WISUN_BR_PARAMS_PROFILE_LARGE = 
     .max_frame_retries = 7,
   },
   .pan_capacity = 10000,
-  .enable_ffn10 = false
+  .enable_ffn10 = false,
+  .auto_adjust = false,
+};
+
+/// Profile for automatic connection parameters adjustment
+static const sl_wisun_br_connection_params_t SL_WISUN_BR_PARAMS_PROFILE_AUTO = {
+  .version = SL_WISUN_BR_PARAMS_API_VERSION,
+  .discovery = {
+    .trickle_pa = {
+      .imin_s = 15,
+      .imax_s = 60,
+      .k = 1
+    }
+  },
+  .configuration = {
+    .trickle_pc = {
+      .imin_s = 15,
+      .imax_s = 60,
+      .k = 1
+    }
+  },
+  .eapol = {
+    .key_lifetimes = {
+      .pmk_lifetime_m = 172800,
+      .lpmk_lifetime_m = 788400,
+      .ptk_lifetime_m = 86400,
+      .lptk_lifetime_m = 525600,
+      .gtk_expire_offset_m = 43200,
+      .lgtk_expire_offset_m = 129600,
+      .gtk_new_activation_time = 720,
+      .lgtk_new_activation_time = 180,
+      .gtk_new_install_required = 80,
+      .lgtk_new_install_required = 90,
+      .ffn_revocation_lifetime_reduction = 30,
+      .lfn_revocation_lifetime_reduction = 30,
+    },
+    .sec_prot_trickle = {
+      .imin_s = 0,
+      .imax_s = 0,
+      .k = 0
+    },
+    .temp_min_timeout_s = 0,
+    .sec_prot_trickle_expirations = 0,
+  },
+  .dhcp = {
+    .dhcp_address_lifetime_s = 0,
+  },
+  .rpl = {
+    .rpl_min_hop_rank_increase = 128,
+    .rpl_dag_max_rank_increase = 0,
+    .rpl_default_lifetime_unit = 1200,
+    .rpl_dio_interval_min = 19,
+    .rpl_dio_interval_doublings = 1,
+    .rpl_dio_redundancy_constant = 0,
+    .rpl_default_lifetime = 6,
+  },
+  .mpl = {
+    .trickle = {
+      .imin_s = 1,
+      .imax_s = 10,
+      .k = 8
+    },
+    .seed_set_entry_lifetime_s = 180,
+    .trickle_expirations = 2,
+  },
+  .lfn_parent = {
+    .lfn_lpc_retry_count = 5,
+  },
+  .misc = {
+    .temp_link_min_timeout_s = 260,
+  },
+  .traffic = {
+    .lowpan_mtu = 1576,
+    .ipv6_mru = 1504,
+    .max_edfe_fragment_count = 5,
+  },
+  .mac = {
+    .backoff_period_us = 0, // calculate from PHY by default
+    .min_be = 3,
+    .max_be = 5,
+    .max_cca_retries = 8,
+    .max_frame_retries = 7,
+  },
+  .pan_capacity = 100,
+  .enable_ffn10 = false,
+  .auto_adjust = true,
 };
 
 /** @} */

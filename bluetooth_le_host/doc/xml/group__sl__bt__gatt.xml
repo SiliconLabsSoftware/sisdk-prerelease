@@ -174,7 +174,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8282" column="1" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8283" bodyend="8303"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8330" column="1" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8331" bodyend="8351"/>
       </memberdef>
       <memberdef kind="enum" id="group__sl__bt__gatt_1gac09c2c4769fe66af0f7e590aff8de05b" prot="public" static="no" strong="no">
         <type></type>
@@ -213,7 +213,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8309" column="1" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8310" bodyend="8315"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8357" column="1" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8358" bodyend="8363"/>
       </memberdef>
       <memberdef kind="enum" id="group__sl__bt__gatt_1ga37ce8cc880b027b2817f78803eb7284d" prot="public" static="no" strong="no">
         <type></type>
@@ -243,7 +243,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8321" column="1" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8322" bodyend="8325"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8369" column="1" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8370" bodyend="8373"/>
       </memberdef>
     </sectiondef>
     <sectiondef kind="func">
@@ -294,7 +294,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8564" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8564" declcolumn="13"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8612" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8612" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__gatt_1gae95e41c59f0cf582b4146a9799c462ec" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -328,7 +328,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8584" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8584" declcolumn="13"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8632" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8632" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__gatt_1ga3d1fb78a2633169c54a9e26482cf7d70" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -386,7 +386,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8606" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8606" declcolumn="13"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8654" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8654" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__gatt_1gaeda4d6603d8ca67959461ff68df5eb08" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -432,7 +432,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8630" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8630" declcolumn="13"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8678" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8678" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__gatt_1ga46982679201ab309b2081775f1804ec5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -478,7 +478,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8654" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8654" declcolumn="13"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8702" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8702" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__gatt_1gae648cf008d821f5d469eb9e40176183c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -548,7 +548,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8681" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8681" declcolumn="13"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8729" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8729" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__gatt_1ga4e78f1820bf6585294186e655b3bfcf3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -594,7 +594,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8706" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8706" declcolumn="13"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8754" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8754" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__gatt_1gaa87871700fd30e648940b7f82548ca6c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -652,7 +652,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8731" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8731" declcolumn="13"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8779" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8779" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__gatt_1ga7d92298836408fba164c46cdb0e32b3d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -715,7 +715,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8767" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8767" declcolumn="13"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8815" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8815" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__gatt_1ga691b8ffe8734ea853fe9315d0767db75" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -745,7 +745,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8785" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8785" declcolumn="13"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8833" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8833" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__gatt_1ga875a2cfdfb8e5c6cad354b4c88846856" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -792,7 +792,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8815" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8815" declcolumn="13"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8863" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8863" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__gatt_1gaf8ccce3c700fbfa4268ebb77dc300b78" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -862,7 +862,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8846" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8846" declcolumn="13"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8894" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8894" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__gatt_1ga1280056328305064307fee152f656623" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -922,7 +922,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8885" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8885" declcolumn="13"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8933" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8933" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__gatt_1ga5bbdba2c22ea0808e4de16e781894a9d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -987,7 +987,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8931" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8931" declcolumn="13"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8979" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8979" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__gatt_1gaa0d581898bf4869cc80eeb040b2a8611" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -1057,7 +1057,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8963" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8963" declcolumn="13"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9011" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="9011" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__gatt_1gafd574a7a8faebb498751f3f90fb975a5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -1127,7 +1127,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8989" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="8989" declcolumn="13"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9037" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="9037" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__gatt_1ga2fb8049cafc0efc9f06bf2fae7c3c119" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -1205,7 +1205,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9013" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="9013" declcolumn="13"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9061" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="9061" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__gatt_1ga11822aabde99210270f63636327ed0ee" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -1299,7 +1299,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9050" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="9050" declcolumn="13"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9098" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="9098" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__gatt_1ga5d50f883c0424a733d9f5ebe1c0c6bc5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -1392,7 +1392,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9086" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="9086" declcolumn="13"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9134" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="9134" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__gatt_1ga55769ce8b00e91a6141dbb2aa09d4e77" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -1441,7 +1441,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9115" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="9115" declcolumn="13"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9163" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="9163" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__gatt_1gac154f2173eec80db460a927230214e83" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -1487,7 +1487,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9140" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="9140" declcolumn="13"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9188" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="9188" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__gatt_1ga10bcb7ca88fb9244042fd812c454d68b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -1556,7 +1556,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9163" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="9163" declcolumn="13"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9211" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="9211" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__gatt_1ga7f34da593d613de7e32da463b6b4c230" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -1598,7 +1598,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9178" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="9178" declcolumn="13"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9226" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="9226" declcolumn="13"/>
       </memberdef>
     </sectiondef>
     <sectiondef kind="define">
@@ -1611,7 +1611,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8231" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8231" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8279" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8279" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga5d4900af1eebfa6745cbf3c645c8fdfc" prot="public" static="no">
         <name>sl_bt_cmd_gatt_discover_primary_services_id</name>
@@ -1622,7 +1622,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8232" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8232" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8280" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8280" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga010a9f893c3125a609d85868e5dc747a" prot="public" static="no">
         <name>sl_bt_cmd_gatt_discover_primary_services_by_uuid_id</name>
@@ -1633,7 +1633,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8233" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8233" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8281" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8281" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1gad4364e6a8987a4da89f223568478574a" prot="public" static="no">
         <name>sl_bt_cmd_gatt_find_included_services_id</name>
@@ -1644,7 +1644,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8234" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8234" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8282" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8282" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga8ba79515469ff335ce3a90a6053d62dc" prot="public" static="no">
         <name>sl_bt_cmd_gatt_discover_characteristics_id</name>
@@ -1655,7 +1655,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8235" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8235" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8283" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8283" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga626311526af70f051867aee916d36426" prot="public" static="no">
         <name>sl_bt_cmd_gatt_discover_characteristics_by_uuid_id</name>
@@ -1666,7 +1666,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8236" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8236" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8284" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8284" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga78911d3aa411eace6808652c25e38b50" prot="public" static="no">
         <name>sl_bt_cmd_gatt_discover_descriptors_id</name>
@@ -1677,7 +1677,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8237" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8237" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8285" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8285" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga2b5f4d7c643804cddce651e05928103e" prot="public" static="no">
         <name>sl_bt_cmd_gatt_discover_characteristic_descriptors_id</name>
@@ -1688,7 +1688,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8238" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8238" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8286" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8286" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga261ebd319850ce91612511f8f4b2a732" prot="public" static="no">
         <name>sl_bt_cmd_gatt_set_characteristic_notification_id</name>
@@ -1699,7 +1699,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8239" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8239" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8287" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8287" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga904d1a294ee948f82660f578d8ddb2bd" prot="public" static="no">
         <name>sl_bt_cmd_gatt_send_characteristic_confirmation_id</name>
@@ -1710,7 +1710,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8240" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8240" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8288" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8288" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga5e3892d0a5a312891f28b7eea86ffefa" prot="public" static="no">
         <name>sl_bt_cmd_gatt_read_characteristic_value_id</name>
@@ -1721,7 +1721,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8241" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8241" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8289" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8289" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga4f7662229ecb8c3e507453a9c4145188" prot="public" static="no">
         <name>sl_bt_cmd_gatt_read_characteristic_value_from_offset_id</name>
@@ -1732,7 +1732,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8242" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8242" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8290" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8290" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga3c84d4555051aeef66afb75bf66b448b" prot="public" static="no">
         <name>sl_bt_cmd_gatt_read_multiple_characteristic_values_id</name>
@@ -1743,7 +1743,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8243" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8243" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8291" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8291" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1gaccf9c8636ac61bc605bc1805185aadab" prot="public" static="no">
         <name>sl_bt_cmd_gatt_read_variable_length_characteristic_values_id</name>
@@ -1754,7 +1754,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8244" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8244" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8292" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8292" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga20c7d18a0af59895fdc17184f0324552" prot="public" static="no">
         <name>sl_bt_cmd_gatt_read_characteristic_value_by_uuid_id</name>
@@ -1765,7 +1765,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8245" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8245" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8293" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8293" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1gacea0d39da9e67422b23a485965f4102d" prot="public" static="no">
         <name>sl_bt_cmd_gatt_write_characteristic_value_id</name>
@@ -1776,7 +1776,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8246" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8246" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8294" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8294" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1gae4137b13d5b3553561494a681e75f685" prot="public" static="no">
         <name>sl_bt_cmd_gatt_write_characteristic_value_without_response_id</name>
@@ -1787,7 +1787,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8247" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8247" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8295" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8295" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1gaa67640ecee117898644df8c7fd66e9fa" prot="public" static="no">
         <name>sl_bt_cmd_gatt_prepare_characteristic_value_write_id</name>
@@ -1798,7 +1798,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8248" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8248" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8296" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8296" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga4f5993ee5a28b3624f58510fa8c12b3f" prot="public" static="no">
         <name>sl_bt_cmd_gatt_prepare_characteristic_value_reliable_write_id</name>
@@ -1809,7 +1809,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8249" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8249" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8297" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8297" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1gab220f8b1bae603bcae35c67e7c06b6d7" prot="public" static="no">
         <name>sl_bt_cmd_gatt_execute_characteristic_value_write_id</name>
@@ -1820,7 +1820,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8250" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8250" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8298" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8298" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga30543d17e8b5da407bdc93838615583f" prot="public" static="no">
         <name>sl_bt_cmd_gatt_read_descriptor_value_id</name>
@@ -1831,7 +1831,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8251" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8251" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8299" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8299" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1gaf93739ff33672a0cf68b9144b6239780" prot="public" static="no">
         <name>sl_bt_cmd_gatt_write_descriptor_value_id</name>
@@ -1842,7 +1842,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8252" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8252" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8300" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8300" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga100714f664d94e04dd43f8d25a1051f9" prot="public" static="no">
         <name>sl_bt_cmd_gatt_get_mtu_id</name>
@@ -1853,7 +1853,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8253" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8253" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8301" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8301" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga942035aae10d17b3e31ce3b745ed379e" prot="public" static="no">
         <name>sl_bt_rsp_gatt_set_max_mtu_id</name>
@@ -1864,7 +1864,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8254" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8254" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8302" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8302" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1gaa29fdf0e0aa1d25a92f0be42467d5d7b" prot="public" static="no">
         <name>sl_bt_rsp_gatt_discover_primary_services_id</name>
@@ -1875,7 +1875,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8255" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8255" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8303" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8303" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1gaf9ca5ef05ae978bfa15cbaf9d6c1c689" prot="public" static="no">
         <name>sl_bt_rsp_gatt_discover_primary_services_by_uuid_id</name>
@@ -1886,7 +1886,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8256" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8256" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8304" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8304" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1gad6fc712b23d6d05b32d77ab6b5b59d97" prot="public" static="no">
         <name>sl_bt_rsp_gatt_find_included_services_id</name>
@@ -1897,7 +1897,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8257" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8257" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8305" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8305" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1gab3482825d2f3f3272366622d277cdcb0" prot="public" static="no">
         <name>sl_bt_rsp_gatt_discover_characteristics_id</name>
@@ -1908,7 +1908,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8258" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8258" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8306" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8306" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1gaacd6e8ab95004385c6740a015eeb1ea4" prot="public" static="no">
         <name>sl_bt_rsp_gatt_discover_characteristics_by_uuid_id</name>
@@ -1919,7 +1919,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8259" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8259" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8307" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8307" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1gaf0e9853ae1d78e28f4826cb5603ea8f6" prot="public" static="no">
         <name>sl_bt_rsp_gatt_discover_descriptors_id</name>
@@ -1930,7 +1930,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8260" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8260" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8308" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8308" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga44131ce025e9f8f05c0c9db6ffb5d10b" prot="public" static="no">
         <name>sl_bt_rsp_gatt_discover_characteristic_descriptors_id</name>
@@ -1941,7 +1941,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8261" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8261" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8309" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8309" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga870488b6d930eea36eb9ae8158de77f7" prot="public" static="no">
         <name>sl_bt_rsp_gatt_set_characteristic_notification_id</name>
@@ -1952,7 +1952,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8262" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8262" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8310" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8310" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1gae072f930035b9185afaa8d15b3c832c8" prot="public" static="no">
         <name>sl_bt_rsp_gatt_send_characteristic_confirmation_id</name>
@@ -1963,7 +1963,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8263" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8263" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8311" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8311" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1gac50f84b7dfea551a28f1c10916bb6960" prot="public" static="no">
         <name>sl_bt_rsp_gatt_read_characteristic_value_id</name>
@@ -1974,7 +1974,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8264" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8264" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8312" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8312" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1gabce853c84bd1c6249fd62f98cc5320ec" prot="public" static="no">
         <name>sl_bt_rsp_gatt_read_characteristic_value_from_offset_id</name>
@@ -1985,7 +1985,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8265" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8265" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8313" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8313" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga12b269acf1ba6b6e7a9bf43cf8b1144c" prot="public" static="no">
         <name>sl_bt_rsp_gatt_read_multiple_characteristic_values_id</name>
@@ -1996,7 +1996,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8266" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8266" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8314" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8314" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1gac49e67fa822f4a0dcf202cf452a88330" prot="public" static="no">
         <name>sl_bt_rsp_gatt_read_variable_length_characteristic_values_id</name>
@@ -2007,7 +2007,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8267" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8267" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8315" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8315" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga461290238aa178a464cb3149c261a7d8" prot="public" static="no">
         <name>sl_bt_rsp_gatt_read_characteristic_value_by_uuid_id</name>
@@ -2018,7 +2018,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8268" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8268" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8316" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8316" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga75b6f5ae610516a1656bf40dd6aff7fe" prot="public" static="no">
         <name>sl_bt_rsp_gatt_write_characteristic_value_id</name>
@@ -2029,7 +2029,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8269" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8269" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8317" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8317" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga3e4c7ae4eb04db4f960d9219ee54dc87" prot="public" static="no">
         <name>sl_bt_rsp_gatt_write_characteristic_value_without_response_id</name>
@@ -2040,7 +2040,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8270" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8270" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8318" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8318" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga8adcb899b60ea773d6397dd3911be2c7" prot="public" static="no">
         <name>sl_bt_rsp_gatt_prepare_characteristic_value_write_id</name>
@@ -2051,7 +2051,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8271" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8271" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8319" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8319" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga10b9239ed1e9e378ced78b200eea98c3" prot="public" static="no">
         <name>sl_bt_rsp_gatt_prepare_characteristic_value_reliable_write_id</name>
@@ -2062,7 +2062,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8272" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8272" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8320" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8320" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga5ebfa5aa4253d752ac5e9432cf619e80" prot="public" static="no">
         <name>sl_bt_rsp_gatt_execute_characteristic_value_write_id</name>
@@ -2073,7 +2073,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8273" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8273" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8321" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8321" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga79d2c11acab86e0fbe1fb1e193147e83" prot="public" static="no">
         <name>sl_bt_rsp_gatt_read_descriptor_value_id</name>
@@ -2084,7 +2084,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8274" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8274" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8322" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8322" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1ga9fffceee5cf933ac493068c16a3a91ca" prot="public" static="no">
         <name>sl_bt_rsp_gatt_write_descriptor_value_id</name>
@@ -2095,7 +2095,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8275" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8275" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8323" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8323" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gatt_1gadbc27360081eeba6004bdad52194ee2d" prot="public" static="no">
         <name>sl_bt_rsp_gatt_get_mtu_id</name>
@@ -2106,7 +2106,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8276" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8276" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8324" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8324" bodyend="-1"/>
       </memberdef>
     </sectiondef>
     <briefdescription>

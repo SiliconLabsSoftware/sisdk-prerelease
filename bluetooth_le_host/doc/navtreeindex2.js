@@ -1,5 +1,6 @@
 var NAVTREEINDEX2 =
 {
+"group__sl__bt__evt__connection__subrate__changed.html#ga1dda4d79620b71d6e971b5e209e9b20c":[2,22,13,1],
 "group__sl__bt__evt__connection__subrate__changed.html#structsl__bt__evt__connection__subrate__changed__s":[2,22,13,0],
 "group__sl__bt__evt__connection__tx__power.html":[2,22,7],
 "group__sl__bt__evt__connection__tx__power.html#a640bfc42eac5eef7639e7703e63abea5":[2,22,7,0,2],
@@ -248,6 +249,5 @@ var NAVTREEINDEX2 =
 "group__sl__bt__evt__gatt__server__execute__write__completed.html#ad0ebdd9dc2244f2ad48076296c22fa83":[2,25,5,0,1],
 "group__sl__bt__evt__gatt__server__execute__write__completed.html#ga025eb202f4120d8040611db566c3d6e6":[2,25,5,1],
 "group__sl__bt__evt__gatt__server__execute__write__completed.html#structsl__bt__evt__gatt__server__execute__write__completed__s":[2,25,5,0],
-"group__sl__bt__evt__gatt__server__indication__timeout.html":[2,25,6],
-"group__sl__bt__evt__gatt__server__indication__timeout.html#a63a7916f48c1b7f5242de4e0accf840c":[2,25,6,0,0]
+"group__sl__bt__evt__gatt__server__indication__timeout.html":[2,25,6]
 };

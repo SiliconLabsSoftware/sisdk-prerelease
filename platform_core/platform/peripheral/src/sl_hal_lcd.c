@@ -138,7 +138,7 @@ void sl_hal_lcd_init_frame_counter(const sl_hal_lcd_frame_counter_init_t *init)
   // Set the Blink and Animation Control Register.
   LCD->BACFG = (LCD->BACFG & ~(_LCD_BACFG_FCTOP_MASK
                                | _LCD_BACFG_FCPRESC_MASK))
-               | ((uint32_t)init->top << _LCD_BACFG_FCTOP_SHIFT)
+               | (init->top << _LCD_BACFG_FCTOP_SHIFT)
                | ((uint32_t)init->prescale << _LCD_BACFG_FCPRESC_SHIFT);
 }
 
@@ -386,28 +386,28 @@ void sl_hal_lcd_segment_set_low(uint8_t com,
   switch (com) {
     case 0:
       segment_data     = LCD->SEGD0;
-      segment_data    &= ~(mask);
+      segment_data    &= ~mask;
       segment_data    |= (mask & bits);
       LCD->SEGD0 = segment_data;
       break;
 
     case 1:
       segment_data     = LCD->SEGD1;
-      segment_data    &= ~(mask);
+      segment_data    &= ~mask;
       segment_data    |= (mask & bits);
       LCD->SEGD1 = segment_data;
 
       break;
     case 2:
       segment_data     = LCD->SEGD2;
-      segment_data    &= ~(mask);
+      segment_data    &= ~mask;
       segment_data    |= (mask & bits);
       LCD->SEGD2 = segment_data;
       break;
 
     case 3:
       segment_data     = LCD->SEGD3;
-      segment_data    &= ~(mask);
+      segment_data    &= ~mask;
       segment_data    |= (mask & bits);
       LCD->SEGD3 = segment_data;
       break;
@@ -415,7 +415,7 @@ void sl_hal_lcd_segment_set_low(uint8_t com,
 #if defined(_LCD_SEGD4_MASK)
     case 4:
       segment_data     = LCD->SEGD4;
-      segment_data    &= ~(mask);
+      segment_data    &= ~mask;
       segment_data    |= (mask & bits);
       LCD->SEGD4 = segment_data;
       break;
@@ -424,7 +424,7 @@ void sl_hal_lcd_segment_set_low(uint8_t com,
 #if defined(_LCD_SEGD5_MASK)
     case 5:
       segment_data     = LCD->SEGD5;
-      segment_data    &= ~(mask);
+      segment_data    &= ~mask;
       segment_data    |= (mask & bits);
       LCD->SEGD5 = segment_data;
       break;
@@ -433,7 +433,7 @@ void sl_hal_lcd_segment_set_low(uint8_t com,
 #if defined(_LCD_SEGD6_MASK)
     case 6:
       segment_data     = LCD->SEGD6;
-      segment_data    &= ~(mask);
+      segment_data    &= ~mask;
       segment_data    |= (mask & bits);
       LCD->SEGD6 = segment_data;
       break;
@@ -442,7 +442,7 @@ void sl_hal_lcd_segment_set_low(uint8_t com,
 #if defined(_LCD_SEGD7_MASK)
     case 7:
       segment_data     = LCD->SEGD7;
-      segment_data    &= ~(mask);
+      segment_data    &= ~mask;
       segment_data    |= (mask & bits);
       LCD->SEGD7 = segment_data;
       break;
@@ -477,32 +477,32 @@ void sl_hal_lcd_segment_set_high(uint8_t com,
   switch (com) {
     case 0:
       segment_data     = LCD->SEGD0H;
-      segment_data    &= ~(mask);
+      segment_data    &= ~mask;
       segment_data    |= (mask & bits);
       LCD->SEGD0H = segment_data;
       break;
     case 1:
       segment_data     = LCD->SEGD1H;
-      segment_data    &= ~(mask);
+      segment_data    &= ~mask;
       segment_data    |= (mask & bits);
       LCD->SEGD1H = segment_data;
       break;
     case 2:
       segment_data     = LCD->SEGD2H;
-      segment_data    &= ~(mask);
+      segment_data    &= ~mask;
       segment_data    |= (mask & bits);
       LCD->SEGD2H = segment_data;
       break;
     case 3:
       segment_data     = LCD->SEGD3H;
-      segment_data    &= ~(mask);
+      segment_data    &= ~mask;
       segment_data    |= (mask & bits);
       LCD->SEGD3H = segment_data;
       break;
 #if defined(_LCD_SEGD4H_MASK)
     case 4:
       segment_data     = LCD->SEGD4H;
-      segment_data    &= ~(mask);
+      segment_data    &= ~mask;
       segment_data    |= (mask & bits);
       LCD->SEGD4H = segment_data;
       break;
@@ -510,7 +510,7 @@ void sl_hal_lcd_segment_set_high(uint8_t com,
 #if defined(_LCD_SEGD5H_MASK)
     case 5:
       segment_data     = LCD->SEGD5H;
-      segment_data    &= ~(mask);
+      segment_data    &= ~mask;
       segment_data    |= (mask & bits);
       LCD->SEGD5H = segment_data;
       break;
@@ -518,7 +518,7 @@ void sl_hal_lcd_segment_set_high(uint8_t com,
 #if defined(_LCD_SEGD6H_MASK)
     case 6:
       segment_data     = LCD->SEGD6H;
-      segment_data    &= ~(mask);
+      segment_data    &= ~mask;
       segment_data    |= (mask & bits);
       LCD->SEGD6H = segment_data;
       break;
@@ -526,7 +526,7 @@ void sl_hal_lcd_segment_set_high(uint8_t com,
 #if defined(_LCD_SEGD7H_MASK)
     case 7:
       segment_data     = LCD->SEGD7H;
-      segment_data    &= ~(mask);
+      segment_data    &= ~mask;
       segment_data    |= (mask & bits);
       LCD->SEGD7H = segment_data;
       break;

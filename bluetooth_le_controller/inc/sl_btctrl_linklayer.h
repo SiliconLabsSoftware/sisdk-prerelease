@@ -351,6 +351,28 @@ sl_status_t sl_btctrl_init_sniff(uint8_t num);
  */
 void sl_btctrl_deinit_sniff(void);
 
+/**
+ * @brief Initialize connection analyzer LLCP reporting via the Event Info
+ * Reporting framework.
+ *
+ * Allocates internal resources and registers the LLCP handler that intercepts
+ * LL_CONNECTION_UPDATE_REQ and LL_CHANNEL_MAP_REQ PDUs. Reporting is controlled
+ * per-connection at runtime via the VS_SiliconLabs_Event_Info_Reporting_Enable
+ * HCI command (procedure_type = 1).
+ *
+ * @param[in] max_connections  Maximum number of simultaneous connections
+ *                             that can have LLCP reporting enabled.
+ * @return #SL_STATUS_OK on success, #SL_STATUS_ALLOCATION_FAILED on OOM.
+ */
+sl_status_t sl_btctrl_init_connection_analyzer_llcp_report(uint8_t max_connections);
+
+/**
+ * @brief Deinitialize connection analyzer LLCP reporting.
+ *
+ * Frees internal resources.
+ */
+void sl_btctrl_deinit_connection_analyzer_llcp_report(void);
+
 void sl_btctrl_init_config(struct sl_btctrl_config *config);
 
 /**

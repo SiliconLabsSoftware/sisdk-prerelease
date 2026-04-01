@@ -32,6 +32,7 @@
 //                                   Includes
 // -----------------------------------------------------------------------------
 #include <stdint.h>
+#include <inttypes.h>
 #include "sl_component_catalog.h"
 #include "sl_rail.h"
 #include "app_process.h"
@@ -366,7 +367,7 @@ static void handle_state_packet_received(sl_rail_handle_t rail_handle)
                                   get_phy_modulation_from_channel(get_channel()));
       rail_status = sl_rail_release_rx_packet(rail_handle, rx_packet_handle);
       if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
-        app_log_warning("ERROR sl_rail_release_rx_packet() result: 0x%08lX\n", rail_status);
+        app_log_warning("ERROR sl_rail_release_rx_packet() result: 0x%08" PRIX32 "\n", rail_status);
       }
       if (rx_requested) {
         printf_rx_packet(start_of_packet, packet_size);
@@ -376,7 +377,7 @@ static void handle_state_packet_received(sl_rail_handle_t rail_handle)
         if (rail_status == SL_RAIL_STATUS_NO_ERROR) {
           app_log_info("Mode switch end, returned to the base channel\n");
         } else {
-          app_log_warning("Error during returning to the base channel: 0x%08lX\n", rail_status);
+          app_log_warning("Error during returning to the base channel: 0x%08" PRIX32 "\n", rail_status);
         }
       }
       toggle_receive_led();
@@ -411,19 +412,19 @@ static void handle_state_packet_sent(sl_rail_handle_t rail_handle)
   if (ms_state == MS_SENDING_MS_END_PACKET) {
     rail_status = return_to_base_channel();
     if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
-      app_log_warning("ERROR return_to_base_channel: 0x%08lX\n", 
+      app_log_warning("ERROR return_to_base_channel: 0x%08" PRIX32 "\n",
                       rail_status);
     }
   }
   if (get_print_packet_details()) {
     if (get_phy_modulation_from_channel(get_channel()) == M_OFDM) {
-      app_log_info("With rate: %u and scramble: %u\n",
+      app_log_info("With rate: %" PRIu8 " and scramble: %" PRIu8 "\n",
                    get_ofdm_rate(),
                    get_ofdm_scrambler());
     } else {
-      app_log_info("With fcs type: %u and whitening: %u\n",
+      app_log_info("With fcs type: %" PRIu8 " and whitening: %s\n",
                    get_fsk_fcs_type(),
-                   get_fsk_whitening());
+                   get_fsk_whitening() ? "ON" : "OFF");
     }
   }
   toggle_send_led();
@@ -440,7 +441,7 @@ static void handle_state_rx_packet_error(sl_rail_handle_t rail_handle)
 {
   (void) rail_handle;
 
-  app_log_error("Radio RX Error occurred\nEvents: 0x%016llX\n", radio_events);
+  app_log_error("Radio RX Error occurred\nEvents: 0x%" PRIX64 "\n", radio_events);
   state = S_IDLE;
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   app_task_notify();
@@ -454,7 +455,7 @@ static void handle_state_tx_packet_error(sl_rail_handle_t rail_handle)
 {
   (void) rail_handle;
 
-  app_log_error("Radio TX Error occurred\nEvents: 0x%016llX\n", radio_events);
+  app_log_error("Radio TX Error occurred\nEvents: 0x%" PRIX64 "\n", radio_events);
   state = S_IDLE;
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   app_task_notify();
@@ -470,8 +471,8 @@ static void handle_state_calibration_error(sl_rail_handle_t rail_handle)
   sl_rail_status_t calibration_status_buff = SL_RAIL_STATUS_NO_ERROR;
 
   calibration_status_buff = calibration_status;
-  app_log_error("Radio Calibration Error occurred\nEvents: 0x%016llX\n"
-                "sl_rail_calibrate() result: 0x%08lX\n",
+  app_log_error("Radio Calibration Error occurred\nEvents: 0x%" PRIX64 "\n"
+                                                                       "sl_rail_calibrate() result: 0x%08" PRIX32 "\n",
                 radio_events,
                 calibration_status_buff);
   state = S_IDLE;
@@ -496,7 +497,7 @@ static void handle_state_idle(sl_rail_handle_t rail_handle)
   if (ms_state == MS_REQUESTED) {
     status = trig_mode_switch_tx(rail_handle);
     if (rail_status != SL_STATUS_OK) {
-      app_log_warning("ERROR sl_rail_ieee802154_compute_channel_from_phy_mode_id: 0x%08lX\n", status);
+      app_log_warning("ERROR sl_rail_ieee802154_compute_channel_from_phy_mode_id: 0x%08" PRIX32 "\n", status);
     }
     // ms_state is changed on success
     ms_state = get_ms_state();
@@ -551,11 +552,11 @@ static void handle_state_idle(sl_rail_handle_t rail_handle)
         if (rail_status == SL_RAIL_STATUS_NO_ERROR) {
           app_log_info("sl_rail_start_tx() ok\n");
         } else {
-          app_log_warning("ERROR sl_rail_start_tx() result: 0x%08lX\n", rail_status);
+          app_log_warning("ERROR sl_rail_start_tx() result: 0x%08" PRIX32 "\n", rail_status);
         }
       }
     } else {
-      app_log_warning("ERROR sl_rail_start_tx() result: 0x%08lX\n", rail_status);
+      app_log_warning("ERROR sl_rail_start_tx() result: 0x%08" PRIX32 "\n", rail_status);
     }
     tx_requested = false;
 #if defined(SL_CATALOG_KERNEL_PRESENT)
@@ -571,9 +572,9 @@ static void printf_rx_packet(const uint8_t * const rx_buffer, uint16_t length)
 {
   uint16_t current_channel = get_channel();
 
-  app_log_info("Packet has been received on channel %u:\n", current_channel);
+  app_log_info("Packet has been received on channel %" PRIu16 ":\n", current_channel);
   for (uint16_t i = 0; i < length; i++) {
-    app_log_info("0x%02X", rx_buffer[i]);
+    app_log_info("0x%" PRIX8, rx_buffer[i]);
     if (i < length - 1) {
       app_log_info(", ");
     } else {
@@ -582,11 +583,11 @@ static void printf_rx_packet(const uint8_t * const rx_buffer, uint16_t length)
   }
   if (get_print_packet_details()) {
     if (get_phy_modulation_from_channel(get_channel()) == M_OFDM) {
-      app_log_info("With rate: %u and scramble: %u\n",
+      app_log_info("With rate: %" PRIu8 " and scramble: %" PRIu8 "\n",
                    get_ofdm_rate(),
                    get_ofdm_scrambler());
     } else {
-      app_log_info("With fcs type: %u and whitening %s\n",
+      app_log_info("With fcs type: %" PRIu8 " and whitening %s\n",
                    get_fsk_fcs_type(),
                    get_fsk_whitening() ? "ON" : "OFF");
     }

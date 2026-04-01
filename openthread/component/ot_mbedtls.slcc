@@ -9,12 +9,15 @@ ui_hints:
 provides:
 - name: ot_mbedtls
 requires:
+- name: ot_crypto_ecdsa
 - name: mbedtls_dtls
-- name: mbedtls_ecdsa_deterministic
 - name: mbedtls_jpake
 - name: mbedtls_ecc_secp256r1
 - name: mbedtls_cmac
 - name: mbedtls_tls_server
+recommends:
+- id: ot_crypto_ecdsa_deterministic
+  vendor: silabs
 template_contribution:
 - name: mbedtls_ssl_content_len_in_requirement
   value: 900

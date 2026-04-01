@@ -57,13 +57,20 @@ typedef struct sl_dma_handle sl_dma_handle_t;
 
 typedef void (*sl_dma_manager_channel_irq_callback_t)(void);
 
+/// A DMA manager instance handle data structure.
+/// Allocated by the application or by the DMA manager.
+/// Several concurrent DMA instances may exist. The application must
+/// not modify the contents of this handle and should not depend on its values.
 struct sl_dma_handle {
+  /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
   sl_peripheral_dma_t dma_peripheral;  ///< DMA peripheral.
   uint32_t dma_channels_bitmap;        ///< Bitmap of allocated channels.
   uint32_t sync_bit_bitmap;            ///< Bitmap of allocated sync bits.
   uint8_t  round_robin_channel_number; ///< Number of round robin channels.
   sl_dma_manager_channel_irq_callback_t* channel_irq_callbacks_table; ///< Table of IRQ callbacks per channel.
+  void** channel_user_data_table;      ///< Table of user data pointers per channel.
   sl_slist_node_t node;                ///< Linked list node for DMA handle management.
+  /// @endcond
 };
 
 // -----------------------------------------------------------------------------
@@ -228,6 +235,45 @@ sl_status_t sl_dma_manager_free_sync(sl_dma_handle_t *dma_handle,
 sl_status_t sl_dma_manager_register_channel_irq_callback(sl_dma_handle_t *dma_handle,
                                                          uint8_t channel_nbr,
                                                          sl_dma_manager_channel_irq_callback_t callback);
+
+/***************************************************************************//**
+ * Registers user data for a specific DMA channel.
+ *
+ * @param[in]  dma_handle Pointer to DMA handle. NULL will take the default
+ *                        DMA instance.
+ *
+ * @param[in]  channel_nbr Channel number.
+ *
+ * @param[in]  user_data Pointer to user data to associate with the channel.
+ *
+ * @return 0 if successful. Error code otherwise.
+ *
+ * @note To remove previously registered user data, call this function with a
+ *       NULL user_data.
+ ******************************************************************************/
+sl_status_t sl_dma_manager_register_channel_user_data(sl_dma_handle_t *dma_handle,
+                                                      uint8_t channel_nbr,
+                                                      void *user_data);
+
+/***************************************************************************//**
+ * Retrieves the user data and channel number for the DMA channel currently
+ * being serviced in the interrupt dispatch context.
+ *
+ * @param[out] channel_nbr Pointer to variable that will receive the channel
+ *                         number currently being serviced.
+ *
+ * @param[out] user_data Pointer to variable that will receive the user data
+ *                       associated with the channel.
+ *
+ * @return 0 if successful. SL_STATUS_INVALID_STATE if called outside of the
+ *         DMA Manager interrupt dispatch context. Error code otherwise.
+ *
+ * @note This function is designed to be called from within a DMA channel IRQ
+ *       callback registered via sl_dma_manager_register_channel_irq_callback().
+ ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_MANAGER, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
+sl_status_t sl_dma_manager_retrieve_current_channel_user_data(uint8_t *channel_nbr,
+                                                              void **user_data);
 
 /***************************************************************************//**
  * Get the pending errors for the DMA manager.

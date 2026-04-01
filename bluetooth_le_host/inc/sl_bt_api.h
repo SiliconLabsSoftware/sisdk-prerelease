@@ -1735,7 +1735,11 @@ sl_status_t sl_bt_system_set_lazy_soft_timer(uint32_t time,
 
 /* Command and Response IDs */
 #define sl_bt_cmd_linklayer_event_info_reporting_enable_id           0x00600020
+#define sl_bt_cmd_linklayer_get_hci_connection_handle_id             0x01600020
+#define sl_bt_cmd_linklayer_get_bgapi_connection_handle_id           0x02600020
 #define sl_bt_rsp_linklayer_event_info_reporting_enable_id           0x00600020
+#define sl_bt_rsp_linklayer_get_hci_connection_handle_id             0x01600020
+#define sl_bt_rsp_linklayer_get_bgapi_connection_handle_id           0x02600020
 
 /**
  * @addtogroup sl_bt_evt_linklayer_event_info_report sl_bt_evt_linklayer_event_info_report
@@ -1827,6 +1831,52 @@ sl_status_t sl_bt_linklayer_event_info_reporting_enable(uint8_t enable,
                                                         uint8_t procedure_type,
                                                         size_t procedure_identifier_len,
                                                         const uint8_t* procedure_identifier);
+
+/***************************************************************************//**
+ *
+ * Get the HCI connection handle corresponding to a BGAPI connection handle.
+ *
+ * The Bluetooth host BGAPI interface and the link layer HCI interface use their
+ * own connection handles. When the application uses the @ref sl_bt_linklayer
+ * class to issue link layer commands that need connection handles, use this
+ * command to convert the BGAPI connection handle to the corresponding HCI
+ * connection handle needed for the link layer command.
+ *
+ * This command is only available when the bluetooth_feature_linklayer_interface
+ * and bluetooth_feature_connection components are included in the application.
+ *
+ * @param[in] connection BGAPI connection handle
+ * @param[out] hci_connection_handle HCI connection handle corresponding to the
+ *   given BGAPI connection handle
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_linklayer_get_hci_connection_handle(uint8_t connection,
+                                                      uint16_t *hci_connection_handle);
+
+/***************************************************************************//**
+ *
+ * Get the BGAPI connection handle corresponding to an HCI connection handle.
+ *
+ * The Bluetooth host BGAPI interface and the link layer HCI interface use their
+ * own connection handles. When the application receives a link layer connection
+ * handle via the @ref sl_bt_linklayer class, use this command to convert the
+ * HCI connection handle to the corresponding BGAPI connection handle used in
+ * the Bluetooth host stack API.
+ *
+ * This command is only available when the bluetooth_feature_linklayer_interface
+ * and bluetooth_feature_connection components are included in the application.
+ *
+ * @param[in] hci_connection_handle HCI connection handle
+ * @param[out] connection BGAPI connection handle corresponding to the given HCI
+ *   connection handle
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_linklayer_get_bgapi_connection_handle(uint16_t hci_connection_handle,
+                                                        uint8_t *connection);
 
 /** @} */ // end addtogroup sl_bt_linklayer
 
@@ -4111,8 +4161,8 @@ typedef struct sl_bt_evt_scanner_extended_advertisement_report_s sl_bt_evt_scann
  *   a scanner.
  *   @endparblock
  * @param[in] window @parblock
- *   The scan window, i.e., the duration of the scan, which must be less than or
- *   equal to the @p interval
+ *   The scan window, i.e., the duration of the primary channel scan, which must
+ *   be less than or equal to the @p interval.
  *     - <b>Range:</b> 0x0004 to 0xFFFF
  *
  *     - Time = Value x 0.625 ms
@@ -4120,8 +4170,7 @@ typedef struct sl_bt_evt_scanner_extended_advertisement_report_s sl_bt_evt_scann
  *
  *     - <b>Default</b> : 10 ms
  *
- *   Note that the packet reception is aborted if it's started just before the
- *   scan window ends.
+ *   Packet reception is aborted if the scan window ends before the packet ends.
  *   @endparblock
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -4176,8 +4225,8 @@ sl_status_t sl_bt_scanner_set_parameters(uint8_t mode,
  *   a scanner.
  *   @endparblock
  * @param[in] window @parblock
- *   The scan window, i.e., the duration of the scan, which must be less than or
- *   equal to the @p interval
+ *   The scan window, i.e., the duration of the primary channel scan, which must
+ *   be less than or equal to the @p interval.
  *     - <b>Range:</b> 0x0004 to 0xFFFF
  *
  *     - Time = Value x 0.625 ms
@@ -4185,8 +4234,7 @@ sl_status_t sl_bt_scanner_set_parameters(uint8_t mode,
  *
  *     - <b>Default</b> : 10 ms
  *
- *   Note that the packet reception is aborted if it's started just before the
- *   scan window ends.
+ *   Packet reception is aborted if the scan window ends before the packet ends.
  *   @endparblock
  * @param[in] flags Additional scanner options. Value: 0 or bitmask of @ref
  *   sl_bt_scanner_option_flags.
@@ -16356,8 +16404,10 @@ sl_status_t sl_bt_cte_receiver_disable_silabs_cte(void);
 
 /* Command and Response IDs */
 #define sl_bt_cmd_connection_analyzer_start_id                       0x00480020
+#define sl_bt_cmd_connection_analyzer_process_llcp_event_id          0x02480020
 #define sl_bt_cmd_connection_analyzer_stop_id                        0x01480020
 #define sl_bt_rsp_connection_analyzer_start_id                       0x00480020
+#define sl_bt_rsp_connection_analyzer_process_llcp_event_id          0x02480020
 #define sl_bt_rsp_connection_analyzer_stop_id                        0x01480020
 
 /**
@@ -16518,6 +16568,40 @@ sl_status_t sl_bt_connection_analyzer_start(uint32_t access_address,
                                             int32_t start_time_us,
                                             uint32_t flags,
                                             uint8_t *analyzer);
+
+/***************************************************************************//**
+ *
+ * Process a Link Layer Control Protocol (LLCP) event from the Central device.
+ *
+ * To maintain synchronization to the connection, an active connection analyzer
+ * needs to be informed of Link Layer Control Protocol (LLCP) events that impact
+ * the parameters of the connection. If the other device uses Silabs' Bluetooth
+ * stack, use the @ref sl_bt_linklayer_event_info_reporting_enable command on
+ * the Central device to enable event information reporting for channel map and
+ * connection parameter updates triggered by the LLCP procedure on the
+ * connection being analyzed. See the documentation of the vendor-specific HCI
+ * command HCI_VS_Siliconlabs_Event_Info_Reporting_Enable for detailed
+ * documentation of the link layer feature.
+ *
+ * When the event info reporting is enabled, the required LLCP event information
+ * is available in the @p event_info portion of the @p data provided in the @ref
+ * sl_bt_evt_linklayer_event_info_report event. When the application receives
+ * the event on the Central device, pass the @p event_info to this device that
+ * is analyzing the connection. The method of passing the information to this
+ * device is application layer logic.
+ *
+ * @param[in] analyzer The handle of the connection analyzer for the connection
+ *   that had the LLCP event
+ * @param[in] llcp_event_info_len Length of data in @p llcp_event_info
+ * @param[in] llcp_event_info The LLCP event information provided by the Central
+ *   device for the connection being analyzed
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_connection_analyzer_process_llcp_event(uint8_t analyzer,
+                                                         size_t llcp_event_info_len,
+                                                         const uint8_t* llcp_event_info);
 
 /***************************************************************************//**
  *

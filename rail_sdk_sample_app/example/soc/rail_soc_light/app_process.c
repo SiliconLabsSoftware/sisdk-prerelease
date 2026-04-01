@@ -32,6 +32,7 @@
 //                                   Includes
 // -----------------------------------------------------------------------------
 #include <stdint.h>
+#include <inttypes.h>
 #include "printf.h"
 #include "sl_component_catalog.h"
 #include "sl_rail.h"
@@ -227,7 +228,7 @@ void app_process_action(void)
   sl_rail_handle_t rail_handle = sl_rail_util_get_handle(SL_RAIL_UTIL_HANDLE_INST0);
 
   if (current_rail_err != 0) {
-    app_log_error("RAIL Error occurred\nEvents: 0x%016llX\n", current_rail_err);
+    app_log_error("RAIL Error occurred\nEvents: 0x%" PRIX64 "\n", current_rail_err);
     current_rail_err = 0;
   }
 
@@ -428,7 +429,7 @@ void transmit_packet(sl_rail_handle_t rail_handle)
   prepare_packet(rail_handle, out_packet, sizeof(out_packet));
   rail_status = sl_rail_start_tx(rail_handle, get_selected_channel(), SL_RAIL_TX_OPTIONS_DEFAULT, NULL);
   if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
-    app_log_warning("sl_rail_start_tx() result: 0x%08lX ", rail_status);
+    app_log_warning("sl_rail_start_tx() result: 0x%08" PRIX32 " ", rail_status);
   }
 }
 
@@ -437,18 +438,14 @@ void transmit_packet(sl_rail_handle_t rail_handle)
  *****************************************************************************/
 static void cli_state_machine_change(void)
 {
-  char text_tmp[64];
 #if defined(_SILICON_LABS_32B_SERIES_2)
   uint64_t sys_id = SYSTEM_GetUnique();
 #else
   uint64_t sys_id = sl_hal_system_get_unique();
 #endif
-  snprintf(text_tmp, sizeof(text_tmp), "%s%04X%s%s",
-           "State changing event at Light Node [",
-           ((uint16_t)(sys_id & 0x0000FFFF)),
-           "]. ",
-           ((light.mode == LIGHT_MODE_ADVERTISE) ? "Mode: READY\n" : "Mode: ADVERTISE\n"));
-  app_log_info(text_tmp);
+  app_log_info("State changing event at Light Node [0x%04" PRIX16 "]. %s",
+               (uint16_t)(sys_id & 0x0000FFFF),
+               (light.mode == LIGHT_MODE_ADVERTISE) ? "Mode: READY\n" : "Mode: ADVERTISE\n");
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   app_task_notify();
 #endif
@@ -459,18 +456,14 @@ static void cli_state_machine_change(void)
  *****************************************************************************/
 static void cli_light_side_light_bulb_toggle(void)
 {
-  char text_tmp[64];
 #if defined(_SILICON_LABS_32B_SERIES_2)
   uint64_t sys_id = SYSTEM_GetUnique();
 #else
   uint64_t sys_id = sl_hal_system_get_unique();
 #endif
-  snprintf(text_tmp, sizeof(text_tmp), "%s%04X%s%s",
-           "Led Toggle event at Light Node [",
-           ((uint16_t)(sys_id & 0x0000FFFF)),
-           "]. ",
-           ((light.state == LIGHT_STATE_OFF) ? "Light Bulb is OFF\n" : "Light Bulb is ON\n"));
-  app_log_info(text_tmp);
+  app_log_info("Led Toggle event at Light Node [0x%04" PRIX16 "]. %s",
+               (uint16_t)(sys_id & 0x0000FFFF),
+               (light.state == LIGHT_STATE_OFF) ? "Light Bulb is OFF\n" : "Light Bulb is ON\n");
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   app_task_notify();
 #endif
@@ -481,11 +474,8 @@ static void cli_light_side_light_bulb_toggle(void)
  *****************************************************************************/
 static void cli_switch_side_light_bulb_toggle(void)
 {
-  char text_tmp[64];
-  snprintf(text_tmp, sizeof(text_tmp), "%s%s",
-           "Led Toggle event at Switch Node ",
-           ((light.state == LIGHT_STATE_OFF) ? "Light Bulb is OFF\n" : "Light Bulb is ON\n"));
-  app_log_info(text_tmp);
+  app_log_info("Led Toggle event at Switch Node. %s",
+               (light.state == LIGHT_STATE_OFF) ? "Light Bulb is OFF\n" : "Light Bulb is ON\n");
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   app_task_notify();
 #endif
@@ -502,12 +492,12 @@ static void save_received_packet(sl_rail_handle_t rail_handle)
     if (packet_info.packet_bytes <= SL_RAIL_SDK_RX_FIFO_SIZE) {
       uint16_t packet_size = unpack_packet(rail_handle, rx_buffer, &packet_info, &start_of_packet);
       if (packet_size == 0) {
-        app_log_warning("Received packet size is :%u", packet_size);
+        app_log_warning("Received packet size is :%" PRIu16, packet_size);
       }
     }
     rail_status = sl_rail_release_rx_packet(rail_handle, SL_RAIL_RX_PACKET_HANDLE_OLDEST_COMPLETE);
     if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
-      app_log_warning("sl_rail_release_rx_packet() result: 0x%08lX", rail_status);
+      app_log_warning("sl_rail_release_rx_packet() result: 0x%" PRIX32, rail_status);
     }
     rx_packet_handle = sl_rail_get_rx_packet_info(rail_handle, SL_RAIL_RX_PACKET_HANDLE_OLDEST_COMPLETE, &packet_info);
   }
@@ -586,7 +576,7 @@ static inline void put_unique_ID_to_buffer(void)
 {
   snprintf(light.modeTextBuf,
            sizeof(light.modeTextBuf),
-           "ID:%04X", *((uint16_t*)light.addr));
+           "ID:%" PRIX16, *((uint16_t*)light.addr));
 }
 
 /******************************************************************************

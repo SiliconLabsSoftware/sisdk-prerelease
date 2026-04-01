@@ -1514,6 +1514,7 @@ __STATIC_INLINE void CMU_DPLLUnlock(void)
   DPLL0->EN_CLR = DPLL_EN_EN;
 #if defined(DPLL_EN_DISABLING)
   while ((DPLL0->EN & DPLL_EN_DISABLING) != 0U) {
+    // Wait for DPLL disabling.
   }
 #endif
 }

@@ -324,7 +324,9 @@ typedef enum {
   /// Profile providing balance between power consumption and performance
   SL_WISUN_LFN_PROFILE_BALANCED = 1,
   /// Profile optimized for low power consumption
-  SL_WISUN_LFN_PROFILE_ECO      = 2
+  SL_WISUN_LFN_PROFILE_ECO      = 2,
+  /// Profile for automatic connection parameters adjustment
+  SL_WISUN_LFN_PROFILE_AUTOMATIC = 3,
 } sl_wisun_lfn_profile_t;
 
 /// Enumeration for CRC type

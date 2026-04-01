@@ -81,7 +81,7 @@
 <title>BGAPI message summary</title>
 <para>The following table summarizes the class and message IDs of commands and events in the BGAPI protocol. A response message has the same class and message ID as the command it responds to.</para>
 <para>The table also shows the minimum payload length for each message. Messages that have an array parameter can have longer payload length depending on the length of the array.</para>
-<para><para><table rows="437" cols="5"><caption>BGAPI message header summary</caption>
+<para><para><table rows="440" cols="5"><caption>BGAPI message header summary</caption>
 <row>
 <entry thead="yes"><para>Message Name </para>
 </entry><entry thead="yes"><para>Class ID </para>
@@ -291,6 +291,18 @@
 </entry><entry thead="no"><para>0x60 </para>
 </entry><entry thead="no"><para>0x00 </para>
 </entry><entry thead="no"><para>7  </para>
+</entry></row>
+<row>
+<entry thead="no" class="message-name"><para><ref refid="group__sl__bt__linklayer_1ga9a51a04253b62f6b706570b1ef930b8b" kindref="member">cmd_linklayer_get_hci_connection_handle</ref> </para>
+</entry><entry thead="no"><para>0x60 </para>
+</entry><entry thead="no"><para>0x01 </para>
+</entry><entry thead="no"><para>1  </para>
+</entry></row>
+<row>
+<entry thead="no" class="message-name"><para><ref refid="group__sl__bt__linklayer_1ga394c7a511b8095400378e895af4d0238" kindref="member">cmd_linklayer_get_bgapi_connection_handle</ref> </para>
+</entry><entry thead="no"><para>0x60 </para>
+</entry><entry thead="no"><para>0x02 </para>
+</entry><entry thead="no"><para>2  </para>
 </entry></row>
 <row>
 <entry thead="no" colspan="5" class="msg-type-header"><para>Events  </para>
@@ -2352,6 +2364,12 @@
 </entry><entry thead="no"><para>0x48 </para>
 </entry><entry thead="no"><para>0x00 </para>
 </entry><entry thead="no"><para>33  </para>
+</entry></row>
+<row>
+<entry thead="no" class="message-name"><para><ref refid="group__sl__bt__connection__analyzer_1ga5d5990b00a62ef42f034e58c89e0c451" kindref="member">cmd_connection_analyzer_process_llcp_event</ref> </para>
+</entry><entry thead="no"><para>0x48 </para>
+</entry><entry thead="no"><para>0x02 </para>
+</entry><entry thead="no"><para>2  </para>
 </entry></row>
 <row>
 <entry thead="no" class="message-name"><para><ref refid="group__sl__bt__connection__analyzer_1gadf538d051a2f17718bbe1ca1d6941f20" kindref="member">cmd_connection_analyzer_stop</ref> </para>

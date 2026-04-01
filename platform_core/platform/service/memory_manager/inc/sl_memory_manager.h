@@ -433,6 +433,20 @@ extern "C" {
  * functions. Refer to the description of @ref sl_memory_heap_info_t
  * "sl_memory_heap_info_t{}" for more information of each field.
  *
+ * \subsubsection subsubsection-retained-statistics Retained heap statistics
+ *
+ * When bank retention control is present, the Memory Manager can report how much
+ * heap memory will be retained in sleep (EM2). Use @ref sl_memory_heap_get_retention_info
+ * and the related getters (e.g. sl_memory_get_retained_size(),
+ * sl_memory_get_unretained_size()). Retained size and retained high watermark are
+ * tracked independently of heap statistics. Unretained size (see
+ * @ref sl_memory_heap_get_unretained_size) requires heap statistics and equals
+ * free size + (heap used - retained size); it includes pool free blocks.
+ * Retention APIs require SL_MEMORY_MANAGER_STATISTICS_RETENTION_ENABLE and bank
+ * retention control (SL_CATALOG_BANK_RETENTION_CONTROL_*). When disabled, getters
+ * return (size_t)-1 (size/count) or 0 (absolute mask). Call
+ * sl_memory_retention_update_high_watermark() at sleep entry to update the retained high watermark.
+ *
  * If you want to know the start address and the total size of the program's
  * stack and/or heap, simply call respectively the function sl_memory_get_stack_region()
  * and/or sl_memory_get_heap_region().
@@ -585,6 +599,15 @@ typedef struct {
   size_t total_bank;                ///< Total number of memory banks.
   size_t used_bank_count;           ///< Number of used memory banks.
 } sl_memory_heap_info_t;
+
+/// @brief Heap retention information (memory retained in sleep).
+typedef struct {
+  size_t retained_size;             ///< Size (bytes) of heap that will be retained in sleep.
+  size_t retained_high_watermark;   ///< High watermark of retained size (updated at sleep via sl_memory_retention_update_high_watermark).
+  size_t retained_bank_count;       ///< Number of RAM banks that have retention enabled.
+  size_t retained_banks_size;       ///< Sum of heap-overlap bytes per retained bank (first/last bank may be partial).
+  uint32_t reserved[4];             ///< Reserved for future use; set to {0}.
+} sl_memory_heap_retention_info_t;
 
 /// @brief Memory block reservation handle.
 typedef struct {
@@ -1149,6 +1172,75 @@ size_t sl_memory_get_heap_high_watermark(void);
 void sl_memory_reset_heap_high_watermark(void);
 
 /***************************************************************************//**
+ * Retrieves the amount of heap that would be retained in the general-purpose
+ * heap if entering EM2.
+ *
+ * @return  Size in bytes of heap that will be retained in sleep.
+ *          (size_t)-1 if statistics or retention control is disabled.
+ ******************************************************************************/
+size_t sl_memory_get_retained_size(void);
+
+/***************************************************************************//**
+ * Retrieves the amount of heap that would not be retained in the
+ * general-purpose heap if entering EM2.
+ * Unretained = free size + explicitly unretained allocations + pool free blocks.
+ * Pool free blocks (blocks returned to the pool via sl_memory_pool_free() and
+ * not yet re-allocated) count as unretained size.
+ *
+ * @return  Size in bytes of heap that will not be retained in sleep (0 if disabled).
+ ******************************************************************************/
+size_t sl_memory_get_unretained_size(void);
+
+/***************************************************************************//**
+ * Retrieves the total size of RAM banks that would have retention enabled
+ * for the general-purpose heap if entering EM2.
+ *
+ * @return  Size in bytes of retained banks.
+ *          (size_t)-1 if statistics or retention control is disabled.
+ ******************************************************************************/
+size_t sl_memory_get_retained_banks_size(void);
+
+/***************************************************************************//**
+ * Retrieves the number of RAM banks that would have retention enabled for
+ * the general-purpose heap if entering EM2.
+ *
+ * @return  Retained bank count.
+ *          (size_t)-1 if statistics or retention control is disabled.
+ ******************************************************************************/
+size_t sl_memory_get_retained_bank_count(void);
+
+/***************************************************************************//**
+ * Retrieves the absolute retained-banks mask for the general-purpose heap's
+ * memory type. Equivalent to sl_memory_heap_get_absolute_retained_banks_mask()
+ * with the default heap. The mask covers all banks in that retention control
+ * (memory type), not only the banks used by the default heap.
+ *
+ * @return  Absolute bitmap: bit i = 1 means bank i would be retained in EM2;
+ *          bit i = 0 means unretained. Valid range 1..UINT64_MAX (all bits set
+ *          = all banks retained). Returns 0 if retention control or statistics
+ *          are disabled (0 is not a valid mask because BSS/data always retain
+ *          some banks).
+ ******************************************************************************/
+uint64_t sl_memory_get_absolute_retained_banks_mask(void);
+
+/***************************************************************************//**
+ * Updates the retained high watermark for the general-purpose heap from the
+ * current retained size. Call this at the moment of going to sleep (e.g. EM2
+ * entry), not on every retained size change. No-op when retention statistics
+ * are disabled.
+ ******************************************************************************/
+void sl_memory_retention_update_high_watermark(void);
+
+/***************************************************************************//**
+ * Updates the retained high watermark for the specified heap from the current
+ * retained size. Call this at the moment of going to sleep (e.g. EM2 entry).
+ * No-op when retention statistics are disabled.
+ *
+ * @param[in]  heap  Heap Handle.
+ ******************************************************************************/
+void sl_memory_heap_retention_update_high_watermark(const sl_memory_heap_t *heap);
+
+/***************************************************************************//**
  * Reserves a memory block that will never need retention in EM2 from a specific
  * heap instance.
  *
@@ -1417,6 +1509,98 @@ size_t sl_memory_heap_get_high_watermark(const sl_memory_heap_t *heap);
  * @param[in]  heap   Handle to the heap instance.
  ******************************************************************************/
 void sl_memory_heap_reset_high_watermark(sl_memory_heap_t *heap);
+
+/***************************************************************************//**
+ * Populates an sl_memory_heap_retention_info_t{} structure with retention
+ * statistics for a specified heap instance.
+ *
+ * @param[in]   heap  Handle to the heap instance.
+ * @param[out]  info  Pointer to structure that will receive retention info.
+ *                    Must not be NULL.
+ *
+ * @return  SL_STATUS_OK if successful.
+ * @return  SL_STATUS_NULL_POINTER if @p info is NULL (no write to @p info).
+ * @return  SL_STATUS_INVALID_PARAMETER if @p heap is NULL or the heap is not
+ *          registered for retention statistics (no write to @p info).
+ * @return  SL_STATUS_NOT_AVAILABLE when statistics or bank retention control
+ *          is disabled (struct is zeroed before returning).
+ *
+ * @note  When retention statistics or bank retention control is disabled, the
+ *        function returns SL_STATUS_NOT_AVAILABLE for non-NULL heap and zeroes
+ *        the struct before returning.
+ * @note  info->retained_high_watermark is updated only when the application
+ *        calls sl_memory_retention_update_high_watermark() (e.g. at sleep entry).
+ * @note  info->retained_banks_size counts only the part of each retained bank
+ *        that overlaps the heap range; the first and last heap banks may be partial.
+ ******************************************************************************/
+sl_status_t sl_memory_heap_get_retention_info(const sl_memory_heap_t *heap,
+                                              sl_memory_heap_retention_info_t *info);
+
+/***************************************************************************//**
+ * Retrieves the amount of heap that would be retained in the specified heap
+ * if entering EM2.
+ *
+ * @param[in]  heap   Handle to the heap instance.
+ *
+ * @return  Retained size in bytes (0 if disabled or heap not registered).
+ ******************************************************************************/
+size_t sl_memory_heap_get_retained_size(const sl_memory_heap_t *heap);
+
+/***************************************************************************//**
+ * Retrieves the amount of heap that would not be retained in the specified
+ * heap if entering EM2.
+ * Unretained = heap free size + explicitly unretained allocations + pool free blocks.
+ * Pool free blocks (blocks returned to the pool via sl_memory_pool_free() and
+ * not yet re-allocated) count as unretained size.
+ *
+ * @param[in]  heap   Handle to the heap instance.
+ *
+ * @return  Unretained size in bytes.
+ *          (size_t)-1 if disabled, or @p heap is NULL or not registered.
+ ******************************************************************************/
+size_t sl_memory_heap_get_unretained_size(const sl_memory_heap_t *heap);
+
+/***************************************************************************//**
+ * Retrieves the total size of RAM banks that would have retention enabled
+ * for the specified heap if entering EM2.
+ *
+ * @param[in]  heap   Handle to the heap instance.
+ *
+ * @return  Retained banks size in bytes (0 if disabled or heap not registered).
+ ******************************************************************************/
+size_t sl_memory_heap_get_retained_banks_size(const sl_memory_heap_t *heap);
+
+/***************************************************************************//**
+ * Retrieves the number of RAM banks that would have retention enabled for
+ * the specified heap if entering EM2.
+ *
+ * @param[in]  heap   Handle to the heap instance.
+ *
+ * @return  Retained bank count.
+ *          (size_t)-1 if disabled, or @p heap is NULL or not registered.
+ ******************************************************************************/
+size_t sl_memory_heap_get_retained_bank_count(const sl_memory_heap_t *heap);
+
+/***************************************************************************//**
+ * Retrieves the absolute retained-banks mask for the memory type of the given heap.
+ *
+ * The heap is used only to select which retention control (memory type, e.g. DMEM,
+ * DTCM) to query. The returned mask is an absolute bitmap over all banks in that
+ * retention control (bank indices 0 to num_banks-1). It includes both banks that
+ * belong to this heap's region and banks outside this heap's region that are in
+ * the same memory type—so the mask aggregates retention across the entire memory
+ * type, not just this heap.
+ *
+ * @param[in]  heap   Heap used to identify the retention control (memory type)
+ *                    to query. The mask covers all banks in that control.
+ *
+ * @return  Absolute bitmap: bit i = 1 means bank i would be retained in EM2;
+ *          bit i = 0 means unretained. Limited to 64 bits. Valid range 1..UINT64_MAX
+ *          (all bits set = all banks retained). Returns 0 if retention control or
+ *          statistics are disabled, or @p heap is NULL or not registered (0 is
+ *          not a valid mask because BSS/data always retain some banks).
+ ******************************************************************************/
+uint64_t sl_memory_heap_get_absolute_retained_banks_mask(const sl_memory_heap_t *heap);
 
 /// @cond
 #if defined(SL_CATALOG_MEMORY_MANAGER_DTCM_PRESENT)
