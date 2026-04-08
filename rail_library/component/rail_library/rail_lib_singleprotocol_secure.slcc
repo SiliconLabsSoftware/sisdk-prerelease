@@ -11,9 +11,6 @@ metadata:
     license: MSLA
 requires:
 - name: rail_lib
-- name: sl_rail_util_built_in_phys
-  condition:
-  - device_init
 provides:
 - name: rail_lib_singleprotocol_secure   # specific tag
 - name: rail_lib_Xprotocol   # generic tag

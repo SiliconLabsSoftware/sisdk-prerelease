@@ -72,21 +72,34 @@ extern "C" {
 extern char __HeapBase[];
 extern char __HeapLimit[];
 
-#define SYSTEMVIEW_HEAP_SIZE (__HeapLimit - __HeapBase)
+#define SLI_SYSTEMVIEW_HEAP_SIZE (__HeapLimit - __HeapBase)
 
 // Heap ID for SystemView heap definitions.
 // These values are chosen to be bigger than SEGGER_SYSVIEW_ID_BASE.
-#define SYSTEMVIEW_HEAP_LT_ID 0xFFFFFFFF
-#define SYSTEMVIEW_HEAP_ST_ID 0xFFFFFFFE
+#define SLI_SYSTEMVIEW_HEAP_LT_ID 0xFFFFFFFF
+#define SLI_SYSTEMVIEW_HEAP_ST_ID 0xFFFFFFFE
 
-// Tag values passed to SEGGER_SYSVIEW_HeapAllocEx() to identify the allocation
-// source in SystemView traces.
-typedef enum {
-  SYSTEMVIEW_TAG_ALLOC_LT       = 1,
-  SYSTEMVIEW_TAG_ALLOC_ST       = 2,
-  SYSTEMVIEW_TAG_RESERVED_BLOCK = 10,
-} sli_systemview_heap_tag_t;
+// Custom SystemView event IDs for allocation site annotation.
+// IDs chosen in the user event range (>= 512) to avoid collision with
+// standard SystemView events (0..31) and OS profile events (32..511).
+#define SLI_SYSTEMVIEW_EVENT_ID_REALLOC         514
+#define SLI_SYSTEMVIEW_EVENT_ID_OWNERSHIP_SITE  515
+
+// GCC-only return address capture helper for SystemView site annotation.
+// Must be called at the top of a function (before any other function calls)
+// to capture the immediate caller's return address.
+#if defined(__GNUC__)
+__attribute__((always_inline)) static inline void *sli_mm_sv_get_return_address(void)
+{
+  return __builtin_extract_return_addr(__builtin_return_address(0));
+}
+#else
+static inline void *sli_mm_sv_get_return_address(void)
+{
+  return (void *)0;
+}
 #endif
+#endif // defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
 
 // Minimum block alignment in bytes. 8 bytes is the minimum alignment to account for largest CPU data type
 // that can be used in some block allocation scenarios. 64-bit data type may be used to manipulate the
@@ -273,6 +286,16 @@ struct sli_memory_pool_block {
   void *block_addr;              ///< Represents the address of a pool block aligned to 2 bytes.
   sli_memory_pool_block_t *next; ///< Pointer to the next block in the memory pool's block list.
 };
+
+#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
+// Tag values passed to SEGGER_SYSVIEW_HeapAllocEx() to identify the allocation
+// source in SystemView traces.
+typedef enum {
+  SLI_SYSTEMVIEW_TAG_ALLOC_LT       = 1,
+  SLI_SYSTEMVIEW_TAG_ALLOC_ST       = 2,
+  SLI_SYSTEMVIEW_TAG_RESERVED_BLOCK = 10,
+} sli_systemview_heap_tag_t;
+#endif // defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
 
 /*******************************************************************************
  ****************************   GLOBAL VARIABLES   *****************************

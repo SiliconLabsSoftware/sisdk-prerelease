@@ -511,10 +511,26 @@ library:
   - zigbee_stack_unix
   - zigbee_multi_network
   unless: []
+- path: build/llvm/aarch64-android-ndk-r27d/ncp-gp-library/release/libncp-gp-library.a
+  condition:
+  - toolchain_gcc
+  - aarch64-android-ndk-r27d
+  - zigbee_ncp
+  - zigbee_stack_unix
+  - zigbee_multi_network
+  unless: []
 - path: build/llvm/aarch64-android-ndk-r25c/ncp-gp-library/release_singlenetwork/libncp-gp-library.a
   condition:
   - toolchain_llvm
   - aarch64-android-ndk-r25c
+  - zigbee_ncp
+  - zigbee_stack_unix
+  unless:
+  - zigbee_multi_network
+- path: build/llvm/aarch64-android-ndk-r27d/ncp-gp-library/release_singlenetwork/libncp-gp-library.a
+  condition:
+  - toolchain_gcc
+  - aarch64-android-ndk-r27d
   - zigbee_ncp
   - zigbee_stack_unix
   unless:
@@ -526,10 +542,24 @@ library:
   - zigbee_stack_unix
   - zigbee_multi_network
   unless: []
+- path: build/llvm/aarch64-android-ndk-r27d/zigbee-gp/release/libzigbee-gp.a
+  condition:
+  - toolchain_gcc
+  - aarch64-android-ndk-r27d
+  - zigbee_stack_unix
+  - zigbee_multi_network
+  unless: []
 - path: build/llvm/aarch64-android-ndk-r25c/zigbee-gp/release_singlenetwork/libzigbee-gp.a
   condition:
   - toolchain_llvm
   - aarch64-android-ndk-r25c
+  - zigbee_stack_unix
+  unless:
+  - zigbee_multi_network
+- path: build/llvm/aarch64-android-ndk-r27d/zigbee-gp/release_singlenetwork/libzigbee-gp.a
+  condition:
+  - toolchain_gcc
+  - aarch64-android-ndk-r27d
   - zigbee_stack_unix
   unless:
   - zigbee_multi_network

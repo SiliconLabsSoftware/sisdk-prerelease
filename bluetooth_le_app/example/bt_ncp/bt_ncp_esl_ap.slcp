@@ -178,7 +178,7 @@ tag:
   - prebuilt_demo
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_series_2
-  - hwfilter:!board:hardware:vcom:no:rts:cts
+  - hwfilter:board:hardware_board_has_vcom_hardware_flowcontrol
   - hwfilter:ram:32k
 
 ui_hints:

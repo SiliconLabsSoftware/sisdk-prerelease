@@ -318,20 +318,6 @@ static void changeTxPayload(uint32_t offset,
 #define sl_power_manager_em4_unlatch_pin_retention EMU_UnlatchPinRetention
 #endif
 
-#if defined(_SILICON_LABS_IP_PROJ_IS_LPWH74000) || (_SILICON_LABS_32B_SERIES_3_CONFIG == 353)
-// Not 100% sure why this works on no 74000 builds.  It has to do with us forcing SL_POWER_MANAGER_DEBUG to 1 in
-// rail_power_manager.c, but not having SL_POWER_MANAGER_DEBUG set to 1 in the fpga power_manager component.  Maybe.
-#undef sli_power_manager_debug_log_em_requirement
-static inline void sli_power_manager_debug_log_em_requirement(sl_power_manager_em_t em,
-                                                              bool                  add,
-                                                              const char            *name)
-{
-  (void) em;
-  (void) add;
-  (void) name;
-}
-#endif
-
 // Function called from sl_main_init before the main super loop.
 void sl_rail_test_internal_app_init(void)
 {

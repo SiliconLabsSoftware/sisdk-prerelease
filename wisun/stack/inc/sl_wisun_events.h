@@ -98,9 +98,11 @@ typedef enum {
   /// This event is sent when a Direct Connect client is requesting servers to identify themselves.
   SL_WISUN_MSG_DIRECT_CONNECT_ID_SOLICIT_IND_ID   = 0x99,
   /// This event is sent when a Direct Connect Identifier (DC ID) is received.
-  SL_WISUN_MSG_DIRECT_CONNECT_ID_RECEIVED_IND_ID    = 0x9A,
+  SL_WISUN_MSG_DIRECT_CONNECT_ID_RECEIVED_IND_ID  = 0x9A,
   /// This event is sent when the state of the DC client changes
   SL_WISUN_MSG_DIRECT_CONNECT_CLIENT_STATE_CHANGED_IND_ID = 0x9B,
+  /// This event is sent when the device is ready to send First Breath datagram.
+  SL_WISUN_MSG_FB_READY_IND_ID                    = 0x9C,
 } sl_wisun_msg_ind_id_t;
 
 /**************************************************************************//**
@@ -851,6 +853,31 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_BR_MSG_ROUTING_TABLE_UPDATE_IND_ID) */
 
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_FB_READY_IND_ID sl_wisun_msg_fb_ready_ind
+ * @{
+ *****************************************************************************/
+
+/// Indication message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the indication
+  uint32_t status;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_fb_ready_ind_body_t;
+SL_PACK_END()
+
+/// Indication message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Indication message body
+  sl_wisun_msg_fb_ready_ind_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_fb_ready_ind_t;
+SL_PACK_END()
+
+/** @} (end SL_WISUN_MSG_FB_READY_IND_ID) */
+
 /// @brief Wi-SUN event definitions
 /// @details This structure contains a Wi-SUN API event and its associated data.
 SL_PACK_START(1)
@@ -916,8 +943,10 @@ typedef struct {
     sl_wisun_br_msg_stopped_ind_body_t br_stopped;
     /// #SL_WISUN_BR_MSG_ROUTING_TABLE_UPDATE_IND_ID event data
     sl_wisun_br_msg_routing_table_update_ind_body_t br_routing_table_update;
-    ///  #SL_WISUN_MSG_LOGGER_EVENT_IND_ID event data
+    /// #SL_WISUN_MSG_LOGGER_EVENT_IND_ID event data
     sl_wisun_msg_logger_event_ind_body_t logger_event;
+    /// #SL_WISUN_MSG_FB_READY_IND_ID event data
+    sl_wisun_msg_fb_ready_ind_body_t fb_ready;
   } evt;
 } SL_ATTRIBUTE_PACKED sl_wisun_evt_t;
 SL_PACK_END()

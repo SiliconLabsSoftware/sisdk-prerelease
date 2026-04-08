@@ -437,6 +437,7 @@ class Tag:
     def state(self, value: TagState):
         """Connection state setter - for class internal use, only!"""
         if self._state != value:
+            old_esl_state = self.esl_state
             now = dt.now()
             new_state = TagState(value)
             self.log.debug(
@@ -451,6 +452,9 @@ class Tag:
             self._state = new_state
             if (new_state == TagState.IDLE):
                 self.limit_connection_retries()
+            new_esl_state = self.esl_state
+            if old_esl_state != new_esl_state:
+                self._notify("esl_state", old_esl_state, new_esl_state)
             self._notify("state", previous_state, new_state)
 
     @property
@@ -533,12 +537,26 @@ class Tag:
             self._connection_timer.cancel()
         # Reset busy state
         self.busy = False
-        self.connection_handle = None
+        # SILENT state change to IDLE during reset to avoid redundant esl_state notification
+        previous_state = self._state
+        previous_handle = self._connection_handle
+        self._state = TagState(TagState.IDLE)
+        self._state_timestamp = dt.now()
+        self._connection_handle = None
+        self.limit_connection_retries()
         self._past_subevents_max = None
         self._associated = False
+        
+        # Notify about BOTH state and esl_state at the end of reset
         new_esl_state = self.esl_state
         if new_esl_state != old_esl_state:
             self._notify("esl_state", old_esl_state, new_esl_state)
+        
+        if previous_state != TagState.IDLE:
+            self._notify("state", previous_state, TagState.IDLE)
+        
+        if previous_handle is not None:
+            self._notify("connection_handle", previous_handle, None)
 
     def block(self, lib_status=elw.ESL_LIB_STATUS_UNSPECIFIED_ERROR):
         """Set blocked state if not set already"""
@@ -848,7 +866,13 @@ class Tag:
                             ix,
                         )
                         self.close_connection(force_close=True)
+                
+                old_esl_state = self.esl_state
                 self.gatt_values.update(evt.tlv_data)
+                new_esl_state = self.esl_state
+                if old_esl_state != new_esl_state:
+                    self._notify("esl_state", old_esl_state, new_esl_state)
+
                 if elw.ESL_LIB_DATA_TYPE_GATT_PNP_ID in evt.tlv_data:
                     if self.pnp_vendor_id is None:
                         self.log.error(

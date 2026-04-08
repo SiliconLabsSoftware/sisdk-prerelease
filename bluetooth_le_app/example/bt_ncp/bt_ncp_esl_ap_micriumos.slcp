@@ -203,7 +203,7 @@ tag:
   - hwfilter:device:device_series_2
   - hwfilter:!device:device_generic_family_efr32xg22
   - hwfilter:ram:64k
-  - hwfilter:!board:hardware:vcom:no:rts:cts
+  - hwfilter:board:hardware_board_has_vcom_hardware_flowcontrol
 
 ui_hints:
   highlight:

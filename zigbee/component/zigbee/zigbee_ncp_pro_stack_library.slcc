@@ -289,6 +289,22 @@ library:
   - zigbee_stack_unix
   unless:
   - zigbee_multi_network
+- path: build/llvm/aarch64-android-ndk-r27d/ncp-pro-library/release/libncp-pro-library.a
+  condition:
+  - toolchain_gcc
+  - aarch64-android-ndk-r27d
+  - zigbee_ncp
+  - zigbee_stack_unix
+  - zigbee_multi_network
+  unless: []
+- path: build/llvm/aarch64-android-ndk-r27d/ncp-pro-library/release_singlenetwork/libncp-pro-library.a
+  condition:
+  - toolchain_gcc
+  - aarch64-android-ndk-r27d
+  - zigbee_ncp
+  - zigbee_stack_unix
+  unless:
+  - zigbee_multi_network
 - path: build/llvm/cortex-m33/ncp-pro-library/release/libncp-pro-library.a
   condition:
   - toolchain_llvm

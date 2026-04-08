@@ -51,6 +51,7 @@
 #include "sl_component_catalog.h"
 #include "border_router/sl_wisun_br_api.h"
 #include "sl_wisun_br_dhcpv6_server.h"
+#include "sl_wisun_br_config.h"
 #include "sl_wisun_keychain.h"
 
 #if defined(SL_CATALOG_WISUN_BR_AGENT_SERVICE_PRESENT)
@@ -219,7 +220,7 @@ static const app_setting_br_t _br_default_settings = {
 #if defined(WISUN_CONFIG_NETWORK_SIZE)
   .network_size = WISUN_CONFIG_NETWORK_SIZE,
 #else
-  .network_size = SL_WISUN_NETWORK_SIZE_SMALL,
+  .network_size = SL_WISUN_NETWORK_SIZE_AUTOMATIC,
 #endif
 #if defined(WISUN_CONFIG_TX_POWER)
   .tx_power_ddbm = WISUN_CONFIG_TX_POWER,
@@ -490,6 +491,9 @@ void sl_wisun_app_br_core_start(void)
 
   // Set Connection Parameters
   switch (_br_setting.network_size) {
+    case SL_WISUN_NETWORK_SIZE_AUTOMATIC:
+      params = SL_WISUN_BR_PARAMS_PROFILE_AUTO;
+      break;
     case SL_WISUN_NETWORK_SIZE_SMALL:
       params = SL_WISUN_BR_PARAMS_PROFILE_SMALL;
       break;

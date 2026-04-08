@@ -22,6 +22,7 @@
 ***************************************************************************/
 
 #ifndef SL_ZIGBEE_TEST
+#if (SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_PRINT_SYSTEM == 1)
 WEAK(void sl_zigbee_af_core_print_wrapper(const char * formatString, ...))
 {
   (void)formatString;
@@ -116,4 +117,6 @@ WEAK(void sl_zigbee_af_println_wrapper(uint16_t area, const char * formatString,
   (void)area;
   (void)formatString;
 }
+
+#endif // (SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_PRINT_SYSTEM == 1)
 #endif // !SL_ZIGBEE_TEST

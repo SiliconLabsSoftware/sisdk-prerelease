@@ -39,7 +39,7 @@ extern __INLINE void sl_hal_gpio_lock(void);
 extern __INLINE void sl_hal_gpio_unlock(void);
 extern __INLINE uint32_t sl_hal_gpio_get_lock_status(void);
 extern __INLINE bool sl_hal_gpio_is_gpio_port(sl_gpio_port_t port);
-#if defined(SL_GPIO_HSIO_PRESENT)
+#if defined(HSIO_PRESENT)
 extern __INLINE bool sl_hal_gpio_is_hsio_port(sl_gpio_port_t port);
 #endif
 extern __INLINE void sl_hal_gpio_set_pin(const sl_gpio_t *gpio);
@@ -83,31 +83,31 @@ extern __INLINE uint32_t sl_hal_gpio_get_pin_em4_wakeup_cause(void);
 extern __INLINE void sl_hal_gpio_enable_debug_swo(bool enable);
 extern __INLINE void sl_hal_gpio_enable_debug_swd_clk(bool enable);
 extern __INLINE void sl_hal_gpio_enable_debug_swd_io(bool enable);
-#if defined(_HSIO_P_PRDRVSTRENGTH_PRDRVSTRENGTH0_MASK)
+#if defined(_HSIO_P_PRDRVSTRENGTH_PRDRVSTRENGTH0_MASK) && defined(HSIO_PRESENT)
 extern __INLINE sl_status_t sl_hal_gpio_set_pre_driver_strength(sl_gpio_t *gpio,
                                                                 uint8_t predrv_strength);
 extern __INLINE sl_status_t sl_hal_gpio_get_pre_driver_strength(sl_gpio_t *gpio,
                                                                 uint8_t *predrv_strength);
 #endif
-#if defined(_HSIO_P_DRVSTRENGTH_MASK)
+#if defined(_HSIO_P_DRVSTRENGTH_MASK) && defined(HSIO_PRESENT)
 extern __INLINE sl_status_t sl_hal_gpio_set_drive_strength(sl_gpio_t *gpio,
                                                            uint8_t drive_strength);
 extern __INLINE sl_status_t sl_hal_gpio_get_drive_strength(sl_gpio_t *gpio,
                                                            uint8_t *drive_strength);
 #endif
-#if defined(_HSIO_P_HSRX_MASK)
+#if defined(_HSIO_P_HSRX_MASK) && defined(HSIO_PRESENT)
 extern __INLINE sl_status_t sl_hal_gpio_is_high_speed_rx_enabled(sl_gpio_t *gpio,
                                                                 bool *is_enabled);
 extern __INLINE sl_status_t sl_hal_gpio_configure_high_speed_rx(sl_gpio_t *gpio,
                                                                 bool enable);
 #endif
-#if defined(_HSIO_P_HSRXHYST_MASK)
+#if defined(_HSIO_P_HSRXHYST_MASK) && defined(HSIO_PRESENT)
 extern __INLINE sl_status_t sl_hal_gpio_set_high_speed_rx_hysteresis(sl_gpio_t *gpio,
                                                                      uint8_t hysteresis);
 extern __INLINE sl_status_t sl_hal_gpio_get_high_speed_rx_hysteresis(sl_gpio_t *gpio,
                                                                      uint8_t *hysteresis);
 #endif
-#if defined(_HSIO_P_NONOVRLPDIS_MASK)
+#if defined(_HSIO_P_NONOVRLPDIS_MASK) && defined(HSIO_PRESENT)
 extern __INLINE sl_status_t sl_hal_gpio_set_non_overlap_protection_disable(sl_gpio_t *gpio,
                                                                           bool disable);
 extern __INLINE sl_status_t sl_hal_gpio_get_non_overlap_protection_disable(sl_gpio_t *gpio,
@@ -119,7 +119,7 @@ extern __INLINE sl_status_t sl_hal_gpio_get_non_overlap_protection_disable(sl_gp
  ******************************************************************************/
 static sl_gpio_mode_t sl_hal_gpio_map_gpio_mode(sl_gpio_mode_t mode);
 static sl_gpio_mode_t sl_hal_gpio_map_gpio_reg_to_mode(sl_gpio_mode_t mode);
-#if defined(SL_GPIO_HSIO_PRESENT)
+#if defined(HSIO_PRESENT)
 static sl_gpio_mode_t sl_hal_gpio_map_hsio_mode(sl_gpio_mode_t mode);
 static sl_gpio_mode_t sl_hal_gpio_map_hsio_reg_to_mode(sl_gpio_mode_t mode);
 #endif
@@ -140,7 +140,7 @@ void sl_hal_gpio_set_pin_mode(const sl_gpio_t *gpio,
   EFM_ASSERT(sl_hal_gpio_get_lock_status() == 0);
 
   sl_gpio_mode_t gpio_mode = SL_GPIO_MODE_DISABLED;
-#if defined(SL_GPIO_HSIO_PRESENT)
+#if defined(HSIO_PRESENT)
   bool is_hsio = sl_hal_gpio_is_hsio_port(gpio->port);
   uint8_t hsio_index = is_hsio ? SL_HAL_HSIO_PORT_INDEX(gpio->port) : 0u;
   gpio_mode = is_hsio ? sl_hal_gpio_map_hsio_mode(mode) : sl_hal_gpio_map_gpio_mode(mode);
@@ -164,7 +164,7 @@ void sl_hal_gpio_set_pin_mode(const sl_gpio_t *gpio,
 
   // There are two registers controlling the pins for each port.
   // The MODEL register controls pins 0-7 and MODEH controls pins 8-15.
-#if defined(SL_GPIO_HSIO_PRESENT)
+#if defined(HSIO_PRESENT)
   if (is_hsio) {
     if (gpio->pin < 8) {
       sl_hal_bus_reg_write_mask(&(GPIO->H[hsio_index].MODEL),
@@ -210,13 +210,13 @@ sl_gpio_mode_t sl_hal_gpio_get_pin_mode(const sl_gpio_t *gpio)
   EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
 
   sl_gpio_mode_t mode = SL_GPIO_MODE_DISABLED;
-#if defined(SL_GPIO_HSIO_PRESENT)
+#if defined(HSIO_PRESENT)
   bool is_hsio = sl_hal_gpio_is_hsio_port(gpio->port);
   uint8_t hsio_index = is_hsio ? SL_HAL_HSIO_PORT_INDEX(gpio->port) : 0u;
 #endif
 
   // Determine the current mode of the GPIO pin based on the pin number.
-#if defined(SL_GPIO_HSIO_PRESENT)
+#if defined(HSIO_PRESENT)
   if (is_hsio) {
     if (gpio->pin < 8) {
       mode = (sl_gpio_mode_t) ((GPIO->H[hsio_index].MODEL >> (gpio->pin * 4)) & 0xF);
@@ -234,7 +234,7 @@ sl_gpio_mode_t sl_hal_gpio_get_pin_mode(const sl_gpio_t *gpio)
   }
 
   // Map the hardware-specific mode to the corresponding sl_gpio_mode_t value
-#if defined(SL_GPIO_HSIO_PRESENT)
+#if defined(HSIO_PRESENT)
   if (is_hsio) {
     return sl_hal_gpio_map_hsio_reg_to_mode(mode);
   }
@@ -353,7 +353,7 @@ int32_t sl_hal_gpio_configure_wakeup_em4_external_interrupt(const sl_gpio_t *gpi
   EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
   EFM_ASSERT(sl_hal_gpio_get_lock_status() == 0);
 
-#if defined(SL_GPIO_HSIO_PRESENT)
+#if defined(HSIO_PRESENT)
   bool is_hsio = sl_hal_gpio_is_hsio_port(gpio->port);
   if (is_hsio) {
     return SL_GPIO_INTERRUPT_UNAVAILABLE;
@@ -535,8 +535,8 @@ static sl_gpio_mode_t sl_hal_gpio_map_gpio_reg_to_mode(sl_gpio_mode_t mode)
   }
 }
 
-#if defined(SL_GPIO_HSIO_PRESENT)
-// Map logical GPIO mode to HSIO register encoding.
+#if defined(HSIO_PRESENT)
+// Map logical GPIO mode to HSIO register encoding (HSIO MODEL/MODEH only).
 static sl_gpio_mode_t sl_hal_gpio_map_hsio_mode(sl_gpio_mode_t mode)
 {
   switch (mode) {
@@ -643,6 +643,6 @@ static sl_gpio_mode_t sl_hal_gpio_map_hsio_reg_to_mode(sl_gpio_mode_t mode)
       return mode;
   }
 }
-#endif /* defined(SL_GPIO_HSIO_PRESENT) */
+#endif /* defined(HSIO_PRESENT) */
 
 #endif /* defined(GPIO_PRESENT)*/

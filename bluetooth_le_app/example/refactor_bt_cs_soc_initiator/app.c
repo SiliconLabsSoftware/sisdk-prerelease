@@ -59,10 +59,8 @@
 #include "cs_ras_client.h"
 
 // other required content
-#include "ble_peer_manager_common.h"
-#include "ble_peer_manager_connections.h"
-#include "ble_peer_manager_central.h"
-#include "ble_peer_manager_filter.h"
+#include "sl_bt_peer_manager_central.h"
+#include "sl_bt_peer_manager_filter.h"
 
 #ifdef SL_CATALOG_CS_INITIATOR_CLI_PRESENT
 #include "cs_initiator_cli.h"
@@ -638,7 +636,7 @@ static sl_status_t create_new_initiator_instance(uint8_t conn_handle)
                                   "error:0x%lx" NL,
               conn_handle,
               sc);
-    (void)ble_peer_manager_central_close_connection(conn_handle);
+    (void)sl_bt_peer_manager_central_close_connection(conn_handle);
   } else {
     num_reflector_connections++;
   }
@@ -736,7 +734,7 @@ static void check_supported_capabilities(const sl_bt_msg_t *evt)
 
 static void print_head_and_data(cs_initiator_instances_t *initiator)
 {
-      const bd_addr *bt_address = ble_peer_manager_get_bt_address(initiator->conn_handle);
+      const bd_addr *bt_address = sl_bt_peer_manager_get_bt_address(initiator->conn_handle);
       for (uint8_t is_data = ((measurement_counter % CS_INITIATOR_HEADER_LOG) > 0); is_data <= 1; is_data++) {
         log_info(APP_INSTANCE_PREFIX, initiator->conn_handle);
         cs_initiator_print_bt_address(!is_data, bt_address);
@@ -900,11 +898,11 @@ static void cs_on_error(uint8_t conn_handle, cs_error_event_t err_evt, sl_status
       }
       // Close the connection
       app_log_info(APP_INSTANCE_PREFIX "Closing connection" NL, conn_handle);
-      sl_status_t status = ble_peer_manager_central_close_connection(conn_handle);
+      sl_status_t status = sl_bt_peer_manager_central_close_connection(conn_handle);
       // If closing the connection fails no connnection_closed event will be received
       // so we need to restart scanning here if needed
       if (status != SL_STATUS_OK) {
-        sc = ble_peer_manager_central_create_connection();
+        sc = sl_bt_peer_manager_central_create_connection();
         app_assert_status(sc);
         app_log_info(APP_PREFIX "Scanning restarted for new reflector connections..." NL);
       }
@@ -948,8 +946,8 @@ void sl_bt_on_event(sl_bt_msg_t * evt)
       log_info(APP_PREFIX "Maximum system TX power is set to: %d dBm" NL, max_tx_power_x10 / 10);
 
       // Reset to initial state
-      ble_peer_manager_central_init();
-      ble_peer_manager_filter_init();
+      sl_bt_peer_manager_central_init();
+      sl_bt_peer_manager_filter_init();
       cs_initiator_init();
 
       // Print the Bluetooth address
@@ -970,17 +968,17 @@ void sl_bt_on_event(sl_bt_msg_t * evt)
       app_assert_status(sc);
 
       // Filter for advertised name (CS_RFLCT)
-      sc = ble_peer_manager_set_filter_device_name(device_name,
-                                                   strlen(device_name),
-                                                   false);
+      sc = sl_bt_peer_manager_set_filter_device_name(device_name,
+                                                     strlen(device_name),
+                                                     false);
       app_assert_status(sc);
 
       uint16_t ras_service_uuid = CS_RAS_SERVICE_UUID;
-      sc = ble_peer_manager_set_filter_service_uuid16((sl_bt_uuid_16_t *)&ras_service_uuid);
+      sc = sl_bt_peer_manager_set_filter_service_uuid16((sl_bt_uuid_16_t *)&ras_service_uuid);
       app_assert_status(sc);
 
 #ifndef SL_CATALOG_CS_INITIATOR_CLI_PRESENT
-      sc = ble_peer_manager_central_create_connection();
+      sc = sl_bt_peer_manager_central_create_connection();
       app_assert_status(sc);
       cs_initiator_display_start_scanning();
       // Start scanning for reflector connections
@@ -1075,7 +1073,7 @@ void sl_bt_on_event(sl_bt_msg_t * evt)
                                       "error:0x%lx" NL,
                   connection,
                   sc);
-        (void)ble_peer_manager_central_close_connection(connection);
+        (void)sl_bt_peer_manager_central_close_connection(connection);
       } else {
         log_info(APP_INSTANCE_PREFIX "New initiator instance created" NL,
                  connection);
@@ -1090,7 +1088,7 @@ void sl_bt_on_event(sl_bt_msg_t * evt)
       }
       // Scan for new reflector connections if we have room for more
       if (num_reflector_connections < CS_INITIATOR_MAX_CONNECTIONS) {
-        sc = ble_peer_manager_central_create_connection();
+        sc = sl_bt_peer_manager_central_create_connection();
         app_assert_status(sc);
         cs_initiator_display_start_scanning();
         log_info(APP_PREFIX "Scanning restarted for new reflector connections..." NL);
@@ -1130,22 +1128,22 @@ void sl_button_on_change(const sl_button_t *handle)
  *
  * @param[in] evt Event coming from the peer manager.
  *****************************************************************************/
-void ble_peer_manager_on_event_initiator(ble_peer_manager_evt_type_t * event)
+void sl_bt_peer_manager_on_event_initiator(sl_bt_peer_manager_evt_type_t * event)
 {
   sl_status_t sc;
   bd_addr *address;
 
   switch (event->evt_id) {
-    case BLE_PEER_MANAGER_ON_CONN_OPENED_CENTRAL:
+    case SL_BT_PEER_MANAGER_ON_CONN_OPENED_CENTRAL:
       sc = save_connection(event->connection_id);
       if (sc != SL_STATUS_OK) {
         log_error(APP_INSTANCE_PREFIX "Error finding a slot for connection: "
                                       "dropping connection..." NL,
                   event->connection_id);
-        (void)ble_peer_manager_central_close_connection(event->connection_id);
+        (void)sl_bt_peer_manager_central_close_connection(event->connection_id);
         break;
       }
-      address = ble_peer_manager_get_bt_address(event->connection_id);
+      address = sl_bt_peer_manager_get_bt_address(event->connection_id);
       log_info(APP_INSTANCE_PREFIX "Connection opened as central with CS Reflector"
                                    " '%02X:%02X:%02X:%02X:%02X:%02X'" NL,
                event->connection_id,
@@ -1159,7 +1157,7 @@ void ble_peer_manager_on_event_initiator(ble_peer_manager_evt_type_t * event)
       cs_initiator_display_set_measurement_mode(initiator_config.cs_main_mode, rtl_config.algo_mode);
 
       break;
-    case BLE_PEER_MANAGER_ON_CONN_CLOSED:
+    case SL_BT_PEER_MANAGER_ON_CONN_CLOSED:
       log_info(APP_INSTANCE_PREFIX "Connection closed" NL, event->connection_id);
       sc = cs_initiator_delete(event->connection_id);
       if ((sc == SL_STATUS_NOT_FOUND) || (sc == SL_STATUS_INVALID_HANDLE)) {
@@ -1171,13 +1169,13 @@ void ble_peer_manager_on_event_initiator(ble_peer_manager_evt_type_t * event)
       }
       delete_initiator_instance(event->connection_id);
       // Restart scanning for new reflector connections
-      sc = ble_peer_manager_central_create_connection();
+      sc = sl_bt_peer_manager_central_create_connection();
       app_assert_status(sc);
       cs_initiator_display_start_scanning();
       log_info(APP_PREFIX "Scanning started for reflector connections..." NL);
       break;
 
-    case BLE_PEER_MANAGER_ERROR:
+    case SL_BT_PEER_MANAGER_ERROR:
       log_error(APP_INSTANCE_PREFIX "Peer Manager error" NL,
                 event->connection_id);
       break;

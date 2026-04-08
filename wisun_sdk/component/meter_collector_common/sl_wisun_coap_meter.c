@@ -1034,7 +1034,7 @@ static sl_wisun_coap_packet_t * _build_const_resp(const sl_wisun_coap_packet_t *
 static const sl_wisun_lfn_params_t * _get_lfn_profile(void)
 {
 #if !defined(WISUN_CONFIG_DEVICE_PROFILE)
-  return &SL_WISUN_PARAMS_LFN_TEST;
+  return &SL_WISUN_PARAMS_LFN_AUTO;
 #else
   switch (WISUN_CONFIG_DEVICE_PROFILE) {
     case SL_WISUN_LFN_PROFILE_TEST:
@@ -1043,6 +1043,8 @@ static const sl_wisun_lfn_params_t * _get_lfn_profile(void)
       return &SL_WISUN_PARAMS_LFN_BALANCED;
     case SL_WISUN_LFN_PROFILE_ECO:
       return &SL_WISUN_PARAMS_LFN_ECO;
+    case SL_WISUN_LFN_PROFILE_AUTOMATIC:
+      return &SL_WISUN_PARAMS_LFN_AUTO;
     default:
       return NULL;
   }

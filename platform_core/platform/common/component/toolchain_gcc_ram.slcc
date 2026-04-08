@@ -1,0 +1,29 @@
+id: toolchain_gcc_ram
+label: 'Toolchain: GCC Linker Support for RAM-Only Execution'
+package: platform_core
+description: >
+  This component is meant to be used only if the intended program must be run
+  from the embedded RAM.
+category: Platform|Toolchain
+quality: evaluation
+metadata:
+  sbom:
+    license: Zlib
+ui_hints:
+  visibility: never
+root_path: platform_core/platform/common
+provides:
+- name: toolchain_gcc_ram
+  condition: [cortexm33]
+- name: toolchain_linker_type
+  condition: [cortexm33]
+- name: toolchain_ram_only
+  condition: [cortexm33]
+template_file:
+- path: toolchain/cortexm/gcc/s2/linkerfile_ram.ld.jinja
+  condition: [device_series_2]
+- path: toolchain/cortexm/gcc/s30/linkerfile_ram.ld.jinja
+  condition: [device_series_3, cortexm33]
+toolchain_settings:
+- option: linkerfile
+  value: autogen/linkerfile_ram.ld

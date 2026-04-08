@@ -38,11 +38,12 @@
  * Weak Symbol Implementations
  *********************************************/
 
-
-SL_WEAK sl_status_t sl_log_init(void) {
-  return SL_STATUS_OK;
+SL_WEAK void sl_log_init_stage1(void) {
 }
 
+SL_WEAK sl_status_t sl_log_init_stage2(void) {
+  return SL_STATUS_OK;
+}
 
 SL_WEAK void sl_log_send_no_args(uint32_t event_id, uint8_t flags) {
 (void) event_id;

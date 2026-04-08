@@ -249,6 +249,27 @@ class HelpersMixin:
             )
             self.stat_sum = stat_sum
 
+    def find_next_optimal_tag(self, esl_id=None):
+        """Find the next synchronized tag in the optimal group/subevent."""
+        # 1. Filter tags: Synchronized and IDLE (not connected/connecting)
+        candidates = [
+            tag for tag in self.tag_db.list_state(TagState.IDLE)
+            if tag.esl_state == EslState.SYNCHRONIZED and not tag.blocked
+        ]
+
+        if esl_id is not None:
+            candidates = [tag for tag in candidates if tag.esl_id == esl_id]
+
+        if not candidates:
+            return None
+
+        # 2. Sort by optimal group (proximity to next_subevent)
+        candidates.sort(
+            key=lambda t: (t.group_id - self.next_subevent) % self.subevent_count
+        )
+
+        return candidates[0]
+
     def check_address_list(self, target=None):  # no specific tag by default
         """Check address list, or try connect to particular tag"""
         num_connecting = len(self.tag_db.list_state(TagState.CONNECTING))

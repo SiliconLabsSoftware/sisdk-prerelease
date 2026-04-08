@@ -636,7 +636,13 @@ void sli_power_manager_apply_em(sl_power_manager_em_t em)
       break;
 
     case SL_POWER_MANAGER_EM2:
+#if defined(SLI_POWER_MANAGER_ENABLE_SYSTEMVIEW)
+      SEGGER_SYSVIEW_MarkStart(SLI_SYSTEMVIEW_MARKER_ID_SLEEP);
+#endif
       EMU_EnterEM2(false);
+#if defined(SLI_POWER_MANAGER_ENABLE_SYSTEMVIEW)
+      SEGGER_SYSVIEW_MarkStop(SLI_SYSTEMVIEW_MARKER_ID_SLEEP);
+#endif
       // Clear the SLEEPDEEP bit after sleep.
       SCB->SCR &= ~SCB_SCR_SLEEPDEEP_Msk;
       break;

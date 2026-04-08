@@ -225,6 +225,10 @@ sl_status_t sl_power_manager_init(void)
   high_frequency_min_offtime_tick = sli_power_manager_get_default_high_frequency_minimum_offtime();
 #endif
 
+#if defined(SLI_POWER_MANAGER_ENABLE_SYSTEMVIEW)
+  SEGGER_SYSVIEW_NameMarker(SLI_SYSTEMVIEW_MARKER_ID_SLEEP, "Device Sleep");
+#endif
+
   is_initialized = true;
   CORE_EXIT_CRITICAL();
 
@@ -1120,3 +1124,31 @@ sl_power_manager_em_t sli_power_manager_get_current_em(void)
 {
   return current_em;
 }
+
+#if !defined(SL_CATALOG_POWER_MANAGER_RETENTION_PRESENT)
+sl_status_t sl_power_manager_clear_peripheral_dirty_state(const sl_peripheral_t peripheral)
+{
+  (void)peripheral;
+  return SL_STATUS_NOT_SUPPORTED;
+}
+
+bool sl_power_manager_get_peripheral_dirty_state(const sl_peripheral_t peripheral)
+{
+  (void)peripheral;
+  return false;
+}
+
+sl_status_t sl_power_manager_set_peripheral_retention_strategy(const sl_peripheral_t peripheral,
+                                                               uint8_t strategy)
+{
+  (void)peripheral;
+  (void)strategy;
+  return SL_STATUS_NOT_SUPPORTED;
+}
+
+uint8_t sl_power_manager_get_peripheral_retention_strategy(const sl_peripheral_t peripheral)
+{
+  (void)peripheral;
+  return 0xFFu;
+}
+#endif

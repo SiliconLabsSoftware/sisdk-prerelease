@@ -112,6 +112,13 @@ library:
   - zigbee_stack_unix
   - zigbee_multi_network
   unless: []
+- path: build/llvm/aarch64-android-ndk-r27d/zigbee-multi-network/release/libzigbee-multi-network.a
+  condition:
+  - toolchain_gcc
+  - aarch64-android-ndk-r27d
+  - zigbee_stack_unix
+  - zigbee_multi_network
+  unless: []
 - path: build/llvm/cortex-m33/zigbee-multi-network/release/libzigbee-multi-network.a
   condition:
   - toolchain_llvm

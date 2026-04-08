@@ -75,7 +75,6 @@ component:
   - id: sl_dmp_ui_stub
   - id: clock_manager
   # Platform - enable LTO for gcc
-  - id: toolchain_gcc_lto
 
 configuration:
   - name: SL_BOARD_ENABLE_VCOM

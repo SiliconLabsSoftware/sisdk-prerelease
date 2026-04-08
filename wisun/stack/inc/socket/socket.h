@@ -279,9 +279,7 @@ typedef int ssize_t;
 /// | :-----------: | :-----------------------------------------------------------------------------------------------: |
 /// | DSCP_DEFAULT  | Default level for normal data usage                                                               |
 /// | DSCP_AF11     | Higher Application data service for prioritize packet forwarding.                                 |
-/// | DSCP_EF       | Expedited Forwarding (EF) for short messages. Allows low loss, low delay, and low jitter services.|
-/// |               | This is meant for very important messages like alerts. EF packet length should be kept in         |
-/// |               | minimum. This should not be used for any other purpose as it will block other network traffic.    |
+/// | DSCP_EF       | Expedited Forwarding (EF). Should only be used for Last Gasp and First Breath traffic.            |
 #define IPV6_TCLASS                  1
 /// Set the unicast hop limit for the socket, as int.
 /// Valid values 0 and 255, -1 for using the route default.

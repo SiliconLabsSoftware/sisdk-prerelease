@@ -41,6 +41,9 @@
 *******************************   DEFINES   ***********************************
 *******************************************************************************/
 
+// Flag set when the timestamp timer has been initialized.
+static volatile bool timer_initialized;
+
 /**
  * @brief Host timestamp timer frequency
  *
@@ -110,6 +113,7 @@ sl_status_t sl_log_hal_platform_core_init(void)
   sl_interrupt_manager_clear_irq_pending(LOGGER_TIMER_IRQ);
   sl_interrupt_manager_enable_irq(LOGGER_TIMER_IRQ);
 
+  timer_initialized = true;
   return SL_STATUS_OK;
 }
 
@@ -141,6 +145,10 @@ sl_status_t sl_log_hal_core_deinit(void)
 uint32_t sl_log_hal_get_timestamp_count(uint8_t core_id)
 {
   (void)core_id;
+
+  if (!timer_initialized) {
+    return 0;
+  }
 
   return (uint32_t)(((uint64_t)sl_hal_timer_get_counter(TIMER_INSTANCE) *
                    (uint64_t)scale_factor) >> 32ULL);

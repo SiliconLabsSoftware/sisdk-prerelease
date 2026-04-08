@@ -27,7 +27,6 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
-
 #include <stdint.h>
 #include <string.h>
 #include <stdalign.h>
@@ -198,10 +197,10 @@ sl_status_t sl_memory_init(void)
 #endif
 
 #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
-  SEGGER_SYSVIEW_HeapDefine((void *)SYSTEMVIEW_HEAP_LT_ID, (void *)__HeapBase, SYSTEMVIEW_HEAP_SIZE, SLI_BLOCK_METADATA_SIZE_BYTE);
-  SEGGER_SYSVIEW_HeapDefine((void *)SYSTEMVIEW_HEAP_ST_ID, (void *)__HeapBase, SYSTEMVIEW_HEAP_SIZE, SLI_BLOCK_METADATA_SIZE_BYTE);
-  SEGGER_SYSVIEW_NameResource((uint32_t) SYSTEMVIEW_HEAP_LT_ID, "HEAP LONG TERM");
-  SEGGER_SYSVIEW_NameResource((uint32_t) SYSTEMVIEW_HEAP_ST_ID, "HEAP SHORT TERM");
+  SEGGER_SYSVIEW_HeapDefine((void *)SLI_SYSTEMVIEW_HEAP_LT_ID, (void *)__HeapBase, SLI_SYSTEMVIEW_HEAP_SIZE, SLI_BLOCK_METADATA_SIZE_BYTE);
+  SEGGER_SYSVIEW_HeapDefine((void *)SLI_SYSTEMVIEW_HEAP_ST_ID, (void *)__HeapBase, SLI_SYSTEMVIEW_HEAP_SIZE, SLI_BLOCK_METADATA_SIZE_BYTE);
+  SEGGER_SYSVIEW_NameResource((uint32_t) SLI_SYSTEMVIEW_HEAP_LT_ID, "HEAP LONG TERM");
+  SEGGER_SYSVIEW_NameResource((uint32_t) SLI_SYSTEMVIEW_HEAP_ST_ID, "HEAP SHORT TERM");
 #endif
 
   if (status == SL_STATUS_OK) {
@@ -955,9 +954,19 @@ sl_status_t sl_memory_heap_alloc_advanced(sl_memory_heap_t *heap,
   block_len_dw = sli_block_len_dword_decode(allocated_blk);
   SLI_MEMORY_STAT_HEAP_INCREASE(heap, SLI_BLOCK_LEN_DWORD_TO_BYTE(block_len_dw));
 
-  CORE_EXIT_ATOMIC();
-
   *block = (void *)((uint8_t *)allocated_blk + SLI_BLOCK_METADATA_SIZE_BYTE);
+
+#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
+  allocated_blk->block_type = type;
+
+  if (block_type == BLOCK_TYPE_LONG_TERM) {
+    SEGGER_SYSVIEW_HeapAllocEx((void *)SLI_SYSTEMVIEW_HEAP_LT_ID, *block, size, SLI_SYSTEMVIEW_TAG_ALLOC_LT);
+  } else if (block_type == BLOCK_TYPE_SHORT_TERM) {
+    SEGGER_SYSVIEW_HeapAllocEx((void *)SLI_SYSTEMVIEW_HEAP_ST_ID, *block, size, SLI_SYSTEMVIEW_TAG_ALLOC_ST);
+  }
+#endif
+
+  CORE_EXIT_ATOMIC();
 
   // Increment bank counters for banks spanning the new allocation.
   // Include metadata as it was removed or is new.
@@ -969,16 +978,6 @@ sl_status_t sl_memory_heap_alloc_advanced(sl_memory_heap_t *heap,
     sli_memory_profiler_track_alloc_with_ownership(sli_mm_heap_malloc_lt_name, *block, size, return_address);
   } else if (block_type == BLOCK_TYPE_SHORT_TERM) {
     sli_memory_profiler_track_alloc_with_ownership(sli_mm_heap_malloc_st_name, *block, size, return_address);
-  }
-#endif
-
-#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
-  allocated_blk->block_type = type;
-
-  if (block_type == BLOCK_TYPE_LONG_TERM) {
-    SEGGER_SYSVIEW_HeapAllocEx((void *)SYSTEMVIEW_HEAP_LT_ID, *block, size, SYSTEMVIEW_TAG_ALLOC_LT);
-  } else if (block_type == BLOCK_TYPE_SHORT_TERM) {
-    SEGGER_SYSVIEW_HeapAllocEx((void *)SYSTEMVIEW_HEAP_ST_ID, *block, size, SYSTEMVIEW_TAG_ALLOC_ST);
   }
 #endif
 
@@ -1152,15 +1151,15 @@ sl_status_t sl_memory_heap_free(sl_memory_heap_t *heap,
   block_heap->free_lt_list_head = (void *)free_lt_list_head;
   block_heap->free_st_list_head = (void *)free_st_list_head;
 
-  CORE_EXIT_ATOMIC();
-
 #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
   if ((current_metadata->block_type & SLI_MEMORY_BLOCK_TYPE_MASK) == BLOCK_TYPE_LONG_TERM) {
-    SEGGER_SYSVIEW_HeapFree((void *)SYSTEMVIEW_HEAP_LT_ID, block);
+    SEGGER_SYSVIEW_HeapFree((void *)SLI_SYSTEMVIEW_HEAP_LT_ID, block);
   } else if ((current_metadata->block_type & SLI_MEMORY_BLOCK_TYPE_MASK) == BLOCK_TYPE_SHORT_TERM) {
-    SEGGER_SYSVIEW_HeapFree((void *)SYSTEMVIEW_HEAP_ST_ID, block);
+    SEGGER_SYSVIEW_HeapFree((void *)SLI_SYSTEMVIEW_HEAP_ST_ID, block);
   }
 #endif
+
+  CORE_EXIT_ATOMIC();
 
   return SL_STATUS_OK;
 }
@@ -1251,6 +1250,12 @@ sl_status_t sl_memory_heap_realloc(sl_memory_heap_t *heap,
   size_t current_block_len;
   size_t size_real;
   uint32_t reservation_offset;
+#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
+  bool systemview_realloc_inplace = false;
+  void *systemview_ptr = NULL;
+  size_t systemview_size = 0;
+  uint8_t systemview_block_type = BLOCK_TYPE_LONG_TERM;
+#endif
 
   // Verify that the block pointer isn't NULL.
   if (block == NULL) {
@@ -1384,6 +1389,13 @@ sl_status_t sl_memory_heap_realloc(sl_memory_heap_t *heap,
                                           (uint8_t *)ptr - SLI_BLOCK_METADATA_SIZE_BYTE,
                                           (uint8_t *)ptr - SLI_BLOCK_METADATA_SIZE_BYTE,
                                           size_real + SLI_BLOCK_METADATA_SIZE_BYTE);
+#endif
+#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
+        // In-place extension: report old block freed then same address allocated with new size.
+        systemview_realloc_inplace = true;
+        systemview_ptr = ptr;
+        systemview_size = size_real;
+        systemview_block_type = current_block->block_type & SLI_MEMORY_BLOCK_TYPE_MASK;
 #endif
       } else {
         // Next block cannot fulfill the extension. Get a new one from the heap.
@@ -1548,6 +1560,13 @@ sl_status_t sl_memory_heap_realloc(sl_memory_heap_t *heap,
                                       (uint8_t *)ptr - SLI_BLOCK_METADATA_SIZE_BYTE,
                                       size_real + SLI_BLOCK_METADATA_SIZE_BYTE);
 #endif
+#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
+    // In-place reduction: report old block freed then same address allocated with new size.
+    systemview_realloc_inplace = true;
+    systemview_ptr = ptr;
+    systemview_size = size_real;
+    systemview_block_type = current_block->block_type & SLI_MEMORY_BLOCK_TYPE_MASK;
+#endif
 #if defined(SL_MEMORY_MANAGER_STATISTICS_API_ENABLE) && (SL_MEMORY_MANAGER_STATISTICS_API_ENABLE == 1)
     if (reduced_block) {
       SLI_MEMORY_STAT_HEAP_DECREASE(heap, (current_block_len - size_real));
@@ -1568,6 +1587,25 @@ sl_status_t sl_memory_heap_realloc(sl_memory_heap_t *heap,
                                       size_real + SLI_BLOCK_METADATA_SIZE_BYTE);
 #endif
   }
+
+#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
+  SEGGER_SYSVIEW_RecordU32x3(SLI_SYSTEMVIEW_EVENT_ID_REALLOC,
+                             (U32)(uintptr_t)ptr,
+                             (U32)(uintptr_t)*block,
+                             (U32)size);
+
+  if (systemview_realloc_inplace && systemview_ptr != NULL) {
+    uint32_t heap_id = (systemview_block_type == BLOCK_TYPE_LONG_TERM)
+                       ? (uint32_t)SLI_SYSTEMVIEW_HEAP_LT_ID
+                       : (uint32_t)SLI_SYSTEMVIEW_HEAP_ST_ID;
+    sli_systemview_heap_tag_t tag = (systemview_block_type == BLOCK_TYPE_LONG_TERM)
+                                    ? SLI_SYSTEMVIEW_TAG_ALLOC_LT
+                                    : SLI_SYSTEMVIEW_TAG_ALLOC_ST;
+
+    SEGGER_SYSVIEW_HeapFree((void *)heap_id, systemview_ptr);
+    SEGGER_SYSVIEW_HeapAllocEx((void *)heap_id, systemview_ptr, systemview_size, tag);
+  }
+#endif
 
   CORE_EXIT_ATOMIC();
 

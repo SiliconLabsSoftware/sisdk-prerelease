@@ -454,8 +454,13 @@ typedef struct {
     #endif
     sli_zigbee_stack_get_token_count_ipc_msg_t get_token_count;
     sli_zigbee_stack_get_token_data_ipc_msg_t get_token_data;
+    sli_zigbee_stack_get_token_default_ipc_msg_t get_token_default;
     sli_zigbee_stack_get_token_info_ipc_msg_t get_token_info;
+    sli_zigbee_stack_initialize_basic_token_ipc_msg_t initialize_basic_token;
+    sli_zigbee_stack_initialize_counter_token_ipc_msg_t initialize_counter_token;
+    sli_zigbee_stack_initialize_index_token_ipc_msg_t initialize_index_token;
     sli_zigbee_stack_set_token_data_ipc_msg_t set_token_data;
+    slxi_zigbee_stack_token_manager_get_data_ipc_msg_t token_manager_get_data;
     #ifdef SL_CATALOG_ZIGBEE_R23_SUPPORT_PRESENT
     sli_zigbee_stack_zdo_get_configuration_req_ipc_msg_t zdo_get_configuration_req;
     sli_zigbee_stack_zdo_set_add_configuration_ipc_msg_t zdo_set_add_configuration;

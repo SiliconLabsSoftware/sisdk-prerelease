@@ -4130,3 +4130,21 @@ void app_set_trickle_params(sl_cli_command_arg_t *arguments)
 
   app_wisun_cli_mutex_unlock();
 }
+
+void app_set_last_gasp(sl_cli_command_arg_t *arguments)
+{
+  sl_status_t ret;
+  bool enable;
+
+  app_wisun_cli_mutex_lock();
+
+  enable = (bool)sl_cli_get_argument_uint8(arguments, 0);
+  ret = sl_wisun_set_last_gasp(enable);
+  if (ret != SL_STATUS_OK) {
+    printf("[Failed: unable to set Last Gasp: %lu]\r\n", ret);
+  } else {
+    printf("[%s Last Gasp]\r\n", enable ? "Entered" : "Left");
+  }
+
+  app_wisun_cli_mutex_unlock();
+}

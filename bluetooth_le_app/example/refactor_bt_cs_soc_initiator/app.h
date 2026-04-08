@@ -31,12 +31,12 @@
 #ifndef APP_H
 #define APP_H
 
-#include "ble_peer_manager_common.h"
+#include "sl_bt_peer_manager_common.h"
 
 /**************************************************************************//**
  * Peer manager event handler.
  * @param[in] event peer manager event
  *****************************************************************************/
-void ble_peer_manager_on_event_initiator(ble_peer_manager_evt_type_t *event);
+void sl_bt_peer_manager_on_event_initiator(sl_bt_peer_manager_evt_type_t *event);
 
 #endif // APP_H

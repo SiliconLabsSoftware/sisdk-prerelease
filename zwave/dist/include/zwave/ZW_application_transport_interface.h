@@ -1628,6 +1628,7 @@ typedef struct STransmitFrameConfig{
   uint8_t TransmitOptions;
   uint8_t iFrameLength;
   uint8_t aFrame[TX_BUFFER_SIZE];
+  uint8_t app_session_id;
 } STransmitFrameConfig;
 
 typedef struct STransmitProtocolFrameConfig{
@@ -1636,6 +1637,7 @@ typedef struct STransmitProtocolFrameConfig{
   uint8_t protocolMetadata[PROTOCOL_METADATA_LENGTH];
   uint8_t FrameLength;
   uint8_t aFrame[TX_BUFFER_SIZE];
+  uint8_t app_session_id;
 } STransmitProtocolFrameConfig;
 
 // Basis API

@@ -51,6 +51,14 @@ template_contribution:
     name: status
     handler: sl_zigbee_af_test_harness_status_command
     help: Displays the current status of the test harness.
+- name: cli_command
+  value:
+    group: test-harness
+    name: wd-trigger
+    handler: sl_zigbee_af_test_harness_wd_trigger_command
+    help: Intentionally loops forever so watchdog forces a reset.
+  condition:
+  - watchdog_manager
 - name: cli_group
   value:
     group: test-harness

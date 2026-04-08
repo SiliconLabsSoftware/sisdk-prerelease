@@ -72,7 +72,6 @@ component:
   # -- End of LED and BUtton GPIO Conflcit Note --
   - id: zigbee_application_bootloader
   # Platform - enable LTO for gcc
-  - id: toolchain_gcc_lto
 
 configuration:
   - name: SL_BOARD_ENABLE_VCOM

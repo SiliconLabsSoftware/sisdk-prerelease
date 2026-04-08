@@ -150,6 +150,8 @@ typedef enum {
   SL_WISUN_MSG_STOP_DIRECT_CONNECT_CLIENT_REQ_ID          = 0x5B,
   SL_WISUN_MSG_SET_DHCPV6_VENDOR_DATA_REQ_ID              = 0x5C,
   SL_WISUN_MSG_SET_TRICKLE_PARAMETERS_REQ_ID              = 0x5D,
+  SL_WISUN_MSG_SET_LAST_GASP_REQ_ID                       = 0x5E,
+  SL_WISUN_MSG_SET_FIRST_BREATH_REQ_ID                    = 0x5F,
 } sl_wisun_msg_req_id_t;
 
 /// Wi-SUN Message API confirmation IDs
@@ -243,6 +245,8 @@ typedef enum {
   SL_WISUN_MSG_STOP_DIRECT_CONNECT_CLIENT_CNF_ID          = 0x5B,
   SL_WISUN_MSG_SET_DHCPV6_VENDOR_DATA_CNF_ID              = 0x5C,
   SL_WISUN_MSG_SET_TRICKLE_PARAMETERS_CNF_ID              = 0x5D,
+  SL_WISUN_MSG_SET_LAST_GASP_CNF_ID                       = 0x5E,
+  SL_WISUN_MSG_SET_FIRST_BREATH_CNF_ID                    = 0x5F,
 } sl_wisun_msg_cnf_id_t;
 
 /**************************************************************************//**
@@ -3451,7 +3455,8 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_ADVERT_DIRECT_CONNECT_SERVER_ID sl_wisun_msg_advert_direct_connect_server_id
  * @{
- ******************************************************************************/
+ *****************************************************************************/
+
 /// Request message body
 SL_PACK_START(1)
 typedef struct {
@@ -3493,7 +3498,8 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_START_DIRECT_CONNECT_CLIENT sl_wisun_msg_start_direct_connect_client
  * @{
- ******************************************************************************/
+ *****************************************************************************/
+
 /// Request message body
 SL_PACK_START(1)
 typedef struct {
@@ -3535,7 +3541,7 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_START_DIRECT_CONNECT_SCAN sl_wisun_msg_start_direct_connect_scan
  * @{
- ******************************************************************************/
+ *****************************************************************************/
 
 /// Request message body
 SL_PACK_START(1)
@@ -3582,7 +3588,8 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_STOP_DIRECT_CONNECT_SCAN sl_wisun_msg_stop_direct_connect_scan
  * @{
- ******************************************************************************/
+ *****************************************************************************/
+
 /// Request message body
 SL_PACK_START(1)
 typedef struct {
@@ -3590,7 +3597,7 @@ typedef struct {
   sl_wisun_msg_header_t header;
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_stop_direct_connect_scan_req_t;
 SL_PACK_END()
- 
+
 /// Confirmation message body
 SL_PACK_START(1)
 typedef struct {
@@ -3598,7 +3605,7 @@ typedef struct {
   uint32_t status;
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_stop_direct_connect_scan_cnf_body_t;
 SL_PACK_END()
- 
+
 /// Confirmation message
 SL_PACK_START(1)
 typedef struct {
@@ -3608,14 +3615,14 @@ typedef struct {
   sl_wisun_msg_stop_direct_connect_scan_cnf_body_t body;
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_stop_direct_connect_scan_cnf_t;
 SL_PACK_END()
- 
+
 /** @} (end SL_WISUN_MSG_STOP_DIRECT_CONNECT_SCAN) */
- 
+
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_CONNECT_TO_DIRECT_CONNECT_SERVER sl_wisun_msg_connect_to_direct_connect_server
  * @{
- ******************************************************************************/
- 
+ *****************************************************************************/
+
 /// Request message body
 SL_PACK_START(1)
 typedef struct {
@@ -3657,14 +3664,14 @@ typedef struct {
   sl_wisun_msg_connect_to_direct_connect_server_cnf_body_t body;
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_connect_to_direct_connect_server_cnf_t;
 SL_PACK_END()
- 
+
 /** @} (end SL_WISUN_MSG_CONNECT_TO_DIRECT_CONNECT_SERVER) */
 
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_STOP_DIRECT_CONNECT_CLIENT sl_wisun_msg_stop_direct_connect_client
  * @{
- ******************************************************************************/
- 
+ *****************************************************************************/
+
 /// Request message
 SL_PACK_START(1)
 typedef struct {
@@ -3690,7 +3697,7 @@ typedef struct {
   sl_wisun_msg_stop_direct_connect_client_cnf_body_t body;
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_stop_direct_connect_client_cnf_t;
 SL_PACK_END()
- 
+
 /** @} (end SL_WISUN_MSG_STOP_DIRECT_CONNECT_CLIENT) */
 
 /**************************************************************************//**
@@ -4233,6 +4240,7 @@ SL_PACK_END()
  * @defgroup SL_WISUN_MSG_SET_TRICKLE_PARAMETERS sl_wisun_msg_set_trickle_parameters
  * @{
  *****************************************************************************/
+
 /// Request message body
 SL_PACK_START(1)
 typedef struct {
@@ -4280,6 +4288,96 @@ typedef struct {
 SL_PACK_END()
 
 /** @} (end SL_WISUN_MSG_SET_TRICKLE_PARAMETERS) */
+
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_SET_LAST_GASP sl_wisun_msg_set_last_gasp
+ * @{
+ *****************************************************************************/
+
+/// Request message body
+SL_PACK_START(1)
+typedef struct {
+  /// Enter (true) or leave (false) Last Gasp mode
+  uint8_t enable;
+  /// Reserved, set to zero
+  uint8_t reserved[3];
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_last_gasp_req_body_t;
+SL_PACK_END()
+
+/// Request message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Request message body
+  sl_wisun_msg_set_last_gasp_req_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_last_gasp_req_t;
+SL_PACK_END()
+
+/// Confirmation message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the request
+  uint32_t status;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_last_gasp_cnf_body_t;
+SL_PACK_END()
+
+/// Confirmation message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Confirmation message body
+  sl_wisun_msg_set_last_gasp_cnf_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_last_gasp_cnf_t;
+SL_PACK_END()
+
+/** @} (end SL_WISUN_MSG_SET_LAST_GASP) */
+
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_SET_FIRST_BREATH sl_wisun_msg_set_first_breath
+ * @{
+ *****************************************************************************/
+
+/// Request message body
+SL_PACK_START(1)
+typedef struct {
+  /// Enter (true) or leave (false) First Breath mode
+  uint8_t enable;
+  /// Reserved, set to zero
+  uint8_t reserved[3];
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_first_breath_req_body_t;
+SL_PACK_END()
+
+/// Request message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Request message body
+  sl_wisun_msg_set_first_breath_req_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_first_breath_req_t;
+SL_PACK_END()
+
+/// Confirmation message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the request
+  uint32_t status;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_first_breath_cnf_body_t;
+SL_PACK_END()
+
+/// Confirmation message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Confirmation message body
+  sl_wisun_msg_set_first_breath_cnf_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_first_breath_cnf_t;
+SL_PACK_END()
+
+/** @} (end SL_WISUN_MSG_SET_FIRST_BREATH) */
 
 /**************************************************************************//**
  * @brief Send a request to the Wi-SUN stack

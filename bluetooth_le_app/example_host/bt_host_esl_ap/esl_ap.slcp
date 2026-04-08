@@ -38,6 +38,7 @@ other_file:
   - path: ap_core_event_handlers_cli.py
   - path: ap_core_event_handlers_common.py
   - path: ap_core_event_handlers_demo.py
+  - path: ap_core_event_handlers_itp.py
   - path: ap_core_helpers.py
   - path: ap_core_pawr_responses.py
   - path: ap_core_scan.py

@@ -298,7 +298,7 @@ sl_zigbee_af_status_t sl_zigbee_af_ias_zone_cluster_set_enrollment_method(uint8_
   } else {
     enrollmentMethod = method;
 #ifndef EZSP_HOST
-    sl_status_t sl_status = sl_token_manager_set_data(COMMON_TOKEN_PLUGIN_IAS_ZONE_SERVER_ENROLLMENT_METHOD,
+    sl_status_t sl_status = slx_zigbee_token_manager_set_data(COMMON_TOKEN_PLUGIN_IAS_ZONE_SERVER_ENROLLMENT_METHOD,
                                                       (void *)&enrollmentMethod,
                                                       sizeof(uint8_t));
     SL_ZIGBEE_TEST_ASSERT(sl_status == SL_STATUS_OK);
@@ -563,7 +563,7 @@ void sl_zigbee_af_ias_zone_cluster_server_init_cb(uint8_t endpoint)
   assert(SL_STATUS_OK == sl_zigbee_af_ias_zone_server_token_init());
 
 #ifndef EZSP_HOST
-  sl_status_t status = sl_token_manager_get_data(COMMON_TOKEN_PLUGIN_IAS_ZONE_SERVER_ENROLLMENT_METHOD,
+  sl_status_t status = slx_zigbee_token_manager_get_data(COMMON_TOKEN_PLUGIN_IAS_ZONE_SERVER_ENROLLMENT_METHOD,
                                                  (void *)&enrollmentMethod,
                                                  sizeof(uint8_t));
   SL_ZIGBEE_TEST_ASSERT(status == SL_STATUS_OK);

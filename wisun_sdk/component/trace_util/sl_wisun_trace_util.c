@@ -317,6 +317,7 @@ const app_enum_t app_wisun_lfn_profile_enum[] =
   { "test", SL_WISUN_LFN_PROFILE_TEST },
   { "balanced", SL_WISUN_LFN_PROFILE_BALANCED },
   { "eco", SL_WISUN_LFN_PROFILE_ECO },
+  { "automatic", SL_WISUN_LFN_PROFILE_AUTOMATIC },
   { NULL, 0 }
 };
 
@@ -635,6 +636,10 @@ const char *app_wisun_mac_addr_to_str(const sl_wisun_mac_address_t *mac_addr)
 const sl_wisun_connection_params_t *sl_wisun_get_conn_param_by_nw_size(const sl_wisun_network_size_t nw_size)
 {
   switch (nw_size) {
+    // Automatic
+    case SL_WISUN_NETWORK_SIZE_AUTOMATIC:
+      return &SL_WISUN_PARAMS_PROFILE_AUTO;
+
     // Small
     case SL_WISUN_NETWORK_SIZE_SMALL:
       return &SL_WISUN_PARAMS_PROFILE_SMALL;

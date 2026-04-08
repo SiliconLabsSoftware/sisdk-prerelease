@@ -88,13 +88,17 @@ bool sl_zigbee_af_mfglib_enabled(void)
   uint8_t enabled = false;
 
 #ifndef SL_ZIGBEE_TEST
-  (void)sl_token_manager_get_data(COMMON_TOKEN_MFG_LIB_ENABLED, &enabled, sizeof(uint8_t));
+  sl_status_t status = slx_zigbee_token_manager_get_data(COMMON_TOKEN_MFG_LIB_ENABLED, &enabled, sizeof(uint8_t));
+  if (status != SL_STATUS_OK) {
+    sl_zigbee_af_cli_println("Failed to get MFG_LIB_ENABLED, status: 0x%08X", status);
+    return false;
+  }
 #else
   // no op
   enabled = true;
 #endif
 
-  sl_zigbee_core_debug_print("MFG_LIB Enabled %02X\r\n", enabled);
+  sl_zigbee_af_cli_println("MFG_LIB Enabled %02X\r\n", enabled);
 
   return enabled;
 }
@@ -437,7 +441,11 @@ void sli_zigbee_af_mfglib_enable_mfglib(SL_CLI_COMMAND_ARG)
 #ifndef SL_ZIGBEE_TEST
   uint8_t enabled = sl_cli_get_argument_uint8(arguments, 0);
 
-  (void)sl_token_manager_set_data(COMMON_TOKEN_MFG_LIB_ENABLED, (void *)&enabled, sizeof(uint8_t));
+  sl_status_t status = slx_zigbee_token_manager_set_data(COMMON_TOKEN_MFG_LIB_ENABLED, (void *)&enabled, sizeof(uint8_t));
+  if (status != SL_STATUS_OK) {
+    sl_zigbee_af_cli_println("Failed to set MFG_LIB_ENABLED, status: 0x%08X", status);
+    return;
+  }
 #endif
 }
 

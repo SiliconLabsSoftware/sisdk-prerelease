@@ -14,6 +14,7 @@ source:
   unless: [trustzone_nonsecure]
 - path: platform/bootloader/core/flash/btl_internal_flash.c
 - path: platform/bootloader/storage/internal_flash/btl_storage_internal_flash_raw.c
+- path: platform/bootloader/core/smp_switch/btl_smp_switch_flash_api.c
 include:
 - path: platform/bootloader
   file_list:
@@ -30,6 +31,10 @@ include:
   file_list:
   - path: btl_internal_flash.h
   - path: btl_internal_flash_raw.h
+- path: platform/bootloader/core/smp_switch
+  file_list:
+  - path: btl_smp_switch_record.h
+  - path: btl_smp_switch_flash_api.h
 provides:
 - name: bootloader_interface_common
   condition: [device_series_2]

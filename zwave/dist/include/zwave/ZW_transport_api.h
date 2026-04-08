@@ -153,6 +153,8 @@ typedef struct _TX_STATUS_TYPE_{
   int8_t bDestinationAckUsedTxPower;
   int8_t bDestinationAckMeasuredRSSI;
   int8_t bDestinationAckMeasuredNoiseFloor;
+  /** Application session id: carried unchanged through all stack layers from the transmit request (constant along the path) so it appears in the transmit status report. */
+  uint8_t app_session_id;
 } TX_STATUS_TYPE;
 
 typedef struct _RECEIVE_OPTIONS_TYPE{

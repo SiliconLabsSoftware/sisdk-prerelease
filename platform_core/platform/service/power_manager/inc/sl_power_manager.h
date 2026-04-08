@@ -41,6 +41,9 @@
 #include "sl_core.h"
 #include "sl_code_classification.h"
 #include "sl_device_peripheral_types.h"
+#if defined(SL_CATALOG_POWER_MANAGER_RETENTION_PRESENT)
+#include "sl_power_manager_retention_config.h"
+#endif
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -437,9 +440,45 @@ bool sl_power_manager_get_peripheral_dirty_state(const sl_peripheral_t periphera
  *
  * @note This API is useful when a driver clears its dirty state after a
  *       successful save/restore sequence.
+ *
+ * @return SL_STATUS_OK if the dirty state was cleared successfully.
+ *         SL_STATUS_NOT_SUPPORTED if retention is not supported.
+ *         SL_STATUS_INVALID_PARAMETER if the peripheral is NULL or not found.
  ******************************************************************************/
-void sl_power_manager_clear_peripheral_dirty_state(const sl_peripheral_t peripheral);
+sl_status_t sl_power_manager_clear_peripheral_dirty_state(const sl_peripheral_t peripheral);
 
+/***************************************************************************//**
+ * Sets the retention strategy for a peripheral.
+ *
+ * @param peripheral  A pointer to peripheral.
+ *
+ * @param strategy    Retention strategy to apply:
+ *                    - SL_PM_RETENTION_STRATEGY_ON_DEMAND - restore on first
+ *                      access since EM2 sleep.
+ *                    - SL_PM_RETENTION_STRATEGY_ON_WAKEUP - restore
+ *                      automatically on EM2 wakeup.
+ *
+ * @return SL_STATUS_OK if the retention strategy was set successfully.
+ *         SL_STATUS_INVALID_PARAMETER if SL_PM_<PERIPHERAL>_RETAINED == 0
+ *         SL_STATUS_NOT_SUPPORTED if retention is not supported.
+ *
+ * @note The retention strategy set via this API persists across EM2 sleep
+ *       cycles. On cold boot, the strategy defaults to the compile-time value
+ *       from sl_power_manager_retention_config.h.
+ ******************************************************************************/
+sl_status_t sl_power_manager_set_peripheral_retention_strategy(const sl_peripheral_t peripheral,
+                                                               uint8_t strategy);
+
+/***************************************************************************//**
+ * Gets the retention strategy for a peripheral.
+ *
+ * @param peripheral  A pointer to peripheral.
+ *
+ * @return the retention strategy for the peripheral
+ *         (SL_PM_RETENTION_STRATEGY_ON_DEMAND or SL_PM_RETENTION_STRATEGY_ON_WAKEUP
+ *         or 0xFFu if the peripheral is NULL or not found).
+ ******************************************************************************/
+uint8_t sl_power_manager_get_peripheral_retention_strategy(const sl_peripheral_t peripheral);
 /** @} (end addtogroup power_manager) */
 
 #ifdef __cplusplus

@@ -199,6 +199,9 @@ typedef struct BootloaderStorageFunctions {
   int32_t (*eraseRaw)(uint32_t address, size_t length);
   /// Get configured DMA channel
   int32_t (*getDMAchannel)(void);
+  /// When non-NULL, copy SMP switch record page bases (\c BTL_SMP_PAGE_1_BASE / \c BTL_SMP_PAGE_2_BASE).
+  /// Set to NULL in non-SMP builds.
+  void (*getSmpSwitchPageBases)(uint32_t *page1Base, uint32_t *page2Base);
 } BootloaderStorageFunctions_t;
 
 // -----------------------------------------------------------------------------

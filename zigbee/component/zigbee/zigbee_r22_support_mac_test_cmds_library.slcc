@@ -281,10 +281,26 @@ library:
   - zigbee_multi_network
   - zigbee_mac_test_commands_support
   unless: []
+- path: build/llvm/aarch64-android-ndk-r27d/zigbee-r22-support-mac-test-cmds/release/libzigbee-r22-support-mac-test-cmds.a
+  condition:
+  - toolchain_gcc
+  - aarch64-android-ndk-r27d
+  - zigbee_stack_unix
+  - zigbee_multi_network
+  - zigbee_mac_test_commands_support
+  unless: []
 - path: build/llvm/aarch64-android-ndk-r25c/zigbee-r22-support-mac-test-cmds/release_singlenetwork/libzigbee-r22-support-mac-test-cmds.a
   condition:
   - toolchain_llvm
   - aarch64-android-ndk-r25c
+  - zigbee_stack_unix
+  - zigbee_mac_test_commands_support
+  unless:
+  - zigbee_multi_network
+- path: build/llvm/aarch64-android-ndk-r27d/zigbee-r22-support-mac-test-cmds/release_singlenetwork/libzigbee-r22-support-mac-test-cmds.a
+  condition:
+  - toolchain_gcc
+  - aarch64-android-ndk-r27d
   - zigbee_stack_unix
   - zigbee_mac_test_commands_support
   unless:

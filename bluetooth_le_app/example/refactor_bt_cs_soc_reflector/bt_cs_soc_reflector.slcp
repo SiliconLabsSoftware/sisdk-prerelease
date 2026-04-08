@@ -44,8 +44,8 @@ component:
   - id: sl_main
   - id: clock_manager
   - id: device_init
-  - id: ble_peer_manager_common
-  - id: ble_peer_manager_peripheral
+  - id: bluetooth_peer_manager_common
+  - id: bluetooth_peer_manager_peripheral
 
 source:
   - path: app.c
@@ -97,16 +97,16 @@ configuration:
     value: 1
   - name: CS_REFLECTOR_ANTENNA_OFFSET
     value: 0
-  - name: BLE_PEER_MANAGER_PERIPHERAL_CONFIG_ADV_PHY
+  - name: SL_BT_PEER_MANAGER_PERIPHERAL_CONFIG_ADV_PHY
     value: sl_bt_gap_phy_2m
   - name: APP_LOG_LEVEL_FILTER_THRESHOLD
     value: APP_LOG_LEVEL_INFO
 
 template_contribution:
-  - name: ble_peer_manager_event_handler
+  - name: sl_bt_peer_manager_event_handler
     value:
       include: app.h
-      handler: ble_peer_manager_on_event_reflector
+      handler: sl_bt_peer_manager_on_event_reflector
 
 post_build:
   - path: ../../postbuild_profile/bt_common_s2.slpb

@@ -117,6 +117,9 @@ struct sl_wisun_params_discovery_s {
   /// Minimum signal level for a node to be selected as the EAPOL target for
   /// authentication immediately after a PAN Advertisement reception.
   /// Range from -174 (0) to +80 (254) dBm, 255 to disable feature.
+  /// Enabling this feature may speed up connection times, but at the cost of
+  /// increased simultaneous authentication traffic. It may be preferable to disable
+  /// it when connecting hundreds of nodes at once.
   uint8_t eapol_target_min_sens;
   /// If true, allow join state 1 to be skipped using cached information
   /// from the previous connection.

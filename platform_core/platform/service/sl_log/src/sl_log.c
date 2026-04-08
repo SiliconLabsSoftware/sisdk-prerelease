@@ -56,6 +56,12 @@
 
 #define SL_LOG_FLAGS_LEVEL_MASK 0x7
 
+/* Ring buffer size for console mode and SystemView.
+ * Used to buffer events logged prior to sl_log_init_stage2
+ * Uses reduced size during early logging in console mode and SystemView.
+ * HOST mode uses SL_LOG_NUMBER_OF_EVENTS */
+#define EARLY_LOG_BUFFER_SIZE 20
+
 #define EVENT_COUNT_DEFAULT 1
 
 #define READ_INDEX_DEFAULT 0
@@ -72,27 +78,29 @@ extern uint32_t timestamp_global;
 /* Global backend status variable to track the backend transfer status */
  sl_log_backend_status_t sl_log_backend_status;
 
-/*******************************************************************************
- ***************************  LOCAL VARIABLES   ********************************
- ******************************************************************************/
-
-static sl_log_level_t current_log_level;
-
-#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE!=SL_LOG_CONFIG_MODE_CONSOLE)
-
-/*
- * Pre-allocated array that provides the actual storage space for log events
- * in the ring buffer. The size is determined at compile time to ensure
- * predictable memory usage in embedded systems.
- */
-static sl_log_event_t buffer[SL_LOG_NUMBER_OF_EVENTS];
-
 /*
  * Global instance of the ring buffer that manages the circular storage
  * of log events. Initialized with zero indices and points to the static
  * storage array for actual event data.
  */
 static sl_log_ring_buffer_t ring_buffer;
+
+/*******************************************************************************
+ ***************************  LOCAL VARIABLES   ********************************
+ ******************************************************************************/
+
+static sl_log_level_t current_log_level;
+
+// Sets after sl_log_init_stage2 and used to determine the early logs
+static bool log_init_stage2_done;
+
+#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_HOST)
+
+/*
+ * In HOST mode, Pre-allocated array that provides the actual storage space for log events
+ * in the ring buffer.
+ */
+static sl_log_event_t buffer[SL_LOG_NUMBER_OF_EVENTS];
 
 static sl_log_event_t overflow_event;
 
@@ -141,6 +149,12 @@ static inline bool log_is_backend_flush_done(void)
   __enable_irq();
   return is_done;
 }
+#else
+/**
+ * Ring buffer is only used for early logs in console mode and SystemView
+ * a reduced buffer size is used to save memory.
+ */
+static sl_log_event_t buffer[EARLY_LOG_BUFFER_SIZE];
 #endif
 /**
  * @brief Write a log event to the ring buffer
@@ -169,7 +183,11 @@ static inline sl_status_t log_write_to_ring_buffer(sl_log_event_t *event_buffer,
                                                       uint32_t event_size)
 {
   (void)event_size;
-#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE!=SL_LOG_CONFIG_MODE_CONSOLE)
+  #if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE == SL_LOG_CONFIG_MODE_HOST)
+    uint32_t buffer_capacity = SL_LOG_NUMBER_OF_EVENTS;
+  #else
+    uint32_t buffer_capacity = EARLY_LOG_BUFFER_SIZE;
+  #endif
   sl_log_ring_buffer_t *ring_buffer_ptr = &ring_buffer;
   __disable_irq();
   ring_buffer_ptr->available_event_slots--;
@@ -180,23 +198,106 @@ static inline sl_status_t log_write_to_ring_buffer(sl_log_event_t *event_buffer,
   }
   uint32_t write_index = ring_buffer_ptr->write_index;
   ring_buffer_ptr->write_index =
-      (write_index + 1u >= SL_LOG_NUMBER_OF_EVENTS) ? 0u : (write_index + 1u);
+      (write_index + 1u >= buffer_capacity) ? 0u : (write_index + 1u);
   __enable_irq();
 
   ring_buffer_ptr->buffer[write_index] = *event_buffer;
 
   __disable_irq();
-  if (++ring_buffer_ptr->event_count > SL_LOG_NUMBER_OF_EVENTS) {
-    ring_buffer_ptr->event_count = SL_LOG_NUMBER_OF_EVENTS;
-    if (++ring_buffer_ptr->read_index == SL_LOG_NUMBER_OF_EVENTS) {
+  if (++ring_buffer_ptr->event_count > buffer_capacity) {
+    ring_buffer_ptr->event_count = buffer_capacity;
+    if (++ring_buffer_ptr->read_index == buffer_capacity) {
       ring_buffer_ptr->read_index = 0;
     }
   }
   __enable_irq();
-#else
-  (void)event_buffer;
-#endif
+
   return SL_STATUS_OK;
+}
+
+/**
+ * @brief Flush early events stored in the ring buffer to the respective backend.
+ *
+ * @param[in] read_index Start index in the ring buffer.
+ * @param[in] event_count Number of events to flush.
+ * @return void
+ */
+static void flush_early_logs_to_backend(uint32_t read_index, uint32_t event_count)
+{
+#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE == SL_LOG_CONFIG_MODE_HOST)
+  uint32_t buffer_capacity = SL_LOG_NUMBER_OF_EVENTS;
+#else
+  uint32_t buffer_capacity = EARLY_LOG_BUFFER_SIZE;
+#endif
+
+  for (uint32_t i = 0; i < event_count; i++) {
+    uint32_t idx = read_index + i;
+    if (idx >= buffer_capacity) {
+      idx -= buffer_capacity;
+    }
+    // SystemView backend sends each event via SEGGER_SYSVIEW_RecordU32 APIs
+#ifdef SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT
+    switch (ring_buffer.buffer[idx].arg_count) {
+      case 0:
+        SEGGER_SYSVIEW_RecordU32(ring_buffer.buffer[idx].event_id, ring_buffer.buffer[idx].flags);
+        break;
+      case 1:
+        SEGGER_SYSVIEW_RecordU32x2(ring_buffer.buffer[idx].event_id, ring_buffer.buffer[idx].flags, ring_buffer.buffer[idx].args[0]);
+        break;
+      case 2:
+        SEGGER_SYSVIEW_RecordU32x3(ring_buffer.buffer[idx].event_id, ring_buffer.buffer[idx].flags, ring_buffer.buffer[idx].args[0], ring_buffer.buffer[idx].args[1]);
+        break;
+      case 3:
+        SEGGER_SYSVIEW_RecordU32x4(ring_buffer.buffer[idx].event_id, ring_buffer.buffer[idx].flags, ring_buffer.buffer[idx].args[0], ring_buffer.buffer[idx].args[1], ring_buffer.buffer[idx].args[2]);
+        break;
+      default:
+        break;
+    }
+#else
+    //Host or console mode: write each event to the backend.
+    sl_log_backend_write(&ring_buffer.buffer[idx], 0, 1);
+#endif
+  }
+
+  ring_buffer.read_index = 0;
+  ring_buffer.write_index = 0;
+  ring_buffer.event_count = 0;
+  ring_buffer.available_event_slots = buffer_capacity;
+}
+
+/*
+ *  Append timestamps to early events
+ *  flush them to the respective backend.
+ */
+static void flush_early_logs(void)
+{
+#ifndef SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT
+  /* Timestamps are only appended for host and console mode. SystemView does not use them.
+   * Assign in sequential order (oldest = smallest timestamp, newest = largest) so older packets can be identified
+   * current time and offsets preserve order including after overflow. */
+  if (ring_buffer.event_count > 0) {
+
+    // buffer_capacity used for ring-buffer wrap
+#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE == SL_LOG_CONFIG_MODE_HOST)
+    // Host mode uses full ring buffer capacity
+    uint32_t buffer_capacity = SL_LOG_NUMBER_OF_EVENTS;
+#else
+    // Console mode uses reduced early buffer capacity
+    uint32_t buffer_capacity = EARLY_LOG_BUFFER_SIZE;
+#endif
+    uint32_t current_timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    for (uint32_t i = 0; i < ring_buffer.event_count; i++) {
+      // Ring buffer is circular where ring_buffer.read_index+i may wrap and get array index.
+      uint32_t event_slot_index = ring_buffer.read_index + i;
+      if (event_slot_index >= buffer_capacity) {
+        event_slot_index -= buffer_capacity;
+      }
+      ring_buffer.buffer[event_slot_index].timestamp = current_timestamp - (ring_buffer.event_count - 1 - i);
+    }
+  }
+#endif
+
+  flush_early_logs_to_backend(ring_buffer.read_index, ring_buffer.event_count);
 }
 
 /*******************************************************************************
@@ -204,54 +305,39 @@ static inline sl_status_t log_write_to_ring_buffer(sl_log_event_t *event_buffer,
  ******************************************************************************/
 
 /**
- * @brief Initialize the Silicon Labs debug logger system
- *
- * Performs comprehensive initialization of the logging system including:
- * - Configuration validation and setup
- * - Ring buffer initialization
- * - Timestamp counter startup
- * - Backend interface initialization
- *
- * The function selects between default configuration (sl_log_config) and
- * Universal Configurator configuration (sl_log_uc_config) based on the
- * SL_LOG_ENABLE_UC_CONFIG compile-time setting.
- *
- * Validation includes checking:
- * - Log level validity (within defined enum range)
- * - Backend interface validity
- * - Event count limits
- * - Argument count limits
- *
- * @return sl_status_t Initialization result:
- *         - SL_STATUS_OK: Logger initialized successfully
- *         - SL_STATUS_NULL_POINTER: Configuration pointer is NULL (shouldn't
- * occur)
- *         - SL_STATUS_INVALID_PARAMETER: Invalid configuration parameter
- * detected
- *
- * @note This function must be called before any logging operations.
- * @note Ring buffer is reset to empty state during initialization.
- */
-sl_status_t sl_log_init(void)
-{
+* Initializes the ring buffer, invoked during sl_main_init.
+* Configures the buffer slot count for the corresponding backend, 
+* enabling early log capture before full system initialization.
+*/
+void sl_log_init_stage1(void) {
 
+  ring_buffer.buffer = buffer;
+  sl_log_backend_status.backend_transfer_done = 1;
+  // set event slots count by mode to save memory during early logging.
+#if defined(SL_LOG_CONFIG_MODE) && ((SL_LOG_CONFIG_MODE == SL_LOG_CONFIG_MODE_HOST))
+  ring_buffer.available_event_slots = SL_LOG_NUMBER_OF_EVENTS;
+#else
+  // Console and SystemView modes do not use the ring buffer so use reduced size buffer.
+  ring_buffer.available_event_slots = EARLY_LOG_BUFFER_SIZE;
+#endif
+}
+
+/**
+ * @brief log_init stage 2: platform/backend init
+ * flush early logs stored in the ring buffer to the respective backend.
+ */
+sl_status_t  sl_log_init_stage2(void) {
 
   if (sl_log_get_api_core() == NULL) {
     return SL_STATUS_NOT_INITIALIZED;
   }
-
   current_log_level = (sl_log_level_t)SL_LOG_CONFIG_LEVEL_COMPILE_TIME;
-#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE!=SL_LOG_CONFIG_MODE_CONSOLE)
-  ring_buffer.write_index = 0;
-  ring_buffer.read_index = 0;
-  ring_buffer.event_count = 0;
-  ring_buffer.buffer = buffer;
-  ring_buffer.available_event_slots=SL_LOG_NUMBER_OF_EVENTS;
-
-  sl_log_backend_status.backend_transfer_done=1;
-#endif
   sl_log_platform_core_init();
   sl_log_backend_init();
+
+  // Flush the early event logs stored in the ring buffer to the respective backend.
+  flush_early_logs();
+  log_init_stage2_done = true;
 
   return SL_STATUS_OK;
 }
@@ -294,11 +380,16 @@ void sl_log_send_no_args(uint32_t event_id, uint8_t flags)
     event.args[1] = 0;
     event.args[2] = 0;
     event.version = 1;
+    if (!log_init_stage2_done) {
+      // Early logging into the ring buffer before stage2 init is complete
+      log_write_to_ring_buffer(&event, sizeof(event));
+    } else {
 #if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_CONSOLE)
     sl_log_backend_write(&event,READ_INDEX_DEFAULT,EVENT_COUNT_DEFAULT);
 #else
     log_write_to_ring_buffer(&event, sizeof(event));
 #endif
+    }
   }
 }
 
@@ -335,11 +426,16 @@ void sl_log_send_arg1(uint32_t event_id, uint8_t flags, uint32_t arg1)
     event.args[2] = 0;
     event.version = 1;
 
+    if (!log_init_stage2_done) {
+      // Early logging into the ring buffer before stage2 init is complete
+      log_write_to_ring_buffer(&event, sizeof(event));
+    } else {
 #if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_CONSOLE)
     sl_log_backend_write(&event,READ_INDEX_DEFAULT,EVENT_COUNT_DEFAULT);
 #else
     log_write_to_ring_buffer(&event, sizeof(event));
 #endif
+    }
   }
 }
 
@@ -374,11 +470,16 @@ void sl_log_send_arg2(uint32_t event_id, uint8_t flags, uint32_t arg1,
     event.args[2] = 0;
     event.version = 1;
 
+    if (!log_init_stage2_done) {
+      // Early logging into the ring buffer before stage2 init is complete
+      log_write_to_ring_buffer(&event, sizeof(event));
+    } else {
 #if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_CONSOLE)
     sl_log_backend_write(&event,READ_INDEX_DEFAULT,EVENT_COUNT_DEFAULT);
 #else
     log_write_to_ring_buffer(&event, sizeof(event));
 #endif
+    }
   }
 }
 
@@ -418,11 +519,16 @@ void sl_log_send_arg3(uint32_t event_id, uint8_t flags, uint32_t arg1,
     event.args[2] = arg3;
     event.version = 1;
 
+    if (!log_init_stage2_done) {
+      // Early logging into the ring buffer before stage2 init is complete
+      log_write_to_ring_buffer(&event, sizeof(event));
+    } else {
 #if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_CONSOLE)
     sl_log_backend_write(&event,READ_INDEX_DEFAULT,EVENT_COUNT_DEFAULT);
 #else
     log_write_to_ring_buffer(&event, sizeof(event));
 #endif
+    }
   }
 }
 /**
@@ -668,7 +774,7 @@ sl_status_t sl_log_platform_core_deinit(void)
  *         - SL_STATUS_INVALID_PARAMETER: Unsupported interface type
  *         - Other codes: Backend-specific initialization errors
  *
- * @note This function is called automatically during sl_log_init().
+ * @note This function is called automatically during sl_log_init_stage2().
  * @note Backend availability depends on compile-time configuration macros.
  * @note Some backends may require additional hardware or software setup.
  */

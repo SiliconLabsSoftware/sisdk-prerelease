@@ -49,6 +49,9 @@
 
 #ifdef SL_CATALOG_SL_RAIL_UTIL_IEEE802154_RX_DUTY_CYCLING_PRESENT
 #include "sl_rail_util_ieee802154_rx_duty_cycling.h"
+#include "sl_rail_util_ieee802154_rx_duty_cycling_radio_config.h"
+static const RAIL_ChannelConfig_t *const RAIL_IEEE802154_PhyRxDutyCycling =
+  &RAIL_IEEE802154_PhyRxDC_channelConfig;
 #endif
 
 bool ieee802154EnhAckEnabled = false;
@@ -303,10 +306,10 @@ static IEEE802154_2p4GHzConfig_t ieee802154Configs[] = {
   { "IEEE802154_2P4_MODE_FCS_1MBPS_FEC", &RAIL_IEEE802154_Phy2p4GHzFcs1MbpsFec, &sl_rail_ieee802154_enable_2p4_ghz_high_data_rate, SL_RAIL_IEEE802154_PHY_2P4_GHZ_FCS_1_MBPS_FEC },
 #endif
 #ifdef SL_CATALOG_SL_RAIL_UTIL_IEEE802154_RX_DUTY_CYCLING_PRESENT
-  { "IEEE802154_2P4_MODE_RX_DUTY_CYCLING", NULL, &sl_rail_ieee802154_config_2p4_ghz_radio_rx_duty_cycling, SL_RAIL_IEEE802154_PHY_2P4_GHZ_RX_DUTY_CYCLING },
+  { "IEEE802154_2P4_MODE_RX_DUTY_CYCLING", &RAIL_IEEE802154_PhyRxDutyCycling, NULL, SL_RAIL_IEEE802154_PHY_2P4_GHZ_RX_DUTY_CYCLING },
 #endif
 #ifdef SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
-  { "IEEE802154_2P4_MODE_FAST_CHANNEL_SWITCHING", NULL, &sl_rail_ieee802154_config_2p4_ghz_radio_fast_channel_switching, SL_RAIL_IEEE802154_PHY_2P4_GHZ_RX_CH_SWITCHING },
+  { "IEEE802154_2P4_MODE_FAST_CHANNEL_SWITCHING", &RAIL_IEEE802154_Phy2p4GHzRxChSwitching, NULL, SL_RAIL_IEEE802154_PHY_2P4_GHZ_RX_CH_SWITCHING },
 #endif
 };
 

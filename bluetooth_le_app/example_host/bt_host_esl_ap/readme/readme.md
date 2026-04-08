@@ -46,6 +46,7 @@ Table of content:
       - [service\_reset](#service_reset)
       - [read\_sensor](#read_sensor)
       - [vendor\_opcode](#vendor_opcode)
+      - [image\_throughput](#image_throughput)
     - [Access Point control commands](#access-point-control-commands)
       - [help](#help)
       - [mode](#mode)
@@ -333,19 +334,21 @@ Examples:
 #### connect
     Connect to one or more ESL devices.
 
-Usage: `connect [-h] [--group_id <u7>] [--addr_type, -t] [address]`
+Usage: `connect [-h] [--group_id <u7> | --next_group] [--addr_type, -t] [address]`
 
 Positional argument:
 - `[address]`               Bluetooth address (e.g. `AA:BB:CC:DD:EE:22`) in case insensitive format or ESL ID of the tag or `all`.
 
 Options:
 - `[--group_id, -g <u7>]`:  ESL group ID (optional, default is group 0).
+- `[--next_group, -ng]`:    Automatically find and connect to the next synchronized tag in the optimal group (based on the upcoming PAwR subevent).
 - `[--addr_type, -t]`:      ESL address type (optional), possible values:
     - `public`:             Public device address (default assumption).
     - `static`:             Random static device address.
 
 _Notes:_
 - _`<esl_id>` and `<group_id>` can be used instead of `<bt_addr>` if ESL is already configured._
+- _The `--next_group` / `-ng` option is mutually exclusive with `--group_id` / `-g`. It prioritizes connection to synchronized tags whose group ID is closest to the upcoming PAwR subevent window, maximizing throughput by reducing radio wait time._
 - _`<address_type>` will be taken into account only if the given `<bt_addr>` is unknown - otherwise the proper type reported by the remote device will be used._
 - _If the `<group_id>` is not given after the ESL ID then the default value group zero is used. This applies to many commands expecting the group ID as optional parameter._
 - _The `all` keyword can be used with a special meaning with `connect` command: it will try to connect to all advertiser ESLs (within the 'group_id' if it is given or to any advertisers if it isn't) up to the the maximum number of simultaneous connections supported by the current build of the ESL library and the attached Network Co-Processor embedded controller._
@@ -362,6 +365,9 @@ Examples:
 - `connect all`
 
    Checks nearby advertisers and connects to all up to the supported number of parallel connections. Scan needs to be enabled for this to work.
+- `connect 0 -ng`
+
+   Connect to a synchronized tag with ESL ID 0 in the most optimal upcoming PAwR group.
 
 #### delete\_timed
     Delete a delayed command of an ESL Tag peripheral with the selected index.
@@ -615,6 +621,40 @@ _Notes:_
  - _The payload is always interpreted as an ASCII hex string, regardless of the presence or absence of the '0x' prefix, and if an odd number of bytes is entered, a leading zero will be added._
  - _The latest Silabs ESL example supports PAwR interval skipping as an experimental feature to further reduce power consumption. To enable skipping on supported ESLs, you can issue the `vendor_opcode <esl_id> -d <skip_count>` command. Skipping can be disabled by issuing the command `vendor_opcode <esl_id> -d 0`._
  - _An ESL for which PAwR skipping is currently enabled **may not receive PAwR commands immediately!** Commands are automatically retransmitted up to 3 times if not responded to, but for higher skip rates you may need to manually retry several times to succeed._
+
+#### image\_throughput
+    Run or stop the image throughput stress test across synchronized ESL Tags.
+
+Usage: `image_throughput [-h] {start,stop} [--max_count <u15>] [--max_group <u7>]`
+
+Positional arguments:
+- `{start, stop}`: Start or stop the image throughput stress test.
+
+Options:
+- `[--max_count, -c <u15>]`: Upper limit on how many **synchronized** Tags are enrolled in a deterministic order: first by ESL ID, then by group ID. This ordering spreads enrollment across groups for better performance. If omitted, all eligible synchronized Tags are considered (subject to `--max_group` and internal eligibility). The value must be at least **1** when given.
+- `[--max_group, -g <u7>]`: Highest **ESL group ID** for Tags that may be enrolled. Tags in groups above this value are skipped. If omitted, there is no group ceiling from this option. When given, the value must be in the range **0**-**127** (aligned with PAwR subevent / group limits).
+
+_Notes:_
+- _While the test is active, the current AP mode line from [`mode`](#mode) will indicate that an image throughput test is running (in addition to manual versus automated)._
+- _At high log verbosity, the console can be very noisy during the test; avoid issuing unrelated CLI commands until the test completes unless you intend to stop it._
+- _Stopping PAwR or losing sync can also end the test; the AP then reverts to the saved pre-test automated/manual state._
+- _This command is a diagnostic utility, not an Access Point operating mode. While the test runs, the AP switches to manual mode; when the test finishes normally, the previous automated versus manual mode is restored automatically. Issuing [`mode auto`](#mode) or [`mode manual`](#mode) while the test runs stops the test as well (with statistics logged)._
+- _PAwR must already be running; ESLs must be in Synchronized state and support image transfer. The AP uses image files from the `image/` folder (same default source as for the [`image_update`](#image_update) command). Demo mode must be disabled before `start`; if demo mode is on, the command is rejected._
+
+_Disclaimer: Switching to manual mode gives full control over devices on your network. Issuing other ESL commands while the test runs can interfere with timing and connection state; it is highly recommended not to issue commands manually during the test._
+
+Examples:
+- `image_throughput start`
+
+  Start the test with default enrollment (all eligible synchronized Tags, subject to eligibility checks in the AP).
+
+- `image_throughput start -c 8 -g 3`
+
+  Start the test, enrolling at most eight Tags whose ESL group ID is 3 or lower. If fewer than eight ESLs are configured in groups 0-3, the test will run on fewer devices than the number given by the `-c` option.
+
+- `image_throughput stop`
+
+  Stop the running test and print summary statistics; the AP restores the operating mode in effect before `start`.
 
 ### Access Point control commands
 ---

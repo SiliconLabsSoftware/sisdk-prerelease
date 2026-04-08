@@ -511,10 +511,26 @@ library:
   - zigbee_stack_unix
   - zigbee_multi_network
   unless: []
+- path: build/llvm/aarch64-android-ndk-r27d/ncp-cbke-library/release/libncp-cbke-library.a
+  condition:
+  - toolchain_gcc
+  - aarch64-android-ndk-r27d
+  - zigbee_ncp
+  - zigbee_stack_unix
+  - zigbee_multi_network
+  unless: []
 - path: build/llvm/aarch64-android-ndk-r25c/ncp-cbke-library/release_singlenetwork/libncp-cbke-library.a
   condition:
   - toolchain_llvm
   - aarch64-android-ndk-r25c
+  - zigbee_ncp
+  - zigbee_stack_unix
+  unless:
+  - zigbee_multi_network
+- path: build/llvm/aarch64-android-ndk-r27d/ncp-cbke-library/release_singlenetwork/libncp-cbke-library.a
+  condition:
+  - toolchain_gcc
+  - aarch64-android-ndk-r27d
   - zigbee_ncp
   - zigbee_stack_unix
   unless:
@@ -526,10 +542,24 @@ library:
   - zigbee_stack_unix
   - zigbee_multi_network
   unless: []
+- path: build/llvm/aarch64-android-ndk-r27d/zigbee-cbke-core/release/libzigbee-cbke-core.a
+  condition:
+  - toolchain_gcc
+  - aarch64-android-ndk-r27d
+  - zigbee_stack_unix
+  - zigbee_multi_network
+  unless: []
 - path: build/llvm/aarch64-android-ndk-r25c/zigbee-cbke-core/release_singlenetwork/libzigbee-cbke-core.a
   condition:
   - toolchain_llvm
   - aarch64-android-ndk-r25c
+  - zigbee_stack_unix
+  unless:
+  - zigbee_multi_network
+- path: build/llvm/aarch64-android-ndk-r27d/zigbee-cbke-core/release_singlenetwork/libzigbee-cbke-core.a
+  condition:
+  - toolchain_gcc
+  - aarch64-android-ndk-r27d
   - zigbee_stack_unix
   unless:
   - zigbee_multi_network

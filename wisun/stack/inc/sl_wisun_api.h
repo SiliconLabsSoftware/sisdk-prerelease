@@ -1262,6 +1262,42 @@ sl_status_t sl_wisun_set_dhcpv6_vendor_data(uint32_t enterprise_number, const ui
  *****************************************************************************/
 sl_status_t sl_wisun_set_trickle_parameters(sl_wisun_trickle_type_t type, uint16_t i_min_s, uint16_t i_max_s, uint8_t k, uint8_t expirations);
 
+/**************************************************************************//**
+ * Configure the Last Gasp mode.
+ *
+ * @param[in] enable Enable (true) or disable (false) Last Gasp mode
+ * @return SL_STATUS_OK if successful,
+ *         SL_STATUS_INVALID_STATE if the stack is not ready
+ *
+ * This function configures the Last Gasp mode.
+ * It can be called after the Wi-SUN network is joined with enable set to true
+ * to activate Last Gasp mode. After a successful call to this function with enable
+ * set to true the stack enters low energy mode. If application needs to send Last
+ * Gasp data, it needs to use a socket with DSCP set to DSCP_EF.
+ * Last Gasp mode can only be enabled once. If it is already enabled, the function
+ * returns SL_STATUS_INVALID_STATE.
+ * When called with enable set to false, the Last Gasp mode is disabled.
+ * The stack returns to normal operation.
+ *
+ * Available in libraries: Full, FFN, (see @ref API_AVAILABILITY)
+ *****************************************************************************/
+sl_status_t sl_wisun_set_last_gasp(bool enable);
+
+/**************************************************************************//**
+ * Enable or disable Wi-SUN First Breath on the FFN.
+ *
+ * @param[in] enable First Breath state
+ *   - **true**: enable First Breath (route/next-hop handling and discovery per First Breath rules)
+ *   - **false**: disable First Breath and tear down the associated route
+ * @return SL_STATUS_OK if successful, an error code otherwise
+ *
+ * When First Breath becomes ready to send application datagrams, the stack may raise
+ * @ref SL_WISUN_MSG_FB_READY_IND_ID.
+ *
+ * Available in libraries: Full, FFN (see @ref API_AVAILABILITY)
+ *****************************************************************************/
+sl_status_t sl_wisun_set_first_breath(bool enable);
+
 /** @} (end SL_WISUN_API) */
 
 #ifdef __cplusplus

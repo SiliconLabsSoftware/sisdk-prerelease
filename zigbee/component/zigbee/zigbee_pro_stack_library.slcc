@@ -317,6 +317,24 @@ library:
   - zigbee_multi_network
   - zigbee_high_datarate_phy
   - rail_mux
+- path: build/llvm/aarch64-android-ndk-r27d/zigbee-pro-stack/release/libzigbee-pro-stack.a
+  condition:
+  - toolchain_gcc
+  - aarch64-android-ndk-r27d
+  - zigbee_stack_unix
+  - zigbee_multi_network
+  unless:
+  - zigbee_high_datarate_phy
+  - rail_mux
+- path: build/llvm/aarch64-android-ndk-r27d/zigbee-pro-stack/release_singlenetwork/libzigbee-pro-stack.a
+  condition:
+  - toolchain_gcc
+  - aarch64-android-ndk-r27d
+  - zigbee_stack_unix
+  unless:
+  - zigbee_multi_network
+  - zigbee_high_datarate_phy
+  - rail_mux
 - path: build/llvm/cortex-m33/zigbee-pro-stack/release/libzigbee-pro-stack.a
   condition:
   - toolchain_llvm

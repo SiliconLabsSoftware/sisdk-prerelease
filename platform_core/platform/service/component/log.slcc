@@ -25,7 +25,7 @@ template_contribution:
   value:
     event: service_init
     include: sl_log.h
-    handler: sl_log_init
+    handler: sl_log_init_stage2
   priority: 9999
 - name: sl_log_module_present
   value: true

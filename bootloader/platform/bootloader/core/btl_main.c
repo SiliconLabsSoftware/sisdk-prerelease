@@ -49,6 +49,10 @@
 #include "communication/btl_communication.h"
 #endif
 
+#if defined(BTL_SMP_SUPPORT)
+#include "core/smp_switch/btl_smp_switch_record.h"
+#endif
+
 #include "em_device.h"
 #include "em_cmu.h"
 #include "em_gpio.h"
@@ -439,6 +443,9 @@ const MainBootloaderTable_t mainStageTable = {
 #if defined(BTL_EM4_GPIO_RETENTION)
                    | BOOTLOADER_CAPABILITY_EM4_GPIO_RETENTION
 #endif
+#if defined(BTL_SMP_SUPPORT)
+                   | BOOTLOADER_CAPABILITY_SMP_SWITCH
+#endif
                    ),
   .init = &btl_init,
   .deinit = &btl_deinit,
@@ -570,6 +577,13 @@ void SystemInit2(void)
 #endif
   uint32_t startOfAppSpace = (uint32_t)mainStageTable.startOfAppSpace;
 
+#if defined(BTL_SMP_SUPPORT)
+  uint32_t smp_app_base = 0U;
+  if (btl_smp_switch_get_selected_app_base(&smp_app_base) == BTL_TRUE) {
+	  startOfAppSpace = smp_app_base;
+  }
+#endif
+
   // Sanity check application program counter
 #if defined(__GNUC__)
 #pragma GCC diagnostic push
@@ -612,6 +626,18 @@ void SystemInit2(void)
 #endif
     // If app verification fails, enter bootloader instead
     enterApp = bootload_verifyApplication(startOfAppSpace);
+#if defined(BTL_SMP_SUPPORT)
+    /* If secure boot failed for the SMP-selected app, try the other app base. */
+    if (enterApp == BTL_FALSE) {
+      uint32_t alternate_base = 0U;
+      if (btl_smp_switch_get_alternate_app_base(startOfAppSpace, &alternate_base) == BTL_TRUE) {
+        enterApp = bootload_verifyApplication(alternate_base);
+        if (enterApp == BTL_TRUE) {
+          startOfAppSpace = alternate_base;
+        }
+      }
+    }
+#endif
     if (enterApp == BTL_FALSE) {
 #if defined(BTL_ENFORCE_GLITCH_MITIGATION) && (BTL_ENFORCE_GLITCH_MITIGATION == 1)
       BTL_SEC_ASSERT_EQUAL(enterApp, BTL_FALSE);

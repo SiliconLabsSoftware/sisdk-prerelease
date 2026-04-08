@@ -88,6 +88,7 @@ library:
 - system: util
   unless:
   - zigbee_aarch64_android_ndk_r25c
+  - zigbee_aarch64_android_ndk_r27d
 - system: stdc++
 
 include:
@@ -258,7 +259,7 @@ define:
 - name: TEST_SUITE_MEMORY_BUFFER_ALLOC
 
 - name: CONFIGURATION_HEADER
-  value: "\"../../../projects/zigbeed/zigbeed_configuration.h\""
+  value: "\"zigbee_app/zigbeed/zigbeed_configuration.h\""
   unless:
   - zigbee_pro_compliance
 

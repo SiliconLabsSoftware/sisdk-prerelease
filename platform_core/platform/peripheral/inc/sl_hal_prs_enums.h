@@ -699,6 +699,60 @@ SL_ENUM_GENERIC(sl_hal_prs_async_producer_signal_t, uint32_t)
 #if defined(PRS_ASYNC_EUART0_RXFL)
   SL_HAL_PRS_ASYNC_EUART0_RXFL = PRS_ASYNC_EUART0_RXFL,        /**< EUART0 RXFL Signal. */
 #endif
+#if defined(PRS_ASYNC_TIMER0L_UF)
+  SL_HAL_PRS_ASYNC_TIMER0L_UF = PRS_ASYNC_TIMER0L_UF,        /**< TIMER0L UF Signal. */
+#endif
+#if defined(PRS_ASYNC_TIMER0L_OF)
+  SL_HAL_PRS_ASYNC_TIMER0L_OF = PRS_ASYNC_TIMER0L_OF,        /**< TIMER0L OF Signal. */
+#endif
+#if defined(PRS_ASYNC_TIMER0L_CC0)
+  SL_HAL_PRS_ASYNC_TIMER0L_CC0 = PRS_ASYNC_TIMER0L_CC0,        /**< TIMER0L CC0 Signal. */
+#endif
+#if defined(PRS_ASYNC_TIMER0L_CC1)
+  SL_HAL_PRS_ASYNC_TIMER0L_CC1 = PRS_ASYNC_TIMER0L_CC1,        /**< TIMER0L CC1 Signal. */
+#endif
+#if defined(PRS_ASYNC_TIMER0L_CC2)
+  SL_HAL_PRS_ASYNC_TIMER0L_CC2 = PRS_ASYNC_TIMER0L_CC2,        /**< TIMER0L CC2 Signal. */
+#endif
+#if defined(PRS_ASYNC_TIMER0L_CC3)
+  SL_HAL_PRS_ASYNC_TIMER0L_CC3 = PRS_ASYNC_TIMER0L_CC3,        /**< TIMER0L CC3 Signal. */
+#endif
+#if defined(PRS_ASYNC_TIMER0L_CC4)
+  SL_HAL_PRS_ASYNC_TIMER0L_CC4 = PRS_ASYNC_TIMER0L_CC4,        /**< TIMER0L CC4 Signal. */
+#endif
+#if defined(PRS_ASYNC_TIMER0L_CC5)
+  SL_HAL_PRS_ASYNC_TIMER0L_CC5 = PRS_ASYNC_TIMER0L_CC5,        /**< TIMER0L CC5 Signal. */
+#endif
+#if defined(PRS_ASYNC_TIMER0_CC6)
+  SL_HAL_PRS_ASYNC_TIMER0_CC6 = PRS_ASYNC_TIMER0_CC6,        /**< TIMER0 CC6 Signal. */
+#endif
+#if defined(PRS_ASYNC_TIMER1L_UF)
+  SL_HAL_PRS_ASYNC_TIMER1L_UF = PRS_ASYNC_TIMER1L_UF,        /**< TIMER1L UF Signal. */
+#endif
+#if defined(PRS_ASYNC_TIMER1L_OF)
+  SL_HAL_PRS_ASYNC_TIMER1L_OF = PRS_ASYNC_TIMER1L_OF,        /**< TIMER1L OF Signal. */
+#endif
+#if defined(PRS_ASYNC_TIMER1L_CC0)
+  SL_HAL_PRS_ASYNC_TIMER1L_CC0 = PRS_ASYNC_TIMER1L_CC0,        /**< TIMER1L CC0 Signal. */
+#endif
+#if defined(PRS_ASYNC_TIMER1L_CC1)
+  SL_HAL_PRS_ASYNC_TIMER1L_CC1 = PRS_ASYNC_TIMER1L_CC1,        /**< TIMER1L CC1 Signal. */
+#endif
+#if defined(PRS_ASYNC_TIMER1L_CC2)
+  SL_HAL_PRS_ASYNC_TIMER1L_CC2 = PRS_ASYNC_TIMER1L_CC2,        /**< TIMER1L CC2 Signal. */
+#endif
+#if defined(PRS_ASYNC_TIMER1L_CC3)
+  SL_HAL_PRS_ASYNC_TIMER1L_CC3 = PRS_ASYNC_TIMER1L_CC3,        /**< TIMER2L CC3 Signal. */
+#endif
+#if defined(PRS_ASYNC_TIMER1L_CC4)
+  SL_HAL_PRS_ASYNC_TIMER1L_CC4 = PRS_ASYNC_TIMER1L_CC4,        /**< TIMER1L CC4 Signal. */
+#endif
+#if defined(PRS_ASYNC_TIMER1L_CC5)
+  SL_HAL_PRS_ASYNC_TIMER1L_CC5 = PRS_ASYNC_TIMER1L_CC5,        /**< TIMER1L CC5 Signal. */
+#endif
+#if defined(PRS_ASYNC_TIMER1_CC6)
+  SL_HAL_PRS_ASYNC_TIMER1_CC6 = PRS_ASYNC_TIMER1_CC6,        /**< TIMER1 CC6 Signal. */
+#endif
 #if defined(PRS_ASYNC_TIMER2L_UF)
   SL_HAL_PRS_ASYNC_TIMER2L_UF = PRS_ASYNC_TIMER2L_UF,        /**< TIMER2L UF Signal. */
 #endif
@@ -1050,6 +1104,54 @@ SL_ENUM_GENERIC(sl_hal_prs_sync_producer_signal_t, uint32_t)
 #endif
 #if defined(PRS_SYNC_TIMER9_CC2)
   SL_HAL_PRS_SYNC_TIMER9_CC2 = PRS_SYNC_TIMER9_CC2,        /**< TIMER9 CC2 Signal. */
+#endif
+#if defined(PRS_SYNC_TIMER0L_UF)
+  SL_HAL_PRS_SYNC_TIMER0L_UF = PRS_SYNC_TIMER0L_UF,        /**< TIMER0L UF Signal. */
+#endif
+#if defined(PRS_SYNC_TIMER0L_OF)
+  SL_HAL_PRS_SYNC_TIMER0L_OF = PRS_SYNC_TIMER0L_OF,        /**< TIMER0L OF Signal. */
+#endif
+#if defined(PRS_SYNC_TIMER0L_CC0)
+  SL_HAL_PRS_SYNC_TIMER0L_CC0 = PRS_SYNC_TIMER0L_CC0,        /**< TIMER0L CC0 Signal. */
+#endif
+#if defined(PRS_SYNC_TIMER0L_CC1)
+  SL_HAL_PRS_SYNC_TIMER0L_CC1 = PRS_SYNC_TIMER0L_CC1,        /**< TIMER0L CC1 Signal. */
+#endif
+#if defined(PRS_SYNC_TIMER0L_CC2)
+  SL_HAL_PRS_SYNC_TIMER0L_CC2 = PRS_SYNC_TIMER0L_CC2,        /**< TIMER0L CC2 Signal. */
+#endif
+#if defined(PRS_SYNC_TIMER0L_CC3)
+  SL_HAL_PRS_SYNC_TIMER0L_CC3 = PRS_SYNC_TIMER0L_CC3,        /**< TIMER0L CC3 Signal. */
+#endif
+#if defined(PRS_SYNC_TIMER0L_CC4)
+  SL_HAL_PRS_SYNC_TIMER0L_CC4 = PRS_SYNC_TIMER0L_CC4,        /**< TIMER0L CC4 Signal. */
+#endif
+#if defined(PRS_SYNC_TIMER0L_CC5)
+  SL_HAL_PRS_SYNC_TIMER0L_CC5 = PRS_SYNC_TIMER0L_CC5,        /**< TIMER0L CC5 Signal. */
+#endif
+#if defined(PRS_SYNC_TIMER1L_UF)
+  SL_HAL_PRS_SYNC_TIMER1L_UF = PRS_SYNC_TIMER1L_UF,        /**< TIMER1L UF Signal. */
+#endif
+#if defined(PRS_SYNC_TIMER1L_OF)
+  SL_HAL_PRS_SYNC_TIMER1L_OF = PRS_SYNC_TIMER1L_OF,        /**< TIMER1L OF Signal. */
+#endif
+#if defined(PRS_SYNC_TIMER1L_CC0)
+  SL_HAL_PRS_SYNC_TIMER1L_CC0 = PRS_SYNC_TIMER1L_CC0,        /**< TIMER1L CC0 Signal. */
+#endif
+#if defined(PRS_SYNC_TIMER1L_CC1)
+  SL_HAL_PRS_SYNC_TIMER1L_CC1 = PRS_SYNC_TIMER1L_CC1,        /**< TIMER1L CC1 Signal. */
+#endif
+#if defined(PRS_SYNC_TIMER1L_CC2)
+  SL_HAL_PRS_SYNC_TIMER1L_CC2 = PRS_SYNC_TIMER1L_CC2,        /**< TIMER1L CC2 Signal. */
+#endif
+#if defined(PRS_SYNC_TIMER1L_CC3)
+  SL_HAL_PRS_SYNC_TIMER1L_CC3 = PRS_SYNC_TIMER1L_CC3,        /**< TIMER1L CC3 Signal. */
+#endif
+#if defined(PRS_SYNC_TIMER1L_CC4)
+  SL_HAL_PRS_SYNC_TIMER1L_CC4 = PRS_SYNC_TIMER1L_CC4,        /**< TIMER1L CC4 Signal. */
+#endif
+#if defined(PRS_SYNC_TIMER1L_CC5)
+  SL_HAL_PRS_SYNC_TIMER1L_CC5 = PRS_SYNC_TIMER1L_CC5,        /**< TIMER1L CC5 Signal. */
 #endif
 #if defined(PRS_SYNC_TIMER2L_UF)
   SL_HAL_PRS_SYNC_TIMER2L_UF = PRS_SYNC_TIMER2L_UF,        /**< TIMER2L UF Signal. */

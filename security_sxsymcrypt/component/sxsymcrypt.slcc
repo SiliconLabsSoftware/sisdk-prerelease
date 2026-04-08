@@ -13,6 +13,7 @@ provides:
 
 requires:
 - name: clock_manager_runtime
+- name: interrupt_manager
 - name: code_classification
 - name: device
 - name: device_has_lpwaes
@@ -91,6 +92,11 @@ define:
 - name: SX_KEYREF_MAX_ID
   value: "32"
   condition: [device_generic_family_sixx301]
+- name: SX_KEYREF_MAX_ID
+  value: "48"
+  condition: [device_generic_family_sixx353]
+
+  
   # Silicon Labs defeature list
 - name: _SILICON_LABS_DEFEATURE_SHA3
 

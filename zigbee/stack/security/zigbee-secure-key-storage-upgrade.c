@@ -33,6 +33,7 @@
 #if !defined(SL_CATALOG_TOKEN_MANAGER_PRESENT)
 #define DEFINETYPES
 #endif
+#include "stack/include/sl_zigbee_token.h"
 #include "stack/config/sl_zigbee_token_defines.h"
 #include "stack/include/stack-info.h"
 #include "stack/include/security.h"
@@ -137,7 +138,10 @@ sl_status_t zb_sec_man_upgrade_gp_proxy_table(void)
 
     sl_zigbee_sec_man_key_t plaintext_key;
     tokTypeStackGpProxyTableEntry tok;
-    (void)sl_token_manager_get_data(COMMON_TOKEN_STACK_GP_PROXY_TABLE + i, (void *)&tok, sizeof(tokTypeStackGpProxyTableEntry));
+    sl_status_t tok_st = slx_zigbee_token_manager_get_data(COMMON_TOKEN_STACK_GP_PROXY_TABLE + i, (void *)&tok, sizeof(tokTypeStackGpProxyTableEntry));
+    if (tok_st != SL_STATUS_OK) {
+      return tok_st;
+    }
     memmove(&plaintext_key.key, tok.gpdKey, SL_ZIGBEE_ENCRYPTION_KEY_SIZE);
 
     vault_import_status = sli_zigbee_stack_sec_man_import_key(&context, &plaintext_key);
@@ -148,7 +152,10 @@ sl_status_t zb_sec_man_upgrade_gp_proxy_table(void)
     }
     //erase token by writing all 0xFF to it
     memset(&tok, 0xFF, SL_ZIGBEE_ENCRYPTION_KEY_SIZE);
-    (void)sl_token_manager_set_data(COMMON_TOKEN_STACK_GP_PROXY_TABLE + i, (void *)&tok, sizeof(tokTypeStackGpProxyTableEntry));
+    tok_st = slx_zigbee_token_manager_set_data(COMMON_TOKEN_STACK_GP_PROXY_TABLE + i, (void *)&tok, sizeof(tokTypeStackGpProxyTableEntry));
+    if (tok_st != SL_STATUS_OK) {
+      return tok_st;
+    }
     keys_passed[KEYS_STATUS_GP]++;
   }
   return SL_STATUS_OK;
@@ -172,7 +179,10 @@ sl_status_t zb_sec_man_upgrade_gp_sink_table(void)
 
     sl_zigbee_sec_man_key_t plaintext_key;
     tokTypeStackGpSinkTableEntry tok;
-    (void)sl_token_manager_get_data(COMMON_TOKEN_STACK_GP_SINK_TABLE + i, (void *)&tok, sizeof(tokTypeStackGpSinkTableEntry));
+    sl_status_t tok_st = slx_zigbee_token_manager_get_data(COMMON_TOKEN_STACK_GP_SINK_TABLE + i, (void *)&tok, sizeof(tokTypeStackGpSinkTableEntry));
+    if (tok_st != SL_STATUS_OK) {
+      return tok_st;
+    }
     memmove(&plaintext_key.key, tok.gpdKey, SL_ZIGBEE_ENCRYPTION_KEY_SIZE);
 
     vault_import_status = sli_zigbee_stack_sec_man_import_key(&context, &plaintext_key);
@@ -182,7 +192,10 @@ sl_status_t zb_sec_man_upgrade_gp_sink_table(void)
     }
     //erase plaintext token's key data by setting it to all 0xFF
     memset(&tok, 0xFF, SL_ZIGBEE_ENCRYPTION_KEY_SIZE);
-    (void)sl_token_manager_set_data(COMMON_TOKEN_STACK_GP_SINK_TABLE + i, (void *)&tok, sizeof(tokTypeStackGpSinkTableEntry));
+    tok_st = slx_zigbee_token_manager_set_data(COMMON_TOKEN_STACK_GP_SINK_TABLE + i, (void *)&tok, sizeof(tokTypeStackGpSinkTableEntry));
+    if (tok_st != SL_STATUS_OK) {
+      return tok_st;
+    }
     keys_passed[KEYS_STATUS_GP]++;
   }
   return SL_STATUS_OK;
@@ -284,7 +297,10 @@ sl_status_t zb_sec_man_upgrade_zll_key(void)
   if (is_key_migrated_enc != SL_STATUS_OK || is_key_migrated_pre != SL_STATUS_OK) {
     sl_zigbee_sec_man_key_t plaintext_key;
     tokTypeStackZllSecurity zllSecurityToken;
-    (void)sl_token_manager_get_data(COMMON_TOKEN_STACK_ZLL_SECURITY, (void *)&zllSecurityToken, sizeof(tokTypeStackZllSecurity));
+    sl_status_t tok_st = slx_zigbee_token_manager_get_data(COMMON_TOKEN_STACK_ZLL_SECURITY, (void *)&zllSecurityToken, sizeof(tokTypeStackZllSecurity));
+    if (tok_st != SL_STATUS_OK) {
+      return tok_st;
+    }
 
     sl_status_t vault_import_status_enc = SL_STATUS_FAIL;
     sl_status_t vault_import_status_pre = SL_STATUS_FAIL;
@@ -320,9 +336,12 @@ sl_status_t zb_sec_man_upgrade_zll_key(void)
       if (vault_import_status_pre == SL_STATUS_OK) {
         memset(&zllSecurityToken.preconfiguredKey, 0xFF, SL_ZIGBEE_ENCRYPTION_KEY_SIZE);
       }
-      (void)sl_token_manager_set_data(COMMON_TOKEN_STACK_ZLL_SECURITY,
-                                      (void *)&zllSecurityToken,
-                                      sizeof(tokTypeStackZllSecurity));
+      tok_st = slx_zigbee_token_manager_set_data(COMMON_TOKEN_STACK_ZLL_SECURITY,
+                                                 (void *)&zllSecurityToken,
+                                                 sizeof(tokTypeStackZllSecurity));
+      if (tok_st != SL_STATUS_OK) {
+        return tok_st;
+      }
     }
   }
 

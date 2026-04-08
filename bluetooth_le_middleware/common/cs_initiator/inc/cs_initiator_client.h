@@ -42,6 +42,7 @@
 #include "cs_sync_antenna.h"
 
 #include "cs_initiator_config.h"
+#include "sl_status.h"
 // -----------------------------------------------------------------------------
 // Macros
 
@@ -317,6 +318,22 @@ sl_status_t cs_initiator_get_intervals(uint8_t main_mode,
 uint32_t cs_initiator_get_subevents_per_procedure(uint16_t procedure_interval,
                                                   uint8_t subevents_per_event,
                                                   uint16_t event_interval);
+
+/**************************************************************************//**
+ * Validate the minimum and maximum subevent lengths against  
+ * connection and procedure interval limits.
+ * @param[in] min_subevent_len_us Minimum subevent length in microseconds.
+ * @param[in] max_subevent_len_us Maximum subevent length in microseconds.
+ * @param[in] max_connection_interval Maximum connection interval (in 1.25 ms steps) 
+ *                                    @ref CS_INITIATOR_DEFAULT_MAX_CONNECTION_INTERVAL
+ * @param[in] max_procedure_interval Maximum procedure interval.
+ * @return SL_STATUS_OK if the min/max subevent relation is correct and min subevent length fits
+ *         within the computed maximum procedure time; SL_STATUS_INVALID_PARAMETER otherwise.
+ *****************************************************************************/
+sl_status_t cs_initiator_validate_subevent_length(uint32_t min_subevent_len_us,
+                                                  uint32_t max_subevent_len_us,
+                                                  uint16_t max_connection_interval,
+                                                  uint16_t max_procedure_interval);
 
 #ifdef __cplusplus
 };

@@ -757,6 +757,21 @@ void sl_zigbee_af_test_harness_status_command(sl_cli_command_arg_t *arguments)
 #endif
 }
 
+#if defined(SL_CATALOG_WATCHDOG_MANAGER_PRESENT)
+void sl_zigbee_af_test_harness_wd_trigger_command(sl_cli_command_arg_t *arguments)
+{
+  // Intentionally loops forever so watchdog forces a reset and tests the watchdog reset functionality.
+  // This is only used for testing right now
+  (void)arguments;
+
+  volatile bool continueLoop = true;
+
+  while (continueLoop) {
+    // Intentional infinite loop to trigger watchdog reset.
+  }
+}
+#endif
+
 #ifndef SL_CATALOG_ZIGBEE_APS_LINK_KEY_AUTHORIZATION_PRESENT
 bool sl_zigbee_af_cluster_security_custom_cb(sl_zigbee_af_profile_id_t profileId,
                                              sl_zigbee_af_cluster_id_t clusterId,

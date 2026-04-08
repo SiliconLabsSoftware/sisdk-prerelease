@@ -617,6 +617,17 @@ template_contribution:
           help: "k"
         - type: uint8
           help: "expirations"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "set_last_gasp"
+      handler: "app_set_last_gasp"
+      help: "Enter or leave Last Gasp mode"
+      shortcuts:
+        - name: "slg"
+      argument:
+        - type: uint8
+          help: "enable: 1 to enter Last Gasp mode, 0 to leave Last Gasp mode"
 
 # -------------------------------
   - name: "cli_group"

@@ -55,8 +55,9 @@ from ap_constants import (
     PA_SUBEVENT_MAX,
     ADDRESS_TYPE_PUBLIC_ADDRESS,
     ADDRESS_TYPE_STATIC_ADDRESS,
+    ESL_MAX_TAGS_IN_GROUP,
 )
-from esl_lib import Address
+from esl_tag import ImageUpdateFailed
 from esl_lib_wrapper import (
     ESL_LIB_CONNECTION_MODE_SINGLE,
     ESL_LIB_CONNECTION_MODE_LIST,
@@ -143,6 +144,7 @@ class CliProcessor(ScriptMixin, cmd.Cmd):
         )
         self.arg_demo()
         self.arg_mode()
+        self.arg_image_throughput()
         self.arg_network()
         self.arg_scan()
         self.arg_config()
@@ -385,12 +387,19 @@ class CliProcessor(ScriptMixin, cmd.Cmd):
             type=address_type,
             help="Bluetooth address (e.g. 'AA:BB:CC:DD:EE:22') in case insensitive format or ESL ID of the tag.",
         )
-        parser_connect.add_argument(
+        group = parser_connect.add_mutually_exclusive_group()
+        group.add_argument(
             "--group_id",
             "-g",
             metavar="<u7>",
             type=int,
             help="ESL group ID (optional, default is group 0)",
+        )
+        group.add_argument(
+            "--next_group",
+            "-ng",
+            action="store_true",
+            help="Automatically find and connect to the next synchronized tag in the optimal group.",
         )
         parser_connect.add_argument(
             "--addr_type",
@@ -408,7 +417,7 @@ class CliProcessor(ScriptMixin, cmd.Cmd):
         """
         Connect to one or more ESL devices.
         """
-        group_id = arg.group_id
+        group_id = PA_SUBEVENT_MAX if arg.next_group else arg.group_id
         bt_addr = None
         esl_id = None
         address_type = None
@@ -1096,17 +1105,20 @@ class CliProcessor(ScriptMixin, cmd.Cmd):
             label = arg.label.encode().decode("unicode-escape")
 
         if not input_error:
-            self.ap.ap_imageupdate(
-                image_index,
-                filename,
-                raw_img,
-                display_index,
-                label,
-                rotation,
-                cropfit,
-                arg.address,
-                arg.group_id,
-            )
+            try:
+                self.ap.ap_imageupdate(
+                    image_index,
+                    filename,
+                    raw_img,
+                    display_index,
+                    label,
+                    rotation,
+                    cropfit,
+                    arg.address,
+                    arg.group_id,
+                )
+            except ImageUpdateFailed as e:
+                self.log.error(e)
 
     def arg_unassociate(self):
         parser_unassociate = self.subparsers.add_parser(
@@ -1160,7 +1172,7 @@ class CliProcessor(ScriptMixin, cmd.Cmd):
             "ap_mode",
             nargs="?",
             choices=["auto", "manual"],
-            help="Toggle between automatic and manual mode of AP operation. ",
+            help="Toggle between automatic or manual mode of AP operation. ",
         )
 
         parser_mode.add_argument(
@@ -1172,7 +1184,7 @@ class CliProcessor(ScriptMixin, cmd.Cmd):
 
     def do_mode(self, arg):
         """
-        Changes the operation mode of the ESL Access Point and the connection initiation method of the underlying ESL library.
+        Change the operation mode of the ESL Access Point and the connection initiation method of the underlying ESL library.
         Automatic mode essentially refers to a set of actions that are performed automatically according to the ESL Profile
         specification, such as automatically configuring and synchronizing newly discovered ESLs with the network.
         The connection initiation method of the library selects whether a new connection is initiated to a single target
@@ -1188,6 +1200,68 @@ class CliProcessor(ScriptMixin, cmd.Cmd):
         elif arg.lib_mode == "list":
             arg.lib_mode = ESL_LIB_CONNECTION_MODE_LIST
         self.ap.ap_mode(arg.ap_mode, arg.lib_mode)
+
+    def arg_image_throughput(self):
+        parser_itp = self.subparsers.add_parser(
+            "image_throughput",
+            formatter_class=lambda prog: argparse.RawDescriptionHelpFormatter(
+                prog, max_help_position=24
+            ),
+            description=self.do_image_throughput.__doc__,
+            epilog="""
+        Note:       While the test runs, the AP uses manual (command) control; when the test finishes,
+                    the previous automated vs manual mode is restored automatically.
+        Disclaimer: Although manual operation mode gives full control over devices on your network,
+                    it is highly recommended to avoid issuing any commands while the test is running.
+                    Depending on the verbosity level, the CLI might be flooded with messages
+                    during the operation.
+        """,
+        )
+        parser_itp.add_argument(
+            "action",
+            choices=["start", "stop"],
+            help="Start or stop the image throughput stress test.",
+        )
+        parser_itp.add_argument(
+            "--max_count",
+            "-c",
+            type=int,
+            metavar="u15",
+            help="Maximum number of synchronized tags to enroll in the test (start only; ignored for stop).",
+        )
+        parser_itp.add_argument(
+            "--max_group",
+            "-g",
+            type=int,
+            metavar="u7",
+            help="The highest ESL group id (inclusive) for tags to enroll at start; ignored for stop.",
+        )
+
+    def do_image_throughput(self, arg):
+        """
+        Run or stop the image throughput stress test across synchronized ESL tags.
+
+        This is a diagnostic utility, not an AP operating mode: on start it switches to manual
+        control for the duration of the test, then restores the prior automated vs manual mode
+        when the test completes. Requires ESLs already in synchronied state.
+        """
+        max_count = arg.max_count if arg.action == "start" else None
+        max_group = arg.max_group if arg.action == "start" else None
+        if max_count is not None and max_count < 1:
+            self.log.error(
+                "Device count must be in the range 1-%d!",
+                ESL_MAX_TAGS_IN_GROUP * PA_SUBEVENT_MAX,
+            )
+            return
+        if max_group is not None and max_group not in range(0,PA_SUBEVENT_MAX):
+            self.log.error(
+                "The highest group_id must be in the range 0-%d!",
+                PA_SUBEVENT_MAX - 1,
+            )
+            return
+        self.ap.ap_image_throughput(
+            arg.action == "start", max_tag_count=max_count, max_group_id=max_group
+        )
 
     def arg_network(self):
         parser_config = self.subparsers.add_parser(

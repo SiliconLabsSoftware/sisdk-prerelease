@@ -139,11 +139,21 @@ void sli_zigbee_af_reporting_set_entry(uint16_t index, sl_zigbee_af_plugin_repor
 
 void sli_zigbee_af_reporting_get_entry(uint16_t index, sl_zigbee_af_plugin_reporting_entry_t *result)
 {
-  ifValidIndex((void)sl_token_manager_get_data(COMMON_TOKEN_REPORT_TABLE + index, (void *)result, sizeof(sl_zigbee_af_plugin_reporting_entry_t)));
+  if (index >= REPORT_TABLE_SIZE) {
+    return;
+  }
+  if (slx_zigbee_token_manager_get_data(COMMON_TOKEN_REPORT_TABLE + index, (void *)result, sizeof(sl_zigbee_af_plugin_reporting_entry_t)) != SL_STATUS_OK) {
+    return;
+  }
 }
 void sli_zigbee_af_reporting_set_entry(uint16_t index, sl_zigbee_af_plugin_reporting_entry_t *value)
 {
-  ifValidIndex((void)sl_token_manager_set_data(COMMON_TOKEN_REPORT_TABLE + index, (void *)value, sizeof(sl_zigbee_af_plugin_reporting_entry_t)));
+  if (index >= REPORT_TABLE_SIZE) {
+    return;
+  }
+  if (slx_zigbee_token_manager_set_data(COMMON_TOKEN_REPORT_TABLE + index, (void *)value, sizeof(sl_zigbee_af_plugin_reporting_entry_t)) != SL_STATUS_OK) {
+    return;
+  }
 }
 #endif
 

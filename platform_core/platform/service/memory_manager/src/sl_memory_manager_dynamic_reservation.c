@@ -230,7 +230,7 @@ sl_status_t sl_memory_release_block(sl_memory_reservation_t *handle)
   CORE_EXIT_ATOMIC();
 
 #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
-  SEGGER_SYSVIEW_HeapFree((void *)SYSTEMVIEW_HEAP_ST_ID, block_address);
+  SEGGER_SYSVIEW_HeapFree((void *)SLI_SYSTEMVIEW_HEAP_ST_ID, block_address);
 #endif
 
   return SL_STATUS_OK;
@@ -451,7 +451,7 @@ sl_status_t sl_memory_heap_reserve_block(sl_memory_heap_t *heap,
 #endif
 
 #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
-  SEGGER_SYSVIEW_HeapAllocEx((void *)SYSTEMVIEW_HEAP_ST_ID, handle->block_address, size, SYSTEMVIEW_TAG_RESERVED_BLOCK);
+  SEGGER_SYSVIEW_HeapAllocEx((void *)SLI_SYSTEMVIEW_HEAP_ST_ID, handle->block_address, size, SLI_SYSTEMVIEW_TAG_RESERVED_BLOCK);
 #endif
 
   return SL_STATUS_OK;

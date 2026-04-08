@@ -37,12 +37,12 @@
 extern "C" {
 #endif
 
-#include "ble_peer_manager_common.h"
+#include "sl_bt_peer_manager_common.h"
 
 /**************************************************************************//**
  * Peer manager event handler
  *****************************************************************************/
-void app_ble_peer_manager_on_event(ble_peer_manager_evt_type_t *event);
+void app_sl_bt_peer_manager_on_event(sl_bt_peer_manager_evt_type_t *event);
 
 #ifdef __cplusplus
 };

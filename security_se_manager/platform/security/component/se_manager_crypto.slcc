@@ -15,8 +15,6 @@ source:
 - path: src/sl_se_manager_key_handling.c
 - path: src/sl_se_manager_signature.c
 - path: src/sl_se_manager_attestation.c
-- path: src/sli_se_manager_supplicant.c
-  condition: [device_has_wificmu]
 
 include:
 - path: inc
@@ -29,10 +27,6 @@ include:
   - path: sl_se_manager_key_handling.h
   - path: sl_se_manager_signature.h
   - path: sl_se_manager_attestation.h
-- path: inc
-  condition: [device_has_wificmu]
-  file_list:
-  - path: sli_se_manager_supplicant.h
 
 requires:
 - name: device

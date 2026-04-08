@@ -211,14 +211,22 @@ typedef struct {
  */
 
 /**
- * @brief Initialize the debug logger.
+ * @brief Pre-initializes the log component.
+ * Called before the backend and timestamp timer are ready.
+ * Initializes the ring buffer configuration.
+ */
+void sl_log_init_stage1(void);
+
+/**
+ * @brief Starts the timestamp timer, initializes the backend
+ * Appends timestamp to early logs and flushes them to the backend
  *
  * @return sl_status_t Status code indicating the result of the operation.
  *         - SL_STATUS_OK: Initialization successful.
- *         - SL_STATUS_NULL_POINTER: Null pointer passed as parameter.
+ *         - SL_STATUS_NOT_INITIALIZED: Logger not properly initialized.
  *         - SL_STATUS_FAIL: Initialization failed.
  */
-sl_status_t sl_log_init(void);
+sl_status_t sl_log_init_stage2(void);
 
 /**
  * @brief Set the log level for the logger.

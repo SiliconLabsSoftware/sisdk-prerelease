@@ -46,7 +46,7 @@
  ******************************************************************************/
 
 /// Version number for bootloader storage functions struct
-#define BOOTLOADER_STORAGE_FUNCTIONS_VERSION 0x00000100
+#define BOOTLOADER_STORAGE_FUNCTIONS_VERSION 0x00000101
 
 /// Information about the storage backend
 typedef struct {

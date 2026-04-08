@@ -114,6 +114,7 @@ static uint32_t region_nbr = 0;
  *****************************************************************************/
 void sl_mpu_disable_execute_from_ram(void)
 {
+#if !defined(SL_RAM_LINKER)
   uint32_t mpu_region_begin = 0u;
   uint32_t mpu_region_end = 0u;
   uint32_t rbar;
@@ -156,6 +157,7 @@ void sl_mpu_disable_execute_from_ram(void)
 
   __DSB();
   __ISB();
+#endif // !defined(SL_RAM_LINKER)
 }
 
 /**************************************************************************//**

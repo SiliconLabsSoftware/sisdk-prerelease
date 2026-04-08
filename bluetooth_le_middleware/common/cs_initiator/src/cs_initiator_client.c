@@ -290,3 +290,25 @@ uint32_t cs_initiator_get_subevents_per_procedure(uint16_t procedure_interval,
 
   return subevents;
 }
+/******************************************************************************
+ * Validate the minimum and maximum subevent lengths against
+ * connection and procedure interval limits.
+ *****************************************************************************/
+sl_status_t cs_initiator_validate_subevent_length(uint32_t min_subevent_len_us,
+                                                  uint32_t max_subevent_len_us,
+                                                  uint16_t max_connection_interval,
+                                                  uint16_t max_procedure_interval)
+{
+  // Calculate maximum possible procedure time, subevents must always fit in the time window of one procedure
+  // @p max_connection_interval is in 1.25 ms steps, which equals 1250 µs per step 
+  uint32_t max_procedure_time_us = (uint32_t)max_procedure_interval * (uint32_t)max_connection_interval * 1250u;
+  if (min_subevent_len_us > max_procedure_time_us) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if (min_subevent_len_us > max_subevent_len_us) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  return SL_STATUS_OK;
+}

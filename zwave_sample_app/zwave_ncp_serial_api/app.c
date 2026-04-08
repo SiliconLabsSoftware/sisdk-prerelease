@@ -55,6 +55,11 @@
 #include "zw_shutdown_manager.h"
 #endif
 
+#ifdef SL_CATALOG_ZW_JAMMING_DETECTION_PRESENT
+#include "sl_jamming_detection.h"
+#include "sl_jamming_cmd_handlers.h"
+#endif
+
 /* Basic level definitions */
 #define BASIC_ON 0xFF
 #define BASIC_OFF 0x00
@@ -778,6 +783,71 @@ ApplicationInitSW(void)
   cmds_power_management_init();
 }
 
+/**
+ * @brief Callback from rssi collection:
+ * - send proprietary Serial API frame 0xF1 to host.
+ * - Subcommands
+ *   -- 0x01: Collection
+ * - Payload is 4 bytes:
+ *     rssi[0] rssi on channel 0
+ *     rssi[1] rssi on channel 1
+ *     rssi[2] rssi on channel 2
+ *     rssi[3] rssi on channel LR Active channel
+ */
+#ifdef SL_CATALOG_ZW_JAMMING_DETECTION_PRESENT
+static zpal_status_t application_rssi_collection_callback(const sl_jamming_detection_collection_t *collection)
+{
+  zpal_status_t status = ZPAL_STATUS_FAIL;
+  struct __attribute__((packed)) {
+    uint8_t sub_command;
+    sl_jamming_detection_collection_t payload;
+  } collection_packet = {
+    .sub_command = FUNC_ID_PROP_JAMMING_SUBCOMMAND_COLLECTION,
+    .payload = *collection
+  };
+
+  status = RequestUnsolicited(FUNC_ID_PROP_JAMMING_DETECTION_COMMAND, (uint8_t *)&collection_packet, sizeof(collection_packet)) ? ZPAL_STATUS_OK : ZPAL_STATUS_FAIL;
+  return status;
+}
+
+/**
+ * Callback from jamming detection ZPAL:
+ * - send proprietary Serial API frame 0xF1 to host.
+ * - Subcommands
+ *   -- 0x00: Report
+ * - Payload is 1 byte: jammed channels bitmap.
+ *    0b00000001 = channel 0 is jammed
+ *    0b00000010 = channel 1 is jammed
+ *    0b00000100 = channel 2 is jammed
+ *    0b00001000 = channel LR Active channel is jammed /!\ we need to check the primary long range channel from the radio profile /!\ .
+ */
+static zpal_status_t application_jamming_detected_callback(const sl_jamming_detection_statistics_t *report)
+{
+  zpal_status_t status = ZPAL_STATUS_FAIL;
+  struct __attribute__((packed)) {
+    uint8_t sub_command;
+    sl_jamming_detection_statistics_t payload;
+  } jamming_packet = {
+    .sub_command   = FUNC_ID_PROP_JAMMING_SUBCOMMAND_REPORT,
+    .payload = *report
+  };
+
+  /* Remap LR active channel (bit 3) to Channel A (bit 3) or B (bit 4) */
+  if (jamming_packet.payload.channel_bitmap & (1u << 3)) {
+    zpal_radio_lr_channel_t primary_lr_channel = zpal_radio_get_primary_long_range_channel();
+    jamming_packet.payload.channel_bitmap &= (uint8_t)(~(1u << 3));
+    if (ZPAL_RADIO_LR_CHANNEL_A == primary_lr_channel) {
+      jamming_packet.payload.channel_bitmap |= (1u << 3);   /* 0b00001000 */
+    } else if (ZPAL_RADIO_LR_CHANNEL_B == primary_lr_channel) {
+      jamming_packet.payload.channel_bitmap |= (1u << 4);   /* 0b00010000 */
+    }
+  }
+
+  status = RequestUnsolicited(FUNC_ID_PROP_JAMMING_DETECTION_COMMAND, (uint8_t *)&jamming_packet, sizeof(jamming_packet)) ? ZPAL_STATUS_OK : ZPAL_STATUS_FAIL;
+  return status;
+}
+#endif /* SL_CATALOG_ZW_JAMMING_DETECTION_PRESENT */
+
 /*==============================   ApplicationInit   ======================
 **    Init UART and setup port pins for LEDs
 **
@@ -793,6 +863,24 @@ ApplicationInit(
   zpal_watchdog_init();
   zpal_enable_watchdog(true);
 
+#ifdef SL_CATALOG_ZW_JAMMING_DETECTION_PRESENT
+  sl_jamming_detection_config_t config = { 0 };
+
+  // set the default configuration for the jamming detection
+  if ( ZPAL_STATUS_OK == sl_jamming_detection_default_config(&config)) {
+    // set the callback function to be called when jamming is detected
+    config.report_callback = application_jamming_detected_callback;
+    config.collection_callback = application_rssi_collection_callback;
+
+    /*with or without jamming detection, the rest of the application runs as usual.*/
+    if (ZPAL_STATUS_OK != sl_jamming_detection_init(&config)) {
+      assert(false);
+    }
+  } else {
+    assert(false);
+  }
+#endif /* SL_CATALOG_ZW_JAMMING_DETECTION_PRESENT */
+
   // Serial API can control hardware with information
   // set in the file system therefore it should be the first
   // step in the Initialization
@@ -802,7 +890,7 @@ ApplicationInit(
   app_hw_init();
 #endif
 
-  /* g_eApplResetReason now contains lastest System Reset reason */
+  /* g_eApplResetReason now contains lastest System Ryeset reason */
   g_eApplResetReason = eResetReason;
 
   ZPAL_LOG_INFO(ZPAL_LOG_APP, "ApplicationInit eResetReason = %d\n", eResetReason);

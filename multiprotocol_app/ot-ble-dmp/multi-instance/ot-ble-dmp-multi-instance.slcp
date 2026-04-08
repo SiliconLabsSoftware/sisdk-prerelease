@@ -43,7 +43,6 @@ component:
   - id: clock_manager
   - id: ot_reset_utils
   # Platform - Enable LTO for gcc by installing the following component
-  - id: toolchain_gcc_lto
   - id: ot_multi_instance_cli
 
 include:

@@ -41,7 +41,7 @@
 /*******************************************************************************
  *********************************   DEFINES   *********************************
  ******************************************************************************/
-
+#if !defined(SL_RAM_LINKER)
 #if defined(__GNUC__)
 // armgcc
 extern uint32_t __vma_ramfuncs_start__;
@@ -74,6 +74,7 @@ extern uint32_t __ramfuncs_start__;
 #error "Unsupported compiler"
 
 #endif
+#endif /* !defined(SL_RAM_LINKER) */
 
 #if defined(SRAM_NS_BASE)
  #if defined(SL_TRUSTZONE_SECURE)

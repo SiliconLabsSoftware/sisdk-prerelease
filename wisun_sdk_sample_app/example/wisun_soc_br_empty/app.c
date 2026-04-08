@@ -225,6 +225,9 @@ static void app_start(void)
 
   // Set Connection Parameters
   switch (WISUN_CONFIG_NETWORK_SIZE) {
+    case SL_WISUN_NETWORK_SIZE_AUTOMATIC:
+      params = SL_WISUN_BR_PARAMS_PROFILE_AUTO;
+      break;
     case SL_WISUN_NETWORK_SIZE_SMALL:
       params = SL_WISUN_BR_PARAMS_PROFILE_SMALL;
       break;

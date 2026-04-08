@@ -44,11 +44,9 @@
 #include "sl_bt_api.h"
 #include "host_comm.h"
 #include "gatt_db.h"
-#include "ble_peer_manager_common.h"
-#include "ble_peer_manager_connections.h"
-#include "ble_peer_manager_central.h"
-#include "ble_peer_manager_peripheral.h"
-#include "ble_peer_manager_filter.h"
+#include "sl_bt_peer_manager_central.h"
+#include "sl_bt_peer_manager_peripheral.h"
+#include "sl_bt_peer_manager_filter.h"
 #include "cs_reflector_config.h"
 #include "cs_acp.h"
 #include "cs_result.h"
@@ -320,7 +318,7 @@ void app_cli_init(int argc, char *argv[])
         }
         // Add the accepted BLE address to the list
         bd_addr *bt_addr_to_add = &cs_host_config.accepted_bt_address_list[cs_host_config.accepted_bt_address_count];
-        sc = ble_peer_manager_str_to_address(optarg, bt_addr_to_add);
+        sc = sl_bt_peer_manager_str_to_address(optarg, bt_addr_to_add);
         if (sc != SL_STATUS_OK) {
           app_log_error(APP_PREFIX "Invalid BLE address filter provided" APP_LOG_NL);
           exit(EXIT_FAILURE);
@@ -653,9 +651,9 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       app_log_debug(APP_PREFIX "Maximum system TX power is set to: %d dBm" APP_LOG_NL, max_tx_power_x10 / 10);
 
       // Reset to initial state
-      ble_peer_manager_central_init();
-      ble_peer_manager_peripheral_init();
-      ble_peer_manager_filter_init();
+      sl_bt_peer_manager_central_init();
+      sl_bt_peer_manager_peripheral_init();
+      sl_bt_peer_manager_filter_init();
       cs_host_state.num_reflector_connections = 0u;
       cs_host_state.num_initiator_connections = 0u;
       cs_host_state.read_remote_capabilities = false;
@@ -685,34 +683,34 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
                    address.addr[0]);
 
       // Filter for advertised name (CS_RFLCT)
-      sc = ble_peer_manager_set_filter_device_name(cs_host_config.device_name, strlen(cs_host_config.device_name), false);
+      sc = sl_bt_peer_manager_set_filter_device_name(cs_host_config.device_name, strlen(cs_host_config.device_name), false);
       app_assert_status(sc);
 
       // Filter for advertised service UUID (RAS)
-      sc = ble_peer_manager_set_filter_service_uuid16((sl_bt_uuid_16_t *)&service_uuid);
+      sc = sl_bt_peer_manager_set_filter_service_uuid16((sl_bt_uuid_16_t *)&service_uuid);
       app_assert_status(sc);
 
       // Filter for BLE address if enabled
       if (cs_host_config.accepted_bt_address_count > 0) {
         // Enable Peer Manager BT address filtering
-        ble_peer_manager_set_filter_bt_address(true);
+        sl_bt_peer_manager_set_filter_bt_address(true);
         // Add all user specified BT addresses to the allowed list
         for (uint32_t i = 0u; i < cs_host_config.accepted_bt_address_count; i++) {
-          sc = ble_peer_manager_add_allowed_bt_address(&cs_host_config.accepted_bt_address_list[i]);
+          sc = sl_bt_peer_manager_add_allowed_bt_address(&cs_host_config.accepted_bt_address_list[i]);
           app_assert_status(sc);
         }
       }
 
       // Start scanning for reflector connections
       if (cs_host_config.max_initiator_instances > 0 ) {
-        sc = ble_peer_manager_central_create_connection();
+        sc = sl_bt_peer_manager_central_create_connection();
         app_assert_status(sc);
         app_log_info(APP_PREFIX "Scanning started for reflector connections..." APP_LOG_NL);
       }
 
       // Start advertising for initiator connections
       if (cs_host_config.max_reflector_instances > 0 ) {
-        sc = ble_peer_manager_peripheral_start_advertising(SL_BT_INVALID_ADVERTISING_SET_HANDLE);
+        sc = sl_bt_peer_manager_peripheral_start_advertising(SL_BT_INVALID_ADVERTISING_SET_HANDLE);
         app_assert_status(sc);
         app_log_info(APP_PREFIX "Advertising started for initiator connections..." APP_LOG_NL);
       }
@@ -742,7 +740,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
               sc = sl_bt_cs_read_remote_supported_capabilities(evt->data.evt_connection_parameters.connection);
               if (sc == SL_STATUS_INVALID_PARAMETER) {
                 app_log_error(APP_PREFIX "Connection not found." APP_LOG_NL);
-                sc = ble_peer_manager_central_create_connection();
+                sc = sl_bt_peer_manager_central_create_connection();
                 app_assert_status(sc);
                 app_log_info(APP_PREFIX "Scanning restarted for new reflector connections..." APP_LOG_NL);
               } else {
@@ -755,7 +753,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
               sc = sl_bt_sm_increase_security(evt->data.evt_connection_parameters.connection);
               if (sc == SL_STATUS_INVALID_PARAMETER) {
                 app_log_error(APP_PREFIX "Connection not found." APP_LOG_NL);
-                sc = ble_peer_manager_central_create_connection();
+                sc = sl_bt_peer_manager_central_create_connection();
                 app_assert_status(sc);
                 app_log_info(APP_PREFIX "Scanning restarted for new reflector connections..." APP_LOG_NL);
               } else {
@@ -1195,7 +1193,7 @@ static void create_initiator(uint8_t conn_handle)
                cs_host_config.max_initiator_instances);
   // Scan for new reflector connections if we have room for more
   if (cs_host_state.num_reflector_connections < cs_host_config.max_initiator_instances) {
-    sl_status_t sc = ble_peer_manager_central_create_connection();
+    sl_status_t sc = sl_bt_peer_manager_central_create_connection();
     app_assert_status(sc);
     app_log_info(APP_PREFIX "Scanning restarted for new reflector connections..." APP_LOG_NL);
   }
@@ -1242,7 +1240,7 @@ static void on_connection_opened_with_initiator(uint8_t conn_handle)
 
   // Advertise for new initiator connections if we have room for more
   if (cs_host_state.num_initiator_connections < cs_host_config.max_reflector_instances) {
-    sl_status_t sc = ble_peer_manager_peripheral_start_advertising(SL_BT_INVALID_ADVERTISING_SET_HANDLE);
+    sl_status_t sc = sl_bt_peer_manager_peripheral_start_advertising(SL_BT_INVALID_ADVERTISING_SET_HANDLE);
     app_assert_status(sc);
     app_log_info(APP_PREFIX "Advertising restarted for new initiator connections..." APP_LOG_NL);
   }
@@ -1276,7 +1274,7 @@ static void on_connection_closed(uint8_t conn_handle)
       }
 
       // Restart scanning for new reflector connections
-      sc = ble_peer_manager_central_create_connection();
+      sc = sl_bt_peer_manager_central_create_connection();
       app_assert_status(sc);
       app_log_info(APP_PREFIX "Scanning restarted for new reflector connections..." APP_LOG_NL);
 
@@ -1315,7 +1313,7 @@ static void on_connection_closed(uint8_t conn_handle)
 
       // Restart advertising for new initiator connections if we were at the limit
       if (cs_host_state.num_initiator_connections == cs_host_config.max_reflector_instances) {
-        sl_status_t sc = ble_peer_manager_peripheral_start_advertising(SL_BT_INVALID_ADVERTISING_SET_HANDLE);
+        sl_status_t sc = sl_bt_peer_manager_peripheral_start_advertising(SL_BT_INVALID_ADVERTISING_SET_HANDLE);
         app_assert_status(sc);
         app_log_info(APP_PREFIX "Advertising restarted for new initiator connections..." APP_LOG_NL);
       }
@@ -1329,12 +1327,12 @@ static void on_connection_closed(uint8_t conn_handle)
   }
 }
 
-void app_ble_peer_manager_on_event(ble_peer_manager_evt_type_t *event)
+void app_sl_bt_peer_manager_on_event(sl_bt_peer_manager_evt_type_t *event)
 {
   const bd_addr *address;
   switch (event->evt_id) {
-    case BLE_PEER_MANAGER_ON_CONN_OPENED_CENTRAL:
-      address = ble_peer_manager_get_bt_address(event->connection_id);
+    case SL_BT_PEER_MANAGER_ON_CONN_OPENED_CENTRAL:
+      address = sl_bt_peer_manager_get_bt_address(event->connection_id);
       cs_host_state.read_remote_capabilities = false;
       cs_host_state.security_increased = false;
       app_log_info(APP_INSTANCE_PREFIX "Connection opened as central with CS Reflector"
@@ -1349,8 +1347,8 @@ void app_ble_peer_manager_on_event(ble_peer_manager_evt_type_t *event)
       on_connection_opened_with_reflector(event->connection_id);
       break;
 
-    case BLE_PEER_MANAGER_ON_CONN_OPENED_PERIPHERAL:
-      address = ble_peer_manager_get_bt_address(event->connection_id);
+    case SL_BT_PEER_MANAGER_ON_CONN_OPENED_PERIPHERAL:
+      address = sl_bt_peer_manager_get_bt_address(event->connection_id);
       app_log_info(APP_INSTANCE_PREFIX "Connection opened as peripheral with CS Initiator"
                                        " '%02X:%02X:%02X:%02X:%02X:%02X'" APP_LOG_NL,
                    event->connection_id,
@@ -1363,16 +1361,16 @@ void app_ble_peer_manager_on_event(ble_peer_manager_evt_type_t *event)
       on_connection_opened_with_initiator(event->connection_id);
       break;
 
-    case BLE_PEER_MANAGER_ON_CONN_CLOSED:
+    case SL_BT_PEER_MANAGER_ON_CONN_CLOSED:
       app_log_info(APP_INSTANCE_PREFIX "Connection closed" APP_LOG_NL, event->connection_id);
       on_connection_closed(event->connection_id);
       break;
 
-    case BLE_PEER_MANAGER_ON_ADV_STOPPED:
+    case SL_BT_PEER_MANAGER_ON_ADV_STOPPED:
       app_log_info(APP_INSTANCE_PREFIX "Advertisement stopped" APP_LOG_NL, event->connection_id);
       break;
 
-    case BLE_PEER_MANAGER_ERROR:
+    case SL_BT_PEER_MANAGER_ERROR:
       app_log_error(APP_INSTANCE_PREFIX "Peer Manager error" APP_LOG_NL, event->connection_id);
       break;
 
@@ -1393,7 +1391,7 @@ static void cs_on_result(const uint8_t conn_handle,
   float value = .0f;
   cs_result_session_data_t result_data;
   
-  const bd_addr *bt_address = ble_peer_manager_get_bt_address(conn_handle);
+  const bd_addr *bt_address = sl_bt_peer_manager_get_bt_address(conn_handle);
   for (uint8_t is_data = ((measurement_counter % CS_HOST_HEADER_LOG) > 0); is_data <= 1; is_data++) {
 
     app_log_info(APP_INSTANCE_PREFIX, conn_handle);
@@ -1689,11 +1687,11 @@ static void cs_on_error(uint8_t conn_handle, cs_error_event_t err_evt, sl_status
       }
       // Close the connection
       app_log_info(APP_INSTANCE_PREFIX "Closing connection" APP_LOG_NL, conn_handle);
-      sl_status_t status = ble_peer_manager_central_close_connection(conn_handle);
+      sl_status_t status = sl_bt_peer_manager_central_close_connection(conn_handle);
       // If closing the connection fails no connnection_closed event will be received
       // so we need to restart scanning here if needed
       if (status != SL_STATUS_OK) {
-        sc = ble_peer_manager_central_create_connection();
+        sc = sl_bt_peer_manager_central_create_connection();
         app_assert_status(sc);
         app_log_info(APP_PREFIX "Scanning restarted for new reflector connections..." APP_LOG_NL);
       }
@@ -1729,7 +1727,7 @@ static void stop_procedure(void)
         app_assert_status(sc);
         app_log_info(APP_INSTANCE_PREFIX "Initiator instance removed" APP_LOG_NL, conn_handle);
       }
-      sc = ble_peer_manager_central_close_connection(conn_handle);
+      sc = sl_bt_peer_manager_central_close_connection(conn_handle);
       app_assert_status(sc);
       app_log_info(APP_INSTANCE_PREFIX "Reflector connection closed" APP_LOG_NL, conn_handle);
 
@@ -1762,7 +1760,7 @@ static void stop_procedure(void)
         app_log_info(APP_INSTANCE_PREFIX "Reflector instance removed" APP_LOG_NL, conn_handle);
       }
 
-      sc = ble_peer_manager_peripheral_close_connection(conn_handle);
+      sc = sl_bt_peer_manager_peripheral_close_connection(conn_handle);
       app_assert_status(sc);
       app_log_info(APP_INSTANCE_PREFIX "Initiator connection closed" APP_LOG_NL, conn_handle);
 

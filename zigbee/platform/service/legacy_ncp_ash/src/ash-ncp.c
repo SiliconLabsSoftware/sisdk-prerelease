@@ -17,6 +17,7 @@
 #include PLATFORM_HEADER
 #include <stddef.h>
 #include "stack/include/sl_zigbee.h"
+#include "stack/include/sl_zigbee_token.h"
 #include "stack/framework/zigbee_debug_channel.h"
 #include "em2xx-reset-defs.h"
 #include "hal/hal.h"
@@ -1264,7 +1265,7 @@ tokTypeMfgAshConfig sli_ash_ncp_get_config(sli_ash_ncp_config_index index)
   sl_status_t status = SL_STATUS_OK;
   tokTypeMfgAshConfig tokenData;
 
-  status = sl_token_manager_get_data(SL_TOKEN_GET_STATIC_DEVICE_TOKEN(TOKEN_MFG_ASH_CONFIG) + index, (void *)&tokenData, sizeof(tokTypeMfgAshConfig));
+  status = slx_zigbee_token_manager_get_data(SL_TOKEN_GET_STATIC_DEVICE_TOKEN(TOKEN_MFG_ASH_CONFIG) + index, (void *)&tokenData, sizeof(tokTypeMfgAshConfig));
 
   if (status != SL_STATUS_OK) {
     return INVALID_ASH_CONFIG_VALUE;

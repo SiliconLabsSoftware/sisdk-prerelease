@@ -779,7 +779,7 @@ heap_size = heap_limit - __HeapBase;
 {%- if memory_flash_size is defined %}
   memory_flash_end = 0x{{ '%0x' % (memory_flash_start | first) }} + 0x{{ '%0x' % (memory_flash_size | first) }};
   physical_flash_end = 0x{{ '%0x' % (flash_addr) }} + 0x{{ '%0x' % (flash_size) }};
-  ASSERT( memory_flash_end <= physical_flash_end, "The template contribution to memory_flash_size exceeds the available flash_size. Check your SLCC or SLCP file to review the flash size defined by memory_flash_size for the sixx301 family.")
+  ASSERT( memory_flash_end <= physical_flash_end, "The template contribution to memory_flash_size exceeds the available flash_size. Check your SLCC or SLCP file to review the flash size defined by memory_flash_size.")
 {%- endif %}
 {#-
   Ensure the code in flash doesn't overflow into other flash regions. 

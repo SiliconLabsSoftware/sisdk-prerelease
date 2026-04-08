@@ -39,6 +39,7 @@
 #include "sl_status.h"
 #include "sl_code_classification.h"
 #include "sxsymcrypt/interrupts.h"
+#include "sl_interrupt_manager.h"
 
 #include <stdbool.h>
 

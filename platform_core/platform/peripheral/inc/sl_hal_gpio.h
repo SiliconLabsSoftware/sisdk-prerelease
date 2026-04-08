@@ -71,7 +71,7 @@ extern "C" {
 
 /// Capability: device has GPIO with HSIO (high-speed I/O) ports.
 /// Only defined when both GPIO and HSIO are present.
-#if defined(GPIO_PRESENT) && defined(HSIO_PORT_INDEX)
+#if defined(HSIO_PRESENT)
 #define SL_GPIO_HSIO_PRESENT
 #endif
 
@@ -279,7 +279,7 @@ extern "C" {
 /// Validation of interrupt number and pin.
 #define SL_HAL_GPIO_INTNO_PIN_VALID(int_no, pin)    (((int_no) & ~_GPIO_EXTIPINSELL_EXTIPINSEL0_MASK) == ((pin) & ~_GPIO_EXTIPINSELL_EXTIPINSEL0_MASK))
 
-#if defined(SL_GPIO_HSIO_PRESENT)
+#if defined(HSIO_PRESENT)
 /***************************************************************************//**
  * HSIO handling and port mapping
  *
@@ -300,13 +300,13 @@ extern "C" {
  * point at the first HSIO port. If a future device uses non-contiguous HSIO
  * ports, this mapping must be replaced with a chipset-specific translation.
  ******************************************************************************/
-#define SL_HAL_GPIO_HSIO_PORT_BASE SL_GPIO_PORT_E
+#define SL_HAL_GPIO_HSIO_PORT_BASE HSIO_PORT_BASE
 
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 #define SL_HAL_HSIO_PORT_INDEX(port)  ((uint8_t)((port) - SL_HAL_GPIO_HSIO_PORT_BASE))
 /** @endcond */
 
-#endif /* SL_GPIO_HSIO_PRESENT */
+#endif /* HSIO_PRESENT */
 
 /*******************************************************************************
  ********************************   ENUMS   ************************************
@@ -452,7 +452,7 @@ __INLINE uint32_t sl_hal_gpio_get_lock_status(void)
   return GPIO->GPIOLOCKSTATUS;
 }
 
-#if defined(SL_GPIO_HSIO_PRESENT)
+#if defined(HSIO_PRESENT)
 /***************************************************************************//**
  * Check if the port is an HSIO port.
  *
@@ -1248,7 +1248,7 @@ __INLINE void sl_hal_gpio_enable_debug_swd_io(bool enable)
   }
 }
 
-#if defined(_HSIO_P_PRDRVSTRENGTH_PRDRVSTRENGTH0_MASK)
+#if defined(_HSIO_P_PRDRVSTRENGTH_PRDRVSTRENGTH0_MASK) && defined(HSIO_PRESENT)
 /***************************************************************************//**
  * Set predriver strength for an HSIO pin.
  *
@@ -1311,7 +1311,7 @@ __INLINE sl_status_t sl_hal_gpio_get_pre_driver_strength(sl_gpio_t *gpio,
 }
 #endif
 
-#if defined(_HSIO_P_DRVSTRENGTH_MASK)
+#if defined(_HSIO_P_DRVSTRENGTH_MASK) && defined(HSIO_PRESENT)
 /***************************************************************************//**
  * Set drive strength (controller TX driver strength) for an HSIO pin.
  *
@@ -1374,7 +1374,7 @@ __INLINE sl_status_t sl_hal_gpio_get_drive_strength(sl_gpio_t *gpio,
 }
 #endif
 
-#if defined(_HSIO_P_HSRX_MASK)
+#if defined(_HSIO_P_HSRX_MASK) && defined(HSIO_PRESENT)
 /***************************************************************************//**
  * Check if High-Speed RX is enabled for an HSIO pin.
  *
@@ -1436,7 +1436,7 @@ __INLINE sl_status_t sl_hal_gpio_configure_high_speed_rx(sl_gpio_t *gpio,
 
 #endif
 
-#if defined(_HSIO_P_HSRXHYST_MASK)
+#if defined(_HSIO_P_HSRXHYST_MASK) && defined(HSIO_PRESENT)
 /***************************************************************************//**
  * Set High-Speed RX hysteresis for an HSIO port.
  *
@@ -1491,7 +1491,7 @@ __INLINE sl_status_t sl_hal_gpio_get_high_speed_rx_hysteresis(sl_gpio_t *gpio,
 }
 #endif
 
-#if defined(_HSIO_P_NONOVRLPDIS_MASK)
+#if defined(_HSIO_P_NONOVRLPDIS_MASK) && defined(HSIO_PRESENT)
 /***************************************************************************//**
  * Set Non-Overlap Protection Disable for an HSIO TX pin.
  *

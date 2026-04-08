@@ -12,6 +12,7 @@ ui_hints:
 root_path: platform_core/platform/common
 provides:
 - name: toolchain_gcc_standard
+- name: toolchain_standard
 - name: toolchain_linker_type
 template_file:
 - path: toolchain/cortexm/gcc/s2/linkerfile.ld.jinja

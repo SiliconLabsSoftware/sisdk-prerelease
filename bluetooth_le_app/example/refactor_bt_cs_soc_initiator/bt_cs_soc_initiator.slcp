@@ -45,9 +45,9 @@ component:
   - id: bluetooth_feature_extended_scanner
   - id: bluetooth_utility_bgapi_trace
   - id: gatt_configuration
-  - id: ble_peer_manager_common
-  - id: ble_peer_manager_central
-  - id: ble_peer_manager_filter
+  - id: bluetooth_peer_manager_common
+  - id: bluetooth_peer_manager_central
+  - id: bluetooth_peer_manager_filter
   - id: clock_manager
   - id: component_catalog
   - id: refactor_cs_initiator
@@ -112,9 +112,9 @@ configuration:
     value: 10000
   - name: SL_BT_CONFIG_MAX_CS_PROCEDURES
     value: 4
-  - name: BLE_PEER_MANAGER_CENTRAL_CONFIG_DEFAULT_SCAN_INTERVAL
+  - name: SL_BT_PEER_MANAGER_CENTRAL_CONFIG_DEFAULT_SCAN_INTERVAL
     value: 21
-  - name: BLE_PEER_MANAGER_CENTRAL_CONFIG_DEFAULT_SCAN_WINDOW
+  - name: SL_BT_PEER_MANAGER_CENTRAL_CONFIG_DEFAULT_SCAN_WINDOW
     value: 21
   - name: SL_BT_CONTROLLER_SCANNER_RECEPTION_EARLY_ABORT
     value: 1
@@ -166,10 +166,10 @@ tag:
   - hwfilter:ram:128k
 
 template_contribution:
-  - name: ble_peer_manager_event_handler
+  - name: sl_bt_peer_manager_event_handler
     value:
       include: app.h
-      handler: ble_peer_manager_on_event_initiator
+      handler: sl_bt_peer_manager_on_event_initiator
   - name: component_catalog
     value: app_trace
 

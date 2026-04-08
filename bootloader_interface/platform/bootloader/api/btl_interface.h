@@ -277,6 +277,9 @@ typedef struct Bootloader_inOutVec {
 /// The bootloader supports EM4 GPIO retention
 #define BOOTLOADER_CAPABILITY_EM4_GPIO_RETENTION   (1 << 21)
 
+/// Bootloader was built with SMP two-page switch (\c BTL_SMP_SUPPORT). Exposed at runtime via \c bootloader_getInfo().
+#define BOOTLOADER_CAPABILITY_SMP_SWITCH           (1 << 22)
+
 // --------------------------------
 // Magic constants for bootloader tables
 

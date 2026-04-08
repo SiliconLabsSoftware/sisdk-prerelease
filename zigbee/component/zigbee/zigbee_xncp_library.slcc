@@ -254,10 +254,24 @@ library:
   - zigbee_stack_unix
   - zigbee_multi_network
   unless: []
+- path: build/llvm/aarch64-android-ndk-r27d/zigbee-xncp/release/libzigbee-xncp.a
+  condition:
+  - toolchain_gcc
+  - aarch64-android-ndk-r27d
+  - zigbee_stack_unix
+  - zigbee_multi_network
+  unless: []
 - path: build/llvm/aarch64-android-ndk-r25c/zigbee-xncp/release_singlenetwork/libzigbee-xncp.a
   condition:
   - toolchain_llvm
   - aarch64-android-ndk-r25c
+  - zigbee_stack_unix
+  unless:
+  - zigbee_multi_network
+- path: build/llvm/aarch64-android-ndk-r27d/zigbee-xncp/release_singlenetwork/libzigbee-xncp.a
+  condition:
+  - toolchain_gcc
+  - aarch64-android-ndk-r27d
   - zigbee_stack_unix
   unless:
   - zigbee_multi_network
