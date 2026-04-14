@@ -164,6 +164,7 @@ enum sli_bt_command_id
     sli_bt_resource_get_connection_tx_status_command_id = 0x03,
     sli_bt_resource_disable_connection_tx_report_command_id = 0x04,
     sli_bt_gap_set_privacy_mode_command_id = 0x01,
+    sli_bt_gap_set_privacy_mode_with_rpa_randomization_command_id = 0x07,
     sli_bt_gap_set_data_channel_classification_command_id = 0x02,
     sli_bt_gap_set_identity_address_command_id = 0x04,
     sli_bt_gap_get_identity_address_command_id = 0x05,
@@ -426,6 +427,7 @@ enum sli_bt_response_id
     sli_bt_resource_get_connection_tx_status_response_id = 0x03,
     sli_bt_resource_disable_connection_tx_report_response_id = 0x04,
     sli_bt_gap_set_privacy_mode_response_id = 0x01,
+    sli_bt_gap_set_privacy_mode_with_rpa_randomization_response_id = 0x07,
     sli_bt_gap_set_data_channel_classification_response_id = 0x02,
     sli_bt_gap_set_identity_address_response_id = 0x04,
     sli_bt_gap_get_identity_address_response_id = 0x05,
@@ -887,6 +889,15 @@ PACKSTRUCT( struct sl_bt_cmd_gap_set_privacy_mode_s
 });
 
 typedef struct sl_bt_cmd_gap_set_privacy_mode_s sl_bt_cmd_gap_set_privacy_mode_t;
+
+PACKSTRUCT( struct sl_bt_cmd_gap_set_privacy_mode_with_rpa_randomization_s
+{
+    uint8_t privacy;
+    uint8_t interval_min_minutes;
+    uint8_t interval_max_minutes;
+});
+
+typedef struct sl_bt_cmd_gap_set_privacy_mode_with_rpa_randomization_s sl_bt_cmd_gap_set_privacy_mode_with_rpa_randomization_t;
 
 PACKSTRUCT( struct sl_bt_cmd_gap_set_data_channel_classification_s
 {
@@ -2969,6 +2980,13 @@ PACKSTRUCT( struct sl_bt_rsp_gap_set_privacy_mode_s
 
 typedef struct sl_bt_rsp_gap_set_privacy_mode_s sl_bt_rsp_gap_set_privacy_mode_t;
 
+PACKSTRUCT( struct sl_bt_rsp_gap_set_privacy_mode_with_rpa_randomization_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_bt_rsp_gap_set_privacy_mode_with_rpa_randomization_s sl_bt_rsp_gap_set_privacy_mode_with_rpa_randomization_t;
+
 PACKSTRUCT( struct sl_bt_rsp_gap_set_data_channel_classification_s
 {
     uint16_t result;
@@ -4699,6 +4717,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_resource_enable_connection_tx_report_t             cmd_resource_enable_connection_tx_report;
     sl_bt_cmd_resource_get_connection_tx_status_t                cmd_resource_get_connection_tx_status;
     sl_bt_cmd_gap_set_privacy_mode_t                             cmd_gap_set_privacy_mode;
+    sl_bt_cmd_gap_set_privacy_mode_with_rpa_randomization_t      cmd_gap_set_privacy_mode_with_rpa_randomization;
     sl_bt_cmd_gap_set_data_channel_classification_t              cmd_gap_set_data_channel_classification;
     sl_bt_cmd_gap_set_identity_address_t                         cmd_gap_set_identity_address;
     sl_bt_cmd_advertiser_configure_t                             cmd_advertiser_configure;
@@ -4937,6 +4956,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_resource_get_connection_tx_status_t                rsp_resource_get_connection_tx_status;
     sl_bt_rsp_resource_disable_connection_tx_report_t            rsp_resource_disable_connection_tx_report;
     sl_bt_rsp_gap_set_privacy_mode_t                             rsp_gap_set_privacy_mode;
+    sl_bt_rsp_gap_set_privacy_mode_with_rpa_randomization_t      rsp_gap_set_privacy_mode_with_rpa_randomization;
     sl_bt_rsp_gap_set_data_channel_classification_t              rsp_gap_set_data_channel_classification;
     sl_bt_rsp_gap_set_identity_address_t                         rsp_gap_set_identity_address;
     sl_bt_rsp_gap_get_identity_address_t                         rsp_gap_get_identity_address;

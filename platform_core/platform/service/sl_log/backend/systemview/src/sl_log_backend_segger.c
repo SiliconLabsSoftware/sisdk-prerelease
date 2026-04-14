@@ -132,21 +132,18 @@ sl_status_t sl_log_systemview_write(sl_log_event_t *buffer, uint32_t read_index,
  * @brief Record a log event to SystemView
  *
  * Records a log event to the SystemView backend with appropriate formatting
- * based on the number of arguments. This function handles events with 0-3
- * arguments and updates the global timestamp for event correlation.
+ * based on the number of arguments. This function handles events with 0 to
+ * SL_LOG_CONFIG_ARG arguments and updates the global timestamp for event
+ * correlation.
  *
  * The function dispatches to different SystemView recording functions based
- * on the argument count:
- * - 0 arguments: SEGGER_SYSVIEW_RecordVoid()
- * - 1 argument: SEGGER_SYSVIEW_RecordU32()
- * - 2 arguments: SEGGER_SYSVIEW_RecordU32x2()
- * - 3 arguments: SEGGER_SYSVIEW_RecordU32x3()
+ * on the argument count (0 through 10 when supported by config and SEGGER API).
  *
  * @param[in] event Pointer to the log event structure containing:
  *                  - timestamp: Event timestamp in system timer units
  *                  - event_id: Unique event identifier
- *                  - args: Array of up to 3 32-bit arguments
- *                  - arg_count: Number of valid arguments (0-3)
+ *                  - args: Array of up to SL_LOG_CONFIG_ARG 32-bit arguments
+ *                  - arg_count: Number of valid arguments (0 to SL_LOG_CONFIG_ARG)
  *                  - Additional metadata (core_id, flags, version)
  */
 sl_status_t sl_log_systemview_record_event(sl_log_event_t *event)
@@ -172,6 +169,55 @@ sl_status_t sl_log_systemview_record_event(sl_log_event_t *event)
     case 3:
       SEGGER_SYSVIEW_RecordU32x3(event->event_id, event->args[0], event->args[1], event->args[2]);
       break;
+#if (SL_LOG_CONFIG_ARG >= 4)
+    case 4:
+      SEGGER_SYSVIEW_RecordU32x4(event->event_id, event->args[0], event->args[1],
+                                  event->args[2], event->args[3]);
+      break;
+#endif
+#if (SL_LOG_CONFIG_ARG >= 5)
+    case 5:
+      SEGGER_SYSVIEW_RecordU32x5(event->event_id, event->args[0], event->args[1],
+                                  event->args[2], event->args[3], event->args[4]);
+      break;
+#endif
+#if (SL_LOG_CONFIG_ARG >= 6)
+    case 6:
+      SEGGER_SYSVIEW_RecordU32x6(event->event_id, event->args[0], event->args[1],
+                                  event->args[2], event->args[3], event->args[4],
+                                  event->args[5]);
+      break;
+#endif
+#if (SL_LOG_CONFIG_ARG >= 7)
+    case 7:
+      SEGGER_SYSVIEW_RecordU32x7(event->event_id, event->args[0], event->args[1],
+                                  event->args[2], event->args[3], event->args[4],
+                                  event->args[5], event->args[6]);
+      break;
+#endif
+#if (SL_LOG_CONFIG_ARG >= 8)
+    case 8:
+      SEGGER_SYSVIEW_RecordU32x8(event->event_id, event->args[0], event->args[1],
+                                  event->args[2], event->args[3], event->args[4],
+                                  event->args[5], event->args[6], event->args[7]);
+      break;
+#endif
+#if (SL_LOG_CONFIG_ARG >= 9)
+    case 9:
+      SEGGER_SYSVIEW_RecordU32x9(event->event_id, event->args[0], event->args[1],
+                                  event->args[2], event->args[3], event->args[4],
+                                  event->args[5], event->args[6], event->args[7],
+                                  event->args[8]);
+      break;
+#endif
+#if (SL_LOG_CONFIG_ARG >= 10)
+    case 10:
+      SEGGER_SYSVIEW_RecordU32x10(event->event_id, event->args[0], event->args[1],
+                                   event->args[2], event->args[3], event->args[4],
+                                   event->args[5], event->args[6], event->args[7],
+                                   event->args[8], event->args[9]);
+      break;
+#endif
     default:
       status = SL_STATUS_INVALID_PARAMETER;
       break;

@@ -44,6 +44,8 @@
 #include "AppTimer.h"
 #endif
 
+// protection for double initialization of the module
+static bool zw_shutdown_manager_inited = false;
 // used for handling timeout of temporary locks
 static sl_sleeptimer_timer_handle_t em4_sleeptimer_handle;
 // global counter of em4 locks
@@ -171,17 +173,12 @@ static void zpal_radio_status_callback(const zpal_radio_status_t state)
   }
 }
 
-/*
- * @brief initialize function for the shutdown manager
- * Initializes the BURTC peripheral for EM4 wakeup operation.
- * @return ZPAL_STATUS_OK if initialization was successful, otherwise ZPAL_STATUS_FAIL
- *
- * @note sl_sleeptimer module is configured to SYSRTC (slcp) vs BURTC wich is the RTC used in EM4 mode.
- * By default config, both module frequency matches in current configuration f=32768; no need for tick conversion between the two.
- * @warning this is not the case if you change the clock configuration! Make sure to check the conversion factor if you change the clock configuration!
- */
 zpal_status_t zw_shutdown_manager_init(void)
 {
+  if (zw_shutdown_manager_inited) {
+    return ZPAL_STATUS_OK;
+  }
+
   BURTC_Init_TypeDef burtc_init_cfg = BURTC_INIT_DEFAULT;
 
   // Enable BURTC bus clock
@@ -212,6 +209,8 @@ zpal_status_t zw_shutdown_manager_init(void)
   // Initialize and register power management transition callback
   sl_power_manager_subscribe_em_transition_event(&pm_event_handle, &pm_event_info);
   (void) zpal_radio_set_status_callback(zpal_radio_status_callback);
+
+  zw_shutdown_manager_inited = true;
 
   return ZPAL_STATUS_OK;
 }
@@ -271,4 +270,5 @@ void zw_shutdown_manager_reset(void)
 {
   em4_locks_counter = 0;
   temporary_lock_active = false;
+  zw_shutdown_manager_inited = false;
 }

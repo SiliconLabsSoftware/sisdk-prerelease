@@ -24,7 +24,6 @@
     - path: bgm260pb32vna.h
     - path: bgm26_acmp.h
     - path: bgm26_aes.h
-    - path: bgm26_amuxcp.h
     - path: bgm26_buram.h
     - path: bgm26_burtc.h
     - path: bgm26_cmu.h
@@ -93,8 +92,6 @@
   - name: device_has_acmp
   - name: device_has_acmp0
   - name: device_has_acmp1
-  - name: device_has_amuxcp
-  - name: device_has_amuxcp0
   - name: device_has_buram
   - name: device_has_burtc
   - name: device_has_cmu

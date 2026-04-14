@@ -942,6 +942,62 @@ sl_status_t sl_memory_reserve_block(size_t size,
 sl_status_t sl_memory_release_block(sl_memory_reservation_t *handle);
 
 /***************************************************************************//**
+ * Adds a retention request on a reserved block.
+ *
+ * Registers that the reserved block's contents must be retained during deep
+ * sleep (EM2).
+ *
+ * @param[in] handle  Pointer to const reservation handle for the reserved block.
+ *
+ * @return  SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @note  A reservation from sl_memory_reserve_block() is not retained during
+ *        EM2 until this API is used.
+ * @note  You do not need to pair every call with
+ *        sl_memory_reservation_remove_retention(); a reservation may stay
+ *        retained for as long as needed.
+ * @note  Do not use this on a memory pool's reservation; the pool manages
+ *        retention for that memory and this call corrupts the mechanism.
+ * @note  Calling this API twice on the same reservation without a corresponding
+ *        call to sl_memory_reservation_remove_retention() will corrupt the
+ *        retention mechanism.
+ ******************************************************************************/
+sl_status_t sl_memory_reservation_add_retention(const sl_memory_reservation_t *handle);
+
+/***************************************************************************//**
+ * Removes a retention request on a reserved block.
+ *
+ * Drops one prior retention request from sl_memory_reservation_add_retention().
+ * When nothing else requires retention for that memory, it may no longer be
+ * retained during deep sleep (EM2).
+ *
+ * @param[in] handle  Pointer to const reservation handle for the reserved block.
+ *
+ * @return  SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @note  A reservation from sl_memory_reserve_block() is not retained during
+ *        EM2 until sl_memory_reservation_add_retention(); see that API.
+ * @note  Only call this once per sl_memory_reservation_add_retention() you
+ *        intend to undo. Calling it when there was no matching add corrupts
+ *        the retention mechanism.
+ * @note  Do not use this on a memory pool's reservation; the pool manages
+ *        retention for that memory and this call corrupts the mechanism.
+ ******************************************************************************/
+sl_status_t sl_memory_reservation_remove_retention(const sl_memory_reservation_t *handle);
+
+/***************************************************************************//**
+ * Retrieves the size of a memory reservation.
+ *
+ * @param[in]  handle  Pointer to const reservation handle for the reserved block.
+ * @param[out] size    Pointer to variable that will receive the size of the
+ *                     reservation, in bytes.
+ *
+ * @return  SL_STATUS_OK if successful. Error code otherwise.
+ ******************************************************************************/
+sl_status_t sl_memory_reservation_get_size(const sl_memory_reservation_t *handle,
+                                           size_t *size);
+
+/***************************************************************************//**
  * Dynamically allocates a block reservation handle.
  *
  * @param[out] handle  Pointer to a reservation handle.

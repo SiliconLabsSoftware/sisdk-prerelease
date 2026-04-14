@@ -95,6 +95,9 @@ extern "C" {
 /// Define pointer to CAN0 peripheral structure.
 #define SL_PERIPHERAL_CAN0 ((sl_peripheral_t)(&sl_peripheral_val_can0))
 
+/// Define pointer to CAN1 peripheral structure.
+#define SL_PERIPHERAL_CAN1 ((sl_peripheral_t)(&sl_peripheral_val_can1))
+
 /// Define pointer to CMU peripheral structure.
 #define SL_PERIPHERAL_CMU (&sl_peripheral_val_cmu)
 
@@ -217,6 +220,9 @@ extern "C" {
 
 /// Define pointer to LETIMER0 peripheral structure.
 #define SL_PERIPHERAL_LETIMER0 (&sl_peripheral_val_letimer0)
+
+/// Define pointer to LETIMER1 peripheral structure.
+#define SL_PERIPHERAL_LETIMER1 (&sl_peripheral_val_letimer1)
 
 /// Define pointer to LFRCO peripheral structure.
 #define SL_PERIPHERAL_LFRCO (&sl_peripheral_val_lfrco)
@@ -412,6 +418,9 @@ typedef struct buram_typedef BURAM_TypeDef;
 
 // Declare peripheral structure for BURTC.
 typedef struct burtc_typedef BURTC_TypeDef;
+
+// Declare peripheral structure for CAN.
+typedef struct can_typedef CAN_TypeDef;
 
 // Declare peripheral structure for CMU.
 typedef struct cmu_typedef CMU_TypeDef;
@@ -662,6 +671,9 @@ extern const sl_peripheral_val_t sl_peripheral_val_burtc;
 // External declaration for CAN0 peripheral structure.
 extern const sl_peripheral_can_val_t sl_peripheral_val_can0;
 
+// External declaration for CAN1 peripheral structure.
+extern const sl_peripheral_can_val_t sl_peripheral_val_can1;
+
 // External declaration for CMU peripheral structure.
 extern const sl_peripheral_val_t sl_peripheral_val_cmu;
 
@@ -781,6 +793,9 @@ extern const sl_peripheral_lesense_val_t sl_peripheral_val_lesense;
 
 // External declaration for LETIMER0 peripheral structure.
 extern const sl_peripheral_val_t sl_peripheral_val_letimer0;
+
+// External declaration for LETIMER1 peripheral structure.
+extern const sl_peripheral_val_t sl_peripheral_val_letimer1;
 
 // External declaration for LFRCO peripheral structure.
 extern const sl_peripheral_val_t sl_peripheral_val_lfrco;
@@ -1024,6 +1039,18 @@ inline BURAM_TypeDef *sl_device_peripheral_buram_get_base_addr(const sl_peripher
 inline BURTC_TypeDef *sl_device_peripheral_burtc_get_base_addr(const sl_peripheral_t peripheral)
 {
   return (BURTC_TypeDef *)peripheral->base;
+}
+
+/***************************************************************************//**
+ * The base address getter for CAN.
+ *
+ * @param peripheral  A pointer to peripheral.
+ *
+ * @return  The base address of the peripheral.
+ ******************************************************************************/
+inline CAN_TypeDef *sl_device_peripheral_can_get_base_addr(const sl_peripheral_t peripheral)
+{
+  return (CAN_TypeDef *)peripheral->base;
 }
 
 /***************************************************************************//**
@@ -2382,6 +2409,54 @@ inline sl_dma_signal_t sl_device_peripheral_get_ldmaxbar_prsreq0_dma_signal(cons
 inline sl_dma_signal_t sl_device_peripheral_get_ldmaxbar_prsreq1_dma_signal(const sl_peripheral_t peripheral)
 {
   return ((sl_peripheral_ldmaxbar_t)peripheral)->dma_signal_prsreq1;
+}
+
+/***************************************************************************//**
+ * Gets the RXFL0 signal for the CAN peripheral instance.
+ *
+ * @param peripheral  A pointer to peripheral.
+ *
+ * @return  The RXFL0 signal
+ ******************************************************************************/
+inline sl_dma_signal_t sl_device_peripheral_get_can_rxfl0_dma_signal(const sl_peripheral_t peripheral)
+{
+  return ((sl_peripheral_can_t)peripheral)->dma_signal_rxfl0;
+}
+
+/***************************************************************************//**
+ * Gets the RXFL1 signal for the CAN peripheral instance.
+ *
+ * @param peripheral  A pointer to peripheral.
+ *
+ * @return  The RXFL1 signal
+ ******************************************************************************/
+inline sl_dma_signal_t sl_device_peripheral_get_can_rxfl1_dma_signal(const sl_peripheral_t peripheral)
+{
+  return ((sl_peripheral_can_t)peripheral)->dma_signal_rxfl1;
+}
+
+/***************************************************************************//**
+ * Gets the TXFL0 signal for the CAN peripheral instance.
+ *
+ * @param peripheral  A pointer to peripheral.
+ *
+ * @return  The TXFL0 signal
+ ******************************************************************************/
+inline sl_dma_signal_t sl_device_peripheral_get_can_txfl0_dma_signal(const sl_peripheral_t peripheral)
+{
+  return ((sl_peripheral_can_t)peripheral)->dma_signal_txfl0;
+}
+
+/***************************************************************************//**
+ * Gets the TXFL1 signal for the CAN peripheral instance.
+ *
+ * @param peripheral  A pointer to peripheral.
+ *
+ * @return  The TXFL1 signal
+ ******************************************************************************/
+inline sl_dma_signal_t sl_device_peripheral_get_can_txfl1_dma_signal(const sl_peripheral_t peripheral)
+{
+  return ((sl_peripheral_can_t)peripheral)->dma_signal_txfl1;
 }
 
 /** @} (end addtogroup device_peripheral) */

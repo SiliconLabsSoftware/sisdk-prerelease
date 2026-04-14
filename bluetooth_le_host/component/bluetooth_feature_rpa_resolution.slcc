@@ -10,6 +10,8 @@ quality: "production"
 requires:
 - name: "bluetooth_stack"
 - name: "bluetooth_feature_bonding_database"
+- name: "bluetooth_crypto"
+- name: "bluetooth_crypto_lib"
 provides:
 - name: "bluetooth_feature_rpa_resolution"
 template_contribution:

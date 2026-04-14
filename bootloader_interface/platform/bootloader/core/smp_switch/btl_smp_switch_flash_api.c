@@ -34,6 +34,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
+
 /* Same GPCRC CRC32 as security/btl_crc32.c (btl_crc32Stream) so records match bootloader
  * validation in btl_smp_switch_record.c. File-local to avoid duplicate btl_crc32Stream when
  * bootloader_crc is linked. */
@@ -250,3 +255,7 @@ bool btl_smp_switch_request_next_boot_app(uint8_t next_app_id)
 
   return btl_smp_switch_write_record(write_p1, next_seq, next_app_id);
 }
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif

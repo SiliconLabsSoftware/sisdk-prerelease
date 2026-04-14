@@ -25,7 +25,6 @@
     - path: em_device.h
     - path: mgm26_acmp.h
     - path: mgm26_aes.h
-    - path: mgm26_amuxcp.h
     - path: mgm26_buram.h
     - path: mgm26_burtc.h
     - path: mgm26_cmu.h
@@ -93,8 +92,6 @@
   - name: device_has_acmp
   - name: device_has_acmp0
   - name: device_has_acmp1
-  - name: device_has_amuxcp
-  - name: device_has_amuxcp0
   - name: device_has_buram
   - name: device_has_burtc
   - name: device_has_cmu

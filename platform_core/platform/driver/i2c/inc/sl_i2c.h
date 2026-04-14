@@ -37,7 +37,8 @@
 #include "sl_device_peripheral.h"
 #include "sl_device_i2c.h"
 #include "sl_device_gpio.h"
-#include "dmadrv.h"
+#include "sl_dma_manager.h"
+#include "sl_hal_ldma.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -121,6 +122,8 @@ SL_ENUM(sl_i2c_transaction_state_t) {
  *******************************   TYPEDEFS   **********************************
  ******************************************************************************/
 
+typedef sl_hal_ldma_descriptor_t sl_i2c_ldma_descriptor_t; ///< LDMA descriptor type for I2C DMA
+
 typedef struct sl_i2c_handle_t sl_i2c_handle_t;  ///< Forward declaration of I2C handle type
 
 /***************************************************************************//**
@@ -159,19 +162,14 @@ typedef sl_status_t (*sl_i2c_event_callback_t)(sl_i2c_handle_t *i2c_handle, sl_i
 
 /// I2C Tx and Rx DMA Channel and trigger source.
 typedef struct {
-  unsigned int dma_tx_channel;  /// DMA Channel assigned for Tx operations
-  unsigned int dma_rx_channel;  /// DMA Channel assigned for Rx operations
+  uint8_t dma_tx_channel;  /// DMA Channel assigned for Tx operations
+  uint8_t dma_rx_channel;  /// DMA Channel assigned for Rx operations
 } sl_i2c_dma_channel_info_t;
 
 /// DMA descriptors for I2C transfers
 typedef struct {
-#if defined(EMDRV_DMADRV_LDMA)
-  LDMA_Descriptor_t tx_desc[SL_I2C_DMA_MAX_TX_DESCRIPTOR_COUNT];
-  LDMA_Descriptor_t rx_desc[SL_I2C_DMA_MAX_RX_DESCRIPTOR_COUNT];
-#elif defined(EMDRV_DMADRV_LDMA_S3)
-  sl_hal_ldma_descriptor_t tx_desc[SL_I2C_DMA_MAX_TX_DESCRIPTOR_COUNT];
-  sl_hal_ldma_descriptor_t rx_desc[SL_I2C_DMA_MAX_RX_DESCRIPTOR_COUNT];
-#endif
+  sl_i2c_ldma_descriptor_t tx_desc[SL_I2C_DMA_MAX_TX_DESCRIPTOR_COUNT];
+  sl_i2c_ldma_descriptor_t rx_desc[SL_I2C_DMA_MAX_RX_DESCRIPTOR_COUNT];
 } sl_i2c_dma_descriptors_t;
 
 /**

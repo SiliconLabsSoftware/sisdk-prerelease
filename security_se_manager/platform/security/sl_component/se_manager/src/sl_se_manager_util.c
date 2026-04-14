@@ -1010,7 +1010,11 @@ sl_status_t sl_se_get_status(sl_se_command_context_t *cmd_ctx,
   }
 
 #if defined(_SILICON_LABS_32B_SERIES_3)
+#if defined(SLI_SE_SUPPORTS_EXTENDED_TAMPER_STATUS)
+  volatile uint32_t output[12] = { 0 };
+#else
   volatile uint32_t output[10] = { 0 };
+#endif
 #else
   volatile uint32_t output[9] = { 0 };
 #endif
@@ -1061,8 +1065,12 @@ sl_status_t sl_se_get_status(sl_se_command_context_t *cmd_ctx,
 #if defined(_SILICON_LABS_32B_SERIES_3)
   status->rom_revision = output[9] & 0xFF;
   status->otp_patch_sequence = (output[9] >> 8) & 0xFF;
+#if defined(SLI_SE_SUPPORTS_EXTENDED_TAMPER_STATUS)
+  // Read out the extra tamper status
+  status->tamper_status_upper = output[10];
+  status->tamper_status_raw_upper = output[11];
 #endif
-
+#endif
   return ret;
 }
 

@@ -191,6 +191,12 @@ SL_ENUM(sl_hal_smu_peripheral_id_t) {
 #if defined(_SMU_PPUPATD1_DMEM_SHIFT)
   SL_HAL_SMU_DMEM         = 32 + _SMU_PPUPATD1_DMEM_SHIFT,      /**< SMU peripheral identifier for DMEM      */
 #endif
+#if defined(_SMU_PPUPATD1_CAN0_SHIFT)
+  SL_HAL_SMU_CAN0         = 32 + _SMU_PPUPATD1_CAN0_SHIFT,      /**< SMU peripheral identifier for CAN0      */
+#endif
+#if defined(_SMU_PPUPATD1_LEDSINK0_SHIFT)
+  SL_HAL_SMU_LEDSINK0     = 32 + _SMU_PPUPATD1_LEDSINK0_SHIFT,  /**< SMU peripheral identifier for LEDSINK0 */
+#endif
 #if defined(_SMU_PPUPATD1_LCDRF_SHIFT)
   SL_HAL_SMU_LCDRF        = 32 + _SMU_PPUPATD1_LCDRF_SHIFT,     /**< SMU peripheral identifier for LCDRF     */
 #endif
@@ -234,8 +240,14 @@ SL_ENUM(sl_hal_smu_peripheral_id_t) {
   SL_HAL_SMU_SEPUF        = 32 + _SMU_PPUPATD1_SEPUF_SHIFT,     /**< SMU peripheral identifier for SEPUF     */
 #endif
   SL_HAL_SMU_LETIMER0     = 32 + _SMU_PPUPATD1_LETIMER0_SHIFT,  /**< SMU peripheral identifier for LETIMER   */
+#if defined(_SMU_PPUPATD1_ADC0_SHIFT)
+  SL_HAL_SMU_ADC0         = 32 + _SMU_PPUPATD1_ADC0_SHIFT,      /**< SMU peripheral identifier for ADC0      */
+#endif
 #if defined(_SMU_PPUPATD1_IADC0_SHIFT)
   SL_HAL_SMU_IADC0        = 32 + _SMU_PPUPATD1_IADC0_SHIFT,     /**< SMU peripheral identifier for IADC0     */
+#endif
+#if defined(_SMU_PPUPATD1_ADC1_SHIFT)
+  SL_HAL_SMU_ADC1         = 32 + _SMU_PPUPATD1_ADC1_SHIFT,      /**< SMU peripheral identifier for ADC1      */
 #endif
 #if defined(_SMU_PPUPATD1_ACMP0_SHIFT)
   SL_HAL_SMU_ACMP0        = 32 + _SMU_PPUPATD1_ACMP0_SHIFT,     /**< SMU peripheral identifier for ACMP0     */
@@ -845,15 +857,17 @@ typedef struct {
   bool sl_hal_smu_privileged_rfsense      : 1;  ///< Privileged access enabler for RFSENSE
   bool sl_hal_smu_privileged_etampdet     : 1;  ///< Privileged access enabler for ETAMPDET
   bool sl_hal_smu_privileged_dmem         : 1;  ///< Privileged access enabler for DMEM
-  bool sl_hal_smu_privileged_eusart1      : 1;  ///< Privileged access enabler for EUSART1
+  bool sl_hal_smu_privileged_can0         : 1;  ///< Privileged access enabler for CAN0
+  bool sl_hal_smu_privileged_ledsink0     : 1;  ///< Privileged access enabler for LEDSINK0
+  bool sl_hal_smu_privileged_wdog0        : 1;  ///< Privileged access enabler for WDOG0
   bool sl_hal_smu_privileged_radioaes     : 1;  ///< Privileged access enabler for RADIOAES
   bool sl_hal_smu_privileged_smu          : 1;  ///< Privileged access enabler for SMU
   bool sl_hal_smu_privileged_smucfgns     : 1;  ///< Privileged access enabler for SMUCFGNS
   bool sl_hal_smu_privileged_rtcc         : 1;  ///< Privileged access enabler for RTCC
-  bool sl_hal_smu_privileged_wdog0        : 1;  ///< Privileged access enabler for WDOG0
   bool sl_hal_smu_privileged_letimer0     : 1;  ///< Privileged access enabler for LETIMER0
-  bool sl_hal_smu_privileged_iadc0        : 1;  ///< Privileged access enabler for IADC0
+  bool sl_hal_smu_privileged_adc0         : 1;  ///< Privileged access enabler for ADC0
   bool sl_hal_smu_privileged_acmp0        : 1;  ///< Privileged access enabler for ACMP0
+  bool sl_hal_smu_privileged_adc1         : 1;  ///< Privileged access enabler for ADC1
   bool sl_hal_smu_privileged_i2c0         : 1;  ///< Privileged access enabler for I2C0
   bool sl_hal_smu_privileged_amuxcp0      : 1;  ///< Privileged access enabler for AMUXCP0
   bool sl_hal_smu_privileged_eusart0      : 1;  ///< Privileged access enabler for EUSART0

@@ -122,7 +122,8 @@ SL_ENUM_GENERIC(sl_hal_system_hfrcodpll_freq_t, uint32_t) {
   SL_HAL_SYSTEM_HFRCODPLL_FREQ_2M0Hz            = 2000000U,         /**< 2MHz RC band.  */
   SL_HAL_SYSTEM_HFRCODPLL_FREQ_4M0Hz            = 4000000U,         /**< 4MHz RC band.  */
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
   SL_HAL_SYSTEM_HFRCODPLL_FREQ_5M0Hz            = 5000000U,         /**< 5MHz RC band.  */
   SL_HAL_SYSTEM_HFRCODPLL_FREQ_10M0Hz           = 10000000U,        /**< 10MHz RC band. */
   SL_HAL_SYSTEM_HFRCODPLL_FREQ_20M0Hz           = 20000000U,        /**< 20MHz RC band. */
@@ -271,6 +272,101 @@ SL_ENUM_GENERIC(sl_hal_system_part_family_t, uint32_t) {
  *   below for details).
  ******************************************************************************/
 sl_hal_system_part_family_t sl_hal_system_get_family(void);
+
+/***************************************************************************//**
+ * @brief
+ *   Get the DMEM Base Address.
+ *
+ * @return
+ *   Base address of DMEM (32-bit unsigned integer).
+ *   Returns 0xFFFFFFFF if DMEM is not present.
+ ******************************************************************************/
+uint32_t sl_hal_system_get_dmem_base_address(void);
+
+/***************************************************************************//**
+ * @brief
+ *   Get the DMEM Base Address for a given DMEM instance.
+ *
+ * @return
+ *   Base address of DMEM (32-bit unsigned integer).
+ *   Returns 0xFFFFFFFF if DMEM is not present.
+ ******************************************************************************/
+uint32_t sl_hal_system_get_dmem_instance_base_address(uint32_t num);
+
+/***************************************************************************//**
+ * @brief
+ *   Get the DMEM size (in KB).
+ *
+ * @return
+ *   Size of DMEM (in KB).
+ ******************************************************************************/
+uint16_t sl_hal_system_get_dmem_size(void);
+
+/***************************************************************************//**
+ * @brief
+ *   Get the DMEM size (in KB) for a given DMEM instance.
+ *
+ * @return
+ *   Size of DMEM (in KB).
+ ******************************************************************************/
+uint16_t sl_hal_system_get_dmem_instance_size(uint32_t num);
+
+/***************************************************************************//**
+ * @brief
+ *   Get the ITCM Base Address.
+ *
+ * @return
+ *   Base address of ITCM (32-bit unsigned integer).
+ *   Returns 0xFFFFFFFF if ITCM is not present.
+ ******************************************************************************/
+uint32_t sl_hal_system_get_itcm_base_address(void);
+
+/***************************************************************************//**
+ * @brief
+ *   Get the ITCM size (in KB).
+ *
+ * @return
+ *   Size of ITCM (in KB).
+ ******************************************************************************/
+uint16_t sl_hal_system_get_itcm_size(void);
+
+/***************************************************************************//**
+ * @brief
+ *   Get the DTCM Base Address.
+ *
+ * @return
+ *   Base address of DTCM (32-bit unsigned integer).
+ *   Returns 0xFFFFFFFF if DTCM is not present.
+ ******************************************************************************/
+uint32_t sl_hal_system_get_dtcm_base_address(void);
+
+/***************************************************************************//**
+ * @brief
+ *   Get the DTCM size (in KB).
+ *
+ * @return
+ *   Size of DTCM (in KB).
+ ******************************************************************************/
+uint16_t sl_hal_system_get_dtcm_size(void);
+
+/***************************************************************************//**
+ * @brief
+ *   Get the PSRAM Base Address.
+ *
+ * @return
+ *   Base address of PSRAM (32-bit unsigned integer).
+ *   Returns 0xFFFFFFFF if PSRAM is not present.
+ ******************************************************************************/
+uint32_t sl_hal_system_get_psram_base_address(void);
+
+/***************************************************************************//**
+ * @brief
+ *   Get the PSRAM size (in KB).
+ *
+ * @return
+ *   Size of PSRAM (in KB).
+ ******************************************************************************/
+uint16_t sl_hal_system_get_psram_size(void);
 
 /** @} (end addtogroup system) */
 

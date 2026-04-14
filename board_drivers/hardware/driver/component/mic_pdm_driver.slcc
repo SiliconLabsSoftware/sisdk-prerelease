@@ -15,9 +15,9 @@ provides:
 requires:
 - name: clock_manager_runtime
 - name: hal_pdm
-- name: emlib_ldma
+- name: hal_ldma
 - name: hal_generic_gpio
-- name: dmadrv
+- name: dma_manager
 - name: device_manager
 - name: sleeptimer
 - name: mic_driver

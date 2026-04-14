@@ -485,7 +485,8 @@ extern "C" {
 /// Boolean to indicate whether the selected chip supports BLE
 /// CS (Channel Sounding).
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_BLE_SUPPORTS_CS.
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 4)
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 4) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11))
 #define RAIL_BLE_SUPPORTS_CS RAIL_SUPPORTS_PROTOCOL_BLE
 #else
 #define RAIL_BLE_SUPPORTS_CS 0

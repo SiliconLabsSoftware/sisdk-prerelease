@@ -283,6 +283,12 @@ exporter:
           - tool: compiler
             option: no_rtti
             value: true
+          - tool: linker
+            option: no_exceptions
+            value: true
+          - tool: linker
+            option: no_rtti
+            value: true
         host: []
       cpu:
         cortex-m0+:

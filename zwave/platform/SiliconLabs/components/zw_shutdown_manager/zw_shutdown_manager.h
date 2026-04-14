@@ -39,13 +39,15 @@ extern "C" {
 // -----------------------------------------------------------------------------
 
 /**
- * @brief Initializes the Z-Wave shutdown manager.
+ * @brief Initialize function for the shutdown manager
+ * Initializes the BURTC peripheral for EM4 wakeup operation.
  *
- * This function sets up any necessary resources or state required for the
- * shutdown manager to operate. It should be called during system startup
- * before using any shutdown-related functionality.
- *
- * @return ZPAL_STATUS_OK if initialization was successful, otherwise ZPAL_STATUS_FAIL.
+ * @return ZPAL_STATUS_OK if initialization was successful, otherwise ZPAL_STATUS_FAIL
+ * @note By default, the sl_sleeptimer module is configured to use SYSRTC instead of BURTC which is the RTC used in EM4 mode.
+ * Unless changed, both module frequencies match (f=32768); no need for tick conversion between the two.
+ * @warning this is not the case if you change the clock configuration! In that case, make sure to check the conversion factor!
+ * @note this function can be called more than once safely if it returns
+ * ZPAL_STATUS_FAIL on the first try.
  */
 zpal_status_t zw_shutdown_manager_init(void);
 

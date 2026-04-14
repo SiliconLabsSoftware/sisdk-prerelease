@@ -851,39 +851,39 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
     goto cleanup;
   }
 
-  switch (app_settings_wisun.network_size) {
-    case SL_WISUN_NETWORK_SIZE_AUTOMATIC:
-      params = SL_WISUN_BR_PARAMS_PROFILE_AUTO;
-      break;
-    case SL_WISUN_NETWORK_SIZE_SMALL:
-      params = SL_WISUN_BR_PARAMS_PROFILE_SMALL;
-      break;
-    case SL_WISUN_NETWORK_SIZE_MEDIUM:
-      params = SL_WISUN_BR_PARAMS_PROFILE_MEDIUM;
-      break;
-    case SL_WISUN_NETWORK_SIZE_LARGE:
-      params = SL_WISUN_BR_PARAMS_PROFILE_LARGE;
-      break;
-    case SL_WISUN_NETWORK_SIZE_TEST:
-      params = SL_WISUN_BR_PARAMS_PROFILE_TEST;
-      break;
-    default:
-      printf("[Failed: unsupported network size %"PRIu8"]\r\n", app_settings_wisun.network_size);
-      status = SL_STATUS_INVALID_CONFIGURATION;
+  // NOTE: Automatic network size is the default in the stack.
+  if (app_settings_wisun.network_size != SL_WISUN_NETWORK_SIZE_AUTOMATIC) {
+    switch (app_settings_wisun.network_size) {
+      case SL_WISUN_NETWORK_SIZE_SMALL:
+        params = SL_WISUN_BR_PARAMS_PROFILE_SMALL;
+        break;
+      case SL_WISUN_NETWORK_SIZE_MEDIUM:
+        params = SL_WISUN_BR_PARAMS_PROFILE_MEDIUM;
+        break;
+      case SL_WISUN_NETWORK_SIZE_LARGE:
+        params = SL_WISUN_BR_PARAMS_PROFILE_LARGE;
+        break;
+      case SL_WISUN_NETWORK_SIZE_TEST:
+        params = SL_WISUN_BR_PARAMS_PROFILE_TEST;
+        break;
+      default:
+        printf("[Failed: unsupported network size %"PRIu8"]\r\n", app_settings_wisun.network_size);
+        status = SL_STATUS_INVALID_CONFIGURATION;
+        goto cleanup;
+    }
+    params.traffic.lowpan_mtu = app_settings_wisun.lowpan_mtu;
+    params.traffic.ipv6_mru = app_settings_wisun.ipv6_mru;
+    params.traffic.max_edfe_fragment_count = app_settings_wisun.max_edfe_fragment_count;
+    params.mac.min_be = app_settings_mac.min_be;
+    params.mac.max_be = app_settings_mac.max_be;
+    params.mac.backoff_period_us = app_settings_mac.backoff_period_us;
+    params.mac.max_cca_retries = app_settings_mac.max_cca_retries;
+    params.mac.max_frame_retries = app_settings_mac.max_frame_retries;
+    status = sl_wisun_br_set_connection_parameters(&params);
+    if (status != SL_STATUS_OK) {
+      printf("[Failed: unable to set parameters (%"PRIu32")]\r\n", status);
       goto cleanup;
-  }
-  params.traffic.lowpan_mtu = app_settings_wisun.lowpan_mtu;
-  params.traffic.ipv6_mru = app_settings_wisun.ipv6_mru;
-  params.traffic.max_edfe_fragment_count = app_settings_wisun.max_edfe_fragment_count;
-  params.mac.min_be = app_settings_mac.min_be;
-  params.mac.max_be = app_settings_mac.max_be;
-  params.mac.backoff_period_us = app_settings_mac.backoff_period_us;
-  params.mac.max_cca_retries = app_settings_mac.max_cca_retries;
-  params.mac.max_frame_retries = app_settings_mac.max_frame_retries;
-  status = sl_wisun_br_set_connection_parameters(&params);
-  if (status != SL_STATUS_OK) {
-    printf("[Failed: unable to set parameters (%"PRIu32")]\r\n", status);
-    goto cleanup;
+    }
   }
 
   status = sl_wisun_config_neighbor_table(app_settings_wisun.max_child_count, app_settings_wisun.max_neighbor_count, app_settings_wisun.max_security_neighbor_count);

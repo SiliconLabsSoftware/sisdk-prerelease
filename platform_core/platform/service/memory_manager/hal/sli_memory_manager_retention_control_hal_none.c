@@ -36,7 +36,9 @@
 #include "em_device.h"
 #include "sl_assert.h"
 
-#if !defined(DMEM_MEM_BASE)
+#if defined(DMEM0_MEM_BASE)
+#define DMEM_MEM_BASE  DMEM0_MEM_BASE
+#elif !defined(DMEM_MEM_BASE)
 #define DMEM_MEM_BASE  SRAM_BASE
 #endif
 

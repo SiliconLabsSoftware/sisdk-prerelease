@@ -249,7 +249,7 @@ library:
   - zigbee_phy_2_4_subghz_switch_coordinator
 - path: build/llvm/aarch64-android-ndk-r25c/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
   condition:
-  - toolchain_llvm
+  - toolchain_gcc
   - aarch64-android-ndk-r25c
   - zigbee_stack_unix
   - zigbee_multi_network
@@ -263,7 +263,7 @@ library:
   unless: []
 - path: build/llvm/aarch64-android-ndk-r25c/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
   condition:
-  - toolchain_llvm
+  - toolchain_gcc
   - aarch64-android-ndk-r25c
   - zigbee_stack_unix
   unless:

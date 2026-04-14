@@ -45,13 +45,13 @@
  *   alone avoids linking both sensor stacks and reduces flash. Use this module when the
  *   product or example must run on either hardware without a separate build per board.
  *
- *   Only @ref sl_rht_unidriver_init takes the I2C bus handle; it caches the handle for
- *   that session. All other functions use that cache and take the logical seven-bit
- *   address and output pointers only.
+ *   Only @ref sl_rht_unidriver_init takes the I2C bus handle; it probes Si70xx then SHT4x
+ *   on fixed board addresses and caches the bus plus selected part. All other functions
+ *   use that cache only.
  *
  * @note
- *   The module keeps one static session (one logical address and I2C bus). It is
- *   not re-entrant; call @ref sl_rht_unidriver_init again to re-probe or switch boards.
+ *   The module keeps one static session. It is not re-entrant; call
+ *   @ref sl_rht_unidriver_init again to re-probe or switch boards.
 
    @n @section rht_unidriver_backend_map Backend API mapping
 
@@ -78,27 +78,23 @@
 
    @n @section rht_unidriver_example RHT UniDriver example code
 
-   Basic example for relative humidity and temperature measurement using
-   the unified logical address (Si70xx probed first, then SHT4x): @n @n
-   @verbatim
-
+ @verbatim
  #include "sl_i2cspm_instances.h"
  #include "sl_rht_unidriver.h"
 
- int main( void )
+ int main(void)
  {
+   uint32_t rh_pct_x1000;
+   int32_t temp_mc;
 
- ...
+   ...
 
- int32_t temp_data;
- uint32_t rh_data;
+   sl_rht_unidriver_init(sl_i2cspm_sensor);
+   sl_rht_unidriver_measure_rh_and_temp(&rh_pct_x1000, &temp_mc);
 
- sl_rht_unidriver_init(sl_i2cspm_sensor, RHT_UNIDRIVER_SI70XX_ADDR);
- sl_rht_unidriver_measure_rh_and_temp(RHT_UNIDRIVER_SI70XX_ADDR, &rh_data, &temp_data);
-
- ...
-
- } @endverbatim
+   ...
+ }
+ @endverbatim
  * @{
  ******************************************************************************/
 
@@ -107,13 +103,9 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @name Sensor Defines
+ * @name Sensor identity
  * @{
  ******************************************************************************/
-/** I2C address for Si70xx on boards such as BRD4002A; also the logical address for unified examples (matches SI7021_ADDR). */
-#define RHT_UNIDRIVER_SI70XX_ADDR   0x40U
-/** I2C device address for SHT4x (matches SHT4X_ADDR). */
-#define RHT_UNIDRIVER_SHT4X_ADDR    0x44U
 /**
  * Placeholder for @ref sl_rht_unidriver_get_device_id when the SHT4x path was
  * selected (not a Sensirion register value; distinguishes from Si70xx IDs).
@@ -126,41 +118,33 @@ extern "C" {
  *   Initialize the RHT sensor (Si70xx or SHT4x).
  * @param[in] i2cspm
  *   The I2C peripheral to use.
- * @param[in] addr
- *   The I2C address to probe. For unified applications, pass @ref RHT_UNIDRIVER_SI70XX_ADDR.
- *   Discovery uses @ref sl_si70xx_present at @p addr (two attempts with delay), then
- *   @ref sl_sht4x_present at @ref RHT_UNIDRIVER_SHT4X_ADDR with the same logic as
- *   @ref sl_sht4x_init (second attempt after 80 ms; serial discarded with NULL). Neither
+ * @details
+ *   Probes Si70xx at the on-board RHT address (same as typical Si7021 placement), then
+ *   SHT4x at its fixed address, with retries matching the dedicated drivers. Neither
  *   @ref sl_si70xx_init nor @ref sl_sht4x_init is called.
  * @retval SL_STATUS_OK A supported sensor is present on the I2C bus
  * @retval SL_STATUS_INITIALIZATION No supported sensor present
  * @retval SL_STATUS_NULL_POINTER @p i2cspm is NULL
  * @note
- *   Call @ref sl_rht_unidriver_init before any other function in this module
- *   for the same logical @p addr; other APIs use the I2C bus stored at init.
+ *   Call @ref sl_rht_unidriver_init before any other function in this module.
  *****************************************************************************/
-sl_status_t sl_rht_unidriver_init(sl_i2cspm_t *i2cspm, uint8_t addr);
+sl_status_t sl_rht_unidriver_init(sl_i2cspm_t *i2cspm);
 
 /**************************************************************************//**
  * @brief
  *   Return the device ID cached during @ref sl_rht_unidriver_init.
- * @param[in] addr
- *   The same logical address passed to @ref sl_rht_unidriver_init.
  * @param[out] device_id
  *   Si70xx: 0x06 (Si7006), 0x0D (Si7013), 0x14 (Si7020), 0x15 (Si7021).
  *   SHT4x: @ref RHT_UNIDRIVER_SHT4X_ID.
- * @retval SL_STATUS_OK Cache is valid for this address
+ * @retval SL_STATUS_OK Cache is valid
  * @retval SL_STATUS_NULL_POINTER @p device_id is NULL
- * @retval SL_STATUS_FAIL Not initialized for this logical @p addr; @p *device_id
- *   is not modified
+ * @retval SL_STATUS_FAIL Not initialized; @p *device_id is not modified
  *****************************************************************************/
-sl_status_t sl_rht_unidriver_get_device_id(uint8_t addr, uint8_t *device_id);
+sl_status_t sl_rht_unidriver_get_device_id(uint8_t *device_id);
 
 /**************************************************************************//**
  * @brief
  *  Measure relative humidity and temperature from an Si70xx or SHT4x sensor.
- * @param[in] addr
- *   The logical I2C address passed to @ref sl_rht_unidriver_init (e.g. @ref RHT_UNIDRIVER_SI70XX_ADDR).
  * @param[out] rh_data
  *   The relative humidity in percent (multiplied by 1000).
  * @param[out] t_data
@@ -168,9 +152,9 @@ sl_status_t sl_rht_unidriver_get_device_id(uint8_t addr, uint8_t *device_id);
  * @retval SL_STATUS_OK Success
  * @retval SL_STATUS_TRANSMIT I2C transmission error
  * @retval SL_STATUS_NULL_POINTER @p rh_data or @p t_data is NULL
- * @retval SL_STATUS_FAIL Not initialized for this address
+ * @retval SL_STATUS_FAIL Not initialized
  *****************************************************************************/
-sl_status_t sl_rht_unidriver_measure_rh_and_temp(uint8_t addr, uint32_t *rh_data, int32_t *t_data);
+sl_status_t sl_rht_unidriver_measure_rh_and_temp(uint32_t *rh_data, int32_t *t_data);
 
 /**************************************************************************//**
  * @brief
@@ -179,8 +163,6 @@ sl_status_t sl_rht_unidriver_measure_rh_and_temp(uint8_t addr, uint32_t *rh_data
  *  For Si70xx devices this reads the result of a previously started no-hold
  *  measurement. For SHT4x devices this uses the same converted measurement as
  *  @ref sl_sht4x_measure_rh_and_temp (not raw @ref sl_sht4x_read_rh_and_temp).
- * @param[in] addr
- *   The logical I2C address passed to @ref sl_rht_unidriver_init (e.g. @ref RHT_UNIDRIVER_SI70XX_ADDR).
  * @param[out] rh_data
  *   The relative humidity in percent (multiplied by 1000).
  * @param[out] t_data
@@ -188,57 +170,51 @@ sl_status_t sl_rht_unidriver_measure_rh_and_temp(uint8_t addr, uint32_t *rh_data
  * @retval SL_STATUS_OK Success
  * @retval SL_STATUS_TRANSMIT I2C transmission error
  * @retval SL_STATUS_NULL_POINTER @p rh_data or @p t_data is NULL
- * @retval SL_STATUS_FAIL Not initialized for this address
+ * @retval SL_STATUS_FAIL Not initialized
  *****************************************************************************/
-sl_status_t sl_rht_unidriver_read_rh_and_temp(uint8_t addr, uint32_t *rh_data, int32_t *t_data);
+sl_status_t sl_rht_unidriver_read_rh_and_temp(uint32_t *rh_data, int32_t *t_data);
 
 /**************************************************************************//**
  * @brief
  *  Start a no hold measurement of relative humidity and temperature.
  * @details
  *  This mode is supported by Si70xx devices only.
- * @param[in] addr
- *   The logical I2C address passed to @ref sl_rht_unidriver_init (e.g. @ref RHT_UNIDRIVER_SI70XX_ADDR).
  * @retval SL_STATUS_OK Success
  * @retval SL_STATUS_TRANSMIT I2C transmission error
- * @retval SL_STATUS_FAIL Not initialized (wrong logical @p addr)
+ * @retval SL_STATUS_FAIL Not initialized
  * @retval SL_STATUS_NOT_SUPPORTED SHT4x path (no-hold not available)
  *****************************************************************************/
-sl_status_t sl_rht_unidriver_start_no_hold_measure_rh_and_temp(uint8_t addr);
+sl_status_t sl_rht_unidriver_start_no_hold_measure_rh_and_temp(void);
 
 /**************************************************************************//**
  * @brief
  *  Read Firmware Revision from an Si7006/13/20/21 sensor.
  * @details
  *  SHT4x does not support this; returns @ref SL_STATUS_NOT_SUPPORTED when SHT4x is present.
- * @param[in] addr
- *   The logical I2C address passed to @ref sl_rht_unidriver_init (e.g. @ref RHT_UNIDRIVER_SI70XX_ADDR).
  * @param[out] fw_rev
  *   The internal firmware revision. 0xFF === 1.0
  * @retval SL_STATUS_OK Success
  * @retval SL_STATUS_NULL_POINTER @p fw_rev is NULL
- * @retval SL_STATUS_FAIL Not initialized (wrong logical @p addr); @p *fw_rev is not modified
+ * @retval SL_STATUS_FAIL Not initialized; @p *fw_rev is not modified
  * @retval SL_STATUS_NOT_SUPPORTED SHT4x path; @p *fw_rev is set to 0
  * @retval SL_STATUS_TRANSMIT I2C transmission error
  *****************************************************************************/
-sl_status_t sl_rht_unidriver_get_firmware_revision(uint8_t addr, uint8_t *fw_rev);
+sl_status_t sl_rht_unidriver_get_firmware_revision(uint8_t *fw_rev);
 
 /**************************************************************************//**
  * @brief
  *  Measure the analog voltage or thermistor temperature from the Si7013 sensor.
  * @note
  *  Analog voltage measurement only supported by Si7013.
- * @param[in] addr
- *   The logical I2C address passed to @ref sl_rht_unidriver_init (e.g. @ref RHT_UNIDRIVER_SI70XX_ADDR).
  * @param[out] v_data
  *   The data read from the sensor.
  * @retval SL_STATUS_OK Success
  * @retval SL_STATUS_NULL_POINTER @p v_data is NULL
- * @retval SL_STATUS_FAIL Not initialized (wrong logical @p addr) or non-Si7013 Si70xx
+ * @retval SL_STATUS_FAIL Not initialized or non-Si7013 Si70xx
  * @retval SL_STATUS_NOT_SUPPORTED SHT4x path
  * @retval SL_STATUS_TRANSMIT I2C transmission error
  *****************************************************************************/
-sl_status_t sl_rht_unidriver_measure_analog_voltage(uint8_t addr, int32_t *v_data);
+sl_status_t sl_rht_unidriver_measure_analog_voltage(int32_t *v_data);
 
 /**************************************************************************//**
  * @brief
@@ -246,8 +222,6 @@ sl_status_t sl_rht_unidriver_measure_analog_voltage(uint8_t addr, int32_t *v_dat
  * @details
  *  Wraps @ref sl_sht4x_enable_low_power_mode. Returns @ref SL_STATUS_NOT_SUPPORTED
  *  when the cached sensor is Si70xx.
- * @param[in] addr
- *   The logical I2C address passed to @ref sl_rht_unidriver_init (e.g. @ref RHT_UNIDRIVER_SI70XX_ADDR).
  * @param[in] enable_low_power_mode
  *   True for low-precision (lower power) mode command byte; false for high-precision.
  * @param[out] sht4x_cmd_measure
@@ -255,16 +229,16 @@ sl_status_t sl_rht_unidriver_measure_analog_voltage(uint8_t addr, int32_t *v_dat
  *   Not written when the return value is not @ref SL_STATUS_OK.
  * @retval SL_STATUS_OK Success (SHT4x path)
  * @retval SL_STATUS_NULL_POINTER @p sht4x_cmd_measure is NULL
- * @retval SL_STATUS_FAIL Not initialized (wrong logical @p addr)
+ * @retval SL_STATUS_FAIL Not initialized
  * @retval SL_STATUS_NOT_SUPPORTED Si70xx path
  *****************************************************************************/
-sl_status_t sl_rht_unidriver_enable_low_power_mode(uint8_t addr, bool enable_low_power_mode,
+sl_status_t sl_rht_unidriver_enable_low_power_mode(bool enable_low_power_mode,
                                                    uint8_t *sht4x_cmd_measure);
 
 #ifdef __cplusplus
 }
 #endif
 
-/** @} (rht_unidriver) */
+/** @} */
 
 #endif /* SL_RHT_UNIDRIVER_H */

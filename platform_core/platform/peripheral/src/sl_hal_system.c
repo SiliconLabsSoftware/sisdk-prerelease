@@ -38,7 +38,7 @@
 #endif
 #include "sl_status.h"
 #include "sl_assert.h"
-#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_240)
+#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_240) || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_250)
 #include "em_cmu.h"
 #endif
 /***************************************************************************//**
@@ -284,7 +284,7 @@ void sl_hal_system_init(void)
   }
 #endif
 
-#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_240)
+#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_240) || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_250)
 
   // Enable ICache out of reset.
   CMU->CLKEN1_SET = _CMU_CLKEN1_ICACHE0_MASK;
@@ -433,7 +433,8 @@ uint32_t sl_hal_system_get_hfrcodpll_band_calibration(uint32_t frequency)
       break;
 
   #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4) \
-      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
     case SL_HAL_SYSTEM_HFRCODPLL_FREQ_5M0Hz:
       calibration_value = DEVINFO->HFRCODPLLCAL[1].HFRCODPLLCAL;
       break;
@@ -691,7 +692,11 @@ uint8_t sl_hal_system_get_prod_rev(void)
  ******************************************************************************/
 uint32_t sl_hal_system_get_sram_base_address(void)
 {
+#if defined(SRAM0_BASE)
+  return SRAM0_BASE;
+#else
   return SRAM_BASE;
+#endif
 }
 
 /***************************************************************************//**
@@ -710,13 +715,35 @@ uint16_t sl_hal_system_get_sram_size(void)
 #endif
 }
 
-#if defined(DMEM_MEM_BASE)
 /***************************************************************************//**
  * Get the DMEM Base Address.
  ******************************************************************************/
 uint32_t sl_hal_system_get_dmem_base_address(void)
 {
+#if defined(DMEM0_MEM_BASE)
+  return DMEM0_MEM_BASE;
+#elif defined(DMEM_MEM_BASE)
   return DMEM_MEM_BASE;
+#else
+  return 0xFFFFFFFF;
+#endif
+}
+
+/***************************************************************************//**
+ * Get the DMEM Base Address for a given DMEM instance.
+ ******************************************************************************/
+uint32_t sl_hal_system_get_dmem_instance_base_address(uint32_t num)
+{
+  switch (num) {
+    case 0:
+      return sl_hal_system_get_dmem_base_address();
+#if defined(DMEM1_MEM_BASE)
+    case 1:
+      return DMEM1_MEM_BASE;
+#endif
+    default:
+      return 0xFFFFFFFF;
+  }
 }
 
 /***************************************************************************//**
@@ -741,19 +768,42 @@ uint16_t sl_hal_system_get_dmem_size(void)
   uint16_t itcm_size_kb = (uint16_t)(itcm_num_blocks * ITCM_BLOCK_SIZE_KB);
 
   return (uint16_t)(DMEM_ITCM_COMBINED_SIZE_KB - itcm_size_kb);
-#else
+#elif defined(DMEM0_MAX_SIZE)
+  return (uint16_t)(DMEM0_MAX_SIZE / 1024U);
+#elif defined(DMEM_MAX_SIZE)
   return (uint16_t)(DMEM_MAX_SIZE / 1024U);
+#else
+  return 0;
 #endif
 }
-#endif
 
-#if defined(ITCM_BASE)
+/***************************************************************************//**
+ * Get the DMEM size (in KB) for a given DMEM instance.
+ ******************************************************************************/
+uint16_t sl_hal_system_get_dmem_instance_size(uint32_t num)
+{
+  switch (num) {
+    case 0:
+      return sl_hal_system_get_dmem_size();
+#if defined(DMEM1_MAX_SIZE)
+    case 1:
+      return (uint16_t)(DMEM1_MAX_SIZE / 1024U);
+#endif
+    default:
+      return 0;
+  }
+}
+
 /***************************************************************************//**
  * Get the ITCM Base Address.
  ******************************************************************************/
 uint32_t sl_hal_system_get_itcm_base_address(void)
 {
+#if defined(ITCM_BASE)
   return ITCM_BASE;
+#else
+  return 0xFFFFFFFF;
+#endif
 }
 
 /***************************************************************************//**
@@ -775,19 +825,23 @@ uint16_t sl_hal_system_get_itcm_size(void)
                              >> _SYSCFG_ITCMNUMSRAMBLK_ITCMNUMSRAMBLK_SHIFT;
 
   return (uint16_t)(itcm_num_blocks * ITCM_BLOCK_SIZE_KB);
-#else
+#elif defined(ITCM_MAX_SIZE)
   return (uint16_t)(ITCM_MAX_SIZE / 1024U);
+#else
+  return 0;
 #endif
 }
-#endif
 
-#if defined(DTCM_BASE)
 /***************************************************************************//**
  * Get the DTCM Base Address.
  ******************************************************************************/
 uint32_t sl_hal_system_get_dtcm_base_address(void)
 {
+#if defined(DTCM_BASE)
   return DTCM_BASE;
+#else
+  return 0xFFFFFFFF;
+#endif
 }
 
 /***************************************************************************//**
@@ -795,17 +849,23 @@ uint32_t sl_hal_system_get_dtcm_base_address(void)
  ******************************************************************************/
 uint16_t sl_hal_system_get_dtcm_size(void)
 {
+#if defined(DTCM_BASE)
   return (uint16_t)(DTCM_MAX_SIZE / 1024U);
-}
+#else
+  return 0;
 #endif
+}
 
-#if defined(PSRAM_BASE)
 /***************************************************************************//**
  * Get the PSRAM Base Address.
  ******************************************************************************/
 uint32_t sl_hal_system_get_psram_base_address(void)
 {
+#if defined(PSRAM_BASE)
   return PSRAM_BASE;
+#else
+  return 0xFFFFFFFF;
+#endif
 }
 
 /***************************************************************************//**
@@ -813,9 +873,12 @@ uint32_t sl_hal_system_get_psram_base_address(void)
  ******************************************************************************/
 uint16_t sl_hal_system_get_psram_size(void)
 {
+#if defined(PSRAM_BASE)
   return (uint16_t)(PSRAM_MAX_SIZE / 1024U);
-}
+#else
+  return 0;
 #endif
+}
 
 /***************************************************************************//**
  * Get the flash size (in KB).

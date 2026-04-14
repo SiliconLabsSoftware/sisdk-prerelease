@@ -1522,7 +1522,7 @@ sl_status_t sl_btmesh_prov_add_ddb_entry(uuid_128 uuid,
     return rsp->data.rsp_prov_add_ddb_entry.result;
 }
 
-sl_status_t sl_btmesh_prov_list_ddb_entries(uint16_t *count)
+SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_prov_list_ddb_entries(uint16_t *count)
 {
     struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
     struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;

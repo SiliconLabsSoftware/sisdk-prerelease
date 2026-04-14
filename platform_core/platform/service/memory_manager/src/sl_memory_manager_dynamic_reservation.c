@@ -36,6 +36,7 @@
 #include "sl_memory_manager_config.h"
 #include "sl_memory_manager.h"
 #include "sli_memory_manager.h"
+#include "sli_memory_manager_retention_control.h"
 
 #include "sl_assert.h"
 #include "sl_bit.h"
@@ -232,6 +233,79 @@ sl_status_t sl_memory_release_block(sl_memory_reservation_t *handle)
 #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
   SEGGER_SYSVIEW_HeapFree((void *)SLI_SYSTEMVIEW_HEAP_ST_ID, block_address);
 #endif
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Adds a retention request on a reserved block.
+ ******************************************************************************/
+sl_status_t sl_memory_reservation_add_retention(const sl_memory_reservation_t *handle)
+{
+  if (handle == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  if (handle->block_address == NULL || handle->block_size == 0) {
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  sl_memory_heap_t *heap = sli_memory_get_heap_handle(handle->block_address);
+
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_ATOMIC();
+
+  SLI_MEMORY_INCREMENT_BANK_COUNTER(heap,
+                                    (uint8_t *)handle->block_address,
+                                    (uint8_t *)handle->block_address + handle->block_size - 1);
+
+  CORE_EXIT_ATOMIC();
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Removes a retention request on a reserved block.
+ ******************************************************************************/
+sl_status_t sl_memory_reservation_remove_retention(const sl_memory_reservation_t *handle)
+{
+  if (handle == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  if (handle->block_address == NULL || handle->block_size == 0) {
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  sl_memory_heap_t *heap = sli_memory_get_heap_handle(handle->block_address);
+
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_ATOMIC();
+
+  SLI_MEMORY_DECREMENT_BANK_COUNTER(heap,
+                                    (uint8_t *)handle->block_address,
+                                    (uint8_t *)handle->block_address + handle->block_size - 1);
+
+  CORE_EXIT_ATOMIC();
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Retrieves the size of a memory reservation.
+ ******************************************************************************/
+sl_status_t sl_memory_reservation_get_size(const sl_memory_reservation_t *handle,
+                                           size_t *size)
+{
+  if (handle == NULL || size == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  if (handle->block_address == NULL) {
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  *size = handle->block_size;
 
   return SL_STATUS_OK;
 }

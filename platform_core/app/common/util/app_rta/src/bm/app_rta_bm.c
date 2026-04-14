@@ -37,8 +37,10 @@
 #include "app_queue.h"
 #include "sl_slist.h"
 #include "sl_memory_manager.h"
-#include "sl_power_manager.h"
 #include "sl_component_catalog.h"
+#ifdef SL_CATALOG_POWER_MANAGER_PRESENT
+#include "sl_power_manager.h"
+#endif // SL_CATALOG_POWER_MANAGER_PRESENT
 
 // -----------------------------------------------------------------------------
 // Definitions
@@ -456,6 +458,8 @@ void app_rta_internal_init(void)
 #endif // SL_CATALOG_SL_MAIN_PRESENT
 }
 
+#ifdef SL_CATALOG_POWER_MANAGER_PRESENT
+
 bool app_rta_is_ok_to_sleep(void)
 {
   sl_slist_node_t *ctx_iterator;
@@ -492,6 +496,8 @@ sl_power_manager_on_isr_exit_t app_rta_on_isr_exit(void)
 
   return SL_POWER_MANAGER_IGNORE;
 }
+
+#endif // SL_CATALOG_POWER_MANAGER_PRESENT
 
 void app_rta_step(void)
 {

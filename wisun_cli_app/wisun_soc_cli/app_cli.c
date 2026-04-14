@@ -1155,11 +1155,14 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
     goto cleanup;
   }
 
-  if (app_settings_wisun.device_type == SL_WISUN_ROUTER) {
+  /*
+   * NOTE: Automatic network size is the default in the stack.
+   * Setting traffic and mac parameters is only supported for non-automatic
+   * network sizes.
+   */
+  if (app_settings_wisun.device_type == SL_WISUN_ROUTER &&
+      app_settings_wisun.network_size != SL_WISUN_NETWORK_SIZE_AUTOMATIC) {
     switch (app_settings_wisun.network_size) {
-      case SL_WISUN_NETWORK_SIZE_AUTOMATIC:
-        params = SL_WISUN_PARAMS_PROFILE_AUTO;
-        break;
       case SL_WISUN_NETWORK_SIZE_SMALL:
         params = SL_WISUN_PARAMS_PROFILE_SMALL;
         break;
@@ -1209,7 +1212,9 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
     }
   }
 
-  if (app_settings_wisun.device_type == SL_WISUN_LFN) {
+  // NOTE: Automatic LFN profile is the default in the stack.
+  if (app_settings_wisun.device_type == SL_WISUN_LFN &&
+      app_settings_wisun.lfn_profile != SL_WISUN_LFN_PROFILE_AUTOMATIC) {
     switch (app_settings_wisun.lfn_profile) {
       case SL_WISUN_LFN_PROFILE_TEST:
         lfn_params = SL_WISUN_PARAMS_LFN_TEST;
@@ -1219,9 +1224,6 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
         break;
       case SL_WISUN_LFN_PROFILE_ECO:
         lfn_params = SL_WISUN_PARAMS_LFN_ECO;
-        break;
-      case SL_WISUN_LFN_PROFILE_AUTOMATIC:
-        lfn_params = SL_WISUN_PARAMS_LFN_AUTO;
         break;
       default:
         printf("[Failed: unsupported LFN profile]\r\n");

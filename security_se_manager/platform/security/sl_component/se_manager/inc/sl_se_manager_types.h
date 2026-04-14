@@ -344,6 +344,12 @@ typedef struct {
   uint8_t rom_revision;
   /// OTP patch sequence
   uint8_t otp_patch_sequence;
+#if defined(SLI_SE_SUPPORTS_EXTENDED_TAMPER_STATUS)
+  /// Upper word of a 64-bit recorded tamper status. Reset on status read.
+  uint32_t tamper_status_upper;
+  /// Upper word of a 64-bit currently active tamper sources.
+  uint32_t tamper_status_raw_upper;
+#endif
 #endif
 } sl_se_status_t;
 

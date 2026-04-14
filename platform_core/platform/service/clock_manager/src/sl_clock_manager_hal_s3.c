@@ -568,6 +568,7 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
       *frequency = SystemSYSCLKGet() / (((CMU->EXPORTCLKCTRL & _CMU_EXPORTCLKCTRL_PRESC_MASK) >> _CMU_EXPORTCLKCTRL_PRESC_SHIFT) + 1);
       break;
 
+#if defined(_CMU_EM01GRPACLKCTRL_CLKSEL_MASK)
     case SL_CLOCK_BRANCH_EM01GRPACLK:
       switch (CMU->EM01GRPACLKCTRL & _CMU_EM01GRPACLKCTRL_CLKSEL_MASK) {
         case CMU_EM01GRPACLKCTRL_CLKSEL_HFRCODPLL:
@@ -597,7 +598,9 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
           return_status = SL_STATUS_INVALID_STATE;
       }
       break;
+#endif
 
+#if defined(_CMU_EM01GRPCCLKCTRL_CLKSEL_MASK)
     case SL_CLOCK_BRANCH_EM01GRPCCLK:
       switch (CMU->EM01GRPCCLKCTRL & _CMU_EM01GRPCCLKCTRL_CLKSEL_MASK) {
         case CMU_EM01GRPCCLKCTRL_CLKSEL_HFRCODPLL:
@@ -628,7 +631,9 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
           break;
       }
       break;
+#endif
 
+#if defined(_CMU_EM23GRPACLKCTRL_CLKSEL_MASK)
     case SL_CLOCK_BRANCH_EM23GRPACLK:
       switch (CMU->EM23GRPACLKCTRL & _CMU_EM23GRPACLKCTRL_CLKSEL_MASK) {
         case CMU_EM23GRPACLKCTRL_CLKSEL_LFRCO:
@@ -649,7 +654,9 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
           break;
       }
       break;
+#endif
 
+#if defined(_CMU_EM4GRPACLKCTRL_CLKSEL_MASK)
     case SL_CLOCK_BRANCH_EM4GRPACLK:
       switch (CMU->EM4GRPACLKCTRL & _CMU_EM4GRPACLKCTRL_CLKSEL_MASK) {
         case CMU_EM4GRPACLKCTRL_CLKSEL_LFRCO:
@@ -670,6 +677,7 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
           break;
       }
       break;
+#endif
 
     case SL_CLOCK_BRANCH_WDOG0CLK:
       switch (CMU->WDOG0CLKCTRL & _CMU_WDOG0CLKCTRL_CLKSEL_MASK) {
@@ -757,10 +765,11 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
 
     case SL_CLOCK_BRANCH_EUSART0CLK:
       switch (CMU->EUSART0CLKCTRL & _CMU_EUSART0CLKCTRL_CLKSEL_MASK) {
+#if defined(CMU_EUSART0CLKCTRL_CLKSEL_EM01GRPCCLK)
         case CMU_EUSART0CLKCTRL_CLKSEL_EM01GRPCCLK:
           return_status =  sli_clock_manager_hal_get_clock_branch_frequency(SL_CLOCK_BRANCH_EM01GRPCCLK, frequency);
           break;
-
+#endif
         case CMU_EUSART0CLKCTRL_CLKSEL_HFRCOEM23:
           *frequency = SystemHFRCOEM23ClockGet();
           break;
@@ -783,10 +792,11 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
 #if defined(_CMU_EUSART1CLKCTRL_MASK)
       case SL_CLOCK_BRANCH_EUSART1CLK:
         switch (CMU->EUSART1CLKCTRL & _CMU_EUSART1CLKCTRL_CLKSEL_MASK) {
+#if defined(_CMU_EUSART1CLKCTRL_CLKSEL_EM01GRPCCLK)
           case CMU_EUSART1CLKCTRL_CLKSEL_EM01GRPCCLK:
             return_status =  sli_clock_manager_hal_get_clock_branch_frequency(SL_CLOCK_BRANCH_EM01GRPCCLK, frequency);
             break;
-  
+#endif
           case CMU_EUSART1CLKCTRL_CLKSEL_HFRCOEM23:
             *frequency = SystemHFRCOEM23ClockGet();
             break;
@@ -809,10 +819,11 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
 
     case SL_CLOCK_BRANCH_PCNT0CLK:
       switch (CMU->PCNT0CLKCTRL & _CMU_PCNT0CLKCTRL_CLKSEL_MASK) {
+#if defined(_CMU_PCNT0CLKCTRL_CLKSEL_EM23GRPACLK)
         case CMU_PCNT0CLKCTRL_CLKSEL_EM23GRPACLK:
           return_status = sli_clock_manager_hal_get_clock_branch_frequency(SL_CLOCK_BRANCH_EM23GRPACLK, frequency);
           break;
-
+#endif
         case CMU_PCNT0CLKCTRL_CLKSEL_PCNTS0:
           *frequency = 0U;
           return_status = SL_STATUS_NOT_SUPPORTED;
@@ -825,6 +836,7 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
       }
       break;
 
+#if defined(_CMU_EM01GRPDCLKCTRL_CLKSEL_MASK)
     case SL_CLOCK_BRANCH_EM01GRPDCLK:
       switch (CMU->EM01GRPDCLKCTRL & _CMU_EM01GRPDCLKCTRL_CLKSEL_MASK) {
         case CMU_EM01GRPDCLKCTRL_CLKSEL_HFRCODPLL:
@@ -849,13 +861,15 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
           break;
       }
       break;
+#endif
 
     case SL_CLOCK_BRANCH_I2C0CLK:
       switch (CMU->I2C0CLKCTRL & _CMU_I2C0CLKCTRL_CLKSEL_MASK) {
+#if defined(_CMU_I2C0CLKCTRL_CLKSEL_EM01GRPDCLK)
         case CMU_I2C0CLKCTRL_CLKSEL_EM01GRPDCLK:
           return_status = sli_clock_manager_hal_get_clock_branch_frequency(SL_CLOCK_BRANCH_EM01GRPDCLK, frequency);
           break;
-
+#endif
         case CMU_I2C0CLKCTRL_CLKSEL_HFRCOEM23:
           *frequency = SystemHFRCOEM23ClockGet();
           break;
@@ -903,6 +917,7 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
       break;
 #endif
 
+#if defined(_CMU_ADCCLKCTRL_CLKSEL_MASK)
     case SL_CLOCK_BRANCH_ADCCLK:
       switch (CMU->ADCCLKCTRL & _CMU_ADCCLKCTRL_CLKSEL_MASK) {
         case CMU_ADCCLKCTRL_CLKSEL_EM01GRPACLK:
@@ -923,6 +938,7 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
           break;
       }
       break;
+#endif
 
     case SL_CLOCK_BRANCH_SYSTICKCLK:
       if (SysTick->CTRL & SysTick_CTRL_CLKSOURCE_Msk) {
@@ -937,14 +953,16 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
 #if defined(_CMU_VDAC0CLKCTRL_MASK)
     case SL_CLOCK_BRANCH_VDAC0CLK:
       switch (CMU->VDAC0CLKCTRL & _CMU_VDAC0CLKCTRL_CLKSEL_MASK) {
+#if defined(_CMU_VDAC0CLKCTRL_CLKSEL_EM01GRPACLK)
         case CMU_VDAC0CLKCTRL_CLKSEL_EM01GRPACLK:
           return_status = sli_clock_manager_hal_get_clock_branch_frequency(SL_CLOCK_BRANCH_EM01GRPACLK, frequency);
           break;
-
+#endif
+#if defined(_CMU_VDAC0CLKCTRL_CLKSEL_EM23GRPACLK)
         case CMU_VDAC0CLKCTRL_CLKSEL_EM23GRPACLK:
           return_status = sli_clock_manager_hal_get_clock_branch_frequency(SL_CLOCK_BRANCH_EM23GRPACLK, frequency);
           break;
-
+#endif
         case CMU_VDAC0CLKCTRL_CLKSEL_FSRCO:
           *frequency = SystemFSRCOClockGet();
           break;
@@ -1122,6 +1140,7 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
       }
       break;
 
+#if defined(_CMU_EM01GRPACLKCTRL_CLKSEL_MASK)
     case SL_CLOCK_BRANCH_EM01GRPACLK:
       switch (CMU->EM01GRPACLKCTRL & _CMU_EM01GRPACLKCTRL_CLKSEL_MASK) {
         case CMU_EM01GRPACLKCTRL_CLKSEL_HFXO:
@@ -1147,7 +1166,9 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
           break;
       }
       break;
+#endif
 
+#if defined(_CMU_EM01GRPCCLKCTRL_CLKSEL_MASK)
     case SL_CLOCK_BRANCH_EM01GRPCCLK:
       switch (CMU->EM01GRPCCLKCTRL & _CMU_EM01GRPCCLKCTRL_CLKSEL_MASK) {
         case CMU_EM01GRPCCLKCTRL_CLKSEL_HFXO:
@@ -1173,7 +1194,9 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
           break;
       }
       break;
+#endif
 
+#if defined(_CMU_EM23GRPACLKCTRL_CLKSEL_MASK)
     case SL_CLOCK_BRANCH_EM23GRPACLK:
       switch (CMU->EM23GRPACLKCTRL & _CMU_EM23GRPACLKCTRL_CLKSEL_MASK) {
         case CMU_EM23GRPACLKCTRL_CLKSEL_LFXO:
@@ -1195,7 +1218,9 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
           break;
       }
       break;
+#endif
 
+#if defined(_CMU_EM4GRPACLKCTRL_CLKSEL_MASK)
     case SL_CLOCK_BRANCH_EM4GRPACLK:
       switch (CMU->EM4GRPACLKCTRL & _CMU_EM4GRPACLKCTRL_CLKSEL_MASK) {
         case CMU_EM4GRPACLKCTRL_CLKSEL_LFXO:
@@ -1217,6 +1242,7 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
           break;
       }
       break;
+#endif
 
     case SL_CLOCK_BRANCH_WDOG0CLK:
       switch (CMU->WDOG0CLKCTRL & _CMU_WDOG0CLKCTRL_CLKSEL_MASK) {
@@ -1299,10 +1325,11 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
 
     case SL_CLOCK_BRANCH_EUSART0CLK:
       switch (CMU->EUSART0CLKCTRL & _CMU_EUSART0CLKCTRL_CLKSEL_MASK) {
+#if defined(_CMU_EUSART0CLKCTRL_CLKSEL_EM01GRPCCLK)
         case CMU_EUSART0CLKCTRL_CLKSEL_EM01GRPCCLK:
           return_status = sli_clock_manager_hal_get_clock_branch_precision(SL_CLOCK_BRANCH_EM01GRPCCLK, precision);
           break;
-
+#endif
         case CMU_EUSART0CLKCTRL_CLKSEL_HFRCOEM23:
           *precision = 0xFFFF;
           return_status = SL_STATUS_NOT_AVAILABLE;
@@ -1326,10 +1353,11 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
 #if defined(_CMU_EUSART1CLKCTRL_CLKSEL_MASK)
     case SL_CLOCK_BRANCH_EUSART1CLK:
       switch (CMU->EUSART1CLKCTRL & _CMU_EUSART1CLKCTRL_CLKSEL_MASK) {
+#if defined(_CMU_EUSART1CLKCTRL_CLKSEL_EM01GRPCCLK)
         case CMU_EUSART1CLKCTRL_CLKSEL_EM01GRPCCLK:
           return_status = sli_clock_manager_hal_get_clock_branch_precision(SL_CLOCK_BRANCH_EM01GRPCCLK, precision);
           break;
-
+#endif
         case CMU_EUSART1CLKCTRL_CLKSEL_HFRCOEM23:
           *precision = 0xFFFF;
           return_status = SL_STATUS_NOT_AVAILABLE;
@@ -1353,9 +1381,11 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
 
     case SL_CLOCK_BRANCH_PCNT0CLK:
       switch (CMU->PCNT0CLKCTRL & _CMU_PCNT0CLKCTRL_CLKSEL_MASK) {
+#if defined(_CMU_PCNT0CLKCTRL_CLKSEL_EM23GRPACLK)
         case CMU_PCNT0CLKCTRL_CLKSEL_EM23GRPACLK:
           return_status = sli_clock_manager_hal_get_clock_branch_precision(SL_CLOCK_BRANCH_EM23GRPACLK, precision);
           break;
+#endif
 
         case CMU_PCNT0CLKCTRL_CLKSEL_PCNTS0:
           *precision = 0;
@@ -1369,6 +1399,7 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
       }
       break;
 
+#if defined(_CMU_EM01GRPDCLKCTRL_CLKSEL_MASK)
     case SL_CLOCK_BRANCH_EM01GRPDCLK:
       switch (CMU->EM01GRPDCLKCTRL & _CMU_EM01GRPDCLKCTRL_CLKSEL_MASK) {
         case CMU_EM01GRPDCLKCTRL_CLKSEL_HFXO:
@@ -1388,6 +1419,7 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
           break;
       }
       break;
+#endif
 
 #if defined(_CMU_QSPISYSCLKCTRL_MASK)
     case SL_CLOCK_BRANCH_QSPISYSCLK:
@@ -1415,10 +1447,11 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
 
     case SL_CLOCK_BRANCH_I2C0CLK:
       switch (CMU->I2C0CLKCTRL & _CMU_I2C0CLKCTRL_CLKSEL_MASK) {
+#if defined(_CMU_I2C0CLKCTRL_CLKSEL_EM01GRPDCLK)
         case CMU_I2C0CLKCTRL_CLKSEL_EM01GRPDCLK:
           return_status = sli_clock_manager_hal_get_clock_branch_precision(SL_CLOCK_BRANCH_EM01GRPDCLK, precision);
           break;
-
+#endif
         case CMU_I2C0CLKCTRL_CLKSEL_HFRCOEM23:
           *precision = 0xFFFF;
           return_status = SL_STATUS_NOT_AVAILABLE;
@@ -1474,14 +1507,16 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
 #if defined(_CMU_VDAC0CLKCTRL_MASK)
     case SL_CLOCK_BRANCH_VDAC0CLK:
       switch (CMU->VDAC0CLKCTRL & _CMU_VDAC0CLKCTRL_CLKSEL_MASK) {
+#if defined(_CMU_VDAC0CLKCTRL_CLKSEL_EM01GRPACLK)
         case CMU_VDAC0CLKCTRL_CLKSEL_EM01GRPACLK:
           return_status = sli_clock_manager_hal_get_clock_branch_precision(SL_CLOCK_BRANCH_EM01GRPACLK, precision);
           break;
-
+#endif
+#if defined(_CMU_VDAC0CLKCTRL_CLKSEL_EM23GRPACLK)
         case CMU_VDAC0CLKCTRL_CLKSEL_EM23GRPACLK:
           return_status = sli_clock_manager_hal_get_clock_branch_precision(SL_CLOCK_BRANCH_EM23GRPACLK, precision);
           break;
-
+#endif
         case CMU_VDAC0CLKCTRL_CLKSEL_FSRCO:
         case CMU_VDAC0CLKCTRL_CLKSEL_HFRCOEM23:
           *precision = 0xFFFF;

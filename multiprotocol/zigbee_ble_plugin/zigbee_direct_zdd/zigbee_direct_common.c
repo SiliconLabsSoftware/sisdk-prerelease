@@ -589,6 +589,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
       assert(index < 0xFF);
 
       bleConnectionTable[index].inUse = false;
+      sl_zigbee_direct_session_auth_state = SL_ZIGBEE_DIRECT_SESSION_NOT_AUTHENTICATED;
       if ( activeBleConnections ) {
         --activeBleConnections;
       }
@@ -1192,7 +1193,7 @@ static void sli_zigbee_direct_identify_read_handler(uint8_t connection)
     ZCL_IDENTIFY_CLUSTER_ID,
     ZCL_IDENTIFY_TIME_ATTRIBUTE_ID,
     CLUSTER_MASK_SERVER,
-    response,
+    &response[SL_ZIGBEE_DIRECT_COUNTER_SIZE],
     2,
     &dataType);
 
@@ -1203,7 +1204,7 @@ static void sli_zigbee_direct_identify_read_handler(uint8_t connection)
     goto EXIT;
   }
 
-  status = sli_zigbee_direct_security_encrypt_packet(sl_zigbee_get_eui64(), response, 2, gattdb_identify);
+  status = sli_zigbee_direct_security_encrypt_packet(sl_zigbee_get_eui64(), &response[SL_ZIGBEE_DIRECT_COUNTER_SIZE], 2, gattdb_identify);
   if (status != SL_STATUS_OK) {
     ble_status = ES_ERR_APPLICATION_SPECIFIC;
     length_to_send = 0;
@@ -2035,7 +2036,7 @@ void sli_zigbee_af_plugin_zdd_stack_status_callback(sl_status_t status)
   }
 
   sl_status_t write_status = sl_token_manager_set_data(COMMON_TOKEN_PLUGIN_ZDD_AUTH_STATUS, (void *)&sl_zvd_connection_status, sizeof(sl_zvd_connection_status));
-  if (status != SL_STATUS_OK) {
+  if (write_status != SL_STATUS_OK) {
     sl_zigbee_app_debug_println("ERROR: failed to set ZDD auth status in persistence: 0x%0X\n", write_status);
     (void)write_status;
   }

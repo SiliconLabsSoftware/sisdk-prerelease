@@ -38,7 +38,10 @@
 #include "sl_bit.h"
 #include "sl_dma_manager.h"
 #include "sli_dma_manager_internal.h"
-#include "sl_dma_manager_config.h"
+#include "sl_component_catalog.h"
+#if defined(SL_CATALOG_DMA_MANAGER_ROUND_ROBIN_PRESENT)
+#include "sl_dma_manager_round_robin_config.h"
+#endif
 #include "sl_device_peripheral.h"
 #include "sl_memory_manager.h"
 
@@ -165,6 +168,12 @@ sl_status_t sl_dma_manager_init(sl_dma_handle_t *dma_handle,
   // Initialize the DMA peripheral Hardware module
   sli_dma_manager_hal_init(dma_peripheral);
 
+#if defined(SL_CATALOG_DMA_MANAGER_ROUND_ROBIN_PRESENT)
+  EFM_ASSERT(SL_DMA_MANAGER_ROUND_ROBIN_CHANNEL_COUNT <= dma_peripheral->nbr_channel);
+  dma_handle->round_robin_channel_number = SL_DMA_MANAGER_ROUND_ROBIN_CHANNEL_COUNT;
+  sli_dma_manager_hal_configure_round_robin_channel_nbr(dma_peripheral, SL_DMA_MANAGER_ROUND_ROBIN_CHANNEL_COUNT);
+#endif
+
   CORE_EXIT_ATOMIC();
 
   return SL_STATUS_OK;
@@ -173,10 +182,10 @@ sl_status_t sl_dma_manager_init(sl_dma_handle_t *dma_handle,
 /***************************************************************************//**
  * Sets the number of round robin channels.
  ******************************************************************************/
-sl_status_t sl_dma_manager_set_nbr_round_robin_channels(sl_dma_handle_t *dma_handle,
-                                                        uint8_t nbr_round_robin_channels)
+#if defined(SL_CATALOG_DMA_MANAGER_ROUND_ROBIN_PRESENT)
+sl_status_t sli_dma_manager_set_nbr_round_robin_channels(sl_dma_handle_t *dma_handle,
+                                                         uint8_t nbr_round_robin_channels)
 {
-#if defined(SL_DMA_ENABLE_ROBIN_CHANNELS) && (SL_DMA_ENABLE_ROBIN_CHANNELS == 1)
   CORE_DECLARE_IRQ_STATE;
 
   if (dma_handle == NULL) {
@@ -203,21 +212,17 @@ sl_status_t sl_dma_manager_set_nbr_round_robin_channels(sl_dma_handle_t *dma_han
   CORE_EXIT_ATOMIC();
 
   return SL_STATUS_OK;
-#else
-  (void)dma_handle;
-  (void)nbr_round_robin_channels;
-  return SL_STATUS_NOT_AVAILABLE;
-#endif
 }
+#endif
 
 /***************************************************************************//**
  * Gets the default DMA handle.
  ******************************************************************************/
- sl_status_t sl_dma_manager_get_default_handle(sl_dma_handle_t **dma_handle)
- {
+sl_status_t sl_dma_manager_get_default_handle(sl_dma_handle_t **dma_handle)
+{
   *dma_handle = default_dma_handle;
   return SL_STATUS_OK;
- }
+}
 
 /***************************************************************************//**
  * Allocates a DMA channel.
@@ -225,7 +230,7 @@ sl_status_t sl_dma_manager_set_nbr_round_robin_channels(sl_dma_handle_t *dma_han
 sl_status_t sl_dma_manager_allocate_channel(sl_dma_handle_t *dma_handle,
                                             uint8_t *channel_nbr)
 {
-#if defined(SL_DMA_ENABLE_ROBIN_CHANNELS) && (SL_DMA_ENABLE_ROBIN_CHANNELS == 0)
+#if !defined(SL_CATALOG_DMA_MANAGER_ROUND_ROBIN_PRESENT)
   CORE_DECLARE_IRQ_STATE;
 
   EFM_ASSERT(channel_nbr != NULL);
@@ -284,7 +289,7 @@ sl_status_t sl_dma_manager_allocate_channel_with_properties(sl_dma_handle_t *dma
   EFM_ASSERT(!((channel_properties & (SL_DMA_CHANNEL_HIGH_PRIORITY | SL_DMA_CHANNEL_USES_ROUND_ROBIN))
                == (SL_DMA_CHANNEL_HIGH_PRIORITY | SL_DMA_CHANNEL_USES_ROUND_ROBIN)));
 
-#if defined(SL_DMA_ENABLE_ROBIN_CHANNELS) && (SL_DMA_ENABLE_ROBIN_CHANNELS == 0)
+#if !defined(SL_CATALOG_DMA_MANAGER_ROUND_ROBIN_PRESENT)
   // Assert if Round Robin channels are not enabled but requested
   EFM_ASSERT((channel_properties & SL_DMA_CHANNEL_USES_ROUND_ROBIN) == 0);
 #endif

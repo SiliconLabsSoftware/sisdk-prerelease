@@ -2200,9 +2200,9 @@ extern sl_rail_packet_queue_entry_t * const sl_rail_builtin_rx_packet_queue_ptr;
  *   that the receive FIFO could include not only packet data received so far,
  *   but also some raw radio-appended info detail bytes that RAIL's
  *   packet-completion processing will subsequently deal with. It's up to the
- *   application to know its packet format well enough to avoid reading this
- *   info because it will corrupt the packet's details and possibly corrupt the
- *   receive FIFO.
+ *   application to know its packet format well enough to know where a packet's
+ *   payload ends and not interpret appended info as payload data coming from
+ *   over the air.
  */
 uint16_t sl_rail_read_rx_fifo(sl_rail_handle_t rail_handle,
                               uint8_t *p_data,

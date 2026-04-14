@@ -34,6 +34,7 @@ component:
   - id: iostream_retarget_stdio
   - id: iostream_stdlib_config
   - id: iostream_recommended_stream
+  - id: udelay
 configuration:
   - name: SL_BOARD_ENABLE_VCOM
     value: 1

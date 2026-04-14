@@ -32,10 +32,10 @@ STARTING WATCHDOG EXAMPLE (FreeRTOS)
 --------------------------------------------------------
 [WDOG] Watchdog 0 created
 [WDOG] Watchdog 1 created
-[APP] Watchdog 0 fed - [APP] Watchdog 1 fed
-[APP] Watchdog 0 fed - [APP] Watchdog 1 fed
-[BTN] Button 0 pressed - Suspended WD 1
-[APP] Watchdog 0 not fed - [APP] Watchdog 1 fed
+[APP] Watchdog 0 fed
+[APP] Watchdog 1 fed
+[BTN] Button 0 pressed - Watchdog 0 feeding disabled
+[APP][ERROR] Watchdog 0 not fed. Waiting for Button 0 to recover...
 ...
 ```
 

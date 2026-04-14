@@ -123,6 +123,20 @@ typedef enum {
   SL_LOG_ENUM_CONFIG_ARG2,
   /** @brief Up to 3 arguments supported */
   SL_LOG_ENUM_CONFIG_ARG3,
+  /** @brief Up to 4 arguments supported */
+  SL_LOG_ENUM_CONFIG_ARG4,
+  /** @brief Up to 5 arguments supported */
+  SL_LOG_ENUM_CONFIG_ARG5,
+  /** @brief Up to 6 arguments supported */
+  SL_LOG_ENUM_CONFIG_ARG6,
+  /** @brief Up to 7 arguments supported */
+  SL_LOG_ENUM_CONFIG_ARG7,
+  /** @brief Up to 8 arguments supported */
+  SL_LOG_ENUM_CONFIG_ARG8,
+  /** @brief Up to 9 arguments supported */
+  SL_LOG_ENUM_CONFIG_ARG9,
+  /** @brief Up to 10 arguments supported */
+  SL_LOG_ENUM_CONFIG_ARG10,
   /** @brief Invalid argument count - used for validation */
   SL_LOG_ENUM_CONFIG_ARG_INVALID,
 } sl_log_args_t;
@@ -164,7 +178,7 @@ typedef __PACKED_STRUCT {
   uint32_t args[SL_LOG_CONFIG_ARG];
   /** @brief Number of valid arguments in the args array (0 to
    * SL_LOG_CONFIG_ARG) */
-  uint16_t arg_count;
+  uint8_t arg_count;
   /** @brief Core identifier that generated the event (0 = host core) */
   uint8_t core_id;
   /** @brief Event flags - bits 1-7: log level, bit 0: event type (0=format
@@ -305,21 +319,111 @@ void sl_log_send_arg2(uint32_t event_id, uint8_t log_level, uint32_t arg1,
 /**
  * @brief Send a log event with three arguments
  *
- * Logs an event with three 32-bit arguments. This is the maximum number
- * of arguments supported by the system for optimal memory efficiency.
+ * Logs an event with three 32-bit arguments. Use sl_log_send_arg4 through
+ * sl_log_send_arg10 for more arguments (when SL_LOG_CONFIG_ARG is configured
+ * accordingly).
  *
  * @param[in] event_id Event identifier (format string pointer or numeric ID)
  * @param[in] log_level Log level combined with event type flags
  * @param[in] arg1 First argument for the log event
  * @param[in] arg2 Second argument for the log event
  * @param[in] arg3 Third argument for the log event
- *
- * @note This function provides the maximum argument capacity. For more
- *       than 3 arguments, consider using multiple log events or structured
- * logging.
  */
 void sl_log_send_arg3(uint32_t event_id, uint8_t log_level, uint32_t arg1,
                       uint32_t arg2, uint32_t arg3);
+
+#if (SL_LOG_CONFIG_ARG >= 4)
+/**
+ * @brief Send a log event with four arguments
+ *
+ * @param[in] event_id Event identifier (format string pointer or numeric ID)
+ * @param[in] log_level Log level combined with event type flags
+ * @param[in] arg1...arg4 Event arguments (in order).
+ */
+void sl_log_send_arg4(uint32_t event_id, uint8_t log_level, uint32_t arg1,
+                      uint32_t arg2, uint32_t arg3, uint32_t arg4);
+#endif
+
+#if (SL_LOG_CONFIG_ARG >= 5)
+/**
+ * @brief Send a log event with four arguments
+ *
+ * @param[in] event_id Event identifier (format string pointer or numeric ID)
+ * @param[in] log_level Log level combined with event type flags
+ * @param[in] arg1...arg5 Event arguments (in order).
+ */
+void sl_log_send_arg5(uint32_t event_id, uint8_t log_level, uint32_t arg1,
+                      uint32_t arg2, uint32_t arg3, uint32_t arg4,
+                      uint32_t arg5);
+#endif
+
+#if (SL_LOG_CONFIG_ARG >= 6)
+/**
+ * @brief Send a log event with four arguments
+ *
+ * @param[in] event_id Event identifier (format string pointer or numeric ID)
+ * @param[in] log_level Log level combined with event type flags
+ * @param[in] arg1...arg6 Event arguments (in order).
+ */
+void sl_log_send_arg6(uint32_t event_id, uint8_t log_level, uint32_t arg1,
+                      uint32_t arg2, uint32_t arg3, uint32_t arg4,
+                      uint32_t arg5, uint32_t arg6);
+#endif
+
+#if (SL_LOG_CONFIG_ARG >= 7)
+/**
+ * @brief Send a log event with four arguments
+ *
+ * @param[in] event_id Event identifier (format string pointer or numeric ID)
+ * @param[in] log_level Log level combined with event type flags
+ * @param[in] arg1...arg7 Event arguments (in order).
+ */
+void sl_log_send_arg7(uint32_t event_id, uint8_t log_level, uint32_t arg1,
+                      uint32_t arg2, uint32_t arg3, uint32_t arg4,
+                      uint32_t arg5, uint32_t arg6, uint32_t arg7);
+#endif
+
+#if (SL_LOG_CONFIG_ARG >= 8)
+/**
+ * @brief Send a log event with four arguments
+ *
+ * @param[in] event_id Event identifier (format string pointer or numeric ID)
+ * @param[in] log_level Log level combined with event type flags
+ * @param[in] arg1...arg8 Event arguments (in order).
+ */
+void sl_log_send_arg8(uint32_t event_id, uint8_t log_level, uint32_t arg1,
+                      uint32_t arg2, uint32_t arg3, uint32_t arg4,
+                      uint32_t arg5, uint32_t arg6, uint32_t arg7,
+                      uint32_t arg8);
+#endif
+
+#if (SL_LOG_CONFIG_ARG >= 9)
+/**
+ * @brief Send a log event with four arguments
+ *
+ * @param[in] event_id Event identifier (format string pointer or numeric ID)
+ * @param[in] log_level Log level combined with event type flags
+ * @param[in] arg1...arg9 Event arguments (in order).
+ */
+void sl_log_send_arg9(uint32_t event_id, uint8_t log_level, uint32_t arg1,
+                      uint32_t arg2, uint32_t arg3, uint32_t arg4,
+                      uint32_t arg5, uint32_t arg6, uint32_t arg7,
+                      uint32_t arg8, uint32_t arg9);
+#endif
+
+#if (SL_LOG_CONFIG_ARG >= 10)
+/**
+ * @brief Send a log event with four arguments
+ *
+ * @param[in] event_id Event identifier (format string pointer or numeric ID)
+ * @param[in] log_level Log level combined with event type flags
+ * @param[in] arg1...arg10 Event arguments (in order).
+ */
+void sl_log_send_arg10(uint32_t event_id, uint8_t log_level, uint32_t arg1,
+                       uint32_t arg2, uint32_t arg3, uint32_t arg4,
+                       uint32_t arg5, uint32_t arg6, uint32_t arg7,
+                       uint32_t arg8, uint32_t arg9, uint32_t arg10);
+#endif
 
 /**
  * @brief Flush the logger buffer

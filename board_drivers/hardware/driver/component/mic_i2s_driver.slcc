@@ -14,10 +14,10 @@ provides:
 - name: mic_i2s_driver
 requires:
 - name: clock_manager_runtime
-- name: emlib_ldma
 - name: hal_usart
+- name: hal_ldma
 - name: gpio
-- name: dmadrv
+- name: dma_manager
 - name: mic_driver
 source:
 - path: src/sl_mic_i2s.c

@@ -66,8 +66,7 @@ requires:
 - name: libcryptosoc
   condition: [device_has_cryptoacc]
 - name: se_manager
-    # PLATFORM-HYD-5151
-  condition: [device_series_2]
+  condition: [device_efx]
 - name: se_manager
   condition: [device_generic_family_sixx301]
 - name: component_catalog

@@ -415,10 +415,19 @@ extern "C" {
 #ifndef DOXYGEN_UNDOCUMENTED
 /// Boolean to indicate whether the selected chip supports BLE
 /// CS (Channel Sounding).
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 4)
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 4) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11))
 #define SL_RAIL_BLE_SUPPORTS_CS SL_RAIL_SUPPORTS_PROTOCOL_BLE
 #else
 #define SL_RAIL_BLE_SUPPORTS_CS 0
+#endif
+
+/// Boolean to indicate whether the selected chip supports BLE
+/// CS (Channel Sounding) HW block.
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 11)
+#define SL_RAIL_BLE_SUPPORTS_CS_HW_BLOCK 1
+#else
+#define SL_RAIL_BLE_SUPPORTS_CS_HW_BLOCK 0
 #endif
 #endif//DOXYGEN_UNDOCUMENTED
 

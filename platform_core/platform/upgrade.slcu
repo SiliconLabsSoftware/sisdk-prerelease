@@ -68,19 +68,9 @@ upgrade:
       id: simplicity_sdk
       version: "2026.6.0"
     component:
-      - script: platform_core/platform/emdrv/component/upgrade_component_spidrv.lua
+      - script: platform_core/platform/emdrv/component/upgrade_component_dmadrv.lua
         description: >
-          The spidrv component is deprecated and replaced by spidrv_usart.
-          Both components configure the same SPIDRV core driver, but the generated configuration header name and symbol prefixes differ.
-          This upgrade will replace `spidrv` with `spidrv_usart` and preserve instance names.
-          IMPORTANT: This upgrade automatically replaces spidrv with spidrv_usart, but the generated symbols have different prefixes:
-            - Old: sl_spidrv_<instance>_handle, SL_SPIDRV_<INSTANCE>_*
-            - New: sl_spidrv_usart_<instance>_handle, SL_SPIDRV_USART_<INSTANCE>_*
-          If your code directly references these handles or config macros, you will need to manually update your source code after the upgrade. For example:
-            - sl_spidrv_exp_handle -> sl_spidrv_usart_exp_handle
-            - SL_SPIDRV_EXP_BITRATE -> SL_SPIDRV_USART_EXP_BITRATE
-  - sdk:
-      id: simplicity_sdk
-      version: "2026.6.0"
+          When DMADRV was configured with round-robin channels (EMDRV_DMADRV_DMA_CH_PRIORITY < EMDRV_DMADRV_DMA_CH_COUNT),
+          this upgrade adds the dma_manager_round_robin component so that round-robin scheduling is preserved.
     configuration:
       - script: platform_core/platform/emdrv/component/upgrade_configuration_dmadrv.lua

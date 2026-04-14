@@ -25,6 +25,7 @@
 
 #include <stdbool.h>
 #include "em_device.h"
+#include "sl_compiler.h"
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
@@ -87,7 +88,8 @@ void Zero_Table();
 /*---------------------------------------------------------------------------
  * Internal References
  *---------------------------------------------------------------------------*/
-__NO_RETURN void Reset_Handler(void);
+__NO_RETURN void Reset_Handler_C(void);
+__NO_PROLOGUE void Reset_Handler(void);
 void Default_Handler(void);
 
 #if defined (__GNUC__)
@@ -358,33 +360,59 @@ const tVectorEntry __VECTOR_TABLE[TOTAL_INTERRUPTS] __VECTOR_TABLE_ATTRIBUTE = {
 #if (defined (__START) && defined (__GNUC__)) || defined(__clang__)
 void Copy_Table()
 {
-  uint32_t        *pSrc, *pDest;
+#if defined(__clang__)
+  typedef struct { uint32_t const* src; uint32_t* dest; uint32_t wlen; }   __copy_table_t;
+  extern const __copy_table_t __copy_table_start__;
+  extern const __copy_table_t __copy_table_end__;
+
+  for (__copy_table_t const* pTable = &__copy_table_start__; pTable < &__copy_table_end__; ++pTable) {
+    for (uint32_t i = 0u; i < pTable->wlen; ++i) {
+      pTable->dest[i] = pTable->src[i];
+    }
+  }
+#else
+  uint32_t        *pSrc;
+  uint32_t        *pDest;
   extern uint32_t __etext;
   extern uint32_t __data_start__;
   extern uint32_t __data_end__;
+
   pSrc  = &__etext;
   pDest = &__data_start__;
 
   for (; pDest < &__data_end__; ) {
     *pDest++ = *pSrc++;
   }
+#endif // defined(__clang__)
 }
 
 void Zero_Table()
 {
+#if defined(__clang__)
+  typedef struct { uint32_t* dest; uint32_t wlen; }   __zero_table_t;
+  extern const __zero_table_t __zero_table_start__;
+  extern const __zero_table_t __zero_table_end__;
+
+  for (__zero_table_t const* pTable = &__zero_table_start__; pTable < &__zero_table_end__; ++pTable) {
+    for (uint32_t i = 0u; i < pTable->wlen; ++i) {
+      pTable->dest[i] = 0UL;
+    }
+  }
+#else
   uint32_t        *pDest;
   extern uint32_t __bss_start__;
   extern uint32_t __bss_end__;
+
   pDest = &__bss_start__;
 
   for (; pDest < &__bss_end__; ) {
     *pDest++ = 0UL;
   }
+#endif // defined(__clang__)
 }
 #endif // (defined (__START) && defined (__GNUC__)) || defined(__clang__)
 
-#if !defined(SL_LEGACY_LINKER) \
-  && !defined(SL_RAM_LINKER)
+#if !defined(SL_LEGACY_LINKER)
 #if defined (__GNUC__) && !defined(__clang__)
 __attribute__((optimize("no-tree-loop-distribute-patterns")))
 #endif
@@ -396,23 +424,24 @@ void CopyMemory(const uint32_t *from, uint32_t *to, uint32_t count)
   }
 }
 #if defined (__GNUC__)
-void CopyToRam(void)
+#if !defined(SL_RAM_LINKER)
+void __USED CopyFunctionsToRam(void)
 {
   extern uint32_t __lma_ramfuncs_start__;
   extern uint32_t __lma_ramfuncs_end__;
   extern uint32_t __ramfuncs_start__;
 
   uint32_t        num_instructions = &__lma_ramfuncs_end__ - &__lma_ramfuncs_start__;
-
-  // Copy RAM functions
   CopyMemory(&__lma_ramfuncs_start__, &__ramfuncs_start__, num_instructions);
 }
+#endif // !defined(SL_RAM_LINKER)
 #elif defined (__ICCARM__)
 #pragma language=save
 #pragma language=extended
+#if !defined(SL_RAM_LINKER)
 #pragma section="text_ram"
 #pragma section="text_ram_init"
-void CopyToRam(void)
+void CopyFunctionsToRam(void)
 {
   uint32_t num_instructions = (__section_size("text_ram") + 3) / 4;
   uint32_t * from           = __section_begin("text_ram_init");
@@ -420,9 +449,10 @@ void CopyToRam(void)
 
   CopyMemory(from, to, num_instructions);
 }
+#endif // !defined(SL_RAM_LINKER)
 #pragma language=restore
 #endif // defined(__GNUC__)
-#endif // !defined(SL_LEGACY_LINKER) && !defined(SL_RAM_LINKER)
+#endif // !defined(SL_LEGACY_LINKER)
 #if !defined(SL_RAM_LINKER)             \
   && !defined(SL_SRAM_DMEM_ECC_DISABLE) \
   && !defined(SL_CATALOG_GECKO_BOOTLOADER_INTERFACE_PRESENT)
@@ -532,9 +562,21 @@ __STATIC_FORCEINLINE void ecc_mem_init(uint32_t *start, uint32_t *end)
 }
 #endif // !defined(SL_RAM_LINKER) && !defined(SL_SRAM_DMEM_ECC_DISABLE) && !defined(SL_CATALOG_GECKO_BOOTLOADER_INTERFACE_PRESENT)
 /*---------------------------------------------------------------------------
- * Reset Handler called on controller reset
+ * Reset Handler (naked trampoline). Branches to Reset_Handler_C where the
+ * C environment is initialized. This trampoline exists as a hook point for
+ * future pre-C-environment instructions.
  *---------------------------------------------------------------------------*/
-__NO_RETURN void Reset_Handler(void)
+__NO_PROLOGUE void Reset_Handler(void)
+{
+  __ASM volatile (
+    "b     Reset_Handler_C                             \n"
+    );
+}
+
+/*---------------------------------------------------------------------------
+ * Main reset initialization logic, called after the assembly Reset_Handler.
+ *---------------------------------------------------------------------------*/
+__NO_RETURN __USED void Reset_Handler_C(void)
 {
 #if !defined(SL_RAM_LINKER) \
   && !defined(SL_SRAM_DMEM_ECC_DISABLE)
@@ -603,9 +645,8 @@ __NO_RETURN void Reset_Handler(void)
   SystemInit();                    /* CMSIS System Initialization */
   #endif
 
-#if !defined(SL_LEGACY_LINKER) \
-  && !defined(SL_RAM_LINKER)
-  CopyToRam();
+#if !defined(SL_LEGACY_LINKER) && !defined(SL_RAM_LINKER)
+  CopyFunctionsToRam();
 #endif // !defined(SL_LEGACY_LINKER) && !defined(SL_RAM_LINKER)
 
 #if defined(BOOTLOADER_ENABLE) || defined(USER_SYSTEM_INIT_ENABLE)

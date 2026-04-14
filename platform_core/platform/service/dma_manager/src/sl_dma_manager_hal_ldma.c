@@ -36,7 +36,6 @@
 #include "sl_bit.h"
 #include "sl_device_peripheral.h"
 #include "sli_dma_manager_internal.h"
-#include "sl_dma_manager_config.h"
 #include "sl_clock_manager.h"
 #include "sl_interrupt_manager.h"
 #include "sl_hal_ldma.h"
@@ -196,7 +195,7 @@ void sli_dma_manager_hal_init(const sl_peripheral_dma_t dma_peripheral)
   sl_hal_ldma_enable(ldma_hw_instance);
 }
 
-#if defined(SL_DMA_ENABLE_ROBIN_CHANNELS) && (SL_DMA_ENABLE_ROBIN_CHANNELS == 1)
+#if defined(SL_CATALOG_DMA_MANAGER_ROUND_ROBIN_PRESENT)
 /***************************************************************************//**
  * Sets the number of round robin channels in LDMA Hardware instance.
  ******************************************************************************/

@@ -473,10 +473,16 @@ heap_size = heap_limit - __HeapBase;
     KEEP(*(.simee*))
   } > DUMMY :dummy_seg
 
-{%- if logger_enable %}
+{%- if log_section_enable %}
+{%- if log_compact_output_enable %}
   .log_fmt (INFO) : {
     KEEP(*(.log_fmt*))
   } > FLASH :empty
+{%- else %}
+  .log_fmt : {
+    KEEP(*(.log_fmt*))
+  } > FLASH :readonly
+{%- endif %}
 {%- endif %}
 
   __ramfuncs_start__ = __vma_ramfuncs_start__;

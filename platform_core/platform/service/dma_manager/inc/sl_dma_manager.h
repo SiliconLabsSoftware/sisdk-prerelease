@@ -89,27 +89,6 @@ sl_status_t sl_dma_manager_init(sl_dma_handle_t *dma_handle,
                                 sl_peripheral_dma_t dma_peripheral);
 
 /***************************************************************************//**
- * Sets the number of round robin channels.
- *
- * @param[in]  dma_handle Pointer to DMA handle. NULL will take the default
- *                        DMA instance.
- *
- * @param[in]  nbr_round_robin_channels Number of round robin channels.
- *
- * @return 0 if successful. Error code otherwise.
- *
- * @note By default, all channels are fixed priorities (no round-robin).
- *
- * @note If used, this function must be called only once and before any channel
- *       is allocated.
- *
- * @note This function is only available if SL_DMA_ENABLE_ROBIN_CHANNELS is
- *       set to 1.
- ******************************************************************************/
-sl_status_t sl_dma_manager_set_nbr_round_robin_channels(sl_dma_handle_t *dma_handle,
-                                                        uint8_t nbr_round_robin_channels);
-
-/***************************************************************************//**
  * Gets the default DMA handle.
  *
  * @param[out] dma_handle Pointer to variable that will receive the default DMA handle.

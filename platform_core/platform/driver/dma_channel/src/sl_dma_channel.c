@@ -142,7 +142,7 @@ static bool is_active_descriptor(const LDMA_TypeDef *ldma,
  *         successor.
  ******************************************************************************/
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static sl_dma_channel_xfer_descriptor_t* get_next_descriptor(sl_dma_channel_xfer_descriptor_t* desc);
+static sl_dma_channel_xfer_descriptor_t * get_next_descriptor(sl_dma_channel_xfer_descriptor_t * desc);
 
 /***************************************************************************//**
  * @brief Populate hardware descriptor fields for a DMA transfer.
@@ -512,8 +512,8 @@ sl_status_t sl_dma_channel_deinit(sl_dma_channel_handle_t *handle)
   sl_hal_ldma_disable_interrupts(ldma, 1UL << channel_number);
 #endif
 
-  // Disable channel requests
-  sl_hal_ldma_disable_channel_request(ldma, channel_number);
+  // Enable channel requests (This is the default state for the channel)
+  sl_hal_ldma_enable_channel_request(ldma, channel_number);
 
   // Reset peripheral signal
   sl_dma_channel_set_peripheral_signal(handle, NULL);
@@ -1202,7 +1202,7 @@ sl_status_t sl_dma_channel_submit_triple_buffered_transfer_p2m(sl_dma_channel_ha
   sl_dma_channel_transfer_t buf1_transfer;
   sl_dma_channel_transfer_t buf2_transfer;
   sl_dma_channel_transfer_t buf3_transfer;
-  
+
   buf1_transfer = (sl_dma_channel_transfer_t) {
     .source = source,
     .destination = destination,
@@ -1429,9 +1429,9 @@ static bool is_transfer_buffer_aligned(const sl_dma_channel_transfer_t *transfer
   return true;
 }
 
-static bool is_active_descriptor( const LDMA_TypeDef *ldma,
-                                  uint8_t ch,
-                                  const sl_dma_channel_xfer_descriptor_t* desc)
+static bool is_active_descriptor(const LDMA_TypeDef *ldma,
+                                 uint8_t ch,
+                                 const sl_dma_channel_xfer_descriptor_t* desc)
 {
   bool is_active = false;
 
@@ -1629,10 +1629,10 @@ static void cleanup_allocated_descriptors(const sl_dma_channel_handle_t *handle,
 }
 
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-static sl_dma_channel_xfer_descriptor_t* process_descriptor(sl_dma_channel_handle_t * handle,
-                                                            sl_dma_channel_xfer_descriptor_t * descriptor,
-                                                            bool error,
-                                                            bool aborted)
+static sl_dma_channel_xfer_descriptor_t * process_descriptor(sl_dma_channel_handle_t * handle,
+                                                             sl_dma_channel_xfer_descriptor_t * descriptor,
+                                                             bool error,
+                                                             bool aborted)
 {
   // Call the user callback if present and if callback was requested for this descriptor.
   if (handle->callback != NULL && descriptor->flags.callback_on_complete) {
@@ -1717,7 +1717,7 @@ static void sl_dma_channel_common_irq_handler(void)
     // the descriptor from the DMA channel's descriptor list and calling the
     // user's callback for each descriptor that requests the callback.
     process_completed_descriptors(handle);
-  } else if ( handle->mode == SL_DMA_CHANNEL_MODE_LOOPING 
+  } else if ( handle->mode == SL_DMA_CHANNEL_MODE_LOOPING
               && handle->callback != NULL ) {
     // When the channel is in looping mode, we don't want to consume descriptors
     // from the channel's descriptor list, instead we will call the user's

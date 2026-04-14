@@ -42,8 +42,8 @@
 #define SL_DEVICE_INIT_LFXO_MODE           cmuLfxoOscMode_Crystal
 
 // <o SL_DEVICE_INIT_LFXO_CTUNE> CTUNE <0-127>
-// <i> Default: 63
-#define SL_DEVICE_INIT_LFXO_CTUNE          40
+// <i> Default: 41
+#define SL_DEVICE_INIT_LFXO_CTUNE          41
 
 // <o SL_DEVICE_INIT_LFXO_PRECISION> LFXO precision in PPM <0-65535>
 // <i> Default: 50

@@ -23,6 +23,7 @@
 #include "sl_sleeptimer.h"
 
 #include "sl_watchdog_manager.h"
+#include "sl_watchdog_manager_config.h"
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
 #endif
@@ -31,8 +32,8 @@
  *******************************   DEFINES   ***********************************
  ******************************************************************************/
 
-#ifndef TOOGLE_DELAY_MS
-#define TOOGLE_DELAY_MS         1000
+#ifndef TOGGLE_DELAY_MS
+#define TOGGLE_DELAY_MS         1000
 #endif
 
 #ifndef BUTTON_INSTANCE_0
@@ -69,19 +70,21 @@ static  bool watchdog_1_faulty = false;
  **************************   GLOBAL FUNCTIONS   *******************************
  ******************************************************************************/
 
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)  && !defined(_WDOG_CFG_EM1RUN_MASK)
-/***************************************************************************//**
- * Force the devices without EM1RUN always be awake.
- *
- * This function is used for the devices that don't have EM1RUN while
- * the application includes power manager component.
- *
- ******************************************************************************/
-bool app_is_ok_to_sleep(void)
-{
-  return false; // prevent the device from sleeping
-}
-#endif
+ #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+ /***************************************************************************//**
+  * Allow sleep; log EM run configuration once (see sl_watchdog_manager_config.h).
+  *
+  * EMx_RUN selects whether the hardware WDOG counter runs in EM1/EM2/EM3. When
+  * zero for a given mode, the counter does not run there; on parts without the
+  * corresponding EMxRUN capability, the manager may disable WDOG around sleep.
+  *
+  ******************************************************************************/
+ bool app_is_ok_to_sleep(void)
+ {
+   printf("[PM] Allow sleep\r\n");
+   return true;
+ }
+ #endif
 
 /***************************************************************************//**
  * Callback on button change.
@@ -93,13 +96,12 @@ bool app_is_ok_to_sleep(void)
 
 void sl_button_on_change(const sl_button_t *handle)
 {
+  // Called from GPIO interrupt context — avoid printf here; log from watchdog_process_action.
   if (sl_button_get_state(handle) == SL_SIMPLE_BUTTON_PRESSED) {
     if (&BUTTON_INSTANCE_0 == handle) {
       btn_pressed[0] = !btn_pressed[0];
-      printf("[BTN] Button 0 pressed\r\n");
     } else if (&BUTTON_INSTANCE_1 == handle) {
       btn_pressed[1] = !btn_pressed[1];
-      printf("[BTN] Button 1 pressed\r\n");
     }
   }
 }
@@ -112,6 +114,13 @@ void watchdog_init(void)
   printf("\r\n***************************************************\r\n");
   printf("STARTING WATCHDOG EXAMPLE\r\n");
   printf("--------------------------------------------------------\r\n");
+  #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  printf("[PM] WDOG EM run (config): EM1=%u EM2=%u EM3=%u - "
+    "1=runs in that EM, 0=stopped; without HW EMxRUN, manager may disable WDOG for sleep.\r\n",
+    (unsigned int)SL_WATCHDOG_MANAGER_EM1_RUN,
+    (unsigned int)SL_WATCHDOG_MANAGER_EM2_RUN,
+    (unsigned int)SL_WATCHDOG_MANAGER_EM3_RUN);
+  #endif
   if (watchdog_0_faulty == true) {
     printf("[WDOG] Watchdog 0 was fault last time\r\n");
   }
@@ -141,7 +150,7 @@ void watchdog_init(void)
 
   // Create timer for waking up the system periodically.
   sl_sleeptimer_start_periodic_timer_ms(&timer,
-                                        TOOGLE_DELAY_MS,
+                                        TOGGLE_DELAY_MS,
                                         on_timeout, NULL,
                                         0,
                                         SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG);
@@ -154,23 +163,45 @@ void watchdog_init(void)
  ******************************************************************************/
 void watchdog_process_action(void)
 {
+  static bool prev_btn0_feed = true;
+  static bool prev_btn1_feed = true;
+
   if (toggle_timeout == true) {
+    bool cur0 = btn_pressed[0];
+    if (cur0 != prev_btn0_feed) {
+      prev_btn0_feed = cur0;
+      printf("[BTN] Button 0 pressed - Watchdog 0 %s\r\n",
+             cur0 ? "feeding enabled" : "feeding disabled");
+    }
+    bool cur1 = btn_pressed[1];
+    if (cur1 != prev_btn1_feed) {
+      prev_btn1_feed = cur1;
+      printf("[BTN] Button 1 pressed - Watchdog 1 %s\r\n",
+             cur1 ? "feeding enabled" : "feeding disabled");
+    }
+
     if (btn_pressed[0] == true) {
       sl_watchdog_manager_feed(&my_watchdog_0);
-      printf("[APP] Watchdog 0 fed");
+      printf("[APP] Watchdog 0 fed\r\n");
     } else {
       // Do nothing
-      printf("[APP] Watchdog 0 not fed");
+      printf("[APP][ERROR]  Watchdog 0 not fed. Waiting for Button 0 to recover...\r\n");
+      while (btn_pressed[0] == false) {
+        // Wait for button 0 to be pressed
+        sl_udelay_wait(100000);
+      }
     }
-    printf(" - ");
     if (btn_pressed[1] == true) {
       sl_watchdog_manager_feed(&my_watchdog_1);
-      printf("Watchdog 1 fed");
+      printf("[APP] Watchdog 1 fed\r\n");
     } else {
       // Do nothing
-      printf("Watchdog 1 not fed");
+      printf("[APP][ERROR] Watchdog 1 not fed. Waiting for Button 1 to recover...\r\n");
+      while (btn_pressed[1] == false) {
+        // Wait for button 1 to be pressed
+        sl_udelay_wait(100000);
+      }
     }
-    printf("\r\n");
     toggle_timeout = false;
   }
 }

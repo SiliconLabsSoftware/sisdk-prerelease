@@ -64,6 +64,9 @@ recommends:
 - id: memory_manager_pool_power_aware
   vendor: silabs
   condition: [device_generic_family_sixx302]
+- id: memory_manager_pool_power_aware
+  vendor: silabs
+  condition: [device_generic_family_sixx381]
 - id: memory_manager_pool
   vendor: silabs
   condition: [device_series_2]

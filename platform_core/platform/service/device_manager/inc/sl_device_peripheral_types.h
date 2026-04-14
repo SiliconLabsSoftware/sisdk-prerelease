@@ -185,7 +185,6 @@ typedef struct sl_peripheral_can {
   uint32_t base;                           ///< Peripheral base address.
   sl_clock_branch_t clk_branch;            ///< Peripheral clock branch.
   sl_bus_clock_t bus_clock;                ///< Peripheral bus clock.
-  sl_dma_signal_t dma_signal_dbg;          ///< DBG channel
   sl_dma_signal_t dma_signal_rxfl0;        ///< RXFL0 DMA channel
   sl_dma_signal_t dma_signal_rxfl1;        ///< RXFL1 DMA channel
   sl_dma_signal_t dma_signal_txfl0;        ///< TXFL0 DMA channel

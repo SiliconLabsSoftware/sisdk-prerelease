@@ -138,6 +138,7 @@ extern sli_bgapi_component_deinit_func_t sli_bt_rtos_adaptation_deinit;
 extern sli_bgapi_component_init_func_t sli_bt_core_init;
 extern sli_bgapi_component_start_func_t sli_bt_core_start;
 extern sli_bgapi_component_deinit_func_t sli_bt_core_deinit;
+extern sli_bgapi_component_deinit_func_t sli_bt_core_timer_deinit;
 extern sli_bgapi_component_init_func_t sli_bt_system_on_demand_start_init;
 extern sli_bgapi_component_init_func_t sli_bt_system_init;
 extern sli_bgapi_component_deinit_func_t sli_bt_system_deinit;
@@ -145,6 +146,9 @@ extern sli_bgapi_component_start_func_t sli_bt_crypto_lib_psa_start;
 extern sli_bgapi_component_start_func_t sli_bt_builtin_bonding_database_start;
 extern sli_bgapi_component_deinit_func_t sli_bt_builtin_bonding_database_deinit;
 extern sli_bgapi_component_init_func_t sli_bt_external_bondingdb_init;
+extern sli_bgapi_component_init_func_t sli_bt_local_privacy_init;
+extern sli_bgapi_component_stop_func_t sli_bt_local_privacy_stop;
+extern sli_bgapi_component_deinit_func_t sli_bt_local_privacy_deinit;
 extern sli_bgapi_component_init_func_t sli_bt_sm_init;
 extern sli_bgapi_component_start_func_t sli_bt_sm_start;
 extern sli_bgapi_component_deinit_func_t sli_bt_sm_deinit;
@@ -207,6 +211,9 @@ static const sli_bgapi_component_init_info_t bt_component_init_info[] = {
   { sli_bt_system_init, &bt_config },
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_EXTERNAL_BONDING_DATABASE_PRESENT)
   { sli_bt_external_bondingdb_init, &sli_bt_external_bondingdb_config },
+#endif
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_LOCAL_PRIVACY_PRESENT)
+  { sli_bt_local_privacy_init, NULL },
 #endif
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_SM_PRESENT)
   { sli_bt_sm_init, NULL },
@@ -334,6 +341,9 @@ static sli_bgapi_component_stop_func_t * const bt_component_stop_functions[] = {
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_ADVERTISER_PRESENT)
   sli_bt_advertiser_stop,
 #endif
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_LOCAL_PRIVACY_PRESENT)
+  sli_bt_local_privacy_stop,
+#endif
   NULL
 };
 
@@ -381,10 +391,14 @@ static sli_bgapi_component_deinit_func_t * const bt_component_deinit_functions[]
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_SM_PRESENT)
   sli_bt_sm_deinit,
 #endif
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_LOCAL_PRIVACY_PRESENT)
+  sli_bt_local_privacy_deinit,
+#endif
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_BUILTIN_BONDING_DATABASE_PRESENT)
   sli_bt_builtin_bonding_database_deinit,
 #endif
   sli_bt_system_deinit,
+  sli_bt_core_timer_deinit,
   sli_bt_core_deinit,
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   sli_bt_rtos_adaptation_deinit,

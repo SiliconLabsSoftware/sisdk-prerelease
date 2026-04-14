@@ -113,6 +113,9 @@
   #define SLI_SE_SUPPORTS_RSA
   #define SLI_SE_SUPPORTS_SAE
   #endif
+  #if !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)
+  #define SLI_SE_SUPPORTS_EXTENDED_TAMPER_STATUS
+  #endif
 #endif
 
 #if defined(SLI_SE_MAJOR_VERSION_ONE)

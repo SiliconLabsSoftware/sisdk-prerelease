@@ -301,7 +301,7 @@ library:
   - rail_mux
 - path: build/llvm/aarch64-android-ndk-r25c/zigbee-pro-router-stack/release/libzigbee-pro-router-stack.a
   condition:
-  - toolchain_llvm
+  - toolchain_gcc
   - aarch64-android-ndk-r25c
   - zigbee_stack_unix
   - zigbee_multi_network
@@ -319,7 +319,7 @@ library:
   - rail_mux
 - path: build/llvm/aarch64-android-ndk-r25c/zigbee-pro-router-stack/release_singlenetwork/libzigbee-pro-router-stack.a
   condition:
-  - toolchain_llvm
+  - toolchain_gcc
   - aarch64-android-ndk-r25c
   - zigbee_stack_unix
   unless:

@@ -449,6 +449,11 @@ sl_memory_heap_t *sli_memory_get_heap_handle(const void *block);
 sl_memory_region_t sli_memory_heap_get_heap_region(const sl_memory_heap_t *heap);
 
 /***************************************************************************//**
+* Initializes the heap region.
+******************************************************************************/
+void sli_memory_initialize_heap_region(void);
+
+/***************************************************************************//**
  * Creates the Stack at the end of the Heap.
  ******************************************************************************/
 void sli_memory_create_stack(void);

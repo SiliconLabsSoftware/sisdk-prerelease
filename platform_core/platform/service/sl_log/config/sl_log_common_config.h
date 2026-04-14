@@ -58,6 +58,20 @@
 #define SL_LOG_CONFIG_ARG2 2
 /** @brief Up to 3 arguments supported */
 #define SL_LOG_CONFIG_ARG3 3
+/** @brief Up to 4 arguments supported */
+#define SL_LOG_CONFIG_ARG4 4
+/** @brief Up to 5 arguments supported */
+#define SL_LOG_CONFIG_ARG5 5
+/** @brief Up to 6 arguments supported */
+#define SL_LOG_CONFIG_ARG6 6
+/** @brief Up to 7 arguments supported */
+#define SL_LOG_CONFIG_ARG7 7
+/** @brief Up to 8 arguments supported */
+#define SL_LOG_CONFIG_ARG8 8
+/** @brief Up to 9 arguments supported */
+#define SL_LOG_CONFIG_ARG9 9
+/** @brief Up to 10 arguments supported */
+#define SL_LOG_CONFIG_ARG10 10
 
 // <o SL_LOG_CONFIG_LEVEL_COMPILE_TIME> LOG_LEVEL
 // <SL_LOG_CONFIG_LEVEL_NONE => NONE
@@ -65,14 +79,21 @@
 // <SL_LOG_CONFIG_LEVEL_INFO => INFO
 // <SL_LOG_CONFIG_LEVEL_WARN => WARN
 // <SL_LOG_CONFIG_LEVEL_ERROR => ERROR
-// <i> Default: SL_LOG_CONFIG_LEVEL_INFO
-#define SL_LOG_CONFIG_LEVEL_COMPILE_TIME SL_LOG_CONFIG_LEVEL_INFO
+// <i> Default: SL_LOG_CONFIG_LEVEL_ERROR
+#define SL_LOG_CONFIG_LEVEL_COMPILE_TIME SL_LOG_CONFIG_LEVEL_ERROR
 
 // <o SL_LOG_CONFIG_ARG> CONFIG_MAX_ARGS
 // <SL_LOG_CONFIG_ARG0 => 0
 // <SL_LOG_CONFIG_ARG1 => 1
 // <SL_LOG_CONFIG_ARG2 => 2
 // <SL_LOG_CONFIG_ARG3 => 3
+// <SL_LOG_CONFIG_ARG4 => 4
+// <SL_LOG_CONFIG_ARG5 => 5
+// <SL_LOG_CONFIG_ARG6 => 6
+// <SL_LOG_CONFIG_ARG7 => 7
+// <SL_LOG_CONFIG_ARG8 => 8
+// <SL_LOG_CONFIG_ARG9 => 9
+// <SL_LOG_CONFIG_ARG10 => 10
 // <i> Default: 3
 #define SL_LOG_CONFIG_ARG SL_LOG_CONFIG_ARG3
 

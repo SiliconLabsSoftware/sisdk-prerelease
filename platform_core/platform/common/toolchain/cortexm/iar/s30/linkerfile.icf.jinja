@@ -268,12 +268,14 @@ define block nvm with alignment = {{ flash_page_size }}
 };
 keep { block nvm };
 
-{%- if logger_enable %}
+{%- if log_section_enable %}
+{%- if log_compact_output_enable %}
 define block logger with alignment = 4
 {
   section log_fmt,
 };
 keep { block logger };
+{%- endif %}
 {%- endif %}
 {%- endif %} {#- trustzone_secure #}
 {%- if trustzone_secure %}
@@ -327,6 +329,11 @@ define block .text with fixed order
 {
   readonly section .intvec,
   readonly
+{%- if log_section_enable %}
+{%- if not log_compact_output_enable %}
+  , readonly section log_fmt
+{%- endif %}
+{%- endif %}
 };
 
 {%- for component in code_classification_components %}
@@ -526,8 +533,10 @@ do not initialize
   section .heap
 {%- endif %}
 {%- if trustzone_secure is not defined %}
-{%- if logger_enable %}
+{%- if log_section_enable %}
+{%- if log_compact_output_enable %}
   , section log_fmt
+{%- endif %}
 {%- endif %}
 {%- endif %}
 };
@@ -560,8 +569,10 @@ place at end of MAIN_FLASH_region {
   block zwavenvm,
 {%- endif %}
   block nvm,
-{%- if logger_enable %}
+{%- if log_section_enable %}
+{%- if log_compact_output_enable %}
   block logger,
+{%- endif %}
 {%- endif %}
 {%- endif %} {#- trustzone_secure #}
 {%- if trustzone_secure %}

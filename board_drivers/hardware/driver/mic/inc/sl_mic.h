@@ -49,11 +49,13 @@ extern "C" {
 
  #include "sl_mic.h"
 
+ #include "sl_common.h"
+
  #define MIC_SAMPLE_RATE            44100
  #define MIC_SAMPLE_BUFFER_SIZE     1024
  #define MIC_N_CHANNELS             2
 
-   static int16_t buffer[MIC_SAMPLE_BUFFER_SIZE * MIC_N_CHANNELS];
+   static int16_t buffer[MIC_SAMPLE_BUFFER_SIZE * MIC_N_CHANNELS] SL_ATTRIBUTE_ALIGN(4);
 
    int main( void )
    {

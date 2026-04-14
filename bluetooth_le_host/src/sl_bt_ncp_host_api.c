@@ -627,6 +627,26 @@ sl_status_t sl_bt_gap_set_privacy_mode(uint8_t privacy, uint8_t interval)
     return rsp->data.rsp_gap_set_privacy_mode.result;
 }
 
+sl_status_t sl_bt_gap_set_privacy_mode_with_rpa_randomization(uint8_t privacy,
+                                                              uint8_t interval_min_minutes,
+                                                              uint8_t interval_max_minutes)
+{
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+    size_t cmd_payload_len = sizeof(sl_bt_cmd_gap_set_privacy_mode_with_rpa_randomization_t);
+
+    cmd->header = SLI_BGAPI_MSG_HEADER(sli_bt_gap_class_id,
+                                       sli_bt_gap_set_privacy_mode_with_rpa_randomization_command_id,
+                                       (uint8_t) sl_bgapi_msg_type_cmd | (uint8_t) sl_bgapi_dev_type_bt,
+                                       cmd_payload_len);
+    cmd->data.cmd_gap_set_privacy_mode_with_rpa_randomization.privacy = privacy;
+    cmd->data.cmd_gap_set_privacy_mode_with_rpa_randomization.interval_min_minutes = interval_min_minutes;
+    cmd->data.cmd_gap_set_privacy_mode_with_rpa_randomization.interval_max_minutes = interval_max_minutes;
+    sl_bt_host_handle_command();
+
+    return rsp->data.rsp_gap_set_privacy_mode_with_rpa_randomization.result;
+}
+
 sl_status_t sl_bt_gap_set_data_channel_classification(size_t channel_map_len,
                                                       const uint8_t* channel_map)
 {

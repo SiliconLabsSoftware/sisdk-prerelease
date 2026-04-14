@@ -2463,9 +2463,9 @@ RAIL_Status_t RAILCb_SetupRxFifo(RAIL_Handle_t railHandle);
  *   that the receive FIFO could include not only packet data received so far,
  *   but also some raw radio-appended info detail bytes that RAIL's
  *   packet-completion processing will subsequently deal with. It's up to the
- *   application to know its packet format well enough to avoid reading this
- *   info because it will corrupt the packet's details and possibly corrupt the
- *   receive FIFO.
+ *   application to know its packet format well enough to know where a packet's
+ *   payload ends and not interpret appended info as payload data coming from
+ *   over the air.
  *
  * @deprecated RAIL 2.x synonym of \ref sl_rail_read_rx_fifo().
  */

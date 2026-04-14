@@ -31,6 +31,7 @@
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
+#include <inttypes.h>
 #include "sl_component_catalog.h"
 #include "app_log.h"
 #include "sl_app_common.h"
@@ -133,9 +134,9 @@ void emberAfInitCallback(void)
                                 &security_key_id);
 
     if (psa_status == PSA_SUCCESS) {
-      app_log_info("Security key import successful, key id: %lu\n", security_key_id);
+      app_log_info("Security key import successful, key id: %" PRIu32 "\n", security_key_id);
     } else {
-      app_log_info("Security Key import failed: %ld\n", psa_status);
+      app_log_info("Security Key import failed: %" PRId32 "\n", psa_status);
     }
   } else {
     app_log_info("PSA AES key found, using the existing one.\n");
@@ -144,7 +145,7 @@ void emberAfInitCallback(void)
   em_status = emberSetPsaSecurityKey(security_key_id);
 
   em_status = emberNetworkInit();
-  app_log_info("Network status 0x%02X\n", em_status);
+  app_log_info("Network status 0x%02" PRIX8 "\n", em_status);
 
   if (em_status == EMBER_SUCCESS) {
     emberEventControlSetActive(*report_control);

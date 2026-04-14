@@ -50,135 +50,53 @@
 #ifndef SL_ZIGBEE_TEST
 #define SL_ZIGBEE_AF_PRINT_CORE 0x0001
 
-#ifdef sl_zigbee_af_core_print
 #undef sl_zigbee_af_core_print
-#endif //sl_zigbee_af_core_print
 
 #if !defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT)
-#ifdef sl_zigbee_af_print_big_endian_eui64
 #undef sl_zigbee_af_print_big_endian_eui64
-#endif //sl_zigbee_af_print_big_endian_eui64
 #endif // !SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 
-#ifdef sl_zigbee_af_core_println
 #undef sl_zigbee_af_core_println
-#endif //sl_zigbee_af_core_println
-
-#ifdef sl_zigbee_af_cli_print
 #undef sl_zigbee_af_cli_print
-#endif //sl_zigbee_af_cli_print
-
-#ifdef sl_zigbee_af_cli_println
 #undef sl_zigbee_af_cli_println
-#endif //sl_zigbee_af_cli_println
-
-#ifdef sl_zigbee_af_green_power_cluster_print
 #undef sl_zigbee_af_green_power_cluster_print
-#endif //sl_zigbee_af_green_power_cluster_print
-
-#ifdef sl_zigbee_af_green_power_cluster_println
 #undef sl_zigbee_af_green_power_cluster_println
-#endif //sl_zigbee_af_green_power_cluster_println
-
-#ifdef sl_zigbee_af_green_power_cluster_print_buffer
 #undef sl_zigbee_af_green_power_cluster_print_buffer
-#endif //sl_zigbee_af_green_power_cluster_print_buffer
-
-#ifdef sl_zigbee_af_green_power_cluster_print_string
 #undef sl_zigbee_af_green_power_cluster_print_string
-#endif //sl_zigbee_af_green_power_cluster_print_string
-
-#ifdef sl_zigbee_af_debug_print
 #undef sl_zigbee_af_debug_print
-#endif //sl_zigbee_af_debug_print
-
-#ifdef sl_zigbee_af_debug_println
 #undef sl_zigbee_af_debug_println
-#endif //sl_zigbee_af_debug_println
-
-#ifdef sl_zigbee_af_zdo_print
 #undef sl_zigbee_af_zdo_print
-#endif // sl_zigbee_af_zdo_print
-
-#ifdef sl_zigbee_af_attributes_print
 #undef sl_zigbee_af_attributes_print
-#endif // sl_zigbee_af_attributes_print
-
-#ifdef sl_zigbee_af_service_discovery_print
 #undef sl_zigbee_af_service_discovery_print
-#endif // sl_zigbee_af_service_discovery_print
 
-#ifdef sl_zigbee_af_print
 #undef sl_zigbee_af_print
-#endif //sl_zigbee_af_print
-
-#ifdef sl_zigbee_af_app_println
 #undef sl_zigbee_af_app_println
-#endif //sl_zigbee_af_app_println
-
-#ifdef sl_zigbee_af_app_print
 #undef sl_zigbee_af_app_print
-#endif //sl_zigbee_af_app_print
-
-#ifdef sl_zigbee_af_attributes_print_buffer
 #undef sl_zigbee_af_attributes_print_buffer
-#endif //sl_zigbee_af_attributes_print_buffer
-
-#ifdef sl_zigbee_af_app_print_buffer
 #undef sl_zigbee_af_app_print_buffer
-#endif //sl_zigbee_af_app_print_buffer
-
-#ifdef sl_zigbee_af_debug_print_buffer
 #undef sl_zigbee_af_debug_print_buffer
-#endif //sl_zigbee_af_debug_print_buffer
-
-#ifdef sl_zigbee_af_print_buffer
 #undef sl_zigbee_af_print_buffer
-#endif //sl_zigbee_af_print_buffer
-
-#ifdef sl_zigbee_af_debug_flush
 #undef sl_zigbee_af_debug_flush
-#endif // sl_zigbee_af_debug_flush
 #define sl_zigbee_af_debug_flush()
 
-#ifdef sl_zigbee_af_attributes_println
 #undef sl_zigbee_af_attributes_println
-#endif // sl_zigbee_af_attributes_println
-
-#ifdef sl_zigbee_af_app_flush
 #undef sl_zigbee_af_app_flush
-#endif // sl_zigbee_af_app_flush
 #define sl_zigbee_af_app_flush()
 
-#ifdef sl_zigbee_af_ota_bootload_cluster_println
+#undef sl_zigbee_af_cli_flush
+#define sl_zigbee_af_cli_flush()
+
 #undef sl_zigbee_af_ota_bootload_cluster_println
-#endif // sl_zigbee_af_ota_bootload_cluster_println
-
-#ifdef sl_zigbee_af_zdo_println
 #undef sl_zigbee_af_zdo_println
-#endif // sl_zigbee_af_zdo_println
-
-#ifdef sl_zigbee_af_service_discovery_println
 #undef sl_zigbee_af_service_discovery_println
-#endif // sl_zigbee_af_service_discovery_println
-
-#ifdef sl_zigbee_af_println
 #undef sl_zigbee_af_println
-#endif // sl_zigbee_af_println
-
-#ifdef sl_zigbee_af_core_flush
 #undef sl_zigbee_af_core_flush
-#endif // sl_zigbee_af_core_flush
 #define sl_zigbee_af_core_flush()
 
-#ifdef sl_zigbee_af_attributes_flush
 #undef sl_zigbee_af_attributes_flush
-#endif // sl_zigbee_af_attributes_flush
 #define sl_zigbee_af_attributes_flush()
 
-#ifdef sl_zigbee_af_app_debug_exec
 #undef sl_zigbee_af_app_debug_exec
-#endif // sl_zigbee_af_app_debug_exec
 #define sl_zigbee_af_app_debug_exec(x) if ( true ) { x; }
 
 extern uint16_t sl_zigbee_af_print_active_area;

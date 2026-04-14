@@ -32,7 +32,11 @@ requires:
 - name: slist
 - name: memory_manager
 - name: power_manager
+  condition:
+  - device_cortexm
 - name: sl_core
+  condition:
+  - device_cortexm
 - name: component_catalog
 root_path: platform_core/app/common/util/app_rta
 include:

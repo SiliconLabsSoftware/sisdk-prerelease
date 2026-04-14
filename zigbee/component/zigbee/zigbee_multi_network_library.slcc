@@ -107,7 +107,7 @@ library:
   - zigbee_phy_2_4_subghz_switch_coordinator
 - path: build/llvm/aarch64-android-ndk-r25c/zigbee-multi-network/release/libzigbee-multi-network.a
   condition:
-  - toolchain_llvm
+  - toolchain_gcc
   - aarch64-android-ndk-r25c
   - zigbee_stack_unix
   - zigbee_multi_network

@@ -317,7 +317,7 @@ FUNCTION_SCOPE void init_lfxo(void)
   clock_manager_lfxo_init.timeout = SL_CLOCK_MANAGER_LFXO_TIMEOUT >> _LFXO_CFG_TIMEOUT_SHIFT;
   clock_manager_lfxo_init.capTune = 0xFF;
 
-#ifndef _SILICON_LABS_32B_SERIES_2_CONFIG_9
+#if !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) && !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
 #if defined(_DEVINFO_MODXOCAL_LFXOCAPTUNE_MASK)
   // Use LFXO tuning value from DEVINFO if available (PCB modules)
   if ((DEVINFO->MODULEINFO & _DEVINFO_MODULEINFO_LFXOCALVAL_MASK) == _DEVINFO_MODULEINFO_LFXOCALVAL_VALID) {

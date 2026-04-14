@@ -374,6 +374,16 @@
                 <param datatype="errorcode" name="result" type="uint16"/>
             </returns>
         </command>
+        <command index="7" name="set_privacy_mode_with_rpa_randomization" >
+            <params>
+                <param datatype="uint8" name="privacy" type="uint8"/>
+                <param datatype="uint8" name="interval_min_minutes" type="uint8"/>
+                <param datatype="uint8" name="interval_max_minutes" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
         <command index="2" name="set_data_channel_classification" >
             <params>
                 <param datatype="uint8array" name="channel_map" type="uint8array"/>

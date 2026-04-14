@@ -22,10 +22,8 @@ requires:
 - name: bit
 - name: slist
 - name: code_classification
+- name: component_catalog
 root_path: platform_core/platform/service/dma_manager
-config_file:
-- path: config/sl_dma_manager_config.h
-  file_id: dma_manager_config
 source:
 - path: src/sl_dma_manager.c
 include:

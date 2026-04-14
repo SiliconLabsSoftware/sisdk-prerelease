@@ -33,6 +33,9 @@
 #include "sl_log_platform_specific.h"
 #include "sl_log_common_config.h"
 #include "sl_component_catalog.h"
+#ifdef SL_CATALOG_LOG_BACKEND_PROPRIETARY_PRESENT
+#include "sl_log_proprietary_config.h"
+#endif
 #if defined (__clang__)
 #include "cmsis_clang.h"
 #elif defined (__GNUC__)
@@ -66,6 +69,8 @@
 
 #define READ_INDEX_DEFAULT 0
 
+#define MAYBE_UNUSED(x) ((void)(x))
+
 /*******************************************************************************
  ***************************  GLOBAL VARIABLES   ********************************
  ******************************************************************************/
@@ -94,7 +99,10 @@ static sl_log_level_t current_log_level;
 // Sets after sl_log_init_stage2 and used to determine the early logs
 static bool log_init_stage2_done;
 
-#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_HOST)
+#if (defined(SL_LOG_CONFIG_MODE) \
+  && (SL_LOG_CONFIG_MODE != SL_LOG_CONFIG_MODE_CONSOLE) \
+  && !defined(SL_CATALOG_LOG_DEFAULT_RING_BUFFER_PRESENT) \
+  )
 
 /*
  * In HOST mode, Pre-allocated array that provides the actual storage space for log events
@@ -183,11 +191,11 @@ static inline sl_status_t log_write_to_ring_buffer(sl_log_event_t *event_buffer,
                                                       uint32_t event_size)
 {
   (void)event_size;
-  #if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE == SL_LOG_CONFIG_MODE_HOST)
+#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE == SL_LOG_CONFIG_MODE_HOST)
     uint32_t buffer_capacity = SL_LOG_NUMBER_OF_EVENTS;
-  #else
+#else
     uint32_t buffer_capacity = EARLY_LOG_BUFFER_SIZE;
-  #endif
+#endif
   sl_log_ring_buffer_t *ring_buffer_ptr = &ring_buffer;
   __disable_irq();
   ring_buffer_ptr->available_event_slots--;
@@ -239,17 +247,107 @@ static void flush_early_logs_to_backend(uint32_t read_index, uint32_t event_coun
 #ifdef SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT
     switch (ring_buffer.buffer[idx].arg_count) {
       case 0:
-        SEGGER_SYSVIEW_RecordU32(ring_buffer.buffer[idx].event_id, ring_buffer.buffer[idx].flags);
+        SEGGER_SYSVIEW_RecordVoid(ring_buffer.buffer[idx].event_id);
         break;
       case 1:
-        SEGGER_SYSVIEW_RecordU32x2(ring_buffer.buffer[idx].event_id, ring_buffer.buffer[idx].flags, ring_buffer.buffer[idx].args[0]);
+        SEGGER_SYSVIEW_RecordU32(ring_buffer.buffer[idx].event_id,
+                                  ring_buffer.buffer[idx].args[0]);
         break;
       case 2:
-        SEGGER_SYSVIEW_RecordU32x3(ring_buffer.buffer[idx].event_id, ring_buffer.buffer[idx].flags, ring_buffer.buffer[idx].args[0], ring_buffer.buffer[idx].args[1]);
+        SEGGER_SYSVIEW_RecordU32x2(ring_buffer.buffer[idx].event_id,
+                                    ring_buffer.buffer[idx].args[0],
+                                    ring_buffer.buffer[idx].args[1]);
         break;
       case 3:
-        SEGGER_SYSVIEW_RecordU32x4(ring_buffer.buffer[idx].event_id, ring_buffer.buffer[idx].flags, ring_buffer.buffer[idx].args[0], ring_buffer.buffer[idx].args[1], ring_buffer.buffer[idx].args[2]);
+        SEGGER_SYSVIEW_RecordU32x3(ring_buffer.buffer[idx].event_id,
+                                    ring_buffer.buffer[idx].args[0],
+                                    ring_buffer.buffer[idx].args[1],
+                                    ring_buffer.buffer[idx].args[2]);
         break;
+#if (SL_LOG_CONFIG_ARG >= 4)
+      case 4:
+        SEGGER_SYSVIEW_RecordU32x4(ring_buffer.buffer[idx].event_id,
+                                    ring_buffer.buffer[idx].args[0],
+                                    ring_buffer.buffer[idx].args[1],
+                                    ring_buffer.buffer[idx].args[2],
+                                    ring_buffer.buffer[idx].args[3]);
+        break;
+#endif
+#if (SL_LOG_CONFIG_ARG >= 5)
+      case 5:
+        SEGGER_SYSVIEW_RecordU32x5(ring_buffer.buffer[idx].event_id,
+                                    ring_buffer.buffer[idx].args[0],
+                                    ring_buffer.buffer[idx].args[1],
+                                    ring_buffer.buffer[idx].args[2],
+                                    ring_buffer.buffer[idx].args[3],
+                                    ring_buffer.buffer[idx].args[4]);
+        break;
+#endif
+#if (SL_LOG_CONFIG_ARG >= 6)
+      case 6:
+        SEGGER_SYSVIEW_RecordU32x6(ring_buffer.buffer[idx].event_id,
+                                    ring_buffer.buffer[idx].args[0],
+                                    ring_buffer.buffer[idx].args[1],
+                                    ring_buffer.buffer[idx].args[2],
+                                    ring_buffer.buffer[idx].args[3],
+                                    ring_buffer.buffer[idx].args[4],
+                                    ring_buffer.buffer[idx].args[5]);
+        break;
+#endif
+#if (SL_LOG_CONFIG_ARG >= 7)
+      case 7:
+        SEGGER_SYSVIEW_RecordU32x7(ring_buffer.buffer[idx].event_id,
+                                    ring_buffer.buffer[idx].args[0],
+                                    ring_buffer.buffer[idx].args[1],
+                                    ring_buffer.buffer[idx].args[2],
+                                    ring_buffer.buffer[idx].args[3],
+                                    ring_buffer.buffer[idx].args[4],
+                                    ring_buffer.buffer[idx].args[5],
+                                    ring_buffer.buffer[idx].args[6]);
+        break;
+#endif
+#if (SL_LOG_CONFIG_ARG >= 8)
+      case 8:
+        SEGGER_SYSVIEW_RecordU32x8(ring_buffer.buffer[idx].event_id,
+                                    ring_buffer.buffer[idx].args[0],
+                                    ring_buffer.buffer[idx].args[1],
+                                    ring_buffer.buffer[idx].args[2],
+                                    ring_buffer.buffer[idx].args[3],
+                                    ring_buffer.buffer[idx].args[4],
+                                    ring_buffer.buffer[idx].args[5],
+                                    ring_buffer.buffer[idx].args[6],
+                                    ring_buffer.buffer[idx].args[7]);
+        break;
+#endif
+#if (SL_LOG_CONFIG_ARG >= 9)
+      case 9:
+        SEGGER_SYSVIEW_RecordU32x9(ring_buffer.buffer[idx].event_id,
+                                    ring_buffer.buffer[idx].args[0],
+                                    ring_buffer.buffer[idx].args[1],
+                                    ring_buffer.buffer[idx].args[2],
+                                    ring_buffer.buffer[idx].args[3],
+                                    ring_buffer.buffer[idx].args[4],
+                                    ring_buffer.buffer[idx].args[5],
+                                    ring_buffer.buffer[idx].args[6],
+                                    ring_buffer.buffer[idx].args[7],
+                                    ring_buffer.buffer[idx].args[8]);
+        break;
+#endif
+#if (SL_LOG_CONFIG_ARG >= 10)
+      case 10:
+        SEGGER_SYSVIEW_RecordU32x10(ring_buffer.buffer[idx].event_id,
+                                     ring_buffer.buffer[idx].args[0],
+                                     ring_buffer.buffer[idx].args[1],
+                                     ring_buffer.buffer[idx].args[2],
+                                     ring_buffer.buffer[idx].args[3],
+                                     ring_buffer.buffer[idx].args[4],
+                                     ring_buffer.buffer[idx].args[5],
+                                     ring_buffer.buffer[idx].args[6],
+                                     ring_buffer.buffer[idx].args[7],
+                                     ring_buffer.buffer[idx].args[8],
+                                     ring_buffer.buffer[idx].args[9]);
+        break;
+#endif
       default:
         break;
     }
@@ -320,6 +418,7 @@ void sl_log_init_stage1(void) {
   // Console and SystemView modes do not use the ring buffer so use reduced size buffer.
   ring_buffer.available_event_slots = EARLY_LOG_BUFFER_SIZE;
 #endif
+  current_log_level = (sl_log_level_t)SL_LOG_CONFIG_LEVEL_COMPILE_TIME;
 }
 
 /**
@@ -331,7 +430,6 @@ sl_status_t  sl_log_init_stage2(void) {
   if (sl_log_get_api_core() == NULL) {
     return SL_STATUS_NOT_INITIALIZED;
   }
-  current_log_level = (sl_log_level_t)SL_LOG_CONFIG_LEVEL_COMPILE_TIME;
   sl_log_platform_core_init();
   sl_log_backend_init();
 
@@ -384,7 +482,8 @@ void sl_log_send_no_args(uint32_t event_id, uint8_t flags)
       // Early logging into the ring buffer before stage2 init is complete
       log_write_to_ring_buffer(&event, sizeof(event));
     } else {
-#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_CONSOLE)
+#if ((defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_CONSOLE)) \
+  || defined(SL_CATALOG_LOG_DEFAULT_RING_BUFFER_PRESENT))
     sl_log_backend_write(&event,READ_INDEX_DEFAULT,EVENT_COUNT_DEFAULT);
 #else
     log_write_to_ring_buffer(&event, sizeof(event));
@@ -421,16 +520,15 @@ void sl_log_send_arg1(uint32_t event_id, uint8_t flags, uint32_t arg1)
     event.flags = flags;
     event.arg_count = 1;
     event.event_id = event_id;
-    event.args[0] = arg1;
-    event.args[1] = 0;
-    event.args[2] = 0;
+    event.args[0] = arg1; 
     event.version = 1;
 
     if (!log_init_stage2_done) {
       // Early logging into the ring buffer before stage2 init is complete
       log_write_to_ring_buffer(&event, sizeof(event));
     } else {
-#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_CONSOLE)
+#if ((defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_CONSOLE)) \
+  || defined(SL_CATALOG_LOG_DEFAULT_RING_BUFFER_PRESENT))
     sl_log_backend_write(&event,READ_INDEX_DEFAULT,EVENT_COUNT_DEFAULT);
 #else
     log_write_to_ring_buffer(&event, sizeof(event));
@@ -467,14 +565,14 @@ void sl_log_send_arg2(uint32_t event_id, uint8_t flags, uint32_t arg1,
     event.event_id = event_id;
     event.args[0] = arg1;
     event.args[1] = arg2;
-    event.args[2] = 0;
     event.version = 1;
 
     if (!log_init_stage2_done) {
       // Early logging into the ring buffer before stage2 init is complete
       log_write_to_ring_buffer(&event, sizeof(event));
     } else {
-#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_CONSOLE)
+#if ((defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_CONSOLE)) \
+  || defined(SL_CATALOG_LOG_DEFAULT_RING_BUFFER_PRESENT))
     sl_log_backend_write(&event,READ_INDEX_DEFAULT,EVENT_COUNT_DEFAULT);
 #else
     log_write_to_ring_buffer(&event, sizeof(event));
@@ -500,8 +598,8 @@ void sl_log_send_arg2(uint32_t event_id, uint8_t flags, uint32_t arg1,
  * @param[in] arg2 Second argument value to be logged
  * @param[in] arg3 Third argument value to be logged
  *
- * @note This function provides maximum argument capacity. For more than
- *       3 arguments, consider using multiple log events or structured logging.
+ * @note For more than 3 arguments use sl_log_send_arg4 through sl_log_send_arg10
+ *       when SL_LOG_CONFIG_ARG is configured accordingly.
  */
 void sl_log_send_arg3(uint32_t event_id, uint8_t flags, uint32_t arg1,
                       uint32_t arg2, uint32_t arg3)
@@ -523,7 +621,8 @@ void sl_log_send_arg3(uint32_t event_id, uint8_t flags, uint32_t arg1,
       // Early logging into the ring buffer before stage2 init is complete
       log_write_to_ring_buffer(&event, sizeof(event));
     } else {
-#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_CONSOLE)
+#if ((defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_CONSOLE)) \
+  || defined(SL_CATALOG_LOG_DEFAULT_RING_BUFFER_PRESENT))
     sl_log_backend_write(&event,READ_INDEX_DEFAULT,EVENT_COUNT_DEFAULT);
 #else
     log_write_to_ring_buffer(&event, sizeof(event));
@@ -531,6 +630,268 @@ void sl_log_send_arg3(uint32_t event_id, uint8_t flags, uint32_t arg1,
     }
   }
 }
+
+#if (SL_LOG_CONFIG_ARG >= 4)
+void sl_log_send_arg4(uint32_t event_id, uint8_t flags, uint32_t arg1,
+                      uint32_t arg2, uint32_t arg3, uint32_t arg4)
+{
+  if(((flags >> SL_LOG_FLAGS_POS)&SL_LOG_FLAGS_LEVEL_MASK) >= current_log_level){
+    sl_log_event_t event;
+
+    event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    event.core_id = 0;
+    event.flags = flags;
+    event.arg_count = 4;
+    event.event_id = event_id;
+    event.args[0] = arg1;
+    event.args[1] = arg2;
+    event.args[2] = arg3;
+    event.args[3] = arg4;    
+    event.version = 1;
+
+    if (!log_init_stage2_done) {
+      // Early logging into the ring buffer before stage2 init is complete
+      log_write_to_ring_buffer(&event, sizeof(event));
+    } else {
+#if ((defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_CONSOLE)) \
+  || defined(SL_CATALOG_LOG_DEFAULT_RING_BUFFER_PRESENT))
+    sl_log_backend_write(&event,READ_INDEX_DEFAULT,EVENT_COUNT_DEFAULT);
+#else
+    log_write_to_ring_buffer(&event, sizeof(event));
+#endif
+    }
+  }
+}
+#endif
+
+#if (SL_LOG_CONFIG_ARG >= 5)
+void sl_log_send_arg5(uint32_t event_id, uint8_t flags, uint32_t arg1,
+                      uint32_t arg2, uint32_t arg3, uint32_t arg4,
+                      uint32_t arg5)
+{
+  if(((flags >> SL_LOG_FLAGS_POS)&SL_LOG_FLAGS_LEVEL_MASK) >= current_log_level){
+    sl_log_event_t event;
+
+    event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    event.core_id = 0;
+    event.flags = flags;
+    event.arg_count = 5;
+    event.event_id = event_id;
+    event.args[0] = arg1;
+    event.args[1] = arg2;
+    event.args[2] = arg3;
+    event.args[3] = arg4;
+    event.args[4] = arg5;    
+    event.version = 1;
+
+    if (!log_init_stage2_done) {
+      // Early logging into the ring buffer before stage2 init is complete
+      log_write_to_ring_buffer(&event, sizeof(event));
+    } else {
+#if ((defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_CONSOLE)) \
+  || defined(SL_CATALOG_LOG_DEFAULT_RING_BUFFER_PRESENT))
+    sl_log_backend_write(&event,READ_INDEX_DEFAULT,EVENT_COUNT_DEFAULT);
+#else
+    log_write_to_ring_buffer(&event, sizeof(event));
+#endif
+    }
+  }
+}
+#endif
+
+#if (SL_LOG_CONFIG_ARG >= 6)
+void sl_log_send_arg6(uint32_t event_id, uint8_t flags, uint32_t arg1,
+                      uint32_t arg2, uint32_t arg3, uint32_t arg4,
+                      uint32_t arg5, uint32_t arg6)
+{
+  if(((flags >> SL_LOG_FLAGS_POS)&SL_LOG_FLAGS_LEVEL_MASK) >= current_log_level){
+    sl_log_event_t event;
+
+    event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    event.core_id = 0;
+    event.flags = flags;
+    event.arg_count = 6;
+    event.event_id = event_id;
+    event.args[0] = arg1;
+    event.args[1] = arg2;
+    event.args[2] = arg3;
+    event.args[3] = arg4;
+    event.args[4] = arg5;
+    event.args[5] = arg6;   
+    event.version = 1;
+
+    if (!log_init_stage2_done) {
+      // Early logging into the ring buffer before stage2 init is complete
+      log_write_to_ring_buffer(&event, sizeof(event));
+    } else {
+#if ((defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_CONSOLE)) \
+  || defined(SL_CATALOG_LOG_DEFAULT_RING_BUFFER_PRESENT))
+    sl_log_backend_write(&event,READ_INDEX_DEFAULT,EVENT_COUNT_DEFAULT);
+#else
+    log_write_to_ring_buffer(&event, sizeof(event));
+#endif
+    }
+  }
+}
+#endif
+
+#if (SL_LOG_CONFIG_ARG >= 7)
+void sl_log_send_arg7(uint32_t event_id, uint8_t flags, uint32_t arg1,
+                      uint32_t arg2, uint32_t arg3, uint32_t arg4,
+                      uint32_t arg5, uint32_t arg6, uint32_t arg7)
+{
+  if(((flags >> SL_LOG_FLAGS_POS)&SL_LOG_FLAGS_LEVEL_MASK) >= current_log_level){
+    sl_log_event_t event;
+
+    event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    event.core_id = 0;
+    event.flags = flags;
+    event.arg_count = 7;
+    event.event_id = event_id;
+    event.args[0] = arg1;
+    event.args[1] = arg2;
+    event.args[2] = arg3;
+    event.args[3] = arg4;
+    event.args[4] = arg5;
+    event.args[5] = arg6;
+    event.args[6] = arg7;    
+    event.version = 1;
+
+    if (!log_init_stage2_done) {
+      // Early logging into the ring buffer before stage2 init is complete
+      log_write_to_ring_buffer(&event, sizeof(event));
+    } else {
+#if ((defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_CONSOLE)) \
+  || defined(SL_CATALOG_LOG_DEFAULT_RING_BUFFER_PRESENT))
+    sl_log_backend_write(&event,READ_INDEX_DEFAULT,EVENT_COUNT_DEFAULT);
+#else
+    log_write_to_ring_buffer(&event, sizeof(event));
+#endif
+    }
+  }
+}
+#endif
+
+#if (SL_LOG_CONFIG_ARG >= 8)
+void sl_log_send_arg8(uint32_t event_id, uint8_t flags, uint32_t arg1,
+                      uint32_t arg2, uint32_t arg3, uint32_t arg4,
+                      uint32_t arg5, uint32_t arg6, uint32_t arg7,
+                      uint32_t arg8)
+{
+  if(((flags >> SL_LOG_FLAGS_POS)&SL_LOG_FLAGS_LEVEL_MASK) >= current_log_level){
+    sl_log_event_t event;
+
+    event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    event.core_id = 0;
+    event.flags = flags;
+    event.arg_count = 8;
+    event.event_id = event_id;
+    event.args[0] = arg1;
+    event.args[1] = arg2;
+    event.args[2] = arg3;
+    event.args[3] = arg4;
+    event.args[4] = arg5;
+    event.args[5] = arg6;
+    event.args[6] = arg7;
+    event.args[7] = arg8;    
+    event.version = 1;
+
+    if (!log_init_stage2_done) {
+      // Early logging into the ring buffer before stage2 init is complete
+      log_write_to_ring_buffer(&event, sizeof(event));
+    } else {
+#if ((defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_CONSOLE)) \
+  || defined(SL_CATALOG_LOG_DEFAULT_RING_BUFFER_PRESENT))
+    sl_log_backend_write(&event,READ_INDEX_DEFAULT,EVENT_COUNT_DEFAULT);
+#else
+    log_write_to_ring_buffer(&event, sizeof(event));
+#endif
+    }
+  }
+}
+#endif
+
+#if (SL_LOG_CONFIG_ARG >= 9)
+void sl_log_send_arg9(uint32_t event_id, uint8_t flags, uint32_t arg1,
+                      uint32_t arg2, uint32_t arg3, uint32_t arg4,
+                      uint32_t arg5, uint32_t arg6, uint32_t arg7,
+                      uint32_t arg8, uint32_t arg9)
+{
+  if(((flags >> SL_LOG_FLAGS_POS)&SL_LOG_FLAGS_LEVEL_MASK) >= current_log_level){
+    sl_log_event_t event;
+
+    event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    event.core_id = 0;
+    event.flags = flags;
+    event.arg_count = 9;
+    event.event_id = event_id;
+    event.args[0] = arg1;
+    event.args[1] = arg2;
+    event.args[2] = arg3;
+    event.args[3] = arg4;
+    event.args[4] = arg5;
+    event.args[5] = arg6;
+    event.args[6] = arg7;
+    event.args[7] = arg8;
+    event.args[8] = arg9;    
+    event.version = 1;
+
+    if (!log_init_stage2_done) {
+      // Early logging into the ring buffer before stage2 init is complete
+      log_write_to_ring_buffer(&event, sizeof(event));
+    } else {
+#if ((defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_CONSOLE)) \
+  || defined(SL_CATALOG_LOG_DEFAULT_RING_BUFFER_PRESENT))
+    sl_log_backend_write(&event,READ_INDEX_DEFAULT,EVENT_COUNT_DEFAULT);
+#else
+    log_write_to_ring_buffer(&event, sizeof(event));
+#endif
+    }
+  }
+}
+#endif
+
+#if (SL_LOG_CONFIG_ARG >= 10)
+void sl_log_send_arg10(uint32_t event_id, uint8_t flags, uint32_t arg1,
+                       uint32_t arg2, uint32_t arg3, uint32_t arg4,
+                       uint32_t arg5, uint32_t arg6, uint32_t arg7,
+                       uint32_t arg8, uint32_t arg9, uint32_t arg10)
+{
+  if(((flags >> SL_LOG_FLAGS_POS)&SL_LOG_FLAGS_LEVEL_MASK) >= current_log_level){
+    sl_log_event_t event;
+
+    event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    event.core_id = 0;
+    event.flags = flags;
+    event.arg_count = 10;
+    event.event_id = event_id;
+    event.args[0] = arg1;
+    event.args[1] = arg2;
+    event.args[2] = arg3;
+    event.args[3] = arg4;
+    event.args[4] = arg5;
+    event.args[5] = arg6;
+    event.args[6] = arg7;
+    event.args[7] = arg8;
+    event.args[8] = arg9;
+    event.args[9] = arg10;
+    event.version = 1;
+
+    if (!log_init_stage2_done) {
+      // Early logging into the ring buffer before stage2 init is complete
+      log_write_to_ring_buffer(&event, sizeof(event));
+    } else {
+#if ((defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE==SL_LOG_CONFIG_MODE_CONSOLE)) \
+  || defined(SL_CATALOG_LOG_DEFAULT_RING_BUFFER_PRESENT))
+    sl_log_backend_write(&event,READ_INDEX_DEFAULT,EVENT_COUNT_DEFAULT);
+#else
+    log_write_to_ring_buffer(&event, sizeof(event));
+#endif
+    }
+  }
+}
+#endif
+
 /**
  * @brief Flush all pending log events to the backend
  *
@@ -999,7 +1360,10 @@ sl_status_t sl_log_sync_timestamp(uint8_t core_id, void *args)
 
 sl_log_ring_buffer_t *sl_log_get_ring_buffer_config(void)
 {
-#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE!=SL_LOG_CONFIG_MODE_CONSOLE)
+#if (defined(SL_LOG_CONFIG_MODE) \
+  && (SL_LOG_CONFIG_MODE != SL_LOG_CONFIG_MODE_CONSOLE) \
+  && !defined(SL_CATALOG_LOG_DEFAULT_RING_BUFFER_PRESENT) \
+  )
   return &ring_buffer;
 #else
   return NULL;
@@ -1013,14 +1377,18 @@ sl_log_ring_buffer_t *sl_log_get_ring_buffer_config(void)
  ******************************************************************************/
  void sli_log_assert_implementation(const char* string_value)
 {
-  // In current implementation logging is not possible before sl_log_init() is called
-  // so we need to check if the ring buffer is initialized
-  // Logging before sl_log_init will be supported in future versions
+  MAYBE_UNUSED(string_value);
+#ifdef SL_CATALOG_LOG_FORMATTED_OUTPUT_PRESENT
   if (ring_buffer.buffer != NULL) {
     SL_PRINT_STRING_ERROR("ASSERT: %s", (uintptr_t)string_value);
   }
-#if (SL_LOG_CONFIG_MODE != SL_LOG_CONFIG_MODE_CONSOLE)
-  // In console mode, flush the log immediately to ensure the assert message is output
+#endif
+
+#if (defined(SL_LOG_CONFIG_MODE) \
+  && (SL_LOG_CONFIG_MODE != SL_LOG_CONFIG_MODE_CONSOLE) \
+  && !defined(SL_CATALOG_LOG_DEFAULT_RING_BUFFER_PRESENT) \
+  )
+  // Non-console + ring-buffer path: flush so the assert message leaves the ring buffer
   sl_log_flush();
 #endif
 

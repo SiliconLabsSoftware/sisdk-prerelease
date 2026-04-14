@@ -111,7 +111,7 @@ Enumerations</h2></td></tr>
 <tr class="memitem:gadc0d564b01ec80cdff8bfb5501bf0dce" id="r_gadc0d564b01ec80cdff8bfb5501bf0dce"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__sl__bt__resolving__list.html#gadc0d564b01ec80cdff8bfb5501bf0dce">sl_bt_resolving_list_privacy_mode_t</a> { <a class="el" href="group__sl__bt__resolving__list.html#ggadc0d564b01ec80cdff8bfb5501bf0dcea26a7a837818b5a1ecd36b4ec3f1ab2ad">sl_bt_resolving_list_privacy_mode_network</a> = 0x0
 , <a class="el" href="group__sl__bt__resolving__list.html#ggadc0d564b01ec80cdff8bfb5501bf0dcea464b10cdc9972f94b943b928c88a5493">sl_bt_resolving_list_privacy_mode_device</a> = 0x1
  }</td></tr>
-<tr class="memdesc:gadc0d564b01ec80cdff8bfb5501bf0dce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specifies the Privacy Mode used for a peer device in the Resolving List.  <a href="group__sl__bt__resolving__list.html#gadc0d564b01ec80cdff8bfb5501bf0dce">More...</a><br /></td></tr>
+<tr class="memdesc:gadc0d564b01ec80cdff8bfb5501bf0dce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specifies the Privacy Mode used for a peer device in the Resolving List. The privacy mode controls how the Bluetooth controller handles packets from the peer device.  <a href="group__sl__bt__resolving__list.html#gadc0d564b01ec80cdff8bfb5501bf0dce">More...</a><br /></td></tr>
 <tr class="separator:gadc0d564b01ec80cdff8bfb5501bf0dce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
@@ -131,7 +131,9 @@ Functions</h2></td></tr>
 <p>Address Resolving List. </p>
 <p>Provides support for adding and removing devices from the Resolving List in controller-based privacy.</p>
 <p>Adding a peer device to the Resolving List allows the Bluetooth controller to resolve the address when the peer device is using privacy and is transmitting with a Resolvable Private Address (RPA). When the controller has resolved an address in a received Bluetooth packet such as an advertisement, the corresponding event will report the peer device's identity address even if a Resolvable Private Address was used over the air.</p>
-<p>When the application has added a peer device to the Resolving List, the application may use the peer device's identity address in commands such as <a class="el" href="group__sl__bt__connection.html#gabb952445e50f64228b279fe9969001fe">sl_bt_connection_open</a> or <a class="el" href="group__sl__bt__sync__scanner.html#gafc4271a3a5784987925927e6aae8652b">sl_bt_sync_scanner_open</a> even if the peer device is using privacy and is using a Resolvable Private Address over the air. </p>
+<p>When the application has added a peer device to the Resolving List, the application may use the peer device's identity address in commands such as <a class="el" href="group__sl__bt__connection.html#gabb952445e50f64228b279fe9969001fe">sl_bt_connection_open</a> or <a class="el" href="group__sl__bt__sync__scanner.html#gafc4271a3a5784987925927e6aae8652b">sl_bt_sync_scanner_open</a> even if the peer device is using privacy and is using a Resolvable Private Address over the air.</p>
+<p>When a device is added to the Resolving List, the stack automatically sets the local Identity Resolving Key (IRK) of the entry based on the current local privacy state. If local privacy is active, the real local IRK is used, which causes the controller to use Resolvable Private Addresses for the local device's address. If local privacy is not active, an all-zero local IRK is used, which allows the controller to use the local device's identity address and to accept directed advertising packets addressed to the identity address.</p>
+<p>Because the local IRK is set at the time the device is added, the application should remove all devices from the Resolving List and re-add them after changing the local privacy mode. Existing Resolving List entries are not automatically updated when the local privacy mode changes. </p>
 <h2 class="groupheader">Enumeration Type Documentation</h2>
 <a id="gadc0d564b01ec80cdff8bfb5501bf0dce" name="gadc0d564b01ec80cdff8bfb5501bf0dce"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gadc0d564b01ec80cdff8bfb5501bf0dce">&#9670;&#160;</a></span>sl_bt_resolving_list_privacy_mode_t</h2>
@@ -145,11 +147,11 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Specifies the Privacy Mode used for a peer device in the Resolving List. </p>
+<p>Specifies the Privacy Mode used for a peer device in the Resolving List. The privacy mode controls how the Bluetooth controller handles packets from the peer device. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggadc0d564b01ec80cdff8bfb5501bf0dcea26a7a837818b5a1ecd36b4ec3f1ab2ad" name="ggadc0d564b01ec80cdff8bfb5501bf0dcea26a7a837818b5a1ecd36b4ec3f1ab2ad"></a>sl_bt_resolving_list_privacy_mode_network&#160;</td><td class="fielddoc"><p>(0x0) Use Network Privacy Mode for the peer device </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggadc0d564b01ec80cdff8bfb5501bf0dcea26a7a837818b5a1ecd36b4ec3f1ab2ad" name="ggadc0d564b01ec80cdff8bfb5501bf0dcea26a7a837818b5a1ecd36b4ec3f1ab2ad"></a>sl_bt_resolving_list_privacy_mode_network&#160;</td><td class="fielddoc"><p>(0x0) Use Network Privacy Mode for the peer device. The controller will only accept Resolvable Private Addresses from the peer device. If the peer device has a non-zero IRK in the Resolving List and sends a packet using its identity address, the controller will reject the packet. This is the default and stricter mode that enforces the use of privacy by the peer device. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggadc0d564b01ec80cdff8bfb5501bf0dcea464b10cdc9972f94b943b928c88a5493" name="ggadc0d564b01ec80cdff8bfb5501bf0dcea464b10cdc9972f94b943b928c88a5493"></a>sl_bt_resolving_list_privacy_mode_device&#160;</td><td class="fielddoc"><p>(0x1) Use Device Privacy Mode for the peer device </p>
+<tr><td class="fieldname"><a id="ggadc0d564b01ec80cdff8bfb5501bf0dcea464b10cdc9972f94b943b928c88a5493" name="ggadc0d564b01ec80cdff8bfb5501bf0dcea464b10cdc9972f94b943b928c88a5493"></a>sl_bt_resolving_list_privacy_mode_device&#160;</td><td class="fielddoc"><p>(0x1) Use Device Privacy Mode for the peer device. The controller will accept both Resolvable Private Addresses and the identity address from the peer device. This is a more permissive mode that allows the peer device to use its identity address even when it has distributed its IRK. Note that using this mode means the peer device's network privacy is not enforced by the local controller. </p>
 </td></tr>
 </table>
 
@@ -183,12 +185,13 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Add a device to the Resolving List based on its bonding handle.</p>
 <p>This command is not available if the application uses the external bonding database provided by the component bluetooth_feature_external_bonding_database. In that configuration the application can use the command <a class="el" href="group__sl__bt__resolving__list.html#ga756f9d30cb9e86853a9c8d02048a61f9">sl_bt_resolving_list_add_device_by_address</a> and provide the peer's identity address and its Identity Resolving Key (IRK).</p>
+<p>The local IRK for the Resolving List entry is set automatically based on whether local privacy is currently active. If local privacy is not active, an all-zero local IRK is used so that the local device uses its identity address.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bonding</td><td>The bonding handle </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">privacy_mode</td><td><p class="starttd">Enum <a class="el" href="group__sl__bt__resolving__list.html#gadc0d564b01ec80cdff8bfb5501bf0dce">sl_bt_resolving_list_privacy_mode_t</a>. The Privacy Mode to use for the peer device. Values:</p><ul>
-<li><b>sl_bt_resolving_list_privacy_mode_network (0x0):</b> Use Network Privacy Mode for the peer device</li>
-<li><b>sl_bt_resolving_list_privacy_mode_device (0x1):</b> Use Device Privacy Mode for the peer device</li>
+<li><b>sl_bt_resolving_list_privacy_mode_network (0x0):</b> Use Network Privacy Mode for the peer device. The controller will only accept Resolvable Private Addresses from the peer device. If the peer device has a non-zero IRK in the Resolving List and sends a packet using its identity address, the controller will reject the packet. This is the default and stricter mode that enforces the use of privacy by the peer device.</li>
+<li><b>sl_bt_resolving_list_privacy_mode_device (0x1):</b> Use Device Privacy Mode for the peer device. The controller will accept both Resolvable Private Addresses and the identity address from the peer device. This is a more permissive mode that allows the peer device to use its identity address even when it has distributed its IRK. Note that using this mode means the peer device's network privacy is not enforced by the local controller.</li>
 </ul>
 <p class="endtd">Default: <a class="el" href="group__sl__bt__resolving__list.html#ggadc0d564b01ec80cdff8bfb5501bf0dcea26a7a837818b5a1ecd36b4ec3f1ab2ad">sl_bt_resolving_list_privacy_mode_network</a> (Use Network Privacy Mode for the peer device) </p>
 </td></tr>
@@ -238,6 +241,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Add a device to the Resolving List based on its identity address and its Identity Resolving Key (IRK).</p>
 <p>This command is typically only needed when the application uses the external bonding database provided by the component bluetooth_feature_external_bonding_database. When the application uses the built-in bonding database, the command <a class="el" href="group__sl__bt__resolving__list.html#ga61a5e71e2ede28c0ff6a2132fd5ad8e1">sl_bt_resolving_list_add_device_by_bonding</a> is more convenient.</p>
+<p>The local IRK for the Resolving List entry is set automatically based on whether local privacy is currently active. If local privacy is not active, an all-zero local IRK is used so that the local device uses its identity address.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">address</td><td>Bluetooth address of the peer device </td></tr>
@@ -248,8 +252,8 @@ Functions</h2></td></tr>
 </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">key</td><td>Identity Resolving Key (IRK) of the peer device in little endian format. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">privacy_mode</td><td><p class="starttd">Enum <a class="el" href="group__sl__bt__resolving__list.html#gadc0d564b01ec80cdff8bfb5501bf0dce">sl_bt_resolving_list_privacy_mode_t</a>. The Privacy Mode to use for the peer device. Values:</p><ul>
-<li><b>sl_bt_resolving_list_privacy_mode_network (0x0):</b> Use Network Privacy Mode for the peer device</li>
-<li><b>sl_bt_resolving_list_privacy_mode_device (0x1):</b> Use Device Privacy Mode for the peer device</li>
+<li><b>sl_bt_resolving_list_privacy_mode_network (0x0):</b> Use Network Privacy Mode for the peer device. The controller will only accept Resolvable Private Addresses from the peer device. If the peer device has a non-zero IRK in the Resolving List and sends a packet using its identity address, the controller will reject the packet. This is the default and stricter mode that enforces the use of privacy by the peer device.</li>
+<li><b>sl_bt_resolving_list_privacy_mode_device (0x1):</b> Use Device Privacy Mode for the peer device. The controller will accept both Resolvable Private Addresses and the identity address from the peer device. This is a more permissive mode that allows the peer device to use its identity address even when it has distributed its IRK. Note that using this mode means the peer device's network privacy is not enforced by the local controller.</li>
 </ul>
 <p class="endtd">Default: <a class="el" href="group__sl__bt__resolving__list.html#ggadc0d564b01ec80cdff8bfb5501bf0dcea26a7a837818b5a1ecd36b4ec3f1ab2ad">sl_bt_resolving_list_privacy_mode_network</a> (Use Network Privacy Mode for the peer device) </p>
 </td></tr>

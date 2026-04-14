@@ -24,7 +24,6 @@
     - path: efr32mg26b221f2048im68.h
     - path: efr32mg26_acmp.h
     - path: efr32mg26_aes.h
-    - path: efr32mg26_amuxcp.h
     - path: efr32mg26_buram.h
     - path: efr32mg26_burtc.h
     - path: efr32mg26_cmu.h
@@ -90,8 +89,6 @@
   - name: device_has_acmp
   - name: device_has_acmp0
   - name: device_has_acmp1
-  - name: device_has_amuxcp
-  - name: device_has_amuxcp0
   - name: device_has_buram
   - name: device_has_burtc
   - name: device_has_cmu

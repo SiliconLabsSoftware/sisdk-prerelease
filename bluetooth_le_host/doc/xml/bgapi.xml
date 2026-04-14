@@ -81,7 +81,7 @@
 <title>BGAPI message summary</title>
 <para>The following table summarizes the class and message IDs of commands and events in the BGAPI protocol. A response message has the same class and message ID as the command it responds to.</para>
 <para>The table also shows the minimum payload length for each message. Messages that have an array parameter can have longer payload length depending on the length of the array.</para>
-<para><para><table rows="440" cols="5"><caption>BGAPI message header summary</caption>
+<para><para><table rows="441" cols="5"><caption>BGAPI message header summary</caption>
 <row>
 <entry thead="yes"><para>Message Name </para>
 </entry><entry thead="yes"><para>Class ID </para>
@@ -369,6 +369,12 @@
 </entry><entry thead="no"><para>0x02 </para>
 </entry><entry thead="no"><para>0x01 </para>
 </entry><entry thead="no"><para>2  </para>
+</entry></row>
+<row>
+<entry thead="no" class="message-name"><para><ref refid="group__sl__bt__gap_1ga3c379e284417946314ba65eeae5c9bd3" kindref="member">cmd_gap_set_privacy_mode_with_rpa_randomization</ref> </para>
+</entry><entry thead="no"><para>0x02 </para>
+</entry><entry thead="no"><para>0x07 </para>
+</entry><entry thead="no"><para>3  </para>
 </entry></row>
 <row>
 <entry thead="no" class="message-name"><para><ref refid="group__sl__bt__gap_1gae1ee4d45283563a12394f5261e45f952" kindref="member">cmd_gap_set_data_channel_classification</ref> </para>

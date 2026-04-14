@@ -39,3 +39,6 @@ requires:
 documentation:
   docset: gecko-platform
   document: platform-service/iostream-uart
+recommends:
+- id: configuration_over_swo
+  vendor: silabs

@@ -66,6 +66,12 @@ __WEAK const uint32_t SL_BUS_CLOCK_BURAM_VALUE = 0xFFFFFFFF;
 // External declaration for BURTC peripheral bus clock value.
 __WEAK const uint32_t SL_BUS_CLOCK_BURTC_VALUE = 0xFFFFFFFF;
 
+// External declaration for CAN0 peripheral bus clock value.
+__WEAK const uint32_t SL_BUS_CLOCK_CAN0_VALUE = 0xFFFFFFFF;
+
+// External declaration for CAN1 peripheral bus clock value.
+__WEAK const uint32_t SL_BUS_CLOCK_CAN1_VALUE = 0xFFFFFFFF;
+
 // External declaration for CRYPTOACC peripheral bus clock value.
 __WEAK const uint32_t SL_BUS_CLOCK_CRYPTOACC_VALUE = 0xFFFFFFFF;
 
@@ -185,6 +191,9 @@ __WEAK const uint32_t SL_BUS_CLOCK_LESENSE_VALUE = 0xFFFFFFFF;
 
 // External declaration for LETIMER0 peripheral bus clock value.
 __WEAK const uint32_t SL_BUS_CLOCK_LETIMER0_VALUE = 0xFFFFFFFF;
+
+// External declaration for LETIMER1 peripheral bus clock value.
+__WEAK const uint32_t SL_BUS_CLOCK_LETIMER1_VALUE = 0xFFFFFFFF;
 
 // External declaration for LFRCO peripheral bus clock value.
 __WEAK const uint32_t SL_BUS_CLOCK_LFRCO_VALUE = 0xFFFFFFFF;

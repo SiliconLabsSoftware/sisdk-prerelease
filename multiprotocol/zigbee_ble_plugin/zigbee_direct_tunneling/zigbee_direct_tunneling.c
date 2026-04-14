@@ -62,6 +62,12 @@ static sl_zigbee_af_event_t zb_tunnel_broadcast_to_zvd_event;
 //this is called when data is arriving via the BLE tunneling service
 void sli_zigbee_direct_tunnel_write(uint8_t connection, byte_array * writeValue)
 {
+  if (sl_zigbee_direct_session_auth_state != SL_ZIGBEE_DIRECT_SESSION_AUTHENTICATED) {
+    sl_zigbee_app_debug_println("Error, ZVD session not authenticated");
+    sl_bt_gatt_server_send_user_write_response(connection, gattdb_zigbee_tunnel_2, ES_ERR_APPLICATION_SPECIFIC);
+    return;
+  }
+
   if (!(sli_zigbee_direct_security_decrypt_packet(sl_zvd_eui, writeValue->data, writeValue->len, gattdb_zigbee_tunnel_2))) {
     sl_bt_gatt_server_send_user_write_response(connection, gattdb_zigbee_tunnel_2, ES_ERR_APPLICATION_SPECIFIC);
     return;
@@ -210,6 +216,12 @@ static void sli_zigbee_direct_queue_outgoing_npdu(uint8_t * packet, uint8_t leng
   if (bleConnectionTable[BLE_CONNECTION_INDEX].inUse == false) {
     outgoing_npdu_queue_index = 0;
     sl_zigbee_app_debug_println("BLE connection is down, flushing queue");
+    return;
+  }
+
+  if (sl_zigbee_direct_session_auth_state != SL_ZIGBEE_DIRECT_SESSION_AUTHENTICATED) {
+    outgoing_npdu_queue_index = 0;
+    sl_zigbee_app_debug_println("ZVD session not authenticated, flushing queue and dropping packet");
     return;
   }
 

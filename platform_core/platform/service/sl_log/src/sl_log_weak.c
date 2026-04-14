@@ -74,6 +74,120 @@ SL_WEAK void sl_log_send_arg3(uint32_t event_id, uint8_t flags, uint32_t arg1,
   (void)arg3;
 }
 
+#if (SL_LOG_CONFIG_ARG >= 4)
+SL_WEAK void sl_log_send_arg4(uint32_t event_id, uint8_t flags, uint32_t arg1,
+                              uint32_t arg2, uint32_t arg3, uint32_t arg4) {
+  (void)event_id;
+  (void)flags;
+  (void)arg1;
+  (void)arg2;
+  (void)arg3;
+  (void)arg4;
+}
+#endif
+
+#if (SL_LOG_CONFIG_ARG >= 5)
+SL_WEAK void sl_log_send_arg5(uint32_t event_id, uint8_t flags, uint32_t arg1,
+                              uint32_t arg2, uint32_t arg3, uint32_t arg4,
+                              uint32_t arg5) {
+  (void)event_id;
+  (void)flags;
+  (void)arg1;
+  (void)arg2;
+  (void)arg3;
+  (void)arg4;
+  (void)arg5;
+}
+#endif
+
+#if (SL_LOG_CONFIG_ARG >= 6)
+SL_WEAK void sl_log_send_arg6(uint32_t event_id, uint8_t flags, uint32_t arg1,
+                              uint32_t arg2, uint32_t arg3, uint32_t arg4,
+                              uint32_t arg5, uint32_t arg6) {
+  (void)event_id;
+  (void)flags;
+  (void)arg1;
+  (void)arg2;
+  (void)arg3;
+  (void)arg4;
+  (void)arg5;
+  (void)arg6;
+}
+#endif
+
+#if (SL_LOG_CONFIG_ARG >= 7)
+SL_WEAK void sl_log_send_arg7(uint32_t event_id, uint8_t flags, uint32_t arg1,
+                              uint32_t arg2, uint32_t arg3, uint32_t arg4,
+                              uint32_t arg5, uint32_t arg6, uint32_t arg7) {
+  (void)event_id;
+  (void)flags;
+  (void)arg1;
+  (void)arg2;
+  (void)arg3;
+  (void)arg4;
+  (void)arg5;
+  (void)arg6;
+  (void)arg7;
+}
+#endif
+
+#if (SL_LOG_CONFIG_ARG >= 8)
+SL_WEAK void sl_log_send_arg8(uint32_t event_id, uint8_t flags, uint32_t arg1,
+                              uint32_t arg2, uint32_t arg3, uint32_t arg4,
+                              uint32_t arg5, uint32_t arg6, uint32_t arg7,
+                              uint32_t arg8) {
+  (void)event_id;
+  (void)flags;
+  (void)arg1;
+  (void)arg2;
+  (void)arg3;
+  (void)arg4;
+  (void)arg5;
+  (void)arg6;
+  (void)arg7;
+  (void)arg8;
+}
+#endif
+
+#if (SL_LOG_CONFIG_ARG >= 9)
+SL_WEAK void sl_log_send_arg9(uint32_t event_id, uint8_t flags, uint32_t arg1,
+                              uint32_t arg2, uint32_t arg3, uint32_t arg4,
+                              uint32_t arg5, uint32_t arg6, uint32_t arg7,
+                              uint32_t arg8, uint32_t arg9) {
+  (void)event_id;
+  (void)flags;
+  (void)arg1;
+  (void)arg2;
+  (void)arg3;
+  (void)arg4;
+  (void)arg5;
+  (void)arg6;
+  (void)arg7;
+  (void)arg8;
+  (void)arg9;
+}
+#endif
+
+#if (SL_LOG_CONFIG_ARG >= 10)
+SL_WEAK void sl_log_send_arg10(uint32_t event_id, uint8_t flags, uint32_t arg1,
+                               uint32_t arg2, uint32_t arg3, uint32_t arg4,
+                               uint32_t arg5, uint32_t arg6, uint32_t arg7,
+                               uint32_t arg8, uint32_t arg9, uint32_t arg10) {
+  (void)event_id;
+  (void)flags;
+  (void)arg1;
+  (void)arg2;
+  (void)arg3;
+  (void)arg4;
+  (void)arg5;
+  (void)arg6;
+  (void)arg7;
+  (void)arg8;
+  (void)arg9;
+  (void)arg10;
+}
+#endif
+
 SL_WEAK sl_status_t sl_log_flush(void) {
   return SL_STATUS_OK; // Data successfully sent
 }

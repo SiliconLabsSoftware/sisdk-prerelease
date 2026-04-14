@@ -28,7 +28,8 @@ requires:
 - name: sl_assert
 - name: hal_gpio
 - name: hal_i2c
-- name: dmadrv
+- name: dma_manager
+- name: dma_channel
 - name: sleeptimer
 include:
 - path: inc

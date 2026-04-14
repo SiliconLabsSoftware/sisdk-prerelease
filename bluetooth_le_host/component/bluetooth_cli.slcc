@@ -311,6 +311,15 @@ template_contribution:
 - name: cli_command
   value:
     group: bt_gap
+    name: set_privacy_mode_with_rpa_randomization
+    handler: sli_bt_cli_gap_set_privacy_mode_with_rpa_randomization
+    argument:
+    - type: uint8
+    - type: uint8
+    - type: uint8
+- name: cli_command
+  value:
+    group: bt_gap
     name: set_data_channel_classification
     handler: sli_bt_cli_gap_set_data_channel_classification
     argument:
@@ -1806,6 +1815,8 @@ template_contribution:
     argument:
     - type: uint32
     - type: uint8
+  condition:
+  - bluetooth_feature_resolving_list
 - name: cli_command
   value:
     group: bt_resolving_list
@@ -1816,6 +1827,8 @@ template_contribution:
     - type: uint8
     - type: hex
     - type: uint8
+  condition:
+  - bluetooth_feature_resolving_list
 - name: cli_command
   value:
     group: bt_resolving_list
@@ -1823,6 +1836,8 @@ template_contribution:
     handler: sli_bt_cli_resolving_list_remove_device_by_bonding
     argument:
     - type: uint32
+  condition:
+  - bluetooth_feature_resolving_list
 - name: cli_command
   value:
     group: bt_resolving_list
@@ -1831,11 +1846,15 @@ template_contribution:
     argument:
     - type: hex
     - type: uint8
+  condition:
+  - bluetooth_feature_resolving_list
 - name: cli_command
   value:
     group: bt_resolving_list
     name: remove_all_devices
     handler: sli_bt_cli_resolving_list_remove_all_devices
+  condition:
+  - bluetooth_feature_resolving_list
 - name: cli_command
   value:
     group: bt_accept_list

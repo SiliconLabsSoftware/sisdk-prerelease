@@ -360,11 +360,11 @@ void sl_btctrl_deinit_sniff(void);
  * per-connection at runtime via the VS_SiliconLabs_Event_Info_Reporting_Enable
  * HCI command (procedure_type = 1).
  *
- * @param[in] max_connections  Maximum number of simultaneous connections
- *                             that can have LLCP reporting enabled.
+ * @param[in] connection_count  Number of LLCP Event Info Report slots to allocate
+ *                              (simultaneous enables cannot exceed this count).
  * @return #SL_STATUS_OK on success, #SL_STATUS_ALLOCATION_FAILED on OOM.
  */
-sl_status_t sl_btctrl_init_connection_analyzer_llcp_report(uint8_t max_connections);
+sl_status_t sl_btctrl_init_connection_analyzer_llcp_report(uint8_t connection_count);
 
 /**
  * @brief Deinitialize connection analyzer LLCP reporting.

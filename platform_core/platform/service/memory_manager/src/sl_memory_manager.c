@@ -118,13 +118,17 @@ static sl_status_t memory_manage_allocation_fallback(size_t size,
 sl_status_t sl_memory_init(void)
 {
   sl_status_t status = SL_STATUS_OK;
-  sl_memory_region_t heap_region = sl_memory_get_heap_region();
+  sl_memory_region_t heap_region;
 
   // Check for double initialization
   if (sli_mm_initialized) {
     status = SL_STATUS_ALREADY_INITIALIZED;
     return status;
   }
+
+  // Initialize the heap region.
+  sli_memory_initialize_heap_region();
+  heap_region = sl_memory_get_heap_region();
 
 #if defined(SL_CATALOG_BANK_RETENTION_CONTROL_PRESENT) \
   || defined(SL_CATALOG_BANK_RETENTION_CONTROL_STUBBED_PRESENT)

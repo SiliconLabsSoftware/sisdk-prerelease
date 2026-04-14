@@ -19,8 +19,6 @@ root_path: platform_core/platform/service/sl_log
 source:
 - path: src/sl_log.c
 template_contribution:
-- name: logger_enable
-  value: 1
 - name: event_handler
   value:
     event: service_init

@@ -21,6 +21,8 @@
 #include "sl_bluetooth.h"
 #include "gatt_db.h"
 
+#define SL_ZIGBEE_DIRECT_COUNTER_SIZE 4
+
 typedef enum {
   BLE_OFF                = 0,
   OPEN_TO_BE_PROVISIONED,
@@ -29,6 +31,11 @@ typedef enum {
   COMMISSIONED_BASIC,
   COMMISSIONED_ADMIN,
 } sl_zigbee_direct_connection_status_t;
+
+typedef enum {
+  SL_ZIGBEE_DIRECT_SESSION_NOT_AUTHENTICATED = 0,
+  SL_ZIGBEE_DIRECT_SESSION_AUTHENTICATED,
+} sl_zigbee_direct_session_auth_state_t;
 
 // Opcode defined by the Zigbee Direct Spec
 enum {
@@ -46,6 +53,7 @@ extern uint32_t incoming_counter;
 extern uint32_t outgoing_counter;
 extern sl_zigbee_af_event_t sli_zigbee_direct_anonymous_join_event;
 extern bool sli_zigbee_direct_tc_is_zigbee_direct_aware;
+extern sl_zigbee_direct_session_auth_state_t sl_zigbee_direct_session_auth_state;
 
 void sli_zigbee_direct_handle_authenticate_write(uint8_t connection, byte_array *writeValue, uint16_t characteristic);
 void sli_zigbee_direct_anonymous_join_event_handler(sl_zigbee_af_event_t *event);

@@ -15,6 +15,11 @@ requires:
 - name: hal_timer
   condition: [device_has_timer]
 - name: device_peripheral
+  condition: [device_efx]
+- name: clock_manager_runtime
+  condition: [device_efx]
+- name: interrupt_manager
+  condition: [device_efx]
 root_path: platform_core/platform/service/sl_log/
 source:
 - path: src/sl_log_platform_specific.c

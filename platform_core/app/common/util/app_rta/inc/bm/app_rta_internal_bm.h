@@ -32,7 +32,10 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "sl_component_catalog.h"
+#ifdef SL_CATALOG_POWER_MANAGER_PRESENT
 #include "sl_power_manager.h"
+#endif // SL_CATALOG_POWER_MANAGER_PRESENT
 
 #ifdef __cplusplus
 extern "C" {
@@ -63,6 +66,8 @@ void app_rta_ready(void);
  *****************************************************************************/
 void app_rta_step(void);
 
+#ifdef SL_CATALOG_POWER_MANAGER_PRESENT
+
 /**************************************************************************//**
  * Check if it is ok to sleep now / power manager
  * @return true - if ready to sleep, false otherwise
@@ -80,6 +85,8 @@ bool app_rta_is_ok_to_sleep(void);
  *         caused the system wakeup and the system MUST NOT go back to sleep
  *****************************************************************************/
 sl_power_manager_on_isr_exit_t app_rta_on_isr_exit(void);
+
+#endif // SL_CATALOG_POWER_MANAGER_PRESENT
 
 #ifdef __cplusplus
 };

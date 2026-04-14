@@ -838,11 +838,13 @@
     <member refid="group__sl__bt__resource__connection__tx__flags_1gafd37e277849a57e07f8f5c2388d67e8b" kind="define"><name>SL_BT_RESOURCE_CONNECTION_TX_FLAGS_ERROR_CORRUPT</name></member>
     <member refid="group__sl__bt__evt__resource__status_1gaa27a8b50b03066e313ef65c96236864f" kind="define"><name>sl_bt_evt_resource_status_id</name></member>
     <member refid="group__sl__bt__gap_1gafe44c545af0f70ba8733013cd3d8e832" kind="define"><name>sl_bt_cmd_gap_set_privacy_mode_id</name></member>
+    <member refid="group__sl__bt__gap_1gabce99903c7c82efbfd6b14ea3676af4d" kind="define"><name>sl_bt_cmd_gap_set_privacy_mode_with_rpa_randomization_id</name></member>
     <member refid="group__sl__bt__gap_1gaaf8e401ac4e5ba0b8b3469d10fc17de0" kind="define"><name>sl_bt_cmd_gap_set_data_channel_classification_id</name></member>
     <member refid="group__sl__bt__gap_1ga266dd784ad902fa2faf499e0084aefb5" kind="define"><name>sl_bt_cmd_gap_set_identity_address_id</name></member>
     <member refid="group__sl__bt__gap_1gaa1fa023adee48b1dc9244343bcaa5a9b" kind="define"><name>sl_bt_cmd_gap_get_identity_address_id</name></member>
     <member refid="group__sl__bt__gap_1ga889b2e4c2f3f01588ab1b9e78aedea1b" kind="define"><name>sl_bt_cmd_gap_get_max_connections_id</name></member>
     <member refid="group__sl__bt__gap_1gad5ef0c0b5b41e18d5be735adaff92645" kind="define"><name>sl_bt_rsp_gap_set_privacy_mode_id</name></member>
+    <member refid="group__sl__bt__gap_1ga605d3f15798954bbcfebefe7bb72e882" kind="define"><name>sl_bt_rsp_gap_set_privacy_mode_with_rpa_randomization_id</name></member>
     <member refid="group__sl__bt__gap_1ga632932216159bdf43f1b0f1f7be7d85f" kind="define"><name>sl_bt_rsp_gap_set_data_channel_classification_id</name></member>
     <member refid="group__sl__bt__gap_1gafa28b857ba33de526244d62e848aaa05" kind="define"><name>sl_bt_rsp_gap_set_identity_address_id</name></member>
     <member refid="group__sl__bt__gap_1ga3083559198beefa63e85619237408067" kind="define"><name>sl_bt_rsp_gap_get_identity_address_id</name></member>
@@ -1604,6 +1606,7 @@
     <member refid="group__sl__bt__resource_1gac20e81967290607f606bac886edfd959" kind="function"><name>sl_bt_resource_get_connection_tx_status</name></member>
     <member refid="group__sl__bt__resource_1ga6a309c7afd2edf511f16d7529183faba" kind="function"><name>sl_bt_resource_disable_connection_tx_report</name></member>
     <member refid="group__sl__bt__gap_1gab8d65fb681a00f260f8b8c49a09ab1d5" kind="function"><name>sl_bt_gap_set_privacy_mode</name></member>
+    <member refid="group__sl__bt__gap_1ga3c379e284417946314ba65eeae5c9bd3" kind="function"><name>sl_bt_gap_set_privacy_mode_with_rpa_randomization</name></member>
     <member refid="group__sl__bt__gap_1gae1ee4d45283563a12394f5261e45f952" kind="function"><name>sl_bt_gap_set_data_channel_classification</name></member>
     <member refid="group__sl__bt__gap_1ga654072e39147679ac71c8f32935eeaf9" kind="function"><name>sl_bt_gap_set_identity_address</name></member>
     <member refid="group__sl__bt__gap_1gaead984805fa3c7145da2c63354f98697" kind="function"><name>sl_bt_gap_get_identity_address</name></member>
@@ -2109,16 +2112,19 @@
     <member refid="group__sl__bt__gap_1ggac8f8f7951d8100e1e969cdf90127a086a207c4b705ad3016dc17edb2d38fa9863" kind="enumvalue"><name>sl_bt_gap_channel_selection_algorithm_1</name></member>
     <member refid="group__sl__bt__gap_1ggac8f8f7951d8100e1e969cdf90127a086aa37ef47df0d5c53d0c73ed0f50ec95ec" kind="enumvalue"><name>sl_bt_gap_channel_selection_algorithm_2</name></member>
     <member refid="group__sl__bt__gap_1gab8d65fb681a00f260f8b8c49a09ab1d5" kind="function"><name>sl_bt_gap_set_privacy_mode</name></member>
+    <member refid="group__sl__bt__gap_1ga3c379e284417946314ba65eeae5c9bd3" kind="function"><name>sl_bt_gap_set_privacy_mode_with_rpa_randomization</name></member>
     <member refid="group__sl__bt__gap_1gae1ee4d45283563a12394f5261e45f952" kind="function"><name>sl_bt_gap_set_data_channel_classification</name></member>
     <member refid="group__sl__bt__gap_1ga654072e39147679ac71c8f32935eeaf9" kind="function"><name>sl_bt_gap_set_identity_address</name></member>
     <member refid="group__sl__bt__gap_1gaead984805fa3c7145da2c63354f98697" kind="function"><name>sl_bt_gap_get_identity_address</name></member>
     <member refid="group__sl__bt__gap_1gac87c0807d9ae80830b80409930d71a78" kind="function"><name>sl_bt_gap_get_max_connections</name></member>
     <member refid="group__sl__bt__gap_1gafe44c545af0f70ba8733013cd3d8e832" kind="define"><name>sl_bt_cmd_gap_set_privacy_mode_id</name></member>
+    <member refid="group__sl__bt__gap_1gabce99903c7c82efbfd6b14ea3676af4d" kind="define"><name>sl_bt_cmd_gap_set_privacy_mode_with_rpa_randomization_id</name></member>
     <member refid="group__sl__bt__gap_1gaaf8e401ac4e5ba0b8b3469d10fc17de0" kind="define"><name>sl_bt_cmd_gap_set_data_channel_classification_id</name></member>
     <member refid="group__sl__bt__gap_1ga266dd784ad902fa2faf499e0084aefb5" kind="define"><name>sl_bt_cmd_gap_set_identity_address_id</name></member>
     <member refid="group__sl__bt__gap_1gaa1fa023adee48b1dc9244343bcaa5a9b" kind="define"><name>sl_bt_cmd_gap_get_identity_address_id</name></member>
     <member refid="group__sl__bt__gap_1ga889b2e4c2f3f01588ab1b9e78aedea1b" kind="define"><name>sl_bt_cmd_gap_get_max_connections_id</name></member>
     <member refid="group__sl__bt__gap_1gad5ef0c0b5b41e18d5be735adaff92645" kind="define"><name>sl_bt_rsp_gap_set_privacy_mode_id</name></member>
+    <member refid="group__sl__bt__gap_1ga605d3f15798954bbcfebefe7bb72e882" kind="define"><name>sl_bt_rsp_gap_set_privacy_mode_with_rpa_randomization_id</name></member>
     <member refid="group__sl__bt__gap_1ga632932216159bdf43f1b0f1f7be7d85f" kind="define"><name>sl_bt_rsp_gap_set_data_channel_classification_id</name></member>
     <member refid="group__sl__bt__gap_1gafa28b857ba33de526244d62e848aaa05" kind="define"><name>sl_bt_rsp_gap_set_identity_address_id</name></member>
     <member refid="group__sl__bt__gap_1ga3083559198beefa63e85619237408067" kind="define"><name>sl_bt_rsp_gap_get_identity_address_id</name></member>
@@ -3536,27 +3542,27 @@
   </compound>
   <compound refid="bgapi" kind="page"><name>bgapi</name>
   </compound>
-  <compound refid="dir_2391b89f2879365d74a63a728bba7d01" kind="dir"><name>/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi</name>
+  <compound refid="dir_2391b89f2879365d74a63a728bba7d01" kind="dir"><name>/var/lib/jenkins/github@3/bluetooth_le_host/build/native/ble_bgapi</name>
   </compound>
-  <compound refid="dir_e2f731d1cb9f97679faa790ae39b91e5" kind="dir"><name>/var/lib/jenkins/github/bluetooth_le_host</name>
+  <compound refid="dir_e2f731d1cb9f97679faa790ae39b91e5" kind="dir"><name>/var/lib/jenkins/github@3/bluetooth_le_host</name>
   </compound>
-  <compound refid="dir_b1a1817b9387e5b054018a5428eb2a3f" kind="dir"><name>/var/lib/jenkins/github/bluetooth_le_host/build</name>
+  <compound refid="dir_b1a1817b9387e5b054018a5428eb2a3f" kind="dir"><name>/var/lib/jenkins/github@3/bluetooth_le_host/build</name>
   </compound>
   <compound refid="dir_5a46a304ca1f10f7c478657ff1bdae3a" kind="dir"><name>doc</name>
   </compound>
-  <compound refid="dir_d9a0b0c47291d7e9365bb8ce2e415e2a" kind="dir"><name>/var/lib/jenkins/github/bluetooth_le_host/event_system</name>
+  <compound refid="dir_d9a0b0c47291d7e9365bb8ce2e415e2a" kind="dir"><name>/var/lib/jenkins/github@3/bluetooth_le_host/event_system</name>
   </compound>
-  <compound refid="dir_ae20ecc429096018a2fe615dace667aa" kind="dir"><name>/var/lib/jenkins/github/bgapi_protocol/protocol/inc</name>
+  <compound refid="dir_ae20ecc429096018a2fe615dace667aa" kind="dir"><name>/var/lib/jenkins/github@3/bgapi_protocol/protocol/inc</name>
   </compound>
-  <compound refid="dir_d0da292a01e2631d4fa972006f72b194" kind="dir"><name>/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc</name>
+  <compound refid="dir_d0da292a01e2631d4fa972006f72b194" kind="dir"><name>/var/lib/jenkins/github@3/bluetooth_le_host/build/native/ble_bgapi/inc</name>
   </compound>
-  <compound refid="dir_2e99f0e5add2c6d752cf2b568e810fad" kind="dir"><name>/var/lib/jenkins/github/bluetooth_le_host/event_system/inc</name>
+  <compound refid="dir_2e99f0e5add2c6d752cf2b568e810fad" kind="dir"><name>/var/lib/jenkins/github@3/bluetooth_le_host/event_system/inc</name>
   </compound>
-  <compound refid="dir_848835a5aecb994e59a4c4b7340e87b9" kind="dir"><name>/var/lib/jenkins/github/bluetooth_le_host/inc</name>
+  <compound refid="dir_848835a5aecb994e59a4c4b7340e87b9" kind="dir"><name>/var/lib/jenkins/github@3/bluetooth_le_host/inc</name>
   </compound>
-  <compound refid="dir_9ef8797857fbe1d47af7accb030e7afd" kind="dir"><name>/var/lib/jenkins/github/bluetooth_le_host/build/native</name>
+  <compound refid="dir_9ef8797857fbe1d47af7accb030e7afd" kind="dir"><name>/var/lib/jenkins/github@3/bluetooth_le_host/build/native</name>
   </compound>
-  <compound refid="dir_6d235e19420f7bb65a9187ffe80ccb69" kind="dir"><name>/var/lib/jenkins/github/bgapi_protocol/protocol</name>
+  <compound refid="dir_6d235e19420f7bb65a9187ffe80ccb69" kind="dir"><name>/var/lib/jenkins/github@3/bgapi_protocol/protocol</name>
   </compound>
   <compound refid="indexpage" kind="page"><name>index</name>
   </compound>

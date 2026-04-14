@@ -23,7 +23,7 @@ include:
 component:
   - id: hal_lcd
   - id: sl_main
-  - id: hal_ldma
+  - id: dma_manager
   - id: device_init
   - id: clock_manager
   - id: segment_lcd_driver

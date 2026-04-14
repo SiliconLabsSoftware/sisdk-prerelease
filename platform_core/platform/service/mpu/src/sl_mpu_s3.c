@@ -94,6 +94,12 @@ extern uint32_t __ramfuncs_start__;
  #define SRAM_ALIAS_END                 (SRAM_ALIAS_BASE + SRAM_SIZE)
 #endif /* defined(SRAM_ALIAS_NS_BASE) */
 
+#if defined(DMEM0_MEM_BASE)
+#define DMEM_MEM_BASE      DMEM0_MEM_BASE
+#define DMEM_MEM_NS_BASE   DMEM0_MEM_NS_BASE
+#define DMEM_MEM_S_BASE    DMEM0_MEM_S_BASE
+#endif
+
 #if defined(DMEM_MEM_NS_BASE)
  #if defined(SL_TRUSTZONE_SECURE)
   #define DMEM_MEM_ALTERNATE_TZ_BASE    DMEM_MEM_NS_BASE

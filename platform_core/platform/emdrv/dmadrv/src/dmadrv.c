@@ -326,8 +326,6 @@ Ecode_t DMADRV_Init(void)
 
   sl_dma_manager_get_default_handle(&dmadrv_dma_manager_handle);
 
-  sl_dma_manager_set_nbr_round_robin_channels(dmadrv_dma_manager_handle, EMDRV_DMADRV_DMA_CH_COUNT - EMDRV_DMADRV_DMA_CH_PRIORITY);
-
   return ECODE_EMDRV_DMADRV_OK;
 }
 

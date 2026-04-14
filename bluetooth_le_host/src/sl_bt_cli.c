@@ -515,6 +515,25 @@ void sli_bt_cli_gap_set_privacy_mode(sl_cli_command_arg_t *arguments)
     printf("rsp_gap_set_privacy_mode 0x%lx ",status);
     printf("\n");
 }
+void sli_bt_cli_gap_set_privacy_mode_with_rpa_randomization(sl_cli_command_arg_t *arguments)
+{
+
+  sl_status_t status;
+  (void)(arguments);
+  // parameters
+  uint8_t privacy=sl_cli_get_argument_uint8(arguments,0);
+  uint8_t interval_min_minutes=sl_cli_get_argument_uint8(arguments,1);
+  uint8_t interval_max_minutes=sl_cli_get_argument_uint8(arguments,2);
+  //return values
+  status=sl_bt_gap_set_privacy_mode_with_rpa_randomization(
+  privacy,
+  interval_min_minutes,
+  interval_max_minutes
+  );
+
+    printf("rsp_gap_set_privacy_mode_with_rpa_randomization 0x%lx ",status);
+    printf("\n");
+}
 void sli_bt_cli_gap_set_data_channel_classification(sl_cli_command_arg_t *arguments)
 {
 
@@ -3934,6 +3953,7 @@ void sli_bt_cli_external_bondingdb_set_local_irk(sl_cli_command_arg_t *arguments
     printf("rsp_external_bondingdb_set_local_irk 0x%lx ",status);
     printf("\n");
 }
+#ifdef SL_CATALOG_BLUETOOTH_FEATURE_RESOLVING_LIST_PRESENT
 void sli_bt_cli_resolving_list_add_device_by_bonding(sl_cli_command_arg_t *arguments)
 {
 
@@ -4026,6 +4046,7 @@ void sli_bt_cli_resolving_list_remove_all_devices(sl_cli_command_arg_t *argument
     printf("rsp_resolving_list_remove_all_devices 0x%lx ",status);
     printf("\n");
 }
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_RESOLVING_LIST_PRESENT
 #ifdef SL_CATALOG_BLUETOOTH_FEATURE_ACCEPT_LIST_PRESENT
 void sli_bt_cli_accept_list_add_device_by_bonding(sl_cli_command_arg_t *arguments)
 {

@@ -116,6 +116,7 @@ SL_ENUM(sl_clock_branch_t) {
   SL_CLOCK_BRANCH_FLPLLREFCLK,   ///< FLPLLREFCLK Clock Branch
   SL_CLOCK_BRANCH_PDM0CLK,       ///< PDM0CLK Clock Branch
   SL_CLOCK_BRANCH_CAN0CLK,       ///< CAN0CLK Clock Branch
+  SL_CLOCK_BRANCH_CAN1CLK,       ///< CAN1CLK Clock Branch
   SL_CLOCK_BRANCH_HCLKDIVN,      ///< HCLKDIVN Clock Branch
   SL_CLOCK_BRANCH_CPUCLK,        ///< CPUCLK Clock Branch
   SL_CLOCK_BRANCH_ADC0CLK,       ///< ADC0CLK Clock Branch
@@ -200,6 +201,9 @@ SL_ENUM(sl_clock_branch_t) {
 
 /// Define for CAN0 peripheral bus clock pointer.
 #define SL_BUS_CLOCK_CAN0 (&SL_BUS_CLOCK_CAN0_VALUE)
+
+/// Define for CAN1 peripheral bus clock pointer.
+#define SL_BUS_CLOCK_CAN1 (&SL_BUS_CLOCK_CAN1_VALUE)
 
 /// Define for CRYPTOACC peripheral bus clock pointer.
 #define SL_BUS_CLOCK_CRYPTOACC (&SL_BUS_CLOCK_CRYPTOACC_VALUE)
@@ -320,6 +324,9 @@ SL_ENUM(sl_clock_branch_t) {
 
 /// Define for LETIMER0 peripheral bus clock pointer.
 #define SL_BUS_CLOCK_LETIMER0 (&SL_BUS_CLOCK_LETIMER0_VALUE)
+
+/// Define for LETIMER1 peripheral bus clock pointer.
+#define SL_BUS_CLOCK_LETIMER1 (&SL_BUS_CLOCK_LETIMER1_VALUE)
 
 /// Define for LFRCO peripheral bus clock pointer.
 #define SL_BUS_CLOCK_LFRCO (&SL_BUS_CLOCK_LFRCO_VALUE)
@@ -547,6 +554,9 @@ extern const uint32_t SL_BUS_CLOCK_BURTC_VALUE;
 // External declaration for CAN0 peripheral bus clock value.
 extern const uint32_t SL_BUS_CLOCK_CAN0_VALUE;
 
+// External declaration for CAN1 peripheral bus clock value.
+extern const uint32_t SL_BUS_CLOCK_CAN1_VALUE;
+
 // External declaration for CRYPTOACC peripheral bus clock value.
 extern const uint32_t SL_BUS_CLOCK_CRYPTOACC_VALUE;
 
@@ -666,6 +676,9 @@ extern const uint32_t SL_BUS_CLOCK_LEDSINK0_VALUE;
 
 // External declaration for LETIMER0 peripheral bus clock value.
 extern const uint32_t SL_BUS_CLOCK_LETIMER0_VALUE;
+
+// External declaration for LETIMER1 peripheral bus clock value.
+extern const uint32_t SL_BUS_CLOCK_LETIMER1_VALUE;
 
 // External declaration for LFRCO peripheral bus clock value.
 extern const uint32_t SL_BUS_CLOCK_LFRCO_VALUE;

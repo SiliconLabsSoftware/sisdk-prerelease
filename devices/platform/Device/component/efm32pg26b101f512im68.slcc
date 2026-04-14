@@ -23,7 +23,6 @@
   - file_list:
     - path: efm32pg26b101f512im68.h
     - path: efm32pg26_acmp.h
-    - path: efm32pg26_amuxcp.h
     - path: efm32pg26_buram.h
     - path: efm32pg26_burtc.h
     - path: efm32pg26_cmu.h
@@ -87,8 +86,6 @@
   - name: device_has_acmp
   - name: device_has_acmp0
   - name: device_has_acmp1
-  - name: device_has_amuxcp
-  - name: device_has_amuxcp0
   - name: device_has_buram
   - name: device_has_burtc
   - name: device_has_cmu

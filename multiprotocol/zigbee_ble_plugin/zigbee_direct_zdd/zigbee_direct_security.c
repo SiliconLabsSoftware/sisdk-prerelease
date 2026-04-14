@@ -57,8 +57,7 @@
 #define ZIGBEE_DIRECT_NONCE_LENGTH 13
 #define ZIGBEE_DIRECT_AUTH_DATA_LENGTH 34
 #define ZIGBEE_DIRECT_MIC_LENGTH 4
-#define ZIGBEE_DIRECT_COUNTER_SIZE 4
-#define ZIGBEE_DIRECT_DECRYPT_OVERHEAD (ZIGBEE_DIRECT_COUNTER_SIZE + ZIGBEE_DIRECT_MIC_LENGTH)
+#define ZIGBEE_DIRECT_DECRYPT_OVERHEAD (SL_ZIGBEE_DIRECT_COUNTER_SIZE + ZIGBEE_DIRECT_MIC_LENGTH)
 #define ENCRYPTION_KEYBITS (ENCRYPTION_BLOCK_SIZE * 8)
 #define UUID_SIZE 16
 
@@ -82,6 +81,7 @@ sl_zigbee_af_event_t sli_zigbee_direct_anonymous_join_event;
 bool sli_zigbee_direct_tc_is_zigbee_direct_aware = false;
 uint8_t sli_zigbee_direct_key_negotiation_method;
 uint8_t sli_zigbee_direct_preshared_key;
+sl_zigbee_direct_session_auth_state_t sl_zigbee_direct_session_auth_state = SL_ZIGBEE_DIRECT_SESSION_NOT_AUTHENTICATED;
 
 //--------------
 // Event handler
@@ -258,7 +258,7 @@ sl_status_t sli_zigbee_direct_security_encrypt_packet(sl_802154_long_addr_t sour
   // assemble NONCE
   memcpy(nonce, sourceEui, EUI64_SIZE);
   sl_util_store_low_high_int32u(&nonce[EUI64_SIZE], outgoing_counter);
-  nonce[EUI64_SIZE + ZIGBEE_DIRECT_COUNTER_SIZE] = ZIGBEE_DIRECT_SECURITY_LEVEL_ENC_MIC32;
+  nonce[EUI64_SIZE + SL_ZIGBEE_DIRECT_COUNTER_SIZE] = ZIGBEE_DIRECT_SECURITY_LEVEL_ENC_MIC32;
 
   // assemble authentication data
   memcpy(authData, service_uuid, UUID_SIZE); // 1. Service UUID (bytes 0-15)
@@ -278,7 +278,7 @@ sl_status_t sli_zigbee_direct_security_encrypt_packet(sl_802154_long_addr_t sour
                                   ZIGBEE_DIRECT_MIC_LENGTH) != 0) {
     return SL_STATUS_FAIL;
   }
-  sl_util_store_low_high_int32u(&encryptData[-ZIGBEE_DIRECT_COUNTER_SIZE], outgoing_counter++);
+  sl_util_store_low_high_int32u(&encryptData[-SL_ZIGBEE_DIRECT_COUNTER_SIZE], outgoing_counter++);
 
   return SL_STATUS_OK;
 }
@@ -306,7 +306,7 @@ bool sli_zigbee_direct_security_decrypt_packet(sl_802154_long_addr_t sourceEui, 
   // assemble NONCE
   memcpy(nonce, sourceEui, EUI64_SIZE);
   sl_util_store_low_high_int32u(&nonce[EUI64_SIZE], counter_from_packet);
-  nonce[EUI64_SIZE + ZIGBEE_DIRECT_COUNTER_SIZE] = ZIGBEE_DIRECT_SECURITY_LEVEL_ENC_MIC32;
+  nonce[EUI64_SIZE + SL_ZIGBEE_DIRECT_COUNTER_SIZE] = ZIGBEE_DIRECT_SECURITY_LEVEL_ENC_MIC32;
 
   // assemble authentication data
   memcpy(authData, service_uuid, UUID_SIZE);
@@ -320,7 +320,7 @@ bool sli_zigbee_direct_security_decrypt_packet(sl_802154_long_addr_t sourceEui, 
                                  ZIGBEE_DIRECT_NONCE_LENGTH,
                                  authData,
                                  ZIGBEE_DIRECT_AUTH_DATA_LENGTH,
-                                 &decryptData[ZIGBEE_DIRECT_COUNTER_SIZE],
+                                 &decryptData[SL_ZIGBEE_DIRECT_COUNTER_SIZE],
                                  decryptData,
                                  &decryptData[dataLen - ZIGBEE_DIRECT_MIC_LENGTH],
                                  ZIGBEE_DIRECT_MIC_LENGTH);
@@ -513,6 +513,7 @@ void sli_zigbee_direct_handle_authenticate_write(uint8_t connection, byte_array 
   //as a ZDD only receiving opcodes 1 and 3 makes sense
   switch (writeValue->data[0]) {
     case SESSION_ESTABLISHMENT_MSG_1:
+      sl_zigbee_direct_session_auth_state = SL_ZIGBEE_DIRECT_SESSION_NOT_AUTHENTICATED;
       // handle Key Negotiation Req Selected Key Negotiation Method TLV
       if (sl_zigbee_tlv_search_buffer_payload_for_id(buffer_len, buffer_ptr, 0, SL_ZIGBEE_DIRECT_SECURITY_TLV_SELECTED_KEY_NEGOTIATION_METHOD_TAG_ID, (sl_zigbee_tlv_t *) &sl_tlv_pointer1, 78 /*writeValue->len - 1*/) == SL_STATUS_OK) {
         sl_zigbee_app_debug_println("Use Key Negotiation method %02X and pre-shared secret %02X", sl_tlv_pointer1.value[0], sl_tlv_pointer1.value[1]);
@@ -590,6 +591,7 @@ void sli_zigbee_direct_handle_authenticate_write(uint8_t connection, byte_array 
       if (memcmp(MacTag_check, &sl_tlv_pointer1.value[0], compare_length) == 0) {
         sl_zigbee_app_debug_println("MAC TAG is matching!");
         sl_zvd_connection_status = sl_zvd_connection_status_next;
+        sl_zigbee_direct_session_auth_state = SL_ZIGBEE_DIRECT_SESSION_AUTHENTICATED;
         (void)sl_token_manager_set_data(COMMON_TOKEN_PLUGIN_ZDD_AUTH_STATUS, (void *)&sl_zvd_connection_status, sizeof(uint8_t));
       } else {
         sl_zigbee_app_debug_println("MAC TAG is NOT matching");

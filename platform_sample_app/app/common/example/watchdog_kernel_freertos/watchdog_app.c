@@ -41,12 +41,12 @@
 #define BUTTON_INSTANCE_1   sl_button_btn1
 #endif
 
-#ifndef TOOGLE_DELAY_MS_0
-#define TOOGLE_DELAY_MS_0            200
+#ifndef TOGGLE_DELAY_MS_0
+#define TOGGLE_DELAY_MS_0            200
 #endif
 
-#ifndef TOOGLE_DELAY_MS_1
-#define TOOGLE_DELAY_MS_1            200
+#ifndef TOGGLE_DELAY_MS_1
+#define TOGGLE_DELAY_MS_1            200
 #endif
 
 #ifndef WATCHDOG_TASK_STACK_SIZE
@@ -105,18 +105,17 @@ static void wdog_task_2(void *arg);
  ******************************************************************************/
 void sl_button_on_change(const sl_button_t *handle)
 {
+  // Runs in GPIO interrupt context — do not call printf/iostream here (FreeRTOS unsafe).
   if (sl_button_get_state(handle) == SL_SIMPLE_BUTTON_PRESSED) {
     if (&BUTTON_INSTANCE_0 == handle) {
       CORE_DECLARE_IRQ_STATE;
       CORE_ENTER_CRITICAL();
       btn_pressed[0] = !btn_pressed[0];
-      printf("[BTN] Button 0 pressed - Suspended WD 1\r\n");
       CORE_EXIT_CRITICAL();
     } else if (&BUTTON_INSTANCE_1 == handle) {
       CORE_DECLARE_IRQ_STATE;
       CORE_ENTER_CRITICAL();
       btn_pressed[1] = !btn_pressed[1];
-      printf("[BTN] Button 1 pressed - Suspended WD 2\r\n");
       CORE_EXIT_CRITICAL();
     }
   }
@@ -138,7 +137,7 @@ void sample_init(void)
   }
   printf("--------------------------------------------------------\r\n");
 
-  sl_udelay_wait(50000);
+  sl_udelay_wait(100000);
 
 #if (EXAMPLE_USE_STATIC_ALLOCATION == 1)
 
@@ -152,7 +151,7 @@ void sample_init(void)
                               "wdog task 1",
                               WATCHDOG_TASK_STACK_SIZE,
                               ( void * ) NULL,
-                              tskIDLE_PRIORITY + 1,
+                              tskIDLE_PRIORITY + 2,
                               xStack_1,
                               &xTaskBuffer_1);
 
@@ -182,7 +181,7 @@ void sample_init(void)
                           "wdog task 1",
                           WATCHDOG_TASK_STACK_SIZE,
                           ( void * ) NULL,
-                          tskIDLE_PRIORITY + 1,
+                          tskIDLE_PRIORITY + 2,
                           &xHandle_1);
 
   // Unlike task creation using static allocation, dynamic task creation can very likely
@@ -208,26 +207,38 @@ void sample_init(void)
  ******************************************************************************/
 static void wdog_task_1(void *arg)
 {
+  static bool prev_btn0_feed = true;
+
   (void)&arg;
 
-  const TickType_t xDelay = pdMS_TO_TICKS(TOOGLE_DELAY_MS_0);
+  const TickType_t xDelay = pdMS_TO_TICKS(TOGGLE_DELAY_MS_0);
 
   status = sl_watchdog_manager_create(&my_watchdog_0, 0x12345678);
   if (status == SL_STATUS_OK) {
     sl_watchdog_manager_enable(&my_watchdog_0);
     printf("[WDOG] Watchdog 0 created\r\n");
-    sl_udelay_wait(500);
+    // prevent printf error in task switch
+    sl_udelay_wait(50000);
     // Force feed the watchdog to prevent it from triggering during initialization.
     sl_watchdog_manager_force_feed();
   }
+
   while (1) {
+    bool cur0 = btn_pressed[0];
+    if (cur0 != prev_btn0_feed) {
+      prev_btn0_feed = cur0;
+      printf("[BTN] Button 0 pressed - Watchdog 0 %s\r\n",
+             cur0 ? "feeding enabled" : "feeding disabled");
+    }
     if (btn_pressed[0] == true) {
       sl_watchdog_manager_feed(&my_watchdog_0);
-      printf("[APP] Watchdog 0 fed");
-      printf(" - ");
+      printf("[APP] Watchdog 0 fed\r\n");
+      // prevent printf error in task switch
+      sl_udelay_wait(50000);
     } else {
-      printf("[APP] Watchdog 0 not fed");
-      printf(" - ");
+      printf("[APP][ERROR] Watchdog 0 not fed. Waiting for Button 0 to recover...\r\n");
+      // prevent printf error in task switch
+      sl_udelay_wait(50000);
     }
     vTaskDelay(xDelay);
   }
@@ -240,24 +251,38 @@ static void wdog_task_1(void *arg)
  ******************************************************************************/
 static void wdog_task_2(void *arg)
 {
+  static bool prev_btn1_feed = true;
+
   (void)&arg;
 
-  const TickType_t xDelay = pdMS_TO_TICKS(TOOGLE_DELAY_MS_1);
+  const TickType_t xDelay = pdMS_TO_TICKS(TOGGLE_DELAY_MS_1);
 
   status = sl_watchdog_manager_create(&my_watchdog_1, 0x12345679);
   if (status == SL_STATUS_OK) {
     sl_watchdog_manager_enable(&my_watchdog_1);
     printf("[WDOG] Watchdog 1 created\r\n");
-    sl_udelay_wait(500);
+    // prevent printf error in task switch
+    sl_udelay_wait(50000);
     // Force feed the watchdog to prevent it from triggering during initialization.
     sl_watchdog_manager_force_feed();
   }
+
   while (1) {
+    bool cur1 = btn_pressed[1];
+    if (cur1 != prev_btn1_feed) {
+      prev_btn1_feed = cur1;
+      printf("[BTN] Button 1 pressed - Watchdog 1 %s\r\n",
+             cur1 ? "feeding enabled" : "feeding disabled");
+    }
     if (btn_pressed[1] == true) {
       sl_watchdog_manager_feed(&my_watchdog_1);
       printf("[APP] Watchdog 1 fed\r\n");
+      // prevent printf error in task switch
+      sl_udelay_wait(50000);
     } else {
-      printf("[APP] Watchdog 1 not fed\r\n");
+      printf("[APP][ERROR] Watchdog 1 not fed. Waiting for Button 1 to recover...\r\n");
+      // prevent printf error in task switch
+      sl_udelay_wait(50000);
     }
     vTaskDelay(xDelay);
   }

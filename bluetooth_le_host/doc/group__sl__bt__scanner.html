@@ -480,6 +480,7 @@ policy" for a detailed description of this setting. </p>
       </table>
 </div><div class="memdoc">
 <p>Start the GAP discovery procedure to scan for advertising devices that use legacy or extended advertising PDUs. To cancel an ongoing discovery procedure, use the <a class="el" href="group__sl__bt__scanner.html#ga59c2a23518c18aa3106312ee8eda1c57">sl_bt_scanner_stop</a> command.</p>
+<p>If privacy is enabled, see <a class="el" href="group__sl__bt__gap.html#gab8d65fb681a00f260f8b8c49a09ab1d5">sl_bt_gap_set_privacy_mode</a> for the scanner private address behavior.</p>
 <p>The invalid parameter error will be returned if the value of scanning PHYs is invalid or the device does not support a PHY.</p>
 <p>Received advertising packets are not filtered in any way, so multiple events will be received for every advertising device in range.</p>
 <dl class="params"><dt>Parameters</dt><dd>
