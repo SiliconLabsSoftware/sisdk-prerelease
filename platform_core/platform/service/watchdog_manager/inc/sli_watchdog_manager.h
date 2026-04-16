@@ -60,6 +60,16 @@ void sli_watchdog_manager_platform_init(void);
  ******************************************************************************/
 void sli_watchdog_manager_platform_feed(void);
 
+#if defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT)
+/***************************************************************************//**
+ * Register Micrium @c OS_AppTaskSwHookPtr to feed on context switches (when
+ * @c OS_CFG_APP_HOOKS_EN is enabled). Called from @ref sl_watchdog_manager_start().
+ *
+ * @note FOR INTERNAL USE ONLY.
+ ******************************************************************************/
+void sli_watchdog_manager_micrium_install_task_sw_hook(void);
+#endif
+
 /***************************************************************************//**
  * Record which software watchdog was not fed, for post-reset retrieval.
  *

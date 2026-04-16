@@ -38,7 +38,7 @@
 #include "sl_wisun_connection_params_api.h"
 
 /// API version used to check compatibility (do not edit when using this header)
-#define SL_WISUN_LFN_PARAMS_API_VERSION  5
+#define SL_WISUN_LFN_PARAMS_API_VERSION  4
 
 /**************************************************************************//**
  * @addtogroup SL_WISUN_TYPES
@@ -167,10 +167,6 @@ typedef struct {
   sl_wisun_params_traffic_t traffic;
   /// MAC parameter set
   sl_wisun_mac_params_t mac;
-  /// Automatically adjust connection parameters based on PAN size
-  uint8_t auto_adjust;
-  /// Reserved, set to zero
-  uint8_t reserved[3];
 } SL_ATTRIBUTE_PACKED sl_wisun_lfn_params_t;
 SL_PACK_END()
 
@@ -242,7 +238,6 @@ static const sl_wisun_lfn_params_t SL_WISUN_PARAMS_LFN_TEST = {
     .max_cca_retries = 8,
     .max_frame_retries = 7,
   },
-  .auto_adjust = false,
 };
 
 /// Profile providing balance between power consumption and performance
@@ -302,7 +297,6 @@ static const sl_wisun_lfn_params_t SL_WISUN_PARAMS_LFN_BALANCED = {
     .max_cca_retries = 8,
     .max_frame_retries = 7,
   },
-  .auto_adjust = false,
 };
 
 /// Profile optimized for low power consumption
@@ -362,67 +356,6 @@ static const sl_wisun_lfn_params_t SL_WISUN_PARAMS_LFN_ECO = {
     .max_cca_retries = 8,
     .max_frame_retries = 7,
   },
-  .auto_adjust = false,
-};
-
-/// Profile for automatic connection parameters adjustment
-static const sl_wisun_lfn_params_t SL_WISUN_PARAMS_LFN_AUTO = {
-  .version = SL_WISUN_LFN_PARAMS_API_VERSION,
-  .connection = {
-    .discovery_slot_time_ms = 60,
-    .discovery_slots = 40,
-    .reserved = { 0 }
-  },
-  .data_layer = {
-    .unicast_interval_ms = SEC_TO_MS(60),
-    .unicast_interval_min_ms = SEC_TO_MS(1),
-    .unicast_interval_max_ms = SEC_TO_MS(300),
-    .eapol_unicast_interval_ms = 1300,
-    .lfn_maintain_parent_time = 20,
-    .reserved = { 0 }
-  },
-  .eapol = {
-    .initial_key_max_s = 30,
-    .initial_key_retry_min_s = 120,
-    .initial_key_retry_max_limit_s = 420,
-    .lgtk_max_mismatch_m = 60,
-    .initial_key_retry_limit = 5,
-    .allow_skip = true
-  },
-  .network = {
-    .lfn_registration_lifetime_m = HOUR_TO_MIN(60),
-    .lfn_na_wait_duration_m = HOUR_TO_MIN(1),
-    .reserved = 0
-  },
-  .power = {
-    .listening_window_min_us = 500,
-    .window_margin_min_us = 1000,
-    .broadcast_lts_only = 0,
-    .reserved = { 0 }
-  },
-  .dhcp = {
-    .sol_txalg = {
-      .rand = 0.1f,
-      .max_delay_s = MIN_TO_SEC(5),
-      .irt_s = MIN_TO_SEC(15),
-      .mrt_s = HOUR_TO_SEC(1),
-      .mrd_s = 0,
-      .mrc = 3,
-    },
-  },
-  .traffic = {
-    .lowpan_mtu = 1576,
-    .ipv6_mru = 1504,
-    .max_edfe_fragment_count = 5,
-  },
-  .mac = {
-    .backoff_period_us = 0, // calculate from PHY by default
-    .min_be = 3,
-    .max_be = 5,
-    .max_cca_retries = 8,
-    .max_frame_retries = 7,
-  },
-  .auto_adjust = true,
 };
 
 /** @} */

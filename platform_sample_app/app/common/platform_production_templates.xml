@@ -360,6 +360,21 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   </descriptors>
+  <descriptors name="rht_unidriver_baremetal" label="Platform - RHT UniDriver Bare-metal" description="Bare-metal example that exercises the RHT UniDriver API for the on-board Si70xx (e.g. Wireless Pro Kit BRD4002A) or SHT4x (WPK BRD4002B). Prints discovery, optional API status codes, and periodic RH/T over VCOM.&#10;">
+    <properties key="namespace" value="template.uc" />
+    <properties key="keywords" value="universal\ configurator" />
+    <properties key="solutionReferenceId" value="app.common.example.rht_unidriver_baremetal.rht_unidriver_baremetal.slcp" />
+    <properties key="projectFilePaths" value="example/rht_unidriver_baremetal/rht_unidriver_baremetal.slcp" />
+    <properties key="readmeFiles" value="example/rht_unidriver_baremetal/readme.md" />
+    <properties key="boardCompatibility" value="brd2503a brd2503b brd2504a brd2506a brd2600a brd2601a brd2601b brd2602a brd2603a brd2608a brd4109a brd4116a brd4117a brd4118a brd4120a brd4121a brd4182a brd4184a brd4184b brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4194a brd4197a brd4198a brd4198b brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4277a brd4278a brd4310a brd4311a brd4311b brd4312a brd4316a brd4317a brd4318a brd4328a brd4328b brd4335a brd4350a brd4351a brd4356a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4402c brd4411a brd4412a brd4413a brd4415a com.silabs.board.none" />
+    <properties key="partCompatibility" value="mcu.arm.ef[mr]32.*" />
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code" />
+    <properties key="toolchainCompatibility" value="gcc iar llvm" />
+    <properties key="category" value="Example|Platform" />
+    <properties key="quality" value="PRODUCTION" />
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
+    <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
+  </descriptors>
   <descriptors name="i2cspm_kernel_freertos" label="Platform - I2C Simple Polled Master on FreeRTOS Kernel" description="This example project demonstrates how to use the I2C Simple Polled Master driver using the Si7021 Relative Humidity and Temperature Sensor in a FreeRTOS kernel task.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />

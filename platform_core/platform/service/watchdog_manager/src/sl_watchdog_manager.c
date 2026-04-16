@@ -219,6 +219,10 @@ void sl_watchdog_manager_start(void)
     sli_watchdog_manager_power_subscribe_em_transition();
 #endif
 
+#if defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT)
+    sli_watchdog_manager_micrium_install_task_sw_hook();
+#endif
+
     manager_state.started = true;
   }
 }

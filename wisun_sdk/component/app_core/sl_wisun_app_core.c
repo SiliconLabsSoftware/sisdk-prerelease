@@ -677,8 +677,6 @@ const sl_wisun_lfn_params_t *sl_wisun_app_core_get_lfn_params(void)
       return &SL_WISUN_PARAMS_LFN_BALANCED;
     case SL_WISUN_LFN_PROFILE_ECO:
       return &SL_WISUN_PARAMS_LFN_ECO;
-    case SL_WISUN_LFN_PROFILE_AUTOMATIC:
-      return &SL_WISUN_PARAMS_LFN_AUTO;
     default:
       return NULL;
   }
@@ -710,7 +708,8 @@ static sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * co
   }
 
 #if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
-  if (setting->device_type == SL_WISUN_LFN) {
+  // NOTE: Automatic network size is the default in the stack.
+  if (setting->device_type == SL_WISUN_LFN && setting->lfn_profile != SL_WISUN_LFN_PROFILE_AUTOMATIC) {
     // Store LFN profile based on wisun config
     ret = sl_wisun_set_lfn_parameters(sl_wisun_app_core_get_lfn_params());
     if (ret != SL_STATUS_OK) {
@@ -721,18 +720,23 @@ static sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * co
 #endif
 
 #if defined(WISUN_CONFIG_BROADCAST_RETRIES)
-  memcpy(&update_param, conn_param, sizeof(sl_wisun_connection_params_t));
-  update_param.mpl.trickle_expirations = WISUN_CONFIG_BROADCAST_RETRIES;
-  conn_param = &update_param;
+  if (setting->network_size != SL_WISUN_NETWORK_SIZE_AUTOMATIC) {
+    memcpy(&update_param, conn_param, sizeof(sl_wisun_connection_params_t));
+    update_param.mpl.trickle_expirations = WISUN_CONFIG_BROADCAST_RETRIES;
+    conn_param = &update_param;
+  }
 #endif
 
 #if defined(SL_CATALOG_WISUN_FFN_DEVICE_SUPPORT_PRESENT)
-  // set the connection parameters
-  ret = sl_wisun_set_connection_parameters(conn_param);
-  if (ret != SL_STATUS_OK) {
-    printf("[Failed: unable to set connection parameters: %lu]\n", ret);
-    _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_SET_NETWORK_SIZE_ERROR);
-    return ret;
+  // NOTE: Automatic network size is the default in the stack.
+  if (setting->network_size != SL_WISUN_NETWORK_SIZE_AUTOMATIC) {
+    // set the connection parameters
+    ret = sl_wisun_set_connection_parameters(conn_param);
+    if (ret != SL_STATUS_OK) {
+      printf("[Failed: unable to set connection parameters: %lu]\n", ret);
+      _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_SET_NETWORK_SIZE_ERROR);
+      return ret;
+    }
   }
 #endif
 

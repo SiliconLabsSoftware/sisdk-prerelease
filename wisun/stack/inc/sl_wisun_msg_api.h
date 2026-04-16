@@ -3325,22 +3325,11 @@ SL_PACK_END()
  * @{
  *****************************************************************************/
 
-
-/// Request message body
-SL_PACK_START(1)
-typedef struct {
-  /// Common message header
-  sl_wisun_msg_header_t header;
-} SL_ATTRIBUTE_PACKED sl_wisun_msg_clear_event_filters_req_body_t;
-SL_PACK_END()
-
 /// Request message
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
   sl_wisun_msg_header_t header;
-  /// Request message body
-  sl_wisun_msg_clear_event_filters_req_body_t body;
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_clear_event_filters_req_t;
 SL_PACK_END()
 

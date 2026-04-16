@@ -1738,3 +1738,9 @@
 #define sl_zigbee_af_sl_wwah_cluster_print_string(buffer)
 
 #endif // (defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT) && (SL_ZIGBEE_DEBUG_ZCL_GROUP_ENABLED == 1))
+
+// green-power-print-wrapper.h maps the same sl_zigbee_af_* names; if it is included
+// after this file, skip redefining those macros there when this TU already used af.h/print.h.
+#ifndef SLI_ZIGBEE_AF_PRINT_MACROS_DEFINED_BY_ZCL_DEBUG_PRINT_H
+#define SLI_ZIGBEE_AF_PRINT_MACROS_DEFINED_BY_ZCL_DEBUG_PRINT_H
+#endif

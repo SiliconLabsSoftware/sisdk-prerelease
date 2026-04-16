@@ -47,3 +47,10 @@ This example uses the I2C Simple Polled Master (SPM) driver in a Micrium OS kern
 You are encouraged to report issues and get help from the community:
 
 - [Silicon Labs Community](https://www.silabs.com/community)
+
+## Note
+
+This project talks to the **Si7021** using explicit I2C writes and reads in `i2cspm.c`, so the I2CSPM usage stays easy to step through. It does **not** add the Si70xx driver component or the **RHT UniDriver**—those wrap the same sensor protocol for normal application code.
+
+Silicon Labs **Wireless Pro Kit** mainboards differ: **BRD4002A** includes Si70xx RHT; **BRD4002B** includes SHT4x. To build **one** firmware that discovers and works with either part, use an **RHT UniDriver** example such as **`rht_unidriver_baremetal`** or **`segment_lcd_tempsensor`**.
+

@@ -47,3 +47,10 @@ This example uses the I2C SPM driver in a FreeRTOS task to read the SHT4x sensor
 You are encouraged to report issues and get help from the community:
 
 - [Silicon Labs Community](https://www.silabs.com/community)
+
+## Note
+
+This project talks to the **SHT4x** using explicit I2C writes and reads in `i2cspm.c`, so the I2CSPM usage stays easy to step through. It does **not** add the SHT4x driver component or the **RHT UniDriver**—those wrap the same sensor protocol for normal application code.
+
+The **SHT4x** RHT is on **Wireless Pro Kit BRD4002B**; **BRD4002A** uses Si70xx instead. To build **one** firmware that discovers and works with either mainboard, use an **RHT UniDriver** example such as **`rht_unidriver_baremetal`** or **`segment_lcd_tempsensor`**.
+

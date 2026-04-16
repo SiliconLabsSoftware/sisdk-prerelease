@@ -112,6 +112,11 @@ configuration:
     condition:
       - si70xx_driver
       - i2cspm
+  - name: SL_BOARD_ENABLE_SENSOR_RHT
+    value: "1"
+    condition:
+      - "sht4x_driver"
+      - "i2cspm"
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"
   - name: SL_BTMESH_PROVISIONEE_AUTO_RESET_DELAY

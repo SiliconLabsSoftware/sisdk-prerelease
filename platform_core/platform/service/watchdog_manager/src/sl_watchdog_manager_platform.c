@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Watchdog Manager default platform integration (Baremetal)
+ * @brief Watchdog Manager default platform integration (bare-metal and RTOS)
  *******************************************************************************
  * # License
  * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
@@ -31,6 +31,12 @@
 #include "sl_watchdog_manager.h"
 #include "sli_watchdog_manager.h"
 #include "sl_status.h"
+#if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
+#include "FreeRTOS.h"
+#endif
+#if defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT)
+#include "os.h"
+#endif
 
 /***************************************************************************//**
  * @addtogroup watchdog_manager
@@ -73,5 +79,61 @@ void sli_watchdog_manager_platform_feed(void)
 {
   sl_watchdog_manager_feed(&platform_watchdog_handle);
 }
+
+#if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
+#if (configUSE_IDLE_HOOK == 1)
+/***************************************************************************//**
+ * FreeRTOS idle hook: feed the platform default software watchdog.
+ *
+ * @details
+ * When Watchdog Manager is used with an RTOS, FreeRTOSConfig.h may set
+ * configUSE_IDLE_HOOK. This complements feeding from portTASK_SWITCH_HOOK
+ * (task switch) so the platform handle is also exercised while the idle task runs.
+ *
+ * @note Keep this hook minimal; do not block or call non–ISR-safe APIs here.
+ ******************************************************************************/
+void vApplicationIdleHook(void)
+{
+  sli_watchdog_manager_platform_feed();
+}
+#endif /* configUSE_IDLE_HOOK == 1 */
+#endif /* SL_CATALOG_FREERTOS_KERNEL_PRESENT */
+
+#if defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT)
+/***************************************************************************//**
+ * Micrium OS idle enter hook: feed the platform default software watchdog.
+ *
+ * @details
+ * The kernel calls this weak hook from @ref OSSched when the highest ready
+ * priority is idle (see @c OSIdleEnterHook in @c os_core.c). This mirrors the
+ * FreeRTOS idle-hook path when the CPU spends time in the idle state without
+ * frequent context switches. Task-switch feeding is installed separately via
+ * @ref sli_watchdog_manager_micrium_install_task_sw_hook when
+ * @c OS_CFG_APP_HOOKS_EN is enabled.
+ *
+ * @note Keep this hook minimal; do not block or call non–ISR-safe APIs here.
+ ******************************************************************************/
+void OSIdleEnterHook(void)
+{
+  sli_watchdog_manager_platform_feed();
+}
+
+/***************************************************************************//**
+ * Install Micrium task-switch hook (same role as FreeRTOS @c portTASK_SWITCH_HOOK).
+ *
+ * @details
+ * Must run after @c OSInit() (which clears @c OS_AppTaskSwHookPtr). Called from
+ * @ref sl_watchdog_manager_start() when the kernel is already initialized.
+ * If @c OS_CFG_APP_HOOKS_EN is @c 0 in @c os_cfg.h, only @c OSIdleEnterHook feeds.
+ ******************************************************************************/
+void sli_watchdog_manager_micrium_install_task_sw_hook(void)
+{
+#if (OS_CFG_APP_HOOKS_EN == DEF_ENABLED)
+  OS_AppTaskSwHookPtr = sli_watchdog_manager_platform_feed;
+#else
+  (void)0;
+#endif
+}
+#endif /* SL_CATALOG_MICRIUMOS_KERNEL_PRESENT */
 
 /** @} (end addtogroup watchdog_manager) */

@@ -178,6 +178,7 @@ sl_status_t sli_iostream_uart_context_init(sl_iostream_uart_t *uart,
   context->xon = true;
   context->rx_empty = true;
   context->uart_periph = config->uart_periph;
+  context->async_tx_mode = config->async_tx_enabled;
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   context->enable_high_frequency = config->enable_high_frequency;
 #endif

@@ -32,7 +32,11 @@
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif
+#if defined(SL_CATALOG_WATCHDOG_MANAGER_PRESENT)
+#include "sl_watchdog_manager.h"
+#endif
 #include "test-harness-config.h"
+
 #if (SL_ZIGBEE_AF_PLUGIN_TEST_HARNESS_AUTO_REGISTRATION_START == 1)
 #define AUTO_REGISTRATION_START
 #endif
@@ -758,14 +762,18 @@ void sl_zigbee_af_test_harness_status_command(sl_cli_command_arg_t *arguments)
 }
 
 #if defined(SL_CATALOG_WATCHDOG_MANAGER_PRESENT)
+#define SLI_ZIGBEE_AF_TEST_HARNESS_WD_TRIGGER_SW_UID  (0x534C5754u) // "SLWT"
+
 void sl_zigbee_af_test_harness_wd_trigger_command(sl_cli_command_arg_t *arguments)
 {
-  // Intentionally loops forever so watchdog forces a reset and tests the watchdog reset functionality.
-  // This is only used for testing right now
   (void)arguments;
+  // create a dummy SW watchdog which is never fed, so the HW WDOG expires and triggers a reset
+  {
+    sl_watchdog_handle_t wdHandle = UINT32_MAX;
+    (void)sl_watchdog_manager_create(&wdHandle, SLI_ZIGBEE_AF_TEST_HARNESS_WD_TRIGGER_SW_UID);
+  }
 
   volatile bool continueLoop = true;
-
   while (continueLoop) {
     // Intentional infinite loop to trigger watchdog reset.
   }

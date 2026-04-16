@@ -47,6 +47,8 @@
 * Customer should define these in their own application code
 ***************************************************************************/
 
+#ifndef SLI_ZIGBEE_AF_PRINT_MACROS_DEFINED_BY_ZCL_DEBUG_PRINT_H
+
 #ifndef SL_ZIGBEE_TEST
 #define SL_ZIGBEE_AF_PRINT_CORE 0x0001
 
@@ -187,5 +189,7 @@ void sl_zigbee_af_println_wrapper(uint16_t area, const char * formatString, ...)
 #error "Include zigbee debug component or use the custom print system by setting SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_PRINT_SYSTEM to 1"
 #endif // SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 #endif // (SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_PRINT_SYSTEM == 1)
+
+#endif // !SLI_ZIGBEE_AF_PRINT_MACROS_DEFINED_BY_ZCL_DEBUG_PRINT_H
 
 #endif //_SILABS_GREEN_POWER_PRINT_WRAPPER_H_

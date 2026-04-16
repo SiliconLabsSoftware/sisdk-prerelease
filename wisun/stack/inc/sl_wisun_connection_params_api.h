@@ -38,7 +38,7 @@
 #include "sl_wisun_types.h"
 
 /// API version used to check compatibility (do not edit when using this header)
-#define SL_WISUN_PARAMS_API_VERSION  10
+#define SL_WISUN_PARAMS_API_VERSION  9
 
 /**************************************************************************//**
  * @addtogroup SL_WISUN_TYPES
@@ -354,10 +354,6 @@ typedef struct {
   sl_wisun_params_traffic_t traffic;
   /// MAC parameter set
   sl_wisun_mac_params_t mac;
-  /// Automatically adjust connection parameters based on PAN size
-  uint8_t auto_adjust;
-  /// Reserved, set to zero
-  uint8_t reserved[3];
 } SL_ATTRIBUTE_PACKED sl_wisun_connection_params_t;
 SL_PACK_END()
 
@@ -499,7 +495,6 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_TEST = {
     .max_cca_retries = 8,
     .max_frame_retries = 7,
   },
-  .auto_adjust = false,
 };
 
 /// Profile for certification testing
@@ -629,7 +624,6 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_CERTIF = {
     .max_cca_retries = 8,
     .max_frame_retries = 7,
   },
-  .auto_adjust = false,
 };
 
 /// Profile for a small network
@@ -758,8 +752,7 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_SMALL = {
     .max_be = 5,
     .max_cca_retries = 8,
     .max_frame_retries = 7,
-  },
-  .auto_adjust = false,
+  }
 };
 
 /// Profile for a medium network
@@ -888,8 +881,7 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_MEDIUM = {
     .max_be = 5,
     .max_cca_retries = 8,
     .max_frame_retries = 7,
-  },
-  .auto_adjust = false,
+  }
 };
 
 /// Profile for a large network
@@ -1018,138 +1010,7 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_LARGE = {
     .max_be = 5,
     .max_cca_retries = 8,
     .max_frame_retries = 7,
-  },
-  .auto_adjust = false,
-};
-
-/// Profile for automatic connection parameters adjustment
-static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_AUTO = {
-  .version = SL_WISUN_PARAMS_API_VERSION,
-  .discovery = {
-    .trickle_pa = {
-      .imin_s = 15,
-      .imax_s = 60,
-      .k = 1
-    },
-    .trickle_pas = {
-      .imin_s = 15,
-      .imax_s = 60,
-      .k = 1
-    },
-    .eapol_target_min_sens = DBM_TO_RSL_RANGE(-60),
-    .allow_skip = true
-  },
-  .configuration = {
-    .trickle_pc = {
-      .imin_s = 15,
-      .imax_s = 60,
-      .k = 1
-    },
-    .trickle_pcs = {
-      .imin_s = 15,
-      .imax_s = 60,
-      .k = 1
-    }
-  },
-  .eapol = {
-    .sec_prot_trickle = {
-      .imin_s = 0,
-      .imax_s = 0,
-      .k = 0,
-    },
-    .pmk_lifetime_m = 0,
-    .ptk_lifetime_m = 0,
-    .sec_prot_retry_timeout_s = 0,
-    .initial_key_min_s = 0,
-    .initial_key_max_s = 60,
-    .initial_key_retry_min_s = 60,
-    .initial_key_retry_max_s = 0,
-    .initial_key_retry_max_limit_s = 180,
-    .temp_min_timeout_s = 0,
-    .gtk_request_imin_m = 0,
-    .gtk_request_imax_m = 0,
-    .gtk_max_mismatch_m = 64,
-    .lgtk_max_mismatch_m = 60,
-    .sec_prot_trickle_expirations = 0,
-    .initial_key_retry_limit = 5,
-    .allow_skip = true
-  },
-  .rpl = {
-    .dao_txalg = {
-      .rand = 0.1f,
-      .max_delay_s = 1,
-      .irt_s = 15,
-      .mrt_s = 180,
-      .mrd_s = 0,
-      .mrc = 3,
-    },
-    .dis_max_delay_first_s = 2,
-    .dis_max_delay_s = 180,
-    .init_parent_selection_s = 10,
-    .etx_probe_period_max_s = 30,
-    .address_registration_lifetime_s = 2220,
-    .etx_samples_init = 2,
-    .etx_samples_refresh = 4,
-    .candidate_parents_max = 5,
-    .parents_max = 2,
-  },
-  .mpl = {
-    .trickle = {
-      .imin_s = 1,
-      .imax_s = 10,
-      .k = 8,
-    },
-    .seed_set_entry_lifetime_s = 180,
-    .trickle_expirations = 2,
-    .seed_id_type = 0,
-  },
-  .dhcp = {
-    .sol_txalg = {
-      .rand = 0.1f,
-      .max_delay_s = 10,
-      .irt_s = 15,
-      .mrt_s = 180,
-      .mrd_s = 0,
-      .mrc = 3,
-    },
-  },
-  .lfn_parent = {
-    .lfn_pan_timeout_m = 0,
-    .lfn_lpc_retry_count = 5,
-    .lfn_na_wait_duration_m = 0,
-  },
-  .misc = {
-    .temp_link_min_timeout_s = 260,
-    .pan_timeout_m = 30,
-  },
-  .direct_connect_eapol = {
-    .pmk_lifetime_m = 0,
-    .ptk_lifetime_m = 0,
-    .sec_prot_retry_timeout_s = 0,
-    .initial_key_min_s = 0,
-    .initial_key_max_s = 0,
-    .initial_key_retry_min_s = 10,
-    .initial_key_retry_max_s = 0,
-    .initial_key_retry_max_limit_s = 30,
-    .gtk_request_imin_m = 0,
-    .gtk_request_imax_m = 0,
-    .gtk_max_mismatch_m = 64,
-    .initial_key_retry_limit = 3,
-    .allow_skip = false
-  },
-  .traffic = {
-    .lowpan_mtu = 1576,
-    .ipv6_mru = 1504,
-    .max_edfe_fragment_count = 5,
-  },
-  .mac = {
-    .backoff_period_us = 0, // calculate from PHY by default
-    .min_be = 3,
-    .max_be = 5,
-    .max_cca_retries = 8,
-    .max_frame_retries = 7,
-  },
-  .auto_adjust = true,
+  }
 };
 
 /** @} */

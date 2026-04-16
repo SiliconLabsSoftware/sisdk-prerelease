@@ -489,28 +489,28 @@ void sl_wisun_app_br_core_start(void)
   // Set TX Power
   EFM_ASSERT(sl_wisun_set_tx_power_ddbm(_br_setting.tx_power_ddbm) == SL_STATUS_OK);
 
-  // Set Connection Parameters
-  switch (_br_setting.network_size) {
-    case SL_WISUN_NETWORK_SIZE_AUTOMATIC:
-      params = SL_WISUN_BR_PARAMS_PROFILE_AUTO;
-      break;
-    case SL_WISUN_NETWORK_SIZE_SMALL:
-      params = SL_WISUN_BR_PARAMS_PROFILE_SMALL;
-      break;
-    case SL_WISUN_NETWORK_SIZE_MEDIUM:
-      params = SL_WISUN_BR_PARAMS_PROFILE_MEDIUM;
-      break;
-    case SL_WISUN_NETWORK_SIZE_LARGE:
-      params = SL_WISUN_BR_PARAMS_PROFILE_LARGE;
-      break;
-    case SL_WISUN_NETWORK_SIZE_TEST:
-      params = SL_WISUN_BR_PARAMS_PROFILE_TEST;
-      break;
-    default:
-      EFM_ASSERT(0);
-      break;
+  // NOTE: Automatic network size is the default in the stack.
+  if (_br_setting.network_size != SL_WISUN_NETWORK_SIZE_AUTOMATIC) {
+    // Set Connection Parameters
+    switch (_br_setting.network_size) {
+      case SL_WISUN_NETWORK_SIZE_SMALL:
+        params = SL_WISUN_BR_PARAMS_PROFILE_SMALL;
+        break;
+      case SL_WISUN_NETWORK_SIZE_MEDIUM:
+        params = SL_WISUN_BR_PARAMS_PROFILE_MEDIUM;
+        break;
+      case SL_WISUN_NETWORK_SIZE_LARGE:
+        params = SL_WISUN_BR_PARAMS_PROFILE_LARGE;
+        break;
+      case SL_WISUN_NETWORK_SIZE_TEST:
+        params = SL_WISUN_BR_PARAMS_PROFILE_TEST;
+        break;
+      default:
+        EFM_ASSERT(0);
+        break;
+    }
+    EFM_ASSERT(sl_wisun_br_set_connection_parameters(&params) == SL_STATUS_OK);
   }
-  EFM_ASSERT(sl_wisun_br_set_connection_parameters(&params) == SL_STATUS_OK);
 
   // Set Neighbor Table
   EFM_ASSERT(sl_wisun_config_neighbor_table(_br_setting.max_child_count,
