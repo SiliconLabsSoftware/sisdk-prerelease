@@ -351,4 +351,11 @@
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS (configNUM_USER_THREAD_LOCAL_STORAGE_POINTERS \
                                                  + configNUM_SDK_THREAD_LOCAL_STORAGE_POINTERS)
 
+/* When Watchdog Manager is used with an RTOS, enable the idle hook so the
+ * platform default watchdog can be fed from vApplicationIdleHook (see
+ * sl_watchdog_manager_platform.c). Complements portTASK_SWITCH_HOOK. */
+#if defined(SL_CATALOG_WATCHDOG_MANAGER_PRESENT)
+#undef configUSE_IDLE_HOOK
+#define configUSE_IDLE_HOOK 1
+#endif                                                 
 #endif /* FREERTOS_CONFIG_H */

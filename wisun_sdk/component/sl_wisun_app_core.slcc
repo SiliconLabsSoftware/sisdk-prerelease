@@ -50,7 +50,6 @@ requires:
 - name: "sl_wisun_event_mgr"
 - name: "sleeptimer"
 - name: "app_project_info"
-- name: "sl_wisun_app_setting"
 
 config_file:
 - path: "config/sl_wisun_app_core_config.h"

@@ -39,13 +39,11 @@
 #include "cs_reflector_config.h"
 #include "cs_antenna.h"
 #include "cs_sync_antenna.h"
+#include "cs_ras_server.h"
 // Security
-#include "security.h"
+#include "sl_bt_peer_security.h"
+#include "app_button_press.h"
 
-#ifdef SL_CATALOG_SIMPLE_BUTTON_PRESENT
-#include "sl_simple_button.h"
-#include "sl_simple_button_instances.h"
-#endif // SL_CATALOG_SIMPLE_BUTTON_PRESENT
 
 #ifdef SL_CATALOG_CS_REFLECTOR_CLI_PRESENT
 #include "cs_reflector_cli.h"
@@ -62,6 +60,15 @@ static cs_reflector_config_t cs_reflector_config = {
 
 static void on_connection_opened_with_initiator(uint8_t conn_handle);
 static void on_connection_closed(uint8_t conn_handle);
+
+void cs_ras_server_on_mode_change(uint8_t connection, cs_ras_mode_t mode,
+                                  bool indication) {
+  app_log_debug(APP_INSTANCE_PREFIX "RAS mode changed to %u" APP_LOG_NL, connection,
+                mode);
+  (void)connection;
+  (void)mode;
+  (void)indication;
+}
 
 /**************************************************************************//**
  * Application Init
@@ -94,7 +101,6 @@ void app_init(void)
       app_log_info(APP_PREFIX "Switching between all antennas for RTT" APP_LOG_NL);
       break;
   }
-  security_set_config_flags();
 
   app_log_info("+-------------------------------------------------------+" APP_LOG_NL);
 
@@ -109,10 +115,6 @@ void app_init(void)
  *****************************************************************************/
 void app_process_action(void)
 {
-  sl_status_t sc = security_send_confirmation();
-  if (sc != SL_STATUS_OK) {
-    app_log_error(APP_PREFIX "Failed to send security confirmation: 0x%04lx" APP_LOG_NL, (unsigned long)sc);
-  }
   /////////////////////////////////////////////////////////////////////////////
   // Put your additional application code here!                              //
   // This is called infinitely.                                              //
@@ -128,10 +130,6 @@ void app_process_action(void)
 void sl_bt_on_event(sl_bt_msg_t *evt)
 {
   sl_status_t sc;
-  sc = on_event_security(evt);
-  if (sc != SL_STATUS_OK) {
-    app_log_error(APP_PREFIX "Security event handler failed: 0x%04lx" APP_LOG_NL, (unsigned long)sc);
-  }
   switch (SL_BT_MSG_ID(evt->header)) {
     // -------------------------------
     // This event indicates the device has started and the radio is ready.
@@ -349,15 +347,15 @@ void sl_bt_peer_manager_on_event_reflector(const sl_bt_peer_manager_evt_type_t *
   }
 }
 
-#if (SL_SIMPLE_BUTTON_COUNT > 1)
-void sl_button_on_change(const sl_button_t *handle)
-{
-  if (security_is_confirmation_in_progress()) {
-    if (handle == SL_SIMPLE_BUTTON_INSTANCE(0)) {
-      security_set_confirmation(SECURITY_ALLOW_CONFIRMATION);
-    } else if (handle == SL_SIMPLE_BUTTON_INSTANCE(1)) {
-      security_set_confirmation(SECURITY_DENY_CONFIRMATION);
-    }
+void sl_bt_peer_security_on_event(uint8_t handle){
+  app_log_info(APP_INSTANCE_PREFIX "Security process started" APP_LOG_NL, handle);
+}
+
+void app_button_press_cb(uint8_t button, uint8_t duration){
+  (void)duration; //unused parameter
+  if (button == 0) {
+    sl_bt_peer_security_send_confirmation(true);
+  } else if (button == 1) {
+    sl_bt_peer_security_send_confirmation(false);
   }
 }
-#endif // SL_SIMPLE_BUTTON_COUNT > 1

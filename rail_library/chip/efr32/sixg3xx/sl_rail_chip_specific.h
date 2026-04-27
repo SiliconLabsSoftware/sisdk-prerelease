@@ -348,15 +348,22 @@ struct sl_rail_channel_config_entry_attr {
 #else
 #define SLI_RAIL_HAS_PA_MODE_SUB_GHZ_OFDM 0
 #endif
+#if     SL_RAIL_SUPPORTS_PROTOCOL_BTC
+#define SL_RAIL_TX_PA_MODE_2P4_GHZ_BTC  ((sl_rail_tx_pa_mode_t)(SL_RAIL_TX_PA_MODE_2P4_GHZ_BTC))
+#define SLI_RAIL_HAS_PA_MODE_2P4_GHZ_BTC 1
+#else
+#define SLI_RAIL_HAS_PA_MODE_2P4_GHZ_BTC 0
+#endif
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /**
  * Indicates on number of PA modes present on a chip.
  */
-#define SL_RAIL_TX_PA_MODES_COUNT \
-  (SLI_RAIL_HAS_PA_MODE_2P4_GHZ   \
-   + SLI_RAIL_HAS_PA_MODE_SUB_GHZ \
-   + SLI_RAIL_HAS_PA_MODE_SUB_GHZ_OFDM)
+#define SL_RAIL_TX_PA_MODES_COUNT      \
+  (SLI_RAIL_HAS_PA_MODE_2P4_GHZ        \
+   + SLI_RAIL_HAS_PA_MODE_SUB_GHZ      \
+   + SLI_RAIL_HAS_PA_MODE_SUB_GHZ_OFDM \
+   + SLI_RAIL_HAS_PA_MODE_2P4_GHZ_BTC)
 
 /**
  * The number of PA's on this chip (including Virtual PAs).

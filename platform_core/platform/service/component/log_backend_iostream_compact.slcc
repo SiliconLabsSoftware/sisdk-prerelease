@@ -15,6 +15,8 @@ metadata:
 provides:
 - name: log_backend
 - name: log_backend_iostream_impl
+- name: log_backend_iostream_compact
+  condition: [device_si91x]
 requires:
 - name: iostream_recommended_console
 - name: log
@@ -23,8 +25,9 @@ requires:
 root_path: platform_core/platform/service/sl_log
 config_file:
 - path: config/sl_log_proprietary_config.h
-  unless: [iostream_rtt]
+  unless: [iostream_rtt, device_si91x]
 - path: config/sl_log_common_config.h
+  unless: [device_si91x]
 - path: config/sl_log_platform_core_config.h
   condition: [device_has_timer]
 source:
@@ -32,7 +35,7 @@ source:
 template_contribution:
 - name: component_catalog
   value: log_backend_proprietary
-  unless: [iostream_rtt]
+  unless: [iostream_rtt, device_si91x]
 - name: log_section_enable
   value: 1
 - name: log_compact_output_enable

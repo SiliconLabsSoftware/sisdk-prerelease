@@ -54,7 +54,7 @@
 #include "cs_initiator_client.h"
 #include "cs_antenna.h"
 #include "extended_result.h"
-#include "security.h"
+#include "sl_bt_peer_security.h"
 #include "sl_rtl_clib_api.h"
 #include "cs_sync_antenna.h"
 #include "app_config.h"
@@ -262,7 +262,6 @@ void app_cli_init(int argc, char *argv[])
   for (uint32_t i = 0u; i < MAX_REFLECTOR_INSTANCES; i++) {
     memset(cs_host_config.accepted_bt_address_list[i].addr, 0xFF, BT_ADDR_LEN);
   }
-  security_set_config_flags();
 
   app_log_info("+-[CS Host by Silicon Labs]------------------------+" APP_LOG_NL);
   app_log_info("+--------------------------------------------------+" APP_LOG_NL APP_LOG_NL);
@@ -627,10 +626,7 @@ void app_init(void)
 void sl_bt_on_event(sl_bt_msg_t *evt)
 {
   sl_status_t sc;
-  sc = on_event_security(evt);
-  if (sc != SL_STATUS_OK) {
-    app_log_error(APP_PREFIX "Security event handler failed: 0x%04lx" APP_LOG_NL, (unsigned long)sc);
-  }
+
   switch (SL_BT_MSG_ID(evt->header)) {
     // --------------------------------
     case sl_bt_evt_system_boot_id:
@@ -864,14 +860,11 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     // --------------------------------
     case sl_bt_evt_user_message_to_host_id:
     {
-      // handle button press security confirmation
       sl_bt_evt_user_message_to_host_t *msg = &evt->data.evt_user_message_to_host;
-      if (security_is_confirmation_in_progress()) {
-        if (msg->message.data[0] == 1) {
-          security_set_confirmation(SECURITY_ALLOW_CONFIRMATION);
-        } else {
-          security_set_confirmation(SECURITY_DENY_CONFIRMATION);
-        }
+      if (msg->message.data[0] == 1) {
+        sl_bt_peer_security_send_confirmation(true);
+      } else {
+        sl_bt_peer_security_send_confirmation(false);
       }
       break;
     }
@@ -894,10 +887,6 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
  *****************************************************************************/
 void app_process_action(void)
 {
-  sl_status_t sc = security_send_confirmation();
-  if (sc != SL_STATUS_OK) {
-    app_log_error(APP_PREFIX "Failed to send security confirmation: 0x%04lx" APP_LOG_NL, (unsigned long)sc);
-  }
   /////////////////////////////////////////////////////////////////////////////
   // Put your additional application code here!                              //
   // This is called infinitely.                                              //
@@ -1770,4 +1759,9 @@ static void stop_procedure(void)
                    cs_host_config.max_reflector_instances);
     }
   }
+}
+
+void sl_bt_peer_security_on_event(uint8_t handle)
+{
+  app_log_info(APP_INSTANCE_PREFIX "Security process started" APP_LOG_NL, handle);
 }

@@ -50,6 +50,8 @@
 #include "sl_se_manager_key_handling.h"
 #endif
 
+#include "sl_memory_manager.h"
+
 #include <assert.h>
 #include "common/code_utils.hpp"
 #include "common/debug.hpp"
@@ -59,6 +61,10 @@
 #include "crypto/storage.hpp"
 #include "mac/mac_frame.hpp"
 #include "openthread/platform/crypto.h"
+
+#if OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA
+#include <psa/crypto.h>
+#endif
 
 using namespace ot;
 using namespace Crypto;
@@ -408,12 +414,32 @@ uint16_t efr32GetFrameVersion(otRadioFrame *aFrame)
     return static_cast<Mac::RxFrame *>(aFrame)->GetVersion();
 }
 
+#if OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA
 otError otPlatCryptoHkdfInit(otCryptoContext *aContext)
 {
     Error error = kErrorNone;
 
     VerifyOrExit(aContext != nullptr, error = kErrorInvalidArgs);
-    VerifyOrExit(aContext->mContextSize >= sizeof(HmacSha256::Hash), error = kErrorFailed);
+
+#if OPENTHREAD_CONFIG_CRYPTO_PLATFORM_ALLOCS_CONTEXT
+    sl_status_t status;
+
+    // OpenThread core expects `kHkdfContextSize == sizeof(psa_key_derivation_operation_t)` for PSA builds.
+    // This platform implementation stores the PRK (Pseudo-Random Key) derived from Extract step at the beginning of
+    // the context and uses it with `HmacSha256`.
+    status = sl_memory_alloc_advanced(sizeof(psa_key_derivation_operation_t),
+                                      SL_MEMORY_BLOCK_ALIGN_8_BYTES,
+                                      BLOCK_TYPE_SHORT_TERM,
+                                      &aContext->mContext);
+    VerifyOrExit(status == SL_STATUS_OK, error = kErrorNoBufs);
+
+    aContext->mContextSize = sizeof(psa_key_derivation_operation_t);
+#else
+    // Core allocated; verify buffer exists
+    VerifyOrExit(aContext->mContextSize >= sizeof(psa_key_derivation_operation_t), error = kErrorFailed);
+#endif
+
+    VerifyOrExit(aContext->mContext != nullptr, error = kErrorInvalidArgs);
 
     new (aContext->mContext) HmacSha256::Hash();
 
@@ -421,7 +447,6 @@ exit:
     return error;
 }
 
-#if OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA
 otError otPlatCryptoHkdfExpand(otCryptoContext *aContext,
                                const uint8_t   *aInfo,
                                uint16_t         aInfoLength,
@@ -437,7 +462,7 @@ otError otPlatCryptoHkdfExpand(otCryptoContext *aContext,
     Crypto::Storage::KeyRef keyRef = 0;
 
     VerifyOrExit(aContext != nullptr, error = kErrorInvalidArgs);
-    VerifyOrExit(aContext->mContextSize >= sizeof(HmacSha256::Hash), error = kErrorFailed);
+    VerifyOrExit(aContext->mContextSize >= sizeof(psa_key_derivation_operation_t), error = kErrorFailed);
     VerifyOrExit(aOutputKey != nullptr, error = kErrorInvalidArgs);
     VerifyOrExit(aInfo != nullptr || aInfoLength == 0, error = kErrorInvalidArgs);
 
@@ -509,7 +534,7 @@ otError otPlatCryptoHkdfExtract(otCryptoContext   *aContext,
     Crypto::Storage::KeyRef keyRef = 0;
 
     VerifyOrExit(aContext != nullptr, error = kErrorInvalidArgs);
-    VerifyOrExit(aContext->mContextSize >= sizeof(HmacSha256::Hash), error = kErrorFailed);
+    VerifyOrExit(aContext->mContextSize >= sizeof(psa_key_derivation_operation_t), error = kErrorFailed);
     VerifyOrExit(aInputKey != nullptr, error = kErrorInvalidArgs);
 
     SuccessOrExit(
@@ -542,10 +567,19 @@ otError otPlatCryptoHkdfDeinit(otCryptoContext *aContext)
     HmacSha256::Hash *prk;
 
     VerifyOrExit(aContext != nullptr, error = kErrorInvalidArgs);
-    VerifyOrExit(aContext->mContextSize >= sizeof(HmacSha256::Hash), error = kErrorFailed);
+    VerifyOrExit(aContext->mContext != nullptr, error = kErrorInvalidArgs);
 
     prk = static_cast<HmacSha256::Hash *>(aContext->mContext);
     prk->~Hash();
+
+#if OPENTHREAD_CONFIG_CRYPTO_PLATFORM_ALLOCS_CONTEXT
+    // Explicitly zeroize context for defense-in-depth security
+    memset(aContext->mContext, 0, aContext->mContextSize);
+
+    // Free platform-allocated context
+    sl_free(aContext->mContext);
+#endif
+
     aContext->mContext     = nullptr;
     aContext->mContextSize = 0;
 

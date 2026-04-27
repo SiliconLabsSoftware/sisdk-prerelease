@@ -14,7 +14,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github@3/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9447" column="9" bodyfile="/var/lib/jenkins/github@3/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9447" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github@2/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9447" column="9" bodyfile="/var/lib/jenkins/github@2/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9447" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gattdb__security__requirements_1gab7600656cb4ccdba2b01af8f02818831" prot="public" static="no">
         <name>SL_BT_GATTDB_BONDED_READ</name>
@@ -26,7 +26,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github@3/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9450" column="9" bodyfile="/var/lib/jenkins/github@3/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9450" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github@2/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9450" column="9" bodyfile="/var/lib/jenkins/github@2/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9450" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gattdb__security__requirements_1ga64dca37f0ec774dd073141d2bde4b2c3" prot="public" static="no">
         <name>SL_BT_GATTDB_AUTHENTICATED_READ</name>
@@ -38,7 +38,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github@3/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9454" column="9" bodyfile="/var/lib/jenkins/github@3/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9454" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github@2/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9454" column="9" bodyfile="/var/lib/jenkins/github@2/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9454" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gattdb__security__requirements_1ga041a4035380438a82a4bdc435fd7951a" prot="public" static="no">
         <name>SL_BT_GATTDB_ENCRYPTED_WRITE</name>
@@ -50,7 +50,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github@3/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9457" column="9" bodyfile="/var/lib/jenkins/github@3/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9457" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github@2/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9457" column="9" bodyfile="/var/lib/jenkins/github@2/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9457" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gattdb__security__requirements_1ga791de29249e61aa9bf2600d5e2740f2b" prot="public" static="no">
         <name>SL_BT_GATTDB_BONDED_WRITE</name>
@@ -62,7 +62,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github@3/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9460" column="9" bodyfile="/var/lib/jenkins/github@3/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9460" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github@2/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9460" column="9" bodyfile="/var/lib/jenkins/github@2/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9460" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gattdb__security__requirements_1ga8f16fc65f5cbb9062416ebbcf71a8ff2" prot="public" static="no">
         <name>SL_BT_GATTDB_AUTHENTICATED_WRITE</name>
@@ -74,7 +74,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github@3/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9464" column="9" bodyfile="/var/lib/jenkins/github@3/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9464" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github@2/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9464" column="9" bodyfile="/var/lib/jenkins/github@2/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9464" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gattdb__security__requirements_1gad0230ddf1e1f94d08a9bf39f8c1c21b8" prot="public" static="no">
         <name>SL_BT_GATTDB_ENCRYPTED_NOTIFY</name>
@@ -86,7 +86,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github@3/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9468" column="9" bodyfile="/var/lib/jenkins/github@3/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9468" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github@2/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9468" column="9" bodyfile="/var/lib/jenkins/github@2/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9468" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gattdb__security__requirements_1ga104d281ac22496d4fa8720ec8ba2739f" prot="public" static="no">
         <name>SL_BT_GATTDB_BONDED_NOTIFY</name>
@@ -98,7 +98,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github@3/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9472" column="9" bodyfile="/var/lib/jenkins/github@3/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9472" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github@2/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9472" column="9" bodyfile="/var/lib/jenkins/github@2/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9472" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__gattdb__security__requirements_1ga1f147ed50894097ad7561728870ee008" prot="public" static="no">
         <name>SL_BT_GATTDB_AUTHENTICATED_NOTIFY</name>
@@ -110,7 +110,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/var/lib/jenkins/github@3/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9476" column="9" bodyfile="/var/lib/jenkins/github@3/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9476" bodyend="-1"/>
+        <location file="/var/lib/jenkins/github@2/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9476" column="9" bodyfile="/var/lib/jenkins/github@2/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9476" bodyend="-1"/>
       </memberdef>
     </sectiondef>
     <briefdescription>

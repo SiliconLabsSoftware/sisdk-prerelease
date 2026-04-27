@@ -66,6 +66,7 @@ configuration:
     value: 3
   - name: SL_BT_CONTROLLER_BUFFER_MEMORY
     value: 1024
+    condition: [device_generic_family_efr32xg21]
   # If using zigbee_secure_key_storage we do not need to support backwards
   # compatibility because we have never deployed images with keys in PSA
   # As a result, these lines end up saving some code space

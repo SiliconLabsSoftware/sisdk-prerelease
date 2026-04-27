@@ -167,6 +167,7 @@ include:
   - path: common/log.hpp
   - path: common/logging.hpp
   - path: common/message.hpp
+  - path: common/message_allocator.hpp
   - path: common/msg_backed_array.hpp
   - path: common/non_copyable.hpp
   - path: common/notifier.hpp

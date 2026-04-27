@@ -55,8 +55,6 @@ void sli_watchdog_manager_platform_init(void);
 
 /***************************************************************************//**
  * Feed platform default watchdog.
- *
- * @note FOR INTERNAL USE ONLY.
  ******************************************************************************/
 void sli_watchdog_manager_platform_feed(void);
 
@@ -64,8 +62,6 @@ void sli_watchdog_manager_platform_feed(void);
 /***************************************************************************//**
  * Register Micrium @c OS_AppTaskSwHookPtr to feed on context switches (when
  * @c OS_CFG_APP_HOOKS_EN is enabled). Called from @ref sl_watchdog_manager_start().
- *
- * @note FOR INTERNAL USE ONLY.
  ******************************************************************************/
 void sli_watchdog_manager_micrium_install_task_sw_hook(void);
 #endif
@@ -78,8 +74,6 @@ void sli_watchdog_manager_micrium_install_task_sw_hook(void);
  * after a watchdog-triggered reset, sl_watchdog_manager_retrieve_faulty() can
  * report which watchdog caused the reset. Called internally when the manager
  * detects that not all enabled watchdogs have been fed in time.
- *
- * @note FOR INTERNAL USE ONLY.
  ******************************************************************************/
 void sli_watchdog_manager_record_state(void);
 
@@ -87,8 +81,6 @@ void sli_watchdog_manager_record_state(void);
 /***************************************************************************//**
  * Subscribe to power manager EM transition events for watchdog disable/enable
  * when EM1/2/3 run is not all supported. Called from sl_watchdog_manager_start().
- *
- * @note FOR INTERNAL USE ONLY.
  ******************************************************************************/
 void sli_watchdog_manager_power_subscribe_em_transition(void);
 #endif

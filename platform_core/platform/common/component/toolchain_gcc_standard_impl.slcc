@@ -16,6 +16,9 @@ provides:
 
 - name: toolchain_gcc_standard_impl
   condition: [cortexm33, device_series_3]
+
+- name: toolchain_gcc_standard_impl
+  condition: [device_host]
 requires:
 - name: toolchain_gcc_standard
 template_file:

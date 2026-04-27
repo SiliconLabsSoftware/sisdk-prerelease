@@ -215,7 +215,7 @@ static void print_rx_packets(sl_rail_handle_t rail_handle)
       if (stl_header->ci_field == WMBUS_CI_EN13757_3_APPLICATION_SHORT) {
         uint8_t *payload_start = rx_buffer + sizeof(sl_rail_sdk_wmbus_dll_header_t) + sizeof(sl_rail_sdk_wmbus_stl_header_t);
         uint16_t payload_len = dll_header->lField - sizeof(sl_rail_sdk_wmbus_dll_header_t) - sizeof(sl_rail_sdk_wmbus_stl_header_t) + 1;
-        app_log_info("AppHeader:[CI:0x%02" PRIX8 ",AccessNr:%" PRIu8 ",Status:0x%02" PRIX8 ",encMode:%" PRIu8 ",Accessibility:%02" PRIX8 "X,encBlocks:%" PRIu8 ",sync:%s]\n",
+        app_log_info("AppHeader:[CI:0x%02" PRIX8 ",AccessNr:%" PRIu8 ",Status:0x%02" PRIX8 ",encMode:%" PRIu8 ",Accessibility:0x%02" PRIX8 ",encBlocks:%" PRIu8 ",sync:%s]\n",
                      stl_header->ci_field,
                      stl_header->access_number,
                      stl_header->status,

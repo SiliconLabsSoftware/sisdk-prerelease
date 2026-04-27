@@ -19,6 +19,7 @@ requires:
 - name: dmadrv
 - name: rail_lib
 - name: component_catalog
+- name: dma_manager_round_robin
 config_file:
 - path: plugin/sl_rail_util_dma/config/sl_rail_util_dma_config.h
 include:

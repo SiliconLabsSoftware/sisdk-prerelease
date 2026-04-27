@@ -6,20 +6,10 @@ description: >
   bootloader.
 category: Platform|Bootloader|Utils
 quality: production
-source:
-- path: "platform/bootloader/core/flash/btl_internal_flash.c"
 include:
 - path: "platform/bootloader/config/device_series_2"
   file_list:
   - path: "btl_core_cfg.h"
-- path: platform/bootloader/api
-  file_list:
-  - path: application_properties.h
-  - path: btl_errorcode.h
-  - path: btl_interface.h
-  - path: btl_interface_parser.h
-  - path: btl_interface_storage.h
-  - path: btl_reset_info.h
 - path: platform/bootloader
   file_list:
   - path: storage/btl_storage.h
@@ -27,6 +17,8 @@ include:
 - path: platform/bootloader/storage
   file_list:
   - path: bootloadinfo/btl_storage_bootloadinfo.h
+requires:
+- name: bootloader_interface_common
 provides:
 - name: btl_flash
 metadata:

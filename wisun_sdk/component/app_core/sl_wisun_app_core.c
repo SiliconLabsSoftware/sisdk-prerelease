@@ -690,20 +690,24 @@ const sl_wisun_lfn_params_t *sl_wisun_app_core_get_lfn_params(void)
 static sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * const setting)
 {
   sl_status_t ret = SL_STATUS_FAIL;
-#if defined(WISUN_CONFIG_BROADCAST_RETRIES) || defined(SL_CATALOG_WISUN_FFN_DEVICE_SUPPORT_PRESENT)
+#if defined(SL_CATALOG_WISUN_FFN_DEVICE_SUPPORT_PRESENT)
   const sl_wisun_connection_params_t *conn_param = NULL;
-#endif
 #if defined(WISUN_CONFIG_BROADCAST_RETRIES)
   sl_wisun_connection_params_t update_param = { 0 };
 #endif
 
-#if defined(WISUN_CONFIG_BROADCAST_RETRIES) || defined(SL_CATALOG_WISUN_FFN_DEVICE_SUPPORT_PRESENT)
   conn_param = sl_wisun_get_conn_param_by_nw_size((sl_wisun_network_size_t) setting->network_size);
 #endif
 
   ret = sl_wisun_set_device_type((sl_wisun_device_type_t)setting->device_type);
   if (ret != SL_STATUS_OK) {
     printf("[Failed: unable to set device type: %lu]\n", ret);
+    return ret;
+  }
+
+  ret = sl_wisun_reset_parameters();
+  if (ret != SL_STATUS_OK) {
+    printf("[Failed: unable to reset parameters: %lu]\n", ret);
     return ret;
   }
 
@@ -719,18 +723,14 @@ static sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * co
   }
 #endif
 
-#if defined(WISUN_CONFIG_BROADCAST_RETRIES)
-  if (setting->network_size != SL_WISUN_NETWORK_SIZE_AUTOMATIC) {
-    memcpy(&update_param, conn_param, sizeof(sl_wisun_connection_params_t));
-    update_param.mpl.trickle_expirations = WISUN_CONFIG_BROADCAST_RETRIES;
-    conn_param = &update_param;
-  }
-#endif
-
 #if defined(SL_CATALOG_WISUN_FFN_DEVICE_SUPPORT_PRESENT)
   // NOTE: Automatic network size is the default in the stack.
   if (setting->network_size != SL_WISUN_NETWORK_SIZE_AUTOMATIC) {
-    // set the connection parameters
+#if defined(WISUN_CONFIG_BROADCAST_RETRIES)
+    memcpy(&update_param, conn_param, sizeof(sl_wisun_connection_params_t));
+    update_param.mpl.trickle_expirations = WISUN_CONFIG_BROADCAST_RETRIES;
+    conn_param = &update_param;
+#endif
     ret = sl_wisun_set_connection_parameters(conn_param);
     if (ret != SL_STATUS_OK) {
       printf("[Failed: unable to set connection parameters: %lu]\n", ret);
@@ -738,6 +738,20 @@ static sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * co
       return ret;
     }
   }
+
+#if defined(WISUN_CONFIG_BROADCAST_RETRIES)
+  if (setting->network_size == SL_WISUN_NETWORK_SIZE_AUTOMATIC) {
+    uint8_t broadcast_retries = WISUN_CONFIG_BROADCAST_RETRIES;
+
+    ret = sl_wisun_set_option(SL_WISUN_OPTION_MPL_TRICKLE_E,
+                              &broadcast_retries,
+                              sizeof(broadcast_retries));
+    if (ret != SL_STATUS_OK) {
+      printf("[Failed: unable to set broadcast retries: %lu]\n", ret);
+      return ret;
+    }
+  }
+#endif
 #endif
 
   // set the TX power

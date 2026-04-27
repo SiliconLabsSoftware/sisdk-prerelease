@@ -125,10 +125,12 @@
 // <i> Maximum length of a procedure stored by the ranging database
 // <i> The optimal value of " Procedure maximum length" is dependent on several
 // <i> configuration values, and can be calculated by the following equation:
-// <i> procedure_max_length = 4 + (subevents * 8) + (mode0_steps * mode0_size) +
+// <i> procedure_max_length = 4 + (subevents * 8) + (subevents * mode0_steps * mode0_size) +
 // <i> channels * ( ( 1 + ( antenna_paths + 1 ) * 4) + 1 )
 // <i> where
-// <i> - subevents value is constant 1 since one subevent per procedure is supported,
+// <i> - subevents is the number of CS subevents per procedure (range: 1..32), determined by the
+// <i>   controller based on CS_INITIATOR_DEFAULT_MIN_SUBEVENT_LEN and CS_INITIATOR_DEFAULT_MAX_SUBEVENT_LEN.
+// <i>   Shorter subevent lengths allow more subevents per procedure.
 // <i> - mode0_size is
 // <i>   - 4 for Reflector and
 // <i>   - 6 for Initiator,
@@ -142,20 +144,20 @@
 // <i> - antenna_paths value is controlled by the "Antenna configuration", and limited by
 // <i> number of antennas presented on each board (capabilities). Maximum can be calculated using
 // <i> the product of used Initiator and Reflector antennae. The default maximum value for antenna_paths is 4.
-// <i> These settings were selected by assuming that the controller creates only one
-// <i> subevent per procedure, and the measuring mode is PBR. In RTT mode there are far less data is created.
-// <i> The default is calculated by using the constants and settings above using the worst case scenario,
-// <i> which gives 1614 bytes.
+// <i> These settings were selected by assuming that the controller creates the maximum number of subevents (32),
+// <i> and the measuring mode is PBR. In RTT mode, far less data is created.
 // <i> Addition to that, if you use RTT as submode, you should add the following equation to calculate the
 // <i> size.
 // <i> (1 + mode1_size) * channels / main_mode_steps
 // <i> where
 // <i> mode1_size is 6, and main_mode_steps is 2. The later can be changed in cs_initiator_client.h.
+// <i> The default is calculated by using the constants and settings above using the worst case scenario,
+// <i> which gives 2672 bytes.
 // <i> RAM consumption can be reduced by changing the affected settings and reducing
 // <i> "Procedure maximum length" accordingly.
-// <i> Default: 1866
+// <i> Default: 2672
 #ifndef CS_PROCEDURE_MAX_LEN
-#define CS_PROCEDURE_MAX_LEN                                                        1866
+#define CS_PROCEDURE_MAX_LEN                                                        2672
 #endif
 // </h>
 

@@ -60,7 +60,7 @@ sudo INFRA_IF_NAME=eth0 \
                    -DOT_PLATFORM_CONFIG=openthread-core-silabs-posix-config.h \
                    -DOTBR_DUA_ROUTING=ON \
                    -DOTBR_DHCP6_PD=ON \
-                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.1.0.0_GitHub-23ec34e55 -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.1.0.0_GitHub-0d4a43ab8" \
+                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.1.0.0_GitHub-111e78d03 -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.1.0.0_GitHub-51353c41d" \
      ./script/setup
 
 */
@@ -89,7 +89,7 @@ sudo INFRA_IF_NAME=eth0 \
                    -DOT_PLATFORM_CONFIG=openthread-core-silabs-posix-config.h \
                    -DOTBR_DUA_ROUTING=ON \
                    -DOTBR_DHCP6_PD=ON \
-                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.1.0.0_GitHub-23ec34e55 -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.1.0.0_GitHub-0d4a43ab8" \
+                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.1.0.0_GitHub-111e78d03 -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.1.0.0_GitHub-51353c41d" \
      ./script/setup
 */
 

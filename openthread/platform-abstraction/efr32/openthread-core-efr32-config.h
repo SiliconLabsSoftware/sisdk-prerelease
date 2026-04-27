@@ -588,6 +588,16 @@
 #endif
 
 /**
+ * @def OPENTHREAD_CONFIG_CRYPTO_PLATFORM_ALLOCS_CONTEXT
+ *
+ * Define to 1 to enable platform allocation of crypto operation contexts (via `otPlatCrypto*` init APIs).
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_CRYPTO_PLATFORM_ALLOCS_CONTEXT
+#define OPENTHREAD_CONFIG_CRYPTO_PLATFORM_ALLOCS_CONTEXT 1
+#endif
+
+/**
  * @def SL_OPENTHREAD_CSL_TX_UNCERTAINTY
  *
  * Uncertainty of scheduling a CSL transmission, in ±10 us units.

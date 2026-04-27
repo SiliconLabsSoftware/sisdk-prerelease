@@ -41,10 +41,11 @@ extern "C" {
 #endif
 #include "sl_log.h"
 #include "sl_log_common_config.h"
+#include "sl_common.h"
 #ifdef SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT
 #include "SEGGER_SYSVIEW.h"
+#include "sl_log_systemview_helper.h"
 #endif
-#include "sl_common.h"
 #define SL_STRINGIFY(x) STRINGIZE(x)
 
 /** @addtogroup sl_log_helper SL Log Helper Functions
@@ -169,175 +170,6 @@ extern "C" {
 #define SL_PRINT_VOID_ARG10_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); (void)sizeof(ARG9); (void)sizeof(ARG10); } while (0);
 
 /** @} (end addtogroup sl_log_disabled_macros) */
-#if defined(SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT)
-/** @brief Debug log with no arguments - disabled */
-#define SL_PRINT_ARG0_DBG(EVENT, EVENT_TYPE) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordVoid(EVENT);
-/** @brief Error log with no arguments - disabled */
-#define SL_PRINT_ARG0_ERR(EVENT, EVENT_TYPE) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordVoid(EVENT);
-/** @brief Warning log with no arguments - disabled */
-#define SL_PRINT_ARG0_WRN(EVENT, EVENT_TYPE) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordVoid(EVENT);
-/** @brief Info log with no arguments - disabled */
-#define SL_PRINT_ARG0_INFO(EVENT, EVENT_TYPE) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordVoid(EVENT);
-/** @brief Debug log with 1 argument - disabled */
-#define SL_PRINT_ARG1_DBG(EVENT, EVENT_TYPE, ARG1) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32(EVENT, ARG1);
-/** @brief Error log with 1 argument - disabled */
-#define SL_PRINT_ARG1_ERR(EVENT, EVENT_TYPE, ARG1) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32(EVENT, ARG1);
-/** @brief Warning log with 1 argument - disabled */
-#define SL_PRINT_ARG1_WRN(EVENT, EVENT_TYPE, ARG1) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32(EVENT, ARG1);
-/** @brief Info log with 1 argument - disabled */
-#define SL_PRINT_ARG1_INFO(EVENT, EVENT_TYPE, ARG1) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32(EVENT, ARG1);
-/** @brief Debug log with 2 arguments - disabled */
-#define SL_PRINT_ARG2_DBG(EVENT, EVENT_TYPE, ARG1, ARG2) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x2(EVENT, ARG1, ARG2);
-/** @brief Error log with 2 arguments - disabled */
-#define SL_PRINT_ARG2_ERR(EVENT, EVENT_TYPE, ARG1, ARG2) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x2(EVENT, ARG1, ARG2);
-/** @brief Warning log with 2 arguments - disabled */
-#define SL_PRINT_ARG2_WRN(EVENT, EVENT_TYPE, ARG1, ARG2) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x2(EVENT, ARG1, ARG2);
-/** @brief Info log with 2 arguments - disabled */
-#define SL_PRINT_ARG2_INFO(EVENT, EVENT_TYPE, ARG1, ARG2) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x2(EVENT, ARG1, ARG2);
-/** @brief Debug log with 3 arguments - disabled */
-#define SL_PRINT_ARG3_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x3(EVENT, ARG1, ARG2, ARG3);
-/** @brief Error log with 3 arguments - disabled */
-#define SL_PRINT_ARG3_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x3(EVENT, ARG1, ARG2, ARG3);
-/** @brief Warning log with 3 arguments - disabled */
-#define SL_PRINT_ARG3_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x3(EVENT, ARG1, ARG2, ARG3);
-/** @brief Info log with 3 arguments - disabled */
-#define SL_PRINT_ARG3_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x3(EVENT, ARG1, ARG2, ARG3);
-#if (SL_LOG_CONFIG_ARG >= 4)
-/** @brief Debug log with 4 arguments */
-#define SL_PRINT_ARG4_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x4(EVENT, ARG1, ARG2, ARG3, ARG4);
-/** @brief Error log with 4 arguments */
-#define SL_PRINT_ARG4_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x4(EVENT, ARG1, ARG2, ARG3, ARG4);
-/** @brief Warning log with 4 arguments */
-#define SL_PRINT_ARG4_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x4(EVENT, ARG1, ARG2, ARG3, ARG4);
-/** @brief Info log with 4 arguments */
-#define SL_PRINT_ARG4_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x4(EVENT, ARG1, ARG2, ARG3, ARG4);
-#endif
-#if (SL_LOG_CONFIG_ARG >= 5)
-/** @brief Debug log with 5 arguments */
-#define SL_PRINT_ARG5_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x5(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5);
-#define SL_PRINT_ARG5_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x5(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5);
-#define SL_PRINT_ARG5_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x5(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5);
-#define SL_PRINT_ARG5_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x5(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5);
-#endif
-#if (SL_LOG_CONFIG_ARG >= 6)
-#define SL_PRINT_ARG6_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x6(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6);
-#define SL_PRINT_ARG6_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x6(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6);
-#define SL_PRINT_ARG6_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x6(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6);
-#define SL_PRINT_ARG6_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x6(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6);
-#endif
-#if (SL_LOG_CONFIG_ARG >= 7)
-#define SL_PRINT_ARG7_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x7(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7);
-#define SL_PRINT_ARG7_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x7(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7);
-#define SL_PRINT_ARG7_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x7(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7);
-#define SL_PRINT_ARG7_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x7(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7);
-#endif
-#if (SL_LOG_CONFIG_ARG >= 8)
-#define SL_PRINT_ARG8_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x8(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8);
-#define SL_PRINT_ARG8_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x8(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8);
-#define SL_PRINT_ARG8_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x8(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8);
-#define SL_PRINT_ARG8_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x8(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8);
-#endif
-#if (SL_LOG_CONFIG_ARG >= 9)
-#define SL_PRINT_ARG9_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x9(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9);
-#define SL_PRINT_ARG9_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x9(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9);
-#define SL_PRINT_ARG9_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x9(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9);
-#define SL_PRINT_ARG9_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x9(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9);
-#endif
-#if (SL_LOG_CONFIG_ARG >= 10)
-#define SL_PRINT_ARG10_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x10(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10);
-#define SL_PRINT_ARG10_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x10(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10);
-#define SL_PRINT_ARG10_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x10(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10);
-#define SL_PRINT_ARG10_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10) \
-  (void)EVENT_TYPE; \
-  SEGGER_SYSVIEW_RecordU32x10(EVENT, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10);
-#endif
-#else
 
 /**
  * @defgroup sl_log_backend_functions Backend Function Declarations
@@ -360,6 +192,8 @@ extern "C" {
  *
  * @{
  */
+
+#if !defined(SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT)
 
 /** @brief Send debug log message with no arguments */
 #define SL_PRINT_ARG0_DBG(EVENT, EVENT_TYPE)                                   \
@@ -542,10 +376,9 @@ extern "C" {
                     ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10);
 #endif
 
+#endif /* !defined(SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT) */
+
 /** @} (end addtogroup sl_log_active_macros) */
-
-#endif
-
 
 
 /**
@@ -610,6 +443,12 @@ extern "C" {
 /** @brief Macro dispatcher for selecting appropriate logging function */
 #define LOG_MACRO_CHOOSER1(count) LOG_MACRO_CHOOSER2(count)
 
+/** @brief Chooser for SL_PRINT_EVENT_* → SEGGER_SYSVIEW_RecordU32 / RecordU32xN */
+#define EVENT_LOG_MACRO_CHOOSER2(count) EXPAND_CONCAT(SL_EVENT_PRINT_ARG, count##_)
+
+/** @brief Chooser for SL_PRINT_EVENT_* → SEGGER_SYSVIEW_RecordU32 / RecordU32xN */
+#define EVENT_LOG_MACRO_CHOOSER1(count) EVENT_LOG_MACRO_CHOOSER2(count)
+
 /** @} (end addtogroup sl_log_macro_helpers) */
 
 /**
@@ -649,10 +488,17 @@ extern "C" {
  * @param event_id Numeric event identifier
  * @param ... Variable arguments (up to 10)
  */
+#if defined(SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT)
+#define sl_event_common(level, event_id, ...)                                  \
+  _Static_assert(COUNT_ARGS(event_id, ##__VA_ARGS__) <= SL_LOG_CONFIG_ARG, "Too many arguments!");  \
+  EXPAND_CONCAT(EVENT_LOG_MACRO_CHOOSER1(COUNT_ARGS(event_id, ##__VA_ARGS__)), level)     \
+  (event_id, 1, ##__VA_ARGS__)
+#else
 #define sl_event_common(level, event_id, ...)                                  \
   _Static_assert(COUNT_ARGS(event_id, ##__VA_ARGS__) <= SL_LOG_CONFIG_ARG, "Too many arguments!");  \
   EXPAND_CONCAT(LOG_MACRO_CHOOSER1(COUNT_ARGS(event_id, ##__VA_ARGS__)), level)     \
   (event_id, 1, ##__VA_ARGS__)
+#endif
 
 /** @} (end addtogroup sl_log_common_macros) */
 
@@ -736,7 +582,7 @@ extern "C" {
 #if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
 #define SL_PRINT_STRING_INFO(fmt, ...) do{ }while(0)
 #else
-#define SL_PRINT_STRING_INFO(fmt, ...) do{sl_printf_common(INFO, fmt, ##__VA_ARGS__) }while(0)
+#define SL_PRINT_STRING_INFO(fmt, ...) do { sl_printf_common(INFO, fmt, ##__VA_ARGS__); } while (0)
 #endif
 
 /**
@@ -751,7 +597,7 @@ extern "C" {
 #if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
 #define SL_PRINT_STRING_DEBUG(fmt, ...) do{ }while(0)
 #else
-#define SL_PRINT_STRING_DEBUG(fmt, ...) do{sl_printf_common(DBG, fmt, ##__VA_ARGS__) }while(0)
+#define SL_PRINT_STRING_DEBUG(fmt, ...) do { sl_printf_common(DBG, fmt, ##__VA_ARGS__); } while (0)
 #endif
 
 /**
@@ -766,7 +612,7 @@ extern "C" {
 #if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
 #define SL_PRINT_STRING_WARN(fmt, ...) do{ }while(0)
 #else
-#define SL_PRINT_STRING_WARN(fmt, ...) do{sl_printf_common(WRN, fmt, ##__VA_ARGS__) }while(0)
+#define SL_PRINT_STRING_WARN(fmt, ...) do { sl_printf_common(WRN, fmt, ##__VA_ARGS__); } while (0)
 #endif
 
 /**
@@ -781,7 +627,7 @@ extern "C" {
 #if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
 #define SL_PRINT_STRING_ERROR(fmt, ...) do{ }while(0)
 #else
-#define SL_PRINT_STRING_ERROR(fmt, ...) do{sl_printf_common(ERR, fmt, ##__VA_ARGS__) }while(0)
+#define SL_PRINT_STRING_ERROR(fmt, ...) do { sl_printf_common(ERR, fmt, ##__VA_ARGS__); } while (0)
 #endif
 
 /** @} (end addtogroup sl_log_printf_api) */
@@ -809,7 +655,7 @@ extern "C" {
 #if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
 #define SL_PRINT_EVENT_INFO(event_id, ...) do{ }while(0)
 #else
-#define SL_PRINT_EVENT_INFO(event_id, ...) do{sl_event_common(INFO, event_id, ##__VA_ARGS__) }while(0)
+#define SL_PRINT_EVENT_INFO(event_id, ...) do { sl_event_common(INFO, event_id, ##__VA_ARGS__); } while (0)
 #endif
 
 /**
@@ -824,7 +670,7 @@ extern "C" {
 #if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
 #define SL_PRINT_EVENT_DEBUG(event_id, ...) do{ }while(0)
 #else
-#define SL_PRINT_EVENT_DEBUG(event_id, ...) do{sl_event_common(DBG, event_id, ##__VA_ARGS__) }while(0)
+#define SL_PRINT_EVENT_DEBUG(event_id, ...) do { sl_event_common(DBG, event_id, ##__VA_ARGS__); } while (0)
 #endif
 /**
  * @brief Log warning-level event with optional arguments
@@ -838,7 +684,7 @@ extern "C" {
 #if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
 #define SL_PRINT_EVENT_WARN(event_id, ...) do{ }while(0)
 #else
-#define SL_PRINT_EVENT_WARN(event_id, ...) do{sl_event_common(WRN, event_id, ##__VA_ARGS__) }while(0)
+#define SL_PRINT_EVENT_WARN(event_id, ...) do { sl_event_common(WRN, event_id, ##__VA_ARGS__); } while (0)
 #endif
 /**
  * @brief Log error-level event with optional arguments
@@ -852,7 +698,7 @@ extern "C" {
 #if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
 #define SL_PRINT_EVENT_ERROR(event_id, ...) do{ }while(0)
 #else
-#define SL_PRINT_EVENT_ERROR(event_id, ...) do{sl_event_common(ERR, event_id, ##__VA_ARGS__) }while(0)
+#define SL_PRINT_EVENT_ERROR(event_id, ...) do { sl_event_common(ERR, event_id, ##__VA_ARGS__); } while (0)
 #endif
 
 /** @} (end addtogroup sl_log_event_api) */

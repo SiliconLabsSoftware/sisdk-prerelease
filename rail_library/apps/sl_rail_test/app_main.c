@@ -120,6 +120,7 @@ uint8_t logLevel = PERIPHERAL_ENABLE | ASYNC_RESPONSE;
 int32_t txCount = 0;
 int32_t txRepeatCount = 0;
 int32_t txRemainingCount = 0;
+volatile txWaitForAck_t txWaitForAck = TX_WAIT_FOR_ACK_ENABLED_OFF;
 uint32_t continuousTransferPeriod = SL_RAIL_TEST_CONTINUOUS_TRANSFER_PERIOD;
 bool enableRandomTxDelay = false;
 uint32_t txAfterRxDelay = 0;
@@ -827,6 +828,17 @@ void sl_rail_util_on_event(sl_rail_handle_t railHandle, sl_rail_events_t events)
     //      this code assumes default position (PACKET_END).
     ackTimeoutDuration = sl_rail_get_time(railHandle)
                          - previousTxAppendedInfo.time_sent.packet_time;
+    if (txWaitForAck == TX_WAIT_FOR_ACK_ENABLED_ON) {
+      txWaitForAck = TX_WAIT_FOR_ACK_ENABLED_OFF;
+#if SL_RAIL_IEEE802154_SUPPORTS_G_MODE_SWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
+      if (modeSwitchState == TX_ON_NEW_PHY) { // Packet has been sent in a MS context
+        scheduleNextModeSwitchTx(true);
+      } else
+#endif
+      {
+        scheduleNextTx();
+      }
+    }
   }
   // End scheduled receive mode if an appropriate end or error event is received
   if ((events & (SL_RAIL_EVENT_RX_SCHEDULED_RX_END
@@ -901,6 +913,9 @@ void sl_rail_util_on_event(sl_rail_handle_t railHandle, sl_rail_events_t events)
                 | SL_RAIL_EVENT_TX_UNDERFLOW
                 | SL_RAIL_EVENT_TX_CHANNEL_BUSY
                 | SL_RAIL_EVENT_TX_SCHEDULED_TX_MISSED)) {
+    if (txWaitForAck == TX_WAIT_FOR_ACK_ENABLED_ON) {
+      txWaitForAck = TX_WAIT_FOR_ACK_ENABLED_OFF;
+    }
     if (currentAppMode() == TX_STREAM) {
       lastTxStatus = events;
       scheduleNextTx();
@@ -1259,24 +1274,43 @@ sl_rail_status_t chooseTxType(void)
 {
   // Invalidate the previous TX's start time
   txStartTime = 0U;
+  sl_rail_tx_options_t options = txOptions;
+#if SL_RAIL_IEEE802154_SUPPORTS_G_MODE_SWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
+  // If WAIT_FOR_ACK option is in effect, do not apply it to mode-switch pkt
+  // otherwise we'll wait for an ACK to the mode-switch before sending the
+  // actual WAIT_FOR_ACK packet.
+  if (modeSwitchState == TX_MS_PACKET) {
+    options &= ~SL_RAIL_TX_OPTION_WAIT_FOR_ACK;
+  }
+#endif
+  if ((txWaitForAck == TX_WAIT_FOR_ACK_ENABLED_OFF)
+      && ((options & SL_RAIL_TX_OPTION_WAIT_FOR_ACK) != 0U)) {
+    txWaitForAck = TX_WAIT_FOR_ACK_ENABLED_ON;
+  }
+  sl_rail_status_t status;
   if (currentAppMode() == TX_SCHEDULED || currentAppMode() == SCHTX_AFTER_RX
       || currentAppMode() == TX_SCHEDULED_N_PACKETS) {
     if (txType == TX_TYPE_CSMA) {
-      return sl_rail_start_scheduled_cca_csma_tx(railHandle, channel, txOptions, &nextPacketTxTime,
-                                                 csmaConfig, NULL);
+      status = sl_rail_start_scheduled_cca_csma_tx(railHandle, channel, options, &nextPacketTxTime,
+                                                   csmaConfig, NULL);
     } else if (txType == TX_TYPE_LBT) {
-      return sl_rail_start_scheduled_cca_lbt_tx(railHandle, channel, txOptions, &nextPacketTxTime,
-                                                lbtConfig, NULL);
+      status = sl_rail_start_scheduled_cca_lbt_tx(railHandle, channel, options, &nextPacketTxTime,
+                                                  lbtConfig, NULL);
     } else {
-      return sl_rail_start_scheduled_tx(railHandle, channel, txOptions, &nextPacketTxTime, NULL);
+      status = sl_rail_start_scheduled_tx(railHandle, channel, options, &nextPacketTxTime, NULL);
     }
   } else if (txType == TX_TYPE_LBT) {
-    return sl_rail_start_cca_lbt_tx(railHandle, channel, txOptions, lbtConfig, NULL);
+    status = sl_rail_start_cca_lbt_tx(railHandle, channel, options, lbtConfig, NULL);
   } else if (txType == TX_TYPE_CSMA) {
-    return sl_rail_start_cca_csma_tx(railHandle, channel, txOptions, csmaConfig, NULL);
+    status = sl_rail_start_cca_csma_tx(railHandle, channel, options, csmaConfig, NULL);
   } else {
-    return sl_rail_start_tx(railHandle, channel, txOptions, NULL);
+    status = sl_rail_start_tx(railHandle, channel, options, NULL);
   }
+  if ((status != SL_RAIL_STATUS_NO_ERROR)
+      && (txWaitForAck == TX_WAIT_FOR_ACK_ENABLED_ON)) {
+    txWaitForAck = TX_WAIT_FOR_ACK_ENABLED_OFF;
+  }
+  return status;
 }
 
 void sendPacketIfPending(void)
@@ -1323,6 +1357,9 @@ void sendPacketIfPending(void)
 void pendFinishTxSequence(void)
 {
   finishTxSequence = true;
+  if (txWaitForAck == TX_WAIT_FOR_ACK_ENABLED_ON) {
+    txWaitForAck = TX_WAIT_FOR_ACK_ENABLED_OFF; // No transmits to schedule
+  }
 }
 
 void pendFinishTxAckSequence(void)

@@ -2812,6 +2812,16 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
   RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE = 11U,
   /** @deprecated Please use \ref RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE instead. */
   RAIL_TX_POWER_MODE_OFDM_PA = RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE,
+#ifndef DOXYGEN_UNDOCUMENTED
+  /**
+   *  2.4 GHz BTC amplifier
+   *  Supported only on platforms with
+   *  \ref RAIL_SUPPORTS_PROTOCOL_BTC (e.g., SiWX353).
+   *
+   * @deprecated RAIL 2.x synonym for \ref SL_RAIL_TX_POWER_MODE_2P4_GHZ_BTC.
+   */
+  RAIL_TX_POWER_MODE_2P4GIG_BTC = 12U,
+#endif // DOXYGEN_UNDOCUMENTED
   /**
    * Invalid amplifier Selection. Must be last.
    *
@@ -2849,6 +2859,7 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
     "RAIL_TX_POWER_MODE_SUBGIG_LLP",                 \
     "RAIL_TX_POWER_MODE_SUBGIG_HIGHEST",             \
     "RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE", \
+    "RAIL_TX_POWER_MODE_2P4GIG_BTC",                 \
     "RAIL_TX_POWER_MODE_NONE"                        \
 }
 

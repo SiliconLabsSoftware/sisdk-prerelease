@@ -680,6 +680,175 @@ sl_status_t sl_wisun_set_mode_switch(uint8_t mode,
 sl_status_t sl_wisun_set_connection_parameters(const sl_wisun_connection_params_t *params);
 
 /**************************************************************************//**
+ * Set a Wi-SUN option.
+ *
+ * @param[in] id      Option to set (see @ref sl_wisun_option_id_t).
+ * @param[in] val     Pointer to the new value. The stack reads val_len
+ *                    bytes from this address.
+ * @param[in] val_len Size in bytes of the value. Must equal the size of the
+ *                    type associated with id.
+ *
+ * @return SL_STATUS_OK on success.
+ * @return SL_STATUS_INVALID_STATE if the stack is not in disconnected
+ *         state, or if @ref sl_wisun_set_connection_parameters,
+ *         @ref sl_wisun_set_lfn_parameters, or
+ *         @ref sl_wisun_br_set_connection_parameters has been called
+ *         previously.
+ * @return SL_STATUS_INVALID_PARAMETER if id is not recognized,
+ *         val_len does not match the expected size for id, or the
+ *         value is out of the allowed range for that option.
+ *
+ * By default, the stack automatically adapts its behavior based on the
+ * PAN Size advertised in the Wi-SUN PAN-IE. This automatic adaptation is
+ * optimized for use with a Silicon Labs Border Router.
+ *
+ * This function is intended for fine-grained configuration of parameters that
+ * are not automatically adapted by the stack and therefore remain fixed unless
+ * explicitly changed.
+ *
+ * This function and
+ * @ref sl_wisun_set_connection_parameters
+ * @ref sl_wisun_set_lfn_parameters
+ * @ref sl_wisun_br_set_connection_parameters
+ * are mutually exclusive. If any of these legacy connection parameters APIs
+ * has been called, any subsequent call to this function will fail with
+ * SL_STATUS_INVALID_STATE. When using the Full library, this applies
+ * regardless of the role the option targets: a previous call to any of the
+ * three legacy APIs locks this function out entirely.
+ *
+ * This restriction remains in effect even if the stack is later disconnected.
+ * To switch back to auto mode and allow this function again, call
+ * @ref sl_wisun_reset_parameters.
+ *
+ * A later call to @ref sl_wisun_set_connection_parameters,
+ * @ref sl_wisun_set_lfn_parameters, or
+ * @ref sl_wisun_br_set_connection_parameters also overrides any overlapping
+ * settings previously applied with this function.
+ *
+ * This function can be used together with
+ * @ref sl_wisun_set_ffn_advanced_parameters
+ * @ref sl_wisun_set_lfn_advanced_parameters
+ * @ref sl_wisun_br_set_advanced_parameters
+ *
+ * This function can only be called before joining a network, i.e.
+ * before calling @ref sl_wisun_join.
+ *
+ * Available in libraries: Full, FFN, LFN, BR (see @ref API_AVAILABILITY)
+ *****************************************************************************/
+sl_status_t sl_wisun_set_option(sl_wisun_option_id_t id, const void *val, uint16_t val_len);
+
+/**************************************************************************//**
+ * Set advanced Wi-SUN connection parameters.
+ *
+ * @param[in] params Pointer to the advanced connection parameters.
+ *
+ * @return SL_STATUS_OK on success.
+ * @return SL_STATUS_INVALID_STATE if the stack is not in disconnected
+ *         state, or if @ref sl_wisun_set_connection_parameters was
+ *         called previously.
+ * @return SL_STATUS_INVALID_PARAMETER if one or more parameters are
+ *         invalid.
+ *
+ * By default, the stack automatically adapts its behavior based on the
+ * PAN Size advertised in the Wi-SUN PAN-IE. This automatic adaptation is
+ * optimized for use with a Silicon Labs Border Router.
+ *
+ * This function overrides that automatic adjustment with explicit values.
+ *
+ * When connecting to a non-Silicon Labs Border Router, automatic adaptation
+ * may not always provide the desired behavior. In that case, it is recommended
+ * to use this function to explicitly set the parameters.
+ *
+ * This function and @ref sl_wisun_set_connection_parameters are mutually
+ * exclusive. If @ref sl_wisun_set_connection_parameters has been called, any
+ * subsequent call to this function will fail with SL_STATUS_INVALID_STATE.
+ *
+ * This restriction remains in effect even if the stack is later disconnected.
+ * To switch back to auto mode and allow this function again, call
+ * @ref sl_wisun_reset_parameters.
+ *
+ * A later call to @ref sl_wisun_set_connection_parameters also overrides any
+ * overlapping settings previously applied with this function.
+ *
+ * This function can be used together with @ref sl_wisun_set_option.
+ *
+ * This function can only be called before joining a network, i.e.
+ * before calling @ref sl_wisun_join.
+ *
+ * Available in libraries: Full, FFN (see @ref API_AVAILABILITY)
+ *****************************************************************************/
+sl_status_t sl_wisun_set_ffn_advanced_parameters(const sl_wisun_ffn_advanced_parameters_t *params);
+
+/**************************************************************************//**
+ * Set advanced Wi-SUN LFN connection parameters.
+ *
+ * @param[in] params Pointer to the advanced LFN parameters.
+ *
+ * @return SL_STATUS_OK on success.
+ * @return SL_STATUS_INVALID_STATE if the stack is not in disconnected
+ *         state, or if @ref sl_wisun_set_lfn_parameters was called
+ *         previously.
+ * @return SL_STATUS_INVALID_PARAMETER if one or more parameters are
+ *         invalid.
+ *
+ * By default, the stack automatically adapts its behavior based on the
+ * PAN Size advertised in the Wi-SUN PAN-IE. This automatic adaptation is
+ * optimized for use with a Silicon Labs Border Router.
+ *
+ * This function overrides that automatic adjustment with explicit values.
+ *
+ * When connecting to a non-Silicon Labs Border Router, automatic adaptation
+ * may not always provide the desired behavior. In that case, it is recommended
+ * to use this function to explicitly set the parameters.
+ *
+ * This function and @ref sl_wisun_set_lfn_parameters are mutually
+ * exclusive. If @ref sl_wisun_set_lfn_parameters has been called, any
+ * subsequent call to this function will fail with SL_STATUS_INVALID_STATE.
+ *
+ * This restriction remains in effect even if the stack is later disconnected.
+ * To switch back to auto mode and allow this function again, call
+ * @ref sl_wisun_reset_parameters.
+ *
+ * A later call to @ref sl_wisun_set_lfn_parameters also overrides any
+ * overlapping settings previously applied with this function.
+ *
+ * This function can be used together with @ref sl_wisun_set_option.
+ *
+ * This function can only be called before joining a network, i.e.
+ * before calling @ref sl_wisun_join.
+ *
+ * Available in libraries: Full, LFN (see @ref API_AVAILABILITY)
+ *****************************************************************************/
+sl_status_t sl_wisun_set_lfn_advanced_parameters(const sl_wisun_lfn_advanced_parameters_t *params);
+
+/**************************************************************************//**
+ * Reset all parameters and options to defaults and re-enable auto mode.
+ *
+ * @return SL_STATUS_OK on success.
+ * @return SL_STATUS_INVALID_STATE if the stack is not in disconnected
+ *         state.
+ *
+ * This function restores all connection parameters and options to their
+ * default values and re-enables the automatic adjustment of parameters
+ * based on the PAN Size advertised in the Wi-SUN PAN-IE.
+ *
+ * After calling this function, the stack switches back to auto mode.
+ * Calls to @ref sl_wisun_set_option,
+ * @ref sl_wisun_set_ffn_advanced_parameters,
+ * @ref sl_wisun_set_lfn_advanced_parameters,
+ * @ref sl_wisun_br_set_advanced_parameters are allowed again.
+ *
+ * Any parameter or option customization previously applied through
+ * those functions is discarded.
+ *
+ * This function can only be called before joining a network, i.e.
+ * before calling @ref sl_wisun_join.
+ *
+ * Available in libraries: Full, FFN, LFN, BR (see @ref API_AVAILABILITY)
+ *****************************************************************************/
+sl_status_t sl_wisun_reset_parameters(void);
+
+/**************************************************************************//**
  * Configure the list of PHY operating modes the device will use for mode switch operations.
  *
  * @param[in] phy_mode_id_count Number of PhyModeId to configure. If set to 0,

@@ -31,6 +31,10 @@
 #include "em_device.h"
 #include "sl_common.h"
 
+#if defined(SL_APP_PROPERTIES)
+#include "api/application_properties.h"
+#endif
+
 #if !defined(__ARM_FEATURE_CMSE) || (__ARM_FEATURE_CMSE != 3U)
   #error "The TZ Non-Secure execution code requires access to the CMSE toolchain extension to set proper SAU settings."
 #endif // __ARM_FEATURE_CMSE
@@ -41,9 +45,6 @@
 
 #define LINK_TIME_INJECTED_DATA_PATTERN   0x0DF0ADBA /* 0xBAADF00D backwards*/
 #define TOTAL_INTERNAL_INTERRUPTS         (16)
-
-#define THUMB_INSTRUCTION_BIT               0x00000001
-#define VECTOR_TABLE_ENTRY_OFFSET(x)        ((uint32_t)(x) + (uint32_t)(THUMB_INSTRUCTION_BIT))
 
 // Linker section definition.
 #if defined (__GNUC__)
@@ -61,11 +62,12 @@
 #elif defined(__ICCARM__)
 
 #pragma data_alignment=512
-#define __ATTRIBUTE_SECURE_VECTORS        SL_ATTRIBUTE_SECTION("secure_vectors")
-#define __ATTRIBUTE_SECURE_CONFIG_DATA    SL_ATTRIBUTE_SECTION("secure_config_data")
-#define __ATTRIBUTE_SECURE_RESET_HANDLER  SL_ATTRIBUTE_SECTION("secure_reset_handler")
-#define __ATTRIBUTE_SECURE_FAULT_HANDLER  SL_ATTRIBUTE_SECTION("secure_fault_handler")
-#define __ATTRIBUTE_SECURE_VECTORS_COPY   SL_ATTRIBUTE_SECTION("secure_vectors_copy")
+/* IAR: mirror GCC (used): ILINK drops unreferenced secure_* sections unless __root (see sl_tz_non_secure_execution.c). */
+#define __ATTRIBUTE_SECURE_VECTORS        _Pragma("location =\"secure_vectors\"") __root
+#define __ATTRIBUTE_SECURE_CONFIG_DATA    _Pragma("location =\"secure_config_data\"") __root
+#define __ATTRIBUTE_SECURE_RESET_HANDLER  _Pragma("location =\"secure_reset_handler\"") __root
+#define __ATTRIBUTE_SECURE_FAULT_HANDLER  _Pragma("location =\"secure_fault_handler\"") __root
+#define __ATTRIBUTE_SECURE_VECTORS_COPY   _Pragma("location =\"secure_vectors_copy\"") __root
 #define __NO_PROLOGUE                     __naked
 
 #else
@@ -80,7 +82,7 @@ extern uint32_t __INITIAL_SP;
 extern ApplicationProperties_t sl_app_properties;
 #define APP_PROPERTIES_ADDR (void(*)(void)) & sl_app_properties
 #else
-#define APP_PROPERTIES_ADDR (void(*)(void))(VECTOR_TABLE_ENTRY_OFFSET(sli_tz_secure_fault_handler))
+#define APP_PROPERTIES_ADDR sli_tz_secure_fault_handler
 #endif
 
 // This data is injected inline with the secure app's binary blob at link-time.
@@ -104,15 +106,32 @@ __ATTRIBUTE_SECURE_CONFIG_DATA secure_config_data_t sl_tz_secure_config_data = {
   .mspu_region_size = LINK_TIME_INJECTED_DATA_PATTERN
 };
 #else
+#if defined(__ICCARM__)
+#pragma language=save
+#pragma language=extended
+#pragma section="secure_vectors"
+#pragma section=".intvec"
+#define SECURE_VECTORS           ((uint32_t)__section_begin("secure_vectors"))
+#define NON_SECURE_VECTORS_START ((uint32_t)__section_begin(".intvec"))
+extern uint32_t __mspu_region_size__;
+#define MSPU_REGION_SIZE         ((uint32_t)&__mspu_region_size__)
+#else
 extern uint32_t __Secure_Vectors;
 extern uint32_t linker_vectors_begin;
 extern uint32_t __mspu_region_size__;
+#define SECURE_VECTORS           ((uint32_t)&__Secure_Vectors)
+#define NON_SECURE_VECTORS_START ((uint32_t)&linker_vectors_begin)
+#define MSPU_REGION_SIZE         ((uint32_t)&__mspu_region_size__)
+#endif
 
 __ATTRIBUTE_SECURE_CONFIG_DATA const secure_config_data_t sl_tz_secure_config_data = {
-  .secure_vector_table = (uint32_t*) (((uint32_t)&__Secure_Vectors) /* + 0x10000000*/),
-  .non_secure_vector_table = (uint32_t*) &linker_vectors_begin,
-  .mspu_region_size = (uint32_t)&__mspu_region_size__
+  .secure_vector_table = (uint32_t *)SECURE_VECTORS,
+  .non_secure_vector_table = (uint32_t *)NON_SECURE_VECTORS_START,
+  .mspu_region_size = MSPU_REGION_SIZE
 };
+#if defined(__ICCARM__)
+#pragma language=restore
+#endif
 #endif
 
 #if defined (__GNUC__)
@@ -555,23 +574,23 @@ __ATTRIBUTE_SECURE_FAULT_HANDLER __NO_PROLOGUE void sli_tz_secure_fault_handler(
 
 #if defined(SL_TZ_NON_SECURE_EXECUTION_USE_SOURCE)
 // Non-Secure Execution Vector Table.
-#define SECURE_VECTOR_TABLE {                                                                                              \
-    { .topOfStack = &__INITIAL_SP },                                             /*      Initial Stack Pointer          */ \
-    { (void(*)(void))(VECTOR_TABLE_ENTRY_OFFSET(sli_tz_secure_reset_handler)) }, /*      sli_tz_secure_reset_handler    */ \
-    { (void(*)(void))(VECTOR_TABLE_ENTRY_OFFSET(sli_tz_secure_fault_handler)) }, /*      sli_tz_secure_fault_handler    */ \
-    { (void(*)(void))(VECTOR_TABLE_ENTRY_OFFSET(sli_tz_secure_fault_handler)) }, /*      sli_tz_secure_fault_handler    */ \
-    { (void(*)(void))(VECTOR_TABLE_ENTRY_OFFSET(sli_tz_secure_fault_handler)) }, /*      sli_tz_secure_fault_handler    */ \
-    { (void(*)(void))(VECTOR_TABLE_ENTRY_OFFSET(sli_tz_secure_fault_handler)) }, /*      sli_tz_secure_fault_handler    */ \
-    { (void(*)(void))(VECTOR_TABLE_ENTRY_OFFSET(sli_tz_secure_fault_handler)) }, /*      sli_tz_secure_fault_handler    */ \
-    { (void(*)(void))(VECTOR_TABLE_ENTRY_OFFSET(sli_tz_secure_fault_handler)) }, /*      sli_tz_secure_fault_handler    */ \
-    { (void(*)(void))(VECTOR_TABLE_ENTRY_OFFSET(sli_tz_secure_fault_handler)) }, /*      sli_tz_secure_fault_handler    */ \
-    { (void(*)(void))(VECTOR_TABLE_ENTRY_OFFSET(sli_tz_secure_fault_handler)) }, /*      sli_tz_secure_fault_handler    */ \
-    { (void(*)(void))(VECTOR_TABLE_ENTRY_OFFSET(sli_tz_secure_fault_handler)) }, /*      sli_tz_secure_fault_handler    */ \
-    { (void(*)(void))(VECTOR_TABLE_ENTRY_OFFSET(sli_tz_secure_fault_handler)) }, /*      sli_tz_secure_fault_handler    */ \
-    { (void(*)(void))(VECTOR_TABLE_ENTRY_OFFSET(sli_tz_secure_fault_handler)) }, /*      sli_tz_secure_fault_handler    */ \
-    { APP_PROPERTIES_ADDR },                                                     /*      Application properties         */ \
-    { (void(*)(void))(VECTOR_TABLE_ENTRY_OFFSET(sli_tz_secure_fault_handler)) }, /*      sli_tz_secure_fault_handler    */ \
-    { (void(*)(void))(VECTOR_TABLE_ENTRY_OFFSET(sli_tz_secure_fault_handler)) }, /*      sli_tz_secure_fault_handler    */ \
+#define SECURE_VECTOR_TABLE {                                                   \
+    { .topOfStack = &__INITIAL_SP },  /*      Initial Stack Pointer         */  \
+    { sli_tz_secure_reset_handler }, /*      sli_tz_secure_reset_handler    */  \
+    { sli_tz_secure_fault_handler }, /*      sli_tz_secure_fault_handler    */  \
+    { sli_tz_secure_fault_handler }, /*      sli_tz_secure_fault_handler    */  \
+    { sli_tz_secure_fault_handler }, /*      sli_tz_secure_fault_handler    */  \
+    { sli_tz_secure_fault_handler }, /*      sli_tz_secure_fault_handler    */  \
+    { sli_tz_secure_fault_handler }, /*      sli_tz_secure_fault_handler    */  \
+    { sli_tz_secure_fault_handler }, /*      sli_tz_secure_fault_handler    */  \
+    { sli_tz_secure_fault_handler }, /*      sli_tz_secure_fault_handler    */  \
+    { sli_tz_secure_fault_handler }, /*      sli_tz_secure_fault_handler    */  \
+    { sli_tz_secure_fault_handler }, /*      sli_tz_secure_fault_handler    */  \
+    { sli_tz_secure_fault_handler }, /*      sli_tz_secure_fault_handler    */  \
+    { sli_tz_secure_fault_handler }, /*      sli_tz_secure_fault_handler    */  \
+    { APP_PROPERTIES_ADDR },         /*      Application properties         */  \
+    { sli_tz_secure_fault_handler }, /*      sli_tz_secure_fault_handler    */  \
+    { sli_tz_secure_fault_handler }, /*      sli_tz_secure_fault_handler    */  \
 }
 
 // Secure Vector Table.

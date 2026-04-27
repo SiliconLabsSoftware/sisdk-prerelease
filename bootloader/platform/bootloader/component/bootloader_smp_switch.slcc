@@ -21,6 +21,9 @@ provides:
 requires:
 - name: bootloader_core
 - name: bootloader_crc
+- name: bootloader_interface_common
+  # Record header is owned by bootloader package (see bootloader_s2_smp_record_header).
+- name: bootloader_s2_smp_record_header
 root_path: bootloader/platform/bootloader
 config_file:
 - path: config/btl_smp_cfg.h
@@ -29,9 +32,3 @@ source:
 define:
 - name: BTL_SMP_SUPPORT
   value: 1
-include:
-- path: core/smp_switch
-  file_list:
-  - path: btl_smp_switch_record.h
-
-

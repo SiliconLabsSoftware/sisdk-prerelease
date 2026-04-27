@@ -87,6 +87,7 @@
 #define CPC_UART_ISR_TX_HANDLER(periph_nbr) SL_CONCAT_PASTER_3(SL_CPC_DRV_PERIPH_NAME, periph_nbr, _TX_IRQHandler)
 #define CPC_UART_TX_IRQn(periph_nbr)        SL_CONCAT_PASTER_3(SL_CPC_DRV_PERIPH_NAME, periph_nbr, _TX_IRQn)
 #define CPC_UART_CLOCK                      SL_CONCAT_PASTER_3(SL_BUS_CLOCK_, SL_CPC_DRV_PERIPH_NAME, SL_CPC_DRV_UART_PERIPHERAL_NO)
+#define CPC_UART_PERIPHERAL(periph_nbr)     SL_CONCAT_PASTER_3(SL_PERIPHERAL_, SL_CPC_DRV_PERIPH_NAME, periph_nbr)
 
 // EUSART defines
 #if defined(SL_CPC_DRV_PERIPH_IS_EUSART)
@@ -129,9 +130,8 @@
 
 // Peripheral HAL (EUSART: Series 2 & 3; USART: Series 2 only)
 #if defined(SL_CPC_DRV_PERIPH_IS_EUSART)
-#define CPC_UART_PERIPHERAL(periph_no)     SL_CONCAT_PASTER_2(SL_PERIPHERAL_EUSART, periph_no)
-#define CPC_LDMA_RX_PERIPH_TRIGGER(periph_nbr)   SL_CONCAT_PASTER_3(SL_HAL_LDMA_PERIPHERAL_SIGNAL_EUSART, periph_nbr, _RXFL)
-#define CPC_LDMA_TX_PERIPH_TRIGGER(periph_nbr)   SL_CONCAT_PASTER_3(SL_HAL_LDMA_PERIPHERAL_SIGNAL_EUSART, periph_nbr, _TXFL)
+#define CPC_LDMA_RX_PERIPH_TRIGGER(periph_nbr)   SL_CONCAT_PASTER_4(SL_HAL_LDMA_PERIPHERAL_SIGNAL_, SL_CPC_DRV_PERIPH_NAME, periph_nbr, _RXFL)
+#define CPC_LDMA_TX_PERIPH_TRIGGER(periph_nbr)   SL_CONCAT_PASTER_4(SL_HAL_LDMA_PERIPHERAL_SIGNAL_, SL_CPC_DRV_PERIPH_NAME, periph_nbr, _TXFL)
 #define cpc_uart_int_clear                 sl_hal_eusart_clear_interrupts
 #define cpc_uart_int_enable                sl_hal_eusart_enable_interrupts
 #define cpc_uart_int_disable               sl_hal_eusart_disable_interrupts
@@ -149,9 +149,8 @@
     sl_hal_eusart_disable(peripheral);    \
   }
 #elif defined(SL_CPC_DRV_PERIPH_IS_USART)
-#define CPC_UART_PERIPHERAL(periph_no)     SL_CONCAT_PASTER_2(SL_PERIPHERAL_USART, periph_no)
-#define CPC_LDMA_RX_PERIPH_TRIGGER(periph_nbr)   SL_CONCAT_PASTER_3(SL_HAL_LDMA_PERIPHERAL_SIGNAL_USART, periph_nbr, _RXDATAV)
-#define CPC_LDMA_TX_PERIPH_TRIGGER(periph_nbr)   SL_CONCAT_PASTER_3(SL_HAL_LDMA_PERIPHERAL_SIGNAL_USART, periph_nbr, _TXBL)
+#define CPC_LDMA_RX_PERIPH_TRIGGER(periph_nbr)   SL_CONCAT_PASTER_4(SL_HAL_LDMA_PERIPHERAL_SIGNAL_, SL_CPC_DRV_PERIPH_NAME, periph_nbr, _RXDATAV)
+#define CPC_LDMA_TX_PERIPH_TRIGGER(periph_nbr)   SL_CONCAT_PASTER_4(SL_HAL_LDMA_PERIPHERAL_SIGNAL_, SL_CPC_DRV_PERIPH_NAME, periph_nbr, _TXBL)
 #define cpc_uart_int_clear                 sl_hal_usart_clear_interrupts
 #define cpc_uart_int_enable                sl_hal_usart_enable_interrupts
 #define cpc_uart_int_disable               sl_hal_usart_disable_interrupts
@@ -364,7 +363,6 @@ static sl_status_t uart_drv_hw_init(sli_cpc_drv_t *drv)
     init.advanced_config = &advancedSettings;
     sl_hal_eusart_init_uart_hf(SL_CPC_DRV_UART_PERIPHERAL, &init);
 
-    // Enable peripheral
   #elif defined(SL_CPC_DRV_PERIPH_IS_USART)
     sl_hal_usart_async_init_t init = SL_HAL_USART_INIT_ASYNC_DEFAULT;
     #if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == WITHOUT_HWFC)
@@ -388,6 +386,8 @@ static sl_status_t uart_drv_hw_init(sli_cpc_drv_t *drv)
     // Discard false frames and/or IRQs
     SL_CPC_DRV_UART_PERIPHERAL->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
   #endif
+    // Enable peripheral
+    cpc_uart_enable(SL_CPC_DRV_UART_PERIPHERAL);
   }
   // Configure GPIO pin routes
   {
@@ -530,8 +530,6 @@ static sl_status_t uart_drv_init(sli_cpc_drv_t *drv, sli_cpc_instance_t *inst)
 
   cpc_uart_int_clear(SL_CPC_DRV_UART_PERIPHERAL, 0xFFFFFFFF);
   cpc_uart_int_enable(SL_CPC_DRV_UART_PERIPHERAL, CPC_UART_IF_TXC);
-
-  cpc_uart_enable(SL_CPC_DRV_UART_PERIPHERAL);
 
 #if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == WITHOUT_HWFC)
   uint8_t * buffer_ptr;

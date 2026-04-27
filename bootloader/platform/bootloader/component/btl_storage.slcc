@@ -20,7 +20,8 @@ include:
   - path: core/btl_bootload.h
   - path: core/btl_parse.h
   - path: parser/gbl/btl_gbl_parser.h
-  - path: core/flash/btl_internal_flash.h
+requires:
+- name: bootloader_interface_common
 provides:
 - name: btl_storage
 metadata:

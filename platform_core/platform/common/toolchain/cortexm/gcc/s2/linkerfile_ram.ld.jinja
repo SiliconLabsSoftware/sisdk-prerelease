@@ -343,7 +343,7 @@ SECTIONS
     __zero_table_end__ = .;
   } > RAM :tables
 
-  .data :
+  .data : AT (__etext)
   {
     *(vtable)
     *(SORT_BY_ALIGNMENT(.data*))
@@ -379,8 +379,14 @@ SECTIONS
 
   } > RAM :ram_data
 
+  .datainit (NOLOAD): {
+     . = ALIGN(4);
+     __etext = .;
+      /* reserve space for .data init value */
+     . += SIZEOF(.data);
+  } > RAM :ram_post_data
+
   /* Values to support copying initialised values at startup */
-  __etext = LOADADDR(.data);
   __data_start__ = ADDR(.data);
   __data_end__ = ADDR(.data) + SIZEOF(.data);
 

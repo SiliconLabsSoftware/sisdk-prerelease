@@ -359,7 +359,7 @@ void cli_set_beacon_payload(sl_cli_command_arg_t *arguments)
 
   status = emberSetApplicationBeaconPayload((uint8_t)length, contents);
 
-  app_log_info("Set beacon payload: {0x");
+  app_log_info("Set beacon payload: {");
   for (uint8_t i = 0; i < length; i++) {
     app_log_info("%02" PRIX8, contents[i]);
   }

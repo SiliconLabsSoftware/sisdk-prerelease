@@ -682,19 +682,16 @@ void setEventConfig(sl_cli_command_arg_t *args)
   }
 
   CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  sl_rail_events_t oldEvents = sl_rail_get_events_config(railHandle);
   sl_rail_config_events(railHandle, eventMask, eventConfig);
+  sl_rail_events_t newEvents = sl_rail_get_events_config(railHandle);
   // Avoid use of %ll long-long formats due to iffy printf library support
-  if (sl_cli_get_argument_count(args) >= 4) {
-    responsePrint(sl_cli_get_command_string(args, 0), "Mask:0x%x%08x,Values:0x%x%08x",
-                  (uint32_t)(eventMask >> 32),
-                  (uint32_t)eventMask,
-                  (uint32_t)(eventConfig >> 32),
-                  (uint32_t)eventConfig);
-  } else {
-    responsePrint(sl_cli_get_command_string(args, 0), "Mask:0x%x,Values:0x%x",
-                  (uint32_t)eventMask,
-                  (uint32_t)eventConfig);
-  }
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "EnabLH:0x%08x 0x%08x,PrevLH:0x%08x 0x%08x",
+                (uint32_t)(newEvents),
+                (uint32_t)(newEvents >> 32),
+                (uint32_t)(oldEvents),
+                (uint32_t)(oldEvents >> 32));
 }
 
 void delayUs(sl_cli_command_arg_t *args)

@@ -96,19 +96,19 @@ sl_status_t sl_log_hal_backend_write(sl_log_event_t *buffer, uint32_t read_index
 
   if (event_count <= SL_LOG_NUMBER_OF_EVENTS - read_index) {
     /* contiguous block */
-    status = sl_iostream_write(sl_iostream_recommended_console_stream, &buffer[read_index], event_count * sizeof(sl_log_event_t));
+    status = sl_iostream_write(sl_iostream_recommended_console_stream, (const void *)&buffer[read_index], event_count * sizeof(sl_log_event_t));
     return status;
   } else {
     /* first chunk: from read_index to end */
     uint32_t first_chunk = SL_LOG_NUMBER_OF_EVENTS - read_index;
-    status = sl_iostream_write(sl_iostream_recommended_console_stream, &buffer[read_index], first_chunk * sizeof(sl_log_event_t));
+    status = sl_iostream_write(sl_iostream_recommended_console_stream, (const void *)&buffer[read_index], first_chunk * sizeof(sl_log_event_t));
     if (status != SL_STATUS_OK) {
       return status;
     }
 
     /* remaining events after wrap-around */
     uint32_t second_chunk = event_count - first_chunk; /* equals event_count + read_index - SL_LOG_NUMBER_OF_EVENTS */
-    status = sl_iostream_write(sl_iostream_recommended_console_stream, buffer, second_chunk * sizeof(sl_log_event_t));
+    status = sl_iostream_write(sl_iostream_recommended_console_stream, (const void *)buffer, second_chunk * sizeof(sl_log_event_t));
     return status;
   }
 }

@@ -874,11 +874,7 @@ extern "C" {
 #ifndef DOXYGEN_UNDOCUMENTED
 /// Boolean to indicate whether the selected chip supports BTC.
 /// See also runtime refinement \ref sl_rail_supports_protocol_btc().
-#if (_SILICON_LABS_32B_SERIES_3_CONFIG == 300)
-#define SL_RAIL_SUPPORTS_PROTOCOL_BTC SL_RAIL_SUPPORTS_2P4_GHZ_BAND
-#else
-#define SL_RAIL_SUPPORTS_PROTOCOL_BTC 0
-#endif
+#define SL_RAIL_SUPPORTS_PROTOCOL_BTC (0U)
 #endif//DOXYGEN_UNDOCUMENTED
 
 #ifndef DOXYGEN_UNDOCUMENTED

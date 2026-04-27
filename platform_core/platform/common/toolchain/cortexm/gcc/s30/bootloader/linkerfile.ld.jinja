@@ -240,9 +240,9 @@
   {%- if tz_non_secure_execution_source is defined %}
     {#- Get the Secure alias by adding 0x10000000 to the start address. #}
     {%- set flash_s_start = app_flash_start + 0x10000000 %}
-   FLASH_S    (rx)  : ORIGIN = 0x{{ '%0x' % flash_s_start }}, LENGTH = 0x{{ '%0x' % device_flash_smpu_region_size | first }}
-    {%- set app_flash_size = app_flash_size - (device_flash_smpu_region_size | first) %}
-    {%- set app_flash_start = app_flash_start + (device_flash_smpu_region_size | first) %}
+   FLASH_S    (rx)  : ORIGIN = 0x{{ '%0x' % flash_s_start }}, LENGTH = 0x{{ '%0x' % device_flash_mspu_region_size | first }}
+    {%- set app_flash_size = app_flash_size - (device_flash_mspu_region_size | first) %}
+    {%- set app_flash_start = app_flash_start + (device_flash_mspu_region_size | first) %}
   {%- endif %}
    FLASH      (rx)  : ORIGIN = 0x{{ '%0x' % app_flash_start }}, LENGTH = 0x{{ '%0x' % app_flash_size }}
    RAM        (rwx) : ORIGIN = 0x{{ '%0x' % app_ram_start }}, LENGTH = 0x{{ '%0x' % app_ram_size }}
@@ -260,7 +260,7 @@
 __flash_size__ = 0x{{ '%0x' % flash_size }};
 __flash_page_size__ = 0x{{ '%0x' % flash_page_size }};
 {%- if tz_non_secure_execution is defined %}
-__mspu_region_size__ = 0x{{ '%0x' % device_flash_smpu_region_size | first }};
+__mspu_region_size__ = 0x{{ '%0x' % device_flash_mspu_region_size | first }};
 {%- endif %}
 
 /*******************************************************************************
@@ -336,7 +336,7 @@ SECTIONS
 {%- if tz_non_secure_execution is defined %}
   .secure_app :
   {
-  {%- if (app_flash_start % (device_flash_smpu_region_size | first)) != 0 %}
+  {%- if (app_flash_start % (device_flash_mspu_region_size | first)) != 0 %}
     KEEP(*(.secure_vectors_copy))
     . = ALIGN(__mspu_region_size__);
   {%- endif %}

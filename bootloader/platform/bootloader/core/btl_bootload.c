@@ -18,7 +18,7 @@
 
 #include "btl_bootload.h"
 #include "btl_reset.h"
-#include "btl_util.h"
+#include "core/btl_util.h"
 
 #if defined(__GNUC__)
 #pragma GCC diagnostic push

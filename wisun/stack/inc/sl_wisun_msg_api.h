@@ -152,6 +152,10 @@ typedef enum {
   SL_WISUN_MSG_SET_TRICKLE_PARAMETERS_REQ_ID              = 0x5D,
   SL_WISUN_MSG_SET_LAST_GASP_REQ_ID                       = 0x5E,
   SL_WISUN_MSG_SET_FIRST_BREATH_REQ_ID                    = 0x5F,
+  SL_WISUN_MSG_SET_OPTION_REQ_ID                          = 0x61,
+  SL_WISUN_MSG_SET_FFN_ADVANCED_PARAMS_REQ_ID             = 0x62,
+  SL_WISUN_MSG_SET_LFN_ADVANCED_PARAMS_REQ_ID             = 0x63,
+  SL_WISUN_MSG_RESET_PARAMS_REQ_ID                        = 0x64,
 } sl_wisun_msg_req_id_t;
 
 /// Wi-SUN Message API confirmation IDs
@@ -247,6 +251,10 @@ typedef enum {
   SL_WISUN_MSG_SET_TRICKLE_PARAMETERS_CNF_ID              = 0x5D,
   SL_WISUN_MSG_SET_LAST_GASP_CNF_ID                       = 0x5E,
   SL_WISUN_MSG_SET_FIRST_BREATH_CNF_ID                    = 0x5F,
+  SL_WISUN_MSG_SET_OPTION_CNF_ID                          = 0x61,
+  SL_WISUN_MSG_SET_FFN_ADVANCED_PARAMS_CNF_ID             = 0x62,
+  SL_WISUN_MSG_SET_LFN_ADVANCED_PARAMS_CNF_ID             = 0x63,
+  SL_WISUN_MSG_RESET_PARAMS_CNF_ID                        = 0x64,
 } sl_wisun_msg_cnf_id_t;
 
 /**************************************************************************//**
@@ -2416,6 +2424,172 @@ typedef struct {
 SL_PACK_END()
 
 /** @} (end SL_WISUN_MSG_SET_CONNECTION_PARAMS) */
+
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_SET_OPTION sl_wisun_msg_set_option
+ * @{
+ *****************************************************************************/
+
+/// Request message body
+SL_PACK_START(1)
+typedef struct {
+  /// Option identifier
+  uint32_t id;
+  /// Size of the value in bytes
+  uint16_t val_len;
+  /// Value
+  uint8_t val[];
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_option_req_body_t;
+SL_PACK_END()
+
+/// Request message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Request message body
+  sl_wisun_msg_set_option_req_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_option_req_t;
+SL_PACK_END()
+
+/// Confirmation message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the request
+  uint32_t status;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_option_cnf_body_t;
+SL_PACK_END()
+
+/// Confirmation message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Confirmation message body
+  sl_wisun_msg_set_option_cnf_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_option_cnf_t;
+SL_PACK_END()
+
+/** @} (end SL_WISUN_MSG_SET_OPTION) */
+
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_SET_FFN_ADVANCED_PARAMS sl_wisun_msg_set_ffn_advanced_params
+ * @{
+ *****************************************************************************/
+
+/// Request message body
+SL_PACK_START(1)
+typedef struct {
+  /// Advanced connection parameters
+  sl_wisun_ffn_advanced_parameters_t params;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_ffn_advanced_params_req_body_t;
+SL_PACK_END()
+
+/// Request message
+SL_PACK_START(1)
+typedef struct {
+  /// Message header
+  sl_wisun_msg_header_t header;
+  /// Message body
+  sl_wisun_msg_set_ffn_advanced_params_req_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_ffn_advanced_params_req_t;
+SL_PACK_END()
+
+/// Confirmation message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the request
+  uint32_t status;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_ffn_advanced_params_cnf_body_t;
+SL_PACK_END()
+
+/// Confirmation message
+SL_PACK_START(1)
+typedef struct {
+  /// Message header
+  sl_wisun_msg_header_t header;
+  /// Message body
+  sl_wisun_msg_set_ffn_advanced_params_cnf_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_ffn_advanced_params_cnf_t;
+SL_PACK_END()
+
+/** @} (end SL_WISUN_MSG_SET_FFN_ADVANCED_PARAMS) */
+
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_SET_LFN_ADVANCED_PARAMS sl_wisun_msg_set_lfn_advanced_params
+ * @{
+ *****************************************************************************/
+
+/// Request message body
+SL_PACK_START(1)
+typedef struct {
+  /// Advanced LFN parameters
+  sl_wisun_lfn_advanced_parameters_t params;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_lfn_advanced_params_req_body_t;
+SL_PACK_END()
+
+/// Request message
+SL_PACK_START(1)
+typedef struct {
+  /// Message header
+  sl_wisun_msg_header_t header;
+  /// Message body
+  sl_wisun_msg_set_lfn_advanced_params_req_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_lfn_advanced_params_req_t;
+SL_PACK_END()
+
+/// Confirmation message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the request
+  uint32_t status;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_lfn_advanced_params_cnf_body_t;
+SL_PACK_END()
+
+/// Confirmation message
+SL_PACK_START(1)
+typedef struct {
+  /// Message header
+  sl_wisun_msg_header_t header;
+  /// Message body
+  sl_wisun_msg_set_lfn_advanced_params_cnf_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_lfn_advanced_params_cnf_t;
+SL_PACK_END()
+
+/** @} (end SL_WISUN_MSG_SET_LFN_ADVANCED_PARAMS) */
+
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_RESET_PARAMS sl_wisun_msg_reset_params
+ * @{
+ *****************************************************************************/
+
+/// Request message
+SL_PACK_START(1)
+typedef struct {
+  /// Message header
+  sl_wisun_msg_header_t header;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_reset_params_req_t;
+SL_PACK_END()
+
+/// Confirmation message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the request
+  uint32_t status;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_reset_params_cnf_body_t;
+SL_PACK_END()
+
+/// Confirmation message
+SL_PACK_START(1)
+typedef struct {
+  /// Message header
+  sl_wisun_msg_header_t header;
+  /// Message body
+  sl_wisun_msg_reset_params_cnf_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_reset_params_cnf_t;
+SL_PACK_END()
+
+/** @} (end SL_WISUN_MSG_RESET_PARAMS) */
 
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_JOIN sl_wisun_msg_join

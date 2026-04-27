@@ -69,3 +69,7 @@ template_contribution:
 documentation:
   docset: rtl-lib
   document: modules
+
+validation_helper:
+- path: scripts/lua/mac_deprecation.lua
+  condition: [macos]

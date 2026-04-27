@@ -1794,18 +1794,6 @@
 
     <table class="outline"><col width="300"><col width="200"><col width="200">
     <tr class="heading">
-    <td><b>Name:</b> radioSetSchedulerPriorities</td><td><b>ID:</b> 0x012B</td><td></td></tr>
-<tr><td colspan="3" style="border-top: solid black 1px;"><b>Description:</b> Set the current scheduler priorities for radio operations</td></tr>
-
-    <tr><td colspan="3" style="border-top: solid black 1px;"><b>Command Parameters:</b></td></tr>
-
-    <tr><td>sl_802154_radio_priorities_t priorities</td><td colspan="2">The current priorities.</td></tr>
-
-    <tr><td colspan="3" style="border-top: solid black 1px;"><b>Response Parameters:</b> None</td></tr>
-</table><br>
-
-    <table class="outline"><col width="300"><col width="200"><col width="200">
-    <tr class="heading">
     <td><b>Name:</b> radioGetSchedulerSliptime</td><td><b>ID:</b> 0x012C</td><td></td></tr>
 <tr><td colspan="3" style="border-top: solid black 1px;"><b>Description:</b> Get the current multiprotocol sliptime</td></tr>
 
@@ -6131,20 +6119,6 @@ source route at <i>index</i>.</td></tr>
 
     <table class="outline"><col width="300"><col width="200"><col width="200">
     <tr class="heading">
-    <td><b>Name:</b> writePaVersion</td><td><b>ID:</b> 0x0165</td><td></td></tr>
-<tr><td colspan="3" style="border-top: solid black 1px;"><b>Description:</b> Write PA dataset version.</td></tr>
-
-    <tr><td colspan="3" style="border-top: solid black 1px;"><b>Command Parameters:</b></td></tr>
-
-    <tr><td>sl_zigbee_dhc_pa_version_t pa_version</td><td colspan="2">Write PA dataset version.</td></tr>
-
-    <tr><td colspan="3" style="border-top: solid black 1px;"><b>Response Parameters:</b></td></tr>
-
-    <tr><td>sl_status_t status</td><td colspan="2">An sl_status_t value indicating success or the reason for failure.</td></tr>
-</table><br>
-
-    <table class="outline"><col width="300"><col width="200"><col width="200">
-    <tr class="heading">
     <td><b>Name:</b> readPaSignature</td><td><b>ID:</b> 0x0166</td><td></td></tr>
 <tr><td colspan="3" style="border-top: solid black 1px;"><b>Description:</b> Read PA signature (metadata.signature mirror).</td></tr>
 
@@ -6398,7 +6372,6 @@ source route at <i>index</i>.</td></tr>
 <tr><td>proxyNextBroadcastFromLong</td><td>0x0066</td></tr>
 <tr><td>radioGetSchedulerPriorities</td><td>0x012A</td></tr>
 <tr><td>radioGetSchedulerSliptime</td><td>0x012C</td></tr>
-<tr><td>radioSetSchedulerPriorities</td><td>0x012B</td></tr>
 <tr><td>radioSetSchedulerSliptime</td><td>0x012D</td></tr>
 <tr><td>rawTransmitCompleteHandler</td><td>0x0098</td></tr>
 <tr><td>readAndClearCounters</td><td>0x0065</td></tr>
@@ -6523,7 +6496,6 @@ source route at <i>index</i>.</td></tr>
 <tr><td>writePaMode</td><td>0x015E</td></tr>
 <tr><td>writePaSignature</td><td>0x0167</td></tr>
 <tr><td>writePaTable</td><td>0x0159</td></tr>
-<tr><td>writePaVersion</td><td>0x0165</td></tr>
 <tr><td>writePaVoltage</td><td>0x015C</td></tr>
 <tr><td>writeRssiOffset</td><td>0x015F</td></tr>
 <tr><td>zigbeeKeyEstablishmentHandler</td><td>0x009B</td></tr>
@@ -6848,7 +6820,7 @@ source route at <i>index</i>.</td></tr>
 <tr><td>0x0128</td><td bgcolor="white">setIncomingTcLinkKeyFrameCounter</td></tr>
 <tr><td>0x0129</td><td bgcolor="white">apsCryptMessage</td></tr>
 <tr><td>0x012A</td><td bgcolor="white">radioGetSchedulerPriorities</td></tr>
-<tr><td>0x012B</td><td bgcolor="white">radioSetSchedulerPriorities</td></tr>
+<tr><td>0x012B</td><td bgcolor="lightgray">-- unassigned --</td></tr>
 <tr><td>0x012C</td><td bgcolor="white">radioGetSchedulerSliptime</td></tr>
 <tr><td>0x012D</td><td bgcolor="white">radioSetSchedulerSliptime</td></tr>
 <tr><td>0x012E</td><td bgcolor="white">getEndpoint</td></tr>
@@ -6906,7 +6878,7 @@ source route at <i>index</i>.</td></tr>
 <tr><td>0x0162</td><td bgcolor="white">readDhcVersion</td></tr>
 <tr><td>0x0163</td><td bgcolor="white">writeDhcVersion</td></tr>
 <tr><td>0x0164</td><td bgcolor="white">readPaVersion</td></tr>
-<tr><td>0x0165</td><td bgcolor="white">writePaVersion</td></tr>
+<tr><td>0x0165</td><td bgcolor="lightgray">-- unassigned --</td></tr>
 <tr><td>0x0166</td><td bgcolor="white">readPaSignature</td></tr>
 <tr><td>0x0167</td><td bgcolor="white">writePaSignature</td></tr>
 <tr><td>0x0168</td><td bgcolor="white">readPaMetadata</td></tr>

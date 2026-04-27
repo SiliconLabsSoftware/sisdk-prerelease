@@ -43,7 +43,7 @@ Shorter subevent lengths allow more subevents per procedure.
   - "Custom" - Number of 1s in channel mask,
 - antenna_paths value is controlled by the "Antenna configuration", and limited by number of antennas presented on each board (capabilities). Maximum can be calculated using the product of used Initiator and Reflector antennae. The default maximum value for antenna_paths is 4.
 
-These settings were selected by assuming that the controller creates only one subevent per procedure, and the measuring mode is PBR. In RTT mode there are far less data is created.
+These settings were selected by assuming that the controller creates the maximum number of subevents (32), and the measuring mode is PBR. In RTT mode, far less data is created.
 
 If you use submode, you should add the following to the sum:
 
@@ -53,7 +53,7 @@ where
 - mode1_size is 6
 - main_mode_steps is the value of min_main_mode_steps ranging from to 2. This can be changed in cs_initiator_client.h.
 
-The default is calculated by using the constants and settings above using the worst case scenario, which gives 1866 bytes.
+The default is calculated by using the constants and settings above using the worst case scenario, which gives 2672 bytes.
 RAM consumption can be reduced by changing the affected settings and reducing "Procedure maximum length" accordingly.
 
 ## Device Firmware Update

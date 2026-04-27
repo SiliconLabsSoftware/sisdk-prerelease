@@ -30,13 +30,14 @@ component:
   - id: bluetooth_feature_gatt
   - id: bluetooth_feature_gatt_server
   - id: bluetooth_feature_extended_scanner
-  - id: bluetooth_feature_sm
+  - id: bluetooth_peer_security
   - id: bluetooth_feature_system
   - id: app_assert
   - id: app_log
   - id: refactor_cs_reflector
   - id: refactor_cs_antenna
   - id: mpu
+  - id: app_button_press
   - id: simple_button
     instance:
       - btn0
@@ -46,16 +47,15 @@ component:
   - id: device_init
   - id: bluetooth_peer_manager_common
   - id: bluetooth_peer_manager_peripheral
+  - id: refactor_cs_ras_server
 
 source:
   - path: app.c
-  - path: security.c
 
 include:
   - path: .
     file_list:
       - path: app.h
-      - path: security.h
 
 config_file:
   - override:

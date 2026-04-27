@@ -21,7 +21,7 @@
 
 #include "btl_errorcode.h"
 #include "btl_reset_info.h"
-#include "application_properties.h"
+#include "api/application_properties.h"
 
 #include "em_emu.h"
 #include "em_cmu.h"
@@ -496,6 +496,21 @@ typedef struct Bootloader_inOutVec {
                                            - (BTL_FIRST_STAGE_BASE \
                                               + BTL_FIRST_STAGE_SIZE))
 #elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_260)
+// No bootloader area: Place the bootloader in main flash
+#define BTL_FIRST_STAGE_BASE              FLASH_BASE
+#if defined(BOOTLOADER_APPLOADER)
+#if defined(BOOTLOADER_SECURE)
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00014000UL)
+#else
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00012000UL)
+#endif // BOOTLOADER_SECURE
+#else
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00006000UL)
+#endif // BOOTLOADER_APPLOADER
+#define BTL_MAIN_STAGE_MAX_SIZE           (BTL_APPLICATION_BASE    \
+                                           - (BTL_FIRST_STAGE_BASE \
+                                              + BTL_FIRST_STAGE_SIZE))
+#elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_250)
 // No bootloader area: Place the bootloader in main flash
 #define BTL_FIRST_STAGE_BASE              FLASH_BASE
 #if defined(BOOTLOADER_APPLOADER)

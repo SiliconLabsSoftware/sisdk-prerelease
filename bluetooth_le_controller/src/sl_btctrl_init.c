@@ -656,6 +656,10 @@ void sl_btctrl_deinit_functional(void)
   sl_btctrl_deinit_connection_analyzer_llcp_report();
 #endif
 
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT) || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT)
+  sl_btctrl_deinit_cs();
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT or SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT
+
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_RESOLVING_LIST_PRESENT)
   sl_btctrl_allocate_resolving_list_memory(0);
 #endif

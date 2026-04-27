@@ -262,7 +262,7 @@ void cli_data(sl_cli_command_arg_t *arguments)
                             hex_value,
                             tx_options);
 
-  app_log_info("TX: Data to 0x%04" PRIX16 ":{0x", destination);
+  app_log_info("TX: Data to 0x%04" PRIX16 ":{", destination);
   for (uint8_t i = 0; i < hex_length; i++) {
     app_log_info("%02" PRIX8 " ", hex_value[i]);
   }

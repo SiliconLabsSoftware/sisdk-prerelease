@@ -200,6 +200,8 @@ static void app_start(void)
   // Set Device Type
   EFM_ASSERT(sl_wisun_set_device_type(SL_WISUN_BORDER_ROUTER) == SL_STATUS_OK);
 
+  EFM_ASSERT(sl_wisun_reset_parameters() == SL_STATUS_OK);
+
   // Set TX Power
 #if defined(WISUN_CONFIG_TX_POWER)
   EFM_ASSERT(sl_wisun_set_tx_power_ddbm(WISUN_CONFIG_TX_POWER) == SL_STATUS_OK);

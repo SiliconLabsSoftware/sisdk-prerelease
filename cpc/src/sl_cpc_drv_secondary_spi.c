@@ -37,6 +37,7 @@
 #endif
 #include "sl_hal_gpio.h"
 #include "sl_hal_ldma.h"
+#include "sl_hal_prs.h"
 #include "sl_status.h"
 #include "sl_atomic.h"
 #include "sl_slist.h"
@@ -64,6 +65,14 @@
 
 #include "sl_dma_manager.h"
 
+#if defined(SL_CATALOG_CPC_DRIVER_HW_CRC_PRESENT)
+#include "sl_hal_gpcrc.h"
+#endif
+
+#if defined(SL_CPC_DRV_SPI_IS_HSPI)
+#include "sl_hal_hspi.h"
+#endif
+
 /*******************************************************************************
  *********************************   DEFINES   *********************************
  ******************************************************************************/
@@ -82,22 +91,6 @@
 
 #if (SL_CPC_DRV_SPI_RX_BUFFER_MAX_COUNT < 3)
 #error  Invalid configuration SL_CPC_DRV_SPI_RX_BUFFER_MAX_COUNT must be at least 3
-#endif
-
-// Platform includes (Series 2: emlib, Series 3: HAL)
-#if defined(_SILICON_LABS_32B_SERIES_2)
-#include "em_prs.h"
-#if defined(SL_CATALOG_CPC_DRIVER_HW_CRC_PRESENT)
-#include "em_gpcrc.h"
-#endif
-#elif defined(_SILICON_LABS_32B_SERIES_3)
-#include "sl_hal_prs.h"
-#if defined(SL_CATALOG_CPC_DRIVER_HW_CRC_PRESENT)
-#include "sl_hal_gpcrc.h"
-#endif
-#if defined(SL_CPC_DRV_SPI_IS_HSPI)
-#include "sl_hal_hspi.h"
-#endif
 #endif
 
 // LDMA (Series 2: LDMA, Series 3: LDMA(0))
@@ -142,29 +135,18 @@
 #define EUSART_TX_IRQn(periph_no)           SL_CONCAT_PASTER_3(EUSART, periph_no, _TX_IRQn)
 #endif
 
-// PRS abstraction (Series 2: emlib, Series 3: HAL)
-#if defined(_SILICON_LABS_32B_SERIES_2)
-typedef PRS_Signal_t prs_signal_t;
-#define PRS_ASYNC_CONNECT_PRODUCER(ch, sig) PRS_ConnectSignal(ch, prsTypeAsync, sig)
-#define PRS_SIGNAL_NONE                     prsSignalNone
-#if defined(SL_CPC_DRV_SPI_IS_EUSART)
-#define PRS_SIGNAL_EXTI(cs_pin_no)          SL_CONCAT_PASTER_2(prsSignalGPIO_PIN, cs_pin_no)
-#define PRS_SIGNAL_SPI(periph_no, signal)   SL_CONCAT_PASTER_4(prsSignalEUSART, periph_no, _, signal)
-#elif defined(SL_CPC_DRV_SPI_IS_USART)
-#define PRS_SIGNAL_SPI(periph, signal)     SL_CONCAT_PASTER_4(prsSignalUSART, periph, _, signal)
-#endif
-#elif defined(_SILICON_LABS_32B_SERIES_3)
 typedef sl_hal_prs_sync_producer_signal_t prs_signal_t;
 #define PRS_ASYNC_CONNECT_PRODUCER          sl_hal_prs_async_connect_channel_producer
 #define PRS_SIGNAL_NONE                     SL_HAL_PRS_ASYNC_NONE
 #define PRS_SIGNAL_EXTI(cs_pin_no)          SL_CONCAT_PASTER_2(SL_HAL_PRS_ASYNC_GPIO_PIN, cs_pin_no)
 #if defined(SL_CPC_DRV_SPI_IS_HSPI)
 #define PRS_SIGNAL_SPI(periph_no, signal)   SL_CONCAT_PASTER_4(SL_HAL_PRS_ASYNC_HSPI, periph_no, L_, signal)
-#else
+#elif defined(SL_CPC_DRV_SPI_IS_EUSART)
 #define PRS_SIGNAL_SPI(periph_no, signal)   SL_CONCAT_PASTER_4(SL_HAL_PRS_ASYNC_EUSART, periph_no, L_, signal)
+#elif defined(SL_CPC_DRV_SPI_IS_USART)
+#define PRS_SIGNAL_SPI(periph_no, signal)   SL_CONCAT_PASTER_4(SL_HAL_PRS_ASYNC_USART, periph_no, _, signal)
 #endif
 #define PRS_TYPE_ASYNC                      SL_HAL_PRS_TYPE_ASYNC
-#endif
 #define LDMA_CLEAR_CH_IRQ(ch)               sl_hal_ldma_clear_interrupts(LDMA_PERIPH, (1 << ch))
 
 // GPIO (Series 2 & 3 — uses sl_hal_gpio per platform HAL)

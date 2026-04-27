@@ -574,6 +574,14 @@ extern sl_rail_tx_options_t concPhyIdOptions;
 // Structure that holds (default) rxOptions
 extern sl_rail_rx_options_t rxOptions;
 
+// When to apply txDelay
+typedef enum {
+  TX_WAIT_FOR_ACK_DISABLED = -1,
+  TX_WAIT_FOR_ACK_ENABLED_OFF = 0,
+  TX_WAIT_FOR_ACK_ENABLED_ON = 1
+} txWaitForAck_t;
+extern volatile txWaitForAck_t txWaitForAck;
+
 // Data Management
 typedef struct Queue {
   QueueEntryPtr_t *head;
@@ -727,6 +735,7 @@ void railtest_RxChannelHoppingComplete(sl_rail_handle_t railHandle);
 void railtest_IEEE802154_DataRequestCommand(sl_rail_handle_t railHandle);
 void railtest_ZWAVE_BeamFrame(sl_rail_handle_t railHandle);
 void railtest_ZWAVE_LrAckData(sl_rail_handle_t railHandle);
+bool railtest_CheckTxWaitForAck(sl_rail_handle_t railHandle);
 
 void printAddresses(sl_cli_command_arg_t *args);
 void getAddressFilter(sl_cli_command_arg_t *args);

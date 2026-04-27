@@ -578,6 +578,8 @@ template_contribution:
     argument:
     - type: uint32
       help: delayMilliseconds
+    - type: uint8opt
+      help: '[0=after wait-for-ACK] 1=on-transmit-complete'
 
 - name: cli_command
   value:

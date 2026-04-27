@@ -251,17 +251,8 @@ Update DHC protocol version (volatile, not persisted).
 
 **Example:**
 ```bash
-plugin dhc set-dhc-version 5
+plugin dhc set-dhc-version 1
 # Output: set-dhc-version -> 0x00000000
-```
-
-#### `plugin dhc set-pa-version <version>`
-Update PA dataset version.
-
-**Example:**
-```bash
-plugin dhc set-pa-version 1
-# Output: set-pa-version -> 0x00000000
 ```
 
 #### `plugin dhc recompute signature`
@@ -461,6 +452,7 @@ Note: The status byte in raw responses is the low byte of the full status code. 
 | Signature remains unchanged | Run `dhc recompute signature` or write a value explicitly with `dhc set signature <hex32>`. |
 | Raw command status byte is non-zero | Ensure the payload length matches the selected setting (1 byte for PA_MODE, 4 bytes for CTUNE, 2 bytes for VOLTAGE, etc.). Check the response interpretation for details. |
 | PA mode reads as 0 | Verify with `dhc read-scalars` to see the actual value. If it's 0, it may be uninitialized. Use `dhc set-scalar pa_mode <value>` to set it. |
+| CTUNE not persistent after gateway restart or NCP reset | DHC persists ctune to NVM3 when set. Ensure the NCP image includes the Clock Manager Oscillator Calibration Override** component (`clock_manager_oscillator_calibration_override`) so the stored value is applied at platform init. Add the component to the NCP project (.slcp) and rebuild if ctune still reverts. |
 | Response shows hex but no interpretation | Ensure you're using the latest build with enhanced raw command output. The interpretation appears on the line following the hex response. |
 
 Enable verbose host logging or EZSP tracing if calibration writes appear to succeed but values revert on reboot. Inspect NVM3 health on the NCP side when repeated writes fail.

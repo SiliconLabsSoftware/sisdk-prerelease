@@ -68,8 +68,7 @@
 #define SL_INTERRUPT_MANAGER_ENABLE_HOOKS (1)
 #endif
 
-// Interrupt vector table need to be in a different section of RAM for Cortex-M55.
-#if defined(__CM55_REV)
+#if defined(_SILICON_LABS_32B_SERIES_3)
 #if defined(__GNUC__)
 #define VECTOR_TABLE_SECTION  __attribute__((section(".vector_table_ram")))
 #else

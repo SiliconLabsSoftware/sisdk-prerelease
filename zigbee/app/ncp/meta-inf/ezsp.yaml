@@ -14346,27 +14346,6 @@
         },
       ],
     },
-    ## WRITE_PA_VERSION
-    {
-      value: "0x0165",
-      needGeneratedHandler: "yes",
-      commandName: "writePaVersion",
-      description: "Write PA dataset version.",
-      commandArguments: [
-        { 
-          type: "sl_zigbee_dhc_pa_version_t", 
-          name: "pa_version",
-          description: "Write PA dataset version.",
-        },
-      ],
-      responseArguments: [
-        { 
-          type: "sl_status_t", 
-          name: "status",
-          description: "An sl_status_t value indicating success or the reason for failure.",
-        },
-      ],
-    },
     ## READ_PA_SIGNATURE
     {
       value: "0x0166",

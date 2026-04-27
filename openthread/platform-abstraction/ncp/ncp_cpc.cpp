@@ -289,7 +289,8 @@ void NcpCPC::HandleEndpointError(Tasklet &aTasklet)
 
 void NcpCPC::HandleEndpointError(void)
 {
-    OT_ASSERT(sl_cpc_close_endpoint(&mUserEp) == SL_STATUS_OK);
+    sl_status_t status = sl_cpc_close_endpoint(&mUserEp);
+    OT_ASSERT(status == SL_STATUS_OK);
     mIsReady = false;
 }
 

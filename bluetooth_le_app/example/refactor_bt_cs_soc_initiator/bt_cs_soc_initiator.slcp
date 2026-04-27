@@ -40,6 +40,7 @@ component:
   - id: bluetooth_controller_anchor_selection
   - id: bluetooth_feature_gap
   - id: bluetooth_feature_connection_role_central
+  - id: bluetooth_peer_security
   - id: bluetooth_feature_sm
   - id: bluetooth_feature_system
   - id: bluetooth_feature_extended_scanner
@@ -60,6 +61,7 @@ component:
     condition:
       - hardware_board_supports_wstk_lcd
   - id: mpu
+  - id: app_button_press
   - id: simple_button
     instance:
       - btn0
@@ -74,15 +76,12 @@ source:
   - path: app.c
   - path: rtl_log.c
   - path: trace.c
-  - path: security.c
-
 include:
   - path: .
     file_list:
       - path: app.h
       - path: rtl_log.h
       - path: trace.h
-      - path: security.h
 
 readme:
   - path: readme.md

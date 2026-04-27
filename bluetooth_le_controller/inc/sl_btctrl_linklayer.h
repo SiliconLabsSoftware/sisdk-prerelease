@@ -219,6 +219,11 @@ sl_status_t sl_btctrl_init_cte();
 sl_status_t sl_btctrl_init_cs(const struct sl_btctrl_cs_config *config);
 
 /**
+ * Deinitialize Channel Sounding
+ */
+sl_status_t sl_btctrl_deinit_cs(void);
+
+/**
  * Raise link layer events to be processed by sl_btctrl_process_events().
  * @param[in] events Event bits to be raised.
  */

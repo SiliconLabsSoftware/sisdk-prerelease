@@ -216,9 +216,19 @@
   {%- if tz_non_secure_execution_source is defined %}
     {#- Get the Secure alias by adding 0x10000000 to the start address. #}
     {%- set flash_s_start = app_flash_start + 0x10000000 %}
-   FLASH_S    (rx)  : ORIGIN = 0x{{ '%0x' % flash_s_start }}, LENGTH = 0x{{ '%0x' % device_flash_smpu_region_size | first }}
-    {%- set app_flash_size = app_flash_size - (device_flash_smpu_region_size | first) %}
-    {%- set app_flash_start = app_flash_start + (device_flash_smpu_region_size | first) %}
+   FLASH_S    (rx)  : ORIGIN = 0x{{ '%0x' % flash_s_start }}, LENGTH = 0x{{ '%0x' % device_flash_mspu_region_size | first }}
+    {%- set app_flash_size = app_flash_size - (device_flash_mspu_region_size | first) %}
+    {%- set app_flash_start = app_flash_start + (device_flash_mspu_region_size | first) %}
+    {%- if tz_non_secure_execution_ram is defined %}
+      {#- Secure RAM alias: same 0x10000000 offset as FLASH_S #}
+      {%- set ram_s_start = app_ram_start + 0x10000000 %}
+   RAM_S    (rwx) : ORIGIN = 0x{{ '%0x' % ram_s_start }}, LENGTH = 0x{{ '%0x' % device_dmem_mspu_region_size | first }}
+      {%- set app_ram_size = app_ram_size - (device_dmem_mspu_region_size | first) %}
+      {%- set app_ram_start = app_ram_start + (device_dmem_mspu_region_size | first) %}
+      {%- if sram_alias_addr is defined %}
+        {%- set app_ram_alias_start = app_ram_alias_start + (device_dmem_mspu_region_size | first) %}
+      {%- endif %}
+    {%- endif %}
   {%- endif %}
    FLASH      (rx)  : ORIGIN = 0x{{ '%0x' % app_flash_start }}, LENGTH = 0x{{ '%0x' % app_flash_size }}
    RAM        (rwx) : ORIGIN = 0x{{ '%0x' % app_ram_start }}, LENGTH = 0x{{ '%0x' % app_ram_size }}
@@ -238,7 +248,10 @@
 __flash_size__ = 0x{{ '%0x' % flash_size }};
 __flash_page_size__ = 0x{{ '%0x' % flash_page_size }};
 {%- if tz_non_secure_execution is defined %}
-__mspu_region_size__ = 0x{{ '%0x' % device_flash_smpu_region_size | first }};
+__mspu_region_size__ = 0x{{ '%0x' % device_flash_mspu_region_size | first }};
+{%- if device_dmem_mspu_region_size is defined %}
+__dmem_mspu_region_size__ = 0x{{ '%0x' % device_dmem_mspu_region_size | first }};
+{%- endif %}
 {%- endif %}
 
 /*******************************************************************************
@@ -249,7 +262,9 @@ __mspu_region_size__ = 0x{{ '%0x' % device_flash_smpu_region_size | first }};
  * Typical Silicon Labs program layout:
  * 
  * ----- START OF APPLICATION FLASH -----
- * R X - TrustZone Secure-to-Nonsecure trampoline app (if present)
+{%- if tz_non_secure_execution is defined %}
+ * R X - TrustZone Secure-to-Nonsecure trampoline app.
+{%- endif %}
  * R   - Vector table
  * R X - RAM functions (copied to RAM at startup)
  * R   - Read-only data
@@ -265,6 +280,9 @@ __mspu_region_size__ = 0x{{ '%0x' % device_flash_smpu_region_size | first }};
  * ----- END OF APPLICATION FLASH -----
  * 
  * ----- START OF APPLICATION RAM -----
+{%- if tz_non_secure_execution_ram is defined %}
+ * RW  - TrustZone Secure-to-Nonsecure RAM functions.
+{%- endif %}
  * RW  - Bootloader reset reason (if present)
  * RW  - stack
  * RW  - stack sealing
@@ -288,15 +306,20 @@ __mspu_region_size__ = 0x{{ '%0x' % device_flash_smpu_region_size | first }};
 
 PHDRS 
 {
+{%- if tz_non_secure_execution is defined %}
   text_s PT_LOAD FLAGS(5);        /* Executable S code (if present) */
+{%- endif %}
   vectors PT_LOAD FLAGS(4);       /* Flash content before RAM functions is R */
   readonly PT_LOAD FLAGS(4);      /* Readonly content after RAM functions */
   text PT_LOAD FLAGS(5);          /* Executable flash content after readonly */
   tables PT_LOAD FLAGS(4);        /* Tables supporting startup copying are R */
   empty PT_LOAD FLAGS(4);         /* Empty area is R */
-  
+
   ram_pre_code PT_LOAD FLAGS(6);  /* All RAM content before RAMfuncs is RW */
   ram_code PT_LOAD FLAGS(5);      /* RAMfuncs need to be RX */
+{%- if tz_non_secure_execution_ram is defined %}
+  ram_code_s PT_LOAD FLAGS(5);    /* RAMfuncs need to be RX */
+{%- endif %}
   ram_data PT_LOAD FLAGS(6);      /* Relocatable RAM data needs own segment */
   ram_post_data PT_LOAD FLAGS(6); /* All RAM content after data is RW */
 {%- if bootloader_enable or bootloader_interface_enable %}
@@ -313,21 +336,44 @@ SECTIONS
 {%- if tz_non_secure_execution is defined %}
   .secure_app :
   {
-  {%- if (app_flash_start % (device_flash_smpu_region_size | first)) != 0 %}
+  {%- if (app_flash_start % (device_flash_mspu_region_size | first)) != 0 %}
     KEEP(*(.secure_vectors_copy))
     . = ALIGN(__mspu_region_size__);
   {%- endif %}
     __Secure_Vectors = .;
     KEEP(*(.secure_vectors))
+  {%- if tz_non_secure_execution_ram is not defined %}
     KEEP(*(.secure_config_data))
+  {%- endif %}
     __Secure_Reset_Handler = .;
     KEEP(*(.secure_reset_handler))
     KEEP(*(.secure_fault_handler))
+  {%- if tz_non_secure_execution_ram is not defined %}
     . = ALIGN(__mspu_region_size__);
+  {%- endif %}
   {%- if tz_non_secure_execution_source is defined %}
   } > FLASH_S :text_s
   {%- else %}
   } > FLASH :text_s
+  {%- endif %}
+
+  {%- if tz_non_secure_execution_ram is defined %}
+  .secure_ram :
+  {
+    __Secure_Ram_Vectors = .;
+    KEEP(*(.secure_ram_vectors))
+    KEEP(*(.secure_config_data))
+    KEEP(*(.secure_bss))
+    __Secure_Reset_Handler_Ram = .;
+    KEEP(*(.secure_reset_handler_ram))
+  {%- if tz_non_secure_execution_source is defined %}
+  } > RAM_S AT > FLASH_S :ram_code_s
+  {%- else %}
+  } > RAM AT > FLASH :ram_code_s
+  {%- endif %}
+
+  __lma_secure_ram_start__ = LOADADDR(.secure_ram);
+  __lma_secure_ram_end__ = LOADADDR(.secure_ram) + SIZEOF(.secure_ram);
   {%- endif %}
 {%- endif %}
 
@@ -588,6 +634,15 @@ SECTIONS
     *(.noinit*);
     __noinit_end__ = .;
   } > RAM :ram_pre_code
+
+{%- if "interrupt_manager" in component_catalog %}
+  vector_table_ram (NOLOAD):
+  {
+    linker_vectors_ram_begin = .;
+    KEEP(*(.vector_table_ram))
+    linker_vectors_ram_end = .;
+  } > RAM :ram_pre_code
+{%- endif %}
 
   .bss :
   {

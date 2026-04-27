@@ -20,7 +20,7 @@ include:
 source:
 - path: ncp_sec_host.c
 library:
-- system: openssl
+- system: ssl
 - system: ws2_32
   condition:
   - win32

@@ -39,6 +39,7 @@
 
 /// API version used to check compatibility (do not edit when using this header)
 #define SL_WISUN_PARAMS_API_VERSION  9
+#define SL_WISUN_FFN_ADVANCED_PARAMS_API_VERSION 1
 
 /**************************************************************************//**
  * @addtogroup SL_WISUN_TYPES
@@ -294,7 +295,7 @@ typedef struct sl_wisun_params_lfn_parent_s sl_wisun_params_lfn_parent_t;
 /// Misc parameter set
 SL_PACK_START(1)
 struct sl_wisun_params_misc_s {
-  /// Temporary neighbor link minimum timeout
+  /// Deprecated
   uint16_t temp_link_min_timeout_s;
   /// Border router communication timeout PAN_TIMEOUT
   uint8_t pan_timeout_m;
@@ -355,6 +356,69 @@ typedef struct {
   /// MAC parameter set
   sl_wisun_mac_params_t mac;
 } SL_ATTRIBUTE_PACKED sl_wisun_connection_params_t;
+SL_PACK_END()
+
+/// Advanced EAPOL parameters for
+/// @ref sl_wisun_set_ffn_advanced_parameters.
+SL_PACK_START(1)
+typedef struct {
+  /// RFC8415 TX algorithm for EAPOL Key-request transmissions.
+  sl_wisun_rfc8415_txalg_params_t key_request_txalg;
+  /// GTK_MAX_MISMATCH (minutes): maximum time between detecting
+  /// a GTKHASH mismatch and the SUP initiating Msg1.
+  uint16_t gtk_max_mismatch_m;
+  /// LGTK_MAX_MISMATCH (minutes): maximum time between detecting
+  /// a LGTKHASH mismatch and the SUP initiating Msg1.
+  uint16_t lgtk_max_mismatch_m;
+} SL_ATTRIBUTE_PACKED sl_wisun_ffn_advanced_eapol_params_t;
+SL_PACK_END()
+
+/// Advanced RPL parameters for @ref sl_wisun_set_ffn_advanced_parameters.
+SL_PACK_START(1)
+typedef struct {
+  /// RFC8415 TX algorithm parameters for DAO transmission
+  /// rand specification range [0.0, 1.0]
+  /// irt_s specification range [1, 60]
+  /// mrt_s specification range [0, 600]
+  /// mrd_s specification range [0, 3600]
+  /// mrc specification range [0, 15]
+  sl_wisun_rfc8415_txalg_params_t dao_txalg;
+  /// Maximum delay before sending the first RPL DIS (unicast/multicast) packet
+  /// following transition to Join State 4 - Preferred Parent Selection (seconds)
+  uint16_t first_dis_max_delay_s;
+  /// Maximum delay before sending an ETX probe (seconds).
+  uint16_t etx_probe_max_delay_s;
+} SL_ATTRIBUTE_PACKED sl_wisun_ffn_advanced_rpl_params_t;
+SL_PACK_END()
+
+/// FFN advanced connection parameters for @ref sl_wisun_set_ffn_advanced_parameters
+SL_PACK_START(1)
+typedef struct {
+  /**
+   * Version of sl_wisun_ffn_advanced_parameters_t.
+   * Set to `SL_WISUN_FFN_ADVANCED_PARAMS_API_VERSION`.
+   *
+   * Used to identify the layout of the structure when applying advanced
+   * connection parameters.
+   * Older supported versions may be accepted and updated internally to the
+   * current format, while unsupported versions are rejected.
+   */
+  uint32_t version;
+  /// PAN advertisement trickle timer parameters
+  sl_wisun_trickle_params_t trickle_pa;
+  /// PAN advertisement Solicit trickle timer parameters
+  sl_wisun_trickle_params_t trickle_pas;
+  /// PAN configuration trickle timer parameters
+  sl_wisun_trickle_params_t trickle_pc;
+  /// PAN configuration Solicit trickle timer parameters
+  sl_wisun_trickle_params_t trickle_pcs;
+  /// Advanced EAPOL parameters
+  sl_wisun_ffn_advanced_eapol_params_t eapol;
+  /// Advanced RPL parameters
+  sl_wisun_ffn_advanced_rpl_params_t rpl;
+  /// DHCP parameter set
+  sl_wisun_params_dhcp_t dhcp;
+} SL_ATTRIBUTE_PACKED sl_wisun_ffn_advanced_parameters_t;
 SL_PACK_END()
 
 /**************************************************************************//**
@@ -465,7 +529,7 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_TEST = {
     .lfn_na_wait_duration_m = 0,
   },
   .misc = {
-    .temp_link_min_timeout_s = 260,
+    .temp_link_min_timeout_s = 0,
     .pan_timeout_m = 30,
   },
   .direct_connect_eapol = {
@@ -594,7 +658,7 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_CERTIF = {
     .lfn_na_wait_duration_m = 0,
   },
   .misc = {
-    .temp_link_min_timeout_s = 260,
+    .temp_link_min_timeout_s = 0,
     .pan_timeout_m = 30,
   },
   .direct_connect_eapol = {
@@ -723,7 +787,7 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_SMALL = {
     .lfn_na_wait_duration_m = 0,
   },
   .misc = {
-    .temp_link_min_timeout_s = 260,
+    .temp_link_min_timeout_s = 0,
     .pan_timeout_m = 30,
   },
   .direct_connect_eapol = {
@@ -852,7 +916,7 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_MEDIUM = {
     .lfn_na_wait_duration_m = 0,
   },
   .misc = {
-    .temp_link_min_timeout_s = 260,
+    .temp_link_min_timeout_s = 0,
     .pan_timeout_m = 60,
   },
   .direct_connect_eapol = {
@@ -981,7 +1045,7 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_LARGE = {
     .lfn_na_wait_duration_m = 0,
   },
   .misc = {
-    .temp_link_min_timeout_s = 520,
+    .temp_link_min_timeout_s = 0,
     .pan_timeout_m = 90,
   },
   .direct_connect_eapol = {

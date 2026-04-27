@@ -44,14 +44,14 @@
 
 {#- Use Secure aliases #}
 {% if trustzone_secure is defined %}
-{%-  set flash_addr = device_flash_addr_s | first %}
+{%-  set flash_addr = device_flash_addr_s | first | default(0, true) %}
 {%-  set sram_addr = device_ram_addr_s | first %}
 {%-  if device_ram_alias_addr_s is defined %}
 {%-    set sram_alias_addr = device_ram_alias_addr_s | first %}
 {%-  endif %}
 {%- else %}
 {#- Use Non-Secure aliases #}
-{%-  set flash_addr = device_flash_addr_ns | first %}
+{%-  set flash_addr = device_flash_addr_ns | first | default(0, true) %}
 {%-  set sram_addr = device_ram_addr_ns | first %}
 {%-  if device_ram_alias_addr_ns is defined %}
 {%-    set sram_alias_addr = device_ram_alias_addr_ns | first %}
@@ -512,7 +512,7 @@ SECTIONS
     __bss_end__ = .;
   } > RAM :ram_pre_code
 
-  .data :
+  .data : AT (__etext)
   {
     *(vtable)
     *(SORT_BY_ALIGNMENT(.data*))
@@ -555,8 +555,14 @@ SECTIONS
 
   } > RAM :ram_data
 
+  .datainit (NOLOAD): {
+     . = ALIGN(4);
+     __etext = .;
+      /* reserve space for .data init value */
+     . += SIZEOF(.data);
+  } > RAM :ram_post_data
+
   /* Values to support copying initialised values at startup */
-  __etext = LOADADDR(.data);
   __data_start__ = ADDR(.data);
   __data_end__ = ADDR(.data) + SIZEOF(.data);
 

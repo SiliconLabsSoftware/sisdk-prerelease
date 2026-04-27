@@ -257,6 +257,8 @@
 -Xlinker --wrap=otCryptoAesCcm
 -Xlinker --wrap=otCryptoHmacSha256
 -Xlinker --wrap=otDatasetIsCommissioned
+-Xlinker --wrap=otDatasetIsValid
+-Xlinker --wrap=otDatasetTlvsCompare
 -Xlinker --wrap=otDatasetGeneratePskc
 -Xlinker --wrap=otDatasetGetActive
 -Xlinker --wrap=otDatasetGetActiveTlvs
@@ -378,6 +380,7 @@
 -Xlinker --wrap=otIp6AddUnicastAddress
 -Xlinker --wrap=otIp6AddUnsecurePort
 -Xlinker --wrap=otIp6AddressFromString
+-Xlinker --wrap=otIp6Init
 -Xlinker --wrap=otIp6PrefixFromString
 -Xlinker --wrap=otIp6RegisterMulticastListeners
 -Xlinker --wrap=otIp6RemoveUnicastAddress
@@ -523,6 +526,8 @@
 -Xlinker --wrap=otLinkRawGetTransmitBuffer
 -Xlinker --wrap=otLinkRawGetRadioTime
 -Xlinker --wrap=otLoggingSetLevel
+-Xlinker --wrap=otSetLogLevel
+-Xlinker --wrap=otGetLogLevel
 -Xlinker --wrap=otLoggingGetLevel
 -Xlinker --wrap=otMdnsGetAutoEnableMode
 -Xlinker --wrap=otMdnsIsEnabled

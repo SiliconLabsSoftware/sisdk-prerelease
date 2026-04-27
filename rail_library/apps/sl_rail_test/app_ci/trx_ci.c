@@ -210,13 +210,24 @@ void txAfterRx(sl_cli_command_arg_t *args)
 
 void getTxDelay(sl_cli_command_arg_t *args)
 {
-  responsePrint(sl_cli_get_command_string(args, 0), "txDelay:%d", continuousTransferPeriod);
+  responsePrint(sl_cli_get_command_string(args, 0), "txDelay:%d,when:%s",
+                continuousTransferPeriod,
+                ((txWaitForAck == TX_WAIT_FOR_ACK_DISABLED)
+                 ? "onTxComplete" : "afterAckWhenWaitForAck"));
 }
 
 void setTxDelay(sl_cli_command_arg_t *args)
 {
   uint32_t delay = sl_cli_get_argument_uint32(args, 0);
-
+  if (sl_cli_get_argument_count(args) > 1) {
+    if (txWaitForAck == TX_WAIT_FOR_ACK_ENABLED_ON) {
+      // Ignore change to txWaitForAck while wait-for-ack transmit is active
+    } else {
+      bool skipWaitForAck = (bool) sl_cli_get_argument_uint32(args, 1);
+      txWaitForAck = (skipWaitForAck
+                      ? TX_WAIT_FOR_ACK_DISABLED : TX_WAIT_FOR_ACK_ENABLED_OFF);
+    }
+  }
   continuousTransferPeriod = delay;
   args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
   getTxDelay(args);

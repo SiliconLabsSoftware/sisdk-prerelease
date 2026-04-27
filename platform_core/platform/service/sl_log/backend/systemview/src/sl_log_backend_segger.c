@@ -17,7 +17,7 @@
 #include "sl_log_platform_specific.h"
 #include "sl_log_common_config.h"
 
-
+extern SEGGER_SYSVIEW_CORE_CONTEXT _ContextCaptiveCore;
 /**
  * @brief Global timestamp variable for SystemView events
  *
@@ -149,79 +149,75 @@ sl_status_t sl_log_systemview_write(sl_log_event_t *buffer, uint32_t read_index,
 sl_status_t sl_log_systemview_record_event(sl_log_event_t *event)
 {
   sl_status_t status = SL_STATUS_OK;
+  U8 *pPayload;
+  U8 *pPayloadStart;
+  unsigned int NumBytes;
+  int i;
+
+  enum { MAX_PREPEND_BYTES = 7 }; /* 2 bytes length + 5 bytes event_id */
+
   if (event == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
   }
-  if(event->arg_count > SL_LOG_CONFIG_ARG){
+
+  if (event->arg_count > SL_LOG_CONFIG_ARG) {
     return SL_STATUS_INVALID_PARAMETER;
   }
-  timestamp_global = event->timestamp;
-  switch (event->arg_count) {
-    case 0:
-      SEGGER_SYSVIEW_RecordVoid(event->event_id);
-      break;
-    case 1:
-      SEGGER_SYSVIEW_RecordU32(event->event_id, event->args[0]);
-      break;
-    case 2:
-      SEGGER_SYSVIEW_RecordU32x2(event->event_id, event->args[0], event->args[1]);
-      break;
-    case 3:
-      SEGGER_SYSVIEW_RecordU32x3(event->event_id, event->args[0], event->args[1], event->args[2]);
-      break;
-#if (SL_LOG_CONFIG_ARG >= 4)
-    case 4:
-      SEGGER_SYSVIEW_RecordU32x4(event->event_id, event->args[0], event->args[1],
-                                  event->args[2], event->args[3]);
-      break;
-#endif
-#if (SL_LOG_CONFIG_ARG >= 5)
-    case 5:
-      SEGGER_SYSVIEW_RecordU32x5(event->event_id, event->args[0], event->args[1],
-                                  event->args[2], event->args[3], event->args[4]);
-      break;
-#endif
-#if (SL_LOG_CONFIG_ARG >= 6)
-    case 6:
-      SEGGER_SYSVIEW_RecordU32x6(event->event_id, event->args[0], event->args[1],
-                                  event->args[2], event->args[3], event->args[4],
-                                  event->args[5]);
-      break;
-#endif
-#if (SL_LOG_CONFIG_ARG >= 7)
-    case 7:
-      SEGGER_SYSVIEW_RecordU32x7(event->event_id, event->args[0], event->args[1],
-                                  event->args[2], event->args[3], event->args[4],
-                                  event->args[5], event->args[6]);
-      break;
-#endif
-#if (SL_LOG_CONFIG_ARG >= 8)
-    case 8:
-      SEGGER_SYSVIEW_RecordU32x8(event->event_id, event->args[0], event->args[1],
-                                  event->args[2], event->args[3], event->args[4],
-                                  event->args[5], event->args[6], event->args[7]);
-      break;
-#endif
-#if (SL_LOG_CONFIG_ARG >= 9)
-    case 9:
-      SEGGER_SYSVIEW_RecordU32x9(event->event_id, event->args[0], event->args[1],
-                                  event->args[2], event->args[3], event->args[4],
-                                  event->args[5], event->args[6], event->args[7],
-                                  event->args[8]);
-      break;
-#endif
-#if (SL_LOG_CONFIG_ARG >= 10)
-    case 10:
-      SEGGER_SYSVIEW_RecordU32x10(event->event_id, event->args[0], event->args[1],
-                                   event->args[2], event->args[3], event->args[4],
-                                   event->args[5], event->args[6], event->args[7],
-                                   event->args[8], event->args[9]);
-      break;
-#endif
-    default:
-      status = SL_STATUS_INVALID_PARAMETER;
-      break;
+
+  U8 aPacket[MAX_PREPEND_BYTES
+             + SEGGER_SYSVIEW_INFO_SIZE
+             + ((3 + event->arg_count) * SEGGER_SYSVIEW_QUANTA_U32)];
+
+  pPayloadStart = aPacket + MAX_PREPEND_BYTES;
+  pPayload = pPayloadStart;
+
+  for (i = 0; i < event->arg_count; i++) {
+    pPayload = SEGGER_SYSVIEW_EncodeU32(pPayload, event->args[i]);
   }
+
+  NumBytes = (unsigned int)(pPayload - pPayloadStart);
+
+  if (NumBytes > 127) {
+    *--pPayloadStart = (U8)(NumBytes >> 7);
+    *--pPayloadStart = (U8)(NumBytes | 0x80);
+  } else {
+    *--pPayloadStart = (U8)NumBytes;
+  }
+
+  if (event->event_id < 127) {
+    *--pPayloadStart = (U8)event->event_id;
+  } else if (event->event_id < (1u << 14)) {
+    *--pPayloadStart = (U8)(event->event_id >> 7);
+    *--pPayloadStart = (U8)(event->event_id | 0x80);
+  } else if (event->event_id < (1ul << 21)) {
+    *--pPayloadStart = (U8)(event->event_id >> 14);
+    *--pPayloadStart = (U8)((event->event_id >> 7) | 0x80);
+    *--pPayloadStart = (U8)(event->event_id | 0x80);
+  } else if (event->event_id < (1ul << 28)) {
+    *--pPayloadStart = (U8)(event->event_id >> 21);
+    *--pPayloadStart = (U8)((event->event_id >> 14) | 0x80);
+    *--pPayloadStart = (U8)((event->event_id >> 7) | 0x80);
+    *--pPayloadStart = (U8)(event->event_id | 0x80);
+  } else {
+    *--pPayloadStart = (U8)(event->event_id >> 28);
+    *--pPayloadStart = (U8)((event->event_id >> 21) | 0x80);
+    *--pPayloadStart = (U8)((event->event_id >> 14) | 0x80);
+    *--pPayloadStart = (U8)((event->event_id >> 7) | 0x80);
+    *--pPayloadStart = (U8)(event->event_id | 0x80);
+  }
+
+  if (event->core_id == 1) {
+    SEGGER_SYSVIEW_SendPacket_Ex(&_ContextCaptiveCore,
+                                 event->timestamp,
+                                 pPayloadStart,
+                                 pPayload);
+  } else {
+    SEGGER_SYSVIEW_SendPacket_Ex(SEGGER_SYSVIEW_GetMainContext(),
+                                 event->timestamp,
+                                 pPayloadStart,
+                                 pPayload);
+  }
+
   return status;
 }
 

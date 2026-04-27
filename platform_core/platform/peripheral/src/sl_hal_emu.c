@@ -68,7 +68,8 @@
 #define RAM0_BLOCKS           32U
 #define RAM0_BLOCK_SIZE   0x4000U // 16 kB blocks
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
 #define RAM0_BLOCKS           16U
 #define RAM0_BLOCK_SIZE   0x4000U // 16 kB blocks
 #endif
@@ -191,6 +192,7 @@ void sl_hal_emu_ram_power_down(uint32_t start,
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)  \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8) \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)
     // These platforms have equally-sized RAM blocks and block 0 can be powered down but should not.
     // This condition happens when the block 0 disable bit flag is available in the retention control register.
@@ -259,6 +261,21 @@ sl_status_t sl_hal_emu_set_dcdc_mode(sl_hal_emu_dcdc_mode_t dcdc_mode)
     current_dcdc_mode = (DCDC->CTRL & _DCDC_CTRL_MODE_MASK) >> _DCDC_CTRL_MODE_SHIFT;
 
     if (current_dcdc_mode != SL_HAL_EMU_DCDC_MODE_BYPASS) {
+#if defined(DCDC_DOCTRL_REGULATIONTYPE_BYPDVDDDEC)
+    bool is_ledvdd_enabled = ((DCDC->STATUS & DCDC_STATUS_LEDVDDON) == 0) ? false : true;
+    if (!is_ledvdd_enabled) {
+      DCDC->LEDVDDBCTRL = DCDC_LEDVDDBCTRL_CMDLEDVSCALE_LEDVSCALE1;
+      DCDC->OUTEN_SET = DCDC_OUTEN_LEDVDDOUTEN;
+      DCDC->LEDVDDBCTRL_SET = DCDC_LEDVDDBCTRL_LEDVDDEN;
+      DCDC->LEDVDDBCTRL = DCDC_LEDVDDBCTRL_CMDLEDVSCALE_LEDVSCALE2
+                          | DCDC_LEDVDDBCTRL_LEDVDDEN;
+      DCDC->IF_CLR = DCDC_IF_BOOSTPOSEDG ;
+      while((DCDC->IF & DCDC_IF_BOOSTPOSEDG) == 0U);
+    }
+#if defined(_DCDC_OUTEN_MASK)
+      DCDC->OUTEN_CLR = DCDC_OUTEN_DVDDOUTEN | DCDC_OUTEN_DECOUTEN;
+#endif
+#endif
       // Switch to BYPASS mode if it is not the current mode.
       DCDC->CTRL_CLR = DCDC_CTRL_MODE;
 #if defined(_DCDC_DOCTRL_MASK)
@@ -277,6 +294,15 @@ sl_status_t sl_hal_emu_set_dcdc_mode(sl_hal_emu_dcdc_mode_t dcdc_mode)
       if (timeout >= EMU_DCDC_MODE_SET_TIMEOUT) {
         error = SL_STATUS_TIMEOUT;
       }
+#if defined(DCDC_DOCTRL_REGULATIONTYPE_BYPDVDDDEC)
+    if (!is_ledvdd_enabled) {
+      DCDC->OUTEN_CLR = DCDC_OUTEN_LEDVDDOUTEN;
+      DCDC->LEDVDDBCTRL = DCDC_LEDVDDBCTRL_CMDLEDVSCALE_LEDVSCALE1
+                          | DCDC_LEDVDDBCTRL_LEDVDDEN;
+      DCDC->LEDVDDBCTRL_CLR = DCDC_LEDVDDBCTRL_LEDVDDEN;
+      DCDC->LEDVDDBCTRL_CLR = DCDC_LEDVDDBCTRL_CMDLEDVSCALE_LEDVSCALE1;
+    }
+#endif
     }
 #if defined(_DCDC_EN_EN_MASK)
     sl_hal_emu_disable_dcdc();
@@ -425,12 +451,16 @@ void sl_hal_emu_init_dcdc(const sl_hal_emu_dcdc_init_t *init)
                     | ((uint32_t)init->peak_current_em01 << _DCDC_EM01CTRL0_IPKVAL_SHIFT)
 #if defined(_DCDC_EM01CTRL0_IPKDECVAL_MASK) && !defined(_DCDC_DOCTRL_MASK)
                     | DCDC_EM01CTRL0_IPKDECVAL_DEFAULT
+#elif defined(_DCDC_EM01CTRL0_IPKLEDVAL_MASK)
+                    | DCDC_EM01CTRL0_IPKLEDVAL_DEFAULT
 #endif
   ;
   DCDC->EM23CTRL0 = ((uint32_t)init->drive_speed_em23 << _DCDC_EM23CTRL0_DRVSPEED_SHIFT)
                     | ((uint32_t)init->peak_current_em23 << _DCDC_EM23CTRL0_IPKVAL_SHIFT)
 #if defined(_DCDC_EM23CTRL0_IPKDECVAL_MASK)
                     | DCDC_EM23CTRL0_IPKDECVAL_DEFAULT
+#elif defined(_DCDC_EM23CTRL0_IPKLEDVAL_MASK)
+                    | DCDC_EM23CTRL0_IPKLEDVAL_DEFAULT
 #endif
   ;
 
@@ -448,6 +478,43 @@ void sl_hal_emu_init_dcdc(const sl_hal_emu_dcdc_init_t *init)
 #endif
 
   sl_hal_emu_set_dcdc_mode(init->mode);
+
+#if defined(_DCDC_OUTEN_MASK)
+  if (!(sl_hal_emu_dcdc_get_output_enable_status(init->regulation_type))) {
+    uint32_t timeout = 0;
+    switch (init->regulation_type) {
+      case SL_HAL_EMU_DCDC_REGULATION_TYPE_REGDVDD:
+        while (((DCDC->IF & _DCDC_IF_DVDD_MASK) == 0U) && (timeout < EMU_DCDC_MODE_SET_TIMEOUT)) {
+          timeout++;
+        }
+        if (timeout >= EMU_DCDC_MODE_SET_TIMEOUT) {
+          EFM_ASSERT(false);
+        }
+        break;
+      case SL_HAL_EMU_DCDC_REGULATION_TYPE_REGDEC:
+        while (((DCDC->IF & _DCDC_IF_DEC_MASK) == 0U) && (timeout < EMU_DCDC_MODE_SET_TIMEOUT)) {
+          timeout++;
+        }
+        if (timeout >= EMU_DCDC_MODE_SET_TIMEOUT) {
+          EFM_ASSERT(false);
+        }
+        break;
+      case SL_HAL_EMU_DCDC_REGULATION_TYPE_REGDVDDDEC:
+        while ((((DCDC->IF & _DCDC_IF_DVDD_MASK) == 0U)
+                || ((DCDC->IF & _DCDC_IF_DEC_MASK) == 0U))
+               && (timeout < EMU_DCDC_MODE_SET_TIMEOUT)) {
+          timeout++;
+        }
+        if (timeout >= EMU_DCDC_MODE_SET_TIMEOUT) {
+          EFM_ASSERT(false);
+        }
+        break;
+      default:
+        EFM_ASSERT(false);
+        break;
+    }
+  }
+#endif
 
 #if defined(_DCDC_DOCTRL_MASK) && defined(_DCDC_EM01CTRL0_IPKDECVAL_MASK)
   /* Restore IPKDECVAL to default value after transition */
@@ -542,10 +609,33 @@ void sl_hal_emu_dcdc_set_regulation_type(sl_hal_emu_dcdc_regulation_type_t regul
 #if defined(DCDC_SYNCBUSY_DOCTRL)
   sl_hal_emu_dcdc_sync(DCDC_SYNCBUSY_DOCTRL);
 #endif
+#if defined(DCDC_DOCTRL_REGULATIONTYPE_BYPDVDDDEC)
+  sl_hal_emu_dcdc_power_off();
+#endif
 
   sl_hal_bus_reg_write_mask(&DCDC->DOCTRL,
                             _DCDC_DOCTRL_REGULATIONTYPE_MASK,
                             ((uint32_t)regulation_type << _DCDC_DOCTRL_REGULATIONTYPE_SHIFT));
+
+#if defined(_DCDC_OUTEN_MASK)
+  switch (regulation_type) {
+    case SL_HAL_EMU_DCDC_REGULATION_TYPE_REGDVDD:
+      DCDC->OUTEN = (DCDC->OUTEN & ~DCDC_OUTEN_DECOUTEN) | DCDC_OUTEN_DVDDOUTEN;
+      break;
+    case SL_HAL_EMU_DCDC_REGULATION_TYPE_REGDEC:
+      DCDC->OUTEN = (DCDC->OUTEN & ~DCDC_OUTEN_DVDDOUTEN) | DCDC_OUTEN_DECOUTEN;
+      break;
+    case SL_HAL_EMU_DCDC_REGULATION_TYPE_REGDVDDDEC:
+      DCDC->OUTEN_SET = DCDC_OUTEN_DVDDOUTEN | DCDC_OUTEN_DECOUTEN;
+      break;
+    case SL_HAL_EMU_DCDC_REGULATION_TYPE_BYPDVDDDEC:
+      DCDC->OUTEN_CLR = DCDC_OUTEN_DVDDOUTEN | DCDC_OUTEN_DECOUTEN;
+      break;
+    default:
+      EFM_ASSERT(false);
+      break;
+  }
+#endif
 
   sl_hal_emu_dcdc_updated_hook();
 }
@@ -563,6 +653,23 @@ sl_hal_emu_dcdc_regulation_type_t sl_hal_emu_dcdc_get_regulation_type(void)
 }
 #endif
 
+#if defined(_DCDC_OUTEN_MASK)
+/***************************************************************************//**
+ * Get DCDC output enable status for the given regulation type.
+ ******************************************************************************/
+bool sl_hal_emu_dcdc_get_output_enable_status(sl_hal_emu_dcdc_regulation_type_t regulation_type)
+{
+  switch (regulation_type) {
+    case SL_HAL_EMU_DCDC_REGULATION_TYPE_REGDVDD:
+      return ((DCDC->OUTEN & DCDC_OUTEN_DVDDOUTEN) != 0U);
+    case SL_HAL_EMU_DCDC_REGULATION_TYPE_REGDEC:
+      return ((DCDC->OUTEN & DCDC_OUTEN_DECOUTEN) != 0U);
+    case SL_HAL_EMU_DCDC_REGULATION_TYPE_REGDVDDDEC:
+      return ((DCDC->OUTEN & DCDC_OUTEN_DVDDOUTEN) != 0) && ((DCDC->OUTEN & DCDC_OUTEN_DECOUTEN) != 0);
+  }
+  return false;
+}
+#endif /* defined(_DCDC_OUTEN_MASK)*/
 #if defined(_DCDC_DOCTRL_DUALIPKEN_MASK)
 /***************************************************************************//**
  * Enable dual IPK DAC mode.

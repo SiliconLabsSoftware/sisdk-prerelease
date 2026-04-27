@@ -625,6 +625,17 @@ template_contribution:
       argument:
         - type: uint8
           help: "enable: 1 to enter Last Gasp mode, 0 to leave Last Gasp mode"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "set_first_breath"
+      handler: "app_set_first_breath"
+      help: "Enable or disable First Breath, an indication is received when the device is ready to transmit the First Breath message"
+      shortcuts:
+        - name: "sfb"
+      argument:
+        - type: uint8
+          help: "enable: 1 to enable First Breath, 0 to disable First Breath"
 
 # -------------------------------
   - name: "cli_group"

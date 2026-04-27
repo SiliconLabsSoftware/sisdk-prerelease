@@ -10,9 +10,9 @@ metadata:
 ui_hints:
   visibility: never
 source:
-- path: systemview/profiles/freertos_v10/SEGGER_SYSVIEW_FreeRTOS.c
+- path: systemview/profiles/freertos_v11/SEGGER_SYSVIEW_FreeRTOS.c
 include:
-- path: systemview/profiles/freertos_v10/
+- path: systemview/profiles/freertos_v11/
   file_list:
   - path: SEGGER_SYSVIEW_FreeRTOS.h
 provides:

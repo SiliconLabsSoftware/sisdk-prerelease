@@ -43,6 +43,7 @@
 #define STATIC_MODE_CONNECTION_INTERVAL 6
 #define STATIC_MODE_PROCEDURE_INTERVAL  38
 
+
 // -----------------------------------------------------------------------------
 // Structs
 SL_PACK_START(1)
@@ -276,20 +277,6 @@ sl_status_t cs_initiator_get_intervals(uint8_t main_mode,
   return SL_STATUS_NOT_FOUND;
 }
 
-/******************************************************************************
- * Calculate the number of CS subevents per procedure.
- *****************************************************************************/
-uint32_t cs_initiator_get_subevents_per_procedure(uint16_t procedure_interval,
-                                                  uint8_t subevents_per_event,
-                                                  uint16_t event_interval)
-{
-  uint32_t events_per_procedure =
-    (event_interval < procedure_interval)
-    ? procedure_interval / event_interval : 1;
-  uint32_t subevents = events_per_procedure * subevents_per_event;
-
-  return subevents;
-}
 /******************************************************************************
  * Validate the minimum and maximum subevent lengths against
  * connection and procedure interval limits.

@@ -78,6 +78,7 @@ enum sl_rtl_error_code{
   SL_RTL_ERROR_CS_CHANNEL_MAP_TOO_FEW_CHANNELS, ///< Too few channels in the proposed channel map
   SL_RTL_ERROR_CS_CHANNEL_SPACING_TOO_LARGE, ///< Channel spacing is too large in the proposed channel map
   SL_RTL_ERROR_POOR_INPUT_DATA_QUALITY, ///< The input data quality is poor
+  SL_RTL_ERROR_QUEUE_FULL, ///< The RTL task's input queue is full
 
   SL_RTL_ERROR_LAST ///< Number of error codes
 };
@@ -711,6 +712,13 @@ enum sl_rtl_error_code sl_rtl_aox_set_antenna_pattern(sl_rtl_aox_libitem *item, 
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_aox_antenna_pattern_deinit(sl_rtl_aox_antenna_pattern *pattern);
+
+/**************************************************************************//**
+ * Get the library version.
+ *
+ * @return The library version string.
+ *****************************************************************************/
+const char *sl_rtl_get_lib_version(void);
 
 /** @} */ // end addtogroup sl_rtl_aox
 

@@ -244,6 +244,17 @@ sl_rail_rx_packet_handle_t processRxPacket(sl_rail_handle_t railHandle,
                                           &phySwitchToRx.params);
       phySwitchToRx.iterations--;
     }
+    if ((txWaitForAck == TX_WAIT_FOR_ACK_ENABLED_ON) && details.is_ack) {
+      txWaitForAck = TX_WAIT_FOR_ACK_ENABLED_OFF;
+#if SL_RAIL_IEEE802154_SUPPORTS_G_MODE_SWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
+      if (modeSwitchState == TX_ON_NEW_PHY) { // Packet has been sent in a MS context
+        scheduleNextModeSwitchTx(true);
+      } else
+#endif
+      {
+        scheduleNextTx();
+      }
+    }
   } else {
     memset(&details, 0, sizeof(details));
   }
@@ -415,6 +426,11 @@ static void fifoMode_RxPacketReceived(void)
           if (rxFifoPacketData->rxPacket.appendedInfo.sub_phy_id < SL_RAIL_BLE_RX_SUBPHY_COUNT) {
             counters.subPhyCount[rxFifoPacketData->rxPacket.appendedInfo.sub_phy_id]++;
           }
+          if ((txWaitForAck == TX_WAIT_FOR_ACK_ENABLED_ON)
+              && rxFifoPacketData->rxPacket.appendedInfo.is_ack) {
+            txWaitForAck = TX_WAIT_FOR_ACK_ENABLED_OFF;
+            scheduleNextTx();
+          }
         }
         // Note that this does not take into account CRC bytes unless
         // SL_RAIL_RX_OPTION_STORE_CRC is used
@@ -515,8 +531,16 @@ void railtest_TxPacketSent(sl_rail_handle_t railHandle, bool isAck)
   railappcb_TxPacketSentCs(railHandle);
 #endif
 #if SL_RAIL_IEEE802154_SUPPORTS_G_MODE_SWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
-  if ((modeSwitchState == TX_MS_PACKET) || (modeSwitchState == TX_ON_NEW_PHY)) { // Packet has been sent in a MS context
+  if (modeSwitchState == TX_MS_PACKET) {
     scheduleNextModeSwitchTx(true);
+  } else if (modeSwitchState == TX_ON_NEW_PHY) { // Packet has been sent in a MS context
+    if (railtest_CheckTxWaitForAck(railHandle)) {
+      // Defer scheduleNextModeSwitchTx() to ACK reception or timeout.
+      // This avoids potentially trying to transmit during the
+      // ACK timeout period thwarting both ACK reception and timeout.
+    } else {
+      scheduleNextModeSwitchTx(true);
+    }
   } else
 #endif
   {

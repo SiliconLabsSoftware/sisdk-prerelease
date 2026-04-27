@@ -32,7 +32,14 @@
 #ifndef SLI_CMSIS_DEPRECATED_ALIASES_H
 #define SLI_CMSIS_DEPRECATED_ALIASES_H
 
+/* DCB/CoreDebug are not in M0/M0+/M1/SC000 headers (DAP-only); omitting avoids
+ * undefined DCB_DEMCR_TRCENA_Msk and guards against undefined behavior. */
+#if !(defined(__CORE_CM0_H_GENERIC)       \
+    || defined(__CORE_CM0PLUS_H_GENERIC) \
+    || defined(__CORE_CM1_H_GENERIC)     \
+    || defined(__CORE_SC000_H_GENERIC))
 #define CoreDebug_DEMCR_TRCENA_Msk      DCB_DEMCR_TRCENA_Msk
+#endif
 
 /* ITM Stimulus Port Register Definitions. */
 #define ITM_TCR_TraceBusID_Pos          ITM_TCR_TRACEBUSID_Pos

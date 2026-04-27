@@ -16,6 +16,7 @@ filter:
 
 component:
   - id: host_bluetooth_connection_config
+  - id: bluetooth_peer_security
   - id: bluetooth_peer_manager_common
   - id: bluetooth_peer_manager_central
   - id: bluetooth_peer_manager_peripheral
@@ -37,7 +38,6 @@ component:
 
 source:
   - path: app.c
-  - path: security.c
   - path: extended_result.c
   - path: ../common/app_log/app_log_cli.c
 
@@ -49,7 +49,6 @@ include:
     file_list:
       - path: app.h
       - path: extended_result.h
-      - path: security.h
 
 config_file:
   - override:

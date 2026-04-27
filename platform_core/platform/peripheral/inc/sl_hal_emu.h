@@ -342,6 +342,9 @@ SL_ENUM(sl_hal_emu_dcdc_regulation_type_t) {
   SL_HAL_EMU_DCDC_REGULATION_TYPE_REGDVDD     = _DCDC_DOCTRL_REGULATIONTYPE_REGDVDD,    ///< Regulate DVDD only.
   SL_HAL_EMU_DCDC_REGULATION_TYPE_REGDEC      = _DCDC_DOCTRL_REGULATIONTYPE_REGDEC,     ///< Regulate DEC only.
   SL_HAL_EMU_DCDC_REGULATION_TYPE_REGDVDDDEC  = _DCDC_DOCTRL_REGULATIONTYPE_REGDVDDDEC, ///< Regulate both DVDD and DEC.
+#if defined(_DCDC_DOCTRL_REGULATIONTYPE_BYPDVDDDEC)
+  SL_HAL_EMU_DCDC_REGULATION_TYPE_BYPDVDDDEC  = _DCDC_DOCTRL_REGULATIONTYPE_BYPDVDDDEC, ///< Disable both DVDD and DEC.
+#endif
 };
 #endif
 
@@ -715,6 +718,24 @@ void sl_hal_emu_dcdc_set_regulation_type(sl_hal_emu_dcdc_regulation_type_t regul
  ******************************************************************************/
 sl_hal_emu_dcdc_regulation_type_t sl_hal_emu_dcdc_get_regulation_type(void);
 #endif /* defined(_DCDC_DOCTRL_REGULATIONTYPE_MASK)*/
+
+#if defined(_DCDC_OUTEN_MASK)
+/***************************************************************************//**
+ * @brief
+ *   Get DCDC output enable status for the given regulation type.
+ *
+ * @param[in] regulation_type
+ *   Regulation type.
+ *
+ * @return
+ *   True if DCDC output is enabled for the given regulation type, false otherwise.
+ *
+ * @note
+ *   The DCDC bus clock must be enabled before calling this function.
+ *   Call sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_DCDC) first.
+ ******************************************************************************/
+bool sl_hal_emu_dcdc_get_output_enable_status(sl_hal_emu_dcdc_regulation_type_t regulation_type);
+#endif /* defined(_DCDC_OUTEN_MASK)*/
 
 #if defined(_DCDC_DOCTRL_DUALIPKEN_MASK)
 /***************************************************************************//**

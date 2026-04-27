@@ -9,6 +9,8 @@ provides:
 requires:
 - name: sl_rail_util_compatible_pa
   condition: [device_cortexm]
+- name: clock_manager_oscillator_calibration_override
+  condition: [zigbee_ncp]
 source:
 - path: app/framework/plugin/dhc/dhc-ncp.c
   condition:
@@ -285,8 +287,8 @@ template_contribution:
     handler: sl_zigbee_af_dhc_cli_set_signature
     help: Set PA metadata signature.
     argument:
-    - type: string
-      help: 32-bit signature value (hex string, e.g., 0x12345678)
+    - type: uint32
+      help: 32-bit signature value (e.g. 0x5A584647 or decimal)
 - name: cli_command
   condition:
   - native_host
@@ -299,18 +301,6 @@ template_contribution:
     argument:
     - type: uint8
       help: DHC version number
-- name: cli_command
-  condition:
-  - native_host
-  - cli
-  value:
-    group: dhc
-    name: set-pa-version
-    handler: sl_zigbee_af_dhc_cli_set_pa_version
-    help: Set PA version.
-    argument:
-    - type: uint8
-      help: PA version number
 - name: cli_command
   condition:
   - native_host

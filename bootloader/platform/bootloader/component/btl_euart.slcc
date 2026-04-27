@@ -8,14 +8,11 @@ quality: production
 source:
 - path: "platform/bootloader/driver/btl_driver_util.c"
 include:
-- path: platform/bootloader
+- path: platform/bootloader/driver
   file_list:
-  - path: api/btl_interface.h
-  - path: api/btl_errorcode.h
-  - path: api/btl_reset_info.h
-  - path: api/application_properties.h
-  - path: api/btl_interface_parser.h
-  - path: api/btl_interface_storage.h
+  - path: btl_driver_util.h
+requires:
+- name: bootloader_interface_common
 provides:
 - name: btl_euart
 config_file:

@@ -1924,6 +1924,12 @@ RAIL_Status_t RAIL_ConfigEvents(RAIL_Handle_t railHandle,
 /// RAIL_EVENT_TX_FIFO_ALMOST_EMPTY event once when the threshold is crossed
 /// in the emptying direction.
 ///
+/// On EFR32xG25 platforms, the transmit FIFO must contain at least two bytes
+/// before starting a transmit. For OFDM and SUN OQPSK modulations, it must
+/// contain at least the PHY header (PHR) and first two payload bytes. When
+/// actively transmitting, loading data must be done by chunks of at least two
+/// bytes, except for the last one.
+///
 /// For receive, the distinction between \ref RAIL_DataMethod_t::PACKET_MODE
 /// and \ref RAIL_DataMethod_t::FIFO_MODE basically boils down to how
 /// unsuccessfully-received packets are handled. In \ref

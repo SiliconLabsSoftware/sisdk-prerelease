@@ -160,6 +160,8 @@ typedef union {
   int32_t unicast_hop_limit;
   /// Socket multicast hop limit
   int32_t multicast_hop_limit;
+  /// Socket traffic class
+  int32_t traffic_class;
 } SL_ATTRIBUTE_PACKED app_socket_option_data_t;
 SL_PACK_END()
 
@@ -186,6 +188,8 @@ static sl_status_t app_socket_multicast_hop_limit_handler(app_socket_option_data
 
 static sl_status_t app_socket_multicast_group_handler(app_socket_option_data_t *option_data,
                                                       const char *option_data_str);
+static sl_status_t app_socket_traffic_class_handler(app_socket_option_data_t *option_data,
+                                                    const char *option_data_str);
 
 typedef struct {
   char *option;
@@ -205,6 +209,7 @@ static const app_socket_option_t app_set_socket_options[] =
   { "IPV6_MULTICAST_HOPS", IPV6_MULTICAST_HOPS, IPPROTO_IPV6, MEMBER_SIZE(app_socket_option_data_t, multicast_hop_limit), app_socket_multicast_hop_limit_handler },
   { "IPV6_JOIN_GROUP", IPV6_JOIN_GROUP, IPPROTO_IPV6, MEMBER_SIZE(app_socket_option_data_t, multicast_group), app_socket_multicast_group_handler },
   { "IPV6_LEAVE_GROUP", IPV6_LEAVE_GROUP, IPPROTO_IPV6, MEMBER_SIZE(app_socket_option_data_t, multicast_group), app_socket_multicast_group_handler },
+  { "IPV6_TRAFFIC_CLASS", IPV6_TCLASS, IPPROTO_IPV6, MEMBER_SIZE(app_socket_option_data_t, traffic_class), app_socket_traffic_class_handler },
   { NULL, 0, 0, 0, NULL }
 };
 
@@ -214,6 +219,7 @@ static const app_socket_option_t app_get_socket_options[] =
   { "SO_SNDBUF", SO_SNDBUF, SOL_SOCKET, MEMBER_SIZE(app_socket_option_data_t, send_buffer_limit), NULL },
   { "IPV6_UNICAST_HOPS", IPV6_UNICAST_HOPS, IPPROTO_IPV6, MEMBER_SIZE(app_socket_option_data_t, unicast_hop_limit), NULL },
   { "IPV6_MULTICAST_HOPS", IPV6_MULTICAST_HOPS, IPPROTO_IPV6, MEMBER_SIZE(app_socket_option_data_t, multicast_hop_limit), NULL },
+  { "IPV6_TRAFFIC_CLASS", IPV6_TCLASS, IPPROTO_IPV6, MEMBER_SIZE(app_socket_option_data_t, traffic_class), NULL },
   { NULL, 0, 0, 0, NULL }
 };
 
@@ -774,6 +780,35 @@ cleanup:
 }
 #endif
 
+static sl_status_t app_set_options(void)
+{
+  struct {
+    sl_wisun_option_id_t id;
+    const void *val;
+    uint32_t val_len;
+  } opts[] = {
+    { SL_WISUN_OPTION_TRAFFIC_LOWPAN_MTU_BYTES,        &app_settings_wisun.lowpan_mtu,              sizeof(app_settings_wisun.lowpan_mtu) },
+    { SL_WISUN_OPTION_TRAFFIC_IPV6_MRU_BYTES,          &app_settings_wisun.ipv6_mru,                sizeof(app_settings_wisun.ipv6_mru) },
+    { SL_WISUN_OPTION_TRAFFIC_MAX_EDFE_FRAGMENT_COUNT, &app_settings_wisun.max_edfe_fragment_count, sizeof(app_settings_wisun.max_edfe_fragment_count) },
+    { SL_WISUN_OPTION_MAC_MIN_BE,                      &app_settings_mac.min_be,                    sizeof(app_settings_mac.min_be) },
+    { SL_WISUN_OPTION_MAC_MAX_BE,                      &app_settings_mac.max_be,                    sizeof(app_settings_mac.max_be) },
+    { SL_WISUN_OPTION_MAC_BACKOFF_PERIOD_US,           &app_settings_mac.backoff_period_us,         sizeof(app_settings_mac.backoff_period_us) },
+    { SL_WISUN_OPTION_MAC_MAX_CCA_RETRIES,             &app_settings_mac.max_cca_retries,           sizeof(app_settings_mac.max_cca_retries) },
+    { SL_WISUN_OPTION_MAC_MAX_FRAME_RETRIES,           &app_settings_mac.max_frame_retries,         sizeof(app_settings_mac.max_frame_retries) },
+  };
+  sl_status_t ret;
+
+  for (uint32_t i = 0; i < sizeof(opts) / sizeof(opts[0]); i++) {
+    ret = sl_wisun_set_option(opts[i].id, opts[i].val, opts[i].val_len);
+    if (ret != SL_STATUS_OK) {
+      printf("[Failed: unable to set option %d, status: %lu]\r\n", opts[i].id, ret);
+      return ret;
+    }
+  }
+
+  return SL_STATUS_OK;
+}
+
 static void app_start(sl_wisun_phy_config_type_t phy_config_type)
 {
 #if SL_RAIL_IEEE802154_SUPPORTS_G_MODE_SWITCH
@@ -834,6 +869,12 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
     goto cleanup;
   }
 
+  status = sl_wisun_reset_parameters();
+  if (status != SL_STATUS_OK) {
+    printf("[Failed: unable to reset parameters: %"PRIu32"]\r\n", status);
+    goto cleanup;
+  }
+
   status = sl_wisun_set_rx_fifo_size(app_settings_wisun.rx_fifo_size);
   if (status != SL_STATUS_OK) {
     printf("[Failed: unable to set RX FIFO size: %lu]\r\n", status);
@@ -882,6 +923,11 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
     status = sl_wisun_br_set_connection_parameters(&params);
     if (status != SL_STATUS_OK) {
       printf("[Failed: unable to set parameters (%"PRIu32")]\r\n", status);
+      goto cleanup;
+    }
+  } else {
+    status = app_set_options();
+    if (status != SL_STATUS_OK) {
       goto cleanup;
     }
   }
@@ -2781,6 +2827,29 @@ static sl_status_t app_socket_multicast_hop_limit_handler(app_socket_option_data
   #endif
 
   return app_util_get_integer((uint32_t *)&option_data->multicast_hop_limit, option_data_str, NULL, true);
+
+  // Restore the defaults
+  #ifdef __GNUC__
+  #pragma GCC diagnostic pop
+  #elif defined __ICCARM__
+  #pragma diag_default=Pa039
+  #endif
+}
+
+static sl_status_t app_socket_traffic_class_handler(app_socket_option_data_t *option_data,
+                                                    const char *option_data_str)
+{
+  // The caller guarantees the aligment of the option data,
+  // thus the warning can be ignored.
+  #ifdef __GNUC__
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wpragmas"
+  #pragma GCC diagnostic ignored "-Waddress-of-packed-member"
+  #elif defined __ICCARM__
+  #pragma diag_suppress=Pa039
+  #endif
+
+  return app_util_get_integer((uint32_t *)&option_data->traffic_class, option_data_str, NULL, true);
 
   // Restore the defaults
   #ifdef __GNUC__

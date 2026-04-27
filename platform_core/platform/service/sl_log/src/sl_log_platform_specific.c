@@ -89,12 +89,17 @@ sl_status_t sl_log_hal_platform_core_init(void)
 {
   sl_clock_branch_t clock_branch = sl_device_peripheral_get_clock_branch(LOGGER_TIMER_PERIPHERAL);
   sl_hal_timer_config_t init_config = SL_HAL_TIMER_CONFIG_DEFAULT;
-  uint32_t sl_log_timer_freq_hz = 0;
+  uint32_t log_timer_freq_hz = 0;
   sl_status_t status;
 
   sl_clock_manager_enable_bus_clock(TIMER_BUS_CLOCK);
 
-  init_config.prescaler = SL_HAL_TIMER_PRESCALER_DIV1;
+  /* With prescaler DIV1 the free-running counter advanced at the full timer branch rate
+   * so the 32-bit hardware counter wrapped in a short interval producing
+   * confusing early timestamp resets in logs.
+   * So we use DIV8 to slow the counter by 8x so the wrap occurs later.
+   */
+  init_config.prescaler = SL_HAL_TIMER_PRESCALER_DIV8;
 
   sl_hal_timer_init(TIMER_INSTANCE, &init_config);
   sl_hal_timer_enable(TIMER_INSTANCE);
@@ -103,12 +108,16 @@ sl_status_t sl_log_hal_platform_core_init(void)
   sl_hal_timer_clear_interrupts(TIMER_INSTANCE, TIMER_IEN_OF);
   sl_hal_timer_enable_interrupts(TIMER_INSTANCE, TIMER_IEN_OF);
 
-  status = sl_clock_manager_get_clock_branch_frequency(clock_branch, &sl_log_timer_freq_hz);
+  status = sl_clock_manager_get_clock_branch_frequency(clock_branch, &log_timer_freq_hz);
   if (status) {
       return status;
   }
 
-  scale_factor = (TIMESTAMP_RESOLUTION << 32) / sl_log_timer_freq_hz;
+  /* log_timer_freq_hz is the timer branch clock (before prescaler). With
+   * DIV8 the counter ticks at freq/8; multiply by 8 so fixed-point scaling in
+   * sl_log_hal_get_timestamp_count() still yields microseconds (TIMESTAMP_RESOLUTION Hz).
+   */
+  scale_factor = ((TIMESTAMP_RESOLUTION << 32) * 8) / log_timer_freq_hz;
 
   sl_interrupt_manager_clear_irq_pending(LOGGER_TIMER_IRQ);
   sl_interrupt_manager_enable_irq(LOGGER_TIMER_IRQ);

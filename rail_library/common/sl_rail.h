@@ -1622,6 +1622,15 @@ sl_rail_status_t sl_rail_config_events(sl_rail_handle_t rail_handle,
                                        sl_rail_events_t mask,
                                        sl_rail_events_t events);
 
+/**
+ * Get configured events.
+ *
+ * @param[in] rail_handle A real RAIL instance handle.
+ * @return A \ref sl_rail_events_t with bits set for enabled events and
+ *   clear for disabled events.
+ */
+sl_rail_events_t sl_rail_get_events_config(sl_rail_handle_t rail_handle);
+
 /** @} */ // end of group Events
 
 /******************************************************************************
@@ -1674,6 +1683,12 @@ sl_rail_status_t sl_rail_config_events(sl_rail_handle_t rail_handle,
 /// The transmit FIFO is edge-based in that it only provides the \ref
 /// SL_RAIL_EVENT_TX_FIFO_ALMOST_EMPTY event once when the threshold is crossed
 /// in the emptying direction.
+///
+/// On EFR32xG25 platforms, the transmit FIFO must contain at least two bytes
+/// before starting a transmit. For OFDM and SUN OQPSK modulations, it must
+/// contain at least the PHY header (PHR) and first two payload bytes. When
+/// actively transmitting, loading data must be done by chunks of at least two
+/// bytes, except for the last one.
 ///
 /// For receive, the distinction between \ref sl_rail_data_method_t::SL_RAIL_DATA_METHOD_PACKET_MODE
 /// and \ref sl_rail_data_method_t::SL_RAIL_DATA_METHOD_FIFO_MODE basically boils down to how
@@ -2792,6 +2807,38 @@ sli_rail_tx_power_level_t sli_rail_get_tx_power(sl_rail_handle_t rail_handle);
 sl_rail_pa_power_setting_t sli_rail_get_pa_power_setting(sl_rail_handle_t rail_handle);
 
 /**
+ * Apply a PA power setting directly, bypassing the dBm-to-powersetting
+ * table lookup.
+ *
+ * Decodes the chip-specific bitfields from \ref pa_power_config (e.g.,
+ * sub-mode and scalar on current devices) and programs the PA hardware
+ * registers accordingly.  The PA mode is derived from the current
+ * channel configuration.
+ *
+ * @param[in] rail_handle A real RAIL instance handle.
+ * @param[in] pa_power_config Opaque power-setting value whose encoding is
+ *   chip-specific. On current chips the layout matches a PA mapping-table
+ *   entry (sub-mode in upper bits, scalar in lower bits).
+ * @return Status code indicating success of the function call.
+ *
+ * @warning This function is for PA characterization use only.
+ *
+ * @note This API does not update RAIL's internal power-tracking state
+ *   (desiredPowerDdbm, desiredPowerLevel, currentPaPowerDbm, etc.).
+ *   After calling it:
+ *   - \ref sl_rail_get_tx_power_dbm() will return \ref SL_RAIL_TX_POWER_MIN
+ *     (sentinel) rather than the true output power.
+ *   - \ref sli_rail_get_tx_power() may return a stale raw power level.
+ *   - A subsequent call to \ref sl_rail_set_tx_power_dbm() will silently
+ *     overwrite the raw setting applied here.
+ *   - Auto-mode power decisions will operate on stale data.
+ *   Do not mix this API with the normal dBm power-setting path in the
+ *   same session.
+ */
+sl_rail_status_t sli_rail_set_pa_power_setting(sl_rail_handle_t rail_handle,
+                                               uint32_t pa_power_config);
+
+/**
  * Indicate whether this chip supports a particular power mode (PA) and
  * provides the maximum and minimum power level for that power mode
  * if supported by the chip.
@@ -2848,7 +2895,7 @@ sl_rail_status_t sl_rail_set_tx_power_dbm(sl_rail_handle_t rail_handle,
 /// @param[in] power_ddbm The desired output power in deci-dBm.
 /// @param[in] pa_mode The PA mode to use (platform-specific,
 //  e.g., SL_RAIL_TX_PA_MODE_SUB_GHZ, SL_RAIL_TX_PA_MODE_SUB_GHZ_OFDM,
-//  SL_RAIL_TX_PA_MODE_2P4_GHZ).
+//  SL_RAIL_TX_PA_MODE_2P4_GHZ, SL_RAIL_TX_PA_MODE_2P4_GHZ_BTC).
 /// @return Status code indicating result of the function call.
 ///
 /// This function sets the TX power for use with an explicit PA mode.

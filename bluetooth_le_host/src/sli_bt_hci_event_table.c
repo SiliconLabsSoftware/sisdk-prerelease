@@ -20,6 +20,16 @@
 #include "sl_component_catalog.h"
 #include "sli_bt_hci_event_table.h"
 
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_LOCAL_PRIVACY_PRESENT) \
+  && defined(SL_CATALOG_BLUETOOTH_FEATURE_ADVERTISER_PRESENT)
+#define SLI_BT_LOCAL_PRIVACY_ADV_TIMERS_PRESENT
+#endif
+
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_LOCAL_PRIVACY_PRESENT) \
+  && (defined(SL_CATALOG_BLUETOOTH_FEATURE_SCANNER_PRESENT) \
+      || defined(SL_CATALOG_BLUETOOTH_FEATURE_PAWR_ADVERTISER_PRESENT))
+#define SLI_BT_LOCAL_PRIVACY_CENTRAL_TIMER_PRESENT
+#endif
 
 // -----------------------------------------------------------------------------
 // Forward declaration of each HCI event handler function

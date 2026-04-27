@@ -401,7 +401,7 @@ sl_rail_timer_tick_t sl_rail_us_to_timer_ticks(sl_rail_time_t microseconds);
 #else
 #define SL_RAIL_RF_PATHS_2P4_GHZ 0
 #endif
-#endif//SL_RAIL_RF_PATHS_2P4GHZ
+#endif//SL_RAIL_RF_PATHS_2P4_GHZ
 
 /**
  * @def SL_RAIL_RF_PATHS_SUB_GHZ

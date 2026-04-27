@@ -76,7 +76,7 @@ sl_status_t sl_dma_descriptor_allocator_allocate(sl_peripheral_t dma_peripheral,
   // Allocate using short-term allocation as required
   sl_status_t status = sl_memory_calloc(1,
                                         sizeof(sl_dma_channel_xfer_descriptor_t),
-                                        BLOCK_TYPE_SHORT_TERM,
+                                        BLOCK_TYPE_LONG_TERM,
                                         descriptor);
 
   if (status != SL_STATUS_OK) {

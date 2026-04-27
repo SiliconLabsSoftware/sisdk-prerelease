@@ -14985,12 +14985,9 @@ typedef struct sl_bt_evt_cs_test_end_completed_s sl_bt_evt_cs_test_end_completed
  *     - <b>sl_bt_gap_phy_2m (0x2):</b> 2M PHY
  *     - <b>sl_bt_gap_phy_coded (0x4):</b> Coded PHY, 125k (S=8) or 500k (S=2)
  *     - <b>sl_bt_gap_phy_any (0xff):</b> Any PHYs the device supports
- * @param[in] antenna_selection @parblock
- *   Antenna Identifier to be used for RTT packets
+ * @param[in] antenna_selection Antenna identifier to be used for CS_SYNC
+ *   packets, including mode-0 packets
  *     - <b>Range:</b> 1 to 4
- *
- *     - Value: 0xFE. Use antennas in repetitive order from 0x01 to 0x04
- *   @endparblock
  * @param[in] subevent_len @parblock
  *   CS subevent length in units of microseconds.
  *     - <b>Range:</b> 1250 to 3999999

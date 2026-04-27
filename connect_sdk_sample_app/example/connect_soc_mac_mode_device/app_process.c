@@ -182,7 +182,7 @@ void emberAfIncomingBeaconCallback(EmberPanId panId,
     app_log_info("none");
   }
 
-  app_log_info(" payload {0x");
+  app_log_info(" payload {");
   for (uint8_t i = 0; i < beaconPayloadLength; i++) {
     app_log_info("%02" PRIX8, beaconPayload[i]);
   }

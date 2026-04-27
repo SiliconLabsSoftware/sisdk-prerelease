@@ -1,7 +1,7 @@
 id: ot_crash_handler
 label: Crash Handler
 package: openthread
-category: OpenThread
+category: OpenThread|Utility
 quality: production
 description: |-
   This component provides a set of APIs for printing crash info.

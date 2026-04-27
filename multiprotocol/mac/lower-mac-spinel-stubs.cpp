@@ -316,14 +316,17 @@ exit:
 using namespace ot;
 
 #if OPENTHREAD_CONFIG_LOG_LEVEL_DYNAMIC_ENABLE
-LogLevel Instance::sLogLevel = static_cast<LogLevel>(OPENTHREAD_CONFIG_LOG_LEVEL_INIT);
 
-void Instance::SetLogLevel(LogLevel aLogLevel)
+Error Instance::SetLogLevel(LogLevel aLogLevel)
 {
-    if (aLogLevel != sLogLevel)
+    Error error = kErrorNone;
+
+    if (aLogLevel != mLogLevel)
     {
-        sLogLevel = aLogLevel;
+        mLogLevel = aLogLevel;
     }
+
+    return error;
 }
 #endif
 
@@ -377,6 +380,13 @@ namespace ot {
     extern "C" otInstance *otInstanceInitSingle(void)
     {
         return (otInstance *)gInstanceRaw;
+    }
+
+    Instance &Instance::Get(void)
+    {
+        void *instance = &gInstanceRaw;
+
+        return *static_cast<Instance *>(instance);
     }
 } // namespace ot
 

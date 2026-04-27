@@ -57,6 +57,10 @@ static void setNetworkConfiguration(void)
 
     memset(&aDataset, 0, sizeof(otOperationalDataset));
 
+    /* Set Active Timestamp */
+    aDataset.mActiveTimestamp.mSeconds             = 1;
+    aDataset.mComponents.mIsActiveTimestampPresent = true;
+
     /* Set Channel */
     aDataset.mChannel                      = SL_OPENTHREAD_DEFAULT_DATASET_CHANNEL;
     aDataset.mComponents.mIsChannelPresent = true;

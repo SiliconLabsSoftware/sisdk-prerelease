@@ -947,11 +947,7 @@ extern "C" {
 /// Boolean to indicate whether the selected chip supports BTC.
 /// See also runtime refinement \ref RAIL_SupportsProtocolBTC().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_SUPPORTS_PROTOCOL_BTC.
-#if (_SILICON_LABS_32B_SERIES_3_CONFIG == 300)
-#define RAIL_SUPPORTS_PROTOCOL_BTC RAIL_SUPPORTS_2P4GHZ_BAND
-#else
-#define RAIL_SUPPORTS_PROTOCOL_BTC 0
-#endif
+#define RAIL_SUPPORTS_PROTOCOL_BTC (0U)
 #endif//DOXYGEN_UNDOCUMENTED
 
 /// Boolean to indicate whether the selected chip supports

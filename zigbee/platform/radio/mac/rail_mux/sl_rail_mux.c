@@ -319,12 +319,6 @@ sl_rail_status_t sl_rail_mux_init(sl_rail_handle_t *p_rail_handle,
     mux_rail_config.tx_fifo_init_bytes = p_rail_config->tx_fifo_init_bytes;
     mux_rail_config.p_tx_fifo_buffer = p_rail_config->p_tx_fifo_buffer;
     mux_rail_config.tx_fifo_bytes = p_rail_config->tx_fifo_bytes;
-    if ( (p_rail_config->p_tx_fifo_buffer != NULL) && (p_rail_config->tx_fifo_bytes > 0)) {
-      fn_set_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_SETUP_TX_FIFO, true);
-      protocol_context[i].fifo_tx_info.data_ptr = (uint8_t *)p_rail_config->p_tx_fifo_buffer;
-      protocol_context[i].fifo_tx_info.tx_init_length = p_rail_config->tx_fifo_init_bytes;;
-      protocol_context[i].fifo_tx_info.tx_size = p_rail_config->tx_fifo_bytes;
-    }
 
     mux_rail_handle = SL_RAIL_EFR32_HANDLE;
     sl_rail_status_t status = sl_rail_init(&mux_rail_handle, &mux_rail_config, NULL);
@@ -344,6 +338,13 @@ sl_rail_status_t sl_rail_mux_init(sl_rail_handle_t *p_rail_handle,
     if (init_complete_callback != NULL) {
       init_complete_callback(&(protocol_context[i]));
     }
+  }
+
+  if ( (p_rail_config->p_tx_fifo_buffer != NULL) && (p_rail_config->tx_fifo_bytes > 0)) {
+    fn_set_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_SETUP_TX_FIFO, true);
+    protocol_context[i].fifo_tx_info.data_ptr = (uint8_t *)p_rail_config->p_tx_fifo_buffer;
+    protocol_context[i].fifo_tx_info.tx_init_length = p_rail_config->tx_fifo_init_bytes;;
+    protocol_context[i].fifo_tx_info.tx_size = p_rail_config->tx_fifo_bytes;
   }
 
   RAIL_MUX_EXIT_CRITICAL();

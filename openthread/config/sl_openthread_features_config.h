@@ -286,6 +286,11 @@
 #ifndef OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM
 #define OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM      2
 #endif
+// <e>  Instance-aware platform logging API
+#ifndef OPENTHREAD_CONFIG_LOG_INSTANCE_AWARE_API_ENABLE
+#define OPENTHREAD_CONFIG_LOG_INSTANCE_AWARE_API_ENABLE      0
+#endif
+// </e>
 // </e>
 // </e>
 // <e>  OTNS (OpenThread Network Simulator)

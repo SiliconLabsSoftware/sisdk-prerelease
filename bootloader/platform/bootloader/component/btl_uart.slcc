@@ -14,24 +14,17 @@ include:
 - path: platform/bootloader/driver
   file_list:
   - path: btl_driver_util.h
-- path: platform/bootloader/api
-  file_list:
-  - path: application_properties.h
-  - path: btl_errorcode.h
-  - path: btl_interface.h
-  - path: btl_interface_parser.h
-  - path: btl_interface_storage.h
-  - path: btl_reset_info.h
 - path: platform/bootloader
   file_list:
   - path: core/btl_core.h
-  - path: core/flash/btl_internal_flash.h
   - path: core/btl_bootload.h
   - path: core/btl_parse.h
   - path: config/btl_config.h
 - path: platform/bootloader/core
   file_list:
   - path: btl_reset.h
+requires:
+- name: bootloader_interface_common
 provides:
 - name: btl_uart
 metadata:

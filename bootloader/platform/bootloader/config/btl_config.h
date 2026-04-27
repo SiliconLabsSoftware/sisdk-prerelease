@@ -175,6 +175,10 @@ MISRAC_ENABLE
 // The upgrade location needs to fit upgrades of up to 96k
 #define MINIMUM_REQUIRED_UPGRADE_SIZE (0x00018000UL)
 
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
+// The upgrade location needs to fit upgrades of up to 96k
+#define MINIMUM_REQUIRED_UPGRADE_SIZE (0x00018000UL)
+
 #else
   #if defined(_SILICON_LABS_32B_SERIES_2)
     #error "Undefined family"

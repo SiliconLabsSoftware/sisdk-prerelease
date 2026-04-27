@@ -63,7 +63,6 @@ include:
   - path: security-profile-data.h
 - path: app/util/zigbee-framework
   file_list:
-  - path: ami-inter-pan.h
   - path: zigbee-device-common.h
   - path: zigbee-device-library.h
 - path: app/util/counters

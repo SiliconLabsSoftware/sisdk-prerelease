@@ -236,7 +236,11 @@
 
 // <o CS_INITIATOR_DEFAULT_MIN_SUBEVENT_LEN> Minimum subevent length [us] <1250..3999999>
 // <i> Minimum suggested duration for each CS subevent in microseconds.
-// <i> Increase CS_INITIATOR_MAX_RANGING_DATA_SIZE if a large number of subevents is expected.
+// <i> Raising this value forces the controller to use longer subevents, reducing the number
+// <i> of subevents that fit within a single procedure. 
+// <i> This value should not exceed the maximum procedure time, which is calculated as:
+// <i> max_procedure_time_us = CS_INITIATOR_DEFAULT_MAX_PROCEDURE_INTERVAL
+// <i>                       * CS_INITIATOR_DEFAULT_MAX_CONNECTION_INTERVAL * 1250
 // <i> Default: 1250
 #ifndef CS_INITIATOR_DEFAULT_MIN_SUBEVENT_LEN
 #define CS_INITIATOR_DEFAULT_MIN_SUBEVENT_LEN          1250
@@ -244,7 +248,13 @@
 
 // <o CS_INITIATOR_DEFAULT_MAX_SUBEVENT_LEN> Maximum subevent length [us] <1250..3999999>
 // <i> Maximum suggested duration for each CS subevent in microseconds.
-// <i> Increase CS_INITIATOR_MAX_RANGING_DATA_SIZE if a large number of subevents is expected.
+// <i> Reducing this value causes the controller to split CS steps across multiple subevents.
+// <i> When a large number of subevents is expected, ensure that the effective procedure interval
+// <i> is at least the number of created subevents, plus additional connection events for RAS data transfer.
+// <i> The effective procedure interval is determined by
+// <i> CS_INITIATOR_DEFAULT_PROCEDURE_SCHEDULING, or by CS_INITIATOR_DEFAULT_MAX_PROCEDURE_INTERVAL
+// <i> when custom scheduling is used.
+// <i> With default settings, values below ~38500 us result in more than one subevent per procedure.
 // <i> Default: 3999999
 #ifndef CS_INITIATOR_DEFAULT_MAX_SUBEVENT_LEN
 #define CS_INITIATOR_DEFAULT_MAX_SUBEVENT_LEN          3999999

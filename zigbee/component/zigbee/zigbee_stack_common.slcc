@@ -338,7 +338,6 @@ include:
 - path: app/framework/plugin/dhc
   file_list:
   - path: dhc-ncp.h
-- path: app/framework/include
 
 source:
 - path: app/util/counters/counters.c
@@ -380,6 +379,9 @@ source:
   condition:
   - zigbee_ncp
 - path: app/em260/command-handlers-trust-center-generated.c
+  condition:
+  - zigbee_ncp
+- path: app/em260/command-handlers-configuration-generated.c
   condition:
   - zigbee_ncp
   # Stubs

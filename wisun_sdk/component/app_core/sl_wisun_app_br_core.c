@@ -486,6 +486,8 @@ void sl_wisun_app_br_core_start(void)
   // Set Device Type
   EFM_ASSERT(sl_wisun_set_device_type(SL_WISUN_BORDER_ROUTER) == SL_STATUS_OK);
 
+  EFM_ASSERT(sl_wisun_reset_parameters() == SL_STATUS_OK);
+
   // Set TX Power
   EFM_ASSERT(sl_wisun_set_tx_power_ddbm(_br_setting.tx_power_ddbm) == SL_STATUS_OK);
 
@@ -541,9 +543,11 @@ void sl_wisun_app_br_core_start(void)
 
   EFM_ASSERT(sl_wisun_br_set_lfn_parameters(&lfn_params) == SL_STATUS_OK);
 
+#if defined(SL_CATALOG_WISUN_APP_SETTING_PRESENT)
   // Get channel mask
   EFM_ASSERT(app_settings_get_channel_mask(_br_setting.allowed_channels,
                                            &channel_mask) == SL_STATUS_OK);
+#endif
 
   // Set Channel Mask
   EFM_ASSERT(sl_wisun_set_channel_mask(&channel_mask) == SL_STATUS_OK);

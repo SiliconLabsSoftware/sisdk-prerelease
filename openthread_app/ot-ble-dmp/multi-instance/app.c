@@ -32,11 +32,14 @@
 #define CURRENT_MODULE_NAME "OPENTHREAD_BLE_DMP_MULTI_INSTANCE_APP"
 
 #include <assert.h>
+#include <stdint.h>
+
 #include <openthread-core-config.h>
 #include <openthread/config.h>
 
 #include <openthread/cli.h>
 #include <openthread/diag.h>
+#include <openthread/instance.h>
 #include <openthread/tasklet.h>
 
 #include "app.h"
@@ -119,6 +122,19 @@ void sl_ot_rtos_application_tick(void)
  * Provide, if required an "otPlatLog()" function
  */
 #if OPENTHREAD_CONFIG_LOG_OUTPUT == OPENTHREAD_CONFIG_LOG_OUTPUT_APP
+#if OPENTHREAD_CONFIG_LOG_INSTANCE_AWARE_API_ENABLE
+void otPlatLogOutput(otInstance *aInstance, otLogLevel aLogLevel, const char *aLogLine)
+{
+    uint8_t instanceIndex = 0;
+
+    if (aInstance != NULL)
+    {
+        instanceIndex = otInstanceGetIndex(aInstance);
+    }
+
+    otPlatLog(aLogLevel, OT_LOG_REGION_CORE, "[%u] %s", instanceIndex, aLogLine);
+}
+#endif
 void otPlatLog(otLogLevel aLogLevel, otLogRegion aLogRegion, const char *aFormat, ...)
 {
     OT_UNUSED_VARIABLE(aLogLevel);

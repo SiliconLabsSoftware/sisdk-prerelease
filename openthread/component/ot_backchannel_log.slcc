@@ -1,7 +1,7 @@
 id: ot_backchannel_log
 label: Backchannel Logger
 package: openthread
-category: OpenThread
+category: OpenThread|Utility|Logging
 quality: production
 description: This component adds support for debug backchannel logging.
 provides:

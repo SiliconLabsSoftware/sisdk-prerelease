@@ -72,7 +72,8 @@
 #endif // SL_CATALOG_SIMPLE_BUTTON_PRESENT
 
 // Security
-#include "security.h"
+#include "sl_bt_peer_security.h"
+#include "app_button_press.h"
 
 // -----------------------------------------------------------------------------
 // Macros
@@ -181,7 +182,6 @@ void app_init(void)
     cs_initiator_instances[i].security_increased = false;
     cs_initiator_instances[i].number_of_measurements = 0u;
   }
-  security_set_config_flags();
 
   // Set configuration parameters
   rtl_config.algo_mode = get_algo_mode();
@@ -250,10 +250,6 @@ void app_init(void)
  *****************************************************************************/
 void app_process_action(void)
 {
-  sl_status_t sc = security_send_confirmation();
-  if (sc != SL_STATUS_OK) {
-    log_error(APP_PREFIX "Failed to send security confirmation: 0x%04lx" NL, (unsigned long)sc);
-  }
   for (uint8_t i = 0u; i < CS_INITIATOR_MAX_CONNECTIONS; i++) {
     if (cs_initiator_instances[i].measurement_arrived) {
       cs_initiator_instances[i].measurement_arrived = false;
@@ -923,10 +919,6 @@ void sl_bt_on_event(sl_bt_msg_t * evt)
   sl_status_t sc;
   uint8_t instance_num;
   const char* device_name = REFLECTOR_DEVICE_NAME;
-  sc = on_event_security(evt);
-  if (sc != SL_STATUS_OK) {
-    log_error(APP_PREFIX "Security event handler failed: 0x%04lx" NL, (unsigned long)sc);
-  }
 
   switch (SL_BT_MSG_ID(evt->header)) {
     // -------------------------------
@@ -1110,18 +1102,20 @@ void sl_bt_on_event(sl_bt_msg_t * evt)
   }
 }
 
-#if (SL_SIMPLE_BUTTON_COUNT > 1)
-void sl_button_on_change(const sl_button_t *handle)
+void sl_bt_peer_security_on_event(uint8_t handle)
 {
-  if (security_is_confirmation_in_progress()) {
-    if (handle == SL_SIMPLE_BUTTON_INSTANCE(0)) {
-      security_set_confirmation(SECURITY_ALLOW_CONFIRMATION);
-    } else if (handle == SL_SIMPLE_BUTTON_INSTANCE(1)) {
-      security_set_confirmation(SECURITY_DENY_CONFIRMATION);
-    }
+  log_info(APP_INSTANCE_PREFIX "Security process started" NL, handle);
+}
+
+void app_button_press_cb(uint8_t button, uint8_t duration)
+{
+  (void)duration;
+  if (button == 0) {
+    sl_bt_peer_security_send_confirmation(true);
+  } else if (button == 1) {
+    sl_bt_peer_security_send_confirmation(false);
   }
 }
-#endif // SL_SIMPLE_BUTTON_COUNT > 1
 
 /******************************************************************************
  * BLE peer manager event handler

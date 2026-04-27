@@ -1202,7 +1202,8 @@ template <typename EventCallback> static void efr32ConfigInit(EventCallback aEve
 
     sli_init_power_manager();
 
-    OT_ASSERT(sli_ot_radio_interface_rail_init(commonConfig) != nullptr);
+    sl_rail_handle_t handle = sli_ot_radio_interface_rail_init(commonConfig);
+    OT_ASSERT(handle != nullptr);
 
     sli_ot_radio_events_update_config(SL_RAIL_EVENTS_ALL,
                                       (0 | SL_RAIL_EVENT_RX_ACK_TIMEOUT | SL_RAIL_EVENT_RX_PACKET_RECEIVED

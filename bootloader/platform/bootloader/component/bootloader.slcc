@@ -11,7 +11,6 @@ source:
 - path: "platform/bootloader/driver/btl_driver_util.c"
 - path: "platform/bootloader/storage/btl_storage_library.c"
 - path: "platform/bootloader/core/btl_reset.c"
-- path: "platform/bootloader/core/flash/btl_internal_flash.c"
 - path: "platform/bootloader/core/btl_bootload.c"
 - path: "platform/bootloader/parser/gbl/btl_gbl_custom_tags.c"
 - path: "platform/bootloader/core/btl_parse.c"
@@ -21,24 +20,13 @@ source:
 - path: "platform/bootloader/core/btl_core.c"
 include:
 - path: platform/bootloader/core
-- path: platform/bootloader/api
-  file_list:
-  - path: application_properties.h
-  - path: btl_interface_parser.h
-  - path: btl_interface_storage.h
-  - path: btl_errorcode.h
-  - path: btl_interface.h
-  - path: btl_reset_info.h
 - path: platform/bootloader
   file_list:
   - path: driver/btl_driver_util.h
-  - path: api/btl_interface.h
   - path: config/btl_config.h
-  - path: core/btl_util.h
   - path: core/btl_reset.h
   - path: core/btl_bootload.h
   - path: core/btl_core.h
-  - path: core/flash/btl_internal_flash.h
   - path: parser/gbl/btl_gbl_parser.h
   - path: parser/gbl/btl_gbl_format.h
   - path: parser/gbl/btl_gbl_custom_tags.h
@@ -65,6 +53,10 @@ include:
   - path: btl_crc32.h
 provides:
 - name: bootloader
+requires:
+- name: bootloader_interface_common
+- name: bootloader_interface_s2
+- name: btl_util_header
 metadata:
   sbom:
     license: MSLA

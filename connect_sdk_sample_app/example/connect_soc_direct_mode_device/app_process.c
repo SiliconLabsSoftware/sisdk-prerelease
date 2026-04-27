@@ -84,22 +84,22 @@ void emberAfIncomingMessageCallback(const EmberIncomingMessage *message)
 {
   uint8_t i;
   if (message->endpoint == DATA_ENDPOINT) {
-    app_log_info("RX: Data from 0x%04" PRIX16 ":{0x", message->source);
+    app_log_info("RX: Data from 0x%04" PRIX16 ":{", message->source);
     for ( i = 0; i < message->length; i++ ) {
       if ( i == 0) {
         app_log_info("%02" PRIX8, message->payload[i]);
       } else {
-        app_log_info("%02" PRIX8, message->payload[i]);
+        app_log_info(" %02" PRIX8, message->payload[i]);
       }
     }
     app_log_info("}\n");
   } else if (message->endpoint == TX_TEST_ENDPOINT && tx_test_print_en) {
-    app_log_info("RX: TX test packet from 0x%04" PRIX16 ":{0x", message->source);
+    app_log_info("RX: TX test packet from 0x%04" PRIX16 ":{", message->source);
     for ( i = 0; i < message->length; i++ ) {
       if ( i == 0) {
         app_log_info("%02" PRIX8, message->payload[i]);
       } else {
-        app_log_info("%02" PRIX8, message->payload[i]);
+        app_log_info(" %02" PRIX8, message->payload[i]);
       }
     }
     app_log_info("}\n");

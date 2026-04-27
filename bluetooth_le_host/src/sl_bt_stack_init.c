@@ -100,6 +100,17 @@ SLI_BT_DECLARE_BGAPI_CLASS(bt, resource);
 SLI_BT_DECLARE_BGAPI_CLASS(bt, connection_analyzer);
 SLI_BT_DECLARE_BGAPI_CLASS(bt, linklayer);
 
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_LOCAL_PRIVACY_PRESENT) \
+  && defined(SL_CATALOG_BLUETOOTH_FEATURE_ADVERTISER_PRESENT)
+#define SLI_BT_LOCAL_PRIVACY_ADV_TIMERS_PRESENT
+#endif
+
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_LOCAL_PRIVACY_PRESENT) \
+  && (defined(SL_CATALOG_BLUETOOTH_FEATURE_SCANNER_PRESENT) \
+      || defined(SL_CATALOG_BLUETOOTH_FEATURE_PAWR_ADVERTISER_PRESENT))
+#define SLI_BT_LOCAL_PRIVACY_CENTRAL_TIMER_PRESENT
+#endif
+
 // Advertiser requires selection of legacy and/or extended advertiser
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_ADVERTISER_PRESENT) \
   && !defined(SL_CATALOG_BLUETOOTH_FEATURE_LEGACY_ADVERTISER_PRESENT) \
@@ -124,6 +135,7 @@ SLI_BT_DECLARE_BGAPI_CLASS(bt, linklayer);
 extern const struct sli_bt_component_config sli_bt_external_bondingdb_config;
 extern const struct sli_bt_component_config sli_bt_accept_list_config;
 extern const struct sli_bt_component_config sli_bt_sync_config;
+extern const struct sli_bt_component_config sli_bt_advertiser_config;
 extern const struct sli_bt_component_config sli_bt_advertiser_config;
 extern const struct sli_bt_component_config sli_bt_l2cap_config;
 extern const struct sli_bt_component_config sli_bt_connection_config;
@@ -171,6 +183,12 @@ extern sli_bgapi_component_init_func_t sli_bt_extended_advertiser_init;
 extern sli_bgapi_component_init_func_t sli_bt_periodic_advertiser_init;
 extern sli_bgapi_component_deinit_func_t sli_bt_periodic_advertiser_deinit;
 extern sli_bgapi_component_init_func_t sli_bt_pawr_advertiser_init;
+extern sli_bgapi_component_init_func_t sli_bt_local_privacy_central_timer_init;
+extern sli_bgapi_component_stop_func_t sli_bt_local_privacy_central_timer_stop;
+extern sli_bgapi_component_deinit_func_t sli_bt_local_privacy_central_timer_deinit;
+extern sli_bgapi_component_init_func_t sli_bt_local_privacy_adv_timers_init;
+extern sli_bgapi_component_stop_func_t sli_bt_local_privacy_adv_timers_stop;
+extern sli_bgapi_component_deinit_func_t sli_bt_local_privacy_adv_timers_deinit;
 extern sli_bgapi_component_start_func_t sli_bt_channel_sounding_start;
 extern sli_bgapi_component_init_func_t sli_bt_channel_sounding_test_init;
 extern sli_bgapi_component_init_func_t sli_bt_l2cap_init;
@@ -253,6 +271,12 @@ static const sli_bgapi_component_init_info_t bt_component_init_info[] = {
 #endif
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_PAWR_ADVERTISER_PRESENT)
   { sli_bt_pawr_advertiser_init, NULL },
+#endif
+#if defined(SLI_BT_LOCAL_PRIVACY_CENTRAL_TIMER_PRESENT)
+  { sli_bt_local_privacy_central_timer_init, NULL },
+#endif
+#if defined(SLI_BT_LOCAL_PRIVACY_ADV_TIMERS_PRESENT)
+  { sli_bt_local_privacy_adv_timers_init, &sli_bt_advertiser_config },
 #endif
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT)
   { sli_bt_channel_sounding_test_init, NULL },
@@ -338,6 +362,12 @@ static sli_bgapi_component_stop_func_t * const bt_component_stop_functions[] = {
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_PRESENT)
   sli_bt_connection_stop,
 #endif
+#if defined(SLI_BT_LOCAL_PRIVACY_ADV_TIMERS_PRESENT)
+  sli_bt_local_privacy_adv_timers_stop,
+#endif
+#if defined(SLI_BT_LOCAL_PRIVACY_CENTRAL_TIMER_PRESENT)
+  sli_bt_local_privacy_central_timer_stop,
+#endif
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_ADVERTISER_PRESENT)
   sli_bt_advertiser_stop,
 #endif
@@ -372,6 +402,12 @@ static sli_bgapi_component_deinit_func_t * const bt_component_deinit_functions[]
 #endif
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_L2CAP_PRESENT)
   sli_bt_l2cap_deinit,
+#endif
+#if defined(SLI_BT_LOCAL_PRIVACY_ADV_TIMERS_PRESENT)
+  sli_bt_local_privacy_adv_timers_deinit,
+#endif
+#if defined(SLI_BT_LOCAL_PRIVACY_CENTRAL_TIMER_PRESENT)
+  sli_bt_local_privacy_central_timer_deinit,
 #endif
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_PERIODIC_ADVERTISER_PRESENT)
   sli_bt_periodic_advertiser_deinit,

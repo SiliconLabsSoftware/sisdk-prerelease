@@ -31,6 +31,7 @@
 #include "sl_watchdog_manager.h"
 #include "sli_watchdog_manager.h"
 #include "sl_status.h"
+#include "sl_common.h"
 #if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
 #include "FreeRTOS.h"
 #endif
@@ -80,6 +81,16 @@ void sli_watchdog_manager_platform_feed(void)
   sl_watchdog_manager_feed(&platform_watchdog_handle);
 }
 
+#if ((defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT) && (configUSE_IDLE_HOOK == 1)) \
+  || defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT))
+/***************************************************************************//**
+ * Optional application hook invoked after the platform idle feed.
+ ******************************************************************************/
+SL_WEAK void sl_watchdog_manager_user_idle_hook(void)
+{
+}
+#endif
+
 #if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
 #if (configUSE_IDLE_HOOK == 1)
 /***************************************************************************//**
@@ -91,10 +102,12 @@ void sli_watchdog_manager_platform_feed(void)
  * (task switch) so the platform handle is also exercised while the idle task runs.
  *
  * @note Keep this hook minimal; do not block or call non–ISR-safe APIs here.
+ * @note Calls @ref sl_watchdog_manager_user_idle_hook after feeding.
  ******************************************************************************/
 void vApplicationIdleHook(void)
 {
   sli_watchdog_manager_platform_feed();
+  sl_watchdog_manager_user_idle_hook();
 }
 #endif /* configUSE_IDLE_HOOK == 1 */
 #endif /* SL_CATALOG_FREERTOS_KERNEL_PRESENT */
@@ -112,19 +125,17 @@ void vApplicationIdleHook(void)
  * @c OS_CFG_APP_HOOKS_EN is enabled.
  *
  * @note Keep this hook minimal; do not block or call non–ISR-safe APIs here.
+ * @note Calls @ref sl_watchdog_manager_user_idle_hook after feeding.
  ******************************************************************************/
 void OSIdleEnterHook(void)
 {
   sli_watchdog_manager_platform_feed();
+  sl_watchdog_manager_user_idle_hook();
 }
 
 /***************************************************************************//**
- * Install Micrium task-switch hook (same role as FreeRTOS @c portTASK_SWITCH_HOOK).
- *
- * @details
- * Must run after @c OSInit() (which clears @c OS_AppTaskSwHookPtr). Called from
- * @ref sl_watchdog_manager_start() when the kernel is already initialized.
- * If @c OS_CFG_APP_HOOKS_EN is @c 0 in @c os_cfg.h, only @c OSIdleEnterHook feeds.
+ * Register Micrium @c OS_AppTaskSwHookPtr to feed on context switches (when
+ * @c OS_CFG_APP_HOOKS_EN is enabled). Called from @ref sl_watchdog_manager_start().
  ******************************************************************************/
 void sli_watchdog_manager_micrium_install_task_sw_hook(void)
 {

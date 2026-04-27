@@ -2460,6 +2460,12 @@ SLI_RAIL_ENUM(sl_rail_tx_pa_mode_t) {
    * PA for Sub-GHz OFDM.
    */
   SL_RAIL_TX_PA_MODE_SUB_GHZ_OFDM = 2U,
+#ifndef DOXYGEN_UNDOCUMENTED
+  /**
+   * PA for 2.4 GHz BTC.
+   */
+  SL_RAIL_TX_PA_MODE_2P4_GHZ_BTC = 3U,
+#endif // DOXYGEN_UNDOCUMENTED
   /**
    * An invalid Power Amplifier (PA) mode in the RAIL TX configuration.
    *
@@ -2469,7 +2475,7 @@ SLI_RAIL_ENUM(sl_rail_tx_pa_mode_t) {
    *
    * @note Ensure that this value is not used in actual transmission configurations.
    */
-  SL_RAIL_TX_PA_MODE_INVALID = 3U,
+  SL_RAIL_TX_PA_MODE_INVALID = 4U,
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -2571,6 +2577,14 @@ SLI_RAIL_ENUM(sl_rail_tx_power_mode_t) {
    *  SL_RAIL_SUPPORTS_OFDM_PA (e.g., EFR32xG25).
    */
   SL_RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE = 11U,
+#ifndef DOXYGEN_UNDOCUMENTED
+  /**
+   *  2.4 GHz BTC amplifier
+   *  Supported only on platforms with
+   *  \ref SL_RAIL_SUPPORTS_PROTOCOL_BTC (e.g., SiWX353).
+   */
+  SL_RAIL_TX_POWER_MODE_2P4_GHZ_BTC = 12U,
+#endif // DOXYGEN_UNDOCUMENTED
   /**
    * Invalid amplifier Selection. Must be last.
    */
@@ -2603,6 +2617,7 @@ SLI_RAIL_ENUM(sl_rail_tx_power_mode_t) {
     "SL_RAIL_TX_POWER_MODE_SUB_GHZ_LLP",                \
     "SL_RAIL_TX_POWER_MODE_SUB_GHZ_HIGHEST",            \
     "SL_RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE", \
+    "SL_RAIL_TX_POWER_MODE_2P4_GHZ_BTC",                \
     "SL_RAIL_TX_POWER_MODE_NONE"                        \
 }
 
@@ -2618,6 +2633,7 @@ SLI_RAIL_ENUM(sl_rail_tx_power_mode_t) {
     "SL_RAIL_TX_PA_MODE_2P4_GHZ",      \
     "SL_RAIL_TX_PA_MODE_SUB_GHZ",      \
     "SL_RAIL_TX_PA_MODE_SUB_GHZ_OFDM", \
+    "SL_RAIL_TX_PA_MODE_2P4_GHZ_BTC",  \
     "SL_RAIL_TX_PA_MODE_INVALID"       \
 }
 

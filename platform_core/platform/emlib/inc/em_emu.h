@@ -548,6 +548,9 @@ typedef enum {
   emuDcdcRegulationType_RegDVDD     = _DCDC_DOCTRL_REGULATIONTYPE_REGDVDD,    /**< Regulate DVDD only. */
   emuDcdcRegulationType_RegDEC      = _DCDC_DOCTRL_REGULATIONTYPE_REGDEC,     /**< Regulate DEC only. */
   emuDcdcRegulationType_RegDVDDDEC  = _DCDC_DOCTRL_REGULATIONTYPE_REGDVDDDEC, /**< Regulate both DVDD and DEC. */
+#if defined(_DCDC_DOCTRL_REGULATIONTYPE_BYPDVDDDEC)
+  emuDcdcRegulationType_BypDVDDDEC  = _DCDC_DOCTRL_REGULATIONTYPE_BYPDVDDDEC, /**< Bypass DVDD and DEC. */
+#endif
 } EMU_DcdcRegulationType_TypeDef;
 #endif
 
@@ -1329,6 +1332,24 @@ void EMU_DCDCSetRegulationType(EMU_DcdcRegulationType_TypeDef regulationType);
  *   Current regulation type setting.
  ******************************************************************************/
 EMU_DcdcRegulationType_TypeDef EMU_DCDCGetRegulationType(void);
+
+#if defined(_DCDC_OUTEN_MASK)
+/***************************************************************************//**
+ * @brief
+ *   Check if the DCDC output is enabled for the given regulation type.
+ *
+ * @details
+ *   Reads the DCDC OUTEN register and returns true if the appropriate
+ *   output enable bits are set for the specified regulation type.
+ *
+ * @param[in] regulationType
+ *   Regulation type to check output enable status for.
+ *
+ * @return
+ *   True if the output is enabled for the given regulation type.
+ ******************************************************************************/
+bool EMU_DCDCGetOutputEnableStatus(EMU_DcdcRegulationType_TypeDef regulationType);
+#endif
 #endif
 
 #if defined(_DCDC_DOCTRL_DUALIPKEN_MASK)

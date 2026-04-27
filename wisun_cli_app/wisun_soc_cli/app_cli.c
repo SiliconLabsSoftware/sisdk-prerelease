@@ -150,6 +150,8 @@ typedef union {
   int32_t unicast_hop_limit;
   /// Socket multicast hop limit
   int32_t multicast_hop_limit;
+  /// Socket traffic class
+  int32_t traffic_class;
 } SL_ATTRIBUTE_PACKED app_socket_option_data_t;
 SL_PACK_END()
 
@@ -176,7 +178,8 @@ static sl_status_t app_socket_multicast_hop_limit_handler(app_socket_option_data
 
 static sl_status_t app_socket_multicast_group_handler(app_socket_option_data_t *option_data,
                                                       const char *option_data_str);
-
+static sl_status_t app_socket_traffic_class_handler(app_socket_option_data_t *option_data,
+                                                    const char *option_data_str);
 static sl_status_t app_get_ip_address(in6_addr_t *value,
                                       const char *value_str);
 
@@ -201,6 +204,7 @@ static const app_socket_option_t app_set_socket_options[] =
   { "IPV6_MULTICAST_HOPS", IPV6_MULTICAST_HOPS, IPPROTO_IPV6, MEMBER_SIZE(app_socket_option_data_t, multicast_hop_limit), app_socket_multicast_hop_limit_handler },
   { "IPV6_JOIN_GROUP", IPV6_JOIN_GROUP, IPPROTO_IPV6, MEMBER_SIZE(app_socket_option_data_t, multicast_group), app_socket_multicast_group_handler },
   { "IPV6_LEAVE_GROUP", IPV6_LEAVE_GROUP, IPPROTO_IPV6, MEMBER_SIZE(app_socket_option_data_t, multicast_group), app_socket_multicast_group_handler },
+  { "IPV6_TRAFFIC_CLASS", IPV6_TCLASS, IPPROTO_IPV6, MEMBER_SIZE(app_socket_option_data_t, traffic_class), app_socket_traffic_class_handler },
   { NULL, 0, 0, 0, NULL }
 };
 
@@ -210,6 +214,7 @@ static const app_socket_option_t app_get_socket_options[] =
   { "SO_SNDBUF", SO_SNDBUF, SOL_SOCKET, MEMBER_SIZE(app_socket_option_data_t, send_buffer_limit), NULL },
   { "IPV6_UNICAST_HOPS", IPV6_UNICAST_HOPS, IPPROTO_IPV6, MEMBER_SIZE(app_socket_option_data_t, unicast_hop_limit), NULL },
   { "IPV6_MULTICAST_HOPS", IPV6_MULTICAST_HOPS, IPPROTO_IPV6, MEMBER_SIZE(app_socket_option_data_t, multicast_hop_limit), NULL },
+  { "IPV6_TRAFFIC_CLASS", IPV6_TCLASS, IPPROTO_IPV6, MEMBER_SIZE(app_socket_option_data_t, traffic_class), NULL },
   { NULL, 0, 0, 0, NULL }
 };
 
@@ -923,6 +928,12 @@ static void app_handle_error_ind(sl_wisun_evt_t *evt)
   printf("[Error: %"PRIu32"]\r\n", evt->evt.error.status);
 }
 
+static void app_handle_fb_ready_ind(sl_wisun_evt_t *evt)
+{
+  (void)evt;
+  printf("[First Breath ready]\r\n");
+}
+
 void sl_wisun_on_event(sl_wisun_evt_t *evt)
 {
   sl_status_t result;
@@ -1003,6 +1014,9 @@ void sl_wisun_on_event(sl_wisun_evt_t *evt)
       break;
     case SL_WISUN_MSG_ERROR_IND_ID:
       app_handle_error_ind(evt);
+      break;
+    case SL_WISUN_MSG_FB_READY_IND_ID:
+      app_handle_fb_ready_ind(evt);
       break;
     default:
       printf("[Unknown event: %d]\r\n", evt->header.id);
@@ -1108,6 +1122,35 @@ static sl_status_t app_build_phy_config(sl_wisun_phy_config_type_t phy_config_ty
   return SL_STATUS_OK;
 }
 
+static sl_status_t app_set_options(void)
+{
+  struct {
+    sl_wisun_option_id_t id;
+    const void *val;
+    uint32_t val_len;
+  } opts[] = {
+    { SL_WISUN_OPTION_TRAFFIC_LOWPAN_MTU_BYTES,        &app_settings_wisun.lowpan_mtu,              sizeof(app_settings_wisun.lowpan_mtu) },
+    { SL_WISUN_OPTION_TRAFFIC_IPV6_MRU_BYTES,          &app_settings_wisun.ipv6_mru,                sizeof(app_settings_wisun.ipv6_mru) },
+    { SL_WISUN_OPTION_TRAFFIC_MAX_EDFE_FRAGMENT_COUNT, &app_settings_wisun.max_edfe_fragment_count, sizeof(app_settings_wisun.max_edfe_fragment_count) },
+    { SL_WISUN_OPTION_MAC_MIN_BE,                      &app_settings_mac.min_be,                    sizeof(app_settings_mac.min_be) },
+    { SL_WISUN_OPTION_MAC_MAX_BE,                      &app_settings_mac.max_be,                    sizeof(app_settings_mac.max_be) },
+    { SL_WISUN_OPTION_MAC_BACKOFF_PERIOD_US,           &app_settings_mac.backoff_period_us,         sizeof(app_settings_mac.backoff_period_us) },
+    { SL_WISUN_OPTION_MAC_MAX_CCA_RETRIES,             &app_settings_mac.max_cca_retries,           sizeof(app_settings_mac.max_cca_retries) },
+    { SL_WISUN_OPTION_MAC_MAX_FRAME_RETRIES,           &app_settings_mac.max_frame_retries,         sizeof(app_settings_mac.max_frame_retries) },
+  };
+  sl_status_t ret;
+
+  for (uint32_t i = 0; i < sizeof(opts) / sizeof(opts[0]); i++) {
+    ret = sl_wisun_set_option(opts[i].id, opts[i].val, opts[i].val_len);
+    if (ret != SL_STATUS_OK) {
+      printf("[Failed: unable to set option %d, status: %lu]\r\n", opts[i].id, ret);
+      return ret;
+    }
+  }
+
+  return SL_STATUS_OK;
+}
+
 static void app_join(sl_wisun_phy_config_type_t phy_config_type)
 {
   sl_status_t ret;
@@ -1155,47 +1198,58 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
     goto cleanup;
   }
 
+  ret = sl_wisun_reset_parameters();
+  if (ret != SL_STATUS_OK) {
+    printf("[Failed: unable to reset parameters: %lu]\r\n", ret);
+    goto cleanup;
+  }
+
   /*
    * NOTE: Automatic network size is the default in the stack.
    * Setting traffic and mac parameters is only supported for non-automatic
    * network sizes.
    */
-  if (app_settings_wisun.device_type == SL_WISUN_ROUTER &&
-      app_settings_wisun.network_size != SL_WISUN_NETWORK_SIZE_AUTOMATIC) {
-    switch (app_settings_wisun.network_size) {
-      case SL_WISUN_NETWORK_SIZE_SMALL:
-        params = SL_WISUN_PARAMS_PROFILE_SMALL;
-        break;
-      case SL_WISUN_NETWORK_SIZE_MEDIUM:
-        params = SL_WISUN_PARAMS_PROFILE_MEDIUM;
-        break;
-      case SL_WISUN_NETWORK_SIZE_LARGE:
-        params = SL_WISUN_PARAMS_PROFILE_LARGE;
-        break;
-      case SL_WISUN_NETWORK_SIZE_TEST:
-        params = SL_WISUN_PARAMS_PROFILE_TEST;
-        break;
-      case SL_WISUN_NETWORK_SIZE_CERTIFICATION:
-        params = SL_WISUN_PARAMS_PROFILE_CERTIF;
-        break;
-      default:
-        printf("[Failed: unsupported network size]\r\n");
+  if (app_settings_wisun.device_type == SL_WISUN_ROUTER) {
+    if (app_settings_wisun.network_size != SL_WISUN_NETWORK_SIZE_AUTOMATIC) {
+      switch (app_settings_wisun.network_size) {
+        case SL_WISUN_NETWORK_SIZE_SMALL:
+          params = SL_WISUN_PARAMS_PROFILE_SMALL;
+          break;
+        case SL_WISUN_NETWORK_SIZE_MEDIUM:
+          params = SL_WISUN_PARAMS_PROFILE_MEDIUM;
+          break;
+        case SL_WISUN_NETWORK_SIZE_LARGE:
+          params = SL_WISUN_PARAMS_PROFILE_LARGE;
+          break;
+        case SL_WISUN_NETWORK_SIZE_TEST:
+          params = SL_WISUN_PARAMS_PROFILE_TEST;
+          break;
+        case SL_WISUN_NETWORK_SIZE_CERTIFICATION:
+          params = SL_WISUN_PARAMS_PROFILE_CERTIF;
+          break;
+        default:
+          printf("[Failed: unsupported network size]\r\n");
+          goto cleanup;
+      }
+      params.traffic.lowpan_mtu = app_settings_wisun.lowpan_mtu;
+      params.traffic.ipv6_mru = app_settings_wisun.ipv6_mru;
+      params.traffic.max_edfe_fragment_count = app_settings_wisun.max_edfe_fragment_count;
+      params.mac.min_be = app_settings_mac.min_be;
+      params.mac.max_be = app_settings_mac.max_be;
+      params.mac.backoff_period_us = app_settings_mac.backoff_period_us;
+      params.mac.max_cca_retries = app_settings_mac.max_cca_retries;
+      params.mac.max_frame_retries = app_settings_mac.max_frame_retries;
+      ret = sl_wisun_set_connection_parameters(&params);
+      if (ret != SL_STATUS_OK) {
+        printf("[Failed: unable to set network size: %lu]\r\n", ret);
         goto cleanup;
+      }
+    } else {
+      ret = app_set_options();
+      if (ret != SL_STATUS_OK) {
+        goto cleanup;
+      }
     }
-    params.traffic.lowpan_mtu = app_settings_wisun.lowpan_mtu;
-    params.traffic.ipv6_mru = app_settings_wisun.ipv6_mru;
-    params.traffic.max_edfe_fragment_count = app_settings_wisun.max_edfe_fragment_count;
-    params.mac.min_be = app_settings_mac.min_be;
-    params.mac.max_be = app_settings_mac.max_be;
-    params.mac.backoff_period_us = app_settings_mac.backoff_period_us;
-    params.mac.max_cca_retries = app_settings_mac.max_cca_retries;
-    params.mac.max_frame_retries = app_settings_mac.max_frame_retries;
-    ret = sl_wisun_set_connection_parameters(&params);
-  }
-
-  if (ret != SL_STATUS_OK) {
-    printf("[Failed: unable to set network size: %lu]\r\n", ret);
-    goto cleanup;
   }
 
   ret = sl_wisun_config_neighbor_table(app_settings_wisun.max_child_count, app_settings_wisun.max_neighbor_count, app_settings_wisun.max_security_neighbor_count);
@@ -1213,26 +1267,32 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
   }
 
   // NOTE: Automatic LFN profile is the default in the stack.
-  if (app_settings_wisun.device_type == SL_WISUN_LFN &&
-      app_settings_wisun.lfn_profile != SL_WISUN_LFN_PROFILE_AUTOMATIC) {
-    switch (app_settings_wisun.lfn_profile) {
-      case SL_WISUN_LFN_PROFILE_TEST:
-        lfn_params = SL_WISUN_PARAMS_LFN_TEST;
-        break;
-      case SL_WISUN_LFN_PROFILE_BALANCED:
-        lfn_params = SL_WISUN_PARAMS_LFN_BALANCED;
-        break;
-      case SL_WISUN_LFN_PROFILE_ECO:
-        lfn_params = SL_WISUN_PARAMS_LFN_ECO;
-        break;
-      default:
-        printf("[Failed: unsupported LFN profile]\r\n");
+  if (app_settings_wisun.device_type == SL_WISUN_LFN) {
+    if (app_settings_wisun.lfn_profile != SL_WISUN_LFN_PROFILE_AUTOMATIC) {
+      switch (app_settings_wisun.lfn_profile) {
+        case SL_WISUN_LFN_PROFILE_TEST:
+          lfn_params = SL_WISUN_PARAMS_LFN_TEST;
+          break;
+        case SL_WISUN_LFN_PROFILE_BALANCED:
+          lfn_params = SL_WISUN_PARAMS_LFN_BALANCED;
+          break;
+        case SL_WISUN_LFN_PROFILE_ECO:
+          lfn_params = SL_WISUN_PARAMS_LFN_ECO;
+          break;
+        default:
+          printf("[Failed: unsupported LFN profile]\r\n");
+          goto cleanup;
+      }
+      ret = sl_wisun_set_lfn_parameters(&lfn_params);
+      if (ret != SL_STATUS_OK) {
+        printf("[Failed: unable to set LFN parameters: %lu]\r\n", ret);
         goto cleanup;
-    }
-    ret = sl_wisun_set_lfn_parameters(&lfn_params);
-    if (ret != SL_STATUS_OK) {
-      printf("[Failed: unable to set LFN parameters: %lu]\r\n", ret);
-      goto cleanup;
+      }
+    } else {
+      ret = app_set_options();
+      if (ret != SL_STATUS_OK) {
+        goto cleanup;
+      }
     }
   }
 
@@ -2468,6 +2528,29 @@ static sl_status_t app_socket_multicast_group_handler(app_socket_option_data_t *
   option_data->multicast_group.ipv6mr_ifindex = 0;
 
   return SL_STATUS_OK;
+
+  // Restore the defaults
+  #ifdef __GNUC__
+  #pragma GCC diagnostic pop
+  #elif defined __ICCARM__
+  #pragma diag_default=Pa039
+  #endif
+}
+
+static sl_status_t app_socket_traffic_class_handler(app_socket_option_data_t *option_data,
+                                                    const char *option_data_str)
+{
+  // The caller guarantees the aligment of the option data,
+  // thus the warning can be ignored.
+  #ifdef __GNUC__
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wpragmas"
+  #pragma GCC diagnostic ignored "-Waddress-of-packed-member"
+  #elif defined __ICCARM__
+  #pragma diag_suppress=Pa039
+  #endif
+
+  return app_util_get_integer((uint32_t *)&option_data->traffic_class, option_data_str, NULL, true);
 
   // Restore the defaults
   #ifdef __GNUC__
@@ -4146,6 +4229,24 @@ void app_set_last_gasp(sl_cli_command_arg_t *arguments)
     printf("[Failed: unable to set Last Gasp: %lu]\r\n", ret);
   } else {
     printf("[%s Last Gasp]\r\n", enable ? "Entered" : "Left");
+  }
+
+  app_wisun_cli_mutex_unlock();
+}
+
+void app_set_first_breath(sl_cli_command_arg_t *arguments)
+{
+  sl_status_t status;
+  bool enable;
+
+  app_wisun_cli_mutex_lock();
+
+  enable = (bool)sl_cli_get_argument_uint8(arguments, 0);
+  status = sl_wisun_set_first_breath(enable);
+  if (status != SL_STATUS_OK) {
+    printf("[Failed: unable to set First Breath: %lu]\r\n", status);
+  } else {
+    printf("[First Breath %s]\r\n", enable ? "enabled" : "disabled");
   }
 
   app_wisun_cli_mutex_unlock();

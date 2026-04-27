@@ -297,6 +297,26 @@ sl_status_t sl_watchdog_manager_force_feed(void);
  ******************************************************************************/
 sl_status_t sl_watchdog_manager_retrieve_faulty(sl_watchdog_handle_t *handle);
 
+#if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT) || defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT)
+/***************************************************************************//**
+ * @brief Optional application hook invoked after the platform idle feed.
+ *
+ * @details
+ * - **FreeRTOS:** When @c configUSE_IDLE_HOOK is @c 1, @c vApplicationIdleHook()
+ *   feeds the platform default watchdog, then calls this user idle hook function.
+ * - **Micrium OS:** @c OSIdleEnterHook() feeds the platform default watchdog,
+ *   then calls this user idle hook function.
+ *
+ * To add application-specific idle work, provide a strong implementation of
+ * @c sl_watchdog_manager_user_idle_hook() in application code; the
+ * linker will replace this weak default implementation with a strong one.
+
+ * @note Do not block. Do not call APIs that might block. Same constraints as
+ *       the RTOS idle hook that invokes this callback.
+ ******************************************************************************/
+void sl_watchdog_manager_user_idle_hook(void);
+#endif
+
 /** @} (end addtogroup watchdog_manager) */
 
 #ifdef __cplusplus

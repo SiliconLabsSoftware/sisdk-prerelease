@@ -34,7 +34,9 @@
 #include "sl_log_common_config.h"
 #include "sl_component_catalog.h"
 #ifdef SL_CATALOG_LOG_BACKEND_PROPRIETARY_PRESENT
+#ifndef SL_CATALOG_LOG_FORMATTED_OUTPUT_PRESENT
 #include "sl_log_proprietary_config.h"
+#endif
 #endif
 #if defined (__clang__)
 #include "cmsis_clang.h"
@@ -97,7 +99,7 @@ static sl_log_ring_buffer_t ring_buffer;
 static sl_log_level_t current_log_level;
 
 // Sets after sl_log_init_stage2 and used to determine the early logs
-static bool log_init_stage2_done;
+bool log_init_stage2_done;
 
 #if (defined(SL_LOG_CONFIG_MODE) \
   && (SL_LOG_CONFIG_MODE != SL_LOG_CONFIG_MODE_CONSOLE) \
@@ -243,27 +245,138 @@ static void flush_early_logs_to_backend(uint32_t read_index, uint32_t event_coun
     if (idx >= buffer_capacity) {
       idx -= buffer_capacity;
     }
-    // SystemView backend sends each event via SEGGER_SYSVIEW_RecordU32 APIs
+    // SystemView: printf-style logs use PrintElf (ELF string address); numeric events use RecordU32xN.
 #ifdef SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT
-    switch (ring_buffer.buffer[idx].arg_count) {
-      case 0:
-        SEGGER_SYSVIEW_RecordVoid(ring_buffer.buffer[idx].event_id);
-        break;
-      case 1:
-        SEGGER_SYSVIEW_RecordU32(ring_buffer.buffer[idx].event_id,
-                                  ring_buffer.buffer[idx].args[0]);
-        break;
-      case 2:
-        SEGGER_SYSVIEW_RecordU32x2(ring_buffer.buffer[idx].event_id,
-                                    ring_buffer.buffer[idx].args[0],
-                                    ring_buffer.buffer[idx].args[1]);
-        break;
-      case 3:
-        SEGGER_SYSVIEW_RecordU32x3(ring_buffer.buffer[idx].event_id,
-                                    ring_buffer.buffer[idx].args[0],
-                                    ring_buffer.buffer[idx].args[1],
-                                    ring_buffer.buffer[idx].args[2]);
-        break;
+    {
+      uint32_t opt = (uint32_t)(ring_buffer.buffer[idx].flags & 1u);
+      if ((ring_buffer.buffer[idx].flags & 1u) == 0u) {
+        /* event_id is format string address — must use PrintElf*, not RecordVoid (see SEGGER SYSVIEW_EVTID_EX_PRINT_ELF). */
+        switch (ring_buffer.buffer[idx].arg_count) {
+          case 0:
+            SEGGER_SYSVIEW__PrintElf((unsigned int)ring_buffer.buffer[idx].event_id, opt);
+            break;
+          case 1:
+            SEGGER_SYSVIEW__PrintElf_U32((unsigned int)ring_buffer.buffer[idx].event_id, opt,
+                                           ring_buffer.buffer[idx].args[0]);
+            break;
+          case 2:
+            SEGGER_SYSVIEW__PrintElf_U32x2((unsigned int)ring_buffer.buffer[idx].event_id, opt,
+                                           ring_buffer.buffer[idx].args[0],
+                                           ring_buffer.buffer[idx].args[1]);
+            break;
+          case 3:
+            SEGGER_SYSVIEW__PrintElf_U32x3((unsigned int)ring_buffer.buffer[idx].event_id, opt,
+                                           ring_buffer.buffer[idx].args[0],
+                                           ring_buffer.buffer[idx].args[1],
+                                           ring_buffer.buffer[idx].args[2]);
+            break;
+#if (SL_LOG_CONFIG_ARG >= 4)
+          case 4:
+            SEGGER_SYSVIEW__PrintElf_U32x4((unsigned int)ring_buffer.buffer[idx].event_id, opt,
+                                           ring_buffer.buffer[idx].args[0],
+                                           ring_buffer.buffer[idx].args[1],
+                                           ring_buffer.buffer[idx].args[2],
+                                           ring_buffer.buffer[idx].args[3]);
+            break;
+#endif
+#if (SL_LOG_CONFIG_ARG >= 5)
+          case 5:
+            SEGGER_SYSVIEW__PrintElf_U32x5((unsigned int)ring_buffer.buffer[idx].event_id, opt,
+                                           ring_buffer.buffer[idx].args[0],
+                                           ring_buffer.buffer[idx].args[1],
+                                           ring_buffer.buffer[idx].args[2],
+                                           ring_buffer.buffer[idx].args[3],
+                                           ring_buffer.buffer[idx].args[4]);
+            break;
+#endif
+#if (SL_LOG_CONFIG_ARG >= 6)
+          case 6:
+            SEGGER_SYSVIEW__PrintElf_U32x6((unsigned int)ring_buffer.buffer[idx].event_id, opt,
+                                           ring_buffer.buffer[idx].args[0],
+                                           ring_buffer.buffer[idx].args[1],
+                                           ring_buffer.buffer[idx].args[2],
+                                           ring_buffer.buffer[idx].args[3],
+                                           ring_buffer.buffer[idx].args[4],
+                                           ring_buffer.buffer[idx].args[5]);
+            break;
+#endif
+#if (SL_LOG_CONFIG_ARG >= 7)
+          case 7:
+            SEGGER_SYSVIEW__PrintElf_U32x7((unsigned int)ring_buffer.buffer[idx].event_id, opt,
+                                           ring_buffer.buffer[idx].args[0],
+                                           ring_buffer.buffer[idx].args[1],
+                                           ring_buffer.buffer[idx].args[2],
+                                           ring_buffer.buffer[idx].args[3],
+                                           ring_buffer.buffer[idx].args[4],
+                                           ring_buffer.buffer[idx].args[5],
+                                           ring_buffer.buffer[idx].args[6]);
+            break;
+#endif
+#if (SL_LOG_CONFIG_ARG >= 8)
+          case 8:
+            SEGGER_SYSVIEW__PrintElf_U32x8((unsigned int)ring_buffer.buffer[idx].event_id, opt,
+                                           ring_buffer.buffer[idx].args[0],
+                                           ring_buffer.buffer[idx].args[1],
+                                           ring_buffer.buffer[idx].args[2],
+                                           ring_buffer.buffer[idx].args[3],
+                                           ring_buffer.buffer[idx].args[4],
+                                           ring_buffer.buffer[idx].args[5],
+                                           ring_buffer.buffer[idx].args[6],
+                                           ring_buffer.buffer[idx].args[7]);
+            break;
+#endif
+#if (SL_LOG_CONFIG_ARG >= 9)
+          case 9:
+            SEGGER_SYSVIEW__PrintElf_U32x9((unsigned int)ring_buffer.buffer[idx].event_id, opt,
+                                           ring_buffer.buffer[idx].args[0],
+                                           ring_buffer.buffer[idx].args[1],
+                                           ring_buffer.buffer[idx].args[2],
+                                           ring_buffer.buffer[idx].args[3],
+                                           ring_buffer.buffer[idx].args[4],
+                                           ring_buffer.buffer[idx].args[5],
+                                           ring_buffer.buffer[idx].args[6],
+                                           ring_buffer.buffer[idx].args[7],
+                                           ring_buffer.buffer[idx].args[8]);
+            break;
+#endif
+#if (SL_LOG_CONFIG_ARG >= 10)
+          case 10:
+            SEGGER_SYSVIEW__PrintElf_U32x10((unsigned int)ring_buffer.buffer[idx].event_id, opt,
+                                            ring_buffer.buffer[idx].args[0],
+                                            ring_buffer.buffer[idx].args[1],
+                                            ring_buffer.buffer[idx].args[2],
+                                            ring_buffer.buffer[idx].args[3],
+                                            ring_buffer.buffer[idx].args[4],
+                                            ring_buffer.buffer[idx].args[5],
+                                            ring_buffer.buffer[idx].args[6],
+                                            ring_buffer.buffer[idx].args[7],
+                                            ring_buffer.buffer[idx].args[8],
+                                            ring_buffer.buffer[idx].args[9]);
+            break;
+#endif
+          default:
+            break;
+        }
+      } else {
+        switch (ring_buffer.buffer[idx].arg_count) {
+          case 0:
+            SEGGER_SYSVIEW_RecordVoid(ring_buffer.buffer[idx].event_id);
+            break;
+          case 1:
+            SEGGER_SYSVIEW_RecordU32(ring_buffer.buffer[idx].event_id,
+                                       ring_buffer.buffer[idx].args[0]);
+            break;
+          case 2:
+            SEGGER_SYSVIEW_RecordU32x2(ring_buffer.buffer[idx].event_id,
+                                       ring_buffer.buffer[idx].args[0],
+                                       ring_buffer.buffer[idx].args[1]);
+            break;
+          case 3:
+            SEGGER_SYSVIEW_RecordU32x3(ring_buffer.buffer[idx].event_id,
+                                       ring_buffer.buffer[idx].args[0],
+                                       ring_buffer.buffer[idx].args[1],
+                                       ring_buffer.buffer[idx].args[2]);
+            break;
 #if (SL_LOG_CONFIG_ARG >= 4)
       case 4:
         SEGGER_SYSVIEW_RecordU32x4(ring_buffer.buffer[idx].event_id,
@@ -348,8 +461,10 @@ static void flush_early_logs_to_backend(uint32_t read_index, uint32_t event_coun
                                      ring_buffer.buffer[idx].args[9]);
         break;
 #endif
-      default:
-        break;
+          default:
+            break;
+        }
+      }
     }
 #else
     //Host or console mode: write each event to the backend.

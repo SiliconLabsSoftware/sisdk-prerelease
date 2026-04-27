@@ -12,6 +12,7 @@ component:
   - id: ot_stack_ftd
   - id: clock_manager
   - id: rail_util_pti
+  - id: bootloader_interface
   # Platform - Enable LTO for gcc by installing the following component
   - id: toolchain_gcc_lto
   - id: ot_default_dataset_values

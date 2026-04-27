@@ -39,6 +39,9 @@
 #define SL_ZIGBEE_DHC_CURVE_SEGMENT_COUNT   9u
 #define SL_ZIGBEE_DHC_TABLE_ENTRY_COUNT     16u
 
+// Max PA descriptors (must match NCP SL_RAIL_NVM_PA_COUNT; host validates before write)
+#define SL_ZIGBEE_DHC_MAX_PA_DESCRIPTORS    2u
+
 // Convenience macro: validate descriptor counts at compile time where possible
 #define SL_ZIGBEE_DHC_DESCRIPTOR_IS_CURVE(d) ((d)->algorithm == SL_ZIGBEE_DHC_ALGO_CURVE)
 #define SL_ZIGBEE_DHC_DESCRIPTOR_IS_TABLE(d) ((d)->algorithm == SL_ZIGBEE_DHC_ALGO_TABLE)
@@ -302,13 +305,6 @@ sl_status_t sl_zigbee_dhc_write_dhc_version(uint8_t dhc_version);
  * @return SL_STATUS_OK on success.
  */
 sl_status_t sl_zigbee_dhc_read_pa_version(sl_zigbee_dhc_pa_version_t *pa_version);
-
-/**
- * @brief Write PA dataset version.
- * @param[in] pa_version New dataset version wrapper.
- * @return SL_STATUS_OK on success.
- */
-sl_status_t sl_zigbee_dhc_write_pa_version(sl_zigbee_dhc_pa_version_t *pa_version);
 
 /**
  * @brief Read PA signature wrapper.

@@ -166,12 +166,6 @@ sl_status_t sli_zigbee_stack_write_dhc_version(uint8_t dhc_version);
  */
 sl_status_t sli_zigbee_stack_read_pa_version(sl_zigbee_dhc_pa_version_t *pa_version);
 /**
- * @brief Write PA dataset version wrapper.
- * @param[in] pa_version New struct.
- * @return SL_STATUS_OK on success.
- */
-sl_status_t sli_zigbee_stack_write_pa_version(sl_zigbee_dhc_pa_version_t *pa_version);
-/**
  * @brief Read PA signature wrapper.
  * @param[out] pa_signature Output signature struct.
  * @return SL_STATUS_OK on success.

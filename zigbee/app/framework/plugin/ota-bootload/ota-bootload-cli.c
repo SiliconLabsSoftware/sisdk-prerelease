@@ -26,6 +26,10 @@
 #include "sl_token_manager_api.h"
 #include "stack/include/sl_zigbee_token.h"
 
+#if defined(_SILICON_LABS_32B_SERIES_2) && defined(SL_CATALOG_TOKEN_MANAGER_PRESENT)
+#include "sl_token_manager_manufacturing.h"
+#endif
+
 #if !defined(EZSP_HOST) && !defined(SL_ZIGBEE_TEST)
 #include "api/btl_interface.h"
 #endif
@@ -36,11 +40,12 @@ void printBootloaderInfoCommand(sl_cli_command_arg_t *arguments)
 #if !defined(EZSP_HOST) && !defined(SL_ZIGBEE_TEST)
   BootloaderInformation_t info = { .type = SL_BOOTLOADER, .version = 0U, .capabilities = 0U };
   bootloader_getInfo(&info);
-  tokTypeMfgSecureBootloaderKey keyData;
   sl_zigbee_af_cli_println("Installed Type (Base):  0x%02X", info.type);
   sl_zigbee_af_cli_println("Capabilities:           0x%04X", info.capabilities);
   sl_zigbee_af_cli_println("Bootloader Version:     0x%04X", info.version);
 
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  tokTypeMfgSecureBootloaderKey keyData;
 #if defined(SL_ZIGBEE_TEST)
   memset(keyData, 0xFF, SL_ZIGBEE_ENCRYPTION_KEY_SIZE);
 #else
@@ -49,10 +54,12 @@ void printBootloaderInfoCommand(sl_cli_command_arg_t *arguments)
     sl_zigbee_af_cli_println("Failed to get MFG_SECURE_BOOTLOADER_KEY, status: 0x%08X", status);
   }
 #endif
-
   sl_zigbee_af_cli_print("Secure Bootloader Key:      ");
   sl_zigbee_af_print_zigbee_key((uint8_t const *)&keyData);
   sl_zigbee_af_cli_println("");
+#else
+  sl_zigbee_af_cli_println("Secure Bootloader Key:      (not available on Series 3)");
+#endif
 
 #else
   sl_zigbee_af_cli_println("Unsupported on EZSP Host");

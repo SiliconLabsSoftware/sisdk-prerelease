@@ -272,6 +272,5 @@
 #define sl_zigbee_dhc_read_dhc_version          sl_zigbee_ezsp_read_dhc_version
 #define sl_zigbee_dhc_write_dhc_version         sl_zigbee_ezsp_write_dhc_version
 #define sl_zigbee_dhc_read_pa_version           sl_zigbee_ezsp_read_pa_version
-#define sl_zigbee_dhc_write_pa_version          sl_zigbee_ezsp_write_pa_version
 #define sl_zigbee_dhc_read_pa_signature         sl_zigbee_ezsp_read_pa_signature
 #define sl_zigbee_dhc_write_pa_signature        sl_zigbee_ezsp_write_pa_signature
