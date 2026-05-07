@@ -563,6 +563,29 @@ template_contribution:
       help: "Reset the duty cycle counters"
       shortcuts:
         - name: "rdc"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "set_option"
+      handler: "app_set_option"
+      help: "set Wi-SUN option"
+      shortcuts:
+        - name: "sopt"
+      argument:
+        - type: uint32
+          help: "Wi-SUN option ID"
+        - type: uint32
+          help: "Option value"
+        - type: uint16
+          help: "Option length in bytes"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "reset_parameters"
+      handler: "app_reset_parameters"
+      help: "reset Wi-SUN parameters"
+      shortcuts:
+        - name: "rstpar"
 
 # -------------------------------
   - name: cli_group

@@ -128,6 +128,7 @@ static const app_enum_t app_frame_type_enum[] = {
   { "pc", SL_WISUN_FRAME_TYPE_PC },
   { "dis", SL_WISUN_FRAME_TYPE_DIS },
   { "dio", SL_WISUN_FRAME_TYPE_DIO },
+  { "lpas", SL_WISUN_FRAME_TYPE_LPAS },
   { NULL, 0 }
 };
 
@@ -1202,12 +1203,6 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
     goto cleanup;
   }
 
-  ret = sl_wisun_reset_parameters();
-  if (ret != SL_STATUS_OK) {
-    printf("[Failed: unable to reset parameters: %lu]\r\n", ret);
-    goto cleanup;
-  }
-
   /*
    * NOTE: Automatic network size is the default in the stack.
    * Setting traffic and mac parameters is only supported for non-automatic
@@ -1323,7 +1318,7 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
     goto cleanup;
   }
 
-  certificate_options = SL_WISUN_CERTIFICATE_OPTION_IS_REF;
+  certificate_options = SL_WISUN_CERTIFICATE_OPTION_NONE;
   for (idx = 0; idx < trustedca_count; ++idx) {
     trustedca = sl_wisun_keychain_get_trustedca(idx);
     if (!trustedca) {
@@ -1360,7 +1355,7 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
     printf("[Using built-in device credentials]\r\n");
   }
 
-  ret = sl_wisun_set_device_certificate(SL_WISUN_CERTIFICATE_OPTION_IS_REF | SL_WISUN_CERTIFICATE_OPTION_HAS_KEY,
+  ret = sl_wisun_set_device_certificate(SL_WISUN_CERTIFICATE_OPTION_NONE,
                                         credential->certificate.data_length,
                                         credential->certificate.data);
   if (ret != SL_STATUS_OK) {
@@ -1369,7 +1364,7 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
   }
 
   if (credential->pk.type == SL_WISUN_KEYCHAIN_KEY_TYPE_PLAINTEXT) {
-    ret = sl_wisun_set_device_private_key(SL_WISUN_PRIVATE_KEY_OPTION_IS_REF,
+    ret = sl_wisun_set_device_private_key(SL_WISUN_PRIVATE_KEY_OPTION_NONE,
                                           credential->pk.u.plaintext.data_length,
                                           credential->pk.u.plaintext.data);
   } else {
@@ -4060,6 +4055,85 @@ void app_set_first_breath(sl_cli_command_arg_t *arguments)
     printf("[Failed: unable to set First Breath: %lu]\r\n", status);
   } else {
     printf("[First Breath %s]\r\n", enable ? "enabled" : "disabled");
+  }
+
+  app_wisun_cli_mutex_unlock();
+}
+
+static void update_app_settings(sl_wisun_option_id_t option_id, uint32_t option_value)
+{
+  // Awkward bit of glue for options that are also app settings
+  switch (option_id) {
+    case SL_WISUN_OPTION_TRAFFIC_LOWPAN_MTU_BYTES:
+      app_settings_wisun.lowpan_mtu = (uint16_t)option_value;
+      break;
+    case SL_WISUN_OPTION_TRAFFIC_IPV6_MRU_BYTES:
+      app_settings_wisun.ipv6_mru = (uint16_t)option_value;
+      break;
+    case SL_WISUN_OPTION_TRAFFIC_MAX_EDFE_FRAGMENT_COUNT:
+      app_settings_wisun.max_edfe_fragment_count = (uint8_t)option_value;
+      break;
+    case SL_WISUN_OPTION_MAC_MIN_BE:
+      app_settings_mac.min_be = (uint8_t)option_value;
+      break;
+    case SL_WISUN_OPTION_MAC_MAX_BE:
+      app_settings_mac.max_be = (uint8_t)option_value;
+      break;
+    case SL_WISUN_OPTION_MAC_BACKOFF_PERIOD_US:
+      app_settings_mac.backoff_period_us = (uint16_t)option_value;
+      break;
+    case SL_WISUN_OPTION_MAC_MAX_CCA_RETRIES:
+      app_settings_mac.max_cca_retries = (uint8_t)option_value;
+      break;
+    case SL_WISUN_OPTION_MAC_MAX_FRAME_RETRIES:
+      app_settings_mac.max_frame_retries = (uint8_t)option_value;
+      break;
+    default:
+      break;
+  }
+}
+
+void app_set_option(sl_cli_command_arg_t *arguments)
+{
+  sl_status_t status;
+  uint32_t option_id;
+  uint32_t option_value;
+  uint16_t option_value_len;
+
+  app_wisun_cli_mutex_lock();
+
+  option_id = sl_cli_get_argument_uint32(arguments, 0);
+  option_value = sl_cli_get_argument_uint32(arguments, 1);
+  option_value_len = sl_cli_get_argument_uint16(arguments, 2);
+
+  if (option_value_len > sizeof(option_value)) {
+    printf("[Failed: option_value_len > %u]\r\n", sizeof(option_value));
+    app_wisun_cli_mutex_unlock();
+    return;
+  }
+
+  status = sl_wisun_set_option(option_id, &option_value, option_value_len);
+  if (status != SL_STATUS_OK) {
+    printf("[Failed: unable to set option: %lu]\r\n", status);
+  } else {
+    printf("[Option set]\r\n");
+    update_app_settings(option_id, option_value);
+  }
+
+  app_wisun_cli_mutex_unlock();
+}
+
+void app_reset_parameters(void)
+{
+  sl_status_t status;
+
+  app_wisun_cli_mutex_lock();
+
+  status = sl_wisun_reset_parameters();
+  if (status != SL_STATUS_OK) {
+    printf("[Failed: unable to reset parameters: %lu]\r\n", status);
+  } else {
+    printf("[Parameters reset]\r\n");
   }
 
   app_wisun_cli_mutex_unlock();

@@ -34,6 +34,7 @@
 #include "cs_result.h"
 #include "cs_algo_log.h"
 #include "cs_algo.h"
+#include "cs_algo_internal.h"
 
 // -----------------------------------------------------------------------------
 // Internal types
@@ -58,7 +59,7 @@ static void show_rtl_api_call_result(cs_algo_instance_t *inst,
                                      enum sl_rtl_error_code err_code);
 static void report_result(cs_algo_instance_t *inst,
                           uint16_t ranging_counter,
-                          unified_ranging_data_t *ranging_data);
+                          cs_rreq_result_t *ranging_data);
 static void report_intermediate_result(cs_algo_instance_t *inst);
 static void cs_mode_converter(uint8_t cs_mode_bt,
                               char **cs_mode_str,
@@ -73,7 +74,6 @@ static cs_algo_instance_t *cs_algo_get_free_slot(void);
 
 static cs_algo_instance_t algo_instances[CS_ALGO_ESTIMATOR_COUNT];
 static cs_algo_app_cb_t algo_app_cb;
-static cs_algo_initiator_cb_t algo_initiator_cb;
 
 // -----------------------------------------------------------------------------
 // Static function definitions
@@ -199,11 +199,11 @@ static void show_rtl_api_call_result(cs_algo_instance_t *inst,
  *
  * @param[in] inst cs_algo instance.
  * @param[in] ranging_counter procedure ranging counter.
- * @param[in] ranging_data pointer to the unified ranging data buffer.
+ * @param[in] ranging_data pointer to the RREQ ranging data buffer.
  *****************************************************************************/
 static void report_result(cs_algo_instance_t *inst,
                           uint16_t ranging_counter,
-                          unified_ranging_data_t *ranging_data)
+                          cs_rreq_result_t *ranging_data)
 {
   sl_status_t sc = SL_STATUS_OK;
   bool estimation_valid = false;
@@ -432,37 +432,21 @@ static void report_result(cs_algo_instance_t *inst,
   }
 
   if (estimation_valid) {
-    // Get ranging data so the app can consume it
-    cs_ranging_data_t cs_ranging_data = {
-      .num_steps     = ranging_data->num_steps,
-      .step_channels = ranging_data->step_channels,
-      .initiator = {
-        .ranging_data_size = ranging_data->initiator.ranging_data_size,
-        .ranging_data      = ranging_data->initiator.ranging_data,
-      },
-      .reflector = {
-        .ranging_data_size = ranging_data->reflector.ranging_data_size,
-        .ranging_data      = ranging_data->reflector.ranging_data,
-      },
-    };
+   
     if (algo_app_cb.on_result != NULL) {
       algo_app_cb.on_result(inst->conn_handle,
-                                  ranging_counter,
-                                  inst->result,
-                                  (uint16_t)inst->result_data.size,
-                                  &cs_ranging_data);
+                            ranging_counter,
+                            inst->result,
+                            (uint16_t)inst->result_data.size,
+                            ranging_data);
     }
     if (algo_app_cb.on_extended_result != NULL) {
       algo_app_cb.on_extended_result(inst->conn_handle,
-                                          ranging_counter,
-                                          inst->result,
-                                          (uint16_t)inst->result_data.size,
-                                          &cs_ranging_data);
+                                     ranging_counter,
+                                     inst->result,
+                                     (uint16_t)inst->result_data.size,
+                                     ranging_data);
     }
-  }
-
-  if (algo_initiator_cb.on_process_finished!= NULL) {
-    algo_initiator_cb.on_process_finished(inst->conn_handle, ranging_counter, SL_STATUS_OK);
   }
 }
 
@@ -682,16 +666,6 @@ void cs_algo_init(void)
 {
   memset(algo_instances, 0, sizeof(algo_instances));
   memset(&algo_app_cb, 0, sizeof(algo_app_cb));
-  memset(&algo_initiator_cb, 0, sizeof(algo_initiator_cb));
-}
-
-sl_status_t cs_algo_initiator_set_callback(cs_algo_initiator_cb_t *cb)
-{
-  if (cb == NULL) {
-    return SL_STATUS_NULL_POINTER;
-  }
-  memcpy(&algo_initiator_cb, cb, sizeof(cs_algo_initiator_cb_t));
-  return SL_STATUS_OK;
 }
 
 sl_status_t cs_algo_app_set_callback(cs_algo_app_cb_t *cb)
@@ -790,17 +764,10 @@ sl_status_t cs_algo_remove(uint8_t conn_handle)
   return SL_STATUS_OK;
 }
 
-/******************************************************************************
- * Calculate distance between initiator and reflector using RTL library.
- *
- * @param[in] conn_handle connection handle.
- * @param[in] ranging_counter procedure ranging counter.
- * @param[in] proc_info pointer to the RAS data structure.
- *****************************************************************************/
 void cs_algo_process_ras_data(uint8_t conn_handle,
                               uint16_t ranging_counter,
-                              cs_algo_procedure_info_t proc_info,
-                              unified_ranging_data_t *ranging_data)
+                              cs_rreq_procedure_info_t proc_info,
+                              cs_rreq_result_t *ranging_data)
 {
   if (ranging_data == NULL) {
     algo_log_error(INSTANCE_PREFIX "Null RAS data!" LOG_NL, conn_handle);
@@ -818,9 +785,6 @@ void cs_algo_process_ras_data(uint8_t conn_handle,
     algo_log_error(INSTANCE_PREFIX "Estimator not created - "
                         "cs_algo_create() must run first!" LOG_NL,
                         conn_handle);
-    if (algo_initiator_cb.on_process_finished != NULL) {
-      algo_initiator_cb.on_process_finished(conn_handle, ranging_counter, SL_STATUS_NOT_READY);
-    }
     return;
   }
 
@@ -829,15 +793,15 @@ void cs_algo_process_ras_data(uint8_t conn_handle,
   // Initiator: Measurement data
   sl_rtl_ras_measurement initiator_measurement = {
     .ranging_data_body
-      = (sl_rtl_ras_ranging_data_body *)ranging_data->initiator.ranging_data,
-    .ranging_data_body_len = ranging_data->initiator.ranging_data_size
+      = (sl_rtl_ras_ranging_data_body *)ranging_data->initiator.data,
+    .ranging_data_body_len = ranging_data->initiator.data_size
   };
 
   // Reflector: Measurement data
   sl_rtl_ras_measurement reflector_measurement = {
     .ranging_data_body
-      = (sl_rtl_ras_ranging_data_body *)ranging_data->reflector.ranging_data,
-    .ranging_data_body_len = ranging_data->reflector.ranging_data_size
+      = (sl_rtl_ras_ranging_data_body *)ranging_data->reflector.data,
+    .ranging_data_body_len = ranging_data->reflector.data_size
   };
 
   // Translate procedure_config fields in cs_algo_procedure_info_t into
@@ -855,7 +819,7 @@ void cs_algo_process_ras_data(uint8_t conn_handle,
   sl_rtl_ras_procedure procedure_data = {
     .cs_procedure_config = procedure_config,
     .ras_info = {
-      .num_antenna_paths = proc_info.num_antenna_paths,
+      .num_antenna_paths = inst->config.num_antenna_paths,
       .num_steps_reported = ranging_data->num_steps,
       .step_channels = ranging_data->step_channels
     },
@@ -868,10 +832,10 @@ void cs_algo_process_ras_data(uint8_t conn_handle,
   algo_log_info(INSTANCE_PREFIX "RAS process start - "
                      "ant:%u steps:%u i_sz:%lu r_sz:%lu" LOG_NL,
                      inst->conn_handle,
-                     proc_info.num_antenna_paths,
+                     inst->config.num_antenna_paths,
                      ranging_data->num_steps,
-                     (unsigned long)ranging_data->initiator.ranging_data_size,
-                     (unsigned long)ranging_data->reflector.ranging_data_size);
+                     (unsigned long)ranging_data->initiator.data_size,
+                     (unsigned long)ranging_data->reflector.data_size);
 
   // Start estimation
   // Note: procedure count is always 1.
@@ -890,16 +854,11 @@ void cs_algo_process_ras_data(uint8_t conn_handle,
       report_intermediate_result(inst);
       break;
     default:
-      if (algo_initiator_cb.on_process_finished != NULL) {
-        algo_initiator_cb.on_process_finished(conn_handle, ranging_counter, (uint32_t)rtl_err);
-      }
       break;
   }
   #else
   algo_log_debug(INSTANCE_PREFIX "RTL process skipped" LOG_NL, inst->conn_handle);
-  if (algo_initiator_cb.on_process_finished != NULL) {
-    algo_initiator_cb.on_process_finished(conn_handle, ranging_counter, SL_STATUS_OK);
-  }
-  #endif // CS_ALGO_SKIP_RTL_PROCESS
+  #endif // CS_ALGO_SKIP_RTL_PROCESSa
+  (void)cs_rreq_set_process_finished(conn_handle, ranging_counter);
 }
 

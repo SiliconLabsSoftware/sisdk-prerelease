@@ -767,6 +767,7 @@ sl_status_t cs_initiator_create(const uint8_t               conn_handle,
                                     initiator->rtl_config.algo_mode,
                                     initiator->config.cs_tone_antenna_config_idx,
                                     initiator->config.use_real_time_ras_mode,
+                                    1,
                                     &conn_interval,
                                     &proc_interval);
     if (sc != SL_STATUS_OK) {

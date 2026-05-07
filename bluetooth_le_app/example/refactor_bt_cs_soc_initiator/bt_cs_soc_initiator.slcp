@@ -54,6 +54,8 @@ component:
   - id: refactor_cs_initiator
   - id: refactor_cs_initiator_display
   - id: refactor_cs_antenna
+  - id: cs_rreq
+  - id: cs_configurator
   - id: device_init
   - id: iostream_recommended_stream
   - id: iostream_bgapi_trace

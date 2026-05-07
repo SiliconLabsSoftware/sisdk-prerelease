@@ -37,6 +37,7 @@ All interface related data types are defined in cs_acp.h.
 Build and flash the application. Use the "bt_cs_host" host sample application to connect to it. If the host was started with any initiator instance, it will scan for a reflectors advertising with the "CS RFLCT" device name. If started with reflector instances, it will start advertising. When an initiator instance finds a reflector, it will create a connection between them and will start the distance measurement process. The initiator estimates the distance, and displays them in the command line terminal.
 
 ## Multiconnection
+
 - Default setup is optimized for 1-1 connection, multiconnection setup requires modification of the timing parameters to operate as expected. Timing can be adjusted by the procedure_interval and connection_interval parameters.
 - Use the following calculation for 1-N connection: procedure_time_1_N[ms] = connection_interval[ms] * procedure_interval * N
 - Note that setting CS_INITIATOR_DEFAULT_MIN/MAX_CONNECTION_INTERVAL and CS_INITIATOR_DEFAULT_MIN/MAX_PROCEDURE_INTERVAL will only take effect if CS_INITIATOR_DEFAULT_PROCEDURE_SCHEDULING is set to CS_PROCEDURE_SCHEDULING_CUSTOM. Otherwise these parameters are managed by the application.
@@ -44,6 +45,7 @@ Build and flash the application. Use the "bt_cs_host" host sample application to
 - If more than 1 initiator instances are created increase SL_BT_CONFIG_BUFFER_SIZE. With maximum number of instances (4) it's safe to use 22000.
 
 ## Resource optimization
+
 - Flash usage can be reduced by
   - removing "Bluetooth controller anchor selection" component if no multiple reflector connection is required,
   - turning off some of the "Supported features" in "CS Ranging Service Server" component. Note that "Real-Time Ranging Data" feature is used by default on the Initiator,
@@ -56,6 +58,7 @@ Build and flash the application. Use the "bt_cs_host" host sample application to
   - reducing "Buffer memory size for Bluetooth stack" in "Bluetooth Core" component configuration if the "Maximum initiator connections" is changed to create less than 4 initiator instances.
 
 ### Calculating the size of "Procedure maximum length" and "Maximum ranging data size"
+
 The optimal value of "Procedure maximum length" is dependent on several configuration values, and can be calculated by the following equation:
 
 proc_max_len = 4 + (subevents * 8) + (subevents * mode0_steps * mode0_size) + channels * ( ( 1 + ( antenna_paths + 1 ) * 4) + 1 )

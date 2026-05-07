@@ -346,6 +346,9 @@ sl_rail_status_t sl_rail_mux_init(sl_rail_handle_t *p_rail_handle,
     protocol_context[i].fifo_tx_info.tx_init_length = p_rail_config->tx_fifo_init_bytes;;
     protocol_context[i].fifo_tx_info.tx_size = p_rail_config->tx_fifo_bytes;
   }
+  // If the RAIL initialization was started by another protocol, but not
+  // completed yet. We will call the protocol init_completed callback when
+  // RAIL calls it.
 
   RAIL_MUX_EXIT_CRITICAL();
 

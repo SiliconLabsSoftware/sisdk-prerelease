@@ -15,6 +15,7 @@ include:
   file_list:
   - path: cs_algo.h
   - path: cs_algo_log.h
+  - path: cs_algo_internal.h
 source:
 - path: common/cs_algo/src/cs_algo.c
 
@@ -34,14 +35,14 @@ provides:
 - name: cs_algo
 
 template_contribution:
-- name: cs_initiator_on_ras_data
+- name: cs_rreq_on_ras_data
   value:
-    include: cs_algo.h
+    include: cs_algo_internal.h
     handler: cs_algo_process_ras_data
 - name: event_handler
   value:
     event: internal_app_init
-    include: cs_algo.h
+    include: cs_algo_internal.h
     handler: cs_algo_init
 
 documentation:

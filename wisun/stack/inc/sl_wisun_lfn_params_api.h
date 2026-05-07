@@ -38,7 +38,7 @@
 #include "sl_wisun_connection_params_api.h"
 
 /// API version used to check compatibility (do not edit when using this header)
-#define SL_WISUN_LFN_PARAMS_API_VERSION  4
+#define SL_WISUN_LFN_PARAMS_API_VERSION  5
 #define SL_WISUN_LFN_ADVANCED_PARAMS_API_VERSION 1
 
 /**************************************************************************//**
@@ -72,14 +72,16 @@ SL_PACK_END()
 /// LFN connection parameters
 SL_PACK_START(1)
 typedef struct {
+  /// Delay between two LFN PAN Advertistement Solicit messages.
+  /// The delay is applied between the end of the response period and the next LPAS.
+  /// Range [1, 65535]
+  uint16_t lpas_interval_s;
   /// Duration of LFN PAN Advertisement (LPA) listening slot (millisecond)
   /// Specification range [15, 255]
   uint8_t discovery_slot_time_ms;
   /// Number of LPA slots for which an LFN shall listen for LPA frames
   /// Specification range [1, 255]
   uint8_t discovery_slots;
-  /// Reserved, set to zero
-  uint8_t reserved[2];
 } SL_ATTRIBUTE_PACKED sl_wisun_lfn_params_connection_t;
 SL_PACK_END()
 
@@ -209,9 +211,9 @@ SL_PACK_END()
 static const sl_wisun_lfn_params_t SL_WISUN_PARAMS_LFN_TEST = {
   .version = SL_WISUN_LFN_PARAMS_API_VERSION,
   .connection = {
+    .lpas_interval_s = 10,
     .discovery_slot_time_ms = 60,
     .discovery_slots = 40,
-    .reserved = { 0 }
   },
   .data_layer = {
     .unicast_interval_ms = SEC_TO_MS(6),
@@ -268,9 +270,9 @@ static const sl_wisun_lfn_params_t SL_WISUN_PARAMS_LFN_TEST = {
 static const sl_wisun_lfn_params_t SL_WISUN_PARAMS_LFN_BALANCED = {
   .version = SL_WISUN_LFN_PARAMS_API_VERSION,
   .connection = {
+    .lpas_interval_s = 10,
     .discovery_slot_time_ms = 60,
     .discovery_slots = 40,
-    .reserved = { 0 }
   },
   .data_layer = {
     .unicast_interval_ms = SEC_TO_MS(60),
@@ -327,9 +329,9 @@ static const sl_wisun_lfn_params_t SL_WISUN_PARAMS_LFN_BALANCED = {
 static const sl_wisun_lfn_params_t SL_WISUN_PARAMS_LFN_ECO = {
   .version = SL_WISUN_LFN_PARAMS_API_VERSION,
   .connection = {
+    .lpas_interval_s = 10,
     .discovery_slot_time_ms = 60,
     .discovery_slots = 40,
-    .reserved = { 0 }
   },
   .data_layer = {
     .unicast_interval_ms = SEC_TO_MS(300),

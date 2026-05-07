@@ -1,0 +1,50 @@
+id: cs_manager
+package: bluetooth_le_middleware
+label: CS Manager
+description: >
+  CS Manager is a component that manages the CS configurations and procedures.
+category: Bluetooth|Application|Miscellaneous
+metadata:
+  sbom:
+    license: Zlib
+quality: experimental
+root_path: bluetooth_le_middleware/common/cs_manager
+include:
+- path: inc
+  file_list:
+  - path: cs_manager.h
+source:
+- path: src/cs_manager.c
+- path: src/cs_manager_config_db.c
+config_file:
+- path: config/cs_manager_config.h
+  file_id: cs_manager_config
+requires:
+- name: bluetooth_stack
+- name: sl_core
+- name: sl_common
+provides:
+- name: cs_manager
+template_contribution:
+- name: event_handler
+  value:
+    event: internal_app_init
+    include: cs_manager_internal.h
+    handler: cs_manager_init
+- name: ncp_local_evt_process
+  value:
+    include: cs_manager_internal.h
+    handler: cs_manager_on_bt_event
+  priority: 69
+  condition:
+  - ncp
+- name: bluetooth_on_event
+  value:
+    include: cs_manager_internal.h
+    function: cs_manager_on_bt_event
+  priority: 69
+  unless:
+  - ncp
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/cs-ras-client

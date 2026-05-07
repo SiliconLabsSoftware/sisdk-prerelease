@@ -42,7 +42,6 @@ component:
   - id: bluetooth_feature_cs
   - id: bluetooth_utility_bgapi_trace
   - id: ncp
-  - id: ncp_user_cmd
   - id: iostream_eusart
     instance:
       - vcom
@@ -58,7 +57,8 @@ component:
   - id: refactor_cs_initiator
   - id: refactor_cs_result
   - id: refactor_cs_antenna
-  - id: refactor_cs_acp
+  - id: cs_rreq
+  - id: cs_acp_target
   - id: iostream_bgapi_trace
   - id: iostream_dummy
     instance:

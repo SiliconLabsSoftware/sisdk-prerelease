@@ -792,7 +792,8 @@ ApplicationInitSW(void)
  *     rssi[0] rssi on channel 0
  *     rssi[1] rssi on channel 1
  *     rssi[2] rssi on channel 2
- *     rssi[3] rssi on channel LR Active channel
+ *     rssi[3] rssi on channel LR Channel A
+ *     rssi[4] rssi on channel LR Channel B
  */
 #ifdef SL_CATALOG_ZW_JAMMING_DETECTION_PRESENT
 static zpal_status_t application_rssi_collection_callback(const sl_jamming_detection_collection_t *collection)
@@ -815,11 +816,12 @@ static zpal_status_t application_rssi_collection_callback(const sl_jamming_detec
  * - send proprietary Serial API frame 0xF1 to host.
  * - Subcommands
  *   -- 0x00: Report
- * - Payload is 1 byte: jammed channels bitmap.
+ * - Payload 1 byte is : jammed channels bitmap.
  *    0b00000001 = channel 0 is jammed
  *    0b00000010 = channel 1 is jammed
  *    0b00000100 = channel 2 is jammed
- *    0b00001000 = channel LR Active channel is jammed /!\ we need to check the primary long range channel from the radio profile /!\ .
+ *    0b00001000 = channel LR A is jammed
+ *    0b00010000 = channel LR B is jammed
  */
 static zpal_status_t application_jamming_detected_callback(const sl_jamming_detection_statistics_t *report)
 {
@@ -831,17 +833,6 @@ static zpal_status_t application_jamming_detected_callback(const sl_jamming_dete
     .sub_command   = FUNC_ID_PROP_JAMMING_SUBCOMMAND_REPORT,
     .payload = *report
   };
-
-  /* Remap LR active channel (bit 3) to Channel A (bit 3) or B (bit 4) */
-  if (jamming_packet.payload.channel_bitmap & (1u << 3)) {
-    zpal_radio_lr_channel_t primary_lr_channel = zpal_radio_get_primary_long_range_channel();
-    jamming_packet.payload.channel_bitmap &= (uint8_t)(~(1u << 3));
-    if (ZPAL_RADIO_LR_CHANNEL_A == primary_lr_channel) {
-      jamming_packet.payload.channel_bitmap |= (1u << 3);   /* 0b00001000 */
-    } else if (ZPAL_RADIO_LR_CHANNEL_B == primary_lr_channel) {
-      jamming_packet.payload.channel_bitmap |= (1u << 4);   /* 0b00010000 */
-    }
-  }
 
   status = RequestUnsolicited(FUNC_ID_PROP_JAMMING_DETECTION_COMMAND, (uint8_t *)&jamming_packet, sizeof(jamming_packet)) ? ZPAL_STATUS_OK : ZPAL_STATUS_FAIL;
   return status;

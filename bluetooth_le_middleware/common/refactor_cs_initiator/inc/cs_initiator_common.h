@@ -175,21 +175,7 @@ typedef struct {
                                           // ranging counter is overwritten
 } ras_client_t;
 
-/// Ranging data array type
-typedef struct {
-  uint32_t ranging_data_size;                               // Actual size
-  uint8_t ranging_data[CS_INITIATOR_MAX_RANGING_DATA_SIZE]; // Ranging data
-} ranging_data_array_t;
-
-/// Unified ranging data
-typedef struct {
-  uint8_t num_steps;                        // Number of steps
-  uint8_t step_channels[CS_MAX_STEP_COUNT]; // Step channel array
-  ranging_data_array_t initiator;           // Initiator ranging data
-  ranging_data_array_t reflector;           // Reflector ranging data
-} unified_ranging_data_t;
-
-
+/// Procedure timing config type (required by estimation)
 typedef struct {
   uint32_t subevent_len;
   uint16_t subevent_interval;
@@ -197,14 +183,13 @@ typedef struct {
   uint16_t procedure_interval;
   uint16_t procedure_count;
   uint8_t  subevents_per_event;
-} cs_procedure_config;
+} cs_procedure_config_t;
 
 /// CS Initiator main class
 typedef struct {
-  unified_ranging_data_t data;
   uint16_t ranging_counter;
   cs_ras_subevent_header_t *last_subevent_header;
-  cs_procedure_config cs_procedure_config;
+  cs_procedure_config_t cs_procedure_config;
   rtl_config_t rtl_config;
   cs_initiator_config_t config;
   ras_client_t ras_client;
@@ -229,7 +214,6 @@ typedef struct {
   uint8_t num_antenna_path;
   uint8_t antenna_config;
   cs_ranging_data_t ranging_data_result;
-  uint8_t subevents_per_procedure_counter;
 } cs_initiator_t;
 
 #ifdef __cplusplus

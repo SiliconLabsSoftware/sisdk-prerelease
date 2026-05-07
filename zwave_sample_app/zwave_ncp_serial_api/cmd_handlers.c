@@ -409,8 +409,12 @@ ZW_ADD_CMD(FUNC_ID_ZW_SEND_DATA)
   node_id_t nodeId = (node_id_t)GET_NODEID(&frame->payload[0], offset);
   uint8_t dataLength = frame->payload[offset + 1];
 
-  assert(dataLength <= BUF_SIZE_RX);
-  dataLength = MIN(dataLength, BUF_SIZE_RX);
+  const uint8_t payload_len = frame_payload_len(frame);
+  if ((dataLength > BUF_SIZE_RX) || ((offset + dataLength + SEND_DATA_FRAME_OVERHEAD) > payload_len)) {
+    assert(false);
+    DoRespond(0);
+    return;
+  }
   const uint8_t * const pSerInData = frame->payload + offset + 2;
   const uint8_t app_session_id = frame->payload[offset + 3 + dataLength];  // Session identifier
 
@@ -473,8 +477,12 @@ ZW_ADD_CMD(FUNC_ID_ZW_SEND_DATA_EX)
   uint8_t dataLength;
 
   dataLength = frame->payload[offset + 1];
-  assert(dataLength <= BUF_SIZE_RX);
-  dataLength = MIN(dataLength, BUF_SIZE_RX);
+  const uint8_t payload_len = frame_payload_len(frame);
+  if ((dataLength > BUF_SIZE_RX) || ((offset + dataLength + SEND_DATA_EX_FRAME_OVERHEAD) > payload_len)) {
+    assert(false);
+    DoRespond(0);
+    return;
+  }
   const uint8_t app_session_id = frame->payload[offset + 6 + dataLength];  // Session identifier
 
   const uint8_t retVal = SendDataEx(nodeId, &frame->payload[offset + 2], dataLength, frame->payload[offset + 2 + dataLength],
@@ -530,9 +538,14 @@ static uint8_t SendDataMulti(uint8_t numberOfNodes, const uint8_t *pNodeList, co
 ZW_ADD_CMD(FUNC_ID_ZW_SEND_DATA_MULTI)
 {
   /* numberNodes | pNodeIDList[] | dataLength | pData[] | txOptions | app_session_id */
-  // Create transmit frame package
+  const uint8_t payload_len = frame_payload_len(frame);
   uint8_t numOfNodes = frame->payload[0];
   uint8_t tLength = frame->payload[1 + numOfNodes];
+  if ((numOfNodes + tLength + SEND_DATA_MULTI_FRAME_OVERHEAD) > payload_len) {
+    assert(false);
+    DoRespond(0);
+    return;
+  }
   uint8_t tOptions = frame->payload[2 + numOfNodes + tLength];
   const uint8_t app_session_id = frame->payload[3 + numOfNodes + tLength];  // Session identifier
 
@@ -584,6 +597,12 @@ ZW_ADD_CMD(FUNC_ID_ZW_SEND_DATA_MULTI_EX)
 {
   /* dataLength | pData[] | txOptions | securityKey | groupId | app_session_id */
   uint8_t dataLength = frame->payload[0];
+  const uint8_t payload_len = frame_payload_len(frame);
+  if ((dataLength + SEND_DATA_MULTI_EX_FRAME_OVERHEAD) > payload_len) {
+    assert(false);
+    DoRespond(0);
+    return;
+  }
   const uint8_t app_session_id = frame->payload[4 + dataLength];  // Session identifier
   uint8_t tOptions = frame->payload[1 + dataLength];
   uint8_t tGID = frame->payload[3 + dataLength];
@@ -663,6 +682,12 @@ ZW_ADD_CMD(FUNC_ID_ZW_SEND_DATA_BRIDGE)
   sourceNodeId = (node_id_t)GET_NODEID(&frame->payload[0], offset);
   destNodeId   = (node_id_t)GET_NODEID(&frame->payload[1 + offset], offset);
   uint8_t dataLength = frame->payload[offset + 2];
+  const uint8_t payload_len = frame_payload_len(frame);
+  if ((dataLength > BUF_SIZE_RX) || ((offset + dataLength + SEND_DATA_BRIDGE_FRAME_OVERHEAD) > payload_len)) {
+    assert(false);
+    DoRespond(0);
+    return;
+  }
   const uint8_t app_session_id = frame->payload[offset + 3 + 1 + 4 + dataLength];  // Session identifier
   uint8_t tOptions = frame->payload[offset + 3 + dataLength];
   const uint8_t retVal = SendDataBridge(sourceNodeId, destNodeId, dataLength, &frame->payload[offset + 3], tOptions,
@@ -768,6 +793,7 @@ ZW_ADD_CMD(FUNC_ID_ZW_SEND_DATA_MULTI_BRIDGE)
   uint8_t   dataLength;
   uint8_t   txOptions;
   uint8_t   offset = 0;
+  const uint8_t payload_len = frame_payload_len(frame);
   node_id_t   srcNodeId = (node_id_t)GET_NODEID(&frame->payload[0], offset);
   uint8_t   nodeid_list_size;
 
@@ -781,6 +807,11 @@ ZW_ADD_CMD(FUNC_ID_ZW_SEND_DATA_MULTI_BRIDGE)
   }
 
   dataLength = frame->payload[offset + 2 + nodeid_list_size];
+  if ((offset + nodeid_list_size + dataLength + SEND_DATA_MULTI_BRIDGE_FRAME_OVERHEAD) > payload_len) {
+    assert(false);
+    DoRespond(0);
+    return;
+  }
   txOptions = frame->payload[offset + 2 + 1 + nodeid_list_size + dataLength];
   const uint8_t app_session_id = frame->payload[offset + 2 + 1 + 1 + nodeid_list_size + dataLength];  // Session identifier
   uint8_t *pDataBuf = &frame->payload[offset + 3 + nodeid_list_size];
@@ -838,6 +869,7 @@ ZW_ADD_CMD(FUNC_ID_ZW_SEND_PROTOCOL_DATA)
   /* HOST->ZW: srcNodeID | destNodeID | dataLength | pData[] | protocolMetadataLength | protocolMetadata[] | sessionID */
   uint8_t retVal = 0;
   uint8_t index = 1;
+  const uint8_t payload_len = frame_payload_len(frame);
   node_id_t destNodeID = (node_id_t) GET_NODEID(&frame->payload[0], index);
   uint8_t dataLength = frame->payload[index++];
 
@@ -849,6 +881,11 @@ ZW_ADD_CMD(FUNC_ID_ZW_SEND_PROTOCOL_DATA)
   index += dataLength;
   uint8_t protocolMetadataLength = frame->payload[index++];
   assert(protocolMetadataLength == PROTOCOL_METADATA_LENGTH);
+  /* Validate that protocolMetadata + sessionID fit in the frame */
+  if ((index + protocolMetadataLength + 1) > payload_len) {
+    DoRespond(retVal);
+    return;
+  }
   const uint8_t * const protocolMetadata = &frame->payload[index];
   index += protocolMetadataLength;
   nlsEncryptionMetadata.app_session_id = frame->payload[index];  // Session identifier
@@ -2969,7 +3006,7 @@ ZW_ADD_CMD(FUNC_ID_ZW_SET_LISTEN_BEFORE_TALK_THRESHOLD)
 #endif
 
 #ifdef SUPPORT_ZW_NETWORK_MANAGEMENT_SET_MAX_INCLUSION_REQUEST_INTERVALS
-static bool SetMaxInclReqIntervals(uint32_t maxInclReqIntervals)
+static bool SetMaxInclReqIntervals(uint8_t maxInclReqIntervals)
 {
   SZwaveCommandPackage setMaxInclusionRequestIntervals = {
     .eCommandType = EZWAVECOMMANDTYPE_ZW_SET_MAX_INCL_REQ_INTERVALS,

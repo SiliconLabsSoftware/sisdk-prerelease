@@ -294,6 +294,7 @@ void cs_initiator_apply_channel_map_preset(cs_channel_map_preset_t preset, uint8
  * @param[in] algo_mode Algorithm mode.
  * @param[in] antenna_path Antenna path.
  * @param[in] use_real_time_ras_mode Use real-time RAS mode.
+ * @param[in] max_reflector_count Maximum reflector count multiplier.
  * @param[out] conn_interval Connection interval.
  * @param[out] proc_interval CS procedure interval.
  * @return Status of the operation.
@@ -305,6 +306,7 @@ sl_status_t cs_initiator_get_intervals(uint8_t main_mode,
                                        uint8_t algo_mode,
                                        uint8_t antenna_path,
                                        uint8_t use_real_time_ras_mode,
+                                       uint8_t max_reflector_count,
                                        uint16_t *conn_interval,
                                        uint16_t *proc_interval);      
                                        

@@ -2379,6 +2379,7 @@ static void resize_current_dma_descriptor(void *pre_loaded_rx_buffer, uint16_t o
   sl_hal_ldma_init_transfer(LDMA_PERIPH, read_channel, &rx_config, rx_descriptor_head);
   sl_hal_ldma_enable_interrupts(LDMA_PERIPH, (1u << read_channel));
   sl_hal_ldma_start_transfer(LDMA_PERIPH, read_channel);
+  sl_hal_ldma_enable_channel(LDMA_PERIPH, read_channel);
 
   return;
 }
@@ -2460,6 +2461,7 @@ static void restart_dma(void)
   sl_hal_ldma_init_transfer(LDMA_PERIPH, read_channel, &rx_config, rx_descriptor_head);
   sl_hal_ldma_enable_interrupts(LDMA_PERIPH, (1u << read_channel));
   sl_hal_ldma_start_transfer(LDMA_PERIPH, read_channel);
+  sl_hal_ldma_enable_channel(LDMA_PERIPH, read_channel);
 
 #if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == WITHOUT_HWFC)
   LDMA_PERIPH->CH[read_channel].LINK |= LDMA_CH_LINK_LINK;

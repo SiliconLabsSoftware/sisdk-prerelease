@@ -52,6 +52,7 @@
 #include "cs_result.h"
 #include "cs_result_config.h"
 #include "cs_initiator_client.h"
+#include "cs_configurator.h"
 #include "cs_antenna.h"
 #include "extended_result.h"
 #include "sl_bt_peer_security.h"
@@ -775,17 +776,26 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
           check_supported_capabilities(evt);
           cs_host_state.read_remote_capabilities = false;
           if (initiator_config.max_procedure_count == 0) {
-            sc = cs_initiator_get_intervals(initiator_config.cs_main_mode,
-                                            initiator_config.cs_sub_mode,
-                                            initiator_config.procedure_scheduling,
-                                            initiator_config.channel_map_preset,
-                                            rtl_config.algo_mode,
-                                            initiator_config.cs_tone_antenna_config_idx,
-                                            initiator_config.use_real_time_ras_mode,
-                                            &conn_interval,
-                                            &proc_interval);
+            uint32_t estimation_time_us;
+            sc = cs_configurator_get_estimation_time_us(NULL, //TODO: remove WIP when CS Manager is ready
+                                                        rtl_config.algo_mode,
+                                                        CS_NCP_CLOCK_FREQUENCY_HZ,
+                                                        &estimation_time_us,
+                                                        initiator_config.channel_map_preset,
+                                                        initiator_config.cs_main_mode,
+                                                        initiator_config.cs_sub_mode);
+            app_assert_status(sc);
+            app_log_info(APP_PREFIX "Estimation time: %lu us" APP_LOG_NL, estimation_time_us);
+            sc = cs_configurator_optimize(initiator_config.procedure_scheduling,
+                                          estimation_time_us,
+                                          CS_INITIATOR_MAX_CONNECTIONS,
+                                          NULL, //TODO: remove WIP when CS Manager is ready
+                                          initiator_config.use_real_time_ras_mode,
+                                          initiator_config.channel_map_preset,
+                                          initiator_config.cs_tone_antenna_config_idx,
+                                          &conn_interval, &proc_interval);
             if (sc == SL_STATUS_NOT_SUPPORTED) {
-              app_log_info(APP_PREFIX "Parameter optimization is not supported with the given input parameters" APP_LOG_NL);
+              app_log_error(APP_PREFIX "Parameter optimization is not supported with the given input parameters" APP_LOG_NL);
             } else if (sc == SL_STATUS_IDLE) {
               app_log_info(APP_PREFIX "No optimization - using custom procedure scheduling" APP_LOG_NL);
             } else if (sc == SL_STATUS_OK) {

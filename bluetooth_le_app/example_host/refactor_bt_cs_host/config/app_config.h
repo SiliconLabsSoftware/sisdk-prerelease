@@ -110,4 +110,12 @@
 // <i> Default: 5
 #define CS_HOST_HEADER_LOG                5
 
+// <o CS_NCP_CLOCK_FREQUENCY_HZ> CS NCP clock frequency <40000000..160000000>
+// <i> The clock frequency of the CS NCP application
+// <i> This value is used to calculate the estimation time for the CS algorithm
+// <i> Default: 80000000
+#ifndef CS_NCP_CLOCK_FREQUENCY_HZ
+#define CS_NCP_CLOCK_FREQUENCY_HZ             80000000
+#endif // CS_NCP_CLOCK_FREQUENCY_HZ
+
 #endif // CS_REFLECTOR_CONFIG_H

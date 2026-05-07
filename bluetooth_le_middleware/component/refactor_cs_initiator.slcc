@@ -19,13 +19,11 @@ include:
   - path: cs_initiator_common.h
   - path: cs_initiator_log.h
   - path: cs_initiator_error.h
-  - path: cs_initiator_extract.h
   - path: cs_initiator_state_machine.h
 
 source:
 - path: common/refactor_cs_initiator/src/cs_initiator.c
 - path: common/refactor_cs_initiator/src/cs_initiator_error.c
-- path: common/refactor_cs_initiator/src/cs_initiator_extract.c
 - path: common/refactor_cs_initiator/src/cs_initiator_state_machine.c
 
 requires:
@@ -39,20 +37,16 @@ requires:
 - name: bluetooth_feature_extended_scanner
 - name: bluetooth_feature_gatt
 - name: bluetooth_feature_legacy_scanner
-- name: cs_ras_client
-- name: refactor_cs_result
 - name: component_catalog
 - name: power_manager
 - name: cs_algo
 - name: printf
 - name: sleeptimer
 - name: sl_common
+- name: cs_rreq
 
 provides:
 - name: refactor_cs_initiator
-
-template_file:
-- path: common/refactor_cs_initiator/template/cs_initiator_ras_handler.c.jinja
 
 template_contribution:
 - name: ncp_local_evt_process

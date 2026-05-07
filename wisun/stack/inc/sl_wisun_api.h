@@ -158,8 +158,6 @@ sl_status_t sl_wisun_disconnect();
  * @param[in] certificate_options Options for the certificate
  *   - #SL_WISUN_CERTIFICATE_OPTION_APPEND: Append the certificate to the list of trusted certificates
  *                                          instead of replacing the previous entries
- *   - #SL_WISUN_CERTIFICATE_OPTION_IS_REF: The application guarantees the certificate data will remain
- *                                          in scope and can therefore be referenced instead of copied
  * @param[in] certificate_length Size of the certificate data
  * @param[in] certificate Pointer to the certificate data
  * @return SL_STATUS_OK if successful, an error code otherwise
@@ -183,9 +181,6 @@ sl_status_t sl_wisun_set_trusted_certificate(uint16_t certificate_options,
  * @param[in] certificate_options Options for the certificate.
  *   - #SL_WISUN_CERTIFICATE_OPTION_APPEND: Append the certificate to the list of device certificates
  *                                          instead of replacing the previous entries
- *   - #SL_WISUN_CERTIFICATE_OPTION_IS_REF: The application guarantees the certificate data will remain
- *                                          in scope and can therefore be referenced instead of copied
- *   - #SL_WISUN_CERTIFICATE_OPTION_HAS_KEY: The certificate has a corresponding private key
  * @param[in] certificate_length Size of the certificate data
  * @param[in] certificate Pointer to the certificate data
  * @return SL_STATUS_OK if successful, an error code otherwise
@@ -206,8 +201,6 @@ sl_status_t sl_wisun_set_device_certificate(uint16_t certificate_options,
  * Set the device private key used to authenticate to the authentication server.
  *
  * @param[in] key_options Options for the private key
- *   - #SL_WISUN_PRIVATE_KEY_OPTION_IS_REF: The application guarantees the private key data will remain
- *                                          in scope and can therefore be referenced instead of copied
  * @param[in] key_length Size of the private key data
  * @param[in] key Pointer to the private key data
  * @return SL_STATUS_OK if successful, an error code otherwise
@@ -689,8 +682,8 @@ sl_status_t sl_wisun_set_connection_parameters(const sl_wisun_connection_params_
  *                    type associated with id.
  *
  * @return SL_STATUS_OK on success.
- * @return SL_STATUS_INVALID_STATE if the stack is not in disconnected
- *         state, or if @ref sl_wisun_set_connection_parameters,
+ * @return SL_STATUS_INVALID_STATE if the stack state does not allow the option to be set,
+ *         or if @ref sl_wisun_set_connection_parameters,
  *         @ref sl_wisun_set_lfn_parameters, or
  *         @ref sl_wisun_br_set_connection_parameters has been called
  *         previously.
@@ -730,8 +723,10 @@ sl_status_t sl_wisun_set_connection_parameters(const sl_wisun_connection_params_
  * @ref sl_wisun_set_lfn_advanced_parameters
  * @ref sl_wisun_br_set_advanced_parameters
  *
- * This function can only be called before joining a network, i.e.
+ * Most options can only be set before joining a network, i.e.
  * before calling @ref sl_wisun_join.
+ * When this restriction does not apply, it is stated as a note in the individual
+ * option ID documentation (see @ref sl_wisun_option_id_t).
  *
  * Available in libraries: Full, FFN, LFN, BR (see @ref API_AVAILABILITY)
  *****************************************************************************/
@@ -962,6 +957,7 @@ sl_status_t sl_wisun_set_pti_state(bool pti_state);
  *   - #SL_WISUN_FRAME_TYPE_PC: Transmit a PAN Configuration frame
  *   - #SL_WISUN_FRAME_TYPE_DIS: Transmit a DODAG Information Solicitation frame
  *   - #SL_WISUN_FRAME_TYPE_DIO: Transmit a DODAG Information Object frame
+ *   - #SL_WISUN_FRAME_TYPE_LPAS: Transmit a LFN PAN Advertisement Solicit frame
  * @return SL_STATUS_OK if successful, an error code otherwise
  *
  * This function causes a periodic frame (FAN Discovery, RPL) to be transmitted

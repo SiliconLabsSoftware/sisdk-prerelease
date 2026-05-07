@@ -1484,7 +1484,7 @@ typedef struct SCommandSetLBTThreshold {
 SCommandSetLBTThreshold;
 
 typedef struct SCommandSetMaxInclReqInterval {
-  uint32_t inclusionRequestInterval;
+  uint8_t inclusionRequestInterval;
 } SCommandSetMaxInclReqInterval;
 
 typedef struct SCommandNvmBackupRestore {

@@ -40,8 +40,10 @@
 #include "sl_bt_api.h"
 #include "sl_rtl_clib_api.h"
 #include "cs_result_config.h"
-/// TODO: Change to RREQ
-#include "cs_initiator_common.h"
+#include "cs_rreq.h"
+// TODO: fix this requirement
+#include "cs_initiator_client.h"
+#include "cs_initiator.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -77,26 +79,13 @@ typedef struct {
   rtl_config_t rtl_config;  // RTL-specific input
 } cs_algo_config_t;
 
-/// RAS data structure passed from the initiator to cs_algo via the
-/// cs_initiator_on_ras_data template contribution. Needed for RTL ras process.
-typedef struct {
-  uint32_t subevent_len;
-  uint16_t subevent_interval;
-  uint16_t event_interval;
-  uint16_t procedure_interval;
-  uint16_t procedure_count;
-  uint8_t subevents_per_event;
-  uint8_t num_antenna_paths;
-} cs_algo_procedure_info_t;
-
-
 typedef void (*cs_algo_on_result_t)(uint8_t conn_handle, uint16_t ranging_counter,
                                     const uint8_t *result, uint16_t result_size,
-                                    const cs_ranging_data_t *ranging_data);
+                                    const cs_rreq_result_t *ranging_data);
 typedef void (*cs_algo_on_intermediate_result_t)(const cs_intermediate_result_t *intermediate_result);
 typedef void (*cs_algo_on_extended_result_t)(uint8_t conn_handle, uint16_t ranging_counter,
                                              const uint8_t *result, uint16_t result_size,
-                                             const cs_ranging_data_t *ranging_data);
+                                             const cs_rreq_result_t *ranging_data);
 
 typedef void (*cs_algo_on_process_finished_t)(uint8_t conn_handle, uint16_t ranging_counter,
                                               uint32_t status);
@@ -107,10 +96,6 @@ typedef struct {
   cs_algo_on_extended_result_t on_extended_result;
 } cs_algo_app_cb_t;
 
-typedef struct {
-  cs_algo_on_process_finished_t on_process_finished;
-} cs_algo_initiator_cb_t;
-
 // -----------------------------------------------------------------------------
 // Public API
 
@@ -120,13 +105,6 @@ typedef struct {
  * @return status of the operation.
  ******************************************************************************/
 sl_status_t cs_algo_app_set_callback(cs_algo_app_cb_t *cb);
-
-/***************************************************************************//**
- * Register initiator callback functions for cs_algo events.
- * @param[in] cb pointer to the callback structure.
- * @return status of the operation.
- ******************************************************************************/
-sl_status_t cs_algo_initiator_set_callback(cs_algo_initiator_cb_t *cb);
 
 /***************************************************************************//**
  * Configure cs_algo for a given (connection, config) pair. Initializes the
@@ -146,29 +124,6 @@ sl_status_t cs_algo_create(uint8_t conn_handle, cs_algo_config_t config);
  *         SL_STATUS_NOT_FOUND if no instance matches
  ******************************************************************************/
 sl_status_t cs_algo_remove(uint8_t conn_handle);
-
-// -----------------------------------------------------------------------------
-// Internal functions (called by generated code / framework)
-
-/***************************************************************************//**
- * Initialize the cs_algo component.
- ******************************************************************************/
-void cs_algo_init(void);
-
-/***************************************************************************//**
- * Process RAS data received from the initiator. This is the handler function
- * registered via template_contribution and called by the jinja-generated
- * dispatch code in the initiator.
- *
- * @param[in] conn_handle connection handle.
- * @param[in] ranging_counter procedure ranging counter.
- * @param[in] proc_info pointer to the RAS data structure.
- * @param[in] ranging_data pointer to the unified ranging data buffer.
- ******************************************************************************/
-void cs_algo_process_ras_data(uint8_t conn_handle,
-                              uint16_t ranging_counter,
-                              cs_algo_procedure_info_t proc_info,
-                              unified_ranging_data_t *ranging_data);
 
 #ifdef __cplusplus
 }

@@ -189,6 +189,15 @@ static const cs_initiator_values_t initiator_values_optimized[] = {
 #endif
 };
 
+static uint16_t multiply_u16_saturated(uint16_t value, uint8_t multiplier)
+{
+  uint32_t scaled = (uint32_t)value * (uint32_t)multiplier;
+  if (scaled > UINT16_MAX) {
+    return UINT16_MAX;
+  }
+  return (uint16_t)scaled;
+}
+
 // -----------------------------------------------------------------------------
 // Public function definitions
 
@@ -233,6 +242,7 @@ sl_status_t cs_initiator_get_intervals(uint8_t main_mode,
                                        uint8_t algo_mode,
                                        uint8_t antenna_path,
                                        uint8_t use_real_time_ras_mode,
+                                       uint8_t max_reflector_count,
                                        uint16_t *conn_interval,
                                        uint16_t *proc_interval)
 {
@@ -245,6 +255,9 @@ sl_status_t cs_initiator_get_intervals(uint8_t main_mode,
   if (conn_interval == NULL || proc_interval == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
   }
+  if (max_reflector_count == 0) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
   if (procedure_scheduling == CS_PROCEDURE_SCHEDULING_CUSTOM) {
     return SL_STATUS_IDLE;
   }
@@ -255,6 +268,7 @@ sl_status_t cs_initiator_get_intervals(uint8_t main_mode,
   if (algo_mode == SL_RTL_CS_ALGO_MODE_STATIC_HIGH_ACCURACY) {
     *conn_interval = STATIC_MODE_CONNECTION_INTERVAL;
     *proc_interval = STATIC_MODE_PROCEDURE_INTERVAL;
+    *proc_interval = multiply_u16_saturated(*proc_interval, max_reflector_count);
     return SL_STATUS_OK;
   }
   if (input_values[0] == CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_ENERGY
@@ -271,6 +285,7 @@ sl_status_t cs_initiator_get_intervals(uint8_t main_mode,
         uint16_t offset = (SUB_MODE_OFFSET_MS + conn_ms - 1) / conn_ms;
         *proc_interval += offset;
       }
+      *proc_interval = multiply_u16_saturated(*proc_interval, max_reflector_count);
       return SL_STATUS_OK;
     }
   }

@@ -118,6 +118,11 @@
 // <i> The number of entries that the Address Table can hold.
 #define SL_ZIGBEE_ADDRESS_TABLE_SIZE   12
 
+// <o SL_ZIGBEE_ROUTE_TABLE_SIZE> Route Table Size <10-255>
+// <i> Default: 16
+// <i> The maximum number of destinations to which this node can route messages (originating locally and relayed). Each route table entry uses 6 bytes of RAM.
+#define SL_ZIGBEE_ROUTE_TABLE_SIZE   16
+
 // </h>
 
 // <<< end of configuration section >>>

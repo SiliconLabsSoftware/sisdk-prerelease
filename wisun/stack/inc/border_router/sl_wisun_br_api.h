@@ -132,9 +132,6 @@ sl_status_t sl_wisun_br_get_state(sl_wisun_br_state_t *state);
  * @param[in] certificate_options Options for the certificate.
  *   <br/><b>SL_WISUN_CERTIFICATE_OPTION_APPEND</b>: Append the certificate to the list of server certificates
  *                                                   instead of replacing the previous entries
- *   <br/><b>SL_WISUN_CERTIFICATE_OPTION_IS_REF</b>: The application guarantees the certificate data will remain
- *                                                   in scope and can therefore be referenced instead of copied
- *   <br/><b>SL_WISUN_CERTIFICATE_OPTION_HAS_KEY</b>: The certificate has a private key
  * @param[in] certificate_length Size of the certificate data
  * @param[in] certificate Pointer to the certificate data
  * @return SL_STATUS_OK if successful, an error code otherwise
