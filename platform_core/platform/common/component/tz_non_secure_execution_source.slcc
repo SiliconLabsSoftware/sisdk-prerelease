@@ -23,8 +23,6 @@ provides:
 - name: tz_non_secure_execution_flash_only
 requires:
 - name: device_has_deepsleep_retention
-conflicts:
-- name: toolchain_llvm
 define:
 - name: SL_TZ_NON_SECURE_EXECUTION_USE_SOURCE
   value: 1

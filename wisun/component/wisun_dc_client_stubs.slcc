@@ -16,6 +16,7 @@ provides:
 source:
 - path: "src/sli_wisun_task_direct_connect_client_stubs.c"
 - path: "src/sli_wisun_direct_connect_client_stubs.c"
+- path: "nanostack-stack/source/6lowpan/ws/dc/dc_bootstrap_stubs.c"
 - path: "nanostack-stack/source/security/authenticator/authenticator_stubs.c"
   unless: [wisun_br_stack]
 - path: nanostack-stack/source/6lowpan/ws/ws_ie_lib_stubs.c

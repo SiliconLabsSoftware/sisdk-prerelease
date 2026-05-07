@@ -31,7 +31,8 @@
       file_id: btl_gpio_activation_cfg
       vendor: silabs
     path: brd2719a/btl_gpio_activation_cfg.h
-  - override:
+  - unless: [clock_manager_oscillator_config_override]
+    override:
       component: clock_manager
       file_id: clock_manager_oscillator_config
       vendor: silabs

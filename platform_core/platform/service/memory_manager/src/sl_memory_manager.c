@@ -155,8 +155,9 @@ sl_status_t sl_memory_init(void)
   }
 #endif
 
-#if defined(SLI_MEMORY_MANAGER_STACK_IN_HEAP)
-  sli_memory_create_stack();
+#if defined(SLI_MEMORY_MANAGER_STACK_IN_HEAP) \
+  && defined(SLI_MEMORY_MANAGER_STACK_IN_HEAP_GENERAL_PURPOSE)
+  sli_memory_create_stack(&sli_general_purpose_heap);
 #endif
 
 #if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
@@ -254,6 +255,11 @@ sl_status_t sl_memory_init_dtcm(void)
                                   dtcm_heap_region.size,
                                   SL_MEMORY_HEAP_ALLOC_CPU_RAM,
                                   &sli_dtcm_heap);
+
+#if defined(SLI_MEMORY_MANAGER_STACK_IN_HEAP)      \
+  && defined(SLI_MEMORY_MANAGER_STACK_IN_HEAP_DTCM)
+  sli_memory_create_stack(&sli_dtcm_heap);
+#endif
 
   return status;
 }
@@ -1690,7 +1696,6 @@ sl_status_t sl_memory_heap_get_info(const sl_memory_heap_t *heap,
   for (uint32_t id = heap_start_bank_id; id <= heap_end_bank_id; id++) {
     if (retention_control->banks_counter[id] > 0) {
       used_bank_count++;
-      __NOP();
     }
     total_bank++;
   }

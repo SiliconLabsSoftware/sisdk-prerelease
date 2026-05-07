@@ -376,61 +376,6 @@
 #endif
 // </h>
 // </h>
-// <h>  Logging
-// <o   OPENTHREAD_CONFIG_LOG_OUTPUT> LOG_OUTPUT
-//      <OPENTHREAD_CONFIG_LOG_OUTPUT_NONE             => NONE
-//      <OPENTHREAD_CONFIG_LOG_OUTPUT_APP              => APP
-//      <OPENTHREAD_CONFIG_LOG_OUTPUT_PLATFORM_DEFINED => PLATFORM_DEFINED
-// <i>  Default: OPENTHREAD_CONFIG_LOG_OUTPUT_APP
-// <d>  OPENTHREAD_CONFIG_LOG_OUTPUT_APP
-#ifndef OPENTHREAD_CONFIG_LOG_OUTPUT
-#define OPENTHREAD_CONFIG_LOG_OUTPUT OPENTHREAD_CONFIG_LOG_OUTPUT_APP
-#endif
-
-// <q>  DYNAMIC_LOG_LEVEL
-#ifndef OPENTHREAD_CONFIG_LOG_LEVEL_DYNAMIC_ENABLE
-#define OPENTHREAD_CONFIG_LOG_LEVEL_DYNAMIC_ENABLE  0
-#endif
-
-// <e>  Enable Logging
-#define OPENTHREAD_FULL_LOGS_ENABLE                 0
-#if     OPENTHREAD_FULL_LOGS_ENABLE
-
-// <h>  Note: Enabling higher log levels, which include logging packet details, can cause delays which may result in join failures.
-// <o   OPENTHREAD_CONFIG_LOG_LEVEL> LOG_LEVEL
-//      <OT_LOG_LEVEL_NONE       => NONE
-//      <OT_LOG_LEVEL_CRIT       => CRIT
-//      <OT_LOG_LEVEL_WARN       => WARN
-//      <OT_LOG_LEVEL_NOTE       => NOTE
-//      <OT_LOG_LEVEL_INFO       => INFO
-//      <OT_LOG_LEVEL_DEBG       => DEBG
-// <i>  Default: OT_LOG_LEVEL_DEBG
-// <d>  OT_LOG_LEVEL_DEBG
-#ifndef OPENTHREAD_CONFIG_LOG_LEVEL
-#define OPENTHREAD_CONFIG_LOG_LEVEL OT_LOG_LEVEL_DEBG
-#endif
-// <q>  CLI
-#ifndef OPENTHREAD_CONFIG_LOG_CLI
-#define OPENTHREAD_CONFIG_LOG_CLI                   1
-#endif
-// <q>  PKT_DUMP
-#ifndef OPENTHREAD_CONFIG_LOG_PKT_DUMP
-#define OPENTHREAD_CONFIG_LOG_PKT_DUMP              1
-#endif
-// <q>  PLATFORM
-#ifndef OPENTHREAD_CONFIG_LOG_PLATFORM
-#define OPENTHREAD_CONFIG_LOG_PLATFORM              1
-#endif
-// <q>  PREPEND_LEVEL
-#ifndef OPENTHREAD_CONFIG_LOG_PREPEND_LEVEL
-#define OPENTHREAD_CONFIG_LOG_PREPEND_LEVEL         1
-#endif
-
-#endif // OPENTHREAD_FULL_LOGS_ENABLE
-
-// </h>
-// </e>
-// </h>
 
 // <<< end of configuration section >>>
 #endif // _SL_OPENTHREAD_FEATURES_CONFIG_H

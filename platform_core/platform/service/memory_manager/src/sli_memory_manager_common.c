@@ -475,6 +475,34 @@ sl_memory_heap_t * sli_memory_get_heap_handle(const void *block)
 }
 
 /***************************************************************************//**
+ * Gets the payload length of a heap-allocated block.
+ ******************************************************************************/
+uint32_t sli_memory_get_block_length(const void *ptr)
+{
+  const sl_memory_heap_t *heap = sli_memory_get_heap_handle(ptr);
+  const sl_memory_region_t stack = sl_memory_get_stack_region();
+  const uint8_t *p = (const uint8_t *)ptr;
+
+  // Reject: unknown heap, below first payload slot, or inside the stack region
+  // (the stack may live inside the heap via SLI_MEMORY_MANAGER_STACK_IN_HEAP,
+  // in which case reading p - METADATA would decode stack garbage as metadata).
+  if ((heap == NULL)
+      || (p < ((const uint8_t *)(heap->base_addr) + SLI_BLOCK_METADATA_SIZE_BYTE))
+      || ((p >= (const uint8_t *)(stack.addr))
+          && (p < ((const uint8_t *)(stack.addr) + stack.size)))) {
+    return 0;
+  }
+
+  const sli_block_metadata_t *block = (const sli_block_metadata_t *)(p - SLI_BLOCK_METADATA_SIZE_BYTE);
+
+  if (block->block_in_use == 0) {
+    return 0;
+  }
+
+  return SLI_BLOCK_LEN_DWORD_TO_BYTE(sli_block_len_dword_decode(block));
+}
+
+/***************************************************************************//**
  * Gets size and location of the given heap.
  ******************************************************************************/
 sl_memory_region_t sli_memory_heap_get_heap_region(const sl_memory_heap_t *heap)
@@ -499,18 +527,24 @@ sl_memory_region_t sli_memory_heap_get_heap_region(const sl_memory_heap_t *heap)
 }
 
 /***************************************************************************//**
- * Creates the Stack at the end of the Heap.
+ * Creates the Stack at the end of the given Heap.
+ *
+ * @param[in] heap  Heap in which to reserve the Stack region as a
+ *                  no-retention block.
  ******************************************************************************/
-void sli_memory_create_stack(void)
+void sli_memory_create_stack(sl_memory_heap_t *heap)
 {
   void *stack;
 
-  // Reserve the Stack at the end of the general-purpose heap.
-  EFM_ASSERT(sl_memory_reserve_no_retention(SL_STACK_SIZE, SL_MEMORY_BLOCK_ALIGN_DEFAULT, &stack) == SL_STATUS_OK);
+  EFM_ASSERT(heap != NULL);
+
+  // Reserve the Stack at the end of the target heap.
+  sl_status_t status = sl_memory_heap_reserve_no_retention(heap, SL_STACK_SIZE, SL_MEMORY_BLOCK_ALIGN_DEFAULT, &stack);
+  EFM_ASSERT(status == SL_STATUS_OK);
 
 #if !defined(SL_CATALOG_KERNEL_PRESENT)
   // On Baremetal applications, the Stack need to be retained.
-  SLI_MEMORY_INCREMENT_BANK_COUNTER(&sli_general_purpose_heap, (uint8_t *)stack, (uint8_t *)((uintptr_t)stack + SL_STACK_SIZE - 1));
+  SLI_MEMORY_INCREMENT_BANK_COUNTER(heap, (uint8_t *)stack, (uint8_t *)((uintptr_t)stack + SL_STACK_SIZE - 1));
 #endif
 
 #if defined(DEBUG_EFM) || defined(DEBUG_EFM_USER)

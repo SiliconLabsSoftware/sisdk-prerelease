@@ -1187,9 +1187,7 @@ sl_rail_status_t sl_rail_mux_yield_radio(sl_rail_handle_t railHandle)
     if (protocol_context[i].rail_config == NULL) {
       continue;
     }
-    if (protocol_context[i].channel != INVALID_CHANNEL) {
-      return SL_RAIL_STATUS_INVALID_CALL;
-    }
+
     if (fn_get_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_RX_SCHEDULED)) {
       return SL_RAIL_STATUS_INVALID_CALL;
     }

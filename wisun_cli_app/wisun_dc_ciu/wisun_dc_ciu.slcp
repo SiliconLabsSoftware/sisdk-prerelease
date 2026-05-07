@@ -13,7 +13,7 @@ filter:
     value: ["Advanced"]
 
 package: wisun
-quality: experimental
+quality: production
 
 readme:
   - path: doc/readme.md

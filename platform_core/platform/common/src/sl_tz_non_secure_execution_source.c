@@ -97,6 +97,7 @@ typedef struct secure_config_data {
  *---------------------------------------------------------------------------*/
 
 void sli_tz_secure_reset_handler(void);
+void sli_tz_secure_reset_handler_C(void);
 void sli_tz_secure_fault_handler(void);
 
 #if !defined(SL_TZ_NON_SECURE_EXECUTION_USE_SOURCE)
@@ -142,6 +143,16 @@ __ATTRIBUTE_SECURE_CONFIG_DATA const secure_config_data_t sl_tz_secure_config_da
  * Secure Reset Handler called on controller reset
  *---------------------------------------------------------------------------*/
 __ATTRIBUTE_SECURE_RESET_HANDLER __NO_PROLOGUE void sli_tz_secure_reset_handler(void)
+{
+  __ASM volatile (
+    "b     sli_tz_secure_reset_handler_C \n"
+    );
+}
+
+/*---------------------------------------------------------------------------
+ * Secure Reset Handler called on controller reset in C code
+ *---------------------------------------------------------------------------*/
+__ATTRIBUTE_SECURE_RESET_HANDLER __USED void sli_tz_secure_reset_handler_C(void)
 {
 /*
  * This code is meant to be pre-compiled and used as a binary blob in applications
@@ -568,8 +579,9 @@ __ATTRIBUTE_SECURE_FAULT_HANDLER __NO_PROLOGUE void sli_tz_secure_fault_handler(
   // a SecureFault. Care should be taken to not access Secure ressources.
   // Secure ressources are the SMU, the Secure aliases and the flash
   // MSPU region in charge of switching the core to Non-Secure.
-  while (1) {
-  }
+  __ASM volatile (
+    "b     sli_tz_secure_fault_handler \n"
+    );
 }
 
 #if defined(SL_TZ_NON_SECURE_EXECUTION_USE_SOURCE)

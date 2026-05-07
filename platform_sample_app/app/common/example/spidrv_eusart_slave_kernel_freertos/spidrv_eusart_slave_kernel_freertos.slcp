@@ -45,3 +45,4 @@ ui_hints:
   highlight: readme.md
 tag:
   - hardware:component:exp_header:spi
+  - hwfilter:board:hardware:has:exp_header:spi

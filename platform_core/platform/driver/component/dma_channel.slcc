@@ -16,6 +16,7 @@ include:
   file_list:
   - path: sl_dma_channel.h
   - path: sl_dma_channel_device.h
+  - path: sli_dma_channel.h
 source:
 - path: src/sl_dma_channel.c
 requires:

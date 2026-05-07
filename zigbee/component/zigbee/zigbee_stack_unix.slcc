@@ -77,6 +77,8 @@ requires:
   condition:
   - zigbee_use_release_libraries
 - name: zigbee_stack_unix_implementation
+# needed for sl_slist.h
+- name: slist
 
 recommends:
 - id: linux
@@ -130,6 +132,7 @@ include:
 - path: platform/service/legacy_ncp_ash/inc
 - path: platform/service/token_manager/inc
   file_list:
+  - path: sl_token_manager_api.h
   - path: sl_token_manager_defines.h
 - path: platform/service/token_manager/legacy/inc
   file_list:

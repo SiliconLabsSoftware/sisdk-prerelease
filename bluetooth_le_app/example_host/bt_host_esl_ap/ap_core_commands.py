@@ -1105,7 +1105,9 @@ class CLICommandsMixin:
             if self.scan_runs and (not self.cmd_mode or self.auto_override):
                 self.start_scan(clear_lists=True)
 
-    def ap_image_throughput(self, start=False, max_tag_count=None, max_group_id=None):
+    def ap_image_throughput(
+        self, start=False, max_tag_count=None, max_group_id=None, parallel_connections=None
+    ):
         """
         Start or stop the image throughput stress test (not an AP operating mode).
 
@@ -1116,6 +1118,8 @@ class CLICommandsMixin:
             start: Boolean indicating whether the request is to start or stop the operation.
             max_tag_count: optional cap on how many synchronized tags are enrolled (start only).
             max_group_id: optional maximum ESL group id (inclusive) for tags to enroll (start only).
+            parallel_connections: optional; start only. Sets how ``_itp_init`` initialises
+                ``_itp_max_conn_limit`` (omit to preserve prior value, 0 to clear, 1..32 for a cap).
         """
         if not start:
             if not self.image_throughput_test:
@@ -1152,7 +1156,11 @@ class CLICommandsMixin:
             )
             return
 
-        self._itp_init(max_tag_count=max_tag_count, max_group_id=max_group_id)
+        self._itp_init(
+            max_tag_count=max_tag_count,
+            max_group_id=max_group_id,
+            parallel_connections=parallel_connections,
+        )
         self.cmd_mode = True
         self.auto_override = False
         self.image_throughput_test = True

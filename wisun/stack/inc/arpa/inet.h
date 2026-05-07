@@ -16,6 +16,12 @@ extern "C" {
 /// Transport layer port
 typedef uint16_t in_port_t;
 
+/** \brief Converts a 64-bit integer from host to network byte order.
+ *  \param hostlonglong The 64-bit integer in host byte order.
+ *  \return The 64-bit integer in network byte order.
+ */
+uint64_t htonll(uint64_t hostlonglong);
+
 /** \brief Converts a 32-bit integer from host to network byte order.
  *  \param hostlong The 32-bit integer in host byte order.
  *  \return The 32-bit integer in network byte order.
@@ -27,6 +33,12 @@ uint32_t htonl(uint32_t hostlong);
  *  \return The 16-bit integer in network byte order.
  */
 uint16_t htons(uint16_t hostshort);
+
+/** \brief Converts a 64-bit integer from network to host byte order.
+ *  \param netlonglong The 64-bit integer in network byte order.
+ *  \return The 64-bit integer in host byte order.
+ */
+uint64_t ntohll(uint64_t netlonglong);
 
 /** \brief Converts a 32-bit integer from network to host byte order.
  *  \param netlong The 32-bit integer in network byte order.

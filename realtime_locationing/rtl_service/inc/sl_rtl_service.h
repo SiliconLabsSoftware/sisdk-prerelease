@@ -144,9 +144,13 @@ void sl_rtl_service_rta_init_cs(void);
  * Allocates a service context backed by an app_rta processing context
  * with a dedicated thread (RTOS) or super-loop step (bare-metal), a
  * mutex guard for thread-safe access, and a per-instance request slot.
+ * If the backing app_rta context is not currently present, it is
+ * created automatically.
  *
  * @note Only one service context may exist at a time. Call
- *       sl_rtl_service_deinit_cs() before creating a new one.
+ *       sl_rtl_service_deinit_cs() before creating a new one. After
+ *       deinit, this function may be called again to create a new
+ *       service context.
  *
  * @param[in]  config  Configuration (must include a non-NULL result_cb).
  * @param[out] ctx     Receives the allocated context pointer.
@@ -154,8 +158,6 @@ void sl_rtl_service_rta_init_cs(void);
  * @return SL_RTL_ERROR_SUCCESS        Context created successfully.
  * @return SL_RTL_ERROR_ARGUMENT       @p config or @p ctx is NULL, or
  *                                     @p config->result_cb is NULL.
- * @return SL_RTL_ERROR_NOT_INITIALIZED RTA contributor has not been
- *                                     initialized yet.
  * @return SL_RTL_ERROR_INTERNAL       A context already exists.
  * @return SL_RTL_ERROR_OUT_OF_MEMORY  Memory allocation failed.
  *****************************************************************************/
@@ -327,6 +329,26 @@ enum sl_rtl_error_code sl_rtl_service_create_cs_estimator(
 enum sl_rtl_error_code sl_rtl_service_set_cs_estimator_param(
   sl_rtl_service_cs_inst_t *inst,
   const sl_rtl_cs_estimator_param *param);
+
+/**************************************************************************//**
+ * Enable RTL library structured logging for an instance.
+ *
+ * Thread-safe: acquires the parent context's RTA guard internally.
+ * Must be called after sl_rtl_service_create_cs_instance() and
+ * before sl_rtl_service_create_cs_estimator(). Has no effect unless
+ * sl_rtl_log_init() and sl_rtl_log_configure() have been called first.
+ *
+ * @param[in] inst  RTL service CS instance.
+ *
+ * @return SL_RTL_ERROR_SUCCESS   Logging enabled for this instance.
+ * @return SL_RTL_ERROR_ARGUMENT  @p inst is NULL or not in use.
+ * @return SL_RTL_ERROR_INTERNAL  Guard acquisition failed.
+ * @return Other values forwarded from the underlying RTL library
+ *         (e.g. SL_RTL_ERROR_ESTIMATOR_ALREADY_CREATED if called
+ *         after sl_rtl_service_create_cs_estimator).
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_service_enable_cs_log(
+  sl_rtl_service_cs_inst_t *inst);
 
 // -----------------------------------------------------------------------------
 // Processing

@@ -490,6 +490,15 @@ template_contribution:
 
 - name: cli_command
   value:
+    name: offsetLqi
+    handler: offsetLqi
+    help: "Adjust the hardware's LQI value for received packets."
+    argument:
+    - type: int16
+      help: "offset: signed value to add\\n                    The resulting LQI is capped within 0..255 range."
+
+- name: cli_command
+  value:
     name: getRssi
     handler: getRssi
     help: Get RSSI in dBm. It'll be invalid if receiver isn't ready.

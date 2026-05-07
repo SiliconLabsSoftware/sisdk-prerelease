@@ -88,14 +88,14 @@ extern "C" {
  * @brief The SIxx301 series size needed for REDUCE_SEQ_SZ
  *   \ref sl_rail_state_buffer_entry_t::buffer_bytes.
  */
-#define SL_RAIL_SIXG301_REDUCED_STATE_BUFFER_BYTES 624U  // DO NOT HAND-EDIT THESE VALUES
+#define SL_RAIL_SIXG301_REDUCED_STATE_BUFFER_BYTES 616U  // DO NOT HAND-EDIT THESE VALUES
 
 /**
  * @def SL_RAIL_SIXG301_STATE_BUFFER_BYTES
  * @brief The SIxx301 series size needed for
  *   \ref sl_rail_state_buffer_entry_t::buffer_bytes.
  */
-#define SL_RAIL_SIXG301_STATE_BUFFER_BYTES 640U  // DO NOT HAND-EDIT THESE VALUES
+#define SL_RAIL_SIXG301_STATE_BUFFER_BYTES 632U  // DO NOT HAND-EDIT THESE VALUES
 
 #ifndef SL_RAIL_STATE_BUFFER_BYTES
 /**

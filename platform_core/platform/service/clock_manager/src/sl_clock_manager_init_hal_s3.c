@@ -579,7 +579,11 @@ FUNCTION_SCOPE void init_lfxo(void)
   ctune = (uint8_t) SL_MIN(0x59U, (uint8_t)ctune);
 
   // Enable Bus Clock for LFXO.
+#if defined(CMU_CLKEN0_LFXO)
   CMU->CLKEN0_SET = CMU_CLKEN0_LFXO;
+#elif defined(CMU_LFXOCLKCTRL_CLKEN)
+  CMU->LFXOCLKCTRL_SET = CMU_LFXOCLKCTRL_CLKEN;
+#endif
 
   // Unlock register interface.
   LFXO->LOCK = LFXO_LOCK_LOCKKEY_UNLOCK;
@@ -652,7 +656,11 @@ FUNCTION_SCOPE void init_dpll(void)
     uint32_t lock_status = 0;
 
     // Enable DPLL module's clock.
+#if defined(CMU_CLKEN0_DPLL0)
     CMU->CLKEN0_SET = CMU_CLKEN0_DPLL0;
+#elif defined(CMU_DPLL0CLKCTRL_CLKEN)
+    CMU->DPLL0CLKCTRL_SET = CMU_DPLL0CLKCTRL_CLKEN;
+#endif
 
     // Disable DPLL before configuring.
     DPLL0->EN_CLR = DPLL_EN_EN;
@@ -873,7 +881,7 @@ FUNCTION_SCOPE void init_socpll(uint8_t socpll_num)
 
 #if defined(_SOCPLL_AUTO_MASK) && defined(FREQPLAN_BASE)
   // Load FREQPLAN if available and start AUTO mode.
-  const sl_clock_manager_freqplan_data_t *freqplan_data = CLOCK_MANAGER_SOCPLL_FREQPLAN_DATA(socpll_num);
+  const sl_clock_manager_socpll_freqplan_data_t *freqplan_data = CLOCK_MANAGER_SOCPLL_FREQPLAN_DATA(socpll_num);
   if (freqplan_data != NULL) {
     for (uint8_t i = 0; i < FREQPLAN_FREQSEL_WIDTH; i++) {
       socpll->FREQPLANCTRL[i].AUTO = (uint32_t)(freqplan_data->socpll_config[i]);

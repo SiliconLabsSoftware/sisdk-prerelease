@@ -157,3 +157,4 @@ tag:
   - hwfilter:!board:zb_boards_spi_incompatible
   - hwfilter:!board:zb_boards_ncp_spi_incompatible
   - toolchain:gcc
+  - toolchain:llvm

@@ -46,10 +46,10 @@ Table of content:
       - [service\_reset](#service_reset)
       - [read\_sensor](#read_sensor)
       - [vendor\_opcode](#vendor_opcode)
-      - [image\_throughput](#image_throughput)
     - [Access Point control commands](#access-point-control-commands)
       - [help](#help)
       - [mode](#mode)
+      - [image\_throughput](#image_throughput)
       - [network](#network)
       - [set\_rssi\_threshold](#set_rssi_threshold)
       - [scan](#scan)
@@ -622,40 +622,6 @@ _Notes:_
  - _The latest Silabs ESL example supports PAwR interval skipping as an experimental feature to further reduce power consumption. To enable skipping on supported ESLs, you can issue the `vendor_opcode <esl_id> -d <skip_count>` command. Skipping can be disabled by issuing the command `vendor_opcode <esl_id> -d 0`._
  - _An ESL for which PAwR skipping is currently enabled **may not receive PAwR commands immediately!** Commands are automatically retransmitted up to 3 times if not responded to, but for higher skip rates you may need to manually retry several times to succeed._
 
-#### image\_throughput
-    Run or stop the image throughput stress test across synchronized ESL Tags.
-
-Usage: `image_throughput [-h] {start,stop} [--max_count <u15>] [--max_group <u7>]`
-
-Positional arguments:
-- `{start, stop}`: Start or stop the image throughput stress test.
-
-Options:
-- `[--max_count, -c <u15>]`: Upper limit on how many **synchronized** Tags are enrolled in a deterministic order: first by ESL ID, then by group ID. This ordering spreads enrollment across groups for better performance. If omitted, all eligible synchronized Tags are considered (subject to `--max_group` and internal eligibility). The value must be at least **1** when given.
-- `[--max_group, -g <u7>]`: Highest **ESL group ID** for Tags that may be enrolled. Tags in groups above this value are skipped. If omitted, there is no group ceiling from this option. When given, the value must be in the range **0**-**127** (aligned with PAwR subevent / group limits).
-
-_Notes:_
-- _While the test is active, the current AP mode line from [`mode`](#mode) will indicate that an image throughput test is running (in addition to manual versus automated)._
-- _At high log verbosity, the console can be very noisy during the test; avoid issuing unrelated CLI commands until the test completes unless you intend to stop it._
-- _Stopping PAwR or losing sync can also end the test; the AP then reverts to the saved pre-test automated/manual state._
-- _This command is a diagnostic utility, not an Access Point operating mode. While the test runs, the AP switches to manual mode; when the test finishes normally, the previous automated versus manual mode is restored automatically. Issuing [`mode auto`](#mode) or [`mode manual`](#mode) while the test runs stops the test as well (with statistics logged)._
-- _PAwR must already be running; ESLs must be in Synchronized state and support image transfer. The AP uses image files from the `image/` folder (same default source as for the [`image_update`](#image_update) command). Demo mode must be disabled before `start`; if demo mode is on, the command is rejected._
-
-_Disclaimer: Switching to manual mode gives full control over devices on your network. Issuing other ESL commands while the test runs can interfere with timing and connection state; it is highly recommended not to issue commands manually during the test._
-
-Examples:
-- `image_throughput start`
-
-  Start the test with default enrollment (all eligible synchronized Tags, subject to eligibility checks in the AP).
-
-- `image_throughput start -c 8 -g 3`
-
-  Start the test, enrolling at most eight Tags whose ESL group ID is 3 or lower. If fewer than eight ESLs are configured in groups 0-3, the test will run on fewer devices than the number given by the `-c` option.
-
-- `image_throughput stop`
-
-  Stop the running test and print summary statistics; the AP restores the operating mode in effect before `start`.
-
 ### Access Point control commands
 ---
 #### help
@@ -697,6 +663,41 @@ Examples:
 - `mode`
 
   Ask current mode.
+
+#### image\_throughput
+    Run or stop the image throughput stress test across synchronized ESL Tags.
+
+Usage: `image_throughput [-h] {start,stop} [--max_count <u15>] [--max_group <u7>] [--parallel_connections <N>]`
+
+Positional arguments:
+- `{start, stop}`: Start or stop the image throughput stress test.
+
+Options:
+- `[--max_count, -c <u15>]`: Upper limit on how many **synchronized** Tags are enrolled in a deterministic order: first by ESL ID, then by group ID. This ordering spreads enrollment across groups for better performance. If omitted, all eligible synchronized Tags are considered (subject to `--max_group` and internal eligibility). The value must be at least **1** when given.
+- `[--max_group, -g <u7>]`: Highest **ESL group ID** for Tags that may be enrolled. Tags in groups above this value are skipped. If omitted, there is no group ceiling from this option. When given, the value must be in the range **0**-**127** (aligned with PAwR subevent / group limits).
+- `[--parallel_connections, -p <N>]` Cap on parallel **BLE** connections: if omitted, the previous or stack-discovered cap is unchanged; **0** clears it; **1**-**32** sets a fixed cap for this run. Please note that setting a cap higher than the maximum parallel connection supported by the ESL AP NCP target will have no effect.
+
+_Notes:_
+- _While the test is active, the current AP mode line from [`mode`](#mode) will indicate that an image throughput test is running (in addition to manual versus automated)._
+- _At high log verbosity, the console can be very noisy during the test; avoid issuing unrelated CLI commands until the test completes unless you intend to stop it._
+- _Stopping PAwR or losing sync can also end the test; the AP then reverts to the saved pre-test automated/manual state._
+- _This command is a diagnostic utility, not an Access Point operating mode. While the test runs, the AP switches to manual mode; when the test finishes normally, the previous automated versus manual mode is restored automatically. Issuing [`mode auto`](#mode) or [`mode manual`](#mode) while the test runs stops the test as well (with statistics logged)._
+- _PAwR must already be running; ESLs must be in Synchronized state and support image transfer. The AP uses image files from the `image/` folder (same default source as for the [`image_update`](#image_update) command). Demo mode must be disabled before `start`; if demo mode is on, the command is rejected._
+
+_Disclaimer: Switching to manual mode gives full control over devices on your network. Issuing other ESL commands while the test runs can interfere with timing and connection state; it is highly recommended not to issue commands manually during the test._
+
+Examples:
+- `image_throughput start`
+
+  Start the test with default enrollment (all eligible synchronized Tags, subject to eligibility checks in the AP).
+
+- `image_throughput start -c 8 -g 3`
+
+  Start the test, enrolling at most eight Tags whose ESL group ID is 3 or lower. If fewer than eight ESLs are configured in groups 0-3, the test will run on fewer devices than the number given by the `-c` option.
+
+- `image_throughput stop`
+
+  Stop the running test and print summary statistics; the AP restores the operating mode in effect before `start`.
 
 #### network
     Execute commands related to the network control.

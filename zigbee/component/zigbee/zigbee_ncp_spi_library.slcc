@@ -17,7 +17,7 @@ requires:
 - name: zigbee_ncp_spi
 
 library:
-- path: build/gcc/cortex-m33/zigbee-ncp-spi/release/libzigbee-ncp-spi.a
+- path: libs/build/gcc/cortex-m33/zigbee-ncp-spi/release/libzigbee-ncp-spi.a
   condition:
   - toolchain_gcc
   - cortexm33
@@ -28,7 +28,7 @@ library:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
   - toolchain_llvm
-- path: build/gcc/cortex-m33/zigbee-ncp-spi/release_dualrail/libzigbee-ncp-spi.a
+- path: libs/build/gcc/cortex-m33/zigbee-ncp-spi/release_dualrail/libzigbee-ncp-spi.a
   condition:
   - toolchain_gcc
   - cortexm33
@@ -38,7 +38,7 @@ library:
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - toolchain_llvm
-- path: build/gcc/cortex-m33/zigbee-ncp-spi/release_dualrail_singlenetwork/libzigbee-ncp-spi.a
+- path: libs/build/gcc/cortex-m33/zigbee-ncp-spi/release_dualrail_singlenetwork/libzigbee-ncp-spi.a
   condition:
   - toolchain_gcc
   - cortexm33
@@ -48,7 +48,7 @@ library:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
   - toolchain_llvm
-- path: build/gcc/cortex-m33/zigbee-ncp-spi/release_singlenetwork/libzigbee-ncp-spi.a
+- path: libs/build/gcc/cortex-m33/zigbee-ncp-spi/release_singlenetwork/libzigbee-ncp-spi.a
   condition:
   - toolchain_gcc
   - cortexm33
@@ -59,7 +59,7 @@ library:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
   - toolchain_llvm
-- path: build/iar/cortex-m33/zigbee-ncp-spi/release/libzigbee-ncp-spi.a
+- path: libs/build/iar/cortex-m33/zigbee-ncp-spi/release/libzigbee-ncp-spi.a
   condition:
   - toolchain_iar
   - cortexm33
@@ -70,7 +70,7 @@ library:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
   - stack_protection_iar
-- path: build/iar/cortex-m33/zigbee-ncp-spi/release_dualrail/libzigbee-ncp-spi.a
+- path: libs/build/iar/cortex-m33/zigbee-ncp-spi/release_dualrail/libzigbee-ncp-spi.a
   condition:
   - toolchain_iar
   - cortexm33
@@ -80,7 +80,7 @@ library:
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - stack_protection_iar
-- path: build/iar/cortex-m33/zigbee-ncp-spi/release_dualrail_singlenetwork/libzigbee-ncp-spi.a
+- path: libs/build/iar/cortex-m33/zigbee-ncp-spi/release_dualrail_singlenetwork/libzigbee-ncp-spi.a
   condition:
   - toolchain_iar
   - cortexm33
@@ -90,29 +90,29 @@ library:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
   - stack_protection_iar
-- path: build/iar/cortex-m33/zigbee-ncp-spi/release_singlenetwork/libzigbee-ncp-spi.a
-  condition:
-  - toolchain_iar
-  - cortexm33
-  - zigbee_ncp
-  - zigbee_phy_2_4
-  unless:
-  - zigbee_multi_network
-  - zigbee_phy_2_4_subghz_selection_end_device
-  - zigbee_phy_2_4_subghz_switch_coordinator
-  - stack_protection_iar
-- path: build/iar/cortex-m33/zigbee-ncp-spi/release_stackprotection/libzigbee-ncp-spi.a
+- path: libs/build/iar/cortex-m33/zigbee-ncp-spi/release_singlenetwork/libzigbee-ncp-spi.a
   condition:
   - toolchain_iar
   - cortexm33
   - zigbee_ncp
   - zigbee_phy_2_4
+  unless:
+  - zigbee_multi_network
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
+  - stack_protection_iar
+- path: libs/build/iar/cortex-m33/zigbee-ncp-spi/release_stackprotection/libzigbee-ncp-spi.a
+  condition:
+  - toolchain_iar
+  - cortexm33
+  - zigbee_ncp
+  - zigbee_phy_2_4
   - zigbee_multi_network
   - stack_protection_iar
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
-- path: build/iar/cortex-m33/zigbee-ncp-spi/release_stackprotection_dualrail/libzigbee-ncp-spi.a
+- path: libs/build/iar/cortex-m33/zigbee-ncp-spi/release_stackprotection_dualrail/libzigbee-ncp-spi.a
   condition:
   - toolchain_iar
   - cortexm33
@@ -122,7 +122,7 @@ library:
   - stack_protection_iar
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
-- path: build/iar/cortex-m33/zigbee-ncp-spi/release_stackprotection_dualrail_singlenetwork/libzigbee-ncp-spi.a
+- path: libs/build/iar/cortex-m33/zigbee-ncp-spi/release_stackprotection_dualrail_singlenetwork/libzigbee-ncp-spi.a
   condition:
   - toolchain_iar
   - cortexm33
@@ -132,7 +132,7 @@ library:
   unless:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
-- path: build/iar/cortex-m33/zigbee-ncp-spi/release_stackprotection_singlenetwork/libzigbee-ncp-spi.a
+- path: libs/build/iar/cortex-m33/zigbee-ncp-spi/release_stackprotection_singlenetwork/libzigbee-ncp-spi.a
   condition:
   - toolchain_iar
   - cortexm33
@@ -143,7 +143,7 @@ library:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
-- path: build/llvm/cortex-m33/zigbee-ncp-spi/release/libzigbee-ncp-spi.a
+- path: libs/build/llvm/cortex-m33/zigbee-ncp-spi/release/libzigbee-ncp-spi.a
   condition:
   - toolchain_llvm
   - cortexm33
@@ -153,7 +153,7 @@ library:
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
-- path: build/llvm/cortex-m33/zigbee-ncp-spi/release_dualrail/libzigbee-ncp-spi.a
+- path: libs/build/llvm/cortex-m33/zigbee-ncp-spi/release_dualrail/libzigbee-ncp-spi.a
   condition:
   - toolchain_llvm
   - cortexm33
@@ -162,7 +162,7 @@ library:
   - zigbee_multi_network
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
-- path: build/llvm/cortex-m33/zigbee-ncp-spi/release_dualrail_singlenetwork/libzigbee-ncp-spi.a
+- path: libs/build/llvm/cortex-m33/zigbee-ncp-spi/release_dualrail_singlenetwork/libzigbee-ncp-spi.a
   condition:
   - toolchain_llvm
   - cortexm33
@@ -171,7 +171,7 @@ library:
   unless:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
-- path: build/llvm/cortex-m33/zigbee-ncp-spi/release_singlenetwork/libzigbee-ncp-spi.a
+- path: libs/build/llvm/cortex-m33/zigbee-ncp-spi/release_singlenetwork/libzigbee-ncp-spi.a
   condition:
   - toolchain_llvm
   - cortexm33

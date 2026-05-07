@@ -54,6 +54,7 @@ component:
       - btn1
   - id: zigbee_application_bootloader
   # Platform - enable LTO for gcc
+  - id: toolchain_gcc_lto
 
 configuration:
   - name: SL_BOARD_ENABLE_VCOM

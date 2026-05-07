@@ -60,8 +60,8 @@ do {\
 // since some the limits used in SLI_WISUN_PARAM_CHECK_LIMITS may be
 // the minimum/maximum integer value.
 #ifdef __ICCARM__
-#define SUPPRESS_CHECK_LIMITS_WARNING _Pragma ("diag_suppress=Pa084")
-#define RESTORE_CHECK_LIMITS_WARNING _Pragma ("diag_default=Pa084")
+#define SUPPRESS_CHECK_LIMITS_WARNING _Pragma ("diag_suppress=Pa084,Pe186")
+#define RESTORE_CHECK_LIMITS_WARNING _Pragma ("diag_default=Pa084,Pe186")
 #else
 #define SUPPRESS_CHECK_LIMITS_WARNING
 #define RESTORE_CHECK_LIMITS_WARNING

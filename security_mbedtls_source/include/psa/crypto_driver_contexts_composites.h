@@ -133,6 +133,9 @@ typedef mbedtls_psa_pake_operation_t
 #if defined(SLI_MBEDTLS_DEVICE_HC)
   #include "sli_hostcrypto_transparent_types.h"
 #endif
+#if defined(SLI_AEAD_DEVICE_SI91X)
+  #include "sl_si91x_psa_aead.h"
+#endif
 
 #endif /* MBEDTLS_PSA_CRYPTO_DRIVERS */
 
@@ -195,6 +198,9 @@ typedef union {
 #if defined(SLI_MBEDTLS_DEVICE_HC)
     sli_hostcrypto_transparent_aead_operation_t sli_hostcrypto_transparent_ctx;
 #endif /* SLI_MBEDTLS_DEVICE_HC */
+#if defined(SLI_AEAD_DEVICE_SI91X)
+    sli_si91x_crypto_aead_operation_t sli_si91x_crypto_aead_ctx;
+#endif
 #endif
 } psa_driver_aead_context_t;
 

@@ -20,6 +20,7 @@ include:
   - path: storage/ext_mem/btl_storage_ext_mem.h
 provides:
 - name: btl_common_storage
+- name: btl_interface_bootloadinfo_provider
 requires:
 - name: btl_storage_bootloadinfo_header
 - name: btl_storage_slots

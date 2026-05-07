@@ -22,6 +22,7 @@ component:
   - id: zigbee_zll
   - id: clock_manager
   # Platform - enable LTO for gcc
+  - id: toolchain_gcc_lto
 
 configuration:
   - name: SL_ZIGBEE_BINDING_TABLE_SIZE

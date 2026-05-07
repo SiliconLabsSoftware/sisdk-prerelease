@@ -33,22 +33,22 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <limits.h>
 #include "sl_bt_api.h"
 #include "sl_component_catalog.h"
-#include "sl_rtl_clib_api.h"
 #include "sl_status.h"
 
 #include "cs_initiator_config.h"
 #include "cs_initiator_common.h"
 #include "cs_initiator_client.h"
 #include "cs_initiator_error.h"
-#include "cs_initiator_estimate.h"
 #include "cs_initiator_extract.h"
 #include "cs_initiator_log.h"
 #include "cs_initiator_state_machine.h"
 #include "cs_ras_client.h"
 #include "cs_ras_format_converter.h"
 #include "cs_sync_antenna.h"
+#include "cs_algo.h"
 
 #ifdef SL_CATALOG_CS_INITIATOR_REPORT_PRESENT
 #include "cs_initiator_report.h"
@@ -102,6 +102,8 @@ static void init_cs_configuration(const uint8_t conn_handle);
 static void cs_initiator_select_antennas(uint8_t conn_handle,
                                          uint8_t cs_initiator_local_antenna_num,
                                          uint8_t cs_initiator_remote_antenna_num);
+static uint32_t get_num_tones_from_channel_map(const uint8_t *ch_map,
+                                                const uint32_t ch_map_len);                                  
 static void process_remote_ranging_data(cs_initiator_t *initiator,
                                         uint8_t *data,
                                         uint32_t data_size);
@@ -115,6 +117,12 @@ static void cs_initiator_get_lost_segments(uint64_t lost_segments,
                                            uint8_t *start_segment,
                                            uint8_t *end_segment);
 #endif
+
+extern void cs_initiator_dispatch_ras_data(uint8_t conn_handle,
+                                           uint16_t ranging_counter,
+                                           cs_algo_procedure_info_t proc_info,
+                                           unified_ranging_data_t *ranging_data);
+
 
 // -----------------------------------------------------------------------------
 // Static variables
@@ -148,6 +156,33 @@ static cs_initiator_t *cs_initiator_get_instance(const uint8_t conn_handle)
   initiator_log_error("No matching instance found for connection handle %u!" LOG_NL,
                       conn_handle);
   return NULL;
+}
+// TODO (RTOS): use this to verify that initiator can only move on in state machine when
+// algo ras process is finished
+static void cs_initiator_on_process_finished(uint8_t conn_handle,
+                                             uint16_t ranging_counter,
+                                             uint32_t status)
+{
+  cs_initiator_t *initiator = cs_initiator_get_instance(conn_handle);
+  if (initiator == NULL) {
+    return;
+  }
+
+  if (status != SL_STATUS_OK) {
+    initiator_log_error(INSTANCE_PREFIX "cs_algo processing failed "
+                                        "(ranging_counter=%u, sc=0x%lx)" LOG_NL,
+                        conn_handle,
+                        ranging_counter,
+                        (unsigned long)status);
+    on_error(initiator,
+             CS_ERROR_EVENT_RTL_PROCESS_ERROR,
+             (sl_status_t)status);
+    return;
+  }
+
+  initiator_log_debug(INSTANCE_PREFIX "cs_algo finished procedure %u " LOG_NL,
+                      conn_handle,
+                      ranging_counter);
 }
 
 /******************************************************************************
@@ -451,7 +486,7 @@ static void cs_initiator_select_antennas(uint8_t conn_handle, uint8_t cs_initiat
   if (initiator->config.cs_main_mode == sl_bt_cs_mode_pbr) {
     switch (initiator->config.cs_tone_antenna_config_idx_req) {
       case CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY:
-        initiator->cs_parameters.num_antenna_paths = 1;
+        initiator->num_antenna_path = 1;
         initiator_log_info(INSTANCE_PREFIX "CS - PBR - 1:1 antenna usage set" LOG_NL,
                            initiator->conn_handle);
         break;
@@ -464,9 +499,9 @@ static void cs_initiator_select_antennas(uint8_t conn_handle, uint8_t cs_initiat
                    CS_ERROR_EVENT_INITIATOR_PBR_ANTENNA_USAGE_NOT_SUPPORTED,
                    SL_STATUS_FAIL);
           initiator->config.cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
-          initiator->cs_parameters.num_antenna_paths = 1;
+          initiator->num_antenna_path = 1;
         } else {
-          initiator->cs_parameters.num_antenna_paths = 2;
+          initiator->num_antenna_path = 2;
           initiator_log_info(INSTANCE_PREFIX "CS - PBR - 2:1 antenna usage set" LOG_NL,
                              initiator->conn_handle);
         }
@@ -480,16 +515,16 @@ static void cs_initiator_select_antennas(uint8_t conn_handle, uint8_t cs_initiat
                    CS_ERROR_EVENT_INITIATOR_PBR_ANTENNA_USAGE_NOT_SUPPORTED,
                    SL_STATUS_FAIL);
           initiator->config.cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
-          initiator->cs_parameters.num_antenna_paths = 1;
+          initiator->num_antenna_path = 1;
         } else {
-          initiator->cs_parameters.num_antenna_paths = 2;
+          initiator->num_antenna_path = 2;
           initiator_log_info(INSTANCE_PREFIX "CS - PBR - 1:2 antenna usage set" LOG_NL,
                              initiator->conn_handle);
         }
         break;
       case CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY:
         if (cs_initiator_remote_antenna_num >= 2 && cs_initiator_local_antenna_num >= 2) {
-          initiator->cs_parameters.num_antenna_paths = 4;
+          initiator->num_antenna_path = 4;
           initiator_log_info(INSTANCE_PREFIX "CS - PBR - 2:2 antenna usage set" LOG_NL,
                              initiator->conn_handle);
         } else {
@@ -497,12 +532,12 @@ static void cs_initiator_select_antennas(uint8_t conn_handle, uint8_t cs_initiat
                    CS_ERROR_EVENT_INITIATOR_PBR_ANTENNA_USAGE_NOT_SUPPORTED,
                    SL_STATUS_FAIL);
           if (cs_initiator_remote_antenna_num == 1 && cs_initiator_local_antenna_num == 2) {
-            initiator->cs_parameters.num_antenna_paths = 2;
+            initiator->num_antenna_path = 2;
             initiator->config.cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R;
             initiator_log_info(INSTANCE_PREFIX "CS - PBR - 2:1 antenna usage set" LOG_NL,
                                initiator->conn_handle);
           } else if (cs_initiator_remote_antenna_num == 2 && cs_initiator_local_antenna_num == 1) {
-            initiator->cs_parameters.num_antenna_paths = 2;
+            initiator->num_antenna_path = 2;
             initiator->config.cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R;
             initiator_log_info(INSTANCE_PREFIX "CS - PBR - 1:2 antenna usage set" LOG_NL,
                                initiator->conn_handle);
@@ -511,7 +546,7 @@ static void cs_initiator_select_antennas(uint8_t conn_handle, uint8_t cs_initiat
                                   initiator->conn_handle);
 
             initiator->config.cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
-            initiator->cs_parameters.num_antenna_paths = 1;
+            initiator->num_antenna_path = 1;
           }
         }
         break;
@@ -519,13 +554,13 @@ static void cs_initiator_select_antennas(uint8_t conn_handle, uint8_t cs_initiat
         initiator_log_warning(INSTANCE_PREFIX "CS - PBR - unknown antenna usage! "
                                               "Using the default setting: 1:1 antenna" LOG_NL,
                               initiator->conn_handle);
-        initiator->cs_parameters.num_antenna_paths = 1;
+        initiator->num_antenna_path = 1;
         initiator->config.cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
         break;
     }
     initiator_log_debug(INSTANCE_PREFIX "CS - PBR - using %u antenna paths" LOG_NL,
                         initiator->conn_handle,
-                        initiator->cs_parameters.num_antenna_paths);
+                        initiator->num_antenna_path);
   }
 
   initiator->config.cs_tone_antenna_config_idx = initiator->config.cs_tone_antenna_config_idx_req;
@@ -569,10 +604,36 @@ static void cs_initiator_select_antennas(uint8_t conn_handle, uint8_t cs_initiat
         break;
     }
     // In case of RTT num_antenna_paths is ignored
-    initiator->cs_parameters.num_antenna_paths = 0;
+    initiator->num_antenna_path = 0;
   }
 }
 
+/******************************************************************************
+ * Get number of tones in channel map
+ *****************************************************************************/
+static uint32_t get_num_tones_from_channel_map(const uint8_t  *ch_map,
+                                                const uint32_t ch_map_len)
+{
+  uint8_t current_ch_map;
+  uint32_t num_cs_channels = 0;
+
+  if (ch_map == NULL) {
+    initiator_log_error("null reference to channel map! Can not get number of tones!" LOG_NL);
+    return num_cs_channels;
+  } else {
+    for (uint32_t ch_map_index = 0; ch_map_index < ch_map_len; ch_map_index++) {
+      current_ch_map = ch_map[ch_map_index];
+      for (uint8_t current_bit_index = 0;
+           current_bit_index < sizeof(uint8_t) * CHAR_BIT;
+           current_bit_index++) {
+        if (current_ch_map & (1 << current_bit_index)) {
+          num_cs_channels++;
+        }
+      }
+    }
+  }
+  return num_cs_channels;
+}
 #if defined (CS_INITIATOR_RAS_MODE_USE_REAL_TIME_MODE) && (CS_INITIATOR_RAS_MODE_USE_REAL_TIME_MODE == 0)
 /******************************************************************************
  * Get start and end segments of the lost_segments bitfield.
@@ -620,6 +681,7 @@ sl_status_t cs_initiator_create(const uint8_t               conn_handle,
   cs_error_event_t initiator_err = CS_ERROR_EVENT_UNHANDLED;
   uint8_t cs_initiator_local_antenna_num;
   uint8_t cs_initiator_remote_antenna_num;
+  cs_algo_initiator_cb_t cs_algo_initiator_cb;
 
   if (conn_handle == SL_BT_INVALID_CONNECTION_HANDLE) {
     return SL_STATUS_INVALID_HANDLE;
@@ -709,16 +771,16 @@ sl_status_t cs_initiator_create(const uint8_t               conn_handle,
   }
   initiator_log_debug(INSTANCE_PREFIX "ch3c_jump=%u, ch3c_shape=%u" LOG_NL,
                       conn_handle,
-                      initiator->cs_parameters.ch3c_jump,
-                      initiator->cs_parameters.ch3c_shape);
+                      initiator->config.ch3c_jump,
+                      initiator->config.ch3c_shape);
   initiator_log_debug(INSTANCE_PREFIX "channel_map_repetition=%u, cs_sync_phy=%u" LOG_NL,
                       conn_handle,
-                      initiator->cs_parameters.channel_map_repetition,
-                      initiator->cs_parameters.cs_sync_phy);
+                      initiator->config.channel_map_repetition,
+                      initiator->config.cs_sync_phy);
   initiator_log_debug(INSTANCE_PREFIX "main_mode_repetition=%lu, rtt_type=%u" LOG_NL,
                       conn_handle,
-                      (unsigned long)initiator->cs_parameters.main_mode_repetition,
-                      initiator->cs_parameters.rtt_type);
+                      (unsigned long)initiator->config.main_mode_repetition,
+                      initiator->config.rtt_type);
 
   initiator_log_debug(INSTANCE_PREFIX "initialize discover state machine" LOG_NL,
                       initiator->conn_handle);
@@ -728,6 +790,17 @@ sl_status_t cs_initiator_create(const uint8_t               conn_handle,
   initiator->error_cb = error_cb;
   initiator_log_debug(INSTANCE_PREFIX "registered callbacks" LOG_NL,
                       initiator->conn_handle);
+
+  cs_algo_initiator_cb.on_process_finished = cs_initiator_on_process_finished;
+  sc = cs_algo_initiator_set_callback(&cs_algo_initiator_cb);
+  if (sc != SL_STATUS_OK) {
+    initiator_log_error(INSTANCE_PREFIX "failed to register cs_algo initiator "
+                                        "callback! [sc: 0x%lx]" LOG_NL,
+                        initiator->conn_handle,
+                        (unsigned long)sc);
+    initiator_err = CS_ERROR_EVENT_INIT_FAILED;
+    goto cleanup;
+  }
 
   // Validate the channel map
   rtl_err = sl_rtl_util_validate_bluetooth_cs_channel_map(initiator->config.cs_main_mode,
@@ -826,22 +899,6 @@ sl_status_t cs_initiator_create(const uint8_t               conn_handle,
   initiator_log_debug(INSTANCE_PREFIX "CS - set connection parameters ..." LOG_NL,
                       initiator->conn_handle);
 
-  // trying to initialize RTL lib within error-timeout
-  initiator_log_debug(INSTANCE_PREFIX "RTL - initialize lib item" LOG_NL,
-                      initiator->conn_handle);
-  rtl_err = rtl_library_init(initiator->conn_handle,
-                             &initiator->rtl_handle,
-                             &initiator->rtl_config,
-                             &initiator->instance_id);
-  if (rtl_err != SL_RTL_ERROR_SUCCESS) {
-    initiator_log_error(INSTANCE_PREFIX "RTL - failed to init lib item! [E: 0x%x]" LOG_NL,
-                        initiator->conn_handle,
-                        rtl_err);
-    initiator_err = CS_ERROR_EVENT_INITIATOR_FAILED_TO_INIT_RTL_LIB;
-    goto cleanup;
-  }
-  initiator_log_info(INSTANCE_PREFIX "RTL - lib item initialized." LOG_NL,
-                     initiator->conn_handle);
   if (instance_id != NULL) {
     *instance_id = initiator->instance_id;
   }
@@ -1405,7 +1462,6 @@ bool cs_initiator_on_event(sl_bt_msg_t *evt)
   cs_initiator_t *initiator;
   state_machine_event_data_t evt_data;
   bool handled = false;
-  enum sl_rtl_error_code rtl_err;
 
   switch (SL_BT_MSG_ID(evt->header)) {
     // --------------------------------
@@ -1601,60 +1657,63 @@ bool cs_initiator_on_event(sl_bt_msg_t *evt)
 
         stop_error_timer(initiator);
 
-        initiator->cs_parameters.num_calib_steps
-          = evt->data.evt_cs_config_complete.mode_calibration_steps;
-        initiator->cs_parameters.T_PM_time
-          = evt->data.evt_cs_config_complete.t_pm_time;
-        initiator->cs_parameters.T_IP1_time
-          = evt->data.evt_cs_config_complete.t_ip1_time;
-        initiator->cs_parameters.T_IP2_time
-          = evt->data.evt_cs_config_complete.t_ip2_time;
-        initiator->cs_parameters.T_FCS_time
-          = evt->data.evt_cs_config_complete.t_fcs_time;
-        initiator->cs_parameters.connection_interval
-          = initiator->conn_interval;
-        initiator->cs_parameters.ch3c_jump
+        initiator->config.ch3c_jump
           = evt->data.evt_cs_config_complete.ch3c_jump;
-        initiator->cs_parameters.ch3c_shape
+        initiator->config.ch3c_shape
           = evt->data.evt_cs_config_complete.ch3c_shape;
-        initiator->cs_parameters.channel_map_repetition
+        initiator->config.channel_map_repetition
           = evt->data.evt_cs_config_complete.channel_map_repetition;
-        initiator->cs_parameters.channel_selection_type
+        initiator->config.channel_selection_type
           = evt->data.evt_cs_config_complete.channel_selection_type;
-        initiator->cs_parameters.cs_sync_phy
+        initiator->config.cs_sync_phy
           = evt->data.evt_cs_config_complete.cs_sync_phy;
-        initiator->cs_parameters.rtt_type
+        initiator->config.rtt_type
           = evt->data.evt_cs_config_complete.rtt_type;
-        initiator->cs_parameters.main_mode_repetition
+        initiator->config.main_mode_repetition
           = evt->data.evt_cs_config_complete.main_mode_repetition;
-        initiator->cs_parameters.max_main_mode_steps
+        initiator->config.max_main_mode_steps
           = evt->data.evt_cs_config_complete.max_main_mode_steps;
-        initiator->cs_parameters.min_main_mode_steps
+        initiator->config.min_main_mode_steps
           = evt->data.evt_cs_config_complete.min_main_mode_steps;
-        memcpy(&initiator->cs_parameters.channel_map[0],
-               &evt->data.evt_cs_config_complete.channel_map.data[0],
-               sizeof(initiator->cs_parameters.channel_map));
 
-        // Create estimator with the set CS configuration parameters
-        initiator_log_debug(INSTANCE_PREFIX "CS - procedure parameters set,"
-                                            "RTL - initialize lib item" LOG_NL,
-                            initiator->conn_handle);
-        rtl_err = rtl_library_create_estimator(initiator->conn_handle,
-                                               &initiator->rtl_handle,
-                                               &initiator->rtl_config,
-                                               &initiator->cs_parameters,
-                                               initiator->config.cs_main_mode,
-                                               initiator->config.cs_sub_mode);
-        if (rtl_err != SL_RTL_ERROR_SUCCESS) {
-          initiator_log_error(INSTANCE_PREFIX "RTL - failed to init lib item! [E: 0x%x]" LOG_NL,
+        // Build the cs_algo_config_t type from cs_config_complete event, the initiator's
+        // static configuration, and the RTL configuration
+        cs_algo_config_t cs_algo_config = {
+          // CS modes
+          .cs_main_mode           = initiator->config.cs_main_mode,
+          .cs_sub_mode            = initiator->config.cs_sub_mode,
+          .min_main_mode_steps    = initiator->config.min_main_mode_steps,
+          .max_main_mode_steps    = initiator->config.max_main_mode_steps,
+          .main_mode_repetition   = initiator->config.main_mode_repetition,
+          .channel_map_repetition = initiator->config.channel_map_repetition,
+          .channel_selection_type = initiator->config.channel_selection_type,
+          .ch3c_shape             = initiator->config.ch3c_shape,
+          .ch3c_jump              = initiator->config.ch3c_jump,
+          .rtt_type               = initiator->config.rtt_type,
+          .cs_sync_phy            = initiator->config.cs_sync_phy,
+          .channel_map_preset     = initiator->config.channel_map_preset,
+          .rssi_ref_tx_power      = initiator->config.rssi_ref_tx_power,
+          .rtl_config             = initiator->rtl_config,
+          .connection_interval    = initiator->conn_interval,
+          .num_antenna_paths      = initiator->num_antenna_path,
+          .channel_map            = evt->data.evt_cs_config_complete.channel_map,
+          .num_calib_steps        = evt->data.evt_cs_config_complete.mode_calibration_steps,
+          .T_PM_time              = evt->data.evt_cs_config_complete.t_pm_time,
+          .T_IP1_time             = evt->data.evt_cs_config_complete.t_ip1_time,
+          .T_IP2_time             = evt->data.evt_cs_config_complete.t_ip2_time,
+          .T_FCS_time             = evt->data.evt_cs_config_complete.t_fcs_time,
+        };
+
+        sc = cs_algo_create(initiator->conn_handle, cs_algo_config);
+        if (sc != SL_STATUS_OK) {
+          initiator_log_error(INSTANCE_PREFIX "cs_algo_create failed! [sc: 0x%04lx]" LOG_NL,
                               initiator->conn_handle,
-                              rtl_err);
+                              (unsigned long)sc);
           on_error(initiator,
                    CS_ERROR_EVENT_INITIATOR_FAILED_TO_INIT_RTL_LIB,
-                   rtl_err);
+                   sc);
+          break;
         }
-        initiator_log_info(INSTANCE_PREFIX "RTL - lib item initialized." LOG_NL,
-                           initiator->conn_handle);
 
         sc = sl_bt_cs_set_procedure_parameters(initiator->conn_handle,
                                                initiator->config.config_id,

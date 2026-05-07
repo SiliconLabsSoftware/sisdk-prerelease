@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="ASCII"?>
 <model:MDescriptors xmlns:model="http://www.silabs.com/ss/Studio.ecore">
-  <descriptors name="compute_soc_math_mvp_demo_efr32_baremetal" label="Compute - Math MVP for EFR32"
+  <descriptors name="compute_soc_math_mvp_demo_efr32" label="Compute - SoC Math MVP EFR32"
                description="Demonstrates the Compute Math MVP API (vector and matrix operations).">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="compute math mvp vector matrix"/>
-    <properties key="solutionReferenceId" value="compute_soc_math_mvp_demo_efr32_baremetal.compute_soc_math_mvp_demo_efr32_baremetal.slcp"/>
-    <properties key="projectFilePaths" value="compute_soc_math_mvp_demo_efr32_baremetal/compute_soc_math_mvp_demo_efr32_baremetal.slcp"/>
-    <properties key="readmeFiles" value="compute_soc_math_mvp_demo_efr32_baremetal/readme.md"/>
+    <properties key="solutionReferenceId" value="compute_soc_math_mvp_demo_efr32.compute_soc_math_mvp_demo_efr32.slcp"/>
+    <properties key="projectFilePaths" value="compute_soc_math_mvp_demo_efr32/compute_soc_math_mvp_demo_efr32.slcp"/>
+    <properties key="readmeFiles" value="compute_soc_math_mvp_demo_efr32/readme.md"/>
     <properties key="boardCompatibility" value="brd2601b brd2608a com.silabs.board.none "/>
     <properties key="partCompatibility" value=".*ef.32.g2[468].*"/>
     <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>

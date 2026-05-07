@@ -122,3 +122,28 @@ uint32_t sli_dma_manager_hal_get_pending_errors(uint8_t channel_nbr);
  ******************************************************************************/
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_MANAGER, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
 void sli_dma_manager_hal_clear_pending_errors(uint8_t channel_nbr);
+
+/***************************************************************************//**
+ *  Latch a pending error bitmap for the DMA manager.
+ *
+ *  Used by callers that detect a DMA channel error outside of the regular IRQ
+ *  dispatch path (for example, when polling channel completion while the DMA
+ *  IRQ is masked) and need the next call to the DMA Channel Driver to consume
+ *  the error and invoke abort callbacks.
+ *
+ * @param[in]  channel_nbr Channel number.
+ * @param[in]  errors      Error bitmap to latch (typically @p (1U << channel_nbr)).
+ ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_MANAGER, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
+void sli_dma_manager_hal_set_pending_errors(uint8_t channel_nbr, uint32_t errors);
+
+/***************************************************************************//**
+ *  Latch a pending error bitmap for the DMA manager.
+ *
+ *  Public-internal forwarder around @ref sli_dma_manager_hal_set_pending_errors.
+ *
+ * @param[in]  channel_nbr Channel number.
+ * @param[in]  errors      Error bitmap to latch (typically @p (1U << channel_nbr)).
+ ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_MANAGER, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
+void sli_dma_manager_set_pending_errors(uint8_t channel_nbr, uint32_t errors);

@@ -54,6 +54,7 @@
 #endif
 
 #include "sl_dma_channel.h"
+#include "sli_dma_channel.h"
 #include "sl_dma_manager.h"
 #include "sl_device_dma.h"
 #include "sl_hal_ldma.h"
@@ -2394,24 +2395,27 @@ static Ecode_t TransferApiPrologue(SPIDRV_Handle_t handle,
 
 /***************************************************************************//**
  * @brief Wait for transfer completion.
+ *
+ * When the DMA IRQ is unmasked, the transfer completion is signaled by the
+ * regular DMA IRQ -> RxDMAComplete -> BlockingComplete callback chain, so we
+ * just spin on the flag.
+ *
+ * When the DMA IRQ is masked (e.g. caller is inside a critical section), no
+ * IRQ will fire to drive that callback chain. We instead poll the DMA Channel
+ * Driver via @ref sli_dma_channel_process_completed, which performs the same
+ * descriptor processing the IRQ would have. This keeps SPIDRV decoupled from
+ * the LDMA register layout and from how DMA Manager dispatches per-channel
+ * IRQs (which differs between Series 2 and Series 3 and may evolve further).
  ******************************************************************************/
 static void WaitForTransferCompletion(SPIDRV_Handle_t handle)
 {
   if (sl_interrupt_manager_is_irq_blocked(SPI_DMA_IRQ)) {
-
-    // Poll for completion by calling IRQ handler.
     while (handle->blockingCompleted == false) {
-      if (LDMA0->IF & (1U << handle->rxDMACh.channel_number)) {
-        sl_interrupt_manager_irq_handler_t* irq_table = sl_interrupt_manager_get_isr_table();
-        uint32_t isr = SPI_DMA_IRQ + 16;
-#if defined(_SILICON_LABS_32B_SERIES) && (_SILICON_LABS_32B_SERIES > 2)
-        isr += handle->rxDMACh.channel_number;
-#endif
-        irq_table[isr]();
-      }
+      sli_dma_channel_process_completed(&handle->rxDMACh);
     }
   } else {
-    while (handle->blockingCompleted == false) ;
+    while (handle->blockingCompleted == false) {
+    }
   }
 }
 
@@ -2444,21 +2448,27 @@ static Ecode_t WaitForIdleLine(SPIDRV_Handle_t handle)
 static Ecode_t sli_spidrv_exit_em23(SPIDRV_Handle_t handle)
 {
   EUSART_TypeDef *eusart = handle->peripheral.eusartPort;
-#if defined(_SILICON_LABS_32B_SERIES_2)
-  EUSART_Enable(eusart, eusartEnable);
-  BUS_RegMaskedWrite(&GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN,
-                     _GPIO_EUSART_ROUTEEN_TXPEN_MASK | _GPIO_EUSART_ROUTEEN_SCLKPEN_MASK,
-                     GPIO_EUSART_ROUTEEN_TXPEN | GPIO_EUSART_ROUTEEN_SCLKPEN);
-#else
-  sl_hal_eusart_enable(eusart);
-  sl_hal_eusart_enable_rx(eusart);
-  sl_hal_eusart_enable_tx(eusart);
-  sl_hal_eusart_wait_sync(eusart, _EUSART_SYNCBUSY_MASK);
-  sl_hal_bus_reg_write_mask(&GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN,
-                            _GPIO_EUSART_ROUTEEN_TXPEN_MASK | _GPIO_EUSART_ROUTEEN_SCLKPEN_MASK,
-                            GPIO_EUSART_ROUTEEN_TXPEN | GPIO_EUSART_ROUTEEN_SCLKPEN);
-#endif
 
+  uint32_t eusart_num = EUSART_NUM(eusart);
+  bool is_eusart_not_em2_capable = EUSART_NOT_EM2_CAPABLE(eusart_num);
+
+  if (is_eusart_not_em2_capable || (handle->initData.type == spidrvMaster)) {
+#if defined(_SILICON_LABS_32B_SERIES_2)
+    EUSART_Enable(eusart, eusartEnable);
+
+    BUS_RegMaskedWrite(&GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN,
+                       _GPIO_EUSART_ROUTEEN_TXPEN_MASK | _GPIO_EUSART_ROUTEEN_SCLKPEN_MASK,
+                       GPIO_EUSART_ROUTEEN_TXPEN | GPIO_EUSART_ROUTEEN_SCLKPEN);
+#else
+    sl_hal_eusart_enable(eusart);
+    sl_hal_eusart_enable_rx(eusart);
+    sl_hal_eusart_enable_tx(eusart);
+    sl_hal_eusart_wait_sync(eusart, _EUSART_SYNCBUSY_MASK);
+    sl_hal_bus_reg_write_mask(&GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN,
+                              _GPIO_EUSART_ROUTEEN_TXPEN_MASK | _GPIO_EUSART_ROUTEEN_SCLKPEN_MASK,
+                              GPIO_EUSART_ROUTEEN_TXPEN | GPIO_EUSART_ROUTEEN_SCLKPEN);
+#endif
+  }
   return ECODE_EMDRV_SPIDRV_OK;
 }
 
@@ -2468,15 +2478,23 @@ static Ecode_t sli_spidrv_exit_em23(SPIDRV_Handle_t handle)
 static Ecode_t sli_spidrv_enter_em23(SPIDRV_Handle_t handle)
 {
   EUSART_TypeDef *eusart = handle->peripheral.eusartPort;
+
+  uint32_t eusart_num = EUSART_NUM(eusart);
+  bool is_eusart_not_em2_capable = EUSART_NOT_EM2_CAPABLE(eusart_num);
+
+  if (is_eusart_not_em2_capable || (handle->initData.type == spidrvMaster)) {
 #if defined(_SILICON_LABS_32B_SERIES_2)
-  BUS_RegMaskedWrite(&GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN,
-                     _GPIO_EUSART_ROUTEEN_TXPEN_MASK | _GPIO_EUSART_ROUTEEN_SCLKPEN_MASK,
-                     0);
+    EUSART_Enable(eusart, eusartDisable);
+
+    BUS_RegMaskedWrite(&GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN,
+                       _GPIO_EUSART_ROUTEEN_TXPEN_MASK | _GPIO_EUSART_ROUTEEN_SCLKPEN_MASK,
+                       0);
 #else
-  sl_hal_bus_reg_write_mask(&GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN,
-                            _GPIO_EUSART_ROUTEEN_TXPEN_MASK | _GPIO_EUSART_ROUTEEN_SCLKPEN_MASK,
-                            0);
+    sl_hal_bus_reg_write_mask(&GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN,
+                              _GPIO_EUSART_ROUTEEN_TXPEN_MASK | _GPIO_EUSART_ROUTEEN_SCLKPEN_MASK,
+                              0);
 #endif
+  }
 
   return ECODE_EMDRV_SPIDRV_OK;
 }

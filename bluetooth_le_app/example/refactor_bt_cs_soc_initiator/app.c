@@ -48,6 +48,7 @@
 #include "cs_antenna.h"
 #include "cs_result.h"
 #include "cs_result_config.h"
+#include "cs_algo.h"
 #include "cs_initiator.h"
 #include "cs_initiator_client.h"
 #include "cs_initiator_config.h"
@@ -130,11 +131,9 @@ static const char *algo_mode_to_str(uint8_t algo_mode);
 static void cs_on_result(const uint8_t conn_handle,
                          const uint16_t ranging_counter,
                          const uint8_t *result,
-                         const cs_result_session_data_t *result_data,
-                         const cs_ranging_data_t *ranging_data,
-                         const void *user_data);
-static void cs_on_intermediate_result(const cs_intermediate_result_t *intermediate_result,
-                                      const void *user_data);
+                         const uint16_t result_size,
+                         const cs_ranging_data_t *ranging_data);
+static void cs_on_intermediate_result(const cs_intermediate_result_t *intermediate_result);
 static void cs_on_error(uint8_t conn_handle,
                         cs_error_event_t err_evt,
                         sl_status_t sc);
@@ -158,6 +157,7 @@ static uint8_t num_reflector_connections = 0u;
 static cs_initiator_instances_t cs_initiator_instances[CS_INITIATOR_MAX_CONNECTIONS];
 static app_timer_t display_timer;
 static uint8_t measurement_counter = 0u;
+static cs_algo_app_cb_t algo_cb;
 
 /******************************************************************************
  * Application Init
@@ -187,6 +187,14 @@ void app_init(void)
   rtl_config.algo_mode = get_algo_mode();
   cs_initiator_apply_channel_map_preset(initiator_config.channel_map_preset,
                                         initiator_config.channel_map.data);
+
+  algo_cb.on_result              = cs_on_result;
+  algo_cb.on_intermediate_result = cs_on_intermediate_result;
+  sc = cs_algo_app_set_callback(&algo_cb);
+  if (sc != SL_STATUS_OK) {
+    log_error(APP_PREFIX "Failed to register cs_algo app callbacks! [sc: 0x%lx]" NL,
+              (unsigned long)sc);
+  }
 
   if ((initiator_config.cs_main_mode == sl_bt_cs_mode_pbr)
       && (initiator_config.cs_sub_mode == sl_bt_cs_mode_rtt)) {
@@ -415,13 +423,13 @@ static sl_status_t save_connection(uint8_t conn_handle)
 static void cs_on_result(const uint8_t conn_handle,
                          const uint16_t ranging_counter,
                          const uint8_t *result,
-                         const cs_result_session_data_t *result_data,
-                         const cs_ranging_data_t *ranging_data,
-                         const void *user_data)
+                         const uint16_t result_size,
+                         const cs_ranging_data_t *ranging_data)
 {
   (void)ranging_data;
-  (void)user_data;
   uint8_t initiator_num;
+  cs_result_session_data_t result_data;
+  cs_result_initialize_results_data(&result_data);
 
   if (result != NULL) {
     sl_status_t sc = get_instance_number(conn_handle, &initiator_num);
@@ -432,7 +440,14 @@ static void cs_on_result(const uint8_t conn_handle,
       return;
     }
 
-    sc = cs_result_extract_field((cs_result_session_data_t *)result_data,
+    sc = cs_result_create_session_data((uint8_t *)result, result_size, &result_data);
+    if (sc != SL_STATUS_OK) {
+      log_error(APP_INSTANCE_PREFIX "Failed to create session data! [sc: 0x%lx]" NL,
+                conn_handle,
+                sc);
+      return;
+    }
+    sc = cs_result_extract_field(&result_data,
                                  CS_RESULT_FIELD_DISTANCE_MAINMODE,
                                  (uint8_t *)result,
                                  (uint8_t *)&cs_initiator_instances[initiator_num].measurement_mainmode.distance_filtered);
@@ -443,7 +458,7 @@ static void cs_on_result(const uint8_t conn_handle,
     }
 
     if (initiator_config.cs_sub_mode != sl_bt_cs_submode_disabled) {
-      sc = cs_result_extract_field((cs_result_session_data_t *)result_data,
+      sc = cs_result_extract_field(&result_data,
                                    CS_RESULT_FIELD_DISTANCE_SUBMODE,
                                    (uint8_t *)result,
                                    (uint8_t *)&cs_initiator_instances[initiator_num].measurement_submode.distance_filtered);
@@ -454,7 +469,7 @@ static void cs_on_result(const uint8_t conn_handle,
       }
     }
 
-    sc = cs_result_extract_field((cs_result_session_data_t *)result_data,
+    sc = cs_result_extract_field(&result_data,
                                  CS_RESULT_FIELD_DISTANCE_RAW_MAINMODE,
                                  (uint8_t *)result,
                                  (uint8_t *)&cs_initiator_instances[initiator_num].measurement_mainmode.distance_raw);
@@ -465,7 +480,7 @@ static void cs_on_result(const uint8_t conn_handle,
     }
 
     if (initiator_config.cs_sub_mode != sl_bt_cs_submode_disabled) {
-      sc = cs_result_extract_field((cs_result_session_data_t *)result_data,
+      sc = cs_result_extract_field(&result_data,
                                    CS_RESULT_FIELD_DISTANCE_RAW_SUBMODE,
                                    (uint8_t *)result,
                                    (uint8_t *)&cs_initiator_instances[initiator_num].measurement_submode.distance_raw);
@@ -476,7 +491,7 @@ static void cs_on_result(const uint8_t conn_handle,
       }
     }
 
-    sc = cs_result_extract_field((cs_result_session_data_t *)result_data,
+    sc = cs_result_extract_field(&result_data,
                                  CS_RESULT_FIELD_LIKELINESS_MAINMODE,
                                  (uint8_t *)result,
                                  (uint8_t *)&cs_initiator_instances[initiator_num].measurement_mainmode.likeliness);
@@ -487,7 +502,7 @@ static void cs_on_result(const uint8_t conn_handle,
     }
 
     if (initiator_config.cs_sub_mode != sl_bt_cs_submode_disabled) {
-      sc = cs_result_extract_field((cs_result_session_data_t *)result_data,
+      sc = cs_result_extract_field(&result_data,
                                    CS_RESULT_FIELD_LIKELINESS_SUBMODE,
                                    (uint8_t *)result,
                                    (uint8_t *)&cs_initiator_instances[initiator_num].measurement_submode.likeliness);
@@ -502,7 +517,7 @@ static void cs_on_result(const uint8_t conn_handle,
         && initiator_config.cs_main_mode == sl_bt_cs_mode_pbr
         && (initiator_config.channel_map_preset == CS_CHANNEL_MAP_PRESET_HIGH
             || initiator_config.channel_map_preset == CS_CHANNEL_MAP_PRESET_MEDIUM)) {
-      sc = cs_result_extract_field((cs_result_session_data_t *)result_data,
+      sc = cs_result_extract_field(&result_data,
                                    CS_RESULT_FIELD_VELOCITY_MAINMODE,
                                    (uint8_t *)result,
                                    (uint8_t *)&cs_initiator_instances[initiator_num].measurement_mainmode.velocity);
@@ -515,7 +530,7 @@ static void cs_on_result(const uint8_t conn_handle,
 
     // BER is only for RTT
     if (initiator_config.cs_main_mode == sl_bt_cs_mode_rtt) {
-      sc = cs_result_extract_field((cs_result_session_data_t *)result_data,
+      sc = cs_result_extract_field(&result_data,
                                    CS_RESULT_FIELD_BIT_ERROR_RATE,
                                    (uint8_t *)result,
                                    (uint8_t *)&cs_initiator_instances[initiator_num].measurement_mainmode.bit_error_rate);
@@ -527,7 +542,7 @@ static void cs_on_result(const uint8_t conn_handle,
     }
 
     // Extract RSSI distance always
-    sc = cs_result_extract_field((cs_result_session_data_t *)result_data,
+    sc = cs_result_extract_field(&result_data,
                                  CS_RESULT_FIELD_DISTANCE_RSSI,
                                  (uint8_t *)result,
                                  (uint8_t *)&cs_initiator_instances[initiator_num].measurement_mainmode.distance_estimate_rssi);
@@ -549,9 +564,8 @@ static void cs_on_result(const uint8_t conn_handle,
  * Extract intermediate results between measurement results
  * Note: only called when stationary object tracking used
  *****************************************************************************/
-static void cs_on_intermediate_result(const cs_intermediate_result_t * intermediate_result, const void *user_data)
+static void cs_on_intermediate_result(const cs_intermediate_result_t * intermediate_result)
 {
-  (void) user_data;
   uint8_t instance_num;
   if (intermediate_result != NULL) {
     sl_status_t sc = get_instance_number(intermediate_result->connection, &instance_num);

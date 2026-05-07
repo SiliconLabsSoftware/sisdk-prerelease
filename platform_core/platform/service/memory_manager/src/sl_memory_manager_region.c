@@ -183,7 +183,6 @@ void sli_memory_initialize_heap_region(void)
 #if defined(SL_CATALOG_MEMORY_MANAGER_ITCM_PRESENT) && !defined(SL_SE_MAILBOX_DISABLE)
   // ITCM is configured in 64 KB blocks (minimum 2 blocks = 128 KB).
   // Only DMEM beyond that hardware-rounded reservation is reclaimable.
-  uintptr_t itcm_total    = (uintptr_t)&__itcm_size__;
   uintptr_t itcm_align    = SLI_ITCM_BLOCK_SIZE - 1u;
   uintptr_t itcm_reserved = ((uintptr_t)&__itcm_used__ + itcm_align) & ~itcm_align;
 
@@ -193,9 +192,7 @@ void sli_memory_initialize_heap_region(void)
   }
 
   // Adjust size of DMEM general purpose heap given the ITCM real used size.
-  if (itcm_total > itcm_reserved) {
-    sli_memory_heap_region.size += itcm_total - itcm_reserved;
-  }
+  sli_memory_heap_region.size -= (size_t)(itcm_reserved - SLI_ITCM_MIN_RESERVED_SIZE);
 #endif
 }
 

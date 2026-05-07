@@ -34,7 +34,7 @@ component:
       - device_has_euart
   - id: mpu
   - id: app_assert
-  - id: bluetooth_feature_connection_pawr_scheduling
+  - id: bluetooth_controller_anchor_selection
 
 requires:
   - name: bluetooth_stack
@@ -115,12 +115,14 @@ configuration:
     value: "50"
   - name: SL_BT_CONFIG_MAX_CONNECTIONS
     value: "5"
+  - name: SL_BT_CONFIG_CONNECTION_DATA_LENGTH
+    value: "247"
   - name: SL_BT_CONFIG_USER_L2CAP_COC_CHANNELS
     value: "5"
   - name: SL_BT_CONFIG_MAX_SOFTWARE_TIMERS
     value: "0"
   - name: SL_BT_CONFIG_BUFFER_SIZE
-    value: "6144"
+    value: "8192"
   - name: SL_BT_CONFIG_ACCEPT_LIST_SIZE
     value: "63"
   - name: SL_BT_CONFIG_USER_ADVERTISERS
@@ -128,8 +130,10 @@ configuration:
   - name: SL_BT_CONFIG_MAX_PERIODIC_ADVERTISERS
     value: "2"
   - name: SL_BT_CONFIG_MAX_PAWR_ADVERTISED_DATA_LENGTH_HINT
-    value: "74"
+    value: "61"
   - name: SL_BT_CONFIG_MAX_PAWR_ADVERTISERS
+    value: "2"
+  - name: SL_BT_CONFIG_PAWR_PACKET_REQUEST_ADVANCE
     value: "2"
   - name: SL_BT_CONFIG_EXTERNAL_LOCAL_IRK
     value: "1"
@@ -144,23 +148,41 @@ configuration:
   - name: SL_BT_CONTROLLER_SCHEDULER_PRI_SCAN_MAX
     value: "212"
   - name: SL_BT_CONTROLLER_SCHEDULER_PRI_SCAN_STEP
-    value: "2"
+    value: "1"
   - name: SL_BT_CONTROLLER_SCHEDULER_PRI_ADV_MIN
-    value: "212"
+    value: "211"
+  - name: SL_BT_CONTROLLER_SCHEDULER_PRI_ADV_MAX
+    value: "127"
   - name: SL_BT_CONTROLLER_SCHEDULER_PRI_ADV_STEP
     value: "6"
   - name: SL_BT_CONTROLLER_SCHEDULER_PRI_CONN_MIN
-    value: "140"
+    value: "126"
+  - name: SL_BT_CONTROLLER_SCHEDULER_PRI_CONN_MAX
+    value: "40"
   - name: SL_BT_CONTROLLER_SCHEDULER_PRI_INIT_MIN
-    value: "48"
+    value: "39"
   - name: SL_BT_CONTROLLER_SCHEDULER_PRI_INIT_MAX
-    value: "7"
+    value: "16"
+  - name: SL_BT_CONTROLLER_SCHEDULER_PRI_RAIL_WINDOW_MIN
+    value: "32"
+  - name: SL_BT_CONTROLLER_SCHEDULER_PRI_RAIL_WINDOW_MAX
+    value: "16"
+  - name: SL_BT_CONTROLLER_SCHEDULER_PRI_PAWR_TX_MIN
+    value: "10"
+  - name: SL_BT_CONTROLLER_SCHEDULER_PRI_PAWR_TX_MAX
+    value: "0"
+  - name: SL_BT_CONTROLLER_SCHEDULER_PRI_PAWR_RX_MIN
+    value: "20"
+  - name: SL_BT_CONTROLLER_SCHEDULER_PRI_PAWR_RX_MAX
+    value: "11"
   - name: SL_BT_CONTROLLER_COMPLETED_PACKETS_THRESHOLD
     value: "3"
   - name: SL_BT_CONTROLLER_COMPLETED_PACKETS_EVENTS_TIMEOUT
     value: "2"
   - name: SL_BT_CONTROLLER_CONN_EVENT_LENGTH_MIN
     value: "1"
+  - name: SL_BTCTRL_ANCHOR_SELECTION_ALGORITHM
+    value: SL_BTCTRL_ANCHOR_SELECTION_ALGORITHM_EMPTY_CENTER
   - name: SL_CLOCK_MANAGER_LFRCO_PRECISION
     value: "cmuPrecisionHigh"
   - name: SL_CLOCK_MANAGER_LFXO_PRECISION

@@ -269,7 +269,7 @@ void sl_main_init(void)
   SLI_METRIC_EVENT_HANDLER_SAVE("sl_memory_init_psram");
 #endif
 
-#if defined(SL_CATALOG_MEMORY_MANAGER_DTCM_PRESENT)
+#if defined(SL_CATALOG_MEMORY_MANAGER_DTCM_PRESENT) && !defined(SL_CATALOG_CPP_SUPPORT_PRESENT)
   sl_memory_init_dtcm();
   SLI_METRIC_EVENT_HANDLER_SAVE("sl_memory_init_dtcm");
 #endif

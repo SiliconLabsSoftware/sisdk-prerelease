@@ -38,7 +38,11 @@ component:
   - id: ot_rtt_log
   - id: rail_util_pti
   - id: bootloader_interface
-  # Platform - enable LTO for gcc
+  # Platform - enable LTO for gcc and llvm
+  - id: toolchain_gcc_lto
+    condition: [toolchain_gcc]
+  - id: toolchain_llvm_lto
+    condition: [toolchain_llvm]
 
 configuration:
   - name: SL_BOARD_ENABLE_VCOM
@@ -205,3 +209,4 @@ tag:
   - hwfilter:!device:device_family_mgm22
   - hwfilter:ram:96k
   - toolchain:gcc
+  - toolchain:llvm

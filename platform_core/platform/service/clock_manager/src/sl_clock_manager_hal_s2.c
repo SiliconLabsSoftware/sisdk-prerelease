@@ -1112,6 +1112,19 @@ sl_status_t sli_clock_manager_hal_get_nwp_socpll_freqplan_config(const uint16_t 
   return SL_STATUS_NOT_SUPPORTED;
 }
 
+/***************************************************************************//**
+ * Retrieves the FREQPLAN NWP CLKMULT config.
+ ******************************************************************************/
+sl_status_t sli_clock_manager_hal_get_nwp_clkmult_freqplan_config(uint8_t clkmult_index,
+                                                                  const uint8_t **nwp_clkmult_freqplan_config,
+                                                                  uint8_t *target_frequency_index)
+{
+  (void) clkmult_index;
+  (void) nwp_clkmult_freqplan_config;
+  (void) target_frequency_index;
+  return SL_STATUS_NOT_SUPPORTED;
+}
+
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 1)
 /***************************************************************************//**
  * Gets the register and bit for the bus clock.

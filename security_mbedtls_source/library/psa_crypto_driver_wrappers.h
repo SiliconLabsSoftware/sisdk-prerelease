@@ -2886,6 +2886,14 @@ static inline psa_status_t psa_driver_wrapper_hash_setup(
     if( status != PSA_ERROR_NOT_SUPPORTED )
         return( status );
 #endif
+#if defined(SLI_SHA_DEVICE_SI91X)
+    status = sli_si91x_crypto_hash_setup(&operation->ctx.sli_si91x_crypto_sha_ctx,
+                                         alg );
+    if( status == PSA_SUCCESS )
+        operation->id = SLI_CRYPTO_SI91X_DRIVER_ID;
+    if( status != PSA_ERROR_NOT_SUPPORTED )
+      return( status );
+#endif
 #endif
 
     /* If software fallback is compiled in, try fallback */
@@ -2952,6 +2960,10 @@ static inline psa_status_t psa_driver_wrapper_hash_clone(
                         &source_operation->ctx.sli_crypto_transparent_ctx,
                         &target_operation->ctx.sli_crypto_transparent_ctx ) );
 #endif
+#if defined(SLI_SHA_DEVICE_SI91X)
+        case SLI_CRYPTO_SI91X_DRIVER_ID:
+            return( PSA_ERROR_NOT_SUPPORTED );
+#endif
 #endif /* MBEDTLS_PSA_CRYPTO_DRIVERS */
         default:
             (void) target_operation;
@@ -3001,6 +3013,11 @@ static inline psa_status_t psa_driver_wrapper_hash_update(
             return( sli_crypto_transparent_hash_update(
                         &operation->ctx.sli_crypto_transparent_ctx,
                         input, input_length ) );
+#endif
+#if defined(SLI_SHA_DEVICE_SI91X)
+        case SLI_CRYPTO_SI91X_DRIVER_ID:
+            return( sli_si91x_crypto_hash_update(&operation->ctx.sli_si91x_crypto_sha_ctx,
+                                                 input, input_length) );
 #endif
 #endif /* MBEDTLS_PSA_CRYPTO_DRIVERS */
         default:
@@ -3054,6 +3071,11 @@ static inline psa_status_t psa_driver_wrapper_hash_finish(
                         &operation->ctx.sli_crypto_transparent_ctx,
                         hash, hash_size, hash_length ) );
 #endif
+#if defined(SLI_SHA_DEVICE_SI91X)
+        case SLI_CRYPTO_SI91X_DRIVER_ID:
+            return ( sli_si91x_crypto_hash_finish(&operation->ctx.sli_si91x_crypto_sha_ctx,
+                                          hash, hash_size, hash_length ) );
+#endif
 #endif /* MBEDTLS_PSA_CRYPTO_DRIVERS */
         default:
             (void) hash;
@@ -3097,6 +3119,10 @@ static inline psa_status_t psa_driver_wrapper_hash_abort(
         case SLI_CRYPTO_TRANSPARENT_DRIVER_ID:
             return( sli_crypto_transparent_hash_abort(
                         &operation->ctx.sli_crypto_transparent_ctx ) );
+#endif
+#if defined(SLI_SHA_DEVICE_SI91X)
+        case SLI_CRYPTO_SI91X_DRIVER_ID:
+            return( sli_si91x_crypto_hash_abort(&operation->ctx.sli_si91x_crypto_sha_ctx ) );
 #endif
 #endif /* MBEDTLS_PSA_CRYPTO_DRIVERS */
         default:
@@ -3526,6 +3552,15 @@ static inline psa_status_t psa_driver_wrapper_aead_encrypt_setup(
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
 #endif
+#if defined(SLI_AEAD_DEVICE_SI91X)
+            operation->id = SLI_CRYPTO_SI91X_DRIVER_ID;
+            status = sli_si91x_psa_aead_encrypt_setup(
+                        &operation->ctx.sli_si91x_crypto_aead_ctx,
+                        attributes, key_buffer, key_buffer_size,
+                        alg );
+            if( status != PSA_ERROR_NOT_SUPPORTED )
+                return( status );
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 
             /* Fell through, meaning no accelerator supports this operation */
@@ -3650,6 +3685,15 @@ static inline psa_status_t psa_driver_wrapper_aead_decrypt_setup(
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
 #endif
+#if defined(SLI_AEAD_DEVICE_SI91X)
+            operation->id = SLI_CRYPTO_SI91X_DRIVER_ID;
+            status = sli_si91x_psa_aead_decrypt_setup(
+                        &operation->ctx.sli_si91x_crypto_aead_ctx,
+                        attributes, key_buffer, key_buffer_size,
+                        alg );
+            if( status != PSA_ERROR_NOT_SUPPORTED )
+                return( status );
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 
             /* Fell through, meaning no accelerator supports this operation */
@@ -3764,6 +3808,12 @@ static inline psa_status_t psa_driver_wrapper_aead_set_nonce(
                         &operation->ctx.sli_se_opaque_ctx,
                         nonce, nonce_length ) );
 #endif
+#if defined(SLI_AEAD_DEVICE_SI91X)
+        case SLI_CRYPTO_SI91X_DRIVER_ID:
+            return( sli_si91x_psa_aead_set_nonce(
+                        &operation->ctx.sli_si91x_crypto_aead_ctx,
+                        nonce, nonce_length ) );
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
     }
 
@@ -3828,6 +3878,12 @@ static inline psa_status_t psa_driver_wrapper_aead_set_lengths(
                         &operation->ctx.sli_se_opaque_ctx,
                         ad_length, plaintext_length ) );
 #endif
+#if defined(SLI_AEAD_DEVICE_SI91X)
+        case SLI_CRYPTO_SI91X_DRIVER_ID:
+            return( sli_si91x_psa_aead_set_lengths(
+                        &operation->ctx.sli_si91x_crypto_aead_ctx,
+                        ad_length, plaintext_length ) );
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
     }
 
@@ -3890,6 +3946,12 @@ static inline psa_status_t psa_driver_wrapper_aead_update_ad(
         case SLI_SE_OPAQUE_DRIVER_ID:
             return( sli_se_opaque_aead_update_ad(
                         &operation->ctx.sli_se_opaque_ctx,
+                        input, input_length ) );
+#endif
+#if defined(SLI_AEAD_DEVICE_SI91X)
+        case SLI_CRYPTO_SI91X_DRIVER_ID:
+            return( sli_si91x_psa_aead_update_ad(
+                        &operation->ctx.sli_si91x_crypto_aead_ctx,
                         input, input_length ) );
 #endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
@@ -3963,6 +4025,13 @@ static inline psa_status_t psa_driver_wrapper_aead_update(
         case SLI_SE_OPAQUE_DRIVER_ID:
             return( sli_se_opaque_aead_update(
                         &operation->ctx.sli_se_opaque_ctx,
+                        input, input_length, output, output_size,
+                        output_length ) );
+#endif
+#if defined(SLI_AEAD_DEVICE_SI91X)
+        case SLI_CRYPTO_SI91X_DRIVER_ID:
+            return( sli_si91x_psa_aead_update(
+                        &operation->ctx.sli_si91x_crypto_aead_ctx,
                         input, input_length, output, output_size,
                         output_length ) );
 #endif
@@ -4042,6 +4111,13 @@ static inline psa_status_t psa_driver_wrapper_aead_finish(
         case SLI_SE_OPAQUE_DRIVER_ID:
             return( sli_se_opaque_aead_finish(
                         &operation->ctx.sli_se_opaque_ctx,
+                        ciphertext, ciphertext_size,
+                        ciphertext_length, tag, tag_size, tag_length ) );
+#endif
+#if defined(SLI_AEAD_DEVICE_SI91X)
+        case SLI_CRYPTO_SI91X_DRIVER_ID:
+            return( sli_si91x_psa_aead_finish(
+                        &operation->ctx.sli_si91x_crypto_aead_ctx,
                         ciphertext, ciphertext_size,
                         ciphertext_length, tag, tag_size, tag_length ) );
 #endif
@@ -4144,6 +4220,13 @@ static inline psa_status_t psa_driver_wrapper_aead_verify(
                         plaintext, plaintext_size,
                         plaintext_length, tag, tag_length ) );
 #endif
+#if defined(SLI_AEAD_DEVICE_SI91X)
+        case SLI_CRYPTO_SI91X_DRIVER_ID:
+            return( sli_si91x_psa_aead_verify(
+                        &operation->ctx.sli_si91x_crypto_aead_ctx,
+                        plaintext, plaintext_size,
+                        plaintext_length, tag, tag_length ) );
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
     }
 
@@ -4200,6 +4283,11 @@ static inline psa_status_t psa_driver_wrapper_aead_abort(
         case SLI_SE_OPAQUE_DRIVER_ID:
             return( sli_se_opaque_aead_abort(
                         &operation->ctx.sli_se_opaque_ctx ) );
+#endif
+#if defined(SLI_AEAD_DEVICE_SI91X)
+        case SLI_CRYPTO_SI91X_DRIVER_ID:
+            return( sli_si91x_psa_aead_abort(
+                        &operation->ctx.sli_si91x_crypto_aead_ctx ) );
 #endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
     }

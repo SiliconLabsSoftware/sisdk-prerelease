@@ -707,20 +707,17 @@ void SystemInit2(void)
 /**
  * Jump to app
  */
-#if defined(__clang__)
-// Clang does not support naked functions which aren't fully inline asm.
-// Todo: rewrite function in assembly.
-__attribute__ ((noreturn)) static void bootToApp(uint32_t startOfAppSpace)
-#else
 __attribute__ ((noreturn, naked)) static void bootToApp(uint32_t startOfAppSpace)
-#endif
 {
+#if defined(__clang__)
+  __ASM volatile("b jumpToApplicationRoutine");
+#else
   jumpToApplicationRoutine(startOfAppSpace);
   while (1) {
     // Do nothing
   }
+#endif
 }
-
 /**
  * Check whether we should enter the bootloader
  *

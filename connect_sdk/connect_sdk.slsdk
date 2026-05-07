@@ -1,6 +1,6 @@
 # This file provides metadata for the stack directory, as part of ESF.
-id=com.silabs.stack.connect
-label=Connect SDK
+id=com.silabs.sdk.connect
+label=ConnectSDK
 description=Connect Software Development Kit
 
 version=4.3.0

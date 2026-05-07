@@ -44,6 +44,8 @@ include:
 - path: inc
   file_list:
   - path: cryptoacc_management.h
+  - path: sli_cryptoacc_driver_key_derivation.h
+    condition: [device_has_sepuf]
   - path: sli_cryptoacc_driver_trng.h
   - path: sli_cryptoacc_transparent_functions.h
   - path: sli_cryptoacc_transparent_types.h

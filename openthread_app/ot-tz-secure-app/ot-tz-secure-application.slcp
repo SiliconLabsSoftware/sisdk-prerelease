@@ -74,6 +74,7 @@ tag:
   - hwfilter:device:device_supports_thread
   - hwfilter:!device:device_series_3
   - toolchain:gcc
+  - toolchain:llvm
 
 import:
   # Import the config files from the TZ Non-Secure application

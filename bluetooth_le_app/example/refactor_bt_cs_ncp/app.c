@@ -38,6 +38,7 @@
 #include "sl_ncp.h"
 #include "cs_acp.h"
 #include "cs_result.h"
+#include "cs_algo.h"
 #include "cs_initiator.h"
 #include "cs_initiator_config.h"
 #include "cs_antenna.h"
@@ -69,6 +70,7 @@
 // Static variables
 static bool button_pressed = false;
 static uint8_t confirmation = 0;
+cs_algo_app_cb_t algo_cb;
 
 // -----------------------------------------------------------------------------
 // Static function declarations
@@ -76,12 +78,10 @@ static uint8_t confirmation = 0;
 static void cs_on_result(const uint8_t conn_handle,
                          const uint16_t ranging_counter,
                          const uint8_t *result,
-                         const cs_result_session_data_t *result_data,
-                         const cs_ranging_data_t *ranging_data,
-                         const void *user_data);
+                         const uint16_t result_size,
+                         const cs_ranging_data_t *ranging_data);
 
-static void cs_on_intermediate_result(const cs_intermediate_result_t *intermediate_result,
-                                      const void *user_data);
+static void cs_on_intermediate_result(const cs_intermediate_result_t *intermediate_result);
 
 static void cs_on_error(uint8_t conn_handle,
                         cs_error_event_t err_evt,
@@ -148,6 +148,25 @@ void sl_ncp_user_cs_cmd_message_to_target_cb(const void *data)
       #if defined(TRACE_RTL_LOGGING) && (TRACE_RTL_LOGGING == 1)
       cs_cmd->data.initiator_cmd_data.rtl_config.rtl_logging_enabled = 1;
       #endif
+      // Register cs_algo app callbacks: the host's extended_result flag
+      // selects which of on_result / on_extended_result fires (exactly one)
+      algo_cb.on_result = (cs_cmd->data.initiator_cmd_data.extended_result == 0)
+                          ? cs_on_result 
+                          : NULL;
+      algo_cb.on_extended_result = (cs_cmd->data.initiator_cmd_data.extended_result == 0)
+                                   ? NULL 
+                                   : cs_on_extended_result;
+      algo_cb.on_intermediate_result = cs_on_intermediate_result;
+      sc = cs_algo_app_set_callback(&algo_cb);
+      if (sc != SL_STATUS_OK) {
+        app_log_error("Failed to register cs_algo app callbacks! [sc: 0x%lx]" APP_LOG_NL,
+                      (unsigned long)sc);
+        cs_on_error(cs_cmd->data.initiator_cmd_data.connection_id,
+                    CS_ERROR_EVENT_INIT_FAILED,
+                    sc);
+        // No valid instance_id to return; let sc carry the error.
+        break;
+      }
       sc = cs_initiator_create(cs_cmd->data.initiator_cmd_data.connection_id,
                                &cs_cmd->data.initiator_cmd_data.initiator_config,
                                &cs_cmd->data.initiator_cmd_data.rtl_config,
@@ -219,11 +238,9 @@ void sl_ncp_user_cs_cmd_message_to_target_cb(const void *data)
 static void cs_on_result(const uint8_t conn_handle,
                          const uint16_t ranging_counter,
                          const uint8_t *result,
-                         const cs_result_session_data_t *result_data,
-                         const cs_ranging_data_t *ranging_data,
-                         const void *user_data)
+                         const uint16_t result_size,
+                         const cs_ranging_data_t *ranging_data)
 {
-  (void)user_data;
   (void)ranging_data;
   (void)ranging_counter;
 
@@ -235,9 +252,9 @@ static void cs_on_result(const uint8_t conn_handle,
   if (result != NULL) {
     memcpy(cs_user_event.data.result.type_value_list,
            result,
-           result_data->size);
+           result_size);
 
-    sl_bt_send_evt_user_cs_service_message_to_host(RESULT_MSG_LEN(result_data->size),
+    sl_bt_send_evt_user_cs_service_message_to_host(RESULT_MSG_LEN(result_size),
                                                    (uint8_t *)&cs_user_event);
   }
 }
@@ -246,11 +263,8 @@ static void cs_on_result(const uint8_t conn_handle,
  * Realize on_intermediate_result callback function for CS initiator device role
  * in order to send back the intermediate results in a response to the host.
  *****************************************************************************/
-static void cs_on_intermediate_result(const cs_intermediate_result_t *intermediate_result,
-                                      const void *user_data)
+static void cs_on_intermediate_result(const cs_intermediate_result_t *intermediate_result)
 {
-  (void)user_data;
-
   cs_acp_event_t cs_user_event;
 
   cs_user_event.acp_evt_id = CS_ACP_EVT_INTERMEDIATE_RESULT_ID;

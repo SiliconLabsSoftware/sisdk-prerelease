@@ -17,7 +17,7 @@ config_file:
 - path: config/cs_reflector_config.h
 requires:
 - name: device_host
-- name: refactor_cs_ras_server_acp
+- name: cs_ras_server_acp
 - name: host_bluetooth_connection_config
 conflicts:
 - name: refactor_cs_reflector

@@ -64,6 +64,7 @@ component:
   - id: zigbee_packet_handoff
   - id: clock_manager
   # Platform - enable LTO for gcc
+  - id: toolchain_gcc_lto
 
 configuration:
   - name: SL_ZIGBEE_GP_PROXY_TABLE_SIZE

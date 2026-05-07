@@ -19,7 +19,6 @@ provides:
 - name: "wisun_dc_client_library"
 
 define:
-- name: "HAVE_DIRECT_CONNECT_CLIENT"
 - name: "HAVE_DIRECT_CONNECT"
 - name: "HAVE_DC_ONLY_STACK"
 

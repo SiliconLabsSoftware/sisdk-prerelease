@@ -3,7 +3,7 @@ label: "Wi-SUN Direct connect client plugin"
 description: "Extends Wi-SUN FFN stack with Direct Connect Client capability"
 package: "wisun"
 category: "Wi-SUN"
-quality: "evaluation"
+quality: "production"
 root_path: "wisun/./stack"
 
 ui_hints:
@@ -17,7 +17,6 @@ provides:
 - name: "wisun_dc_client_plugin"
 
 define:
-- name: "HAVE_DIRECT_CONNECT_CLIENT"
 - name: "HAVE_DIRECT_CONNECT"
 
 library:

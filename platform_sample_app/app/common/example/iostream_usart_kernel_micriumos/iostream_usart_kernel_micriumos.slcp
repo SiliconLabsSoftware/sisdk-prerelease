@@ -44,3 +44,6 @@ ui_hints:
   highlight: readme.md
 tag:
   - hardware:device:ram:10
+  - hwfilter:device:device_has_uart
+  - hwfilter:ram:10k
+  - hwfilter:device:device_series_2

@@ -68,9 +68,15 @@
 #include "sl_bt_accept_list_config.h"
 #endif
 
-#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT) || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT)
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT)                      \
+    || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT)              \
+    || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_LEADER_PRESENT)   \
+    || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_FOLLOWER_PRESENT)
 #include "sl_bluetooth_cs_config.h"
-#endif
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT
+       // or SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT
+       // or SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_LEADER_PRESENT
+       // or SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_FOLLOWER_PRESENT
 
 #if defined(SL_CATALOG_BLUETOOTH_RCP_PRESENT)
 #include "sl_btctrl_hci.h"
@@ -228,6 +234,16 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
   config->tx_power_max = SL_BT_CONTROLLER_MAX_POWER_LEVEL;
 #endif
 
+  // If the value passed from Stack is the default tx path gain (i.e. zero), apply the BLE Controller config.
+  if (config->txGain == 0) {
+    config->txGain = SL_BT_CONTROLLER_RF_TX_PATH_GAIN_DECI_DB;
+  }
+
+  // If the value passed from Stack is the default rx path gain (i.e. zero), apply the BLE Controller config.
+  if (config->rxGain == 0) {
+    config->rxGain = SL_BT_CONTROLLER_RF_RX_PATH_GAIN_DECI_DB;
+  }
+
 #else // SL_CATALOG_BLUETOOTH_PRESENT
 
 #if (SL_BT_CONTROLLER_MIN_POWER_LEVEL_OVERRIDE == 1)
@@ -241,6 +257,9 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
 #else
   config->tx_power_max = SL_BT_USE_MAX_POWER_LEVEL_SUPPORTED_BY_RADIO;
 #endif
+
+  config->txGain = SL_BT_CONTROLLER_RF_TX_PATH_GAIN_DECI_DB;
+  config->rxGain = SL_BT_CONTROLLER_RF_RX_PATH_GAIN_DECI_DB;
 #endif // SL_CATALOG_BLUETOOTH_PRESENT
 
 #if !defined(SL_CATALOG_KERNEL_PRESENT)
@@ -456,13 +475,38 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
   }
 #endif
 
-#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT) || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT)
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT)                    \
+    || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT)            \
+    || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_LEADER_PRESENT) \
+    || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_FOLLOWER_PRESENT)
+
   struct sl_btctrl_cs_config cs_config = { 0 };
   cs_config.configs_per_connection = SL_BT_CONFIG_MAX_CS_CONFIGS_PER_CONNECTION;
   cs_config.procedures = SL_BT_CONFIG_MAX_CS_PROCEDURES;
   cs_config.cs_sync_antennas_max = SL_BT_CONFIG_CS_SYNC_MAX_ANTENNAS;
   sl_btctrl_init_cs(&cs_config);
-#endif // SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT or SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT
+
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_PRESENT)
+  sl_btctrl_init_cs_conn();
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_PRESENT
+
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT)
+  sl_btctrl_init_cs_test();
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT
+
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_LEADER_PRESENT) \
+    || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_FOLLOWER_PRESENT)
+  sl_btctrl_init_cs_handover();
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_FOLLOWER_PRESENT)
+  sl_btctrl_init_cs_sniff();
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_FOLLOWER_PRESENT
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_LEADER_PRESENT
+       // or SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_FOLLOWER_PRESENT
+
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT
+       // or SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT
+       // or SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_LEADER_PRESENT
+       // or SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_FOLLOWER_PRESENT
 
   // In addition to the user advertisers and connections, the number of internal
   // advertisers and connections also needs to be accounted for (i.e. SL_BT_COMPONENT_ADVERTISERS
@@ -576,6 +620,12 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT) || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT)
   sl_btctrl_hci_parser_init_cs();
 #endif // SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT or SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT
+
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_LEADER_PRESENT) \
+    || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_FOLLOWER_PRESENT)
+  sl_btctrl_hci_parser_init_cs_handover();
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_LEADER_PRESENT
+       // or SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_FOLLOWER_PRESENT
 
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_SUBRATING_PRESENT)
   sl_btctrl_hci_parser_init_subrate();

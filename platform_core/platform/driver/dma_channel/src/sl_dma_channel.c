@@ -31,9 +31,11 @@
 #include "em_device.h"
 #include "sl_hal_ldma.h"
 #include "sl_dma_channel.h"
+#include "sli_dma_channel.h"
 #include "sl_dma_channel_device.h"
 #include "sl_device_dma.h"
 #include "sl_dma_manager.h"
+#include "sli_dma_manager_internal.h"
 #include "sl_dma_descriptor_allocator.h"
 #include "sl_clock_manager.h"
 #include "sl_memory_manager.h"
@@ -1698,6 +1700,136 @@ static void process_completed_descriptors(sl_dma_channel_handle_t* handle)
     sl_hal_ldma_disable_channel(ldma, ch);
     handle->state = SL_DMA_CHANNEL_STATE_DISABLED;
   }
+}
+
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
+void sli_dma_channel_process_completed(sl_dma_channel_handle_t *handle)
+{
+  EFM_ASSERT(handle != NULL);
+  EFM_ASSERT(handle->dma_peripheral != NULL);
+
+  LDMA_TypeDef *ldma = sl_device_peripheral_ldma_get_base_addr((sl_peripheral_t)handle->dma_peripheral);
+  uint8_t ch = handle->channel_number;
+  EFM_ASSERT(ch < DMA_CHAN_COUNT);
+
+  // Race protection rationale:
+  // This function may run concurrently with the channel's real LDMA IRQ
+  // handler. That happens whenever the caller's "is the IRQ masked?" check is
+  // a coarse approximation - for example, SPIDRV on Series 3 checks
+  // LDMA0_CHNL0_IRQn even when its allocated channel is something else, so the
+  // actual channel's NVIC line stays enabled while we poll.
+  //
+  // Two safety properties must hold:
+  //   1. The done/error IF bits act as a single-consumer hand-off. Whoever
+  //      clears them "owns" the resulting descriptor processing. We therefore
+  //      only call process_completed_descriptors() if WE successfully cleared
+  //      a bit; if the IRQ already cleared it, it has already (or will
+  //      shortly) walk the descriptor list - we must not race it.
+  //   2. The read-clear-process sequence and the descriptor-list walk inside
+  //      process_completed_descriptors() must be atomic with respect to that
+  //      same IRQ on the same channel. We mask interrupts globally for the
+  //      short critical section. The IRQ stays NVIC-pending and runs once we
+  //      exit; it will read IF==0 and become a no-op.
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_ATOMIC();
+
+  uint32_t to_clear = 0U;
+  uint32_t pending_error_value = 0U;
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  // Series 2: only one LDMA with channels 0..15 in IF[0..15]; error is a
+  // single bit (LDMA_IF_ERROR) and the offending channel is reported in
+  // LDMA->STATUS.CHERROR.
+  uint32_t channel_mask         = 1UL << ch;
+  uint32_t pending              = sl_hal_ldma_get_enabled_pending_interrupts(ldma);
+  uint32_t pending_done_for_ch  = pending & channel_mask;
+  uint32_t pending_error        = pending & _LDMA_IF_ERROR_MASK;
+
+  to_clear = pending_done_for_ch;
+
+  if (pending_error != 0U) {
+    uint8_t error_channel = (uint8_t)((ldma->STATUS & _LDMA_STATUS_CHERROR_MASK)
+                                      >> _LDMA_STATUS_CHERROR_SHIFT);
+    if (error_channel == ch) {
+      pending_error_value = channel_mask;
+      to_clear           |= pending_error;
+    }
+  }
+#else
+  // Series 3: each channel has its own done/error bits. Channels 0..15 live in
+  // IF (done at IF[ch], error at IF[ch+16]); channels 16..31 - on parts that
+  // expose them via _LDMA_IFH_MASK - live in IFH (done at IFH[ch-16], error at
+  // IFH[ch]). This mirrors ldma_irq_channel_handler() in sl_dma_manager_hal_ldma.c.
+  uint32_t to_clear_high = 0U;
+
+  if (ch < 16) {
+    uint32_t channel_mask        = 1UL << ch;
+    uint32_t pending             = sl_hal_ldma_get_enabled_pending_interrupts(ldma);
+    uint32_t pending_done_for_ch = pending & channel_mask;
+    uint32_t pending_error_bit   = pending & (channel_mask << 16);
+
+    to_clear            = pending_done_for_ch | pending_error_bit;
+    pending_error_value = (pending_error_bit != 0U) ? channel_mask : 0U;
+  }
+#if defined(_LDMA_IFH_MASK)
+  else {
+    // Channel ch in 16..31: bit position in IFH is (ch - 16) for done and
+    // ch for error. We keep the stored "pending error" value in the same
+    // form the IRQ handler uses: bitmap shifted to position ch in a 32-bit
+    // word (i.e. (1U << ch)).
+    uint32_t channel_mask        = 1UL << ch;          // bit ch in IFH (error position)
+    uint32_t done_bit_in_ifh     = 1UL << (ch - 16);   // bit (ch-16) in IFH (done position)
+    uint32_t pending_high        = sl_hal_ldma_get_enabled_pending_high_interrupts(ldma);
+    uint32_t pending_done_for_ch = pending_high & done_bit_in_ifh;
+    uint32_t pending_error_bit   = pending_high & channel_mask;
+
+    to_clear_high       = pending_done_for_ch | pending_error_bit;
+    pending_error_value = pending_error_bit; // already in (1U << ch) form
+  }
+#else
+  else {
+    // No IFH on this part -> channels 16+ should not exist. DMA_CHAN_COUNT
+    // would already constrain us, but guard explicitly so the polling loop
+    // cannot silently spin on an unsupported channel.
+    EFM_ASSERT(false);
+  }
+#endif
+#endif // !_SILICON_LABS_32B_SERIES_2
+
+  bool claimed_event = false;
+#if !defined(_SILICON_LABS_32B_SERIES_2)
+  if ((to_clear != 0U) || (to_clear_high != 0U)) {
+    if (to_clear != 0U) {
+      sl_hal_ldma_clear_interrupts(ldma, to_clear);
+    }
+#if defined(_LDMA_IFH_MASK)
+    if (to_clear_high != 0U) {
+      sl_hal_ldma_clear_high_interrupts(ldma, to_clear_high);
+    }
+#endif
+    claimed_event = true;
+  }
+#else
+  if (to_clear != 0U) {
+    sl_hal_ldma_clear_interrupts(ldma, to_clear);
+    claimed_event = true;
+  }
+#endif
+
+  if (claimed_event) {
+    // We successfully claimed a completion event; the real IRQ handler will
+    // see IF==0 for our channel and skip the callback dispatch.
+    if (pending_error_value != 0U) {
+      sli_dma_manager_set_pending_errors(ch, pending_error_value);
+    }
+
+    // Walk the descriptor list and fire user callbacks for completed
+    // descriptors (still inside the critical section so the IRQ cannot
+    // reenter the same descriptor list concurrently).
+    process_completed_descriptors(handle);
+  }
+
+  CORE_EXIT_ATOMIC();
 }
 
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)

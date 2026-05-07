@@ -324,8 +324,9 @@ typedef int ssize_t;
 
 /// Enable Extended Directed Frame Exchange mode.
 /// When set, optval must point to an uint32_t.
-/// When set, EDFE mode is used to transmit fragmented packets from the socket.
-/// Enabled by default.
+/// When set, all data from the socket will be sent using the EDFE mode
+/// even if there is a single fragment.
+/// Disabled by default.
 #define SO_EDFE_MODE              0xfb
 #define SOCKET_EDFE_MODE          SO_EDFE_MODE
 ///@}
@@ -366,6 +367,7 @@ typedef enum socket_domain {
 
 /// Socket types
 typedef enum socket_type {
+  SOCK_INVALID  = 0,  ///< invalid socket type
   SOCK_STREAM   = 1,  ///< stream (connection) socket (TCP)
   SOCK_DGRAM    = 2,  ///< datagram (connectionless) socket (UDP)
   SOCK_RAW      = 3,  ///< raw socket

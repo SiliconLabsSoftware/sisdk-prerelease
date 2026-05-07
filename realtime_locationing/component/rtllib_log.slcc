@@ -1,7 +1,7 @@
 id: rtllib_log
 label: Real-Time Locationing Library Log
 package: realtime_locationing
-description: Real time locationing library logging component
+description: Real time locationing library logging component.
 category: Bluetooth|Direction Finding
 quality: production
 metadata:
@@ -51,12 +51,14 @@ library:
 
 requires:
 - name: rtllib_log_api
+- name: rtl_log_mutex
 - name: cortexm33
   condition: [device_cortexm]
 - name: memory_manager_cpp
   condition: [device_cortexm]
 - name: printf
 - name: rtllib_printf
+- name: cmsis_core
 
 template_contribution:
 - name: component_catalog

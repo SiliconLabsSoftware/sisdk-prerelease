@@ -61,6 +61,7 @@ requires:
 - name: rtllib_eigen
 - name: rtllib_cmsis_dsp
 - name: rtllib_printf
+- name: rtl_log_mutex
 
 template_contribution:
 - name: component_catalog

@@ -483,9 +483,19 @@ heap_size = heap_limit - __HeapBase;
 #}
 {% if trustzone_secure is not defined %}
   {%- if app_flash_start and app_flash_size %}
-  app_flash_end = 0x{{ '%0x' % (app_flash_start) }} + 0x{{ '%0x' % (app_flash_size) }};
+  HIDDEN(app_flash_end = 0x{{ '%0x' % (app_flash_start) }} + 0x{{ '%0x' % (app_flash_size) }});
   ASSERT( (linker_nvm_begin + SIZEOF(.nvm)) <= app_flash_end, "NVM3 is excessing the flash size !")
   {%- endif %}
 {%- endif %} {#- trustzone_secure #}
+
+{%- if memory_ram_size is defined %}
+{%- if memory_ram_start is defined %}
+  HIDDEN(memory_ram_end = 0x{{ '%0x' % (memory_ram_start | first) }} + 0x{{ '%0x' % (memory_ram_size | first) }});
+{%- else %}
+  HIDDEN(memory_ram_end = 0x{{ '%0x' % sram_addr }} + 0x{{ '%0x' % (memory_ram_size | first) }});
+{%- endif %}
+  HIDDEN(physical_ram_end = 0x{{ '%0x' % sram_addr }} + 0x{{ '%0x' % sram_size }});
+  ASSERT( memory_ram_end <= physical_ram_end, "The template contribution to memory_ram_size exceeds the real device RAM size. Check your SLCC or SLCP file to review the RAM size defined by memory_ram_size.")
+{%- endif %}
 
 } {#- END of SECTIONS #}

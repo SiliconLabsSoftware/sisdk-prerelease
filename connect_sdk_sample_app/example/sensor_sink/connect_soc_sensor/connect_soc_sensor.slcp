@@ -16,7 +16,6 @@ component:
   - id: device_init
   - id: board_control
     condition: [hardware_board]
-  - id: radio_config_simple_connect_singlephy
   - id: app_log
   - id: app_assert
   - id: token_manager
@@ -32,11 +31,8 @@ component:
   - id: connect_poll
   - id: connect_parent_support
   - id: connect_frequency_hopping
-  - id: si70xx_driver
-    condition: [hardware_board_has_si70xx]
-  - id: i2cspm
-    instance: [sensor]
-    condition: [hardware_board_has_si70xx]
+  - id: rht_unidriver_driver
+    condition: [hardware_board_has_tempsensor]
   - id: simple_button
     instance: [btn0]
   - id: simple_led
@@ -65,6 +61,7 @@ component:
 #----------------- Require list ----------------------
 requires:
   - name: a_radio_config
+  - name: radio_config_simple_connect_singlephy
   - name: radio_config_simple_connect_singlephy_device_family_fgm23
     condition: [device_family_fgm23]
 

@@ -84,16 +84,13 @@ static sl_status_t serialize_extended_result(const uint16_t ranging_counter,
  * Add extended result data to the ACP event buffer.
  *****************************************************************************/
 void cs_on_extended_result(const uint8_t conn_handle,
-                           const uint16_t ranging_counter,
-                           const uint8_t *result,
-                           const cs_result_session_data_t *result_metadata,
-                           const cs_ranging_data_t *ranging_data,
-                           const void *user_data)
+                          const uint16_t ranging_counter,
+                          const uint8_t *result,
+                          const uint16_t result_size,
+                          const cs_ranging_data_t *ranging_data)
 {
   sl_status_t sc;
   size_t data_len;
-
-  (void)user_data;
 
   if (evt_data_buffer_len > 0) {
     app_log_error("Event data buffer busy" APP_LOG_NL);
@@ -102,7 +99,7 @@ void cs_on_extended_result(const uint8_t conn_handle,
 
   sc = serialize_extended_result(ranging_counter,
                                  result,
-                                 result_metadata->size,
+                                 result_size,
                                  ranging_data,
                                  sizeof(evt_data_buffer),
                                  &data_len,

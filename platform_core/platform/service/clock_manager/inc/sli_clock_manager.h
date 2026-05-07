@@ -73,6 +73,24 @@ sl_status_t sli_clock_manager_get_hfxo_average_startup_time(uint32_t *val);
 sl_status_t sli_clock_manager_get_nwp_socpll_freqplan_config(const uint16_t **socpll_freqplan_config,
                                                              uint8_t *target_frequency_index);
 
+/***************************************************************************//**
+ * Retrieves the FREQPLAN NWP CLKMULT config.
+ *
+ * @param[in]   clkmult_index Index of the CLKMULT instance (0 or 1).
+ *
+ * @param[out]  nwp_clkmult_freqplan_config Table with CLKMULT FREQPLAN
+ *   configurations for FREQPLAN_FREQSEL_WIDTH frequencies.
+ *
+ * @param[out]  target_frequency_index Index of the target frequency in the
+ *   table with CLKMULT FREQPLAN configurations.
+ *
+ * @return  Status code.
+ *          SL_STATUS_OK if successful. Error code otherwise.
+ ******************************************************************************/
+sl_status_t sli_clock_manager_get_nwp_clkmult_freqplan_config(uint8_t clkmult_index,
+                                                              const uint8_t **nwp_clkmult_freqplan_config,
+                                                              uint8_t *target_frequency_index);
+
 #if defined (SL_CLOCK_MANAGER_SYSCLK_OSPI_DYNAMIC_CFG_EN) && (SL_CLOCK_MANAGER_SYSCLK_OSPI_DYNAMIC_CFG_EN == 1)
 /***************************************************************************//**
  * Sets the Radio Friendly mode state.

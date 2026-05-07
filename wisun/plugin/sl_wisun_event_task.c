@@ -25,7 +25,7 @@
 
 #define SL_WISUN_EVENT_TASK_PRIORITY osPriorityAboveNormal // Lower priority than EVENT_LOOP_TASK
 #define SL_WISUN_EVENT_TASK_SIZE 250 // in units of CPU_INT32U
-#define SL_WISUN_EVENT_QUEUE_SIZE 3
+#define SL_WISUN_EVENT_QUEUE_SIZE 16
 
 static void sl_wisun_event_task_worker(void *argument)
 {

@@ -37,3 +37,7 @@ readme:
   - path: readme.md
 ui_hints:
   highlight: readme.md
+tag:
+  - hardware:component:mpu
+  - hwfilter:device:device_has_mpu
+  - hwfilter:device:device_series_2

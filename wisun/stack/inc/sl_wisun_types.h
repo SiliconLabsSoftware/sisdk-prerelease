@@ -1319,6 +1319,20 @@ typedef enum {
   /// Default: 0
   /// Available: FFN, LFN, BR
   SL_WISUN_OPTION_JOIN_NODE_COUNT = 5,
+  /// GTK_MAX_MISMATCH (minutes).
+  /// Maximum time between a SUP detecting a GTKHASH mismatch and the SUP
+  /// initiating Msg1 of the authentication flow.
+  /// Type: uint16_t
+  /// Default: 64
+  /// Available: FFN
+  SL_WISUN_OPTION_GTK_MAX_MISMATCH_M = 65,
+  /// LGTK_MAX_MISMATCH (minutes).
+  /// Maximum time between a SUP detecting an LGTKHASH mismatch and the SUP
+  /// initiating Msg1 of the authentication flow.
+  /// Type: uint16_t
+  /// Default: 60
+  /// Available: FFN, LFN
+  SL_WISUN_OPTION_LGTK_MAX_MISMATCH_M = 66,
 
   /// Maximum number of RPL parents.
   /// Limited to 4 due to Path Control field size in DAO.
@@ -1665,7 +1679,7 @@ typedef enum {
   /// Default: 0
   /// Available: BR
   SL_WISUN_OPTION_BR_ENABLE_FFN10 = 64,
-  SL_WISUN_OPTION_MAX = 65,
+  SL_WISUN_OPTION_MAX = 67,
 } sl_wisun_option_id_t;
 
 /// Enumeration for event types
@@ -1802,20 +1816,6 @@ typedef struct {
   } u;
 } SL_ATTRIBUTE_PACKED sl_wisun_logger_event_t;
 SL_PACK_END()
-
-/// Enumeration for trickle message types
-typedef enum {
-  /// PAN advertisement
-  SL_WISUN_TRICKLE_PA = 0,
-  /// PAN advertisement solicit
-  SL_WISUN_TRICKLE_PAS = 1,
-  /// PAN configuration
-  SL_WISUN_TRICKLE_PC = 2,
-  /// PAN configuration solicit
-  SL_WISUN_TRICKLE_PCS = 3,
-  /// MPL messages
-  SL_WISUN_TRICKLE_MPL = 4,
-} sl_wisun_trickle_type_t;
 
 /**************************************************************************//**
  * Handler called for an IPv6 packet from Wi-SUN network.

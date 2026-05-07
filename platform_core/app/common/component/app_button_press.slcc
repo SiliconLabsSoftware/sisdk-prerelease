@@ -46,7 +46,7 @@ template_contribution:
     help: "Emulating a button press"
     argument:
     - type: uint8
-      help: "Button: 0: BTN0, 1+: BTN1"
+      help: "Button: 0: BTN0, 1: BTN1"
     - type: uint8
       help: "Press and hold duration: 0 - short, 1- medium, 2 - long, 3+ - verylong"
   condition:
@@ -62,7 +62,7 @@ template_contribution:
     help: "Emulates pressing and holding a button."
     argument:
     - type: uint8
-      help: "Button: 0: BTN0, 1+: BTN1"
+      help: "Button: 0: BTN0, 1: BTN1"
   condition:
   - "cli"
 
@@ -76,7 +76,7 @@ template_contribution:
     help: "Emulates releasing a button."
     argument:
     - type: uint8
-      help: "Button: 0: BTN0, 1+: BTN1"
+      help: "Button: 0: BTN0, 1: BTN1"
   condition:
   - "cli"
 

@@ -38,6 +38,8 @@
 
 #if OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA
 #include "security_manager.h"
+#include <stdint.h>
+#include <string.h>
 #include "common/debug.hpp"
 #include "utils/code_utils.h"
 
@@ -54,6 +56,7 @@
 #endif
 #include "sl_memory_manager.h"
 #include "sl_psa_crypto.h"
+#include "sl_status.h"
 #include "sli_psa_crypto.h"
 
 #define PERSISTENCE_KEY_ID_USED_MAX (7)
@@ -80,32 +83,51 @@ static inline otCryptoKeyRef getHmacKeyRef(const otCryptoKey *aKey)
     return keyRef;
 }
 
-#if OPENTHREAD_CONFIG_CRYPTO_PLATFORM_ALLOCS_CONTEXT
-static otError allocateCryptoContext(otCryptoContext *aContext, size_t aContextSize)
+sl_status_t sli_ot_crypto_context_init(otCryptoContext *aContext, size_t aContextSize)
 {
-    otError     error = OT_ERROR_NONE;
-    sl_status_t status;
+    sl_status_t status = SL_STATUS_OK;
 
-    otEXPECT_ACTION((aContext != NULL), error = OT_ERROR_INVALID_ARGS);
+    otEXPECT_ACTION((aContext != NULL), status = SL_STATUS_INVALID_PARAMETER);
 
-    // In platform-alloc mode, core is expected to provide a null context pointer and let the platform allocate it.
-    // If a context is already present, keep it.
+#if OPENTHREAD_CONFIG_CRYPTO_PLATFORM_ALLOCS_CONTEXT
     if (aContext->mContext == NULL)
     {
-        // Allocate with explicit alignment. OpenThread core aligns its context storage to `uint64_t`, so we use 8-byte
-        // alignment here as well.
         status = sl_memory_alloc_advanced(aContextSize,
                                           SL_MEMORY_BLOCK_ALIGN_8_BYTES,
                                           BLOCK_TYPE_SHORT_TERM,
                                           &aContext->mContext);
-        otEXPECT_ACTION((status == SL_STATUS_OK), error = OT_ERROR_NO_BUFS);
-        aContext->mContextSize = aContextSize;
+        otEXPECT(status == SL_STATUS_OK);
+        aContext->mContextSize = (uint16_t)aContextSize;
     }
+#else
+    otEXPECT_ACTION((aContext->mContext != NULL), status = SL_STATUS_INVALID_PARAMETER);
+#endif
+
+    otEXPECT_ACTION(((size_t)aContext->mContextSize >= aContextSize), status = SL_STATUS_WOULD_OVERFLOW);
+    memset(aContext->mContext, 0, aContextSize);
 
 exit:
-    return error;
+    return status;
 }
+
+sl_status_t sli_ot_crypto_context_deinit(otCryptoContext *aContext)
+{
+    sl_status_t status = SL_STATUS_OK;
+
+    otEXPECT_ACTION((aContext != NULL), status = SL_STATUS_INVALID_PARAMETER);
+    otEXPECT_ACTION((aContext->mContext != NULL), status = SL_STATUS_INVALID_PARAMETER);
+
+    memset(aContext->mContext, 0, aContext->mContextSize);
+
+#if OPENTHREAD_CONFIG_CRYPTO_PLATFORM_ALLOCS_CONTEXT
+    sl_free(aContext->mContext);
+    aContext->mContext     = NULL;
+    aContext->mContextSize = 0;
 #endif
+
+exit:
+    return status;
+}
 
 // Helper function to convert otCryptoKeyType to psa_key_type_t
 static psa_key_type_t getPsaKeyType(otCryptoKeyType aKeyType)
@@ -224,6 +246,32 @@ static psa_key_persistence_t getPsaKeyPersistence(otCryptoKeyStorage aKeyPersist
     }
 
     return aPsaKeyPersistence;
+}
+
+// Helper function to map sl_status_t status codes to OpenThread error codes
+static otError mapSlStatusToOtError(sl_status_t status)
+{
+    otError error = OT_ERROR_NONE;
+
+    switch (status)
+    {
+    case SL_STATUS_OK:
+        error = OT_ERROR_NONE;
+        break;
+    case SL_STATUS_INVALID_PARAMETER:
+        error = OT_ERROR_INVALID_ARGS;
+        break;
+    case SL_STATUS_WOULD_OVERFLOW:
+    case SL_STATUS_ALLOCATION_FAILED:
+    case SL_STATUS_NO_MORE_RESOURCE:
+        error = OT_ERROR_NO_BUFS;
+        break;
+    default:
+        error = OT_ERROR_FAILED;
+        break;
+    }
+
+    return error;
 }
 
 // Helper function to map psa_status_t status codes to OpenThread error codes
@@ -448,23 +496,14 @@ bool otPlatCryptoHasKey(otCryptoKeyRef aKeyRef)
 // AES  Implementation
 otError otPlatCryptoAesInit(otCryptoContext *aContext)
 {
-    otError error = OT_ERROR_NONE;
-    otEXPECT_ACTION((aContext != NULL), error = OT_ERROR_INVALID_ARGS);
+    otError     error = OT_ERROR_NONE;
+    sl_status_t status;
 
-#if OPENTHREAD_CONFIG_CRYPTO_PLATFORM_ALLOCS_CONTEXT
-    // PSA backend AES ECB uses a key-id handle as its "context" payload.
-    // The OpenThread core-side `kAesContextSize` is `sizeof(psa_key_id_t)` for PSA builds.
-    // On Silicon Labs, `otCryptoKeyRef` is used to store the PSA key-id value.
-    error = allocateCryptoContext(aContext, sizeof(psa_key_id_t));
-    otEXPECT(error == OT_ERROR_NONE);
-#endif
+    // PSA AES ECB stores `otCryptoKeyRef` (PSA key id) in `mContext`.
+    status = sli_ot_crypto_context_init(aContext, sizeof(otCryptoKeyRef));
+    otEXPECT_ACTION(status == SL_STATUS_OK, error = mapSlStatusToOtError(status));
 
-    // Verify context is valid (platform allocated or core allocated)
-    otEXPECT_ACTION((aContext->mContext != NULL), error = OT_ERROR_INVALID_STATE);
-
-    // Initialize keyRef to invalid
-    otCryptoKeyRef *keyRef = (otCryptoKeyRef *)aContext->mContext;
-    *keyRef                = PSA_KEY_ID_NULL;
+    *(otCryptoKeyRef *)aContext->mContext = PSA_KEY_ID_NULL;
 
 exit:
     return error;
@@ -503,18 +542,11 @@ exit:
 
 otError otPlatCryptoAesFree(otCryptoContext *aContext)
 {
-    otError error = OT_ERROR_NONE;
-    otEXPECT_ACTION((aContext != NULL), error = OT_ERROR_INVALID_ARGS);
+    otError     error = OT_ERROR_NONE;
+    sl_status_t status;
 
-#if OPENTHREAD_CONFIG_CRYPTO_PLATFORM_ALLOCS_CONTEXT
-    otEXPECT_ACTION((aContext->mContext != NULL), error = OT_ERROR_INVALID_ARGS);
-
-    // Clear sensitive key reference
-    memset(aContext->mContext, 0, aContext->mContextSize);
-    sl_free(aContext->mContext);
-    aContext->mContext     = NULL;
-    aContext->mContextSize = 0;
-#endif
+    status = sli_ot_crypto_context_deinit(aContext);
+    otEXPECT_ACTION(status == SL_STATUS_OK, error = mapSlStatusToOtError(status));
 
 exit:
     return error;
@@ -523,21 +555,15 @@ exit:
 // HMAC implementations
 otError otPlatCryptoHmacSha256Init(otCryptoContext *aContext)
 {
-    otError error = OT_ERROR_NONE;
+    otError     error = OT_ERROR_NONE;
+    sl_status_t status;
+    size_t      contextSize;
 
-    otEXPECT_ACTION((aContext != NULL), error = OT_ERROR_INVALID_ARGS);
-#if OPENTHREAD_CONFIG_CRYPTO_PLATFORM_ALLOCS_CONTEXT
-    size_t context_size;
+    contextSize = sli_psa_context_get_size(SLI_PSA_CONTEXT_ENUM_NAME(psa_mac_operation_t));
+    status      = sli_ot_crypto_context_init(aContext, contextSize);
+    otEXPECT_ACTION(status == SL_STATUS_OK, error = mapSlStatusToOtError(status));
 
-    // Get runtime context size for PSA backend.
-    context_size = sli_psa_context_get_size(SLI_PSA_CONTEXT_ENUM_NAME(psa_mac_operation_t));
-    error        = allocateCryptoContext(aContext, context_size);
-    otEXPECT(error == OT_ERROR_NONE);
-#endif
-    otEXPECT_ACTION((aContext->mContext != NULL), error = OT_ERROR_INVALID_ARGS);
-
-    psa_mac_operation_t *mMacOperation = (psa_mac_operation_t *)aContext->mContext;
-    *mMacOperation                     = psa_mac_operation_init();
+    *(psa_mac_operation_t *)aContext->mContext = psa_mac_operation_init();
 
 exit:
     return error;
@@ -547,22 +573,19 @@ otError otPlatCryptoHmacSha256Deinit(otCryptoContext *aContext)
 {
     otError      error = OT_ERROR_NONE;
     psa_status_t status;
+    sl_status_t  slstatus = SL_STATUS_OK;
 
     otEXPECT_ACTION((aContext != NULL) && (aContext->mContext != NULL), error = OT_ERROR_INVALID_ARGS);
 
-    psa_mac_operation_t *mMacOperation = (psa_mac_operation_t *)aContext->mContext;
-    status                             = sl_sec_man_hmac_deinit(mMacOperation);
-    error                              = mapPsaStatusToOtError(status);
+    status = sl_sec_man_hmac_deinit((psa_mac_operation_t *)aContext->mContext);
+    error  = mapPsaStatusToOtError(status);
 
-#if OPENTHREAD_CONFIG_CRYPTO_PLATFORM_ALLOCS_CONTEXT
-    // Explicitly zeroize context for defense-in-depth security
-    memset(aContext->mContext, 0, aContext->mContextSize);
+    slstatus = sli_ot_crypto_context_deinit(aContext);
+    if (error == OT_ERROR_NONE)
+    {
+        otEXPECT_ACTION(slstatus == SL_STATUS_OK, error = mapSlStatusToOtError(slstatus));
+    }
 
-    // Free context
-    sl_free(aContext->mContext);
-    aContext->mContext     = NULL;
-    aContext->mContextSize = 0;
-#endif
 exit:
     return error;
 }
@@ -657,20 +680,15 @@ otError otPlatCryptoHmacSha256Finish(otCryptoContext *aContext, uint8_t *aBuf, s
 // SHA256 platform implementations
 otError otPlatCryptoSha256Init(otCryptoContext *aContext)
 {
-    otError error = OT_ERROR_NONE;
-    otEXPECT_ACTION((aContext != NULL), error = OT_ERROR_INVALID_ARGS);
-#if OPENTHREAD_CONFIG_CRYPTO_PLATFORM_ALLOCS_CONTEXT
-    size_t context_size;
+    otError     error = OT_ERROR_NONE;
+    sl_status_t status;
+    size_t      contextSize;
 
-    // Get runtime context size for PSA backend.
-    context_size = sli_psa_context_get_size(SLI_PSA_CONTEXT_ENUM_NAME(psa_hash_operation_t));
-    error        = allocateCryptoContext(aContext, context_size);
-    otEXPECT(error == OT_ERROR_NONE);
-#endif
-    otEXPECT_ACTION((aContext->mContext != NULL), error = OT_ERROR_INVALID_ARGS);
+    contextSize = sli_psa_context_get_size(SLI_PSA_CONTEXT_ENUM_NAME(psa_hash_operation_t));
+    status      = sli_ot_crypto_context_init(aContext, contextSize);
+    otEXPECT_ACTION(status == SL_STATUS_OK, error = mapSlStatusToOtError(status));
 
-    psa_hash_operation_t *ctx = (psa_hash_operation_t *)aContext->mContext;
-    *ctx                      = sl_sec_man_hash_init();
+    *(psa_hash_operation_t *)aContext->mContext = sl_sec_man_hash_init();
 
 exit:
     return error;
@@ -680,21 +698,19 @@ otError otPlatCryptoSha256Deinit(otCryptoContext *aContext)
 {
     otError      error = OT_ERROR_NONE;
     psa_status_t status;
+    sl_status_t  slstatus = SL_STATUS_OK;
 
     otEXPECT_ACTION((aContext != NULL) && (aContext->mContext != NULL), error = OT_ERROR_INVALID_ARGS);
 
-    psa_hash_operation_t *ctx = (psa_hash_operation_t *)aContext->mContext;
-    status                    = sl_sec_man_hash_deinit(ctx);
-    error                     = mapPsaStatusToOtError(status);
+    status = sl_sec_man_hash_deinit((psa_hash_operation_t *)aContext->mContext);
+    error  = mapPsaStatusToOtError(status);
 
-#if OPENTHREAD_CONFIG_CRYPTO_PLATFORM_ALLOCS_CONTEXT
-    // Explicitly zeroize context for defense-in-depth security
-    memset(aContext->mContext, 0, aContext->mContextSize);
-    // Free context
-    sl_free(aContext->mContext);
-    aContext->mContext     = NULL;
-    aContext->mContextSize = 0;
-#endif
+    slstatus = sli_ot_crypto_context_deinit(aContext);
+    if (error == OT_ERROR_NONE)
+    {
+        otEXPECT_ACTION(slstatus == SL_STATUS_OK, error = mapSlStatusToOtError(slstatus));
+    }
+
 exit:
     return error;
 }

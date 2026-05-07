@@ -46,6 +46,10 @@
 #include "sl_usbd_driver_config.h"
 #endif
 
+#if defined(_SILICON_LABS_32B_SERIES_3)
+#include "sl_usbd_driver_dwc_bcd.h"
+#endif
+
 #include "sl_gpio.h"
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
@@ -447,12 +451,12 @@
  *******************************************************************************************************/
 
 typedef struct {                                         // ------ DEVICE ENDPOINT DATA STRUCTURE ------
-  uint16_t  EP_MaxPktSize[NBR_EPS_PHY_MAX];              // Max pkt size of opened EPs.
-  uint16_t  EP_PktXferLen[NBR_EPS_PHY_MAX];              // EPs current xfer len.
+  volatile uint16_t  EP_MaxPktSize[NBR_EPS_PHY_MAX];     // Max pkt size of opened EPs.
+  volatile uint16_t  EP_PktXferLen[NBR_EPS_PHY_MAX];     // EPs current xfer len.
   uint8_t  *EP_AppBufPtr[NBR_EPS_PHY_MAX];               // Ptr to endpoint app buffer.
-  uint16_t  EP_AppBufLen[NBR_EPS_PHY_MAX];               // Lenght of endpoint app buffer.
+  volatile uint16_t  EP_AppBufLen[NBR_EPS_PHY_MAX];      // Lenght of endpoint app buffer.
   uint32_t  EP_SetupBuf[(3 * SETUP_PACKET_SIZE) / 4];    // Buffer that contains setup pkt.
-  bool EnumDone;                                         // Indicates if EnumDone ISR occurred.
+  volatile bool EnumDone;                                // Indicates if EnumDone ISR occurred.
 } sli_usbd_driver_endpoint_data_t;
 
 sli_usbd_driver_endpoint_data_t usbd_driver_data = { 0 };
@@ -514,6 +518,17 @@ static sli_usbd_driver_endpoint_info_t usbd_endpoint_info_table[] = {
 static void DWC_EP_OutProcess(void);
 
 static void DWC_EP_InProcess(void);
+
+#if defined(_SILICON_LABS_32B_SERIES_3)
+__WEAK void sli_usbd_bcd_trigger_event(sl_usbd_bcd_type_t detection_type)
+{
+  (void)detection_type;
+}
+__WEAK bool sli_usbd_bcd_is_deactivated(void)
+{
+  return false;
+}
+#endif
 
 /********************************************************************************************************
  ********************************************************************************************************
@@ -1421,6 +1436,97 @@ sl_status_t sli_usbd_driver_irq_handler(void)
       SLI_USBD_DRV_PHY_SUSPEND();
     }
   }
+
+#if defined(_SILICON_LABS_32B_SERIES_3)
+  //------------------- BCD INTERRUPTS -------------------
+  if (((int_status_wrapper & (_USB_IF_DCDCIF_MASK
+                              | _USB_IF_PDCIF_MASK
+                              | _USB_IF_SDCIF_MASK
+                              | _USB_IF_DCDDBNCIF_MASK)) != 0u)
+      && (SL_IS_BIT_SET(USB_APBS->CDFLOWSTATUS, _USB_CDFLOWSTATUS_ERR_MASK) == true)) {
+    // Handle BCD errors before dispatching phase results to avoid
+    // publishing an invalid port type or advancing to the next phase.
+    USB_APBS->IEN_CLR = (USB_IEN_DCDCIEN
+                         | USB_IEN_PDCIEN
+                         | USB_IEN_SDCIEN
+                         | USB_IEN_DCDDBNCIEN);
+    USB_APBS->IF_CLR = (USB_IF_DCDCIF
+                        | USB_IF_PDCIF
+                        | USB_IF_SDCIF
+                        | USB_IF_DCDDBNCIF);
+    USB_APBS->CDCTRL_CLR = (_USB_CDCTRL_DCDEN_MASK
+                            | USB_CDCTRL_PDEN
+                            | USB_CDCTRL_SDEN);
+    USB_APBS->CDCTRL_SET = USB_CDCTRL_STOPCD;
+    sli_usbd_bcd_trigger_event(SL_USBD_BCD_DETECTION_ERROR);
+  } else {
+    if (SL_IS_BIT_SET(int_status_wrapper, _USB_IF_DCDCIF_MASK) == true) {
+      USB_APBS->IF_CLR = USB_IF_DCDCIF;
+
+      if (SL_IS_BIT_SET(USB_APBS->CDSTATUS, _USB_CDSTATUS_DCDTO_MASK) == true) {
+        sli_usbd_bcd_trigger_event(SL_USBD_BCD_DETECTION_DCD_TIMEOUT);
+      } else if (SL_IS_BIT_SET(USB_APBS->CDFLOWSTATUS, _USB_CDFLOWSTATUS_DCDC_MASK) == true) {
+        sli_usbd_bcd_trigger_event(SL_USBD_BCD_DATA_CONTACT_DETECTION);
+      }
+
+      USB_APBS->CDCTRL_CLR = _USB_CDCTRL_DCDEN_MASK;
+      if (sli_usbd_bcd_is_deactivated() == false) {
+        USB_APBS->CDCTRL_SET = USB_CDCTRL_PDEN;
+      }
+    }
+
+    if (SL_IS_BIT_SET(int_status_wrapper, _USB_IF_PDCIF_MASK) == true) {
+      USB_APBS->IF_CLR = USB_IF_PDCIF;
+
+      // PDCIF indicates primary detection completed; CDSTATUS indicates the result.
+      // Read CDSTATUS before clearing PDEN; hardware may invalidate CDSTATUS when
+      // PDEN is deasserted (consistent with DCDCIF/SDCIF ordering).
+      if (SL_IS_BIT_SET(USB_APBS->CDSTATUS, _USB_CDSTATUS_SDPD_MASK) == true) {
+        USB_APBS->CDCTRL_CLR = USB_CDCTRL_PDEN;
+        sli_usbd_bcd_trigger_event(SL_USBD_BCD_STD_DOWNSTREAM_PORT);
+        USB_APBS->IEN_CLR = (USB_IEN_DCDCIEN
+                             | USB_IEN_PDCIEN
+                             | USB_IEN_SDCIEN
+                             | USB_IEN_DCDDBNCIEN);
+        USB_APBS->CDCTRL_SET = USB_CDCTRL_STOPCD;
+        if (sli_usbd_bcd_is_deactivated() == false) {
+          sli_usbd_bcd_trigger_event(SL_USBD_BCD_DETECTION_COMPLETED);
+        }
+      } else {
+        USB_APBS->CDCTRL_CLR = USB_CDCTRL_PDEN;
+        if (sli_usbd_bcd_is_deactivated() == false) {
+          USB_APBS->CDCTRL_SET = USB_CDCTRL_SDEN;
+        }
+      }
+    }
+
+    if (SL_IS_BIT_SET(int_status_wrapper, _USB_IF_SDCIF_MASK) == true) {
+      USB_APBS->IF_CLR = USB_IF_SDCIF;
+
+      if (SL_IS_BIT_SET(USB_APBS->CDFLOWSTATUS, _USB_CDFLOWSTATUS_SDC_MASK) == true) {
+        if (SL_IS_BIT_SET(USB_APBS->CDSTATUS, _USB_CDSTATUS_CDPD_MASK) == true) {
+          sli_usbd_bcd_trigger_event(SL_USBD_BCD_CHARGING_DOWNSTREAM_PORT);
+        } else if (SL_IS_BIT_SET(USB_APBS->CDSTATUS, _USB_CDSTATUS_DCPD_MASK) == true) {
+          sli_usbd_bcd_trigger_event(SL_USBD_BCD_DEDICATED_CHARGING_PORT);
+        }
+      }
+
+      USB_APBS->CDCTRL_CLR = USB_CDCTRL_SDEN;
+      USB_APBS->IEN_CLR = (USB_IEN_DCDCIEN
+                           | USB_IEN_PDCIEN
+                           | USB_IEN_SDCIEN
+                           | USB_IEN_DCDDBNCIEN);
+      USB_APBS->CDCTRL_SET = USB_CDCTRL_STOPCD;
+      if (sli_usbd_bcd_is_deactivated() == false) {
+        sli_usbd_bcd_trigger_event(SL_USBD_BCD_DETECTION_COMPLETED);
+      }
+    }
+
+    if (SL_IS_BIT_SET(int_status_wrapper, _USB_IF_DCDDBNCIF_MASK) == true) {
+      USB_APBS->IF_CLR = USB_IF_DCDDBNCIF;
+    }
+  }
+#endif
 #else
   //-------------- SESSION REQ DETECTION ---------------
   if (SL_IS_BIT_SET(int_stat, GINTSTS_BIT_SRQINT) == true) {

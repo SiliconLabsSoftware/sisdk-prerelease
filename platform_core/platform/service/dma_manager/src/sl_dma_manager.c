@@ -648,3 +648,12 @@ void sl_dma_manager_clear_pending_errors(uint8_t channel_nbr)
 {
   sli_dma_manager_hal_clear_pending_errors(channel_nbr);
 }
+
+/***************************************************************************//**
+ *  Latch a pending error bitmap for the DMA manager.
+ *  Forwards to the HAL implementation.
+ ******************************************************************************/
+void sli_dma_manager_set_pending_errors(uint8_t channel_nbr, uint32_t errors)
+{
+  sli_dma_manager_hal_set_pending_errors(channel_nbr, errors);
+}

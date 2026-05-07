@@ -135,10 +135,10 @@ static sl_status_t get_attestation_token_size(sl_se_command_context_t *cmd_ctx,
   sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   // Or comman word with 0x01 to enable length output only
   sli_se_command_init(cmd_ctx, command_word | 0x01UL);
-  sli_se_datatransfer_t noncedata =
+  volatile sli_se_datatransfer_t noncedata =
     SLI_SE_DATATRANSFER_DEFAULT(dummy_nonce, challenge_size);
   sli_se_mailbox_command_add_input(se_cmd, &noncedata);
-  sli_se_datatransfer_t sizedata =
+  volatile sli_se_datatransfer_t sizedata =
     SLI_SE_DATATRANSFER_DEFAULT(token_size, sizeof(*token_size));
   sli_se_mailbox_command_add_output(se_cmd, &sizedata);
 
@@ -211,13 +211,13 @@ static sl_status_t get_attestation_token(sl_se_command_context_t *cmd_ctx,
   // Build and execute the command
   sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   sli_se_command_init(cmd_ctx, command_word);
-  sli_se_datatransfer_t noncedata =
+  volatile sli_se_datatransfer_t noncedata =
     SLI_SE_DATATRANSFER_DEFAULT(auth_challenge, challenge_size);
   sli_se_mailbox_command_add_input(se_cmd, &noncedata);
-  sli_se_datatransfer_t sizedata =
+  volatile sli_se_datatransfer_t sizedata =
     SLI_SE_DATATRANSFER_DEFAULT(token_size, sizeof(*token_size));
   sli_se_mailbox_command_add_output(se_cmd, &sizedata);
-  sli_se_datatransfer_t tokendata =
+  volatile sli_se_datatransfer_t tokendata =
     SLI_SE_DATATRANSFER_DEFAULT(token_buf, ((*token_size + 0x3) & ~0x3));
   sli_se_mailbox_command_add_output(se_cmd, &tokendata);
 

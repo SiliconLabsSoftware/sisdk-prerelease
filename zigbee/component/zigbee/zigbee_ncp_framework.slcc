@@ -114,6 +114,9 @@ template_file:
 - path: app/framework/common/template/zigbee_ncp_callback_dispatcher.c.jinja
 - path: app/framework/util/template/zigbee_af_token_headers.h.jinja
 
+validation_helper:
+- path: component/scripts/zigbee_ncp_ffd_ram_validation.lua
+
 template_contribution:
 - name: component_catalog
   value: zigbee_ncp_framework

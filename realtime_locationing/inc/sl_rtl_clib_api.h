@@ -739,32 +739,32 @@ const char *sl_rtl_get_lib_version(void);
  *
  * Main Mode: Phase-Based Ranging (PBR), Sub Mode: None
  *
- * | CS Algorithm Mode       | Channel Map Preset <br> HIGH | Channel Map Preset <br> MEDIUM | Channel Map Preset <br> LOW |
- * | :---------------------- | :--------------------------: | :----------------------------: | :-------------------------: |
- * | REAL TIME BASIC         |                          yes |                            yes |                          no |
- * | STATIC HIGH ACCURACY    |                          yes |                             no |                          no |
- * | REAL TIME FAST          |                    yes + vel |                      yes + vel |                          no |
+ * | CS Algorithm Mode           | Channel Map Preset <br> HIGH | Channel Map Preset <br> MEDIUM | Channel Map Preset <br> LOW |
+ * | :-------------------------- | :--------------------------: | :----------------------------: | :-------------------------: |
+ * | STATIONARY                  |                          yes |                             no |                          no |
+ * | TRACKING ACCURACY OPTIMIZED |                          yes |                            yes |                          no |
+ * | TRACKING LATENCY OPTIMIZED  |                    yes + vel |                      yes + vel |                          no |
  *
  * Main Mode: Round-Trip Time (RTT), Sub Mode: None
  *
- * | CS Algorithm Mode       | Channel Map Preset <br> HIGH | Channel Map Preset <br> MEDIUM | Channel Map Preset <br> LOW |
- * | :---------------------- | :--------------------------: | :----------------------------: | :-------------------------: |
- * | REAL TIME BASIC         |                          yes |                             no |                          no |
- * | STATIC HIGH ACCURACY    |            (yes)<sup>*</sup> |                             no |                          no |
- * | REAL TIME FAST          |                           no |                             no |                          no |
+ * | CS Algorithm Mode           | Channel Map Preset <br> HIGH | Channel Map Preset <br> MEDIUM | Channel Map Preset <br> LOW |
+ * | :-------------------------- | :--------------------------: | :----------------------------: | :-------------------------: |
+ * | STATIONARY                  |            (yes)<sup>*</sup> |                             no |                          no |
+ * | TRACKING ACCURACY OPTIMIZED |                          yes |                             no |                          no |
+ * | TRACKING LATENCY OPTIMIZED  |                           no |                             no |                          no |
  *
  * Main Mode: Phase-Based Ranging (PBR), Sub Mode: Round-Trip Time (RTT)
  *
- * | CS Algorithm Mode       | Channel Map Preset <br> HIGH | Channel Map Preset <br> MEDIUM | Channel Map Preset <br> LOW |
- * | :---------------------- | :--------------------------: | :----------------------------: | :-------------------------: |
- * | REAL TIME BASIC         |                          yes |                             no |                          no |
- * | STATIC HIGH ACCURACY    |                          yes |                             no |                          no |
- * | REAL TIME FAST          |                    yes + vel |                             no |                          no |
+ * | CS Algorithm Mode           | Channel Map Preset <br> HIGH | Channel Map Preset <br> MEDIUM | Channel Map Preset <br> LOW |
+ * | :-------------------------- | :--------------------------: | :----------------------------: | :-------------------------: |
+ * | STATIONARY                  |                          yes |                             no |                          no |
+ * | TRACKING ACCURACY OPTIMIZED |                          yes |                             no |                          no |
+ * | TRACKING LATENCY OPTIMIZED  |                    yes + vel |                             no |                          no |
  *
  * Refer to *Developer's Guide > Channel Sounding Capabilities & Configurability* for the channel map preset definitions.
  *
  * @note vel = Velocity is reported.
- * @note <sup>*</sup> This mode uses the same implementation as REAL TIME BASIC.
+ * @note <sup>*</sup> This mode uses the same implementation as TRACKING ACCURACY OPTIMIZED.
  * @note RTT mode currently supports a maximum of two unique ordered
  *       packet_antenna pairs per procedure (one packet_antenna from initiator, other one from reflector).
  */
@@ -798,6 +798,13 @@ const char *sl_rtl_get_lib_version(void);
 #define SL_RTL_CS_CHANNEL_MAP_SIZE               10
 /**< Size of the channel map in bytes. */
 
+#define SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC SL_RTL_CS_ALGO_MODE_TRACKING_ACCURACY_OPTIMIZED
+/**< Alias for SL_RTL_CS_ALGO_MODE_TRACKING_ACCURACY_OPTIMIZED */
+#define SL_RTL_CS_ALGO_MODE_STATIC_HIGH_ACCURACY SL_RTL_CS_ALGO_MODE_STATIONARY
+/**< Alias for SL_RTL_CS_ALGO_MODE_STATIONARY */
+#define SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST SL_RTL_CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED
+/**< Alias for SL_RTL_CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED */
+
 typedef enum {
   SL_RTL_CS_ROLE_INITIATOR = 0, /**< Initiator role. */
   SL_RTL_CS_ROLE_REFLECTOR      /**< Reflector role. */
@@ -808,15 +815,17 @@ typedef enum {
  * with each algorithm mode.
  */
 typedef enum {
-  SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC = 0,
-  /**< Medium filtering, medium response, medium CPU cost. Suitable for
-   * real-time tracking. */
-  SL_RTL_CS_ALGO_MODE_STATIC_HIGH_ACCURACY,
+  SL_RTL_CS_ALGO_MODE_STATIONARY =                          1,
   /**< High filtering, high CPU cost, high accuracy. Suitable for static
    * high-accuracy use cases. */
-  SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST,
+  SL_RTL_CS_ALGO_MODE_TRACKING_ACCURACY_OPTIMIZED =         0,
+  /**< Medium filtering, medium response, medium CPU cost. Suitable for
+   * real-time tracking. */
+  SL_RTL_CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED =          2,
   /**< Low filtering, low CPU and RAM cost, basic accuracy. Suitable for
    * real-time tracking with constrained computational resources. */
+  SL_RTL_CS_ALGO_MODE_INVALID =                             0xFF,
+  /**< Invalid algorithm mode. */
 } sl_rtl_cs_algo_mode;
 
 typedef enum  {
@@ -1098,7 +1107,7 @@ enum sl_rtl_error_code sl_rtl_cs_deinit(sl_rtl_cs_libitem *item);
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *
  * Set the estimation mode. For example,
- * ::SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC sets medium filtering. For
+ * ::SL_RTL_CS_ALGO_MODE_TRACKING_ACCURACY_OPTIMIZED sets medium filtering. For
  * further description of the modes, see the documentation
  * of::sl_rtl_cs_algo_mode. CS libitem must be initialized before
  * calling this method, or it will fail with return code

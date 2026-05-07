@@ -217,6 +217,18 @@ sl_status_t sl_btctrl_init_cte();
  * Initialize Channel Sounding
  */
 sl_status_t sl_btctrl_init_cs(const struct sl_btctrl_cs_config *config);
+sl_status_t sl_btctrl_init_cs_conn(void);
+
+/**
+ * Initialize Channel Sounding Test
+ */
+sl_status_t sl_btctrl_init_cs_test(void);
+
+/**
+ * Initialize Channel Sounding Handover
+ */
+sl_status_t sl_btctrl_init_cs_handover(void);
+sl_status_t sl_btctrl_init_cs_sniff(void);
 
 /**
  * Deinitialize Channel Sounding

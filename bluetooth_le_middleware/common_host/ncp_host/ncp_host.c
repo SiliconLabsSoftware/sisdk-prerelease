@@ -434,17 +434,18 @@ static void on_boot_timer_expire(app_timer_t *timer, void *data)
  *****************************************************************************/
 void ncp_host_on_bt_event(sl_bt_msg_t *evt)
 {
-  sl_status_t sc;
-  uint32_t max_command_payload;
-  uint32_t max_response_payload;
-  uint32_t max_event_payload;
-
   switch (SL_BT_MSG_ID(evt->header)) {
     // -------------------------------
     // This event indicates the device has started and the radio is ready.
     // Do not call any stack command before receiving this boot event!
     case sl_bt_evt_system_boot_id:
 #if defined(VERIFY_BGAPI_PAYLOAD_SIZES) && (VERIFY_BGAPI_PAYLOAD_SIZES == 1)
+    {
+      sl_status_t sc;
+      uint32_t max_command_payload;
+      uint32_t max_response_payload;
+      uint32_t max_event_payload;
+
       // Check max BGAPI payload sizes on NCP target
       sc = sl_bgapi_system_get_max_payload_sizes(&max_command_payload,
                                                  &max_response_payload,
@@ -482,6 +483,7 @@ void ncp_host_on_bt_event(sl_bt_msg_t *evt)
       } else {
         app_log_status_error(sc);
       }
+    }
 #endif // VERIFY_BGAPI_PAYLOAD_SIZES
       break;
 

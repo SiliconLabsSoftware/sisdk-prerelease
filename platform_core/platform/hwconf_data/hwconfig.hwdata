@@ -172,4 +172,28 @@
     <properties key="hardwareConfigData" value="pin_tool/efr32mg2b"/>
     <properties key="partCompatibility" value="mcu.arm.efr32.mg2b.efr32.*"/>
   </descriptors>
+  <descriptors>
+    <properties key="hardwareConfigData" value="pin_tool/siwg350"/>
+    <properties key="partCompatibility" value="mcu.arm.si.wg350.si.*"/>
+  </descriptors>
+  <descriptors>
+    <properties key="hardwareConfigData" value="pin_tool/siwg351"/>
+    <properties key="partCompatibility" value="mcu.arm.si.wg351.si.*"/>
+  </descriptors>
+  <descriptors>
+    <properties key="hardwareConfigData" value="pin_tool/siwg353"/>
+    <properties key="partCompatibility" value="mcu.arm.si.wg353.si.*"/>
+  </descriptors>
+  <descriptors>
+    <properties key="hardwareConfigData" value="pin_tool/siwn350"/>
+    <properties key="partCompatibility" value="mcu.arm.si.wn350.si.*"/>
+  </descriptors>
+  <descriptors>
+    <properties key="hardwareConfigData" value="pin_tool/siwn351"/>
+    <properties key="partCompatibility" value="mcu.arm.si.wn351.si.*"/>
+  </descriptors>
+  <descriptors>
+    <properties key="hardwareConfigData" value="pin_tool/siwn353"/>
+    <properties key="partCompatibility" value="mcu.arm.si.wn353.si.*"/>
+  </descriptors>
 </model:MDescriptors>

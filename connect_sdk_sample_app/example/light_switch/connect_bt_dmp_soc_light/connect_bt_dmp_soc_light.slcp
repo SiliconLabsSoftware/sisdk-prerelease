@@ -22,7 +22,6 @@ component:
   - id: device_init
   - id: board_control
     condition: [hardware_board]
-  - id: radio_config_simple_connect_singlephy
   - id: app_log
   - id: app_assert
   - id: token_manager
@@ -68,7 +67,9 @@ component:
 #----------------- Require list ----------------------
 requires:
   - name: a_radio_config
-    condition: [device_is_module]
+  - name: radio_config_simple_connect_singlephy
+  - name: radio_config_simple_connect_singlephy_device_family_fgm23
+    condition: [device_family_fgm23]
 
 #----------------- Project files ---------------------
 include:

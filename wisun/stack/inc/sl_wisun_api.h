@@ -1403,35 +1403,6 @@ sl_status_t sl_wisun_set_rx_fifo_size(uint16_t size);
 sl_status_t sl_wisun_set_dhcpv6_vendor_data(uint32_t enterprise_number, const uint8_t *data, uint16_t length);
 
 /**************************************************************************//**
- * Dynamically configure the trickle parameters.
- *
- * @param[in] type Type of trickle parameters to set
- * @param[in] i_min_s Minimum interval size in seconds
- * @param[in] i_max_s Maximum interval size in seconds
- * @param[in] k Redundancy constant
- * @param[in] expirations Expiration count (used only by MPL)
- * @return SL_STATUS_OK if successful,
- *         SL_STATUS_INVALID_PARAMETER if the given Imin is bigger than Imax,
- *         SL_STATUS_NOT_AVAILABLE if called on a device that is not an FFN or a BR, or if the type is not supported,
- *         SL_STATUS_FAIL otherwise
- *
- * This function sets the trickle parameters for the specified type (PA, PAS, PC, PCS, MPL) and
- * takes effect immediately.
- * Only MPL makes use of the timer expiration parameter. It is ignored when not used.
- * The function MUST be called after starting a connection or the parameters will be overwritten when
- * initiating a connection.
- *
- * @note This is an advanced API, use with caution.
- *
- * @warning Having heterogeneous trickle parameters in the network may lead to unpredictable behavior.
- *          It can lead to some device transmitting significantly more than others and as such, jeopardize
- *          network stability.
- *
- * Available in libraries: Full, FFN, BR (see @ref API_AVAILABILITY)
- *****************************************************************************/
-sl_status_t sl_wisun_set_trickle_parameters(sl_wisun_trickle_type_t type, uint16_t i_min_s, uint16_t i_max_s, uint8_t k, uint8_t expirations);
-
-/**************************************************************************//**
  * Configure the Last Gasp mode.
  *
  * @param[in] enable Enable (true) or disable (false) Last Gasp mode

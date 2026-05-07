@@ -19,8 +19,6 @@ define:
   value: 1
 - name: SL_RAMFUNC_DISABLE
   value: 1
-- name: __START
-  value: main
 - name: __STARTUP_CLEAR_BSS
   value: 1
 - name: BOOTLOADER_SECOND_STAGE

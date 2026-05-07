@@ -303,6 +303,18 @@ void setPtiProtocol(sl_cli_command_arg_t *args)
   getPti(args);
 }
 
+void offsetLqi(sl_cli_command_arg_t *args)
+{
+  int16_t offset = sl_cli_get_argument_int16(args, 0);
+  if ((offset > 0xFF) || (offset < -0xFF)) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x08,
+                       "Invalid value. Must be between -255 and 255.");
+    return;
+  }
+  lqiOffset = offset;
+  responsePrint(sl_cli_get_command_string(args, 0), "lqiOffset:%d", lqiOffset);
+}
+
 void getRssi(sl_cli_command_arg_t *args)
 {
   char bufRssi[10];

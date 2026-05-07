@@ -69,77 +69,77 @@ extern "C" {
  * @brief The EFR32xG21 series size needed for
  *   \ref sl_rail_state_buffer_entry_t::buffer_bytes.
  */
-#define SL_RAIL_EFR32XG21_STATE_BUFFER_BYTES 608U  // DO NOT HAND-EDIT THESE VALUES
+#define SL_RAIL_EFR32XG21_STATE_BUFFER_BYTES 600U  // DO NOT HAND-EDIT THESE VALUES
 
 /**
  * @def SL_RAIL_EFR32XG22_STATE_BUFFER_BYTES
  * @brief The EFR32xG22 series size needed for
  *   \ref sl_rail_state_buffer_entry_t::buffer_bytes.
  */
-#define SL_RAIL_EFR32XG22_STATE_BUFFER_BYTES 616U  // DO NOT HAND-EDIT THESE VALUES
+#define SL_RAIL_EFR32XG22_STATE_BUFFER_BYTES 608U  // DO NOT HAND-EDIT THESE VALUES
 
 /**
  * @def SL_RAIL_EFR32XG23_STATE_BUFFER_BYTES
  * @brief The EFR32xG23 series size needed for
  *   \ref sl_rail_state_buffer_entry_t::buffer_bytes.
  */
-#define SL_RAIL_EFR32XG23_STATE_BUFFER_BYTES 632U  // DO NOT HAND-EDIT THESE VALUES
+#define SL_RAIL_EFR32XG23_STATE_BUFFER_BYTES 624U  // DO NOT HAND-EDIT THESE VALUES
 
 /**
  * @def SL_RAIL_EFR32XG24_STATE_BUFFER_BYTES
  * @brief The EFR32xG24 series size needed for
  *   \ref sl_rail_state_buffer_entry_t::buffer_bytes.
  */
-#define SL_RAIL_EFR32XG24_STATE_BUFFER_BYTES 648U  // DO NOT HAND-EDIT THESE VALUES
+#define SL_RAIL_EFR32XG24_STATE_BUFFER_BYTES 640U  // DO NOT HAND-EDIT THESE VALUES
 
 /**
  * @def SL_RAIL_EFR32XG25_STATE_BUFFER_BYTES
  * @brief The EFR32xG25 series size needed for
  *   \ref sl_rail_state_buffer_entry_t::buffer_bytes.
  */
-#define SL_RAIL_EFR32XG25_STATE_BUFFER_BYTES 624U  // DO NOT HAND-EDIT THESE VALUES
+#define SL_RAIL_EFR32XG25_STATE_BUFFER_BYTES 616U  // DO NOT HAND-EDIT THESE VALUES
 
 /**
  * @def SL_RAIL_EFR32XG26_STATE_BUFFER_BYTES
  * @brief The EFR32xG26 series size needed for
  *   \ref sl_rail_state_buffer_entry_t::buffer_bytes.
  */
-#define SL_RAIL_EFR32XG26_STATE_BUFFER_BYTES 648U  // DO NOT HAND-EDIT THESE VALUES
+#define SL_RAIL_EFR32XG26_STATE_BUFFER_BYTES 640U  // DO NOT HAND-EDIT THESE VALUES
 
 /**
  * @def SL_RAIL_EFR32XG27_STATE_BUFFER_BYTES
  * @brief The EFR32xG27 series size needed for
  *   \ref sl_rail_state_buffer_entry_t::buffer_bytes.
  */
-#define SL_RAIL_EFR32XG27_STATE_BUFFER_BYTES 616U  // DO NOT HAND-EDIT THESE VALUES
+#define SL_RAIL_EFR32XG27_STATE_BUFFER_BYTES 608U  // DO NOT HAND-EDIT THESE VALUES
 
 /**
  * @def SL_RAIL_EFR32XG28_STATE_BUFFER_BYTES
  * @brief The EFR32xG28 series size needed for
  *   \ref sl_rail_state_buffer_entry_t::buffer_bytes.
  */
-#define SL_RAIL_EFR32XG28_STATE_BUFFER_BYTES 632U  // DO NOT HAND-EDIT THESE VALUES
+#define SL_RAIL_EFR32XG28_STATE_BUFFER_BYTES 624U  // DO NOT HAND-EDIT THESE VALUES
 
 /**
  * @def SL_RAIL_EFR32XG29_STATE_BUFFER_BYTES
  * @brief The EFR32xG29 series size needed for
  *   \ref sl_rail_state_buffer_entry_t::buffer_bytes.
  */
-#define SL_RAIL_EFR32XG29_STATE_BUFFER_BYTES 616U  // DO NOT HAND-EDIT THESE VALUES
+#define SL_RAIL_EFR32XG29_STATE_BUFFER_BYTES 608U  // DO NOT HAND-EDIT THESE VALUES
 
 /**
  * @def SL_RAIL_EFR32XG2B_STATE_BUFFER_BYTES
  * @brief The EFR32xG2B series size needed for
  *   \ref sl_rail_state_buffer_entry_t::buffer_bytes.
  */
-#define SL_RAIL_EFR32XG2B_STATE_BUFFER_BYTES 616U  // DO NOT HAND-EDIT THESE VALUES
+#define SL_RAIL_EFR32XG2B_STATE_BUFFER_BYTES 608U  // DO NOT HAND-EDIT THESE VALUES
 
 /**
  * @def SL_RAIL_EFR32XG2D_STATE_BUFFER_BYTES
  * @brief The EFR32xG2D series size needed for
  *   \ref sl_rail_state_buffer_entry_t::buffer_bytes.
  */
-#define SL_RAIL_EFR32XG2D_STATE_BUFFER_BYTES 632U  // DO NOT HAND-EDIT THESE VALUES
+#define SL_RAIL_EFR32XG2D_STATE_BUFFER_BYTES 624U  // DO NOT HAND-EDIT THESE VALUES
 
 #ifndef SL_RAIL_STATE_BUFFER_BYTES
 /**

@@ -692,11 +692,7 @@ uint8_t sl_hal_system_get_prod_rev(void)
  ******************************************************************************/
 uint32_t sl_hal_system_get_sram_base_address(void)
 {
-#if defined(SRAM0_BASE)
-  return SRAM0_BASE;
-#else
   return SRAM_BASE;
-#endif
 }
 
 /***************************************************************************//**
@@ -720,9 +716,7 @@ uint16_t sl_hal_system_get_sram_size(void)
  ******************************************************************************/
 uint32_t sl_hal_system_get_dmem_base_address(void)
 {
-#if defined(DMEM0_MEM_BASE)
-  return DMEM0_MEM_BASE;
-#elif defined(DMEM_MEM_BASE)
+#if defined(DMEM_MEM_BASE)
   return DMEM_MEM_BASE;
 #else
   return 0xFFFFFFFF;
@@ -736,7 +730,11 @@ uint32_t sl_hal_system_get_dmem_instance_base_address(uint32_t num)
 {
   switch (num) {
     case 0:
+#if defined(DMEM0_MEM_BASE)
+      return DMEM0_MEM_BASE;
+#else
       return sl_hal_system_get_dmem_base_address();
+#endif
 #if defined(DMEM1_MEM_BASE)
     case 1:
       return DMEM1_MEM_BASE;
@@ -768,8 +766,6 @@ uint16_t sl_hal_system_get_dmem_size(void)
   uint16_t itcm_size_kb = (uint16_t)(itcm_num_blocks * ITCM_BLOCK_SIZE_KB);
 
   return (uint16_t)(DMEM_ITCM_COMBINED_SIZE_KB - itcm_size_kb);
-#elif defined(DMEM0_MAX_SIZE)
-  return (uint16_t)(DMEM0_MAX_SIZE / 1024U);
 #elif defined(DMEM_MAX_SIZE)
   return (uint16_t)(DMEM_MAX_SIZE / 1024U);
 #else
@@ -784,7 +780,11 @@ uint16_t sl_hal_system_get_dmem_instance_size(uint32_t num)
 {
   switch (num) {
     case 0:
+#if defined(DMEM0_MAX_SIZE)
+      return (uint16_t)(DMEM0_MAX_SIZE / 1024U);
+#else
       return sl_hal_system_get_dmem_size();
+#endif
 #if defined(DMEM1_MAX_SIZE)
     case 1:
       return (uint16_t)(DMEM1_MAX_SIZE / 1024U);

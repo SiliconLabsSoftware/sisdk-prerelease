@@ -5,13 +5,13 @@ category: OpenThread|Utility|Logging
 quality: production
 description: This component adds support for RTT logging.
 provides:
-- name: ot_logging
 - name: ot_rtt_log
 requires:
 - name: ot_platform_abstraction_implementation
 - name: segger_rtt
 conflicts:
 - name: ot_backchannel_log
+- name: ot_sl_log
 recommends:
 - id: ot_platform_abstraction_source
   vendor: silabs

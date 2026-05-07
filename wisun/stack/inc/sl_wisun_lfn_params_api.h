@@ -46,18 +46,6 @@
  * @{
  *****************************************************************************/
 
-/// Advanced LFN EAPOL parameters for
-/// @ref sl_wisun_set_lfn_advanced_parameters.
-SL_PACK_START(1)
-typedef struct {
-  /// RFC8415 TX algorithm for EAPOL Key-request transmissions.
-  sl_wisun_rfc8415_txalg_params_t key_request_txalg;
-  /// LGTK_MAX_MISMATCH (minutes): maximum time between detecting
-  /// a LGTKHASH mismatch and the SUP initiating Msg1.
-  uint16_t lgtk_max_mismatch_m;
-} SL_ATTRIBUTE_PACKED sl_wisun_lfn_advanced_eapol_params_t;
-SL_PACK_END()
-
 /// LFN advanced connection parameters for
 /// @ref sl_wisun_set_lfn_advanced_parameters
 SL_PACK_START(1)
@@ -72,10 +60,10 @@ typedef struct {
    * current format, while unsupported versions are rejected.
    */
   uint32_t version;
-  /// DHCP solicitation TX algorithm parameters
-  sl_wisun_rfc8415_txalg_params_t dhcp_sol_txalg;
-  /// Advanced EAPOL parameters
-  sl_wisun_lfn_advanced_eapol_params_t eapol;
+  /// RFC8415 TX algorithm for DHCP solicitation transmissions
+  sl_wisun_rfc8415_txalg_params_t dhcp_solicit_txalg;
+  /// RFC8415 TX algorithm for EAPOL Key-request transmissions
+  sl_wisun_rfc8415_txalg_params_t key_request_txalg;
   /// Duration for which an LFN waits for a registration confirmation (minutes).
   uint8_t lfn_na_wait_duration_m;
 } SL_ATTRIBUTE_PACKED sl_wisun_lfn_advanced_parameters_t;

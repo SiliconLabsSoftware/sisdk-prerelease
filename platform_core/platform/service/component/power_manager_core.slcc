@@ -37,6 +37,7 @@ requires:
 - name: power_manager_core_impl
 - name: sl_core
 - name: sl_assert
+- name: sl_common
 - name: status
 - name: slist
 - name: atomic

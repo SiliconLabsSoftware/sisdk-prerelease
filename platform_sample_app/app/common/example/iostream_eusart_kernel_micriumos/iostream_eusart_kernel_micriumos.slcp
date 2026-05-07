@@ -41,3 +41,7 @@ readme:
   - path: readme.md
 ui_hints:
   highlight: readme.md
+tag:
+  - hwfilter:device:device_has_euart
+  - hwfilter:ram:20k
+  - hwfilter:device:device_series_2

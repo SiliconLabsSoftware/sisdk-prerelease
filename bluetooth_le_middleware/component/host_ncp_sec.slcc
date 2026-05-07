@@ -21,6 +21,10 @@ source:
 - path: ncp_sec_host.c
 library:
 - system: ssl
+- system: crypto
+- system: crypt32
+  condition:
+  - win32
 - system: ws2_32
   condition:
   - win32

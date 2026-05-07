@@ -41,3 +41,5 @@ ui_hints:
   highlight: readme.md
 tag:
   - hardware:component:joystick:skrhaae010
+  - hwfilter:board:joystick
+  - hwfilter:device:device_series_2

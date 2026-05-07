@@ -11,6 +11,7 @@ source:
 - path: platform/bootloader/series3/storage/bootloadinfo/btl_storage_bootloadinfo_single.c
 provides:
 - name: btl_interface_bootloadinfo_single
+- name: btl_interface_bootloadinfo_provider
 requires:
 - name: btl_storage_bootloadinfo_header
 - name: btl_crc

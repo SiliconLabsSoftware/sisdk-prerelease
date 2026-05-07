@@ -38,5 +38,8 @@ readme:
   - path: readme.md
 tag:
   - hardware:component:usb
+  - hwfilter:device:device_has_usb
+  - hwfilter:ram:64k
+  - hwfilter:device:device_series_2
 ui_hints:
   highlight: readme.md

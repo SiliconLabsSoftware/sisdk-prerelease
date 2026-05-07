@@ -588,18 +588,16 @@ void SystemInit2(void)
  * 
  * @param startOfAppSpace Start address of application space
  */
-#if defined(__clang__)
-// Clang does not support naked functions which aren't fully inline asm.
-// Todo: rewrite function in assembly.
-__attribute__ ((noreturn)) static void boot_to_app(uint32_t startOfAppSpace)
-#else
 __attribute__ ((noreturn, naked)) static void boot_to_app(uint32_t startOfAppSpace)
-#endif
 {
+#if defined(__clang__)
+  __ASM volatile("b jump_to_application_routine");
+#else
   jump_to_application_routine(startOfAppSpace);
   while (1) {
     // Do nothing
   }
+#endif
 }
 
 // -----------------------------------------------------------------------------

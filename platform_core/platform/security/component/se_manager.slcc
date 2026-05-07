@@ -58,6 +58,9 @@ requires:
 - name: se_manager_config
   condition: [trustzone_secure, device_cortexm]
 
+- name: clock_manager_runtime
+  condition: [device_cortexm]
+
   # Not implemented for the TZ SE Manager Service (but used by the PSA drivers).
 - name: se_manager_crypto
   condition: [trustzone_unaware]

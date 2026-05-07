@@ -53,3 +53,8 @@ tag:
   - hardware:component:led:2+
   - hardware:component:button:2+
   - hardware:!shared:button:led
+  - hwfilter:board:simple_led:led0
+  - hwfilter:board:simple_led:led1
+  - hwfilter:board:simple_button:btn0
+  - hwfilter:board:simple_button:btn1
+  - hwfilter:!board:hardware:shares:button:led

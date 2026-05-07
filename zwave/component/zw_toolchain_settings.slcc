@@ -12,15 +12,18 @@ metadata:
     reference: zw_sbom_license
 provides:
 - name: zw_toolchain_settings
-requires:
+recommends:
 - name: toolchain_gcc
+  vendor: silabs
 - name: toolchain_gcc_standard
+  vendor: silabs
+requires:
 - name: toolchain_lto
-  condition: [zw_release]
+  condition: [zw_release, toolchain_gcc]
 toolchain_settings:
 - option: gcc_compiler_option
   value: "-s"
-  unless: [zw_nostrip]
+  unless: [zw_nostrip, zw_debug]
 - option: gcc_compiler_option
   value: "-fmerge-all-constants"
 - option: gcc_compiler_option
@@ -42,7 +45,13 @@ toolchain_settings:
 - option: gcc_compiler_option
   value: "-Wno-implicit-function-declaration"
   condition: [zw_release]
+  # LLVM/Clang: same intent as COMMON_FLAGS in toolchain_llvm.cmake (ABI: all-LLVM image only)
+- option: llvm_compiler_option
+  value: "-fshort-enums"
+- option: llvm_compiler_option
+  value: "-fmerge-all-constants"
   # Linker flags
-- option: gcc_linker_option
-  value: "-Wl,--start-group -lgcc -lc -Wl,--end-group"
+- option: llvm_linker_option
+  value: "-s"
+  unless: [zw_nostrip, zw_debug]
 root_path: zwave

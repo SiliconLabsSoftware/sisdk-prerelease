@@ -77,7 +77,11 @@ component:
     condition:
       - hardware_board_supports_wstk_lcd
   - id: clock_manager
-  # Platform - enable LTO for gcc
+  # Platform - enable LTO for gcc and llvm
+  - id: toolchain_gcc_lto
+    condition: [toolchain_gcc]
+  - id: toolchain_llvm_lto
+    condition: [toolchain_llvm]
 
 configuration:
   - name: SL_BOARD_ENABLE_VCOM

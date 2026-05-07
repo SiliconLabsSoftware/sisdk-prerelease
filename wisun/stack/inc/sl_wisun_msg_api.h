@@ -149,7 +149,6 @@ typedef enum {
   SL_WISUN_MSG_CONNECT_TO_DIRECT_CONNECT_SERVER_REQ_ID    = 0x5A,
   SL_WISUN_MSG_STOP_DIRECT_CONNECT_CLIENT_REQ_ID          = 0x5B,
   SL_WISUN_MSG_SET_DHCPV6_VENDOR_DATA_REQ_ID              = 0x5C,
-  SL_WISUN_MSG_SET_TRICKLE_PARAMETERS_REQ_ID              = 0x5D,
   SL_WISUN_MSG_SET_LAST_GASP_REQ_ID                       = 0x5E,
   SL_WISUN_MSG_SET_FIRST_BREATH_REQ_ID                    = 0x5F,
   SL_WISUN_MSG_SET_OPTION_REQ_ID                          = 0x61,
@@ -248,7 +247,6 @@ typedef enum {
   SL_WISUN_MSG_CONNECT_TO_DIRECT_CONNECT_SERVER_CNF_ID    = 0x5A,
   SL_WISUN_MSG_STOP_DIRECT_CONNECT_CLIENT_CNF_ID          = 0x5B,
   SL_WISUN_MSG_SET_DHCPV6_VENDOR_DATA_CNF_ID              = 0x5C,
-  SL_WISUN_MSG_SET_TRICKLE_PARAMETERS_CNF_ID              = 0x5D,
   SL_WISUN_MSG_SET_LAST_GASP_CNF_ID                       = 0x5E,
   SL_WISUN_MSG_SET_FIRST_BREATH_CNF_ID                    = 0x5F,
   SL_WISUN_MSG_SET_OPTION_CNF_ID                          = 0x61,
@@ -4398,59 +4396,6 @@ typedef struct {
 SL_PACK_END()
 
 /** @} (end SL_WISUN_MSG_SET_DHCPV6_VENDOR_DATA) */
-
-/**************************************************************************//**
- * @defgroup SL_WISUN_MSG_SET_TRICKLE_PARAMETERS sl_wisun_msg_set_trickle_parameters
- * @{
- *****************************************************************************/
-
-/// Request message body
-SL_PACK_START(1)
-typedef struct {
-  /// Trickle type
-  uint32_t type;
-  /// I min in seconds
-  uint16_t i_min_s;
-  /// I max in seconds
-  uint16_t i_max_s;
-  /// Redundancy constant
-  uint8_t k;
-  /// Timer expirations
-  uint8_t expirations;
-  /// Reserved, set to zero
-  uint8_t reserved[2];
-} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_trickle_parameters_req_body_t;
-SL_PACK_END()
-
-/// Request message
-SL_PACK_START(1)
-typedef struct {
-  /// Common message header
-  sl_wisun_msg_header_t header;
-  /// Request message body
-  sl_wisun_msg_set_trickle_parameters_req_body_t body;
-} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_trickle_parameters_req_t;
-SL_PACK_END()
-
-/// Confirmation message body
-SL_PACK_START(1)
-typedef struct {
-  /// Status of the request
-  uint32_t status;
-} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_trickle_parameters_cnf_body_t;
-SL_PACK_END()
-
-/// Confirmation message
-SL_PACK_START(1)
-typedef struct {
-  /// Common message header
-  sl_wisun_msg_header_t header;
-  /// Confirmation message body
-  sl_wisun_msg_set_trickle_parameters_cnf_body_t body;
-} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_trickle_parameters_cnf_t;
-SL_PACK_END()
-
-/** @} (end SL_WISUN_MSG_SET_TRICKLE_PARAMETERS) */
 
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SET_LAST_GASP sl_wisun_msg_set_last_gasp

@@ -359,7 +359,8 @@ void button_press_from_cli(sl_cli_command_arg_t *arguments)
     duration = APP_BUTTON_PRESS_DURATION_VERYLONG;
   }
   if (button_id >= SL_SIMPLE_BUTTON_COUNT) {
-    button_id = SL_SIMPLE_BUTTON_COUNT - 1;
+    app_button_press_error(SL_STATUS_INVALID_RANGE);
+    return;
   }
   app_button_press_cb(button_id, duration);
 }
@@ -374,7 +375,8 @@ void button_hold_from_cli(sl_cli_command_arg_t *arguments)
   uint8_t button_id;
   button_id = sl_cli_get_argument_uint8(arguments, BUTTON_ID_PARAM_IDX);
   if (button_id >= SL_SIMPLE_BUTTON_COUNT) {
-    button_id = SL_SIMPLE_BUTTON_COUNT - 1;
+    app_button_press_error(SL_STATUS_INVALID_RANGE);
+    return;
   }
   if (cli_button_states[button_id] == SL_SIMPLE_BUTTON_RELEASED) {
     cli_button_timestamps[button_id] = sl_sleeptimer_get_tick_count();
@@ -395,7 +397,8 @@ void button_release_from_cli(sl_cli_command_arg_t *arguments)
   uint8_t button_id;
   button_id = sl_cli_get_argument_uint8(arguments, BUTTON_ID_PARAM_IDX);
   if (button_id >= SL_SIMPLE_BUTTON_COUNT) {
-    button_id = SL_SIMPLE_BUTTON_COUNT - 1;
+    app_button_press_error(SL_STATUS_INVALID_RANGE);
+    return;
   }
   if (cli_button_states[button_id] == SL_SIMPLE_BUTTON_PRESSED) {
     uint32_t t_diff = sl_sleeptimer_get_tick_count() - cli_button_timestamps[button_id];

@@ -289,7 +289,7 @@ static bool app_direct_connect_state = false;
 static bool app_direct_connect_auto_mode = false;  // When true, auto-advertise DC ID and auto-accept link
 #define APP_DIRECT_CONNECT_AUTO_DC_ID_DEFAULT  "DC_ID_DEFAULT"  // Default DC ID when not specified
 static sl_wisun_dc_id_t app_direct_connect_auto_dc_id = { .id = APP_DIRECT_CONNECT_AUTO_DC_ID_DEFAULT };
-static uint32_t app_direct_connect_pmk_key_id = MBEDTLS_SVC_KEY_ID_INIT;
+uint32_t app_direct_connect_pmk_key_id = MBEDTLS_SVC_KEY_ID_INIT;
 static char crash_buff[300] = { 0 };
 
 #if defined (SL_CATALOG_WISUN_CLI_DMP_PRESENT)
@@ -298,6 +298,8 @@ static bool app_ble_is_advertising;
 static bool app_ble_is_advertiser_enabled;
 static bool app_ble_is_scanning;
 #endif
+
+static bool leaf_explicit_enable = false;
 
 typedef struct
 {
@@ -549,7 +551,9 @@ static void app_handle_network_update_ind(sl_wisun_evt_t *evt)
       ret = sl_wisun_get_network_info(&network_info);
       if (ret == SL_STATUS_OK) {
         printf("[Node hop count: %u]\r\n", network_info.hop_count);
-        sl_wisun_set_leaf(network_info.hop_count >= app_settings_wisun.max_hop_count);
+        if (!leaf_explicit_enable) {
+          sl_wisun_set_leaf(network_info.hop_count >= app_settings_wisun.max_hop_count);
+        }
       }
     }
   }
@@ -2842,6 +2846,7 @@ void app_set_leaf(sl_cli_command_arg_t *arguments)
 
   ret = sl_wisun_set_leaf(is_leaf);
   if (ret == SL_STATUS_OK) {
+    leaf_explicit_enable = is_leaf;
     printf("[Leaf behavior set]\r\n");
   } else {
     printf("[Failed: unable to set leaf behavior: %lu]\r\n", ret);
@@ -3468,7 +3473,7 @@ void app_getpeername(sl_cli_command_arg_t *arguments)
   app_wisun_cli_mutex_unlock();
 }
 
-static sl_status_t app_import_direct_connect_pmk(void)
+sl_status_t app_import_direct_connect_pmk(void)
 {
   psa_key_attributes_t pmk_key_attributes = psa_key_attributes_init();
   psa_key_location_t pmk_location = PSA_KEY_LOCATION_LOCAL_STORAGE;
@@ -4002,174 +4007,6 @@ cleanup:
 
 #endif
 
-#ifdef HAVE_DIRECT_CONNECT_CLIENT
-
-void app_wisun_start_direct_connect_client(sl_cli_command_arg_t *arguments)
-{
-  sl_status_t status;
-  (void)arguments;
-
-  sl_wisun_phy_config_type_t phy_type;
-  sl_wisun_phy_config_t phy_config;
-
-  app_wisun_cli_mutex_lock();
-
-  if (sl_cli_get_argument_count(arguments) > 0) {
-    phy_type = sl_cli_get_argument_uint32(arguments, 0);
-  } else {
-    printf("[Failed: missing phy type]\r\n");
-    goto cleanup;
-  }
-
-  switch (phy_type) {
-    case SL_WISUN_PHY_CONFIG_FAN10:
-      phy_config.type = SL_WISUN_PHY_CONFIG_FAN10;
-      phy_config.config.fan10.reg_domain = app_settings_wisun.regulatory_domain;
-      phy_config.config.fan10.op_class = app_settings_wisun.operating_class;
-      phy_config.config.fan10.op_mode = app_settings_wisun.operating_mode;
-      phy_config.config.fan10.fec = app_settings_wisun.fec;
-      break;
-    case SL_WISUN_PHY_CONFIG_FAN11:
-      phy_config.type = SL_WISUN_PHY_CONFIG_FAN11;
-      phy_config.config.fan11.reg_domain = app_settings_wisun.regulatory_domain;
-      phy_config.config.fan11.chan_plan_id = app_settings_wisun.chan_plan_id;
-      phy_config.config.fan11.phy_mode_id = app_settings_wisun.phy_mode_id;
-      break;
-    case SL_WISUN_PHY_CONFIG_EXPLICIT:
-      phy_config.type = SL_WISUN_PHY_CONFIG_EXPLICIT;
-      phy_config.config.explicit_plan.ch0_frequency_khz = app_settings_wisun.ch0_frequency;
-      phy_config.config.explicit_plan.number_of_channels = app_settings_wisun.number_of_channels;
-      break;
-    default:
-      printf("[Failed: unsupported phy type: %u]\r\n", phy_type);
-  }
-
-  status = sl_wisun_start_direct_connect_client(&phy_config);
-  if (status != SL_STATUS_OK) {
-    printf("[Failed: unable to start Direct Connect client: %lu]\r\n", status);
-    goto cleanup;
-  }
-
-  printf("[Direct Connect client has started]\r\n");
-
-cleanup:
-
-  app_wisun_cli_mutex_unlock();
-}
-
-void app_wisun_stop_direct_connect_client(sl_cli_command_arg_t *arguments)
-{
-  sl_status_t status;
-  (void)arguments;
-
-  app_wisun_cli_mutex_lock();
-
-  status = sl_wisun_stop_direct_connect_client();
-  if (status != SL_STATUS_OK) {
-    printf("[Failed: unable to stop Direct Connect client: %lu]\r\n", status);
-    goto cleanup;
-  }
-
-  printf("[Direct Connect client has stopped]\r\n");
-
-cleanup:
-
-  app_wisun_cli_mutex_unlock();
-}
-
-void app_wisun_direct_connect_scan(sl_cli_command_arg_t *arguments)
-{
-  sl_status_t status;
-  uint8_t max_solicits_count = 0;
-  sl_wisun_dc_id_t dc_id = {0};
-
-  app_wisun_cli_mutex_lock();
-
-  if (sl_cli_get_argument_count(arguments) == 2) {
-    strncpy((char *)dc_id.id, sl_cli_get_argument_string(arguments, 0), SL_WISUN_DC_ID_LEN - 1);
-    max_solicits_count = sl_cli_get_argument_uint8(arguments, 1);
-  } else {
-    printf("[Failed: missing parameters]\r\n");
-    goto cleanup;
-  }
-
-  status = sl_wisun_start_direct_connect_scan(&dc_id, max_solicits_count);
-  if (status != SL_STATUS_OK) {
-    printf("[Failed: unable to start Direct Connect client scanning: %lu]\r\n", status);
-    goto cleanup;
-  }
-
-  printf("[Direct Connect client is scanning using DC_ID: %s]\r\n", (char *) dc_id.id);
-
-cleanup:
-
-  app_wisun_cli_mutex_unlock();
-
-}
-
-void app_wisun_stop_direct_connect_scan(sl_cli_command_arg_t *arguments)
-{
-  sl_status_t status;
-  (void)arguments;
-
-  app_wisun_cli_mutex_lock();
-
-  status = sl_wisun_stop_direct_connect_scan();
-  if (status != SL_STATUS_OK) {
-    printf("[Failed: unable to stop Direct Connect client scanning: %lu]\r\n", status);
-    goto cleanup;
-  }
-
-  printf("[Direct Connect client has stopped scanning]\r\n");
-
-cleanup:
-
-  app_wisun_cli_mutex_unlock();
-}
-
-void app_wisun_connect_to_direct_connect_server(sl_cli_command_arg_t *arguments)
-{
-  uint32_t ret = 0;
-  sl_status_t status = SL_STATUS_OK;
-  uint8_t max_solicits_count = 0;
-  sl_wisun_mac_address_t mac_address = {0};
-  char mac_str[24];
-
-  app_wisun_cli_mutex_lock();
-
-  if (sl_cli_get_argument_count(arguments) == 2) {
-    ret = app_util_get_mac_address(&mac_address, sl_cli_get_argument_string(arguments, 0));
-    if (ret != SL_STATUS_OK) {
-      printf("[Failed: invalid MAC address: %s]\r\n", sl_cli_get_argument_string(arguments, 0));
-      goto cleanup;
-    }
-    max_solicits_count = sl_cli_get_argument_uint8(arguments, 1);
-  } else {
-    printf("[Failed: missing parameters]\r\n");
-    goto cleanup;
-  }
-
-  status = app_import_direct_connect_pmk();
-  if (status != SL_STATUS_OK) {
-    goto cleanup;
-  }
-
-  status = sl_wisun_connect_to_direct_connect_server(&mac_address, app_direct_connect_pmk_key_id, max_solicits_count);
-  if (status != SL_STATUS_OK) {
-    printf("[Failed: unable to connect to Direct Connect server: %lu]\r\n", status);
-    goto cleanup;
-  }
-
-  app_util_get_mac_address_string(mac_str, &mac_address);
-  printf("[Connecting to Direct Connect server %s]\r\n", mac_str);
-
-cleanup:
-
-  app_wisun_cli_mutex_unlock();
-}
-
-#endif
-
 void app_set_dhcpv6_vendor_data(sl_cli_command_arg_t *arguments)
 {
   sl_status_t ret;
@@ -4187,30 +4024,6 @@ void app_set_dhcpv6_vendor_data(sl_cli_command_arg_t *arguments)
     printf("[Failed: unable to set DHCPv6 client vendor data: %lu]\r\n", ret);
   } else {
     printf("[DHCPv6 client vendor data set]\r\n");
-  }
-
-  app_wisun_cli_mutex_unlock();
-}
-
-void app_set_trickle_params(sl_cli_command_arg_t *arguments)
-{
-  sl_status_t ret;
-  sl_wisun_trickle_type_t type;
-  uint16_t i_min_s, i_max_s;
-  uint8_t k, expirations;
-
-  app_wisun_cli_mutex_lock();
-
-  type = (sl_wisun_trickle_type_t)sl_cli_get_argument_uint8(arguments, 0);
-  i_min_s = sl_cli_get_argument_uint16(arguments, 1);
-  i_max_s = sl_cli_get_argument_uint16(arguments, 2);
-  k = sl_cli_get_argument_uint8(arguments, 3);
-  expirations = sl_cli_get_argument_uint8(arguments, 4);
-  ret = sl_wisun_set_trickle_parameters(type, i_min_s, i_max_s, k, expirations);
-  if (ret != SL_STATUS_OK) {
-    printf("[Failed: unable to set Trickle parameters: %lu]\r\n", ret);
-  } else {
-    printf("[Trickle parameters set]\r\n");
   }
 
   app_wisun_cli_mutex_unlock();

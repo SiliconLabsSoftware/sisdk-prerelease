@@ -210,6 +210,13 @@ sl_status_t sli_clock_manager_hal_get_ext_flash_clk(sl_oscillator_t *oscillator)
 sl_status_t sli_clock_manager_hal_get_nwp_socpll_freqplan_config(const uint16_t **socpll_freqplan_config,
                                                                  uint8_t *target_frequency_index);
 
+/***************************************************************************//**
+ * Retrieves the FREQPLAN NWP CLKMULT config.
+ ******************************************************************************/
+sl_status_t sli_clock_manager_hal_get_nwp_clkmult_freqplan_config(uint8_t clkmult_index,
+                                                                  const uint8_t **nwp_clkmult_freqplan_config,
+                                                                  uint8_t *target_frequency_index);
+
 #if defined(CLOCK_MANAGER_RUNTIME_HAL_INTERNAL_PRESENT)
 /***************************************************************************//**
  * Gets frequency of given internal clock branch.

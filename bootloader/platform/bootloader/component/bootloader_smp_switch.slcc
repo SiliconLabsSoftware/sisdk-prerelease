@@ -19,8 +19,6 @@ metadata:
 provides:
 - name: bootloader_smp_switch
 requires:
-- name: bootloader_core
-- name: bootloader_crc
 - name: bootloader_interface_common
   # Record header is owned by bootloader package (see bootloader_s2_smp_record_header).
 - name: bootloader_s2_smp_record_header

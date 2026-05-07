@@ -17,6 +17,7 @@ include:
   - path: storage/btl_storage.h
 provides:
 - name: btl_common_storage_single
+- name: btl_interface_bootloadinfo_provider
 requires:
 - name: btl_storage_bootloadinfo_header
 - name: btl_storage_slots

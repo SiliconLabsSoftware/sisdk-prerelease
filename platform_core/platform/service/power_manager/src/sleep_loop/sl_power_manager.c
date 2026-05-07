@@ -42,6 +42,10 @@
 #include "sl_power_manager_execution_modes.h"
 #endif
 
+#if defined(SL_CATALOG_POWER_MANAGER_RETENTION_PRESENT)
+#include "sli_power_manager_periph_state.h"
+#endif
+
 #include "em_device.h"
 #if !defined(_SILICON_LABS_32B_SERIES_3)
 #include "em_emu.h"
@@ -850,6 +854,15 @@ static void evaluate_wakeup(sl_power_manager_em_t to)
 
     case SL_POWER_MANAGER_EM2:
     case SL_POWER_MANAGER_EM3:
+#if defined(SL_CATALOG_POWER_MANAGER_RETENTION_PRESENT)
+      if (sli_power_manager_is_non_em2_peripheral_enabled()) {
+        // If any non-EM2-capable peripheral is enabled, the corresponding MENS register bits will
+        // be set in the MENS registers, which will cause the EM2 to abort and go to EM1 instead.
+        update_em1_requirement(true);
+        requirement_on_em1_added = true;
+        break;
+      }
+#endif
       // Get the time remaining until the next sleeptimer requiring early wake-up
       status = sl_sleeptimer_get_remaining_time_of_first_timer(0, &tick_remaining);
       if (status == SL_STATUS_OK) {
@@ -876,9 +889,9 @@ static void evaluate_wakeup(sl_power_manager_em_t to)
             if (sli_power_manager_is_high_freq_accuracy_clk_used()) {
               hf_accuracy_clk_flag = SLI_SLEEPTIMER_POWER_MANAGER_HF_ACCURACY_CLK_FLAG;
             }
-#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT) \
-  && (SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_SYSRTC) \
-  && defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)                  \
+            && (SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_SYSRTC) \
+            && defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
             uint32_t hfxo_startup_time;
             sli_clock_manager_get_hfxo_average_startup_time(&hfxo_startup_time);
             wakeup_delay -= hfxo_startup_time;
@@ -1107,13 +1120,13 @@ void sli_clock_manager_notify_hfxo_ready(void)
   // Complete HF restore and change current Energy mode
   // The notification will be done once back in the sleep loop
   if (current_em != SL_POWER_MANAGER_EM0
-    && (is_sleeping_waiting_for_clock_restore == true)) {
-  sli_power_manager_restore_states();
-  is_sleeping_waiting_for_clock_restore = false;
-  is_states_saved = false;
-  is_restored_from_hfxo_isr = true;
-  is_restored_from_hfxo_isr_internal = true;
-}
+      && (is_sleeping_waiting_for_clock_restore == true)) {
+    sli_power_manager_restore_states();
+    is_sleeping_waiting_for_clock_restore = false;
+    is_states_saved = false;
+    is_restored_from_hfxo_isr = true;
+    is_restored_from_hfxo_isr_internal = true;
+  }
 }
 #endif
 

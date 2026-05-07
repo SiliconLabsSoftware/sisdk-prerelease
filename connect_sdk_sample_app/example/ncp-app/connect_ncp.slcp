@@ -16,7 +16,6 @@ component:
   - id: connect_parent_support
   - id: connect_stack_counters
   - id: connect_poll
-  - id: radio_config_simple_connect_singlephy
   - id: psa_crypto
   - id: connect_ncp
   - id: connect_cpc
@@ -24,6 +23,12 @@ component:
   - id: iostream_cpc
   - id: iostream_retarget_stdio
   - id: bootloader_interface
+
+requires:
+  - name: a_radio_config
+  - name: radio_config_simple_connect_singlephy
+  - name: radio_config_simple_connect_singlephy_device_family_fgm23
+    condition: [device_family_fgm23]
 
 configuration:
   - name: SL_BOARD_ENABLE_VCOM

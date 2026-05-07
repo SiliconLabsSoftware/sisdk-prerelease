@@ -58,6 +58,7 @@ component:
   - id: bootloader_interface
   - id: clock_manager
   # Platform - enable LTO for gcc
+  - id: toolchain_gcc_lto
   - id: zigbee_pro_stack_mac_test_cmds
   - id: zigbee_pro_compliance
   - id: zigbee_mac_address_filtering

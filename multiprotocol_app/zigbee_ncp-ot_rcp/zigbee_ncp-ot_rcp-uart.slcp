@@ -163,3 +163,4 @@ tag:
   - hwfilter:!device:device_family_mgm22
   - hwfilter:ram:96k
   - toolchain:gcc
+  - toolchain:llvm

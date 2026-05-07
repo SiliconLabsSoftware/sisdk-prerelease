@@ -113,7 +113,7 @@ Next time you issue the `wisun join_xxxxx` command, the device starts a connecti
 | wisun.border_router                  | R   | list of IPv6 addresses |  | List of known IPv6 addresses of the border router | |
 | wisun.parents                        | R   | list of IPv6 addresses |  | List of known IPv6 addresses of the parents |  |
 | wisun.neighbors                      | R   | list of IPv6 addresses |  | List of known IPv6 addresses of the RPL neighbors  |  |
-| wisun.join_state                     | R   | integer     | - Idle (0) <br> - Select PAN (1) <br> - Authenticate (2) <br> - Acquire PAN Config (3) <br> - Configure Routing (4) <br> - Operational (5) | Current join state in the connection process |  |
+| wisun.join_state                     | R   | integer     | - Disconnected (0) <br> - Select PAN (1) <br> - Authenticate (2) <br> - Acquire PAN Config (3) <br> - Configure Routing (4) <br> - Operational (5) | Current join state in the connection process |  |
 | wisun.mac_address                    | R/W | MAC address |  | MAC address to use                                       |  |
 | wisun.allowed_channels               | R/W | string      |  | Allowed channel ranges (e.g. 0-54,57-60,64,67-68)        |  |
 | wisun.fec                            | R/W | bool        | - disable FEC (0) <br> - enable FEC (1) | Use FEC flag | FAN1.0 |

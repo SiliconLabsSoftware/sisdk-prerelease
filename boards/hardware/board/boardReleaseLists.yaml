@@ -21,6 +21,8 @@ socket_board_opn:
     BRD1020A: efr32mg29b230f1024cm40
     BRD1021A: efr32bg29b221f1024cj45
     # BRD1026A: efr32fg2db010f512im48
+    # BRD1025C: Everest QFN60 socket for SiWG353 bring-up; first silicon OPN siwg353m001ent. Actual device component is siwg353m001ent_16mb.
+    BRD1025C: siwg353m001ent_16mb
 
 revision_blacklist:
     - BRD2504A_A00
@@ -35,6 +37,7 @@ socket_boards:
     - BRD1020A
     - BRD1021A
     # - BRD1026A
+    - BRD1025C
 
 board_release_whitelist:
     - BRD2503A

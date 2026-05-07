@@ -129,6 +129,27 @@ void halHostSerialPowerup(void)
   //---- Configure SPI ----//
   SPIDRV_Init_t initData = SPI_NCP_USART_INIT;
   SPIDRV_Init(spiHandle, &initData);
+#if defined(SL_CATALOG_IOSTREAM_EUSART_PRESENT)
+  /* Use the public initData copy on the handle; do not reach into
+   * handle->peripheral.eusartPort (that field is documented opaque). */
+  EUSART_TypeDef *eusart = (EUSART_TypeDef *)spiHandle->initData.port;
+  /* EUSART_NUM() returns -1 for non-EUSART peripherals, so this is also
+  * safe when SPI_NCP_USART_INIT happens to bind to a USART instance. */
+  if (EUSART_NUM(eusart) >= 0) {
+    uint32_t spi_ncp_idle_byte = 0xFFFFU;
+    /* DTXDATCFG is in the EN-must-be-zero (CONFIG-type) register group,
+     * so cycle the peripheral through disable/write/enable. */
+    sl_hal_eusart_disable(eusart);
+    sl_hal_eusart_wait_ready(eusart);
+    eusart->DTXDATCFG = (spi_ncp_idle_byte << _EUSART_DTXDATCFG_DTXDAT_SHIFT) & _EUSART_DTXDATCFG_DTXDAT_MASK;
+    /* sl_hal_eusart_enable() only sets EN; RX/TX are separate CMD ops
+     * and a full disable cycle clears them, so re-enable explicitly. */
+    sl_hal_eusart_enable(eusart);
+    sl_hal_eusart_enable_rx(eusart);
+    sl_hal_eusart_enable_tx(eusart);
+    sl_hal_eusart_wait_sync(eusart, _EUSART_SYNCBUSY_MASK);
+  }
+#endif // SL_CATALOG_IOSTREAM_EUSART_PRESENT
 
 #if defined(_SILICON_LABS_32B_SERIES_3)
   // Series 3 GPIO initialization
@@ -162,10 +183,10 @@ void halHostSerialPowerup(void)
 
   int32_t interrupt_ext = BSP_SPINCP_NWAKE_PIN;
   (void)sl_gpio_configure_external_interrupt(&n_wake_int_gpio,
-                                       &interrupt_ext,
-                                       SL_GPIO_INTERRUPT_FALLING_EDGE,
-                                       nWAKE_ISR,
-                                       NULL);
+                                             &interrupt_ext,
+                                             SL_GPIO_INTERRUPT_FALLING_EDGE,
+                                             nWAKE_ISR,
+                                             NULL);
   #else
   GPIO_IntDisable(1 << BSP_SPINCP_NWAKE_PIN);
   GPIO_PinModeSet(BSP_SPINCP_NWAKE_PORT,

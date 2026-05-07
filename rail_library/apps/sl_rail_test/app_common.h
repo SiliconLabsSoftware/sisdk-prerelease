@@ -606,6 +606,9 @@ extern bool printTxAck;
 extern const char * const paStrings[];
 extern const char * const paStrings2x[]; // For RAIL 2.x compat
 
+// LQI offset variable
+extern int16_t lqiOffset;
+
 // Variable containing current RSSI
 extern float averageRssi;
 

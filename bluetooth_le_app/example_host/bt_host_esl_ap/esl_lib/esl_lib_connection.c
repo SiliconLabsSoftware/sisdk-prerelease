@@ -926,9 +926,14 @@ void esl_lib_connection_on_bt_event(sl_bt_msg_t *evt)
           (void)esl_lib_connection_remove_ptr(conn);
           conn = ESL_LIB_INVALID_HANDLE;
         } else if (conn->command != NULL) {
+          // PAwR: if connection_opened never ran, automatic retry usually wastes time (out of sync with the train).
+          const bool pawr_pre_open_no_retry =
+            (conn->state == ESL_LIB_CONNECTION_STATE_CONNECTING)
+            && find_tlv(conn->command, ESL_LIB_CONNECT_DATA_TYPE_PAWR, &tlv);
           // Not connected, check if a retry is required (link issue or bonding issue)
           if ((conn->command->cmd_code == ESL_LIB_CMD_CONNECT)
               && (conn->command->data.cmd_connect.retries_left)
+              && !pawr_pre_open_no_retry
               && ((reason == SL_STATUS_BT_CTRL_CONNECTION_FAILED_TO_BE_ESTABLISHED)
                   || (conn->state == ESL_LIB_CONNECTION_STATE_BONDING_RECOVERY))) {
             esl_lib_log_connection_debug(CONN_FMT "Connection retry scheduled, connection handle = %u" APP_LOG_NL,
@@ -993,6 +998,9 @@ void esl_lib_connection_on_bt_event(sl_bt_msg_t *evt)
               // event occurs without the preceding sl_bt_evt_connection_opened_id event!
               conn->command_complete = true;
               esl_lib_core_connection_complete();
+            }
+            if (pawr_pre_open_no_retry && conn->command->cmd_code == ESL_LIB_CMD_CONNECT) {
+              conn->command->data.cmd_connect.retries_left = 0;
             }
           }
           // And also remove connection from the list in the end.

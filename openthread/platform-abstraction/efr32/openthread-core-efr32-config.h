@@ -62,6 +62,10 @@
 #include SL_OPENTHREAD_STACK_FEATURES_CONFIG_FILE
 #endif
 
+#if !defined(SL_CATALOG_OT_SL_LOG_PRESENT)
+#include "sl_openthread_log_config.h"
+#endif
+
 #include "board_config.h"
 #include "em_device.h"
 
@@ -752,5 +756,36 @@
 #endif
 #define OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE 0
 #endif
+
+/**
+ * @def OPENTHREAD_CONFIG_LOG_LEVEL
+ *
+ * When `ot_sl_log` is present, derive OpenThread's compile-time log level from the Silicon Labs Log
+ * component only (`SL_LOG_CONFIG_LEVEL_COMPILE_TIME` in `sl_log_common_config.h`). The OpenThread
+ * log config wizard does not set `OPENTHREAD_CONFIG_LOG_LEVEL` in that case (see `sl_openthread_log_config.h`).
+ */
+#if defined(SL_CATALOG_OT_SL_LOG_PRESENT)
+#include "sl_log_common_config.h"
+#include <openthread/platform/logging.h>
+
+#undef OPENTHREAD_CONFIG_LOG_LEVEL
+
+#if SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE
+#define OPENTHREAD_CONFIG_LOG_LEVEL OT_LOG_LEVEL_NONE
+#elif SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_CRASH
+#define OPENTHREAD_CONFIG_LOG_LEVEL OT_LOG_LEVEL_CRIT
+#elif SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_ERROR
+#define OPENTHREAD_CONFIG_LOG_LEVEL OT_LOG_LEVEL_CRIT
+#elif SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_WARN
+#define OPENTHREAD_CONFIG_LOG_LEVEL OT_LOG_LEVEL_WARN
+#elif SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_INFO
+#define OPENTHREAD_CONFIG_LOG_LEVEL OT_LOG_LEVEL_INFO
+#elif SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_DEBUG
+#define OPENTHREAD_CONFIG_LOG_LEVEL OT_LOG_LEVEL_DEBG
+#else
+#define OPENTHREAD_CONFIG_LOG_LEVEL OT_LOG_LEVEL_DEBG
+#endif
+
+#endif // SL_CATALOG_OT_SL_LOG_PRESENT
 
 #endif // OPENTHREAD_CORE_EFR32_CONFIG_H_

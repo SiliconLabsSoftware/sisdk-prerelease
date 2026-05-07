@@ -563,25 +563,6 @@ template_contribution:
       help: "Reset the duty cycle counters"
       shortcuts:
         - name: "rdc"
-  - name: "cli_command"
-    value:
-      group: "wisun"
-      name: "set_trickle_params"
-      handler: "app_set_trickle_params"
-      help: "Dynamically set the trickle parameters for a certain trickle type"
-      shortcuts:
-        - name: "stp"
-      argument:
-        - type: uint8
-          help: "Trickle type"
-        - type: uint16
-          help: "i_min_s"
-        - type: uint16
-          help: "i_max_s"
-        - type: uint8
-          help: "k"
-        - type: uint8
-          help: "expirations"
 
 # -------------------------------
   - name: cli_group

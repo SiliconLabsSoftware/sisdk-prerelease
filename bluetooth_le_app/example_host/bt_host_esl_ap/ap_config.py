@@ -41,6 +41,11 @@ INITIAL_AUTO_ADVERTISE_PAWR_TRAIN = False
 # Max number of images to upload automatically
 IMAGE_MAX_AUTO_UPLOAD_COUNT = 2
 
+# Image throughput (ITP) stress test: max connection attempts per tag before skipping
+ITP_MAX_ATTEMPTS = 3
+# ITP: upper bound for ``--parallel_connections`` / -p and for fixed _itp_max_conn_limit caps
+ITP_MAX_PARALLEL_CONNECTIONS = 32 # 32 is the absolute upper limit for our Bluetooth LE stack
+
 # Retry count for ESL command opcodes re-sending
 ESL_CMD_MAX_RETRY_COUNT = 3
 

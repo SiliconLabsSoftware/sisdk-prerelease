@@ -31,6 +31,8 @@
 #ifndef CS_RAS_SERVER_CONFIG_H
 #define CS_RAS_SERVER_CONFIG_H
 
+#include "app_rta.h"
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <h> General
@@ -42,15 +44,11 @@
 
 // <q CS_RAS_SERVER_CONFIG_LOG_ENABLE> Log
 // <i> Default: 0
-#ifndef CS_RAS_SERVER_CONFIG_LOG_ENABLE
 #define CS_RAS_SERVER_CONFIG_LOG_ENABLE                                              0
-#endif
 
 // <q CS_RAS_SERVER_CONFIG_LOG_DATA> Print data output
 // <i> Default: 0
-#ifndef CS_RAS_SERVER_CONFIG_LOG_DATA
 #define CS_RAS_SERVER_CONFIG_LOG_DATA                                                0
-#endif
 
 // </h>
 
@@ -58,21 +56,15 @@
 
 // <q CS_RAS_SERVER_CONFIG_SUPPORT_FEATURE_REAL_TIME_RANGING_DATA> Real-Time Ranging Data
 // <i> Default: 1
-#ifndef CS_RAS_SERVER_CONFIG_SUPPORT_FEATURE_REAL_TIME_RANGING_DATA
 #define CS_RAS_SERVER_CONFIG_SUPPORT_FEATURE_REAL_TIME_RANGING_DATA                  1
-#endif
 
 // <q CS_RAS_SERVER_CONFIG_SUPPORT_FEATURE_RETRIEVE_LOST_RANGING_DATA_SEGMENTS> Retrieve Lost Ranging Data Segments
 // <i> Default: 1
-#ifndef CS_RAS_SERVER_CONFIG_SUPPORT_FEATURE_RETRIEVE_LOST_RANGING_DATA_SEGMENTS
 #define CS_RAS_SERVER_CONFIG_SUPPORT_FEATURE_RETRIEVE_LOST_RANGING_DATA_SEGMENTS     1
-#endif
 
 // <q CS_RAS_SERVER_CONFIG_SUPPORT_FEATURE_ABORT> Abort
 // <i> Default: 1
-#ifndef CS_RAS_SERVER_CONFIG_SUPPORT_FEATURE_ABORT
 #define CS_RAS_SERVER_CONFIG_SUPPORT_FEATURE_ABORT                                   1
-#endif
 
 // </h>
 
@@ -80,15 +72,11 @@
 
 // <q CS_RAS_SERVER_CONFIG_DATA_READY_NOTIFICATIONS> Data Ready
 // <i> Default: 1
-#ifndef CS_RAS_SERVER_CONFIG_DATA_READY_NOTIFICATIONS
 #define CS_RAS_SERVER_CONFIG_DATA_READY_NOTIFICATIONS                                1
-#endif
 
 // <q CS_RAS_SERVER_CONFIG_OVERWRITTEN_NOTIFICATIONS> Data overwritten
 // <i> Default: 1
-#ifndef CS_RAS_SERVER_CONFIG_OVERWRITTEN_NOTIFICATIONS
 #define CS_RAS_SERVER_CONFIG_OVERWRITTEN_NOTIFICATIONS                               1
-#endif
 
 // </h>
 
@@ -96,15 +84,11 @@
 
 // <q CS_RAS_SERVER_CONFIG_DATA_READY_READ> Data Ready
 // <i> Default: 1
-#ifndef CS_RAS_SERVER_CONFIG_DATA_READY_READ
 #define CS_RAS_SERVER_CONFIG_DATA_READY_READ                                         1
-#endif
 
 // <q CS_RAS_SERVER_CONFIG_OVERWRITTEN_READ> Data Overwritten
 // <i> Default: 1
-#ifndef CS_RAS_SERVER_CONFIG_OVERWRITTEN_READ
 #define CS_RAS_SERVER_CONFIG_OVERWRITTEN_READ                                        1
-#endif
 
 // </h>
 
@@ -113,9 +97,7 @@
 // <o CS_RAS_SERVER_CONFIG_DATA_RETENTION_TIMEOUT_MS> Data retention [ms] <10..10000>
 // <i> Timeout for data retention from Complete Ranging data to ACK or Retrieve Lost Segments
 // <i> Default: 10000
-#ifndef CS_RAS_SERVER_CONFIG_DATA_RETENTION_TIMEOUT_MS
 #define CS_RAS_SERVER_CONFIG_DATA_RETENTION_TIMEOUT_MS                               10000
-#endif
 
 // </h>
 
@@ -156,19 +138,28 @@
 // <i> RAM consumption can be reduced by changing the affected settings and reducing
 // <i> "Procedure maximum length" accordingly.
 // <i> Default: 2672
-#ifndef CS_PROCEDURE_MAX_LEN
 #define CS_PROCEDURE_MAX_LEN                                                        2672
-#endif
 // </h>
 
 // <h> Procedure per connection
 
 // <o CS_RAS_PROCEDURE_PER_CONNECTION> Maximum concurrent procedures per connections <1..255>
 // <i> Default: 2
-#ifndef CS_RAS_PROCEDURE_PER_CONNECTION
 #define CS_RAS_PROCEDURE_PER_CONNECTION                                             2u
-#endif
 // </h>
+
+// <h> Runtime settings
+// <o CS_RAS_SERVER_TASK_PRIO> Runtime context priority
+// <i> Default: Normal
+#define CS_RAS_SERVER_TASK_PRIO                                                    APP_RTA_PRIORITY_NORMAL
+// <o CS_RAS_SERVER_TASK_STACK> Stack size (in bytes)
+// <i> Default: 1024
+#define CS_RAS_SERVER_TASK_STACK                                                  1024
+// <o CS_RAS_SERVER_WAIT_FOR_GUARD> Timeout for guard (in ticks)
+// <i> Default: 10
+#define CS_RAS_SERVER_WAIT_FOR_GUARD                                                  10
+// </h>
+
 
 // <<< end of configuration section >>>
 

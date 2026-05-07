@@ -449,8 +449,5 @@
 // Default: 1
 #define CS_INITIATOR_DEFAULT_CONFIG_ID      1
 
-// Internal define to skip RTL processing
-#define CS_INITIATOR_INTERNAL_SKIP_RTL_PROCESS         0
-
 /** @} (end addtogroup cs_initiator) */
 #endif // CS_INITIATOR_CONFIG_H

@@ -1101,7 +1101,7 @@ static psa_status_t psa_restrict_key_policy(
  * (when mutexes are enabled). psa_unregister_read_under_mutex() encapsulates
  * the unregister with mutex lock and unlock operations.
  */
-static psa_status_t psa_get_and_lock_key_slot_with_policy(
+psa_status_t psa_get_and_lock_key_slot_with_policy(
     mbedtls_svc_key_id_t key,
     psa_key_slot_t **p_slot,
     psa_key_usage_t usage,
@@ -1774,7 +1774,7 @@ static psa_status_t psa_validate_key_attributes(
  * \return If this function fails, the key slot is an invalid state.
  *         You must call psa_fail_key_creation() to wipe and free the slot.
  */
-static psa_status_t psa_start_key_creation(
+psa_status_t psa_start_key_creation(
     psa_key_creation_method_t method,
     const psa_key_attributes_t *attributes,
     psa_key_slot_t **p_slot,
@@ -1910,7 +1910,7 @@ static psa_status_t psa_start_key_creation(
  * \return If this function fails, the key slot is an invalid state.
  *         You must call psa_fail_key_creation() to wipe and free the slot.
  */
-static psa_status_t psa_finish_key_creation(
+psa_status_t psa_finish_key_creation(
     psa_key_slot_t *slot,
     psa_se_drv_table_entry_t *driver,
     mbedtls_svc_key_id_t *key)
@@ -2002,8 +2002,8 @@ static psa_status_t psa_finish_key_creation(
  * \param[in] driver    The secure element driver for the key,
  *                      or NULL for a transparent key.
  */
-static void psa_fail_key_creation(psa_key_slot_t *slot,
-                                  psa_se_drv_table_entry_t *driver)
+void psa_fail_key_creation(psa_key_slot_t *slot,
+                           psa_se_drv_table_entry_t *driver)
 {
     (void) driver;
 
@@ -7722,182 +7722,6 @@ psa_status_t psa_key_derivation_input_key(
     unlock_status = psa_unregister_read_under_mutex(slot);
 
     return (status == PSA_SUCCESS) ? unlock_status : status;
-}
-
-#if defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
-
-#include "sli_psa_driver_features.h"
-
-psa_status_t sli_se_driver_single_shot_hkdf(
-    psa_algorithm_t alg,
-    const psa_key_attributes_t *key_in_attributes,
-    const uint8_t *key_in_buffer,
-    size_t key_in_buffer_size,
-    const uint8_t* info,
-    size_t info_length,
-    const uint8_t* salt,
-    size_t salt_length,
-    const psa_key_attributes_t *key_out_attributes,
-    uint8_t *key_out_buffer,
-    size_t key_out_buffer_size);
-
-psa_status_t sli_se_driver_single_shot_pbkdf2(
-  psa_algorithm_t alg,
-  const psa_key_attributes_t *key_in_attributes,
-  const uint8_t *key_in_buffer,
-  size_t key_in_buffer_size,
-  const uint8_t* salt,
-  size_t salt_length,
-  const psa_key_attributes_t *key_out_attributes,
-  uint32_t iterations,
-  uint8_t *key_out_buffer,
-  size_t key_out_buffer_size);
-
-#if defined(SLI_MBEDTLS_DEVICE_VSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
-psa_status_t sli_cryptoacc_driver_single_shot_pbkdf2(
-  psa_algorithm_t alg,
-  const psa_key_attributes_t *key_in_attributes,
-  const uint8_t *key_in_buffer,
-  size_t key_in_buffer_size,
-  const uint8_t* salt,
-  size_t salt_length,
-  const psa_key_attributes_t *key_out_attributes,
-  uint32_t iterations,
-  uint8_t *key_out_buffer,
-  size_t key_out_buffer_size);
-#endif
-#endif /* MBEDTLS_PSA_CRYPTO_DRIVERS */
-
-psa_status_t sl_psa_key_derivation_single_shot(
-    psa_algorithm_t alg,
-    mbedtls_svc_key_id_t key_in,
-    const uint8_t *info,
-    size_t info_length,
-    const uint8_t *salt,
-    size_t salt_length,
-    size_t iterations,
-    const psa_key_attributes_t *key_out_attributes,
-    mbedtls_svc_key_id_t *key_out )
-{
-    psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
-    psa_status_t unlock_status = PSA_ERROR_CORRUPTION_DETECTED;
-    psa_key_slot_t *input_key_slot = NULL;
-    psa_key_slot_t *output_key_slot = NULL;
-    psa_se_drv_table_entry_t *driver = NULL;
-    *key_out = MBEDTLS_SVC_KEY_ID_INIT;
-    size_t storage_size = 0;
-
-    /* Reject any attempt to create a zero-length key so that we don't
-     * risk tripping up later, e.g. on a malloc(0) that returns NULL. */
-    if( psa_get_key_bits( key_out_attributes ) == 0 )
-        return( PSA_ERROR_INVALID_ARGUMENT );
-
-    status = psa_get_and_lock_key_slot_with_policy(
-                 key_in, &input_key_slot, PSA_KEY_USAGE_DERIVE, alg );
-    if( status != PSA_SUCCESS )
-        return( status );
-
-    status = psa_start_key_creation( PSA_KEY_CREATION_DERIVE, key_out_attributes,
-                                     &output_key_slot, &driver );
-    if( status != PSA_SUCCESS )
-        goto exit;
-
-    status = psa_driver_wrapper_get_key_buffer_size( key_out_attributes, &storage_size );
-    if( status != PSA_SUCCESS )
-        goto exit;
-
-    /* In the case of a transparent key or an opaque key stored in local
-     * storage (thus not in the case of generating a key in a secure element
-     * or cryptoprocessor with storage), we have to allocate a buffer to
-     * hold the generated key material. */
-    if( output_key_slot->key.data == NULL )
-    {
-        status = psa_allocate_buffer_to_slot( output_key_slot, storage_size );
-        if( status != PSA_SUCCESS )
-            goto exit;
-    }
-
-    {
-
-        /* Call the appropriate driver. Since this function is used exclusively with
-         * the SE as an accelerator, we can skip the wrapper layer and call the
-         * driver functions directly. */
-        if (PSA_ALG_IS_HKDF(alg))
-#if defined(SLI_PSA_DRIVER_FEATURE_HKDF)
-        {
-            status = sli_se_driver_single_shot_hkdf(
-                alg, &input_key_slot->attr, input_key_slot->key.data,
-                input_key_slot->key.bytes, info, info_length, salt, salt_length,
-                &output_key_slot->attr, output_key_slot->key.data,
-                output_key_slot->key.bytes);
-        }
-#else /* SLI_PSA_DRIVER_FEATURE_HKDF */
-        {
-            (void)info;
-            (void)info_length;
-            (void)salt;
-            (void)salt_length;
-
-            status = PSA_ERROR_NOT_SUPPORTED;
-        }
-#endif /* SLI_PSA_DRIVER_FEATURE_HKDF */
-        else if ( (PSA_ALG_IS_PBKDF2_HMAC(alg) || (alg == PSA_ALG_PBKDF2_AES_CMAC_PRF_128)) )
-#if defined(SLI_PSA_DRIVER_FEATURE_PBKDF2)
-#if defined(SLI_MBEDTLS_DEVICE_VSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
-        {
-            if (alg == PSA_ALG_PBKDF2_AES_CMAC_PRF_128)
-            {
-                status = sli_cryptoacc_driver_single_shot_pbkdf2(
-                    alg, &input_key_slot->attr, input_key_slot->key.data,
-                    input_key_slot->key.bytes, salt, salt_length,
-                    &output_key_slot->attr, iterations, output_key_slot->key.data,
-                    output_key_slot->key.bytes);
-            }
-            else
-            {
-                (void)salt;
-                (void)salt_length;
-                (void)iterations;
-
-                status = PSA_ERROR_NOT_SUPPORTED;
-            }
-        }
-#else /* SLI_MBEDTLS_DEVICE_VSE && SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS */
-        {
-            status = sli_se_driver_single_shot_pbkdf2(
-                alg, &input_key_slot->attr, input_key_slot->key.data,
-                input_key_slot->key.bytes, salt, salt_length,
-                &output_key_slot->attr, iterations, output_key_slot->key.data,
-                output_key_slot->key.bytes);
-        }
-#endif /* SLI_MBEDTLS_DEVICE_VSE && SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS */
-#else /* SLI_PSA_DRIVER_FEATURE_PBKDF2 */
-        {
-            (void)salt;
-            (void)salt_length;
-            (void)iterations;
-
-            status = PSA_ERROR_NOT_SUPPORTED;
-        }
-#endif /* SLI_PSA_DRIVER_FEATURE_PBKDF2 */
-        else
-        {
-            status = PSA_ERROR_NOT_SUPPORTED;
-        }
-    }
-
-exit:
-
-    /* Finish (or fail) key creation. */
-    if( status == PSA_SUCCESS )
-        status = psa_finish_key_creation( output_key_slot, driver, key_out );
-    if( status != PSA_SUCCESS )
-        psa_fail_key_creation( output_key_slot, driver );
-
-    /* Release input key slot. */
-    unlock_status = psa_unregister_read( input_key_slot );
-
-    return( ( status == PSA_SUCCESS ) ? unlock_status : status );
 }
 
 

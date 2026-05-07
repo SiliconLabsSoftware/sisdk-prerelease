@@ -17,7 +17,7 @@ requires:
 - name: zigbee_multi_pan
 
 library:
-- path: build/gcc/cortex-m33/zigbee-multi-pan/release/libzigbee-multi-pan.a
+- path: libs/build/gcc/cortex-m33/zigbee-multi-pan/release/libzigbee-multi-pan.a
   condition:
   - toolchain_gcc
   - cortexm33
@@ -27,7 +27,7 @@ library:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
   - toolchain_llvm
-- path: build/iar/cortex-m33/zigbee-multi-pan/release/libzigbee-multi-pan.a
+- path: libs/build/iar/cortex-m33/zigbee-multi-pan/release/libzigbee-multi-pan.a
   condition:
   - toolchain_iar
   - cortexm33
@@ -37,7 +37,7 @@ library:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
   - stack_protection_iar
-- path: build/iar/cortex-m33/zigbee-multi-pan/release_stackprotection/libzigbee-multi-pan.a
+- path: libs/build/iar/cortex-m33/zigbee-multi-pan/release_stackprotection/libzigbee-multi-pan.a
   condition:
   - toolchain_iar
   - cortexm33
@@ -47,7 +47,7 @@ library:
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
-- path: build/llvm/cortex-m33/zigbee-multi-pan/release/libzigbee-multi-pan.a
+- path: libs/build/llvm/cortex-m33/zigbee-multi-pan/release/libzigbee-multi-pan.a
   condition:
   - toolchain_llvm
   - cortexm33

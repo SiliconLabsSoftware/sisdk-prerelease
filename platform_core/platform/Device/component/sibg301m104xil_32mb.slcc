@@ -76,6 +76,7 @@
     unless:
     - device_content_override
 - provides:
+  - name: device_has_deepsleep_retention
   - name: sibg301m104xil_32mb
   - name: device
   - name: device_efx
@@ -182,7 +183,6 @@
   - name: device_supports_bluetooth_cte
   - name: device_supports_connect
   - name: device_compute_basic
-  - name: device_has_deepsleep_retention
   - name: device_has_32576kb_flash
 - recommends:
   - id: trustzone_unaware

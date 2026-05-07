@@ -131,6 +131,7 @@ bool afterRxCancelAck = false;
 bool afterRxUseTxBufferForAck = false;
 uint32_t rssiDoneCount = 0; // HW rssi averaging
 float averageRssi = -128;
+int16_t lqiOffset = 0;
 bool printTxAck = false;
 const char buildDateTime[] = __DATE__ " " __TIME__;
 bool rxHeld = false;
@@ -216,6 +217,7 @@ uint8_t ackData[SL_RAIL_DEFAULT_AUTO_ACK_FIFO_BYTES] = {
 uint8_t ackDataLen = 16;
 
 // Static RAIL callbacks
+static uint8_t railtest_ConvertLqi(uint8_t lqi, int8_t rssi);
 static void railtest_RssiAverageDone(sl_rail_handle_t railHandle);
 
 // Structures that hold default TX & RX Options
@@ -351,6 +353,9 @@ void sl_rail_test_internal_app_init(void)
   getPti(NULL);
 
   (void) sl_rail_get_channel(railHandle, &channel);
+
+  // Register an LQI conversion callback.
+  sl_rail_convert_lqi(railHandle, &railtest_ConvertLqi);
 
   sl_rail_config_rx_options(railHandle, SL_RAIL_RX_OPTIONS_ALL, rxOptions);
 
@@ -638,6 +643,20 @@ void railtest_TimerExpired(sl_rail_handle_t railHandle)
   } else {
     pendPacketTx();
   }
+}
+
+static uint8_t railtest_ConvertLqi(uint8_t lqi, int8_t rssi)
+{
+  (void)rssi;
+  // Put any custom LQI conversion code here.
+  // In this application, lqiOffset is between -255 and 255 but LQI is uint8_t:
+  int16_t newLqi = lqiOffset + lqi;
+  if (newLqi < 0) {
+    newLqi = 0;     // uint8_t min
+  } else if (newLqi > 0xFF) {
+    newLqi = 0xFF;  // uint8_t max
+  }
+  return (uint8_t)newLqi;
 }
 
 static void railtest_RssiAverageDone(sl_rail_handle_t railHandle)

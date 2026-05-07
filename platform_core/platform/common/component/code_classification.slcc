@@ -21,9 +21,15 @@ include:
   - path: sli_code_classification.h
 provides:
 - name: code_classification
+define:
+- name: SLI_CODE_CLASSIFICATION_GCC_USE_USED
+  condition: [device_si91x]
 template_contribution:
 - name: code_classification_standard_selections
   condition: [device_series_3]
+  value: timecritical
+- name: code_classification_standard_selections
+  condition: [device_si91x]
   value: timecritical
 - name: gcc_ram_objects
   condition: [device_series_3]

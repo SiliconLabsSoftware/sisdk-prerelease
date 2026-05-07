@@ -202,6 +202,13 @@
   #define SLI_PSA_DRIVER_FEATURE_PBKDF2_CMAC
 #endif
 
+#if defined(SLI_PSA_DRIVER_FEATURE_PUF_KEY)
+  #define SLI_PSA_DRIVER_FEATURE_SP800_108R1
+  #ifndef SLI_PSA_DRIVER_FEATURE_KDF
+    #define SLI_PSA_DRIVER_FEATURE_KDF
+  #endif
+#endif
+
 // -------------------------------------
 // Hash
 

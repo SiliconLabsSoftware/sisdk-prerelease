@@ -135,7 +135,7 @@
  * declared rx), we need to define our segments manually.
  *
  * Typical Silicon Labs program layout:
- * 
+ *
  * ----- START OF APPLICATION FLASH -----
  * R   - Vector table
  * R X - RAM functions (copied to RAM at startup)
@@ -150,7 +150,7 @@
  *     - [unallocated space]
  *     - NVM (defined using linker symbols only, not an ELF section)
  * ----- END OF APPLICATION FLASH -----
- * 
+ *
  * ----- START OF APPLICATION RAM -----
  * RW  - Bootloader reset reason (if present)
  * RW  - stack
@@ -173,14 +173,14 @@
  * content: the initial RW segment, the RX segment, and the final RW segment.
  ******************************************************************************/
 
-PHDRS 
+PHDRS
 {
   vectors PT_LOAD FLAGS(4);       /* Flash content before RAM functions is R */
   readonly PT_LOAD FLAGS(4);      /* Readonly content after RAM functions */
   text PT_LOAD FLAGS(5);          /* Executable flash content after readonly */
   tables PT_LOAD FLAGS(4);        /* Tables supporting startup copying are R */
   empty PT_LOAD FLAGS(4);         /* Empty area is R */
-  
+
   ram_pre_code PT_LOAD FLAGS(6);  /* All RAM content before RAMfuncs is RW */
   ram_code PT_LOAD FLAGS(5);      /* RAMfuncs need to be RX */
   ram_data PT_LOAD FLAGS(6);      /* Relocatable RAM data needs own segment */
@@ -235,6 +235,7 @@ SECTIONS
   .stackseal (NOLOAD):
   {
     __StackSeal = .;
+    __stack_seal = .;
     . = . + 8;
     . = ALIGN(8);
   } > RAM :ram_pre_code
@@ -518,9 +519,31 @@ heap_size = heap_limit - __HeapBase;
   ASSERT((linker_storage_begin >= (__etext + SIZEOF(.data))), "FLASH memory overflowed !")
 {%- endif %}
 
+{%- if skip_memory_asserts is not defined %}
+{%- if memory_ram_size is defined %}
+{%- if memory_ram_start is defined %}
+  HIDDEN(memory_ram_end = 0x{{ '%0x' % (memory_ram_start | first) }} + 0x{{ '%0x' % (memory_ram_size | first) }});
+{%- else %}
+  HIDDEN(memory_ram_end = 0x{{ '%0x' % sram_addr }} + 0x{{ '%0x' % (memory_ram_size | first) }});
+{%- endif %}
+  HIDDEN(physical_ram_end = 0x{{ '%0x' % sram_addr }} + 0x{{ '%0x' % sram_size }});
+  ASSERT( memory_ram_end <= physical_ram_end, "The template contribution to memory_ram_size exceeds the real device RAM size. Check your SLCC or SLCP file to review the RAM size defined by memory_ram_size.")
+{%- endif %}
+
+{%- if memory_flash_size is defined %}
+{%- if memory_flash_start is defined %}
+  HIDDEN(memory_flash_end = 0x{{ '%0x' % (memory_flash_start | first) }} + 0x{{ '%0x' % (memory_flash_size | first) }});
+{%- else %}
+  HIDDEN(memory_flash_end = 0x{{ '%0x' % flash_addr }} + 0x{{ '%0x' % (memory_flash_size | first) }});
+{%- endif %}
+  HIDDEN(physical_flash_end = 0x{{ '%0x' % flash_addr }} + 0x{{ '%0x' % flash_size }});
+  ASSERT( memory_flash_end <= physical_flash_end, "The template contribution to memory_flash_size exceeds the available flash size. Check your SLCC or SLCP file to review the flash size defined by memory_flash_size.")
+{%- endif %}
+{%- endif %} {#- skip_memory_asserts #}
+
 {% if trustzone_secure is not defined %}
   {%- if app_flash_start and app_flash_size %}
-  app_flash_end = 0x{{ '%0x' % (app_flash_start) }} + 0x{{ '%0x' % (app_flash_size) }};
+  HIDDEN(app_flash_end = 0x{{ '%0x' % (app_flash_start) }} + 0x{{ '%0x' % (app_flash_size) }});
   ASSERT( (linker_nvm_begin + SIZEOF(.nvm)) <= app_flash_end, "NVM3 is excessing the flash size !")
   {%- endif %}
 {%- endif %} {#- trustzone_secure #}

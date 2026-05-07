@@ -34,8 +34,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "sl_bt_api.h"
-#include "sl_rtl_clib_api.h"
-#include "sl_sleeptimer.h"
 #include "sl_component_catalog.h"
 
 #include "cs_initiator_common.h"

@@ -358,21 +358,6 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_connection_params_t;
 SL_PACK_END()
 
-/// Advanced EAPOL parameters for
-/// @ref sl_wisun_set_ffn_advanced_parameters.
-SL_PACK_START(1)
-typedef struct {
-  /// RFC8415 TX algorithm for EAPOL Key-request transmissions.
-  sl_wisun_rfc8415_txalg_params_t key_request_txalg;
-  /// GTK_MAX_MISMATCH (minutes): maximum time between detecting
-  /// a GTKHASH mismatch and the SUP initiating Msg1.
-  uint16_t gtk_max_mismatch_m;
-  /// LGTK_MAX_MISMATCH (minutes): maximum time between detecting
-  /// a LGTKHASH mismatch and the SUP initiating Msg1.
-  uint16_t lgtk_max_mismatch_m;
-} SL_ATTRIBUTE_PACKED sl_wisun_ffn_advanced_eapol_params_t;
-SL_PACK_END()
-
 /// Advanced RPL parameters for @ref sl_wisun_set_ffn_advanced_parameters.
 SL_PACK_START(1)
 typedef struct {
@@ -412,12 +397,12 @@ typedef struct {
   sl_wisun_trickle_params_t trickle_pc;
   /// PAN configuration Solicit trickle timer parameters
   sl_wisun_trickle_params_t trickle_pcs;
-  /// Advanced EAPOL parameters
-  sl_wisun_ffn_advanced_eapol_params_t eapol;
+  /// RFC8415 TX algorithm for EAPOL Key-request transmissions
+  sl_wisun_rfc8415_txalg_params_t key_request_txalg;
   /// Advanced RPL parameters
   sl_wisun_ffn_advanced_rpl_params_t rpl;
-  /// DHCP parameter set
-  sl_wisun_params_dhcp_t dhcp;
+  /// RFC8415 TX algorithm for DHCP solicitation transmissions
+  sl_wisun_rfc8415_txalg_params_t dhcp_solicit_txalg;
 } SL_ATTRIBUTE_PACKED sl_wisun_ffn_advanced_parameters_t;
 SL_PACK_END()
 

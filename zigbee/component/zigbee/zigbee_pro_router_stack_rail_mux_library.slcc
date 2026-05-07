@@ -17,7 +17,7 @@ requires:
 - name: zigbee_pro_router_stack_rail_mux
 
 library:
-- path: build/gcc/cortex-m33/zigbee-pro-router-stack-rail-mux/release/libzigbee-pro-router-stack-rail-mux.a
+- path: libs/build/gcc/cortex-m33/zigbee-pro-router-stack-rail-mux/release/libzigbee-pro-router-stack-rail-mux.a
   condition:
   - toolchain_gcc
   - cortexm33
@@ -29,7 +29,7 @@ library:
   - zigbee_phy_2_4_subghz_switch_coordinator
   - zigbee_high_datarate_phy
   - toolchain_llvm
-- path: build/gcc/cortex-m33/zigbee-pro-router-stack-rail-mux/release_singlenetwork/libzigbee-pro-router-stack-rail-mux.a
+- path: libs/build/gcc/cortex-m33/zigbee-pro-router-stack-rail-mux/release_singlenetwork/libzigbee-pro-router-stack-rail-mux.a
   condition:
   - toolchain_gcc
   - cortexm33
@@ -41,7 +41,7 @@ library:
   - zigbee_phy_2_4_subghz_switch_coordinator
   - zigbee_high_datarate_phy
   - toolchain_llvm
-- path: build/iar/cortex-m33/zigbee-pro-router-stack-rail-mux/release/libzigbee-pro-router-stack-rail-mux.a
+- path: libs/build/iar/cortex-m33/zigbee-pro-router-stack-rail-mux/release/libzigbee-pro-router-stack-rail-mux.a
   condition:
   - toolchain_iar
   - cortexm33
@@ -53,7 +53,7 @@ library:
   - zigbee_phy_2_4_subghz_switch_coordinator
   - zigbee_high_datarate_phy
   - stack_protection_iar
-- path: build/iar/cortex-m33/zigbee-pro-router-stack-rail-mux/release_singlenetwork/libzigbee-pro-router-stack-rail-mux.a
+- path: libs/build/iar/cortex-m33/zigbee-pro-router-stack-rail-mux/release_singlenetwork/libzigbee-pro-router-stack-rail-mux.a
   condition:
   - toolchain_iar
   - cortexm33
@@ -65,7 +65,7 @@ library:
   - zigbee_phy_2_4_subghz_switch_coordinator
   - zigbee_high_datarate_phy
   - stack_protection_iar
-- path: build/iar/cortex-m33/zigbee-pro-router-stack-rail-mux/release_stackprotection/libzigbee-pro-router-stack-rail-mux.a
+- path: libs/build/iar/cortex-m33/zigbee-pro-router-stack-rail-mux/release_stackprotection/libzigbee-pro-router-stack-rail-mux.a
   condition:
   - toolchain_iar
   - cortexm33
@@ -77,7 +77,7 @@ library:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
   - zigbee_high_datarate_phy
-- path: build/iar/cortex-m33/zigbee-pro-router-stack-rail-mux/release_stackprotection_singlenetwork/libzigbee-pro-router-stack-rail-mux.a
+- path: libs/build/iar/cortex-m33/zigbee-pro-router-stack-rail-mux/release_stackprotection_singlenetwork/libzigbee-pro-router-stack-rail-mux.a
   condition:
   - toolchain_iar
   - cortexm33
@@ -89,7 +89,7 @@ library:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
   - zigbee_high_datarate_phy
-- path: build/llvm/cortex-m33/zigbee-pro-router-stack-rail-mux/release/libzigbee-pro-router-stack-rail-mux.a
+- path: libs/build/llvm/cortex-m33/zigbee-pro-router-stack-rail-mux/release/libzigbee-pro-router-stack-rail-mux.a
   condition:
   - toolchain_llvm
   - cortexm33
@@ -100,7 +100,7 @@ library:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
   - zigbee_high_datarate_phy
-- path: build/llvm/cortex-m33/zigbee-pro-router-stack-rail-mux/release_singlenetwork/libzigbee-pro-router-stack-rail-mux.a
+- path: libs/build/llvm/cortex-m33/zigbee-pro-router-stack-rail-mux/release_singlenetwork/libzigbee-pro-router-stack-rail-mux.a
   condition:
   - toolchain_llvm
   - cortexm33

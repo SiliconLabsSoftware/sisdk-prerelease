@@ -27,7 +27,6 @@ source:
 
 define:
 - name: "HAVE_DIRECT_CONNECT"
-- name: "HAVE_DIRECT_CONNECT_CLIENT"
 
 provides:
 - name: "wisun_stack_dc_client"

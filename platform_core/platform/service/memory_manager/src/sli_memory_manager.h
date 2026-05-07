@@ -164,12 +164,11 @@ static inline void *sli_mm_sv_get_return_address(void)
 #define SLI_MAX_RESERVATION_COUNT 32
 #endif
 
-#if !defined(_SILICON_LABS_32B_SERIES_2)             \
-  && !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301) \
-  && !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_302) \
-  && defined(__CORTEXM)
+#if defined(SL_CATALOG_MEMORY_MANAGER_DTCM_PRESENT)
 // Internal define to indicate that the memory manager stack is in the heap.
 #define SLI_MEMORY_MANAGER_STACK_IN_HEAP 1
+#define SLI_MEMORY_MANAGER_STACK_IN_HEAP_DTCM 1
+#define SLI_MEMORY_MANAGER_STACK_HEAP_HANDLE &sli_dtcm_heap
 #endif
 
 #if !defined(DMEMCACHE_PRESENT)
@@ -440,6 +439,18 @@ sl_status_t sli_memory_create_heap(void *base_addr,
 sl_memory_heap_t *sli_memory_get_heap_handle(const void *block);
 
 /***************************************************************************//**
+ * Gets the payload length of a heap-allocated block.
+ *
+ * @param[in] ptr  Pointer to the data payload of a heap-allocated block
+ *                 (e.g. the pointer returned by sl_malloc(), sl_memory_alloc(), etc).
+ *
+ * @return  Block payload length in bytes, or 0 if @p ptr is NULL, does not
+ *          belong to any known heap, or falls within the stack region
+ *          (on devices where the stack is carved out of the heap).
+ ******************************************************************************/
+uint32_t sli_memory_get_block_length(const void *ptr);
+
+/***************************************************************************//**
  * Gets size and location of the given heap.
  *
  * @param[in]  heap  Heap handle.
@@ -449,14 +460,16 @@ sl_memory_heap_t *sli_memory_get_heap_handle(const void *block);
 sl_memory_region_t sli_memory_heap_get_heap_region(const sl_memory_heap_t *heap);
 
 /***************************************************************************//**
-* Initializes the heap region.
-******************************************************************************/
+ * Initializes the heap region.
+ ******************************************************************************/
 void sli_memory_initialize_heap_region(void);
 
 /***************************************************************************//**
  * Creates the Stack at the end of the Heap.
+ *
+ * @param[in]  heap  Heap handle.
  ******************************************************************************/
-void sli_memory_create_stack(void);
+void sli_memory_create_stack(sl_memory_heap_t *heap);
 
 #if defined(SLI_MEMORY_MANAGER_ENABLE_TEST_UTILITIES)
 /***************************************************************************//**

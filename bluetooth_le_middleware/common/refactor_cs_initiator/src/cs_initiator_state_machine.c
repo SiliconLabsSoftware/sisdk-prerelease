@@ -39,12 +39,12 @@
 #include "app_timer.h"
 
 #include "cs_initiator_common.h"
+#include "cs_initiator.h"
 #include "cs_initiator_config.h"
 #include "cs_initiator_extract.h"
 #include "cs_initiator_error.h"
-#include "cs_initiator_estimate.h"
 #include "cs_initiator_log.h"
-#include "cs_ras_format_converter.h"
+#include "cs_algo.h"
 
 #ifdef SL_CATALOG_CS_INITIATOR_REPORT_PRESENT
 #include "cs_initiator_report.h"
@@ -90,6 +90,11 @@ static void handle_procedure_enable_completed_event_disable(cs_initiator_t *init
 static initiator_state_t initiator_stop_procedure_on_invalid_state(cs_initiator_t *initiator);
 static sl_status_t initiator_finalize_cleanup(cs_initiator_t *initiator);
 static void procedure_timer_cb(app_timer_t *handle, void *data);
+
+extern void cs_initiator_dispatch_ras_data(uint8_t conn_handle,
+                                           uint16_t ranging_counter,
+                                           cs_algo_procedure_info_t proc_info,
+                                           unified_ranging_data_t *ranging_data);
 
 // -----------------------------------------------------------------------------
 // Static function definitions
@@ -536,7 +541,21 @@ static sl_status_t state_wait_reflector_on_ranging_data(cs_initiator_t          
     if ((data->evt_ranging_data.procedure_state == CS_PROCEDURE_STATE_COMPLETED)
         && initiator_complete) {
       cs_initiator_report(CS_INITIATOR_REPORT_LAST_CS_RESULT);
-      calculate_distance(initiator);
+
+      cs_algo_procedure_info_t proc_info = {
+        .subevent_len        = initiator->cs_procedure_config.subevent_len,
+        .subevent_interval   = initiator->cs_procedure_config.subevent_interval,
+        .event_interval      = initiator->cs_procedure_config.event_interval,
+        .procedure_interval  = initiator->cs_procedure_config.procedure_interval,
+        .procedure_count     = initiator->cs_procedure_config.procedure_count,
+        .subevents_per_event = initiator->cs_procedure_config.subevents_per_event,
+        .num_antenna_paths   = initiator->num_antenna_path,
+      };
+
+      cs_initiator_dispatch_ras_data(initiator->conn_handle,
+                                     initiator->ranging_counter,
+                                     proc_info,
+                                     &initiator->data);
     } else {
       initiator_log_info(INSTANCE_PREFIX "Procedure not completed: %u" LOG_NL,
                          initiator->conn_handle,
@@ -554,7 +573,21 @@ static sl_status_t state_wait_reflector_on_ranging_data(cs_initiator_t          
   if ((data->evt_ranging_data.procedure_state == CS_PROCEDURE_STATE_COMPLETED)
       && initiator_complete) {
     cs_initiator_report(CS_INITIATOR_REPORT_LAST_CS_RESULT);
-    calculate_distance(initiator);
+
+    cs_algo_procedure_info_t proc_info = {
+      .subevent_len        = initiator->cs_procedure_config.subevent_len,
+      .subevent_interval   = initiator->cs_procedure_config.subevent_interval,
+      .event_interval      = initiator->cs_procedure_config.event_interval,
+      .procedure_interval  = initiator->cs_procedure_config.procedure_interval,
+      .procedure_count     = initiator->cs_procedure_config.procedure_count,
+      .subevents_per_event = initiator->cs_procedure_config.subevents_per_event,
+      .num_antenna_paths   = initiator->num_antenna_path,
+    };
+
+    cs_initiator_dispatch_ras_data(initiator->conn_handle,
+                                   initiator->ranging_counter,
+                                   proc_info,
+                                   &initiator->data);
   } else {
     initiator_log_info(INSTANCE_PREFIX "Procedure not completed: %u" LOG_NL,
                        initiator->conn_handle,
@@ -686,18 +719,16 @@ static initiator_state_t initiator_stop_procedure_on_invalid_state(cs_initiator_
  *****************************************************************************/
 static sl_status_t initiator_finalize_cleanup(cs_initiator_t *initiator)
 {
-  enum sl_rtl_error_code rtl_err;
   sl_status_t sc = SL_STATUS_OK;
   (void)sl_bt_cs_remove_config(initiator->conn_handle, initiator->config.config_id);
-
-  if (initiator->rtl_handle != NULL) {
-    rtl_err = sl_rtl_cs_deinit(&initiator->rtl_handle);
-    if (rtl_err != SL_RTL_ERROR_SUCCESS) {
-      initiator_log_error(INSTANCE_PREFIX "Failed to deinit RTL lib! [err: 0x%02x]" LOG_NL,
-                          initiator->conn_handle,
-                          rtl_err);
-      return SL_STATUS_FAIL;
-    }
+  
+  sl_status_t algo_sc = cs_algo_remove(initiator->conn_handle);
+  if (algo_sc != SL_STATUS_OK && algo_sc != SL_STATUS_NOT_FOUND) {
+    initiator_log_error(INSTANCE_PREFIX
+                        "cs_algo_remove failed! [sc: 0x%lx]" LOG_NL,
+                        initiator->conn_handle,
+                        (unsigned long)algo_sc);
+    sc = SL_STATUS_FAIL;
   }
 
   initiator_log_debug(INSTANCE_PREFIX "deleting instance" LOG_NL,

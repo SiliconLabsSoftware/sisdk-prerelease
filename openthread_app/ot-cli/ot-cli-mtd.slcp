@@ -17,8 +17,11 @@ component:
   - id: bootloader_interface
   - id: clock_manager
   - id: ot_reset_utils
-  # Platform - Enable LTO for gcc by installing the following component
+  # Platform - Enable LTO for gcc and llvm by installing the following component
   - id: toolchain_gcc_lto
+    condition: [toolchain_gcc]
+  - id: toolchain_llvm_lto
+    condition: [toolchain_llvm]
 
 include:
   - path: .
@@ -98,6 +101,7 @@ tag:
   - hwfilter:device:device_supports_thread
   - hwfilter:!device:device_family_efr32mr21
   - toolchain:gcc
+  - toolchain:llvm
 readme:
   - path: ./README.md
 

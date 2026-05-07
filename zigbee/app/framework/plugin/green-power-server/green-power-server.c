@@ -2952,7 +2952,7 @@ sl_zigbee_af_zcl_request_status_t sl_zigbee_af_green_power_cluster_gp_pairing_co
     }
 
     uint8_t sinkEntryIndex = sl_zigbee_gp_sink_table_lookup(&gpdAddr);
-    if (sinkEntryIndex != 0xFF) {
+    if (sinkEntryIndex != 0xFF && sli_zigbee_af_gp_check_communication_mode_support(gpPairingConfigCommunicationMode)) {
       sl_zigbee_gp_sink_table_entry_t entry = { 0 };
       if (sl_zigbee_gp_sink_table_get_entry(sinkEntryIndex, &entry) != SL_STATUS_OK) {
         // return if entry not found
@@ -2973,24 +2973,24 @@ sl_zigbee_af_zcl_request_status_t sl_zigbee_af_green_power_cluster_gp_pairing_co
             return SL_ZIGBEE_ZCL_STATUS_INTERNAL_COMMAND_HANDLED;
           }
 
-          bool found = false;
+          uint8_t cnt = 0u;
+          sl_zigbee_gp_sink_group_t gpPairingConfigGroupID[GP_SINK_LIST_ENTRIES];
 
           for (uint8_t i = 0; i < cmd_data.groupListCount; i++) {
-            sl_zigbee_gp_sink_group_t gpPairingConfigGroupID = { 0 };
-            memcpy(&gpPairingConfigGroupID, &(cmd_data.groupList[i * sizeof(sl_zigbee_gp_sink_group_t)]), sizeof(sl_zigbee_gp_sink_group_t));
+            memcpy(&gpPairingConfigGroupID[cnt], &(cmd_data.groupList[i * sizeof(sl_zigbee_gp_sink_group_t)]), sizeof(sl_zigbee_gp_sink_group_t));
             for (uint8_t j = 0; j < GP_SINK_LIST_ENTRIES; j++) {
               if (entry.sinkList[j].type == SL_ZIGBEE_GP_SINK_TYPE_GROUPCAST
-                  && entry.sinkList[j].target.groupcast.groupID == gpPairingConfigGroupID.groupID) {
+                  && entry.sinkList[j].target.groupcast.groupID == gpPairingConfigGroupID[cnt].groupID) {
                 // Remove paring if group id match
-                sl_zigbee_af_green_power_cluster_println("Remove GPD group ID: 0x%04X", gpPairingConfigGroupID.groupID);
-                sl_zigbee_gp_sink_table_remove_group(sinkEntryIndex, gpPairingConfigGroupID.groupID, gpPairingConfigGroupID.alias);
-                found = true;
+                sl_zigbee_af_green_power_cluster_println("Remove GPD group ID: 0x%04X", gpPairingConfigGroupID[cnt].groupID);
+                sl_zigbee_gp_sink_table_remove_group(sinkEntryIndex, gpPairingConfigGroupID[cnt].groupID, gpPairingConfigGroupID[cnt].alias);
+                cnt++;
                 break;
               }
             }
           }
 
-          if (!found) {
+          if (cnt == 0u) {
             sl_zigbee_af_green_power_cluster_println("Group ID mismatch found");
             return SL_ZIGBEE_ZCL_STATUS_INTERNAL_COMMAND_HANDLED;
           }
@@ -3012,6 +3012,25 @@ sl_zigbee_af_zcl_request_status_t sl_zigbee_af_green_power_cluster_gp_pairing_co
           if (isRemoved) {
             sl_zigbee_af_green_power_cluster_println("decommission GPD!");
             decommissionGpd(0, 0, &gpdAddr, false, cmd_data.actions & SL_ZIGBEE_AF_GP_PAIRING_CONFIGURATION_ACTIONS_SEND_GP_PAIRING);
+          } else {
+            if (cmd_data.actions & SL_ZIGBEE_AF_GP_PAIRING_CONFIGURATION_ACTIONS_SEND_GP_PAIRING) {
+              for (uint8_t i = 0u; i < cnt; i++) {
+                uint32_t pairingOptions = (cmd_data.options & SL_ZIGBEE_AF_GP_PAIRING_CONFIGURATION_OPTION_APPLICATION_ID);
+                pairingOptions |= (2 << SL_ZIGBEE_AF_GP_PAIRING_OPTION_COMMUNICATION_MODE_OFFSET);
+                sl_status_t retval = sendGpPairingMessage(SL_ZIGBEE_OUTGOING_BROADCAST,
+                                                          SL_ZIGBEE_RX_ON_WHEN_IDLE_BROADCAST_ADDRESS,
+                                                          pairingOptions,
+                                                          &(entry.gpd),
+                                                          gpPairingConfigGroupID[i].groupID,
+                                                          0xFF,
+                                                          0xFFFFFFFFu,
+                                                          NULL,
+                                                          0xFFFF,
+                                                          0xFF,
+                                                          true);
+                sl_zigbee_af_green_power_cluster_println("Send GP Pairing, returned: %d", retval);
+              }
+            }
           }
           return SL_ZIGBEE_ZCL_STATUS_SUCCESS;
         }

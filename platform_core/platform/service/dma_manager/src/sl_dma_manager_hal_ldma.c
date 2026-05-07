@@ -256,6 +256,19 @@ void sli_dma_manager_hal_clear_pending_errors(uint8_t channel_nbr)
   sli_dma_manager_pending_errors[channel_nbr] = 0;
 }
 
+/***************************************************************************//**
+ *  Latch a pending error bitmap for the DMA manager.
+ *
+ *  Allows callers outside the IRQ dispatch path to surface a DMA channel error
+ *  to the DMA Channel Driver. The next call to
+ *  @ref sli_dma_manager_hal_get_pending_errors for this channel will return
+ *  the latched value.
+ ******************************************************************************/
+void sli_dma_manager_hal_set_pending_errors(uint8_t channel_nbr, uint32_t errors)
+{
+  sli_dma_manager_pending_errors[channel_nbr] = errors;
+}
+
 #if defined(_SILICON_LABS_32B_SERIES_2)
 /***************************************************************************//**
  * Interrupt handler for LDMA module.

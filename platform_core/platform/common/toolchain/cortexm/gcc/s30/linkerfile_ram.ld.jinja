@@ -241,7 +241,7 @@ __flash_page_size__ = 0x{{ '%0x' % flash_page_size }};
  * data loaded changes type.
  ******************************************************************************/
 
-PHDRS 
+PHDRS
 {
 {%- if bootloader_interface_enable %}
   btl_data PT_LOAD FLAGS(6);      /* Bootloader data is in a separate region */
@@ -658,7 +658,7 @@ heap_size = heap_limit - __HeapBase;
 #}
 {% if trustzone_secure is not defined %}
 {%- if app_flash_start and app_flash_size %}
-  app_flash_end = 0x{{ '%0x' % (app_flash_start) }} + 0x{{ '%0x' % (app_flash_size) }};
+  HIDDEN(app_flash_end = 0x{{ '%0x' % (app_flash_start) }} + 0x{{ '%0x' % (app_flash_size) }});
   ASSERT( (linker_nvm_begin + SIZEOF(.nvm)) <= linker_static_secure_tokens_begin, "NVM3 is excessing the flash size !")
   ASSERT( (linker_static_secure_tokens_begin + 0x{{ '%0x' % flash_static_secure_tokens_storage_size}}) <= app_flash_end, "Static secure storage is exceeding the flash size !")
 {%- endif %}
@@ -672,8 +672,23 @@ heap_size = heap_limit - __HeapBase;
   of Simplicity Studio.
 #}
 {%- if memory_flash_size is defined %}
-  memory_flash_end = 0x{{ '%0x' % (memory_flash_start | first) }} + 0x{{ '%0x' % (memory_flash_size | first) }};
-  physical_flash_end = 0x{{ '%0x' % (flash_addr) }} + 0x{{ '%0x' % (flash_size) }};
-  ASSERT( memory_flash_end <= physical_flash_end, "The template contribution to memory_flash_size exceeds the available flash_size. Check your SLCC or SLCP file to review the flash size defined by memory_flash_size.")
+{%- if memory_flash_start is defined %}
+  HIDDEN(memory_flash_end = 0x{{ '%0x' % (memory_flash_start | first) }} + 0x{{ '%0x' % (memory_flash_size | first) }});
+{%- else %}
+  HIDDEN(memory_flash_end = 0x{{ '%0x' % flash_addr }} + 0x{{ '%0x' % (memory_flash_size | first) }});
 {%- endif %}
+  HIDDEN(physical_flash_end = 0x{{ '%0x' % flash_addr }} + 0x{{ '%0x' % flash_size }});
+  ASSERT( memory_flash_end <= physical_flash_end, "The template contribution to memory_flash_size exceeds the available flash size. Check your SLCC or SLCP file to review the flash size defined by memory_flash_size.")
+{%- endif %}
+
+{%- if memory_ram_size is defined %}
+{%- if memory_ram_start is defined %}
+  HIDDEN(memory_ram_end = 0x{{ '%0x' % (memory_ram_start | first) }} + 0x{{ '%0x' % (memory_ram_size | first) }});
+{%- else %}
+  HIDDEN(memory_ram_end = 0x{{ '%0x' % sram_addr }} + 0x{{ '%0x' % (memory_ram_size | first) }});
+{%- endif %}
+  HIDDEN(physical_ram_end = 0x{{ '%0x' % sram_addr }} + 0x{{ '%0x' % sram_size }});
+  ASSERT( memory_ram_end <= physical_ram_end, "The template contribution to memory_ram_size exceeds the real device RAM size. Check your SLCC or SLCP file to review the RAM size defined by memory_ram_size.")
+{%- endif %}
+
 } {#- END of SECTIONS #}

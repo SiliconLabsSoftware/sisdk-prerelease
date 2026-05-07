@@ -345,6 +345,18 @@ SL_WEAK void sl_hal_emu_dcdc_updated_hook(void)
 {
   // This implementation is empty, but this function can be redefined as it's a weak implementation.
 }
+
+/***************************************************************************//**
+ * Power off the DCDC regulator.
+ ******************************************************************************/
+sl_status_t sl_hal_emu_dcdc_power_off(void)
+{
+  sl_status_t status;
+
+  status = sl_hal_emu_set_dcdc_mode(SL_HAL_EMU_DCDC_MODE_BYPASS);
+
+  return status;
+}
 #endif /* (defined(SL_HAL_EMU_DCDC_BUCK_PRESENT) || defined(SL_HAL_EMU_DCDC_BOOST_PRESENT)) */
 
 #if defined(SL_HAL_EMU_DCDC_BOOST_PRESENT)
@@ -355,6 +367,62 @@ void sl_hal_emu_init_dcdc_boost(const sl_hal_emu_dcdc_boost_init_t *init)
 {
   EFM_ASSERT(init != NULL);
 
+#if defined(_DCDC_DVDDBBCFG_MASK)
+#if defined(_EMU_VREGVDDCMPCTRL_THRESSEL_MASK)
+  EMU->VREGVDDCMPCTRL = ((uint32_t)init->comparator_threshold << _EMU_VREGVDDCMPCTRL_THRESSEL_SHIFT)
+                        | EMU_VREGVDDCMPCTRL_VREGINCMPEN;
+#endif
+#if defined(_DCDC_SYNCBUSY_MASK)
+  sl_hal_emu_dcdc_sync(_DCDC_SYNCBUSY_MASK);
+#endif
+
+  DCDC->DVDDBBCFG = (DCDC->DVDDBBCFG & ~((uint32_t)_DCDC_DVDDBBCFG_DVDDBBEN_MASK | (uint32_t)_DCDC_DVDDBBCFG_DVDDBSTEN_MASK))
+                    | (uint32_t)DCDC_DVDDBBCFG_DVDDBBEN
+                    | (uint32_t)DCDC_DVDDBBCFG_DVDDBSTEN;
+
+#if defined(_DCDC_OUTEN_DVDDOUTEN_MASK) && defined(_DCDC_OUTEN_DECOUTEN_MASK)
+  DCDC->OUTEN |= (uint32_t)DCDC_OUTEN_DVDDOUTEN_enable | (uint32_t)DCDC_OUTEN_DECOUTEN_enable;
+#endif
+
+  DCDC->CTRL = (DCDC->CTRL & ~((uint32_t)_DCDC_CTRL_IPKTMAXCTRL_MASK))
+               | ((uint32_t)init->ton_max << _DCDC_CTRL_IPKTMAXCTRL_SHIFT);
+  DCDC->EM01CTRL0 = ((uint32_t)init->drive_speed_em01 << _DCDC_EM01CTRL0_DRVSPEED_SHIFT)
+                    | ((uint32_t)init->peak_current_em01 << _DCDC_EM01CTRL0_IPKVAL_SHIFT)
+                    | ((uint32_t)init->led_peak_current_em01 << _DCDC_EM01CTRL0_IPKLEDVAL_SHIFT);
+  DCDC->EM23CTRL0 = ((uint32_t)init->drive_speed_em23 << _DCDC_EM23CTRL0_DRVSPEED_SHIFT)
+                    | ((uint32_t)init->peak_current_em23 << _DCDC_EM23CTRL0_IPKVAL_SHIFT)
+                    | ((uint32_t)init->led_peak_current_em23 << _DCDC_EM23CTRL0_IPKLEDVAL_SHIFT);
+
+#if defined(_DCDC_LEDVDDRAMPCFG_MASK)
+  sl_hal_bus_reg_write_mask(&DCDC->LEDVDDRAMPCFG,
+                            _DCDC_LEDVDDRAMPCFG_LEDVDDVREGSTEPSIZE_MASK,
+                            (uint32_t)init->ledvdd_ramp_stepsize << _DCDC_LEDVDDRAMPCFG_LEDVDDVREGSTEPSIZE_SHIFT);
+  sl_hal_bus_reg_write_mask(&DCDC->LEDVDDRAMPCFG,
+                            _DCDC_LEDVDDRAMPCFG_LEDVDDTOCNTLD_MASK,
+                            (uint32_t)init->ledvdd_ramp_timeout_cntld << _DCDC_LEDVDDRAMPCFG_LEDVDDTOCNTLD_SHIFT);
+  sl_hal_bus_reg_write_mask(&DCDC->LEDVDDRAMPCFG,
+                            _DCDC_LEDVDDRAMPCFG_LEDVDDSTEPUPWAIT_MASK,
+                            (uint32_t)init->ledvdd_ramp_stepup_wait << _DCDC_LEDVDDRAMPCFG_LEDVDDSTEPUPWAIT_SHIFT);
+#endif
+#if defined(_DCDC_LEDVDDBCTRL_LEDVDDEN_MASK)
+  sl_hal_bus_reg_write_mask(&DCDC->LEDVDDBCTRL,
+                            _DCDC_LEDVDDBCTRL_LEDVDDEN_MASK,
+                            (uint32_t)_DCDC_LEDVDDBCTRL_LEDVDDEN_Enable << _DCDC_LEDVDDBCTRL_LEDVDDEN_SHIFT);
+#endif
+#if defined(_DCDC_OUTEN_LEDVDDOUTEN_MASK)
+  sl_hal_bus_reg_write_mask(&DCDC->OUTEN,
+                            _DCDC_OUTEN_LEDVDDOUTEN_MASK,
+                            (uint32_t)_DCDC_OUTEN_LEDVDDOUTEN_enable << _DCDC_OUTEN_LEDVDDOUTEN_SHIFT);
+#endif
+
+  sl_hal_emu_set_dcdc_mode(SL_HAL_EMU_DCDC_MODE_REGULATION);
+
+#if defined(_DCDC_SYNCBUSY_MASK)
+  sl_hal_emu_dcdc_sync(_DCDC_SYNCBUSY_MASK);
+#endif
+
+  sl_hal_emu_dcdc_updated_hook();
+#else
 #if defined(_DCDC_SYNCBUSY_MASK)
   sl_hal_emu_dcdc_sync(_DCDC_SYNCBUSY_MASK);
 #endif
@@ -381,6 +449,7 @@ void sl_hal_emu_init_dcdc_boost(const sl_hal_emu_dcdc_boost_init_t *init)
   sl_hal_emu_set_dcdc_mode(SL_HAL_EMU_DCDC_MODE_REGULATION);
 
   sl_hal_emu_dcdc_updated_hook();
+#endif
 }
 
 /***************************************************************************//**
@@ -393,9 +462,15 @@ void sl_hal_emu_set_em01_boost_peak_current(const sl_hal_emu_dcdc_boost_em01_pea
   sl_hal_emu_dcdc_sync(_DCDC_SYNCBUSY_MASK);
 #endif
 
+#if defined(_DCDC_DVDDBBCFG_MASK)
+  sl_hal_bus_reg_write_mask(&DCDC->EM01CTRL0,
+                            _DCDC_EM01CTRL0_IPKVAL_MASK,
+                            ((uint32_t)boost_peak_current_em01 << _DCDC_EM01CTRL0_IPKVAL_SHIFT));
+#else
   sl_hal_bus_reg_write_mask(&DCDC->BSTEM01CTRL,
                             _DCDC_BSTEM01CTRL_IPKVAL_MASK,
                             ((uint32_t)boost_peak_current_em01 << _DCDC_BSTEM01CTRL_IPKVAL_SHIFT));
+#endif
 
   sl_hal_emu_dcdc_updated_hook();
 }
@@ -414,6 +489,25 @@ void sl_hal_emu_set_dcdc_boost_output_voltage(const sl_hal_emu_dcdc_boost_output
   sl_hal_bus_reg_write_mask(&DCDC->CTRL,
                             _DCDC_CTRL_DVDDBSTPRG_MASK,
                             ((uint32_t)boost_output_voltage << _DCDC_CTRL_DVDDBSTPRG_SHIFT));
+
+  sl_hal_emu_dcdc_updated_hook();
+}
+#endif
+
+#if defined(_DCDC_DVDDBBCFG_MASK)
+/***************************************************************************//**
+ * Set DCDC Boost output voltage.
+ ******************************************************************************/
+void sl_hal_emu_set_dcdc_boost_output_voltage(const sl_hal_emu_dcdc_boost_output_voltage_t boost_voltage)
+{
+  // Wait for synchronization before writing new value.
+#if defined(_DCDC_SYNCBUSY_MASK)
+  sl_hal_emu_dcdc_sync(_DCDC_SYNCBUSY_MASK);
+#endif
+
+  sl_hal_bus_reg_write_mask(&DCDC->LEDVDDBCTRL,
+                            _DCDC_LEDVDDBCTRL_CMDLEDVSCALE_MASK,
+                            ((uint32_t)boost_voltage << _DCDC_LEDVDDBCTRL_CMDLEDVSCALE_SHIFT));
 
   sl_hal_emu_dcdc_updated_hook();
 }
@@ -525,18 +619,6 @@ void sl_hal_emu_init_dcdc(const sl_hal_emu_dcdc_init_t *init)
 #endif
 
   sl_hal_emu_dcdc_updated_hook();
-}
-
-/***************************************************************************//**
- * Power off the DCDC regulator.
- ******************************************************************************/
-sl_status_t sl_hal_emu_dcdc_power_off(void)
-{
-  sl_status_t status;
-
-  status = sl_hal_emu_set_dcdc_mode(SL_HAL_EMU_DCDC_MODE_BYPASS);
-
-  return status;
 }
 
 /***************************************************************************//**

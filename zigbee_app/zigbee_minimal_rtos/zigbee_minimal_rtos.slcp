@@ -27,6 +27,7 @@ component:
   - id: zigbee_ipc
   - id: clock_manager
   # Platform - enable LTO for gcc
+  - id: toolchain_gcc_lto
 
 configuration:
   - name: SLI_ZIGBEE_PRIMARY_NETWORK_DEVICE_TYPE

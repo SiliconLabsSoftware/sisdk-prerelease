@@ -2740,6 +2740,12 @@
             <enum name="request_retries" value="0x3"/>
             <enum name="retry_interval" value="0x4"/>
             <enum name="clock_accuracy" value="0x5"/>
+            <enum name="max_receive_window" value="0x6"/>
+            <enum name="min_subscription_list_size" value="0x7"/>
+            <enum name="min_friend_offer_rssi" value="0x8"/>
+            <enum name="receive_window_factor" value="0x9"/>
+            <enum name="rssi_factor" value="0xa"/>
+            <enum name="friend_offer_listen_timeout_slack" value="0xb"/>
         </enums>
     </class>
     <class index="36" name="friend">

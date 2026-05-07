@@ -7521,9 +7521,9 @@ sl_status_t sl_btmesh_lc_server_init_all_properties(uint16_t elem_index)
     return rsp->data.rsp_lc_server_init_all_properties.result;
 }
 
-sl_status_t sl_btmesh_lc_server_set_publish_mask(uint16_t elem_index,
-                                                 uint16_t status_type,
-                                                 uint8_t value)
+SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_lc_server_set_publish_mask(uint16_t elem_index,
+                                                                     uint16_t status_type,
+                                                                     uint8_t value)
 {
     struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
     struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;

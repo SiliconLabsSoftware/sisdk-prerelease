@@ -973,7 +973,7 @@ sl_status_t sli_se_spi_device_command(sl_se_command_context_t *cmd_ctx,
   unsigned data_in_size, data_out_size;
 
   if ((cmd_ctx == NULL)
-      || (spi_instance != 1)
+      || ((spi_instance != 0) && (spi_instance != 1))
       || (command_size == 0)
       || ((command_type == SLI_SE_SPI_COMMAND_READ) && (data_size == 0))
       || ((data_size != 0) && (data == NULL))
@@ -1034,7 +1034,10 @@ sl_status_t sli_se_write_spi_registers(sl_se_command_context_t *cmd_ctx,
                                        uint32_t *table,
                                        uint32_t count)
 {
-  if ((cmd_ctx == NULL) || (spi_instance != 1) || (table == NULL) || (count == 0)) {
+  if ((cmd_ctx == NULL)
+      || ((spi_instance != 0) && (spi_instance != 1))
+      || (table == NULL)
+      || (count == 0)) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 

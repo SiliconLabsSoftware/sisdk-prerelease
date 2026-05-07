@@ -6,7 +6,7 @@ This package contains sample applications demonstrating Silicon Labs Compute SDK
 
 ### Math MVP
 
-- **`compute_soc_math_mvp_demo_efr32_baremetal`**
+- **`compute_soc_math_mvp_demo_efr32`**
   - **Purpose:** Demonstrate Compute Math MVP API usage
   - **Description:** Shows various examples of using the Compute Math MVP functions. This app was moved from [platform-sample-apps](https://github.com/SiliconLabsInternal/platform-sample-apps) (`app/common/example/math_mvp_demo`).
   - **Use Case:** Learning the Compute SDK, math acceleration

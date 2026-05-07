@@ -17,7 +17,7 @@ requires:
 - name: zigbee_dynamic_commissioning
 
 library:
-- path: build/gcc/aarch64_cortex-a72_gcc-12.3.0_musl/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
+- path: libs/build/gcc/aarch64_cortex-a72_gcc-12.3.0_musl/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
   - aarch64_cortex-a72_gcc-12.3.0_musl
@@ -26,7 +26,7 @@ library:
   - zigbee_aarch64_cortex_a72_gcc_12_3_0_musl
   unless:
   - zigbee_x86_64
-- path: build/gcc/aarch64_cortex-a72_gcc-12.3.0_musl/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
+- path: libs/build/gcc/aarch64_cortex-a72_gcc-12.3.0_musl/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
   - aarch64_cortex-a72_gcc-12.3.0_musl
@@ -35,21 +35,21 @@ library:
   unless:
   - zigbee_multi_network
   - zigbee_x86_64
-- path: build/gcc/aarch64_tizen-0.1-13.1_gcc-9.2-softfp/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
+- path: libs/build/gcc/aarch64_tizen-0.1-13.1_gcc-9.2-softfp/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
   - aarch64_tizen-0.1-13.1_gcc-9.2-softfp
   - zigbee_stack_unix
   - zigbee_multi_network
   unless: []
-- path: build/gcc/aarch64_tizen-0.1-13.1_gcc-9.2-softfp/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
+- path: libs/build/gcc/aarch64_tizen-0.1-13.1_gcc-9.2-softfp/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
   - aarch64_tizen-0.1-13.1_gcc-9.2-softfp
   - zigbee_stack_unix
   unless:
   - zigbee_multi_network
-- path: build/gcc/arm32v7/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
+- path: libs/build/gcc/arm32v7/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
   - arm32v7
@@ -58,7 +58,7 @@ library:
   - linux_arch_arm32v7
   unless:
   - zigbee_i386
-- path: build/gcc/arm32v7/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
+- path: libs/build/gcc/arm32v7/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
   - arm32v7
@@ -67,7 +67,7 @@ library:
   unless:
   - zigbee_multi_network
   - zigbee_i386
-- path: build/gcc/arm64v8/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
+- path: libs/build/gcc/arm64v8/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
   - arm64v8
@@ -77,7 +77,7 @@ library:
   unless:
   - zigbee_x86_64
   - zigbee_aarch64_cortex_a72_gcc_12_3_0_musl
-- path: build/gcc/arm64v8/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
+- path: libs/build/gcc/arm64v8/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
   - arm64v8
@@ -87,21 +87,21 @@ library:
   - zigbee_multi_network
   - zigbee_x86_64
   - zigbee_aarch64_cortex_a72_gcc_12_3_0_musl
-- path: build/gcc/armv7l_tizen-0.1-13.1_gcc-9.2-softfp/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
+- path: libs/build/gcc/armv7l_tizen-0.1-13.1_gcc-9.2-softfp/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
   - armv7l_tizen-0.1-13.1_gcc-9.2-softfp
   - zigbee_stack_unix
   - zigbee_multi_network
   unless: []
-- path: build/gcc/armv7l_tizen-0.1-13.1_gcc-9.2-softfp/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
+- path: libs/build/gcc/armv7l_tizen-0.1-13.1_gcc-9.2-softfp/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
   - armv7l_tizen-0.1-13.1_gcc-9.2-softfp
   - zigbee_stack_unix
   unless:
   - zigbee_multi_network
-- path: build/gcc/cortex-m33/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
+- path: libs/build/gcc/cortex-m33/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
   - cortexm33
@@ -111,7 +111,7 @@ library:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
   - toolchain_llvm
-- path: build/gcc/cortex-m33/zigbee-dynamic-commissioning/release_dualrail/libzigbee-dynamic-commissioning.a
+- path: libs/build/gcc/cortex-m33/zigbee-dynamic-commissioning/release_dualrail/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
   - cortexm33
@@ -120,7 +120,7 @@ library:
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - toolchain_llvm
-- path: build/gcc/cortex-m33/zigbee-dynamic-commissioning/release_dualrail_singlenetwork/libzigbee-dynamic-commissioning.a
+- path: libs/build/gcc/cortex-m33/zigbee-dynamic-commissioning/release_dualrail_singlenetwork/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
   - cortexm33
@@ -129,7 +129,7 @@ library:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
   - toolchain_llvm
-- path: build/gcc/cortex-m33/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
+- path: libs/build/gcc/cortex-m33/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
   - cortexm33
@@ -139,7 +139,7 @@ library:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
   - toolchain_llvm
-- path: build/gcc/i386/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
+- path: libs/build/gcc/i386/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
   - i386
@@ -147,7 +147,7 @@ library:
   - zigbee_multi_network
   - zigbee_i386
   unless: []
-- path: build/gcc/i386/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
+- path: libs/build/gcc/i386/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
   - i386
@@ -155,7 +155,7 @@ library:
   - zigbee_i386
   unless:
   - zigbee_multi_network
-- path: build/gcc/x86-64/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
+- path: libs/build/gcc/x86-64/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
   - x86-64
@@ -163,7 +163,7 @@ library:
   - zigbee_multi_network
   - zigbee_x86_64
   unless: []
-- path: build/gcc/x86-64/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
+- path: libs/build/gcc/x86-64/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
   - x86-64
@@ -171,7 +171,7 @@ library:
   - zigbee_x86_64
   unless:
   - zigbee_multi_network
-- path: build/iar/cortex-m33/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
+- path: libs/build/iar/cortex-m33/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_iar
   - cortexm33
@@ -181,7 +181,7 @@ library:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
   - stack_protection_iar
-- path: build/iar/cortex-m33/zigbee-dynamic-commissioning/release_dualrail/libzigbee-dynamic-commissioning.a
+- path: libs/build/iar/cortex-m33/zigbee-dynamic-commissioning/release_dualrail/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_iar
   - cortexm33
@@ -190,7 +190,7 @@ library:
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - stack_protection_iar
-- path: build/iar/cortex-m33/zigbee-dynamic-commissioning/release_dualrail_singlenetwork/libzigbee-dynamic-commissioning.a
+- path: libs/build/iar/cortex-m33/zigbee-dynamic-commissioning/release_dualrail_singlenetwork/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_iar
   - cortexm33
@@ -199,27 +199,27 @@ library:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
   - stack_protection_iar
-- path: build/iar/cortex-m33/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
-  condition:
-  - toolchain_iar
-  - cortexm33
-  - zigbee_phy_2_4
-  unless:
-  - zigbee_multi_network
-  - zigbee_phy_2_4_subghz_selection_end_device
-  - zigbee_phy_2_4_subghz_switch_coordinator
-  - stack_protection_iar
-- path: build/iar/cortex-m33/zigbee-dynamic-commissioning/release_stackprotection/libzigbee-dynamic-commissioning.a
+- path: libs/build/iar/cortex-m33/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_iar
   - cortexm33
   - zigbee_phy_2_4
+  unless:
+  - zigbee_multi_network
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
+  - stack_protection_iar
+- path: libs/build/iar/cortex-m33/zigbee-dynamic-commissioning/release_stackprotection/libzigbee-dynamic-commissioning.a
+  condition:
+  - toolchain_iar
+  - cortexm33
+  - zigbee_phy_2_4
   - zigbee_multi_network
   - stack_protection_iar
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
-- path: build/iar/cortex-m33/zigbee-dynamic-commissioning/release_stackprotection_dualrail/libzigbee-dynamic-commissioning.a
+- path: libs/build/iar/cortex-m33/zigbee-dynamic-commissioning/release_stackprotection_dualrail/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_iar
   - cortexm33
@@ -228,7 +228,7 @@ library:
   - stack_protection_iar
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
-- path: build/iar/cortex-m33/zigbee-dynamic-commissioning/release_stackprotection_dualrail_singlenetwork/libzigbee-dynamic-commissioning.a
+- path: libs/build/iar/cortex-m33/zigbee-dynamic-commissioning/release_stackprotection_dualrail_singlenetwork/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_iar
   - cortexm33
@@ -237,7 +237,7 @@ library:
   unless:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
-- path: build/iar/cortex-m33/zigbee-dynamic-commissioning/release_stackprotection_singlenetwork/libzigbee-dynamic-commissioning.a
+- path: libs/build/iar/cortex-m33/zigbee-dynamic-commissioning/release_stackprotection_singlenetwork/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_iar
   - cortexm33
@@ -247,35 +247,35 @@ library:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
-- path: build/llvm/aarch64-android-ndk-r25c/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
+- path: libs/build/llvm/aarch64-android-ndk-r25c/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
   - aarch64-android-ndk-r25c
   - zigbee_stack_unix
   - zigbee_multi_network
   unless: []
-- path: build/llvm/aarch64-android-ndk-r27d/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
+- path: libs/build/llvm/aarch64-android-ndk-r27d/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
   - aarch64-android-ndk-r27d
   - zigbee_stack_unix
   - zigbee_multi_network
   unless: []
-- path: build/llvm/aarch64-android-ndk-r25c/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
+- path: libs/build/llvm/aarch64-android-ndk-r25c/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
   - aarch64-android-ndk-r25c
   - zigbee_stack_unix
   unless:
   - zigbee_multi_network
-- path: build/llvm/aarch64-android-ndk-r27d/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
+- path: libs/build/llvm/aarch64-android-ndk-r27d/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
   - aarch64-android-ndk-r27d
   - zigbee_stack_unix
   unless:
   - zigbee_multi_network
-- path: build/llvm/cortex-m33/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
+- path: libs/build/llvm/cortex-m33/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_llvm
   - cortexm33
@@ -284,7 +284,7 @@ library:
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
-- path: build/llvm/cortex-m33/zigbee-dynamic-commissioning/release_dualrail/libzigbee-dynamic-commissioning.a
+- path: libs/build/llvm/cortex-m33/zigbee-dynamic-commissioning/release_dualrail/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_llvm
   - cortexm33
@@ -292,7 +292,7 @@ library:
   - zigbee_multi_network
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
-- path: build/llvm/cortex-m33/zigbee-dynamic-commissioning/release_dualrail_singlenetwork/libzigbee-dynamic-commissioning.a
+- path: libs/build/llvm/cortex-m33/zigbee-dynamic-commissioning/release_dualrail_singlenetwork/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_llvm
   - cortexm33
@@ -300,7 +300,7 @@ library:
   unless:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
-- path: build/llvm/cortex-m33/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
+- path: libs/build/llvm/cortex-m33/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_llvm
   - cortexm33

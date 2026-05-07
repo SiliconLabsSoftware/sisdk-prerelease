@@ -1857,6 +1857,16 @@ template_contribution:
   - bluetooth_feature_resolving_list
 - name: cli_command
   value:
+    group: bt_resolving_list
+    name: read_peer_resolvable_address
+    handler: sli_bt_cli_resolving_list_read_peer_resolvable_address
+    argument:
+    - type: hex
+    - type: uint8
+  condition:
+  - bluetooth_feature_resolving_list
+- name: cli_command
+  value:
     group: bt_accept_list
     name: add_device_by_bonding
     handler: sli_bt_cli_accept_list_add_device_by_bonding
@@ -2059,6 +2069,60 @@ template_contribution:
     name: read_remote_supported_capabilities
     handler: sli_bt_cli_cs_read_remote_supported_capabilities
     argument:
+    - type: uint8
+  condition:
+  - device_supports_bluetooth_cs
+- name: cli_command
+  value:
+    group: bt_cs
+    name: handover_get_procedure_parameters
+    handler: sli_bt_cli_cs_handover_get_procedure_parameters
+    argument:
+    - type: uint8
+    - type: uint8
+  condition:
+  - device_supports_bluetooth_cs
+- name: cli_command
+  value:
+    group: bt_cs
+    name: handover_set_procedure_parameters
+    handler: sli_bt_cli_cs_handover_set_procedure_parameters
+    argument:
+    - type: hex
+  condition:
+  - device_supports_bluetooth_cs
+- name: cli_command
+  value:
+    group: bt_cs
+    name: handover_create_sync
+    handler: sli_bt_cli_cs_handover_create_sync
+    argument:
+    - type: uint8
+    - type: uint8
+    - type: uint16
+  condition:
+  - device_supports_bluetooth_cs
+- name: cli_command
+  value:
+    group: bt_cs
+    name: handover_enable_procedure
+    handler: sli_bt_cli_cs_handover_enable_procedure
+    argument:
+    - type: uint8
+    - type: uint16
+    - type: uint16
+    - type: uint8
+    - type: uint8
+    - type: uint8
+  condition:
+  - device_supports_bluetooth_cs
+- name: cli_command
+  value:
+    group: bt_cs
+    name: handover_remove_procedure
+    handler: sli_bt_cli_cs_handover_remove_procedure
+    argument:
+    - type: uint8
     - type: uint8
   condition:
   - device_supports_bluetooth_cs

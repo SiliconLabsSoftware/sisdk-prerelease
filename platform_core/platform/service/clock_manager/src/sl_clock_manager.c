@@ -345,3 +345,16 @@ sl_status_t sli_clock_manager_get_nwp_socpll_freqplan_config(const uint16_t **so
   }
   return sli_clock_manager_hal_get_nwp_socpll_freqplan_config(socpll_freqplan_config, target_frequency_index);
 }
+
+/***************************************************************************//**
+ * Retrieves the FREQPLAN NWP CLKMULT config.
+ ******************************************************************************/
+sl_status_t sli_clock_manager_get_nwp_clkmult_freqplan_config(uint8_t clkmult_index,
+                                                              const uint8_t **nwp_clkmult_freqplan_config,
+                                                              uint8_t *target_frequency_index)
+{
+  if (nwp_clkmult_freqplan_config == NULL || target_frequency_index == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+  return sli_clock_manager_hal_get_nwp_clkmult_freqplan_config(clkmult_index, nwp_clkmult_freqplan_config, target_frequency_index);
+}

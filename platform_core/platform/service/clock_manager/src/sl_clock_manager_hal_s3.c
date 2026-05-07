@@ -2364,10 +2364,36 @@ sl_status_t sli_clock_manager_hal_get_nwp_socpll_freqplan_config(const uint16_t 
 {
 #if defined(SLI_CLOCK_MANAGER_NWPSOCPLL_FREQPLAN_DATA)
   *socpll_freqplan_config = SLI_CLOCK_MANAGER_NWPSOCPLL_FREQPLAN_DATA->socpll_config;
-  *target_frequency_index = SLI_CLOCK_MANAGER_NWPSOCPLL_FREQPLAN_DATA->default_freqsel;
+  *target_frequency_index = SLI_CLOCK_MANAGER_NWPSOCPLL_FREQPLAN_DATA->freqplan_data.default_freqsel;
   return SL_STATUS_OK;
 #else
   (void)socpll_freqplan_config;
+  (void)target_frequency_index;
+  return SL_STATUS_NOT_SUPPORTED;
+#endif
+}
+
+/***************************************************************************//**
+ * Retrieves the FREQPLAN NWP CLKMULT config.
+ ******************************************************************************/
+sl_status_t sli_clock_manager_hal_get_nwp_clkmult_freqplan_config(uint8_t clkmult_index,
+                                                                  const uint8_t **nwp_clkmult_freqplan_config,
+                                                                  uint8_t *target_frequency_index)
+{
+#if defined(SLI_CLOCK_MANAGER_NWPCLKMULT_FREQPLAN_DATA)
+  if (clkmult_index == 0) {
+    *nwp_clkmult_freqplan_config = SLI_CLOCK_MANAGER_NWPCLKMULT_FREQPLAN_DATA->clkmult0_config;
+  } else if (clkmult_index == 1) {
+    *nwp_clkmult_freqplan_config = SLI_CLOCK_MANAGER_NWPCLKMULT_FREQPLAN_DATA->clkmult1_config;
+  } else {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  *target_frequency_index = SLI_CLOCK_MANAGER_NWPCLKMULT_FREQPLAN_DATA->freqplan_data.default_freqsel;
+
+  return SL_STATUS_OK;
+#else
+  (void)clkmult_index;
+  (void)nwp_clkmult_freqplan_config;
   (void)target_frequency_index;
   return SL_STATUS_NOT_SUPPORTED;
 #endif

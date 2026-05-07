@@ -25,6 +25,7 @@ requires:
 - name: bootloader_application_properties_header
 - name: bootloader_interface_s3_bootload_headers
 - name: btl_storage_bootloadinfo_header
+- name: btl_interface_bootloadinfo_provider
 - name: device_series_3
 - name: cmsis_core
 - name: device
@@ -34,7 +35,10 @@ requires:
 - name: btl_interface_osal
   condition: [cmsis_rtos2]
 - name: btl_utils_image_parser
+recommends:
+- id: btl_interface_bootloadinfo
 
+  vendor: silabs
 config_file:
 - path: platform/bootloader/series3/config/device_series_3/btl_core_cfg.h
   file_id: btl_core_config
@@ -44,6 +48,7 @@ template_contribution:
   value: 1
 - name: component_catalog
   value: gecko_bootloader_interface
+  unless: [btl_core]
 - name: event_handler
   value:
     event: platform_init
