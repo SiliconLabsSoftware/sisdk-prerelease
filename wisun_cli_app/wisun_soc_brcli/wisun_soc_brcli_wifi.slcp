@@ -51,8 +51,6 @@ include:
 define:
 - name: "DEBUG_EFM_USER"
 - name: "WISUN_CLI_SAMPLE_APP"
-- name: "SL_SUPPRESS_DEPRECATION_WARNINGS_WISECONNECT_4_1"
-- name: "SL_SUPPRESS_DEPRECATION_WARNINGS_SDK_2026_6"
 configuration:
 - name: "SL_BOARD_ENABLE_VCOM"
   value: "1"

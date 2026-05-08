@@ -47,7 +47,6 @@ requires:
 - name: slist
 - name: app_queue
 - name: power_manager
-- name: app_rta
 provides:
 - name: cs_ras_client
 template_contribution:
@@ -70,14 +69,6 @@ template_contribution:
   priority: 69
   unless:
   - ncp
-- name: app_rta_init
-  value:
-    include: cs_ras_client_internal.h
-    handler: cs_ras_client_rta_init
-- name: app_rta_ready
-  value:
-    include: cs_ras_client_internal.h
-    handler: cs_ras_client_rta_ready
 documentation:
   docset: bluetooth
   document: bluetooth-service-api/cs-ras-client

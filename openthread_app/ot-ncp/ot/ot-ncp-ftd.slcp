@@ -27,11 +27,8 @@ component:
   - id: ot_rtt_log
   - id: clock_manager
   - id: ot_reset_utils
-  # Platform - Enable LTO for gcc and llvm by installing the following component
+  # Platform - Enable LTO for gcc by installing the following component
   - id: toolchain_gcc_lto
-    condition: [toolchain_gcc]
-  - id: toolchain_llvm_lto
-    condition: [toolchain_llvm]
   - id: ot_cli_source
 
 include:
@@ -102,7 +99,6 @@ tag:
   - prebuilt_demo
   - hwfilter:device:device_supports_thread
   - toolchain:gcc
-  - toolchain:llvm
   - hwfilter:!device:device_family_efr32mr21
 readme:
   - path: ./README-OT-NCP.md

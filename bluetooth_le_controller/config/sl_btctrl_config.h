@@ -7,10 +7,7 @@
 
 // <o SL_BT_CONTROLLER_BUFFER_MEMORY> Bluetooth Controller Buffer Memory
 // <i> Default: SL_BT_CONTROLLER_BUFFER_MEMORY
-// <i> Define the amount of memory to allocate for tx/rx buffers in Bluetooth Controller
-// <i> NOTE: SL_BT_CONTROLLER_BUFFER_MEMORY is deprecated in Simplicity SDK Suite v2026.6.0 and
-// <i> marked for removal in Simplicity SDK Suite v2027.6.0. SL_BT_CONTROLLER_BUFFER_MEMORY is
-// <i> replaced by SL_BLUETOOTH_COMMON_BUFFER_MEMORY_SIZE in the Bluetooth Common Component.
+// <i> Define the Amount of memory to allocate for tx/rx buffers in Bluetooth Controller
 #ifndef SL_BT_CONTROLLER_BUFFER_MEMORY
 #define SL_BT_CONTROLLER_BUFFER_MEMORY     (8192)
 #endif
@@ -67,7 +64,7 @@
 #define SL_BT_CONTROLLER_MIN_POWER_LEVEL_OVERRIDE (0)
 #endif
 
-// <o SL_BT_CONTROLLER_MIN_POWER_LEVEL> Minimum radiated TX power level in 0.1dBm units
+// <o SL_BT_CONTROLLER_MIN_POWER_LEVEL> Minimum radiated TX power level in 0.1dBm unit
 // <i> Default: 0
 // <i> Define the minimum radiated TX power level.
 // <i> If the configured power level is lower than what the radio supports, the minimum supported level will be used.
@@ -86,7 +83,7 @@
 #define SL_BT_CONTROLLER_MAX_POWER_LEVEL_OVERRIDE (0)
 #endif
 
-// <o SL_BT_CONTROLLER_MAX_POWER_LEVEL> Maximum radiated TX power level in 0.1dBm units
+// <o SL_BT_CONTROLLER_MAX_POWER_LEVEL> Maximum radiated TX power level in 0.1dBm unit
 // <i> Default: 0
 // <i> Define the maximum radiated TX power level.
 // <i> If the configured power level is higher than what the radio supports, the maximum supported level will be used.
@@ -99,28 +96,6 @@
 // </e>
 
 // </h> End TX Power Levels
-
-// <h> RF Path
-
-// <o SL_BT_CONTROLLER_RF_TX_PATH_GAIN_DECI_DB> TX RF path gain in 0.1dB units
-// <i> Default: 0
-// <i> The Bluetooth controller takes TX RF path gain into account when adjusting transmitter
-// <i> output power. Power radiated from the antenna then matches the application request.
-// <i> A negative value indicates some power loss in the path. For example,
-// <i> with radiated TX power set to +10 dBm and this configuration to -10
-// <i> (i.e., 1 dB loss), the transmitter output power will be set to +11 dBm.
-#ifndef SL_BT_CONTROLLER_RF_TX_PATH_GAIN_DECI_DB
-#define SL_BT_CONTROLLER_RF_TX_PATH_GAIN_DECI_DB     (0)
-#endif
-
-// <o SL_BT_CONTROLLER_RF_RX_PATH_GAIN_DECI_DB> RX RF path gain in 0.1dB units
-// <i> Default: 0
-// <i> RX RF path gain is used to compensate the RSSI reports received by the Bluetooth controller.
-#ifndef SL_BT_CONTROLLER_RF_RX_PATH_GAIN_DECI_DB
-#define SL_BT_CONTROLLER_RF_RX_PATH_GAIN_DECI_DB     (0)
-#endif
-
-// </h> End RF Path
 
 // <h> Bluetooth Controller Configuration for LE Connection
 // <o SL_BT_CONTROLLER_COMPLETED_PACKETS_THRESHOLD> Total transmitted packets threshold for all connections to send the Number Of Completed Packets HCI event to the host <1-255>

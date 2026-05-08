@@ -21,6 +21,7 @@ filter:
     value: ["Beginner"]
 
 component:
+  - id: toolchain_gcc
   - id: bluetooth_stack
   - id: bluetooth_controller_anchor_selection
   - id: bluetooth_feature_legacy_advertiser
@@ -42,6 +43,7 @@ component:
   - id: bluetooth_feature_cs
   - id: bluetooth_utility_bgapi_trace
   - id: ncp
+  - id: ncp_user_cmd
   - id: iostream_eusart
     instance:
       - vcom
@@ -57,8 +59,7 @@ component:
   - id: refactor_cs_initiator
   - id: refactor_cs_result
   - id: refactor_cs_antenna
-  - id: cs_rreq
-  - id: cs_acp_target
+  - id: refactor_cs_acp
   - id: iostream_bgapi_trace
   - id: iostream_dummy
     instance:
@@ -144,7 +145,6 @@ post_build:
 tag:
   - prebuilt_demo
   - toolchain:gcc
-  - toolchain:llvm
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_generic_family_efr32xg24
   - hwfilter:board:hardware_board_has_hfxo_freq_40mhz

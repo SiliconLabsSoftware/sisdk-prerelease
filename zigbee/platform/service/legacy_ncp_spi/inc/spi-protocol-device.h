@@ -17,7 +17,7 @@
 #ifndef __SPI_PROTOCOL_DEVICE_H__
 #define __SPI_PROTOCOL_DEVICE_H__
 
-#include "em_device.h"
+#include "sl_component_catalog.h"
 #include "legacy_ncp_spi_config.h"
 
 // Size of SPIP VERSION and ALIVE commands (not including the frame terminator).
@@ -74,7 +74,7 @@
 #endif
 // SPI NCP USART selection
 
-#if defined(_SILICON_LABS_32B_SERIES_3)
+#ifdef SL_CATALOG_IOSTREAM_EUSART_PRESENT
 #if (LEGACY_NCP_SPI_PERIPHERAL_NO == 0)
   #define SPI_NCP_USART           EUSART0
   #define SPI_NCP_USART_IRQn      EUSART0_RX_IRQn
@@ -108,7 +108,7 @@
 #else
   #error Invalid EUSART selected for SPI NCP
 #endif
-#else // Series 2 (and earlier) always use USART for SPI NCP
+#elif defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
 #if (LEGACY_NCP_SPI_PERIPHERAL_NO == 0)
   #define SPI_NCP_USART           USART0
   #define SPI_NCP_USART_IRQn      USART0_RX_IRQn
@@ -142,7 +142,7 @@
 #else
   #error Invalid USART selected for SPI NCP
 #endif
-#endif // _SILICON_LABS_32B_SERIES_3
+#endif // SL_CATALOG_IOSTREAM_EUSART_PRESENT
 
 #if defined(LEGACY_NCP_SPI_TX_LOC)
   #define SPI_NCP_MOSI_LOC        LEGACY_NCP_SPI_TX_LOC

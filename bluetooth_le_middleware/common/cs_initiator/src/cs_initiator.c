@@ -107,9 +107,6 @@ static void process_remote_ranging_data(cs_initiator_t *initiator,
                                         uint32_t data_size);
 static bool ras_client_handler(cs_initiator_t *initiator, sl_bt_msg_t *evt);
 static void reset_ras_config(cs_initiator_t* initiator);
-static void cs_initiator_track_subevent(cs_initiator_t* initiator,
-                                        uint8_t procedure_done_status);
-
 #if defined (CS_INITIATOR_RAS_MODE_USE_REAL_TIME_MODE) && (CS_INITIATOR_RAS_MODE_USE_REAL_TIME_MODE == 0)
 static void cs_initiator_get_lost_segments(uint64_t lost_segments,
                                            uint8_t *start_segment,
@@ -767,7 +764,6 @@ sl_status_t cs_initiator_create(const uint8_t               conn_handle,
                                     initiator->rtl_config.algo_mode,
                                     initiator->config.cs_tone_antenna_config_idx,
                                     initiator->config.use_real_time_ras_mode,
-                                    1,
                                     &conn_interval,
                                     &proc_interval);
     if (sc != SL_STATUS_OK) {
@@ -893,7 +889,6 @@ sl_status_t cs_initiator_delete(const uint8_t conn_handle)
   if (initiator->conn_handle == SL_BT_INVALID_CONNECTION_HANDLE) {
     return SL_STATUS_INVALID_HANDLE;
   }
-  initiator->subevents_per_procedure_counter = 0;
   sc = initiator_state_machine_event_handler(initiator,
                                              INITIATOR_EVT_DELETE_INSTANCE,
                                              NULL);
@@ -911,38 +906,6 @@ void cs_initiator_deinit(void)
     if (initiator->conn_handle != SL_BT_INVALID_CONNECTION_HANDLE) {
       cs_initiator_delete(initiator->conn_handle);
     }
-  }
-}
-
-/******************************************************************************
- * Log the number of successfully created subevents when CS procedure is completed
- * or aborted, then reset the counter for the next procedure.
- *
- * @param[in] initiator             Initiator instance.
- * @param[in] procedure_done_status Done status of the current CS procedure
- *                                  (sl_bt_cs_done_status_complete or
- *                                   sl_bt_cs_done_status_aborted).
- *****************************************************************************/
-static void cs_initiator_track_subevent(cs_initiator_t *initiator,
-                                        uint8_t procedure_done_status)
-{
-  if (procedure_done_status == sl_bt_cs_done_status_complete || procedure_done_status == sl_bt_cs_done_status_aborted)
-  {
-    if (procedure_done_status == sl_bt_cs_done_status_complete)
-    {
-      initiator_log_info(INSTANCE_PREFIX "Created subevents in completed procedure %u: %u" LOG_NL,
-                         initiator->conn_handle,
-                         initiator->ranging_counter & CS_RAS_RANGING_COUNTER_MASK,
-                         initiator->subevents_per_procedure_counter);
-    }
-    else
-    {
-      initiator_log_info(INSTANCE_PREFIX "Created subevents in aborted procedure %u: %u" LOG_NL,
-                         initiator->conn_handle,
-                         initiator->ranging_counter & CS_RAS_RANGING_COUNTER_MASK,
-                         initiator->subevents_per_procedure_counter);
-    }
-    initiator->subevents_per_procedure_counter = 0u;
   }
 }
 
@@ -1572,6 +1535,24 @@ bool cs_initiator_on_event(sl_bt_msg_t *evt)
                             evt->data.evt_cs_procedure_enable_complete.connection);
         break;
       }
+      else {
+        uint32_t subevents = cs_initiator_get_subevents_per_procedure(evt->data.evt_cs_procedure_enable_complete.procedure_interval,
+                                                                    evt->data.evt_cs_procedure_enable_complete.subevents_per_event,
+                                                                    evt->data.evt_cs_procedure_enable_complete.event_interval);
+        uint32_t procedure_time_us = (uint32_t)evt->data.evt_cs_procedure_enable_complete.procedure_interval * (uint32_t)initiator->conn_interval * 1250u;
+
+        initiator_log_info(INSTANCE_PREFIX 
+                 "CS - New procedure scheduled: "
+                 "Subevents per procedure: %lu  "
+                 "Subevent length: %lu us  "
+                 "Procedure time: %lu us  "
+                 "Subevents per event: %u  " LOG_NL,
+                 initiator->conn_handle,
+                 (unsigned long)subevents,
+                 evt->data.evt_cs_procedure_enable_complete.subevent_len,
+                 (unsigned long)procedure_time_us,
+                 evt->data.evt_cs_procedure_enable_complete.subevents_per_event);
+      }
       handled = true;
       evt_data.evt_procedure_enable_completed = &evt->data.evt_cs_procedure_enable_complete;
       if (initiator->config.cs_main_mode == sl_bt_cs_mode_pbr) {
@@ -1720,10 +1701,6 @@ bool cs_initiator_on_event(sl_bt_msg_t *evt)
         } else {
           initiator_log_info(INSTANCE_PREFIX "CS - ongoing measurement, drop new result" LOG_NL,
                              evt->data.evt_cs_result.connection);
-          // Still count this subevent even though the result is dropped
-          initiator->subevents_per_procedure_counter++;
-          cs_initiator_track_subevent(initiator,
-                                  evt->data.evt_cs_result.procedure_done_status);
           break;
         }
       }
@@ -1732,8 +1709,6 @@ bool cs_initiator_on_event(sl_bt_msg_t *evt)
       (void)initiator_state_machine_event_handler(initiator,
                                                   INITIATOR_EVT_CS_RESULT,
                                                   &evt_data);
-      cs_initiator_track_subevent(initiator,
-                                  evt->data.evt_cs_result.procedure_done_status);
       break;
 
     // --------------------------------
@@ -1744,8 +1719,6 @@ bool cs_initiator_on_event(sl_bt_msg_t *evt)
         break;
       }
       handled = true;
-      cs_initiator_track_subevent(initiator,
-                                  evt->data.evt_cs_result_continue.procedure_done_status);
       if (initiator->initiator_state != INITIATOR_STATE_WAIT_REFLECTOR_PROCEDURE_COMPLETE
           && initiator->initiator_state != INITIATOR_STATE_WAIT_REFLECTOR_PROCEDURE_ABORTED) {
         initiator_log_info(INSTANCE_PREFIX "CS - received initiator CS result" LOG_NL,

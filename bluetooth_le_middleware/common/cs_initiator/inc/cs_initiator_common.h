@@ -224,7 +224,6 @@ typedef struct {
   uint8_t num_antenna_path;
   uint8_t antenna_config;
   cs_ranging_data_t ranging_data_result;
-  uint8_t subevents_per_procedure_counter;
 } cs_initiator_t;
 
 #ifdef __cplusplus

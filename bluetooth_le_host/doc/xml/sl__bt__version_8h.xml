@@ -24,11 +24,11 @@
 <codeline lineno="39"><highlight class="normal"></highlight></codeline>
 <codeline lineno="45" refid="group__sl__bt__version_1gabdc3b1f3ef5b86303857c56b8c89e600" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>SL_BT_VERSION_PATCH<sp/>0</highlight><highlight class="normal"></highlight></codeline>
 <codeline lineno="46"><highlight class="normal"></highlight></codeline>
-<codeline lineno="50" refid="group__sl__bt__version_1ga702d68a51ae68d689249900414058101" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>SL_BT_VERSION_HASH<sp/>{0xcf,0x2b,0xc4,0x0c,0xb4,0x69,0xed,0x4c,0x48,0xb5,0x84,0xa5,0xe5,0xa7,0xe4,0xf5,0x13,0x90,0xb7,0x73}</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="50" refid="group__sl__bt__version_1ga702d68a51ae68d689249900414058101" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>SL_BT_VERSION_HASH<sp/>{0x7c,0x23,0xff,0xca,0x04,0xef,0x36,0x2a,0x0a,0x45,0x4b,0x9a,0xc7,0x44,0xd4,0x4c,0x33,0x0e,0xdd,0x98}</highlight><highlight class="normal"></highlight></codeline>
 <codeline lineno="51"><highlight class="normal"></highlight></codeline>
 <sp/><highlight class="comment">//<sp/>end<sp/>addtogroup<sp/>sl_bt_version</highlight><codeline lineno="53"><highlight class="normal"></highlight></codeline>
 <codeline lineno="54"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
     </programlisting>
-    <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_version.h"/>
+    <location file="/var/lib/jenkins/github@2/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_version.h"/>
   </compounddef>
 </doxygen>

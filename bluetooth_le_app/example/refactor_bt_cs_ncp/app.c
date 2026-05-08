@@ -75,11 +75,11 @@ cs_algo_app_cb_t algo_cb;
 // -----------------------------------------------------------------------------
 // Static function declarations
 
-static void cs_on_result(uint8_t conn_handle,
-                         uint16_t ranging_counter,
+static void cs_on_result(const uint8_t conn_handle,
+                         const uint16_t ranging_counter,
                          const uint8_t *result,
-                         uint16_t result_size,
-                         const cs_rreq_result_t *ranging_data);
+                         const uint16_t result_size,
+                         const cs_ranging_data_t *ranging_data);
 
 static void cs_on_intermediate_result(const cs_intermediate_result_t *intermediate_result);
 
@@ -167,12 +167,13 @@ void sl_ncp_user_cs_cmd_message_to_target_cb(const void *data)
         // No valid instance_id to return; let sc carry the error.
         break;
       }
-      // Result callbacks are now delivered through cs_algo
       sc = cs_initiator_create(cs_cmd->data.initiator_cmd_data.connection_id,
                                &cs_cmd->data.initiator_cmd_data.initiator_config,
                                &cs_cmd->data.initiator_cmd_data.rtl_config,
-                               NULL,
-                               NULL,
+                               cs_cmd->data.initiator_cmd_data.extended_result == 0
+                               ? cs_on_result
+                               : cs_on_extended_result,
+                               cs_on_intermediate_result,
                                cs_on_error,
                                rsp_data);
       rsp_len = 1;
@@ -234,11 +235,11 @@ void sl_ncp_user_cs_cmd_message_to_target_cb(const void *data)
  * Realize on_result callback function for CS initiator device role in order
  * to send back the measurement results in a response to the host.
  *****************************************************************************/
-static void cs_on_result(uint8_t conn_handle,
-                         uint16_t ranging_counter,
+static void cs_on_result(const uint8_t conn_handle,
+                         const uint16_t ranging_counter,
                          const uint8_t *result,
-                         uint16_t result_size,
-                         const cs_rreq_result_t *ranging_data)
+                         const uint16_t result_size,
+                         const cs_ranging_data_t *ranging_data)
 {
   (void)ranging_data;
   (void)ranging_counter;

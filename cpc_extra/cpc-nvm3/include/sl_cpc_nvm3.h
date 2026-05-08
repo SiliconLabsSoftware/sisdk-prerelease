@@ -48,9 +48,7 @@ extern "C"
 #endif
 
 /***************************************************************************//**
- * @addtogroup cpc_nvm3_secondary
- * @brief CPC-NVM3 endpoint init
- * @{
+ * CPC-NVM3 endpoint init
  ******************************************************************************/
 sl_status_t sl_cpc_nvm3_init(void);
 

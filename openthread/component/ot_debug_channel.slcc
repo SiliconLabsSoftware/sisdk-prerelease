@@ -19,6 +19,9 @@ source:
 template_contribution:
 - name: component_catalog
   value: ot_debug_channel
+- name: ot_init
+  value: sl_ot_debug_channel_init
+  priority: 30
 metadata:
   sbom:
     license: Zlib

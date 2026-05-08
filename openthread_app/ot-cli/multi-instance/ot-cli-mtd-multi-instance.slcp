@@ -18,9 +18,6 @@ component:
   - id: clock_manager
   - id: ot_reset_utils
   - id: toolchain_gcc_lto
-    condition: [toolchain_gcc]
-  - id: toolchain_llvm_lto
-    condition: [toolchain_llvm]
   - id: ot_multi_instance_cli
 
 include:
@@ -112,7 +109,6 @@ tag:
   - hwfilter:device:device_supports_thread
   - hwfilter:!device:device_family_efr32mr21
   - toolchain:gcc
-  - toolchain:llvm
 
 filter:
   - name: "Wireless Technology"

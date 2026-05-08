@@ -44,11 +44,8 @@ component:
   - id: trustzone_nonsecure
   - id: tz_secure_key_library
   - id: ot_reset_utils
-  # Platform - Enable LTO for gcc and llvm by installing the following component
+  # Platform - Enable LTO for gcc by installing the following component
   - id: toolchain_gcc_lto
-    condition: [toolchain_gcc]
-  - id: toolchain_llvm_lto
-    condition: [toolchain_llvm]
 
 include:
   - path: ../
@@ -168,7 +165,6 @@ tag:
   - hwfilter:flash:768k
   - hwfilter:!device:device_series_3
   - toolchain:gcc
-  - toolchain:llvm
 
 readme:
   - path: ../README.md

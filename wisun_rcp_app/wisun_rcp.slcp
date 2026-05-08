@@ -77,9 +77,6 @@ configuration:
     value: "SL_RAIL_UTIL_SFM_SEQUENCER_SUN_MODULATIONS_OFDM"
     condition: [device_sdid_220]
 
-define:
-  - name: "SL_SUPPRESS_DEPRECATION_WARNINGS_SDK_2026_6"
-
 toolchain_settings:
   - option: optimize
     value: size

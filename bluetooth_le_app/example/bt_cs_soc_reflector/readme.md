@@ -5,7 +5,6 @@ The Bluetooth SoC-CS Reflector is a project that can be used to test the Channel
 > Note: this example does not include Device Firmware Update (DFU) functionality by default. For details see the [Device Firmware Update](#device-firmware-update) section.
 
 ## Getting Started
-
 After startup it will advertise the name "CS RFLCT", and will provide the Ranging Service (RAS).
 Measurement data is collected on the initiator side.
 The Reflector can connect to multiple initiators (maximum 4).
@@ -13,13 +12,11 @@ Reflector specific default values can be found and modified in the component con
 CS mode and object tracking mode is configured on the initiator side.
 
 ## Usage
-
 - Generate the project
 - Configure values if needed
 - Build and flash the sample application
 
 ## Resource optimization
-
 - Flash usage can be reduced by
   - turning off some of the "Supported features" in "CS Ranging Service Server" component. Note that "Real-Time Ranging Data" feature is used by default on the Initiator,
   - turning off "Logging" in "CS Reflector" component or completely in "Application"- "Utility" -"Log" component,
@@ -28,7 +25,6 @@ CS mode and object tracking mode is configured on the initiator side.
   - decreasing "Procedure maximum length" or "Procedure per connection" "CS Ranging Service Server" component configuration. Note that reducing "Procedure maximum length" also affects the maximum number of procedures that can be stored in the buffer in case of RAS On-Demand mode.
 
 ### Calculating the size of "Procedure maximum length"
-
 The optimal value of "Procedure maximum length" is dependent on several configuration values, and can be calculated by the following equation:
 
 proc_max_len = 4 + (subevents * 8) + (subevents * mode0_steps * mode0_size) + channels * ( ( 1 + ( antenna_paths + 1 ) * 4) + 1 )
@@ -45,7 +41,7 @@ Shorter subevent lengths allow more subevents per procedure.
   - "High"   - 72 (default),
   - "Medium" - 37,
   - "Custom" - Number of 1s in channel mask,
-- antenna_paths value is controlled by the "Antenna configuration", and limited by number of antennas presented on each board (capabilities). Maximum can be calculated using the product of used Initiator and Reflector antennas. The default maximum value for antenna_paths is 4.
+- antenna_paths value is controlled by the "Antenna configuration", and limited by number of antennas presented on each board (capabilities). Maximum can be calculated using the product of used Initiator and Reflector antennae. The default maximum value for antenna_paths is 4.
 
 These settings were selected by assuming that the controller creates the maximum number of subevents (32), and the measuring mode is PBR. In RTT mode, far less data is created.
 

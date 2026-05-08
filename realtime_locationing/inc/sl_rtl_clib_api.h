@@ -78,7 +78,6 @@ enum sl_rtl_error_code{
   SL_RTL_ERROR_CS_CHANNEL_MAP_TOO_FEW_CHANNELS, ///< Too few channels in the proposed channel map
   SL_RTL_ERROR_CS_CHANNEL_SPACING_TOO_LARGE, ///< Channel spacing is too large in the proposed channel map
   SL_RTL_ERROR_POOR_INPUT_DATA_QUALITY, ///< The input data quality is poor
-  SL_RTL_ERROR_QUEUE_FULL, ///< The RTL task's input queue is full
 
   SL_RTL_ERROR_LAST ///< Number of error codes
 };
@@ -104,25 +103,23 @@ enum sl_rtl_error_code{
 
 /// AoX antenna array type
 enum sl_rtl_aox_array_type{
-  SL_RTL_AOX_ARRAY_TYPE_4x4_URA = 0,        ///< Silicon Labs Ref. 4x4 Uniform Rectangular Array
-  SL_RTL_AOX_ARRAY_TYPE_3x3_URA,            ///< Silicon Labs Ref. 3x3 Uniform Rectangular Array
-  SL_RTL_AOX_ARRAY_TYPE_1x4_ULA,            ///< Silicon Labs Ref. 1x4 Uniform Linear Array
-  SL_RTL_AOX_ARRAY_TYPE_4x4_DP_URA,         ///< Silicon Labs Ref. 4x4 Uniform Dual Polarized Rectangular Array
+  SL_RTL_AOX_ARRAY_TYPE_4x4_URA = 0, ///< Silicon Labs Ref. 4x4 Uniform Rectangular Array
+  SL_RTL_AOX_ARRAY_TYPE_3x3_URA,     ///< Silicon Labs Ref. 3x3 Uniform Rectangular Array
+  SL_RTL_AOX_ARRAY_TYPE_1x4_ULA,     ///< Silicon Labs Ref. 1x4 Uniform Linear Array
+  SL_RTL_AOX_ARRAY_TYPE_4x4_DP_URA,  ///< Silicon Labs Ref. 4x4 Uniform Dual Polarized Rectangular Array
   SL_RTL_AOX_ARRAY_TYPE_COREHW_15x15_DP,    ///< CoreHw Ref. 150 mm x 150 mm, 8 Element Dual Polarized Array
   SL_RTL_AOX_ARRAY_TYPE_COREHW_12x12_DP,    ///< CoreHw Ref. 120 mm x 120 mm, 8 Element Dual Polarized Array
   SL_RTL_AOX_ARRAY_TYPE_COREHW_4x4_URA,     ///< CoreHw Ref. 4x4 Uniform Rectangular Array
   SL_RTL_AOX_ARRAY_TYPE_COREHW_2x2_URA,     ///< CoreHw Ref. 2x2 Uniform Rectangular Array
-  SL_RTL_AOX_ARRAY_TYPE_RESERVED,           ///< Reserved for future use
 
-  SL_RTL_AOX_ARRAY_TYPE_LAST = 16 ///< Placeholder
+  SL_RTL_AOX_ARRAY_TYPE_LAST ///< Placeholder
 };
 
 enum sl_rtl_aox_switch_pattern_array{
   SL_RTL_AOX_SWITCH_PATTERN_ARRAY_4x4_CP = 0,
   SL_RTL_AOX_SWITCH_PATTERN_ARRAY_4x4_DP,
-  SL_RTL_AOX_SWITCH_PATTERN_ARRAY_RESERVED,  ///< Reserved for future use
 
-  SL_RTL_AOX_SWITCH_PATTERN_ARRAY_LAST = 16 ///< Placeholder
+  SL_RTL_AOX_SWITCH_PATTERN_ARRAY_LAST
 };
 
 enum sl_rtl_aox_switch_pattern_options{
@@ -713,13 +710,6 @@ enum sl_rtl_error_code sl_rtl_aox_set_antenna_pattern(sl_rtl_aox_libitem *item, 
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_aox_antenna_pattern_deinit(sl_rtl_aox_antenna_pattern *pattern);
 
-/**************************************************************************//**
- * Get the library version.
- *
- * @return The library version string.
- *****************************************************************************/
-const char *sl_rtl_get_lib_version(void);
-
 /** @} */ // end addtogroup sl_rtl_aox
 
 /**
@@ -739,32 +729,32 @@ const char *sl_rtl_get_lib_version(void);
  *
  * Main Mode: Phase-Based Ranging (PBR), Sub Mode: None
  *
- * | CS Algorithm Mode           | Channel Map Preset <br> HIGH | Channel Map Preset <br> MEDIUM | Channel Map Preset <br> LOW |
- * | :-------------------------- | :--------------------------: | :----------------------------: | :-------------------------: |
- * | STATIONARY                  |                          yes |                             no |                          no |
- * | TRACKING ACCURACY OPTIMIZED |                          yes |                            yes |                          no |
- * | TRACKING LATENCY OPTIMIZED  |                    yes + vel |                      yes + vel |                          no |
+ * | CS Algorithm Mode       | Channel Map Preset <br> HIGH | Channel Map Preset <br> MEDIUM | Channel Map Preset <br> LOW |
+ * | :---------------------- | :--------------------------: | :----------------------------: | :-------------------------: |
+ * | REAL TIME BASIC         |                          yes |                            yes |                         yes |
+ * | STATIC HIGH ACCURACY    |                          yes |                             no |                          no |
+ * | REAL TIME FAST          |                    yes + vel |                      yes + vel |                         yes |
  *
  * Main Mode: Round-Trip Time (RTT), Sub Mode: None
  *
- * | CS Algorithm Mode           | Channel Map Preset <br> HIGH | Channel Map Preset <br> MEDIUM | Channel Map Preset <br> LOW |
- * | :-------------------------- | :--------------------------: | :----------------------------: | :-------------------------: |
- * | STATIONARY                  |            (yes)<sup>*</sup> |                             no |                          no |
- * | TRACKING ACCURACY OPTIMIZED |                          yes |                             no |                          no |
- * | TRACKING LATENCY OPTIMIZED  |                           no |                             no |                          no |
+ * | CS Algorithm Mode       | Channel Map Preset <br> HIGH | Channel Map Preset <br> MEDIUM | Channel Map Preset <br> LOW |
+ * | :---------------------- | :--------------------------: | :----------------------------: | :-------------------------: |
+ * | REAL TIME BASIC         |                          yes |                             no |                          no |
+ * | STATIC HIGH ACCURACY    |            (yes)<sup>*</sup> |                             no |                          no |
+ * | REAL TIME FAST          |                           no |                             no |                          no |
  *
  * Main Mode: Phase-Based Ranging (PBR), Sub Mode: Round-Trip Time (RTT)
  *
- * | CS Algorithm Mode           | Channel Map Preset <br> HIGH | Channel Map Preset <br> MEDIUM | Channel Map Preset <br> LOW |
- * | :-------------------------- | :--------------------------: | :----------------------------: | :-------------------------: |
- * | STATIONARY                  |                          yes |                             no |                          no |
- * | TRACKING ACCURACY OPTIMIZED |                          yes |                             no |                          no |
- * | TRACKING LATENCY OPTIMIZED  |                    yes + vel |                             no |                          no |
+ * | CS Algorithm Mode       | Channel Map Preset <br> HIGH | Channel Map Preset <br> MEDIUM | Channel Map Preset <br> LOW |
+ * | :---------------------- | :--------------------------: | :----------------------------: | :-------------------------: |
+ * | REAL TIME BASIC         |                          yes |                             no |                          no |
+ * | STATIC HIGH ACCURACY    |                          yes |                             no |                          no |
+ * | REAL TIME FAST          |                    yes + vel |                             no |                          no |
  *
  * Refer to *Developer's Guide > Channel Sounding Capabilities & Configurability* for the channel map preset definitions.
  *
  * @note vel = Velocity is reported.
- * @note <sup>*</sup> This mode uses the same implementation as TRACKING ACCURACY OPTIMIZED.
+ * @note <sup>*</sup> This mode uses the same implementation as REAL TIME BASIC.
  * @note RTT mode currently supports a maximum of two unique ordered
  *       packet_antenna pairs per procedure (one packet_antenna from initiator, other one from reflector).
  */
@@ -798,13 +788,6 @@ const char *sl_rtl_get_lib_version(void);
 #define SL_RTL_CS_CHANNEL_MAP_SIZE               10
 /**< Size of the channel map in bytes. */
 
-#define SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC SL_RTL_CS_ALGO_MODE_TRACKING_ACCURACY_OPTIMIZED
-/**< Alias for SL_RTL_CS_ALGO_MODE_TRACKING_ACCURACY_OPTIMIZED */
-#define SL_RTL_CS_ALGO_MODE_STATIC_HIGH_ACCURACY SL_RTL_CS_ALGO_MODE_STATIONARY
-/**< Alias for SL_RTL_CS_ALGO_MODE_STATIONARY */
-#define SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST SL_RTL_CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED
-/**< Alias for SL_RTL_CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED */
-
 typedef enum {
   SL_RTL_CS_ROLE_INITIATOR = 0, /**< Initiator role. */
   SL_RTL_CS_ROLE_REFLECTOR      /**< Reflector role. */
@@ -815,17 +798,15 @@ typedef enum {
  * with each algorithm mode.
  */
 typedef enum {
-  SL_RTL_CS_ALGO_MODE_STATIONARY =                          1,
-  /**< High filtering, high CPU cost, high accuracy. Suitable for static
-   * high-accuracy use cases. */
-  SL_RTL_CS_ALGO_MODE_TRACKING_ACCURACY_OPTIMIZED =         0,
+  SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC = 0,
   /**< Medium filtering, medium response, medium CPU cost. Suitable for
    * real-time tracking. */
-  SL_RTL_CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED =          2,
+  SL_RTL_CS_ALGO_MODE_STATIC_HIGH_ACCURACY,
+  /**< High filtering, high CPU cost, high accuracy. Suitable for static
+   * high-accuracy use cases. */
+  SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST,
   /**< Low filtering, low CPU and RAM cost, basic accuracy. Suitable for
    * real-time tracking with constrained computational resources. */
-  SL_RTL_CS_ALGO_MODE_INVALID =                             0xFF,
-  /**< Invalid algorithm mode. */
 } sl_rtl_cs_algo_mode;
 
 typedef enum  {
@@ -1107,7 +1088,7 @@ enum sl_rtl_error_code sl_rtl_cs_deinit(sl_rtl_cs_libitem *item);
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *
  * Set the estimation mode. For example,
- * ::SL_RTL_CS_ALGO_MODE_TRACKING_ACCURACY_OPTIMIZED sets medium filtering. For
+ * ::SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC sets medium filtering. For
  * further description of the modes, see the documentation
  * of::sl_rtl_cs_algo_mode. CS libitem must be initialized before
  * calling this method, or it will fail with return code
@@ -2269,15 +2250,13 @@ char *sl_rtl_util_iq_sample_qa_code2string(char *buf, int size, uint32_t code);
  * does not check for any Bluetooth-related constraints (for example skipping
  * of the advertisement channels).
  *
- * @param[in] main_mode Channel sounding main mode (see the CS API)
- * @param[in] sub_mode Channel sounding sub mode (see the CS API)
+ * @param[in] cs_mode Channel sounding mode (see the CS API)
  * @param[in] algo_mode Channel sounding algorithm mode (see the CS API)
  * @param[in] channel_map Bluetooth channel bitmap to validate
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_util_validate_bluetooth_cs_channel_map(
-  const sl_rtl_cs_mode main_mode,
-  const sl_rtl_cs_mode sub_mode,
+  const sl_rtl_cs_mode cs_mode,
   const sl_rtl_cs_algo_mode algo_mode,
   const uint8_t channel_map[10]);
 

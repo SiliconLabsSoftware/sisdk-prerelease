@@ -63,7 +63,7 @@ void sl_wisun_event_task_init(void)
   osThreadId_t event_task_id;
 
   const osThreadAttr_t event_task_attribute = {
-    "ws_evt",
+    "Wi-SUN Event Task",
     osThreadDetached,
     NULL,
     0,

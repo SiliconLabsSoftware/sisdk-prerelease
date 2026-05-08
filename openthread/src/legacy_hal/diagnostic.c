@@ -188,7 +188,7 @@ void halPrintCrashData(uint8_t port)
     i++;
     if (!(i % 4))
     {
-      otLogCritPlat("%s", outBuf);
+      otLogCritPlat(outBuf);
       outBufIdx = 0;
     }
   }
@@ -196,7 +196,7 @@ void halPrintCrashData(uint8_t port)
   // Print out remaining contents of outBuf
   if (outBufIdx != 0)
   {
-    otLogCritPlat("%s", outBuf);
+    otLogCritPlat(outBuf);
     outBufIdx = 0;
   }
 }

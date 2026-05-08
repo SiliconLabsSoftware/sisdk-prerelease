@@ -43,6 +43,7 @@
 #include <stdbool.h>
 #include "sl_status.h"
 #include "sl_bt_api.h"
+#include "sl_rtl_clib_api.h"
 #include "cs_result.h"
 #include "cs_initiator_client.h"
 
@@ -90,7 +91,7 @@ typedef struct {
 typedef void (*cs_error_cb_t)(uint8_t conn_handle, cs_error_event_t evt, uint32_t sc);
 
 /***************************************************************************//**
- * Initiator result callback type - not used anymore, can be removed
+ * Initiator result callback type
  * Called in case a CS procedure extracted successfully and based on the
  * extracted data a distance measurement by the RTL library has been successfully
  * performed.
@@ -98,17 +99,19 @@ typedef void (*cs_error_cb_t)(uint8_t conn_handle, cs_error_event_t evt, uint32_
  * @param[in] conn_handle connection handle
  * @param[in] ranging_counter Ranging counter value.
  * @param[in] result pointer to the result array.
- * @param[in] result_size size of the result array in bytes.
+ * @param[in] result_data pointer to the result session data.
  * @param[in] ranging_data ranging data that the result was calculated from.
+ * @param[in] user_data pointer to additional user data.
  ******************************************************************************/
 typedef void (*cs_result_cb_t)(const uint8_t conn_handle,
                                const uint16_t ranging_counter,
                                const uint8_t *result,
-                               const uint16_t result_size,
-                               const cs_ranging_data_t *ranging_data);
+                               const cs_result_session_data_t *result_data,
+                               const cs_ranging_data_t *ranging_data,
+                               const void *user_data);
 
 /***************************************************************************//**
- * Initiator intermediate result callback type - not used anymore, can be removed
+ * Initiator intermediate result callback type
  * Called only in case the static object tracking mode is active.
  * That means not in every CS procedure the CS initiator gets a distance
  * measurement. When the measurement is still in progress at the end of a
@@ -116,8 +119,10 @@ typedef void (*cs_result_cb_t)(const uint8_t conn_handle,
  * the result callback.
  *
  * @param[in] result pointer to the intermediate result structure.
+ * @param[in] user_data pointer to additional user data.
  ******************************************************************************/
-typedef void (*cs_intermediate_result_cb_t)(const cs_intermediate_result_t *result);
+typedef void (*cs_intermediate_result_cb_t)(const cs_intermediate_result_t *result,
+                                            const void *user_data);
 
 // -----------------------------------------------------------------------------
 // Function declarations

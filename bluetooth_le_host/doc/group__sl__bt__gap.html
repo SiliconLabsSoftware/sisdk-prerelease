@@ -97,7 +97,6 @@ $(document).ready(function(){initNavTree('group__sl__bt__gap.html',''); initResi
 
 <div class="header">
   <div class="summary">
-<a href="#groups">Modules</a> &#124;
 <a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">GAP</div></div>
@@ -107,12 +106,6 @@ $(document).ready(function(){initNavTree('group__sl__bt__gap.html',''); initResi
 <p>GAP.  
 <a href="#details">More...</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="groups" name="groups"></a>
-Modules</h2></td></tr>
-<tr class="memitem:group__sl__bt__evt__gap__random__address__refresh" id="r_group__sl__bt__evt__gap__random__address__refresh"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__sl__bt__evt__gap__random__address__refresh.html">sl_bt_evt_gap_random_address_refresh</a></td></tr>
-<tr class="memdesc:group__sl__bt__evt__gap__random__address__refresh"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sent when the controller starts using a new resolvable private address for scanning or initiating. <br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
 <tr class="memitem:gac8d5431d3062e47c5d51b9fb9f36c104" id="r_gac8d5431d3062e47c5d51b9fb9f36c104"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__sl__bt__gap.html#gac8d5431d3062e47c5d51b9fb9f36c104">sl_bt_gap_address_type_t</a> { <br />
@@ -304,7 +297,6 @@ Functions</h2></td></tr>
 <p>Enable or disable the privacy feature on all GAP roles. New privacy mode will take effect for advertising next time advertising is enabled, for scanning next time scanning is enabled, and for initiating on the next open connection command.</p>
 <p>When privacy is enabled and the device is advertising or scanning, the stack will maintain a periodic timer with the specified time interval as a timeout value. At each timeout, the stack generates a new resolvable private address and uses it in scanning requests. Starting the scanner always generates a new scanner private address, so the application can stop and restart scanning to force an immediate address change. When opening a connection while scanning is idle, the initiator uses a new resolvable private address for each connection attempt. When opening a connection while scanning is active, the initiator uses the current scanner private address.</p>
 <p>For advertisers, the stack generates a new resolvable or non-resolvable private address for each advertising set if its address is not application-managed, i.e., the address was not set by the application with the <a class="el" href="group__sl__bt__advertiser.html#gab7f12454d8502bce94240325a0eec4d4">sl_bt_advertiser_set_random_address</a> command. Different advertising sets use different private addresses, and starting advertising on an advertising set always generates a new private address for that set. The application is fully responsible for application-managed advertiser addresses. For an application-managed resolvable private address, the application should schedule periodic address updates for enhancing the privacy. It is recommended to use different schedules for different advertising sets.</p>
-<p>When the controller starts using a new scanner or initiator resolvable private address, the stack sends <a class="el" href="group__sl__bt__evt__gap__random__address__refresh.html">sl_bt_evt_gap_random_address_refresh</a>. When the controller starts using a new stack-managed random advertiser address on an advertising set, the stack sends <a class="el" href="group__sl__bt__evt__advertiser__random__address__refresh.html">sl_bt_evt_advertiser_random_address_refresh</a>. Enabling privacy alone does not send these events, but the first start of scanning, initiating, or advertising after enabling privacy may do so if it causes a new private address to be programmed to the controller.</p>
 <p>Changing the privacy during active advertising or scanning is not allowed.</p>
 <p>By default, privacy feature is disabled.</p>
 <p>This command is supported only when the application has included the Bluetooth component bluetooth_feature_local_privacy.</p>
@@ -323,11 +315,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>SL_STATUS_OK if successful. Error code otherwise.</dd></dl>
-<p><b>Events</b> </p><ul>
-<li><a class="el" href="group__sl__bt__evt__gap__random__address__refresh.html">sl_bt_evt_gap_random_address_refresh</a> - Triggered when the controller starts using a new scanner or initiator resolvable private address</li>
-<li><a class="el" href="group__sl__bt__evt__advertiser__random__address__refresh.html">sl_bt_evt_advertiser_random_address_refresh</a> - Triggered when the controller starts using a new stack-managed random advertiser address on an advertising set </li>
-</ul>
+<dl class="section return"><dt>Returns</dt><dd>SL_STATUS_OK if successful. Error code otherwise. </dd></dl>
 
 </div>
 </div>
@@ -364,7 +352,6 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Enable or disable the privacy feature on all GAP roles with randomized RPA rotation intervals. New privacy mode will take effect for advertising next time advertising is enabled, for scanning next time scanning is enabled, and for initiating on the next open connection command.</p>
 <p>This command is similar to <a class="el" href="group__sl__bt__gap.html#gab8d65fb681a00f260f8b8c49a09ab1d5">sl_bt_gap_set_privacy_mode</a> but instead of a single interval, it uses a range between <code>interval_min_minutes</code> and <code>interval_max_minutes</code> minutes. Each advertising set and the scanner independently choose random periods within this range for their RPA updates. If <code>interval_min_minutes</code> equals <code>interval_max_minutes</code>, the behavior is identical to <a class="el" href="group__sl__bt__gap.html#gab8d65fb681a00f260f8b8c49a09ab1d5">sl_bt_gap_set_privacy_mode</a>.</p>
-<p>When the controller starts using a new scanner or initiator resolvable private address, the stack sends <a class="el" href="group__sl__bt__evt__gap__random__address__refresh.html">sl_bt_evt_gap_random_address_refresh</a>. When the controller starts using a new stack-managed random advertiser address on an advertising set, the stack sends <a class="el" href="group__sl__bt__evt__advertiser__random__address__refresh.html">sl_bt_evt_advertiser_random_address_refresh</a>. Enabling privacy alone does not send these events, but the first start of scanning, initiating, or advertising after enabling privacy may do so if it causes a new private address to be programmed to the controller.</p>
 <p>Changing the privacy during active advertising or scanning is not allowed.</p>
 <p>This command is supported only when the application has included the Bluetooth component bluetooth_feature_local_privacy.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -387,11 +374,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>SL_STATUS_OK if successful. Error code otherwise.</dd></dl>
-<p><b>Events</b> </p><ul>
-<li><a class="el" href="group__sl__bt__evt__gap__random__address__refresh.html">sl_bt_evt_gap_random_address_refresh</a> - Triggered when the controller starts using a new scanner or initiator resolvable private address</li>
-<li><a class="el" href="group__sl__bt__evt__advertiser__random__address__refresh.html">sl_bt_evt_advertiser_random_address_refresh</a> - Triggered when the controller starts using a new stack-managed random advertiser address on an advertising set </li>
-</ul>
+<dl class="section return"><dt>Returns</dt><dd>SL_STATUS_OK if successful. Error code otherwise. </dd></dl>
 
 </div>
 </div>

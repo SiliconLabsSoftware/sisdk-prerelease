@@ -1318,7 +1318,7 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
     goto cleanup;
   }
 
-  certificate_options = SL_WISUN_CERTIFICATE_OPTION_NONE;
+  certificate_options = SL_WISUN_CERTIFICATE_OPTION_IS_REF;
   for (idx = 0; idx < trustedca_count; ++idx) {
     trustedca = sl_wisun_keychain_get_trustedca(idx);
     if (!trustedca) {
@@ -1355,7 +1355,7 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
     printf("[Using built-in device credentials]\r\n");
   }
 
-  ret = sl_wisun_set_device_certificate(SL_WISUN_CERTIFICATE_OPTION_NONE,
+  ret = sl_wisun_set_device_certificate(SL_WISUN_CERTIFICATE_OPTION_IS_REF | SL_WISUN_CERTIFICATE_OPTION_HAS_KEY,
                                         credential->certificate.data_length,
                                         credential->certificate.data);
   if (ret != SL_STATUS_OK) {
@@ -1364,7 +1364,7 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
   }
 
   if (credential->pk.type == SL_WISUN_KEYCHAIN_KEY_TYPE_PLAINTEXT) {
-    ret = sl_wisun_set_device_private_key(SL_WISUN_PRIVATE_KEY_OPTION_NONE,
+    ret = sl_wisun_set_device_private_key(SL_WISUN_PRIVATE_KEY_OPTION_IS_REF,
                                           credential->pk.u.plaintext.data_length,
                                           credential->pk.u.plaintext.data);
   } else {

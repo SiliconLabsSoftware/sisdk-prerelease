@@ -4046,29 +4046,6 @@ void sli_bt_cli_resolving_list_remove_all_devices(sl_cli_command_arg_t *argument
     printf("rsp_resolving_list_remove_all_devices 0x%lx ",status);
     printf("\n");
 }
-void sli_bt_cli_resolving_list_read_peer_resolvable_address(sl_cli_command_arg_t *arguments)
-{
-
-  sl_status_t status;
-  (void)(arguments);
-  // parameters
-  size_t _address_len;
-  uint8_t *_address=sl_cli_get_argument_hex(arguments,0,&_address_len);
-  bd_addr address;
-  memcpy(&address,_address,sizeof(address));
-  uint8_t address_type=sl_cli_get_argument_uint8(arguments,1);
-  //return values
-  bd_addr address_out;
-  status=sl_bt_resolving_list_read_peer_resolvable_address(
-  address,
-  address_type,
-  &address_out
-  );
-
-    printf("rsp_resolving_list_read_peer_resolvable_address 0x%lx ",status);
-    print_hex(address_out.addr,sizeof(address_out.addr));
-    printf("\n");
-}
 #endif // SL_CATALOG_BLUETOOTH_FEATURE_RESOLVING_LIST_PRESENT
 #ifdef SL_CATALOG_BLUETOOTH_FEATURE_ACCEPT_LIST_PRESENT
 void sli_bt_cli_accept_list_add_device_by_bonding(sl_cli_command_arg_t *arguments)
@@ -4543,113 +4520,6 @@ void sli_bt_cli_cs_read_remote_supported_capabilities(sl_cli_command_arg_t *argu
   );
 
     printf("rsp_cs_read_remote_supported_capabilities 0x%lx ",status);
-    printf("\n");
-}
-void sli_bt_cli_cs_handover_get_procedure_parameters(sl_cli_command_arg_t *arguments)
-{
-
-  sl_status_t status;
-  (void)(arguments);
-  // parameters
-  uint8_t connection=sl_cli_get_argument_uint8(arguments,0);
-  uint8_t config_id=sl_cli_get_argument_uint8(arguments,1);
-  //return values
-  size_t cs_parameters_len;
-  uint8_t cs_parameters[MAX_P_SIZE];
-  status=sl_bt_cs_handover_get_procedure_parameters(
-  connection,
-  config_id,
-  MAX_P_SIZE,
-  &cs_parameters_len,
-  cs_parameters
-  );
-
-    printf("rsp_cs_handover_get_procedure_parameters 0x%lx ",status);
-    print_hex(cs_parameters,cs_parameters_len);
-    printf("\n");
-}
-void sli_bt_cli_cs_handover_set_procedure_parameters(sl_cli_command_arg_t *arguments)
-{
-
-  sl_status_t status;
-  (void)(arguments);
-  // parameters
-  size_t cs_parameters_len;
-  uint8_t *cs_parameters=sl_cli_get_argument_hex(arguments,0,&cs_parameters_len);
-  //return values
-  uint8_t analyzer;
-  uint8_t config_id;
-  status=sl_bt_cs_handover_set_procedure_parameters(
-  cs_parameters_len,
-  cs_parameters,
-  &analyzer,
-  &config_id
-  );
-
-    printf("rsp_cs_handover_set_procedure_parameters 0x%lx ",status);
-    printf("0x%x ",analyzer);
-    printf("0x%x ",config_id);
-    printf("\n");
-}
-void sli_bt_cli_cs_handover_create_sync(sl_cli_command_arg_t *arguments)
-{
-
-  sl_status_t status;
-  (void)(arguments);
-  // parameters
-  uint8_t analyzer=sl_cli_get_argument_uint8(arguments,0);
-  uint8_t config_id=sl_cli_get_argument_uint8(arguments,1);
-  uint16_t procedure_counter=sl_cli_get_argument_uint16(arguments,2);
-  //return values
-  status=sl_bt_cs_handover_create_sync(
-  analyzer,
-  config_id,
-  procedure_counter
-  );
-
-    printf("rsp_cs_handover_create_sync 0x%lx ",status);
-    printf("\n");
-}
-void sli_bt_cli_cs_handover_enable_procedure(sl_cli_command_arg_t *arguments)
-{
-
-  sl_status_t status;
-  (void)(arguments);
-  // parameters
-  uint8_t enable=sl_cli_get_argument_uint8(arguments,0);
-  uint16_t start_procedure_counter=sl_cli_get_argument_uint16(arguments,1);
-  uint16_t procedure_skip=sl_cli_get_argument_uint16(arguments,2);
-  uint8_t handle_type=sl_cli_get_argument_uint8(arguments,3);
-  uint8_t handle=sl_cli_get_argument_uint8(arguments,4);
-  uint8_t config_id=sl_cli_get_argument_uint8(arguments,5);
-  //return values
-  status=sl_bt_cs_handover_enable_procedure(
-  enable,
-  start_procedure_counter,
-  procedure_skip,
-  handle_type,
-  handle,
-  config_id
-  );
-
-    printf("rsp_cs_handover_enable_procedure 0x%lx ",status);
-    printf("\n");
-}
-void sli_bt_cli_cs_handover_remove_procedure(sl_cli_command_arg_t *arguments)
-{
-
-  sl_status_t status;
-  (void)(arguments);
-  // parameters
-  uint8_t analyzer=sl_cli_get_argument_uint8(arguments,0);
-  uint8_t config_id=sl_cli_get_argument_uint8(arguments,1);
-  //return values
-  status=sl_bt_cs_handover_remove_procedure(
-  analyzer,
-  config_id
-  );
-
-    printf("rsp_cs_handover_remove_procedure 0x%lx ",status);
     printf("\n");
 }
 #endif // SL_CATALOG_BLUETOOTH_CS_SUPPORT_PRESENT
@@ -5369,12 +5239,6 @@ void sl_bt_cli_on_event(sl_bt_msg_t* evt)
       printf("0x%" PRIx32 " ",(uint32_t)evt->data.evt_resource_status.free_bytes);
       printf("\n");
     break;
-    case sl_bt_evt_gap_random_address_refresh_id:
-      printf("sl_bt_evt_gap_random_address_refresh ");
-      print_hex(evt->data.evt_gap_random_address_refresh.address.addr,sizeof(evt->data.evt_gap_random_address_refresh.address.addr));
-      printf("0x%x ",evt->data.evt_gap_random_address_refresh.address_type);
-      printf("\n");
-    break;
     case sl_bt_evt_advertiser_timeout_id:
       printf("sl_bt_evt_advertiser_timeout ");
       printf("0x%x ",evt->data.evt_advertiser_timeout.handle);
@@ -5386,13 +5250,6 @@ void sl_bt_cli_on_event(sl_bt_msg_t* evt)
       print_hex(evt->data.evt_advertiser_scan_request.address.addr,sizeof(evt->data.evt_advertiser_scan_request.address.addr));
       printf("0x%x ",evt->data.evt_advertiser_scan_request.address_type);
       printf("0x%x ",evt->data.evt_advertiser_scan_request.bonding);
-      printf("\n");
-    break;
-    case sl_bt_evt_advertiser_random_address_refresh_id:
-      printf("sl_bt_evt_advertiser_random_address_refresh ");
-      printf("0x%x ",evt->data.evt_advertiser_random_address_refresh.advertising_set);
-      print_hex(evt->data.evt_advertiser_random_address_refresh.address.addr,sizeof(evt->data.evt_advertiser_random_address_refresh.address.addr));
-      printf("0x%x ",evt->data.evt_advertiser_random_address_refresh.address_type);
       printf("\n");
     break;
     case sl_bt_evt_periodic_advertiser_status_id:
@@ -5939,49 +5796,6 @@ void sl_bt_cli_on_event(sl_bt_msg_t* evt)
       printf("0x%x ",evt->data.evt_cs_read_remote_supported_capabilities_complete.t_pm_times);
       printf("0x%x ",evt->data.evt_cs_read_remote_supported_capabilities_complete.t_sw_times);
       printf("0x%x ",evt->data.evt_cs_read_remote_supported_capabilities_complete.tx_snr_capability);
-      printf("\n");
-    break;
-    case sl_bt_evt_cs_handover_sync_established_id:
-      printf("sl_bt_evt_cs_handover_sync_established ");
-      printf("0x%x ",evt->data.evt_cs_handover_sync_established.status);
-      printf("0x%x ",evt->data.evt_cs_handover_sync_established.analyzer);
-      printf("0x%x ",evt->data.evt_cs_handover_sync_established.config_id);
-      printf("0x%x ",evt->data.evt_cs_handover_sync_established.procedure_counter);
-      printf("\n");
-    break;
-    case sl_bt_evt_cs_handover_complete_id:
-      printf("sl_bt_evt_cs_handover_complete ");
-      printf("0x%x ",evt->data.evt_cs_handover_complete.reason);
-      printf("0x%x ",evt->data.evt_cs_handover_complete.analyzer);
-      printf("0x%x ",evt->data.evt_cs_handover_complete.config_id);
-      printf("\n");
-    break;
-    case sl_bt_evt_cs_handover_result_id:
-      printf("sl_bt_evt_cs_handover_result ");
-      printf("0x%x ",evt->data.evt_cs_handover_result.analyzer);
-      printf("0x%x ",evt->data.evt_cs_handover_result.config_id);
-      printf("0x%x ",evt->data.evt_cs_handover_result.start_acl_conn_event);
-      printf("0x%x ",evt->data.evt_cs_handover_result.procedure_counter);
-      printf("%d ",evt->data.evt_cs_handover_result.frequency_compensation);
-      printf("%d ",evt->data.evt_cs_handover_result.reference_power_level);
-      printf("0x%x ",evt->data.evt_cs_handover_result.procedure_done_status);
-      printf("0x%x ",evt->data.evt_cs_handover_result.subevent_done_status);
-      printf("0x%x ",evt->data.evt_cs_handover_result.abort_reason);
-      printf("0x%x ",evt->data.evt_cs_handover_result.num_antenna_paths);
-      printf("0x%x ",evt->data.evt_cs_handover_result.num_steps);
-      print_hex(evt->data.evt_cs_handover_result.data.data,evt->data.evt_cs_handover_result.data.len);
-      printf("\n");
-    break;
-    case sl_bt_evt_cs_handover_result_continue_id:
-      printf("sl_bt_evt_cs_handover_result_continue ");
-      printf("0x%x ",evt->data.evt_cs_handover_result_continue.analyzer);
-      printf("0x%x ",evt->data.evt_cs_handover_result_continue.config_id);
-      printf("0x%x ",evt->data.evt_cs_handover_result_continue.procedure_done_status);
-      printf("0x%x ",evt->data.evt_cs_handover_result_continue.subevent_done_status);
-      printf("0x%x ",evt->data.evt_cs_handover_result_continue.abort_reason);
-      printf("0x%x ",evt->data.evt_cs_handover_result_continue.num_antenna_paths);
-      printf("0x%x ",evt->data.evt_cs_handover_result_continue.num_steps);
-      print_hex(evt->data.evt_cs_handover_result_continue.data.data,evt->data.evt_cs_handover_result_continue.data.len);
       printf("\n");
     break;
     case sl_bt_evt_cs_test_end_completed_id:

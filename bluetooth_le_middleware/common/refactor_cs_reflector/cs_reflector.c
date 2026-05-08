@@ -31,6 +31,7 @@
 #include "sl_bt_api.h"
 #include "app_assert.h"
 #include "app_log.h"
+#include "cs_ras_server.h"
 #include "cs_reflector.h"
 #include "cs_reflector_config.h"
 #include "cs_reflector_connmanager.h"
@@ -181,6 +182,15 @@ sl_status_t cs_reflector_delete(uint8_t conn_handle)
   return SL_STATUS_OK;
 }
 
+void cs_ras_server_on_mode_change(uint8_t       connection,
+                                  cs_ras_mode_t mode,
+                                  bool          indication)
+{
+  reflector_log_debug(INSTANCE_PREFIX "RAS mode changed to %u" NL, connection, mode);
+  (void)connection;
+  (void)mode;
+  (void)indication;
+}
 
 // -----------------------------------------------------------------------------
 // Event / callback definitions

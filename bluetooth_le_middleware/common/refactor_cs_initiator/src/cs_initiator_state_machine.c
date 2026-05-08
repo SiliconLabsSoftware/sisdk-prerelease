@@ -39,11 +39,12 @@
 #include "app_timer.h"
 
 #include "cs_initiator_common.h"
-#include "cs_initiator.h"
 #include "cs_initiator_config.h"
+#include "cs_initiator_extract.h"
 #include "cs_initiator_error.h"
+#include "cs_initiator_estimate.h"
 #include "cs_initiator_log.h"
-#include "cs_algo.h"
+#include "cs_ras_format_converter.h"
 
 #ifdef SL_CATALOG_CS_INITIATOR_REPORT_PRESENT
 #include "cs_initiator_report.h"
@@ -74,12 +75,21 @@ static sl_status_t state_start_procedure_on_start_procedure(cs_initiator_t      
                                                             state_machine_event_data_t *data);
 static sl_status_t state_wait_procedure_enable_complete_on_enable_completed(cs_initiator_t             *initiator,
                                                                             state_machine_event_data_t *data);
+static sl_status_t state_in_procedure_on_cs_result(cs_initiator_t             *initiator,
+                                                   state_machine_event_data_t *data);
+static sl_status_t state_wait_reflector_on_ranging_data(cs_initiator_t             *initiator,
+                                                        state_machine_event_data_t *data,
+                                                        bool                       complete);
+static sl_status_t state_in_procedure_on_ranging_data(cs_initiator_t             *initiator,
+                                                      state_machine_event_data_t *data);
 static sl_status_t state_wait_procedure_disable_on_procedure_enable_completed(cs_initiator_t             *initiator,
                                                                               state_machine_event_data_t *data);
 static sl_status_t state_delete_on_procedure_enable_completed(cs_initiator_t             *initiator,
                                                               state_machine_event_data_t *data);
 static void handle_procedure_enable_completed_event_disable(cs_initiator_t *initiator);
+static initiator_state_t initiator_stop_procedure_on_invalid_state(cs_initiator_t *initiator);
 static sl_status_t initiator_finalize_cleanup(cs_initiator_t *initiator);
+static void procedure_timer_cb(app_timer_t *handle, void *data);
 
 // -----------------------------------------------------------------------------
 // Static function definitions
@@ -170,6 +180,22 @@ static sl_status_t state_init_on_start_init_completed(cs_initiator_t            
                        initiator->conn_handle);
     initiator->initiator_state = (uint8_t)INITIATOR_STATE_START_PROCEDURE;
     initiator->procedure_enable_retry_counter = 0;
+    if (initiator->ras_client.real_time_mode) {
+      sc = cs_ras_client_real_time_receive(initiator->conn_handle,
+                                           sizeof(initiator->data.reflector.ranging_data),
+                                           initiator->data.reflector.ranging_data);
+      if (sc != SL_STATUS_OK) {
+        initiator_log_error(INSTANCE_PREFIX "RAS - failed to receive real-time data! [sc: 0x%lx]" LOG_NL,
+                            initiator->conn_handle,
+                            (unsigned long)sc);
+        on_error(initiator,
+                 CS_ERROR_EVENT_RAS_CLIENT_REALTIME_RECEIVE_FAILED,
+                 sc);
+        return sc;
+      }
+      initiator_log_info(INSTANCE_PREFIX "RAS - real-time data reception started" LOG_NL,
+                         initiator->conn_handle);
+    }
     sc = initiator_state_machine_event_handler(initiator,
                                                INITIATOR_EVT_START_PROCEDURE,
                                                NULL);
@@ -211,10 +237,29 @@ static sl_status_t state_start_procedure_on_start_procedure(cs_initiator_t      
                                  initiator->config.config_id);
 
   if (sc == SL_STATUS_OK) {
-    initiator_log_info(INSTANCE_PREFIX "Instance new state: WAIT_PROCEDURE_ENABLE_COMPLETE" LOG_NL,
-                        initiator->conn_handle);
-    initiator->initiator_state = (uint8_t)INITIATOR_STATE_WAIT_PROCEDURE_ENABLE_COMPLETE;
-    sc = SL_STATUS_OK;
+    // Start timer for procedure timeout
+    // The timer is stopped when the procedure is completed/aborted
+    // for both the initiator and the reflector or when there was an error
+    sc = app_timer_start(&initiator->timer_handle,
+                         CS_INITIATOR_PROCEDURE_TIMEOUT_MS,
+                         procedure_timer_cb,
+                         (void *)initiator,
+                         false);
+    if (sc == SL_STATUS_OK) {
+      cs_ras_client_procedure_enabled(initiator->conn_handle,
+                                      true);
+      initiator_log_info(INSTANCE_PREFIX "Instance new state: WAIT_PROCEDURE_ENABLE_COMPLETE" LOG_NL,
+                         initiator->conn_handle);
+      initiator->initiator_state = (uint8_t)INITIATOR_STATE_WAIT_PROCEDURE_ENABLE_COMPLETE;
+      sc = SL_STATUS_OK;
+    } else {
+      initiator->initiator_state = (uint8_t)INITIATOR_STATE_ERROR;
+      data_out.evt_error.error_type = CS_ERROR_EVENT_CS_PROCEDURE_START_TIMER_FAILED;
+      data_out.evt_error.sc = sc;
+      sc = initiator_state_machine_event_handler(initiator,
+                                                 INITIATOR_EVT_ERROR,
+                                                 &data_out);
+    }
   } else {
     initiator->initiator_state = (uint8_t)INITIATOR_STATE_ERROR;
     data_out.evt_error.error_type = CS_ERROR_EVENT_CS_PROCEDURE_START_FAILED;
@@ -274,6 +319,7 @@ static sl_status_t state_wait_procedure_enable_complete_on_enable_completed(cs_i
     initiator_log_info(INSTANCE_PREFIX "Instance new state: IN_PROCEDURE" LOG_NL,
                        initiator->conn_handle);
     // Start with a clean slate
+    reset_subevent_data(initiator, false);
     initiator->initiator_state = (uint8_t)INITIATOR_STATE_IN_PROCEDURE;
     sc = SL_STATUS_OK;
   } else {
@@ -326,6 +372,198 @@ static sl_status_t state_wait_procedure_enable_complete_on_enable_completed(cs_i
                                                &data_out);
   }
 
+  return sc;
+}
+
+static sl_status_t state_in_procedure_on_ranging_data(cs_initiator_t             *initiator,
+                                                      state_machine_event_data_t *data)
+{
+  sl_status_t sc = SL_STATUS_FAIL;
+  state_machine_event_data_t data_out;
+
+  // Reflector data is not valid
+  if (!data->evt_ranging_data.initiator_part) {
+    if (initiator->config.max_procedure_count != 0) {
+      // Invalid event, stopping procedure
+      initiator->initiator_state = (uint8_t)initiator_stop_procedure_on_invalid_state(initiator);
+      sc = SL_STATUS_OK;
+      if (initiator->initiator_state == ((uint8_t)INITIATOR_STATE_ERROR)) {
+        data_out.evt_error.error_type = CS_ERROR_EVENT_CS_PROCEDURE_UNEXPECTED_DATA;
+        data_out.evt_error.sc = sc;
+        sc = initiator_state_machine_event_handler(initiator,
+                                                   INITIATOR_EVT_ERROR,
+                                                   &data_out);
+      }
+      return sc;
+    }
+    initiator_log_info(INSTANCE_PREFIX "CS - ignoring ranging data %u because of the ongoing measurement" LOG_NL,
+                       initiator->conn_handle,
+                       data->evt_ranging_data.ranging_counter);
+    return SL_STATUS_OK;
+  }
+  // Initiator data
+  if (data->evt_ranging_data.procedure_state == CS_PROCEDURE_STATE_ABORTED) {
+    if (initiator->config.max_procedure_count != 0) {
+      initiator_log_info(INSTANCE_PREFIX "Instance new state: WAIT_REFLECTOR_PROCEDURE_ABORTED" LOG_NL,
+                         initiator->conn_handle);
+      initiator->initiator_state = (uint8_t)INITIATOR_STATE_WAIT_REFLECTOR_PROCEDURE_ABORTED;
+    } else {
+      initiator_log_info(INSTANCE_PREFIX "Instance new state: INITIATOR_STATE_IN_PROCEDURE" LOG_NL,
+                         initiator->conn_handle);
+      initiator->initiator_state = (uint8_t)INITIATOR_STATE_IN_PROCEDURE;
+      // Allow upcoming procedures
+      reset_subevent_data(initiator, false);
+      sc = SL_STATUS_OK;
+    }
+  } else if (data->evt_ranging_data.procedure_state == CS_PROCEDURE_STATE_COMPLETED) {
+    initiator_log_info(INSTANCE_PREFIX "Instance new state: WAIT_REFLECTOR_PROCEDURE_COMPLETE" LOG_NL,
+                       initiator->conn_handle);
+    initiator->initiator_state = (uint8_t)INITIATOR_STATE_WAIT_REFLECTOR_PROCEDURE_COMPLETE;
+    sc = SL_STATUS_OK;
+  }
+  return sc;
+}
+
+static sl_status_t state_in_procedure_on_cs_result(cs_initiator_t             *initiator,
+                                                   state_machine_event_data_t *data)
+{
+  sl_status_t sc = SL_STATUS_OK;
+  cs_procedure_state_t procedure_state;
+  state_machine_event_data_t data_out;
+
+  procedure_state = extract_cs_result_data(initiator, &data->evt_cs_result);
+
+  if (procedure_state == CS_PROCEDURE_STATE_IN_PROGRESS) {
+    initiator->initiator_state = (uint8_t)INITIATOR_STATE_IN_PROCEDURE;
+    return sc;
+  }
+
+  if (procedure_state == CS_PROCEDURE_STATE_ABORTED) {
+    initiator_log_info(INSTANCE_PREFIX "Initiator ranging data %u aborted" LOG_NL,
+                       initiator->conn_handle,
+                       initiator->ranging_counter);
+  } else {
+    initiator_log_info(INSTANCE_PREFIX "Initiator ranging data %u complete" LOG_NL,
+                       initiator->conn_handle,
+                       initiator->ranging_counter);
+  }
+
+  // Pass a ranging data event
+  data_out.evt_ranging_data.initiator_part = true;
+  data_out.evt_ranging_data.ranging_counter = initiator->ranging_counter;
+  data_out.evt_ranging_data.data = initiator->data.initiator.ranging_data;
+  data_out.evt_ranging_data.data_size = initiator->data.initiator.ranging_data_size;
+  data_out.evt_ranging_data.procedure_state = procedure_state;
+  sc = initiator_state_machine_event_handler(initiator,
+                                             INITIATOR_EVT_RANGING_DATA,
+                                             &data_out);
+  return sc;
+}
+
+static sl_status_t state_wait_reflector_on_ranging_data(cs_initiator_t             *initiator,
+                                                        state_machine_event_data_t *data,
+                                                        bool                       initiator_complete)
+{
+  sl_status_t sc = SL_STATUS_FAIL;
+  state_machine_event_data_t data_out;
+
+  if (data->evt_ranging_data.initiator_part) {
+    if (initiator->config.max_procedure_count != 0) {
+      // Disable procedure
+      initiator->initiator_state = (uint8_t)initiator_stop_procedure_on_invalid_state(initiator);
+      sc = SL_STATUS_OK;
+      if (initiator->initiator_state == ((uint8_t)INITIATOR_STATE_ERROR)) {
+        data_out.evt_error.error_type = CS_ERROR_EVENT_CS_PROCEDURE_UNEXPECTED_DATA;
+        data_out.evt_error.sc = sc;
+        sc = initiator_state_machine_event_handler(initiator,
+                                                   INITIATOR_EVT_ERROR,
+                                                   &data_out);
+      }
+      return sc;
+    }
+    initiator_log_info(INSTANCE_PREFIX "CS - ignoring initiator ranging data %u  because %u is in progress" LOG_NL,
+                       initiator->conn_handle,
+                       data->evt_ranging_data.ranging_counter,
+                       initiator->ranging_counter);
+    return SL_STATUS_OK;
+  }
+  #if defined(CS_INITIATOR_CONFIG_LOG_DATA) && (CS_INITIATOR_CONFIG_LOG_DATA == 1)
+  initiator_log_debug(INSTANCE_PREFIX "Reflector Ranging Data %u ready" LOG_NL,
+                      initiator->conn_handle,
+                      ((cs_ras_ranging_header_t *)initiator->data.reflector.ranging_data)->ranging_counter);
+  initiator_log_hexdump_debug((initiator->data.reflector.ranging_data),
+                              (initiator->data.reflector.ranging_data_size));
+  initiator_log_append_debug(LOG_NL);
+  #endif // defined(CS_INITIATOR_CONFIG_LOG_DATA) && (CS_INITIATOR_CONFIG_LOG_DATA == 1)
+  if (data->evt_ranging_data.ranging_counter != initiator->ranging_counter) {
+    if (initiator->config.max_procedure_count != 0) {
+      // Disable procedure
+      initiator->initiator_state = (uint8_t)initiator_stop_procedure_on_invalid_state(initiator);
+      sc = SL_STATUS_OK;
+      if (initiator->initiator_state == ((uint8_t)INITIATOR_STATE_ERROR)) {
+        data_out.evt_error.error_type = CS_ERROR_EVENT_CS_PROCEDURE_UNEXPECTED_DATA;
+        data_out.evt_error.sc = sc;
+        sc = initiator_state_machine_event_handler(initiator,
+                                                   INITIATOR_EVT_ERROR,
+                                                   &data_out);
+      }
+      return sc;
+    }
+    initiator_log_info(INSTANCE_PREFIX "CS - ignoring reflector ranging data %u because %u is in progress" LOG_NL,
+                       initiator->conn_handle,
+                       data->evt_ranging_data.ranging_counter,
+                       initiator->ranging_counter);
+
+    return SL_STATUS_OK;
+  }
+
+  sc = app_timer_stop(&initiator->timer_handle);
+  if (sc != SL_STATUS_OK) {
+    initiator->initiator_state = (uint8_t)INITIATOR_STATE_ERROR;
+    data_out.evt_error.error_type = CS_ERROR_EVENT_CS_PROCEDURE_STOP_TIMER_FAILED;
+    data_out.evt_error.sc = sc;
+    sc = initiator_state_machine_event_handler(initiator,
+                                               INITIATOR_EVT_ERROR,
+                                               &data_out);
+  }
+  if (initiator->config.max_procedure_count != 0) {
+    initiator_log_info(INSTANCE_PREFIX "Instance new state: START_PROCEDURE" LOG_NL,
+                       initiator->conn_handle);
+    initiator->initiator_state = (uint8_t)INITIATOR_STATE_START_PROCEDURE;
+    sc = initiator_state_machine_event_handler(initiator,
+                                               INITIATOR_EVT_START_PROCEDURE,
+                                               NULL);
+    if ((data->evt_ranging_data.procedure_state == CS_PROCEDURE_STATE_COMPLETED)
+        && initiator_complete) {
+      cs_initiator_report(CS_INITIATOR_REPORT_LAST_CS_RESULT);
+      calculate_distance(initiator);
+    } else {
+      initiator_log_info(INSTANCE_PREFIX "Procedure not completed: %u" LOG_NL,
+                         initiator->conn_handle,
+                         data->evt_ranging_data.ranging_counter);
+    }
+    // Also reset subevent data
+    reset_subevent_data(initiator, false);
+    return sc;
+  }
+
+  initiator_log_info(INSTANCE_PREFIX "Instance new state: IN_PROCEDURE" LOG_NL,
+                     initiator->conn_handle);
+  initiator->initiator_state = (uint8_t)INITIATOR_STATE_IN_PROCEDURE;
+
+  if ((data->evt_ranging_data.procedure_state == CS_PROCEDURE_STATE_COMPLETED)
+      && initiator_complete) {
+    cs_initiator_report(CS_INITIATOR_REPORT_LAST_CS_RESULT);
+    calculate_distance(initiator);
+  } else {
+    initiator_log_info(INSTANCE_PREFIX "Procedure not completed: %u" LOG_NL,
+                       initiator->conn_handle,
+                       data->evt_ranging_data.ranging_counter);
+  }
+  // Procedure data processed in free running mode, clear the subevent data
+  reset_subevent_data(initiator, false);
+
+  sc = SL_STATUS_OK;
   return sc;
 }
 
@@ -416,6 +654,29 @@ static void handle_procedure_enable_completed_event_disable(cs_initiator_t *init
                      (unsigned long)time_tick);
 }
 
+static initiator_state_t initiator_stop_procedure_on_invalid_state(cs_initiator_t *initiator)
+{
+  sl_status_t sc;
+
+  sc = sl_bt_cs_procedure_enable(initiator->conn_handle,
+                                 sl_bt_cs_procedure_state_disabled,
+                                 initiator->config.config_id);
+  if (sc == SL_STATUS_OK) {
+    initiator_log_info(INSTANCE_PREFIX "Instance new state: WAIT_PROCEDURE_DISABLE_COMPLETE" LOG_NL,
+                       initiator->conn_handle);
+    return INITIATOR_STATE_WAIT_PROCEDURE_DISABLE_COMPLETE;
+  } else if (sc == SL_STATUS_INVALID_HANDLE) {
+    // Procedure is already stopped by stack
+    app_timer_stop(&initiator->timer_handle);
+    initiator_log_info(INSTANCE_PREFIX "Instance new state: START_PROCEDURE" LOG_NL,
+                       initiator->conn_handle);
+    return INITIATOR_STATE_START_PROCEDURE;
+  } else {
+    // all other errors creates an error state
+    return INITIATOR_STATE_ERROR;
+  }
+}
+
 /******************************************************************************
  * Initiator finalize cleanup. Remove the configuration and deinit RTL lib.
  * This function is called after the procedure was stopped.
@@ -425,16 +686,18 @@ static void handle_procedure_enable_completed_event_disable(cs_initiator_t *init
  *****************************************************************************/
 static sl_status_t initiator_finalize_cleanup(cs_initiator_t *initiator)
 {
+  enum sl_rtl_error_code rtl_err;
   sl_status_t sc = SL_STATUS_OK;
   (void)sl_bt_cs_remove_config(initiator->conn_handle, initiator->config.config_id);
-  
-  sl_status_t algo_sc = cs_algo_remove(initiator->conn_handle);
-  if (algo_sc != SL_STATUS_OK && algo_sc != SL_STATUS_NOT_FOUND) {
-    initiator_log_error(INSTANCE_PREFIX
-                        "cs_algo_remove failed! [sc: 0x%lx]" LOG_NL,
-                        initiator->conn_handle,
-                        (unsigned long)algo_sc);
-    sc = SL_STATUS_FAIL;
+
+  if (initiator->rtl_handle != NULL) {
+    rtl_err = sl_rtl_cs_deinit(&initiator->rtl_handle);
+    if (rtl_err != SL_RTL_ERROR_SUCCESS) {
+      initiator_log_error(INSTANCE_PREFIX "Failed to deinit RTL lib! [err: 0x%02x]" LOG_NL,
+                          initiator->conn_handle,
+                          rtl_err);
+      return SL_STATUS_FAIL;
+    }
   }
 
   initiator_log_debug(INSTANCE_PREFIX "deleting instance" LOG_NL,
@@ -458,6 +721,10 @@ static sl_status_t initiator_finalize_cleanup(cs_initiator_t *initiator)
   initiator->ras_client.config.ranging_data_overwritten_notification =
     CS_INITIATOR_RAS_DATA_OVERWRITTEN_NOTIFICATION;
 
+  initiator->data.reflector.ranging_data_size = 0;
+  memset(&initiator->data.reflector.ranging_data,
+         0,
+         sizeof(initiator->data.reflector.ranging_data));
   return sc;
 }
 
@@ -518,6 +785,25 @@ sl_status_t initiator_state_machine_event_handler(cs_initiator_t *initiator,
       break;
 
     case INITIATOR_STATE_IN_PROCEDURE:
+      if (event == INITIATOR_EVT_RANGING_DATA) {
+        sc = state_in_procedure_on_ranging_data(initiator, data);
+      }
+      if ((event == INITIATOR_EVT_CS_RESULT)
+          || (event == INITIATOR_EVT_CS_RESULT_CONTINUE)) {
+        sc = state_in_procedure_on_cs_result(initiator, data);
+      }
+      break;
+
+    case INITIATOR_STATE_WAIT_REFLECTOR_PROCEDURE_COMPLETE:
+      if (event == INITIATOR_EVT_RANGING_DATA) {
+        sc = state_wait_reflector_on_ranging_data(initiator, data, true);
+      }
+      break;
+
+    case INITIATOR_STATE_WAIT_REFLECTOR_PROCEDURE_ABORTED:
+      if (event == INITIATOR_EVT_RANGING_DATA) {
+        sc = state_wait_reflector_on_ranging_data(initiator, data, false);
+      }
       break;
 
     case INITIATOR_STATE_WAIT_PROCEDURE_DISABLE_COMPLETE:
@@ -540,4 +826,19 @@ sl_status_t initiator_state_machine_event_handler(cs_initiator_t *initiator,
       break;
   }
   return sc;
+}
+
+/******************************************************************************
+ * Procedure timer callback
+ *****************************************************************************/
+static void procedure_timer_cb(app_timer_t *handle, void *data)
+{
+  cs_initiator_t *initiator = (cs_initiator_t *)data;
+  if (handle == &initiator->timer_handle) {
+    initiator->error_timer_started = false;
+    initiator->error_timer_elapsed = true;
+    on_error(initiator,
+             CS_ERROR_EVENT_TIMER_ELAPSED,
+             SL_STATUS_TIMEOUT);
+  }
 }

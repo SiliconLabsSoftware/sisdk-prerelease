@@ -105,19 +105,19 @@
 // <i> antennas presented on each board (capabilities). Maximum can be calculated using the product
 // <i> of used Initiator and Reflector antennae. The default maximum value for antenna_paths is 4.
 // <i> These settings were selected by assuming that the controller creates the maximum number of subevents (32),
-// <i> and the measuring mode is PBR. In RTT mode, far less data is created.
+// <i> and the measuring mode is PBR. In RTT mode there are far less data is created.
 // <i> Addition to that, if you use RTT as submode, you should add the following equation to calculate the
 // <i> size.
 // <i> (1 + mode1_size) * channels / main_mode_steps
 // <i> where
 // <i> mode1_size is 6, and main_mode_steps is 2. The later can be changed in cs_initiator_client.h.
 // <i> The default is calculated by using the constants and settings above using the worst case scenario, including using RTT submode
-// <i> which gives 2672 bytes.
+// <i> which gives 2,672 bytes.
 // <i> RAM consumption can be reduced by changing the affected settings and reducing
 // <i> "Procedure maximum length" accordingly.
-// <i> Default: 2672
+// <i> Default: 2700
 #ifndef CS_INITIATOR_MAX_RANGING_DATA_SIZE
-#define CS_INITIATOR_MAX_RANGING_DATA_SIZE            (2672)
+#define CS_INITIATOR_MAX_RANGING_DATA_SIZE            (2700)
 #endif
 
 // <o CS_INITIATOR_MAX_DROP> Maximum dropped procedures <2..10>
@@ -236,11 +236,7 @@
 
 // <o CS_INITIATOR_DEFAULT_MIN_SUBEVENT_LEN> Minimum subevent length [us] <1250..3999999>
 // <i> Minimum suggested duration for each CS subevent in microseconds.
-// <i> Raising this value forces the controller to use longer subevents, reducing the number
-// <i> of subevents that fit within a single procedure. 
-// <i> This value should not exceed the maximum procedure time, which is calculated as:
-// <i> max_procedure_time_us = CS_INITIATOR_DEFAULT_MAX_PROCEDURE_INTERVAL
-// <i>                       * CS_INITIATOR_DEFAULT_MAX_CONNECTION_INTERVAL * 1250
+// <i> Increase CS_INITIATOR_MAX_RANGING_DATA_SIZE if a large number of subevents is expected.
 // <i> Default: 1250
 #ifndef CS_INITIATOR_DEFAULT_MIN_SUBEVENT_LEN
 #define CS_INITIATOR_DEFAULT_MIN_SUBEVENT_LEN          1250
@@ -248,13 +244,7 @@
 
 // <o CS_INITIATOR_DEFAULT_MAX_SUBEVENT_LEN> Maximum subevent length [us] <1250..3999999>
 // <i> Maximum suggested duration for each CS subevent in microseconds.
-// <i> Reducing this value causes the controller to split CS steps across multiple subevents.
-// <i> When a large number of subevents is expected, ensure that the effective procedure interval
-// <i> is at least the number of created subevents, plus additional connection events for RAS data transfer.
-// <i> The effective procedure interval is determined by
-// <i> CS_INITIATOR_DEFAULT_PROCEDURE_SCHEDULING, or by CS_INITIATOR_DEFAULT_MAX_PROCEDURE_INTERVAL
-// <i> when custom scheduling is used.
-// <i> With default settings, values below ~38500 us result in more than one subevent per procedure.
+// <i> Increase CS_INITIATOR_MAX_RANGING_DATA_SIZE if a large number of subevents is expected.
 // <i> Default: 3999999
 #ifndef CS_INITIATOR_DEFAULT_MAX_SUBEVENT_LEN
 #define CS_INITIATOR_DEFAULT_MAX_SUBEVENT_LEN          3999999

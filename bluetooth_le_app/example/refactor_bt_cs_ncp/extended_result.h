@@ -32,16 +32,16 @@
 #define EXTENDED_RESULT_H
 
 #include "sl_rtl_clib_api.h"
-#include "cs_rreq.h"
+#include "cs_initiator.h"
 
 /**************************************************************************//**
  * Add extended result data to the ACP event buffer.
  *****************************************************************************/
-void cs_on_extended_result(uint8_t conn_handle,
-                           uint16_t ranging_counter,
-                           const uint8_t *result,
-                           uint16_t result_size,
-                           const cs_rreq_result_t *ranging_data);
+void cs_on_extended_result(const uint8_t conn_handle,
+                          const uint16_t ranging_counter,
+                          const uint8_t *result,
+                          const uint16_t result_size,
+                          const cs_ranging_data_t *ranging_data);
 
 /**************************************************************************//**
  * Extended result event serializer task.

@@ -250,17 +250,17 @@ void cs_initiator_cli_conn_phy(sl_cli_command_arg_t *arguments)
   uint8_t arg_data;
   arg_data = sl_cli_get_argument_uint8(arguments, 0);
   if (arg_data != sl_bt_gap_phy_1m && arg_data != sl_bt_gap_phy_2m) {
-    cli_print("ERROR. Only %d and %d are supported." APP_LOG_NL,
-              sl_bt_gap_phy_1m, sl_bt_gap_phy_2m);
+    app_log("ERROR. Only %d and %d are supported." APP_LOG_NL,
+            sl_bt_gap_phy_1m, sl_bt_gap_phy_2m);
   } else {
-    cli_print("OK. Connection PHY set to %d" APP_LOG_NL,
-              arg_data);
+    app_log("OK. Connection PHY set to %d" APP_LOG_NL,
+            arg_data);
     conn_phy = arg_data;
   }
 }
 
 /*******************************************************************************
- * CLI Callback for "proc_count" command
+ * CLI Callback for "conn_phy" command
  * @param[in] arguments pointer to CLI arguments
  ******************************************************************************/
 void cs_initiator_cli_procedure_counter(sl_cli_command_arg_t *arguments)
@@ -268,10 +268,10 @@ void cs_initiator_cli_procedure_counter(sl_cli_command_arg_t *arguments)
   uint8_t arg_data;
   arg_data = sl_cli_get_argument_uint8(arguments, 0);
   if (arg_data != 0 && arg_data != 1) {
-    cli_print("ERROR. Only 0 and 1 are supported." APP_LOG_NL);
+    app_log("ERROR. Only 0 and 1 are supported." APP_LOG_NL);
   } else {
-    cli_print("OK. Procedure counter set to %d" APP_LOG_NL,
-              arg_data);
+    app_log("OK. Procedure counter set to %d" APP_LOG_NL,
+            arg_data);
     procedure_counter = arg_data;
   }
 }

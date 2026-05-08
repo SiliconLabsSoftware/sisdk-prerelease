@@ -88,7 +88,7 @@ uint32_t sli_bt_can_sleep_ticks(void);
 // Forward declarations of internal data structures
 
 /** @brief The BGAPI device structure for the Bluetooth host stack */
-extern sli_bgapi_device_t *sli_bt_bgapi_device;
+extern sli_bgapi_device_t sli_bt_bgapi_device;
 
 // -----------------------------------------------------------------------------
 // Class and command IDs for `bt` API
@@ -340,7 +340,6 @@ enum sli_bt_command_id
     sli_bt_resolving_list_remove_device_by_bonding_command_id = 0x02,
     sli_bt_resolving_list_remove_device_by_address_command_id = 0x03,
     sli_bt_resolving_list_remove_all_devices_command_id = 0x04,
-    sli_bt_resolving_list_read_peer_resolvable_address_command_id = 0x05,
     sli_bt_accept_list_add_device_by_bonding_command_id = 0x00,
     sli_bt_accept_list_add_device_by_address_command_id = 0x01,
     sli_bt_accept_list_remove_device_by_bonding_command_id = 0x02,
@@ -361,11 +360,6 @@ enum sli_bt_command_id
     sli_bt_cs_set_antenna_configuration_command_id = 0x07,
     sli_bt_cs_read_local_supported_capabilities_command_id = 0x08,
     sli_bt_cs_read_remote_supported_capabilities_command_id = 0x09,
-    sli_bt_cs_handover_get_procedure_parameters_command_id = 0x0a,
-    sli_bt_cs_handover_set_procedure_parameters_command_id = 0x0b,
-    sli_bt_cs_handover_create_sync_command_id = 0x0c,
-    sli_bt_cs_handover_enable_procedure_command_id = 0x0d,
-    sli_bt_cs_handover_remove_procedure_command_id = 0x0e,
     sli_bt_cs_test_start_command_id = 0x00,
     sli_bt_cs_test_end_command_id = 0x01,
     sli_bt_l2cap_open_le_channel_command_id = 0x01,
@@ -609,7 +603,6 @@ enum sli_bt_response_id
     sli_bt_resolving_list_remove_device_by_bonding_response_id = 0x02,
     sli_bt_resolving_list_remove_device_by_address_response_id = 0x03,
     sli_bt_resolving_list_remove_all_devices_response_id = 0x04,
-    sli_bt_resolving_list_read_peer_resolvable_address_response_id = 0x05,
     sli_bt_accept_list_add_device_by_bonding_response_id = 0x00,
     sli_bt_accept_list_add_device_by_address_response_id = 0x01,
     sli_bt_accept_list_remove_device_by_bonding_response_id = 0x02,
@@ -630,11 +623,6 @@ enum sli_bt_response_id
     sli_bt_cs_set_antenna_configuration_response_id = 0x07,
     sli_bt_cs_read_local_supported_capabilities_response_id = 0x08,
     sli_bt_cs_read_remote_supported_capabilities_response_id = 0x09,
-    sli_bt_cs_handover_get_procedure_parameters_response_id = 0x0a,
-    sli_bt_cs_handover_set_procedure_parameters_response_id = 0x0b,
-    sli_bt_cs_handover_create_sync_response_id = 0x0c,
-    sli_bt_cs_handover_enable_procedure_response_id = 0x0d,
-    sli_bt_cs_handover_remove_procedure_response_id = 0x0e,
     sli_bt_cs_test_start_response_id = 0x00,
     sli_bt_cs_test_end_response_id = 0x01,
     sli_bt_l2cap_open_le_channel_response_id = 0x01,
@@ -684,10 +672,8 @@ enum sli_bt_event_id
     sli_bt_system_soft_timer_event_id = 0x07,
     sli_bt_linklayer_event_info_report_event_id = 0x00,
     sli_bt_resource_status_event_id = 0x00,
-    sli_bt_gap_random_address_refresh_event_id = 0x00,
     sli_bt_advertiser_timeout_event_id = 0x01,
     sli_bt_advertiser_scan_request_event_id = 0x02,
-    sli_bt_advertiser_random_address_refresh_event_id = 0x03,
     sli_bt_periodic_advertiser_status_event_id = 0x00,
     sli_bt_scanner_legacy_advertisement_report_event_id = 0x00,
     sli_bt_scanner_extended_advertisement_report_event_id = 0x02,
@@ -747,10 +733,6 @@ enum sli_bt_event_id
     sli_bt_cs_result_event_id = 0x03,
     sli_bt_cs_result_continue_event_id = 0x05,
     sli_bt_cs_read_remote_supported_capabilities_complete_event_id = 0x04,
-    sli_bt_cs_handover_sync_established_event_id = 0x06,
-    sli_bt_cs_handover_complete_event_id = 0x07,
-    sli_bt_cs_handover_result_event_id = 0x08,
-    sli_bt_cs_handover_result_continue_event_id = 0x09,
     sli_bt_cs_test_end_completed_event_id = 0x00,
     sli_bt_l2cap_le_channel_open_request_event_id = 0x01,
     sli_bt_l2cap_le_channel_open_response_event_id = 0x02,
@@ -2324,14 +2306,6 @@ PACKSTRUCT( struct sl_bt_cmd_resolving_list_remove_device_by_address_s
 
 typedef struct sl_bt_cmd_resolving_list_remove_device_by_address_s sl_bt_cmd_resolving_list_remove_device_by_address_t;
 
-PACKSTRUCT( struct sl_bt_cmd_resolving_list_read_peer_resolvable_address_s
-{
-    bd_addr address;
-    uint8_t address_type;
-});
-
-typedef struct sl_bt_cmd_resolving_list_read_peer_resolvable_address_s sl_bt_cmd_resolving_list_read_peer_resolvable_address_t;
-
 PACKSTRUCT( struct sl_bt_cmd_accept_list_add_device_by_bonding_s
 {
     uint32_t bonding;
@@ -2493,50 +2467,6 @@ PACKSTRUCT( struct sl_bt_cmd_cs_read_remote_supported_capabilities_s
 });
 
 typedef struct sl_bt_cmd_cs_read_remote_supported_capabilities_s sl_bt_cmd_cs_read_remote_supported_capabilities_t;
-
-PACKSTRUCT( struct sl_bt_cmd_cs_handover_get_procedure_parameters_s
-{
-    uint8_t connection;
-    uint8_t config_id;
-});
-
-typedef struct sl_bt_cmd_cs_handover_get_procedure_parameters_s sl_bt_cmd_cs_handover_get_procedure_parameters_t;
-
-PACKSTRUCT( struct sl_bt_cmd_cs_handover_set_procedure_parameters_s
-{
-    uint8array cs_parameters;
-});
-
-typedef struct sl_bt_cmd_cs_handover_set_procedure_parameters_s sl_bt_cmd_cs_handover_set_procedure_parameters_t;
-
-PACKSTRUCT( struct sl_bt_cmd_cs_handover_create_sync_s
-{
-    uint8_t analyzer;
-    uint8_t config_id;
-    uint16_t procedure_counter;
-});
-
-typedef struct sl_bt_cmd_cs_handover_create_sync_s sl_bt_cmd_cs_handover_create_sync_t;
-
-PACKSTRUCT( struct sl_bt_cmd_cs_handover_enable_procedure_s
-{
-    uint8_t enable;
-    uint16_t start_procedure_counter;
-    uint16_t procedure_skip;
-    uint8_t handle_type;
-    uint8_t handle;
-    uint8_t config_id;
-});
-
-typedef struct sl_bt_cmd_cs_handover_enable_procedure_s sl_bt_cmd_cs_handover_enable_procedure_t;
-
-PACKSTRUCT( struct sl_bt_cmd_cs_handover_remove_procedure_s
-{
-    uint8_t analyzer;
-    uint8_t config_id;
-});
-
-typedef struct sl_bt_cmd_cs_handover_remove_procedure_s sl_bt_cmd_cs_handover_remove_procedure_t;
 
 PACKSTRUCT( struct sl_bt_cmd_cs_test_start_s
 {
@@ -4362,14 +4292,6 @@ PACKSTRUCT( struct sl_bt_rsp_resolving_list_remove_all_devices_s
 
 typedef struct sl_bt_rsp_resolving_list_remove_all_devices_s sl_bt_rsp_resolving_list_remove_all_devices_t;
 
-PACKSTRUCT( struct sl_bt_rsp_resolving_list_read_peer_resolvable_address_s
-{
-    uint16_t result;
-    bd_addr address_out;
-});
-
-typedef struct sl_bt_rsp_resolving_list_read_peer_resolvable_address_s sl_bt_rsp_resolving_list_read_peer_resolvable_address_t;
-
 PACKSTRUCT( struct sl_bt_rsp_accept_list_add_device_by_bonding_s
 {
     uint16_t result;
@@ -4534,44 +4456,6 @@ PACKSTRUCT( struct sl_bt_rsp_cs_read_remote_supported_capabilities_s
 });
 
 typedef struct sl_bt_rsp_cs_read_remote_supported_capabilities_s sl_bt_rsp_cs_read_remote_supported_capabilities_t;
-
-PACKSTRUCT( struct sl_bt_rsp_cs_handover_get_procedure_parameters_s
-{
-    uint16_t result;
-    uint8array cs_parameters;
-});
-
-typedef struct sl_bt_rsp_cs_handover_get_procedure_parameters_s sl_bt_rsp_cs_handover_get_procedure_parameters_t;
-
-PACKSTRUCT( struct sl_bt_rsp_cs_handover_set_procedure_parameters_s
-{
-    uint16_t result;
-    uint8_t analyzer;
-    uint8_t config_id;
-});
-
-typedef struct sl_bt_rsp_cs_handover_set_procedure_parameters_s sl_bt_rsp_cs_handover_set_procedure_parameters_t;
-
-PACKSTRUCT( struct sl_bt_rsp_cs_handover_create_sync_s
-{
-    uint16_t result;
-});
-
-typedef struct sl_bt_rsp_cs_handover_create_sync_s sl_bt_rsp_cs_handover_create_sync_t;
-
-PACKSTRUCT( struct sl_bt_rsp_cs_handover_enable_procedure_s
-{
-    uint16_t result;
-});
-
-typedef struct sl_bt_rsp_cs_handover_enable_procedure_s sl_bt_rsp_cs_handover_enable_procedure_t;
-
-PACKSTRUCT( struct sl_bt_rsp_cs_handover_remove_procedure_s
-{
-    uint16_t result;
-});
-
-typedef struct sl_bt_rsp_cs_handover_remove_procedure_s sl_bt_rsp_cs_handover_remove_procedure_t;
 
 PACKSTRUCT( struct sl_bt_rsp_cs_test_start_s
 {
@@ -4998,7 +4882,6 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_resolving_list_add_device_by_address_t             cmd_resolving_list_add_device_by_address;
     sl_bt_cmd_resolving_list_remove_device_by_bonding_t          cmd_resolving_list_remove_device_by_bonding;
     sl_bt_cmd_resolving_list_remove_device_by_address_t          cmd_resolving_list_remove_device_by_address;
-    sl_bt_cmd_resolving_list_read_peer_resolvable_address_t      cmd_resolving_list_read_peer_resolvable_address;
     sl_bt_cmd_accept_list_add_device_by_bonding_t                cmd_accept_list_add_device_by_bonding;
     sl_bt_cmd_accept_list_add_device_by_address_t                cmd_accept_list_add_device_by_address;
     sl_bt_cmd_accept_list_remove_device_by_bonding_t             cmd_accept_list_remove_device_by_bonding;
@@ -5016,11 +4899,6 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_cs_procedure_enable_t                              cmd_cs_procedure_enable;
     sl_bt_cmd_cs_set_antenna_configuration_t                     cmd_cs_set_antenna_configuration;
     sl_bt_cmd_cs_read_remote_supported_capabilities_t            cmd_cs_read_remote_supported_capabilities;
-    sl_bt_cmd_cs_handover_get_procedure_parameters_t             cmd_cs_handover_get_procedure_parameters;
-    sl_bt_cmd_cs_handover_set_procedure_parameters_t             cmd_cs_handover_set_procedure_parameters;
-    sl_bt_cmd_cs_handover_create_sync_t                          cmd_cs_handover_create_sync;
-    sl_bt_cmd_cs_handover_enable_procedure_t                     cmd_cs_handover_enable_procedure;
-    sl_bt_cmd_cs_handover_remove_procedure_t                     cmd_cs_handover_remove_procedure;
     sl_bt_cmd_cs_test_start_t                                    cmd_cs_test_start;
     sl_bt_cmd_l2cap_open_le_channel_t                            cmd_l2cap_open_le_channel;
     sl_bt_cmd_l2cap_send_le_channel_open_response_t              cmd_l2cap_send_le_channel_open_response;
@@ -5254,7 +5132,6 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_resolving_list_remove_device_by_bonding_t          rsp_resolving_list_remove_device_by_bonding;
     sl_bt_rsp_resolving_list_remove_device_by_address_t          rsp_resolving_list_remove_device_by_address;
     sl_bt_rsp_resolving_list_remove_all_devices_t                rsp_resolving_list_remove_all_devices;
-    sl_bt_rsp_resolving_list_read_peer_resolvable_address_t      rsp_resolving_list_read_peer_resolvable_address;
     sl_bt_rsp_accept_list_add_device_by_bonding_t                rsp_accept_list_add_device_by_bonding;
     sl_bt_rsp_accept_list_add_device_by_address_t                rsp_accept_list_add_device_by_address;
     sl_bt_rsp_accept_list_remove_device_by_bonding_t             rsp_accept_list_remove_device_by_bonding;
@@ -5275,11 +5152,6 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_cs_set_antenna_configuration_t                     rsp_cs_set_antenna_configuration;
     sl_bt_rsp_cs_read_local_supported_capabilities_t             rsp_cs_read_local_supported_capabilities;
     sl_bt_rsp_cs_read_remote_supported_capabilities_t            rsp_cs_read_remote_supported_capabilities;
-    sl_bt_rsp_cs_handover_get_procedure_parameters_t             rsp_cs_handover_get_procedure_parameters;
-    sl_bt_rsp_cs_handover_set_procedure_parameters_t             rsp_cs_handover_set_procedure_parameters;
-    sl_bt_rsp_cs_handover_create_sync_t                          rsp_cs_handover_create_sync;
-    sl_bt_rsp_cs_handover_enable_procedure_t                     rsp_cs_handover_enable_procedure;
-    sl_bt_rsp_cs_handover_remove_procedure_t                     rsp_cs_handover_remove_procedure;
     sl_bt_rsp_cs_test_start_t                                    rsp_cs_test_start;
     sl_bt_rsp_cs_test_end_t                                      rsp_cs_test_end;
     sl_bt_rsp_l2cap_open_le_channel_t                            rsp_l2cap_open_le_channel;
@@ -5322,10 +5194,8 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_evt_system_soft_timer_t                                evt_system_soft_timer;
     sl_bt_evt_linklayer_event_info_report_t                      evt_linklayer_event_info_report;
     sl_bt_evt_resource_status_t                                  evt_resource_status;
-    sl_bt_evt_gap_random_address_refresh_t                       evt_gap_random_address_refresh;
     sl_bt_evt_advertiser_timeout_t                               evt_advertiser_timeout;
     sl_bt_evt_advertiser_scan_request_t                          evt_advertiser_scan_request;
-    sl_bt_evt_advertiser_random_address_refresh_t                evt_advertiser_random_address_refresh;
     sl_bt_evt_periodic_advertiser_status_t                       evt_periodic_advertiser_status;
     sl_bt_evt_scanner_legacy_advertisement_report_t              evt_scanner_legacy_advertisement_report;
     sl_bt_evt_scanner_extended_advertisement_report_t            evt_scanner_extended_advertisement_report;
@@ -5384,10 +5254,6 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_evt_cs_result_t                                        evt_cs_result;
     sl_bt_evt_cs_result_continue_t                               evt_cs_result_continue;
     sl_bt_evt_cs_read_remote_supported_capabilities_complete_t   evt_cs_read_remote_supported_capabilities_complete;
-    sl_bt_evt_cs_handover_sync_established_t                     evt_cs_handover_sync_established;
-    sl_bt_evt_cs_handover_complete_t                             evt_cs_handover_complete;
-    sl_bt_evt_cs_handover_result_t                               evt_cs_handover_result;
-    sl_bt_evt_cs_handover_result_continue_t                      evt_cs_handover_result_continue;
     sl_bt_evt_cs_test_end_completed_t                            evt_cs_test_end_completed;
     sl_bt_evt_l2cap_le_channel_open_request_t                    evt_l2cap_le_channel_open_request;
     sl_bt_evt_l2cap_le_channel_open_response_t                   evt_l2cap_le_channel_open_response;

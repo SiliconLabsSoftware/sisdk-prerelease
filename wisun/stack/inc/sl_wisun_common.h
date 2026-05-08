@@ -32,7 +32,6 @@
 #define SL_WISUN_COMMON_H
 
 #include <inttypes.h>
-#include <sl_slist.h>
 
 #define CMSIS_RTOS_ERROR_MASK       0x80000000
 
@@ -146,6 +145,8 @@ uint64_t divide_integer(uint64_t dividend, uint32_t divisor);
 #define MIN(a, b) (((a) <= (b)) ? (a) : (b))
 
 #define MAX(a, b) (((a) >= (b)) ? (a) : (b))
+
+#define container_of(ptr, type, member)  (type *)((uintptr_t)(ptr) - ((uintptr_t)(&((type *)0)->member)))
 
 /// Get the number of elements in an array (must not be used with pointers)
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))

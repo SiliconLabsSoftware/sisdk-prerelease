@@ -1,6 +1,5 @@
 var group__sl__bt__gap =
 [
-    [ "sl_bt_evt_gap_random_address_refresh", "group__sl__bt__evt__gap__random__address__refresh.html", "group__sl__bt__evt__gap__random__address__refresh" ],
     [ "sl_bt_gap_address_type_t", "group__sl__bt__gap.html#gac8d5431d3062e47c5d51b9fb9f36c104", [
       [ "sl_bt_gap_public_address", "group__sl__bt__gap.html#ggac8d5431d3062e47c5d51b9fb9f36c104a9bd23a182f82727d767972fa82a41295", null ],
       [ "sl_bt_gap_static_address", "group__sl__bt__gap.html#ggac8d5431d3062e47c5d51b9fb9f36c104a0906c9f6e28dd0d93b011d7509c3d70c", null ],

@@ -221,7 +221,7 @@ int select(int nfds, fd_set *restrict readfds,
 void sl_wisun_select_init(void)
 {
   const osEventFlagsAttr_t select_flags_attr = {
-    "ws_select",
+    "select event flag",
     0,
     NULL,
     0

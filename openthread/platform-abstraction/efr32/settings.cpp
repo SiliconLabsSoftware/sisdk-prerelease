@@ -363,14 +363,14 @@ void otPlatSettingsInit(otInstance *aInstance, const uint16_t *aSensitiveKeys, u
 
     sl_status_t status = settingsApiCheck(aInstance);
 
-    otEXPECT_ACTION(status == SL_STATUS_OK, otLogDebgPlat("Error initializing settings: %u", status));
+    otEXPECT_ACTION(status == SL_STATUS_OK, otLogDebgPlat("Error initializing settings: %lu", status));
 
     sInstanceCount++;
 
     otEXPECT(!nvm3_defaultHandle->hasBeenOpened);
     status = nvm3_open(nvm3_defaultHandle, nvm3_defaultInit);
 
-    otEXPECT_ACTION(status == SL_STATUS_OK, otLogDebgPlat("Error initializing nvm3 instance: %u", status));
+    otEXPECT_ACTION(status == SL_STATUS_OK, otLogDebgPlat("Error initializing nvm3 instance: %lu", status));
     sNvm3OpenedByOT = true;
 
 exit:
@@ -380,7 +380,7 @@ exit:
 void otPlatSettingsDeinit(otInstance *aInstance)
 {
     sl_status_t status = settingsApiCheck(aInstance);
-    otEXPECT_ACTION(status == SL_STATUS_OK, otLogDebgPlat("Error deinitializing settings: %u", status));
+    otEXPECT_ACTION(status == SL_STATUS_OK, otLogDebgPlat("Error deinitializing settings: %lu", status));
 
     sInstanceCount--;
     otEXPECT(sNvm3OpenedByOT && sInstanceCount == 0);
@@ -459,7 +459,7 @@ exit:
 void otPlatSettingsWipe(otInstance *aInstance)
 {
     sl_status_t status = settingsApiCheck(aInstance);
-    otEXPECT_ACTION(status == SL_STATUS_OK, otLogDebgPlat("Error wiping settings: %u", status));
+    otEXPECT_ACTION(status == SL_STATUS_OK, otLogDebgPlat("Error wiping settings: %lu", status));
 
     deleteSettingsRange(SettingsKey::getFirstInstanceKey(aInstance), SettingsKey::getLastInstanceKey(aInstance));
 

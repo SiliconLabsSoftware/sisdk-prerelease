@@ -788,7 +788,6 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
                                             rtl_config.algo_mode,
                                             initiator_config.cs_tone_antenna_config_idx,
                                             initiator_config.use_real_time_ras_mode,
-                                            1,
                                             &conn_interval,
                                             &proc_interval);
             if (sc == SL_STATUS_NOT_SUPPORTED) {

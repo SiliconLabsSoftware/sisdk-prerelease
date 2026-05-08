@@ -702,7 +702,7 @@ void sli_ot_radio_events_update_config(sl_rail_events_t mask, sl_rail_events_t v
 
             if (status != SL_RAIL_STATUS_NO_ERROR)
             {
-                otLogWarnPlat("Failed to configure radio events: %u", status);
+                otLogWarnPlat("Failed to configure radio events: %lu", status);
             }
             sCurrentEventConfig = newEventConfig;
         }
@@ -2606,12 +2606,10 @@ static rxBuffer *prepareNextRxPacketforCb(void)
     return rxPacketBuf;
 }
 
-#if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
 static inline bool isRxPacketBroadcast(void)
 {
     return (sReceive.instance == nullptr);
 }
-#endif // OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
 
 static void deliverRxPacketToInstance(otInstance *aInstance)
 {

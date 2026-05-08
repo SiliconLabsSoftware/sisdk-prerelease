@@ -1,0 +1,29 @@
+id: refactor_cs_acp
+package: bluetooth_le_middleware
+label: CS ACP
+description: >
+  Channel Sounding (CS) Application Co-Processor (ACP) provides the ACP commands and events to the CS device roles.
+category: Bluetooth|Application|Miscellaneous
+metadata:
+  sbom:
+    license: Zlib
+quality: experimental
+root_path: bluetooth_le_middleware/common/refactor_cs_acp
+
+include:
+- path: ./
+  file_list:
+  - path: cs_acp.h
+
+requires:
+- name: component_catalog
+- name: refactor_cs_result
+
+provides:
+- name: refactor_cs_acp
+template_contribution:
+- name: component_catalog
+  value: cs_acp
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/cs-acp

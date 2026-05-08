@@ -2158,34 +2158,6 @@ typedef enum
                                                       algorithm #2 */
 } sl_bt_gap_channel_selection_algorithm_t;
 
-/**
- * @addtogroup sl_bt_evt_gap_random_address_refresh sl_bt_evt_gap_random_address_refresh
- * @{
- * @brief Sent when the controller starts using a new resolvable private address
- * for scanning or initiating
- *
- * Enabling privacy alone does not generate this event.
- */
-
-/** @brief Identifier of the random_address_refresh event */
-#define sl_bt_evt_gap_random_address_refresh_id                      0x000200a0
-
-/***************************************************************************//**
- * @brief Data structure of the random_address_refresh event
- ******************************************************************************/
-PACKSTRUCT( struct sl_bt_evt_gap_random_address_refresh_s
-{
-  bd_addr address;      /**< The new resolvable private address */
-  uint8_t address_type; /**< Enum @ref sl_bt_gap_address_type_t. The type of the
-                             new scanner or initiator address. Values:
-                               - <b>sl_bt_gap_random_resolvable_address
-                                 (0x2):</b> Resolvable private random address */
-});
-
-typedef struct sl_bt_evt_gap_random_address_refresh_s sl_bt_evt_gap_random_address_refresh_t;
-
-/** @} */ // end addtogroup sl_bt_evt_gap_random_address_refresh
-
 /***************************************************************************//**
  *
  * Enable or disable the privacy feature on all GAP roles. New privacy mode will
@@ -2215,15 +2187,6 @@ typedef struct sl_bt_evt_gap_random_address_refresh_s sl_bt_evt_gap_random_addre
  * privacy. It is recommended to use different schedules for different
  * advertising sets.
  *
- * When the controller starts using a new scanner or initiator resolvable
- * private address, the stack sends @ref sl_bt_evt_gap_random_address_refresh.
- * When the controller starts using a new stack-managed random advertiser
- * address on an advertising set, the stack sends @ref
- * sl_bt_evt_advertiser_random_address_refresh. Enabling privacy alone does not
- * send these events, but the first start of scanning, initiating, or
- * advertising after enabling privacy may do so if it causes a new private
- * address to be programmed to the controller.
- *
  * Changing the privacy during active advertising or scanning is not allowed.
  *
  * By default, privacy feature is disabled.
@@ -2242,13 +2205,6 @@ typedef struct sl_bt_evt_gap_random_address_refresh_s sl_bt_evt_gap_random_addre
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
- * @b Events
- *   - @ref sl_bt_evt_gap_random_address_refresh - Triggered when the controller
- *     starts using a new scanner or initiator resolvable private address
- *   - @ref sl_bt_evt_advertiser_random_address_refresh - Triggered when the
- *     controller starts using a new stack-managed random advertiser address on
- *     an advertising set
- *
  ******************************************************************************/
 sl_status_t sl_bt_gap_set_privacy_mode(uint8_t privacy, uint8_t interval);
 
@@ -2265,15 +2221,6 @@ sl_status_t sl_bt_gap_set_privacy_mode(uint8_t privacy, uint8_t interval);
  * independently choose random periods within this range for their RPA updates.
  * If @p interval_min_minutes equals @p interval_max_minutes, the behavior is
  * identical to @ref sl_bt_gap_set_privacy_mode.
- *
- * When the controller starts using a new scanner or initiator resolvable
- * private address, the stack sends @ref sl_bt_evt_gap_random_address_refresh.
- * When the controller starts using a new stack-managed random advertiser
- * address on an advertising set, the stack sends @ref
- * sl_bt_evt_advertiser_random_address_refresh. Enabling privacy alone does not
- * send these events, but the first start of scanning, initiating, or
- * advertising after enabling privacy may do so if it causes a new private
- * address to be programmed to the controller.
  *
  * Changing the privacy during active advertising or scanning is not allowed.
  *
@@ -2299,13 +2246,6 @@ sl_status_t sl_bt_gap_set_privacy_mode(uint8_t privacy, uint8_t interval);
  *   @endparblock
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- * @b Events
- *   - @ref sl_bt_evt_gap_random_address_refresh - Triggered when the controller
- *     starts using a new scanner or initiator resolvable private address
- *   - @ref sl_bt_evt_advertiser_random_address_refresh - Triggered when the
- *     controller starts using a new stack-managed random advertiser address on
- *     an advertising set
  *
  ******************************************************************************/
 sl_status_t sl_bt_gap_set_privacy_mode_with_rpa_randomization(uint8_t privacy,
@@ -2625,38 +2565,6 @@ PACKSTRUCT( struct sl_bt_evt_advertiser_scan_request_s
 typedef struct sl_bt_evt_advertiser_scan_request_s sl_bt_evt_advertiser_scan_request_t;
 
 /** @} */ // end addtogroup sl_bt_evt_advertiser_scan_request
-
-/**
- * @addtogroup sl_bt_evt_advertiser_random_address_refresh sl_bt_evt_advertiser_random_address_refresh
- * @{
- * @brief Sent when the controller starts using a new stack-managed random
- * advertiser address on an advertising set
- *
- * This event is not generated for application-managed advertiser addresses.
- */
-
-/** @brief Identifier of the random_address_refresh event */
-#define sl_bt_evt_advertiser_random_address_refresh_id               0x030400a0
-
-/***************************************************************************//**
- * @brief Data structure of the random_address_refresh event
- ******************************************************************************/
-PACKSTRUCT( struct sl_bt_evt_advertiser_random_address_refresh_s
-{
-  uint8_t advertising_set; /**< The advertising set handle */
-  bd_addr address;         /**< The new advertiser address */
-  uint8_t address_type;    /**< Enum @ref sl_bt_gap_address_type_t. The type of
-                                the new advertiser address. Values:
-                                  - <b>sl_bt_gap_random_resolvable_address
-                                    (0x2):</b> Resolvable private random address
-                                  - <b>sl_bt_gap_random_nonresolvable_address
-                                    (0x3):</b> Non-resolvable private random
-                                    address */
-});
-
-typedef struct sl_bt_evt_advertiser_random_address_refresh_s sl_bt_evt_advertiser_random_address_refresh_t;
-
-/** @} */ // end addtogroup sl_bt_evt_advertiser_random_address_refresh
 
 /***************************************************************************//**
  *
@@ -5480,37 +5388,6 @@ sl_status_t sl_bt_sync_past_transfer(uint8_t connection,
  */
 
 /**
- * @brief Defines the data completeness status types of periodic advertisements.
- */
-typedef enum
-{
-  sl_bt_periodic_sync_data_status_complete          = 0x0, /**< (0x0) All data
-                                                                of the periodic
-                                                                advertisement
-                                                                has been
-                                                                reported. */
-  sl_bt_periodic_sync_data_status_incomplete_more   = 0x1, /**< (0x1) Data of
-                                                                the periodic
-                                                                advertisement is
-                                                                incomplete in
-                                                                this event, and
-                                                                more data will
-                                                                come in new
-                                                                events. */
-  sl_bt_periodic_sync_data_status_incomplete_nomore = 0x2  /**< (0x2) Data of
-                                                                the periodic
-                                                                advertisement is
-                                                                incomplete in
-                                                                this event, but
-                                                                no more data
-                                                                will come, i.e.,
-                                                                the data of the
-                                                                periodic
-                                                                advertisement is
-                                                                truncated. */
-} sl_bt_periodic_sync_data_status_t;
-
-/**
  * @addtogroup sl_bt_evt_periodic_sync_opened sl_bt_evt_periodic_sync_opened
  * @{
  * @brief Indicates that synchronization to a periodic advertising train that
@@ -5695,20 +5572,12 @@ PACKSTRUCT( struct sl_bt_evt_periodic_sync_report_s
                                  - <b>0x01:</b> AoD CTE with 1us slots
                                  - <b>0x02:</b> AoD CTE with 2us slots
                                  - <b>0xFF:</b> No CTE */
-  uint8_t    data_status; /**< Enum @ref sl_bt_periodic_sync_data_status_t. The
-                               data completeness status. Values:
-                                 - <b>sl_bt_periodic_sync_data_status_complete
-                                   (0x0):</b> All data of the periodic
-                                   advertisement has been reported.
-                                 - <b>sl_bt_periodic_sync_data_status_incomplete_more
-                                   (0x1):</b> Data of the periodic advertisement
-                                   is incomplete in this event, and more data
-                                   will come in new events.
-                                 - <b>sl_bt_periodic_sync_data_status_incomplete_nomore
-                                   (0x2):</b> Data of the periodic advertisement
-                                   is incomplete in this event, but no more data
-                                   will come, i.e., the data of the periodic
-                                   advertisement is truncated. */
+  uint8_t    data_status; /**< Data completeness:
+                                 - <b>0:</b> Complete
+                                 - <b>1:</b> Incomplete, more data to come in
+                                   new events
+                                 - <b>2:</b> Incomplete, data truncated, no more
+                                   to come */
   uint8_t    counter;     /**< The sequence number of this @ref
                                sl_bt_evt_periodic_sync_report event as a
                                monotonically increasing counter that wraps from
@@ -5747,56 +5616,6 @@ typedef struct sl_bt_evt_periodic_sync_report_s sl_bt_evt_periodic_sync_report_t
 #define sl_bt_cmd_pawr_sync_set_response_data_id                     0x03540020
 #define sl_bt_rsp_pawr_sync_set_sync_subevents_id                    0x02540020
 #define sl_bt_rsp_pawr_sync_set_response_data_id                     0x03540020
-
-/**
- * @brief Defines the data completeness status types of data received in PAwR
- * subevents.
- */
-typedef enum
-{
-  sl_bt_pawr_sync_subevent_data_status_complete          = 0x0,  /**< (0x0) All
-                                                                      data of
-                                                                      the PAwR
-                                                                      subevent
-                                                                      has been
-                                                                      reported. */
-  sl_bt_pawr_sync_subevent_data_status_incomplete_more   = 0x1,  /**< (0x1) Data
-                                                                      of the
-                                                                      PAwR
-                                                                      subevent
-                                                                      is
-                                                                      incomplete
-                                                                      in this
-                                                                      event, and
-                                                                      more data
-                                                                      will come
-                                                                      in new
-                                                                      events. */
-  sl_bt_pawr_sync_subevent_data_status_incomplete_nomore = 0x2,  /**< (0x2) Data
-                                                                      of the
-                                                                      PAwR
-                                                                      subevent
-                                                                      is
-                                                                      incomplete
-                                                                      in this
-                                                                      event, but
-                                                                      no more
-                                                                      data will
-                                                                      come,
-                                                                      i.e., the
-                                                                      data of
-                                                                      the PAwR
-                                                                      subevent
-                                                                      is
-                                                                      truncated. */
-  sl_bt_pawr_sync_subevent_data_status_not_received      = 0xff  /**< (0xff)
-                                                                      Failed to
-                                                                      receive
-                                                                      subevent
-                                                                      data in
-                                                                      this
-                                                                      subevent. */
-} sl_bt_pawr_sync_subevent_data_status_t;
 
 /**
  * @addtogroup sl_bt_evt_pawr_sync_opened sl_bt_evt_pawr_sync_opened
@@ -6066,24 +5885,14 @@ PACKSTRUCT( struct sl_bt_evt_pawr_sync_subevent_report_s
                                  advertisement, use this field as the value of
                                  @p request_subevent parameter for the @ref
                                  sl_bt_pawr_sync_set_response_data command. */
-  uint8_t    data_status;   /**< Enum @ref
-                                 sl_bt_pawr_sync_subevent_data_status_t. The
-                                 subevent data completeness status. Values:
-                                   - <b>sl_bt_pawr_sync_subevent_data_status_complete
-                                     (0x0):</b> All data of the PAwR subevent
-                                     has been reported.
-                                   - <b>sl_bt_pawr_sync_subevent_data_status_incomplete_more
-                                     (0x1):</b> Data of the PAwR subevent is
-                                     incomplete in this event, and more data
-                                     will come in new events.
-                                   - <b>sl_bt_pawr_sync_subevent_data_status_incomplete_nomore
-                                     (0x2):</b> Data of the PAwR subevent is
-                                     incomplete in this event, but no more data
-                                     will come, i.e., the data of the PAwR
-                                     subevent is truncated.
-                                   - <b>sl_bt_pawr_sync_subevent_data_status_not_received
-                                     (0xff):</b> Failed to receive subevent data
-                                     in this subevent. */
+  uint8_t    data_status;   /**< Data completeness:
+                                   - <b>0:</b> Complete
+                                   - <b>1:</b> Incomplete, more data to come in
+                                     new events
+                                   - <b>2:</b> Incomplete, data truncated, no
+                                     more to come
+                                   - <b>255:</b> Failed to receive subevent data
+                                     in this subevent */
   uint8_t    counter;       /**< The sequence number of this @ref
                                  sl_bt_evt_pawr_sync_subevent_report event as a
                                  monotonically increasing counter that wraps
@@ -12938,13 +12747,11 @@ sl_status_t sl_bt_external_bondingdb_set_local_irk(size_t irk_len,
 #define sl_bt_cmd_resolving_list_remove_device_by_bonding_id         0x025d0020
 #define sl_bt_cmd_resolving_list_remove_device_by_address_id         0x035d0020
 #define sl_bt_cmd_resolving_list_remove_all_devices_id               0x045d0020
-#define sl_bt_cmd_resolving_list_read_peer_resolvable_address_id     0x055d0020
 #define sl_bt_rsp_resolving_list_add_device_by_bonding_id            0x005d0020
 #define sl_bt_rsp_resolving_list_add_device_by_address_id            0x015d0020
 #define sl_bt_rsp_resolving_list_remove_device_by_bonding_id         0x025d0020
 #define sl_bt_rsp_resolving_list_remove_device_by_address_id         0x035d0020
 #define sl_bt_rsp_resolving_list_remove_all_devices_id               0x045d0020
-#define sl_bt_rsp_resolving_list_read_peer_resolvable_address_id     0x055d0020
 
 /**
  * @brief Specifies the Privacy Mode used for a peer device in the Resolving
@@ -13132,34 +12939,6 @@ sl_status_t sl_bt_resolving_list_remove_device_by_address(bd_addr address,
  *
  ******************************************************************************/
 sl_status_t sl_bt_resolving_list_remove_all_devices(void);
-
-/***************************************************************************//**
- *
- * Read the peer's current Resolvable Private Address (RPA) from the controller
- * Resolving List.
- *
- * The peer must already exist in the Resolving List. The command identifies the
- * peer by its identity address. The controller returns the current peer RPA
- * that it is tracking for that Resolving List entry.
- *
- * Use this command when the application needs to inspect the peer's current
- * over-the-air RPA after the peer has been resolved to its identity address by
- * the controller.
- *
- * @param[in] address Bluetooth identity address of the peer device
- * @param[in] address_type Enum @ref sl_bt_gap_address_type_t. The peer identity
- *   address type. Values:
- *     - <b>sl_bt_gap_public_address (0x0):</b> Public device address
- *     - <b>sl_bt_gap_static_address (0x1):</b> Static device address
- * @param[out] address_out The peer's current resolvable private address tracked
- *   by the controller.
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-sl_status_t sl_bt_resolving_list_read_peer_resolvable_address(bd_addr address,
-                                                              uint8_t address_type,
-                                                              bd_addr *address_out);
 
 /** @} */ // end addtogroup sl_bt_resolving_list
 
@@ -13478,11 +13257,6 @@ sl_status_t sl_bt_coex_get_counters(uint8_t reset,
 #define sl_bt_cmd_cs_set_antenna_configuration_id                    0x07590020
 #define sl_bt_cmd_cs_read_local_supported_capabilities_id            0x08590020
 #define sl_bt_cmd_cs_read_remote_supported_capabilities_id           0x09590020
-#define sl_bt_cmd_cs_handover_get_procedure_parameters_id            0x0a590020
-#define sl_bt_cmd_cs_handover_set_procedure_parameters_id            0x0b590020
-#define sl_bt_cmd_cs_handover_create_sync_id                         0x0c590020
-#define sl_bt_cmd_cs_handover_enable_procedure_id                    0x0d590020
-#define sl_bt_cmd_cs_handover_remove_procedure_id                    0x0e590020
 #define sl_bt_rsp_cs_security_enable_id                              0x00590020
 #define sl_bt_rsp_cs_set_default_settings_id                         0x01590020
 #define sl_bt_rsp_cs_create_config_id                                0x02590020
@@ -13493,11 +13267,6 @@ sl_status_t sl_bt_coex_get_counters(uint8_t reset,
 #define sl_bt_rsp_cs_set_antenna_configuration_id                    0x07590020
 #define sl_bt_rsp_cs_read_local_supported_capabilities_id            0x08590020
 #define sl_bt_rsp_cs_read_remote_supported_capabilities_id           0x09590020
-#define sl_bt_rsp_cs_handover_get_procedure_parameters_id            0x0a590020
-#define sl_bt_rsp_cs_handover_set_procedure_parameters_id            0x0b590020
-#define sl_bt_rsp_cs_handover_create_sync_id                         0x0c590020
-#define sl_bt_rsp_cs_handover_enable_procedure_id                    0x0d590020
-#define sl_bt_rsp_cs_handover_remove_procedure_id                    0x0e590020
 
 /**
  * @brief Specifies the role for the device during CS procedure.
@@ -13527,42 +13296,6 @@ typedef enum
   sl_bt_cs_procedure_state_disabled = 0x0, /**< (0x0) CS procedures are disabled */
   sl_bt_cs_procedure_state_enabled  = 0x1  /**< (0x1) CS procedures are enabled */
 } sl_bt_cs_procedure_state_t;
-
-/**
- * @brief Defines whether the command handle references a connection or a
- * connection analyzer instance.
- */
-typedef enum
-{
-  sl_bt_cs_handover_handle_type_connection = 0x1, /**< (0x1) Handle identifies a
-                                                       Bluetooth connection. */
-  sl_bt_cs_handover_handle_type_analyzer   = 0x2  /**< (0x2) Handle identifies a
-                                                       connection analyzer
-                                                       instance. */
-} sl_bt_cs_handover_handle_type_t;
-
-/**
- * @brief Defines the reason why a CS handover procedure completed.
- */
-typedef enum
-{
-  sl_bt_cs_handover_complete_reason_max_procedure_count_reached = 0x0, /**<
-                                                                            (0x0)
-                                                                            Configured
-                                                                            maximum
-                                                                            procedure
-                                                                            count
-                                                                            was
-                                                                            reached. */
-  sl_bt_cs_handover_complete_reason_sync_lost                   = 0x1  /**<
-                                                                            (0x1)
-                                                                            Synchronization
-                                                                            to
-                                                                            the
-                                                                            connection
-                                                                            was
-                                                                            lost. */
-} sl_bt_cs_handover_complete_reason_t;
 
 /**
  * @brief Defines the different modes for CS steps.
@@ -14066,7 +13799,7 @@ PACKSTRUCT( struct sl_bt_evt_cs_result_s
                                           sl_bt_cs_test_start command. */
   int16_t    frequency_compensation; /**< Frequency compensation value. Units:
                                           0.01 ppm (15-bit signed integer).
-                                            - <b>Range:</b> -100ppm (-10000) to
+                                            - <b>Range:</b> -100ppm (227680) to
                                               +100ppm (10000)
 
                                             - Value: 0xC000. Frequency
@@ -14083,7 +13816,7 @@ PACKSTRUCT( struct sl_bt_evt_cs_result_s
                                             - Value: 0x07F. The reference power
                                               level is not applicable */
   uint8_t    procedure_done_status;  /**< Enum @ref sl_bt_cs_done_status_t.
-                                          Current status of the CS procedure.
+                                          Current status of the CS procedure
                                           Values:
                                             - <b>sl_bt_cs_done_status_complete
                                               (0x0):</b> All results complete
@@ -14097,7 +13830,7 @@ PACKSTRUCT( struct sl_bt_evt_cs_result_s
                                               procedure aborted or current
                                               subevent aborted. */
   uint8_t    subevent_done_status;   /**< Enum @ref sl_bt_cs_done_status_t.
-                                          Current status of the CS subevent.
+                                          Current status of the CS subevent
                                           Values:
                                             - <b>sl_bt_cs_done_status_complete
                                               (0x0):</b> All results complete
@@ -14203,7 +13936,7 @@ PACKSTRUCT( struct sl_bt_evt_cs_result_continue_s
                                          sl_bt_cs_test_start command.
                                            - <b>Range:</b> 0 to 3 */
   uint8_t    procedure_done_status; /**< Enum @ref sl_bt_cs_done_status_t.
-                                         Current status of the CS procedure.
+                                         Current status of the CS procedure
                                          Values:
                                            - <b>sl_bt_cs_done_status_complete
                                              (0x0):</b> All results complete for
@@ -14217,7 +13950,7 @@ PACKSTRUCT( struct sl_bt_evt_cs_result_continue_s
                                              procedure aborted or current
                                              subevent aborted. */
   uint8_t    subevent_done_status;  /**< Enum @ref sl_bt_cs_done_status_t.
-                                         Current status of the CS subevent.
+                                         Current status of the CS subevent
                                          Values:
                                            - <b>sl_bt_cs_done_status_complete
                                              (0x0):</b> All results complete for
@@ -14542,325 +14275,6 @@ PACKSTRUCT( struct sl_bt_evt_cs_read_remote_supported_capabilities_complete_s
 typedef struct sl_bt_evt_cs_read_remote_supported_capabilities_complete_s sl_bt_evt_cs_read_remote_supported_capabilities_complete_t;
 
 /** @} */ // end addtogroup sl_bt_evt_cs_read_remote_supported_capabilities_complete
-
-/**
- * @addtogroup sl_bt_evt_cs_handover_sync_established sl_bt_evt_cs_handover_sync_established
- * @{
- * @brief Indicates that the controller either synchronized to the CS handover
- * procedure and the connection, or completed the listening window without
- * establishing synchronization
- *
- * This event is intended for the CS Follower role.
- */
-
-/** @brief Identifier of the handover_sync_established event */
-#define sl_bt_evt_cs_handover_sync_established_id                    0x065900a0
-
-/***************************************************************************//**
- * @brief Data structure of the handover_sync_established event
- ******************************************************************************/
-PACKSTRUCT( struct sl_bt_evt_cs_handover_sync_established_s
-{
-  uint16_t status;            /**< Status of the synchronization attempt */
-  uint8_t  analyzer;          /**< Connection analyzer handle */
-  uint8_t  config_id;         /**< CS configuration identifier */
-  uint16_t procedure_counter; /**< CS procedure counter that the controller
-                                   synchronized to */
-});
-
-typedef struct sl_bt_evt_cs_handover_sync_established_s sl_bt_evt_cs_handover_sync_established_t;
-
-/** @} */ // end addtogroup sl_bt_evt_cs_handover_sync_established
-
-/**
- * @addtogroup sl_bt_evt_cs_handover_complete sl_bt_evt_cs_handover_complete
- * @{
- * @brief Indicates that the controller completed the CS handover procedure
- * because synchronization was lost or the configured maximum procedure count
- * was reached
- *
- * When this event is sent, the configured CS parameters are removed and the
- * associated connection analyzer handle is deallocated. This event is intended
- * for the CS Follower role.
- */
-
-/** @brief Identifier of the handover_complete event */
-#define sl_bt_evt_cs_handover_complete_id                            0x075900a0
-
-/***************************************************************************//**
- * @brief Data structure of the handover_complete event
- ******************************************************************************/
-PACKSTRUCT( struct sl_bt_evt_cs_handover_complete_s
-{
-  uint8_t reason;    /**< Enum @ref sl_bt_cs_handover_complete_reason_t. Reason
-                          for completion. Values:
-                            - <b>sl_bt_cs_handover_complete_reason_max_procedure_count_reached
-                              (0x0):</b> Configured maximum procedure count was
-                              reached.
-                            - <b>sl_bt_cs_handover_complete_reason_sync_lost
-                              (0x1):</b> Synchronization to the connection was
-                              lost. */
-  uint8_t analyzer;  /**< Connection analyzer handle */
-  uint8_t config_id; /**< CS configuration identifier */
-});
-
-typedef struct sl_bt_evt_cs_handover_complete_s sl_bt_evt_cs_handover_complete_t;
-
-/** @} */ // end addtogroup sl_bt_evt_cs_handover_complete
-
-/**
- * @addtogroup sl_bt_evt_cs_handover_result sl_bt_evt_cs_handover_result
- * @{
- * @brief Reports results of every CS handover subevent within the CS procedure
- *
- * When the number of steps exceeds the maximum HCI event size, the controller
- * may report further results for the CS subevent using the @ref
- * sl_bt_evt_cs_handover_result_continue event. This event is intended for the
- * CS Follower role.
- */
-
-/** @brief Identifier of the handover_result event */
-#define sl_bt_evt_cs_handover_result_id                              0x085900a0
-
-/***************************************************************************//**
- * @brief Data structure of the handover_result event
- ******************************************************************************/
-PACKSTRUCT( struct sl_bt_evt_cs_handover_result_s
-{
-  uint8_t    analyzer;               /**< Connection analyzer handle */
-  uint8_t    config_id;              /**< CS configuration identifier */
-  uint16_t   start_acl_conn_event;   /**< Starting ACL connection event count
-                                          for the results reported in the event.
-                                          This is reported only in the first
-                                          subevent in the procedure. For
-                                          subsequent subevents, this value is
-                                          set to 0. */
-  uint16_t   procedure_counter;      /**< Associated CS procedure counter for
-                                          the results reported in this event */
-  int16_t    frequency_compensation; /**< Frequency compensation value. Units:
-                                          0.01 ppm (15-bit signed integer).
-                                            - <b>Range:</b> -100ppm (-10000) to
-                                              +100ppm (10000)
-
-                                            - Value: 0xC000. Frequency
-                                              compensation value is not
-                                              available or the role is not
-                                              initiator. This is reported only
-                                              in the first subevent in the
-                                              procedure. For subsequent
-                                              subevents, this value is set to 0. */
-  int8_t     reference_power_level;  /**< Reference power level used by the
-                                          transmission. Units: dBm.
-                                            - <b>Range:</b> -127 to +20
-
-                                            - Value: 0x07F. The reference power
-                                              level is not applicable */
-  uint8_t    procedure_done_status;  /**< Enum @ref sl_bt_cs_done_status_t.
-                                          Current status of the CS procedure.
-                                          Values:
-                                            - <b>sl_bt_cs_done_status_complete
-                                              (0x0):</b> All results complete
-                                              for the CS procedure or subevent
-                                            - <b>sl_bt_cs_done_status_partial_results_continue
-                                              (0x1):</b> Partial results with
-                                              more to follow
-                                            - <b>sl_bt_cs_done_status_aborted
-                                              (0xf):</b> Current procedure and
-                                              all subsequent subevents in the
-                                              procedure aborted or current
-                                              subevent aborted. */
-  uint8_t    subevent_done_status;   /**< Enum @ref sl_bt_cs_done_status_t.
-                                          Current status of the CS subevent.
-                                          Values:
-                                            - <b>sl_bt_cs_done_status_complete
-                                              (0x0):</b> All results complete
-                                              for the CS procedure or subevent
-                                            - <b>sl_bt_cs_done_status_partial_results_continue
-                                              (0x1):</b> Partial results with
-                                              more to follow
-                                            - <b>sl_bt_cs_done_status_aborted
-                                              (0xf):</b> Current procedure and
-                                              all subsequent subevents in the
-                                              procedure aborted or current
-                                              subevent aborted. */
-  uint8_t    abort_reason;           /**< Indicates the abort reason when the @p
-                                          procedure_done_status or @p
-                                          subevent_done_status is set to 0xF,
-                                          otherwise the default value is set to
-                                          zero.
-
-                                          Bits 0-3 indicate the procedure abort
-                                          reasons:
-
-                                            - 0x0 = Report with no abort
-                                            - 0x1 = Abort because of local Host
-                                              or remote request
-                                            - 0x2 = Abort because filtered
-                                              channel map has less than 15
-                                              channels
-                                            - 0x3 = Abort because the channel
-                                              map update instant has passed
-                                            - 0xF = Abort because of unspecified
-                                              reasons
-
-                                          Bits 4-7 indicate the subevent done
-                                          reasons:
-
-                                            - 0x0 = Report with no abort
-                                            - 0x1 = Abort because of local Host
-                                              or remote request
-                                            - 0x2 = Abort because no CS_SYNC
-                                              (mode-0) received
-                                            - 0x3 = Abort because of scheduling
-                                              conflicts or limited resources
-                                            - 0xF = Abort because of unspecified
-                                              reasons */
-  uint8_t    num_antenna_paths;      /**< Number of antenna paths supported by
-                                          the local controller for the CS tone
-                                          exchanges. The number of antenna paths
-                                          used during the phase measurement
-                                          stage of the CS step.
-                                            - <b>Range:</b> 1 to 4
-
-                                            - Value: 0. Phase measurement does
-                                              not occur during the CS step,
-                                              therefore ignored */
-  uint8_t    num_steps;              /**< Number of steps in the CS subevent for
-                                          which results are reported.
-                                            - <b>Range:</b> 1 to 160 */
-  uint8array data;                   /**< The result data is structured as
-                                          follows:
-                                            - step_mode: 1 octet for each
-                                              num_steps. Mode type. Range 0 to
-                                              3.
-                                            - step_channel: 1 octet for each
-                                              num_steps. Channel index. Range 1
-                                              to 78.
-                                            - step_data_length: 1 octet for each
-                                              num_steps. Length of mode and role
-                                              specific information being
-                                              reported. Range 0x00 to 0xFF.
-                                            - step_data: step_data_length octet
-                                              for each corresponding steps in
-                                              num_steps. */
-});
-
-typedef struct sl_bt_evt_cs_handover_result_s sl_bt_evt_cs_handover_result_t;
-
-/** @} */ // end addtogroup sl_bt_evt_cs_handover_result
-
-/**
- * @addtogroup sl_bt_evt_cs_handover_result_continue sl_bt_evt_cs_handover_result_continue
- * @{
- * @brief Reports continuation results when the number of steps exceeds the
- * maximum HCI event size, of every CS handover subevent within the CS procedure
- *
- * This event is triggered after the @ref sl_bt_evt_cs_handover_result event.
- * This event is intended for the CS Follower role.
- */
-
-/** @brief Identifier of the handover_result_continue event */
-#define sl_bt_evt_cs_handover_result_continue_id                     0x095900a0
-
-/***************************************************************************//**
- * @brief Data structure of the handover_result_continue event
- ******************************************************************************/
-PACKSTRUCT( struct sl_bt_evt_cs_handover_result_continue_s
-{
-  uint8_t    analyzer;              /**< Connection analyzer handle */
-  uint8_t    config_id;             /**< CS configuration identifier */
-  uint8_t    procedure_done_status; /**< Enum @ref sl_bt_cs_done_status_t.
-                                         Current status of the CS procedure
-                                         Values:
-                                           - <b>sl_bt_cs_done_status_complete
-                                             (0x0):</b> All results complete for
-                                             the CS procedure or subevent
-                                           - <b>sl_bt_cs_done_status_partial_results_continue
-                                             (0x1):</b> Partial results with
-                                             more to follow
-                                           - <b>sl_bt_cs_done_status_aborted
-                                             (0xf):</b> Current procedure and
-                                             all subsequent subevents in the
-                                             procedure aborted or current
-                                             subevent aborted. */
-  uint8_t    subevent_done_status;  /**< Enum @ref sl_bt_cs_done_status_t.
-                                         Current status of the CS subevent
-                                         Values:
-                                           - <b>sl_bt_cs_done_status_complete
-                                             (0x0):</b> All results complete for
-                                             the CS procedure or subevent
-                                           - <b>sl_bt_cs_done_status_partial_results_continue
-                                             (0x1):</b> Partial results with
-                                             more to follow
-                                           - <b>sl_bt_cs_done_status_aborted
-                                             (0xf):</b> Current procedure and
-                                             all subsequent subevents in the
-                                             procedure aborted or current
-                                             subevent aborted. */
-  uint8_t    abort_reason;          /**< Indicates the abort reason when the @p
-                                         procedure_done_status or @p
-                                         subevent_done_status is set to 0xF,
-                                         otherwise the default value is set to
-                                         zero.
-
-                                         Bits 0-3 indicate the procedure abort
-                                         reasons:
-
-                                           - 0x0 = Report with no abort
-                                           - 0x1 = Abort because of local Host
-                                             or remote request
-                                           - 0x2 = Abort because filtered
-                                             channel map has less than 15
-                                             channels
-                                           - 0x3 = Abort because the channel map
-                                             update instant has passed
-                                           - 0xF = Abort because of unspecified
-                                             reasons
-
-                                         Bits 4-7 indicate the subevent done
-                                         reasons:
-
-                                           - 0x0 = Report with no abort
-                                           - 0x1 = Abort because of local Host
-                                             or remote request
-                                           - 0x2 = Abort because no CS_SYNC
-                                             (mode-0) received
-                                           - 0x3 = Abort because of scheduling
-                                             conflicts or limited resources
-                                           - 0xF = Abort because of unspecified
-                                             reasons */
-  uint8_t    num_antenna_paths;     /**< Number of antenna paths supported by
-                                         the local controller for the CS tone
-                                         exchanges. The number of antenna paths
-                                         used during the phase measurement stage
-                                         of the CS step.
-                                           - <b>Range:</b> 1 to 4
-
-                                           - Value: 0. Phase measurement does
-                                             not occur during the CS step,
-                                             therefore ignored */
-  uint8_t    num_steps;             /**< Number of steps in the CS subevent for
-                                         which results are reported.
-                                           - <b>Range:</b> 1 to 160 */
-  uint8array data;                  /**< The result data is structured as
-                                         follows:
-                                           - step_mode: 1 octet for each
-                                             num_steps. Mode type. Range 0 to 3.
-                                           - step_channel: 1 octet for each
-                                             num_steps. Channel index. Range 1
-                                             to 78.
-                                           - step_data_length: 1 octet for each
-                                             num_steps. Length of mode and role
-                                             specific information being
-                                             reported. Range 0x00 to 0xFF.
-                                           - step_data: step_data_length octet
-                                             for each corresponding steps in
-                                             num_steps. */
-});
-
-typedef struct sl_bt_evt_cs_handover_result_continue_s sl_bt_evt_cs_handover_result_continue_t;
-
-/** @} */ // end addtogroup sl_bt_evt_cs_handover_result_continue
 
 /***************************************************************************//**
  *
@@ -15437,117 +14851,6 @@ sl_status_t sl_bt_cs_read_local_supported_capabilities(uint8_t *num_config,
  *
  ******************************************************************************/
 sl_status_t sl_bt_cs_read_remote_supported_capabilities(uint8_t connection);
-
-/***************************************************************************//**
- *
- * Retrieve CS handover procedure parameters for a given connection and
- * configuration. This command is intended for the CS Leader role. If this
- * command is sent to a non-leader device, an error is returned.
- *
- * @param[in] connection Connection handle
- * @param[in] config_id CS configuration identifier
- * @param[in] max_cs_parameters_size Size of output buffer passed in @p
- *   cs_parameters
- * @param[out] cs_parameters_len On return, set to the length of output data
- *   written to @p cs_parameters
- * @param[out] cs_parameters Serialized CS handover parameters
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-sl_status_t sl_bt_cs_handover_get_procedure_parameters(uint8_t connection,
-                                                       uint8_t config_id,
-                                                       size_t max_cs_parameters_size,
-                                                       size_t *cs_parameters_len,
-                                                       uint8_t *cs_parameters);
-
-/***************************************************************************//**
- *
- * Configure CS handover procedure parameters in the controller using parameters
- * retrieved from the CS Leader. This command creates the CS configuration and
- * procedure, and allocates a new connection analyzer if one does not already
- * exist for the connection. This command is intended for the CS Follower role.
- *
- * @param[in] cs_parameters_len Length of data in @p cs_parameters
- * @param[in] cs_parameters Serialized CS handover parameters retrieved from the
- *   CS Leader
- * @param[out] analyzer Connection analyzer handle assigned by the controller.
- *   This handle is valid only if the result code of this command is
- *   SL_STATUS_OK.
- * @param[out] config_id CS configuration identifier
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-sl_status_t sl_bt_cs_handover_set_procedure_parameters(size_t cs_parameters_len,
-                                                       const uint8_t* cs_parameters,
-                                                       uint8_t *analyzer,
-                                                       uint8_t *config_id);
-
-/***************************************************************************//**
- *
- * Start synchronization of a CS handover anchor using an existing connection
- * analyzer handle and configuration. This command is intended for the CS
- * Follower role.
- *
- * @param[in] analyzer Connection analyzer handle
- * @param[in] config_id CS configuration identifier
- * @param[in] procedure_counter CS procedure counter to synchronize to
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-sl_status_t sl_bt_cs_handover_create_sync(uint8_t analyzer,
-                                          uint8_t config_id,
-                                          uint16_t procedure_counter);
-
-/***************************************************************************//**
- *
- * Enable or disable CS handover procedure scheduling using either a connection
- * or connection analyzer handle. This command can be used on both CS Leader and
- * CS Follower roles.
- *
- * @param[in] enable Enum @ref sl_bt_cs_procedure_state_t. Enabled or disabled
- *   CS procedure state. Values:
- *     - <b>sl_bt_cs_procedure_state_disabled (0x0):</b> CS procedures are
- *       disabled
- *     - <b>sl_bt_cs_procedure_state_enabled (0x1):</b> CS procedures are
- *       enabled
- * @param[in] start_procedure_counter Procedure counter where execution starts
- * @param[in] procedure_skip Number of procedures to skip between executed
- *   procedures
- * @param[in] handle_type Enum @ref sl_bt_cs_handover_handle_type_t. Specifies
- *   if @p handle is a BGAPI connection or connection analyzer handle. Values:
- *     - <b>sl_bt_cs_handover_handle_type_connection (0x1):</b> Handle
- *       identifies a Bluetooth connection.
- *     - <b>sl_bt_cs_handover_handle_type_analyzer (0x2):</b> Handle identifies
- *       a connection analyzer instance.
- * @param[in] handle BGAPI connection or connection analyzer handle
- * @param[in] config_id CS configuration identifier
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-sl_status_t sl_bt_cs_handover_enable_procedure(uint8_t enable,
-                                               uint16_t start_procedure_counter,
-                                               uint16_t procedure_skip,
-                                               uint8_t handle_type,
-                                               uint8_t handle,
-                                               uint8_t config_id);
-
-/***************************************************************************//**
- *
- * Remove a configured CS handover procedure identified by connection analyzer
- * handle and configuration. This command is intended for the CS Follower role.
- *
- * @param[in] analyzer Connection analyzer handle
- * @param[in] config_id CS configuration identifier
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-sl_status_t sl_bt_cs_handover_remove_procedure(uint8_t analyzer,
-                                               uint8_t config_id);
 
 /** @} */ // end addtogroup sl_bt_cs
 
@@ -17639,10 +16942,8 @@ PACKSTRUCT( struct sl_bt_msg {
     sl_bt_evt_system_soft_timer_t                                evt_system_soft_timer; /**< Data field for event sl_bt_evt_system_soft_timer_id */
     sl_bt_evt_linklayer_event_info_report_t                      evt_linklayer_event_info_report; /**< Data field for event sl_bt_evt_linklayer_event_info_report_id */
     sl_bt_evt_resource_status_t                                  evt_resource_status; /**< Data field for event sl_bt_evt_resource_status_id */
-    sl_bt_evt_gap_random_address_refresh_t                       evt_gap_random_address_refresh; /**< Data field for event sl_bt_evt_gap_random_address_refresh_id */
     sl_bt_evt_advertiser_timeout_t                               evt_advertiser_timeout; /**< Data field for event sl_bt_evt_advertiser_timeout_id */
     sl_bt_evt_advertiser_scan_request_t                          evt_advertiser_scan_request; /**< Data field for event sl_bt_evt_advertiser_scan_request_id */
-    sl_bt_evt_advertiser_random_address_refresh_t                evt_advertiser_random_address_refresh; /**< Data field for event sl_bt_evt_advertiser_random_address_refresh_id */
     sl_bt_evt_periodic_advertiser_status_t                       evt_periodic_advertiser_status; /**< Data field for event sl_bt_evt_periodic_advertiser_status_id */
     sl_bt_evt_scanner_legacy_advertisement_report_t              evt_scanner_legacy_advertisement_report; /**< Data field for event sl_bt_evt_scanner_legacy_advertisement_report_id */
     sl_bt_evt_scanner_extended_advertisement_report_t            evt_scanner_extended_advertisement_report; /**< Data field for event sl_bt_evt_scanner_extended_advertisement_report_id */
@@ -17701,10 +17002,6 @@ PACKSTRUCT( struct sl_bt_msg {
     sl_bt_evt_cs_result_t                                        evt_cs_result; /**< Data field for event sl_bt_evt_cs_result_id */
     sl_bt_evt_cs_result_continue_t                               evt_cs_result_continue; /**< Data field for event sl_bt_evt_cs_result_continue_id */
     sl_bt_evt_cs_read_remote_supported_capabilities_complete_t   evt_cs_read_remote_supported_capabilities_complete; /**< Data field for event sl_bt_evt_cs_read_remote_supported_capabilities_complete_id */
-    sl_bt_evt_cs_handover_sync_established_t                     evt_cs_handover_sync_established; /**< Data field for event sl_bt_evt_cs_handover_sync_established_id */
-    sl_bt_evt_cs_handover_complete_t                             evt_cs_handover_complete; /**< Data field for event sl_bt_evt_cs_handover_complete_id */
-    sl_bt_evt_cs_handover_result_t                               evt_cs_handover_result; /**< Data field for event sl_bt_evt_cs_handover_result_id */
-    sl_bt_evt_cs_handover_result_continue_t                      evt_cs_handover_result_continue; /**< Data field for event sl_bt_evt_cs_handover_result_continue_id */
     sl_bt_evt_cs_test_end_completed_t                            evt_cs_test_end_completed; /**< Data field for event sl_bt_evt_cs_test_end_completed_id */
     sl_bt_evt_l2cap_le_channel_open_request_t                    evt_l2cap_le_channel_open_request; /**< Data field for event sl_bt_evt_l2cap_le_channel_open_request_id */
     sl_bt_evt_l2cap_le_channel_open_response_t                   evt_l2cap_le_channel_open_response; /**< Data field for event sl_bt_evt_l2cap_le_channel_open_response_id */
