@@ -21,6 +21,8 @@ requires:
 - name: bluetooth_peer_manager_common
 provides:
 - name: ble_peer_manager_common
+validation_helper:
+- path: config/validator.lua
 template_contribution:
 - name: component_catalog
   value: ble_peer_manager_common

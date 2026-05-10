@@ -193,7 +193,7 @@ static inline sl_status_t log_write_to_ring_buffer(sl_log_event_t *event_buffer,
                                                       uint32_t event_size)
 {
   (void)event_size;
-#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE == SL_LOG_CONFIG_MODE_HOST)
+#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE != SL_LOG_CONFIG_MODE_CONSOLE)
     uint32_t buffer_capacity = SL_LOG_NUMBER_OF_EVENTS;
 #else
     uint32_t buffer_capacity = EARLY_LOG_BUFFER_SIZE;
@@ -234,7 +234,7 @@ static inline sl_status_t log_write_to_ring_buffer(sl_log_event_t *event_buffer,
  */
 static void flush_early_logs_to_backend(uint32_t read_index, uint32_t event_count)
 {
-#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE == SL_LOG_CONFIG_MODE_HOST)
+#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE != SL_LOG_CONFIG_MODE_CONSOLE)
   uint32_t buffer_capacity = SL_LOG_NUMBER_OF_EVENTS;
 #else
   uint32_t buffer_capacity = EARLY_LOG_BUFFER_SIZE;
@@ -491,7 +491,7 @@ static void flush_early_logs(void)
   if (ring_buffer.event_count > 0) {
 
     // buffer_capacity used for ring-buffer wrap
-#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE == SL_LOG_CONFIG_MODE_HOST)
+#if defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE != SL_LOG_CONFIG_MODE_CONSOLE)
     // Host mode uses full ring buffer capacity
     uint32_t buffer_capacity = SL_LOG_NUMBER_OF_EVENTS;
 #else
@@ -527,7 +527,7 @@ void sl_log_init_stage1(void) {
   ring_buffer.buffer = buffer;
   sl_log_backend_status.backend_transfer_done = 1;
   // set event slots count by mode to save memory during early logging.
-#if defined(SL_LOG_CONFIG_MODE) && ((SL_LOG_CONFIG_MODE == SL_LOG_CONFIG_MODE_HOST))
+#if defined(SL_LOG_CONFIG_MODE) && ((SL_LOG_CONFIG_MODE != SL_LOG_CONFIG_MODE_CONSOLE))
   ring_buffer.available_event_slots = SL_LOG_NUMBER_OF_EVENTS;
 #else
   // Console and SystemView modes do not use the ring buffer so use reduced size buffer.

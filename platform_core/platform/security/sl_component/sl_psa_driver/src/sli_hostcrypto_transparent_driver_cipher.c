@@ -221,6 +221,7 @@ psa_status_t sli_hostcrypto_transparent_cipher_encrypt(
 #if defined(SLI_PSA_DRIVER_FEATURE_AES_CTR) \
     || defined(SLI_PSA_DRIVER_FEATURE_AES_CCM_STAR_NO_TAG)
     case PSA_ALG_CTR:
+    {
       uint8_t iv_buf[16] = { 0 };
 #if defined(SLI_PSA_DRIVER_FEATURE_AES_CCM_STAR_NO_TAG)
       if (alg == PSA_ALG_CCM_STAR_NO_TAG) {
@@ -250,6 +251,7 @@ psa_status_t sli_hostcrypto_transparent_cipher_encrypt(
                                                  &key_ref,
                                                  (const char *) iv_buf);
       break;
+    }
 #endif // SLI_PSA_DRIVER_FEATURE_AES_CTR || SLI_PSA_DRIVER_FEATURE_AES_CCM_STAR_NO_TAG
 
 #if defined(SLI_PSA_DRIVER_FEATURE_AES_CBC_NO_PADDING) \

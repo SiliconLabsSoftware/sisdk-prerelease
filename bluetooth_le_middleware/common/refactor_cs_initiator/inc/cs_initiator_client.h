@@ -42,6 +42,7 @@
 #include "cs_sync_antenna.h"
 
 #include "cs_initiator_config.h"
+#include "sl_status.h"
 // -----------------------------------------------------------------------------
 // Macros
 
@@ -129,11 +130,14 @@
 // Enums, structs, typedefs
 
 // CS channel map preset
+#ifndef CS_CHANNEL_MAP_PRESET_T_DEFINED
+#define CS_CHANNEL_MAP_PRESET_T_DEFINED
 SL_ENUM(cs_channel_map_preset_t) {
   CS_CHANNEL_MAP_PRESET_MEDIUM = 1,
   CS_CHANNEL_MAP_PRESET_HIGH = 2,
   CS_CHANNEL_MAP_PRESET_CUSTOM = 3
 };
+#endif // CS_CHANNEL_MAP_PRESET_T_DEFINED
 
 // CS antenna configuration index
 SL_ENUM(cs_tone_antenna_config_index_t) {
@@ -263,12 +267,15 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED cs_initiator_config_t;
 SL_PACK_END()
 
+#ifndef RTL_CONFIG_T_DEFINED
+#define RTL_CONFIG_T_DEFINED
 SL_PACK_START(1)
 typedef struct {
   uint8_t algo_mode;
   bool rtl_logging_enabled;
 } SL_ATTRIBUTE_PACKED rtl_config_t;
 SL_PACK_END()
+#endif // RTL_CONFIG_T_DEFINED
 
 // -----------------------------------------------------------------------------
 // Function declarations
@@ -308,15 +315,20 @@ sl_status_t cs_initiator_get_intervals(uint8_t main_mode,
                                        uint16_t *proc_interval);
 
 /**************************************************************************//**
- * Calculate the number of CS subevents within one procedure.
- * @param[in] procedure_interval Negotiated procedure time.
- * @param[in] subevents_per_event Number of subevents within an event.
- * @param[in] event_interval Number of connection intervals between consecutive CS event anchor points.
- * @return Number of subevents per procedure (min. 1)
+ * Validate the minimum and maximum subevent lengths against  
+ * connection and procedure interval limits.
+ * @param[in] min_subevent_len_us Minimum subevent length in microseconds.
+ * @param[in] max_subevent_len_us Maximum subevent length in microseconds.
+ * @param[in] max_connection_interval Maximum connection interval (in 1.25 ms steps) 
+ *                                    @ref CS_INITIATOR_DEFAULT_MAX_CONNECTION_INTERVAL
+ * @param[in] max_procedure_interval Maximum procedure interval.
+ * @return SL_STATUS_OK if the min/max subevent relation is correct and min subevent length fits
+ *         within the computed maximum procedure time; SL_STATUS_INVALID_PARAMETER otherwise.
  *****************************************************************************/
-uint32_t cs_initiator_get_subevents_per_procedure(uint16_t procedure_interval,
-                                                  uint8_t subevents_per_event,
-                                                  uint16_t event_interval);
+sl_status_t cs_initiator_validate_subevent_length(uint32_t min_subevent_len_us,
+                                                  uint32_t max_subevent_len_us,
+                                                  uint16_t max_connection_interval,
+                                                  uint16_t max_procedure_interval);
 
 #ifdef __cplusplus
 };

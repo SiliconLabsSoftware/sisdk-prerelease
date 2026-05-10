@@ -1,0 +1,36 @@
+#include <stdint.h>
+#include "cs_rreq.h"
+
+{%- set includes = [] -%}
+{%- for handler in cs_rreq_on_ras_data %}
+{%- if 'include' in handler and handler['include'] not in includes -%}
+{%- if includes.append(handler['include']) %}{% endif -%}
+{%- endif -%}
+{%- endfor -%}
+{%- for include in includes %}
+#include "{{include}}"
+{%- endfor %}
+
+/***************************************************************************//**
+ * Dispatch ranging data from the RREQ to every component that registered
+ * a handler via the 'cs_rreq_on_ras_data' template contribution.
+ *
+ * @param[in] conn_handle     Connection handle.
+ * @param[in] ranging_counter Procedure ranging counter.
+ * @param[in] proc_info       Contains procedure info
+ * @param[in] ranging_data    Pointer to the RREQ-owned ranging data buffer for
+ *                            this procedure.
+ ******************************************************************************/
+void cs_rreq_dispatch_ras_data(uint8_t conn_handle,
+                               uint16_t ranging_counter,
+                               cs_rreq_procedure_info_t proc_info,
+                               cs_rreq_result_t *ranging_data)
+{
+  (void)conn_handle;
+  (void)ranging_counter;
+  (void)proc_info;
+  (void)ranging_data;
+{% for handler in cs_rreq_on_ras_data %}
+  {{ handler['handler'] }}(conn_handle, ranging_counter, proc_info, ranging_data);
+{% endfor %}
+}

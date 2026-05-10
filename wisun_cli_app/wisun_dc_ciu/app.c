@@ -29,7 +29,9 @@
 #include "sl_sleeptimer.h"
 #include "dmd.h"
 #include "glib.h"
-#include "socket/socket.h"
+#include "sys/socket.h"
+#include "arpa/inet.h"
+#include "netinet/in.h"
 #include "cmsis_os2.h"
 #include "app_cli.h"
 

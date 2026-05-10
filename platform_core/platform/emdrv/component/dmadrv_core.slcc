@@ -4,7 +4,7 @@ package: platform_core
 description: >
   The core implementation for the Direct Memory Access (DMA) driver.
 category: Platform|Driver
-quality: production
+quality: deprecated
 metadata:
   sbom:
     license: Zlib
@@ -44,4 +44,5 @@ requires:
 - name: sl_core
 - name: code_classification
 - name: dma_manager
+- name: sl_common
 root_path: platform_core

@@ -48,7 +48,6 @@ requires:
 - name: bluetooth_feature_cs
   condition:
   - device_cortexm
-- name: refactor_cs_ras_server
 provides:
 - name: refactor_cs_reflector
 template_contribution:

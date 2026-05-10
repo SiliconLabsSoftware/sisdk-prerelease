@@ -21,8 +21,10 @@ component:
   - id: bluetooth_peer_manager_central
   - id: bluetooth_peer_manager_peripheral
   - id: refactor_cs_initiator_client
+  - id: cs_configurator
   - id: refactor_cs_reflector_acp
-  - id: refactor_cs_acp
+  - id: cs_rreq
+  - id: cs_acp_host
   - id: rtllib_api
   - id: refactor_cs_antenna
   - id: gatt_configuration
@@ -59,7 +61,7 @@ config_file:
   - path: config/app_config.h
 
 configuration:
-  - name: APP_LOG_LEVEL_FILTER_DYNAMIC 
+  - name: APP_LOG_LEVEL_FILTER_DYNAMIC
     value: 1
   - name: SL_BT_PEER_MANAGER_PERIPHERAL_CONFIG_ADV_PHY
     value: sl_bt_gap_phy_2m

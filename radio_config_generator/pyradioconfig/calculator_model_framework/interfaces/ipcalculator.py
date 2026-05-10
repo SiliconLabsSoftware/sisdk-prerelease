@@ -6,12 +6,6 @@ from pycalcmodel.core.variable import ModelVariableFormat
 Calculations interface file
 """
 
-class IPRegFields(object):
-    """Define IPRegfield for calculator search automation"""
-    def __init__(self):
-        self.reg_field_list = ()
-    pass
-
 class IPCalculator(ICalculator):
 
     _peripheral_name = ""

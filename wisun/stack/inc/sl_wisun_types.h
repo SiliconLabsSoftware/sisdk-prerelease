@@ -115,9 +115,9 @@ typedef enum {
   SL_WISUN_CERTIFICATE_OPTION_NONE    = 0,
   /// Certificate is appended to a chain
   SL_WISUN_CERTIFICATE_OPTION_APPEND  = 1,
-  /// Certificate data will remain in scope
+  /// Deprecated/Ignored: Certificate is stored into a parsed form internally
   SL_WISUN_CERTIFICATE_OPTION_IS_REF  = 2,
-  /// Certificate has a private key
+  /// Deprecated/Ignored: Device certificates must have a key
   SL_WISUN_CERTIFICATE_OPTION_HAS_KEY = 4
 } sl_wisun_certificate_option_t;
 
@@ -125,7 +125,7 @@ typedef enum {
 typedef enum {
   /// Empty option
   SL_WISUN_PRIVATE_KEY_OPTION_NONE    = 0,
-  /// Private key data will remain in scope
+  /// Deprecated/Ignored: Private key is stored into a parsed form internally
   SL_WISUN_PRIVATE_KEY_OPTION_IS_REF  = 1
 } sl_wisun_private_key_option_t;
 
@@ -1011,13 +1011,13 @@ typedef enum {
   SL_WISUN_TRACE_GROUP_COUNT   = 64     ///< Max number of trace group in this enum
 } sl_wisun_trace_group_t;
 
-/// Thread identifier "Wi-SUN Task"
+/// Thread identifier "ws_task"
 #define SL_WISUN_TRACE_THREAD_WISUN         "WS"
-/// Thread identifier "Wi-SUN Event Task"
+/// Thread identifier "ws_evt"
 #define SL_WISUN_TRACE_THREAD_EVENT_TASK    "EVT"
-/// Thread identifier "Wi-SUN Event Loop Task"
+/// Thread identifier "ws_evl"
 #define SL_WISUN_TRACE_THREAD_EVENT_LOOP    "EVL"
-/// Thread identifier "Wi-SUN RF Task"
+/// Thread identifier "ws_rf"
 #define SL_WISUN_TRACE_THREAD_MAC           "MAC"
 
 /// Enumerations for trace level

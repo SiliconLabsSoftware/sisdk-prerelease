@@ -351,6 +351,9 @@ sl_status_t sl_se_read_pubkey(sl_se_command_context_t *cmd_ctx,
     case SL_SE_KEY_TYPE_IMMUTABLE_SE_ATTESTATION:
       command_word = command_word & ~0x1;
     // Intentional fallthrough
+    #if defined (__GNUC__)
+    __attribute__((fallthrough));
+    #endif
     case SL_SE_KEY_TYPE_IMMUTABLE_ATTESTATION:
       se_key_type = SLI_SE_KEY_TYPE_ATTEST;
       break;
@@ -887,13 +890,14 @@ sl_status_t sl_se_read_otp(sl_se_command_context_t *cmd_ctx,
 
 /***************************************************************************//**
  * @brief
- *   Writes data to User Data section in MTP. The full MTP element is written every
- *   time, so length of write data (num_bytes) must always be equal to
+ *   Static wrappable function for writing data to User Data section in MTP,
+ *   allowing to bypass the static token data write limit.
  *   \ref SL_SE_USER_DATA_SIZE.
  ******************************************************************************/
-sl_status_t sl_se_write_user_data(sl_se_command_context_t *cmd_ctx,
-                                  const void *data,
-                                  size_t num_bytes)
+static sl_status_t sli_se_write_user_data(sl_se_command_context_t *cmd_ctx,
+                                          const void *data,
+                                          size_t num_bytes,
+                                          bool force_write)
 {
   if (cmd_ctx == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
@@ -904,15 +908,19 @@ sl_status_t sl_se_write_user_data(sl_se_command_context_t *cmd_ctx,
   }
 
   if (num_bytes != SL_SE_USER_DATA_SIZE) {
-    // We only support writing the full MTP region
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   // Setup SE command structures
+  uint32_t command_id = SLI_SE_COMMAND_WRITE_USER_DATA;
   sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
   volatile sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(data, num_bytes);
 
-  sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_WRITE_USER_DATA);
+  if (force_write) {
+    command_id = SLI_SE_COMMAND_WRITE_USER_DATA_FORCE;
+  }
+
+  sli_se_command_init(cmd_ctx, command_id);
   sli_se_mailbox_command_add_input(se_cmd, &in_data);
 
   sli_se_mailbox_command_add_parameter(se_cmd, num_bytes);
@@ -920,7 +928,30 @@ sl_status_t sl_se_write_user_data(sl_se_command_context_t *cmd_ctx,
   // Execute and wait
   return sli_se_execute_and_wait(cmd_ctx);
 }
+/***************************************************************************//**
+ * @brief
+ *   Writes data to User Data section in MTP. The full MTP element is written every
+ *   time, so length of write data (num_bytes) must always be equal to
+ *   \ref SL_SE_USER_DATA_SIZE.
+ ******************************************************************************/
+sl_status_t sl_se_write_user_data(sl_se_command_context_t *cmd_ctx,
+                                  const void *data,
+                                  size_t num_bytes)
+{
+  return sli_se_write_user_data(cmd_ctx, data, num_bytes, false);
+}
 
+/***************************************************************************//**
+ * @brief
+ *   Writes data to User Data section in MTP without regarding the static token data
+ *   write limit.
+ ******************************************************************************/
+sl_status_t sli_se_write_user_data_force(sl_se_command_context_t *cmd_ctx,
+                                         const void *data,
+                                         size_t num_bytes)
+{
+  return sli_se_write_user_data(cmd_ctx, data, num_bytes, true);
+}
 /***************************************************************************//**
  * @brief
  *   Retrieves the data from the user data section in MTP.
@@ -948,6 +979,22 @@ sl_status_t sl_se_get_user_data(sl_se_command_context_t *cmd_ctx,
   return sli_se_execute_and_wait(cmd_ctx);
 }
 
+sl_status_t sl_se_get_user_data_remaining_writes(sl_se_command_context_t *cmd_ctx,
+                                                 uint32_t *remaining_writes)
+{
+  if (cmd_ctx == NULL || remaining_writes == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  // Setup SE command structures
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
+  volatile sli_se_datatransfer_t remaining_writes_data = SLI_SE_DATATRANSFER_DEFAULT(remaining_writes, sizeof(uint32_t));
+  sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_GET_USER_DATA_REMAINING);
+  sli_se_mailbox_command_add_output(se_cmd, &remaining_writes_data);
+
+  // Execute and wait
+  return sli_se_execute_and_wait(cmd_ctx);
+}
 #else
 
 /***************************************************************************//**

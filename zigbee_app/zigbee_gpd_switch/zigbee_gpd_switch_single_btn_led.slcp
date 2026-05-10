@@ -48,8 +48,13 @@ component:
   - id: zigbee_gpd_application_support
   - id: zigbee_gpd_network_support
   - id: clock_manager
-  # Platform - enable LTO for gcc
+  # Platform - enable LTO for gcc and llvm
   - id: toolchain_gcc_lto
+    condition:
+      - toolchain_gcc
+  - id: toolchain_llvm_lto
+    condition:
+      - toolchain_llvm
 
 configuration:
   - name: SL_RAIL_UTIL_INIT_GPDRAIL_ENABLE

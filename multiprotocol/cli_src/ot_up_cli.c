@@ -333,7 +333,9 @@ void sl_ot_rtos_application_tick(void)
     case OT_CLI_TXPOWER_SET:
     {
       otError error = otPlatRadioSetTransmitPower(otGetInstance(), sTxPowerPending);
-
+      if (error != OT_ERROR_NONE) {
+        sl_zigbee_app_debug_println("Status: 0x%0x", error);
+      }
       // Show what the driver actually configured (may be clamped)
       int8_t eff = 0;
       if (otPlatRadioGetTransmitPower(otGetInstance(), &eff) == OT_ERROR_NONE) {

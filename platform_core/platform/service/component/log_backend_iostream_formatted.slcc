@@ -3,10 +3,14 @@ label: Log Backend I/O Stream – Formatted Output
 package: platform_core
 description: >
   Human-readable text output for the I/O Stream log backend. Each log line is
-  formatted as [LEVEL|TYPE|TIMESTAMP] followed by the payload and terminated
-  with CRLF. String logs expand printf-style specifiers (%d, %x, %s, %p);
-  event logs emit hex-encoded event_id, arguments, core_id, and version.
-  Requires the log_backend_iostream component for transport.
+  the payload (string logs expand printf-style specifiers; event logs emit
+  hex-encoded fields) terminated with CRLF. Log level is not printed. Optional
+  leading bracket prefix (timestamp and/or log type) is configured in
+  sl_log_formatted_iostream_config.h. Requires the log_backend_iostream
+  component for transport.
+  Formatted strings are currently supported only for host logs.
+  Captive core logs do not support formatted output; instead, they are emitted
+  in an encoded form and require a post processing script for decoding and interpretation.
 category: Services|Log
 quality: evaluation
 metadata:
@@ -28,6 +32,7 @@ config_file:
   unless: [device_si91x]
 - path: config/sl_log_platform_core_config.h
   condition: [device_has_timer]
+- path: config/sl_log_formatted_iostream_config.h
 source:
 - path: backend/iostream/src/sl_log_backend_iostream_formatted.c
 template_contribution:

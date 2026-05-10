@@ -51,6 +51,7 @@
 #include "cs_algo.h"
 #include "cs_initiator.h"
 #include "cs_initiator_client.h"
+#include "cs_configurator.h"
 #include "cs_initiator_config.h"
 #include "cs_initiator_display_core.h"
 #include "cs_initiator_display.h"
@@ -62,6 +63,7 @@
 // other required content
 #include "sl_bt_peer_manager_central.h"
 #include "sl_bt_peer_manager_filter.h"
+#include "sl_clock_manager.h"
 
 #ifdef SL_CATALOG_CS_INITIATOR_CLI_PRESENT
 #include "cs_initiator_cli.h"
@@ -128,11 +130,11 @@ typedef struct {
 static uint8_t get_algo_mode(void);
 static const char *antenna_usage_to_str(const cs_initiator_config_t *config);
 static const char *algo_mode_to_str(uint8_t algo_mode);
-static void cs_on_result(const uint8_t conn_handle,
-                         const uint16_t ranging_counter,
+static void cs_on_result(uint8_t conn_handle,
+                         uint16_t ranging_counter,
                          const uint8_t *result,
-                         const uint16_t result_size,
-                         const cs_ranging_data_t *ranging_data);
+                         uint16_t result_size,
+                         const cs_rreq_result_t *ranging_data);
 static void cs_on_intermediate_result(const cs_intermediate_result_t *intermediate_result);
 static void cs_on_error(uint8_t conn_handle,
                         cs_error_event_t err_evt,
@@ -420,11 +422,11 @@ static sl_status_t save_connection(uint8_t conn_handle)
 /******************************************************************************
  * Extract measurement results
  *****************************************************************************/
-static void cs_on_result(const uint8_t conn_handle,
-                         const uint16_t ranging_counter,
+static void cs_on_result(uint8_t conn_handle,
+                         uint16_t ranging_counter,
                          const uint8_t *result,
-                         const uint16_t result_size,
-                         const cs_ranging_data_t *ranging_data)
+                         uint16_t result_size,
+                         const cs_rreq_result_t *ranging_data)
 {
   (void)ranging_data;
   uint8_t initiator_num;
@@ -637,8 +639,8 @@ static sl_status_t create_new_initiator_instance(uint8_t conn_handle)
   sc = cs_initiator_create(conn_handle,
                            &initiator_config,
                            &rtl_config,
-                           cs_on_result,
-                           cs_on_intermediate_result,
+                           NULL,
+                           NULL,
                            cs_on_error,
                            NULL);
   if (sc != SL_STATUS_OK) {
@@ -1042,17 +1044,29 @@ void sl_bt_on_event(sl_bt_msg_t * evt)
       uint8_t connection = evt->data.evt_cs_read_remote_supported_capabilities_complete.connection;
       check_supported_capabilities(evt);
       if (initiator_config.max_procedure_count == 0) {
-        sc = cs_initiator_get_intervals(initiator_config.cs_main_mode,
-                                        initiator_config.cs_sub_mode,
-                                        initiator_config.procedure_scheduling,
-                                        initiator_config.channel_map_preset,
-                                        rtl_config.algo_mode,
-                                        initiator_config.cs_tone_antenna_config_idx,
-                                        initiator_config.use_real_time_ras_mode,
-                                        &conn_interval,
-                                        &proc_interval);
+        uint32_t estimation_time_us;
+        uint32_t clock_frequency_hz = 0;
+        sc = sl_clock_manager_get_clock_branch_frequency(SL_CLOCK_BRANCH_HCLK, &clock_frequency_hz);
+        app_assert_status(sc);
+        sc = cs_configurator_get_estimation_time_us(NULL, //TODO: remove WIP when CS Manager is ready
+                                                    rtl_config.algo_mode,
+                                                    clock_frequency_hz,
+                                                    &estimation_time_us,
+                                                    initiator_config.channel_map_preset,
+                                                    initiator_config.cs_main_mode,
+                                                    initiator_config.cs_sub_mode);
+        app_assert_status(sc);
+        log_info(APP_INSTANCE_PREFIX "Estimation time: %lu us" NL, connection, estimation_time_us);
+        sc = cs_configurator_optimize(initiator_config.procedure_scheduling,
+                                      estimation_time_us,
+                                      CS_INITIATOR_MAX_CONNECTIONS,
+                                      NULL, //TODO: remove WIP when CS Manager is ready
+                                      initiator_config.use_real_time_ras_mode,
+                                      initiator_config.channel_map_preset,
+                                      initiator_config.cs_tone_antenna_config_idx,
+                                      &conn_interval, &proc_interval);
         if (sc == SL_STATUS_NOT_SUPPORTED) {
-          log_info(APP_INSTANCE_PREFIX "Parameter optimization is not supported with the given input parameters" NL, connection);
+          log_error(APP_INSTANCE_PREFIX "Parameter optimization is not supported with the given input parameters" NL, connection);
         } else if (sc == SL_STATUS_IDLE) {
           log_info(APP_PREFIX "No optimization - using custom procedure scheduling" NL);
         } else if (sc == SL_STATUS_OK) {
@@ -1072,7 +1086,20 @@ void sl_bt_on_event(sl_bt_msg_t * evt)
                  (((uint16_t)(1000000.0f / period_ms)) % 1000));
         // put remote antenna num into cs_tone_antenna_config_idx
         initiator_config.cs_tone_antenna_config_idx = evt->data.evt_cs_read_remote_supported_capabilities_complete.num_antennas;
+        sc = cs_configurator_validate(estimation_time_us,
+                                      CS_INITIATOR_MAX_CONNECTIONS,
+                                      NULL, //TODO: remove WIP when CS Manager is ready
+                                      initiator_config.use_real_time_ras_mode,
+                                      initiator_config.channel_map_preset,
+                                      initiator_config.cs_tone_antenna_config_idx,
+                                      initiator_config.min_procedure_interval,
+                                      initiator_config.min_connection_interval,
+                                      initiator_config.max_procedure_interval, 
+                                      initiator_config.max_connection_interval);
+        app_assert_status(sc);
+        log_info(APP_INSTANCE_PREFIX "Validated parameters for connection interval and procedure interval." NL, connection);
       }
+
       sc = create_new_initiator_instance(connection);
       if (sc != SL_STATUS_OK) {
         log_error(APP_INSTANCE_PREFIX "Failed to create initiator instance, "

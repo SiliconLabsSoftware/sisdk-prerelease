@@ -37,7 +37,6 @@
 #include <stdint.h>
 #include "sl_status.h"
 #include "sl_bt_api.h"
-#include "sl_rtl_clib_api.h"
 #include "app_timer.h"
 
 #include "cs_result.h"
@@ -176,30 +175,22 @@ typedef struct {
                                           // ranging counter is overwritten
 } ras_client_t;
 
-/// Ranging data array type
+/// Procedure timing config type (required by estimation)
 typedef struct {
-  uint32_t ranging_data_size;                               // Actual size
-  uint8_t ranging_data[CS_INITIATOR_MAX_RANGING_DATA_SIZE]; // Ranging data
-} ranging_data_array_t;
-
-/// Unified ranging data
-typedef struct {
-  uint8_t num_steps;                        // Number of steps
-  uint8_t step_channels[CS_MAX_STEP_COUNT]; // Step channel array
-  ranging_data_array_t initiator;           // Initiator ranging data
-  ranging_data_array_t reflector;           // Reflector ranging data
-} unified_ranging_data_t;
+  uint32_t subevent_len;
+  uint16_t subevent_interval;
+  uint16_t event_interval;
+  uint16_t procedure_interval;
+  uint16_t procedure_count;
+  uint8_t  subevents_per_event;
+} cs_procedure_config_t;
 
 /// CS Initiator main class
 typedef struct {
-  unified_ranging_data_t data;
   uint16_t ranging_counter;
   cs_ras_subevent_header_t *last_subevent_header;
-  sl_rtl_cs_procedure_config cs_procedure_config;
+  cs_procedure_config_t cs_procedure_config;
   rtl_config_t rtl_config;
-  sl_rtl_cs_params cs_parameters;
-  cs_result_session_data_t result_data;
-  uint8_t result[CS_RESULT_MAX_BUFFER_SIZE];
   cs_initiator_config_t config;
   ras_client_t ras_client;
   uint8_t conn_handle;
@@ -207,7 +198,6 @@ typedef struct {
   sl_bt_connection_security_t security_mode;
   bool cs_security_enabled;
   bool connection_parameters_set;
-  sl_rtl_cs_libitem rtl_handle;
   uint8_t instance_id;
   cs_result_cb_t result_cb;
   cs_intermediate_result_cb_t intermediate_result_cb;

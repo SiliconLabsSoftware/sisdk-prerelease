@@ -7,6 +7,7 @@ If the configuration is changed to create more than 1 initiator instances, SL_BT
 
 
 ## Usage
+
 - Build and flash the sample application.
 
 - The default object tracking mode is Moving Object tracking - fast. Pressing BTN1 while resetting the device selects Stationary Object tracking algorithm mode.
@@ -21,6 +22,7 @@ If the configuration is changed to create more than 1 initiator instances, SL_BT
 ![](./image/cs_lcd.png)
 
 ## Multiconnection
+
 - Default setup is optimized for 1-1 connection, multiconnection setup requires modification of the timing parameters to operate as expected. Timing can be adjusted by the procedure_interval and connection_interval parameters.
 - Use the following calculation for 1-N connection: procedure_time_1_N[ms] = connection_interval[ms] * procedure_interval * N
 - Note that setting CS_INITIATOR_DEFAULT_MIN/MAX_CONNECTION_INTERVAL and CS_INITIATOR_DEFAULT_MIN/MAX_PROCEDURE_INTERVAL will only take effect if CS_INITIATOR_DEFAULT_PROCEDURE_SCHEDULING is set to CS_PROCEDURE_SCHEDULING_CUSTOM. Otherwise these parameters are managed by the application.
@@ -28,6 +30,7 @@ If the configuration is changed to create more than 1 initiator instances, SL_BT
 - If more than 1 initiator instances are created increase SL_BT_CONFIG_BUFFER_SIZE. With maximum number of instances (4) it's safe to use 22000.
 
 ## Resource optimization
+
 - Flash usage can be reduced by
   - removing "Bluetooth controller anchor selection" component if no multiple reflector connection is required,
   - turning off "Logging"-"Initiator component" feature in "CS Initiator" component, CS_INITIATOR_UART_LOG in application config (app_config.h) or application logging in "Application"- "Utility" -"Log" component configuration.
@@ -37,6 +40,7 @@ If the configuration is changed to create more than 1 initiator instances, SL_BT
   - reducing "Buffer memory size for Bluetooth stack" in "Bluetooth Core" component configuration if the "Maximum initiator connections" is changed to create less than 4 initiator instances.
 
 ### Calculating the size of "Maximum ranging data size"
+
 The optimal value of "Maximum ranging data size" is dependent on several configuration values, and can be calculated by the following equation:
 
 ranging_max_size = 4 + (subevents * 8) + (subevents * mode0_steps * mode0_size) + channels * ( ( 1 + ( antenna_paths + 1 ) * 4) + 1 )

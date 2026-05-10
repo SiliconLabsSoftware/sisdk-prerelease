@@ -7,16 +7,16 @@ supplier: Silicon Laboratories, Inc.
 component_path:
 - path: generative_ai/component
 - path: bgapi_protocol/component
-- path: bluetooth_le_middleware/component
+- path: bluetooth_apploader/component
+- path: bluetooth_le_host/component
 - path: bluetooth_le_controller_xg2b/component
 - path: bluetooth_zvd/component
-- path: bluetooth_mesh_middleware/component
-- path: bluetooth_le_host/component
 - path: bluetooth_le_controller/component
-- path: bluetooth_apploader/component
+- path: bluetooth_mesh_middleware/component
 - path: bluetooth_common/component
 - path: bluetooth_mesh_srtest/component
 - path: bluetooth_mesh/component
+- path: bluetooth_le_middleware/component
 - path: boards_internal/hardware/kit/component
 - path: boards_internal/hardware/kit/common/component
 - path: boards_internal/hardware/board/component
@@ -54,6 +54,7 @@ component_path:
 - path: delta_dfu/component
 - path: freertos/component
 - path: freertos_internal/component
+- path: mbedtls/component
 - path: micriumos/platform/micrium_os/component
 - path: micriumos_internal/platform/micrium_os/component
 - path: multiprotocol/component
@@ -75,14 +76,6 @@ component_path:
 - path: platform_core/hardware/module/config/component
 - path: platform_core/platform/middleware/glib/component
 - path: platform_core/platform/security/component
-- path: platform_riscv_internal/platform/rvlib/component
-- path: platform_riscv_internal/platform/service/component
-- path: platform_riscv_internal/platform/common/component
-- path: platform_everest/platform/peripheral/component
-- path: platform_everest/platform/common/component
-- path: platform_everest/platform/Device/component
-- path: platform_everest/platform/service/component
-- path: platform_efr32xg2b/platform/Device/component
 - path: platform_core_internal/app/common/component
 - path: platform_core_internal/platform/common/component
 - path: platform_core_internal/platform/service/component
@@ -99,21 +92,28 @@ component_path:
 - path: platform_core_internal/hardware/kit/common/component
 - path: platform_core_internal/hardware/board/component
 - path: platform_core_internal/hardware/board/config/component
+- path: platform_riscv_internal/platform/rvlib/component
+- path: platform_riscv_internal/platform/service/component
+- path: platform_riscv_internal/platform/common/component
+- path: platform_everest/platform/peripheral/component
+- path: platform_everest/platform/common/component
+- path: platform_everest/platform/Device/component
+- path: platform_everest/platform/service/component
+- path: platform_efr32xg2b/platform/Device/component
 - path: printf/component
 - path: proprietary_default_radio_confs/.
 - path: protocol_user_sequencer_internal/component/protocol_user_sequencer_internal
 - path: rail_library_internal_chips/component/rail_library_internal_chips
 - path: rail_internal/component/rail_internal
-- path: rail_library_alpha_chips/component/rail_library_alpha_chips
 - path: rail_sdk/component
 - path: rail_library_efr32xg2b/component/rail_library_efr32xg2b
 - path: rail_library/component/rail_library
+- path: rail_library_alpha_chips/component/rail_library_alpha_chips
 - path: realtime_locationing/component
 - path: rtos_benchmark_internal/component
 - path: rv2_framework_internal/component
 - path: security_sxsymcrypt/component
 - path: security_tfm/component
-- path: security_mbedtls_source/component
 - path: security_libcryptosoc/component
 - path: segger/component
 - path: unity_internal/component
@@ -123,8 +123,6 @@ component_path:
 - path: wisun/component
 - path: wisun_config_generator/component
 - path: wisun_sdk/component
-- path: zigbee_sleepy_to_sleepy/component/zigbee_sleepy_to_sleepy
-- path: zigbee_sleepy_to_sleepy/app/framework/component/zigbee_sleepy_to_sleepy
 - path: zigbee_wwah/app/framework/component/zigbee_wwah
 - path: zigbee/platform/radio/mac/component/zigbee
 - path: zigbee/platform/radio/rail_lib/plugin/component/zigbee
@@ -133,6 +131,8 @@ component_path:
 - path: zigbee/util/silicon_labs/silabs_core/component/zigbee
 - path: zigbee/app/framework/component/zigbee
 - path: zigbee/platform/service/component/zigbee
+- path: zigbee_sleepy_to_sleepy/component/zigbee_sleepy_to_sleepy
+- path: zigbee_sleepy_to_sleepy/app/framework/component/zigbee_sleepy_to_sleepy
 - path: zigbee_smart_energy/component/zigbee_smart_energy
 - path: zwave/component
 - path: zwave/component/CommandClasses
@@ -146,6 +146,8 @@ documentation:
   version: 4.1.0
 - docset: btmesh-service-api
   version: 11.0.0
+- docset: gecko-platform
+  version: 6.1.0
 - docset: mcu-bootloader
   version: 3.1.0
 - docset: multiprotocol
@@ -166,19 +168,19 @@ documentation:
   version: 2.9.0
 - docset: protocol-usb
   version: 1.5.0
-- docset: wifi
-  version: 4.1.0
 - docset: wifi_sqa_internal
+  version: 4.1.0
+- docset: wifi
   version: 4.1.0
 - docset: wisun
   version: 2.12.0
 - docset: zigbee
   version: 9.1.0
 upgrade_manifest:
-- path: bluetooth_le_middleware/upgrade.slcu
-- path: bluetooth_mesh_middleware/upgrade.slcu
 - path: bluetooth_le_host/component/upgrade.slcu
+- path: bluetooth_mesh_middleware/upgrade.slcu
 - path: bluetooth_mesh/component/upgrade.slcu
+- path: bluetooth_le_middleware/upgrade.slcu
 - path: connect_stack/component/upgrade.slcu
 - path: cpc/upgrade.slcu
 - path: multiprotocol/component/upgrade.slcu

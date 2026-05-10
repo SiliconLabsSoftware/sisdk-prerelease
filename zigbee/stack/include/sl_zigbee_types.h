@@ -1340,6 +1340,7 @@ typedef struct {
   uint16_t groupId;
   /** The sequence number. */
   uint8_t sequence;
+  /** The radius of the message, which determines number of hops. */
   uint8_t radius;
 } sl_zigbee_aps_frame_t;
 

@@ -33,22 +33,21 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <limits.h>
 #include "sl_bt_api.h"
 #include "sl_component_catalog.h"
-#include "sl_rtl_clib_api.h"
 #include "sl_status.h"
 
 #include "cs_initiator_config.h"
 #include "cs_initiator_common.h"
 #include "cs_initiator_client.h"
 #include "cs_initiator_error.h"
-#include "cs_initiator_estimate.h"
-#include "cs_initiator_extract.h"
 #include "cs_initiator_log.h"
 #include "cs_initiator_state_machine.h"
-#include "cs_ras_client.h"
 #include "cs_ras_format_converter.h"
 #include "cs_sync_antenna.h"
+#include "cs_algo.h"
+#include "cs_rreq.h"
 
 #ifdef SL_CATALOG_CS_INITIATOR_REPORT_PRESENT
 #include "cs_initiator_report.h"
@@ -102,19 +101,28 @@ static void init_cs_configuration(const uint8_t conn_handle);
 static void cs_initiator_select_antennas(uint8_t conn_handle,
                                          uint8_t cs_initiator_local_antenna_num,
                                          uint8_t cs_initiator_remote_antenna_num);
-static void process_remote_ranging_data(cs_initiator_t *initiator,
-                                        uint8_t *data,
-                                        uint32_t data_size);
+static uint32_t get_num_tones_from_channel_map(const uint8_t *ch_map,
+                                                const uint32_t ch_map_len); 
 static bool ras_client_handler(cs_initiator_t *initiator, sl_bt_msg_t *evt);
-static void reset_ras_config(cs_initiator_t* initiator);
+
 #if defined (CS_INITIATOR_RAS_MODE_USE_REAL_TIME_MODE) && (CS_INITIATOR_RAS_MODE_USE_REAL_TIME_MODE == 0)
 static void cs_initiator_get_lost_segments(uint64_t lost_segments,
                                            uint8_t *start_segment,
                                            uint8_t *end_segment);
 #endif
 
+static void rreq_enable_complete(uint8_t conn_handle, uint8_t enable, sl_status_t sc);
+static void rreq_create_complete(uint8_t conn_handle, sl_status_t sc);
+static void rreq_on_error(uint8_t conn_handle, cs_rreq_error_t error, sl_status_t sc);
+
 // -----------------------------------------------------------------------------
 // Static variables
+
+static const cs_rreq_event_callback_t rreq_callbacks = {
+  .on_create = rreq_create_complete,
+  .on_enable = rreq_enable_complete,
+  .on_error = rreq_on_error,
+};
 
 static cs_initiator_t cs_initiator_instances[CS_INITIATOR_MAX_CONNECTIONS];
 
@@ -283,38 +291,6 @@ static void init_cs_configuration(const uint8_t conn_handle)
   }
 }
 
-static void process_remote_ranging_data(cs_initiator_t *initiator,
-                                        uint8_t *data,
-                                        uint32_t data_size)
-{
-  sl_status_t sc;
-  cs_ras_ranging_header_t *ranging_header = (cs_ras_ranging_header_t *)data;
-  initiator_log_info(INSTANCE_PREFIX "Ranging Data for Procedure %u arrived, size = %lu" LOG_NL,
-                     initiator->conn_handle,
-                     ranging_header->ranging_counter,
-                     data_size);
-
-  // Pass Ranging Data to the state machine
-  state_machine_event_data_t evt_data;
-  evt_data.evt_ranging_data.ranging_counter = ranging_header->ranging_counter;
-  evt_data.evt_ranging_data.initiator_part = false;
-  evt_data.evt_ranging_data.data = data;
-  evt_data.evt_ranging_data.data_size = data_size;
-  // Check done status of the procedure
-  evt_data.evt_ranging_data.procedure_state = ranging_data_is_complete(initiator->data.reflector.ranging_data,
-                                                                       initiator->data.reflector.ranging_data_size,
-                                                                       false,
-                                                                       initiator->num_antenna_path);
-  sc = initiator_state_machine_event_handler(initiator,
-                                             INITIATOR_EVT_RANGING_DATA,
-                                             &evt_data);
-  if (sc != SL_STATUS_OK) {
-    initiator_log_error(INSTANCE_PREFIX "RAS - failed pass reflector ranging data [sc: 0x%lx]" LOG_NL,
-                        initiator->conn_handle,
-                        (unsigned long)sc);
-  }
-}
-
 /******************************************************************************
  * RAS client event handler.
  *****************************************************************************/
@@ -382,9 +358,25 @@ static bool ras_client_handler(cs_initiator_t *initiator, sl_bt_msg_t *evt)
       }
       initiator_log_debug(INSTANCE_PREFIX "RAS - discovery - characteristics found" LOG_NL,
                           initiator->conn_handle);
-      sc = cs_ras_client_create(initiator->conn_handle,
-                                &initiator->ras_client.gattdb_handles,
-                                initiator->config.mtu);
+
+      cs_rreq_create_config_t rreq_config;
+      rreq_config.is_initiator = true;
+      rreq_config.real_time_mode
+        = CS_INITIATOR_RAS_MODE_USE_REAL_TIME_MODE;
+      rreq_config.service = initiator->ras_client.service;
+      rreq_config.mtu = initiator->ras_client.mtu;
+      memcpy(&rreq_config.gattdb_handles, &initiator->ras_client.gattdb_handles, sizeof(rreq_config.gattdb_handles));
+      rreq_config.ras_config.real_time_ranging_data_indication =
+        CS_INITIATOR_RAS_REAL_TIME_INDICATION;
+      rreq_config.ras_config.on_demand_ranging_data_indication =
+        CS_INITIATOR_RAS_ON_DEMAND_INDICATION;
+      rreq_config.ras_config.ranging_data_ready_notification =
+        CS_INITIATOR_RAS_DATA_READY_NOTIFICATION;
+      rreq_config.ras_config.ranging_data_overwritten_notification =
+        CS_INITIATOR_RAS_DATA_OVERWRITTEN_NOTIFICATION;
+      rreq_config.antenna_config = initiator->antenna_config;
+
+      sc = cs_rreq_create(initiator->conn_handle, &rreq_config);
       if (sc != SL_STATUS_OK) {
         initiator_log_error(INSTANCE_PREFIX "RAS - client create failed! [sc: 0x%lx]" LOG_NL,
                             initiator->conn_handle,
@@ -410,32 +402,6 @@ static bool ras_client_handler(cs_initiator_t *initiator, sl_bt_msg_t *evt)
   return handled;
 }
 
-/******************************************************************************
- * Set the RAS config flags for indication and notification.
- *****************************************************************************/
-static void reset_ras_config(cs_initiator_t* initiator)
-{
-  initiator->ras_client.real_time_mode
-    = CS_INITIATOR_RAS_MODE_USE_REAL_TIME_MODE;
-
-  initiator->ras_client.service = INVALID_SERVICE_HANDLE;
-  initiator->ras_client.mtu = ATT_MTU_MIN;
-
-  initiator->ras_client.config.real_time_ranging_data_indication =
-    CS_INITIATOR_RAS_REAL_TIME_INDICATION;
-  initiator->ras_client.config.on_demand_ranging_data_indication =
-    CS_INITIATOR_RAS_ON_DEMAND_INDICATION;
-  initiator->ras_client.config.ranging_data_ready_notification =
-    CS_INITIATOR_RAS_DATA_READY_NOTIFICATION;
-  initiator->ras_client.config.ranging_data_overwritten_notification =
-    CS_INITIATOR_RAS_DATA_OVERWRITTEN_NOTIFICATION;
-
-  initiator->data.reflector.ranging_data_size = 0;
-  memset(&initiator->data.reflector.ranging_data,
-         0,
-         sizeof(initiator->data.reflector.ranging_data));
-  initiator->ras_client.overwritten = false;
-}
 
 /******************************************************************************
  * Select antennas for the CS mode.
@@ -448,7 +414,7 @@ static void cs_initiator_select_antennas(uint8_t conn_handle, uint8_t cs_initiat
   if (initiator->config.cs_main_mode == sl_bt_cs_mode_pbr) {
     switch (initiator->config.cs_tone_antenna_config_idx_req) {
       case CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY:
-        initiator->cs_parameters.num_antenna_paths = 1;
+        initiator->num_antenna_path = 1;
         initiator_log_info(INSTANCE_PREFIX "CS - PBR - 1:1 antenna usage set" LOG_NL,
                            initiator->conn_handle);
         break;
@@ -461,9 +427,9 @@ static void cs_initiator_select_antennas(uint8_t conn_handle, uint8_t cs_initiat
                    CS_ERROR_EVENT_INITIATOR_PBR_ANTENNA_USAGE_NOT_SUPPORTED,
                    SL_STATUS_FAIL);
           initiator->config.cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
-          initiator->cs_parameters.num_antenna_paths = 1;
+          initiator->num_antenna_path = 1;
         } else {
-          initiator->cs_parameters.num_antenna_paths = 2;
+          initiator->num_antenna_path = 2;
           initiator_log_info(INSTANCE_PREFIX "CS - PBR - 2:1 antenna usage set" LOG_NL,
                              initiator->conn_handle);
         }
@@ -477,16 +443,16 @@ static void cs_initiator_select_antennas(uint8_t conn_handle, uint8_t cs_initiat
                    CS_ERROR_EVENT_INITIATOR_PBR_ANTENNA_USAGE_NOT_SUPPORTED,
                    SL_STATUS_FAIL);
           initiator->config.cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
-          initiator->cs_parameters.num_antenna_paths = 1;
+          initiator->num_antenna_path = 1;
         } else {
-          initiator->cs_parameters.num_antenna_paths = 2;
+          initiator->num_antenna_path = 2;
           initiator_log_info(INSTANCE_PREFIX "CS - PBR - 1:2 antenna usage set" LOG_NL,
                              initiator->conn_handle);
         }
         break;
       case CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY:
         if (cs_initiator_remote_antenna_num >= 2 && cs_initiator_local_antenna_num >= 2) {
-          initiator->cs_parameters.num_antenna_paths = 4;
+          initiator->num_antenna_path = 4;
           initiator_log_info(INSTANCE_PREFIX "CS - PBR - 2:2 antenna usage set" LOG_NL,
                              initiator->conn_handle);
         } else {
@@ -494,12 +460,12 @@ static void cs_initiator_select_antennas(uint8_t conn_handle, uint8_t cs_initiat
                    CS_ERROR_EVENT_INITIATOR_PBR_ANTENNA_USAGE_NOT_SUPPORTED,
                    SL_STATUS_FAIL);
           if (cs_initiator_remote_antenna_num == 1 && cs_initiator_local_antenna_num == 2) {
-            initiator->cs_parameters.num_antenna_paths = 2;
+            initiator->num_antenna_path = 2;
             initiator->config.cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R;
             initiator_log_info(INSTANCE_PREFIX "CS - PBR - 2:1 antenna usage set" LOG_NL,
                                initiator->conn_handle);
           } else if (cs_initiator_remote_antenna_num == 2 && cs_initiator_local_antenna_num == 1) {
-            initiator->cs_parameters.num_antenna_paths = 2;
+            initiator->num_antenna_path = 2;
             initiator->config.cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R;
             initiator_log_info(INSTANCE_PREFIX "CS - PBR - 1:2 antenna usage set" LOG_NL,
                                initiator->conn_handle);
@@ -508,7 +474,7 @@ static void cs_initiator_select_antennas(uint8_t conn_handle, uint8_t cs_initiat
                                   initiator->conn_handle);
 
             initiator->config.cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
-            initiator->cs_parameters.num_antenna_paths = 1;
+            initiator->num_antenna_path = 1;
           }
         }
         break;
@@ -516,13 +482,13 @@ static void cs_initiator_select_antennas(uint8_t conn_handle, uint8_t cs_initiat
         initiator_log_warning(INSTANCE_PREFIX "CS - PBR - unknown antenna usage! "
                                               "Using the default setting: 1:1 antenna" LOG_NL,
                               initiator->conn_handle);
-        initiator->cs_parameters.num_antenna_paths = 1;
+        initiator->num_antenna_path = 1;
         initiator->config.cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
         break;
     }
     initiator_log_debug(INSTANCE_PREFIX "CS - PBR - using %u antenna paths" LOG_NL,
                         initiator->conn_handle,
-                        initiator->cs_parameters.num_antenna_paths);
+                        initiator->num_antenna_path);
   }
 
   initiator->config.cs_tone_antenna_config_idx = initiator->config.cs_tone_antenna_config_idx_req;
@@ -566,34 +532,36 @@ static void cs_initiator_select_antennas(uint8_t conn_handle, uint8_t cs_initiat
         break;
     }
     // In case of RTT num_antenna_paths is ignored
-    initiator->cs_parameters.num_antenna_paths = 0;
+    initiator->num_antenna_path = 0;
   }
 }
 
-#if defined (CS_INITIATOR_RAS_MODE_USE_REAL_TIME_MODE) && (CS_INITIATOR_RAS_MODE_USE_REAL_TIME_MODE == 0)
 /******************************************************************************
- * Get start and end segments of the lost_segments bitfield.
+ * Get number of tones in channel map
  *****************************************************************************/
-static void cs_initiator_get_lost_segments(uint64_t lost_segments,
-                                           uint8_t *start_segment,
-                                           uint8_t *end_segment)
+static uint32_t get_num_tones_from_channel_map(const uint8_t  *ch_map,
+                                                const uint32_t ch_map_len)
 {
-  bool found_start_segment = false;
-  uint64_t bitmask;
-  for (uint64_t i = 0; i < sizeof(uint64_t) * 8; i++) {
-    bitmask = 1ULL << i;
-    if ((bitmask & lost_segments) > 0) {
-      if (!found_start_segment) {
-        *start_segment = i;
-        *end_segment = i;
-        found_start_segment = true;
-      } else {
-        *end_segment = i;
+  uint8_t current_ch_map;
+  uint32_t num_cs_channels = 0;
+
+  if (ch_map == NULL) {
+    initiator_log_error("null reference to channel map! Can not get number of tones!" LOG_NL);
+    return num_cs_channels;
+  } else {
+    for (uint32_t ch_map_index = 0; ch_map_index < ch_map_len; ch_map_index++) {
+      current_ch_map = ch_map[ch_map_index];
+      for (uint8_t current_bit_index = 0;
+           current_bit_index < sizeof(uint8_t) * CHAR_BIT;
+           current_bit_index++) {
+        if (current_ch_map & (1 << current_bit_index)) {
+          num_cs_channels++;
+        }
       }
     }
   }
+  return num_cs_channels;
 }
-#endif
 
 // -----------------------------------------------------------------------------
 // Public function definitions
@@ -622,9 +590,7 @@ sl_status_t cs_initiator_create(const uint8_t               conn_handle,
     return SL_STATUS_INVALID_HANDLE;
   }
   if (initiator_config == NULL
-      || result_cb == NULL
-      || error_cb == NULL
-      || intermediate_result_cb == NULL) {
+      || error_cb == NULL) {
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -640,8 +606,6 @@ sl_status_t cs_initiator_create(const uint8_t               conn_handle,
   initiator_log_debug(INSTANCE_PREFIX "clean-up initiator and reflector data" LOG_NL,
                       initiator->conn_handle);
   memset(initiator, 0, sizeof(cs_initiator_t));
-  reset_subevent_data(initiator, false);
-  reset_ras_config(initiator);
 
   // Assign connection handle
   initiator->conn_handle = conn_handle;
@@ -706,20 +670,21 @@ sl_status_t cs_initiator_create(const uint8_t               conn_handle,
   }
   initiator_log_debug(INSTANCE_PREFIX "ch3c_jump=%u, ch3c_shape=%u" LOG_NL,
                       conn_handle,
-                      initiator->cs_parameters.ch3c_jump,
-                      initiator->cs_parameters.ch3c_shape);
+                      initiator->config.ch3c_jump,
+                      initiator->config.ch3c_shape);
   initiator_log_debug(INSTANCE_PREFIX "channel_map_repetition=%u, cs_sync_phy=%u" LOG_NL,
                       conn_handle,
-                      initiator->cs_parameters.channel_map_repetition,
-                      initiator->cs_parameters.cs_sync_phy);
+                      initiator->config.channel_map_repetition,
+                      initiator->config.cs_sync_phy);
   initiator_log_debug(INSTANCE_PREFIX "main_mode_repetition=%lu, rtt_type=%u" LOG_NL,
                       conn_handle,
-                      (unsigned long)initiator->cs_parameters.main_mode_repetition,
-                      initiator->cs_parameters.rtt_type);
+                      (unsigned long)initiator->config.main_mode_repetition,
+                      initiator->config.rtt_type);
 
   initiator_log_debug(INSTANCE_PREFIX "initialize discover state machine" LOG_NL,
                       initiator->conn_handle);
 
+  initiator->ras_client.mtu = initiator->config.mtu;
   initiator->result_cb = result_cb;
   initiator->intermediate_result_cb = intermediate_result_cb;
   initiator->error_cb = error_cb;
@@ -823,22 +788,6 @@ sl_status_t cs_initiator_create(const uint8_t               conn_handle,
   initiator_log_debug(INSTANCE_PREFIX "CS - set connection parameters ..." LOG_NL,
                       initiator->conn_handle);
 
-  // trying to initialize RTL lib within error-timeout
-  initiator_log_debug(INSTANCE_PREFIX "RTL - initialize lib item" LOG_NL,
-                      initiator->conn_handle);
-  rtl_err = rtl_library_init(initiator->conn_handle,
-                             &initiator->rtl_handle,
-                             &initiator->rtl_config,
-                             &initiator->instance_id);
-  if (rtl_err != SL_RTL_ERROR_SUCCESS) {
-    initiator_log_error(INSTANCE_PREFIX "RTL - failed to init lib item! [E: 0x%x]" LOG_NL,
-                        initiator->conn_handle,
-                        rtl_err);
-    initiator_err = CS_ERROR_EVENT_INITIATOR_FAILED_TO_INIT_RTL_LIB;
-    goto cleanup;
-  }
-  initiator_log_info(INSTANCE_PREFIX "RTL - lib item initialized." LOG_NL,
-                     initiator->conn_handle);
   if (instance_id != NULL) {
     *instance_id = initiator->instance_id;
   }
@@ -853,7 +802,7 @@ sl_status_t cs_initiator_create(const uint8_t               conn_handle,
   if (rtl_err != SL_RTL_ERROR_SUCCESS) {
     on_error(initiator, initiator_err, rtl_err);
     sc = SL_STATUS_FAIL;
-  }
+  } 
   return sc;
 }
 
@@ -868,11 +817,11 @@ void cs_initiator_init(void)
     initiator->conn_handle = SL_BT_INVALID_CONNECTION_HANDLE;
     initiator->initiator_state = (uint8_t)INITIATOR_STATE_UNINITIALIZED;
     initiator->antenna_config = INVALID_ANTENNA_CONF;
-    reset_ras_config(initiator);
-    reset_subevent_data(initiator, true);
   }
 
   cs_initiator_report(CS_INITIATOR_REPORT_INIT);
+
+  (void)cs_rreq_set_event_callbacks(rreq_callbacks);
 }
 
 /******************************************************************************
@@ -909,457 +858,6 @@ void cs_initiator_deinit(void)
   }
 }
 
-// -----------------------------------------------------------------------------
-// Event / callback definitions
-
-/******************************************************************************
- * RAS client initialized callback.
- *****************************************************************************/
-void cs_ras_client_on_initialized(uint8_t connection,
-                                  cs_ras_features_t features,
-                                  sl_status_t sc_in)
-{
-  cs_initiator_t *initiator = cs_initiator_get_instance(connection);
-  if (initiator == NULL) {
-    initiator_log_error(INSTANCE_PREFIX "RAS - unknown connection id!" LOG_NL,
-                        connection);
-    on_error(initiator,
-             CS_ERROR_EVENT_INITIATOR_INSTANCE_NULL,
-             SL_STATUS_NULL_POINTER);
-    return;
-  }
-
-  if (initiator->ras_client.config.real_time_ranging_data_indication
-      && !(features & CS_RAS_FEATURE_RT_RANGING_DATA_MASK)) {
-    initiator_log_error(INSTANCE_PREFIX "RAS - client initialized - "
-                                        "real-time ranging data indication feature not supported!" LOG_NL,
-                        initiator->conn_handle);
-    on_error(initiator,
-             CS_ERROR_EVENT_RAS_CLIENT_INIT_FEATURE_NOT_SUPPORTED,
-             sc_in);
-    return;
-  }
-
-  if (sc_in != SL_STATUS_OK) {
-    initiator_log_error(INSTANCE_PREFIX "RAS - failed to initialize client! [sc: 0x%lx]" LOG_NL,
-                        initiator->conn_handle,
-                        (unsigned long)sc_in);
-    on_error(initiator,
-             CS_ERROR_EVENT_RAS_CLIENT_INIT_FAILED,
-             sc_in);
-    return;
-  }
-
-  initiator_log_info(INSTANCE_PREFIX "RAS - client initialized [features: 0x%08lx]" LOG_NL,
-                     initiator->conn_handle,
-                     features);
-
-  sl_status_t sc = cs_ras_client_configure(initiator->conn_handle, initiator->ras_client.config);
-  if (sc != SL_STATUS_OK) {
-    initiator_log_error(INSTANCE_PREFIX "RAS - failed to configure client! [sc: 0x%lx]" LOG_NL,
-                        initiator->conn_handle,
-                        (unsigned long)sc);
-    on_error(initiator,
-             CS_ERROR_EVENT_RAS_CLIENT_CONFIG_FAILED,
-             sc);
-    return;
-  }
-
-  initiator_log_debug(INSTANCE_PREFIX "RAS - client configured." LOG_NL
-                      " - real-time ranging indication: %s" LOG_NL
-                      " - on-demand ranging indication: %s" LOG_NL
-                      " - ranging data ready notification: %s" LOG_NL
-                      " - ranging data overwritten notification: %s" LOG_NL,
-                      initiator->conn_handle,
-                      ((initiator->ras_client.config.real_time_ranging_data_indication) ? "on" : "off"),
-                      ((initiator->ras_client.config.on_demand_ranging_data_indication) ? "on" : "off"),
-                      ((initiator->ras_client.config.ranging_data_ready_notification) ? "on" : "off"),
-                      ((initiator->ras_client.config.ranging_data_overwritten_notification) ? "on" : "off"));
-  #if defined (CS_INITIATOR_RAS_MODE_USE_REAL_TIME_MODE) && (CS_INITIATOR_RAS_MODE_USE_REAL_TIME_MODE == 0)
-  cs_ras_mode_t ras_mode = CS_RAS_MODE_ON_DEMAND_RANGING_DATA;
-  #else
-  cs_ras_mode_t ras_mode = CS_RAS_MODE_REAL_TIME_RANGING_DATA;
-  #endif
-  sc = cs_ras_client_select_mode(initiator->conn_handle, ras_mode);
-  if (sc != SL_STATUS_OK) {
-    initiator_log_error(INSTANCE_PREFIX "RAS - failed to select mode! [sc: 0x%lx]" LOG_NL,
-                        initiator->conn_handle,
-                        (unsigned long)sc);
-    on_error(initiator,
-             CS_ERROR_EVENT_RAS_CLIENT_MODE_CHANGE_FAILED,
-             sc);
-    return;
-  }
-}
-
-/******************************************************************************
- * RAS client on mode change callback.
- *****************************************************************************/
-void cs_ras_client_on_mode_changed(uint8_t       connection,
-                                   cs_ras_mode_t mode,
-                                   sl_status_t   sc_in)
-{
-  cs_initiator_t *initiator = cs_initiator_get_instance(connection);
-  if (initiator == NULL) {
-    initiator_log_error(INSTANCE_PREFIX "RAS - mode change - unknown connection id!" LOG_NL,
-                        connection);
-    on_error(initiator,
-             CS_ERROR_EVENT_RAS_CLIENT_MODE_CHANGE_FAILED,
-             SL_STATUS_NULL_POINTER);
-    return;
-  }
-
-  if (sc_in != SL_STATUS_OK) {
-    initiator_log_error(INSTANCE_PREFIX "RAS - failed to change mode to %u! [sc: 0x%lx]" LOG_NL,
-                        connection,
-                        mode,
-                        (unsigned long)sc_in);
-    on_error(initiator,
-             CS_ERROR_EVENT_RAS_CLIENT_MODE_CHANGE_FAILED,
-             sc_in);
-    return;
-  }
-
-  state_machine_event_data_t evt_data;
-  sl_status_t sc;
-
-  initiator_log_debug(INSTANCE_PREFIX "RAS - mode changed to %u" LOG_NL,
-                      initiator->conn_handle,
-                      mode);
-
-  switch (mode) {
-    case CS_RAS_MODE_REAL_TIME_RANGING_DATA:
-      // Emit the event for the initialization phase
-      if (initiator->ras_client.state != RAS_STATE_MODE_REAL_TIME_REENABLE) {
-        evt_data.evt_init_completed = true;
-        (void)initiator_state_machine_event_handler(initiator,
-                                                    INITIATOR_EVT_INIT_COMPLETED,
-                                                    &evt_data);
-      } else {
-        sc = cs_ras_client_real_time_receive(initiator->conn_handle,
-                                             sizeof(initiator->data.reflector.ranging_data),
-                                             initiator->data.reflector.ranging_data);
-        if (sc != SL_STATUS_OK) {
-          initiator_log_error(INSTANCE_PREFIX "RAS - failed to receive real-time data! [sc: 0x%lx]" LOG_NL,
-                              initiator->conn_handle,
-                              (unsigned long)sc);
-          on_error(initiator,
-                   CS_ERROR_EVENT_RAS_CLIENT_REALTIME_RECEIVE_FAILED,
-                   sc);
-        }
-      }
-      initiator->ras_client.state = RAS_STATE_MODE_REAL_TIME;
-      break;
-    case CS_RAS_MODE_ON_DEMAND_RANGING_DATA:
-      initiator->ras_client.state = RAS_STATE_MODE_ON_DEMAND;
-      initiator->ras_client.overwritten = false;
-      evt_data.evt_init_completed = true;
-      (void)initiator_state_machine_event_handler(initiator,
-                                                  INITIATOR_EVT_INIT_COMPLETED,
-                                                  &evt_data);
-      break;
-    case CS_RAS_MODE_CHANGE_IN_PROGRESS:
-      initiator_log_debug(INSTANCE_PREFIX "RAS - mode change in progress ..." LOG_NL,
-                          initiator->conn_handle);
-      break;
-    case CS_RAS_MODE_NONE:
-      if (initiator->ras_client.state == RAS_STATE_MODE_REAL_TIME) {
-        initiator->ras_client.state = RAS_STATE_MODE_REAL_TIME_REENABLE;
-        sc = cs_ras_client_select_mode(initiator->conn_handle,
-                                       CS_RAS_MODE_REAL_TIME_RANGING_DATA);
-        if (sc != SL_STATUS_OK) {
-          initiator_log_error(INSTANCE_PREFIX "RAS - failed to select mode! [sc: 0x%lx]" LOG_NL,
-                              initiator->conn_handle,
-                              (unsigned long)sc);
-          on_error(initiator,
-                   CS_ERROR_EVENT_RAS_CLIENT_MODE_CHANGE_FAILED,
-                   sc);
-          return;
-        }
-      }
-      break;
-    default:
-      break;
-  }
-}
-
-/******************************************************************************
- * RAS client callback that indicates the end of reception of ranging data.
- *****************************************************************************/
-void cs_ras_client_on_ranging_data_reception_finished(uint8_t                         connection,
-                                                      bool                            real_time,
-                                                      bool                            retrieve_lost,
-                                                      sl_status_t                     sc,
-                                                      cs_ras_cp_response_code_value_t response,
-                                                      cs_ras_ranging_counter_t        ranging_counter,
-                                                      uint8_t                         start_segment,
-                                                      uint8_t                         end_segment,
-                                                      bool                            recoverable,
-                                                      uint32_t                        size,
-                                                      bool                            last_arrived,
-                                                      uint8_t                         last_known_segment,
-                                                      uint64_t                        lost_segments)
-{
-  sl_status_t status;
-  cs_initiator_t *initiator = cs_initiator_get_instance(connection);
-  if (initiator == NULL) {
-    initiator_log_error(INSTANCE_PREFIX "RAS - reception finished - unknown connection id!" LOG_NL,
-                        connection);
-    on_error(initiator,
-             CS_ERROR_EVENT_RAS_CLIENT_DATA_RECEPTION_FINISH_FAILED,
-             SL_STATUS_NULL_POINTER);
-    return;
-  }
-  cs_initiator_report(CS_INITIATOR_REPORT_LAST_CS_RESULT_BEGIN);
-  if (initiator->ras_client.real_time_mode) {
-    // Re-enable reception for Real-Time mode
-    status = cs_ras_client_real_time_receive(initiator->conn_handle,
-                                             sizeof(initiator->data.reflector.ranging_data),
-                                             initiator->data.reflector.ranging_data);
-    if (status != SL_STATUS_OK) {
-      initiator_log_error(INSTANCE_PREFIX "RAS - failed to receive real-time data! [sc: 0x%lx]" LOG_NL,
-                          initiator->conn_handle,
-                          (unsigned long)status);
-      on_error(initiator,
-               CS_ERROR_EVENT_RAS_CLIENT_REALTIME_RECEIVE_FAILED,
-               status);
-      return;
-    }
-
-    initiator_log_debug(INSTANCE_PREFIX "RAS - real-time data reception restarted" LOG_NL,
-                        initiator->conn_handle);
-  }
-  if (sc != SL_STATUS_OK) {
-    initiator_log_error(INSTANCE_PREFIX "RAS - reception finished - failure! [sc: 0x%lx]" LOG_NL,
-                        initiator->conn_handle,
-                        (unsigned long)sc);
-    if ((lost_segments > 0) && (sc != SL_STATUS_ABORT)) {
-      on_error(initiator,
-               CS_ERROR_EVENT_RAS_CLIENT_DATA_RECEPTION_FINISH_FAILED,
-               sc);
-    }
-    return;
-  }
-
-  initiator_log_debug(INSTANCE_PREFIX "RAS - %s reception finished, "
-                                      "lost:%u counter:%u, resp.code:0x%02x, "
-                                      "segment: %u -> %u %s, size:%lu, %s, "
-                                      "last known segment: %u, lost segments mask: %16llx" LOG_NL,
-                      initiator->conn_handle,
-                      (real_time ? "real-time" : "on-demand"),
-                      retrieve_lost,
-                      ranging_counter,
-                      response,
-                      start_segment,
-                      end_segment,
-                      (recoverable ? "recoverable" : "non-recoverable"),
-                      size,
-                      (last_arrived ? "last arrived" : "more to come"),
-                      last_known_segment,
-                      lost_segments);
-  if (real_time) {
-    initiator->data.reflector.ranging_data_size = size;
-    process_remote_ranging_data(initiator,
-                                initiator->data.reflector.ranging_data,
-                                initiator->data.reflector.ranging_data_size);
-    return;
-  }
-  (void)status;
-  (void)real_time;
-  (void)retrieve_lost;
-  (void)response;
-  (void)ranging_counter;
-  (void)start_segment;
-  (void)end_segment;
-  (void)recoverable;
-  (void)last_arrived;
-  (void)last_known_segment;
-  #if defined (CS_INITIATOR_RAS_MODE_USE_REAL_TIME_MODE) && (CS_INITIATOR_RAS_MODE_USE_REAL_TIME_MODE == 0)
-  // Received Complete Ranging Data or Complete Lost Ranging Segment Response
-  if (response == CS_RAS_CP_RESPONSE_CODE_SUCCESS) {
-    if (lost_segments == 0) {
-      if (retrieve_lost) {
-        initiator_log_info(INSTANCE_PREFIX "RAS - Received Complete Lost Ranging Segment Response" LOG_NL,
-                           initiator->conn_handle);
-      } else {
-        initiator_log_info(INSTANCE_PREFIX "RAS - Received Complete Ranging Data Response" LOG_NL,
-                           initiator->conn_handle);
-      }
-      // Sending ACK
-      status = cs_ras_client_ack(initiator->conn_handle,
-                                 ranging_counter);
-      if (status != SL_STATUS_OK) {
-        initiator_log_error(INSTANCE_PREFIX "RAS - failed to send ACK! [sc: 0x%lx]" LOG_NL,
-                            initiator->conn_handle,
-                            (unsigned long)sc);
-        on_error(initiator,
-                 CS_ERROR_EVENT_RAS_CLIENT_ACK_FAILED,
-                 sc);
-        return;
-      }
-      initiator_log_info(INSTANCE_PREFIX "RAS - ACK was sent!" LOG_NL,
-                         initiator->conn_handle);
-      initiator->data.reflector.ranging_data_size = size;
-      process_remote_ranging_data(initiator,
-                                  initiator->data.reflector.ranging_data,
-                                  initiator->data.reflector.ranging_data_size);
-      return;
-    } else {
-      if (!retrieve_lost && recoverable && initiator->config.max_procedure_count != 0) {
-        // Get start and end segment
-        cs_initiator_get_lost_segments(lost_segments,
-                                       &start_segment,
-                                       &end_segment);
-        // Request lost segments
-        status = cs_ras_client_retreive_lost_segments(initiator->conn_handle,
-                                                      ranging_counter,
-                                                      start_segment,
-                                                      end_segment,
-                                                      sizeof(initiator->data.reflector.ranging_data),
-                                                      initiator->data.reflector.ranging_data);
-        if (status != SL_STATUS_OK) {
-          initiator_log_error(INSTANCE_PREFIX "RAS - failed to request lost segments! [sc: 0x%lx]" LOG_NL,
-                              initiator->conn_handle,
-                              (unsigned long)sc);
-          on_error(initiator,
-                   CS_ERROR_EVENT_RAS_CLIENT_REQUEST_LOST_SEGMENTS_FAILED,
-                   sc);
-          return;
-        }
-      }
-      // Complete Lost Ranging Segment Response returned with lost segments
-      // Or not recoverable lost segments arrived
-      // sending ACK, no calculation
-      initiator_log_error(INSTANCE_PREFIX "RAS - unrecoverable lost segments, sending ACK!" LOG_NL,
-                          initiator->conn_handle);
-      status = cs_ras_client_ack(initiator->conn_handle,
-                                 ranging_counter);
-      if (status != SL_STATUS_OK) {
-        initiator_log_error(INSTANCE_PREFIX "RAS - failed to send ACK! [sc: 0x%lx]" LOG_NL,
-                            initiator->conn_handle,
-                            (unsigned long)sc);
-        on_error(initiator,
-                 CS_ERROR_EVENT_RAS_CLIENT_ACK_FAILED,
-                 sc);
-        return;
-      }
-    }
-  }
-  #endif
-}
-
-#if defined (CS_INITIATOR_RAS_MODE_USE_REAL_TIME_MODE) && (CS_INITIATOR_RAS_MODE_USE_REAL_TIME_MODE == 0)
-void cs_ras_client_on_ack_finished(uint8_t connection, sl_status_t sc, cs_ras_cp_response_code_value_t response)
-{
-  cs_initiator_t *initiator = cs_initiator_get_instance(connection);
-  if (initiator == NULL) {
-    initiator_log_error(INSTANCE_PREFIX "RAS - ranging data ready - unknown connection id!" LOG_NL,
-                        connection);
-    on_error(initiator,
-             CS_ERROR_EVENT_RAS_CLIENT_ON_ACK_FINISHED_FAILED,
-             SL_STATUS_NULL_POINTER);
-    return;
-  }
-  initiator_log_info(INSTANCE_PREFIX "RAS - ACK finished, [sc: 0x%lx], [response: 0x%lx]" LOG_NL,
-                     initiator->conn_handle,
-                     (unsigned long)sc,
-                     (unsigned long)response);
-}
-
-void cs_ras_client_on_ranging_data_ready(uint8_t connection,
-                                         cs_ras_ranging_counter_t ranging_counter)
-{
-  cs_initiator_t *initiator = cs_initiator_get_instance(connection);
-  if (initiator == NULL) {
-    initiator_log_error(INSTANCE_PREFIX "RAS - ranging data ready - unknown connection id!" LOG_NL,
-                        connection);
-    on_error(initiator,
-             CS_ERROR_EVENT_RAS_CLIENT_RANGING_DATA_READY_FAILED,
-             SL_STATUS_NULL_POINTER);
-    return;
-  }
-  initiator_log_info(INSTANCE_PREFIX "RAS - ranging data ready, counter: %u" LOG_NL,
-                     initiator->conn_handle,
-                     ranging_counter);
-  // write GET to RAS CP
-  if (((ranging_counter & CS_RAS_RANGING_COUNTER_MASK) == initiator->ranging_counter)
-      && (initiator->ras_client.overwritten == false || initiator->ranging_counter != ranging_counter)) {
-    sl_status_t sc = cs_ras_client_get_ranging_data(initiator->conn_handle,
-                                                    (uint16_t)ranging_counter,
-                                                    sizeof(initiator->data.reflector.ranging_data),
-                                                    initiator->data.reflector.ranging_data);
-    if (sc != SL_STATUS_OK) {
-      initiator_log_error(INSTANCE_PREFIX "RAS - failed to get ranging data! [sc: 0x%lx]" LOG_NL,
-                          initiator->conn_handle,
-                          (unsigned long)sc);
-      on_error(initiator,
-               CS_ERROR_EVENT_RAS_CLIENT_GET_RANGING_DATA_FAILED,
-               sc);
-      return;
-    }
-    initiator_log_info(INSTANCE_PREFIX "RAS - GET ranging data, counter: %u" LOG_NL,
-                       initiator->conn_handle,
-                       ranging_counter);
-  }
-}
-
-void cs_ras_client_on_abort_finished(uint8_t connection, sl_status_t sc, cs_ras_cp_response_code_value_t response)
-{
-  cs_initiator_t *initiator = cs_initiator_get_instance(connection);
-  if (initiator == NULL) {
-    initiator_log_error(INSTANCE_PREFIX "RAS - abort finished - unknown connection id!" LOG_NL,
-                        connection);
-    on_error(initiator,
-             CS_ERROR_EVENT_RAS_CLIENT_ABORT_FINISHED_FAILED,
-             SL_STATUS_NULL_POINTER);
-    return;
-  }
-  initiator_log_info(INSTANCE_PREFIX "RAS - abort finished, [sc: 0x%lx], [response: 0x%lx]" LOG_NL,
-                     initiator->conn_handle,
-                     (unsigned long)sc,
-                     (unsigned long)response);
-  initiator->initiator_state = (uint8_t)INITIATOR_STATE_IN_PROCEDURE;
-  initiator_log_info(INSTANCE_PREFIX "Instance new state: IN_PROCEDURE" LOG_NL,
-                     initiator->conn_handle);
-}
-
-void cs_ras_client_on_ranging_data_overwritten(uint8_t connection, cs_ras_ranging_counter_t ranging_counter)
-{
-  cs_initiator_t *initiator = cs_initiator_get_instance(connection);
-  if (initiator == NULL) {
-    initiator_log_error(INSTANCE_PREFIX "RAS - ranging data overwritten - unknown connection id!" LOG_NL,
-                        connection);
-    on_error(initiator,
-             CS_ERROR_EVENT_RAS_CLIENT_RANGING_DATA_OVERWRITTEN_FAILED,
-             SL_STATUS_NULL_POINTER);
-    return;
-  }
-  initiator->ranging_counter = ranging_counter;
-  initiator->ras_client.overwritten = true;
-  initiator_log_info(INSTANCE_PREFIX "RAS - ranging data overwritten, counter: %u" LOG_NL,
-                     initiator->conn_handle,
-                     ranging_counter);
-}
-#endif // CS_RAS_MODE_ON_DEMAND_RANGING_DATA
-
-bool cs_ras_client_on_timeout(uint8_t connection,
-                              cs_ras_client_timeout_t timeout,
-                              cs_ras_client_timeout_action_t action)
-{
-  cs_initiator_t *initiator = cs_initiator_get_instance(connection);
-  initiator_log_debug(INSTANCE_PREFIX "RAS timeout: %u, action: %u" LOG_NL,
-                      connection,
-                      timeout,
-                      action);
-  (void)timeout;
-  (void)action;
-  on_error(initiator,
-           CS_ERROR_EVENT_RAS_CLIENT_REALTIME_RECEIVE_FAILED,
-           SL_STATUS_TIMEOUT);
-  // Perform the action automatically
-  return false;
-}
-
 /******************************************************************************
  * Bluetooth stack event handler.
  *****************************************************************************/
@@ -1369,7 +867,6 @@ bool cs_initiator_on_event(sl_bt_msg_t *evt)
   cs_initiator_t *initiator;
   state_machine_event_data_t evt_data;
   bool handled = false;
-  enum sl_rtl_error_code rtl_err;
 
   switch (SL_BT_MSG_ID(evt->header)) {
     // --------------------------------
@@ -1535,28 +1032,25 @@ bool cs_initiator_on_event(sl_bt_msg_t *evt)
                             evt->data.evt_cs_procedure_enable_complete.connection);
         break;
       }
-      else {
-        uint32_t subevents = cs_initiator_get_subevents_per_procedure(evt->data.evt_cs_procedure_enable_complete.procedure_interval,
-                                                                    evt->data.evt_cs_procedure_enable_complete.subevents_per_event,
-                                                                    evt->data.evt_cs_procedure_enable_complete.event_interval);
-        uint32_t procedure_time_us = (uint32_t)evt->data.evt_cs_procedure_enable_complete.procedure_interval * (uint32_t)initiator->conn_interval * 1250u;
-
-        initiator_log_info(INSTANCE_PREFIX
-                 "CS - New procedure scheduled: "
-                 "Subevents per procedure: %lu  "
-                 "Subevent length: %lu us  "
-                 "Procedure time: %lu us  "
-                 "Subevents per event: %u  " LOG_NL,
-                 initiator->conn_handle,
-                 (unsigned long)subevents,
-                 evt->data.evt_cs_procedure_enable_complete.subevent_len,
-                 (unsigned long)procedure_time_us,
-                 evt->data.evt_cs_procedure_enable_complete.subevents_per_event);
-      }
       handled = true;
       evt_data.evt_procedure_enable_completed = &evt->data.evt_cs_procedure_enable_complete;
       if (initiator->config.cs_main_mode == sl_bt_cs_mode_pbr) {
         initiator->antenna_config = evt->data.evt_cs_procedure_enable_complete.antenna_config;
+        switch (initiator->antenna_config) {
+          case CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY:
+            initiator->num_antenna_path = 1;
+            break;
+          case CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R:
+          case CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R:
+            initiator->num_antenna_path = 2;
+            break;
+          case CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY:
+            initiator->num_antenna_path = 4;
+            break;
+          default:
+            initiator->num_antenna_path = 0;
+            break;
+        }
       }
 
       // procedure enable/disable received
@@ -1583,60 +1077,63 @@ bool cs_initiator_on_event(sl_bt_msg_t *evt)
 
         stop_error_timer(initiator);
 
-        initiator->cs_parameters.num_calib_steps
-          = evt->data.evt_cs_config_complete.mode_calibration_steps;
-        initiator->cs_parameters.T_PM_time
-          = evt->data.evt_cs_config_complete.t_pm_time;
-        initiator->cs_parameters.T_IP1_time
-          = evt->data.evt_cs_config_complete.t_ip1_time;
-        initiator->cs_parameters.T_IP2_time
-          = evt->data.evt_cs_config_complete.t_ip2_time;
-        initiator->cs_parameters.T_FCS_time
-          = evt->data.evt_cs_config_complete.t_fcs_time;
-        initiator->cs_parameters.connection_interval
-          = initiator->conn_interval;
-        initiator->cs_parameters.ch3c_jump
+        initiator->config.ch3c_jump
           = evt->data.evt_cs_config_complete.ch3c_jump;
-        initiator->cs_parameters.ch3c_shape
+        initiator->config.ch3c_shape
           = evt->data.evt_cs_config_complete.ch3c_shape;
-        initiator->cs_parameters.channel_map_repetition
+        initiator->config.channel_map_repetition
           = evt->data.evt_cs_config_complete.channel_map_repetition;
-        initiator->cs_parameters.channel_selection_type
+        initiator->config.channel_selection_type
           = evt->data.evt_cs_config_complete.channel_selection_type;
-        initiator->cs_parameters.cs_sync_phy
+        initiator->config.cs_sync_phy
           = evt->data.evt_cs_config_complete.cs_sync_phy;
-        initiator->cs_parameters.rtt_type
+        initiator->config.rtt_type
           = evt->data.evt_cs_config_complete.rtt_type;
-        initiator->cs_parameters.main_mode_repetition
+        initiator->config.main_mode_repetition
           = evt->data.evt_cs_config_complete.main_mode_repetition;
-        initiator->cs_parameters.max_main_mode_steps
+        initiator->config.max_main_mode_steps
           = evt->data.evt_cs_config_complete.max_main_mode_steps;
-        initiator->cs_parameters.min_main_mode_steps
+        initiator->config.min_main_mode_steps
           = evt->data.evt_cs_config_complete.min_main_mode_steps;
-        memcpy(&initiator->cs_parameters.channel_map[0],
-               &evt->data.evt_cs_config_complete.channel_map.data[0],
-               sizeof(initiator->cs_parameters.channel_map));
 
-        // Create estimator with the set CS configuration parameters
-        initiator_log_debug(INSTANCE_PREFIX "CS - procedure parameters set,"
-                                            "RTL - initialize lib item" LOG_NL,
-                            initiator->conn_handle);
-        rtl_err = rtl_library_create_estimator(initiator->conn_handle,
-                                               &initiator->rtl_handle,
-                                               &initiator->rtl_config,
-                                               &initiator->cs_parameters,
-                                               initiator->config.cs_main_mode,
-                                               initiator->config.cs_sub_mode);
-        if (rtl_err != SL_RTL_ERROR_SUCCESS) {
-          initiator_log_error(INSTANCE_PREFIX "RTL - failed to init lib item! [E: 0x%x]" LOG_NL,
+        // Build the cs_algo_config_t type from cs_config_complete event, the initiator's
+        // static configuration, and the RTL configuration
+        cs_algo_config_t cs_algo_config = {
+          // CS modes
+          .cs_main_mode           = initiator->config.cs_main_mode,
+          .cs_sub_mode            = initiator->config.cs_sub_mode,
+          .min_main_mode_steps    = initiator->config.min_main_mode_steps,
+          .max_main_mode_steps    = initiator->config.max_main_mode_steps,
+          .main_mode_repetition   = initiator->config.main_mode_repetition,
+          .channel_map_repetition = initiator->config.channel_map_repetition,
+          .channel_selection_type = initiator->config.channel_selection_type,
+          .ch3c_shape             = initiator->config.ch3c_shape,
+          .ch3c_jump              = initiator->config.ch3c_jump,
+          .rtt_type               = initiator->config.rtt_type,
+          .cs_sync_phy            = initiator->config.cs_sync_phy,
+          .channel_map_preset     = initiator->config.channel_map_preset,
+          .rssi_ref_tx_power      = initiator->config.rssi_ref_tx_power,
+          .rtl_config             = initiator->rtl_config,
+          .connection_interval    = initiator->conn_interval,
+          .num_antenna_paths      = initiator->num_antenna_path,
+          .channel_map            = evt->data.evt_cs_config_complete.channel_map,
+          .num_calib_steps        = evt->data.evt_cs_config_complete.mode_calibration_steps,
+          .T_PM_time              = evt->data.evt_cs_config_complete.t_pm_time,
+          .T_IP1_time             = evt->data.evt_cs_config_complete.t_ip1_time,
+          .T_IP2_time             = evt->data.evt_cs_config_complete.t_ip2_time,
+          .T_FCS_time             = evt->data.evt_cs_config_complete.t_fcs_time,
+        };
+
+        sc = cs_algo_create(initiator->conn_handle, cs_algo_config);
+        if (sc != SL_STATUS_OK) {
+          initiator_log_error(INSTANCE_PREFIX "cs_algo_create failed! [sc: 0x%04lx]" LOG_NL,
                               initiator->conn_handle,
-                              rtl_err);
+                              (unsigned long)sc);
           on_error(initiator,
                    CS_ERROR_EVENT_INITIATOR_FAILED_TO_INIT_RTL_LIB,
-                   rtl_err);
+                   sc);
+          break;
         }
-        initiator_log_info(INSTANCE_PREFIX "RTL - lib item initialized." LOG_NL,
-                           initiator->conn_handle);
 
         sc = sl_bt_cs_set_procedure_parameters(initiator->conn_handle,
                                                initiator->config.config_id,
@@ -1668,76 +1165,6 @@ bool cs_initiator_on_event(sl_bt_msg_t *evt)
       break;
 
     // --------------------------------
-    // CS result (initiator) arrived
-    case sl_bt_evt_cs_result_id:
-      initiator = cs_initiator_get_instance(evt->data.evt_cs_result.connection);
-      if (initiator == NULL) {
-        break;
-      }
-      handled = true;
-      #ifdef SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT
-      handled = false;
-      #endif //SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT
-      initiator_log_info(INSTANCE_PREFIX "CS - received first initiator CS result" LOG_NL,
-                         evt->data.evt_cs_result.connection);
-      if (initiator->ranging_counter == CS_RAS_INVALID_RANGING_COUNTER) {
-        if (initiator->initiator_state == INITIATOR_STATE_WAIT_REFLECTOR_PROCEDURE_COMPLETE
-            || initiator->initiator_state == INITIATOR_STATE_WAIT_REFLECTOR_PROCEDURE_ABORTED) {
-          initiator->initiator_state = (uint8_t)INITIATOR_STATE_IN_PROCEDURE;
-          initiator_log_info(INSTANCE_PREFIX "Instance new state: IN_PROCEDURE" LOG_NL,
-                             initiator->conn_handle);
-        }
-      }
-      if (initiator->initiator_state == INITIATOR_STATE_WAIT_REFLECTOR_PROCEDURE_COMPLETE
-          || initiator->initiator_state == INITIATOR_STATE_WAIT_REFLECTOR_PROCEDURE_ABORTED) {
-        initiator->drop_counter++;
-        if (initiator->drop_counter > CS_INITIATOR_MAX_DROP) {
-          initiator->drop_counter = 0;
-          initiator->ranging_counter = CS_RAS_INVALID_RANGING_COUNTER;
-          reset_subevent_data(initiator, false);
-          initiator->initiator_state = (uint8_t)INITIATOR_STATE_IN_PROCEDURE;
-          initiator_log_info(INSTANCE_PREFIX "Instance new state: IN_PROCEDURE" LOG_NL,
-                             initiator->conn_handle);
-        } else {
-          initiator_log_info(INSTANCE_PREFIX "CS - ongoing measurement, drop new result" LOG_NL,
-                             evt->data.evt_cs_result.connection);
-          break;
-        }
-      }
-      evt_data.evt_cs_result.cs_event = evt;
-      evt_data.evt_cs_result.first_cs_result = true;
-      (void)initiator_state_machine_event_handler(initiator,
-                                                  INITIATOR_EVT_CS_RESULT,
-                                                  &evt_data);
-      break;
-
-    // --------------------------------
-    // Consecutive CS result (initiator) arrived
-    case sl_bt_evt_cs_result_continue_id:
-      initiator = cs_initiator_get_instance(evt->data.evt_cs_result_continue.connection);
-      if (initiator == NULL) {
-        break;
-      }
-      handled = true;
-      if (initiator->initiator_state != INITIATOR_STATE_WAIT_REFLECTOR_PROCEDURE_COMPLETE
-          && initiator->initiator_state != INITIATOR_STATE_WAIT_REFLECTOR_PROCEDURE_ABORTED) {
-        initiator_log_info(INSTANCE_PREFIX "CS - received initiator CS result" LOG_NL,
-                           evt->data.evt_cs_result_continue.connection);
-        evt_data.evt_cs_result.cs_event = evt;
-        evt_data.evt_cs_result.first_cs_result = false;
-        (void)initiator_state_machine_event_handler(initiator,
-                                                    INITIATOR_EVT_CS_RESULT_CONTINUE,
-                                                    &evt_data);
-      } else {
-        initiator_log_info(INSTANCE_PREFIX "CS - ongoing measurement, drop new result continue" LOG_NL,
-                           evt->data.evt_cs_result.connection);
-      }
-      #ifdef SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT
-      handled = false;
-      #endif //SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT
-      break;
-
-    // --------------------------------
     // Bluetooth stack resource exhausted
     case sl_bt_evt_system_resource_exhausted_id:
     {
@@ -1762,4 +1189,83 @@ bool cs_initiator_on_event(sl_bt_msg_t *evt)
 
   // Return false if the event was handled above.
   return !handled;
+}
+
+
+static void rreq_create_complete(uint8_t conn_handle, sl_status_t sc)
+{
+  cs_initiator_t *initiator = cs_initiator_get_instance(conn_handle);
+  if (initiator == NULL) {
+    initiator_log_error("rreq_create_complete - No instance found for handle %d" LOG_NL,
+                        conn_handle);
+    return;
+  }
+  if (sc != SL_STATUS_OK) {
+    initiator_log_error(INSTANCE_PREFIX "Failed to create RREQ "
+                                        "[sc: 0x%lx]" LOG_NL,
+                        initiator->conn_handle,
+                        (unsigned long)sc);
+    on_error(initiator,
+             CS_ERROR_EVENT_RAS_CLIENT_CREATE_FAILED,
+             sc);
+    return;
+  }
+  sl_status_t status = cs_rreq_enable(initiator->conn_handle, true);
+  if (status != SL_STATUS_OK) {
+    initiator_log_error(INSTANCE_PREFIX "Failed to enable RREQ "
+                                        "[sc: 0x%lx]" LOG_NL,
+                        initiator->conn_handle,
+                        (unsigned long)status);
+    on_error(initiator,
+             CS_ERROR_EVENT_RAS_CLIENT_MODE_CHANGE_FAILED,
+             sc);
+  }
+}
+
+static void rreq_enable_complete(uint8_t conn_handle, uint8_t enable, sl_status_t sc)
+{
+  cs_initiator_t *initiator = cs_initiator_get_instance(conn_handle);
+  if (initiator == NULL) {
+    initiator_log_error("rreq_enable_complete - No instance found for handle %d" LOG_NL,
+                        conn_handle);
+    return;
+  }
+  if (sc != SL_STATUS_OK) {
+    initiator_log_error(INSTANCE_PREFIX "Failed to %s RREQ "
+                                        "[sc: 0x%lx]" LOG_NL,
+                        initiator->conn_handle,
+                        enable ? "enable" : "disable",
+                        (unsigned long)sc);
+    on_error(initiator,
+             CS_ERROR_EVENT_RAS_CLIENT_MODE_CHANGE_FAILED,
+             sc);
+    return;
+  }
+  initiator_log_info(INSTANCE_PREFIX"rreq_enable_complete OK" LOG_NL,
+                     conn_handle);
+  
+  state_machine_event_data_t evt_data;
+  evt_data.evt_init_completed = true;
+  (void)initiator_state_machine_event_handler(initiator,
+                                              INITIATOR_EVT_INIT_COMPLETED,
+                                              &evt_data);
+}
+
+
+static void rreq_on_error(uint8_t conn_handle, cs_rreq_error_t error, sl_status_t sc)
+{
+  cs_initiator_t *initiator = cs_initiator_get_instance(conn_handle);
+  if (initiator == NULL) {
+    initiator_log_error("rreq_on_error - No instance found for handle %d" LOG_NL,
+                        conn_handle);
+    return;
+  }
+  initiator_log_error(INSTANCE_PREFIX "RREQ error %d "
+                                      "[sc: 0x%lx]" LOG_NL,
+                        initiator->conn_handle,
+                        error,
+                        (unsigned long)sc);
+  on_error(initiator,
+           CS_ERROR_EVENT_RAS_CLIENT_CONFIG_FAILED,
+           sc);
 }

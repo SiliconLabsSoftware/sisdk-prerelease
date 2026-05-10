@@ -21,8 +21,13 @@ component:
   - id: zigbee_r22_support
   - id: zigbee_zll
   - id: clock_manager
-  # Platform - enable LTO for gcc
+  # Platform - enable LTO for gcc and llvm
   - id: toolchain_gcc_lto
+    condition:
+      - toolchain_gcc
+  - id: toolchain_llvm_lto
+    condition:
+      - toolchain_llvm
 
 configuration:
   - name: SL_ZIGBEE_BINDING_TABLE_SIZE
@@ -35,7 +40,7 @@ configuration:
     value: 10
   - name: SL_CPC_TX_QUEUE_ITEM_MAX_COUNT
     value: 10
-  - name: EMBER_AF_PLUGIN_ZIGBEE_PRO_STACK_CHILD_TABLE_SIZE
+  - name: SL_ZIGBEE_CHILD_TABLE_SIZE
     value: 32
   - name: SL_ZIGBEE_KEY_TABLE_SIZE
     value: 12

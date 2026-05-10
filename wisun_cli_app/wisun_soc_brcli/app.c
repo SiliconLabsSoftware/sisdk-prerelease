@@ -35,11 +35,12 @@
 #include "sl_wisun_version.h"
 #include "sl_wisun_keychain.h"
 #include "sl_rail_features.h"
-#include "socket/socket.h"
+#include "sys/socket.h"
+#include "netinet/in.h"
+#include "sys/select.h"
 #include "arpa/inet.h"
 #include "sl_wisun_ip6string.h"
 #include "sl_select_util.h"
-#include "select.h"
 #include "sl_main_init.h"
 #include "sl_wisun_crash_handler.h"
 
@@ -997,7 +998,7 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
     goto cleanup;
   }
 
-  certificate_options = SL_WISUN_CERTIFICATE_OPTION_IS_REF;
+  certificate_options = SL_WISUN_CERTIFICATE_OPTION_NONE;
   for (idx = 0; idx < trustedca_count; ++idx) {
     trustedca = sl_wisun_keychain_get_trustedca(idx);
     if (!trustedca) {
@@ -1036,7 +1037,7 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
     printf("[Using built-in device credentials]\r\n");
   }
 
-  status = sl_wisun_set_br_device_certificate(SL_WISUN_CERTIFICATE_OPTION_IS_REF | SL_WISUN_CERTIFICATE_OPTION_HAS_KEY,
+  status = sl_wisun_set_br_device_certificate(SL_WISUN_CERTIFICATE_OPTION_NONE,
                                               credential->certificate.data_length,
                                               credential->certificate.data);
   if (status != SL_STATUS_OK) {
@@ -1045,7 +1046,7 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
   }
 
   if (credential->pk.type == SL_WISUN_KEYCHAIN_KEY_TYPE_PLAINTEXT) {
-    status = sl_wisun_set_device_private_key(SL_WISUN_PRIVATE_KEY_OPTION_IS_REF,
+    status = sl_wisun_set_device_private_key(SL_WISUN_PRIVATE_KEY_OPTION_NONE,
                                              credential->pk.u.plaintext.data_length,
                                              credential->pk.u.plaintext.data);
   } else {

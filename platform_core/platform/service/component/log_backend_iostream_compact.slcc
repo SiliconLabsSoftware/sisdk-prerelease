@@ -25,7 +25,7 @@ requires:
 root_path: platform_core/platform/service/sl_log
 config_file:
 - path: config/sl_log_proprietary_config.h
-  unless: [iostream_rtt, device_si91x]
+  unless: [device_si91x]
 - path: config/sl_log_common_config.h
   unless: [device_si91x]
 - path: config/sl_log_platform_core_config.h
@@ -35,11 +35,8 @@ source:
 template_contribution:
 - name: component_catalog
   value: log_backend_proprietary
-  unless: [iostream_rtt, device_si91x]
+  unless: [device_si91x]
 - name: log_section_enable
   value: 1
 - name: log_compact_output_enable
   value: 1
-- name: component_catalog
-  value: log_default_ring_buffer
-  condition: [iostream_rtt]

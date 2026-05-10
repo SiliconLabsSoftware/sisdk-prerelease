@@ -5,23 +5,32 @@
  * ## Output format
  *
  * Each log line is sent to iostream backend and ends with CRLF (\\r\\n).
+ * Log level is not printed.
  *
- * **Common header** (all lines):
- *   [LEVEL|TYPE|TIMESTAMP]
- * - LEVEL: one of D (Debug), I (Info), W (Warning), E (Error), C (Crash).
- * - TYPE: S = string log (format string + args), E = numeric event.
- * - TIMESTAMP: 8 hexadecimal digits (system timer units).
+ * **Payload** (always):
  *
- * **String log** (TYPE=S): a space, then the format string with specifiers
- * expanded: %d = signed decimal (32-bit), %x = 8-digit hex (32-bit),
- * %p = pointer (0x + 8-digit hex), %s = string. %% produces a literal '%'.
- * Other characters after % are emitted as-is.
- * Example: format "count=%d addr=%p" with args -1, 0x1000 gives
- * [I|S|00005678] count=-1 addr=0x00001000
+ * **String log**: the format string with specifiers expanded: %d = signed decimal (32-bit),
+ * %x = 8-digit hex (32-bit), %p = pointer (0x + 8-digit hex), %s = string.
+ * %% produces a literal '%'. Other characters after % are emitted as-is.
+ * Example: "count=%d addr=%p" with args -1, 0x1000 gives
+ * count=-1 addr=0x00001000
  *
- * **Event** (TYPE=E): a space, then event_id (8 hex), then for each argument
- * in arg_count: 8 hex digits and '|', then core_id (2 hex), '|', version (2 hex).
- * Example: [D|E|00001234] 00000001|AABBCCDD|01|02
+ * **Event**: event_id (8 hex), then for each argument in arg_count: '|' and 8 hex digits.
+ * Example: 00000001|AABBCCDD
+ *
+ * **Optional leading prefix** (see @ref sl_log_formatted_iostream_config.h):
+ * - Both @c SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP and
+ *   @c SL_LOG_FORMATTED_IOSTREAM_PREFIX_LOG_TYPE: [TIMESTAMP|TYPE] and a space
+ *   (TYPE is S or E; TIMESTAMP is 8 hex digits).
+ * - Timestamp only: [TIMESTAMP] and a space.
+ * - Log type only: [TYPE] and a space.
+ *
+ * **Optional trailing core ID** (when @c SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID is set):
+ * a space and [CC] (2 hex digits) is appended after the payload. Applies to both
+ * string and event lines.
+ *
+ * Example (string, all options): [00005678|S] count=-1 addr=0x00001000 [00]
+ * Example (event, all options):  [00001234|E] 00000001|AABBCCDD [00]
  *******************************************************************************
  * # License
  * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
@@ -51,18 +60,36 @@
 
 #include "sl_log_platform_specific.h"
 #include "sl_log_helper.h"
+#include "sl_log_formatted_iostream_config.h"
 #include "sl_log.h"
 #include "sl_iostream.h"
 #include "sl_iostream_handles.h"
 #include "em_device.h"
 #include <stdint.h>
 
+#ifndef SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP
+#define SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP  0
+#endif
+#ifndef SL_LOG_FORMATTED_IOSTREAM_PREFIX_LOG_TYPE
+#define SL_LOG_FORMATTED_IOSTREAM_PREFIX_LOG_TYPE  0
+#endif
+#ifndef SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID
+#define SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID  0
+#endif
+
 /*******************************************************************************
  ***************************  DEFINE MACROS ********************************
  ******************************************************************************/
-/** Line buffer size for output. String logs are truncated when they would
- * exceed (LINE_MAX - 12) chars to leave room for CRLF and guard. */
+/** Line buffer size for output. String logs are truncated so an optional
+ * leading prefix, payload, optional " [CC]" core-id suffix, and CRLF fit in LINE_MAX. */
 #define LINE_MAX  200
+/** Reserve trailing bytes during string expansion for the optional " [CC]" core-id
+ * suffix (5 chars) plus CRLF. */
+#if SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID
+#define SL_LOG_FORMATTED_IOSTREAM_RESERVED_TAIL  (2U + 5U)
+#else
+#define SL_LOG_FORMATTED_IOSTREAM_RESERVED_TAIL  2U
+#endif
 
 /*******************************************************************************
  ***************************  LOCAL VARIABLES   ********************************
@@ -89,6 +116,7 @@ static inline char* u32_to_hex8(char *p, uint32_t v)
   return p;
 }
 
+#if SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID
 /**
  * @brief Write an 8-bit value as 2 hexadecimal digits into a buffer.
  *
@@ -103,31 +131,7 @@ static inline char* u8_to_hex2(char *p, uint8_t v)
   *p++ = hex_chars[v & 0xF];
   return p;
 }
-
-/**
- * @brief Map a numeric log level to a single-character label.
- *
- * @param[in] level  Log level (1=Debug, 2=Info, 3=Warning, 4=Error, 5=Crash)
- *
- * @return 'D', 'I', 'W', 'E', 'C', or '?' for unknown level
- */
-static inline char level_to_char(uint8_t level)
-{
-  switch (level) {
-    case 1:
-      return 'D';
-    case 2:
-      return 'I';
-    case 3:
-      return 'W';
-    case 4:
-      return 'E';
-    case 5:
-      return 'C';
-    default:
-      return '?';
-  }
-}
+#endif
 
 /**
  * @brief Write a 32-bit value as decimal digits into a buffer.
@@ -207,47 +211,39 @@ sl_status_t sl_log_hal_backend_write(sl_log_event_t *buffer, uint32_t read_index
   char line[LINE_MAX];
   char *p = line;
 
-  /* Decode level (bits 1..) and type (bit 0: 0 = string log, 1 = event). */
-  uint8_t level = buffer->flags >> 1;
-  uint8_t type  = buffer->flags & 0x01;
+  /* Type: bit 0 — 0 = string log, 1 = event (level is not emitted). */
+  uint8_t type = buffer->flags & 0x01;
 
-  /* Build header: [level|type|timestamp] */
+#if (SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP || SL_LOG_FORMATTED_IOSTREAM_PREFIX_LOG_TYPE)
   *p++ = '[';
-  *p++ = level_to_char(level);
-  *p++ = '|';
-  *p++ = (type ? 'E' : 'S');
-  *p++ = '|';
-
-  /* Always print timestamp as 8 hex digits. */
+#if SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP
   p = u32_to_hex8(p, buffer->timestamp);
+#endif
+#if (SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP && SL_LOG_FORMATTED_IOSTREAM_PREFIX_LOG_TYPE)
+  *p++ = '|';
+#endif
+#if SL_LOG_FORMATTED_IOSTREAM_PREFIX_LOG_TYPE
+  *p++ = (type ? 'E' : 'S');
+#endif
   *p++ = ']';
+  *p++ = ' ';
+#endif
 
-  if (type)  /* Event type: append event_id, args (n), core_id, version as hex. */
+  if (type)  /* Event type: event_id and args as 8-hex digits joined by '|'. */
   {
     uint32_t i;
 
-    *p++ = ' ';
-
     p = u32_to_hex8(p, buffer->event_id);
-    *p++ = '|';
 
-    /* Append each argument as 8 hex digits; number of args is from arg_count. */
     for (i = 0; i < buffer->arg_count; i++) {
-      p = u32_to_hex8(p, buffer->args[i]);
       *p++ = '|';
+      p = u32_to_hex8(p, buffer->args[i]);
     }
-
-    p = u8_to_hex2(p, buffer->core_id);
-    *p++ = '|';
-
-    p = u8_to_hex2(p, buffer->version);
   } else { /* String log: event_id is format string, expand specifiers with args. */
     const char *fmt = (const char *)buffer->event_id;
     uint32_t arg_index = 0;
 
-    *p++ = ' ';
-
-    while (*fmt && (p < (line + sizeof(line) - 12))) {
+    while (*fmt && (p < (line + sizeof(line) - SL_LOG_FORMATTED_IOSTREAM_RESERVED_TAIL))) {
 
       if (*fmt == '%') {
         fmt++;
@@ -279,7 +275,7 @@ sl_status_t sl_log_hal_backend_write(sl_log_event_t *buffer, uint32_t read_index
         else if (*fmt == 's' && arg_index < buffer->arg_count) {
           const char *s = (const char *)(uintptr_t)buffer->args[arg_index++];
           if (s != NULL) {
-            while (*s && (p < (line + sizeof(line) - 12))) {
+            while (*s && (p < (line + sizeof(line) - SL_LOG_FORMATTED_IOSTREAM_RESERVED_TAIL))) {
               *p++ = *s++;
             }
           }
@@ -297,6 +293,13 @@ sl_status_t sl_log_hal_backend_write(sl_log_event_t *buffer, uint32_t read_index
       }
     }
   }
+
+#if SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID
+  *p++ = ' ';
+  *p++ = '[';
+  p = u8_to_hex2(p, buffer->core_id);
+  *p++ = ']';
+#endif
 
   /* Terminate line with CRLF. */
   *p++ = '\r';

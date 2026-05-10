@@ -137,11 +137,10 @@ class CALC_Demodulator_jumbo(CALC_Demodulator):
         flag_allow_dec0_dec_by_3 = model.vars.input_decimation_filter_allow_dec3.value
         flag_allow_dec0_dec_by_8 = model.vars.input_decimation_filter_allow_dec8.value
 
-        # Optional input to allow DEC0 enums of DEC5
-        flag_allow_dec0_dec_by_5 = model.vars.input_decimation_filter_allow_dec5.value
-
-        src_disable = model.vars.src_disable.value == model.vars.src_disable.var_enum.DISABLED
-        src2_only = model.vars.src_disable.value == model.vars.src_disable.var_enum.SRC2_ONLY
+        if model.vars.src_disable.value == model.vars.src_disable.var_enum.DISABLED:
+            src_disable = True
+        else:
+            src_disable = False
 
         debug = 0
 
@@ -170,7 +169,7 @@ class CALC_Demodulator_jumbo(CALC_Demodulator):
             rxbrnum_list = xrange(0, 32, 1)
             rxbrden_list = [31]
             src1_range = [src1_bit_width_pow]
-        elif src_disable or src2_only:
+        elif src_disable:
             rxbrint_list = [1, 2, 3, 4, 5, 6, 7]
             rxbrnum_list = xrange(0, 32, 1)
             rxbrden_list = xrange(1, 32, 1)
@@ -211,8 +210,7 @@ class CALC_Demodulator_jumbo(CALC_Demodulator):
         dec0_choices += [4]
         if flag_allow_dec0_dec_by_3 == 1:
             dec0_choices += [3]
-        if flag_allow_dec0_dec_by_5 == 1:
-            dec0_choices += [5]
+        flag_allow_dec0_dec_by_8 = model.vars.input_decimation_filter_allow_dec8.value
 
         if model.part_family.lower() in ["dumbo", "jumbo", "nerio", "nixi", "unit_test_part"]:
             dumbo_jumbo_nerio_nixi = True
@@ -224,7 +222,7 @@ class CALC_Demodulator_jumbo(CALC_Demodulator):
             # Calculated per part family:
             # EFR32 90nm allows [0.263, 0.196]
             # 40nm Panther restricted to [0.263] only
-            bwsel_list =  model.vars.ch_filt_bw_available.value
+            bwsel_list =  model.vars.ch_filt_bw_available
 
             # 0.219 setting is going away in Nerio so we should not expose that to the customer
             for bwsel in bwsel_list: #[0.263, 0.219, 0.196]:

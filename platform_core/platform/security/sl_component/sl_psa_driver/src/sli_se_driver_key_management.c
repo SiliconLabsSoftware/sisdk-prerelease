@@ -1489,6 +1489,7 @@ psa_status_t sli_se_ksu_copy_key(const psa_key_attributes_t *source_attributes,
                                      target_key_buffer_size,
                                      target_key_buffer_length);
     case PSA_KEY_LOCATION_LOCAL_STORAGE:
+    {
       // Import plaintext key to KSU
       size_t bits;
       return sli_se_ksu_import_key(target_attributes,
@@ -1498,6 +1499,7 @@ psa_status_t sli_se_ksu_copy_key(const psa_key_attributes_t *source_attributes,
                                    target_key_buffer_size,
                                    target_key_buffer_length,
                                    &bits);
+    }
     default:
       return PSA_ERROR_NOT_SUPPORTED;
   }

@@ -79,9 +79,12 @@ include:
 - path: "inc/socket/"
   file_list:
   - path: "socket.h"
-- path: "inc/arpa/"
+- path: "inc/posix/"
   file_list:
-  - path: "inet.h"
+  - path: "sys/socket.h"
+  - path: "arpa/inet.h"
+  - path: "netinet/in.h"
+  - path: "netinet/ip6.h"
 - path: "src/"
   file_list:
   - path: "sli_wisun_certificate.h"

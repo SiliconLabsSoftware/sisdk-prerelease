@@ -7,7 +7,7 @@ description: >
   The driver handles central management of the DMA channels and interrupt vector which
   allows sharing DMA resources between several users.
 category: Platform|Driver
-quality: production
+quality: deprecated
 metadata:
   sbom:
     license: Zlib

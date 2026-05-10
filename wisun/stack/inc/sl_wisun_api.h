@@ -158,8 +158,6 @@ sl_status_t sl_wisun_disconnect();
  * @param[in] certificate_options Options for the certificate
  *   - #SL_WISUN_CERTIFICATE_OPTION_APPEND: Append the certificate to the list of trusted certificates
  *                                          instead of replacing the previous entries
- *   - #SL_WISUN_CERTIFICATE_OPTION_IS_REF: The application guarantees the certificate data will remain
- *                                          in scope and can therefore be referenced instead of copied
  * @param[in] certificate_length Size of the certificate data
  * @param[in] certificate Pointer to the certificate data
  * @return SL_STATUS_OK if successful, an error code otherwise
@@ -183,9 +181,6 @@ sl_status_t sl_wisun_set_trusted_certificate(uint16_t certificate_options,
  * @param[in] certificate_options Options for the certificate.
  *   - #SL_WISUN_CERTIFICATE_OPTION_APPEND: Append the certificate to the list of device certificates
  *                                          instead of replacing the previous entries
- *   - #SL_WISUN_CERTIFICATE_OPTION_IS_REF: The application guarantees the certificate data will remain
- *                                          in scope and can therefore be referenced instead of copied
- *   - #SL_WISUN_CERTIFICATE_OPTION_HAS_KEY: The certificate has a corresponding private key
  * @param[in] certificate_length Size of the certificate data
  * @param[in] certificate Pointer to the certificate data
  * @return SL_STATUS_OK if successful, an error code otherwise
@@ -206,8 +201,6 @@ sl_status_t sl_wisun_set_device_certificate(uint16_t certificate_options,
  * Set the device private key used to authenticate to the authentication server.
  *
  * @param[in] key_options Options for the private key
- *   - #SL_WISUN_PRIVATE_KEY_OPTION_IS_REF: The application guarantees the private key data will remain
- *                                          in scope and can therefore be referenced instead of copied
  * @param[in] key_length Size of the private key data
  * @param[in] key Pointer to the private key data
  * @return SL_STATUS_OK if successful, an error code otherwise

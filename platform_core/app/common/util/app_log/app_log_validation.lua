@@ -41,11 +41,11 @@ function check_type(project, stream_type)
     if components ~= nil then
         if type(components) == "table" then
             for _, component_name in ipairs(components) do
-                if project.is_selected(component_name) then
+                if project.is_provided(component_name) then
                     return true
                 end
             end
-        elseif project.is_selected(components) then
+        elseif project.is_provided(components) then
             return true
         end
     end
@@ -58,11 +58,11 @@ function get_selected_component(project, stream_type)
     if components ~= nil then
         if type(components) == "table" then
             for _, component_name in ipairs(components) do
-                if project.is_selected(component_name) then
+                if project.is_provided(component_name) then
                     return project.component(component_name)
                 end
             end
-        elseif project.is_selected(components) then
+        elseif project.is_provided(components) then
             return project.component(components)
         end
     end
@@ -75,12 +75,12 @@ function get_types(project)
     for stream_type, component_name in pairs(component_table) do
         if type(component_name) == "table" then
             for _, name in ipairs(component_name) do
-                if project.is_selected(name) then
+                if project.is_provided(name) then
                     table.insert(result_types, stream_type)
                     break
                 end
             end
-        elseif project.is_selected(component_name) then
+        elseif project.is_provided(component_name) then
             table.insert(result_types, stream_type)
         end
     end
@@ -131,12 +131,19 @@ if override_enabled ~= nil and override_enabled == 1 then
             stream_name_formatted = stream_name.value:gsub("\"","")
             selected_name = check_name(slc, stream_type.value, stream_name_formatted)
         end
-        local component_label = slc.component(component_table[stream_type.value]).label
+        local components = component_table[stream_type.value]
+        local component_id
+        if type(components) == "table" then
+            component_id = components[1]
+        else
+            component_id = components
+        end
+        local component_label = slc.component(component_id).label
         if selected_type == false then
             local types = get_types(slc)
             validation.error("IO Stream is not found by type!",
                             validation.target_for_defines({'APP_LOG_STREAM_TYPE'}),
-                            "Selected type " .. stream_type.value:gsub("SL_IOSTREAM_TYPE_", "") ..  " is not present. Add the \'" .. component_label .. "\' (" .. component_table[stream_type.value] .. ")" .. 
+                            "Selected type " .. stream_type.value:gsub("SL_IOSTREAM_TYPE_", "") ..  " is not present. Add the \'" .. component_label .. "\' (" .. component_id .. ")" .. 
                             " component to the project or choose a type from installed ones: [" .. table_to_string(types,true):gsub("SL_IOSTREAM_TYPE_", "") ..  "]",
                             validation.quickfix(types))
         elseif type_has_instance == true and selected_name == false then

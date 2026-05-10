@@ -557,7 +557,7 @@ extern "C" {
 
 /** @} (end addtogroup SL_DEBUG_ASSERT) */
 
-#if defined(LIBRARY_BUILD) || defined(SL_CATALOG_LOG_COMPONENT_PRESENT)
+#if (defined(LIBRARY_BUILD) || defined(SL_CATALOG_LOG_COMPONENT_PRESENT)) && (SL_LOG_CONFIG_LEVEL_COMPILE_TIME != SL_LOG_CONFIG_LEVEL_NONE)
 
 /**
  * @defgroup sl_log_printf_api Printf-Style Logging API
@@ -579,11 +579,8 @@ extern "C" {
  * @param fmt Printf-style format string
  * @param ... Variable arguments for format string (up to 10)
  */
-#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
-#define SL_PRINT_STRING_INFO(fmt, ...) do{ }while(0)
-#else
-#define SL_PRINT_STRING_INFO(fmt, ...) do { sl_printf_common(INFO, fmt, ##__VA_ARGS__); } while (0)
-#endif
+#define SL_PRINT_STRING_INFO(fmt, ...) do{sl_printf_common(INFO, fmt, ##__VA_ARGS__); }while(0)
+
 
 /**
  * @brief Print debug-level message with printf-style formatting
@@ -594,11 +591,8 @@ extern "C" {
  * @param fmt Printf-style format string
  * @param ... Variable arguments for format string (up to 10)
  */
-#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
-#define SL_PRINT_STRING_DEBUG(fmt, ...) do{ }while(0)
-#else
-#define SL_PRINT_STRING_DEBUG(fmt, ...) do { sl_printf_common(DBG, fmt, ##__VA_ARGS__); } while (0)
-#endif
+#define SL_PRINT_STRING_DEBUG(fmt, ...) do{sl_printf_common(DBG, fmt, ##__VA_ARGS__); }while(0)
+
 
 /**
  * @brief Print warning-level message with printf-style formatting
@@ -609,11 +603,9 @@ extern "C" {
  * @param fmt Printf-style format string
  * @param ... Variable arguments for format string (up to 10)
  */
-#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
-#define SL_PRINT_STRING_WARN(fmt, ...) do{ }while(0)
-#else
-#define SL_PRINT_STRING_WARN(fmt, ...) do { sl_printf_common(WRN, fmt, ##__VA_ARGS__); } while (0)
-#endif
+
+#define SL_PRINT_STRING_WARN(fmt, ...) do{sl_printf_common(WRN, fmt, ##__VA_ARGS__); }while(0)
+
 
 /**
  * @brief Print error-level message with printf-style formatting
@@ -624,11 +616,7 @@ extern "C" {
  * @param fmt Printf-style format string
  * @param ... Variable arguments for format string (up to 10)
  */
-#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
-#define SL_PRINT_STRING_ERROR(fmt, ...) do{ }while(0)
-#else
-#define SL_PRINT_STRING_ERROR(fmt, ...) do { sl_printf_common(ERR, fmt, ##__VA_ARGS__); } while (0)
-#endif
+#define SL_PRINT_STRING_ERROR(fmt, ...) do{sl_printf_common(ERR, fmt, ##__VA_ARGS__); }while(0)
 
 /** @} (end addtogroup sl_log_printf_api) */
 
@@ -652,11 +640,7 @@ extern "C" {
  * @param event_id Numeric event identifier
  * @param ... Variable arguments for the event (up to 10)
  */
-#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
-#define SL_PRINT_EVENT_INFO(event_id, ...) do{ }while(0)
-#else
-#define SL_PRINT_EVENT_INFO(event_id, ...) do { sl_event_common(INFO, event_id, ##__VA_ARGS__); } while (0)
-#endif
+#define SL_PRINT_EVENT_INFO(event_id, ...) do{sl_event_common(INFO, event_id, ##__VA_ARGS__); }while(0)
 
 /**
  * @brief Log debug-level event with optional arguments
@@ -667,11 +651,7 @@ extern "C" {
  * @param event_id Numeric event identifier
  * @param ... Variable arguments for the event (up to 10)
  */
-#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
-#define SL_PRINT_EVENT_DEBUG(event_id, ...) do{ }while(0)
-#else
-#define SL_PRINT_EVENT_DEBUG(event_id, ...) do { sl_event_common(DBG, event_id, ##__VA_ARGS__); } while (0)
-#endif
+#define SL_PRINT_EVENT_DEBUG(event_id, ...) do{sl_event_common(DBG, event_id, ##__VA_ARGS__); }while(0)
 /**
  * @brief Log warning-level event with optional arguments
  *
@@ -681,11 +661,7 @@ extern "C" {
  * @param event_id Numeric event identifier
  * @param ... Variable arguments for the event (up to 10)
  */
-#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
-#define SL_PRINT_EVENT_WARN(event_id, ...) do{ }while(0)
-#else
-#define SL_PRINT_EVENT_WARN(event_id, ...) do { sl_event_common(WRN, event_id, ##__VA_ARGS__); } while (0)
-#endif
+#define SL_PRINT_EVENT_WARN(event_id, ...) do{sl_event_common(WRN, event_id, ##__VA_ARGS__); }while(0)
 /**
  * @brief Log error-level event with optional arguments
  *
@@ -695,11 +671,8 @@ extern "C" {
  * @param event_id Numeric event identifier
  * @param ... Variable arguments for the event (up to 10)
  */
-#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
-#define SL_PRINT_EVENT_ERROR(event_id, ...) do{ }while(0)
-#else
-#define SL_PRINT_EVENT_ERROR(event_id, ...) do { sl_event_common(ERR, event_id, ##__VA_ARGS__); } while (0)
-#endif
+
+#define SL_PRINT_EVENT_ERROR(event_id, ...) do{sl_event_common(ERR, event_id, ##__VA_ARGS__); }while(0)
 
 /** @} (end addtogroup sl_log_event_api) */
 
@@ -726,35 +699,23 @@ extern "C" {
  */
 
 #define sl_log_common_void(level, event_id, ...)                                  \
-  _Static_assert(COUNT_ARGS(event_id, ##__VA_ARGS__) <= SL_LOG_CONFIG_ARG, "Too many arguments!");  \
+ _Static_assert(COUNT_ARGS(event_id, ##__VA_ARGS__) <= SL_LOG_CONFIG_ARG, "Too many arguments!");  \
   EXPAND_CONCAT(LOG_VOID_MACRO_CHOOSER1(COUNT_ARGS(event_id, ##__VA_ARGS__)), level)     \
   (event_id, 1, ##__VA_ARGS__)
 
 /* Compile-time–controlled PRINTF-style macros */
-#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
-#define SL_PRINT_STRING_INFO(fmt, ...) do{ }while(0)
-#define SL_PRINT_STRING_DEBUG(fmt, ...) do{ }while(0)
-#define SL_PRINT_STRING_WARN(fmt, ...) do{ }while(0)
-#define SL_PRINT_STRING_ERROR(fmt, ...) do{ }while(0)
-#else
-#define SL_PRINT_STRING_INFO(fmt, ...)  sl_log_common_void(INFO, fmt, ##__VA_ARGS__)
-#define SL_PRINT_STRING_DEBUG(fmt, ...) sl_log_common_void(DBG, fmt, ##__VA_ARGS__)
-#define SL_PRINT_STRING_WARN(fmt, ...)  sl_log_common_void(WRN, fmt, ##__VA_ARGS__)
-#define SL_PRINT_STRING_ERROR(fmt, ...) sl_log_common_void(ERR, fmt, ##__VA_ARGS__)
-#endif
+
+
+#define SL_PRINT_STRING_INFO(fmt, ...)   do { sl_log_common_void(INFO, fmt, ##__VA_ARGS__); } while(0)
+#define SL_PRINT_STRING_DEBUG(fmt, ...)  do { sl_log_common_void(DBG, fmt, ##__VA_ARGS__); } while(0)
+#define SL_PRINT_STRING_WARN(fmt, ...)   do { sl_log_common_void(WRN, fmt, ##__VA_ARGS__); } while(0)
+#define SL_PRINT_STRING_ERROR(fmt, ...)  do { sl_log_common_void(ERR, fmt, ##__VA_ARGS__); } while(0)
 
 /* Compile-time–controlled EVENT-style macros */
-#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
-#define SL_PRINT_EVENT_INFO(event_id, ...) do{ }while(0)
-#define SL_PRINT_EVENT_DEBUG(event_id, ...) do{ }while(0)
-#define SL_PRINT_EVENT_WARN(event_id, ...) do{ }while(0)
-#define SL_PRINT_EVENT_ERROR(event_id, ...) do{ }while(0)
-#else
-#define SL_PRINT_EVENT_INFO(event_id, ...)  sl_log_common_void(INFO, event_id, ##__VA_ARGS__)
-#define SL_PRINT_EVENT_DEBUG(event_id, ...) sl_log_common_void(DBG, event_id, ##__VA_ARGS__)
-#define SL_PRINT_EVENT_WARN(event_id, ...)  sl_log_common_void(WRN, event_id, ##__VA_ARGS__)
-#define SL_PRINT_EVENT_ERROR(event_id, ...) sl_log_common_void(ERR, event_id, ##__VA_ARGS__)
-#endif
+#define SL_PRINT_EVENT_INFO(event_id, ...)   do { sl_log_common_void(INFO, event_id, ##__VA_ARGS__); } while(0)
+#define SL_PRINT_EVENT_DEBUG(event_id, ...)  do { sl_log_common_void(DBG, event_id, ##__VA_ARGS__); } while(0)
+#define SL_PRINT_EVENT_WARN(event_id, ...)   do { sl_log_common_void(WRN, event_id, ##__VA_ARGS__); } while(0)
+#define SL_PRINT_EVENT_ERROR(event_id, ...)  do { sl_log_common_void(ERR, event_id, ##__VA_ARGS__); } while(0)
 
 #endif // LIBRARY_BUILD
 

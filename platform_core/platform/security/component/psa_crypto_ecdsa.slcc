@@ -47,6 +47,7 @@ requires:
     # SIXX301 does not accelerate secp521r1
 - name: mbedtls_ecdsa
   condition: [device_generic_family_sixx301, psa_crypto_ecc_secp521r1]
+
 template_contribution:
 - name: psa_crypto_config
   value: PSA_WANT_ALG_ECDSA 1

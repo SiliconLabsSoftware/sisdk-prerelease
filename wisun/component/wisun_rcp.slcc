@@ -33,8 +33,6 @@ include:
 - path: "stack/inc/"
   file_list:
   - path: "sl_wisun_ip6string.h"
-  - path: "socket/socket.h"
-  - path: "arpa/inet.h"
 - path: stack/src
   file_list:
   - path: common/bits.h

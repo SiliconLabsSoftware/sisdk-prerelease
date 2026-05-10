@@ -1,21 +1,15 @@
 id: mbedtls_pem
 package: platform_core
-label: PEM Parsing
+label: PEM Parsing and Writing
 description: >-
-  This component provides support for reading PEM formatted keys and certificates in Mbed TLS.
+  This component provides support for reading and writing PEM formatted keys and certificates in Mbed TLS.
 category: Platform|Security|Mbed TLS|Upper Layer
 quality: production
 provides:
 - name: mbedtls_pem
 requires:
-- name: mbedtls_cipher
-- name: mbedtls_base64
-- name: mbedtls_core
-template_contribution:
-- name: mbedtls_config
-  value: MBEDTLS_PEM_PARSE_C
-- name: mbedtls_config
-  value: MBEDTLS_PEM_WRITE_C
+- name: mbedtls_pem_parse
+- name: mbedtls_pem_write
 metadata:
   sbom:
     reference: mbedtls_sbom

@@ -28,9 +28,6 @@ provides:
 - name: bluetooth_peer_manager_common
 config_file:
 - path: config/sl_bt_peer_manager_common_config.h
-- path: config/validator.lua
-  validation:
-  - id: bluetooth_peer_manager_max_conn_validation
 - path: config/ble_peer_manager_common_config_compat.h
   condition:
   - ble_peer_manager_common
@@ -39,6 +36,8 @@ template_file:
 template_contribution:
 - name: component_catalog
   value: bluetooth_peer_manager_common
+validation_helper:
+- path: config/validator.lua
 documentation:
   docset: bluetooth
   document: bluetooth-service-api/bluetooth-peer-manager-common

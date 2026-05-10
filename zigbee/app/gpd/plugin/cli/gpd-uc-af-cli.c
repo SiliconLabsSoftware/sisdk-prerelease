@@ -126,11 +126,13 @@ void sl_zigbee_gpd_af_cli_node_set_addr(sl_cli_command_arg_t *arguments)
                            + ((uint32_t)str[2] << 16) \
                            + ((uint32_t)str[3] << 8)  \
                            + str[4];
+      sl_zigbee_gpd_security_init(&(gpd->addr), gpd->securityKey, gpd->securityFrameCounter);
     } else if (gpd->addr.appId == SL_ZIGBEE_GPD_APP_ID_IEEE_ID) {
       // Endpoint
       gpd->addr.gpdEndpoint = str[1];
       // A simple way to use the command for testing
       memcpy(gpd->addr.id.ieee, &str[2], SL_ZIGBEE_GPD_EUI64_SIZE);
+      sl_zigbee_gpd_security_init(&(gpd->addr), gpd->securityKey, gpd->securityFrameCounter);
     } else {
       // Error in the input argument
       gpdDebugPrintf("Must be exactly %d or %d bytes hex\n", \

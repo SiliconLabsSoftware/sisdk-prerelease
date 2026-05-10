@@ -2,9 +2,9 @@ id: mbedtls_pki
 package: platform_core
 label: Public-Key Abstraction Layer
 description: >-
-  This component provides support for the Public Key (PK) abstraction layer in
-  Mbed TLS. This layer provides indirect support for public-key
-  encryption/decryption as well signature generation/verification.
+  This component provides support for the full Public Key (PK) abstraction
+  layer in Mbed TLS, including encryption and decryption, signature
+  generation and verification, and public key file parsing and writing.
 category: Platform|Security|Mbed TLS|Upper Layer
 quality: production
 provides:
@@ -12,13 +12,9 @@ provides:
 - name: mbedtls_uses_psa_crypto
   allow_multiple: true
 requires:
-- name: mbedtls_core
-- name: mbedtls_asn1
-- name: mbedtls_mpi
-- name: mbedtls_oid
-
-  # Always needed.
-- name: psa_crypto_hash
+- name: mbedtls_pk
+- name: mbedtls_pk_parse
+- name: mbedtls_pk_write
 
   # We need either RSA or ECDSA to be enabled.
 - name: mbedtls_pk_backend
@@ -28,13 +24,6 @@ recommends:
 - id: psa_crypto_ecdsa
 
   vendor: silabs
-template_contribution:
-- name: mbedtls_config
-  value: MBEDTLS_PK_C
-- name: mbedtls_config
-  value: MBEDTLS_PK_PARSE_C
-- name: mbedtls_config
-  value: MBEDTLS_PK_WRITE_C
 metadata:
   sbom:
     reference: mbedtls_sbom

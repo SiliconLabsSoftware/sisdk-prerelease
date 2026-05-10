@@ -49,10 +49,10 @@
 // This is not an exact calculation, but a good enough approximation that can
 // safely store the procedure data coming from the CS initiator component.
 // Including size of the header, step channel array and 2 RAS data arrays.
-#define EVT_DATA_BUFFER_MAX_SIZE (                                  \
-    sizeof(cs_acp_result_evt_t) + sizeof(uint8_t)                   \
-    + sizeof(uint8_t) + CS_MAX_STEP_COUNT                           \
-    + ((sizeof(uint32_t) + CS_INITIATOR_MAX_RANGING_DATA_SIZE) * 2) \
+#define EVT_DATA_BUFFER_MAX_SIZE (                                       \
+    sizeof(cs_acp_result_evt_t) + sizeof(uint8_t)                        \
+    + sizeof(uint8_t) + CS_RREQ_MAX_STEP_COUNT                           \
+    + ((sizeof(uint32_t) + CS_RREQ_CONFIG_MAX_RANGING_DATA_SIZE) * 2)    \
     )
 
 #define EVT_OVERHEAD             (sizeof(cs_acp_event_id_t) + 3)
@@ -69,10 +69,10 @@ static uint8_t connection;
 // -----------------------------------------------------------------------------
 // Static function declarations
 
-static sl_status_t serialize_extended_result(const uint16_t ranging_counter,
-                                             const uint8_t*result,
+static sl_status_t serialize_extended_result(uint16_t ranging_counter,
+                                             const uint8_t *result,
                                              uint8_t result_size,
-                                             const cs_ranging_data_t *ranging_data,
+                                             const cs_rreq_result_t *ranging_data,
                                              size_t max_data_size,
                                              size_t *data_len,
                                              uint8_t *data);
@@ -83,11 +83,11 @@ static sl_status_t serialize_extended_result(const uint16_t ranging_counter,
 /******************************************************************************
  * Add extended result data to the ACP event buffer.
  *****************************************************************************/
-void cs_on_extended_result(const uint8_t conn_handle,
-                          const uint16_t ranging_counter,
-                          const uint8_t *result,
-                          const uint16_t result_size,
-                          const cs_ranging_data_t *ranging_data)
+void cs_on_extended_result(uint8_t conn_handle,
+                           uint16_t ranging_counter,
+                           const uint8_t *result,
+                           uint16_t result_size,
+                           const cs_rreq_result_t *ranging_data)
 {
   sl_status_t sc;
   size_t data_len;
@@ -154,10 +154,10 @@ void extended_result_step(void)
 /******************************************************************************
  * Serialize extended result data.
  *****************************************************************************/
-static sl_status_t serialize_extended_result(const uint16_t ranging_counter,
+static sl_status_t serialize_extended_result(uint16_t ranging_counter,
                                              const uint8_t *result,
                                              uint8_t result_size,
-                                             const cs_ranging_data_t *ranging_data,
+                                             const cs_rreq_result_t *ranging_data,
                                              size_t max_data_size,
                                              size_t *data_len,
                                              uint8_t *data)
@@ -168,10 +168,10 @@ static sl_status_t serialize_extended_result(const uint16_t ranging_counter,
       + result_size
       + sizeof(ranging_data->num_steps)
       + ranging_data->num_steps
-      + sizeof(ranging_data->initiator.ranging_data_size)
-      + ranging_data->initiator.ranging_data_size
-      + sizeof(ranging_data->initiator.ranging_data_size)
-      + ranging_data->reflector.ranging_data_size;
+      + sizeof(ranging_data->initiator.data_size)
+      + ranging_data->initiator.data_size
+      + sizeof(ranging_data->reflector.data_size)
+      + ranging_data->reflector.data_size;
 
   if (data_len_calculated > max_data_size) {
     return SL_STATUS_WOULD_OVERFLOW;
@@ -195,27 +195,27 @@ static sl_status_t serialize_extended_result(const uint16_t ranging_counter,
 
   // Serialize ranging data size for initiator
   memcpy(data,
-         &ranging_data->initiator.ranging_data_size,
-         sizeof(ranging_data->initiator.ranging_data_size));
-  data += sizeof(ranging_data->initiator.ranging_data_size);
+         &ranging_data->initiator.data_size,
+         sizeof(ranging_data->initiator.data_size));
+  data += sizeof(ranging_data->initiator.data_size);
 
   // Serialize ranging data for initiator
   memcpy(data,
-         ranging_data->initiator.ranging_data,
-         ranging_data->initiator.ranging_data_size);
-  data += ranging_data->initiator.ranging_data_size;
+         ranging_data->initiator.data,
+         ranging_data->initiator.data_size);
+  data += ranging_data->initiator.data_size;
 
   // Serialize ranging data size for reflector
   memcpy(data,
-         &ranging_data->reflector.ranging_data_size,
-         sizeof(ranging_data->reflector.ranging_data_size));
-  data += sizeof(ranging_data->reflector.ranging_data_size);
+         &ranging_data->reflector.data_size,
+         sizeof(ranging_data->reflector.data_size));
+  data += sizeof(ranging_data->reflector.data_size);
 
   // Serialize ranging data for reflector
   memcpy(data,
-         ranging_data->reflector.ranging_data,
-         ranging_data->reflector.ranging_data_size);
-  data += ranging_data->reflector.ranging_data_size;
+         ranging_data->reflector.data,
+         ranging_data->reflector.data_size);
+  data += ranging_data->reflector.data_size;
 
   *data_len = data_len_calculated;
 

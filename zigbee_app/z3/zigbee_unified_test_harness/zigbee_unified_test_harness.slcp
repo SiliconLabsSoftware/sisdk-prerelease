@@ -57,8 +57,13 @@ component:
   - id: zigbee_zll_on_off_server
   - id: bootloader_interface
   - id: clock_manager
-  # Platform - enable LTO for gcc
+  # Platform - enable LTO for gcc and llvm
   - id: toolchain_gcc_lto
+    condition:
+      - toolchain_gcc
+  - id: toolchain_llvm_lto
+    condition:
+      - toolchain_llvm
   - id: zigbee_pro_stack_mac_test_cmds
   - id: zigbee_pro_compliance
   - id: zigbee_mac_address_filtering

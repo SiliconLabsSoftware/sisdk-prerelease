@@ -63,8 +63,13 @@ component:
   - id: zigbee_multirail_demo
   - id: zigbee_packet_handoff
   - id: clock_manager
-  # Platform - enable LTO for gcc
+  # Platform - enable LTO for gcc and llvm
   - id: toolchain_gcc_lto
+    condition:
+      - toolchain_gcc
+  - id: toolchain_llvm_lto
+    condition:
+      - toolchain_llvm
 
 configuration:
   - name: SL_ZIGBEE_GP_PROXY_TABLE_SIZE

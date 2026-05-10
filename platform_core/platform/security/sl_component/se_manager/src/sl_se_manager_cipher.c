@@ -2589,10 +2589,10 @@ sl_status_t sl_se_gcm_multipart_finish(sl_se_gcm_multipart_context_t *gcm_ctx,
   }
 
   // Construct GCM LenA || LenC block into temporary buffer
-  tmpbuf[0] = __REV(gcm_ctx->add_len >> 29);
-  tmpbuf[1] = __REV((gcm_ctx->add_len << 3) & 0xFFFFFFFFUL);
-  tmpbuf[2] = __REV(gcm_ctx->len >> 29);
-  tmpbuf[3] = __REV((gcm_ctx->len << 3) & 0xFFFFFFFFUL);
+  tmpbuf[0] = __REV((uint32_t)(gcm_ctx->add_len >> 29));
+  tmpbuf[1] = __REV((uint32_t)(gcm_ctx->add_len << 3) & 0xFFFFFFFFUL);
+  tmpbuf[2] = __REV((uint32_t)(gcm_ctx->len >> 29));
+  tmpbuf[3] = __REV((uint32_t)(gcm_ctx->len << 3) & 0xFFFFFFFFUL);
 
   volatile sli_se_datatransfer_t data_in =
     SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->final_data, length);

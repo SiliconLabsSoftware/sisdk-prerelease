@@ -8,13 +8,8 @@ quality: production
 provides:
 - name: mbedtls_asn1
 requires:
-- name: mbedtls_core
-- name: mbedtls_mpi
-template_contribution:
-- name: mbedtls_config
-  value: MBEDTLS_ASN1_PARSE_C
-- name: mbedtls_config
-  value: MBEDTLS_ASN1_WRITE_C
+- name: mbedtls_asn1_parse
+- name: mbedtls_asn1_write
 metadata:
   sbom:
     reference: mbedtls_sbom
