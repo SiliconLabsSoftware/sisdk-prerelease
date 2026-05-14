@@ -9,6 +9,7 @@ provides:
 
 requires:
 - name: lower_mac_spinel
+- name: ot_cpc_transport_posix
 
 library:
   # needs to be built, and available separately

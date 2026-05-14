@@ -416,38 +416,37 @@ extern "C" {
  * @{
  */
 
-/** @brief Token concatenation helper */
-#define CONCAT(a, b) a##b
-
-/** @brief Expanded token concatenation helper */
-#define EXPAND_CONCAT(a, b) CONCAT(a, b)
+/* Token concatenation is provided by sl_common.h:
+ *   _SL_CONCAT_2(a, b)       - concatenates without expanding macro arguments
+ *   SL_CONCAT_PASTER_2(a, b) - expands macro arguments before concatenating
+ */
 
 /** @brief Generate unique name based on line number */
-#define UNIQUE_NAME(base) EXPAND_CONCAT(base, EXPAND_CONCAT(__LINE__, 0))
+#define SLI_LOG_UNIQUE_NAME(base) SL_CONCAT_PASTER_2(base, SL_CONCAT_PASTER_2(__LINE__, 0))
 
 /** @brief Implementation macro for counting variadic arguments (up to 10) */
-#define COUNT_ARGS_IMPL(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, N, ...) N
+#define SLI_LOG_COUNT_ARGS_IMPL(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, N, ...) N
 
 /** @brief Count the number of variadic arguments (up to 10) */
-#define COUNT_ARGS(fmt, ...) COUNT_ARGS_IMPL(_, ##__VA_ARGS__, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+#define SLI_LOG_COUNT_ARGS(fmt, ...) SLI_LOG_COUNT_ARGS_IMPL(_, ##__VA_ARGS__, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
 
 /** @brief Helper for choosing logging macro based on argument count */
-#define LOG_MACRO_CHOOSER2(count) EXPAND_CONCAT(SL_PRINT_ARG, count##_)
+#define SLI_LOG_MACRO_CHOOSER2(count) SL_CONCAT_PASTER_2(SL_PRINT_ARG, count##_)
 
 /** @brief Macro dispatcher for selecting appropriate logging function */
-#define LOG_VOID_MACRO_CHOOSER2(count) EXPAND_CONCAT(SL_PRINT_VOID_ARG, count##_)
+#define SLI_LOG_VOID_MACRO_CHOOSER2(count) SL_CONCAT_PASTER_2(SL_PRINT_VOID_ARG, count##_)
 
 /** @brief Macro dispatcher for selecting appropriate logging function */
-#define LOG_VOID_MACRO_CHOOSER1(count) LOG_VOID_MACRO_CHOOSER2(count)
+#define SLI_LOG_VOID_MACRO_CHOOSER1(count) SLI_LOG_VOID_MACRO_CHOOSER2(count)
 
 /** @brief Macro dispatcher for selecting appropriate logging function */
-#define LOG_MACRO_CHOOSER1(count) LOG_MACRO_CHOOSER2(count)
+#define SLI_LOG_MACRO_CHOOSER1(count) SLI_LOG_MACRO_CHOOSER2(count)
 
-/** @brief Chooser for SL_PRINT_EVENT_* → SEGGER_SYSVIEW_RecordU32 / RecordU32xN */
-#define EVENT_LOG_MACRO_CHOOSER2(count) EXPAND_CONCAT(SL_EVENT_PRINT_ARG, count##_)
+/** @brief Chooser for SL_PRINT_EVENT_* -> SEGGER_SYSVIEW_RecordU32 / RecordU32xN */
+#define SLI_LOG_EVENT_MACRO_CHOOSER2(count) SL_CONCAT_PASTER_2(SL_EVENT_PRINT_ARG, count##_)
 
-/** @brief Chooser for SL_PRINT_EVENT_* → SEGGER_SYSVIEW_RecordU32 / RecordU32xN */
-#define EVENT_LOG_MACRO_CHOOSER1(count) EVENT_LOG_MACRO_CHOOSER2(count)
+/** @brief Chooser for SL_PRINT_EVENT_* -> SEGGER_SYSVIEW_RecordU32 / RecordU32xN */
+#define SLI_LOG_EVENT_MACRO_CHOOSER1(count) SLI_LOG_EVENT_MACRO_CHOOSER2(count)
 
 /** @} (end addtogroup sl_log_macro_helpers) */
 
@@ -473,10 +472,10 @@ extern "C" {
  * @param ... Variable arguments (up to 10)
  */
 #define sl_printf_common(level, fmt, ...)                                      \
-  static const char UNIQUE_NAME(logstr_)[] SL_COMPACT_STRINGS_SECTION = fmt;               \
-  _Static_assert(COUNT_ARGS(fmt, ##__VA_ARGS__) <= SL_LOG_CONFIG_ARG, "Too many arguments!");  \
-  EXPAND_CONCAT(LOG_MACRO_CHOOSER1(COUNT_ARGS(fmt, ##__VA_ARGS__)), level)     \
-  ((uintptr_t)UNIQUE_NAME(logstr_), 0, ##__VA_ARGS__)
+  static const char SLI_LOG_UNIQUE_NAME(logstr_)[] SL_COMPACT_STRINGS_SECTION = fmt;               \
+  _Static_assert(SLI_LOG_COUNT_ARGS(fmt, ##__VA_ARGS__) <= SL_LOG_CONFIG_ARG, "Too many arguments!");  \
+  SL_CONCAT_PASTER_2(SLI_LOG_MACRO_CHOOSER1(SLI_LOG_COUNT_ARGS(fmt, ##__VA_ARGS__)), level)     \
+  ((uintptr_t)SLI_LOG_UNIQUE_NAME(logstr_), 0, ##__VA_ARGS__)
 
 /**
  * @brief Common event-based logging macro
@@ -490,13 +489,13 @@ extern "C" {
  */
 #if defined(SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT)
 #define sl_event_common(level, event_id, ...)                                  \
-  _Static_assert(COUNT_ARGS(event_id, ##__VA_ARGS__) <= SL_LOG_CONFIG_ARG, "Too many arguments!");  \
-  EXPAND_CONCAT(EVENT_LOG_MACRO_CHOOSER1(COUNT_ARGS(event_id, ##__VA_ARGS__)), level)     \
+  _Static_assert(SLI_LOG_COUNT_ARGS(event_id, ##__VA_ARGS__) <= SL_LOG_CONFIG_ARG, "Too many arguments!");  \
+  SL_CONCAT_PASTER_2(SLI_LOG_EVENT_MACRO_CHOOSER1(SLI_LOG_COUNT_ARGS(event_id, ##__VA_ARGS__)), level)     \
   (event_id, 1, ##__VA_ARGS__)
 #else
 #define sl_event_common(level, event_id, ...)                                  \
-  _Static_assert(COUNT_ARGS(event_id, ##__VA_ARGS__) <= SL_LOG_CONFIG_ARG, "Too many arguments!");  \
-  EXPAND_CONCAT(LOG_MACRO_CHOOSER1(COUNT_ARGS(event_id, ##__VA_ARGS__)), level)     \
+  _Static_assert(SLI_LOG_COUNT_ARGS(event_id, ##__VA_ARGS__) <= SL_LOG_CONFIG_ARG, "Too many arguments!");  \
+  SL_CONCAT_PASTER_2(SLI_LOG_MACRO_CHOOSER1(SLI_LOG_COUNT_ARGS(event_id, ##__VA_ARGS__)), level)     \
   (event_id, 1, ##__VA_ARGS__)
 #endif
 
@@ -699,8 +698,8 @@ extern "C" {
  */
 
 #define sl_log_common_void(level, event_id, ...)                                  \
- _Static_assert(COUNT_ARGS(event_id, ##__VA_ARGS__) <= SL_LOG_CONFIG_ARG, "Too many arguments!");  \
-  EXPAND_CONCAT(LOG_VOID_MACRO_CHOOSER1(COUNT_ARGS(event_id, ##__VA_ARGS__)), level)     \
+ _Static_assert(SLI_LOG_COUNT_ARGS(event_id, ##__VA_ARGS__) <= SL_LOG_CONFIG_ARG, "Too many arguments!");  \
+  SL_CONCAT_PASTER_2(SLI_LOG_VOID_MACRO_CHOOSER1(SLI_LOG_COUNT_ARGS(event_id, ##__VA_ARGS__)), level)     \
   (event_id, 1, ##__VA_ARGS__)
 
 /* Compile-time–controlled PRINTF-style macros */

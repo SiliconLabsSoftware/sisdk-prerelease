@@ -16,6 +16,7 @@
  ******************************************************************************/
 
 /* standard includes */
+#include <assert.h>
 #include <stdint.h>
 
 /* platform includes */
@@ -30,6 +31,7 @@
 #include "em_device.h"
 
 /* zpal includes */
+#include "system_startup.h"
 #include "zpal_retention_register_private.h"
 #include "zpal_misc.h"
 #include "zpal_radio.h"
@@ -55,6 +57,28 @@ static bool temporary_lock_active = false;
 // satisfy compiler with forward declarations
 void zw_shutdown_manager_callback(sl_power_manager_em_t from, sl_power_manager_em_t to);
 static void temporary_lock_revoke_callback(__attribute__((unused)) sl_sleeptimer_timer_handle_t *handle, __attribute__((unused)) void *contextData);
+
+static zpal_status_t zw_shutdown_manager_sleeptimer_ticks_to_burtc_ticks(uint32_t sleeptimer_ticks, uint32_t *burtc_ticks)
+{
+  if (burtc_ticks == NULL || sleeptimer_ticks == 0U) {
+    return ZPAL_STATUS_INVALID_ARGUMENT;
+  }
+
+  uint32_t sleeptimer_freq = sl_sleeptimer_get_timer_frequency();
+  uint32_t burtc_freq = zpal_get_burtc_counter_frequency_hz();
+
+  if (sleeptimer_freq == 0U || burtc_freq == 0U) {
+    return ZPAL_STATUS_FAIL;
+  }
+
+  if (sleeptimer_freq == burtc_freq) {
+    *burtc_ticks = sleeptimer_ticks;
+    return ZPAL_STATUS_OK;
+  }
+
+  *burtc_ticks = (uint32_t)(((uint64_t)sleeptimer_ticks * (uint64_t)burtc_freq) / (uint64_t)sleeptimer_freq);
+  return ZPAL_STATUS_OK;
+}
 
 /* Define the events we want to be notified about from power manager module
  * here our interest is about EM2 transition entry/leaving
@@ -88,15 +112,15 @@ void zw_shutdown_manager_callback(sl_power_manager_em_t from, sl_power_manager_e
       return;
     }
 
-    uint32_t tick_remaining = UINT32_MAX;
-    if (SL_STATUS_OK != sl_sleeptimer_get_remaining_time_of_first_timer(SL_SLEEPTIMER_ANY_FLAG, &tick_remaining)) {
+    uint32_t sleeptimer_ticks_remaining = UINT32_MAX;
+    if (SL_STATUS_OK != sl_sleeptimer_get_remaining_time_of_first_timer(SL_SLEEPTIMER_ANY_FLAG, &sleeptimer_ticks_remaining)) {
       sl_dcdc_setup_em2();
       // failed to acquire remaining time of platform timer
       assert(0);
       return;
     }
-    if (sl_sleeptimer_ms_to_tick(1000) > tick_remaining) {
-      ZPAL_LOG_DEBUG(ZPAL_LOG_SHUTDOWN_MANAGER, "Timer expiring soon: %u ticks remaining\n", tick_remaining);
+    if (sl_sleeptimer_ms_to_tick(1000) > sleeptimer_ticks_remaining) {
+      ZPAL_LOG_DEBUG(ZPAL_LOG_SHUTDOWN_MANAGER, "Timer expiring soon: %u ticks remaining\n", sleeptimer_ticks_remaining);
       sl_dcdc_setup_em2();
       // timer expiring soon, stay in EM2/EM1P
       return;
@@ -107,6 +131,14 @@ void zw_shutdown_manager_callback(sl_power_manager_em_t from, sl_power_manager_e
     ZPAL_LOG_DEBUG(ZPAL_LOG_SHUTDOWN_MANAGER, "Going to EM4 (not effective in debug)\n");
     return;
 #endif
+
+    // before entering critical EM4 path, validate the tick conversion is correct
+    uint32_t burtc_ticks_probe = 0U;
+    if (zw_shutdown_manager_sleeptimer_ticks_to_burtc_ticks(sleeptimer_ticks_remaining, &burtc_ticks_probe) != ZPAL_STATUS_OK) {
+      assert(0);
+      sl_dcdc_setup_em2();
+      return;
+    }
 
     // from this point, we will be going to EM4, so shutdown the Z-Wave stack
     ZW_stack_shutdown();
@@ -120,16 +152,23 @@ void zw_shutdown_manager_callback(sl_power_manager_em_t from, sl_power_manager_e
     CORE_DECLARE_IRQ_STATE;
     CORE_ENTER_CRITICAL();
     // get remaining time of earliest platform timer
-    (void) sl_sleeptimer_get_remaining_time_of_first_timer(SL_SLEEPTIMER_ANY_FLAG, &tick_remaining);
+    (void) sl_sleeptimer_get_remaining_time_of_first_timer(SL_SLEEPTIMER_ANY_FLAG, &sleeptimer_ticks_remaining);
     uint32_t counter = BURTC_CounterGet();
-    // set the compare value for next wakeup tick
-    BURTC_CompareSet(0, counter + tick_remaining);
+    uint32_t burtc_ticks_remaining = 0U;
+    if (zw_shutdown_manager_sleeptimer_ticks_to_burtc_ticks(sleeptimer_ticks_remaining, &burtc_ticks_remaining) != ZPAL_STATUS_OK) {
+      CORE_EXIT_CRITICAL();
+      assert(0);
+      sl_dcdc_setup_em2();
+      return;
+    }
+    // set the compare value for next wakeup tick (BURTC counter domain)
+    BURTC_CompareSet(0, counter + burtc_ticks_remaining);
     // enable compare and overflow interrupts
     BURTC_IntClear(BURTC_IF_COMP | BURTC_IF_OF);
     BURTC_IntEnable(BURTC_IF_COMP | BURTC_IF_OF); // enable BURTC interrupt level (already enabled at NVIC level in init function)
     CORE_EXIT_CRITICAL();
 
-    ZPAL_LOG_DEBUG(ZPAL_LOG_SHUTDOWN_MANAGER, "Reprogrammed BURTC compare to %lu ticks (delta=%lu ms)\n", tick_remaining, sl_sleeptimer_tick_to_ms(tick_remaining));
+    ZPAL_LOG_DEBUG(ZPAL_LOG_SHUTDOWN_MANAGER, "Reprogrammed BURTC compare %lu BURTC ticks (sleeptimer %lu ticks, %lu ms)\n", burtc_ticks_remaining, sleeptimer_ticks_remaining, sl_sleeptimer_tick_to_ms(sleeptimer_ticks_remaining));
     ZPAL_LOG_DEBUG(ZPAL_LOG_SHUTDOWN_MANAGER, "BURTC actual count=%d\n", counter);
 
     // store the current BURTC count in retention register to compute sleep duration at wakeup time (system_startup_core() in system_startup.c)

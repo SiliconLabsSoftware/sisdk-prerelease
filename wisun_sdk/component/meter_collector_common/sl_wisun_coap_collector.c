@@ -694,6 +694,7 @@ static sl_status_t _send_request(const sockaddr_in6_t * addr,
                                  const sl_wisun_meter_request_t * const req)
 {
   // Create socket
+  sl_status_t status = SL_STATUS_OK;
   int32_t sockid = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
   if (sockid == SOCKET_RETVAL_ERROR) {
     return SL_STATUS_FAIL;
@@ -705,10 +706,11 @@ static sl_status_t _send_request(const sockaddr_in6_t * addr,
              0,
              (const struct sockaddr *)addr,
              (socklen_t)sizeof(*addr)) == SOCKET_RETVAL_ERROR) {
-    return SL_STATUS_FAIL;
+    status = SL_STATUS_FAIL;
   }
 
-  return SL_STATUS_OK;
+  close(sockid);
+  return status;
 }
 
 /* Prepare requests */

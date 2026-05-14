@@ -36,12 +36,20 @@
 #include "cs_rreq.h"
 #include "cs_rreq_types.h"
 #include "cs_rreq_config.h"
+#include "cs_ras_client.h"
+#include "cs_ras_client_timeout.h"
+#include "cs_ras_common.h"
 #include "sl_bt_api.h"
+#include "sl_enum.h"
 #include "sl_status.h"
+#include "app_rta.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+// RTA context guarding shared state.
+extern app_rta_context_t cs_rreq_ctx;
 
 // Registered event callbacks (create, enable, error).
 // set via cs_rreq_set_event_callbacks.
@@ -83,9 +91,38 @@ bool cs_rreq_on_bt_event(sl_bt_msg_t *evt);
 /******************************************************************************
  * Initialize the RREQ module.
  *
- * @note Resets all instance slots. Called automatically,
+ * @note Resets all instance slots. Called automatically
+ *       during application initialization.
  *****************************************************************************/
 void cs_rreq_init(void);
+
+/******************************************************************************
+ * Create the RTA context used by the RREQ module.
+ *****************************************************************************/
+void cs_rreq_rta_init(void);
+
+/******************************************************************************
+ * Signal the RTA context that initialization is complete and operations may
+ * proceed.
+ *****************************************************************************/
+void cs_rreq_rta_ready(void);
+
+/******************************************************************************
+ * RTA step function.
+ *****************************************************************************/
+void cs_rreq_step(void);
+
+/******************************************************************************
+ * Enqueue a RAS Client event for deferred processing in @ref cs_rreq_step.
+ *
+ * @note Safe to call from any context (e.g. the cs_ras_client callback
+ *       chain that already holds cs_ras_client's guard). Does NOT acquire the
+ *       cs_rreq guard.
+ *
+ * @param[in] evt Pointer to the populated event. Copied by value into the
+ *                queue; @p evt does not need to outlive the call.
+ *****************************************************************************/
+void cs_rreq_post_ras_evt(const cs_rreq_ras_evt_t *evt);
 
 /******************************************************************************
  * Invoke the registered error callback for an RREQ instance.
@@ -99,7 +136,7 @@ void cs_rreq_init(void);
 void rreq_error(rreq_t *rreq, cs_rreq_error_t evt, sl_status_t sc);
 
 /******************************************************************************
- * Reset subevent data and synchronization for an RREQ instance.a
+ * Reset subevent data and synchronization for an RREQ instance.
  *
  * @param[in] rreq RREQ instance reference.
  * @param[in] init true if the reset is performed during initialization (skips

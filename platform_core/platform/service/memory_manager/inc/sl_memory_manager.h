@@ -551,6 +551,11 @@ extern "C" {
 #define SL_MEMORY_BLOCK_ALIGN_256_BYTES   256U    ///< 256 bytes alignment.
 #define SL_MEMORY_BLOCK_ALIGN_512_BYTES   512U    ///< 512 bytes alignment.
 
+/// Heap attributes.
+#define SL_MEMORY_HEAP_ALLOC_GENERAL_RAM  0x2   ///< General-purpose RAM.
+#define SL_MEMORY_HEAP_ALLOC_CPU_RAM      0x4   ///< RAM only accessed by the CPU.
+#define SL_MEMORY_HEAP_ALLOC_EXTERNAL_RAM 0x8   ///< External RAM.
+
 // ----------------------------------------------------------------------------
 // DATA TYPES
 
@@ -560,12 +565,9 @@ typedef enum {
   BLOCK_TYPE_SHORT_TERM = 1   ///< Short-term block type.
 } sl_memory_block_type_t;
 
-/// @brief Heap attributes.
-typedef enum {
-  SL_MEMORY_HEAP_ALLOC_GENERAL_RAM  = 0x2,  ///< General-purpose RAM.
-  SL_MEMORY_HEAP_ALLOC_CPU_RAM      = 0x4,  ///< RAM only accessed by the CPU.
-  SL_MEMORY_HEAP_ALLOC_EXTERNAL_RAM = 0x8   ///< External RAM.
-} sl_memory_block_attrib_t;
+/// @deprecated Use uint8_t directly.
+// Backward-compatible typedef for block attributes.
+typedef uint8_t sl_memory_block_attrib_t;
 
 // Forward declaration of sl_memory_heap_t
 typedef struct sl_memory_heap_t sl_memory_heap_t;
@@ -579,7 +581,7 @@ struct sl_memory_heap_t {
   uint32_t free_blocks_number;      ///< Number of free blocks in the heap.
   void *free_lt_list_head;          ///< Long-term free blocks list head pointer.
   void *free_st_list_head;          ///< Short-term free blocks list head pointer.
-  sl_memory_block_attrib_t attrib;  ///< Heap attributes.
+  uint8_t attrib;                   ///< Heap attributes.
   void *retention_control;          ///< Retention control handle.
   sl_memory_heap_t *next_handle;    ///< Pointer to next heap handle.
 };

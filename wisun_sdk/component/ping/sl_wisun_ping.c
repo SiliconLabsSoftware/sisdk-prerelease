@@ -258,8 +258,20 @@ sl_status_t sl_wisun_ping(const sockaddr_in6_t *const remote_addr,
   (void) osMessageQueueReset(_ping_resp_msg_queue);
 
   req = (sl_wisun_ping_info_t *) sl_malloc(sizeof(sl_wisun_ping_info_t));
+  if (!req) {
+    res = SL_STATUS_FAIL;
+    goto error_handler;
+  }
   resp = (sl_wisun_ping_info_t *) sl_malloc(sizeof(sl_wisun_ping_info_t));
+  if (!resp) {
+    res = SL_STATUS_FAIL;
+    goto error_handler;
+  }
   stat = (sl_wisun_ping_stat_t *) sl_malloc(sizeof(sl_wisun_ping_stat_t));
+  if (!stat) {
+    res = SL_STATUS_FAIL;
+    goto error_handler;
+  }
 
   // fill statistic
   stat->packet_count  = packet_count;
@@ -299,7 +311,8 @@ sl_status_t sl_wisun_ping(const sockaddr_in6_t *const remote_addr,
 
     if ((!_is_ping_evt_error(flags))
         && (flags & SL_WISUN_PING_STATUS_ABORT_REQUESTED)) {
-      return SL_STATUS_ABORT;
+      res = SL_STATUS_ABORT;
+      goto error_handler;
     }
 
     // Get count of queued messages
@@ -378,6 +391,7 @@ sl_status_t sl_wisun_ping(const sockaddr_in6_t *const remote_addr,
   }
   app_wisun_trace_util_destroy_ip_str(rem_ip_str);
 
+error_handler:
   // free memory
   sl_free(stat);
   sl_free(req);

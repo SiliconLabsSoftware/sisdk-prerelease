@@ -11,4 +11,5 @@ quality: experimental
 provides:
 - name: cs_acp_state
 - name: cs_acp_none
+- name: cs_acp_with_impl
 root_path: bluetooth_le_middleware

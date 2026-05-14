@@ -389,7 +389,7 @@ void sli_update_free_list_heads(sl_memory_heap_t *heap,
  ******************************************************************************/
 sl_status_t sli_memory_create_heap(void *base_addr,
                                    size_t size,
-                                   sl_memory_block_attrib_t attrib,
+                                   uint8_t attrib,
                                    sl_memory_heap_t *heap)
 {
   // Verify parameters.

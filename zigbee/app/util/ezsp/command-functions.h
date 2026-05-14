@@ -794,18 +794,6 @@ void sl_zigbee_ezsp_radio_get_scheduler_priorities(
   }
 }
 
-void sl_zigbee_ezsp_radio_set_scheduler_priorities(
-  sl_802154_radio_priorities_t *priorities)
-{
-  startCommand(SL_ZIGBEE_EZSP_RADIO_SET_SCHEDULER_PRIORITIES);
-  append_sl_802154_radio_priorities_t(priorities);
-  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
-  sli_zigbee_ezsp_set_last_status(sendStatus);
-  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
-    EZSP_ASH_TRACE("%s(): sendCommand() error: 0x%02X", __func__, sendStatus);
-  }
-}
-
 void sl_zigbee_ezsp_radio_get_scheduler_sliptime(
       uint32_t *slipTime)
 {
@@ -2141,6 +2129,18 @@ void sl_zigbee_ezsp_set_binding_remote_node_id(
   startCommand(SL_ZIGBEE_EZSP_SET_BINDING_REMOTE_NODE_ID);
   appendInt8u(index);
   appendInt16u(nodeId);
+  sl_zigbee_ezsp_status_t sendStatus = sendCommand();
+  sli_zigbee_ezsp_set_last_status(sendStatus);
+  if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {
+    EZSP_ASH_TRACE("%s(): sendCommand() error: 0x%02X", __func__, sendStatus);
+  }
+}
+
+void sl_zigbee_ezsp_clear_binding_table_on_leave(
+      bool clear)
+{
+  startCommand(SL_ZIGBEE_EZSP_CLEAR_BINDING_TABLE_ON_LEAVE);
+  appendInt8u(clear);
   sl_zigbee_ezsp_status_t sendStatus = sendCommand();
   sli_zigbee_ezsp_set_last_status(sendStatus);
   if (sendStatus == SL_ZIGBEE_EZSP_SUCCESS) {

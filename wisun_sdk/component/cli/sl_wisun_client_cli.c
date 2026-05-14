@@ -38,7 +38,7 @@
 #include "sl_cli.h"
 #include "sl_wisun_cli_core.h"
 #include "sl_mempool.h"
-#include "socket/socket.h"
+#include "sys/socket.h"
 
 #if defined(SL_CATALOG_WISUN_TCP_CLIENT_PRESENT)
 #include "sl_wisun_tcp_client.h"

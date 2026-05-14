@@ -31,7 +31,7 @@ component:
     instance: [example]
   - id: app_log
   - id: app_assert
-  - id: token_manager
+  - id: common_token_manager
 #------------Memory Protection Unit-------------------
   - id: mpu
 #-------------- Restriction rules -------------------

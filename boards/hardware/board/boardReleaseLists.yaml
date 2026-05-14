@@ -32,6 +32,7 @@ board_ref_ignore:
     - BRD8006
     - BRD8010
     - BRD8029
+    - BRD8049
 
 socket_boards:
     - BRD1020A

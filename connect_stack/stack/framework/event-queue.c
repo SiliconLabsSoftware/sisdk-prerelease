@@ -91,7 +91,7 @@ void emberCancelAllEvents(EventQueue *queue)
 static void printEvents(Event *events, bool *firstLoc)
 {
   for (; events != LIST_END; events = events->next) {
-    fprintf(stderr, "%s%s: %"PRIu32,
+    fprintf(stderr, "%s%s: %" PRIu32,
             *firstLoc ? "[" : " | ",
             (events->actions->name == NULL
              ? "?"

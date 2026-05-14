@@ -306,7 +306,7 @@ static int dhcp_send_reply(struct sockaddr_in6 *dest,
 
 static int dhcp_handle_request_fwd(uint8_t *req, int len, struct pktbuf *reply)
 {
-  struct pktbuf buf = { 0 };
+  struct pktbuf buf = { .use_ws_heap = true };
   uint8_t *opt_interface_id, *opt_relay;
   int32_t opt_interface_id_len, opt_relay_len;
   uint8_t linkaddr[16], peeraddr[16];
@@ -338,7 +338,7 @@ if (len < 33) {
     sl_wisun_trace_error("dhcp-fwd: missing relay option");
     return -1;
   }
-  pktbuf_init(&buf, NULL, 0, true);
+
   if (dhcp_handle_request(opt_relay, opt_relay_len, &buf) < 0) {
     pktbuf_free(&buf);
     return -1;
@@ -420,7 +420,7 @@ static int dhcp_handle_request(uint8_t *req, int len, struct pktbuf *reply)
 void sl_wisun_br_dhcpv6_server_on_recv(uint8_t *buffer, ssize_t length, in6_addr_t peer_address, in_port_t remote_port)
 {
   char src_addr_str[MAX_IPV6_STRING_LEN_WITH_TRAILING_NULL];
-  struct pktbuf buf = { 0 };
+  struct pktbuf buf = { .use_ws_heap = true };
 
   sockaddr_in6_t src_addr = {
     .sin6_family = AF_INET6,
@@ -429,7 +429,6 @@ void sl_wisun_br_dhcpv6_server_on_recv(uint8_t *buffer, ssize_t length, in6_addr
     .sin6_addr = IN6ADDR_ANY_INIT,
     .sin6_scope_id = 0,
   };
-  pktbuf_init(&buf, NULL, 0, true);
 
   ip6tos(peer_address.address, src_addr_str);
   sl_wisun_trace_info("dhcp: received msg from %s", src_addr_str);

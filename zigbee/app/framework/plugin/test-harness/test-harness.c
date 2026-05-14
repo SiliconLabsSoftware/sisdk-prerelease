@@ -780,7 +780,8 @@ void sl_zigbee_af_test_harness_wd_trigger_command(sl_cli_command_arg_t *argument
 }
 #endif
 
-#ifndef SL_CATALOG_ZIGBEE_APS_LINK_KEY_AUTHORIZATION_PRESENT
+#if !defined(SL_CATALOG_ZIGBEE_APS_LINK_KEY_AUTHORIZATION_PRESENT) && \
+    !defined(SL_CATALOG_ZIGBEE_DIRECT_ZDD_PRESENT)
 bool sl_zigbee_af_cluster_security_custom_cb(sl_zigbee_af_profile_id_t profileId,
                                              sl_zigbee_af_cluster_id_t clusterId,
                                              bool incoming,
@@ -792,7 +793,7 @@ bool sl_zigbee_af_cluster_security_custom_cb(sl_zigbee_af_profile_id_t profileId
   return (clusterIdRequiringApsSecurity != NULL_CLUSTER_ID
           && clusterId == clusterIdRequiringApsSecurity);
 }
-#endif // SL_CATALOG_ZIGBEE_APS_LINK_KEY_AUTHORIZATION_PRESENT
+#endif // !SL_CATALOG_ZIGBEE_APS_LINK_KEY_AUTHORIZATION_PRESENT && !SL_CATALOG_ZIGBEE_DIRECT_ZDD_PRESENT
 
 void sl_zigbee_af_test_harness_price_send_new_fields_command(sl_cli_command_arg_t *arguments)
 {

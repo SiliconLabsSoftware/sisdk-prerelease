@@ -123,7 +123,8 @@ SL_ENUM_GENERIC(sl_hal_system_hfrcodpll_freq_t, uint32_t) {
   SL_HAL_SYSTEM_HFRCODPLL_FREQ_4M0Hz            = 4000000U,         /**< 4MHz RC band.  */
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
   SL_HAL_SYSTEM_HFRCODPLL_FREQ_5M0Hz            = 5000000U,         /**< 5MHz RC band.  */
   SL_HAL_SYSTEM_HFRCODPLL_FREQ_10M0Hz           = 10000000U,        /**< 10MHz RC band. */
   SL_HAL_SYSTEM_HFRCODPLL_FREQ_20M0Hz           = 20000000U,        /**< 20MHz RC band. */
@@ -230,6 +231,9 @@ SL_ENUM_GENERIC(sl_hal_system_part_family_t, uint32_t) {
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
   SL_HAL_SYSTEM_PART_FAMILY_MIGHTY_2B = DEVINFO_PART_FAMILY_MG | (31 << _DEVINFO_PART_FAMILYNUM_SHIFT),  ///< EFR32 Mighty Gecko Series 2 Config 11 Value Device Family
   SL_HAL_SYSTEM_PART_FAMILY_BLUE_2B = DEVINFO_PART_FAMILY_BG | (31 << _DEVINFO_PART_FAMILYNUM_SHIFT),   ///< EFR32 Blue Gecko Series 2 Config 11 Value Device Family
+#endif
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
+  SL_HAL_SYSTEM_PART_FAMILY_MIGHTY_2E = DEVINFO_PART_FAMILY_MG | (34 << _DEVINFO_PART_FAMILYNUM_SHIFT),     ///< EFR32 XG Series 2 Config 14 (LionU) Value Device Family
 #endif
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)
   SL_HAL_SYSTEM_PART_FAMILY_FLEX_2D = DEVINFO_PART_FAMILY_FG | (33 << _DEVINFO_PART_FAMILYNUM_SHIFT),  ///< EFR32 Flex Gecko Series 2 Config 13 Value Device Family

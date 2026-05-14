@@ -4254,7 +4254,7 @@ void sli_bt_cli_coex_get_counters(sl_cli_command_arg_t *arguments)
     print_hex(counters,counters_len);
     printf("\n");
 }
-#ifdef SL_CATALOG_BLUETOOTH_CS_SUPPORT_PRESENT
+#ifdef SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT
 void sli_bt_cli_cs_security_enable(sl_cli_command_arg_t *arguments)
 {
 
@@ -4652,8 +4652,8 @@ void sli_bt_cli_cs_handover_remove_procedure(sl_cli_command_arg_t *arguments)
     printf("rsp_cs_handover_remove_procedure 0x%lx ",status);
     printf("\n");
 }
-#endif // SL_CATALOG_BLUETOOTH_CS_SUPPORT_PRESENT
-#ifdef SL_CATALOG_BLUETOOTH_CS_SUPPORT_PRESENT
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT
+#ifdef SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT
 void sli_bt_cli_cs_test_start(sl_cli_command_arg_t *arguments)
 {
 
@@ -4735,7 +4735,7 @@ void sli_bt_cli_cs_test_end(sl_cli_command_arg_t *arguments)
     printf("rsp_cs_test_end 0x%lx ",status);
     printf("\n");
 }
-#endif // SL_CATALOG_BLUETOOTH_CS_SUPPORT_PRESENT
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT
 void sli_bt_cli_l2cap_open_le_channel(sl_cli_command_arg_t *arguments)
 {
 

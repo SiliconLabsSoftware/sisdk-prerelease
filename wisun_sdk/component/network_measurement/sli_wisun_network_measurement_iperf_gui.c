@@ -48,7 +48,6 @@
 #include "sl_wisun_network_measurement_config.h"
 #include "sl_display.h"
 #include "sl_gui.h"
-#include "socket/socket.h"
 #include "sl_wisun_ping.h"
 #include "sl_wisun_network_measurement_stat.h"
 // -----------------------------------------------------------------------------

@@ -45,7 +45,6 @@
 #include "sl_display.h"
 #include "sl_gui.h"
 #include "sl_string.h"
-#include "socket/socket.h"
 #include "sl_wisun_ping.h"
 #include "silabs_wisun_logo.h"
 // -----------------------------------------------------------------------------

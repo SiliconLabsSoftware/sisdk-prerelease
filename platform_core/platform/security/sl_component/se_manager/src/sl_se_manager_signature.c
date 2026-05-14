@@ -160,6 +160,65 @@ sl_status_t sl_se_ecc_sign(sl_se_command_context_t *cmd_ctx,
   return sli_se_execute_and_wait(cmd_ctx);
 }
 
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
+/***************************************************************************//**
+ * Deterministic ECDSA signature generation (RFC 6979).
+ ******************************************************************************/
+sl_status_t sl_se_ecc_sign_deterministic(sl_se_command_context_t *cmd_ctx,
+                                         const sl_se_key_descriptor_t *key,
+                                         sl_se_hash_type_t hash_alg,
+                                         const unsigned char *message,
+                                         size_t message_len,
+                                         unsigned char *signature,
+                                         size_t signature_len)
+{
+  if (cmd_ctx == NULL || key == NULL || signature == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  if (message == NULL && message_len != 0) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  // Deterministic ECDSA is not supported for EdDSA keys
+  if ((key->type & SL_SE_KEY_TYPE_ALGORITHM_MASK) == SL_SE_KEY_TYPE_ECC_EDDSA) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
+  sl_status_t status;
+  uint32_t command_word = SLI_SE_COMMAND_SIGNATURE_SIGN;
+  uint32_t hash_option = 0;
+
+  status = hash_alg_to_option(hash_alg, &hash_option);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+  command_word |= hash_option;
+
+  // Add deterministic ECDSA option
+  command_word |= SLI_SE_COMMAND_OPTION_DETERMINISTIC_ECDSA;
+
+  // Setup SE command and parameters
+  sli_se_command_init(cmd_ctx, command_word);
+  // Add key parameters to command
+  sli_add_key_parameters(cmd_ctx, key, status);
+  // Message size (number of bytes)
+  sli_se_mailbox_command_add_parameter(se_cmd, message_len);
+  // Add key metadata block to command
+  sli_add_key_metadata(cmd_ctx, key, status);
+  // Add key input block to command
+  sli_add_key_input(cmd_ctx, key, status);
+
+  volatile sli_se_datatransfer_t message_buffer = SLI_SE_DATATRANSFER_DEFAULT(message, message_len);
+  sli_se_mailbox_command_add_input(se_cmd, &message_buffer);
+
+  volatile sli_se_datatransfer_t signature_buffer = SLI_SE_DATATRANSFER_DEFAULT(signature, signature_len);
+  sli_se_mailbox_command_add_output(se_cmd, &signature_buffer);
+
+  return sli_se_execute_and_wait(cmd_ctx);
+}
+#endif // _SILICON_LABS_32B_SERIES_2_CONFIG_11
+
 /***************************************************************************//**
  * ECC signature verification.
  ******************************************************************************/

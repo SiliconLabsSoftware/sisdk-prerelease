@@ -85,7 +85,7 @@
 static sl_interrupt_manager_irq_handler_t vector_table_ram[TOTAL_INTERRUPTS] __attribute__((aligned(VECTOR_TABLE_ALIGNMENT) )) VECTOR_TABLE_SECTION;
 #elif defined(__ICCARM__)
 #pragma data_alignment = VECTOR_TABLE_ALIGNMENT
-static sl_interrupt_manager_irq_handler_t vector_table_ram[TOTAL_INTERRUPTS] VECTOR_TABLE_SECTION;
+VECTOR_TABLE_SECTION static sl_interrupt_manager_irq_handler_t vector_table_ram[TOTAL_INTERRUPTS];
 #endif /* defined(__GNUC__) */
 
 #if defined(SL_INTERRUPT_MANAGER_ENABLE_HOOKS)
@@ -96,7 +96,7 @@ static sl_interrupt_manager_irq_handler_t vector_table_ram[TOTAL_INTERRUPTS] VEC
 static sl_interrupt_manager_irq_handler_t wrapped_vector_table[TOTAL_INTERRUPTS] __attribute__((aligned(VECTOR_TABLE_ALIGNMENT) )) VECTOR_TABLE_SECTION;
 #elif defined(__ICCARM__)
 #pragma data_alignment = VECTOR_TABLE_ALIGNMENT
-static sl_interrupt_manager_irq_handler_t wrapped_vector_table[TOTAL_INTERRUPTS] VECTOR_TABLE_SECTION;
+VECTOR_TABLE_SECTION static sl_interrupt_manager_irq_handler_t wrapped_vector_table[TOTAL_INTERRUPTS];
 #endif /* defined(__GNUC__) */
 #endif /* SL_INTERRUPT_MANAGER_ENABLE_HOOKS */
 

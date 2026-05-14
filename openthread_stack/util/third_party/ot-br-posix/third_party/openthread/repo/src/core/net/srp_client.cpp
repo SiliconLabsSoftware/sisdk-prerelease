@@ -2050,6 +2050,8 @@ void Client::UpdateState(void)
         OT_FALL_THROUGH;
 
     case kToAdd:
+        OT_FALL_THROUGH;
+
     case kToRefresh:
         // Make sure we have at least one service and at least one
         // host address, otherwise no need to send SRP update message.

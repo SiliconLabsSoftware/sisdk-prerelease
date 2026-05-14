@@ -33,6 +33,10 @@
 #include "sl_memory_manager_region_config.h"
 #include "sl_component_catalog.h"
 
+#if defined(SL_CATALOG_MEMORY_MANAGER_PRESENT)
+#include "sli_memory_manager.h"
+#endif
+
 // Prevent's compilation errors when building in simulation.
 #ifndef   __USED
   #define __USED
@@ -63,12 +67,21 @@ __root char sl_stack[SL_STACK_SIZE] @ ".stack";
 
   #pragma section=IAR_HEAP_BLOCK_NAME
 
+#if defined(SLI_MEMORY_MANAGER_STACK_IN_HEAP)
+#define IAR_STACK_BLOCK_NAME    "CSTACK"
+  #pragma section=IAR_STACK_BLOCK_NAME
+#endif
+
 #endif
 
 #if defined(SL_CATALOG_MEMORY_MANAGER_ITCM_PRESENT) && !defined(SL_SE_MAILBOX_DISABLE)
 extern uint32_t __itcm_size__;
+#if defined(__GNUC__)
 extern uint32_t __itcm_used__;
-// Must match linker-script constants ITCM_BLOCK_SIZE__ and ITCM_MIN_RESERVED_SIZE__.
+#elif defined(__ICCARM__)
+#define IAR_ITCM_BLOCK_NAME   "application_itcm"
+  #pragma section=IAR_ITCM_BLOCK_NAME
+#endif
 #define SLI_ITCM_BLOCK_SIZE          0x10000u
 #define SLI_ITCM_MIN_RESERVED_SIZE   0x20000u
 #endif
@@ -161,6 +174,10 @@ sl_memory_region_t sl_memory_get_dtcm_heap_region(void)
 #elif defined(__ICCARM__)
   region.addr = __section_begin(IAR_DTCM_BLOCK_NAME);
   region.size = __section_size(IAR_DTCM_BLOCK_NAME);
+
+#if defined(SLI_MEMORY_MANAGER_STACK_IN_HEAP_DTCM)
+  region.size += __section_size(IAR_STACK_BLOCK_NAME);
+#endif
 #endif
 
   return region;
@@ -168,7 +185,7 @@ sl_memory_region_t sl_memory_get_dtcm_heap_region(void)
 #endif
 
 /***************************************************************************//**
- * Initializes the heap region.
+ * Initializes the general-purpose heap region.
  ******************************************************************************/
 void sli_memory_initialize_heap_region(void)
 {
@@ -183,8 +200,13 @@ void sli_memory_initialize_heap_region(void)
 #if defined(SL_CATALOG_MEMORY_MANAGER_ITCM_PRESENT) && !defined(SL_SE_MAILBOX_DISABLE)
   // ITCM is configured in 64 KB blocks (minimum 2 blocks = 128 KB).
   // Only DMEM beyond that hardware-rounded reservation is reclaimable.
+#if defined(__GNUC__)
+  uintptr_t itcm_used     = (uintptr_t)&__itcm_used__;
+#elif defined(__ICCARM__)
+  uintptr_t itcm_used     = (uintptr_t)__section_size(IAR_ITCM_BLOCK_NAME);
+#endif
   uintptr_t itcm_align    = SLI_ITCM_BLOCK_SIZE - 1u;
-  uintptr_t itcm_reserved = ((uintptr_t)&__itcm_used__ + itcm_align) & ~itcm_align;
+  uintptr_t itcm_reserved = (itcm_used + itcm_align) & ~itcm_align;
 
   // Ensure minimum fixed size of 128KB for ITCM.
   if (itcm_reserved < SLI_ITCM_MIN_RESERVED_SIZE) {

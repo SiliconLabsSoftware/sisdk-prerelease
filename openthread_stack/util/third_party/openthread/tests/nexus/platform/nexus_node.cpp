@@ -28,8 +28,47 @@
 
 #include "nexus_node.hpp"
 
+#include "nexus_utils.hpp"
+
 namespace ot {
 namespace Nexus {
+
+const char *Node::GetExtendedRoleString(void) const
+{
+    const char     *roleStr;
+    Mle::DeviceRole role = Get<Mle::Mle>().GetRole();
+
+    switch (role)
+    {
+    case Mle::kRoleDisabled:
+        roleStr = "Disabled";
+        break;
+    case Mle::kRoleDetached:
+        roleStr = "Detached";
+        break;
+    case Mle::kRoleLeader:
+        roleStr = "Leader";
+        break;
+    case Mle::kRoleRouter:
+        roleStr = "Router";
+        break;
+    case Mle::kRoleChild:
+        if (Get<Mle::Mle>().IsFullThreadDevice())
+        {
+            roleStr = Get<Mle::Mle>().IsRouterRoleAllowed() ? "REED" : "FED";
+        }
+        else
+        {
+            roleStr = Get<Mle::Mle>().IsRxOnWhenIdle() ? "MED" : "SED";
+        }
+        break;
+    default:
+        roleStr = "Unknown";
+        break;
+    }
+
+    return roleStr;
+}
 
 void Node::Reset(void)
 {
@@ -54,7 +93,7 @@ void Node::Reset(void)
     instance->SetId(id);
     instance->AfterInit();
 
-    otIp6SetReceiveCallback(instance, Node::HandleIp6Receive, this);
+    instance->Get<Ip6::Ip6>().SetReceiveCallback(Node::HandleIp6Receive, this);
 }
 
 void Node::Form(void)
@@ -132,9 +171,6 @@ void Node::SendEchoRequest(const Ip6::Address &aDestination,
     {
         messageInfo.SetSockAddr(*aSrcAddress);
     }
-
-    Log("Sending Echo Request from Node %lu (%s) to %s (payload-size:%u)", ToUlong(GetId()), GetName(),
-        aDestination.ToString().AsCString(), aPayloadSize);
 
     SuccessOrQuit(Get<Ip6::Icmp>().SendEchoRequest(*message, messageInfo, aIdentifier));
 }
@@ -250,6 +286,18 @@ bool Node::Matches(const Ip6::Address &aAddress, AddressNetif aNetif) const
     }
 
     return matches;
+}
+
+void AllowLinkBetween(Node &aFirstNode, Node &aSecondNode)
+{
+    aFirstNode.AllowList(aSecondNode);
+    aSecondNode.AllowList(aFirstNode);
+}
+
+void UnallowLinkBetween(Node &aFirstNode, Node &aSecondNode)
+{
+    aFirstNode.UnallowList(aSecondNode);
+    aSecondNode.UnallowList(aFirstNode);
 }
 
 } // namespace Nexus

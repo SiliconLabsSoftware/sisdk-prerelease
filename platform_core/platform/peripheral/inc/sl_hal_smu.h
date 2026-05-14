@@ -820,6 +820,58 @@ typedef struct {
   bool sl_hal_smu_privileged_eusart0      : 1;  ///< Privileged access enabler for EUSART0
   bool sl_hal_smu_privileged_semailbox    : 1;  ///< Privileged access enabler for SEMAILBOX
   bool sl_hal_smu_privileged_ahbradio     : 1;  ///< Privileged access enabler for AHBRADIO
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
+  // LionU
+  bool sl_hal_smu_privileged_reserved0    : 1;
+  bool sl_hal_smu_privileged_emu          : 1;
+  bool sl_hal_smu_privileged_cmu          : 1;
+  bool sl_hal_smu_privileged_hfxo0        : 1;
+  bool sl_hal_smu_privileged_hfrco0       : 1;
+  bool sl_hal_smu_privileged_fsrco        : 1;
+  bool sl_hal_smu_privileged_dpll0        : 1;
+  bool sl_hal_smu_privileged_lfxo         : 1;
+  bool sl_hal_smu_privileged_lfrco        : 1;
+  bool sl_hal_smu_privileged_ulfrco       : 1;
+  bool sl_hal_smu_privileged_msc          : 1;
+  bool sl_hal_smu_privileged_icache0      : 1;
+  bool sl_hal_smu_privileged_prs          : 1;
+  bool sl_hal_smu_privileged_gpio         : 1;
+  bool sl_hal_smu_privileged_ldma         : 1;
+  bool sl_hal_smu_privileged_ldmaxbar     : 1;
+  bool sl_hal_smu_privileged_timer0       : 1;
+  bool sl_hal_smu_privileged_timer1       : 1;
+  bool sl_hal_smu_privileged_timer2       : 1;
+  bool sl_hal_smu_privileged_timer3       : 1;
+  bool sl_hal_smu_privileged_timer4       : 1;
+  bool sl_hal_smu_privileged_usart0       : 1;
+  bool sl_hal_smu_privileged_usart1       : 1;
+  bool sl_hal_smu_privileged_burtc        : 1;
+  bool sl_hal_smu_privileged_i2c1         : 1;
+  bool sl_hal_smu_privileged_chiptestctrl : 1;
+  bool sl_hal_smu_privileged_syscfgcfgns  : 1;
+  bool sl_hal_smu_privileged_syscfg       : 1;
+  bool sl_hal_smu_privileged_buram        : 1;
+  bool sl_hal_smu_privileged_ifadcdebug   : 1;
+  bool sl_hal_smu_privileged_gpcrc        : 1;
+  bool sl_hal_smu_privileged_dcdc         : 1;
+  bool sl_hal_smu_privileged_pdm          : 1;
+  bool sl_hal_smu_privileged_rfsense      : 1;
+  bool sl_hal_smu_privileged_etampdet     : 1;
+  bool sl_hal_smu_privileged_dmem         : 1;
+  bool sl_hal_smu_privileged_eusart1      : 1;
+  bool sl_hal_smu_privileged_radioaes     : 1;
+  bool sl_hal_smu_privileged_smu          : 1;
+  bool sl_hal_smu_privileged_smucfgns     : 1;
+  bool sl_hal_smu_privileged_rtcc         : 1;
+  bool sl_hal_smu_privileged_wdog0        : 1;
+  bool sl_hal_smu_privileged_letimer0     : 1;
+  bool sl_hal_smu_privileged_iadc0        : 1;
+  bool sl_hal_smu_privileged_acmp0        : 1;
+  bool sl_hal_smu_privileged_i2c0         : 1;
+  bool sl_hal_smu_privileged_amuxcp0      : 1;
+  bool sl_hal_smu_privileged_eusart0      : 1;
+  bool sl_hal_smu_privileged_semailbox    : 1;
+  bool sl_hal_smu_privileged_ahbradio     : 1;
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
   bool sl_hal_smu_privileged_reserved0    : 1;  ///< Reserved privileged access enabler
   bool sl_hal_smu_privileged_emu          : 1;  ///< Privileged access enabler for EMU

@@ -293,6 +293,10 @@ extern "C" {
   #define SLI_SE_COMMAND_OPTION_HASH_SHA224       0x00000300UL
 /// Use SHA256 as hash algorithm
   #define SLI_SE_COMMAND_OPTION_HASH_SHA256       0x00000400UL
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
+/// Deterministic ECDSA: SE command word option1 (low byte).
+  #define SLI_SE_COMMAND_OPTION_DETERMINISTIC_ECDSA  0x00000001UL
+#endif // _SILICON_LABS_32B_SERIES_2_CONFIG_11
 #if defined(_SILICON_LABS_32B_SERIES_3)
 /// Use SHA1 as hash algorithm for HMAC streaming operation
   #define SLI_SE_COMMAND_OPTION_HMAC_HASH_SHA1      0x00000700UL

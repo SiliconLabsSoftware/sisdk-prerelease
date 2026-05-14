@@ -327,7 +327,7 @@ typedef enum {
   /** Vddio2 / 4 */
   iadcPosInputVddio2    = (_IADC_SCAN_PORTPOS_SUPPLY << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT))
                           | 3,
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)|| defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
   /** Vbat /4 */
   iadcPosInputVbat      = (_IADC_SCAN_PORTPOS_SUPPLY << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT))
                           | 2,
@@ -762,7 +762,7 @@ typedef enum {
   /** Data valid level is 4 before requesting DMA transfer */
   iadcFifoCfgDvl4  = _IADC_SCANFIFOCFG_DVL_VALID4,
 
-#if !(defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9))
+#if !(defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14))
 #if _SILICON_LABS_32B_SERIES_2_CONFIG > 2
   /** Data valid level is 5 before requesting DMA transfer */
   iadcFifoCfgDvl5  = _IADC_SCANFIFOCFG_DVL_VALID5,

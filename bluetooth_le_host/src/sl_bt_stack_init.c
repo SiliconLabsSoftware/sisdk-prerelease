@@ -190,7 +190,6 @@ extern sli_bgapi_component_init_func_t sli_bt_local_privacy_adv_timers_init;
 extern sli_bgapi_component_stop_func_t sli_bt_local_privacy_adv_timers_stop;
 extern sli_bgapi_component_deinit_func_t sli_bt_local_privacy_adv_timers_deinit;
 extern sli_bgapi_component_start_func_t sli_bt_channel_sounding_start;
-extern sli_bgapi_component_init_func_t sli_bt_channel_sounding_test_init;
 extern sli_bgapi_component_init_func_t sli_bt_l2cap_init;
 extern sli_bgapi_component_deinit_func_t sli_bt_l2cap_deinit;
 extern sli_bgapi_component_init_func_t sli_bt_connection_init;
@@ -277,9 +276,6 @@ static const sli_bgapi_component_init_info_t bt_component_init_info[] = {
 #endif
 #if defined(SLI_BT_LOCAL_PRIVACY_ADV_TIMERS_PRESENT)
   { sli_bt_local_privacy_adv_timers_init, &sli_bt_advertiser_config },
-#endif
-#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT)
-  { sli_bt_channel_sounding_test_init, NULL },
 #endif
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_L2CAP_PRESENT)
   { sli_bt_l2cap_init, &sli_bt_l2cap_config },

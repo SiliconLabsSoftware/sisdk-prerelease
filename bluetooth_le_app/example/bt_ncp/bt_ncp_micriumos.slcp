@@ -7,7 +7,7 @@ description: >
   connection. NCP mode makes it possible to run your application on a host
   controller or PC.
 category: Bluetooth Examples
-quality: experimental
+quality: production
 
 filter:
   - name: "Wireless Technology"

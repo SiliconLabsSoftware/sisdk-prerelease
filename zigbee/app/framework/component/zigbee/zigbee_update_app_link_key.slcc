@@ -1,5 +1,5 @@
 package: zigbee
-description: This component provides the functionality to update the application link key of a device on a Zigbee R21+ network.
+description: This component provides the functionality to update the application link key of a device on a Zigbee R21+ network. This component is only applicable for a non-trust center device.
 label: Update Application Link Key
 quality: production
 id: zigbee_update_app_link_key

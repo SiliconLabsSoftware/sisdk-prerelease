@@ -3,7 +3,7 @@
  * @brief internal wrappers for 'stack-info' ipc commands
  *******************************************************************************
  * # License
- * <b>Copyright 2025 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc. Your use of this
@@ -35,11 +35,6 @@ void sli_802154_stack_radio_get_scheduler_priorities_process_ipc_command(sli_zig
 void sli_802154_stack_radio_get_scheduler_sliptime_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
 {
   msg->data.radio_get_scheduler_sliptime.response.result = sli_802154_stack_radio_get_scheduler_sliptime(&msg->data.radio_get_scheduler_sliptime.request.slipTime);
-}
-
-void sli_802154_stack_radio_set_scheduler_priorities_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
-{
-  msg->data.radio_set_scheduler_priorities.response.result = sli_802154_stack_radio_set_scheduler_priorities(&msg->data.radio_set_scheduler_priorities.request.priorities);
 }
 
 void sli_802154_stack_radio_set_scheduler_sliptime_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
@@ -476,19 +471,6 @@ sl_status_t sl_802154_radio_get_scheduler_sliptime(uint32_t *slipTime)
   }
 
   return msg.data.radio_get_scheduler_sliptime.response.result;
-}
-
-sl_status_t sl_802154_radio_set_scheduler_priorities(const sl_802154_radio_priorities_t *priorities)
-{
-  sli_zigbee_ipc_cmd_t msg = { 0, };
-
-  if (priorities != NULL) {
-    msg.data.radio_set_scheduler_priorities.request.priorities = *priorities;
-  }
-
-  sli_zigbee_send_ipc_cmd(sli_802154_stack_radio_set_scheduler_priorities_process_ipc_command, &msg);
-
-  return msg.data.radio_set_scheduler_priorities.response.result;
 }
 
 sl_status_t sl_802154_radio_set_scheduler_sliptime(uint32_t slipTime)
@@ -1065,6 +1047,7 @@ void sl_zigbee_read_and_clear_counters(uint16_t *counter_array,
 
   if (len > SL_ZIGBEE_COUNTER_TYPE_COUNT) {
     assert(false); // "vector counter_array length exceeds expected maximum
+    return;
   }
 
   memmove(msg.data.read_and_clear_counters.request.counter_array, counter_array, sizeof(uint16_t) * len);
@@ -1073,6 +1056,7 @@ void sl_zigbee_read_and_clear_counters(uint16_t *counter_array,
 
   if (len > SL_ZIGBEE_COUNTER_TYPE_COUNT) {
     assert(false); // "vector counter_array length exceeds expected maximum
+    return;
   }
 
   memmove(counter_array, msg.data.read_and_clear_counters.request.counter_array, sizeof(uint16_t) * len);
@@ -1085,6 +1069,7 @@ void sl_zigbee_read_counters(uint16_t *counter_array,
 
   if (len > SL_ZIGBEE_COUNTER_TYPE_COUNT) {
     assert(false); // "vector counter_array length exceeds expected maximum
+    return;
   }
 
   memmove(msg.data.read_counters.request.counter_array, counter_array, sizeof(uint16_t) * len);
@@ -1093,6 +1078,7 @@ void sl_zigbee_read_counters(uint16_t *counter_array,
 
   if (len > SL_ZIGBEE_COUNTER_TYPE_COUNT) {
     assert(false); // "vector counter_array length exceeds expected maximum
+    return;
   }
 
   memmove(counter_array, msg.data.read_counters.request.counter_array, sizeof(uint16_t) * len);

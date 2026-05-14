@@ -27,12 +27,16 @@
  */
 
 #include "nexus_core.hpp"
+#include "nexus_sim.hpp"
 
 #include <cstdio>
 #include <cstdlib>
 
 #include "mac_frame.h"
 #include "nexus_node.hpp"
+#include "nexus_radio_model.hpp"
+#include "thread/child_table.hpp"
+#include "thread/mle.hpp"
 
 namespace ot {
 namespace Nexus {
@@ -332,7 +336,60 @@ void Core::AddOmrPrefixTestVar(const char *aName, Node &aNode)
 #endif
 }
 
-Core::~Core(void) { sInUse = false; }
+Core::~Core(void)
+{
+    while (!mNodes.IsEmpty())
+    {
+        Node *node = mNodes.GetHead();
+
+        UpdateActiveInstance(&node->GetInstance());
+        mNodes.Pop();
+    }
+
+    UpdateActiveInstance(nullptr);
+    sInUse = false;
+}
+
+void Core::NotifyHeartbeat(void)
+{
+    for (Observer &observer : mObservers)
+    {
+        observer.OnHeartbeat(mNow);
+    }
+}
+
+void Core::NotifyDumpState(void)
+{
+    for (Observer &observer : mObservers)
+    {
+        observer.DumpState();
+    }
+}
+
+void Core::SetNodeEnabled(uint32_t aNodeId, bool aEnabled)
+{
+    Node *node = FindNodeById(aNodeId);
+
+    if (node != nullptr)
+    {
+        Log("Core::SetNodeEnabled: Node %u found. Setting Thread enabled=%d", aNodeId, aEnabled);
+
+        if (!aEnabled)
+        {
+            node->Get<ThreadNetif>().Down();
+            node->Get<Mle::Mle>().Stop();
+        }
+        else
+        {
+            node->Get<ThreadNetif>().Up();
+            SuccessOrQuit(node->Get<Mle::Mle>().Start());
+        }
+    }
+}
+
+Node *Core::FindNodeById(uint32_t aNodeId) { return mNodes.FindMatching(aNodeId); }
+
+Node *Core::FindNodeByExtAddress(const Mac::ExtAddress &aExtAddress) { return mNodes.FindMatching(aExtAddress); }
 
 Node &Core::CreateNode(void)
 {
@@ -359,9 +416,195 @@ Node &Core::CreateNode(void)
 
     node->GetInstance().AfterInit();
 
-    otIp6SetReceiveCallback(&node->GetInstance(), Node::HandleIp6Receive, node);
+    node->Get<Ip6::Ip6>().SetReceiveCallback(Node::HandleIp6Receive, node);
+
+    node->Get<NeighborTable>().RegisterCallback(&Core::HandleNeighborTableChanged);
+    SuccessOrQuit(node->Get<Notifier>().RegisterCallback(&Core::HandleStateChanged, node));
+
+    for (Observer &observer : mObservers)
+    {
+        observer.OnNodeStateChanged(node);
+    }
 
     return *node;
+}
+
+void Core::HandleNeighborTableChanged(otNeighborTableEvent aEvent, const otNeighborTableEntryInfo *aInfo)
+{
+    NeighborTable::Event event = static_cast<NeighborTable::Event>(aEvent);
+
+    Core    &core     = Core::Get();
+    uint32_t srcId    = 0;
+    uint32_t dstId    = 0;
+    bool     foundSrc = false;
+    bool     foundDst = false;
+    bool     isActive;
+
+    const Mac::ExtAddress *extAddr = nullptr;
+
+    VerifyOrExit(!core.mObservers.IsEmpty());
+
+    Log("HandleNeighborTableChanged: Event %d", event);
+
+    {
+        Node &srcNode = Node::From(aInfo->mInstance);
+
+        srcId    = srcNode.GetId();
+        foundSrc = true;
+    }
+
+    switch (event)
+    {
+    case NeighborTable::kChildAdded:
+    case NeighborTable::kChildRemoved:
+        extAddr  = &AsCoreType(&aInfo->mInfo.mChild.mExtAddress);
+        isActive = (event == NeighborTable::kChildAdded);
+
+        if (event == NeighborTable::kChildRemoved)
+        {
+            Instance &instance = *static_cast<Instance *>(aInfo->mInstance);
+
+            if (instance.Get<RouterTable>().FindRouter(*extAddr) != nullptr)
+            {
+                Log("Suppressing CHILD_REMOVED event because neighbor is a valid router");
+                ExitNow();
+            }
+        }
+        break;
+
+    case NeighborTable::kRouterAdded:
+    case NeighborTable::kRouterRemoved:
+        extAddr  = &AsCoreType(&aInfo->mInfo.mRouter.mExtAddress);
+        isActive = (event == NeighborTable::kRouterAdded);
+        break;
+
+    default:
+        break;
+    }
+
+    if (extAddr != nullptr)
+    {
+        Node *node = core.GetNodes().FindMatching(*extAddr);
+
+        if (node != nullptr)
+        {
+            dstId    = node->GetInstance().GetId();
+            foundDst = true;
+        }
+    }
+
+    if (foundSrc && foundDst)
+    {
+        for (Observer &observer : core.mObservers)
+        {
+            observer.OnLinkUpdate(srcId, dstId, isActive);
+        }
+    }
+    else
+    {
+        Log("HandleNeighborTableChanged: Failed to find srcId or dstId. foundSrc: %d, foundDst: %d", foundSrc,
+            foundDst);
+    }
+
+exit:
+    return;
+}
+
+void Core::HandleStateChanged(otChangedFlags aFlags, void *aContext)
+{
+    OT_UNUSED_VARIABLE(aFlags);
+
+    Core &core = Core::Get();
+    Node *node = static_cast<Node *>(aContext);
+
+    VerifyOrExit(!core.mObservers.IsEmpty() && node != nullptr);
+
+    for (Observer &observer : core.mObservers)
+    {
+        observer.OnNodeStateChanged(node);
+    }
+
+    // Decoupled from flags to capture SED parent changes
+    switch (node->Get<Mle::Mle>().GetRole())
+    {
+    case Mle::kRoleChild:
+    {
+        Router::Info parentInfo;
+
+        if (node->Get<Mle::Mle>().GetParentInfo(parentInfo) == kErrorNone)
+        {
+            uint32_t srcId  = node->GetInstance().GetId();
+            uint32_t dstId  = 0xffff;
+            Node    *rxNode = core.mNodes.FindMatching(AsCoreType(&parentInfo.mExtAddress));
+
+            if (rxNode != nullptr)
+            {
+                dstId = rxNode->GetInstance().GetId();
+            }
+
+            if (dstId != 0xffff && dstId != node->GetLastParentId())
+            {
+                if (node->GetLastParentId() != 0xffff)
+                {
+                    for (Observer &observer : core.mObservers)
+                    {
+                        observer.OnLinkUpdate(srcId, node->GetLastParentId(), false);
+                    }
+                }
+                node->SetLastParentId(dstId);
+                for (Observer &observer : core.mObservers)
+                {
+                    observer.OnLinkUpdate(srcId, dstId, true);
+                }
+            }
+        }
+        break;
+    }
+    case Mle::kRoleDetached:
+    {
+        uint32_t srcId = node->GetInstance().GetId();
+
+        for (Node &rxNode : core.mNodes)
+        {
+            if (&rxNode == node)
+            {
+                continue;
+            }
+
+            if (node->Get<NeighborTable>().FindNeighbor(rxNode.Get<Mac::Mac>().GetExtAddress(),
+                                                        Neighbor::kInStateValid) != nullptr)
+            {
+                uint32_t dstId = rxNode.GetInstance().GetId();
+
+                for (Observer &observer : core.mObservers)
+                {
+                    observer.OnLinkUpdate(srcId, dstId, false);
+                    observer.OnLinkUpdate(dstId, srcId, false);
+                }
+            }
+        }
+
+        if (node->GetLastParentId() != 0xffff)
+        {
+            for (Observer &observer : core.mObservers)
+            {
+                observer.OnLinkUpdate(srcId, node->GetLastParentId(), false);
+            }
+            node->SetLastParentId(0xffff);
+        }
+        break;
+    }
+    case Mle::kRoleRouter:
+    case Mle::kRoleLeader:
+        node->SetLastParentId(0xffff);
+        break;
+
+    default:
+        break;
+    }
+
+exit:
+    return;
 }
 
 void Core::UpdateNextAlarmMilli(const Alarm &aAlarm)
@@ -399,6 +642,35 @@ void Core::UpdateNextAlarmMicro(const Alarm &aAlarm)
         }
 
         mNextAlarmTime = Min(mNextAlarmTime, alarmTime);
+    }
+}
+
+bool Core::IsUiConnected(void) const
+{
+    bool connected = false;
+
+    for (const Observer &observer : mObservers)
+    {
+        if (observer.IsConnected())
+        {
+            connected = true;
+            break;
+        }
+    }
+
+    return connected;
+}
+
+void Core::Reset(void)
+{
+    mNodes.Clear();
+    mCurNodeId     = 0;
+    mNow           = 0;
+    mNextAlarmTime = NumericLimits<uint64_t>::kMax;
+
+    for (Observer &observer : mObservers)
+    {
+        observer.OnClearEvents();
     }
 }
 
@@ -475,6 +747,40 @@ void Core::ProcessRadio(Node &aNode)
 
     mPcap.WriteFrame(aNode.mRadio.mTxFrame, mNow);
 
+    if (!mObservers.IsEmpty())
+    {
+        uint32_t dstNodeId = 0xffff; // Default to broadcast / unknown
+
+        if (!dstAddr.IsBroadcast())
+        {
+            for (Node &rxNode : mNodes)
+            {
+                if (&rxNode == &aNode)
+                {
+                    continue;
+                }
+
+                if (rxNode.mRadio.Matches(dstAddr, dstPanId))
+                {
+                    dstNodeId = rxNode.GetInstance().GetId();
+                    break;
+                }
+            }
+        }
+
+        if (!dstAddr.IsBroadcast() && dstNodeId == 0xffff)
+        {
+            Log("ProcessRadio: Failed to resolve dstNodeId for unicast from node %u to %s", aNode.GetInstance().GetId(),
+                dstAddr.ToString().AsCString());
+        }
+
+        for (Observer &observer : mObservers)
+        {
+            observer.OnPacketEvent(aNode.GetInstance().GetId(), dstNodeId, aNode.mRadio.mTxFrame.GetPsdu(),
+                                   aNode.mRadio.mTxFrame.GetLength());
+        }
+    }
+
     otPlatRadioTxStarted(&aNode.GetInstance(), &aNode.mRadio.mTxFrame);
 
     for (Node &rxNode : mNodes)
@@ -495,8 +801,18 @@ void Core::ProcessRadio(Node &aNode)
             Radio::Frame rxFrame(aNode.mRadio.mTxFrame);
 
             rxFrame.mInfo.mRxInfo.mTimestamp = mNow;
-            rxFrame.mInfo.mRxInfo.mRssi      = kDefaultRxRssi;
-            rxFrame.mInfo.mRxInfo.mLqi       = kDefaultRxLqi;
+
+            int16_t localRssi = RadioModel::CalculateRssi(aNode, rxNode);
+
+            // Completely intercept and drop packets that dip below target receiver sensitivity
+            if (RadioModel::ShouldDropPacket(localRssi))
+            {
+                continue;
+            }
+
+            rxFrame.mInfo.mRxInfo.mRssi = ClampToInt8(localRssi);
+
+            rxFrame.mInfo.mRxInfo.mLqi = kDefaultRxLqi;
 
             if (matchesDst && !dstAddr.IsNone() && !dstAddr.IsBroadcast() && ackRequested)
             {
@@ -578,9 +894,25 @@ void Core::ProcessRadio(Node &aNode)
         }
 
         ackFrame.UpdateFcs();
-        mPcap.WriteFrame(ackFrame, mNow);
 
-        otPlatRadioTxDone(&aNode.GetInstance(), &aNode.mRadio.mTxFrame, &ackFrame, kErrorNone);
+        {
+            int16_t ackRssi = RadioModel::CalculateRssi(*ackNode, aNode);
+
+            ackFrame.mInfo.mRxInfo.mRssi      = ClampToInt8(ackRssi);
+            ackFrame.mInfo.mRxInfo.mLqi       = kDefaultRxLqi;
+            ackFrame.mInfo.mRxInfo.mTimestamp = mNow;
+
+            mPcap.WriteFrame(ackFrame, mNow);
+
+            if (RadioModel::ShouldDropPacket(ackRssi))
+            {
+                otPlatRadioTxDone(&aNode.GetInstance(), &aNode.mRadio.mTxFrame, nullptr, kErrorNoAck);
+            }
+            else
+            {
+                otPlatRadioTxDone(&aNode.GetInstance(), &aNode.mRadio.mTxFrame, &ackFrame, kErrorNone);
+            }
+        }
     }
     else
     {
@@ -648,7 +980,10 @@ void Core::ProcessInfraIf(Node &aNode)
 
         if (!header.GetDestination().IsMulticast())
         {
-            targetNode = FindNodeByInfraIfAddress(header.GetDestination());
+            if (!IsThreadAddress(header.GetDestination()))
+            {
+                targetNode = FindNodeByAddress(header.GetDestination());
+            }
         }
 
         for (Node &rxNode : mNodes)
@@ -696,6 +1031,7 @@ Core::IcmpEchoResponseContext::IcmpEchoResponseContext(Node &aNode, uint16_t aId
     : mNode(aNode)
     , mIdentifier(aIdentifier)
     , mResponseReceived(false)
+    , mExpectedSourceCheck(false)
 {
 }
 
@@ -720,6 +1056,14 @@ void Core::HandleIcmpResponse(void                *aContext,
 
         Log("Received Echo Reply on Node %u (%s) from %s", context->mNode.GetId(), context->mNode.GetName(),
             messageInfo->GetPeerAddr().ToString().AsCString());
+
+        if (context->mExpectedSourceCheck)
+        {
+            Log("Verifying source address: Expected %s, Actual %s", context->mExpectedSource.ToString().AsCString(),
+                messageInfo->GetSockAddr().ToString().AsCString());
+
+            VerifyOrQuit(messageInfo->GetSockAddr() == context->mExpectedSource);
+        }
     }
 }
 
@@ -738,9 +1082,80 @@ void Core::SendAndVerifyEchoRequest(Node               &aSender,
 
     aSender.SendEchoRequest(aDestination, kIdentifier, aPayloadSize, aHopLimit);
     AdvanceTime(aResponseTimeout);
-    VerifyOrQuit(icmpContext.mResponseReceived);
 
     SuccessOrQuit(aSender.Get<Ip6::Icmp>().UnregisterHandler(icmpHandler));
+
+    VerifyOrQuit(icmpContext.mResponseReceived);
+}
+
+void Core::SendAndVerifyEchoRequest(Node               &aSender,
+                                    const Ip6::Address &aExpectedSource,
+                                    const Ip6::Address &aDestination,
+                                    uint16_t            aPayloadSize,
+                                    uint8_t             aHopLimit,
+                                    uint32_t            aResponseTimeout,
+                                    bool                aForceSource)
+{
+    static constexpr uint16_t kIdentifier = 0x1234;
+
+    IcmpEchoResponseContext icmpContext(aSender, kIdentifier);
+    icmpContext.mExpectedSource      = aExpectedSource;
+    icmpContext.mExpectedSourceCheck = true;
+
+    Ip6::Icmp::Handler icmpHandler(HandleIcmpResponse, &icmpContext);
+
+    SuccessOrQuit(aSender.Get<Ip6::Icmp>().RegisterHandler(icmpHandler));
+
+    aSender.SendEchoRequest(aDestination, kIdentifier, aPayloadSize, aHopLimit,
+                            aForceSource ? &aExpectedSource : nullptr);
+    AdvanceTime(aResponseTimeout);
+
+    SuccessOrQuit(aSender.Get<Ip6::Icmp>().UnregisterHandler(icmpHandler));
+
+    VerifyOrQuit(icmpContext.mResponseReceived);
+}
+
+void Core::SendAndVerifyNoEchoResponse(Node               &aSender,
+                                       const Ip6::Address &aDestination,
+                                       uint16_t            aPayloadSize,
+                                       uint8_t             aHopLimit,
+                                       uint32_t            aResponseTimeout)
+{
+    static constexpr uint16_t kIdentifier = 0x1234;
+
+    IcmpEchoResponseContext icmpContext(aSender, kIdentifier);
+    Ip6::Icmp::Handler      icmpHandler(HandleIcmpResponse, &icmpContext);
+
+    SuccessOrQuit(aSender.Get<Ip6::Icmp>().RegisterHandler(icmpHandler));
+
+    aSender.SendEchoRequest(aDestination, kIdentifier, aPayloadSize, aHopLimit);
+    AdvanceTime(aResponseTimeout);
+
+    SuccessOrQuit(aSender.Get<Ip6::Icmp>().UnregisterHandler(icmpHandler));
+
+    VerifyOrQuit(!icmpContext.mResponseReceived);
+}
+
+void Core::SendAndVerifyNoEchoResponse(Node               &aSender,
+                                       const Ip6::Address &aSrcAddress,
+                                       const Ip6::Address &aDestination,
+                                       uint16_t            aPayloadSize,
+                                       uint8_t             aHopLimit,
+                                       uint32_t            aResponseTimeout)
+{
+    static constexpr uint16_t kIdentifier = 0x1234;
+
+    IcmpEchoResponseContext icmpContext(aSender, kIdentifier);
+    Ip6::Icmp::Handler      icmpHandler(HandleIcmpResponse, &icmpContext);
+
+    SuccessOrQuit(aSender.Get<Ip6::Icmp>().RegisterHandler(icmpHandler));
+
+    aSender.SendEchoRequest(aDestination, kIdentifier, aPayloadSize, aHopLimit, &aSrcAddress);
+    AdvanceTime(aResponseTimeout);
+
+    SuccessOrQuit(aSender.Get<Ip6::Icmp>().UnregisterHandler(icmpHandler));
+
+    VerifyOrQuit(!icmpContext.mResponseReceived);
 }
 
 } // namespace Nexus

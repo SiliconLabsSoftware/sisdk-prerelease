@@ -351,6 +351,7 @@ void sl_wisun_disconnected_event_hnd(sl_wisun_evt_t *evt)
 
   __CHECK_FOR_STATUS(evt->evt.error.status);
   _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_NETWORK_DISCONNECTED);
+  _app_wisun_core_clear_state(SL_WISUN_APP_CORE_STATE_NETWORK_CONNECTED);
   _join_state = SL_WISUN_JOIN_STATE_DISCONNECTED;
 }
 
@@ -832,7 +833,7 @@ static sl_status_t _app_wisun_security_setting(void)
   const uint32_t max_cert_str_len = 2048U;
 
   // set the trusted certificate
-  ret = sl_wisun_set_trusted_certificate(SL_WISUN_CERTIFICATE_OPTION_IS_REF,
+  ret = sl_wisun_set_trusted_certificate(SL_WISUN_CERTIFICATE_OPTION_NONE,
                                          _get_cert_str_len(wisun_config_ca_certificate, max_cert_str_len) + 1,
                                          wisun_config_ca_certificate);
   if (ret != SL_STATUS_OK) {
@@ -842,7 +843,7 @@ static sl_status_t _app_wisun_security_setting(void)
   }
 
   // set the device certificate
-  ret = sl_wisun_set_device_certificate(SL_WISUN_CERTIFICATE_OPTION_IS_REF | SL_WISUN_CERTIFICATE_OPTION_HAS_KEY,
+  ret = sl_wisun_set_device_certificate(SL_WISUN_CERTIFICATE_OPTION_NONE,
                                         _get_cert_str_len(wisun_config_device_certificate, max_cert_str_len) + 1,
                                         wisun_config_device_certificate);
   if (ret != SL_STATUS_OK) {
@@ -854,7 +855,7 @@ static sl_status_t _app_wisun_security_setting(void)
   // set the device private key
   // NOTE: to use a wrapped PSA private key, the app needs to import the key
   // and use the API sl_wisun_set_device_private_key_id() instead of the one below
-  ret = sl_wisun_set_device_private_key(SL_WISUN_PRIVATE_KEY_OPTION_IS_REF,
+  ret = sl_wisun_set_device_private_key(SL_WISUN_PRIVATE_KEY_OPTION_NONE,
                                         _get_cert_str_len(wisun_config_device_private_key, max_cert_str_len) + 1,
                                         wisun_config_device_private_key);
   if (ret != SL_STATUS_OK) {
@@ -870,25 +871,32 @@ static sl_status_t _app_wisun_security_setting(void)
 {
   sl_status_t ret = SL_STATUS_FAIL;
   sl_wisun_keychain_credential_t *credential = NULL;
+  sl_wisun_keychain_entry_t *trustedca = NULL;
   uint8_t trustedca_count;
   uint8_t idx;
-  sl_wisun_keychain_entry_t *trustedca = NULL;
   uint16_t certificate_options;
+  credential = sl_wisun_keychain_get_credential((sl_wisun_keychain_t)_setting.keychain,
+                                                _setting.keychain_index);
+  if (credential == NULL) {
+    printf("[Failed: unable to load device credential]\r\n");
+    _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_SET_DEVICE_CERTIFICATE_ERROR);
+    goto cleanup;
+  }
 
-  credential = sl_wisun_keychain_get_credential((sl_wisun_keychain_t)_setting.keychain, _setting.keychain_index);
-
-  // set the trusted certificate
   trustedca_count = sl_wisun_keychain_get_trustedca_count();
   if (!trustedca_count) {
     printf("[Failed: unable to locate trusted CAs]\r\n");
+    _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_SET_TRUSTED_CERTIFICATE_ERROR);
+    goto cleanup;
   }
 
-  certificate_options = SL_WISUN_CERTIFICATE_OPTION_IS_REF;
+  certificate_options = SL_WISUN_CERTIFICATE_OPTION_NONE;
   for (idx = 0; idx < trustedca_count; ++idx) {
     trustedca = sl_wisun_keychain_get_trustedca(idx);
     if (!trustedca) {
       printf("[Failed to load trusted CA]\r\n");
-      return ret;
+      _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_SET_TRUSTED_CERTIFICATE_ERROR);
+      goto cleanup;
     }
 
     ret = sl_wisun_set_trusted_certificate(certificate_options,
@@ -896,7 +904,8 @@ static sl_status_t _app_wisun_security_setting(void)
                                            trustedca->data);
     if (ret != SL_STATUS_OK) {
       printf("[Failed: unable to set the trusted certificate: %lu]\r\n", ret);
-      return ret;
+      _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_SET_TRUSTED_CERTIFICATE_ERROR);
+      goto cleanup;
     }
 
     sl_free(trustedca);
@@ -904,32 +913,25 @@ static sl_status_t _app_wisun_security_setting(void)
     certificate_options |= SL_WISUN_CERTIFICATE_OPTION_APPEND;
   }
 
-  if (ret != SL_STATUS_OK) {
-    printf("[Failed: unable to set the trusted certificate: %lu]\n", ret);
-    _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_SET_TRUSTED_CERTIFICATE_ERROR);
-    return ret;
-  }
-
-  // set the device certificate
-  ret = sl_wisun_set_device_certificate(SL_WISUN_CERTIFICATE_OPTION_IS_REF | SL_WISUN_CERTIFICATE_OPTION_HAS_KEY,
+  ret = sl_wisun_set_device_certificate(SL_WISUN_CERTIFICATE_OPTION_NONE,
                                         credential->certificate.data_length,
                                         credential->certificate.data);
   if (ret != SL_STATUS_OK) {
     printf("[Failed: unable to set the device certificate: %lu]\n", ret);
     _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_SET_DEVICE_CERTIFICATE_ERROR);
-    return ret;
+    goto cleanup;
   }
 
-  // set the device private key
-  // NOTE: to use a wrapped PSA private key, the app needs to import the key
-  // and use the API sl_wisun_set_device_private_key_id() instead of the one below
   ret = sl_wisun_set_device_private_key_id(credential->pk.u.key_id);
   if (ret != SL_STATUS_OK) {
     printf("[Failed: unable to set the device private key: %lu]\n", ret);
     _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_SET_DEVICE_PRIVATE_KEY_ERROR);
-    return ret;
+    goto cleanup;
   }
 
+cleanup:
+  sl_free(trustedca);
+  sl_free(credential);
   return ret;
 }
 #endif

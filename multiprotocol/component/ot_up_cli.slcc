@@ -94,9 +94,21 @@ template_contribution:
 
 - name: cli_command
   value:
+    name: ifconfig_down
+    handler: ifconfig_down
+    help: thread ifconfig down
+
+- name: cli_command
+  value:
     name: thread_start
     handler: thread_start
     help: start thread network
+
+- name: cli_command
+  value:
+    name: thread_stop
+    handler: thread_stop
+    help: stop thread network
 
 - name: cli_command
   value:

@@ -137,69 +137,9 @@ typedef UintTlvInfo<ThreadTlv::kCommissionerSessionId, uint16_t> ThreadCommissio
 typedef UintTlvInfo<ThreadTlv::kStatus, uint8_t> ThreadStatusTlv;
 
 /**
- * Implements Router Mask TLV generation and parsing.
+ * Defines Router Mask TLV  constants and types.
  */
-OT_TOOL_PACKED_BEGIN
-class ThreadRouterMaskTlv : public ThreadTlv, public TlvInfo<ThreadTlv::kRouterMask>
-{
-public:
-    /**
-     * Initializes the TLV.
-     */
-    void Init(void)
-    {
-        SetType(kRouterMask);
-        SetLength(sizeof(*this) - sizeof(ThreadTlv));
-        mAssignedRouterIdMask.Clear();
-    }
-
-    /**
-     * Indicates whether or not the TLV appears to be well-formed.
-     *
-     * @retval TRUE   If the TLV appears to be well-formed.
-     * @retval FALSE  If the TLV does not appear to be well-formed.
-     */
-    bool IsValid(void) const { return GetLength() >= sizeof(*this) - sizeof(ThreadTlv); }
-
-    /**
-     * Returns the ID Sequence value.
-     *
-     * @returns The ID Sequence value.
-     */
-    uint8_t GetIdSequence(void) const { return mIdSequence; }
-
-    /**
-     * Sets the ID Sequence value.
-     *
-     * @param[in]  aSequence  The ID Sequence value.
-     */
-    void SetIdSequence(uint8_t aSequence) { mIdSequence = aSequence; }
-
-    /**
-     * Gets the Assigned Router ID Mask.
-     *
-     * @returns The Assigned Router ID Mask.
-     */
-    const Mle::RouterIdSet &GetAssignedRouterIdMask(void) const { return mAssignedRouterIdMask; }
-
-    /**
-     * Gets the Assigned Router ID Mask.
-     *
-     * @returns The Assigned Router ID Mask.
-     */
-    Mle::RouterIdSet &GetAssignedRouterIdMask(void) { return mAssignedRouterIdMask; }
-
-    /**
-     * Sets the Assigned Router ID Mask.
-     *
-     * @param[in]  aRouterIdSet A reference to the Assigned Router ID Mask.
-     */
-    void SetAssignedRouterIdMask(const Mle::RouterIdSet &aRouterIdSet) { mAssignedRouterIdMask = aRouterIdSet; }
-
-private:
-    uint8_t          mIdSequence;
-    Mle::RouterIdSet mAssignedRouterIdMask;
-} OT_TOOL_PACKED_END;
+typedef SimpleTlvInfo<ThreadTlv::kRouterMask, Mle::RouterIdMask> ThreadRouterMaskTlv;
 
 /**
  * Defines Thread Network Data TLV constants and types.
@@ -209,46 +149,9 @@ typedef TlvInfo<ThreadTlv::kThreadNetworkData> ThreadNetworkDataTlv;
 #if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
 
 /**
- * Implements IPv6 Addresses TLV generation and parsing.
+ * Defines IPv6 Addresses TLV constants and types.
  */
-OT_TOOL_PACKED_BEGIN
-class Ip6AddressesTlv : public ThreadTlv, public TlvInfo<ThreadTlv::kIp6Addresses>
-{
-public:
-    // Thread 1.2.0 5.19.13 limits the number of IPv6 addresses to [1, 15].
-    static constexpr uint8_t kMinAddresses = 1;
-    static constexpr uint8_t kMaxAddresses = OT_IP6_MAX_MLR_ADDRESSES;
-
-    /**
-     * Initializes the TLV.
-     */
-    void Init(void) { SetType(kIp6Addresses); }
-
-    /**
-     * Indicates whether or not the TLV appears to be well-formed.
-     *
-     * @retval TRUE   If the TLV appears to be well-formed.
-     * @retval FALSE  If the TLV does not appear to be well-formed.
-     */
-    bool IsValid(void) const
-    {
-        return GetLength() >= sizeof(Ip6::Address) * Ip6AddressesTlv::kMinAddresses &&
-               GetLength() <= sizeof(Ip6::Address) * Ip6AddressesTlv::kMaxAddresses &&
-               (GetLength() % sizeof(Ip6::Address)) == 0;
-    }
-
-    /**
-     * Returns a pointer to the IPv6 address entry.
-     *
-     * @param[in]  aIndex  The index into the IPv6 address list.
-     *
-     * @returns A reference to the IPv6 address.
-     */
-    const Ip6::Address &GetIp6Address(uint8_t aIndex) const
-    {
-        return *reinterpret_cast<const Ip6::Address *>(GetValue() + (aIndex * sizeof(Ip6::Address)));
-    }
-} OT_TOOL_PACKED_END;
+typedef TlvInfo<ThreadTlv::kIp6Addresses> Ip6AddressesTlv;
 
 #endif // OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
 

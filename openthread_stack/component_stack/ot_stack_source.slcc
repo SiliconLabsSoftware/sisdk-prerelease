@@ -252,6 +252,7 @@ source:
 - path: thread/network_data_types.cpp
 - path: thread/network_diagnostic.cpp
 - path: thread/network_diagnostic_tlvs.cpp
+- path: thread/network_diagnostic_types.cpp
 - path: thread/panid_query_server.cpp
 - path: thread/peer.cpp
 - path: thread/peer_table.cpp

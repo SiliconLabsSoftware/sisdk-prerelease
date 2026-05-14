@@ -73,10 +73,7 @@
     || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_LEADER_PRESENT)   \
     || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_FOLLOWER_PRESENT)
 #include "sl_bluetooth_cs_config.h"
-#endif // SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT
-       // or SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT
-       // or SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_LEADER_PRESENT
-       // or SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_FOLLOWER_PRESENT
+#endif
 
 #if defined(SL_CATALOG_BLUETOOTH_RCP_PRESENT)
 #include "sl_btctrl_hci.h"
@@ -210,8 +207,12 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
   config->flags |= SL_BTCTRL_CONFIG_FLAG_ENABLE_CONN_EVENT_LENGTH_EXTENSION;
 #endif // SL_BT_CONTROLLER_CONN_EVENT_LENGTH_EXTENSION
 
-#if SL_BT_CONTROLLER_SCANNER_RECEPTION_EARLY_ABORT == 1
+#if SL_BT_CONTROLLER_SCANNER_RECEPTION_EARLY_ABORT == 1 \
+  || defined(SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_ANALYZER_PRESENT)
   sl_btctrl_init_radio_early_rx_abort();
+#endif
+
+#if SL_BT_CONTROLLER_SCANNER_RECEPTION_EARLY_ABORT == 1
   config->flags |= SL_BTCTRL_CONFIG_FLAG_SCANNER_RECEPTION_EARLY_ABORT;
 #endif // SL_BT_CONTROLLER_SCANNER_RECEPTION_EARLY_ABORT
 
@@ -296,6 +297,17 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
   if (status != SL_STATUS_OK) {
     return status;
   }
+
+  // Validate the RAIL mapping configuration. This is only supported if multiprotocol is enabled.
+#if (SL_RAIL_LIB_MULTIPROTOCOL_SUPPORT == 1)
+  // Valid scheduler priority levels range from 0 to 255.
+#if (SL_BT_CONTROLLER_SCHEDULER_PRI_RAIL_WINDOW_MIN > 255)
+#error Invalid configuration: SL_BT_CONTROLLER_SCHEDULER_PRI_RAIL_WINDOW_MIN > 255
+#endif
+#if (SL_BT_CONTROLLER_SCHEDULER_PRI_RAIL_WINDOW_MIN < SL_BT_CONTROLLER_SCHEDULER_PRI_RAIL_WINDOW_MAX)
+#error Invalid configuration: SL_BT_CONTROLLER_SCHEDULER_PRI_RAIL_WINDOW_MIN < SL_BT_CONTROLLER_SCHEDULER_PRI_RAIL_WINDOW_MAX
+#endif
+#endif // SL_RAIL_LIB_MULTIPROTOCOL_SUPPORT == 1
 
   sl_btctrl_configure_scheduler_priorities(&sli_btctrl_priority_table);
 
@@ -468,18 +480,10 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
   sl_btctrl_init_past_receiver();
 #endif
 
-#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_ANALYZER_PRESENT)
-  status = sl_btctrl_init_sniff(SL_BT_CONFIG_MAX_CONNECTION_ANALYZERS);
-  if (status != SL_STATUS_OK) {
-    return status;
-  }
-#endif
-
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT)                    \
     || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT)            \
     || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_LEADER_PRESENT) \
     || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_FOLLOWER_PRESENT)
-
   struct sl_btctrl_cs_config cs_config = { 0 };
   cs_config.configs_per_connection = SL_BT_CONFIG_MAX_CS_CONFIGS_PER_CONNECTION;
   cs_config.procedures = SL_BT_CONFIG_MAX_CS_PROCEDURES;
@@ -488,25 +492,28 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
 
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_PRESENT)
   sl_btctrl_init_cs_conn();
-#endif // SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_PRESENT
+#endif
 
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT)
   sl_btctrl_init_cs_test();
-#endif // SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT
+#endif
 
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_LEADER_PRESENT) \
     || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_FOLLOWER_PRESENT)
   sl_btctrl_init_cs_handover();
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_FOLLOWER_PRESENT)
   sl_btctrl_init_cs_sniff();
-#endif // SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_FOLLOWER_PRESENT
-#endif // SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_LEADER_PRESENT
-       // or SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_FOLLOWER_PRESENT
+#endif
+#endif
 
-#endif // SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT
-       // or SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT
-       // or SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_LEADER_PRESENT
-       // or SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_FOLLOWER_PRESENT
+#endif
+
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_ANALYZER_PRESENT)
+  status = sl_btctrl_init_sniff(SL_BT_CONFIG_MAX_CONNECTION_ANALYZERS);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+#endif
 
   // In addition to the user advertisers and connections, the number of internal
   // advertisers and connections also needs to be accounted for (i.e. SL_BT_COMPONENT_ADVERTISERS
@@ -619,13 +626,12 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
 
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT) || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT)
   sl_btctrl_hci_parser_init_cs();
-#endif // SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT or SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT
+#endif
 
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_LEADER_PRESENT) \
     || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_FOLLOWER_PRESENT)
   sl_btctrl_hci_parser_init_cs_handover();
-#endif // SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_LEADER_PRESENT
-       // or SL_CATALOG_BLUETOOTH_FEATURE_CS_HANDOVER_FOLLOWER_PRESENT
+#endif
 
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_SUBRATING_PRESENT)
   sl_btctrl_hci_parser_init_subrate();
@@ -708,7 +714,7 @@ void sl_btctrl_deinit_functional(void)
 
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT) || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT)
   sl_btctrl_deinit_cs();
-#endif // SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT or SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT
+#endif
 
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_RESOLVING_LIST_PRESENT)
   sl_btctrl_allocate_resolving_list_memory(0);

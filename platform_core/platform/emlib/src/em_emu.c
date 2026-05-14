@@ -227,7 +227,8 @@ static errataFixDcdcHs_TypeDef errataFixDcdcHsState = errataFixDcdcHsInit;
 #define RAM0_BLOCK_SIZE   0x4000U // 16 kB blocks
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)  \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
 #define RAM0_BLOCKS           16U
 #define RAM0_BLOCK_SIZE   0x4000U // 16 kB blocks
 #endif
@@ -1730,7 +1731,8 @@ void EMU_RamPowerDown(uint32_t start, uint32_t end)
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8) \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) \
-    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13) 
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13) \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
     // These platforms have equally-sized RAM blocks and block 0 can be powered down but should not.
     // This condition happens when the block 0 disable bit flag is available in the retention control register.
     for (unsigned i = 1; i < RAM0_BLOCKS; i++) {

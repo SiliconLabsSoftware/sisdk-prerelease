@@ -42,8 +42,8 @@
  // <1=> RegDEC
  // <2=> RegDVDDDEC
  // <i>
- // <i> Default: 2
- #define SL_DEVICE_INIT_DCDC_REGULATION_TYPE   2
+ // <i> Default: 0
+ #define SL_DEVICE_INIT_DCDC_REGULATION_TYPE   0
  
  // <q SL_DEVICE_INIT_DCDC_ENABLE> Enable DC/DC Converter
  // <i>

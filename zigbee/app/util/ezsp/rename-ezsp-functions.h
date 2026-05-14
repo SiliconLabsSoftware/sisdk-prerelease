@@ -99,6 +99,7 @@
 
 //Binding Frames
 #define sl_zigbee_clear_binding_table              sl_zigbee_ezsp_clear_binding_table
+#define sl_zigbee_clear_binding_table_on_leave     sl_zigbee_ezsp_clear_binding_table_on_leave
 #define sl_zigbee_set_binding                     sl_zigbee_ezsp_set_binding
 #define sl_zigbee_get_binding                     sl_zigbee_ezsp_get_binding
 #define sl_zigbee_delete_binding                  sl_zigbee_ezsp_delete_binding
@@ -242,7 +243,6 @@
 #define sl_zigbee_get_endpoint_cluster sl_zigbee_ezsp_get_endpoint_cluster
 
 #define sl_zigbee_radio_get_scheduler_priorities sl_zigbee_ezsp_radio_get_scheduler_priorities
-#define sl_zigbee_radio_set_scheduler_priorities sl_zigbee_ezsp_radio_set_scheduler_priorities
 #define sl_zigbee_radio_get_scheduler_sliptime sl_zigbee_ezsp_radio_get_scheduler_sliptime
 #define sl_zigbee_radio_set_scheduler_sliptime sl_zigbee_ezsp_radio_set_scheduler_sliptime
 #define sl_zigbee_counter_requires_phy_index sl_zigbee_ezsp_counter_requires_phy_index

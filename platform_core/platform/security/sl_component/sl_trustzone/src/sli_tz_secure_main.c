@@ -1213,7 +1213,7 @@ static fih_int __attribute__ ((noinline)) check_se_version(uint32_t se_version)
 
   // Additional check that the version_diff is different than the initial value.
   if (fih_eq(fih_int_encode(version_diff),
-             fih_int_encode(A_NEGATIVE_VALUE))) {
+             fih_int_encode((int32_t)A_NEGATIVE_VALUE))) {
     fatal_error();
     goto exit; // if fatal_error is glitched
   } else {

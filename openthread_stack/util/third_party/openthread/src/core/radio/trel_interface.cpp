@@ -35,6 +35,7 @@
 #if OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
 
 #include "instance/instance.hpp"
+#include "net/udp6.hpp"
 
 namespace ot {
 namespace Trel {
@@ -47,13 +48,25 @@ Interface::Interface(Instance &aInstance)
     , mStackEnabled(false)
     , mFiltered(false)
     , mState(kStateUninitialized)
+    , mUdpPort(0)
+#if OPENTHREAD_NCP
+    , mHostUdpPort(0)
+#endif
+    , mCallbackTask(aInstance)
 {
 }
+
+void Interface::AssignDefaultUdpPortFromEphemeral(void) { mUdpPort = Get<Ip6::Udp>().GetEphemeralPort(); }
 
 void Interface::Init(void)
 {
     VerifyOrExit(mState == kStateUninitialized);
     mState = kStateDisabled;
+
+#if OPENTHREAD_NCP
+    mUserEnabled = false;
+#endif
+
     UpdateState();
 
 exit:
@@ -67,6 +80,7 @@ void Interface::SetEnabled(bool aEnable, Requester aRequester)
     case kRequesterUser:
         VerifyOrExit(mUserEnabled != aEnable);
         mUserEnabled = aEnable;
+        AssignDefaultUdpPortFromEphemeral();
         LogInfo("User %sabled interface", aEnable ? "en" : "dis");
         break;
 
@@ -92,7 +106,14 @@ void Interface::UpdateState(void)
         mState = kStateEnabled;
 
         otPlatTrelEnable(&GetInstance(), &mUdpPort);
-        Get<PeerDiscoverer>().Start();
+
+#if OPENTHREAD_NCP
+        // Wait for the host UDP port (SPINEL_PROP_TREL_STATE) before starting peer discovery.
+        if (mHostUdpPort != 0)
+#endif
+        {
+            Get<PeerDiscoverer>().Start();
+        }
 
         LogInfo("Enabled interface, local port:%u", mUdpPort);
     }
@@ -107,9 +128,13 @@ void Interface::UpdateState(void)
         LogInfo("Disabled interface");
     }
 
+    mCallbackTask.Post();
+
 exit:
     return;
 }
+
+void Interface::HandleTask(void) { mCallback.InvokeIfSet(); }
 
 const Counters *Interface::GetCounters(void) const { return otPlatTrelGetCounters(&GetInstance()); }
 
@@ -199,6 +224,13 @@ exit:
     return;
 }
 
+#if OPENTHREAD_NCP
+void Interface::SetHostUdpPort(uint16_t aPort)
+{
+    mHostUdpPort = aPort;
+    Get<PeerDiscoverer>().Start();
+}
+#endif
 } // namespace Trel
 } // namespace ot
 

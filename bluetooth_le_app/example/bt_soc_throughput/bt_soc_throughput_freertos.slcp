@@ -6,7 +6,7 @@ description: >
   to measure throughput between 2 *EFR32* devices, as well as between a device
   and a smartphone using the 'Si Connect' mobile app, through the 'Throughput' demo tile.
 category: Bluetooth Examples
-quality: experimental
+quality: production
 
 filter:
   - name: "Wireless Technology"

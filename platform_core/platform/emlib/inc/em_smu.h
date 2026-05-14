@@ -1382,7 +1382,7 @@ typedef struct {
   bool privilegedSEMAILBOX    : 1;  /**< Privileged access enabler for SEMAILBOX    */
   bool privilegedMVP          : 1;  /**< Privileged access enabler for MVP          */
   bool privilegedAHBRADIO     : 1;  /**< Privileged access enabler for AHBRADIO     */
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
   bool privilegedReserved0    : 1;  /**< Reserved privileged access enabler         */
   bool privilegedEMU          : 1;  /**< Privileged access enabler for EMU          */
   bool privilegedCMU          : 1;  /**< Privileged access enabler for CMU          */

@@ -48,30 +48,18 @@ requires:
 - name: component_catalog
 - name: cs_acp_state
 - name: sl_common
+- name: app_rta
 
-  # ACP target components
 - name: bluetooth_api
-  condition: [cs_acp_target]
+  condition: [cs_acp_with_impl]
 - name: bluetooth_feature_cs
-  condition: [cs_acp_target]
+  condition: [cs_acp_with_impl]
 - name: cs_ras_client
-  condition: [cs_acp_target]
+  condition: [cs_acp_with_impl]
 - name: refactor_cs_result
-  condition: [cs_acp_target]
+  condition: [cs_acp_with_impl]
 - name: refactor_cs_initiator
-  condition: [cs_acp_target]
-
-  # SoC and Host only (without ACP)
-- name: bluetooth_api
-  condition: [cs_acp_none]
-- name: bluetooth_feature_cs
-  condition: [cs_acp_none]
-- name: cs_ras_client
-  condition: [cs_acp_none]
-- name: refactor_cs_result
-  condition: [cs_acp_none]
-- name: refactor_cs_initiator
-  condition: [cs_acp_none]
+  condition: [cs_acp_with_impl]
 
 recommends:
 - id: cs_acp_none
@@ -110,6 +98,16 @@ template_contribution:
     event: internal_app_init
     include: cs_rreq_internal.h
     handler: cs_rreq_init
+  unless: [cs_acp_host]
+- name: app_rta_init
+  value:
+    include: cs_rreq_internal.h
+    handler: cs_rreq_rta_init
+  unless: [cs_acp_host]
+- name: app_rta_ready
+  value:
+    include: cs_rreq_internal.h
+    handler: cs_rreq_rta_ready
   unless: [cs_acp_host]
 documentation:
   docset: bluetooth

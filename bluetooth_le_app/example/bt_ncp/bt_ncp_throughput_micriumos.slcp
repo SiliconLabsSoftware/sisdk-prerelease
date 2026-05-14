@@ -6,7 +6,7 @@ description: >
   support the Throughput solution. Can be used together with the
   "Bluetooth - Host Throughput Example".
 category: Bluetooth Examples
-quality: experimental
+quality: production
 
 filter:
   - name: "Wireless Technology"

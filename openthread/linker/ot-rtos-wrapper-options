@@ -682,7 +682,9 @@
 -Xlinker --wrap=otThreadSetVendorAppUrl
 -Xlinker --wrap=otThreadSetVendorModel
 -Xlinker --wrap=otThreadSetVendorName
+-Xlinker --wrap=otThreadSetVendorOui
 -Xlinker --wrap=otThreadSetVendorSwVersion
+-Xlinker --wrap=otThreadGetVendorOui
 -Xlinker --wrap=otThreadSetNonPreferredChannels
 -Xlinker --wrap=otThreadSetNonPreferredChannelsResetCallback
 -Xlinker --wrap=otNetworkTimeSetSyncPeriod
@@ -972,6 +974,7 @@
 -Xlinker --wrap=otTrelResetCounters
 -Xlinker --wrap=otTrelSetEnabled
 -Xlinker --wrap=otTrelSetFilterEnabled
+-Xlinker --wrap=otTrelSetStateChangedCallback
 -Xlinker --wrap=otUdpIsOpen
 -Xlinker --wrap=otUdpIsPortInUse
 -Xlinker --wrap=otUdpAddReceiver

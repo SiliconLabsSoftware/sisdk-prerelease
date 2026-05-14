@@ -299,7 +299,8 @@ static inline void init_hf_clocks(sl_iostream_eusart_config_t *eusart_config)
   #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
     #if defined(EUART_PRESENT)
   CMU_CLOCK_SELECT_SET(EUART0CLK, EM01GRPACLK);
     #elif defined(EUSART_PRESENT)
@@ -325,7 +326,8 @@ static inline void init_lf_clocks(sl_iostream_eusart_config_t *eusart_config)
   #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
   #if defined(EUART_PRESENT)
   CMU_CLOCK_SELECT_SET(EUART0CLK, EM23GRPACLK);
   #elif defined(EUSART_PRESENT)

@@ -132,20 +132,46 @@ public:
 
     bool Matches(const Ip6::Address &aAddress, AddressNetif aNetif) const;
 
+    bool Matches(uint32_t aId) const { return GetInstance().GetId() == aId; }
+    bool Matches(const Mac::ExtAddress &aExtAddress) const { return Get<Mac::Mac>().GetExtAddress() == aExtAddress; }
+
     void        SetName(const char *aName) { mName.Clear().Append("%s", aName); }
     void        SetName(const char *aPrefix, uint16_t aIndex);
     const char *GetName(void) const { return mName.AsCString(); }
+
+    void SetPosition(float aX, float aY)
+    {
+        mX = aX;
+        mY = aY;
+    }
+    float GetPositionX(void) const { return mX; }
+    float GetPositionY(void) const { return mY; }
+
+    uint32_t GetLastParentId(void) const { return mLastParentId; }
+    void     SetLastParentId(uint32_t aId) { mLastParentId = aId; }
 
     //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     template <typename Type> Type       &Get(void) { return Instance::Get<Type>(); }
     template <typename Type> const Type &Get(void) const { return AsConst(AsNonConst(this)->Get<Type>()); }
 
-    Instance &GetInstance(void) { return *this; }
+    Instance       &GetInstance(void) { return *this; }
+    const Instance &GetInstance(void) const { return *this; }
 
-    uint32_t GetId(void) { return GetInstance().GetId(); }
+    uint32_t GetId(void) const { return GetInstance().GetId(); }
 
-    static Node &From(otInstance *aInstance) { return static_cast<Node &>(*aInstance); }
+    /**
+     * Returns the extended role string of the node.
+     *
+     * @returns The role string (e.g., "Leader", "Router", "REED", "FED", "MED", "SED", "Disabled").
+     */
+    const char *GetExtendedRoleString(void) const;
+
+    static Node &From(otInstance *aInstance)
+    {
+        Instance *instance = static_cast<Instance *>(aInstance);
+        return *static_cast<Node *>(instance);
+    }
 
     static void HandleIp6Receive(otMessage *aMessage, void *aContext);
 
@@ -168,15 +194,26 @@ public:
 private:
     Node(void)
         : Platform(static_cast<Instance &>(*this))
+        , mX(0.0f)
+        , mY(0.0f)
+        , mLastParentId(0xffff)
     {
     }
 
     void HandleIp6Receive(OwnedPtr<Message> aMessagePtr);
 
     String<32> mName;
+    float      mX;
+    float      mY;
+    uint32_t   mLastParentId;
+
+public:
 };
 
 inline Node &AsNode(otInstance *aInstance) { return Node::From(aInstance); }
+
+void AllowLinkBetween(Node &aFirstNode, Node &aSecondNode);
+void UnallowLinkBetween(Node &aFirstNode, Node &aSecondNode);
 
 } // namespace Nexus
 

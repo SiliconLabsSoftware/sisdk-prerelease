@@ -34,6 +34,8 @@ provides:
   condition: [device_sdid_260]
 - name: dma_manager_round_robin
   condition: [device_generic_family_sixx301]
+- name: dma_manager_round_robin
+  condition: [device_sdid_265]
 requires:
 - name: dma_manager
 - name: component_catalog
@@ -72,6 +74,9 @@ config_file:
 - path: config/8ch/sl_dma_manager_round_robin_config.h
   file_id: dma_manager_round_robin_config
   condition: [device_generic_family_sixx301]
+- path: config/8ch/sl_dma_manager_round_robin_config.h
+  file_id: dma_manager_round_robin_config
+  condition: [device_sdid_265]
 template_contribution:
 - name: component_catalog
   value: dma_manager_round_robin

@@ -136,6 +136,15 @@
 #ifndef OPENTHREAD_CONFIG_BORDER_ROUTING_ENABLE
 #define OPENTHREAD_CONFIG_BORDER_ROUTING_ENABLE        1
 #endif
+// <q>  NAT64 Border Routing prefix manager
+#ifndef OPENTHREAD_CONFIG_NAT64_BORDER_ROUTING_ENABLE
+#define OPENTHREAD_CONFIG_NAT64_BORDER_ROUTING_ENABLE  1
+#endif
+// <i>  NAT64 Translator
+// <i>  Disabled by default for NCP, translator runs on the host
+#ifndef OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE
+#define OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE      0
+#endif
 // <q>  DNS-SD Platform
 #ifndef OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE
 #define OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE        1
@@ -158,7 +167,11 @@
 #endif
 // <q>  Thread over Infrastructure
 #ifndef OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
-#define OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE       0
+#define OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE       1
+#endif
+// <q>  TREL uses platform DNS-SD (NCP delegates discovery to host over Spinel)
+#ifndef OPENTHREAD_CONFIG_TREL_MANAGE_DNSSD_ENABLE
+#define OPENTHREAD_CONFIG_TREL_MANAGE_DNSSD_ENABLE     OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
 #endif
 // </h>
 
@@ -239,25 +252,33 @@
 #endif
 // </e>
 // <h>  IPv6 Limits
-// <o OPENTHREAD_CONFIG_IP6_MAX_EXT_UCAST_ADDRS>  Maximum IPv6 external unicast addresses
+// <q OPENTHREAD_CONFIG_IP6_INIT_EXT_ADDR_POOL_ENABLE>  Runtime IPv6 external address pools
+// <i>  Enable runtime configuration of external unicast and multicast address pools via otIp6Init().
+#ifndef OPENTHREAD_CONFIG_IP6_INIT_EXT_ADDR_POOL_ENABLE
+#define OPENTHREAD_CONFIG_IP6_INIT_EXT_ADDR_POOL_ENABLE  0
+#endif
+#if OPENTHREAD_CONFIG_IP6_INIT_EXT_ADDR_POOL_ENABLE
+// <e OPENTHREAD_CONFIG_CLI_IFCONFIG_INIT_ENABLE>  CLI support for runtime IPv6 external address pools
+// <i>  Enable `ifconfig init` CLI command for testing otIp6Init() pool configuration.
+#ifndef OPENTHREAD_CONFIG_CLI_IFCONFIG_INIT_ENABLE
+#define OPENTHREAD_CONFIG_CLI_IFCONFIG_INIT_ENABLE  1
+#endif
+// </e>
+#else
+// <o OPENTHREAD_CONFIG_IP6_MAX_EXT_UCAST_ADDRS>  Maximum IPv6 external unicast addresses (ignored in runtime mode)
 // <i>  Maximum number of IPv6 unicast addresses allowed to be externally added
 // <d>  4
 #ifndef OPENTHREAD_CONFIG_IP6_MAX_EXT_UCAST_ADDRS
 #define OPENTHREAD_CONFIG_IP6_MAX_EXT_UCAST_ADDRS   4
 #endif
-// <o OPENTHREAD_CONFIG_IP6_MAX_EXT_MCAST_ADDRS>  Maximum IPv6 external multicast addresses
+// <o OPENTHREAD_CONFIG_IP6_MAX_EXT_MCAST_ADDRS>  Maximum IPv6 external multicast addresses (ignored in runtime mode)
 // <i>  Maximum number of IPv6 multicast addresses allowed to be externally added
 // <d>  4
 #ifndef OPENTHREAD_CONFIG_IP6_MAX_EXT_MCAST_ADDRS
 #define OPENTHREAD_CONFIG_IP6_MAX_EXT_MCAST_ADDRS   4
 #endif
-// <o OPENTHREAD_CONFIG_MLE_IP_ADDRS_TO_REGISTER>  Maximum IPv6 address registrations for MTD
-// <i>  The maximum number of IPv6 address registrations for MTD.
-// <i>  If left unchanged will default to the value of OPENTHREAD_CONFIG_MLE_IP_ADDRS_PER_CHILD
-// <d>  4
-#ifndef OPENTHREAD_CONFIG_MLE_IP_ADDRS_TO_REGISTER
-#define OPENTHREAD_CONFIG_MLE_IP_ADDRS_TO_REGISTER (OPENTHREAD_CONFIG_MLE_IP_ADDRS_PER_CHILD)
 #endif
+// </q>
 // </h>
 // <e>  Jam Detection
 #ifndef OPENTHREAD_CONFIG_JAM_DETECTION_ENABLE
@@ -440,7 +461,7 @@
 // </e>
 // <e>  UDP Forward
 #ifndef OPENTHREAD_CONFIG_UDP_FORWARD_ENABLE
-#define OPENTHREAD_CONFIG_UDP_FORWARD_ENABLE        0
+#define OPENTHREAD_CONFIG_UDP_FORWARD_ENABLE        OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
 #endif
 // </e>
 // <e>  Enable Mac beacon payload parsing support

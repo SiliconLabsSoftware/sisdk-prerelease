@@ -5760,22 +5760,6 @@
         }
       ],
     },
-    ##RADIO_SET_SCHEDULER_PRIORITIES
-    {
-      value: "0x012B",
-      needGeneratedHandler: "yes",
-      commandName: "radioSetSchedulerPriorities",
-      description: "Set the current scheduler priorities for radio operations",
-      commandArguments: [
-        {
-          type: "sl_802154_radio_priorities_t",
-          name: "priorities",
-          description: "The current priorities."
-        }
-      ],
-      responseArguments: [
-      ],
-    },
     ##RADIO_GET_SCHEDULER_SLIPTIME
     {
       value: "0x012C",
@@ -8268,6 +8252,24 @@
           type: "sl_802154_short_addr_t",
           name: "nodeId",
           description: "The short ID of the destination node.",
+        },
+      ],
+      responseArguments: [
+      ],
+    },
+    ## CLEAR_BINDING_TABLE_ON_LEAVE
+    {
+      value: "0x006D",
+      needGeneratedHandler : "yes",
+      commandName: "clearBindingTableOnLeave",
+      description: "When enabled, the stack clears the binding table on
+                    definitive leave (not leave-with-rejoin), as required
+                    for Zigbee 4.0 security profile (e.g. CN-Reset-TC-01).",
+      commandArguments: [
+        {
+          type: "bool",
+          name: "clear",
+          description: "True to clear bindings on leave; false to disable.",
         },
       ],
       responseArguments: [

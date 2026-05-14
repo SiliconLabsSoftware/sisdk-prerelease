@@ -79,6 +79,9 @@ Interpreter::Interpreter(Instance *aInstance, otCliOutputCallback aCallback, voi
     , Utils(aInstance, *this)
     , mCommandIsPending(false)
     , mInternalDebugCommand(false)
+#if OPENTHREAD_CONFIG_CLI_PROMPT_ENABLE
+    , mPromptEnabled(true)
+#endif
     , mTimer(*aInstance, HandleTimer, this)
 #if OPENTHREAD_FTD || OPENTHREAD_MTD
 #if OPENTHREAD_CONFIG_SNTP_CLIENT_ENABLE
@@ -414,6 +417,10 @@ otError Interpreter::SetUserCommands(const otCliCommand *aCommands, uint8_t aLen
 
     return error;
 }
+
+#if OPENTHREAD_CONFIG_CLI_PROMPT_ENABLE
+void Interpreter::SetPromptConfig(bool aEnabled) { mPromptEnabled = aEnabled; }
+#endif
 
 #if OPENTHREAD_FTD || OPENTHREAD_MTD
 
@@ -5611,7 +5618,7 @@ exit:
  * Specifies the preferred router ID that the leader should provide when solicited.
  * @sa otThreadSetPreferredRouterId
  */
-#if OPENTHREAD_FTD
+#if OPENTHREAD_FTD && OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
 template <> otError Interpreter::Process<Cmd("preferrouterid")>(Arg aArgs[])
 {
     return ProcessSet(aArgs, otThreadSetPreferredRouterId);
@@ -6355,10 +6362,10 @@ template <> otError Interpreter::Process<Cmd("singleton")>(Arg aArgs[])
 #if OPENTHREAD_CONFIG_SNTP_CLIENT_ENABLE
 template <> otError Interpreter::Process<Cmd("sntp")>(Arg aArgs[])
 {
-    otError          error = OT_ERROR_NONE;
-    uint16_t         port  = OT_SNTP_DEFAULT_SERVER_PORT;
-    Ip6::MessageInfo messageInfo;
-    otSntpQuery      query;
+    otError       error = OT_ERROR_NONE;
+    uint16_t      port  = OT_SNTP_DEFAULT_SERVER_PORT;
+    otMessageInfo messageInfo;
+    otSntpQuery   query;
 
     /**
      * @cli sntp query
@@ -6384,14 +6391,16 @@ template <> otError Interpreter::Process<Cmd("sntp")>(Arg aArgs[])
     {
         VerifyOrExit(!mSntpQueryingInProgress, error = OT_ERROR_BUSY);
 
+        ClearAllBytes(messageInfo);
+
         if (!aArgs[1].IsEmpty())
         {
-            SuccessOrExit(error = aArgs[1].ParseAsIp6Address(messageInfo.GetPeerAddr()));
+            SuccessOrExit(error = aArgs[1].ParseAsIp6Address(messageInfo.mPeerAddr));
         }
         else
         {
             // Use IPv6 address of default SNTP server.
-            SuccessOrExit(error = messageInfo.GetPeerAddr().FromString(OT_SNTP_DEFAULT_SERVER_IP));
+            SuccessOrExit(error = otIp6AddressFromString(OT_SNTP_DEFAULT_SERVER_IP, &messageInfo.mPeerAddr));
         }
 
         if (!aArgs[2].IsEmpty())
@@ -6399,9 +6408,8 @@ template <> otError Interpreter::Process<Cmd("sntp")>(Arg aArgs[])
             SuccessOrExit(error = aArgs[2].ParseAsUint16(port));
         }
 
-        messageInfo.SetPeerPort(port);
-
-        query.mMessageInfo = static_cast<const otMessageInfo *>(&messageInfo);
+        messageInfo.mPeerPort = port;
+        query.mMessageInfo    = &messageInfo;
 
         SuccessOrExit(error = otSntpClientQuery(GetInstancePtr(), &query, &Interpreter::HandleSntpResponse, this));
 
@@ -7619,6 +7627,53 @@ template <> otError Interpreter::Process<Cmd("vendor")>(Arg aArgs[])
         error = ProcessGetSet(aArgs, otThreadGetVendorAppUrl, otThreadSetVendorAppUrl);
 #endif
     }
+    /**
+     * @cli vendor oui
+     * @code
+     * vendor oui
+     * B4-A6-61
+     * Done
+     * @endcode
+     * @par api_copy
+     * #otThreadGetVendorOui
+     */
+    else if (aArgs[0] == "oui")
+    {
+        if (aArgs[1].IsEmpty())
+        {
+            uint32_t oui = otThreadGetVendorOui(GetInstancePtr());
+
+            if (oui == OT_THREAD_UNSPECIFIED_VENDOR_OUI)
+            {
+                OutputLine("unspecified");
+            }
+            else
+            {
+                OutputLine("%02X-%02X-%02X", static_cast<uint8_t>((oui >> 16) & 0xff),
+                           static_cast<uint8_t>((oui >> 8) & 0xff), static_cast<uint8_t>(oui & 0xff));
+            }
+
+            error = OT_ERROR_NONE;
+        }
+        else
+        {
+#if OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE
+            /**
+             * @cli vendor oui (set)
+             * @code
+             * vendor oui 0xb4a661
+             * Done
+             * @endcode
+             * @par api_copy
+             * #otThreadSetVendorOui
+             * @cparam vendor oui @ca{oui}
+             */
+            error = ProcessSet(aArgs + 1, otThreadSetVendorOui);
+#else
+            error = OT_ERROR_INVALID_ARGS;
+#endif
+        }
+    }
 
     return error;
 }
@@ -7790,13 +7845,12 @@ void Interpreter::HandleDiagnosticGetResponse(otError              aError,
                                               const otMessageInfo *aMessageInfo,
                                               void                *aContext)
 {
-    static_cast<Interpreter *>(aContext)->HandleDiagnosticGetResponse(
-        aError, aMessage, static_cast<const Ip6::MessageInfo *>(aMessageInfo));
+    static_cast<Interpreter *>(aContext)->HandleDiagnosticGetResponse(aError, aMessage, aMessageInfo);
 }
 
-void Interpreter::HandleDiagnosticGetResponse(otError                 aError,
-                                              const otMessage        *aMessage,
-                                              const Ip6::MessageInfo *aMessageInfo)
+void Interpreter::HandleDiagnosticGetResponse(otError              aError,
+                                              const otMessage     *aMessage,
+                                              const otMessageInfo *aMessageInfo)
 {
     uint8_t               buf[16];
     uint16_t              bytesToPrint;
@@ -8427,7 +8481,9 @@ void Interpreter::Initialize(otInstance *aInstance, otCliOutputCallback aCallbac
 void Interpreter::OutputPrompt(void)
 {
 #if OPENTHREAD_CONFIG_CLI_PROMPT_ENABLE
-    static const char sPrompt[] = "> ";
+    static const char kPrompt[] = "> ";
+
+    VerifyOrExit(mPromptEnabled);
 
     // The `OutputFormat()` below is adding the prompt which is not
     // part of any command output, so we set the `EmittingCommandOutput`
@@ -8435,9 +8491,12 @@ void Interpreter::OutputPrompt(void)
     // log (under `OPENTHREAD_CONFIG_CLI_LOG_INPUT_OUTPUT_ENABLE`).
 
     SetEmittingCommandOutput(false);
-    OutputFormat("%s", sPrompt);
+    OutputFormat("%s", kPrompt);
     SetEmittingCommandOutput(true);
-#endif // OPENTHREAD_CONFIG_CLI_PROMPT_ENABLE
+
+exit:
+    return;
+#endif
 }
 
 void Interpreter::HandleTimer(Timer &aTimer)
@@ -8644,7 +8703,7 @@ otError Interpreter::ProcessCommand(Arg aArgs[])
 #endif
         CmdEntry("platform"),
         CmdEntry("pollperiod"),
-#if OPENTHREAD_FTD
+#if OPENTHREAD_FTD && OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
         CmdEntry("preferrouterid"),
 #endif
 #if OPENTHREAD_CONFIG_BORDER_ROUTER_ENABLE
@@ -8765,55 +8824,6 @@ otError Interpreter::ProcessCommand(Arg aArgs[])
     }
 
     return error;
-}
-
-extern "C" void otCliInit(otInstance *aInstance, otCliOutputCallback aCallback, void *aContext)
-{
-    Interpreter::Initialize(aInstance, aCallback, aContext);
-
-#if OPENTHREAD_CONFIG_CLI_VENDOR_COMMANDS_ENABLE && OPENTHREAD_CONFIG_CLI_MAX_USER_CMD_ENTRIES > 1
-    otCliVendorSetUserCommands();
-#endif
-}
-
-extern "C" void otCliInputLine(char *aBuf) { Interpreter::GetInterpreter().ProcessLine(aBuf); }
-
-extern "C" otError otCliSetUserCommands(const otCliCommand *aUserCommands, uint8_t aLength, void *aContext)
-{
-    return Interpreter::GetInterpreter().SetUserCommands(aUserCommands, aLength, aContext);
-}
-
-extern "C" void otCliOutputBytes(const uint8_t *aBytes, uint8_t aLength)
-{
-    Interpreter::GetInterpreter().OutputBytes(aBytes, aLength);
-}
-
-extern "C" void otCliOutputFormat(const char *aFmt, ...)
-{
-    va_list aAp;
-    va_start(aAp, aFmt);
-    Interpreter::GetInterpreter().OutputFormatV(aFmt, aAp);
-    va_end(aAp);
-}
-
-extern "C" void otCliAppendResult(otError aError) { Interpreter::GetInterpreter().OutputResult(aError); }
-
-extern "C" void otCliPlatLogv(otLogLevel aLogLevel, otLogRegion aLogRegion, const char *aFormat, va_list aArgs)
-{
-    OT_UNUSED_VARIABLE(aLogLevel);
-    OT_UNUSED_VARIABLE(aLogRegion);
-
-    VerifyOrExit(Interpreter::IsInitialized());
-
-    // CLI output is being used for logging, so we set the flag
-    // `EmittingCommandOutput` to false indicate this.
-    Interpreter::GetInterpreter().SetEmittingCommandOutput(false);
-    Interpreter::GetInterpreter().OutputFormatV(aFormat, aArgs);
-    Interpreter::GetInterpreter().OutputNewLine();
-    Interpreter::GetInterpreter().SetEmittingCommandOutput(true);
-
-exit:
-    return;
 }
 
 } // namespace Cli

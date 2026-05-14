@@ -242,22 +242,22 @@ public:
     const Router *FindRouterByRloc16(uint16_t aRloc16) const;
 
     /**
-     * Finds the router that is the next hop of a given router.
+     * Finds the router that is the next hop towards a given router.
      *
-     * @param[in]  aRouter  The router to find next hop of.
+     * @param[in]  aRouter  The destination router.
      *
      * @returns A pointer to the router or `nullptr` if the router could not be found.
      */
-    Router *FindNextHopOf(const Router &aRouter) { return AsNonConst(AsConst(this)->FindNextHopOf(aRouter)); }
+    Router *FindNextHopTowards(const Router &aRouter) { return AsNonConst(AsConst(this)->FindNextHopTowards(aRouter)); }
 
     /**
-     * Finds the router that is the next hop of a given router.
+     * Finds the router that is the next hop towards a given router.
      *
-     * @param[in]  aRouter  The router to find next hop of.
+     * @param[in]  aRouter  The destination router.
      *
      * @returns A pointer to the router or `nullptr` if the router could not be found.
      */
-    const Router *FindNextHopOf(const Router &aRouter) const;
+    const Router *FindNextHopTowards(const Router &aRouter) const;
 
     /**
      * Find the router for a given MAC Extended Address.
@@ -339,12 +339,11 @@ public:
     bool IsAllocated(uint8_t aRouterId) const { return mRouterIdMap.IsAllocated(aRouterId); }
 
     /**
-     * Updates the Router ID allocation set.
+     * Updates the allocated Router ID mask.
      *
-     * @param[in]  aRouterIdSequence  The Router ID Sequence.
-     * @param[in]  aRouterIdSet       The Router ID Set.
+     * @param[in]  aRouterIdMask      The Router ID Mask.
      */
-    void UpdateRouterIdSet(uint8_t aRouterIdSequence, const Mle::RouterIdSet &aRouterIdSet);
+    void UpdateRouterIdMask(const Mle::RouterIdMask &aRouterIdMask);
 
     /**
      * Updates the routes based on a received `RouteTlv` from a neighboring router.
@@ -365,11 +364,11 @@ public:
     void UpdateRouterOnFtdChild(const Mle::RouteTlv &aRouteTlv, uint8_t aParentId);
 
     /**
-     * Gets the allocated Router ID set.
+     * Gets the allocated Router ID Mask.
      *
-     * @param[out]  aRouterIdSet   A reference to output the allocated Router ID set.
+     * @param[out]  aRouterIdMask   A reference to output the allocated Router ID Mask.
      */
-    void GetRouterIdSet(Mle::RouterIdSet &aRouterIdSet) const { return mRouterIdMap.GetAsRouterIdSet(aRouterIdSet); }
+    void GetRouterIdMask(Mle::RouterIdMask &aRouterIdMask) const;
 
     /**
      * Fills a Route TLV.
@@ -462,7 +461,6 @@ private:
         void    SetIndex(uint8_t aRouterId, uint8_t aIndex) { mIndexes[aRouterId] = kAllocatedFlag | aIndex; }
         bool    CanAllocate(uint8_t aRouterId) const { return (mIndexes[aRouterId] == 0); }
         void    Release(uint8_t aRouterId) { mIndexes[aRouterId] = kReuseDelay; }
-        void    GetAsRouterIdSet(Mle::RouterIdSet &aRouterIdSet) const;
         void    HandleTimeTick(void);
 
     private:

@@ -60,7 +60,7 @@ sudo INFRA_IF_NAME=eth0 \
                    -DOT_PLATFORM_CONFIG=openthread-core-silabs-posix-config.h \
                    -DOTBR_DUA_ROUTING=ON \
                    -DOTBR_DHCP6_PD=ON \
-                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.1.0.0_GitHub-111e78d03 -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.1.0.0_GitHub-51353c41d" \
+                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.1.0.0_GitHub-717abf0dc -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.1.0.0_GitHub-fb274efe6" \
      ./script/setup
 
 */
@@ -89,7 +89,7 @@ sudo INFRA_IF_NAME=eth0 \
                    -DOT_PLATFORM_CONFIG=openthread-core-silabs-posix-config.h \
                    -DOTBR_DUA_ROUTING=ON \
                    -DOTBR_DHCP6_PD=ON \
-                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.1.0.0_GitHub-111e78d03 -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.1.0.0_GitHub-51353c41d" \
+                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.1.0.0_GitHub-717abf0dc -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.1.0.0_GitHub-fb274efe6" \
      ./script/setup
 */
 
@@ -177,6 +177,16 @@ sudo INFRA_IF_NAME=eth0 RELEASE=1 BACKBONE_ROUTER=1 BORDER_ROUTING=0 NAT64=0 \
 /******************************************************************************
  * Vendor defaults
  *****************************************************************************/
+
+/**
+ * OPENTHREAD_NCP
+ *
+ * POSIX/OTBR host builds are not Silicon Labs on-chip NCP firmware.
+ */
+#ifndef OPENTHREAD_NCP
+#define OPENTHREAD_NCP 0
+#endif
+
 /**
  * OPENTHREAD_POSIX_CONFIG_SPINEL_VENDOR_INTERFACE_URL_PROTOCOL_NAME
  *
@@ -381,9 +391,16 @@ sudo INFRA_IF_NAME=eth0 RELEASE=1 BACKBONE_ROUTER=1 BORDER_ROUTING=0 NAT64=0 \
  *
  * This value is a higher on the OTBR than the stack default.
  *
+ * Security processing is delegated to the RCP. For Series-3, we need to account for more ahead time;
+ * even though the EnhAck path is entirely in RAM, LPWCRYPTO executes from flash,
+ * adding non-deterministic latency on the critical path from MAC timer fire to RAIL scheduled TX submission.
+ * NOTE: This increased ahead time configuration on the host is compatible with both Series-2
+ * and Series-3 RCPs because this config only controls when the MAC timer fires.
+ * The actual on-air TX time is anchored to an absolute radio timestamp targeting the child's CSL receive window.
+ * A Series-2 RCP simply receives the frame with more lead time than it needs.
  */
 #undef OPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US
-#define OPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US 5000
+#define OPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US 18000
 
 /**
  * OPENTHREAD_CONFIG_CSL_TRANSMIT_TIME_AHEAD

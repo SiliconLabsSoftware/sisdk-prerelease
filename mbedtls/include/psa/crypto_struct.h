@@ -55,6 +55,13 @@
 
 #ifndef PSA_CRYPTO_STRUCT_H
 #define PSA_CRYPTO_STRUCT_H
+
+#if defined(__IAR_SYSTEMS_ICC__) && __VER__ >= 9070000
+/* Suppress IAR Pa217 (bit-field/non-bit-field overlap). Tag was
+ * introduced in IAR 9.70; older versions skip the gate entirely. */
+#pragma diag_suppress=Pa217
+#endif
+
 #include "mbedtls/private_access.h"
 
 #ifdef __cplusplus
@@ -531,6 +538,10 @@ psa_verify_hash_interruptible_operation_init(void)
 
 #ifdef __cplusplus
 }
+#endif
+
+#if defined(__IAR_SYSTEMS_ICC__) && __VER__ >= 9070000
+#pragma diag_default=Pa217
 #endif
 
 #endif /* PSA_CRYPTO_STRUCT_H */

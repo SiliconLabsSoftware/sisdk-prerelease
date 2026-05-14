@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="ASCII"?>
 <model:MDescriptors xmlns:model="http://www.silabs.com/ss/Studio.ecore">
+  <descriptors name="cpc-spinel-proxy" label="OpenThread - Host CPC Spinel Proxy" description="Host daemon that bridges a Unix-domain Spinel socket to a CPCd instance. Intended for host environments which support socket based spinel interfaces, such as the default Android Thread HAL.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="openthread.cpc-spinel-proxy.cpc-spinel-proxy.slcp"/>
+    <properties key="projectFilePaths" value="cpc-spinel-proxy/cpc-spinel-proxy.slcp"/>
+    <properties key="readmeFiles" value="cpc-spinel-proxy/README.md"/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*linux.* .*macos.* .*win32.*"/>
+    <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc"/>
+    <properties key="category" value="OpenThread Host Tools"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Capability|Multiprotocol Device\ Type|Host Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+  </descriptors>
   <descriptors name="ot-ble-dmp-multi-instance" label="OpenThread BLE DMP - SoC FreeRTOS (multi-instance)" description="Demonstrates DMP (Dynamic Multiprotocol) with OpenThread multi-instance and Bluetooth running on FreeRTOS.
 ">
     <properties key="namespace" value="template.uc"/>

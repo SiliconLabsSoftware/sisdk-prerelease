@@ -30,7 +30,9 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include "sl_status.h"
+#include "app_rta.h"
 #include "cs_rreq.h"
 #include "cs_rreq_internal.h"
 #include "cs_rreq_config.h"
@@ -44,6 +46,8 @@
 static void process_remote_ranging_data(rreq_t *rreq,
                                         uint8_t *data,
                                         uint32_t data_size);
+static void dispatch_evt(rreq_t *rreq, const cs_rreq_ras_evt_t *evt);
+static cs_rreq_error_t evt_type_to_error(cs_rreq_ras_evt_type_t type);
 
 #if defined(CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT) && (CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT == 1)
 static void get_lost_segments(uint64_t lost_segments,
@@ -51,28 +55,252 @@ static void get_lost_segments(uint64_t lost_segments,
                               uint8_t *end_segment);
 #endif // defined(CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT) && (CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT == 1)
 
+// Static event handlers
+// Guard must be acquired before calling the event handlers
+static void handle_initialized(rreq_t *rreq, const cs_rreq_ras_evt_t *evt);
+static void handle_mode_changed(rreq_t *rreq, const cs_rreq_ras_evt_t *evt);
+static void handle_reception_finished(rreq_t *rreq, const cs_rreq_ras_evt_t *evt);
+#if defined(CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT) && (CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT == 1)
+static void handle_ack_finished(rreq_t *rreq, const cs_rreq_ras_evt_t *evt);
+static void handle_ranging_data_ready(rreq_t *rreq, const cs_rreq_ras_evt_t *evt);
+static void handle_abort_finished(rreq_t *rreq, const cs_rreq_ras_evt_t *evt);
+static void handle_ranging_data_overwritten(rreq_t *rreq, const cs_rreq_ras_evt_t *evt);
+#endif // CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT
+static void handle_timeout(rreq_t *rreq, const cs_rreq_ras_evt_t *evt);
+
+
+void cs_rreq_step(void) {
+  cs_rreq_ras_evt_t evt;
+  size_t size = sizeof(evt);
+  sl_status_t sc =
+      app_rta_queue_read_and_acquire(cs_rreq_ctx, (uint8_t *)&evt, &size);
+  if (sc == SL_STATUS_EMPTY) {
+    return;
+  }
+  if (sc != SL_STATUS_OK) {
+    rreq_log_error("Failed to read RAS event queue, sc=0x%lx" LOG_NL,
+                   (unsigned long)sc);
+    return;
+  }
+
+  rreq_t *rreq = cs_rreq_find(evt.connection);
+  if (rreq == NULL) {
+    rreq_log_error(INSTANCE_PREFIX
+                   "RAS - unknown connection id (evt type=%u)!" LOG_NL,
+                   evt.connection, (unsigned)evt.type);
+    rreq_error(NULL, evt_type_to_error(evt.type), SL_STATUS_NULL_POINTER);
+  } else {
+    dispatch_evt(rreq, &evt);
+  }
+
+  (void)app_rta_release(cs_rreq_ctx);
+}
+
+// Helper functions
+// Map an event type to the error code reported when the corresponding rreq
+// instance can no longer be resolved (e.g. the connection was removed
+// between the callback firing and the queue being drained).
+static cs_rreq_error_t evt_type_to_error(cs_rreq_ras_evt_type_t type)
+{
+  switch (type) {
+    case CS_RREQ_RAS_EVT_INITIALIZED:
+      return CS_RREQ_ERROR_RAS_CLIENT_INIT_FAILED;
+    case CS_RREQ_RAS_EVT_MODE_CHANGED:
+      return CS_RREQ_ERROR_RAS_CLIENT_MODE_CHANGE_FAILED;
+    case CS_RREQ_RAS_EVT_RECEPTION_FINISHED:
+      return CS_RREQ_ERROR_RAS_CLIENT_DATA_RECEPTION_FINISH_FAILED;
+#if defined(CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT) && (CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT == 1)
+    case CS_RREQ_RAS_EVT_ACK_FINISHED:
+      return CS_RREQ_ERROR_RAS_CLIENT_ON_ACK_FINISHED_FAILED;
+    case CS_RREQ_RAS_EVT_RANGING_DATA_READY:
+      return CS_RREQ_ERROR_RAS_CLIENT_RANGING_DATA_READY_FAILED;
+    case CS_RREQ_RAS_EVT_ABORT_FINISHED:
+      return CS_RREQ_ERROR_RAS_CLIENT_ABORT_FINISHED_FAILED;
+    case CS_RREQ_RAS_EVT_RANGING_DATA_OVERWRITTEN:
+      return CS_RREQ_ERROR_RAS_CLIENT_RANGING_DATA_OVERWRITTEN_FAILED;
+#endif // CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT
+    case CS_RREQ_RAS_EVT_TIMEOUT:
+      return CS_RREQ_ERROR_RAS_CLIENT_TIMEOUT;
+    default:
+      return CS_RREQ_ERROR_RAS_CLIENT_INIT_FAILED;
+  }
+}
+
+// Dispatch one already-dequeued event. Caller holds the cs_rreq guard.
+static void dispatch_evt(rreq_t *rreq, const cs_rreq_ras_evt_t *evt)
+{
+  switch (evt->type) {
+    case CS_RREQ_RAS_EVT_INITIALIZED:
+      handle_initialized(rreq, evt);
+      break;
+    case CS_RREQ_RAS_EVT_MODE_CHANGED:
+      handle_mode_changed(rreq, evt);
+      break;
+    case CS_RREQ_RAS_EVT_RECEPTION_FINISHED:
+      handle_reception_finished(rreq, evt);
+      break;
+#if defined(CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT) && (CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT == 1)
+    case CS_RREQ_RAS_EVT_ACK_FINISHED:
+      handle_ack_finished(rreq, evt);
+      break;
+    case CS_RREQ_RAS_EVT_RANGING_DATA_READY:
+      handle_ranging_data_ready(rreq, evt);
+      break;
+    case CS_RREQ_RAS_EVT_ABORT_FINISHED:
+      handle_abort_finished(rreq, evt);
+      break;
+    case CS_RREQ_RAS_EVT_RANGING_DATA_OVERWRITTEN:
+      handle_ranging_data_overwritten(rreq, evt);
+      break;
+#endif // CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT
+    case CS_RREQ_RAS_EVT_TIMEOUT:
+      handle_timeout(rreq, evt);
+      break;
+    default:
+      rreq_log_error(INSTANCE_PREFIX "RAS - unknown event type %u!" LOG_NL,
+                     rreq->conn_handle,
+                     (unsigned)evt->type);
+      break;
+  }
+}
 
 // -----------------------------------------------------------------------------
-// Event / callback definitions
+// Public cs_ras_client callbacks - queue events only, no guard.
 
-/******************************************************************************
- * RAS client initialized callback.
- *****************************************************************************/
 void cs_ras_client_on_initialized(uint8_t connection,
                                   cs_ras_features_t features,
                                   sl_status_t sc_in)
 {
-  sm_evt_data_t evt;
-  rreq_t *rreq = cs_rreq_find(connection);
+  cs_rreq_ras_evt_t evt;
+  memset(&evt, 0, sizeof(evt));
+  evt.type = CS_RREQ_RAS_EVT_INITIALIZED;
+  evt.connection = connection;
+  evt.data.initialized.features = features;
+  evt.data.initialized.sc = sc_in;
+  cs_rreq_post_ras_evt(&evt);
+}
+
+void cs_ras_client_on_mode_changed(uint8_t       connection,
+                                   cs_ras_mode_t mode,
+                                   sl_status_t   sc_in)
+{
+  cs_rreq_ras_evt_t evt;
+  memset(&evt, 0, sizeof(evt));
+  evt.type = CS_RREQ_RAS_EVT_MODE_CHANGED;
+  evt.connection = connection;
+  evt.data.mode_changed.mode = mode;
+  evt.data.mode_changed.sc = sc_in;
+  cs_rreq_post_ras_evt(&evt);
+}
+
+void cs_ras_client_on_ranging_data_reception_finished(uint8_t                         connection,
+                                                      bool                            real_time,
+                                                      bool                            retrieve_lost,
+                                                      sl_status_t                     sc_in,
+                                                      cs_ras_cp_response_code_value_t response,
+                                                      cs_ras_ranging_counter_t        ranging_counter,
+                                                      uint8_t                         start_segment,
+                                                      uint8_t                         end_segment,
+                                                      bool                            recoverable,
+                                                      uint32_t                        size,
+                                                      bool                            last_arrived,
+                                                      uint8_t                         last_known_segment,
+                                                      uint64_t                        lost_segments)
+{
+  cs_rreq_ras_evt_t evt;
+  memset(&evt, 0, sizeof(evt));
+  evt.type = CS_RREQ_RAS_EVT_RECEPTION_FINISHED;
+  evt.connection = connection;
+  evt.data.reception_finished.real_time          = real_time;
+  evt.data.reception_finished.retrieve_lost      = retrieve_lost;
+  evt.data.reception_finished.sc                 = sc_in;
+  evt.data.reception_finished.response           = response;
+  evt.data.reception_finished.ranging_counter    = ranging_counter;
+  evt.data.reception_finished.start_segment      = start_segment;
+  evt.data.reception_finished.end_segment        = end_segment;
+  evt.data.reception_finished.recoverable        = recoverable;
+  evt.data.reception_finished.size               = size;
+  evt.data.reception_finished.last_arrived       = last_arrived;
+  evt.data.reception_finished.last_known_segment = last_known_segment;
+  evt.data.reception_finished.lost_segments      = lost_segments;
+  cs_rreq_post_ras_evt(&evt);
+}
+
+#if defined(CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT) && (CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT == 1)
+void cs_ras_client_on_ack_finished(uint8_t connection,
+                                   sl_status_t sc_in,
+                                   cs_ras_cp_response_code_value_t response)
+{
+  cs_rreq_ras_evt_t evt;
+  memset(&evt, 0, sizeof(evt));
+  evt.type = CS_RREQ_RAS_EVT_ACK_FINISHED;
+  evt.connection = connection;
+  evt.data.ack_finished.sc = sc_in;
+  evt.data.ack_finished.response = response;
+  cs_rreq_post_ras_evt(&evt);
+}
+
+void cs_ras_client_on_ranging_data_ready(uint8_t connection,
+                                         cs_ras_ranging_counter_t ranging_counter)
+{
+  cs_rreq_ras_evt_t evt;
+  memset(&evt, 0, sizeof(evt));
+  evt.type = CS_RREQ_RAS_EVT_RANGING_DATA_READY;
+  evt.connection = connection;
+  evt.data.ranging_data_ready.ranging_counter = ranging_counter;
+  cs_rreq_post_ras_evt(&evt);
+}
+
+void cs_ras_client_on_abort_finished(uint8_t connection,
+                                     sl_status_t sc_in,
+                                     cs_ras_cp_response_code_value_t response)
+{
+  cs_rreq_ras_evt_t evt;
+  memset(&evt, 0, sizeof(evt));
+  evt.type = CS_RREQ_RAS_EVT_ABORT_FINISHED;
+  evt.connection = connection;
+  evt.data.abort_finished.sc = sc_in;
+  evt.data.abort_finished.response = response;
+  cs_rreq_post_ras_evt(&evt);
+}
+
+void cs_ras_client_on_ranging_data_overwritten(uint8_t connection,
+                                               cs_ras_ranging_counter_t ranging_counter)
+{
+  cs_rreq_ras_evt_t evt;
+  memset(&evt, 0, sizeof(evt));
+  evt.type = CS_RREQ_RAS_EVT_RANGING_DATA_OVERWRITTEN;
+  evt.connection = connection;
+  evt.data.ranging_data_overwritten.ranging_counter = ranging_counter;
+  cs_rreq_post_ras_evt(&evt);
+}
+#endif // defined(CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT) && (CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT == 1)
+
+bool cs_ras_client_on_timeout(uint8_t connection,
+                              cs_ras_client_timeout_t timeout,
+                              cs_ras_client_timeout_action_t action)
+{
+  // Default response: let the RAS client perform the action automatically.
+  // The error is reported asynchronously from handle_timeout.
+  cs_rreq_ras_evt_t evt;
+  memset(&evt, 0, sizeof(evt));
+  evt.type = CS_RREQ_RAS_EVT_TIMEOUT;
+  evt.connection = connection;
+  evt.data.timeout.timeout = timeout;
+  evt.data.timeout.action = action;
+  cs_rreq_post_ras_evt(&evt);
+  return false;
+}
+
+// -----------------------------------------------------------------------------
+// Static event handlers
+
+static void handle_initialized(rreq_t *rreq, const cs_rreq_ras_evt_t *evt)
+{
+  sm_evt_data_t sm_evt;
+  cs_ras_features_t features = evt->data.initialized.features;
+  sl_status_t sc_in = evt->data.initialized.sc;
   sl_status_t sc;
-  if (rreq == NULL) {  
-    rreq_log_error(INSTANCE_PREFIX "RAS - unknown connection id!" LOG_NL,
-                        connection);
-    rreq_error(rreq,
-               CS_RREQ_ERROR_RAS_CLIENT_INIT_FAILED,
-               SL_STATUS_NULL_POINTER);
-    return;
-  }
 
   if (rreq->config.ras_config.real_time_ranging_data_indication
       && !(features & CS_RAS_FEATURE_RT_RANGING_DATA_MASK)) {
@@ -82,21 +310,20 @@ void cs_ras_client_on_initialized(uint8_t connection,
     rreq_error(rreq,
                CS_RREQ_ERROR_RAS_CLIENT_INIT_FEATURE_NOT_SUPPORTED,
                sc_in);
-    evt.evt_init_completed = SL_STATUS_NOT_SUPPORTED;
-    sc = sm_on_evt(rreq, RREQ_EVT_INIT_COMPLETED, &evt);
+    sm_evt.evt_init_completed = SL_STATUS_NOT_SUPPORTED;
+    (void)sm_on_evt(rreq, RREQ_EVT_INIT_COMPLETED, &sm_evt);
     return;
   }
 
   if (sc_in != SL_STATUS_OK) {
     rreq_log_error(INSTANCE_PREFIX "RAS - failed to initialize client! [sc: 0x%lx]" LOG_NL,
-                        rreq->conn_handle,
-                        (unsigned long)sc_in);
+                   rreq->conn_handle,
+                   (unsigned long)sc_in);
     rreq_error(rreq,
                CS_RREQ_ERROR_RAS_CLIENT_INIT_FAILED,
                sc_in);
-    // RAS Client init failed
-    evt.evt_init_completed = sc_in;
-    sc = sm_on_evt(rreq, RREQ_EVT_INIT_COMPLETED, &evt);
+    sm_evt.evt_init_completed = sc_in;
+    (void)sm_on_evt(rreq, RREQ_EVT_INIT_COMPLETED, &sm_evt);
     return;
   }
 
@@ -112,9 +339,8 @@ void cs_ras_client_on_initialized(uint8_t connection,
     rreq_error(rreq,
                CS_RREQ_ERROR_RAS_CLIENT_CONFIG_FAILED,
                sc);
-    // RAS Client init faled
-    evt.evt_init_completed = sc;
-    sc = sm_on_evt(rreq, RREQ_EVT_INIT_COMPLETED, &evt);
+    sm_evt.evt_init_completed = sc;
+    (void)sm_on_evt(rreq, RREQ_EVT_INIT_COMPLETED, &sm_evt);
     return;
   }
 
@@ -129,44 +355,29 @@ void cs_ras_client_on_initialized(uint8_t connection,
                 ((rreq->config.ras_config.on_demand_ranging_data_indication) ? "on" : "off"),
                 ((rreq->config.ras_config.ranging_data_ready_notification) ? "on" : "off"),
                 ((rreq->config.ras_config.ranging_data_overwritten_notification) ? "on" : "off"));
-  // RAS Client init completed
-  evt.evt_init_completed = SL_STATUS_OK;
-  sc = sm_on_evt(rreq, RREQ_EVT_INIT_COMPLETED, &evt);
-  return;
+  sm_evt.evt_init_completed = SL_STATUS_OK;
+  (void)sm_on_evt(rreq, RREQ_EVT_INIT_COMPLETED, &sm_evt);
 }
 
-/******************************************************************************
- * RAS client on mode change callback.
- *****************************************************************************/
-void cs_ras_client_on_mode_changed(uint8_t       connection,
-                                   cs_ras_mode_t mode,
-                                   sl_status_t   sc_in)
+static void handle_mode_changed(rreq_t *rreq, const cs_rreq_ras_evt_t *evt)
 {
-  sm_evt_data_t evt;
+  sm_evt_data_t sm_evt;
+  cs_ras_mode_t mode = evt->data.mode_changed.mode;
+  sl_status_t sc_in = evt->data.mode_changed.sc;
   sl_status_t sc;
-  rreq_t *rreq = cs_rreq_find(connection);
-  if (rreq == NULL) {
-    rreq_log_error(INSTANCE_PREFIX "RAS - mode change - unknown connection id!" LOG_NL,
-                   connection);
-    rreq_error(rreq,
-               CS_RREQ_ERROR_RAS_CLIENT_MODE_CHANGE_FAILED,
-               SL_STATUS_NULL_POINTER);
-    return;
-  }
 
   if (sc_in != SL_STATUS_OK) {
     rreq_log_error(INSTANCE_PREFIX "RAS - failed to change mode to %u! [sc: 0x%lx]" LOG_NL,
-                        connection,
-                        mode,
-                        (unsigned long)sc_in);
+                   rreq->conn_handle,
+                   mode,
+                   (unsigned long)sc_in);
     rreq_error(rreq,
                CS_RREQ_ERROR_RAS_CLIENT_MODE_CHANGE_FAILED,
                sc_in);
-    // RREQ enable failed
-    evt.evt_enable_completed.status = sc_in;
-    evt.evt_enable_completed.enable 
+    sm_evt.evt_enable_completed.status = sc_in;
+    sm_evt.evt_enable_completed.enable
       = (rreq->state == RREQ_STATE_ENABLING) ? CS_RREQ_ENABLE : CS_RREQ_DISABLE;
-    sc = sm_on_evt(rreq, RREQ_EVT_ENABLE_COMPLETED, &evt);
+    (void)sm_on_evt(rreq, RREQ_EVT_ENABLE_COMPLETED, &sm_evt);
     return;
   }
 
@@ -181,7 +392,6 @@ void cs_ras_client_on_mode_changed(uint8_t       connection,
 
   switch (mode) {
     case CS_RAS_MODE_REAL_TIME_RANGING_DATA:
-      // Emit the event for the initialization phase
       sc = cs_ras_client_real_time_receive(rreq->conn_handle,
                                            sizeof(buffer->data),
                                            buffer->data);
@@ -196,31 +406,27 @@ void cs_ras_client_on_mode_changed(uint8_t       connection,
       }
       rreq_log_debug(INSTANCE_PREFIX "RAS - real-time data reception started" LOG_NL,
                      rreq->conn_handle);
-      // RREQ enable completed
-      evt.evt_enable_completed.status = sc;
-      evt.evt_enable_completed.enable 
+      sm_evt.evt_enable_completed.status = sc;
+      sm_evt.evt_enable_completed.enable
         = (rreq->state == RREQ_STATE_ENABLING) ? CS_RREQ_ENABLE : CS_RREQ_DISABLE;
-      sc = sm_on_evt(rreq, RREQ_EVT_ENABLE_COMPLETED, &evt);
+      (void)sm_on_evt(rreq, RREQ_EVT_ENABLE_COMPLETED, &sm_evt);
       break;
     case CS_RAS_MODE_ON_DEMAND_RANGING_DATA:
-      // RREQ enable success
-      evt.evt_enable_completed.status = SL_STATUS_OK;
-      evt.evt_enable_completed.enable 
+      sm_evt.evt_enable_completed.status = SL_STATUS_OK;
+      sm_evt.evt_enable_completed.enable
         = (rreq->state == RREQ_STATE_ENABLING) ? CS_RREQ_ENABLE : CS_RREQ_DISABLE;
-      sc = sm_on_evt(rreq, RREQ_EVT_ENABLE_COMPLETED, &evt);
+      (void)sm_on_evt(rreq, RREQ_EVT_ENABLE_COMPLETED, &sm_evt);
       break;
     case CS_RAS_MODE_CHANGE_IN_PROGRESS:
       rreq_log_debug(INSTANCE_PREFIX "RAS - mode change in progress ..." LOG_NL,
                      rreq->conn_handle);
       break;
     case CS_RAS_MODE_NONE:
-      // Check if disabled
-      if (rreq->state != RREQ_STATE_INIT){
-        // RREQ disable success
-        evt.evt_enable_completed.status = SL_STATUS_OK;
-        evt.evt_enable_completed.enable 
+      if (rreq->state != RREQ_STATE_INIT) {
+        sm_evt.evt_enable_completed.status = SL_STATUS_OK;
+        sm_evt.evt_enable_completed.enable
             = (rreq->state == RREQ_STATE_ENABLING) ? CS_RREQ_ENABLE : CS_RREQ_DISABLE;
-        sc = sm_on_evt(rreq, RREQ_EVT_ENABLE_COMPLETED, &evt);
+        (void)sm_on_evt(rreq, RREQ_EVT_ENABLE_COMPLETED, &sm_evt);
       }
       break;
     default:
@@ -228,33 +434,13 @@ void cs_ras_client_on_mode_changed(uint8_t       connection,
   }
 }
 
-/******************************************************************************
- * RAS client callback that indicates the end of reception of ranging data.
- *****************************************************************************/
-void cs_ras_client_on_ranging_data_reception_finished(uint8_t                         connection,
-                                                      bool                            real_time,
-                                                      bool                            retrieve_lost,
-                                                      sl_status_t                     sc,
-                                                      cs_ras_cp_response_code_value_t response,
-                                                      cs_ras_ranging_counter_t        ranging_counter,
-                                                      uint8_t                         start_segment,
-                                                      uint8_t                         end_segment,
-                                                      bool                            recoverable,
-                                                      uint32_t                        size,
-                                                      bool                            last_arrived,
-                                                      uint8_t                         last_known_segment,
-                                                      uint64_t                        lost_segments)
+static void handle_reception_finished(rreq_t *rreq, const cs_rreq_ras_evt_t *evt)
 {
   sl_status_t status;
-  rreq_t *rreq = cs_rreq_find(connection);
-  if (rreq == NULL) {
-    rreq_log_error(INSTANCE_PREFIX "RAS - reception finished - unknown connection id!" LOG_NL,
-                   connection);
-    rreq_error(rreq,
-               CS_RREQ_ERROR_RAS_CLIENT_DATA_RECEPTION_FINISH_FAILED,
-               SL_STATUS_NULL_POINTER);
-    return;
-  }
+  bool        real_time     = evt->data.reception_finished.real_time;
+  sl_status_t sc_in         = evt->data.reception_finished.sc;
+  uint32_t    size          = evt->data.reception_finished.size;
+  uint64_t    lost_segments = evt->data.reception_finished.lost_segments;
 
   // Access remote ranging data based on the role
   cs_rreq_ranging_buffer_t *buffer = rreq->config.is_initiator 
@@ -279,14 +465,14 @@ void cs_ras_client_on_ranging_data_reception_finished(uint8_t                   
     rreq_log_debug(INSTANCE_PREFIX "RAS - real-time data reception restarted" LOG_NL,
                    rreq->conn_handle);
   }
-  if (sc != SL_STATUS_OK) {
+  if (sc_in != SL_STATUS_OK) {
     rreq_log_error(INSTANCE_PREFIX "RAS - reception finished - failure! [sc: 0x%lx]" LOG_NL,
                    rreq->conn_handle,
-                   (unsigned long)sc);
-    if ((lost_segments > 0) && (sc != SL_STATUS_ABORT)) {
+                   (unsigned long)sc_in);
+    if ((lost_segments > 0) && (sc_in != SL_STATUS_ABORT)) {
       rreq_error(rreq,
                  CS_RREQ_ERROR_RAS_CLIENT_DATA_RECEPTION_FINISH_FAILED,
-                 sc);
+                 sc_in);
     }
     return;
   }
@@ -297,15 +483,15 @@ void cs_ras_client_on_ranging_data_reception_finished(uint8_t                   
                  "last known segment: %u, lost segments mask: %16llx" LOG_NL,
                  rreq->conn_handle,
                  (real_time ? "real-time" : "on-demand"),
-                 retrieve_lost,
-                 ranging_counter,
-                 response,
-                 start_segment,
-                 end_segment,
-                 (recoverable ? "recoverable" : "non-recoverable"),
+                 evt->data.reception_finished.retrieve_lost,
+                 evt->data.reception_finished.ranging_counter,
+                 evt->data.reception_finished.response,
+                 evt->data.reception_finished.start_segment,
+                 evt->data.reception_finished.end_segment,
+                 (evt->data.reception_finished.recoverable ? "recoverable" : "non-recoverable"),
                  size,
-                 (last_arrived ? "last arrived" : "more to come"),
-                 last_known_segment,
+                 (evt->data.reception_finished.last_arrived ? "last arrived" : "more to come"),
+                 evt->data.reception_finished.last_known_segment,
                  lost_segments);
   if (real_time) {
     buffer->data_size = size;
@@ -314,138 +500,112 @@ void cs_ras_client_on_ranging_data_reception_finished(uint8_t                   
                                 buffer->data_size);
     return;
   }
-  (void)status;
-  (void)real_time;
-  (void)retrieve_lost;
-  (void)response;
-  (void)ranging_counter;
-  (void)start_segment;
-  (void)end_segment;
-  (void)recoverable;
-  (void)last_arrived;
-  (void)last_known_segment;
-  
+
   #if defined(CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT) && (CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT == 1)
+  bool                            retrieve_lost   = evt->data.reception_finished.retrieve_lost;
+  cs_ras_cp_response_code_value_t response        = evt->data.reception_finished.response;
+  cs_ras_ranging_counter_t        ranging_counter = evt->data.reception_finished.ranging_counter;
+  uint8_t                         start_segment   = evt->data.reception_finished.start_segment;
+  uint8_t                         end_segment     = evt->data.reception_finished.end_segment;
+  bool                            recoverable     = evt->data.reception_finished.recoverable;
+
   // Received Complete Ranging Data or Complete Lost Ranging Segment Response
   if (response == CS_RAS_CP_RESPONSE_CODE_SUCCESS) {
     if (lost_segments == 0) {
       if (retrieve_lost) {
-        rreq_log_info(INSTANCE_PREFIX "RAS - Received Complete Lost Ranging Segment Response" LOG_NL,
-                      rreq->conn_handle);
+        rreq_log_info(
+            INSTANCE_PREFIX
+            "RAS - Received Complete Lost Ranging Segment Response" LOG_NL,
+            rreq->conn_handle);
       } else {
-        rreq_log_info(INSTANCE_PREFIX "RAS - Received Complete Ranging Data Response" LOG_NL,
+        rreq_log_info(INSTANCE_PREFIX
+                      "RAS - Received Complete Ranging Data Response" LOG_NL,
                       rreq->conn_handle);
       }
       // Sending ACK
-      status = cs_ras_client_ack(rreq->conn_handle,
-                                 ranging_counter);
+      status = cs_ras_client_ack(rreq->conn_handle, ranging_counter);
       if (status != SL_STATUS_OK) {
-        rreq_log_error(INSTANCE_PREFIX "RAS - failed to send ACK! [sc: 0x%lx]" LOG_NL,
-                       rreq->conn_handle,
-                       (unsigned long)sc);
-        rreq_error(rreq,
-                   CS_RREQ_ERROR_RAS_CLIENT_ACK_FAILED,
-                   sc);
+        rreq_log_error(INSTANCE_PREFIX
+                       "RAS - failed to send ACK! [sc: 0x%lx]" LOG_NL,
+                       rreq->conn_handle, (unsigned long)status);
+        rreq_error(rreq, CS_RREQ_ERROR_RAS_CLIENT_ACK_FAILED, status);
         return;
       }
       rreq_log_info(INSTANCE_PREFIX "RAS - ACK was sent!" LOG_NL,
                     rreq->conn_handle);
-            
+
       buffer->data_size = size;
-      process_remote_ranging_data(rreq,
-                                  buffer->data,
-                                  buffer->data_size);
+      process_remote_ranging_data(rreq, buffer->data, buffer->data_size);
       rreq->ras_state = RAS_STATE_ON_DEMAND_ACK;
       return;
-    } else {
-      if (!retrieve_lost && recoverable) {
-        // Get start and end segment
-        get_lost_segments(lost_segments, &start_segment, &end_segment);
-        // Request lost segments
-        status = cs_ras_client_retreive_lost_segments(rreq->conn_handle,
-                                                      ranging_counter,
-                                                      start_segment,
-                                                      end_segment,
-                                                      sizeof(buffer->data),
-                                                      buffer->data);
-        if (status != SL_STATUS_OK) {
-          rreq_log_error(INSTANCE_PREFIX "RAS - failed to request lost segments! [sc: 0x%lx]" LOG_NL,
-                              rreq->conn_handle,
-                              (unsigned long)sc);
-          rreq_error(rreq,
-                     CS_RREQ_ERROR_RAS_CLIENT_REQUEST_LOST_SEGMENTS_FAILED,
-                     sc);
-          return;
-        }
-        rreq->ras_state = RAS_STATE_ON_DEMAND_RETRIEVE_LOST;
+    } else if (!retrieve_lost && recoverable) {
+      // Get start and end segment
+      get_lost_segments(lost_segments, &start_segment, &end_segment);
+      // Request lost segments
+      status = cs_ras_client_retreive_lost_segments(
+          rreq->conn_handle, ranging_counter, start_segment, end_segment,
+          sizeof(buffer->data), buffer->data);
+      if (status != SL_STATUS_OK) {
+        rreq_log_error(
+            INSTANCE_PREFIX
+            "RAS - failed to request lost segments! [sc: 0x%lx]" LOG_NL,
+            rreq->conn_handle, (unsigned long)status);
+        rreq_error(rreq, CS_RREQ_ERROR_RAS_CLIENT_REQUEST_LOST_SEGMENTS_FAILED,
+                   status);
+        return;
       }
+      rreq->ras_state = RAS_STATE_ON_DEMAND_RETRIEVE_LOST;
+    } else {
       // Complete Lost Ranging Segment Response returned with lost segments
       // Or not recoverable lost segments arrived
       // sending ACK, no calculation
-      rreq_log_error(INSTANCE_PREFIX "RAS - unrecoverable lost segments, sending ACK!" LOG_NL,
+      rreq_log_error(INSTANCE_PREFIX
+                     "RAS - unrecoverable lost segments, sending ACK!" LOG_NL,
                      rreq->conn_handle);
-      status = cs_ras_client_ack(rreq->conn_handle,
-                                 ranging_counter);
+      status = cs_ras_client_ack(rreq->conn_handle, ranging_counter);
       if (status != SL_STATUS_OK) {
-        rreq_log_error(INSTANCE_PREFIX "RAS - failed to send ACK! [sc: 0x%lx]" LOG_NL,
-                       rreq->conn_handle,
-                       (unsigned long)sc);
-        rreq_error(rreq,
-                   CS_RREQ_ERROR_RAS_CLIENT_ACK_FAILED,
-                   sc);
+        rreq_log_error(INSTANCE_PREFIX
+                       "RAS - failed to send ACK! [sc: 0x%lx]" LOG_NL,
+                       rreq->conn_handle, (unsigned long)status);
+        rreq_error(rreq, CS_RREQ_ERROR_RAS_CLIENT_ACK_FAILED, status);
         return;
       }
       rreq->ras_state = RAS_STATE_ON_DEMAND_ACK;
     }
   }
-  #endif // defined(CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT) && (CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT == 1)
+#endif // defined(CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT) &&
+       // (CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT == 1)
 }
 
 #if defined(CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT) && (CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT == 1)
-void cs_ras_client_on_ack_finished(uint8_t connection, sl_status_t sc, cs_ras_cp_response_code_value_t response)
+static void handle_ack_finished(rreq_t *rreq, const cs_rreq_ras_evt_t *evt)
 {
-  rreq_t *rreq = cs_rreq_find(connection);
-  if (rreq == NULL) {
-    rreq_log_error(INSTANCE_PREFIX "RAS - ranging data ready - unknown connection id!" LOG_NL,
-                   connection);
-    rreq_error(rreq,
-               CS_RREQ_ERROR_RAS_CLIENT_ON_ACK_FINISHED_FAILED,
-               SL_STATUS_NULL_POINTER);
-    return;
-  }
   rreq_log_info(INSTANCE_PREFIX "RAS - ACK finished, [sc: 0x%lx], [response: 0x%lx]" LOG_NL,
                 rreq->conn_handle,
-                (unsigned long)sc,
-                (unsigned long)response);
+                (unsigned long)evt->data.ack_finished.sc,
+                (unsigned long)evt->data.ack_finished.response);
   rreq->ras_state = RAS_STATE_ON_DEMAND;
 }
 
-void cs_ras_client_on_ranging_data_ready(uint8_t connection,
-                                         cs_ras_ranging_counter_t ranging_counter)
+static void handle_ranging_data_ready(rreq_t *rreq, const cs_rreq_ras_evt_t *evt)
 {
-  rreq_t *rreq = cs_rreq_find(connection);
-  if (rreq == NULL) {
-    rreq_log_error(INSTANCE_PREFIX "RAS - ranging data ready - unknown connection id!" LOG_NL,
-                   connection);
-    rreq_error(rreq,
-               CS_RREQ_ERROR_RAS_CLIENT_RANGING_DATA_READY_FAILED,
-               SL_STATUS_NULL_POINTER);
-    return;
-  }
+  cs_ras_ranging_counter_t ranging_counter = evt->data.ranging_data_ready.ranging_counter;
+  sl_status_t sc;
+
   rreq_log_info(INSTANCE_PREFIX "RAS - ranging data ready, counter: %u" LOG_NL,
                 rreq->conn_handle,
                 ranging_counter);
   // write GET to RAS CP
   if (((ranging_counter & CS_RAS_RANGING_COUNTER_MASK) == rreq->ranging_counter)
       && (rreq->ras_overwritten == false || rreq->ranging_counter != ranging_counter)) {
-      // Access ranging data based on the role
+    // Access ranging data based on the role
     cs_rreq_ranging_buffer_t *buffer = rreq->config.is_initiator 
                                        ? &rreq->data.initiator 
                                        : &rreq->data.reflector;
-    sl_status_t sc = cs_ras_client_get_ranging_data(rreq->conn_handle,
-                                                    (uint16_t)ranging_counter,
-                                                    sizeof(buffer->data),
-                                                    buffer->data);
+    sc = cs_ras_client_get_ranging_data(rreq->conn_handle,
+                                        (uint16_t)ranging_counter,
+                                        sizeof(buffer->data),
+                                        buffer->data);
     if (sc != SL_STATUS_OK) {
       rreq_log_error(INSTANCE_PREFIX "RAS - failed to get ranging data! [sc: 0x%lx]" LOG_NL,
                      rreq->conn_handle,
@@ -462,37 +622,20 @@ void cs_ras_client_on_ranging_data_ready(uint8_t connection,
   }
 }
 
-void cs_ras_client_on_abort_finished(uint8_t connection, sl_status_t sc, cs_ras_cp_response_code_value_t response)
+static void handle_abort_finished(rreq_t *rreq, const cs_rreq_ras_evt_t *evt)
 {
-  rreq_t *rreq = cs_rreq_find(connection);
-  if (rreq == NULL) {
-    rreq_log_error(INSTANCE_PREFIX "RAS - abort finished - unknown connection id!" LOG_NL,
-                   connection);
-    rreq_error(rreq,
-               CS_RREQ_ERROR_RAS_CLIENT_ABORT_FINISHED_FAILED,
-               SL_STATUS_NULL_POINTER);
-    return;
-  }
   rreq_log_info(INSTANCE_PREFIX "RAS - abort finished, [sc: 0x%lx], [response: 0x%lx]" LOG_NL,
                 rreq->conn_handle,
-                (unsigned long)sc,
-                (unsigned long)response);
+                (unsigned long)evt->data.abort_finished.sc,
+                (unsigned long)evt->data.abort_finished.response);
   rreq->state = (uint8_t)RREQ_STATE_IN_PROCEDURE;
   rreq_log_info(INSTANCE_PREFIX "Instance new state: IN_PROCEDURE" LOG_NL,
                 rreq->conn_handle);
 }
 
-void cs_ras_client_on_ranging_data_overwritten(uint8_t connection, cs_ras_ranging_counter_t ranging_counter)
+static void handle_ranging_data_overwritten(rreq_t *rreq, const cs_rreq_ras_evt_t *evt)
 {
-  rreq_t *rreq = cs_rreq_find(connection);
-  if (rreq == NULL) {
-    rreq_log_error(INSTANCE_PREFIX "RAS - ranging data overwritten - unknown connection id!" LOG_NL,
-                   connection);
-    rreq_error(rreq,
-               CS_RREQ_ERROR_RAS_CLIENT_RANGING_DATA_OVERWRITTEN_FAILED,
-               SL_STATUS_NULL_POINTER);
-    return;
-  }
+  cs_ras_ranging_counter_t ranging_counter = evt->data.ranging_data_overwritten.ranging_counter;
   rreq->ranging_counter = ranging_counter;
   rreq->ras_overwritten = true;
   rreq_log_info(INSTANCE_PREFIX "RAS - ranging data overwritten, counter: %u" LOG_NL,
@@ -501,33 +644,16 @@ void cs_ras_client_on_ranging_data_overwritten(uint8_t connection, cs_ras_rangin
 }
 #endif // defined(CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT) && (CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT == 1)
 
-bool cs_ras_client_on_timeout(uint8_t connection,
-                              cs_ras_client_timeout_t timeout,
-                              cs_ras_client_timeout_action_t action)
+static void handle_timeout(rreq_t *rreq, const cs_rreq_ras_evt_t *evt)
 {
-  rreq_t *rreq = cs_rreq_find(connection);
-  if (rreq == NULL) {
-    rreq_log_error(INSTANCE_PREFIX "RAS - timeout - unknown connection id!" LOG_NL,
-                   connection);
-    rreq_error(rreq,
-               CS_RREQ_ERROR_RAS_CLIENT_TIMEOUT,
-               SL_STATUS_NULL_POINTER);
-    // Perform the action automatically
-    return false;
-  }
   rreq_log_debug(INSTANCE_PREFIX "RAS timeout: %u, action: %u" LOG_NL,
-                 connection,
-                 timeout,
-                 action);
-  (void)timeout;
-  (void)action;
+                 rreq->conn_handle,
+                 evt->data.timeout.timeout,
+                 evt->data.timeout.action);
   rreq_error(rreq,
              CS_RREQ_ERROR_RAS_CLIENT_TIMEOUT,
              SL_STATUS_TIMEOUT);
-  // Perform the action automatically
-  return false;
 }
-
 
 // -----------------------------------------------------------------------------
 // Private functions
@@ -586,4 +712,3 @@ static void get_lost_segments(uint64_t lost_segments,
   }
 }
 #endif // defined(CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT) && (CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT == 1)
-

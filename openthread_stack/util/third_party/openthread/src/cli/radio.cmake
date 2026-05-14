@@ -33,6 +33,7 @@ target_compile_definitions(openthread-cli-radio
         OPENTHREAD_FTD=0
         OPENTHREAD_MTD=0
         OPENTHREAD_RADIO=1
+        OPENTHREAD_NCP=0
         OPENTHREAD_RADIO_CLI=1
 )
 
@@ -46,6 +47,7 @@ target_include_directories(openthread-cli-radio PUBLIC ${OT_PUBLIC_INCLUDES} PRI
 target_sources(openthread-cli-radio
     PRIVATE
         cli.cpp
+        cli_api.cpp
         cli_logging.cpp
         cli_utils.cpp
 )

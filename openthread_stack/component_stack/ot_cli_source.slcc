@@ -48,6 +48,7 @@ source:
   unless:
   - ot_ncp
 - path: util/third_party/openthread/src/cli/cli.cpp
+- path: util/third_party/openthread/src/cli/cli_api.cpp
 - path: util/third_party/openthread/src/cli/cli_ba.cpp
 - path: util/third_party/openthread/src/cli/cli_bbr.cpp
 - path: util/third_party/openthread/src/cli/cli_br.cpp

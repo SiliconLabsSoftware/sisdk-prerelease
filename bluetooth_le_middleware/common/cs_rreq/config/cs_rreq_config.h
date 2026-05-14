@@ -130,6 +130,43 @@
 
 // </h>
 
+// <h> Runtime settings
+
+// <o CS_RREQ_CONFIG_QUEUE_SIZE_PER_INSTANCE Event queue size per connection <2..8>
+// <i> Maximum number of pending RAS Client callback events per connection.
+// <i> Default: 4
+#define CS_RREQ_CONFIG_QUEUE_SIZE_PER_INSTANCE        4
+
+// <o CS_RREQ_CONFIG_WAIT_FOR_GUARD> Timeout for guard (in ticks) <0..65535>
+// <i> Default: 10
+// <i> Only applicable for RTOS
+#define CS_RREQ_CONFIG_WAIT_FOR_GUARD                10
+
+// <o CS_RREQ_CONFIG_RTA_QUEUE_SIZE> RTA event queue depth <2..64>
+// <i> Maximum number of pending RAS Client callback events that may be
+// <i> buffered before being processed by the cs_rreq step function.
+// <i> Keep this value at a minimum to avoid unnecessary memory usage.
+// <i> Default: 4
+#define CS_RREQ_CONFIG_RTA_QUEUE_SIZE                (CS_RREQ_CONFIG_MAX_CONNECTIONS * CS_RREQ_CONFIG_QUEUE_SIZE_PER_INSTANCE)
+
+// <o CS_RREQ_CONFIG_RTA_STACK_SIZE> RTA task stack size (bytes) <256..8192>
+// <i> Stack size of the cs_rreq runtime task that drains the RAS Client
+// <i> event queue.
+// <i> Only applicable for RTOS
+// <i> Default: 1024
+#define CS_RREQ_CONFIG_RTA_STACK_SIZE                1024
+
+// <o CS_RREQ_CONFIG_RTA_PRIORITY> RTA task priority
+// <APP_RTA_PRIORITY_LOW=> Low
+// <APP_RTA_PRIORITY_BELOW_NORMAL=> Below normal
+// <APP_RTA_PRIORITY_NORMAL=> Normal
+// <APP_RTA_PRIORITY_ABOVE_NORMAL=> Above normal
+// <APP_RTA_PRIORITY_HIGH=> High
+// <i> Only applicable for RTOS
+// <i> Default: APP_RTA_PRIORITY_NORMAL
+#define CS_RREQ_CONFIG_RTA_PRIORITY                  APP_RTA_PRIORITY_NORMAL
+// </h>
+
 // <<< end of configuration section >>>
 
 /** @} (end addtogroup cs_rreq) */

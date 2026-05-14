@@ -822,7 +822,7 @@ sl_status_t sl_memory_heap_alloc_advanced(sl_memory_heap_t *heap,
   if ((current_block_metadata == NULL) || (size_adjusted == 0)) {
     CORE_EXIT_ATOMIC();
 #if defined(SLI_MEMORY_MANAGER_SUPPORT_ALLOCATION_FALLBACK)
-    sl_memory_block_attrib_t blocks_heap_attribute = (sl_memory_block_attrib_t) (type & SLI_MEMORY_BLOCK_ATTRIBUTE_MASK);
+    uint8_t blocks_heap_attribute = (type & SLI_MEMORY_BLOCK_ATTRIBUTE_MASK);
     if (blocks_heap_attribute != 0) {
       sl_status_t status;
       status = memory_manage_allocation_fallback(size,
@@ -2256,7 +2256,7 @@ static sl_status_t memory_manage_allocation_fallback(size_t size,
                                                      void **block)
 {
   sl_memory_heap_t *fallback_heap = sli_general_purpose_heap.next_handle;
-  sl_memory_block_attrib_t blocks_heap_attribute = (sl_memory_block_attrib_t) (type & SLI_MEMORY_BLOCK_ATTRIBUTE_MASK);
+  uint8_t blocks_heap_attribute = (uint8_t) (type & SLI_MEMORY_BLOCK_ATTRIBUTE_MASK);
   size_t allocation_size = SLI_ALIGN_ROUND_UP(size, SLI_BLOCK_ALLOC_MIN_ALIGN);
 
   while (fallback_heap != NULL) {

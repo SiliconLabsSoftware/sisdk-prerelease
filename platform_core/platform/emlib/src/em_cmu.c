@@ -76,7 +76,8 @@
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)  \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
 #define CMU_MAX_FREQ_0WS_1V1              40000000UL
 
 #define CMU_MAX_FREQ_0WS_1V0              40000000UL
@@ -735,7 +736,8 @@ void CMU_ClockDivSet(CMU_Clock_TypeDef clock, CMU_ClkDiv_TypeDef div)
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)   \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)   \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)  \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)) \
   && defined(CoreDebug_DEMCR_TRCENA_Msk)
   bool restoreTrace;
 #endif
@@ -784,7 +786,8 @@ void CMU_ClockDivSet(CMU_Clock_TypeDef clock, CMU_ClkDiv_TypeDef div)
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)  \
-      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)) \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)  \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)) \
       && defined(CoreDebug_DEMCR_TRCENA_Msk)
       restoreTrace = CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk;
       if (restoreTrace) {
@@ -805,7 +808,8 @@ void CMU_ClockDivSet(CMU_Clock_TypeDef clock, CMU_ClkDiv_TypeDef div)
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)  \
-      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)) \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)  \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)) \
       && defined(CoreDebug_DEMCR_TRCENA_Msk)
       if (restoreTrace) {
         CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
@@ -1669,7 +1673,8 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)   \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)   \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)  \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)) \
   && defined(CoreDebug_DEMCR_TRCENA_Msk)
   bool restoreTrace;
 #endif
@@ -2110,7 +2115,8 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)  \
-      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)) \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)  \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)) \
       && defined(CoreDebug_DEMCR_TRCENA_Msk)
       restoreTrace = CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk;
       if (restoreTrace) {
@@ -2130,8 +2136,9 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
         || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
         || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8) \
         || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
-        || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)  \
-        || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)
+        || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)\
+        || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13) \
+        || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
         case cmuSelect_SYSCLK:
           tmp = CMU_TRACECLKCTRL_CLKSEL_SYSCLK;
           break;
@@ -2160,7 +2167,8 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)  \
-      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)) \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)  \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)) \
       && defined(CoreDebug_DEMCR_TRCENA_Msk)
       if (restoreTrace) {
         CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;

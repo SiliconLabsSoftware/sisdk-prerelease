@@ -7,7 +7,7 @@ description: >
   Note: Some BLE features unused by the ESL Access Point are removed compared
   to the NCP target application.
 category: Bluetooth Examples
-quality: experimental
+quality: production
 
 filter:
   - name: "Wireless Technology"

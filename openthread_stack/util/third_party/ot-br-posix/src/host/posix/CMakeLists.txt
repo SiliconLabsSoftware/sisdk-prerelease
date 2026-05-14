@@ -33,6 +33,8 @@ add_library(otbr-posix
     dnssd.cpp
     entropy.hpp
     entropy.cpp
+    firewall_ingress.hpp
+    firewall_ingress.cpp
     infra_if.hpp
     infra_if.cpp
     multicast_routing_manager.hpp
@@ -45,7 +47,11 @@ add_library(otbr-posix
     udp_proxy.hpp
 )
 
-target_link_libraries(otbr-posix
+target_link_libraries(otbr-posix PRIVATE
     otbr-common
     otbr-utils
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND DEFINED OT_FIREWALL AND OT_FIREWALL)
+    target_compile_definitions(otbr-posix PRIVATE OPENTHREAD_POSIX_CONFIG_FIREWALL_ENABLE=1)
+endif()

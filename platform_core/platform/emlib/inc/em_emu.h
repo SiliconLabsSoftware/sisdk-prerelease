@@ -375,7 +375,8 @@ typedef enum {
 typedef enum {
 #if (defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9))
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14))
   emuDcdcTonMaxTimeout_Off    = _DCDC_CTRL_IPKTMAXCTRL_OFF,         /**< Ton max off.       */
   emuDcdcTonMaxTimeout_0P35us = _DCDC_CTRL_IPKTMAXCTRL_TMAX_0P35us, /**< Ton max is 0.35us. */
   emuDcdcTonMaxTimeout_0P63us = _DCDC_CTRL_IPKTMAXCTRL_TMAX_0P63us, /**< Ton max is 0.63us. */
@@ -1171,7 +1172,8 @@ typedef struct {
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
 #if defined(_DCDC_DOCTRL_MASK)
 #define EMU_DCDCINIT_DEFAULT                                                 \
   {                                                                          \

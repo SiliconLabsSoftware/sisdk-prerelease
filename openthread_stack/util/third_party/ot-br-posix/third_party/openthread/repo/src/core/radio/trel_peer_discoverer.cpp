@@ -145,7 +145,11 @@ void PeerDiscoverer::RegisterService(void)
     TxtDataEncoder txtData(GetInstance());
     uint16_t       port;
 
+#if OPENTHREAD_NCP
+    port = Get<Interface>().GetHostUdpPort();
+#else
     port = Get<Interface>().GetUdpPort();
+#endif
 
     txtData.Encode();
 

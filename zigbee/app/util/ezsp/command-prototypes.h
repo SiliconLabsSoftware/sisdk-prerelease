@@ -502,11 +502,6 @@ void sl_zigbee_ezsp_radio_get_scheduler_priorities(
       // Return: The current priorities.
       sl_802154_radio_priorities_t *priorities);
 
-// Set the current scheduler priorities for radio operations
-void sl_zigbee_ezsp_radio_set_scheduler_priorities(
-  // The current priorities.
-  sl_802154_radio_priorities_t *priorities);
-
 // Get the current multiprotocol sliptime
 void sl_zigbee_ezsp_radio_get_scheduler_sliptime(
       // Return: Value of the current slip time.
@@ -1361,6 +1356,13 @@ void sl_zigbee_ezsp_set_binding_remote_node_id(
       uint8_t index,
       // The short ID of the destination node.
       sl_802154_short_addr_t nodeId);
+
+// When enabled, the stack clears the binding table on definitive leave (not
+// leave-with-rejoin), as required for Zigbee 4.0 security profile (e.g.
+// CN-Reset-TC-01).
+void sl_zigbee_ezsp_clear_binding_table_on_leave(
+      // True to clear bindings on leave; false to disable.
+      bool clear);
 
 // Callback
 // The NCP used the external binding modification policy to decide how to handle

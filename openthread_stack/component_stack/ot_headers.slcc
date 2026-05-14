@@ -368,6 +368,7 @@ include:
   - path: thread/network_data_types.hpp
   - path: thread/network_diagnostic.hpp
   - path: thread/network_diagnostic_tlvs.hpp
+  - path: thread/network_diagnostic_types.hpp
   - path: thread/panid_query_server.hpp
   - path: thread/peer.hpp
   - path: thread/peer_table.hpp

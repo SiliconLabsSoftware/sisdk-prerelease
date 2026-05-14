@@ -49,7 +49,9 @@ typedef enum  {
   OT_CLI_DATASET_PANID,
   OT_CLI_DATASET_EXTPANID,
   OT_CLI_IFCONFIG_UP,
+  OT_CLI_IFCONFIG_DOWN,
   OT_CLI_THREAD_START,
+  OT_CLI_THREAD_STOP,
   OT_CLI_THREAD_STATE,
   OT_CLI_DATASET,
   OT_CLI_TXPOWER_GET,
@@ -184,10 +186,26 @@ void ifconfig_up(sl_cli_command_arg_t *arguments)
   sl_ot_rtos_set_pending_event(SL_OT_RTOS_EVENT_APP);
 }
 
+void ifconfig_down(sl_cli_command_arg_t *arguments)
+{
+  (void) arguments;
+  ot_cli_to_execute = OT_CLI_IFCONFIG_DOWN;
+
+  sl_ot_rtos_set_pending_event(SL_OT_RTOS_EVENT_APP);
+}
+
 void thread_start(sl_cli_command_arg_t *arguments)
 {
   (void) arguments;
   ot_cli_to_execute = OT_CLI_THREAD_START;
+
+  sl_ot_rtos_set_pending_event(SL_OT_RTOS_EVENT_APP);
+}
+
+void thread_stop(sl_cli_command_arg_t *arguments)
+{
+  (void) arguments;
+  ot_cli_to_execute = OT_CLI_THREAD_STOP;
 
   sl_ot_rtos_set_pending_event(SL_OT_RTOS_EVENT_APP);
 }
@@ -274,11 +292,25 @@ void sl_ot_rtos_application_tick(void)
       sl_zigbee_app_debug_println("Status: 0x%0x", error);
       break;
     }
+    case OT_CLI_IFCONFIG_DOWN:
+    {
+      otError error = OT_ERROR_INVALID_ARGS;
+      error = otIp6SetEnabled(otGetInstance(), false);
+      sl_zigbee_app_debug_println("Status: 0x%0x", error);
+      break;
+    }
 
     case OT_CLI_THREAD_START:
     {
       otError error = OT_ERROR_INVALID_ARGS;
       error = otThreadSetEnabled(otGetInstance(), true);
+      sl_zigbee_app_debug_println("Status: 0x%0x", error);
+      break;
+    }
+    case OT_CLI_THREAD_STOP:
+    {
+      otError error = OT_ERROR_INVALID_ARGS;
+      error = otThreadSetEnabled(otGetInstance(), false);
       sl_zigbee_app_debug_println("Status: 0x%0x", error);
       break;
     }

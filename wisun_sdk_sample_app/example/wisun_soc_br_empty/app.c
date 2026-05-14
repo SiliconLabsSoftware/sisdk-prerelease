@@ -45,7 +45,10 @@
 #include "sl_wisun_keychain.h"
 #include "sl_wisun_ip6string.h"
 #include "sl_select_util.h"
-#include "select.h"
+#include "sys/socket.h"
+#include "arpa/inet.h"
+#include "netinet/in.h"
+#include "sys/select.h"
 #include "sl_wisun_config.h"
 #include "sl_wisun_br_config.h"
 #include "app.h"
@@ -299,7 +302,7 @@ static void app_start(void)
   trustedca_count = sl_wisun_keychain_get_trustedca_count();
   EFM_ASSERT(trustedca_count > 0U);
 
-  certificate_options = SL_WISUN_CERTIFICATE_OPTION_IS_REF;
+  certificate_options = SL_WISUN_CERTIFICATE_OPTION_NONE;
   for (uint8_t idx = 0U; idx < trustedca_count; ++idx) {
     trustedca = sl_wisun_keychain_get_trustedca(idx);
     EFM_ASSERT(trustedca != NULL);
@@ -328,12 +331,12 @@ static void app_start(void)
   }
 
   // Set Device Certificate
-  EFM_ASSERT(sl_wisun_set_br_device_certificate(SL_WISUN_CERTIFICATE_OPTION_IS_REF | SL_WISUN_CERTIFICATE_OPTION_HAS_KEY,
+  EFM_ASSERT(sl_wisun_set_br_device_certificate(SL_WISUN_CERTIFICATE_OPTION_NONE,
                                                 credential->certificate.data_length,
                                                 credential->certificate.data) == SL_STATUS_OK);
   if (credential->pk.type == SL_WISUN_KEYCHAIN_KEY_TYPE_PLAINTEXT) {
     // Set Device Private Key
-    EFM_ASSERT(sl_wisun_set_device_private_key(SL_WISUN_PRIVATE_KEY_OPTION_IS_REF,
+    EFM_ASSERT(sl_wisun_set_device_private_key(SL_WISUN_PRIVATE_KEY_OPTION_NONE,
                                                credential->pk.u.plaintext.data_length,
                                                credential->pk.u.plaintext.data) == SL_STATUS_OK);
   } else {

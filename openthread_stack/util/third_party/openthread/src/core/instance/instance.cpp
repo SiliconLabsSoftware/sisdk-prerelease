@@ -78,7 +78,8 @@ LogLevel Instance::sGlobalLogLevel = static_cast<LogLevel>(OPENTHREAD_CONFIG_LOG
 #endif
 
 Instance::Instance(void)
-    : mTimerMilliScheduler(*this)
+    : mActiveInstanceTracker(*this)
+    , mTimerMilliScheduler(*this)
 #if OPENTHREAD_CONFIG_PLATFORM_USEC_TIMER_ENABLE
     , mTimerMicroScheduler(*this)
 #endif
@@ -319,6 +320,11 @@ Instance::Instance(void)
 #endif
 #if OPENTHREAD_CONFIG_LOG_LEVEL_DYNAMIC_ENABLE
     , mLogLevel(static_cast<LogLevel>(OPENTHREAD_CONFIG_LOG_LEVEL_INIT))
+#if OPENTHREAD_CONFIG_LOG_LEVEL_OVERRIDE_ENABLE
+    , mOriginalLogLevel(kLogLevelNone)
+    , mOverrideLogLevel(kLogLevelNone)
+    , mIsLogLevelOverriden(false)
+#endif
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
     , mIsLogLevelSet(false)
 #else
@@ -336,6 +342,10 @@ Instance::Instance(void)
 #endif
 #endif
 }
+
+#if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE && OPENTHREAD_CONFIG_LOG_INSTANCE_AWARE_API_ENABLE
+Instance::~Instance(void) { gActiveInstance = this; }
+#endif
 
 #if (OPENTHREAD_MTD || OPENTHREAD_FTD) && !OPENTHREAD_CONFIG_HEAP_EXTERNAL_ENABLE
 Utils::Heap &Instance::GetHeap(void)
@@ -490,15 +500,7 @@ void Instance::Finalize(void)
 
     IgnoreError(Get<Mac::SubMac>().Disable());
 
-#if !OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
-
-    /**
-     * Object was created on buffer, so instead of deleting
-     * the object we call destructor explicitly.
-     */
     this->~Instance();
-
-#endif // !OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
 
 exit:
     return;
@@ -594,20 +596,66 @@ Error Instance::SetLogLevel(LogLevel aLogLevel)
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE && !OPENTHREAD_CONFIG_LOG_INSTANCE_AWARE_API_ENABLE
     ExitNow(error = kErrorNotCapable);
 #else
+#if OPENTHREAD_CONFIG_LOG_LEVEL_OVERRIDE_ENABLE
+    if (mIsLogLevelOverriden)
+    {
+        mOriginalLogLevel = aLogLevel;
+        aLogLevel         = Max(aLogLevel, mOverrideLogLevel);
+    }
+#endif
     VerifyOrExit(mLogLevel != aLogLevel);
     mLogLevel = aLogLevel;
-
-#if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
-    mIsLogLevelSet = true;
-#else
-    otPlatLogHandleLevelChanged(mLogLevel);
-#endif
-    otPlatLogHandleLogLevelChanged(this, mLogLevel);
+    SignalLogLevelChange();
 #endif
 
 exit:
     return error;
 }
+
+void Instance::SignalLogLevelChange(void)
+{
+#if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
+    mIsLogLevelSet = true;
+#else
+    otPlatLogHandleLevelChanged(mLogLevel);
+#endif
+
+    otPlatLogHandleLogLevelChanged(this, mLogLevel);
+}
+
+#if OPENTHREAD_CONFIG_LOG_LEVEL_OVERRIDE_ENABLE
+void Instance::OverrideLogLevel(LogLevel aLogLevel)
+{
+    LogLevel logLevel;
+
+    if (!mIsLogLevelOverriden)
+    {
+        mOriginalLogLevel    = GetLogLevel();
+        mIsLogLevelOverriden = true;
+    }
+
+    mOverrideLogLevel = aLogLevel;
+
+    logLevel = Max(mOverrideLogLevel, mOriginalLogLevel);
+
+    VerifyOrExit(mLogLevel != logLevel);
+    mLogLevel = logLevel;
+    SignalLogLevelChange();
+
+exit:
+    return;
+}
+
+void Instance::RestoreLogLevel(void)
+{
+    VerifyOrExit(mIsLogLevelOverriden);
+    mIsLogLevelOverriden = false;
+    IgnoreError(SetLogLevel(mOriginalLogLevel));
+
+exit:
+    return;
+}
+#endif // OPENTHREAD_CONFIG_LOG_LEVEL_OVERRIDE_ENABLE
 
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
 Error Instance::SetGlobalLogLevel(LogLevel aLogLevel)

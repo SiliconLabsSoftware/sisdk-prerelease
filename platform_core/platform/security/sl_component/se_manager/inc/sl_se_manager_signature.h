@@ -116,6 +116,60 @@ sl_status_t sl_se_ecc_sign(sl_se_command_context_t *cmd_ctx,
                            unsigned char *signature,
                            size_t signature_len);
 
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
+/***************************************************************************//**
+ * @brief
+ *   This function computes deterministic ECDSA digital signatures
+ *
+ * @note
+ *   Deterministic ECDSA is only available on Curl (xG2B) devices.
+ *   Unlike regular ECDSA which uses random nonces, deterministic ECDSA
+ *   derives the nonce from the message and private key, making the signature
+ *   reproducible for the same message and key pair.
+ *
+ * @note
+ *   Pre-hashed messages are not supported for deterministic ECDSA.
+ *   The hash algorithm must always be specified.
+ *
+ *   P-521 Elliptic Curve expects a 544 bits (68 bytes) buffer for storing
+ *   private keys, and a 1088 bits (136 bytes) buffer for storing public keys
+ *   and signatures. The first 23 bits of d, Qx, Qy, R and S are padding bits
+ *   to comply with word-aligned addressing.
+ *
+ * @param[in] cmd_ctx
+ *   Pointer to an SE command context object.
+ *
+ * @param[in] key
+ *   Pointer to sl_se_key_descriptor_t structure.
+ *
+ * @param[in] hash_alg
+ *   Which hashing algorithm to use. Must be specified (cannot be NONE).
+ *
+ * @param[in] message
+ *   The message to be used to compute the signature.
+ *
+ * @param[in] message_len
+ *   The length of message.
+ *
+ * @param[out] signature
+ *   The computed signature.
+ *
+ * @param[in] signature_len
+ *   The length of the computed signature.
+ *
+ * @return
+ *   SL_STATUS_OK when the command was executed successfully, otherwise an
+ *   appropriate error code (@ref sl_status.h).
+ ******************************************************************************/
+sl_status_t sl_se_ecc_sign_deterministic(sl_se_command_context_t *cmd_ctx,
+                                         const sl_se_key_descriptor_t *key,
+                                         sl_se_hash_type_t hash_alg,
+                                         const unsigned char *message,
+                                         size_t message_len,
+                                         unsigned char *signature,
+                                         size_t signature_len);
+#endif // _SILICON_LABS_32B_SERIES_2_CONFIG_11
+
 /***************************************************************************//**
  * @brief
  *   ECC signature verification.

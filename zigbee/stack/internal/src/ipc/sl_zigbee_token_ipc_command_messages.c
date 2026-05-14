@@ -161,6 +161,7 @@ sl_status_t sl_zigbee_initialize_basic_token(uint32_t token,
 
   if (token_size > MAX_IPC_VEC_ARG_CAPACITY) {
     assert(false); // "vector default_token_value length exceeds expected maximum
+    return msg.data.initialize_basic_token.response.result;
   }
 
   memmove(msg.data.initialize_basic_token.request.default_token_value, default_token_value, sizeof(uint8_t) * token_size);
@@ -169,6 +170,7 @@ sl_status_t sl_zigbee_initialize_basic_token(uint32_t token,
 
   if (token_size > MAX_IPC_VEC_ARG_CAPACITY) {
     assert(false); // "vector default_token_value length exceeds expected maximum
+    return msg.data.initialize_basic_token.response.result;
   }
 
   memmove(default_token_value, msg.data.initialize_basic_token.request.default_token_value, sizeof(uint8_t) * token_size);
@@ -184,6 +186,7 @@ sl_status_t sl_zigbee_initialize_counter_token(uint32_t token,
 
   if (token_size > MAX_IPC_VEC_ARG_CAPACITY) {
     assert(false); // "vector default_token_value length exceeds expected maximum
+    return msg.data.initialize_counter_token.response.result;
   }
 
   memmove(msg.data.initialize_counter_token.request.default_token_value, default_token_value, sizeof(uint8_t) * token_size);
@@ -192,6 +195,7 @@ sl_status_t sl_zigbee_initialize_counter_token(uint32_t token,
 
   if (token_size > MAX_IPC_VEC_ARG_CAPACITY) {
     assert(false); // "vector default_token_value length exceeds expected maximum
+    return msg.data.initialize_counter_token.response.result;
   }
 
   memmove(default_token_value, msg.data.initialize_counter_token.request.default_token_value, sizeof(uint8_t) * token_size);
@@ -208,6 +212,7 @@ sl_status_t sl_zigbee_initialize_index_token(uint32_t token_base,
 
   if (token_size > MAX_IPC_VEC_ARG_CAPACITY) {
     assert(false); // "vector default_token_value length exceeds expected maximum
+    return msg.data.initialize_index_token.response.result;
   }
 
   memmove(msg.data.initialize_index_token.request.default_token_value, default_token_value, sizeof(uint8_t) * token_size);
@@ -217,6 +222,7 @@ sl_status_t sl_zigbee_initialize_index_token(uint32_t token_base,
 
   if (token_size > MAX_IPC_VEC_ARG_CAPACITY) {
     assert(false); // "vector default_token_value length exceeds expected maximum
+    return msg.data.initialize_index_token.response.result;
   }
 
   memmove(default_token_value, msg.data.initialize_index_token.request.default_token_value, sizeof(uint8_t) * token_size);
@@ -253,6 +259,7 @@ sl_status_t slx_zigbee_token_manager_get_data(uint32_t token,
 
   if (length > MAX_IPC_VEC_ARG_CAPACITY) {
     assert(false); // "vector data length exceeds expected maximum
+    return msg.data.token_manager_get_data.response.result;
   }
 
   memmove(msg.data.token_manager_get_data.request.data, data, sizeof(uint8_t) * length);
@@ -261,6 +268,7 @@ sl_status_t slx_zigbee_token_manager_get_data(uint32_t token,
 
   if (length > MAX_IPC_VEC_ARG_CAPACITY) {
     assert(false); // "vector data length exceeds expected maximum
+    return msg.data.token_manager_get_data.response.result;
   }
 
   memmove(data, msg.data.token_manager_get_data.request.data, sizeof(uint8_t) * length);

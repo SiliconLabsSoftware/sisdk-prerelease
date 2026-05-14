@@ -30,7 +30,7 @@ component:
   - id: connect_poll
   - id: connect_mailbox_server
   - id: connect_mailbox_client
-  - id: token_manager
+  - id: common_token_manager
   - id: connect_frequency_hopping
 #---------------------- CLI --------------------------
   - id: cli

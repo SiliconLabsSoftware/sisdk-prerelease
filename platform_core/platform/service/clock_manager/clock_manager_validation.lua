@@ -56,6 +56,7 @@ local is_efr32xg28 = slc.is_provided("device_generic_family_efr32xg28")
 local is_efr32xg29 = slc.is_provided("device_generic_family_efr32xg29")
 local is_efr32xg2b = slc.is_provided("device_generic_family_efr32xg2b")
 local is_efr32xg2d = slc.is_provided("device_generic_family_efr32xg2d")
+local is_efr32xg2e = slc.is_provided("device_generic_family_efr32xg2e")
 local is_sixx301 = slc.is_provided("device_generic_family_sixx301")
 
 -- HELPER FUNCTIONS --
@@ -629,7 +630,7 @@ elseif max_freq_is_38m then
 elseif is_efr32xg21 or is_efr32xg22 then
   device_thresholds = series2_thresholds(80, 50)  -- HCLK < 80MHz, PCLK < 50MHz
 
-elseif is_efr32xg23 or is_efr32xg24 or is_efr32xg26 or is_efr32xg27 or is_efr32xg28 or is_efr32xg29 or is_efr32xg2d then
+elseif is_efr32xg23 or is_efr32xg24 or is_efr32xg26 or is_efr32xg27 or is_efr32xg28 or is_efr32xg29 or is_efr32xg2d or is_efr32xg2e then
   device_thresholds = series2_thresholds(80, 40)  -- HCLK < 80MHz, PCLK < 40MHz
 
 elseif is_efr32xg25 then

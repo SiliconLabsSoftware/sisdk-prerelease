@@ -506,6 +506,7 @@ void sl_mac_test_send_mac_command(uint8_t macCommandLength,
 
   if (macCommandLength > MAX_IPC_VEC_ARG_CAPACITY) {
     assert(false); // "vector macCommand length exceeds expected maximum
+    return;
   }
 
   memmove(msg.data.test_send_mac_command.request.macCommand, macCommand, sizeof(uint8_t) * macCommandLength);
@@ -513,6 +514,7 @@ void sl_mac_test_send_mac_command(uint8_t macCommandLength,
 
   if (macCommandLength > MAX_IPC_VEC_ARG_CAPACITY) {
     assert(false); // "vector macCommand length exceeds expected maximum
+    return;
   }
 
   memmove(macCommand, msg.data.test_send_mac_command.request.macCommand, sizeof(uint8_t) * macCommandLength);
@@ -747,6 +749,7 @@ void sl_zigbee_test_join_list_add(uint8_t command,
 
   if ((counts * EUI64_SIZE) > MAX_IPC_VEC_ARG_CAPACITY) {
     assert(false); // "vector eui64List length exceeds expected maximum
+    return;
   }
 
   memmove(msg.data.test_join_list_add.request.eui64List, eui64List, sizeof(uint8_t) * (counts * EUI64_SIZE));
@@ -755,6 +758,7 @@ void sl_zigbee_test_join_list_add(uint8_t command,
 
   if ((counts * EUI64_SIZE) > MAX_IPC_VEC_ARG_CAPACITY) {
     assert(false); // "vector eui64List length exceeds expected maximum
+    return;
   }
 
   memmove(eui64List, msg.data.test_join_list_add.request.eui64List, sizeof(uint8_t) * (counts * EUI64_SIZE));
@@ -1103,6 +1107,7 @@ sl_status_t sl_zigbee_test_zdo_generate_clear_all_bindings_req(sl_802154_short_a
 
   if ((counts * EUI64_SIZE) > MAX_IPC_VEC_ARG_CAPACITY) {
     assert(false); // "vector eui64_list length exceeds expected maximum
+    return msg.data.test_zdo_generate_clear_all_bindings_req.response.result;
   }
 
   memmove(msg.data.test_zdo_generate_clear_all_bindings_req.request.eui64_list, eui64_list, sizeof(uint8_t) * (counts * EUI64_SIZE));
@@ -1111,6 +1116,7 @@ sl_status_t sl_zigbee_test_zdo_generate_clear_all_bindings_req(sl_802154_short_a
 
   if ((counts * EUI64_SIZE) > MAX_IPC_VEC_ARG_CAPACITY) {
     assert(false); // "vector eui64_list length exceeds expected maximum
+    return msg.data.test_zdo_generate_clear_all_bindings_req.response.result;
   }
 
   memmove(eui64_list, msg.data.test_zdo_generate_clear_all_bindings_req.request.eui64_list, sizeof(uint8_t) * (counts * EUI64_SIZE));
@@ -1149,6 +1155,7 @@ sl_status_t sl_zigbee_test_zdo_generate_security_decommission_req(sl_802154_shor
 
   if ((counts * EUI64_SIZE) > MAX_IPC_VEC_ARG_CAPACITY) {
     assert(false); // "vector eui64_list length exceeds expected maximum
+    return msg.data.test_zdo_generate_security_decommission_req.response.result;
   }
 
   memmove(msg.data.test_zdo_generate_security_decommission_req.request.eui64_list, eui64_list, sizeof(uint8_t) * (counts * EUI64_SIZE));
@@ -1157,6 +1164,7 @@ sl_status_t sl_zigbee_test_zdo_generate_security_decommission_req(sl_802154_shor
 
   if ((counts * EUI64_SIZE) > MAX_IPC_VEC_ARG_CAPACITY) {
     assert(false); // "vector eui64_list length exceeds expected maximum
+    return msg.data.test_zdo_generate_security_decommission_req.response.result;
   }
 
   memmove(eui64_list, msg.data.test_zdo_generate_security_decommission_req.request.eui64_list, sizeof(uint8_t) * (counts * EUI64_SIZE));

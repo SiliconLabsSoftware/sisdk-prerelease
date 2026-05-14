@@ -42,6 +42,7 @@
 
 #include "common/code_utils.hpp"
 #include "common/logging.hpp"
+#include "common/types.hpp"
 #include "host/posix/dnssd.hpp"
 #include "utils/socket_utils.hpp"
 
@@ -111,8 +112,20 @@ void UdpProxy::Process(const MainloopContext &aContext)
 
     SuccessOrExit(ReceivePacket(payload, length, remoteAddr, remotePort));
 
-    // UDP Forward to NCPq
-    mDeps.UdpForward(payload, length, remoteAddr, remotePort, *this);
+    // UDP forward: infrastructure -> host socket -> NCP (Spinel THREAD_UDP_FORWARD_STREAM)
+    {
+        otbrError fwdError = mDeps.UdpForward(payload, length, remoteAddr, remotePort, *this);
+
+        if (fwdError == OTBR_ERROR_NONE)
+        {
+            otbrLogDebug("UDP proxy: infra->host->NCP forwarded len=%u (threadPort=%u hostBoundPort=%u) remote=%s:%u",
+                         length, mThreadPort, mHostPort, Ip6Address(remoteAddr).ToString().c_str(), remotePort);
+        }
+        else
+        {
+            otbrLogWarning("UDP proxy: UdpForward to NCP failed len=%u: %s", length, otbrErrorString(fwdError));
+        }
+    }
 
 exit:
     return;
@@ -192,6 +205,11 @@ void UdpProxy::SendToPeer(const uint8_t      *aUdpPayload,
     {
         otbrLogWarning("Failed to sendmsg: %s", strerror(errno));
     }
+    else
+    {
+        otbrLogDebug("UDP proxy: NCP->host->infra forwarded len=%zd (threadPort=%u hostBoundPort=%u) peer=%s:%u", rval,
+                     mThreadPort, mHostPort, Ip6Address(aPeerAddr).ToString().c_str(), aPeerPort);
+    }
 }
 
 otbrError UdpProxy::BindToEphemeralPort(void)
@@ -268,8 +286,8 @@ otbrError UdpProxy::ReceivePacket(uint8_t      *aPayload,
     aRemotePort = ntohs(peerAddr.sin6_port);
     memcpy(&aRemoteAddr, &peerAddr.sin6_addr, sizeof(otIp6Address));
 
-    otbrLogDebug("Receive a packet, remote address:%s, remote port:%d", Ip6Address(aRemoteAddr).ToString().c_str(),
-                 aRemotePort);
+    otbrLogDebug("UDP proxy: recv from infra (host socket) len=%u remote=%s port=%u", static_cast<unsigned>(aLength),
+                 Ip6Address(aRemoteAddr).ToString().c_str(), aRemotePort);
 
 exit:
     return rval > 0 ? OTBR_ERROR_NONE : OTBR_ERROR_ERRNO;

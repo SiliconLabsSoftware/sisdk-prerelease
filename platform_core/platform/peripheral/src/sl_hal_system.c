@@ -434,7 +434,8 @@ uint32_t sl_hal_system_get_hfrcodpll_band_calibration(uint32_t frequency)
 
   #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4) \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
-      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
     case SL_HAL_SYSTEM_HFRCODPLL_FREQ_5M0Hz:
       calibration_value = DEVINFO->HFRCODPLLCAL[1].HFRCODPLLCAL;
       break;

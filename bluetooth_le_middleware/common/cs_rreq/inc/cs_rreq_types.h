@@ -36,6 +36,70 @@
 #include "sl_status.h"
 #include "cs_rreq.h"
 
+/// Identifies which RAS Client callback produced a deferred event.
+SL_ENUM(cs_rreq_ras_evt_type_t) {
+  CS_RREQ_RAS_EVT_INITIALIZED = 0,            ///< cs_ras_client_on_initialized
+  CS_RREQ_RAS_EVT_MODE_CHANGED,               ///< cs_ras_client_on_mode_changed
+  CS_RREQ_RAS_EVT_RECEPTION_FINISHED,         ///< cs_ras_client_on_ranging_data_reception_finished
+#if defined(CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT) && (CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT == 1)
+  CS_RREQ_RAS_EVT_ACK_FINISHED,               ///< cs_ras_client_on_ack_finished
+  CS_RREQ_RAS_EVT_RANGING_DATA_READY,         ///< cs_ras_client_on_ranging_data_ready
+  CS_RREQ_RAS_EVT_ABORT_FINISHED,             ///< cs_ras_client_on_abort_finished
+  CS_RREQ_RAS_EVT_RANGING_DATA_OVERWRITTEN,   ///< cs_ras_client_on_ranging_data_overwritten
+#endif // CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT
+  CS_RREQ_RAS_EVT_TIMEOUT                     ///< cs_ras_client_on_timeout
+};
+
+/// Deferred RAS Client event.
+typedef struct {
+  cs_rreq_ras_evt_type_t type;
+  uint8_t                connection;
+  union {
+    struct {
+      cs_ras_features_t features;
+      sl_status_t       sc;
+    } initialized;
+    struct {
+      cs_ras_mode_t mode;
+      sl_status_t   sc;
+    } mode_changed;
+    struct {
+      bool                            real_time;
+      bool                            retrieve_lost;
+      sl_status_t                     sc;
+      cs_ras_cp_response_code_value_t response;
+      cs_ras_ranging_counter_t        ranging_counter;
+      uint8_t                         start_segment;
+      uint8_t                         end_segment;
+      bool                            recoverable;
+      uint32_t                        size;
+      bool                            last_arrived;
+      uint8_t                         last_known_segment;
+      uint64_t                        lost_segments;
+    } reception_finished;
+#if defined(CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT) && (CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT == 1)
+    struct {
+      sl_status_t                     sc;
+      cs_ras_cp_response_code_value_t response;
+    } ack_finished;
+    struct {
+      cs_ras_ranging_counter_t ranging_counter;
+    } ranging_data_ready;
+    struct {
+      sl_status_t                     sc;
+      cs_ras_cp_response_code_value_t response;
+    } abort_finished;
+    struct {
+      cs_ras_ranging_counter_t ranging_counter;
+    } ranging_data_overwritten;
+#endif // CS_RREQ_CONFIG_RAS_ON_DEMAND_SUPPORT
+    struct {
+      cs_ras_client_timeout_t        timeout;
+      cs_ras_client_timeout_action_t action;
+    } timeout;
+  } data;
+} cs_rreq_ras_evt_t;
+
 // CS procedure completion state type
 typedef enum {
   CS_PROCEDURE_STATE_IN_PROGRESS = 0u, // Procedure is still collecting subevent data

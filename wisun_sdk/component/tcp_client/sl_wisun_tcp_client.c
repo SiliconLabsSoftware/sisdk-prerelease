@@ -34,7 +34,9 @@
 #include <stdio.h>
 
 #include "sl_string.h"
-#include "socket/socket.h"
+#include "sys/socket.h"
+#include "arpa/inet.h"
+#include "netinet/in.h"
 #include "sl_wisun_tcp_client.h"
 #include "errno.h"
 

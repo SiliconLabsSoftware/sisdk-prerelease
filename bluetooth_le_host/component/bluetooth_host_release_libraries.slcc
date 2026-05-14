@@ -75,6 +75,16 @@ library:
   - toolchain_gcc
   - cortexm33
   - bluetooth_feature_channel_classification
+- path: build/gcc/cortex-m33/channel_sounding/channel_sounding_test/release/libble_host_channel_sounding_test.a
+  condition:
+  - toolchain_gcc
+  - cortexm33
+  - bluetooth_feature_cs_test
+- path: build/gcc/cortex-m33/channel_sounding/release/libble_host_channel_sounding.a
+  condition:
+  - toolchain_gcc
+  - cortexm33
+  - bluetooth_feature_cs
 - path: build/gcc/cortex-m33/connection/connection_analyzer/release/libble_host_connection_analyzer.a
   condition:
   - toolchain_gcc
@@ -220,6 +230,16 @@ library:
   - toolchain_gcc
   - cortexm55
   - bluetooth_feature_channel_classification
+- path: build/gcc/cortex-m55/channel_sounding/channel_sounding_test/release/libble_host_channel_sounding_test.a
+  condition:
+  - toolchain_gcc
+  - cortexm55
+  - bluetooth_feature_cs_test
+- path: build/gcc/cortex-m55/channel_sounding/release/libble_host_channel_sounding.a
+  condition:
+  - toolchain_gcc
+  - cortexm55
+  - bluetooth_feature_cs
 - path: build/gcc/cortex-m55/connection/connection_analyzer/release/libble_host_connection_analyzer.a
   condition:
   - toolchain_gcc
@@ -365,6 +385,16 @@ library:
   - toolchain_iar
   - cortexm33
   - bluetooth_feature_channel_classification
+- path: build/iar/cortex-m33/channel_sounding/channel_sounding_test/release/libble_host_channel_sounding_test.a
+  condition:
+  - toolchain_iar
+  - cortexm33
+  - bluetooth_feature_cs_test
+- path: build/iar/cortex-m33/channel_sounding/release/libble_host_channel_sounding.a
+  condition:
+  - toolchain_iar
+  - cortexm33
+  - bluetooth_feature_cs
 - path: build/iar/cortex-m33/connection/connection_analyzer/release/libble_host_connection_analyzer.a
   condition:
   - toolchain_iar
@@ -510,6 +540,16 @@ library:
   - toolchain_iar
   - cortexm55
   - bluetooth_feature_channel_classification
+- path: build/iar/cortex-m55/channel_sounding/channel_sounding_test/release/libble_host_channel_sounding_test.a
+  condition:
+  - toolchain_iar
+  - cortexm55
+  - bluetooth_feature_cs_test
+- path: build/iar/cortex-m55/channel_sounding/release/libble_host_channel_sounding.a
+  condition:
+  - toolchain_iar
+  - cortexm55
+  - bluetooth_feature_cs
 - path: build/iar/cortex-m55/connection/connection_analyzer/release/libble_host_connection_analyzer.a
   condition:
   - toolchain_iar
@@ -655,6 +695,16 @@ library:
   - toolchain_llvm
   - cortexm33
   - bluetooth_feature_channel_classification
+- path: build/llvm/cortex-m33/channel_sounding/channel_sounding_test/release/libble_host_channel_sounding_test.a
+  condition:
+  - toolchain_llvm
+  - cortexm33
+  - bluetooth_feature_cs_test
+- path: build/llvm/cortex-m33/channel_sounding/release/libble_host_channel_sounding.a
+  condition:
+  - toolchain_llvm
+  - cortexm33
+  - bluetooth_feature_cs
 - path: build/llvm/cortex-m33/connection/connection_analyzer/release/libble_host_connection_analyzer.a
   condition:
   - toolchain_llvm
@@ -800,6 +850,16 @@ library:
   - toolchain_llvm
   - cortexm55
   - bluetooth_feature_channel_classification
+- path: build/llvm/cortex-m55/channel_sounding/channel_sounding_test/release/libble_host_channel_sounding_test.a
+  condition:
+  - toolchain_llvm
+  - cortexm55
+  - bluetooth_feature_cs_test
+- path: build/llvm/cortex-m55/channel_sounding/release/libble_host_channel_sounding.a
+  condition:
+  - toolchain_llvm
+  - cortexm55
+  - bluetooth_feature_cs
 - path: build/llvm/cortex-m55/connection/connection_analyzer/release/libble_host_connection_analyzer.a
   condition:
   - toolchain_llvm

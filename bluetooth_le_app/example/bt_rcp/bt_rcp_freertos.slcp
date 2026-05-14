@@ -6,7 +6,7 @@ description: >
   (i.e. the Link Layer only) and provides access to it using the standard HCI
   (Host-Controller Interface) over a UART connection.
 category: Bluetooth Examples
-quality: experimental
+quality: production
 
 filter:
   - name: "Wireless Technology"

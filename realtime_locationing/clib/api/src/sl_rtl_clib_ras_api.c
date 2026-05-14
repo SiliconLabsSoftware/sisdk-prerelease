@@ -15,15 +15,25 @@
  *
  ******************************************************************************/
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif
 #include "sl_rtl_clib_api.h"
+
+#if defined(SL_CATALOG_KERNEL_PRESENT) || !defined(SL_CATALOG_RTL_LIB_PRESENT)
+#define SLI_RTL_RAS_API_DISABLED
+#endif
+
+#ifndef SLI_RTL_RAS_API_DISABLED
 #include "sli_rtl_clib_ras_api.h"
+#endif
 
 enum sl_rtl_error_code sl_rtl_ras_process(
   sl_rtl_cs_libitem *item,
   const uint8_t num_procedures,
   const sl_rtl_ras_procedure *procedure_data)
 {
-#if defined(SL_CATALOG_KERNEL_PRESENT)
+#ifdef SLI_RTL_RAS_API_DISABLED
   (void)item;
   (void)num_procedures;
   (void)procedure_data;

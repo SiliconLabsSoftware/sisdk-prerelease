@@ -27,6 +27,7 @@ requires:
 provides:
 - name: cs_acp_state
 - name: cs_acp_target
+- name: cs_acp_with_impl
 template_contribution:
 - name: component_catalog
   value: cs_acp

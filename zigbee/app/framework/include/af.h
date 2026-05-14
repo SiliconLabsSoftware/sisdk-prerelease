@@ -84,12 +84,12 @@ extern void sl_zigbee_af_test_harness_z3_reset_event_handler(sl_zigbee_af_event_
 #endif // SL_COMPONENT_CATALOG_PRESENT
 
 #if defined(SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT) \
-  || defined(SL_ZIGBEE_SCRIPTED_TEST) || defined(SL_CATALOG_ZIGBEE_SIMULATION_PRESENT)
+  || (defined(SL_ZIGBEE_AF_NCP) && defined(SL_CATALOG_ZIGBEE_SIMULATION_PRESENT))
 #include "app/framework/util/print.h"
 #include "app/framework/util/zcl-debug-print.h"
 #elif defined(SL_CATALOG_ZIGBEE_GREEN_POWER_ADAPTER_PRESENT)
 #include "green-power-print-wrapper.h"
-#endif // SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT || SL_ZIGBEE_SCRIPTED_TEST || SL_CATALOG_ZIGBEE_SIMULATION_PRESENT
+#endif // SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 
 #ifdef SL_CATALOG_CLI_PRESENT
 #include "sl_cli.h"

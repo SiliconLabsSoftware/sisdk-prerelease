@@ -35,7 +35,9 @@
 #include <stdio.h>
 
 #include "sl_string.h"
-#include "socket/socket.h"
+#include "sys/socket.h"
+#include "arpa/inet.h"
+#include "netinet/in.h"
 #include "sl_wisun_trace_util.h"
 #include "sl_wisun_udp_client.h"
 #include "sl_memory_manager.h"

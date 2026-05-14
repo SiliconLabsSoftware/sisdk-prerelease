@@ -702,7 +702,7 @@ void sli_ot_radio_events_update_config(sl_rail_events_t mask, sl_rail_events_t v
 
             if (status != SL_RAIL_STATUS_NO_ERROR)
             {
-                otLogWarnPlat("Failed to configure radio events: %u", status);
+                otLogWarnPlat("Failed to configure radio events: %lu", static_cast<unsigned long>(status));
             }
             sCurrentEventConfig = newEventConfig;
         }

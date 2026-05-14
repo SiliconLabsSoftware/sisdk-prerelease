@@ -10,6 +10,13 @@
 #ifndef MBEDTLS_SSL_MISC_H
 #define MBEDTLS_SSL_MISC_H
 
+#if defined(__IAR_SYSTEMS_ICC__)
+/* Suppress IAR Pe188 (enum mixed with another type) and Pe111
+ * (statement is unreachable) on the static-inline helpers below. */
+#pragma diag_suppress=Pe188
+#pragma diag_suppress=Pe111
+#endif
+
 #include "mbedtls/build_info.h"
 #include "common.h"
 
@@ -3101,5 +3108,10 @@ int mbedtls_ct_hmac(mbedtls_md_context_t *ctx,
                     unsigned char *output);
 #endif /* defined(MBEDTLS_USE_PSA_CRYPTO) */
 #endif /* MBEDTLS_TEST_HOOKS && defined(MBEDTLS_SSL_SOME_SUITES_USE_MAC) */
+
+#if defined(__IAR_SYSTEMS_ICC__)
+#pragma diag_default=Pe188
+#pragma diag_default=Pe111
+#endif
 
 #endif /* ssl_misc.h */

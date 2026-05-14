@@ -3,7 +3,7 @@
  * @brief internal wrappers for 'sl_zigbee_stack_specific_tlv' ipc commands
  *******************************************************************************
  * # License
- * <b>Copyright 2025 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc. Your use of this
@@ -130,6 +130,7 @@ sl_status_t sl_zigbee_global_tlv_add_configurations(sli_buffer_manager_buffer_t 
 
   if (tag_c > 10) {
     assert(false); // "vector tag_v length exceeds expected maximum
+    return msg.data.global_tlv_add_configurations.response.result;
   }
 
   memmove(msg.data.global_tlv_add_configurations.request.tag_v, tag_v, sizeof(uint8_t) * tag_c);
@@ -211,6 +212,7 @@ sli_buffer_manager_buffer_t sl_zigbee_global_tlv_get_configurations(uint8_t tag_
 
   if (tag_c > 10) {
     assert(false); // "vector tag_v length exceeds expected maximum
+    return msg.data.global_tlv_get_configurations.response.result;
   }
 
   memmove(msg.data.global_tlv_get_configurations.request.tag_v, tag_v, sizeof(uint8_t) * tag_c);

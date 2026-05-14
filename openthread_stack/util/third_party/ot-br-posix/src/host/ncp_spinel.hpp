@@ -35,9 +35,12 @@
 #define OTBR_AGENT_NCP_SPINEL_HPP_
 
 #include <functional>
+#include <map>
 #include <memory>
 
 #include <vector>
+
+#include "openthread-br/config.h"
 
 #include <openthread/backbone_router_ftd.h>
 #include <openthread/border_agent.h>
@@ -347,13 +350,16 @@ public:
      */
     void SrpServerSetAutoEnableMode(bool aEnabled);
 
+#endif // OTBR_ENABLE_SRP_ADVERTISING_PROXY
+
+#if OTBR_ENABLE_MDNS && (OTBR_ENABLE_SRP_ADVERTISING_PROXY || OTBR_ENABLE_DNSSD_PLAT)
     /**
      * This method sets the dnssd state on NCP.
      *
      * @param[in] aState  The dnssd state.
      */
     void DnssdSetState(Mdns::Publisher::State aState);
-#endif // OTBR_ENABLE_SRP_ADVERTISING_PROXY
+#endif
 
 #if OTBR_ENABLE_MDNS
     /**
@@ -379,6 +385,18 @@ public:
      * @param[in] aCallback  The callback function.
      */
     void AddEphemeralKeyStateChangedCallback(const EphemeralKeyStateChangedCallback &aCallback);
+
+#if OTBR_ENABLE_TREL
+    /**
+     * Invoked when the NCP signals TREL state (`SPINEL_PROP_TREL_STATE`): `aThreadPort` is the UDP port on the
+     * NCP/Thread side to associate with the host UDP proxy.
+     */
+    using TrelStateChangedCallback = std::function<void(bool aEnabled, uint16_t aThreadPort)>;
+
+    void SetTrelStateChangedCallback(const TrelStateChangedCallback &aCallback);
+
+    otError SetTrelHostUdpPort(bool aEnabled, uint16_t aHostPort);
+#endif
 
     /**
      * This method forwards a UDP packet to the NCP.
@@ -489,6 +507,20 @@ public:
     otbrError BorderRoutingProcessDhcp6PdPrefix(const otBorderRoutingPrefixTableEntry *aPrefixInfo);
 #endif
 
+#if OTBR_ENABLE_NAT64 && OTBR_ENABLE_BORDER_ROUTING
+    /**
+     * This method enables/disables NAT64 prefix management on NCP.
+     *
+     * With border-routing NAT64 enabled on the co-processor, the NCP discovers NAT64
+     * prefixes on the infrastructure link (for example from Router Advertisements) and
+     * publishes them in Thread Network Data. Packet translation is outside the NCP when
+     * the NAT64 translator is not built or enabled on the co-processor.
+     *
+     * @param[in] aEnabled  A boolean to enable/disable NAT64 prefix management.
+     */
+    void BorderRoutingSetNat64Enabled(bool aEnabled);
+#endif
+
 private:
     using FailureHandler = std::function<void(otError)>;
 
@@ -582,7 +614,14 @@ private:
                                   uint16_t            &aLocalPort);
     otError SendDnssdResult(otPlatDnssdRequestId aRequestId, const std::vector<uint8_t> &aCallbackData, otError aError);
 #if OTBR_ENABLE_DNSSD_PLAT
-    otError SendDnssdBrowseResult(const otPlatDnssdBrowseResult &aResult, const std::vector<uint8_t> &aCallbackData);
+    otError  SendDnssdBrowseResult(const otPlatDnssdBrowseResult &aResult, const std::vector<uint8_t> &aCallbackData);
+    otError  SendDnssdSrvResult(const otPlatDnssdSrvResult &aResult, const std::vector<uint8_t> &aCallbackData);
+    otError  SendDnssdTxtResult(const otPlatDnssdTxtResult &aResult, const std::vector<uint8_t> &aCallbackData);
+    otError  SendDnssdAddressResult(spinel_prop_key_t               aKey,
+                                    const otPlatDnssdAddressResult &aResult,
+                                    const std::vector<uint8_t>     &aCallbackData);
+    uint64_t AllocateDnssdStableId(const std::vector<uint8_t> &aCallbackData);
+    bool     ReleaseDnssdStableId(const std::vector<uint8_t> &aCallbackData, uint64_t &aStableIdOut);
 #endif
 
     ot::Spinel::SpinelDriver *mSpinelDriver;
@@ -606,7 +645,8 @@ private:
     otbr::Mdns::Publisher *mPublisher;
 #endif
 #if OTBR_ENABLE_DNSSD_PLAT
-    uint64_t mDiscoveryProxyId;
+    uint64_t                                 mDiscoveryProxyId;
+    std::map<std::vector<uint8_t>, uint64_t> mDnssdStableIdByCallbackData;
 #endif
 
     AsyncTaskPtr mDatasetSetActiveTask;
@@ -629,6 +669,11 @@ private:
     BackboneRouterStateChangedCallback       mBackboneRouterStateChangedCallback;
     BackboneRouterMulticastListenerCallback  mBackboneRouterMulticastListenerCallback;
     EphemeralKeyStateChangedCallback         mEphemeralKeyStateChangedCallback;
+#if OTBR_ENABLE_TREL
+    TrelStateChangedCallback mTrelStateChangedCallback;
+    /// TREL stack UDP port on the NCP (from `SPINEL_PROP_TREL_STATE`); 0 when TREL is off or not yet known.
+    uint16_t mTrelThreadUdpPort;
+#endif
 };
 
 } // namespace Host

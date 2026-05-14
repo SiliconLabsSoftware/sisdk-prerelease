@@ -17773,58 +17773,6 @@ uint32_t sl_bt_event_pending_len(void);
 void sl_bt_run(void);
 
 /**
- * Handle an API command in binary format.
- *
- * <b>Deprecated</b> and replaced by @ref sl_bgapi_execute_binary_command. The
- * replacement provides a more flexible and efficient way to execute BGAPI
- * commands in their binary format. The new function automatically performs any
- * locking that's needed and enables re-using the command buffer memory for the
- * response.
- *
- * This is provided to NCP target applications for processing commands received
- * from NCP transport. This function is a synonym for a generic BGAPI function
- * @ref sl_bgapi_handle_command. If the NCP application uses an RTOS, use the
- * sequence documented in @ref sl_bgapi_handle_command to handle the BGAPI
- * command in a thread-safe manner.
- *
- * @param hdr the command header
- * @param data the command payload in a byte array
- */
-SL_BGAPI_DEPRECATED void sl_bt_handle_command(uint32_t hdr, void* data);
-
-/**
- * Get the response to the command currently being handled.
- *
- * <b>Deprecated</b> and replaced by @ref sl_bgapi_execute_binary_command. The
- * replacement provides a more flexible and efficient way to execute BGAPI
- * commands in their binary format. The new function automatically performs any
- * locking that's needed and enables re-using the command buffer memory for the
- * response.
- *
- * This is provided to NCP target applications for processing commands received
- * from NCP transport. This function is a synonym for a generic BGAPI function
- * @ref sl_bgapi_get_command_response.
- */
-SL_BGAPI_DEPRECATED static inline sl_bt_msg_t* sl_bt_get_command_response()
-{
-  // We intentionally call a deprecated function, so ignore the warning
-#if defined(__IAR_SYSTEMS_ICC__)
-  _Pragma("diag_suppress=Pe1215")
-#elif defined(__GNUC__)
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
-
-  return (sl_bt_msg_t*) sl_bgapi_get_command_response();
-
-#if defined(__IAR_SYSTEMS_ICC__)
-  _Pragma("diag_default=Pe1215")
-#elif defined(__GNUC__)
-  #pragma GCC diagnostic pop
-#endif
-}
-
-/**
  * Priority message handler function if user application requires the use of
  * PendSV interrupt.
  *
@@ -17959,6 +17907,61 @@ void sl_bt_send_rsp_user_cs_service_message_to_target(uint16_t result, uint8_t d
  * data. Do not use it in SoC mode.
  */
 void sl_bt_send_evt_user_cs_service_message_to_host(uint8_t data_len, uint8_t *data);
+
+// -----------------------------------------------------------------------------
+// The following functions are deprecated. Diagnostic warnings are intentionally suppressed 
+// to allow usage of these deprecated API functions for backward compatibility.
+
+#if defined(__IAR_SYSTEMS_ICC__)
+_Pragma("diag_suppress=Pe1215")
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
+/**
+ * Handle an API command in binary format.
+ *
+ * <b>Deprecated</b> and replaced by @ref sl_bgapi_execute_binary_command. The
+ * replacement provides a more flexible and efficient way to execute BGAPI
+ * commands in their binary format. The new function automatically performs any
+ * locking that's needed and enables re-using the command buffer memory for the
+ * response.
+ *
+ * This is provided to NCP target applications for processing commands received
+ * from NCP transport. This function is a synonym for a generic BGAPI function
+ * @ref sl_bgapi_handle_command. If the NCP application uses an RTOS, use the
+ * sequence documented in @ref sl_bgapi_handle_command to handle the BGAPI
+ * command in a thread-safe manner.
+ *
+ * @param hdr the command header
+ * @param data the command payload in a byte array
+ */
+SL_BGAPI_DEPRECATED void sl_bt_handle_command(uint32_t hdr, void* data);
+
+/**
+ * Get the response to the command currently being handled.
+ *
+ * <b>Deprecated</b> and replaced by @ref sl_bgapi_execute_binary_command. The
+ * replacement provides a more flexible and efficient way to execute BGAPI
+ * commands in their binary format. The new function automatically performs any
+ * locking that's needed and enables re-using the command buffer memory for the
+ * response.
+ *
+ * This is provided to NCP target applications for processing commands received
+ * from NCP transport. This function is a synonym for a generic BGAPI function
+ * @ref sl_bgapi_get_command_response.
+ */
+SL_BGAPI_DEPRECATED static inline sl_bt_msg_t* sl_bt_get_command_response()
+{
+  return (sl_bt_msg_t*) sl_bgapi_get_command_response();
+}
+
+#if defined(__IAR_SYSTEMS_ICC__)
+_Pragma("diag_default=Pe1215")
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 
 /** @} */ // end addtogroup sl_bt_utility_functions

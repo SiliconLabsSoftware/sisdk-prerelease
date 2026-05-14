@@ -82,6 +82,12 @@ void sl_zigbee_af_idle_sleep_power_mode_eco_command(sl_cli_command_arg_t *argume
   sl_zigbee_af_cli_println("Switched to power save mode with status %02X", status);
 }
 #if defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_RX_DUTY_CYCLING_PRESENT)
+#ifdef SL_CATALOG_RAIL_MULTIPLEXER_PRESENT
+#include "sl_rail_mux_rename.h"
+#else
+#include "sl_rail_util_ieee802154_rx_duty_cycling.h"
+#include "sl_rail_util_ieee802154_rx_duty_cycling_radio_config.h"
+#endif
 void sl_zigbee_af_radio_rx_duty_cycle_command(sl_cli_command_arg_t *arguments)
 {
   sl_rail_handle_t *rail_handle = (sl_rail_handle_t *)sl_zigbee_get_rail_handle();

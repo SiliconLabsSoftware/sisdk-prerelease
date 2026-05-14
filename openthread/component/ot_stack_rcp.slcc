@@ -35,8 +35,6 @@ define:
   value: 1
 - name: OPENTHREAD_SPINEL_CONFIG_OPENTHREAD_MESSAGE_ENABLE
   value: 0
-- name: OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
-  value: 0
 template_contribution:
 - name: component_catalog
   value: openthread_stack_rcp

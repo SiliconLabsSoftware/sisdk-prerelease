@@ -3,7 +3,7 @@
  * @brief struct definitions for zigbee calllback events
  *******************************************************************************
  * # License
- * <b>Copyright 2025 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc. Your use of this
@@ -25,6 +25,9 @@
 #include "sl_enum.h"
 #include "sl_event_system.h"
 #include "sl_memory_manager.h"
+#ifdef SL_CATALOG_RAIL_MUX_AUX_PRESENT
+#include "stack/internal/src/ipc/sl_zigbee_rail_mux_aux_raw_ipc_callback_events.h"
+#endif
 #include "stack/internal/src/ipc/binding-table-ipc-callback-events.h"
 #include "stack/internal/src/ipc/bootload_ipc_callback_events.h"
 #ifdef SL_CATALOG_ZIGBEE_CBKE_CORE_PRESENT
@@ -58,6 +61,7 @@
 #endif
 
 SL_ENUM_GENERIC(sl_zigbee_stack_cb_event_tag_t, uint16_t) {
+  SLI_ZIGBEE_STACK_RAIL_MUX_AUX_EVENT_CALLBACK_IPC_EVENT_TYPE,
   SLI_ZIGBEE_STACK_REMOTE_DELETE_BINDING_HANDLER_IPC_EVENT_TYPE,
   SLI_ZIGBEE_STACK_REMOTE_SET_BINDING_HANDLER_IPC_EVENT_TYPE,
   SLI_ZIGBEE_STACK_BOOTLOAD_TRANSMIT_COMPLETE_HANDLER_IPC_EVENT_TYPE,
@@ -119,6 +123,9 @@ typedef struct {
 #endif // !SL_ZIGBEE_MULTI_NETWORK_STRIPPED
   sl_zigbee_stack_cb_event_tag_t tag;
   union {
+    #ifdef SL_CATALOG_RAIL_MUX_AUX_PRESENT
+    sli_zigbee_stack_rail_mux_aux_event_callback_ipc_event_t rail_mux_aux_event_callback;
+    #endif
     sli_zigbee_stack_remote_delete_binding_handler_ipc_event_t remote_delete_binding_handler;
     sli_zigbee_stack_remote_set_binding_handler_ipc_event_t remote_set_binding_handler;
     sli_zigbee_stack_bootload_transmit_complete_handler_ipc_event_t bootload_transmit_complete_handler;
@@ -189,6 +196,8 @@ typedef struct {
 } sl_zigbee_stack_cb_event_t;
 
 // module specific handlers
+
+void sli_zigbee_sl_zigbee_rail_mux_aux_raw_process_ipc_event(sl_zigbee_stack_cb_event_t *cb_event);
 
 void sli_zigbee_binding_table_process_ipc_event(sl_zigbee_stack_cb_event_t *cb_event);
 

@@ -70,7 +70,8 @@ SL_ENUM(cs_rreq_error_t) {
   CS_RREQ_ERROR_RAS_CLIENT_ACK_FAILED,                   ///< Acknowledgement control point operation failed
   CS_RREQ_ERROR_RAS_CLIENT_REQUEST_LOST_SEGMENTS_FAILED, ///< Lost segment retrieval failed
   CS_RREQ_ERROR_RAS_CLIENT_ON_ACK_FINISHED_FAILED,       ///< Ack-finished callback handling failed
-  CS_RREQ_ERROR_RAS_CLIENT_TIMEOUT                       ///< Data reception timeout occurred
+  CS_RREQ_ERROR_RAS_CLIENT_TIMEOUT,                      ///< Data reception timeout occurred
+  CS_RREQ_ERROR_RUNTIME_ERROR                            ///< Runtime error occurred
 };
 
 /// RREQ enable type

@@ -35,17 +35,15 @@
 
 #include "instance/instance.hpp"
 
-using IcmpType = ot::Ip6::Icmp::Header::Type;
-
-static const IcmpType kForwardIcmpTypes[] = {
-    IcmpType::kTypeDstUnreach,       IcmpType::kTypePacketToBig, IcmpType::kTypeTimeExceeded,
-    IcmpType::kTypeParameterProblem, IcmpType::kTypeEchoRequest, IcmpType::kTypeEchoReply,
-};
-
 namespace ot {
 namespace Ip6 {
 
 RegisterLogModule("Ip6");
+
+const uint8_t Ip6::kForwardIcmpTypes[] = {
+    Icmp::Header::kTypeDstUnreach,       Icmp::Header::kTypePacketToBig, Icmp::Header::kTypeTimeExceeded,
+    Icmp::Header::kTypeParameterProblem, Icmp::Header::kTypeEchoRequest, Icmp::Header::kTypeEchoReply,
+};
 
 Ip6::Ip6(Instance &aInstance)
     : InstanceLocator(aInstance)
@@ -809,6 +807,7 @@ Error Ip6::HandleExtensionHeaders(OwnedPtr<Message> &aMessagePtr,
 {
     Error           error = kErrorNone;
     ExtensionHeader extHeader;
+    bool            first = true;
 
     while (aReceive || aNextHeader == kProtoHopOpts)
     {
@@ -817,6 +816,9 @@ Error Ip6::HandleExtensionHeaders(OwnedPtr<Message> &aMessagePtr,
         switch (aNextHeader)
         {
         case kProtoHopOpts:
+            VerifyOrExit(first, error = kErrorDrop);
+            OT_FALL_THROUGH;
+
         case kProtoDstOpts:
             SuccessOrExit(error = HandleOptions(*aMessagePtr, aHeader, aReceive));
             break;
@@ -838,6 +840,7 @@ Error Ip6::HandleExtensionHeaders(OwnedPtr<Message> &aMessagePtr,
         }
 
         aNextHeader = extHeader.GetNextHeader();
+        first       = false;
     }
 
 exit:
@@ -1293,20 +1296,8 @@ Error Ip6::HandleDatagram(OwnedPtr<Message> aMessagePtr, bool aIsReassembled)
 
             SuccessOrExit(error = aMessagePtr->Read(aMessagePtr->GetOffset(), icmpType));
 
-            error = kErrorDrop;
-
-            for (IcmpType type : kForwardIcmpTypes)
-            {
-                if (icmpType == type)
-                {
-                    error = kErrorNone;
-                    break;
-                }
-            }
-
-            SuccessOrExit(error);
+            VerifyOrExit(DoesArrayContain(kForwardIcmpTypes, icmpType), error = kErrorDrop);
         }
-
 #if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
         if (mTmfOriginFilterEnabled)
 #endif

@@ -13,6 +13,16 @@ Apply the following migration steps:
 - Set `SL_SLEEPTIMER_PERIPHERAL` to `SL_SLEEPTIMER_PERIPHERAL_DEFAULT` (replace `SL_SLEEPTIMER_PERIPHERAL_BURTC` if it is still selected).
 - Set `SL_CLOCK_MANAGER_SYSRTCCLK_SOURCE` to `CMU_SYSRTC0CLKCTRL_CLKSEL_ULFRCO`.
 
+## DC/DC configuration (`ZW_DCDC_CONFIG`) {#migrate-section-8-1-0-dcdc}
+
+In 8.1.0, `ZW_DCDC_CONFIG` in `zw_hardware_config.h` (or Project Configurator) is applied when the radio platform initializes the DC/DC at startup. In 8.0.0 that setting was ignored and the firmware always used `EDCDCMODE_AUTO`.
+
+The setting chooses how the on-chip DC/DC runs at startup:
+
+- `EDCDCMODE_AUTO` (default): the chip picks bypass vs regulation from the supply level. Fine for most boards.
+- `EDCDCMODE_BYPASS`: always bypass. Try this if sleep current stays high after transmit on a very low battery (roughly 2.1–2.5 V).
+- `EDCDCMODE_DCDC_LOW_NOISE`: always regulate for lower noise. Use when the battery or regulator always stays above the minimum the DC/DC needs.
+
 # 8.0.0 {#migrate-section-8-0-0}
 
 ## zpal_power_manager APIs migration
@@ -74,7 +84,7 @@ These values can now be set via the Z-Wave Core Component (if using the GUI) or 
 | `SL_DEVICE_INIT_EMU_EM4_RETAIN_LFRCO`       | `ZW_EM4_RETAIN_LFRCO`         |
 | `SL_DEVICE_INIT_EMU_EM4_RETAIN_ULFRCO`      | `ZW_EM4_RETAIN_ULFRCO`        |
 
-\* The `ZW_DCDC_CONFIG` configuration value is still hard-coded to `EDCDCMODE_AUTO`, regardless of the value of this setting. A workaround is currently not available.
+\* The `ZW_DCDC_CONFIG` configuration value is still hard-coded to `EDCDCMODE_AUTO`, regardless of the value of this setting. A workaround is currently not available. SDK 8.1.0 applies this setting; see [DC/DC configuration (`ZW_DCDC_CONFIG`)](#migrate-section-8-1-0-dcdc).
 
 ## RAIL Power Manager Initialization
 

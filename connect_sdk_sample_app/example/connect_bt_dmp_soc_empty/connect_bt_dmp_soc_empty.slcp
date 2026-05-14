@@ -21,7 +21,7 @@ component:
     instance: [example]
   - id: connect_app_framework_common
   - id: connect_ble_cli
-  - id: token_manager
+  - id: common_token_manager
   - id: micriumos_kernel
   - id: sl_rail_util_pti
   - id: bt_ipc_listener

@@ -1735,7 +1735,8 @@ Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
   if (initData->useLowFrequencyMode) {
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)    \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
-    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)  \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14) \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
     CMU_CLOCK_SELECT_SET(EM23GRPACLK, LFRCO);
 #if defined(EUART_PRESENT)
@@ -1757,7 +1758,8 @@ Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
   } else {
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)    \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
-    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)  \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14) \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
 #if defined(EUART_PRESENT)
     CMU_CLOCK_SELECT_SET(EUART0CLK, EM01GRPACLK);

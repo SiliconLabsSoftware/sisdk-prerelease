@@ -24,7 +24,7 @@ component:
     condition: [hardware_board]
   - id: app_log
   - id: app_assert
-  - id: token_manager
+  - id: common_token_manager
   - id: cli
     instance: [example]
   - id: sl_rail_util_pti

@@ -43,9 +43,9 @@ extern "C" {
  * Initializes the BURTC peripheral for EM4 wakeup operation.
  *
  * @return ZPAL_STATUS_OK if initialization was successful, otherwise ZPAL_STATUS_FAIL
- * @note By default, the sl_sleeptimer module is configured to use SYSRTC instead of BURTC which is the RTC used in EM4 mode.
- * Unless changed, both module frequencies match (f=32768); no need for tick conversion between the two.
- * @warning this is not the case if you change the clock configuration! In that case, make sure to check the conversion factor!
+ * @note sl_sleeptimer uses SYSRTC while EM4 wakeup uses BURTC. If their counter frequencies differ,
+ * remaining sleeptimer ticks are converted to BURTC ticks using sl_sleeptimer_get_timer_frequency()
+ * and zpal_get_burtc_counter_frequency_hz() before programming the BURTC compare.
  * @note this function can be called more than once safely if it returns
  * ZPAL_STATUS_FAIL on the first try.
  */

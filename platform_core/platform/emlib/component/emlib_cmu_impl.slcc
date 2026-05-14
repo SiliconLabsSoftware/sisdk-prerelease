@@ -34,6 +34,8 @@ provides:
   condition: [device_sdid_250]
 - name: emlib_cmu_impl
   condition: [device_sdid_260]
+- name: emlib_cmu_impl
+  condition: [device_sdid_265]
 requires:
 - name: emlib_cmu
 - name: device

@@ -67,6 +67,12 @@ config_file:
 - path: config/EFX32XG2D/sl_clock_manager_tree_config.h
   file_id: clock_manager_tree_config
   condition: [device_generic_family_efr32xg2d]
+- path: config/EFX32XG2E/sl_clock_manager_oscillator_config.h
+  file_id: clock_manager_oscillator_config
+  condition: [device_generic_family_efr32xg2e]
+- path: config/EFX32XG2E/sl_clock_manager_tree_config.h
+  file_id: clock_manager_tree_config
+  condition: [device_generic_family_efr32xg2e]
 - path: config/EFX32XG22/sl_clock_manager_oscillator_config.h
   file_id: clock_manager_oscillator_config
   condition: [device_family_efm32pg22]

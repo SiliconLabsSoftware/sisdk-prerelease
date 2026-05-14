@@ -47,9 +47,6 @@
 * Customer should define these in their own application code
 ***************************************************************************/
 
-#ifndef SLI_ZIGBEE_AF_PRINT_MACROS_DEFINED_BY_ZCL_DEBUG_PRINT_H
-
-#ifndef SL_ZIGBEE_TEST
 #define SL_ZIGBEE_AF_PRINT_CORE 0x0001
 
 #undef sl_zigbee_af_core_print
@@ -102,7 +99,6 @@
 #define sl_zigbee_af_app_debug_exec(x) if ( true ) { x; }
 
 extern uint16_t sl_zigbee_af_print_active_area;
-#endif // !SL_ZIGBEE_TEST
 
 #if (SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_PRINT_SYSTEM == 1)
 // Using custom print system - this is the default behavior
@@ -178,7 +174,7 @@ void sl_zigbee_af_println_wrapper(uint16_t area, const char * formatString, ...)
 #define sl_zigbee_af_attributes_print_buffer(buffer, len, withSpace) sl_zigbee_core_debug_print_buffer((buffer), (len), (withSpace))
 #define sl_zigbee_af_app_print_buffer(buffer, len, withSpace)   sl_zigbee_core_debug_print_buffer((buffer), (len), (withSpace))
 #define sl_zigbee_af_debug_print_buffer(buffer, len, withSpace) sl_zigbee_core_debug_print_buffer((buffer), (len), (withSpace))
-#define sl_zigbee_af_print_buffer(...) sl_zigbee_core_debug_print_buffer(__VA_ARGS__)
+#define sl_zigbee_af_print_buffer(area, buffer, bufferLen, withSpace) sl_zigbee_core_debug_print_buffer(buffer, bufferLen, withSpace)
 #define sl_zigbee_af_attributes_println(...) sl_zigbee_core_debug_println(__VA_ARGS__)
 #define sl_zigbee_af_ota_bootload_cluster_println(...) sl_zigbee_core_debug_println(__VA_ARGS__)
 #define sl_zigbee_af_zdo_println(...) sl_zigbee_core_debug_println(__VA_ARGS__)
@@ -189,7 +185,5 @@ void sl_zigbee_af_println_wrapper(uint16_t area, const char * formatString, ...)
 #error "Include zigbee debug component or use the custom print system by setting SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_PRINT_SYSTEM to 1"
 #endif // SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 #endif // (SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_PRINT_SYSTEM == 1)
-
-#endif // !SLI_ZIGBEE_AF_PRINT_MACROS_DEFINED_BY_ZCL_DEBUG_PRINT_H
 
 #endif //_SILABS_GREEN_POWER_PRINT_WRAPPER_H_

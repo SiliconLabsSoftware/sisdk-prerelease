@@ -2296,7 +2296,7 @@ static sl_status_t _app_cli_get_connection(char *value_str,
   sl_wisun_join_state_t join_state = SL_WISUN_JOIN_STATE_DISCONNECTED;
   (void)key_str;
 
-  if ((value_str == NULL) || (entry == NULL)) {
+  if ((value_str == NULL) || (entry == NULL) || (entry->output_enum_list == NULL)) {
     return SL_STATUS_FAIL;
   }
 
@@ -2312,6 +2312,10 @@ static sl_status_t _app_cli_get_connection(char *value_str,
 
   if (value_enum->value_str != NULL) {
     while (value_enum) {
+      if (value_enum->value_str == NULL) {
+        // No matching enumeration found
+        return SL_STATUS_FAIL;
+      }
       if (value_enum->value == value) {
         // Matching enumeration found
         break;
@@ -2421,11 +2425,15 @@ static sl_status_t _app_cli_get_network_size(char *value_str,
   // finds the proper string for the value
   value_enum = entry->output_enum_list;
 
-  if (res != SL_STATUS_OK || value_enum->value_str == NULL) {
+  if (res != SL_STATUS_OK || value_enum == NULL || value_enum->value_str == NULL) {
     return SL_STATUS_FAIL;
   }
 
   while (value_enum) {
+    if (value_enum->value_str == NULL) {
+      // No matching enumeration found
+      return SL_STATUS_FAIL;
+    }
     if (value_enum->value == value) {
       // Matching enumeration found
       break;
@@ -2889,11 +2897,15 @@ static sl_status_t _app_get_regulation(char *value_str,
 
   // finds the proper string for the value for regulation
   value_enum = entry->output_enum_list;
-  if (value_enum->value_str == NULL) {
+  if (value_enum == NULL || value_enum->value_str == NULL) {
     return SL_STATUS_FAIL;
   }
 
   while (value_enum) {
+    if (value_enum->value_str == NULL) {
+      // No matching enumeration found
+      return SL_STATUS_FAIL;
+    }
     if (value_enum->value == _app_regulation) {
       // Matching enumeration found
       break;
@@ -3195,11 +3207,15 @@ static sl_status_t _app_cli_get_security(char *value_str,
   // finds the proper string for the value
   value_enum = entry->output_enum_list;
 
-  if (res != SL_STATUS_OK || value_enum->value_str == NULL) {
+  if (res != SL_STATUS_OK || value_enum == NULL || value_enum->value_str == NULL) {
     return SL_STATUS_FAIL;
   }
 
   while (value_enum) {
+    if (value_enum->value_str == NULL) {
+      // No matching enumeration found
+      return SL_STATUS_FAIL;
+    }
     if (value_enum->value == value) {
       // Matching enumeration found
       break;

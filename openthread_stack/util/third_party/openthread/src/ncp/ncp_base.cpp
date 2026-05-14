@@ -298,7 +298,7 @@ NcpBase::NcpBase(Instance *aInstance)
 #if OPENTHREAD_CONFIG_TMF_NETDATA_SERVICE_ENABLE
     , mAllowLocalServerDataChange(false)
 #endif
-#if OPENTHREAD_FTD
+#if OPENTHREAD_FTD && OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
     , mPreferredRouteId(0)
 #endif
     , mCurCommandIid(0)
@@ -381,6 +381,9 @@ NcpBase::NcpBase(Instance *aInstance)
 #endif // OPENTHREAD_FTD
 #if OPENTHREAD_CONFIG_SRP_CLIENT_ENABLE
     otSrpClientSetCallback(mInstance, HandleSrpClientCallback, this);
+#endif
+#if OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
+    otTrelSetStateChangedCallback(mInstance, &NcpBase::HandleTrelStateChanged, this);
 #endif
 #endif // OPENTHREAD_MTD || OPENTHREAD_FTD
 #if OPENTHREAD_CONFIG_DIAG_ENABLE

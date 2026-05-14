@@ -35,6 +35,8 @@ config_file:
   condition: [device_generic_family_efr32xg2b]
 - path: config/s2/sl_device_init_emu_config.h
   condition: [device_sdid_260]
+- path: config/s2/sl_device_init_emu_config.h
+  condition: [device_sdid_265]
 include:
 - path: inc
   file_list:
@@ -62,6 +64,8 @@ source:
   condition: [device_generic_family_efr32xg2b]
 - path: src/sl_device_init_emu_s2.c
   condition: [device_sdid_260]
+- path: src/sl_device_init_emu_s2.c
+  condition: [device_sdid_265]
 provides:
 - name: device_init_emu
   condition: [device_sdid_200]
@@ -85,6 +89,8 @@ provides:
   condition: [device_generic_family_efr32xg2b]
 - name: device_init_emu
   condition: [device_sdid_260]
+- name: device_init_emu
+  condition: [device_sdid_265]
 requires:
 - name: emlib_emu
 - name: status

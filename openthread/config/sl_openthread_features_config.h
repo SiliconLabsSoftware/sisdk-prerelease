@@ -200,25 +200,33 @@
 #endif
 // </e>
 // <h>  IPv6 Limits
-// <o OPENTHREAD_CONFIG_IP6_MAX_EXT_UCAST_ADDRS>  Maximum IPv6 external unicast addresses
+// <q OPENTHREAD_CONFIG_IP6_INIT_EXT_ADDR_POOL_ENABLE>  Runtime IPv6 external address pools
+// <i>  Enable runtime configuration of external unicast and multicast address pools via otIp6Init().
+#ifndef OPENTHREAD_CONFIG_IP6_INIT_EXT_ADDR_POOL_ENABLE
+#define OPENTHREAD_CONFIG_IP6_INIT_EXT_ADDR_POOL_ENABLE  0
+#endif
+#if OPENTHREAD_CONFIG_IP6_INIT_EXT_ADDR_POOL_ENABLE
+// <e OPENTHREAD_CONFIG_CLI_IFCONFIG_INIT_ENABLE>  CLI support for runtime IPv6 external address pools
+// <i>  Enable `ifconfig init` CLI command for testing otIp6Init() pool configuration.
+#ifndef OPENTHREAD_CONFIG_CLI_IFCONFIG_INIT_ENABLE
+#define OPENTHREAD_CONFIG_CLI_IFCONFIG_INIT_ENABLE  1
+#endif
+// </e>
+#else
+// <o OPENTHREAD_CONFIG_IP6_MAX_EXT_UCAST_ADDRS>  Maximum IPv6 external unicast addresses (ignored in runtime mode)
 // <i>  Maximum number of IPv6 unicast addresses allowed to be externally added
 // <d>  4
 #ifndef OPENTHREAD_CONFIG_IP6_MAX_EXT_UCAST_ADDRS
 #define OPENTHREAD_CONFIG_IP6_MAX_EXT_UCAST_ADDRS   4
 #endif
-// <o OPENTHREAD_CONFIG_IP6_MAX_EXT_MCAST_ADDRS>  Maximum IPv6 external multicast addresses
+// <o OPENTHREAD_CONFIG_IP6_MAX_EXT_MCAST_ADDRS>  Maximum IPv6 external multicast addresses (ignored in runtime mode)
 // <i>  Maximum number of IPv6 multicast addresses allowed to be externally added
 // <d>  4
 #ifndef OPENTHREAD_CONFIG_IP6_MAX_EXT_MCAST_ADDRS
 #define OPENTHREAD_CONFIG_IP6_MAX_EXT_MCAST_ADDRS   4
 #endif
-// <o OPENTHREAD_CONFIG_MLE_IP_ADDRS_TO_REGISTER>  Maximum IPv6 address registrations for MTD
-// <i>  The maximum number of IPv6 address registrations for MTD.
-// <i>  If left unchanged will default to the value of OPENTHREAD_CONFIG_MLE_IP_ADDRS_PER_CHILD
-// <d>  4
-#ifndef OPENTHREAD_CONFIG_MLE_IP_ADDRS_TO_REGISTER
-#define OPENTHREAD_CONFIG_MLE_IP_ADDRS_TO_REGISTER (OPENTHREAD_CONFIG_MLE_IP_ADDRS_PER_CHILD)
 #endif
+// </q>
 // </h>
 // <e>  Jam Detection
 #ifndef OPENTHREAD_CONFIG_JAM_DETECTION_ENABLE

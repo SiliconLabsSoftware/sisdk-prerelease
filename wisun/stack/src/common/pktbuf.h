@@ -46,7 +46,7 @@ static inline size_t pktbuf_len(const struct pktbuf *pktbuf)
     return pktbuf->offset_tail - pktbuf->offset_head;
 }
 
-void pktbuf_init(struct pktbuf *pktbuf, const void *buf, size_t buf_len, bool use_ws_heap);
+void pktbuf_init(struct pktbuf *pktbuf, const void *buf, size_t buf_len);
 void pktbuf_free(struct pktbuf *pktbuf);
 
 // Use buf = NULL to reserve bytes (0-init)

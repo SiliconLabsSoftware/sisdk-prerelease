@@ -761,14 +761,6 @@ public:
 
 #if OPENTHREAD_FTD
     /**
-     * Indicates whether or not the device is router-eligible.
-     *
-     * @retval true   If device is router-eligible.
-     * @retval false  If device is not router-eligible.
-     */
-    bool IsRouterEligible(void) const;
-
-    /**
      * Sets whether or not the device is router-eligible.
      *
      * If @p aEligible is false and the device is currently operating as a router, this call will cause the device to
@@ -780,6 +772,17 @@ public:
      * @retval kErrorNotCapable   The device is not capable of becoming a router.
      */
     Error SetRouterEligible(bool aEligible);
+
+    /**
+     * Indicates whether the router role is currently allowed.
+     *
+     * A device is allowed to become a router if it is a Full Thread Device (FTD), is currently configured to be
+     * router-eligible (see `SetRouterEligible(true)`), and the active Security Policy permits routers.
+     *
+     * @retval TRUE   If the router role is allowed.
+     * @retval FALSE  If the router role is not allowed.
+     */
+    bool IsRouterRoleAllowed(void) const { return mRouterRoleAllowed; }
 
     /**
      * Indicates whether a node is the only router on the network.
@@ -872,8 +875,6 @@ public:
      */
     void SetPreferredLeaderPartitionId(uint32_t aPartitionId) { mPreferredLeaderPartitionId = aPartitionId; }
 
-#endif
-
     /**
      * Sets the preferred Router Id. Upon becoming a router/leader the node
      * attempts to use this Router Id. If the preferred Router Id is not set or if it
@@ -886,6 +887,8 @@ public:
      * @retval kErrorInvalidState  Could not set (role is other than detached and disabled)
      */
     Error SetPreferredRouterId(uint8_t aRouterId);
+
+#endif // OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
 
     /**
      * Gets the Partition Id which the device joined successfully once.
@@ -1176,14 +1179,14 @@ public:
      *
      * @param[in]  aEnabled  TRUE if the device was commissioned using CCM, FALSE otherwise.
      */
-    void SetCcmEnabled(bool aEnabled) { mCcmEnabled = aEnabled; }
+    void SetCcmEnabled(bool aEnabled);
 
     /**
      * Sets whether the Security Policy TLV version-threshold for routing (VR field) is enabled.
      *
      * @param[in]  aEnabled  TRUE to enable Security Policy TLV version-threshold for routing, FALSE otherwise.
      */
-    void SetThreadVersionCheckEnabled(bool aEnabled) { mThreadVersionCheckEnabled = aEnabled; }
+    void SetThreadVersionCheckEnabled(bool aEnabled);
 
     /**
      * Gets the current Interval Max value used by Advertisement trickle timer.
@@ -1319,7 +1322,6 @@ private:
     static constexpr uint8_t  kMleHopLimit                   = 255;
     static constexpr uint8_t  kMleSecurityTagSize            = 4;
     static constexpr uint32_t kDefaultStoreFrameCounterAhead = OPENTHREAD_CONFIG_STORE_FRAME_COUNTER_AHEAD;
-    static constexpr uint8_t  kMaxIpAddressesToRegister      = OPENTHREAD_CONFIG_MLE_IP_ADDRS_TO_REGISTER;
     static constexpr uint32_t kDefaultChildTimeout           = OPENTHREAD_CONFIG_MLE_CHILD_TIMEOUT_DEFAULT;
     static constexpr uint32_t kDefaultCslTimeout             = OPENTHREAD_CONFIG_CSL_TIMEOUT;
 
@@ -1471,6 +1473,16 @@ private:
         kAddrSolicitUnrecognizedReason = 6,
     };
 
+#if OPENTHREAD_FTD
+    enum UpdateRouterRoleAllowedReason : uint8_t // Used in `UpdateRouterRoleAllowed()`
+    {
+        kReasonMleInit,
+        kReasonDeviceModeChanged,
+        kReasonConfigParameterChanged,
+        kReasonSecurityPolicyChanged,
+    };
+#endif
+
     enum MessageAction : uint8_t
     {
         kMessageSend,
@@ -1556,14 +1568,15 @@ private:
     class TxMessage : public Message
     {
     public:
+        // Appending single TLV
         Error AppendSourceAddressTlv(void);
+        Error AppendModeTlv(void);
         Error AppendModeTlv(DeviceMode aMode);
         Error AppendTimeoutTlv(uint32_t aTimeout);
         Error AppendChallengeTlv(const TxChallenge &aChallenge);
         Error AppendResponseTlv(const RxChallenge &aResponse);
         Error AppendLinkFrameCounterTlv(void);
         Error AppendMleFrameCounterTlv(void);
-        Error AppendLinkAndMleFrameCounterTlvs(void);
         Error AppendAddress16Tlv(uint16_t aRloc16);
         Error AppendNetworkDataTlv(NetworkData::Type aType);
         Error AppendTlvRequestTlv(const uint8_t *aTlvs, uint8_t aTlvsLength);
@@ -1578,7 +1591,6 @@ private:
         Error AppendXtalAccuracyTlv(void);
         Error AppendActiveTimestampTlv(void);
         Error AppendPendingTimestampTlv(void);
-        Error AppendActiveAndPendingTimestampTlvs(void);
 #if OPENTHREAD_CONFIG_TIME_SYNC_ENABLE
         Error AppendTimeRequestTlv(void);
         Error AppendTimeParameterTlv(void);
@@ -1602,6 +1614,11 @@ private:
         {
             return AppendTlvRequestTlv(aTlvArray, kArrayLength);
         }
+
+        // Appending multiple TLVs
+        Error AppendLinkAndMleFrameCounterTlvs(void);
+        Error AppendSourceAddressAndLeaderDataTlvs(void);
+        Error AppendActiveAndPendingTimestampTlvs(void);
 
         Error SendTo(const Ip6::Address &aDestination);
 
@@ -2323,11 +2340,12 @@ private:
     void       HandleChildUpdateResponseOnChild(RxInfo &aRxInfo);
     void       HandleDataResponse(RxInfo &aRxInfo);
     Error      HandleLeaderData(RxInfo &aRxInfo);
-    bool       HasUnregisteredAddress(void);
     uint32_t   GetAttachStartDelay(void) const;
     void       SendAnnounce(uint8_t aChannel, AnnounceMode aMode);
     void       SendAnnounce(uint8_t aChannel, const Ip6::Address &aDestination, AnnounceMode aMode = kNormalAnnounce);
     bool       IsNetworkDataNewer(const LeaderData &aLeaderData);
+    bool       HasUnregisteredAddress(void) const;
+    bool       ShouldRegisterUnicastAddrWithParent(const Ip6::Netif::UnicastAddress &aUnicastAddress) const;
     bool       ShouldRegisterMulticastAddrsWithParent(void) const;
     Error      ProcessMessageSecurity(Crypto::AesCcm::Mode    aMode,
                                       Message                &aMessage,
@@ -2398,10 +2416,11 @@ private:
     void     ClearAlternateRloc16(void);
     uint8_t  SelectLeaderId(void) const;
     uint32_t SelectPartitionId(void) const;
+    bool     DetermineIfRouterRoleAllowed(void) const;
+    void     UpdateRouterRoleAllowed(UpdateRouterRoleAllowedReason aReason);
     void     DetermineConnectivity(Connectivity &aConnectivity) const;
     void     HandleDetachStart(void);
     void     HandleChildStart(void);
-    void     HandleSecurityPolicyChanged(void);
     void     HandleLinkRequest(RxInfo &aRxInfo);
     void     HandleLinkAccept(RxInfo &aRxInfo);
     void     HandleLinkAcceptAndRequest(RxInfo &aRxInfo);
@@ -2527,6 +2546,7 @@ private:
 #if OPENTHREAD_FTD
 
     bool mRouterEligible : 1;
+    bool mRouterRoleAllowed : 1;
     bool mBlockDowngrade : 1;
     bool mAddressSolicitPending : 1;
     bool mAddressSolicitRejected : 1;

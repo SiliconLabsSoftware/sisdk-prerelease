@@ -90,13 +90,11 @@ configuration:
     value: 32768
     condition:
       - device_series_2
-  # On Series 2, disable fast channel switching by default so DEFAULT_PHY_FEATURES
-  # is a supported configuration.
+  # Note: On Series 2, if not using fast channel switching it can be disabled fast channel switching by 
+  # setting the value to 0 and adding the conditional configuration for Series 2.
   # (antenna diversity and fast channel switching cannot both be enabled by default)
   - name: SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_DEFAULT_ENABLED
-    value: 0
-    condition:
-      - device_series_2
+    value: 1
   # If using zigbee_secure_key_storage we do not need to support backwards
   # compatibility because we have never deployed images with keys in PSA
   # As a result, these lines end up saving some code space

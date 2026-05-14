@@ -39,6 +39,9 @@ readonly BACKBONE_ROUTER
 NAT64="${NAT64:-1}"
 readonly NAT64
 
+NAT64_SERVICE="${NAT64_SERVICE:-openthread}"
+readonly NAT64_SERVICE
+
 DISCOVERY_PROXY="${DISCOVERY_PROXY:-1}"
 readonly DISCOVERY_PROXY
 
@@ -160,6 +163,11 @@ otbr_install()
     if without NAT64; then
         otbr_options+=(
             "-DOTBR_NAT64=OFF"
+        )
+    elif [[ ${NAT64_SERVICE} == "openthread" ]]; then
+        otbr_options+=(
+            "-DOTBR_NAT64=ON"
+            "-DOT_POSIX_NAT64_CIDR=${NAT64_DYNAMIC_POOL:-192.168.255.0/24}"
         )
     fi
 

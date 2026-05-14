@@ -15,12 +15,22 @@
  *
  ******************************************************************************/
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif
 #include "sl_rtl_clib_api.h"
+
+#if defined(SL_CATALOG_KERNEL_PRESENT) || !defined(SL_CATALOG_RTL_LIB_PRESENT)
+#define SLI_RTL_CS_API_DISABLED
+#endif
+
+#ifndef SLI_RTL_CS_API_DISABLED
 #include "sli_rtl_clib_cs_api.h"
+#endif
 
 enum sl_rtl_error_code sl_rtl_cs_init(sl_rtl_cs_libitem *item)
 {
-#if defined(SL_CATALOG_KERNEL_PRESENT)
+#ifdef SLI_RTL_CS_API_DISABLED
   (void)item;
   return SL_RTL_ERROR_FEATURE_NOT_SUPPORTED;
 #else
@@ -30,7 +40,7 @@ enum sl_rtl_error_code sl_rtl_cs_init(sl_rtl_cs_libitem *item)
 
 enum sl_rtl_error_code sl_rtl_cs_deinit(sl_rtl_cs_libitem *item)
 {
-#if defined(SL_CATALOG_KERNEL_PRESENT)
+#ifdef SLI_RTL_CS_API_DISABLED
   (void)item;
   return SL_RTL_ERROR_FEATURE_NOT_SUPPORTED;
 #else
@@ -41,7 +51,7 @@ enum sl_rtl_error_code sl_rtl_cs_deinit(sl_rtl_cs_libitem *item)
 enum sl_rtl_error_code sl_rtl_cs_set_algo_mode(sl_rtl_cs_libitem *item,
                                                const sl_rtl_cs_algo_mode mode)
 {
-#if defined(SL_CATALOG_KERNEL_PRESENT)
+#ifdef SLI_RTL_CS_API_DISABLED
   (void)item;
   (void)mode;
   return SL_RTL_ERROR_FEATURE_NOT_SUPPORTED;
@@ -54,7 +64,7 @@ enum sl_rtl_error_code sl_rtl_cs_set_cs_mode(sl_rtl_cs_libitem *item,
                                              const sl_rtl_cs_mode main_mode,
                                              const sl_rtl_cs_mode sub_mode)
 {
-#if defined(SL_CATALOG_KERNEL_PRESENT)
+#ifdef SLI_RTL_CS_API_DISABLED
   (void)item;
   (void)main_mode;
   (void)sub_mode;
@@ -68,7 +78,7 @@ enum sl_rtl_error_code
 sl_rtl_cs_set_cs_params(sl_rtl_cs_libitem *item,
                         const sl_rtl_cs_params *parameters)
 {
-#if defined(SL_CATALOG_KERNEL_PRESENT)
+#ifdef SLI_RTL_CS_API_DISABLED
   (void)item;
   (void)parameters;
   return SL_RTL_ERROR_FEATURE_NOT_SUPPORTED;
@@ -79,7 +89,7 @@ sl_rtl_cs_set_cs_params(sl_rtl_cs_libitem *item,
 
 enum sl_rtl_error_code sl_rtl_cs_create_estimator(sl_rtl_cs_libitem *item)
 {
-#if defined(SL_CATALOG_KERNEL_PRESENT)
+#ifdef SLI_RTL_CS_API_DISABLED
   (void)item;
   return SL_RTL_ERROR_FEATURE_NOT_SUPPORTED;
 #else
@@ -91,7 +101,7 @@ enum sl_rtl_error_code
 sl_rtl_cs_set_estimator_param(sl_rtl_cs_libitem *item,
                               const sl_rtl_cs_estimator_param *param)
 {
-#if defined(SL_CATALOG_KERNEL_PRESENT)
+#ifdef SLI_RTL_CS_API_DISABLED
   (void)item;
   (void)param;
   return SL_RTL_ERROR_FEATURE_NOT_SUPPORTED;
@@ -105,7 +115,7 @@ sl_rtl_cs_process(sl_rtl_cs_libitem *item,
                   const uint8_t num_procedures,
                   const sl_rtl_cs_procedure *procedure_data)
 {
-#if defined(SL_CATALOG_KERNEL_PRESENT)
+#ifdef SLI_RTL_CS_API_DISABLED
   (void)item;
   (void)num_procedures;
   (void)procedure_data;
@@ -122,7 +132,7 @@ sl_rtl_cs_get_distance_estimate(
   const sl_rtl_cs_distance_estimate_mode estimate_mode,
   float *distance)
 {
-#if defined(SL_CATALOG_KERNEL_PRESENT)
+#ifdef SLI_RTL_CS_API_DISABLED
   (void)item;
   (void)estimate_type;
   (void)estimate_mode;
@@ -141,7 +151,7 @@ sl_rtl_cs_get_distance_estimate_confidence(
   const sl_rtl_cs_distance_estimate_confidence_mode confidence_mode,
   float *confidence)
 {
-#if defined(SL_CATALOG_KERNEL_PRESENT)
+#ifdef SLI_RTL_CS_API_DISABLED
   (void)item;
   (void)confidence_type;
   (void)confidence_mode;
@@ -160,7 +170,7 @@ sl_rtl_cs_get_distance_estimate_extended_info(
   const sl_rtl_cs_distance_estimate_extended_info_type extended_info_type,
   float *extended_info)
 {
-#if defined(SL_CATALOG_KERNEL_PRESENT)
+#ifdef SLI_RTL_CS_API_DISABLED
   (void)item;
   (void)extended_info_type;
   (void)extended_info;
@@ -174,7 +184,7 @@ sl_rtl_cs_get_distance_estimate_extended_info(
 
 enum sl_rtl_error_code sl_rtl_cs_log_enable(sl_rtl_cs_libitem *item)
 {
-#if defined(SL_CATALOG_KERNEL_PRESENT)
+#ifdef SLI_RTL_CS_API_DISABLED
   (void)item;
   return SL_RTL_ERROR_FEATURE_NOT_SUPPORTED;
 #else
@@ -184,7 +194,7 @@ enum sl_rtl_error_code sl_rtl_cs_log_enable(sl_rtl_cs_libitem *item)
 
 enum sl_rtl_error_code sl_rtl_cs_log_disable(sl_rtl_cs_libitem *item)
 {
-#if defined(SL_CATALOG_KERNEL_PRESENT)
+#ifdef SLI_RTL_CS_API_DISABLED
   (void)item;
   return SL_RTL_ERROR_FEATURE_NOT_SUPPORTED;
 #else
@@ -195,7 +205,7 @@ enum sl_rtl_error_code sl_rtl_cs_log_disable(sl_rtl_cs_libitem *item)
 enum sl_rtl_error_code sl_rtl_cs_log_get_instance_id(sl_rtl_cs_libitem *item,
                                                      uint8_t *instance_id)
 {
-#if defined(SL_CATALOG_KERNEL_PRESENT)
+#ifdef SLI_RTL_CS_API_DISABLED
   (void)item;
   (void)instance_id;
   return SL_RTL_ERROR_FEATURE_NOT_SUPPORTED;

@@ -866,6 +866,7 @@ static const char *_get_status_json_string(void)
 
   // Evt flag error
   if (flags & SL_WISUN_OTA_DFU_EVT_FLAG_ERROR_MSK) {
+    sl_free((void *)str);
     return NULL;
   }
 

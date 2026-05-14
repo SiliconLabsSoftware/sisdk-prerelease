@@ -70,6 +70,16 @@
 #include "em_device.h"
 
 /**
+ * @def OPENTHREAD_NCP
+ *
+ * Indicates a Network Co-Processor firmware image (full Thread stack on-chip with host control via Spinel).
+ *
+ */
+#ifndef OPENTHREAD_NCP
+#define OPENTHREAD_NCP 0
+#endif
+
+/**
  * @def OPENTHREAD_CONFIG_NET_DIAG_VENDOR_NAME
  *
  * Specifies the default Vendor Name string.
@@ -293,6 +303,9 @@
  *
  * Define how many microseconds ahead should MAC deliver CSL frame to SubMac.
  *
+ * For Series-3, we need to account for more ahead time; even though the EnhAck path is entirely in RAM,
+ * LPWCRYPTO executes from flash, adding non-deterministic latency on the critical path
+ * from MAC timer fire to RAIL scheduled TX submission.
  */
 #ifndef OPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US
 #if defined(_SILICON_LABS_32B_SERIES_3)
@@ -558,23 +571,6 @@
 #define OPENTHREAD_CONFIG_PSA_ITS_NVM_OFFSET 0x20000
 
 /**
- * @def OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
- *
- * This config enables key references to be used in Openthread stack instead of
- * literal keys.
- *
- * Platform needs to support PSA Crypto to enable this option.
- *
- */
-#ifndef OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
-#if OPENTHREAD_RADIO
-#define OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE 0
-#else
-#define OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE 1
-#endif
-#endif
-
-/**
  * @def OPENTHREAD_CONFIG_CRYPTO_LIB
  *
  * Selects the crypto backend library for OpenThread.
@@ -587,8 +583,12 @@
  * - @sa OPENTHREAD_CONFIG_CRYPTO_LIB_PLATFORM
  *
  */
-#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+#ifndef OPENTHREAD_CONFIG_CRYPTO_LIB
+#if OPENTHREAD_RADIO
+#define OPENTHREAD_CONFIG_CRYPTO_LIB OPENTHREAD_CONFIG_CRYPTO_LIB_MBEDTLS
+#else
 #define OPENTHREAD_CONFIG_CRYPTO_LIB OPENTHREAD_CONFIG_CRYPTO_LIB_PSA
+#endif
 #endif
 
 /**
@@ -598,7 +598,8 @@
  *
  */
 #ifndef OPENTHREAD_CONFIG_CRYPTO_PLATFORM_ALLOCS_CONTEXT
-#define OPENTHREAD_CONFIG_CRYPTO_PLATFORM_ALLOCS_CONTEXT 1
+#define OPENTHREAD_CONFIG_CRYPTO_PLATFORM_ALLOCS_CONTEXT \
+    (OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA)
 #endif
 
 /**
