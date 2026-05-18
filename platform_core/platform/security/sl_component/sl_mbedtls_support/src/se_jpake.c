@@ -775,7 +775,7 @@ void mbedtls_ecjpake_free(mbedtls_ecjpake_context *ctx)
     return;
   }
 
-  memset(ctx, 0, sizeof(*ctx));
+  mbedtls_platform_zeroize(ctx, sizeof(*ctx));
 }
 
 #endif /* #if defined(SEMAILBOX_PRESENT) */

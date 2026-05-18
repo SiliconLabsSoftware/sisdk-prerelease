@@ -205,7 +205,6 @@ library:
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/ncp-source-route-library/release_dualrail/libncp-source-route-library.a
   condition:
   - toolchain_gcc
@@ -215,7 +214,6 @@ library:
   - zigbee_multi_network
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/ncp-source-route-library/release_dualrail_singlenetwork/libncp-source-route-library.a
   condition:
   - toolchain_gcc
@@ -225,7 +223,6 @@ library:
   unless:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/ncp-source-route-library/release_singlenetwork/libncp-source-route-library.a
   condition:
   - toolchain_gcc
@@ -236,7 +233,6 @@ library:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/zigbee-source-route/release/libzigbee-source-route.a
   condition:
   - toolchain_gcc
@@ -246,7 +242,6 @@ library:
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/zigbee-source-route/release_dualrail/libzigbee-source-route.a
   condition:
   - toolchain_gcc
@@ -255,7 +250,6 @@ library:
   - zigbee_multi_network
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/zigbee-source-route/release_dualrail_singlenetwork/libzigbee-source-route.a
   condition:
   - toolchain_gcc
@@ -264,7 +258,6 @@ library:
   unless:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/zigbee-source-route/release_singlenetwork/libzigbee-source-route.a
   condition:
   - toolchain_gcc
@@ -274,7 +267,6 @@ library:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
-  - toolchain_llvm
 - path: libs/build/gcc/i386/ncp-source-route-library/release/libncp-source-route-library.a
   condition:
   - toolchain_gcc
@@ -511,26 +503,10 @@ library:
   - zigbee_stack_unix
   - zigbee_multi_network
   unless: []
-- path: libs/build/llvm/aarch64-android-ndk-r27d/ncp-source-route-library/release/libncp-source-route-library.a
-  condition:
-  - toolchain_gcc
-  - aarch64-android-ndk-r27d
-  - zigbee_ncp
-  - zigbee_stack_unix
-  - zigbee_multi_network
-  unless: []
 - path: libs/build/llvm/aarch64-android-ndk-r25c/ncp-source-route-library/release_singlenetwork/libncp-source-route-library.a
   condition:
   - toolchain_gcc
   - aarch64-android-ndk-r25c
-  - zigbee_ncp
-  - zigbee_stack_unix
-  unless:
-  - zigbee_multi_network
-- path: libs/build/llvm/aarch64-android-ndk-r27d/ncp-source-route-library/release_singlenetwork/libncp-source-route-library.a
-  condition:
-  - toolchain_gcc
-  - aarch64-android-ndk-r27d
   - zigbee_ncp
   - zigbee_stack_unix
   unless:
@@ -542,13 +518,6 @@ library:
   - zigbee_stack_unix
   - zigbee_multi_network
   unless: []
-- path: libs/build/llvm/aarch64-android-ndk-r27d/zigbee-source-route/release/libzigbee-source-route.a
-  condition:
-  - toolchain_gcc
-  - aarch64-android-ndk-r27d
-  - zigbee_stack_unix
-  - zigbee_multi_network
-  unless: []
 - path: libs/build/llvm/aarch64-android-ndk-r25c/zigbee-source-route/release_singlenetwork/libzigbee-source-route.a
   condition:
   - toolchain_gcc
@@ -556,6 +525,29 @@ library:
   - zigbee_stack_unix
   unless:
   - zigbee_multi_network
+- path: libs/build/llvm/aarch64-android-ndk-r27d/ncp-source-route-library/release/libncp-source-route-library.a
+  condition:
+  - toolchain_gcc
+  - aarch64-android-ndk-r27d
+  - zigbee_ncp
+  - zigbee_stack_unix
+  - zigbee_multi_network
+  unless: []
+- path: libs/build/llvm/aarch64-android-ndk-r27d/ncp-source-route-library/release_singlenetwork/libncp-source-route-library.a
+  condition:
+  - toolchain_gcc
+  - aarch64-android-ndk-r27d
+  - zigbee_ncp
+  - zigbee_stack_unix
+  unless:
+  - zigbee_multi_network
+- path: libs/build/llvm/aarch64-android-ndk-r27d/zigbee-source-route/release/libzigbee-source-route.a
+  condition:
+  - toolchain_gcc
+  - aarch64-android-ndk-r27d
+  - zigbee_stack_unix
+  - zigbee_multi_network
+  unless: []
 - path: libs/build/llvm/aarch64-android-ndk-r27d/zigbee-source-route/release_singlenetwork/libzigbee-source-route.a
   condition:
   - toolchain_gcc

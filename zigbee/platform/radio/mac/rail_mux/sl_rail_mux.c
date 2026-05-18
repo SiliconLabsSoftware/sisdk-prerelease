@@ -40,7 +40,7 @@
 #include "sl_rail_util_compatible_pa.h"
 
 #include "sl_rail_mux.h"
-#include "sli_rail_mux_aux.h"
+
 #include "mac-flat-header.h"
 #include "buffer_manager/buffer-management.h"
 #include "buffer_manager/buffer-queue.h"
@@ -49,6 +49,10 @@
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
+
+#if defined(SL_CATALOG_RAIL_MUX_AUX_PRESENT)
+#include "sli_rail_mux_aux.h"
 #endif
 
 // Unit-test/simulation builds may compile sl_rail_mux.c without sli_rail_mux_aux.c.
@@ -62,6 +66,10 @@ SL_WEAK void sli_rail_mux_aux_on_unregister_success(void)
 {
 }
 
+#if defined(SL_CATALOG_RAIL_UTIL_IEEE802154_RX_DUTY_CYCLING_PRESENT) || defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_RX_DUTY_CYCLING_PRESENT)
+#include "sl_rail_util_ieee802154_rx_duty_cycling.h"
+#endif
+
 #if defined(SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT) || defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT)
 #include "sl_rail_util_ieee802154_fast_channel_switching_config.h"
 #include "sl_rail_util_ieee802154_fast_channel_switching.h"
@@ -69,10 +77,6 @@ SL_WEAK void sli_rail_mux_aux_on_unregister_success(void)
 #if (SUPPORTED_PROTOCOL_COUNT > SL_RAIL_IEEE802154_RX_CHANNEL_SWITCHING_NUM_CHANNELS + 1)
 /* e.g. at most one logical context "outside" the FCS window when base is 1 and NUM_CHANNELS is 2 */
 #error "SL RAIL MUX: unsupported SUPPORTED_PROTOCOL_COUNT vs RX channel-switching slot count"
-#endif
-
-#if defined(SL_CATALOG_RAIL_UTIL_IEEE802154_RX_DUTY_CYCLING_PRESENT) || defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_RX_DUTY_CYCLING_PRESENT)
-#include "sl_rail_util_ieee802154_rx_duty_cycling.h"
 #endif
 
 /* Logical context indices stay [0, SUPPORTED_PROTOCOL_COUNT). RAIL channel_switching_cfg.channels[0..NUM-1]

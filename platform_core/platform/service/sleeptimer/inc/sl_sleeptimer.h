@@ -1054,6 +1054,18 @@ uint16_t sl_sleeptimer_get_clock_accuracy(void);
 ///   | RTC                | <b>cmuClock_RTC</b>   | Real time counter clock (LF A branch)              |
 ///   | BURTC              | <b>cmuClock_BURTC</b> | BURTC clock (EM4 Group A branch)                   |
 ///
+///   @n @subsection sleeptimer_burtc_em4 BURTC and EM4 limitations
+///
+///   @warning Do not use Sleeptimer on BURTC if the application needs EM4 timekeeping, EM4 wake on BURTC, or continuity of Sleeptimer state across an EM4 reset.
+///
+///   The BURTC peripheral can run in EM4 and can be an EM4 wake source in hardware, but when `SL_SLEEPTIMER_PERIPHERAL_BURTC` is selected, the Sleeptimer HAL does not configure it that way.
+///
+///   If the firmware needs EM4 wake or EM4 timekeeping on BURTC, reserve BURTC for the application or stack and keep `SL_SLEEPTIMER_PERIPHERAL` on `SL_SLEEPTIMER_PERIPHERAL_DEFAULT` so Sleeptimer is backed by another timer (RTCC or SYSRTC, depending on what is available on the device).
+///
+///   @code{.c}
+///   #define SL_SLEEPTIMER_PERIPHERAL  SL_SLEEPTIMER_PERIPHERAL_DEFAULT
+///   @endcode
+///
 ///   When the Radio internal RTC (PRORTC) is selected, it is not necessary to configure the clock source for the peripheral. However, it is important to enable the desired oscillator before initializing the sleeptimer module or any communication stacks. The best oscillator available (LFXO being the first choice) will be used by the sleeptimer at initalization. The following example shows how the desired oscilator should be enabled:
 ///
 ///   @code{.c}
@@ -1076,13 +1088,15 @@ uint16_t sl_sleeptimer_get_clock_accuracy(void);
 ///
 ///   `SL_SLEEPTIMER_PERIPHERAL` can be set to one of the following values:
 ///
-///   | Config                            | Description                                                                                          |
-///   | --------------------------------- |------------------------------------------------------------------------------------------------------|
-///   | `SL_SLEEPTIMER_PERIPHERAL_DEFAULT`| Selects either RTC or RTCC, depending of what is available on the platform.                          |
-///   | `SL_SLEEPTIMER_PERIPHERAL_RTCC`   | Selects RTCC                                                                                         |
-///   | `SL_SLEEPTIMER_PERIPHERAL_RTC`    | Selects RTC                                                                                          |
-///   | `SL_SLEEPTIMER_PERIPHERAL_PRORTC` | Selects Internal radio RTC. Available only on EFR32XG13, EFR32XG14, EFR32XG21 and EFR32XG22 families.|
-///   | `SL_SLEEPTIMER_PERIPHERAL_BURTC`  | Selects BURTC. Not available on Series 0 devices.                                                    |
+///   | Config                            | Description                                                                                                                |
+///   | --------------------------------- |----------------------------------------------------------------------------------------------------------------------------|
+///   | `SL_SLEEPTIMER_PERIPHERAL_DEFAULT`| Selects either RTC or RTCC, depending of what is available on the platform.                                                |
+///   | `SL_SLEEPTIMER_PERIPHERAL_RTCC`   | Selects RTCC                                                                                                               |
+///   | `SL_SLEEPTIMER_PERIPHERAL_RTC`    | Selects RTC                                                                                                                |
+///   | `SL_SLEEPTIMER_PERIPHERAL_PRORTC` | Selects Internal radio RTC. Available only on EFR32XG13, EFR32XG14, EFR32XG21, EFR32XG22, EFR32XG27 and EFR32XG29 families.|
+///   | `SL_SLEEPTIMER_PERIPHERAL_BURTC`  | Selects BURTC. Not available on Series 0 devices. See @ref sleeptimer_burtc_em4.                                           |
+///
+///   @note `SL_SLEEPTIMER_PERIPHERAL_PRORTC` must not be used as the underlying peripheral for sleeptimer when RAIL is present in the project. Select a different peripheral via `SL_SLEEPTIMER_PERIPHERAL` in that case.
 ///
 ///   `SL_SLEEPTIMER_WALLCLOCK_CONFIG` must be set to 1 to enable timestamp and date functionnalities.
 ///

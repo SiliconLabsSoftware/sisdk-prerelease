@@ -270,6 +270,8 @@
     value: system
 - tag:
   - device:opn:sibg301m114kgh
+  - device:flash:1856k
+  - device:ram:512k
 - toolchain_settings:
   - option: device_opn
     value: sibg301m114kgh

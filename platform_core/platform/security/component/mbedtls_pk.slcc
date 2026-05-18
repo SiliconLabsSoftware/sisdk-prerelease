@@ -9,8 +9,6 @@ category: Platform|Security|Mbed TLS|Upper Layer
 quality: production
 provides:
 - name: mbedtls_pk
-- name: mbedtls_uses_psa_crypto
-  allow_multiple: true
 requires:
 - name: mbedtls_mpi
   condition: [psa_crypto_ecdsa]

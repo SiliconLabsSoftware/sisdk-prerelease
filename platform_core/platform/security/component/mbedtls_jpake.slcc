@@ -3,10 +3,14 @@ package: platform_core
 label: J-PAKE over Elliptic Curves
 description: >-
   This component provides support for Elliptic Curve (EC) J-PAKE using Mbed TLS.
+  This component is DEPRECATED and will be removed in a future version of this product.
+  This component will be replaced by psa_crypto_jpake.
 category: Platform|Security|Mbed TLS|Key Exchange
 quality: production
 provides:
 - name: mbedtls_jpake
+- name: mbedtls_key_exchange
+  allow_multiple: true
 requires:
 - name: mbedtls_core
 - name: mbedtls_ecc_secp256r1

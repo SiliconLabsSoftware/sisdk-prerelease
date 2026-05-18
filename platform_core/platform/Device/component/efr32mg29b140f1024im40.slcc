@@ -219,6 +219,8 @@
     value: system
 - tag:
   - device:opn:efr32mg29b140f1024im40
+  - device:flash:1024k
+  - device:ram:256k
 - toolchain_settings:
   - option: device_opn
     value: efr32mg29b140f1024im40

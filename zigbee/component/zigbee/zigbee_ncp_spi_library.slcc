@@ -27,7 +27,6 @@ library:
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/zigbee-ncp-spi/release_dualrail/libzigbee-ncp-spi.a
   condition:
   - toolchain_gcc
@@ -37,7 +36,6 @@ library:
   - zigbee_multi_network
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/zigbee-ncp-spi/release_dualrail_singlenetwork/libzigbee-ncp-spi.a
   condition:
   - toolchain_gcc
@@ -47,7 +45,6 @@ library:
   unless:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/zigbee-ncp-spi/release_singlenetwork/libzigbee-ncp-spi.a
   condition:
   - toolchain_gcc
@@ -58,7 +55,6 @@ library:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
-  - toolchain_llvm
 - path: libs/build/iar/cortex-m33/zigbee-ncp-spi/release/libzigbee-ncp-spi.a
   condition:
   - toolchain_iar

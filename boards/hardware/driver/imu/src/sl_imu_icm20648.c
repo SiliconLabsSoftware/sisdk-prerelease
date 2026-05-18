@@ -39,7 +39,6 @@
 static uint8_t IMU_state = IMU_STATE_DISABLED; /**< IMU state variable                                  */
 static float gyroSampleRate;                   /**< Gyroscope sample rate                               */
 static float accelSampleRate;                  /**< Accelerometer sample rate                           */
-static volatile bool dataReady;                /**< Flag to show if new accel/gyro data ready to read   */
 static uint32_t IMU_isDataReadyQueryCount = 0; /**< The number of the total data ready queries          */
 static uint32_t IMU_isDataReadyTrueCount = 0;  /**< The number of queries when data is ready            */
 static sl_imu_sensor_fusion_t fuseObj;         /**< Structure to store the sensor fusion data           */

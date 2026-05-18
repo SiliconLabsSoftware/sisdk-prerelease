@@ -239,6 +239,8 @@
     value: system
 - tag:
   - device:opn:mgm240sd22vna
+  - device:flash:1536k
+  - device:ram:256k
 - toolchain_settings:
   - option: device_opn
     value: mgm240sd22vna

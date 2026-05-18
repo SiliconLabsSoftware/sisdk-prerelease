@@ -128,6 +128,12 @@ sl_status_t sl_log_systemview_write(sl_log_event_t *buffer, uint32_t read_index,
   return status;
 }
 
+/* Maximum number of bytes prepended to the SystemView payload:
+ * 2 bytes of length + 5 bytes of event_id. Defined as a macro (not a
+ * block-scope enum) so that the array dimension below is a true integer
+ * constant expression for IAR (avoids Pe060). */
+#define SLI_LOG_SYSVIEW_MAX_PREPEND_BYTES  7
+
 /**
  * @brief Record a log event to SystemView
  *
@@ -154,8 +160,6 @@ sl_status_t sl_log_systemview_record_event(sl_log_event_t *event)
   unsigned int NumBytes;
   int i;
 
-  enum { MAX_PREPEND_BYTES = 7 }; /* 2 bytes length + 5 bytes event_id */
-
   if (event == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
   }
@@ -164,11 +168,14 @@ sl_status_t sl_log_systemview_record_event(sl_log_event_t *event)
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  U8 aPacket[MAX_PREPEND_BYTES
+  /* Size the buffer for the worst case (every argument slot used). The
+   * arg_count bound was validated above; using the compile-time maximum
+   * keeps this a fixed-size array (no VLA). */
+  U8 aPacket[SLI_LOG_SYSVIEW_MAX_PREPEND_BYTES
              + SEGGER_SYSVIEW_INFO_SIZE
-             + ((3 + event->arg_count) * SEGGER_SYSVIEW_QUANTA_U32)];
+             + ((3 + SL_LOG_CONFIG_ARG) * SEGGER_SYSVIEW_QUANTA_U32)];
 
-  pPayloadStart = aPacket + MAX_PREPEND_BYTES;
+  pPayloadStart = aPacket + SLI_LOG_SYSVIEW_MAX_PREPEND_BYTES;
   pPayload = pPayloadStart;
 
   for (i = 0; i < event->arg_count; i++) {

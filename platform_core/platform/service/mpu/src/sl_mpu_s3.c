@@ -38,6 +38,10 @@
 #include <math.h>
 #include <stdbool.h>
 
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+
 /*******************************************************************************
  *********************************   DEFINES   *********************************
  ******************************************************************************/
@@ -427,6 +431,7 @@ sl_status_t sl_mpu_disable_execute(uint32_t address_begin,
 }
 
 #if __CORTEX_M != (0u)
+#if !defined(SL_CATALOG_CRASH_MANAGER_COMPONENT_PRESENT)
 /**************************************************************************//**
  * MemManage default exception handler. Reset target.
  *****************************************************************************/
@@ -443,4 +448,5 @@ void MemManage_Handler(void)
 {
   mpu_fault_handler();
 }
+#endif
 #endif

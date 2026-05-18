@@ -1092,6 +1092,19 @@ typedef struct {
 
 /** Default DCDC Boost initialization. */
 #if defined(_DCDC_CTRL_DVDDBSTPRG_MASK)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
+#define EMU_DCDCBOOSTINIT_DEFAULT                                                         \
+  {                                                                                       \
+    emuDcdcBoostTonMaxTimeout_1P19us,     /**< Ton max is 1.19us. */                      \
+    true,                                 /**< disable DCDC boost mode with BOOST_EN=0 */ \
+    emuDcdcBoostDriveSpeed_Default,       /**< Default efficiency in EM0/1. */            \
+    emuDcdcBoostDriveSpeed_Default,       /**< Default efficiency in EM2/3. */            \
+    emuDcdcBoostEM01PeakCurrent_Load25mA, /**< Default peak current in EM0/1. */          \
+    emuDcdcBoostEM23PeakCurrent_Load10mA, /**< Default peak current in EM2/3. */          \
+    emuDcdcBoostOutputVoltage_1v8         /**< DCDC Boost output voltage. */              \
+  }
+#else
 #define EMU_DCDCBOOSTINIT_DEFAULT                                                         \
   {                                                                                       \
     emuDcdcBoostTonMaxTimeout_1P19us,     /**< Ton max is 1.19us. */                      \
@@ -1102,6 +1115,7 @@ typedef struct {
     emuDcdcBoostEM23PeakCurrent_Load10mA, /**< Default peak current in EM2/3. */          \
     emuDcdcBoostOutputVoltage_1v8         /**< DCDC Boost output voltage. */              \
   }
+#endif
 #else
 #if defined(_DCDC_DVDDBBCFG_MASK)
 #define EMU_DCDCBOOSTINIT_DEFAULT                                                              \

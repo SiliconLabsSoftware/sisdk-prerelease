@@ -14,6 +14,15 @@ requires:
 - name: tz_service_common
   condition: [trustzone_secure]
 
+  # sli_psec_zeroize() is used by sli_tz_service_attestation.c to wipe
+  # the attestation private key on the secure side.
+- name: sli_psec_common
+  condition: [trustzone_secure]
+
+  # Kept for downstream consumers that depend on the historical edge.
+- name: psa_driver_common
+  condition: [trustzone_secure]
+
 - name: psa_builtin_key_support_se
   condition: [device_security_vault, trustzone_nonsecure]
 

@@ -3506,6 +3506,21 @@ psa_status_t psa_key_derivation_input_key(
     psa_key_derivation_step_t step,
     mbedtls_svc_key_id_t key);
 
+/* This forward-declaration is included for reverse-compatibility
+ * the implementation of this function has moved to sl_psa_crypto
+ * See sl_psa_crypto.h for more details
+ */
+psa_status_t sl_psa_key_derivation_single_shot(
+    psa_algorithm_t alg,
+    mbedtls_svc_key_id_t key_in,
+    const uint8_t *info,
+    size_t info_length,
+    const uint8_t *salt,
+    size_t salt_length,
+    size_t iterations,
+    const psa_key_attributes_t *key_out_attributes,
+    mbedtls_svc_key_id_t *key_out);
+
 /** Perform a key agreement and use the shared secret as input to a key
  * derivation.
  *

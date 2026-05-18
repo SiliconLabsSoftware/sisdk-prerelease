@@ -22,6 +22,9 @@
 #include <stdbool.h>
 #include <assert.h>
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_MEMORY_MANAGER_PRESENT
 #include "sl_memory_manager.h"
 #else

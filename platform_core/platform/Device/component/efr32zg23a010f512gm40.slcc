@@ -232,6 +232,8 @@
     value: system
 - tag:
   - device:opn:efr32zg23a010f512gm40
+  - device:flash:512k
+  - device:ram:64k
 - toolchain_settings:
   - option: device_opn
     value: efr32zg23a010f512gm40

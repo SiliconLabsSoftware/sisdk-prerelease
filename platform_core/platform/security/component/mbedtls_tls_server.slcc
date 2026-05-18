@@ -3,6 +3,8 @@ package: platform_core
 label: TLS Server
 description: >-
   This component provides support for using TLS (as a server) in Mbed TLS.
+  This component is DEPRECATED and will be removed in a future version of this product.
+  This component will be replaced by the new component called mbedtls_ssl_server.
 category: Platform|Security|Mbed TLS|Upper Layer
 quality: production
 provides:

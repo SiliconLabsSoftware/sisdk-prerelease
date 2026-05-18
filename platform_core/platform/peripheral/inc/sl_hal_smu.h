@@ -1284,13 +1284,13 @@ __STATIC_INLINE void sl_hal_smu_int_set(uint32_t flags)
 #if !defined (SL_TRUSTZONE_SECURE) && defined (_SILICON_LABS_32B_SERIES_2)
 void SMU_SECURE_IRQHandler(void)
 {
-  if (SMU_IF_PPUSEC) {
-    EFM_ASSERT(SMU->IF & SMU_IF_PPUSEC);
-  }
+#if (SMU_IF_PPUSEC != 0)
+  EFM_ASSERT(SMU->IF & SMU_IF_PPUSEC);
+#endif
 
-  if (SMU_IF_BMPUSEC) {
-    EFM_ASSERT(SMU->IF & SMU_IF_BMPUSEC);
-  }
+#if (SMU_IF_BMPUSEC != 0)
+  EFM_ASSERT(SMU->IF & SMU_IF_BMPUSEC);
+#endif
 
   // PPUFS contains the ID of the peripheral caused the fault
   // The ID is ordered after the PPUSATD0-PPUSATD1 register bit fields.

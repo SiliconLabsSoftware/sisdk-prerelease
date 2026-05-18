@@ -605,7 +605,8 @@ sl_status_t sl_se_ccm_auth_decrypt(sl_se_command_context_t *cmd_ctx,
   if (command_status == SL_STATUS_OK) {
     return SL_STATUS_OK;
   } else {
-    memset(output, 0, length);
+    // Wipe partial plaintext/ciphertext on HW failure.
+    sli_psec_zeroize(output, length);
     return command_status;
   }
 }
@@ -946,21 +947,28 @@ sl_status_t sl_se_ccm_multipart_finish(sl_se_ccm_multipart_context_t *ccm_ctx,
                                 out_tag);
 
   if (status != SL_STATUS_OK) {
-    memset(out_tag, 0, sizeof(out_tag));
-    return status;
+    // Computed tag wipe handled at the cleanup label.
+    goto cleanup;
   }
 
   if (ccm_ctx->mode == SL_SE_DECRYPT) {
     if (memcmp_time_cst(tag, out_tag, ccm_ctx->tag_len) != 0) {
-      memset(tag, 0, ccm_ctx->tag_len);
-      return SL_STATUS_INVALID_SIGNATURE;
+      // Clear unverified caller-owned tag on signature mismatch.
+      sli_psec_zeroize(tag, ccm_ctx->tag_len);
+      status = SL_STATUS_INVALID_SIGNATURE;
+      goto cleanup;
     }
   } else {
     memcpy(tag, out_tag, ccm_ctx->tag_len);
   }
 
   *output_length = 0;
-  return SL_STATUS_OK;
+
+cleanup:
+  // Wipe locally computed tag buffer on every exit path (success and
+  // error), regardless of comparison result.
+  sli_psec_zeroize(out_tag, sizeof(out_tag));
+  return status;
 }
 #endif // SLI_SE_MAJOR_VERSION_ONE
 
@@ -1046,7 +1054,9 @@ sl_status_t sl_se_ccm_multipart_starts(sl_se_ccm_multipart_context_t *ccm_ctx,
 
     status = sli_se_execute_and_wait(cmd_ctx);
     if (status != SL_STATUS_OK) {
-      memset(ccm_ctx->mode_specific_buffer.tagbuf, 0, sizeof(ccm_ctx->mode_specific_buffer.tagbuf));
+      // Wipe accumulated tag buffer on CCM start failure.
+      sli_psec_zeroize(ccm_ctx->mode_specific_buffer.tagbuf,
+                             sizeof(ccm_ctx->mode_specific_buffer.tagbuf));
     }
     return status;
   }
@@ -1078,7 +1088,8 @@ sl_status_t sl_se_ccm_multipart_starts(sl_se_ccm_multipart_context_t *ccm_ctx,
 
   status = sli_se_execute_and_wait(cmd_ctx);
   if (status != SL_STATUS_OK) {
-    memset(ccm_ctx->se_ctx, 0, sizeof(ccm_ctx->se_ctx));
+    // Wipe partial CCM streaming context on error.
+    sli_psec_zeroize(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
     return status;
   }
 
@@ -1193,8 +1204,9 @@ sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
 
     status = sli_se_execute_and_wait(cmd_ctx);
     if (status != SL_STATUS_OK) {
-      memset(output, 0, length);
-      memset(ccm_ctx->se_ctx, 0, sizeof(ccm_ctx->se_ctx));
+      // Wipe partial plaintext/ciphertext and CCM streaming context on error.
+      sli_psec_zeroize(output, length);
+      sli_psec_zeroize(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
       *output_length = 0;
       return status;
     }
@@ -1259,8 +1271,9 @@ sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
 
   status = sli_se_execute_and_wait(cmd_ctx);
   if (status != SL_STATUS_OK) {
-    memset(output, 0, length);
-    memset(ccm_ctx->se_ctx, 0, sizeof(ccm_ctx->se_ctx));
+    // Wipe partial plaintext/ciphertext and CCM streaming context on error.
+    sli_psec_zeroize(output, length);
+    sli_psec_zeroize(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
     return status;
   }
 
@@ -1297,15 +1310,21 @@ sl_status_t sl_se_ccm_multipart_finish(sl_se_ccm_multipart_context_t *ccm_ctx,
   sl_status_t status = SL_STATUS_OK;
 
   if (ccm_ctx->total_message_length == 0) {
+    sl_status_t empty_status = SL_STATUS_OK;
     if (ccm_ctx->mode == SL_SE_DECRYPT) {
       if (memcmp_time_cst(tag, ccm_ctx->mode_specific_buffer.tagbuf, ccm_ctx->tag_len) != 0) {
-        memset(tag, 0, ccm_ctx->tag_len);
-        return SL_STATUS_INVALID_SIGNATURE;
+        // Clear unverified caller-owned tag on signature mismatch.
+        sli_psec_zeroize(tag, ccm_ctx->tag_len);
+        empty_status = SL_STATUS_INVALID_SIGNATURE;
       }
     } else {
       memcpy(tag, ccm_ctx->mode_specific_buffer.tagbuf, ccm_ctx->tag_len);
     }
-    return SL_STATUS_OK;
+    // Wipe the accumulated CCM tag in the operation context on every
+    // exit path of the empty-message branch, regardless of compare result.
+    sli_psec_zeroize(ccm_ctx->mode_specific_buffer.tagbuf,
+                           sizeof(ccm_ctx->mode_specific_buffer.tagbuf));
+    return empty_status;
   }
 
   sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
@@ -1345,7 +1364,8 @@ sl_status_t sl_se_ccm_multipart_finish(sl_se_ccm_multipart_context_t *ccm_ctx,
   status = sli_se_execute_and_wait(cmd_ctx);
 
   if (status != SL_STATUS_OK) {
-    memset(tag, 0, ccm_ctx->tag_len);
+    // Wipe caller-owned tag on CCM finish error.
+    sli_psec_zeroize(tag, ccm_ctx->tag_len);
     *output_length = 0;
     return status;
   }
@@ -1750,7 +1770,8 @@ sl_status_t sl_se_gcm_crypt_and_tag(sl_se_command_context_t *cmd_ctx,
     // Execute GCM operation.
     status = sli_se_execute_and_wait(cmd_ctx);
     if ((status != SL_STATUS_OK) && (status != SL_STATUS_INVALID_SIGNATURE)) {
-      memset(output, 0, length);
+      // Wipe decrypted plaintext on GCM HW failure.
+      sli_psec_zeroize(output, length);
       return status;
     }
 
@@ -1792,7 +1813,8 @@ sl_status_t sl_se_gcm_crypt_and_tag(sl_se_command_context_t *cmd_ctx,
     // For encryption, copy requested tag size to output tag buffer.
     memcpy(tag, tagbuf, tag_len);
   } else {
-    memset(output, 0, length);
+    // Wipe partial ciphertext on GCM HW failure.
+    sli_psec_zeroize(output, length);
   }
 
   return status;
@@ -1875,7 +1897,8 @@ sl_status_t sl_se_gcm_auth_decrypt(sl_se_command_context_t *cmd_ctx,
   status = sli_se_execute_and_wait(cmd_ctx);
 
   if (status != SL_STATUS_OK) {
-    memset(output, 0, length);
+    // Wipe decrypted plaintext on GCM HW failure.
+    sli_psec_zeroize(output, length);
   }
 
   return status;
@@ -1948,7 +1971,8 @@ sl_status_t sl_se_gcm_multipart_starts(sl_se_gcm_multipart_context_t *gcm_ctx,
 
     status = sli_se_execute_and_wait(cmd_ctx);
     if (status != SL_STATUS_OK) {
-      memset(gcm_ctx->se_ctx, 0, sizeof(gcm_ctx->se_ctx));
+      // Wipe GCM streaming context on error.
+      sli_psec_zeroize(gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
       return status;
     }
     gcm_ctx->first_operation = false;
@@ -2031,7 +2055,8 @@ sl_status_t sl_se_gcm_multipart_starts(sl_se_gcm_multipart_context_t *gcm_ctx,
 
     status = sli_se_execute_and_wait(cmd_ctx);
     if (status != SL_STATUS_OK) {
-      memset(gcm_ctx->tagbuf, 0, sizeof(gcm_ctx->tagbuf));
+      // Wipe tag buffer on GCM starts() failure.
+      sli_psec_zeroize(gcm_ctx->tagbuf, sizeof(gcm_ctx->tagbuf));
       return status;
     }
 
@@ -2049,7 +2074,8 @@ sl_status_t sl_se_gcm_multipart_starts(sl_se_gcm_multipart_context_t *gcm_ctx,
 
     status = sli_se_execute_and_wait(cmd_ctx);
     if (status != SL_STATUS_OK) {
-      memset(gcm_ctx->se_ctx, 0, sizeof(gcm_ctx->se_ctx));
+      // Wipe GCM streaming context on error.
+      sli_psec_zeroize(gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
       return status;
     }
     gcm_ctx->first_operation = false;
@@ -2158,7 +2184,8 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
     status = sli_se_execute_and_wait(cmd_ctx);
 
     if (status != SL_STATUS_OK) {
-      memset(gcm_ctx->se_ctx, 0, sizeof(gcm_ctx->se_ctx));
+      // Wipe GCM streaming context on error.
+      sli_psec_zeroize(gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
       return status;
     }
     gcm_ctx->first_operation = false;
@@ -2224,7 +2251,8 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
   status = sli_se_execute_and_wait(cmd_ctx);
 
   if (status != SL_STATUS_OK) {
-    memset(gcm_ctx->se_ctx, 0, sizeof(gcm_ctx->se_ctx));
+    // Wipe GCM streaming context on error.
+    sli_psec_zeroize(gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
     return status;
   }
   *output_length += length;
@@ -2349,7 +2377,8 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
     status = sli_se_execute_and_wait(cmd_ctx);
 
     if (status != SL_STATUS_OK) {
-      memset(gcm_ctx->se_ctx, 0, sizeof(gcm_ctx->se_ctx));
+      // Wipe GCM streaming context on error.
+      sli_psec_zeroize(gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
       return status;
     }
     gcm_ctx->first_operation = false;
@@ -2426,7 +2455,8 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
       status = sli_se_execute_and_wait(cmd_ctx);
 
       if (status != SL_STATUS_OK) {
-        memset(gcm_ctx->se_ctx, 0, sizeof(gcm_ctx->se_ctx));
+        // Wipe GCM streaming context on error.
+        sli_psec_zeroize(gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
         return status;
       }
 
@@ -2481,7 +2511,8 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
   status = sli_se_execute_and_wait(cmd_ctx);
 
   if (status != SL_STATUS_OK) {
-    memset(gcm_ctx->se_ctx, 0, sizeof(gcm_ctx->se_ctx));
+    // Wipe GCM streaming context on error.
+    sli_psec_zeroize(gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
     return status;
   }
   *output_length += length;
@@ -2520,15 +2551,20 @@ sl_status_t sl_se_gcm_multipart_finish(sl_se_gcm_multipart_context_t *gcm_ctx,
 
   #if defined(SLI_SE_MAJOR_VERSION_ONE)
   if ((gcm_ctx->add_len > 0) && (gcm_ctx->len == 0)) {
+    sl_status_t aad_only_status = SL_STATUS_OK;
     if (gcm_ctx->mode == SL_SE_DECRYPT) {
       if (memcmp_time_cst(tag, gcm_ctx->tagbuf, tag_length)) {
-        memset(tag, 0, tag_length);
-        return SL_STATUS_INVALID_SIGNATURE;
+        // Clear unverified caller-owned tag on GCM signature mismatch.
+        sli_psec_zeroize(tag, tag_length);
+        aad_only_status = SL_STATUS_INVALID_SIGNATURE;
       }
     } else {
       memcpy(tag, gcm_ctx->tagbuf, tag_length);
     }
-    return SL_STATUS_OK;
+    // Wipe the accumulated GCM tag in the operation context on every
+    // exit path of the AAD-only branch, regardless of compare result.
+    sli_psec_zeroize(gcm_ctx->tagbuf, sizeof(gcm_ctx->tagbuf));
+    return aad_only_status;
   }
   #endif
 
@@ -2577,7 +2613,8 @@ sl_status_t sl_se_gcm_multipart_finish(sl_se_gcm_multipart_context_t *gcm_ctx,
     }
     if (status != SL_STATUS_OK) {
       *output_length = 0;
-      memset(tag, 0, tag_length);
+      // Clear caller-owned tag on GCM one-shot finish error.
+      sli_psec_zeroize(tag, tag_length);
       return status;
     }
     if (length < 16) {
@@ -2644,7 +2681,8 @@ sl_status_t sl_se_gcm_multipart_finish(sl_se_gcm_multipart_context_t *gcm_ctx,
 
   if (status != SL_STATUS_OK) {
     if (gcm_ctx->mode == SL_SE_ENCRYPT) {
-      memset(tag, 0, tag_length);
+      // Clear unfinished caller-owned tag on GCM encrypt finish error.
+      sli_psec_zeroize(tag, tag_length);
     }
     *output_length = 0;
     return status;

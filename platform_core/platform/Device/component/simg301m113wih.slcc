@@ -272,6 +272,8 @@
     value: system
 - tag:
   - device:opn:simg301m113wih
+  - device:flash:2880k
+  - device:ram:384k
 - toolchain_settings:
   - option: device_opn
     value: simg301m113wih

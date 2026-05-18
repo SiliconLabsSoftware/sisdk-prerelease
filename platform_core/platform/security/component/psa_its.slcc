@@ -17,6 +17,17 @@ requires:
   condition: [trustzone_unaware]
 - name: psa_crypto_common
   condition: [trustzone_secure]
+  # sli_psa_safer_memcmp and other sli_psa_driver_common.h symbols
+  # used by sl_psa_its_nvm3.c.
+- name: psa_driver_common
+  condition: [trustzone_unaware]
+- name: psa_driver_common
+  condition: [trustzone_secure]
+  # sli_psec_zeroize() wipes session keys and ITS file buffers.
+- name: sli_psec_common
+  condition: [trustzone_unaware]
+- name: sli_psec_common
+  condition: [trustzone_secure]
   # unless trustzone secure
 - name: psa_its_source
   condition: [trustzone_unaware]

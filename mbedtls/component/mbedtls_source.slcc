@@ -55,6 +55,14 @@ source:
   - mbedtls_chacha20
   unless:
   - trustzone_nonsecure
+- path: library/chacha20.c
+  condition: [mbedtls_cipher, psa_crypto_cipher_chacha20]
+  unless:
+  - trustzone_nonsecure
+- path: library/chacha20.c
+  condition: [mbedtls_cipher, psa_crypto_chachapoly]
+  unless:
+  - trustzone_nonsecure
 - path: library/chachapoly.c
   condition:
   - mbedtls_chachapoly
@@ -267,6 +275,48 @@ source:
 - path: library/ssl_tls13_server.c
   condition:
   - mbedtls_tls
+- path: library/ssl_cache.c
+  condition:
+  - mbedtls_ssl_tls
+- path: library/ssl_ciphersuites.c
+  condition:
+  - mbedtls_ssl_tls
+- path: library/ssl_client.c
+  condition:
+  - mbedtls_ssl_client
+- path: library/ssl_cookie.c
+  condition:
+  - mbedtls_ssl_cookie
+- path: library/ssl_debug_helpers_generated.c
+  condition:
+  - mbedtls_ssl_tls
+- path: library/ssl_msg.c
+  condition:
+  - mbedtls_ssl_tls
+- path: library/ssl_ticket.c
+  condition:
+  - mbedtls_ssl_tls
+- path: library/ssl_tls.c
+  condition:
+  - mbedtls_ssl_tls
+- path: library/ssl_tls12_client.c
+  condition:
+  - mbedtls_ssl_proto_tls12
+- path: library/ssl_tls12_server.c
+  condition:
+  - mbedtls_ssl_proto_tls12
+- path: library/ssl_tls13_client.c
+  condition:
+  - mbedtls_ssl_proto_tls13
+- path: library/ssl_tls13_generic.c
+  condition:
+  - mbedtls_ssl_proto_tls13
+- path: library/ssl_tls13_keys.c
+  condition:
+  - mbedtls_ssl_proto_tls13
+- path: library/ssl_tls13_server.c
+  condition:
+  - mbedtls_ssl_proto_tls13
 - path: library/threading.c
 - path: library/version.c
   condition:

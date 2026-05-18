@@ -49,16 +49,6 @@
 #include "sli_se_manager_mailbox.h"
 #include <string.h>
 
-/* Implementation that should never be optimized out by the compiler */
-static void mbedtls_zeroize(void *v, size_t n)
-{
-  if (n == 0) {
-    return;
-  }
-  volatile unsigned char *p = v;
-  while ( n-- ) *p++ = 0;
-}
-
 static void sx_math_u64_to_u8array(uint64_t in, uint8_t *out)
 {
   uint32_t i = 0;
@@ -470,7 +460,7 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
     *output_length = input_length;
     return(0);
   } else {
-    mbedtls_zeroize(output, output_size);
+    mbedtls_platform_zeroize(output, output_size);
     return(MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED);
   }
 }
@@ -627,8 +617,8 @@ int mbedtls_gcm_crypt_and_tag(mbedtls_gcm_context *ctx,
     memcpy(tag, tagbuf, tag_len);
     return(0);
   } else {
-    mbedtls_zeroize(output, length);
-    mbedtls_zeroize(tagbuf, sizeof(tagbuf));
+    mbedtls_platform_zeroize(output, length);
+    mbedtls_platform_zeroize(tagbuf, sizeof(tagbuf));
     return(MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED);
   }
 }
@@ -703,7 +693,7 @@ int mbedtls_gcm_auth_decrypt(mbedtls_gcm_context *ctx,
   if (se_response == SLI_SE_RESPONSE_OK) {
     return(0);
   } else {
-    mbedtls_zeroize(output, length);
+    mbedtls_platform_zeroize(output, length);
     if (se_response == SLI_SE_RESPONSE_INVALID_SIGNATURE) {
       return(MBEDTLS_ERR_GCM_AUTH_FAILED);
     } else {
@@ -717,7 +707,7 @@ void mbedtls_gcm_free(mbedtls_gcm_context *ctx)
   if ( ctx == NULL ) {
     return;
   }
-  mbedtls_zeroize(ctx, sizeof(mbedtls_gcm_context) );
+  mbedtls_platform_zeroize(ctx, sizeof(mbedtls_gcm_context) );
 }
 
 #endif /* MBEDTLS_GCM_ALT && MBEDTLS_GCM_C */

@@ -212,6 +212,8 @@
     value: system
 - tag:
   - device:opn:rm21z000f1024im32
+  - device:flash:1024k
+  - device:ram:96k
 - toolchain_settings:
   - option: device_opn
     value: rm21z000f1024im32

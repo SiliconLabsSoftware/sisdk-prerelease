@@ -272,6 +272,8 @@
     value: system
 - tag:
   - device:opn:simg301m114lih
+  - device:flash:3904k
+  - device:ram:512k
 - toolchain_settings:
   - option: device_opn
     value: simg301m114lih

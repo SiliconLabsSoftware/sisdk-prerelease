@@ -30,6 +30,7 @@
 ******************************************************************************/
 
 #include "sl_log.h"
+#include "sl_log_internal.h"
 #include "sl_log_platform_specific.h"
 #include "sl_log_common_config.h"
 #include "sl_component_catalog.h"
@@ -97,6 +98,27 @@ static sl_log_ring_buffer_t ring_buffer;
  ******************************************************************************/
 
 static sl_log_level_t current_log_level;
+
+/* When true every sl_log_send_* call is silently dropped. Set by integration
+ * code (e.g. the power-manager glue) on entry to a sleep mode that gates the
+ * timestamp timer or the backend transport, and cleared once both are usable
+ * again. The user-configured runtime level is preserved across the cycle. */
+static volatile bool log_suspended = false;
+
+void sli_log_set_suspended(bool suspended)
+{
+  log_suspended = suspended;
+}
+
+/* Returns true when an event with the given flags byte should be produced.
+ * Combines the suspension gate (cheap volatile read, short-circuited first)
+ * with the existing runtime severity filter. */
+static inline bool log_should_send(uint8_t flags)
+{
+  return !log_suspended
+         && (((flags >> SL_LOG_FLAGS_POS) & SL_LOG_FLAGS_LEVEL_MASK)
+             >= current_log_level);
+}
 
 // Sets after sl_log_init_stage2 and used to determine the early logs
 bool log_init_stage2_done;
@@ -581,7 +603,7 @@ sl_status_t  sl_log_init_stage2(void) {
  */
 void sl_log_send_no_args(uint32_t event_id, uint8_t flags)
 {
-  if(((flags >> SL_LOG_FLAGS_POS)&SL_LOG_FLAGS_LEVEL_MASK) >= current_log_level){
+  if(log_should_send(flags)){
     sl_log_event_t event;
 
     event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
@@ -627,7 +649,7 @@ void sl_log_send_no_args(uint32_t event_id, uint8_t flags)
  */
 void sl_log_send_arg1(uint32_t event_id, uint8_t flags, uint32_t arg1)
 {
-  if(((flags >> SL_LOG_FLAGS_POS)&SL_LOG_FLAGS_LEVEL_MASK) >= current_log_level){
+  if(log_should_send(flags)){
     sl_log_event_t event;
 
     event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
@@ -670,7 +692,7 @@ void sl_log_send_arg1(uint32_t event_id, uint8_t flags, uint32_t arg1)
 void sl_log_send_arg2(uint32_t event_id, uint8_t flags, uint32_t arg1,
                       uint32_t arg2)
 {
-  if(((flags >> SL_LOG_FLAGS_POS)&SL_LOG_FLAGS_LEVEL_MASK) >= current_log_level){   
+  if(log_should_send(flags)){
     sl_log_event_t event;
 
     event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
@@ -719,7 +741,7 @@ void sl_log_send_arg2(uint32_t event_id, uint8_t flags, uint32_t arg1,
 void sl_log_send_arg3(uint32_t event_id, uint8_t flags, uint32_t arg1,
                       uint32_t arg2, uint32_t arg3)
 {
-  if(((flags >> SL_LOG_FLAGS_POS)&SL_LOG_FLAGS_LEVEL_MASK) >= current_log_level){      
+  if(log_should_send(flags)){
     sl_log_event_t event;
 
     event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
@@ -750,7 +772,7 @@ void sl_log_send_arg3(uint32_t event_id, uint8_t flags, uint32_t arg1,
 void sl_log_send_arg4(uint32_t event_id, uint8_t flags, uint32_t arg1,
                       uint32_t arg2, uint32_t arg3, uint32_t arg4)
 {
-  if(((flags >> SL_LOG_FLAGS_POS)&SL_LOG_FLAGS_LEVEL_MASK) >= current_log_level){
+  if(log_should_send(flags)){
     sl_log_event_t event;
 
     event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
@@ -784,7 +806,7 @@ void sl_log_send_arg5(uint32_t event_id, uint8_t flags, uint32_t arg1,
                       uint32_t arg2, uint32_t arg3, uint32_t arg4,
                       uint32_t arg5)
 {
-  if(((flags >> SL_LOG_FLAGS_POS)&SL_LOG_FLAGS_LEVEL_MASK) >= current_log_level){
+  if(log_should_send(flags)){
     sl_log_event_t event;
 
     event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
@@ -819,7 +841,7 @@ void sl_log_send_arg6(uint32_t event_id, uint8_t flags, uint32_t arg1,
                       uint32_t arg2, uint32_t arg3, uint32_t arg4,
                       uint32_t arg5, uint32_t arg6)
 {
-  if(((flags >> SL_LOG_FLAGS_POS)&SL_LOG_FLAGS_LEVEL_MASK) >= current_log_level){
+  if(log_should_send(flags)){
     sl_log_event_t event;
 
     event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
@@ -855,7 +877,7 @@ void sl_log_send_arg7(uint32_t event_id, uint8_t flags, uint32_t arg1,
                       uint32_t arg2, uint32_t arg3, uint32_t arg4,
                       uint32_t arg5, uint32_t arg6, uint32_t arg7)
 {
-  if(((flags >> SL_LOG_FLAGS_POS)&SL_LOG_FLAGS_LEVEL_MASK) >= current_log_level){
+  if(log_should_send(flags)){
     sl_log_event_t event;
 
     event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
@@ -893,7 +915,7 @@ void sl_log_send_arg8(uint32_t event_id, uint8_t flags, uint32_t arg1,
                       uint32_t arg5, uint32_t arg6, uint32_t arg7,
                       uint32_t arg8)
 {
-  if(((flags >> SL_LOG_FLAGS_POS)&SL_LOG_FLAGS_LEVEL_MASK) >= current_log_level){
+  if(log_should_send(flags)){
     sl_log_event_t event;
 
     event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
@@ -932,7 +954,7 @@ void sl_log_send_arg9(uint32_t event_id, uint8_t flags, uint32_t arg1,
                       uint32_t arg5, uint32_t arg6, uint32_t arg7,
                       uint32_t arg8, uint32_t arg9)
 {
-  if(((flags >> SL_LOG_FLAGS_POS)&SL_LOG_FLAGS_LEVEL_MASK) >= current_log_level){
+  if(log_should_send(flags)){
     sl_log_event_t event;
 
     event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
@@ -972,7 +994,7 @@ void sl_log_send_arg10(uint32_t event_id, uint8_t flags, uint32_t arg1,
                        uint32_t arg5, uint32_t arg6, uint32_t arg7,
                        uint32_t arg8, uint32_t arg9, uint32_t arg10)
 {
-  if(((flags >> SL_LOG_FLAGS_POS)&SL_LOG_FLAGS_LEVEL_MASK) >= current_log_level){
+  if(log_should_send(flags)){
     sl_log_event_t event;
 
     event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);

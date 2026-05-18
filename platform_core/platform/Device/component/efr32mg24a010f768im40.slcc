@@ -233,6 +233,8 @@
     value: system
 - tag:
   - device:opn:efr32mg24a010f768im40
+  - device:flash:768k
+  - device:ram:64k
 - toolchain_settings:
   - option: device_opn
     value: efr32mg24a010f768im40

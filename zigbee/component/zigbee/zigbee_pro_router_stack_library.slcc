@@ -132,7 +132,6 @@ library:
   - zigbee_phy_2_4_subghz_switch_coordinator
   - zigbee_high_datarate_phy
   - rail_mux
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/zigbee-pro-router-stack/release_dualrail/libzigbee-pro-router-stack.a
   condition:
   - toolchain_gcc
@@ -143,7 +142,6 @@ library:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_high_datarate_phy
   - rail_mux
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/zigbee-pro-router-stack/release_dualrail_singlenetwork/libzigbee-pro-router-stack.a
   condition:
   - toolchain_gcc
@@ -154,7 +152,6 @@ library:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_high_datarate_phy
   - rail_mux
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/zigbee-pro-router-stack/release_singlenetwork/libzigbee-pro-router-stack.a
   condition:
   - toolchain_gcc
@@ -166,7 +163,6 @@ library:
   - zigbee_phy_2_4_subghz_switch_coordinator
   - zigbee_high_datarate_phy
   - rail_mux
-  - toolchain_llvm
 - path: libs/build/gcc/i386/zigbee-pro-router-stack/release/libzigbee-pro-router-stack.a
   condition:
   - toolchain_gcc
@@ -308,15 +304,6 @@ library:
   unless:
   - zigbee_high_datarate_phy
   - rail_mux
-- path: libs/build/llvm/aarch64-android-ndk-r27d/zigbee-pro-router-stack/release/libzigbee-pro-router-stack.a
-  condition:
-  - toolchain_gcc
-  - aarch64-android-ndk-r27d
-  - zigbee_stack_unix
-  - zigbee_multi_network
-  unless:
-  - zigbee_high_datarate_phy
-  - rail_mux
 - path: libs/build/llvm/aarch64-android-ndk-r25c/zigbee-pro-router-stack/release_singlenetwork/libzigbee-pro-router-stack.a
   condition:
   - toolchain_gcc
@@ -324,6 +311,15 @@ library:
   - zigbee_stack_unix
   unless:
   - zigbee_multi_network
+  - zigbee_high_datarate_phy
+  - rail_mux
+- path: libs/build/llvm/aarch64-android-ndk-r27d/zigbee-pro-router-stack/release/libzigbee-pro-router-stack.a
+  condition:
+  - toolchain_gcc
+  - aarch64-android-ndk-r27d
+  - zigbee_stack_unix
+  - zigbee_multi_network
+  unless:
   - zigbee_high_datarate_phy
   - rail_mux
 - path: libs/build/llvm/aarch64-android-ndk-r27d/zigbee-pro-router-stack/release_singlenetwork/libzigbee-pro-router-stack.a

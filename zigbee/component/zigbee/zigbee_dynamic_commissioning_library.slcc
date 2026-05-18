@@ -110,7 +110,6 @@ library:
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/zigbee-dynamic-commissioning/release_dualrail/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
@@ -119,7 +118,6 @@ library:
   - zigbee_multi_network
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/zigbee-dynamic-commissioning/release_dualrail_singlenetwork/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
@@ -128,7 +126,6 @@ library:
   unless:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
@@ -138,7 +135,6 @@ library:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
-  - toolchain_llvm
 - path: libs/build/gcc/i386/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
@@ -254,13 +250,6 @@ library:
   - zigbee_stack_unix
   - zigbee_multi_network
   unless: []
-- path: libs/build/llvm/aarch64-android-ndk-r27d/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
-  condition:
-  - toolchain_gcc
-  - aarch64-android-ndk-r27d
-  - zigbee_stack_unix
-  - zigbee_multi_network
-  unless: []
 - path: libs/build/llvm/aarch64-android-ndk-r25c/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc
@@ -268,6 +257,13 @@ library:
   - zigbee_stack_unix
   unless:
   - zigbee_multi_network
+- path: libs/build/llvm/aarch64-android-ndk-r27d/zigbee-dynamic-commissioning/release/libzigbee-dynamic-commissioning.a
+  condition:
+  - toolchain_gcc
+  - aarch64-android-ndk-r27d
+  - zigbee_stack_unix
+  - zigbee_multi_network
+  unless: []
 - path: libs/build/llvm/aarch64-android-ndk-r27d/zigbee-dynamic-commissioning/release_singlenetwork/libzigbee-dynamic-commissioning.a
   condition:
   - toolchain_gcc

@@ -53,6 +53,9 @@ requires:
 - name: sli_psec_osal
   condition: [device_cortexm]
 
+- name: sli_psec_common
+  condition: [device_cortexm]
+
 - name: se_manager_config
   condition: [trustzone_unaware, device_cortexm]
 - name: se_manager_config

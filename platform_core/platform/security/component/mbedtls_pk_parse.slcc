@@ -7,8 +7,6 @@ category: Platform|Security|Mbed TLS|Upper Layer
 quality: production
 provides:
 - name: mbedtls_pk_parse
-- name: mbedtls_uses_psa_crypto
-  allow_multiple: true
 requires:
 - name: mbedtls_asn1_parse
 - name: mbedtls_pk

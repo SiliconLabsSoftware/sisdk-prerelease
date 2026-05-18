@@ -17,7 +17,10 @@
 
 #include "config/btl_config.h"
 #include "api/btl_interface.h"
-#include "btl_core_cfg.h"  
+/* BOOTLOADER_SECURE: btl_core_s_cfg.h is included from btl_config.h; btl_core_cfg.h is not emitted. */
+#if !defined(BOOTLOADER_SECURE)
+#include "btl_core_cfg.h"
+#endif
 
 #include "core/btl_core.h"
 #include "core/btl_helper.h"

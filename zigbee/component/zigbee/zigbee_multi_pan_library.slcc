@@ -26,7 +26,6 @@ library:
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
-  - toolchain_llvm
 - path: libs/build/iar/cortex-m33/zigbee-multi-pan/release/libzigbee-multi-pan.a
   condition:
   - toolchain_iar

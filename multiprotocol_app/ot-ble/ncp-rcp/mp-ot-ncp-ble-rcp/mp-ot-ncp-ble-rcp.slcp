@@ -137,6 +137,8 @@ configuration:
     value: 1100
     condition: [toolchain_lto, freertos]
     unless: [device_series_3]
+  - name: SL_OPENTHREAD_ENABLE_SERIAL_TASK
+    value: 0
 
 define:
   - name: OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE

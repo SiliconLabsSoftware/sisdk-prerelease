@@ -44,7 +44,7 @@ component:
   - id: trustzone_nonsecure
   - id: tz_secure_key_library
   - id: ot_reset_utils
-  # Platform - Enable LTO for gcc and llvm by installing the following components
+  # Platform - Enable LTO for gcc and llvm by installing the following component
   - id: toolchain_gcc_lto
     condition: [toolchain_gcc]
   - id: toolchain_llvm_lto
@@ -89,7 +89,7 @@ configuration:
   # Stack size config end
   - name: SL_MAIN_START_TASK_STACK_SIZE_BYTES
     value: 4608
-    condition: [sl_main]  
+    condition: [sl_main]
   - name: OPENTHREAD_CONFIG_TMF_NETDIAG_CLIENT_ENABLE
     value: 0
   - name: CIRCULAR_QUEUE_LEN_MAX
@@ -160,11 +160,15 @@ post_build:
 tag:
   - companion:secure_app
   - hardware:device:flash:768
-  - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_supports_thread
+  - hwfilter:device:device_supports_bluetooth
   - hwfilter:!device:device_family_efr32mr21
   - hwfilter:board:simple_button:btn0
   - hwfilter:board:simple_button:btn1
+  - hwfilter:flash:768k
+  - hwfilter:!device:device_series_3
+  - toolchain:gcc
+  - toolchain:llvm
 
 readme:
   - path: ../mp-ot-ble-soc/README.md

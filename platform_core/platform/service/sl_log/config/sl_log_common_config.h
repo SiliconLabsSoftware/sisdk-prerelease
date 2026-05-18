@@ -79,6 +79,7 @@
 // <SL_LOG_CONFIG_LEVEL_INFO => INFO
 // <SL_LOG_CONFIG_LEVEL_WARN => WARN
 // <SL_LOG_CONFIG_LEVEL_ERROR => ERROR
+// <SL_LOG_CONFIG_LEVEL_CRASH => CRASH
 // <i> Default: SL_LOG_CONFIG_LEVEL_ERROR
 #define SL_LOG_CONFIG_LEVEL_COMPILE_TIME SL_LOG_CONFIG_LEVEL_ERROR
 
@@ -107,6 +108,9 @@
 // <i>during development to catch errors early
 // <i> Default: 0 (disabled)
 #define SL_LOG_DEBUG_ASSERT_ENABLE 0
+
+/** @brief Event ID: Crash (args: type, pc, sp). "CRSH" = Crash */
+#define SL_LOG_EVENT_ID_CRASH 0x43525348U
 
 #endif /* SL_LOG_COMMON_CONFIG_H */
 

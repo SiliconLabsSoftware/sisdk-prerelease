@@ -240,6 +240,8 @@
     value: system
 - tag:
   - device:opn:zgm230sb27hgn
+  - device:flash:512k
+  - device:ram:64k
 - toolchain_settings:
   - option: device_opn
     value: zgm230sb27hgn

@@ -616,6 +616,9 @@ do not initialize
   section .reset_reason,
 {%- endif %}
  section .noinit,
+{%- if crash_manager_enable and crash_manager_backend_ram %}
+ section .ram_crash_data.noinit,
+{%- endif %}
  section .stack,
 {%- if trustzone_secure %}
  section .stackseal,

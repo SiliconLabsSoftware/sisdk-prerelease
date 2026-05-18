@@ -244,6 +244,8 @@
     value: system
 - tag:
   - device:opn:efr32fg25a221f1152im56
+  - device:flash:1152k
+  - device:ram:512k
 - toolchain_settings:
   - option: device_opn
     value: efr32fg25a221f1152im56

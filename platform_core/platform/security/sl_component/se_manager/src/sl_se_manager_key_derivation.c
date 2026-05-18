@@ -505,7 +505,7 @@ sl_status_t sl_se_ecjpake_free(sl_se_ecjpake_context_t *ctx)
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  memset(ctx, 0, sizeof(*ctx));
+  sli_psec_zeroize(ctx, sizeof(*ctx));
 
   return SL_STATUS_OK;
 }

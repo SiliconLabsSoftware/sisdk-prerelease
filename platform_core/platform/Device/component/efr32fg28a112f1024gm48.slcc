@@ -238,6 +238,8 @@
     value: system
 - tag:
   - device:opn:efr32fg28a112f1024gm48
+  - device:flash:1024k
+  - device:ram:256k
 - toolchain_settings:
   - option: device_opn
     value: efr32fg28a112f1024gm48

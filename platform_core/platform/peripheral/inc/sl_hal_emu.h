@@ -539,6 +539,19 @@ typedef sl_hal_emu_dcdc_init_t sl_hal_emu_dcdc_config_t;
 #if defined(SL_HAL_EMU_DCDC_BOOST_PRESENT)
 /// Default DCDC Boost initialization.
 #if defined(_DCDC_CTRL_DVDDBSTPRG_MASK)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
+#define SL_HAL_EMU_DCDC_BOOST_INIT_DEFAULT                                                                  \
+  {                                                                                                         \
+    SL_HAL_EMU_DCDC_BOOST_TON_MAX_TIMEOUT_1P19US,            /*< Ton max is 1.19us. */                      \
+    true,                                                    /*< disable DCDC boost mode with BOOST_EN=0 */ \
+    SL_HAL_EMU_DCDC_BOOST_DRIVE_SPEED_DEFAULT,               /*< Default efficiency in EM0/1. */            \
+    SL_HAL_EMU_DCDC_BOOST_DRIVE_SPEED_DEFAULT,               /*< Default efficiency in EM2/3. */            \
+    SL_HAL_EMU_DCDC_BOOST_EM01_PEAK_CURRENT_LOAD_25MA,       /*< Default peak current in EM0/1. */          \
+    SL_HAL_EMU_DCDC_BOOST_EM23_PEAK_CURRENT_LOAD_10MA,       /*< Default peak current in EM2/3. */          \
+    SL_HAL_EMU_DCDC_BOOST_OUTPUT_VOLTAGE_1V8                 /*< DCDC Boost output voltage. */              \
+  }
+#else
 #define SL_HAL_EMU_DCDC_BOOST_INIT_DEFAULT                                                                  \
   {                                                                                                         \
     SL_HAL_EMU_DCDC_BOOST_TON_MAX_TIMEOUT_1P19US,            /*< Ton max is 1.19us. */                      \
@@ -549,6 +562,7 @@ typedef sl_hal_emu_dcdc_init_t sl_hal_emu_dcdc_config_t;
     SL_HAL_EMU_DCDC_BOOST_EM23_PEAK_CURRENT_LOAD_10MA,       /*< Default peak current in EM2/3. */          \
     SL_HAL_EMU_DCDC_BOOST_OUTPUT_VOLTAGE_1V8                 /*< DCDC Boost output voltage. */              \
   }
+#endif
 #else
 #if defined(_DCDC_DVDDBBCFG_MASK)
 #define SL_HAL_EMU_DCDC_BOOST_INIT_DEFAULT                                                                  \

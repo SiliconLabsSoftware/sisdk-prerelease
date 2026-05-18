@@ -1364,14 +1364,22 @@ static sl_status_t sli_dma_channel_submit_transfer_list(sl_dma_channel_handle_t 
   // the channel handle is the same as the head of the list of descriptors that
   // is being submitted, this means that the DMA channel must be refreshed.
   // We are ignoring the link mode field, only checking if the link address is 0.
+  // LINKLOAD_SET (sl_hal_ldma_start_transfer) atomically loads the descriptor
+  // and enables the channel. A redundant CHEN_SET on the same idle channel
+  // races with CHDONE on short (xfer_count=0) transfers and over-fires one
+  // extra peripheral request, hence the transfer_started flag.
+  bool transfer_started = false;
   if ( (ldma->CH[ch].LINK & ~_LDMA_CH_LINK_LINKMODE_MASK) == 0UL ) {
     ldma->CH[ch].LINK = ((uint32_t)(list_head->descriptor) & _LDMA_CH_LINK_LINKADDR_MASK) | LDMA_CH_LINK_LINKMODE | LDMA_CH_LINK_LINK;
     if ( sl_hal_ldma_transfer_is_done(ldma, ch) ) {
       sl_hal_ldma_start_transfer(ldma, ch);
+      transfer_started = true;
     }
   }
 
-  sl_hal_ldma_enable_channel(ldma, ch);
+  if (!transfer_started) {
+    sl_hal_ldma_enable_channel(ldma, ch);
+  }
   handle->state = SL_DMA_CHANNEL_STATE_ENABLED;
 
   CORE_EXIT_ATOMIC();

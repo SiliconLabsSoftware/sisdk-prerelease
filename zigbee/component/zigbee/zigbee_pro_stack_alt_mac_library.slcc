@@ -26,7 +26,6 @@ library:
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/zigbee-pro-stack-alt-mac/release_dualrail/libzigbee-pro-stack-alt-mac.a
   condition:
   - toolchain_gcc
@@ -35,7 +34,6 @@ library:
   - zigbee_multi_network
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/zigbee-pro-stack-alt-mac/release_dualrail_singlenetwork/libzigbee-pro-stack-alt-mac.a
   condition:
   - toolchain_gcc
@@ -44,7 +42,6 @@ library:
   unless:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/zigbee-pro-stack-alt-mac/release_singlenetwork/libzigbee-pro-stack-alt-mac.a
   condition:
   - toolchain_gcc
@@ -54,7 +51,6 @@ library:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
-  - toolchain_llvm
 - path: libs/build/iar/cortex-m33/zigbee-pro-stack-alt-mac/release/libzigbee-pro-stack-alt-mac.a
   condition:
   - toolchain_iar

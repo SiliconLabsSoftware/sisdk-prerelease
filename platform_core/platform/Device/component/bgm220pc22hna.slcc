@@ -215,6 +215,8 @@
     value: system
 - tag:
   - device:opn:bgm220pc22hna
+  - device:flash:512k
+  - device:ram:32k
 - toolchain_settings:
   - option: device_opn
     value: bgm220pc22hna

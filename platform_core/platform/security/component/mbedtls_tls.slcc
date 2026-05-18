@@ -3,6 +3,9 @@ package: platform_core
 label: TLS Client
 description: >-
   This component provides support for using TLS (as a client) in Mbed TLS.
+  This component is DEPRECATED and will be removed in a future version of this product.
+  This component will be replaced by a new set of components including mbedtls_ssl_tls,
+  mbedtls_ssl_proto_tls12, mbedtls_ssl_client and mbedtls_ssl_keep_peer_certificate.
 category: Platform|Security|Mbed TLS|Upper Layer
 quality: production
 provides:

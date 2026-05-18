@@ -934,7 +934,18 @@ class Tag:
         elif isinstance(evt, esl_lib.EventConfigureTagResponse):
             if evt.connection_handle == self.connection_handle:
                 if evt.status == elw.SL_STATUS_OK:
+                    # SL_STATUS_OK confirms the device accepted the write; notify TagDB here when
+                    # the stored ESL Address changes (setter alone runs before confirmation).
+                    old_esl_address_for_notify = self.esl_address
                     self.gatt_values[evt.type] = self.gatt_write_values[evt.type]
+                    if evt.type == elw.ESL_LIB_DATA_TYPE_GATT_ESL_ADDRESS:
+                        new_esl_address = self.esl_address
+                        if old_esl_address_for_notify != new_esl_address:
+                            self._notify(
+                                "esl_address",
+                                old_esl_address_for_notify,
+                                new_esl_address,
+                            )
                 else:
                     self.log.error(
                         "Tag configuration failed for %s at addres %s with result %s!",

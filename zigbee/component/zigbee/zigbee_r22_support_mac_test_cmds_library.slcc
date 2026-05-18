@@ -121,7 +121,6 @@ library:
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/zigbee-r22-support-mac-test-cmds/release_dualrail/libzigbee-r22-support-mac-test-cmds.a
   condition:
   - toolchain_gcc
@@ -131,7 +130,6 @@ library:
   - zigbee_mac_test_commands_support
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/zigbee-r22-support-mac-test-cmds/release_dualrail_singlenetwork/libzigbee-r22-support-mac-test-cmds.a
   condition:
   - toolchain_gcc
@@ -141,7 +139,6 @@ library:
   unless:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/zigbee-r22-support-mac-test-cmds/release_singlenetwork/libzigbee-r22-support-mac-test-cmds.a
   condition:
   - toolchain_gcc
@@ -152,7 +149,6 @@ library:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
-  - toolchain_llvm
 - path: libs/build/gcc/i386/zigbee-r22-support-mac-test-cmds/release/libzigbee-r22-support-mac-test-cmds.a
   condition:
   - toolchain_gcc
@@ -281,14 +277,6 @@ library:
   - zigbee_multi_network
   - zigbee_mac_test_commands_support
   unless: []
-- path: libs/build/llvm/aarch64-android-ndk-r27d/zigbee-r22-support-mac-test-cmds/release/libzigbee-r22-support-mac-test-cmds.a
-  condition:
-  - toolchain_gcc
-  - aarch64-android-ndk-r27d
-  - zigbee_stack_unix
-  - zigbee_multi_network
-  - zigbee_mac_test_commands_support
-  unless: []
 - path: libs/build/llvm/aarch64-android-ndk-r25c/zigbee-r22-support-mac-test-cmds/release_singlenetwork/libzigbee-r22-support-mac-test-cmds.a
   condition:
   - toolchain_gcc
@@ -297,6 +285,14 @@ library:
   - zigbee_mac_test_commands_support
   unless:
   - zigbee_multi_network
+- path: libs/build/llvm/aarch64-android-ndk-r27d/zigbee-r22-support-mac-test-cmds/release/libzigbee-r22-support-mac-test-cmds.a
+  condition:
+  - toolchain_gcc
+  - aarch64-android-ndk-r27d
+  - zigbee_stack_unix
+  - zigbee_multi_network
+  - zigbee_mac_test_commands_support
+  unless: []
 - path: libs/build/llvm/aarch64-android-ndk-r27d/zigbee-r22-support-mac-test-cmds/release_singlenetwork/libzigbee-r22-support-mac-test-cmds.a
   condition:
   - toolchain_gcc

@@ -217,6 +217,8 @@
     value: system
 - tag:
   - device:opn:mgm210pb22jia
+  - device:flash:1024k
+  - device:ram:96k
 - toolchain_settings:
   - option: device_opn
     value: mgm210pb22jia

@@ -253,6 +253,8 @@
     value: system
 - tag:
   - device:opn:mgm260pd32vnn
+  - device:flash:3200k
+  - device:ram:512k
 - toolchain_settings:
   - option: device_opn
     value: mgm260pd32vnn

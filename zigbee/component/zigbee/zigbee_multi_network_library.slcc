@@ -68,7 +68,6 @@ library:
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
-  - toolchain_llvm
 - path: libs/build/gcc/i386/zigbee-multi-network/release/libzigbee-multi-network.a
   condition:
   - toolchain_gcc

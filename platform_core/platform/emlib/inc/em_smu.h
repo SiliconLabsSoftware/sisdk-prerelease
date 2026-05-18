@@ -1607,9 +1607,9 @@ __STATIC_INLINE void SMU_SetPrivilegedAccess(SMU_Peripheral_TypeDef peripheral,
 
 #if !defined (SL_TRUSTZONE_SECURE) && defined(_SILICON_LABS_32B_SERIES_2_CONFIG) \
   && (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
-  if (peripheral < 32) {
+  if ((uint32_t)peripheral < 32) {
     BUS_RegBitWrite(&SMU_NS_CFGNS->PPUNSPATD0, peripheral, privileged);
-  } else if (peripheral < 64) {
+  } else if ((uint32_t)peripheral < 64) {
     BUS_RegBitWrite(&SMU_NS_CFGNS->PPUNSPATD1, peripheral - 32, privileged);
   } else {
 #if defined(_SMU_PPUNSPATD2_MASK)
@@ -1619,9 +1619,9 @@ __STATIC_INLINE void SMU_SetPrivilegedAccess(SMU_Peripheral_TypeDef peripheral,
 #endif //defined(_SMU_PPUNSPATD2_MASK)
   }
 #else
-  if (peripheral < 32) {
+  if ((uint32_t)peripheral < 32) {
     BUS_RegBitWrite(&SMU->PPUPATD0, peripheral, privileged);
-  } else if (peripheral < 64) {
+  } else if ((uint32_t)peripheral < 64) {
     BUS_RegBitWrite(&SMU->PPUPATD1, peripheral - 32, privileged);
   } else {
 #if defined(_SMU_PPUNSPATD2_MASK)
@@ -1812,13 +1812,13 @@ __STATIC_INLINE void SMU_IntSet(uint32_t flags)
 #if !defined (SL_TRUSTZONE_SECURE) && defined (_SILICON_LABS_32B_SERIES_2)
 void SMU_SECURE_IRQHandler(void)
 {
-  if (SMU_IF_PPUSEC) {
-    EFM_ASSERT(SMU->IF & SMU_IF_PPUSEC);
-  }
+#if (SMU_IF_PPUSEC != 0)
+  EFM_ASSERT(SMU->IF & SMU_IF_PPUSEC);
+#endif
 
-  if (SMU_IF_BMPUSEC) {
-    EFM_ASSERT(SMU->IF & SMU_IF_BMPUSEC);
-  }
+#if (SMU_IF_BMPUSEC != 0)
+  EFM_ASSERT(SMU->IF & SMU_IF_BMPUSEC);
+#endif
 
   // PPUFS contains the ID of the peripheral caused the fault
   // The ID is ordered after the PPUSATD0-PPUSATD1 register bit fields.

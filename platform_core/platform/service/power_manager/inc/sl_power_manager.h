@@ -667,6 +667,11 @@ uint8_t sl_power_manager_get_peripheral_retention_strategy(const sl_peripheral_t
 * mode will result in a system reset. Careful consideration should be given to
 * the conditions under which EM4 is entered.
 *
+* If `SL_SLEEPTIMER_PERIPHERAL` is set to `SL_SLEEPTIMER_PERIPHERAL_BURTC` in
+* `sl_sleeptimer_config.h`, it does not configure EM4 wake on BURTC and does
+* not support EM4 timekeeping; see @ref sleeptimer_burtc_em4 in the Sleeptimer
+* in the Sleeptimer documentation.
+*
 * ## Update Power Manager after runtime clock changes
 *
 * The @ref slx_power_manager_update_clock_info() API is an advanced function

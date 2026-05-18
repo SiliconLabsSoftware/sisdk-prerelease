@@ -40,7 +40,7 @@
 #include "sli_se_opaque_types.h"
 #include "sli_se_opaque_functions.h"
 #include "sli_se_driver_key_management.h"
-#include "sli_psa_driver_common.h"  // sli_psa_zeroize()
+#include "sli_psa_driver_common.h"
 #include "sli_se_version_dependencies.h"
 
 #include "sl_se_manager_key_derivation.h"
@@ -1049,13 +1049,16 @@ psa_status_t sli_se_key_desc_from_input(const psa_key_attributes_t* attributes,
           key_buffer_size - offsetof(sli_se_opaque_wrapped_key_context_t,
                                      wrapped_buffer);
 
-        // Clear temporary key context
+        // Clear temporary key context (holds a copy of the wrapped key
+        // material) explicitly.
         if ((uintptr_t)key_buffer & 0x3) {
-          memset(&key_context_temp, 0, sizeof(sli_se_opaque_wrapped_key_context_t));
+          sli_psec_zeroize(&key_context_temp, sizeof(sli_se_opaque_wrapped_key_context_t));
         }
 
         if (sli_key_get_size(key_desc, &key_size) != SL_STATUS_OK) {
-          memset(key_desc, 0, sizeof(sl_se_key_descriptor_t));
+          // Descriptor holds a pointer to wrapped key material; scrub on the
+          // failure path so stack-scan attacks cannot recover it.
+          sli_psec_zeroize(key_desc, sizeof(sl_se_key_descriptor_t));
           return PSA_ERROR_INVALID_ARGUMENT;
         }
 
@@ -1070,7 +1073,7 @@ psa_status_t sli_se_key_desc_from_input(const psa_key_attributes_t* attributes,
         #endif     // SLI_PSA_DRIVER_FEATURE_SECPR1
 
         if (key_desc->storage.location.buffer.size < key_full_size + SLI_SE_WRAPPED_KEY_OVERHEAD) {
-          memset(key_desc, 0, sizeof(sl_se_key_descriptor_t));
+          sli_psec_zeroize(key_desc, sizeof(sl_se_key_descriptor_t));
           return PSA_ERROR_INVALID_ARGUMENT;
         }
 
@@ -1118,7 +1121,7 @@ psa_status_t sli_se_key_desc_from_input(const psa_key_attributes_t* attributes,
   // Run a general validation routine once the key desc has been populated
   psa_status_t status = validate_key_desc(attributes, key_size, key_desc);
   if (status != PSA_SUCCESS) {
-    memset(key_desc, 0, sizeof(sl_se_key_descriptor_t));
+    sli_psec_zeroize(key_desc, sizeof(sl_se_key_descriptor_t));
     return PSA_ERROR_INVALID_ARGUMENT;
   }
   return PSA_SUCCESS;

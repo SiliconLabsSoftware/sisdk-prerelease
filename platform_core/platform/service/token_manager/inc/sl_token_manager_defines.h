@@ -205,6 +205,15 @@
 #define SL_TOKEN_NVM3_REGION_ALIRO                (0x89a00)
 
 /** @ingroup NVM3 key space regions
+*   @brief NVM3 Key Region for All the platform specific tokens.
+*   This region allocates 256 keys (0x89b00 - 0x89bFF).
+*   Below are the keys that are allocated:
+*   - 0x89b00: Crash log token
+*   - 0x89b01 - 0x89bFF: Reserved for future use
+*/
+#define SL_TOKEN_NVM3_REGION_PLATFORM            (0x89b00)
+
+/** @ingroup NVM3 key space regions
  *  @brief NVM3 Key Region for Wi-SUN.
  */
 #define SL_TOKEN_NVM3_REGION_WISUN                (0x90000)

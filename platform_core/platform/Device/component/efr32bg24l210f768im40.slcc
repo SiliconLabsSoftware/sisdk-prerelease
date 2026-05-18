@@ -233,6 +233,8 @@
     value: system
 - tag:
   - device:opn:efr32bg24l210f768im40
+  - device:flash:768k
+  - device:ram:96k
 - toolchain_settings:
   - option: device_opn
     value: efr32bg24l210f768im40

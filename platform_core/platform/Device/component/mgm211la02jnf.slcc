@@ -218,6 +218,8 @@
     value: system
 - tag:
   - device:opn:mgm211la02jnf
+  - device:flash:1024k
+  - device:ram:96k
 - toolchain_settings:
   - option: device_opn
     value: mgm211la02jnf

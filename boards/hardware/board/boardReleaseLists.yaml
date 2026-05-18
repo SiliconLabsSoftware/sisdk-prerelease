@@ -1,5 +1,17 @@
+# Board-gen input: boards listed in this file (whitelist, socket_boards, etc.) are
+# candidates for generation, not an assertion that each board ships in the public
+# ``boards`` package. Target package and SLCC quality come from
+# siliconlabs.slc ``board_properties`` (``quality`` / ``package`` maps and
+# ``normalize_board_quality_package_pair``), and for some boards from the
+# **device** ``*.slcc`` ``quality`` when revisions require different silicon drops
+# (e.g. ``platform_core`` vs ``platform_core_internal``).
 
-# This is to overwrite the IC opn declared in the t207_hardware_description for a given board
+# ``opn_override``: only keys listed here are applied by ``board_import`` (IC OPN from
+# t207_hardware_description is replaced for that board revision or bare board OPN). There
+# is no override elsewhere for the same purpose. Use ``<boardopn>_<revision>`` (e.g.
+# ``brd4408a_a06``) when a single revision needs a different public OPN; use bare
+# ``<boardopn>`` only when no revision-specific row exists. Values map internal-only device
+# OPNs to public OPNs so a production-quality drop is not tied to an internal device (quality inversion).
 opn_override:
     # BRD4270A_A02 has a target device OPN EFR32XG25 which is an internal OPN. Use a public OPN for this revision
     # BRD4408A_A06 has a target device OPN SiXG301M104XILZ0 which is an internal OPN. Use public OPN for this revision
@@ -43,16 +55,25 @@ socket_boards:
 board_release_whitelist:
     - BRD2503A
     - BRD2503B
+    - BRD2503C
     - BRD2504A
+    - BRD2504B
     - BRD2505A
     - BRD2506A
+    - BRD2506B
     - BRD2600A
+    - BRD2600B
+    - BRD2600C
     - BRD2601A
     - BRD2601B
+    - BRD2601D
     - BRD2602A
+    - BRD2602B
     - BRD2603A
+    - BRD2603B
     - BRD2606A
     - BRD2608A
+    - BRD2608B
     - BRD2611A
     - BRD2703A
     - BRD2704A

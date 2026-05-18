@@ -1467,8 +1467,7 @@ psa_status_t sli_hostcrypto_transparent_cipher_finish(
     *output_length = 0;
   }
 
-  // Wipe context.
-  memset(operation, 0, sizeof(sli_hostcrypto_transparent_cipher_operation_t));
+  sli_psec_zeroize(operation, sizeof(sli_hostcrypto_transparent_cipher_operation_t));
 
   return psa_status;
 
@@ -1497,8 +1496,8 @@ psa_status_t sli_hostcrypto_transparent_cipher_abort(
   || defined(SLI_PSA_DRIVER_FEATURE_AES_CCM_STAR_NO_TAG)
 
   if (operation != NULL) {
-    // Wipe context.
-    memset(operation, 0, sizeof(*operation));
+    // Wipe context (key material/nonce/intermediate state) explicitly.
+    sli_psec_zeroize(operation, sizeof(*operation));
   }
 
   return PSA_SUCCESS;

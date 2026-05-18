@@ -231,6 +231,8 @@
     value: system
 - tag:
   - device:opn:efm32pg26b501f3200im68
+  - device:flash:3200k
+  - device:ram:512k
 - toolchain_settings:
   - option: device_opn
     value: efm32pg26b501f3200im68

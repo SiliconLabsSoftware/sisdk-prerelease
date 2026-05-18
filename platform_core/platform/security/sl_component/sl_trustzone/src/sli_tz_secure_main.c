@@ -143,13 +143,6 @@ typedef void (*nsfunc)(void) __attribute__((cmse_nonsecure_call));
   #define BUILTIN_UNREACHABLE() __builtin_unreachable();
 #endif
 
-// Require GCC version 10.3.1 (or later) for TrustZone support
-#if defined(__GNUC__) && ((__GNUC__ < 10)   \
-  || (__GNUC__ == 10 && __GNUC_MINOR__ < 3) \
-  || (__GNUC__ == 10 && __GNUC_MINOR__ == 3 && __GNUC_PATCHLEVEL__ < 1))
-#error "GCC version 10.3.1 (or later) is required for Trustzone support."
-#endif
-
 // -----------------------------------------------------------------------------
 // Static function declarations
 

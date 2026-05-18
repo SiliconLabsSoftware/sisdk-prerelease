@@ -237,6 +237,8 @@
     value: system
 - tag:
   - device:opn:fgm230sa27hgn
+  - device:flash:512k
+  - device:ram:64k
 - toolchain_settings:
   - option: device_opn
     value: fgm230sa27hgn

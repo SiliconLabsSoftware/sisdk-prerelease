@@ -31,6 +31,7 @@
 #include <string.h>
 #include "em_device.h"
 #include "sli_tz_iovec_check.h"
+#include "sli_psec_common.h"
 #include "psa/storage_common.h"
 
 #if (_SILICON_LABS_SECURITY_FEATURE != _SILICON_LABS_SECURITY_FEATURE_VAULT)
@@ -354,8 +355,8 @@ static psa_status_t generate_attestation_key(void)
   }
 
   exit:
-  // Clean the private key buffer explicitly
-  memset(attestation_private_key, 0u, sizeof(attestation_private_key));
+  // Clean the private key buffer explicitly.
+  sli_psec_zeroize(attestation_private_key, sizeof(attestation_private_key));
   // The key has been generated and stored in ITS, hence the key can be cleaned.
   (void)psa_destroy_key(key_id);
   return status;
@@ -428,8 +429,8 @@ static psa_status_t get_attestation_public_key(uint8_t *output_key)
   (void)psa_destroy_key(key_id);
 
   exit:
-  // Clean the private key buffer explicitly
-  memset(attestation_private_key, 0u, sizeof(attestation_private_key));
+  // Clean the private key buffer explicitly.
+  sli_psec_zeroize(attestation_private_key, sizeof(attestation_private_key));
   return status;
 }
 

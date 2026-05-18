@@ -132,7 +132,6 @@ library:
   - zigbee_phy_2_4_subghz_switch_coordinator
   - zigbee_high_datarate_phy
   - rail_mux
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/zigbee-pro-stack/release_dualrail/libzigbee-pro-stack.a
   condition:
   - toolchain_gcc
@@ -143,7 +142,6 @@ library:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_high_datarate_phy
   - rail_mux
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/zigbee-pro-stack/release_dualrail_singlenetwork/libzigbee-pro-stack.a
   condition:
   - toolchain_gcc
@@ -154,7 +152,6 @@ library:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_high_datarate_phy
   - rail_mux
-  - toolchain_llvm
 - path: libs/build/gcc/cortex-m33/zigbee-pro-stack/release_singlenetwork/libzigbee-pro-stack.a
   condition:
   - toolchain_gcc
@@ -166,7 +163,6 @@ library:
   - zigbee_phy_2_4_subghz_switch_coordinator
   - zigbee_high_datarate_phy
   - rail_mux
-  - toolchain_llvm
 - path: libs/build/gcc/i386/zigbee-pro-stack/release/libzigbee-pro-stack.a
   condition:
   - toolchain_gcc

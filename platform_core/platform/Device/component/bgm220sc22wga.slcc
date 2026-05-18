@@ -211,6 +211,8 @@
     value: system
 - tag:
   - device:opn:bgm220sc22wga
+  - device:flash:352k
+  - device:ram:32k
 - toolchain_settings:
   - option: device_opn
     value: bgm220sc22wga

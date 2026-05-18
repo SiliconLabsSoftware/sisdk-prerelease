@@ -644,6 +644,14 @@ SECTIONS
   } > RAM :ram_pre_code
 {%- endif %}
 
+{%- if crash_manager_enable and crash_manager_backend_ram %}
+  /* Crash Manager: dedicated RAM output section; objects use input section .ram_crash_data.noinit */
+  .ram_crash_data (NOLOAD) : ALIGN({{ram_code_alignment}})
+  {
+    KEEP(*(.ram_crash_data.noinit))
+  } > RAM :ram_pre_code
+{%- endif %}
+
   .bss :
   {
     . = ALIGN(4);

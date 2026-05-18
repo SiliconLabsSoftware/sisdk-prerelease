@@ -194,6 +194,8 @@
     value: system
 - tag:
   - device:opn:efm32pg22c200f64im32
+  - device:flash:64k
+  - device:ram:32k
 - toolchain_settings:
   - option: device_opn
     value: efm32pg22c200f64im32
