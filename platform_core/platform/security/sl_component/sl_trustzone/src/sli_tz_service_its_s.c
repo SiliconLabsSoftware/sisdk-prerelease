@@ -34,7 +34,7 @@
 
 #include "sli_tz_service_its.h"
 #if defined(SL_CATALOG_PSA_CRYPTO_KEY_PROTECTION_PRESENT)
-#include "sl_psa_key_protection.h"
+#include "sli_tz_secure_psa_key_protection.h"
 #endif
 #include "psa/crypto_values.h"
 #include "tfm_api.h"

@@ -944,8 +944,15 @@ psa_status_t psa_its_set(psa_storage_uid_t uid,
   if (((create_flags == PSA_STORAGE_FLAG_WRITE_ONCE_SECURE_ACCESSIBLE)
        || (create_flags == PSA_STORAGE_FLAG_SECURE_ACCESSIBLE))
       && (!object_lives_in_s(p_data, data_length))) {
-    // The flag indicates that this data should not be set by the non-secure domain
     return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  if (data_length > 0u && object_lives_in_s(p_data, data_length)) {
+    if (create_flags == PSA_STORAGE_FLAG_NONE) {
+      create_flags = PSA_STORAGE_FLAG_SECURE_ACCESSIBLE;
+    } else if (create_flags == PSA_STORAGE_FLAG_WRITE_ONCE) {
+      create_flags = PSA_STORAGE_FLAG_WRITE_ONCE_SECURE_ACCESSIBLE;
+    }
   }
 #endif
   sli_its_acquire_mutex();
@@ -2920,8 +2927,15 @@ psa_status_t psa_its_set(psa_storage_uid_t uid,
   if (((create_flags == PSA_STORAGE_FLAG_WRITE_ONCE_SECURE_ACCESSIBLE)
        || (create_flags == PSA_STORAGE_FLAG_SECURE_ACCESSIBLE))
       && (!object_lives_in_s(p_data, data_length))) {
-    // The flag indicates that this data should not be set by the non-secure domain
     return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  if (data_length > 0u && object_lives_in_s(p_data, data_length)) {
+    if (create_flags == PSA_STORAGE_FLAG_NONE) {
+      create_flags = PSA_STORAGE_FLAG_SECURE_ACCESSIBLE;
+    } else if (create_flags == PSA_STORAGE_FLAG_WRITE_ONCE) {
+      create_flags = PSA_STORAGE_FLAG_WRITE_ONCE_SECURE_ACCESSIBLE;
+    }
   }
 #endif
 

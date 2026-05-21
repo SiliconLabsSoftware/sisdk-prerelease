@@ -104,9 +104,6 @@ configuration:
     value: 5
   - name: ZAF_APP_NAME
     value: '"zniffer"'
-  # SYSRTC on ULFRCO for all boards; LFXO left enabled so DEFAULT_LF branches stay valid
-  - name: SL_CLOCK_MANAGER_SYSRTCCLK_SOURCE
-    value: CMU_SYSRTC0CLKCTRL_CLKSEL_ULFRCO
 define:
   - name: APP_PROPERTIES_CONFIG_FILE
     value: <application_properties_config.h>

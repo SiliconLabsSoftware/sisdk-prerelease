@@ -71,11 +71,6 @@ Revision: $Rev: 9599 $
 #include "sli_uart_recorder.h"
 #endif
 
-#ifdef SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT
-#include "sl_log_common_config.h"
-#include "sl_log.h"
-#endif
-
 // System core clock frequency.
 extern uint32_t SystemCoreClock;
 
@@ -193,9 +188,6 @@ static void _cbSendSystemDesc(void) {
 void SEGGER_SYSVIEW_Conf(void) {
   SEGGER_SYSVIEW_OS_API *os_api = NULL;
 
-#if defined(SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT)
-  sl_log_platform_core_init();
-#else
 #if (SEGGER_SYSVIEW_TIMESTAMP_SOURCE == SEGGER_SYSVIEW_TIMESTAMP_SOURCE_SLEEPTIMER)
   // Initialize Sleeptimer module in case not already done.
   sl_status_t status = SL_STATUS_OK;
@@ -211,7 +203,7 @@ void SEGGER_SYSVIEW_Conf(void) {
   ITM->LAR          = 0xc5acce55;
   DWT->CTRL        |= DWT_CTRL_CYCCNTENA_Msk;
 #endif
-#endif /* SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT */
+
   // Register Simplicity SDK module
   gecko_sdk_module.EventOffset = 0;
   gecko_sdk_module.NumEvents = 28671;

@@ -2810,10 +2810,8 @@ sl_rail_pa_power_setting_t sli_rail_get_pa_power_setting(sl_rail_handle_t rail_h
  * Apply a PA power setting directly, bypassing the dBm-to-powersetting
  * table lookup.
  *
- * Decodes the chip-specific bitfields from \ref pa_power_config (e.g.,
- * sub-mode and scalar on current devices) and programs the PA hardware
- * registers accordingly.  The PA mode is derived from the current
- * channel configuration.
+ * The power setting value is assumed to be consistent with the PA mode
+ * of the current channel configuration.
  *
  * @param[in] rail_handle A real RAIL instance handle.
  * @param[in] pa_power_config Opaque power-setting value whose encoding is
@@ -4633,6 +4631,9 @@ bool sl_rail_is_tx_auto_ack_paused(sl_rail_handle_t rail_handle);
  *   - Radio is either looking for sync, receiving the packet after sync, or in
  *     the \ref sl_rail_state_timing_t::rx_to_tx turnaround before the Ack is sent.
  *
+ * @note Call before \ref SL_RAIL_EVENT_RX_PACKET_RECEIVED (for example from
+ *   \ref SL_RAIL_EVENT_RX_FILTER_PASSED) so Auto-Ack can use the transmit FIFO.
+ *
  * @note The transmit FIFO must not be used for Auto-Ack when IEEE 802.15.4,
  *   Z-Wave, or BLE protocols are active.
  */
@@ -4650,8 +4651,11 @@ sl_rail_status_t sl_rail_use_tx_fifo_for_auto_ack(sl_rail_handle_t rail_handle);
  *
  * This function only returns true if the following conditions are met:
  *   - Radio has not already decided to transmit the Ack, and
- *   - Radio is either looking for sync, receiving the packet after sync or in
+ *   - Radio is either looking for sync, receiving the packet after sync, or in
  *     the \ref sl_rail_state_timing_t::rx_to_tx turnaround before the Ack is sent.
+ *
+ * @note Call before \ref SL_RAIL_EVENT_RX_PACKET_RECEIVED (for example from
+ *   \ref SL_RAIL_EVENT_RX_FILTER_PASSED) so Auto-Ack can cancel the upcoming Ack.
  */
 sl_rail_status_t sl_rail_cancel_auto_ack(sl_rail_handle_t rail_handle);
 

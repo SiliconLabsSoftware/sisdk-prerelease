@@ -356,6 +356,16 @@
       vendor: silabs
     path: brd2503c/sl_pwm_init_led0_config.h
   - override:
+      component: rail_util_pti
+      file_id: rail_util_pti_config
+      vendor: silabs
+    path: brd2503c/sl_rail_util_pti_config.h
+  - override:
+      component: sl_rail_util_pti
+      file_id: rail_util_pti_config
+      vendor: silabs
+    path: brd2503c/sl_rail_util_pti_config.h
+  - override:
       component: simple_button
       file_id: simple_button_config
       instance: btn0

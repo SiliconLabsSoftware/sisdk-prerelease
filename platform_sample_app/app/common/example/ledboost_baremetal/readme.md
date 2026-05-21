@@ -1,6 +1,12 @@
 # LED Boost DCDC Bare-metal
 
-This example demonstrates LEDVDD voltage ramp from 1.8 V to 3.8 V on the DCDC boost regulator. Ramp completion is signalled by the DCDC interrupt. After the 3.8 V ramp completes, the DCDC is powered off so LEDVDD falls back to the board's default voltage (~3.2 V).
+This example demonstrates the DCDC boost LEDVDD output running in a bare-metal (no RTOS) build. The application runs a self-driven loop that continuously alternates between an LEDVDD ramp in EM0 and a low-power EM2 dwell, so the behavior on the LEDVDD pin and on the AEM can be observed without any user input.
+
+- **Boot**            -> Leaves the DCDC untouched (LEDVDD = input-rail passthrough, ~3.2 V on a typical board), subscribes to EM-transition events, and enters the main loop.
+- **Odd iteration**   -> Brings DCDC boost up, ramps LEDVDD 1.8 V -> 3.8 V using the `LEDVDDRAMPDONE` interrupt flag, then powers the DCDC off and gates its bus clock.
+- **Even iteration**  -> Brings DCDC boost up, parks LEDVDD at 1.8 V, and drops the device into EM2 for a fixed dwell. EM2 exit is driven by the sleeptimer.
+
+A short delay (`LEDBOOST_DEBOUNCE_MS`) separates each iteration so the transitions are clearly visible  on a scope.
 
 ## Table of Contents
 
@@ -13,24 +19,34 @@ This example demonstrates LEDVDD voltage ramp from 1.8 V to 3.8 V on the DCDC bo
 
 ## Purpose / Scope
 
-This example shows how to bring up the DCDC boost regulator and run a LEDVDD ramp sequence in a bare-metal application. After initialising the regulator, LEDVDD is held at 1.8 V until it reaches regulation, then commanded to 3.8 V. Once the 3.8 V ramp completes, the application powers off the DCDC so LEDVDD collapses to the board's default voltage (~3.2 V).
+This example brings up the DCDC boost regulator on a bare-metal application and runs a two-action sequence in an infinite loop:
+
+| Iteration   | Action                                                                                     | Power state           |
+|-------------|--------------------------------------------------------------------------------------------|-----------------------|
+| Odd         | Init DCDC boost, ramp LEDVDD 1.8 V -> 3.8 V, power DCDC off, gate DCDC bus clock           | EM0                   |
+| Even        | Init DCDC boost, park LEDVDD at 1.8 V, dwell in EM2 for `LEDBOOST_EM2_MS`                  | EM2 (LEDVDD = 1.8 V)  |
 
 ## Prerequisites / Setup Requirements
 
 **Hardware**
 - Silicon Labs kit with DCDC LEDVDD support.
 - USB cable for flashing and powering the board.
+- An external current meter to observe the EM0/EM2 current.
+- Multimeter or oscilloscope on the LEDVDD pin to observe the voltage transitions.
 
 **Software**
 - Simplicity Studio 5 (or later).
-- A debugger to observe the `ramp_done` flag, or a multimeter / oscilloscope on the LEDVDD pin to observe the voltage transition from 1.8 V to 3.8 V back to ~3.2 V.
 
 ## Steps to Run Demo
 
 1. Open the project in Simplicity Studio and build it.
-2. Connect the kit via USB.
-3. Flash and run the application on the board.
-4. Observe the LEDVDD output transition `1.8 V -> 3.8 V -> ~3.2 V (default)` on a scope or meter, or set a breakpoint inside `ledboost_process_action()` to confirm the DCDC ramp-done interrupt fires.
+2. Connect the kit via USB and flash the application with Simplicity Commander.
+3. Reset the board. The application begins running the alternating sequence automatically:
+   - Odd iteration: LEDVDD ramps 1.8 V -> 3.8 V, then drops to the passthrough level (~3.2 V) after the DCDC is powered off.
+   - Even iteration: LEDVDD is regulated at 1.8 V and the current drops to the EM2 plateau (typically a few microamps with DCDC in boost mode).
+4. Observe the LEDVDD pin on a scope to see the ramp edges, and to confirm the EM0 / EM2 transitions.
+
+> Note: `SL_DEVICE_INIT_DCDC_ENABLE` is set to `0` in `config/sl_device_init_dcdc_config.h` so the DCDC stays off at boot and LEDVDD starts in input-rail passthrough (~3.2 V).
 
 ## Troubleshooting
 

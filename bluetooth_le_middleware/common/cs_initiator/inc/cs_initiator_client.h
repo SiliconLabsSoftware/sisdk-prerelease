@@ -131,9 +131,10 @@
 
 // CS channel map preset
 SL_ENUM(cs_channel_map_preset_t) {
-  CS_CHANNEL_MAP_PRESET_MEDIUM = 1,
-  CS_CHANNEL_MAP_PRESET_HIGH = 2,
-  CS_CHANNEL_MAP_PRESET_CUSTOM = 3
+  CS_CHANNEL_MAP_PRESET_LOW,        // This is only for compatibility
+  CS_CHANNEL_MAP_PRESET_MEDIUM,
+  CS_CHANNEL_MAP_PRESET_HIGH,
+  CS_CHANNEL_MAP_PRESET_CUSTOM
 };
 
 // CS antenna configuration index
@@ -287,6 +288,30 @@ void cs_initiator_apply_channel_map_preset(cs_channel_map_preset_t preset, uint8
 
 /**************************************************************************//**
  * Get the connection and procedure intervals
+ * Compatibility API for old SDK.
+ * @param[in] main_mode CS main mode.
+ * @param[in] sub_mode CS sub mode.
+ * @param[in] procedure_scheduling Procedure scheduling.
+ * @param[in] channel_map_preset Channel map preset.
+ * @param[in] algo_mode Algorithm mode.
+ * @param[in] antenna_path Antenna path.
+ * @param[in] use_real_time_ras_mode Use real-time RAS mode.
+ * @param[out] conn_interval Connection interval.
+ * @param[out] proc_interval CS procedure interval.
+ * @return Status of the operation.
+ *****************************************************************************/
+sl_status_t cs_initiator_get_intervals(uint8_t main_mode,
+                                       uint8_t sub_mode,
+                                       cs_procedure_scheduling_t procedure_scheduling,
+                                       uint8_t channel_map_preset,
+                                       uint8_t algo_mode,
+                                       uint8_t antenna_path,
+                                       uint8_t use_real_time_ras_mode,
+                                       uint16_t *conn_interval,
+                                       uint16_t *proc_interval);
+
+/**************************************************************************//**
+ * Get the connection and procedure intervals
  * @param[in] main_mode CS main mode.
  * @param[in] sub_mode CS sub mode.
  * @param[in] procedure_scheduling Procedure scheduling.
@@ -299,7 +324,7 @@ void cs_initiator_apply_channel_map_preset(cs_channel_map_preset_t preset, uint8
  * @param[out] proc_interval CS procedure interval.
  * @return Status of the operation.
  *****************************************************************************/
-sl_status_t cs_initiator_get_intervals(uint8_t main_mode,
+sl_status_t cs_initiator_get_multiple_intervals(uint8_t main_mode,
                                        uint8_t sub_mode,
                                        cs_procedure_scheduling_t procedure_scheduling,
                                        uint8_t channel_map_preset,
@@ -308,14 +333,14 @@ sl_status_t cs_initiator_get_intervals(uint8_t main_mode,
                                        uint8_t use_real_time_ras_mode,
                                        uint8_t max_reflector_count,
                                        uint16_t *conn_interval,
-                                       uint16_t *proc_interval);      
-                                       
+                                       uint16_t *proc_interval);
+
 /**************************************************************************//**
- * Validate the minimum and maximum subevent lengths against  
+ * Validate the minimum and maximum subevent lengths against
  * connection and procedure interval limits.
  * @param[in] min_subevent_len_us Minimum subevent length in microseconds.
  * @param[in] max_subevent_len_us Maximum subevent length in microseconds.
- * @param[in] max_connection_interval Maximum connection interval (in 1.25 ms steps) 
+ * @param[in] max_connection_interval Maximum connection interval (in 1.25 ms steps)
  *                                    @ref CS_INITIATOR_DEFAULT_MAX_CONNECTION_INTERVAL
  * @param[in] max_procedure_interval Maximum procedure interval.
  * @return SL_STATUS_OK if the min/max subevent relation is correct and min subevent length fits

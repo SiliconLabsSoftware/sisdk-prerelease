@@ -4,15 +4,6 @@ This guide shows how to migrate projects from previous SDKs to a newer one.
 
 # 8.1.0 {#migrate-section-8-1-0}
 
-## Sleeptimer peripheral configuration
-The sleeptimer is now configured to use SYSRTC instead of the BURTC peripheral. This change is driven by the custom EM4 implementation in Z-Wave for never-listening devices, which uses the BURTC peripheral in the `zw_shutdown_manager` module and would overlap the platform sleeptimer if both relied on BURTC.
-- Platform code now relies on the DEFAULT peripheral (SYSRTC).
-- Z-Wave code now initializes and uses BURTC internally for power-management use cases.
-
-Apply the following migration steps:
-- Set `SL_SLEEPTIMER_PERIPHERAL` to `SL_SLEEPTIMER_PERIPHERAL_DEFAULT` (replace `SL_SLEEPTIMER_PERIPHERAL_BURTC` if it is still selected).
-- Set `SL_CLOCK_MANAGER_SYSRTCCLK_SOURCE` to `CMU_SYSRTC0CLKCTRL_CLKSEL_ULFRCO`.
-
 ## DC/DC configuration (`ZW_DCDC_CONFIG`) {#migrate-section-8-1-0-dcdc}
 
 In 8.1.0, `ZW_DCDC_CONFIG` in `zw_hardware_config.h` (or Project Configurator) is applied when the radio platform initializes the DC/DC at startup. In 8.0.0 that setting was ignored and the firmware always used `EDCDCMODE_AUTO`.

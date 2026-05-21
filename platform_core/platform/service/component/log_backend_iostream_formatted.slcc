@@ -2,9 +2,9 @@ id: log_backend_iostream_formatted
 label: Log Backend I/O Stream – Formatted Output
 package: platform_core
 description: >
-  Human-readable text output for the I/O Stream log backend. Each log line is
-  the payload (string logs expand printf-style specifiers; event logs emit
-  hex-encoded fields) terminated with CRLF. Log level is not printed. Optional
+  Human-readable text output for the I/O Stream log backend. Event logs emit
+  hex-encoded fields terminated with CRLF. String logs expand printf-style
+  specifiers and emit CRLF only when present in the payload. Log level is not printed. Optional
   leading bracket prefix (timestamp and/or log type) is configured in
   sl_log_formatted_iostream_config.h. Requires the log_backend_iostream
   component for transport.

@@ -780,6 +780,14 @@ void sl_rail_util_on_event(sl_rail_handle_t railHandle, sl_rail_events_t events)
     }
     counters.rxFifoFull++;
   }
+  if (events & SL_RAIL_EVENT_RX_FILTER_PASSED) {
+    if (afterRxUseTxBufferForAck) {
+      // Use Tx Buffer for Ack if user requested
+      afterRxUseTxBufferForAck = false;
+      sl_rail_write_tx_fifo(railHandle, txData, txDataLen, true);
+      sl_rail_use_tx_fifo_for_auto_ack(railHandle);
+    }
+  }
   if (events & (SL_RAIL_EVENT_RX_FIFO_OVERFLOW
                 | SL_RAIL_EVENT_RX_ADDRESS_FILTERED
                 | SL_RAIL_EVENT_RX_PACKET_ABORTED

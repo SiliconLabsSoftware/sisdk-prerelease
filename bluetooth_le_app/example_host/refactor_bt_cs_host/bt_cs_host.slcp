@@ -23,6 +23,7 @@ component:
   - id: refactor_cs_initiator_client
   - id: cs_configurator
   - id: refactor_cs_reflector_acp
+  - id: cs_rrsp
   - id: cs_rreq
   - id: cs_acp_host
   - id: rtllib_api

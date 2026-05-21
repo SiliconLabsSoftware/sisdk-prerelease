@@ -1,5 +1,20 @@
 <?xml version='1.0' encoding='ASCII'?>
 <ns0:MDescriptors xmlns:ns0="http://www.silabs.com/ss/Studio.ecore">
+  <descriptors name="adc_baremetal" label="Platform - ADC Bare-metal" description="This example project shows how to use the SAR ADC (sl_hal_adc) in a bare-metal configuration: GPIO loopback, immediate single conversion on ADC0, and a periodic LED toggle driven by sleeptimer (see adc_test.c for the reference flow).&#10;">
+    <properties key="namespace" value="template.uc" />
+    <properties key="keywords" value="universal\ configurator" />
+    <properties key="solutionReferenceId" value="app.common.example.adc_baremetal.adc_baremetal.slcp" />
+    <properties key="projectFilePaths" value="example/adc_baremetal/adc_baremetal.slcp" />
+    <properties key="readmeFiles" value="example/adc_baremetal/readme.md" />
+    <properties key="boardCompatibility" value=" brd4407a brd4408a brd4419a" />
+    <properties key="partCompatibility" value=".*efr32xg2b.* .*efr32mg2b.* .*efr32bg2b.* .*simg301.* .*sibg301.*" />
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code" />
+    <properties key="toolchainCompatibility" value="gcc iar llvm" />
+    <properties key="category" value="Example|Platform" />
+    <properties key="quality" value="PRODUCTION" />
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
+    <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Intermediate" />
+  </descriptors>
   <descriptors name="blink_baremetal" label="Platform - Blink Bare-metal" description="This example project shows how to blink an LED in a bare-metal configuration.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
@@ -564,6 +579,36 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   </descriptors>
+    <descriptors name="ledsink_baremetal" label="Platform - LEDSINK Bare-metal" description="This example project demonstrates the three LEDSINK use-case modes plus a button-triggered EM2 deep-sleep test in a bare-metal application.&#10;">
+    <properties key="namespace" value="template.uc" />
+    <properties key="keywords" value="universal\ configurator" />
+    <properties key="solutionReferenceId" value="app.common.example.ledsink_baremetal.ledsink_baremetal.slcp" />
+    <properties key="projectFilePaths" value="example/ledsink_baremetal/ledsink_baremetal.slcp" />
+    <properties key="readmeFiles" value="example/ledsink_baremetal/readme.md" />
+    <properties key="boardCompatibility" value="brd4419a" />
+    <properties key="partCompatibility" value=".*efr32xg2b.* .*efr32bg2b.*" />
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code" />
+    <properties key="toolchainCompatibility" value="gcc iar llvm" />
+    <properties key="category" value="Example|Platform" />
+    <properties key="quality" value="evaluation" />
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
+    <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Intermediate" />
+  </descriptors>
+    <descriptors name="ledsink_kernel_freertos" label="Platform - LEDSINK Kernel on FreeRTOS" description="This example project demonstrates the three LEDSINK use-case modes plus a button-triggered EM2 deep-sleep test in a FreeRTOS kernel task.&#10;">
+    <properties key="namespace" value="template.uc" />
+    <properties key="keywords" value="universal\ configurator" />
+    <properties key="solutionReferenceId" value="app.common.example.ledsink_kernel_freertos.ledsink_kernel_freertos.slcp" />
+    <properties key="projectFilePaths" value="example/ledsink_kernel_freertos/ledsink_kernel_freertos.slcp" />
+    <properties key="readmeFiles" value="example/ledsink_kernel_freertos/readme.md" />
+    <properties key="boardCompatibility" value="brd4419a" />
+    <properties key="partCompatibility" value=".*efr32xg2b.* .*efr32bg2b.*" />
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code" />
+    <properties key="toolchainCompatibility" value="gcc iar llvm" />
+    <properties key="category" value="Example|Platform" />
+    <properties key="quality" value="evaluation" />
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
+    <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Intermediate" />
+  </descriptors>
   <descriptors name="joystick_kernel_micriumos" label="Platform - Joystick on Micrium OS Kernel" description="Prints joystick position at intervals over VCOM using Micrium OS. View output in a terminal. Requires Wireless Pro Kit (BRD4002A) as mainboard.&#10;">
     <properties key="namespace" value="template.uc" />
     <properties key="keywords" value="universal\ configurator" />
@@ -576,6 +621,21 @@
     <properties key="toolchainCompatibility" value="gcc iar llvm" />
     <properties key="category" value="Example|Platform" />
     <properties key="quality" value="PRODUCTION" />
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
+    <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
+  </descriptors>
+    <descriptors name="ledboost_baremetal" label="Platform - LEDBOOST Bare-metal" description="This example project demonstrates the DCDC boost LEDVDD behaviour with a self-driven loop that alternates between an EM0 ramp and an EM2 dwell. On odd iterations the app brings LEDVDD up at 1.8 V, ramps it to 3.8 V using the DCDC LEDVDDRAMPDONE interrupt for each step, and then powers the DCDC off. On even iterations the app parks LEDVDD at 1.8 V and drops the device into EM2 for a fixed dwell.&#10;">
+    <properties key="namespace" value="template.uc" />
+    <properties key="keywords" value="universal\ configurator" />
+    <properties key="solutionReferenceId" value="app.common.example.ledboost_baremetal.ledboost_baremetal.slcp" />
+    <properties key="projectFilePaths" value="example/ledboost_baremetal/ledboost_baremetal.slcp" />
+    <properties key="readmeFiles" value="example/ledboost_baremetal/readme.md" />
+    <properties key="boardCompatibility" value="brd4419a com.silabs.board.none" />
+    <properties key="partCompatibility" value=".*efr32xg2b.* .*efr32mg2b.* .*efr32bg2b.*" />
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code" />
+    <properties key="toolchainCompatibility" value="gcc iar llvm" />
+    <properties key="category" value="Example|Platform" />
+    <properties key="quality" value="evaluation" />
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner" />
   </descriptors>

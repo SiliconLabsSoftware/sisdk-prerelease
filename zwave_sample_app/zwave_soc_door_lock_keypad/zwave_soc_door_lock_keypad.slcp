@@ -141,9 +141,6 @@ configuration:
     value: 1
   - name: ZAF_APP_NAME
     value: '"door_lock_keypad"'
-  # SYSRTC on ULFRCO for all boards; LFXO left enabled so DEFAULT_LF branches stay valid
-  - name: SL_CLOCK_MANAGER_SYSRTCCLK_SOURCE
-    value: CMU_SYSRTC0CLKCTRL_CLKSEL_ULFRCO
   - name: U3C_BUFFER_SIZE_CREDENTIAL_DATA
     value: 32
   # USART configuration

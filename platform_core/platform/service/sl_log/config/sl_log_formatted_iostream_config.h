@@ -45,10 +45,10 @@
 // <i> Default: 0
 #define SL_LOG_FORMATTED_IOSTREAM_PREFIX_LOG_TYPE 0
 
-// <q SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID> Formatted iostream: append core ID
-// <i> When set, each line ends with a trailing " [CC]" suffix (2 hex digits) that
-// <i> identifies the captive core that produced the log. Applies to both string
-// <i> and event lines. When cleared, the core ID is not emitted.
+// <q SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID> Formatted iostream: emit core ID
+// <i> When set, emits a [CC] core identifier (2 hex digits) for the captive core
+// <i> that produced the log. String logs emit it before the payload; event logs
+// <i> append it after the payload. When cleared, the core ID is not emitted.
 // <i> Default: 0
 #define SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID 0
 

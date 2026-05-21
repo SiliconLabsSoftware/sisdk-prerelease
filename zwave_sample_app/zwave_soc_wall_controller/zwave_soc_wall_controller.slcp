@@ -126,9 +126,6 @@ configuration:
     value: 1
   - name: ZAF_APP_NAME
     value: '"wall_controller"'
-  # SYSRTC on ULFRCO for all boards; LFXO left enabled so DEFAULT_LF branches stay valid
-  - name: SL_CLOCK_MANAGER_SYSRTCCLK_SOURCE
-    value: CMU_SYSRTC0CLKCTRL_CLKSEL_ULFRCO
   - name: SL_IOSTREAM_EUSART_INSTANCE_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
     value: 0
     condition: [zw_cli_common, iostream_eusart]

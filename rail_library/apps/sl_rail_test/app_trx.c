@@ -290,7 +290,9 @@ sl_rail_rx_packet_handle_t processRxPacket(sl_rail_handle_t railHandle,
       sl_rail_cancel_auto_ack(railHandle);
     }
 
-    // Use Tx Buffer for Ack if user requested
+    // When SL_RAIL_EVENT_RX_FILTER_PASSED is not enabled, finish selecting the TX FIFO for
+    // auto-ACK here (later in the Rx-to-Tx turnaround). With FILTER_PASSED enabled,
+    // app_main does this earlier; the flag is already cleared before we run.
     if (afterRxUseTxBufferForAck) {
       afterRxUseTxBufferForAck = false;
       sl_rail_use_tx_fifo_for_auto_ack(railHandle);

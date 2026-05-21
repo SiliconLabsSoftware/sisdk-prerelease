@@ -16,7 +16,7 @@ provides:
 - name: sl_rail_util_dma
 - name: rail_util_dma
 requires:
-- name: dmadrv
+- name: dma_manager
 - name: rail_lib
 - name: component_catalog
 - name: dma_manager_round_robin

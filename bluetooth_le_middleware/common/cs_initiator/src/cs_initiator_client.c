@@ -234,8 +234,37 @@ void cs_initiator_apply_channel_map_preset(cs_channel_map_preset_t preset, uint8
 /******************************************************************************
  * Get the connection and procedure intervals based on
  * the procedure scheduling and input values.
+ * Compatibility API for old SDK.
  *****************************************************************************/
 sl_status_t cs_initiator_get_intervals(uint8_t main_mode,
+                                       uint8_t sub_mode,
+                                       cs_procedure_scheduling_t procedure_scheduling,
+                                       uint8_t channel_map_preset,
+                                       uint8_t algo_mode,
+                                       uint8_t antenna_path,
+                                       uint8_t use_real_time_ras_mode,
+                                       uint16_t *conn_interval,
+                                       uint16_t *proc_interval)
+{
+
+  return cs_initiator_get_multiple_intervals(main_mode,
+                                             sub_mode,
+                                             procedure_scheduling,
+                                             channel_map_preset,
+                                             algo_mode,
+                                             antenna_path,
+                                             use_real_time_ras_mode,
+                                             1,
+                                             conn_interval,
+                                             proc_interval);
+
+}
+
+/******************************************************************************
+ * Get the connection and procedure intervals based on
+ * the procedure scheduling and input values.
+ *****************************************************************************/
+sl_status_t cs_initiator_get_multiple_intervals(uint8_t main_mode,
                                        uint8_t sub_mode,
                                        cs_procedure_scheduling_t procedure_scheduling,
                                        uint8_t channel_map_preset,

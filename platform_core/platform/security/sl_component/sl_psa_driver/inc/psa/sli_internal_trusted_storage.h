@@ -29,6 +29,18 @@ extern "C" {
 #if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
 #define PSA_STORAGE_FLAG_WRITE_ONCE_SECURE_ACCESSIBLE (1 << 3)
 #define PSA_STORAGE_FLAG_SECURE_ACCESSIBLE (1 << 4)
+
+/**
+ * Vendor-extension key usage flags that control ITS storage permissions.
+ *
+ * Pass these to psa_set_key_usage_flags() together with the standard
+ * PSA_KEY_USAGE_* flags.  When a persistent key is saved, the storage layer
+ * maps these bits to the corresponding PSA_STORAGE_FLAG_* create-flags for
+ * psa_its_set().  Non-secure callers will receive PSA_ERROR_NOT_SUPPORTED
+ * from the ITS back-end.
+ */
+#define PSA_KEY_USAGE_SECURE_ACCESSIBLE            ((psa_key_usage_t) 0x01000000)
+#define PSA_KEY_USAGE_WRITE_ONCE_SECURE_ACCESSIBLE ((psa_key_usage_t) 0x02000000)
 #endif // TFM_CONFIG_SL_SECURE_LIBRARY
 
 psa_status_t sli_psa_its_change_key_id(mbedtls_svc_key_id_t old_id,

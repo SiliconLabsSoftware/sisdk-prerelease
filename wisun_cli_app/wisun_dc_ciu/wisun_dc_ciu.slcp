@@ -16,7 +16,7 @@ package: wisun
 quality: production
 
 readme:
-  - path: doc/readme.md
+  - path: readme.md
 
 source:
   - path: app.c

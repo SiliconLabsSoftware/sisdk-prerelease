@@ -46,7 +46,7 @@ component:
   - id: device_init
   - id: bluetooth_peer_manager_common
   - id: bluetooth_peer_manager_peripheral
-  - id: cs_ras_server
+  - id: cs_rrsp
 
 source:
   - path: app.c

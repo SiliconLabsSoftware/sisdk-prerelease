@@ -4,18 +4,21 @@
  *
  * ## Output format
  *
- * Each log line is sent to iostream backend and ends with CRLF (\\r\\n).
+ * Each formatted record is sent to the iostream backend. Event logs end with
+ * CRLF. String logs emit explicit CR/LF characters only when they are present
+ * in the format string or a %s argument.
  * Log level is not printed.
  *
  * **Payload** (always):
  *
  * **String log**: the format string with specifiers expanded: %d = signed decimal (32-bit),
- * %x = 8-digit hex (32-bit), %p = pointer (0x + 8-digit hex), %s = string.
- * %% produces a literal '%'. Other characters after % are emitted as-is.
+ * %u = unsigned decimal (32-bit), %x = 8-digit hex (32-bit), %p = pointer (0x + 8-digit hex),
+ * %s = string. %% produces a literal '%'. Other characters after % are emitted as-is.
  * Example: "count=%d addr=%p" with args -1, 0x1000 gives
  * count=-1 addr=0x00001000
  *
- * **Event**: event_id (8 hex), then for each argument in arg_count: '|' and 8 hex digits.
+ * **Event**: event_id (8 hex), then for each argument in arg_count: '|' and 8 hex digits,
+ * terminated with CRLF.
  * Example: 00000001|AABBCCDD
  *
  * **Optional leading prefix** (see @ref sl_log_formatted_iostream_config.h):
@@ -25,11 +28,12 @@
  * - Timestamp only: [TIMESTAMP] and a space.
  * - Log type only: [TYPE] and a space.
  *
- * **Optional trailing core ID** (when @c SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID is set):
- * a space and [CC] (2 hex digits) is appended after the payload. Applies to both
- * string and event lines.
+ * **Optional core ID** (when @c SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID is set):
+ * [CC] (2 hex digits). String logs emit it before the payload so
+ * payload-provided CR/LF characters do not split it onto a new line. Event logs
+ * append it after the payload.
  *
- * Example (string, all options): [00005678|S] count=-1 addr=0x00001000 [00]
+ * Example (string, all options): [00005678|S] [00] count=-1 addr=0x00001000
  * Example (event, all options):  [00001234|E] 00000001|AABBCCDD [00]
  *******************************************************************************
  * # License
@@ -65,6 +69,7 @@
 #include "sl_iostream.h"
 #include "sl_iostream_handles.h"
 #include "em_device.h"
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifndef SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP
@@ -81,15 +86,12 @@
  ***************************  DEFINE MACROS ********************************
  ******************************************************************************/
 /** Line buffer size for output. String logs are truncated so an optional
- * leading prefix, payload, optional " [CC]" core-id suffix, and CRLF fit in LINE_MAX. */
+ * leading prefix, optional " [CC]" core ID, and payload fit in LINE_MAX. */
 #define LINE_MAX  200
-/** Reserve trailing bytes during string expansion for the optional " [CC]" core-id
- * suffix (5 chars) plus CRLF. */
-#if SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID
-#define SL_LOG_FORMATTED_IOSTREAM_RESERVED_TAIL  (2U + 5U)
-#else
-#define SL_LOG_FORMATTED_IOSTREAM_RESERVED_TAIL  2U
-#endif
+/** Reserve trailing bytes during string expansion. */
+#define SL_LOG_FORMATTED_IOSTREAM_RESERVED_TAIL  0U
+#define SL_LOG_FORMATTED_IOSTREAM_HEX8_LEN       8U
+#define SL_LOG_FORMATTED_IOSTREAM_POINTER_LEN    (2U + SL_LOG_FORMATTED_IOSTREAM_HEX8_LEN)
 
 /*******************************************************************************
  ***************************  LOCAL VARIABLES   ********************************
@@ -163,6 +165,23 @@ static inline char* u32_to_dec(char *p, uint32_t v)
   return p;
 }
 
+static inline uint32_t u32_dec_len(uint32_t v)
+{
+  uint32_t len = 1U;
+
+  while (v >= 10U) {
+    len++;
+    v /= 10U;
+  }
+
+  return len;
+}
+
+static inline bool buffer_has_space(const char *p, const char *end, uint32_t len)
+{
+  return (uint32_t)(end - p) >= len;
+}
+
 /*******************************************************************************
 **************************   GLOBAL FUNCTIONS   ********************************
 *******************************************************************************/
@@ -210,6 +229,7 @@ sl_status_t sl_log_hal_backend_write(sl_log_event_t *buffer, uint32_t read_index
 
   char line[LINE_MAX];
   char *p = line;
+  char *line_end = line + sizeof(line) - SL_LOG_FORMATTED_IOSTREAM_RESERVED_TAIL;
 
   /* Type: bit 0 — 0 = string log, 1 = event (level is not emitted). */
   uint8_t type = buffer->flags & 0x01;
@@ -243,7 +263,14 @@ sl_status_t sl_log_hal_backend_write(sl_log_event_t *buffer, uint32_t read_index
     const char *fmt = (const char *)buffer->event_id;
     uint32_t arg_index = 0;
 
-    while (*fmt && (p < (line + sizeof(line) - SL_LOG_FORMATTED_IOSTREAM_RESERVED_TAIL))) {
+#if SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID
+    *p++ = '[';
+    p = u8_to_hex2(p, buffer->core_id);
+    *p++ = ']';
+    *p++ = ' ';
+#endif
+
+    while (*fmt && (p < line_end)) {
 
       if (*fmt == '%') {
         fmt++;
@@ -253,7 +280,17 @@ sl_status_t sl_log_hal_backend_write(sl_log_event_t *buffer, uint32_t read_index
           fmt++;
         }
         else if (*fmt == 'd' && arg_index < buffer->arg_count) {
-          int32_t sval = (int32_t)buffer->args[arg_index++];
+          int32_t sval = (int32_t)buffer->args[arg_index];
+          uint32_t dec_len = u32_dec_len((sval < 0)
+                                         ? (0u - (uint32_t)sval)
+                                         : (uint32_t)sval);
+          if (sval < 0) {
+            dec_len++;
+          }
+          if (!buffer_has_space(p, line_end, dec_len)) {
+            break;
+          }
+          arg_index++;
           if (sval < 0) {
             *p++ = '-';
             p = u32_to_dec(p, 0u - (uint32_t)sval);
@@ -262,11 +299,24 @@ sl_status_t sl_log_hal_backend_write(sl_log_event_t *buffer, uint32_t read_index
           }
           fmt++;
         }
+        else if (*fmt == 'u' && arg_index < buffer->arg_count) {
+          if (!buffer_has_space(p, line_end, u32_dec_len(buffer->args[arg_index]))) {
+            break;
+          }
+          p = u32_to_dec(p, buffer->args[arg_index++]);
+          fmt++;
+        }
         else if (*fmt == 'x' && arg_index < buffer->arg_count) {
+          if (!buffer_has_space(p, line_end, SL_LOG_FORMATTED_IOSTREAM_HEX8_LEN)) {
+            break;
+          }
           p = u32_to_hex8(p, buffer->args[arg_index++]);
           fmt++;
         }
         else if (*fmt == 'p' && arg_index < buffer->arg_count) {
+          if (!buffer_has_space(p, line_end, SL_LOG_FORMATTED_IOSTREAM_POINTER_LEN)) {
+            break;
+          }
           *p++ = '0';
           *p++ = 'x';
           p = u32_to_hex8(p, buffer->args[arg_index++]);
@@ -275,13 +325,16 @@ sl_status_t sl_log_hal_backend_write(sl_log_event_t *buffer, uint32_t read_index
         else if (*fmt == 's' && arg_index < buffer->arg_count) {
           const char *s = (const char *)(uintptr_t)buffer->args[arg_index++];
           if (s != NULL) {
-            while (*s && (p < (line + sizeof(line) - SL_LOG_FORMATTED_IOSTREAM_RESERVED_TAIL))) {
+            while (*s && (p < line_end)) {
               *p++ = *s++;
             }
           }
           fmt++;
         }
         else {
+          if (!buffer_has_space(p, line_end, (*fmt != '\0') ? 2U : 1U)) {
+            break;
+          }
           *p++ = '%';
           if (*fmt != '\0') {
             *p++ = *fmt++;
@@ -295,15 +348,18 @@ sl_status_t sl_log_hal_backend_write(sl_log_event_t *buffer, uint32_t read_index
   }
 
 #if SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID
-  *p++ = ' ';
-  *p++ = '[';
-  p = u8_to_hex2(p, buffer->core_id);
-  *p++ = ']';
+  if (type) {
+    *p++ = ' ';
+    *p++ = '[';
+    p = u8_to_hex2(p, buffer->core_id);
+    *p++ = ']';
+  }
 #endif
 
-  /* Terminate line with CRLF. */
-  *p++ = '\r';
-  *p++ = '\n';
+  if (type) {
+    *p++ = '\r';
+    *p++ = '\n';
+  }
 
   status = sl_iostream_write(sl_iostream_recommended_console_stream, line, p - line);
   return status;

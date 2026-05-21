@@ -29,6 +29,8 @@ recommends:
 - id: toolchain_gcc_standard
   condition: [device_host]
   vendor: silabs
+- id: toolchain_gcc_lto
+  vendor: silabs
 library:
 - system: gcc
   unless: [device_host]

@@ -10,9 +10,8 @@
 -- 2. sl_psa required settings
 --  1. SL_PSA_ITS_USER_MAX_FILES must be set to 32 in Z_Wave applications for Series 2 with Security Vault
 --  2. SL_PSA_KEY_USER_SLOT_COUNT must be set to 12 in Z_Wave applications for Series 2 with Security Vault
--- 3. sl_sleeptimer / SYSRTC clock required settings (Series 2)
---  1. SL_SLEEPTIMER_PERIPHERAL must be set to SL_SLEEPTIMER_PERIPHERAL_DEFAULT in Z-Wave applications
---  2. SL_CLOCK_MANAGER_SYSRTCCLK_SOURCE must be CMU_SYSRTC0CLKCTRL_CLKSEL_ULFRCO (SYSRTC on ULFRCO; see migration guide)
+-- 3. sl_sleeptimer required settings
+--  1. SL_SLEEPTIMER_PERIPHERAL must be set to SL_SLEEPTIMER_PERIPHERAL_DEFAULT in Z_Wave applications for Series 2
 -- -- 5. sl_power_manager
 -- --  1. power_manager_deepsleep component must be added to Z_Wave applications to support the lowest energy mode EM3
 
@@ -30,7 +29,6 @@ function validate_config_component(name, value)
     if config == nil then
         validation.error('zwave requires ' .. name .. ' to be available',
                          validation.target_for_defines({name}), nil, nil)
-        return
     end
     if config.value ~= value then
         validation.error('zwave requires ' .. config.id .. ' to be set to ' ..
@@ -65,10 +63,9 @@ if device_series_2 and device_security_vault and psa_crypto and psa_its then
     validate_config_component("SL_PSA_KEY_USER_SLOT_COUNT", "14")
 end
 
--- sl_sleeptimer / SYSRTC clock
+-- sl_sleeptimer
 if device_series_2 then
     validate_config_component("SL_SLEEPTIMER_PERIPHERAL", "SL_SLEEPTIMER_PERIPHERAL_DEFAULT")
-    validate_config_component("SL_CLOCK_MANAGER_SYSRTCCLK_SOURCE", "CMU_SYSRTC0CLKCTRL_CLKSEL_ULFRCO")
 end
 
 --

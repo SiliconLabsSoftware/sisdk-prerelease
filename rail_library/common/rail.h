@@ -5543,6 +5543,9 @@ bool RAIL_IsTxAutoAckPaused(RAIL_Handle_t railHandle);
  *   - Radio is either looking for sync, receiving the packet after sync, or in
  *     the \ref RAIL_StateTiming_t::rxToTx turnaround before the Ack is sent.
  *
+ * @note Call before \ref RAIL_EVENT_RX_PACKET_RECEIVED (for example from
+ *   \ref RAIL_EVENT_RX_FILTER_PASSED) so Auto-Ack can use the transmit FIFO.
+ *
  * @note The transmit FIFO must not be used for Auto-Ack when IEEE 802.15.4,
  *   Z-Wave, or BLE protocols are active.
  *
@@ -5564,6 +5567,9 @@ RAIL_Status_t RAIL_UseTxFifoForAutoAck(RAIL_Handle_t railHandle);
  *   - Radio has not already decided to transmit the Ack, and
  *   - Radio is either looking for sync, receiving the packet after sync or in
  *     the \ref RAIL_StateTiming_t::rxToTx turnaround before the Ack is sent.
+ *
+ * @note Call before \ref RAIL_EVENT_RX_PACKET_RECEIVED (for example from
+ *   \ref RAIL_EVENT_RX_FILTER_PASSED) so Auto-Ack can cancel the upcoming Ack.
  *
  * @deprecated RAIL 2.x synonym of \ref sl_rail_cancel_auto_ack().
  */

@@ -192,7 +192,7 @@ include:
 
 tag:
   - prebuilt_demo
-  - hardware:device:ram:32
+  - hwfilter:ram:64k
   - hwfilter:device:device_supports_zigbee
   - hwfilter:board:simple_led:led0
   - hwfilter:board:simple_button:btn1

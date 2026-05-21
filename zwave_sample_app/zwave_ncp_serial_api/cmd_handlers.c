@@ -84,7 +84,7 @@ ZW_ADD_CMD(FUNC_ID_ZW_INITIATE_SHUTDOWN)
     set_state_and_notify(stateIdle);
   } else {
     // somthing went wrong we failed to start the graceful shutdown
-    DoRespond(0);
+    DoRespond(SAPI_COMMAND_STATUS_FAILURE);
   }
 }
 
@@ -188,7 +188,7 @@ ZW_ADD_CMD(FUNC_ID_ZW_CLEAR_NETWORK_STATS)
   /* HOST->ZW: */
   /* ZW->HOST: 0x01 */
   ClearNetworkStats();
-  DoRespond(1);
+  DoRespond(SAPI_COMMAND_STATUS_SUCCESS);
 }
 #endif /* SUPPORT_ZW_CLEAR_NETWORK_STATS */
 
@@ -2871,7 +2871,7 @@ static void zw_set_routing_max_handler(const comm_interface_frame_ptr frame)
     .uCommandParams.SetRoutingMax.value = frame->payload[0]
   };
   QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&Command, 0);
-  DoRespond(1);
+  DoRespond(SAPI_COMMAND_STATUS_SUCCESS);
 }
 
 ZW_ADD_CMD(FUNC_ID_ZW_SET_ROUTING_MAX)
@@ -2903,7 +2903,7 @@ ZW_ADD_CMD(FUNC_ID_SERIAL_API_EXT)
       break;
       default:
       {
-        DoRespond(0);
+        DoRespond(SAPI_COMMAND_STATUS_FAILURE);
       }
       break;
     }

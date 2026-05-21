@@ -42,6 +42,8 @@ requires:
 toolchain_settings:
   - option: gcc_compiler_option
     value: "-Wno-incompatible-pointer-types"
+  - option: llvm_compiler_option
+    value: "-Wno-incompatible-pointer-types"
 
 configuration:
   - name: SL_VCOM_ENABLE
@@ -76,3 +78,4 @@ tag:
   - hwfilter:device:device_supports_zwave
   - hwfilter:!board:brd4205a
   - toolchain:gcc
+  - toolchain:llvm

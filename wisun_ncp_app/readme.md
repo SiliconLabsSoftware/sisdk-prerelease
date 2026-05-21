@@ -10,7 +10,7 @@ To get started with Wi-SUN and Simplicity Studio, see [Developing with Wi-SUN](h
 
 Before programming the radio board mounted on the WSTK, ensure the power supply switch is in the AEM position (right side), as shown.
 
-![Radio Board Power Supply Switch](readme_img0.png)
+![Radio Board Power Supply Switch](doc/readme_img0.png)
 
 ## Report Bugs & Get Support
 

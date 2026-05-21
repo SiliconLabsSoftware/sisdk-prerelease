@@ -103,4 +103,5 @@ filter:
   - name: Project Difficulty
     value: [Advanced]
 tag:
+  - hwfilter:ram:64k
   - hwfilter:device:device_supports_zigbee

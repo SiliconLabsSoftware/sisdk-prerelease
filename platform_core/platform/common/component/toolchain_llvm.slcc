@@ -27,6 +27,8 @@ recommends:
 - id: toolchain_gcc_standard
   condition: [device_cortexm]
   vendor: silabs
+- id: toolchain_llvm_lto
+  vendor: silabs
 library:
 - system: c
 - system: m

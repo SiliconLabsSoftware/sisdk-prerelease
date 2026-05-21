@@ -108,6 +108,9 @@ EventHandlerZwRx(void)
     ZPAL_LOG_DEBUG(ZPAL_LOG_ZAF_EVENT_DISTRIBUTOR, "Incoming Rx msg\r\n");
 
     switch (RxPackage.eReceiveType) {
+      case EZWAVERECEIVETYPE_SINGLE_URGENT:
+        ZPAL_LOG_DEBUG(ZPAL_LOG_ZAF_EVENT_DISTRIBUTOR, "Urgent Rx msg\r\n");
+        __attribute__((fallthrough));
       case EZWAVERECEIVETYPE_SINGLE:
         ZAF_CP_CommandPublish(ZAF_getCPHandle(), (void *) &RxPackage);
         break;

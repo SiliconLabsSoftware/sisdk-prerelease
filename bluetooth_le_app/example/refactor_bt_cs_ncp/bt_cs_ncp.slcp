@@ -57,6 +57,7 @@ component:
   - id: refactor_cs_result
   - id: refactor_cs_antenna
   - id: cs_rreq
+  - id: cs_rrsp
   - id: cs_acp_target
   - id: iostream_bgapi_trace
   - id: iostream_dummy

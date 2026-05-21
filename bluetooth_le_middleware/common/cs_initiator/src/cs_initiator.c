@@ -760,16 +760,16 @@ sl_status_t cs_initiator_create(const uint8_t               conn_handle,
   uint16_t proc_interval;
   // Set optimized intervals for PBR mode
   if (initiator->config.max_procedure_count == 0) {
-    sc = cs_initiator_get_intervals(initiator->config.cs_main_mode,
-                                    initiator->config.cs_sub_mode,
-                                    initiator->config.procedure_scheduling,
-                                    initiator->config.channel_map_preset,
-                                    initiator->rtl_config.algo_mode,
-                                    initiator->config.cs_tone_antenna_config_idx,
-                                    initiator->config.use_real_time_ras_mode,
-                                    1,
-                                    &conn_interval,
-                                    &proc_interval);
+    sc = cs_initiator_get_multiple_intervals(initiator->config.cs_main_mode,
+                                             initiator->config.cs_sub_mode,
+                                             initiator->config.procedure_scheduling,
+                                             initiator->config.channel_map_preset,
+                                             initiator->rtl_config.algo_mode,
+                                             initiator->config.cs_tone_antenna_config_idx,
+                                             initiator->config.use_real_time_ras_mode,
+                                             1,
+                                             &conn_interval,
+                                             &proc_interval);
     if (sc != SL_STATUS_OK) {
       if (sc == SL_STATUS_NOT_SUPPORTED) {
         initiator_log_warning(INSTANCE_PREFIX "Parameter optimization is not supported in RTT mode or with CUSTOM preset" LOG_NL,

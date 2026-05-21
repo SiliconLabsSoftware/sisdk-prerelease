@@ -1348,7 +1348,9 @@ void app_about(void)
 
   printf("%s\r\n", app_name);
   printf("Versions:\r\n");
-#if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__)
+#if defined(__clang__) && defined(__clang_major__) && defined(__clang_minor__) && defined(__clang_patchlevel__)
+  printf("  * Compiler (LLVM): %u.%u.%u\r\n", __clang_major__, __clang_minor__, __clang_patchlevel__);
+#elif defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__)
   printf("  * Compiler (GCC): %u.%u.%u\r\n", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
 #endif
 #if defined(__ICCARM__) && defined(__VER__)

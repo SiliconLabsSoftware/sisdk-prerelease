@@ -72,21 +72,13 @@ requires:
 - name: emlib_timer
   condition:
   - device_sdid_215     # Needed for BLE channel sounding
-- name: emlib_ldma
+  # sl_hal_ldma is required on every device with an LDMA (Series 2 and
+  # Series 3). RAIL features that depend on it include IEEE 802.15.4 RX
+  # channel switching, BLE channel sounding antenna switching, and the
+  # sl_rail_util_dma plugin.
+- name: hal_ldma
   condition:
-  - device_sdid_210     # Needed for TrustZone
-- name: emlib_ldma
-  condition:
-  - device_sdid_215     # Needed for IEEE802154 RX channel switching & BLE channel sounding
-- name: emlib_ldma
-  condition:
-  - device_sdid_225     # Needed for IEEE802154 RX channel switching
-- name: emlib_ldma
-  condition:
-  - device_sdid_235     # Needed for TrustZone
-- name: emlib_ldma
-  condition:
-  - device_sdid_260     # Needed for TrustZone
+  - device_has_ldma
 - name: se_manager
   condition:
   - device_generic_family_sixx301

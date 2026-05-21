@@ -8,13 +8,13 @@ To get started with Wi-SUN and Simplicity Studio, see [Developing with Wi-SUN](h
 
 The RCP term stands for "radio coprocessor", meaning the application runs on the EFR32 and requires an external Linux host. The Linux host has to run the [wsbrd daemon hosted on GitHub](https://github.com/SiliconLabs/wisun-br-linux). Using both the linux host and the EFR32 running the RCP image, the aim is to create a Wi-SUN border router that can scale to support large network deployments.
 
-![Linux Border Router Architecture](readme_img1.png)
+![Linux Border Router Architecture](doc/readme_img1.png)
 
 ## Troubleshooting
 
 Before programming the radio board mounted on the WSTK, ensure the power supply switch is in the AEM position (right side), as shown.
 
-![Radio Board Power Supply Switch](readme_img0.png)
+![Radio Board Power Supply Switch](doc/readme_img0.png)
 
 ## Report Bugs & Get Support
 

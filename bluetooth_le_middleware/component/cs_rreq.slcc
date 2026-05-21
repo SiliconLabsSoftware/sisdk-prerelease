@@ -1,6 +1,6 @@
 id: cs_rreq
 package: bluetooth_le_middleware
-label: CS RREQ
+label: CS Ranging Requester (RREQ)
 description: >
   Channel Sounding (CS) Ranging Profile (RAP) Ranging Requester (RREQ) role.
   Supports Application Co-Processor (ACP) mode.

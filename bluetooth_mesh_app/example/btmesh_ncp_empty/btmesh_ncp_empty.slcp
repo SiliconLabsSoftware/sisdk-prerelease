@@ -85,6 +85,8 @@ component:
   - id: ncp_btmesh_user_cmd
   - id: rail_util_pti
   - id: toolchain_gcc_lto
+    condition:
+      - toolchain_gcc
   - id: iostream_eusart
     instance:
       - vcom

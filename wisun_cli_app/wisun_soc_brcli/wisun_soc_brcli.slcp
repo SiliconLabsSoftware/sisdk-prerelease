@@ -636,7 +636,7 @@ template_contribution:
         - name: "rh"
 
 readme:
-  - path: doc/readme.md
+  - path: readme.md
 
 other_file:
   - path: doc/readme_img0.png
@@ -651,7 +651,7 @@ toolchain_settings:
 
 ui_hints:
   highlight:
-    - path: doc/readme.md
+    - path: readme.md
       focus: true
 
 tag:

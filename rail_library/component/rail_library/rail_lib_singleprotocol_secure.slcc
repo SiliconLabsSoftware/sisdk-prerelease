@@ -13,6 +13,9 @@ requires:
 - name: rail_lib
 provides:
 - name: rail_lib_singleprotocol_secure   # specific tag
+- name: rail_lib_singleprotocol   # don't provide by default
+  condition:
+  - rail_lib_singleprotocol_secure
 - name: rail_lib_Xprotocol   # generic tag
 documentation:
   docset: rail

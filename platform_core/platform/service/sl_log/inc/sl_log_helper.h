@@ -114,71 +114,71 @@ extern "C" {
 
 
 
-#define SL_PRINT_VOID_ARG0_DBG(EVENT, EVENT_TYPE)                           do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); } while (0);
-#define SL_PRINT_VOID_ARG0_ERR(EVENT, EVENT_TYPE)                           do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); } while (0);
-#define SL_PRINT_VOID_ARG0_WRN(EVENT, EVENT_TYPE)                           do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); } while (0);
-#define SL_PRINT_VOID_ARG0_INFO(EVENT, EVENT_TYPE)                          do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); } while (0);
-#define SL_PRINT_VOID_ARG0_CRASH(EVENT, EVENT_TYPE)                         do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); } while (0);
+#define SL_PRINT_VOID_ARG0_DBG(EVENT, EVENT_TYPE)                           do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); } while (0)
+#define SL_PRINT_VOID_ARG0_ERR(EVENT, EVENT_TYPE)                           do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); } while (0)
+#define SL_PRINT_VOID_ARG0_WRN(EVENT, EVENT_TYPE)                           do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); } while (0)
+#define SL_PRINT_VOID_ARG0_INFO(EVENT, EVENT_TYPE)                          do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); } while (0)
+#define SL_PRINT_VOID_ARG0_CRASH(EVENT, EVENT_TYPE)                         do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); } while (0)
 
-#define SL_PRINT_VOID_ARG1_DBG(EVENT, EVENT_TYPE, ARG1)                     do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); } while (0);
-#define SL_PRINT_VOID_ARG1_ERR(EVENT, EVENT_TYPE, ARG1)                     do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); } while (0);
-#define SL_PRINT_VOID_ARG1_WRN(EVENT, EVENT_TYPE, ARG1)                     do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); } while (0);
-#define SL_PRINT_VOID_ARG1_INFO(EVENT, EVENT_TYPE, ARG1)                    do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); } while (0);
-#define SL_PRINT_VOID_ARG1_CRASH(EVENT, EVENT_TYPE, ARG1)                   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); } while (0);
+#define SL_PRINT_VOID_ARG1_DBG(EVENT, EVENT_TYPE, ARG1)                     do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); } while (0)
+#define SL_PRINT_VOID_ARG1_ERR(EVENT, EVENT_TYPE, ARG1)                     do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); } while (0)
+#define SL_PRINT_VOID_ARG1_WRN(EVENT, EVENT_TYPE, ARG1)                     do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); } while (0)
+#define SL_PRINT_VOID_ARG1_INFO(EVENT, EVENT_TYPE, ARG1)                    do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); } while (0)
+#define SL_PRINT_VOID_ARG1_CRASH(EVENT, EVENT_TYPE, ARG1)                   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); } while (0)
 
-#define SL_PRINT_VOID_ARG2_DBG(EVENT, EVENT_TYPE, ARG1, ARG2)               do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); } while (0);
-#define SL_PRINT_VOID_ARG2_ERR(EVENT, EVENT_TYPE, ARG1, ARG2)               do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); } while (0);
-#define SL_PRINT_VOID_ARG2_WRN(EVENT, EVENT_TYPE, ARG1, ARG2)               do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); } while (0);
-#define SL_PRINT_VOID_ARG2_INFO(EVENT, EVENT_TYPE, ARG1, ARG2)              do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); } while (0);
-#define SL_PRINT_VOID_ARG2_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2)             do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); } while (0);
+#define SL_PRINT_VOID_ARG2_DBG(EVENT, EVENT_TYPE, ARG1, ARG2)               do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); } while (0)
+#define SL_PRINT_VOID_ARG2_ERR(EVENT, EVENT_TYPE, ARG1, ARG2)               do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); } while (0)
+#define SL_PRINT_VOID_ARG2_WRN(EVENT, EVENT_TYPE, ARG1, ARG2)               do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); } while (0)
+#define SL_PRINT_VOID_ARG2_INFO(EVENT, EVENT_TYPE, ARG1, ARG2)              do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); } while (0)
+#define SL_PRINT_VOID_ARG2_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2)             do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); } while (0)
 
-#define SL_PRINT_VOID_ARG3_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)         do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); } while (0);
-#define SL_PRINT_VOID_ARG3_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)         do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); } while (0);
-#define SL_PRINT_VOID_ARG3_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)         do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); } while (0);
-#define SL_PRINT_VOID_ARG3_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)        do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); } while (0);
-#define SL_PRINT_VOID_ARG3_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)       do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); } while (0);
+#define SL_PRINT_VOID_ARG3_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)         do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); } while (0)
+#define SL_PRINT_VOID_ARG3_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)         do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); } while (0)
+#define SL_PRINT_VOID_ARG3_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)         do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); } while (0)
+#define SL_PRINT_VOID_ARG3_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)        do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); } while (0)
+#define SL_PRINT_VOID_ARG3_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)       do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); } while (0)
 
-#define SL_PRINT_VOID_ARG4_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); } while (0);
-#define SL_PRINT_VOID_ARG4_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); } while (0);
-#define SL_PRINT_VOID_ARG4_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); } while (0);
-#define SL_PRINT_VOID_ARG4_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); } while (0);
-#define SL_PRINT_VOID_ARG4_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); } while (0);
+#define SL_PRINT_VOID_ARG4_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); } while (0)
+#define SL_PRINT_VOID_ARG4_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); } while (0)
+#define SL_PRINT_VOID_ARG4_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); } while (0)
+#define SL_PRINT_VOID_ARG4_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); } while (0)
+#define SL_PRINT_VOID_ARG4_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); } while (0)
 
-#define SL_PRINT_VOID_ARG5_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); } while (0);
-#define SL_PRINT_VOID_ARG5_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); } while (0);
-#define SL_PRINT_VOID_ARG5_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); } while (0);
-#define SL_PRINT_VOID_ARG5_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); } while (0);
-#define SL_PRINT_VOID_ARG5_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); } while (0);
+#define SL_PRINT_VOID_ARG5_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); } while (0)
+#define SL_PRINT_VOID_ARG5_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); } while (0)
+#define SL_PRINT_VOID_ARG5_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); } while (0)
+#define SL_PRINT_VOID_ARG5_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); } while (0)
+#define SL_PRINT_VOID_ARG5_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); } while (0)
 
-#define SL_PRINT_VOID_ARG6_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); } while (0);
-#define SL_PRINT_VOID_ARG6_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); } while (0);
-#define SL_PRINT_VOID_ARG6_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); } while (0);
-#define SL_PRINT_VOID_ARG6_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); } while (0);
-#define SL_PRINT_VOID_ARG6_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); } while (0);
+#define SL_PRINT_VOID_ARG6_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); } while (0)
+#define SL_PRINT_VOID_ARG6_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); } while (0)
+#define SL_PRINT_VOID_ARG6_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); } while (0)
+#define SL_PRINT_VOID_ARG6_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); } while (0)
+#define SL_PRINT_VOID_ARG6_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); } while (0)
 
-#define SL_PRINT_VOID_ARG7_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); } while (0);
-#define SL_PRINT_VOID_ARG7_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); } while (0);
-#define SL_PRINT_VOID_ARG7_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); } while (0);
-#define SL_PRINT_VOID_ARG7_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); } while (0);
-#define SL_PRINT_VOID_ARG7_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); } while (0);
+#define SL_PRINT_VOID_ARG7_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); } while (0)
+#define SL_PRINT_VOID_ARG7_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); } while (0)
+#define SL_PRINT_VOID_ARG7_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); } while (0)
+#define SL_PRINT_VOID_ARG7_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); } while (0)
+#define SL_PRINT_VOID_ARG7_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); } while (0)
 
-#define SL_PRINT_VOID_ARG8_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); } while (0);
-#define SL_PRINT_VOID_ARG8_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); } while (0);
-#define SL_PRINT_VOID_ARG8_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); } while (0);
-#define SL_PRINT_VOID_ARG8_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); } while (0);
-#define SL_PRINT_VOID_ARG8_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); } while (0);
+#define SL_PRINT_VOID_ARG8_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); } while (0)
+#define SL_PRINT_VOID_ARG8_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); } while (0)
+#define SL_PRINT_VOID_ARG8_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); } while (0)
+#define SL_PRINT_VOID_ARG8_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); } while (0)
+#define SL_PRINT_VOID_ARG8_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); } while (0)
 
-#define SL_PRINT_VOID_ARG9_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); (void)sizeof(ARG9); } while (0);
-#define SL_PRINT_VOID_ARG9_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); (void)sizeof(ARG9); } while (0);
-#define SL_PRINT_VOID_ARG9_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); (void)sizeof(ARG9); } while (0);
-#define SL_PRINT_VOID_ARG9_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); (void)sizeof(ARG9); } while (0);
-#define SL_PRINT_VOID_ARG9_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); (void)sizeof(ARG9); } while (0);
+#define SL_PRINT_VOID_ARG9_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); (void)sizeof(ARG9); } while (0)
+#define SL_PRINT_VOID_ARG9_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); (void)sizeof(ARG9); } while (0)
+#define SL_PRINT_VOID_ARG9_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); (void)sizeof(ARG9); } while (0)
+#define SL_PRINT_VOID_ARG9_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); (void)sizeof(ARG9); } while (0)
+#define SL_PRINT_VOID_ARG9_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); (void)sizeof(ARG9); } while (0)
 
-#define SL_PRINT_VOID_ARG10_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); (void)sizeof(ARG9); (void)sizeof(ARG10); } while (0);
-#define SL_PRINT_VOID_ARG10_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); (void)sizeof(ARG9); (void)sizeof(ARG10); } while (0);
-#define SL_PRINT_VOID_ARG10_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); (void)sizeof(ARG9); (void)sizeof(ARG10); } while (0);
-#define SL_PRINT_VOID_ARG10_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); (void)sizeof(ARG9); (void)sizeof(ARG10); } while (0);
-#define SL_PRINT_VOID_ARG10_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); (void)sizeof(ARG9); (void)sizeof(ARG10); } while (0);
+#define SL_PRINT_VOID_ARG10_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); (void)sizeof(ARG9); (void)sizeof(ARG10); } while (0)
+#define SL_PRINT_VOID_ARG10_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); (void)sizeof(ARG9); (void)sizeof(ARG10); } while (0)
+#define SL_PRINT_VOID_ARG10_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10)   do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); (void)sizeof(ARG9); (void)sizeof(ARG10); } while (0)
+#define SL_PRINT_VOID_ARG10_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); (void)sizeof(ARG9); (void)sizeof(ARG10); } while (0)
+#define SL_PRINT_VOID_ARG10_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10)  do { (void)sizeof(EVENT); (void)sizeof(EVENT_TYPE); (void)sizeof(ARG1); (void)sizeof(ARG2); (void)sizeof(ARG3); (void)sizeof(ARG4); (void)sizeof(ARG5); (void)sizeof(ARG6); (void)sizeof(ARG7); (void)sizeof(ARG8); (void)sizeof(ARG9); (void)sizeof(ARG10); } while (0)
 
 /** @} (end addtogroup sl_log_disabled_macros) */
 
@@ -208,223 +208,223 @@ extern "C" {
 
 /** @brief Send debug log message with no arguments */
 #define SL_PRINT_ARG0_DBG(EVENT, EVENT_TYPE)                                   \
-  sl_log_send_no_args(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE);
+  sl_log_send_no_args(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE)
 
 /** @brief Send error log message with no arguments */
 #define SL_PRINT_ARG0_ERR(EVENT, EVENT_TYPE)                                   \
-  sl_log_send_no_args(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE);
+  sl_log_send_no_args(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE)
 
 /** @brief Send crash log message with no arguments */
 #define SL_PRINT_ARG0_CRASH(EVENT, EVENT_TYPE)                                 \
-  sl_log_send_no_args(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE);
+  sl_log_send_no_args(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE)
 
 /** @brief Send warning log message with no arguments */
 #define SL_PRINT_ARG0_WRN(EVENT, EVENT_TYPE)                                   \
-  sl_log_send_no_args(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE);
+  sl_log_send_no_args(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE)
 
 /** @brief Send info log message with no arguments */
 #define SL_PRINT_ARG0_INFO(EVENT, EVENT_TYPE)                                  \
-  sl_log_send_no_args(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE);
+  sl_log_send_no_args(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE)
 
 /** @brief Send debug log message with 1 argument */
 #define SL_PRINT_ARG1_DBG(EVENT, EVENT_TYPE, ARG1)                             \
-  sl_log_send_arg1(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, ARG1);
+  sl_log_send_arg1(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, ARG1)
 
 /** @brief Send error log message with 1 argument */
 #define SL_PRINT_ARG1_ERR(EVENT, EVENT_TYPE, ARG1)                             \
-  sl_log_send_arg1(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, ARG1);
+  sl_log_send_arg1(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, ARG1)
 
 /** @brief Send crash log message with 1 argument */
 #define SL_PRINT_ARG1_CRASH(EVENT, EVENT_TYPE, ARG1)                           \
-  sl_log_send_arg1(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, ARG1);
+  sl_log_send_arg1(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, ARG1)
 
 /** @brief Send warning log message with 1 argument */
 #define SL_PRINT_ARG1_WRN(EVENT, EVENT_TYPE, ARG1)                             \
-  sl_log_send_arg1(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, ARG1);
+  sl_log_send_arg1(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, ARG1)
 
 /** @brief Send info log message with 1 argument */
 #define SL_PRINT_ARG1_INFO(EVENT, EVENT_TYPE, ARG1)                            \
-  sl_log_send_arg1(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, ARG1);
+  sl_log_send_arg1(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, ARG1)
 
 /** @brief Send debug log message with 2 arguments */
 #define SL_PRINT_ARG2_DBG(EVENT, EVENT_TYPE, ARG1, ARG2)                       \
   sl_log_send_arg2(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2);
+                   ARG2)
 
 /** @brief Send error log message with 2 arguments */
 #define SL_PRINT_ARG2_ERR(EVENT, EVENT_TYPE, ARG1, ARG2)                       \
   sl_log_send_arg2(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2);
+                   ARG2)
 
 /** @brief Send crash log message with 2 arguments */
 #define SL_PRINT_ARG2_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2)                      \
   sl_log_send_arg2(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2);
+                   ARG2)
 
 /** @brief Send warning log message with 2 arguments */
 #define SL_PRINT_ARG2_WRN(EVENT, EVENT_TYPE, ARG1, ARG2)                       \
   sl_log_send_arg2(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2);
+                   ARG2)
 
 /** @brief Send info log message with 2 arguments */
 #define SL_PRINT_ARG2_INFO(EVENT, EVENT_TYPE, ARG1, ARG2)                      \
   sl_log_send_arg2(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2);
+                   ARG2)
 
 /** @brief Send debug log message with 3 arguments */
 #define SL_PRINT_ARG3_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)                 \
   sl_log_send_arg3(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3);
+                   ARG2, ARG3)
 
 /** @brief Send error log message with 3 arguments */
 #define SL_PRINT_ARG3_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)                 \
   sl_log_send_arg3(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3);
+                   ARG2, ARG3)
 
 /** @brief Send crash log message with 3 arguments */
 #define SL_PRINT_ARG3_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)               \
   sl_log_send_arg3(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3);
+                   ARG2, ARG3)
 
 /** @brief Send warning log message with 3 arguments */
 #define SL_PRINT_ARG3_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)                 \
   sl_log_send_arg3(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2, ARG3);
+                   ARG2, ARG3)
 
 /** @brief Send info log message with 3 arguments */
 #define SL_PRINT_ARG3_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)                \
   sl_log_send_arg3(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2, ARG3);
+                   ARG2, ARG3)
 
 #if (SL_LOG_CONFIG_ARG >= 4)
 /** @brief Send debug log message with 4 arguments */
 #define SL_PRINT_ARG4_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4)          \
   sl_log_send_arg4(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4);
+                   ARG2, ARG3, ARG4)
 /** @brief Send error log message with 4 arguments */
 #define SL_PRINT_ARG4_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4)          \
   sl_log_send_arg4(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3, ARG4);
+                   ARG2, ARG3, ARG4)
 /** @brief Send crash log message with 4 arguments */
 #define SL_PRINT_ARG4_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4)         \
   sl_log_send_arg4(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3, ARG4);
+                   ARG2, ARG3, ARG4)
 /** @brief Send warning log message with 4 arguments */
 #define SL_PRINT_ARG4_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4)          \
   sl_log_send_arg4(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2, ARG3, ARG4);
+                   ARG2, ARG3, ARG4)
 /** @brief Send info log message with 4 arguments */
 #define SL_PRINT_ARG4_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4)          \
   sl_log_send_arg4(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3, ARG4);
+                   ARG2, ARG3, ARG4)
 #endif
 
 #if (SL_LOG_CONFIG_ARG >= 5)
 #define SL_PRINT_ARG5_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5)     \
   sl_log_send_arg5(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3, ARG4, ARG5);
+                   ARG2, ARG3, ARG4, ARG5)
 #define SL_PRINT_ARG5_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5)     \
   sl_log_send_arg5(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3, ARG4, ARG5);
+                   ARG2, ARG3, ARG4, ARG5)
 #define SL_PRINT_ARG5_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5)   \
   sl_log_send_arg5(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3, ARG4, ARG5);
+                   ARG2, ARG3, ARG4, ARG5)
 #define SL_PRINT_ARG5_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5)     \
   sl_log_send_arg5(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2, ARG3, ARG4, ARG5);
+                   ARG2, ARG3, ARG4, ARG5)
 #define SL_PRINT_ARG5_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5)    \
   sl_log_send_arg5(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2, ARG3, ARG4, ARG5);
+                   ARG2, ARG3, ARG4, ARG5)
 #endif
 
 #if (SL_LOG_CONFIG_ARG >= 6)
 #define SL_PRINT_ARG6_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6) \
   sl_log_send_arg6(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3, ARG4, ARG5, ARG6);
+                   ARG2, ARG3, ARG4, ARG5, ARG6)
 #define SL_PRINT_ARG6_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6) \
   sl_log_send_arg6(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4, ARG5, ARG6);
+                   ARG2, ARG3, ARG4, ARG5, ARG6)
 #define SL_PRINT_ARG6_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6) \
   sl_log_send_arg6(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4, ARG5, ARG6);
+                   ARG2, ARG3, ARG4, ARG5, ARG6)
 #define SL_PRINT_ARG6_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6) \
   sl_log_send_arg6(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2, ARG3, ARG4, ARG5, ARG6);
+                   ARG2, ARG3, ARG4, ARG5, ARG6)
 #define SL_PRINT_ARG6_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6) \
   sl_log_send_arg6(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2, ARG3, ARG4, ARG5, ARG6);
+                   ARG2, ARG3, ARG4, ARG5, ARG6)
 #endif
 
 #if (SL_LOG_CONFIG_ARG >= 7)
 #define SL_PRINT_ARG7_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7) \
   sl_log_send_arg7(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7);
+                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7)
 #define SL_PRINT_ARG7_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7) \
   sl_log_send_arg7(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7);
+                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7)
 #define SL_PRINT_ARG7_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7) \
   sl_log_send_arg7(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7);
+                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7)
 #define SL_PRINT_ARG7_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7) \
   sl_log_send_arg7(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7);
+                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7)
 #define SL_PRINT_ARG7_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7) \
   sl_log_send_arg7(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7);
+                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7)
 #endif
 
 #if (SL_LOG_CONFIG_ARG >= 8)
 #define SL_PRINT_ARG8_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8) \
   sl_log_send_arg8(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8);
+                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8)
 #define SL_PRINT_ARG8_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8) \
   sl_log_send_arg8(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8);
+                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8)
 #define SL_PRINT_ARG8_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8) \
   sl_log_send_arg8(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8);
+                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8)
 #define SL_PRINT_ARG8_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8) \
   sl_log_send_arg8(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8);
+                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8)
 #define SL_PRINT_ARG8_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8) \
   sl_log_send_arg8(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8);
+                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8)
 #endif
 
 #if (SL_LOG_CONFIG_ARG >= 9)
 #define SL_PRINT_ARG9_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9) \
   sl_log_send_arg9(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9);
+                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9)
 #define SL_PRINT_ARG9_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9) \
   sl_log_send_arg9(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9);
+                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9)
 #define SL_PRINT_ARG9_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9) \
   sl_log_send_arg9(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9);
+                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9)
 #define SL_PRINT_ARG9_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9) \
   sl_log_send_arg9(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9);
+                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9)
 #define SL_PRINT_ARG9_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9) \
   sl_log_send_arg9(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9);
+                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9)
 #endif
 
 #if (SL_LOG_CONFIG_ARG >= 10)
 #define SL_PRINT_ARG10_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10) \
   sl_log_send_arg10(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, ARG1,  \
-                    ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10);
+                    ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10)
 #define SL_PRINT_ARG10_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10) \
   sl_log_send_arg10(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, ARG1,  \
-                    ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10);
+                    ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10)
 #define SL_PRINT_ARG10_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10) \
   sl_log_send_arg10(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, ARG1,  \
-                    ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10);
+                    ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10)
 #define SL_PRINT_ARG10_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10) \
   sl_log_send_arg10(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, ARG1,    \
-                    ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10);
+                    ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10)
 #define SL_PRINT_ARG10_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10) \
   sl_log_send_arg10(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, ARG1,   \
-                    ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10);
+                    ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10)
 #endif
 
 #endif /* !defined(SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT) */

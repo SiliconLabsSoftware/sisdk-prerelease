@@ -1,0 +1,50 @@
+id: zw_host_hibernation
+label: Z-Wave Host Hibernation
+category: Z-Wave|NCP
+description: >
+  This component provides host hibernation for Z-Wave (NCP) Serial API controller
+  applications. It provides the required SerialAPI command handling for host hibernation.
+  With this component, the module can track a list of devices either for keep alive or
+  for synchronizing S2 SPAN. This component enable wake up of the host by GPIO on configurable PIN.
+
+  Configure SL_HOST_HIBERNATION_DEVICE_TABLE_SIZE and SL_HOST_HIBERNATION_KEEP_ALIVE_CHECK_PERIOD_MS
+  Use sl_pwm_init_host_wakeup_config.h to configure GPIO wakeup parameters
+
+package: zwave
+quality: evaluation
+metadata:
+  sbom:
+    reference: zw_sbom_license
+source:
+- path: "sample_apps/zwave_ncp_serial_api/silabs/sl_host_hibernation_cmd_handlers.c"
+config_file:
+- path: sample_apps/zwave_ncp_serial_api/config/zw_host_hibernation_config.h
+  file_id: zw_host_hibernation_config
+- path: sample_apps/zwave_ncp_serial_api/sl_pwm_init_host_wakeup_config.h
+  override:
+    component: pwm
+    file_id: pwm_config
+    instance: host_wakeup
+    vendor: silabs
+include:
+- path: "sample_apps/zwave_ncp_serial_api/silabs"
+  file_list:
+  - path: "sl_host_hibernation_cmd_handlers.h"
+  - path: "sl_host_hibernation_api.h"
+
+recommends:
+- id: pwm
+  instance: [host_wakeup]
+  vendor: silabs
+
+define:
+- name: SUPPORT_HOST_SLEEP
+  value: "1"
+
+provides:
+- name: zw_host_hibernation
+
+template_contribution:
+- name: component_catalog
+  value: zw_host_hibernation
+root_path: zwave

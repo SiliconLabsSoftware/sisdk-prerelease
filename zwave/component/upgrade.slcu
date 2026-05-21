@@ -1,5 +1,3 @@
-# `version` is the Simplicity SDK the project is upgrading *to*
-# See SLC upgrade manifest / internal tooling behavior.
 upgrade:
   - sdk:
       id: simplicity_sdk
@@ -7,19 +5,9 @@ upgrade:
     configuration:
       - script: zwave/component/scripts/rail_pm_init_upgrade.lua
         description: Enable RAIL Power Manager initialization in Z-Wave applications.
-
   - sdk:
       id: simplicity_sdk
       version: 2025.12.0
     configuration:
       - script: zwave/component/scripts/rail_pm_init_upgrade.lua
         description: Enable RAIL Power Manager initialization in Z-Wave applications.
-
-  - sdk:
-      id: simplicity_sdk
-      version: 2026.6.0
-    configuration:
-      - script: zwave/component/scripts/rail_pm_init_upgrade.lua
-        description: Enable RAIL Power Manager initialization in Z-Wave applications.
-      - script: zwave/component/scripts/sleeptimer_sysrtc_ulfrco_upgrade.lua
-        description: Migrate sleeptimer to SYSRTC (DEFAULT) and SYSRTC clock to ULFRCO for Z-Wave Core on Series 2

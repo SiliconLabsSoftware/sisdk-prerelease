@@ -348,6 +348,7 @@
     <properties key="quality" value="PRODUCTION" />
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced" />
+    <properties key="hidden" value="true" />
   </descriptors>
   <descriptors name="bootloader-apploader-secure" label="Bootloader - SoC Bluetooth AppLoader OTA DFU Secure part of Bootloader using TrustZone" description="TrustZone is used to split into a Secure and Non-Secure bootloader. This is the secure part of the bootloader. The non-secure part of the bootloader, which contains the communication interfaces needs to be built separately and used together with the secure part of the bootloader.&#10;">
     <properties key="namespace" value="template.uc" />
@@ -363,6 +364,7 @@
     <properties key="quality" value="PRODUCTION" />
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced" />
+    <properties key="hidden" value="true" />
   </descriptors>
   <descriptors name="bootloader-spi-ezsp-nonsecure" label="Bootloader - NCP EZSP SPI Non-Secure part of Bootloader using TrustZone" description="TrustZone is used to split into a Secure and Non-Secure bootloader. This is the non-secure part of the bootloader. The secure part of the bootloader, which contains the core functionalities needs to be built separately and used together with the non-secure part of the bootloader.&#10;">
     <properties key="namespace" value="template.uc" />
@@ -378,6 +380,7 @@
     <properties key="quality" value="PRODUCTION" />
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced" />
+    <properties key="hidden" value="true" />
   </descriptors>
   <descriptors name="bootloader-spi-ezsp-secure" label="Bootloader - NCP EZSP SPI Secure part of Bootloader using TrustZone" description="TrustZone is used to split into a Secure and Non-Secure bootloader. This is the secure part of the bootloader. The non-secure part of the bootloader, which contains the communication interfaces needs to be built separately and used together with the secure part of the bootloader.&#10;">
     <properties key="namespace" value="template.uc" />
@@ -393,6 +396,7 @@
     <properties key="quality" value="PRODUCTION" />
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced" />
+    <properties key="hidden" value="true" />
   </descriptors>
   <descriptors name="bootloader-storage-internal-single" label="Bootloader - SoC Internal Storage (single image on 1MB device)" description="This sample configuration of the Gecko bootloader configures the bootloader to use the internal main flash to store firmware update images. The storage configuration is set up to store a single firmware update image at a time, in a single storage slot. The storage slot is configured to start at address 0x84000 (or 0x8084000 for device with 0x8000000 flash base), and have a size of 448 kB. This can be configured on the &quot;Storage&quot; tab.&#10;">
     <properties key="namespace" value="template.uc" />
@@ -423,6 +427,7 @@
     <properties key="quality" value="PRODUCTION" />
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced" />
+    <properties key="hidden" value="true" />
   </descriptors>
   <descriptors name="bootloader-uart-bgapi-secure" label="Bootloader - NCP BGAPI UART DFU Secure part of Bootloader using TrustZone" description="TrustZone is used to split into a Secure and Non-Secure bootloader. This is the secure part of the bootloader. The non-secure part of the bootloader, which contains the communication interfaces needs to be built separately and used together with the secure part of the bootloader.&#10;">
     <properties key="namespace" value="template.uc" />
@@ -438,6 +443,7 @@
     <properties key="quality" value="PRODUCTION" />
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced" />
+    <properties key="hidden" value="true" />
   </descriptors>
   <descriptors name="bootloader-uart-xmodem-nonsecure" label="Bootloader - NCP UART XMODEM Non-Secure part of Bootloader using TrustZone" description="TrustZone is used to split into a Secure and Non-Secure bootloader. This is the non-secure part of the bootloader. The secure part of the bootloader, which contains the core functionalities needs to be built separately and used together with the non-secure part of the bootloader.&#10;">
     <properties key="namespace" value="template.uc" />
@@ -453,6 +459,7 @@
     <properties key="quality" value="PRODUCTION" />
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced" />
+    <properties key="hidden" value="true" />
   </descriptors>
   <descriptors name="bootloader-uart-xmodem-secure" label="Bootloader - NCP UART XMODEM Secure part of Bootloader using TrustZone" description="TrustZone is used to split into a Secure and Non-Secure bootloader. This is the secure part of the bootloader. The non-secure part of the bootloader, which contains the communication interfaces needs to be built separately and used together with the secure part of the bootloader.&#10;">
     <properties key="namespace" value="template.uc" />
@@ -468,6 +475,7 @@
     <properties key="quality" value="PRODUCTION" />
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced" />
+    <properties key="hidden" value="true" />
   </descriptors>
   <descriptors name="bootloader-storage-multi-4096k" label="Bootloader - SoC Storage (Multiple OTA images of size 756kB for 4MB flash)" description="This sample configuration of the Gecko bootloader configures the bootloader to use the flash to store firmware update images to store up to two firmware update images at a time, in two storage slots. The storage slots are configured to start at address 0x011FA000 and 0x12B7000 of the flash respectively, and have a size of 756kB. This can be configured on the &quot;Storage&quot; tab.&#10;">
     <properties key="namespace" value="template.uc" />

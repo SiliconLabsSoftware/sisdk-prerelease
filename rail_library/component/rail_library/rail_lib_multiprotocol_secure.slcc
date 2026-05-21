@@ -17,6 +17,9 @@ requires:
   - device_series_3
 provides:
 - name: rail_lib_multiprotocol_secure   # specific tag
+- name: rail_lib_multiprotocol   # don't provide by default
+  condition:
+  - rail_lib_multiprotocol_secure
 - name: rail_lib_Xprotocol   # generic tag
 documentation:
   docset: rail

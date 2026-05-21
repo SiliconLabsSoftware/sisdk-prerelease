@@ -53,9 +53,6 @@
  * the stack to notify the application of any important information, such as
  * the state of the connection.
  *
- * The NCP application is expected to override sl_wisun_on_event() to handle
- * events from the stack.
- *
  * @{
  *****************************************************************************/
 

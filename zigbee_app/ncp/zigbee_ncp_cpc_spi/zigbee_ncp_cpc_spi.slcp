@@ -98,6 +98,7 @@ filter:
 
 tag:
   - hardware:component:exp_header:spi
+  - hwfilter:ram:64k
   - hwfilter:device:device_supports_zigbee
   - hwfilter:!board:zb_boards_spi_incompatible
   - hwfilter:!board:zb_boards_ncp_spi_incompatible

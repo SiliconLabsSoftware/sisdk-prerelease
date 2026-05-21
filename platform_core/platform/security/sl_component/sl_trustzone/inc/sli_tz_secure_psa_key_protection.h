@@ -22,6 +22,18 @@ extern "C" {
 #endif
 /***************************************************************************//**
  * @brief
+ *   Check whether a key ID falls within a protected range.
+ *
+ * @param[in] key_id
+ *   The PSA key ID to check.
+ *
+ * @return
+ *   true if the key ID is inside any protected range, false otherwise.
+ ******************************************************************************/
+bool sl_psa_key_id_is_protected(psa_key_id_t key_id);
+
+/***************************************************************************//**
+ * @brief
  *   Check if NonSecure access to a key ID should be denied.
  *   
  *   This is the main entry point for access control. It checks if the key ID

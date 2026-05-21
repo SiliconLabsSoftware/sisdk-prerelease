@@ -40,6 +40,9 @@
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
 #endif
+#ifdef SL_CATALOG_ZW_HOST_HIBERNATION_PRESENT
+#include "sl_host_hibernation_api.h"
+#endif
 
 #include <assert.h>
 
@@ -139,6 +142,9 @@ zpal_reset_reason_t g_eApplResetReason;
 
 bool bTxStatusReportEnabled;
 
+static void (*m_urgent_app_callback)(const SZwaveReceivePackage *) = NULL;
+static bool (*m_keep_alive_callback)(node_id_t) = NULL;
+
 static void ApplicationInitSW(void);
 static void ApplicationTask(SApplicationHandles *pAppHandles);
 
@@ -147,7 +153,7 @@ static bool request_protocol_cc_encryption(SZwaveReceivePackage *pRPCCEPackage);
 #endif
 
 #ifdef ZW_CONTROLLER_BRIDGE
-static void ApplicationCommandHandler_Bridge(SReceiveMulti *pReciveMulti);
+void ApplicationCommandHandler_Bridge(SReceiveMulti *pReciveMulti);
 #else
 void ApplicationCommandHandler(void *pSubscriberContext, SZwaveReceivePackage* pRxPackage);
 #endif
@@ -312,12 +318,28 @@ void zaf_event_distributor_app_zw_rx(SZwaveReceivePackage *RxPackage)
   switch (RxPackage->eReceiveType) {
     case EZWAVERECEIVETYPE_SINGLE:
 #ifndef ZW_CONTROLLER_BRIDGE
+#ifdef SL_CATALOG_ZW_HOST_HIBERNATION_PRESENT
+      if (is_host_sleeping()) {
+        node_id_t node_id = RxPackage->uReceiveParams.Rx.RxOptions.sourceNode;
+        const uint8_t * const payload = (uint8_t*) &RxPackage->uReceiveParams.Rx.Payload;
+        s2_message_update_count(node_id, payload);
+        break;
+      }
+#endif
       ApplicationCommandHandler(NULL, RxPackage);
 #endif
       break;
 
 #ifdef ZW_CONTROLLER_BRIDGE
     case EZWAVERECEIVETYPE_MULTI:
+#ifdef SL_CATALOG_ZW_HOST_HIBERNATION_PRESENT
+      if (is_host_sleeping()) {
+        node_id_t node_id = RxPackage->uReceiveParams.RxMulti.RxOptions.sourceNode;
+        const uint8_t * const payload = (uint8_t*) &RxPackage->uReceiveParams.RxMulti.Payload;
+        s2_message_update_count(node_id, payload);
+        break;
+      }
+#endif
       ApplicationCommandHandler_Bridge(&RxPackage->uReceiveParams.RxMulti);
       break;
 #endif // #ifdef ZW_CONTROLLER_BRIDGE
@@ -335,6 +357,18 @@ void zaf_event_distributor_app_zw_rx(SZwaveReceivePackage *RxPackage)
                                  ?ERPCCEEVENT_SERIALAPI_OK : ERPCCEEVENT_SERIALAPI_FAIL);
       break;
 #endif
+    case EZWAVERECEIVETYPE_SINGLE_URGENT:
+      if (m_urgent_app_callback != NULL) {
+        m_urgent_app_callback(RxPackage);
+      } else {
+#ifndef ZW_CONTROLLER_BRIDGE
+        ApplicationCommandHandler(NULL, RxPackage);
+#else
+        ApplicationCommandHandler_Bridge(&RxPackage->uReceiveParams.RxMulti);
+#endif
+      }
+      break;
+
     default:
       break;
   }
@@ -391,6 +425,11 @@ void zaf_event_distributor_app_zw_command_status(SZwaveCommandStatusPackage *Sta
     }
 #endif
 #endif
+    case EZWAVECOMMANDSTATUS_KEEP_ALIVE_UPDATE:
+      if (m_keep_alive_callback != NULL) {
+        m_keep_alive_callback(Status->Content.KeepAliveUpdate.nodeId);
+      }
+      break;
     default:
       break;
   }
@@ -485,6 +524,11 @@ ApplicationTask(SApplicationHandles* pAppHandles)
   zw_shutdown_manager_add_lock();
 #endif
   zaf_event_distributor_init();
+
+#ifdef SL_CATALOG_ZW_HOST_HIBERNATION_PRESENT
+  keep_alive_init();
+  gpio_wakeup_host_init();
+#endif
 
   set_state_and_notify(stateStartup);
   // Wait for and process events
@@ -920,8 +964,7 @@ ApplicationInit(
 **    Handling of received application commands and requests
 **
 **--------------------------------------------------------------------------*/
-void /*RET Nothing                  */
-ApplicationCommandHandler(__attribute__((unused)) void *pSubscriberContext, SZwaveReceivePackage* pRxPackage)
+void ApplicationCommandHandler(__attribute__((unused)) void *pSubscriberContext, SZwaveReceivePackage* pRxPackage)
 {
   ZW_APPLICATION_TX_BUFFER *pCmd = (ZW_APPLICATION_TX_BUFFER *)&pRxPackage->uReceiveParams.Rx.Payload;
   uint8_t cmdLength = pRxPackage->uReceiveParams.Rx.iLength;
@@ -970,8 +1013,7 @@ typedef struct SMultiCastNodeMaskHeaderSerial{
 **    Handling of received application commands and requests
 **
 **--------------------------------------------------------------------------*/
-static void                       /*RET Nothing                  */
-ApplicationCommandHandler_Bridge(SReceiveMulti* pReceiveMulti)
+void ApplicationCommandHandler_Bridge(SReceiveMulti* pReceiveMulti)
 {
   /* ZW->HOST: REQ | 0xA8 | rxStatus | destNode | sourceNode | cmdLength
    *          | pCmd[] | multiDestsOffset_NodeMaskLen | multiDestsNodeMask[] | rssiVal
@@ -1127,4 +1169,14 @@ ApplicationNodeUpdate(
 ZW_WEAK const void * SerialAPI_get_uart_config_ext(void)
 {
   return NULL;
+}
+
+void set_urgent_app_callback(urgent_app_callback_t callback)
+{
+  m_urgent_app_callback = callback;
+}
+
+void set_keep_alive_callback(keep_alive_callback_t callback)
+{
+  m_keep_alive_callback = callback;
 }

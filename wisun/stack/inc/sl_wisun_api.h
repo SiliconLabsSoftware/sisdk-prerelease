@@ -59,10 +59,38 @@ extern "C" {
  * are also used by the stack to notify the application of any important
  * information, such as the state of the connection.
  *
- * The application is expected to override sl_wisun_on_event() to handle events
- * from the stack. Because all events share a common header, the function may be
- * implemented as a switch statement. The event-specific data can be accessed
- * through the #sl_wisun_evt_t::evt union.
+ * The stack relies on platform specific event system to deliver events to the
+ * application. The application is expected to subscribe to SL_EVENT_CLASS_WISUN
+ * event class and SL_WISUN_EVENT_IND_MASK event mask to receive these events.
+ * Because all events share a common header, they can be differentiated using a
+ * switch statement. The event-specific data can be accessed through the
+ * #sl_wisun_evt_t::evt union.
+ *
+ * The API is thread-safe, which means it can be called from multiple RTOS tasks.
+ * The stack guarantees that only a single request is executed at a time and that
+ * requests are handled in the order they were made. Note that the events need to
+ * be handled in a different context so the API functions can be called directly.
+ *
+ * @{
+ *****************************************************************************/
+
+/**
+ * @name Callbacks
+ * @{
+ */
+
+/**************************************************************************//**
+ * Function called to receive events from the Wi-SUN stack.
+ *
+ * @param[out] evt The event to be handled
+ *
+ * The component wisun_event_task provides a default implementation of a task that
+ * can be used to receive the events published by the stack and redirect them to
+ * the function sl_wisun_on_event().
+ * The application needs to implement this function to receive the events published
+ * by the stack and handle them accordingly. The function is called from a
+ * task context different from the Wi-SUN stack so the API functions can be called
+ * directly.
  *
  * @code
  *     void sl_wisun_on_event(sl_wisun_evt_t *evt)
@@ -77,28 +105,9 @@ extern "C" {
  *     }
  * @endcode
  *
- * The API is thread-safe, which means can be called from multiple RTOS tasks. The
- * stack guarantees that only a single request is executed at a time and that requests
- * are handled in the order they were made. Event callback is executed in a
- * different context than the request, so the API functions may be called from
- * the event callback.
- *
- * @{
- *****************************************************************************/
-
-/**
- * @name Callbacks
- * @{
- */
-
-/**************************************************************************//**
- * Callback handler for a single event.
- *
- * @param[out] evt The event to be handled
- *
- * This function is called when the stack sends an event to the application.
- * The application can declare its own version this function to customize
- * event handling. The default implementation discards all events.
+ * @note The application can use the component wisun_disable_event_task to
+ *       implement its own event handling logic instead of using the default
+ *       implementation provided by the component wisun_event_task.
  *
  * @see #SL_WISUN_EVT
  *****************************************************************************/

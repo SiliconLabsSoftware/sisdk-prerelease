@@ -275,7 +275,7 @@ Example: to set 'Network' to 'Debug' and 'IPV6' to 'Warning', use:
 
 Before programming the radio board mounted on the WSTK, ensure the power supply switch is in the AEM position (right side), as shown.
 
-![Radio Board Power Supply Switch](readme_img0.png)
+![Radio Board Power Supply Switch](doc/readme_img0.png)
 
 ## Report Bugs & Get Support
 

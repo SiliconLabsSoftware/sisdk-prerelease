@@ -47,6 +47,10 @@ enum {
 
 
 // Crypto service
+{% for fp in tfm_interface_func|unique -%}
+#define SLI_TZ_HAS_{{ fp|upper }}_SID 1
+{% endfor %}
+
 enum {
     TFM_CRYPTO_SID_MIN = -1,
   {% for fp in tfm_interface_func|unique -%}

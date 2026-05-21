@@ -15,6 +15,8 @@ include:
 - path: systemview/profiles/freertos_v11/
   file_list:
   - path: SEGGER_SYSVIEW_FreeRTOS.h
+requires:
+- name: segger_systemview
 provides:
 - name: segger_systemview_freertos
 root_path: segger

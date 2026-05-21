@@ -1038,16 +1038,16 @@ void sl_bt_on_event(sl_bt_msg_t * evt)
       uint8_t connection = evt->data.evt_cs_read_remote_supported_capabilities_complete.connection;
       check_supported_capabilities(evt);
       if (initiator_config.max_procedure_count == 0) {
-        sc = cs_initiator_get_intervals(initiator_config.cs_main_mode,
-                                        initiator_config.cs_sub_mode,
-                                        initiator_config.procedure_scheduling,
-                                        initiator_config.channel_map_preset,
-                                        rtl_config.algo_mode,
-                                        initiator_config.cs_tone_antenna_config_idx,
-                                        initiator_config.use_real_time_ras_mode,
-                                        1,
-                                        &conn_interval,
-                                        &proc_interval);
+        sc = cs_initiator_get_multiple_intervals(initiator_config.cs_main_mode,
+                                                 initiator_config.cs_sub_mode,
+                                                 initiator_config.procedure_scheduling,
+                                                 initiator_config.channel_map_preset,
+                                                 rtl_config.algo_mode,
+                                                 initiator_config.cs_tone_antenna_config_idx,
+                                                 initiator_config.use_real_time_ras_mode,
+                                                 1,
+                                                 &conn_interval,
+                                                 &proc_interval);
         if (sc == SL_STATUS_NOT_SUPPORTED) {
           log_info(APP_INSTANCE_PREFIX "Parameter optimization is not supported with the given input parameters" NL, connection);
         } else if (sc == SL_STATUS_IDLE) {
