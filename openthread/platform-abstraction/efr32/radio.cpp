@@ -1997,6 +1997,8 @@ static bool writeIeee802154EnhancedAck(sl_rail_handle_t          aRailHandle,
 
     sAckIeDataLength = generateAckIeData(instance, dataPtr, linkMetricsDataLen, &receivedFrame);
 
+    // Set the radioType to 0 to let mac know that this frame is intended for a 802.15.4 radio
+    enhAckFrame.mRadioType = 0;
     otEXPECT(otMacFrameGenerateEnhAck(&receivedFrame, setFramePending, sAckIeData, sAckIeDataLength, &enhAckFrame)
              == OT_ERROR_NONE);
 

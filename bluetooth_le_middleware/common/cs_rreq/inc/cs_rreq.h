@@ -147,7 +147,7 @@ extern "C" {
  * @retval SL_STATUS_OK           Callbacks set successfully.
  * @retval SL_STATUS_NULL_POINTER One or more callback pointers are NULL.
  *****************************************************************************/
-sl_status_t cs_rreq_set_event_callbacks(cs_rreq_event_callback_t cb);
+sl_status_t cs_rreq_set_event_callbacks(cs_rreq_event_callback_t *cb);
 
 /**************************************************************************//**
  * Set the ranging result callback.

@@ -55,6 +55,14 @@ extern "C" {
  *****************************************************************************/
 sl_status_t sm_on_evt(rreq_t *rreq, sm_evt_t event, sm_evt_data_t *data);
 
+/******************************************************************************
+ * Set the state of an RREQ instance.
+ *
+ * @param[in] rreq  RREQ instance to set the state of.
+ * @param[in] state New state to set.
+ *****************************************************************************/
+void set_state(rreq_t *rreq, rreq_state_t state);
+
 #ifdef __cplusplus
 };
 #endif

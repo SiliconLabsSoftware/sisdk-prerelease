@@ -29,7 +29,7 @@
  ******************************************************************************/
 
 #include "rtl_log.h"
-#include "cs_initiator_config.h"
+// TODO: include config file
 
 #if CS_INITIATOR_RTL_LOG
 #include "sl_rtl_clib_api.h"

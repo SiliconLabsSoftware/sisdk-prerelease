@@ -3,7 +3,7 @@
  * @brief CS Algo - estimation implementation
  *******************************************************************************
  * # License
- * <b>Copyright 2025 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -32,7 +32,7 @@
 // Includes
 
 #include "cs_result.h"
-#include "cs_algo_log.h"
+#include "cs_algo_log_internal.h"
 #include "cs_algo.h"
 #include "cs_algo_internal.h"
 
@@ -56,6 +56,9 @@ typedef struct {
 
 // -----------------------------------------------------------------------------
 // Static function declarations
+static void algo_error(cs_algo_instance_t *inst,
+                       cs_algo_error_t evt,
+                       sl_status_t sc);
 static void show_rtl_api_call_result(cs_algo_instance_t *inst,
                                      enum sl_rtl_error_code err_code);
 static void report_result(cs_algo_instance_t *inst,
@@ -80,7 +83,7 @@ static void cs_algo_rtl_service_result_cb(sl_rtl_service_cs_inst_t *rtl_inst,
 // -----------------------------------------------------------------------------
 // Static variables
 
-static cs_algo_instance_t algo_instances[CS_ALGO_ESTIMATOR_COUNT];
+static cs_algo_instance_t algo_instances[CS_ALGO_CONFIG_ESTIMATOR_COUNT];
 static cs_algo_app_cb_t algo_app_cb;
 static sl_rtl_service_cs_ctx_t *algo_rtl_svc_ctx;
 
@@ -88,119 +91,156 @@ static sl_rtl_service_cs_ctx_t *algo_rtl_svc_ctx;
 // Static function definitions
 
 /******************************************************************************
- * Show error messages based on RTL API call error codes.
+ * Call user error callback.
  *
- * @param[in] inst cs_algo instance.
- * @param[in] err_code RTL API error code.
+ * @param[in] inst cs_algo instance reference.
+ * @param[in] evt  ALGO error event identifier.
+ * @param[in] sc   Underlying status code (see @ref cs_algo_error_t).
+ *****************************************************************************/
+static void algo_error(cs_algo_instance_t *inst,
+                       cs_algo_error_t evt,
+                       sl_status_t sc)
+{
+  if (inst == NULL) {
+    algo_log_error("[#?] Instance is NULL! (sc: 0x%lx)" LOG_NL,
+                   (unsigned long)sc);
+    return;
+  }
+  algo_log_error(INSTANCE_PREFIX "Error occurred (sc: 0x%lx)" LOG_NL,
+                 inst->conn_handle,
+                 (unsigned long)sc);
+  if (algo_app_cb.on_error != NULL) {
+    algo_app_cb.on_error(inst->conn_handle, evt, sc);
+  }
+}
+
+/******************************************************************************
+ * Log a description of an RTL service call outcome, and on non-success 
+ * forward the matching @ref cs_algo_error_t event to the
+ * application via @ref algo_error().
+ *
+ * @param[in] inst     cs_algo instance.
+ * @param[in] err_code RTL API error code returned by the rtl_service call.
  *****************************************************************************/
 static void show_rtl_api_call_result(cs_algo_instance_t *inst,
                                      enum sl_rtl_error_code err_code)
 {
+  cs_algo_error_t app_error;
+  uint8_t conn_handle = (inst != NULL) ? inst->conn_handle : 0xFF;
+
   switch (err_code) {
     case SL_RTL_ERROR_SUCCESS:
-      break;
+      return;
+
     case SL_RTL_ERROR_ARGUMENT:
       algo_log_error(INSTANCE_PREFIX "RTL - invalid argument! [E: 0x%x]" LOG_NL,
-                     inst->conn_handle,
-                     err_code);
+                     conn_handle, err_code);
+      app_error = CS_ALGO_ERROR_RTL_ARGUMENT;
       break;
 
     case SL_RTL_ERROR_OUT_OF_MEMORY:
       algo_log_error(INSTANCE_PREFIX "RTL - memory allocation error! [E: 0x%x]" LOG_NL,
-                     inst->conn_handle,
-                     err_code);
+                     conn_handle, err_code);
+      app_error = CS_ALGO_ERROR_RTL_OUT_OF_MEMORY;
       break;
 
     case SL_RTL_ERROR_ESTIMATION_IN_PROGRESS:
       algo_log_error(INSTANCE_PREFIX "RTL - estimation not yet finished! [E: 0x%x]" LOG_NL,
-                    inst->conn_handle,
-                    err_code);
+                     conn_handle, err_code);
+      app_error = CS_ALGO_ERROR_RTL_ESTIMATION_IN_PROGRESS;
       break;
 
     case SL_RTL_ERROR_NUMBER_OF_SNAPHOTS_DO_NOT_MATCH:
       algo_log_error(INSTANCE_PREFIX "RTL - initialized and calculated "
-                                          "snapshots do not match! [E: 0x%x]" LOG_NL,
-                     inst->conn_handle,
-                     err_code);
+                                     "snapshots do not match! [E: 0x%x]" LOG_NL,
+                     conn_handle, err_code);
+      app_error = CS_ALGO_ERROR_RTL_NUMBER_OF_SNAPSHOTS_DO_NOT_MATCH;
       break;
 
     case SL_RTL_ERROR_ESTIMATOR_NOT_CREATED:
       algo_log_error(INSTANCE_PREFIX "RTL - estimator not created! [E: 0x%x]" LOG_NL,
-                     inst->conn_handle,
-                     err_code);
+                     conn_handle, err_code);
+      app_error = CS_ALGO_ERROR_RTL_ESTIMATOR_NOT_CREATED;
       break;
 
     case SL_RTL_ERROR_ESTIMATOR_ALREADY_CREATED:
       algo_log_error(INSTANCE_PREFIX "RTL - estimator already created! [E: 0x%x]" LOG_NL,
-                     inst->conn_handle,
-                     err_code);
+                     conn_handle, err_code);
+      app_error = CS_ALGO_ERROR_RTL_ESTIMATOR_ALREADY_CREATED;
       break;
 
     case SL_RTL_ERROR_NOT_INITIALIZED:
       algo_log_error(INSTANCE_PREFIX "RTL - library item not initialized! [E: 0x%x]" LOG_NL,
-                     inst->conn_handle,
-                     err_code);
+                     conn_handle, err_code);
+      app_error = CS_ALGO_ERROR_RTL_NOT_INITIALIZED;
       break;
 
     case SL_RTL_ERROR_INTERNAL:
       algo_log_error(INSTANCE_PREFIX "RTL - internal error! [E: 0x%x]" LOG_NL,
-                     inst->conn_handle,
-                     err_code);
+                     conn_handle, err_code);
+      app_error = CS_ALGO_ERROR_RTL_INTERNAL;
       break;
 
     case SL_RTL_ERROR_IQ_SAMPLE_QA:
       algo_log_error(INSTANCE_PREFIX "RTL - IQ sample quality analysis failed! [E: 0x%x]" LOG_NL,
-                     inst->conn_handle,
-                     err_code);
+                     conn_handle, err_code);
+      app_error = CS_ALGO_ERROR_RTL_IQ_SAMPLE_QA;
       break;
 
     case SL_RTL_ERROR_FEATURE_NOT_SUPPORTED:
       algo_log_error(INSTANCE_PREFIX "RTL - feature not supported! [E: 0x%x]" LOG_NL,
-                     inst->conn_handle,
-                     err_code);
+                     conn_handle, err_code);
+      app_error = CS_ALGO_ERROR_RTL_FEATURE_NOT_SUPPORTED;
       break;
 
     case SL_RTL_ERROR_INCORRECT_MEASUREMENT:
       algo_log_error(INSTANCE_PREFIX "RTL - incorrect measurement! Error of the last"
                                      " measurement was too large! [E: 0x%x]" LOG_NL,
-                     inst->conn_handle,
-                     err_code);
+                     conn_handle, err_code);
+      app_error = CS_ALGO_ERROR_RTL_INCORRECT_MEASUREMENT;
       break;
 
     case SL_RTL_ERROR_CS_CHANNEL_MAP_TOO_SPARSE:
       algo_log_error(INSTANCE_PREFIX "RTL - too many skipped channels "
                                      "in the proposed channel map! [E: 0x%x]" LOG_NL,
-                     inst->conn_handle,
-                     err_code);
+                     conn_handle, err_code);
+      app_error = CS_ALGO_ERROR_RTL_CS_CHANNEL_MAP_TOO_SPARSE;
       break;
 
     case SL_RTL_ERROR_CS_CHANNEL_MAP_TOO_FEW_CHANNELS:
       algo_log_error(INSTANCE_PREFIX "RTL - too few channels "
                                      "in the proposed channel map! [E: 0x%x]" LOG_NL,
-                     inst->conn_handle,
-                     err_code);
+                     conn_handle, err_code);
+      app_error = CS_ALGO_ERROR_RTL_CS_CHANNEL_MAP_TOO_FEW_CHANNELS;
       break;
 
     case SL_RTL_ERROR_CS_CHANNEL_SPACING_TOO_LARGE:
       algo_log_error(INSTANCE_PREFIX "RTL - channel spacing is too large "
                                      "in the proposed channel map! [E: 0x%x]" LOG_NL,
-                     inst->conn_handle,
-                     err_code);
+                     conn_handle, err_code);
+      app_error = CS_ALGO_ERROR_RTL_CS_CHANNEL_SPACING_TOO_LARGE;
       break;
 
     case SL_RTL_ERROR_POOR_INPUT_DATA_QUALITY:
       algo_log_error(INSTANCE_PREFIX "RTL - input data quality is poor! [E: 0x%x]" LOG_NL,
-                     inst->conn_handle,
-                     err_code);
+                     conn_handle, err_code);
+      app_error = CS_ALGO_ERROR_RTL_POOR_INPUT_DATA_QUALITY;
+      break;
+
+    case SL_RTL_ERROR_QUEUE_FULL:
+      algo_log_error(INSTANCE_PREFIX "RTL - task input queue is full! [E: 0x%x]" LOG_NL,
+                     conn_handle, err_code);
+      app_error = CS_ALGO_ERROR_RTL_QUEUE_FULL;
       break;
 
     default:
       algo_log_error(INSTANCE_PREFIX "RTL - unknown error! [E: 0x%x]" LOG_NL,
-                     inst->conn_handle,
-                     err_code);
+                     conn_handle, err_code);
+      app_error = CS_ALGO_ERROR_RTL_UNKNOWN;
       break;
   }
-  (void)inst;
+
+  algo_error(inst, app_error, (sl_status_t)err_code);
 }
 
 /******************************************************************************
@@ -249,6 +289,7 @@ static void report_result(cs_algo_instance_t *inst,
       algo_log_error(INSTANCE_PREFIX "failed to append distance! [sc: 0x%lx]" LOG_NL,
                      inst->conn_handle,
                      (unsigned long)sc);
+      algo_error(inst, CS_ALGO_ERROR_RESULT_APPEND_FAILED, sc);
     } else {
       estimation_valid = true;
     }
@@ -269,6 +310,7 @@ static void report_result(cs_algo_instance_t *inst,
         algo_log_error(INSTANCE_PREFIX "failed to append sub mode distance! [sc: 0x%lx]" LOG_NL,
                        inst->conn_handle,
                        (unsigned long)sc);
+        algo_error(inst, CS_ALGO_ERROR_RESULT_APPEND_FAILED, sc);
       } else {
         estimation_valid = true;
       }
@@ -291,6 +333,7 @@ static void report_result(cs_algo_instance_t *inst,
       algo_log_error(INSTANCE_PREFIX "failed to append RAW distance! [sc: 0x%lx]" LOG_NL,
                      inst->conn_handle,
                      (unsigned long)sc);
+      algo_error(inst, CS_ALGO_ERROR_RESULT_APPEND_FAILED, sc);
     } else {
       estimation_valid = true;
     }
@@ -311,6 +354,7 @@ static void report_result(cs_algo_instance_t *inst,
         algo_log_error(INSTANCE_PREFIX "failed to append RAW sub mode distance! [sc: 0x%lx]" LOG_NL,
                        inst->conn_handle,
                        (unsigned long)sc);
+        algo_error(inst, CS_ALGO_ERROR_RESULT_APPEND_FAILED, sc);
       } else {
         estimation_valid = true;
       }
@@ -333,6 +377,7 @@ static void report_result(cs_algo_instance_t *inst,
       algo_log_error(INSTANCE_PREFIX "failed to append distance likeliness! [sc: 0x%lx]" LOG_NL,
                      inst->conn_handle,
                      (unsigned long)sc);
+      algo_error(inst, CS_ALGO_ERROR_RESULT_APPEND_FAILED, sc);
     } else {
       estimation_valid = true;
     }
@@ -353,6 +398,7 @@ static void report_result(cs_algo_instance_t *inst,
         algo_log_error(INSTANCE_PREFIX "failed to append sub mode distance likeliness! [sc: 0x%lx]" LOG_NL,
                        inst->conn_handle,
                        (unsigned long)sc);
+        algo_error(inst, CS_ALGO_ERROR_RESULT_APPEND_FAILED, sc);
       } else {
         estimation_valid = true;
       }
@@ -382,6 +428,7 @@ static void report_result(cs_algo_instance_t *inst,
       algo_log_error(INSTANCE_PREFIX "failed to append RSSI distance! [sc: 0x%lx]" LOG_NL,
                      inst->conn_handle,
                      (unsigned long)sc);
+      algo_error(inst, CS_ALGO_ERROR_RESULT_APPEND_FAILED, sc);
     } else {
       estimation_valid = true;
       param.type = SL_RTL_LAST_KNOWN_DISTANCE;
@@ -411,6 +458,7 @@ static void report_result(cs_algo_instance_t *inst,
         algo_log_error(INSTANCE_PREFIX "failed to append velocity! [sc: 0x%lx]" LOG_NL,
                        inst->conn_handle,
                        (unsigned long)sc);
+        algo_error(inst, CS_ALGO_ERROR_RESULT_APPEND_FAILED, sc);
       } else {
         estimation_valid = true;
       }
@@ -434,6 +482,7 @@ static void report_result(cs_algo_instance_t *inst,
         algo_log_error(INSTANCE_PREFIX "failed to append BER! [sc: 0x%lx]" LOG_NL,
                        inst->conn_handle,
                        (unsigned long)sc);
+        algo_error(inst, CS_ALGO_ERROR_RESULT_APPEND_FAILED, sc);
       } else {
         estimation_valid = true;
       }
@@ -540,7 +589,7 @@ static void build_rtl_cs_params(const cs_algo_config_t *src, sl_rtl_cs_params *d
 
 static cs_algo_instance_t *cs_algo_get_instance(uint8_t conn_handle)
 {
-  for (uint8_t i = 0; i < CS_ALGO_ESTIMATOR_COUNT; i++) {
+  for (uint8_t i = 0; i < CS_ALGO_CONFIG_ESTIMATOR_COUNT; i++) {
     if (algo_instances[i].in_use
         && algo_instances[i].conn_handle == conn_handle) {
       return &algo_instances[i];
@@ -551,7 +600,7 @@ static cs_algo_instance_t *cs_algo_get_instance(uint8_t conn_handle)
 
 static cs_algo_instance_t *cs_algo_get_free_slot(void)
 {
-  for (uint8_t i = 0; i < CS_ALGO_ESTIMATOR_COUNT; i++) {
+  for (uint8_t i = 0; i < CS_ALGO_CONFIG_ESTIMATOR_COUNT; i++) {
     if (!algo_instances[i].in_use) {
       return &algo_instances[i];
     }
@@ -561,7 +610,7 @@ static cs_algo_instance_t *cs_algo_get_free_slot(void)
 
 static cs_algo_instance_t *cs_algo_find_by_rtl_inst(sl_rtl_service_cs_inst_t *rtl_inst)
 {
-  for (uint8_t i = 0; i < CS_ALGO_ESTIMATOR_COUNT; i++) {
+  for (uint8_t i = 0; i < CS_ALGO_CONFIG_ESTIMATOR_COUNT; i++) {
     if (algo_instances[i].in_use
         && algo_instances[i].rtl_inst == rtl_inst) {
       return &algo_instances[i];
@@ -635,6 +684,8 @@ static enum sl_rtl_error_code rtl_service_configure_instance(const uint8_t conn_
 {
   enum sl_rtl_error_code rtl_err;
 
+  cs_algo_instance_t *inst = cs_algo_find_by_rtl_inst(rtl_inst);
+
   if (config->rtl_config.rtl_logging_enabled) {
     rtl_err = sl_rtl_service_enable_cs_log(rtl_inst);
     if (rtl_err != SL_RTL_ERROR_SUCCESS) {
@@ -642,6 +693,9 @@ static enum sl_rtl_error_code rtl_service_configure_instance(const uint8_t conn_
                                      "[E: 0x%x]" LOG_NL,
                      conn_handle,
                      rtl_err);
+      algo_error(inst,
+                 CS_ALGO_ERROR_CONFIGURE_FAILED,
+                 (sl_status_t)rtl_err);
       return rtl_err;
     }
   }
@@ -652,6 +706,9 @@ static enum sl_rtl_error_code rtl_service_configure_instance(const uint8_t conn_
                                    "[E: 0x%x]" LOG_NL,
                    conn_handle,
                    rtl_err);
+    algo_error(inst,
+               CS_ALGO_ERROR_CONFIGURE_FAILED,
+               (sl_status_t)rtl_err);
     return rtl_err;
   }
 
@@ -673,6 +730,9 @@ static enum sl_rtl_error_code rtl_service_configure_instance(const uint8_t conn_
                                    "[E: 0x%x]" LOG_NL,
                    conn_handle,
                    rtl_err);
+    algo_error(inst,
+               CS_ALGO_ERROR_CONFIGURE_FAILED,
+               (sl_status_t)rtl_err);
     return rtl_err;
   }
   rtl_err = sl_rtl_service_set_cs_params(rtl_inst, rtl_cs_parameters);
@@ -681,6 +741,9 @@ static enum sl_rtl_error_code rtl_service_configure_instance(const uint8_t conn_
                                    "[E: 0x%x]" LOG_NL,
                    conn_handle,
                    rtl_err);
+    algo_error(inst,
+               CS_ALGO_ERROR_CONFIGURE_FAILED,
+               (sl_status_t)rtl_err);
     return rtl_err;
   }
 
@@ -689,6 +752,9 @@ static enum sl_rtl_error_code rtl_service_configure_instance(const uint8_t conn_
     algo_log_error(INSTANCE_PREFIX "RTL - failed to create estimator! [E: 0x%x]" LOG_NL,
                    conn_handle,
                    rtl_err);
+    algo_error(inst,
+               CS_ALGO_ERROR_CONFIGURE_FAILED,
+               (sl_status_t)rtl_err);
     return rtl_err;
   }
   (void)conn_handle;
@@ -731,6 +797,9 @@ sl_status_t cs_algo_create(uint8_t conn_handle, cs_algo_config_t config)
   if (algo_rtl_svc_ctx == NULL) {
     algo_log_error(INSTANCE_PREFIX "RTL service context not initialized!" LOG_NL,
                    conn_handle);
+    algo_error(NULL,
+               CS_ALGO_ERROR_CREATE_FAILED,
+               SL_STATUS_NOT_INITIALIZED);
     return SL_STATUS_NOT_INITIALIZED;
   }
 
@@ -744,6 +813,7 @@ sl_status_t cs_algo_create(uint8_t conn_handle, cs_algo_config_t config)
   inst = cs_algo_get_free_slot();
   if (inst == NULL) {
     algo_log_error(INSTANCE_PREFIX "No free algo slots!" LOG_NL, conn_handle);
+    algo_error(NULL, CS_ALGO_ERROR_CREATE_FAILED, SL_STATUS_FULL);
     return SL_STATUS_FULL;
   }
 
@@ -759,6 +829,9 @@ sl_status_t cs_algo_create(uint8_t conn_handle, cs_algo_config_t config)
     algo_log_error(INSTANCE_PREFIX "RTL service - create instance failed! [E: 0x%x]" LOG_NL,
                    conn_handle,
                    rtl_err);
+    algo_error(inst,
+               CS_ALGO_ERROR_CREATE_FAILED,
+               (sl_status_t)rtl_err);
     inst->in_use = false;
     inst->rtl_inst = NULL;
     return SL_STATUS_FAIL;
@@ -806,6 +879,9 @@ sl_status_t cs_algo_remove(uint8_t conn_handle)
     if (rtl_err != SL_RTL_ERROR_SUCCESS) {
       algo_log_error(INSTANCE_PREFIX "RTL service - destroy instance failed! [E: 0x%x]" LOG_NL,
                      conn_handle, rtl_err);
+      algo_error(inst,
+                 CS_ALGO_ERROR_REMOVE_FAILED,
+                 (sl_status_t)rtl_err);
     }
   }
 
@@ -821,6 +897,7 @@ void cs_algo_process_ras_data(uint8_t conn_handle,
 {
   if (ranging_data == NULL) {
     algo_log_error(INSTANCE_PREFIX "Null RAS data!" LOG_NL, conn_handle);
+    algo_error(NULL, CS_ALGO_ERROR_INVALID_ARGUMENT, SL_STATUS_NULL_POINTER);
     return;
   }
 
@@ -828,6 +905,7 @@ void cs_algo_process_ras_data(uint8_t conn_handle,
   if (inst == NULL) {
     algo_log_error(INSTANCE_PREFIX "No algo instance for connection!" LOG_NL,
                         conn_handle);
+    algo_error(NULL, CS_ALGO_ERROR_INVALID_ARGUMENT, SL_STATUS_NOT_FOUND);
     return;
   }
 
@@ -835,6 +913,9 @@ void cs_algo_process_ras_data(uint8_t conn_handle,
     algo_log_error(INSTANCE_PREFIX "Estimator not created - "
                         "cs_algo_create() must run first!" LOG_NL,
                         conn_handle);
+    algo_error(inst,
+               CS_ALGO_ERROR_INVALID_ARGUMENT,
+               SL_STATUS_NOT_INITIALIZED);
     return;
   }
 
@@ -867,7 +948,7 @@ void cs_algo_process_ras_data(uint8_t conn_handle,
   inst->procedure_data.reflector_ras_measurement   = &inst->reflector_meas;
 
   algo_log_info(INSTANCE_PREFIX "RAS process start - "
-                     "ant:%u steps:%u i_sz:%lu r_sz:%lu" LOG_NL,
+                     "ant:%u steps:%u init_data_size:%lu refl_data_size:%lu" LOG_NL,
                      inst->conn_handle,
                      inst->config.num_antenna_paths,
                      ranging_data->num_steps,
@@ -877,7 +958,7 @@ void cs_algo_process_ras_data(uint8_t conn_handle,
   // Submit to rtl_service, the result is dispatched via
   // cs_algo_rtl_service_result_cb, which fires synchronously (bare-metal) 
   // or asynchronously (RTOS)
-  #if !defined(CS_ALGO_SKIP_RTL_PROCESS) || (CS_ALGO_SKIP_RTL_PROCESS == 0)
+  #if !defined(CS_ALGO_CONFIG_SKIP_RTL_PROCESS) || (CS_ALGO_CONFIG_SKIP_RTL_PROCESS == 0)
   enum sl_rtl_error_code rtl_err = sl_rtl_service_process_ras(inst->rtl_inst,
                                                               &inst->procedure_data);
   algo_log_info(INSTANCE_PREFIX "RTL service RAS submit done [E: 0x%x]" LOG_NL,
@@ -894,5 +975,5 @@ void cs_algo_process_ras_data(uint8_t conn_handle,
   algo_log_debug(INSTANCE_PREFIX "RTL process skipped" LOG_NL, inst->conn_handle);
   (void)cs_rreq_set_process_finished(inst->conn_handle, inst->ranging_counter);
   inst->ranging_data = NULL;
-  #endif // CS_ALGO_SKIP_RTL_PROCESS
+  #endif // !defined(CS_ALGO_CONFIG_SKIP_RTL_PROCESS) || (CS_ALGO_CONFIG_SKIP_RTL_PROCESS == 0)
 }

@@ -33,8 +33,9 @@
 
 #include "sl_common.h"
 #include "cs_configurator.h"
-#include "cs_configurator_optimization.h"
-#include "cs_configurator_rtllib.h"
+#include "cs_configurator_optimization_internal.h"
+#include "cs_configurator_rtllib_internal.h"
+#include "cs_common.h"
 
 // -----------------------------------------------------------------------------
 // Definitions
@@ -70,58 +71,75 @@ static uint16_t calc_min_proc_interval(uint32_t estimation_time_us,
                                        uint16_t conn_interval);
 
 static uint32_t calc_measurement_time_us(cs_channel_map_preset_t channel_map_preset,
-                                         cs_tone_antenna_config_index_t num_antennas);
+                                         uint8_t num_antenna_paths);
 static uint32_t calc_ras_data_time_us(cs_channel_map_preset_t channel_map_preset,
-                                      cs_tone_antenna_config_index_t num_antennas);
+                                      uint8_t num_antenna_paths);
 
 // -----------------------------------------------------------------------------
 // Public function definitions
 
+void cs_configurator_apply_channel_map_preset(cs_channel_map_preset_t preset,
+                                              uint8_t *channel_map)
+{
+  switch (preset) {
+    case CS_CHANNEL_MAP_PRESET_MEDIUM:
+    {
+      uint8_t channel_map_medium[10] = { 0x54, 0x55, 0x55, 0x54, 0x55, 0x55, 0x55, 0x55, 0x55, 0x15 };
+      memcpy(channel_map, channel_map_medium, sizeof(channel_map_medium));
+    }
+    break;
+    case CS_CHANNEL_MAP_PRESET_HIGH:
+    {
+      uint8_t channel_map_high[10] = { 0xFC, 0xFF, 0x7F, 0xFC, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x1F };
+      memcpy(channel_map, channel_map_high, sizeof(channel_map_high));
+    }
+    break;
+    case CS_CHANNEL_MAP_PRESET_CUSTOM:
+    {
+       // Do nothing
+    }
+    break;
+    default:
+      // No other values allowed
+      break;
+  }
+}
+
 sl_status_t cs_configurator_get_estimation_time_us(cs_configurator_parameters_t *input,
-                                                   uint8_t algo_mode,
+                                                   cs_algo_mode_t algo_mode,
+                                                   cs_channel_map_preset_t channel_map_preset,
                                                    uint32_t clock_frequency_hz,
-                                                   uint32_t *estimation_time_us_out,
-                                                   //TODO: remove WIP when CS Manager is ready
-                                                   cs_channel_map_preset_t WIP_channel_map_preset,
-                                                   sl_bt_cs_mode_t WIP_main_mode,
-                                                   sl_bt_cs_mode_t WIP_sub_mode)
+                                                   uint8_t num_antenna_paths,
+                                                   uint32_t *estimation_time_us_out)
 {
   return cs_configurator_rtllib_get_estimation_time_us(input,
                                                        algo_mode,
+                                                       channel_map_preset,
                                                        clock_frequency_hz,
-                                                       estimation_time_us_out,
-                                                       WIP_channel_map_preset,
-                                                       WIP_main_mode,
-                                                       WIP_sub_mode);
+                                                       num_antenna_paths,
+                                                       estimation_time_us_out);
 }
 
-sl_status_t cs_configurator_validate(uint32_t estimation_time_us,
+sl_status_t cs_configurator_validate(cs_configurator_parameters_t *config,
+                                     cs_channel_map_preset_t channel_map_preset,
+                                     uint32_t estimation_time_us,
                                      uint8_t peer_count,
-                                     cs_configurator_parameters_t *config,
-                                     //TODO: remove WIP when CS Manager is ready
-                                     bool WIP_use_real_time_ras,
-                                     cs_channel_map_preset_t WIP_channel_map_preset,
-                                     cs_tone_antenna_config_index_t WIP_num_antennas,
-                                     uint16_t WIP_min_procedure_interval,
-                                     uint16_t WIP_min_connection_interval,
-                                     uint16_t WIP_max_procedure_interval,
-                                     uint16_t WIP_max_connection_interval)
+                                     uint8_t num_antenna_paths)
 {
-  uint16_t min_procedure_interval = WIP_min_procedure_interval;
-  uint16_t max_procedure_interval = WIP_max_procedure_interval;
-  uint16_t min_connection_interval = WIP_min_connection_interval;
-  uint16_t max_connection_interval = WIP_max_connection_interval;
-  //TODO: Uncomment when CS Manager is ready
-  (void)config;
-  //if (config == NULL || 
-  //    config->cs_instance_config == NULL || 
-  //    config->cs_config == NULL) {
-  //  return SL_STATUS_NULL_POINTER;
-  //}
+  if ((config == NULL)
+      || (config->cs_instance_config == NULL)
+      || (config->cs_procedure_parameters == NULL)
+      || (config->connection_parameters == NULL)) {
+    return SL_STATUS_NULL_POINTER;
+  }
 
   if (peer_count == 0) {
     return SL_STATUS_INVALID_PARAMETER;
   }
+  uint16_t min_procedure_interval = config->cs_procedure_parameters->min_procedure_interval;
+  uint16_t max_procedure_interval = config->cs_procedure_parameters->max_procedure_interval;
+  uint16_t min_connection_interval = config->connection_parameters->min_connection_interval;
+  uint16_t max_connection_interval = config->connection_parameters->max_connection_interval;
 
   // Validate the connection interval
   if (min_connection_interval > max_connection_interval) {
@@ -137,15 +155,15 @@ sl_status_t cs_configurator_validate(uint32_t estimation_time_us,
   }
 
   // Calculate estimation time and RAS data transfer time
-  uint32_t measurement_time_us = calc_measurement_time_us(WIP_channel_map_preset,
-                                                          WIP_num_antennas);
-  uint32_t ras_data_time_us = calc_ras_data_time_us(WIP_channel_map_preset,
-                                                    WIP_num_antennas);
+  uint32_t measurement_time_us = calc_measurement_time_us(channel_map_preset,
+                                                          num_antenna_paths);
+  uint32_t ras_data_time_us = calc_ras_data_time_us(channel_map_preset,
+                                                    num_antenna_paths);
   uint16_t min_proc_interval_for_config = calc_min_proc_interval(estimation_time_us,
                                                                  measurement_time_us,
                                                                  ras_data_time_us,
-                                                                 WIP_use_real_time_ras,
-                                                                 WIP_min_connection_interval);
+                                                                 config->rreq_config->real_time_mode,
+                                                                 min_connection_interval);
   if ((min_proc_interval_for_config * peer_count) > min_procedure_interval) {
     return SL_STATUS_INVALID_PARAMETER;
   }
@@ -154,25 +172,23 @@ sl_status_t cs_configurator_validate(uint32_t estimation_time_us,
 }
 
 sl_status_t cs_configurator_optimize(cs_procedure_scheduling_t scheduling,
+                                     cs_channel_map_preset_t channel_map_preset,
                                      uint32_t estimation_time_us,
                                      uint8_t peer_count,
-                                     cs_configurator_parameters_t *parameters_inout,
-                                     //TODO: remove WIP when CS Manager is ready
-                                     bool WIP_use_real_time_ras,
-                                     cs_channel_map_preset_t WIP_channel_map_preset,
-                                     cs_tone_antenna_config_index_t WIP_num_antennas,
-                                     uint16_t *WIP_conn_interval_out,
-                                     uint16_t *WIP_proc_interval_out
-                                     )
+                                     uint8_t num_antenna_paths,
+                                     cs_configurator_parameters_t *parameters_inout)
 {
-  //TODO: Remove this when CS Manager is ready
-  (void)parameters_inout;
+  if ((parameters_inout == NULL)
+      || (parameters_inout->connection_parameters == NULL)
+      || (parameters_inout->cs_procedure_parameters == NULL)
+      || (parameters_inout->rreq_config == NULL)) {
+    return SL_STATUS_NULL_POINTER;
+  }
 
   uint32_t conn_interval = CS_CONFIGURATOR_OPTIMIZE_INITIAL_CONN_INTERVAL;
   uint32_t proc_interval = CS_CONFIGURATOR_OPTIMIZE_INITIAL_PROC_INTERVAL;
-  bool use_real_time_ras = WIP_use_real_time_ras;
-  cs_tone_antenna_config_index_t num_antennas = WIP_num_antennas;
-  cs_channel_map_preset_t channel_map_preset = WIP_channel_map_preset;
+  bool use_real_time_ras = parameters_inout->rreq_config->real_time_mode;
+
   if (scheduling == CS_PROCEDURE_SCHEDULING_CUSTOM) {
     return SL_STATUS_IDLE;
   }
@@ -182,10 +198,10 @@ sl_status_t cs_configurator_optimize(cs_procedure_scheduling_t scheduling,
   }
 
   uint32_t measurement_time_us = calc_measurement_time_us(channel_map_preset, 
-                                                          num_antennas);
+                                                          num_antenna_paths);
   // Excluding RAS overhead
   uint32_t ras_data_time_us = calc_ras_data_time_us(channel_map_preset,
-                                                    num_antennas);
+                                                    num_antenna_paths);
 
   // Set bounds for conn_interval based on scheduling
   uint32_t conn_interval_lower_bound = CS_CONFIGURATOR_OPTIMIZE_FREQUENCY_CONN_INTERVAL_LOWER_BOUND;
@@ -218,10 +234,18 @@ sl_status_t cs_configurator_optimize(cs_procedure_scheduling_t scheduling,
       || conn_interval >= CS_CONFIGURATOR_OPTIMIZE_INITIAL_CONN_INTERVAL) {
     return SL_STATUS_FAIL;
   }
+  if (conn_interval > UINT16_MAX) {
+    return SL_STATUS_WOULD_OVERFLOW;
+  }
+  if (proc_interval > UINT16_MAX) {
+    return SL_STATUS_WOULD_OVERFLOW;
+  }
 
   // Write to parameters_inout
-  *WIP_conn_interval_out = (uint16_t)(conn_interval & 0xFFFF);
-  *WIP_proc_interval_out = (uint16_t)(proc_interval & 0xFFFF);
+  parameters_inout->connection_parameters->max_connection_interval = (uint16_t)conn_interval;
+  parameters_inout->connection_parameters->min_connection_interval = (uint16_t)conn_interval;
+  parameters_inout->cs_procedure_parameters->max_procedure_interval = (uint16_t)proc_interval;
+  parameters_inout->cs_procedure_parameters->min_procedure_interval = (uint16_t)proc_interval;
 
   return SL_STATUS_OK;
 }
@@ -293,7 +317,7 @@ static uint16_t calc_min_proc_interval(uint32_t estimation_time_us,
 }
 
 static uint32_t calc_measurement_time_us(cs_channel_map_preset_t channel_map_preset,
-                                         cs_tone_antenna_config_index_t num_antennas)
+                                         uint8_t num_antenna_paths)
 {
   // Start with the base measurement time (for high channel map, dual antenna, pbr)
   uint32_t measurement_time_us = CS_CONFIGURATOR_MEASUREMENT_BASE_US;
@@ -304,9 +328,9 @@ static uint32_t calc_measurement_time_us(cs_channel_map_preset_t channel_map_pre
                                      CS_CONFIGURATOR_MEASUREMENT_RATIO_CHANNEL_MAP_HIGH_TO_MEDIUM);
   }
   // Apply the time ratio for the antenna paths
-  switch (num_antennas) {
-    case CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R:
-    case CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R:
+  switch (num_antenna_paths) {
+    case CS_ANTENNA_CONFIG_INDEX_DUAL_LOCAL_SINGLE_REMOTE:
+    case CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_DUAL_REMOTE:
       CS_CONFIGURATOR_APPLY_TIME_RATIO(measurement_time_us,
                                        CS_CONFIGURATOR_MEASUREMENT_RATIO_ANTENNA_PATHS_4_TO_2);
       break;
@@ -327,7 +351,7 @@ static uint32_t calc_measurement_time_us(cs_channel_map_preset_t channel_map_pre
 }
 
 static uint32_t calc_ras_data_time_us(cs_channel_map_preset_t channel_map_preset,
-                                      cs_tone_antenna_config_index_t num_antennas)
+                                      uint8_t num_antenna_paths)
 {
   // Start with the base RAS data time 
   // (for high channel map, dual antenna, pbr)
@@ -340,9 +364,9 @@ static uint32_t calc_ras_data_time_us(cs_channel_map_preset_t channel_map_preset
                                      CS_CONFIGURATOR_RAS_DATA_RATIO_CHANNEL_MAP_HIGH_TO_MEDIUM);
   }
   // Apply the time ratio for the antenna paths
-  switch (num_antennas) {
-    case CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R:
-    case CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R:
+  switch (num_antenna_paths) {
+    case CS_ANTENNA_CONFIG_INDEX_DUAL_LOCAL_SINGLE_REMOTE:
+    case CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_DUAL_REMOTE:
       CS_CONFIGURATOR_APPLY_TIME_RATIO(ras_data_time_excluding_on_demand_overhead_us,
                                        CS_CONFIGURATOR_RAS_DATA_RATIO_ANTENNA_PATHS_4_TO_2);
       break;

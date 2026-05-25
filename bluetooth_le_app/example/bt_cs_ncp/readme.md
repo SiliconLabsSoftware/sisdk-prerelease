@@ -38,10 +38,8 @@ Build and flash the application. Use the "bt_cs_host" host sample application to
 
 ## Multiconnection
 
-- Default setup is optimized for 1-1 connection, multiconnection setup requires modification of the timing parameters to operate as expected. Timing can be adjusted by the procedure_interval and connection_interval parameters.
-- Use the following calculation for 1-N connection: procedure_time_1_N[ms] = connection_interval[ms] * procedure_interval * N
-- Note that setting CS_INITIATOR_DEFAULT_MIN/MAX_CONNECTION_INTERVAL and CS_INITIATOR_DEFAULT_MIN/MAX_PROCEDURE_INTERVAL will only take effect if CS_INITIATOR_DEFAULT_PROCEDURE_SCHEDULING is set to CS_PROCEDURE_SCHEDULING_CUSTOM. Otherwise these parameters are managed by the application.
-- If getting frequent measurement results is not priority, it's safe to use procedure_interval = 120 and connection_interval = 24 even with the maximum number of connections (4).
+- Default setup is able to handle up to 4 initiator instances. Set the number of connections using CS_INITIATOR_MAX_CONNECTIONS.
+- If more than 2 initiator instances are created it is recommended to set CS_INITIATOR_DISABLE_CONNECTION_PARAMETER_UPDATE to 1. This disables dynamic connection parameter updates, and uses default values to improve multiconnection stability.
 - If more than 1 initiator instances are created increase SL_BT_CONFIG_BUFFER_SIZE. With maximum number of instances (4) it's safe to use 22000.
 
 ## Resource optimization
@@ -98,6 +96,7 @@ When using multiple subevents:
 - Ensure that the effective procedure interval is at least the number of created subevents, plus additional connection events for RAS data transfer.
   The effective procedure interval is determined by CS_INITIATOR_DEFAULT_PROCEDURE_SCHEDULING, or by CS_INITIATOR_DEFAULT_MAX_PROCEDURE_INTERVAL when custom scheduling is used.
 - The minimum subevent length must fit within the procedure time window: max_procedure_interval * max_connection_interval * 1250 us.
+- As each subevent contains Mode 0 steps followed by main mode steps, the subevent length must be large enough to accommodate their combined duration.
 
 The following table shows example scenarios with other configuration parameters left at their defaults. 
 

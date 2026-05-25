@@ -3,7 +3,7 @@
  * @brief CS initiator - core implementation
  *******************************************************************************
  * # License
- * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -767,7 +767,7 @@ sl_status_t cs_initiator_create(const uint8_t               conn_handle,
                                              initiator->rtl_config.algo_mode,
                                              initiator->config.cs_tone_antenna_config_idx,
                                              initiator->config.use_real_time_ras_mode,
-                                             1,
+                                             CS_INITIATOR_MAX_CONNECTIONS,
                                              &conn_interval,
                                              &proc_interval);
     if (sc != SL_STATUS_OK) {
@@ -795,6 +795,9 @@ sl_status_t cs_initiator_create(const uint8_t               conn_handle,
     }
   }
 
+  // Use connection parameter update only if not disabled or the config is undefined.
+  #if (!(defined(CS_INITIATOR_DISABLE_CONNECTION_PARAMETER_UPDATE)) \
+      || !CS_INITIATOR_DISABLE_CONNECTION_PARAMETER_UPDATE)
   // Request connection parameter update.
   sc = sl_bt_connection_set_parameters(initiator->conn_handle,
                                        initiator->config.min_connection_interval,
@@ -812,6 +815,8 @@ sl_status_t cs_initiator_create(const uint8_t               conn_handle,
       CS_ERROR_EVENT_INITIATOR_FAILED_TO_SET_CONNECTION_PARAMETERS;
     goto cleanup;
   }
+  #endif // (!(defined(CS_INITIATOR_DISABLE_CONNECTION_PARAMETER_UPDATE))
+         // || !CS_INITIATOR_DISABLE_CONNECTION_PARAMETER_UPDATE)
 
   sc = sl_bt_connection_set_preferred_phy(conn_handle, initiator->config.conn_phy, sl_bt_gap_phy_any);
   if (sc != SL_STATUS_OK) {
@@ -849,6 +854,30 @@ sl_status_t cs_initiator_create(const uint8_t               conn_handle,
   (void)initiator_state_machine_event_handler(initiator,
                                               INITIATOR_EVT_INIT_STARTED,
                                               NULL);
+
+  // Used when connection parameter update is disabled.
+  #if (defined(CS_INITIATOR_DISABLE_CONNECTION_PARAMETER_UPDATE) \
+      && (CS_INITIATOR_DISABLE_CONNECTION_PARAMETER_UPDATE))
+  // The application is responsible for setting the default connection
+  // parameters, so no further sl_bt_evt_connection_parameters_id event is
+  // expected once the instance has been created. Start RAS discovery now if
+  // security has already been established.
+  initiator->conn_interval = initiator->config.max_connection_interval;
+  initiator->connection_parameters_set = true;
+  if (initiator->security_mode != sl_bt_connection_mode1_level1
+      && initiator->ras_client.state == RAS_STATE_INIT) {
+    sc = sl_bt_gatt_discover_primary_services(initiator->conn_handle);
+    if (sc != SL_STATUS_OK && sc != SL_STATUS_IN_PROGRESS) {
+      initiator_log_error(INSTANCE_PREFIX "failed to start RAS service discovery!" LOG_NL,
+                          initiator->conn_handle);
+      initiator_err = CS_ERROR_EVENT_START_SERVICE_DISCOVERY;
+      goto cleanup;
+    }
+    initiator->ras_client.state = RAS_STATE_SERVICE_DISCOVERY;
+    init_cs_configuration(initiator->conn_handle);
+  }
+  #endif // (defined(CS_INITIATOR_DISABLE_CONNECTION_PARAMETER_UPDATE)
+         // && (CS_INITIATOR_DISABLE_CONNECTION_PARAMETER_UPDATE))
   cleanup:
   if (sc != SL_STATUS_OK) {
     on_error(initiator, initiator_err, sc);
@@ -1426,6 +1455,9 @@ bool cs_initiator_on_event(sl_bt_msg_t *evt)
       // initiation or the value set by local or the peer user.
       initiator->conn_interval = evt->data.evt_connection_parameters.interval;
 
+      // Use connection parameter update only if not disabled or the config is undefined.
+      #if (!(defined(CS_INITIATOR_DISABLE_CONNECTION_PARAMETER_UPDATE)) \
+          || !CS_INITIATOR_DISABLE_CONNECTION_PARAMETER_UPDATE)
       // Check if the connection parameters are set correctly the first time.
       if (!cs_initiator_check_connection_parameters(initiator, &evt->data.evt_connection_parameters)
           && !initiator->connection_parameters_set) {
@@ -1440,7 +1472,7 @@ bool cs_initiator_on_event(sl_bt_msg_t *evt)
                                              initiator->config.max_ce_length);
         if (sc != SL_STATUS_OK) {
           initiator_log_warning(INSTANCE_PREFIX "CS - failed to set connection parameters again!"
-                                                "Proceeding with current values!" LOG_NL,
+                                              "Proceeding with current values!" LOG_NL,
                                 initiator->conn_handle);
           // Set connection parameters request failed again immediately,
           // proceed with the current values.
@@ -1450,7 +1482,25 @@ bool cs_initiator_on_event(sl_bt_msg_t *evt)
         // Connection parameters set, no need to retry.
         initiator->connection_parameters_set = true;
       }
-
+      // Used when connection parameter update is disabled.
+      #else // !(defined(CS_INITIATOR_DISABLE_CONNECTION_PARAMETER_UPDATE))
+            // || !CS_INITIATOR_DISABLE_CONNECTION_PARAMETER_UPDATE
+      // Warn if the negotiated connection parameters do not match the expected
+      // configuration. The application is responsible for setting the default
+      // connection parameters; proceed with the current values regardless.
+      if (!cs_initiator_check_connection_parameters(initiator, &evt->data.evt_connection_parameters)) {
+        initiator_log_error(INSTANCE_PREFIX "CS - negotiated connection parameters "
+                                              "do not match the expected configuration. "
+                                              "Aborting connection!" LOG_NL,
+                            initiator->conn_handle);
+        on_error(initiator,
+                  CS_ERROR_EVENT_INITIATOR_FAILED_TO_SET_CONNECTION_PARAMETERS,
+                  SL_STATUS_INVALID_STATE);
+        break;
+      }
+      initiator->connection_parameters_set = true;
+      #endif // !(defined(CS_INITIATOR_DISABLE_CONNECTION_PARAMETER_UPDATE))
+             // || !CS_INITIATOR_DISABLE_CONNECTION_PARAMETER_UPDATE
       // Only proceed with the RAS discovery if the connection parameters set.
       if (initiator->connection_parameters_set
           && evt->data.evt_connection_parameters.security_mode

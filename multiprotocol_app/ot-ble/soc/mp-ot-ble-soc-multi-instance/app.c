@@ -32,11 +32,14 @@
 #define CURRENT_MODULE_NAME "OPENTHREAD_BLE_DMP_MULTI_INSTANCE_APP"
 
 #include <assert.h>
+#include <stdint.h>
+
 #include <openthread-core-config.h>
 #include <openthread/config.h>
 
 #include <openthread/cli.h>
 #include <openthread/diag.h>
+#include <openthread/instance.h>
 #include <openthread/tasklet.h>
 
 #include "app.h"
@@ -78,13 +81,6 @@ static otInstance *sInstances[OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM] = {NULL};
 static bool        sButtonPressed                                      = false;
 static bool        sStayAwake                                          = true;
 
-otInstance *otGetInstance(void)
-{
-    // Return the current active instance
-    uint8_t currentIndex = sl_ot_get_current_instance_index();
-    return sInstances[currentIndex];
-}
-
 #if (defined(SL_CATALOG_BTN0_PRESENT) || defined(SL_CATALOG_BTN1_PRESENT))
 void sl_button_on_change(const sl_button_t *handle)
 {
@@ -98,6 +94,11 @@ void sl_button_on_change(const sl_button_t *handle)
 
 void sl_ot_rtos_application_tick(void)
 {
+    if (sl_ot_should_change_instance())
+    {
+        sl_ot_switch_to_instance_index(sl_ot_get_new_instance_index());
+    }
+
     if (sButtonPressed)
     {
         sButtonPressed = false;
@@ -121,6 +122,19 @@ void sl_ot_rtos_application_tick(void)
  * Provide, if required an "otPlatLog()" function
  */
 #if OPENTHREAD_CONFIG_LOG_OUTPUT == OPENTHREAD_CONFIG_LOG_OUTPUT_APP
+#if OPENTHREAD_CONFIG_LOG_INSTANCE_AWARE_API_ENABLE
+void otPlatLogOutput(otInstance *aInstance, otLogLevel aLogLevel, const char *aLogLine)
+{
+    uint8_t instanceIndex = 0;
+
+    if (aInstance != NULL)
+    {
+        instanceIndex = otInstanceGetIndex(aInstance);
+    }
+
+    otPlatLog(aLogLevel, OT_LOG_REGION_CORE, "[%u] %s", instanceIndex, aLogLine);
+}
+#endif
 void otPlatLog(otLogLevel aLogLevel, otLogRegion aLogRegion, const char *aFormat, ...)
 {
     OT_UNUSED_VARIABLE(aLogLevel);
@@ -201,12 +215,4 @@ void app_exit(void)
             sInstances[i] = NULL;
         }
     }
-}
-
-/******************************************************************************
- * Multi-instance accessor functions
- *****************************************************************************/
-otInstance **sl_ot_get_instances_array(void)
-{
-    return sInstances;
 }

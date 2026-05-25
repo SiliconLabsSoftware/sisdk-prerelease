@@ -107,10 +107,6 @@ configuration:
     value: 16384
     condition: [toolchain_lto, freertos]
 
-define:
-  - name: OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
-    value: 0
-
 tag:
   - prebuilt_demo
   - hwfilter:device:device_supports_thread

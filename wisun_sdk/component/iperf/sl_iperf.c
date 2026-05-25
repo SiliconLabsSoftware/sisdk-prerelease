@@ -42,7 +42,7 @@
 #include "sl_iperf_util.h"
 
 #if !defined(SL_IPERF_CMSIS_RTOS_DISABLED)
-#include "em_common.h"
+#include "sl_common.h"
 #include "cmsis_os2.h"
 #include "sl_status.h"
 #include "sl_cmsis_os2_common.h"
@@ -142,7 +142,7 @@ static const osMutexAttr_t _iperf_mtx_attr = {
 #endif
 
 /// Receive buffer for Server test
-static uint8_t _iperf_buff[SL_IPERF_BUFFER_SIZE] = { 0 };
+SL_ALIGN(4) static uint8_t _iperf_buff[SL_IPERF_BUFFER_SIZE] SL_ATTRIBUTE_ALIGN(4) = { 0 };
 
 /// Default log instance
 static sl_iperf_log_t _def_log = { 0 };

@@ -220,6 +220,9 @@ tag:
   - hwfilter:!device:rm21z000f1024im32
   - hwfilter:board:simple_button:btn0
   - hwfilter:board:simple_button:btn1
+  - toolchain:gcc
+  - toolchain:iar
+  - toolchain:llvm
 readme:
   - path: ./readme.md
 

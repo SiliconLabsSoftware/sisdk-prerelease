@@ -280,7 +280,12 @@ SL_ENUM(cs_ras_cp_response_code_value_t) {
 #define CS_RAS_CHAR_UUID_RANGING_DATA_OVERWRITTEN 0x2C19
 
 // Invalid characteristic handle
-#define CS_RAS_INVALID_CHARACTERISTIC_HANDLE       0xFFFF
+#define CS_RAS_INVALID_CHARACTERISTIC_HANDLE       (UINT16_MAX)
+// Invalid service handle
+#define CS_RAS_INVALID_SERVICE_HANDLE              (UINT32_MAX)
+
+// RAS service UUID 
+#define CS_RAS_SERVICE_UUID                        0x185B
 
 // Invalid ranging counter value
 #define CS_RAS_INVALID_RANGING_COUNTER             0xFFFF

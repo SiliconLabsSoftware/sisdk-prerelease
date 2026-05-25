@@ -54,8 +54,8 @@ component:
   - id: rail_util_ble_cs_antenna_offset
   - id: refactor_cs_reflector
   - id: refactor_cs_initiator
-  - id: refactor_cs_result
-  - id: refactor_cs_antenna
+  - id: cs_result
+  - id: cs_antenna
   - id: cs_rreq
   - id: cs_rrsp
   - id: cs_acp_target
@@ -142,7 +142,6 @@ post_build:
     condition: [device_series_2, bootloader_app_properties]
 
 tag:
-  - prebuilt_demo
   - toolchain:gcc
   - toolchain:llvm
   - hwfilter:device:device_supports_bluetooth

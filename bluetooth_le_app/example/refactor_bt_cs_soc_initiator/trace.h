@@ -57,14 +57,22 @@
     sl_iostream_printf(sl_iostream_recommended_console_stream, __VA_ARGS__); \
   } while (0)
 
+#define log_warning(...)                                                     \
+  do {                                                                       \
+    app_log_warning(__VA_ARGS__);                                            \
+    sl_iostream_printf(sl_iostream_recommended_console_stream, __VA_ARGS__); \
+  } while (0)
+
 #define log_error(...)                                                       \
   do {                                                                       \
     app_log_error(__VA_ARGS__);                                              \
     sl_iostream_printf(sl_iostream_recommended_console_stream, __VA_ARGS__); \
   } while (0)
+
 #else
 #define log_debug(...)   app_log_debug(__VA_ARGS__)
 #define log_info(...)    app_log_info(__VA_ARGS__)
+#define log_warning(...) app_log_warning(__VA_ARGS__)
 #define log_error(...)   app_log_error(__VA_ARGS__)
 #define log_append(...)  app_log_append_info(__VA_ARGS__)
 #endif

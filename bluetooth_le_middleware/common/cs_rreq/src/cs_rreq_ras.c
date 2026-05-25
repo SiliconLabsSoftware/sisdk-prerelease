@@ -628,7 +628,7 @@ static void handle_abort_finished(rreq_t *rreq, const cs_rreq_ras_evt_t *evt)
                 rreq->conn_handle,
                 (unsigned long)evt->data.abort_finished.sc,
                 (unsigned long)evt->data.abort_finished.response);
-  rreq->state = (uint8_t)RREQ_STATE_IN_PROCEDURE;
+  set_state(rreq, RREQ_STATE_IN_PROCEDURE);
   rreq_log_info(INSTANCE_PREFIX "Instance new state: IN_PROCEDURE" LOG_NL,
                 rreq->conn_handle);
 }

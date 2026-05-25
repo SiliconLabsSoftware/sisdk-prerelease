@@ -53,7 +53,7 @@ component:
 include:
   - path: ../mp-ot-ble-soc
     file_list:
-    - path: app.h
+      - path: app.h
 
 source:
   - path: ../mp-ot-ble-soc/app.c

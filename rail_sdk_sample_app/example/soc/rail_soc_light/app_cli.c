@@ -64,10 +64,6 @@
 // -----------------------------------------------------------------------------
 //                                Global Variables
 // -----------------------------------------------------------------------------
-//indicates if light bulb toggle is required
-extern bool cli_toggle_light_required;
-//indicates if state change is required
-extern bool cli_change_state_required;
 // -----------------------------------------------------------------------------
 //                                Static Variables
 // -----------------------------------------------------------------------------
@@ -95,7 +91,7 @@ void cli_info(sl_cli_command_arg_t *arguments)
 void cli_toggle_light(sl_cli_command_arg_t *arguments)
 {
   (void) arguments;
-  cli_toggle_light_required = true;
+  light_bulb_toggle_required = true;
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   app_task_notify();
 #endif
@@ -107,7 +103,7 @@ void cli_toggle_light(sl_cli_command_arg_t *arguments)
 void cli_change_status(sl_cli_command_arg_t *arguments)
 {
   (void) arguments;
-  cli_change_state_required = true;
+  state_change_required = true;
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   app_task_notify();
 #endif

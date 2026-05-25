@@ -67,17 +67,9 @@
  */
 extern void otAppCliInit(otInstance *aInstance);
 
-#if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
-static uint8_t *sOtInstanceBuffer = NULL;
-#endif
 static otInstance *sInstance      = NULL;
 static bool        sButtonPressed = false;
 static bool        sStayAwake     = true;
-
-otInstance *otGetInstance(void)
-{
-    return sInstance;
-}
 
 #if (defined(SL_CATALOG_BTN0_PRESENT) || defined(SL_CATALOG_BTN1_PRESENT))
 void sl_button_on_change(const sl_button_t *handle)
@@ -130,21 +122,7 @@ void otPlatLog(otLogLevel aLogLevel, otLogRegion aLogRegion, const char *aFormat
 
 void sl_ot_create_instance(void)
 {
-#if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
-    size_t otInstanceBufferLength = 0;
-
-    // Call to query the buffer size
-    (void)otInstanceInit(NULL, &otInstanceBufferLength);
-
-    // Call to allocate the buffer
-    sOtInstanceBuffer = (uint8_t *)sl_malloc(otInstanceBufferLength);
-    assert(sOtInstanceBuffer);
-
-    // Initialize OpenThread with the buffer
-    sInstance = otInstanceInit(sOtInstanceBuffer, &otInstanceBufferLength);
-#else
     sInstance = otInstanceInitSingle();
-#endif
     assert(sInstance);
 }
 
@@ -177,8 +155,5 @@ void app_process_action(void)
 void app_exit(void)
 {
     otInstanceFinalize(sInstance);
-#if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
-    sl_free(sOtInstanceBuffer);
-#endif
     // TO DO : pseudo reset?
 }

@@ -31,17 +31,9 @@
 // -----------------------------------------------------------------------------
 // Includes
 
-#include "cs_configurator_rtllib.h"
-#include "cs_configurator_rtllib_parameters.h"
-
-// -----------------------------------------------------------------------------
-// Enums, structs, typedefs
-
-typedef enum {
-  CS_ALGO_MODE_REAL_TIME_BASIC = 0,
-  CS_ALGO_MODE_STATIC_HIGH_ACCURACY,
-  CS_ALGO_MODE_REAL_TIME_FAST,
-} cs_algo_mode_t;
+#include "cs_configurator_rtllib_internal.h"
+#include "cs_configurator_rtllib_parameters_internal.h"
+#include "cs_common.h"
 
 // -----------------------------------------------------------------------------
 // Static function declarations
@@ -134,30 +126,28 @@ static sl_status_t cs_configurator_cycles_to_us(uint64_t cycles,
 // Public function definitions
 
 sl_status_t cs_configurator_rtllib_get_estimation_time_us(cs_configurator_parameters_t *input,
-                                                          uint8_t algo_mode,
+                                                          cs_algo_mode_t algo_mode,
+                                                          cs_channel_map_preset_t channel_map_preset,
                                                           uint32_t clock_frequency_hz,
-                                                          uint32_t *estimation_time_us,
-                                                          //TODO: remove WIP when CS Manager is ready
-                                                          cs_channel_map_preset_t WIP_channel_map_preset,
-                                                          sl_bt_cs_mode_t WIP_main_mode,
-                                                          sl_bt_cs_mode_t WIP_sub_mode)
+                                                          uint8_t num_antenna_paths,
+                                                          uint32_t *estimation_time_us)
 {
+  (void)num_antenna_paths; // TODO: use num_antenna_paths
+  
   uint64_t cycles = 0;
   uint8_t row = 0;
   uint8_t col = 0;
   sl_status_t sc = SL_STATUS_OK;
-  cs_channel_map_preset_t channel_map_preset = WIP_channel_map_preset;
-  sl_bt_cs_mode_t main_mode = WIP_main_mode;
-  sl_bt_cs_mode_t sub_mode = WIP_sub_mode;
 
-  //TODO: Uncomment when CS Manager is ready
-  (void)input;
-  //if (input == NULL || 
-  //    estimation_time_us == NULL || 
-  //    input->cs_config == NULL || 
-  //    input->cs_instance_config == NULL) {
-  //  return SL_STATUS_NULL_POINTER;
-  //}
+  if ((input == NULL)
+      || (estimation_time_us == NULL)
+      || (input->cs_config == NULL)) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  sl_bt_cs_mode_t main_mode = input->cs_config->main_mode_type;
+  sl_bt_cs_mode_t sub_mode = input->cs_config->sub_mode_type;
+
 
   sc = validate_rtl_supported_combinations(main_mode,
                                            sub_mode,
@@ -211,24 +201,18 @@ sl_status_t cs_configurator_rtllib_get_estimation_time_us(cs_configurator_parame
                                       estimation_time_us);
 }
 
-sl_status_t cs_configurator_validate_for_rtl(cs_procedure_scheduling_t scheduling,
+sl_status_t cs_configurator_validate_for_rtl(cs_configurator_parameters_t *config,
+                                             cs_procedure_scheduling_t scheduling,
+                                             cs_algo_mode_t algo_mode,
+                                             cs_channel_map_preset_t channel_map_preset,
                                              uint32_t estimation_time_us,
-                                             uint8_t peer_count,
-                                             uint8_t algo_mode,
-                                             cs_configurator_parameters_t *config,
-                                             //TODO: remove WIP when CS Manager is ready
-                                             cs_channel_map_preset_t WIP_channel_map_preset,
-                                             sl_bt_cs_mode_t WIP_main_mode,
-                                             sl_bt_cs_mode_t WIP_sub_mode)
+                                             uint8_t peer_count)
 {
   sl_status_t sc;
-  cs_channel_map_preset_t channel_map_preset = WIP_channel_map_preset;
-  sl_bt_cs_mode_t main_mode = WIP_main_mode;
-  sl_bt_cs_mode_t sub_mode = WIP_sub_mode;
 
-  if (scheduling != CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY
-      && scheduling != CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_ENERGY
-      && scheduling != CS_PROCEDURE_SCHEDULING_CUSTOM) {
+  if ((scheduling != CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY)
+      && (scheduling != CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_ENERGY)
+      && (scheduling != CS_PROCEDURE_SCHEDULING_CUSTOM)) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -240,14 +224,12 @@ sl_status_t cs_configurator_validate_for_rtl(cs_procedure_scheduling_t schedulin
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  //TODO: Uncomment when CS Manager is ready
-  (void)config;
-  //if (config == NULL ||
-  //    config->cs_config == NULL ||
-  //    config->cs_instance_config == NULL ||
-  //    config->rreq_config == NULL) {
-  //  return SL_STATUS_NULL_POINTER;
-  //}
+  if ((config == NULL)
+      || (config->cs_config == NULL)) {
+    return SL_STATUS_NULL_POINTER;
+  }
+  sl_bt_cs_mode_t main_mode = config->cs_config->main_mode_type;
+  sl_bt_cs_mode_t sub_mode = config->cs_config->sub_mode_type;
 
   sc = validate_rtl_supported_combinations(main_mode,
                                            sub_mode,

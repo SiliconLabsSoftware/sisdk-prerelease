@@ -23,7 +23,7 @@ requires:
 - name: enum
 - name: component_catalog
 - name: host_ncp
-- name: refactor_cs_result
+- name: cs_result
 provides:
 - name: cs_acp_state
 - name: cs_acp_host

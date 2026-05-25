@@ -52,8 +52,8 @@
 // Forward declaration of private functions
 
 static void track_subevent(rreq_t *rreq, uint8_t procedure_done_status);
-static void clear_instance_data(uint8_t i);
 static void on_runtime_error(app_rta_error_t error, sl_status_t result);
+static void clear_instance_data(rreq_t *rreq);
 
 // -----------------------------------------------------------------------------
 // Internal variables
@@ -77,11 +77,12 @@ app_rta_context_t cs_rreq_ctx;
 // -----------------------------------------------------------------------------
 // Public functions
 
-sl_status_t cs_rreq_set_event_callbacks(cs_rreq_event_callback_t cb)
+sl_status_t cs_rreq_set_event_callbacks(cs_rreq_event_callback_t *cb)
 {
-  if ((cb.on_create == NULL)
-      || (cb.on_enable == NULL)
-      || (cb.on_error == NULL)) {
+  if ((cb == NULL)
+      || (cb->on_create == NULL)
+      || (cb->on_enable == NULL)
+      || (cb->on_error == NULL)) {
     return SL_STATUS_NULL_POINTER;
   }
   sl_status_t sc = app_rta_acquire(cs_rreq_ctx);
@@ -90,9 +91,9 @@ sl_status_t cs_rreq_set_event_callbacks(cs_rreq_event_callback_t cb)
                    (unsigned long)sc);
     return sc;
   }
-  callback.on_create = cb.on_create;
-  callback.on_enable = cb.on_enable;
-  callback.on_error = cb.on_error;
+  callback.on_create = cb->on_create;
+  callback.on_enable = cb->on_enable;
+  callback.on_error = cb->on_error;
   (void)app_rta_release(cs_rreq_ctx);
   return SL_STATUS_OK;
 }
@@ -174,6 +175,8 @@ sl_status_t cs_rreq_create(uint8_t conn_handle,
     return SL_STATUS_NO_MORE_RESOURCE;
   }
 
+  clear_instance_data(rreq);
+
   // Assign instance to connection handle
   rreq->conn_handle = conn_handle;
   // Copy config
@@ -185,9 +188,8 @@ sl_status_t cs_rreq_create(uint8_t conn_handle,
   rreq->config.is_initiator = config->is_initiator;
   memcpy(&rreq->config.gattdb_handles,
          &config->gattdb_handles,
-         sizeof(cs_rreq_create_config_t));
+         sizeof(rreq->config.gattdb_handles));
 
-  rreq_log_info("Handle 0 %x" LOG_NL, rreq->config.gattdb_handles.array[CS_RAS_CHARACTERISTIC_INDEX_RAS_FEATURES]);
   sc = cs_ras_client_create(rreq->conn_handle,
                             &rreq->config.gattdb_handles,
                             rreq->config.mtu);
@@ -258,21 +260,17 @@ sl_status_t cs_rreq_remove(uint8_t conn_handle)
                    (unsigned long)sc);
     return sc;
   }
-  for (uint8_t i = 0; i < CS_RREQ_CONFIG_MAX_CONNECTIONS; i++) {
-    if (rreq_instances[i].conn_handle == conn_handle) {
-      if (rreq_instances[i].state != RREQ_STATE_DISABLED) {
-        (void)app_rta_release(cs_rreq_ctx);
-        return SL_STATUS_INVALID_STATE;
-      }
-
-      clear_instance_data(i);
-      rreq_log_info(INSTANCE_PREFIX "instance deleted" LOG_NL, conn_handle);
-      (void)app_rta_release(cs_rreq_ctx);
-      return SL_STATUS_OK;
-    }
+  rreq_t * rreq = cs_rreq_find(conn_handle);
+  if (rreq == NULL) {
+    return SL_STATUS_NOT_FOUND;
   }
+  if (rreq->state != RREQ_STATE_DISABLED) {
+    return SL_STATUS_INVALID_STATE;
+  }
+  clear_instance_data(rreq);
+  rreq_log_info(INSTANCE_PREFIX "instance deleted" LOG_NL, conn_handle);
   (void)app_rta_release(cs_rreq_ctx);
-  return SL_STATUS_NOT_FOUND;
+  return SL_STATUS_OK;
 }
 
 // -----------------------------------------------------------------------------
@@ -281,14 +279,13 @@ sl_status_t cs_rreq_remove(uint8_t conn_handle)
 void cs_rreq_reset(void)
 {
   for (uint8_t i = 0; i < CS_RREQ_CONFIG_MAX_CONNECTIONS; i++) {
-    clear_instance_data(i);
+    clear_instance_data(&rreq_instances[i]);
   }
 }
 
 rreq_t *cs_rreq_find(uint8_t conn_handle)
 {
   for (uint8_t i = 0; i < CS_RREQ_CONFIG_MAX_CONNECTIONS; i++) {
-    rreq_log_debug("HANDLE %u : %u" LOG_NL, i, rreq_instances[i].conn_handle);
     if (rreq_instances[i].conn_handle == conn_handle) {
       return &rreq_instances[i];
     }
@@ -392,6 +389,18 @@ bool cs_rreq_on_bt_event(sl_bt_msg_t *evt)
 
   switch (SL_BT_MSG_ID(evt->header)) {
     // --------------------------------
+    // Connection closed
+    case sl_bt_evt_connection_closed_id:
+      rreq_log_info("sl_bt_evt_connection_closed_id" LOG_NL);
+      rreq = cs_rreq_find(evt->data.evt_connection_closed.connection);
+      if (rreq == NULL) {
+        break;
+      }
+      clear_instance_data(rreq);
+      rreq_log_info(INSTANCE_PREFIX "instance deleted" LOG_NL, 
+                    evt->data.evt_connection_closed.connection);
+      break;
+    // --------------------------------
     // CS result arrived
     case sl_bt_evt_cs_result_id:
       rreq_log_info("sl_bt_evt_cs_result_id" LOG_NL);
@@ -408,7 +417,7 @@ bool cs_rreq_on_bt_event(sl_bt_msg_t *evt)
       if (rreq->ranging_counter == CS_RAS_INVALID_RANGING_COUNTER) {
         if (rreq->state == RREQ_STATE_WAIT_REMOTE_COMPLETE
             || rreq->state == RREQ_STATE_WAIT_REMOTE_ABORT) {
-          rreq->state = (uint8_t)RREQ_STATE_IN_PROCEDURE;
+          set_state(rreq, RREQ_STATE_IN_PROCEDURE);
           rreq_log_info(INSTANCE_PREFIX "Instance new state: IN_PROCEDURE" LOG_NL,
                         rreq->conn_handle);
         }
@@ -420,7 +429,7 @@ bool cs_rreq_on_bt_event(sl_bt_msg_t *evt)
           rreq->drop_counter = 0;
           rreq->ranging_counter = CS_RAS_INVALID_RANGING_COUNTER;
           reset_subevent_data(rreq, false);
-          rreq->state = (uint8_t)RREQ_STATE_IN_PROCEDURE;
+          set_state(rreq, RREQ_STATE_IN_PROCEDURE);
           rreq_log_info(INSTANCE_PREFIX "Instance new state: IN_PROCEDURE" LOG_NL,
                         rreq->conn_handle);
         } else {
@@ -462,13 +471,6 @@ bool cs_rreq_on_bt_event(sl_bt_msg_t *evt)
       #ifdef SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT
       handled = false;
       #endif //SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT
-      break;
-    case sl_bt_evt_connection_closed_id:
-      rreq = cs_rreq_find(evt->data.evt_connection_closed.connection);
-      if (rreq == NULL) {
-        break;
-      }
-      cs_rreq_remove(rreq->conn_handle);
       break;
     // --------------------------------
     // CS procedure enable completed
@@ -514,20 +516,21 @@ bool cs_rreq_on_bt_event(sl_bt_msg_t *evt)
   return !handled;
 }
 
-static void clear_instance_data(uint8_t i)
+static void clear_instance_data(rreq_t *rreq)
 {
-  memset(&rreq_instances[i], 0, sizeof(rreq_instances[i]));
-  reset_subevent_data(&rreq_instances[i], false);
-  rreq_instances[i].conn_handle = SL_BT_INVALID_CONNECTION_HANDLE;
-  rreq_instances[i].config.real_time_mode = true;
-  rreq_instances[i].config.service = SL_BT_INVALID_SERVICE_HANDLE;
-  rreq_instances[i].config.mtu = ATT_MTU_MIN;
-  rreq_instances[i].config.ras_config.real_time_ranging_data_indication = false;
-  rreq_instances[i].config.ras_config.on_demand_ranging_data_indication = false;
-  rreq_instances[i].config.ras_config.ranging_data_ready_notification = true;
-  rreq_instances[i].config.ras_config.ranging_data_overwritten_notification = true;
-  rreq_instances[i].data.initiator.data_size = 0;
-  rreq_instances[i].data.reflector.data_size = 0;
+  memset(rreq, 0, sizeof(rreq_t));
+  reset_subevent_data(rreq, false);
+  rreq->conn_handle = SL_BT_INVALID_CONNECTION_HANDLE;
+  rreq->config.real_time_mode = true;
+  rreq->config.service = SL_BT_INVALID_SERVICE_HANDLE;
+  rreq->config.mtu = ATT_MTU_MIN;
+  rreq->config.ras_config.real_time_ranging_data_indication = false;
+  rreq->config.ras_config.on_demand_ranging_data_indication = false;
+  rreq->config.ras_config.ranging_data_ready_notification = true;
+  rreq->config.ras_config.ranging_data_overwritten_notification = true;
+  rreq->data.initiator.data_size = 0;
+  rreq->data.reflector.data_size = 0;
+  set_state(rreq, RREQ_STATE_UNINITIALIZED);
 }
 
 /******************************************************************************

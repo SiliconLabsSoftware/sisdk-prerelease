@@ -1,0 +1,24 @@
+id: cs_manager_feature_config
+package: bluetooth_le_middleware
+label: CS Manager - CS Configuration
+description: >
+  CS configuration feature for CS Manager.
+category: Bluetooth|Application|Miscellaneous
+metadata:
+  sbom:
+    license: Zlib
+quality: experimental
+root_path: bluetooth_le_middleware/common/cs_manager
+include:
+- path: inc
+  file_list:
+  - path: cs_manager_cs_config_internal.h
+source:
+- path: src/cs_manager_cs_config.c
+requires:
+- name: cs_manager
+provides:
+- name: cs_manager_feature_config
+template_contribution:
+- name: component_catalog
+  value: cs_manager_feature_config

@@ -7,15 +7,15 @@ supplier: Silicon Laboratories, Inc.
 component_path:
 - path: generative_ai/component
 - path: bgapi_protocol/component
-- path: bluetooth_mesh_middleware/component
+- path: bluetooth_le_middleware/component
 - path: bluetooth_le_controller/component
 - path: bluetooth_apploader/component
-- path: bluetooth_zvd/component
+- path: bluetooth_mesh_srtest/component
 - path: bluetooth_le_host/component
+- path: bluetooth_mesh_middleware/component
 - path: bluetooth_mesh/component
 - path: bluetooth_common/component
-- path: bluetooth_mesh_srtest/component
-- path: bluetooth_le_middleware/component
+- path: bluetooth_zvd/component
 - path: bluetooth_le_controller_xg2b/component
 - path: boards/hardware/board/config/component
 - path: boards/hardware/board/component
@@ -42,7 +42,6 @@ component_path:
 - path: common_15_4/mac/component
 - path: compute/component
 - path: connect_stack/component
-- path: connect_sdk/component
 - path: coremark/component
 - path: cpc/component
 - path: cpc_extra/cpc-gpio/component
@@ -149,18 +148,16 @@ toolchain_mapping: toolchains.slct
 documentation:
 - docset: machine-learning
   version: 3.0.0
-- docset: btmesh-service-api
-  version: 11.0.0
 - docset: bluetooth_le_siwx91x
   version: 4.1.0
+- docset: btmesh-service-api
+  version: 11.0.0
 - docset: gecko-platform
   version: 6.1.0
 - docset: mcu-bootloader
   version: 3.3.0
 - docset: multiprotocol
   version: 1.1.0
-- docset: connect-sdk
-  version: 4.3.0
 - docset: openthread
   version: 3.1.0
 - docset: platform_siwx91x
@@ -175,19 +172,19 @@ documentation:
   version: 2.9.0
 - docset: protocol-usb
   version: 1.7.0
-- docset: wifi_sqa_internal
-  version: 4.1.0
 - docset: wifi
+  version: 4.1.0
+- docset: wifi_sqa_internal
   version: 4.1.0
 - docset: wisun
   version: 2.12.0
 - docset: zigbee
   version: 9.1.0
 upgrade_manifest:
-- path: bluetooth_mesh_middleware/upgrade.slcu
-- path: bluetooth_le_host/component/upgrade.slcu
-- path: bluetooth_mesh/component/upgrade.slcu
 - path: bluetooth_le_middleware/upgrade.slcu
+- path: bluetooth_le_host/component/upgrade.slcu
+- path: bluetooth_mesh_middleware/upgrade.slcu
+- path: bluetooth_mesh/component/upgrade.slcu
 - path: connect_stack/component/upgrade.slcu
 - path: cpc/upgrade.slcu
 - path: multiprotocol/component/upgrade.slcu

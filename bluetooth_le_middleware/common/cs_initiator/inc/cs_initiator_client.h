@@ -130,29 +130,38 @@
 // Enums, structs, typedefs
 
 // CS channel map preset
+#ifndef CS_CHANNEL_MAP_PRESET_T_DEFINED
+#define CS_CHANNEL_MAP_PRESET_T_DEFINED
 SL_ENUM(cs_channel_map_preset_t) {
   CS_CHANNEL_MAP_PRESET_LOW,        // This is only for compatibility
   CS_CHANNEL_MAP_PRESET_MEDIUM,
   CS_CHANNEL_MAP_PRESET_HIGH,
   CS_CHANNEL_MAP_PRESET_CUSTOM
 };
+#endif // CS_CHANNEL_MAP_PRESET_T_DEFINED
 
 // CS antenna configuration index
+#ifndef CS_TONE_ANTENNA_CONFIG_INDEX_T_DEFINED
+#define CS_TONE_ANTENNA_CONFIG_INDEX_T_DEFINED
 SL_ENUM(cs_tone_antenna_config_index_t) {
   CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY = 0,
   CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R = 1,
   CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R = 4,
   CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY = 7
 };
+#endif // CS_TONE_ANTENNA_CONFIG_INDEX_T_DEFINED
 
 
 // Parameters optimization for energy or frequency
 // Has an effect on procedure and connection intervals
+#ifndef CS_PROCEDURE_SCHEDULING_T_DEFINED
+#define CS_PROCEDURE_SCHEDULING_T_DEFINED
 SL_ENUM(cs_procedure_scheduling_t) {
   CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY = 0,
   CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_ENERGY,
   CS_PROCEDURE_SCHEDULING_CUSTOM
 };
+#endif // CS_PROCEDURE_SCHEDULING_T_DEFINED
 
 SL_ENUM(cs_error_event_t) {
   CS_ERROR_EVENT_UNHANDLED,

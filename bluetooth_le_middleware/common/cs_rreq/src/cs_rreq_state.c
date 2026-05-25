@@ -32,6 +32,7 @@
 #include <stdbool.h>
 #include "sl_status.h"
 #include "cs_rreq.h"
+#include "cs_rreq_state.h"
 #include "cs_rreq_internal.h"
 #include "cs_rreq_config.h"
 #include "cs_rreq_log.h"
@@ -80,6 +81,11 @@ sl_status_t sm_on_evt(rreq_t *rreq, sm_evt_t event, sm_evt_data_t *data)
                SL_STATUS_NULL_POINTER);
     return SL_STATUS_NULL_POINTER;
   }
+
+  rreq_log_debug(INSTANCE_PREFIX "Event: %u [state: %u]" LOG_NL,
+                 rreq->conn_handle,
+                 event,
+                 rreq->state);
 
   if (event == RREQ_EVT_ERROR) {
     sc = state_any_on_error(rreq, data);
@@ -157,7 +163,7 @@ sl_status_t sm_on_evt(rreq_t *rreq, sm_evt_t event, sm_evt_data_t *data)
 static sl_status_t state_any_on_error(rreq_t *rreq, sm_evt_data_t *data)
 {
   rreq_log_error(INSTANCE_PREFIX "Instance new state: ERROR" LOG_NL, rreq->conn_handle);
-  rreq->state = RREQ_STATE_ERROR;
+  set_state(rreq, RREQ_STATE_ERROR);
   rreq_error(rreq,
              data->evt_error.error,
              data->evt_error.status);
@@ -170,7 +176,7 @@ static sl_status_t state_disabled_on_enable(rreq_t *rreq,
   (void)data;
   rreq_log_info(INSTANCE_PREFIX "Instance new state: ENABLING" LOG_NL,
                      rreq->conn_handle);
-  rreq->state = RREQ_STATE_ENABLING;
+  set_state(rreq, RREQ_STATE_ENABLING);
 
   return SL_STATUS_OK;
 }
@@ -181,7 +187,7 @@ static sl_status_t state_any_on_disable(rreq_t *rreq,
   (void)data;
   rreq_log_info(INSTANCE_PREFIX "Instance new state: DISABLED" LOG_NL,
                 rreq->conn_handle);
-  rreq->state = RREQ_STATE_DISABLED;
+  set_state(rreq, RREQ_STATE_DISABLED);
 
   return SL_STATUS_OK;
 }
@@ -197,7 +203,7 @@ static sl_status_t state_enabling_on_enable_complete(rreq_t *rreq,
       rreq->ras_state = RAS_STATE_REAL_TIME;
       rreq_log_info(INSTANCE_PREFIX "Instance new state: IN_PROCEDURE" LOG_NL,
                     rreq->conn_handle);
-      rreq->state = RREQ_STATE_IN_PROCEDURE;
+      set_state(rreq, RREQ_STATE_IN_PROCEDURE);
     } else {
       rreq->ras_state = RAS_STATE_ON_DEMAND;
       rreq->ras_overwritten = false;
@@ -205,7 +211,7 @@ static sl_status_t state_enabling_on_enable_complete(rreq_t *rreq,
   } else {
     rreq_log_info(INSTANCE_PREFIX "Instance new state: DISABLED" LOG_NL,
                   rreq->conn_handle);
-    rreq->state = RREQ_STATE_DISABLED;
+    set_state(rreq, RREQ_STATE_DISABLED);
   }
   if (callback.on_enable != NULL) {
     callback.on_enable(rreq->conn_handle, true, enable_status);
@@ -219,7 +225,7 @@ static sl_status_t state_disabling_on_enable_complete(rreq_t *rreq,
   sl_status_t enable_status = data->evt_enable_completed.status;
   if (enable_status == SL_STATUS_OK) {
     rreq->ras_state = RAS_STATE_IDLE;
-    rreq->state = RREQ_STATE_DISABLED;
+    set_state(rreq, RREQ_STATE_DISABLED);
     reset_subevent_data(rreq, false);
   }
   if (callback.on_enable != NULL) {
@@ -234,14 +240,14 @@ static sl_status_t state_uninitialized_on_init_started(rreq_t *rreq,
   (void)data;
   rreq_log_info(INSTANCE_PREFIX "Instance new state: INIT" LOG_NL,
                 rreq->conn_handle);
-  rreq->state = RREQ_STATE_INIT;
+  set_state(rreq, RREQ_STATE_INIT);
   return SL_STATUS_OK;
 }
 
 static sl_status_t state_init_on_init_completed(rreq_t *rreq,
                                                 sm_evt_data_t *data)
 {
-  rreq->state = RREQ_STATE_DISABLED;
+  set_state(rreq, RREQ_STATE_DISABLED);
   if (callback.on_create != NULL) {
     callback.on_create(rreq->conn_handle,
                        data->evt_init_completed);
@@ -264,7 +270,7 @@ static sl_status_t state_in_procedure_on_ranging_data(rreq_t *rreq,
   if (data->evt_ranging_data.procedure_state == CS_PROCEDURE_STATE_ABORTED) {
     rreq_log_info(INSTANCE_PREFIX "Instance new state: IN_PROCEDURE" LOG_NL,
                 rreq->conn_handle);
-    rreq->state = RREQ_STATE_IN_PROCEDURE;
+    set_state(rreq, RREQ_STATE_IN_PROCEDURE);
     // Allow upcoming procedures
     reset_subevent_data(rreq, false);
     sc = SL_STATUS_OK;
@@ -272,7 +278,7 @@ static sl_status_t state_in_procedure_on_ranging_data(rreq_t *rreq,
 
     rreq_log_info(INSTANCE_PREFIX "Instance new state: WAIT_REMOTE_COMPLETE" LOG_NL,
                   rreq->conn_handle);
-    rreq->state = RREQ_STATE_WAIT_REMOTE_COMPLETE;
+    set_state(rreq, RREQ_STATE_WAIT_REMOTE_COMPLETE);
     sc = SL_STATUS_OK;
   }
   return sc;
@@ -289,7 +295,7 @@ static sl_status_t state_in_procedure_on_cs_result(rreq_t *rreq,
 
   // Stay in procedure state
   if (procedure_state == CS_PROCEDURE_STATE_IN_PROGRESS) {
-    rreq->state = RREQ_STATE_IN_PROCEDURE;
+    set_state(rreq, RREQ_STATE_IN_PROCEDURE);
     return sc;
   }
 
@@ -349,7 +355,7 @@ static sl_status_t state_wait_remote_on_ranging_data(rreq_t *rreq,
   }
   rreq_log_info(INSTANCE_PREFIX "Instance new state: IN_PROCEDURE" LOG_NL,
                 rreq->conn_handle);
-  rreq->state = RREQ_STATE_IN_PROCEDURE;
+  set_state(rreq, RREQ_STATE_IN_PROCEDURE);
   // Check complete of remote and local data
   if ((data->evt_ranging_data.procedure_state == CS_PROCEDURE_STATE_COMPLETED)
       && local_complete) {
@@ -373,4 +379,14 @@ static sl_status_t state_wait_remote_on_ranging_data(rreq_t *rreq,
   }
   sc = SL_STATUS_OK;
   return sc;
+}
+
+void set_state(rreq_t *rreq, rreq_state_t state)
+{
+  rreq_state_t old_state = rreq->state;
+  rreq->state = state;
+  rreq_log_debug(INSTANCE_PREFIX "State change: %u -> %u" LOG_NL,
+                 rreq->conn_handle,
+                 old_state,
+                 state);
 }

@@ -26,9 +26,6 @@ include:
     unless: [cs_acp_host]
   - path: cs_rreq_acp_host.h
     condition: [cs_acp_host]
-- path: cs_ras/common/inc
-  file_list:
-  - path: cs_ras_common.h
 config_file:
 - path: cs_rreq/config/cs_rreq_config.h
 source:
@@ -56,9 +53,9 @@ requires:
   condition: [cs_acp_with_impl]
 - name: cs_ras_client
   condition: [cs_acp_with_impl]
-- name: refactor_cs_result
-  condition: [cs_acp_with_impl]
-- name: refactor_cs_initiator
+- name: cs_ras_common
+  condition: [cs_acp_host]
+- name: cs_result
   condition: [cs_acp_with_impl]
 
 recommends:

@@ -60,6 +60,7 @@
 #include "sli_wisun_meter_collector.h"
 #include "sl_wisun_meter_collector_config.h"
 #include "sl_memory_manager.h"
+#include "sl_common.h"
 
 #if !defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_wisun_led_driver.h"
@@ -393,7 +394,7 @@ static sl_wisun_meter_metrics_cnt_t _metrics_cnt = {
 static sl_mempool_t _metrics_mpool = { 0 };
 
 /// Metrics storage buffer
-static uint8_t _metrics_buff[SL_WISUN_METER_MEASUREMENT_BUFFER_SIZE * sizeof(sl_wisun_meter_packet_t)] = { 0 };
+SL_ALIGN(4) static uint8_t _metrics_buff[SL_WISUN_METER_MEASUREMENT_BUFFER_SIZE * sizeof(sl_wisun_meter_packet_t)] SL_ATTRIBUTE_ALIGN(4) = { 0 };
 
 #if SL_WISUN_COAP_NOTIFY_SERVICE_ENABLE
 /// Notification payload buffer

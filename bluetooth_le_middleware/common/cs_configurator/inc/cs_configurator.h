@@ -45,22 +45,19 @@
 #include "sl_enum.h"
 #include "sl_bt_api.h"
 #include "cs_rreq_api.h"
-
-// TODO: Remove this when the structs can be included from CS Manager 
-// and the structs previously used from cs_initiator_client.h are removed.
-#include "cs_configurator_WIP_helper.h"
-#include "cs_initiator_client.h"
+#include "cs_manager.h"
+#include "cs_common.h"
 
 // -----------------------------------------------------------------------------
-// Enums, structs, typedefs
+// Defnitions
 
-/***************************************************************************//**
- * CS configurator input parameter type
- ******************************************************************************/
+/// CS configurator input parameter type
 typedef struct {
   cs_manager_instance_config_t *cs_instance_config; ///< CS instance settings.
   cs_config_t *cs_config;                           ///< CS procedure settings.
   cs_rreq_create_config_t *rreq_config;             ///< RREQ creation settings.
+  cs_procedure_parameters_t *cs_procedure_parameters; ///< CS procedure parameters.
+  cs_manager_connection_parameters_t *connection_parameters; ///< CS connection parameters.
 } cs_configurator_parameters_t;
 
 // -----------------------------------------------------------------------------
@@ -75,67 +72,68 @@ extern "C" {
  *
  * When using the Silicon Labs RTL CS library, the default weak implementation
  * forwards to @ref cs_configurator_rtllib_get_estimation_time_us (see
- * cs_configurator_rtllib.h). Applications may supply a non-weak definition to
- * replace the estimation behavior.
+ * cs_configurator_rtllib.h).
  *
  * @param[in] input               Pointer to configurator input parameters.
  * @param[in] algo_mode           RTL algorithm mode.
+ * @param[in] channel_map_preset Channel map preset.
+ * @param[in] clock_frequency_hz Clock frequency in Hz.
+ * @param[in] num_antenna_paths  Number of antenna paths.
  * @param[out] estimation_time_us Estimated procedure time in microseconds.
  *
  * @return Status of the operation.
  ******************************************************************************/
 sl_status_t cs_configurator_get_estimation_time_us(cs_configurator_parameters_t *input,
-                                                   uint8_t algo_mode,
+                                                   cs_algo_mode_t algo_mode,
+                                                   cs_channel_map_preset_t channel_map_preset,
                                                    uint32_t clock_frequency_hz,
-                                                   uint32_t *estimation_time_us,
-                                                   //TODO: remove WIP when CS Manager is ready
-                                                   cs_channel_map_preset_t WIP_channel_map_preset,
-                                                   sl_bt_cs_mode_t WIP_main_mode,
-                                                   sl_bt_cs_mode_t WIP_sub_mode);
+                                                   uint8_t num_antenna_paths,
+                                                   uint32_t *estimation_time_us_out);
 
 /***************************************************************************//**
  * Validate CS configuration values against timing and peer constraints.
  *
- * @param[in] scheduling         Procedure scheduling mode.
+ * @param[in] config             Pointer to configuration parameters.
+ * @param[in] channel_map_preset Channel map preset.
  * @param[in] estimation_time_us Estimated procedure time in microseconds.
  * @param[in] peer_count         Number of connected peers.
- * @param[in] config             Pointer to configuration parameters.
+ * @param[in] num_antenna_paths  Number of antenna paths.
  *
  * @return Status of the validation.
  ******************************************************************************/
-sl_status_t cs_configurator_validate(uint32_t estimation_time_us,
+sl_status_t cs_configurator_validate(cs_configurator_parameters_t *config,
+                                     cs_channel_map_preset_t channel_map_preset,
+                                     uint32_t estimation_time_us,
                                      uint8_t peer_count,
-                                     cs_configurator_parameters_t *config,
-                                     //TODO: remove WIP when CS Manager is ready
-                                     bool WIP_use_real_time_ras,
-                                     cs_channel_map_preset_t WIP_channel_map_preset,
-                                     cs_tone_antenna_config_index_t WIP_num_antennas,
-                                     uint16_t WIP_min_procedure_interval,
-                                     uint16_t WIP_min_connection_interval,
-                                     uint16_t WIP_max_procedure_interval,
-                                     uint16_t WIP_max_connection_interval);
+                                     uint8_t num_antenna_paths);
 
 /***************************************************************************//**
  * Optimize CS configuration values based on scheduling and topology.
  *
  * @param[in] scheduling         Procedure scheduling mode.
+ * @param[in] channel_map_preset Channel map preset.
  * @param[in] estimation_time_us Estimated procedure time in microseconds.
  * @param[in] peer_count         Number of connected peers.
+ * @param[in] num_antenna_paths  Number of antenna paths.
  * @param[in,out] parameters_inout Pointer to parameters to be updated.
  *
  * @return Status of the optimization.
  ******************************************************************************/
 sl_status_t cs_configurator_optimize(cs_procedure_scheduling_t scheduling,
+                                     cs_channel_map_preset_t channel_map_preset,
                                      uint32_t estimation_time_us,
                                      uint8_t peer_count,
-                                     cs_configurator_parameters_t *parameters_inout,
-                                     //TODO: remove WIP when CS Manager is ready
-                                     bool WIP_use_real_time_ras,
-                                     cs_channel_map_preset_t WIP_channel_map_preset,
-                                     cs_tone_antenna_config_index_t WIP_num_antennas,
-                                     uint16_t *WIP_conn_interval_out,
-                                     uint16_t *WIP_proc_interval_out);
+                                     uint8_t num_antenna_paths,
+                                     cs_configurator_parameters_t *parameters_inout);
 
+/***************************************************************************//**
+ * Apply a preset to a channel map data array
+ *
+ * @param[in]  preset       Channel map preset
+ * @param[out] channel_map Channel map data array
+ ******************************************************************************/
+void cs_configurator_apply_channel_map_preset(cs_channel_map_preset_t preset,
+                                              uint8_t *channel_map);
 #ifdef __cplusplus
 };
 #endif

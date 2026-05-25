@@ -47,7 +47,11 @@ extern "C"
 // Only kept for backward compatibility, will be deprecated
 #define PRINT_HEAD_AND_DATA(counter, is_data) \
   for (uint8_t is_data = (((counter - 1) % CS_INITIATOR_HEADER_LOG) > 0); is_data <= 1; is_data++)
-  
+
+// Compatibility macros
+#define cs_initiator_print_result(...) cs_result_print(__VA_ARGS__)
+#define cs_initiator_print_bt_address(...) cs_result_print_bt_address(__VA_ARGS__)
+
 // -----------------------------------------------------------------------------
 // Enums, structs, typedefs
 
@@ -137,17 +141,18 @@ sl_status_t cs_result_create_session_data(uint8_t *buffer,
  * @param[in] header true if header should be printed, false otherwise.
  * @param[in] result_data pointer to the result data.
  ******************************************************************************/
-void cs_initiator_print_result(cs_result_field_type_t field_type,
-                               bool header,
-                               void *result_data);
+void cs_result_print(cs_result_field_type_t field_type,
+                     bool header,
+                     void *result_data);
 
 /***************************************************************************//**
  * Print Bluetooth address to the console.
  * @param[in] header true if header should be printed, false otherwise.
  * @param[in] bt_address pointer to the Bluetooth address to be printed.
  ******************************************************************************/
-void cs_initiator_print_bt_address(bool header,
-                                   const bd_addr *bt_address);
+void cs_result_print_bt_address(bool header,
+                                const bd_addr *bt_address);
+
 
 #ifdef __cplusplus
 }

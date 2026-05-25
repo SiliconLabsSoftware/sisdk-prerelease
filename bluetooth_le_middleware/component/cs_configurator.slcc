@@ -10,24 +10,29 @@ metadata:
 quality: experimental
 
 include:
+- path: common/cs_common
+  file_list:
+  - path: cs_common.h
 - path: common/cs_configurator/inc
   file_list:
   - path: cs_configurator.h
-  - path: cs_configurator_rtllib.h
-  - path: cs_configurator_optimization.h
-  - path: cs_configurator_rtllib_parameters.h
-  - path: cs_configurator_WIP_helper.h
+  - path: cs_configurator_rtllib_internal.h
+  - path: cs_configurator_optimization_internal.h
+  - path: cs_configurator_rtllib_parameters_internal.h
 
 source:
 - path: common/cs_configurator/src/cs_configurator.c
 - path: common/cs_configurator/src/cs_configurator_rtllib.c
 
+config_file:
+- path: common/cs_configurator/config/cs_configurator_config.h
+
 requires:
 - name: bluetooth_api
 - name: component_catalog
 - name: sl_common
-- name: refactor_cs_initiator_client
 - name: cs_rreq
+- name: cs_manager
 
 provides:
 - name: cs_configurator

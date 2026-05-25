@@ -27,7 +27,7 @@ component:
   - id: cs_rreq
   - id: cs_acp_host
   - id: rtllib_api
-  - id: refactor_cs_antenna
+  - id: cs_antenna
   - id: gatt_configuration
   - id: ncp_gatt
   - id: ncp_version
@@ -43,6 +43,7 @@ source:
   - path: app.c
   - path: extended_result.c
   - path: ../common/app_log/app_log_cli.c
+  - path: ../../common/cs/app_cs_discovery.c
 
 include:
   - path: ../common/app_log
@@ -52,6 +53,9 @@ include:
     file_list:
       - path: app.h
       - path: extended_result.h
+  - path: ../../common/cs
+    file_list:
+      - path: app_cs_discovery.h
 
 config_file:
   - override:
@@ -70,6 +74,8 @@ configuration:
     value: 21
   - name: SL_BT_PEER_MANAGER_CENTRAL_CONFIG_DEFAULT_SCAN_WINDOW
     value: 21
+  - name: CS_ANTENNA_CONFIG_SET_ON_BOOT
+    value: 1
 
 readme:
   - path: readme.md

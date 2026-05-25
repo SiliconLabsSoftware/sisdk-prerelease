@@ -300,6 +300,46 @@ sl_status_t cs_initiator_get_multiple_intervals(uint8_t main_mode,
     *proc_interval = multiply_u16_saturated(*proc_interval, max_reflector_count);
     return SL_STATUS_OK;
   }
+
+  // More than 4 reflectors - not supported for optimization
+  if (max_reflector_count >= 5u) {
+    return SL_STATUS_NOT_SUPPORTED;
+  }
+
+  // 3–4 reflectors
+  if (max_reflector_count >= 3u && max_reflector_count <= 4u) {
+    if (algo_mode == SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST) {
+      if (input_values[0] == CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_FREQUENCY) {
+        *conn_interval = (channel_map_preset == CS_CHANNEL_MAP_PRESET_MEDIUM
+                          && antenna_path == CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY) ? 8u : 10u;
+      } else {
+        // Energy optimized
+        *conn_interval = 16u;
+      }
+      if (use_real_time_ras_mode) {
+        *proc_interval = (channel_map_preset == CS_CHANNEL_MAP_PRESET_HIGH
+                            && antenna_path == CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY) ? 24u : 20u;
+      } else {
+        *proc_interval = (channel_map_preset == CS_CHANNEL_MAP_PRESET_HIGH
+                            && antenna_path == CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY) ? 48u : 44u;
+      }
+    } else {
+      // Fallback value for RT BASIC, STATIC
+      *conn_interval = 20u;
+      *proc_interval = 52u;
+    }
+    if (max_reflector_count == 3u) {
+      *proc_interval = (uint16_t)((uint32_t)*proc_interval * 3u / 4u);
+    }
+    if (sub_mode != sl_bt_cs_submode_disabled) {
+      uint16_t conn_ms = (uint16_t)(*conn_interval * 1.25f);
+      uint16_t offset = (SUB_MODE_OFFSET_MS + conn_ms - 1) / conn_ms;
+      *proc_interval += offset * max_reflector_count;
+    }
+    return SL_STATUS_OK;
+  }
+
+  // 1-2 reflectors
   if (input_values[0] == CS_PROCEDURE_SCHEDULING_OPTIMIZED_FOR_ENERGY
       && input_values[2] == SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST) {
     input_values[2] = SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC;

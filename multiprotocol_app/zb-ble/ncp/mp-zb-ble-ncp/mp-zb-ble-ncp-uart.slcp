@@ -149,3 +149,6 @@ tag:
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_supports_zigbee
   - hwfilter:ram:64k
+  - toolchain:gcc
+  - toolchain:iar
+  - toolchain:llvm

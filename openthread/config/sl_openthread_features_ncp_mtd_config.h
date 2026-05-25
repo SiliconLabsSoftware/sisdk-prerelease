@@ -160,6 +160,10 @@
 #ifndef OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
 #define OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE       0
 #endif
+// <q>  TREL uses platform DNS-SD (NCP delegates discovery to host over Spinel)
+#ifndef OPENTHREAD_CONFIG_TREL_MANAGE_DNSSD_ENABLE
+#define OPENTHREAD_CONFIG_TREL_MANAGE_DNSSD_ENABLE     OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
+#endif
 // </h>
 
 // <e>  Border Agent
@@ -448,7 +452,7 @@
 // </e>
 // <e>  UDP Forward
 #ifndef OPENTHREAD_CONFIG_UDP_FORWARD_ENABLE
-#define OPENTHREAD_CONFIG_UDP_FORWARD_ENABLE        0
+#define OPENTHREAD_CONFIG_UDP_FORWARD_ENABLE        1
 #endif
 // </e>
 // <e>  Enable Mac beacon payload parsing support

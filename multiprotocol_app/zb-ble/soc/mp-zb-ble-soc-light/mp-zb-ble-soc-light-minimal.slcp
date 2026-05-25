@@ -196,6 +196,9 @@ tag:
   - hwfilter:device:device_supports_zigbee
   - hwfilter:ram:64k
   - hwfilter:!device:device_is_module
+  - toolchain:gcc
+  - toolchain:iar
+  - toolchain:llvm
 readme:
   - path: ./readme.md
 

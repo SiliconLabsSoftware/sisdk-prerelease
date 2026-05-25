@@ -11,10 +11,13 @@ metadata:
 quality: production
 
 include:
+- path: common/cs_common
+  file_list:
+  - path: cs_common.h
 - path: common/cs_algo/inc
   file_list:
   - path: cs_algo.h
-  - path: cs_algo_log.h
+  - path: cs_algo_log_internal.h
   - path: cs_algo_internal.h
 source:
 - path: common/cs_algo/src/cs_algo.c
@@ -24,8 +27,7 @@ config_file:
 
 requires:
 - name: rtl_service
-- name: refactor_cs_result
-- name: refactor_cs_initiator
+- name: cs_result
 - name: app_log
 - name: bluetooth_api
 - name: bluetooth_feature_cs

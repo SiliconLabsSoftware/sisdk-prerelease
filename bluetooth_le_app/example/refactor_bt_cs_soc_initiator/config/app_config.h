@@ -129,10 +129,18 @@
 #define CS_APP_CAPABILITY              sl_bt_sm_io_capability_noinputnooutput
 #endif // CS_APP_CAPABILITY
 
-// <o CS_INITIATOR_HEADER_LOG> Header log of measurements results <1..20>
+// <o CS_HEADER_LOG> Header log of measurements results <1..20>
 // <i> Sets how many measurements are written between header logs
 // <i> Default: 5
-#define CS_INITIATOR_HEADER_LOG                5
+#define CS_HEADER_LOG                      5
+
+// <o CS_ANTENNA_OFFSET> Specify antenna offset
+// <0=> Wireless antenna offset
+// <1=> Wired antenna offset
+// <i> Default: 0
+#ifndef CS_ANTENNA_OFFSET
+#define CS_ANTENNA_OFFSET                  0
+#endif
 
 // <<< end of configuration section >>>
 

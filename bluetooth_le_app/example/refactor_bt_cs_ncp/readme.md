@@ -90,6 +90,25 @@ where
 The default is calculated by using the constants and settings above using the worst case scenario, which gives 2672 bytes.
 RAM consumption can be reduced by changing the affected settings and reducing "Procedure maximum length" accordingly.
 
+### Subevents
+
+A CS procedure consists of one or more subevents (range: 1..32), each containing a set of CS steps. Subevent count is based on CS_MANAGER_DEFAULT_MIN_SUBEVENT_LEN (default: 1250 us) and CS_INITIATOR_MANAGER_MAX_SUBEVENT_LEN (default: 3999999 us), but the controller determines the actual subevent count and scheduling at runtime and it may differ from these configured values based on resource constraints and scheduling feasibility. With the default maximum of ~4 s, all steps fit in a single subevent. Reducing the maximum causes the controller to split steps across multiple shorter subevents. More subevents require a larger RAS buffer and therefore more RAM.
+
+When using multiple subevents:
+- Ensure that the effective procedure interval is at least the number of created subevents, plus additional connection events for RAS data transfer.
+  The effective procedure interval is determined by CS_CONFIGURATOR_CONFIG_DEFAULT_PROCEDURE_SCHEDULING, or by CS_MANAGER_DEFAULT_MAX_PROCEDURE_INTERVAL when custom scheduling is used.
+- The minimum subevent length must fit within the procedure time window: max_procedure_interval * max_connection_interval * 1250 us.
+- As each subevent contains Mode 0 steps followed by main mode steps, the subevent length must be large enough to accommodate their combined duration.
+
+The following table shows example scenarios with other configuration parameters left at their defaults. 
+
+| Scenario | MIN subevent length | MAX subevent length | Subevents (approx.)| Effective procedure interval |
+|---|---|---|---|---|
+| Single subevent (default) | 1250 us | 3999999 us | 1 | All steps fit in one subevent |
+| Few subevents | 1250 us | 15000 us | 3 | 3 + RAS overhead |
+| Many subevents | 1250 us | 4000 us | 18 | 18 + RAS overhead |
+| Maximum subevents | 1250 us | 2000 us | 32 | 32 + RAS overhead |
+
 ## Device Firmware Update
 
 This example project does not include Device Firmware Update (DFU) functionality by default.

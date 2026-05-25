@@ -30,6 +30,106 @@
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates a Multiprotocol OpenThread (FTD) NCP and BLE RCP application using CPC over UART/EUSART for concurrent Thread and BLE with a Linux host. </description>
 	</demo>
+	<demo name="brd4180a.demo.mp-ot-ble-soc-minimal" label="OpenThread BLE DMP - SoC (Minimal)">
+		<property key="blurb" value="OpenThread BLE DMP - SoC (Minimal)" />
+		<property key="partCompatibility" value=".*efr32mg21a020f1024im32.*" />
+		<property key="boardCompatibility" value="brd4180a" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.0/multiprotocol_app/demos/mp-ot-ble-soc-minimal/mp-ot-ble-soc-minimal-brd4180a.s37" />
+		<property key="readmeFiles" value="ot-ble/soc/mp-ot-ble-soc/README.md" />
+		<property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
+		<property key="quality" value="PRODUCTION" />
+		<description>Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth without button UI running on FreeRTOS. For boards without buttons. </description>
+	</demo>
+	<demo name="brd4186c.demo.mp-ot-ble-soc-minimal" label="OpenThread BLE DMP - SoC (Minimal)">
+		<property key="blurb" value="OpenThread BLE DMP - SoC (Minimal)" />
+		<property key="partCompatibility" value=".*efr32mg24b210f1536im48.*" />
+		<property key="boardCompatibility" value="brd4186c" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.0/multiprotocol_app/demos/mp-ot-ble-soc-minimal/mp-ot-ble-soc-minimal-brd4186c.s37" />
+		<property key="readmeFiles" value="ot-ble/soc/mp-ot-ble-soc/README.md" />
+		<property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
+		<property key="quality" value="PRODUCTION" />
+		<description>Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth without button UI running on FreeRTOS. For boards without buttons. </description>
+	</demo>
+	<demo name="brd2703a.demo.mp-ot-ble-soc-minimal" label="OpenThread BLE DMP - SoC (Minimal)">
+		<property key="blurb" value="OpenThread BLE DMP - SoC (Minimal)" />
+		<property key="partCompatibility" value=".*efr32mg24b210f1536im48.*" />
+		<property key="boardCompatibility" value="brd2703a" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.0/multiprotocol_app/demos/mp-ot-ble-soc-minimal/mp-ot-ble-soc-minimal-brd2703a.s37" />
+		<property key="readmeFiles" value="ot-ble/soc/mp-ot-ble-soc/README.md" />
+		<property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
+		<property key="quality" value="PRODUCTION" />
+		<description>Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth without button UI running on FreeRTOS. For boards without buttons. </description>
+	</demo>
+	<demo name="brd4116a.demo.mp-ot-ble-soc-minimal" label="OpenThread BLE DMP - SoC (Minimal)">
+		<property key="blurb" value="OpenThread BLE DMP - SoC (Minimal)" />
+		<property key="partCompatibility" value=".*efr32mg26b410f3200im48.*" />
+		<property key="boardCompatibility" value="brd4116a" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.0/multiprotocol_app/demos/mp-ot-ble-soc-minimal/mp-ot-ble-soc-minimal-brd4116a.s37" />
+		<property key="readmeFiles" value="ot-ble/soc/mp-ot-ble-soc/README.md" />
+		<property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
+		<property key="quality" value="PRODUCTION" />
+		<description>Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth without button UI running on FreeRTOS. For boards without buttons. </description>
+	</demo>
+	<demo name="brd4407a.demo.mp-ot-ble-soc-minimal" label="OpenThread BLE DMP - SoC (Minimal)">
+		<property key="blurb" value="OpenThread BLE DMP - SoC (Minimal)" />
+		<property key="partCompatibility" value=".*simg301m104lil.*" />
+		<property key="boardCompatibility" value="brd4407a" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.0/multiprotocol_app/demos/mp-ot-ble-soc-minimal/mp-ot-ble-soc-minimal-brd4407a.s37" />
+		<property key="readmeFiles" value="ot-ble/soc/mp-ot-ble-soc/README.md" />
+		<property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
+		<property key="quality" value="PRODUCTION" />
+		<description>Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth without button UI running on FreeRTOS. For boards without buttons. </description>
+	</demo>
+	<demo name="brd4180a.demo.mp-ot-ble-soc" label="OpenThread BLE DMP - SoC">
+		<property key="blurb" value="OpenThread BLE DMP - SoC" />
+		<property key="partCompatibility" value=".*efr32mg21a020f1024im32.*" />
+		<property key="boardCompatibility" value="brd4180a" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.0/multiprotocol_app/demos/mp-ot-ble-soc/mp-ot-ble-soc-brd4180a.s37" />
+		<property key="readmeFiles" value="ot-ble/soc/mp-ot-ble-soc/README.md" />
+		<property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
+		<property key="quality" value="PRODUCTION" />
+		<description>Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth running on FreeRTOS. </description>
+	</demo>
+	<demo name="brd4186c.demo.mp-ot-ble-soc" label="OpenThread BLE DMP - SoC">
+		<property key="blurb" value="OpenThread BLE DMP - SoC" />
+		<property key="partCompatibility" value=".*efr32mg24b210f1536im48.*" />
+		<property key="boardCompatibility" value="brd4186c" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.0/multiprotocol_app/demos/mp-ot-ble-soc/mp-ot-ble-soc-brd4186c.s37" />
+		<property key="readmeFiles" value="ot-ble/soc/mp-ot-ble-soc/README.md" />
+		<property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
+		<property key="quality" value="PRODUCTION" />
+		<description>Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth running on FreeRTOS. </description>
+	</demo>
+	<demo name="brd2703a.demo.mp-ot-ble-soc" label="OpenThread BLE DMP - SoC">
+		<property key="blurb" value="OpenThread BLE DMP - SoC" />
+		<property key="partCompatibility" value=".*efr32mg24b210f1536im48.*" />
+		<property key="boardCompatibility" value="brd2703a" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.0/multiprotocol_app/demos/mp-ot-ble-soc/mp-ot-ble-soc-brd2703a.s37" />
+		<property key="readmeFiles" value="ot-ble/soc/mp-ot-ble-soc/README.md" />
+		<property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
+		<property key="quality" value="PRODUCTION" />
+		<description>Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth running on FreeRTOS. </description>
+	</demo>
+	<demo name="brd4116a.demo.mp-ot-ble-soc" label="OpenThread BLE DMP - SoC">
+		<property key="blurb" value="OpenThread BLE DMP - SoC" />
+		<property key="partCompatibility" value=".*efr32mg26b410f3200im48.*" />
+		<property key="boardCompatibility" value="brd4116a" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.0/multiprotocol_app/demos/mp-ot-ble-soc/mp-ot-ble-soc-brd4116a.s37" />
+		<property key="readmeFiles" value="ot-ble/soc/mp-ot-ble-soc/README.md" />
+		<property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
+		<property key="quality" value="PRODUCTION" />
+		<description>Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth running on FreeRTOS. </description>
+	</demo>
+	<demo name="brd4407a.demo.mp-ot-ble-soc" label="OpenThread BLE DMP - SoC">
+		<property key="blurb" value="OpenThread BLE DMP - SoC" />
+		<property key="partCompatibility" value=".*simg301m104lil.*" />
+		<property key="boardCompatibility" value="brd4407a" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.0/multiprotocol_app/demos/mp-ot-ble-soc/mp-ot-ble-soc-brd4407a.s37" />
+		<property key="readmeFiles" value="ot-ble/soc/mp-ot-ble-soc/README.md" />
+		<property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
+		<property key="quality" value="PRODUCTION" />
+		<description>Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth running on FreeRTOS. </description>
+	</demo>
 	<demo name="brd4186c.demo.mp-zb-ble-soc-light-sed" label="Zigbee BLE DMP - SoC Light SED">
 		<property key="blurb" value="Zigbee BLE DMP - SoC Light SED" />
 		<property key="partCompatibility" value=".*efr32mg24b210f1536im48.*" />

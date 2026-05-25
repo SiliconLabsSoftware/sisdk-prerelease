@@ -50,7 +50,7 @@
 // <h>  The following features require at least Thread Stack Protocol Version 1.2
 // <q>  Backbone Router
 #ifndef OPENTHREAD_CONFIG_BACKBONE_ROUTER_ENABLE
-#define OPENTHREAD_CONFIG_BACKBONE_ROUTER_ENABLE    0
+#define OPENTHREAD_CONFIG_BACKBONE_ROUTER_ENABLE    1
 #endif
 // <q>  CSL Auto Synchronization using data polling
 #ifndef OPENTHREAD_CONFIG_MAC_CSL_AUTO_SYNC_ENABLE
@@ -62,7 +62,7 @@
 #endif
 // <q>  CSL (Coordinated Sampled Listening) Receiver
 #ifndef OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
-#define OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE   1
+#define OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE   0
 #endif
 // <o SL_OPENTHREAD_CSL_TX_UNCERTAINTY> CSL Scheduling Uncertainty (±10 us units) <12..999:1>
 // <i> Left unchanged the value will be set to 175 for RCPs, 20 for FTDs, and 12 for MTDs
@@ -461,7 +461,7 @@
 // </e>
 // <e>  UDP Forward
 #ifndef OPENTHREAD_CONFIG_UDP_FORWARD_ENABLE
-#define OPENTHREAD_CONFIG_UDP_FORWARD_ENABLE        OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
+#define OPENTHREAD_CONFIG_UDP_FORWARD_ENABLE        1
 #endif
 // </e>
 // <e>  Enable Mac beacon payload parsing support

@@ -1,0 +1,29 @@
+id: cs_manager_feature_control
+package: bluetooth_le_middleware
+label: CS Manager - Procedure control
+description: >
+  Procedure control feature for CS Manager.
+category: Bluetooth|Application|Miscellaneous
+metadata:
+  sbom:
+    license: Zlib
+quality: experimental
+root_path: bluetooth_le_middleware/common/cs_manager
+include:
+- path: inc
+  file_list:
+  - path: cs_manager_cs_control_internal.h
+source:
+- path: src/cs_manager_cs_control.c
+requires:
+- name: cs_manager
+provides:
+- name: cs_manager_feature_control
+template_contribution:
+- name: component_catalog
+  value: cs_manager_feature_control
+- name: bluetooth_on_event
+  value:
+    include: cs_manager_cs_control_internal.h
+    function: cs_manager_cs_control_on_bt_event
+  priority: 69

@@ -3,7 +3,7 @@
  * @brief CS Algo - configuration header
  *******************************************************************************
  * # License
- * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -39,38 +39,51 @@
 
 // <h> Logging
 
-// <e CS_ALGO_LOG> Algo component
+// <e CS_ALGO_CONFIG_LOG> Algo component
 // <i> Default: 1
 // <i> Enable Algo component logging
-#ifndef CS_ALGO_LOG
-#define CS_ALGO_LOG                              (1)
-#endif
+#define CS_ALGO_CONFIG_LOG                        1
 
-// <s CS_ALGO_LOG_PREFIX> Log prefix
-// <i> Default: "[Algo]"
-#ifndef CS_ALGO_LOG_PREFIX
-#define CS_ALGO_LOG_PREFIX                       "[Algo]"
-#endif
-
-// <o CS_ALGO_ESTIMATOR_COUNT> Number of connections that own a CS estimator <1..4>
+// <e CS_ALGO_CONFIG_RTL_LOG> RTL Library
 // <i> Default: 1
-// <i> Must be in the range [1 .. SL_BT_CONFIG_MAX_CONNECTIONS] and must match
-// <i> CS_INITIATOR_MAX_CONNECTIONS, since every initiator connection may
-// <i> allocate 0 or 1 estimators.
-#ifndef CS_ALGO_ESTIMATOR_COUNT
-#define CS_ALGO_ESTIMATOR_COUNT 1
-#endif
+// <i> Enable RTL Library logging
+#define CS_ALGO_CONFIG_RTL_LOG                    1
 
-// Internal define to skip RTL processing
-#ifndef CS_ALGO_SKIP_RTL_PROCESS
-#define CS_ALGO_SKIP_RTL_PROCESS         0
-#endif
-
-// </e>
+// <s CS_ALGO_CONFIG_LOG_PREFIX> Log prefix
+// <i> Default: "[Algo]"
+#define CS_ALGO_CONFIG_LOG_PREFIX                 "[Algo]"
 
 // </h>
 
+// <h> General
+
+// <o CS_ALGO_CONFIG_ESTIMATOR_COUNT> Number of connections that own a CS estimator <1..4>
+// <i> Default: 1
+// <i> Must be in the range [1 .. SL_BT_CONFIG_MAX_CONNECTIONS] and must match
+// <i> CS_ALGO_CONFIG_ESTIMATOR_COUNT, since every connection may own 0 or 1 estimator.
+#define CS_ALGO_CONFIG_ESTIMATOR_COUNT            1
+
+// <o CS_ALGO_CONFIG_DEFAULT_RSSI_REF_TX_POWER> RSSI reference TX power <-110..30>
+// <i> Reference RSSI value of the remote device at 1.0 m distance in dBm
+// <i> Default: -40.0F
+#define CS_ALGO_CONFIG_DEFAULT_RSSI_REF_TX_POWER  -40.0F
+
+// </e>
+
 // <<< end of configuration section >>>
+
+// Internal define to skip RTL processing
+#define CS_ALGO_CONFIG_SKIP_RTL_PROCESS         0
+
+// Default algorithm mode
+#define CS_ALGO_CONFIG_DEFAULT_ALGO_MODE        CS_ALGO_MODE_REAL_TIME_FAST
+
+// Default RTL library configuration
+#define CS_ALGO_CONFIG_RTL_CONFIG_DEFAULT                   \
+  {                                                         \
+    .rtl_logging_enabled = (bool)CS_ALGO_CONFIG_RTL_LOG,    \
+    .algo_mode           = CS_ALGO_CONFIG_DEFAULT_ALGO_MODE,\
+  }
 
 /** @} (end addtogroup cs_algo) */
 

@@ -35,16 +35,17 @@
 #include "app_config.h"
 #include "sl_main_init.h"
 #include "sl_bt_peer_manager_peripheral.h"
-#include "cs_reflector.h"
-#include "cs_reflector_config.h"
+#include "cs_manager.h"
+#include "cs_manager_config.h"
 #include "cs_antenna.h"
-#include "cs_sync_antenna.h"
+#include "cs_antenna_config.h"
+#include "cs_common.h"
 #include "cs_ras_server.h"
 // Security
 #include "sl_bt_peer_security.h"
 #include "app_button_press.h"
 
-
+// TODO: CLI
 #ifdef SL_CATALOG_CS_REFLECTOR_CLI_PRESENT
 #include "cs_reflector_cli.h"
 #endif // SL_CATALOG_CS_REFLECTOR_CLI_PRESENT
@@ -53,13 +54,14 @@
 #define INSTANCE_PREFIX             "[%u] "
 #define APP_INSTANCE_PREFIX         APP_PREFIX INSTANCE_PREFIX
 
-static cs_reflector_config_t cs_reflector_config = {
-  .max_tx_power_dbm = CS_REFLECTOR_MAX_TX_POWER_DBM,
-  .cs_sync_antenna = CS_REFLECTOR_CS_SYNC_ANTENNA
-};
+static cs_manager_instance_config_t cs_manager_config;
 
 static void on_connection_opened_with_initiator(uint8_t conn_handle);
 static void on_connection_closed(uint8_t conn_handle);
+static void on_cs_manager_event(uint8_t conn_handle,
+                                uint8_t config_id,
+                                cs_manager_event_type_t event,
+                                sl_status_t status);
 
 void cs_ras_server_on_mode_change(uint8_t connection, cs_ras_mode_t mode,
                                   bool indication) {
@@ -76,16 +78,30 @@ void cs_ras_server_on_mode_change(uint8_t connection, cs_ras_mode_t mode,
 void app_init(void)
 {
   app_log_info(APP_LOG_NL);
-  app_log_info("+-[CS Reflector by Silicon Labs]------------------------+" APP_LOG_NL);
-  app_log_info("+-------------------------------------------------------+" APP_LOG_NL);
-  app_log_info(APP_PREFIX "Maximum concurrent connections: %u" APP_LOG_NL, SL_BT_CONFIG_MAX_CONNECTIONS);
-  app_log_debug(APP_PREFIX "Default minimum transmit power: %d dBm" APP_LOG_NL, CS_REFLECTOR_MIN_TX_POWER_DBM);
-  app_log_debug(APP_PREFIX "Default maximum transmit power: %d dBm" APP_LOG_NL, CS_REFLECTOR_MAX_TX_POWER_DBM);
+  app_log_info("+-[CS Reflector by Silicon Labs]---------------+" APP_LOG_NL);
+
+  sl_status_t sc = cs_manager_set_callback(on_cs_manager_event);
+  if (sc != SL_STATUS_OK) {
+    app_log_error(APP_PREFIX "Failed to register CS Manager event callback! [sc: 0x%lx]" APP_LOG_NL,
+              (unsigned long)sc);
+    app_assert_status(sc);
+  }
+
+  cs_manager_get_default_instance_config(false, // Reflector CS role
+                                         false, // Peripheral role
+                                         &cs_manager_config);
+
+  app_log_info(APP_PREFIX "Maximum concurrent connections: %u" APP_LOG_NL,
+               CS_MANAGER_CONFIG_MAX_INSTANCES);
+  app_log_debug(APP_PREFIX "Default minimum transmit power: %d dBm" APP_LOG_NL,
+                CS_MANAGER_CONFIG_DEFAULT_MIN_TX_POWER_DBM);
+  app_log_debug(APP_PREFIX "Default maximum transmit power: %d dBm" APP_LOG_NL, 
+                CS_MANAGER_CONFIG_DEFAULT_MAX_TX_POWER_DBM);
 
   app_log_info(APP_PREFIX "Wire%s antenna offset will be used." APP_LOG_NL,
-               CS_REFLECTOR_ANTENNA_OFFSET ? "d" : "less");
+               CS_ANTENNA_CONFIG_DEFAULT_ANTENNA_OFFSET ? "d" : "less");
 
-  switch (cs_reflector_config.cs_sync_antenna) {
+  switch (cs_manager_config.cs_sync_antenna) {
     case CS_SYNC_ANTENNA_1:
       app_log_info(APP_PREFIX "Antenna 1 will be used for RTT" APP_LOG_NL);
       break;
@@ -93,10 +109,10 @@ void app_init(void)
       app_log_info(APP_PREFIX "Antenna 2 will be used for RTT" APP_LOG_NL);
       break;
     default:
-      if (cs_reflector_config.cs_sync_antenna != CS_SYNC_SWITCHING) {
+      if (cs_manager_config.cs_sync_antenna != CS_SYNC_SWITCHING) {
         app_log_warning(APP_PREFIX "Unknown RTT antenna usage (%d)! " APP_LOG_NL,
-                        cs_reflector_config.cs_sync_antenna);
-        cs_reflector_config.cs_sync_antenna = CS_SYNC_SWITCHING;
+                        cs_manager_config.cs_sync_antenna);
+        cs_manager_config.cs_sync_antenna = CS_SYNC_SWITCHING;
       }
       app_log_info(APP_PREFIX "Switching between all antennas for RTT" APP_LOG_NL);
       break;
@@ -138,15 +154,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     {
       bd_addr address;
       uint8_t address_type;
-      int16_t min_tx_power_x10 = CS_REFLECTOR_MIN_TX_POWER_DBM * 10;
-      int16_t max_tx_power_x10 = CS_REFLECTOR_MAX_TX_POWER_DBM * 10;
-      sc = sl_bt_system_set_tx_power(min_tx_power_x10,
-                                     max_tx_power_x10,
-                                     &min_tx_power_x10,
-                                     &max_tx_power_x10);
-      app_assert_status(sc);
-      app_log_debug(APP_PREFIX "Set minimum transmit power to: %d dBm" APP_LOG_NL, min_tx_power_x10 / 10);
-      app_log_debug(APP_PREFIX "Set maximum transmit power to: %d dBm" APP_LOG_NL, max_tx_power_x10 / 10);
+      //TODO: move to component?
       sc = sl_bt_gap_get_identity_address(&address, &address_type);
       app_assert_status(sc);
       // Print the Bluetooth address
@@ -159,12 +167,8 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
                    address.addr[1],
                    address.addr[0]);
 
-      // Set antenna offset
-      sc = cs_antenna_configure(CS_REFLECTOR_ANTENNA_OFFSET);
-      app_assert_status(sc);
-
       // Start advertising for initiator connections
-      if (SL_BT_CONFIG_MAX_CONNECTIONS > 0) {
+      if (!cs_manager_is_full()) {
 #ifndef SL_CATALOG_CS_REFLECTOR_CLI_PRESENT
         sc = sl_bt_peer_manager_peripheral_start_advertising(SL_BT_INVALID_ADVERTISING_SET_HANDLE);
         app_assert_status(sc);
@@ -212,6 +216,8 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     case sl_bt_evt_connection_phy_status_id:
       app_log_debug(APP_INSTANCE_PREFIX "PHY update procedure completed" APP_LOG_NL,
                     evt->data.evt_connection_phy_status.connection);
+      // Save connection PHY
+      cs_manager_config.conn_phy = evt->data.evt_connection_phy_status.phy;
       break;
 
     // -------------------------------
@@ -264,10 +270,10 @@ static void on_connection_opened_with_initiator(uint8_t conn_handle)
 {
   sl_status_t sc;
 #ifdef SL_CATALOG_CS_REFLECTOR_CLI_PRESENT
-  cs_reflector_config.cs_sync_antenna = cs_reflector_cli_get_cs_sync_antenna_usage();
+  cs_manager_config.cs_sync_antenna = cs_reflector_cli_get_cs_sync_antenna_usage();
 #endif // SL_CATALOG_CS_REFLECTOR_CLI_PRESENT
-  // Create a new reflector instance for the connection handle
-  sc = cs_reflector_create(conn_handle, &cs_reflector_config);
+  // Create a new instance for the connection handle
+  sc = cs_manager_create(conn_handle, &cs_manager_config, NULL);
   if (sc != SL_STATUS_OK) {
     app_log_error(APP_INSTANCE_PREFIX "Failed to create reflector instance'" APP_LOG_NL, conn_handle);
     sl_bt_peer_manager_peripheral_close_connection(conn_handle);
@@ -275,7 +281,7 @@ static void on_connection_opened_with_initiator(uint8_t conn_handle)
   }
 
   // Advertise for new initiator connections if we have room for more
-  if (cs_reflector_get_active_instance_count() < SL_BT_CONFIG_MAX_CONNECTIONS) {
+  if (!cs_manager_is_full()) {
     sc = sl_bt_peer_manager_peripheral_start_advertising(SL_BT_INVALID_ADVERTISING_SET_HANDLE);
     app_assert_status(sc);
     app_log_info(APP_PREFIX "Advertising restarted for new initiator connections..." APP_LOG_NL);
@@ -286,17 +292,13 @@ static void on_connection_closed(uint8_t conn_handle)
 {
   sl_status_t sc;
   bool advertisement_should_be_restarted = false;
-  uint8_t reflector_count = cs_reflector_get_active_instance_count();
+  // Remove the instance for the connection handle
+  sc = cs_manager_delete(conn_handle);
+  app_assert_status_f(sc, "Failed to delete instance");
   // If we are at the maximum capacity - it means that the advertisement is not running
   // Restart advertising for new initiator connections if we were at the limit
-  if (reflector_count <= SL_BT_CONFIG_MAX_CONNECTIONS) {
+  if (!cs_manager_is_full()) {
     advertisement_should_be_restarted = true;
-  }
-
-  if (reflector_count > 0) {
-    // Remove the reflector instance for the connection handle
-    sc = cs_reflector_delete(conn_handle);
-    app_assert_status_f(sc, "Failed to delete reflector instance");
   }
 
   // Restart advertising if needed
@@ -304,6 +306,73 @@ static void on_connection_closed(uint8_t conn_handle)
     sc = sl_bt_peer_manager_peripheral_start_advertising(SL_BT_INVALID_ADVERTISING_SET_HANDLE);
     app_assert_status(sc);
     app_log_info(APP_PREFIX "Advertising restarted for new initiator connections..." APP_LOG_NL);
+  }
+}
+
+static void on_cs_manager_event(uint8_t conn_handle,
+                                uint8_t config_id,
+                                cs_manager_event_type_t event,
+                                sl_status_t status)
+{
+  (void)config_id;
+
+  switch (event) {
+    case CS_MANAGER_EVENT_INSTANCE_CREATE_COMPLETE:
+      if (status != SL_STATUS_OK) {
+        app_log_error(APP_INSTANCE_PREFIX "Failed to create CS Manager instance"
+                                          " [sc: 0x%lx]" APP_LOG_NL,
+                      conn_handle, (unsigned long)status);
+        (void)sl_bt_peer_manager_peripheral_close_connection(conn_handle);
+        return;
+      }
+      app_log_info(APP_INSTANCE_PREFIX "CS Manager instance created" APP_LOG_NL,
+                   conn_handle);
+      break;
+
+    case CS_MANAGER_EVENT_INSTANCE_REMOVE_COMPLETE:
+      app_log_info(APP_INSTANCE_PREFIX "CS Manager instance removed" APP_LOG_NL,
+                   conn_handle);
+      break;
+
+    case CS_MANAGER_EVENT_CONFIG_CREATE_COMPLETE:
+      app_log_info(APP_INSTANCE_PREFIX "CS configuration created by initiator"
+                                       APP_LOG_NL, conn_handle);
+      break;
+
+    case CS_MANAGER_EVENT_CONFIG_OVERWRITTEN:
+      app_log_info(APP_INSTANCE_PREFIX "CS configuration overwritten by initiator"
+                                       APP_LOG_NL, conn_handle);
+      break;
+
+    case CS_MANAGER_EVENT_CONFIG_REMOVE_COMPLETE:
+      app_log_info(APP_INSTANCE_PREFIX "CS configuration removed" APP_LOG_NL,
+                   conn_handle);
+      break;
+
+    case CS_MANAGER_EVENT_PROCEDURE_START_COMPLETE:
+      app_log_info(APP_INSTANCE_PREFIX "CS procedure started" APP_LOG_NL,
+                   conn_handle);
+      break;
+
+    case CS_MANAGER_EVENT_PROCEDURE_STOP_COMPLETE:
+      app_log_info(APP_INSTANCE_PREFIX "CS procedure stopped" APP_LOG_NL,
+                   conn_handle);
+      break;
+
+    case CS_MANAGER_EVENT_ERROR:
+      app_log_error(APP_INSTANCE_PREFIX "CS Manager general error"
+                                        " [sc: 0x%lx]" APP_LOG_NL,
+                    conn_handle, (unsigned long)status);
+      if (conn_handle != SL_BT_INVALID_CONNECTION_HANDLE) {
+        (void)sl_bt_peer_manager_peripheral_close_connection(conn_handle);
+      }
+      break;
+
+    default:
+      app_log_debug(APP_INSTANCE_PREFIX "Unhandled CS Manager event (%u)"
+                                        " [sc: 0x%lx]" APP_LOG_NL,
+                    conn_handle, (unsigned)event, (unsigned long)status);
+      break;
   }
 }
 

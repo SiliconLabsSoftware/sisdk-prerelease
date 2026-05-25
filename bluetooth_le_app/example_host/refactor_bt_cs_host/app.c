@@ -54,10 +54,11 @@
 #include "cs_initiator_client.h"
 #include "cs_configurator.h"
 #include "cs_antenna.h"
+#include "cs_antenna_config.h"
 #include "extended_result.h"
 #include "sl_bt_peer_security.h"
 #include "sl_rtl_clib_api.h"
-#include "cs_sync_antenna.h"
+#include "cs_common.h"
 #include "app_config.h"
 
 // MAX_CONNECTIONS should be less or equal to the SL_BT_CONFIG_MAX_CONNECTIONS in the CS NCP example.
@@ -199,7 +200,7 @@ typedef struct {
 } cs_host_state_t;
 
 cs_host_config_t cs_host_config = {
-  .use_antenna_wired_offset = false,
+  .use_antenna_wired_offset = CS_ANTENNA_CONFIG_DEFAULT_ANTENNA_OFFSET,
   .accepted_bt_address_count = 0u,
   .max_reflector_instances = 0u,
   .max_initiator_instances = 0u,
@@ -376,8 +377,8 @@ void app_cli_init(int argc, char *argv[])
         int cs_tone_antenna_config_idx_req = atoi(optarg);
         if (cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY
             && cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY
-            && cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R
-            && cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R) {
+            && cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_DUAL_LOCAL_SINGLE_REMOTE
+            && cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_DUAL_REMOTE) {
           app_log_error(APP_PREFIX "Invalid antenna usage for PBR (%d) provided!" APP_LOG_NL, cs_tone_antenna_config_idx_req);
           exit(EXIT_FAILURE);
         } else {
@@ -712,10 +713,6 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
         app_log_info(APP_PREFIX "Advertising started for initiator connections..." APP_LOG_NL);
       }
 
-      // Set antenna configuration
-      sc = cs_antenna_configure(cs_host_config.use_antenna_wired_offset);
-      app_assert_status(sc);
-
       // If there are initiator instances, read the target side configuration
       if (cs_host_config.max_initiator_instances > 0 ) {
         get_target_config();
@@ -934,10 +931,10 @@ static const char *antenna_usage_to_str(const cs_initiator_config_t *config)
     switch (config->cs_tone_antenna_config_idx_req) {
       case CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY:
         return "single antenna on both sides (1:1)";
-      case CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R:
-        return "dual antenna initiator & single antenna reflector (2:1)";
-      case CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R:
-        return "single antenna initiator & dual antenna reflector (1:2)";
+      case CS_ANTENNA_CONFIG_INDEX_DUAL_LOCAL_SINGLE_REMOTE:
+        return "dual local antenna & single remote antenna (2:1)";
+      case CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_DUAL_REMOTE:
+        return "single local antenna & dual remote antenna (1:2)";
       case CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY:
         return "dual antennas on both sides (2:2)";
       default:

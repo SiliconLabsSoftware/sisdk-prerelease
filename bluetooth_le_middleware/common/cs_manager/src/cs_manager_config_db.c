@@ -38,7 +38,7 @@
 #include "cs_manager.h"
 #include "cs_manager_internal.h"
 #include "cs_manager_config.h"
-#include "cs_manager_config_db.h"
+#include "cs_manager_config_db_internal.h"
 
 // -----------------------------------------------------------------------------
 // Macros
@@ -51,10 +51,10 @@
 // -----------------------------------------------------------------------------
 // Static function declarations
 
-static sl_bt_evt_cs_config_complete_t *find_entry_by_config_id(uint8_t conn_handle,
-                                                          uint8_t config_id);
-static sl_bt_evt_cs_config_complete_t *find_entry_to_write(uint8_t conn_handle,
-                                                      uint8_t config_id);
+static cs_config_data_t *find_entry_by_config_id(uint8_t conn_handle,
+                                                               uint8_t config_id);
+static cs_config_data_t *find_entry_to_write(uint8_t conn_handle,
+                                                           uint8_t config_id);
 
 // -----------------------------------------------------------------------------
 // Static variables
@@ -62,10 +62,10 @@ static sl_bt_evt_cs_config_complete_t *find_entry_to_write(uint8_t conn_handle,
 // -----------------------------------------------------------------------------
 // Private (static) function definitions
 
-static sl_bt_evt_cs_config_complete_t *find_entry_by_config_id(uint8_t conn_handle,
+static cs_config_data_t *find_entry_by_config_id(uint8_t conn_handle,
                                                                uint8_t config_id)
 {
-  cs_manager_t *instance = cs_manager_get_instance(conn_handle);
+  cs_manager_t *instance = cs_manager_find(conn_handle);
   if (instance == NULL) {
     return NULL;
   }
@@ -77,10 +77,10 @@ static sl_bt_evt_cs_config_complete_t *find_entry_by_config_id(uint8_t conn_hand
   return NULL;
 }
 
-static sl_bt_evt_cs_config_complete_t *find_entry_to_write(uint8_t conn_handle,
+static cs_config_data_t *find_entry_to_write(uint8_t conn_handle,
                                                            uint8_t config_id)
 {
-  cs_manager_t *instance = cs_manager_get_instance(conn_handle);
+  cs_manager_t *instance = cs_manager_find(conn_handle);
   if (instance == NULL) {
     return NULL;
   }
@@ -102,28 +102,29 @@ static sl_bt_evt_cs_config_complete_t *find_entry_to_write(uint8_t conn_handle,
 // -----------------------------------------------------------------------------
 // Public function definitions
 
-sl_status_t cs_manager_config_db_create(const sl_bt_evt_cs_config_complete_t *config)
+sl_status_t cs_manager_config_db_create(const cs_config_data_t *config)
 {
   if (config == NULL) {
     return SL_STATUS_NULL_POINTER;
   }
-  sl_bt_evt_cs_config_complete_t *entry = find_entry_to_write(config->connection, 
-                                                              config->config_id);
+  cs_config_data_t *entry = find_entry_to_write(config->connection, 
+                                                config->config_id);
   if (entry == NULL) {
     return SL_STATUS_FULL;
   }
+  bool overwrites = (entry->config_id != CS_MANAGER_INVALID_CONFIG_ID);
   *entry = *config;
-  return SL_STATUS_OK;
+  return overwrites ? SL_STATUS_ALREADY_EXISTS : SL_STATUS_OK;
 }
 
 sl_status_t cs_manager_config_db_get(uint8_t conn_handle,
-                                      uint8_t config_id,
-                                      sl_bt_evt_cs_config_complete_t *config_out)
+                                     uint8_t config_id,
+                                     cs_config_data_t *config_out)
 {
   if (config_out == NULL) {
     return SL_STATUS_NULL_POINTER;
   }
-  sl_bt_evt_cs_config_complete_t *entry = find_entry_by_config_id(conn_handle, config_id);
+  cs_config_data_t *entry = find_entry_by_config_id(conn_handle, config_id);
   if (entry == NULL || 
       entry->config_id == CS_MANAGER_INVALID_CONFIG_ID) {
     return SL_STATUS_NOT_FOUND;
@@ -135,7 +136,7 @@ sl_status_t cs_manager_config_db_get(uint8_t conn_handle,
 sl_status_t cs_manager_config_db_remove(uint8_t conn_handle,
                                         uint8_t config_id)
 {
-  sl_bt_evt_cs_config_complete_t *entry = find_entry_by_config_id(conn_handle, config_id);
+  cs_config_data_t *entry = find_entry_by_config_id(conn_handle, config_id);
   if (entry == NULL || 
       entry->config_id == CS_MANAGER_INVALID_CONFIG_ID) {
     return SL_STATUS_NOT_FOUND;
@@ -143,9 +144,4 @@ sl_status_t cs_manager_config_db_remove(uint8_t conn_handle,
   entry->connection = SL_BT_INVALID_CONNECTION_HANDLE;
   entry->config_id = CS_MANAGER_INVALID_CONFIG_ID;
   return SL_STATUS_OK;
-}
-
-void cs_manager_config_db_process_bt_event(const sl_bt_msg_t *evt)
-{
-  //TODO
 }

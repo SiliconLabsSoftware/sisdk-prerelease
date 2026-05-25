@@ -51,10 +51,14 @@ component:
   - id: bluetooth_peer_manager_filter
   - id: clock_manager
   - id: component_catalog
-  - id: refactor_cs_initiator
-  - id: refactor_cs_initiator_display
-  - id: refactor_cs_antenna
+  - id: cs_rreq_display
+  - id: cs_antenna
+  - id: cs_manager
+  - id: cs_manager_feature_initiator
+  - id: cs_manager_feature_config
+  - id: cs_manager_feature_control
   - id: cs_rreq
+  - id: cs_algo
   - id: cs_configurator
   - id: device_init
   - id: iostream_recommended_stream
@@ -72,18 +76,26 @@ component:
     instance:
       - led0
   - id: sl_main
-  - id: cs_algo
 
 source:
   - path: app.c
+  - path: app_cs.c
+  - path: app_cs_error.c
+  - path: app_cs_result.c
   - path: rtl_log.c
   - path: trace.c
+  - path: ../../common/cs/app_cs_discovery.c
+
 include:
   - path: .
     file_list:
       - path: app.h
       - path: rtl_log.h
       - path: trace.h
+  - path: ../../common/cs
+    file_list:
+      - path: app_cs_discovery.h
+
 
 readme:
   - path: readme.md
@@ -139,8 +151,6 @@ configuration:
     value: 0
     unless:
       - cli
-  - name: CS_INITIATOR_ANTENNA_OFFSET
-    value: 0
   - name: SL_BGAPI_TRACE_RTT_BUFFER_SIZE
     value: 4096
   - name: BUFFER_SIZE_UP
@@ -149,6 +159,8 @@ configuration:
     value: 4
   - name: APP_LOG_LEVEL_FILTER_THRESHOLD
     value: APP_LOG_LEVEL_INFO
+  - name: CS_ANTENNA_CONFIG_SET_ON_BOOT
+    value: 1
 
 define:
   - name: SLI_BGAPI_TRACE_DISABLE_AUTO_START
@@ -159,7 +171,6 @@ post_build:
     condition: [device_series_2, bootloader_app_properties]
 
 tag:
-  - prebuilt_demo
   - toolchain:gcc
   - toolchain:llvm
   - hwfilter:device:device_supports_bluetooth
