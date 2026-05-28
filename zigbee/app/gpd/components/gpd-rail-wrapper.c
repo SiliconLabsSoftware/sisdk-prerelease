@@ -103,6 +103,11 @@ uint16_t sl_zigbee_gpd_rail_get_radio_entropy_wrapper(uint8_t *dataPtr, uint16_t
   return sl_rail_get_radio_entropy(railHandle, dataPtr, dataLength);
 }
 
+void sl_zigbee_gpd_rail_set_long_address_wrapper(uint8_t *ieee)
+{
+  (void) sl_rail_ieee802154_set_long_address(railHandle, ieee, 0x00);
+}
+
 void sl_zigbee_gpd_radio_init(void)
 {
   // Set TX FIFO, and verify that the size is correct

@@ -36,6 +36,7 @@
 #include "sl_bt_peer_manager_common.h"
 #include "cs_algo.h"
 #include "cs_common.h"
+#include "cs_manager.h"
 #include "app_cs_discovery.h"
 
 // -----------------------------------------------------------------------------
@@ -124,6 +125,7 @@ SL_ENUM(cs_app_error_t) {
   // ---- cs_manager / cs_configurator call errors ----
   CS_APP_ERROR_CS_MANAGER_INSTANCE_CREATE_FAILED = 0,
   CS_APP_ERROR_CS_MANAGER_INSTANCE_REMOVE_FAILED,
+  CS_APP_ERROR_CS_MANAGER_GENERAL_ERROR,
   CS_APP_ERROR_CS_CONFIG_CREATE_FAILED,
   CS_APP_ERROR_CS_CONFIG_GET_DATA_FAILED,
   CS_APP_ERROR_CS_CONFIG_REMOVE_FAILED,
@@ -159,9 +161,10 @@ SL_ENUM(cs_app_error_t) {
 };
 
 typedef enum {
-  CS_ERROR_TYPE_RREQ = 0, ///< value is a @ref cs_rreq_error_t
-  CS_ERROR_TYPE_ALGO,     ///< value is a @ref cs_algo_error_t
-  CS_ERROR_TYPE_APP       ///< value is a @ref cs_app_error_t
+  CS_ERROR_TYPE_RREQ = 0,    ///< value is a @ref cs_rreq_error_t
+  CS_ERROR_TYPE_ALGO,        ///< value is a @ref cs_algo_error_t
+  CS_ERROR_TYPE_APP,         ///< value is a @ref cs_app_error_t
+  CS_ERROR_TYPE_CS_MANAGER   ///< value is a @ref cs_manager_error_t
 } cs_error_type_t;
 
 /**************************************************************************//**
@@ -177,6 +180,13 @@ void app_on_cs_rreq_on_error(uint8_t conn_handle,
 void app_on_cs_algo_on_error(uint8_t conn_handle,
                              cs_algo_error_t error,
                              sl_status_t sc);
+
+/**************************************************************************//**
+ * cs_manager error callback. Defined in app_cs_error.c.
+ *****************************************************************************/
+void app_on_cs_manager_on_error(uint8_t conn_handle,
+                                cs_manager_error_t error,
+                                sl_status_t sc);
 
 /**************************************************************************//**
  * Generic CS application error handler. Defined in app_cs_error.c.

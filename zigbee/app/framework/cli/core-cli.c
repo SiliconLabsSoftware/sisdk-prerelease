@@ -24,6 +24,7 @@
 #include "library.h"
 #ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_PHY_SELECT_PRESENT
 #include "sl_rail_ieee802154.h"
+#include "sl_rail_util_ieee802154_phy_select.h"
 #endif
 #ifdef SL_ZIGBEE_AF_HAS_SECURITY_PROFILE_SE
   #include "stack/include/cbke-crypto-engine.h"  // sl_zigbee_get_certificate()
@@ -56,7 +57,48 @@ void  sli_get_pti_radio_config(sl_cli_command_arg_t *arguments)
   sl_zigbee_af_cli_println("Current Config: %0x", sl_rail_ieee802154_get_phy_id(sl_zigbee_get_rail_handle()));
 }
 
-#endif
+#ifndef SL_CATALOG_ZIGBEE_EZSP_PRESENT
+static const char *sli_zigbee_cli_phy_config_name(sl_rail_util_radio_config_t phy_id)
+{
+  switch (phy_id) {
+    case SL_RAIL_IEEE802154_PHY_2P4_GHZ:                    return "2P4_GHZ";
+    case SL_RAIL_IEEE802154_PHY_2P4_GHZ_ANT_DIV:            return "2P4_GHZ_ANT_DIV";
+    case SL_RAIL_IEEE802154_PHY_2P4_GHZ_COEX:               return "2P4_GHZ_COEX";
+    case SL_RAIL_IEEE802154_PHY_2P4_GHZ_ANT_DIV_COEX:       return "2P4_GHZ_ANT_DIV_COEX";
+    case SL_RAIL_IEEE802154_PHY_2P4_GHZ_FEM:                return "2P4_GHZ_FEM";
+    case SL_RAIL_IEEE802154_PHY_2P4_GHZ_FEM_ANT_DIV:        return "2P4_GHZ_FEM_ANT_DIV";
+    case SL_RAIL_IEEE802154_PHY_2P4_GHZ_FEM_COEX:           return "2P4_GHZ_FEM_COEX";
+    case SL_RAIL_IEEE802154_PHY_2P4_GHZ_FEM_ANT_DIV_COEX:   return "2P4_GHZ_FEM_ANT_DIV_COEX";
+    case SL_RAIL_IEEE802154_PHY_2P4_GHZ_2_MBPS:             return "2P4_GHZ_2_MBPS";
+    case SL_RAIL_IEEE802154_PHY_2P4_GHZ_RX_CH_SWITCHING:    return "2P4_GHZ_RX_CH_SWITCHING";
+    case SL_RAIL_IEEE802154_PHY_2P4_GHZ_1_MBPS_FEC:         return "2P4_GHZ_1_MBPS_FEC";
+    case SL_RAIL_IEEE802154_PHY_2P4_GHZ_FCS_2_MBPS:         return "2P4_GHZ_FCS_2_MBPS";
+    case SL_RAIL_IEEE802154_PHY_2P4_GHZ_FCS_1_MBPS_FEC:     return "2P4_GHZ_FCS_1_MBPS_FEC";
+    case SL_RAIL_IEEE802154_PHY_863_MHZ_GB868:              return "863_MHZ_GB868";
+    case SL_RAIL_IEEE802154_PHY_915_MHZ_GB868:              return "915_MHZ_GB868";
+    default:                                                return NULL;
+  }
+}
+
+void sli_zigbee_cli_get_active_phy_command(sl_cli_command_arg_t *arguments)
+{
+  sl_rail_util_radio_config_t active_phy;
+  const char *phy_name;
+
+  (void)arguments;
+
+  active_phy = sl_rail_util_ieee802154_get_active_radio_config();
+  phy_name = sli_zigbee_cli_phy_config_name(active_phy);
+
+  if (phy_name != NULL) {
+    sl_zigbee_af_cli_println("Active Radio PHY: %s", phy_name);
+  } else {
+    sl_zigbee_af_cli_println("Active Radio PHY: unknown PHY combination of (0x%02X)", active_phy);
+  }
+}
+#endif // !SL_CATALOG_ZIGBEE_EZSP_PRESENT
+
+#endif // SL_CATALOG_RAIL_UTIL_IEEE802154_PHY_SELECT_PRESENT
 
 void sli_zigbee_cli_config_cca_mode_command(sl_cli_command_arg_t *arguments)
 {

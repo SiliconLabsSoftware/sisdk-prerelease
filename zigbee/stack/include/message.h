@@ -876,8 +876,8 @@ sl_zigbee_packet_action_t sl_zigbee_pre_incoming_packet_filter_cb(sl_zigbee_zigb
  * @return void This function does not return a value as it is informative only.
  *
  * @internal SL_ZIGBEE_IPC_ARGS
- * {# packetData | length: size_p | max: MAX_IPC_VEC_ARG_CAPACITY #}
- * {# data | length: size_d | max: MAX_IPC_VEC_ARG_CAPACITY #}
+ * {# packetData | length: size_p | max: MAX_IPC_PACKET_HANDOFF_DATA_LENGTH_ARG_CAPACITY #}
+ * {# data | length: size_d | max: MAX_IPC_PACKET_HANDOFF_DATA_LENGTH_ARG_CAPACITY #}
  */
 void sl_zigbee_post_incoming_packet_filter_cb(sl_zigbee_zigbee_packet_type_t packetType,
                                               uint8_t* packetData,
@@ -903,8 +903,8 @@ void sl_zigbee_post_incoming_packet_filter_cb(sl_zigbee_zigbee_packet_type_t pac
  * @param size_d The size of the auxiliary data.
  * @param action The action that the pre-filter callback took for this packet.
  * @internal SL_ZIGBEE_IPC_ARGS
- * {# packetData | length: size_p | max: MAX_IPC_VEC_ARG_CAPACITY #}
- * {# data | length: size_d | max: MAX_IPC_VEC_ARG_CAPACITY #}
+ * {# packetData | length: size_p | max: MAX_IPC_PACKET_HANDOFF_DATA_LENGTH_ARG_CAPACITY #}
+ * {# data | length: size_d | max: MAX_IPC_PACKET_HANDOFF_DATA_LENGTH_ARG_CAPACITY #}
  */
 void sl_zigbee_post_incoming_packet_filter_with_lqi_and_rssi_cb(sl_zigbee_zigbee_packet_type_t packetType,
                                                                 sl_zigbee_packet_link_quality_t *linkQuality,
@@ -975,8 +975,8 @@ sl_zigbee_packet_action_t sl_zigbee_pre_outgoing_packet_filter_cb(sl_zigbee_zigb
  * SL_ZIGBEE_ACCEPT_PACKET, SL_ZIGBEE_DROP_PACKET, or SL_ZIGBEE_MANGLE_PACKET
  *
  * @internal SL_ZIGBEE_IPC_ARGS
- * {# packetData | length: size_p | max: MAX_IPC_VEC_ARG_CAPACITY #}
- * {# data | length: size_d | max: MAX_IPC_VEC_ARG_CAPACITY #}
+ * {# packetData | length: size_p | max: MAX_IPC_PACKET_HANDOFF_DATA_LENGTH_ARG_CAPACITY #}
+ * {# data | length: size_d | max: MAX_IPC_PACKET_HANDOFF_DATA_LENGTH_ARG_CAPACITY #}
  */
 void sl_zigbee_post_outgoing_packet_filter_cb(sl_zigbee_zigbee_packet_type_t packetType,
                                               uint8_t* packetData,

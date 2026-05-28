@@ -368,8 +368,17 @@ const app_saving_item_t *saving_settings[] = {
 };
 
 static sl_wisun_statistics_t app_statistics;
-static sl_wisun_network_info_t app_network_info;
-static sl_wisun_rpl_info_t app_rpl_info;
+
+SL_ALIGN(4) static sl_wisun_network_info_t app_network_info SL_ATTRIBUTE_ALIGN(4);
+SL_ALIGN(4) static sl_wisun_rpl_info_t app_rpl_info SL_ATTRIBUTE_ALIGN(4);
+/*
+ * sl_wisun_*_info_t use SL_ATTRIBUTE_PACKED; IAR warns (Pa039) on & of uint16
+ * members in static app_settings tables. Mirror those fields in plain
+ * uint16_t storage and refresh after sl_wisun_get_{network,rpl}_info().
+ */
+static uint16_t app_settings_mirror_network_pan_id;
+static uint16_t app_settings_mirror_rpl_dodag_rank;
+static uint16_t app_settings_mirror_rpl_lifetime_unit;
 
 #if SLI_WISUN_DISABLE_SECURITY
 uint32_t app_security_state = 1;
@@ -2973,7 +2982,7 @@ static const app_settings_entry_t app_info_entries[] =
     .value_size = APP_SETTINGS_VALUE_SIZE_UINT16,
     .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
     .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = &app_network_info.pan_id,
+    .value = &app_settings_mirror_network_pan_id,
     .input_enum_list = NULL,
     .output_enum_list = NULL,
     .set_handler = NULL,
@@ -3029,7 +3038,7 @@ static const app_settings_entry_t app_rpl_entries[] =
     .value_size = APP_SETTINGS_VALUE_SIZE_UINT16,
     .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
     .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = &app_rpl_info.dodag_rank,
+    .value = &app_settings_mirror_rpl_dodag_rank,
     .input_enum_list = NULL,
     .output_enum_list = NULL,
     .set_handler = NULL,
@@ -3146,7 +3155,7 @@ static const app_settings_entry_t app_rpl_entries[] =
     .value_size = APP_SETTINGS_VALUE_SIZE_UINT16,
     .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
     .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = &app_rpl_info.lifetime_unit,
+    .value = &app_settings_mirror_rpl_lifetime_unit,
     .input_enum_list = NULL,
     .output_enum_list = NULL,
     .set_handler = NULL,
@@ -4002,6 +4011,8 @@ static sl_status_t app_settings_get_network_info(char *value_str,
     return SL_STATUS_FAIL;
   }
 
+  app_settings_mirror_network_pan_id = app_network_info.pan_id;
+
   iter = app_info_entries;
   while (iter->key) {
     if (!strcmp(entry->key, app_info_domain_str[iter->domain])) {
@@ -4033,6 +4044,9 @@ static sl_status_t app_settings_get_rpl_info(char *value_str,
     printf("[Failed to retrieve Wi-SUN RPL information: %lu]\r\n", ret);
     return SL_STATUS_FAIL;
   }
+
+  app_settings_mirror_rpl_dodag_rank = app_rpl_info.dodag_rank;
+  app_settings_mirror_rpl_lifetime_unit = app_rpl_info.lifetime_unit;
 
   iter = app_rpl_entries;
   while (iter->key) {

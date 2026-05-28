@@ -29,6 +29,10 @@
 
 #define MAX_IPC_VEC_ARG_CAPACITY 127
 
+// 127 is max packet size over the air but internally we add a few bytes
+// for the packet handoff data length
+#define MAX_IPC_PACKET_HANDOFF_DATA_LENGTH_ARG_CAPACITY 137
+
 /**
  * @addtogroup ember_types
  *

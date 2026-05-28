@@ -1527,6 +1527,7 @@ typedef struct SCommandSetKeepAliveTracking {
 } SCommandSetKeepAliveTracking;
 
 typedef struct SCommandSetSeverityLevel {
+  node_id_t nodeID;
   uint8_t severity_level;
 } SCommandSetSeverityLevel;
 

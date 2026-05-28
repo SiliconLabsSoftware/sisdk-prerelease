@@ -284,9 +284,9 @@ void sli_zigbee_stack_post_incoming_packet_filter_cb(sl_zigbee_zigbee_packet_typ
   }
   cb_event->data.post_incoming_packet_filter_cb.packetType = packetType;
 
-  if (size_p > MAX_IPC_VEC_ARG_CAPACITY) {
+  if (size_p > MAX_IPC_PACKET_HANDOFF_DATA_LENGTH_ARG_CAPACITY) {
     assert(false); // "vector packetData length exceeds expected maximum
-    size_p = MAX_IPC_VEC_ARG_CAPACITY;
+    size_p = MAX_IPC_PACKET_HANDOFF_DATA_LENGTH_ARG_CAPACITY;
   }
 
   if (packetData != NULL) {
@@ -295,9 +295,9 @@ void sli_zigbee_stack_post_incoming_packet_filter_cb(sl_zigbee_zigbee_packet_typ
 
   cb_event->data.post_incoming_packet_filter_cb.size_p = size_p;
 
-  if (size_d > MAX_IPC_VEC_ARG_CAPACITY) {
+  if (size_d > MAX_IPC_PACKET_HANDOFF_DATA_LENGTH_ARG_CAPACITY) {
     assert(false); // "vector data length exceeds expected maximum
-    size_d = MAX_IPC_VEC_ARG_CAPACITY;
+    size_d = MAX_IPC_PACKET_HANDOFF_DATA_LENGTH_ARG_CAPACITY;
   }
 
   if (data != NULL) {
@@ -333,9 +333,9 @@ void sli_zigbee_stack_post_incoming_packet_filter_with_lqi_and_rssi_cb(sl_zigbee
     cb_event->data.post_incoming_packet_filter_with_lqi_and_rssi_cb.linkQuality = *linkQuality;
   }
 
-  if (size_p > MAX_IPC_VEC_ARG_CAPACITY) {
+  if (size_p > MAX_IPC_PACKET_HANDOFF_DATA_LENGTH_ARG_CAPACITY) {
     assert(false); // "vector packetData length exceeds expected maximum
-    size_p = MAX_IPC_VEC_ARG_CAPACITY;
+    size_p = MAX_IPC_PACKET_HANDOFF_DATA_LENGTH_ARG_CAPACITY;
   }
 
   if (packetData != NULL) {
@@ -344,9 +344,9 @@ void sli_zigbee_stack_post_incoming_packet_filter_with_lqi_and_rssi_cb(sl_zigbee
 
   cb_event->data.post_incoming_packet_filter_with_lqi_and_rssi_cb.size_p = size_p;
 
-  if (size_d > MAX_IPC_VEC_ARG_CAPACITY) {
+  if (size_d > MAX_IPC_PACKET_HANDOFF_DATA_LENGTH_ARG_CAPACITY) {
     assert(false); // "vector data length exceeds expected maximum
-    size_d = MAX_IPC_VEC_ARG_CAPACITY;
+    size_d = MAX_IPC_PACKET_HANDOFF_DATA_LENGTH_ARG_CAPACITY;
   }
 
   if (data != NULL) {
@@ -377,9 +377,9 @@ void sli_zigbee_stack_post_outgoing_packet_filter_cb(sl_zigbee_zigbee_packet_typ
   }
   cb_event->data.post_outgoing_packet_filter_cb.packetType = packetType;
 
-  if (size_p > MAX_IPC_VEC_ARG_CAPACITY) {
+  if (size_p > MAX_IPC_PACKET_HANDOFF_DATA_LENGTH_ARG_CAPACITY) {
     assert(false); // "vector packetData length exceeds expected maximum
-    size_p = MAX_IPC_VEC_ARG_CAPACITY;
+    size_p = MAX_IPC_PACKET_HANDOFF_DATA_LENGTH_ARG_CAPACITY;
   }
 
   if (packetData != NULL) {
@@ -388,9 +388,9 @@ void sli_zigbee_stack_post_outgoing_packet_filter_cb(sl_zigbee_zigbee_packet_typ
 
   cb_event->data.post_outgoing_packet_filter_cb.size_p = size_p;
 
-  if (size_d > MAX_IPC_VEC_ARG_CAPACITY) {
+  if (size_d > MAX_IPC_PACKET_HANDOFF_DATA_LENGTH_ARG_CAPACITY) {
     assert(false); // "vector data length exceeds expected maximum
-    size_d = MAX_IPC_VEC_ARG_CAPACITY;
+    size_d = MAX_IPC_PACKET_HANDOFF_DATA_LENGTH_ARG_CAPACITY;
   }
 
   if (data != NULL) {

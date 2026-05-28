@@ -35,6 +35,7 @@
 #include <stdint.h>
 #include "sl_status.h"
 #include "sl_bt_api.h"
+#include "app_rta.h"
 #include "cs_manager_config.h"
 #include "cs_manager.h"
 
@@ -75,6 +76,12 @@ typedef struct {
 // Event callback
 extern cs_manager_event_t on_event;
 
+// User error callback
+extern cs_manager_on_error_t on_error;
+
+// RTA guard context — shared between cs_manager.c and cs_manager_cs_control.c
+extern app_rta_context_t cs_manager_ctx;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -90,12 +97,33 @@ extern "C" {
 sl_status_t cs_manager_init(void);
 
 /**************************************************************************//**
+ * Create the app_rta guard context for CS Manager.
+ * Called via app_rta_init template contribution.
+ *****************************************************************************/
+void cs_manager_rta_init(void);
+
+/**************************************************************************//**
  * Find CS Manager instance for a given connection handle.
  * 
  * @param[in] conn_handle The connection handle of the CS Manager instance.
  * @return Pointer to the CS Manager instance.
  *****************************************************************************/
 cs_manager_t *cs_manager_find(uint8_t conn_handle);
+
+/**************************************************************************//**
+ * Log an error and dispatch it to the registered user error callback.
+ *
+ * Mirrors the @c rreq_error helper in cs_rreq. May be safely called with a
+ * NULL @p m, in which case @ref SL_BT_INVALID_CONNECTION_HANDLE is reported
+ * as the connection handle.
+ *
+ * @param[in] m   Instance reference (may be NULL for non-instance errors).
+ * @param[in] evt CS Manager error event identifier.
+ * @param[in] sc  Underlying status code.
+ *****************************************************************************/
+void cs_manager_error(cs_manager_t *m,
+                      cs_manager_error_t evt,
+                      sl_status_t sc);
 
 // -----------------------------------------------------------------------------
 // Event / callback declarations

@@ -76,8 +76,14 @@ configuration:
     value: 2752
   - name: SL_BT_CONFIG_BUFFER_SIZE
     value: 30000
+  - name: SL_BT_PEER_MANAGER_COMMON_MAX_ALLOWED_CONN_COUNT
+    value: 1
+  - name: SL_BT_CONFIG_MAX_CONNECTIONS
+    value: 1
+  - name: CS_MANAGER_CONFIG_MAX_INSTANCES
+    value: 1
   - name: SL_BT_CONFIG_MAX_CS_PROCEDURES
-    value: 4
+    value: 1
   - name: SL_BT_CONTROLLER_CONN_EVENT_LENGTH_EXTENSION
     value: 1
   - name: SL_PSA_KEY_USER_SLOT_COUNT

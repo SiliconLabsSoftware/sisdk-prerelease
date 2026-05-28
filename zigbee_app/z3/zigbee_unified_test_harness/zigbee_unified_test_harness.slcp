@@ -223,6 +223,9 @@ tag:
   - hwfilter:device:device_supports_zigbee
   - hwfilter:board:zb_zuth_supported_boards
   - hwfilter:device:zb_zuth_supported_parts
+  - toolchain:gcc
+  - toolchain:iar
+  - toolchain:llvm
 
 readme:
   - path: ./readme.md

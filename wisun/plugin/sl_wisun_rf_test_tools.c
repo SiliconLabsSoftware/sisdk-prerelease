@@ -375,13 +375,14 @@ sl_status_t rf_test_phy_config_to_chan_config(sl_wisun_phy_config_t *phy_config,
       *crc_length = rf_test_get_crc_length(phy_config->config.custom_oqpsk.crc_type);
       break;
 
-    case SL_WISUN_PHY_CONFIG_IDS:
+    case SL_WISUN_PHY_CONFIG_IDS: {
+      int proto_index = 0;
+
       status = sli_wisun_get_rail_handle(&rail_handle);
       if (status != SL_STATUS_OK) {
         sl_wisun_trace_error("rf_test: failed to get rail handle");
         return status;
       }
-      int proto_index = 0;
       while (channelConfigs[proto_index] != NULL && proto_index < phy_config->config.ids.protocol_id) {
         proto_index++;
       }
@@ -410,6 +411,7 @@ sl_status_t rf_test_phy_config_to_chan_config(sl_wisun_phy_config_t *phy_config,
       }
       sl_wisun_trace_error("rf_test: IDS config did not match entry");
       return SL_STATUS_INVALID_PARAMETER;
+    }
 
     default:
       sl_wisun_trace_error("rf_test: unknown phy_config type %u",

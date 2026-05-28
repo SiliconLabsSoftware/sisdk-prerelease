@@ -172,10 +172,6 @@ extern void ZCB_ComplHandler_ZW_ReplaceFailedNode(uint8_t bStatus);
 extern void ZCB_ComplHandler_ZW_SetSlaveLearnMode(uint8_t bStatus, uint8_t orgID, uint8_t newID);
 #endif
 
-#if SUPPORT_ZW_SET_RF_RECEIVE_MODE
-extern uint8_t SetRFReceiveMode(uint8_t mode);
-#endif
-
 ZW_WEAK void cmds_power_management_init(void)
 {
   // Do nothing
@@ -590,7 +586,6 @@ static void SerialAPIStateHandler(void)
       case stateStartup:
       {
         ApplicationInitSW();
-        SetRFReceiveMode(1);
         set_state_and_notify(stateIdle);
       }
       break;

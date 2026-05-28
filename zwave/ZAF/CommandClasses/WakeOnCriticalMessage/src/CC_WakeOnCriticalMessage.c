@@ -16,10 +16,16 @@
 #include <CC_Common.h>
 #include <ZAF_nvm.h>
 #include <ZAF_file_ids.h>
+#include <ZW_TransportSecProtocol.h>
 
 /****************************************************************************/
 /*                              PRIVATE DATA                                */
 /****************************************************************************/
+
+typedef struct wocm_nvm_t_ {
+  uint16_t node_id;
+  uint8_t severity;
+} wocm_nvm_t;
 
 /****************************************************************************/
 /*                              EXPORTED DATA                               */
@@ -29,10 +35,11 @@
 /*                            PRIVATE FUNCTIONS                             */
 /****************************************************************************/
 
-static void send_severity_to_protocol_task(const uint8_t severity_level)
+static void send_severity_to_protocol_task(const node_id_t node_id, const uint8_t severity_level)
 {
   SZwaveCommandPackage cmdPackage = {
     .eCommandType = EZWAVECOMMANDTYPE_SET_SEVERITY_LEVEL,
+    .uCommandParams.SetSeverityLevel.nodeID = node_id,
     .uCommandParams.SetSeverityLevel.severity_level = severity_level
   };
   __attribute__((unused)) EQueueNotifyingStatus QueueStatus =
@@ -40,14 +47,14 @@ static void send_severity_to_protocol_task(const uint8_t severity_level)
   assert(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
 }
 
-static bool nvm_write_severity(uint8_t severity)
+static bool nvm_wocm_data_write(wocm_nvm_t *wocm_nvm)
 {
-  return ZPAL_STATUS_OK == ZAF_nvm_write(ZAF_FILE_ID_CC_WOCM_SEVERITY, &severity, sizeof(severity));
+  return ZPAL_STATUS_OK == ZAF_nvm_write(ZAF_FILE_ID_CC_WOCM, wocm_nvm, sizeof(*wocm_nvm));
 }
 
-static bool nvm_read_severity(uint8_t *severity)
+static bool nvm_wocm_data_read(wocm_nvm_t *wocm_nvm)
 {
-  return ZPAL_STATUS_OK == ZAF_nvm_read(ZAF_FILE_ID_CC_WOCM_SEVERITY, severity, sizeof(*severity));
+  return ZPAL_STATUS_OK == ZAF_nvm_read(ZAF_FILE_ID_CC_WOCM, wocm_nvm, sizeof(*wocm_nvm));
 }
 
 /**
@@ -90,6 +97,10 @@ CC_WakeOnCriticalMessage_handler(
   switch (input->frame->ZW_Common.cmd) {
     case COMMAND_WAKE_ON_CRITICAL_MESSAGE_CONFIGURATION_SET:
     {
+      if (input->rx_options->securityKey != GetHighestSecureLevel(ZAF_GetSecurityKeys())) {
+        return RECEIVED_FRAME_STATUS_FAIL;
+      }
+
       if (input->length < sizeof(ZW_WAKE_ON_CRITICAL_MESSAGE_CONFIGURATION_SET_FRAME)) {
         return RECEIVED_FRAME_STATUS_FAIL;
       }
@@ -97,8 +108,13 @@ CC_WakeOnCriticalMessage_handler(
       const uint8_t *raw = (const uint8_t *)input->frame;
       uint8_t severity = raw[2] & WAKE_ON_CRITICAL_MESSAGE_SEVERITY_MASK;
 
-      nvm_write_severity(severity);
-      send_severity_to_protocol_task(severity);
+      node_id_t node_id = input->rx_options->sourceNode.nodeId;
+      wocm_nvm_t wocm_nvm = {
+        .node_id = node_id,
+        .severity = severity
+      };
+      nvm_wocm_data_write(&wocm_nvm);
+      send_severity_to_protocol_task(node_id, severity);
 
       return RECEIVED_FRAME_STATUS_SUCCESS;
     }
@@ -106,6 +122,10 @@ CC_WakeOnCriticalMessage_handler(
     case COMMAND_WAKE_ON_CRITICAL_MESSAGE_CONFIGURATION_GET:
     {
       if (true == Check_not_legal_response_job(input->rx_options)) {
+        return RECEIVED_FRAME_STATUS_FAIL;
+      }
+
+      if (input->rx_options->securityKey != GetHighestSecureLevel(ZAF_GetSecurityKeys())) {
         return RECEIVED_FRAME_STATUS_FAIL;
       }
 
@@ -132,18 +152,27 @@ CC_WakeOnCriticalMessage_handler(
 
 static void init(void)
 {
-  uint8_t severity = WAKE_ON_CRITICAL_MESSAGE_SEVERITY_DEFAULT;
-  if (nvm_read_severity(&severity)) {
-    severity &= WAKE_ON_CRITICAL_MESSAGE_SEVERITY_MASK;
+  wocm_nvm_t wocm_nvm = {
+    .node_id = 0,
+    .severity = WAKE_ON_CRITICAL_MESSAGE_SEVERITY_DEFAULT
+  };
+  if (nvm_wocm_data_read(&wocm_nvm)) {
+    wocm_nvm.severity &= WAKE_ON_CRITICAL_MESSAGE_SEVERITY_MASK;
+  } else {
+    wocm_nvm.node_id = 0;
+    wocm_nvm.severity = WAKE_ON_CRITICAL_MESSAGE_SEVERITY_DEFAULT;
   }
-  send_severity_to_protocol_task(severity);
+  send_severity_to_protocol_task(wocm_nvm.node_id, wocm_nvm.severity);
 }
 
 static void reset(void)
 {
-  uint8_t severity = WAKE_ON_CRITICAL_MESSAGE_SEVERITY_DEFAULT;
-  nvm_write_severity(severity);
-  send_severity_to_protocol_task(severity);
+  wocm_nvm_t wocm_nvm = {
+    .node_id = 0,
+    .severity = WAKE_ON_CRITICAL_MESSAGE_SEVERITY_DEFAULT
+  };
+  nvm_wocm_data_write(&wocm_nvm);
+  send_severity_to_protocol_task(wocm_nvm.node_id, wocm_nvm.severity);
 }
 
 /****************************************************************************/

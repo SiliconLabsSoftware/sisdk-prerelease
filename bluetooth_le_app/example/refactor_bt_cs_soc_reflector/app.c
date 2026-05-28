@@ -62,6 +62,9 @@ static void on_cs_manager_event(uint8_t conn_handle,
                                 uint8_t config_id,
                                 cs_manager_event_type_t event,
                                 sl_status_t status);
+static void on_cs_manager_error(uint8_t conn_handle,
+                                cs_manager_error_t error,
+                                sl_status_t sc);
 
 void cs_ras_server_on_mode_change(uint8_t connection, cs_ras_mode_t mode,
                                   bool indication) {
@@ -80,9 +83,13 @@ void app_init(void)
   app_log_info(APP_LOG_NL);
   app_log_info("+-[CS Reflector by Silicon Labs]---------------+" APP_LOG_NL);
 
-  sl_status_t sc = cs_manager_set_callback(on_cs_manager_event);
+  cs_manager_event_callback_t manager_callbacks = {
+    .on_event = on_cs_manager_event,
+    .on_error = on_cs_manager_error,
+  };
+  sl_status_t sc = cs_manager_set_event_callbacks(&manager_callbacks);
   if (sc != SL_STATUS_OK) {
-    app_log_error(APP_PREFIX "Failed to register CS Manager event callback! [sc: 0x%lx]" APP_LOG_NL,
+    app_log_error(APP_PREFIX "Failed to register CS Manager event callbacks! [sc: 0x%lx]" APP_LOG_NL,
               (unsigned long)sc);
     app_assert_status(sc);
   }
@@ -374,6 +381,14 @@ static void on_cs_manager_event(uint8_t conn_handle,
                     conn_handle, (unsigned)event, (unsigned long)status);
       break;
   }
+}
+
+static void on_cs_manager_error(uint8_t conn_handle,
+                                cs_manager_error_t error,
+                                sl_status_t sc)
+{
+  app_log_error(APP_INSTANCE_PREFIX "CS Manager error (%u) [sc: 0x%lx]" APP_LOG_NL,
+                conn_handle, (unsigned)error, (unsigned long)sc);
 }
 
 void sl_bt_peer_manager_on_event_reflector(const sl_bt_peer_manager_evt_type_t *event)

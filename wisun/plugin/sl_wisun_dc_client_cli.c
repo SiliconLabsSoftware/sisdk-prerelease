@@ -17,6 +17,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "sl_cli.h"
 #include "sl_status.h"
@@ -36,7 +37,7 @@ void app_wisun_start_direct_connect_client(sl_cli_command_arg_t *arguments)
   app_wisun_cli_mutex_lock();
 
   if (sl_cli_get_argument_count(arguments) > 0) {
-    phy_type = sl_cli_get_argument_uint32(arguments, 0);
+    phy_type = (sl_wisun_phy_config_type_t)sl_cli_get_argument_uint32(arguments, 0);
   } else {
     printf("[Failed: missing phy type]\r\n");
     goto cleanup;
@@ -68,7 +69,7 @@ void app_wisun_start_direct_connect_client(sl_cli_command_arg_t *arguments)
 
   status = sl_wisun_start_direct_connect_client(&phy_config);
   if (status != SL_STATUS_OK) {
-    printf("[Failed: unable to start Direct Connect client: %lu]\r\n", status);
+    printf("[Failed: unable to start Direct Connect client: %"PRIu32"]\r\n", status);
     goto cleanup;
   }
 
@@ -87,7 +88,7 @@ void app_wisun_stop_direct_connect_client(sl_cli_command_arg_t *arguments)
 
   status = sl_wisun_stop_direct_connect_client();
   if (status != SL_STATUS_OK) {
-    printf("[Failed: unable to stop Direct Connect client: %lu]\r\n", status);
+    printf("[Failed: unable to stop Direct Connect client: %"PRIu32"]\r\n", status);
     goto cleanup;
   }
 
@@ -115,7 +116,7 @@ void app_wisun_direct_connect_scan(sl_cli_command_arg_t *arguments)
 
   status = sl_wisun_start_direct_connect_scan(&dc_id, max_solicits_count);
   if (status != SL_STATUS_OK) {
-    printf("[Failed: unable to start Direct Connect client scanning: %lu]\r\n", status);
+    printf("[Failed: unable to start Direct Connect client scanning: %"PRIu32"]\r\n", status);
     goto cleanup;
   }
 
@@ -134,7 +135,7 @@ void app_wisun_stop_direct_connect_scan(sl_cli_command_arg_t *arguments)
 
   status = sl_wisun_stop_direct_connect_scan();
   if (status != SL_STATUS_OK) {
-    printf("[Failed: unable to stop Direct Connect client scanning: %lu]\r\n", status);
+    printf("[Failed: unable to stop Direct Connect client scanning: %"PRIu32"]\r\n", status);
     goto cleanup;
   }
 
@@ -173,7 +174,7 @@ void app_wisun_connect_to_direct_connect_server(sl_cli_command_arg_t *arguments)
 
   status = sl_wisun_connect_to_direct_connect_server(&mac_address, app_direct_connect_pmk_key_id, max_solicits_count);
   if (status != SL_STATUS_OK) {
-    printf("[Failed: unable to connect to Direct Connect server: %lu]\r\n", status);
+    printf("[Failed: unable to connect to Direct Connect server: %"PRIu32"]\r\n", status);
     goto cleanup;
   }
 

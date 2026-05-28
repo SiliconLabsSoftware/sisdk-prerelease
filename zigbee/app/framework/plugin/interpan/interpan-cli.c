@@ -63,11 +63,11 @@ void sli_zigbee_af_interpan_disable_command(sl_cli_command_arg_t *args)
 // Test an inter-PAN fragment transmission with a randomly-filled payload
 void sli_zigbee_af_interpan_fragment_test_command(sl_cli_command_arg_t *args)
 {
+  sl_zigbee_af_interpan_header_t header;
   sl_802154_pan_id_t panId = sl_cli_get_argument_uint16(args, 0);
-  sl_802154_long_addr_t eui64;
-  sl_zigbee_copy_eui64_arg(args, 1, eui64, true);
   uint16_t clusterId = sl_cli_get_argument_uint16(args, 2);
   uint16_t messageLen = sl_cli_get_argument_uint16(args, 3);
+  uint16_t options = sl_cli_get_argument_uint16(args, 4);
 
   messageLen = (messageLen > sizeof(testMessage))
                ? sizeof(testMessage) : messageLen;
@@ -81,18 +81,24 @@ void sli_zigbee_af_interpan_fragment_test_command(sl_cli_command_arg_t *args)
   //sl_zigbee_af_core_debug_exec(sl_zigbee_af_print_big_endian_eui64(eui64));
   sl_zigbee_af_cli_print(" with random values: ");
 
-  sl_status_t status = sl_zigbee_af_send_inter_pan(panId,
-                                                   eui64,
-                                                   SL_ZIGBEE_NULL_NODE_ID,
-                                                   0,     // mcast id - unused
-                                                   clusterId,
-                                                   SE_PROFILE_ID, // GBCS only
-                                                   messageLen,
-                                                   testMessage);
+  memset(&header, 0, sizeof(header));
+  header.panId = panId;
+  header.clusterId = clusterId;
+  header.profileId = SE_PROFILE_ID;
+  header.messageType = SL_ZIGBEE_AF_INTER_PAN_UNICAST;
+  sl_zigbee_copy_eui64_arg(args, 1, header.longAddress, true);
+  header.options = (options | SL_ZIGBEE_AF_INTERPAN_OPTION_MAC_HAS_LONG_ADDRESS);
 
-  sl_zigbee_af_cli_println("%s (0x%02X)",
+  // When SL_ZIGBEE_AF_INTERPAN_OPTION_APS_ENCRYPT is set, stub APS link security is applied
+  // to the full logical PDU before IPMF fragmentation.
+
+  sl_status_t status = sl_zigbee_af_interpan_send_message_cb(&header,
+                                                            messageLen,
+                                                            testMessage);
+
+  sl_zigbee_af_cli_println("%s (0x%08X)",
                            (SL_STATUS_OK == status) ? "success" : "failure",
-                           status);
+                           (unsigned int)status);
   sl_zigbee_af_cli_flush();
 }
 

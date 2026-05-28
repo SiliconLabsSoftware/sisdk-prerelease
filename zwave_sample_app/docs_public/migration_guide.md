@@ -4,6 +4,15 @@ This guide shows how to migrate projects from previous SDKs to a newer one.
 
 # 8.1.0 {#migrate-section-8-1-0}
 
+## CLI no longer uses app_log
+CLI components are now designed to use `sl_iostream` for both input and output.
+For old projects that are using CLI components with `app_log` API, the automated upgrade (slcu) will add a dependency on `app_log`.
+If you don't want to use app_log in your CLI files, you should:
+- Include `sl_iostream.h` and `sl_iostream_handles.h` instead of `app_log.h`
+- Load the correct iostream (e.g. `sl_iostream_t *stream = sl_iostream_get_handle("vcom");`)
+- Replace calls to `app_log_info(...)` with `sl_iostream_vprintf(stream, ...)`
+Note that if you get the error "app_log.h: No such file or directory" after the migration, that means your are missing the `app_log` component in your projet. It can be easly fixed by installing the `app_log` component in your project.
+
 ## DC/DC configuration (`ZW_DCDC_CONFIG`) {#migrate-section-8-1-0-dcdc}
 
 In 8.1.0, `ZW_DCDC_CONFIG` in `zw_hardware_config.h` (or Project Configurator) is applied when the radio platform initializes the DC/DC at startup. In 8.0.0 that setting was ignored and the firmware always used `EDCDCMODE_AUTO`.

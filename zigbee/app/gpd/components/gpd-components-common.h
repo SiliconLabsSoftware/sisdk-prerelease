@@ -321,6 +321,7 @@ void sl_zigbee_gpd_rail_write_tx_fifo_wrapper(const uint8_t *dataPtr,
 void sl_zigbee_gpd_rail_start_rx_wrapper(uint8_t channel);
 void sl_zigbee_gpd_rail_idle_wrapper(void);
 uint16_t sl_zigbee_gpd_rail_get_radio_entropy_wrapper(uint8_t *dataPtr, uint16_t dataLength);
+void sl_zigbee_gpd_rail_set_long_address_wrapper(uint8_t *ieee);
 void sl_zigbee_gpd_rail_provide_rail_handle(sl_rail_handle_t handle);
 
 // Security Function Prototypes

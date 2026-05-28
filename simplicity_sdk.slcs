@@ -7,15 +7,15 @@ supplier: Silicon Laboratories, Inc.
 component_path:
 - path: generative_ai/component
 - path: bgapi_protocol/component
-- path: bluetooth_le_middleware/component
 - path: bluetooth_le_controller/component
 - path: bluetooth_apploader/component
+- path: bluetooth_le_middleware/component
 - path: bluetooth_mesh_srtest/component
 - path: bluetooth_le_host/component
 - path: bluetooth_mesh_middleware/component
+- path: bluetooth_zvd/component
 - path: bluetooth_mesh/component
 - path: bluetooth_common/component
-- path: bluetooth_zvd/component
 - path: bluetooth_le_controller_xg2b/component
 - path: boards/hardware/board/config/component
 - path: boards/hardware/board/component
@@ -42,14 +42,15 @@ component_path:
 - path: common_15_4/mac/component
 - path: compute/component
 - path: connect_stack/component
+- path: connect_sdk/component
 - path: coremark/component
-- path: cpc/component
 - path: cpc_extra/cpc-gpio/component
 - path: cpc_extra/cpc-nvm3/component
 - path: cpc_extra/iostream-cpc/component
 - path: cpc_extra_tests/cpc-gpio/component
 - path: cpc_extra_tests/cpc-nvm3/component
 - path: cpc_tests/component
+- path: cpc/component
 - path: delta_dfu/component
 - path: freertos/component
 - path: freertos_internal/component
@@ -119,9 +120,11 @@ component_path:
 - path: unity_test_framework/component
 - path: usb/protocol/usb/component
 - path: usb_internal/protocol/usb/component
-- path: wisun_sdk/component
 - path: wisun/component
 - path: wisun_config_generator/component
+- path: wisun_sdk/component
+- path: zigbee_smart_energy/component/zigbee_smart_energy
+- path: zigbee_wwah/app/framework/component/zigbee_wwah
 - path: zigbee_internal/platform/radio/mac/component/zigbee_internal
 - path: zigbee_internal/platform/radio/rail_lib/plugin/component/zigbee_internal
 - path: zigbee_internal/component/zigbee_internal
@@ -129,10 +132,6 @@ component_path:
 - path: zigbee_internal/util/silicon_labs/silabs_core/component/zigbee_internal
 - path: zigbee_internal/app/framework/component/zigbee_internal
 - path: zigbee_internal/platform/service/component/zigbee_internal
-- path: zigbee_wwah/app/framework/component/zigbee_wwah
-- path: zigbee_sleepy_to_sleepy/component/zigbee_sleepy_to_sleepy
-- path: zigbee_sleepy_to_sleepy/app/framework/component/zigbee_sleepy_to_sleepy
-- path: zigbee_smart_energy/component/zigbee_smart_energy
 - path: zigbee/platform/radio/mac/component/zigbee
 - path: zigbee/platform/radio/rail_lib/plugin/component/zigbee
 - path: zigbee/component/zigbee
@@ -140,6 +139,8 @@ component_path:
 - path: zigbee/util/silicon_labs/silabs_core/component/zigbee
 - path: zigbee/app/framework/component/zigbee
 - path: zigbee/platform/service/component/zigbee
+- path: zigbee_sleepy_to_sleepy/component/zigbee_sleepy_to_sleepy
+- path: zigbee_sleepy_to_sleepy/app/framework/component/zigbee_sleepy_to_sleepy
 - path: zwave/component
 - path: zwave/component/CommandClasses
 - path: zwave/component-internal
@@ -158,11 +159,13 @@ documentation:
   version: 3.3.0
 - docset: multiprotocol
   version: 1.1.0
+- docset: connect-sdk
+  version: 4.3.0
 - docset: openthread
   version: 3.1.0
-- docset: platform_siwx91x
-  version: 4.1.0
 - docset: platform_nwp_siwx91x
+  version: 4.1.0
+- docset: platform_siwx91x
   version: 4.1.0
 - docset: rail
   version: 3.1.0
@@ -172,9 +175,9 @@ documentation:
   version: 2.9.0
 - docset: protocol-usb
   version: 1.7.0
-- docset: wifi
-  version: 4.1.0
 - docset: wifi_sqa_internal
+  version: 4.1.0
+- docset: wifi
   version: 4.1.0
 - docset: wisun
   version: 2.12.0
@@ -197,9 +200,9 @@ upgrade_manifest:
 - path: proprietary_default_radio_confs/./upgrade.slcu
 - path: rail_sdk/upgrade.slcu
 - path: unity_test_framework/component/upgrade.slcu
-- path: wisun_sdk/upgrade.slcu
 - path: wisun/upgrade.slcu
 - path: wisun_config_generator/wisun_config_generator.slcu
+- path: wisun_sdk/upgrade.slcu
 - path: zigbee/component/upgrade.slcu
 - path: zwave/component/upgrade.slcu
 post_build_profile:

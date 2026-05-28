@@ -653,6 +653,9 @@ static void app_on_cs_manager_event(uint8_t conn_handle,
       }
       log_info(APP_INSTANCE_PREFIX "CS procedure stopped" NL, conn_handle);
       break;
+    case CS_MANAGER_EVENT_ERROR:
+      cs_on_error(conn_handle, CS_APP_ERROR_CS_MANAGER_GENERAL_ERROR, status);
+      break;
     default:
       break;
   }
@@ -686,11 +689,14 @@ static void app_on_cs_rreq_enable_complete(uint8_t conn_handle,
   log_info(APP_INSTANCE_PREFIX "RREQ %s complete" NL,
           conn_handle,
           enable ? "enable" : "disable");
+
   if (enable == true) {
     sl_status_t status = cs_manager_config_create(conn_handle, 0, true, &cs_config);
     if (status != SL_STATUS_OK) {
       cs_on_error(conn_handle, CS_APP_ERROR_CS_CONFIG_CREATE_FAILED, status);
+      return;
     }
+    log_info(APP_INSTANCE_PREFIX "CS configuration creating" NL, conn_handle);
   }
 }
 
@@ -698,10 +704,14 @@ void app_cs_set_callbacks(cs_algo_app_cb_t *algo_cb)
 {
   sl_status_t sc;
   
-  // Assign CS manager event callback
-  sc = cs_manager_set_callback(app_on_cs_manager_event);
+  cs_manager_event_callback_t manager_callbacks = {
+    .on_event = app_on_cs_manager_event,
+    .on_error = app_on_cs_manager_on_error,
+  };
+  // Assign CS manager event and error callbacks
+  sc = cs_manager_set_event_callbacks(&manager_callbacks);
   if (sc != SL_STATUS_OK) {
-    log_error(APP_PREFIX "Failed to register CS Manager event callback! [sc: 0x%lx]" NL,
+    log_error(APP_PREFIX "Failed to register CS Manager event callbacks! [sc: 0x%lx]" NL,
               (unsigned long)sc);
     app_assert_status(sc);
   }
@@ -856,7 +866,7 @@ void app_cs_optimize_parameters(uint8_t connection)
   sc = cs_configurator_validate(&configurator_parameters,
                                 channel_map_preset,
                                 estimation_time_us,
-                                CS_MANAGER_CONFIG_MAX_INSTANCES,
+                                1, // TODO: Change to number of connections
                                 algo_config.num_antenna_paths);
   app_assert_status(sc);
   log_info(APP_INSTANCE_PREFIX "Validated parameters for connection interval "

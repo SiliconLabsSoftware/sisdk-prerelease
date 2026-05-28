@@ -66,6 +66,8 @@ typedef struct {
   sl_wisun_rfc8415_txalg_params_t key_request_txalg;
   /// Duration for which an LFN waits for a registration confirmation (minutes).
   uint8_t lfn_na_wait_duration_m;
+  /// Reserved, set to zero
+  uint8_t reserved[3];
 } SL_ATTRIBUTE_PACKED sl_wisun_lfn_advanced_parameters_t;
 SL_PACK_END()
 

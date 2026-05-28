@@ -33,6 +33,7 @@
 
 #include "sl_status.h"
 #include "sl_common.h"
+#include "app_rta.h"
 #include "cs_manager.h"
 #include "cs_manager_internal.h"
 #include "cs_manager_config.h"
@@ -54,6 +55,7 @@ static void handle_cs_config_completed(const cs_config_data_t *evt);
 static void handle_cs_config_created(cs_manager_t *m, const cs_config_data_t *evt);
 static void handle_cs_config_removed(cs_manager_t *m, const cs_config_data_t *evt);
 static bool needs_connection_parameter_update(const cs_manager_connection_parameters_t *params);
+static void on_runtime_error(app_rta_error_t error, sl_status_t result);
 
 // -----------------------------------------------------------------------------
 // Static variables
@@ -64,6 +66,12 @@ static cs_manager_t cs_manager_instances[CS_MANAGER_CONFIG_MAX_INSTANCES];
 // Event callback
 cs_manager_event_t on_event;
 
+// User error callback
+cs_manager_on_error_t on_error;
+
+// RTA guard context — also extern-declared in cs_manager_internal.h
+app_rta_context_t cs_manager_ctx;
+
 // -----------------------------------------------------------------------------
 // Public function definitions
 
@@ -71,15 +79,11 @@ sl_status_t cs_manager_create(uint8_t conn_handle,
                               cs_manager_instance_config_t *inst_config,
                               cs_manager_connection_parameters_t *connection_parameters)
 {
-  sl_status_t sc;
   if (conn_handle == SL_BT_INVALID_CONNECTION_HANDLE) {
     return SL_STATUS_INVALID_HANDLE;
   }
   if (inst_config == NULL) {
     return SL_STATUS_NULL_POINTER;
-  }
-  if (on_event == NULL) {
-    return SL_STATUS_NOT_INITIALIZED;
   }
   #if !defined(CS_MANAGER_CONFIG_SET_DEFAULT_CONNECTION_PARAMETERS) \
       || CS_MANAGER_CONFIG_SET_DEFAULT_CONNECTION_PARAMETERS == 0
@@ -87,14 +91,24 @@ sl_status_t cs_manager_create(uint8_t conn_handle,
     return SL_STATUS_NULL_POINTER;
   }
   #endif
+  sl_status_t sc = app_rta_acquire(cs_manager_ctx);
+  if (sc != SL_STATUS_OK) {
+    return sc;
+  }
+  if (on_event == NULL) {
+    (void)app_rta_release(cs_manager_ctx);
+    return SL_STATUS_NOT_INITIALIZED;
+  }
   // Check existance
   cs_manager_t *m = cs_manager_find(conn_handle);
   if (m != NULL) {
+    (void)app_rta_release(cs_manager_ctx);
     return SL_STATUS_ALREADY_EXISTS;
   }
   // Check free slot
   m = cs_manager_find(SL_BT_INVALID_CONNECTION_HANDLE);
   if (m == NULL) {
+    (void)app_rta_release(cs_manager_ctx);
     return SL_STATUS_FULL;
   }
 
@@ -124,6 +138,7 @@ sl_status_t cs_manager_create(uint8_t conn_handle,
                                                   NULL);
 
   if (sc != SL_STATUS_OK) {
+    (void)app_rta_release(cs_manager_ctx);
     return sc;
   }
   cs_sync_antenna = inst_config->cs_sync_antenna;
@@ -165,6 +180,7 @@ sl_status_t cs_manager_create(uint8_t conn_handle,
   }
   #else // SL_CATALOG_CS_MANAGER_FEATURE_INITIATOR_PRESENT
   if (inst_config->is_initiator) {
+    (void)app_rta_release(cs_manager_ctx);
     return SL_STATUS_NOT_SUPPORTED;
   }
   #endif // SL_CATALOG_CS_MANAGER_FEATURE_INITIATOR_PRESENT
@@ -174,6 +190,7 @@ sl_status_t cs_manager_create(uint8_t conn_handle,
   }
   #else // SL_CATALOG_CS_MANAGER_FEATURE_REFLECTOR_PRESENT
   if (!inst_config->is_initiator) {
+    (void)app_rta_release(cs_manager_ctx);
     return SL_STATUS_NOT_SUPPORTED;
   }
   #endif // SL_CATALOG_CS_MANAGER_FEATURE_REFLECTOR_PRESENT
@@ -186,6 +203,7 @@ sl_status_t cs_manager_create(uint8_t conn_handle,
   if (sc != SL_STATUS_OK) {
     cs_manager_log_error(INSTANCE_PREFIX " Error setting CS default settings" NL,
                          conn_handle);
+    (void)app_rta_release(cs_manager_ctx);
     return sc;
   }
 
@@ -217,10 +235,12 @@ sl_status_t cs_manager_create(uint8_t conn_handle,
     if (sc != SL_STATUS_OK) {
       cs_manager_log_error(INSTANCE_PREFIX "Error setting connection parameters" NL, conn_handle);
       m->conn_handle = SL_BT_INVALID_CONNECTION_HANDLE;
+      (void)app_rta_release(cs_manager_ctx);
       return sc;
     }
     cs_manager_log_info(INSTANCE_PREFIX "Setting connection parameters, waiting for confirmation" NL, conn_handle);
     m->state = CS_MANAGER_STATE_SETTING_CONN_PARAMS;
+    (void)app_rta_release(cs_manager_ctx);
     return SL_STATUS_OK;
   } else if (connection_parameters != NULL) {
     cs_manager_log_info(INSTANCE_PREFIX "Connection parameters match defaults, skipping update" NL, conn_handle);
@@ -233,6 +253,7 @@ sl_status_t cs_manager_create(uint8_t conn_handle,
       cs_manager_log_error(INSTANCE_PREFIX " Error enabling CS security" NL,
                            conn_handle);
       m->conn_handle = SL_BT_INVALID_CONNECTION_HANDLE;
+      (void)app_rta_release(cs_manager_ctx);
       return sc;
     }
     cs_manager_log_info(INSTANCE_PREFIX "Enabling CS security before configuration" NL, conn_handle);
@@ -240,6 +261,7 @@ sl_status_t cs_manager_create(uint8_t conn_handle,
   }
   #endif // defined(CS_MANAGER_CONFIG_ENABLE_CS_SECURITY_BEFORE_CONFIG) && CS_MANAGER_CONFIG_ENABLE_CS_SECURITY_BEFORE_CONFIG == 1
 
+  (void)app_rta_release(cs_manager_ctx);
   return sc;
 }
 
@@ -248,8 +270,13 @@ sl_status_t cs_manager_delete(uint8_t conn_handle)
   if (conn_handle == SL_BT_INVALID_CONNECTION_HANDLE) {
     return SL_STATUS_INVALID_HANDLE;
   }
+  sl_status_t sc = app_rta_acquire(cs_manager_ctx);
+  if (sc != SL_STATUS_OK) {
+    return sc;
+  }
   cs_manager_t *m = cs_manager_find(conn_handle);
   if (m == NULL) {
+    (void)app_rta_release(cs_manager_ctx);
     return SL_STATUS_NOT_FOUND;
   }
   (void)cs_manager_stop(conn_handle);
@@ -259,16 +286,25 @@ sl_status_t cs_manager_delete(uint8_t conn_handle)
     m->configs[j].connection = SL_BT_INVALID_CONNECTION_HANDLE;
     m->configs[j].config_id = CS_MANAGER_INVALID_CONFIG_ID;
   }
+  (void)app_rta_release(cs_manager_ctx);
   return SL_STATUS_OK;
 }
 
 // Assign callback
-sl_status_t cs_manager_set_callback(cs_manager_event_t event_cb)
+sl_status_t cs_manager_set_event_callbacks(cs_manager_event_callback_t *cb)
 {
-  if (event_cb == NULL) {
+  if ((cb == NULL)
+      || (cb->on_event == NULL)
+      || (cb->on_error == NULL)) {
     return SL_STATUS_NULL_POINTER;
   }
-  on_event = event_cb;
+  sl_status_t sc = app_rta_acquire(cs_manager_ctx);
+  if (sc != SL_STATUS_OK) {
+    return sc;
+  }
+  on_event = cb->on_event;
+  on_error = cb->on_error;
+  (void)app_rta_release(cs_manager_ctx);
   return SL_STATUS_OK;
 }
 
@@ -290,8 +326,14 @@ sl_status_t cs_manager_get_default_instance_config(bool is_initiator,
 
 bool cs_manager_is_full(void)
 {
+  sl_status_t sc = app_rta_acquire(cs_manager_ctx);
+  if (sc != SL_STATUS_OK) {
+    return true;
+  }
   cs_manager_t *m = cs_manager_find(SL_BT_INVALID_CONNECTION_HANDLE);
-  return (m == NULL); 
+  bool full = (m == NULL);
+  (void)app_rta_release(cs_manager_ctx);
+  return full;
 }
 
 sl_status_t cs_manager_get_default_connection_parameters(cs_manager_connection_parameters_t *params)
@@ -315,25 +357,38 @@ sl_status_t cs_manager_start(uint8_t conn_handle,
                              uint8_t config_id,
                              cs_procedure_parameters_t *params)
 {
-
+  sl_status_t sc;
   #ifdef SL_CATALOG_CS_MANAGER_FEATURE_CONTROL_PRESENT
-  return cs_manager_cs_control_start(conn_handle, config_id, params);
+  sc = app_rta_acquire(cs_manager_ctx);
+  if (sc != SL_STATUS_OK) {
+    return sc;
+  }
+  sc = cs_manager_cs_control_start(conn_handle, config_id, params);
+  (void)app_rta_release(cs_manager_ctx);
   #else // SL_CATALOG_CS_MANAGER_FEATURE_CONTROL_PRESENT
   (void)conn_handle;
   (void)config_id;
   (void)params;
-  return SL_STATUS_NOT_SUPPORTED;
+  sc = SL_STATUS_NOT_SUPPORTED;
   #endif // SL_CATALOG_CS_MANAGER_FEATURE_CONTROL_PRESENT
+  return sc;
 }
 
 sl_status_t cs_manager_stop(uint8_t conn_handle)
 {
+  sl_status_t sc;
   #ifdef SL_CATALOG_CS_MANAGER_FEATURE_CONTROL_PRESENT
-  return cs_manager_cs_control_stop(conn_handle);
+  sc = app_rta_acquire(cs_manager_ctx);
+  if (sc != SL_STATUS_OK) {
+    return sc;
+  }
+  sc = cs_manager_cs_control_stop(conn_handle);
+  (void)app_rta_release(cs_manager_ctx);
   #else // SL_CATALOG_CS_MANAGER_FEATURE_CONTROL_PRESENT
   (void)conn_handle;
-  return SL_STATUS_NOT_SUPPORTED;
+  sc = SL_STATUS_NOT_SUPPORTED;
   #endif // SL_CATALOG_CS_MANAGER_FEATURE_CONTROL_PRESENT
+  return sc;
 }
 
 sl_status_t cs_manager_get_default_procedure_parameters(cs_procedure_parameters_t *params)
@@ -364,33 +419,53 @@ sl_status_t cs_manager_config_create(uint8_t conn_handle,
                                      bool create_context,
                                      const cs_config_t *config)
 {
+  sl_status_t sc;
   #ifdef SL_CATALOG_CS_MANAGER_FEATURE_CONFIG_PRESENT
-  return cs_manager_cs_config_create(conn_handle, config_id, create_context, config);
+  sc = app_rta_acquire(cs_manager_ctx);
+  if (sc != SL_STATUS_OK) {
+    return sc;
+  }
+  sc = cs_manager_cs_config_create(conn_handle, config_id, create_context, config);
+  (void)app_rta_release(cs_manager_ctx);
   #else // SL_CATALOG_CS_MANAGER_FEATURE_CONFIG_PRESENT
   (void)conn_handle;
   (void)config_id;
   (void)create_context;
   (void)config;
-  return SL_STATUS_NOT_SUPPORTED;
+  sc = SL_STATUS_NOT_SUPPORTED;
   #endif // SL_CATALOG_CS_MANAGER_FEATURE_CONFIG_PRESENT
+  return sc;
 }
 
 sl_status_t cs_manager_config_remove(uint8_t conn_handle, uint8_t config_id)
 {
+  sl_status_t sc;
   #ifdef SL_CATALOG_CS_MANAGER_FEATURE_CONFIG_PRESENT
-  return cs_manager_cs_config_remove(conn_handle, config_id);
+  sc = app_rta_acquire(cs_manager_ctx);
+  if (sc != SL_STATUS_OK) {
+    return sc;
+  }
+  sc = cs_manager_cs_config_remove(conn_handle, config_id);
+  (void)app_rta_release(cs_manager_ctx);
   #else // SL_CATALOG_CS_MANAGER_FEATURE_CONFIG_PRESENT
   (void)conn_handle;
   (void)config_id;
-  return SL_STATUS_NOT_SUPPORTED;
+  sc = SL_STATUS_NOT_SUPPORTED;
   #endif // SL_CATALOG_CS_MANAGER_FEATURE_CONFIG_PRESENT
+  return sc;
 }
 
 sl_status_t cs_manager_config_get(uint8_t conn_handle,
                                   uint8_t config_id,
                                   cs_config_data_t *config_out)
 {
-  return cs_manager_config_db_get(conn_handle, config_id, config_out);
+  sl_status_t sc = app_rta_acquire(cs_manager_ctx);
+  if (sc != SL_STATUS_OK) {
+    return sc;
+  }
+  sc = cs_manager_config_db_get(conn_handle, config_id, config_out);
+  (void)app_rta_release(cs_manager_ctx);
+  return sc;
 }
 
 // -----------------------------------------------------------------------------
@@ -423,7 +498,11 @@ cs_manager_t *cs_manager_find(uint8_t conn_handle)
 
 void cs_manager_on_bt_event(const sl_bt_msg_t *evt)
 {
-  sl_status_t sc;
+  sl_status_t sc = app_rta_acquire(cs_manager_ctx);
+  if (sc != SL_STATUS_OK) {
+    on_runtime_error(APP_RTA_ERROR_ACQUIRE_FAILED, sc);
+    return;
+  }
 
   switch (SL_BT_MSG_ID(evt->header)) {
     case sl_bt_evt_system_boot_id: {
@@ -568,6 +647,7 @@ void cs_manager_on_bt_event(const sl_bt_msg_t *evt)
     default:
       break;
   }
+  (void)app_rta_release(cs_manager_ctx);
 }
 
 // -----------------------------------------------------------------------------
@@ -728,4 +808,69 @@ static void handle_cs_config_removed(cs_manager_t *m, const cs_config_data_t *ev
            evt->config_id,
            CS_MANAGER_EVENT_CONFIG_REMOVE_COMPLETE,
            SL_STATUS_OK);
+}
+
+// -----------------------------------------------------------------------------
+// Internal error helper
+
+void cs_manager_error(cs_manager_t *m,
+                      cs_manager_error_t evt,
+                      sl_status_t sc)
+{
+  uint8_t conn_handle = SL_BT_INVALID_CONNECTION_HANDLE;
+  if (m != NULL) {
+    conn_handle = m->conn_handle;
+  }
+  cs_manager_log_error(INSTANCE_PREFIX "Error occurred (evt: %u, sc: 0x%lx)" NL,
+                       conn_handle,
+                       (unsigned)evt,
+                       (unsigned long)sc);
+  if (on_error != NULL) {
+    on_error(conn_handle, evt, sc);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// RTA lifecycle functions
+
+void cs_manager_rta_init(void)
+{
+  app_rta_config_t config = {
+    .requirement.runtime = false,
+    .requirement.guard   = true,
+    .requirement.signal  = false,
+    .step                = NULL,
+    .priority            = 0,
+    .stack_size          = 0,
+    .error               = on_runtime_error,
+    .wait_for_guard      = CS_MANAGER_CONFIG_RTA_WAIT_FOR_GUARD
+  };
+  sl_status_t sc = app_rta_create_context(&config, &cs_manager_ctx);
+  if (sc != SL_STATUS_OK) {
+    cs_manager_log_error("Failed to create RTA context, sc=0x%lx" APP_LOG_NL, sc);
+  }
+}
+
+static void on_runtime_error(app_rta_error_t error, sl_status_t result)
+{
+  (void)result;
+  cs_manager_error_t evt;
+  switch (error) {
+    case APP_RTA_ERROR_RUNTIME_INIT_FAILED:
+      cs_manager_log_error("RTA runtime init failed, sc=0x%lx" APP_LOG_NL, result);
+      evt = CS_MANAGER_ERROR_RTA_INIT_FAILED;
+      break;
+    case APP_RTA_ERROR_ACQUIRE_FAILED:
+      cs_manager_log_error("RTA acquire failed, sc=0x%lx" APP_LOG_NL, result);
+      evt = CS_MANAGER_ERROR_RTA_ACQUIRE_FAILED;
+      break;
+    case APP_RTA_ERROR_RELEASE_FAILED:
+      cs_manager_log_error("RTA release failed, sc=0x%lx" APP_LOG_NL, result);
+      evt = CS_MANAGER_ERROR_RTA_RELEASE_FAILED;
+      break;
+    default:
+      evt = CS_MANAGER_ERROR_RUNTIME_ERROR;
+      break;
+  }
+  cs_manager_error(NULL, evt, result);
 }

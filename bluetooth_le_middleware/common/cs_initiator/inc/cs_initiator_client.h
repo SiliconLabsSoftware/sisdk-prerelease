@@ -345,6 +345,33 @@ sl_status_t cs_initiator_get_multiple_intervals(uint8_t main_mode,
                                        uint16_t *proc_interval);
 
 /**************************************************************************//**
+ * Select antennas for the CS mode.
+ *
+ * Updates the antenna-related fields of @p config based on the available
+ * number of local/remote antennas and the requested antenna configuration.
+ *
+ * @param[in,out] config            Pointer to the initiator config to update.
+ * @param[in]     local_antenna_num Number of antennas available on the local
+ *                                  (initiator) device.
+ * @param[in]     remote_antenna_num Number of antennas available on the remote
+ *                                  (reflector) device.
+ * @param[out]    num_antenna_paths Optional. If not NULL, receives the number
+ *                                  of PBR antenna paths that result from the
+ *                                  selection (1, 2, or 4 for PBR; 0 for RTT).
+ *
+ * @return Status of the operation.
+ *         SL_STATUS_OK if the requested configuration is supported.
+ *         SL_STATUS_NULL_POINTER if @p config is NULL.
+ *         SL_STATUS_NOT_SUPPORTED if the requested antenna usage is not
+ *         supported with the given local/remote antenna counts. In this case
+ *         a fallback configuration is still applied to @p config.
+ *****************************************************************************/
+sl_status_t cs_initiator_select_antennas(cs_initiator_config_t *config,
+                                         uint8_t local_antenna_num,
+                                         uint8_t remote_antenna_num,
+                                         uint8_t *num_antenna_paths);
+
+/**************************************************************************//**
  * Validate the minimum and maximum subevent lengths against
  * connection and procedure interval limits.
  * @param[in] min_subevent_len_us Minimum subevent length in microseconds.

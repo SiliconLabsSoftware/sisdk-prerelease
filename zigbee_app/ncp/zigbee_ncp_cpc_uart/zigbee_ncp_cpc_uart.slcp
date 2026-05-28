@@ -105,3 +105,6 @@ filter:
 tag:
   - hwfilter:ram:64k
   - hwfilter:device:device_supports_zigbee
+  - toolchain:gcc
+  - toolchain:iar
+  - toolchain:llvm

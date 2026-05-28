@@ -45,6 +45,7 @@ requires:
   condition:
   - device_cortexm
 - name: cs_manager_role
+- name: app_rta
 recommends:
 - id: cs_manager_feature_reflector
   vendor: silabs
@@ -61,6 +62,10 @@ template_contribution:
     include: cs_manager_internal.h
     function: cs_manager_on_bt_event
   priority: 69
+- name: app_rta_init
+  value:
+    include: cs_manager_internal.h
+    handler: cs_manager_rta_init
 documentation:
   docset: bluetooth
   document: bluetooth-service-api/cs-ras-client

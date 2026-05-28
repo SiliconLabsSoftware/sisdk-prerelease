@@ -99,9 +99,6 @@ static cs_initiator_t *cs_initiator_get_free_slot();
 static bool cs_initiator_check_connection_parameters(cs_initiator_t *initiator,
                                                      sl_bt_evt_connection_parameters_t *parameters);
 static void init_cs_configuration(const uint8_t conn_handle);
-static void cs_initiator_select_antennas(uint8_t conn_handle,
-                                         uint8_t cs_initiator_local_antenna_num,
-                                         uint8_t cs_initiator_remote_antenna_num);
 static void process_remote_ranging_data(cs_initiator_t *initiator,
                                         uint8_t *data,
                                         uint32_t data_size);
@@ -440,139 +437,6 @@ static void reset_ras_config(cs_initiator_t* initiator)
   initiator->ras_client.overwritten = false;
 }
 
-/******************************************************************************
- * Select antennas for the CS mode.
- *****************************************************************************/
-static void cs_initiator_select_antennas(uint8_t conn_handle, uint8_t cs_initiator_local_antenna_num, uint8_t cs_initiator_remote_antenna_num)
-{
-  cs_initiator_t *initiator;
-  initiator = cs_initiator_get_instance(conn_handle);
-  // Prepare for the CS main mode: PBR antenna usage
-  if (initiator->config.cs_main_mode == sl_bt_cs_mode_pbr) {
-    switch (initiator->config.cs_tone_antenna_config_idx_req) {
-      case CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY:
-        initiator->cs_parameters.num_antenna_paths = 1;
-        initiator_log_info(INSTANCE_PREFIX "CS - PBR - 1:1 antenna usage set" LOG_NL,
-                           initiator->conn_handle);
-        break;
-      case CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R:
-        if (cs_initiator_local_antenna_num < 2) {
-          initiator_log_warning(INSTANCE_PREFIX "CS - PBR - 1:1 antenna usage "
-                                                "is possible only!" LOG_NL,
-                                initiator->conn_handle);
-          on_error(initiator,
-                   CS_ERROR_EVENT_INITIATOR_PBR_ANTENNA_USAGE_NOT_SUPPORTED,
-                   SL_STATUS_FAIL);
-          initiator->config.cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
-          initiator->cs_parameters.num_antenna_paths = 1;
-        } else {
-          initiator->cs_parameters.num_antenna_paths = 2;
-          initiator_log_info(INSTANCE_PREFIX "CS - PBR - 2:1 antenna usage set" LOG_NL,
-                             initiator->conn_handle);
-        }
-        break;
-      case CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R:
-        if (cs_initiator_remote_antenna_num < 2) {
-          initiator_log_warning(INSTANCE_PREFIX "CS - PBR - 1:1 antenna usage "
-                                                "is possible only!" LOG_NL,
-                                initiator->conn_handle);
-          on_error(initiator,
-                   CS_ERROR_EVENT_INITIATOR_PBR_ANTENNA_USAGE_NOT_SUPPORTED,
-                   SL_STATUS_FAIL);
-          initiator->config.cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
-          initiator->cs_parameters.num_antenna_paths = 1;
-        } else {
-          initiator->cs_parameters.num_antenna_paths = 2;
-          initiator_log_info(INSTANCE_PREFIX "CS - PBR - 1:2 antenna usage set" LOG_NL,
-                             initiator->conn_handle);
-        }
-        break;
-      case CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY:
-        if (cs_initiator_remote_antenna_num >= 2 && cs_initiator_local_antenna_num >= 2) {
-          initiator->cs_parameters.num_antenna_paths = 4;
-          initiator_log_info(INSTANCE_PREFIX "CS - PBR - 2:2 antenna usage set" LOG_NL,
-                             initiator->conn_handle);
-        } else {
-          on_error(initiator,
-                   CS_ERROR_EVENT_INITIATOR_PBR_ANTENNA_USAGE_NOT_SUPPORTED,
-                   SL_STATUS_FAIL);
-          if (cs_initiator_remote_antenna_num == 1 && cs_initiator_local_antenna_num == 2) {
-            initiator->cs_parameters.num_antenna_paths = 2;
-            initiator->config.cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R;
-            initiator_log_info(INSTANCE_PREFIX "CS - PBR - 2:1 antenna usage set" LOG_NL,
-                               initiator->conn_handle);
-          } else if (cs_initiator_remote_antenna_num == 2 && cs_initiator_local_antenna_num == 1) {
-            initiator->cs_parameters.num_antenna_paths = 2;
-            initiator->config.cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R;
-            initiator_log_info(INSTANCE_PREFIX "CS - PBR - 1:2 antenna usage set" LOG_NL,
-                               initiator->conn_handle);
-          } else {
-            initiator_log_warning(INSTANCE_PREFIX "CS - PBR - 1:1 antenna usage is possible only!" LOG_NL,
-                                  initiator->conn_handle);
-
-            initiator->config.cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
-            initiator->cs_parameters.num_antenna_paths = 1;
-          }
-        }
-        break;
-      default:
-        initiator_log_warning(INSTANCE_PREFIX "CS - PBR - unknown antenna usage! "
-                                              "Using the default setting: 1:1 antenna" LOG_NL,
-                              initiator->conn_handle);
-        initiator->cs_parameters.num_antenna_paths = 1;
-        initiator->config.cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
-        break;
-    }
-    initiator_log_debug(INSTANCE_PREFIX "CS - PBR - using %u antenna paths" LOG_NL,
-                        initiator->conn_handle,
-                        initiator->cs_parameters.num_antenna_paths);
-  }
-
-  initiator->config.cs_tone_antenna_config_idx = initiator->config.cs_tone_antenna_config_idx_req;
-  initiator_log_debug(INSTANCE_PREFIX "Using tone antenna configuration index: %u" LOG_NL,
-                      initiator->conn_handle,
-                      initiator->config.cs_tone_antenna_config_idx);
-
-  // Prepare for the CS main mode: RTT antenna usage
-  if (initiator->config.cs_main_mode == sl_bt_cs_mode_rtt) {
-    switch (initiator->config.cs_sync_antenna_req) {
-      case CS_SYNC_ANTENNA_1:
-        initiator_log_warning(INSTANCE_PREFIX "CS - RTT - 1. antenna device! Using the antenna ID 1" LOG_NL,
-                              initiator->conn_handle);
-        initiator->config.cs_sync_antenna = CS_SYNC_ANTENNA_1;
-        break;
-      case CS_SYNC_ANTENNA_2:
-        if (cs_initiator_local_antenna_num >= 2) {
-          initiator_log_warning(INSTANCE_PREFIX "CS - RTT - 2. antenna device! Using the antenna ID 1" LOG_NL,
-                                initiator->conn_handle);
-          initiator->config.cs_sync_antenna = CS_SYNC_ANTENNA_2;
-        } else {
-          initiator_log_warning(INSTANCE_PREFIX "CS - RTT - only 1 antenna device! Using the antenna ID 1" LOG_NL,
-                                initiator->conn_handle);
-          initiator->config.cs_sync_antenna = CS_SYNC_ANTENNA_1;
-          on_error(initiator,
-                   CS_ERROR_EVENT_INITIATOR_RTT_ANTENNA_USAGE_NOT_SUPPORTED,
-                   SL_STATUS_FAIL);
-        }
-        break;
-      case CS_SYNC_SWITCHING:
-        initiator_log_info(INSTANCE_PREFIX "CS - RTT - switching between %u available antennas" LOG_NL,
-                           initiator->conn_handle,
-                           initiator->config.num_antennas);
-        initiator->config.cs_sync_antenna = CS_SYNC_SWITCHING;
-        break;
-      default:
-        initiator_log_warning(INSTANCE_PREFIX "CS - RTT - unknown antenna usage! "
-                                              "Using the default setting: antenna ID 1" LOG_NL,
-                              initiator->conn_handle);
-        initiator->config.cs_sync_antenna_req = CS_SYNC_ANTENNA_1;
-        break;
-    }
-    // In case of RTT num_antenna_paths is ignored
-    initiator->cs_parameters.num_antenna_paths = 0;
-  }
-}
-
 #if defined (CS_INITIATOR_RAS_MODE_USE_REAL_TIME_MODE) && (CS_INITIATOR_RAS_MODE_USE_REAL_TIME_MODE == 0)
 /******************************************************************************
  * Get start and end segments of the lost_segments bitfield.
@@ -755,7 +619,21 @@ sl_status_t cs_initiator_create(const uint8_t               conn_handle,
                      (unsigned long)enabled_channels);
   (void)enabled_channels;
 
-  cs_initiator_select_antennas(initiator->conn_handle, cs_initiator_local_antenna_num, cs_initiator_remote_antenna_num);
+  sl_status_t antenna_sc = cs_initiator_select_antennas(&initiator->config,
+                                                        cs_initiator_local_antenna_num,
+                                                        cs_initiator_remote_antenna_num,
+                                                        &initiator->cs_parameters.num_antenna_paths);
+  if (antenna_sc == SL_STATUS_NOT_SUPPORTED) {
+    cs_error_event_t ant_err =
+      (initiator->config.cs_main_mode == sl_bt_cs_mode_rtt)
+      ? CS_ERROR_EVENT_INITIATOR_RTT_ANTENNA_USAGE_NOT_SUPPORTED
+      : CS_ERROR_EVENT_INITIATOR_PBR_ANTENNA_USAGE_NOT_SUPPORTED;
+    on_error(initiator, ant_err, SL_STATUS_FAIL);
+  } else if (antenna_sc != SL_STATUS_OK) {
+    sc = antenna_sc;
+    initiator_err = CS_ERROR_EVENT_UNHANDLED;
+    goto cleanup;
+  }
   uint16_t conn_interval;
   uint16_t proc_interval;
   // Set optimized intervals for PBR mode
@@ -772,10 +650,10 @@ sl_status_t cs_initiator_create(const uint8_t               conn_handle,
                                              &proc_interval);
     if (sc != SL_STATUS_OK) {
       if (sc == SL_STATUS_NOT_SUPPORTED) {
-        initiator_log_warning(INSTANCE_PREFIX "Parameter optimization is not supported in RTT mode or with CUSTOM preset" LOG_NL,
+        initiator_log_info(INSTANCE_PREFIX "Parameter optimization is not supported for CUSTOM channel map preset" LOG_NL,
                               initiator->conn_handle);
       } else if (sc == SL_STATUS_IDLE) {
-        initiator_log_warning(INSTANCE_PREFIX "No optimization - using custom procedure scheduling" LOG_NL,
+        initiator_log_info(INSTANCE_PREFIX "No optimization - using custom procedure scheduling" LOG_NL,
                               initiator->conn_handle);
       } else {
         initiator_log_error(INSTANCE_PREFIX "CS - failed to set procedure and connection intervals! "

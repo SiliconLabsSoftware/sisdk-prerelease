@@ -262,6 +262,10 @@ sl_status_t sl_wisun_rf_test_start_tx(uint16_t channel,
   sl_rail_tx_options_t options = SL_RAIL_TX_OPTIONS_DEFAULT | SL_RAIL_TX_OPTION_RESEND;
   sl_rail_handle_t rail_handle;
   sl_rail_csma_config_t csma_config = SL_RAIL_CSMA_CONFIG_SINGLE_CCA;
+  sl_rail_state_transitions_t tx_transitions = {
+    .success = SL_RAIL_RF_STATE_IDLE,
+    .error = SL_RAIL_RF_STATE_IDLE
+  };
   uint16_t fifo_size_bytes = 0;
   uint16_t init_bytes = 0;
   uint8_t phr_length = 0;
@@ -320,10 +324,6 @@ sl_status_t sl_wisun_rf_test_start_tx(uint16_t channel,
   }
 
   rf_scheduler_info.priority = RF_PRIORITY_PROTECTED;
-  sl_rail_state_transitions_t tx_transitions = {
-    .success = SL_RAIL_RF_STATE_IDLE,
-    .error = SL_RAIL_RF_STATE_IDLE
-  };
   rail_status = sl_rail_set_tx_transitions(rail_handle, &tx_transitions);
   SLI_WISUN_ERROR_CHECK_SET_STATUS(SL_RAIL_STATUS_NO_ERROR == rail_status, SL_STATUS_FAIL);
 

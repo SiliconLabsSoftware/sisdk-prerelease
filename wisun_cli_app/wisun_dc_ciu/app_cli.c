@@ -502,6 +502,8 @@ void app_cli_set_cmd(sl_cli_command_arg_t *arguments)
 
   if (set_setting(setting, value)) {
     printf("%s = %s\n", setting, value);
+    // Refresh idle timer so a new idle_timeout_ms applies immediately.
+    app_reset_idle_timer();
   } else {
     printf("Failed to set %s\n", setting);
   }

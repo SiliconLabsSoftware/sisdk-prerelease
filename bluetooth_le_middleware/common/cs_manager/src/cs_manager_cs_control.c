@@ -183,7 +183,15 @@ void cs_manager_cs_control_on_bt_event(const sl_bt_msg_t *evt)
 {
   switch (SL_BT_MSG_ID(evt->header)) {
     case sl_bt_evt_cs_procedure_enable_complete_id: {
+      sl_status_t sc = app_rta_acquire(cs_manager_ctx);
+      if (sc != SL_STATUS_OK) {
+        if (on_error != NULL) {
+          on_error(evt->data.evt_cs_procedure_enable_complete.connection, CS_MANAGER_ERROR_RTA_ACQUIRE_FAILED, sc);
+        }  
+        break;
+      }
       handle_cs_procedure_enable_completed(&evt->data.evt_cs_procedure_enable_complete);
+      (void)app_rta_release(cs_manager_ctx);
       break;
     }
   }

@@ -71,7 +71,7 @@ template_contribution:
     group: interpan
     name: fragment-test
     handler: sli_zigbee_af_interpan_fragment_test_command
-    help: Sends a message of specified length of random values to target device over inter-PAN.
+    help: Sends a message of specified length of random values to target device over inter-PAN. Options bit 0 enables stub APS link encryption (requires link key and SL_ZIGBEE_AF_PLUGIN_INTERPAN_ALLOW_APS_ENCRYPTED_MESSAGES); same as plugin interpan long.
     argument:
     - type: uint16
       help: The PAN ID that the target is located on
@@ -81,6 +81,8 @@ template_contribution:
       help: The cluster ID that the sample message should contain
     - type: uint16
       help: The length of the randomly-filled message to be sent across inter-PAN
+    - type: uint16
+      help: Inter-PAN options (bit 0 = APS encrypt)
 - name: cli_command
   value:
     group: interpan

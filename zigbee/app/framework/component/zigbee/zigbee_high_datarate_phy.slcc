@@ -154,15 +154,6 @@ template_contribution:
 - name: cli_command
   value:
     group: high_datarate_phy
-    name: get_active_phy
-    handler: sl_high_datarate_phy_get_phy_command
-    help: Get current active phy
-  condition:
-  - cli
-
-- name: cli_command
-  value:
-    group: high_datarate_phy
     name: force_tx_after_failed_hdr_phy_cca
     argument:
     - type: uint8

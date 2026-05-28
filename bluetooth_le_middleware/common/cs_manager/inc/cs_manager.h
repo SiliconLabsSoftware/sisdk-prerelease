@@ -64,6 +64,14 @@ typedef enum {
   CS_MANAGER_EVENT_ERROR, ///< General CS Manager error
 } cs_manager_event_type_t;
 
+/// CS Manager error type
+SL_ENUM(cs_manager_error_t) {
+  CS_MANAGER_ERROR_RTA_INIT_FAILED,               ///< RTA init failed
+  CS_MANAGER_ERROR_RTA_ACQUIRE_FAILED,            ///< RTA acquire failed
+  CS_MANAGER_ERROR_RTA_RELEASE_FAILED,            ///< RTA release failed
+  CS_MANAGER_ERROR_RUNTIME_ERROR,                 ///< Runtime error reported by app_rta
+};
+
 typedef struct {
   uint16_t min_connection_interval; ///< Minimum connection interval (1.25 ms)
   uint16_t max_connection_interval; ///< Maximum connection interval (1.25 ms)
@@ -132,6 +140,25 @@ typedef void (*cs_manager_event_t)(uint8_t conn_handle,
                                    uint8_t config_id,
                                    cs_manager_event_type_t event,
                                    sl_status_t status);
+
+/**************************************************************************//**
+ * @brief Callback invoked when an error occurs during CS Manager operation.
+ *
+ * @param[in] conn_handle Connection handle (or @ref SL_BT_INVALID_CONNECTION_HANDLE
+ *                        for non-connection-bound errors).
+ * @param[in] error       Error event identifier (@ref cs_manager_error_t).
+ * @param[in] sc          Underlying status code.
+ *****************************************************************************/
+typedef void (*cs_manager_on_error_t)(uint8_t conn_handle,
+                                      cs_manager_error_t error,
+                                      sl_status_t sc);
+
+/// Collection type of event callbacks registered with
+/// @ref cs_manager_set_event_callbacks
+typedef struct {
+  cs_manager_event_t    on_event; ///< Lifecycle event callback (required).
+  cs_manager_on_error_t on_error; ///< Error event callback (required).
+} cs_manager_event_callback_t;
 
 // -----------------------------------------------------------------------------
 // Function declarations
@@ -219,16 +246,17 @@ sl_status_t cs_manager_config_get(uint8_t conn_handle,
                                   cs_config_data_t *config_out);
 
 /**************************************************************************//**
- * Register the event callback for CS Manager lifecycle events.
+ * Register the event and error callbacks for CS Manager.
  *
- * @note Replaces any previously registered callback. Pass NULL to clear.
+ * @note Replaces any previously registered callbacks. All callbacks in @p cb
+ *       are required; pass NULL members to clear them is not supported.
  *
- * @param[in] event_cb Callback function, or NULL to deregister.
+ * @param[in] cb Pointer to a populated callback collection.
  * @return Status of the operation.
- * @retval SL_STATUS_OK               Callback set successfully.
- * @retval SL_STATUS_NULL_POINTER     @p event_cb is NULL.
+ * @retval SL_STATUS_OK               Callbacks set successfully.
+ * @retval SL_STATUS_NULL_POINTER     @p cb or any of its members is NULL.
  *****************************************************************************/
-sl_status_t cs_manager_set_callback(cs_manager_event_t event_cb);
+sl_status_t cs_manager_set_event_callbacks(cs_manager_event_callback_t *cb);
 
 /**************************************************************************//**
  * Populate a cs_config_t structure with default CS configuration values.

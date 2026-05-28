@@ -248,8 +248,13 @@ ZW_ADD_CMD(FUNC_ID_ZW_SET_RF_RECEIVE_MODE)
 {
   /* HOST->ZW: mode */
   /* ZW->HOST: retVal */
-  const uint8_t retVal = SetRFReceiveMode(frame->payload[0]);
+  const uint8_t mode = frame->payload[0];
+  const uint8_t retVal = SetRFReceiveMode(mode);
   DoRespond(retVal);
+  if (retVal && mode) {
+    comm_interface_wait_transmit_done();
+    zpal_reboot_with_info(MFG_ID_ZWAVE, ZPAL_RESET_RADIO_RECONFIGURE);
+  }
 }
 #endif /* SUPPORT_ZW_SET_RF_RECEIVE_MODE */
 #if SUPPORT_ZW_SEND_NODE_INFORMATION

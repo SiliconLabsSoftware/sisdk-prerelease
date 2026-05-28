@@ -700,7 +700,7 @@ static void handle_dc_client_connected(const in6_addr_t *link_local_ipv6)
                                  idle_timer_callback,
                                  NULL, 0, 0);
 
-  printf("Connected in %.1f s\n", (float)connect_time_ms / 1000.0f);
+  printf("Connected in %.1f s\n", (double)connect_time_ms / 1000.0);
   refresh_display("OK in %lu.%lus",
                   (unsigned long)(connect_time_ms / 1000),
                   (unsigned long)((connect_time_ms % 1000) / 100));

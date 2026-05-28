@@ -151,6 +151,15 @@
 
 // </h>
 
+// <h> Runtime settings
+
+// <o CS_MANAGER_CONFIG_RTA_WAIT_FOR_GUARD> Timeout for guard acquisition (in ticks) <0-65535>
+// <i> Number of RTOS ticks to wait when acquiring the RTA guard mutex.
+// <i> Default: 10
+#define CS_MANAGER_CONFIG_RTA_WAIT_FOR_GUARD  10
+
+// </h>
+
 // <<< end of configuration section >>>
 
 #endif // CS_MANAGER_CONFIG_H

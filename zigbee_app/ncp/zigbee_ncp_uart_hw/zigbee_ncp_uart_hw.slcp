@@ -99,6 +99,9 @@ define:
 tag:
   - prebuilt_demo
   - hwfilter:device:device_supports_zigbee
+  - toolchain:gcc
+  - toolchain:iar
+  - toolchain:llvm
 readme:
   - path: ./readme.md
 

@@ -115,3 +115,6 @@ filter:
     value: [Advanced]
 tag:
   - hwfilter:device:device_supports_zigbee
+  - toolchain:gcc
+  - toolchain:iar
+  - toolchain:llvm

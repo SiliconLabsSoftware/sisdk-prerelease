@@ -10,7 +10,7 @@
 #include <ZAF_CC_Invoker.h>
 #include <FreeRTOS.h>
 #include <zaf_config_api.h>
-#include <ZW_wake_on_critical_message.h>
+#include "ZW_wake_on_critical_message.h"
 
 typedef struct zaf_endpoint_cc_lists {
   zaf_cc_list_t unsecure_included_ccs;

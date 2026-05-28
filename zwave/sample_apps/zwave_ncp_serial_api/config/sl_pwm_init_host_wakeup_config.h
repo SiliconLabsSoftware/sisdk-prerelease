@@ -43,6 +43,11 @@ extern "C" {
 // <i> Default: 10000
  #define SL_PWM_HOST_WAKEUP_FREQUENCY       1
 
+// <o SL_PWM_HOST_WAKEUP_DUTY_CYCLE> PWM duty cycle [%]
+// <0-100>
+// <i> Default: 50
+ #define SL_PWM_HOST_WAKEUP_DUTY_CYCLE      50
+
 // <o SL_PWM_HOST_WAKEUP_POLARITY> Polarity
 // <PWM_ACTIVE_HIGH=> Active high
 // <PWM_ACTIVE_LOW=> Active low

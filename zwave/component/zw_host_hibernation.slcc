@@ -20,7 +20,7 @@ source:
 config_file:
 - path: sample_apps/zwave_ncp_serial_api/config/zw_host_hibernation_config.h
   file_id: zw_host_hibernation_config
-- path: sample_apps/zwave_ncp_serial_api/sl_pwm_init_host_wakeup_config.h
+- path: sample_apps/zwave_ncp_serial_api/config/sl_pwm_init_host_wakeup_config.h
   override:
     component: pwm
     file_id: pwm_config

@@ -196,6 +196,9 @@ tag:
   - hwfilter:device:device_supports_zigbee
   - hwfilter:board:simple_led:led0
   - hwfilter:board:simple_button:btn1
+  - toolchain:gcc
+  - toolchain:iar
+  - toolchain:llvm
 readme:
   - path: ./readme.md
 

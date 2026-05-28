@@ -132,6 +132,8 @@ void sl_zigbee_gpd_af_cli_node_set_addr(sl_cli_command_arg_t *arguments)
       gpd->addr.gpdEndpoint = str[1];
       // A simple way to use the command for testing
       memcpy(gpd->addr.id.ieee, &str[2], SL_ZIGBEE_GPD_EUI64_SIZE);
+      // Update RAIL's long address filter so the radio accepts frames addressed to this IEEE
+      sl_zigbee_gpd_rail_set_long_address_wrapper(gpd->addr.id.ieee);
       sl_zigbee_gpd_security_init(&(gpd->addr), gpd->securityKey, gpd->securityFrameCounter);
     } else {
       // Error in the input argument

@@ -223,3 +223,6 @@ tag:
   - hwfilter:!device:device_is_module
   - hwfilter:!device:device_series_3
   - hwfilter:!board:hardware:shares:button:led
+  - toolchain:gcc
+  - toolchain:iar
+  - toolchain:llvm

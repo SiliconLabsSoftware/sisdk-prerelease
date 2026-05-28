@@ -142,6 +142,16 @@ template_contribution:
   - sl_rail_util_ieee802154_phy_select
 - name: cli_command
   value:
+    name: get-active-phy
+    handler: sli_zigbee_cli_get_active_phy_command
+    help: Prints the active IEEE 802.15.4 radio PHY configuration (SoC builds with phy select).
+  condition:
+  - cli
+  - sl_rail_util_ieee802154_phy_select
+  unless:
+  - zigbee_ezsp
+- name: cli_command
+  value:
     name: config-cca-mode
     handler: sli_zigbee_cli_config_cca_mode_command
     help: Set the configured 802.15.4 CCA mode in the radio. See documentation regarding RAIL_IEEE802154_CcaMode_t.

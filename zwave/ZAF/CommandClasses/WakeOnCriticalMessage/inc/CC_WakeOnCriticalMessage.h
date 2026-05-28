@@ -12,7 +12,7 @@
 
 #include <ZW_TransportEndpoint.h>
 #include <ZW_application_transport_interface.h>
-#include <ZW_wake_on_critical_message.h>
+#include "ZW_wake_on_critical_message.h"
 
 /**
  * @addtogroup CC

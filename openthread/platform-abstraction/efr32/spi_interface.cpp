@@ -252,13 +252,13 @@ static void gpio_deassert_host_request(void)
 
 static void gpio_set_pin_mode(uint32_t port, uint32_t pin, uint32_t mode, uint32_t out)
 {
-    const sl_gpio_t gpio = {.port = port, .pin = pin};
+    const sl_gpio_t gpio = {.port = static_cast<uint8_t>(port), .pin = static_cast<uint8_t>(pin)};
     sl_hal_gpio_set_pin_mode(&gpio, mode, out);
 }
 
 static bool gpio_get_pin_input(uint32_t port, uint32_t pin)
 {
-    const sl_gpio_t gpio = {.port = port, .pin = pin};
+    const sl_gpio_t gpio = {.port = static_cast<uint8_t>(port), .pin = static_cast<uint8_t>(pin)};
     return sl_hal_gpio_get_pin_input(&gpio) != 0U;
 }
 
@@ -273,7 +273,7 @@ static void spi_transaction_end_interrupt(uint8_t intNo, void *ctx);
 
 static void gpio_configure_cs_interrupt(uint32_t port, uint32_t pin, uint32_t int_no, bool rising_edge)
 {
-    const sl_gpio_t cs_gpio = {.port = port, .pin = pin};
+    const sl_gpio_t cs_gpio = {.port = static_cast<uint8_t>(port), .pin = static_cast<uint8_t>(pin)};
     int32_t         intNo   = (int32_t)int_no;
     sl_status_t     status  = sl_gpio_configure_external_interrupt(&cs_gpio,
                                                               &intNo,

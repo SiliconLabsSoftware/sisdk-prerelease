@@ -44,6 +44,7 @@
 static bool rreq_is_fatal(cs_rreq_error_t error);
 static bool algo_is_fatal(cs_algo_error_t error);
 static bool app_is_fatal(cs_app_error_t error);
+static bool manager_is_fatal(cs_manager_error_t error);
 static void report(uint8_t conn_handle,
                    cs_error_type_t type,
                    uint8_t error_code,
@@ -73,6 +74,17 @@ void app_on_cs_algo_on_error(uint8_t conn_handle,
          (uint8_t)error,
          sc,
          algo_is_fatal(error));
+}
+
+void app_on_cs_manager_on_error(uint8_t conn_handle,
+                                cs_manager_error_t error,
+                                sl_status_t sc)
+{
+  report(conn_handle,
+         CS_ERROR_TYPE_CS_MANAGER,
+         (uint8_t)error,
+         sc,
+         manager_is_fatal(error));
 }
 
 void cs_on_error(uint8_t conn_handle,
@@ -120,6 +132,18 @@ static bool algo_is_fatal(cs_algo_error_t error)
   }
 }
 
+/// All cs_manager errors are treated as fatal by default.
+static bool manager_is_fatal(cs_manager_error_t error)
+{
+  switch (error) {
+    case CS_MANAGER_ERROR_RTA_ACQUIRE_FAILED:
+    case CS_MANAGER_ERROR_RTA_RELEASE_FAILED:
+      return false;
+    default:
+      return true;
+  }
+}
+
 /// Non-fatal app-level events. Anything not listed is fatal.
 static bool app_is_fatal(cs_app_error_t error)
 {
@@ -144,7 +168,7 @@ static void report(uint8_t conn_handle,
                    sl_status_t sc,
                    bool fatal)
 {
-  static const char *const type_str[] = { "RREQ", "ALGO", "APP" };
+  static const char *const type_str[] = { "RREQ", "ALGO", "APP", "CS_MANAGER" };
 
   log_error(APP_INSTANCE_PREFIX "%s error (%u), status code (0x%04lx)" NL,
             conn_handle,

@@ -224,3 +224,6 @@ tag:
   - hwfilter:device:device_supports_zigbee
   - hwfilter:!device:device_is_module
   - hwfilter:!device:device_series_3
+  - toolchain:gcc
+  - toolchain:iar
+  - toolchain:llvm

@@ -3457,13 +3457,13 @@ static void update_app_settings(sl_wisun_option_id_t option_id, uint32_t option_
 void app_set_option(sl_cli_command_arg_t *arguments)
 {
   sl_status_t status;
-  uint32_t option_id;
+  sl_wisun_option_id_t option_id;
   uint32_t option_value;
   uint16_t option_value_len;
 
   app_wisun_cli_mutex_lock();
 
-  option_id = sl_cli_get_argument_uint32(arguments, 0);
+  option_id = (sl_wisun_option_id_t)sl_cli_get_argument_uint32(arguments, 0);
   option_value = sl_cli_get_argument_uint32(arguments, 1);
   option_value_len = sl_cli_get_argument_uint16(arguments, 2);
 

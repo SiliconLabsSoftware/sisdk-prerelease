@@ -123,8 +123,18 @@ configuration:
     value: 3496
   - name: SL_BT_CONFIG_BUFFER_SIZE
     value: 10000
+  - name: SL_BT_CONFIG_MAX_CONNECTIONS
+    value: 1
+  - name: CS_MANAGER_CONFIG_MAX_INSTANCES
+    value: 1
+  - name: CS_RREQ_CONFIG_MAX_CONNECTIONS
+    value: 1
+  - name: CS_ALGO_CONFIG_ESTIMATOR_COUNT
+    value: 1
   - name: SL_BT_CONFIG_MAX_CS_PROCEDURES
-    value: 4
+    value: 1
+  - name: SL_BT_PEER_MANAGER_COMMON_MAX_ALLOWED_CONN_COUNT
+    value: 1
   - name: SL_BT_PEER_MANAGER_CENTRAL_CONFIG_DEFAULT_SCAN_INTERVAL
     value: 21
   - name: SL_BT_PEER_MANAGER_CENTRAL_CONFIG_DEFAULT_SCAN_WINDOW

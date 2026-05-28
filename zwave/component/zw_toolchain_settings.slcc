@@ -12,14 +12,9 @@ metadata:
     reference: zw_sbom_license
 provides:
 - name: zw_toolchain_settings
-recommends:
-- name: toolchain_gcc
-  vendor: silabs
-- name: toolchain_gcc_standard
-  vendor: silabs
 requires:
 - name: toolchain_lto
-  condition: [zw_release, toolchain_gcc]
+  condition: [zw_release, toolchain]
 toolchain_settings:
 - option: gcc_compiler_option
   value: "-s"

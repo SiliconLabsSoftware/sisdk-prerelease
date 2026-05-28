@@ -61,4 +61,9 @@ typedef struct _ZW_WAKE_ON_CRITICAL_MESSAGE_CONFIGURATION_REPORT_FRAME_ {
   uint8_t properties1;  /* bits 7-4: Reserved (0), bits 3-0: Severity */
 } ZW_WAKE_ON_CRITICAL_MESSAGE_CONFIGURATION_REPORT_FRAME;
 
+typedef struct _wocm_context_t_ {
+  uint16_t node_id;
+  uint8_t severity_level;
+} wocm_context_t;
+
 #endif /* ZW_WAKE_ON_CRITICAL_MESSAGE_H_ */
