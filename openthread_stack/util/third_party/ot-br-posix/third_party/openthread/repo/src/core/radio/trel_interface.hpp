@@ -165,7 +165,7 @@ public:
      */
     void SetUdpPort(uint16_t aPort) { mUdpPort = aPort; }
 
-#if OPENTHREAD_NCP
+#if OPENTHREAD_CONFIG_TREL_DELEGATE_INFRA_TO_HOST_ENABLE
     /**
      * Gets the TREL interface's host UDP port.
      *
@@ -179,7 +179,7 @@ public:
      * @param[in] aPort   The UDP port number.
      */
     void SetHostUdpPort(uint16_t aPort);
-#endif // OPENTHREAD_NCP
+#endif // OPENTHREAD_CONFIG_TREL_DELEGATE_INFRA_TO_HOST_ENABLE
     /**
      * Sets the callback.
      *
@@ -217,7 +217,7 @@ private:
     bool     mFiltered : 1;
     State    mState;
     uint16_t mUdpPort;
-#if OPENTHREAD_NCP
+#if OPENTHREAD_CONFIG_TREL_DELEGATE_INFRA_TO_HOST_ENABLE
     uint16_t mHostUdpPort;
 #endif
     Packet                        mRxPacket;

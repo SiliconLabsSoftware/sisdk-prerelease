@@ -33,6 +33,7 @@
 #include "sl_bluetooth.h"
 #include "sl_bt_api.h"
 #include <openthread/cli.h>
+#include <inttypes.h>
 
 extern void printBleAddress(bd_addr address);
 
@@ -60,7 +61,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
         }
         else
         {
-            otCliOutputFormat("error: 0x%2x", address_rsp);
+            otCliOutputFormat("error: 0x%04" PRIx32, address_rsp);
         }
         otCliOutputFormat("\r\n");
     }
@@ -121,7 +122,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     }
     break;
     default:
-        otCliOutputFormat("BLE event: 0x%04x\r\n", SL_BT_MSG_ID(evt->header));
+        otCliOutputFormat("BLE event: 0x%04" PRIx32 "\r\n", SL_BT_MSG_ID(evt->header));
     }
 }
 

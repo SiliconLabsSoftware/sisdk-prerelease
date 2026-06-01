@@ -49,7 +49,7 @@ Interface::Interface(Instance &aInstance)
     , mFiltered(false)
     , mState(kStateUninitialized)
     , mUdpPort(0)
-#if OPENTHREAD_NCP
+#if OPENTHREAD_CONFIG_TREL_DELEGATE_INFRA_TO_HOST_ENABLE
     , mHostUdpPort(0)
 #endif
     , mCallbackTask(aInstance)
@@ -63,7 +63,7 @@ void Interface::Init(void)
     VerifyOrExit(mState == kStateUninitialized);
     mState = kStateDisabled;
 
-#if OPENTHREAD_NCP
+#if OPENTHREAD_CONFIG_TREL_DELEGATE_INFRA_TO_HOST_ENABLE
     mUserEnabled = false;
 #endif
 
@@ -107,7 +107,7 @@ void Interface::UpdateState(void)
 
         otPlatTrelEnable(&GetInstance(), &mUdpPort);
 
-#if OPENTHREAD_NCP
+#if OPENTHREAD_CONFIG_TREL_DELEGATE_INFRA_TO_HOST_ENABLE
         // Wait for the host UDP port (SPINEL_PROP_TREL_STATE) before starting peer discovery.
         if (mHostUdpPort != 0)
 #endif
@@ -224,11 +224,16 @@ exit:
     return;
 }
 
-#if OPENTHREAD_NCP
+#if OPENTHREAD_CONFIG_TREL_DELEGATE_INFRA_TO_HOST_ENABLE
 void Interface::SetHostUdpPort(uint16_t aPort)
 {
+    LogInfo("Host UDP port set to %u (threadUdpPort:%u, trelEnabled:%d)", aPort, mUdpPort, IsEnabled());
     mHostUdpPort = aPort;
-    Get<PeerDiscoverer>().Start();
+
+    if (IsEnabled() && (aPort != 0))
+    {
+        Get<PeerDiscoverer>().Start();
+    }
 }
 #endif
 } // namespace Trel

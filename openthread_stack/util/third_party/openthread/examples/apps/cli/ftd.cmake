@@ -38,7 +38,6 @@ target_compile_definitions(ot-cli-ftd
         OPENTHREAD_FTD=1
         OPENTHREAD_MTD=0
         OPENTHREAD_RADIO=0
-        OPENTHREAD_NCP=0
 )
 
 if(NOT DEFINED OT_PLATFORM_LIB_FTD)

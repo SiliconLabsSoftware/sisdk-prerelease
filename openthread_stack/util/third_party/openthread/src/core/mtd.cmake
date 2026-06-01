@@ -32,7 +32,6 @@ target_compile_definitions(openthread-mtd PRIVATE
     OPENTHREAD_FTD=0
     OPENTHREAD_MTD=1
     OPENTHREAD_RADIO=0
-    OPENTHREAD_NCP=0
 )
 
 target_compile_options(openthread-mtd PRIVATE

@@ -25,11 +25,15 @@ include:
   file_list:
   - path: "app_button_press.h"
   - path: "app_button_press_internal.h"
+template_file:
+- path: app_button_press_em_static.c.jinja
+  condition:
+  - device_series_2
+  - power_manager
 provides:
 - name: "app_button_press"
 requires:
 - name: "component_catalog"
-- name: "power_manager"
 - name: "sleeptimer"
 - name: "simple_button"
 - name: "app_rta"

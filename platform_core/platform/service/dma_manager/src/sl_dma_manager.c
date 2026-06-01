@@ -220,7 +220,12 @@ sl_status_t sli_dma_manager_set_nbr_round_robin_channels(sl_dma_handle_t *dma_ha
  ******************************************************************************/
 sl_status_t sl_dma_manager_get_default_handle(sl_dma_handle_t **dma_handle)
 {
+  if (dma_handle == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
   *dma_handle = default_dma_handle;
+
   return SL_STATUS_OK;
 }
 

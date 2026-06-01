@@ -30,23 +30,60 @@
  * @file
  *   NCP TREL platform implementation.
  *
- *   Sends TREL packets to OTBR host via UDP datagrams.
- *   Host forwards packets to infrastructure network.
+ *   Forwards TREL UDP datagrams between the Thread stack and the OTBR host
+ *   using SPINEL_PROP_THREAD_UDP_FORWARD_STREAM.
  */
 
 #include "openthread-core-config.h"
 
 #if OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE && OPENTHREAD_CONFIG_UDP_FORWARD_ENABLE
 
+#include <string.h>
+
 #include <openthread/instance.h>
+#include <openthread/logging.h>
+#include <openthread/trel.h>
+#include <openthread/udp.h>
 #include <openthread/platform/trel.h>
 
-#include "lib/spinel/spinel.h"
-#include "lib/spinel/spinel_encoder.hpp"
-#include "ncp/ncp_base.hpp"
-#include "ncp/ncp_config.h"
+#include "common/code_utils.hpp"
+
+namespace {
+constexpr uint16_t kMaxTrelPacketSize = 1400;
+
+otUdpSocket sUdpForwardSocket;
+bool        sUdpForwardSocketIsOpen = false;
+} // namespace
 
 static otPlatTrelCounters sCounters;
+
+static void HandleUdpForwardReceive(void *aContext, otMessage *aMessage, const otMessageInfo *aMessageInfo)
+{
+    otInstance *instance = static_cast<otInstance *>(aContext);
+    uint8_t     buffer[kMaxTrelPacketSize];
+    uint16_t    length;
+    uint16_t    readLength;
+    otSockAddr  senderAddr;
+
+    VerifyOrExit(otTrelIsEnabled(instance));
+
+    length = otMessageGetLength(aMessage);
+    VerifyOrExit(length > 0 && length <= sizeof(buffer));
+
+    readLength = otMessageRead(aMessage, 0, buffer, length);
+    VerifyOrExit(readLength == length);
+
+    senderAddr.mAddress = aMessageInfo->mPeerAddr;
+    senderAddr.mPort    = aMessageInfo->mPeerPort;
+
+    sCounters.mRxPackets++;
+    sCounters.mRxBytes += length;
+
+    otPlatTrelHandleReceived(instance, buffer, length, &senderAddr);
+
+exit:
+    return;
+}
 
 extern "C" void otPlatTrelSend(otInstance       *aInstance,
                                const uint8_t    *aUdpPayload,
@@ -89,11 +126,37 @@ exit:
 
 extern "C" void otPlatTrelEnable(otInstance *aInstance, uint16_t *aUdpPort)
 {
-    OT_UNUSED_VARIABLE(aInstance);
-    OT_UNUSED_VARIABLE(aUdpPort);
+    otError    error = OT_ERROR_NONE;
+    otSockAddr sockAddr;
+
+    VerifyOrExit(aInstance != nullptr && aUdpPort != nullptr);
+    VerifyOrExit(!sUdpForwardSocketIsOpen);
+
+    memset(&sockAddr, 0, sizeof(sockAddr));
+    sockAddr.mPort = *aUdpPort;
+
+    SuccessOrExit(error = otUdpOpen(aInstance, &sUdpForwardSocket, HandleUdpForwardReceive, aInstance));
+    SuccessOrExit(error = otUdpBind(aInstance, &sUdpForwardSocket, &sockAddr, OT_NETIF_UNSPECIFIED));
+
+    sUdpForwardSocketIsOpen = true;
+
+exit:
+    if (error != OT_ERROR_NONE)
+    {
+        otLogWarnPlat("Failed to bind TREL UDP forward socket on port %u: %s", *aUdpPort, otThreadErrorToString(error));
+        IgnoreError(otUdpClose(aInstance, &sUdpForwardSocket));
+        sUdpForwardSocketIsOpen = false;
+    }
 }
 
-extern "C" void otPlatTrelDisable(otInstance *aInstance) { OT_UNUSED_VARIABLE(aInstance); }
+extern "C" void otPlatTrelDisable(otInstance *aInstance)
+{
+    if (sUdpForwardSocketIsOpen)
+    {
+        IgnoreError(otUdpClose(aInstance, &sUdpForwardSocket));
+        sUdpForwardSocketIsOpen = false;
+    }
+}
 
 extern "C" void otPlatTrelNotifyPeerSocketAddressDifference(otInstance       *aInstance,
                                                             const otSockAddr *aPeerSockAddr,

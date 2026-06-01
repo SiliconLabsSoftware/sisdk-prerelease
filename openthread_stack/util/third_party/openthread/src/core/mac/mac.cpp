@@ -37,6 +37,7 @@
 
 #include "crypto/aes_ccm.hpp"
 #include "crypto/sha256.hpp"
+#include "crypto/storage.hpp"
 #include "instance/instance.hpp"
 #include "utils/static_counter.hpp"
 
@@ -1624,6 +1625,10 @@ Error Mac::ProcessReceiveSecurity(RxFrame &aFrame, const Address &aSrcAddr, Neig
         ExitNow();
     }
 
+#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+    VerifyOrExit((macKey != nullptr) && Crypto::Storage::IsKeyRefValid(macKey->GetKeyRef()));
+#endif
+
     SuccessOrExit(aFrame.ProcessReceiveAesCcm(*extAddress, *macKey));
 
     if ((keyIdMode == Frame::kKeyIdMode1) && aNeighbor->IsStateValid())
@@ -1746,6 +1751,10 @@ Error Mac::ProcessEnhAckSecurity(TxFrame &aTxFrame, RxFrame &aAckFrame)
     {
         VerifyOrExit(frameCounter >= neighbor->GetLinkAckFrameCounter());
     }
+
+#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+    VerifyOrExit((macKey != nullptr) && Crypto::Storage::IsKeyRefValid(macKey->GetKeyRef()));
+#endif
 
     error = aAckFrame.ProcessReceiveAesCcm(srcAddr.GetExtended(), *macKey);
     SuccessOrExit(error);

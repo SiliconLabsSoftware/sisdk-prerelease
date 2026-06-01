@@ -1257,7 +1257,7 @@ class CalcManager(object):
                 raise InvalidOptionOverride('xtal_frequency_hz is not a valid option input for {} profile.'.format(model_instance.profile.name))
 
         return model_instance
-
+    
     def load_input_dictionary_into_model(self, model_instance, inputs=None):
         """Loads input dictionary into model instance
 
@@ -1277,31 +1277,15 @@ class CalcManager(object):
                 if model_instance.phy and model_instance.phy.locked and value is not None and input.var_value != value:
                     raise StaticPHYInputException("This model has a static 'locked' PHY.  Cannot supply input overrides: {}!".format(key))
 
-                if input._var.var_type != Enum:
-                    if value is not None:
-                        input.var_value = (input._var.var_type)(value)
-                    else:
-                        input.var_value = value
-                else:
-                    if isinstance(value, basestring):
-                        if value.isdigit():
-                            value = int(value)
-                            enum_val = input._var.var_enum(value)
-                        else:
-                            enum_val = getattr(input._var.var_enum, value)
-                    elif isinstance(value, int):
-                        enum_val = input._var.var_enum(value)
-                    elif isinstance(value, float):
-                        value = int(value)
-                        enum_val = input._var.var_enum(value)
-                    input.var_value = enum_val
+                input.var_value = self.__variable_value_type_cast(input._var, value)
             elif hasattr(model_instance.profile.outputs, key):
                 self.__override_profile_output(model_instance, key, value)
             elif hasattr(model_instance.profile.outputs, key.upper()):
                 self.__override_profile_output(model_instance, key.upper(), value)
             elif hasattr(model_instance.vars, key):
                 var = getattr(model_instance.vars, key)
-                var.value_forced = value
+                print("Overriding variable {} with value {}".format(key, value))
+                var.value_forced = self.__variable_value_type_cast(var, value)
             else:
                 raise InvalidOptionOverride(key + ' is not a valid option input or output for {} profile.'.format(model_instance.profile.name))
 
@@ -2029,18 +2013,7 @@ class CalcManager(object):
     def __override_profile_output(self, model_instance, key, value):
         # process option inputs into profile output overrides
         output = getattr(model_instance.profile.outputs, key)
-        if output._var.is_array and isinstance(value, list):
-            output.override = value
-        elif output._var.var_type != Enum:
-            output.override = (output._var.var_type)(value)
-        else:
-            if isinstance(value, basestring):
-                if value.isdigit():
-                    value = int(value)
-                    enum_val = output._var.var_enum(value)
-                else:
-                    enum_val = getattr(output._var.var_enum, value)
-            output.override = enum_val
+        output.override = self.__variable_value_type_cast(output._var, value)
 
     def getPartFamilyImportPath(self, part_family, import_type):
         return "pyradioconfig.parts.{}.{}".format(part_family.lower(), import_type)
@@ -2065,3 +2038,32 @@ class CalcManager(object):
             # LogMgr.Warning("Unable to import modules: {}".format(ie))
             pass
         return reg_groups
+
+    @staticmethod
+    def __variable_value_type_cast(variable, value):
+        """
+        Type casts the value to the variable type and returns the casted value.  Handles enums as well.
+        Args:
+            variable (ModelVariable) : Variable object reference to cast value to
+            value : value to be casted to variable type
+        Returns:
+            value: value after type casting to variable type
+        """
+        if variable.is_array and isinstance(value, list):
+            return value
+        if variable.var_type != Enum:
+            return (variable.var_type)(value)
+        
+        #variable is an Enum
+        if isinstance(value, basestring):
+            if value.isdigit():
+                value = int(value)
+                enum_val = variable.var_enum(value)
+            else:
+                enum_val = getattr(variable.var_enum, value)
+        elif isinstance(value, int):
+            enum_val = variable.var_enum(value)
+        elif isinstance(value, float):
+            value = int(value)
+            enum_val = variable.var_enum(value)
+        return enum_val

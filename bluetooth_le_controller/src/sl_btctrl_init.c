@@ -203,6 +203,10 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
     return SL_STATUS_OK;
   }
 
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_DTM_PRESENT)
+  sli_btctrl_init_dtm();
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_DTM_PRESENT
+
 #if SL_BT_CONTROLLER_CONN_EVENT_LENGTH_EXTENSION == 1
   config->flags |= SL_BTCTRL_CONFIG_FLAG_ENABLE_CONN_EVENT_LENGTH_EXTENSION;
 #endif // SL_BT_CONTROLLER_CONN_EVENT_LENGTH_EXTENSION

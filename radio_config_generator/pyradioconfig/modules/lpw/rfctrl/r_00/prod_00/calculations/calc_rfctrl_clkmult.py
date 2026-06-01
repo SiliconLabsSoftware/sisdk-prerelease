@@ -131,10 +131,11 @@ class CalcRfctrlClkmult(IPCalculator):
             self._ip_reg_write(model, 'CLKMULTEN2_CLKMULTDIVRTX', 1)
             self._ip_reg_write(model, 'CLKMULTEN2_CLKMULTDIVXTX', 0)
         elif dac_clock_mode_actual == model.vars.dac_clock_mode.var_enum.HFXOx2:
+            # https://jira.silabs.com/browse/MCUW_RADIO_CFG-3520
             self._ip_reg_write(model, 'CLKMULTEN2_CLKMULTENBYPASS40MHZTX', 0)
-            self._ip_reg_write(model, 'CLKMULTEN2_CLKMULTDIVNTX', 32)
+            self._ip_reg_write(model, 'CLKMULTEN2_CLKMULTDIVNTX', 40)
             self._ip_reg_write(model, 'CLKMULTEN2_CLKMULTDIVRTX', 1)
-            self._ip_reg_write(model, 'CLKMULTEN2_CLKMULTDIVXTX', 8)
+            self._ip_reg_write(model, 'CLKMULTEN2_CLKMULTDIVXTX', 5) 
         elif dac_clock_mode_actual == model.vars.dac_clock_mode.var_enum.HFXOx4:
             self._ip_reg_write(model, 'CLKMULTEN2_CLKMULTENBYPASS40MHZTX', 0)
             self._ip_reg_write(model, 'CLKMULTEN2_CLKMULTDIVNTX', 32)

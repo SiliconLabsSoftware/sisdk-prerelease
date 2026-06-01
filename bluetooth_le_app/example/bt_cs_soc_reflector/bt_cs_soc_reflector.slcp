@@ -10,7 +10,7 @@ description: >
   and keeps advertising until every connection slots are occupied. If a
   connection slot becomes free, the device will start advertising again.
 category: Bluetooth Examples
-quality: production
+quality: deprecated
 
 filter:
   - name: "Wireless Technology"

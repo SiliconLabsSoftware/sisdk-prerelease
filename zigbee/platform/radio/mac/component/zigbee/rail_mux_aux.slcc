@@ -77,7 +77,7 @@ template_contribution:
     group: rail-mux-aux
     name: unregister-aux
     handler: sl_zigbee_cli_rail_mux_aux_unregister_aux
-    help: sl_zigbee_rail_mux_aux_unregister_protocol; stops aux RX and restores IEEE 802.15.4 fast channel-switching logical base 1. Prints mux_aux_tear:0xXXXX.
+    help: sl_zigbee_rail_mux_aux_unregister_protocol; stops aux RX, restores slot_base 0 and ZB+OT FCS listen. Prints mux_aux_tear:0xXXXX.
 - name: cli_command
   value:
     group: rail-mux-aux

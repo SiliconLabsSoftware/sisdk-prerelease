@@ -28,6 +28,7 @@ define:
   value: 1
 - name: SL_STACK_SIZE
   value: 16384
+- name: SL_APP_PROPERTIES
 
 include:
 - path: platform/bootloader/series3

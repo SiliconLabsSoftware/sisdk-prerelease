@@ -22,6 +22,7 @@ component:
   - id: zigbee_system_common
   - id: zigbee_ncp_cpc
   - id: rail_mux
+  - id: sl_rail_util_ieee802154_fast_channel_switching
   - id: ot_stack_rcp
   - id: ot_ncp_cpc
   - id: ot_rtt_log

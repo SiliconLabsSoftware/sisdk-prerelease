@@ -10,7 +10,7 @@ description: >
   Real Time Locating (RTL) library and a CS Reflector device role that can
   be instantiated or deleted with the CS specific user messages.
 category: Bluetooth Examples
-quality: production
+quality: deprecated
 
 filter:
   - name: "Wireless Technology"

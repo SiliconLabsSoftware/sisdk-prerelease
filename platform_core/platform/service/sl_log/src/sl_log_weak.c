@@ -272,3 +272,9 @@ SL_WEAK sl_log_ring_buffer_t *sl_log_get_ring_buffer_config(void){
 SL_WEAK void sli_log_assert_implementation(const char* string_value){
   (void)string_value;
 }
+
+SL_WEAK void sl_log_vprint_target_ex(uint32_t options, const char *fmt, va_list ap) {
+  (void)options;
+  (void)fmt;
+  (void)ap;
+}

@@ -55,6 +55,19 @@ tayga_tun_device()
     echo "${dev:-nat64}"
 }
 
+# Ensure exactly one active tayga.conf directive line (idempotent across setup re-runs).
+tayga_conf_ensure_line()
+{
+    local key="$1"
+    local value="$2"
+    local commented_marker="##${key}"
+
+    # Drop prior OTBR/active lines for this key (setup runs uninstall then install).
+    sudo sed -i "/^${key}[[:space:]]/d" "$TAYGA_CONF"
+    sudo sed -i "/^${commented_marker}[[:space:]]/d" "$TAYGA_CONF"
+    echo "${key} ${value}" | sudo tee -a "$TAYGA_CONF" >/dev/null
+}
+
 tayga_install()
 {
     local tayga_tun otbr_tayga_dropin otbr_tayga_sysctl
@@ -67,17 +80,17 @@ tayga_install()
     sudo sed -i 's/^RUN="no"/RUN="yes"/' $TAYGA_DEFAULT
     sudo sed -i 's/^IPV4_TUN_ADDR=""/IPV4_TUN_ADDR="'$TAYGA_IPV4_ADDR'"/' $TAYGA_DEFAULT
     sudo sed -i 's/^IPV6_TUN_ADDR=""/IPV6_TUN_ADDR="'$TAYGA_TUN_V6_ADDR'"/' $TAYGA_DEFAULT
-    sudo sed -i 's/^prefix /##prefix /' $TAYGA_CONF
-    sudo sed -i '/^##prefix /a prefix '$NAT64_PREFIX $TAYGA_CONF
-    sudo sed -i '/^#ipv6-addr/a ipv6-addr '$TAYGA_IPV6_ADDR $TAYGA_CONF
-    sudo sed -i 's/^dynamic-pool /##dynamic-pool /' $TAYGA_CONF
-    sudo sed -i '/^##dynamic-pool /a dynamic-pool '"$DYNAMIC_POOL" $TAYGA_CONF
+    tayga_conf_ensure_line prefix "$NAT64_PREFIX"
+    tayga_conf_ensure_line ipv6-addr "$TAYGA_IPV6_ADDR"
+    tayga_conf_ensure_line dynamic-pool "$DYNAMIC_POOL"
 
     if have systemctl; then
         sudo mkdir -p "$(dirname "$otbr_tayga_dropin")"
-        # --nodetach: default tayga detaches and breaks Type=simple; ExecStartPost needs link up before routes.
+        # Type=simple overrides any distro-packaged Type=forking; without it systemctl restart hangs
+        # waiting for a fork that --nodetach prevents. ExecStart= clears inherited value; ExecStartPost polls TUN.
         sudo tee "$otbr_tayga_dropin" >/dev/null <<OTBR_TAYGA_UNIT
 [Service]
+Type=simple
 ExecStart=
 ExecStart=/usr/sbin/tayga --nodetach --config ${TAYGA_CONF}
 ExecStartPost=/bin/bash -c "TUN=${tayga_tun}; for i in \$(seq 1 50); do ip link show dev \"\$TUN\" >/dev/null 2>&1 && break; sleep 0.05; done; ip link set dev \"\$TUN\" up; ip route replace ${DYNAMIC_POOL} dev \"\$TUN\"; ip -6 route replace ${NAT64_PREFIX} dev \"\$TUN\" metric 256"
@@ -110,17 +123,9 @@ tayga_uninstall()
 
     sudo sed -i 's/^RUN="yes"/RUN="no"/' $TAYGA_DEFAULT
     sudo sed -i 's/^IPV4_TUN_ADDR="'$TAYGA_IPV4_ADDR'"/IPV4_TUN_ADDR=""/' $TAYGA_DEFAULT
-    sudo sed -i '/^prefix /d' $TAYGA_CONF
-    if grep "##prefix " $TAYGA_CONF; then
-        sudo sed -i 's/^##prefix /prefix /' $TAYGA_CONF
-    else
-        sudo sed -i 's/^# prefix /prefix /' $TAYGA_CONF
-    fi
-    sudo sed -i '/^ipv6-addr '$TAYGA_IPV6_ADDR'/d' $TAYGA_CONF
-    if grep "##dynamic-pool " $TAYGA_CONF; then
-        sudo sed -i '/^dynamic-pool /d' $TAYGA_CONF
-        sudo sed -i 's/^##dynamic-pool /dynamic-pool /' $TAYGA_CONF
-    fi
+    sudo sed -i "/^prefix[[:space:]]${NAT64_PREFIX//\//\\/}/d" "$TAYGA_CONF"
+    sudo sed -i "/^dynamic-pool[[:space:]]${DYNAMIC_POOL//\//\\/}/d" "$TAYGA_CONF"
+    sudo sed -i "/^ipv6-addr[[:space:]]${TAYGA_IPV6_ADDR}\$/d" "$TAYGA_CONF"
 }
 
 tayga_start()

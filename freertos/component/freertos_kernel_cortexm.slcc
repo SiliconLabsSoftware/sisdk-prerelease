@@ -82,6 +82,12 @@ source:
   condition:
   - toolchain_gcc
   - cortexm4
+  unless:
+  - device_si91x
+- path: kernel/portable/SiliconLabs/SiWx91X/port.c
+  condition:
+  - toolchain_gcc
+  - device_si91x
 - path: kernel/portable/GCC/ARM_CM33_NTZ/non_secure/port.c
   condition:
   - toolchain_gcc
@@ -122,6 +128,12 @@ source:
   condition:
   - toolchain_llvm
   - cortexm4
+  unless:
+  - device_si91x
+- path: kernel/portable/SiliconLabs/SiWx91X/port.c
+  condition:
+  - toolchain_llvm
+  - device_si91x
 - path: kernel/portable/GCC/ARM_CM33_NTZ/non_secure/port.c
   condition:
   - toolchain_llvm
@@ -149,6 +161,10 @@ source:
 - path: kernel/portable/SiliconLabs/cortexm/tick_power_manager.c
   condition:
   - power_manager
+  unless: [device_si91x]
+- path: kernel/portable/SiliconLabs/cortexm/sl_si91x_low_power_tickless_mode.c
+  condition:
+  - si91x_tickless_mode
 include:
 - path: cmsis/Include
   file_list:

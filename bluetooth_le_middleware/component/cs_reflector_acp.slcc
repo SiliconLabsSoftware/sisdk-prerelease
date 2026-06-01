@@ -7,7 +7,7 @@ category: Bluetooth|Application|Miscellaneous
 metadata:
   sbom:
     license: Zlib
-quality: production
+quality: deprecated
 root_path: bluetooth_le_middleware/common/cs_reflector
 include:
 - path: .

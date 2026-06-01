@@ -221,6 +221,53 @@ static uint8_t sli_rail_mux_rx_cs_slot_base_runtime;
 
 HIDDEN sl_rail_mux_context_t protocol_context[SUPPORTED_PROTOCOL_COUNT];
 
+#if defined(SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT) || defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT)
+static void sli_rail_mux_fcs_resync_table(void)
+{
+  uint8_t base = sli_rail_mux_rx_cs_slot_base_runtime;
+  uint8_t s;
+  uint8_t ctx;
+
+  RAIL_MUX_DECLARE_IRQ_STATE;
+  RAIL_MUX_ENTER_CRITICAL();
+  for (s = 0U; s < SL_RAIL_IEEE802154_RX_CHANNEL_SWITCHING_NUM_CHANNELS; s++) {
+    channel_switching_cfg.channels[s] = INVALID_CHANNEL;
+  }
+  for (ctx = base; ctx < base + SL_RAIL_IEEE802154_RX_CHANNEL_SWITCHING_NUM_CHANNELS; ctx++) {
+    if (ctx < SUPPORTED_PROTOCOL_COUNT
+        && protocol_context[ctx].rail_config != NULL
+        && protocol_context[ctx].channel != INVALID_CHANNEL) {
+      channel_switching_cfg.channels[ctx - base] = protocol_context[ctx].channel;
+    }
+  }
+  RAIL_MUX_EXIT_CRITICAL();
+}
+
+/** After aux unregister: reprogram FCS for slot_base 0 and restart RX on each peer (ZB then OT).
+ * CONFIGURE does not call sl_rail_start_rx(); a single start_rx on ZB only left OT not listening
+ * when Thread was already up on the mux (MULTIPROT-2308). */
+static void sli_rail_mux_fcs_refresh_listen(void)
+{
+  uint8_t base;
+  uint8_t ctx;
+
+  sli_rail_mux_fcs_resync_table();
+  if (!s_sl_rail_mux_base_rail_started || (mux_rail_handle == NULL)) {
+    return;
+  }
+  CONFIGURE_RX_CHANNEL_SWITCHING(mux_rail_handle, channel_switching_cfg);
+  base = sli_rail_mux_rx_cs_slot_base_runtime;
+  for (ctx = base; ctx < base + SL_RAIL_IEEE802154_RX_CHANNEL_SWITCHING_NUM_CHANNELS; ctx++) {
+    if (ctx < SUPPORTED_PROTOCOL_COUNT
+        && protocol_context[ctx].rail_config != NULL
+        && protocol_context[ctx].channel != INVALID_CHANNEL) {
+      (void)sl_rail_start_rx(mux_rail_handle, protocol_context[ctx].channel, NULL);
+      rx_channel = protocol_context[ctx].channel;
+    }
+  }
+}
+#endif
+
 HIDDEN sl_rail_config_t mux_rail_config = {
   .events_callback = fn_mux_rail_events_callback,
 };
@@ -530,6 +577,10 @@ sl_rail_status_t sli_zigbee_stack_rail_mux_aux_unregister_protocol(void)
   sli_rail_mux_aux_on_unregister_success();
 
   fn_update_802154_address_filtering_table();
+#if defined(SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT) || defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT)
+  /* slot_base is 0; resync peers ZB+OT and restart RX on both (OT needed for Thread ping). */
+  sli_rail_mux_fcs_refresh_listen();
+#endif
   return SL_RAIL_STATUS_NO_ERROR;
 }
 

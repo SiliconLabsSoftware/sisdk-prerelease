@@ -380,6 +380,22 @@ void Application::CreateNcpMode(void)
 #endif
 }
 
+void Application::ConfigureUdpProxiesInfraInterface(void)
+{
+    const char *infraIfName = mBackboneInterfaceName.empty() ? nullptr : mBackboneInterfaceName.c_str();
+
+#if OTBR_ENABLE_BORDER_AGENT
+    mBorderAgentUdpProxy.SetInfraInterface(infraIfName);
+#if OTBR_ENABLE_EPSKC
+    mEphemeralKeyUdpProxy.SetInfraInterface(infraIfName);
+#endif
+#endif
+#if OTBR_ENABLE_TREL
+    mTrelUdpProxy.SetInfraInterface(infraIfName);
+#endif
+    OTBR_UNUSED_VARIABLE(infraIfName);
+}
+
 void Application::InitNcpMode(void)
 {
     otbr::Host::NcpHost &ncpHost = static_cast<otbr::Host::NcpHost &>(mHost);
@@ -392,6 +408,7 @@ void Application::InitNcpMode(void)
     {
         mInfraIf->SetInfraIf(mBackboneInterfaceName);
     }
+    ConfigureUdpProxiesInfraInterface();
     ncpHost.InitInfraIfCallbacks(*mInfraIf);
 
 #if OTBR_ENABLE_MDNS && (OTBR_ENABLE_SRP_ADVERTISING_PROXY || OTBR_ENABLE_DNSSD_PLAT)
@@ -449,19 +466,15 @@ void Application::InitNcpMode(void)
 #if OTBR_ENABLE_BORDER_AGENT || OTBR_ENABLE_TREL
     mHost.SetUdpForwardToHostCallback([this](const uint8_t *aUdpPayload, uint16_t aLength,
                                              const otIp6Address &aPeerAddr, uint16_t aPeerPort, uint16_t aLocalPort) {
-        otbrLogDebug("UDP forward: NCP->app len=%u localThreadPort=%u peerPort=%u peer=%s", aLength, aLocalPort,
-                     aPeerPort, Ip6Address(aPeerAddr).ToString().c_str());
 #if OTBR_ENABLE_BORDER_AGENT
         if (aLocalPort == mBorderAgentUdpProxy.GetThreadPort() && mBorderAgentUdpProxy.GetThreadPort() != 0)
         {
-            otbrLogDebug("UDP forward: dispatch -> BorderAgentUdpProxy (thread port %u)", aLocalPort);
             mBorderAgentUdpProxy.SendToPeer(aUdpPayload, aLength, aPeerAddr, aPeerPort);
             return;
         }
 #if OTBR_ENABLE_EPSKC
         if (aLocalPort == mEphemeralKeyUdpProxy.GetThreadPort() && mEphemeralKeyUdpProxy.GetThreadPort() != 0)
         {
-            otbrLogDebug("UDP forward: dispatch -> EphemeralKeyUdpProxy (thread port %u)", aLocalPort);
             mEphemeralKeyUdpProxy.SendToPeer(aUdpPayload, aLength, aPeerAddr, aPeerPort);
             return;
         }
@@ -470,7 +483,6 @@ void Application::InitNcpMode(void)
 #if OTBR_ENABLE_TREL
         if (aLocalPort == mTrelUdpProxy.GetThreadPort() && mTrelUdpProxy.GetThreadPort() != 0)
         {
-            otbrLogDebug("UDP forward: dispatch -> TrelUdpProxy (thread port %u)", aLocalPort);
             mTrelUdpProxy.SendToPeer(aUdpPayload, aLength, aPeerAddr, aPeerPort);
             return;
         }
@@ -506,23 +518,16 @@ void Application::InitNcpMode(void)
     ncpHost.SetTrelStateChangedCallback([this, &ncpHost](bool aEnabled, uint16_t aThreadPort) {
         if (!aEnabled || aThreadPort == 0)
         {
-            otbrLogInfo(
-                "TREL state from NCP: disabled or no thread port (enabled=%s threadPort=%u), stopping UDP proxy",
-                aEnabled ? "true" : "false", aThreadPort);
             mTrelUdpProxy.Stop();
             return;
         }
-        otbrLogInfo("TREL state from NCP: enabled, threadPort=%u — starting UDP proxy and reporting host port to NCP",
-                    aThreadPort);
+
         mTrelUdpProxy.Start(aThreadPort);
+
         otError err = ncpHost.SetTrelHostUdpPort(true, mTrelUdpProxy.GetHostPort());
         if (err != OT_ERROR_NONE)
         {
-            otbrLogWarning("Failed reporting TREL host UDP port to NCP: %s", otThreadErrorToString(err));
-        }
-        else
-        {
-            otbrLogInfo("Reported TREL host UDP port %u to NCP", mTrelUdpProxy.GetHostPort());
+            otbrLogWarning("Failed to set TREL host UDP port on NCP: %s", otThreadErrorToString(err));
         }
     });
 #endif
@@ -539,10 +544,8 @@ void Application::InitNcpMode(void)
 #endif
 
 #if OTBR_ENABLE_DNSSD_PLAT
-    mDnssdPlatform.SetDnssdStateChangedCallback([&ncpHost](otPlatDnssdState aState) {
-        otbrLogInfo("DnssdPlatform -> NCP: otPlatDnssdState=%s", (aState == OT_PLAT_DNSSD_READY) ? "READY" : "STOPPED");
-        ncpHost.NotifyDnssdPlatformStateToNcp(aState);
-    });
+    mDnssdPlatform.SetDnssdStateChangedCallback(
+        [&ncpHost](otPlatDnssdState aState) { ncpHost.NotifyDnssdPlatformStateToNcp(aState); });
     mDnssdPlatform.Start();
 #endif
 }

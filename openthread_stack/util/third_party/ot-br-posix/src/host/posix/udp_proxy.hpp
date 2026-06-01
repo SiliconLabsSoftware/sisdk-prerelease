@@ -65,6 +65,16 @@ public:
     ~UdpProxy(void) = default;
 
     /**
+     * Sets the infrastructure interface used for link-local egress on this proxy.
+     *
+     * Should be called before @p Start. When unset or empty, outbound link-local packets are not scoped to an
+     * interface (legacy behavior).
+     *
+     * @param[in] aInfraIfName  The infrastructure interface name (e.g. backbone `-B` interface), or `nullptr`.
+     */
+    void SetInfraInterface(const char *aInfraIfName);
+
+    /**
      * Start the UDP Proxy for Thread UDP port @p aPort.
      *
      * The UDP Proxy will bind to an ephemeral port and set a mapping between the ephemeral port and @p aPort.
@@ -114,6 +124,7 @@ private:
     int      mFd; ///< Used to proxy UDP packets in Thread network.
     uint16_t mHostPort;
     uint16_t mThreadPort;
+    uint32_t mInfraIfIndex; ///< Backbone interface for link-local egress (0 if unset).
 
     Dependencies &mDeps;
 };

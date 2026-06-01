@@ -36,6 +36,7 @@ define:
   value: 0x6000
   unless:
   - bootloader_apploader
+- name: SL_APP_PROPERTIES
 
 provides:
 - name: bootloader_core
@@ -159,6 +160,12 @@ toolchain_settings:
   value: size
 - option: trustzone_library
   value: enabled
+
+  # CMSE import-library generation (--cmse-implib) is incompatible with GCC
+  # whole-program LTO: Setting the same SLC option here to 'disabled' aims 
+  # to override toolchain_lto's 'enabled' for the secure project specifically.
+- option: link_time_optimization
+  value: disabled
 metadata:
   sbom:
     license: MSLA

@@ -195,7 +195,7 @@
     <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc llvm"/>
     <properties key="category" value="Bluetooth Examples"/>
-    <properties key="quality" value="PRODUCTION"/>
+    <properties key="quality" value="DEPRECATED"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
   </descriptors>
@@ -211,7 +211,7 @@
     <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc llvm"/>
     <properties key="category" value="Bluetooth Examples"/>
-    <properties key="quality" value="PRODUCTION"/>
+    <properties key="quality" value="DEPRECATED"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
   </descriptors>
@@ -227,7 +227,7 @@
     <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc llvm"/>
     <properties key="category" value="Bluetooth Examples"/>
-    <properties key="quality" value="PRODUCTION"/>
+    <properties key="quality" value="DEPRECATED"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
   </descriptors>
@@ -1890,86 +1890,6 @@ This project makes a TrustZone secure library for running PSA libraries in the s
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>
-  <descriptors name="refactor_bt_cs_ncp" label="Bluetooth - NCP CS" description="Network Co-Processor (NCP) target application for Channel Sounding (CS). Runs the Bluetooth stack and provides access to it by exposing the Bluetooth API (BGAPI) via UART connection. In addition to the standard NCP features, it listens to Channel Sounding specific user messages, and executes them. This application also features a CS Initiator with Real Time Locating (RTL) library and a CS Reflector device role that can be instantiated or deleted with the CS specific user messages.
-">
-    <properties key="namespace" value="template.uc"/>
-    <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="bluetooth_le_app.example.refactor_bt_cs_ncp.bt_cs_ncp.slcp"/>
-    <properties key="projectFilePaths" value="example/refactor_bt_cs_ncp/bt_cs_ncp.slcp"/>
-    <properties key="readmeFiles" value="example/refactor_bt_cs_ncp/readme.md"/>
-    <properties key="boardCompatibility" value="brd2606a brd4198a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*bgm240pa22vna.* .*bgm240pa32vna.* .*bgm240pa32vnn.* .*bgm240pb22vna.* .*bgm240pb32vna.* .*bgm240pb32vnn.* .*bgm240sa22vna.* .*bgm240sb22vna.* .*bgm241sb22vna.* .*bgm241sd22vna.* .*efr32bg24a010f1024gj42.* .*efr32bg24a010f1024im40.* .*efr32bg24a010f1024im48.* .*efr32bg24a010f1536im40.* .*efr32bg24a010f1536im48.* .*efr32bg24a020f1024im40.* .*efr32bg24a020f1024im48.* .*efr32bg24a020f1536im40.* .*efr32bg24a610f1536im40.* .*efr32bg24a620f1536im40.* .*efr32bg24b010f1024gj42.* .*efr32bg24b010f1536im40.* .*efr32bg24b010f1536im48.* .*efr32bg24b020f1536im40.* .*efr32bg24b110f1536im48.* .*efr32bg24b210f1024im48.* .*efr32bg24b210f1536im48.* .*efr32bg24b220f1024im48.* .*efr32bg24b310f1536ij42.* .*efr32bg24b410f1536ij42.* .*efr32bg24b610f1536im40.* .*efr32bg24b620f1536im40.* .*efr32mg24a010f1024im40.* .*efr32mg24a010f1024im48.* .*efr32mg24a010f1536gm40.* .*efr32mg24a010f1536gm48.* .*efr32mg24a010f1536im40.* .*efr32mg24a010f1536im48.* .*efr32mg24a020f1024im40.* .*efr32mg24a020f1024im48.* .*efr32mg24a020f1536gm40.* .*efr32mg24a020f1536gm48.* .*efr32mg24a020f1536im40.* .*efr32mg24a020f1536im48.* .*efr32mg24a021f1024im40.* .*efr32mg24a110f1024im48.* .*efr32mg24a110f1536gm48.* .*efr32mg24a111f1536gm48.* .*efr32mg24a120f1536gm48.* .*efr32mg24a121f1536gm48.* .*efr32mg24a410f1536im40.* .*efr32mg24a410f1536im48.* .*efr32mg24a420f1536im40.* .*efr32mg24a420f1536im48.* .*efr32mg24a610f1536im40.* .*efr32mg24a620f1536im40.* .*efr32mg24b010f1024im48.* .*efr32mg24b010f1536im40.* .*efr32mg24b010f1536im48.* .*efr32mg24b020f1024im48.* .*efr32mg24b020f1536im40.* .*efr32mg24b020f1536im48.* .*efr32mg24b110f1536gm48.* .*efr32mg24b110f1536im48.* .*efr32mg24b120f1536im48.* .*efr32mg24b210f1536im40.* .*efr32mg24b210f1536im48.* .*efr32mg24b220f1536im48.* .*efr32mg24b310f1536im48.* .*efr32mg24b610f1536im40.* .*mgm240l022rnf.* .*mgm240l022vif.* .*mgm240l022vnf.* .*mgm240la22uif.* .*mgm240la22vif.* .*mgm240ld22vif.* .*mgm240pa22vna.* .*mgm240pa32vna.* .*mgm240pa32vnn.* .*mgm240pb22vna.* .*mgm240pb32vna.* .*mgm240pb32vnn.* .*mgm240sa22vna.* .*mgm240sb22vna.* .*mgm240sd22vna.*"/>
-    <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
-    <properties key="toolchainCompatibility" value="gcc llvm"/>
-    <properties key="category" value="Bluetooth Examples"/>
-    <properties key="quality" value="EXPERIMENTAL"/>
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
-  </descriptors>
-  <descriptors name="refactor_bt_cs_soc_initiator" label="Bluetooth - SoC CS Initiator" description="Channel Sounding (CS) Initiator for Bluetooth LE. This example connects to a CS Reflector device and starts the distance measurement. Results are printed on the display of the main board if available and can be read via the serial port VCOM. It can measure in two CS measurement main modes PBR (default) and RTT. RTT mode can be selected by setting the `CS_INITIATOR_DEFAULT_CS_MODE` macro to `sl_bt_cs_mode_rtt`. Submode can also be used by setting the `CS_INITIATOR_DEFAULT_CS_SUB_MODE` to RTT. Submode is disabled by default. The initiator can measure in two object tracking modes: in moving object tracking mode (default) or in stationary object tracking mode. In moving object tracking mode measurement results will be calculated for every procedure. Moving object tracking has two different modes based on filtering and CPU cost: real-time basic and real-time fast. In stationary object tracking mode multiple CS procedure data is required for the estimation process. The progress of the estimation will be shown on the LCD and in the logs in percentages. Once the estimation process is done the measurement results will be shown similarly like in the moving object tracking mode. The push button BTN1 will change the default object tracking mode real-time fast to stationary object tracking mode. Default values can be found and modified in the component configuration file (config/cs_initiator_config.h). The actual mode can be checked on the serial output and in the captured logs.
-">
-    <properties key="namespace" value="template.uc"/>
-    <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="bluetooth_le_app.example.refactor_bt_cs_soc_initiator.bt_cs_soc_initiator.slcp"/>
-    <properties key="projectFilePaths" value="example/refactor_bt_cs_soc_initiator/bt_cs_soc_initiator.slcp"/>
-    <properties key="readmeFiles" value="example/refactor_bt_cs_soc_initiator/readme.md"/>
-    <properties key="boardCompatibility" value="brd2606a brd4198a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*bgm240pa22vna.* .*bgm240pa32vna.* .*bgm240pa32vnn.* .*bgm240pb22vna.* .*bgm240pb32vna.* .*bgm240pb32vnn.* .*bgm240sa22vna.* .*bgm240sb22vna.* .*bgm241sb22vna.* .*bgm241sd22vna.* .*efr32bg24a010f1024gj42.* .*efr32bg24a010f1024im40.* .*efr32bg24a010f1024im48.* .*efr32bg24a010f1536im40.* .*efr32bg24a010f1536im48.* .*efr32bg24a020f1024im40.* .*efr32bg24a020f1024im48.* .*efr32bg24a020f1536im40.* .*efr32bg24a610f1536im40.* .*efr32bg24a620f1536im40.* .*efr32bg24b010f1024gj42.* .*efr32bg24b010f1536im40.* .*efr32bg24b010f1536im48.* .*efr32bg24b020f1536im40.* .*efr32bg24b110f1536im48.* .*efr32bg24b210f1024im48.* .*efr32bg24b210f1536im48.* .*efr32bg24b220f1024im48.* .*efr32bg24b310f1536ij42.* .*efr32bg24b410f1536ij42.* .*efr32bg24b610f1536im40.* .*efr32bg24b620f1536im40.* .*efr32mg24a010f1024im40.* .*efr32mg24a010f1024im48.* .*efr32mg24a010f1536gm40.* .*efr32mg24a010f1536gm48.* .*efr32mg24a010f1536im40.* .*efr32mg24a010f1536im48.* .*efr32mg24a020f1024im40.* .*efr32mg24a020f1024im48.* .*efr32mg24a020f1536gm40.* .*efr32mg24a020f1536gm48.* .*efr32mg24a020f1536im40.* .*efr32mg24a020f1536im48.* .*efr32mg24a021f1024im40.* .*efr32mg24a110f1024im48.* .*efr32mg24a110f1536gm48.* .*efr32mg24a111f1536gm48.* .*efr32mg24a120f1536gm48.* .*efr32mg24a121f1536gm48.* .*efr32mg24a410f1536im40.* .*efr32mg24a410f1536im48.* .*efr32mg24a420f1536im40.* .*efr32mg24a420f1536im48.* .*efr32mg24a610f1536im40.* .*efr32mg24a620f1536im40.* .*efr32mg24b010f1024im48.* .*efr32mg24b010f1536im40.* .*efr32mg24b010f1536im48.* .*efr32mg24b020f1024im48.* .*efr32mg24b020f1536im40.* .*efr32mg24b020f1536im48.* .*efr32mg24b110f1536gm48.* .*efr32mg24b110f1536im48.* .*efr32mg24b120f1536im48.* .*efr32mg24b210f1536im40.* .*efr32mg24b210f1536im48.* .*efr32mg24b220f1536im48.* .*efr32mg24b310f1536im48.* .*efr32mg24b610f1536im40.* .*mgm240l022rnf.* .*mgm240l022vif.* .*mgm240l022vnf.* .*mgm240la22uif.* .*mgm240la22vif.* .*mgm240ld22vif.* .*mgm240pa22vna.* .*mgm240pa32vna.* .*mgm240pa32vnn.* .*mgm240pb22vna.* .*mgm240pb32vna.* .*mgm240pb32vnn.* .*mgm240sa22vna.* .*mgm240sb22vna.* .*mgm240sd22vna.*"/>
-    <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
-    <properties key="toolchainCompatibility" value="gcc llvm"/>
-    <properties key="category" value="Bluetooth Examples"/>
-    <properties key="quality" value="EXPERIMENTAL"/>
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
-  </descriptors>
-  <descriptors name="refactor_bt_cs_soc_initiator_freertos" label="Bluetooth - SoC CS Initiator (FreeRTOS)" description="Channel Sounding (CS) Initiator for Bluetooth LE. This example connects to a CS Reflector device and starts the distance measurement. Results are printed on the display of the main board if available and can be read via the serial port VCOM. It can measure in two CS measurement main modes PBR (default) and RTT. RTT mode can be selected by setting the `CS_INITIATOR_DEFAULT_CS_MODE` macro to `sl_bt_cs_mode_rtt`. Submode can also be used by setting the `CS_INITIATOR_DEFAULT_CS_SUB_MODE` to RTT. Submode is disabled by default. The initiator can measure in two object tracking modes: in moving object tracking mode (default) or in stationary object tracking mode. In moving object tracking mode measurement results will be calculated for every procedure. Moving object tracking has two different modes based on filtering and CPU cost: real-time basic and real-time fast. In stationary object tracking mode multiple CS procedure data is required for the estimation process. The progress of the estimation will be shown on the LCD and in the logs in percentages. Once the estimation process is done the measurement results will be shown similarly like in the moving object tracking mode. The push button BTN1 will change the default object tracking mode real-time fast to stationary object tracking mode. Default values can be found and modified in the component configuration file (config/cs_initiator_config.h). The actual mode can be checked on the serial output and in the captured logs.
-">
-    <properties key="namespace" value="template.uc"/>
-    <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="bluetooth_le_app.example.refactor_bt_cs_soc_initiator.bt_cs_soc_initiator_freertos.slcp"/>
-    <properties key="projectFilePaths" value="example/refactor_bt_cs_soc_initiator/bt_cs_soc_initiator_freertos.slcp"/>
-    <properties key="readmeFiles" value="example/refactor_bt_cs_soc_initiator/readme.md"/>
-    <properties key="boardCompatibility" value="brd2606a brd4198a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*bgm240pa22vna.* .*bgm240pa32vna.* .*bgm240pa32vnn.* .*bgm240pb22vna.* .*bgm240pb32vna.* .*bgm240pb32vnn.* .*bgm240sa22vna.* .*bgm240sb22vna.* .*bgm241sb22vna.* .*bgm241sd22vna.* .*efr32bg24a010f1024gj42.* .*efr32bg24a010f1024im40.* .*efr32bg24a010f1024im48.* .*efr32bg24a010f1536im40.* .*efr32bg24a010f1536im48.* .*efr32bg24a020f1024im40.* .*efr32bg24a020f1024im48.* .*efr32bg24a020f1536im40.* .*efr32bg24a610f1536im40.* .*efr32bg24a620f1536im40.* .*efr32bg24b010f1024gj42.* .*efr32bg24b010f1536im40.* .*efr32bg24b010f1536im48.* .*efr32bg24b020f1536im40.* .*efr32bg24b110f1536im48.* .*efr32bg24b210f1024im48.* .*efr32bg24b210f1536im48.* .*efr32bg24b220f1024im48.* .*efr32bg24b310f1536ij42.* .*efr32bg24b410f1536ij42.* .*efr32bg24b610f1536im40.* .*efr32bg24b620f1536im40.* .*efr32mg24a010f1024im40.* .*efr32mg24a010f1024im48.* .*efr32mg24a010f1536gm40.* .*efr32mg24a010f1536gm48.* .*efr32mg24a010f1536im40.* .*efr32mg24a010f1536im48.* .*efr32mg24a020f1024im40.* .*efr32mg24a020f1024im48.* .*efr32mg24a020f1536gm40.* .*efr32mg24a020f1536gm48.* .*efr32mg24a020f1536im40.* .*efr32mg24a020f1536im48.* .*efr32mg24a021f1024im40.* .*efr32mg24a110f1024im48.* .*efr32mg24a110f1536gm48.* .*efr32mg24a111f1536gm48.* .*efr32mg24a120f1536gm48.* .*efr32mg24a121f1536gm48.* .*efr32mg24a410f1536im40.* .*efr32mg24a410f1536im48.* .*efr32mg24a420f1536im40.* .*efr32mg24a420f1536im48.* .*efr32mg24a610f1536im40.* .*efr32mg24a620f1536im40.* .*efr32mg24b010f1024im48.* .*efr32mg24b010f1536im40.* .*efr32mg24b010f1536im48.* .*efr32mg24b020f1024im48.* .*efr32mg24b020f1536im40.* .*efr32mg24b020f1536im48.* .*efr32mg24b110f1536gm48.* .*efr32mg24b110f1536im48.* .*efr32mg24b120f1536im48.* .*efr32mg24b210f1536im40.* .*efr32mg24b210f1536im48.* .*efr32mg24b220f1536im48.* .*efr32mg24b310f1536im48.* .*efr32mg24b610f1536im40.* .*mgm240l022rnf.* .*mgm240l022vif.* .*mgm240l022vnf.* .*mgm240la22uif.* .*mgm240la22vif.* .*mgm240ld22vif.* .*mgm240pa22vna.* .*mgm240pa32vna.* .*mgm240pa32vnn.* .*mgm240pb22vna.* .*mgm240pb32vna.* .*mgm240pb32vnn.* .*mgm240sa22vna.* .*mgm240sb22vna.* .*mgm240sd22vna.*"/>
-    <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
-    <properties key="toolchainCompatibility" value="gcc llvm"/>
-    <properties key="category" value="Bluetooth Examples"/>
-    <properties key="quality" value="EXPERIMENTAL"/>
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
-  </descriptors>
-  <descriptors name="refactor_bt_cs_soc_reflector" label="Bluetooth - SoC CS Reflector" description="Channel Sounding (CS) Reflector for Bluetooth LE. This example sends measurement results back to the CS Initiator device via the CS Ranging Service. The CS Reflector has to connect to at least one CS Initiator device to start the measurement. It can connect to a maximum of four CS Initiators at a time. The application starts advertising after boot and keeps advertising until every connection slots are occupied. If a connection slot becomes free, the device will start advertising again.
-">
-    <properties key="namespace" value="template.uc"/>
-    <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="bluetooth_le_app.example.refactor_bt_cs_soc_reflector.bt_cs_soc_reflector.slcp"/>
-    <properties key="projectFilePaths" value="example/refactor_bt_cs_soc_reflector/bt_cs_soc_reflector.slcp"/>
-    <properties key="readmeFiles" value="example/refactor_bt_cs_soc_reflector/readme.md"/>
-    <properties key="boardCompatibility" value="brd2606a brd4198a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*bgm240pa22vna.* .*bgm240pa32vna.* .*bgm240pa32vnn.* .*bgm240pb22vna.* .*bgm240pb32vna.* .*bgm240pb32vnn.* .*bgm240sa22vna.* .*bgm240sb22vna.* .*bgm241sb22vna.* .*bgm241sd22vna.* .*efr32bg24a010f1024gj42.* .*efr32bg24a010f1024im40.* .*efr32bg24a010f1024im48.* .*efr32bg24a010f1536im40.* .*efr32bg24a010f1536im48.* .*efr32bg24a020f1024im40.* .*efr32bg24a020f1024im48.* .*efr32bg24a020f1536im40.* .*efr32bg24a610f1536im40.* .*efr32bg24a620f1536im40.* .*efr32bg24b010f1024gj42.* .*efr32bg24b010f1536im40.* .*efr32bg24b010f1536im48.* .*efr32bg24b020f1536im40.* .*efr32bg24b110f1536im48.* .*efr32bg24b210f1024im48.* .*efr32bg24b210f1536im48.* .*efr32bg24b220f1024im48.* .*efr32bg24b310f1536ij42.* .*efr32bg24b410f1536ij42.* .*efr32bg24b610f1536im40.* .*efr32bg24b620f1536im40.* .*efr32bg24l010f768im40.* .*efr32bg24l210f768im40.* .*efr32mg24a010f1024im40.* .*efr32mg24a010f1024im48.* .*efr32mg24a010f1536gm40.* .*efr32mg24a010f1536gm48.* .*efr32mg24a010f1536im40.* .*efr32mg24a010f1536im48.* .*efr32mg24a010f768im40.* .*efr32mg24a010f768im48.* .*efr32mg24a020f1024im40.* .*efr32mg24a020f1024im48.* .*efr32mg24a020f1536gm40.* .*efr32mg24a020f1536gm48.* .*efr32mg24a020f1536im40.* .*efr32mg24a020f1536im48.* .*efr32mg24a020f768im40.* .*efr32mg24a021f1024im40.* .*efr32mg24a110f1024im48.* .*efr32mg24a110f1536gm48.* .*efr32mg24a111f1536gm48.* .*efr32mg24a120f1536gm48.* .*efr32mg24a121f1536gm48.* .*efr32mg24a410f1536im40.* .*efr32mg24a410f1536im48.* .*efr32mg24a420f1536im40.* .*efr32mg24a420f1536im48.* .*efr32mg24a610f1536im40.* .*efr32mg24a620f1536im40.* .*efr32mg24b010f1024im48.* .*efr32mg24b010f1536im40.* .*efr32mg24b010f1536im48.* .*efr32mg24b020f1024im48.* .*efr32mg24b020f1536im40.* .*efr32mg24b020f1536im48.* .*efr32mg24b110f1536gm48.* .*efr32mg24b110f1536im48.* .*efr32mg24b120f1536im48.* .*efr32mg24b210f1536im40.* .*efr32mg24b210f1536im48.* .*efr32mg24b220f1536im48.* .*efr32mg24b310f1536im48.* .*efr32mg24b610f1536im40.* .*mgm240l022rnf.* .*mgm240l022vif.* .*mgm240l022vnf.* .*mgm240la22uif.* .*mgm240la22vif.* .*mgm240ld22vif.* .*mgm240pa22vna.* .*mgm240pa32vna.* .*mgm240pa32vnn.* .*mgm240pb22vna.* .*mgm240pb32vna.* .*mgm240pb32vnn.* .*mgm240sa22vna.* .*mgm240sb22vna.* .*mgm240sd22vna.*"/>
-    <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
-    <properties key="toolchainCompatibility" value="gcc llvm"/>
-    <properties key="category" value="Bluetooth Examples"/>
-    <properties key="quality" value="EXPERIMENTAL"/>
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
-  </descriptors>
-  <descriptors name="refactor_bt_cs_soc_reflector_freertos" label="Bluetooth - SoC CS Reflector (FreeRTOS)" description="Channel Sounding (CS) Reflector for Bluetooth LE. This example sends measurement results back to the CS Initiator device via the CS Ranging Service. The CS Reflector has to connect to at least one CS Initiator device to start the measurement. It can connect to a maximum of four CS Initiators at a time. The application starts advertising after boot and keeps advertising until every connection slots are occupied. If a connection slot becomes free, the device will start advertising again.
-">
-    <properties key="namespace" value="template.uc"/>
-    <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="bluetooth_le_app.example.refactor_bt_cs_soc_reflector.bt_cs_soc_reflector_freertos.slcp"/>
-    <properties key="projectFilePaths" value="example/refactor_bt_cs_soc_reflector/bt_cs_soc_reflector_freertos.slcp"/>
-    <properties key="readmeFiles" value="example/refactor_bt_cs_soc_reflector/readme.md"/>
-    <properties key="boardCompatibility" value="brd2606a brd4198a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*bgm240pa22vna.* .*bgm240pa32vna.* .*bgm240pa32vnn.* .*bgm240pb22vna.* .*bgm240pb32vna.* .*bgm240pb32vnn.* .*bgm240sa22vna.* .*bgm240sb22vna.* .*bgm241sb22vna.* .*bgm241sd22vna.* .*efr32bg24a010f1024gj42.* .*efr32bg24a010f1024im40.* .*efr32bg24a010f1024im48.* .*efr32bg24a010f1536im40.* .*efr32bg24a010f1536im48.* .*efr32bg24a020f1024im40.* .*efr32bg24a020f1024im48.* .*efr32bg24a020f1536im40.* .*efr32bg24a610f1536im40.* .*efr32bg24a620f1536im40.* .*efr32bg24b010f1024gj42.* .*efr32bg24b010f1536im40.* .*efr32bg24b010f1536im48.* .*efr32bg24b020f1536im40.* .*efr32bg24b110f1536im48.* .*efr32bg24b210f1024im48.* .*efr32bg24b210f1536im48.* .*efr32bg24b220f1024im48.* .*efr32bg24b310f1536ij42.* .*efr32bg24b410f1536ij42.* .*efr32bg24b610f1536im40.* .*efr32bg24b620f1536im40.* .*efr32bg24l010f768im40.* .*efr32bg24l210f768im40.* .*efr32mg24a010f1024im40.* .*efr32mg24a010f1024im48.* .*efr32mg24a010f1536gm40.* .*efr32mg24a010f1536gm48.* .*efr32mg24a010f1536im40.* .*efr32mg24a010f1536im48.* .*efr32mg24a010f768im40.* .*efr32mg24a010f768im48.* .*efr32mg24a020f1024im40.* .*efr32mg24a020f1024im48.* .*efr32mg24a020f1536gm40.* .*efr32mg24a020f1536gm48.* .*efr32mg24a020f1536im40.* .*efr32mg24a020f1536im48.* .*efr32mg24a020f768im40.* .*efr32mg24a021f1024im40.* .*efr32mg24a110f1024im48.* .*efr32mg24a110f1536gm48.* .*efr32mg24a111f1536gm48.* .*efr32mg24a120f1536gm48.* .*efr32mg24a121f1536gm48.* .*efr32mg24a410f1536im40.* .*efr32mg24a410f1536im48.* .*efr32mg24a420f1536im40.* .*efr32mg24a420f1536im48.* .*efr32mg24a610f1536im40.* .*efr32mg24a620f1536im40.* .*efr32mg24b010f1024im48.* .*efr32mg24b010f1536im40.* .*efr32mg24b010f1536im48.* .*efr32mg24b020f1024im48.* .*efr32mg24b020f1536im40.* .*efr32mg24b020f1536im48.* .*efr32mg24b110f1536gm48.* .*efr32mg24b110f1536im48.* .*efr32mg24b120f1536im48.* .*efr32mg24b210f1536im40.* .*efr32mg24b210f1536im48.* .*efr32mg24b220f1536im48.* .*efr32mg24b310f1536im48.* .*efr32mg24b610f1536im40.* .*mgm240l022rnf.* .*mgm240l022vif.* .*mgm240l022vnf.* .*mgm240la22uif.* .*mgm240la22vif.* .*mgm240ld22vif.* .*mgm240pa22vna.* .*mgm240pa32vna.* .*mgm240pa32vnn.* .*mgm240pb22vna.* .*mgm240pb32vna.* .*mgm240pb32vnn.* .*mgm240sa22vna.* .*mgm240sb22vna.* .*mgm240sd22vna.*"/>
-    <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
-    <properties key="toolchainCompatibility" value="gcc llvm"/>
-    <properties key="category" value="Bluetooth Examples"/>
-    <properties key="quality" value="EXPERIMENTAL"/>
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
-  </descriptors>
   <descriptors name="bt_aoa_host_locator" label="Bluetooth AoA - Host Locator" description="Host application that performs real-time Angle of Arrival (AoA) calculations for Bluetooth direction finding. It connects to an NCP target with an antenna array (e.g., WSTK with antenna board) via UART to receive IQ samples from AoA tags. The application processes these samples using the Silicon Labs RTL library to calculate azimuth and elevation angles, then publishes the positioning data to an MQTT broker for integration with location tracking systems.
 ">
     <properties key="namespace" value="template.uc"/>
@@ -1998,7 +1918,7 @@ This project makes a TrustZone secure library for running PSA libraries in the s
     <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Bluetooth Examples"/>
-    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="quality" value="DEPRECATED"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|Host Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
   </descriptors>
@@ -2197,21 +2117,5 @@ This project makes a TrustZone secure library for running PSA libraries in the s
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|Host Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
-  </descriptors>
-  <descriptors name="refactor_bt_cs_host" label="Bluetooth - CS Host" description="CS host
-">
-    <properties key="namespace" value="template.uc"/>
-    <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="bluetooth_le_app.example_host.refactor_bt_cs_host.bt_cs_host.slcp"/>
-    <properties key="projectFilePaths" value="example_host/refactor_bt_cs_host/bt_cs_host.slcp"/>
-    <properties key="readmeFiles" value="example_host/refactor_bt_cs_host/readme.md"/>
-    <properties key="boardCompatibility" value="com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*linux.* .*macos.* .*win32.*"/>
-    <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
-    <properties key="toolchainCompatibility" value="gcc"/>
-    <properties key="category" value="Bluetooth Examples"/>
-    <properties key="quality" value="EXPERIMENTAL"/>
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="filters" value="Device\ Type|Host Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
   </descriptors>
 </model:MDescriptors>

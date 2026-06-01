@@ -70,16 +70,6 @@
 #include "em_device.h"
 
 /**
- * @def OPENTHREAD_NCP
- *
- * Indicates a Network Co-Processor firmware image (full Thread stack on-chip with host control via Spinel).
- *
- */
-#ifndef OPENTHREAD_NCP
-#define OPENTHREAD_NCP 0
-#endif
-
-/**
  * @def OPENTHREAD_CONFIG_NET_DIAG_VENDOR_NAME
  *
  * Specifies the default Vendor Name string.

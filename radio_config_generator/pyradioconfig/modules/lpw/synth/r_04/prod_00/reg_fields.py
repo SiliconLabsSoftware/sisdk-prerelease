@@ -49,7 +49,6 @@ class SynthRegFields(IPRegFields):
         'DSMCTRLTX.PHISELTX',
         'DSMCTRLTX.QNCMODETX',
         'DSMCTRLTX.REQORDERTX',
-        'FCALCTRL.FCALMODE',
         'FCALCTRL.NUMCYCLE10',
         'FCALCTRL.NUMCYCLE6',
         'FCALCTRL.NUMCYCLE7',

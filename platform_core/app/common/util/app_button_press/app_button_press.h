@@ -31,7 +31,6 @@
 #ifndef APP_BUTTON_PRESS_H
 #define APP_BUTTON_PRESS_H
 
-#include "sl_power_manager.h"
 #include "sl_status.h"
 
 #ifdef __cplusplus

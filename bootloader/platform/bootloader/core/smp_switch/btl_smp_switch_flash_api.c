@@ -107,10 +107,9 @@ bool get_smp_page_bases_from_storage(uint32_t *page1Base, uint32_t *page2Base)
       && (mainBootloaderTable->storage->getSmpSwitchPageBases != NULL)) {
     mainBootloaderTable->storage->getSmpSwitchPageBases(page1Base, page2Base);
     /* When both outputs are requested, reject NULL map and garbage (invalid to dereference as rec). */
-    if ((page1Base != NULL) && (page2Base != NULL)) {
-      if (!smp_switch_page_addresses_ok(*page1Base, *page2Base)) {
-        return false;
-      }
+    if ((page1Base != NULL) && (page2Base != NULL)
+        && !smp_switch_page_addresses_ok(*page1Base, *page2Base)) {
+      return false;
     }
     return true;
   }

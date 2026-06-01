@@ -4231,7 +4231,7 @@ template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_TREL_STATE>(void)
     // stored host port (e.g. proxy stopped). Does not change stack TREL enablement (see SPINEL_PROP_TREL_USER_ENABLE).
     if (otTrelIsEnabled(mInstance))
     {
-#if OPENTHREAD_NCP
+#if OPENTHREAD_CONFIG_TREL_DELEGATE_INFRA_TO_HOST_ENABLE
         mInstance->Get<Trel::Interface>().SetHostUdpPort(enabled ? port : 0);
 #endif
     }

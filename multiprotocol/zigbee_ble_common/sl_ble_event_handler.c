@@ -834,6 +834,34 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
     }
     break;
 
+    case sl_bt_evt_gatt_characteristic_id: {
+      sl_bt_evt_gatt_characteristic_t *ch_evt =
+        (sl_bt_evt_gatt_characteristic_t *)&(evt->data);
+      uint8_t i;
+      sl_zigbee_app_debug_println(
+        "GATT characteristic, conn=0x%02x, char_handle=0x%04x, properties=0x%02x",
+        ch_evt->connection,
+        ch_evt->characteristic,
+        ch_evt->properties);
+      sl_zigbee_app_debug_print("UUID=[");
+      for (i = 0; i < ch_evt->uuid.len; i++) {
+        sl_zigbee_app_debug_print("%02X", ch_evt->uuid.data[i]);
+      }
+      sl_zigbee_app_debug_println("]");
+    }
+    break;
+
+    case sl_bt_evt_gatt_procedure_completed_id: {
+      const sl_bt_evt_gatt_procedure_completed_t *proc_evt =
+        (const sl_bt_evt_gatt_procedure_completed_t *)&(evt->data);
+      sl_zigbee_app_debug_println(
+        "GATT procedure completed, conn=0x%02x, result=0x%04x (%s)",
+        proc_evt->connection,
+        proc_evt->result,
+        (proc_evt->result == SL_STATUS_OK) ? "ok" : "error");
+    }
+    break;
+
     default:
       break;
   }

@@ -36,6 +36,7 @@
 #include "sl_simple_button.h"
 #include "sl_simple_button_instances.h"
 #include "app_rta.h"
+#include "em_device.h"
 #include "sl_component_catalog.h"
 
 #ifdef SL_CATALOG_CLI_PRESENT
@@ -51,6 +52,10 @@
 #include "em_gpio.h"
 #include "sl_hal_gpio.h"
 #endif // SL_CATALOG_APP_EM4H_RESET_PRESENT
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && defined(_SILICON_LABS_32B_SERIES_2)
+#include "sl_power_manager.h"
+#endif // SL_CATALOG_POWER_MANAGER_PRESENT && _SILICON_LABS_32B_SERIES_2
 
 // -----------------------------------------------------------------------------
 // Definitions
@@ -105,6 +110,7 @@ static bool wakeup_buttons[SL_SIMPLE_BUTTON_COUNT] = { false };
 
 static void init_error(app_rta_error_t error, sl_status_t result);
 static void calculate_press(button_event_t *evt);
+static void update_em1_requirement(void);
 
 // -----------------------------------------------------------------------------
 // Public functions
@@ -214,6 +220,8 @@ sl_status_t app_button_press_enable(void)
     }
     // Clear disabled state
     disabled = false;
+    // Re-evaluate EM1 requirement now that the component is enabled.
+    update_em1_requirement();
     (void)app_rta_release(ctx);
   }
   return sc;
@@ -234,6 +242,9 @@ sl_status_t app_button_press_disable(void)
         state.buttons[i].press = APP_BUTTON_PRESS_NONE;
         state.buttons[i].timestamp = 0;
       }
+      // Release any EM1 requirement we may be holding; while the component is
+      // disabled we are not interested in detecting button release edges.
+      update_em1_requirement();
     }
     (void)app_rta_release(ctx);
   }
@@ -306,6 +317,9 @@ void sl_button_on_change(const sl_button_t *handle)
   if (disabled) {
     return;
   }
+  // Re-evaluate the EM1 requirement on every edge so that the device stays in
+  // EM1 while any non-EM2-capable button is held down.
+  update_em1_requirement();
   for (uint8_t i = 0; i < SL_SIMPLE_BUTTON_COUNT; i++) {
     // If the handle is applicable
     if (SL_SIMPLE_BUTTON_INSTANCE(i) == handle) {
@@ -444,3 +458,59 @@ static void calculate_press(button_event_t *evt)
     state.buttons[i].press = APP_BUTTON_PRESS_DURATION_VERYLONG;
   }
 }
+
+// -----------------------------------------------------------------------------
+// Dynamic (run-time) Energy Management Check
+
+// Buttons on Port A or Port B can generate standard GPIO interrupts in EM2/EM3,
+// so the release edge is detected even when the device is in deep sleep. For
+// buttons on other ports, the device must stay in EM1 while the button is held
+// down so that the release edge can be observed.
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && defined(_SILICON_LABS_32B_SERIES_2) && APP_BUTTON_PRESS_EM_CHECK_DYNAMIC
+#include "sl_core.h"
+
+// Tracks whether this component currently holds an EM1 requirement, so that
+// we add/remove it at most once per state change instead of on every button
+// edge.
+static bool em1_required = false;
+
+static void update_em1_requirement(void)
+{
+  bool need_em1 = false;
+
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_ATOMIC();
+  if (!disabled) {
+    // Scan every configured button. As soon as we find one that is pressed
+    // and not on an EM2-capable port, the requirement is needed.
+    for (uint8_t i = 0; i < SL_SIMPLE_BUTTON_COUNT; i++) {
+      const sl_button_t *button = SL_SIMPLE_BUTTON_INSTANCE(i);
+      sl_simple_button_context_t *btn_ctx =
+        (sl_simple_button_context_t *)button->context;
+      if (btn_ctx->port == SL_GPIO_PORT_A || btn_ctx->port == SL_GPIO_PORT_B) {
+        continue;
+      }
+      if (sl_button_get_state(button) == SL_SIMPLE_BUTTON_PRESSED) {
+        need_em1 = true;
+        break;
+      }
+    }
+  }
+  if (need_em1 && !em1_required) {
+    sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
+    em1_required = true;
+  } else if (!need_em1 && em1_required) {
+    sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
+    em1_required = false;
+  }
+  CORE_EXIT_ATOMIC();
+}
+
+#else
+
+static void update_em1_requirement(void)
+{
+}
+
+#endif

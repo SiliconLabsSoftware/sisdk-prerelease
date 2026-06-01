@@ -13,6 +13,8 @@ class CalcBtcphyBrvitdemod(IPCalculator):
         self._ip_reg_write(model, 'BRVITDEMOD_VITERBIKSI2', 180, do_not_care=value_do_not_care)
         self._ip_reg_write(model, 'BRVITDEMOD_VITERBIKSI3', 110, do_not_care=value_do_not_care)
         self._ip_reg_write(model, 'CTRL3_TXPOLAREN', 0, do_not_care=value_do_not_care)
+        # https://jira.silabs.com/browse/MCUW_RADIO_CFG-3489
+        self._ip_reg_write(model, 'EDR_TX_GUARD3_EDRGUARDTX', 0x6, do_not_care=value_do_not_care)
 
     ### https://jira.silabs.com/browse/MCUW_RADIO_CFG-2737
     def calc_fbafcgain_reg(self, model):

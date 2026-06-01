@@ -43,11 +43,9 @@
  #define SL_LOG_FLAGS_LEVEL_MASK 0x7
  #endif
  
- extern bool log_init_stage2_done;
- 
  #define SL_PRINT_ARG0_IMPL(EVENT, EVENT_TYPE, LOG_LEVEL) \
  do { \
-     if (!log_init_stage2_done) { \
+     if (!sli_log_init_stage2_done) { \
        sl_log_send_no_args( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE))); \
@@ -60,7 +58,7 @@
  
  #define SL_PRINT_ARG1_IMPL(EVENT, EVENT_TYPE, LOG_LEVEL, ARG1) \
  do { \
-   if (!log_init_stage2_done) { \
+   if (!sli_log_init_stage2_done) { \
      sl_log_send_arg1( \
            (EVENT), \
            (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
@@ -74,7 +72,7 @@
  
  #define SL_PRINT_ARG2_IMPL(EVENT, EVENT_TYPE, LOG_LEVEL, ARG1, ARG2) \
  do { \
-   if (!log_init_stage2_done) { \
+   if (!sli_log_init_stage2_done) { \
      sl_log_send_arg2( \
        (EVENT), \
        (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
@@ -90,7 +88,7 @@
  
  #define SL_PRINT_ARG3_IMPL(EVENT, EVENT_TYPE, LOG_LEVEL, ARG1, ARG2, ARG3) \
  do { \
-   if (!log_init_stage2_done) { \
+   if (!sli_log_init_stage2_done) { \
      sl_log_send_arg3( \
        (EVENT), \
        (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
@@ -107,7 +105,7 @@
  #if (SL_LOG_CONFIG_ARG >= 4)
  #define SL_PRINT_ARG4_IMPL(EVENT, EVENT_TYPE, LOG_LEVEL, ARG1, ARG2, ARG3, ARG4) \
  do { \
-   if (!log_init_stage2_done) { \
+   if (!sli_log_init_stage2_done) { \
      sl_log_send_arg4( \
        (EVENT), \
        (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
@@ -124,7 +122,7 @@
  #if (SL_LOG_CONFIG_ARG >= 5)
  #define SL_PRINT_ARG5_IMPL(EVENT, EVENT_TYPE, LOG_LEVEL, ARG1, ARG2, ARG3, ARG4, ARG5) \
  do { \
-     if (!log_init_stage2_done) { \
+     if (!sli_log_init_stage2_done) { \
        sl_log_send_arg5( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
@@ -141,7 +139,7 @@
  #if (SL_LOG_CONFIG_ARG >= 6)
  #define SL_PRINT_ARG6_IMPL(EVENT, EVENT_TYPE, LOG_LEVEL, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6) \
  do { \
-     if (!log_init_stage2_done) { \
+     if (!sli_log_init_stage2_done) { \
        sl_log_send_arg6( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
@@ -158,7 +156,7 @@
  #if (SL_LOG_CONFIG_ARG >= 7)
  #define SL_PRINT_ARG7_IMPL(EVENT, EVENT_TYPE, LOG_LEVEL, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7) \
  do { \
-     if (!log_init_stage2_done) { \
+     if (!sli_log_init_stage2_done) { \
        sl_log_send_arg7( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
@@ -175,7 +173,7 @@
  #if (SL_LOG_CONFIG_ARG >= 8)
  #define SL_PRINT_ARG8_IMPL(EVENT, EVENT_TYPE, LOG_LEVEL, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8) \
  do { \
-     if (!log_init_stage2_done) { \
+     if (!sli_log_init_stage2_done) { \
        sl_log_send_arg8( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
@@ -192,7 +190,7 @@
  #if (SL_LOG_CONFIG_ARG >= 9)
  #define SL_PRINT_ARG9_IMPL(EVENT, EVENT_TYPE, LOG_LEVEL, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9) \
  do { \
-     if (!log_init_stage2_done) { \
+     if (!sli_log_init_stage2_done) { \
        sl_log_send_arg9( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
@@ -209,7 +207,7 @@
  #if (SL_LOG_CONFIG_ARG >= 10)
  #define SL_PRINT_ARG10_IMPL(EVENT, EVENT_TYPE, LOG_LEVEL, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10) \
  do { \
-     if (!log_init_stage2_done) { \
+     if (!sli_log_init_stage2_done) { \
        sl_log_send_arg10( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
@@ -225,7 +223,7 @@
  
  #define SL_EVENT_PRINT_ARG0_IMPL(EVENT, EVENT_TYPE, LOG_LEVEL) \
  do { \
-     if (!log_init_stage2_done) { \
+     if (!sli_log_init_stage2_done) { \
        sl_log_send_no_args( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE))); \
@@ -238,7 +236,7 @@
  
  #define SL_EVENT_PRINT_ARG1_IMPL(EVENT, EVENT_TYPE, LOG_LEVEL, ARG1) \
  do { \
-     if (!log_init_stage2_done) { \
+     if (!sli_log_init_stage2_done) { \
        sl_log_send_arg1( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
@@ -252,7 +250,7 @@
  
  #define SL_EVENT_PRINT_ARG2_IMPL(EVENT, EVENT_TYPE, LOG_LEVEL, ARG1, ARG2) \
  do { \
-     if (!log_init_stage2_done) { \
+     if (!sli_log_init_stage2_done) { \
        sl_log_send_arg2( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
@@ -266,7 +264,7 @@
  
  #define SL_EVENT_PRINT_ARG3_IMPL(EVENT, EVENT_TYPE, LOG_LEVEL, ARG1, ARG2, ARG3) \
  do { \
-     if (!log_init_stage2_done) { \
+     if (!sli_log_init_stage2_done) { \
        sl_log_send_arg3( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
@@ -281,7 +279,7 @@
  #if (SL_LOG_CONFIG_ARG >= 4)
  #define SL_EVENT_PRINT_ARG4_IMPL(EVENT, EVENT_TYPE, LOG_LEVEL, ARG1, ARG2, ARG3, ARG4) \
  do { \
-     if (!log_init_stage2_done) { \
+     if (!sli_log_init_stage2_done) { \
        sl_log_send_arg4( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
@@ -297,7 +295,7 @@
  #if (SL_LOG_CONFIG_ARG >= 5)
  #define SL_EVENT_PRINT_ARG5_IMPL(EVENT, EVENT_TYPE, LOG_LEVEL, ARG1, ARG2, ARG3, ARG4, ARG5) \
  do { \
-     if (!log_init_stage2_done) { \
+     if (!sli_log_init_stage2_done) { \
        sl_log_send_arg5( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
@@ -313,7 +311,7 @@
  #if (SL_LOG_CONFIG_ARG >= 6)
  #define SL_EVENT_PRINT_ARG6_IMPL(EVENT, EVENT_TYPE, LOG_LEVEL, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6) \
  do { \
-     if (!log_init_stage2_done) { \
+     if (!sli_log_init_stage2_done) { \
        sl_log_send_arg6( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
@@ -329,7 +327,7 @@
  #if (SL_LOG_CONFIG_ARG >= 7)
  #define SL_EVENT_PRINT_ARG7_IMPL(EVENT, EVENT_TYPE, LOG_LEVEL, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7) \
  do { \
-     if (!log_init_stage2_done) { \
+     if (!sli_log_init_stage2_done) { \
        sl_log_send_arg7( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
@@ -345,7 +343,7 @@
  #if (SL_LOG_CONFIG_ARG >= 8)
  #define SL_EVENT_PRINT_ARG8_IMPL(EVENT, EVENT_TYPE, LOG_LEVEL, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8) \
  do { \
-     if (!log_init_stage2_done) { \
+     if (!sli_log_init_stage2_done) { \
        sl_log_send_arg8( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
@@ -361,7 +359,7 @@
  #if (SL_LOG_CONFIG_ARG >= 9)
  #define SL_EVENT_PRINT_ARG9_IMPL(EVENT, EVENT_TYPE, LOG_LEVEL, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9) \
  do { \
-     if (!log_init_stage2_done) { \
+     if (!sli_log_init_stage2_done) { \
        sl_log_send_arg9( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
@@ -377,7 +375,7 @@
  #if (SL_LOG_CONFIG_ARG >= 10)
  #define SL_EVENT_PRINT_ARG10_IMPL(EVENT, EVENT_TYPE, LOG_LEVEL, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10) \
  do { \
-     if (!log_init_stage2_done) { \
+     if (!sli_log_init_stage2_done) { \
        sl_log_send_arg10( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \

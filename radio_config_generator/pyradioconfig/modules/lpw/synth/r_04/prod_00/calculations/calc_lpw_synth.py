@@ -98,7 +98,6 @@ class CalcLpwSynth(IPCalculator):
     # Method name: calc_fcal_reg
     # Defined in: rainier\calculators\calc_synth.py
     def calc_fcal_reg(self, model):
-        self._ip_reg_write(model, 'FCALCTRL_FCALMODE', 1)
         ## NUMCYCLE
         self._ip_reg_write(model, 'LOCNTCTRL_NUMCYCLE', 5)
         self._ip_reg_write(model, 'LOCNTCTRL_NUMCYCLE1', 5)
@@ -214,11 +213,11 @@ class CalcLpwSynth(IPCalculator):
     # Defined in: rainier\calculators\calc_synth.py
     def calc_lms_reg(self, model):
         self._ip_reg_write(model, 'GLMS_GLMSENABLEDELAY', 7)
-        self._ip_reg_write(model, 'GLMS_GLMSGEAR0', 10)
-        self._ip_reg_write(model, 'GLMS_GLMSGEAR1', 10)
-        self._ip_reg_write(model, 'GLMS_GLMSGEAR2', 9)
-        self._ip_reg_write(model, 'GLMS_GLMSGEAR3', 7)
-        self._ip_reg_write(model, 'GLMS_GLMSGEAR4', 6)
+        self._ip_reg_write(model, 'GLMS_GLMSGEAR0', 4)
+        self._ip_reg_write(model, 'GLMS_GLMSGEAR1', 4)
+        self._ip_reg_write(model, 'GLMS_GLMSGEAR2', 4)
+        self._ip_reg_write(model, 'GLMS_GLMSGEAR3', 4)
+        self._ip_reg_write(model, 'GLMS_GLMSGEAR4', 4)
         self._ip_reg_write(model, 'GLMS_GLMSGEARSLOT', 0)
         self._ip_reg_write(model, 'PLMS_PLMSENABLEDELAY', 7)
         self._ip_reg_write(model, 'PLMS_PLMSGEAR0', 11)

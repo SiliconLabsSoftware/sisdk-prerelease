@@ -48,52 +48,188 @@ extern "C" {
  * @addtogroup dma_channel DMA Channel Driver
  * @brief High-level API to perform DMA transfers on a single channel.
  * @details
- *  The DMA Channel Driver builds on top of the @ref dma_manager module. It
- *  assumes a DMA channel has already been allocated (or reserved) and focuses
- *  on per-channel operations: transfer submission, queuing/linking, status
- *  query and callback notification.
+ *  ## Overview
+ *
+ *  The DMA Channel Driver builds on top of the @ref dma_manager service. It
+ *  assumes a DMA channel has already been allocated (or reserved) at the
+ *  manager layer and focuses on per-channel operations: transfer submission,
+ *  queuing and linking, status query, and callback notification.
+ *
+ *  Together, the DMA Manager and the DMA Channel Driver replace the legacy
+ *  @ref dmadrv component. See the
+ *  <a href="https://docs.silabs.com/gecko-platform/latest/platform-dmadrv-migration-guide/">
+ *  DMADRV Migration Guide</a> for the full API mapping table when porting
+ *  existing code.
  *
  *  Core responsibilities:
  *   - Provide simple memory-to-memory (M2M), memory-to-peripheral (M2P) and
  *     peripheral-to-memory (P2M) submission APIs.
  *   - Maintain a software queue (singly-linked list) mirroring the hardware
- *     ABS link chain so that completions can be processed in batch when
- *     interrupts are delayed or masked.
+ *     descriptor link chain so that completions can be processed in batch
+ *     when interrupts are delayed or masked.
  *   - Invoke a user callback once per descriptor (or per aborted descriptor
  *     when an error occurs) with explicit error / abort flags.
- *   - Automatically select optimal transfer unit size (byte/half/word) based
- *     on alignment and length for M2M transfers.
+ *   - Automatically select an optimal transfer unit size (byte/half/word)
+ *     based on alignment and length for M2M transfers, and automatically
+ *     segment transfers larger than the hardware descriptor capacity.
  *
- *  Error handling:
+ *  ## Integration steps
+ *
+ *  To integrate the DMA Channel Driver in an application:
+ *
+ *  -# **Add the components.** Include the `dma_channel` and `dma_manager`
+ *     SLC components in your `.slcp`. The DMA Manager is auto-initialized by
+ *     SL Main; no manual `init()` call is required.
+ *  -# **Allocate (or reserve) a channel.** Use
+ *     `sl_dma_manager_allocate_channel()` (any channel) or
+ *     `sl_dma_manager_reserve_channel()` (a specific channel number) from
+ *     the DMA Manager.
+ *  -# **Declare and initialize a channel handle.** Each active channel needs
+ *     one application-owned `sl_dma_channel_handle_t`. Call
+ *     @ref sl_dma_channel_init() with the channel number, the peripheral
+ *     instance (or NULL for the default), the completion callback and a
+ *     user-data pointer.
+ *  -# **Set the peripheral signal if required.** Memory-to-peripheral and
+ *     peripheral-to-memory transfers use block-handshake mode by default
+ *     and need a request line from the peripheral. Call
+ *     @ref sl_dma_channel_set_peripheral_signal() with the appropriate
+ *     `SL_DMA_SIGNAL_*` constant before submitting M2P/P2M traffic.
+ *     Memory-to-memory transfers do not need this step.
+ *  -# **Submit transfers.** Pick the helper that matches your transfer
+ *     pattern (see "Transfer modes" below). Pass `NULL` as the descriptor
+ *     argument to let the driver allocate one, or pre-allocate via
+ *     @ref sl_dma_channel_descriptor_alloc() for deterministic memory use.
+ *  -# **Handle completions.** The callback registered at init time is
+ *     invoked once per descriptor that requested a callback, with explicit
+ *     `error` / `aborted` flags. Application code may also poll progress
+ *     via @ref sl_dma_channel_get_status().
+ *  -# **Tear down.** When done, call @ref sl_dma_channel_abort() if a
+ *     transfer is still active, then @ref sl_dma_channel_deinit() to release
+ *     the channel handle and `sl_dma_manager_free_channel()` to return the
+ *     channel to the manager.
+ *
+ *  ## Transfer modes
+ *
+ *  | Helper                                              | Pattern                                      | Loops? | Peripheral signal required |
+ *  | :-------------------------------------------------- | :------------------------------------------- | :----- | :------------------------- |
+ *  | @ref sl_dma_channel_submit_transfer_m2m()             | Memory-to-memory                             | No     | No                         |
+ *  | @ref sl_dma_channel_submit_transfer_m2p()             | Memory-to-peripheral                         | No     | Yes                        |
+ *  | @ref sl_dma_channel_submit_transfer_p2m()             | Peripheral-to-memory                         | No     | Yes                        |
+ *  | @ref sl_dma_channel_submit_transfer_list()            | Linked list of heterogeneous transfers       | No     | When list contains M2P/P2M |
+ *  | @ref sl_dma_channel_submit_ping_pong_transfer_m2p()   | Two-buffer streaming M2P                     | Yes    | Yes                        |
+ *  | @ref sl_dma_channel_submit_ping_pong_transfer_p2m()   | Two-buffer streaming P2M                     | Yes    | Yes                        |
+ *  | @ref sl_dma_channel_submit_triple_buffered_transfer_m2p() | Three-buffer streaming M2P               | Yes    | Yes                        |
+ *  | @ref sl_dma_channel_submit_triple_buffered_transfer_p2m() | Three-buffer streaming P2M               | Yes    | Yes                        |
+ *  | @ref sl_dma_channel_update_active_transfer()          | Resize the currently-running head transfer   | -      | -                          |
+ *
+ *  ## Peripheral signals and block-handshake mode
+ *
+ *  Peripheral-attached transfers (M2P, P2M, and their ping-pong /
+ *  triple-buffered variants) advance one block at a time on a request line
+ *  asserted by the peripheral — this is what the API and the underlying
+ *  hardware call *block-handshake mode* (see the @p block_handshake_mode
+ *  field of @ref sl_dma_channel_transfer_t). The peripheral signal selected
+ *  via @ref sl_dma_channel_set_peripheral_signal() identifies that request
+ *  line. Without a signal set, an M2P or P2M transfer would have no
+ *  hardware event to gate on. M2M transfers use full-cycle mode and ignore
+ *  the peripheral signal.
+ *
+ *  ## Callback contract
+ *
+ *  The completion callback installed by @ref sl_dma_channel_init() is invoked
+ *  from DMA channel IRQ context. It receives the channel handle, the
+ *  user-data pointer, and two booleans:
+ *
+ *   - @p error    — set when the hardware reported a channel error. The
+ *                   channel is automatically disabled and the remaining
+ *                   queued descriptors are aborted.
+ *   - @p aborted  — set when @ref sl_dma_channel_abort() was used to terminate
+ *                   the descriptor (or when the descriptor was aborted as a
+ *                   side-effect of an error).
+ *
+ *  Both `false` means a normal completion. In looping modes
+ *  (ping-pong / triple-buffered) the callback is invoked on every buffer
+ *  completion until the channel is aborted by the application. The callback
+ *  return type is `void` — there is no way to stop a looping transfer from
+ *  the callback by returning a value; call @ref sl_dma_channel_abort()
+ *  instead.
+ *
+ *  ## Error handling
+ *
  *  If the hardware sets the CHERROR bit for a channel, the driver disables
  *  the channel, aborts all queued descriptors and invokes the registered
  *  callback for each pending descriptor with @p error=true and
  *  @p aborted=true. The application is responsible for re-enabling or
  *  reinitializing the channel before submitting new work.
  *
- *  Performance:
- *  On devices with external FLASH, the component RAM Code for DMA Channel
- *  Performance can be added to improve interrupt latency for the DMA Channel
- *  Driver at the cost of higher RAM consumption.
+ *  ## Performance
  *
- *  Typical usage:
+ *  On devices with external FLASH, the component "RAM Code for DMA Channel
+ *  Performance" (`ram_code_select_dma_channel_performance`) can be added to
+ *  move the DMA channel ISR into RAM to improve interrupt latency at the
+ *  cost of higher RAM consumption.
+ *
+ *  ## Typical usage
+ *
+ *  The example below shows a memory-to-memory transfer (`app_dma_m2m`,
+ *  no peripheral signal needed) and a memory-to-peripheral transfer
+ *  (`app_dma_tx`, which calls @ref sl_dma_channel_set_peripheral_signal()
+ *  first because m2p uses block-handshake mode).
+ *
  *  @code{.c}
- *  uint8_t ch;
- *  sl_dma_channel_handle_t h;
- *  sl_dma_manager_allocate_channel(NULL, &ch);
- *  sl_dma_channel_init(&h, SL_PERIPHERAL_LDMA0, ch, my_callback, my_user_data);
- *  sl_dma_channel_submit_transfer_m2m(&h, src, dst, len, NULL);
- *  wait for callback(s) or poll status ...
+ *  static sl_dma_channel_handle_t dma_handle;
+ *
+ *  static void dma_cb(sl_dma_channel_handle_t *handle,
+ *                     void                    *user_data,
+ *                     bool                     error,
+ *                     bool                     aborted)
+ *  {
+ *    (void)handle;
+ *    (void)user_data;
+ *    if (!error && !aborted) {
+ *      do_application_work();
+ *    }
+ *  }
+ *
+ *  void app_dma_init(void)
+ *  {
+ *    uint8_t ch;
+ *    sl_dma_manager_allocate_channel(NULL, &ch);
+ *    sl_dma_channel_init(&dma_handle, NULL, ch, dma_cb, NULL);
+ *  }
+ *
+ *  void app_dma_m2m(void *src, void *dst, size_t len)
+ *  {
+ *    sl_dma_channel_submit_transfer_m2m(&dma_handle, src, dst, len, NULL);
+ *  }
+ *
+ *  void app_dma_tx(const uint8_t *data, size_t len)
+ *  {
+ *    sl_dma_channel_set_peripheral_signal(&dma_handle,
+ *                                         SL_DMA_SIGNAL_EUSART0_TXFL);
+ *    sl_dma_channel_submit_transfer_m2p(&dma_handle,
+ *                                       (void *)data,
+ *                                       (void *)&EUSART0->TXDATA,
+ *                                       len,
+ *                                       SL_DMA_CTRL_SIZE_BYTE,
+ *                                       NULL);
+ *  }
  *  @endcode
  *
  *  @ingroup dma
+ *  @{
  ******************************************************************************/
 
 /*******************************************************************************
  *****************************   DATA TYPES   *********************************
  ******************************************************************************/
 
-/// Forward declaration
+/// @brief Opaque DMA channel handle.
+///
+/// The application allocates one handle per active channel. Each handle
+/// tracks the bound DMA channel number, peripheral instance, callback and
+/// driver-internal state. Treat its contents as opaque; use the
+/// `sl_dma_channel_*` API to manipulate the channel.
 typedef struct sl_dma_channel_handle sl_dma_channel_handle_t;
 
 /// DMA channel opaque transfer descriptor
@@ -106,7 +242,7 @@ typedef struct sl_dma_channel_xfer_descriptor_flags {
   uint32_t reserved               : 30;
 } sl_dma_channel_xfer_descriptor_flags_t;
 
-/// DMA channel state 
+/// DMA channel state
 typedef enum {
   SL_DMA_CHANNEL_STATE_DISABLED,
   SL_DMA_CHANNEL_STATE_ENABLED,
@@ -123,7 +259,7 @@ typedef enum {
  * Typedef for the user supplied callback function which is called on a transfer
  * complete event.
  *
- * @param dma_channel_handle Handle to DMA channel.
+ * @param handle Handle to DMA channel.
  *
  * @param user_data Pointer to user data that is passed to the tx complete
  *                  handler function.
@@ -234,7 +370,7 @@ sl_status_t sl_dma_channel_abort(sl_dma_channel_handle_t *handle);
  *
  * @note Any active transfer will be allowed to complete, but no new transfers
  *       will be started until the channel is resumed with
- *       @ref sl_dma_channel_resume.
+ *       @ref sl_dma_channel_resume().
  *
  * @note Invalid handle checks are performed via assertions in debug builds only.
  ******************************************************************************/
@@ -244,7 +380,7 @@ sl_status_t sl_dma_channel_suspend(const sl_dma_channel_handle_t *handle);
  * Resumes peripheral requests for a previously suspended DMA channel.
  *
  * This re-enables peripheral requests that were disabled by
- * @ref sl_dma_channel_suspend, allowing new transfers to be triggered.
+ * @ref sl_dma_channel_suspend(), allowing new transfers to be triggered.
  *
  * @param[in]  handle DMA channel handle.
  *
@@ -301,7 +437,7 @@ sl_status_t sl_dma_channel_handle_alloc(sl_dma_channel_handle_t **handle);
 /***************************************************************************//**
  * Free a DMA channel handle previously allocated by sl_dma_channel_handle_alloc().
  *
- * The channel must be deinitialized with @ref sl_dma_channel_deinit before
+ * The channel must be deinitialized with @ref sl_dma_channel_deinit() before
  * calling this function. Calling this function while transfers are in progress
  * or while descriptors are still queued results in undefined behavior.
  *
@@ -396,7 +532,7 @@ size_t sl_dma_channel_descriptor_get_size(void);
  *         there are transfers that are not yet completed.
  *
  * @note If you wish to force re-initialization of a DMA channel that is currently
- *       enabled, you can call @ref sl_dma_channel_abort beforehand to abort
+ *       enabled, you can call @ref sl_dma_channel_abort() beforehand to abort
  *       any pending transfers and disable the channel.
  *
  * @note Invalid arguments (NULL handle pointer, invalid channel number) trigger
@@ -415,7 +551,7 @@ sl_status_t sl_dma_channel_init(sl_dma_channel_handle_t *handle,
  * The channel must not be enabled when calling this function. If the channel
  * is enabled (indicating active or pending transfers), this function will
  * return SL_STATUS_BUSY. To deinitialize a channel with active transfers,
- * first call @ref sl_dma_channel_abort to abort pending transfers and disable
+ * first call @ref sl_dma_channel_abort() to abort pending transfers and disable
  * the channel.
  *
  * @param[in,out] handle  Pointer to the channel handle to deinitialize.
@@ -423,7 +559,7 @@ sl_status_t sl_dma_channel_init(sl_dma_channel_handle_t *handle,
  * @return SL_STATUS_OK on success.
  * @return SL_STATUS_BUSY if the DMA channel is currently enabled. The channel
  *         must be disabled (either by completing all transfers naturally or by
- *         calling @ref sl_dma_channel_abort) before it can be deinitialized.
+ *         calling @ref sl_dma_channel_abort()) before it can be deinitialized.
  *
  * @note Invalid arguments (NULL handle pointer) trigger EFM_ASSERT in debug
  *       builds only. In release builds, passing invalid arguments will result
@@ -432,16 +568,38 @@ sl_status_t sl_dma_channel_init(sl_dma_channel_handle_t *handle,
 sl_status_t sl_dma_channel_deinit(sl_dma_channel_handle_t *handle);
 
 /***************************************************************************//**
- * Set the peripheral signal for a channel handle. The peripheral signal is
- * necessary for memory-to-peripheral or peripheral-to-memory transfers which
- * require a handshake with the peripheral for each block transferred.
+ * Set the peripheral signal routed to a DMA channel.
  *
- * No transfers should be active in the DMA channel when calling this API.
+ * The peripheral signal is necessary for transfers configured in
+ * block-handshake mode (`block_handshake_mode == true` in
+ * @ref sl_dma_channel_transfer_t), which pend on the signal being asserted
+ * before executing each block. For instance, memory-to-peripheral or
+ * peripheral-to-memory transfers shall only execute when the peripheral is
+ * ready to consume or serve data, so the DMA waits on the peripheral's
+ * request line between blocks.
  *
- * This function configures the peripheral signal routing for the channel.
+ * The peripheral signal is shared by every transfer subsequently submitted
+ * on the channel, so it typically only needs to be set once during channel
+ * setup. The m2p / p2m helpers
+ * (@ref sl_dma_channel_submit_transfer_m2p(),
+ *  @ref sl_dma_channel_submit_transfer_p2m(),
+ *  @ref sl_dma_channel_submit_ping_pong_transfer_m2p(),
+ *  @ref sl_dma_channel_submit_ping_pong_transfer_p2m(),
+ *  @ref sl_dma_channel_submit_triple_buffered_transfer_m2p(), and
+ *  @ref sl_dma_channel_submit_triple_buffered_transfer_p2m()) enable
+ * block-handshake mode by default, so they all rely on this routing.
+ * Memory-to-memory transfers (@ref sl_dma_channel_submit_transfer_m2m()) do
+ * not use block-handshake mode and therefore do not depend on the
+ * peripheral signal.
  *
- * @param[in] handle    Pointer to handle (must be allocated).
- * @param[in] signal    Signal from another peripheral (pointer to signal value).
+ * No transfers must be active on the DMA channel when calling this API; the
+ * channel must be idle so that the new routing applies cleanly to the next
+ * submission.
+ *
+ * @param[in] handle    Pointer to handle (must be allocated and initialized).
+ * @param[in] signal    Peripheral signal to route to the channel, expressed
+ *                      as one of the `SL_DMA_SIGNAL_*` constants defined in
+ *                      `sl_device_dma.h`.
  *
  * @return SL_STATUS_OK on success.
  * @return SL_STATUS_BUSY when the DMA channel has active transfers.
@@ -497,9 +655,9 @@ sl_status_t sl_dma_channel_submit_transfer_m2m(sl_dma_channel_handle_t *handle,
  *
  * If @p descriptor is NULL, a descriptor is allocated internally and populated.
  * The transfer is triggered in block handshake mode with the current peripheral
- * signal set with @ref sl_dma_channel_set_peripheral_signal.
+ * signal set with @ref sl_dma_channel_set_peripheral_signal().
  *
- * Contrary to @ref sl_dma_channel_submit_transfer_m2m, the destination address
+ * Contrary to @ref sl_dma_channel_submit_transfer_m2m(), the destination address
  * is a peripheral register address. The source address is incremented during
  * the transfer.
  *
@@ -547,9 +705,9 @@ sl_status_t sl_dma_channel_submit_transfer_m2p(sl_dma_channel_handle_t *handle,
  *
  * If @p descriptor is NULL, a descriptor is allocated internally and populated.
  * The transfer is triggered in block handshake mode with the current peripheral
- * signal set with @ref sl_dma_channel_set_peripheral_signal.
+ * signal set with @ref sl_dma_channel_set_peripheral_signal().
  *
- * Contrary to @ref sl_dma_channel_submit_transfer_m2m, the source address
+ * Contrary to @ref sl_dma_channel_submit_transfer_m2m(), the source address
  * is a peripheral register address. The destination address is incremented during
  * the transfer.
  *
@@ -677,7 +835,7 @@ sl_status_t sl_dma_channel_submit_transfer_list(sl_dma_channel_handle_t *handle,
  * @return SL_STATUS_ALLOCATION_FAILED if descriptor allocation fails.
  *
  * @note The transfer loops infinitely until the channel is stopped with
- *       @ref sl_dma_channel_abort.
+ *       @ref sl_dma_channel_abort().
  *
  * @note This implementation configures the source to increment. The destination
  *       does not increment.
@@ -726,7 +884,7 @@ sl_status_t sl_dma_channel_submit_ping_pong_transfer_m2p(sl_dma_channel_handle_t
  * @return SL_STATUS_ALLOCATION_FAILED if descriptor allocation fails.
  *
  * @note The transfer loops infinitely until the channel is stopped with
- *       @ref sl_dma_channel_abort.
+ *       @ref sl_dma_channel_abort().
  *
  * @note This implementation configures the destination to increment. The source
  *       does not increment.
@@ -776,7 +934,7 @@ sl_status_t sl_dma_channel_submit_ping_pong_transfer_p2m(sl_dma_channel_handle_t
  * @return SL_STATUS_ALLOCATION_FAILED if descriptor allocation fails.
  *
  * @note The transfer loops infinitely until the channel is stopped with
- *       @ref sl_dma_channel_abort.
+ *       @ref sl_dma_channel_abort().
  *
  * @note This implementation configures the source to increment. The destination
  *       does not increment.
@@ -827,7 +985,7 @@ sl_status_t sl_dma_channel_submit_triple_buffered_transfer_m2p(sl_dma_channel_ha
  * @return SL_STATUS_ALLOCATION_FAILED if descriptor allocation fails.
  *
  * @note The transfer loops infinitely until the channel is stopped with
- *       @ref sl_dma_channel_abort.
+ *       @ref sl_dma_channel_abort().
  *
  * @note This implementation configures the destination to increment. The source
  *       does not increment.
@@ -882,6 +1040,8 @@ sl_status_t sl_dma_channel_submit_triple_buffered_transfer_p2m(sl_dma_channel_ha
  ******************************************************************************/
 sl_status_t sl_dma_channel_update_active_transfer(sl_dma_channel_handle_t *handle,
                                                   size_t new_size);
+
+/** @} (end addtogroup dma_channel) */
 
 #ifdef __cplusplus
 }

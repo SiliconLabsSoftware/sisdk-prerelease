@@ -32,7 +32,6 @@ target_compile_definitions(openthread-radio PRIVATE
     OPENTHREAD_FTD=0
     OPENTHREAD_MTD=0
     OPENTHREAD_RADIO=1
-    OPENTHREAD_NCP=0
     OPENTHREAD_RADIO_CLI=0
 )
 

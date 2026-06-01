@@ -10,7 +10,7 @@ category: Bluetooth|Application|Miscellaneous
 metadata:
   sbom:
     license: Zlib
-quality: production
+quality: deprecated
 
 include:
 - path: common/cs_initiator/inc

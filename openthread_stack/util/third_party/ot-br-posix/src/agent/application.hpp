@@ -262,6 +262,7 @@ private:
     void CreateNcpMode(void);
     void InitNcpMode(void);
     void DeinitNcpMode(void);
+    void ConfigureUdpProxiesInfraInterface(void);
 
 #if OTBR_ENABLE_BORDER_AGENT
     void SetBorderAgentOnInitState(void);

@@ -38,7 +38,6 @@ target_compile_definitions(ot-cli-radio
         OPENTHREAD_FTD=0
         OPENTHREAD_MTD=0
         OPENTHREAD_RADIO=1
-        OPENTHREAD_NCP=0
 )
 
 if(NOT DEFINED OT_PLATFORM_LIB_RCP)

@@ -38,10 +38,6 @@
 #define OPENTHREAD_RADIO 0
 #endif
 
-#ifndef OPENTHREAD_NCP
-#define OPENTHREAD_NCP 0
-#endif
-
 /**
  * @def OPENTHREAD_CONFIG_NCP_SPI_ENABLE
  *

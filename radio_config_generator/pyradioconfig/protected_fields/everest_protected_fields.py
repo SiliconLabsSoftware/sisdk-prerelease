@@ -48,4 +48,5 @@ class ProtectedFieldsEverest(ProtectedFieldsRainier):
         'FRC_TRAILRXDATA_PROTIMERCC0WRAPL',
         'FRC_TRAILRXDATA_RSSI',
         'FRC_TRAILRXDATA_RTCSTAMP',
+        'SYNTH_FCALCTRL_FCALMODE',
     ]

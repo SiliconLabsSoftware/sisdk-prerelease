@@ -23,6 +23,7 @@ component:
   - id: zigbee_debug_extended
   - id: zigbee_multirail_demo
   - id: rail_mux
+  - id: sl_rail_util_ieee802154_fast_channel_switching
   - id: zigbee_xncp
   - id: clock_manager
   - id: zigbee_green_power_client

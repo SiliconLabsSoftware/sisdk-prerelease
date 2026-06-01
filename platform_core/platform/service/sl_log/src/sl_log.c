@@ -121,7 +121,7 @@ static inline bool log_should_send(uint8_t flags)
 }
 
 // Sets after sl_log_init_stage2 and used to determine the early logs
-bool log_init_stage2_done;
+bool sli_log_init_stage2_done;
 
 #if (defined(SL_LOG_CONFIG_MODE) \
   && (SL_LOG_CONFIG_MODE != SL_LOG_CONFIG_MODE_CONSOLE) \
@@ -572,7 +572,7 @@ sl_status_t  sl_log_init_stage2(void) {
 
   // Flush the early event logs stored in the ring buffer to the respective backend.
   flush_early_logs();
-  log_init_stage2_done = true;
+  sli_log_init_stage2_done = true;
 
   return SL_STATUS_OK;
 }
@@ -615,7 +615,7 @@ void sl_log_send_no_args(uint32_t event_id, uint8_t flags)
     event.args[1] = 0;
     event.args[2] = 0;
     event.version = 1;
-    if (!log_init_stage2_done) {
+    if (!sli_log_init_stage2_done) {
       // Early logging into the ring buffer before stage2 init is complete
       log_write_to_ring_buffer(&event, sizeof(event));
     } else {
@@ -660,7 +660,7 @@ void sl_log_send_arg1(uint32_t event_id, uint8_t flags, uint32_t arg1)
     event.args[0] = arg1; 
     event.version = 1;
 
-    if (!log_init_stage2_done) {
+    if (!sli_log_init_stage2_done) {
       // Early logging into the ring buffer before stage2 init is complete
       log_write_to_ring_buffer(&event, sizeof(event));
     } else {
@@ -704,7 +704,7 @@ void sl_log_send_arg2(uint32_t event_id, uint8_t flags, uint32_t arg1,
     event.args[1] = arg2;
     event.version = 1;
 
-    if (!log_init_stage2_done) {
+    if (!sli_log_init_stage2_done) {
       // Early logging into the ring buffer before stage2 init is complete
       log_write_to_ring_buffer(&event, sizeof(event));
     } else {
@@ -754,7 +754,7 @@ void sl_log_send_arg3(uint32_t event_id, uint8_t flags, uint32_t arg1,
     event.args[2] = arg3;
     event.version = 1;
 
-    if (!log_init_stage2_done) {
+    if (!sli_log_init_stage2_done) {
       // Early logging into the ring buffer before stage2 init is complete
       log_write_to_ring_buffer(&event, sizeof(event));
     } else {
@@ -786,7 +786,7 @@ void sl_log_send_arg4(uint32_t event_id, uint8_t flags, uint32_t arg1,
     event.args[3] = arg4;    
     event.version = 1;
 
-    if (!log_init_stage2_done) {
+    if (!sli_log_init_stage2_done) {
       // Early logging into the ring buffer before stage2 init is complete
       log_write_to_ring_buffer(&event, sizeof(event));
     } else {
@@ -821,7 +821,7 @@ void sl_log_send_arg5(uint32_t event_id, uint8_t flags, uint32_t arg1,
     event.args[4] = arg5;    
     event.version = 1;
 
-    if (!log_init_stage2_done) {
+    if (!sli_log_init_stage2_done) {
       // Early logging into the ring buffer before stage2 init is complete
       log_write_to_ring_buffer(&event, sizeof(event));
     } else {
@@ -857,7 +857,7 @@ void sl_log_send_arg6(uint32_t event_id, uint8_t flags, uint32_t arg1,
     event.args[5] = arg6;   
     event.version = 1;
 
-    if (!log_init_stage2_done) {
+    if (!sli_log_init_stage2_done) {
       // Early logging into the ring buffer before stage2 init is complete
       log_write_to_ring_buffer(&event, sizeof(event));
     } else {
@@ -894,7 +894,7 @@ void sl_log_send_arg7(uint32_t event_id, uint8_t flags, uint32_t arg1,
     event.args[6] = arg7;    
     event.version = 1;
 
-    if (!log_init_stage2_done) {
+    if (!sli_log_init_stage2_done) {
       // Early logging into the ring buffer before stage2 init is complete
       log_write_to_ring_buffer(&event, sizeof(event));
     } else {
@@ -933,7 +933,7 @@ void sl_log_send_arg8(uint32_t event_id, uint8_t flags, uint32_t arg1,
     event.args[7] = arg8;    
     event.version = 1;
 
-    if (!log_init_stage2_done) {
+    if (!sli_log_init_stage2_done) {
       // Early logging into the ring buffer before stage2 init is complete
       log_write_to_ring_buffer(&event, sizeof(event));
     } else {
@@ -973,7 +973,7 @@ void sl_log_send_arg9(uint32_t event_id, uint8_t flags, uint32_t arg1,
     event.args[8] = arg9;    
     event.version = 1;
 
-    if (!log_init_stage2_done) {
+    if (!sli_log_init_stage2_done) {
       // Early logging into the ring buffer before stage2 init is complete
       log_write_to_ring_buffer(&event, sizeof(event));
     } else {
@@ -1014,7 +1014,7 @@ void sl_log_send_arg10(uint32_t event_id, uint8_t flags, uint32_t arg1,
     event.args[9] = arg10;
     event.version = 1;
 
-    if (!log_init_stage2_done) {
+    if (!sli_log_init_stage2_done) {
       // Early logging into the ring buffer before stage2 init is complete
       log_write_to_ring_buffer(&event, sizeof(event));
     } else {
@@ -1508,6 +1508,24 @@ sl_log_ring_buffer_t *sl_log_get_ring_buffer_config(void)
 }
 
 /***************************************************************************//**
+ * @brief Variadic capture for @ref SL_LOG_PRINT_TARGET_EX.
+ *
+ * Ellipsis is required here; @c va_start is only valid inside a variadic
+ * function (not a macro).
+ ******************************************************************************/
+void sli_log_print_target_ex(uint32_t options, const char *fmt, ...) /* NOSONAR */
+{
+  va_list ap;
+
+  if (!fmt) {
+    return;
+  }
+  va_start(ap, fmt);
+  sl_log_vprint_target_ex(options, fmt, ap);
+  va_end(ap);
+}
+
+/***************************************************************************//**
  * @brief Assert handler implementation - triggers breakpoint in debug mode
  * if debugger is attached
  * @param[in] string_value Formatted error string with file:line - condition
@@ -1519,6 +1537,9 @@ sl_log_ring_buffer_t *sl_log_get_ring_buffer_config(void)
   if (ring_buffer.buffer != NULL) {
     SL_PRINT_STRING_ERROR("ASSERT: %s", (uintptr_t)string_value);
   }
+#elif defined(SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT)
+  // Assert message appears in SystemView.
+  SL_PRINT_FMT_ERROR("ASSERT: %s", string_value);
 #endif
 
 #if (defined(SL_LOG_CONFIG_MODE) \

@@ -144,7 +144,7 @@ class ProfileBaseCurl(ProfileBaseLion):
         self.make_hidden_input(profile, model.vars.adc_clock_mode, "modem",
                                    readable_name="ADC Clock Mode (XO vs VCO)")
         self.make_hidden_input(profile, model.vars.adc_rate_mode, 'Advanced', readable_name="ADC Rate Mode")
-
+    
     def build_deprecated_profile_inputs(self, model, profile):
         pass
 

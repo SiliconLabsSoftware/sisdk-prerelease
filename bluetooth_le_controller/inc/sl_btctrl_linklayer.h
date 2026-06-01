@@ -284,6 +284,8 @@ void sl_btctrl_init_channel_classification(void);
 
 sl_status_t sl_btctrl_allocate_channel_classification_memory(uint8_t connectionsCount);
 
+void sli_btctrl_init_dtm(void);
+
 void sl_btctrl_init_phy(void);
 
 void sl_btctrl_init_adv_ext(void);

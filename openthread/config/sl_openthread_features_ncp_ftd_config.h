@@ -145,11 +145,13 @@
 #ifndef OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE
 #define OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE      0
 #endif
-// <q>  DNS-SD Platform
+// <i>  DNS-SD Platform
+// <i>  Required on NCP: gates the platform DNS-SD abstraction used by NCP DNS-SD, TREL, and SRP Advertising Proxy.
 #ifndef OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE
 #define OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE        1
 #endif
-// <q>  DNS-SD NCP
+// <i>  DNS-SD NCP
+// <i>  Required on NCP: Spinel-based implementation backing PLATFORM_DNSSD_ENABLE. Must match it.
 #ifndef OPENTHREAD_CONFIG_NCP_DNSSD_ENABLE
 #define OPENTHREAD_CONFIG_NCP_DNSSD_ENABLE             1
 #endif
@@ -157,7 +159,8 @@
 #ifndef OPENTHREAD_CONFIG_NCP_CLI_STREAM_ENABLE
 #define OPENTHREAD_CONFIG_NCP_CLI_STREAM_ENABLE        1
 #endif
-// <q>  NCP implementation of platform InfraIf APIs
+// <i>  NCP implementation of platform InfraIf APIs
+// <i>  Required on NCP FTD: provides ICMPv6 ND forwarding via Spinel needed by Border Routing.
 #ifndef OPENTHREAD_CONFIG_NCP_INFRA_IF_ENABLE 
 #define OPENTHREAD_CONFIG_NCP_INFRA_IF_ENABLE          1
 #endif
@@ -169,9 +172,18 @@
 #ifndef OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
 #define OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE       1
 #endif
-// <q>  TREL uses platform DNS-SD (NCP delegates discovery to host over Spinel)
+// <i>  TREL uses platform DNS-SD (NCP delegates discovery to host over Spinel)
 #ifndef OPENTHREAD_CONFIG_TREL_MANAGE_DNSSD_ENABLE
 #define OPENTHREAD_CONFIG_TREL_MANAGE_DNSSD_ENABLE     OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
+#endif
+// <i>  TREL delegates infrastructure operations to the connected host
+#ifndef OPENTHREAD_CONFIG_TREL_DELEGATE_INFRA_TO_HOST_ENABLE
+#define OPENTHREAD_CONFIG_TREL_DELEGATE_INFRA_TO_HOST_ENABLE 1
+#endif
+
+// <i>  TREL DNS-SD discovery stabilization (debounce browse remove on NCP)
+#ifndef OPENTHREAD_CONFIG_TREL_DNSSD_DISCOVERY_STABILIZATION_ENABLE
+#define OPENTHREAD_CONFIG_TREL_DNSSD_DISCOVERY_STABILIZATION_ENABLE OPENTHREAD_CONFIG_TREL_MANAGE_DNSSD_ENABLE
 #endif
 // </h>
 

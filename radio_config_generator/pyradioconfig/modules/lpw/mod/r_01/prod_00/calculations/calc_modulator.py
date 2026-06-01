@@ -451,7 +451,9 @@ class CalcModulator(IPCalculator):
         """
         modulator_select = model.vars.modulator_select.value
         br2m = model.vars.br2m.value
-        if modulator_select == model.vars.modulator_select.var_enum.IQ_MOD_DIRECT:
+        protocol_id = model.vars.protocol_id.value
+        if (modulator_select == model.vars.modulator_select.var_enum.IQ_MOD_DIRECT and
+                protocol_id != model.vars.protocol_id.var_enum.BTC):
             if br2m:
                 # modulation multiplier is running at (f_xo/2)
                 mod_samp_rate_factor = 2
@@ -470,7 +472,7 @@ class CalcModulator(IPCalculator):
         fxo = model.vars.xtal_frequency_hz.value * 1.0
         br2m = model.vars.br2m.value
         modulator_select = model.vars.modulator_select.value
-        if modulator_select == model.vars.modulator_select.var_enum.IQ_MOD_DIRECT:
+        if False: #modulator_select == model.vars.modulator_select.var_enum.IQ_MOD_DIRECT:
             mod_samp_rate = fxo / 2 if br2m else fxo / 4  # IQMOD
         else:
             # mod_samp_rate = super().get_modulator_sample_rate(model)

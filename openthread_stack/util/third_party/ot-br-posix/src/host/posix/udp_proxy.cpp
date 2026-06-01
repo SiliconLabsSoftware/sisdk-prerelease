@@ -36,6 +36,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <net/if.h>
 #include <netinet/in.h>
 #include <sys/select.h>
 #include <unistd.h>
@@ -67,8 +68,25 @@ UdpProxy::UdpProxy(Dependencies &aDeps)
     : mFd(-1)
     , mHostPort(0)
     , mThreadPort(0)
+    , mInfraIfIndex(0)
     , mDeps(aDeps)
 {
+}
+
+void UdpProxy::SetInfraInterface(const char *aInfraIfName)
+{
+    mInfraIfIndex = 0;
+
+    if (aInfraIfName == nullptr || aInfraIfName[0] == '\0')
+    {
+        return;
+    }
+
+    mInfraIfIndex = if_nametoindex(aInfraIfName);
+    if (mInfraIfIndex == 0)
+    {
+        otbrLogWarning("Failed to resolve infra interface %s for UDP proxy: %s", aInfraIfName, strerror(errno));
+    }
 }
 
 void UdpProxy::Start(uint16_t aPort)
@@ -112,16 +130,10 @@ void UdpProxy::Process(const MainloopContext &aContext)
 
     SuccessOrExit(ReceivePacket(payload, length, remoteAddr, remotePort));
 
-    // UDP forward: infrastructure -> host socket -> NCP (Spinel THREAD_UDP_FORWARD_STREAM)
     {
         otbrError fwdError = mDeps.UdpForward(payload, length, remoteAddr, remotePort, *this);
 
-        if (fwdError == OTBR_ERROR_NONE)
-        {
-            otbrLogDebug("UDP proxy: infra->host->NCP forwarded len=%u (threadPort=%u hostBoundPort=%u) remote=%s:%u",
-                         length, mThreadPort, mHostPort, Ip6Address(remoteAddr).ToString().c_str(), remotePort);
-        }
-        else
+        if (fwdError != OTBR_ERROR_NONE)
         {
             otbrLogWarning("UDP proxy: UdpForward to NCP failed len=%u: %s", length, otbrErrorString(fwdError));
         }
@@ -165,6 +177,11 @@ void UdpProxy::SendToPeer(const uint8_t      *aUdpPayload,
     peerAddr.sin6_port   = htons(aPeerPort);
     peerAddr.sin6_family = AF_INET6;
     memcpy(&peerAddr.sin6_addr, &aPeerAddr, sizeof(aPeerAddr));
+    if (mInfraIfIndex != 0 &&
+        (IN6_IS_ADDR_LINKLOCAL(&peerAddr.sin6_addr) || IN6_IS_ADDR_MC_LINKLOCAL(&peerAddr.sin6_addr)))
+    {
+        peerAddr.sin6_scope_id = mInfraIfIndex;
+    }
     memset(control, 0, sizeof(control));
 
     iov.iov_base = reinterpret_cast<void *>(const_cast<uint8_t *>(aUdpPayload));
@@ -178,12 +195,28 @@ void UdpProxy::SendToPeer(const uint8_t      *aUdpPayload,
     msg.msg_iovlen     = 1;
     msg.msg_flags      = 0;
 
+    cmsg = CMSG_FIRSTHDR(&msg);
+
+    if (mInfraIfIndex != 0)
+    {
+        struct in6_pktinfo *packetInfo;
+
+        cmsg->cmsg_level = IPPROTO_IPV6;
+        cmsg->cmsg_type  = IPV6_PKTINFO;
+        cmsg->cmsg_len   = CMSG_LEN(sizeof(*packetInfo));
+        packetInfo       = reinterpret_cast<struct in6_pktinfo *>(CMSG_DATA(cmsg));
+        memset(packetInfo, 0, sizeof(*packetInfo));
+        packetInfo->ipi6_ifindex = mInfraIfIndex;
+
+        controlLength += CMSG_SPACE(sizeof(*packetInfo));
+        cmsg = CMSG_NXTHDR(&msg, cmsg);
+    }
+
     {
         constexpr int kIp6HopLimit = 64;
 
         int hopLimit = kIp6HopLimit;
 
-        cmsg             = CMSG_FIRSTHDR(&msg);
         cmsg->cmsg_level = IPPROTO_IPV6;
         cmsg->cmsg_type  = IPV6_HOPLIMIT;
         cmsg->cmsg_len   = CMSG_LEN(sizeof(int));
@@ -204,11 +237,6 @@ void UdpProxy::SendToPeer(const uint8_t      *aUdpPayload,
     if (rval == -1)
     {
         otbrLogWarning("Failed to sendmsg: %s", strerror(errno));
-    }
-    else
-    {
-        otbrLogDebug("UDP proxy: NCP->host->infra forwarded len=%zd (threadPort=%u hostBoundPort=%u) peer=%s:%u", rval,
-                     mThreadPort, mHostPort, Ip6Address(aPeerAddr).ToString().c_str(), aPeerPort);
     }
 }
 
@@ -285,9 +313,6 @@ otbrError UdpProxy::ReceivePacket(uint8_t      *aPayload,
 
     aRemotePort = ntohs(peerAddr.sin6_port);
     memcpy(&aRemoteAddr, &peerAddr.sin6_addr, sizeof(otIp6Address));
-
-    otbrLogDebug("UDP proxy: recv from infra (host socket) len=%u remote=%s port=%u", static_cast<unsigned>(aLength),
-                 Ip6Address(aRemoteAddr).ToString().c_str(), aRemotePort);
 
 exit:
     return rval > 0 ? OTBR_ERROR_NONE : OTBR_ERROR_ERRNO;

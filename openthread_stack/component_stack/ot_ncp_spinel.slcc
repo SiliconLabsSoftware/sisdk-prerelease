@@ -1,7 +1,7 @@
 id: ot_ncp_spinel
 label: NCP Spinel Library
 package: openthread_stack
-category: OpenThread
+category: OpenThread|NCP
 quality: production
 description: This component provides the Spinel protocol library for both NCP and RCP implementations.
 provides:

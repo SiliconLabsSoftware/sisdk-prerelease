@@ -31,6 +31,7 @@ component:
   - id: bluetooth_feature_extended_scanner
   - id: bluetooth_feature_extended_advertiser
   - id: rail_lib_multiprotocol
+  - id: sl_rail_util_ieee802154_fast_channel_switching
   - id: clock_manager
   - id: ot_diags
   - id: ot_reset_utils
@@ -106,7 +107,11 @@ configuration:
     value: 1100
     condition: [toolchain_lto, freertos]
     unless: [device_series_3]
-  
+  - name: SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_DEFAULT_ENABLED
+    value: 0
+    condition:
+      - device_series_2
+
 template_contribution:
   - name: component_catalog
     value: bluetooth_ncp

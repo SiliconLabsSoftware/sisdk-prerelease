@@ -759,6 +759,115 @@ extern "C" {
 
 /** @} (end addtogroup sl_log_event_api) */
 
+/**
+ * @defgroup sl_log_fmt_api Target-Side Formatted Logging API
+ * @brief printf-style logging that formats on the target before transmission.
+ *
+ * Unlike SL_PRINT_STRING_*, which encodes only the format-string pointer plus
+ * numeric arguments (the host renders the message from a description file),
+ * the SL_PRINT_FMT_* macros call @ref SL_LOG_PRINT_TARGET_EX so the format
+ * string is fully expanded on target and the resulting text is forwarded to
+ * the active backend:
+ *
+ *   - SystemView backend: emitted as a SystemView text packet via
+ *     SEGGER_SYSVIEW_VPrintfTargetEx().
+ *   - I/O Stream (proprietary) backend: emitted as a `[L|F] text\\r\\n` line
+ *     to the recommended console iostream (formatted and compact builds
+ *     both link the same implementation).
+ *   - log_none / no backend: linked against a weak no-op (message discarded).
+ *
+ * Use these when:
+ *   - A host-side description / lookup file for the format strings is not
+ *     available, or
+ *   - The format string is not a string literal pointer (e.g. composed at
+ *     runtime), or
+ *   - You want the same call site to work across all log backends without
+ *     extra glue.
+ *
+ * Trade-off: higher CPU and bandwidth than SL_PRINT_STRING_*.
+ *
+ * Each macro is compile-time gated by SL_LOG_CONFIG_LEVEL_COMPILE_TIME
+ * (severities above the build-time level collapse to a (void)sizeof() no-op),
+ * consistent with SL_PRINT_STRING_* and SL_PRINT_EVENT_*.
+ * At runtime, @ref SL_LOG_PRINT_TARGET_EX is invoked only when the macro's
+ * level passes @ref sl_log_get_loglevel() (same ordering rule as @c sl_log_send_*)
+ * and when @c sli_log_init_stage2_done is true (set when @ref sl_log_init_stage2()
+ * finishes). Unlike @c sl_log_send_*, this path does not buffer early output
+ * in the ring buffer, so nothing is emitted before stage 2 completes.
+ * If SL_LOG_CONFIG_LEVEL_COMPILE_TIME is SL_LOG_CONFIG_LEVEL_NONE, all four
+ * macros are stripped entirely at compile time.
+ *
+ * @{
+ */
+#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME != SL_LOG_CONFIG_LEVEL_NONE)
+
+/* Outer #if on each SL_PRINT_FMT_*: compile-time strip (no code). Inner if:
+ * runtime threshold via sl_log_set_loglevel / sl_log_get_loglevel (same rule
+ * as sl_log_send_*) and @c sli_log_init_stage2_done (backend ready). */
+
+/** @brief Print info-level message via the active backend's target-side printf. */
+#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME <= SL_LOG_CONFIG_LEVEL_INFO)
+#define SL_PRINT_FMT_INFO(fmt, ...)                                            \
+  do {                                                                         \
+    if ((sl_log_level_t)SL_LOG_CONFIG_LEVEL_INFO >= sl_log_get_loglevel()      \
+        && sli_log_init_stage2_done) {                                          \
+      SL_LOG_PRINT_TARGET_EX(SL_LOG_PRINT_OPT_LOG, (fmt), ##__VA_ARGS__);      \
+    }                                                                          \
+  } while (0)
+#else
+#define SL_PRINT_FMT_INFO(fmt, ...)  do { (void)sizeof(fmt); } while (0)
+#endif
+
+/** @brief Print debug-level message via the active backend's target-side printf. */
+#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME <= SL_LOG_CONFIG_LEVEL_DEBUG)
+#define SL_PRINT_FMT_DEBUG(fmt, ...)                                           \
+  do {                                                                         \
+    if ((sl_log_level_t)SL_LOG_CONFIG_LEVEL_DEBUG >= sl_log_get_loglevel()     \
+        && sli_log_init_stage2_done) {                                          \
+      SL_LOG_PRINT_TARGET_EX(SL_LOG_PRINT_OPT_LOG, (fmt), ##__VA_ARGS__);      \
+    }                                                                          \
+  } while (0)
+#else
+#define SL_PRINT_FMT_DEBUG(fmt, ...) do { (void)sizeof(fmt); } while (0)
+#endif
+
+/** @brief Print warning-level message via the active backend's target-side printf. */
+#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME <= SL_LOG_CONFIG_LEVEL_WARN)
+#define SL_PRINT_FMT_WARN(fmt, ...)                                            \
+  do {                                                                         \
+    if ((sl_log_level_t)SL_LOG_CONFIG_LEVEL_WARN >= sl_log_get_loglevel()      \
+        && sli_log_init_stage2_done) {                                          \
+      SL_LOG_PRINT_TARGET_EX(SL_LOG_PRINT_OPT_WARN, (fmt), ##__VA_ARGS__);     \
+    }                                                                          \
+  } while (0)
+#else
+#define SL_PRINT_FMT_WARN(fmt, ...)  do { (void)sizeof(fmt); } while (0)
+#endif
+
+/** @brief Print error-level message via the active backend's target-side printf. */
+#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME <= SL_LOG_CONFIG_LEVEL_ERROR)
+#define SL_PRINT_FMT_ERROR(fmt, ...)                                           \
+  do {                                                                         \
+    if ((sl_log_level_t)SL_LOG_CONFIG_LEVEL_ERROR >= sl_log_get_loglevel()      \
+        && sli_log_init_stage2_done) {                                          \
+      SL_LOG_PRINT_TARGET_EX(SL_LOG_PRINT_OPT_ERROR, (fmt), ##__VA_ARGS__);    \
+    }                                                                          \
+  } while (0)
+#else
+#define SL_PRINT_FMT_ERROR(fmt, ...) do { (void)sizeof(fmt); } while (0)
+#endif
+
+#else /* compile-time level == NONE */
+
+#define SL_PRINT_FMT_INFO(fmt, ...)  do { (void)sizeof(fmt); } while (0)
+#define SL_PRINT_FMT_DEBUG(fmt, ...) do { (void)sizeof(fmt); } while (0)
+#define SL_PRINT_FMT_WARN(fmt, ...)  do { (void)sizeof(fmt); } while (0)
+#define SL_PRINT_FMT_ERROR(fmt, ...) do { (void)sizeof(fmt); } while (0)
+
+#endif
+
+/** @} (end addtogroup sl_log_fmt_api) */
+
 
 #else // LIBRARY_BUILD
 /**
@@ -801,6 +910,13 @@ extern "C" {
 #define SL_PRINT_EVENT_WARN(event_id, ...)   do { sl_log_common_void(WRN, event_id, ##__VA_ARGS__); } while(0)
 #define SL_PRINT_EVENT_ERROR(event_id, ...)  do { sl_log_common_void(ERR, event_id, ##__VA_ARGS__); } while(0)
 #define SL_PRINT_EVENT_CRASH(event_id, ...)  do { sl_log_common_void(CRASH, event_id, ##__VA_ARGS__); } while(0)
+
+/* In LIBRARY_BUILD, SL_PRINT_FMT_* expand to no-ops but link the
+ * to SL_LOG_PRINT_TARGET_EX implementation. */
+#define SL_PRINT_FMT_INFO(fmt, ...)  do { (void)sizeof(fmt); } while (0)
+#define SL_PRINT_FMT_DEBUG(fmt, ...) do { (void)sizeof(fmt); } while (0)
+#define SL_PRINT_FMT_WARN(fmt, ...)  do { (void)sizeof(fmt); } while (0)
+#define SL_PRINT_FMT_ERROR(fmt, ...) do { (void)sizeof(fmt); } while (0)
 
 #endif // LIBRARY_BUILD
 

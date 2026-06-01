@@ -3607,6 +3607,7 @@ sl_status_t EMU_DCDCModeSet(EMU_DcdcMode_TypeDef dcdcMode)
 
     if (currentDcdcMode != emuDcdcMode_Bypass) {
 #if defined(DCDC_DOCTRL_REGULATIONTYPE_BYPDVDDDEC)
+#if defined(LEDSINK_PRESENT)
     bool isLedvddEnabled = ((DCDC->STATUS & DCDC_STATUS_LEDVDDON) != 0);
     if (!isLedvddEnabled) {
       DCDC->LEDVDDBCTRL = DCDC_LEDVDDBCTRL_CMDLEDVSCALE_LEDVSCALE1;
@@ -3617,6 +3618,7 @@ sl_status_t EMU_DCDCModeSet(EMU_DcdcMode_TypeDef dcdcMode)
       DCDC->IF_CLR = DCDC_IF_BOOSTPOSEDG;
       while ((DCDC->IF & DCDC_IF_BOOSTPOSEDG) == 0U);
     }
+#endif
 #if defined(_DCDC_OUTEN_MASK)
       DCDC->OUTEN_CLR = DCDC_OUTEN_DVDDOUTEN | DCDC_OUTEN_DECOUTEN;
 #endif
@@ -3639,7 +3641,7 @@ sl_status_t EMU_DCDCModeSet(EMU_DcdcMode_TypeDef dcdcMode)
       if (timeout >= EMU_DCDC_MODE_SET_TIMEOUT) {
         error = SL_STATUS_TIMEOUT;
       }
-#if defined(DCDC_DOCTRL_REGULATIONTYPE_BYPDVDDDEC)
+#if defined(LEDSINK_PRESENT)
     if (!isLedvddEnabled) {
       DCDC->OUTEN_CLR = DCDC_OUTEN_LEDVDDOUTEN;
       DCDC->LEDVDDBCTRL = DCDC_LEDVDDBCTRL_CMDLEDVSCALE_LEDVSCALE1

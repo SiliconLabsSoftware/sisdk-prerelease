@@ -81,6 +81,21 @@
 
 // </h>
 
+// <h> Energy Management (Series 2 only)
+
+// <q APP_BUTTON_PRESS_EM_CHECK_STATIC> Enable static (build-time) Energy Management check
+// <i> Default: 0
+// <i> If enabled, the component will check that every configured simple_button instance is
+// wired to a pin that can wake up the device from EM2.
+#define APP_BUTTON_PRESS_EM_CHECK_STATIC       (0)
+
+// <q APP_BUTTON_PRESS_EM_CHECK_DYNAMIC> Enable dynamic (run-time) Energy Management check
+// <i> Default: 0
+// <i> If enabled, the component will keep the device in EM1 mode until all buttons are released.
+#define APP_BUTTON_PRESS_EM_CHECK_DYNAMIC      (0)
+
+// </h>
+
 // <h> Runtime Adaptation
 
 // <o APP_BUTTON_PRESS_CONFIG_PRIORITY> Runtime context priority

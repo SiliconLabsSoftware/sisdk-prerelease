@@ -23,6 +23,7 @@ define:
   value: 1
 - name: BOOTLOADER_SECOND_STAGE
   value: 1
+- name: SL_APP_PROPERTIES
 
 include:
 - path: platform/bootloader

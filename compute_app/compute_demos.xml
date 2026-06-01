@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <demos xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.silabs.com/ss/Demo.ecore">
-  <demo name="brd2601b.demo.compute_soc_math_mvp_demo_efr32" label="Compute - SoC Math MVP EFR32 Demo for xG24">
-    <property key="demos.blurb" value="Compute - Math MVP EFR32" />
+  <demo name="brd2601b.demo.compute_soc_math_mvp_demo_efr32" label="Compute - SoC Math MVP EFR32">
+    <property key="demos.blurb" value="Compute - SoC Math MVP EFR32" />
     <property key="core.partCompatibility" value=".*ef.32.g24.*" />
     <property key="core.boardCompatibility" value="brd2601b" />
     <property key="core.readmeFiles" value="compute_soc_math_mvp_demo_efr32/readme.md" />
@@ -10,8 +10,8 @@
     <property key="core.quality" value="PRODUCTION" />
     <description>Demonstrates the Compute Math MVP API (vector and matrix operations).</description>
   </demo>
-  <demo name="brd2608a.demo.compute_soc_math_mvp_demo_efr32" label="Compute - SoC Math MVP EFR32 Demo for xG26">
-    <property key="demos.blurb" value="Compute - Math MVP EFR32" />
+  <demo name="brd2608a.demo.compute_soc_math_mvp_demo_efr32" label="Compute - SoC Math MVP EFR32">
+    <property key="demos.blurb" value="Compute - SoC Math MVP EFR32" />
     <property key="core.partCompatibility" value=".*ef.32.g26.*" />
     <property key="core.boardCompatibility" value="brd2608a" />
     <property key="core.readmeFiles" value="compute_soc_math_mvp_demo_efr32/readme.md" />

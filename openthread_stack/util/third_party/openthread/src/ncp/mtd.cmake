@@ -32,7 +32,6 @@ target_compile_definitions(openthread-ncp-mtd PRIVATE
     OPENTHREAD_FTD=0
     OPENTHREAD_MTD=1
     OPENTHREAD_RADIO=0
-    OPENTHREAD_NCP=0
     OPENTHREAD_CONFIG_NCP_HDLC_ENABLE=1
 )
 

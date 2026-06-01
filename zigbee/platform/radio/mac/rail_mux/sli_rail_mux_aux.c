@@ -442,7 +442,8 @@ sl_rail_status_t sli_zigbee_stack_rail_mux_aux_try_register_and_start_rx(uint16_
   st = sl_rail_start_rx(out_handle, channel, NULL);
   if (st != SL_RAIL_STATUS_NO_ERROR) {
     (void)sli_zigbee_stack_rail_mux_aux_unregister_protocol();
+    return st;
   }
 
-  return st;
+  return SL_RAIL_STATUS_NO_ERROR;
 }

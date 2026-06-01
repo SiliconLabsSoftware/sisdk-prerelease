@@ -32,6 +32,7 @@ component:
   - id: zigbee_system_common
   - id: zigbee_ncp_cpc
   - id: rail_mux
+  - id: sl_rail_util_ieee802154_fast_channel_switching
   - id: ot_stack_rcp
   - id: ot_ncp_cpc
   - id: ot_rtt_log
@@ -94,7 +95,9 @@ configuration:
   # setting the value to 0 and adding the conditional configuration for Series 2.
   # (antenna diversity and fast channel switching cannot both be enabled by default)
   - name: SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_DEFAULT_ENABLED
-    value: 1
+    value: 0
+    condition:
+      - device_series_2
   # If using zigbee_secure_key_storage we do not need to support backwards
   # compatibility because we have never deployed images with keys in PSA
   # As a result, these lines end up saving some code space

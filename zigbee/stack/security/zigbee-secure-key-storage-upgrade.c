@@ -150,8 +150,8 @@ sl_status_t zb_sec_man_upgrade_gp_proxy_table(void)
       keys_failed[KEYS_STATUS_GP]++;
       continue;
     }
-    //erase token by writing all 0xFF to it
-    memset(&tok, 0xFF, SL_ZIGBEE_ENCRYPTION_KEY_SIZE);
+    //erase plaintext token's key data by setting it to all 0xFF
+    memset(&tok.gpdKey, 0xFF, SL_ZIGBEE_ENCRYPTION_KEY_SIZE);
     tok_st = slx_zigbee_token_manager_set_data(COMMON_TOKEN_STACK_GP_PROXY_TABLE + i, (void *)&tok, sizeof(tokTypeStackGpProxyTableEntry));
     if (tok_st != SL_STATUS_OK) {
       return tok_st;
@@ -191,7 +191,7 @@ sl_status_t zb_sec_man_upgrade_gp_sink_table(void)
       continue;
     }
     //erase plaintext token's key data by setting it to all 0xFF
-    memset(&tok, 0xFF, SL_ZIGBEE_ENCRYPTION_KEY_SIZE);
+    memset(&tok.gpdKey, 0xFF, SL_ZIGBEE_ENCRYPTION_KEY_SIZE);
     tok_st = slx_zigbee_token_manager_set_data(COMMON_TOKEN_STACK_GP_SINK_TABLE + i, (void *)&tok, sizeof(tokTypeStackGpSinkTableEntry));
     if (tok_st != SL_STATUS_OK) {
       return tok_st;

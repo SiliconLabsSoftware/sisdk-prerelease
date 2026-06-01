@@ -179,15 +179,6 @@ sudo INFRA_IF_NAME=eth0 RELEASE=1 BACKBONE_ROUTER=1 BORDER_ROUTING=0 NAT64=0 \
  *****************************************************************************/
 
 /**
- * OPENTHREAD_NCP
- *
- * POSIX/OTBR host builds are not Silicon Labs on-chip NCP firmware.
- */
-#ifndef OPENTHREAD_NCP
-#define OPENTHREAD_NCP 0
-#endif
-
-/**
  * OPENTHREAD_POSIX_CONFIG_SPINEL_VENDOR_INTERFACE_URL_PROTOCOL_NAME
  *
  * Define the URL protocol name of our vendor Spinel interface, which is CPC
@@ -354,7 +345,7 @@ sudo INFRA_IF_NAME=eth0 RELEASE=1 BACKBONE_ROUTER=1 BORDER_ROUTING=0 NAT64=0 \
  * See `OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE`
  */
 #undef OPENTHREAD_CONFIG_NET_DIAG_VENDOR_MODEL
-#define OPENTHREAD_CONFIG_NET_DIAG_VENDOR_MODEL "OpenThread Border Router"
+#define OPENTHREAD_CONFIG_NET_DIAG_VENDOR_MODEL "Sample"
 
 /**
  * @def OPENTHREAD_CONFIG_NET_DIAG_VENDOR_SW_VERSION

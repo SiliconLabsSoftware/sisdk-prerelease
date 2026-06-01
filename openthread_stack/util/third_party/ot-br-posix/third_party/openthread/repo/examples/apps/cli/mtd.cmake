@@ -38,7 +38,6 @@ target_compile_definitions(ot-cli-mtd
         OPENTHREAD_FTD=0
         OPENTHREAD_MTD=1
         OPENTHREAD_RADIO=0
-        OPENTHREAD_NCP=0
 )
 
 if(NOT DEFINED OT_PLATFORM_LIB_MTD)

@@ -299,7 +299,7 @@ void NcpSpinel::SetTrelStateChangedCallback(const TrelStateChangedCallback &aCal
 {
     mTrelStateChangedCallback = aCallback;
 
-    otbrLogInfo("SetTrelStateChangedCallback: setting initial SPINEL_PROP_TREL_USER_ENABLE");
+    otbrLogInfo("SetTrelStateChangedCallback: enabling TREL on NCP (SPINEL_PROP_TREL_USER_ENABLE)");
     if (SetProperty(SPINEL_PROP_TREL_USER_ENABLE,
                     [](ot::Spinel::Encoder &aEncoder) { return aEncoder.WriteBool(true); }) != OT_ERROR_NONE)
     {
@@ -318,9 +318,7 @@ otError NcpSpinel::SetTrelHostUdpPort(bool aEnabled, uint16_t aHostPort)
         return encErr;
     };
 
-    otbrLogInfo("SetTrelHostUdpPort: enabled=%s hostUdpPort=%u -> SPINEL_PROP_TREL_STATE SET",
-                aEnabled ? "true" : "false", aHostPort);
-
+    otbrLogInfo("SetTrelHostUdpPort: enabled=%s hostUdpPort=%u", aEnabled ? "true" : "false", aHostPort);
     error = SetProperty(SPINEL_PROP_TREL_STATE, encodingFunc);
     if (error != OT_ERROR_NONE)
     {
@@ -668,8 +666,7 @@ void NcpSpinel::HandleValueIs(spinel_prop_key_t aKey, const uint8_t *aBuffer, ui
         decoder.Init(aBuffer, aLength);
         SuccessOrExit(decoder.ReadBool(enabled), error = OTBR_ERROR_PARSE);
         SuccessOrExit(decoder.ReadUint16(port), error = OTBR_ERROR_PARSE);
-        otbrLogInfo("HandleValueIs: SPINEL_PROP_TREL_STATE enabled=%s threadUdpPort=%u (notification)",
-                    enabled ? "true" : "false", port);
+        otbrLogInfo("NCP TREL_STATE notify: enabled=%s threadUdpPort=%u", enabled ? "true" : "false", port);
         SafeInvoke(mTrelStateChangedCallback, enabled, port);
         break;
     }
@@ -1104,8 +1101,6 @@ otbrError NcpSpinel::HandleResponseForPropGet(spinel_tid_t      aTid,
         decoder.Init(aData, aLength);
         SuccessOrExit(decoder.ReadBool(enabled), error = OTBR_ERROR_PARSE);
         SuccessOrExit(decoder.ReadUint16(port), error = OTBR_ERROR_PARSE);
-        otbrLogInfo("HandleResponseForPropGet: SPINEL_PROP_TREL_STATE enabled=%s threadUdpPort=%u (GET response)",
-                    enabled ? "true" : "false", port);
         SafeInvoke(mTrelStateChangedCallback, enabled, port);
         break;
     }
@@ -1217,7 +1212,15 @@ otbrError NcpSpinel::HandleResponseForPropSet(spinel_tid_t      aTid,
         break;
 
     default:
-        VerifyOrExit(aKey == mWaitingKeyTable[aTid], error = OTBR_ERROR_INVALID_STATE);
+        if (aKey == SPINEL_PROP_LAST_STATUS)
+        {
+            SuccessOrExit(error = SpinelDataUnpack(aData, aLength, SPINEL_DATATYPE_UINT_PACKED_S, &status));
+            VerifyOrExit(status == SPINEL_STATUS_OK, error = OTBR_ERROR_OPENTHREAD);
+        }
+        else
+        {
+            VerifyOrExit(aKey == mWaitingKeyTable[aTid], error = OTBR_ERROR_INVALID_STATE);
+        }
         break;
     }
 

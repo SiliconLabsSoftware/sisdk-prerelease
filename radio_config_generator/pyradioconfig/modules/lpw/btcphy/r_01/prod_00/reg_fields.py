@@ -12,4 +12,5 @@ class BtcRegFields(IPRegFields):
             'BRVITDEMOD.VITERBIKSI3',
             'FREQ_COMP.FBAFCGAIN',
             'CTRL3.TXPOLAREN',
+            'EDR_TX_GUARD3.EDRGUARDTX',
         ]

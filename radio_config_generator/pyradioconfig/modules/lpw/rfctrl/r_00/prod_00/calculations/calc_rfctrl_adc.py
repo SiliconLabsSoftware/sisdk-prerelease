@@ -13,7 +13,7 @@ class CalcRfctrlAdc(IPCalculator):
         self._ip_reg_write(model,'ADCCTRL0_ADCCLKSEL', reg)
 
     def calc_adcsidetoneamp_reg(self, model):
-        self._ip_reg_write_default(model,'ADCTRIM0_ADCSIDETONEAMP')
+        self._ip_reg_write(model,'ADCTRIM0_ADCSIDETONEAMP', 3)
 
     def calc_adc_rate_mode_actual(self, model):
         # This function calculates the actual value of the adc rate mode based on the reg value used

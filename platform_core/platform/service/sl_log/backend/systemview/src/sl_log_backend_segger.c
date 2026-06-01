@@ -13,6 +13,8 @@
  * @version 1.0
  */
 
+#include <stdarg.h>
+
 #include "SEGGER_SYSVIEW.h"
 #include "sl_log_platform_specific.h"
 #include "sl_log_common_config.h"
@@ -240,4 +242,45 @@ sl_status_t sl_log_systemview_record_event(sl_log_event_t *event)
  */
 sl_log_api_backend_t * sl_log_get_api_backend(void){
   return &sl_log_api_backend;
+}
+
+/**
+ * @brief Print a formatted string directly to SystemView (target-side formatting).
+ *
+ * Formats @p fmt with the supplied variadic arguments on the target and emits the
+ * resulting text packet to SystemView via SEGGER_SYSVIEW_VPrintfTargetEx().
+ * The @p options value is forwarded as the SystemView message-type / option
+ * flag (e.g. SEGGER_SYSVIEW_LOG, SEGGER_SYSVIEW_WARNING, SEGGER_SYSVIEW_ERROR).
+ *
+ * Intended as the implementation backend for the SL_PRINT_FMT_* macros.
+ * Unlike the event-based SL_PRINT_STRING_* path, this routine does not store
+ * the format string pointer - the host receives the already-formatted text -
+ * so it works without a SystemView description / lookup file at the cost of
+ * extra runtime CPU and bandwidth.
+ *
+ * @param[in] options Message-type / options flag. Accepts the backend-agnostic
+ *                    SL_LOG_PRINT_OPT_* values from sl_log.h (numerically
+ *                    identical to SEGGER_SYSVIEW_LOG / WARNING / ERROR /
+ *                    FLAG_APPEND) and forwards them to SystemView as-is.
+ * @param[in] fmt     printf-style format string (must not be NULL).
+ * @param[in] ap      va_list previously initialised by the variadic wrapper
+ *                    SL_LOG_PRINT_TARGET_EX.
+ *
+ * @note Must be called only after the SystemView backend has been started
+ *       (sl_log_systemview_init()).
+ */
+void sl_log_vprint_target_ex(uint32_t options, const char *fmt, va_list ap)
+{
+  va_list ap_copy;
+
+  if (fmt == NULL) {
+    return;
+  }
+
+  /* ap_copy is a local va_list object so &ap_copy is valid on all ABIs (GCC
+   * struct, IAR array decay, etc.). Passing &ap is unsafe when va_list is an
+   * array type (IAR ARM): ap decays to a pointer and &ap is a pointer-to-pointer. */
+  va_copy(ap_copy, ap);
+  SEGGER_SYSVIEW_VPrintfTargetEx(fmt, (U32)options, &ap_copy);
+  va_end(ap_copy);
 }
