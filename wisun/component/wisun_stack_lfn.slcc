@@ -14,7 +14,7 @@ root_path: "wisun/./stack"
 requires:
 - name: "device_supports_wisun"
 - name: "wisun_stack"
-- name: "wisun_dc_client_stubs"
+- name: "wisun_dc_client_implementation"
 
 recommends:
 - id: wisun_dc_client_stubs

@@ -45,15 +45,8 @@ extern "C" {
  ******************************************************************************/
 
 // Detect whether the device has a unified L2 cache (instructions and data
-// share a single L2 cache memory). Series 3 parts expose the cache topology
-// through the L2ICACHE_PRESENT / L2DCACHE_PRESENT macros from em_device.h:
-//   - Unified L2 (e.g. SIMG301, SIMG302): L2ICACHE_PRESENT defined,
-//     L2DCACHE_PRESENT NOT defined. The "L2ICACHE" peripheral is in fact a
-//     unified instruction+data cache on those parts.
-//   - Split L2 (e.g. SIWG353, SIWN353, SIWX353): both L2ICACHE_PRESENT and
-//     L2DCACHE_PRESENT defined. The two caches are independent peripherals.
-// Devices without an L2 cache (e.g. Series 2) define neither macro and are
-// correctly treated as not having a unified cache.
+// share a single L2 cache memory), detected via L2ICACHE_PRESENT /
+// L2DCACHE_PRESENT from em_device.h.
 #if defined(L2ICACHE_PRESENT) && !defined(L2DCACHE_PRESENT)
 #define SL_DEVICE_HAS_UNIFIED_CACHE
 #endif

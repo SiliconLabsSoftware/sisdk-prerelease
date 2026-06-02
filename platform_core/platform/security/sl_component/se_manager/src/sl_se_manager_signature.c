@@ -145,16 +145,16 @@ sl_status_t sl_se_ecc_sign(sl_se_command_context_t *cmd_ctx,
   // Add key input block to command
   sli_add_key_input(cmd_ctx, key, status);
 
-  volatile sli_se_datatransfer_t message_buffer = SLI_SE_DATATRANSFER_DEFAULT(message, message_len);
+  sli_se_datatransfer_t message_buffer = SLI_SE_DATATRANSFER_DEFAULT(message, message_len);
   sli_se_mailbox_command_add_input(se_cmd, &message_buffer);
 
   // EdDSA requires the message twice
-  volatile sli_se_datatransfer_t repeated_message_buffer = SLI_SE_DATATRANSFER_DEFAULT(message, message_len);
+  sli_se_datatransfer_t repeated_message_buffer = SLI_SE_DATATRANSFER_DEFAULT(message, message_len);
   if ((key->type & SL_SE_KEY_TYPE_ALGORITHM_MASK) == SL_SE_KEY_TYPE_ECC_EDDSA) {
     sli_se_mailbox_command_add_input(se_cmd, &repeated_message_buffer);
   }
 
-  volatile sli_se_datatransfer_t signature_buffer = SLI_SE_DATATRANSFER_DEFAULT(signature, signature_len);
+  sli_se_datatransfer_t signature_buffer = SLI_SE_DATATRANSFER_DEFAULT(signature, signature_len);
   sli_se_mailbox_command_add_output(se_cmd, &signature_buffer);
 
   return sli_se_execute_and_wait(cmd_ctx);
@@ -209,10 +209,10 @@ sl_status_t sl_se_ecc_sign_deterministic(sl_se_command_context_t *cmd_ctx,
   // Add key input block to command
   sli_add_key_input(cmd_ctx, key, status);
 
-  volatile sli_se_datatransfer_t message_buffer = SLI_SE_DATATRANSFER_DEFAULT(message, message_len);
+  sli_se_datatransfer_t message_buffer = SLI_SE_DATATRANSFER_DEFAULT(message, message_len);
   sli_se_mailbox_command_add_input(se_cmd, &message_buffer);
 
-  volatile sli_se_datatransfer_t signature_buffer = SLI_SE_DATATRANSFER_DEFAULT(signature, signature_len);
+  sli_se_datatransfer_t signature_buffer = SLI_SE_DATATRANSFER_DEFAULT(signature, signature_len);
   sli_se_mailbox_command_add_output(se_cmd, &signature_buffer);
 
   return sli_se_execute_and_wait(cmd_ctx);
@@ -268,9 +268,9 @@ sl_status_t sl_se_ecc_verify(sl_se_command_context_t *cmd_ctx,
   // Add key input block to command
   sli_add_key_input(cmd_ctx, key, status);
 
-  volatile sli_se_datatransfer_t message_buffer = SLI_SE_DATATRANSFER_DEFAULT(message,
+  sli_se_datatransfer_t message_buffer = SLI_SE_DATATRANSFER_DEFAULT(message,
                                                                                 message_len);
-  volatile sli_se_datatransfer_t signature_buffer = SLI_SE_DATATRANSFER_DEFAULT(signature,
+  sli_se_datatransfer_t signature_buffer = SLI_SE_DATATRANSFER_DEFAULT(signature,
                                                                                   signature_len);
 
   if ((key->type & SL_SE_KEY_TYPE_ALGORITHM_MASK) == SL_SE_KEY_TYPE_ECC_EDDSA) {
@@ -338,11 +338,11 @@ sl_status_t sl_se_rsa_sign(sl_se_command_context_t *cmd_ctx,
   sli_add_key_metadata(cmd_ctx, key, status);
   sli_add_key_input(cmd_ctx, key, status);
 
-  volatile sli_se_datatransfer_t message_buffer =
+  sli_se_datatransfer_t message_buffer =
     SLI_SE_DATATRANSFER_DEFAULT(message, message_len);
   sli_se_mailbox_command_add_input(se_cmd, &message_buffer);
 
-  volatile sli_se_datatransfer_t signature_buffer =
+  sli_se_datatransfer_t signature_buffer =
     SLI_SE_DATATRANSFER_DEFAULT(signature, signature_len);
   sli_se_mailbox_command_add_output(se_cmd, &signature_buffer);
 
@@ -404,11 +404,11 @@ sl_status_t sl_se_rsa_verify(sl_se_command_context_t *cmd_ctx,
   sli_add_key_metadata(cmd_ctx, key, status);
   sli_add_key_input(cmd_ctx, key, status);
 
-  volatile sli_se_datatransfer_t message_buffer =
+  sli_se_datatransfer_t message_buffer =
     SLI_SE_DATATRANSFER_DEFAULT(message, message_len);
   sli_se_mailbox_command_add_input(se_cmd, &message_buffer);
 
-  volatile sli_se_datatransfer_t signature_buffer =
+  sli_se_datatransfer_t signature_buffer =
     SLI_SE_DATATRANSFER_DEFAULT(signature, signature_len);
   sli_se_mailbox_command_add_input(se_cmd, &signature_buffer);
 

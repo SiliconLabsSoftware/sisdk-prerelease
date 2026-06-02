@@ -23,12 +23,14 @@ requires:
 - name: "wisun_br_implementation"
 - name: "event_system"
 - name: "errno"
-- name: "wisun_dc_client_stubs"
+- name: "wisun_dc_client_implementation"
 - name: "hal_prs"
 - name: "clock_manager_runtime"
 - name: "event_queue_task"
 
 recommends:
+- id: "wisun_dc_client_stubs"
+  vendor: silabs
 - id: "wisun_br_common_library"
   vendor: silabs
 - id: "rail_lib_singleprotocol"

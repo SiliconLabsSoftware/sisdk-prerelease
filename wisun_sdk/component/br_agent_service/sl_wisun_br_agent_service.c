@@ -61,7 +61,7 @@
 // -----------------------------------------------------------------------------
 
 // Agent Service Thread stack size in words
-#define SL_WISUN_BR_AGENT_SERVICE_STACK_SIZE_WORD         (256UL)
+#define SL_WISUN_BR_AGENT_SERVICE_STACK_SIZE_WORD         (512UL)
 
 // Agent Service buffer size
 #define SL_WISUN_BR_AGENT_SERVICE_BUFF_SIZE               (2048U)

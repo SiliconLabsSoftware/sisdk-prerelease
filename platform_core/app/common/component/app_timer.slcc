@@ -136,3 +136,7 @@ validation_helper:
 - path: micriumos/app_timer_micriumos_validation.lua
   condition:
   - micriumos_kernel
+library:
+- system: rt
+  condition:
+  - linux

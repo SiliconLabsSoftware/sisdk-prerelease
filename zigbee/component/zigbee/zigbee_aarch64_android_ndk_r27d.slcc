@@ -1,5 +1,5 @@
 id: zigbee_aarch64_android_ndk_r27d
-label: Zigbee ARM64 (Android 15)
+label: Zigbee ARM64 (Android 15 - NDK r27d)
 package: zigbee
 category: Zigbee
 quality: production

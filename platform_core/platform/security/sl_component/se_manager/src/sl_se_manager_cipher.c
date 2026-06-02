@@ -88,10 +88,10 @@ sl_status_t sl_se_aes_crypt_ecb(sl_se_command_context_t *cmd_ctx,
   // Add key input block to command
   sli_add_key_input(cmd_ctx, key, status);
 
-  volatile sli_se_datatransfer_t in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
+  sli_se_datatransfer_t in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
   sli_se_mailbox_command_add_input(se_cmd, &in);
 
-  volatile sli_se_datatransfer_t out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_datatransfer_t out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
   sli_se_mailbox_command_add_output(se_cmd, &out);
 
   return sli_se_execute_and_wait(cmd_ctx);
@@ -137,13 +137,13 @@ sl_status_t sl_se_aes_crypt_cbc(sl_se_command_context_t *cmd_ctx,
   // Add key input block to command
   sli_add_key_input(cmd_ctx, key, status);
 
-  volatile sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, 16);
-  volatile sli_se_datatransfer_t in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
+  sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, 16);
+  sli_se_datatransfer_t in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
   sli_se_mailbox_command_add_input(se_cmd, &iv_in);
   sli_se_mailbox_command_add_input(se_cmd, &in);
 
-  volatile sli_se_datatransfer_t out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
-  volatile sli_se_datatransfer_t iv_out = SLI_SE_DATATRANSFER_DEFAULT(iv, 16);
+  sli_se_datatransfer_t out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_datatransfer_t iv_out = SLI_SE_DATATRANSFER_DEFAULT(iv, 16);
   sli_se_mailbox_command_add_output(se_cmd, &out);
   sli_se_mailbox_command_add_output(se_cmd, &iv_out);
 
@@ -205,13 +205,13 @@ sl_status_t sl_se_aes_crypt_cfb128(sl_se_command_context_t *cmd_ctx,
         // Add key input block to command
         sli_add_key_input(cmd_ctx, key, command_status);
 
-        volatile sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, 16);
-        volatile sli_se_datatransfer_t in = SLI_SE_DATATRANSFER_DEFAULT(&input[processed], iterations * 16);
+        sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, 16);
+        sli_se_datatransfer_t in = SLI_SE_DATATRANSFER_DEFAULT(&input[processed], iterations * 16);
         sli_se_mailbox_command_add_input(se_cmd, &iv_in);
         sli_se_mailbox_command_add_input(se_cmd, &in);
 
-        volatile sli_se_datatransfer_t out = SLI_SE_DATATRANSFER_DEFAULT(&output[processed], iterations * 16);
-        volatile sli_se_datatransfer_t iv_out = SLI_SE_DATATRANSFER_DEFAULT(iv, 16);
+        sli_se_datatransfer_t out = SLI_SE_DATATRANSFER_DEFAULT(&output[processed], iterations * 16);
+        sli_se_datatransfer_t iv_out = SLI_SE_DATATRANSFER_DEFAULT(iv, 16);
         sli_se_mailbox_command_add_output(se_cmd, &out);
         sli_se_mailbox_command_add_output(se_cmd, &iv_out);
 
@@ -389,13 +389,13 @@ sl_status_t sl_se_aes_crypt_ctr(sl_se_command_context_t *cmd_ctx,
         // Add key input block to command
         sli_add_key_input(cmd_ctx, key, command_status);
 
-        volatile sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(nonce_counter, SL_SE_AES_BLOCK_SIZE);
-        volatile sli_se_datatransfer_t in = SLI_SE_DATATRANSFER_DEFAULT(&input[processed], iterations * SL_SE_AES_BLOCK_SIZE);
+        sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(nonce_counter, SL_SE_AES_BLOCK_SIZE);
+        sli_se_datatransfer_t in = SLI_SE_DATATRANSFER_DEFAULT(&input[processed], iterations * SL_SE_AES_BLOCK_SIZE);
         sli_se_mailbox_command_add_input(se_cmd, &iv_in);
         sli_se_mailbox_command_add_input(se_cmd, &in);
 
-        volatile sli_se_datatransfer_t out = SLI_SE_DATATRANSFER_DEFAULT(&output[processed], iterations * SL_SE_AES_BLOCK_SIZE);
-        volatile sli_se_datatransfer_t iv_out = SLI_SE_DATATRANSFER_DEFAULT(nonce_counter, SL_SE_AES_BLOCK_SIZE);
+        sli_se_datatransfer_t out = SLI_SE_DATATRANSFER_DEFAULT(&output[processed], iterations * SL_SE_AES_BLOCK_SIZE);
+        sli_se_datatransfer_t iv_out = SLI_SE_DATATRANSFER_DEFAULT(nonce_counter, SL_SE_AES_BLOCK_SIZE);
         sli_se_mailbox_command_add_output(se_cmd, &out);
         sli_se_mailbox_command_add_output(se_cmd, &iv_out);
 
@@ -510,15 +510,15 @@ sl_status_t sl_se_ccm_encrypt_and_tag(sl_se_command_context_t *cmd_ctx,
   // Add key input block to command
   sli_add_key_input(cmd_ctx, key, command_status);
 
-  volatile sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(input, length);
-  volatile sli_se_datatransfer_t in_add = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
-  volatile sli_se_datatransfer_t in_nonce = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
+  sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(input, length);
+  sli_se_datatransfer_t in_add = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
+  sli_se_datatransfer_t in_nonce = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
   sli_se_mailbox_command_add_input(se_cmd, &in_nonce);
   sli_se_mailbox_command_add_input(se_cmd, &in_add);
   sli_se_mailbox_command_add_input(se_cmd, &in_data);
 
-  volatile sli_se_datatransfer_t out_data = SLI_SE_DATATRANSFER_DEFAULT(output, length);
-  volatile sli_se_datatransfer_t out_tag = SLI_SE_DATATRANSFER_DEFAULT(tag, tag_len);
+  sli_se_datatransfer_t out_data = SLI_SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_datatransfer_t out_tag = SLI_SE_DATATRANSFER_DEFAULT(tag, tag_len);
   sli_se_mailbox_command_add_output(se_cmd, &out_data);
   sli_se_mailbox_command_add_output(se_cmd, &out_tag);
 
@@ -589,16 +589,16 @@ sl_status_t sl_se_ccm_auth_decrypt(sl_se_command_context_t *cmd_ctx,
   // Add key input block to command
   sli_add_key_input(cmd_ctx, key, command_status);
 
-  volatile sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(input, length);
-  volatile sli_se_datatransfer_t in_add = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
-  volatile sli_se_datatransfer_t in_nonce = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
+  sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(input, length);
+  sli_se_datatransfer_t in_add = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
+  sli_se_datatransfer_t in_nonce = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
   sli_se_mailbox_command_add_input(se_cmd, &in_nonce);
   sli_se_mailbox_command_add_input(se_cmd, &in_add);
   sli_se_mailbox_command_add_input(se_cmd, &in_data);
 
-  volatile sli_se_datatransfer_t out_data = SLI_SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_datatransfer_t out_data = SLI_SE_DATATRANSFER_DEFAULT(output, length);
   sli_se_mailbox_command_add_output(se_cmd, &out_data);
-  volatile sli_se_datatransfer_t in_tag = SLI_SE_DATATRANSFER_DEFAULT(tag, tag_len);
+  sli_se_datatransfer_t in_tag = SLI_SE_DATATRANSFER_DEFAULT(tag, tag_len);
   sli_se_mailbox_command_add_input(se_cmd, &in_tag);
 
   command_status = sli_se_execute_and_wait(cmd_ctx);
@@ -1028,9 +1028,9 @@ sl_status_t sl_se_ccm_multipart_starts(sl_se_ccm_multipart_context_t *ccm_ctx,
     // For decryption, the pre-computed is compared to the input tag in
     // sl_se_ccm_multipart_finish.
 
-    volatile sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
-    volatile sli_se_datatransfer_t add_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
-    volatile sli_se_datatransfer_t tag_out = SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->mode_specific_buffer.tagbuf,
+    sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
+    sli_se_datatransfer_t add_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
+    sli_se_datatransfer_t tag_out = SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->mode_specific_buffer.tagbuf,
                                                                 tag_len);
 
     sli_se_command_init(cmd_ctx,
@@ -1060,11 +1060,11 @@ sl_status_t sl_se_ccm_multipart_starts(sl_se_ccm_multipart_context_t *ccm_ctx,
     }
     return status;
   }
-  volatile sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
-  volatile sli_se_datatransfer_t add_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
-  volatile sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
+  sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
+  sli_se_datatransfer_t add_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
+  sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
 
-  volatile sli_se_datatransfer_t message_length_in = SLI_SE_DATATRANSFER_DEFAULT(&total_message_length, sizeof(uint32_t));
+  sli_se_datatransfer_t message_length_in = SLI_SE_DATATRANSFER_DEFAULT(&total_message_length, sizeof(uint32_t));
 
   sli_se_command_init(cmd_ctx,
                       ((ccm_ctx->mode == SL_SE_DECRYPT)
@@ -1175,14 +1175,14 @@ sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
       return SL_STATUS_OK;
     }
 
-    volatile sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
+    sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
 
-    volatile sli_se_datatransfer_t data_in =
+    sli_se_datatransfer_t data_in =
       SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->mode_specific_buffer.final_data, 16);
-    volatile sli_se_datatransfer_t data_out =
+    sli_se_datatransfer_t data_out =
       SLI_SE_DATATRANSFER_DEFAULT(output, 16);
 
-    volatile sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
+    sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
 
     sli_se_command_init(cmd_ctx,
                         ((ccm_ctx->mode == SL_SE_DECRYPT)
@@ -1242,14 +1242,14 @@ sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
     }
   }
 
-  volatile sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
+  sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
 
-  volatile sli_se_datatransfer_t data_in =
+  sli_se_datatransfer_t data_in =
     SLI_SE_DATATRANSFER_DEFAULT(input, length);
-  volatile sli_se_datatransfer_t data_out =
+  sli_se_datatransfer_t data_out =
     SLI_SE_DATATRANSFER_DEFAULT(output, length);
 
-  volatile sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
+  sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
 
   sli_se_command_init(cmd_ctx,
                       ((ccm_ctx->mode == SL_SE_DECRYPT)
@@ -1329,13 +1329,13 @@ sl_status_t sl_se_ccm_multipart_finish(sl_se_ccm_multipart_context_t *ccm_ctx,
 
   sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
 
-  volatile sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
+  sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
 
-  volatile sli_se_datatransfer_t data_in =
+  sli_se_datatransfer_t data_in =
     SLI_SE_DATATRANSFER_DEFAULT(ccm_ctx->mode_specific_buffer.final_data, ccm_ctx->final_data_length);
 
-  volatile sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, ccm_ctx->final_data_length);
-  volatile sli_se_datatransfer_t tag_buf = SLI_SE_DATATRANSFER_DEFAULT(tag,
+  sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, ccm_ctx->final_data_length);
+  sli_se_datatransfer_t tag_buf = SLI_SE_DATATRANSFER_DEFAULT(tag,
                                                               ccm_ctx->tag_len);
 
   sli_se_command_init(cmd_ctx,
@@ -1416,11 +1416,11 @@ sl_status_t sl_se_cmac(sl_se_command_context_t *cmd_ctx,
   sli_add_key_input(cmd_ctx, key, status);
 
   // Data input.
-  volatile sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(input, input_len);
+  sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(input, input_len);
   sli_se_mailbox_command_add_input(se_cmd, &in_data);
 
   // Data output.
-  volatile sli_se_datatransfer_t out_tag = SLI_SE_DATATRANSFER_DEFAULT(output, 16);
+  sli_se_datatransfer_t out_tag = SLI_SE_DATATRANSFER_DEFAULT(output, 16);
   sli_se_mailbox_command_add_output(se_cmd, &out_tag);
 
   return sli_se_execute_and_wait(cmd_ctx);
@@ -1471,10 +1471,10 @@ sl_status_t sl_se_cmac_multipart_finish(sl_se_cmac_multipart_context_t *cmac_ctx
     sli_add_key_metadata(cmd_ctx, key, status);
     sli_add_key_input(cmd_ctx, key, status);
 
-    volatile sli_se_datatransfer_t in_data1 = SLI_SE_DATATRANSFER_DEFAULT(cmac_ctx->state, 16U);
-    volatile sli_se_datatransfer_t in_data2 = SLI_SE_DATATRANSFER_DEFAULT(cmac_ctx->data_in,
+    sli_se_datatransfer_t in_data1 = SLI_SE_DATATRANSFER_DEFAULT(cmac_ctx->state, 16U);
+    sli_se_datatransfer_t in_data2 = SLI_SE_DATATRANSFER_DEFAULT(cmac_ctx->data_in,
                                                                  cmac_ctx->length & 0xFU);
-    volatile sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(cmac_ctx->data_in,
+    sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(cmac_ctx->data_in,
                                                                 cmac_ctx->length);
     // Data input.
     if (cmac_ctx->length >= 16U) {
@@ -1487,7 +1487,7 @@ sl_status_t sl_se_cmac_multipart_finish(sl_se_cmac_multipart_context_t *cmac_ctx
     }
 
     // Data output.
-    volatile sli_se_datatransfer_t out_tag = SLI_SE_DATATRANSFER_DEFAULT(output, 16U);
+    sli_se_datatransfer_t out_tag = SLI_SE_DATATRANSFER_DEFAULT(output, 16U);
     sli_se_mailbox_command_add_output(se_cmd, &out_tag);
 
     status = sli_se_execute_and_wait(cmd_ctx);
@@ -1560,25 +1560,25 @@ sl_status_t sl_se_cmac_multipart_update(sl_se_cmac_multipart_context_t *cmac_ctx
     // Add key input block to command.
     sli_add_key_input(cmd_ctx, key, status);
 
-    volatile sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(cmac_ctx->state, 16U);
+    sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(cmac_ctx->state, 16U);
     sli_se_mailbox_command_add_input(se_cmd, &iv_in);
 
     // Data input, collect data from two sources.
-    volatile sli_se_datatransfer_t in1 = SLI_SE_DATATRANSFER_DEFAULT(cmac_ctx->data_in, pending);
-    volatile sli_se_datatransfer_t in2 = SLI_SE_DATATRANSFER_DEFAULT(input, bytes_to_process - pending);
+    sli_se_datatransfer_t in1 = SLI_SE_DATATRANSFER_DEFAULT(cmac_ctx->data_in, pending);
+    sli_se_datatransfer_t in2 = SLI_SE_DATATRANSFER_DEFAULT(input, bytes_to_process - pending);
     in1.length &= ~SLI_SE_DATATRANSFER_REALIGN;
     sli_se_mailbox_command_add_input(se_cmd, &in1);
     sli_se_mailbox_command_add_input(se_cmd, &in2);
 
     // Data output, discard everything except the last 16 bytes.
-    volatile sli_se_datatransfer_t out1 = SLI_SE_DATATRANSFER_DEFAULT(NULL, bytes_to_process - 16U);
-    volatile sli_se_datatransfer_t out2 = SLI_SE_DATATRANSFER_DEFAULT(cmac_ctx->data_out, 16U);
+    sli_se_datatransfer_t out1 = SLI_SE_DATATRANSFER_DEFAULT(NULL, bytes_to_process - 16U);
+    sli_se_datatransfer_t out2 = SLI_SE_DATATRANSFER_DEFAULT(cmac_ctx->data_out, 16U);
     out1.length |= SLI_SE_DATATRANSFER_DISCARD;
     out1.length &= ~SLI_SE_DATATRANSFER_REALIGN;
     sli_se_mailbox_command_add_output(se_cmd, &out1);
     sli_se_mailbox_command_add_output(se_cmd, &out2);
 
-    volatile sli_se_datatransfer_t iv_out = SLI_SE_DATATRANSFER_DEFAULT(cmac_ctx->state, 16U);
+    sli_se_datatransfer_t iv_out = SLI_SE_DATATRANSFER_DEFAULT(cmac_ctx->state, 16U);
     sli_se_mailbox_command_add_output(se_cmd, &iv_out);
 
     status = sli_se_execute_and_wait(cmd_ctx);
@@ -1680,11 +1680,11 @@ sl_status_t sl_se_hmac(sl_se_command_context_t *cmd_ctx,
   sli_add_key_input(cmd_ctx, key, status);
 
   // Data input.
-  volatile sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(message, message_len);
+  sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(message, message_len);
   sli_se_mailbox_command_add_input(se_cmd, &in_data);
 
   // Data output.
-  volatile sli_se_datatransfer_t out_hmac = SLI_SE_DATATRANSFER_DEFAULT(output, hmac_len);
+  sli_se_datatransfer_t out_hmac = SLI_SE_DATATRANSFER_DEFAULT(output, hmac_len);
   sli_se_mailbox_command_add_output(se_cmd, &out_hmac);
 
   return sli_se_execute_and_wait(cmd_ctx);
@@ -1749,19 +1749,19 @@ sl_status_t sl_se_gcm_crypt_and_tag(sl_se_command_context_t *cmd_ctx,
     sli_add_key_metadata(cmd_ctx, key, status);
     sli_add_key_input(cmd_ctx, key, status);
 
-    volatile sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
+    sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
     sli_se_mailbox_command_add_input(se_cmd, &iv_in);
 
-    volatile sli_se_datatransfer_t aad_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
+    sli_se_datatransfer_t aad_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
     sli_se_mailbox_command_add_input(se_cmd, &aad_in);
 
-    volatile sli_se_datatransfer_t data_in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
+    sli_se_datatransfer_t data_in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
     sli_se_mailbox_command_add_input(se_cmd, &data_in);
 
-    volatile sli_se_datatransfer_t tag_in = SLI_SE_DATATRANSFER_DEFAULT(tag, tag_len);
+    sli_se_datatransfer_t tag_in = SLI_SE_DATATRANSFER_DEFAULT(tag, tag_len);
     sli_se_mailbox_command_add_input(se_cmd, &tag_in);
 
-    volatile sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
+    sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
     if (output == NULL) {
       data_out.length |= SLI_SE_DATATRANSFER_DISCARD;
     }
@@ -1789,22 +1789,22 @@ sl_status_t sl_se_gcm_crypt_and_tag(sl_se_command_context_t *cmd_ctx,
   sli_add_key_metadata(cmd_ctx, key, status);
   sli_add_key_input(cmd_ctx, key, status);
 
-  volatile sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
+  sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
   sli_se_mailbox_command_add_input(se_cmd, &iv_in);
 
-  volatile sli_se_datatransfer_t aad_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
+  sli_se_datatransfer_t aad_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
   sli_se_mailbox_command_add_input(se_cmd, &aad_in);
 
-  volatile sli_se_datatransfer_t data_in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
+  sli_se_datatransfer_t data_in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
   sli_se_mailbox_command_add_input(se_cmd, &data_in);
 
-  volatile sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
   if (output == NULL) {
     data_out.length |= SLI_SE_DATATRANSFER_DISCARD;
   }
   sli_se_mailbox_command_add_output(se_cmd, &data_out);
 
-  volatile sli_se_datatransfer_t mac_out = SLI_SE_DATATRANSFER_DEFAULT(tagbuf, sizeof(tagbuf));
+  sli_se_datatransfer_t mac_out = SLI_SE_DATATRANSFER_DEFAULT(tagbuf, sizeof(tagbuf));
   sli_se_mailbox_command_add_output(se_cmd, &mac_out);
 
   // Execute GCM operation.
@@ -1875,19 +1875,19 @@ sl_status_t sl_se_gcm_auth_decrypt(sl_se_command_context_t *cmd_ctx,
   sli_add_key_metadata(cmd_ctx, key, status);
   sli_add_key_input(cmd_ctx, key, status);
 
-  volatile sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
+  sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
   sli_se_mailbox_command_add_input(se_cmd, &iv_in);
 
-  volatile sli_se_datatransfer_t aad_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
+  sli_se_datatransfer_t aad_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
   sli_se_mailbox_command_add_input(se_cmd, &aad_in);
 
-  volatile sli_se_datatransfer_t data_in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
+  sli_se_datatransfer_t data_in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
   sli_se_mailbox_command_add_input(se_cmd, &data_in);
 
-  volatile sli_se_datatransfer_t tag_in = SLI_SE_DATATRANSFER_DEFAULT(tag, tag_len);
+  sli_se_datatransfer_t tag_in = SLI_SE_DATATRANSFER_DEFAULT(tag, tag_len);
   sli_se_mailbox_command_add_input(se_cmd, &tag_in);
 
-  volatile sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
   if (output == NULL) {
     data_out.length |= SLI_SE_DATATRANSFER_DISCARD;
   }
@@ -1948,9 +1948,9 @@ sl_status_t sl_se_gcm_multipart_starts(sl_se_gcm_multipart_context_t *gcm_ctx,
   // input data < 16 run sl_se_gcm_auth_decrypt()/sl_se_gcm_crypt_and_tag() in
   // sl_se_gcm_multipart_finish.
   if ( add_len > 0 ) {
-    volatile sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
-    volatile sli_se_datatransfer_t add_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
-    volatile sli_se_datatransfer_t ctx_out =
+    sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
+    sli_se_datatransfer_t add_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
+    sli_se_datatransfer_t ctx_out =
       SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
 
     sli_se_command_init(cmd_ctx,
@@ -2034,9 +2034,9 @@ sl_status_t sl_se_gcm_multipart_starts(sl_se_gcm_multipart_context_t *gcm_ctx,
     // sl_se_gcm_auth_decrypt()/sl_se_gcm_crypt_and_tag() in finish, so this is only
     // an issue for 0 input data and add_len != 0.
     sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
-    volatile sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
-    volatile sli_se_datatransfer_t add_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
-    volatile sli_se_datatransfer_t tag_out = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->tagbuf,
+    sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(iv, iv_len);
+    sli_se_datatransfer_t add_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
+    sli_se_datatransfer_t tag_out = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->tagbuf,
                                                                 sizeof(gcm_ctx->tagbuf));
     sli_se_command_init(cmd_ctx,
                         SLI_SE_COMMAND_AES_GCM_ENCRYPT
@@ -2060,7 +2060,7 @@ sl_status_t sl_se_gcm_multipart_starts(sl_se_gcm_multipart_context_t *gcm_ctx,
       return status;
     }
 
-    volatile sli_se_datatransfer_t ctx_out =
+    sli_se_datatransfer_t ctx_out =
       SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
 
     // Reuse the values of the command context object from the previous
@@ -2152,14 +2152,14 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
     memcpy(gcm_ctx->final_data + gcm_ctx->final_data_length, input, stored_res_length);
 
     //The gcm_ctx->se_ctx buffer contain iv data with length 12 if gcm_ctx->first_operation = true
-    volatile sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+    sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
                                                                   gcm_ctx->first_operation ? 12 : sizeof(gcm_ctx->se_ctx));
 
-    volatile sli_se_datatransfer_t data_in =
+    sli_se_datatransfer_t data_in =
       SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->final_data, 16);
 
-    volatile sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, 16);
-    volatile sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+    sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, 16);
+    sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
                                                                 sizeof(gcm_ctx->se_ctx));
 
     sli_se_command_init(cmd_ctx,
@@ -2219,14 +2219,14 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
   }
   gcm_ctx->len += length;
 
-  volatile sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+  sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
                                                                 gcm_ctx->first_operation ? 12 : sizeof(gcm_ctx->se_ctx));
 
-  volatile sli_se_datatransfer_t data_in =
+  sli_se_datatransfer_t data_in =
     SLI_SE_DATATRANSFER_DEFAULT(input + stored_res_length, length);
 
-  volatile sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
-  volatile sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+  sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
                                                               sizeof(gcm_ctx->se_ctx));
 
   sli_se_command_init(cmd_ctx,
@@ -2345,14 +2345,14 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
     stored_res_length = 16 - gcm_ctx->final_data_length;
     memcpy(gcm_ctx->final_data + gcm_ctx->final_data_length, input, stored_res_length);
 
-    volatile sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+    sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
                                                                   gcm_ctx->first_operation ? 12 : sizeof(gcm_ctx->se_ctx));
 
-    volatile sli_se_datatransfer_t data_in =
+    sli_se_datatransfer_t data_in =
       SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->final_data, 16);
 
-    volatile sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, 16);
-    volatile sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+    sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, 16);
+    sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
                                                                 sizeof(gcm_ctx->se_ctx));
 
     sli_se_command_init(cmd_ctx,
@@ -2423,14 +2423,14 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
       gcm_ctx->final_data_length = 16;
 
       //The gcm_ctx->se_ctx buffer contain iv data with length 12 if gcm_ctx->first_operation = true
-      volatile sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+      sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
                                                                     gcm_ctx->first_operation ? 12 : sizeof(gcm_ctx->se_ctx));
 
-      volatile sli_se_datatransfer_t data_in =
+      sli_se_datatransfer_t data_in =
         SLI_SE_DATATRANSFER_DEFAULT(input + stored_res_length, length - 16);
 
-      volatile sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length - 16);
-      volatile sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+      sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length - 16);
+      sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
                                                                   sizeof(gcm_ctx->se_ctx));
 
       sli_se_command_init(cmd_ctx,
@@ -2479,14 +2479,14 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
   gcm_ctx->len += length;
 
   // The gcm_ctx->se_ctx buffer contain iv data with length 12 if gcm_ctx->first_operation = true
-  volatile sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+  sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
                                                                 gcm_ctx->first_operation ? 12 : sizeof(gcm_ctx->se_ctx));
 
-  volatile sli_se_datatransfer_t data_in =
+  sli_se_datatransfer_t data_in =
     SLI_SE_DATATRANSFER_DEFAULT(input + stored_res_length, length);
 
-  volatile sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
-  volatile sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+  sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
                                                               sizeof(gcm_ctx->se_ctx));
 
   sli_se_command_init(cmd_ctx,
@@ -2631,25 +2631,25 @@ sl_status_t sl_se_gcm_multipart_finish(sl_se_gcm_multipart_context_t *gcm_ctx,
   tmpbuf[2] = __REV((uint32_t)(gcm_ctx->len >> 29));
   tmpbuf[3] = __REV((uint32_t)(gcm_ctx->len << 3) & 0xFFFFFFFFUL);
 
-  volatile sli_se_datatransfer_t data_in =
+  sli_se_datatransfer_t data_in =
     SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->final_data, length);
 
   #if defined(SLI_SE_MAJOR_VERSION_ONE)
-  volatile sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT((length % 16 != 0 || length == 0) ? gcm_ctx->se_ctx : gcm_ctx->previous_se_ctx, sizeof(gcm_ctx->previous_se_ctx));
+  sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT((length % 16 != 0 || length == 0) ? gcm_ctx->se_ctx : gcm_ctx->previous_se_ctx, sizeof(gcm_ctx->previous_se_ctx));
   #else
-  volatile sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
+  sli_se_datatransfer_t iv_ctx_in = SLI_SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
   #endif
 
-  volatile sli_se_datatransfer_t lenalenc_in = SLI_SE_DATATRANSFER_DEFAULT(&tmpbuf[0],
+  sli_se_datatransfer_t lenalenc_in = SLI_SE_DATATRANSFER_DEFAULT(&tmpbuf[0],
                                                                   sizeof(tmpbuf));
 
-  volatile sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
   if (length == 16) {
     data_out.data = NULL;
     data_out.length |= SLI_SE_DATATRANSFER_DISCARD;
   }
 
-  volatile sli_se_datatransfer_t gcm_tag = SLI_SE_DATATRANSFER_DEFAULT(tag, tag_length);
+  sli_se_datatransfer_t gcm_tag = SLI_SE_DATATRANSFER_DEFAULT(tag, tag_length);
 
   sli_se_command_init(cmd_ctx,
                       (gcm_ctx->mode == SL_SE_DECRYPT ? SLI_SE_COMMAND_AES_GCM_DECRYPT
@@ -2740,19 +2740,19 @@ sl_status_t sl_se_chacha20_crypt(sl_se_command_context_t *cmd_ctx,
   sli_add_key_input(cmd_ctx, key, status);
 
   // Add initial counter to command
-  volatile sli_se_datatransfer_t counter = SLI_SE_DATATRANSFER_DEFAULT(initial_counter, 4);
+  sli_se_datatransfer_t counter = SLI_SE_DATATRANSFER_DEFAULT(initial_counter, 4);
   sli_se_mailbox_command_add_input(se_cmd, &counter);
 
   // Add nonce/IV to command
-  volatile sli_se_datatransfer_t iv = SLI_SE_DATATRANSFER_DEFAULT(nonce, 12);
+  sli_se_datatransfer_t iv = SLI_SE_DATATRANSFER_DEFAULT(nonce, 12);
   sli_se_mailbox_command_add_input(se_cmd, &iv);
 
   // Add input data to command
-  volatile sli_se_datatransfer_t in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
+  sli_se_datatransfer_t in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
   sli_se_mailbox_command_add_input(se_cmd, &in);
 
   // Request output data from command
-  volatile sli_se_datatransfer_t out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_datatransfer_t out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
   sli_se_mailbox_command_add_output(se_cmd, &out);
 
   return sli_se_execute_and_wait(cmd_ctx);
@@ -2794,22 +2794,22 @@ sl_status_t sl_se_chacha20_poly1305_encrypt_and_tag(sl_se_command_context_t *cmd
   sli_add_key_metadata(cmd_ctx, key, status);
   sli_add_key_input(cmd_ctx, key, status);
 
-  volatile sli_se_datatransfer_t nonce_in = SLI_SE_DATATRANSFER_DEFAULT(nonce, 12);
+  sli_se_datatransfer_t nonce_in = SLI_SE_DATATRANSFER_DEFAULT(nonce, 12);
   sli_se_mailbox_command_add_input(se_cmd, &nonce_in);
 
-  volatile sli_se_datatransfer_t aad_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
+  sli_se_datatransfer_t aad_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
   sli_se_mailbox_command_add_input(se_cmd, &aad_in);
 
-  volatile sli_se_datatransfer_t data_in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
+  sli_se_datatransfer_t data_in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
   sli_se_mailbox_command_add_input(se_cmd, &data_in);
 
-  volatile sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
   if (output == NULL) {
     data_out.length |= SLI_SE_DATATRANSFER_DISCARD;
   }
   sli_se_mailbox_command_add_output(se_cmd, &data_out);
 
-  volatile sli_se_datatransfer_t mac_out = SLI_SE_DATATRANSFER_DEFAULT(tag, 16);
+  sli_se_datatransfer_t mac_out = SLI_SE_DATATRANSFER_DEFAULT(tag, 16);
   if (tag == NULL) {
     mac_out.length |= SLI_SE_DATATRANSFER_DISCARD;
   }
@@ -2855,19 +2855,19 @@ sl_status_t sl_se_chacha20_poly1305_auth_decrypt(sl_se_command_context_t *cmd_ct
   sli_add_key_metadata(cmd_ctx, key, status);
   sli_add_key_input(cmd_ctx, key, status);
 
-  volatile sli_se_datatransfer_t nonce_in = SLI_SE_DATATRANSFER_DEFAULT(nonce, 12);
+  sli_se_datatransfer_t nonce_in = SLI_SE_DATATRANSFER_DEFAULT(nonce, 12);
   sli_se_mailbox_command_add_input(se_cmd, &nonce_in);
 
-  volatile sli_se_datatransfer_t aad_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
+  sli_se_datatransfer_t aad_in = SLI_SE_DATATRANSFER_DEFAULT(add, add_len);
   sli_se_mailbox_command_add_input(se_cmd, &aad_in);
 
-  volatile sli_se_datatransfer_t data_in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
+  sli_se_datatransfer_t data_in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
   sli_se_mailbox_command_add_input(se_cmd, &data_in);
 
-  volatile sli_se_datatransfer_t mac_in = SLI_SE_DATATRANSFER_DEFAULT(tag, 16);
+  sli_se_datatransfer_t mac_in = SLI_SE_DATATRANSFER_DEFAULT(tag, 16);
   sli_se_mailbox_command_add_input(se_cmd, &mac_in);
 
-  volatile sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
   if (output == NULL) {
     data_out.length |= SLI_SE_DATATRANSFER_DISCARD;
   }
@@ -2913,15 +2913,15 @@ sl_status_t sl_se_poly1305_genkey_tag(sl_se_command_context_t *cmd_ctx,
   sli_add_key_input(cmd_ctx, key, status);
 
   // Add nonce/IV to command
-  volatile sli_se_datatransfer_t iv = SLI_SE_DATATRANSFER_DEFAULT(nonce, 12);
+  sli_se_datatransfer_t iv = SLI_SE_DATATRANSFER_DEFAULT(nonce, 12);
   sli_se_mailbox_command_add_input(se_cmd, &iv);
 
   // Add input data to command
-  volatile sli_se_datatransfer_t in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
+  sli_se_datatransfer_t in = SLI_SE_DATATRANSFER_DEFAULT(input, length);
   sli_se_mailbox_command_add_input(se_cmd, &in);
 
   // Request tag from command
-  volatile sli_se_datatransfer_t out = SLI_SE_DATATRANSFER_DEFAULT(tag, 16);
+  sli_se_datatransfer_t out = SLI_SE_DATATRANSFER_DEFAULT(tag, 16);
   sli_se_mailbox_command_add_output(se_cmd, &out);
 
   return sli_se_execute_and_wait(cmd_ctx);
@@ -3002,11 +3002,11 @@ sl_status_t sl_se_hmac_multipart_starts(sl_se_command_context_t *cmd_ctx,
   sli_add_key_input(cmd_ctx, key, status);
 
   // Data input.
-  volatile sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(message, message_len);
+  sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(message, message_len);
   sli_se_mailbox_command_add_input(se_cmd, &in_data);
 
   // Data output.
-  volatile sli_se_datatransfer_t out_hmac_state = SLI_SE_DATATRANSFER_DEFAULT(state_out, hmac_state_len);
+  sli_se_datatransfer_t out_hmac_state = SLI_SE_DATATRANSFER_DEFAULT(state_out, hmac_state_len);
   sli_se_mailbox_command_add_output(se_cmd, &out_hmac_state);
 
   return sli_se_execute_and_wait(cmd_ctx);
@@ -3071,12 +3071,12 @@ sl_status_t sl_se_hmac_multipart_update(sl_se_command_context_t *cmd_ctx,
   sli_se_mailbox_command_add_parameter(se_cmd, message_len);
 
   // Data input.
-  volatile sli_se_datatransfer_t in_hmac_state = SLI_SE_DATATRANSFER_DEFAULT(state_in_out, hmac_state_len);
-  volatile sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(message, message_len);
+  sli_se_datatransfer_t in_hmac_state = SLI_SE_DATATRANSFER_DEFAULT(state_in_out, hmac_state_len);
+  sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(message, message_len);
   sli_se_mailbox_command_add_input(se_cmd, &in_hmac_state);
   sli_se_mailbox_command_add_input(se_cmd, &in_data);
 
-  volatile sli_se_datatransfer_t out_hmac_state = SLI_SE_DATATRANSFER_DEFAULT(state_in_out, hmac_state_len);
+  sli_se_datatransfer_t out_hmac_state = SLI_SE_DATATRANSFER_DEFAULT(state_in_out, hmac_state_len);
   sli_se_mailbox_command_add_output(se_cmd, &out_hmac_state);
 
   return sli_se_execute_and_wait(cmd_ctx);
@@ -3163,13 +3163,13 @@ sl_status_t sl_se_hmac_multipart_finish(sl_se_command_context_t *cmd_ctx,
   sli_add_key_input(cmd_ctx, key, status);
 
   // Data input.
-  volatile sli_se_datatransfer_t state_in_data = SLI_SE_DATATRANSFER_DEFAULT(state_in, hmac_state_len);
-  volatile sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(message, message_len);
+  sli_se_datatransfer_t state_in_data = SLI_SE_DATATRANSFER_DEFAULT(state_in, hmac_state_len);
+  sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(message, message_len);
   sli_se_mailbox_command_add_input(se_cmd, &state_in_data);
   sli_se_mailbox_command_add_input(se_cmd, &in_data);
 
   // Data output.
-  volatile sli_se_datatransfer_t out_hmac = SLI_SE_DATATRANSFER_DEFAULT(output, hmac_len);
+  sli_se_datatransfer_t out_hmac = SLI_SE_DATATRANSFER_DEFAULT(output, hmac_len);
   sli_se_mailbox_command_add_output(se_cmd, &out_hmac);
 
   return sli_se_execute_and_wait(cmd_ctx);

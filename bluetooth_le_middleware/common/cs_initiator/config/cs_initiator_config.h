@@ -3,7 +3,7 @@
  * @brief CS initiator - configuration header
  *******************************************************************************
  * # License
- * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -77,18 +77,10 @@
 
 // <o CS_INITIATOR_MAX_CONNECTIONS> Maximum initiator connections <1..4>
 // <i> If more than 1 initiator instances are created SL_BT_CONFIG_BUFFER_SIZE shall be increased.
-// <i> If more than 2 initiator instances are created, set CS_INITIATOR_DISABLE_CONNECTION_PARAMETER_UPDATE to 1.
 // <i> Default: 1
 #ifndef CS_INITIATOR_MAX_CONNECTIONS
 #define CS_INITIATOR_MAX_CONNECTIONS                  (1)
 #endif
-
-// <q CS_INITIATOR_DISABLE_CONNECTION_PARAMETER_UPDATE> Disable Connection parameter update
-// <i> Disable connection parameter update during the initiator instance creation.
-// <i> Connection parameter updates may degrade reliability when more than 2 initiator instances are created.
-// <i> If set to 1, the application must use sl_bt_connection_set_default_parameters.
-// <i> Default: 0
-#define CS_INITIATOR_DISABLE_CONNECTION_PARAMETER_UPDATE          (0)
 
 // <o CS_INITIATOR_MAX_RANGING_DATA_SIZE> Maximum ranging data size <32..2700>
 // <i> The optimal value of "Maximum ranging data size" is dependent on several configuration values,

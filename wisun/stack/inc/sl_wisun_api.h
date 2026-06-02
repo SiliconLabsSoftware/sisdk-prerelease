@@ -1436,8 +1436,10 @@ sl_status_t sl_wisun_set_last_gasp(bool enable);
  *   - **false**: disable First Breath and tear down the associated route
  * @return SL_STATUS_OK if successful, an error code otherwise
  *
- * When First Breath becomes ready to send application datagrams, the stack may raise
- * @ref SL_WISUN_MSG_FB_READY_IND_ID.
+ * When the stack is ready to route datagrams, the event
+ * @ref SL_WISUN_MSG_FB_READY_IND_ID is raised to notify the application.
+ * On reception of the event, the application needs to use a socket with DSCP
+ * set to DSCP_EF to send First Breath data.
  *
  * Available in libraries: Full, FFN (see @ref API_AVAILABILITY)
  *****************************************************************************/

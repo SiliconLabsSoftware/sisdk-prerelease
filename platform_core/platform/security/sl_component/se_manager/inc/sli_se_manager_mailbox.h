@@ -415,12 +415,12 @@ typedef struct {
   volatile void* volatile data; /**< Data pointer */
   volatile void* volatile next; /**< Next descriptor */
   volatile uint32_t length;     /**< Length */
-} sli_se_datatransfer_t;
+} volatile sli_se_datatransfer_t;
 
 /** Default initialization of data transfer struct */
 #define SLI_SE_DATATRANSFER_DEFAULT(address, data_size)                                          \
   {                                                                                              \
-    .data = (void*)(address),                        /* Pointer to data block */                 \
+    .data = (void*)(address),                            /* Pointer to data block */             \
     .next = (void*)SLI_SE_DATATRANSFER_STOP,             /* This is the last block by default */ \
     .length = (data_size) | SLI_SE_DATATRANSFER_REALIGN  /* Add size, use realign by default */  \
   }
@@ -433,8 +433,8 @@ typedef struct {
  ******************************************************************************/
 typedef struct {
   uint32_t command;                                   /**< SE Command */
-  volatile sli_se_datatransfer_t* data_in;            /**< Input data */
-  volatile sli_se_datatransfer_t* data_out;           /**< Output data */
+  sli_se_datatransfer_t* volatile data_in;            /**< Input data */
+  sli_se_datatransfer_t* volatile data_out;           /**< Output data */
   uint32_t parameters[SLI_SE_COMMAND_MAX_PARAMETERS]; /**< Parameters */
   size_t num_parameters;                              /**< Number of parameters */
 } sli_se_mailbox_command_t;
@@ -476,7 +476,7 @@ typedef uint32_t sli_se_mailbox_response_t;
  * @param[in]  data
  *   Pointer to a data transfer structure.
  ******************************************************************************/
-void sli_se_mailbox_command_add_input(sli_se_mailbox_command_t *command, volatile sli_se_datatransfer_t *data);
+void sli_se_mailbox_command_add_input(sli_se_mailbox_command_t *command, sli_se_datatransfer_t *data);
 
 /***************************************************************************//**
  * @brief
@@ -498,7 +498,7 @@ void sli_se_mailbox_command_add_input(sli_se_mailbox_command_t *command, volatil
  * @param[in]  data
  *   Pointer to a data transfer structure.
  ******************************************************************************/
-void sli_se_mailbox_command_add_output(sli_se_mailbox_command_t *command, volatile sli_se_datatransfer_t *data);
+void sli_se_mailbox_command_add_output(sli_se_mailbox_command_t *command, sli_se_datatransfer_t *data);
 
 /***************************************************************************//**
  * @brief

@@ -38,7 +38,6 @@ component:
   - id: wisun_stack_debug
   - id: wisun_default_radioconf
   - id: wisun_stack_dc_client
-  - id: wisun_dc_client_library
 
   # platform
   - id: sl_main

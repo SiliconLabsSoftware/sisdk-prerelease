@@ -8,6 +8,9 @@ upgrade:
   - sdk:
       id: simplicity_sdk
       version: 2026.6.0
+    configuration:
+      - script: zwave/component/scripts/sleeptimer_peripheral_upgrade.lua
+        description: Migrate sleeptimer peripheral to SL_SLEEPTIMER_PERIPHERAL_DEFAULT for Z-Wave Core on Series 2
     component:
       - trigger: zw_cli_common
         description: >

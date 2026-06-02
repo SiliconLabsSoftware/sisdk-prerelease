@@ -1,27 +1,41 @@
 id: "wisun_stack_dc_client"
-label: "Wi-SUN Direct connect Client device type"
+label: "Wi-SUN Direct Connect Client Support"
 description: >
-  Wi-SUN Direct Connect client device type. Provides stack device type for
-  DC-client-only builds.
+  Adds Wi-SUN Direct Connect (DC) client capability.
 package: "wisun"
 category: "Wi-SUN|Stack"
-quality: "evaluation"
+quality: "production"
 root_path: "wisun/./stack"
 
-ui_hints:
-  visibility: never
+# We would like to have:
+#   requires:
+#     - name: wisun_dc_client_implementation
+#   recommends:
+#     - name: wisun_dc_client_plugin
+#       condition: [wisun_stack_ffn]
+#     - name: wisun_dc_client_library
+#       unless: [wisun_stack_ffn]
+# But this does not work because of some slc limitations, so the following must
+# be done as a workaround. Note that "unless" is not officially supported by
+# "recommends", but it seems to work in practice.
 
 requires:
 - name: "device_supports_wisun"
-- name: "wisun_dc_client_library"
+- name: "wisun_dc_client_implementation"
+- name: "wisun_dc_client_plugin"
+  condition: [wisun_stack_ffn]
+
+recommends:
+- id: "wisun_dc_client_library"
+  unless: [wisun_stack_ffn]
+  vendor: silabs
 
 conflicts:
 - name: "wisun_br_stack"
-- name: "wisun_stack_ffn"
-- name: "wisun_stack_lfn"
 
 source:
 - path: "src/sl_wisun_regdb.c"
+  condition: [wisun_dc_client_library]
   project:
     transfer_ownership: true
 
@@ -31,6 +45,7 @@ define:
 provides:
 - name: "wisun_stack_dc_client"
 - name: "wisun_stack_device_type"
+  condition: [wisun_dc_client_library]
 
 metadata:
   sbom:

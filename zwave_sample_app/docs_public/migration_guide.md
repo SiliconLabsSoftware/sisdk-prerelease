@@ -4,6 +4,13 @@ This guide shows how to migrate projects from previous SDKs to a newer one.
 
 # 8.1.0 {#migrate-section-8-1-0}
 
+## Sleeptimer peripheral configuration 
+
+In 8.1.0, Z-Wave applications on Series 2 must use SL_SLEEPTIMER_PERIPHERAL_DEFAULT (SYSRTC) for the platform sleeptimer. BURTC is reserved for Z-Wave power management (zw_shutdown_manager).
+
+When upgrading from an older SDK, the automated upgrade (upgrade.slcu) sets:
+- SL_SLEEPTIMER_PERIPHERAL to SL_SLEEPTIMER_PERIPHERAL_DEFAULT
+
 ## CLI no longer uses app_log
 CLI components are now designed to use `sl_iostream` for both input and output.
 For old projects that are using CLI components with `app_log` API, the automated upgrade (slcu) will add a dependency on `app_log`.

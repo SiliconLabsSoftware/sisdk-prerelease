@@ -109,48 +109,58 @@ const char *mbedtls_test_helper_is_psa_leaking(void)
     return NULL;
 }
 
-
-
 psa_hash_operation_t psa_hash_operation_init_short(void)
 {
     psa_hash_operation_t operation = PSA_HASH_OPERATION_INIT;
+    #if !defined(TFM_CONFIG_SL_SECURE_LIBRARY)
     memset(&operation.ctx, '!', sizeof(operation.ctx));
+    #endif
     return operation;
 }
 
 psa_mac_operation_t psa_mac_operation_init_short(void)
 {
     psa_mac_operation_t operation = PSA_MAC_OPERATION_INIT;
+    #if !defined(TFM_CONFIG_SL_SECURE_LIBRARY)
     memset(&operation.ctx, '!', sizeof(operation.ctx));
+    #endif
     return operation;
 }
 
 psa_cipher_operation_t psa_cipher_operation_init_short(void)
 {
     psa_cipher_operation_t operation = PSA_CIPHER_OPERATION_INIT;
+    #if !defined(TFM_CONFIG_SL_SECURE_LIBRARY)
     memset(&operation.ctx, '!', sizeof(operation.ctx));
+    #endif
     return operation;
 }
 
 psa_aead_operation_t psa_aead_operation_init_short(void)
 {
     psa_aead_operation_t operation = PSA_AEAD_OPERATION_INIT;
+    #if !defined(TFM_CONFIG_SL_SECURE_LIBRARY)
     memset(&operation.ctx, '!', sizeof(operation.ctx));
+    #endif
     return operation;
 }
 
 psa_key_derivation_operation_t psa_key_derivation_operation_init_short(void)
 {
     psa_key_derivation_operation_t operation = PSA_KEY_DERIVATION_OPERATION_INIT;
+    #if !defined(TFM_CONFIG_SL_SECURE_LIBRARY)
     memset(&operation.ctx, '!', sizeof(operation.ctx));
+    #endif
     return operation;
 }
 
 psa_pake_operation_t psa_pake_operation_init_short(void)
 {
     psa_pake_operation_t operation = PSA_PAKE_OPERATION_INIT;
+    #if !defined(TFM_CONFIG_SL_SECURE_LIBRARY)
     memset(&operation.computation_stage, '!', sizeof(operation.computation_stage));
     memset(&operation.data, '!', sizeof(operation.data));
+    #endif
     return operation;
 }
 
@@ -158,7 +168,9 @@ psa_sign_hash_interruptible_operation_t psa_sign_hash_interruptible_operation_in
 {
     psa_sign_hash_interruptible_operation_t operation =
         PSA_SIGN_HASH_INTERRUPTIBLE_OPERATION_INIT;
+    #if !defined(TFM_CONFIG_SL_SECURE_LIBRARY)
     memset(&operation.ctx, '!', sizeof(operation.ctx));
+    #endif
     return operation;
 }
 
@@ -166,7 +178,9 @@ psa_verify_hash_interruptible_operation_t psa_verify_hash_interruptible_operatio
 {
     psa_verify_hash_interruptible_operation_t operation =
         PSA_VERIFY_HASH_INTERRUPTIBLE_OPERATION_INIT;
+    #if !defined(TFM_CONFIG_SL_SECURE_LIBRARY)
     memset(&operation.ctx, '!', sizeof(operation.ctx));
+    #endif
     return operation;
 }
 
@@ -196,8 +210,6 @@ psa_export_public_key_iop_t psa_export_public_key_iop_init_short(void)
     return operation;
 }
 #endif
-
-
 
 #if defined(RECORD_PSA_STATUS_COVERAGE_LOG)
 /** Name of the file where return statuses are logged by #RECORD_STATUS. */

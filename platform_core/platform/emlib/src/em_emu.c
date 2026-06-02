@@ -3655,10 +3655,12 @@ sl_status_t EMU_DCDCModeSet(EMU_DcdcMode_TypeDef dcdcMode)
     DCDC->EN_CLR = DCDC_EN_EN;
 #endif
   } else {
+#if !defined(_DCDC_DVDDBBCFG_MASK)
     while (((DCDC->STATUS & DCDC_STATUS_VREGIN) != 0U) && (timeout < EMU_DCDC_MODE_SET_TIMEOUT)) {
       /* Wait for VREGIN voltage to rise above threshold. */
       timeout++;
     }
+#endif
     if (timeout >= EMU_DCDC_MODE_SET_TIMEOUT) {
       error = SL_STATUS_TIMEOUT;
     } else {
@@ -3754,6 +3756,15 @@ bool EMU_DCDCInit(const EMU_DCDCInit_TypeDef *dcdcInit)
   /* Set DCDC regulation type. */
 #if defined(_DCDC_DOCTRL_REGULATIONTYPE_MASK)
   EMU_DCDCSetRegulationType(dcdcInit->regulationType);
+#endif
+
+#if defined(_DCDC_DVDDBBCFG_MASK)
+  /* Enable DVDD Buck-Boost FSM (LEDVDD must be OFF, holds at init).
+     VCMPDVDDBSTVPROG is a PTE-calibrated trim and is preserved. */
+  DCDC->DVDDBBCFG = (DCDC->DVDDBBCFG & ~(_DCDC_DVDDBBCFG_DVDDBBEN_MASK
+                                         | _DCDC_DVDDBBCFG_DVDDBSTEN_MASK))
+                    | DCDC_DVDDBBCFG_DVDDBSTEN
+                    | DCDC_DVDDBBCFG_DVDDBBEN;
 #endif
 
   EMU_DCDCModeSet(dcdcInit->mode);

@@ -226,7 +226,6 @@
 #define OPENTHREAD_CONFIG_IP6_MAX_EXT_MCAST_ADDRS   4
 #endif
 #endif
-// </q>
 // </h>
 // <e>  Jam Detection
 #ifndef OPENTHREAD_CONFIG_JAM_DETECTION_ENABLE

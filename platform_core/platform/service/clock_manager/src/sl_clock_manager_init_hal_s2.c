@@ -527,7 +527,7 @@ FUNCTION_SCOPE void init_rffpll(void)
  ******************************************************************************/
 FUNCTION_SCOPE void init_usbpll(void)
 {
-  CMU_USBPLL_Init_TypeDef usbpll_config;
+  CMU_USBPLL_Init_TypeDef usbpll_config = { 0 };
   uint32_t hfxo_freq = SystemHFXOClockGet();
 
   // Validate that HFXO frequency is adequate for USB PLL and set the right frequency.

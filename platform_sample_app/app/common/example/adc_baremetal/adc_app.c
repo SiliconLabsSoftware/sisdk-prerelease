@@ -23,6 +23,7 @@
 
 #if defined(ADC_PRESENT)
 
+#include <stdio.h>
 #include "sl_hal_adc.h"
 #include "sl_hal_gpio.h"
 #include "sl_clock_manager.h"
@@ -92,6 +93,7 @@ static sl_gpio_t gpio_adc_in;
 
 static sl_sleeptimer_timer_handle_t sample_timer;
 static volatile bool sample_due = false;
+static uint32_t sample_count = 0;
 
 /*******************************************************************************
  *********************   LOCAL FUNCTION PROTOTYPES   ***************************
@@ -110,6 +112,9 @@ static void adc_sample_once(void);
 
 void adc_init(void)
 {
+  // Make stdout unbuffered so each printf is flushed to VCOM immediately.
+  setvbuf(stdout, NULL, _IONBF, 0);
+
   config_gpios();
 
   sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_ADC0);
@@ -123,6 +128,11 @@ void adc_init(void)
                                         on_sample_tick, NULL,
                                         0,
                                         SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG);
+
+  // stdout is redirected to VCOM in project configuration
+  printf("Welcome to the ADC bare-metal example application\r\n");
+  printf("Sampling channel %u every %u ms\r\n",
+         (unsigned)ADC_SAMPLE_CHANNEL, (unsigned)SAMPLE_PERIOD_MS);
 }
 
 void adc_process_action(void)
@@ -183,24 +193,37 @@ static void adc_hw_init(void)
 
 static void adc_sample_once(void)
 {
+  sl_hal_adc_result_t second_sample;
+
   sl_hal_adc_flush_fifo(ADC0);
   while (ADC0->STATUS & ADC_STATUS_SCANFIFOFLUSHING) {
   }
 
   sl_hal_adc_set_scan_mask(ADC0, 1U << ADC_SAMPLE_CHANNEL);
 
+  // First (warm-up) conversion: drain the FIFO entry and discard it.
   sl_hal_adc_start(ADC0);
   while (!sl_hal_adc_get_enabled_pending_interrupts(ADC0)) {
   }
-  sl_hal_adc_pull(ADC0);
+  (void)sl_hal_adc_pull(ADC0);
   sl_hal_adc_clear_interrupts(ADC0, ADC_IF_SCANENTRYDONE);
 
+  // Second conversion: this is the result we report.
   sl_hal_adc_start(ADC0);
   while (!sl_hal_adc_get_enabled_pending_interrupts(ADC0)) {
   }
   (void)sl_hal_adc_peek(ADC0);
   sl_hal_adc_clear_interrupts(ADC0, ADC_IF_SCANENTRYDONE);
-  sl_hal_adc_pull(ADC0);
+  second_sample = sl_hal_adc_pull(ADC0);
+
+  sample_count++;
+
+  // Print the current ADC sample to vcom
+  printf("\r\n");
+  printf("Sample #%lu\r\n", (unsigned long)sample_count);
+  printf("ADC data = %lu (0x%04lX)\r\n",
+         (unsigned long)second_sample.data,
+         (unsigned long)second_sample.data);
 
   sl_led_toggle(&LED_INSTANCE);
 }

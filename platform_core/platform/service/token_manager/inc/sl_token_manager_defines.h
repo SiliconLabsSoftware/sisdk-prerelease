@@ -99,8 +99,7 @@
  * visible to the user so they can avoid using the same keys for NVM3 objects created manually in
  * the application code. Refer application note 'AN1135: Using Third Generation Non-Volatile Memory (NVM3) Data Storage' for more details.
  *
- * @note NVM3 key region 0x8E000-0x8EFFF and 0x8F000-0x8FFFF are used for static tokens, which are stored as override tokens in NVM3.
- * The key region 0xC0000 to 0xFFFFF are reserved.
+ * @note The key regions from 0xC0000 to 0xFFFFF are reserved.
  */
 
 /** @ingroup NVM3 key space regions
@@ -201,17 +200,20 @@
 
 /** @ingroup NVM3 key space regions
  *  @brief NVM3 Key Region for Aliro.
+ *  @note A total of 1536 key ids are allocated for Aliro.
  */
 #define SL_TOKEN_NVM3_REGION_ALIRO                (0x89a00)
 
 /** @ingroup NVM3 key space regions
 *   @brief NVM3 Key Region for All the platform specific tokens.
-*   This region allocates 256 keys (0x89b00 - 0x89bFF).
-*   Below are the keys that are allocated:
-*   - 0x89b00: Crash log token
-*   - 0x89b01 - 0x89bFF: Reserved for future use
+*   This region allocates keys from 0x8DC00 to 0x8FFFF.
+*   Below are the keys that are used within this region:
+*   - 0x8DC00: Crash log token
+*   - 0x8DC01 - 0x8DFFF: Unused keys
+*   - 0x8E000 - 0x8EFFF: Static device override tokens
+*   - 0x8F000 - 0x8FFFF: Static secure override tokens
 */
-#define SL_TOKEN_NVM3_REGION_PLATFORM            (0x89b00)
+#define SL_TOKEN_NVM3_REGION_PLATFORM            (0x8DC00)
 
 /** @ingroup NVM3 key space regions
  *  @brief NVM3 Key Region for Wi-SUN.

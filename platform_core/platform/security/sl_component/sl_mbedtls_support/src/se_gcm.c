@@ -180,16 +180,16 @@ int mbedtls_gcm_update_ad(mbedtls_gcm_context *ctx,
   sli_se_mailbox_command_t gcm_cmd_enc = SLI_SE_MAILBOX_COMMAND_DEFAULT(SLI_SE_COMMAND_AES_GCM_ENCRYPT | SLI_SE_COMMAND_OPTION_CONTEXT_START);
   sli_se_mailbox_command_t gcm_cmd_enc_full = SLI_SE_MAILBOX_COMMAND_DEFAULT(SLI_SE_COMMAND_AES_GCM_ENCRYPT | SLI_SE_COMMAND_OPTION_CONTEXT_WHOLE);
 
-  volatile sli_se_datatransfer_t key_in = SLI_SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
-  volatile sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(ctx->se_ctx_dec, ctx->iv_len);
-  volatile sli_se_datatransfer_t aad_in = SLI_SE_DATATRANSFER_DEFAULT((void*)add, add_len);
+  sli_se_datatransfer_t key_in = SLI_SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
+  sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(ctx->se_ctx_dec, ctx->iv_len);
+  sli_se_datatransfer_t aad_in = SLI_SE_DATATRANSFER_DEFAULT((void*)add, add_len);
 
-  volatile sli_se_datatransfer_t key_in_full = SLI_SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
-  volatile sli_se_datatransfer_t iv_in_full = SLI_SE_DATATRANSFER_DEFAULT(ctx->se_ctx_dec, ctx->iv_len);
-  volatile sli_se_datatransfer_t aad_in_full = SLI_SE_DATATRANSFER_DEFAULT((void*)add, add_len);
+  sli_se_datatransfer_t key_in_full = SLI_SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
+  sli_se_datatransfer_t iv_in_full = SLI_SE_DATATRANSFER_DEFAULT(ctx->se_ctx_dec, ctx->iv_len);
+  sli_se_datatransfer_t aad_in_full = SLI_SE_DATATRANSFER_DEFAULT((void*)add, add_len);
 
-  volatile sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(ctx->se_ctx_enc, sizeof(ctx->se_ctx_enc));
-  volatile sli_se_datatransfer_t tag_out = SLI_SE_DATATRANSFER_DEFAULT(ctx->tagbuf, sizeof(ctx->tagbuf));
+  sli_se_datatransfer_t ctx_out = SLI_SE_DATATRANSFER_DEFAULT(ctx->se_ctx_enc, sizeof(ctx->se_ctx_enc));
+  sli_se_datatransfer_t tag_out = SLI_SE_DATATRANSFER_DEFAULT(ctx->tagbuf, sizeof(ctx->tagbuf));
 
   sli_se_mailbox_command_add_input(&gcm_cmd_enc, &key_in);
   sli_se_mailbox_command_add_input(&gcm_cmd_enc, &iv_in);
@@ -226,11 +226,11 @@ int mbedtls_gcm_update_ad(mbedtls_gcm_context *ctx,
   if (ctx->mode == MBEDTLS_GCM_DECRYPT) {
     sli_se_mailbox_command_t gcm_cmd_dec = SLI_SE_MAILBOX_COMMAND_DEFAULT(SLI_SE_COMMAND_AES_GCM_DECRYPT | SLI_SE_COMMAND_OPTION_CONTEXT_START);
 
-    volatile sli_se_datatransfer_t key_in_dec = SLI_SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
-    volatile sli_se_datatransfer_t iv_in_dec = SLI_SE_DATATRANSFER_DEFAULT(ctx->se_ctx_dec, ctx->iv_len);
-    volatile sli_se_datatransfer_t aad_in_dec = SLI_SE_DATATRANSFER_DEFAULT((void*)add, add_len);
+    sli_se_datatransfer_t key_in_dec = SLI_SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
+    sli_se_datatransfer_t iv_in_dec = SLI_SE_DATATRANSFER_DEFAULT(ctx->se_ctx_dec, ctx->iv_len);
+    sli_se_datatransfer_t aad_in_dec = SLI_SE_DATATRANSFER_DEFAULT((void*)add, add_len);
 
-    volatile sli_se_datatransfer_t ctx_out_dec = SLI_SE_DATATRANSFER_DEFAULT(ctx->se_ctx_dec, sizeof(ctx->se_ctx_dec));
+    sli_se_datatransfer_t ctx_out_dec = SLI_SE_DATATRANSFER_DEFAULT(ctx->se_ctx_dec, sizeof(ctx->se_ctx_dec));
 
     sli_se_mailbox_command_add_input(&gcm_cmd_dec, &key_in_dec);
     sli_se_mailbox_command_add_input(&gcm_cmd_dec, &iv_in_dec);
@@ -341,13 +341,13 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
     // Run decryption first
     sli_se_mailbox_command_t gcm_cmd_dec = SLI_SE_MAILBOX_COMMAND_DEFAULT(SLI_SE_COMMAND_AES_GCM_DECRYPT | (first_op ? SLI_SE_COMMAND_OPTION_CONTEXT_START : (ctx->last_op ? SLI_SE_COMMAND_OPTION_CONTEXT_END : SLI_SE_COMMAND_OPTION_CONTEXT_ADD)));
 
-    volatile sli_se_datatransfer_t key_in_dec = SLI_SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
-    volatile sli_se_datatransfer_t iv_ctx_in_dec = SLI_SE_DATATRANSFER_DEFAULT(ctx->se_ctx_dec, (first_op ? ctx->iv_len : sizeof(ctx->se_ctx_dec)));
-    volatile sli_se_datatransfer_t data_in_dec = SLI_SE_DATATRANSFER_DEFAULT((void*)input, input_length);
-    volatile sli_se_datatransfer_t lenalenc_in_dec = SLI_SE_DATATRANSFER_DEFAULT(lena_lenc, sizeof(lena_lenc));
-    volatile sli_se_datatransfer_t data_out_dec = SLI_SE_DATATRANSFER_DEFAULT(output, input_length);
-    volatile sli_se_datatransfer_t ctx_out_dec = SLI_SE_DATATRANSFER_DEFAULT(ctx->se_ctx_dec, sizeof(ctx->se_ctx_dec));
-    volatile sli_se_datatransfer_t mac_in_dec = SLI_SE_DATATRANSFER_DEFAULT(ctx->tagbuf, sizeof(ctx->tagbuf));
+    sli_se_datatransfer_t key_in_dec = SLI_SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
+    sli_se_datatransfer_t iv_ctx_in_dec = SLI_SE_DATATRANSFER_DEFAULT(ctx->se_ctx_dec, (first_op ? ctx->iv_len : sizeof(ctx->se_ctx_dec)));
+    sli_se_datatransfer_t data_in_dec = SLI_SE_DATATRANSFER_DEFAULT((void*)input, input_length);
+    sli_se_datatransfer_t lenalenc_in_dec = SLI_SE_DATATRANSFER_DEFAULT(lena_lenc, sizeof(lena_lenc));
+    sli_se_datatransfer_t data_out_dec = SLI_SE_DATATRANSFER_DEFAULT(output, input_length);
+    sli_se_datatransfer_t ctx_out_dec = SLI_SE_DATATRANSFER_DEFAULT(ctx->se_ctx_dec, sizeof(ctx->se_ctx_dec));
+    sli_se_datatransfer_t mac_in_dec = SLI_SE_DATATRANSFER_DEFAULT(ctx->tagbuf, sizeof(ctx->tagbuf));
 
     sli_se_mailbox_command_add_input(&gcm_cmd_dec, &key_in_dec);
     sli_se_mailbox_command_add_input(&gcm_cmd_dec, &iv_ctx_in_dec);
@@ -380,13 +380,13 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
     // we need to do the final calculation first, such that we keep the input context intact
     sli_se_mailbox_command_t gcm_cmd_enc_final = SLI_SE_MAILBOX_COMMAND_DEFAULT(SLI_SE_COMMAND_AES_GCM_ENCRYPT | (first_op ? SLI_SE_COMMAND_OPTION_CONTEXT_WHOLE : SLI_SE_COMMAND_OPTION_CONTEXT_END));
 
-    volatile sli_se_datatransfer_t key_in_enc_final = SLI_SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
-    volatile sli_se_datatransfer_t iv_ctx_in_enc_final = SLI_SE_DATATRANSFER_DEFAULT(ctx->se_ctx_enc, (first_op ? ctx->iv_len : sizeof(ctx->se_ctx_enc)));
-    volatile sli_se_datatransfer_t lenalenc_in_enc_final = SLI_SE_DATATRANSFER_DEFAULT(lena_lenc, sizeof(lena_lenc));
-    volatile sli_se_datatransfer_t data_in_enc_final = SLI_SE_DATATRANSFER_DEFAULT(ctx->mode == MBEDTLS_GCM_ENCRYPT ? (void*)input : (void*)output, input_length);
-    volatile sli_se_datatransfer_t data_out_enc_final = SLI_SE_DATATRANSFER_DEFAULT(NULL, input_length);
+    sli_se_datatransfer_t key_in_enc_final = SLI_SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
+    sli_se_datatransfer_t iv_ctx_in_enc_final = SLI_SE_DATATRANSFER_DEFAULT(ctx->se_ctx_enc, (first_op ? ctx->iv_len : sizeof(ctx->se_ctx_enc)));
+    sli_se_datatransfer_t lenalenc_in_enc_final = SLI_SE_DATATRANSFER_DEFAULT(lena_lenc, sizeof(lena_lenc));
+    sli_se_datatransfer_t data_in_enc_final = SLI_SE_DATATRANSFER_DEFAULT(ctx->mode == MBEDTLS_GCM_ENCRYPT ? (void*)input : (void*)output, input_length);
+    sli_se_datatransfer_t data_out_enc_final = SLI_SE_DATATRANSFER_DEFAULT(NULL, input_length);
     data_out_enc_final.length |= SLI_SE_DATATRANSFER_DISCARD;
-    volatile sli_se_datatransfer_t tag_out_final = SLI_SE_DATATRANSFER_DEFAULT(ctx->tagbuf, sizeof(ctx->tagbuf));
+    sli_se_datatransfer_t tag_out_final = SLI_SE_DATATRANSFER_DEFAULT(ctx->tagbuf, sizeof(ctx->tagbuf));
 
     sli_se_mailbox_command_add_input(&gcm_cmd_enc_final, &key_in_enc_final);
     sli_se_mailbox_command_add_input(&gcm_cmd_enc_final, &iv_ctx_in_enc_final);
@@ -415,19 +415,19 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
   // continue calculation with another call to mbedtls_gcm_update.
   {
     sli_se_mailbox_command_t gcm_cmd_enc = SLI_SE_MAILBOX_COMMAND_DEFAULT(SLI_SE_COMMAND_AES_GCM_ENCRYPT | (first_op ? SLI_SE_COMMAND_OPTION_CONTEXT_START : (ctx->last_op ? SLI_SE_COMMAND_OPTION_CONTEXT_END : SLI_SE_COMMAND_OPTION_CONTEXT_ADD)));
-    volatile sli_se_datatransfer_t key_in_enc = SLI_SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
-    volatile sli_se_datatransfer_t iv_ctx_in_enc = SLI_SE_DATATRANSFER_DEFAULT(ctx->se_ctx_enc, (first_op ? ctx->iv_len : sizeof(ctx->se_ctx_enc)));
-    volatile sli_se_datatransfer_t lenalenc_in_enc = SLI_SE_DATATRANSFER_DEFAULT(lena_lenc, sizeof(lena_lenc));
-    volatile sli_se_datatransfer_t data_in_enc = SLI_SE_DATATRANSFER_DEFAULT(ctx->mode == MBEDTLS_GCM_ENCRYPT ? (void*)input : (void*)output, input_length);
+    sli_se_datatransfer_t key_in_enc = SLI_SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
+    sli_se_datatransfer_t iv_ctx_in_enc = SLI_SE_DATATRANSFER_DEFAULT(ctx->se_ctx_enc, (first_op ? ctx->iv_len : sizeof(ctx->se_ctx_enc)));
+    sli_se_datatransfer_t lenalenc_in_enc = SLI_SE_DATATRANSFER_DEFAULT(lena_lenc, sizeof(lena_lenc));
+    sli_se_datatransfer_t data_in_enc = SLI_SE_DATATRANSFER_DEFAULT(ctx->mode == MBEDTLS_GCM_ENCRYPT ? (void*)input : (void*)output, input_length);
 
-    volatile sli_se_datatransfer_t data_out_enc = SLI_SE_DATATRANSFER_DEFAULT(output, input_length);
+    sli_se_datatransfer_t data_out_enc = SLI_SE_DATATRANSFER_DEFAULT(output, input_length);
     if (ctx->mode == MBEDTLS_GCM_DECRYPT) {
       data_out_enc.data = NULL;
       data_out_enc.length |= SLI_SE_DATATRANSFER_DISCARD;
     }
 
-    volatile sli_se_datatransfer_t tag_out_enc = SLI_SE_DATATRANSFER_DEFAULT(ctx->tagbuf, sizeof(ctx->tagbuf));
-    volatile sli_se_datatransfer_t ctx_out_enc = SLI_SE_DATATRANSFER_DEFAULT(ctx->se_ctx_enc, sizeof(ctx->se_ctx_enc));
+    sli_se_datatransfer_t tag_out_enc = SLI_SE_DATATRANSFER_DEFAULT(ctx->tagbuf, sizeof(ctx->tagbuf));
+    sli_se_datatransfer_t ctx_out_enc = SLI_SE_DATATRANSFER_DEFAULT(ctx->se_ctx_enc, sizeof(ctx->se_ctx_enc));
 
     sli_se_mailbox_command_add_input(&gcm_cmd_enc, &key_in_enc);
     sli_se_mailbox_command_add_input(&gcm_cmd_enc, &iv_ctx_in_enc);
@@ -534,15 +534,15 @@ int mbedtls_gcm_crypt_and_tag(mbedtls_gcm_context *ctx,
     // Extract plaintext first
     sli_se_mailbox_command_t gcm_cmd = SLI_SE_MAILBOX_COMMAND_DEFAULT(SLI_SE_COMMAND_AES_GCM_DECRYPT | ((tag_len & 0xFF) << 8));
 
-    volatile sli_se_datatransfer_t key_in = SLI_SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
-    volatile sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT((void*)iv, iv_len);
-    volatile sli_se_datatransfer_t aad_in = SLI_SE_DATATRANSFER_DEFAULT((void*)add, add_len);
-    volatile sli_se_datatransfer_t data_in = SLI_SE_DATATRANSFER_DEFAULT((void*)input, length);
-    volatile sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
+    sli_se_datatransfer_t key_in = SLI_SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
+    sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT((void*)iv, iv_len);
+    sli_se_datatransfer_t aad_in = SLI_SE_DATATRANSFER_DEFAULT((void*)add, add_len);
+    sli_se_datatransfer_t data_in = SLI_SE_DATATRANSFER_DEFAULT((void*)input, length);
+    sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
     if (output == NULL) {
       data_out.length |= SLI_SE_DATATRANSFER_DISCARD;
     }
-    volatile sli_se_datatransfer_t tag_in = SLI_SE_DATATRANSFER_DEFAULT(tag, tag_len);
+    sli_se_datatransfer_t tag_in = SLI_SE_DATATRANSFER_DEFAULT(tag, tag_len);
 
     sli_se_mailbox_command_add_input(&gcm_cmd, &key_in);
     sli_se_mailbox_command_add_input(&gcm_cmd, &iv_in);
@@ -579,15 +579,15 @@ int mbedtls_gcm_crypt_and_tag(mbedtls_gcm_context *ctx,
   {
     sli_se_mailbox_command_t gcm_cmd = SLI_SE_MAILBOX_COMMAND_DEFAULT(SLI_SE_COMMAND_AES_GCM_ENCRYPT);
 
-    volatile sli_se_datatransfer_t key_in = SLI_SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
-    volatile sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT((void*)iv, iv_len);
-    volatile sli_se_datatransfer_t aad_in = SLI_SE_DATATRANSFER_DEFAULT((void*)add, add_len);
-    volatile sli_se_datatransfer_t data_in = SLI_SE_DATATRANSFER_DEFAULT((void*)input, length);
-    volatile sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
+    sli_se_datatransfer_t key_in = SLI_SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
+    sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT((void*)iv, iv_len);
+    sli_se_datatransfer_t aad_in = SLI_SE_DATATRANSFER_DEFAULT((void*)add, add_len);
+    sli_se_datatransfer_t data_in = SLI_SE_DATATRANSFER_DEFAULT((void*)input, length);
+    sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
     if (output == NULL) {
       data_out.length |= SLI_SE_DATATRANSFER_DISCARD;
     }
-    volatile sli_se_datatransfer_t mac_out = SLI_SE_DATATRANSFER_DEFAULT(tagbuf, sizeof(tagbuf));
+    sli_se_datatransfer_t mac_out = SLI_SE_DATATRANSFER_DEFAULT(tagbuf, sizeof(tagbuf));
 
     sli_se_mailbox_command_add_input(&gcm_cmd, &key_in);
     sli_se_mailbox_command_add_input(&gcm_cmd, &iv_in);
@@ -614,11 +614,11 @@ int mbedtls_gcm_crypt_and_tag(mbedtls_gcm_context *ctx,
   exit:
   if (se_response == SLI_SE_RESPONSE_OK) {
     // For encryption, copy requested tag size to output tag buffer.
-    memcpy(tag, tagbuf, tag_len);
+    memcpy(tag, (void*)tagbuf, tag_len);
     return(0);
   } else {
     mbedtls_platform_zeroize(output, length);
-    mbedtls_platform_zeroize(tagbuf, sizeof(tagbuf));
+    mbedtls_platform_zeroize((void*)tagbuf, sizeof(tagbuf));
     return(MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED);
   }
 }
@@ -660,15 +660,15 @@ int mbedtls_gcm_auth_decrypt(mbedtls_gcm_context *ctx,
 
   sli_se_mailbox_command_t gcm_cmd = SLI_SE_MAILBOX_COMMAND_DEFAULT(SLI_SE_COMMAND_AES_GCM_DECRYPT | ((tag_len & 0xFF) << 8));
 
-  volatile sli_se_datatransfer_t key_in = SLI_SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
-  volatile sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT((void*)iv, iv_len);
-  volatile sli_se_datatransfer_t aad_in = SLI_SE_DATATRANSFER_DEFAULT((void*)add, add_len);
-  volatile sli_se_datatransfer_t data_in = SLI_SE_DATATRANSFER_DEFAULT((void*)input, length);
-  volatile sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
+  sli_se_datatransfer_t key_in = SLI_SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
+  sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT((void*)iv, iv_len);
+  sli_se_datatransfer_t aad_in = SLI_SE_DATATRANSFER_DEFAULT((void*)add, add_len);
+  sli_se_datatransfer_t data_in = SLI_SE_DATATRANSFER_DEFAULT((void*)input, length);
+  sli_se_datatransfer_t data_out = SLI_SE_DATATRANSFER_DEFAULT(output, length);
   if (output == NULL) {
     data_out.length |= SLI_SE_DATATRANSFER_DISCARD;
   }
-  volatile sli_se_datatransfer_t tag_in = SLI_SE_DATATRANSFER_DEFAULT((void*)tag, tag_len);
+  sli_se_datatransfer_t tag_in = SLI_SE_DATATRANSFER_DEFAULT((void*)tag, tag_len);
 
   sli_se_mailbox_command_add_input(&gcm_cmd, &key_in);
   sli_se_mailbox_command_add_input(&gcm_cmd, &iv_in);

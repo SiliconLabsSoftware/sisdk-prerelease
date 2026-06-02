@@ -24,10 +24,12 @@
 #include "sl_core.h"
 #include "rsi_sysrtc.h"
 #include "sli_si91x_clock_manager.h"
-#include "sl_code_classification.h"
 #ifdef SL_SI91X_POWER_MANAGER_UC_AVAILABLE
 #include "sl_si91x_power_manager_wakeup_handler.h"
 #endif
+
+#include "sli_code_classification.h"
+
 #if (SL_SI91X_TICKLESS_MODE == 1)
 /*******************************************************************************
  **************************** Local variables  *********************************
@@ -67,17 +69,6 @@ typedef enum {
  **************************** Local functions  *********************************
  ******************************************************************************/
 
-/* Schedule wakeup timer call-back handler */
-static void sli_schedule_wakeup_timer_expire_handler(sl_sleeptimer_timer_handle_t *handle, void *data);
-
-/**************************************************************************
- * @fn           static void sli_os_schedule_wakeup(TickType_t os_ticks)
- * @brief        This function wakeup core based on teh timer value.
- * @param[in]    os_ticks - os ticks value, feeding to the timer
- * @param[out]   None
- *******************************************************************************/
-static void sli_os_schedule_wakeup(TickType_t os_ticks);
-
 /**************************************************************************
  * @fn           void vTaskStepTick(const TickType_t xTicksToJump)
  * @brief        This function is to initialize the RTC alarm IRQHandler.
@@ -92,7 +83,6 @@ void vTaskStepTick(const TickType_t xTicksToJump);
  * @param[in]    None
  * @param[out]   None
  *******************************************************************************/
-void sl_power_manager_sleep_on_isr_exit();
 
 /**************************************************************************
  * @fn           eSleepModeStatus eTaskConfirmSleepModeStatus(void);
@@ -111,8 +101,25 @@ eSleepModeStatus eTaskConfirmSleepModeStatus(void);
 BaseType_t xTaskIncrementTick(void);
 
 extern uint32_t frontend_switch_control;
-sl_status_t sl_si91x_power_manager_sleep(void);
+sl_status_t sli_si91x_power_manager_sleep(void);
 boolean_t sl_si91x_power_manager_is_ok_to_sleep(void);
+
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SI91X_TICKLESS, SL_CODE_CLASS_TIME_CRITICAL)
+void vPortSetupTimerInterrupt(void);
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SI91X_TICKLESS, SL_CODE_CLASS_TIME_CRITICAL)
+SL_WEAK void sli_iot_power_set_expected_idle(TickType_t expected_idle);
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SI91X_TICKLESS, SL_CODE_CLASS_TIME_CRITICAL)
+void vPortSuppressTicksAndSleep(TickType_t xExpectedIdleTime);
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SI91X_TICKLESS, SL_CODE_CLASS_TIME_CRITICAL)
+static void sli_schedule_wakeup_timer_expire_handler(sl_sleeptimer_timer_handle_t *handle, void *data);
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SI91X_TICKLESS, SL_CODE_CLASS_TIME_CRITICAL)
+static void sli_os_schedule_wakeup(TickType_t os_ticks);
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SI91X_TICKLESS, SL_CODE_CLASS_TIME_CRITICAL)
+SL_WEAK bool sli_iot_power_ok_to_sleep(void);
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SI91X_TICKLESS, SL_CODE_CLASS_TIME_CRITICAL)
+bool sl_power_manager_is_ok_to_sleep(void);
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SI91X_TICKLESS, SL_CODE_CLASS_TIME_CRITICAL)
+void sl_power_manager_sleep_on_isr_exit(void);
 
 #define DEFAULT_TICK_FREQUENCY 32000 // Default frequency
 #define SLEEP_TRANSITION_DELAY 96    // This is the post sleep transition delay
@@ -154,7 +161,6 @@ void vPortSetupTimerInterrupt(void)
  * @param xExpectedIdleTime Time in os ticks that the system is expected to
  *                          sleep.
  ******************************************************************************/
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_FREERTOS_KERNEL, SL_CODE_CLASS_TIME_CRITICAL)
 SL_WEAK void sli_iot_power_set_expected_idle(TickType_t expected_idle)
 {
   (void)expected_idle;
@@ -165,11 +171,9 @@ SL_WEAK void sli_iot_power_set_expected_idle(TickType_t expected_idle)
  * Implemented the M4 sleep-to-wake sequence.
  ******************************************************************************/
 
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_FREERTOS_KERNEL, SL_CODE_CLASS_TIME_CRITICAL)
 void vPortSuppressTicksAndSleep(TickType_t xExpectedIdleTime)
 {
   //Disable the NVIC interrupts.
-  //SL_PRINT_STRING_INFO("Entering sleep api");
   __asm volatile("cpsid i" ::: "memory");
   __asm volatile("dsb");
   __asm volatile("isb");
@@ -178,10 +182,8 @@ void vPortSuppressTicksAndSleep(TickType_t xExpectedIdleTime)
   if ((eTaskConfirmSleepModeStatus() == sl_eAbortSleep) || (sl_si91x_power_manager_is_ok_to_sleep() == false)) {
     xExpectedIdleTime = 0;
     // Enable the NVIC interrupts.
-    //SL_PRINT_STRING_INFO("Sleep failed");
     __asm volatile("cpsie i" ::: "memory");
   } else {
-    //SL_PRINT_STRING_INFO("Sleep success");
     // Disable the chip level interrupt
     sleeptimer_hal_disable_int(SLEEPTIMER_EVENT_COMP);
 
@@ -231,7 +233,7 @@ void vPortSuppressTicksAndSleep(TickType_t xExpectedIdleTime)
 
     expected_sleep_ticks = xExpectedIdleTime;
     total_slept_os_ticks = 0;
-    //SL_PRINT_STRING_INFO("Sleep mode entering");
+
     if (sl_si91x_power_manager_get_ps1_state_status() && (M4_ULP_SLP_STATUS_REG & ULP_MODE_SWITCHED_NPSS)) {
       // Add the PS1 state requirement to the power manager.
       sl_si91x_power_manager_add_ps_requirement(SL_SI91X_POWER_MANAGER_PS1);
@@ -240,13 +242,11 @@ void vPortSuppressTicksAndSleep(TickType_t xExpectedIdleTime)
       // Initializing and configuring the wakeup sources as per UC inputs, if available
       sl_si91x_power_manager_wakeup_init();
 #endif
-   
       // Call the API to enable the standby state.
-      sl_si91x_power_manager_standby();
+      sli_si91x_power_manager_standby();
     } else {
-      //SL_PRINT_STRING_INFO("Entering sleep mode");
       // Call the API to enable the sleep state.
-      sl_si91x_power_manager_sleep();
+      sli_si91x_power_manager_sleep();
     }
 
     sl_power_manager_sleep_on_isr_exit();

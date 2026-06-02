@@ -40,6 +40,7 @@ source:
   - path: cmd_handlers.c
   - path: cmd_get_capabilities.c
   - path: silabs/sl_dcdc_cmd_handlers.c
+  - path: silabs/initiate_shutdown_cmd_handlers.c
   - path: cmds_management.c
   - path: cmds_rf.c
   - path: cmds_security.c

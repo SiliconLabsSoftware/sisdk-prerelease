@@ -729,27 +729,6 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       sc = sl_bt_connection_set_default_preferred_phy(initiator_config.conn_phy,
                                                       sl_bt_gap_phy_any);
       app_assert_status(sc);
-
-      // Set default connection parameters
-      uint16_t conn_interval = CS_INITIATOR_DEFAULT_MIN_CONNECTION_INTERVAL;
-      uint16_t proc_interval = CS_INITIATOR_DEFAULT_MIN_PROCEDURE_INTERVAL;
-      (void)cs_initiator_get_multiple_intervals(initiator_config.cs_main_mode,
-                                               initiator_config.cs_sub_mode,
-                                               initiator_config.procedure_scheduling,
-                                               initiator_config.channel_map_preset,
-                                               rtl_config.algo_mode,
-                                               initiator_config.cs_tone_antenna_config_idx,
-                                               initiator_config.use_real_time_ras_mode,
-                                               CS_INITIATOR_MAX_CONNECTIONS,
-                                               &conn_interval,
-                                               &proc_interval);
-      sc = sl_bt_connection_set_default_parameters(conn_interval,
-                                                   conn_interval,
-                                                   initiator_config.latency,
-                                                   initiator_config.timeout,
-                                                   initiator_config.min_ce_length,
-                                                   initiator_config.max_ce_length);
-      app_assert_status(sc);
       break;
     }
     // --------------------------------
@@ -824,11 +803,11 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
                                                      rtl_config.algo_mode,
                                                      effective_config.cs_tone_antenna_config_idx,
                                                      effective_config.use_real_time_ras_mode,
-                                                     CS_INITIATOR_MAX_CONNECTIONS,
+                                                     1,
                                                      &conn_interval,
                                                      &proc_interval);
             if (sc == SL_STATUS_NOT_SUPPORTED) {
-              app_log_info(APP_PREFIX "Parameter optimization is not supported - Using default" APP_LOG_NL);
+              app_log_info(APP_PREFIX "Parameter optimization is not supported with the given input parameters" APP_LOG_NL);
             } else if (sc == SL_STATUS_IDLE) {
               app_log_info(APP_PREFIX "No optimization - using custom procedure scheduling" APP_LOG_NL);
             } else if (sc == SL_STATUS_OK) {

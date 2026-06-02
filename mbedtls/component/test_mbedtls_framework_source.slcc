@@ -10,6 +10,9 @@ provides:
 - name: test_mbedtls_framework_source
 requires:
 - name: psa_crypto_source
+  condition: [trustzone_unaware]
+- name: psa_crypto_source
+  condition: [trustzone_secure]
 source:
 - path: src/asn1_helpers.c
 - path: src/bignum_codepath_check.c

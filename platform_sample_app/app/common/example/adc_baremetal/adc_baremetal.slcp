@@ -32,6 +32,9 @@ component:
   - id: hal_adc
   - id: hal_gpio
   - id: code_classification
+  - id: iostream_stdlib_config
+  - id: iostream_retarget_stdio
+  - id: iostream_recommended_stream
 define:
   - name: DEBUG_EFM
   - name: SIMG301_BRD4408A
@@ -48,3 +51,6 @@ ui_hints:
   highlight: readme.md
 tag:
   - hardware:component:led:1+
+configuration:
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1

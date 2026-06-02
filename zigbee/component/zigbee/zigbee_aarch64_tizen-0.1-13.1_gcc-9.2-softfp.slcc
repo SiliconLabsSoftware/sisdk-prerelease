@@ -1,5 +1,5 @@
 id: zigbee_aarch64_tizen_13_1_gcc_9_2
-label: Zigbee ARM64
+label: Zigbee ARM64 (Tizen 13.1, GCC 9.2 softfp)
 package: zigbee
 category: Zigbee
 quality: production

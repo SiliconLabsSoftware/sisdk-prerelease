@@ -1563,6 +1563,12 @@ SL_RAMFUNC_DEFINITION_END
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
   || defined(_MPAHBRAM_CTRL_MASK)
 
+#if defined(__ICCARM__)
+#define SL_ECC_ASM_NOINLINE __attribute__((noinline))
+#else
+#define SL_ECC_ASM_NOINLINE
+#endif
+
 /***************************************************************************//**
  * @brief
  *    Read and write existing values in RAM (for ECC initialization).
@@ -1574,7 +1580,7 @@ SL_RAMFUNC_DEFINITION_END
  * @param[in] eccBank
  *    Pointer to ECC RAM bank (MSC_EccBank_Typedef)
  ******************************************************************************/
-static void mscEccReadWriteExistingPio(const MSC_EccBank_Typedef *eccBank)
+static void SL_ECC_ASM_NOINLINE mscEccReadWriteExistingPio(const MSC_EccBank_Typedef *eccBank)
 {
   volatile uint32_t *ramptr = (volatile uint32_t *) eccBank->base;
   const uint32_t *endptr = (const uint32_t *) (eccBank->base + eccBank->size);
@@ -1661,7 +1667,7 @@ static void mscEccReadWriteExistingPio(const MSC_EccBank_Typedef *eccBank)
     "ADDS %[ramptr], %[ramptr], #4\n\t" /* increment ramptr by 4 (size of
                                            a word)                           */
     "CMP %[ramptr], %[endptr]\n\t"   /* compare ramptr and endptr...         */
-    "BCC 1b\n\t"                     /* ... and jump back to label 1 if Carrry
+    "BCC 1b\n\t"                     /* ... and jump back to label 1 if Carry
                                         Clear (meaning ramptr < endptr)      */
     "ORR r0, r0, %[enableEcc]\n\t"     /* and re-enable ECC ASAP to be sure no */
     "STR r0, [%[ctrlreg]]\n\t"       /* STR occurs with ECC disabled         */

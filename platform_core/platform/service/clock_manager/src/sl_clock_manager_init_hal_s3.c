@@ -1312,6 +1312,8 @@ static void init_se(sl_se_command_context_t *context, uint32_t  *se_fw_version)
 QSPI_FUNCTION_SCOPE void qspi_frequency_scale(uint32_t *qspi_frequency)
 {
   EFM_ASSERT(qspi_frequency != NULL);
+  // Zero sentinel means configure_flpll() was reached with an unsupported PART_NUMBER.
+  EFM_ASSERT(*qspi_frequency != 0);
 
   uint32_t scaled_qspi_frequency;
   // Lower and upper limits of 2.4GHz radio band.
@@ -1360,7 +1362,7 @@ static void configure_flpll(sli_se_qspi_flpll_config_t *flpll_config)
     return;
   }
 
-  uint32_t qspi_frequency;
+  uint32_t qspi_frequency = 0;
   uint64_t frac_div;
 
 #if defined(SL_CLOCK_MANAGER_EXT_FLASH_MAX_FREQ)

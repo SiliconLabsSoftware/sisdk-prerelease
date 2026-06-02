@@ -271,8 +271,8 @@
     value: 32768
 - tag:
   - device:opn:simg301m104xil
-  - device:flash:3904k
   - device:ram:512k
+  - device:flash:3904k
 - toolchain_settings:
   - option: device_opn
     value: simg301m104xil

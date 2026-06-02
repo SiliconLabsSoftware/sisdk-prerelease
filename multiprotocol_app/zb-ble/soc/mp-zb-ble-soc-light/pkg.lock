@@ -12,7 +12,7 @@ version = "0"
   cmake = [{ installer = "conan", ref = "cmake/3.30.2@silabs#8798657aa78b2da38a3ae465f2d10090", type = "apack", version = "3.30.2" }]
   cmsis = [{ installer = "conan", ref = "cmsis/1.1.0@silabs#ffa80dea438cc109c927f807fda3d505", type = "sdk", version = "1.1.0" }]
   commander = [{ installer = "archive", type = "apack", version = "1.24.1" }]
-  common_15_4 = [{ installer = "conan", ref = "common_15_4/1.1.0-beta.52@silabs#954907a24aaa55f7e0de2486b3ce8d312e62ca14", type = "sdk", version = "1.1.0-beta.52" }]
+  common_15_4 = [{ installer = "conan", ref = "common_15_4/1.1.0-beta.53@silabs#954907a24aaa55f7e0de2486b3ce8d312e62ca14", type = "sdk", version = "1.1.0-beta.53" }]
   coremark = [{ installer = "conan", ref = "coremark/1.1.0@silabs#18f9ee91c773959888b0ca1fa914139a", type = "sdk", version = "1.1.0" }]
   delta_dfu = [{ installer = "conan", ref = "delta_dfu/1.1.0@silabs#1ebba4a316f35b36228125a8942d772c72943ec6", type = "sdk", version = "1.1.0" }]
   freertos = [{ installer = "conan", ref = "freertos/1.1.0@silabs#46eec7b810eb2954242545a4d8b1403c", type = "sdk", version = "1.1.0" }]
@@ -21,7 +21,7 @@ version = "0"
   llvm-arm-toolchain-for-embedded = [{ installer = "conan", ref = "llvm-arm-toolchain-for-embedded/21.1.1@silabs#877f3e0faf9658c618b4c2fe80bbb9fa", type = "toolchain", version = "21.1.1" }]
   mbedtls = [{ installer = "conan", ref = "mbedtls/1.1.0@silabs#cba94f7268f06decdea70e7c6aa07c37", type = "sdk", version = "1.1.0" }]
   micriumos = [{ installer = "conan", ref = "micriumos/6.1.0@silabs#690711e09534755dc2dc85cf7e2dc2a8", type = "sdk", version = "6.1.0" }]
-  multiprotocol = [{ installer = "conan", ref = "multiprotocol/1.1.0-beta.60@silabs#7ca9533c4b2e589ca08a8c1a2f2f5965885f081d", type = "sdk", version = "1.1.0-beta.60" }]
+  multiprotocol = [{ installer = "conan", ref = "multiprotocol/1.1.0-beta.61@silabs#0632cd50626741d775c3277ce8c61ce0c9190941", type = "sdk", version = "1.1.0-beta.61" }]
   ninja = [{ installer = "conan", ref = "ninja/1.12.1@silabs#9ce59e07a142d4da1c532b49742fe16d", type = "apack", version = "1.12.1" }]
   platform = [{ installer = "conan", ref = "platform/6.1.0-beta.1@silabs#0b22638704b38199137ac983fb085477", type = "sdk", version = "6.1.0-beta.1" }]
   platform_core = [{ installer = "conan", ref = "platform_core/1.1.0@silabs#5868596dbfd3aa0035ef1587b8c08fea", type = "sdk", version = "1.1.0" }]
@@ -36,7 +36,7 @@ version = "0"
   unity_test_framework = [{ installer = "conan", ref = "unity_test_framework/1.1.0@silabs#f418a9460d44f860469de8d9aba3d723", type = "sdk", version = "1.1.0" }]
   usb = [{ installer = "conan", ref = "usb/1.7.0@silabs#7cbc8f1f2a9d31ac04595a1be7d0ba9f", type = "sdk", version = "1.7.0" }]
   zap = [{ installer = "archive", type = "apack", version = "2026.05.21" }]
-  zigbee = [{ installer = "conan", ref = "zigbee/9.1.0-beta.79@silabs#cf1761dd784de321d4205f52137fd7f69205496b", type = "sdk", version = "9.1.0-beta.79" }]
+  zigbee = [{ installer = "conan", ref = "zigbee/9.1.0-beta.80@silabs#5604f46ccc6b9703b322d19940ae972462bc067e", type = "sdk", version = "9.1.0-beta.80" }]
 
 [engine]
   conan-repos = [

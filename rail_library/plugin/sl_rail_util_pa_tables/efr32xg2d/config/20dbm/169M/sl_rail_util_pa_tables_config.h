@@ -35,6 +35,7 @@
 
 // <h> PA Table Configuration
 // <o SL_RAIL_UTIL_PA_TABLE_HEADER> PA Table Selection
+// <"sl_rail_util_pa_dbm_powersetting_mapping_table_20dbm_169M_automode.h"=> 20dBm 169MHz automode PA powersetting mapping table
 // <"sl_rail_util_pa_dbm_powersetting_mapping_table_20dbm_169M_HP.h"=> 20dBm 169MHz HP PA powersetting mapping table
 // <"sl_rail_util_pa_dbm_powersetting_mapping_table_20dbm_169M_MP.h"=> 20dBm 169MHz MP PA powersetting mapping table
 // <"sl_rail_util_pa_dbm_powersetting_mapping_table_20dbm_169M_LP.h"=> 20dBm 169MHz LP PA powersetting mapping table

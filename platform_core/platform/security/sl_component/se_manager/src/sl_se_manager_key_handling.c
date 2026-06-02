@@ -924,7 +924,7 @@ static const uint32_t default_auth_data[2] = { 0 };
 #endif
 
 sl_status_t sli_se_get_auth_buffer(const sl_se_key_descriptor_t *key,
-                                   volatile sli_se_datatransfer_t *auth_buffer)
+                                   sli_se_datatransfer_t *auth_buffer)
 {
   if (key == NULL || auth_buffer == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
@@ -954,7 +954,7 @@ sl_status_t sli_se_get_auth_buffer(const sl_se_key_descriptor_t *key,
 }
 
 sl_status_t sli_se_get_key_input_output(const sl_se_key_descriptor_t *key,
-                                        volatile sli_se_datatransfer_t *buffer)
+                                        sli_se_datatransfer_t *buffer)
 {
   if (key == NULL || buffer == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
@@ -1027,13 +1027,13 @@ sl_status_t sl_se_validate_key(const sl_se_key_descriptor_t *key)
     return status;
   }
 
-  volatile sli_se_datatransfer_t auth_buffer;
+  sli_se_datatransfer_t auth_buffer;
   status = sli_se_get_auth_buffer(key, &auth_buffer);
   if (status != SL_STATUS_OK) {
     return status;
   }
 
-  volatile sli_se_datatransfer_t key_buffer;
+  sli_se_datatransfer_t key_buffer;
   status = sli_se_get_key_input_output(key, &key_buffer);
   if (status != SL_STATUS_OK) {
     return status;
@@ -1066,12 +1066,12 @@ sl_status_t sl_se_generate_key(sl_se_command_context_t *cmd_ctx,
   // Mark as volatile to prevent LTO from optimizing away these structures.
   // They must persist until sli_se_execute_and_wait completes since pointers
   // to them are stored in the command structure and accessed by hardware DMA.
-  volatile sli_se_datatransfer_t domain_p_buffer;
-  volatile sli_se_datatransfer_t domain_N_buffer;
-  volatile sli_se_datatransfer_t domain_Gx_buffer;
-  volatile sli_se_datatransfer_t domain_Gy_buffer;
-  volatile sli_se_datatransfer_t domain_a_buffer;
-  volatile sli_se_datatransfer_t domain_b_buffer;
+  sli_se_datatransfer_t domain_p_buffer;
+  sli_se_datatransfer_t domain_N_buffer;
+  sli_se_datatransfer_t domain_Gx_buffer;
+  sli_se_datatransfer_t domain_Gy_buffer;
+  sli_se_datatransfer_t domain_a_buffer;
+  sli_se_datatransfer_t domain_b_buffer;
 
   if (key_out->flags & SL_SE_KEY_FLAG_ASYMMETRIC_USES_CUSTOM_DOMAIN) {
     if (key_out->type & SL_SE_KEY_TYPE_ECC_WEIERSTRASS_PRIME_CUSTOM) {
@@ -1189,7 +1189,7 @@ sl_status_t sl_se_export_public_key(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_WOULD_OVERFLOW;
   }
 
-  volatile sli_se_datatransfer_t pubkey_buffer = SLI_SE_DATATRANSFER_DEFAULT(
+  sli_se_datatransfer_t pubkey_buffer = SLI_SE_DATATRANSFER_DEFAULT(
     key_out->storage.location.buffer.pointer, required_storage_size);
   sli_se_mailbox_command_add_output(se_cmd, &pubkey_buffer);
 
@@ -1363,7 +1363,7 @@ sl_status_t sl_se_transfer_key(sl_se_command_context_t *cmd_ctx,
   // Mark as volatile to prevent LTO from optimizing away this structure.
   // It must persist until sli_se_execute_and_wait completes since its address
   // is stored in the command structure and accessed by hardware DMA.
-  volatile sli_se_datatransfer_t auth_buffer_out;
+  sli_se_datatransfer_t auth_buffer_out;
   uint32_t key_update_index;
   uint32_t key_update_mode;
 

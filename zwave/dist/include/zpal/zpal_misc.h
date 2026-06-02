@@ -87,16 +87,6 @@ void zpal_reboot_with_info(const zpal_soft_reset_mfid_t manufacturer_id,
                            const zpal_soft_reset_info_t reset_info);
 
 /**
- * @brief Prepare for shutdown handler.
- */
-void zpal_initiate_shutdown_handler(void);
-
-/**
- * @brief Shutdown handler.
- */
-void zpal_shutdown_handler(void);
-
-/**
  * @brief Get serial number length.
  *
  * @return Serial number length.

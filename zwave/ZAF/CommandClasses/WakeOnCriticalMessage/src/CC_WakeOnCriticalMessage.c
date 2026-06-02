@@ -17,6 +17,7 @@
 #include <ZAF_nvm.h>
 #include <ZAF_file_ids.h>
 #include <ZW_TransportSecProtocol.h>
+#include "association_plus_base.h"
 
 /****************************************************************************/
 /*                              PRIVATE DATA                                */
@@ -34,6 +35,28 @@ typedef struct wocm_nvm_t_ {
 /****************************************************************************/
 /*                            PRIVATE FUNCTIONS                             */
 /****************************************************************************/
+
+/**
+ * Retrieve the node ID of the destination configured in the Lifeline
+ * association group (group 1).
+ *
+ * The Wake On Critical Message Notify encapsulation must target the Lifeline
+ * destination (the node the device reports to, typically the controller /
+ * gateway) rather than whichever node happened to send the Configuration Set.
+ *
+ * @return Lifeline destination node ID, or 0 if the Lifeline group is empty.
+ */
+static node_id_t get_lifeline_node_id(void)
+{
+  destination_info_t *p_node_list = NULL;
+  uint8_t list_length = 0;
+  NODE_LIST_STATUS status =
+    handleAssociationGetnodeList(LIFELINE_GROUP_ID, LIFELINE_ENDPOINT_ALLOWED, &p_node_list, &list_length);
+  if (NODE_LIST_STATUS_SUCCESS == status && NULL != p_node_list && list_length > 0) {
+    return p_node_list->node.nodeId;
+  }
+  return 0;
+}
 
 static void send_severity_to_protocol_task(const node_id_t node_id, const uint8_t severity_level)
 {
@@ -94,13 +117,12 @@ CC_WakeOnCriticalMessage_handler(
   cc_handler_input_t * input,
   cc_handler_output_t * output)
 {
+  if (input->rx_options->securityKey != GetHighestSecureLevel(ZAF_GetSecurityKeys())) {
+    return RECEIVED_FRAME_STATUS_NO_SUPPORT;
+  }
   switch (input->frame->ZW_Common.cmd) {
     case COMMAND_WAKE_ON_CRITICAL_MESSAGE_CONFIGURATION_SET:
     {
-      if (input->rx_options->securityKey != GetHighestSecureLevel(ZAF_GetSecurityKeys())) {
-        return RECEIVED_FRAME_STATUS_FAIL;
-      }
-
       if (input->length < sizeof(ZW_WAKE_ON_CRITICAL_MESSAGE_CONFIGURATION_SET_FRAME)) {
         return RECEIVED_FRAME_STATUS_FAIL;
       }
@@ -108,7 +130,14 @@ CC_WakeOnCriticalMessage_handler(
       const uint8_t *raw = (const uint8_t *)input->frame;
       uint8_t severity = raw[2] & WAKE_ON_CRITICAL_MESSAGE_SEVERITY_MASK;
 
-      node_id_t node_id = input->rx_options->sourceNode.nodeId;
+      /* Store the Lifeline destination rather than the sender of this frame, so
+       * that WoCM Notify encapsulation later targets the node the device
+       * actually reports to. */
+      node_id_t node_id = get_lifeline_node_id();
+      if (0 == node_id) {
+        // Fallback to configuring nodeID in case of no Lifeline configured.
+        node_id = input->rx_options->sourceNode.nodeId;
+      }
       wocm_nvm_t wocm_nvm = {
         .node_id = node_id,
         .severity = severity
@@ -122,10 +151,6 @@ CC_WakeOnCriticalMessage_handler(
     case COMMAND_WAKE_ON_CRITICAL_MESSAGE_CONFIGURATION_GET:
     {
       if (true == Check_not_legal_response_job(input->rx_options)) {
-        return RECEIVED_FRAME_STATUS_FAIL;
-      }
-
-      if (input->rx_options->securityKey != GetHighestSecureLevel(ZAF_GetSecurityKeys())) {
         return RECEIVED_FRAME_STATUS_FAIL;
       }
 

@@ -60,36 +60,6 @@ static void SetupNodeManagement(const comm_interface_frame_ptr frame, uint8_t fu
 }
 #endif
 
-#if SUPPORT_ZW_INITIATE_SHUTDOWN
-/*
-   This callback function called from protocol just before going into deep sleep (Deep Sleep)
-   The function itself sends a respond to the host notifying it that the device is ready to go into deep sleep.
- */
-static void Initiate_shutdown_cb(void)
-{
-  // 0x1 0x03 0x00 0xd9
-  const uint8_t status = 0x01;
-  comm_interface_transmit_frame(FUNC_ID_ZW_INITIATE_SHUTDOWN, RESPONSE, &status, sizeof(status), NULL);
-  comm_interface_wait_transmit_done();
-}
-
-/*
-   HOST->ZW
-   ZW-HOST 0x01
- */
-ZW_ADD_CMD(FUNC_ID_ZW_INITIATE_SHUTDOWN)
-{
-  AppTimerStopAll();
-  if (InitiateShutdown(&Initiate_shutdown_cb)) {
-    set_state_and_notify(stateIdle);
-  } else {
-    // somthing went wrong we failed to start the graceful shutdown
-    DoRespond(SAPI_COMMAND_STATUS_FAILURE);
-  }
-}
-
-#endif
-
 #if SUPPORT_FUNC_ID_CLEAR_TX_TIMERS
 static void ClearTxTimers(void)
 {
