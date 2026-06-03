@@ -458,7 +458,7 @@ template_contribution:
         - name: "cd"
       argument:
         - type: uint8
-          help: "enable: 0=disabled, 1=enabled"
+          help: "enable: 0=disabled, greater than 0=enabled"
     condition:
       - "cli"
   - name: "cli_command"
@@ -498,7 +498,7 @@ template_contribution:
       help: "Set Leaf behavior"
       argument:
         - type: uint8
-          help: "is_leaf: 1 to act as RPL leaf"
+          help: "is_leaf: greater than 0 to act as RPL leaf"
   - name: "cli_command"
     value:
       group: "wisun"
@@ -507,7 +507,7 @@ template_contribution:
       help: "Enable/disable Direct Connect"
       argument:
         - type: uint8
-          help: "is_enabled: 1 to enable Direct Connect"
+          help: "is_enabled: greater than 0 to enable Direct Connect"
         - type: uint8
           help: "mode: 0=manual (user runs advert/accept commands), 1=auto (advertise DC ID + accept link)"
         - type: stringopt
@@ -605,7 +605,7 @@ template_contribution:
         - name: "slg"
       argument:
         - type: uint8
-          help: "enable: 1 to enter Last Gasp mode, 0 to leave Last Gasp mode"
+          help: "enable: greater than 0 to enter Last Gasp mode, 0 to leave Last Gasp mode"
   - name: "cli_command"
     value:
       group: "wisun"
@@ -616,7 +616,7 @@ template_contribution:
         - name: "sfb"
       argument:
         - type: uint8
-          help: "enable: 1 to enable First Breath, 0 to disable First Breath"
+          help: "enable: greater than 0 to enable First Breath, 0 to disable First Breath"
   - name: "cli_command"
     value:
       group: "wisun"

@@ -461,7 +461,7 @@ template_contribution:
         - name: "cd"
       argument:
         - type: uint8
-          help: "enable: 0=disabled, 1=enabled"
+          help: "enable: 0=disabled, greater than 0=enabled"
   - name: "cli_command"
     value:
       group: "wisun"
