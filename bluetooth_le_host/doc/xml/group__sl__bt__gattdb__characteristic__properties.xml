@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="group__sl__bt__gattdb__characteristic__properties" kind="group">
     <compoundname>sl_bt_gattdb_characteristic_properties</compoundname>
     <title>GATT Characteristic Property Flags</title>
-    <sectiondef kind="define">
+      <sectiondef kind="define">
       <memberdef kind="define" id="group__sl__bt__gattdb__characteristic__properties_1gacc9eb5e217b4d2cc764e25edd5491207" prot="public" static="no">
         <name>SL_BT_GATTDB_CHARACTERISTIC_READ</name>
         <initializer>0x2</initializer>
@@ -88,7 +88,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9712" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9712" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
     </briefdescription>
     <detaileddescription>

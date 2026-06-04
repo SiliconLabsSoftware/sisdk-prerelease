@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="group__sl__bt__coex" kind="group">
     <compoundname>sl_bt_coex</compoundname>
     <title>Coexistence</title>
-    <sectiondef kind="enum">
+      <sectiondef kind="enum">
       <memberdef kind="enum" id="group__sl__bt__coex_1ga35af928f08226b258ebee855f287f7e5" prot="public" static="no" strong="no">
         <type></type>
         <name>sl_bt_coex_option_t</name>
@@ -43,8 +43,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="13351" column="1" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="13352" bodyend="13358"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="func">
+      </sectiondef>
+      <sectiondef kind="func">
       <memberdef kind="function" id="group__sl__bt__coex_1gad09b577c4a6dfc0dce7f68488117a5a7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
         <definition>sl_status_t sl_bt_coex_set_options</definition>
@@ -325,8 +325,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="13450" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="13450" declcolumn="13"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="define">
+      </sectiondef>
+      <sectiondef kind="define">
       <memberdef kind="define" id="group__sl__bt__coex_1ga948490b9927bdea7b325b04d0c91f7d7" prot="public" static="no">
         <name>sl_bt_cmd_coex_set_options_id</name>
         <initializer>0x00200020</initializer>
@@ -437,7 +437,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="13346" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="13346" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
 <para>Coexistence. </para>
     </briefdescription>

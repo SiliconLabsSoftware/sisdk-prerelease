@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="group__sl__bt__resource" kind="group">
     <compoundname>sl_bt_resource</compoundname>
     <title>Resource Report</title>
     <innergroup refid="group__sl__bt__resource__connection__tx__flags">Connection TX status flags</innergroup>
     <innergroup refid="group__sl__bt__evt__resource__status">sl_bt_evt_resource_status</innergroup>
-    <sectiondef kind="func">
+      <sectiondef kind="func">
       <memberdef kind="function" id="group__sl__bt__resource_1ga364e6338e65b335e0ebfcbbb600c1757" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
         <definition>sl_status_t sl_bt_resource_get_status</definition>
@@ -211,8 +211,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="2055" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="2055" declcolumn="13"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="define">
+      </sectiondef>
+      <sectiondef kind="define">
       <memberdef kind="define" id="group__sl__bt__resource_1ga3e388e1c9065574f6fb3c7139507228f" prot="public" static="no">
         <name>sl_bt_cmd_resource_get_status_id</name>
         <initializer>0x005f0020</initializer>
@@ -323,7 +323,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="1913" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="1913" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
 <para>Resource Report. </para>
     </briefdescription>

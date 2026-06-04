@@ -324,7 +324,7 @@ void sl_wisun_coap_notify_print_notifications(void)
 
   while (slot != NULL) {
     notify = (sl_wisun_coap_notify_t *)slot->start_addr;
-    printf("%s (%lu/%lu)\n", notify->id, notify->tick_ms, notify->schedule_time_ms);
+    printf("%s (%"PRIu32"/%"PRIu32")\n", notify->id, notify->tick_ms, notify->schedule_time_ms);
     slot = slot->next;
   }
 
@@ -451,7 +451,7 @@ sl_status_t sl_wisun_coap_notify_send_notification(const sl_wisun_coap_notify_t 
 #if SL_WISUN_COAP_NOTIFY_SERVICE_ENABLE
 SL_WEAK void sl_wisun_coap_notify_error_hnd(const sl_wisun_coap_notify_t * const notify)
 {
-  printf("[CoAP Notify Error: %s (%lu/%lu)]\n", notify->id, notify->tick_ms, notify->schedule_time_ms);
+  printf("[CoAP Notify Error: %s (%"PRIu32"/%"PRIu32")]\n", notify->id, notify->tick_ms, notify->schedule_time_ms);
 }
 #endif
 // -----------------------------------------------------------------------------

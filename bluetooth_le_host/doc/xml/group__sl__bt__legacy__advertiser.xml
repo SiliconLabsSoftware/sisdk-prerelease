@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="group__sl__bt__legacy__advertiser" kind="group">
     <compoundname>sl_bt_legacy_advertiser</compoundname>
     <title>Legacy Advertiser</title>
-    <sectiondef kind="enum">
+      <sectiondef kind="enum">
       <memberdef kind="enum" id="group__sl__bt__legacy__advertiser_1gaf55ab87e2eda26ad9f13b131b274d6b7" prot="public" static="no" strong="no">
         <type></type>
         <name>sl_bt_legacy_advertiser_connection_mode_t</name>
@@ -73,8 +73,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="2974" column="1" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="2975" bodyend="2988"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="func">
+      </sectiondef>
+      <sectiondef kind="func">
       <memberdef kind="function" id="group__sl__bt__legacy__advertiser_1gacfa5efdd898d261318b013713dda15ff" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
         <definition>sl_status_t sl_bt_legacy_advertiser_set_data</definition>
@@ -354,8 +354,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="3204" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="3204" declcolumn="13"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="define">
+      </sectiondef>
+      <sectiondef kind="define">
       <memberdef kind="define" id="group__sl__bt__legacy__advertiser_1gab634bc878218f5fbd9fa61f315cf3b9f" prot="public" static="no">
         <name>sl_bt_cmd_legacy_advertiser_set_data_id</name>
         <initializer>0x00560020</initializer>
@@ -444,7 +444,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="2950" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="2950" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
 <para>Legacy Advertiser. </para>
     </briefdescription>

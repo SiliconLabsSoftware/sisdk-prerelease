@@ -481,7 +481,9 @@ RAIL_ENUM(RAIL_PacketTimePosition_t) {
   /**
    * Request the time stamp corresponding to the first preamble bit
    * sent or received.
-   * Indicate that time stamp did require using totalPacketBytes.
+   * Indicate that time stamp did require using totalPacketBytes or
+   * packetDurationUs if totalPacketBytes was set to \ref
+   * RAIL_RX_STARTED_BYTES.
    *
    * @deprecated RAIL 2.x synonym of \ref SL_RAIL_PACKET_TIME_AT_PREAMBLE_START_USED_TOTAL.
    */
@@ -497,7 +499,9 @@ RAIL_ENUM(RAIL_PacketTimePosition_t) {
   /**
    * Request the time stamp corresponding to right after its last
    * SYNC word bit has been sent or received.
-   * Indicate that time stamp did require using totalPacketBytes.
+   * Indicate that time stamp did require using totalPacketBytes or
+   * packetDurationUs if totalPacketBytes was set to \ref
+   * RAIL_RX_STARTED_BYTES.
    *
    * @deprecated RAIL 2.x synonym of \ref SL_RAIL_PACKET_TIME_AT_SYNC_END_USED_TOTAL.
    */
@@ -513,7 +517,9 @@ RAIL_ENUM(RAIL_PacketTimePosition_t) {
   /**
    * Request the time stamp corresponding to right after its last
    * bit has been sent or received.
-   * Indicate that time stamp did require using totalPacketBytes.
+   * Indicate that time stamp did require using totalPacketBytes or
+   * packetDurationUs if totalPacketBytes was set to \ref
+   * RAIL_RX_STARTED_BYTES.
    *
    * @deprecated RAIL 2.x synonym of \ref SL_RAIL_PACKET_TIME_AT_PACKET_END_USED_TOTAL.
    */
@@ -538,6 +544,15 @@ RAIL_ENUM(RAIL_PacketTimePosition_t) {
 #define RAIL_PACKET_TIME_AT_PACKET_END_USED_TOTAL     ((RAIL_PacketTimePosition_t) RAIL_PACKET_TIME_AT_PACKET_END_USED_TOTAL)
 #define RAIL_PACKET_TIME_COUNT                        ((RAIL_PacketTimePosition_t) RAIL_PACKET_TIME_COUNT)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
+
+/**
+ * A value to pass as \ref RAIL_GetRxTimePreambleStartAlt() or \ref
+ * RAIL_GetRxTimeSyncWordEndAlt() \ref RAIL_RxPacketDetails_t::timeReceived
+ * parameter field totalPacketBytes to use the packetDurationUs value for time
+ * stamp adjustment.
+ * Not supported with BLE.
+ */
+#define RAIL_RX_STARTED_BYTES 0U
 
 /**
  * @struct RAIL_PacketTimeStamp_t
@@ -572,10 +587,12 @@ typedef struct RAIL_PacketTimeStamp {
    */
   RAIL_PacketTimePosition_t timePosition;
   /**
-   * In RX for EFR32xG25 only:
+   * In RX for all platforms (except EFR32xG21):
    * A value specifying the on-air duration of the data packet,
    * starting with the first bit of the PHR (i.e., end of sync word);
    * preamble and sync word duration are hence excluded.
+   * It is not available with BLE.
+   * When not available it will be 0.
    *
    * In Tx for all platforms:
    * A value specifying the on-air duration of the data packet,

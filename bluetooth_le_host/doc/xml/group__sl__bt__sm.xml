@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="group__sl__bt__sm" kind="group">
     <compoundname>sl_bt_sm</compoundname>
     <title>Security Manager</title>
@@ -10,7 +10,7 @@
     <innergroup refid="group__sl__bt__evt__sm__bonded">sl_bt_evt_sm_bonded</innergroup>
     <innergroup refid="group__sl__bt__evt__sm__bonding__failed">sl_bt_evt_sm_bonding_failed</innergroup>
     <innergroup refid="group__sl__bt__evt__sm__confirm__bonding">sl_bt_evt_sm_confirm_bonding</innergroup>
-    <sectiondef kind="enum">
+      <sectiondef kind="enum">
       <memberdef kind="enum" id="group__sl__bt__sm_1gad428091a8f4174a3dfc1adaaca2b6785" prot="public" static="no" strong="no">
         <type></type>
         <name>sl_bt_sm_io_capability_t</name>
@@ -68,8 +68,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="11731" column="1" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="11732" bodyend="11740"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="func">
+      </sectiondef>
+      <sectiondef kind="func">
       <memberdef kind="function" id="group__sl__bt__sm_1ga2668706f7ffb70681ed974f1e0b46c86" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
         <definition>sl_status_t sl_bt_sm_configure</definition>
@@ -1050,8 +1050,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="12429" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="12429" declcolumn="13"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="define">
+      </sectiondef>
+      <sectiondef kind="define">
       <memberdef kind="define" id="group__sl__bt__sm_1ga45259515f1a63fa4f739963ecf53394e" prot="public" static="no">
         <name>sl_bt_cmd_sm_configure_id</name>
         <initializer>0x010f0020</initializer>
@@ -1470,7 +1470,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="11671" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="11671" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
 <para>Security Manager. </para>
     </briefdescription>

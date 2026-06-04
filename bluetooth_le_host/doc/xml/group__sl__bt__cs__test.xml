@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="group__sl__bt__cs__test" kind="group">
     <compoundname>sl_bt_cs_test</compoundname>
     <title>Channel Sounding Test</title>
     <innergroup refid="group__sl__bt__evt__cs__test__end__completed">sl_bt_evt_cs_test_end_completed</innergroup>
-    <sectiondef kind="enum">
+      <sectiondef kind="enum">
       <memberdef kind="enum" id="group__sl__bt__cs__test_1ga63927ecc8c3951878256e65b568b3f08" prot="public" static="no" strong="no">
         <type></type>
         <name>sl_bt_cs_test_tone_extension_t</name>
@@ -101,8 +101,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15599" column="1" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="15600" bodyend="15612"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="func">
+      </sectiondef>
+      <sectiondef kind="func">
       <memberdef kind="function" id="group__sl__bt__cs__test_1gaa66d7b45664c0c2e0b99db3946802ab2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
         <definition>sl_status_t sl_bt_cs_test_start</definition>
@@ -543,8 +543,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15800" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15800" declcolumn="13"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="define">
+      </sectiondef>
+      <sectiondef kind="define">
       <memberdef kind="define" id="group__sl__bt__cs__test_1ga9402e24cbe4b765d9b6ac4e759dbcb2d" prot="public" static="no">
         <name>sl_bt_cmd_cs_test_start_id</name>
         <initializer>0x005a0020</initializer>
@@ -589,7 +589,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15568" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="15568" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
 <para>Channel Sounding Test. </para>
     </briefdescription>

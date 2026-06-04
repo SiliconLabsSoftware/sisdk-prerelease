@@ -595,7 +595,7 @@ void sl_wisun_coap_rhnd_service_resp_received_ext_hnd(const sockaddr_in6_t * con
     meter->resp_recv_timestamp = sl_sleeptimer_get_tick_count();
     if (meter->type == SL_WISUN_MC_REQ_ASYNC) {
       response_time_ms = sl_sleeptimer_tick_to_ms(meter->resp_recv_timestamp - meter->req_sent_timestamp);
-      printf("[Response time: %ldms]\n", response_time_ms);
+      printf("[Response time: %"PRIu32"ms]\n", response_time_ms);
       sl_mempool_free(&_async_meters_mempool, meter);
     }
   }
@@ -649,7 +649,7 @@ static void _print_async_meters(void)
     }
 
     ip_addr = app_wisun_trace_util_get_ip_str(&tmp_meter_entry->addr.sin6_addr);
-    printf("[%s - time to live: %lu ms]\n", ip_addr, remaining_ms);
+    printf("[%s - time to live: %"PRIu32" ms]\n", ip_addr, remaining_ms);
     app_wisun_trace_util_destroy_ip_str(ip_addr);
 
     block = block->next;
@@ -679,7 +679,7 @@ static void _print_registered_meters(void)
     tmp_meter_entry = (sl_wisun_meter_entry_t *)block->start_addr;
     elapsed_ms = sl_sleeptimer_tick_to_ms(timestamp - tmp_meter_entry->req_sent_timestamp);
     ip_addr = app_wisun_trace_util_get_ip_str(&tmp_meter_entry->addr.sin6_addr);
-    printf("[%s - registered %lu seconds ago]\n", ip_addr, elapsed_ms / 1000);
+    printf("[%s - registered %"PRIu32" seconds ago]\n", ip_addr, elapsed_ms / 1000);
     app_wisun_trace_util_destroy_ip_str(ip_addr);
 
     block = block->next;

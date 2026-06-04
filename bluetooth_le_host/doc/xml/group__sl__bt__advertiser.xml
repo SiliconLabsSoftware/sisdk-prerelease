@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="group__sl__bt__advertiser" kind="group">
     <compoundname>sl_bt_advertiser</compoundname>
     <title>Advertiser</title>
@@ -7,7 +7,7 @@
     <innergroup refid="group__sl__bt__evt__advertiser__timeout">sl_bt_evt_advertiser_timeout</innergroup>
     <innergroup refid="group__sl__bt__evt__advertiser__scan__request">sl_bt_evt_advertiser_scan_request</innergroup>
     <innergroup refid="group__sl__bt__evt__advertiser__random__address__refresh">sl_bt_evt_advertiser_random_address_refresh</innergroup>
-    <sectiondef kind="enum">
+      <sectiondef kind="enum">
       <memberdef kind="enum" id="group__sl__bt__advertiser_1ga5ba0781115b475f1f26eec61863b8d62" prot="public" static="no" strong="no">
         <type></type>
         <name>sl_bt_advertiser_discovery_mode_t</name>
@@ -107,8 +107,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="2479" column="1" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="2480" bodyend="2485"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="func">
+      </sectiondef>
+      <sectiondef kind="func">
       <memberdef kind="function" id="group__sl__bt__advertiser_1gaa2006031a5d5b1bfdf9417b4c82b36f7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
         <definition>sl_status_t sl_bt_advertiser_create_set</definition>
@@ -621,8 +621,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="2928" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="2928" declcolumn="13"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="define">
+      </sectiondef>
+      <sectiondef kind="define">
       <memberdef kind="define" id="group__sl__bt__advertiser_1ga2d671f485b45f359ca183e091df4eeb8" prot="public" static="no">
         <name>sl_bt_cmd_advertiser_create_set_id</name>
         <initializer>0x01040020</initializer>
@@ -843,7 +843,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="2444" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="2444" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
 <para>Advertiser. </para>
     </briefdescription>

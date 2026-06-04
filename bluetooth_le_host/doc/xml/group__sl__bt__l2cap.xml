@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="group__sl__bt__l2cap" kind="group">
     <compoundname>sl_bt_l2cap</compoundname>
     <title>L2CAP Connection Oriented Channels</title>
@@ -9,7 +9,7 @@
     <innergroup refid="group__sl__bt__evt__l2cap__channel__credit">sl_bt_evt_l2cap_channel_credit</innergroup>
     <innergroup refid="group__sl__bt__evt__l2cap__channel__closed">sl_bt_evt_l2cap_channel_closed</innergroup>
     <innergroup refid="group__sl__bt__evt__l2cap__command__rejected">sl_bt_evt_l2cap_command_rejected</innergroup>
-    <sectiondef kind="enum">
+      <sectiondef kind="enum">
       <memberdef kind="enum" id="group__sl__bt__l2cap_1gae9842dbd44c2e083436b58bcd06cdb42" prot="public" static="no" strong="no">
         <type></type>
         <name>sl_bt_l2cap_connection_result_t</name>
@@ -190,8 +190,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15944" column="1" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="15945" bodyend="15951"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="func">
+      </sectiondef>
+      <sectiondef kind="func">
       <memberdef kind="function" id="group__sl__bt__l2cap_1gab8c1a8f13e15e1511d6db2dca0bc6e5c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
         <definition>sl_status_t sl_bt_l2cap_open_le_channel</definition>
@@ -570,8 +570,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="16307" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="16307" declcolumn="13"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="define">
+      </sectiondef>
+      <sectiondef kind="define">
       <memberdef kind="define" id="group__sl__bt__l2cap_1gace5a7ee306be59e96749853c10383dda" prot="public" static="no">
         <name>sl_bt_cmd_l2cap_open_le_channel_id</name>
         <initializer>0x01430020</initializer>
@@ -682,7 +682,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15854" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="15854" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
 <para>L2CAP Connection Oriented Channels. </para>
     </briefdescription>

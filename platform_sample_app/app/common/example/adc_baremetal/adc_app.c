@@ -112,8 +112,10 @@ static void adc_sample_once(void);
 
 void adc_init(void)
 {
-  // Make stdout unbuffered so each printf is flushed to VCOM immediately.
+  // Prevent buffering of output (newlib/GCC only; IAR DLIB does not expose setvbuf).
+#if !defined(__CROSSWORKS_ARM) && defined(__GNUC__)
   setvbuf(stdout, NULL, _IONBF, 0);
+#endif
 
   config_gpios();
 

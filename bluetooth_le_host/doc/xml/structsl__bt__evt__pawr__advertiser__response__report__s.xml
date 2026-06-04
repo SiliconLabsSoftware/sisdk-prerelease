@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="structsl__bt__evt__pawr__advertiser__response__report__s" kind="struct" language="C++" prot="public">
     <compoundname>sl_bt_evt_pawr_advertiser_response_report_s</compoundname>
     <includes refid="sl__bt__api_8h" local="no">sl_bt_api.h</includes>
-    <sectiondef kind="public-attrib">
+      <sectiondef kind="public-attrib">
       <memberdef kind="variable" id="structsl__bt__evt__pawr__advertiser__response__report__s_1ab07939b6a6800a8021c8ee36fc77451f" prot="public" static="no" mutable="no">
         <type>uint8_t</type>
         <definition>uint8_t sl_bt_evt_pawr_advertiser_response_report_s::advertising_set</definition>
@@ -159,7 +159,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="6399" column="14" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="6399" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
 <para>Data structure of the response_report event. </para>
     </briefdescription>

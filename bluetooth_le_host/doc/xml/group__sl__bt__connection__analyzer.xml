@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="group__sl__bt__connection__analyzer" kind="group">
     <compoundname>sl_bt_connection_analyzer</compoundname>
     <title>Connection Analyzer</title>
     <innergroup refid="group__sl__bt__connection__analyzer__flags">Connection Analyzer Configuration flags</innergroup>
     <innergroup refid="group__sl__bt__evt__connection__analyzer__report">sl_bt_evt_connection_analyzer_report</innergroup>
     <innergroup refid="group__sl__bt__evt__connection__analyzer__completed">sl_bt_evt_connection_analyzer_completed</innergroup>
-    <sectiondef kind="func">
+      <sectiondef kind="func">
       <memberdef kind="function" id="group__sl__bt__connection__analyzer_1gaa3898b966e74863f4e2fe159f5f7d183" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
         <definition>sl_status_t sl_bt_connection_analyzer_start</definition>
@@ -317,8 +317,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="17468" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="17468" declcolumn="13"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="define">
+      </sectiondef>
+      <sectiondef kind="define">
       <memberdef kind="define" id="group__sl__bt__connection__analyzer_1gad613de875f5a9f34ebe326ef5bf19fbb" prot="public" static="no">
         <name>sl_bt_cmd_connection_analyzer_start_id</name>
         <initializer>0x00480020</initializer>
@@ -385,7 +385,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="17262" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="17262" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
 <para>Connection Analyzer. </para>
     </briefdescription>

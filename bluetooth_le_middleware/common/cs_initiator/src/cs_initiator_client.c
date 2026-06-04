@@ -35,7 +35,6 @@
 #include <string.h>
 #include "cs_initiator_config.h"
 #include "cs_initiator_client.h"
-#include "cs_initiator_log.h"
 #include "sl_rtl_clib_api.h"
 
 // -----------------------------------------------------------------------------
@@ -345,93 +344,69 @@ sl_status_t cs_initiator_select_antennas(cs_initiator_config_t *config,
     switch (config->cs_tone_antenna_config_idx_req) {
       case CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY:
         antenna_paths = 1;
-        initiator_log_info("CS - PBR - 1:1 antenna usage set" LOG_NL);
         break;
       case CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R:
         if (local_antenna_num < 2) {
-          initiator_log_warning("CS - PBR - 1:1 antenna usage "
-                                "is possible only!" LOG_NL);
           sc = SL_STATUS_NOT_SUPPORTED;
           config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
           antenna_paths = 1;
         } else {
           antenna_paths = 2;
-          initiator_log_info("CS - PBR - 2:1 antenna usage set" LOG_NL);
         }
         break;
       case CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R:
         if (remote_antenna_num < 2) {
-          initiator_log_warning("CS - PBR - 1:1 antenna usage "
-                                "is possible only!" LOG_NL);
           sc = SL_STATUS_NOT_SUPPORTED;
           config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
           antenna_paths = 1;
         } else {
           antenna_paths = 2;
-          initiator_log_info("CS - PBR - 1:2 antenna usage set" LOG_NL);
         }
         break;
       case CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY:
         if (remote_antenna_num >= 2 && local_antenna_num >= 2) {
           antenna_paths = 4;
-          initiator_log_info("CS - PBR - 2:2 antenna usage set" LOG_NL);
         } else {
           sc = SL_STATUS_NOT_SUPPORTED;
           if (remote_antenna_num == 1 && local_antenna_num == 2) {
             antenna_paths = 2;
             config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R;
-            initiator_log_info("CS - PBR - 2:1 antenna usage set" LOG_NL);
           } else if (remote_antenna_num == 2 && local_antenna_num == 1) {
             antenna_paths = 2;
             config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R;
-            initiator_log_info("CS - PBR - 1:2 antenna usage set" LOG_NL);
           } else {
-            initiator_log_warning("CS - PBR - 1:1 antenna usage is possible only!" LOG_NL);
             config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
             antenna_paths = 1;
           }
         }
         break;
       default:
-        initiator_log_warning("CS - PBR - unknown antenna usage! "
-                              "Using the default setting: 1:1 antenna" LOG_NL);
         antenna_paths = 1;
         config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
         break;
     }
-    initiator_log_debug("CS - PBR - using %u antenna paths" LOG_NL,
-                        antenna_paths);
   }
 
   config->cs_tone_antenna_config_idx = config->cs_tone_antenna_config_idx_req;
-  initiator_log_debug("Using tone antenna configuration index: %u" LOG_NL,
-                      config->cs_tone_antenna_config_idx);
 
   // Prepare for the CS main mode: RTT antenna usage
   if (config->cs_main_mode == sl_bt_cs_mode_rtt) {
     switch (config->cs_sync_antenna_req) {
       case CS_SYNC_ANTENNA_1:
-        initiator_log_warning("CS - RTT - 1. antenna device! Using the antenna ID 1" LOG_NL);
         config->cs_sync_antenna = CS_SYNC_ANTENNA_1;
         break;
       case CS_SYNC_ANTENNA_2:
         if (local_antenna_num >= 2) {
-          initiator_log_warning("CS - RTT - 2. antenna device! Using the antenna ID 2" LOG_NL);
           config->cs_sync_antenna = CS_SYNC_ANTENNA_2;
         } else {
-          initiator_log_warning("CS - RTT - only 1 antenna device! Using the antenna ID 1" LOG_NL);
           config->cs_sync_antenna = CS_SYNC_ANTENNA_1;
           sc = SL_STATUS_NOT_SUPPORTED;
         }
         break;
       case CS_SYNC_SWITCHING:
-        initiator_log_info("CS - RTT - switching between %u available antennas" LOG_NL,
-                           local_antenna_num);
         config->cs_sync_antenna = CS_SYNC_SWITCHING;
         break;
       default:
-        initiator_log_warning("CS - RTT - unknown antenna usage! "
-                              "Using the default setting: antenna ID 1" LOG_NL);
         config->cs_sync_antenna_req = CS_SYNC_ANTENNA_1;
         config->cs_sync_antenna = CS_SYNC_ANTENNA_1;
         sc = SL_STATUS_NOT_SUPPORTED;

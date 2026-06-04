@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="structsl__bt__evt__user__message__to__host__s" kind="struct" language="C++" prot="public">
     <compoundname>sl_bt_evt_user_message_to_host_s</compoundname>
     <includes refid="sl__bt__api_8h" local="no">sl_bt_api.h</includes>
-    <sectiondef kind="public-attrib">
+      <sectiondef kind="public-attrib">
       <memberdef kind="variable" id="structsl__bt__evt__user__message__to__host__s_1ac305560b2422f120fd03279c5699bc62" prot="public" static="no" mutable="no">
         <type><ref refid="structuint8array" kindref="compound">uint8array</ref></type>
         <definition>uint8array sl_bt_evt_user_message_to_host_s::message</definition>
@@ -19,7 +19,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="17512" column="14" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="17512" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
 <para>Data structure of the message_to_host event. </para>
     </briefdescription>

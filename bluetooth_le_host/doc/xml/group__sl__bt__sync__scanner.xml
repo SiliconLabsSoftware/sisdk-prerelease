@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="group__sl__bt__sync__scanner" kind="group">
     <compoundname>sl_bt_sync_scanner</compoundname>
     <title>Periodic Advertising Sync Scanner</title>
-    <sectiondef kind="func">
+      <sectiondef kind="func">
       <memberdef kind="function" id="group__sl__bt__sync__scanner_1ga861e55e868835b042abf965073485a5e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
         <definition>sl_status_t sl_bt_sync_scanner_set_sync_parameters</definition>
@@ -172,8 +172,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="4867" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="4867" declcolumn="13"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="define">
+      </sectiondef>
+      <sectiondef kind="define">
       <memberdef kind="define" id="group__sl__bt__sync__scanner_1gacc212085e60be2258e152df9957db71a" prot="public" static="no">
         <name>sl_bt_cmd_sync_scanner_set_sync_parameters_id</name>
         <initializer>0x00500020</initializer>
@@ -218,7 +218,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="4717" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="4717" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
 <para>Periodic Advertising Sync Scanner. </para>
     </briefdescription>

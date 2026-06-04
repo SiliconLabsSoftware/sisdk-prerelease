@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="group__sl__bt__linklayer" kind="group">
     <compoundname>sl_bt_linklayer</compoundname>
     <title>Link Layer</title>
     <innergroup refid="group__sl__bt__evt__linklayer__event__info__report">sl_bt_evt_linklayer_event_info_report</innergroup>
-    <sectiondef kind="func">
+      <sectiondef kind="func">
       <memberdef kind="function" id="group__sl__bt__linklayer_1ga7626df3c11d39b180f58b2bf688eff8c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
         <definition>sl_status_t sl_bt_linklayer_event_info_reporting_enable</definition>
@@ -179,8 +179,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="1878" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="1878" declcolumn="13"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="define">
+      </sectiondef>
+      <sectiondef kind="define">
       <memberdef kind="define" id="group__sl__bt__linklayer_1gad0b08b8edc5e44c264565d086828f9dc" prot="public" static="no">
         <name>sl_bt_cmd_linklayer_event_info_reporting_enable_id</name>
         <initializer>0x00600020</initializer>
@@ -247,7 +247,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="1742" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="1742" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
 <para>Link Layer. </para>
     </briefdescription>

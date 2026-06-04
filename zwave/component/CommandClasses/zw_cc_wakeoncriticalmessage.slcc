@@ -20,4 +20,7 @@ include:
   - path: CC_WakeOnCriticalMessage.h
 provides:
 - name: zw_cc_wakeoncriticalmessage
+requires:
+- name: zw_core
+- name: zw_cc_association
 root_path: zwave

@@ -35,8 +35,6 @@ component:
   - id: "wisun_cli_util"
   - id: "errno"
   - id: "wisun_crash_handler"
-  - id: "wisun_dc_client_cli"
-    condition: [wisun_dc_client_plugin]
 
 source:
   - path: "app.c"

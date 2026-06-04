@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="group__sl__bt__system" kind="group">
     <compoundname>sl_bt_system</compoundname>
     <title>System</title>
@@ -10,7 +10,7 @@
     <innergroup refid="group__sl__bt__evt__system__external__signal">sl_bt_evt_system_external_signal</innergroup>
     <innergroup refid="group__sl__bt__evt__system__awake">sl_bt_evt_system_awake</innergroup>
     <innergroup refid="group__sl__bt__evt__system__soft__timer">sl_bt_evt_system_soft_timer</innergroup>
-    <sectiondef kind="enum">
+      <sectiondef kind="enum">
       <memberdef kind="enum" id="group__sl__bt__system_1gabeb0cee19ac79ff0d4789a07e8e185af" prot="public" static="no" strong="no">
         <type></type>
         <name>sl_bt_system_linklayer_config_key_t</name>
@@ -220,8 +220,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="299" column="1" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="300" bodyend="981"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="func">
+      </sectiondef>
+      <sectiondef kind="func">
       <memberdef kind="function" id="group__sl__bt__system_1ga1f54f752280395f47946800ea39b6e8a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
         <definition>sl_status_t sl_bt_system_hello</definition>
@@ -1117,8 +1117,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="1716" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="1716" declcolumn="13"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="define">
+      </sectiondef>
+      <sectiondef kind="define">
       <memberdef kind="define" id="group__sl__bt__system_1gaf0fac57922ed80ad7aae24334822e8d6" prot="public" static="no">
         <name>sl_bt_cmd_system_hello_id</name>
         <initializer>0x00010020</initializer>
@@ -1493,7 +1493,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="294" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="294" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
 <para>System. </para>
     </briefdescription>

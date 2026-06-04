@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="structsl__bt__evt__cte__receiver__connectionless__iq__report__s" kind="struct" language="C++" prot="public">
     <compoundname>sl_bt_evt_cte_receiver_connectionless_iq_report_s</compoundname>
     <includes refid="sl__bt__api_8h" local="no">sl_bt_api.h</includes>
-    <sectiondef kind="public-attrib">
+      <sectiondef kind="public-attrib">
       <memberdef kind="variable" id="structsl__bt__evt__cte__receiver__connectionless__iq__report__s_1a81236587b38ed04941988cf6bfe89e7d" prot="public" static="no" mutable="no">
         <type>uint16_t</type>
         <definition>uint16_t sl_bt_evt_cte_receiver_connectionless_iq_report_s::status</definition>
@@ -148,7 +148,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="16692" column="14" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="16692" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
 <para>Data structure of the connectionless_iq_report event. </para>
     </briefdescription>

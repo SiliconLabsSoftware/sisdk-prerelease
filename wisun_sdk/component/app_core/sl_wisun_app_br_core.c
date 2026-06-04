@@ -333,7 +333,7 @@ void sl_wisun_connection_lost_event_hnd(sl_wisun_evt_t *evt)
 /* Error event handler */
 void sl_wisun_error_event_hnd(sl_wisun_evt_t *evt)
 {
-  printf("[Wi-SUN network error occurred. Status: %lu\n",
+  printf("[Wi-SUN network error occurred. Status: %"PRIu32"\n",
          evt->evt.error.status);
 }
 

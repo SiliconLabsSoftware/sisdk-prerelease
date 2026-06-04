@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="group__sl__bt__sm__configuration" kind="group">
     <compoundname>sl_bt_sm_configuration</compoundname>
     <title>Security Manager configuration flags</title>
-    <sectiondef kind="define">
+      <sectiondef kind="define">
       <memberdef kind="define" id="group__sl__bt__sm__configuration_1ga93b80fde2c2f52cb996acbfa075b3089" prot="public" static="no">
         <name>SL_BT_SM_CONFIGURATION_MITM_REQUIRED</name>
         <initializer>0x1</initializer>
@@ -100,7 +100,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="11776" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="11776" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
     </briefdescription>
     <detaileddescription>

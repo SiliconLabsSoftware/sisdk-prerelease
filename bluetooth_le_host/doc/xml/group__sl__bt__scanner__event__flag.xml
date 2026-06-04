@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="group__sl__bt__scanner__event__flag" kind="group">
     <compoundname>sl_bt_scanner_event_flag</compoundname>
     <title>Event Type Flags of Advertisement Reports</title>
-    <sectiondef kind="define">
+      <sectiondef kind="define">
       <memberdef kind="define" id="group__sl__bt__scanner__event__flag_1gaf62947b2b89a980373db6d9be3ef0cad" prot="public" static="no">
         <name>SL_BT_SCANNER_EVENT_FLAG_CONNECTABLE</name>
         <initializer>0x1</initializer>
@@ -52,7 +52,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="3971" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="3971" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
     </briefdescription>
     <detaileddescription>

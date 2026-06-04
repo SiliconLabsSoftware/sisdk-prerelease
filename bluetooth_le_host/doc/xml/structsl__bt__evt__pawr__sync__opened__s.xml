@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="structsl__bt__evt__pawr__sync__opened__s" kind="struct" language="C++" prot="public">
     <compoundname>sl_bt_evt_pawr_sync_opened_s</compoundname>
     <includes refid="sl__bt__api_8h" local="no">sl_bt_api.h</includes>
-    <sectiondef kind="public-attrib">
+      <sectiondef kind="public-attrib">
       <memberdef kind="variable" id="structsl__bt__evt__pawr__sync__opened__s_1af074879d705317dce59425b57d582827" prot="public" static="no" mutable="no">
         <type>uint16_t</type>
         <definition>uint16_t sl_bt_evt_pawr_sync_opened_s::sync</definition>
@@ -227,7 +227,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="5887" column="12" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="5887" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
 <para>Data structure of the opened event. </para>
     </briefdescription>

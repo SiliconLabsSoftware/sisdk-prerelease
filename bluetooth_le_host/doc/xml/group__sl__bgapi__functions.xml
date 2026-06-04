@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="group__sl__bgapi__functions" kind="group">
     <compoundname>sl_bgapi_functions</compoundname>
     <title>BGAPI Functions</title>
-    <sectiondef kind="func">
+      <sectiondef kind="func">
       <memberdef kind="function" id="group__sl__bgapi__functions_1ga16f194dee0b0f8e0d9b1bfc06aa69755" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
         <definition>sl_status_t sl_bgapi_obtain_message_buffer</definition>
@@ -383,7 +383,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bgapi_protocol/protocol/inc/sl_bgapi.h" line="500" column="6" declfile="/var/lib/jenkins/github/bgapi_protocol/protocol/inc/sl_bgapi.h" declline="500" declcolumn="6"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
 <para>Functions provided by the BGAPI protocol. </para>
     </briefdescription>

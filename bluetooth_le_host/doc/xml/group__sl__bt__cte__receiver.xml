@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="group__sl__bt__cte__receiver" kind="group">
     <compoundname>sl_bt_cte_receiver</compoundname>
     <title>CTE Receiver</title>
@@ -8,7 +8,7 @@
     <innergroup refid="group__sl__bt__evt__cte__receiver__connection__iq__report">sl_bt_evt_cte_receiver_connection_iq_report</innergroup>
     <innergroup refid="group__sl__bt__evt__cte__receiver__connectionless__iq__report">sl_bt_evt_cte_receiver_connectionless_iq_report</innergroup>
     <innergroup refid="group__sl__bt__evt__cte__receiver__silabs__iq__report">sl_bt_evt_cte_receiver_silabs_iq_report</innergroup>
-    <sectiondef kind="func">
+      <sectiondef kind="func">
       <memberdef kind="function" id="group__sl__bt__cte__receiver_1ga8c9ade43479e0eeddff587b18f8f5b49" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
         <definition>sl_status_t sl_bt_cte_receiver_set_dtm_parameters</definition>
@@ -803,8 +803,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="17241" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="17241" declcolumn="13"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="define">
+      </sectiondef>
+      <sectiondef kind="define">
       <memberdef kind="define" id="group__sl__bt__cte__receiver_1gaf6a0327ca1dc83bea8159bef90fc2295" prot="public" static="no">
         <name>sl_bt_cmd_cte_receiver_set_dtm_parameters_id</name>
         <initializer>0x05450020</initializer>
@@ -1069,7 +1069,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="16549" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="16549" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
 <para>CTE Receiver. </para>
     </briefdescription>

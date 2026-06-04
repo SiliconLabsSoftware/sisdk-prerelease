@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="structsl__bt__evt__l2cap__le__channel__open__response__s" kind="struct" language="C++" prot="public">
     <compoundname>sl_bt_evt_l2cap_le_channel_open_response_s</compoundname>
     <includes refid="sl__bt__api_8h" local="no">sl_bt_api.h</includes>
-    <sectiondef kind="public-attrib">
+      <sectiondef kind="public-attrib">
       <memberdef kind="variable" id="structsl__bt__evt__l2cap__le__channel__open__response__s_1a6d5a3c592f25cb7a996b9b7ff6833d38" prot="public" static="no" mutable="no">
         <type>uint8_t</type>
         <definition>uint8_t sl_bt_evt_l2cap_le_channel_open_response_s::connection</definition>
@@ -111,7 +111,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="16033" column="12" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="16033" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
 <para>Data structure of the le_channel_open_response event. </para>
     </briefdescription>

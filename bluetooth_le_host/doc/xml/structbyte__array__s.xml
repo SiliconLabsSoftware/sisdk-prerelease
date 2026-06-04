@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="structbyte__array__s" kind="struct" language="C++" prot="public">
     <compoundname>byte_array_s</compoundname>
     <includes refid="sl__bgapi_8h" local="no">sl_bgapi.h</includes>
-    <sectiondef kind="public-attrib">
+      <sectiondef kind="public-attrib">
       <memberdef kind="variable" id="structbyte__array__s_1a5bfb9ef637d707bab6dd8b6754c925a8" prot="public" static="no" mutable="no">
         <type>uint16_t</type>
         <definition>uint16_t byte_array_s::len</definition>
@@ -34,7 +34,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bgapi_protocol/protocol/inc/sl_bgapi.h" line="83" column="12" bodyfile="/var/lib/jenkins/github/bgapi_protocol/protocol/inc/sl_bgapi.h" bodystart="83" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
 <para>Variable-length uint8_t array. Maximum length: 65535. </para>
     </briefdescription>

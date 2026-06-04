@@ -61,24 +61,9 @@
 /// Ping transaction finished mask
 #define SL_WISUN_PING_STATUS_TRANSACTION_END        (1LU << 5LU)
 
-/// Ping Start format string
-#define SL_WISUN_PING_START_FORMAT_STR \
-  "PING %s: %u data bytes\n"
-
 /// Ping Destination unreachable format string
 #define SL_WISUN_PING_DEST_UNREACHABLE_STR \
   "[Destination is unreachable]\n"
-
-/// Ping one line statistic format string
-#define SL_WISUN_PING_ONE_LINE_STAT_FORMAT_STR \
-  "[%u bytes from %s: seq=%u time=%lu ms]\n"
-
-/// Ping full statistic format string
-#define SL_WISUN_PING_FULL_STAT_FORMAT_STR                           \
-  "\nPing statistics for %s:\n"                                      \
-  "  Packets: Sent = %lu, Received = %lu, Lost = %u, (%lu%% loss)\n" \
-  "Approximate round trip times in milli-seconds:\n"                 \
-  "  Minimum = %lums, Maximum = %lums, Average = %lums\n\n"
 
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
@@ -296,7 +281,7 @@ sl_status_t sl_wisun_ping(const sockaddr_in6_t *const remote_addr,
 
   rem_ip_str = app_wisun_trace_util_get_ip_str(&req->remote_addr.sin6_addr);
 
-  printf(SL_WISUN_PING_START_FORMAT_STR,
+  printf("PING %s: %u data bytes\n",
          rem_ip_str, req->packet_length);
   app_wisun_trace_util_destroy_ip_str(rem_ip_str);
 
@@ -332,7 +317,7 @@ sl_status_t sl_wisun_ping(const sockaddr_in6_t *const remote_addr,
       if (resp->lost) {
         printf(SL_WISUN_PING_DEST_UNREACHABLE_STR);
       } else {
-        printf(SL_WISUN_PING_ONE_LINE_STAT_FORMAT_STR,
+        printf("[%u bytes from %s: seq=%u time=%"PRIu32" ms]\n",
                resp->packet_length,
                rem_ip_str,
                htons(resp->sequence_number),
@@ -378,7 +363,10 @@ sl_status_t sl_wisun_ping(const sockaddr_in6_t *const remote_addr,
 
   rem_ip_str = app_wisun_trace_util_get_ip_str(&req->remote_addr.sin6_addr);
   if (stat_hnd == NULL) {
-    printf(SL_WISUN_PING_FULL_STAT_FORMAT_STR,
+    printf(  "\nPing statistics for %s:\n"
+           "  Packets: Sent = %"PRIu32", Received = %"PRIu32", Lost = %u, (%u%% loss)\n"
+           "Approximate round trip times in milli-seconds:\n"
+           "  Minimum = %"PRIu32"ms, Maximum = %"PRIu32"ms, Average = %"PRIu32"ms\n\n",
            rem_ip_str,
            sum_resp_pkt, sum_resp_pkt - stat->lost,
            stat->lost,

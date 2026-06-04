@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="group__sl__bt__resource__connection__tx__flags" kind="group">
     <compoundname>sl_bt_resource_connection_tx_flags</compoundname>
     <title>Connection TX status flags</title>
-    <sectiondef kind="define">
+      <sectiondef kind="define">
       <memberdef kind="define" id="group__sl__bt__resource__connection__tx__flags_1ga9d41051751a183fee0868821a31c9bfc" prot="public" static="no">
         <name>SL_BT_RESOURCE_CONNECTION_TX_FLAGS_ERROR_PACKET_OVERFLOW</name>
         <initializer>0x1</initializer>
@@ -29,7 +29,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="1946" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="1946" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
     </briefdescription>
     <detaileddescription>

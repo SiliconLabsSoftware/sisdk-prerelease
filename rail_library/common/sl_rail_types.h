@@ -380,7 +380,9 @@ SLI_RAIL_ENUM(sl_rail_packet_time_position_t) {
   /**
    * Request the time stamp corresponding to the first preamble bit
    * sent or received.
-   * Indicate that time stamp did require using total_packet_bytes.
+   * Indicate that time stamp did require using total_packet_bytes or
+   * packet_duration_us if total_packet_bytes was set to \ref
+   * SL_RAIL_RX_STARTED_BYTES.
    */
   SL_RAIL_PACKET_TIME_AT_PREAMBLE_START_USED_TOTAL = 3u,
   /**
@@ -392,7 +394,9 @@ SLI_RAIL_ENUM(sl_rail_packet_time_position_t) {
   /**
    * Request the time stamp corresponding to right after its last
    * SYNC word bit has been sent or received.
-   * Indicate that time stamp did require using total_packet_bytes.
+   * Indicate that time stamp did require using total_packet_bytes or
+   * packet_duration_us if total_packet_bytes was set to \ref
+   * SL_RAIL_RX_STARTED_BYTES.
    */
   SL_RAIL_PACKET_TIME_AT_SYNC_END_USED_TOTAL = 5u,
   /**
@@ -404,7 +408,9 @@ SLI_RAIL_ENUM(sl_rail_packet_time_position_t) {
   /**
    * Request the time stamp corresponding to right after its last
    * bit has been sent or received.
-   * Indicate that time stamp did require using total_packet_bytes.
+   * Indicate that time stamp did require using total_packet_bytes or
+   * packet_duration_us if total_packet_bytes was set to \ref
+   * SL_RAIL_RX_STARTED_BYTES.
    */
   SL_RAIL_PACKET_TIME_AT_PACKET_END_USED_TOTAL = 7u,
   /**
@@ -425,6 +431,15 @@ SLI_RAIL_ENUM(sl_rail_packet_time_position_t) {
 #define SL_RAIL_PACKET_TIME_AT_PACKET_END_USED_TOTAL     ((sl_rail_packet_time_position_t) SL_RAIL_PACKET_TIME_AT_PACKET_END_USED_TOTAL)
 #define SL_RAIL_PACKET_TIME_COUNT                        ((sl_rail_packet_time_position_t) SL_RAIL_PACKET_TIME_COUNT)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
+
+/**
+ * A value to pass as \ref sl_rail_get_rx_time_preamble_start() or \ref
+ * sl_rail_get_rx_time_sync_word_end() \ref
+ * sl_rail_rx_packet_details_t::time_received parameter field total_packet_bytes
+ * to use the packet_duration_us value for time stamp adjustment.
+ * Not supported with BLE.
+ */
+#define SL_RAIL_RX_STARTED_BYTES 0U
 
 /**
  * @struct sl_rail_packet_time_stamp_t
@@ -451,10 +466,12 @@ typedef struct sl_rail_packet_time_stamp {
    */
   sl_rail_packet_time_position_t time_position;
   /**
-   * In RX for EFR32xG25 only:
+   * In RX for all platforms (except EFR32xG21):
    * A value specifying the on-air duration of the data packet,
    * starting with the first bit of the PHR (i.e., end of sync word);
    * preamble and sync word duration are hence excluded.
+   * It is not available with BLE.
+   * When not available it will be 0.
    *
    * In Tx for all platforms:
    * A value specifying the on-air duration of the data packet,

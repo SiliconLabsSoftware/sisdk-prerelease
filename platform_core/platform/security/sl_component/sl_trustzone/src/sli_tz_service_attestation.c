@@ -110,7 +110,7 @@ extern const uint32_t linker_vectors_begin;
 extern bool                          otp_initialized;
 extern sl_se_otp_init_t              otp_configuration;
 extern uint32_t                      otp_version;
-extern const ApplicationProperties_t sl_app_properties;
+extern volatile const ApplicationProperties_t sl_app_properties;
 #endif // (_SILICON_LABS_SECURITY_FEATURE != _SILICON_LABS_SECURITY_FEATURE_VAULT)
 
 //------------------------------------------------------------------------------
@@ -898,7 +898,8 @@ enum psa_attest_err_t sli_attest_add_all_sw_components(struct attest_token_encod
     // to the address at the end of the NS application.
     uint32_t ns_firmware_end_addr = (uint32_t)sl_app_properties.signatureLocation;
     if (!validate_signature_location(ns_firmware_start_addr, ns_firmware_end_addr)) {
-      return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
+      ret_val = PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
+      goto exit;
     }
     size_t ns_firmware_size = ns_firmware_end_addr - ns_firmware_start_addr;
 
@@ -965,7 +966,6 @@ enum psa_attest_err_t sli_attest_add_all_sw_components(struct attest_token_encod
 
 //-------------------------------------
 // Full services (IOVEC usage)
-
 /**************************************************************************//**
  * @brief Get attestation public key.
  *****************************************************************************/

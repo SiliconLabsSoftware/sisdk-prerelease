@@ -32,7 +32,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced Wireless\ Technology|Z-Wave"/>
   </descriptors>
-  <descriptors name="ZWave_NCP_SerialAPI_Controller_Solution" label="ZWave_NCP_SerialAPI_Controller_Solution" description="Demonstrates Serial Applications Programming Interface (Serial API) combined with OTW bootloader. The Serial Applications Programming Interface (Serial API) allows a host to communicate with a Z-Wave chip. The host may be a PC or a less powerful embedded host CPU, such as in a remote control or in a gateway device, and so on.
+  <descriptors name="zwave_ncp_serial_api_controller_otw" label="ZWave_NCP_SerialAPI_Controller_Solution" description="Demonstrates Serial Applications Programming Interface (Serial API) combined with OTW bootloader. The Serial Applications Programming Interface (Serial API) allows a host to communicate with a Z-Wave chip. The host may be a PC or a less powerful embedded host CPU, such as in a remote control or in a gateway device, and so on.
 ">
     <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
@@ -49,7 +49,7 @@
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="zwave_sample_app.bootloaders.bootloader-uart-xmodem-zwave-otw.slcp zwave_sample_app.zwave_ncp_serial_api.zwave_ncp_serial_api_controller.slcp"/>
   </descriptors>
-  <descriptors name="ZWave_NCP_SerialAPI_EndDevice_Solution" label="ZWave_NCP_SerialAPI_EndDevice_Solution" description="Demonstrates Serial Applications Programming Interface (Serial API) combined with OTW bootloader. The Serial API End Device allows the user to create a product with a host application with different capabilites than the Z-Wave device, such as drive a high performance display, but does not require the Z-Wave Controller role.
+  <descriptors name="zwave_ncp_serial_api_end_device_otw" label="ZWave_NCP_SerialAPI_EndDevice_Solution" description="Demonstrates Serial Applications Programming Interface (Serial API) combined with OTW bootloader. The Serial API End Device allows the user to create a product with a host application with different capabilites than the Z-Wave device, such as drive a high performance display, but does not require the Z-Wave Controller role.
 ">
     <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
@@ -66,7 +66,7 @@
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="zwave_sample_app.bootloaders.bootloader-uart-xmodem-zwave-otw.slcp zwave_sample_app.zwave_ncp_serial_api.zwave_ncp_serial_api_end_device.slcp"/>
   </descriptors>
-  <descriptors name="ZWave_NCP_Zniffer_Solution" label="ZWave_NCP_Zniffer_Solution" description="Demonstrates Zniffer application combined with OTW bootloader. The Z-Wave Interface application helps with analyzing the communication between devices and debugging the application. It is possible to log and filter datagrams in any supported region. The log can be saved for later analysis.
+  <descriptors name="zwave_ncp_zniffer_otw" label="ZWave_NCP_Zniffer_Solution" description="Demonstrates Zniffer application combined with OTW bootloader. The Z-Wave Interface application helps with analyzing the communication between devices and debugging the application. It is possible to log and filter datagrams in any supported region. The log can be saved for later analysis.
 ">
     <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
@@ -83,7 +83,7 @@
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="zwave_sample_app.bootloaders.bootloader-uart-xmodem-zwave-otw.slcp zwave_sample_app.zwave_ncp_zniffer.zwave_ncp_zniffer.slcp"/>
   </descriptors>
-  <descriptors name="ZWave_SoC_DoorLockKeypad_Solution" label="ZWave_SoC_DoorLockKeypad_Solution" description="Demonstrates Door Lock application combined with OTA bootloader. The Z-Wave certified Door Lock application shows a lock implementation. It will support user codes to open a door and thereby eliminate the need for traditional keys. It is possible to both lock and unlock the door remotely through the Z-Wave protocol.
+  <descriptors name="zwave_soc_door_lock_keypad_ota" label="ZWave_SoC_DoorLockKeypad_Solution" description="Demonstrates Door Lock application combined with OTA bootloader. The Z-Wave certified Door Lock application shows a lock implementation. It will support user codes to open a door and thereby eliminate the need for traditional keys. It is possible to both lock and unlock the door remotely through the Z-Wave protocol.
 ">
     <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
@@ -100,7 +100,7 @@
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="zwave_sample_app.bootloaders.bootloader-storage-internal-single-zwave-ota.slcp zwave_sample_app.zwave_soc_door_lock_keypad.zwave_soc_door_lock_keypad.slcp"/>
   </descriptors>
-  <descriptors name="ZWave_SoC_LEDBulb_Solution" label="ZWave_SoC_LEDBulb_Solution" description="Demonstrates LED Bulb application combined with OTA bootloader. The Z-Wave LED Bulb application shows an implementation of a remotely controlled color switch. An example is an LED bulb or any other color-capable device. The app supports dimming of an RGB LED.
+  <descriptors name="zwave_soc_led_bulb_ota" label="ZWave_SoC_LEDBulb_Solution" description="Demonstrates LED Bulb application combined with OTA bootloader. The Z-Wave LED Bulb application shows an implementation of a remotely controlled color switch. An example is an LED bulb or any other color-capable device. The app supports dimming of an RGB LED.
 ">
     <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
@@ -117,7 +117,7 @@
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="zwave_sample_app.bootloaders.bootloader-storage-internal-single-zwave-ota.slcp zwave_sample_app.zwave_soc_led_bulb.zwave_soc_led_bulb.slcp"/>
   </descriptors>
-  <descriptors name="ZWave_SoC_MultilevelSensor_Solution" label="ZWave_SoC_MultilevelSensor_Solution" description="Demonstrates Switch Multilevel Sensor application combined with OTA bootloader. The Z-Wave Switch Multilevel Sensor application shows the ability to advertize numerical sensor readings, such as temperature and humidity, and so on. Multiple parameters can be set for the minimum and maximum values, and a notification will be sent if the measured temperature value is out of the range.
+  <descriptors name="zwave_soc_multilevel_sensor_ota" label="ZWave_SoC_MultilevelSensor_Solution" description="Demonstrates Switch Multilevel Sensor application combined with OTA bootloader. The Z-Wave Switch Multilevel Sensor application shows the ability to advertize numerical sensor readings, such as temperature and humidity, and so on. Multiple parameters can be set for the minimum and maximum values, and a notification will be sent if the measured temperature value is out of the range.
 ">
     <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
@@ -134,7 +134,7 @@
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="zwave_sample_app.bootloaders.bootloader-storage-internal-single-zwave-ota.slcp zwave_sample_app.zwave_soc_multilevel_sensor.zwave_soc_multilevel_sensor.slcp"/>
   </descriptors>
-  <descriptors name="ZWave_SoC_PowerStrip_Solution" label="ZWave_SoC_PowerStrip_Solution" description="Demonstrates Power Strip application combined with OTA bootloader. The Z-Wave certified Power Strip application shows an extension block implementation used to turn on several devices that are connected to power. Examples include lights, appliances, etc.
+  <descriptors name="zwave_soc_power_strip_ota" label="ZWave_SoC_PowerStrip_Solution" description="Demonstrates Power Strip application combined with OTA bootloader. The Z-Wave certified Power Strip application shows an extension block implementation used to turn on several devices that are connected to power. Examples include lights, appliances, etc.
 ">
     <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
@@ -151,7 +151,7 @@
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="zwave_sample_app.bootloaders.bootloader-storage-internal-single-zwave-ota.slcp zwave_sample_app.zwave_soc_power_strip.zwave_soc_power_strip.slcp"/>
   </descriptors>
-  <descriptors name="ZWave_SoC_SensorPIR_Solution" label="ZWave_SoC_SensorPIR_Solution" description="Demonstrates passive infrared (PIR) sensor application combined with OTA bootloader. The Z-Wave certified passive infrared (PIR) sensor application shows a presence/movement detector implementation for controlling other devices and for sending notifications.
+  <descriptors name="zwave_soc_sensor_pir_ota" label="ZWave_SoC_SensorPIR_Solution" description="Demonstrates passive infrared (PIR) sensor application combined with OTA bootloader. The Z-Wave certified passive infrared (PIR) sensor application shows a presence/movement detector implementation for controlling other devices and for sending notifications.
 ">
     <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
@@ -168,7 +168,7 @@
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="zwave_sample_app.bootloaders.bootloader-storage-internal-single-zwave-ota.slcp zwave_sample_app.zwave_soc_sensor_pir.zwave_soc_sensor_pir.slcp"/>
   </descriptors>
-  <descriptors name="ZWave_SoC_SwitchOnOff_Solution" label="ZWave_SoC_SwitchOnOff_Solution" description="Demonstrates Switch On/Off application combined with OTA bootloader. The Z-Wave certified Switch On/Off application shows a switch implementation that turns on any device that is connected to power. Examples include lights, appliances, and so on.
+  <descriptors name="zwave_soc_switch_on_off_ota" label="ZWave_SoC_SwitchOnOff_Solution" description="Demonstrates Switch On/Off application combined with OTA bootloader. The Z-Wave certified Switch On/Off application shows a switch implementation that turns on any device that is connected to power. Examples include lights, appliances, and so on.
 ">
     <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
@@ -185,7 +185,7 @@
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="zwave_sample_app.bootloaders.bootloader-storage-internal-single-zwave-ota.slcp zwave_sample_app.zwave_soc_switch_on_off.zwave_soc_switch_on_off.slcp"/>
   </descriptors>
-  <descriptors name="ZWave_SoC_WallController_Solution" label="ZWave_SoC_WallController_Solution" description="Demonstrates Wall Controller application combined with OTA bootloader. The Z-Wave certified Wall Controller application shows a push-button switch panel implementation to control devices in the Z-Wave network from push buttons (physical or virtual) on a device that is meant to be mounted on a wall. Examples include scene and zone controllers and wall-mounted AV controllers.
+  <descriptors name="zwave_soc_wall_controller_ota" label="ZWave_SoC_WallController_Solution" description="Demonstrates Wall Controller application combined with OTA bootloader. The Z-Wave certified Wall Controller application shows a push-button switch panel implementation to control devices in the Z-Wave network from push buttons (physical or virtual) on a device that is meant to be mounted on a wall. Examples include scene and zone controllers and wall-mounted AV controllers.
 ">
     <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>

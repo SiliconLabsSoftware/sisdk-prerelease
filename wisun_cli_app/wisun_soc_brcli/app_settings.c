@@ -3549,13 +3549,13 @@ static sl_status_t app_settings_get_neighbors(char *value_str,
             if (strcmp(value_str, "::")) {
               printf("    gua = %s\r\n", value_str);
             }
-            printf("    lifetime = %lu\r\n", neighbor_info.lifetime);
-            printf("    mac_tx_count = %lu\r\n", neighbor_info.mac_tx_count);
-            printf("    mac_tx_failed_count = %lu\r\n", neighbor_info.mac_tx_failed_count);
-            printf("    mac_tx_ms_count = %lu\r\n", neighbor_info.mac_tx_ms_count);
-            printf("    mac_tx_ms_failed_count = %lu\r\n", neighbor_info.mac_tx_ms_failed_count);
-            printf("    mac_tx_cd_count = %lu\r\n", neighbor_info.mac_tx_cd_count);
-            printf("    mac_rx_count = %lu\r\n", neighbor_info.mac_rx_count);
+            printf("    lifetime = %"PRIu32"\r\n", neighbor_info.lifetime);
+            printf("    mac_tx_count = %"PRIu32"\r\n", neighbor_info.mac_tx_count);
+            printf("    mac_tx_failed_count = %"PRIu32"\r\n", neighbor_info.mac_tx_failed_count);
+            printf("    mac_tx_ms_count = %"PRIu32"\r\n", neighbor_info.mac_tx_ms_count);
+            printf("    mac_tx_ms_failed_count = %"PRIu32"\r\n", neighbor_info.mac_tx_ms_failed_count);
+            printf("    mac_tx_cd_count = %"PRIu32"\r\n", neighbor_info.mac_tx_cd_count);
+            printf("    mac_rx_count = %"PRIu32"\r\n", neighbor_info.mac_rx_count);
             if (neighbor_info.rpl_rank != 0xFFFF) {
               printf("    rpl_rank = %hu\r\n", neighbor_info.rpl_rank);
             }
@@ -3611,7 +3611,7 @@ static sl_status_t app_settings_get_statistics(char *value_str,
   // Update statistics
   ret = sl_wisun_get_statistics(statistics_type, &app_statistics);
   if (ret != SL_STATUS_OK) {
-    printf("[Failed to retrieve statistics: %lu]\r\n", ret);
+    printf("[Failed to retrieve statistics: %"PRIu32"]\r\n", ret);
     return SL_STATUS_FAIL;
   }
 
@@ -4007,7 +4007,7 @@ static sl_status_t app_settings_get_network_info(char *value_str,
 
   ret = sl_wisun_get_network_info(&app_network_info);
   if (ret != SL_STATUS_OK) {
-    printf("[Failed to retrieve Wi-SUN network information: %lu]\r\n", ret);
+    printf("[Failed to retrieve Wi-SUN network information: %"PRIu32"]\r\n", ret);
     return SL_STATUS_FAIL;
   }
 
@@ -4041,7 +4041,7 @@ static sl_status_t app_settings_get_rpl_info(char *value_str,
 
   ret = sl_wisun_get_rpl_info(&app_rpl_info);
   if (ret != SL_STATUS_OK) {
-    printf("[Failed to retrieve Wi-SUN RPL information: %lu]\r\n", ret);
+    printf("[Failed to retrieve Wi-SUN RPL information: %"PRIu32"]\r\n", ret);
     return SL_STATUS_FAIL;
   }
 
@@ -4099,7 +4099,7 @@ static sl_status_t app_settings_get_wifi_info(char *value_str,
 
   status = sl_wisun_br_wifi_get_info(&connected, &channel_number, mac_address, ipv6_address);
   if (status != SL_STATUS_OK) {
-    printf("[Failed to retrieve Wi-Fi information: %lu]\r\n", status);
+    printf("[Failed to retrieve Wi-Fi information: %"PRIu32"]\r\n", status);
     return SL_STATUS_FAIL;
   }
 

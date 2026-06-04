@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="group__sl__bt__gattdb__security__requirements" kind="group">
     <compoundname>sl_bt_gattdb_security_requirements</compoundname>
     <title>GATT Attribute Security Requirement Flags</title>
-    <sectiondef kind="define">
+      <sectiondef kind="define">
       <memberdef kind="define" id="group__sl__bt__gattdb__security__requirements_1ga8e87d8a1130ba5bc94d9162b0375069a" prot="public" static="no">
         <name>SL_BT_GATTDB_ENCRYPTED_READ</name>
         <initializer>0x1</initializer>
@@ -112,7 +112,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9667" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9667" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
     </briefdescription>
     <detaileddescription>

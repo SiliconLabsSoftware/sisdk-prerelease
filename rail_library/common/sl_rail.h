@@ -3784,12 +3784,15 @@ sl_rail_status_t sl_rail_get_rx_packet_details(sl_rail_handle_t rail_handle,
  * @param[in] rail_handle A real RAIL instance handle.
  * @param[in,out] p_packet_details A non-NULL pointer to the details that were returned from
  *   a previous call to \ref sl_rail_get_rx_packet_details() for this same packet.
- *   The application must update the time_received field total_packet_bytes to be
- *   the total number of bytes of the received packet for RAIL to use when
- *   calculating the specified time stamp. This should account for all bytes
- *   received over the air after the Preamble and Sync word(s), including CRC
- *   bytes. After this function, the time_received field packet_time will be
- *   updated with the time that the preamble for this packet started on air.
+ *   The application can set \ref sl_rail_rx_packet_details_t::time_received field
+ *   total_packet_bytes to \ref SL_RAIL_RX_STARTED_BYTES to make RAIL use
+ *   packet_duration_us field for this adjustment. Otherwise the application must
+ *   update the time_received field total_packet_bytes to be the total number of
+ *   bytes of the received packet for RAIL to use when calculating the specified
+ *   time stamp. This should account for all bytes received over the air after the
+ *   Preamble and Sync word(s), including CRC bytes. After this function, the
+ *   time_received field packet_time will be updated with the time that the preamble
+ *   for this packet started on air.
  * @return \ref SL_RAIL_STATUS_NO_ERROR if the packet time was successfully
  *   calculated, or an appropriate error code otherwise.
  */
@@ -3802,12 +3805,15 @@ sl_rail_status_t sl_rail_get_rx_time_preamble_start(sl_rail_handle_t rail_handle
  * @param[in] rail_handle A real RAIL instance handle.
  * @param[in,out] p_packet_details A non-NULL pointer to the details that were returned from
  *   a previous call to \ref sl_rail_get_rx_packet_details() for this same packet.
- *   The application must update the time_received field total_packet_bytes to be
- *   the total number of bytes of the received packet for RAIL to use when
- *   calculating the specified time stamp. This should account for all bytes
- *   received over the air after the Preamble and Sync word(s), including CRC
- *   bytes. After this function, the time_received field packet_time will be
- *   updated with the time that the sync word for this packet finished on air.
+ *   The application can set \ref sl_rail_rx_packet_details_t::time_received field
+ *   total_packet_bytes to \ref SL_RAIL_RX_STARTED_BYTES to make RAIL use
+ *   packet_duration_us field for this adjustment. Otherwise the application must
+ *   update the time_received field total_packet_bytes to be the total number of
+ *   bytes of the received packet for RAIL to use when calculating the specified
+ *   time stamp. This should account for all bytes received over the air after the
+ *   Preamble and Sync word(s), including CRC bytes. After this function, the
+ *   time_received field packet_time will be updated with the time that the sync
+ *   word for this packet finished on air.
  * @return \ref SL_RAIL_STATUS_NO_ERROR if the packet time was successfully
  *   calculated, or an appropriate error code otherwise.
  */

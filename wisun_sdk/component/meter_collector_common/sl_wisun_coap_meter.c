@@ -88,18 +88,6 @@
     }                                                                \
   } while (0)
 
-/// Json measurement begin format string
-#define SL_WISUN_COAP_METER_JSON_MEAS_RESP_BEGIN_FORMAT_STR \
-  "{\"%s\" : \n["
-
-/// Json measurement line format string
-#define SL_WISUN_COAP_METER_JSON_MEAS_RESP_LINE_FORMAT_STR \
-  "\n\"#%u: %lu.%luC %lu.%lu%% %ulux\""
-
-/// Json measurement end format string
-#define SL_WISUN_COAP_JSON_MEAS_RESP_END_FORMAT_STR \
-  "\n]}"
-
 /// JSON formatted measurement data maximum size
 #define SL_WISUN_COAP_METER_JSON_REQUIRED_PAYLOAD_SIZE \
   (SL_WISUN_METER_MEASUREMENT_BUFFER_SIZE * 36 + 64)
@@ -112,18 +100,6 @@
 
 /// JSON formatted measurement data maximum size
 #define SL_WISUN_COAP_METER_JSON_MEAS_DATA_SIZE         350U
-
-/// JSON format string for measurement
-#define SL_WISUN_COAP_METER_JSON_MEAS_FORMAT_STR \
-  "  {\n"                                        \
-  "    \"%s\" :\n"                               \
-  "    {\n"                                      \
-  "      \"id\": %u,\n"                          \
-  "      \"temp\": %lu.%lu,\n"                   \
-  "      \"hum\": %lu.%lu,\n"                    \
-  "      \"lx\": %u\n"                           \
-  "    }\n"                                      \
-  "  }"
 
 /// Measurement plain text buffer size
 #define SL_WISUN_COAP_METER_MEAS_PLAIN_TXT_DATA_SIZE    32U
@@ -526,7 +502,15 @@ static const char *_meter_packet2json(const sl_wisun_meter_packet_t * const pack
   const char *ip_str = (ip_str_global != NULL) ? ip_str_global : "unknown";
   snprintf(buff,
            SL_WISUN_COAP_METER_JSON_MEAS_DATA_SIZE,
-           SL_WISUN_COAP_METER_JSON_MEAS_FORMAT_STR,
+           "  {\n"
+           "    \"%s\" :\n"
+           "    {\n"
+           "      \"id\": %u,\n"
+           "      \"temp\": %"PRIi32".%"PRIi32",\n"
+           "      \"hum\": %"PRIu32".%"PRIu32",\n"
+           "      \"lx\": %u\n"
+           "    }\n"
+           "  }",
            ip_str,
            packet->id,
            packet->temperature / 1000,
@@ -836,7 +820,7 @@ static sl_wisun_coap_packet_t *_prepare_measurement_resp(const sl_wisun_coap_pac
     sli_wisun_meter_get_temperature(&packet);
     snprintf(content,
              max_content_size,
-             "%lu.%lu Cdeg", packet.temperature / 1000,
+             "%"PRIi32".%"PRIi32" Cdeg", packet.temperature / 1000,
              (packet.temperature % 1000) / 10);
 
     // Humidity measurement
@@ -844,7 +828,7 @@ static sl_wisun_coap_packet_t *_prepare_measurement_resp(const sl_wisun_coap_pac
     sli_wisun_meter_get_humidity(&packet);
     snprintf(content,
              max_content_size,
-             "%lu.%lu %%", packet.humidity / 1000,
+             "%"PRIu32".%"PRIu32" %%", packet.humidity / 1000,
              (packet.humidity % 1000) / 10);
 
     // Light measurement
@@ -961,8 +945,7 @@ static sl_wisun_coap_packet_t * _notify_hnd_cb(const sl_wisun_coap_notify_t *not
   }
 
   __print_to_buff(res, pkt_ptr, tmp_buff, payload_len,
-                  SL_WISUN_COAP_METER_JSON_MEAS_RESP_BEGIN_FORMAT_STR,
-                  ip_str_global);
+                  "{\"%s\" : \n[", ip_str_global);
   app_wisun_trace_util_destroy_ip_str(ip_str_global);
 
   cnt = 0U;
@@ -972,20 +955,18 @@ static sl_wisun_coap_packet_t * _notify_hnd_cb(const sl_wisun_coap_notify_t *not
     meas_pkt = (sl_wisun_meter_packet_t *)block->start_addr;
 
     __print_to_buff(res, pkt_ptr, tmp_buff, payload_len,
-                    cnt != (_metrics_mpool.used_block_count - 1)
-                    ? SL_WISUN_COAP_METER_JSON_MEAS_RESP_LINE_FORMAT_STR ","
-                    : SL_WISUN_COAP_METER_JSON_MEAS_RESP_LINE_FORMAT_STR,
+                    "\n\"#%u: %"PRIi32".%"PRIi32"C %"PRIu32".%"PRIu32"%% %ulux\"%s",
                     meas_pkt->id,
                     meas_pkt->temperature / 1000,
                     (meas_pkt->temperature % 1000) / 10,
                     meas_pkt->humidity / 1000,
                     (meas_pkt->humidity % 1000) / 10,
-                    meas_pkt->light);
+                    meas_pkt->light,
+                    cnt != (_metrics_mpool.used_block_count - 1) ? "," : "");
     ++cnt;
   }
 
-  __print_to_buff(res, pkt_ptr, tmp_buff, payload_len,
-                  SL_WISUN_COAP_JSON_MEAS_RESP_END_FORMAT_STR);
+  __print_to_buff(res, pkt_ptr, tmp_buff, payload_len, "\n]}");
 
   // Calculate packet payload length
   pkt_ptr->payload_len = sl_strnlen((char *)pkt_ptr->payload_ptr, SL_WISUN_COAP_METER_JOSN_PAYLOAD_SIZE);

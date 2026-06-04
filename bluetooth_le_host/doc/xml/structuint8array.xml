@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="structuint8array" kind="struct" language="C++" prot="public">
     <compoundname>uint8array</compoundname>
     <includes refid="sl__bgapi_8h" local="no">sl_bgapi.h</includes>
-    <sectiondef kind="public-attrib">
+      <sectiondef kind="public-attrib">
       <memberdef kind="variable" id="structuint8array_1a4698938af444ec839076786df946394d" prot="public" static="no" mutable="no">
         <type>uint8_t</type>
         <definition>uint8_t uint8array::len</definition>
@@ -34,7 +34,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bgapi_protocol/protocol/inc/sl_bgapi.h" line="74" column="11" bodyfile="/var/lib/jenkins/github/bgapi_protocol/protocol/inc/sl_bgapi.h" bodystart="74" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
 <para>Variable-length uint8_t array. Maximum length: 255. </para>
     </briefdescription>

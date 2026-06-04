@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="group__sl__bt__gattdb" kind="group">
     <compoundname>sl_bt_gattdb</compoundname>
     <title>GATT Database</title>
@@ -9,7 +9,7 @@
     <innergroup refid="group__sl__bt__gattdb__characteristic__properties">GATT Characteristic Property Flags</innergroup>
     <innergroup refid="group__sl__bt__gattdb__descriptor__properties">GATT Descriptor Property Flags</innergroup>
     <innergroup refid="group__sl__bt__gattdb__attribute__state">GATT Attribute State Flags</innergroup>
-    <sectiondef kind="enum">
+      <sectiondef kind="enum">
       <memberdef kind="enum" id="group__sl__bt__gattdb_1ga91d3c36ce798fd1c1bdf8af403dcc179" prot="public" static="no" strong="no">
         <type></type>
         <name>sl_bt_gattdb_service_type_t</name>
@@ -136,8 +136,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9599" column="1" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9600" bodyend="9615"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="func">
+      </sectiondef>
+      <sectiondef kind="func">
       <memberdef kind="function" id="group__sl__bt__gattdb_1ga33d351121d4c9ac2fef4a131c71de5e2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
         <definition>sl_status_t sl_bt_gattdb_new_session</definition>
@@ -1376,8 +1376,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="10266" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="10266" declcolumn="13"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="define">
+      </sectiondef>
+      <sectiondef kind="define">
       <memberdef kind="define" id="group__sl__bt__gattdb_1ga141e15417b765121dc7d5119438257da" prot="public" static="no">
         <name>sl_bt_cmd_gattdb_new_session_id</name>
         <initializer>0x00460020</initializer>
@@ -1774,7 +1774,7 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9558" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="9558" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
 <para>GATT Database. </para>
     </briefdescription>

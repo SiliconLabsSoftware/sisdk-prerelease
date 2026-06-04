@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="group__sl__bt__gatt" kind="group">
     <compoundname>sl_bt_gatt</compoundname>
     <title>GATT Client</title>
@@ -10,7 +10,7 @@
     <innergroup refid="group__sl__bt__evt__gatt__characteristic__value">sl_bt_evt_gatt_characteristic_value</innergroup>
     <innergroup refid="group__sl__bt__evt__gatt__descriptor__value">sl_bt_evt_gatt_descriptor_value</innergroup>
     <innergroup refid="group__sl__bt__evt__gatt__procedure__completed">sl_bt_evt_gatt_procedure_completed</innergroup>
-    <sectiondef kind="enum">
+      <sectiondef kind="enum">
       <memberdef kind="enum" id="group__sl__bt__gatt_1ga459acca869ec6d9edd49c57ff6357dd8" prot="public" static="no" strong="no">
         <type></type>
         <name>sl_bt_gatt_att_opcode_t</name>
@@ -245,8 +245,8 @@
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8642" column="1" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8643" bodyend="8646"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="func">
+      </sectiondef>
+      <sectiondef kind="func">
       <memberdef kind="function" id="group__sl__bt__gatt_1ga8acd415ed593fb75fcf408246293852f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
         <definition>sl_status_t sl_bt_gatt_set_max_mtu</definition>
@@ -1600,8 +1600,8 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="9499" column="13" declfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="9499" declcolumn="13"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="define">
+      </sectiondef>
+      <sectiondef kind="define">
       <memberdef kind="define" id="group__sl__bt__gatt_1gabb965ea7fe8b808cdf5e4727586e8c12" prot="public" static="no">
         <name>sl_bt_cmd_gatt_set_max_mtu_id</name>
         <initializer>0x00090020</initializer>
@@ -2108,7 +2108,7 @@ long&quot; GATT procedure is used automatically. Received <ref refid="group__sl_
         </inbodydescription>
         <location file="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8597" column="9" bodyfile="/var/lib/jenkins/github/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8597" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
 <para>GATT Client. </para>
     </briefdescription>

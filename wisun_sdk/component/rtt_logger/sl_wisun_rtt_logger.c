@@ -34,6 +34,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "sl_assert.h"
 #include "cmsis_os2.h"
@@ -209,7 +210,7 @@ static void _rtt_logger_task_fnc(void *args)
                              osWaitForever);
 
     if (flags & SL_WISUN_RTT_LOGGER_EVT_ERROR_MSK) {
-      printf("[Failed: RTT Logger evt flags (0x%08lX)]\n", flags);
+      printf("[Failed: RTT Logger evt flags (0x%08"PRIx32")]\n", flags);
       continue;
     }
 

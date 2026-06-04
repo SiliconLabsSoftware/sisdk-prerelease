@@ -32,6 +32,7 @@
 //                                   Includes
 // -----------------------------------------------------------------------------
 #include <stdio.h>
+#include <inttypes.h>
 
 #include "sl_string.h"
 #include "sys/socket.h"
@@ -75,10 +76,10 @@ int32_t sl_wisun_tcp_client_create(const char *ip_address, uint16_t port)
   sockid = socket(AF_INET6, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP);
 
   if (sockid == SOCKET_INVALID_ID) {
-    printf("[Failed to create socket: %ld]\n", sockid);
+    printf("[Failed to create socket: %"PRIi32"]\n", sockid);
     return SOCKET_INVALID_ID;
   } else {
-    printf("[Socket created: %ld]\n", sockid);
+    printf("[Socket created: %"PRIi32"]\n", sockid);
   }
 
   // setting the server address
@@ -107,9 +108,9 @@ int32_t sl_wisun_tcp_client_create(const char *ip_address, uint16_t port)
 void sl_wisun_tcp_client_close(const int32_t sockid)
 {
   if (close(sockid) == SOCKET_RETVAL_ERROR) {
-    printf("[Failed to close socket: %ld]\n", sockid);
+    printf("[Failed to close socket: %"PRIi32"]\n", sockid);
   } else {
-    printf("[Socket closed: %ld]\n", sockid);
+    printf("[Socket closed: %"PRIi32"]\n", sockid);
   }
 }
 
@@ -124,7 +125,7 @@ void sl_wisun_tcp_client_write(const int32_t sockid, const char *str)
   }
   res = send(sockid, str, sl_strlen(str), 0);
   if (res == SOCKET_RETVAL_ERROR) {
-    printf("[Failed to send on socket: %ld]\n", sockid);
+    printf("[Failed to send on socket: %"PRIi32"]\n", sockid);
   }
 }
 
