@@ -38,11 +38,10 @@
 #include "sl_rtl_clib_api.h"
 
 // -----------------------------------------------------------------------------
-// Defnitions
+// Definitions
 #define SUB_MODE_OFFSET_MS              20
 #define STATIC_MODE_CONNECTION_INTERVAL 6
 #define STATIC_MODE_PROCEDURE_INTERVAL  38
-
 
 // -----------------------------------------------------------------------------
 // Structs
@@ -246,7 +245,6 @@ sl_status_t cs_initiator_get_intervals(uint8_t main_mode,
                                        uint16_t *conn_interval,
                                        uint16_t *proc_interval)
 {
-
   return cs_initiator_get_multiple_intervals(main_mode,
                                              sub_mode,
                                              procedure_scheduling,
@@ -257,7 +255,6 @@ sl_status_t cs_initiator_get_intervals(uint8_t main_mode,
                                              1,
                                              conn_interval,
                                              proc_interval);
-
 }
 
 /******************************************************************************
@@ -265,15 +262,15 @@ sl_status_t cs_initiator_get_intervals(uint8_t main_mode,
  * the procedure scheduling and input values.
  *****************************************************************************/
 sl_status_t cs_initiator_get_multiple_intervals(uint8_t main_mode,
-                                       uint8_t sub_mode,
-                                       cs_procedure_scheduling_t procedure_scheduling,
-                                       uint8_t channel_map_preset,
-                                       uint8_t algo_mode,
-                                       uint8_t antenna_path,
-                                       uint8_t use_real_time_ras_mode,
-                                       uint8_t max_reflector_count,
-                                       uint16_t *conn_interval,
-                                       uint16_t *proc_interval)
+                                                uint8_t sub_mode,
+                                                cs_procedure_scheduling_t procedure_scheduling,
+                                                uint8_t channel_map_preset,
+                                                uint8_t algo_mode,
+                                                uint8_t antenna_path,
+                                                uint8_t use_real_time_ras_mode,
+                                                uint8_t max_reflector_count,
+                                                uint16_t *conn_interval,
+                                                uint16_t *proc_interval)
 {
   uint8_t input_values[5];
   input_values[0] = procedure_scheduling;
@@ -433,7 +430,7 @@ sl_status_t cs_initiator_validate_subevent_length(uint32_t min_subevent_len_us,
                                                   uint16_t max_procedure_interval)
 {
   // Calculate maximum possible procedure time, subevents must always fit in the time window of one procedure
-  // @p max_connection_interval is in 1.25 ms steps, which equals 1250 µs per step 
+  // @p max_connection_interval is in 1.25 ms steps, which equals 1250 µs per step
   uint32_t max_procedure_time_us = (uint32_t)max_procedure_interval * (uint32_t)max_connection_interval * 1250u;
   if (min_subevent_len_us > max_procedure_time_us) {
     return SL_STATUS_INVALID_PARAMETER;

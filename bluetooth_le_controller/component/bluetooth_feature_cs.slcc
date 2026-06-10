@@ -15,7 +15,7 @@ requires:
 recommends:
 - id: "bluetooth_feature_cs_connection"
   condition:
-  - id: "bluetooth_feature_connection"
+  - "bluetooth_feature_connection"
   vendor: silabs
 provides:
 - name: "bluetooth_feature_cs"

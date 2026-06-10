@@ -51,10 +51,10 @@ extern "C" {
 // -----------------------------------------------------------------------------
 // Enums
 
- /// @enum spp_role_t
- ///
- /// This enumeration specifies whether the device operates as a central
- /// or peripheral in an SPP Bluetooth connection.
+/// @enum spp_role_t
+///
+/// This enumeration specifies whether the device operates as a central
+/// or peripheral in an SPP Bluetooth connection.
 typedef enum {
   SPP_CENTRAL = 0,
   SPP_PERIPHERAL,

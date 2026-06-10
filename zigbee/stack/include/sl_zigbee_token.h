@@ -145,7 +145,7 @@ sl_status_t sl_zigbee_initialize_index_token(uint32_t token_base,
  * @return status.
  *
  * @internal SL_ZIGBEE_IPC_ARGS
- * {# data | length: length | max: MAX_IPC_VEC_ARG_CAPACITY | storage_type: uint8_t #}
+ * {# data | length: length | max: MAX_IPC_TOKEN_MANAGER_DATA_LENGTH_ARG_CAPACITY | storage_type: uint8_t #}
  */
 sl_status_t slx_zigbee_token_manager_get_data(uint32_t token,
                                               void *data,

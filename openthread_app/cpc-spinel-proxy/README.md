@@ -10,7 +10,7 @@ cpc-spinel-proxy -s /path/to/socket -i cpcd_0 -e 12
 
 - `-s, --socket PATH` Unix socket path for HAL connection
 - `-i, --cpc-instance NAME` CPCd instance
-- `-e, --endpoint ID` CPC endpoint (9 for OpenThread)
+- `-e, --endpoint ID` CPC endpoint (12 for 15.4)
 - `--iid N` Secondary-side Spinel IID; enables IID translation
 - `--host-iid N` HAL-side Spinel IID for translated frames (default `0`)
 - `--iid-list N,N,...` additional secondary-side IIDs to forward to HAL

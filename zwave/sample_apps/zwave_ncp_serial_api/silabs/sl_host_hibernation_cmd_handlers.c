@@ -33,11 +33,14 @@
 
 #include "sl_host_hibernation_cmd_handlers.h"
 
-#ifdef SL_CATALOG_PWM_PRESENT
+#ifdef SL_CATALOG_ZW_HOST_WAKEUP_GPIO_PRESENT
 #include "sl_gpio.h"
-#include "sl_pwm.h"
-#include "sl_pwm_instances.h"
-#include "sl_pwm_init_host_wakeup_config.h"
+#include "sl_host_wakeup_gpio_config.h"
+
+static const sl_gpio_t host_wake_gpio = {
+  .port = SL_HOST_WAKEUP_GPIO_PORT,
+  .pin  = SL_HOST_WAKEUP_GPIO_PIN
+};
 #endif
 
 #include "SwTimer.h"
@@ -48,22 +51,17 @@
 
 void gpio_wakeup_host_init(void)
 {
-#ifdef SL_CATALOG_PWM_PRESENT
-  /* SLC generates both @ref sl_pwm_host_wakeup and @ref sl_pwm_init_instances(), which
-   * calls `sl_pwm_init()` function.
-   * These are called at platform init time in @ref sl_envent_hanlder.c inside @ref `sl_driver_init()`
-   * So that we don't need to re-init in this module.
-   */
-  sl_pwm_set_duty_cycle(&sl_pwm_host_wakeup, SL_PWM_HOST_WAKEUP_DUTY_CYCLE);
+#ifdef SL_CATALOG_ZW_HOST_WAKEUP_GPIO_PRESENT
+  (void)sl_gpio_set_pin_mode(&host_wake_gpio, SL_GPIO_MODE_PUSH_PULL, 1);
+  (void)sl_gpio_set_pin(&host_wake_gpio);
 #endif
 }
 
 static void gpio_wakeup_host(void)
 {
-#ifdef SL_CATALOG_PWM_PRESENT
-  sl_pwm_start(&sl_pwm_host_wakeup);
+#ifdef SL_CATALOG_ZW_HOST_WAKEUP_GPIO_PRESENT
+  (void)sl_gpio_clear_pin(&host_wake_gpio);
 #else
-  /* Emulate GPIO wakeup (no PWM): SAPI frame ID 0xFE */
   compl_workbuf[0] = 0xFE;
   RequestUnsolicited(0xFE, compl_workbuf, 1);
 #endif
@@ -71,10 +69,8 @@ static void gpio_wakeup_host(void)
 
 static void gpio_wakeup_host_clear(void)
 {
-#ifdef SL_CATALOG_PWM_PRESENT
-  sl_pwm_stop(&sl_pwm_host_wakeup);
-  const sl_gpio_t host_wake_gpio = { .port = sl_pwm_host_wakeup.port, .pin = sl_pwm_host_wakeup.pin };
-  (void)sl_gpio_clear_pin(&host_wake_gpio);
+#ifdef SL_CATALOG_ZW_HOST_WAKEUP_GPIO_PRESENT
+  (void)sl_gpio_set_pin(&host_wake_gpio);
 #endif
 }
 

@@ -465,15 +465,10 @@ void app_cli_init(void)
 #endif
 
   const osThreadAttr_t app_task_attribute = {
-    "App Task",
-    osThreadDetached,
-    NULL,
-    0,
-    NULL,
-    (APP_TASK_STACK_SIZE * sizeof(void *)) & 0xFFFFFFF8u,
-    APP_TASK_PRIORITY,
-    0,
-    0
+    .name = "App Task",
+    .attr_bits = osThreadDetached,
+    .stack_size = (APP_TASK_STACK_SIZE * sizeof(void *)) & 0xFFFFFFF8u,
+    .priority = APP_TASK_PRIORITY
   };
 
   app_task_id = osThreadNew(app_cli_task, NULL, &app_task_attribute);

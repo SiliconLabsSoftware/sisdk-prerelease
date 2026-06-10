@@ -183,7 +183,7 @@ class CLICommandsMixin:
                 else:
                     tag = next(item for item in tags if item is not None)
                     address_type = tag.ble_address.address_type
-            
+
             bt_address = esl_lib.Address.from_str(bt_addr, address_type)
             tag = self.tag_db.find(bt_address)
             if tag is None or (
@@ -332,7 +332,7 @@ class CLICommandsMixin:
                     )
                     not_started_due_to_ap_limit_in_scope = len(connecting_to) - idx
                     break
-            
+
             # Wait for remaining in-flight connections if there were more than one tag
             if len(connecting_to) > 1:
                 while requested_connect_count > 0:

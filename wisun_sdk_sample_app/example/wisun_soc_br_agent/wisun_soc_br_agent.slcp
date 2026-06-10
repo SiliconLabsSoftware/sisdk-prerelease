@@ -156,6 +156,7 @@ tag:
 - hwfilter:!board:brd4270b
 - hwfilter:!board:brd4272a
 - hwfilter:!board:brd2705a
+- toolchain:gcc
 
 #--------------------- Toolchain ------------------------
 toolchain_settings:

@@ -282,7 +282,7 @@ class ImageThroughputEventHandlersMixin:
         for gid in available:
             # Check for both hard and dynamic connection limits
             total_busy = len(self._itp_active)
-            
+
             if self.max_conn_count_reached or (self._itp_max_conn_limit is not None and total_busy >= self._itp_max_conn_limit):
                 self._itp_log.debug(
                     "Connection limit reached (%d active, %d initiating, limit: %s).",
@@ -317,7 +317,7 @@ class ImageThroughputEventHandlersMixin:
             )
             self.connect(tag)
             initiated += 1
-            
+
             # Check immediately if the synchronous connect() hited the stack limit
             if self.max_conn_count_reached:
                 break
@@ -660,7 +660,7 @@ class ImageThroughputEventHandlersMixin:
                 self._itp_log.warning("Discovered dynamic connection limit: %d", self._itp_max_conn_limit)
         else:
             self._itp_total_errors += 1
-        
+
         self._itp_initiating.discard(tag)
 
         if evt.lib_status in _OTS_ERROR_STATUSES:
@@ -693,11 +693,11 @@ class ImageThroughputEventHandlersMixin:
             esl_lib.get_sl_status_str(evt.sl_status),
             "deferring" if is_limit_error else "will retry",
         )
-        
+
         if is_limit_error:
             # Resource limit reached: don't count this as a failed attempt
             self._itp_attempts[tag] = max(0, self._itp_attempt_count(tag) - 1)
-        
+
         state = self._itp_active.pop(tag, None)
         if state is not None:
             self._itp_requeue(tag)

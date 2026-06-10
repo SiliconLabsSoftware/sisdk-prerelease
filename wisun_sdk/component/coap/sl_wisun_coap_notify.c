@@ -165,12 +165,8 @@ static osThreadId_t _notify_thr = NULL;
 static const osThreadAttr_t _notify_thr_attr = {
   .name        = "CoAP-Notification-Service",
   .attr_bits   = osThreadDetached,
-  .cb_mem      = NULL,
-  .cb_size     = 0U,
-  .stack_mem   = NULL,
   .stack_size  = app_stack_size_word_to_byte(SL_WISUN_COAP_NOTIFY_STACK_SIZE_WORD),
-  .priority    = osPriorityNormal7,
-  .tz_module   = 0U
+  .priority    = osPriorityNormal7
 };
 
 /// Schedule parameters

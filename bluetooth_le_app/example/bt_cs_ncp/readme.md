@@ -100,7 +100,7 @@ When using multiple subevents:
 - The minimum subevent length must fit within the procedure time window: max_procedure_interval * max_connection_interval * 1250 us.
 - As each subevent contains Mode 0 steps followed by main mode steps, the subevent length must be large enough to accommodate their combined duration.
 
-The following table shows example scenarios with other configuration parameters left at their defaults. 
+The following table shows example scenarios with other configuration parameters left at their defaults.
 
 | Scenario | MIN subevent length | MAX subevent length | Subevents (approx.)| Effective procedure interval |
 |---|---|---|---|---|

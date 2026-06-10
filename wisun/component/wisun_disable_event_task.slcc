@@ -12,7 +12,7 @@ provides:
 - name: "event_queue_task"
 
 conflicts:
-  -name: "wisun_event_task"
+- name: "wisun_event_task"
 
 metadata:
   sbom:

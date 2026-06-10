@@ -804,17 +804,13 @@ void cs_initiator_deinit(void)
 static void cs_initiator_track_subevent(cs_initiator_t *initiator,
                                         uint8_t procedure_done_status)
 {
-  if (procedure_done_status == sl_bt_cs_done_status_complete || procedure_done_status == sl_bt_cs_done_status_aborted)
-  {
-    if (procedure_done_status == sl_bt_cs_done_status_complete)
-    {
+  if (procedure_done_status == sl_bt_cs_done_status_complete || procedure_done_status == sl_bt_cs_done_status_aborted) {
+    if (procedure_done_status == sl_bt_cs_done_status_complete) {
       initiator_log_info(INSTANCE_PREFIX "Created subevents in completed procedure %u: %u" LOG_NL,
                          initiator->conn_handle,
                          initiator->ranging_counter & CS_RAS_RANGING_COUNTER_MASK,
                          initiator->subevents_per_procedure_counter);
-    }
-    else
-    {
+    } else {
       initiator_log_info(INSTANCE_PREFIX "Created subevents in aborted procedure %u: %u" LOG_NL,
                          initiator->conn_handle,
                          initiator->ranging_counter & CS_RAS_RANGING_COUNTER_MASK,
@@ -1601,7 +1597,7 @@ bool cs_initiator_on_event(sl_bt_msg_t *evt)
           // Still count this subevent even though the result is dropped
           initiator->subevents_per_procedure_counter++;
           cs_initiator_track_subevent(initiator,
-                                  evt->data.evt_cs_result.procedure_done_status);
+                                      evt->data.evt_cs_result.procedure_done_status);
           break;
         }
       }

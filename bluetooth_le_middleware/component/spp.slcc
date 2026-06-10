@@ -53,4 +53,3 @@ template_contribution:
     event: service_process_action
     include: spp.h
     handler: spp_step
-

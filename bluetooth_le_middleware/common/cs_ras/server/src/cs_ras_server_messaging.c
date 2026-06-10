@@ -224,12 +224,10 @@ sl_status_t cs_ras_server_messaging_cancel(cs_ras_server_messaging_transmit_t *t
   return sc;
 }
 
-
 bool cs_ras_server_messaging_has_data_to_process(void)
 {
   return (transmit_list_head != NULL);
 }
-
 
 // -----------------------------------------------------------------------------
 // Private functions
@@ -447,7 +445,7 @@ static sl_status_t transmit_segment(cs_ras_server_messaging_transmit_t *tx)
                             tx->config.conn_handle,
                             tx->segment_counter);
     tx->message_status.sent = true;
-    // Set confirmation automatically in case of notificaion
+    // Set confirmation automatically in case of notification
     if (tx->config.indication == false) {
       // Require to create message
       tx->message_status.created   = false;

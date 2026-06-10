@@ -73,8 +73,8 @@ class ImageTypeRequired(Exception):
 
 
 class PAwRSyncLostError(Exception):
-    """PAwR sync lost occured"""
-    def __init__(self, message, esl_id, group_id, ble_address):            
+    """PAwR sync lost occurred"""
+    def __init__(self, message, esl_id, group_id, ble_address):
         super().__init__(message)
         self.esl_id = esl_id
         self.group_id = group_id
@@ -546,15 +546,15 @@ class Tag:
         self.limit_connection_retries()
         self._past_subevents_max = None
         self._associated = False
-        
+
         # Notify about BOTH state and esl_state at the end of reset
         new_esl_state = self.esl_state
         if new_esl_state != old_esl_state:
             self._notify("esl_state", old_esl_state, new_esl_state)
-        
+
         if previous_state != TagState.IDLE:
             self._notify("state", previous_state, TagState.IDLE)
-        
+
         if previous_handle is not None:
             self._notify("connection_handle", previous_handle, None)
 
@@ -866,7 +866,7 @@ class Tag:
                             ix,
                         )
                         self.close_connection(force_close=True)
-                
+
                 old_esl_state = self.esl_state
                 self.gatt_values.update(evt.tlv_data)
                 new_esl_state = self.esl_state
@@ -948,7 +948,7 @@ class Tag:
                             )
                 else:
                     self.log.error(
-                        "Tag configuration failed for %s at addres %s with result %s!",
+                        "Tag configuration failed for %s at address %s with result %s!",
                         esl_lib.get_enum("ESL_LIB_DATA_TYPE_", evt.type),
                         self.ble_address,
                         esl_lib.get_sl_status_str(evt.status),

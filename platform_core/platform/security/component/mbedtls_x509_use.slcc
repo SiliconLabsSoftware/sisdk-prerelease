@@ -1,6 +1,6 @@
 id: mbedtls_x509_use
 package: platform_core
-label: X.509 Use certificates
+label: X.509 Use Certificates
 description: >-
   This component is the core for using X.509 standard-
   based certificates in Mbed TLS.

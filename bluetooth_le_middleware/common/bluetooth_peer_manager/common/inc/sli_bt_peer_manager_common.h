@@ -46,7 +46,7 @@
 #define sli_bt_peer_manager_log_error(...)                    app_log_error(SLI_BT_PM_PREFIX __VA_ARGS__)
 #define sli_bt_peer_manager_log_hexdump(p_data, len) \
   do {                                               \
-    app_log_append(SLI_BT_PM_PREFIX);               \
+    app_log_append(SLI_BT_PM_PREFIX);                \
     app_log_hexdump_debug(p_data, len);              \
   } while (0);
 #else

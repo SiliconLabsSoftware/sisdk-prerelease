@@ -61,7 +61,8 @@ static app_rta_context_t ctx;
 
 // -----------------------------------------------------------------------------
 // Callback weak implementation
-SL_WEAK void sl_bt_peer_security_on_event(uint8_t handle){
+SL_WEAK void sl_bt_peer_security_on_event(uint8_t handle)
+{
   (void)handle;
 }
 
@@ -116,13 +117,13 @@ sl_status_t sli_bt_peer_security_on_bt_event(const sl_bt_msg_t *evt)
 
     case sl_bt_evt_sm_bonding_failed_id:
       peer_security_log_warning(
-          "Bonding failed (handle=%u, reason=0x%lx)." NL_SEC,
-          evt->data.evt_sm_bonding_failed.connection,
-          (unsigned long)evt->data.evt_sm_bonding_failed.reason);
-      if ((evt->data.evt_sm_bonding_failed.reason ==
-           SL_STATUS_BT_SMP_PAIRING_NOT_SUPPORTED) ||
-          (evt->data.evt_sm_bonding_failed.reason ==
-           SL_STATUS_BT_CTRL_PIN_OR_KEY_MISSING)) {
+        "Bonding failed (handle=%u, reason=0x%lx)." NL_SEC,
+        evt->data.evt_sm_bonding_failed.connection,
+        (unsigned long)evt->data.evt_sm_bonding_failed.reason);
+      if ((evt->data.evt_sm_bonding_failed.reason
+           == SL_STATUS_BT_SMP_PAIRING_NOT_SUPPORTED)
+          || (evt->data.evt_sm_bonding_failed.reason
+              == SL_STATUS_BT_CTRL_PIN_OR_KEY_MISSING)) {
         bd_addr address;
         uint8_t address_type;
         uint32_t bonding_handle;
@@ -186,7 +187,7 @@ sl_status_t sli_bt_peer_security_on_bt_event(const sl_bt_msg_t *evt)
       break;
     default:
       break;
-    }
+  }
   return sc;
 }
 
@@ -212,14 +213,14 @@ static sl_status_t send_confirmation(bool confirm)
 void sli_bt_peer_security_rta_init(void)
 {
   sl_status_t sc;
-  app_rta_config_t config = {.requirement.runtime = false,
-                             .requirement.guard = true,
-                             .requirement.signal = false,
-                             .step = NULL,
-                             .priority = 0,
-                             .stack_size = 0,
-                             .error = on_runtime_error,
-                             .wait_for_guard = 10};
+  app_rta_config_t config = { .requirement.runtime = false,
+                              .requirement.guard = true,
+                              .requirement.signal = false,
+                              .step = NULL,
+                              .priority = 0,
+                              .stack_size = 0,
+                              .error = on_runtime_error,
+                              .wait_for_guard = 10 };
   sc = app_rta_create_context(&config, &ctx);
   if (sc != SL_STATUS_OK) {
     peer_security_log_error("Failed to create context, sc=0x%lx" NL_SEC, sc);

@@ -74,3 +74,8 @@ upgrade:
         description: >
           For MultiPAN-enabled projects, enable the instance-aware logging platform API
           (OPENTHREAD_CONFIG_LOG_INSTANCE_AWARE_API_ENABLE) so logs can be attributed to the correct OpenThread instance.
+      - script: openthread/component/script/upgrade_mle_ip_addrs_to_register.lua
+        description: >
+          OPENTHREAD_CONFIG_MLE_IP_ADDRS_TO_REGISTER has been removed (OpenThread PR #12997).
+          MTDs now register all valid unicast/multicast addresses unconditionally.
+          Projects that override this config will fail to compile; the override is removed automatically.

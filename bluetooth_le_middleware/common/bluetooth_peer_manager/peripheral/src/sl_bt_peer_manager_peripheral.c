@@ -96,8 +96,8 @@ void sli_bt_peer_manager_peripheral_on_bt_event(sl_bt_msg_t *evt)
       if (evt->data.evt_connection_opened.advertiser == advertiser.advertising_handle
           && evt->data.evt_connection_opened.role == sl_bt_connection_role_peripheral) {
         sli_bt_peer_manager_add_connection(evt->data.evt_connection_opened.connection,
-                                          evt->data.evt_connection_opened.address,
-                                          sl_bt_connection_role_peripheral);
+                                           evt->data.evt_connection_opened.address,
+                                           sl_bt_connection_role_peripheral);
         sli_bt_peer_manager_log_info("Connection opened as peripheral with '%02x:%02x:%02x:%02x:%02x:%02x'" APP_LOG_NL,
                                      evt->data.evt_connection_opened.address.addr[5],
                                      evt->data.evt_connection_opened.address.addr[4],

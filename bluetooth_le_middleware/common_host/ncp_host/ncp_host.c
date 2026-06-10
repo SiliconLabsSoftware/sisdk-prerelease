@@ -304,7 +304,7 @@ static int32_t ncp_host_get_msg(void)
   }
   ret = ncp_host_peek_timeout(msg_len, MSG_RECV_TIMEOUT_COUNT * msg_len);
   if (ret < 0) {
-    app_log_error("Message reveice timeout occured, the BGAPI data stream has been corrupted!" APP_LOG_NL);
+    app_log_error("Message reveice timeout occurred, the BGAPI data stream has been corrupted!" APP_LOG_NL);
     return -1;
   }
   // Read the rest of the message
@@ -440,50 +440,50 @@ void ncp_host_on_bt_event(sl_bt_msg_t *evt)
     // Do not call any stack command before receiving this boot event!
     case sl_bt_evt_system_boot_id:
 #if defined(VERIFY_BGAPI_PAYLOAD_SIZES) && (VERIFY_BGAPI_PAYLOAD_SIZES == 1)
-    {
-      sl_status_t sc;
-      uint32_t max_command_payload;
-      uint32_t max_response_payload;
-      uint32_t max_event_payload;
+      {
+        sl_status_t sc;
+        uint32_t max_command_payload;
+        uint32_t max_response_payload;
+        uint32_t max_event_payload;
 
-      // Check max BGAPI payload sizes on NCP target
-      sc = sl_bgapi_system_get_max_payload_sizes(&max_command_payload,
-                                                 &max_response_payload,
-                                                 &max_event_payload);
-      if (sc == SL_STATUS_OK) {
-        // Display warning if payload sizes are not matching.
-        if (max_command_payload != SL_BGAPI_MAX_PAYLOAD_SIZE) {
-          app_log_warning("BGAPI command payload size mismatch! On target: %u. On host: %u. " \
-                          "Please configure SL_BGAPI_MAX_PAYLOAD_SIZE." APP_LOG_NL,
-                          max_command_payload,
-                          SL_BGAPI_MAX_PAYLOAD_SIZE);
-        } else {
-          app_log_debug("BGAPI command payload size matches on host and target." APP_LOG_NL);
-        }
+        // Check max BGAPI payload sizes on NCP target
+        sc = sl_bgapi_system_get_max_payload_sizes(&max_command_payload,
+                                                   &max_response_payload,
+                                                   &max_event_payload);
+        if (sc == SL_STATUS_OK) {
+          // Display warning if payload sizes are not matching.
+          if (max_command_payload != SL_BGAPI_MAX_PAYLOAD_SIZE) {
+            app_log_warning("BGAPI command payload size mismatch! On target: %u. On host: %u. " \
+                            "Please configure SL_BGAPI_MAX_PAYLOAD_SIZE." APP_LOG_NL,
+                            max_command_payload,
+                            SL_BGAPI_MAX_PAYLOAD_SIZE);
+          } else {
+            app_log_debug("BGAPI command payload size matches on host and target." APP_LOG_NL);
+          }
 
-        if (max_response_payload != SL_BGAPI_MAX_PAYLOAD_SIZE) {
-          app_log_warning("BGAPI response payload size mismatch! On target: %u. On host: %u. " \
-                          "Please configure SL_BGAPI_MAX_PAYLOAD_SIZE." APP_LOG_NL,
-                          max_response_payload,
-                          SL_BGAPI_MAX_PAYLOAD_SIZE);
-        } else {
-          app_log_debug("BGAPI response payload size matches on host and target." APP_LOG_NL);
-        }
+          if (max_response_payload != SL_BGAPI_MAX_PAYLOAD_SIZE) {
+            app_log_warning("BGAPI response payload size mismatch! On target: %u. On host: %u. " \
+                            "Please configure SL_BGAPI_MAX_PAYLOAD_SIZE." APP_LOG_NL,
+                            max_response_payload,
+                            SL_BGAPI_MAX_PAYLOAD_SIZE);
+          } else {
+            app_log_debug("BGAPI response payload size matches on host and target." APP_LOG_NL);
+          }
 
-        if (max_event_payload != SL_BGAPI_MAX_PAYLOAD_SIZE) {
-          app_log_warning("BGAPI event payload size mismatch! On target: %u. On host: %u. " \
-                          "Please configure SL_BGAPI_MAX_PAYLOAD_SIZE." APP_LOG_NL,
-                          max_event_payload,
-                          SL_BGAPI_MAX_PAYLOAD_SIZE);
+          if (max_event_payload != SL_BGAPI_MAX_PAYLOAD_SIZE) {
+            app_log_warning("BGAPI event payload size mismatch! On target: %u. On host: %u. " \
+                            "Please configure SL_BGAPI_MAX_PAYLOAD_SIZE." APP_LOG_NL,
+                            max_event_payload,
+                            SL_BGAPI_MAX_PAYLOAD_SIZE);
+          } else {
+            app_log_debug("BGAPI event payload size matches on host and target." APP_LOG_NL);
+          }
+        } else if (sc == SL_STATUS_NOT_AVAILABLE || sc == SL_STATUS_NOT_SUPPORTED) {
+          // Ignore if NCP target does not support this command.
         } else {
-          app_log_debug("BGAPI event payload size matches on host and target." APP_LOG_NL);
+          app_log_status_error(sc);
         }
-      } else if (sc == SL_STATUS_NOT_AVAILABLE || sc == SL_STATUS_NOT_SUPPORTED) {
-        // Ignore if NCP target does not support this command.
-      } else {
-        app_log_status_error(sc);
       }
-    }
 #endif // VERIFY_BGAPI_PAYLOAD_SIZES
       break;
 

@@ -1,6 +1,6 @@
 id: mbedtls_x509_crt_write
 package: platform_core
-label: X.509
+label: X.509 Create Certificates
 description: >-
   This component provides full support for handling X.509 standard-
   based certificates in Mbed TLS.

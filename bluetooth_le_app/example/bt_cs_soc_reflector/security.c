@@ -95,8 +95,7 @@ sl_status_t on_event_security(const sl_bt_msg_t *evt)
       sc = sl_bt_sm_delete_bondings();
       if (sc != SL_STATUS_OK) {
         app_log_error(APP_SEC_PREFIX "Failed to delete bonding DB, sc = %lu" NL_SEC, sc);
-      }
-      else {
+      } else {
         app_log_info(APP_SEC_PREFIX "Bonding DB deleted." NL_SEC);
       }
       #endif
@@ -106,36 +105,35 @@ sl_status_t on_event_security(const sl_bt_msg_t *evt)
       break;
     case sl_bt_evt_sm_bonding_failed_id:
       app_log_info(APP_SEC_PREFIX "Bonding failed on reflector side, reason: 0x%lx. Deleting corresponding bonding info." NL_SEC, (unsigned long)evt->data.evt_sm_bonding_failed.reason);
-          // If bonding is deleted on central device, it will still send pairing request
-          // Since peripheral still has bonding for that address, PAIRING_NOT_SUPPORTED error is expected.
-          // Delete corresponding bonding entry on peripheral
-          if ((evt->data.evt_sm_bonding_failed.reason == SL_STATUS_BT_SMP_PAIRING_NOT_SUPPORTED) || (evt->data.evt_sm_bonding_failed.reason == SL_STATUS_BT_CTRL_PIN_OR_KEY_MISSING)) {
-            uint32_t bonding;  
-            bd_addr address;
-            uint8_t address_type;  
-            uint8_t security_mode;
-            uint8_t key_size;
+      // If bonding is deleted on central device, it will still send pairing request
+      // Since peripheral still has bonding for that address, PAIRING_NOT_SUPPORTED error is expected.
+      // Delete corresponding bonding entry on peripheral
+      if ((evt->data.evt_sm_bonding_failed.reason == SL_STATUS_BT_SMP_PAIRING_NOT_SUPPORTED) || (evt->data.evt_sm_bonding_failed.reason == SL_STATUS_BT_CTRL_PIN_OR_KEY_MISSING)) {
+        uint32_t bonding;
+        bd_addr address;
+        uint8_t address_type;
+        uint8_t security_mode;
+        uint8_t key_size;
 
-              sc = sl_bt_connection_get_remote_address(evt->data.evt_sm_bonding_failed.connection, &address, &address_type);
-              if (sc != SL_STATUS_OK) {
-                app_log_error(APP_SEC_PREFIX "Failed to get remote address, sc = %lx" NL_SEC, sc);
-                return sc;
-              }
-              sc = sl_bt_sm_find_bonding_by_address(address, &bonding, &security_mode, &key_size);
-              if (sc != SL_STATUS_OK) {
-                app_log_error(APP_SEC_PREFIX "Failed to find bonding by address, sc = 0x%lx" NL_SEC, sc);
-                return sc;
-              }
-              sc= sl_bt_sm_delete_bonding((uint8_t)bonding);
-              if (sc != SL_STATUS_OK) {
-                app_log_error(APP_SEC_PREFIX "Failed to delete bonding DB, sc = 0x%lx" NL_SEC, sc);
-                return sc;
-              }
-              else {
-               app_log_info(APP_SEC_PREFIX "Bonding info deleted." NL_SEC);
-              }
-          }
-    break;
+        sc = sl_bt_connection_get_remote_address(evt->data.evt_sm_bonding_failed.connection, &address, &address_type);
+        if (sc != SL_STATUS_OK) {
+          app_log_error(APP_SEC_PREFIX "Failed to get remote address, sc = %lx" NL_SEC, sc);
+          return sc;
+        }
+        sc = sl_bt_sm_find_bonding_by_address(address, &bonding, &security_mode, &key_size);
+        if (sc != SL_STATUS_OK) {
+          app_log_error(APP_SEC_PREFIX "Failed to find bonding by address, sc = 0x%lx" NL_SEC, sc);
+          return sc;
+        }
+        sc = sl_bt_sm_delete_bonding((uint8_t)bonding);
+        if (sc != SL_STATUS_OK) {
+          app_log_error(APP_SEC_PREFIX "Failed to delete bonding DB, sc = 0x%lx" NL_SEC, sc);
+          return sc;
+        } else {
+          app_log_info(APP_SEC_PREFIX "Bonding info deleted." NL_SEC);
+        }
+      }
+      break;
 
     case sl_bt_evt_sm_passkey_display_id:
     {

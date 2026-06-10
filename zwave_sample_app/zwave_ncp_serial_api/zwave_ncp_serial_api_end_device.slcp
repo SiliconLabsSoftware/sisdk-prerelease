@@ -165,6 +165,11 @@ filter:
   - name: "Project Difficulty"
     value: ["Beginner"]
 
+readme:
+   - path: README.md
+ui_hints:
+   highlight: README.md
+
 template_contribution:
   - name: rodata_sections # Ensure memory section define by Z-Wave stack are placed in the rodata section
     value: zw_cmd_handlers

@@ -20,13 +20,6 @@
 
 #ifndef PSA_CRYPTO_BUILTIN_KEY_DERIVATION_H
 #define PSA_CRYPTO_BUILTIN_KEY_DERIVATION_H
-
-#if defined(__IAR_SYSTEMS_ICC__) && __VER__ >= 9070000
-/* Suppress IAR Pa217 (bit-field/non-bit-field overlap). Tag was
- * introduced in IAR 9.70; older versions skip the gate entirely. */
-#pragma diag_suppress=Pa217
-#endif
-
 #include "mbedtls/private_access.h"
 
 #include <psa/crypto_driver_common.h>
@@ -121,9 +114,5 @@ typedef struct {
     uint32_t MBEDTLS_PRIVATE(block_number);
 } psa_pbkdf2_key_derivation_t;
 #endif /* PSA_HAVE_SOFT_PBKDF2 */
-
-#if defined(__IAR_SYSTEMS_ICC__) && __VER__ >= 9070000
-#pragma diag_default=Pa217
-#endif
 
 #endif /* PSA_CRYPTO_BUILTIN_KEY_DERIVATION_H */

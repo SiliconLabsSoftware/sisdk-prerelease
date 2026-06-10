@@ -24,5 +24,3 @@ recommends:
 - id: log_backend_iostream_compact
   vendor: silabs
 root_path: platform_core/platform/service/sl_log
-source:
-- path: backend/iostream/src/sl_log_backend_iostream_print.c

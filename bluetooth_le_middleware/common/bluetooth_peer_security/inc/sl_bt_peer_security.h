@@ -41,8 +41,6 @@
 // -----------------------------------------------------------------------------
 // Enums
 
-
-
 // -----------------------------------------------------------------------------
 // Public function declarations
 
@@ -57,7 +55,6 @@
  * @return SL_STATUS_OK on success, or an error code on failure.
  *****************************************************************************/
 sl_status_t sl_bt_peer_security_send_confirmation(bool confirm);
-
 
 /**************************************************************************//**
  * Connection callback for Peer Security.

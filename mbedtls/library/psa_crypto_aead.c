@@ -8,6 +8,15 @@
 
 #include "common.h"
 
+#if defined(__IAR_SYSTEMS_ICC__) && __VER__ >= 9047000
+/* Suppress IAR Pa217 (bit-field/non-bit-field overlap) for accesses to
+ * psa_aead_operation_s bit-fields. Pa217 fires at the access site in this
+ * translation unit; suppressing inside the headers that declare the
+ * bit-fields has no effect.
+ */
+#pragma diag_suppress=Pa217
+#endif
+
 #if defined(MBEDTLS_PSA_CRYPTO_C)
 
 #include "psa_crypto_aead.h"

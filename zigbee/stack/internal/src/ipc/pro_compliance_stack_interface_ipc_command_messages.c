@@ -211,7 +211,7 @@ void sli_zigbee_stack_test_join_list_request_process_ipc_command(sli_zigbee_ipc_
 void sli_zigbee_stack_test_network_send_command_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
 {
   msg->data.test_network_send_command.response.result = sli_zigbee_stack_test_network_send_command(msg->data.test_network_send_command.request.destination,
-                                                                                                   &msg->data.test_network_send_command.request.commandFrame,
+                                                                                                   msg->data.test_network_send_command.request.commandFrame,
                                                                                                    msg->data.test_network_send_command.request.length,
                                                                                                    msg->data.test_network_send_command.request.tryToInsertLongDest,
                                                                                                    msg->data.test_network_send_command.request.destinationEui);
@@ -293,7 +293,7 @@ void sli_zigbee_stack_test_send_route_error_payload_process_ipc_command(sli_zigb
   sli_zigbee_stack_test_send_route_error_payload(msg->data.test_send_route_error_payload.request.destination,
                                                  msg->data.test_send_route_error_payload.request.target,
                                                  msg->data.test_send_route_error_payload.request.errorCode,
-                                                 &msg->data.test_send_route_error_payload.request.payload,
+                                                 msg->data.test_send_route_error_payload.request.payload,
                                                  msg->data.test_send_route_error_payload.request.payload_len);
 }
 
@@ -302,7 +302,7 @@ void sli_zigbee_stack_test_send_route_error_payload_no_network_encryption_proces
   sli_zigbee_stack_test_send_route_error_payload_no_network_encryption(msg->data.test_send_route_error_payload_no_network_encryption.request.destination,
                                                                        msg->data.test_send_route_error_payload_no_network_encryption.request.target,
                                                                        msg->data.test_send_route_error_payload_no_network_encryption.request.errorCode,
-                                                                       &msg->data.test_send_route_error_payload_no_network_encryption.request.payload,
+                                                                       msg->data.test_send_route_error_payload_no_network_encryption.request.payload,
                                                                        msg->data.test_send_route_error_payload_no_network_encryption.request.payload_len);
 }
 
@@ -331,7 +331,7 @@ void sli_zigbee_stack_test_set_network_tokens_process_ipc_command(sli_zigbee_ipc
 void sli_zigbee_stack_test_spoof_device_announcement_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
 {
   sli_zigbee_stack_test_spoof_device_announcement(msg->data.test_spoof_device_announcement.request.shortId,
-                                                  &msg->data.test_spoof_device_announcement.request.sourceEUI64,
+                                                  msg->data.test_spoof_device_announcement.request.sourceEUI64,
                                                   msg->data.test_spoof_device_announcement.request.deviceAnnounceEui,
                                                   msg->data.test_spoof_device_announcement.request.capabilities);
 }
@@ -780,10 +780,12 @@ bool sl_zigbee_test_network_send_command(sl_802154_short_addr_t destination,
   sli_zigbee_ipc_cmd_t msg = { 0, };
   msg.data.test_network_send_command.request.destination = destination;
 
-  if (commandFrame != NULL) {
-    msg.data.test_network_send_command.request.commandFrame = *commandFrame;
+  if (length > MAX_IPC_VEC_ARG_CAPACITY) {
+    assert(false); // "vector commandFrame length exceeds expected maximum
+    return msg.data.test_network_send_command.response.result;
   }
 
+  memmove(msg.data.test_network_send_command.request.commandFrame, commandFrame, sizeof(uint8_t) * length);
   msg.data.test_network_send_command.request.length = length;
   msg.data.test_network_send_command.request.tryToInsertLongDest = tryToInsertLongDest;
 
@@ -793,9 +795,12 @@ bool sl_zigbee_test_network_send_command(sl_802154_short_addr_t destination,
 
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_test_network_send_command_process_ipc_command, &msg);
 
-  if (commandFrame != NULL) {
-    *commandFrame = msg.data.test_network_send_command.request.commandFrame;
+  if (length > MAX_IPC_VEC_ARG_CAPACITY) {
+    assert(false); // "vector commandFrame length exceeds expected maximum
+    return msg.data.test_network_send_command.response.result;
   }
+
+  memmove(commandFrame, msg.data.test_network_send_command.request.commandFrame, sizeof(uint8_t) * length);
 
   if (destinationEui != NULL) {
     memmove(destinationEui, msg.data.test_network_send_command.request.destinationEui, sizeof(sl_802154_long_addr_t));
@@ -990,16 +995,21 @@ void sl_zigbee_test_send_route_error_payload(sl_802154_short_addr_t destination,
   msg.data.test_send_route_error_payload.request.target = target;
   msg.data.test_send_route_error_payload.request.errorCode = errorCode;
 
-  if (payload != NULL) {
-    msg.data.test_send_route_error_payload.request.payload = *payload;
+  if (payload_len > MAX_IPC_VEC_ARG_CAPACITY) {
+    assert(false); // "vector payload length exceeds expected maximum
+    return;
   }
 
+  memmove(msg.data.test_send_route_error_payload.request.payload, payload, sizeof(uint8_t) * payload_len);
   msg.data.test_send_route_error_payload.request.payload_len = payload_len;
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_test_send_route_error_payload_process_ipc_command, &msg);
 
-  if (payload != NULL) {
-    *payload = msg.data.test_send_route_error_payload.request.payload;
+  if (payload_len > MAX_IPC_VEC_ARG_CAPACITY) {
+    assert(false); // "vector payload length exceeds expected maximum
+    return;
   }
+
+  memmove(payload, msg.data.test_send_route_error_payload.request.payload, sizeof(uint8_t) * payload_len);
 }
 
 void sl_zigbee_test_send_route_error_payload_no_network_encryption(sl_802154_short_addr_t destination,
@@ -1013,16 +1023,21 @@ void sl_zigbee_test_send_route_error_payload_no_network_encryption(sl_802154_sho
   msg.data.test_send_route_error_payload_no_network_encryption.request.target = target;
   msg.data.test_send_route_error_payload_no_network_encryption.request.errorCode = errorCode;
 
-  if (payload != NULL) {
-    msg.data.test_send_route_error_payload_no_network_encryption.request.payload = *payload;
+  if (payload_len > MAX_IPC_VEC_ARG_CAPACITY) {
+    assert(false); // "vector payload length exceeds expected maximum
+    return;
   }
 
+  memmove(msg.data.test_send_route_error_payload_no_network_encryption.request.payload, payload, sizeof(uint8_t) * payload_len);
   msg.data.test_send_route_error_payload_no_network_encryption.request.payload_len = payload_len;
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_test_send_route_error_payload_no_network_encryption_process_ipc_command, &msg);
 
-  if (payload != NULL) {
-    *payload = msg.data.test_send_route_error_payload_no_network_encryption.request.payload;
+  if (payload_len > MAX_IPC_VEC_ARG_CAPACITY) {
+    assert(false); // "vector payload length exceeds expected maximum
+    return;
   }
+
+  memmove(payload, msg.data.test_send_route_error_payload_no_network_encryption.request.payload, sizeof(uint8_t) * payload_len);
 }
 
 sl_status_t sl_zigbee_test_send_route_request_with_tlv(sl_802154_short_addr_t target)
@@ -1077,7 +1092,7 @@ void sl_zigbee_test_spoof_device_announcement(uint16_t shortId,
   msg.data.test_spoof_device_announcement.request.shortId = shortId;
 
   if (sourceEUI64 != NULL) {
-    msg.data.test_spoof_device_announcement.request.sourceEUI64 = *sourceEUI64;
+    memmove(msg.data.test_spoof_device_announcement.request.sourceEUI64, sourceEUI64, sizeof(uint8_t) * EUI64_SIZE);
   }
 
   if (deviceAnnounceEui != NULL) {
@@ -1088,7 +1103,7 @@ void sl_zigbee_test_spoof_device_announcement(uint16_t shortId,
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_test_spoof_device_announcement_process_ipc_command, &msg);
 
   if (sourceEUI64 != NULL) {
-    *sourceEUI64 = msg.data.test_spoof_device_announcement.request.sourceEUI64;
+    memmove(sourceEUI64, msg.data.test_spoof_device_announcement.request.sourceEUI64, sizeof(uint8_t) * EUI64_SIZE);
   }
 
   if (deviceAnnounceEui != NULL) {

@@ -366,12 +366,8 @@ static osThreadId_t _ota_dfu_thr = NULL;
 static const osThreadAttr_t _ota_dfu_thr_attr = {
   .name        = "DfuThread",
   .attr_bits   = osThreadDetached,
-  .cb_mem      = NULL,
-  .cb_size     = 0,
-  .stack_mem   = NULL,
   .stack_size  = app_stack_size_word_to_byte(SL_WISUN_OTA_DFU_STACK_SIZE_WORD),
-  .priority    = osPriorityNormal7,
-  .tz_module   = 0
+  .priority    = osPriorityNormal7
 };
 
 /// OTA DFU event flag

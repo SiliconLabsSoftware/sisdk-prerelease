@@ -63,15 +63,10 @@ void sl_wisun_event_task_init(void)
   osThreadId_t event_task_id;
 
   const osThreadAttr_t event_task_attribute = {
-    "ws_evt",
-    osThreadDetached,
-    NULL,
-    0,
-    NULL,
-    (SL_WISUN_EVENT_TASK_SIZE * sizeof(void *)) & 0xFFFFFFF8u,
-    SL_WISUN_EVENT_TASK_PRIORITY,
-    0,
-    0
+    .name = "ws_evt",
+    .attr_bits = osThreadDetached,
+    .stack_size = (SL_WISUN_EVENT_TASK_SIZE * sizeof(void *)) & 0xFFFFFFF8u,
+    .priority = SL_WISUN_EVENT_TASK_PRIORITY
   };
 
   event_task_id = osThreadNew(sl_wisun_event_task_worker, NULL, &event_task_attribute);

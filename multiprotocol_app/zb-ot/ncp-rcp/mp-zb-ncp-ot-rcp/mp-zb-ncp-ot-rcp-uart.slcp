@@ -53,7 +53,7 @@ configuration:
     value: 10
   - name: LIB_MEM_CFG_HEAP_SIZE
     value: 0
-  - name: EMBER_AF_PLUGIN_ZIGBEE_PRO_STACK_CHILD_TABLE_SIZE
+  - name: SL_ZIGBEE_CHILD_TABLE_SIZE
     value: 32
   - name: SL_ZIGBEE_KEY_TABLE_SIZE
     value: 12

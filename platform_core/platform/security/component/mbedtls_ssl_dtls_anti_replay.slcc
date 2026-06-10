@@ -1,6 +1,6 @@
 id: mbedtls_ssl_dtls_anti_replay
 package: platform_core
-label: DTLS
+label: DTLS Anti Replay
 description: >-
   This component enables support for the anti-replay mechanism of DTLS in Mbed TLS.
 category: Platform|Security|Mbed TLS|Upper Layer

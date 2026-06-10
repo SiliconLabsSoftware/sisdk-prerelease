@@ -736,16 +736,11 @@ cleanup:
 static sl_status_t app_service_task_start(void)
 {
   osThreadId_t service_task_id;
-  osThreadAttr_t task_attribute = {
-      APP_SERVICE_TASK_NAME,
-      osThreadDetached,
-      NULL,
-      0,
-      NULL,
-      (APP_SERVICE_TASK_STACK_SIZE * sizeof(void *)) & 0xFFFFFFF8u,
-      APP_SERVICE_TASK_PRIORITY,
-      0,
-      0
+  const osThreadAttr_t task_attribute = {
+    .name = APP_SERVICE_TASK_NAME,
+    .attr_bits = osThreadDetached,
+    .stack_size = (APP_SERVICE_TASK_STACK_SIZE * sizeof(void *)) & 0xFFFFFFF8u,
+    .priority = APP_SERVICE_TASK_PRIORITY
   };
   service_task_id = osThreadNew(app_service_task, NULL, &task_attribute);
   if (!service_task_id) {
@@ -1824,16 +1819,11 @@ static void app_task(void *argument)
 void app_init(void)
 {
   osThreadId_t task_id;
-  osThreadAttr_t task_attribute = {
-    "App Task",
-    osThreadDetached,
-    NULL,
-    0,
-    NULL,
-    (APP_TASK_STACK_SIZE * sizeof(void *)) & 0xFFFFFFF8u,
-    APP_TASK_PRIORITY,
-    0,
-    0
+  const osThreadAttr_t task_attribute = {
+    .name = "App Task",
+    .attr_bits = osThreadDetached,
+    .stack_size = (APP_TASK_STACK_SIZE * sizeof(void *)) & 0xFFFFFFF8u,
+    .priority = APP_TASK_PRIORITY
   };
   int i;
 

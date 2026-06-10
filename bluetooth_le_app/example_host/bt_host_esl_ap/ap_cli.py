@@ -584,7 +584,7 @@ class CliProcessor(ScriptMixin, cmd.Cmd):
             description=self.do_led.__doc__,
             epilog="""
         Notes: Almost all of the optional led control parameters are "sticky", meaning that the last values are
-               preserved by the AP internally and will be re-used next time, if the given parameter is omitted in the
+               preserved by the AP internally and will be reused next time, if the given parameter is omitted in the
                argument list. This doesn't apply on the delay, time and absolute parameters, though.""",
         )
         group_led_delay_absolute = parser_led.add_mutually_exclusive_group()
@@ -2035,7 +2035,7 @@ class CliProcessor(ScriptMixin, cmd.Cmd):
             ),
             description=self.do_update_complete.__doc__,
             epilog="""
-        Notes: This command used only for testing purposes in IOP test mode. 
+        Notes: This command used only for testing purposes in IOP test mode.
                If the group is specified along with the keyword `all`, then only devices in the group will be affected.
                """,
         )
@@ -2072,7 +2072,7 @@ class CliProcessor(ScriptMixin, cmd.Cmd):
             description=self.do_verbosity.__doc__,
             epilog="""
         Notes:   To check current verbosity level you can issue the command without argument.
-                 NOTSET can be used to display debugging messages not only for AP code, but also for all python modules that may utilze logging.
+                 NOTSET can be used to display debugging messages not only for AP code, but also for all python modules that may utilize logging.
         """,
         )
         parser_verbosity.add_argument(

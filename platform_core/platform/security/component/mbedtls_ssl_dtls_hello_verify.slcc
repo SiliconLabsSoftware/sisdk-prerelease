@@ -1,6 +1,6 @@
 id: mbedtls_ssl_dtls_hello_verify
 package: platform_core
-label: DTLS
+label: DTLS Hello Verify
 description: >-
   This component enables support for HelloVerifyRequest on DTLS servers in Mbed TLS.
 category: Platform|Security|Mbed TLS|Upper Layer

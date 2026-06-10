@@ -1,6 +1,6 @@
 id: mbedtls_ssl_proto_dtls
 package: platform_core
-label: DTLS
+label: DTLS Protocol
 description: >-
   This component provides support for the DTLS protocol using Mbed TLS.
 category: Platform|Security|Mbed TLS|Upper Layer

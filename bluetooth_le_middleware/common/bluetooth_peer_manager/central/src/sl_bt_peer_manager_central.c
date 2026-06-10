@@ -109,7 +109,7 @@ void sli_bt_peer_manager_central_on_bt_event(sl_bt_msg_t *evt)
         sc = sl_bt_scanner_stop();
         if (sc != SL_STATUS_OK) {
           sli_bt_peer_manager_log_error("Failed to stop scanner: 0x%04lx" APP_LOG_NL,
-                                       (unsigned long)sc);
+                                        (unsigned long)sc);
           // Emit an error event
           peer_evt.evt_id = SL_BT_PEER_MANAGER_ERROR;
           peer_evt.connection_id = SL_BT_INVALID_CONNECTION_HANDLE;
@@ -120,11 +120,11 @@ void sli_bt_peer_manager_central_on_bt_event(sl_bt_msg_t *evt)
       }
       // Add connection to the database
       sc = sli_bt_peer_manager_add_connection(evt->data.evt_connection_opened.connection,
-                                             evt->data.evt_connection_opened.address,
-                                             sl_bt_connection_role_central);
+                                              evt->data.evt_connection_opened.address,
+                                              sl_bt_connection_role_central);
       if (sc != SL_STATUS_OK) {
         sli_bt_peer_manager_log_error("Failed to add connection: 0x%04lx" APP_LOG_NL,
-                                     (unsigned long)sc);
+                                      (unsigned long)sc);
         // Emit an error event
         peer_evt.evt_id = SL_BT_PEER_MANAGER_ERROR;
         peer_evt.connection_id = SL_BT_INVALID_CONNECTION_HANDLE;
@@ -403,12 +403,12 @@ static sl_status_t process_scan_response(bd_addr *address,
   // If there was a match or there is no filtering active,
   // open connection as central
   sli_bt_peer_manager_log_info("Opening connection as central to '%02x:%02x:%02x:%02x:%02x:%02x'" APP_LOG_NL,
-                              address->addr[5],
-                              address->addr[4],
-                              address->addr[3],
-                              address->addr[2],
-                              address->addr[1],
-                              address->addr[0]);
+                               address->addr[5],
+                               address->addr[4],
+                               address->addr[3],
+                               address->addr[2],
+                               address->addr[1],
+                               address->addr[0]);
   sc = sl_bt_peer_manager_central_open_connection(address, address_type);
   return sc;
 }

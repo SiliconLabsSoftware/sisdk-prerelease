@@ -364,8 +364,6 @@
 #endif
 // </h>
 // </h>
-// </e>
-// </h>
 
 // <<< end of configuration section >>>
 #endif // _SL_OPENTHREAD_FEATURES_CONFIG_H

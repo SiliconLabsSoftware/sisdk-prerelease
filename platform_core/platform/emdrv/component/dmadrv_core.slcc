@@ -30,6 +30,8 @@ provides:
 - name: dmadrv_core
   condition: [device_sdid_240]
 - name: dmadrv_core
+  condition: [device_generic_family_efr32xg2b]
+- name: dmadrv_core
   condition: [device_sdid_260]
 - name: dmadrv_core
   condition: [device_generic_family_sixx301]

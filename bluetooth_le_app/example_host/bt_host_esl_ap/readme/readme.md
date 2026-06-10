@@ -166,7 +166,7 @@ To build the required shared libraries for the Python ESL Access Point, please f
 1. **Open Simplicity Studio and start creating the workspace.**
    - Choose `Bluetooth LE` from the Wireless Technology list on the _Home_ page. This will open the _Project_ on the left and a new _Examples and Demos_ tab on the top.
    - Use the search field to filter with the keyword `esl`.
-   - Select `Blutooth` checkbox in the _Wireless Technology_ list and the `Host` option from the _Device Type_ list for better filtering. This will narrow down the list on the right to four elements: three ESL AP related projects and the workspace that combines them.
+   - Select `Bluetooth` checkbox in the _Wireless Technology_ list and the `Host` option from the _Device Type_ list for better filtering. This will narrow down the list on the right to four elements: three ESL AP related projects and the workspace that combines them.
    - Select the `Bluetooth - Host ESL Access Point` workspace, which groups the three ESL AP host projects together.
      (If you are unsure which one is the workspace, you can hide individual projects for clarity by disabling the visibility of _Example Projects_.)
 
@@ -514,7 +514,7 @@ _Notes:_
 - _Timed LED commands with a delay shorter than the actual periodic advertisement interval may be rejected on receive by Implausible Absolute Time (0x0C) ESL error response. Please refer the ESL specification on timed commands._
 - _If the delay is given in the human readable form (using `--time`) then the LED will either turn on on the same day at the specified time or the next day - the latter if the given time has passed already on your local computer's clock!_
 - _In the SoC ESL Tag example the LED at index 0 is used for special purposes, that is it can't be controlled directly as opposed to LED 1 on the WSTK. Rather, LED 0 is used as optical feedback only for various internal states of the ESL Tag. Nevertheless, the special function for LED 0 can be still switched on and off via the `led` command._
-- _Almost all of the optional led control parameters are "sticky", meaning that the last values are preserved by the AP internally and will be re-used next time, if the given parameter is omitted in the argument list. This doesn't apply on the delay, time and absolute parameters, though._
+- _Almost all of the optional led control parameters are "sticky", meaning that the last values are preserved by the AP internally and will be reused next time, if the given parameter is omitted in the argument list. This doesn't apply on the delay, time and absolute parameters, though._
 
 #### refresh\_display
     Refresh ESL Tag display.
@@ -835,7 +835,7 @@ Subcommands:
 
     Positional argument:
     - `filename`: Filename to read AP commands from.
-  
+
 - `wait [--group_id <u7>] seconds [event] [address]`: Wait before running the next command.
 
     Positional arguments:
@@ -855,7 +855,7 @@ Subcommands:
     Option:
     - `-v, --verbose`: With `list`, show the full command template alongside each event name (without it, only event names are shown). With `clean`, list each removed binding before the summary count.
 
-- `register <event> <command> [params ...]`: Bind a CLI command to an ESL event so that the command is executed automatically whenever the event occurs. 
+- `register <event> <command> [params ...]`: Bind a CLI command to an ESL event so that the command is executed automatically whenever the event occurs.
     Positional arguments:
     - `event`: Event name to react to (e.g. `connection_opened`, `tag_found`).
     - `command`: CLI command to execute (e.g. `ping`, `disconnect`, `led`).

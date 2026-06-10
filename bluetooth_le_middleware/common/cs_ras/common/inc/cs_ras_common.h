@@ -284,7 +284,7 @@ SL_ENUM(cs_ras_cp_response_code_value_t) {
 // Invalid service handle
 #define CS_RAS_INVALID_SERVICE_HANDLE              (UINT32_MAX)
 
-// RAS service UUID 
+// RAS service UUID
 #define CS_RAS_SERVICE_UUID                        0x185B
 
 // Invalid ranging counter value

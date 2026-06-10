@@ -135,7 +135,7 @@ typedef struct {
 
 typedef struct {
   uint32_t token;
-  uint8_t data[MAX_IPC_VEC_ARG_CAPACITY];
+  uint8_t data[MAX_IPC_TOKEN_MANAGER_DATA_LENGTH_ARG_CAPACITY];
   uint32_t length;
 } slxi_zigbee_stack_token_manager_get_data_ipc_req_t;
 

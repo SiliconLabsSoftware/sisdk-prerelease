@@ -40,7 +40,12 @@ void set_host_state(bool sleeping);
 void keep_alive_init(void);
 
 /**
- * @brief Initialize the host-wake PWM (instance @c host_wakeup, default PA10). Legacy name @c gpio_wakeup_host_init. Call once at startup.
+ * @brief Initialize the host-wake GPIO as push-pull, driven HIGH (idle).
+ *
+ * Requires the @c zw_host_wakeup_gpio component. Pin defaults to PA10;
+ * override via @c sl_host_wakeup_gpio_config.h. Without the component,
+ * this is a no-op and the 0xFE unsolicited frame fallback is used instead.
+ * Call once at startup.
  */
 void gpio_wakeup_host_init(void);
 

@@ -620,6 +620,23 @@ extern "C" {
  * They include both compile-time and runtime level filtering for optimal
  * performance and flexibility.
  *
+ * @note When @c SL_CATALOG_LOG_FORMATTED_OUTPUT_PRESENT is defined,
+ *       SL_PRINT_STRING_INFO/DEBUG/WARN/ERROR/CRASH are redirected to the
+ *       SL_PRINT_FMT_* path (including SL_PRINT_FMT_CRASH) and
+ *       SL_PRINT_EVENT_* become no-ops. Early logging (before
+ *       @ref sl_log_init_stage2() completes) is not supported in this
+ *       mode: messages emitted before stage 2 are discarded rather than
+ *       buffered.
+ *
+ * @note The SL_PRINT_FMT_* path (and therefore the redirect above) is
+ *       implemented only by the @c log_backend_iostream_formatted backend.
+ *       In compact-output builds, @c log_none, or builds with no backend
+ *       installed, @ref sl_log_vprint_target_ex resolves to the weak no-op
+ *       in sl_log_weak.c — direct SL_PRINT_FMT_* calls in those modes are
+ *       intentionally silent. SL_PRINT_STRING_* without the formatted
+ *       catalog still flows through the legacy ring-buffer path
+ *       (@c sl_printf_common) and is unaffected.
+ *
  * @{
  */
 
@@ -632,7 +649,11 @@ extern "C" {
  * @param fmt Printf-style format string
  * @param ... Variable arguments for format string (up to 10)
  */
+#if defined(SL_CATALOG_LOG_FORMATTED_OUTPUT_PRESENT)
+#define SL_PRINT_STRING_INFO(fmt, ...) SL_PRINT_FMT_INFO(fmt, ##__VA_ARGS__)
+#else
 #define SL_PRINT_STRING_INFO(fmt, ...) do{sl_printf_common(INFO, fmt, ##__VA_ARGS__); }while(0)
+#endif
 
 
 /**
@@ -644,7 +665,11 @@ extern "C" {
  * @param fmt Printf-style format string
  * @param ... Variable arguments for format string (up to 10)
  */
+#if defined(SL_CATALOG_LOG_FORMATTED_OUTPUT_PRESENT)
+#define SL_PRINT_STRING_DEBUG(fmt, ...) SL_PRINT_FMT_DEBUG(fmt, ##__VA_ARGS__)
+#else
 #define SL_PRINT_STRING_DEBUG(fmt, ...) do{sl_printf_common(DBG, fmt, ##__VA_ARGS__); }while(0)
+#endif
 
 
 /**
@@ -657,7 +682,11 @@ extern "C" {
  * @param ... Variable arguments for format string (up to 10)
  */
 
+#if defined(SL_CATALOG_LOG_FORMATTED_OUTPUT_PRESENT)
+#define SL_PRINT_STRING_WARN(fmt, ...) SL_PRINT_FMT_WARN(fmt, ##__VA_ARGS__)
+#else
 #define SL_PRINT_STRING_WARN(fmt, ...) do{sl_printf_common(WRN, fmt, ##__VA_ARGS__); }while(0)
+#endif
 
 
 /**
@@ -669,7 +698,11 @@ extern "C" {
  * @param fmt Printf-style format string
  * @param ... Variable arguments for format string (up to 10)
  */
+#if defined(SL_CATALOG_LOG_FORMATTED_OUTPUT_PRESENT)
+#define SL_PRINT_STRING_ERROR(fmt, ...) SL_PRINT_FMT_ERROR(fmt, ##__VA_ARGS__)
+#else
 #define SL_PRINT_STRING_ERROR(fmt, ...) do{sl_printf_common(ERR, fmt, ##__VA_ARGS__); }while(0)
+#endif
 
 /**
  * @brief Print crash-level message with printf-style formatting
@@ -680,7 +713,9 @@ extern "C" {
  * @param fmt Printf-style format string
  * @param ... Variable arguments for format string (up to 10)
  */
-#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
+#if defined(SL_CATALOG_LOG_FORMATTED_OUTPUT_PRESENT)
+#define SL_PRINT_STRING_CRASH(fmt, ...) SL_PRINT_FMT_CRASH(fmt, ##__VA_ARGS__)
+#elif (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
 #define SL_PRINT_STRING_CRASH(fmt, ...) do{ }while(0)
 #else
 #define SL_PRINT_STRING_CRASH(fmt, ...) do{sl_printf_common(CRASH, fmt, ##__VA_ARGS__); }while(0)
@@ -708,7 +743,11 @@ extern "C" {
  * @param event_id Numeric event identifier
  * @param ... Variable arguments for the event (up to 10)
  */
+#if defined(SL_CATALOG_LOG_FORMATTED_OUTPUT_PRESENT)
+#define SL_PRINT_EVENT_INFO(event_id, ...) do { (void)sizeof(event_id); } while(0)
+#else
 #define SL_PRINT_EVENT_INFO(event_id, ...) do{sl_event_common(INFO, event_id, ##__VA_ARGS__); }while(0)
+#endif
 
 /**
  * @brief Log debug-level event with optional arguments
@@ -719,7 +758,11 @@ extern "C" {
  * @param event_id Numeric event identifier
  * @param ... Variable arguments for the event (up to 10)
  */
+#if defined(SL_CATALOG_LOG_FORMATTED_OUTPUT_PRESENT)
+#define SL_PRINT_EVENT_DEBUG(event_id, ...) do { (void)sizeof(event_id); } while(0)
+#else
 #define SL_PRINT_EVENT_DEBUG(event_id, ...) do{sl_event_common(DBG, event_id, ##__VA_ARGS__); }while(0)
+#endif
 /**
  * @brief Log warning-level event with optional arguments
  *
@@ -729,7 +772,11 @@ extern "C" {
  * @param event_id Numeric event identifier
  * @param ... Variable arguments for the event (up to 10)
  */
+#if defined(SL_CATALOG_LOG_FORMATTED_OUTPUT_PRESENT)
+#define SL_PRINT_EVENT_WARN(event_id, ...) do { (void)sizeof(event_id); } while(0)
+#else
 #define SL_PRINT_EVENT_WARN(event_id, ...) do{sl_event_common(WRN, event_id, ##__VA_ARGS__); }while(0)
+#endif
 /**
  * @brief Log error-level event with optional arguments
  *
@@ -740,7 +787,11 @@ extern "C" {
  * @param ... Variable arguments for the event (up to 10)
  */
 
+#if defined(SL_CATALOG_LOG_FORMATTED_OUTPUT_PRESENT)
+#define SL_PRINT_EVENT_ERROR(event_id, ...) do { (void)sizeof(event_id); } while(0)
+#else
 #define SL_PRINT_EVENT_ERROR(event_id, ...) do{sl_event_common(ERR, event_id, ##__VA_ARGS__); }while(0)
+#endif
 
 /**
  * @brief Log crash-level event with optional arguments
@@ -751,7 +802,9 @@ extern "C" {
  * @param event_id Numeric event identifier
  * @param ... Variable arguments for the event (up to 10)
  */
-#if (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
+#if defined(SL_CATALOG_LOG_FORMATTED_OUTPUT_PRESENT)
+#define SL_PRINT_EVENT_CRASH(event_id, ...) do { (void)sizeof(event_id); } while(0)
+#elif (SL_LOG_CONFIG_LEVEL_COMPILE_TIME == SL_LOG_CONFIG_LEVEL_NONE)
 #define SL_PRINT_EVENT_CRASH(event_id, ...) do{ }while(0)
 #else
 #define SL_PRINT_EVENT_CRASH(event_id, ...) do{sl_event_common(CRASH, event_id, ##__VA_ARGS__); }while(0)
@@ -771,10 +824,20 @@ extern "C" {
  *
  *   - SystemView backend: emitted as a SystemView text packet via
  *     SEGGER_SYSVIEW_VPrintfTargetEx().
- *   - I/O Stream (proprietary) backend: emitted as a `[L|F] text\\r\\n` line
- *     to the recommended console iostream (formatted and compact builds
- *     both link the same implementation).
- *   - log_none / no backend: linked against a weak no-op (message discarded).
+ *   - I/O Stream **formatted** backend (component
+ *     @c log_backend_iostream_formatted): the format string is rendered on
+ *     target with vsnprintf() and emitted to the recommended console
+ *     iostream as `[TIMESTAMP] [CC] <text>` (each prefix optional, see
+ *     sl_log_formatted_iostream_config.h). No trailing CR/LF is appended.
+ *   - All other backends (I/O Stream **compact**, @c log_none, or no
+ *     backend installed): no strong implementation of
+ *     @ref sl_log_vprint_target_ex is linked, so calls fall through to the
+ *     weak no-op in sl_log_weak.c and the message is silently discarded.
+ *
+ * @warning SL_PRINT_FMT_* (and the SL_PRINT_STRING_* redirects below) only
+ *          render under the formatted-output backend. They are intentionally
+ *          inert in compact-output builds; do not rely on them to produce
+ *          output there.
  *
  * Use these when:
  *   - A host-side description / lookup file for the format strings is not
@@ -794,8 +857,8 @@ extern "C" {
  * and when @c sli_log_init_stage2_done is true (set when @ref sl_log_init_stage2()
  * finishes). Unlike @c sl_log_send_*, this path does not buffer early output
  * in the ring buffer, so nothing is emitted before stage 2 completes.
- * If SL_LOG_CONFIG_LEVEL_COMPILE_TIME is SL_LOG_CONFIG_LEVEL_NONE, all four
- * macros are stripped entirely at compile time.
+ * If SL_LOG_CONFIG_LEVEL_COMPILE_TIME is SL_LOG_CONFIG_LEVEL_NONE, all five
+ * macros (INFO/DEBUG/WARN/ERROR/CRASH) are stripped entirely at compile time.
  *
  * @{
  */
@@ -815,7 +878,7 @@ extern "C" {
     }                                                                          \
   } while (0)
 #else
-#define SL_PRINT_FMT_INFO(fmt, ...)  do { (void)sizeof(fmt); } while (0)
+#define SL_PRINT_FMT_INFO(fmt, ...)  do { sl_printf_common(INFO, fmt, ##__VA_ARGS__); } while (0)
 #endif
 
 /** @brief Print debug-level message via the active backend's target-side printf. */
@@ -828,7 +891,7 @@ extern "C" {
     }                                                                          \
   } while (0)
 #else
-#define SL_PRINT_FMT_DEBUG(fmt, ...) do { (void)sizeof(fmt); } while (0)
+#define SL_PRINT_FMT_DEBUG(fmt, ...) do { sl_printf_common(DBG, fmt, ##__VA_ARGS__); } while (0)
 #endif
 
 /** @brief Print warning-level message via the active backend's target-side printf. */
@@ -841,7 +904,7 @@ extern "C" {
     }                                                                          \
   } while (0)
 #else
-#define SL_PRINT_FMT_WARN(fmt, ...)  do { (void)sizeof(fmt); } while (0)
+#define SL_PRINT_FMT_WARN(fmt, ...)  do { sl_printf_common(WRN, fmt, ##__VA_ARGS__); } while (0)
 #endif
 
 /** @brief Print error-level message via the active backend's target-side printf. */
@@ -854,8 +917,22 @@ extern "C" {
     }                                                                          \
   } while (0)
 #else
-#define SL_PRINT_FMT_ERROR(fmt, ...) do { (void)sizeof(fmt); } while (0)
+#define SL_PRINT_FMT_ERROR(fmt, ...) do { sl_printf_common(ERR, fmt, ##__VA_ARGS__); } while (0)
 #endif
+
+/** @brief Print crash-level message via the active backend's target-side printf.
+ *
+ * CRASH is the highest severity, so any compile-time level other than NONE
+ * accepts it. There is no dedicated SL_LOG_PRINT_OPT_CRASH option, so the
+ * call is forwarded with SL_LOG_PRINT_OPT_ERROR (the formatted backend
+ * ignores the level field; only the payload is rendered). */
+#define SL_PRINT_FMT_CRASH(fmt, ...)                                           \
+  do {                                                                         \
+    if ((sl_log_level_t)SL_LOG_CONFIG_LEVEL_CRASH >= sl_log_get_loglevel()      \
+        && sli_log_init_stage2_done) {                                          \
+      SL_LOG_PRINT_TARGET_EX(SL_LOG_PRINT_OPT_ERROR, (fmt), ##__VA_ARGS__);    \
+    }                                                                          \
+  } while (0)
 
 #else /* compile-time level == NONE */
 
@@ -863,6 +940,7 @@ extern "C" {
 #define SL_PRINT_FMT_DEBUG(fmt, ...) do { (void)sizeof(fmt); } while (0)
 #define SL_PRINT_FMT_WARN(fmt, ...)  do { (void)sizeof(fmt); } while (0)
 #define SL_PRINT_FMT_ERROR(fmt, ...) do { (void)sizeof(fmt); } while (0)
+#define SL_PRINT_FMT_CRASH(fmt, ...) do { (void)sizeof(fmt); } while (0)
 
 #endif
 
@@ -917,6 +995,7 @@ extern "C" {
 #define SL_PRINT_FMT_DEBUG(fmt, ...) do { (void)sizeof(fmt); } while (0)
 #define SL_PRINT_FMT_WARN(fmt, ...)  do { (void)sizeof(fmt); } while (0)
 #define SL_PRINT_FMT_ERROR(fmt, ...) do { (void)sizeof(fmt); } while (0)
+#define SL_PRINT_FMT_CRASH(fmt, ...) do { (void)sizeof(fmt); } while (0)
 
 #endif // LIBRARY_BUILD
 

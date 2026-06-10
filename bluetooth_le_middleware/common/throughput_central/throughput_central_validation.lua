@@ -19,7 +19,7 @@ if mtu_size ~= nil and mtu_size.number ~= nil and mtu_max ~= nil and mtu_max.num
 end
 
 -- MAC address format validation in allowlist
-local slots = { 
+local slots = {
     {
         name = "Slot 1",
         enable = "THROUGHPUT_CENTRAL_ALLOWLIST_SLOT_1_ENABLE",

@@ -53,7 +53,7 @@ ESL_CMD_MAX_RETRY_COUNT = 3
 # Set it higher than the internal retry limits of the ESL C library (ESL_LIB_CONNECTION_RETRY_COUNT_MAX value)
 UNSUCCESSFUL_ONBOARDING_LIMIT = 6
 
-# Pending count for connection requests: 1 is the minmum ad also the safest value, but auto provisioning will be the slowest
+# Pending count for connection requests: 1 is the minimum ad also the safest value, but auto provisioning will be the slowest
 ESL_CMD_MAX_PENDING_CONNECTION_REQUEST_COUNT = 4096 # Best if aligned with elw.ESL_LIB_SKIPLIST_MAX_LEVEL_LIB macro value
 
 # Tags in a group in automated mode addressing

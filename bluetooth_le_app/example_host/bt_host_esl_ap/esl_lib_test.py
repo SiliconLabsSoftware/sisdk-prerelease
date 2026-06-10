@@ -477,7 +477,7 @@ class LibTest(threading.Thread):
             print("Time to set PAwR data")
             self.wait_event(EventPawrResponse, 5)
 
-        # Connect again throug PAwR
+        # Connect again through PAwR
         print(f"Reconnecting to {tag_count} tags.")
         pawr_subevent = PAWRSubevent(pawr_handle, 0)
         for address in self.address_list:
@@ -655,7 +655,7 @@ class LibTest(threading.Thread):
             )
             print("Time to set PAwR data")
             self.wait_event(EventPawrResponse, 5)
-        # Connect again throug PAwR
+        # Connect again through PAwR
         pawr_subevent = PAWRSubevent(pawr_handle, 0)
         print(
             f"Reconnect to {tag_found.address} using {pawr_subevent} and key {bonding_data.ltk}"

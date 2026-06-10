@@ -583,12 +583,8 @@ static void start_udp_rx_task(void)
   const osThreadAttr_t udp_rx_task_attr = {
     .name        = "DcCiuUdpRxTask",
     .attr_bits   = osThreadDetached,
-    .cb_mem      = NULL,
-    .cb_size     = 0,
-    .stack_mem   = NULL,
     .stack_size  = (SL_DC_CIU_UDP_RX_TASK_STACK_SIZE * sizeof(void *)) & 0xFFFFFFF8U,
-    .priority    = osPriorityNormal,
-    .tz_module   = 0
+    .priority    = osPriorityNormal
   };
 
   if (udp_rx_task_id != NULL) {
@@ -894,12 +890,8 @@ void app_init(void)
   const osThreadAttr_t event_task_attr = {
     .name        = "DcCiuEventTask",
     .attr_bits   = osThreadDetached,
-    .cb_mem      = NULL,
-    .cb_size     = 0,
-    .stack_mem   = NULL,
     .stack_size  = (SL_DC_CIU_BTN_TASK_STACK_SIZE * sizeof(void *)) & 0xFFFFFFF8U,
-    .priority    = osPriorityNormal,
-    .tz_module   = 0
+    .priority    = osPriorityNormal
   };
 
   const osMessageQueueAttr_t queue_attr = {

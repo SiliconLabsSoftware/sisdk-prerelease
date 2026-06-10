@@ -341,9 +341,7 @@ sl_zigbee_global_tlv_symmetric_passphrase_t sl_zigbee_global_tlv_symmetric_passp
   sli_zigbee_ipc_cmd_t msg = { 0, };
 
   if (passphrase != NULL) {
-    memmove(msg.data.global_tlv_symmetric_passphrase.request.passphrase,
-            passphrase,
-            sizeof(uint8_t) * ZB_GLOBAL_TLV_SYMMETRIC_PASSPHRASE_MAX_LEN);
+    memmove(msg.data.global_tlv_symmetric_passphrase.request.passphrase, passphrase, sizeof(uint8_t) * ZB_GLOBAL_TLV_SYMMETRIC_PASSPHRASE_MAX_LEN);
   }
 
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_global_tlv_symmetric_passphrase_process_ipc_command, &msg);

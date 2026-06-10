@@ -99,12 +99,8 @@ static osThreadId_t _adv_controller_task = NULL;
 static const osThreadAttr_t _adv_controller_task_attr = {
   .name       = "AdvControllerTask",
   .attr_bits  = osThreadDetached,
-  .cb_mem     = NULL,
-  .cb_size    = 0UL,
-  .stack_mem  = NULL,
   .stack_size = (SL_WISUN_BLE_DMP_ADVERTISE_CONTROLLER_STACK_SIZE_WORD * sizeof(void *)) & 0xFFFFFFF8U,
-  .priority   = osPriorityNormal1,
-  .tz_module  = 0UL
+  .priority   = osPriorityNormal1
 };
 
 // BLE advertising event flags

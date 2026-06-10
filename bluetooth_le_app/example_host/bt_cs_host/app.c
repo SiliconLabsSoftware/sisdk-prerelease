@@ -1408,10 +1408,9 @@ static void cs_on_result(const uint8_t conn_handle,
   sl_status_t sc = SL_STATUS_OK;
   float value = .0f;
   cs_result_session_data_t result_data;
-  
+
   const bd_addr *bt_address = ble_peer_manager_get_bt_address(conn_handle);
   for (uint8_t is_data = ((measurement_counter % CS_HOST_HEADER_LOG) > 0); is_data <= 1; is_data++) {
-
     app_log_info(APP_INSTANCE_PREFIX, conn_handle);
     cs_initiator_print_bt_address(!is_data, bt_address);
 
@@ -1587,7 +1586,6 @@ static void cs_on_result(const uint8_t conn_handle,
   }
   measurement_counter++;
 }
-
 
 /******************************************************************************
  * Extract and display intermediate results between measurement results

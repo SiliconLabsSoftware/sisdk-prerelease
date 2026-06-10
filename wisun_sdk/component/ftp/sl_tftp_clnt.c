@@ -365,12 +365,8 @@ static osThreadId_t _clnt_thr = NULL;
 static const osThreadAttr_t _clnt_thr_attr = {
   .name        = "TftpClntThread",
   .attr_bits   = osThreadDetached,
-  .cb_mem      = NULL,
-  .cb_size     = 0,
-  .stack_mem   = NULL,
   .stack_size  = (SL_TFTP_CLNT_STACK_SIZE_WORD * sizeof(void *)) & 0xFFFFFFF8U,
-  .priority    = osPriorityNormal7,
-  .tz_module   = 0
+  .priority    = osPriorityNormal7
 };
 
 /// TFTP Client message queue ID

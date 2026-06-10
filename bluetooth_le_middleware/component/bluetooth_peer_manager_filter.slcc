@@ -2,7 +2,9 @@ id: bluetooth_peer_manager_filter
 package: bluetooth_le_middleware
 label: Bluetooth Peer Manager Filter
 description: >
-  Filter module of Peer Manager for Bluetooth Low Energy.  Responsible for filtering scan responses by address, address type,  device name, service UUID, service data, manufacturer data, and RSSI.
+  Filter module of Peer Manager for Bluetooth Low Energy.
+  Responsible for filtering scan responses by address, address type,
+  device name, service UUID, service data, manufacturer data, and RSSI.
 category: Bluetooth|Application|Miscellaneous
 metadata:
   sbom:

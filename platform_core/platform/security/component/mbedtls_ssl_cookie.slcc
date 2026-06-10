@@ -1,6 +1,6 @@
 id: mbedtls_ssl_cookie
 package: platform_core
-label: DTLS
+label: DTLS Cookie
 description: >-
   This component enables support for DTLS cookies for hello verification.
 category: Platform|Security|Mbed TLS|Upper Layer

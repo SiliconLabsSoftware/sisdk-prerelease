@@ -733,58 +733,57 @@ static void check_supported_capabilities(const sl_bt_msg_t *evt)
 /******************************************************************************
  * Write measurement results to the display and to the iostream
  *****************************************************************************/
-
 static void print_head_and_data(cs_initiator_instances_t *initiator)
 {
-      const bd_addr *bt_address = ble_peer_manager_get_bt_address(initiator->conn_handle);
-      for (uint8_t is_data = ((measurement_counter % CS_INITIATOR_HEADER_LOG) > 0); is_data <= 1; is_data++) {
-        log_info(APP_INSTANCE_PREFIX, initiator->conn_handle);
-        cs_initiator_print_bt_address(!is_data, bt_address);
+  const bd_addr *bt_address = ble_peer_manager_get_bt_address(initiator->conn_handle);
+  for (uint8_t is_data = ((measurement_counter % CS_INITIATOR_HEADER_LOG) > 0); is_data <= 1; is_data++) {
+    log_info(APP_INSTANCE_PREFIX, initiator->conn_handle);
+    cs_initiator_print_bt_address(!is_data, bt_address);
 
-        cs_initiator_print_result(CS_RESULT_FIELD_DISTANCE_MAINMODE,
-                                  !is_data,
-                                  &(initiator->measurement_mainmode.distance_filtered));
-        // Distance submode
-        if (initiator_config.cs_sub_mode != sl_bt_cs_submode_disabled) {
-          cs_initiator_print_result(CS_RESULT_FIELD_DISTANCE_SUBMODE,
-                                    !is_data,
-                                    &(initiator->measurement_submode.distance_filtered));
-        }
-        // Distance RAW
-        cs_initiator_print_result(CS_RESULT_FIELD_DISTANCE_RAW_MAINMODE,
-                                  !is_data,
-                                  &(initiator->measurement_mainmode.distance_raw));
-        // Distance submode RAW
-        if (initiator_config.cs_sub_mode != sl_bt_cs_submode_disabled) {
-          cs_initiator_print_result(CS_RESULT_FIELD_DISTANCE_RAW_SUBMODE,
-                                    !is_data,
-                                    &(initiator->measurement_submode.distance_raw));
-        }
-        // Likeliness
-        cs_initiator_print_result(CS_RESULT_FIELD_LIKELINESS_MAINMODE,
-                                  !is_data,
-                                  &(initiator->measurement_mainmode.likeliness));
-        // Likeliness submode
-        if (initiator_config.cs_sub_mode != sl_bt_cs_submode_disabled) {
-          cs_initiator_print_result(CS_RESULT_FIELD_LIKELINESS_SUBMODE,
-                                    !is_data,
-                                    &(initiator->measurement_submode.likeliness));
-        }
-        // RSSI distance
-        cs_initiator_print_result(CS_RESULT_FIELD_DISTANCE_RSSI,
-                                  !is_data,
-                                  &(initiator->measurement_mainmode.distance_estimate_rssi));
-        // Velocity
-        cs_initiator_print_result(CS_RESULT_FIELD_VELOCITY_MAINMODE,
-                                  !is_data,
-                                  &(initiator->measurement_mainmode.velocity));
+    cs_initiator_print_result(CS_RESULT_FIELD_DISTANCE_MAINMODE,
+                              !is_data,
+                              &(initiator->measurement_mainmode.distance_filtered));
+    // Distance submode
+    if (initiator_config.cs_sub_mode != sl_bt_cs_submode_disabled) {
+      cs_initiator_print_result(CS_RESULT_FIELD_DISTANCE_SUBMODE,
+                                !is_data,
+                                &(initiator->measurement_submode.distance_filtered));
+    }
+    // Distance RAW
+    cs_initiator_print_result(CS_RESULT_FIELD_DISTANCE_RAW_MAINMODE,
+                              !is_data,
+                              &(initiator->measurement_mainmode.distance_raw));
+    // Distance submode RAW
+    if (initiator_config.cs_sub_mode != sl_bt_cs_submode_disabled) {
+      cs_initiator_print_result(CS_RESULT_FIELD_DISTANCE_RAW_SUBMODE,
+                                !is_data,
+                                &(initiator->measurement_submode.distance_raw));
+    }
+    // Likeliness
+    cs_initiator_print_result(CS_RESULT_FIELD_LIKELINESS_MAINMODE,
+                              !is_data,
+                              &(initiator->measurement_mainmode.likeliness));
+    // Likeliness submode
+    if (initiator_config.cs_sub_mode != sl_bt_cs_submode_disabled) {
+      cs_initiator_print_result(CS_RESULT_FIELD_LIKELINESS_SUBMODE,
+                                !is_data,
+                                &(initiator->measurement_submode.likeliness));
+    }
+    // RSSI distance
+    cs_initiator_print_result(CS_RESULT_FIELD_DISTANCE_RSSI,
+                              !is_data,
+                              &(initiator->measurement_mainmode.distance_estimate_rssi));
+    // Velocity
+    cs_initiator_print_result(CS_RESULT_FIELD_VELOCITY_MAINMODE,
+                              !is_data,
+                              &(initiator->measurement_mainmode.velocity));
 
-        // BER
-        cs_initiator_print_result(CS_RESULT_FIELD_BIT_ERROR_RATE,
-                                  !is_data,
-                                  &(initiator->measurement_mainmode.bit_error_rate));
-        log_append(APP_LOG_NL);
-      }
+    // BER
+    cs_initiator_print_result(CS_RESULT_FIELD_BIT_ERROR_RATE,
+                              !is_data,
+                              &(initiator->measurement_mainmode.bit_error_rate));
+    log_append(APP_LOG_NL);
+  }
 }
 
 /******************************************************************************

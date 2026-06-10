@@ -43,7 +43,6 @@
 #include "app_timer.h"
 #include "app_rta.h"
 
-
 #if defined(CS_RAS_SERVER_CONFIG_SUPPORT_FEATURE_REAL_TIME_RANGING_DATA) && (CS_RAS_SERVER_CONFIG_SUPPORT_FEATURE_REAL_TIME_RANGING_DATA == 1)
 #define FEATURE_REAL_TIME_RANGING_DATA
 #endif // defined(CS_RAS_SERVER_CONFIG_SUPPORT_FEATURE_REAL_TIME_RANGING_DATA) && (CS_RAS_SERVER_CONFIG_SUPPORT_FEATURE_REAL_TIME_RANGING_DATA == 1)
@@ -229,7 +228,7 @@ sl_status_t cs_ras_send_data_ready(uint8_t connection,
  * @return status of the operation.
  *****************************************************************************/
 sl_status_t cs_ras_send_data_ready_internal(uint8_t connection,
-                                          cs_ras_ranging_counter_t ranging_counter);
+                                            cs_ras_ranging_counter_t ranging_counter);
 
 /**************************************************************************//**
  * Send RAS data when it is due to retransmit.
@@ -252,7 +251,7 @@ sl_status_t cs_ras_send_overwritten(uint8_t connection,
  * @return status of the operation.
  *****************************************************************************/
 sl_status_t cs_ras_send_overwritten_internal(uint8_t connection,
-                                           cs_ras_ranging_counter_t ranging_counter);
+                                             cs_ras_ranging_counter_t ranging_counter);
 
 /**************************************************************************//**
  * Get handle for a given characteristic index
@@ -270,7 +269,7 @@ uint16_t cs_ras_server_get_handle(cs_ras_characteristic_index_t index);
 
 /**************************************************************************//**
  * Initialize RTA context.
- *****************************************************************************/ 
+ *****************************************************************************/
 void cs_ras_server_rta_init(void);
 
 /**************************************************************************//**

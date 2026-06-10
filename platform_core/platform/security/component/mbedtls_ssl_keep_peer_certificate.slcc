@@ -1,6 +1,6 @@
 id: mbedtls_ssl_keep_peer_certificate
 package: platform_core
-label: TLS Client
+label: SSL Keep Peer Certificate
 description: >-
   This component provides support for using TLS (as a client) in Mbed TLS.
 category: Platform|Security|Mbed TLS|Upper Layer

@@ -619,6 +619,18 @@ exporter:
             option: misc
             action: append
             value: "-fno-lto"
+          - tool: makefile.arm.llvm.compiler.c
+            option: misc
+            action: append
+            value: "-fno-lto"
+          - tool: makefile.arm.llvm.compiler.cpp
+            option: misc
+            action: append
+            value: "-fno-lto"
+          - tool: makefile.arm.llvm.linker
+            option: misc
+            action: append
+            value: "-fno-lto"
           - tool: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.base
             option: com.silabs.gnu.c.compiler.option.misc.otherlist
             action: append

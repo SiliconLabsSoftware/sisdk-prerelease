@@ -257,7 +257,7 @@ sl_status_t slx_zigbee_token_manager_get_data(uint32_t token,
   sli_zigbee_ipc_cmd_t msg = { 0, };
   msg.data.token_manager_get_data.request.token = token;
 
-  if (length > MAX_IPC_VEC_ARG_CAPACITY) {
+  if (length > MAX_IPC_TOKEN_MANAGER_DATA_LENGTH_ARG_CAPACITY) {
     assert(false); // "vector data length exceeds expected maximum
     return msg.data.token_manager_get_data.response.result;
   }
@@ -266,7 +266,7 @@ sl_status_t slx_zigbee_token_manager_get_data(uint32_t token,
   msg.data.token_manager_get_data.request.length = length;
   sli_zigbee_send_ipc_cmd(slxi_zigbee_stack_token_manager_get_data_process_ipc_command, &msg);
 
-  if (length > MAX_IPC_VEC_ARG_CAPACITY) {
+  if (length > MAX_IPC_TOKEN_MANAGER_DATA_LENGTH_ARG_CAPACITY) {
     assert(false); // "vector data length exceeds expected maximum
     return msg.data.token_manager_get_data.response.result;
   }

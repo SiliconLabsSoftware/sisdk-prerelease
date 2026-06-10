@@ -22,7 +22,7 @@ The **Bluetooth - SoC SPP** example requires two development kits. When powered 
 
 To exchange data, open a serial terminal on either device and type text. The app reads data from the serial port in the main loop, buffers it inside SPP, and sends it over BLE in **chunks**. Central and Peripheral are symmetric: either side can send and receive, and incoming data is printed on the console.
 
-![SPP Example](image/readme_img1.png) 
+![SPP Example](image/readme_img1.png)
 
 ### Flow Control
 

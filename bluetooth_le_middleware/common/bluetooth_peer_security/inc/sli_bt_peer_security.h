@@ -37,9 +37,9 @@
 
 /// Passkey confirmation process states
 typedef enum {
-    SL_BT_PEER_SECURITY_PROCESS_STARTED,
-    SL_BT_PEER_SECURITY_PROCESS_IDLE,
-  } sl_bt_peer_security_process_state_t;
+  SL_BT_PEER_SECURITY_PROCESS_STARTED,
+  SL_BT_PEER_SECURITY_PROCESS_IDLE,
+} sl_bt_peer_security_process_state_t;
 
 // -----------------------------------------------------------------------------
 // Internal function declarations

@@ -99,3 +99,8 @@ tag:
   - hwfilter:!board:brd4205a
   - toolchain:gcc
   - toolchain:llvm
+
+readme:
+   - path: README.md
+ui_hints:
+   highlight: README.md

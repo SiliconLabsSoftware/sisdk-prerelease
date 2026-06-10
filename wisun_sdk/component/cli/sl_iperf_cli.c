@@ -856,7 +856,7 @@ __STATIC_INLINE void _opt_bandwidth_setter(void *val)
 
 __STATIC_INLINE const char *_opt_bandwidth_getter(void)
 {
-  __prepare_getter_buff(PRIu32, _options.bandwidth);
+  __prepare_getter_buff("%"PRIu32, _options.bandwidth);
 }
 
 // packet number

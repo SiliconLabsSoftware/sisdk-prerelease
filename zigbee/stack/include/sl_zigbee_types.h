@@ -33,6 +33,9 @@
 // for the packet handoff data length
 #define MAX_IPC_PACKET_HANDOFF_DATA_LENGTH_ARG_CAPACITY 137
 
+// 148 bytes for the CBKE 283k1 data
+#define MAX_IPC_TOKEN_MANAGER_DATA_LENGTH_ARG_CAPACITY 148
+
 /**
  * @addtogroup ember_types
  *

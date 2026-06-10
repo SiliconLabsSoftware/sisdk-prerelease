@@ -1,9 +1,9 @@
 /***************************************************************************//**
- * @file sl_pwm_init_host_wakeup_config.h
- * @brief Project PWM configuration for the NCP host-wake line (`host_wakeup` instance; default output PA10).
+ * @file sl_host_wakeup_gpio_config.h
+ * @brief GPIO configuration for the NCP host-wake line (default output PA10).
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,52 +28,35 @@
  *
  ******************************************************************************/
 
- #ifndef SL_PWM_INIT_HOST_WAKEUP_CONFIG_H
- #define SL_PWM_INIT_HOST_WAKEUP_CONFIG_H
+#ifndef SL_HOST_WAKEUP_GPIO_CONFIG_H
+#define SL_HOST_WAKEUP_GPIO_CONFIG_H
 
- #ifdef __cplusplus
+#ifdef __cplusplus
 extern "C" {
- #endif
+#endif
 
 // <<< Use Configuration Wizard in Context Menu >>>
 
-// <h>PWM configuration
+// <h> Host Wakeup GPIO configuration
 
-// <o SL_PWM_HOST_WAKEUP_FREQUENCY> PWM frequency [Hz]
-// <i> Default: 10000
- #define SL_PWM_HOST_WAKEUP_FREQUENCY       1
+// <o SL_HOST_WAKEUP_GPIO_PORT> GPIO port
+// <SL_GPIO_PORT_A=> Port A
+// <SL_GPIO_PORT_B=> Port B
+// <SL_GPIO_PORT_C=> Port C
+// <SL_GPIO_PORT_D=> Port D
+// <i> Default: SL_GPIO_PORT_A
+#define SL_HOST_WAKEUP_GPIO_PORT   SL_GPIO_PORT_A
 
-// <o SL_PWM_HOST_WAKEUP_DUTY_CYCLE> PWM duty cycle [%]
-// <0-100>
-// <i> Default: 50
- #define SL_PWM_HOST_WAKEUP_DUTY_CYCLE      50
+// <o SL_HOST_WAKEUP_GPIO_PIN> GPIO pin number
+// <i> Default: 10
+#define SL_HOST_WAKEUP_GPIO_PIN    10
 
-// <o SL_PWM_HOST_WAKEUP_POLARITY> Polarity
-// <PWM_ACTIVE_HIGH=> Active high
-// <PWM_ACTIVE_LOW=> Active low
-// <i> Default: PWM_ACTIVE_HIGH
- #define SL_PWM_HOST_WAKEUP_POLARITY        PWM_ACTIVE_HIGH
-// </h> end pwm configuration
+// </h> end host wakeup gpio configuration
 
 // <<< end of configuration section >>>
 
-// <<< sl:start pin_tool >>>
-
-// <timer channel=OUTPUT> SL_PWM_HOST_WAKEUP
-// $[TIMER_SL_PWM_HOST_WAKEUP]
-
-#define SL_PWM_HOST_WAKEUP_PERIPHERAL              TIMER2
-#define SL_PWM_HOST_WAKEUP_PERIPHERAL_NO           2
-
-#define SL_PWM_HOST_WAKEUP_OUTPUT_CHANNEL          0
-#define SL_PWM_HOST_WAKEUP_OUTPUT_PORT             SL_GPIO_PORT_A
-#define SL_PWM_HOST_WAKEUP_OUTPUT_PIN              10
-// [TIMER_SL_PWM_HOST_WAKEUP]$
-
-// <<< sl:end pin_tool >>>
-
- #ifdef __cplusplus
+#ifdef __cplusplus
 }
- #endif
+#endif
 
- #endif // SL_PWM_INIT_HOST_WAKEUP_CONFIG_H
+#endif // SL_HOST_WAKEUP_GPIO_CONFIG_H

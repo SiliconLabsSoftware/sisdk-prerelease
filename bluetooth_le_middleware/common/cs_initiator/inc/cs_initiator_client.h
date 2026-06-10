@@ -151,7 +151,6 @@ SL_ENUM(cs_tone_antenna_config_index_t) {
 };
 #endif // CS_TONE_ANTENNA_CONFIG_INDEX_T_DEFINED
 
-
 // Parameters optimization for energy or frequency
 // Has an effect on procedure and connection intervals
 #ifndef CS_PROCEDURE_SCHEDULING_T_DEFINED
@@ -334,15 +333,15 @@ sl_status_t cs_initiator_get_intervals(uint8_t main_mode,
  * @return Status of the operation.
  *****************************************************************************/
 sl_status_t cs_initiator_get_multiple_intervals(uint8_t main_mode,
-                                       uint8_t sub_mode,
-                                       cs_procedure_scheduling_t procedure_scheduling,
-                                       uint8_t channel_map_preset,
-                                       uint8_t algo_mode,
-                                       uint8_t antenna_path,
-                                       uint8_t use_real_time_ras_mode,
-                                       uint8_t max_reflector_count,
-                                       uint16_t *conn_interval,
-                                       uint16_t *proc_interval);
+                                                uint8_t sub_mode,
+                                                cs_procedure_scheduling_t procedure_scheduling,
+                                                uint8_t channel_map_preset,
+                                                uint8_t algo_mode,
+                                                uint8_t antenna_path,
+                                                uint8_t use_real_time_ras_mode,
+                                                uint8_t max_reflector_count,
+                                                uint16_t *conn_interval,
+                                                uint16_t *proc_interval);
 
 /**************************************************************************//**
  * Select antennas for the CS mode.

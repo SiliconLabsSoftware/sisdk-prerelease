@@ -1,40 +1,34 @@
 /***************************************************************************//**
  * @file
- * @brief Platform backend glue for the logging subsystem
+ * @brief Target-side printf implementation for the formatted I/O Stream log
+ *        backend.
  *
- * ## Output format
+ * Provides the formatted-output backend implementation of
+ * sl_log_vprint_target_ex(), the va_list primitive that the single variadic
+ * wrapper SL_LOG_PRINT_TARGET_EX forwards to. SL_PRINT_FMT_* macros declared
+ * in sl_log_helper.h reach this code path. When the formatted-output backend
+ * is installed, SL_PRINT_STRING_* are also redirected to SL_PRINT_FMT_*, so
+ * every string log goes through this file. Numeric event records
+ * (SL_PRINT_EVENT_*) are not supported in this output mode.
  *
- * Each formatted record is sent to the iostream backend. Event logs end with
- * CRLF. String logs emit explicit CR/LF characters only when they are present
- * in the format string or a %s argument.
- * Log level is not printed.
- *
- * **Payload** (always):
- *
- * **String log**: the format string with specifiers expanded: %d = signed decimal (32-bit),
- * %u = unsigned decimal (32-bit), %x = 8-digit hex (32-bit), %p = pointer (0x + 8-digit hex),
- * %s = string. %% produces a literal '%'. Other characters after % are emitted as-is.
- * Example: "count=%d addr=%p" with args -1, 0x1000 gives
- * count=-1 addr=0x00001000
- *
- * **Event**: event_id (8 hex), then for each argument in arg_count: '|' and 8 hex digits,
- * terminated with CRLF.
- * Example: 00000001|AABBCCDD
+ * The text is formatted on target with vsnprintf() and emitted to the
+ * recommended console iostream as a single line. The line layout follows the
+ * formatted backend convention; the legacy S/E line-type indicator is no
+ * longer emitted because event encoding is not supported here.
  *
  * **Optional leading prefix** (see @ref sl_log_formatted_iostream_config.h):
- * - Both @c SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP and
- *   @c SL_LOG_FORMATTED_IOSTREAM_PREFIX_LOG_TYPE: [TIMESTAMP|TYPE] and a space
- *   (TYPE is S or E; TIMESTAMP is 8 hex digits).
- * - Timestamp only: [TIMESTAMP] and a space.
- * - Log type only: [TYPE] and a space.
+ * - @c SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP: `[TIMESTAMP]` (8 hex
+ *   digits) and a space.
  *
- * **Optional core ID** (when @c SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID is set):
- * [CC] (2 hex digits). String logs emit it before the payload so
- * payload-provided CR/LF characters do not split it onto a new line. Event logs
- * append it after the payload.
+ * **Optional core ID** (when @c SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID is
+ * set): `[CC]` (2 hex digits) and a space, before the formatted payload.
  *
- * Example (string, all options): [00005678|S] [00] count=-1 addr=0x00001000
- * Example (event, all options):  [00001234|E] 00000001|AABBCCDD [00]
+ * Example (all options): [00005678] [00] count=-1 addr=0x00001000
+ *
+ * The trailing CR/LF is not appended automatically: callers must include any
+ * desired line terminator in the format string (matching the string-log
+ * behavior of the previous formatted backend).
+ *
  *******************************************************************************
  * # License
  * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
@@ -62,54 +56,77 @@
  *
  ******************************************************************************/
 
+#include <stdarg.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stddef.h>
+
+#include "sl_log.h"
 #include "sl_log_platform_specific.h"
 #include "sl_log_helper.h"
 #include "sl_log_formatted_iostream_config.h"
-#include "sl_log.h"
 #include "sl_iostream.h"
 #include "sl_iostream_handles.h"
-#include "em_device.h"
-#include <stdbool.h>
-#include <stdint.h>
 
 #ifndef SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP
 #define SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP  0
 #endif
-#ifndef SL_LOG_FORMATTED_IOSTREAM_PREFIX_LOG_TYPE
-#define SL_LOG_FORMATTED_IOSTREAM_PREFIX_LOG_TYPE  0
-#endif
 #ifndef SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID
-#define SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID  0
+#define SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID    0
 #endif
 
-/*******************************************************************************
- ***************************  DEFINE MACROS ********************************
- ******************************************************************************/
-/** Line buffer size for output. String logs are truncated so an optional
- * leading prefix, optional " [CC]" core ID, and payload fit in LINE_MAX. */
-#define LINE_MAX  200
-/** Reserve trailing bytes during string expansion. */
-#define SL_LOG_FORMATTED_IOSTREAM_RESERVED_TAIL  0U
-#define SL_LOG_FORMATTED_IOSTREAM_HEX8_LEN       8U
-#define SL_LOG_FORMATTED_IOSTREAM_POINTER_LEN    (2U + SL_LOG_FORMATTED_IOSTREAM_HEX8_LEN)
+/** Maximum size (bytes) of one printf line emitted to iostream, including the
+ *  optional leading prefix(es). Lines longer than this are truncated. */
+#ifndef SL_LOG_PRINT_LINE_MAX
+#define SL_LOG_PRINT_LINE_MAX 200
+#endif
 
-/*******************************************************************************
- ***************************  LOCAL VARIABLES   ********************************
- ******************************************************************************/
-static const char hex_chars[] = "0123456789ABCDEF";
+#define SL_LOG_FORMATTED_IOSTREAM_HEX8_LEN  8U
+#define SL_LOG_FORMATTED_IOSTREAM_HEX2_LEN  2U
+
+/* Worst-case prefix lengths written unchecked into line[] before the bounds
+ * test in sl_log_vprint_target_ex(). Keep these in sync with the prefix
+ * blocks below: '[' + 8 hex + ']' + ' ' = 11 for the timestamp; '[' + 2 hex
+ * + ']' + ' ' = 5 for the core ID. */
+#define SL_LOG_FORMATTED_IOSTREAM_TIMESTAMP_PREFIX_LEN \
+  (1U + SL_LOG_FORMATTED_IOSTREAM_HEX8_LEN + 1U + 1U)
+#define SL_LOG_FORMATTED_IOSTREAM_CORE_ID_PREFIX_LEN   \
+  (1U + SL_LOG_FORMATTED_IOSTREAM_HEX2_LEN + 1U + 1U)
+
+#if SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP
+#define SL_LOG_FORMATTED_IOSTREAM_TS_LEN_ACTIVE   SL_LOG_FORMATTED_IOSTREAM_TIMESTAMP_PREFIX_LEN
+#else
+#define SL_LOG_FORMATTED_IOSTREAM_TS_LEN_ACTIVE   0U
+#endif
+
+#if SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID
+#define SL_LOG_FORMATTED_IOSTREAM_CID_LEN_ACTIVE  SL_LOG_FORMATTED_IOSTREAM_CORE_ID_PREFIX_LEN
+#else
+#define SL_LOG_FORMATTED_IOSTREAM_CID_LEN_ACTIVE  0U
+#endif
+
+#define SL_LOG_FORMATTED_IOSTREAM_PREFIX_MAX_LEN \
+  (SL_LOG_FORMATTED_IOSTREAM_TS_LEN_ACTIVE + SL_LOG_FORMATTED_IOSTREAM_CID_LEN_ACTIVE)
+
+/* Refuse to build if the line buffer is too small to even hold the enabled
+ * prefix plus at least one payload byte. Without this the prefix writes in
+ * sl_log_vprint_target_ex() would overflow the stack-allocated line[]
+ * before the post-write bounds check is reached. */
+_Static_assert(SL_LOG_PRINT_LINE_MAX > SL_LOG_FORMATTED_IOSTREAM_PREFIX_MAX_LEN,
+               "SL_LOG_PRINT_LINE_MAX is too small for the enabled prefix(es). "
+               "Increase SL_LOG_PRINT_LINE_MAX or disable "
+               "SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP / "
+               "SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID.");
 
 /*******************************************************************************
 **************************   LOCAL FUNCTIONS   ********************************
 *******************************************************************************/
 
-/**
- * @brief Write a 32-bit value as 8 hexadecimal digits into a buffer.
- *
- * @param[in,out] p  Pointer to the next character position in the buffer
- * @param[in]     v  Value to format (32-bit unsigned)
- *
- * @return Pointer to the character past the written digits (p + 8)
- */
+#if SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP || SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID
+static const char hex_chars[] = "0123456789ABCDEF";
+#endif
+
+#if SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP
 static inline char* u32_to_hex8(char *p, uint32_t v)
 {
   for (int i = 7; i >= 0; i--) {
@@ -117,16 +134,9 @@ static inline char* u32_to_hex8(char *p, uint32_t v)
   }
   return p;
 }
+#endif
 
 #if SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID
-/**
- * @brief Write an 8-bit value as 2 hexadecimal digits into a buffer.
- *
- * @param[in,out] p  Pointer to the next character position in the buffer
- * @param[in]     v  Value to format (8-bit unsigned)
- *
- * @return Pointer to the character past the written digits (p + 2)
- */
 static inline char* u8_to_hex2(char *p, uint8_t v)
 {
   *p++ = hex_chars[(v >> 4) & 0xF];
@@ -135,65 +145,72 @@ static inline char* u8_to_hex2(char *p, uint8_t v)
 }
 #endif
 
-/**
- * @brief Write a 32-bit value as decimal digits into a buffer.
- *
- * @param[in,out] p  Pointer to the next character position in the buffer
- * @param[in]     v  Value to format (32-bit unsigned)
- *
- * @return Pointer to the character past the written digits
- */
-static inline char* u32_to_dec(char *p, uint32_t v)
-{
-  char tmp[10];
-  int i = 0;
-
-  if (v == 0) {
-    *p++ = '0';
-    return p;
-  }
-
-  while (v > 0) {
-    tmp[i++] = '0' + (v % 10);
-    v /= 10;
-  }
-
-  while (i--) {
-    *p++ = tmp[i];
-  }
-
-  return p;
-}
-
-static inline uint32_t u32_dec_len(uint32_t v)
-{
-  uint32_t len = 1U;
-
-  while (v >= 10U) {
-    len++;
-    v /= 10U;
-  }
-
-  return len;
-}
-
-static inline bool buffer_has_space(const char *p, const char *end, uint32_t len)
-{
-  return (uint32_t)(end - p) >= len;
-}
-
 /*******************************************************************************
 **************************   GLOBAL FUNCTIONS   ********************************
 *******************************************************************************/
 
+void sl_log_vprint_target_ex(uint32_t options, const char *fmt, va_list ap)
+{
+  (void)options;
+
+  char line[SL_LOG_PRINT_LINE_MAX];
+  size_t header_len = 0U;
+  int body_len;
+  size_t total;
+
+  if (fmt == NULL) {
+    return;
+  }
+
+#if SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP
+  {
+    uint32_t timestamp = sl_log_get_timestamp_count(SL_LOG_HOST_CORE_ID);
+    line[header_len++] = '[';
+    char *p = u32_to_hex8(&line[header_len], timestamp);
+    header_len = (size_t)(p - line);
+    line[header_len++] = ']';
+    line[header_len++] = ' ';
+  }
+#endif
+
+#if SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID
+  {
+    line[header_len++] = '[';
+    char *p = u8_to_hex2(&line[header_len], (uint8_t)SL_LOG_HOST_CORE_ID);
+    header_len = (size_t)(p - line);
+    line[header_len++] = ']';
+    line[header_len++] = ' ';
+  }
+#endif
+
+  if (header_len >= sizeof(line)) {
+    return;
+  }
+
+  size_t body_capacity = sizeof(line) - header_len;
+  body_len = vsnprintf(line + header_len, body_capacity, fmt, ap);
+  if (body_len < 0) {
+    return;
+  }
+
+  /* vsnprintf returns the would-be length and writes at most body_capacity-1
+   * payload bytes plus a NUL at body_capacity-1 on truncation. Clamp so the
+   * NUL byte is never transmitted. */
+  size_t actual_body;
+  if ((size_t)body_len < body_capacity) {
+    actual_body = (size_t)body_len;
+  } else {
+    actual_body = body_capacity - 1U;
+  }
+  total = header_len + actual_body;
+
+  (void)sl_iostream_write(sl_iostream_recommended_console_stream, line, total);
+}
+
 /**
  * @brief Initialize the logging backend.
  *
- * This prototype is exported to the generic logging code via the
- * sl_log_api_backend structure below. The implementation brings up the
- * platform transport (for example, UART) and prepares it for log output.
- *
- * Synchronization: called from the logger initialization path (single-threaded)
+ * Sets the recommended console iostream as the default for log output.
  *
  * @return SL_STATUS_OK on success, an sl_status_t error code otherwise.
  */
@@ -205,173 +222,26 @@ sl_status_t sl_log_hal_backend_init(void)
 /**
  * @brief Write a formatted log event to the backend transport.
  *
- * Formatted iostream output is a direct-write path: caller provides a pointer
- * to one event and the backend formats that event into a text line and pushes
- * it immediately to the configured iostream.
+ * The formatted-output backend renders all string logs via
+ * sl_log_vprint_target_ex(); the ring-buffer-driven event/string write path
+ * is not exercised in this output mode (event logging is a no-op and string
+ * logging is redirected to SL_PRINT_FMT_*). The function exists to satisfy
+ * the @ref sl_log_api_backend_t contract.
  *
- * @param[in] buffer      Pointer to the event to format and send
- * @param[in] read_index  Unused for formatted direct-write path
- * @param[in] event_count Unused for formatted direct-write path (expected 1)
- *
- * @return SL_STATUS_OK on success or an sl_status_t error code from
- *         sl_iostream_write().
+ * @return SL_STATUS_NOT_SUPPORTED.
  */
 sl_status_t sl_log_hal_backend_write(sl_log_event_t *buffer, uint32_t read_index, uint32_t event_count)
 {
-  /* iostream formatted output path is direct-write only: caller passes a single event (&event). */
+  (void)buffer;
   (void)read_index;
-  sl_status_t status = SL_STATUS_OK;
-
-  /* event_count is always expected to be 1 for formatted output. */
-  if (event_count != 1) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  char line[LINE_MAX];
-  char *p = line;
-  char *line_end = line + sizeof(line) - SL_LOG_FORMATTED_IOSTREAM_RESERVED_TAIL;
-
-  /* Type: bit 0 — 0 = string log, 1 = event (level is not emitted). */
-  uint8_t type = buffer->flags & 0x01;
-
-#if (SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP || SL_LOG_FORMATTED_IOSTREAM_PREFIX_LOG_TYPE)
-  *p++ = '[';
-#if SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP
-  p = u32_to_hex8(p, buffer->timestamp);
-#endif
-#if (SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP && SL_LOG_FORMATTED_IOSTREAM_PREFIX_LOG_TYPE)
-  *p++ = '|';
-#endif
-#if SL_LOG_FORMATTED_IOSTREAM_PREFIX_LOG_TYPE
-  *p++ = (type ? 'E' : 'S');
-#endif
-  *p++ = ']';
-  *p++ = ' ';
-#endif
-
-  if (type)  /* Event type: event_id and args as 8-hex digits joined by '|'. */
-  {
-    uint32_t i;
-
-    p = u32_to_hex8(p, buffer->event_id);
-
-    for (i = 0; i < buffer->arg_count; i++) {
-      *p++ = '|';
-      p = u32_to_hex8(p, buffer->args[i]);
-    }
-  } else { /* String log: event_id is format string, expand specifiers with args. */
-    const char *fmt = (const char *)buffer->event_id;
-    uint32_t arg_index = 0;
-
-#if SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID
-    *p++ = '[';
-    p = u8_to_hex2(p, buffer->core_id);
-    *p++ = ']';
-    *p++ = ' ';
-#endif
-
-    while (*fmt && (p < line_end)) {
-
-      if (*fmt == '%') {
-        fmt++;
-
-        if (*fmt == '%') {
-          *p++ = '%';
-          fmt++;
-        }
-        else if (*fmt == 'd' && arg_index < buffer->arg_count) {
-          int32_t sval = (int32_t)buffer->args[arg_index];
-          uint32_t dec_len = u32_dec_len((sval < 0)
-                                         ? (0u - (uint32_t)sval)
-                                         : (uint32_t)sval);
-          if (sval < 0) {
-            dec_len++;
-          }
-          if (!buffer_has_space(p, line_end, dec_len)) {
-            break;
-          }
-          arg_index++;
-          if (sval < 0) {
-            *p++ = '-';
-            p = u32_to_dec(p, 0u - (uint32_t)sval);
-          } else {
-            p = u32_to_dec(p, (uint32_t)sval);
-          }
-          fmt++;
-        }
-        else if (*fmt == 'u' && arg_index < buffer->arg_count) {
-          if (!buffer_has_space(p, line_end, u32_dec_len(buffer->args[arg_index]))) {
-            break;
-          }
-          p = u32_to_dec(p, buffer->args[arg_index++]);
-          fmt++;
-        }
-        else if (*fmt == 'x' && arg_index < buffer->arg_count) {
-          if (!buffer_has_space(p, line_end, SL_LOG_FORMATTED_IOSTREAM_HEX8_LEN)) {
-            break;
-          }
-          p = u32_to_hex8(p, buffer->args[arg_index++]);
-          fmt++;
-        }
-        else if (*fmt == 'p' && arg_index < buffer->arg_count) {
-          if (!buffer_has_space(p, line_end, SL_LOG_FORMATTED_IOSTREAM_POINTER_LEN)) {
-            break;
-          }
-          *p++ = '0';
-          *p++ = 'x';
-          p = u32_to_hex8(p, buffer->args[arg_index++]);
-          fmt++;
-        }
-        else if (*fmt == 's' && arg_index < buffer->arg_count) {
-          const char *s = (const char *)(uintptr_t)buffer->args[arg_index++];
-          if (s != NULL) {
-            while (*s && (p < line_end)) {
-              *p++ = *s++;
-            }
-          }
-          fmt++;
-        }
-        else {
-          if (!buffer_has_space(p, line_end, (*fmt != '\0') ? 2U : 1U)) {
-            break;
-          }
-          *p++ = '%';
-          if (*fmt != '\0') {
-            *p++ = *fmt++;
-          }
-        }
-      }
-      else {
-        *p++ = *fmt++;
-      }
-    }
-  }
-
-#if SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID
-  if (type) {
-    *p++ = ' ';
-    *p++ = '[';
-    p = u8_to_hex2(p, buffer->core_id);
-    *p++ = ']';
-  }
-#endif
-
-  if (type) {
-    *p++ = '\r';
-    *p++ = '\n';
-  }
-
-  status = sl_iostream_write(sl_iostream_recommended_console_stream, line, p - line);
-  return status;
+  (void)event_count;
+  return SL_STATUS_NOT_SUPPORTED;
 }
 
 /**
  * @brief Deinitialize the logging backend.
  *
- * Tear down any resources allocated by sl_log_hal_backend_init(). After this
- * call the backend is considered inactive until reinitialized.
- *
- * @return SL_STATUS_OK on success or an sl_status_t error code.
+ * @return SL_STATUS_OK.
  */
 sl_status_t sl_log_hal_backend_deinit(void)
 {
@@ -387,10 +257,6 @@ sl_log_api_backend_t sl_log_api_backend = { .backend_init   = sl_log_hal_backend
 
 /**
  * @brief Return pointer to the backend API structure.
- *
- * Provides the generic logging core with the platform-specific backend
- * implementation (init/write/deinit). This function returns a pointer to the
- * statically allocated `sl_log_api_backend` structure.
  *
  * @return Pointer to the populated sl_log_api_backend_t structure.
  */

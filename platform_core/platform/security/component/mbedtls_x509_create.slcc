@@ -1,6 +1,6 @@
 id: mbedtls_x509_create
 package: platform_core
-label: X.509 Create certificates
+label: X.509 Create Certificates Core
 description: >-
   This component provides X.509 core for creating certificates.
 category: Platform|Security|Mbed TLS|Upper Layer

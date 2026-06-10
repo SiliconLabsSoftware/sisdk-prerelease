@@ -60,9 +60,6 @@ component:
   - id: cs_antenna
   - id: cs_acp
   - id: iostream_bgapi_trace
-  - id: iostream_dummy
-    instance:
-      - mock
   - id: simple_button
     instance:
       - btn0

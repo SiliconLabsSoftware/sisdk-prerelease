@@ -13,12 +13,11 @@ metadata:
 provides:
 - name: zw_toolchain_settings
 requires:
-- name: toolchain_lto
-  condition: [zw_release, toolchain]
+- name: toolchain_gcc_lto
+  condition: [zw_release, toolchain_gcc]
+- name: toolchain_llvm_lto
+  condition: [zw_release, toolchain_llvm]
 toolchain_settings:
-- option: gcc_compiler_option
-  value: "-s"
-  unless: [zw_nostrip, zw_debug]
 - option: gcc_compiler_option
   value: "-fmerge-all-constants"
 - option: gcc_compiler_option
@@ -45,8 +44,5 @@ toolchain_settings:
   value: "-fshort-enums"
 - option: llvm_compiler_option
   value: "-fmerge-all-constants"
-  # Linker flags
-- option: llvm_linker_option
-  value: "-s"
-  unless: [zw_nostrip, zw_debug]
+
 root_path: zwave

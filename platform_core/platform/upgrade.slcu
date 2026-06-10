@@ -72,5 +72,12 @@ upgrade:
         description: >
           When DMADRV was configured with round-robin channels (EMDRV_DMADRV_DMA_CH_PRIORITY < EMDRV_DMADRV_DMA_CH_COUNT),
           this upgrade adds the dma_manager_round_robin component so that round-robin scheduling is preserved.
+      - script: platform_core/platform/scripts/upgrade_component_toolchain_lto.lua
+        description: >
+          Projects that still list toolchain_gcc_lto in the .slcp pull in toolchain_gcc by default, including
+          when generating for IAR or LLVM, because that component requires the GCC toolchain. Use the
+          toolchain_lto component instead; it selects toolchain_gcc_lto, toolchain_llvm_lto, or
+          toolchain_iar_lto (no-op) from the project's toolchain. This upgrade removes toolchain_gcc_lto and
+          adds toolchain_lto when present after upgrading to simplicity_sdk 2026.6.0.
     configuration:
       - script: platform_core/platform/emdrv/component/upgrade_configuration_dmadrv.lua

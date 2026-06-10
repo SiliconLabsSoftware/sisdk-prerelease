@@ -331,6 +331,12 @@ const tVectorEntry __VECTOR_TABLE[TOTAL_INTERRUPTS] __VECTOR_TABLE_ATTRIBUTE = {
 #endif
 
 #if (defined (__START) && defined (__GNUC__)) || defined(__clang__)
+#if defined (__GNUC__) && !defined(__clang__)
+__attribute__((optimize("no-tree-loop-distribute-patterns")))
+#endif
+#if defined(__clang__)
+__attribute__((no_builtin("memcpy")))
+#endif
 void Copy_Table()
 {
 #if defined(__clang__)
@@ -389,7 +395,9 @@ void Zero_Table()
 #if defined (__GNUC__) && !defined(__clang__)
 __attribute__((optimize("no-tree-loop-distribute-patterns")))
 #endif
-
+#if defined(__clang__)
+__attribute__((no_builtin("memcpy")))
+#endif
 void CopyMemory(const uint32_t *from, uint32_t *to, uint32_t count)
 {
   while (count--) {

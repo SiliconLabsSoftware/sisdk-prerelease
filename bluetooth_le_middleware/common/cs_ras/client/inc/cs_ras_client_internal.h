@@ -47,7 +47,6 @@
 #define CS_RAS_CLIENT_INTER_EVENT_TIMEOUT_MS                     1000
 #define CS_RAS_CLIENT_GET_ON_DEMAND_RANGING_DATA_TIMEOUT_MS      5000
 
-
 // RAS client state
 typedef enum {
   CLIENT_STATE_NOT_INITIALIZED = 0,

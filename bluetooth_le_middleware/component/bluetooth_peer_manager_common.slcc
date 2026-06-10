@@ -3,7 +3,8 @@ package: bluetooth_le_middleware
 label: Bluetooth Peer Manager Common
 description: >
   Common module of Peer Manager for Bluetooth Low Energy.
-  Responsible for advertising and creating connections. The user can  set the advertising parameters.
+  Responsible for advertising and creating connections. The user can
+  set the advertising parameters.
 category: Bluetooth|Application|Miscellaneous
 metadata:
   sbom:

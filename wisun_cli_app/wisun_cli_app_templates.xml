@@ -5,7 +5,7 @@
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="wisun_soc_brcli.wisun_soc_brcli.slcp"/>
     <properties key="projectFilePaths" value="wisun_soc_brcli/wisun_soc_brcli.slcp"/>
-    <properties key="readmeFiles" value="wisun_soc_brcli/doc/readme.md"/>
+    <properties key="readmeFiles" value="wisun_soc_brcli/readme.md"/>
     <properties key="boardCompatibility" value="brd2705a brd4270a brd4270b brd4271a brd4272a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32fg25.* .*efr32fg28.* .*efr32zg28.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
@@ -20,11 +20,11 @@
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="wisun_soc_brcli_wifi.wisun_soc_brcli_wifi.slcp"/>
     <properties key="projectFilePaths" value="wisun_soc_brcli_wifi/wisun_soc_brcli_wifi.slcp"/>
-    <properties key="readmeFiles" value="wisun_soc_brcli/doc/readme.md"/>
+    <properties key="readmeFiles" value="wisun_soc_brcli/readme.md"/>
     <properties key="boardCompatibility" value="brd4270a brd4271a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32fg25.* .*efr32fg28.* .*efr32zg28.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
-    <properties key="toolchainCompatibility" value="gcc iar llvm segger"/>
+    <properties key="toolchainCompatibility" value="gcc segger"/>
     <properties key="category" value="Wi-SUN Examples"/>
     <properties key="quality" value="EVALUATION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
@@ -36,7 +36,7 @@
     <properties key="solutionReferenceId" value="wisun_soc_cli.wisun_soc_cli.slcp"/>
     <properties key="projectFilePaths" value="wisun_soc_cli/wisun_soc_cli.slcp"/>
     <properties key="projectFilePaths" value="wisun_soc_cli/wisun_soc_cli.slcp"/>
-    <properties key="readmeFiles" value="wisun_soc_cli/doc/readme.md"/>
+    <properties key="readmeFiles" value="wisun_soc_cli/readme.md"/>
     <properties key="boardCompatibility" value="brd2705a brd4270a brd4270b brd4271a brd4272a brd4276a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32fg25.* .*efr32fg28.* .*efr32zg28.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
@@ -51,7 +51,7 @@
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="wisun_soc_cli.wisun_soc_lfn_cli.slcp"/>
     <properties key="projectFilePaths" value="wisun_soc_cli/wisun_soc_lfn_cli.slcp"/>
-    <properties key="readmeFiles" value="wisun_soc_cli/doc/readme_lfn.md"/>
+    <properties key="readmeFiles" value="wisun_soc_cli/readme_lfn.md"/>
     <properties key="boardCompatibility" value="brd2705a brd4270a brd4270b brd4271a brd4272a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32fg25.* .*efr32fg28.* .*efr32zg28.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
@@ -66,7 +66,7 @@
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="wisun_dc_ciu.wisun_dc_ciu.slcp"/>
     <properties key="projectFilePaths" value="wisun_dc_ciu/wisun_dc_ciu.slcp"/>
-    <properties key="readmeFiles" value="wisun_dc_ciu/doc/readme.md"/>
+    <properties key="readmeFiles" value="wisun_dc_ciu/readme.md"/>
     <properties key="boardCompatibility" value="brd4204d brd4210a brd4263c brd4264c brd4270a brd4270b brd4271a brd4272a brd4276a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32fg23.* .*efr32zg23.* .*efr32fg25.* .*efr32fg28.* .*efr32zg28.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>

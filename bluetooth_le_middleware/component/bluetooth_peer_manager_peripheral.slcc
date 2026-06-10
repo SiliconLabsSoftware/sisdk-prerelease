@@ -2,7 +2,9 @@ id: bluetooth_peer_manager_peripheral
 package: bluetooth_le_middleware
 label: Bluetooth Peer Manager Peripheral
 description: >
-  Peripheral role of Peer Manager for Bluetooth Low Energy.  Responsible for advertising and creating connections. The user can set  the advertising parameters.
+  Peripheral role of Peer Manager for Bluetooth Low Energy.
+  Responsible for advertising and creating connections. The user can set
+  the advertising parameters.
 category: Bluetooth|Application|Miscellaneous
 metadata:
   sbom:

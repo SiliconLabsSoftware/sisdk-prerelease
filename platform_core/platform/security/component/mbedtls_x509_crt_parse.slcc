@@ -1,6 +1,6 @@
 id: mbedtls_x509_crt_parse
 package: platform_core
-label: X.509 CRT Parsing
+label: X.509 Parse Certificates
 description: >-
   This component provides support for parsing X.509 standard-
   based certificates in Mbed TLS.

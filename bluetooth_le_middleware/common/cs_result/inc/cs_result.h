@@ -70,7 +70,7 @@ SL_ENUM(cs_result_field_type_t) {
   CS_RESULT_FIELD_BIT_ERROR_RATE            ///< bit error rate for RTT only
 };
 
-/// Result sesion data
+/// Result session data
 typedef struct {
   uint8_t type_count;          ///< number of field types in the result buffer
   uint8_t last_type;           ///< last field type added to the result buffer
@@ -152,7 +152,6 @@ void cs_result_print(cs_result_field_type_t field_type,
  ******************************************************************************/
 void cs_result_print_bt_address(bool header,
                                 const bd_addr *bt_address);
-
 
 #ifdef __cplusplus
 }

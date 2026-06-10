@@ -35,20 +35,12 @@
 
 // <q SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP> Formatted iostream: prefix timestamp
 // <i> When set, each line begins with an 8-digit hexadecimal timestamp inside the leading bracket.
-// <i> May be combined with SL_LOG_FORMATTED_IOSTREAM_PREFIX_LOG_TYPE ([TIMESTAMP|TYPE] when both set).
 // <i> Default: 0
 #define SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP 0
 
-// <q SL_LOG_FORMATTED_IOSTREAM_PREFIX_LOG_TYPE> Formatted iostream: prefix log type
-// <i> When set, each line prefix includes S (string log) or E (event log) inside the leading bracket.
-// <i> May be combined with SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP ([TIMESTAMP|TYPE] when both set).
-// <i> Default: 0
-#define SL_LOG_FORMATTED_IOSTREAM_PREFIX_LOG_TYPE 0
-
 // <q SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID> Formatted iostream: emit core ID
-// <i> When set, emits a [CC] core identifier (2 hex digits) for the captive core
-// <i> that produced the log. String logs emit it before the payload; event logs
-// <i> append it after the payload. When cleared, the core ID is not emitted.
+// <i> When set, emits a [CC] core identifier (2 hex digits) for the host
+// <i> core that produced the log, before the formatted payload.
 // <i> Default: 0
 #define SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID 0
 

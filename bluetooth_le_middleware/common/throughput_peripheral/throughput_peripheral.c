@@ -360,7 +360,7 @@ static void throughput_peripheral_advertising_start(void)
                                          sl_bt_gap_phy_coded);
 
   app_assert( (sc == SL_STATUS_OK) || (sc == SL_STATUS_INVALID_PARAMETER),
-              "[E: 0x%04x] Failed to set CODED PHY for the advertistment\n",
+              "[E: 0x%04x] Failed to set CODED PHY for the advertisement\n",
               (int)sc);
 
   if (sc == SL_STATUS_OK) {

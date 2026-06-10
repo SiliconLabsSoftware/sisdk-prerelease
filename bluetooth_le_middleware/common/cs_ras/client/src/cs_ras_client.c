@@ -1358,16 +1358,16 @@ void cs_ras_client_messaging_segment_received(cs_ras_client_messaging_reception_
 }
 
 void cs_ras_client_rta_init(void)
-{  
+{
   sl_status_t sc;
-  app_rta_config_t config = {.requirement.runtime = false,
-                             .requirement.guard = true,
-                             .requirement.signal = false,
-                             .step = NULL,
-                             .priority = 0,
-                             .stack_size = 0,
-                             .error = on_runtime_error,
-                             .wait_for_guard = CS_RAS_CLIENT_WAIT_FOR_GUARD};
+  app_rta_config_t config = { .requirement.runtime = false,
+                              .requirement.guard = true,
+                              .requirement.signal = false,
+                              .step = NULL,
+                              .priority = 0,
+                              .stack_size = 0,
+                              .error = on_runtime_error,
+                              .wait_for_guard = CS_RAS_CLIENT_WAIT_FOR_GUARD };
   sc = app_rta_create_context(&config, &cs_ras_client_rta_context);
   if (sc != SL_STATUS_OK) {
     cs_ras_client_log_error("Failed to create rta context, sc=0x%lx" LOG_NL, sc);

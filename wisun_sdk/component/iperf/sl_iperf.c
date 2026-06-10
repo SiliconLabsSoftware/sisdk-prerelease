@@ -94,12 +94,8 @@ static osThreadId_t _iperf_thr = NULL;
 static const osThreadAttr_t _iperf_thr_attr = {
   .name        = "iPerfThread",
   .attr_bits   = osThreadDetached,
-  .cb_mem      = NULL,
-  .cb_size     = 0,
-  .stack_mem   = NULL,
   .stack_size  = (SL_IPERF_STACK_SIZE_WORD * sizeof(void *)) & 0xFFFFFFF8U,
-  .priority    = osPriorityNormal7,
-  .tz_module   = 0
+  .priority    = osPriorityNormal7
 };
 
 /// Test request message queue ID

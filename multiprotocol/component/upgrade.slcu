@@ -3,7 +3,7 @@ upgrade:
       id: multiprotocol
       version: 1.1.0
     configuration:
-      - script: multiprotocol/upgrade_mp_bltctrl_rtos_link_layer_task_stack_size.lua
+      - script: multiprotocol/component/scripts/upgrade_mp_bltctrl_rtos_link_layer_task_stack_size.lua
         description: >
           For OpenThread+BLE NCP projects and RCP blehci projects, ensure
           SL_BTCTRL_RTOS_LINK_LAYER_TASK_STACK_SIZE is at least 1100 to

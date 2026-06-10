@@ -93,6 +93,7 @@ tag:
   - prebuilt_demo
   - hardware:component:exp_header:spi
   - hwfilter:device:device_supports_zigbee
+  - hwfilter:ram:64k
   - hwfilter:board:hardware_board_has_spi
   - hwfilter:!board:zb_boards_spi_incompatible
   - hwfilter:!board:zb_boards_ncp_spi_incompatible

@@ -127,12 +127,8 @@ __STATIC_INLINE bool _is_ping_evt_error(const uint32_t flags);
 static const osThreadAttr_t _ping_task_attr = {
   .name       = "Ping",
   .attr_bits  = osThreadDetached,
-  .cb_mem     = NULL,
-  .cb_size    = 0,
-  .stack_mem  = NULL,
   .stack_size = app_stack_size_word_to_byte(SL_WISUN_PING_STACK_SIZE_WORD),
-  .priority   = osPriorityNormal2,
-  .tz_module  = 0
+  .priority   = osPriorityNormal2
 };
 
 /// Ping request message queue
@@ -364,7 +360,7 @@ sl_status_t sl_wisun_ping(const sockaddr_in6_t *const remote_addr,
   rem_ip_str = app_wisun_trace_util_get_ip_str(&req->remote_addr.sin6_addr);
   if (stat_hnd == NULL) {
     printf(  "\nPing statistics for %s:\n"
-           "  Packets: Sent = %"PRIu32", Received = %"PRIu32", Lost = %u, (%u%% loss)\n"
+           "  Packets: Sent = %"PRIu32", Received = %"PRIu32", Lost = %u, (%"PRIu32"%% loss)\n"
            "Approximate round trip times in milli-seconds:\n"
            "  Minimum = %"PRIu32"ms, Maximum = %"PRIu32"ms, Average = %"PRIu32"ms\n\n",
            rem_ip_str,

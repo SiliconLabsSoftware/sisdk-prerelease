@@ -19,7 +19,7 @@
 // <h>Wi-SUN Application Allocator Configuration
 
 // <o SL_WISUN_ALLOC_HEAP_SIZE> Allocator heap size <f.h>
-// <d> 20kB
+// <d> 20480
 #define SL_WISUN_ALLOC_HEAP_SIZE (20 * 1024)
 
 // </h>

@@ -13,7 +13,7 @@ conflicts:
   # An app cannot have both the WWAH Connectivity Manager and this component, as both seek to restore connectivity upon connection loss
 - name: zigbee_wwah_connectivity_manager
 config_file:
-- path: app/framework/plugin/zigbee-bdb-3dot1-rejoin-algorithm/zigbee-bdb-3dot1-rejoin-algorithm-config.h
+- path: app/framework/plugin/zigbee-bdb-3dot1-rejoin-algorithm/config/zigbee-bdb-3dot1-rejoin-algorithm-config.h
 source:
 - path: app/framework/plugin/zigbee-bdb-3dot1-rejoin-algorithm/zigbee-bdb-3dot1-rejoin-algorithm.c
 - path: app/framework/plugin/zigbee-bdb-3dot1-rejoin-algorithm/zigbee-bdb-3dot1-rejoin-algorithm-cli.c

@@ -80,7 +80,7 @@ bool throughput_central_allowlist_add(uint8_t *address);
 
 /**************************************************************************//**
  * Clear the allowlist
- * @return true if adding the clear was succesful
+ * @return true if adding the clear was successful
  *****************************************************************************/
 bool throughput_central_allowlist_clear(void);
 
