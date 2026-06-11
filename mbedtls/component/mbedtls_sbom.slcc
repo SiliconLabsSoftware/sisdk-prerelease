@@ -9,6 +9,7 @@ ui_hints:
 
 metadata:
   sbom:
+    id: mbedtls_sbom
     license: "Apache-2.0"
     upstream:
       name: "Mbed TLS"

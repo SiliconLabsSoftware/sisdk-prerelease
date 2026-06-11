@@ -100,16 +100,6 @@
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates CLI application to test the OpenThread stack on a Minimal Thread Device (MTD). </description>
 	</demo>
-	<demo name="brd4180a.demo.ot-ncp-ftd-cpc" label="OpenThread - NCP FTD with CPC">
-		<property key="blurb" value="OpenThread - NCP FTD with CPC" />
-		<property key="partCompatibility" value=".*efr32mg21a020f1024im32.*" />
-		<property key="boardCompatibility" value="brd4180a" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.0/openthread_app/demos/ot-ncp-ftd-cpc/ot-ncp-ftd-cpc-brd4180a.s37" />
-		<property key="readmeFiles" value="ot-ncp/cpc/README-OT-NCP.md" />
-		<property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread" />
-		<property key="quality" value="PRODUCTION" />
-		<description>Demonstrates OpenThread Full Thread Device (FTD) Network Co-Processor (NCP) application using CPC (Co-Processor Communication). </description>
-	</demo>
 	<demo name="brd4186c.demo.ot-ncp-ftd-cpc" label="OpenThread - NCP FTD with CPC">
 		<property key="blurb" value="OpenThread - NCP FTD with CPC" />
 		<property key="partCompatibility" value=".*efr32mg24b210f1536im48.*" />
@@ -149,16 +139,6 @@
 		<property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates OpenThread Full Thread Device (FTD) Network Co-Processor (NCP) application using CPC (Co-Processor Communication). </description>
-	</demo>
-	<demo name="brd4180a.demo.ot-ncp-mtd-cpc" label="OpenThread - NCP MTD with CPC">
-		<property key="blurb" value="OpenThread - NCP MTD with CPC" />
-		<property key="partCompatibility" value=".*efr32mg21a020f1024im32.*" />
-		<property key="boardCompatibility" value="brd4180a" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.0/openthread_app/demos/ot-ncp-mtd-cpc/ot-ncp-mtd-cpc-brd4180a.s37" />
-		<property key="readmeFiles" value="ot-ncp/cpc/README-OT-NCP.md" />
-		<property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread" />
-		<property key="quality" value="PRODUCTION" />
-		<description>Demonstrates OpenThread Minimal Thread Device (MTD) Network Co-Processor (NCP) application using CPC (Co-Processor Communication). </description>
 	</demo>
 	<demo name="brd4186c.demo.ot-ncp-mtd-cpc" label="OpenThread - NCP MTD with CPC">
 		<property key="blurb" value="OpenThread - NCP MTD with CPC" />

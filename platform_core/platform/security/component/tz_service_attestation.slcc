@@ -91,10 +91,4 @@ template_contribution:
 metadata:
   sbom:
     license: Zlib
-    upstream:
-      name: TrustedFirmware-M (TF-M)
-      version: v1.5
-      supplier: Trusted Firmware
-      url: https://review.trustedfirmware.org/TF-M/trusted-firmware-m.git
-      comment: Trusted Firmware for M profile Arm CPUs
 root_path: platform_core/platform/security

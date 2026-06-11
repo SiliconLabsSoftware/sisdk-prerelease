@@ -309,7 +309,7 @@ static sl_status_t import_direct_connect_pmk(void)
 {
   psa_key_attributes_t pmk_key_attributes = psa_key_attributes_init();
   psa_key_location_t pmk_location = PSA_KEY_LOCATION_LOCAL_STORAGE;
-  sl_status_t status;
+  sl_status_t status = SL_STATUS_OK;
   psa_status_t ret;
 
 #if defined(SEMAILBOX_PRESENT)
@@ -336,13 +336,10 @@ static sl_status_t import_direct_connect_pmk(void)
                        SL_WISUN_PMK_LEN,
                        &dc_pmk_key_id);
   if (ret != PSA_SUCCESS) {
+    printf("PMK import failed: psa_import_key: %" PRIu32 "\n", (uint32_t)ret);
     status = SL_STATUS_FAIL;
-    goto error_handler;
   }
 
-  status = sl_wisun_set_direct_connect_pmk(dc_pmk_key_id);
-
-error_handler:
   psa_reset_key_attributes(&pmk_key_attributes);
   return status;
 }
@@ -515,7 +512,6 @@ static void start_connect(void)
 
   status = import_direct_connect_pmk();
   if (status != SL_STATUS_OK) {
-    printf("PMK import failed\n");
     initiate_stop(STOP_REASON_CONNECT_FAILED);
     return;
   }

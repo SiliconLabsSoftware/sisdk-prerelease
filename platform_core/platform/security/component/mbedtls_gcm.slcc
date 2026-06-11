@@ -17,8 +17,7 @@ template_contribution:
 - name: mbedtls_config
   value: MBEDTLS_GCM_C
 documentation:
-  docset: mbed-tls
-  document: group-sl-crypto-gcm
+  url: https://mbed-tls.readthedocs.io/projects/api/en/development/api/file/gcm_8h/
 metadata:
   sbom:
     reference: mbedtls_sbom

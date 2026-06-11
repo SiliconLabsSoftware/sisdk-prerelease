@@ -96,16 +96,20 @@ configuration:
   - name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
     value: SL_IOSTREAM_EUSART_UART_FLOW_CTRL_CTS_RTS
     condition: [iostream_eusart]
-  - name: SL_CPC_RX_BUFFER_MAX_COUNT
-    value: 15
-  - name: SL_CPC_TX_QUEUE_ITEM_MAX_COUNT
-    value: 15
   - name: SL_OPENTHREAD_STACK_TASK_MEM_SIZE
     value: 7168
     condition: [toolchain_lto]
   - name: configTOTAL_HEAP_SIZE
     value: 16384
     condition: [toolchain_lto, freertos]
+  # default is 256, in CPC SL_CPC_RX_PAYLOAD_MAX_LENGTH * 
+  # SL_CPC_RX_BUFFER_MAX_COUNT memory is allocated.
+  - name: SL_CPC_RX_PAYLOAD_MAX_LENGTH
+    value: 1024
+  - name: SL_CPC_RX_BUFFER_MAX_COUNT
+    value: 15
+  - name: SL_CPC_TX_QUEUE_ITEM_MAX_COUNT
+    value: 15
 
 tag:
   - prebuilt_demo
@@ -113,6 +117,7 @@ tag:
   - hwfilter:!device:device_family_efr32mr21
   - toolchain:gcc
   - toolchain:llvm
+  - hwfilter:ram:128k
 
 readme:
   - path: ./README-OT-NCP.md

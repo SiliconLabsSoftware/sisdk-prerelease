@@ -484,7 +484,7 @@ static bool sendStoredDataToCpc(uint8_t      *aBuffer,
         ssize_t  sent  = aTransport.Send(aBuffer, chunk);
         if (sent < 0)
         {
-            if (sent == -EAGAIN || sent == -EWOULDBLOCK || sent == -EINTR)
+            if (sent == -EAGAIN || sent == -EWOULDBLOCK || sent == -EINVAL || sent == -EINTR)
             {
                 return true;
             }

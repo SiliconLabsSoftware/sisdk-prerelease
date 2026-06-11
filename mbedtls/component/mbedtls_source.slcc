@@ -305,18 +305,6 @@ source:
 - path: library/ssl_tls12_server.c
   condition:
   - mbedtls_ssl_proto_tls12
-- path: library/ssl_tls13_client.c
-  condition:
-  - mbedtls_ssl_proto_tls13
-- path: library/ssl_tls13_generic.c
-  condition:
-  - mbedtls_ssl_proto_tls13
-- path: library/ssl_tls13_keys.c
-  condition:
-  - mbedtls_ssl_proto_tls13
-- path: library/ssl_tls13_server.c
-  condition:
-  - mbedtls_ssl_proto_tls13
 - path: library/threading.c
 - path: library/version.c
   condition:

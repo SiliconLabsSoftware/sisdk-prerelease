@@ -117,6 +117,11 @@ public:
      */
     static NcpBase *GetNcpInstance(void);
 
+#if OPENTHREAD_FTD && OPENTHREAD_CONFIG_NAT64_BORDER_ROUTING_ENABLE && \
+    OPENTHREAD_CONFIG_NAT64_FAVORED_PREFIX_NOTIFICATION_ENABLE
+    void HandleNat64FavoredPrefixChanged(void);
+#endif
+
     /**
      * Returns an IID for the given instance
      *
@@ -632,6 +637,7 @@ protected:
     static void HandleTrelStateChanged(void *aContext);
     void        HandleTrelStateChanged(void);
 #endif
+
 #endif // OPENTHREAD_MTD || OPENTHREAD_FTD
 
 #if OPENTHREAD_CONFIG_MLE_LINK_METRICS_INITIATOR_ENABLE || OPENTHREAD_CONFIG_MLE_LINK_METRICS_SUBJECT_ENABLE

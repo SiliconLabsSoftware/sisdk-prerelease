@@ -197,6 +197,14 @@
 #define OPENTHREAD_CONFIG_BORDER_ROUTER_ENABLE      1
 #endif
 // </e>
+// <i>  Border Agent MeshCoP mDNS registration on NCP (disable for OTBR NCP mode).
+// <i>  When 0, the NCP stops registering only _meshcop._udp and _meshcop-e._udp via Spinel.
+// <i>  OTBR on the host publishes both on UDP-proxy ports instead (OTBR_BORDER_AGENT_MESHCOP_SERVICE).
+// <i>  Unaffected: border agent DTLS/ePSKc, Spinel MESHCOP_SERVICE_STATE/TXT, TREL (_trel._udp),
+// <i>  SRP advertising proxy, DNS-SD discovery proxy, and all other platform DNS-SD users.
+#ifndef OPENTHREAD_CONFIG_BORDER_AGENT_MESHCOP_SERVICE_ENABLE
+#define OPENTHREAD_CONFIG_BORDER_AGENT_MESHCOP_SERVICE_ENABLE 0
+#endif
 // <e>  Channel Manager
 #ifndef OPENTHREAD_CONFIG_CHANNEL_MANAGER_ENABLE
 #define OPENTHREAD_CONFIG_CHANNEL_MANAGER_ENABLE    0

@@ -827,6 +827,10 @@ uint32_t sl_zigbee_af_get_int24u(const uint8_t* message, uint16_t currentIndex, 
  */
 uint16_t sl_zigbee_af_get_int16u(const uint8_t* message, uint16_t currentIndex, uint16_t msgLen);
 /**
+ * @brief Extract an 8-bit integer from the message buffer.
+ */
+uint8_t sl_zigbee_af_get_int8u(const uint8_t* message, uint16_t currentIndex, uint16_t msgLen);
+/**
  * @brief Extract a ZCL string from the message buffer.
  */
 uint8_t* sl_zigbee_af_get_string(uint8_t* message, uint16_t currentIndex, uint16_t msgLen);
@@ -839,11 +843,6 @@ uint8_t* sl_zigbee_af_get_long_string(uint8_t* message, uint16_t currentIndex, u
  * in the given destination. Returns the number of bytes copied.
  */
 uint8_t sl_zigbee_af_get_date(uint8_t* message, uint16_t currentIndex, uint16_t msgLen, sl_zigbee_af_date_t *destination);
-
-/**
- * @brief Extract a single byte out of the message.
- */
-#define sl_zigbee_af_get_int8u(message, currentIndex, msgLen) message[currentIndex]
 
 /**
  * @brief Copy a uint8_t from variable into buffer.

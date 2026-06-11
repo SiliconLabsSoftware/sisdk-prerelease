@@ -15,9 +15,9 @@ requires:
   # TLS 1.2 requires a MBEDTLS_KEY_EXCHANGE_xxxx
 - name: mbedtls_key_exchange
 recommends:
-- name: psa_crypto_sha256
+- id: psa_crypto_sha256
   vendor: silabs
-- name: mbedtls_key_exchange_ecdhe_psk
+- id: mbedtls_key_exchange_ecdhe_psk
 
   vendor: silabs
 template_contribution:

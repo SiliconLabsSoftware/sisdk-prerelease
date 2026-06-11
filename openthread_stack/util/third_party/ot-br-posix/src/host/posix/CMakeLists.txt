@@ -35,6 +35,8 @@ add_library(otbr-posix
     entropy.cpp
     firewall_ingress.hpp
     firewall_ingress.cpp
+    nat64_tayga_host.hpp
+    nat64_tayga_host.cpp
     infra_if.hpp
     infra_if.cpp
     multicast_routing_manager.hpp

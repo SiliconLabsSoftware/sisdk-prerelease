@@ -5141,6 +5141,15 @@ enum
      */
     SPINEL_PROP_BORDER_ROUTER_NAT64_ENABLE = SPINEL_PROP_BORDER_ROUTER__BEGIN + 3,
 
+    /// Returns the favored NAT64 prefix from the Border Routing Manager.
+    /**
+     * Format: `6C` - Get and unsolicited updates (NCP to host).
+     *
+     * `6` : IPv6 prefix address
+     * `C` : Prefix length in bits
+     */
+    SPINEL_PROP_BORDER_ROUTER_NAT64_FAVORED_PREFIX = SPINEL_PROP_BORDER_ROUTER__BEGIN + 4,
+
     SPINEL_PROP_BORDER_ROUTER__END = 0x9A0,
 
     SPINEL_PROP_TREL__BEGIN = 0x9A0,

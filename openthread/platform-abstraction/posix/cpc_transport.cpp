@@ -195,14 +195,7 @@ void CpcTransport::Deinit(void)
 
 ssize_t CpcTransport::Send(const uint8_t *aFrame, uint16_t aLength)
 {
-    ssize_t send_result;
-    int     connection_status = CheckAndReconnect();
-
-    if (connection_status != 0)
-    {
-        send_result = static_cast<ssize_t>(connection_status);
-        goto exit;
-    }
+    ssize_t send_result = 0;
 
     if (IsEndpointOpen())
     {
@@ -215,14 +208,21 @@ ssize_t CpcTransport::Send(const uint8_t *aFrame, uint16_t aLength)
 
     if (send_result < 0)
     {
-        if (!((send_result == -EAGAIN) || (send_result == -EWOULDBLOCK) || (send_result == -EINTR)))
+        // If the write failed for a fatal reason, we queue a reconnect.
+        // If the errors are non-fatal instead, the caller is expected to retry:
+        // EAGAIN, EWOULDBLOCK, and EINVAL usually mean the endpoint is busy or out of buffers, so retry once there is
+        // room. EINTR just means the syscall was interrupted, so the caller can retry the write right away. Otherwise,
+        // the error is fatal and we queue a reconnect.
+        const bool needsReconnection = (send_result != -EAGAIN) && (send_result != -EWOULDBLOCK)
+                                       && (send_result != -EINVAL) && (send_result != -EINTR);
+
+        if (needsReconnection)
         {
             mSendDisconnectPending.store(1, std::memory_order_relaxed);
             RequestReconnect();
         }
     }
 
-exit:
     return send_result;
 }
 

@@ -42,6 +42,9 @@
 #include "common/code_utils.hpp"
 #include "common/logging.hpp"
 #include "host/posix/dnssd.hpp"
+#if OTBR_ENABLE_NAT64 && OTBR_ENABLE_NAT64_TAYGA
+#include "host/posix/nat64_tayga_host.hpp"
+#endif
 #include "lib/spinel/spinel.h"
 #include "lib/spinel/spinel_decoder.hpp"
 #include "lib/spinel/spinel_driver.hpp"
@@ -305,6 +308,10 @@ void NcpSpinel::SetTrelStateChangedCallback(const TrelStateChangedCallback &aCal
     {
         otbrLogWarning("Failed to set TREL user enable on NCP");
     }
+
+    // Pull current TREL state so the UDP proxy starts when the NCP already had TREL enabled
+    // (otbr-only restart without an NCP reset does not emit a TREL_STATE notify).
+    SuccessOrDie(GetProperty(SPINEL_PROP_TREL_STATE), "Failed to get TREL state");
 }
 
 otError NcpSpinel::SetTrelHostUdpPort(bool aEnabled, uint16_t aHostPort)
@@ -655,6 +662,17 @@ void NcpSpinel::HandleValueIs(spinel_prop_key_t aKey, const uint8_t *aBuffer, ui
 
         break;
     }
+
+#if OTBR_ENABLE_NAT64 && OTBR_ENABLE_NAT64_TAYGA
+    case SPINEL_PROP_BORDER_ROUTER_NAT64_FAVORED_PREFIX:
+    {
+        otIp6Prefix prefix;
+
+        SuccessOrExit(ParseNat64FavoredPrefix(aBuffer, aLength, prefix) == OT_ERROR_NONE, error = OTBR_ERROR_PARSE);
+        SyncNat64Tayga(prefix);
+        break;
+    }
+#endif
 
 #if OTBR_ENABLE_TREL
     case SPINEL_PROP_TREL_STATE:
@@ -1106,6 +1124,17 @@ otbrError NcpSpinel::HandleResponseForPropGet(spinel_tid_t      aTid,
     }
 #endif
 
+#if OTBR_ENABLE_NAT64 && OTBR_ENABLE_NAT64_TAYGA
+    case SPINEL_PROP_BORDER_ROUTER_NAT64_FAVORED_PREFIX:
+    {
+        otIp6Prefix prefix;
+
+        SuccessOrExit(ParseNat64FavoredPrefix(aData, aLength, prefix) == OT_ERROR_NONE, error = OTBR_ERROR_PARSE);
+        SyncNat64Tayga(prefix);
+        break;
+    }
+#endif
+
     default:
         VerifyOrExit(aKey == mWaitingKeyTable[aTid], error = OTBR_ERROR_INVALID_STATE);
         break;
@@ -1503,6 +1532,28 @@ otError NcpSpinel::ParseStreamCliOutput(const uint8_t *aBuf, uint16_t aLen, cons
 exit:
     return error;
 }
+
+#if OTBR_ENABLE_NAT64 && OTBR_ENABLE_NAT64_TAYGA
+otError NcpSpinel::ParseNat64FavoredPrefix(const uint8_t *aBuf, uint16_t aLen, otIp6Prefix &aPrefix)
+{
+    otError             error = OT_ERROR_NONE;
+    const otIp6Address *addr;
+    uint8_t             prefixLength;
+    ot::Spinel::Decoder decoder;
+
+    VerifyOrExit(aBuf != nullptr, error = OT_ERROR_INVALID_ARGS);
+
+    decoder.Init(aBuf, aLen);
+    SuccessOrExit(error = decoder.ReadIp6Address(addr));
+    SuccessOrExit(error = decoder.ReadUint8(prefixLength));
+
+    memcpy(&aPrefix.mPrefix, addr, sizeof(otIp6Address));
+    aPrefix.mLength = prefixLength;
+
+exit:
+    return error;
+}
+#endif // OTBR_ENABLE_NAT64 && OTBR_ENABLE_NAT64_TAYGA
 
 otError NcpSpinel::ParseOperationalDatasetTlvs(const uint8_t            *aBuf,
                                                uint16_t                  aLen,

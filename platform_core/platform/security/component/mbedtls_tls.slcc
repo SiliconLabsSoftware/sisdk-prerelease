@@ -57,8 +57,7 @@ template_contribution:
 - name: mbedtls_config
   value: MBEDTLS_SSL_KEEP_PEER_CERTIFICATE
 documentation:
-  docset: mbed-tls
-  document: group-ssltls-communication-module
+  url: https://mbed-tls.readthedocs.io/projects/api/en/development/api/file/mbedtls__config_8h/#c.MBEDTLS_SSL_CLI_C
 metadata:
   sbom:
     reference: mbedtls_sbom

@@ -210,8 +210,8 @@ otError CpcInterfaceImpl::SendFrame(const uint8_t *aFrame, uint16_t aLength)
     if (n != static_cast<ssize_t>(aLength))
     {
         VerifyOrDie(n < 0, OT_EXIT_FAILURE);
-        VerifyOrExit(((n != -EAGAIN) && (n != -EWOULDBLOCK)), error = OT_ERROR_NO_BUFS);
-        VerifyOrExit(!mTransport.CheckAndClearDisconnectStatus(), error = OT_ERROR_NONE);
+        VerifyOrExit(((n != -EAGAIN) && (n != -EWOULDBLOCK) && (n != -EINVAL)), error = OT_ERROR_NO_BUFS);
+        VerifyOrExit(!mTransport.CheckAndClearDisconnectStatus(), error = OT_ERROR_FAILED);
     }
 
 exit:

@@ -3,7 +3,7 @@ label: LLVM Toolchain
 package: platform_core
 description: Toolchain profile for building with LLVM instead of GCC
 category: Platform|Toolchain
-quality: experimental
+quality: production
 tag:
 - toolchain:id:llvm
 metadata:

@@ -558,6 +558,15 @@ void Application::DeinitNcpMode(void)
     mBorderAgentUdpProxy.Stop();
 #endif
 #if OTBR_ENABLE_TREL
+    {
+        otbr::Host::NcpHost &ncpHost = static_cast<otbr::Host::NcpHost &>(mHost);
+        otError              err     = ncpHost.SetTrelHostUdpPort(false, 0);
+
+        if (err != OT_ERROR_NONE)
+        {
+            otbrLogWarning("Failed to clear TREL host UDP port on NCP: %s", otThreadErrorToString(err));
+        }
+    }
     mTrelUdpProxy.Stop();
 #endif
 #if OTBR_ENABLE_DNSSD_PLAT

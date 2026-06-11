@@ -1050,7 +1050,7 @@ uint16_t sli_zigbee_af_gp_copy_additional_info_block_array_to_structure(uint8_t 
   totalLengthOfAddInfoBlockCnt = additionalInfoBlockOut->totalLengthOfAddInfoBlock;
 
   if ((additionalInfoBlockOut->totalLengthOfAddInfoBlock) != 0x00) {
-    optionSelector = sl_zigbee_af_get_int8u(additionalInfoBlockInPtr, 0, totalLengthOfAddInfoBlock);
+    optionSelector = sl_zigbee_af_get_int8u(additionalInfoBlockInPtr, 0, totalLengthOfAddInfoBlockCnt);
     additionalInfoBlockInPtr += sizeof(uint8_t);
     totalLengthOfAddInfoBlockCnt -= 1;
 

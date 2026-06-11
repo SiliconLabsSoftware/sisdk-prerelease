@@ -612,6 +612,9 @@ private:
                                   const otIp6Address *&aPeerAddr,
                                   uint16_t            &aPeerPort,
                                   uint16_t            &aLocalPort);
+#if OTBR_ENABLE_NAT64 && OTBR_ENABLE_NAT64_TAYGA
+    otError ParseNat64FavoredPrefix(const uint8_t *aBuf, uint16_t aLen, otIp6Prefix &aPrefix);
+#endif
     otError SendDnssdResult(otPlatDnssdRequestId aRequestId, const std::vector<uint8_t> &aCallbackData, otError aError);
 #if OTBR_ENABLE_DNSSD_PLAT
     otError  SendDnssdBrowseResult(const otPlatDnssdBrowseResult &aResult, const std::vector<uint8_t> &aCallbackData);

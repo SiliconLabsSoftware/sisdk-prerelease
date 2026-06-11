@@ -47,6 +47,9 @@
 #include <openthread/dataset_ftd.h>
 #include <openthread/diag.h>
 #include <openthread/icmp6.h>
+#if OPENTHREAD_CONFIG_NAT64_BORDER_ROUTING_ENABLE
+#include <openthread/border_routing.h>
+#endif
 #if OPENTHREAD_CONFIG_NAT64_BORDER_ROUTING_ENABLE || OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE
 #include <openthread/nat64.h>
 #endif
@@ -1708,6 +1711,30 @@ exit:
 }
 #endif // OPENTHREAD_CONFIG_BORDER_ROUTING_ENABLE && (OPENTHREAD_CONFIG_NAT64_BORDER_ROUTING_ENABLE ||
        // OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE)
+
+#if OPENTHREAD_CONFIG_NAT64_BORDER_ROUTING_ENABLE && OPENTHREAD_CONFIG_NAT64_FAVORED_PREFIX_NOTIFICATION_ENABLE
+void NcpBase::HandleNat64FavoredPrefixChanged(void)
+{
+    mChangedPropsSet.AddProperty(SPINEL_PROP_BORDER_ROUTER_NAT64_FAVORED_PREFIX);
+    mUpdateChangedPropsTask.Post();
+}
+#endif
+
+#if OPENTHREAD_CONFIG_NAT64_BORDER_ROUTING_ENABLE
+template <> otError NcpBase::HandlePropertyGet<SPINEL_PROP_BORDER_ROUTER_NAT64_FAVORED_PREFIX>(void)
+{
+    otError           error = OT_ERROR_NONE;
+    otIp6Prefix       prefix;
+    otRoutePreference preference;
+
+    SuccessOrExit(error = otBorderRoutingGetFavoredNat64Prefix(mInstance, &prefix, &preference));
+    SuccessOrExit(error = mEncoder.WriteIp6Address(prefix.mPrefix));
+    SuccessOrExit(error = mEncoder.WriteUint8(prefix.mLength));
+
+exit:
+    return error;
+}
+#endif
 
 #if OPENTHREAD_CONFIG_NCP_DNSSD_ENABLE && OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE
 

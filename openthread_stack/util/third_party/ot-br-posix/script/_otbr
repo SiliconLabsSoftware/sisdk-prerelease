@@ -169,6 +169,11 @@ otbr_install()
             "-DOTBR_NAT64=ON"
             "-DOT_POSIX_NAT64_CIDR=${NAT64_DYNAMIC_POOL:-192.168.255.0/24}"
         )
+    elif [[ ${NAT64_SERVICE} == "tayga" ]]; then
+        otbr_options+=(
+            "-DOTBR_NAT64=ON"
+            "-DOTBR_NAT64_TAYGA=ON"
+        )
     fi
 
     # OT Discovery Proxy depends on Border Routing. Disable it if Border Routing is disabled or if explicitly disabled.

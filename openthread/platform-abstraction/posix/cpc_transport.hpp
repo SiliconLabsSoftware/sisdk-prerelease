@@ -109,10 +109,10 @@ public:
      * Non-blocking `cpc_write_endpoint`. Per `sl_cpc.h`, a successful write returns the full requested length
      * (partial writes are not possible; `0` is not a valid success return).
      *
-     * Runs `CheckAndReconnect()` first so a pending reconnect is applied before the write.
+     * Pending reconnects are applied from `Process()` / `ReadEndpoint()`.
      *
-     * On errors other than `-EAGAIN`, `-EWOULDBLOCK`, and `-EINTR`, queues `RequestReconnect()` and latches
-     * disconnect status until `CheckAndClearDisconnectStatus()` clears it.
+     * On errors other than `-EAGAIN`, `-EWOULDBLOCK`, `-EINVAL`, and `-EINTR`, queues `RequestReconnect()` and
+     * latches disconnect status until `CheckAndClearDisconnectStatus()` clears it.
      */
     ssize_t Send(const uint8_t *aFrame, uint16_t aLength);
 

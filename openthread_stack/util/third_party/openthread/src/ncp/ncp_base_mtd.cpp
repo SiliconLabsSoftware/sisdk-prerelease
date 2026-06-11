@@ -4243,11 +4243,19 @@ exit:
 template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_TREL_USER_ENABLE>(void)
 {
     bool    enabled;
+    bool    wasEnabled;
     otError error = OT_ERROR_NONE;
 
     SuccessOrExit(error = mDecoder.ReadBool(enabled));
 
+    wasEnabled = otTrelIsEnabled(mInstance);
     otTrelSetEnabled(mInstance, enabled);
+
+    // Re-notify when TREL was already enabled so a reconnecting host can sync without toggling TREL.
+    if (enabled && wasEnabled)
+    {
+        HandleTrelStateChanged();
+    }
 
 exit:
     return error;

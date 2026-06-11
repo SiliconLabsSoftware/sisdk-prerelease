@@ -25,8 +25,7 @@ recommends:
 - id: mbedtls_entropy_nvseed
   vendor: silabs
 documentation:
-  docset: mbed-tls
-  document: group-rng-module
+  url: https://mbed-tls.readthedocs.io/projects/api/en/development/api/group/group__rng__module/
 metadata:
   sbom:
     reference: mbedtls_sbom

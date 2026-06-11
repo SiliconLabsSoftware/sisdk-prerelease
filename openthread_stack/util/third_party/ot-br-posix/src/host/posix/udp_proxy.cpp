@@ -93,6 +93,7 @@ void UdpProxy::Start(uint16_t aPort)
 {
     VerifyOrExit(!IsStarted());
 
+    mPeerLocalAddrs.clear();
     BindToEphemeralPort();
     mThreadPort = aPort;
 
@@ -105,6 +106,7 @@ void UdpProxy::Stop(void)
     VerifyOrExit(IsStarted());
 
     mHostPort = 0;
+    mPeerLocalAddrs.clear();
 
     if (mFd >= 0)
     {
@@ -200,6 +202,8 @@ void UdpProxy::SendToPeer(const uint8_t      *aUdpPayload,
     if (mInfraIfIndex != 0)
     {
         struct in6_pktinfo *packetInfo;
+        otIp6Address        localAddr = GetPeerLocalAddr(aPeerAddr, aPeerPort);
+        struct in6_addr     localIn6Addr;
 
         cmsg->cmsg_level = IPPROTO_IPV6;
         cmsg->cmsg_type  = IPV6_PKTINFO;
@@ -207,6 +211,11 @@ void UdpProxy::SendToPeer(const uint8_t      *aUdpPayload,
         packetInfo       = reinterpret_cast<struct in6_pktinfo *>(CMSG_DATA(cmsg));
         memset(packetInfo, 0, sizeof(*packetInfo));
         packetInfo->ipi6_ifindex = mInfraIfIndex;
+        memcpy(&localIn6Addr, &localAddr, sizeof(localIn6Addr));
+        if (!IN6_IS_ADDR_UNSPECIFIED(&localIn6Addr))
+        {
+            packetInfo->ipi6_addr = localIn6Addr;
+        }
 
         controlLength += CMSG_SPACE(sizeof(*packetInfo));
         cmsg = CMSG_NXTHDR(&msg, cmsg);
@@ -314,8 +323,49 @@ otbrError UdpProxy::ReceivePacket(uint8_t      *aPayload,
     aRemotePort = ntohs(peerAddr.sin6_port);
     memcpy(&aRemoteAddr, &peerAddr.sin6_addr, sizeof(otIp6Address));
 
+    for (struct cmsghdr *cmh = CMSG_FIRSTHDR(&msg); cmh != nullptr; cmh = CMSG_NXTHDR(&msg, cmh))
+    {
+        if (cmh->cmsg_level == IPPROTO_IPV6 && cmh->cmsg_type == IPV6_PKTINFO &&
+            cmh->cmsg_len == CMSG_LEN(sizeof(struct in6_pktinfo)))
+        {
+            const struct in6_pktinfo *pktInfo = reinterpret_cast<const struct in6_pktinfo *>(CMSG_DATA(cmh));
+            otIp6Address              localAddr;
+
+            memcpy(&localAddr, &pktInfo->ipi6_addr, sizeof(localAddr));
+            UpdatePeerLocalAddr(aRemoteAddr, aRemotePort, localAddr);
+            break;
+        }
+    }
+
 exit:
     return rval > 0 ? OTBR_ERROR_NONE : OTBR_ERROR_ERRNO;
+}
+
+void UdpProxy::UpdatePeerLocalAddr(const otIp6Address &aPeerAddr, uint16_t aPeerPort, const otIp6Address &aLocalAddr)
+{
+    struct in6_addr localIn6Addr;
+
+    memcpy(&localIn6Addr, &aLocalAddr, sizeof(localIn6Addr));
+    VerifyOrExit(!IN6_IS_ADDR_UNSPECIFIED(&localIn6Addr));
+
+    mPeerLocalAddrs[{aPeerAddr, aPeerPort}] = aLocalAddr;
+
+exit:
+    return;
+}
+
+otIp6Address UdpProxy::GetPeerLocalAddr(const otIp6Address &aPeerAddr, uint16_t aPeerPort) const
+{
+    otIp6Address localAddr = {};
+
+    auto it = mPeerLocalAddrs.find({aPeerAddr, aPeerPort});
+
+    if (it != mPeerLocalAddrs.end())
+    {
+        localAddr = it->second;
+    }
+
+    return localAddr;
 }
 
 } // namespace otbr
