@@ -65,3 +65,5 @@ This example brings up the DCDC boost regulator on a bare-metal application and 
 You are encouraged to report issues and get help from the community:
 
 - [Silicon Labs Community](https://www.silabs.com/community)
+
+> Note: Before running the example, make sure the DCDC feature macro in the device header is set to BOOST. Set `_SILICON_LABS_DCDC_FEATURE` to `_SILICON_LABS_DCDC_FEATURE_DCDC_BOOST` in the target device header file, for example [`efr32bg2bb312f1016im48.h`].

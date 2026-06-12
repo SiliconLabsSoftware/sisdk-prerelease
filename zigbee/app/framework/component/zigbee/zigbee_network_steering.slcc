@@ -35,8 +35,10 @@ template_contribution:
     function_name: sli_zigbee_af_network_steering_stack_status_callback
 - name: zigbee_af_callback
   value:
-    callback_type: event_init
+      # This init routine invokes a EZSP exchange (sl_zigbee_clear_binding_table_on_leave), so it must run after sli_zigbee_af_init_cb, where the host first configures the NCP over EZSP
+    callback_type: init_done
     function_name: sli_zigbee_af_network_steering_init_callback
+    priority: 500
 - name: cli_group
   value:
     group: plugin
