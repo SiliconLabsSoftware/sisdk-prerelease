@@ -164,9 +164,9 @@ documentation:
   version: 4.3.0
 - docset: openthread
   version: 3.1.0
-- docset: platform_nwp_siwx91x
-  version: 4.1.0
 - docset: platform_siwx91x
+  version: 4.1.0
+- docset: platform_nwp_siwx91x
   version: 4.1.0
 - docset: rail
   version: 3.1.0
