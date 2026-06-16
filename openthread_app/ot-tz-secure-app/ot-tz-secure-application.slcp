@@ -16,7 +16,6 @@ filter:
     value: ["Advanced"]
 
 component:
-  - id: watchdog_manager
   - id: tz_secure_key_library_s
 
 provides:

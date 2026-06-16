@@ -7,7 +7,6 @@ description: This is a Zigbee 4.0 light application using NVM3 as the persistent
 author: Silicon Laboratories, Inc.
 component:
   - id: sl_main
-  - id: watchdog_manager
   - id: cli
     instance:
       - example

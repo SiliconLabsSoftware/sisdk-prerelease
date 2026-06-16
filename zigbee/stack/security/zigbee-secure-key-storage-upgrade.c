@@ -42,6 +42,8 @@
 #include "stack/internal/inc/internal-defs-patch.h"
 
 extern uint8_t sli_zigbee_gp_proxy_table_size;
+extern void sli_zigbee_gp_load_proxy_table_entry_key(uint8_t index);
+extern void sli_zigbee_gp_load_sink_table_entry_key(uint8_t index);
 
 extern void sli_zigbee_stack_token_primitive(bool tokenRead,
                                              void* tokenStruct,
@@ -156,6 +158,8 @@ sl_status_t zb_sec_man_upgrade_gp_proxy_table(void)
     if (tok_st != SL_STATUS_OK) {
       return tok_st;
     }
+    // Refresh the in-memory entry key from PSA now that migration is complete.
+    sli_zigbee_gp_load_proxy_table_entry_key(i);
     keys_passed[KEYS_STATUS_GP]++;
   }
   return SL_STATUS_OK;
@@ -196,6 +200,8 @@ sl_status_t zb_sec_man_upgrade_gp_sink_table(void)
     if (tok_st != SL_STATUS_OK) {
       return tok_st;
     }
+    // Refresh the in-memory entry key from PSA now that migration is complete.
+    sli_zigbee_gp_load_sink_table_entry_key(i);
     keys_passed[KEYS_STATUS_GP]++;
   }
   return SL_STATUS_OK;

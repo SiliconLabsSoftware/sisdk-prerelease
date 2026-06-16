@@ -6,7 +6,6 @@ quality: production
 description: This is a Zigbee 3.0 Zigbee Unified Test Harness (ZUTH) dongle application.
 component:
   - id: sl_main
-  - id: watchdog_manager
   - id: cli
     instance:
       - example

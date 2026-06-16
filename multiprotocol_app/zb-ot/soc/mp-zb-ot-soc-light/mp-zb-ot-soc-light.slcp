@@ -7,7 +7,6 @@ description: Demonstrates a CMP (Concurrent Multiprotocol) Zigbee 3.0 Light and 
 
 component:
   - id: sl_main
-  - id: watchdog_manager
   - id: cli
     instance:
       - example

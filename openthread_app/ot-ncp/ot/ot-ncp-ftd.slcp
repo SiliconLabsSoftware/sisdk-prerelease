@@ -8,7 +8,6 @@ quality: production
 
 component:
   - id: sl_main
-  - id: watchdog_manager
   - id: ot_stack_ftd
   - id: ot_ncp_source
   - id: ot_crash_handler

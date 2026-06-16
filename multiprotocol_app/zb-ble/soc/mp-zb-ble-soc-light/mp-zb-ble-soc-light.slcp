@@ -8,7 +8,6 @@ author: Silicon Laboratories, Inc.
 
 component:
   - id: sl_main
-  - id: watchdog_manager
   - id: cli
     instance:
       - example

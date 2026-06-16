@@ -792,6 +792,7 @@ void sl_zigbee_af_network_steering_autostart(void)
 #ifdef ENABLE_STEERING_AUTOSTART
   sl_status_t status = sl_zigbee_af_network_steering_start();
   sl_zigbee_af_core_println("%s network %s: 0x%02X", "Join", "start", status);
+  UNUSED_VAR(status);
 #else
   sl_zigbee_af_core_println("Network steering: auto-start disabled by configuration");
 #endif
