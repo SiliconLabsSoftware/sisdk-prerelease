@@ -11,11 +11,11 @@ component_path:
 - path: bluetooth_common/component
 - path: bluetooth_mesh_srtest/component
 - path: bluetooth_le_controller_xg2b/component
+- path: bluetooth_le_middleware/component
 - path: bluetooth_le_controller/component
 - path: bluetooth_zvd/component
 - path: bluetooth_le_host/component
 - path: bluetooth_mesh/component
-- path: bluetooth_le_middleware/component
 - path: bluetooth_mesh_middleware/component
 - path: boards_internal/hardware/kit/component
 - path: boards_internal/hardware/kit/common/component
@@ -59,9 +59,9 @@ component_path:
 - path: micriumos/platform/micrium_os/component
 - path: multiprotocol/component
 - path: multiprotocol/mac/component
+- path: openthread_internal/component/internal
 - path: openthread/component
 - path: openthread_stack/component_stack
-- path: openthread_internal/component/internal
 - path: platform_riscv_internal/platform/rvlib/component
 - path: platform_riscv_internal/platform/service/component
 - path: platform_riscv_internal/platform/common/component
@@ -164,9 +164,9 @@ documentation:
   version: 4.3.0
 - docset: openthread
   version: 3.1.0
-- docset: platform_siwx91x
-  version: 4.1.0
 - docset: platform_nwp_siwx91x
+  version: 4.1.0
+- docset: platform_siwx91x
   version: 4.1.0
 - docset: rail
   version: 3.1.0
@@ -185,9 +185,9 @@ documentation:
 - docset: zigbee
   version: 9.1.0
 upgrade_manifest:
+- path: bluetooth_le_middleware/upgrade.slcu
 - path: bluetooth_le_host/component/upgrade.slcu
 - path: bluetooth_mesh/component/upgrade.slcu
-- path: bluetooth_le_middleware/upgrade.slcu
 - path: bluetooth_mesh_middleware/upgrade.slcu
 - path: connect_stack/component/upgrade.slcu
 - path: cpc/upgrade.slcu

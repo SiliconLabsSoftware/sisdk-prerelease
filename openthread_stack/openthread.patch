@@ -1350,10 +1350,28 @@ index 8a9d5f0c830833135108a29f10661aea22effadf..7b32145e8667cc22e36ae4ce6e7a16ff
  
      SPINEL_PROP_NEST_STREAM_MFG = SPINEL_PROP_NEST__BEGIN + 0,
 diff --git a/src/lib/spinel/spinel_prop_codec.cpp b/src/lib/spinel/spinel_prop_codec.cpp
-index 9751d3030f973c92f1f774a6a60ef8c78b3b150f..7619fde52ab61790401656a7674cd8357a0b22fa 100644
+index 9751d3030f973c92f1f774a6a60ef8c78b3b150f..2efab7336f04877204afd5ec64c9ba510ca57c6c 100644
 --- a/src/lib/spinel/spinel_prop_codec.cpp
 +++ b/src/lib/spinel/spinel_prop_codec.cpp
-@@ -377,5 +377,159 @@ exit:
+@@ -124,7 +124,16 @@ otError DecodeDnssdHost(Decoder              &aDecoder,
+ 
+     SuccessOrExit(error = aDecoder.ReadUtf8(aHost.mHostName));
+     SuccessOrExit(error = aDecoder.ReadUint16(aHost.mAddressesLength));
+-    SuccessOrExit(error = aDecoder.ReadIp6Address(aHost.mAddresses));
++    aHost.mAddresses = nullptr;
++    for (uint16_t i = 0; i < aHost.mAddressesLength; i++)
++    {
++        const otIp6Address *addrPtr;
++        SuccessOrExit(error = aDecoder.ReadIp6Address(addrPtr));
++        if (i == 0)
++        {
++            aHost.mAddresses = addrPtr;
++        }
++    }
+     SuccessOrExit(error = aDecoder.ReadUint32(aRequestId));
+     SuccessOrExit(error = aDecoder.ReadData(aCallbackData, aCallbackDataLen));
+ 
+@@ -377,5 +386,159 @@ exit:
      return error;
  }
  

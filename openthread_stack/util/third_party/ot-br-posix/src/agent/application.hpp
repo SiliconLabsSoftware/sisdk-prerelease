@@ -298,6 +298,7 @@ private:
 #if OTBR_ENABLE_BACKBONE_ROUTER
     std::unique_ptr<BackboneRouter::BackboneAgent> mBackboneAgent;
     std::unique_ptr<MulticastRoutingManager>       mMulticastRoutingManager;
+    UdpProxy                                       mBackboneTmfUdpProxy;
 #endif
 #if OTBR_ENABLE_SRP_ADVERTISING_PROXY
     std::unique_ptr<AdvertisingProxy> mAdvertisingProxy;

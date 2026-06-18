@@ -89,12 +89,12 @@ void UdpProxy::SetInfraInterface(const char *aInfraIfName)
     }
 }
 
-void UdpProxy::Start(uint16_t aPort)
+void UdpProxy::Start(uint16_t aPort, uint16_t aHostPort)
 {
     VerifyOrExit(!IsStarted());
 
     mPeerLocalAddrs.clear();
-    BindToEphemeralPort();
+    BindToPort(aHostPort);
     mThreadPort = aPort;
 
 exit:
@@ -249,12 +249,26 @@ void UdpProxy::SendToPeer(const uint8_t      *aUdpPayload,
     }
 }
 
-otbrError UdpProxy::BindToEphemeralPort(void)
+otbrError UdpProxy::BindToPort(uint16_t aHostPort)
 {
     otbrError error = OTBR_ERROR_NONE;
     mFd             = SocketWithCloseExec(AF_INET6, SOCK_DGRAM, IPPROTO_UDP, kSocketNonBlock);
 
     VerifyOrExit(mFd != 0, error = OTBR_ERROR_ERRNO);
+
+    if (mInfraIfIndex != 0)
+    {
+#ifdef __linux__
+        char ifName[IF_NAMESIZE];
+
+        VerifyOrExit(if_indextoname(mInfraIfIndex, ifName) != nullptr, error = OTBR_ERROR_ERRNO);
+        VerifyOrExit(0 == setsockopt(mFd, SOL_SOCKET, SO_BINDTODEVICE, ifName, strlen(ifName)),
+                     error = OTBR_ERROR_ERRNO);
+#else
+        VerifyOrExit(0 == setsockopt(mFd, IPPROTO_IPV6, IPV6_BOUND_IF, &mInfraIfIndex, sizeof(mInfraIfIndex)),
+                     error = OTBR_ERROR_ERRNO);
+#endif
+    }
 
     {
         struct sockaddr_in6 sin6;
@@ -262,7 +276,7 @@ otbrError UdpProxy::BindToEphemeralPort(void)
         memset(&sin6, 0, sizeof(sin6));
         sin6.sin6_family = AF_INET6;
         sin6.sin6_addr   = in6addr_any;
-        sin6.sin6_port   = 0;
+        sin6.sin6_port   = htons(aHostPort);
 
         VerifyOrExit(0 == bind(mFd, reinterpret_cast<struct sockaddr *>(&sin6), sizeof(sin6)),
                      error = OTBR_ERROR_ERRNO);
@@ -274,9 +288,16 @@ otbrError UdpProxy::BindToEphemeralPort(void)
         VerifyOrExit(0 == setsockopt(mFd, IPPROTO_IPV6, IPV6_RECVPKTINFO, &on, sizeof(on)), error = OTBR_ERROR_ERRNO);
     }
 
+    if (aHostPort != 0)
+    {
+        mHostPort = aHostPort;
+        otbrLogInfo("Bound to port: %u", mHostPort);
+    }
+    else
     {
         struct sockaddr_in bound_addr;
         socklen_t          addr_len = sizeof(bound_addr);
+
         getsockname(mFd, (struct sockaddr *)&bound_addr, &addr_len);
 
         mHostPort = ntohs(bound_addr.sin_port);
@@ -284,7 +305,7 @@ otbrError UdpProxy::BindToEphemeralPort(void)
     }
 
 exit:
-    otbrLogResult(error, "Bind to ephemeral port");
+    otbrLogResult(error, "Bind to port");
     if (error != OTBR_ERROR_NONE)
     {
         Stop();

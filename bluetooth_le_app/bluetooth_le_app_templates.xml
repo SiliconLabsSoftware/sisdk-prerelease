@@ -195,7 +195,7 @@
     <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc llvm"/>
     <properties key="category" value="Bluetooth Examples"/>
-    <properties key="quality" value="DEPRECATED"/>
+    <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
   </descriptors>
@@ -211,7 +211,7 @@
     <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc llvm"/>
     <properties key="category" value="Bluetooth Examples"/>
-    <properties key="quality" value="DEPRECATED"/>
+    <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
   </descriptors>
@@ -227,7 +227,7 @@
     <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc llvm"/>
     <properties key="category" value="Bluetooth Examples"/>
-    <properties key="quality" value="DEPRECATED"/>
+    <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
   </descriptors>
@@ -1918,7 +1918,7 @@ This project makes a TrustZone secure library for running PSA libraries in the s
     <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Bluetooth Examples"/>
-    <properties key="quality" value="DEPRECATED"/>
+    <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|Host Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth"/>
   </descriptors>

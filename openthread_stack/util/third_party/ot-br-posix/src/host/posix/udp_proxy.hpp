@@ -81,9 +81,10 @@ public:
      *
      * The UDP Proxy will bind to an ephemeral port and set a mapping between the ephemeral port and @p aPort.
      *
-     * @param[in] aPort  The UDP port to be proxied in Thread stack.
+     * @param[in] aPort      The UDP port to be proxied in Thread stack.
+     * @param[in] aHostPort  The UDP port to bind on host, or `0` to use an ephemeral port.
      */
-    void Start(uint16_t aPort);
+    void Start(uint16_t aPort, uint16_t aHostPort = 0);
 
     /**
      * Stop the UDP Proxy if started.
@@ -120,7 +121,7 @@ private:
     void Update(MainloopContext &aMainloop) override;
 
     bool         IsStarted(void) const { return mHostPort != 0; }
-    otbrError    BindToEphemeralPort(void);
+    otbrError    BindToPort(uint16_t aHostPort);
     otbrError    ReceivePacket(uint8_t *aPayload, uint16_t &aLength, otIp6Address &aRemoteAddr, uint16_t &aRemotePort);
     void         UpdatePeerLocalAddr(const otIp6Address &aPeerAddr, uint16_t aPeerPort, const otIp6Address &aLocalAddr);
     otIp6Address GetPeerLocalAddr(const otIp6Address &aPeerAddr, uint16_t aPeerPort) const;

@@ -924,6 +924,7 @@ otbrError PublisherMDnsSd::PublishHostImpl(const std::string &aName,
 
     aCallback = HandleDuplicateHostRegistration(aName, aAddresses, std::move(aCallback));
     VerifyOrExit(!aCallback.IsNull());
+    VerifyOrExit(!aAddresses.empty(), std::move(aCallback)(OTBR_ERROR_NONE));
 
     hostReg = std::make_shared<DnssdHostRegistration>(aName, aAddresses, std::move(aCallback), this);
     AddHostRegistration(hostReg);

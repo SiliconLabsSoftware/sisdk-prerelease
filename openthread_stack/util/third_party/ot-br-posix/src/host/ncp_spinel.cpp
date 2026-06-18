@@ -752,7 +752,7 @@ void NcpSpinel::HandleValueInserted(spinel_prop_key_t aKey, const uint8_t *aBuff
         otPlatDnssdService           service;
         Mdns::Publisher::SubTypeList subTypeList;
         const char                  *subTypeArray[kMaxSubTypes];
-        uint16_t                     subTypeCount;
+        uint16_t                     subTypeCount = kMaxSubTypes;
         Mdns::Publisher::TxtData     txtData;
         otPlatDnssdRequestId         requestId;
         const uint8_t               *callbackData;
@@ -760,7 +760,8 @@ void NcpSpinel::HandleValueInserted(spinel_prop_key_t aKey, const uint8_t *aBuff
         std::vector<uint8_t>         callbackDataCopy;
 
         SuccessOrExit(ot::Spinel::DecodeDnssdService(decoder, service, subTypeArray, subTypeCount, requestId,
-                                                     callbackData, callbackDataSize));
+                                                     callbackData, callbackDataSize),
+                      error = OTBR_ERROR_PARSE);
         for (uint16_t i = 0; i < subTypeCount; i++)
         {
             subTypeList.push_back(subTypeArray[i]);
@@ -938,14 +939,15 @@ void NcpSpinel::HandleValueRemoved(spinel_prop_key_t aKey, const uint8_t *aBuffe
     {
         otPlatDnssdService   service;
         const char          *subTypeArray[kMaxSubTypes];
-        uint16_t             subTypeCount;
+        uint16_t             subTypeCount = kMaxSubTypes;
         otPlatDnssdRequestId requestId;
         const uint8_t       *callbackData;
         uint16_t             callbackDataSize;
         std::vector<uint8_t> callbackDataCopy;
 
         SuccessOrExit(ot::Spinel::DecodeDnssdService(decoder, service, subTypeArray, subTypeCount, requestId,
-                                                     callbackData, callbackDataSize));
+                                                     callbackData, callbackDataSize),
+                      error = OTBR_ERROR_PARSE);
         callbackDataCopy.assign(callbackData, callbackData + callbackDataSize);
 
         mPublisher->UnpublishService(

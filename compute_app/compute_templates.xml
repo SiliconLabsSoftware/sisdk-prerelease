@@ -9,8 +9,8 @@
     <properties key="readmeFiles" value="compute_soc_math_mvp_demo_efr32/readme.md"/>
     <properties key="boardCompatibility" value="brd2601b brd2608a com.silabs.board.none "/>
     <properties key="partCompatibility" value=".*ef.32.g2[468].*"/>
-    <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
-    <properties key="toolchainCompatibility" value="gcc"/>
+    <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake iar-embedded-workbench"/>
+    <properties key="toolchainCompatibility" value="gcc iar"/>
     <properties key="category" value="Compute Application"/>
     <properties key="quality" value="production"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>

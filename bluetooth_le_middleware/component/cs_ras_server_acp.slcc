@@ -9,7 +9,7 @@ category: Bluetooth|Application|GATT Services
 metadata:
   sbom:
     license: Zlib
-quality: deprecated
+quality: production
 root_path: bluetooth_le_middleware/common/cs_ras
 config_file:
 - path: server/config/ras.xml

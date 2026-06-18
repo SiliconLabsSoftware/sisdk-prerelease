@@ -82,6 +82,9 @@ Application::Application(Host::ThreadHost  &aHost,
 #if OTBR_ENABLE_TREL
     , mTrelUdpProxy(mHost)
 #endif
+#if OTBR_ENABLE_BACKBONE_ROUTER
+    , mBackboneTmfUdpProxy(mHost)
+#endif
 #if OTBR_ENABLE_DBUS_SERVER
     , mDBusAgent(MakeDBusDependentComponents())
 #endif
@@ -393,6 +396,9 @@ void Application::ConfigureUdpProxiesInfraInterface(void)
 #if OTBR_ENABLE_TREL
     mTrelUdpProxy.SetInfraInterface(infraIfName);
 #endif
+#if OTBR_ENABLE_BACKBONE_ROUTER
+    mBackboneTmfUdpProxy.SetInfraInterface(infraIfName);
+#endif
     OTBR_UNUSED_VARIABLE(infraIfName);
 }
 
@@ -463,7 +469,7 @@ void Application::InitNcpMode(void)
 #endif // OTBR_ENABLE_EPSKC
     SetBorderAgentOnInitState();
 #endif
-#if OTBR_ENABLE_BORDER_AGENT || OTBR_ENABLE_TREL
+#if OTBR_ENABLE_BORDER_AGENT || OTBR_ENABLE_TREL || OTBR_ENABLE_BACKBONE_ROUTER
     mHost.SetUdpForwardToHostCallback([this](const uint8_t *aUdpPayload, uint16_t aLength,
                                              const otIp6Address &aPeerAddr, uint16_t aPeerPort, uint16_t aLocalPort) {
 #if OTBR_ENABLE_BORDER_AGENT
@@ -487,8 +493,15 @@ void Application::InitNcpMode(void)
             return;
         }
 #endif
-        otbrLogWarning("UDP forward: no UdpProxy for localThreadPort=%u (BorderAgent=%u, EphemeralKey=%u, TREL=%u) — "
-                       "port mismatch or proxy not started",
+#if OTBR_ENABLE_BACKBONE_ROUTER
+        if (aLocalPort == mBackboneTmfUdpProxy.GetThreadPort() && mBackboneTmfUdpProxy.GetThreadPort() != 0)
+        {
+            mBackboneTmfUdpProxy.SendToPeer(aUdpPayload, aLength, aPeerAddr, aPeerPort);
+            return;
+        }
+#endif
+        otbrLogWarning("UDP forward: no UdpProxy for localThreadPort=%u (BorderAgent=%u, EphemeralKey=%u, TREL=%u, "
+                       "BackboneTmf=%u) — port mismatch or proxy not started",
                        aLocalPort
 #if OTBR_ENABLE_BORDER_AGENT
                        ,
@@ -511,8 +524,22 @@ void Application::InitNcpMode(void)
                        ,
                        0u
 #endif
+#if OTBR_ENABLE_BACKBONE_ROUTER
+                           ,
+                       mBackboneTmfUdpProxy.GetThreadPort()
+#else
+                       ,
+                       0u
+#endif
         );
     });
+#endif
+#if OTBR_ENABLE_BACKBONE_ROUTER
+    if (!mBackboneInterfaceName.empty())
+    {
+        mBackboneTmfUdpProxy.Start(BackboneRouter::BackboneAgent::kBackboneUdpPort,
+                                   BackboneRouter::BackboneAgent::kBackboneUdpPort);
+    }
 #endif
 #if OTBR_ENABLE_TREL
     ncpHost.SetTrelStateChangedCallback([this, &ncpHost](bool aEnabled, uint16_t aThreadPort) {
@@ -568,6 +595,9 @@ void Application::DeinitNcpMode(void)
         }
     }
     mTrelUdpProxy.Stop();
+#endif
+#if OTBR_ENABLE_BACKBONE_ROUTER
+    mBackboneTmfUdpProxy.Stop();
 #endif
 #if OTBR_ENABLE_DNSSD_PLAT
     mDnssdPlatform.Stop();

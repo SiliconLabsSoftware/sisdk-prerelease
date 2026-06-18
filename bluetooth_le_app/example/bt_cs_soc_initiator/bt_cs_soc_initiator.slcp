@@ -23,7 +23,7 @@ description: >
   (config/cs_initiator_config.h). The actual mode can be checked on the serial
   output and in the captured logs.
 category: Bluetooth Examples
-quality: deprecated
+quality: production
 
 filter:
   - name: "Wireless Technology"

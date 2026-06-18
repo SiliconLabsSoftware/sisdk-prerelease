@@ -337,7 +337,7 @@ index 89bd7df1f8b4b72f9a78661c3e9afb881d7df71d..0dbcca5b2fd9a05cdd59b222b57c4d3f
      sudo $PM install -y wget
      sudo $PM install -y protobuf protobuf-devel
 diff --git a/src/agent/application.cpp b/src/agent/application.cpp
-index fe2aa55bb106dcdd6080dee1fd09fe6202278ff4..0c1c8802e884979bab90666d5588a6b5930cc9b1 100644
+index fe2aa55bb106dcdd6080dee1fd09fe6202278ff4..482a880981850d02cfd7439a11eef8697aa816e0 100644
 --- a/src/agent/application.cpp
 +++ b/src/agent/application.cpp
 @@ -37,9 +37,13 @@
@@ -354,17 +354,20 @@ index fe2aa55bb106dcdd6080dee1fd09fe6202278ff4..0c1c8802e884979bab90666d5588a6b5
  #include "host/posix/dnssd.hpp"
  #include "utils/infra_link_selector.hpp"
  
-@@ -75,6 +79,9 @@ Application::Application(Host::ThreadHost  &aHost,
+@@ -75,6 +79,12 @@ Application::Application(Host::ThreadHost  &aHost,
      , mEphemeralKeyUdpProxy(mHost)
  #endif
  #endif
 +#if OTBR_ENABLE_TREL
 +    , mTrelUdpProxy(mHost)
 +#endif
++#if OTBR_ENABLE_BACKBONE_ROUTER
++    , mBackboneTmfUdpProxy(mHost)
++#endif
  #if OTBR_ENABLE_DBUS_SERVER
      , mDBusAgent(MakeDBusDependentComponents())
  #endif
-@@ -373,6 +380,22 @@ void Application::CreateNcpMode(void)
+@@ -373,6 +383,25 @@ void Application::CreateNcpMode(void)
  #endif
  }
  
@@ -381,13 +384,16 @@ index fe2aa55bb106dcdd6080dee1fd09fe6202278ff4..0c1c8802e884979bab90666d5588a6b5
 +#if OTBR_ENABLE_TREL
 +    mTrelUdpProxy.SetInfraInterface(infraIfName);
 +#endif
++#if OTBR_ENABLE_BACKBONE_ROUTER
++    mBackboneTmfUdpProxy.SetInfraInterface(infraIfName);
++#endif
 +    OTBR_UNUSED_VARIABLE(infraIfName);
 +}
 +
  void Application::InitNcpMode(void)
  {
      otbr::Host::NcpHost &ncpHost = static_cast<otbr::Host::NcpHost &>(mHost);
-@@ -385,9 +408,10 @@ void Application::InitNcpMode(void)
+@@ -385,9 +414,10 @@ void Application::InitNcpMode(void)
      {
          mInfraIf->SetInfraIf(mBackboneInterfaceName);
      }
@@ -399,7 +405,7 @@ index fe2aa55bb106dcdd6080dee1fd09fe6202278ff4..0c1c8802e884979bab90666d5588a6b5
      mMdnsStateSubject.AddObserver(ncpHost);
  #endif
  #if OTBR_ENABLE_BORDER_AGENT && OTBR_ENABLE_BORDER_AGENT_MESHCOP_SERVICE
-@@ -420,19 +444,6 @@ void Application::InitNcpMode(void)
+@@ -420,19 +450,6 @@ void Application::InitNcpMode(void)
              OTBR_UNUSED_VARIABLE(aLength);
  #endif
          });
@@ -419,11 +425,11 @@ index fe2aa55bb106dcdd6080dee1fd09fe6202278ff4..0c1c8802e884979bab90666d5588a6b5
  #if OTBR_ENABLE_EPSKC
      mHost.AddEphemeralKeyStateChangedCallback([this](otBorderAgentEphemeralKeyState aState, uint16_t aPort) {
          if (aState == OT_BORDER_AGENT_STATE_STARTED)
-@@ -452,6 +463,74 @@ void Application::InitNcpMode(void)
+@@ -452,6 +469,95 @@ void Application::InitNcpMode(void)
  #endif // OTBR_ENABLE_EPSKC
      SetBorderAgentOnInitState();
  #endif
-+#if OTBR_ENABLE_BORDER_AGENT || OTBR_ENABLE_TREL
++#if OTBR_ENABLE_BORDER_AGENT || OTBR_ENABLE_TREL || OTBR_ENABLE_BACKBONE_ROUTER
 +    mHost.SetUdpForwardToHostCallback([this](const uint8_t *aUdpPayload, uint16_t aLength,
 +                                             const otIp6Address &aPeerAddr, uint16_t aPeerPort, uint16_t aLocalPort) {
 +#if OTBR_ENABLE_BORDER_AGENT
@@ -447,8 +453,15 @@ index fe2aa55bb106dcdd6080dee1fd09fe6202278ff4..0c1c8802e884979bab90666d5588a6b5
 +            return;
 +        }
 +#endif
-+        otbrLogWarning("UDP forward: no UdpProxy for localThreadPort=%u (BorderAgent=%u, EphemeralKey=%u, TREL=%u) — "
-+                       "port mismatch or proxy not started",
++#if OTBR_ENABLE_BACKBONE_ROUTER
++        if (aLocalPort == mBackboneTmfUdpProxy.GetThreadPort() && mBackboneTmfUdpProxy.GetThreadPort() != 0)
++        {
++            mBackboneTmfUdpProxy.SendToPeer(aUdpPayload, aLength, aPeerAddr, aPeerPort);
++            return;
++        }
++#endif
++        otbrLogWarning("UDP forward: no UdpProxy for localThreadPort=%u (BorderAgent=%u, EphemeralKey=%u, TREL=%u, "
++                       "BackboneTmf=%u) — port mismatch or proxy not started",
 +                       aLocalPort
 +#if OTBR_ENABLE_BORDER_AGENT
 +                       ,
@@ -471,8 +484,22 @@ index fe2aa55bb106dcdd6080dee1fd09fe6202278ff4..0c1c8802e884979bab90666d5588a6b5
 +                       ,
 +                       0u
 +#endif
++#if OTBR_ENABLE_BACKBONE_ROUTER
++                           ,
++                       mBackboneTmfUdpProxy.GetThreadPort()
++#else
++                       ,
++                       0u
++#endif
 +        );
 +    });
++#endif
++#if OTBR_ENABLE_BACKBONE_ROUTER
++    if (!mBackboneInterfaceName.empty())
++    {
++        mBackboneTmfUdpProxy.Start(BackboneRouter::BackboneAgent::kBackboneUdpPort,
++                                   BackboneRouter::BackboneAgent::kBackboneUdpPort);
++    }
 +#endif
 +#if OTBR_ENABLE_TREL
 +    ncpHost.SetTrelStateChangedCallback([this, &ncpHost](bool aEnabled, uint16_t aThreadPort) {
@@ -494,7 +521,7 @@ index fe2aa55bb106dcdd6080dee1fd09fe6202278ff4..0c1c8802e884979bab90666d5588a6b5
  #if OTBR_ENABLE_BACKBONE_ROUTER
      mHost.SetBackboneRouterStateChangedCallback(
          [this](otBackboneRouterState aState) { mMulticastRoutingManager->HandleStateChange(aState); });
-@@ -465,6 +544,8 @@ void Application::InitNcpMode(void)
+@@ -465,6 +571,8 @@ void Application::InitNcpMode(void)
  #endif
  
  #if OTBR_ENABLE_DNSSD_PLAT
@@ -503,7 +530,7 @@ index fe2aa55bb106dcdd6080dee1fd09fe6202278ff4..0c1c8802e884979bab90666d5588a6b5
      mDnssdPlatform.Start();
  #endif
  }
-@@ -476,7 +557,22 @@ void Application::DeinitNcpMode(void)
+@@ -476,7 +584,25 @@ void Application::DeinitNcpMode(void)
      mBorderAgent.Deinit();
      mBorderAgentUdpProxy.Stop();
  #endif
@@ -520,6 +547,9 @@ index fe2aa55bb106dcdd6080dee1fd09fe6202278ff4..0c1c8802e884979bab90666d5588a6b5
 +    }
 +    mTrelUdpProxy.Stop();
 +#endif
++#if OTBR_ENABLE_BACKBONE_ROUTER
++    mBackboneTmfUdpProxy.Stop();
++#endif
 +#if OTBR_ENABLE_DNSSD_PLAT
 +    mDnssdPlatform.Stop();
 +#endif
@@ -528,7 +558,7 @@ index fe2aa55bb106dcdd6080dee1fd09fe6202278ff4..0c1c8802e884979bab90666d5588a6b5
  #endif
      mNetif->Deinit();
 diff --git a/src/agent/application.hpp b/src/agent/application.hpp
-index 24f3f0f105239af2bd2d850f0270b53400c66c9a..0e74e3eb0262c9c103ffc9edbff89b66f9226a6a 100644
+index 24f3f0f105239af2bd2d850f0270b53400c66c9a..df2702c568dc5be7b300b87d94c3eef4305a13fc 100644
 --- a/src/agent/application.hpp
 +++ b/src/agent/application.hpp
 @@ -262,6 +262,7 @@ private:
@@ -539,7 +569,7 @@ index 24f3f0f105239af2bd2d850f0270b53400c66c9a..0e74e3eb0262c9c103ffc9edbff89b66
  
  #if OTBR_ENABLE_BORDER_AGENT
      void SetBorderAgentOnInitState(void);
-@@ -290,6 +291,9 @@ private:
+@@ -290,10 +291,14 @@ private:
      UdpProxy mEphemeralKeyUdpProxy;
  #endif
  
@@ -549,6 +579,11 @@ index 24f3f0f105239af2bd2d850f0270b53400c66c9a..0e74e3eb0262c9c103ffc9edbff89b66
  #endif
  #if OTBR_ENABLE_BACKBONE_ROUTER
      std::unique_ptr<BackboneRouter::BackboneAgent> mBackboneAgent;
+     std::unique_ptr<MulticastRoutingManager>       mMulticastRoutingManager;
++    UdpProxy                                       mBackboneTmfUdpProxy;
+ #endif
+ #if OTBR_ENABLE_SRP_ADVERTISING_PROXY
+     std::unique_ptr<AdvertisingProxy> mAdvertisingProxy;
 diff --git a/src/host/ncp_host.cpp b/src/host/ncp_host.cpp
 index ebf1a4520cbb98278466ee34a556999f2639a73c..39b9ddd201838366b97a554a44ed6653e001c757 100644
 --- a/src/host/ncp_host.cpp
@@ -675,7 +710,7 @@ index 45ad7aea10cc945786d0453f54a5eb5982de739a..7f0ccdd2784a3973a881fd2bed1a9497
                           bool                           aIsRunning,
                           const std::vector<Ip6Address> &aIp6Addresses) override;
 diff --git a/src/host/ncp_spinel.cpp b/src/host/ncp_spinel.cpp
-index c95237f43e5b8339271fd0803b6c4193a6db99ab..575619e1f1f915550da4d55072f4fd0520b033a7 100644
+index c95237f43e5b8339271fd0803b6c4193a6db99ab..8899ce6c7f1e39d2d7e08e96f94a61686ffb2c4a 100644
 --- a/src/host/ncp_spinel.cpp
 +++ b/src/host/ncp_spinel.cpp
 @@ -42,6 +42,9 @@
@@ -806,7 +841,26 @@ index c95237f43e5b8339271fd0803b6c4193a6db99ab..575619e1f1f915550da4d55072f4fd05
      return;
  }
  
-@@ -734,7 +810,81 @@ void NcpSpinel::HandleValueInserted(spinel_prop_key_t aKey, const uint8_t *aBuff
+@@ -676,7 +752,7 @@ void NcpSpinel::HandleValueInserted(spinel_prop_key_t aKey, const uint8_t *aBuff
+         otPlatDnssdService           service;
+         Mdns::Publisher::SubTypeList subTypeList;
+         const char                  *subTypeArray[kMaxSubTypes];
+-        uint16_t                     subTypeCount;
++        uint16_t                     subTypeCount = kMaxSubTypes;
+         Mdns::Publisher::TxtData     txtData;
+         otPlatDnssdRequestId         requestId;
+         const uint8_t               *callbackData;
+@@ -684,7 +760,8 @@ void NcpSpinel::HandleValueInserted(spinel_prop_key_t aKey, const uint8_t *aBuff
+         std::vector<uint8_t>         callbackDataCopy;
+ 
+         SuccessOrExit(ot::Spinel::DecodeDnssdService(decoder, service, subTypeArray, subTypeCount, requestId,
+-                                                     callbackData, callbackDataSize));
++                                                     callbackData, callbackDataSize),
++                      error = OTBR_ERROR_PARSE);
+         for (uint16_t i = 0; i < subTypeCount; i++)
+         {
+             subTypeList.push_back(subTypeArray[i]);
+@@ -734,7 +811,81 @@ void NcpSpinel::HandleValueInserted(spinel_prop_key_t aKey, const uint8_t *aBuff
                                                       [this, callbackDataCopy](const otPlatDnssdBrowseResult &aResult) {
                                                           SendDnssdBrowseResult(aResult, callbackDataCopy);
                                                       },
@@ -889,7 +943,21 @@ index c95237f43e5b8339271fd0803b6c4193a6db99ab..575619e1f1f915550da4d55072f4fd05
          break;
      }
  #endif // OTBR_ENABLE_DNSSD_PLAT
-@@ -799,7 +949,7 @@ void NcpSpinel::HandleValueRemoved(spinel_prop_key_t aKey, const uint8_t *aBuffe
+@@ -788,18 +939,19 @@ void NcpSpinel::HandleValueRemoved(spinel_prop_key_t aKey, const uint8_t *aBuffe
+     {
+         otPlatDnssdService   service;
+         const char          *subTypeArray[kMaxSubTypes];
+-        uint16_t             subTypeCount;
++        uint16_t             subTypeCount = kMaxSubTypes;
+         otPlatDnssdRequestId requestId;
+         const uint8_t       *callbackData;
+         uint16_t             callbackDataSize;
+         std::vector<uint8_t> callbackDataCopy;
+ 
+         SuccessOrExit(ot::Spinel::DecodeDnssdService(decoder, service, subTypeArray, subTypeCount, requestId,
+-                                                     callbackData, callbackDataSize));
++                                                     callbackData, callbackDataSize),
++                      error = OTBR_ERROR_PARSE);
          callbackDataCopy.assign(callbackData, callbackData + callbackDataSize);
  
          mPublisher->UnpublishService(
@@ -898,7 +966,7 @@ index c95237f43e5b8339271fd0803b6c4193a6db99ab..575619e1f1f915550da4d55072f4fd05
                  OT_UNUSED_VARIABLE(SendDnssdResult(requestId, callbackDataCopy, OtbrErrorToOtError(aError)));
              });
          break;
-@@ -821,6 +971,100 @@ void NcpSpinel::HandleValueRemoved(spinel_prop_key_t aKey, const uint8_t *aBuffe
+@@ -821,6 +973,100 @@ void NcpSpinel::HandleValueRemoved(spinel_prop_key_t aKey, const uint8_t *aBuffe
          break;
      }
  #endif // OTBR_ENABLE_SRP_ADVERTISING_PROXY
@@ -999,7 +1067,7 @@ index c95237f43e5b8339271fd0803b6c4193a6db99ab..575619e1f1f915550da4d55072f4fd05
      case SPINEL_PROP_BACKBONE_ROUTER_MULTICAST_LISTENER:
      {
          const otIp6Address *addr;
-@@ -865,6 +1109,31 @@ otbrError NcpSpinel::HandleResponseForPropGet(spinel_tid_t      aTid,
+@@ -865,6 +1111,31 @@ otbrError NcpSpinel::HandleResponseForPropGet(spinel_tid_t      aTid,
          SafeInvoke(mBorderAgentMeshCoPServiceChangedCallback, isActive, port, data, dataLen);
          break;
      }
@@ -1031,7 +1099,7 @@ index c95237f43e5b8339271fd0803b6c4193a6db99ab..575619e1f1f915550da4d55072f4fd05
  
      default:
          VerifyOrExit(aKey == mWaitingKeyTable[aTid], error = OTBR_ERROR_INVALID_STATE);
-@@ -927,6 +1196,7 @@ otbrError NcpSpinel::HandleResponseForPropSet(spinel_tid_t      aTid,
+@@ -927,6 +1198,7 @@ otbrError NcpSpinel::HandleResponseForPropSet(spinel_tid_t      aTid,
          break;
  
      case SPINEL_PROP_STREAM_NET:
@@ -1039,7 +1107,7 @@ index c95237f43e5b8339271fd0803b6c4193a6db99ab..575619e1f1f915550da4d55072f4fd05
          break;
  
      case SPINEL_PROP_STREAM_CLI:
-@@ -971,7 +1241,15 @@ otbrError NcpSpinel::HandleResponseForPropSet(spinel_tid_t      aTid,
+@@ -971,7 +1243,15 @@ otbrError NcpSpinel::HandleResponseForPropSet(spinel_tid_t      aTid,
          break;
  
      default:
@@ -1056,7 +1124,7 @@ index c95237f43e5b8339271fd0803b6c4193a6db99ab..575619e1f1f915550da4d55072f4fd05
          break;
      }
  
-@@ -1255,6 +1533,28 @@ exit:
+@@ -1255,6 +1535,28 @@ exit:
      return error;
  }
  
@@ -1085,7 +1153,7 @@ index c95237f43e5b8339271fd0803b6c4193a6db99ab..575619e1f1f915550da4d55072f4fd05
  otError NcpSpinel::ParseOperationalDatasetTlvs(const uint8_t            *aBuf,
                                                 uint16_t                  aLen,
                                                 otOperationalDatasetTlvs &aDatasetTlvs)
-@@ -1360,6 +1660,80 @@ otError NcpSpinel::SendDnssdBrowseResult(const otPlatDnssdBrowseResult &aResult,
+@@ -1360,6 +1662,80 @@ otError NcpSpinel::SendDnssdBrowseResult(const otPlatDnssdBrowseResult &aResult,
  
      return error;
  }
@@ -1166,7 +1234,7 @@ index c95237f43e5b8339271fd0803b6c4193a6db99ab..575619e1f1f915550da4d55072f4fd05
  #endif
  
  otbrError NcpSpinel::SetInfraIf(uint32_t aInfraIfIndex, bool aIsRunning, const std::vector<Ip6Address> &aIp6Addresses)
-@@ -1380,6 +1754,10 @@ otbrError NcpSpinel::SetInfraIf(uint32_t aInfraIfIndex, bool aIsRunning, const s
+@@ -1380,6 +1756,10 @@ otbrError NcpSpinel::SetInfraIf(uint32_t aInfraIfIndex, bool aIsRunning, const s
  
      SuccessOrExit(SetProperty(SPINEL_PROP_INFRA_IF_STATE, encodingFunc), error = OTBR_ERROR_OPENTHREAD);
  
@@ -1177,7 +1245,7 @@ index c95237f43e5b8339271fd0803b6c4193a6db99ab..575619e1f1f915550da4d55072f4fd05
  exit:
      return error;
  }
-@@ -1608,5 +1986,20 @@ exit:
+@@ -1608,5 +1988,20 @@ exit:
  }
  #endif // OTBR_ENABLE_DHCP6_PD && OTBR_ENABLE_BORDER_ROUTING
  
@@ -2050,7 +2118,7 @@ index 2286f6ef82f2a2e893858f5d32bf04e3056cd5cc..362abcd0b8d6120cfba576196b59917e
  
      Netif(const std::string &aInterfaceName, Dependencies &aDependencies);
 diff --git a/src/host/posix/udp_proxy.cpp b/src/host/posix/udp_proxy.cpp
-index e8e793a45ac5b7fc3d804213f4a92d6f16b3c492..d464ab485db7dbe6ae9678f8c245e327a56b73da 100644
+index e8e793a45ac5b7fc3d804213f4a92d6f16b3c492..09fa4a5691fac4947c47f7897c111e2f0769d523 100644
 --- a/src/host/posix/udp_proxy.cpp
 +++ b/src/host/posix/udp_proxy.cpp
 @@ -36,12 +36,14 @@
@@ -2068,7 +2136,7 @@ index e8e793a45ac5b7fc3d804213f4a92d6f16b3c492..d464ab485db7dbe6ae9678f8c245e327
  #include "host/posix/dnssd.hpp"
  #include "utils/socket_utils.hpp"
  
-@@ -66,14 +68,32 @@ UdpProxy::UdpProxy(Dependencies &aDeps)
+@@ -66,15 +68,33 @@ UdpProxy::UdpProxy(Dependencies &aDeps)
      : mFd(-1)
      , mHostPort(0)
      , mThreadPort(0)
@@ -2077,6 +2145,7 @@ index e8e793a45ac5b7fc3d804213f4a92d6f16b3c492..d464ab485db7dbe6ae9678f8c245e327
  {
  }
  
+-void UdpProxy::Start(uint16_t aPort)
 +void UdpProxy::SetInfraInterface(const char *aInfraIfName)
 +{
 +    mInfraIfIndex = 0;
@@ -2093,14 +2162,16 @@ index e8e793a45ac5b7fc3d804213f4a92d6f16b3c492..d464ab485db7dbe6ae9678f8c245e327
 +    }
 +}
 +
- void UdpProxy::Start(uint16_t aPort)
++void UdpProxy::Start(uint16_t aPort, uint16_t aHostPort)
  {
      VerifyOrExit(!IsStarted());
  
+-    BindToEphemeralPort();
 +    mPeerLocalAddrs.clear();
-     BindToEphemeralPort();
++    BindToPort(aHostPort);
      mThreadPort = aPort;
  
+ exit:
 @@ -86,6 +106,7 @@ void UdpProxy::Stop(void)
      VerifyOrExit(IsStarted());
  
@@ -2175,7 +2246,70 @@ index e8e793a45ac5b7fc3d804213f4a92d6f16b3c492..d464ab485db7dbe6ae9678f8c245e327
          cmsg->cmsg_level = IPPROTO_IPV6;
          cmsg->cmsg_type  = IPV6_HOPLIMIT;
          cmsg->cmsg_len   = CMSG_LEN(sizeof(int));
-@@ -268,11 +323,49 @@ otbrError UdpProxy::ReceivePacket(uint8_t      *aPayload,
+@@ -194,20 +249,34 @@ void UdpProxy::SendToPeer(const uint8_t      *aUdpPayload,
+     }
+ }
+ 
+-otbrError UdpProxy::BindToEphemeralPort(void)
++otbrError UdpProxy::BindToPort(uint16_t aHostPort)
+ {
+     otbrError error = OTBR_ERROR_NONE;
+     mFd             = SocketWithCloseExec(AF_INET6, SOCK_DGRAM, IPPROTO_UDP, kSocketNonBlock);
+ 
+     VerifyOrExit(mFd != 0, error = OTBR_ERROR_ERRNO);
+ 
++    if (mInfraIfIndex != 0)
++    {
++#ifdef __linux__
++        char ifName[IF_NAMESIZE];
++
++        VerifyOrExit(if_indextoname(mInfraIfIndex, ifName) != nullptr, error = OTBR_ERROR_ERRNO);
++        VerifyOrExit(0 == setsockopt(mFd, SOL_SOCKET, SO_BINDTODEVICE, ifName, strlen(ifName)),
++                     error = OTBR_ERROR_ERRNO);
++#else
++        VerifyOrExit(0 == setsockopt(mFd, IPPROTO_IPV6, IPV6_BOUND_IF, &mInfraIfIndex, sizeof(mInfraIfIndex)),
++                     error = OTBR_ERROR_ERRNO);
++#endif
++    }
++
+     {
+         struct sockaddr_in6 sin6;
+ 
+         memset(&sin6, 0, sizeof(sin6));
+         sin6.sin6_family = AF_INET6;
+         sin6.sin6_addr   = in6addr_any;
+-        sin6.sin6_port   = 0;
++        sin6.sin6_port   = htons(aHostPort);
+ 
+         VerifyOrExit(0 == bind(mFd, reinterpret_cast<struct sockaddr *>(&sin6), sizeof(sin6)),
+                      error = OTBR_ERROR_ERRNO);
+@@ -219,9 +288,16 @@ otbrError UdpProxy::BindToEphemeralPort(void)
+         VerifyOrExit(0 == setsockopt(mFd, IPPROTO_IPV6, IPV6_RECVPKTINFO, &on, sizeof(on)), error = OTBR_ERROR_ERRNO);
+     }
+ 
++    if (aHostPort != 0)
++    {
++        mHostPort = aHostPort;
++        otbrLogInfo("Bound to port: %u", mHostPort);
++    }
++    else
+     {
+         struct sockaddr_in bound_addr;
+         socklen_t          addr_len = sizeof(bound_addr);
++
+         getsockname(mFd, (struct sockaddr *)&bound_addr, &addr_len);
+ 
+         mHostPort = ntohs(bound_addr.sin_port);
+@@ -229,7 +305,7 @@ otbrError UdpProxy::BindToEphemeralPort(void)
+     }
+ 
+ exit:
+-    otbrLogResult(error, "Bind to ephemeral port");
++    otbrLogResult(error, "Bind to port");
+     if (error != OTBR_ERROR_NONE)
+     {
+         Stop();
+@@ -268,11 +344,49 @@ otbrError UdpProxy::ReceivePacket(uint8_t      *aPayload,
      aRemotePort = ntohs(peerAddr.sin6_port);
      memcpy(&aRemoteAddr, &peerAddr.sin6_addr, sizeof(otIp6Address));
  
@@ -2228,7 +2362,7 @@ index e8e793a45ac5b7fc3d804213f4a92d6f16b3c492..d464ab485db7dbe6ae9678f8c245e327
 +
  } // namespace otbr
 diff --git a/src/host/posix/udp_proxy.hpp b/src/host/posix/udp_proxy.hpp
-index fa7b53fe4b209f2526e2d377a7db58c123e4bb03..b43ed3b6c5af0f05fb9a8090679c4a1d00a8a43b 100644
+index fa7b53fe4b209f2526e2d377a7db58c123e4bb03..5f912aa6e1a2a55b1c05fef07d1ade9267972860 100644
 --- a/src/host/posix/udp_proxy.hpp
 +++ b/src/host/posix/udp_proxy.hpp
 @@ -34,6 +34,8 @@
@@ -2240,7 +2374,7 @@ index fa7b53fe4b209f2526e2d377a7db58c123e4bb03..b43ed3b6c5af0f05fb9a8090679c4a1d
  #include <openthread/error.h>
  #include <openthread/ip6.h>
  
-@@ -64,6 +66,16 @@ public:
+@@ -64,14 +66,25 @@ public:
  
      ~UdpProxy(void) = default;
  
@@ -2257,7 +2391,18 @@ index fa7b53fe4b209f2526e2d377a7db58c123e4bb03..b43ed3b6c5af0f05fb9a8090679c4a1d
      /**
       * Start the UDP Proxy for Thread UDP port @p aPort.
       *
-@@ -107,13 +119,31 @@ private:
+      * The UDP Proxy will bind to an ephemeral port and set a mapping between the ephemeral port and @p aPort.
+      *
+-     * @param[in] aPort  The UDP port to be proxied in Thread stack.
++     * @param[in] aPort      The UDP port to be proxied in Thread stack.
++     * @param[in] aHostPort  The UDP port to bind on host, or `0` to use an ephemeral port.
+      */
+-    void Start(uint16_t aPort);
++    void Start(uint16_t aPort, uint16_t aHostPort = 0);
+ 
+     /**
+      * Stop the UDP Proxy if started.
+@@ -107,13 +120,31 @@ private:
      void Process(const MainloopContext &aMainloop) override;
      void Update(MainloopContext &aMainloop) override;
  
@@ -2265,7 +2410,7 @@ index fa7b53fe4b209f2526e2d377a7db58c123e4bb03..b43ed3b6c5af0f05fb9a8090679c4a1d
 -    otbrError BindToEphemeralPort(void);
 -    otbrError ReceivePacket(uint8_t *aPayload, uint16_t &aLength, otIp6Address &aRemoteAddr, uint16_t &aRemotePort);
 +    bool         IsStarted(void) const { return mHostPort != 0; }
-+    otbrError    BindToEphemeralPort(void);
++    otbrError    BindToPort(uint16_t aHostPort);
 +    otbrError    ReceivePacket(uint8_t *aPayload, uint16_t &aLength, otIp6Address &aRemoteAddr, uint16_t &aRemotePort);
 +    void         UpdatePeerLocalAddr(const otIp6Address &aPeerAddr, uint16_t aPeerPort, const otIp6Address &aLocalAddr);
 +    otIp6Address GetPeerLocalAddr(const otIp6Address &aPeerAddr, uint16_t aPeerPort) const;
@@ -2335,10 +2480,18 @@ index a50e90bb362708e62746654407c6cc39e491bddd..fa9f0e82a659ce75b7d7f405e0672a24
          RemoveServiceResolver(aName);
          break;
 diff --git a/src/mdns/mdns_mdnssd.cpp b/src/mdns/mdns_mdnssd.cpp
-index c55207cce8ab9d2bd0284dcc9917935f9634abae..8f807a5156569e9ce9fdcb7c7d06c70c9696de78 100644
+index c55207cce8ab9d2bd0284dcc9917935f9634abae..1893fa5636664dd57bbff3ecef1bf76500bd55f1 100644
 --- a/src/mdns/mdns_mdnssd.cpp
 +++ b/src/mdns/mdns_mdnssd.cpp
-@@ -1194,6 +1194,9 @@ void PublisherMDnsSd::ServiceSubscription::HandleBrowseResult(DNSServiceRef
+@@ -924,6 +924,7 @@ otbrError PublisherMDnsSd::PublishHostImpl(const std::string &aName,
+ 
+     aCallback = HandleDuplicateHostRegistration(aName, aAddresses, std::move(aCallback));
+     VerifyOrExit(!aCallback.IsNull());
++    VerifyOrExit(!aAddresses.empty(), std::move(aCallback)(OTBR_ERROR_NONE));
+ 
+     hostReg = std::make_shared<DnssdHostRegistration>(aName, aAddresses, std::move(aCallback), this);
+     AddHostRegistration(hostReg);
+@@ -1194,6 +1195,9 @@ void PublisherMDnsSd::ServiceSubscription::HandleBrowseResult(DNSServiceRef
      }
      else
      {
