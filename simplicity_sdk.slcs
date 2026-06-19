@@ -164,9 +164,9 @@ documentation:
   version: 4.3.0
 - docset: openthread
   version: 3.1.0
-- docset: platform_nwp_siwx91x
-  version: 4.1.0
 - docset: platform_siwx91x
+  version: 4.1.0
+- docset: platform_nwp_siwx91x
   version: 4.1.0
 - docset: rail
   version: 3.1.0
@@ -176,9 +176,9 @@ documentation:
   version: 2.9.0
 - docset: protocol-usb
   version: 1.7.0
-- docset: wifi
-  version: 4.1.0
 - docset: wifi_sqa_internal
+  version: 4.1.0
+- docset: wifi
   version: 4.1.0
 - docset: wisun
   version: 2.12.0
