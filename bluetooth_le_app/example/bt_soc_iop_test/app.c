@@ -3,7 +3,7 @@
  * @brief Core application logic.
  *******************************************************************************
  * # License
- * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -205,6 +205,35 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
 
       // Test 3 (MA discovers the GATT) takes place now.
 
+      // During the LE Privacy 1.2 (RPA) test the bonded peer reconnects using
+      // a resolvable private address. An address that was resolved from an RPA
+      // together with a valid bonding handle proves that the controller
+      // resolved the peer's RPA against the stored IRK.
+      if (privacy_test_in_progress) {
+        uint8_t address_type = evt->data.evt_connection_opened.address_type;
+        bool rpa_resolved =
+          (address_type == sl_bt_gap_public_address_resolved_from_rpa)
+          || (address_type == sl_bt_gap_static_address_resolved_from_rpa);
+
+        // Record the outcome so the bonded notification subscription is only
+        // accepted as a privacy test pass when this connection was actually
+        // established via a resolved RPA.
+        privacy_rpa_resolved =
+          rpa_resolved
+          && (evt->data.evt_connection_opened.bonding != SL_BT_INVALID_BONDING_HANDLE);
+
+        if (privacy_rpa_resolved) {
+          app_log_info("LE Privacy test: bonded peer reconnected with a "
+                       "resolved private address (RPA resolution successful)." APP_LOG_NL);
+        } else {
+          app_log_warning("LE Privacy test: peer reconnected but the address "
+                          "was not resolved from an RPA (address type: [%d], "
+                          "bonding: [%d]). Privacy resolution may have failed." APP_LOG_NL,
+                          address_type,
+                          evt->data.evt_connection_opened.bonding);
+        }
+      }
+
       // Increase the security of the connection if requested by the tester.
       if (increase_security) {
         sl_bt_sm_increase_security(connection_handle);
@@ -300,6 +329,16 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
                    evt->data.evt_connection_closed.connection);
       set_display(DISPLAY_STATE_IDLE, NULL);
 
+      // The LE Privacy 1.2 (RPA) test spans a single bonded reconnection: the
+      // RPA resolution is evaluated on connection_opened and confirmed when the
+      // bonded notification is re-enabled, both on the same open connection.
+      // Clear the test state on every close so a failed or abandoned run cannot
+      // leave the flag set and make later, unrelated connections emit privacy
+      // warnings. The privacy test setup below (SECURITY_LEVEL_PRIVACY) re-arms
+      // it afterward when the tester actually requests the privacy test.
+      privacy_test_in_progress = false;
+      privacy_rpa_resolved = false;
+
       // Configure security manager for the next connection.
       switch (security_level) {
         // Unauthenticated pairing with encryption
@@ -379,6 +418,15 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
 
           sc = sl_bt_advertiser_configure(advertising_set_handle, SL_BT_ADVERTISER_USE_FILTER_FOR_CONNECTION_REQUESTS);
           app_log_status_error_f(sc, "Failed to configure advertising set." APP_LOG_NL);
+
+          // The bonded peer is expected to reconnect using a resolvable
+          // private address. Mark the test as ongoing so the reconnection and
+          // bonded notification subscription can be evaluated as a pass, and
+          // clear any stale RPA-resolution result from a previous run.
+          privacy_test_in_progress = true;
+          privacy_rpa_resolved = false;
+          app_log_info("LE Privacy test: waiting for the bonded peer to "
+                       "reconnect with a resolvable private address." APP_LOG_NL);
           break;
         }
 

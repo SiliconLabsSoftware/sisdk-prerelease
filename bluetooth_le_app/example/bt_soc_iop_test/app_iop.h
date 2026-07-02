@@ -3,7 +3,7 @@
  * @brief Helper functions for BLE interoperability test.
  *******************************************************************************
  * # License
- * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -30,6 +30,7 @@
 #ifndef APP_IOP_H
 #define APP_IOP_H
 
+#include <stdbool.h>
 #include "sl_bt_api.h"
 
 #define BONDING_DISABLED          0x00
@@ -73,8 +74,8 @@ typedef enum security_level_e {
 } security_level_t;
 
 extern security_level_t security_level;
-
-// Encryption key for pairing and bonding.
+extern bool privacy_test_in_progress;
+extern bool privacy_rpa_resolved;
 extern uint32_t passkey;
 
 //--------------------------------

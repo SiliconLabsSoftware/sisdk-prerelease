@@ -9,6 +9,9 @@ description: >
   The API of this component is marked as internal.
 category: Compute
 quality: production
+documentation:
+  docset: compute
+  document: compute-reference-guide
 metadata:
   sbom:
     license: Zlib
