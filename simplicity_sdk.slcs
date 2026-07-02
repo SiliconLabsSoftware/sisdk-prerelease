@@ -121,9 +121,9 @@ component_path:
 - path: unity_test_framework/component
 - path: usb/protocol/usb/component
 - path: usb_internal/protocol/usb/component
+- path: wisun_sdk/component
 - path: wisun/component
 - path: wisun_config_generator/component
-- path: wisun_sdk/component
 - path: zigbee_wwah/app/framework/component/zigbee_wwah
 - path: zigbee_smart_energy/component/zigbee_smart_energy
 - path: zigbee/platform/radio/mac/component/zigbee
@@ -203,9 +203,9 @@ upgrade_manifest:
 - path: proprietary_default_radio_confs/./upgrade.slcu
 - path: rail_sdk/upgrade.slcu
 - path: unity_test_framework/component/upgrade.slcu
+- path: wisun_sdk/upgrade.slcu
 - path: wisun/upgrade.slcu
 - path: wisun_config_generator/wisun_config_generator.slcu
-- path: wisun_sdk/upgrade.slcu
 - path: zigbee/component/upgrade.slcu
 - path: zwave/component/upgrade.slcu
 post_build_profile:
