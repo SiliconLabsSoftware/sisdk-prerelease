@@ -52,8 +52,6 @@ requires:
 source:
 - path: ../../third_party/trusted-firmware-m/platform/ext/target/siliconlabs/common/tfm_ns_interface.c
 - path: sl_component/sl_trustzone/src/sli_tz_ns_interface.c
-  # NS-side PSA<->legacy ECC bridge (mbedtls_ecc_group_to/from_psa); avoids dragging psa_util.c onto NS.
-- path: sl_component/sl_trustzone/src/sli_tz_tls_helpers.c
 
 define:
   # Use Silabs Secure Library configuration of TF-M (interface).

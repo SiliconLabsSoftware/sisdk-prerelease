@@ -26,7 +26,6 @@ source:
 - path: psa_crypto_pake.c
 - path: psa_crypto_rsa.c
 - path: psa_crypto_se.c
-- path: psa_util.c
 - path: psa_its_file.c
   condition:
   - native

@@ -39,6 +39,8 @@ component:
   - id: printf
   - id: iostream_retarget_stdio
   - id: iostream_recommended_stream
+  - id: toolchain_llvm_lto
+    condition: [toolchain_llvm]
 configuration:
   - name: SL_STATUS_STRING_ENABLE_BLUETOOTH
     value: 0
@@ -53,4 +55,4 @@ define:
   - name: SE_MANAGER_PRINT
 toolchain_settings:
   - option: optimize
-    value: debug
+    value: size

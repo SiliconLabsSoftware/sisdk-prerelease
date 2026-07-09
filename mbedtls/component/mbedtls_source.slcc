@@ -113,6 +113,7 @@ source:
 - path: library/pk_wrap.c
   condition:
   - mbedtls_pk
+- path: library/psa_util.c
 - path: library/rsa.c
   condition:
   - mbedtls_rsa

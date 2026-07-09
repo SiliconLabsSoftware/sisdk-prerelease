@@ -40,6 +40,9 @@ requires:
 - name: cmsis_rtos2
   condition:
   - kernel
+recommends:
+- id: bluetooth_controller_release_libraries
+  vendor: silabs
 template_contribution:
 - name: event_handler
   value:

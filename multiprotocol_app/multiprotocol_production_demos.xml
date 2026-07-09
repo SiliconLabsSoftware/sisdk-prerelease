@@ -1,31 +1,31 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <demos>
-	<demo name="brd4186c.demo.mp-ot-ncp-ble-rcp" label="OpenThread NCP + BLE RCP (DMP)">
-		<property key="blurb" value="OpenThread NCP + BLE RCP (DMP)" />
+	<demo name="brd4186c.demo.mp-ot-ncp-ble-rcp" label="OpenThread NCP + BLE RCP - UART (DMP)">
+		<property key="blurb" value="OpenThread NCP + BLE RCP - UART (DMP)" />
 		<property key="partCompatibility" value=".*efr32mg24b210f1536im48.*" />
 		<property key="boardCompatibility" value="brd4186c" />
 		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.1/multiprotocol_app/demos/mp-ot-ncp-ble-rcp/mp-ot-ncp-ble-rcp-brd4186c.s37" />
-		<property key="readmeFiles" value="ot-ble/ncp-rcp/mp-ot-ncp-ble-rcp/README-OT-NCP-BLE-RCP.md" />
+		<property key="readmeFiles" value="ot-ble/ncp-rcp/mp-ot-ncp-ble-rcp/readme-ot-ncp-ble-rcp.md" />
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates a Multiprotocol OpenThread (FTD) NCP and BLE RCP application using CPC over UART/EUSART for concurrent Thread and BLE with a Linux host. </description>
 	</demo>
-	<demo name="brd4116a.demo.mp-ot-ncp-ble-rcp" label="OpenThread NCP + BLE RCP (DMP)">
-		<property key="blurb" value="OpenThread NCP + BLE RCP (DMP)" />
+	<demo name="brd4116a.demo.mp-ot-ncp-ble-rcp" label="OpenThread NCP + BLE RCP - UART (DMP)">
+		<property key="blurb" value="OpenThread NCP + BLE RCP - UART (DMP)" />
 		<property key="partCompatibility" value=".*efr32mg26b410f3200im48.*" />
 		<property key="boardCompatibility" value="brd4116a" />
 		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.1/multiprotocol_app/demos/mp-ot-ncp-ble-rcp/mp-ot-ncp-ble-rcp-brd4116a.s37" />
-		<property key="readmeFiles" value="ot-ble/ncp-rcp/mp-ot-ncp-ble-rcp/README-OT-NCP-BLE-RCP.md" />
+		<property key="readmeFiles" value="ot-ble/ncp-rcp/mp-ot-ncp-ble-rcp/readme-ot-ncp-ble-rcp.md" />
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates a Multiprotocol OpenThread (FTD) NCP and BLE RCP application using CPC over UART/EUSART for concurrent Thread and BLE with a Linux host. </description>
 	</demo>
-	<demo name="brd4407a.demo.mp-ot-ncp-ble-rcp" label="OpenThread NCP + BLE RCP (DMP)">
-		<property key="blurb" value="OpenThread NCP + BLE RCP (DMP)" />
+	<demo name="brd4407a.demo.mp-ot-ncp-ble-rcp" label="OpenThread NCP + BLE RCP - UART (DMP)">
+		<property key="blurb" value="OpenThread NCP + BLE RCP - UART (DMP)" />
 		<property key="partCompatibility" value=".*simg301m104lil.*" />
 		<property key="boardCompatibility" value="brd4407a" />
 		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.1/multiprotocol_app/demos/mp-ot-ncp-ble-rcp/mp-ot-ncp-ble-rcp-brd4407a.s37" />
-		<property key="readmeFiles" value="ot-ble/ncp-rcp/mp-ot-ncp-ble-rcp/README-OT-NCP-BLE-RCP.md" />
+		<property key="readmeFiles" value="ot-ble/ncp-rcp/mp-ot-ncp-ble-rcp/readme-ot-ncp-ble-rcp.md" />
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates a Multiprotocol OpenThread (FTD) NCP and BLE RCP application using CPC over UART/EUSART for concurrent Thread and BLE with a Linux host. </description>
@@ -165,7 +165,7 @@
 		<property key="partCompatibility" value=".*efr32mg21a020f1024im32.*" />
 		<property key="boardCompatibility" value="brd4180a" />
 		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.1/multiprotocol_app/demos/mp-zb-ot-ble-rcp-spi/mp-zb-ot-ble-rcp-spi-brd4180a.s37" />
-		<property key="readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/README.md" />
+		<property key="readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/readme-mp-zb-ot-ble-rcp-spi.md" />
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates a Multiprotocol 802.15.4 RCP application running OpenThread, Zigbee (CMP/multi-PAN), and BLE (DMP) over SPI using CPC for host communication. </description>
@@ -175,7 +175,7 @@
 		<property key="partCompatibility" value=".*efr32mg21a020f1024im32.*" />
 		<property key="boardCompatibility" value="brd4180b" />
 		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.1/multiprotocol_app/demos/mp-zb-ot-ble-rcp-spi/mp-zb-ot-ble-rcp-spi-brd4180b.s37" />
-		<property key="readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/README.md" />
+		<property key="readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/readme-mp-zb-ot-ble-rcp-spi.md" />
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates a Multiprotocol 802.15.4 RCP application running OpenThread, Zigbee (CMP/multi-PAN), and BLE (DMP) over SPI using CPC for host communication. </description>
@@ -185,7 +185,7 @@
 		<property key="partCompatibility" value=".*efr32mg24b210f1536im48.*" />
 		<property key="boardCompatibility" value="brd4186c" />
 		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.1/multiprotocol_app/demos/mp-zb-ot-ble-rcp-spi/mp-zb-ot-ble-rcp-spi-brd4186c.s37" />
-		<property key="readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/README.md" />
+		<property key="readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/readme-mp-zb-ot-ble-rcp-spi.md" />
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates a Multiprotocol 802.15.4 RCP application running OpenThread, Zigbee (CMP/multi-PAN), and BLE (DMP) over SPI using CPC for host communication. </description>
@@ -195,7 +195,7 @@
 		<property key="partCompatibility" value=".*efr32mg26b410f3200im48.*" />
 		<property key="boardCompatibility" value="brd4116a" />
 		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.1/multiprotocol_app/demos/mp-zb-ot-ble-rcp-spi/mp-zb-ot-ble-rcp-spi-brd4116a.s37" />
-		<property key="readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/README.md" />
+		<property key="readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/readme-mp-zb-ot-ble-rcp-spi.md" />
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates a Multiprotocol 802.15.4 RCP application running OpenThread, Zigbee (CMP/multi-PAN), and BLE (DMP) over SPI using CPC for host communication. </description>
@@ -205,7 +205,7 @@
 		<property key="partCompatibility" value=".*simg301m104lil.*" />
 		<property key="boardCompatibility" value="brd4407a" />
 		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.1/multiprotocol_app/demos/mp-zb-ot-ble-rcp-spi/mp-zb-ot-ble-rcp-spi-brd4407a.s37" />
-		<property key="readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/README.md" />
+		<property key="readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/readme-mp-zb-ot-ble-rcp-spi.md" />
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates a Multiprotocol 802.15.4 RCP application running OpenThread, Zigbee (CMP/multi-PAN), and BLE (DMP) over SPI using CPC for host communication. </description>
@@ -215,7 +215,7 @@
 		<property key="partCompatibility" value=".*efr32mg21a020f1024im32.*" />
 		<property key="boardCompatibility" value="brd4180a" />
 		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.1/multiprotocol_app/demos/mp-zb-ot-ble-rcp-uart/mp-zb-ot-ble-rcp-uart-brd4180a.s37" />
-		<property key="readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/README.md" />
+		<property key="readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/readme-mp-zb-ot-ble-rcp-uart.md" />
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates a Multiprotocol 802.15.4 RCP application running OpenThread, Zigbee (CMP/multi-PAN), and BLE (DMP) over UART using CPC for host communication. </description>
@@ -225,7 +225,7 @@
 		<property key="partCompatibility" value=".*efr32mg21a020f1024im32.*" />
 		<property key="boardCompatibility" value="brd4180b" />
 		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.1/multiprotocol_app/demos/mp-zb-ot-ble-rcp-uart/mp-zb-ot-ble-rcp-uart-brd4180b.s37" />
-		<property key="readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/README.md" />
+		<property key="readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/readme-mp-zb-ot-ble-rcp-uart.md" />
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates a Multiprotocol 802.15.4 RCP application running OpenThread, Zigbee (CMP/multi-PAN), and BLE (DMP) over UART using CPC for host communication. </description>
@@ -235,7 +235,7 @@
 		<property key="partCompatibility" value=".*efr32mg24b210f1536im48.*" />
 		<property key="boardCompatibility" value="brd4186c" />
 		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.1/multiprotocol_app/demos/mp-zb-ot-ble-rcp-uart/mp-zb-ot-ble-rcp-uart-brd4186c.s37" />
-		<property key="readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/README.md" />
+		<property key="readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/readme-mp-zb-ot-ble-rcp-uart.md" />
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates a Multiprotocol 802.15.4 RCP application running OpenThread, Zigbee (CMP/multi-PAN), and BLE (DMP) over UART using CPC for host communication. </description>
@@ -245,7 +245,7 @@
 		<property key="partCompatibility" value=".*efr32mg26b410f3200im48.*" />
 		<property key="boardCompatibility" value="brd4116a" />
 		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.1/multiprotocol_app/demos/mp-zb-ot-ble-rcp-uart/mp-zb-ot-ble-rcp-uart-brd4116a.s37" />
-		<property key="readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/README.md" />
+		<property key="readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/readme-mp-zb-ot-ble-rcp-uart.md" />
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates a Multiprotocol 802.15.4 RCP application running OpenThread, Zigbee (CMP/multi-PAN), and BLE (DMP) over UART using CPC for host communication. </description>
@@ -255,7 +255,7 @@
 		<property key="partCompatibility" value=".*simg301m104lil.*" />
 		<property key="boardCompatibility" value="brd4407a" />
 		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.6.1/multiprotocol_app/demos/mp-zb-ot-ble-rcp-uart/mp-zb-ot-ble-rcp-uart-brd4407a.s37" />
-		<property key="readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/README.md" />
+		<property key="readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/readme-mp-zb-ot-ble-rcp-uart.md" />
 		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates a Multiprotocol 802.15.4 RCP application running OpenThread, Zigbee (CMP/multi-PAN), and BLE (DMP) over UART using CPC for host communication. </description>

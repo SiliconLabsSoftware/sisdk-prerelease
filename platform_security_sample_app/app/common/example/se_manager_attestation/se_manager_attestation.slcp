@@ -39,6 +39,8 @@ component:
   - id: printf
   - id: iostream_retarget_stdio
   - id: iostream_recommended_stream
+  - id: toolchain_llvm_lto
+    condition: [toolchain_llvm]
 requires:
   - name: device_security_vault
 configuration:
@@ -55,4 +57,4 @@ define:
   - name: SE_MANAGER_PRINT
 toolchain_settings:
   - option: optimize
-    value: debug
+    value: size
