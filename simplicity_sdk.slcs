@@ -7,10 +7,10 @@ supplier: Silicon Laboratories, Inc.
 component_path:
 - path: generative_ai/component
 - path: bgapi_protocol/component
-- path: bluetooth_le_middleware/component
 - path: bluetooth_common/component
 - path: bluetooth_mesh_middleware/component
 - path: bluetooth_mesh_srtest/component
+- path: bluetooth_le_middleware/component
 - path: bluetooth_le_controller/component
 - path: bluetooth_apploader/component
 - path: bluetooth_mesh/component
@@ -62,10 +62,6 @@ component_path:
 - path: openthread_internal/component/internal
 - path: openthread/component
 - path: openthread_stack/component_stack
-- path: platform_everest/platform/peripheral/component
-- path: platform_everest/platform/common/component
-- path: platform_everest/platform/Device/component
-- path: platform_everest/platform/service/component
 - path: platform_core_internal/app/common/component
 - path: platform_core_internal/platform/common/component
 - path: platform_core_internal/platform/service/component
@@ -85,7 +81,10 @@ component_path:
 - path: platform_riscv_internal/platform/rvlib/component
 - path: platform_riscv_internal/platform/service/component
 - path: platform_riscv_internal/platform/common/component
-- path: platform_efr32xg2b/platform/Device/component
+- path: platform_everest/platform/peripheral/component
+- path: platform_everest/platform/common/component
+- path: platform_everest/platform/Device/component
+- path: platform_everest/platform/service/component
 - path: platform_core/app/common/component
 - path: platform_core/util/plugin/component
 - path: platform_core/hardware/driver/component
@@ -100,6 +99,7 @@ component_path:
 - path: platform_core/hardware/module/config/component
 - path: platform_core/platform/middleware/glib/component
 - path: platform_core/platform/security/component
+- path: platform_efr32xg2b/platform/Device/component
 - path: printf/component
 - path: proprietary_default_radio_confs_xg2b/.
 - path: proprietary_default_radio_confs/.
@@ -187,8 +187,8 @@ documentation:
 - docset: zigbee
   version: 9.1.1
 upgrade_manifest:
-- path: bluetooth_le_middleware/upgrade.slcu
 - path: bluetooth_mesh_middleware/upgrade.slcu
+- path: bluetooth_le_middleware/upgrade.slcu
 - path: bluetooth_mesh/component/upgrade.slcu
 - path: bluetooth_le_host/component/upgrade.slcu
 - path: connect_stack/component/upgrade.slcu

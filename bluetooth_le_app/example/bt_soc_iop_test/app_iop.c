@@ -118,7 +118,7 @@ static uint8_t iop_connection_arr[11];
 
 //--------------------------------
 // Security level request from the tester.
-security_level_t security_level = SECURITY_LEVEL_NONE;
+security_config_t security_config = SECURITY_CONFIG_NONE;
 
 // Indicates that the LE Privacy 1.2 (RPA) test case (Test 7.6) is ongoing:
 // the device has been configured to let a bonded peer reconnect through a
@@ -475,16 +475,16 @@ sl_status_t handle_user_write(sl_bt_evt_gatt_server_user_write_request_t *user_w
         break;
       }
 
-      security_level = (security_level_t)user_write_req->value.data[1];
+      security_config = (security_config_t)user_write_req->value.data[1];
       app_log_info("Mobile OS: [0x%02x], Requesting security level: [0x%02x]." APP_LOG_NL,
                    user_write_req->value.data[0],
-                   security_level);
-      if (security_level > SECURITY_LEVEL_PRIVACY) {
+                   security_config);
+      if (security_config > SECURITY_CONFIG_PRIVACY) {
         // Map invalid values to NONE
-        security_level = SECURITY_LEVEL_NONE;
+        security_config = SECURITY_CONFIG_NONE;
       }
 
-      if (security_level != SECURITY_LEVEL_NONE) {
+      if (security_config != SECURITY_CONFIG_NONE) {
         sc = sl_bt_connection_close(user_write_req->connection);
         if (sc == SL_STATUS_IDLE) {
           app_log_info("Connection kept open." APP_LOG_NL);

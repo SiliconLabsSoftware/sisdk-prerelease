@@ -49,9 +49,9 @@ static bool increase_security = false;
 // Readable strings for sl_bt_connection_security_t
 static const char *connection_security_str[] = {
   "(0x00) No security",
-  "(0x01) Unauthenticated pairing",
-  "(0x02) Authenticated pairing",
-  "(0x03) Authenticated secure connections pairing (128-bit key)"
+  "(0x01) Unauthenticated pairing with encryption",
+  "(0x02) Authenticated pairing with encryption (legacy)",
+  "(0x03) Authenticated Secure Connections pairing with encryption using a 128-bit strength encryption key"
 };
 
 /***************************************************************************//**
@@ -334,23 +334,23 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
       // bonded notification is re-enabled, both on the same open connection.
       // Clear the test state on every close so a failed or abandoned run cannot
       // leave the flag set and make later, unrelated connections emit privacy
-      // warnings. The privacy test setup below (SECURITY_LEVEL_PRIVACY) re-arms
+      // warnings. The privacy test setup below (SECURITY_CONFIG_PRIVACY) re-arms
       // it afterward when the tester actually requests the privacy test.
       privacy_test_in_progress = false;
       privacy_rpa_resolved = false;
 
       // Configure security manager for the next connection.
-      switch (security_level) {
+      switch (security_config) {
         // Unauthenticated pairing with encryption
-        case SECURITY_LEVEL_PAIRING: {
+        case SECURITY_CONFIG_PAIRING: {
           // Preparing for test 7.2 (Security/Pairing).
           increase_security = true;
           sc = sl_bt_sm_delete_bondings();
           app_log_status_error(sc);
 
           if (sc == SL_STATUS_OK) {
-            app_log_info("Bondings deleted. Preparing for security level: [%d]." APP_LOG_NL,
-                         (int)security_level);
+            app_log_info("Bondings deleted. Preparing for security configuration: [%d]." APP_LOG_NL,
+                         (int)security_config);
           }
 
           sc = sl_bt_sm_configure(BONDING_WITHOUT_MITM, sl_bt_sm_io_capability_noinputnooutput);
@@ -362,15 +362,15 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
         }
 
         // Authenticated pairing with encryption
-        case SECURITY_LEVEL_AUTHENTICATION: {
+        case SECURITY_CONFIG_AUTHENTICATION: {
           // Preparing for test 7.3 (Security/Authentication).
           increase_security = true;
           sc = sl_bt_sm_delete_bondings();
           app_log_status_error(sc);
 
           if (sc == SL_STATUS_OK) {
-            app_log_info("Bondings deleted. Preparing for security level: [%d]." APP_LOG_NL,
-                         (int)security_level);
+            app_log_info("Bondings deleted. Preparing for security configuration: [%d]." APP_LOG_NL,
+                         (int)security_config);
           }
 
           sc = sl_bt_sm_configure(BONDING_WITH_MITM, sl_bt_sm_io_capability_displayonly);
@@ -386,15 +386,15 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
 
         // Authenticated Secure Connections pairing with encryption using a
         // 128-bit strength encryption key
-        case SECURITY_LEVEL_BONDING: {
+        case SECURITY_CONFIG_BONDING: {
           // Preparing for test 7.4 (Security/Bonding).
           increase_security = true;
           sc = sl_bt_sm_delete_bondings();
           app_log_status_error(sc);
 
           if (sc == SL_STATUS_OK) {
-            app_log_info("Bondings deleted. Preparing for security level: [%d]." APP_LOG_NL,
-                         (int)security_level);
+            app_log_info("Bondings deleted. Preparing for security configuration: [%d]." APP_LOG_NL,
+                         (int)security_config);
           }
 
           sc = sl_bt_sm_configure(BONDING_WITH_MITM, sl_bt_sm_io_capability_displayonly);
@@ -409,7 +409,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
         }
 
         // LE Privacy 1.2 test based on an existing bonding
-        case SECURITY_LEVEL_PRIVACY: {
+        case SECURITY_CONFIG_PRIVACY: {
           sc = sl_bt_resolving_list_add_device_by_bonding(bonding_handle, sl_bt_resolving_list_privacy_mode_network);
           app_log_status_error_f(sc, "Failed to add bonding handle %ld to the resolving list." APP_LOG_NL, bonding_handle);
 
@@ -435,7 +435,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
         }
       }
       // Evaluate security request only once.
-      security_level = SECURITY_LEVEL_NONE;
+      security_config = SECURITY_CONFIG_NONE;
 
       // Restart advertising.
       sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
