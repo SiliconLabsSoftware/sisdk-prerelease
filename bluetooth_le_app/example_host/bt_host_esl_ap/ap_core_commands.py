@@ -1255,9 +1255,6 @@ class CLICommandsMixin:
                 )
                 return
             self.cmd_mode = False
-            if self.adv_dedup_enabled:
-                # configure() flushes dedup cache so auto mode sees tag_found immediately.
-                self._adv_dedup_apply()
             if not self.auto_override:
                 if self.pawr_active is None:
                     self.start_pawr_train(advertise=INITIAL_AUTO_ADVERTISE_PAWR_TRAIN)

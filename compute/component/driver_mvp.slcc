@@ -43,6 +43,10 @@ recommends:
   condition:
   - device_series_2
   vendor: silabs
+- id: driver_mvp_hal_si91x
+  condition:
+  - device_si91x
+  vendor: silabs
 template_contribution:
 - name: component_catalog
   value: mvp

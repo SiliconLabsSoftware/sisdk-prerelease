@@ -191,6 +191,7 @@ tag:
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:!device:rm21z000f1024im32
   - hwfilter:!device:device_family_mgm22
+  - hwfilter:!device:device_series_3
   - hwfilter:ram:96k
   - toolchain:gcc
   - toolchain:llvm

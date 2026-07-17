@@ -3,7 +3,7 @@ package: platform
 quality: production
 label: Platform Security - SoC SE Manager Key Agreement (ECDH)
 description: >
-  This example project demonstrates the key agreement (ECDH) API of SE Manager.
+  Demonstrates how to perform ECDH key agreement between client and server peers with the SE Manager API, using plain, wrapped, or volatile ECC keys on Secure Vault devices.
 category: Example|Platform
 filter:
   - name: "Device Type"

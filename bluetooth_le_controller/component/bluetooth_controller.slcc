@@ -30,10 +30,11 @@ include:
   - path: sl_btctrl_linklayer_defs.h
   - path: sl_btctrl_packets.h
 requires:
+- name: bluetooth_agents_controller
 - name: bluetooth_controller_libraries
-- name: bluetooth_controller_libraries_250
+- name: bluetooth_controller_libraries_xg2b
   condition:
-  - device_sdid_250
+  - device_generic_family_efr32xg2b
 - name: bluetooth_controller_rtos_adaptation
   condition:
   - kernel

@@ -725,15 +725,18 @@ static void ReceiveDmaComplete(sl_dma_channel_handle_t * dma_handle,
 
   status = GetTailBuffer(handle->rxQueue, &buffer);
 
-  if (enableRxWhenSleeping) {
-    em1RequestRemove(handle);
-  }
-
   // If an abort was in progress when DMA completed, the ISR could be deferred
-  // until after the critical section. In this case, the buffers no longer
-  // exist, even though the DMA complete callback was called.
+  // until after the critical section. The buffers no longer exist and
+  // AbortRxDmaTransfers() already released the RX EM1 requirement, so this
+  // callback must not release it a second time.
   if (status == ECODE_EMDRV_UARTDRV_QUEUE_EMPTY) {
     return;
+  }
+
+  // Release the EM1 requirement taken at receive start, now that this
+  // completion is known to own the buffer (queue non-empty).
+  if (enableRxWhenSleeping) {
+    em1RequestRemove(handle);
   }
 
   EFM_ASSERT(buffer != NULL);
@@ -946,19 +949,19 @@ static void TransmitDmaComplete(sl_dma_channel_handle_t * dma_handle,
 
   status = GetTailBuffer(handle->txQueue, &buffer);
 
+  // If an abort was in progress when DMA completed, the buffers no longer exist
+  // and AbortTxDmaTransfers() already released the TX EM1 requirement and
+  // stopped delayedTxTimer, so do not arm the timer or release again here
+  if (status == ECODE_EMDRV_UARTDRV_QUEUE_EMPTY) {
+    return;
+  }
+
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   uint32_t ticks = calculateSleeptimerTicksToFlushTxBuffers(handle);
   sl_sleeptimer_start_timer(&handle->delayedTxTimer, ticks, TransmitDmaCompleteDelayed, user_data, 0, 0);
 #else
   em1RequestRemove(handle);
 #endif
-
-  // If an abort was in progress when DMA completed, the ISR could be deferred
-  // until after the critical section. In this case, the buffers no longer
-  // exist, even though the DMA complete callback was called.
-  if (status == ECODE_EMDRV_UARTDRV_QUEUE_EMPTY) {
-    return;
-  }
 
   EFM_ASSERT(buffer != NULL);
 
@@ -1733,8 +1736,8 @@ Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
 
 #if !defined(SL_CATALOG_CLOCK_MANAGER_PRESENT)
   if (initData->useLowFrequencyMode) {
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)    \
-    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)     \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)  \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14) \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
@@ -1756,8 +1759,8 @@ Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
   #error "Please assign a LF clock to EUSART instance"
 #endif
   } else {
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)    \
-    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)     \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)  \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14) \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
@@ -2056,6 +2059,19 @@ __STATIC_INLINE void AbortTxDmaTransfers(UARTDRV_Handle_t handle)
     // on subsequent transfers
   }
 
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  // If a transmit finished its DMA but is still in the flush window, delayedTxTimer is armed
+  // and TransmitDmaCompleteDelayed() would later release the TX-owned EM1 requirement.
+  // The removal below releases that same requirement now, so stop the timer to keep it
+  // from firing and removing a second time -- which would drive em1RequestCount negative.
+  // No-op when the timer is not armed (active-transmit or no-transmit abort).
+  bool delayedTxTimerRunning = false;
+  if ((sl_sleeptimer_is_timer_running(&handle->delayedTxTimer, &delayedTxTimerRunning) == SL_STATUS_OK)
+      && delayedTxTimerRunning) {
+    sl_sleeptimer_stop_timer(&handle->delayedTxTimer);
+  }
+#endif
+
   if (handle->em1RequestCount > 0) {
     em1RequestRemove(handle);
   }
@@ -2103,6 +2119,15 @@ __STATIC_INLINE void AbortRxDmaTransfers(UARTDRV_Handle_t handle)
                            #endif
                            );
       }
+    }
+
+    // Release the EM1 requirement taken when the DMA receive started.
+    // The (handle->em1RequestCount > 0) guard protects the uartdrvAbortAll path:
+    // AbortTxDmaTransfers() runs first and unconditionally removes one requirement whenever the count
+    // is non-zero, on an RX-only abortAll, it will already have consumed the RX-owned count.
+    // Without the guard we would decrement a second time and underflow.
+    if (enableRxWhenSleeping && handle->em1RequestCount > 0) {
+      em1RequestRemove(handle);
     }
   }
 }
@@ -2966,6 +2991,7 @@ sl_power_manager_on_isr_exit_t sl_uartdrv_sleep_on_isr_exit(void)
 }
 #endif
 
+/* *INDENT-OFF* */
 /******** THE REST OF THE FILE IS DOCUMENTATION ONLY !**********************//**
  * @addtogroup uartdrv UARTDRV - UART Driver
  * @brief Universal Asynchronous Receiver/Transmitter Driver
@@ -3004,16 +3030,16 @@ sl_power_manager_on_isr_exit_t sl_uartdrv_sleep_on_isr_exit(void)
    @code
 
    // Set to 1 to enable hardware flow control.
- #define EMDRV_UARTDRV_FLOW_CONTROL_ENABLE       1
+   #define EMDRV_UARTDRV_FLOW_CONTROL_ENABLE       1
 
    // Maximum number of driver instances.
- #define EMDRV_UARTDRV_MAX_DRIVER_INSTANCES      4
+   #define EMDRV_UARTDRV_MAX_DRIVER_INSTANCES      4
 
    // UART software flow control code: request peer to start Tx.
- #define UARTDRV_FC_SW_XON                       0x11
+   #define UARTDRV_FC_SW_XON                       0x11
 
    // UART software flow control code: request peer to stop Tx.
- #define UARTDRV_FC_SW_XOFF                      0x13
+   #define UARTDRV_FC_SW_XOFF                      0x13
    @endcode
 
    The properties of each UART driver instance are set at run-time via the
@@ -3192,3 +3218,4 @@ sl_power_manager_on_isr_exit_t sl_uartdrv_sleep_on_isr_exit(void)
    @endcode
 
  * @} end group uartdrv *********************************************************/
+/* *INDENT-ON* */

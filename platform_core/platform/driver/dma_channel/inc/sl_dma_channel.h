@@ -310,7 +310,7 @@ typedef struct sl_dma_channel_transfer {
   bool increment_destination;                   ///< Increment destination pointer per unit
   bool block_handshake_mode;                    ///< Transfer one block per DMA channel request if true
   bool callback_on_complete;                    ///< Generate callback when this transfer completes
-  bool cacheable;                               ///< If requires cacheable attribute (Everest/XDMA)
+  bool cacheable;                               ///< If requires cacheable attribute (XDMA)
   sl_dma_channel_xfer_descriptor_t *descriptor; ///< HW Descriptor buffer (Dynamically allocated if NULL)
   struct sl_dma_channel_transfer *next;         ///< Next in list (NULL = end or forms loop)
 } sl_dma_channel_transfer_t;
