@@ -35,7 +35,10 @@
  * @{
  ******************************************************************************/
 
-/*** Driver instrumentation options */
+/*** Driver instrumentation options
+     NVM3_TRACE_PORT_UNITYPRINTF requires the test_framework_unity component
+     and the UNITY_INCLUDE_PRINT_FORMATTED macro to be defined.
+ */
 #define NVM3_TRACE_PORT_NONE               0               // Nothing is printed
 #define NVM3_TRACE_PORT_PRINTF             1               // Print is available
 #define NVM3_TRACE_PORT_UNITYPRINTF        2               // Unity print is available
@@ -53,6 +56,19 @@
 #define NVM3_TRACE_LEVEL_LOW               3
 
 #define NVM3_TRACE_LEVEL                   NVM3_TRACE_LEVEL_WARNING
+
+/*** NVM3 operation timing trace:
+     Add the nvm3_time_trace component to emit traces for supported NVM3
+     operations. Currently timing trace is supported for:
+       - Forced repacks
+       - User-initiated repacks
+     Requires NVM3_TRACE_LEVEL to be set to NVM3_TRACE_LEVEL_WARNING or higher and
+     NVM3_TRACE_PORT to be set to PRINTF or UNITYPRINTF.
+     The nvm3_time_trace component pulls in cycle_counter on DWT-capable devices.
+ */
+#ifndef NVM3_TIME_TRACE_ENABLE
+#define NVM3_TIME_TRACE_ENABLE             0
+#endif
 
 #define NVM3_ASSERT_ON_ERROR               false
 

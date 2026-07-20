@@ -328,12 +328,12 @@ sl_status_t sli_se_lock_acquire(void)
   #endif
   #if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
   if (status == SL_STATUS_OK) {
-  #if defined(_SILICON_LABS_32B_SERIES_3)
-    sl_hal_bus_reg_write_bit(&CMU->CLKEN1, _CMU_CLKEN1_SEMAILBOXHOST_SHIFT, 1);
+  #if defined(CMU_SEMAILBOXCLKCTRL_CLKEN)
+    CMU->SEMAILBOXCLKCTRL_SET = CMU_SEMAILBOXCLKCTRL_CLKEN;
   #else
-    BUS_RegBitWrite(&CMU->CLKEN1, _CMU_CLKEN1_SEMAILBOXHOST_SHIFT, 1);
+    CMU->CLKEN1_SET = CMU_CLKEN1_SEMAILBOXHOST;
   #endif
-    // Make sure the write to CMU->CLKEN1 is finished.
+    // Make sure the write to CMU is finished.
     __DSB();
     __ISB();
   }

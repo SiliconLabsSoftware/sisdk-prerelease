@@ -325,6 +325,16 @@ static sl_status_t usart_deinit(void *context)
   }
 #endif
 
+#if defined(GPIO_USART_ROUTEEN_TXPEN)
+  GPIO->USARTROUTE[USART_NUM(usart_context->usart)].ROUTEEN = _GPIO_USART_ROUTEEN_RESETVALUE;
+  GPIO->USARTROUTE[USART_NUM(usart_context->usart)].TXROUTE = _GPIO_USART_TXROUTE_RESETVALUE;
+  GPIO->USARTROUTE[USART_NUM(usart_context->usart)].RXROUTE = _GPIO_USART_RXROUTE_RESETVALUE;
+#elif defined(USART_ROUTEPEN_RXPEN)
+  usart_context->usart->ROUTEPEN = _USART_ROUTEPEN_RESETVALUE;
+#elif defined(_USART_ROUTE_MASK)
+  usart_context->usart->ROUTE = _USART_ROUTE_RESETVALUE;
+#endif
+
   // Disable USART IRQ
   #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
   USART_IntDisable(usart_context->usart, USART_IF_TXC);

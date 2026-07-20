@@ -130,6 +130,7 @@ uint32_t sli_power_manager_get_restore_delay(void);
 /***************************************************************************//**
  * Initiates the wake-up restore process.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 void sli_power_manager_initiate_restore(void);
 
 /***************************************************************************//**
@@ -159,6 +160,13 @@ void sli_power_manager_init_em4(void);
 void sli_power_manager_em23_voltage_scaling_enable_fast_wakeup(bool enable);
 
 /***************************************************************************//**
+ * Enable or disable Flash Power-down on demand mode.
+ *
+ * @note Will also update the wake up time from EM2 to EM0.
+ ******************************************************************************/
+void sli_power_manager_em23_flash_power_down_enable_fast_wakeup(bool enable);
+
+/***************************************************************************//**
  * Initializes energy mode transition list.
  ******************************************************************************/
 void sli_power_manager_em_transition_event_list_init(void);
@@ -183,6 +191,13 @@ void sli_power_manager_notify_em_transition(sl_power_manager_em_t from,
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 void sli_power_manager_hal_exit_interrupt(void);
 #endif
+
+/*******************************************************************************
+ * HAL hook function for pre EM4 sleep.
+ *
+ * @note FOR INTERNAL USE ONLY.
+ ******************************************************************************/
+void sli_power_manager_em4_presleep_operations(void);
 
 #ifdef __cplusplus
 }

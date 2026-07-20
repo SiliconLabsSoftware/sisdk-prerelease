@@ -41,7 +41,7 @@ extern "C" {
 
 #include <stdbool.h>
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_enum.h"
 #include "sl_code_classification.h"
 
@@ -342,6 +342,18 @@ SL_ENUM_GENERIC(sl_hal_ldma_peripheral_signal_t, uint32_t) {
   #endif
   #if defined(LDMAXBAR0_CH_REQSEL_SIGSEL_EUSART2TXFL)
   SL_HAL_LDMA_PERIPHERAL_SIGNAL_EUSART2_TXFL = LDMAXBAR0_CH_REQSEL_SIGSEL_EUSART2TXFL | LDMAXBAR0_CH_REQSEL_SOURCESEL_EUSART2,             ///< Trigger on EUSART2_TXFL.
+  #endif
+  #if defined(LDMAXBAR0_CH_REQSEL_SIGSEL_EUSART3RXFL)
+  SL_HAL_LDMA_PERIPHERAL_SIGNAL_EUSART3_RXFL = LDMAXBAR0_CH_REQSEL_SIGSEL_EUSART3RXFL | LDMAXBAR0_CH_REQSEL_SOURCESEL_EUSART3,             ///< Trigger on EUSART3_RXFL.
+  #endif
+  #if defined(LDMAXBAR0_CH_REQSEL_SIGSEL_EUSART3TXFL)
+  SL_HAL_LDMA_PERIPHERAL_SIGNAL_EUSART3_TXFL = LDMAXBAR0_CH_REQSEL_SIGSEL_EUSART3TXFL | LDMAXBAR0_CH_REQSEL_SOURCESEL_EUSART3,             ///< Trigger on EUSART3_TXFL.
+  #endif
+  #if defined(LDMAXBAR0_CH_REQSEL_SIGSEL_EUSART4RXFL)
+  SL_HAL_LDMA_PERIPHERAL_SIGNAL_EUSART4_RXFL = LDMAXBAR0_CH_REQSEL_SIGSEL_EUSART4RXFL | LDMAXBAR0_CH_REQSEL_SOURCESEL_EUSART4,             ///< Trigger on EUSART4_RXFL.
+  #endif
+  #if defined(LDMAXBAR0_CH_REQSEL_SIGSEL_EUSART4TXFL)
+  SL_HAL_LDMA_PERIPHERAL_SIGNAL_EUSART4_TXFL = LDMAXBAR0_CH_REQSEL_SIGSEL_EUSART4TXFL | LDMAXBAR0_CH_REQSEL_SOURCESEL_EUSART4,             ///< Trigger on EUSART4_TXFL.
   #endif
   #if defined(LDMAXBAR0_CH_REQSEL_SIGSEL_PIXELRZ0REQ_TXF)
   SL_HAL_LDMA_PERIPHERAL_SIGNAL_PIXELRZ0REQ_TXF = LDMAXBAR0_CH_REQSEL_SIGSEL_PIXELRZ0REQ_TXF | LDMAXBAR0_CH_REQSEL_SOURCESEL_PIXELRZ0,     ///< Trigger on PIXELRZ0REQ_TXF.
@@ -2507,7 +2519,7 @@ __INLINE void sl_hal_ldma_enable_channel(LDMA_TypeDef *ldma,
                                          uint32_t channel)
 {
   uint32_t ch_mask = 1UL << channel;
-  EFM_ASSERT(channel < DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(channel < DMA_CHAN_COUNT);
 
   // Enable LDMA channel
   ldma->CHEN_SET = ch_mask;
@@ -2545,7 +2557,7 @@ __INLINE void sl_hal_ldma_disable_channel(LDMA_TypeDef *ldma,
                                           uint32_t channel)
 {
   uint32_t ch_mask = 1UL << channel;
-  EFM_ASSERT(channel < DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(channel < DMA_CHAN_COUNT);
 
   // Disable LDMA channel
   ldma->CHDIS_SET = ch_mask;
@@ -2597,7 +2609,7 @@ SL_CODE_CLASSIFY(SL_CODE_COMPONENT_HAL_LDMA, SL_CODE_CLASS_TIME_CRITICAL)
 __INLINE bool sl_hal_ldma_channel_is_enabled(LDMA_TypeDef *ldma,
                                              uint32_t channel)
 {
-  EFM_ASSERT(channel < DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(channel < DMA_CHAN_COUNT);
   return ldma->CHSTATUS & (1 << channel);
 }
 
@@ -2618,7 +2630,7 @@ __INLINE bool sl_hal_ldma_channel_is_enabled(LDMA_TypeDef *ldma,
 __INLINE bool sl_hal_ldma_channel_is_active(LDMA_TypeDef *ldma,
                                             uint32_t channel)
 {
-  EFM_ASSERT(channel < DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(channel < DMA_CHAN_COUNT);
   return ldma->CHBUSY & (1 << channel);
 }
 
@@ -2641,7 +2653,7 @@ __INLINE void sl_hal_ldma_enable_channel_request(LDMA_TypeDef *ldma,
                                                  uint32_t channel)
 {
   uint32_t ch_mask = 1UL << channel;
-  EFM_ASSERT(channel < DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(channel < DMA_CHAN_COUNT);
 
   // Enable LDMA channel request
   ldma->REQDIS_CLR = ch_mask;
@@ -2666,7 +2678,7 @@ __INLINE void sl_hal_ldma_disable_channel_request(LDMA_TypeDef *ldma,
                                                   uint32_t channel)
 {
   uint32_t ch_mask = 1UL << channel;
-  EFM_ASSERT(channel < DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(channel < DMA_CHAN_COUNT);
 
   // Disable LDMA channel request
   ldma->REQDIS_SET = ch_mask;

@@ -27,6 +27,7 @@ requires:
 - name: device_gpio
 - name: component_catalog
 - name: code_classification
+- name: log_none
 template_contribution:
 - name: event_handler
   value:

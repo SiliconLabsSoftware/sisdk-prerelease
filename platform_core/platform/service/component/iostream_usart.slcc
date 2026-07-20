@@ -46,6 +46,8 @@ template_contribution:
     event: sleep_on_isr_exit
     include: sl_iostream_init_usart_instances.h
     handler: sl_iostream_usart_{{instance}}_sleep_on_isr_exit
+- name: component_catalog
+  value: iostream_usart_{{instance}}
 documentation:
   docset: gecko-platform
   document: platform-service/iostream-usart

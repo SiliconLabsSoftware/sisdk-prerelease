@@ -84,8 +84,9 @@ void sl_hal_letimer_init(LETIMER_TypeDef *letimer,
                          const sl_hal_letimer_init_t *init)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
-
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(init != NULL);
+  
   sl_hal_letimer_enable(letimer);
   sl_hal_letimer_wait_sync(letimer);
 
@@ -116,7 +117,7 @@ void sl_hal_letimer_init(LETIMER_TypeDef *letimer,
 void sl_hal_letimer_reset(LETIMER_TypeDef *letimer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
 
 #if defined(_LETIMER_SWRST_MASK)
   letimer->SWRST_SET = LETIMER_SWRST_SWRST;
@@ -154,11 +155,11 @@ void sl_hal_letimer_set_compare(LETIMER_TypeDef *letimer,
                                 uint32_t value)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
   // Make sure compare value is valid.
-  EFM_ASSERT(value <= SL_HAL_LETIMER_MAX_COUNT(letimer));
+  SL_LOG_DEBUG_ASSERT(value <= SL_HAL_LETIMER_MAX_COUNT(letimer));
   // Make sure module is enabled.
-  EFM_ASSERT(letimer->EN & _LETIMER_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(letimer->EN & _LETIMER_EN_EN_MASK);
 
   sl_hal_letimer_wait_sync(letimer);
 
@@ -171,7 +172,7 @@ void sl_hal_letimer_set_compare(LETIMER_TypeDef *letimer,
       break;
     default:
       // Asserts if the channel doesn't exist
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
   }
 }
 
@@ -183,7 +184,7 @@ uint32_t sl_hal_letimer_get_compare(LETIMER_TypeDef *letimer,
                                     uint8_t channel)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
 
   uint32_t return_value = 0;
 
@@ -198,7 +199,7 @@ uint32_t sl_hal_letimer_get_compare(LETIMER_TypeDef *letimer,
       break;
     default:
       // Asserts if the channel doesn't exist
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
   }
   return return_value;
 }
@@ -212,11 +213,11 @@ void sl_hal_letimer_set_repeat(LETIMER_TypeDef *letimer,
                                uint32_t value)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
   // Make sure repeat value is valid.
-  EFM_ASSERT((value & ~(_LETIMER_REP0_REP0_MASK >> _LETIMER_REP0_REP0_SHIFT)) == 0);
+  SL_LOG_DEBUG_ASSERT((value & ~(_LETIMER_REP0_REP0_MASK >> _LETIMER_REP0_REP0_SHIFT)) == 0);
   // Make sure module is enabled.
-  EFM_ASSERT(letimer->EN & _LETIMER_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(letimer->EN & _LETIMER_EN_EN_MASK);
 
   sl_hal_letimer_wait_sync(letimer);
 
@@ -229,7 +230,7 @@ void sl_hal_letimer_set_repeat(LETIMER_TypeDef *letimer,
       break;
     default:
       // Asserts if the channel doesn't exist
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
   }
 }
 
@@ -241,7 +242,7 @@ uint32_t sl_hal_letimer_get_repeat(LETIMER_TypeDef *letimer,
                                    uint8_t channel)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
 
   uint32_t return_value = 0;
 
@@ -256,7 +257,7 @@ uint32_t sl_hal_letimer_get_repeat(LETIMER_TypeDef *letimer,
       break;
     default:
       // Asserts if the channel doesn't exist
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
   }
   return return_value;
 }

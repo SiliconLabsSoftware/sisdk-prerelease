@@ -18,13 +18,15 @@
 #include PLATFORM_HEADER
 
 #include <stdio.h>
+#include "sl_component_catalog.h"
 #include "hal.h"
 #include "sl_rail_util_compatible_pa.h"
 #include "sl_sleeptimer.h"
+#ifdef SL_CATALOG_POWER_MANAGER_PRESENT
 #include "sl_power_manager.h"
+#endif // SL_CATALOG_POWER_MANAGER_PRESENT
 #include "rail.h"
 #include "sl_status.h"
-#include "sl_component_catalog.h"
 
 #if defined(SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT)
 #include "sl_iostream.h"
@@ -80,10 +82,12 @@ uint16_t halCommonGetInt16uQuarterSecondTick(void)
   return (uint16_t)ticks;
 }
 
+#ifdef SL_CATALOG_POWER_MANAGER_PRESENT
 sl_power_manager_on_isr_exit_t sl_legacy_hal_sleep_on_isr_exit(void)
 {
   return SL_POWER_MANAGER_WAKEUP;
 }
+#endif // SL_CATALOG_POWER_MANAGER_PRESENT
 
 void halCommonDelayMicroseconds(uint16_t us)
 {
@@ -134,7 +138,9 @@ void halInit(void)
     *dataDestination-- = STACK_FILL_VALUE;
   }
 
+#ifdef SL_CATALOG_POWER_MANAGER_PRESENT
   sl_power_manager_em4_unlatch_pin_retention();
+#endif // SL_CATALOG_POWER_MANAGER_PRESENT
 
 #if ((SL_LEGACY_HAL_ENABLE_WATCHDOG == 1) && (SL_LEGACY_HAL_DISABLE_WATCHDOG == 0))
   halInternalEnableWatchDog();

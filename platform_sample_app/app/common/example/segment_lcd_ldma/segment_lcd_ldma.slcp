@@ -35,8 +35,7 @@ ui_hints:
   highlight: readme.md
 tag:
   - hardware:component:segment_lcd_driver:cl010-1087-04
-  - hwfilter:board:hardware:has:segment_lcd_driver:cl010-1087-04
-  - hwfilter:!board:brd2506b
+  - hwfilter:board:hardware_board_has_segment_lcd
   - hwfilter:device:device_series_2
 configuration:
   - name: SL_SEGMENT_LCD_LDMA_MODE

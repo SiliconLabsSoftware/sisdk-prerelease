@@ -35,11 +35,13 @@
 #define SL_BTCTRL_RESET_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 // Custom reset reason.
 #define SL_BTCTRL_RESET_CUSTOM_REASON_NA               0x00000000UL
 #define SL_BTCTRL_RESET_CUSTOM_REASON_HCI_COMMAND      (0x1UL << 0)
 #define SL_BTCTRL_RESET_CUSTOM_REASON_UNKNOWN          (0x1UL << 31)
+#define SL_BTCTRL_RESET_CUSTOM_REASON_SIGNATURE        0x0C0FFE00UL
 
 #define SL_BTCTRL_RESET_VALID_MASK                     ((0x1UL << 1) - 1)
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2025 Silicon Laboratories Inc. www.silabs.com
+# Copyright 2026 Silicon Laboratories Inc. www.silabs.com
 #
 # SPDX-License-Identifier: Zlib
 #
@@ -37,10 +37,9 @@ A connected device with the prepared certificate signing request with the
 '''
 # Metadata
 __author__ = 'Silicon Laboratories, Inc'
-__copyright__ = 'Copyright 2025, Silicon Laboratories, Inc.'
+__copyright__ = 'Copyright 2026, Silicon Laboratories, Inc.'
 
 import os
-import sys
 import pathlib
 import datetime
 import re
@@ -55,17 +54,14 @@ RAM_DATA_START            = 0x20007C00
 RAM_DATA_LEN_MAX          = 1024
 STATIC_AUTH_DATA_LEN      = 32
 
-NVM3_CONTROL_BLOCK_KEY    = { 'ble': 0x40400, 'btmesh': 0x60400 }
-NVM3_CONTROL_BLOCK_SIZE   = 17
-
-# Control Block bit fields
-CERTIFICATE_ON_DEVICE_BIT = 0
-DEVICE_EC_KEY_BIT         = 1
-STATIC_AUTH_DATA_BIT      = 2
+# CBAP NVM3 key definitions.
+CBAP_NVM_BASE             = 0x8A000
+CBAP_NVM_ROOT_CERT        = CBAP_NVM_BASE + 0
+CBAP_NVM_DEVICE_CERT      = CBAP_NVM_BASE + 3
 
 MAX_ITERATIONS            = 10
 
-def main(level, validity, serial, ip, device, protocol):
+def main(level, validity, serial, ip, device):
     # Check the presence of Simplicity Commander.
     try:
         subprocess.run(['commander', '-v'], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT) # Suppress output
@@ -79,8 +75,6 @@ def main(level, validity, serial, ip, device, protocol):
         raise Exception('Validity should be greater than or equal to 1 [days]!')
     if serial is not None and ip is not None:
         raise Exception('At most one of [J-Link serial number] or [IP address] shall be defined.')
-    if protocol not in NVM3_CONTROL_BLOCK_KEY:
-        raise Exception('Invalid protocol: ' + protocol + ' (choose from: ' + str(NVM3_CONTROL_BLOCK_KEY.keys()) + ')')
 
     # Set paths and check certificate authority.
     if level == 0:
@@ -102,19 +96,11 @@ def main(level, validity, serial, ip, device, protocol):
     csr = get_csr(ram_data)
     print('Certificate Signing Request retrieved from RAM data.', os.linesep)
 
-    # Retrieve Control Block from NVM3.
     path_nvm3_dump = dump_nvm3(path_auth_dir)
-    control_block  = ControlBlock(path_nvm3_dump)
 
-    if control_block.static_auth_present == True:
-        # Get Static Authentication Data from RAM dump.
-        static_auth = ram_data[1:STATIC_AUTH_DATA_LEN]
-        print("Static Authentication Data is ready for further processing.")
-
-    if control_block.device_ec_key_present == False:
-        print('EC key pair is missing from the device. It is needed to generate a CSR. Exiting.')
-        os.remove(path_nvm3_dump)
-        sys.exit(1)
+    # Get Static Authentication Data from RAM dump.
+    static_auth = ram_data[1:STATIC_AUTH_DATA_LEN]
+    print("Static Authentication Data is ready for further processing.")
 
     # Load private key and certificate of the authority.
     with open(path_auth_key, 'rb') as f:
@@ -125,21 +111,18 @@ def main(level, validity, serial, ip, device, protocol):
     # Sign the request and create the Device Certificate.
     cert = sign_csr(auth_key, auth_cert, path_auth_database, csr, validity)
 
-    # Exit if the device is not configured to hold the certificate.
-    if control_block.certificate_on_device == False:
-        print('The device is not configured to hold the certificate. The certificate file is ready for further processing. Exiting.')
-        os.remove(path_nvm3_dump)
-        sys.exit(0)
-
-    # Add the signed certificate to the NVM3 image according to the Control Block.
+    # Add the signed certificate to the NVM3 image at its dedicated key.
     patch_nvm3(path_nvm3_dump,
                cert.public_bytes(primitives.serialization.Encoding.DER), # Export in binary (DER) format
-               control_block.nvm3_key[CERTIFICATE_ON_DEVICE_BIT],
-               control_block.max_link_data_len)
+               CBAP_NVM_DEVICE_CERT)
+    # Add root certificate as well.
+    patch_nvm3(path_nvm3_dump,
+               auth_cert.public_bytes(primitives.serialization.Encoding.DER),
+               CBAP_NVM_ROOT_CERT)
 
     # Flash back the modified NVM3 content onto the device.
     subprocess_call(('commander flash ' + path_nvm3_dump + ' ' + device_argument()).split())
-    print('Certificate flashed onto the device.')
+    print('Certificates flashed onto the device.')
     os.remove(path_nvm3_dump) # Clean up
 
 def read_ram(start_address, memory_size):
@@ -181,7 +164,8 @@ def get_csr(ram_data):
     csr_len = tuple[0]
 
     if is_complete == False or csr_len == 0:
-        raise Exception('Certificate signing request generation is incomplete!')
+        raise Exception("Certificate signing request generation is incomplete! " \
+                        "(It is worth checking if the device has been already provisioned.)")
 
     csr_bytes = ram_data[STATIC_AUTH_DATA_LEN + 3 : STATIC_AUTH_DATA_LEN + 3 + csr_len]
     return x509.load_der_x509_csr(csr_bytes)
@@ -319,14 +303,13 @@ def dump_nvm3(path_dir):
     subprocess_call(('commander nvm3 read ' + device_argument() + ' -o ' + path_nvm3_dump).split())
     return path_nvm3_dump
 
-def patch_nvm3(path_nvm3_dump, data, nvm3_start_key, nvm3_object_size):
+def patch_nvm3(path_nvm3_dump, data, nvm3_key):
     '''Create an NVM3 patch file containing the given data and apply on the NVM3 image.
 
     Keyword arguments:
     path_nvm3_dump -- Path to the NVM3 image.
     data -- The data to add to the NVM3 image.
-    nvm3_start_key -- NVM3 objects will be created or overwritten starting from this key.
-    nvm3_object_size -- The size of each NVM3 object data.
+    nvm3_key -- NVM3 objects will be created or overwritten for this key.
     '''
 
     # Temporary file to help patching the NVM3 dump file.
@@ -334,120 +317,11 @@ def patch_nvm3(path_nvm3_dump, data, nvm3_start_key, nvm3_object_size):
 
     # Create patch file
     with open(path_nvm3_patch, 'w') as f:
-        nvm3_key = nvm3_start_key
-
-        while nvm3_key != 0:
-            # Select next chunk.
-            if len(data) >= nvm3_object_size:
-                length = nvm3_object_size
-            else:
-                length = len(data)
-
-            chunk = data[:length]
-            data = data[length:]
-
-            if len(data) > 0:
-                next_nvm3_key = nvm3_key + 1
-                header = 0x0001 | 2 | next_nvm3_key << 2
-            else: # The last chunk is being processed.
-                next_nvm3_key = 0
-                header = 0x0001
-
-            # Construct next line and write to file.
-            key = NVM3_CONTROL_BLOCK_KEY[args.protocol] | nvm3_key # Add key prefix.
-            data_chunk = struct.pack(f'<HHH', header, 0x0001, length) + chunk # Pack data chunk.
-            f.write(hex(key) + ' : OBJ : ' + binascii.hexlify(data_chunk).decode('utf-8') + '\n') # <key>:<type>:<data>
-
-            nvm3_key = next_nvm3_key
+        f.write(hex(nvm3_key) + ' : OBJ : ' + binascii.hexlify(data).decode('utf-8') + '\n') # <key>:<type>:<data>
 
     # Apply patch
     subprocess_call(['commander', 'nvm3', 'set', path_nvm3_dump, '--nvm3file', path_nvm3_patch, '--outfile', path_nvm3_dump])
     os.remove(path_nvm3_patch)
-
-class ControlBlock():
-    def __init__(self, path_nvm3_dump):
-        '''Get Control Block from an NVM3 image file.
-
-        Keyword arguments:
-        path_nvm3_dump -- Path to the NVM3 image.
-        Return values:
-        ControlBlock -- The retrieved and parsed Control Block.
-        '''
-        nvm3_object = self.get_nvm3_object(path_nvm3_dump)
-        self.parse_data(nvm3_object)
-        self.validate()
-
-    def get_nvm3_object(self, path_nvm3_dump):
-        # Read NVM3 object from the NVM3 image that belongs to the control block key.
-        cmd = ('commander nvm3 parse ' + path_nvm3_dump + ' --key ' + str(NVM3_CONTROL_BLOCK_KEY[args.protocol])).split()
-        nvm3_object = subprocess_call(cmd).stdout.decode('utf-8')
-
-        # Check Control Block key.
-        key = re.findall(r'^Key\s+:\s+(0x\d+).*$', nvm3_object, re.MULTILINE)
-
-        if len(re.findall(r'^Found NVM3 range:', nvm3_object, re.MULTILINE)) == 0 or len(key) == 0:
-            raise Exception('NVM3 range cannot be found.')
-
-        self.key = key[0]
-        return nvm3_object
-
-    def parse_data(self, nvm3_object):
-        # Get raw bytes of the Control Block.
-        data = ''
-
-        for item in re.findall(r'^([0-9A-Fa-f]{8}):((\s[0-9A-Fa-f]{2}){1,16})', nvm3_object, re.MULTILINE):
-            data = data + item[1].replace(' ', '')
-
-        data = binascii.unhexlify(data)
-
-        if data == None or len(data) != NVM3_CONTROL_BLOCK_SIZE:
-            raise Exception('Invalid Control Block!')
-
-        # Unpack the data of the NVM3 object.
-        self.nvm3_key = [0, 0, 0]
-        (self.header,
-         self.next_control_block,
-         bitmap,
-         self.nvm3_key[0], self.nvm3_key[1], self.nvm3_key[2],
-         self.max_link_data_len) = struct.unpack('<HHQbbbH', data)
-        self.version = self.header & 0xf000 # Upper 4 bits of the header contain version number. Other bits are reserved for future use.
-        self.next_control_block |= NVM3_CONTROL_BLOCK_KEY[args.protocol] & 0xF0000 # Only stored on two bytes. Adding prefix.
-
-        print(f'Control Block retrieved from device NVM3 ({self.key}).')
-        print('\tVersion:', self.version)
-        print('\tHeader:', hex(self.header))
-        print('\tMaximum link data length:', self.max_link_data_len)
-        print('\tNext Control Block:', hex(self.next_control_block))
-
-        # Inspect bitmap.
-        print(f'\tConfiguration: {format(bitmap, "#06b")}')
-
-        self.certificate_on_device = bool(bitmap & (1 << CERTIFICATE_ON_DEVICE_BIT))
-        print('\t\tCertificate on device required:', self.certificate_on_device)
-
-        self.device_ec_key_present = bool(bitmap & (1 << DEVICE_EC_KEY_BIT))
-        print('\t\tEC key pair present:', self.device_ec_key_present)
-
-        self.static_auth_present = bool(bitmap & (1 << STATIC_AUTH_DATA_BIT))
-        print('\t\tStatic Authentication data present:', self.static_auth_present, os.linesep)
-
-    def validate(self):
-        # Expecting zero as the version number.
-        if self.version != 0:
-            raise Exception('Invalid Control Block! Version: ', self.version, '. "0" is expected.')
-
-        # Expecting only one control block. Therefore it should point onto itself.
-        if self.next_control_block != NVM3_CONTROL_BLOCK_KEY[args.protocol]:
-            raise Exception('Invalid Control Block! Next Control Block NVM3 key: ',
-                            hex(self.next_control_block), '. ',
-                            hex(NVM3_CONTROL_BLOCK_KEY[args.protocol]), ' is expected.')
-
-        # Check the security of NVM3 ITS data.
-        if self.device_ec_key_present and self.nvm3_key[DEVICE_EC_KEY_BIT] != 0:
-            raise Exception('EC key pair is exposed. Any data stored in ITS should not be accessible!')
-
-        if self.static_auth_present and self.nvm3_key[STATIC_AUTH_DATA_BIT] != 0:
-            raise Exception('Static Authentication data is exposed. Any data stored in ITS should not be accessible!')
 
 def subprocess_call(command):
     '''Handle subprocess calls.
@@ -513,15 +387,10 @@ def load_args():
                         help='IP Address. Should not be given together with the J-Link serial number.')
     parser.add_argument('-d', '--device',
                         help='The device, device family or platform to target. Only needed for custom hardware.')
-    parser.add_argument('-p', '--protocol',
-                        default='btmesh',
-                        type=str.lower,
-                        choices=['ble', 'btmesh'],
-                        help='Determines which NVM3 region to use.')
 
     args = parser.parse_args()
     return args
 
 if __name__ == '__main__':
     args = load_args()
-    main(args.level, args.validity, args.serial, args.ip, args.device, args.protocol)
+    main(args.level, args.validity, args.serial, args.ip, args.device)

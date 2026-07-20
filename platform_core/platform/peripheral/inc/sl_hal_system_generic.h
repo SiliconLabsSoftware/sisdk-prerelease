@@ -205,6 +205,23 @@ uint32_t sl_hal_system_get_hfrcodpll_band_calibration(uint32_t frequency);
 
 /***************************************************************************//**
  * @brief
+ *    Get the DPLL K0 offset value for a given HFRCODPLL frequency band.
+ *
+ * @param[in] frequency
+ *    HFRCODPLL target frequency for which to retrieve the K0 offset.
+ *
+ * @return
+ *    K0 offset value for the given band, or 0 on error.
+ *
+ * @note
+ *    The returned value should be written to the DPLL OFFSET register K0 field
+ *    before enabling the DPLL. The K0 offsets are stored per band in the
+ *    DevInfo OTP table.
+ ******************************************************************************/
+uint32_t sl_hal_system_get_dpll_k0_offset(uint32_t frequency);
+
+/***************************************************************************//**
+ * @brief
  *    Get a factory calibration value for HFRCOEM23 oscillator.
  *
  * @param[in] frequency

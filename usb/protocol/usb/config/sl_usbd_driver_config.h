@@ -18,6 +18,8 @@
 #ifndef SL_USBD_DRIVER_CONFIG_H
 #define SL_USBD_DRIVER_CONFIG_H
 
+#include <stdint.h>
+
 // <<< sl:start pin_tool >>>
 // <gpio> SL_USBD_DRIVER_VBUS_SENSE
 // $[GPIO_SL_USBD_DRIVER_VBUS_SENSE]
@@ -26,5 +28,14 @@
  #define SL_USBD_DRIVER_VBUS_SENSE_PIN        2
 // [GPIO_SL_USBD_DRIVER_VBUS_SENSE]$
 // <<< sl:end pin_tool >>>
+
+// Default above is Series 2 (port C). Series 3 boards use port D; override here
+// (outside pin_tool) so Pin Tool does not remove this block.
+#if defined(_SILICON_LABS_32B_SERIES_3)
+#undef SL_USBD_DRIVER_VBUS_SENSE_PORT
+#undef SL_USBD_DRIVER_VBUS_SENSE_PIN
+#define SL_USBD_DRIVER_VBUS_SENSE_PORT       SL_GPIO_PORT_D
+#define SL_USBD_DRIVER_VBUS_SENSE_PIN        2
+#endif
 
 #endif // SL_USBD_DRIVER_CONFIG_H

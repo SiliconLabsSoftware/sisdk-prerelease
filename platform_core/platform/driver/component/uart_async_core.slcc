@@ -1,0 +1,29 @@
+id: uart_async_core
+package: platform_core
+label: UART Driver
+description: >
+  Internal UART async driver component meant for users that do not wish to have their UART instance
+  declared statically.
+category: Platform|Driver|UART
+quality: experimental
+ui_hints:
+  visibility: never
+metadata:
+  sbom:
+    license: Zlib
+root_path: platform_core/platform/driver/uart/
+source:
+- path: src/sl_uart_async.c
+- path: src/sli_uart_async.h
+- path: src/sli_uart_transfer_pool.c
+- path: src/sli_uart_transfer_pool.h
+provides:
+- name: uart_async_core
+requires:
+- name: dma_channel
+- name: dma_manager
+- name: memory_manager
+- name: uart_core
+template_contribution:
+- name: component_catalog
+  value: uart_async

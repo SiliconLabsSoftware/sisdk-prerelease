@@ -425,6 +425,7 @@ __attribute__((optimize("no-tree-loop-distribute-patterns")))
 #if defined(__clang__)
 __attribute__((no_builtin("memcpy")))
 #endif
+
 void CopyMemory(const uint32_t *from, uint32_t *to, uint32_t count)
 {
   while (count--) {
@@ -526,6 +527,7 @@ __STATIC_FORCEINLINE void ecc_write_zeros(uint32_t *start, uint32_t *end)
     : "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12", "memory"
     );
 }
+
 /*---------------------------------------------------------------------------
  * ECC preserve initialization function using ARM Load/Store Multiple
  * (LDM/STM) instructions
@@ -620,7 +622,6 @@ __NO_RETURN __USED void Reset_Handler_C(void)
     ecc_init_fast = false;
   }
 #endif // !defined(SL_CATALOG_GECKO_BOOTLOADER_INTERFACE_PRESENT)
-
   // Enable DMEM controller registers.
   CMU->CLKEN1_SET = CMU_CLKEN1_DMEM;
   // Enable ECC syndrome writes.

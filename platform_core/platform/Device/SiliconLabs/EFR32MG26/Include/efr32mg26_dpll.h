@@ -43,45 +43,45 @@
 
 /** DPLL Register Declaration. */
 typedef struct dpll_typedef{
-  __IM uint32_t  IPVERSION;                     /**< IP Version                                         */
-  __IOM uint32_t EN;                            /**< Enable                                             */
-  __IOM uint32_t CFG;                           /**< Config                                             */
-  __IOM uint32_t CFG1;                          /**< Config1                                            */
-  __IOM uint32_t IF;                            /**< Interrupt Flag                                     */
-  __IOM uint32_t IEN;                           /**< Interrupt Enable                                   */
-  __IM uint32_t  STATUS;                        /**< Status                                             */
+  __IM uint32_t  IPVERSION;                     /**< IP Version Register                                */
+  __IOM uint32_t EN;                            /**< Enable Register                                    */
+  __IOM uint32_t CFG;                           /**< Config Register                                    */
+  __IOM uint32_t CFG1;                          /**< Config1 Register                                   */
+  __IOM uint32_t IF;                            /**< Interrupt Flag Register                            */
+  __IOM uint32_t IEN;                           /**< Interrupt Enable Register                          */
+  __IM uint32_t  STATUS;                        /**< Status Register                                    */
   uint32_t       RESERVED0[2U];                 /**< Reserved for future use                            */
-  __IOM uint32_t LOCK;                          /**< Lock                                               */
+  __IOM uint32_t LOCK;                          /**< Lock Register                                      */
   uint32_t       RESERVED1[1014U];              /**< Reserved for future use                            */
-  __IM uint32_t  IPVERSION_SET;                 /**< IP Version                                         */
-  __IOM uint32_t EN_SET;                        /**< Enable                                             */
-  __IOM uint32_t CFG_SET;                       /**< Config                                             */
-  __IOM uint32_t CFG1_SET;                      /**< Config1                                            */
-  __IOM uint32_t IF_SET;                        /**< Interrupt Flag                                     */
-  __IOM uint32_t IEN_SET;                       /**< Interrupt Enable                                   */
-  __IM uint32_t  STATUS_SET;                    /**< Status                                             */
+  __IM uint32_t  IPVERSION_SET;                 /**< IP Version Register                                */
+  __IOM uint32_t EN_SET;                        /**< Enable Register                                    */
+  __IOM uint32_t CFG_SET;                       /**< Config Register                                    */
+  __IOM uint32_t CFG1_SET;                      /**< Config1 Register                                   */
+  __IOM uint32_t IF_SET;                        /**< Interrupt Flag Register                            */
+  __IOM uint32_t IEN_SET;                       /**< Interrupt Enable Register                          */
+  __IM uint32_t  STATUS_SET;                    /**< Status Register                                    */
   uint32_t       RESERVED2[2U];                 /**< Reserved for future use                            */
-  __IOM uint32_t LOCK_SET;                      /**< Lock                                               */
+  __IOM uint32_t LOCK_SET;                      /**< Lock Register                                      */
   uint32_t       RESERVED3[1014U];              /**< Reserved for future use                            */
-  __IM uint32_t  IPVERSION_CLR;                 /**< IP Version                                         */
-  __IOM uint32_t EN_CLR;                        /**< Enable                                             */
-  __IOM uint32_t CFG_CLR;                       /**< Config                                             */
-  __IOM uint32_t CFG1_CLR;                      /**< Config1                                            */
-  __IOM uint32_t IF_CLR;                        /**< Interrupt Flag                                     */
-  __IOM uint32_t IEN_CLR;                       /**< Interrupt Enable                                   */
-  __IM uint32_t  STATUS_CLR;                    /**< Status                                             */
+  __IM uint32_t  IPVERSION_CLR;                 /**< IP Version Register                                */
+  __IOM uint32_t EN_CLR;                        /**< Enable Register                                    */
+  __IOM uint32_t CFG_CLR;                       /**< Config Register                                    */
+  __IOM uint32_t CFG1_CLR;                      /**< Config1 Register                                   */
+  __IOM uint32_t IF_CLR;                        /**< Interrupt Flag Register                            */
+  __IOM uint32_t IEN_CLR;                       /**< Interrupt Enable Register                          */
+  __IM uint32_t  STATUS_CLR;                    /**< Status Register                                    */
   uint32_t       RESERVED4[2U];                 /**< Reserved for future use                            */
-  __IOM uint32_t LOCK_CLR;                      /**< Lock                                               */
+  __IOM uint32_t LOCK_CLR;                      /**< Lock Register                                      */
   uint32_t       RESERVED5[1014U];              /**< Reserved for future use                            */
-  __IM uint32_t  IPVERSION_TGL;                 /**< IP Version                                         */
-  __IOM uint32_t EN_TGL;                        /**< Enable                                             */
-  __IOM uint32_t CFG_TGL;                       /**< Config                                             */
-  __IOM uint32_t CFG1_TGL;                      /**< Config1                                            */
-  __IOM uint32_t IF_TGL;                        /**< Interrupt Flag                                     */
-  __IOM uint32_t IEN_TGL;                       /**< Interrupt Enable                                   */
-  __IM uint32_t  STATUS_TGL;                    /**< Status                                             */
+  __IM uint32_t  IPVERSION_TGL;                 /**< IP Version Register                                */
+  __IOM uint32_t EN_TGL;                        /**< Enable Register                                    */
+  __IOM uint32_t CFG_TGL;                       /**< Config Register                                    */
+  __IOM uint32_t CFG1_TGL;                      /**< Config1 Register                                   */
+  __IOM uint32_t IF_TGL;                        /**< Interrupt Flag Register                            */
+  __IOM uint32_t IEN_TGL;                       /**< Interrupt Enable Register                          */
+  __IM uint32_t  STATUS_TGL;                    /**< Status Register                                    */
   uint32_t       RESERVED6[2U];                 /**< Reserved for future use                            */
-  __IOM uint32_t LOCK_TGL;                      /**< Lock                                               */
+  __IOM uint32_t LOCK_TGL;                      /**< Lock Register                                      */
 } DPLL_TypeDef;
 /** @} End of group EFR32MG26_DPLL */
 
@@ -181,7 +181,7 @@ typedef struct dpll_typedef{
 #define _DPLL_IEN_LOCK_MASK                  0x1UL                                      /**< Bit mask for DPLL_LOCK                      */
 #define _DPLL_IEN_LOCK_DEFAULT               0x00000000UL                               /**< Mode DEFAULT for DPLL_IEN                   */
 #define DPLL_IEN_LOCK_DEFAULT                (_DPLL_IEN_LOCK_DEFAULT << 0)              /**< Shifted mode DEFAULT for DPLL_IEN           */
-#define DPLL_IEN_LOCKFAILLOW                 (0x1UL << 1)                               /**< LOCKFAILLOW Interrupe Enable                */
+#define DPLL_IEN_LOCKFAILLOW                 (0x1UL << 1)                               /**< LOCKFAILLOW Interrupt Enable                */
 #define _DPLL_IEN_LOCKFAILLOW_SHIFT          1                                          /**< Shift value for DPLL_LOCKFAILLOW            */
 #define _DPLL_IEN_LOCKFAILLOW_MASK           0x2UL                                      /**< Bit mask for DPLL_LOCKFAILLOW               */
 #define _DPLL_IEN_LOCKFAILLOW_DEFAULT        0x00000000UL                               /**< Mode DEFAULT for DPLL_IEN                   */

@@ -22,6 +22,7 @@ requires:
 - name: device_has_vdac
 - name: hal_common
 - name: cmsis_core
+- name: log_none
 documentation:
   docset: gecko-platform
   document:

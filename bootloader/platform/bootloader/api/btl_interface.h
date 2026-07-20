@@ -21,7 +21,7 @@
 
 #include "btl_errorcode.h"
 #include "btl_reset_info.h"
-#include "api/application_properties.h"
+#include "application_properties.h"
 
 #include "em_emu.h"
 #include "em_cmu.h"

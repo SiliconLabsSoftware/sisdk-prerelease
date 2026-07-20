@@ -397,7 +397,10 @@ struct sl_rail_channel_config_entry_attr {
  * Convenience macro to check if the power mode supports raw setting.
  */
 #define SL_RAIL_POWER_MODE_SUPPORTS_RAW_SETTING(x) \
-  (((x) == SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP) || ((x) == SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP))
+  (((x) == SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP)       \
+   || ((x) == SL_RAIL_TX_POWER_MODE_2P4_GHZ_MP)    \
+   || ((x) == SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP)    \
+   || ((x) == SL_RAIL_TX_POWER_MODE_2P4_GHZ_BTC))
 
 /** @} */ // end of group PA_SIXX3XX
 

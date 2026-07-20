@@ -1,0 +1,41 @@
+id: spp_iostream
+label: Serial Port Profile IO Stream
+package: bluetooth_le
+description: >
+  Provides IO Stream interface for the Serial Port Profile component.
+category: Bluetooth|Application|GATT Profiles
+quality: experimental
+root_path: bluetooth_le/common/spp_iostream
+config_file:
+- path: config/spp_iostream_config.h
+source:
+- path: spp_iostream.c
+include:
+- path: .
+  file_list:
+  - path: spp_iostream.h
+provides:
+- name: spp_iostream
+requires:
+- name: component_catalog
+- name: iostream
+- name: spp
+- name: sl_core
+- name: status
+- name: app_assert
+template_contribution:
+- name: component_catalog
+  value: spp_iostream
+- name: iostream_instances
+  value: spp
+- name: iostream_handles
+  value: spp
+- name: event_handler
+  value:
+    event: iostream_instance_init_stage_1
+    include: spp_iostream.h
+    handler: spp_iostream_init
+- name: iostream_instance_info
+  value:
+    include: spp_iostream.h
+    handler: sl_iostream_instance_spp_info

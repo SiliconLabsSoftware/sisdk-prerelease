@@ -30,7 +30,6 @@
 
 #include "sl_hal_keyscan.h"
 #if defined(KEYSCAN_COUNT) && (KEYSCAN_COUNT > 0)
-#include "sl_assert.h"
 
 /***************************************************************************//**
  * @addtogroup keyscan KEYSCAN - Keyboard Scan
@@ -59,12 +58,12 @@ void sl_hal_keyscan_init(const sl_hal_keyscan_init_t *init)
   }
 
   // A sanity check of configuration parameters.
-  EFM_ASSERT(init->clock_divider <= _KEYSCAN_CFG_CLKDIV_MASK);
-  EFM_ASSERT(init->column_number <= KEYSCAN_COLNUM);
-  EFM_ASSERT(init->row_number <= KEYSCAN_ROWNUM);
-  EFM_ASSERT(init->scan_delay <= SL_HAL_KEYSCAN_DELAY_32MS);
-  EFM_ASSERT(init->debounce_delay <= SL_HAL_KEYSCAN_DELAY_32MS);
-  EFM_ASSERT(init->stable_delay <= SL_HAL_KEYSCAN_DELAY_32MS);
+  SL_LOG_DEBUG_ASSERT(init->clock_divider <= _KEYSCAN_CFG_CLKDIV_MASK);
+  SL_LOG_DEBUG_ASSERT(init->column_number <= KEYSCAN_COLNUM);
+  SL_LOG_DEBUG_ASSERT(init->row_number <= KEYSCAN_ROWNUM);
+  SL_LOG_DEBUG_ASSERT(init->scan_delay <= SL_HAL_KEYSCAN_DELAY_32MS);
+  SL_LOG_DEBUG_ASSERT(init->debounce_delay <= SL_HAL_KEYSCAN_DELAY_32MS);
+  SL_LOG_DEBUG_ASSERT(init->stable_delay <= SL_HAL_KEYSCAN_DELAY_32MS);
 
   // Set configuration
   KEYSCAN->CFG = ((init->clock_divider) << _KEYSCAN_CFG_CLKDIV_SHIFT)

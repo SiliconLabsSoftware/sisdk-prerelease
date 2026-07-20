@@ -29,7 +29,6 @@
  ******************************************************************************/
 
 #include "em_device.h"
-#if !defined(FPGA)
 
 #include <stdbool.h>
 #include <limits.h>
@@ -50,7 +49,7 @@
 #include "sl_common.h"
 #include "sl_assert.h"
 #include "sl_core.h"
-#if defined(SL_COMMON_TOKEN_MANAGER_ENABLE_STATIC_TOKENS)
+#if defined(SL_COMMON_TOKEN_MANAGER_ENABLE_STATIC_TOKENS) && !defined(SLI_SE_FIRMWARE_UNAVAILABLE)
 #include "sl_token_manager_api.h"
 #include "sl_token_manager_defines.h"
 #include "sl_token_manager_manufacturing.h"
@@ -59,6 +58,7 @@
 
 #if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION)
 #include "sli_clock_manager_runtime_configuration.h"
+#include "sli_clock_manager_runtime_config.h"
 #endif
 
 #if defined(SL_CATALOG_CLOCK_MANAGER_EXT_FLASH_PRESENT)
@@ -96,13 +96,13 @@
                                                      : ((n) == 2) ? SLI_CLOCK_MANAGER_SOCPLL2_FREQ \
                                                      : 0x0UL)
 
-#define CLOCK_MANAGER_SOCPLL_FREQ0(n)               (CLOCK_MANAGER_SOCPLL_OUT0_EN(n) \
+#define CLOCK_MANAGER_SOCPLL_FREQ0(n)               (CLOCK_MANAGER_SOCPLL_OUT0_EN(n)                                           \
                                                      ? (CLOCK_MANAGER_SOCPLL_FREQ(n) / (CLOCK_MANAGER_SOCPLL_OUT0_DIV(n) + 2)) \
                                                      : 0UL)
-#define CLOCK_MANAGER_SOCPLL_FREQ1(n)               (CLOCK_MANAGER_SOCPLL_OUT1_EN(n) \
+#define CLOCK_MANAGER_SOCPLL_FREQ1(n)               (CLOCK_MANAGER_SOCPLL_OUT1_EN(n)                                           \
                                                      ? (CLOCK_MANAGER_SOCPLL_FREQ(n) / (CLOCK_MANAGER_SOCPLL_OUT1_DIV(n) + 2)) \
                                                      : 0UL)
-#define CLOCK_MANAGER_SOCPLL_FREQ2(n)               (CLOCK_MANAGER_SOCPLL_OUT2_EN(n) \
+#define CLOCK_MANAGER_SOCPLL_FREQ2(n)               (CLOCK_MANAGER_SOCPLL_OUT2_EN(n)                                           \
                                                      ? (CLOCK_MANAGER_SOCPLL_FREQ(n) / (CLOCK_MANAGER_SOCPLL_OUT2_DIV(n) + 2)) \
                                                      : 0UL)
 
@@ -269,15 +269,15 @@ static void get_hfxo_ctune(uint8_t *ctune_xi_steady, uint8_t *ctune_xo_steady)
 #else
   if (true) {
 #endif
-    // Determine CTUNE value.
-    int32_t ctune = -1;
-
 #if defined(SL_CLOCK_MANAGER_HFXO_SEPARATE_CTUNEXIANA_CTUNEXOANA_EN) && (SL_CLOCK_MANAGER_HFXO_SEPARATE_CTUNEXIANA_CTUNEXOANA_EN == 1)
     // Use separate XI and XO CTUNE values
     *ctune_xi_steady = SL_CLOCK_MANAGER_HFXO_CTUNEXIANA;
     *ctune_xo_steady = SL_CLOCK_MANAGER_HFXO_CTUNEXOANA;
     return;
-#endif
+#else
+
+    // Determine CTUNE value.
+    int32_t ctune = -1;
 
     // Retrieve HFXO calibration value from DEVINFO data.
     ctune = sl_hal_system_get_hfxocal();
@@ -285,7 +285,7 @@ static void get_hfxo_ctune(uint8_t *ctune_xi_steady, uint8_t *ctune_xo_steady)
       ctune = -1;
     }
 
-#if defined(SL_COMMON_TOKEN_MANAGER_ENABLE_STATIC_TOKENS)
+#if defined(SL_COMMON_TOKEN_MANAGER_ENABLE_STATIC_TOKENS) && !defined(SLI_SE_FIRMWARE_UNAVAILABLE)
     // Use HFXO tuning value from MFG token in UD page if not already set
     if (ctune == -1) {
       uint16_t mfg_ctune = 0;
@@ -294,8 +294,8 @@ static void get_hfxo_ctune(uint8_t *ctune_xi_steady, uint8_t *ctune_xo_steady)
         // Since SE Command is necessary to get the calibration value, and sl_se_init() is not yet called,
         // we need to enter atomic mode to prevent the SE Command from being interrupted.
         status = sli_token_manager_get_token_data_preinit(SL_TOKEN_GET_STATIC_DEVICE_TOKEN(TOKEN_MFG_CTUNE),
-                                                                      &mfg_ctune, TOKEN_MFG_CTUNE_SIZE);
-      )
+                                                          &mfg_ctune, TOKEN_MFG_CTUNE_SIZE);
+        )
 #if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION)
       if (status != SL_STATUS_OK) {
         status = sl_token_manager_get_data(SL_TOKEN_GET_STATIC_DEVICE_TOKEN(TOKEN_MFG_CTUNE),
@@ -307,7 +307,7 @@ static void get_hfxo_ctune(uint8_t *ctune_xi_steady, uint8_t *ctune_xo_steady)
         ctune = mfg_ctune;
       }
     }
-#endif
+#endif // defined(SL_COMMON_TOKEN_MANAGER_ENABLE_STATIC_TOKENS) && !defined(SLI_SE_FIRMWARE_UNAVAILABLE)
 
     // Use HFXO tuning value from configurations as fallback
     if (ctune == -1) {
@@ -331,8 +331,9 @@ static void get_hfxo_ctune(uint8_t *ctune_xi_steady, uint8_t *ctune_xo_steady)
     } else {
       EFM_ASSERT(false);
     }
+#endif  // (SL_CLOCK_MANAGER_HFXO_SEPARATE_CTUNEXIANA_CTUNEXOANA_EN == 1)
   }
-#endif
+#endif  // (SL_CLOCK_MANAGER_HFXO_MODE == HFXO_CFG_MODE_XTAL)
 }
 
 /***************************************************************************//**
@@ -555,14 +556,14 @@ FUNCTION_SCOPE void init_lfxo(void)
   EFM_ASSERT(SL_CLOCK_MANAGER_LFXO_CTUNE
              <= (_LFXO_CAL_CAPTUNE_MASK >> _LFXO_CAL_CAPTUNE_SHIFT));
 
-#if defined(SL_COMMON_TOKEN_MANAGER_ENABLE_STATIC_TOKENS)
+#if defined(SL_COMMON_TOKEN_MANAGER_ENABLE_STATIC_TOKENS) && !defined(SLI_SE_FIRMWARE_UNAVAILABLE)
   if (ctune == -1) {
     uint8_t mfg_lxfo_tune = 0;
     sl_status_t status;
     CORE_ATOMIC_SECTION(
       status = sli_token_manager_get_token_data_preinit(SL_TOKEN_GET_STATIC_DEVICE_TOKEN(TOKEN_MFG_LFXO_TUNE),
-                                                                    &mfg_lxfo_tune, TOKEN_MFG_LFXO_TUNE_SIZE);
-    )
+                                                        &mfg_lxfo_tune, TOKEN_MFG_LFXO_TUNE_SIZE);
+      )
     if ((status == SL_STATUS_OK)
         && (mfg_lxfo_tune <= (_LFXO_CAL_CAPTUNE_MASK >> _LFXO_CAL_CAPTUNE_SHIFT))) {
       ctune = mfg_lxfo_tune;
@@ -618,7 +619,7 @@ FUNCTION_SCOPE void init_lfxo(void)
 /***************************************************************************//**
  * Initializes Clock Input CLKIN0.
  ******************************************************************************/
-static void init_clkin0(void)
+FUNCTION_SCOPE void init_clkin0(void)
 {
 #if (defined(SL_CLOCK_MANAGER_SYSCLK_SOURCE) && (SL_CLOCK_MANAGER_SYSCLK_SOURCE == CMU_SYSCLKCTRL_CLKSEL_CLKIN0)) \
   || (defined(SL_CLOCK_MANAGER_DPLL_REFCLK) && (SL_CLOCK_MANAGER_DPLL_REFCLK == CMU_DPLLREFCLKCTRL_CLKSEL_CLKIN0))
@@ -652,8 +653,9 @@ FUNCTION_SCOPE void init_dpll(void)
   if (SLI_CLOCK_MANAGER_HFRCO_DPLL_EN)
 #endif
   {
+#if !defined(SL_CATALOG_CLOCK_MANAGER_PTE_PRESENT) && !defined(SLI_SE_FIRMWARE_UNAVAILABLE)
     uint32_t hfrco_cal_val;
-    uint32_t lock_status = 0;
+#endif
 
     // Enable DPLL module's clock.
 #if defined(CMU_CLKEN0_DPLL0)
@@ -671,12 +673,12 @@ FUNCTION_SCOPE void init_dpll(void)
     EFM_ASSERT(SLI_CLOCK_MANAGER_DPLL_N <= (_DPLL_CFG1_N_MASK >> _DPLL_CFG1_N_SHIFT));
     EFM_ASSERT(SLI_CLOCK_MANAGER_DPLL_M <= (_DPLL_CFG1_M_MASK >> _DPLL_CFG1_M_SHIFT));
 
-#if !defined(SL_CATALOG_CLOCK_MANAGER_PTE_PRESENT)
+#if !defined(SL_CATALOG_CLOCK_MANAGER_PTE_PRESENT) && !defined(SLI_SE_FIRMWARE_UNAVAILABLE)
     CORE_ATOMIC_SECTION(
       // Since SE Command is necessary to get the calibration value, and sl_se_init() is not yet called,
       // we need to enter atomic mode to prevent the SE Command from being interrupted.
       hfrco_cal_val = sl_hal_system_get_hfrcodpll_band_calibration(SLI_CLOCK_MANAGER_DPLL_FREQ);
-    )
+      )
     EFM_ASSERT((hfrco_cal_val != 0UL) && (hfrco_cal_val != UINT32_MAX));
 
     while (HFRCO0->STATUS & (HFRCO_STATUS_SYNCBUSY | HFRCO_STATUS_FREQBSY)) {
@@ -685,6 +687,17 @@ FUNCTION_SCOPE void init_dpll(void)
     }
 
     HFRCO0->CAL = hfrco_cal_val;
+
+#if defined(_DPLL_OFFSET_K0_MASK)
+    uint32_t dpll_k0_val;
+    CORE_ATOMIC_SECTION(
+      dpll_k0_val = sl_hal_system_get_dpll_k0_offset(SLI_CLOCK_MANAGER_DPLL_FREQ);
+      )
+    if ((dpll_k0_val != 0UL) && (dpll_k0_val != 0xFFFu)) {
+      DPLL0->OFFSET = (DPLL0->OFFSET & ~_DPLL_OFFSET_K0_MASK)
+                      | ((dpll_k0_val << _DPLL_OFFSET_K0_SHIFT) & _DPLL_OFFSET_K0_MASK);
+    }
+#endif
 #endif
 
     DPLL0->CFG1 = (DPLL0->CFG1 & ~(_DPLL_CFG1_N_MASK | _DPLL_CFG1_M_MASK))
@@ -705,16 +718,15 @@ FUNCTION_SCOPE void init_dpll(void)
     // Update CMSIS HFRCODPLL frequency.
     SystemHFRCODPLLClockSet(SLI_CLOCK_MANAGER_DPLL_FREQ);
 
-    // Enable DPLL.
+    // Clear some interrupt flags.
     DPLL0->IF_CLR = DPLL_IF_LOCK | DPLL_IF_LOCKFAILLOW | DPLL_IF_LOCKFAILHIGH;
-
-    // Lock DPLL.
+    // Enable DPLL and wait for lock via STATUS register.
     DPLL0->EN_SET = DPLL_EN_EN;
-    while (lock_status == 0UL) {
-      lock_status = DPLL0->IF;
-    }
 
-    EFM_ASSERT(lock_status == DPLL_IF_LOCK);
+    while ((DPLL0->STATUS & (DPLL_STATUS_RDY | DPLL_STATUS_ENS))
+           != (DPLL_STATUS_RDY | DPLL_STATUS_ENS)) {
+      // Wait for DPLL lock, ready, and enabled.
+    }
   }
 }
 #endif
@@ -761,17 +773,12 @@ FUNCTION_SCOPE void init_hfrcodpll(void)
 
     // Retrieve HFRCO calibration from DEVINFO data.
     switch (SLI_CLOCK_MANAGER_HFRCO_BAND) {
-#if defined (_SILICON_LABS_32B_SERIES_3_CONFIG_301) || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_302)
       case 38000000:
         freq_cal = sl_hal_system_get_hfrco_default_calibration();
         break;
-#endif
-#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
-      case 40000000:
-        freq_cal = sl_hal_system_get_hfrco_default_calibration();
-        break;
-#endif
+
       case 100000000:
+      case 140000000:
         freq_cal = sl_hal_system_get_hfrco_speed_calibration();
         break;
       default:
@@ -927,13 +934,13 @@ FUNCTION_SCOPE void init_hfrcoem23(void)
   sl_status_t status;
   uint32_t frequency_calibration;
 
-#if !defined(SL_CATALOG_CLOCK_MANAGER_PTE_PRESENT)
+#if !defined(SL_CATALOG_CLOCK_MANAGER_PTE_PRESENT) && !defined(SLI_SE_FIRMWARE_UNAVAILABLE)
   // Retrieve HFRCOEM23 Calibration value from DEVINFO data
   CORE_ATOMIC_SECTION(
     // Since SE Command is necessary to get the calibration value, and sl_se_init() is not yet called,
     // we need to enter atomic mode to prevent the SE Command from being interrupted.
     frequency_calibration = sl_hal_system_get_hfrcoem23_calibration(SL_CLOCK_MANAGER_HFRCOEM23_BAND);
-  )
+    )
   EFM_ASSERT((frequency_calibration != 0UL) && (frequency_calibration != UINT_MAX));
 #else
   frequency_calibration = _HFRCO_CAL_RESETVALUE;
@@ -1022,7 +1029,6 @@ FUNCTION_SCOPE void init_clock_branches(void)
 {
   // Initialize SYSCLK clock branch.
 #if defined(SL_CLOCK_MANAGER_SYSCLK_SOURCE)
-  // TODO validate clock frequency range and prescaler
 #if (SL_CLOCK_MANAGER_SYSCLK_SOURCE == SL_CLOCK_MANAGER_DEFAULT_HF_CLOCK_SOURCE)
   CLOCK_MANAGER_CLOCK_SELECT_SET(SYSCLK, CLOCK_MANAGER_GET_DEFAULT_CLOCK_SOURCE(SYSCLK, SL_CLOCK_MANAGER_DEFAULT_HF_CLOCK_SOURCE_CONCATENATION));
 #elif defined(SLI_CLOCK_MANAGER_SYSCLK_SOURCE)
@@ -1032,28 +1038,24 @@ FUNCTION_SCOPE void init_clock_branches(void)
 #endif
   CMU->SYSCLKCTRL = (CMU->SYSCLKCTRL & ~(_CMU_SYSCLKCTRL_HCLKPRESC_MASK | _CMU_SYSCLKCTRL_PCLKPRESC_MASK
 #if defined(_CMU_SYSCLKCTRL_CPUCLKPRESC_MASK)
-    | _CMU_SYSCLKCTRL_CPUCLKPRESC_MASK
+                                         | _CMU_SYSCLKCTRL_CPUCLKPRESC_MASK
 #endif
 #if defined(_CMU_SYSCLKCTRL_HCLKDIVNPRESC_MASK)
-    | _CMU_SYSCLKCTRL_HCLKDIVNPRESC_MASK
+                                         | _CMU_SYSCLKCTRL_HCLKDIVNPRESC_MASK
 #endif
-    ))
-    | SL_CLOCK_MANAGER_HCLK_DIVIDER
-    | SL_CLOCK_MANAGER_PCLK_DIVIDER
+                                         ))
+                    | SL_CLOCK_MANAGER_HCLK_DIVIDER
+                    | SL_CLOCK_MANAGER_PCLK_DIVIDER
 #if defined(_CMU_SYSCLKCTRL_CPUCLKPRESC_MASK)
-    | SL_CLOCK_MANAGER_CPUCLK_DIVIDER
+                    | SL_CLOCK_MANAGER_CPUCLK_DIVIDER
 #endif
 #if defined(_CMU_SYSCLKCTRL_HCLKDIVNPRESC_MASK)
-    | SL_CLOCK_MANAGER_HCLKDIVN_DIVIDER
+                    | SL_CLOCK_MANAGER_HCLKDIVN_DIVIDER
 #endif
   ;
 
 #else
   EFM_ASSERT(false);
-#endif
-
-#if defined(CLOCK_MANAGER_INIT_HAL_INTERNAL_PRESENT)
-  sli_clock_manager_hal_init_sysclk_internal();
 #endif
 
   SystemCoreClockUpdate();
@@ -1070,7 +1072,8 @@ FUNCTION_SCOPE void init_clock_branches(void)
   CLOCK_MANAGER_CLOCK_SELECT_SET(TRACECLK, SL_CLOCK_MANAGER_TRACECLK_SOURCE);
 #endif
 #if defined(SL_CLOCK_MANAGER_TRACECLK_DIVIDER)
-  CMU->TRACECLKCTRL |= SL_CLOCK_MANAGER_TRACECLK_DIVIDER;
+  CMU->TRACECLKCTRL = (CMU->TRACECLKCTRL & ~_CMU_TRACECLKCTRL_PRESC_MASK)
+                      | SL_CLOCK_MANAGER_TRACECLK_DIVIDER;
 #endif
 #if defined(CoreDebug_DEMCR_TRCENA_Msk)
   // Enable back the Core Debug module if it was already enabled.
@@ -1271,7 +1274,7 @@ FUNCTION_SCOPE void init_clock_branches(void)
 #endif
 #endif
 
-#if defined(CLOCK_MANAGER_INIT_HAL_INTERNAL_PRESENT)
+#if defined(SL_CATALOG_CLOCK_MANAGER_INIT_HAL_INTERNAL_PRESENT)
   sli_clock_manager_hal_init_clock_branches_internal();
 #endif
 }
@@ -1387,6 +1390,7 @@ static void configure_flpll(sli_se_qspi_flpll_config_t *flpll_config)
     qspi_frequency = 133000000;
   } else {
     EFM_ASSERT(false);
+    return;
   }
 #if defined(SL_CLOCK_MANAGER_QSPICLK_ADVANCED_CONFIG_EN) && (SL_CLOCK_MANAGER_QSPICLK_ADVANCED_CONFIG_EN == 1)
   // Ensure the custom QSPI frequency is less than the co-packaged flash max frequency.
@@ -1450,10 +1454,20 @@ static void configure_flpll(sli_se_qspi_flpll_config_t *flpll_config)
  ******************************************************************************/
 sl_status_t sli_clock_manager_hal_init(void)
 {
+#if defined(SLI_CLOCK_MANAGER_SKIP_INIT) && (SLI_CLOCK_MANAGER_SKIP_INIT == 1)
+  return SL_STATUS_OK;
+#else
   sl_status_t status;
 
   // Make sure SYSCLK is on FSRCO
   CLOCK_MANAGER_CLOCK_SELECT_SET(SYSCLK, CMU_SYSCLKCTRL_CLKSEL_FSRCO);
+
+  // Make sure OSPI0CLK is on FSRCO.
+#if defined(CMU_OSPI0CLKCTRL_CLKSEL_FSRCO)
+  CLOCK_MANAGER_CLOCK_SELECT_SET(OSPI0CLK, CMU_OSPI0CLKCTRL_CLKSEL_FSRCO);
+#elif defined(CMU_OSPI0CLKCTRL_CLKSEL_FSRCO40)
+  CLOCK_MANAGER_CLOCK_SELECT_SET(OSPI0CLK, CMU_OSPI0CLKCTRL_CLKSEL_FSRCO40);
+#endif
 
 #if defined(SYSRTC_PRESENT)
   status =  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_SYSRTC0);
@@ -1508,7 +1522,7 @@ sl_status_t sli_clock_manager_hal_init(void)
 
   init_lfrco();
 
-#if defined(CLOCK_MANAGER_INIT_HAL_INTERNAL_PRESENT)
+#if defined(SL_CATALOG_CLOCK_MANAGER_INIT_HAL_INTERNAL_PRESENT)
   sli_clock_manager_hal_init_oscillators_internal();
 #endif
 
@@ -1516,5 +1530,5 @@ sl_status_t sli_clock_manager_hal_init(void)
   init_clock_branches();
 
   return SL_STATUS_OK;
+#endif
 }
-#endif // FPGA

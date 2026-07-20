@@ -21,9 +21,7 @@ provides:
   condition: [bootloader_core_nonsecure]
 requires:
 - name: bootloader_interface_common
-  condition: [trustzone_unaware]
-- name: bootloader_interface_common
-  condition: [trustzone_nonsecure]
+  unless: [trustzone_secure]
 - name: btl_util_header
 - name: bootloader_crc
 - name: bootloader_aes_sha_ecdsa

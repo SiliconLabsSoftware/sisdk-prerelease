@@ -1,6 +1,6 @@
 project_name: mp-zb-ot-ble-rcp-uart
 label: Zigbee RCP + OpenThread RCP + BLE RCP - UART (CMP, DMP)
-package: multiprotocol
+package: multiprotocol_app
 description: >
   Demonstrates a Multiprotocol 802.15.4 RCP application running OpenThread, Zigbee (CMP/multi-PAN), and BLE (DMP) over UART using CPC for host communication.
 category: OpenThread Examples

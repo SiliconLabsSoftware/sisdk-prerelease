@@ -367,11 +367,20 @@ bool sli_zigbee_stack_is_ok_to_sleep(void)
   return false;
 }
 
+#ifndef SL_CATALOG_KERNEL_PRESENT
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_ZIGBEE_STACK, SL_CODE_CLASS_TIME_CRITICAL)
 bool sli_zigbee_is_stack_task_or_isr_current_context(void)
 {
   return true;
 }
+#endif // !SL_CATALOG_KERNEL_PRESENT
+
+extern uint32_t sli_zigbee_stack_ms_to_next_stack_event(void);
+uint32_t sli_zigbee_stack_get_ms_to_next_wakeup(void)
+{
+  return sli_zigbee_stack_ms_to_next_stack_event();
+}
+
 uint8_t sli_zigbee_stack_sleep_on_isr_exit(void)
 {
   return (1UL << 0UL);

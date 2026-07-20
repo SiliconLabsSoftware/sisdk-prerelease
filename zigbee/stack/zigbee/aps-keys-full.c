@@ -219,7 +219,7 @@ sl_status_t sli_zigbee_af_set_key_table_entry(bool erase,
   }
 
   if ( erase ) {
-    memset(&tok, 0, sizeof(tokTypeStackKeyTable));
+    memset(&tok, 0, sizeof(tok));
   } else {
     sl_802154_long_addr_t tcAddress;
     uint8_t existingIndex = sli_zigbee_stack_find_key_table_entry(keyStruct->partnerEUI64, KEY_TABLE_TYPE_LINK_KEY);
@@ -274,7 +274,7 @@ sl_status_t sli_zigbee_update_key_state(uint8_t index,
     tokTypeStackKeyTable tok;
     sli_zigbee_stack_fetch_key_table_entry_at_index(index, &tok);
 
-    if (!sli_zigbee_is_token_data_initialized((uint8_t*)&tok, sizeof(tokTypeStackKeyTable))) {
+    if (!sli_zigbee_is_token_data_initialized((uint8_t*)&tok, sizeof(tok))) {
       return SL_STATUS_INVALID_KEY;
     }
     tok[KEY_ENTRY_INFO_OFFSET] &= (uint8_t) (~clearFlags);

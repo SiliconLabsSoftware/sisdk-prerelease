@@ -117,6 +117,10 @@
 #include "sl_clock_manager_init.h"
 #endif
 
+#if defined(SL_CATALOG_DELAY_PRESENT)
+#include "sli_delay.h"
+#endif
+
 #if defined(SL_SI91X_SOC_MODE)
 #include "system_si91x.h"
 #endif
@@ -144,6 +148,10 @@
 
 #if defined(SL_CATALOG_SYSTEMVIEW_TRACE_PRESENT) && !defined(SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT)
 #include "SEGGER_SYSVIEW.h"
+#endif
+
+#if defined(SL_CATALOG_SEGGER_RTT_PRESENT)
+#include "SEGGER_RTT.h"
 #endif
 
 /******************************************************************************
@@ -253,6 +261,11 @@ void sl_main_init(void)
 {
   SLI_METRIC_EVENT_HANDLER_START();
 
+#if defined(SL_CATALOG_SEGGER_RTT_PRESENT)
+  SEGGER_RTT_Init();
+  SLI_METRIC_EVENT_HANDLER_SAVE("SEGGER_RTT_Init");
+#endif
+
 #if defined(SL_CATALOG_LOG_COMPONENT_PRESENT)
   sl_log_init_stage1();
   SLI_METRIC_EVENT_HANDLER_SAVE("sl_log_init_stage1");
@@ -281,6 +294,10 @@ void sl_main_init(void)
 #if defined(SL_CATALOG_HAL_SYSTEM_PRESENT)
   sl_hal_system_init();
   SLI_METRIC_EVENT_HANDLER_SAVE("sl_hal_system_init");
+#endif
+
+#if defined(SL_CATALOG_DELAY_PRESENT)
+  sli_delay();
 #endif
 
   // Pre-clock application initialization.
@@ -356,16 +373,6 @@ void sl_main_init(void)
   SLI_METRIC_EVENT_HANDLER_SAVE("sl_device_init_emu");
 #endif
 
-#if defined(SL_CATALOG_SLEEPTIMER_PRESENT)
-  sl_sleeptimer_init();
-  SLI_METRIC_EVENT_HANDLER_SAVE("sl_sleeptimer_init");
-#endif
-
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
-  sl_power_manager_init();
-  SLI_METRIC_EVENT_HANDLER_SAVE("sl_power_manager_init");
-#endif
-
 #if defined(SL_CATALOG_MPA_MANAGER_PRESENT)
   sl_mpa_manager_init();
   SLI_METRIC_EVENT_HANDLER_SAVE("sl_mpa_manager_init");
@@ -374,6 +381,16 @@ void sl_main_init(void)
 #if defined(SL_CATALOG_MPU_PRESENT)
   sl_mpu_disable_execute_from_ram();
   SLI_METRIC_EVENT_HANDLER_SAVE("sl_mpu_disable_execute_from_ram");
+#endif
+
+#if defined(SL_CATALOG_SLEEPTIMER_PRESENT)
+  sl_sleeptimer_init();
+  SLI_METRIC_EVENT_HANDLER_SAVE("sl_sleeptimer_init");
+#endif
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  sl_power_manager_init();
+  SLI_METRIC_EVENT_HANDLER_SAVE("sl_power_manager_init");
 #endif
 
   // Early application initialization (post-system init).

@@ -1,0 +1,20 @@
+id: nvm3_time_trace
+label: NVM3 Time Trace
+package: platform_core
+description: >
+  Enables NVM3 operation timing traces, such as reporting repack duration. Pulls in
+  the cycle_counter driver and sets NVM3_TIME_TRACE_ENABLE. Add this component
+  only when timing diagnostics are required.
+category: Services|NVM3
+quality: production
+metadata:
+  sbom:
+    license: Zlib
+define:
+- name: NVM3_TIME_TRACE_ENABLE
+  value: '1'
+provides:
+- name: nvm3_time_trace
+requires:
+- name: cycle_counter
+root_path: platform_core

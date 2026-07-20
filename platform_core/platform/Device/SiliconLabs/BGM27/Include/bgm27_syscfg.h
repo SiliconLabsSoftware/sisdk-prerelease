@@ -404,7 +404,7 @@ typedef struct syscfg_typedef{
 /* Bit fields for SYSCFG CTRL */
 #define _SYSCFG_CTRL_RESETVALUE                            0x00000023UL                                 /**< Default value for SYSCFG_CTRL               */
 #define _SYSCFG_CTRL_MASK                                  0x00000023UL                                 /**< Mask for SYSCFG_CTRL                        */
-#define SYSCFG_CTRL_ADDRFAULTEN                            (0x1UL << 0)                                 /**< Invalid Address Bus Fault Response Enabl    */
+#define SYSCFG_CTRL_ADDRFAULTEN                            (0x1UL << 0)                                 /**< Invalid Address Bus Fault Response Enable   */
 #define _SYSCFG_CTRL_ADDRFAULTEN_SHIFT                     0                                            /**< Shift value for SYSCFG_ADDRFAULTEN          */
 #define _SYSCFG_CTRL_ADDRFAULTEN_MASK                      0x1UL                                        /**< Bit mask for SYSCFG_ADDRFAULTEN             */
 #define _SYSCFG_CTRL_ADDRFAULTEN_DEFAULT                   0x00000001UL                                 /**< Mode DEFAULT for SYSCFG_CTRL                */
@@ -414,7 +414,7 @@ typedef struct syscfg_typedef{
 #define _SYSCFG_CTRL_CLKDISFAULTEN_MASK                    0x2UL                                        /**< Bit mask for SYSCFG_CLKDISFAULTEN           */
 #define _SYSCFG_CTRL_CLKDISFAULTEN_DEFAULT                 0x00000001UL                                 /**< Mode DEFAULT for SYSCFG_CTRL                */
 #define SYSCFG_CTRL_CLKDISFAULTEN_DEFAULT                  (_SYSCFG_CTRL_CLKDISFAULTEN_DEFAULT << 1)    /**< Shifted mode DEFAULT for SYSCFG_CTRL        */
-#define SYSCFG_CTRL_RAMECCERRFAULTEN                       (0x1UL << 5)                                 /**< Two bit ECC error bus fault response ena    */
+#define SYSCFG_CTRL_RAMECCERRFAULTEN                       (0x1UL << 5)                                 /**< Two Bit ECC Error Bus Fault Response Enable */
 #define _SYSCFG_CTRL_RAMECCERRFAULTEN_SHIFT                5                                            /**< Shift value for SYSCFG_RAMECCERRFAULTEN     */
 #define _SYSCFG_CTRL_RAMECCERRFAULTEN_MASK                 0x20UL                                       /**< Bit mask for SYSCFG_RAMECCERRFAULTEN        */
 #define _SYSCFG_CTRL_RAMECCERRFAULTEN_DEFAULT              0x00000001UL                                 /**< Mode DEFAULT for SYSCFG_CTRL                */

@@ -60,9 +60,9 @@ void sl_hal_gpcrc_init(GPCRC_TypeDef *gpcrc,
                        const sl_hal_gpcrc_init_t *init)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
   // Init structure must be provided.
-  EFM_ASSERT(init);
+  SL_LOG_DEBUG_ASSERT(init);
 
   uint32_t poly_select;
   uint32_t rev_poly = 0;
@@ -71,7 +71,7 @@ void sl_hal_gpcrc_init(GPCRC_TypeDef *gpcrc,
     poly_select = GPCRC_CTRL_POLYSEL_CRC32;
   } else {
     // If not using the fixed CRC-32 polynomial, use 16-bit.
-    EFM_ASSERT((init->crc_poly & 0xFFFF0000UL) == 0U);
+    SL_LOG_DEBUG_ASSERT((init->crc_poly & 0xFFFF0000UL) == 0U);
 
     poly_select = GPCRC_CTRL_POLYSEL_CRC16;
     rev_poly = (uint32_t)SL_RBIT16((uint16_t)init->crc_poly);

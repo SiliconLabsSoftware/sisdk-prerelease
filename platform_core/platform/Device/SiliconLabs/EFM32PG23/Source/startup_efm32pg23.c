@@ -380,6 +380,7 @@ __attribute__((optimize("no-tree-loop-distribute-patterns")))
 #if defined(__clang__)
 __attribute__((no_builtin("memcpy")))
 #endif
+
 void CopyMemory(const uint32_t *from, uint32_t *to, uint32_t count)
 {
   while (count--) {

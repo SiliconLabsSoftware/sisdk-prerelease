@@ -39,13 +39,13 @@ config_file:
   condition: [device_sdid_240]
   file_id: device_init_hfxo_config
 - path: config/s2/sdid250/sl_device_init_hfxo_config.h
-  condition: [device_generic_family_efr32xg2b]
+  condition: [device_sdid_250]
   file_id: device_init_hfxo_config
 - path: config/s2/sdid260/sl_device_init_hfxo_config.h
   condition: [device_sdid_260]
   file_id: device_init_hfxo_config
 - path: config/s2/sdid265/sl_device_init_hfxo_config.h
-  condition: [device_generic_family_efr32xg2e]
+  condition: [device_sdid_265]
   file_id: device_init_hfxo_config
 include:
 - path: inc

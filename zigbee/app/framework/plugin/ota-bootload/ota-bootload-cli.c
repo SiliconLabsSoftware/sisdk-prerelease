@@ -49,7 +49,7 @@ void printBootloaderInfoCommand(sl_cli_command_arg_t *arguments)
 #if defined(SL_ZIGBEE_TEST)
   memset(keyData, 0xFF, SL_ZIGBEE_ENCRYPTION_KEY_SIZE);
 #else
-  sl_status_t status = slx_zigbee_token_manager_get_data(SL_TOKEN_GET_STATIC_SECURE_TOKEN(TOKEN_MFG_SECURE_BOOTLOADER_KEY), (void *)&keyData, sizeof(tokTypeMfgSecureBootloaderKey));
+  sl_status_t status = slx_zigbee_token_manager_get_data(SL_TOKEN_GET_STATIC_SECURE_TOKEN(TOKEN_MFG_SECURE_BOOTLOADER_KEY), (void *)&keyData, sizeof(keyData));
   if (status != SL_STATUS_OK) {
     sl_zigbee_af_cli_println("Failed to get MFG_SECURE_BOOTLOADER_KEY, status: 0x%08X", status);
   }

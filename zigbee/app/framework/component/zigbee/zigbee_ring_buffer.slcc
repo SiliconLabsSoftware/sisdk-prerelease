@@ -1,0 +1,25 @@
+package: zigbee
+description: This component manages a ring buffer of binary entries.  Each entry has a 1- or 2-byte length field that is recorded to manage the buffer.  This ring buffer can be used by multiple entities as the buffer space for the ring buffer is allocated by the caller.
+id: zigbee_ring_buffer
+label: Ring Buffer
+category: Zigbee|Utility
+quality: production
+provides:
+- name: zigbee_ring_buffer
+source:
+- path: app/framework/plugin/ring-buffer/ring-buffer.c
+include:
+- path: app/framework/plugin/ring-buffer
+  file_list:
+  - path: ring-buffer.h
+template_contribution:
+- name: component_catalog
+  value: zigbee_ring_buffer
+
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/ring-buffer
+metadata:
+  sbom:
+    license: MSLA
+root_path: zigbee

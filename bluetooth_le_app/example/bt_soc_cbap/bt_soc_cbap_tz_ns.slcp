@@ -81,6 +81,10 @@ configuration:
     value: "1"
     condition:
       - psa_crypto
+  - name: NVM3_DEFAULT_MAX_OBJECT_SIZE
+    value: "1200"
+    condition:
+      - nvm3
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"
   - name: SL_IOSTREAM_USART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION

@@ -119,14 +119,14 @@ extern __INLINE uint32_t sl_hal_lesense_get_enabled_pending_interrupts(void);
 void sl_hal_lesense_init(const sl_hal_lesense_init_t *init)
 {
   // Make sure the module is disabled.
-  EFM_ASSERT(LESENSE->EN == 0);
+  SL_LOG_DEBUG_ASSERT(LESENSE->EN == 0);
   // Sanity check of initialization values.
-  EFM_ASSERT(init != NULL);
-  EFM_ASSERT(init->time_control.start_delay < 4U);
-  EFM_ASSERT(init->core_control.fifo_trigger_level < 16);
+  SL_LOG_DEBUG_ASSERT(init != NULL);
+  SL_LOG_DEBUG_ASSERT(init->time_control.start_delay < 4U);
+  SL_LOG_DEBUG_ASSERT(init->core_control.fifo_trigger_level < 16);
 
   // Set sensor start delay for each channel.
-  sl_hal_lesense_set_start_delay((uint32_t)init->time_control.start_delay);
+  sl_hal_lesense_set_start_delay(init->time_control.start_delay);
 
   // Clear bitfields and configure the AUXHRFCO startup delay.
   LESENSE->TIMCTRL = (LESENSE->TIMCTRL & (~_LESENSE_TIMCTRL_AUXSTARTUP_MASK))
@@ -183,14 +183,14 @@ uint32_t sl_hal_lesense_set_scan_frequency(uint32_t reference_frequency,
                                            uint32_t scan_frequency)
 {
   // Make sure the module is disabled.
-  EFM_ASSERT(LESENSE->EN == 0);
+  SL_LOG_DEBUG_ASSERT(LESENSE->EN == 0);
   // The maximum value of period_counter_prescaler is 128. As a result, using the reference frequency less than
   // 33554431 Hz (33.554431 MHz), the frequency calculation in the while loop
   // below will not overflow.
-  EFM_ASSERT(reference_frequency < ((uint32_t)UINT32_MAX / 128UL));
+  SL_LOG_DEBUG_ASSERT(reference_frequency < ((uint32_t)UINT32_MAX / 128UL));
 
   // A sanity check of scan frequency value.
-  EFM_ASSERT((scan_frequency > 0U) && (scan_frequency <= reference_frequency));
+  SL_LOG_DEBUG_ASSERT((scan_frequency > 0U) && (scan_frequency <= reference_frequency));
 
   uint32_t period_counter_prescaler = 0UL;
   uint32_t clock_divisor  = 1UL;
@@ -208,7 +208,7 @@ uint32_t sl_hal_lesense_set_scan_frequency(uint32_t reference_frequency,
 
   // Calculate the period_counter_top value.
   period_counter_top = (reference_frequency / (scan_frequency * clock_divisor)) - 1UL;
-  EFM_ASSERT(period_counter_top <= (_LESENSE_TIMCTRL_PCTOP_MASK >> _LESENSE_TIMCTRL_PCTOP_SHIFT));
+  SL_LOG_DEBUG_ASSERT(period_counter_top <= (_LESENSE_TIMCTRL_PCTOP_MASK >> _LESENSE_TIMCTRL_PCTOP_SHIFT));
 
   // Clear current PCPRESC and PCTOP settings and set values in the LESENSE_TIMCTRL register.
   LESENSE->TIMCTRL = (LESENSE->TIMCTRL & ~(_LESENSE_TIMCTRL_PCPRESC_MASK | _LESENSE_TIMCTRL_PCTOP_MASK))
@@ -228,13 +228,13 @@ void sl_hal_lesense_set_clock_division(sl_hal_lesense_excitation_clock_t clock,
                                        sl_hal_lesense_clock_prescale_t clock_divisor)
 {
   // Make sure the module is disabled.
-  EFM_ASSERT(LESENSE->EN == 0);
+  SL_LOG_DEBUG_ASSERT(LESENSE->EN == 0);
 
   // Select the clock to prescale.
   switch (clock) {
     case SL_HAL_LESENSE_EXCITATION_TIMING_AUXHFRCO:
       // A sanity check of the clock divisor for the HF clock.
-      EFM_ASSERT((uint32_t)clock_divisor <= SL_HAL_LESENSE_CLOCK_DIV8);
+      SL_LOG_DEBUG_ASSERT((uint32_t)clock_divisor <= SL_HAL_LESENSE_CLOCK_DIV8);
       // Clear current AUXPRESC settings and set new values in LESENSE_TIMCTRL register.
       LESENSE->TIMCTRL = (LESENSE->TIMCTRL & ~_LESENSE_TIMCTRL_AUXPRESC_MASK)
                          | (clock_divisor << _LESENSE_TIMCTRL_AUXPRESC_SHIFT);
@@ -247,7 +247,7 @@ void sl_hal_lesense_set_clock_division(sl_hal_lesense_excitation_clock_t clock,
       break;
 
     default:
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 }
@@ -257,7 +257,7 @@ void sl_hal_lesense_set_clock_division(sl_hal_lesense_excitation_clock_t clock,
  ******************************************************************************/
 void sl_hal_lesense_channel_config_all(const sl_hal_lesense_channel_all_t *config_all_channel)
 {
-  EFM_ASSERT(config_all_channel != NULL);
+  SL_LOG_DEBUG_ASSERT(config_all_channel != NULL);
 
   // Iterate through all 16 channels.
   for (uint8_t i = 0U; i < SL_HAL_LESENSE_NUM_CHANNELS; ++i) {
@@ -273,17 +273,17 @@ void sl_hal_lesense_channel_config(const sl_hal_lesense_channel_descriptor_t *co
                                    uint32_t channel_index)
 {
   // A sanity check of configuration parameters.
-  EFM_ASSERT(config_channel != NULL);
-  EFM_ASSERT(channel_index < SL_HAL_LESENSE_NUM_CHANNELS);
-  EFM_ASSERT(config_channel->excitation_time <= (_LESENSE_CH_TIMING_EXTIME_MASK >> _LESENSE_CH_TIMING_EXTIME_SHIFT));
-  EFM_ASSERT(config_channel->measure_delay   <= (_LESENSE_CH_TIMING_MEASUREDLY_MASK >> _LESENSE_CH_TIMING_MEASUREDLY_SHIFT));
-  EFM_ASSERT(config_channel->offset          <= (_LESENSE_CH_INTERACT_OFFSET_MASK >> _LESENSE_CH_INTERACT_OFFSET_SHIFT));
+  SL_LOG_DEBUG_ASSERT(config_channel != NULL);
+  SL_LOG_DEBUG_ASSERT(channel_index < SL_HAL_LESENSE_NUM_CHANNELS);
+  SL_LOG_DEBUG_ASSERT(config_channel->excitation_time <= (_LESENSE_CH_TIMING_EXTIME_MASK >> _LESENSE_CH_TIMING_EXTIME_SHIFT));
+  SL_LOG_DEBUG_ASSERT(config_channel->measure_delay   <= (_LESENSE_CH_TIMING_MEASUREDLY_MASK >> _LESENSE_CH_TIMING_MEASUREDLY_SHIFT));
+  SL_LOG_DEBUG_ASSERT(config_channel->offset          <= (_LESENSE_CH_INTERACT_OFFSET_MASK >> _LESENSE_CH_INTERACT_OFFSET_SHIFT));
   // Not a complete assert, as the maximum value of acmp_threshold depends on other
   // configuration parameters. Check the parameter description of acmp_threshold
   // for more details.
-  EFM_ASSERT(config_channel->acmp_threshold < (_LESENSE_CH_INTERACT_THRES_MASK + 1U));
+  SL_LOG_DEBUG_ASSERT(config_channel->acmp_threshold < (_LESENSE_CH_INTERACT_THRES_MASK + 1U));
   if (config_channel->excitation_mode == SL_HAL_LESENSE_CHANNEL_PIN_EXCITATION_DAC_OUTPUT) {
-    EFM_ASSERT((0x1 << channel_index) & SLI_HAL_LESENSE_DACOUT_SUPPORT);
+    SL_LOG_DEBUG_ASSERT((0x1 << channel_index) & SLI_HAL_LESENSE_DACOUT_SUPPORT);
   }
 
   // Wait for synchronization before writing to EN register.
@@ -298,7 +298,7 @@ void sl_hal_lesense_channel_config(const sl_hal_lesense_channel_descriptor_t *co
 
   // A channel-specific timing configuration on scan channel channel_index.
   // Set excitation time, sampling delay, and measurement delay.
-  sl_hal_lesense_channel_set_timing(channel_index,
+  sl_hal_lesense_channel_set_timing((uint8_t)channel_index,
                                     config_channel->excitation_time,
                                     config_channel->sample_delay,
                                     config_channel->measure_delay);
@@ -337,7 +337,7 @@ void sl_hal_lesense_channel_config(const sl_hal_lesense_channel_descriptor_t *co
 
   // Configure the analog comparator (ACMP) threshold and decision threshold for
   // the counter separately with the function provided for that.
-  sl_hal_lesense_channel_set_threshold(channel_index,
+  sl_hal_lesense_channel_set_threshold((uint8_t)channel_index,
                                        config_channel->acmp_threshold,
                                        config_channel->count_threshold);
 
@@ -356,7 +356,7 @@ void sl_hal_lesense_channel_config(const sl_hal_lesense_channel_descriptor_t *co
  ******************************************************************************/
 void sl_hal_lesense_config_alternate_excitation(const sl_hal_lesense_channel_alternate_excitation_t *config_alternate_excitation)
 {
-  EFM_ASSERT(config_alternate_excitation != NULL);
+  SL_LOG_DEBUG_ASSERT(config_alternate_excitation != NULL);
 
   // Iterate through all 16 alternate excitation channels.
   for (uint8_t i = 0U; i < 16U; ++i) {
@@ -372,7 +372,7 @@ void sl_hal_lesense_channel_enable(uint8_t channel_index,
                                    bool enable_scan_channel,
                                    bool enable_pin)
 {
-  EFM_ASSERT(channel_index < SL_HAL_LESENSE_NUM_CHANNELS);
+  SL_LOG_DEBUG_ASSERT(channel_index < SL_HAL_LESENSE_NUM_CHANNELS);
 
   // Enable/disable the assigned pin of scan channel channel_index.
   sl_hal_bus_reg_write_bit(&SLI_HAL_GENERIC_LESENSE_ROUTE, channel_index, enable_pin);
@@ -401,11 +401,11 @@ void sl_hal_lesense_channel_set_threshold(uint8_t channel_index,
                                           uint16_t count_threshold)
 {
   // Make sure the module is disabled.
-  EFM_ASSERT(LESENSE->EN == 0);
+  SL_LOG_DEBUG_ASSERT(LESENSE->EN == 0);
   // A sanity check for acmp_threshold only, count_threshold is a 16 bit value.
-  EFM_ASSERT(acmp_threshold < (_LESENSE_CH_INTERACT_THRES_MASK + 1U));
+  SL_LOG_DEBUG_ASSERT(acmp_threshold < (_LESENSE_CH_INTERACT_THRES_MASK + 1U));
   // A sanity check for the LESENSE channel ID.
-  EFM_ASSERT(channel_index < SL_HAL_LESENSE_NUM_CHANNELS);
+  SL_LOG_DEBUG_ASSERT(channel_index < SL_HAL_LESENSE_NUM_CHANNELS);
 
   // Set the ACMP threshold value to the INTERACT register of the channel channel_index.
   LESENSE->CH[channel_index].INTERACT = (LESENSE->CH[channel_index].INTERACT & ~_LESENSE_CH_INTERACT_THRES_MASK)
@@ -427,8 +427,8 @@ void sl_hal_lesense_channel_config_sliding_window(uint8_t channel_index,
                                                   uint32_t init_value)
 {
   // Make sure the module is disabled.
-  EFM_ASSERT(LESENSE->EN == 0);
-  EFM_ASSERT(channel_index < SL_HAL_LESENSE_NUM_CHANNELS);
+  SL_LOG_DEBUG_ASSERT(LESENSE->EN == 0);
+  SL_LOG_DEBUG_ASSERT(channel_index < SL_HAL_LESENSE_NUM_CHANNELS);
 
   LESENSE_CH_TypeDef *channel = &LESENSE->CH[channel_index];
 
@@ -452,8 +452,8 @@ void sl_hal_lesense_channel_config_step_detection(uint8_t channel_index,
                                                   uint32_t init_value)
 {
   // Make sure the module is disabled.
-  EFM_ASSERT(LESENSE->EN == 0);
-  EFM_ASSERT(channel_index < SL_HAL_LESENSE_NUM_CHANNELS);
+  SL_LOG_DEBUG_ASSERT(LESENSE->EN == 0);
+  SL_LOG_DEBUG_ASSERT(channel_index < SL_HAL_LESENSE_NUM_CHANNELS);
 
   LESENSE_CH_TypeDef *channel = &LESENSE->CH[channel_index];
 
@@ -473,7 +473,7 @@ void sl_hal_lesense_channel_config_step_detection(uint8_t channel_index,
  ******************************************************************************/
 void sl_hal_lesense_decoder_config_all_arcs(const sl_hal_lesense_all_transition_arcs_t *config_all_arcs)
 {
-  EFM_ASSERT(config_all_arcs != NULL);
+  SL_LOG_DEBUG_ASSERT(config_all_arcs != NULL);
 
   // Iterate through all 64 transition arcs.
   for (uint8_t i = 0U; i < SL_HAL_LESENSE_NUM_ARCS; ++i) {

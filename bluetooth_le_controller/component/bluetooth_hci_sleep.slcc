@@ -15,7 +15,7 @@ include:
 provides:
 - name: bluetooth_hci_sleep
 requires:
-- name: gpiointerrupt
+- name: gpio
 - name: power_manager
 - name: bluetooth_hci_transport
 template_contribution:

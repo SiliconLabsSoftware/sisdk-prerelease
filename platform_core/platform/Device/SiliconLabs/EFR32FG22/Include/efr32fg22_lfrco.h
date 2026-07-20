@@ -156,47 +156,47 @@ typedef struct lfrco_typedef{
 /* Bit fields for LFRCO IF */
 #define _LFRCO_IF_RESETVALUE                     0x00000000UL                           /**< Default value for LFRCO_IF                  */
 #define _LFRCO_IF_MASK                           0x00070707UL                           /**< Mask for LFRCO_IF                           */
-#define LFRCO_IF_RDY                             (0x1UL << 0)                           /**< Ready Flag                                  */
+#define LFRCO_IF_RDY                             (0x1UL << 0)                           /**< Ready Interrupt Flag                        */
 #define _LFRCO_IF_RDY_SHIFT                      0                                      /**< Shift value for LFRCO_RDY                   */
 #define _LFRCO_IF_RDY_MASK                       0x1UL                                  /**< Bit mask for LFRCO_RDY                      */
 #define _LFRCO_IF_RDY_DEFAULT                    0x00000000UL                           /**< Mode DEFAULT for LFRCO_IF                   */
 #define LFRCO_IF_RDY_DEFAULT                     (_LFRCO_IF_RDY_DEFAULT << 0)           /**< Shifted mode DEFAULT for LFRCO_IF           */
-#define LFRCO_IF_POSEDGE                         (0x1UL << 1)                           /**< Rising Edge Flag                            */
+#define LFRCO_IF_POSEDGE                         (0x1UL << 1)                           /**< Rising Edge Interrupt Flag                  */
 #define _LFRCO_IF_POSEDGE_SHIFT                  1                                      /**< Shift value for LFRCO_POSEDGE               */
 #define _LFRCO_IF_POSEDGE_MASK                   0x2UL                                  /**< Bit mask for LFRCO_POSEDGE                  */
 #define _LFRCO_IF_POSEDGE_DEFAULT                0x00000000UL                           /**< Mode DEFAULT for LFRCO_IF                   */
 #define LFRCO_IF_POSEDGE_DEFAULT                 (_LFRCO_IF_POSEDGE_DEFAULT << 1)       /**< Shifted mode DEFAULT for LFRCO_IF           */
-#define LFRCO_IF_NEGEDGE                         (0x1UL << 2)                           /**< Falling Edge Flag                           */
+#define LFRCO_IF_NEGEDGE                         (0x1UL << 2)                           /**< Falling Edge Interrupt Flag                 */
 #define _LFRCO_IF_NEGEDGE_SHIFT                  2                                      /**< Shift value for LFRCO_NEGEDGE               */
 #define _LFRCO_IF_NEGEDGE_MASK                   0x4UL                                  /**< Bit mask for LFRCO_NEGEDGE                  */
 #define _LFRCO_IF_NEGEDGE_DEFAULT                0x00000000UL                           /**< Mode DEFAULT for LFRCO_IF                   */
 #define LFRCO_IF_NEGEDGE_DEFAULT                 (_LFRCO_IF_NEGEDGE_DEFAULT << 2)       /**< Shifted mode DEFAULT for LFRCO_IF           */
-#define LFRCO_IF_TCDONE                          (0x1UL << 8)                           /**< Temperature Check Done Flag                 */
+#define LFRCO_IF_TCDONE                          (0x1UL << 8)                           /**< Temperature Check Done Interrupt Flag       */
 #define _LFRCO_IF_TCDONE_SHIFT                   8                                      /**< Shift value for LFRCO_TCDONE                */
 #define _LFRCO_IF_TCDONE_MASK                    0x100UL                                /**< Bit mask for LFRCO_TCDONE                   */
 #define _LFRCO_IF_TCDONE_DEFAULT                 0x00000000UL                           /**< Mode DEFAULT for LFRCO_IF                   */
 #define LFRCO_IF_TCDONE_DEFAULT                  (_LFRCO_IF_TCDONE_DEFAULT << 8)        /**< Shifted mode DEFAULT for LFRCO_IF           */
-#define LFRCO_IF_CALDONE                         (0x1UL << 9)                           /**< Calibration Done Flag                       */
+#define LFRCO_IF_CALDONE                         (0x1UL << 9)                           /**< Calibration Done Interrupt Flag             */
 #define _LFRCO_IF_CALDONE_SHIFT                  9                                      /**< Shift value for LFRCO_CALDONE               */
 #define _LFRCO_IF_CALDONE_MASK                   0x200UL                                /**< Bit mask for LFRCO_CALDONE                  */
 #define _LFRCO_IF_CALDONE_DEFAULT                0x00000000UL                           /**< Mode DEFAULT for LFRCO_IF                   */
 #define LFRCO_IF_CALDONE_DEFAULT                 (_LFRCO_IF_CALDONE_DEFAULT << 9)       /**< Shifted mode DEFAULT for LFRCO_IF           */
-#define LFRCO_IF_TEMPCHANGE                      (0x1UL << 10)                          /**< Temperature Change Flag                     */
+#define LFRCO_IF_TEMPCHANGE                      (0x1UL << 10)                          /**< Temperature Change Interrupt Flag           */
 #define _LFRCO_IF_TEMPCHANGE_SHIFT               10                                     /**< Shift value for LFRCO_TEMPCHANGE            */
 #define _LFRCO_IF_TEMPCHANGE_MASK                0x400UL                                /**< Bit mask for LFRCO_TEMPCHANGE               */
 #define _LFRCO_IF_TEMPCHANGE_DEFAULT             0x00000000UL                           /**< Mode DEFAULT for LFRCO_IF                   */
 #define LFRCO_IF_TEMPCHANGE_DEFAULT              (_LFRCO_IF_TEMPCHANGE_DEFAULT << 10)   /**< Shifted mode DEFAULT for LFRCO_IF           */
-#define LFRCO_IF_SCHEDERR                        (0x1UL << 16)                          /**< Scheduling Error Flag                       */
+#define LFRCO_IF_SCHEDERR                        (0x1UL << 16)                          /**< Scheduling Error Interrupt Flag             */
 #define _LFRCO_IF_SCHEDERR_SHIFT                 16                                     /**< Shift value for LFRCO_SCHEDERR              */
 #define _LFRCO_IF_SCHEDERR_MASK                  0x10000UL                              /**< Bit mask for LFRCO_SCHEDERR                 */
 #define _LFRCO_IF_SCHEDERR_DEFAULT               0x00000000UL                           /**< Mode DEFAULT for LFRCO_IF                   */
 #define LFRCO_IF_SCHEDERR_DEFAULT                (_LFRCO_IF_SCHEDERR_DEFAULT << 16)     /**< Shifted mode DEFAULT for LFRCO_IF           */
-#define LFRCO_IF_TCOOR                           (0x1UL << 17)                          /**< Temperature Check Out Of Range Flag         */
+#define LFRCO_IF_TCOOR                           (0x1UL << 17)                          /**< Temperature Check Out Of Range Interrupt Flag*/
 #define _LFRCO_IF_TCOOR_SHIFT                    17                                     /**< Shift value for LFRCO_TCOOR                 */
 #define _LFRCO_IF_TCOOR_MASK                     0x20000UL                              /**< Bit mask for LFRCO_TCOOR                    */
 #define _LFRCO_IF_TCOOR_DEFAULT                  0x00000000UL                           /**< Mode DEFAULT for LFRCO_IF                   */
 #define LFRCO_IF_TCOOR_DEFAULT                   (_LFRCO_IF_TCOOR_DEFAULT << 17)        /**< Shifted mode DEFAULT for LFRCO_IF           */
-#define LFRCO_IF_CALOOR                          (0x1UL << 18)                          /**< Calibration Out Of Range Flag               */
+#define LFRCO_IF_CALOOR                          (0x1UL << 18)                          /**< Calibration Out Of Range Interrupt Flag     */
 #define _LFRCO_IF_CALOOR_SHIFT                   18                                     /**< Shift value for LFRCO_CALOOR                */
 #define _LFRCO_IF_CALOOR_MASK                    0x40000UL                              /**< Bit mask for LFRCO_CALOOR                   */
 #define _LFRCO_IF_CALOOR_DEFAULT                 0x00000000UL                           /**< Mode DEFAULT for LFRCO_IF                   */
@@ -205,47 +205,47 @@ typedef struct lfrco_typedef{
 /* Bit fields for LFRCO IEN */
 #define _LFRCO_IEN_RESETVALUE                    0x00000000UL                           /**< Default value for LFRCO_IEN                 */
 #define _LFRCO_IEN_MASK                          0x00070707UL                           /**< Mask for LFRCO_IEN                          */
-#define LFRCO_IEN_RDY                            (0x1UL << 0)                           /**< Ready Enable                                */
+#define LFRCO_IEN_RDY                            (0x1UL << 0)                           /**< Ready Interrupt Enable                      */
 #define _LFRCO_IEN_RDY_SHIFT                     0                                      /**< Shift value for LFRCO_RDY                   */
 #define _LFRCO_IEN_RDY_MASK                      0x1UL                                  /**< Bit mask for LFRCO_RDY                      */
 #define _LFRCO_IEN_RDY_DEFAULT                   0x00000000UL                           /**< Mode DEFAULT for LFRCO_IEN                  */
 #define LFRCO_IEN_RDY_DEFAULT                    (_LFRCO_IEN_RDY_DEFAULT << 0)          /**< Shifted mode DEFAULT for LFRCO_IEN          */
-#define LFRCO_IEN_POSEDGE                        (0x1UL << 1)                           /**< Rising Edge Enable                          */
+#define LFRCO_IEN_POSEDGE                        (0x1UL << 1)                           /**< Rising Edge Interrupt Enable                */
 #define _LFRCO_IEN_POSEDGE_SHIFT                 1                                      /**< Shift value for LFRCO_POSEDGE               */
 #define _LFRCO_IEN_POSEDGE_MASK                  0x2UL                                  /**< Bit mask for LFRCO_POSEDGE                  */
 #define _LFRCO_IEN_POSEDGE_DEFAULT               0x00000000UL                           /**< Mode DEFAULT for LFRCO_IEN                  */
 #define LFRCO_IEN_POSEDGE_DEFAULT                (_LFRCO_IEN_POSEDGE_DEFAULT << 1)      /**< Shifted mode DEFAULT for LFRCO_IEN          */
-#define LFRCO_IEN_NEGEDGE                        (0x1UL << 2)                           /**< Falling Edge Enable                         */
+#define LFRCO_IEN_NEGEDGE                        (0x1UL << 2)                           /**< Falling Edge Interrupt Enable               */
 #define _LFRCO_IEN_NEGEDGE_SHIFT                 2                                      /**< Shift value for LFRCO_NEGEDGE               */
 #define _LFRCO_IEN_NEGEDGE_MASK                  0x4UL                                  /**< Bit mask for LFRCO_NEGEDGE                  */
 #define _LFRCO_IEN_NEGEDGE_DEFAULT               0x00000000UL                           /**< Mode DEFAULT for LFRCO_IEN                  */
 #define LFRCO_IEN_NEGEDGE_DEFAULT                (_LFRCO_IEN_NEGEDGE_DEFAULT << 2)      /**< Shifted mode DEFAULT for LFRCO_IEN          */
-#define LFRCO_IEN_TCDONE                         (0x1UL << 8)                           /**< Temperature Check Done Enable               */
+#define LFRCO_IEN_TCDONE                         (0x1UL << 8)                           /**< Temperature Check Done Interrupt Enable     */
 #define _LFRCO_IEN_TCDONE_SHIFT                  8                                      /**< Shift value for LFRCO_TCDONE                */
 #define _LFRCO_IEN_TCDONE_MASK                   0x100UL                                /**< Bit mask for LFRCO_TCDONE                   */
 #define _LFRCO_IEN_TCDONE_DEFAULT                0x00000000UL                           /**< Mode DEFAULT for LFRCO_IEN                  */
 #define LFRCO_IEN_TCDONE_DEFAULT                 (_LFRCO_IEN_TCDONE_DEFAULT << 8)       /**< Shifted mode DEFAULT for LFRCO_IEN          */
-#define LFRCO_IEN_CALDONE                        (0x1UL << 9)                           /**< Calibration Done Enable                     */
+#define LFRCO_IEN_CALDONE                        (0x1UL << 9)                           /**< Calibration Done Interrupt Enable           */
 #define _LFRCO_IEN_CALDONE_SHIFT                 9                                      /**< Shift value for LFRCO_CALDONE               */
 #define _LFRCO_IEN_CALDONE_MASK                  0x200UL                                /**< Bit mask for LFRCO_CALDONE                  */
 #define _LFRCO_IEN_CALDONE_DEFAULT               0x00000000UL                           /**< Mode DEFAULT for LFRCO_IEN                  */
 #define LFRCO_IEN_CALDONE_DEFAULT                (_LFRCO_IEN_CALDONE_DEFAULT << 9)      /**< Shifted mode DEFAULT for LFRCO_IEN          */
-#define LFRCO_IEN_TEMPCHANGE                     (0x1UL << 10)                          /**< Temperature Change Enable                   */
+#define LFRCO_IEN_TEMPCHANGE                     (0x1UL << 10)                          /**< Temperature Change Interrupt Enable         */
 #define _LFRCO_IEN_TEMPCHANGE_SHIFT              10                                     /**< Shift value for LFRCO_TEMPCHANGE            */
 #define _LFRCO_IEN_TEMPCHANGE_MASK               0x400UL                                /**< Bit mask for LFRCO_TEMPCHANGE               */
 #define _LFRCO_IEN_TEMPCHANGE_DEFAULT            0x00000000UL                           /**< Mode DEFAULT for LFRCO_IEN                  */
 #define LFRCO_IEN_TEMPCHANGE_DEFAULT             (_LFRCO_IEN_TEMPCHANGE_DEFAULT << 10)  /**< Shifted mode DEFAULT for LFRCO_IEN          */
-#define LFRCO_IEN_SCHEDERR                       (0x1UL << 16)                          /**< Scheduling Error Enable                     */
+#define LFRCO_IEN_SCHEDERR                       (0x1UL << 16)                          /**< Scheduling Error Interrupt Enable           */
 #define _LFRCO_IEN_SCHEDERR_SHIFT                16                                     /**< Shift value for LFRCO_SCHEDERR              */
 #define _LFRCO_IEN_SCHEDERR_MASK                 0x10000UL                              /**< Bit mask for LFRCO_SCHEDERR                 */
 #define _LFRCO_IEN_SCHEDERR_DEFAULT              0x00000000UL                           /**< Mode DEFAULT for LFRCO_IEN                  */
 #define LFRCO_IEN_SCHEDERR_DEFAULT               (_LFRCO_IEN_SCHEDERR_DEFAULT << 16)    /**< Shifted mode DEFAULT for LFRCO_IEN          */
-#define LFRCO_IEN_TCOOR                          (0x1UL << 17)                          /**< Temperature Check Out Of Range Enable       */
+#define LFRCO_IEN_TCOOR                          (0x1UL << 17)                          /**< Temperature Check Out Of Range Interrupt Enable*/
 #define _LFRCO_IEN_TCOOR_SHIFT                   17                                     /**< Shift value for LFRCO_TCOOR                 */
 #define _LFRCO_IEN_TCOOR_MASK                    0x20000UL                              /**< Bit mask for LFRCO_TCOOR                    */
 #define _LFRCO_IEN_TCOOR_DEFAULT                 0x00000000UL                           /**< Mode DEFAULT for LFRCO_IEN                  */
 #define LFRCO_IEN_TCOOR_DEFAULT                  (_LFRCO_IEN_TCOOR_DEFAULT << 17)       /**< Shifted mode DEFAULT for LFRCO_IEN          */
-#define LFRCO_IEN_CALOOR                         (0x1UL << 18)                          /**< Calibration Out Of Range Enable             */
+#define LFRCO_IEN_CALOOR                         (0x1UL << 18)                          /**< Calibration Out Of Range Interrupt Enable   */
 #define _LFRCO_IEN_CALOOR_SHIFT                  18                                     /**< Shift value for LFRCO_CALOOR                */
 #define _LFRCO_IEN_CALOOR_MASK                   0x40000UL                              /**< Bit mask for LFRCO_CALOOR                   */
 #define _LFRCO_IEN_CALOOR_DEFAULT                0x00000000UL                           /**< Mode DEFAULT for LFRCO_IEN                  */

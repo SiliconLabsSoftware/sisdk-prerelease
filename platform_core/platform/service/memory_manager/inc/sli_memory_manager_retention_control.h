@@ -148,7 +148,7 @@ void sli_memory_manager_retention_add_size(sl_memory_heap_t *heap,
  * @param[in]  size_bytes  Size in bytes to subtract.
  ******************************************************************************/
 void sli_memory_manager_retention_subtract_size(sl_memory_heap_t *heap,
-                                           size_t size_bytes);
+                                                size_t size_bytes);
 
 /***************************************************************************//**
  * Updates the retained high watermark from the current retained_size.

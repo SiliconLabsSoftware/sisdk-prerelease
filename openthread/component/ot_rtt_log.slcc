@@ -6,6 +6,7 @@ quality: production
 description: This component adds support for RTT logging.
 provides:
 - name: ot_rtt_log
+- name: ot_platform_defined_logger
 requires:
 - name: ot_platform_abstraction_implementation
 - name: segger_rtt

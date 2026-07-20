@@ -28,6 +28,7 @@ requires:
 - name: cmsis_core
 - name: component_catalog
 - name: code_classification
+- name: log_none
 template_contribution:
 - name: component_catalog
   value: gpio

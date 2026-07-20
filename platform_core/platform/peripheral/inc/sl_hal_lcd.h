@@ -35,7 +35,7 @@
 
 #if defined(LCD_COUNT) && (LCD_COUNT > 0)
 #include "sl_enum.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -764,7 +764,7 @@ __INLINE void sl_hal_lcd_set_dma_mode(sl_hal_lcd_dma_mode_t mode)
  ******************************************************************************/
 __INLINE void sl_hal_lcd_bias_set(sl_hal_lcd_bias_t bias)
 {
-  EFM_ASSERT(LCD->EN != LCD_EN_EN);
+  SL_LOG_DEBUG_ASSERT(LCD->EN != LCD_EN_EN);
 
   LCD->DISPCTRL = (LCD->DISPCTRL & ~_LCD_DISPCTRL_BIAS_MASK) | (bias << _LCD_DISPCTRL_BIAS_SHIFT);
 }
@@ -776,7 +776,7 @@ __INLINE void sl_hal_lcd_bias_set(sl_hal_lcd_bias_t bias)
  ******************************************************************************/
 __INLINE void sl_hal_lcd_set_contrast(uint8_t level)
 {
-  EFM_ASSERT(level < 32);
+  SL_LOG_DEBUG_ASSERT(level < 32);
 
   LCD->BIASCTRL = (LCD->BIASCTRL & ~_LCD_BIASCTRL_VLCD_MASK)
                   | (level << _LCD_BIASCTRL_VLCD_SHIFT);
@@ -791,8 +791,8 @@ __INLINE void sl_hal_lcd_set_contrast(uint8_t level)
  ******************************************************************************/
 __INLINE void sl_hal_lcd_set_charge_redistribution_cycle(uint8_t cycles)
 {
-  EFM_ASSERT(LCD->EN != LCD_EN_EN);
-  EFM_ASSERT(cycles <= 4);
+  SL_LOG_DEBUG_ASSERT(LCD->EN != LCD_EN_EN);
+  SL_LOG_DEBUG_ASSERT(cycles <= 4);
 
   LCD->DISPCTRL = (LCD->DISPCTRL & ~_LCD_DISPCTRL_CHGRDST_MASK)
                   | ((uint32_t)cycles << _LCD_DISPCTRL_CHGRDST_SHIFT);

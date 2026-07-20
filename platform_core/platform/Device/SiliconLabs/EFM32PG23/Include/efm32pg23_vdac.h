@@ -53,8 +53,8 @@ typedef struct vdac_typedef{
   __IOM uint32_t CMD;                           /**< Command Register                                   */
   __IOM uint32_t IF;                            /**< Interrupt Flag Register                            */
   __IOM uint32_t IEN;                           /**< Interrupt Enable Register                          */
-  __IOM uint32_t CH0F;                          /**< Channel 0 Data Write Fifo                          */
-  __IOM uint32_t CH1F;                          /**< Channel 1 Data Write Fifo                          */
+  __IOM uint32_t CH0F;                          /**< Channel 0 Data Write FIFO                          */
+  __IOM uint32_t CH1F;                          /**< Channel 1 Data Write FIFO                          */
   __IOM uint32_t OUTCTRL;                       /**< DAC Output Control                                 */
   __IOM uint32_t OUTTIMERCFG;                   /**< DAC Out Timer Config Register                      */
   uint32_t       RESERVED0[50U];                /**< Reserved for future use                            */
@@ -72,8 +72,8 @@ typedef struct vdac_typedef{
   __IOM uint32_t CMD_SET;                       /**< Command Register                                   */
   __IOM uint32_t IF_SET;                        /**< Interrupt Flag Register                            */
   __IOM uint32_t IEN_SET;                       /**< Interrupt Enable Register                          */
-  __IOM uint32_t CH0F_SET;                      /**< Channel 0 Data Write Fifo                          */
-  __IOM uint32_t CH1F_SET;                      /**< Channel 1 Data Write Fifo                          */
+  __IOM uint32_t CH0F_SET;                      /**< Channel 0 Data Write FIFO                          */
+  __IOM uint32_t CH1F_SET;                      /**< Channel 1 Data Write FIFO                          */
   __IOM uint32_t OUTCTRL_SET;                   /**< DAC Output Control                                 */
   __IOM uint32_t OUTTIMERCFG_SET;               /**< DAC Out Timer Config Register                      */
   uint32_t       RESERVED5[50U];                /**< Reserved for future use                            */
@@ -91,8 +91,8 @@ typedef struct vdac_typedef{
   __IOM uint32_t CMD_CLR;                       /**< Command Register                                   */
   __IOM uint32_t IF_CLR;                        /**< Interrupt Flag Register                            */
   __IOM uint32_t IEN_CLR;                       /**< Interrupt Enable Register                          */
-  __IOM uint32_t CH0F_CLR;                      /**< Channel 0 Data Write Fifo                          */
-  __IOM uint32_t CH1F_CLR;                      /**< Channel 1 Data Write Fifo                          */
+  __IOM uint32_t CH0F_CLR;                      /**< Channel 0 Data Write FIFO                          */
+  __IOM uint32_t CH1F_CLR;                      /**< Channel 1 Data Write FIFO                          */
   __IOM uint32_t OUTCTRL_CLR;                   /**< DAC Output Control                                 */
   __IOM uint32_t OUTTIMERCFG_CLR;               /**< DAC Out Timer Config Register                      */
   uint32_t       RESERVED10[50U];               /**< Reserved for future use                            */
@@ -110,8 +110,8 @@ typedef struct vdac_typedef{
   __IOM uint32_t CMD_TGL;                       /**< Command Register                                   */
   __IOM uint32_t IF_TGL;                        /**< Interrupt Flag Register                            */
   __IOM uint32_t IEN_TGL;                       /**< Interrupt Enable Register                          */
-  __IOM uint32_t CH0F_TGL;                      /**< Channel 0 Data Write Fifo                          */
-  __IOM uint32_t CH1F_TGL;                      /**< Channel 1 Data Write Fifo                          */
+  __IOM uint32_t CH0F_TGL;                      /**< Channel 0 Data Write FIFO                          */
+  __IOM uint32_t CH1F_TGL;                      /**< Channel 1 Data Write FIFO                          */
   __IOM uint32_t OUTCTRL_TGL;                   /**< DAC Output Control                                 */
   __IOM uint32_t OUTTIMERCFG_TGL;               /**< DAC Out Timer Config Register                      */
   uint32_t       RESERVED15[50U];               /**< Reserved for future use                            */

@@ -27,6 +27,7 @@ requires:
 - name: "hal_prs"
 - name: "clock_manager_runtime"
 - name: "event_queue_task"
+- name: "wisun_lxpm_implementation"
 
 recommends:
 - id: "wisun_dc_client_stubs"
@@ -36,6 +37,8 @@ recommends:
 - id: "rail_lib_singleprotocol"
   vendor: silabs
 - id: "wisun_event_task"
+  vendor: silabs
+- id: "wisun_lxpm_stubs"
 
   vendor: silabs
 conflicts:
@@ -44,6 +47,9 @@ conflicts:
 provides:
 - name: "wisun_br_stack"
 - name: "a_wisun_stack"
+
+define:
+- name: DEBUG_EFM
 
 template_contribution:
 - name: "event_handler"

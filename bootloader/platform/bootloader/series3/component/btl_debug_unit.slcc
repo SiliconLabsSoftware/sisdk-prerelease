@@ -1,0 +1,33 @@
+id: btl_debug_unit
+label: Bootloader debug (unit test)
+package: bootloader
+description: >
+  Debug print sources for Series 3 bootloader unit tests without btl_core or
+  bootloader_interface_s3. Matches production btl_debug.c and btl_debug_swo.c only.
+category: Platform|Bootloader|Test
+quality: production
+ui_hints:
+  visibility: never
+source:
+- path: platform/bootloader/debug/btl_debug.c
+- path: platform/bootloader/debug/btl_debug_swo.c
+include:
+- path: platform/bootloader/debug
+  file_list:
+  - path: btl_debug.h
+- path: platform/bootloader/debug/config
+  file_list:
+  - path: btl_debug_cfg.h
+- path: platform/bootloader/series3
+  file_list:
+  - path: config/btl_config.h
+config_file:
+- path: platform/bootloader/debug/config/btl_debug_cfg.h
+requires:
+- name: btl_util_header
+provides:
+- name: btl_debug_unit
+metadata:
+  sbom:
+    license: MSLA
+root_path: bootloader

@@ -18,6 +18,8 @@ include:
   - path: sl_hal_sysrtc.h
   - path: peripheral_sysrtc.h
   - path: peripheral_sysrtc_compat.h
+requires:
+- name: log_none
 provides:
 - name: hal_sysrtc_subsystem_host
 - name: hal_sysrtc_subsystem

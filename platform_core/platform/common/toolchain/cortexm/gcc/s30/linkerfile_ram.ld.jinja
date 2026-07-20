@@ -42,20 +42,24 @@
   {%- set ram_code_alignment = 4 %}
 {%- endif %}
 
+{#- Legacy stack (before BSS): Sixx301 only. #}
+{%- set family_match = namespace(legacy_stack_placement = false) %}
+{%- for family in device_family | default([]) %}
+  {%- set family_lc = family | string | lower %}
+  {%- if family_lc in ['simg301', 'sibg301', 'sixg301'] %}
+    {%- set family_match.legacy_stack_placement = true %}
+  {%- endif %}
+{%- endfor %}
+{%- set legacy_stack_placement = family_match.legacy_stack_placement %}
+
 {#- Use Secure aliases #}
 {% if trustzone_secure is defined %}
 {%-  set flash_addr = device_flash_addr_s | first | default(0, true) %}
 {%-  set sram_addr = device_ram_addr_s | first %}
-{%-  if device_ram_alias_addr_s is defined %}
-{%-    set sram_alias_addr = device_ram_alias_addr_s | first %}
-{%-  endif %}
 {%- else %}
 {#- Use Non-Secure aliases #}
 {%-  set flash_addr = device_flash_addr_ns | first | default(0, true) %}
 {%-  set sram_addr = device_ram_addr_ns | first %}
-{%-  if device_ram_alias_addr_ns is defined %}
-{%-    set sram_alias_addr = device_ram_alias_addr_ns | first %}
-{%-  endif %}
 {%- endif %}
 
 {#-
@@ -129,14 +133,8 @@
 #}
 {%- if memory_ram_start is defined %}
   {%- set app_ram_start = memory_ram_start | first %}
-  {%- if sram_alias_addr is defined %}
-  {%- set app_ram_alias_start = memory_ram_alias_start | first %}
-  {%- endif %}
 {%- else %}
   {%- set app_ram_start = sram_addr %}
-  {%- if sram_alias_addr is defined %}
-  {%- set app_ram_alias_start = sram_alias_addr %}
-  {%- endif %}
 {%- endif %}
 
 {%- if memory_ram_size is defined %}
@@ -148,9 +146,6 @@
 {%- if bootloader_interface_enable %}
   {%- set bootloader_reset_region_start = app_ram_start %}
   {%- set app_ram_start = app_ram_start + bootloader_reset_cause_size %}
-  {%- if sram_alias_addr is defined %}
-  {%- set app_ram_alias_start = app_ram_alias_start + bootloader_reset_cause_size %}
-  {%- endif %}
   {%- set app_ram_size = app_ram_size - bootloader_reset_cause_size %}
 {%- endif %}
 
@@ -216,6 +211,22 @@ __flash_page_size__ = 0x{{ '%0x' % flash_page_size }};
  * ----- START OF APPLICATION RAM -----
  * RW  - Bootloader reset reason (if present)
  * R   - Vector table
+{%- if not legacy_stack_placement %}
+ * RW  - BSS (zero-init RAM)
+ * RW  - uninitialised RAM
+ * R X - RAM functions
+ * R   - Read-only data
+ * R X - Code
+ * R X - Secure Gateways (Trustzone S only)
+ * R X - extab
+ * R X - exidx
+ * R   - startup copy table
+ * R   - startup zeroization table
+ * RW  - Initialised RAM
+ * RW  - Heap (expanded up to the main stack; stack at end of RAM inside heap)
+ * RW  - Main stack
+ * RW  - Stack sealing (Trustzone S only)
+{%- else %}
  * RW  - stack
  * RW  - stack sealing
  * RW  - BSS (zero-init RAM)
@@ -230,6 +241,7 @@ __flash_page_size__ = 0x{{ '%0x' % flash_page_size }};
  * R   - startup zeroization table
  * RW  - Initialised RAM
  * RW  - Heap (automatically expanded to end of RAM)
+{%- endif %}
  * ----- END OF APPLICATION RAM -----
  *
  * ----- START OF DUMMY REGION -----
@@ -263,6 +275,7 @@ ENTRY(Reset_Handler)
 
 SECTIONS
 {
+
   .vectors :
   {
     linker_vectors_begin = .;
@@ -472,6 +485,7 @@ SECTIONS
   } > BOOTLOADER_RESET_REGION :btl_data
 {%- endif %}
 
+{%- if legacy_stack_placement %}
   .stack (NOLOAD):
   {
     . = ALIGN(8);
@@ -493,6 +507,7 @@ SECTIONS
     . = . + 8;
     . = ALIGN(8);
   } > RAM :ram_pre_code
+{%- endif %}
 {%- endif %}
 
   .noinit (NOLOAD):
@@ -574,7 +589,61 @@ SECTIONS
   __data_start__ = ADDR(.data);
   __data_end__ = ADDR(.data) + SIZEOF(.data);
 
-/* Calculate heap size based on RAM limits. */
+{%- if not legacy_stack_placement %}
+{%- if trustzone_secure %}
+  {%- set stackseal_size = 8 %}
+  {%- set stackseal_align = 8 %}
+  {%- set ram_end_addr = app_ram_start + app_ram_size %}
+  {%- set stackseal_start = (ram_end_addr - stackseal_size) // stackseal_align * stackseal_align %}
+  {%- set stackseal_size = ram_end_addr - stackseal_start %}
+{%- else %}
+  {%- set stackseal_size = 0 %}
+{%- endif %}
+  {%- set stack_alignment = 8 %}
+
+heap_limit = ORIGIN(RAM) + LENGTH(RAM);  /* End of RAM */
+heap_size = heap_limit - __HeapBase - SIZEOF(.stack) - {{ stack_alignment }} - {{ stackseal_size }};
+
+{%- if "memory_manager" in component_catalog %}
+  .memory_manager_heap (NOLOAD):
+  {
+    . = ALIGN(8);
+    __HeapBase = .;
+    . += heap_size;
+    KEEP(*(.memory_manager_heap*))
+  } > RAM :ram_post_data
+
+{%- else %}
+  .heap (NOLOAD):
+  {
+    . = ALIGN(8);
+    __HeapBase = .;
+    . += heap_size;
+    KEEP(*(.heap*))
+  } > RAM :ram_post_data
+{%- endif %}
+
+  .stack (NOLOAD):
+  {
+    . = ALIGN({{ stack_alignment }});
+    __StackLimit = .;
+    __stack_limit = __StackLimit;
+    KEEP(*(.stack*))
+    __StackTop = .;
+    __stack = __StackTop;
+    __HeapLimit = __StackTop;
+  } > RAM :ram_post_data
+
+{%- if trustzone_secure %}
+  .stackseal :
+  {
+    __StackSeal = .;
+    . = . + 8;
+    . = ALIGN(8);
+  } > RAM :ram_post_data
+{%- endif %}
+
+{%- else %}
 heap_limit = ORIGIN(RAM) + LENGTH(RAM);  /* End of RAM */
 heap_size = heap_limit - __HeapBase;
 
@@ -584,8 +653,6 @@ heap_size = heap_limit - __HeapBase;
     . = ALIGN(8);
     __HeapBase = .;
     . += heap_size;
-    __end__ = .;
-    _end = __end__;
     KEEP(*(.memory_manager_heap*))
     __HeapLimit = ORIGIN(RAM) + LENGTH(RAM);
   } > RAM :ram_post_data
@@ -595,12 +662,17 @@ heap_size = heap_limit - __HeapBase;
     . = ALIGN(8);
     __HeapBase = .;
     . += heap_size;
-    __end__ = .;
-    _end = __end__;
     KEEP(*(.heap*))
     __HeapLimit = ORIGIN(RAM) + LENGTH(RAM);
   } > RAM :ram_post_data
 {%- endif %}
+{%- endif %}
+
+  .ram_end :
+  {
+    __end__ = .;
+    _end = __end__;
+  } > RAM :ram_post_data
 
   __ram_end__ = 0x{{ '%0x' % app_ram_start }} + 0x{{ '%0x' % app_ram_size }};
   __main_flash_end__ = 0x{{ '%0x' % app_flash_start }} + 0x{{ '%0x' % app_flash_size }};
@@ -674,7 +746,7 @@ heap_size = heap_limit - __HeapBase;
 
 {#-
   Ensure the template contribution to memory_flash_size does not exceed the available flash_size.
-  On Rainier, if the AXiP is enabled, the flash size is reduced by the overhead of the AXiP regions.
+  On Series 30 family 301 devices, if the AXiP is enabled, the flash size is reduced by the overhead of the AXiP regions.
   memory_flash_size is the size of the flash region defined in the SLCP file. memory_flash_size value can be
   hardcoded from a given SiSDK stack sample apps project or can be edited via the Memory Editor configuration tool
   of Simplicity Studio.

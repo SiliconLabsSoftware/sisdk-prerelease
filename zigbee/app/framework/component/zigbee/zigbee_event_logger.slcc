@@ -1,0 +1,77 @@
+package: zigbee
+description: This component provides an interface to add system event data into the zigbee-event-logger's circular buffer.  It also provides hooks for the application to be able to print and decode the logged event data.
+label: Zigbee Event Logger
+quality: production
+id: zigbee_event_logger
+category: Zigbee|Utility
+provides:
+- name: zigbee_event_logger
+requires:
+- name: zigbee_compact_logger
+- name: zigbee_ring_buffer
+config_file:
+- path: app/framework/plugin/zigbee-event-logger/config/zigbee-event-logger-config.h
+source:
+- path: app/framework/plugin/zigbee-event-logger/zigbee-event-logger.c
+- path: app/framework/plugin/zigbee-event-logger/zigbee-event-logger-gen.c
+- path: app/framework/plugin/zigbee-event-logger/zigbee-event-logger-internal.c
+- path: app/framework/plugin/zigbee-event-logger/zigbee-event-logger-print-gen.c
+- path: app/framework/plugin/zigbee-event-logger/zigbee-event-logger-cli.c
+  condition:
+  - cli
+- path: app/framework/plugin/zigbee-event-logger/zigbee-event-logger-host.c
+  condition:
+  - zigbee_ezsp
+- path: app/framework/plugin/zigbee-event-logger/zigbee-event-logger-soc.c
+  condition:
+  - zigbee_stack_common
+include:
+- path: app/framework/plugin/zigbee-event-logger
+  file_list:
+  - path: zigbee-event-logger-internal.h
+  - path: zigbee-event-logger-print-gen.h
+- path: stack/include
+  file_list:
+  - path: zigbee-event-logger-gen.h
+template_contribution:
+- name: component_catalog
+  value: zigbee_event_logger
+- name: zigbee_af_callback
+  value:
+    callback_type: local_data_init
+    function_name: sl_zigbee_af_zigbee_event_logger_init_cb
+- name: zigbee_stack_callback
+  value:
+    callback_type: stack_status
+    function_name: sl_zigbee_af_zigbee_event_logger_stack_status_cb
+- name: zigbee_stack_callback
+  value:
+    callback_type: zigbee_key_establishment
+    function_name: sl_zigbee_af_zigbee_event_logger_zigbee_key_establishment_cb
+- name: zigbee_stack_callback
+  value:
+    callback_type: switch_network_key
+    function_name: sli_zigbee_af_zigbee_event_logger_switch_network_key_callback
+- name: zigbee_stack_callback
+  value:
+    callback_type: child_join
+    function_name: sli_zigbee_af_zigbee_event_logger_child_join_callback
+- name: zigbee_stack_callback
+  value:
+    callback_type: duty_cycle
+    function_name: sli_zigbee_af_zigbee_event_logger_duty_cycle_callback
+- name: cli_group
+  value:
+    group: plugin
+    name: zigbee-event-logger
+    help: zigbee-event-logger related commands
+- name: cli_command
+  value:
+    group: zigbee-event-logger
+    name: print
+    handler: sli_zigbee_af_zigbee_event_logger_print_events
+    help: Prints all stored events.
+metadata:
+  sbom:
+    license: MSLA
+root_path: zigbee

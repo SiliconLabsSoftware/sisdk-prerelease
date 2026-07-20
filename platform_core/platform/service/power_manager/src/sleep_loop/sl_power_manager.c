@@ -93,8 +93,10 @@ uint8_t requirement_high_accuracy_hf_clock_counter = 0;
 bool requirement_high_accuracy_hf_clock_back_to_zero = false;
 #endif
 
+#if !defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
 // Saved energy mode we are coming from when waiting for HFXO ready.
 static sl_power_manager_em_t waiting_clock_restore_from_em = SL_POWER_MANAGER_EM0;
+#endif
 
 // Flag indicating if we are sleeping, waiting for the HF clock restore
 static volatile bool is_sleeping_waiting_for_clock_restore = false;
@@ -289,10 +291,15 @@ __NO_INLINE void sl_power_manager_sleep(void)
 #ifdef SLI_DEVICE_SUPPORTS_EM1P
       requirement_high_accuracy_hf_clock_back_to_zero = false;
 #endif
+
+#if defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
+      sli_power_manager_notify_em_transition(current_em, lowest_em);
+#else
       if (is_sleeping_waiting_for_clock_restore == false) {
         // But only notify if we are not in the process of waiting for the HF oscillators restore.
         sli_power_manager_notify_em_transition(current_em, lowest_em);
       }
+#endif
       current_em = lowest_em;           // Keep new active energy mode
     }
 
@@ -321,11 +328,13 @@ __NO_INLINE void sl_power_manager_sleep(void)
     // Apply lowest reachable energy mode
     sli_power_manager_apply_em(current_em);
 
+#if !defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
     // In case we are waiting for the restore from an early wake-up,
     // we put back the current EM to the one before the early wake-up to do the next notification correctly.
     if (is_sleeping_waiting_for_clock_restore == true) {
       current_em = waiting_clock_restore_from_em;
     }
+#endif
 
     // Notify consumer of wakeup while interrupts are still off
     // For internal Silicon Labs use only
@@ -333,6 +342,7 @@ __NO_INLINE void sl_power_manager_sleep(void)
 
     primask_state = yield_critical_with_primask(primask_state);
 
+#if !defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
     // In case the HF restore was completed from the HFXO ISR,
     // and notification not done elsewhere, do it here
     if (is_restored_from_hfxo_isr_internal == true) {
@@ -342,6 +352,7 @@ __NO_INLINE void sl_power_manager_sleep(void)
         sli_power_manager_notify_em_transition(waiting_clock_restore_from_em, SL_POWER_MANAGER_EM1);
       }
     }
+#endif
 
     // Stop the internal power manager sleeptimer.
     sl_sleeptimer_stop_timer(&clock_wakeup_timer_handle);
@@ -358,11 +369,16 @@ __NO_INLINE void sl_power_manager_sleep(void)
       sli_power_manager_restore_high_freq_accuracy_clk();
       is_hf_x_oscillator_not_preserved = false;
     }
+
+#if defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
+    sli_power_manager_is_high_freq_accuracy_clk_ready(true);
+#else
     // If possible, go back to sleep in EM1 while waiting for HF accuracy restore
     while (!sli_power_manager_is_high_freq_accuracy_clk_ready(false)) {
       sli_power_manager_apply_em(SL_POWER_MANAGER_EM1);
       primask_state = yield_critical_with_primask(primask_state);
     }
+#endif
     sli_power_manager_restore_states();
     is_states_saved = false;
   }
@@ -889,8 +905,7 @@ static void evaluate_wakeup(sl_power_manager_em_t to)
             if (sli_power_manager_is_high_freq_accuracy_clk_used()) {
               hf_accuracy_clk_flag = SLI_SLEEPTIMER_POWER_MANAGER_HF_ACCURACY_CLK_FLAG;
             }
-#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)                  \
-            && (SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_SYSRTC) \
+#if (SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_SYSRTC) \
             && defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
             uint32_t hfxo_startup_time;
             sli_clock_manager_get_hfxo_average_startup_time(&hfxo_startup_time);
@@ -1032,8 +1047,10 @@ static void clock_restore(void)
       // If the HF oscillator is not yet ready, we will go back to sleep while waiting
       is_sleeping_waiting_for_clock_restore = true;
 
+#if !defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
       // Save current EM to do the right notification later
       waiting_clock_restore_from_em = current_em;
+#endif
     }
   }
 }

@@ -40,7 +40,7 @@
 extern "C" {
 #endif
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include <stdbool.h>
 
 /***************************************************************************//**
@@ -422,7 +422,7 @@ void sl_hal_vdac_reset(VDAC_TypeDef *vdac);
 __INLINE void sl_hal_vdac_wait_sync(VDAC_TypeDef *vdac)
 {
   // Verifies that the VDAC reference is valid.
-  EFM_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
 
   while (vdac->STATUS & VDAC_STATUS_SYNCBUSY) {
     // Wait for synchronization to finish.
@@ -439,7 +439,7 @@ __INLINE void sl_hal_vdac_wait_sync(VDAC_TypeDef *vdac)
 __INLINE void sl_hal_vdac_wait_ready(VDAC_TypeDef *vdac)
 {
   // Verifies that the VDAC reference is valid.
-  EFM_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
 
   while (vdac->EN & _VDAC_EN_DISABLING_MASK) {
     // Wait for the VDAC to be completely disabled.
@@ -456,7 +456,7 @@ __INLINE void sl_hal_vdac_wait_ready(VDAC_TypeDef *vdac)
 __INLINE void sl_hal_vdac_enable(VDAC_TypeDef *vdac)
 {
   // Verifies that the VDAC reference is valid.
-  EFM_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
 
   if (vdac->EN & VDAC_EN_EN) {
     // If the VDAC is already enabled, return.
@@ -476,7 +476,7 @@ __INLINE void sl_hal_vdac_enable(VDAC_TypeDef *vdac)
 __INLINE void sl_hal_vdac_disable(VDAC_TypeDef *vdac)
 {
   // Verifies that the VDAC reference is valid.
-  EFM_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
 
   sl_hal_vdac_wait_sync(vdac);
   vdac->EN_CLR = VDAC_EN_EN;
@@ -503,7 +503,7 @@ __INLINE void sl_hal_vdac_enable_interrupts(VDAC_TypeDef *vdac,
                                             uint32_t flags)
 {
   // Verifies that the VDAC reference is valid.
-  EFM_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
 
   vdac->IEN_SET = flags;
 }
@@ -524,7 +524,7 @@ __INLINE void sl_hal_vdac_disable_interrupts(VDAC_TypeDef *vdac,
                                              uint32_t flags)
 {
   // Verifies that the VDAC reference is valid.
-  EFM_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
 
   vdac->IEN_CLR = flags;
 }
@@ -545,7 +545,7 @@ __INLINE void sl_hal_vdac_set_interrupts(VDAC_TypeDef *vdac,
                                          uint32_t flags)
 {
   // Verifies that the VDAC reference is valid.
-  EFM_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
 
   vdac->IF_SET = flags;
 }
@@ -566,7 +566,7 @@ __INLINE void sl_hal_vdac_clear_interrupts(VDAC_TypeDef *vdac,
                                            uint32_t flags)
 {
   // Verifies that the VDAC reference is valid.
-  EFM_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
 
   vdac->IF_CLR = flags;
 }
@@ -585,7 +585,7 @@ __INLINE void sl_hal_vdac_clear_interrupts(VDAC_TypeDef *vdac,
 __INLINE uint32_t sl_hal_vdac_get_pending_interrupts(VDAC_TypeDef *vdac)
 {
   // Verifies that the VDAC reference is valid.
-  EFM_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
 
   return vdac->IF;
 }
@@ -612,7 +612,7 @@ __INLINE uint32_t sl_hal_vdac_get_pending_interrupts(VDAC_TypeDef *vdac)
 __INLINE uint32_t sl_hal_vdac_get_enabled_pending_interrupts(VDAC_TypeDef *vdac)
 {
   // Verifies that the VDAC reference is valid.
-  EFM_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
 
   uint32_t ien = vdac->IEN;
 
@@ -633,7 +633,7 @@ __INLINE uint32_t sl_hal_vdac_get_enabled_pending_interrupts(VDAC_TypeDef *vdac)
 __INLINE void sl_hal_vdac_sine_mode_start(VDAC_TypeDef *vdac)
 {
   // Verifies that the VDAC reference is valid.
-  EFM_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
 
   sl_hal_vdac_wait_sync(vdac);
   // Start sine mode.
@@ -656,7 +656,7 @@ __INLINE void sl_hal_vdac_sine_mode_start(VDAC_TypeDef *vdac)
 __INLINE void sl_hal_vdac_sine_mode_stop(VDAC_TypeDef *vdac)
 {
   // Verifies that the VDAC reference is valid.
-  EFM_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
 
   sl_hal_vdac_wait_sync(vdac);
   // Stop sine mode.
@@ -679,7 +679,7 @@ __INLINE void sl_hal_vdac_sine_mode_stop(VDAC_TypeDef *vdac)
 __INLINE uint32_t sl_hal_vdac_get_status(VDAC_TypeDef *vdac)
 {
   // Verifies that the VDAC reference is valid.
-  EFM_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
 
   return vdac->STATUS;
 }

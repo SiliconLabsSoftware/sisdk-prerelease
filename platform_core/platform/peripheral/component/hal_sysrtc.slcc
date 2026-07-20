@@ -21,6 +21,7 @@ provides:
 requires:
 - name: device
 - name: device_has_sysrtc
+- name: log_none
 - name: hal_sysrtc_subsystem
 - name: hal_generic_common
 - name: cmsis_core

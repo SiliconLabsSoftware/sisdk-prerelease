@@ -74,12 +74,12 @@ typedef enum {
 
 //============================================================================
 
-__STATIC_INLINE bool pageHdrErased(nvm3_PageHdr_t *pageHdr)
+__STATIC_INLINE bool pageHdrErased(const nvm3_PageHdr_t *pageHdr)
 {
   return (pageHdr->data[0] == 0xFFFFFFFFU);
 }
 
-__STATIC_INLINE bool pageHdrMagicAndVersion(nvm3_PageHdr_t *pageHdr)
+__STATIC_INLINE bool pageHdrMagicAndVersion(const nvm3_PageHdr_t *pageHdr)
 {
   uint16_t magic;
   uint16_t version;
@@ -89,14 +89,14 @@ __STATIC_INLINE bool pageHdrMagicAndVersion(nvm3_PageHdr_t *pageHdr)
   return (magic == H1_MAGIC_V1) && (version == H1_VERSION_V1);
 }
 
-__STATIC_INLINE bool pageHdrIsPageBad(nvm3_PageHdr_t *pageHdr)
+__STATIC_INLINE bool pageHdrIsPageBad(const nvm3_PageHdr_t *pageHdr)
 {
   uint32_t badPage = (pageHdr->data[3] & H4_BAD_MASK) >> H4_BAD_SHIFT;
 
   return badPage != H4_BAD_GOOD;
 }
 
-__STATIC_INLINE bool pageHdrIsEraseInProgress(nvm3_PageHdr_t *pageHdr)
+__STATIC_INLINE bool pageHdrIsEraseInProgress(const nvm3_PageHdr_t *pageHdr)
 {
   uint16_t EIP = (pageHdr->data[3]);
 

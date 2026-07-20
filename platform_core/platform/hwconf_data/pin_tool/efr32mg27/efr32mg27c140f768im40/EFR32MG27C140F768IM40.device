@@ -134,7 +134,7 @@
       <peripheral componentIdRef="pin_tool.efr32.efr32mg27.rtcc" displayName="RTCC" name="RTCC" revision="A" category="Timers" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32mg27.letimer" displayName="LETIMER0" name="LETIMER0" revision="A" category="Timers" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32mg27.iadc" displayName="IADC0" name="IADC0" revision="A" category="Analog" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efr32.efr32mg27.acmp" displayName="ACMP0" name="ACMP0" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.efr32mg27.acmp" displayName="ACMP0" name="ACMP0" revision="A" category="Analog" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32mg27.i2c" displayName="I2C0" name="I2C0" revision="A" category="Communications" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32mg27.wdog" displayName="WDOG0" name="WDOG0" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32mg27.eusart" displayName="EUSART0" name="EUSART0" revision="A" category="Communications" hidden="false"/>

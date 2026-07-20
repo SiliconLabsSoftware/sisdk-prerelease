@@ -88,6 +88,17 @@ sl_status_t sli_wisun_disable_rf_test_event_callback(void);
 #define sl_wisun_set_mac_mode_switch(mode, phy_mode_id, neighbor_address) \
                    sl_wisun_config_mode_switch(mode, phy_mode_id, neighbor_address, true)
 
+/**************************************************************************//**
+ * Get Wi-SUN broadcast schedule time in milliseconds.
+ *
+ * @param[out] schedule_time Pointer where broadcast schedule time is written.
+ *                           The value is computed as BSN * BI + BIO.
+ * @return SL_STATUS_OK if successful, an error code otherwise
+ *
+ * Available in libraries: Full, FFN, BR
+ *****************************************************************************/
+ sl_status_t sli_wisun_get_broadcast_schedule_time(uint64_t *schedule_time_ms);
+
 /** @} (end SL_WISUN_INTERNAL_API) */
 
 #ifdef __cplusplus

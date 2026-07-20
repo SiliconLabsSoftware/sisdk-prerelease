@@ -29,7 +29,7 @@
 
 #include "api/btl_interface.h"
 #include "api/btl_interface_parser.h"
-#include "api/application_properties.h"
+#include "application_properties.h"
 
 /***************************************************************************//**
  * @addtogroup Components

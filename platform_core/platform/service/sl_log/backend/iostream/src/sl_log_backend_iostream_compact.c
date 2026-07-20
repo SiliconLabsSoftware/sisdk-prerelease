@@ -82,7 +82,7 @@ sl_status_t sl_log_hal_backend_init(void)
  * @return SL_STATUS_OK on success or an sl_status_t error code from the
  *         underlying transport send operation.
  */
-sl_status_t sl_log_hal_backend_write(sl_log_event_t *buffer, uint32_t read_index, uint32_t event_count)
+sl_status_t sl_log_hal_backend_write(const sl_log_event_t *buffer, uint32_t read_index, uint32_t event_count)
 {
   sl_status_t status = SL_STATUS_OK;
 

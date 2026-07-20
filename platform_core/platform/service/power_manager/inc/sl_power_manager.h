@@ -279,6 +279,7 @@ void sl_power_manager_unsubscribe_em_transition_event(sl_power_manager_em_transi
  *       power_manager_no_deepsleep component, which configures the
  *       lowest energy mode as EM1.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 int32_t sl_power_manager_schedule_wakeup_get_restore_overhead_tick(void);
 
 /***************************************************************************//**
@@ -341,7 +342,7 @@ uint32_t sl_power_manager_schedule_wakeup_get_minimum_offtime_tick(void);
 void sl_power_manager_schedule_wakeup_set_minimum_offtime_tick(uint32_t minimum_offtime_tick);
 
 /***************************************************************************//**
- * Enable or disable fast wake-up in EM2 and EM3
+ * Enable or disable fast wake-up in EM2 and EM3 for voltage scaling.
  *
  * @param enable True False variable act as a switch for this api
  *
@@ -352,6 +353,19 @@ void sl_power_manager_schedule_wakeup_set_minimum_offtime_tick(uint32_t minimum_
  *       lowest energy mode as EM1.
  ******************************************************************************/
 void sl_power_manager_em23_voltage_scaling_enable_fast_wakeup(bool enable);
+
+/***************************************************************************//**
+ * Enable or disable fast wake-up in EM2 and EM3 for flash deep power-down.
+ *
+ * @param enable True False variable act as a switch for this api
+ *
+ * @note Will also update the wake up time from EM2 to EM0.
+ *
+ * @note This function will do nothing when a project contains the
+ *       power_manager_no_deepsleep component, which configures the
+ *       lowest energy mode as EM1.
+ ******************************************************************************/
+void sl_power_manager_em23_flash_power_down_enable_fast_wakeup(bool enable);
 
 /**************************************************************************//**
  * Determines if the HFXO interrupt was part of the last wake-up and/or if

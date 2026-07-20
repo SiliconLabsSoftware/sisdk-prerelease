@@ -14,6 +14,16 @@
   {%- set ram_code_alignment = 8 %}
 {%- endif %}
 
+{#- Legacy stack (before BSS): Sixx301 only. #}
+{%- set family_match = namespace(legacy_stack_placement = false) %}
+{%- for family in device_family | default([]) %}
+  {%- set family_lc = family | string | lower %}
+  {%- if family_lc in ['simg301', 'sibg301', 'sixg301'] %}
+    {%- set family_match.legacy_stack_placement = true %}
+  {%- endif %}
+{%- endfor %}
+{%- set legacy_stack_placement = family_match.legacy_stack_placement %}
+
 {#- Use Secure aliases #}
 {%- if trustzone_secure is defined %}
 {%-  set flash_addr = device_flash_addr_s | first %}
@@ -273,6 +283,16 @@ define block MEMORY_MANAGER_HEAP with expanding size, alignment = 8
 define block HEAP with expanding size, alignment = 8
 {
   section .heap
+};
+{%- endif %}
+
+{%- if not legacy_stack_placement %}
+define block MEMORY_MANAGER_STACK with fixed order, alignment = 8
+{
+  block CSTACK,
+{%- if trustzone_secure %}
+  block STACKSEAL,
+{%- endif %}
 };
 {%- endif %}
 
@@ -578,9 +598,11 @@ define block application_ram with fixed order
 {%- if bootloader_enable %}
   block BOOTLOADER_RESET_REASON,
 {%- endif %}
+{%- if legacy_stack_placement %}
   block CSTACK,
 {%- if trustzone_secure %}
   block STACKSEAL,
+{%- endif %}
 {%- endif %}
 {%- if "interrupt_manager" in component_catalog %}
   block vector_table_ram_block,
@@ -601,6 +623,7 @@ initialize by copy { readwrite } except
 initialize by copy { readwrite };
 {%- endif %}
 
+{%- if legacy_stack_placement %}
 define block application_heap with fixed order
 {
 {%- if "memory_manager" in component_catalog %}
@@ -609,6 +632,7 @@ define block application_heap with fixed order
   block HEAP
 {%- endif %}
 };
+{%- endif %}
 
 do not initialize
 {
@@ -718,7 +742,16 @@ place in RAM_region {
 
 "application_heap":
 place in RAM_region {
+{%- if not legacy_stack_placement %}
+{%- if "memory_manager" in component_catalog %}
+  block MEMORY_MANAGER_HEAP,
+{%- else %}
+  block HEAP,
+{%- endif %}
+  last block MEMORY_MANAGER_STACK,
+{%- else %}
   block application_heap,
+{%- endif %}
 };
 
 /* Linker file assertions. */

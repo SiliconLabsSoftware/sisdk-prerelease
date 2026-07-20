@@ -1,0 +1,25 @@
+id: memory_manager_psram
+label: Memory Manager PSRAM Support
+package: platform_core
+description: >
+  This component adds PSRAM initialization and enables memory allocations
+  on the PSRAM through the memory manager. It provides the necessary
+  configuration and setup to utilize external PSRAM as an additional
+  memory heap for dynamic allocations, enhancing the available memory
+  pool for applications requiring larger memory footprints.
+category: Services|Memory Manager
+quality: evaluation
+ui_hints:
+  visibility: never
+metadata:
+  sbom:
+    license: Zlib
+root_path: platform_core/platform/service/memory_manager
+provides:
+- name: memory_manager_psram
+requires:
+- name: memory_manager
+- name: device_has_psram
+template_contribution:
+- name: component_catalog
+  value: memory_manager_psram

@@ -33,6 +33,8 @@
 
 #include <stddef.h>
 
+
+
 /*******************************************************************************
  *******************************   DEFINES   ***********************************
  ******************************************************************************/
@@ -102,7 +104,7 @@ void sl_hal_i2c_init(I2C_TypeDef *i2c,
                      sl_i2c_operating_mode_t  mode)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   // Reset the i2c peripheral.
   sl_hal_i2c_reset(i2c);
@@ -121,7 +123,7 @@ void sl_hal_i2c_tx(I2C_TypeDef *i2c,
                    uint8_t data)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
 #if defined(_I2C_STATUS_TXFL_MASK)
   // Check TX FIFO has space for at least one more frame.
@@ -139,7 +141,7 @@ uint8_t sl_hal_i2c_rx(I2C_TypeDef *i2c)
 {
   uint8_t rx_data = 0;
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   // Check for data to be available in receive buffer.
   while (!(i2c->STATUS & _I2C_STATUS_RXDATAV_MASK)) {
@@ -182,11 +184,11 @@ void sl_hal_i2c_set_clock_frequency(I2C_TypeDef *i2c,
   int32_t clkdiv;
 
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   // Avoid dividing by 0.
-  EFM_ASSERT(freq_scl);
-  EFM_ASSERT(i2c_clk);
+  SL_LOG_DEBUG_ASSERT(freq_scl);
+  SL_LOG_DEBUG_ASSERT(i2c_clk);
 
   // Wait for synchronization to complete.
   sl_hal_i2c_wait_sync(i2c);
@@ -207,7 +209,7 @@ void sl_hal_i2c_set_clock_frequency(I2C_TypeDef *i2c,
         min_freq = 14000000;
         break;
       default:
-        EFM_ASSERT(false);
+        SL_LOG_DEBUG_ASSERT(false);
         break;
     }
   } else {
@@ -222,13 +224,14 @@ void sl_hal_i2c_set_clock_frequency(I2C_TypeDef *i2c,
         min_freq = 20000000;
         break;
       default:
-        EFM_ASSERT(false);
+        SL_LOG_DEBUG_ASSERT(false);
         break;
     }
   }
 
   // Reference frequency must be larger-than min frequency.
-  EFM_ASSERT(i2c_clk > min_freq);
+  SL_LOG_DEBUG_ASSERT(i2c_clk > min_freq);
+  (void)min_freq;
 
   // I2C SCL frequency is given by: freq_scl = i2c_clk/((Nlow + Nhigh) * (DIV + 1) + SL_HAL_I2C_CR_MAX).
   // Therefore, DIV = ((i2c_clk - (SL_HAL_I2C_CR_MAX * freq_scl))/((Nlow + Nhigh) * freq_scl)) - 1.
@@ -239,15 +242,15 @@ void sl_hal_i2c_set_clock_frequency(I2C_TypeDef *i2c,
   denominator = prescaled_clk_cycles * freq_scl;
 
   // Ensure denominator is never zero.
-  EFM_ASSERT(denominator);
+  SL_LOG_DEBUG_ASSERT(denominator);
 
   // Perform integer division so that clkdiv is rounded up.
   clkdiv = (int32_t)(((i2c_clk - (SL_HAL_I2C_CR_MAX * freq_scl) + denominator - 1)
                       / denominator) - 1);
 
   // Verify that the resulting clock divider is within limits.
-  EFM_ASSERT(clkdiv >= 0);
-  EFM_ASSERT((uint32_t)clkdiv <= _I2C_CLKDIV_DIV_MASK);
+  SL_LOG_DEBUG_ASSERT(clkdiv >= 0);
+  SL_LOG_DEBUG_ASSERT((uint32_t)clkdiv <= _I2C_CLKDIV_DIV_MASK);
 
   // The clock divisor must be at least 1 in follower mode according to the reference.
   // Manual (in which case there is normally no need to set the bus frequency).
@@ -269,10 +272,10 @@ uint32_t sl_hal_i2c_get_clock_frequency(I2C_TypeDef *i2c,
   uint32_t prescaled_clk_cycles;
 
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   // Make sure module is enabled.
-  EFM_ASSERT(i2c->EN & _I2C_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(i2c->EN & _I2C_EN_EN_MASK);
 
   // Wait for synchronization to complete.
   sl_hal_i2c_wait_sync(i2c);
@@ -289,7 +292,7 @@ uint32_t sl_hal_i2c_get_clock_frequency(I2C_TypeDef *i2c,
 void sl_hal_i2c_reset(I2C_TypeDef *i2c)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
   // Cancel ongoing operations and clear TX buffer
@@ -332,11 +335,12 @@ void sl_hal_i2c_reset(I2C_TypeDef *i2c)
 sl_status_t sl_hal_i2c_start_cmd(I2C_TypeDef *i2c)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   sl_status_t status = SL_STATUS_OK;
 
   if ((i2c->EN & _I2C_EN_EN_MASK) != I2C_EN_EN) {
+    SL_LOG_DEBUG_ASSERT(false);
     status = SL_STATUS_NOT_INITIALIZED;
   } else {
     // Intiate Start Command.
@@ -355,11 +359,12 @@ sl_status_t sl_hal_i2c_start_cmd(I2C_TypeDef *i2c)
 sl_status_t sl_hal_i2c_stop_cmd(I2C_TypeDef *i2c)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   sl_status_t status = SL_STATUS_OK;
 
   if ((i2c->EN & _I2C_EN_EN_MASK) != I2C_EN_EN) {
+    SL_LOG_DEBUG_ASSERT(false);
     status = SL_STATUS_NOT_INITIALIZED;
   } else {
     // Intiate Stop Command.

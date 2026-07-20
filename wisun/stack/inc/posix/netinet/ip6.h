@@ -35,42 +35,35 @@
 extern "C" {
 #endif
 
-/**************************************************************************//**
- * @addtogroup SL_WISUN_SOCKET_API Socket API
- * @ingroup SL_WISUN_API
- *
- * @{
- *****************************************************************************/
-
-/** \name Differentiated Services Code Points (DSCP) — IANA assigned values
+/** \name Differentiated Services Code Points (DSCP) — IETF assigned values
  *
  * These are the raw code-point values;
  * combine with #IPV6_TCLASS_FROM_DSCP or #IPV6_TCLASS_FROM_DSCP_AND_ECN
  * to obtain a Traffic Class octet suitable for use with #IPV6_TCLASS.
  */
 ///@{
-#define IP_DSCP_CS0         0   ///< CS0
-#define IP_DSCP_CS1         8   ///< CS1
-#define IP_DSCP_AF11        10  ///< AF11
-#define IP_DSCP_AF12        12  ///< AF12
-#define IP_DSCP_AF13        14  ///< AF13
-#define IP_DSCP_CS2         16  ///< CS2
-#define IP_DSCP_AF21        18  ///< AF21
-#define IP_DSCP_AF22        20  ///< AF22
-#define IP_DSCP_AF23        22  ///< AF23
-#define IP_DSCP_CS3         24  ///< CS3
-#define IP_DSCP_AF31        26  ///< AF31
-#define IP_DSCP_AF32        28  ///< AF32
-#define IP_DSCP_AF33        30  ///< AF33
-#define IP_DSCP_CS4         32  ///< CS4
-#define IP_DSCP_AF41        34  ///< AF41
-#define IP_DSCP_AF42        36  ///< AF42
-#define IP_DSCP_AF43        38  ///< AF43
-#define IP_DSCP_CS5         40  ///< CS5
-#define IP_DSCP_VOICE_ADMIT 44  ///< VOICE-ADMIT
-#define IP_DSCP_EF          46  ///< EF
-#define IP_DSCP_CS6         48  ///< CS6
-#define IP_DSCP_CS7         56  ///< CS7
+#define IP_DSCP_CS0         0
+#define IP_DSCP_CS1         8
+#define IP_DSCP_AF11        10
+#define IP_DSCP_AF12        12
+#define IP_DSCP_AF13        14
+#define IP_DSCP_CS2         16
+#define IP_DSCP_AF21        18
+#define IP_DSCP_AF22        20
+#define IP_DSCP_AF23        22
+#define IP_DSCP_CS3         24
+#define IP_DSCP_AF31        26
+#define IP_DSCP_AF32        28
+#define IP_DSCP_AF33        30
+#define IP_DSCP_CS4         32
+#define IP_DSCP_AF41        34
+#define IP_DSCP_AF42        36
+#define IP_DSCP_AF43        38
+#define IP_DSCP_CS5         40
+#define IP_DSCP_VOICE_ADMIT 44
+#define IP_DSCP_EF          46
+#define IP_DSCP_CS6         48
+#define IP_DSCP_CS7         56
 ///@}
 
 /** \name Wi-SUN DSCP (Differentiated Services Code Point) QoS supported levels. */
@@ -128,7 +121,6 @@ extern "C" {
     ((int)((((unsigned)(tclass)) >> IPV6_TCLASS_DSCP_SHIFT) & IPV6_DSCP_CODEPOINT_MASK))
 ///@}
 
-/** @} */
 
 #ifdef __cplusplus
 }

@@ -23,7 +23,7 @@
 #include "btl_apploader_callback.h"
 #include "sl_apploader_lib_api.h"
 
-#include "api/application_properties.h"
+#include "application_properties.h"
 #include "config/btl_config.h"
 #if !defined(BOOTLOADER_NONSECURE)
 #include "sl_device_init_clocks.h"

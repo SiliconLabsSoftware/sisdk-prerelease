@@ -22,9 +22,7 @@
 #include "sl_power_manager.h"
 #include "sl_sleeptimer.h"
 #include "sl_status.h"
- 
-#if defined(SL_HAL_EMU_DCDC_BOOST_PRESENT) && defined(_DCDC_DVDDBBCFG_MASK)
- 
+
 /*******************************************************************************
  ***************************   LOCAL DEFINES   *********************************
  ******************************************************************************/
@@ -103,31 +101,27 @@ static bool ledboost_wait_if(uint32_t mask, uint32_t want)
 static void ledboost_run_ramp_to_3v8(void)
 {
   sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_DCDC);
-
+  sl_hal_emu_set_dcdc_mode(SL_HAL_EMU_DCDC_MODE_BYPASS);
   sl_hal_emu_dcdc_clear_pending_interrupts((uint32_t)_DCDC_IF_MASK);
   sl_hal_emu_dcdc_disable_interrupts((uint32_t)_DCDC_IEN_MASK);
   NVIC_DisableIRQ(DCDC_IRQn);
   NVIC_ClearPendingIRQ(DCDC_IRQn);
 
   sl_hal_emu_dcdc_set_regulation_type(SL_HAL_EMU_DCDC_REGULATION_TYPE_REGDVDDDEC);
-
-  sl_hal_emu_dcdc_boost_init_t boost_cfg = SL_HAL_EMU_DCDC_BOOST_INIT_DEFAULT;
-  sl_hal_emu_init_dcdc_boost(&boost_cfg);
-
+  sl_hal_emu_set_dcdc_mode(SL_HAL_EMU_DCDC_MODE_REGULATION);
   sl_hal_emu_dcdc_clear_pending_interrupts(DCDC_IF_LEDVDDRAMPDONE
                                           | DCDC_IF_BOOSTPOSEDG);
   sl_hal_emu_dcdc_sync(_DCDC_SYNCBUSY_MASK);
-  sl_hal_emu_set_dcdc_boost_output_voltage(SL_HAL_EMU_DCDC_BOOST_OUTPUT_VOLTAGE_1V8);
+  sl_hal_emu_set_dcdc_ledboost_output_voltage(SL_HAL_EMU_DCDC_BOOST_OUTPUT_VOLTAGE_1V8);
   (void)ledboost_wait_if(DCDC_IF_LEDVDDRAMPDONE, DCDC_IF_LEDVDDRAMPDONE);
 
   sl_hal_emu_dcdc_clear_pending_interrupts(DCDC_IF_LEDVDDRAMPDONE
                                           | DCDC_IF_BOOSTPOSEDG);
   sl_hal_emu_dcdc_sync(_DCDC_SYNCBUSY_MASK);
-  sl_hal_emu_set_dcdc_boost_output_voltage(SL_HAL_EMU_DCDC_BOOST_OUTPUT_VOLTAGE_3V8);
+  sl_hal_emu_set_dcdc_ledboost_output_voltage(SL_HAL_EMU_DCDC_BOOST_OUTPUT_VOLTAGE_3V8);
   (void)ledboost_wait_if(DCDC_IF_LEDVDDRAMPDONE, DCDC_IF_LEDVDDRAMPDONE);
 
   sl_hal_emu_dcdc_power_off();
-
   sl_clock_manager_disable_bus_clock(SL_BUS_CLOCK_DCDC);
 }
  
@@ -204,21 +198,18 @@ static void ledboost_low_power_sleep(uint32_t timeout_ms)
 static void ledboost_park_at_1v8_in_em2(void)
 {
   sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_DCDC);
-
+  sl_hal_emu_set_dcdc_mode(SL_HAL_EMU_DCDC_MODE_BYPASS);
   sl_hal_emu_dcdc_clear_pending_interrupts((uint32_t)_DCDC_IF_MASK);
   sl_hal_emu_dcdc_disable_interrupts((uint32_t)_DCDC_IEN_MASK);
   NVIC_DisableIRQ(DCDC_IRQn);
   NVIC_ClearPendingIRQ(DCDC_IRQn);
 
   sl_hal_emu_dcdc_set_regulation_type(SL_HAL_EMU_DCDC_REGULATION_TYPE_REGDVDDDEC);
-
-  sl_hal_emu_dcdc_boost_init_t boost_cfg = SL_HAL_EMU_DCDC_BOOST_INIT_DEFAULT;
-  sl_hal_emu_init_dcdc_boost(&boost_cfg);
-
+  sl_hal_emu_set_dcdc_mode(SL_HAL_EMU_DCDC_MODE_REGULATION);
   sl_hal_emu_dcdc_clear_pending_interrupts(DCDC_IF_LEDVDDRAMPDONE
                                           | DCDC_IF_BOOSTPOSEDG);
   sl_hal_emu_dcdc_sync(_DCDC_SYNCBUSY_MASK);
-  sl_hal_emu_set_dcdc_boost_output_voltage(SL_HAL_EMU_DCDC_BOOST_OUTPUT_VOLTAGE_1V8);
+  sl_hal_emu_set_dcdc_ledboost_output_voltage(SL_HAL_EMU_DCDC_BOOST_OUTPUT_VOLTAGE_1V8);
   (void)ledboost_wait_if(DCDC_IF_LEDVDDRAMPDONE, DCDC_IF_LEDVDDRAMPDONE);
 
   // LEDVDD held at 1.8 V; enter EM2.
@@ -274,21 +265,4 @@ void ledboost_process_action(void)
   }
 }
 
-#else /* !(SL_HAL_EMU_DCDC_BOOST_PRESENT && _DCDC_DVDDBBCFG_MASK) */
- 
-/***************************************************************************//**
- * Initialize LED Boost example (unsupported device: empty).
- ******************************************************************************/
-void ledboost_init(void)
-{
-}
- 
-/***************************************************************************//**
- * LED Boost process action (unsupported device: empty).
- ******************************************************************************/
-void ledboost_process_action(void)
-{
-}
-
-#endif /* SL_HAL_EMU_DCDC_BOOST_PRESENT && _DCDC_DVDDBBCFG_MASK */
  

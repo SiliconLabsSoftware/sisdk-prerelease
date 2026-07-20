@@ -316,4 +316,9 @@ bool sli_zigbee_app_framework_is_ok_to_sleep(void)
 {
   return false;
 }
+extern uint32_t sli_zigbee_af_ms_to_next_event(void);
+uint32_t sli_zigbee_app_framework_set_pm_requirements_and_get_ms_to_next_wakeup(void)
+{
+  return sli_zigbee_af_ms_to_next_event();
+}
 #endif //#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)

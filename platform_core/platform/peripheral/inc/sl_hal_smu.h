@@ -34,11 +34,19 @@
 #include "em_device.h"
 #if defined(SMU_COUNT) && (SMU_COUNT > 0)
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_hal_bus.h"
 
 #include <stdint.h>
 #include <stdbool.h>
+
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+
+#if defined(SL_CATALOG_HAL_SMU_INTERNAL_PRESENT)
+#include "sl_hal_smu_internal.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -65,6 +73,7 @@ extern "C" {
  ********************************   ENUMS   ************************************
  ******************************************************************************/
 
+#if !defined(SL_CATALOG_HAL_SMU_INTERNAL_PRESENT)
 /// SMU peripheral identifiers.
 SL_ENUM(sl_hal_smu_peripheral_id_t) {
 #if defined(_SILICON_LABS_32B_SERIES_2)
@@ -988,6 +997,7 @@ typedef struct {
 #error "No peripherals defined for SMU for this device configuration"
 #endif
 } sl_hal_smu_privileged_t;
+#endif // !defined(SL_CATALOG_HAL_SMU_INTERNAL_PRESENT)
 
 /*******************************************************************************
  ******************************   STRUCTS   ************************************
@@ -996,7 +1006,9 @@ typedef struct {
 /** SMU initialization structure. */
 typedef struct {
   union {
-#if defined(_SMU_PPUNSPATD2_MASK)
+#if defined(_SMU_PPUPATD3_MASK)
+    uint32_t reg[4];                      ///< Peripheral access control array.
+#elif defined(_SMU_PPUNSPATD2_MASK) || defined(_SMU_PPUPATD2_MASK)
     uint32_t reg[3];                      ///< Peripheral access control array.
 #else
     uint32_t reg[2];                      ///< Peripheral access control array.
@@ -1042,19 +1054,24 @@ __STATIC_INLINE void sl_hal_smu_enable_ppu(bool enable)
  ******************************************************************************/
 __STATIC_INLINE void sl_hal_smu_init(const sl_hal_smu_init_t *init)
 {
-#if !defined (SL_TRUSTZONE_SECURE) && defined(_SILICON_LABS_32B_SERIES_2_CONFIG) \
-  && (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
+#if !defined (SL_TRUSTZONE_SECURE) && defined(_SMU_PPUNSPATD0_MASK)
   SMU_NS_CFGNS->PPUNSPATD0 = init->ppu.reg[0];
   SMU_NS_CFGNS->PPUNSPATD1 = init->ppu.reg[1];
 #if defined(_SMU_PPUNSPATD2_MASK)
   SMU_NS_CFGNS->PPUNSPATD2 = init->ppu.reg[2];
 #endif //defined(_SMU_PPUNSPATD2_MASK)
+#if defined(_SMU_PPUNSPATD3_MASK)
+  SMU_NS_CFGNS->PPUNSPATD3 = init->ppu.reg[3];
+#endif //defined(_SMU_PPUNSPATD3_MASK)
 #else
   SMU->PPUPATD0 = init->ppu.reg[0];
   SMU->PPUPATD1 = init->ppu.reg[1];
-#if defined(_SMU_PPUNSPATD2_MASK)
+#if defined(_SMU_PPUPATD2_MASK)
   SMU->PPUPATD2 = init->ppu.reg[2];
-#endif //defined(_SMU_PPUNSPATD2_MASK)
+#endif //defined(_SMU_PPUPATD2_MASK)
+#if defined(_SMU_PPUPATD3_MASK)
+  SMU->PPUPATD3 = init->ppu.reg[3];
+#endif //defined(_SMU_PPUPATD3_MASK)
 #endif //SL_TRUSTZONE_SECURE
 
   sl_hal_smu_enable_ppu(init->enable);
@@ -1076,32 +1093,43 @@ __STATIC_INLINE void sl_hal_smu_init(const sl_hal_smu_init_t *init)
 __STATIC_INLINE void sl_hal_smu_set_privileged_access(sl_hal_smu_peripheral_id_t peripheral,
                                                       bool privileged)
 {
-  EFM_ASSERT(peripheral < SL_HAL_SMU_END);
+  SL_LOG_DEBUG_ASSERT(peripheral < SL_HAL_SMU_END);
 
-#if !defined (SL_TRUSTZONE_SECURE) && defined(_SILICON_LABS_32B_SERIES_2_CONFIG) \
-  && (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
+#if !defined (SL_TRUSTZONE_SECURE) && defined(_SMU_PPUNSPATD0_MASK)
   if (peripheral < 32) {
     sl_hal_bus_ram_write_bit(&SMU_NS_CFGNS->PPUNSPATD0, peripheral, privileged);
   } else if (peripheral < 64) {
     sl_hal_bus_ram_write_bit(&SMU_NS_CFGNS->PPUNSPATD1, peripheral - 32, privileged);
-  } else {
+  } else if (peripheral < 96) {
 #if defined(_SMU_PPUNSPATD2_MASK)
     sl_hal_bus_ram_write_bit(&SMU_NS_CFGNS->PPUNSPATD2, peripheral - 64, privileged);
 #else
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
 #endif //defined(_SMU_PPUNSPATD2_MASK)
+  } else {
+#if defined(_SMU_PPUNSPATD3_MASK)
+    sl_hal_bus_ram_write_bit(&SMU_NS_CFGNS->PPUNSPATD3, peripheral - 96, privileged);
+#else
+    SL_LOG_DEBUG_ASSERT(false);
+#endif //defined(_SMU_PPUNSPATD3_MASK)
   }
 #else
   if (peripheral < 32) {
     sl_hal_bus_ram_write_bit(&SMU->PPUPATD0, peripheral, privileged);
   } else if (peripheral < 64) {
     sl_hal_bus_ram_write_bit(&SMU->PPUPATD1, peripheral - 32, privileged);
-  } else {
-#if defined(_SMU_PPUNSPATD2_MASK)
-    sl_hal_bus_ram_write_bit(&SMU_NS_CFGNS->PPUNSPATD2, peripheral - 64, privileged);
+  } else if (peripheral < 96) {
+#if defined(_SMU_PPUPATD2_MASK)
+    sl_hal_bus_ram_write_bit(&SMU->PPUPATD2, peripheral - 64, privileged);
 #else
-    EFM_ASSERT(false);
-#endif //defined(_SMU_PPUNSPATD2_MASK)
+    SL_LOG_DEBUG_ASSERT(false);
+#endif //defined(_SMU_PPUPATD2_MASK)
+  } else {
+#if defined(_SMU_PPUPATD3_MASK)
+    sl_hal_bus_ram_write_bit(&SMU->PPUPATD3, peripheral - 96, privileged);
+#else
+    SL_LOG_DEBUG_ASSERT(false);
+#endif //defined(_SMU_PPUPATD3_MASK)
   }
 #endif //SL_TRUSTZONE_SECURE
 }
@@ -1119,11 +1147,18 @@ __STATIC_INLINE void sl_hal_smu_set_privileged_access(sl_hal_smu_peripheral_id_t
  ******************************************************************************/
 __STATIC_INLINE sl_hal_smu_peripheral_id_t sl_hal_smu_get_faulting_peripheral(void)
 {
-#if !defined (SL_TRUSTZONE_SECURE) && defined(_SILICON_LABS_32B_SERIES_2_CONFIG) \
-  && (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
+#if !defined (SL_TRUSTZONE_SECURE) && defined(_SMU_PPUNSPATD0_MASK)
+#if defined(_SMU_PPUNSFS_PPUFSPERIPHID_MASK)
+  return (sl_hal_smu_peripheral_id_t)(SMU_NS_CFGNS->PPUNSFS & _SMU_PPUNSFS_PPUFSPERIPHID_MASK);
+#else
   return (sl_hal_smu_peripheral_id_t)SMU_NS_CFGNS->PPUNSFS;
+#endif
+#else
+#if defined(_SMU_PPUFS_PPUFSPERIPHID_MASK)
+  return (sl_hal_smu_peripheral_id_t)(SMU->PPUFS & _SMU_PPUFS_PPUFSPERIPHID_MASK);
 #else
   return (sl_hal_smu_peripheral_id_t)SMU->PPUFS;
+#endif
 #endif //SL_TRUSTZONE_SECURE
 }
 
@@ -1137,8 +1172,7 @@ __STATIC_INLINE sl_hal_smu_peripheral_id_t sl_hal_smu_get_faulting_peripheral(vo
 __STATIC_INLINE void sl_hal_smu_int_clear(uint32_t flags)
 {
 #if defined (SMU_HAS_SET_CLEAR)
-#if !defined (SL_TRUSTZONE_SECURE) && defined(_SILICON_LABS_32B_SERIES_2_CONFIG) \
-  && (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
+#if !defined (SL_TRUSTZONE_SECURE) && defined(_SMU_PPUNSPATD0_MASK)
   SMU_NS_CFGNS->NSIF_CLR = flags;
 #else
   SMU->IF_CLR = flags;
@@ -1158,8 +1192,7 @@ __STATIC_INLINE void sl_hal_smu_int_clear(uint32_t flags)
 __STATIC_INLINE void sl_hal_smu_int_disable(uint32_t flags)
 {
 #if defined (SMU_HAS_SET_CLEAR)
-#if !defined (SL_TRUSTZONE_SECURE) && defined(_SILICON_LABS_32B_SERIES_2_CONFIG) \
-  && (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
+#if !defined (SL_TRUSTZONE_SECURE) && defined(_SMU_PPUNSPATD0_MASK)
   SMU_NS_CFGNS->NSIEN_CLR = flags;
 #else
   SMU->IEN_CLR = flags;
@@ -1184,8 +1217,7 @@ __STATIC_INLINE void sl_hal_smu_int_disable(uint32_t flags)
 __STATIC_INLINE void sl_hal_smu_int_enable(uint32_t flags)
 {
 #if defined (SMU_HAS_SET_CLEAR)
-#if !defined (SL_TRUSTZONE_SECURE) && defined(_SILICON_LABS_32B_SERIES_2_CONFIG) \
-  && (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
+#if !defined (SL_TRUSTZONE_SECURE) && defined(_SMU_PPUNSPATD0_MASK)
   SMU_NS_CFGNS->NSIEN_SET = flags;
 #else
   SMU->IEN_SET = flags;
@@ -1204,8 +1236,7 @@ __STATIC_INLINE void sl_hal_smu_int_enable(uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE uint32_t sl_hal_smu_int_get(void)
 {
-#if !defined (SL_TRUSTZONE_SECURE) && defined(_SILICON_LABS_32B_SERIES_2_CONFIG) \
-  && (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
+#if !defined (SL_TRUSTZONE_SECURE) && defined(_SMU_PPUNSPATD0_MASK)
   return SMU_NS_CFGNS->NSIF;
 #else
   return SMU->IF;
@@ -1230,8 +1261,7 @@ __STATIC_INLINE uint32_t sl_hal_smu_int_get_enabled(void)
 {
   uint32_t tmp;
 
-#if !defined (SL_TRUSTZONE_SECURE) && defined(_SILICON_LABS_32B_SERIES_2_CONFIG) \
-  && (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
+#if !defined (SL_TRUSTZONE_SECURE) && defined(_SMU_PPUNSPATD0_MASK)
   // Store SMU->IEN in temporary variable to define explicit order
   // of volatile accesses.
   tmp = SMU_NS_CFGNS->NSIEN;
@@ -1258,8 +1288,7 @@ __STATIC_INLINE uint32_t sl_hal_smu_int_get_enabled(void)
 __STATIC_INLINE void sl_hal_smu_int_set(uint32_t flags)
 {
 #if defined (SMU_HAS_SET_CLEAR)
-#if !defined (SL_TRUSTZONE_SECURE) && defined(_SILICON_LABS_32B_SERIES_2_CONFIG) \
-  && (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
+#if !defined (SL_TRUSTZONE_SECURE) && defined(_SMU_PPUNSPATD0_MASK)
   SMU_NS_CFGNS->NSIF_SET = flags;
 #else
   SMU->IF_SET = flags;
@@ -1285,16 +1314,16 @@ __STATIC_INLINE void sl_hal_smu_int_set(uint32_t flags)
 void SMU_SECURE_IRQHandler(void)
 {
 #if (SMU_IF_PPUSEC != 0)
-  EFM_ASSERT(SMU->IF & SMU_IF_PPUSEC);
+  SL_LOG_DEBUG_ASSERT(SMU->IF & SMU_IF_PPUSEC);
 #endif
 
 #if (SMU_IF_BMPUSEC != 0)
-  EFM_ASSERT(SMU->IF & SMU_IF_BMPUSEC);
+  SL_LOG_DEBUG_ASSERT(SMU->IF & SMU_IF_BMPUSEC);
 #endif
 
   // PPUFS contains the ID of the peripheral caused the fault
   // The ID is ordered after the PPUSATD0-PPUSATD1 register bit fields.
-  EFM_ASSERT(SMU->PPUFS);
+  SL_LOG_DEBUG_ASSERT(SMU->PPUFS);
 
   while (1) {
     // do nothing

@@ -35,7 +35,7 @@
         </portBank>
       </portBanks>
     </portIo>
-    <pinOut description="39-pin BGA, 39" indicatorLocation="topleft" package="BGA" padDescription="NONE" subtitle="(top view)">
+    <pinOut description="39-pin BGA, 39_leo.ard" indicatorLocation="topleft" package="BGA" padDescription="NONE" subtitle="(top view)">
       <pin defaultLabel="VREGSW" location="0,1" number="A1"/>
       <pin defaultLabel="VREGVDD" location="1,1" number="A2"/>
       <pin defaultLabel="VREGVSS" location="2,1" number="A3"/>
@@ -126,7 +126,7 @@
       <peripheral componentIdRef="pin_tool.efr32.efr32bg27.rtcc" displayName="RTCC" name="RTCC" revision="A" category="Timers" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32bg27.letimer" displayName="LETIMER0" name="LETIMER0" revision="A" category="Timers" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32bg27.iadc" displayName="IADC0" name="IADC0" revision="A" category="Analog" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efr32.efr32bg27.acmp" displayName="ACMP0" name="ACMP0" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.efr32bg27.acmp" displayName="ACMP0" name="ACMP0" revision="A" category="Analog" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32bg27.i2c" displayName="I2C0" name="I2C0" revision="A" category="Communications" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32bg27.wdog" displayName="WDOG0" name="WDOG0" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32bg27.eusart" displayName="EUSART0" name="EUSART0" revision="A" category="Communications" hidden="false"/>

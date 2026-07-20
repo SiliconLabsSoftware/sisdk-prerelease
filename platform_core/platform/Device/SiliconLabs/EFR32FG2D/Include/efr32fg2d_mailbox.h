@@ -88,22 +88,22 @@ typedef struct mailbox_typedef{
 /* Bit fields for MAILBOX IF */
 #define _MAILBOX_IF_RESETVALUE           0x00000000UL                                   /**< Default value for MAILBOX_IF                */
 #define _MAILBOX_IF_MASK                 0x0000000FUL                                   /**< Mask for MAILBOX_IF                         */
-#define MAILBOX_IF_MBOXIF0               (0x1UL << 0)                                   /**< Mailbox Interupt Flag                       */
+#define MAILBOX_IF_MBOXIF0               (0x1UL << 0)                                   /**< Mailbox Interrupt Flag                      */
 #define _MAILBOX_IF_MBOXIF0_SHIFT        0                                              /**< Shift value for MAILBOX_MBOXIF0             */
 #define _MAILBOX_IF_MBOXIF0_MASK         0x1UL                                          /**< Bit mask for MAILBOX_MBOXIF0                */
 #define _MAILBOX_IF_MBOXIF0_DEFAULT      0x00000000UL                                   /**< Mode DEFAULT for MAILBOX_IF                 */
 #define MAILBOX_IF_MBOXIF0_DEFAULT       (_MAILBOX_IF_MBOXIF0_DEFAULT << 0)             /**< Shifted mode DEFAULT for MAILBOX_IF         */
-#define MAILBOX_IF_MBOXIF1               (0x1UL << 1)                                   /**< Mailbox Interupt Flag                       */
+#define MAILBOX_IF_MBOXIF1               (0x1UL << 1)                                   /**< Mailbox Interrupt Flag                      */
 #define _MAILBOX_IF_MBOXIF1_SHIFT        1                                              /**< Shift value for MAILBOX_MBOXIF1             */
 #define _MAILBOX_IF_MBOXIF1_MASK         0x2UL                                          /**< Bit mask for MAILBOX_MBOXIF1                */
 #define _MAILBOX_IF_MBOXIF1_DEFAULT      0x00000000UL                                   /**< Mode DEFAULT for MAILBOX_IF                 */
 #define MAILBOX_IF_MBOXIF1_DEFAULT       (_MAILBOX_IF_MBOXIF1_DEFAULT << 1)             /**< Shifted mode DEFAULT for MAILBOX_IF         */
-#define MAILBOX_IF_MBOXIF2               (0x1UL << 2)                                   /**< Mailbox Interupt Flag                       */
+#define MAILBOX_IF_MBOXIF2               (0x1UL << 2)                                   /**< Mailbox Interrupt Flag                      */
 #define _MAILBOX_IF_MBOXIF2_SHIFT        2                                              /**< Shift value for MAILBOX_MBOXIF2             */
 #define _MAILBOX_IF_MBOXIF2_MASK         0x4UL                                          /**< Bit mask for MAILBOX_MBOXIF2                */
 #define _MAILBOX_IF_MBOXIF2_DEFAULT      0x00000000UL                                   /**< Mode DEFAULT for MAILBOX_IF                 */
 #define MAILBOX_IF_MBOXIF2_DEFAULT       (_MAILBOX_IF_MBOXIF2_DEFAULT << 2)             /**< Shifted mode DEFAULT for MAILBOX_IF         */
-#define MAILBOX_IF_MBOXIF3               (0x1UL << 3)                                   /**< Mailbox Interupt Flag                       */
+#define MAILBOX_IF_MBOXIF3               (0x1UL << 3)                                   /**< Mailbox Interrupt Flag                      */
 #define _MAILBOX_IF_MBOXIF3_SHIFT        3                                              /**< Shift value for MAILBOX_MBOXIF3             */
 #define _MAILBOX_IF_MBOXIF3_MASK         0x8UL                                          /**< Bit mask for MAILBOX_MBOXIF3                */
 #define _MAILBOX_IF_MBOXIF3_DEFAULT      0x00000000UL                                   /**< Mode DEFAULT for MAILBOX_IF                 */

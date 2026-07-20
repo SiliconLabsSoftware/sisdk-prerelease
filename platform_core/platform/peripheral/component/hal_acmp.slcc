@@ -25,6 +25,7 @@ requires:
 - name: device_has_acmp
 - name: enum
 - name: status
+- name: log_none
 documentation:
   docset: gecko-platform
   document:

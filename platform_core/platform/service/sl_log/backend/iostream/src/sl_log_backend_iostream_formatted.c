@@ -230,7 +230,7 @@ sl_status_t sl_log_hal_backend_init(void)
  *
  * @return SL_STATUS_NOT_SUPPORTED.
  */
-sl_status_t sl_log_hal_backend_write(sl_log_event_t *buffer, uint32_t read_index, uint32_t event_count)
+sl_status_t sl_log_hal_backend_write(const sl_log_event_t *buffer, uint32_t read_index, uint32_t event_count)
 {
   (void)buffer;
   (void)read_index;

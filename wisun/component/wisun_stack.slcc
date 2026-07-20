@@ -46,6 +46,9 @@ provides:
 - name: "wisun_stack"
 - name: "a_wisun_stack"
 
+define:
+- name: DEBUG_EFM
+
 template_contribution:
 - name: "event_handler"
   value:

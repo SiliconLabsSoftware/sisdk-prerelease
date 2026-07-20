@@ -1,0 +1,25 @@
+id: sl_memcpy
+package: platform_core
+label: Fast Memcpy
+description: Speed optimized memcpy implementation
+category: Platform|Utilities
+quality: evaluation
+metadata:
+  sbom:
+    license: Zlib
+root_path: platform_core/platform/common
+source:
+- path: src/sl_memcpy.c
+requires:
+- name: sl_common
+- name: device_cortexm
+provides:
+- name: sl_memcpy
+toolchain_settings:
+- option: gcc_linker_option
+  value: -Wl,--wrap=memcpy
+- option: llvm_compiler_option
+  value: -fno-builtin-memcpy
+- option: llvm_linker_option
+  value: -Wl,--wrap=memcpy
+

@@ -328,6 +328,39 @@ sl_status_t sli_usbd_driver_stall_endpoint(uint8_t  ep_addr,
 sl_status_t sli_usbd_driver_irq_handler(void);
 
 /****************************************************************************************************//**
+ * @brief  Return true when the endpoint uses active descriptor DMA for bulk transfers.
+ *
+ * @param  ep_addr  Endpoint address.
+ *
+ * @return true if bulk IN/OUT with descriptor DMA active; false otherwise.
+ ******************************************************************************************************/
+bool sli_usbd_driver_endpoint_uses_ddma_bulk(uint8_t ep_addr);
+
+/****************************************************************************************************//**
+ * @brief  Return true when bulk endpoint may accept a multi-descriptor DDMA transfer.
+ *
+ * @param  ep_addr  Endpoint address.
+ *
+ * @return true if descriptor DMA bulk scatter/gather is active on this endpoint.
+ ******************************************************************************************************/
+static inline bool sli_usbd_driver_endpoint_can_accept_large_ddma_xfer(uint8_t ep_addr)
+{
+  return sli_usbd_driver_endpoint_uses_ddma_bulk(ep_addr);
+}
+
+/****************************************************************************************************//**
+ * @brief  Maximum bytes the driver accepts per bulk IN/OUT submission.
+ *
+ * @note   Buffer-DMA bulk endpoints return 512. DDMA bulk IN may use larger scatter/gather
+ *         submissions. OUT remains capped until multi-descriptor OUT is fully validated.
+ *
+ * @param  ep_addr  Endpoint address.
+ *
+ * @return Maximum transfer length for the next driver submission.
+ ******************************************************************************************************/
+uint32_t sli_usbd_driver_bulk_max_xfer_len(uint8_t ep_addr);
+
+/****************************************************************************************************//**
  ********************************************************************************************************
  *                                               MODULE END
  ********************************************************************************************************

@@ -67,6 +67,7 @@ Additional information:
 #ifndef SEGGER_SYSVIEW_CONF_H
 #define SEGGER_SYSVIEW_CONF_H
 
+#include "em_device.h"
 #include "sl_systemview_config.h"
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)

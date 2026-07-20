@@ -1,6 +1,6 @@
 /***************************************************************************/ /**
 * @file sl_log_weak.c
-* @brief weak implementation of the Silicon Labs Debug Logger functions 
+* @brief weak implementation of the Silicon Labs Debug Logger functions
 * @version 1.0.0
 *******************************************************************************
 * # License
@@ -34,11 +34,34 @@
 #include "sl_common.h"
 
 
-/********************************************* 
+/*******************************************************************************
  * Weak Symbol Implementations
- *********************************************/
+ *
+ * Every function below is a SL_WEAK fallback that the linker selects only
+ * when no log backend or feature module provides a strong override. Their
+ * empty / SL_STATUS_OK bodies are intentional, not stubs:
+ *
+ *   - They keep callers in the core (and in user code) link-clean when the
+ *     matching backend (iostream-formatted, iostream-compact, SystemView,
+ *     log_none, ...) or capability (timestamping, sleep hooks, ring buffer,
+ *     extended-arg send paths) is absent from the build.
+ *   - Returning SL_STATUS_OK / 0 / NULL from a no-op is the documented
+ *     "logging unavailable" behavior (see sl_log.h API contracts), not a
+ *     silent failure mode that needs filling in later.
+ *   - "Send" / "write" paths discard their inputs via (void)cast to suppress
+ *     unused-parameter warnings on the no-op build path.
+ *
+ * Reviewers / static analyzers flagging individual bodies as "empty method"
+ * or "incomplete implementation" should treat this header as the rationale
+ * for the entire file.
+ ******************************************************************************/
 
 SL_WEAK void sl_log_init_stage1(void) {
+  /* Intentionally empty. sl_log_init_stage1() is called from sl_main before
+   * any backend or timestamp source is available. When the @c log component
+   * is not installed, this weak no-op satisfies the call-site so sl_main
+   * can run unmodified. The strong override in sl_log.c performs the real
+   * pre-backend setup (ring buffer config, level cache, etc.). */
 }
 
 SL_WEAK sl_status_t sl_log_init_stage2(void) {
@@ -200,13 +223,6 @@ SL_WEAK sl_log_level_t sl_log_get_loglevel(void) { return SL_LOG_ENUM_CONFIG_NON
 
 SL_WEAK int sl_log_get_timestamp_delta(void) { return 0; }
 
-SL_WEAK sl_status_t sl_log_write_to_ring_buffer(sl_log_event_t *event_buffer,
-                                        uint32_t event_size) {
-  (void)event_size;
-  (void)event_buffer;
-  return SL_STATUS_OK;
-}
-
 SL_WEAK sl_status_t sl_log_platform_core_init(void) {
   return SL_STATUS_OK;
 }
@@ -224,33 +240,38 @@ SL_WEAK sl_status_t sl_log_backend_init(void) {
   return SL_STATUS_OK;
 }
 
-SL_WEAK sl_status_t sl_log_pre_sleep_process(void * args) {
-    (void) args;
+SL_WEAK sl_status_t sl_log_pre_sleep_process(const void *args)
+{
+  (void)args;
   return SL_STATUS_OK;
 }
 
-SL_WEAK sl_status_t sl_log_post_sleep_process(void * args) {
-    (void)args;
+SL_WEAK sl_status_t sl_log_post_sleep_process(const void *args)
+{
+  (void)args;
   return SL_STATUS_OK;
 }
 
-SL_WEAK sl_status_t sl_log_set_configurations(void *args, uint8_t core_id) {
-    (void)args;
-    (void)core_id;
-   return SL_STATUS_OK;
+SL_WEAK sl_status_t sl_log_set_configurations(const void *args, uint8_t core_id)
+{
+  (void)args;
+  (void)core_id;
+  return SL_STATUS_OK;
 }
 
-SL_WEAK sl_status_t sl_log_get_configurations(void *args, uint8_t core_id) {
-    (void)args;
-    (void)core_id;
-   return SL_STATUS_OK;
+SL_WEAK sl_status_t sl_log_get_configurations(void *args, uint8_t core_id)
+{
+  (void)args;
+  (void)core_id;
+  return SL_STATUS_OK;
 }
 
-SL_WEAK sl_status_t sl_log_backend_write(sl_log_event_t *buffer, uint32_t read_index,
-                                 uint32_t event_count) {
-   (void)buffer;
-   (void)read_index;
-   (void)event_count;                                 
+SL_WEAK sl_status_t sl_log_backend_write(const sl_log_event_t *buffer, uint32_t read_index,
+                                         uint32_t event_count)
+{
+  (void)buffer;
+  (void)read_index;
+  (void)event_count;
   return SL_STATUS_OK;
 }
 
@@ -259,10 +280,11 @@ SL_WEAK uint32_t sl_log_get_timestamp_timer_frequency(uint8_t core_id){
    return 0U;
 }
 
-SL_WEAK sl_status_t sl_log_sync_timestamp(uint8_t core_id, void *args) {
-    (void)core_id;
-    (void)args;
-   return SL_STATUS_OK;
+SL_WEAK sl_status_t sl_log_sync_timestamp(uint8_t core_id, const void *args)
+{
+  (void)core_id;
+  (void)args;
+  return SL_STATUS_OK;
 }
 
 SL_WEAK sl_log_ring_buffer_t *sl_log_get_ring_buffer_config(void){

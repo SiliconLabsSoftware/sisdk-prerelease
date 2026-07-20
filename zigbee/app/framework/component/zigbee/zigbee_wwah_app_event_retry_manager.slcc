@@ -1,0 +1,33 @@
+package: zigbee
+description: Silicon Labs proprietary Works With All Hubs (WWAH) app event retry manager.
+label: SL Works With All Hubs App Event Retry Manager
+quality: production
+id: zigbee_wwah_app_event_retry_manager
+category: Zigbee|Works With All Hubs
+provides:
+- name: zigbee_wwah_app_event_retry_manager
+requires:
+- name: zigbee_critical_message_queue
+config_file:
+- path: app/framework/plugin/wwah-app-event-retry-manager/config/wwah-app-event-retry-manager-config.h
+source:
+- path: app/framework/plugin/wwah-app-event-retry-manager/wwah-app-event-retry-manager.c
+- path: app/framework/plugin/wwah-app-event-retry-manager/wwah-app-event-retry-manager-cb.c
+include:
+- path: app/framework/plugin/wwah-app-event-retry-manager
+  file_list:
+  - path: wwah-app-event-retry-manager.h
+  - path: wwah-app-event-retry-manager-tokens.h
+template_contribution:
+- name: component_catalog
+  value: zigbee_wwah_app_event_retry_manager
+- name: token_header
+  value: wwah-app-event-retry-manager-tokens.h
+
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/wwah-app-event-retry-manager
+metadata:
+  sbom:
+    license: MSLA
+root_path: zigbee

@@ -33,9 +33,14 @@ provides:
   condition: [clock_manager_device_init]
 - name: clock_manager_init_internal
   condition: [device_series_3]
+- name: clock_manager_init_config
+  condition: [device_series_2]
+- name: clock_manager_init_config
+  condition: [device_generic_family_sixx301]
 requires:
 - name: clock_manager_runtime
 - name: clock_manager_init_hal
+- name: clock_manager_init_config
 - name: status
 root_path: platform_core/platform/service/clock_manager
 config_file:

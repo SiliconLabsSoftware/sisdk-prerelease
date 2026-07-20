@@ -94,7 +94,7 @@ SL_WEAK bool sl_power_manager_sleep_on_isr_exit(void)
 }
 
 /***************************************************************************//**
- * Enable or disable fast wake-up in EM2 and EM3
+ * Enable or disable fast wake-up in EM2 and EM3 for voltage scaling.
  *
  * @note Will also update the wake up time from EM2 to EM0.
  *
@@ -110,6 +110,30 @@ void sl_power_manager_em23_voltage_scaling_enable_fast_wakeup(bool enable)
   CORE_ENTER_CRITICAL();
 
   sli_power_manager_em23_voltage_scaling_enable_fast_wakeup(enable);
+
+  CORE_EXIT_CRITICAL();
+#else
+  (void)enable;
+#endif
+}
+
+/***************************************************************************//**
+ * Enable or disable fast wake-up in EM2 and EM3 for flash deep power-down.
+ *
+ * @note Will also update the wake up time from EM2 to EM0.
+ *
+ * @note This function will do nothing when a project contains the
+ *       power_manager_no_deepsleep component, which configures the
+ *       lowest energy mode as EM1.
+ ******************************************************************************/
+void sl_power_manager_em23_flash_power_down_enable_fast_wakeup(bool enable)
+{
+#if (defined(SLI_POWER_MANAGER_DPD_EM23_PRESENT) && !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT))
+  CORE_DECLARE_IRQ_STATE;
+
+  CORE_ENTER_CRITICAL();
+
+  sli_power_manager_em23_flash_power_down_enable_fast_wakeup(enable);
 
   CORE_EXIT_CRITICAL();
 #else

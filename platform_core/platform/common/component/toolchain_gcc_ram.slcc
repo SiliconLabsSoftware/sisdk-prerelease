@@ -18,6 +18,7 @@ provides:
 - name: toolchain_ram_only
 requires:
 - name: toolchain_gcc_ram_impl
+- name: ram_only_execution
 toolchain_settings:
 - option: linkerfile
   value: autogen/linkerfile_ram.ld

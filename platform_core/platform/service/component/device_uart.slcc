@@ -1,0 +1,23 @@
+id: device_uart
+label: Device Manager UART
+package: platform_core
+description: >
+  The Device Manager UART component defines the macros, structures, and enums that are used common across UART driver and
+  peripheral.
+category: Services|Device Manager
+quality: production
+metadata:
+  sbom:
+    license: Zlib
+provides:
+- name: device_uart
+requires:
+- name: enum
+root_path: platform_core/platform/service/device_manager
+include:
+- path: inc
+  file_list:
+  - path: sl_device_uart.h
+# documentation:
+  # docset: gecko-platform
+  # document: platform-service/device-manager

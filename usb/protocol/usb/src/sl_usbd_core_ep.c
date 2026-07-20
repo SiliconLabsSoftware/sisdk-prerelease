@@ -2215,6 +2215,8 @@ static sl_status_t usbd_core_endpoint_read(sli_usbd_endpoint_t         *p_ep,
 
   status = SL_STATUS_OK;
 
+  // Driver rx_start() overwrites next_xfer_len with the burst size (512 buffer-DMA,
+  // or up to the DDMA bulk scatter/gather limit from sli_usbd_driver_bulk_max_xfer_len()).
   while ((status == SL_STATUS_OK) && (p_urb->next_xfer_len > 0u)) {
     p_buf_cur = &p_urb->buf_ptr[p_urb->transfer_len];
 
@@ -2424,6 +2426,9 @@ static sl_status_t usbd_core_endpoint_write(sli_usbd_endpoint_t         *p_ep,
 
   status = SL_STATUS_OK;
 
+  // Each loop iteration submits one driver burst. Buffer-DMA bulk endpoints cap at
+  // 512 bytes; DDMA bulk endpoints may accept a larger scatter/gather burst via
+  // sli_usbd_driver_bulk_max_xfer_len().
   while ((status == SL_STATUS_OK) && ((xfer_rem > 0u) || (zlp_flag == true))) {
     if (zlp_flag == false) {
       p_buf_cur = &p_urb->buf_ptr[p_urb->transfer_len];

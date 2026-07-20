@@ -30,7 +30,6 @@
 
 #include "sl_hal_dcdc_coulomb_counter.h"
 #if defined(DCDC_COUNT) && (DCDC_COUNT > 0) && defined(DCDC_CCCTRL_CCEN)
-#include "sl_assert.h"
 #include "em_bus.h"
 #include "em_prs.h"
 
@@ -53,6 +52,8 @@ static int prs_channel = -1;
  ******************************************************************************/
 void sl_hal_dcdc_coulomb_counter_init(const sl_hal_dcdc_coulomb_counter_init_t *init)
 {
+  SL_LOG_DEBUG_ASSERT(init != NULL);
+
   if (DCDC->CCCTRL & _DCDC_CCCTRL_CCEN_MASK) {
     /* Disable COULOMB_COUNTER_INTERNAL module. */
     sl_hal_dcdc_coulomb_counter_disable();
@@ -116,7 +117,7 @@ void sl_hal_dcdc_coulomb_counter_cal_init(sl_hal_dcdc_coulomb_counter_calibratio
     /* Channel number >= 0 if an unused PRS channel was found. */
     /* If no free PRS channel was found then -1 is returned. */
     if (prs_channel == -1) {
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
     }
 
     /* Configure an asynchronous PRS channel */
@@ -251,11 +252,11 @@ uint16_t sl_hal_dcdc_coulomb_counter_get_cal_load_current(sl_hal_dcdc_coulomb_co
       break;
 
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
   }
 
   /* Make sure calibration load setting was measured during production test. */
-  EFM_ASSERT(ccload < (_DEVINFO_CCLOAD10_CCLOAD0_MASK >> _DEVINFO_CCLOAD10_CCLOAD0_SHIFT));
+  SL_LOG_DEBUG_ASSERT(ccload < (_DEVINFO_CCLOAD10_CCLOAD0_MASK >> _DEVINFO_CCLOAD10_CCLOAD0_SHIFT));
 
   return ccload;
 }
@@ -304,7 +305,7 @@ uint32_t sl_hal_dcdc_coulomb_counter_get_cal_reference_freq(void)
 
     case _CMU_CALCTRL_UPSEL_DISABLED:
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
   }
 
   return freq;

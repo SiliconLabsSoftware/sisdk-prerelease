@@ -46,12 +46,12 @@
 #endif
 #if defined(SL_CATALOG_CLOCK_MANAGER_PRESENT)
 #include "sl_clock_manager_oscillator_config.h"
+#if defined(FREQPLAN_PRESENT)
+#include "sli_clock_manager_init_hal_freqplan.h"
+#endif
 #endif
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
-#endif
-#if defined(CLOCK_MANAGER_INIT_HAL_INTERNAL_PRESENT)
-#include "sli_clock_manager_init_hal_internal.h"
 #endif
 
 /*******************************************************************************
@@ -127,10 +127,10 @@ static const uint8_t hfxo_timeout_steady_cfg_lf_ticks[16] = {
  ***************************   LOCAL FUNCTIONS   *******************************
  ******************************************************************************/
 
- SL_CODE_CLASSIFY(SL_CODE_COMPONENT_CLOCK_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
- static sl_status_t bus_clock_get_register_info(sl_bus_clock_t module,
-                                                volatile uint32_t **reg,
-                                                uint32_t *bit);
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_CLOCK_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
+static sl_status_t bus_clock_get_register_info(sl_bus_clock_t module,
+                                               volatile uint32_t **reg,
+                                               uint32_t *bit);
 
 /*******************************************************************************
  **********************   GLOBAL INTERNAL FUNCTIONS   **************************
@@ -156,7 +156,9 @@ sl_status_t sli_clock_manager_hal_runtime_init(void)
   NVIC_ClearPendingIRQ(HFXO_IRQ_NUMBER);
   NVIC_EnableIRQ(HFXO_IRQ_NUMBER);
 
+#if !defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
   HFXO0->IEN_SET = HFXO_IEN_RDY;
+#endif
 
   return SL_STATUS_OK;
 }
@@ -394,6 +396,7 @@ sl_status_t sli_clock_manager_hal_set_gpio_clock_output(sl_clock_manager_export_
   CORE_DECLARE_IRQ_STATE;
 
   EFM_ASSERT(pin <= (_GPIO_CMU_CLKOUT0ROUTE_PIN_MASK >> _GPIO_CMU_CLKOUT0ROUTE_PIN_SHIFT));
+  EFM_ASSERT(divider <= 32U);
 
   sl_gpio_t gpio;
   gpio.port = (sl_gpio_port_t)port;
@@ -434,7 +437,7 @@ sl_status_t sli_clock_manager_hal_set_gpio_clock_output(sl_clock_manager_export_
       break;
 
     case SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_HFEXPCLK:
-      EFM_ASSERT((divider > 0U) && (divider <= 32U));
+      EFM_ASSERT(divider > 0U);
       tmp  = CMU_EXPORTCLKCTRL_CLKOUTSEL0_HFEXPCLK;
       break;
 
@@ -454,6 +457,40 @@ sl_status_t sli_clock_manager_hal_set_gpio_clock_output(sl_clock_manager_export_
       tmp = CMU_EXPORTCLKCTRL_CLKOUTSEL0_HCLK;
       break;
 
+#if defined(CMU_EXPORTCLKCTRL_CLKOUTSEL0_SOCPLL0)
+    case SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_SOCPLL0:
+      tmp = CMU_EXPORTCLKCTRL_CLKOUTSEL0_SOCPLL0;
+      break;
+#elif defined(CMU_EXPORTCLKCTRL_CLKOUTSEL0_SOCPLL)
+    case SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_SOCPLL0:
+      tmp = CMU_EXPORTCLKCTRL_CLKOUTSEL0_SOCPLL;
+      break;
+#endif
+
+#if defined(CMU_EXPORTCLKCTRL_CLKOUTSEL0_SOCPLL1)
+    case SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_SOCPLL1:
+      tmp = CMU_EXPORTCLKCTRL_CLKOUTSEL0_SOCPLL1;
+      break;
+#endif
+
+#if defined(CMU_EXPORTCLKCTRL_CLKOUTSEL0_SOCPLL2)
+    case SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_SOCPLL2:
+      tmp = CMU_EXPORTCLKCTRL_CLKOUTSEL0_SOCPLL2;
+      break;
+#endif
+
+#if defined(CMU_EXPORTCLKCTRL_CLKOUTSEL0_PERPLL0)
+    case SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_PERPLL0:
+      tmp = CMU_EXPORTCLKCTRL_CLKOUTSEL0_PERPLL0;
+      break;
+#endif
+
+#if defined(CMU_EXPORTCLKCTRL_CLKOUTSEL0_PERPLL1)
+    case SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_PERPLL1:
+      tmp = CMU_EXPORTCLKCTRL_CLKOUTSEL0_PERPLL1;
+      break;
+#endif
+
     default:
       return SL_STATUS_NOT_SUPPORTED;
   }
@@ -461,9 +498,16 @@ sl_status_t sli_clock_manager_hal_set_gpio_clock_output(sl_clock_manager_export_
   mask  = _CMU_EXPORTCLKCTRL_CLKOUTSEL0_MASK << (output_select * _CMU_EXPORTCLKCTRL_CLKOUTSEL1_SHIFT);
   tmp <<= output_select * _CMU_EXPORTCLKCTRL_CLKOUTSEL1_SHIFT;
 
-  if (export_clock_source == SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_HFEXPCLK) {
-    tmp  |= (divider - 1U) << _CMU_EXPORTCLKCTRL_PRESC_SHIFT;
-    mask |= _CMU_EXPORTCLKCTRL_PRESC_MASK;
+  if ((export_clock_source != SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_DISABLED) && (divider > 0U)) {
+    if (export_clock_source == SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_HFEXPCLK) {
+      tmp  |= (divider - 1U) << _CMU_EXPORTCLKCTRL_PRESC_SHIFT;
+      mask |= _CMU_EXPORTCLKCTRL_PRESC_MASK;
+    } else {
+  #if defined(_CMU_EXPORTCLKCTRL_CLKOUTPRESC_MASK)
+      tmp  |= (divider - 1U) << _CMU_EXPORTCLKCTRL_CLKOUTPRESC_SHIFT;
+      mask |= _CMU_EXPORTCLKCTRL_CLKOUTPRESC_MASK;
+  #endif
+    }
   }
 
   CORE_ENTER_ATOMIC();
@@ -693,6 +737,7 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
           *frequency = SystemULFRCOClockGet();
           break;
 
+#if defined(CMU_WDOG0CLKCTRL_CLKSEL_HCLKDIV1024)
         case CMU_WDOG0CLKCTRL_CLKSEL_HCLKDIV1024:
 #if defined(_CMU_SYSCLKCTRL_HCLKDIVNPRESC_MASK)
           *frequency = SystemHCLKDIVNGet();
@@ -700,6 +745,7 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
           *frequency = SystemHCLKGet() / 1024U;
 #endif
           break;
+#endif
 
         default:
           *frequency = 0U;
@@ -723,6 +769,7 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
           *frequency = SystemULFRCOClockGet();
           break;
 
+#if defined(CMU_WDOG1CLKCTRL_CLKSEL_HCLKDIV1024)
         case CMU_WDOG1CLKCTRL_CLKSEL_HCLKDIV1024:
 #if defined(_CMU_SYSCLKCTRL_HCLKDIVNPRESC_MASK)
           *frequency = SystemHCLKDIVNGet();
@@ -730,6 +777,7 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
           *frequency = SystemHCLKGet() / 1024U;
 #endif
           break;
+#endif
 
         default:
           *frequency = 0U;
@@ -790,31 +838,31 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
       break;
 
 #if defined(_CMU_EUSART1CLKCTRL_MASK)
-      case SL_CLOCK_BRANCH_EUSART1CLK:
-        switch (CMU->EUSART1CLKCTRL & _CMU_EUSART1CLKCTRL_CLKSEL_MASK) {
+    case SL_CLOCK_BRANCH_EUSART1CLK:
+      switch (CMU->EUSART1CLKCTRL & _CMU_EUSART1CLKCTRL_CLKSEL_MASK) {
 #if defined(_CMU_EUSART1CLKCTRL_CLKSEL_EM01GRPCCLK)
-          case CMU_EUSART1CLKCTRL_CLKSEL_EM01GRPCCLK:
-            return_status =  sli_clock_manager_hal_get_clock_branch_frequency(SL_CLOCK_BRANCH_EM01GRPCCLK, frequency);
-            break;
+        case CMU_EUSART1CLKCTRL_CLKSEL_EM01GRPCCLK:
+          return_status =  sli_clock_manager_hal_get_clock_branch_frequency(SL_CLOCK_BRANCH_EM01GRPCCLK, frequency);
+          break;
 #endif
-          case CMU_EUSART1CLKCTRL_CLKSEL_HFRCOEM23:
-            *frequency = SystemHFRCOEM23ClockGet();
-            break;
-  
-          case CMU_EUSART1CLKCTRL_CLKSEL_LFRCO:
-            *frequency = SystemLFRCOClockGet();
-            break;
-  
-          case CMU_EUSART1CLKCTRL_CLKSEL_LFXO:
-            *frequency = SystemLFXOClockGet();
-            break;
-  
-          default:
-            *frequency = 0U;
-            return_status = SL_STATUS_INVALID_STATE;
-            break;
-        }
-        break;
+        case CMU_EUSART1CLKCTRL_CLKSEL_HFRCOEM23:
+          *frequency = SystemHFRCOEM23ClockGet();
+          break;
+
+        case CMU_EUSART1CLKCTRL_CLKSEL_LFRCO:
+          *frequency = SystemLFRCOClockGet();
+          break;
+
+        case CMU_EUSART1CLKCTRL_CLKSEL_LFXO:
+          *frequency = SystemLFXOClockGet();
+          break;
+
+        default:
+          *frequency = 0U;
+          return_status = SL_STATUS_INVALID_STATE;
+          break;
+      }
+      break;
   #endif
 
     case SL_CLOCK_BRANCH_PCNT0CLK:
@@ -1047,7 +1095,7 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
 #endif
 
     default:
-#if defined(CLOCK_MANAGER_RUNTIME_HAL_INTERNAL_PRESENT)
+#if defined(SL_CATALOG_CLOCK_MANAGER_RUNTIME_HAL_INTERNAL_PRESENT)
       return_status = sli_clock_manager_hal_get_clock_branch_frequency_internal(clock_branch, frequency);
 #else
       *frequency = 0U;
@@ -1254,9 +1302,11 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
           return_status = sli_clock_manager_hal_get_oscillator_precision(SL_OSCILLATOR_LFRCO, precision);
           break;
 
+#if defined(CMU_WDOG0CLKCTRL_CLKSEL_HCLKDIV1024)
         case CMU_WDOG0CLKCTRL_CLKSEL_HCLKDIV1024:
           return_status = sli_clock_manager_hal_get_clock_branch_precision(SL_CLOCK_BRANCH_HCLK, precision);
           break;
+#endif
 
         case CMU_WDOG0CLKCTRL_CLKSEL_ULFRCO:
           *precision = 0xFFFF;
@@ -1281,9 +1331,11 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
           return_status = sli_clock_manager_hal_get_oscillator_precision(SL_OSCILLATOR_LFRCO, precision);
           break;
 
+#if defined(CMU_WDOG1CLKCTRL_CLKSEL_HCLKDIV1024)
         case CMU_WDOG1CLKCTRL_CLKSEL_HCLKDIV1024:
           return_status = sli_clock_manager_hal_get_clock_branch_precision(SL_CLOCK_BRANCH_HCLK, precision);
           break;
+#endif
 
         case CMU_WDOG1CLKCTRL_CLKSEL_ULFRCO:
           *precision = 0xFFFF;
@@ -1575,7 +1627,7 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
 #endif
 
     default:
-#if defined(CLOCK_MANAGER_RUNTIME_HAL_INTERNAL_PRESENT)
+#if defined(SL_CATALOG_CLOCK_MANAGER_RUNTIME_HAL_INTERNAL_PRESENT)
       return_status = sli_clock_manager_hal_get_clock_branch_precision_internal(clock_branch, precision);
 #else
       *precision = 0U;
@@ -2233,6 +2285,7 @@ sl_status_t sli_clock_manager_hal_get_sysclk_source(sl_oscillator_t *source)
 void HFXO_IRQ_HANDLER_FUNCTION(void)
 {
   uint32_t irq_flag = HFXO0->IF;
+  (void)irq_flag;
 
 #if defined(SL_CLOCK_MANAGER_HFXO_SLEEPY_CRYSTAL_SUPPORT) && (SL_CLOCK_MANAGER_HFXO_SLEEPY_CRYSTAL_SUPPORT == 1)
   // SLEEPYXTAL Interrupt Flag Handling.
@@ -2246,6 +2299,7 @@ void HFXO_IRQ_HANDLER_FUNCTION(void)
 #endif
 
   // Ready Interrupt Flag Handling.
+#if !defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
   if (irq_flag & HFXO_IF_RDY) {
     // Clear Ready flag.
     HFXO0->IF_CLR = irq_flag & HFXO_IF_RDY;
@@ -2253,6 +2307,7 @@ void HFXO_IRQ_HANDLER_FUNCTION(void)
     // Callback fuction to notify HFXO is ready.
     sli_clock_manager_notify_hfxo_ready();
   }
+#endif
 
 #if defined(SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN) && SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN
   // Startup time Measure Done Interrupt Flag Handling.
@@ -2406,12 +2461,12 @@ static sl_status_t bus_clock_get_register_info(sl_bus_clock_t module,
                                                volatile uint32_t **reg,
                                                uint32_t *bit)
 {
-#if defined (_SILICON_LABS_32B_SERIES_3_CONFIG_301)
-  uint32_t clken_index;
-
   if (module == SL_BUS_CLOCK_INVALID) {
     return SL_STATUS_NOT_AVAILABLE;
   }
+
+#if defined (_SILICON_LABS_32B_SERIES_3_CONFIG_301)
+  uint32_t clken_index;
 
   *bit = (*module & _BUS_CLOCK_CLKEN_BIT_MASK) >> _BUS_CLOCK_CLKEN_BIT_SHIFT;
   clken_index = (*module & _BUS_CLOCK_CLKENX_MASK) >> _BUS_CLOCK_CLKENX_SHIFT;
@@ -2439,4 +2494,3 @@ static sl_status_t bus_clock_get_register_info(sl_bus_clock_t module,
 
   return SL_STATUS_OK;
 }
-

@@ -48,16 +48,12 @@ static void adc_calibrate_config(ADC_TypeDef *adc,
 static sl_status_t adc_calculate_prescalers(uint32_t branch_clock_freq,
                                             uint8_t* hsclkrate,
                                             uint8_t* adcprescale);
-#if defined(_ADC_OFFSETSE_MASK) || (defined(_ADC_OFFSETCAL_MASK) && !defined(_ADC_OFFSETCAL_NYQOFFSET_MASK))
+#if defined(_ADC_OFFSETSE_MASK) 
 static uint32_t adc_calculate_offset(uint8_t trim);
 #endif
 #if defined(_ADC_OFFSETCAL_MASK) && !defined(_ADC_OFFSETCAL_NYQOFFSET_MASK)
-static uint32_t adc_translate_4x_trim_for_vref_gain(uint8_t trim_4x, uint8_t half_gain_mode);
-static void adc_apply_vref_mux_gain(sl_hal_adc_voltage_reference_t vref,
-                                    uint8_t trim_4x,
-                                    uint8_t half_gain_mode,
-                                    uint32_t *gain_se,
-                                    uint32_t *gain_diff);
+static uint16_t adc_get_gain_trim(ADC_TypeDef *adc,
+                                  sl_hal_adc_voltage_reference_t vref);
 #endif
 static sl_hal_adc_result_t adc_decode_result(uint32_t data,
                                              sl_hal_adc_alignment_t alignment);
@@ -119,12 +115,14 @@ void sl_hal_adc_init(ADC_TypeDef *adc,
                      uint32_t branch_clock_freq)
 {
   // Assert that the adc reference is valid and the adc is disabled.
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
-  EFM_ASSERT(!(adc->EN & _ADC_EN_EN_MASK));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(!(adc->EN & _ADC_EN_EN_MASK));
 
-  uint8_t hsclkrate;
-  uint8_t adcprescale;
-  EFM_ASSERT(adc_calculate_prescalers(branch_clock_freq, &hsclkrate, &adcprescale) == SL_STATUS_OK);
+  uint8_t hsclkrate = 0U;
+  uint8_t adcprescale = 0U;
+  sl_status_t status = adc_calculate_prescalers(branch_clock_freq, &hsclkrate, &adcprescale);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
   adc->CTRL = ((hsclkrate << _ADC_CTRL_HSCLKRATE_SHIFT) & _ADC_CTRL_HSCLKRATE_MASK)
               | ((adcprescale << _ADC_CTRL_ADCPRESCALE_SHIFT) & _ADC_CTRL_ADCPRESCALE_MASK);
 
@@ -167,18 +165,18 @@ void sl_hal_adc_init(ADC_TypeDef *adc,
   for (uint8_t i = 0; i < ADC_CONFIGNUM(ADC_NUM(adc)); i++) {
     // The ATIME bitfield is 10bits wide, let's make sure that the init value
     // conforms to this bitfield's width.
-    EFM_ASSERT((uint32_t)init->config[i].acquisition_time <= (uint32_t)(_ADC_CFG_ATIME_MASK >> _ADC_CFG_ATIME_SHIFT));
+    SL_LOG_DEBUG_ASSERT((uint32_t)init->config[i].acquisition_time <= (uint32_t)(_ADC_CFG_ATIME_MASK >> _ADC_CFG_ATIME_SHIFT));
 
 #if defined(_ADC_CFG_AVERAGESEL_MASK)
     // Due to hardware limitations, the ADC cannot be configured for hardware
     // averaging if the adcprescale is 0 (divide by 1).
     if ( adcprescale == 0 ) {
-      EFM_ASSERT(init->config[i].average == SL_HAL_ADC_AVERAGE_X1);
+      SL_LOG_DEBUG_ASSERT(init->config[i].average == SL_HAL_ADC_AVERAGE_X1);
     }
 #else
     // No averaging is only supported for Nyquist mode.
     if (init->config[i].oversampling_mode != SL_HAL_ADC_OS_MODE_0) {
-      EFM_ASSERT(init->config[i].oversampling_rate != SL_HAL_ADC_OS_RATE_X1);
+      SL_LOG_DEBUG_ASSERT(init->config[i].oversampling_rate != SL_HAL_ADC_OS_RATE_X1);
     }
 #endif
 
@@ -211,7 +209,7 @@ void sl_hal_adc_init(ADC_TypeDef *adc,
  ******************************************************************************/
 void sl_hal_adc_reset(ADC_TypeDef *adc)
 {
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
 
   sl_hal_adc_enable(adc);
 
@@ -244,8 +242,8 @@ void sl_hal_adc_reset(ADC_TypeDef *adc)
 void sl_hal_adc_set_scan_mask(ADC_TypeDef *adc,
                               uint32_t mask)
 {
-  EFM_ASSERT(adc->EN & _ADC_EN_EN_MASK);
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(adc->EN & _ADC_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
 
   adc->MASKREQ = (mask << _ADC_MASKREQ_MASKREQ_SHIFT) & _ADC_MASKREQ_MASKREQ_MASK;
 }
@@ -256,7 +254,7 @@ void sl_hal_adc_set_scan_mask(ADC_TypeDef *adc,
  ******************************************************************************/
 uint32_t sl_hal_adc_get_scan_mask(ADC_TypeDef *adc)
 {
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
   sl_hal_adc_wait_sync(adc);
   return adc->STMASK;
 }
@@ -269,9 +267,9 @@ void sl_hal_adc_update_scan_entry(ADC_TypeDef *adc,
                                   sl_hal_adc_channel_id_t id,
                                   const sl_hal_adc_scan_entry_t* entry)
 {
-  EFM_ASSERT(!(adc->EN & _ADC_EN_EN_MASK));
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
-  EFM_ASSERT(id < ADC_CHANNELS(ADC_NUM(adc)));
+  SL_LOG_DEBUG_ASSERT(!(adc->EN & _ADC_EN_EN_MASK));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(id < ADC_CHANNELS(ADC_NUM(adc)));
 
   adc->SCANTABLE[id].SCAN = ((entry->compare ? 1U : 0U) << _ADC_SCAN_CMP_SHIFT)
                             | (((uint32_t)entry->config_id << _ADC_SCAN_CFG_SHIFT) & _ADC_SCAN_CFG_MASK)
@@ -287,7 +285,7 @@ void sl_hal_adc_update_scan_entry(ADC_TypeDef *adc,
  ******************************************************************************/
 sl_hal_adc_result_t sl_hal_adc_pull(const ADC_TypeDef *adc)
 {
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
 
   sl_hal_adc_alignment_t alignment =
     (adc->SCANFIFOCFG & _ADC_SCANFIFOCFG_ALIGNMENT_MASK)
@@ -302,7 +300,7 @@ sl_hal_adc_result_t sl_hal_adc_pull(const ADC_TypeDef *adc)
  ******************************************************************************/
 sl_hal_adc_result_t sl_hal_adc_peek(const ADC_TypeDef *adc)
 {
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
 
   sl_hal_adc_alignment_t alignment =
     (adc->SCANFIFOCFG & _ADC_SCANFIFOCFG_ALIGNMENT_MASK)
@@ -317,7 +315,7 @@ sl_hal_adc_result_t sl_hal_adc_peek(const ADC_TypeDef *adc)
  ******************************************************************************/
 uint32_t sl_hal_adc_get_fifo_count(const ADC_TypeDef *adc)
 {
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
 
   return ((adc->SCANFIFOSTAT
            & _ADC_SCANFIFOSTAT_FIFOREADCNT_MASK)
@@ -330,7 +328,8 @@ uint32_t sl_hal_adc_get_fifo_count(const ADC_TypeDef *adc)
  ******************************************************************************/
 uint32_t sl_hal_adc_get_internal_reference_voltage(const ADC_TypeDef *adc)
 {
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  (void)adc;
 
   // ADC reference voltages VDDA, VREFPL, VREFPH and VREFPBUF are all
   // application specific and cannot be known in advance.
@@ -361,7 +360,7 @@ uint32_t sl_hal_adc_get_internal_reference_voltage(const ADC_TypeDef *adc)
 uint32_t sl_hal_adc_get_timer_frequency(const ADC_TypeDef *adc,
                                         uint32_t branch_clock_freq)
 {
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
 
   uint32_t hsclkrate = (adc->CTRL & _ADC_CTRL_HSCLKRATE_MASK) >> _ADC_CTRL_HSCLKRATE_SHIFT;
   return (branch_clock_freq / (hsclkrate + 1));
@@ -374,7 +373,7 @@ uint32_t sl_hal_adc_get_timer_frequency(const ADC_TypeDef *adc,
 void sl_hal_adc_set_timer_period(ADC_TypeDef *adc,
                                  uint16_t    timer_period)
 {
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
   adc->TIMER = timer_period;
 }
 
@@ -390,18 +389,18 @@ void sl_hal_adc_set_clock_prescalers(ADC_TypeDef *adc,
   uint32_t clock_prescaled;
 
   // Assert that the adc reference is valid and the adc is disabled.
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
-  EFM_ASSERT(!(adc->EN & _ADC_EN_EN_MASK));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(!(adc->EN & _ADC_EN_EN_MASK));
 
   // Verify clock prescalers are suitable for the operation of the ADC with
   // regards to the branch clock frequency.
-  EFM_ASSERT(hsclkrate <= SLI_HAL_ADC_HSCLKRATE_MAX);
+  SL_LOG_DEBUG_ASSERT(hsclkrate <= SLI_HAL_ADC_HSCLKRATE_MAX);
   clock_prescaled = branch_clock_freq / (hsclkrate + 1);
-  EFM_ASSERT(clock_prescaled <= SLI_HAL_ADC_CLK_SRC_MAX);
+  SL_LOG_DEBUG_ASSERT(clock_prescaled <= SLI_HAL_ADC_CLK_SRC_MAX);
 
-  EFM_ASSERT(adcprescale <= SLI_HAL_ADC_ADCPRESCALE_MAX);
+  SL_LOG_DEBUG_ASSERT(adcprescale <= SLI_HAL_ADC_ADCPRESCALE_MAX);
   clock_prescaled = clock_prescaled / (adcprescale + 1);
-  EFM_ASSERT(clock_prescaled >= SLI_HAL_ADC_CLK_CORE_MIN && clock_prescaled <= SLI_HAL_ADC_CLK_CORE_MAX);
+  SL_LOG_DEBUG_ASSERT(clock_prescaled >= SLI_HAL_ADC_CLK_CORE_MIN && clock_prescaled <= SLI_HAL_ADC_CLK_CORE_MAX);
 
   adc->CTRL_CLR = _ADC_CTRL_HSCLKRATE_MASK | _ADC_CTRL_ADCPRESCALE_MASK;
   adc->CTRL_SET = ((hsclkrate << _ADC_CTRL_HSCLKRATE_SHIFT) & _ADC_CTRL_HSCLKRATE_MASK)
@@ -415,75 +414,57 @@ void sl_hal_adc_set_clock_prescalers(ADC_TypeDef *adc,
 }
 
 #if defined(_ADC_OFFSETCAL_MASK) && !defined(_ADC_OFFSETCAL_NYQOFFSET_MASK)
-/***************************************************************************//**
- * @brief
- *   Translate DEVINFO 4x gain trim for Series 2 config 11 unified GAINCAL path.
- *
- * @param[in] trim_4x
- *   Raw 4x gain trim from DEVINFO.
- *
- * @param[in] half_gain_mode
- *   Non-zero selects 0.5x VREF translation; zero selects 1x VREF translation.
- ******************************************************************************/
-static uint32_t adc_translate_4x_trim_for_vref_gain(uint8_t trim_4x, uint8_t half_gain_mode)
+static uint16_t adc_get_gain_trim(ADC_TypeDef *adc,
+                                  sl_hal_adc_voltage_reference_t vref)
 {
-  uint32_t g6 = SLI_HAL_ADC_GAIN_TRIM_G6(trim_4x);
-  uint32_t g5 = SLI_HAL_ADC_GAIN_TRIM_G5(trim_4x);
-  uint32_t upper = (g6 << 6) | (0x1UL << 5) | ((g6 ^ 0x1U) << 4);
+  uint32_t devinfo_gaincal;
+  uint32_t devinfo_gaincaldiff;
+  uint8_t adc_gaincal_se = (uint8_t)_ADC_GAINCAL_SE_DEFAULT;
+  uint8_t adc_gaincal_diff = (uint8_t)_ADC_GAINCAL_DIFF_DEFAULT;
 
-  if (half_gain_mode != 0U) {
-    // b = [g6, 1, !g6, !g6, g6^g5, g4, g3]; use lower 4 bits for GAINCAL.
-    return upper | ((g6 ^ 0x1U) << 3)
-           | ((g6 ^ g5) << 2)
-           | (SLI_HAL_ADC_GAIN_TRIM_G4(trim_4x) << 1)
-           | (SLI_HAL_ADC_GAIN_TRIM_G3(trim_4x) << 0);
-  }
-  // b = [g6, 1, !g6, g6^g5, g4, g3, g2]; use lower 4 bits for GAINCAL.
-  return upper | ((g6 ^ g5) << 3)
-         | (SLI_HAL_ADC_GAIN_TRIM_G4(trim_4x) << 2)
-         | (SLI_HAL_ADC_GAIN_TRIM_G3(trim_4x) << 1)
-         | (SLI_HAL_ADC_GAIN_TRIM_G2(trim_4x) << 0);
-}
-
-/***************************************************************************//**
- * @brief
- *   Compute SE and DIFF GAINCAL nibbles for unbuffered external VREF (Series 2 config 11).
- *
- * @details
- *   When the reference is VREFPL or VREFPH, applies the factory 4x gain trim translated
- *   to 0.5x or 1x analog gain (see @ref adc_translate_4x_trim_for_vref_gain) and writes
- *   the same 4-bit value to both SE and DIFF. For other references, uses the hardware
- *   default nibble (0x8).
- *
- * @param[in] vref
- *   Selected ADC voltage reference (@ref sl_hal_adc_voltage_reference_t).
- *
- * @param[in] trim_4x
- *   Raw 4x gain trim from DEVINFO.
- *
- * @param[in] half_gain_mode
- *   Non-zero selects 0.5x VREF translation; zero selects 1x VREF translation.
- *
- * @param[out] gain_se
- *   SE GAINCAL nibble (lower 4 bits used by the caller).
- *
- * @param[out] gain_diff
- *   DIFF GAINCAL nibble (lower 4 bits used by the caller).
- ******************************************************************************/
-static void adc_apply_vref_mux_gain(sl_hal_adc_voltage_reference_t vref,
-                                    uint8_t trim_4x,
-                                    uint8_t half_gain_mode,
-                                    uint32_t *gain_se,
-                                    uint32_t *gain_diff)
-{
-  if (vref == SL_HAL_ADC_REFERENCE_VREFPL || vref == SL_HAL_ADC_REFERENCE_VREFPH) {
-    uint32_t nibble = adc_translate_4x_trim_for_vref_gain(trim_4x, half_gain_mode) & 0x0FUL;
-    *gain_se = nibble;
-    *gain_diff = nibble;
+  if (adc == ADC0) {
+    devinfo_gaincal = DEVINFO->ADC0GAINCALSE;
+    devinfo_gaincaldiff = DEVINFO->ADC0GAINCALDIFF;
+#if defined(ADC1) && defined(_DEVINFO_ADC1GAINCALSE_TRIMVREFINT_MASK)
+  } else if (adc == ADC1) {
+    devinfo_gaincal = DEVINFO->ADC1GAINCALSE;
+    devinfo_gaincaldiff = DEVINFO->ADC1GAINCALDIFF;
+#endif
   } else {
-    *gain_se = 0x08UL;
-    *gain_diff = 0x08UL;
+    return (uint16_t)(((uint16_t)adc_gaincal_diff << 8) | adc_gaincal_se);
   }
+
+  switch (vref) {
+    case SL_HAL_ADC_REFERENCE_VREFINT:
+      adc_gaincal_se = (uint8_t)((devinfo_gaincal & _DEVINFO_ADC0GAINCALSE_TRIMVREFINT_MASK)
+                                 >> _DEVINFO_ADC0GAINCALSE_TRIMVREFINT_SHIFT);
+      adc_gaincal_diff = (uint8_t)((devinfo_gaincaldiff & _DEVINFO_ADC0GAINCALDIFF_TRIMVREFINT_MASK)
+                                   >> _DEVINFO_ADC0GAINCALDIFF_TRIMVREFINT_SHIFT);
+      break;
+    case SL_HAL_ADC_REFERENCE_VREFPL:
+    case SL_HAL_ADC_REFERENCE_VREFPH:
+      adc_gaincal_se = (uint8_t)((devinfo_gaincal & _DEVINFO_ADC0GAINCALSE_TRIMVREFPL_MASK)
+                                 >> _DEVINFO_ADC0GAINCALSE_TRIMVREFPL_SHIFT);
+      adc_gaincal_diff = (uint8_t)((devinfo_gaincaldiff & _DEVINFO_ADC0GAINCALDIFF_TRIMVREFPL_MASK)
+                                   >> _DEVINFO_ADC0GAINCALDIFF_TRIMVREFPL_SHIFT);
+      break;
+    case SL_HAL_ADC_REFERENCE_VDDA:
+      adc_gaincal_se = (uint8_t)((devinfo_gaincal & _DEVINFO_ADC0GAINCALSE_TRIMVDDA_MASK)
+                                 >> _DEVINFO_ADC0GAINCALSE_TRIMVDDA_SHIFT);
+      adc_gaincal_diff = (uint8_t)((devinfo_gaincaldiff & _DEVINFO_ADC0GAINCALDIFF_TRIMVDDA_MASK)
+                                   >> _DEVINFO_ADC0GAINCALDIFF_TRIMVDDA_SHIFT);
+      break;
+    case SL_HAL_ADC_REFERENCE_VREFPBUF:
+      adc_gaincal_se = (uint8_t)((devinfo_gaincal & _DEVINFO_ADC0GAINCALSE_TRIMVREFPBUF_MASK)
+                                 >> _DEVINFO_ADC0GAINCALSE_TRIMVREFPBUF_SHIFT);
+      adc_gaincal_diff = (uint8_t)((devinfo_gaincaldiff & _DEVINFO_ADC0GAINCALDIFF_TRIMVREFPBUF_MASK)
+                                   >> _DEVINFO_ADC0GAINCALDIFF_TRIMVREFPBUF_SHIFT);
+      break;
+    default:
+      break;
+  }
+
+  return (uint16_t)(((uint16_t)adc_gaincal_diff << 8) | adc_gaincal_se);
 }
 #endif
 
@@ -611,59 +592,36 @@ static void adc_calibrate_config(ADC_TypeDef *adc,
   }
 #elif defined(_ADC_OFFSETCAL_MASK) && !defined(_ADC_OFFSETCAL_NYQOFFSET_MASK)
   // Using unified OFFSETCAL instead of OFFSETSE/OFFSETDIFF and a simpler GAINCAL (SE and DIFF nibbles only).
-  sl_hal_system_devinfo_adc_t adc_devinfo;
-  sl_hal_system_get_adc_calibration_info(&adc_devinfo);
-
-  uint32_t offset_se;
-  uint32_t offset_diff;
   uint32_t gain_se;
   uint32_t gain_diff;
+  uint16_t adc_trim_value = adc_get_gain_trim(adc, init->voltage_reference);
+  uint8_t trim_se = (uint8_t)(adc_trim_value & 0xFFU);
+  uint8_t trim_diff = (uint8_t)((adc_trim_value >> 8) & 0xFFU);
 
-  // Determine offset and gain values based on gain setting
   switch (init->config[config_id].gain) {
     case SL_HAL_ADC_ANALOG_GAIN_0_5:
-      // Apply 0.5x gain trim for unbuffered external reference voltage.
-      // Translate 4x gain trim to 0.5x gain trim with formula
-      // b = [g6, 1, !g6, !g6, g6^g5, g4, g3]
-      // Extract lower 4 bits for GAINCAL field
-      adc_apply_vref_mux_gain(init->voltage_reference,
-                              adc_devinfo.cal_data.trim_gain_4x,
-                              1U,
-                              &gain_se,
-                              &gain_diff);
-      offset_se = adc_calculate_offset(adc_devinfo.offset.trim_off_1x);
-      offset_diff = offset_se + 1U;
+      // CURL 0.5x gain trim uses the 1x trim nibble shifted right by 1,
+      // then offset by 0b0100, yielding [g3, ~g3, g2, g1].
+      gain_se = (((uint32_t)trim_se >> 1U) + 0x4UL) & 0x0FUL;
+      gain_diff = (((uint32_t)trim_diff >> 1U) + 0x4UL) & 0x0FUL;
       break;
     case SL_HAL_ADC_ANALOG_GAIN_1:
-      // Apply 1x gain trim for unbuffered external reference voltage.
-      // Translate 4x gain trim to 1x gain trim with formula
-      // b = [g6, 1, !g6, g6^g5, g4, g3, g2]
-      // Extract lower 4 bits for GAINCAL field
-      adc_apply_vref_mux_gain(init->voltage_reference,
-                              adc_devinfo.cal_data.trim_gain_4x,
-                              0U,
-                              &gain_se,
-                              &gain_diff);
-      offset_se = adc_calculate_offset(adc_devinfo.offset.trim_off_1x);
-      offset_diff = offset_se + 1U;
+      // CURL 1x gain uses the original 4-bit DEVINFO trim nibble directly.
+      gain_se = trim_se & 0x0FUL;
+      gain_diff = trim_diff & 0x0FUL;
       break;
     default:
-      gain_se = 0x08UL;
-      gain_diff = 0x08UL;
-      offset_se = adc_calculate_offset(adc_devinfo.offset.trim_off_1x);
-      offset_diff = offset_se + 1U;
+      gain_se = _ADC_GAINCAL_SE_DEFAULT;
+      gain_diff = _ADC_GAINCAL_DIFF_DEFAULT;
       break;
   }
 
-  // Apply gain calibration to unified GAINCAL register
-  // SE gain in lower 4 bits, DIFF gain in upper 4 bits (starting at bit 20)
   adc->CFG[config_id].GAINCAL = ((gain_se << _ADC_GAINCAL_SE_SHIFT) & _ADC_GAINCAL_SE_MASK)
                                 | ((gain_diff << _ADC_GAINCAL_DIFF_SHIFT) & _ADC_GAINCAL_DIFF_MASK);
 
-  // Apply offset calibration to unified OFFSETCAL register
-  // SE offset in lower 13 bits, DIFF offset in upper 13 bits (starting at bit 16)
-  adc->CFG[config_id].OFFSETCAL = ((offset_se << _ADC_OFFSETCAL_SE_SHIFT) & _ADC_OFFSETCAL_SE_MASK)
-                                  | ((offset_diff << _ADC_OFFSETCAL_DIFF_SHIFT) & _ADC_OFFSETCAL_DIFF_MASK);
+  adc->CFG[config_id].OFFSETCAL = ADC_OFFSETCAL_SE_DEFAULT
+                                  | ADC_OFFSETCAL_DIFF_DEFAULT;
+
 #else
   (void)adc;
   (void)init;
@@ -719,12 +677,13 @@ static sl_status_t adc_calculate_prescalers(uint32_t branch_clock_freq,
   }
 
   if ( *hsclkrate == 127 || *adcprescale == 127 ) {
+    SL_PRINT_STRING_ERROR("prescalers failed, %d\r\n", (int)__LINE__);
     return SL_STATUS_FAIL;
   }
 
   return SL_STATUS_OK;
 }
-#if defined(_ADC_OFFSETSE_MASK) || (defined(_ADC_OFFSETCAL_MASK) && !defined(_ADC_OFFSETCAL_NYQOFFSET_MASK))
+#if defined(_ADC_OFFSETSE_MASK) 
 /***************************************************************************//**
  * @brief
  *   Calculate the offset calibration to apply from the 6 bit trim value in
@@ -818,7 +777,7 @@ static sl_hal_adc_result_t adc_decode_result(uint32_t data, sl_hal_adc_alignment
       break;
 #endif
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       result.data = 0x0;
       result.id = 0x0;
       break;

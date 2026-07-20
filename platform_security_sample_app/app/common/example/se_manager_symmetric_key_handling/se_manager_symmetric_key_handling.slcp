@@ -3,7 +3,7 @@ package: platform
 quality: production
 label: Platform Security - SoC SE Manager Symmetric Key Handling
 description: >
-  Demonstrates how to generate, import, export, wrap, and transfer AES and custom-size symmetric keys with SE Manager on Secure Vault devices.
+  This example project demonstrates the symmetric key handling API of SE Manager.
 category: Example|Platform
 filter:
   - name: "Device Type"

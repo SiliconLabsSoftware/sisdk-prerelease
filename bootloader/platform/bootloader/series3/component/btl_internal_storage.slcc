@@ -11,6 +11,11 @@ quality: production
 source:
 - path: platform/bootloader/series3/storage/ext_mem/btl_storage_ext_mem.c
 include:
+- path: platform/bootloader/series3
+- path: platform/bootloader/series3/api
+  file_list:
+  - path: btl_interface.h
+  - path: btl_interface_parser.h
 - path: platform/bootloader/series3/storage/ext_mem
   file_list:
   - path: btl_storage_ext_mem.h
@@ -20,7 +25,9 @@ define:
 provides:
 - name: btl_internal_storage
 requires:
-- name: bootloader_interface_s3
+- name: bootloader_application_properties_header
+- name: bootloader_interface_headers
+- name: bootloader_interface_s3_bootload_headers
 config_file:
 - path: platform/bootloader/series3/config/internal_storage_slot_cfg/btl_storage_slot_cfg_default.h
   override:

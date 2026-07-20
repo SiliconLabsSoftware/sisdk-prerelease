@@ -19,3 +19,5 @@ requires:
 - name: device_gpio
 - name: device_i2c
 - name: device_dma
+- name: device_emac
+  condition: [device_has_emac]

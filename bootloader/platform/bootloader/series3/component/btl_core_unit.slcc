@@ -1,0 +1,24 @@
+id: btl_core_unit
+label: Bootloader core init only (unit test)
+package: bootloader
+description: >
+  btl_init/btl_deinit stubs (btl_core.c) for unit tests without btl_main or
+  bootloader_interface_s3.
+category: Platform|Bootloader|Test
+quality: production
+ui_hints:
+  visibility: never
+source:
+- path: platform/bootloader/series3/core/btl_core.c
+include:
+- path: platform/bootloader/series3
+  file_list:
+  - path: core/btl_core.h
+provides:
+- name: btl_core_unit
+requires:
+- name: bootloader_interface_headers
+metadata:
+  sbom:
+    license: MSLA
+root_path: bootloader

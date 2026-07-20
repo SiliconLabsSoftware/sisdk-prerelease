@@ -582,7 +582,7 @@ typedef struct hfxo_typedef{
 /* Bit fields for HFXO CMD */
 #define _HFXO_CMD_RESETVALUE                            0x00000000UL                         /**< Default value for HFXO_CMD                  */
 #define _HFXO_CMD_MASK                                  0x00000001UL                         /**< Mask for HFXO_CMD                           */
-#define HFXO_CMD_COREBIASOPT                            (0x1UL << 0)                         /**< Core Bias Optimizaton                       */
+#define HFXO_CMD_COREBIASOPT                            (0x1UL << 0)                         /**< Core Bias Optimization                      */
 #define _HFXO_CMD_COREBIASOPT_SHIFT                     0                                    /**< Shift value for HFXO_COREBIASOPT            */
 #define _HFXO_CMD_COREBIASOPT_MASK                      0x1UL                                /**< Bit mask for HFXO_COREBIASOPT               */
 #define _HFXO_CMD_COREBIASOPT_DEFAULT                   0x00000000UL                         /**< Mode DEFAULT for HFXO_CMD                   */
@@ -684,7 +684,7 @@ typedef struct hfxo_typedef{
 #define _HFXO_IF_BUFOUTFROZEN_MASK                      0x8000UL                                 /**< Bit mask for HFXO_BUFOUTFROZEN              */
 #define _HFXO_IF_BUFOUTFROZEN_DEFAULT                   0x00000000UL                             /**< Mode DEFAULT for HFXO_IF                    */
 #define HFXO_IF_BUFOUTFROZEN_DEFAULT                    (_HFXO_IF_BUFOUTFROZEN_DEFAULT << 15)    /**< Shifted mode DEFAULT for HFXO_IF            */
-#define HFXO_IF_PRSERR                                  (0x1UL << 20)                            /**< PRS Requset Error Interrupt                 */
+#define HFXO_IF_PRSERR                                  (0x1UL << 20)                            /**< PRS Request Error Interrupt                 */
 #define _HFXO_IF_PRSERR_SHIFT                           20                                       /**< Shift value for HFXO_PRSERR                 */
 #define _HFXO_IF_PRSERR_MASK                            0x100000UL                               /**< Bit mask for HFXO_PRSERR                    */
 #define _HFXO_IF_PRSERR_DEFAULT                         0x00000000UL                             /**< Mode DEFAULT for HFXO_IF                    */
@@ -748,7 +748,7 @@ typedef struct hfxo_typedef{
 #define _HFXO_IEN_BUFOUTFROZEN_MASK                     0x8000UL                                  /**< Bit mask for HFXO_BUFOUTFROZEN              */
 #define _HFXO_IEN_BUFOUTFROZEN_DEFAULT                  0x00000000UL                              /**< Mode DEFAULT for HFXO_IEN                   */
 #define HFXO_IEN_BUFOUTFROZEN_DEFAULT                   (_HFXO_IEN_BUFOUTFROZEN_DEFAULT << 15)    /**< Shifted mode DEFAULT for HFXO_IEN           */
-#define HFXO_IEN_PRSERR                                 (0x1UL << 20)                             /**< PRS Requset Error Interrupt                 */
+#define HFXO_IEN_PRSERR                                 (0x1UL << 20)                             /**< PRS Request Error Interrupt                 */
 #define _HFXO_IEN_PRSERR_SHIFT                          20                                        /**< Shift value for HFXO_PRSERR                 */
 #define _HFXO_IEN_PRSERR_MASK                           0x100000UL                                /**< Bit mask for HFXO_PRSERR                    */
 #define _HFXO_IEN_PRSERR_DEFAULT                        0x00000000UL                              /**< Mode DEFAULT for HFXO_IEN                   */

@@ -56,6 +56,7 @@ extern __INLINE void sl_hal_usart_disable_interrupts(USART_TypeDef *usart, uint3
 extern __INLINE void sl_hal_usart_enable_interrupts(USART_TypeDef *usart, uint32_t flags);
 extern __INLINE void sl_hal_usart_set_interrupts(USART_TypeDef *usart, uint32_t flags);
 extern __INLINE uint32_t sl_hal_usart_get_pending_interrupts(USART_TypeDef *usart);
+extern __INLINE uint32_t sl_hal_usart_get_enabled_interrupts(USART_TypeDef *usart);
 extern __INLINE uint32_t sl_hal_usart_get_enabled_pending_interrupts(USART_TypeDef *usart);
 extern __INLINE uint32_t sl_hal_usart_get_status(USART_TypeDef *usart);
 extern __INLINE void sl_hal_usart_async_set_clock_div(USART_TypeDef *usart, uint32_t clock_div);
@@ -92,7 +93,8 @@ void sl_hal_usart_init_async(USART_TypeDef *usart,
   // Configure majority vote, auto CS mode, CS invert mode.
   usart->CTRL |= ((uint32_t)init->majority_vote << _USART_CTRL_MVDIS_SHIFT)
                  | ((uint32_t)init->auto_cs_enable << _USART_CTRL_AUTOCS_SHIFT)
-                 | ((uint32_t)init->cs_invert << _USART_CTRL_CSINV_SHIFT);
+                 | ((uint32_t)init->cs_invert << _USART_CTRL_CSINV_SHIFT)
+                 | ((uint32_t)init->tx_buffer_interrupt_level << _USART_CTRL_TXBIL_SHIFT);
 
   // Configure the PRS input mode.
   if (init->prs_rx_enable) {

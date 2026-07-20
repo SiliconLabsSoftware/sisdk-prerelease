@@ -34,11 +34,6 @@
 #include "sl_component_catalog.h"
 #endif
 
-#if defined(SL_CATALOG_KERNEL_PRESENT)
-#include "cmsis_os2.h"
-#include "sl_cmsis_os2_common.h"
-#endif
-
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
 #endif
@@ -57,13 +52,6 @@
 /*******************************************************************************
  *************************   LOCAL DATA TYPES   ********************************
  ******************************************************************************/
-
-#if defined(SL_CATALOG_KERNEL_PRESENT)
-typedef struct {
-  osMutexId_t lock;
-  __ALIGNED(4) uint8_t lock_cb[osMutexCbSize];
-} vuart_context_t;
-#endif
 
 /*******************************************************************************
  ******************************   VARIABLES   **********************************
@@ -87,11 +75,6 @@ static char rtt_buffer[SL_IOSTREAM_VUART_RX_BUFFER_SIZE];
 
 // Packet TX sequence number
 static uint8_t seq_number = 0;
-
-#if defined(SL_CATALOG_KERNEL_PRESENT)
-// Internal context variable for SWO io component
-vuart_context_t vuart_context;
-#endif
 
 /*******************************************************************************
  *********************   LOCAL FUNCTION PROTOTYPES   ***************************

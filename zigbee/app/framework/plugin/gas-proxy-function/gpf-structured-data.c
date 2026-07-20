@@ -3326,7 +3326,9 @@ void sl_zigbee_af_simple_metering_cluster_client_default_response_cb(uint8_t end
   uint8_t i = findStructuredData(endpoint);
 
   if (commandId == ZCL_MIRROR_REMOVED_COMMAND_ID && status == SL_ZIGBEE_ZCL_STATUS_SUCCESS) {
-    sl_zigbee_af_endpoint_enable_disable(endpoint, false);
+    #ifdef EZSP_HOST
+    sl_zigbee_ezsp_set_endpoint_flags(endpoint, SL_ZIGBEE_EZSP_ENDPOINT_DISABLED);
+    #endif // EZSP_HOST
     sl_zigbee_af_gas_proxy_function_println("GPF: Disabling endpoint %u", endpoint);
     return;
   }

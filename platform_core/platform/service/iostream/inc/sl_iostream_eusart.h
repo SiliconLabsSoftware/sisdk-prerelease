@@ -146,6 +146,9 @@ typedef struct {
   uint8_t rts_port;                             ///< Flow control, RTS port
   uint8_t rts_pin;                              ///< Flow control, RTS pin
   uint8_t flags;                                ///< Configuration flags
+#if defined(EUSART_COUNT)
+  uint8_t port_index;                           ///< Port index for GPIO routing
+#endif
 #if (defined(SL_CATALOG_POWER_MANAGER_PRESENT))
   sl_slist_node_t node;
 #endif

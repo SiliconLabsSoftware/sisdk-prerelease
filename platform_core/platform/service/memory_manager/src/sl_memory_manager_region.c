@@ -35,6 +35,18 @@
 
 #if defined(SL_CATALOG_MEMORY_MANAGER_PRESENT)
 #include "sli_memory_manager.h"
+#elif defined(_SILICON_LABS_32B_SERIES_3) \
+  && !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)
+// Series 3 non-301 parts place main stack inside a heap region.
+// 35x devices place it in DTCM; others place it in the general-purpose RAM heap.
+#define SLI_MEMORY_REGION_STACK_IN_HEAP 1
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_350) \
+  || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_351) \
+  || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+#define SLI_MEMORY_REGION_STACK_IN_HEAP_DTCM 1
+#else
+#define SLI_MEMORY_REGION_STACK_IN_HEAP_GENERAL_PURPOSE 1
+#endif
 #endif
 
 // Prevent's compilation errors when building in simulation.
@@ -67,14 +79,14 @@ __root char sl_stack[SL_STACK_SIZE] @ ".stack";
 
   #pragma section=IAR_HEAP_BLOCK_NAME
 
-#if defined(SLI_MEMORY_MANAGER_STACK_IN_HEAP)
+#if defined(SLI_MEMORY_REGION_STACK_IN_HEAP) || defined(SLI_MEMORY_MANAGER_STACK_IN_HEAP)
 #define IAR_STACK_BLOCK_NAME    "CSTACK"
   #pragma section=IAR_STACK_BLOCK_NAME
 #endif
 
 #endif
 
-#if defined(SL_CATALOG_MEMORY_MANAGER_ITCM_PRESENT) && !defined(SL_SE_MAILBOX_DISABLE)
+#if defined(SL_CATALOG_MEMORY_MANAGER_ITCM_PRESENT) && !defined(SLI_SE_FIRMWARE_UNAVAILABLE)
 extern uint32_t __itcm_size__;
 #if defined(__GNUC__)
 extern uint32_t __itcm_used__;
@@ -175,7 +187,7 @@ sl_memory_region_t sl_memory_get_dtcm_heap_region(void)
   region.addr = __section_begin(IAR_DTCM_BLOCK_NAME);
   region.size = __section_size(IAR_DTCM_BLOCK_NAME);
 
-#if defined(SLI_MEMORY_MANAGER_STACK_IN_HEAP_DTCM)
+#if defined(SLI_MEMORY_REGION_STACK_IN_HEAP_DTCM) || defined(SLI_MEMORY_MANAGER_STACK_IN_HEAP_DTCM)
   region.size += __section_size(IAR_STACK_BLOCK_NAME);
 #endif
 #endif
@@ -195,9 +207,13 @@ void sli_memory_initialize_heap_region(void)
 #elif defined(__ICCARM__)
   sli_memory_heap_region.addr = __section_begin(IAR_HEAP_BLOCK_NAME);
   sli_memory_heap_region.size = __section_size(IAR_HEAP_BLOCK_NAME);
+#if defined(SLI_MEMORY_REGION_STACK_IN_HEAP_GENERAL_PURPOSE) || defined(SLI_MEMORY_MANAGER_STACK_IN_HEAP_GENERAL_PURPOSE)
+  // ICF places CSTACK via last block MEMORY_MANAGER_STACK; include it in GP heap bounds.
+  sli_memory_heap_region.size += __section_size(IAR_STACK_BLOCK_NAME);
+#endif
 #endif
 
-#if defined(SL_CATALOG_MEMORY_MANAGER_ITCM_PRESENT) && !defined(SL_SE_MAILBOX_DISABLE)
+#if defined(SL_CATALOG_MEMORY_MANAGER_ITCM_PRESENT) && !defined(SLI_SE_FIRMWARE_UNAVAILABLE)
   // ITCM is configured in 64 KB blocks (minimum 2 blocks = 128 KB).
   // Only DMEM beyond that hardware-rounded reservation is reclaimable.
 #if defined(__GNUC__)
@@ -214,7 +230,7 @@ void sli_memory_initialize_heap_region(void)
   }
 
   // Adjust size of DMEM general purpose heap given the ITCM real used size.
-  sli_memory_heap_region.size -= (size_t)(itcm_reserved - SLI_ITCM_MIN_RESERVED_SIZE);
+  sli_memory_heap_region.size -= itcm_reserved - SLI_ITCM_MIN_RESERVED_SIZE;
 #endif
 }
 
@@ -243,6 +259,11 @@ void sli_memory_initialize_heap_region(void)
  *           In that case, the MM retarget, wrapping the GCC malloc() to the
  *           MM sl_malloc(), may have not worked. You may want to double-check
  *           your project settings.
+ *
+ * @note (3) When the linker places the main stack at the
+ *           RAM top inside the heap region and sets __HeapLimit to __StackTop.
+ *           When the Memory Manager is not used, _sbrk() must stop at
+ *           __StackLimit so newlib malloc() cannot grow into the stack.
  ******************************************************************************/
 __USED __WEAK void * _sbrk(int incr)
 {
@@ -256,8 +277,13 @@ __USED __WEAK void * _sbrk(int incr)
 #else
   static char *heap_end = __HeapBase;
   char *prev_heap_end;
+#if defined(SLI_MEMORY_REGION_STACK_IN_HEAP) && defined(SLI_MEMORY_REGION_STACK_IN_HEAP_GENERAL_PURPOSE)
+  char * const heap_limit = __StackLimit;
+#else
+  char * const heap_limit = __HeapLimit;
+#endif
 
-  if ((heap_end + incr) > __HeapLimit) {
+  if ((heap_end + incr) > heap_limit) {
     // Not enough heap
     return (void *) -1;
   }

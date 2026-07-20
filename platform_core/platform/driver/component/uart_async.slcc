@@ -1,0 +1,30 @@
+id: uart_async
+package: platform_core
+label: UART Async Driver
+description: >
+  Platform UART async driver for USART, EUART, and EUSART peripherals. Declares the
+  underlying peripheral signals (TX, RX, CTS, RTS) and configures the DMA channels  for transmission and reception. An instance declared via this component will only
+  support the asynchronous transfer APIs.
+category: Platform|Driver|UART
+quality: experimental
+metadata:
+  sbom:
+    license: Zlib
+root_path: platform_core/platform/driver/uart/
+instantiable:
+  prefix: inst
+provides:
+- name: uart_async
+  allow_multiple: true
+requires:
+- name: uart_async_core
+config_file:
+- path: config/sl_uart_{{instance}}_config.h
+  file_id: uart_async_config
+template_file:
+- path: init/sl_uart_instances.c.jinja
+- path: init/sl_uart_instances.h.jinja
+
+template_contribution:
+- name: uart_async_instances
+  value: '{{instance}}'

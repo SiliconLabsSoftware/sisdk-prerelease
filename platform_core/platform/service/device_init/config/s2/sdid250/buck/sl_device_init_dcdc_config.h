@@ -65,6 +65,18 @@
  // <i> Default: DCDC_PFMXCTRL_IPKVAL_DEFAULT
  #define SL_DEVICE_INIT_DCDC_PFMX_IPKVAL    DCDC_PFMXCTRL_IPKVAL_DEFAULT
  
+ // <q SL_DEVICE_INIT_LEDVDD_ENABLE> Enable LEDVDD
+ // <i>
+ // <i> Default: 0
+ #define SL_DEVICE_INIT_LEDVDD_ENABLE  0 
+
+ // <o SL_DEVICE_INIT_LEDVDD_OUTPUT_VOLTAGE> LEDVDD Output Voltage
+ // <1=> OutputVoltage_1v8
+ // <2=> OutputVoltage_3v8
+ // <i>
+ // <i> Default: 1
+ #define SL_DEVICE_INIT_LEDVDD_OUTPUT_VOLTAGE   1
+
  // <<< end of configuration section >>>
  
  #endif // SL_DEVICE_INIT_DCDC_CONFIG_H

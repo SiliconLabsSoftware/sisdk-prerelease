@@ -59,6 +59,7 @@
 #define KEYSPEC_MODE_OFFSET                 26
 #define KEYSPEC_MODE_UNPROTECTED            (0UL << KEYSPEC_MODE_OFFSET)
 #define KEYSPEC_MODE_VOLATILE               (1UL << KEYSPEC_MODE_OFFSET)
+#define KEYSPEC_MODE_INTERNAL               (1UL << KEYSPEC_MODE_OFFSET)
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   #define KEYSPEC_MODE_WRAPPED              (2UL << KEYSPEC_MODE_OFFSET)
 #endif
@@ -443,16 +444,17 @@ sl_status_t sli_se_key_to_keyspec(const sl_se_key_descriptor_t *key,
     case SL_SE_KEY_STORAGE_EXTERNAL_WRAPPED:
       *keyspec |= KEYSPEC_MODE_WRAPPED;
       break;
-
+#endif
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
     case SL_SE_KEY_STORAGE_INTERNAL_VOLATILE:
       *keyspec |= KEYSPEC_MODE_VOLATILE;
       break;
 #endif
 
     case SL_SE_KEY_STORAGE_INTERNAL_IMMUTABLE:
-      *keyspec |= KEYSPEC_MODE_VOLATILE;
+      *keyspec |= KEYSPEC_MODE_INTERNAL;
       break;
-#if defined(_SILICON_LABS_32B_SERIES_3)
+#if defined(SLI_SE_SUPPORTS_KSU_KEY_STORAGE)
     case SL_SE_KEY_STORAGE_INTERNAL_KSU:
       *keyspec |= KEYSPEC_MODE_KSU;
       break;
@@ -463,7 +465,7 @@ sl_status_t sli_se_key_to_keyspec(const sl_se_key_descriptor_t *key,
 
   // Handle key mode specific attributes:
   switch (key->storage.method) {
-    #if defined(_SILICON_LABS_32B_SERIES_3)
+    #if defined(SLI_SE_SUPPORTS_KSU_KEY_STORAGE)
     case SL_SE_KEY_STORAGE_INTERNAL_KSU:
       // ---------------------
       // KSU ID [25-24]
@@ -524,7 +526,7 @@ sl_status_t sli_se_key_to_keyspec(const sl_se_key_descriptor_t *key,
       // ---------------------
       // Key index [23-16]
 
-      #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+      #if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
       if (key->storage.method == SL_SE_KEY_STORAGE_INTERNAL_VOLATILE) {
         if (key->storage.location.slot > SL_SE_KEY_SLOT_VOLATILE_3) {
           return SL_STATUS_INVALID_PARAMETER;
@@ -736,7 +738,7 @@ sl_status_t sli_se_keyspec_to_key(const uint32_t keyspec,
     // Volatile can mean either internal-volatile or internal-immutable
     // Check which is which based on key index
     uint32_t key_index = (keyspec & KEYSPEC_INDEX_MASK) >> KEYSPEC_INDEX_OFFSET;
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
     if (key_index <= SL_SE_KEY_SLOT_VOLATILE_3) {
       key->storage.method = SL_SE_KEY_STORAGE_INTERNAL_VOLATILE;
     } else
@@ -749,7 +751,7 @@ sl_status_t sli_se_keyspec_to_key(const uint32_t keyspec,
     }
     key->storage.location.slot = key_index;
   }
-  #if defined(_SILICON_LABS_32B_SERIES_3)
+  #if defined(SLI_SE_SUPPORTS_KSU_KEY_STORAGE)
   else if ((keyspec & KEYSPEC_MODE_MASK) == KEYSPEC_MODE_KSU) {
     key->storage.method = SL_SE_KEY_STORAGE_INTERNAL_KSU;
   }
@@ -761,7 +763,7 @@ sl_status_t sli_se_keyspec_to_key(const uint32_t keyspec,
   // ---------------------
   // Key MODE specific attributes
   switch (key->storage.method) {
-    #if defined(_SILICON_LABS_32B_SERIES_3)
+    #if defined(SLI_SE_SUPPORTS_KSU_KEY_STORAGE)
     case SL_SE_KEY_STORAGE_INTERNAL_KSU:
     {
       // KSU ID [25-24]
@@ -774,7 +776,7 @@ sl_status_t sli_se_keyspec_to_key(const uint32_t keyspec,
       key->storage.location.ksu.crypto_engine_id = (keyspec & KEYSPEC_KSU_KEY_USAGE_MASK) >> KEYSPEC_KSU_KEY_USAGE_OFFSET;
       break;
     }
-    #endif // defined(_SILICON_LABS_32B_SERIES_3)
+    #endif // defined(SLI_SE_SUPPORTS_KSU_KEY_STORAGE)
 
     default:
     {
@@ -933,8 +935,11 @@ sl_status_t sli_se_get_auth_buffer(const sl_se_key_descriptor_t *key,
   auth_buffer->next = (void*)SLI_SE_DATATRANSFER_STOP;
 
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-  if ((key->storage.method == SL_SE_KEY_STORAGE_INTERNAL_VOLATILE)
-      || (key->storage.method == SL_SE_KEY_STORAGE_EXTERNAL_WRAPPED)) {
+  if ((key->storage.method == SL_SE_KEY_STORAGE_EXTERNAL_WRAPPED)
+  #if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
+      || (key->storage.method == SL_SE_KEY_STORAGE_INTERNAL_VOLATILE)
+  #endif
+  ) {
     if (key->password) {
       auth_buffer->data = key->password;
       auth_buffer->length = sizeof(default_auth_data) | SLI_SE_DATATRANSFER_REALIGN;
@@ -995,10 +1000,10 @@ sl_status_t sli_se_get_key_input_output(const sl_se_key_descriptor_t *key,
     buffer->data = key->storage.location.buffer.pointer;
     buffer->length = total_storage_size | SLI_SE_DATATRANSFER_REALIGN;
   } else if ((key->storage.method == SL_SE_KEY_STORAGE_INTERNAL_IMMUTABLE)
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
              || (key->storage.method == SL_SE_KEY_STORAGE_INTERNAL_VOLATILE)
 #endif
-#if defined(_SILICON_LABS_32B_SERIES_3)
+#if defined(SLI_SE_SUPPORTS_KSU_KEY_STORAGE)
              || (key->storage.method == SL_SE_KEY_STORAGE_INTERNAL_KSU)
 #endif
              ) {
@@ -1231,7 +1236,7 @@ sl_status_t sl_se_get_storage_size(const sl_se_key_descriptor_t *key, uint32_t *
     }
 #endif
   } else if ((key->storage.method == SL_SE_KEY_STORAGE_INTERNAL_IMMUTABLE)
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
              || (key->storage.method == SL_SE_KEY_STORAGE_INTERNAL_VOLATILE)
 #endif
              ) {
@@ -1267,11 +1272,15 @@ sl_status_t sl_se_import_key(sl_se_command_context_t *cmd_ctx,
   // key_type in = plaintext
   // key out volatile, wrapped or KSU storage
   if ((key_in->storage.method != SL_SE_KEY_STORAGE_EXTERNAL_PLAINTEXT)
-      || ((key_out->storage.method != SL_SE_KEY_STORAGE_INTERNAL_VOLATILE)
-    #if defined(_SILICON_LABS_32B_SERIES_3)
-          && (key_out->storage.method != SL_SE_KEY_STORAGE_INTERNAL_KSU)
+      || (
+    #if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
+          (key_out->storage.method != SL_SE_KEY_STORAGE_INTERNAL_VOLATILE) &&
     #endif
-          && (key_out->storage.method != SL_SE_KEY_STORAGE_EXTERNAL_WRAPPED))) {
+    #if defined(SLI_SE_SUPPORTS_KSU_KEY_STORAGE)
+          (key_out->storage.method != SL_SE_KEY_STORAGE_INTERNAL_KSU) &&
+    #endif
+          (key_out->storage.method != SL_SE_KEY_STORAGE_EXTERNAL_WRAPPED)
+    )) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1314,8 +1323,11 @@ sl_status_t sl_se_export_key(sl_se_command_context_t *cmd_ctx,
   }
 
   if ((key_out->storage.method != SL_SE_KEY_STORAGE_EXTERNAL_PLAINTEXT)
-      || ((key_in->storage.method != SL_SE_KEY_STORAGE_INTERNAL_VOLATILE)
-          && (key_in->storage.method != SL_SE_KEY_STORAGE_EXTERNAL_WRAPPED))) {
+      || (
+    #if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
+        (key_in->storage.method != SL_SE_KEY_STORAGE_INTERNAL_VOLATILE) &&
+    #endif
+          (key_in->storage.method != SL_SE_KEY_STORAGE_EXTERNAL_WRAPPED))) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1373,7 +1385,7 @@ sl_status_t sl_se_transfer_key(sl_se_command_context_t *cmd_ctx,
     return status;
   }
 
-  #if defined(_SILICON_LABS_32B_SERIES_3)
+  #if defined(SLI_SE_SUPPORTS_KSU_KEY_STORAGE)
   if ((key_in->storage.method == SL_SE_KEY_STORAGE_EXTERNAL_PLAINTEXT)
       || ((key_in->storage.method == SL_SE_KEY_STORAGE_INTERNAL_IMMUTABLE && key_out->storage.method != SL_SE_KEY_STORAGE_INTERNAL_KSU))
       || (key_in->storage.method == SL_SE_KEY_STORAGE_INTERNAL_KSU)
@@ -1411,7 +1423,7 @@ sl_status_t sl_se_transfer_key(sl_se_command_context_t *cmd_ctx,
   key_update_index = ((keyspec_out & KEYSPEC_INDEX_MASK) >> KEYSPEC_INDEX_OFFSET);
   key_update_mode = ((keyspec_out & KEYSPEC_MODE_MASK) >> KEYSPEC_MODE_OFFSET);
 
-  #if defined(_SILICON_LABS_32B_SERIES_3)
+  #if defined(SLI_SE_SUPPORTS_KSU_KEY_STORAGE)
   if (key_out->storage.method == SL_SE_KEY_STORAGE_INTERNAL_KSU) {
     // Set KSU specific keyspecs
     key_update_index = ((keyspec_out & KEYSPEC_KSU_KEYSLOT_MASK) >> KEYSPEC_KSU_KEYSLOT_OFFSET);

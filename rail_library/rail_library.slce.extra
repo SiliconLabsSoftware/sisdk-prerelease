@@ -3,7 +3,7 @@ examples:
 sample_apps:
 description:
 dependencies:
-  - platform/6.1.1@silabs
+  - platform/6.2.0-alpha.3@silabs
 components:
   - rail_lib
   - rail_util_power_manager_init
@@ -84,5 +84,6 @@ components:
   - sl_rail_util_vdet
 extra_files:
   - plugin/pa-conversions/sl_rail_util_pa_conversions_efr32_config.h
+  - tools/convert_curves_to_tables_s2.py
 git_extra_files: []
 git_path_mapping: []

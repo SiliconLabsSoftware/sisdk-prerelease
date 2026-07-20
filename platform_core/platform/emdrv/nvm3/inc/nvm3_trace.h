@@ -62,7 +62,7 @@
 #if (NVM3_TRACE_PORT == NVM3_TRACE_PORT_PRINTF)
 #define nvm3_tracePrint(lev, ...) do { if (lev <= NVM3_TRACE_LEVEL) { printf(__VA_ARGS__); } } while (0)
 #elif (NVM3_TRACE_PORT == NVM3_TRACE_PORT_UNITYPRINTF)
-#define nvm3_tracePrint(lev, ...) do { if (lev <= NVM3_TRACE_LEVEL) { UnityPrintf(__VA_ARGS__); } } while (0)
+#define nvm3_tracePrint(lev, ...) do { if (lev <= NVM3_TRACE_LEVEL) { UnityPrintF(__LINE__, __VA_ARGS__); } } while (0)
 #else
 #define nvm3_tracePrint(lev, ...)
 #endif

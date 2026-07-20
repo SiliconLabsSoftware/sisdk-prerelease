@@ -340,7 +340,7 @@ typedef struct hfxo_typedef{
 /* Bit fields for HFXO CMD */
 #define _HFXO_CMD_RESETVALUE                      0x00000000UL                            /**< Default value for HFXO_CMD                  */
 #define _HFXO_CMD_MASK                            0x00000003UL                            /**< Mask for HFXO_CMD                           */
-#define HFXO_CMD_COREBIASOPT                      (0x1UL << 0)                            /**< Core Bias Optimizaton                       */
+#define HFXO_CMD_COREBIASOPT                      (0x1UL << 0)                            /**< Core Bias Optimization                      */
 #define _HFXO_CMD_COREBIASOPT_SHIFT               0                                       /**< Shift value for HFXO_COREBIASOPT            */
 #define _HFXO_CMD_COREBIASOPT_MASK                0x1UL                                   /**< Bit mask for HFXO_COREBIASOPT               */
 #define _HFXO_CMD_COREBIASOPT_DEFAULT             0x00000000UL                            /**< Mode DEFAULT for HFXO_CMD                   */

@@ -16,3 +16,6 @@ source:
 - path: hal/sli_memory_manager_retention_control_hal_none.c
 provides:
 - name: memory_manager_retention_control_hal_none
+template_contribution:
+- name: component_catalog
+  value: bank_retention_control_stubbed

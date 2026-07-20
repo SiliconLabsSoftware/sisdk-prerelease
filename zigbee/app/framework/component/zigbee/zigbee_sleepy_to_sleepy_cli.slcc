@@ -1,0 +1,73 @@
+id: zigbee_sleepy_to_sleepy_cli
+label: Zigbee Sleepy-to-Sleepy Apps Command Line Interface
+package: zigbee
+category: Zigbee|Utility
+quality: production
+description: Zigbee Sleepy-to-Sleepy Command Line Interface
+provides:
+- name: zigbee_sleepy_to_sleepy_cli
+requires:
+- name: zigbee_system_common
+- name: zigbee_zcl_framework_core
+
+source:
+- path: app/framework/plugin/sleepy-to-sleepy-cli/sl_zigbee_sleepy_to_sleepy_cli.c
+  condition:
+  - cli
+
+include:
+- path: app/framework/plugin/sleepy-to-sleepy-cli/
+  file_list:
+  - path: sl_zigbee_sleepy_to_sleepy_cli.h
+
+template_contribution:
+- name: component_catalog
+  value: zigbee_sleepy_to_sleepy_cli
+
+# CLI Commands < custom >
+- name: cli_group
+  value:
+    name: custom
+    help: Custom commands
+
+- name: cli_command
+  value:
+    group: custom
+    name: set-ext-pan-id
+    handler: sl_zigbee_sleepy_to_sleepy_set_ext_pan_id_cli_handler
+    help: Sets extended PAN ID to be used for commissioning
+    argument:
+    - type: hex
+      help: The extended PAN ID to use
+
+- name: cli_command
+  value:
+    group: custom
+    name: set-nwk-key
+    handler: sl_zigbee_sleepy_to_sleepy_set_nwk_key_cli_handler
+    help: Sets network key to be used for commissioning
+    argument:
+    - type: hex
+      help: The network key to be used
+
+- name: cli_command
+  value:
+    group: custom
+    name: s2s-commission
+    handler: sl_zigbee_sleepy_to_sleepy_commission_cli_handler
+    help: Commission a Sleepy-to-Sleepy device
+    argument:
+    - type: uint8
+      help: 0 if the local device is a S2S target, 1 if S2S initiator
+    - type: uint8
+      help: The radio channel to start S2S network on
+    - type: int8
+      help: The radio power to use for the S2S network
+    - type: uint16
+      help: The PAN ID to use for the S2S network
+    - type: uint16
+      help: The Node ID to use on the S2S network
+metadata:
+  sbom:
+    license: MSLA
+root_path: zigbee

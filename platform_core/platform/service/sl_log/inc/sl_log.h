@@ -303,7 +303,7 @@ sl_log_level_t sl_log_get_loglevel(void);
  *         - SL_STATUS_INVALID_PARAMETER: Invalid parameters provided.
  *         - any other error codes as defined by the underlying implementation.
  */
-sl_status_t sl_log_sync_timestamp(uint8_t core_id, void *args);
+sl_status_t sl_log_sync_timestamp(uint8_t core_id, const void *args);
 
 /**
  * @brief Send a log event with no arguments
@@ -583,7 +583,7 @@ sl_log_config_t sl_log_get_config(void);
  * @note This function should only be called with a valid ring_buffer pointer.
  */
 static inline uint8_t
-sl_log_is_ring_buffer_empty(sl_log_ring_buffer_t *ring_buffer) {
+sl_log_is_ring_buffer_empty(const sl_log_ring_buffer_t *ring_buffer) {
   return (ring_buffer->event_count == 0);
 }
 
@@ -599,8 +599,8 @@ sl_log_is_ring_buffer_empty(sl_log_ring_buffer_t *ring_buffer) {
  * @note This function should only be called with a valid ring_buffer pointer.
  */
 static inline uint8_t
-sl_log_is_ring_buffer_full(sl_log_ring_buffer_t *ring_buffer) {
-  return ((ring_buffer->event_count == SL_LOG_NUMBER_OF_EVENTS));
+sl_log_is_ring_buffer_full(const sl_log_ring_buffer_t *ring_buffer) {
+  return (ring_buffer->event_count == SL_LOG_NUMBER_OF_EVENTS);
 }
 
 
@@ -647,7 +647,7 @@ void sli_log_assert_implementation(const char* string_value);
  * @note This function should be called before entering any sleep mode
  *       to ensure log data integrity and proper system behavior.
  */
-sl_status_t sl_log_pre_sleep_process(void * args);
+sl_status_t sl_log_pre_sleep_process(const void *args);
 
 /**
  * @brief Initialize logger after wake-up
@@ -665,7 +665,7 @@ sl_status_t sl_log_pre_sleep_process(void * args);
  * @note This function should be called immediately after waking from
  *       sleep mode to restore full logging functionality.
  */
-sl_status_t sl_log_post_sleep_process(void * args);
+sl_status_t sl_log_post_sleep_process(const void *args);
 
 /**
  * @brief Initialize the selected logging backend
@@ -703,7 +703,7 @@ sl_status_t sl_log_backend_init(void);
  * @note This function may be called multiple times for large event counts
  *       to handle ring buffer wraparound conditions efficiently.
  */
-sl_status_t sl_log_backend_write(sl_log_event_t *buffer, uint32_t read_index,
+sl_status_t sl_log_backend_write(const sl_log_event_t *buffer, uint32_t read_index,
                                  uint32_t event_count);
 
 
@@ -781,7 +781,7 @@ uint32_t sl_log_get_timestamp_timer_frequency(uint8_t core_id);
  * @note The format and content of the args parameter depends on the
  *       specific core type and its configuration requirements.
  */
-sl_status_t sl_log_set_configurations(void *args, uint8_t core_id);
+sl_status_t sl_log_set_configurations(const void *args, uint8_t core_id);
 
 /**
  * @brief Get core-specific logger configurations

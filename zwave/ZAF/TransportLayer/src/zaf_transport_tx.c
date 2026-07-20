@@ -2,8 +2,13 @@
  * @file
  *
  * @copyright 2023 Silicon Laboratories Inc.
+ *
+ * @note Multicast + AGI: callers may pass @c agi_profile referencing stack. The queue stores a byte copy in
+ *       @c agi_profile_copy and clears @c zaf_tx_options.agi_profile so no interior pointer is serialized.
+ *       @c use_agi_profile_copy selects @c ReqNodeList(&agi_profile_copy, …) vs lifeline @c ReqNodeList(NULL, …).
  */
 
+#include <stdbool.h>
 #include <string.h>
 #include "zaf_transport_config.h"
 #include "zaf_transport_tx.h"
@@ -20,6 +25,8 @@ typedef struct {
   zaf_tx_callback_t callback;
   ZW_APPLICATION_TX_BUFFER frame;
   zaf_tx_options_t zaf_tx_options;
+  agi_profile_t agi_profile_copy;
+  bool use_agi_profile_copy; /**< Multicast: true => pass @c &agi_profile_copy to @c ReqNodeList */
   uint8_t frame_length;
 } transport_queue_item_t;
 
@@ -105,7 +112,10 @@ transport_tx(void)
       }
     } else {
       /* Get transmit options (node list) */
-      tx_options_ex = ReqNodeList(queue_item.zaf_tx_options.agi_profile,
+      const agi_profile_t *agi_for_req = queue_item.use_agi_profile_copy
+                                         ? &queue_item.agi_profile_copy
+                                         : NULL;
+      tx_options_ex = ReqNodeList(agi_for_req,
                                   (cc_group_t *)&queue_item.frame,
                                   queue_item.zaf_tx_options.source_endpoint);
       if (!tx_options_ex || ZW_TransportMulticast_SendRequest(
@@ -130,10 +140,16 @@ zaf_transport_tx(const uint8_t *frame, uint8_t frame_length,
   BaseType_t ret;
   transport_queue_item_t queue_item = {
     .callback = callback,
-    .frame_length = frame_length
+    .frame_length = frame_length,
+    .use_agi_profile_copy = false
   };
   memcpy(&queue_item.frame, frame, frame_length);
   memcpy(&queue_item.zaf_tx_options, zaf_tx_options, sizeof(zaf_tx_options_t));
+  if (queue_item.zaf_tx_options.dest_node_id == 0 && zaf_tx_options->agi_profile != NULL) {
+    queue_item.agi_profile_copy = *zaf_tx_options->agi_profile;
+    queue_item.zaf_tx_options.agi_profile = NULL;
+    queue_item.use_agi_profile_copy = true;
+  }
 
   ZPAL_LOG_INFO(ZPAL_LOG_ZAF_TRANSPORT, "Adding new frame to queue\n");
   ret = xQueueSend(transport_queue_handle, &queue_item, 0);

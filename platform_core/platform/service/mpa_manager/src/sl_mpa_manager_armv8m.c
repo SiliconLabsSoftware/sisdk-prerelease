@@ -267,14 +267,14 @@ bool sli_mpa_manager_device_region_validate(uint32_t base_address,
 
   // CODE 0x00000000 - 0x1FFFFFFF
   // SRAM 0x20000000 - 0x3FFFFFFF
-  if (base_address <= 0x3FFFFFFFul && end_address <= 0x3FFFFFFFul) {
+  if (base_address <= 0x3FFFFFFFUL && end_address <= 0x3FFFFFFFUL) {
     return true;
   }
 
   // RAM  0x60000000 - 0x7FFFFFFF
   // RAM  0x80000000 - 0x9FFFFFFF
-  if ((base_address >= 0x60000000ul && end_address >= 0x60000000ul)
-      && (base_address <= 0x9FFFFFFFul && end_address <= 0x9FFFFFFFul)) {
+  if ((base_address >= 0x60000000UL && end_address >= 0x60000000UL)
+      && (base_address <= 0x9FFFFFFFUL && end_address <= 0x9FFFFFFFUL)) {
     return true;
   }
 
@@ -385,7 +385,7 @@ static mpu_region_attributes_t encode_mpu_region_attributes(mpu_attribute_counte
 static void update_attribute_counters(mpu_attribute_counters_t * counters,
                                       sli_mpa_manager_boundary_t * boundary)
 {
-  sl_mpa_manager_region_t* region = (sl_mpa_manager_region_t*)boundary->region;
+  const sl_mpa_manager_region_t* region = (const sl_mpa_manager_region_t*)boundary->region;
   sl_mpa_manager_attribute_t mpam_attr = region->attribute;
   mpu_attribute_t mpu_attr = map_region_attribute_to_mpu_attribute(mpam_attr);
 

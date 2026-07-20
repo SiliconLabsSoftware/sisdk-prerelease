@@ -132,13 +132,13 @@ static bool find_service_in_advertisement(const uint8_t *scan_data,
 // Certificates
 
 // Device certificate in DER format
-static uint8_t device_certificate_der[CHAIN_LINK_DATA_LEN * CHAIN_LINK_DATA_NUM] = { 0 };
+static uint8_t device_certificate_der[SL_BT_CBAP_CERTIFICATE_MAX_SIZE] = { 0 };
 static uint32_t device_certificate_der_len = 0;
 static uint32_t dev_cert_sending_progression = 0;
 static bool device_cert_sent = false;
 
 // Remote certificate which was sent over GATT in DER format
-static uint8_t remote_certificate_der[CHAIN_LINK_DATA_LEN * CHAIN_LINK_DATA_NUM] = { 0 };
+static uint8_t remote_certificate_der[SL_BT_CBAP_CERTIFICATE_MAX_SIZE] = { 0 };
 static uint32_t remote_certificate_der_len = 0;
 static bool remote_cert_arrived = false;
 

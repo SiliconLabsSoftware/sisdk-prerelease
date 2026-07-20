@@ -31,36 +31,13 @@
 *
 ******************************************************************************/
 
-#include <em_device.h>
+#include "sl_btctrl_reset.h"
+#include <sl_common.h>
+#include <sl_core.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include "sl_btctrl_reset.h"
-#include "sl_common.h"
-
-#if defined(_SILICON_LABS_32B_SERIES_2)
-#include <em_rmu.h>
-#elif defined(_SILICON_LABS_32B_SERIES_3)
-#include <sl_hal_emu.h>
-#else
-#error "Unsupported platform"
-#endif
 
 SL_ALIGN(4) static uint32_t reset_custom_reason SL_ATTRIBUTE_ALIGN(4) SL_ATTRIBUTE_SECTION(".noinit");
-
-static uint32_t sl_btctrl_reset_get_mcu_reset_cause(void)
-{
-  static uint32_t cause_cache = 0xFFFFFFFF;
-  if (cause_cache == 0xFFFFFFFF) {
-#if defined(_SILICON_LABS_32B_SERIES_2)
-    cause_cache = RMU_ResetCauseGet();
-    RMU_ResetCauseClear();
-#elif defined(_SILICON_LABS_32B_SERIES_3)
-    cause_cache = sl_hal_emu_get_reset_cause();
-    sl_hal_emu_clear_reset_cause();
-#endif
-  }
-  return cause_cache;
-}
 
 void sl_btctrl_hci_reset(void)
 {
@@ -71,18 +48,19 @@ void sl_btctrl_reset_set_custom_reason(uint32_t reason)
 {
   reason &= SL_BTCTRL_RESET_VALID_MASK;
   if (reason) {
-    reset_custom_reason = reason;
+    reset_custom_reason = reason | SL_BTCTRL_RESET_CUSTOM_REASON_SIGNATURE;
   }
 }
 
 uint32_t sl_btctrl_reset_get_custom_reason(void)
 {
-  static uint32_t reason_cache = SL_BTCTRL_RESET_CUSTOM_REASON_NA;
-  if (reason_cache == SL_BTCTRL_RESET_CUSTOM_REASON_NA
-      && sl_btctrl_reset_get_mcu_reset_cause() == EMU_RSTCAUSE_SYSREQ) {
-    reason_cache = reset_custom_reason;
+  uint32_t reason = reset_custom_reason;
+  reset_custom_reason = SL_BTCTRL_RESET_CUSTOM_REASON_NA;
+  if ((reason & ~SL_BTCTRL_RESET_VALID_MASK) != SL_BTCTRL_RESET_CUSTOM_REASON_SIGNATURE) {
+    return SL_BTCTRL_RESET_CUSTOM_REASON_NA;
   }
-  return reason_cache;
+  reason &= SL_BTCTRL_RESET_VALID_MASK;
+  return reason;
 }
 
 void sl_btctrl_reset_clear_custom_reason(void)

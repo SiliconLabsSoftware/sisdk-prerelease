@@ -439,6 +439,9 @@ sl_status_t sl_iostream_eusart_init(sl_iostream_uart_t *iostream_uart,
   eusart_context->rts_pin = eusart_config->rts_pin;
   eusart_context->rts_port = eusart_config->rts_port;
   eusart_context->eusart = eusart_config->eusart;
+#if defined(EUSART_COUNT)
+  eusart_context->port_index = eusart_config->port_index;
+#endif
 
   // Configure GPIO pins
   sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_GPIO);
@@ -665,6 +668,16 @@ static sl_status_t eusart_deinit(void *context)
     GPIO_PIN_MODE_SET(eusart_context->rts_port, eusart_context->rts_pin, GPIO_MODE_DISABLED, 0);
   }
   #endif
+
+#if defined(EUART_COUNT) && (EUART_COUNT > 0)
+  GPIO->EUARTROUTE->ROUTEEN = _GPIO_EUART_ROUTEEN_RESETVALUE;
+  GPIO->EUARTROUTE->TXROUTE = _GPIO_EUART_TXROUTE_RESETVALUE;
+  GPIO->EUARTROUTE->RXROUTE = _GPIO_EUART_RXROUTE_RESETVALUE;
+#elif defined(EUSART_COUNT)
+  GPIO->EUSARTROUTE[eusart_context->port_index].ROUTEEN = _GPIO_EUSART_ROUTEEN_RESETVALUE;
+  GPIO->EUSARTROUTE[eusart_context->port_index].TXROUTE = _GPIO_EUSART_TXROUTE_RESETVALUE;
+  GPIO->EUSARTROUTE[eusart_context->port_index].RXROUTE = _GPIO_EUSART_RXROUTE_RESETVALUE;
+#endif
 
   // Disable EUSART IRQ
   #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)

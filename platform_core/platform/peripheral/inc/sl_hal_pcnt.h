@@ -40,7 +40,7 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_enum.h"
 
 /***************************************************************************//**
@@ -234,7 +234,7 @@ void sl_hal_pcnt_reset(PCNT_TypeDef *pcnt);
 __INLINE void sl_hal_pcnt_enable(PCNT_TypeDef *pcnt)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
 
   if ((pcnt->EN & _PCNT_EN_EN_MASK) == PCNT_EN_EN) {
     return;
@@ -253,7 +253,7 @@ __INLINE void sl_hal_pcnt_enable(PCNT_TypeDef *pcnt)
 __INLINE void sl_hal_pcnt_disable(PCNT_TypeDef *pcnt)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
 
   if ((pcnt->EN & _PCNT_EN_EN_MASK) != PCNT_EN_EN) {
     return;
@@ -274,7 +274,7 @@ __INLINE void sl_hal_pcnt_disable(PCNT_TypeDef *pcnt)
 __INLINE bool sl_hal_pcnt_is_enabled(PCNT_TypeDef *pcnt)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
 
   return ((pcnt->EN & _PCNT_EN_EN_MASK) >> _PCNT_EN_EN_SHIFT);
 }
@@ -289,7 +289,7 @@ __INLINE bool sl_hal_pcnt_is_enabled(PCNT_TypeDef *pcnt)
 __INLINE void sl_hal_pcnt_wait_ready(PCNT_TypeDef *pcnt)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
 
   while (pcnt->SWRST & PCNT_SWRST_RESETTING) {
     // Wait for resetting to finish.
@@ -310,7 +310,7 @@ __INLINE void sl_hal_pcnt_wait_ready(PCNT_TypeDef *pcnt)
 __INLINE void sl_hal_pcnt_wait_sync(PCNT_TypeDef *pcnt)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
 
   while (pcnt->SYNCBUSY & _PCNT_SYNCBUSY_MASK) {
     // Wait for the update to finish.
@@ -330,7 +330,7 @@ __INLINE void sl_hal_pcnt_wait_sync(PCNT_TypeDef *pcnt)
 __INLINE uint32_t sl_hal_pcnt_get_status(PCNT_TypeDef *pcnt)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
 
   return pcnt->STATUS;
 }
@@ -350,7 +350,7 @@ __INLINE void sl_hal_pcnt_enable_interrupts(PCNT_TypeDef *pcnt,
                                             uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
 
   pcnt->IEN_SET = flags;
 }
@@ -370,7 +370,7 @@ __INLINE void sl_hal_pcnt_disable_interrupts(PCNT_TypeDef *pcnt,
                                              uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
 
   pcnt->IEN_CLR = flags;
 }
@@ -390,7 +390,7 @@ __INLINE void sl_hal_pcnt_clear_interrupts(PCNT_TypeDef *pcnt,
                                            uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
 
   pcnt->IF_CLR = flags;
 }
@@ -410,7 +410,7 @@ __INLINE void sl_hal_pcnt_set_interrupts(PCNT_TypeDef *pcnt,
                                          uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
 
   pcnt->IF_SET = flags;
 }
@@ -432,7 +432,7 @@ __INLINE void sl_hal_pcnt_set_interrupts(PCNT_TypeDef *pcnt,
 __INLINE uint32_t sl_hal_pcnt_get_pending_interrupts(PCNT_TypeDef *pcnt)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
 
   return pcnt->IF;
 }
@@ -459,7 +459,7 @@ __INLINE uint32_t sl_hal_pcnt_get_pending_interrupts(PCNT_TypeDef *pcnt)
 __INLINE uint32_t sl_hal_pcnt_get_enabled_pending_interrupts(PCNT_TypeDef *pcnt)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
 
   // Store PCNT->IEN in temporary variable in order to define explicit order
   // of volatile accesses.
@@ -482,7 +482,7 @@ __INLINE uint32_t sl_hal_pcnt_get_enabled_pending_interrupts(PCNT_TypeDef *pcnt)
 __INLINE void sl_hal_pcnt_lock(PCNT_TypeDef *pcnt)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
 
   pcnt->LOCK = ~PCNT_LOCK_PCNTLOCKKEY_UNLOCK;
 }
@@ -497,7 +497,7 @@ __INLINE void sl_hal_pcnt_lock(PCNT_TypeDef *pcnt)
 __INLINE void sl_hal_pcnt_unlock(PCNT_TypeDef *pcnt)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
 
   pcnt->LOCK = PCNT_LOCK_PCNTLOCKKEY_UNLOCK;
 }
@@ -522,11 +522,11 @@ __INLINE void sl_hal_pcnt_set_top_buffer(PCNT_TypeDef *pcnt,
                                          uint32_t value)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
   // Make sure counter value is valid.
-  EFM_ASSERT(value <= SL_HAL_PCNT_MAX_COUNT(pcnt));
+  SL_LOG_DEBUG_ASSERT(value <= SL_HAL_PCNT_MAX_COUNT(pcnt));
   // Make sure module is enabled.
-  EFM_ASSERT(pcnt->EN & _PCNT_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(pcnt->EN & _PCNT_EN_EN_MASK);
 
   sl_hal_pcnt_wait_sync(pcnt);
   pcnt->TOPB = value;
@@ -545,7 +545,7 @@ __INLINE void sl_hal_pcnt_set_top_buffer(PCNT_TypeDef *pcnt,
 __INLINE uint32_t sl_hal_pcnt_get_top_buffer(PCNT_TypeDef *pcnt)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
 
   sl_hal_pcnt_wait_sync(pcnt);
   return pcnt->TOPB;
@@ -565,11 +565,11 @@ __INLINE void sl_hal_pcnt_set_top(PCNT_TypeDef *pcnt,
                                   uint32_t value)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
   // Make sure counter value is valid.
-  EFM_ASSERT(value <= SL_HAL_PCNT_MAX_COUNT(pcnt));
+  SL_LOG_DEBUG_ASSERT(value <= SL_HAL_PCNT_MAX_COUNT(pcnt));
   // Make sure module is enabled.
-  EFM_ASSERT(pcnt->EN & _PCNT_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(pcnt->EN & _PCNT_EN_EN_MASK);
 
   sl_hal_pcnt_wait_sync(pcnt);
   pcnt->TOP = value;
@@ -588,7 +588,7 @@ __INLINE void sl_hal_pcnt_set_top(PCNT_TypeDef *pcnt,
 __INLINE uint32_t sl_hal_pcnt_get_top(PCNT_TypeDef *pcnt)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
 
   sl_hal_pcnt_wait_sync(pcnt);
   return pcnt->TOP;
@@ -610,9 +610,9 @@ __INLINE uint32_t sl_hal_pcnt_get_top(PCNT_TypeDef *pcnt)
 __INLINE void sl_hal_pcnt_start_main_counter(PCNT_TypeDef *pcnt)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
   // Make sure module is enabled.
-  EFM_ASSERT(pcnt->EN & _PCNT_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(pcnt->EN & _PCNT_EN_EN_MASK);
 
   sl_hal_pcnt_wait_sync(pcnt);
   pcnt->CMD_SET = PCNT_CMD_STARTCNT;
@@ -634,9 +634,9 @@ __INLINE void sl_hal_pcnt_start_main_counter(PCNT_TypeDef *pcnt)
 __INLINE void sl_hal_pcnt_stop_main_counter(PCNT_TypeDef *pcnt)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
   // Make sure module is enabled.
-  EFM_ASSERT(pcnt->EN & _PCNT_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(pcnt->EN & _PCNT_EN_EN_MASK);
 
   sl_hal_pcnt_wait_sync(pcnt);
   pcnt->CMD_SET = PCNT_CMD_STOPCNT;
@@ -674,7 +674,7 @@ void sl_hal_pcnt_set_main_counter(PCNT_TypeDef *pcnt,
 __INLINE uint32_t sl_hal_pcnt_get_main_counter(PCNT_TypeDef *pcnt)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
 
   sl_hal_pcnt_wait_sync(pcnt);
   return pcnt->CNT;
@@ -696,9 +696,9 @@ __INLINE uint32_t sl_hal_pcnt_get_main_counter(PCNT_TypeDef *pcnt)
 __INLINE void sl_hal_pcnt_start_aux_counter(PCNT_TypeDef *pcnt)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
   // Make sure module is enabled.
-  EFM_ASSERT(pcnt->EN & _PCNT_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(pcnt->EN & _PCNT_EN_EN_MASK);
 
   sl_hal_pcnt_wait_sync(pcnt);
   pcnt->CMD_SET = PCNT_CMD_STARTAUXCNT;
@@ -720,9 +720,9 @@ __INLINE void sl_hal_pcnt_start_aux_counter(PCNT_TypeDef *pcnt)
 __INLINE void sl_hal_pcnt_stop_aux_counter(PCNT_TypeDef *pcnt)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
   // Make sure module is enabled.
-  EFM_ASSERT(pcnt->EN & _PCNT_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(pcnt->EN & _PCNT_EN_EN_MASK);
 
   sl_hal_pcnt_wait_sync(pcnt);
   pcnt->CMD_SET = PCNT_CMD_STOPAUXCNT;
@@ -741,7 +741,7 @@ __INLINE void sl_hal_pcnt_stop_aux_counter(PCNT_TypeDef *pcnt)
 __INLINE uint32_t sl_hal_pcnt_get_aux_counter(PCNT_TypeDef *pcnt)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
 
   sl_hal_pcnt_wait_sync(pcnt);
   return pcnt->AUXCNT;
@@ -757,9 +757,9 @@ __INLINE uint32_t sl_hal_pcnt_get_aux_counter(PCNT_TypeDef *pcnt)
 __INLINE void sl_hal_pcnt_reset_counters(PCNT_TypeDef *pcnt)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
   // Make sure module is enabled.
-  EFM_ASSERT(pcnt->EN & _PCNT_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(pcnt->EN & _PCNT_EN_EN_MASK);
 
   sl_hal_pcnt_wait_sync(pcnt);
   pcnt->CMD_SET = PCNT_CMD_CNTRST | PCNT_CMD_AUXCNTRST;

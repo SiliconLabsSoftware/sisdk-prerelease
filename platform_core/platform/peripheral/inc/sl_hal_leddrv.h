@@ -39,7 +39,7 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_enum.h"
 
 /***************************************************************************//**
@@ -251,7 +251,7 @@ void sl_hal_leddrv_init(LEDDRV_TypeDef *leddrv,
 __INLINE void sl_hal_leddrv_wait_ready(LEDDRV_TypeDef *leddrv)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   while (leddrv->SWRST & _LEDDRV_SWRST_RESETTING_MASK) {
     // Wait for reset to complete.
@@ -272,7 +272,7 @@ __INLINE void sl_hal_leddrv_wait_ready(LEDDRV_TypeDef *leddrv)
 __INLINE void sl_hal_leddrv_enable(LEDDRV_TypeDef *leddrv)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   // Enable peripheral.
   leddrv->EN_SET = LEDDRV_EN_EN;
@@ -288,7 +288,7 @@ __INLINE void sl_hal_leddrv_enable(LEDDRV_TypeDef *leddrv)
 __INLINE void sl_hal_leddrv_disable(LEDDRV_TypeDef *leddrv)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   if ((leddrv->EN & LEDDRV_EN_EN) == 0) {
     return;
@@ -307,10 +307,10 @@ __INLINE void sl_hal_leddrv_disable(LEDDRV_TypeDef *leddrv)
 __INLINE void sl_hal_leddrv_enable_dual_drive_mode(LEDDRV_TypeDef *leddrv)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   // Make sure module is enabled
-  EFM_ASSERT(leddrv->EN & LEDDRV_EN_EN);
+  SL_LOG_DEBUG_ASSERT(leddrv->EN & LEDDRV_EN_EN);
 
   // Enable dual drive mode.
   leddrv->CTRL_SET = LEDDRV_CTRL_ENADUALMODE;
@@ -326,10 +326,10 @@ __INLINE void sl_hal_leddrv_enable_dual_drive_mode(LEDDRV_TypeDef *leddrv)
 __INLINE void sl_hal_leddrv_disable_dual_drive_mode(LEDDRV_TypeDef *leddrv)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   // Make sure module is enabled
-  EFM_ASSERT(leddrv->EN & LEDDRV_EN_EN);
+  SL_LOG_DEBUG_ASSERT(leddrv->EN & LEDDRV_EN_EN);
 
   // Disable dual drive mode.
   leddrv->CTRL_CLR = LEDDRV_CTRL_ENADUALMODE;
@@ -345,10 +345,10 @@ __INLINE void sl_hal_leddrv_disable_dual_drive_mode(LEDDRV_TypeDef *leddrv)
 __INLINE void sl_hal_leddrv_enable_peak_current_foldback(LEDDRV_TypeDef *leddrv)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   // Make sure module is enabled
-  EFM_ASSERT(leddrv->EN & LEDDRV_EN_EN);
+  SL_LOG_DEBUG_ASSERT(leddrv->EN & LEDDRV_EN_EN);
 
   // Enable peak current foldback.
   leddrv->CTRL_SET = LEDDRV_CTRL_IPKFOLDBACK;
@@ -364,10 +364,10 @@ __INLINE void sl_hal_leddrv_enable_peak_current_foldback(LEDDRV_TypeDef *leddrv)
 __INLINE void sl_hal_leddrv_disable_peak_current_foldback(LEDDRV_TypeDef *leddrv)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   // Make sure module is enabled
-  EFM_ASSERT(leddrv->EN & LEDDRV_EN_EN);
+  SL_LOG_DEBUG_ASSERT(leddrv->EN & LEDDRV_EN_EN);
 
   // Disable peak current foldback.
   leddrv->CTRL_CLR = LEDDRV_CTRL_IPKFOLDBACK;
@@ -383,10 +383,10 @@ __INLINE void sl_hal_leddrv_disable_peak_current_foldback(LEDDRV_TypeDef *leddrv
 __INLINE void sl_hal_leddrv_enable_direct_drive_mode(LEDDRV_TypeDef *leddrv)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   // Make sure module is enabled
-  EFM_ASSERT(leddrv->EN & LEDDRV_EN_EN);
+  SL_LOG_DEBUG_ASSERT(leddrv->EN & LEDDRV_EN_EN);
 
   // Enable direct drive mode.
   leddrv->CTRL_SET = LEDDRV_CTRL_ENDIRDRV;
@@ -402,10 +402,10 @@ __INLINE void sl_hal_leddrv_enable_direct_drive_mode(LEDDRV_TypeDef *leddrv)
 __INLINE void sl_hal_leddrv_disable_direct_drive_mode(LEDDRV_TypeDef *leddrv)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   // Make sure module is enabled
-  EFM_ASSERT(leddrv->EN & LEDDRV_EN_EN);
+  SL_LOG_DEBUG_ASSERT(leddrv->EN & LEDDRV_EN_EN);
 
   // Disable direct drive mode.
   leddrv->CTRL_CLR = LEDDRV_CTRL_ENDIRDRV;
@@ -421,10 +421,10 @@ __INLINE void sl_hal_leddrv_disable_direct_drive_mode(LEDDRV_TypeDef *leddrv)
 __INLINE void sl_hal_leddrv_enable_ocflag_hardware_control(LEDDRV_TypeDef *leddrv)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   // Make sure module is enabled
-  EFM_ASSERT(leddrv->EN & LEDDRV_EN_EN);
+  SL_LOG_DEBUG_ASSERT(leddrv->EN & LEDDRV_EN_EN);
 
   // Hardware overcurrent control.
   leddrv->CTRL_CLR = LEDDRV_CTRL_HWOCFLAGDIS;
@@ -440,10 +440,10 @@ __INLINE void sl_hal_leddrv_enable_ocflag_hardware_control(LEDDRV_TypeDef *leddr
 __INLINE void sl_hal_leddrv_disable_ocflag_hardware_control(LEDDRV_TypeDef *leddrv)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   // Make sure module is enabled
-  EFM_ASSERT(leddrv->EN & LEDDRV_EN_EN);
+  SL_LOG_DEBUG_ASSERT(leddrv->EN & LEDDRV_EN_EN);
 
   // Disable Hardware overcurrent control.
   leddrv->CTRL_SET = LEDDRV_CTRL_HWOCFLAGDIS;
@@ -459,10 +459,10 @@ __INLINE void sl_hal_leddrv_disable_ocflag_hardware_control(LEDDRV_TypeDef *ledd
 __INLINE void sl_hal_leddrv_set_ton_forced_calibration(LEDDRV_TypeDef *leddrv)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   // Make sure module is enabled
-  EFM_ASSERT(leddrv->EN & LEDDRV_EN_EN);
+  SL_LOG_DEBUG_ASSERT(leddrv->EN & LEDDRV_EN_EN);
 
   // Set Ton calibration trigger.
   leddrv->CTRL_SET = LEDDRV_CTRL_TONFRCCAL;
@@ -478,10 +478,10 @@ __INLINE void sl_hal_leddrv_set_ton_forced_calibration(LEDDRV_TypeDef *leddrv)
 __INLINE void sl_hal_leddrv_clear_ton_forced_calibration(LEDDRV_TypeDef *leddrv)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   // Make sure module is enabled
-  EFM_ASSERT(leddrv->EN & LEDDRV_EN_EN);
+  SL_LOG_DEBUG_ASSERT(leddrv->EN & LEDDRV_EN_EN);
 
   // Clear Ton calibration trigger.
   leddrv->CTRL_CLR = LEDDRV_CTRL_TONFRCCAL;
@@ -497,10 +497,10 @@ __INLINE void sl_hal_leddrv_clear_ton_forced_calibration(LEDDRV_TypeDef *leddrv)
 __INLINE void sl_hal_leddrv_clear_ocflag_channel0(LEDDRV_TypeDef *leddrv)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   // Make sure module is enabled
-  EFM_ASSERT(leddrv->EN & LEDDRV_EN_EN);
+  SL_LOG_DEBUG_ASSERT(leddrv->EN & LEDDRV_EN_EN);
 
   // Clear Overcurrent Flag on channel 0.
   leddrv->CTRL_SET = LEDDRV_CTRL_SWCLROCFLAG0;
@@ -516,10 +516,10 @@ __INLINE void sl_hal_leddrv_clear_ocflag_channel0(LEDDRV_TypeDef *leddrv)
 __INLINE void sl_hal_leddrv_clear_ocflag_channel1(LEDDRV_TypeDef *leddrv)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   // Make sure module is enabled
-  EFM_ASSERT(leddrv->EN & LEDDRV_EN_EN);
+  SL_LOG_DEBUG_ASSERT(leddrv->EN & LEDDRV_EN_EN);
 
   // Clear Overcurrent Flag on channel 1.
   leddrv->CTRL_SET = LEDDRV_CTRL_SWCLROCFLAG1;
@@ -535,7 +535,7 @@ __INLINE void sl_hal_leddrv_clear_ocflag_channel1(LEDDRV_TypeDef *leddrv)
 __INLINE void sl_hal_leddrv_reset(LEDDRV_TypeDef *leddrv)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   leddrv->SWRST_SET = LEDDRV_SWRST_SWRST;
 }
@@ -553,7 +553,7 @@ __INLINE void sl_hal_leddrv_reset(LEDDRV_TypeDef *leddrv)
 __INLINE uint32_t sl_hal_leddrv_get_status(LEDDRV_TypeDef *leddrv)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   return leddrv->STATUS;
 }
@@ -573,7 +573,7 @@ __INLINE void sl_hal_leddrv_clear_interrupts(LEDDRV_TypeDef *leddrv,
                                              uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   leddrv->IF_CLR = flags;
 }
@@ -593,7 +593,7 @@ __INLINE void sl_hal_leddrv_set_interrupts(LEDDRV_TypeDef *leddrv,
                                            uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   leddrv->IF_SET = flags;
 }
@@ -613,7 +613,7 @@ __INLINE void sl_hal_leddrv_disable_interrupts(LEDDRV_TypeDef *leddrv,
                                                uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   leddrv->IEN_CLR = flags;
 }
@@ -638,7 +638,7 @@ __INLINE void sl_hal_leddrv_enable_interrupts(LEDDRV_TypeDef *leddrv,
                                               uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   leddrv->IEN_SET = flags;
 }
@@ -660,7 +660,7 @@ __INLINE void sl_hal_leddrv_enable_interrupts(LEDDRV_TypeDef *leddrv,
 __INLINE uint32_t sl_hal_leddrv_get_pending_interrupts(LEDDRV_TypeDef *leddrv)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   return leddrv->IF;
 }
@@ -682,7 +682,7 @@ __INLINE uint32_t sl_hal_leddrv_get_pending_interrupts(LEDDRV_TypeDef *leddrv)
 __INLINE uint32_t sl_hal_leddrv_get_enabled_interrupts(LEDDRV_TypeDef *leddrv)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   return leddrv->IEN;
 }
@@ -711,7 +711,7 @@ __INLINE uint32_t sl_hal_leddrv_get_enabled_pending_interrupts(LEDDRV_TypeDef *l
   uint32_t ien;
 
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
 
   // Store LEDDRV->IEN in temporary variable in order to define explicit order.
   // of volatile accesses.

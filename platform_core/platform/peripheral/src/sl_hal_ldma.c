@@ -32,7 +32,6 @@
 
 #if defined(LDMA_PRESENT)
 #include <stddef.h>
-#include "sl_assert.h"
 #include "sl_hal_bus.h"
 #include "sl_core.h"
 
@@ -103,7 +102,7 @@ static __INLINE LDMAXBAR_TypeDef *sli_get_ldmaxbar_by_ldma_instance(LDMA_TypeDef
   LDMAXBAR_TypeDef * ldmaXbar_instance = LDMAXBAR(ldma_instance_number);
 
   // ldma instance is null of invalid.
-  EFM_ASSERT((uint32_t)ldmaXbar_instance != 0x0UL);
+  SL_LOG_DEBUG_ASSERT((uint32_t)ldmaXbar_instance != 0x0UL);
 
   return ldmaXbar_instance;
 #else
@@ -119,13 +118,13 @@ static __INLINE LDMAXBAR_TypeDef *sli_get_ldmaxbar_by_ldma_instance(LDMA_TypeDef
 void sl_hal_ldma_init(LDMA_TypeDef *ldma,
                       const sl_hal_ldma_init_t *init)
 {
-  EFM_ASSERT(init != NULL);
-  EFM_ASSERT(!(((uint32_t)init->num_fixed_priority << _LDMA_CTRL_NUMFIXED_SHIFT)
+  SL_LOG_DEBUG_ASSERT(init != NULL);
+  SL_LOG_DEBUG_ASSERT(!(((uint32_t)init->num_fixed_priority << _LDMA_CTRL_NUMFIXED_SHIFT)
                & ~_LDMA_CTRL_NUMFIXED_MASK));
 
-  EFM_ASSERT(!(((uint32_t)init->sync_prs_clr_en << _LDMA_SYNCHWEN_SYNCCLREN_SHIFT)
+  SL_LOG_DEBUG_ASSERT(!(((uint32_t)init->sync_prs_clr_en << _LDMA_SYNCHWEN_SYNCCLREN_SHIFT)
                & ~_LDMA_SYNCHWEN_SYNCCLREN_MASK));
-  EFM_ASSERT(!(((uint32_t)init->sync_prs_set_en << _LDMA_SYNCHWEN_SYNCSETEN_SHIFT)
+  SL_LOG_DEBUG_ASSERT(!(((uint32_t)init->sync_prs_set_en << _LDMA_SYNCHWEN_SYNCSETEN_SHIFT)
                & ~_LDMA_SYNCHWEN_SYNCSETEN_MASK));
 
   ldma->CTRL = (uint32_t)init->num_fixed_priority << _LDMA_CTRL_NUMFIXED_SHIFT;
@@ -151,19 +150,19 @@ void sl_hal_ldma_init_transfer(LDMA_TypeDef *ldma,
   CORE_DECLARE_IRQ_STATE;
   uint32_t ch_mask = 1UL << channel;
 
-  EFM_ASSERT(channel < DMA_CHAN_COUNT);
-  EFM_ASSERT(transfer_init != NULL);
-  EFM_ASSERT(descriptor != NULL);
+  SL_LOG_DEBUG_ASSERT(channel < DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(transfer_init != NULL);
+  SL_LOG_DEBUG_ASSERT(descriptor != NULL);
 
-  EFM_ASSERT(!(transfer_init->request_sel & ~_LDMAXBAR_CH_REQSEL_MASK));
+  SL_LOG_DEBUG_ASSERT(!(transfer_init->request_sel & ~_LDMAXBAR_CH_REQSEL_MASK));
 
-  EFM_ASSERT(!(((uint32_t)transfer_init->arb_slots << _LDMA_CH_CFG_ARBSLOTS_SHIFT)
+  SL_LOG_DEBUG_ASSERT(!(((uint32_t)transfer_init->arb_slots << _LDMA_CH_CFG_ARBSLOTS_SHIFT)
                & ~_LDMA_CH_CFG_ARBSLOTS_MASK));
-  EFM_ASSERT(!(((uint32_t)transfer_init->src_inc_sign << _LDMA_CH_CFG_SRCINCSIGN_SHIFT)
+  SL_LOG_DEBUG_ASSERT(!(((uint32_t)transfer_init->src_inc_sign << _LDMA_CH_CFG_SRCINCSIGN_SHIFT)
                & ~_LDMA_CH_CFG_SRCINCSIGN_MASK));
-  EFM_ASSERT(!(((uint32_t)transfer_init->dst_inc_sign << _LDMA_CH_CFG_DSTINCSIGN_SHIFT)
+  SL_LOG_DEBUG_ASSERT(!(((uint32_t)transfer_init->dst_inc_sign << _LDMA_CH_CFG_DSTINCSIGN_SHIFT)
                & ~_LDMA_CH_CFG_DSTINCSIGN_MASK));
-  EFM_ASSERT(!(((uint32_t)transfer_init->loop_count << _LDMA_CH_LOOP_LOOPCNT_SHIFT)
+  SL_LOG_DEBUG_ASSERT(!(((uint32_t)transfer_init->loop_count << _LDMA_CH_LOOP_LOOPCNT_SHIFT)
                & ~_LDMA_CH_LOOP_LOOPCNT_MASK));
 
   CORE_ENTER_ATOMIC();
@@ -219,13 +218,13 @@ void sl_hal_ldma_init_transfer_extend(LDMA_TypeDef *ldma,
 {
   // Ensure destination interleaving supported for given channel if enabled.
 #if !defined(LDMA0_ILCHNL)
-  EFM_ASSERT(!descriptor_extend->dst_il_en || ((1 << channel) & LDMA_ILCHNL));
+  SL_LOG_DEBUG_ASSERT(!descriptor_extend->dst_il_en || ((1 << channel) & LDMA_ILCHNL));
 #else
-  EFM_ASSERT(!descriptor_extend->dst_il_en || ((1 << channel) & LDMA_ILCHNL(LDMA_NUM(ldma))));
+  SL_LOG_DEBUG_ASSERT(!descriptor_extend->dst_il_en || ((1 << channel) & LDMA_ILCHNL(LDMA_NUM(ldma))));
 #endif
 #if defined(_LDMA_CH_XCTRL_DUALDSTEN_MASK)
   // Ensure dual destination supported for given channel if enabled.
-  EFM_ASSERT(!descriptor_extend->dual_dst_en || ((1 << channel) & LDMA_DUALDSTCHNL(LDMA_NUM(ldma))));
+  SL_LOG_DEBUG_ASSERT(!descriptor_extend->dual_dst_en || ((1 << channel) & LDMA_DUALDSTCHNL(LDMA_NUM(ldma))));
 #endif
 
   sl_hal_ldma_init_transfer(ldma,
@@ -243,7 +242,7 @@ void sl_hal_ldma_start_transfer(LDMA_TypeDef *ldma,
                                 uint32_t channel)
 {
   uint32_t ch_mask = 1UL << channel;
-  EFM_ASSERT(channel < DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(channel < DMA_CHAN_COUNT);
 
   // Make sure prior data accesses are visible before proceding.
 #if defined(__CORTEXM)
@@ -266,7 +265,7 @@ void sl_hal_ldma_stop_transfer(LDMA_TypeDef *ldma,
 {
   uint32_t ch_mask = 1UL << channel;
 
-  EFM_ASSERT(channel < DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(channel < DMA_CHAN_COUNT);
 
   /* *INDENT-OFF* */
   CORE_ATOMIC_SECTION(
@@ -286,7 +285,7 @@ bool sl_hal_ldma_transfer_is_done(LDMA_TypeDef *ldma,
   bool     ret_val = false;
   uint32_t ch_mask = 1UL << channel;
 
-  EFM_ASSERT(channel < DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(channel < DMA_CHAN_COUNT);
 
   /* *INDENT-OFF* */
   CORE_ATOMIC_SECTION(
@@ -306,7 +305,7 @@ bool sl_hal_ldma_transfer_is_done(LDMA_TypeDef *ldma,
 uint32_t sl_hal_ldma_transfer_remaining_count(LDMA_TypeDef *ldma,
                                               uint32_t channel)
 {
-  EFM_ASSERT(channel < DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(channel < DMA_CHAN_COUNT);
 
   uint32_t done;
   uint32_t ctrl_reg;

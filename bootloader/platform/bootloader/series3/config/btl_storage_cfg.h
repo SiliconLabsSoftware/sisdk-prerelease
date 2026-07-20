@@ -30,7 +30,9 @@
 // <i> Default: 0
 // <i> Absolute start address for the "bootload info" meta-information about which storage slot to attempt firmware update
 // <i> from, in which order. Take care to ensure that any storage slots don't overlap with the location of bootload info.
+#ifndef BTL_STORAGE_BASE_ADDRESS
 #define BTL_STORAGE_BASE_ADDRESS  0
+#endif
 
 // </e>
 

@@ -34,8 +34,7 @@
 
 sl_status_t sl_device_init_dcdc(void)
 {
-#if defined(EMU_SERIES2_DCDC_BUCK_PRESENT) \
-  && (!defined(SL_DEVICE_INIT_DCDC_TYPE) || (SL_DEVICE_INIT_DCDC_TYPE != SL_DEVICE_INIT_DCDC_TYPE_BOOST))
+#if !defined(SL_DEVICE_INIT_DCDC_TYPE) || (defined(SL_DEVICE_INIT_DCDC_TYPE) && (SL_DEVICE_INIT_DCDC_TYPE == SL_DEVICE_INIT_DCDC_TYPE_BUCK))
 #if SL_DEVICE_INIT_DCDC_ENABLE
   EMU_DCDCInit_TypeDef dcdcInit = EMU_DCDCINIT_DEFAULT;
 #if SL_DEVICE_INIT_DCDC_BYPASS
@@ -48,10 +47,17 @@ sl_status_t sl_device_init_dcdc(void)
 #if defined(SL_DEVICE_INIT_DCDC_PFMX_IPKVAL_OVERRIDE) && (SL_DEVICE_INIT_DCDC_PFMX_IPKVAL_OVERRIDE == 1)
   EMU_DCDCSetPFMXModePeakCurrent(SL_DEVICE_INIT_DCDC_PFMX_IPKVAL);
 #endif
+#if defined(SL_DEVICE_INIT_LEDVDD_ENABLE) && (SL_DEVICE_INIT_LEDVDD_ENABLE == 1)
+#if defined(SL_DEVICE_INIT_LEDVDD_OUTPUT_VOLTAGE) && (SL_DEVICE_INIT_LEDVDD_OUTPUT_VOLTAGE == 1)
+  EMU_DCDCLedboostOutputVoltageSet(emuDcdcBoostOutputVoltage_1v8);
+#else
+  EMU_DCDCLedboostOutputVoltageSet(emuDcdcBoostOutputVoltage_3v8);
+#endif
+#endif
 #else // SL_DEVICE_INIT_DCDC_ENABLE
   EMU_DCDCPowerOff();
 #endif // SL_DEVICE_INIT_DCDC_ENABLE
-#elif defined(EMU_SERIES2_DCDC_BOOST_PRESENT)
+#else
 #if SL_DEVICE_INIT_DCDC_ENABLE
   EMU_DCDCBoostInit_TypeDef dcdcBoostInit = EMU_DCDCBOOSTINIT_DEFAULT;
 #if defined(_DCDC_CTRL_DVDDBSTPRG_MASK)

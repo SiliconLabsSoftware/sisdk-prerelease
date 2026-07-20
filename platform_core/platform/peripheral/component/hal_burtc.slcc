@@ -23,6 +23,7 @@ requires:
 - name: device
 - name: device_has_burtc
 - name: hal_common
+- name: log_none
 documentation:
   docset: gecko-platform
   document:

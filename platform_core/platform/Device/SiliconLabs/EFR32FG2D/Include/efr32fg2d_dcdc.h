@@ -182,7 +182,7 @@ typedef struct dcdc_typedef{
 #define DCDC_DOCTRL_REGULATIONTYPE_REGDVDD          (_DCDC_DOCTRL_REGULATIONTYPE_REGDVDD << 0)    /**< Shifted mode REGDVDD for DCDC_DOCTRL        */
 #define DCDC_DOCTRL_REGULATIONTYPE_REGDEC           (_DCDC_DOCTRL_REGULATIONTYPE_REGDEC << 0)     /**< Shifted mode REGDEC for DCDC_DOCTRL         */
 #define DCDC_DOCTRL_REGULATIONTYPE_REGDVDDDEC       (_DCDC_DOCTRL_REGULATIONTYPE_REGDVDDDEC << 0) /**< Shifted mode REGDVDDDEC for DCDC_DOCTRL     */
-#define DCDC_DOCTRL_DUALIPKEN                       (0x1UL << 31)                                 /**< Use seperate IPK DAC values                 */
+#define DCDC_DOCTRL_DUALIPKEN                       (0x1UL << 31)                                 /**< Use separate IPK DAC values                 */
 #define _DCDC_DOCTRL_DUALIPKEN_SHIFT                31                                            /**< Shift value for DCDC_DUALIPKEN              */
 #define _DCDC_DOCTRL_DUALIPKEN_MASK                 0x80000000UL                                  /**< Bit mask for DCDC_DUALIPKEN                 */
 #define _DCDC_DOCTRL_DUALIPKEN_DEFAULT              0x00000000UL                                  /**< Mode DEFAULT for DCDC_DOCTRL                */

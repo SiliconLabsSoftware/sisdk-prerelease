@@ -19,6 +19,9 @@ provides:
 - name: "wisun_dc_client_implementation"
 - name: "wisun_dc_client_plugin"
 
+define:
+- name: "HAVE_DC_CLIENT"
+
 library:
   # FFN DC client plugin: link when FFN stack is present (extends FFN with DC client). Series 2 only.
 - path: "libwisun_dc_client_plugin_efr32xg2x_gcc_debug.a"

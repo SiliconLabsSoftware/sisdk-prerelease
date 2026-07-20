@@ -117,7 +117,7 @@
       <peripheral componentIdRef="pin_tool.efr32.efr32mr21.hfrco" displayName="HFRCOEM23" name="HFRCOEM23" revision="A" category="Clocking" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32mr21.wdog" displayName="WDOG0" name="WDOG0" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32mr21.wdog" displayName="WDOG1" name="WDOG1" revision="A" category="Core" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efr32.efr32mr21.semailbox" displayName="SEMAILBOX" name="SEMAILBOX" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.efr32mr21.semailbox" displayName="SEMAILBOX" name="SEMAILBOX" revision="A" category="Security" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32mr21.rtcc" displayName="PRORTC" name="PRORTC" revision="A" category="Timers" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32mr21.pti" displayName="PTI" name="PTI" revision="A" category="Radio" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32mr21.modem" displayName="MODEM" name="MODEM" revision="A" category="Radio" hidden="false"/>

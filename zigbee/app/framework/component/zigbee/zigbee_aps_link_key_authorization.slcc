@@ -1,0 +1,86 @@
+package: zigbee
+description: The component enables a better granularity of a cluster-specific APS link key security.
+label: APS Link Key Authorization
+quality: production
+id: zigbee_aps_link_key_authorization
+category: Zigbee|Works With All Hubs
+provides:
+- name: zigbee_aps_link_key_authorization
+config_file:
+- path: app/framework/plugin/aps-link-key-authorization/config/aps-link-key-authorization-config.h
+  unless:
+  - zigbee_simulation
+- path: app/framework/plugin/aps-link-key-authorization/config/aps-link-key-authorization-zigbee-simulation-config.h
+  condition:
+  - zigbee_simulation
+source:
+- path: app/framework/plugin/aps-link-key-authorization/aps-link-key-authorization.c
+- path: app/framework/plugin/aps-link-key-authorization/aps-link-key-authorization-cli.c
+  condition:
+  - cli
+include:
+- path: app/framework/plugin/aps-link-key-authorization
+  file_list:
+  - path: aps-link-key-authorization.h
+  - path: aps-link-key-authorization-tokens.h
+template_contribution:
+- name: component_catalog
+  value: zigbee_aps_link_key_authorization
+- name: token_header
+  value: aps-link-key-authorization-tokens.h
+- name: cli_group
+  value:
+    name: aps-link-key-auth
+    group: plugin
+- name: cli_command
+  value:
+    group: aps-link-key-auth
+    name: info
+    handler: sl_zigbee_af_aps_link_key_authorization_cli_info
+    help: Lists information on the current state of APS link key authorization.
+- name: cli_command
+  value:
+    group: aps-link-key-auth
+    name: enable
+    handler: sl_zigbee_af_aps_link_key_authorization_cli_enable
+    help: Enables or disables APS link key authorization for all clusters.
+    argument:
+    - type: uint8
+      help: Sets the enable state of the APS link key security
+- name: cli_command
+  value:
+    group: aps-link-key-auth
+    name: clear-exempt-list
+    handler: sl_zigbee_af_aps_link_key_authorization_cli_clear
+    help: Clears the exempt list.
+- name: cli_command
+  value:
+    group: aps-link-key-auth
+    name: enable-with-exempt-list
+    handler: sl_zigbee_af_aps_link_key_authorization_cli_enable_with_exempt_list
+    help: Enables or disables APS link key authorization and sets up the exempt list.
+    argument:
+    - type: uint8
+      help: Set the enable state of the APS link key security.
+    - type: uint16opt
+      help: List of exempted clusters
+- name: cli_command
+  value:
+    group: aps-link-key-auth
+    name: add-cluster-exempted
+    handler: sl_zigbee_af_aps_link_key_authorization_cli_add_cluster_exempted
+    help: Adds an entry to the cluster exempt list.
+    argument:
+    - type: uint16
+      help: Cluster to be added to the exempt list
+- name: zigbee_af_callback
+  value:
+    callback_type: local_data_init
+    function_name: sl_zigbee_af_aps_link_key_authorization_init
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/aps-link-key-authorization
+metadata:
+  sbom:
+    license: MSLA
+root_path: zigbee

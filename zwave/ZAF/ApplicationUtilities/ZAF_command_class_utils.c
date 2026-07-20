@@ -62,6 +62,15 @@ CmdClassSupported(security_key_t eKey,
     return true;
   }
 
+  /* CC:009F.01.0D.11.007 - only SECURITY_COMMANDS_SUPPORTED_GET is accepted below highest key. */
+  if ((SECURITY_KEY_S0 == eKey)
+      && (SECURITY_KEY_S0 != device_higest_secure_level)
+      && (0 != (ZAF_GetSecurityKeys() & SECURITY_KEY_S0_BIT))
+      && (COMMAND_CLASS_SECURITY == commandClass)
+      && (SECURITY_COMMANDS_SUPPORTED_GET == command)) {
+    return true;
+  }
+
   // Command is not supported.
   return false;
 }

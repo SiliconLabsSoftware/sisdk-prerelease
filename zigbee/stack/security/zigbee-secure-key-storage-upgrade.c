@@ -140,7 +140,7 @@ sl_status_t zb_sec_man_upgrade_gp_proxy_table(void)
 
     sl_zigbee_sec_man_key_t plaintext_key;
     tokTypeStackGpProxyTableEntry tok;
-    sl_status_t tok_st = slx_zigbee_token_manager_get_data(COMMON_TOKEN_STACK_GP_PROXY_TABLE + i, (void *)&tok, sizeof(tokTypeStackGpProxyTableEntry));
+    sl_status_t tok_st = slx_zigbee_token_manager_get_data(COMMON_TOKEN_STACK_GP_PROXY_TABLE + i, (void *)&tok, sizeof(tok));
     if (tok_st != SL_STATUS_OK) {
       return tok_st;
     }
@@ -154,7 +154,7 @@ sl_status_t zb_sec_man_upgrade_gp_proxy_table(void)
     }
     //erase plaintext token's key data by setting it to all 0xFF
     memset(&tok.gpdKey, 0xFF, SL_ZIGBEE_ENCRYPTION_KEY_SIZE);
-    tok_st = slx_zigbee_token_manager_set_data(COMMON_TOKEN_STACK_GP_PROXY_TABLE + i, (void *)&tok, sizeof(tokTypeStackGpProxyTableEntry));
+    tok_st = slx_zigbee_token_manager_set_data(COMMON_TOKEN_STACK_GP_PROXY_TABLE + i, (void *)&tok, sizeof(tok));
     if (tok_st != SL_STATUS_OK) {
       return tok_st;
     }
@@ -183,7 +183,7 @@ sl_status_t zb_sec_man_upgrade_gp_sink_table(void)
 
     sl_zigbee_sec_man_key_t plaintext_key;
     tokTypeStackGpSinkTableEntry tok;
-    sl_status_t tok_st = slx_zigbee_token_manager_get_data(COMMON_TOKEN_STACK_GP_SINK_TABLE + i, (void *)&tok, sizeof(tokTypeStackGpSinkTableEntry));
+    sl_status_t tok_st = slx_zigbee_token_manager_get_data(COMMON_TOKEN_STACK_GP_SINK_TABLE + i, (void *)&tok, sizeof(tok));
     if (tok_st != SL_STATUS_OK) {
       return tok_st;
     }
@@ -196,7 +196,7 @@ sl_status_t zb_sec_man_upgrade_gp_sink_table(void)
     }
     //erase plaintext token's key data by setting it to all 0xFF
     memset(&tok.gpdKey, 0xFF, SL_ZIGBEE_ENCRYPTION_KEY_SIZE);
-    tok_st = slx_zigbee_token_manager_set_data(COMMON_TOKEN_STACK_GP_SINK_TABLE + i, (void *)&tok, sizeof(tokTypeStackGpSinkTableEntry));
+    tok_st = slx_zigbee_token_manager_set_data(COMMON_TOKEN_STACK_GP_SINK_TABLE + i, (void *)&tok, sizeof(tok));
     if (tok_st != SL_STATUS_OK) {
       return tok_st;
     }
@@ -223,9 +223,9 @@ sl_status_t zb_sec_man_upgrade_nwk_key(uint8_t key_index)
 
     tokTypeStackKeys tok;
     if (context.key_index == 1) {
-      sli_zigbee_stack_token_primitive(true, &tok, COMMON_TOKEN_STACK_ALTERNATE_KEY, sizeof(tokTypeStackKeys));
+      sli_zigbee_stack_token_primitive(true, &tok, COMMON_TOKEN_STACK_ALTERNATE_KEY, sizeof(tok));
     } else {
-      sli_zigbee_stack_token_primitive(true, &tok, COMMON_TOKEN_STACK_KEYS, sizeof(tokTypeStackKeys));
+      sli_zigbee_stack_token_primitive(true, &tok, COMMON_TOKEN_STACK_KEYS, sizeof(tok));
     }
     memmove(&plaintext_key.key, tok.networkKey, SL_ZIGBEE_ENCRYPTION_KEY_SIZE);
 
@@ -247,9 +247,9 @@ sl_status_t zb_sec_man_upgrade_nwk_key(uint8_t key_index)
     memset(&tok.networkKey, 0xFF, SL_ZIGBEE_ENCRYPTION_KEY_SIZE);
     //write the cleared token data back to NVM3
     if (context.key_index == 1) {
-      sli_zigbee_stack_token_primitive(false, &tok, COMMON_TOKEN_STACK_ALTERNATE_KEY, sizeof(tokTypeStackKeys));
+      sli_zigbee_stack_token_primitive(false, &tok, COMMON_TOKEN_STACK_ALTERNATE_KEY, sizeof(tok));
     } else {
-      sli_zigbee_stack_token_primitive(false, &tok, COMMON_TOKEN_STACK_KEYS, sizeof(tokTypeStackKeys));
+      sli_zigbee_stack_token_primitive(false, &tok, COMMON_TOKEN_STACK_KEYS, sizeof(tok));
     }
     keys_passed[KEYS_STATUS_NETWORK]++;
   }
@@ -269,7 +269,7 @@ sl_status_t zb_sec_man_upgrade_tc_link_key(void)
     sl_status_t vault_import_status;
 
     tokTypeStackTrustCenter tok;
-    sli_zigbee_stack_token_primitive(true, &tok, COMMON_TOKEN_STACK_TRUST_CENTER, sizeof(tokTypeStackTrustCenter));
+    sli_zigbee_stack_token_primitive(true, &tok, COMMON_TOKEN_STACK_TRUST_CENTER, sizeof(tok));
     memmove(&plaintext_key.key, tok.key, SL_ZIGBEE_ENCRYPTION_KEY_SIZE);
 
     vault_import_status = sli_zigbee_stack_sec_man_import_key(&context, &plaintext_key);
@@ -282,7 +282,7 @@ sl_status_t zb_sec_man_upgrade_tc_link_key(void)
     memset(&tok.key, 0xFF, SL_ZIGBEE_ENCRYPTION_KEY_SIZE);
     // write cleared token data to NVM3; previous call to import already marked this key as
     // having been migrated away from token
-    sli_zigbee_stack_token_primitive(false, &tok, COMMON_TOKEN_STACK_TRUST_CENTER, sizeof(tokTypeStackTrustCenter));
+    sli_zigbee_stack_token_primitive(false, &tok, COMMON_TOKEN_STACK_TRUST_CENTER, sizeof(tok));
     keys_passed[KEYS_STATUS_LINK]++;
   }
   return SL_STATUS_OK;
@@ -303,7 +303,7 @@ sl_status_t zb_sec_man_upgrade_zll_key(void)
   if (is_key_migrated_enc != SL_STATUS_OK || is_key_migrated_pre != SL_STATUS_OK) {
     sl_zigbee_sec_man_key_t plaintext_key;
     tokTypeStackZllSecurity zllSecurityToken;
-    sl_status_t tok_st = slx_zigbee_token_manager_get_data(COMMON_TOKEN_STACK_ZLL_SECURITY, (void *)&zllSecurityToken, sizeof(tokTypeStackZllSecurity));
+    sl_status_t tok_st = slx_zigbee_token_manager_get_data(COMMON_TOKEN_STACK_ZLL_SECURITY, (void *)&zllSecurityToken, sizeof(zllSecurityToken));
     if (tok_st != SL_STATUS_OK) {
       return tok_st;
     }
@@ -344,7 +344,7 @@ sl_status_t zb_sec_man_upgrade_zll_key(void)
       }
       tok_st = slx_zigbee_token_manager_set_data(COMMON_TOKEN_STACK_ZLL_SECURITY,
                                                  (void *)&zllSecurityToken,
-                                                 sizeof(tokTypeStackZllSecurity));
+                                                 sizeof(zllSecurityToken));
       if (tok_st != SL_STATUS_OK) {
         return tok_st;
       }

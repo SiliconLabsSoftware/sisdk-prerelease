@@ -34,7 +34,10 @@
 #include "sl_code_classification.h"
 #include "sl_common.h"
 
-#if defined(DEVICE_PERIPHERAL_INTERNAL_PRESENT)
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+#if defined(SL_CATALOG_DEVICE_PERIPHERAL_INTERNAL_PRESENT)
 #include "sli_device_peripheral_internal.h"
 #endif
 
@@ -2182,6 +2185,66 @@ __STATIC_INLINE sl_dma_signal_t sl_device_peripheral_get_iadc_single_dma_signal(
 __STATIC_INLINE sl_dma_signal_t sl_device_peripheral_get_adc_scan_dma_signal(const sl_peripheral_t peripheral)
 {
   return ((sl_peripheral_adc_t)peripheral)->dma_signal_scan;
+}
+
+/***************************************************************************//**
+ * Gets the IP type for the serial peripheral instance.
+ *
+ * @param peripheral  A pointer to peripheral.
+ *
+ * @return  The IP type of the serial peripheral.
+ ******************************************************************************/
+__STATIC_INLINE sl_peripheral_serial_type_t sl_device_peripheral_get_serial_ip_type(const sl_peripheral_t peripheral)
+{
+  return ((sl_peripheral_serial_t)peripheral)->ip_type;
+}
+
+/***************************************************************************//**
+ * Gets the RX interrupt number for the serial peripheral instance.
+ *
+ * @param peripheral  A pointer to peripheral.
+ *
+ * @return  The RX interrupt number
+ ******************************************************************************/
+__STATIC_INLINE uint32_t sl_device_peripheral_get_serial_rx_irqn(const sl_peripheral_t peripheral)
+{
+  return ((sl_peripheral_serial_t)peripheral)->rx_irqn;
+}
+
+/***************************************************************************//**
+ * Gets the TX interrupt number for the serial peripheral instance.
+ *
+ * @param peripheral  A pointer to peripheral.
+ *
+ * @return  The TX interrupt number
+ ******************************************************************************/
+__STATIC_INLINE uint32_t sl_device_peripheral_get_serial_tx_irqn(const sl_peripheral_t peripheral)
+{
+  return ((sl_peripheral_serial_t)peripheral)->tx_irqn;
+}
+
+/***************************************************************************//**
+ * Gets the RX data available DMA signal for the serial peripheral instance.
+ *
+ * @param peripheral  A pointer to peripheral.
+ *
+ * @return  The RX data available DMA signal
+ ******************************************************************************/
+__STATIC_INLINE sl_dma_signal_t sl_device_peripheral_get_serial_dma_signal_rx_trigger(const sl_peripheral_t peripheral)
+{
+  return ((sl_peripheral_serial_t)peripheral)->dma_signal_rx_trigger;
+}
+
+/***************************************************************************//**
+ * Gets the TX buffer level DMA signal for the serial peripheral instance.
+ *
+ * @param peripheral  A pointer to peripheral.
+ *
+ * @return  The TX buffer level DMA signal
+ ******************************************************************************/
+__STATIC_INLINE sl_dma_signal_t sl_device_peripheral_get_serial_dma_signal_tx_trigger(const sl_peripheral_t peripheral)
+{
+  return ((sl_peripheral_serial_t)peripheral)->dma_signal_tx_trigger;
 }
 
 /***************************************************************************//**

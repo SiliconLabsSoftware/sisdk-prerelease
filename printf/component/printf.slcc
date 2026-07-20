@@ -28,6 +28,9 @@ template_contribution:
 source:
 - path: printf.c
 - path: src/iostream_printf.c
+define:
+- name: PRINTF_DISABLE_SUPPORT_FLOAT
+  condition: [cortexm55]
 toolchain_settings:
 - option: no_builtin_printf
   value: enabled

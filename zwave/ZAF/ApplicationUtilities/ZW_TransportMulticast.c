@@ -85,6 +85,12 @@ static uint8_t * p_data_hold;
 static size_t data_length_hold;
 static node_id_t singleCastTxDestNodeId = 0;  // this variable is used to save the current destination node ID for the singlecast follow-up frames
 static TRANSMIT_OPTIONS_TYPE_EX * p_nodelist_hold;
+/**
+ * Copy of @c ReqNodeList() transmit options for the multicast session in progress.
+ * @c ReqNodeList() uses one static @c TRANSMIT_OPTIONS_TYPE_EX; the TX FIFO may call it again
+ * before this multicast completes, which would overwrite fields still read via @c p_nodelist_hold.
+ */
+static TRANSMIT_OPTIONS_TYPE_EX nodelist_options_snapshot;
 
 static bool multicast_cb_called = false;
 static bool gotSupervision      = false;
@@ -368,21 +374,32 @@ ZW_TransportMulticast_SendRequest(const uint8_t * const p_data,
                                   TRANSMIT_OPTIONS_TYPE_EX * p_nodelist,
                                   ZAF_TX_Callback_t p_callback)
 {
-  if (IS_NULL(p_nodelist) || 0 == p_nodelist->list_length
-      || IS_NULL(p_data) || 0 == data_length || multiCastInProgress) {
+  if (IS_NULL(p_nodelist)) {
     return ETRANSPORTMULTICAST_FAILED;
   }
+  if (0 == p_nodelist->list_length) {
+    return ETRANSPORTMULTICAST_FAILED;
+  }
+  if (IS_NULL(p_data)) {
+    return ETRANSPORTMULTICAST_FAILED;
+  }
+  if (0 == data_length) {
+    return ETRANSPORTMULTICAST_FAILED;
+  }
+  if (multiCastInProgress) {
+    return ETRANSPORTMULTICAST_FAILED;
+  }
+  memcpy(&nodelist_options_snapshot, p_nodelist, sizeof(TRANSMIT_OPTIONS_TYPE_EX));
+  p_nodelist_hold = &nodelist_options_snapshot;
 
   memcpy(&txBuf.appTxBuf, p_data, data_length);
 
   p_callback_hold = p_callback;
-  p_nodelist_hold = p_nodelist;
   p_data_hold = (uint8_t *)&(txBuf.appTxBuf);
   data_length_hold = data_length;
 
   CommandClassSupervisionGetAdd(&(txBuf.supervisionGet));
   if (true != RequestBufferSetPayloadLength(data_length)) {
-    // Failure to set payload length
     return ETRANSPORTMULTICAST_FAILED;
   }
 
@@ -401,7 +418,6 @@ ZW_TransportMulticast_SendRequest(const uint8_t * const p_data,
         &data_length_hold,
         ((0 != (SECURITY_KEY_S2_MASK & secKeys))
          && fSupervisionEnableHold))) {
-    // Something is wrong.
     return ETRANSPORTMULTICAST_FAILED;
   }
   multicast_cb_called = false;

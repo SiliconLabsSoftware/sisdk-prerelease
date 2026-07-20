@@ -21,6 +21,7 @@ requires:
 - name: device
 - name: device_has_leddrv
 - name: device_series_3
+- name: log_none
 - name: hal_common
 - name: cmsis_core
 - name: enum

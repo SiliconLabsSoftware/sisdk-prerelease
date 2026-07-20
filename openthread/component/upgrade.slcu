@@ -12,8 +12,8 @@ upgrade:
           - ot_mbedtls
       - script: openthread/component/script/upgrade_log_config.lua
         description: >
-          The implementation for platform defined logging has been split into the ot_rtt_log component.
-          If a project configures for platform defined logging, this component must be included.
+          Projects that configure platform defined logging must include a component that provides
+          ot_platform_defined_logger. If a project has no such component, ot_rtt_log is added.
 
   - sdk:
       id: simplicity_sdk

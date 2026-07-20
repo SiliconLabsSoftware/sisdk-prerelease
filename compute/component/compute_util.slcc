@@ -5,9 +5,6 @@ description: >
   This component provides compute utilities.
 category: Compute
 quality: production
-documentation:
-  docset: compute
-  document: compute-reference-guide
 metadata:
   sbom:
     license: Zlib

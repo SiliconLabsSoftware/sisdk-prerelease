@@ -15,7 +15,6 @@ ui_hints:
 requires:
 - name: device_init
 - name: sl_main
-- name: wisun_mac
 - name: a_radio_config
 - name: emlib_ldma   # em_ldma.h required
 - name: memory_manager

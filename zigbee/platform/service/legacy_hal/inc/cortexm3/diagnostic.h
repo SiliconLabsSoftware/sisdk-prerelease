@@ -979,7 +979,7 @@ typedef union {
     uint32_t KSULPWAES_IRQn         : 1; /*!< 72 Si KSULPWAES Interrupt */
     uint32_t KSUHOSTSYMCRYPTO_IRQn  : 1; /*!< 73 Si KSUHOSTSYMCRYPTO Interrupt */
     uint32_t SYMCRYPTO_IRQn         : 1; /*!< 74 Si SYMCRYPTO Interrupt */
-    uint32_t AES_IRQn               : 1; /*!< 75 Si AES Interrupt */
+    uint32_t LPWAES_IRQn            : 1; /*!< 75 Si LPWAES Interrupt */
     uint32_t ADC0_IRQn              : 1; /*!< 76 Si ADC0 Interrupt */
     uint32_t LEDDRV0_IRQn           : 1; /*!< 77 Si LEDDRV0 Interrupt */
     uint32_t DPLL0_IRQn             : 1; /*!< 78 Si DPLL0 Interrupt */
@@ -999,12 +999,21 @@ typedef union {
   uint32_t word[3];
 #elif defined(_SILICON_LABS_32B_SERIES_3_CONFIG_302)
     // There are 100 used bits
-    uint32_t                : 32; // B0-31
-    uint32_t                : 32; // B32-63
-    uint32_t                : 32; // B64-95
-    uint32_t                : 32; // B96-127
+    uint32_t RESERVED0              : 32; // B0-31
+    uint32_t RESERVED1              : 32; // B32-63
+    uint32_t RESERVED2              : 32; // B64-95
+    uint32_t RESERVED3              : 32; // B96-127
   } bits;
   uint32_t word[4];
+#elif defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+    // There are 160 used bits
+    uint32_t RESERVED0              : 32; // B0-31
+    uint32_t RESERVED1              : 32; // B32-63
+    uint32_t RESERVED2              : 32; // B64-95
+    uint32_t RESERVED3              : 32; // B96-127
+    uint32_t RESERVED4              : 32; // B128-159
+  } bits;
+  uint32_t word[5];
 #elif CORTEXM3_EMBER_MICRO
     uint32_t TIM1_IRQn      : 1;  // B0
     uint32_t TIM2_IRQn      : 1;  // B1

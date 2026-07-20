@@ -57,6 +57,42 @@
 #define TRACE_LEVEL_RESIZE                          TRACE_LEVEL_LOW
 #define TRACE_LEVEL_WRITE                           TRACE_LEVEL_LOW
 
+// NVM3 operation timing trace. Uses the Cortex-M DWT cycle counter via the
+// sl_cycle_counter driver when NVM3_TIME_TRACE_ENABLE is set. Currently enabled
+// for repack operations only. Compiled out when NVM3_TIME_TRACE_ENABLE is 0 and
+// on host builds.
+#if (NVM3_TIME_TRACE_ENABLE != 0) && !defined(NVM3_HOST_BUILD)
+#include "sl_cycle_counter.h"
+
+#define NVM3_TIME_TRACE_BEGIN(count)                                                           \
+  do {                                                                                         \
+    (void)sl_cycle_counter_init(count);                                                        \
+    sl_cycle_counter_enable();                                                                 \
+    sl_cycle_counter_start(count);                                                             \
+  } while (0)
+
+#define NVM3_TIME_TRACE_END(count, label_str)                                                  \
+  do {                                                                                         \
+    uint32_t nvm3_time_trace_cycles;                                                           \
+    uint32_t nvm3_time_trace_duration_us;                                                      \
+    uint32_t nvm3_time_trace_freq_hz;                                                          \
+    sl_cycle_counter_stop(count);                                                              \
+    nvm3_time_trace_cycles = sl_cycle_counter_get_cycles(count);                               \
+    nvm3_time_trace_freq_hz = SystemCoreClockGet();                                            \
+    if (nvm3_time_trace_freq_hz > 0U) {                                                        \
+      nvm3_time_trace_duration_us = (uint32_t)((uint64_t)nvm3_time_trace_cycles * 1000000ULL   \
+                                               / (uint64_t)nvm3_time_trace_freq_hz);           \
+      nvm3_tracePrint(NVM3_TRACE_LEVEL_WARNING,                                                \
+                      "NVM3 " label_str " took %lu us (%lu cycles).\n",                        \
+                      (unsigned long)nvm3_time_trace_duration_us,                              \
+                      (unsigned long)nvm3_time_trace_cycles);                                  \
+    }                                                                                          \
+  } while (0)
+#else
+#define NVM3_TIME_TRACE_BEGIN(count)           ((void)(count))
+#define NVM3_TIME_TRACE_END(count, label_str)  do { (void)(count); (void)(label_str); } while (0)
+#endif
+
 // Bit masking of the page size. pageSize MUST be power of 2.
 #define PAGE_SIZE_MASK(pageSize)                    ((pageSize) - 1U)
 
@@ -119,6 +155,9 @@ uint8_t nvm3_decBuf[NVM3_MAX_OBJECT_SIZE_HIGH_LIMIT];
 // definition could be changed for test and comparison.
 #define ALLOCATE_NVM3_OBJ_STATIC            1
 
+// Enable assertions to detect overlapping use of statically allocated NVM3 objects
+#define DEBUG_ALLOCATE_NVM3_OBJ_STATIC      0
+
 #if ALLOCATE_NVM3_OBJ_STATIC
 #define NVM3_OBJ_T_ALLOCATION(obj)
 #else
@@ -137,10 +176,13 @@ uint8_t nvm3_decBuf[NVM3_MAX_OBJECT_SIZE_HIGH_LIMIT];
 
 // Defined hooks to check overlapped use of obj's
 #if ALLOCATE_NVM3_OBJ_STATIC
-//#define objBegin(obj) do { if (obj.objAdr != NULL) { assert(false); } } while (false)
-//#define objEnd(obj) do { obj.objAdr = NULL; } while (false)
+#if DEBUG_ALLOCATE_NVM3_OBJ_STATIC
+#define objBegin(obj) do { if ((obj).objAdr != NULL) { assert(false); } } while (false)
+#define objEnd(obj)   do { (obj).objAdr = NULL; } while (false)
+#else
 #define objBegin(obj)
 #define objEnd(obj)
+#endif
 #else
 #define objBegin(obj)
 #define objEnd(obj)
@@ -194,7 +236,7 @@ static uint32_t instanceCnt = 0;
 //****************************************************************************
 // Function prototypes
 #if !defined(NVM3_SECURITY)
-static uint32_t getObjContent(nvm3_Handle_t *h, size_t hdrLen, nvm3_Obj_t *obj, size_t ofs);
+static uint32_t getObjContent(const nvm3_Handle_t *h, size_t hdrLen, nvm3_Obj_t *obj, size_t ofs);
 #endif
 static uint32_t readCounter(nvm3_Handle_t *h, nvm3_Obj_t *);
 static sl_status_t repackUntilGood(nvm3_Handle_t *h);
@@ -213,7 +255,7 @@ static void getMemInfo(nvm3_Handle_t *h);
 //****************************************************************************
 // Static functions
 
-__STATIC_INLINE size_t pagesRepack(nvm3_Handle_t *h)
+__STATIC_INLINE size_t pagesRepack(const nvm3_Handle_t *h)
 {
   // A repack may require for maximum:
   // All objects in the first page
@@ -231,7 +273,7 @@ __STATIC_INLINE size_t pagesRepack(nvm3_Handle_t *h)
   return cntRepackA + cntRepackB + cntExtra;
 }
 
-__STATIC_INLINE size_t thrFull(nvm3_Handle_t *h, size_t objSize)
+__STATIC_INLINE size_t thrFull(const nvm3_Handle_t *h, size_t objSize)
 {
   // The full threshold is just the object size
   return OBJ_LEN_REQ(h->halInfo.pageSize, objSize);
@@ -339,20 +381,20 @@ __STATIC_INLINE size_t pageIdxFromAdr(nvm3_Handle_t *h, void *adr)
   return offset / h->halInfo.pageSize;
 }
 
-__STATIC_INLINE bool samePage(nvm3_Handle_t *h, const void *ptrA, const void *ptrB)
+__STATIC_INLINE bool samePage(const nvm3_Handle_t *h, const void *ptrA, const void *ptrB)
 {
   size_t mask = h->halInfo.pageSize - 1U;
   const uint8_t *addrA = ptrA;
   const uint8_t *addrB = ptrB;
-  return ((((size_t)addrA) & ~(mask)) == (((size_t)addrB) & ~(mask)));
+  return ((size_t)addrA & ~mask) == ((size_t)addrB & ~mask);
 }
 
-__STATIC_INLINE size_t pageIdxIncrement(nvm3_Handle_t *h, size_t idx)
+__STATIC_INLINE size_t pageIdxIncrement(const nvm3_Handle_t *h, size_t idx)
 {
   return (idx + 1U) % h->totalNvmPageCnt;
 }
 
-__STATIC_INLINE size_t pageIdxDecrement(nvm3_Handle_t *h, size_t idx)
+__STATIC_INLINE size_t pageIdxDecrement(const nvm3_Handle_t *h, size_t idx)
 {
   return (idx > 0U) ? (idx - 1U) : (h->totalNvmPageCnt - 1U);
 }
@@ -532,13 +574,13 @@ static size_t getPreviousGoodPage(nvm3_Handle_t *h, size_t idx)
   return idx;
 }
 
-__STATIC_INLINE size_t pageFreeSize(nvm3_Handle_t *h, const void *adr)
+__STATIC_INLINE size_t pageFreeSize(const nvm3_Handle_t *h, const void *adr)
 {
   const uint8_t * mem = adr;
   return (h->halInfo.pageSize - ((size_t)mem & (PAGE_SIZE_MASK(h->halInfo.pageSize))));
 }
 
-__STATIC_INLINE size_t getPageOfs(nvm3_Handle_t *h, nvm3_HalPtr_t adr)
+__STATIC_INLINE size_t getPageOfs(const nvm3_Handle_t *h, nvm3_HalPtr_t adr)
 {
   return (size_t)adr & PAGE_SIZE_MASK(h->halInfo.pageSize);
 }
@@ -654,17 +696,17 @@ __STATIC_INLINE bool keyIsValid(nvm3_ObjectKey_t key)
   return ((key & NVM3_KEY_MASK) == key);
 }
 
-__STATIC_INLINE size_t counterMaxIncVal(nvm3_Handle_t *h)
+__STATIC_INLINE size_t counterMaxIncVal(const nvm3_Handle_t *h)
 {
   return (h->halInfo.writeSize == NVM3_HAL_WRITE_SIZE_16) ? COUNTER_MAX_INC_VAL_16 : COUNTER_MAX_INC_VAL_32;
 }
 
-__STATIC_INLINE size_t counterMaxNumberOfInc(nvm3_Handle_t *h)
+__STATIC_INLINE size_t counterMaxNumberOfInc(const nvm3_Handle_t *h)
 {
   return (h->halInfo.writeSize == NVM3_HAL_WRITE_SIZE_16) ? COUNTER_MAX_NO_INC_16 : COUNTER_MAX_NO_INC_32;
 }
 
-__STATIC_INLINE size_t counterNumberOfIncPrBase(nvm3_Handle_t *h)
+__STATIC_INLINE size_t counterNumberOfIncPrBase(const nvm3_Handle_t *h)
 {
   return (h->halInfo.writeSize == NVM3_HAL_WRITE_SIZE_16) ? COUNTER_NO_INC_PER_NEW_MEM_LOC_16 : COUNTER_NO_INC_PER_NEW_MEM_LOC_32;
 }
@@ -1013,15 +1055,13 @@ static sl_status_t writeObj(nvm3_Handle_t *h, nvm3_Obj_t *srcObj, nvm3_Obj_t *ds
   srcHdrLen = srcHdrIsLarge ? NVM3_OBJ_HEADER_SIZE_LARGE : NVM3_OBJ_HEADER_SIZE_SMALL;
 
   dstHdrIsLarge = (srcLen > NVM3_OBJ_SMALL_MAX_SIZE);
-  if (!dstHdrIsLarge) {
-    if (pageFreeBytes < (srcLen + NVM3_OBJ_HEADER_SIZE_SMALL)) {
-      // In this case, normally the object will be fragmented.
-      // But if the first fragment is empty it is still small - starting in the next page.
-      if ((srcLen > 0) && (pageFreeBytes > NVM3_OBJ_HEADER_SIZE_LARGE)) {
-        dstHdrIsLarge = true;
-      } else {
-        dstHdrAux = NVM3_OBJ_HEADER_SIZE_LARGE - NVM3_OBJ_HEADER_SIZE_SMALL;
-      }
+  if ((!dstHdrIsLarge) && (pageFreeBytes < (srcLen + NVM3_OBJ_HEADER_SIZE_SMALL))) {
+    // In this case, normally the object will be fragmented.
+    // But if the first fragment is empty it is still small - starting in the next page.
+    if ((srcLen > 0) && (pageFreeBytes > NVM3_OBJ_HEADER_SIZE_LARGE)) {
+      dstHdrIsLarge = true;
+    } else {
+      dstHdrAux = NVM3_OBJ_HEADER_SIZE_LARGE - NVM3_OBJ_HEADER_SIZE_SMALL;
     }
   }
   dstHdrLen = dstHdrIsLarge ? NVM3_OBJ_HEADER_SIZE_LARGE : NVM3_OBJ_HEADER_SIZE_SMALL;
@@ -1409,7 +1449,14 @@ static sl_status_t fifoWriteWrapper(nvm3_Handle_t *h, nvm3_ObjectKey_t key,
     return SL_STATUS_NVM3_WRITE_DATA_SIZE;
   }
 
+#if (NVM3_TIME_TRACE_ENABLE != 0) && !defined(NVM3_HOST_BUILD)
+  sl_cycle_counter_handle_t nvm3_repack_cc;
+  NVM3_TIME_TRACE_BEGIN(&nvm3_repack_cc);
   (void)repackUntilGood(h);
+  NVM3_TIME_TRACE_END(&nvm3_repack_cc, "forced repack");
+#else
+  (void)repackUntilGood(h);
+#endif
 
   // Always allow writing of delete objects.
   wrAllowed = (objGroup == objGroupDeleted) ? true : writeHardAllowed(h, srcLen);
@@ -1881,10 +1928,9 @@ static bool validateObjFragments(nvm3_Handle_t *h, nvm3_ObjPtr_t fragAdr, nvm3_O
   /* Find the next object location. For fragmentation or
      packet error, the next object is the current object.
      Retry, starting from that new object. */
-  if (obj->isValid) {
-    if ((!fragError) || (fragError && ((fragTyp != fragTypeFirst) && (fragTyp != fragTypeNone)))) {
-      obj->nextObjAdr = getNextObj(h, fragAdr, hdrLen, fragLen);
-    }
+  if ((obj->isValid)
+      && ((!fragError) || (fragError && ((fragTyp != fragTypeFirst) && (fragTyp != fragTypeNone))))) {
+    obj->nextObjAdr = getNextObj(h, fragAdr, hdrLen, fragLen);
   }
 
   nvm3_tracePrint(TRACE_LEVEL_LOW, "      validateObjFragments: fragment: is=%u, typ=%u, error=%u, cnt=%u\n", obj->isFragmented ? 1 : 0, fragTyp, fragError, obj->frag.idx);
@@ -1900,13 +1946,13 @@ static bool validateObjFragments(nvm3_Handle_t *h, nvm3_ObjPtr_t fragAdr, nvm3_O
   }
 
   // If the object is fragmented, validate the next fragment.
-  if (checkAllFrag && (obj->isValid)) {
-    if ((obj->isFragmented)
-        && (!fragError)
-        && (fragTyp != fragTypeLast)
-        && (obj->nextObjAdr != NVM3_OBJ_PTR_INVALID)) {
-      obj->isValid = validateObjFragments(h, obj->nextObjAdr, obj, true, pObjGroup);
-    }
+  if (checkAllFrag
+      && (obj->isValid)
+      && (obj->isFragmented)
+      && (!fragError)
+      && (fragTyp != fragTypeLast)
+      && (obj->nextObjAdr != NVM3_OBJ_PTR_INVALID)) {
+    obj->isValid = validateObjFragments(h, obj->nextObjAdr, obj, true, pObjGroup);
   }
 
   nvm3_tracePrint(TRACE_LEVEL_LOW, "      validateObjFragments: done, key=%lu, adr=%p, valid=%s, group=%d\n", obj->key, fragAdr, obj->isValid ? "true" : "false", *pObjGroup);
@@ -2065,7 +2111,7 @@ static sl_status_t findObj(nvm3_Handle_t *h, nvm3_ObjectKey_t key, nvm3_Obj_t *o
 
 #if !defined(NVM3_SECURITY)
 /* Read object data (as a word) from the position given by the index. */
-static uint32_t getObjContent(nvm3_Handle_t *h, size_t hdrLen, nvm3_Obj_t *obj, size_t ofs)
+static uint32_t getObjContent(const nvm3_Handle_t *h, size_t hdrLen, nvm3_Obj_t *obj, size_t ofs)
 {
   nvm3_HalPtr_t adr = obj->objAdr;
   uint32_t word;
@@ -2092,13 +2138,12 @@ static uint32_t getObjContent(nvm3_Handle_t *h, size_t hdrLen, nvm3_Obj_t *obj, 
 
 static size_t findValidPageCnt(nvm3_Handle_t *h)
 {
-  size_t idx;
   nvm3_HalPtr_t pageAdr;
   nvm3_PageHdr_t pageHdr;
   nvm3_PageState_t pageState;
 
   h->validNvmPageCnt = 0;
-  for (idx = 0; idx < h->totalNvmPageCnt; idx++) {
+  for (size_t idx = 0; idx < h->totalNvmPageCnt; idx++) {
     pageAdr = pageAdrFromIdx(h, idx);
     nvm3_halReadWords(HAL, pageAdr, &pageHdr, NVM3_PAGE_HEADER_WSIZE);
     pageState = nvm3_pageGetState(&pageHdr);
@@ -2160,14 +2205,13 @@ static void findFirstPage(nvm3_Handle_t *h)
 
 static size_t findNumberOfUnusedPages(nvm3_Handle_t *h)
 {
-  size_t idx;
   nvm3_HalPtr_t pageAdr;
   nvm3_PageHdr_t pageHdr;
   nvm3_PageState_t pageState;
   size_t unusedSize;
   size_t unusedCnt = 0;
 
-  for (idx = 0; idx < h->totalNvmPageCnt; idx++) {
+  for (size_t idx = 0; idx < h->totalNvmPageCnt; idx++) {
     pageAdr = pageAdrFromIdx(h, idx);
     nvm3_halReadWords(HAL, pageAdr, &pageHdr, NVM3_PAGE_HEADER_WSIZE);
     pageState = nvm3_pageGetState(&pageHdr);
@@ -2589,10 +2633,9 @@ static void eraseEipAndInvalidPages(nvm3_Handle_t *h)
   nvm3_HalPtr_t pageAdr;
   nvm3_PageHdr_t pageHdr;
   nvm3_PageState_t pageState;
-  size_t idx;
   uint32_t eraseCnt;
 
-  for (idx = 0; idx < h->totalNvmPageCnt; idx++) {
+  for (size_t idx = 0; idx < h->totalNvmPageCnt; idx++) {
     pageAdr = pageAdrFromIdx(h, idx);
     nvm3_halReadWords(HAL, pageAdr, &pageHdr, NVM3_PAGE_HEADER_WSIZE);
     pageState = nvm3_pageGetState(&pageHdr);
@@ -2687,7 +2730,7 @@ static sl_status_t repackUntilGood(nvm3_Handle_t *h)
   return sta;
 }
 
-static nvm3_HalPtr_t counterIdxToAdr(nvm3_Handle_t *h, nvm3_Obj_t *obj, size_t idx, bool *high)
+static nvm3_HalPtr_t counterIdxToAdr(const nvm3_Handle_t *h, nvm3_Obj_t *obj, size_t idx, bool *high)
 {
   nvm3_HalPtr_t incAddr = 0;
   size_t incOffset;
@@ -3204,14 +3247,14 @@ static sl_status_t initialize(nvm3_Handle_t *h, uint32_t newCfgEraseCnt)
   return sta;
 }
 
-static void workBegin(nvm3_Handle_t *h, nvm3_HalNvmAccessCode_t access)
+static void workBegin(const nvm3_Handle_t *h, nvm3_HalNvmAccessCode_t access)
 {
   (void)h;
   nvm3_lockBegin();
   nvm3_halNvmAccess(HAL, access);
 }
 
-static void workEnd(nvm3_Handle_t *h)
+static void workEnd(const nvm3_Handle_t *h)
 {
   (void)h;
   nvm3_halNvmAccess(HAL, NVM3_HAL_NVM_ACCESS_NONE);
@@ -3818,13 +3861,13 @@ static bool enumScanFifoCallback(nvm3_Handle_t *h, nvm3_ObjPtr_t obj, nvm3_ObjGr
   if (((bool)(group == objGroupDeleted) == scanEnum->lookForDeleted) && (obj->key >= scanEnum->keyMin) && (obj->key <= scanEnum->keyMax)) {
     objBegin(pObjB);
     sta = findObj(h, obj->key, pObjB, &objFindGroup);
-    if ((sta == SL_STATUS_OK) && (pObjB->objAdr == obj->objAdr)) {
-      if ((objFindGroup == objGroupDeleted) == (scanEnum->lookForDeleted)) {
-        scanEnum->keyTotalCnt++;
-        if (scanEnum->keyListIdx < scanEnum->keyListSize) {
-          scanEnum->keyListPtr[scanEnum->keyListIdx] = obj->key;
-          scanEnum->keyListIdx++;
-        }
+    if ((sta == SL_STATUS_OK)
+        && (pObjB->objAdr == obj->objAdr)
+        && ((objFindGroup == objGroupDeleted) == (scanEnum->lookForDeleted))) {
+      scanEnum->keyTotalCnt++;
+      if (scanEnum->keyListIdx < scanEnum->keyListSize) {
+        scanEnum->keyListPtr[scanEnum->keyListIdx] = obj->key;
+        scanEnum->keyListIdx++;
       }
     }
     objEnd(pObjB);
@@ -4001,7 +4044,14 @@ sl_status_t nvm3_repack(nvm3_Handle_t *h)
 
   repackNeeded = !softUserAvailable(h);
   if (repackNeeded) {
+#if (NVM3_TIME_TRACE_ENABLE != 0) && !defined(NVM3_HOST_BUILD)
+    sl_cycle_counter_handle_t nvm3_repack_cc;
+    NVM3_TIME_TRACE_BEGIN(&nvm3_repack_cc);
     repackOnce(h);
+    NVM3_TIME_TRACE_END(&nvm3_repack_cc, "user repack");
+#else
+    repackOnce(h);
+#endif
   }
 
   nvm3_tracePrint(TRACE_LEVEL_INFO, "nvm3_repack: End,   unusedNvmSize=%u, nextObj=%p.\n", h->unusedNvmSize, h->fifoNextObj);

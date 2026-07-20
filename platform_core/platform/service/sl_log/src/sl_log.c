@@ -32,6 +32,7 @@
 #include "sl_log.h"
 #include "sl_log_internal.h"
 #include "sl_log_platform_specific.h"
+#include "sl_core.h"
 #include "sl_log_common_config.h"
 #include "sl_component_catalog.h"
 #ifdef SL_CATALOG_LOG_BACKEND_PROPRIETARY_PRESENT
@@ -164,21 +165,25 @@ static inline void update_over_flow_event(uint32_t overflow_count)
 
 /**
  * @brief atomic check of the backend transfer status
- * 
- * Checks the backend transfer status atomically by disabling interrupts
- * and checking the backend transfer status.
- * 
+ *
+ * `backend_transfer_done` is shared with log producers in
+ * `log_write_to_ring_buffer()` (ISR-safe). The atomic section makes the
+ * read-and-clear indivisible: only one `sl_log_flush()` proceeds, and
+ * producers immediately see the backend as busy once this caller claims it.
+ *
  * @return bool True if the backend transfer is done, false otherwise
  */
 static inline bool log_is_backend_flush_done(void)
 {
   bool is_done = false;
-  __disable_irq();
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_ATOMIC();
+
   if (sl_log_backend_status.backend_transfer_done) {
-    sl_log_backend_status.backend_transfer_done = 0;  // claim
+    sl_log_backend_status.backend_transfer_done = 0;
     is_done = true;
   }
-  __enable_irq();
+  CORE_EXIT_ATOMIC();
   return is_done;
 }
 #else
@@ -1308,7 +1313,7 @@ sl_status_t sl_log_backend_init(void)
  * @note This function should be called before entering any sleep mode.
  * @note Must be paired with sl_log_post_sleep_process() after wake-up.
  */
-sl_status_t sl_log_pre_sleep_process(void * args)
+sl_status_t sl_log_pre_sleep_process(const void *args)
 {
   if(sl_log_get_api_core() == NULL) {
     return SL_STATUS_NOT_INITIALIZED;
@@ -1342,7 +1347,7 @@ sl_status_t sl_log_pre_sleep_process(void * args)
  * @note Must be paired with sl_log_pre_sleep_process() before sleep entry.
  * @note Logging functionality may be impaired until this function completes.
  */
-sl_status_t sl_log_post_sleep_process(void * args)
+sl_status_t sl_log_post_sleep_process(const void *args)
 {
   if(sl_log_get_api_core() == NULL) {
     return SL_STATUS_NOT_INITIALIZED;
@@ -1358,7 +1363,7 @@ sl_status_t sl_log_post_sleep_process(void * args)
  * @return sl_status_t SL_STATUS_OK if successful, or an error code if
  * initialization fails.
  */
-sl_status_t sl_log_set_configurations(void *args, uint8_t core_id)
+sl_status_t sl_log_set_configurations(const void *args, uint8_t core_id)
 {
   if(sl_log_get_api_core() == NULL) {
     return SL_STATUS_NOT_INITIALIZED;
@@ -1417,7 +1422,7 @@ sl_status_t sl_log_get_configurations(void *args, uint8_t core_id)
  * @note SystemView backend processes events individually for real-time
  * analysis.
  */
-sl_status_t sl_log_backend_write(sl_log_event_t *buffer, uint32_t read_index,
+sl_status_t sl_log_backend_write(const sl_log_event_t *buffer, uint32_t read_index,
                                  uint32_t event_count)
 {
   sl_log_api_backend_t * sl_log_backend_api=sl_log_get_api_backend();
@@ -1486,7 +1491,7 @@ uint32_t sl_log_get_timestamp_timer_frequency(uint8_t core_id)
  * @note Should be called periodically to maintain synchronization accuracy.
  * @note Platform-specific implementation determines synchronization method.
  */
-sl_status_t sl_log_sync_timestamp(uint8_t core_id, void *args)
+sl_status_t sl_log_sync_timestamp(uint8_t core_id, const void *args)
 {
   if(sl_log_get_api_core() == NULL) {
     return SL_STATUS_NOT_INITIALIZED;

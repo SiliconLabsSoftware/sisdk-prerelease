@@ -1,0 +1,11 @@
+# Properties file for Simplicity Studio metadata.
+id=com.silabs.tool.wisun
+label=Wi-SUN stack
+description=Wi-SUN stack sources and tools
+version=2.14.0
+
+# General properties are prepended with "prop."
+prop.file.templatesFile=
+prop.file.demosFile=
+prop.file.adapterPacks=middleware/wisun_config/scripts/apack.info
+prop.file.hkconfAdkModels=

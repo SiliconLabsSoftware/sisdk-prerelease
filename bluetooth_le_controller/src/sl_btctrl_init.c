@@ -185,6 +185,9 @@ sl_status_t sl_btctrl_init_internal(struct sl_btctrl_config *config)
 
 #if defined(SL_CATALOG_BLUETOOTH_RCP_PRESENT)
   sl_btctrl_configure_le_buffer_size(SL_BT_CONTROLLER_LE_BUFFER_SIZE_MAX);
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_ISO_CONN_PRESENT) || defined(SL_CATALOG_BLUETOOTH_FEATURE_ISO_BCAST_PRESENT)
+  sl_btctrl_configure_le_iso_buffer_size(SL_BT_CONTROLLER_LE_ISO_BUFFER_SIZE_MAX);
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_ISO_CONN_PRESENT or SL_CATALOG_BLUETOOTH_FEATURE_ISO_BCAST_PRESENT
 #endif // SL_CATALOG_BLUETOOTH_RCP_PRESENT
 
   status = sl_btctrl_init_mem(config);
@@ -680,6 +683,10 @@ sl_status_t sl_btctrl_init(void)
 
   sl_btctrl_init_config(&config);
   config.buffer_memory = SL_BT_CONTROLLER_BUFFER_MEMORY;
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_ISO_CONN_PRESENT) \
+  || defined(SL_CATALOG_BLUETOOTH_FEATURE_ISO_BCAST_PRESENT)
+  config.buffer_memory += SL_BT_CONTROLLER_ISO_BUFFER_MEMORY;
+#endif
 
   return sl_btctrl_init_internal(&config);
 }

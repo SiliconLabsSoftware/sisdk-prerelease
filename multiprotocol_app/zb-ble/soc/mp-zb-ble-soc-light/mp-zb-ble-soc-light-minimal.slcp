@@ -1,6 +1,6 @@
 project_name: mp-zb-ble-soc-light-minimal
 label: Zigbee BLE DMP - SoC Light (Minimal)
-package: multiprotocol
+package: multiprotocol_app
 category: Zigbee Application
 quality: production
 description: Demonstrates a Zigbee + BLE DMP (Dynamic Multiprotocol) light application without LCD, LEDs, or buttons.
@@ -8,6 +8,7 @@ author: Silicon Laboratories, Inc.
 
 component:
   - id: sl_main
+  - id: watchdog_manager
   - id: cli
     instance:
       - example

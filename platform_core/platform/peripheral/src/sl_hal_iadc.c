@@ -32,7 +32,6 @@
 
 #if defined(IADC_COUNT) && (IADC_COUNT > 0)
 
-#include "sl_assert.h"
 #include "sl_common.h"
 #include "sl_hal_system.h"
 #include <stddef.h>
@@ -227,8 +226,8 @@ void sl_hal_iadc_init(IADC_TypeDef *iadc,
   uint8_t timebase;
   sl_hal_iadc_config_adc_mode_t adc_mode;
 
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
-  EFM_ASSERT(init != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(init != NULL);
 
   // Calculate min allowed SRC_CLK prescaler setting.
   src_clk_prescale = sl_hal_iadc_calculate_src_clk_prescale(iadc, IADC_CLK_MAX_FREQ, src_clk_freq);
@@ -332,8 +331,8 @@ void sl_hal_iadc_calculate_gain_offset(IADC_TypeDef *iadc,
                                        uint8_t config,
                                        uint32_t adc_clk_prescale)
 {
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
-  EFM_ASSERT(init != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(init != NULL);
 
   // Calculate gain and offset based on ADC mode
   switch (adc_mode) {
@@ -352,7 +351,7 @@ void sl_hal_iadc_calculate_gain_offset(IADC_TypeDef *iadc,
 
     default:
       // Mode not supported.
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       break;
   }
 
@@ -366,11 +365,11 @@ void sl_hal_iadc_calculate_gain_offset(IADC_TypeDef *iadc,
  ******************************************************************************/
 void sl_hal_iadc_reset(IADC_TypeDef *iadc)
 {
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   // Write all WSYNC registers to reset value while enabled.
   sl_hal_iadc_enable(iadc);
-  EFM_ASSERT((iadc->EN & _IADC_EN_EN_MASK) == _IADC_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT((iadc->EN & _IADC_EN_EN_MASK) == _IADC_EN_EN_MASK);
 
   // Stop conversions and timer, before resetting other registers.
   iadc->CMD = IADC_CMD_SINGLESTOP | IADC_CMD_SCANSTOP | IADC_CMD_TIMERDIS;
@@ -447,13 +446,13 @@ void sl_hal_iadc_init_scan(IADC_TypeDef *iadc,
                            const sl_hal_iadc_init_scan_t *init,
                            const sl_hal_iadc_scan_table_t *scan_table)
 {
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
-  EFM_ASSERT(init != NULL);
-  EFM_ASSERT(scan_table != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(init != NULL);
+  SL_LOG_DEBUG_ASSERT(scan_table != NULL);
 
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
   // Errata IADC_E305. Makes sure that DVL is equal or less than 7 entries.
-  EFM_ASSERT(init->data_valid_level <= SL_HAL_IADC_DATA_VALID_7);
+  SL_LOG_DEBUG_ASSERT(init->data_valid_level <= SL_HAL_IADC_DATA_VALID_7);
 #endif
 
   sl_hal_iadc_disable(iadc);
@@ -491,8 +490,8 @@ void sl_hal_iadc_update_scan_entry(IADC_TypeDef *iadc,
                                    uint8_t id,
                                    sl_hal_iadc_scan_table_entry_t *entry)
 {
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
-  EFM_ASSERT(entry != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(entry != NULL);
 
   sl_hal_iadc_disable(iadc);
 
@@ -521,8 +520,8 @@ void sl_hal_iadc_update_scan_entry(IADC_TypeDef *iadc,
  ******************************************************************************/
 void sl_hal_iadc_set_scan_mask(IADC_TypeDef *iadc, uint32_t mask)
 {
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
-  EFM_ASSERT(mask <= ((1UL << IADC_SCANENTRIES(iadc)) - 1UL));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(mask <= ((1UL << IADC_SCANENTRIES(iadc)) - 1UL));
 
   sl_hal_iadc_enable(iadc);
 
@@ -538,8 +537,8 @@ void sl_hal_iadc_set_scan_mask_multiple_entries(IADC_TypeDef *iadc,
 {
   uint32_t temp = 0;
 
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
-  EFM_ASSERT(scan_table != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(scan_table != NULL);
 
   sl_hal_iadc_enable(iadc);
 
@@ -560,13 +559,13 @@ void sl_hal_iadc_init_single(IADC_TypeDef *iadc,
                              const sl_hal_iadc_init_single_t *init,
                              const sl_hal_iadc_single_input_t *input)
 {
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
-  EFM_ASSERT(init != NULL);
-  EFM_ASSERT(input != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(init != NULL);
+  SL_LOG_DEBUG_ASSERT(input != NULL);
 
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
   // Errata IADC_E305. Makes sure that DVL is equal or less than 7 entries.
-  EFM_ASSERT(init->data_valid_level <= SL_HAL_IADC_DATA_VALID_7);
+  SL_LOG_DEBUG_ASSERT(init->data_valid_level <= SL_HAL_IADC_DATA_VALID_7);
 #endif
 
   sl_hal_iadc_disable(iadc);
@@ -596,8 +595,8 @@ void sl_hal_iadc_init_single(IADC_TypeDef *iadc,
 void sl_hal_iadc_update_single_input(IADC_TypeDef *iadc,
                                      const sl_hal_iadc_single_input_t *input)
 {
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
-  EFM_ASSERT(input != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(input != NULL);
 
   // IADCn->SINGLE has WSYNC type and can only be written while enabled.
   sl_hal_iadc_enable(iadc);
@@ -621,8 +620,9 @@ uint8_t sl_hal_iadc_calculate_src_clk_prescale(IADC_TypeDef *iadc,
 {
   uint32_t ret;
 
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
-  EFM_ASSERT(src_clk_freq);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(src_clk_freq);
+  (void)iadc;
 
   // Make sure wanted CLK_SRC_ADC clock is below max allowed frequency.
   src_clk_freq = SL_MIN(src_clk_freq, IADC_CLK_MAX_FREQ);
@@ -651,8 +651,9 @@ uint32_t sl_hal_iadc_calculate_adc_clk_prescale(IADC_TypeDef *iadc,
 {
   uint32_t ret;
 
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
-  EFM_ASSERT(adc_clk_freq);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(adc_clk_freq);
+  (void)iadc;
 
   // Make sure wanted analog clock is below max allowed frequency for the given mode.
   if (adc_clk_freq > IADC_ANA_CLK_MAX_FREQ(adc_mode)) {
@@ -679,7 +680,7 @@ uint32_t sl_hal_iadc_calculate_adc_clk_prescale(IADC_TypeDef *iadc,
 uint8_t sl_hal_iadc_calculate_timebase(IADC_TypeDef *iadc,
                                        uint32_t src_clk_freq)
 {
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   // Make sure we get non-zero frequency for below calculation.
   if (src_clk_freq == 0UL) {
@@ -712,7 +713,7 @@ uint8_t sl_hal_iadc_calculate_timebase(IADC_TypeDef *iadc,
  ******************************************************************************/
 sl_hal_iadc_result_t sl_hal_iadc_read_single_result(IADC_TypeDef *iadc)
 {
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   uint32_t alignment = (iadc->SINGLEFIFOCFG & _IADC_SINGLEFIFOCFG_ALIGNMENT_MASK)
                        >> _IADC_SINGLEFIFOCFG_ALIGNMENT_SHIFT;
@@ -727,7 +728,7 @@ sl_hal_iadc_result_t sl_hal_iadc_read_single_result(IADC_TypeDef *iadc)
  ******************************************************************************/
 sl_hal_iadc_result_t sl_hal_iadc_read_single_fifo_result(IADC_TypeDef *iadc)
 {
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   uint32_t alignment = (iadc->SINGLEFIFOCFG & _IADC_SINGLEFIFOCFG_ALIGNMENT_MASK)
                        >> _IADC_SINGLEFIFOCFG_ALIGNMENT_SHIFT;
@@ -743,7 +744,7 @@ sl_hal_iadc_result_t sl_hal_iadc_read_single_fifo_result(IADC_TypeDef *iadc)
  ******************************************************************************/
 sl_hal_iadc_result_t sl_hal_iadc_read_scan_result(IADC_TypeDef *iadc)
 {
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   uint32_t alignment = (iadc->SCANFIFOCFG & _IADC_SCANFIFOCFG_ALIGNMENT_MASK)
                        >> _IADC_SCANFIFOCFG_ALIGNMENT_SHIFT;
@@ -758,7 +759,7 @@ sl_hal_iadc_result_t sl_hal_iadc_read_scan_result(IADC_TypeDef *iadc)
  ******************************************************************************/
 sl_hal_iadc_result_t sl_hal_iadc_pull_scan_fifo_result(IADC_TypeDef *iadc)
 {
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   uint32_t alignment = (iadc->SCANFIFOCFG & _IADC_SCANFIFOCFG_ALIGNMENT_MASK)
                        >> _IADC_SCANFIFOCFG_ALIGNMENT_SHIFT;
@@ -813,7 +814,7 @@ uint32_t sl_hal_iadc_get_reference_voltage(sl_hal_iadc_voltage_reference_t refer
       break;
 #endif
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       break;
   }
 
@@ -851,7 +852,7 @@ static sl_hal_iadc_result_t iadc_convert_raw_data_to_result(uint32_t raw_data,
       result.id   = (uint8_t)(raw_data & 0x000000FFUL);
       break;
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       break;
   }
 
@@ -937,6 +938,9 @@ static void iadc_calculate_normal_highspeed_gain_offset(IADC_TypeDef *iadc,
   unsigned analog_gain;
   uint16_t calc_ana_gain;
 
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(init != NULL);
+
   // Calculate analog gain.
   analog_gain = (iadc->CFG[config].CFG & _IADC_CFG_ANALOGGAIN_MASK) >> _IADC_CFG_ANALOGGAIN_SHIFT;
   calc_ana_gain = iadc_get_analog_gain_cal_value(analog_gain);
@@ -1020,6 +1024,9 @@ static void iadc_calculate_high_accuracy_gain_offset(IADC_TypeDef *iadc,
   float ref_voltage;
   unsigned analog_gain;
   uint16_t calc_ana_gain;
+
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(init != NULL);
 
   // Calculate analog gain.
   analog_gain = (iadc->CFG[config].CFG & _IADC_CFG_ANALOGGAIN_MASK) >> _IADC_CFG_ANALOGGAIN_SHIFT;

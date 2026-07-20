@@ -1,0 +1,25 @@
+id: btl_reset
+label: Bootloader reset
+package: bootloader
+description: >
+  Reset-cause implementation shared across Series 2 and Series 3 bootloaders.
+  Use for unit tests that exercise reset APIs without pulling in btl_core or btl_main.
+category: Platform|Bootloader|Core
+quality: production
+ui_hints:
+  visibility: never
+source:
+- path: platform/bootloader/core/btl_reset.c
+include:
+- path: platform/bootloader
+  file_list:
+  - path: core/btl_reset.h
+requires:
+- name: btl_util_header
+- name: bootloader_interface_headers
+provides:
+- name: btl_reset
+metadata:
+  sbom:
+    license: MSLA
+root_path: bootloader

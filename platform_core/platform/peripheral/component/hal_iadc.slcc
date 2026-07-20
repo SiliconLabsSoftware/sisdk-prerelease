@@ -21,6 +21,7 @@ provides:
 requires:
 - name: device
 - name: device_has_iadc
+- name: log_none
 - name: hal_common
 - name: hal_gpio
 - name: cmsis_core

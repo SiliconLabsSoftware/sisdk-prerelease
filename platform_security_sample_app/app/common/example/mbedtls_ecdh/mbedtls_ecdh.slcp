@@ -3,7 +3,7 @@ package: platform
 quality: production
 label: Platform Security - SoC mbedTLS ECDH
 description: >
-  Demonstrates how to perform ECDH key agreement between two peers with mbedTLS on SECP256R1 or SECP192R1, reporting hardware-accelerated key generation and shared-secret timing over UART.
+  This example uses hardware accelerators of the supported devices to perform ECDH key generation with mbedTLS.
 category: Example|Platform
 filter:
   - name: "Device Type"

@@ -999,6 +999,27 @@ sl_status_t sli_se_write_spi_register(sl_se_command_context_t *cmd_ctx,
 
 /***************************************************************************//**
  * @brief
+ *  Read a specific SPI register
+ *
+ * @param[in] cmd_ctx
+ *   Pointer to an SE command context object.
+ * @param[in] spi_instance:
+ *   SPI instance number, 0 = QSPI0, 1 = QSPI1.
+ * @param[in] offset
+ *   Register offset.
+ * @param[out] value
+ *   Value to write to register.
+ *
+ * @return SL_STATUS_OK if the operation is successful, or error code
+ *         defined in sl_status.h.
+ ******************************************************************************/
+ sl_status_t sli_se_read_spi_register(sl_se_command_context_t *cmd_ctx,
+  uint32_t spi_instance,
+  uint32_t offset,
+  uint32_t *value);
+
+/***************************************************************************//**
+ * @brief
  *   Write to several SPI peripheral registers. Used to configure a QSPI
  *   interface for a specific SPI memory device.
  *   Multiple writes is performed by using a table of offset-value pairs.
@@ -1020,6 +1041,35 @@ sl_status_t sli_se_write_spi_registers(sl_se_command_context_t *cmd_ctx,
                                        uint32_t *table,
                                        uint32_t count);
 
+/***************************************************************************//**
+ * @brief
+ *   Write to several SPI peripheral registers. Used to configure a QSPI
+ *   interface for a specific SPI memory device.
+ *   Multiple writes is performed by using a table of offset-value pairs.
+ *   Readback of register value after write is supported.
+ *
+ * @param[in] cmd_ctx
+ *   Pointer to an SE command context object.
+ * @param[in] spi_instance:
+ *   SPI instance number, 0 = QSPI0, 1 = QSPI1.
+ * @param[in] write_table
+ *   Table of offset-value pairs.
+ * @param[in] write_count
+ *   Size of table, i.e. number of register writes to perform.
+ * @param[in] read_table
+ *   Buffer to store received data.
+ * @param[in] read_count
+ *   Number of elements in read_table. Must be equal to write_count or 0.
+ *
+ * @return SL_STATUS_OK if the operation is successful, or error code
+ *         defined in sl_status.h.
+ ******************************************************************************/
+ sl_status_t sli_se_write_and_read_back_spi_registers(sl_se_command_context_t *cmd_ctx,
+                                                      uint32_t spi_instance,
+                                                      uint32_t *write_table,
+                                                      uint32_t write_count,
+                                                      uint32_t *read_table,
+                                                      uint32_t read_count);
 
 #ifdef __cplusplus
 }

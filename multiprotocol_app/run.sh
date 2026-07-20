@@ -85,11 +85,22 @@ while [[ $# -gt 0 ]]; do
             exit
             ;;
         -O|--ot-cli)
+            # Drop any prior owner of the OT spinel CPC endpoint so this ot-cli
+            # can actually claim it.
+            docker exec multiprotocol pkill -9 -x ot-cli 2>/dev/null || true
+            docker exec multiprotocol pkill -9 -x ot-ctl 2>/dev/null || true
+            docker exec multiprotocol sh -c 'systemctl stop "otbr@*" 2>/dev/null' || true
             IID=$(validate_interface_id $2)
             docker exec -it multiprotocol /usr/local/bin/ot-cli 'spinel+cpc://cpcd_0?iid='$IID'&iid-list=0'
             exit
             ;;
         -T|--ot-ctl)
+            # otbr-agent will silently fail to come up if anything else still
+            # owns the OT spinel CPC endpoint (a stale ot-cli from -O, a
+            # leftover otbr@<IID> from a previous IID, etc.).
+            docker exec multiprotocol pkill -9 -x ot-cli 2>/dev/null || true
+            docker exec multiprotocol pkill -9 -x ot-ctl 2>/dev/null || true
+            docker exec multiprotocol sh -c 'systemctl stop "otbr@*" 2>/dev/null' || true
             echo "Cleaning up stale OTBR firewall rules. Ignore errors..."
             docker exec -it multiprotocol ip6tables -D FORWARD 1
             docker exec -it multiprotocol ip6tables -F
@@ -98,21 +109,46 @@ while [[ $# -gt 0 ]]; do
             echo "Starting OTBR..."
             docker exec -it multiprotocol systemctl start otbr@$IID
             sleep 5
+            # Poll for the OTBR control socket; budget must stay under the
+            # caller's setupRaspi expect timeout (~20s).
+            echo "Waiting for OTBR control socket to appear..."
+            otbr_ready=0
+            for i in $(seq 1 15); do
+                if docker exec multiprotocol sh -c 'ls /run/openthread-*.sock >/dev/null 2>&1'; then
+                    otbr_ready=1
+                    break
+                fi
+                sleep 1
+            done
+            if [[ $otbr_ready -eq 0 ]]; then
+                echo "OTBR control socket did not appear after 15s; proceeding anyway."
+            fi
             echo "Starting ot-ctl..."
             echo "Press ENTER for prompt..."
             echo
-            while
+            # Bounded retry loop: previously this was an unbounded "while
+            # ot-ctl fails, restart otbr" which, when otbr could not come up,
+            # spammed the telnet session forever and swallowed any recovery
+            # commands the test framework tried to send.
+            attempt=0
+            max_attempts=5
+            rc=1
+            while [[ $attempt -lt $max_attempts ]]; do
                 docker exec -it multiprotocol ot-ctl
-                [[ $? -eq 1 ]]
-            do
+                rc=$?
+                if [[ $rc -ne 1 ]]; then
+                    break
+                fi
+                attempt=$((attempt + 1))
                 sleep 3
-                echo "Failed to start ot-ctl, restarting..."
+                echo "Failed to start ot-ctl, restarting (attempt $attempt/$max_attempts)..."
                 docker exec -it multiprotocol systemctl restart otbr-agent
-                docker exec -it multiprotocol systemctl restart otbr
+                # otbr is a templated unit (otbr@.service); restart the instance.
+                docker exec -it multiprotocol systemctl restart otbr@$IID
                 echo "(If errors persist, run 'journalctl -fex' inside container for logs.)"
                 echo "Press ENTER for prompt..."
             done
-            exit
+            exit $rc
             ;;
         -Z|--zigbee-host)
             echo "Starting zigbeed..."

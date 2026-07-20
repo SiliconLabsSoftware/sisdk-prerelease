@@ -40,6 +40,7 @@ extern "C" {
 
 #include "sl_common.h"
 #include "sl_enum.h"
+#include "sl_log_helper.h"
 /***************************************************************************//**
  * @addtogroup ledsink LEDSINK - LED Sink Controller
  * @{
@@ -419,6 +420,7 @@ __INLINE sl_status_t sl_hal_ledsink_enable_module(LEDSINK_TypeDef *ledsink)
 {
   // Make sure the module exists on the selected chip.
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -439,6 +441,7 @@ __INLINE sl_status_t sl_hal_ledsink_disable_module(LEDSINK_TypeDef *ledsink)
 {
   // Make sure the module exists on the selected chip.
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -464,6 +467,7 @@ __INLINE sl_status_t sl_hal_ledsink_reset(LEDSINK_TypeDef *ledsink)
 {
   // Make sure the module exists on the selected chip.
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -487,7 +491,7 @@ __INLINE sl_status_t sl_hal_ledsink_reset(LEDSINK_TypeDef *ledsink)
 __INLINE uint32_t sl_hal_ledsink_get_ctrl(LEDSINK_TypeDef *ledsink)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDSINK_REF_VALID(ledsink));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDSINK_REF_VALID(ledsink));
   // Get the control register value.
 
   return ledsink->CTRL;
@@ -512,6 +516,7 @@ __INLINE sl_status_t sl_hal_ledsink_enable_bias_ref(LEDSINK_TypeDef *ledsink)
 {
   // Make sure the module exists on the selected chip.
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -539,6 +544,7 @@ __INLINE sl_status_t sl_hal_ledsink_disable_bias_ref(LEDSINK_TypeDef *ledsink)
 {
   // Make sure the module exists on the selected chip.
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -556,7 +562,7 @@ __INLINE sl_status_t sl_hal_ledsink_disable_bias_ref(LEDSINK_TypeDef *ledsink)
  ******************************************************************************/
 __INLINE bool sl_hal_ledsink_get_bias_ref_enabled(LEDSINK_TypeDef *ledsink)
 {
-  EFM_ASSERT(SL_HAL_LEDSINK_REF_VALID(ledsink));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDSINK_REF_VALID(ledsink));
 
   // Check if ENBIASREF bit is set in DRCTLEDCTRL register to determine if
   // bias reference is enabled in software direct-drive mode.
@@ -581,11 +587,13 @@ __INLINE sl_status_t sl_hal_ledsink_enable_direct_led(LEDSINK_TypeDef *ledsink,
 {
   // Make sure the module exists on the selected chip.
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   // Make sure the channel number is valid.
   if (led_channel >= SL_HAL_LEDSINK_MAX_LED_CHANNELS) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -613,11 +621,13 @@ __INLINE sl_status_t sl_hal_ledsink_disable_direct_led(LEDSINK_TypeDef *ledsink,
 {
   // Make sure the module exists on the selected chip.
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   // Make sure the channel number is valid.
   if (led_channel >= SL_HAL_LEDSINK_MAX_LED_CHANNELS) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -643,9 +653,9 @@ __INLINE bool sl_hal_ledsink_get_direct_led_enabled(LEDSINK_TypeDef *ledsink,
   uint32_t enled_mask;
 
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDSINK_REF_VALID(ledsink));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDSINK_REF_VALID(ledsink));
   // Make sure the channel number is valid.
-  EFM_ASSERT(led_channel < SL_HAL_LEDSINK_MAX_LED_CHANNELS);
+  SL_LOG_DEBUG_ASSERT(led_channel < SL_HAL_LEDSINK_MAX_LED_CHANNELS);
 
   enled_mask = LEDSINK_DRCTLEDCTRL_ENLED_ENLED0 << led_channel;
   return (ledsink->DRCTLEDCTRL & enled_mask) != 0;
@@ -674,11 +684,13 @@ __INLINE sl_status_t sl_hal_ledsink_clear_interrupts(LEDSINK_TypeDef *ledsink,
 {
   // Make sure the module exists on the selected chip.
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   // Make sure the flags mask is valid.
   if (flags_mask & ~_LEDSINK_IF_MASK) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -706,7 +718,7 @@ __INLINE sl_status_t sl_hal_ledsink_clear_interrupts(LEDSINK_TypeDef *ledsink,
 __INLINE uint8_t sl_hal_ledsink_get_pending_interrupts(LEDSINK_TypeDef *ledsink)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDSINK_REF_VALID(ledsink));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDSINK_REF_VALID(ledsink));
 
   return ledsink->IF & _LEDSINK_IF_MASK;
 }
@@ -734,11 +746,13 @@ __INLINE sl_status_t sl_hal_ledsink_enable_interrupts(LEDSINK_TypeDef *ledsink,
 {
   // Make sure the module exists on the selected chip.
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   // Make sure the interrupt mask is valid.
   if (interrupt_mask & ~_LEDSINK_IEN_MASK) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -766,7 +780,7 @@ __INLINE sl_status_t sl_hal_ledsink_enable_interrupts(LEDSINK_TypeDef *ledsink,
 __INLINE uint8_t sl_hal_ledsink_get_enabled_interrupts(LEDSINK_TypeDef *ledsink)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDSINK_REF_VALID(ledsink));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDSINK_REF_VALID(ledsink));
 
   return ledsink->IEN;
 }
@@ -784,10 +798,12 @@ __INLINE uint8_t sl_hal_ledsink_get_enabled_interrupts(LEDSINK_TypeDef *ledsink)
 __INLINE sl_status_t sl_hal_ledsink_set_dbg(LEDSINK_TypeDef *ledsink, uint8_t dbg_value)
 {
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   // Make sure the debug value is valid.
   if (dbg_value > _LEDSINK_DBG_MASK) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   // Set the debug value.
@@ -806,7 +822,7 @@ __INLINE sl_status_t sl_hal_ledsink_set_dbg(LEDSINK_TypeDef *ledsink, uint8_t db
 __INLINE uint32_t sl_hal_ledsink_get_status(LEDSINK_TypeDef *ledsink)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDSINK_REF_VALID(ledsink));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDSINK_REF_VALID(ledsink));
 
   return ledsink->STATUS;
 }
@@ -827,7 +843,7 @@ __INLINE uint32_t sl_hal_ledsink_get_status(LEDSINK_TypeDef *ledsink)
 __INLINE bool sl_hal_ledsink_get_ledvdd_fall_edge(LEDSINK_TypeDef *ledsink)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDSINK_REF_VALID(ledsink));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDSINK_REF_VALID(ledsink));
 
   return (ledsink->STATUS & LEDSINK_STATUS_LEDVDDFALLEDGE) != 0U;
 }
@@ -842,7 +858,7 @@ __INLINE bool sl_hal_ledsink_get_ledvdd_fall_edge(LEDSINK_TypeDef *ledsink)
 __INLINE uint32_t sl_hal_ledsink_get_sync_busy(LEDSINK_TypeDef *ledsink)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDSINK_REF_VALID(ledsink));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDSINK_REF_VALID(ledsink));
 
   return ledsink->SYNCBUSY;
 }
@@ -860,9 +876,9 @@ __INLINE uint8_t sl_hal_ledsink_get_channel_current(LEDSINK_TypeDef *ledsink,
                                                     sl_hal_ledsink_led_channel_t led_channel)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDSINK_REF_VALID(ledsink));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDSINK_REF_VALID(ledsink));
   // Make sure the channel number is valid.
-  EFM_ASSERT(led_channel < SL_HAL_LEDSINK_MAX_LED_CHANNELS);
+  SL_LOG_DEBUG_ASSERT(led_channel < SL_HAL_LEDSINK_MAX_LED_CHANNELS);
   return (uint8_t)((ledsink->CFGSEQ[led_channel].CURRCTRL & _LEDSINK_CURRCTRL_CURRSET_MASK) >> _LEDSINK_CURRCTRL_CURRSET_SHIFT);
 }
 
@@ -885,9 +901,9 @@ __INLINE uint32_t sl_hal_ledsink_get_pattern_execution_status(LEDSINK_TypeDef *l
                                                               sl_hal_ledsink_led_channel_t led_channel)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LEDSINK_REF_VALID(ledsink));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDSINK_REF_VALID(ledsink));
   // Make sure the channel number is valid.
-  EFM_ASSERT(led_channel < SL_HAL_LEDSINK_MAX_LED_CHANNELS);
+  SL_LOG_DEBUG_ASSERT(led_channel < SL_HAL_LEDSINK_MAX_LED_CHANNELS);
   return ledsink->CFGSEQ[led_channel].PTRNEXSTS;
 }
 

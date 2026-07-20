@@ -86,17 +86,17 @@ void sl_hal_acmp_init(ACMP_TypeDef *acmp,
                       const sl_hal_acmp_init_t *init)
 {
   /* Make sure the module exists on the selected chip. */
-  EFM_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
 
-  EFM_ASSERT(init->bias_prog
+  SL_LOG_DEBUG_ASSERT(init->bias_prog
              <= (_ACMP_CFG_BIAS_MASK >> _ACMP_CFG_BIAS_SHIFT));
 
 // PM-5507: enforce that biasProg is a functional value
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
-  EFM_ASSERT(init->bias_prog >= PM5507_ACMP_CFG_BIAS_DEFAULT);
+  SL_LOG_DEBUG_ASSERT(init->bias_prog >= PM5507_ACMP_CFG_BIAS_DEFAULT);
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
   // Allow customer to use BIASPROG in [2; 3]
-  EFM_ASSERT(init->bias_prog >= 2);
+  SL_LOG_DEBUG_ASSERT(init->bias_prog >= 2);
 #else
   // Allow customer to use BIASPROG in [0; 3]
   // but the implementation of the wait operation would be their responsibility
@@ -151,7 +151,7 @@ void sl_hal_acmp_init(ACMP_TypeDef *acmp,
 void sl_hal_acmp_reset(ACMP_TypeDef *acmp)
 {
   // Make sure the module exists on the selected chip
-  EFM_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
 #if defined(ACMP_SWRST_SWRST)
   acmp->SWRST_SET = ACMP_SWRST_SWRST;
 
@@ -176,7 +176,7 @@ void sl_hal_acmp_setup_gpio_inversion(ACMP_TypeDef *acmp,
                                       bool invert)
 {
   // Make sure the module exists on the selected chip
-  EFM_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
 
   // Set GPIO inversion
   acmp->CTRL = (acmp->CTRL & ~_ACMP_CTRL_GPIOINV_MASK)
@@ -192,28 +192,28 @@ void sl_hal_acmp_set_input(ACMP_TypeDef *acmp,
                            sl_hal_acmp_input_t positive_input)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
   // Make sure that positive_input and negative_input channel selectors are valid.
-  EFM_ASSERT(negative_input <= _ACMP_INPUTCTRL_NEGSEL_PD15);
-  EFM_ASSERT(positive_input <= _ACMP_INPUTCTRL_POSSEL_PD15);
+  SL_LOG_DEBUG_ASSERT(negative_input <= _ACMP_INPUTCTRL_NEGSEL_PD15);
+  SL_LOG_DEBUG_ASSERT(positive_input <= _ACMP_INPUTCTRL_POSSEL_PD15);
 
   // Make sure that positive_input and negative_input channel selectors don't both use odd or even pins.
 #if defined(_ACMP_INPUTCTRL_POSSEL_EXTPA)
-  EFM_ASSERT(!((((positive_input >= _ACMP_INPUTCTRL_POSSEL_EXTPA)
+  SL_LOG_DEBUG_ASSERT(!((((positive_input >= _ACMP_INPUTCTRL_POSSEL_EXTPA)
                  && (positive_input <= _ACMP_INPUTCTRL_POSSEL_EXTPD))
                 || (positive_input >= _ACMP_INPUTCTRL_POSSEL_PA0))
                && (negative_input >= _ACMP_INPUTCTRL_NEGSEL_PA0)
                && (positive_input % 2 == negative_input % 2)));
 
 #else
-  EFM_ASSERT(!((positive_input >= _ACMP_INPUTCTRL_POSSEL_PA0)
+  SL_LOG_DEBUG_ASSERT(!((positive_input >= _ACMP_INPUTCTRL_POSSEL_PA0)
                && (negative_input >= _ACMP_INPUTCTRL_NEGSEL_PA0)
                && (positive_input % 2 == negative_input % 2)));
 
 #endif
 
   // Make sure that the ACMP is enabled and not busy before changing INPUTCTRL.
-  EFM_ASSERT(acmp->EN & ACMP_EN_EN);
+  SL_LOG_DEBUG_ASSERT(acmp->EN & ACMP_EN_EN);
   sl_hal_acmp_wait_sync(acmp);
 
   acmp->INPUTCTRL = (acmp->INPUTCTRL & ~(_ACMP_INPUTCTRL_POSSEL_MASK
@@ -232,7 +232,7 @@ void sl_hal_acmp_set_input(ACMP_TypeDef *acmp,
 void sl_hal_acmp_enable(ACMP_TypeDef *acmp)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
 
 #if defined(_ACMP_EN_MASK)
   acmp->EN_SET = ACMP_EN_EN;
@@ -248,7 +248,7 @@ void sl_hal_acmp_enable(ACMP_TypeDef *acmp)
 void sl_hal_acmp_disable(ACMP_TypeDef *acmp)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
 
   sl_hal_acmp_wait_sync(acmp);
   acmp->EN_CLR = ACMP_EN_EN;

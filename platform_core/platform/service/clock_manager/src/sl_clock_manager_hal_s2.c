@@ -657,7 +657,7 @@ sl_status_t sli_clock_manager_hal_set_gpio_clock_output(sl_clock_manager_export_
 
   CORE_ENTER_ATOMIC();
 
-  CMU_ClkOutPinConfig((uint32_t)output_select, cmu_clock_select, (CMU_ClkDiv_TypeDef)divider, port, pin);
+  CMU_ClkOutPinConfig((uint32_t)output_select, cmu_clock_select, (CMU_ClkDiv_TypeDef)divider, (GPIO_Port_TypeDef)port, pin);
 
   CORE_EXIT_ATOMIC();
 

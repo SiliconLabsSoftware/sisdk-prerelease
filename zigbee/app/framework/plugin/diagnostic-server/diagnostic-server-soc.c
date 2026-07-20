@@ -131,7 +131,7 @@ bool sl_zigbee_af_read_diagnostic_attribute(
 
       uint16_t rebootCounter16;
 
-      status = slx_zigbee_token_manager_get_data(COMMON_TOKEN_STACK_BOOT_COUNTER, (void *)&rebootCounter, sizeof(tokTypeStackBootCounter));
+      status = slx_zigbee_token_manager_get_data(COMMON_TOKEN_STACK_BOOT_COUNTER, (void *)&rebootCounter, sizeof(rebootCounter));
       if (status != SL_STATUS_OK) {
         sl_zigbee_af_core_println("Failed to get boot counter, status: 0x%08X", status);
         return false;

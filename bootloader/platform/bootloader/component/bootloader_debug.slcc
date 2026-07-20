@@ -26,9 +26,7 @@ include:
   - path: config/btl_config.h
 requires:
 - name: bootloader_interface_common
-  condition: [trustzone_unaware]
-- name: bootloader_interface_common
-  condition: [trustzone_nonsecure]
+  unless: [trustzone_secure]
 provides:
 - name: bootloader_debug
 - name: bootloader_nonsecure_incompatible

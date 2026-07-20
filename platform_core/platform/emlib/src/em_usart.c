@@ -860,14 +860,12 @@ void USART_InitAsync(USART_TypeDef *usart, const USART_InitAsync_TypeDef *init)
 #if USART_COUNT > 1
     GPIO->USARTROUTE_SET[USART_NUM(usart)].ROUTEEN = GPIO_USART_ROUTEEN_RTSPEN;
 #else
-    //! @todo cleanup when ADM is updated to have USART_NUM macros
     GPIO->USARTROUTE_SET[0].ROUTEEN = GPIO_USART_ROUTEEN_RTSPEN;
 #endif
   } else {
 #if USART_COUNT > 1
     GPIO->USARTROUTE_CLR[USART_NUM(usart)].ROUTEEN = GPIO_USART_ROUTEEN_RTSPEN;
 #else
-    //! @todo cleanup when ADM is updated to have USART_NUM macros
     GPIO->USARTROUTE_CLR[0].ROUTEEN = GPIO_USART_ROUTEEN_RTSPEN;
 #endif
   }

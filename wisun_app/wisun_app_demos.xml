@@ -1,0 +1,1853 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<demos xmlns:ns1="http://www.silabs.com/ss/Studio.ecore" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.silabs.com/ss/Demo.ecore">
+  <demo name="brd2705a.demo.wisun_soc_brcli" label="Wi-SUN - SoC Border Router">
+    <ns1:description>This demo is an out-of-the-box Wi-SUN border router application. It provides a command-line interface to control basic configurations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd2705a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd2705a/wisun_soc_brcli-brd2705a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_brcli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4270a.demo.wisun_soc_brcli" label="Wi-SUN - SoC Border Router">
+    <ns1:description>This demo is an out-of-the-box Wi-SUN border router application. It provides a command-line interface to control basic configurations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270a/wisun_soc_brcli-brd4270a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_brcli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4270b.demo.wisun_soc_brcli" label="Wi-SUN - SoC Border Router">
+    <ns1:description>This demo is an out-of-the-box Wi-SUN border router application. It provides a command-line interface to control basic configurations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270b/wisun_soc_brcli-brd4270b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_brcli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4271a.demo.wisun_soc_brcli" label="Wi-SUN - SoC Border Router">
+    <ns1:description>This demo is an out-of-the-box Wi-SUN border router application. It provides a command-line interface to control basic configurations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4271a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4271a/wisun_soc_brcli-brd4271a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_brcli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4272a.demo.wisun_soc_brcli" label="Wi-SUN - SoC Border Router">
+    <ns1:description>This demo is an out-of-the-box Wi-SUN border router application. It provides a command-line interface to control basic configurations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4272a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4272a/wisun_soc_brcli-brd4272a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_brcli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400a.demo.wisun_soc_brcli" label="Wi-SUN - SoC Border Router">
+    <ns1:description>This demo is an out-of-the-box Wi-SUN border router application. It provides a command-line interface to control basic configurations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400a/wisun_soc_brcli-brd4400a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_brcli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400b.demo.wisun_soc_brcli" label="Wi-SUN - SoC Border Router">
+    <ns1:description>This demo is an out-of-the-box Wi-SUN border router application. It provides a command-line interface to control basic configurations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400b/wisun_soc_brcli-brd4400b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_brcli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400c.demo.wisun_soc_brcli" label="Wi-SUN - SoC Border Router">
+    <ns1:description>This demo is an out-of-the-box Wi-SUN border router application. It provides a command-line interface to control basic configurations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400c/wisun_soc_brcli-brd4400c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_brcli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401a.demo.wisun_soc_brcli" label="Wi-SUN - SoC Border Router">
+    <ns1:description>This demo is an out-of-the-box Wi-SUN border router application. It provides a command-line interface to control basic configurations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401a/wisun_soc_brcli-brd4401a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_brcli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401b.demo.wisun_soc_brcli" label="Wi-SUN - SoC Border Router">
+    <ns1:description>This demo is an out-of-the-box Wi-SUN border router application. It provides a command-line interface to control basic configurations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401b/wisun_soc_brcli-brd4401b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_brcli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401c.demo.wisun_soc_brcli" label="Wi-SUN - SoC Border Router">
+    <ns1:description>This demo is an out-of-the-box Wi-SUN border router application. It provides a command-line interface to control basic configurations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401c/wisun_soc_brcli-brd4401c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_brcli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4270a.demo.wisun_soc_brcli_wifi" label="Wi-SUN - SoC Border Router CLI with Wi-Fi connectivity">
+    <ns1:description>The Wi-SUN Border Router CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to create a Wi-SUN network and then to connect and exchange IP packets with Wi-SUN devices.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router CLI with Wi-Fi connectivity" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270a/wisun_soc_brcli_wifi-brd4270a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_brcli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4271a.demo.wisun_soc_brcli_wifi" label="Wi-SUN - SoC Border Router CLI with Wi-Fi connectivity">
+    <ns1:description>The Wi-SUN Border Router CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to create a Wi-SUN network and then to connect and exchange IP packets with Wi-SUN devices.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router CLI with Wi-Fi connectivity" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4271a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4271a/wisun_soc_brcli_wifi-brd4271a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_brcli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd2705a.demo.wisun_soc_cli" label="Wi-SUN - CLI example">
+    <ns1:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - CLI example" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd2705a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd2705a/wisun_soc_cli-brd2705a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_cli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4270a.demo.wisun_soc_cli" label="Wi-SUN - CLI example">
+    <ns1:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - CLI example" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270a/wisun_soc_cli-brd4270a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_cli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4270b.demo.wisun_soc_cli" label="Wi-SUN - CLI example">
+    <ns1:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - CLI example" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270b/wisun_soc_cli-brd4270b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_cli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4271a.demo.wisun_soc_cli" label="Wi-SUN - CLI example">
+    <ns1:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - CLI example" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4271a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4271a/wisun_soc_cli-brd4271a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_cli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4272a.demo.wisun_soc_cli" label="Wi-SUN - CLI example">
+    <ns1:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - CLI example" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4272a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4272a/wisun_soc_cli-brd4272a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_cli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4276a.demo.wisun_soc_cli" label="Wi-SUN - CLI example">
+    <ns1:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - CLI example" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4276a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4276a/wisun_soc_cli-brd4276a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_cli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400a.demo.wisun_soc_cli" label="Wi-SUN - CLI example">
+    <ns1:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - CLI example" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400a/wisun_soc_cli-brd4400a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_cli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400b.demo.wisun_soc_cli" label="Wi-SUN - CLI example">
+    <ns1:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - CLI example" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400b/wisun_soc_cli-brd4400b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_cli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400c.demo.wisun_soc_cli" label="Wi-SUN - CLI example">
+    <ns1:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - CLI example" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400c/wisun_soc_cli-brd4400c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_cli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401a.demo.wisun_soc_cli" label="Wi-SUN - CLI example">
+    <ns1:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - CLI example" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401a/wisun_soc_cli-brd4401a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_cli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401b.demo.wisun_soc_cli" label="Wi-SUN - CLI example">
+    <ns1:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - CLI example" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401b/wisun_soc_cli-brd4401b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_cli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401c.demo.wisun_soc_cli" label="Wi-SUN - CLI example">
+    <ns1:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - CLI example" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401c/wisun_soc_cli-brd4401c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_cli/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd2705a.demo.wisun_soc_lfn_cli" label="Wi-SUN - LFN CLI example">
+    <ns1:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN LFN device. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - LFN CLI example" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd2705a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd2705a/wisun_soc_lfn_cli-brd2705a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_cli/readme_lfn.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4270a.demo.wisun_soc_lfn_cli" label="Wi-SUN - LFN CLI example">
+    <ns1:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN LFN device. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - LFN CLI example" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270a/wisun_soc_lfn_cli-brd4270a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_cli/readme_lfn.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4270b.demo.wisun_soc_lfn_cli" label="Wi-SUN - LFN CLI example">
+    <ns1:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN LFN device. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - LFN CLI example" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270b/wisun_soc_lfn_cli-brd4270b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_cli/readme_lfn.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4271a.demo.wisun_soc_lfn_cli" label="Wi-SUN - LFN CLI example">
+    <ns1:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN LFN device. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - LFN CLI example" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4271a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4271a/wisun_soc_lfn_cli-brd4271a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_cli/readme_lfn.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4272a.demo.wisun_soc_lfn_cli" label="Wi-SUN - LFN CLI example">
+    <ns1:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN LFN device. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - LFN CLI example" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4272a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4272a/wisun_soc_lfn_cli-brd4272a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_cli/readme_lfn.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4400a.demo.wisun_soc_lfn_cli" label="Wi-SUN - LFN CLI example">
+    <ns1:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN LFN device. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - LFN CLI example" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400a/wisun_soc_lfn_cli-brd4400a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_cli/readme_lfn.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4400b.demo.wisun_soc_lfn_cli" label="Wi-SUN - LFN CLI example">
+    <ns1:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN LFN device. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - LFN CLI example" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400b/wisun_soc_lfn_cli-brd4400b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_cli/readme_lfn.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4400c.demo.wisun_soc_lfn_cli" label="Wi-SUN - LFN CLI example">
+    <ns1:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN LFN device. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - LFN CLI example" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400c/wisun_soc_lfn_cli-brd4400c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_cli/readme_lfn.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4401a.demo.wisun_soc_lfn_cli" label="Wi-SUN - LFN CLI example">
+    <ns1:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN LFN device. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - LFN CLI example" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401a/wisun_soc_lfn_cli-brd4401a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_cli/readme_lfn.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4401b.demo.wisun_soc_lfn_cli" label="Wi-SUN - LFN CLI example">
+    <ns1:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN LFN device. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - LFN CLI example" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401b/wisun_soc_lfn_cli-brd4401b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_cli/readme_lfn.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4401c.demo.wisun_soc_lfn_cli" label="Wi-SUN - LFN CLI example">
+    <ns1:description>The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN LFN device. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - LFN CLI example" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401c/wisun_soc_lfn_cli-brd4401c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_cli/readme_lfn.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4204d.demo.wisun_dc_ciu" label="Wi-SUN - SoC DC CIU">
+    <ns1:description>Wi-SUN Direct Connect Control Interface Unit. Simple button-driven interface for DC client operations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC DC CIU" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4204d" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4204d/wisun_dc_ciu-brd4204d.s37" />
+    <property key="core.readmeFiles" value="wisun_dc_ciu/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EXPERIMENTAL" />
+  </demo>
+  <demo name="brd4210a.demo.wisun_dc_ciu" label="Wi-SUN - SoC DC CIU">
+    <ns1:description>Wi-SUN Direct Connect Control Interface Unit. Simple button-driven interface for DC client operations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC DC CIU" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4210a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4210a/wisun_dc_ciu-brd4210a.s37" />
+    <property key="core.readmeFiles" value="wisun_dc_ciu/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EXPERIMENTAL" />
+  </demo>
+  <demo name="brd4263c.demo.wisun_dc_ciu" label="Wi-SUN - SoC DC CIU">
+    <ns1:description>Wi-SUN Direct Connect Control Interface Unit. Simple button-driven interface for DC client operations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC DC CIU" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4263c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4263c/wisun_dc_ciu-brd4263c.s37" />
+    <property key="core.readmeFiles" value="wisun_dc_ciu/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EXPERIMENTAL" />
+  </demo>
+  <demo name="brd4264c.demo.wisun_dc_ciu" label="Wi-SUN - SoC DC CIU">
+    <ns1:description>Wi-SUN Direct Connect Control Interface Unit. Simple button-driven interface for DC client operations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC DC CIU" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4264c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4264c/wisun_dc_ciu-brd4264c.s37" />
+    <property key="core.readmeFiles" value="wisun_dc_ciu/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EXPERIMENTAL" />
+  </demo>
+  <demo name="brd4270a.demo.wisun_dc_ciu" label="Wi-SUN - SoC DC CIU">
+    <ns1:description>Wi-SUN Direct Connect Control Interface Unit. Simple button-driven interface for DC client operations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC DC CIU" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270a/wisun_dc_ciu-brd4270a.s37" />
+    <property key="core.readmeFiles" value="wisun_dc_ciu/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EXPERIMENTAL" />
+  </demo>
+  <demo name="brd4270b.demo.wisun_dc_ciu" label="Wi-SUN - SoC DC CIU">
+    <ns1:description>Wi-SUN Direct Connect Control Interface Unit. Simple button-driven interface for DC client operations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC DC CIU" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270b/wisun_dc_ciu-brd4270b.s37" />
+    <property key="core.readmeFiles" value="wisun_dc_ciu/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EXPERIMENTAL" />
+  </demo>
+  <demo name="brd4271a.demo.wisun_dc_ciu" label="Wi-SUN - SoC DC CIU">
+    <ns1:description>Wi-SUN Direct Connect Control Interface Unit. Simple button-driven interface for DC client operations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC DC CIU" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4271a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4271a/wisun_dc_ciu-brd4271a.s37" />
+    <property key="core.readmeFiles" value="wisun_dc_ciu/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EXPERIMENTAL" />
+  </demo>
+  <demo name="brd4272a.demo.wisun_dc_ciu" label="Wi-SUN - SoC DC CIU">
+    <ns1:description>Wi-SUN Direct Connect Control Interface Unit. Simple button-driven interface for DC client operations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC DC CIU" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4272a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4272a/wisun_dc_ciu-brd4272a.s37" />
+    <property key="core.readmeFiles" value="wisun_dc_ciu/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EXPERIMENTAL" />
+  </demo>
+  <demo name="brd4276a.demo.wisun_dc_ciu" label="Wi-SUN - SoC DC CIU">
+    <ns1:description>Wi-SUN Direct Connect Control Interface Unit. Simple button-driven interface for DC client operations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC DC CIU" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4276a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4276a/wisun_dc_ciu-brd4276a.s37" />
+    <property key="core.readmeFiles" value="wisun_dc_ciu/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EXPERIMENTAL" />
+  </demo>
+  <demo name="brd4400a.demo.wisun_dc_ciu" label="Wi-SUN - SoC DC CIU">
+    <ns1:description>Wi-SUN Direct Connect Control Interface Unit. Simple button-driven interface for DC client operations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC DC CIU" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400a/wisun_dc_ciu-brd4400a.s37" />
+    <property key="core.readmeFiles" value="wisun_dc_ciu/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EXPERIMENTAL" />
+  </demo>
+  <demo name="brd4400b.demo.wisun_dc_ciu" label="Wi-SUN - SoC DC CIU">
+    <ns1:description>Wi-SUN Direct Connect Control Interface Unit. Simple button-driven interface for DC client operations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC DC CIU" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400b/wisun_dc_ciu-brd4400b.s37" />
+    <property key="core.readmeFiles" value="wisun_dc_ciu/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EXPERIMENTAL" />
+  </demo>
+  <demo name="brd4400c.demo.wisun_dc_ciu" label="Wi-SUN - SoC DC CIU">
+    <ns1:description>Wi-SUN Direct Connect Control Interface Unit. Simple button-driven interface for DC client operations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC DC CIU" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400c/wisun_dc_ciu-brd4400c.s37" />
+    <property key="core.readmeFiles" value="wisun_dc_ciu/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EXPERIMENTAL" />
+  </demo>
+  <demo name="brd4401a.demo.wisun_dc_ciu" label="Wi-SUN - SoC DC CIU">
+    <ns1:description>Wi-SUN Direct Connect Control Interface Unit. Simple button-driven interface for DC client operations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC DC CIU" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401a/wisun_dc_ciu-brd4401a.s37" />
+    <property key="core.readmeFiles" value="wisun_dc_ciu/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EXPERIMENTAL" />
+  </demo>
+  <demo name="brd4401b.demo.wisun_dc_ciu" label="Wi-SUN - SoC DC CIU">
+    <ns1:description>Wi-SUN Direct Connect Control Interface Unit. Simple button-driven interface for DC client operations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC DC CIU" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401b/wisun_dc_ciu-brd4401b.s37" />
+    <property key="core.readmeFiles" value="wisun_dc_ciu/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EXPERIMENTAL" />
+  </demo>
+  <demo name="brd4401c.demo.wisun_dc_ciu" label="Wi-SUN - SoC DC CIU">
+    <ns1:description>Wi-SUN Direct Connect Control Interface Unit. Simple button-driven interface for DC client operations.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC DC CIU" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401c/wisun_dc_ciu-brd4401c.s37" />
+    <property key="core.readmeFiles" value="wisun_dc_ciu/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EXPERIMENTAL" />
+  </demo>
+  <demo name="brd2705a.demo.wisun_bt_dmp_soc_empty" label="Wi-SUN Bluetooth DMP - SoC Empty">
+    <ns1:description>The Wi-SUN Bluetooth DMP - SoC Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN - BLE DMP (Dynamic Multiprotocol) application. Can be tested with the Simplicity Connect mobile app. </ns1:description>
+    <property key="demos.blurb" value="Wi-SUN Bluetooth DMP - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd2705a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd2705a/wisun_bt_dmp_soc_empty-brd2705a.s37" />
+    <property key="core.readmeFiles" value="wisun_bt_dmp_soc_empty/readme.md" />
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4400a.demo.wisun_bt_dmp_soc_empty" label="Wi-SUN Bluetooth DMP - SoC Empty">
+    <ns1:description>The Wi-SUN Bluetooth DMP - SoC Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN - BLE DMP (Dynamic Multiprotocol) application. Can be tested with the Simplicity Connect mobile app. </ns1:description>
+    <property key="demos.blurb" value="Wi-SUN Bluetooth DMP - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400a/wisun_bt_dmp_soc_empty-brd4400a.s37" />
+    <property key="core.readmeFiles" value="wisun_bt_dmp_soc_empty/readme.md" />
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4400b.demo.wisun_bt_dmp_soc_empty" label="Wi-SUN Bluetooth DMP - SoC Empty">
+    <ns1:description>The Wi-SUN Bluetooth DMP - SoC Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN - BLE DMP (Dynamic Multiprotocol) application. Can be tested with the Simplicity Connect mobile app. </ns1:description>
+    <property key="demos.blurb" value="Wi-SUN Bluetooth DMP - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400b/wisun_bt_dmp_soc_empty-brd4400b.s37" />
+    <property key="core.readmeFiles" value="wisun_bt_dmp_soc_empty/readme.md" />
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4400c.demo.wisun_bt_dmp_soc_empty" label="Wi-SUN Bluetooth DMP - SoC Empty">
+    <ns1:description>The Wi-SUN Bluetooth DMP - SoC Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN - BLE DMP (Dynamic Multiprotocol) application. Can be tested with the Simplicity Connect mobile app. </ns1:description>
+    <property key="demos.blurb" value="Wi-SUN Bluetooth DMP - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400c/wisun_bt_dmp_soc_empty-brd4400c.s37" />
+    <property key="core.readmeFiles" value="wisun_bt_dmp_soc_empty/readme.md" />
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4401a.demo.wisun_bt_dmp_soc_empty" label="Wi-SUN Bluetooth DMP - SoC Empty">
+    <ns1:description>The Wi-SUN Bluetooth DMP - SoC Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN - BLE DMP (Dynamic Multiprotocol) application. Can be tested with the Simplicity Connect mobile app. </ns1:description>
+    <property key="demos.blurb" value="Wi-SUN Bluetooth DMP - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401a/wisun_bt_dmp_soc_empty-brd4401a.s37" />
+    <property key="core.readmeFiles" value="wisun_bt_dmp_soc_empty/readme.md" />
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4401b.demo.wisun_bt_dmp_soc_empty" label="Wi-SUN Bluetooth DMP - SoC Empty">
+    <ns1:description>The Wi-SUN Bluetooth DMP - SoC Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN - BLE DMP (Dynamic Multiprotocol) application. Can be tested with the Simplicity Connect mobile app. </ns1:description>
+    <property key="demos.blurb" value="Wi-SUN Bluetooth DMP - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401b/wisun_bt_dmp_soc_empty-brd4401b.s37" />
+    <property key="core.readmeFiles" value="wisun_bt_dmp_soc_empty/readme.md" />
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4401c.demo.wisun_bt_dmp_soc_empty" label="Wi-SUN Bluetooth DMP - SoC Empty">
+    <ns1:description>The Wi-SUN Bluetooth DMP - SoC Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN - BLE DMP (Dynamic Multiprotocol) application. Can be tested with the Simplicity Connect mobile app. </ns1:description>
+    <property key="demos.blurb" value="Wi-SUN Bluetooth DMP - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401c/wisun_bt_dmp_soc_empty-brd4401c.s37" />
+    <property key="core.readmeFiles" value="wisun_bt_dmp_soc_empty/readme.md" />
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd2705a.demo.wisun_bt_dmp_soc_spp" label="Wi-SUN Bluetooth DMP - SoC SPP">
+    <ns1:description>The Wi-SUN Bluetooth DMP - SoC SPP sample application emulates a serial port over Bluetooth LE. This application showcases how BLE can be used to help configure or troubleshoot deployed Wi-SUN devices. Can be tested with the Serial Bluetooth Terminal mobile app. </ns1:description>
+    <property key="demos.blurb" value="Wi-SUN Bluetooth DMP - SoC SPP" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd2705a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd2705a/wisun_bt_dmp_soc_spp-brd2705a.s37" />
+    <property key="core.readmeFiles" value="wisun_bt_dmp_soc_spp/readme.md" />
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4400a.demo.wisun_bt_dmp_soc_spp" label="Wi-SUN Bluetooth DMP - SoC SPP">
+    <ns1:description>The Wi-SUN Bluetooth DMP - SoC SPP sample application emulates a serial port over Bluetooth LE. This application showcases how BLE can be used to help configure or troubleshoot deployed Wi-SUN devices. Can be tested with the Serial Bluetooth Terminal mobile app. </ns1:description>
+    <property key="demos.blurb" value="Wi-SUN Bluetooth DMP - SoC SPP" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400a/wisun_bt_dmp_soc_spp-brd4400a.s37" />
+    <property key="core.readmeFiles" value="wisun_bt_dmp_soc_spp/readme.md" />
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4400b.demo.wisun_bt_dmp_soc_spp" label="Wi-SUN Bluetooth DMP - SoC SPP">
+    <ns1:description>The Wi-SUN Bluetooth DMP - SoC SPP sample application emulates a serial port over Bluetooth LE. This application showcases how BLE can be used to help configure or troubleshoot deployed Wi-SUN devices. Can be tested with the Serial Bluetooth Terminal mobile app. </ns1:description>
+    <property key="demos.blurb" value="Wi-SUN Bluetooth DMP - SoC SPP" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400b/wisun_bt_dmp_soc_spp-brd4400b.s37" />
+    <property key="core.readmeFiles" value="wisun_bt_dmp_soc_spp/readme.md" />
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4400c.demo.wisun_bt_dmp_soc_spp" label="Wi-SUN Bluetooth DMP - SoC SPP">
+    <ns1:description>The Wi-SUN Bluetooth DMP - SoC SPP sample application emulates a serial port over Bluetooth LE. This application showcases how BLE can be used to help configure or troubleshoot deployed Wi-SUN devices. Can be tested with the Serial Bluetooth Terminal mobile app. </ns1:description>
+    <property key="demos.blurb" value="Wi-SUN Bluetooth DMP - SoC SPP" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400c/wisun_bt_dmp_soc_spp-brd4400c.s37" />
+    <property key="core.readmeFiles" value="wisun_bt_dmp_soc_spp/readme.md" />
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4401a.demo.wisun_bt_dmp_soc_spp" label="Wi-SUN Bluetooth DMP - SoC SPP">
+    <ns1:description>The Wi-SUN Bluetooth DMP - SoC SPP sample application emulates a serial port over Bluetooth LE. This application showcases how BLE can be used to help configure or troubleshoot deployed Wi-SUN devices. Can be tested with the Serial Bluetooth Terminal mobile app. </ns1:description>
+    <property key="demos.blurb" value="Wi-SUN Bluetooth DMP - SoC SPP" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401a/wisun_bt_dmp_soc_spp-brd4401a.s37" />
+    <property key="core.readmeFiles" value="wisun_bt_dmp_soc_spp/readme.md" />
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4401b.demo.wisun_bt_dmp_soc_spp" label="Wi-SUN Bluetooth DMP - SoC SPP">
+    <ns1:description>The Wi-SUN Bluetooth DMP - SoC SPP sample application emulates a serial port over Bluetooth LE. This application showcases how BLE can be used to help configure or troubleshoot deployed Wi-SUN devices. Can be tested with the Serial Bluetooth Terminal mobile app. </ns1:description>
+    <property key="demos.blurb" value="Wi-SUN Bluetooth DMP - SoC SPP" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401b/wisun_bt_dmp_soc_spp-brd4401b.s37" />
+    <property key="core.readmeFiles" value="wisun_bt_dmp_soc_spp/readme.md" />
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4401c.demo.wisun_bt_dmp_soc_spp" label="Wi-SUN Bluetooth DMP - SoC SPP">
+    <ns1:description>The Wi-SUN Bluetooth DMP - SoC SPP sample application emulates a serial port over Bluetooth LE. This application showcases how BLE can be used to help configure or troubleshoot deployed Wi-SUN devices. Can be tested with the Serial Bluetooth Terminal mobile app. </ns1:description>
+    <property key="demos.blurb" value="Wi-SUN Bluetooth DMP - SoC SPP" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401c/wisun_bt_dmp_soc_spp-brd4401c.s37" />
+    <property key="core.readmeFiles" value="wisun_bt_dmp_soc_spp/readme.md" />
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4270a.demo.wisun_soc_br_agent" label="Wi-SUN - SoC Border Router Agent">
+    <ns1:description>The Wi-SUN SoC Border Router Agent sample application demonstrates a Wi-SUN SoC Border Router with Border Router Agent Service functionality. The application provides a TCP server that listens for incoming connections from a remote host agent client service. The service allows remote management and monitoring of the Border Router through a defined interface. The application also includes a command line interface (CLI) for local management and monitoring of the Border Router. The CLI supports various commands to interact with the Border Router and retrieve information about its status and configuration.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router Agent" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270a/wisun_soc_br_agent-brd4270a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_agent/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd4271a.demo.wisun_soc_br_agent" label="Wi-SUN - SoC Border Router Agent">
+    <ns1:description>The Wi-SUN SoC Border Router Agent sample application demonstrates a Wi-SUN SoC Border Router with Border Router Agent Service functionality. The application provides a TCP server that listens for incoming connections from a remote host agent client service. The service allows remote management and monitoring of the Border Router through a defined interface. The application also includes a command line interface (CLI) for local management and monitoring of the Border Router. The CLI supports various commands to interact with the Border Router and retrieve information about its status and configuration.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router Agent" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4271a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4271a/wisun_soc_br_agent-brd4271a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_agent/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="EVALUATION" />
+  </demo>
+  <demo name="brd2705a.demo.wisun_soc_br_empty" label="Wi-SUN - SoC Border Router Empty">
+    <ns1:description>The Wi-SUN Border Router Empty sample application is a bare-bones application. It can be used as a template to develop a Wi-SUN border router application with custom application logics.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd2705a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd2705a/wisun_soc_br_empty-brd2705a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4270a.demo.wisun_soc_br_empty" label="Wi-SUN - SoC Border Router Empty">
+    <ns1:description>The Wi-SUN Border Router Empty sample application is a bare-bones application. It can be used as a template to develop a Wi-SUN border router application with custom application logics.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270a/wisun_soc_br_empty-brd4270a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4270b.demo.wisun_soc_br_empty" label="Wi-SUN - SoC Border Router Empty">
+    <ns1:description>The Wi-SUN Border Router Empty sample application is a bare-bones application. It can be used as a template to develop a Wi-SUN border router application with custom application logics.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270b/wisun_soc_br_empty-brd4270b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4271a.demo.wisun_soc_br_empty" label="Wi-SUN - SoC Border Router Empty">
+    <ns1:description>The Wi-SUN Border Router Empty sample application is a bare-bones application. It can be used as a template to develop a Wi-SUN border router application with custom application logics.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4271a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4271a/wisun_soc_br_empty-brd4271a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4272a.demo.wisun_soc_br_empty" label="Wi-SUN - SoC Border Router Empty">
+    <ns1:description>The Wi-SUN Border Router Empty sample application is a bare-bones application. It can be used as a template to develop a Wi-SUN border router application with custom application logics.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4272a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4272a/wisun_soc_br_empty-brd4272a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4276a.demo.wisun_soc_br_empty" label="Wi-SUN - SoC Border Router Empty">
+    <ns1:description>The Wi-SUN Border Router Empty sample application is a bare-bones application. It can be used as a template to develop a Wi-SUN border router application with custom application logics.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4276a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4276a/wisun_soc_br_empty-brd4276a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400a.demo.wisun_soc_br_empty" label="Wi-SUN - SoC Border Router Empty">
+    <ns1:description>The Wi-SUN Border Router Empty sample application is a bare-bones application. It can be used as a template to develop a Wi-SUN border router application with custom application logics.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400a/wisun_soc_br_empty-brd4400a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400b.demo.wisun_soc_br_empty" label="Wi-SUN - SoC Border Router Empty">
+    <ns1:description>The Wi-SUN Border Router Empty sample application is a bare-bones application. It can be used as a template to develop a Wi-SUN border router application with custom application logics.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400b/wisun_soc_br_empty-brd4400b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400c.demo.wisun_soc_br_empty" label="Wi-SUN - SoC Border Router Empty">
+    <ns1:description>The Wi-SUN Border Router Empty sample application is a bare-bones application. It can be used as a template to develop a Wi-SUN border router application with custom application logics.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400c/wisun_soc_br_empty-brd4400c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401a.demo.wisun_soc_br_empty" label="Wi-SUN - SoC Border Router Empty">
+    <ns1:description>The Wi-SUN Border Router Empty sample application is a bare-bones application. It can be used as a template to develop a Wi-SUN border router application with custom application logics.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401a/wisun_soc_br_empty-brd4401a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401b.demo.wisun_soc_br_empty" label="Wi-SUN - SoC Border Router Empty">
+    <ns1:description>The Wi-SUN Border Router Empty sample application is a bare-bones application. It can be used as a template to develop a Wi-SUN border router application with custom application logics.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401b/wisun_soc_br_empty-brd4401b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401c.demo.wisun_soc_br_empty" label="Wi-SUN - SoC Border Router Empty">
+    <ns1:description>The Wi-SUN Border Router Empty sample application is a bare-bones application. It can be used as a template to develop a Wi-SUN border router application with custom application logics.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401c/wisun_soc_br_empty-brd4401c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd2705a.demo.wisun_soc_br_in_meter_gateway" label="Wi-SUN - SoC Border Router In-Meter Gateway">
+    <ns1:description>The Wi-SUN Border Router In-Meter Gateway sample application is a meter application running on the border router SoC.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router In-Meter Gateway" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd2705a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd2705a/wisun_soc_br_in_meter_gateway-brd2705a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_in_meter_gateway/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4270a.demo.wisun_soc_br_in_meter_gateway" label="Wi-SUN - SoC Border Router In-Meter Gateway">
+    <ns1:description>The Wi-SUN Border Router In-Meter Gateway sample application is a meter application running on the border router SoC.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router In-Meter Gateway" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270a/wisun_soc_br_in_meter_gateway-brd4270a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_in_meter_gateway/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4270b.demo.wisun_soc_br_in_meter_gateway" label="Wi-SUN - SoC Border Router In-Meter Gateway">
+    <ns1:description>The Wi-SUN Border Router In-Meter Gateway sample application is a meter application running on the border router SoC.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router In-Meter Gateway" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270b/wisun_soc_br_in_meter_gateway-brd4270b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_in_meter_gateway/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4271a.demo.wisun_soc_br_in_meter_gateway" label="Wi-SUN - SoC Border Router In-Meter Gateway">
+    <ns1:description>The Wi-SUN Border Router In-Meter Gateway sample application is a meter application running on the border router SoC.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router In-Meter Gateway" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4271a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4271a/wisun_soc_br_in_meter_gateway-brd4271a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_in_meter_gateway/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4272a.demo.wisun_soc_br_in_meter_gateway" label="Wi-SUN - SoC Border Router In-Meter Gateway">
+    <ns1:description>The Wi-SUN Border Router In-Meter Gateway sample application is a meter application running on the border router SoC.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router In-Meter Gateway" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4272a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4272a/wisun_soc_br_in_meter_gateway-brd4272a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_in_meter_gateway/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4276a.demo.wisun_soc_br_in_meter_gateway" label="Wi-SUN - SoC Border Router In-Meter Gateway">
+    <ns1:description>The Wi-SUN Border Router In-Meter Gateway sample application is a meter application running on the border router SoC.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router In-Meter Gateway" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4276a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4276a/wisun_soc_br_in_meter_gateway-brd4276a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_in_meter_gateway/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400a.demo.wisun_soc_br_in_meter_gateway" label="Wi-SUN - SoC Border Router In-Meter Gateway">
+    <ns1:description>The Wi-SUN Border Router In-Meter Gateway sample application is a meter application running on the border router SoC.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router In-Meter Gateway" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400a/wisun_soc_br_in_meter_gateway-brd4400a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_in_meter_gateway/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400b.demo.wisun_soc_br_in_meter_gateway" label="Wi-SUN - SoC Border Router In-Meter Gateway">
+    <ns1:description>The Wi-SUN Border Router In-Meter Gateway sample application is a meter application running on the border router SoC.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router In-Meter Gateway" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400b/wisun_soc_br_in_meter_gateway-brd4400b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_in_meter_gateway/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400c.demo.wisun_soc_br_in_meter_gateway" label="Wi-SUN - SoC Border Router In-Meter Gateway">
+    <ns1:description>The Wi-SUN Border Router In-Meter Gateway sample application is a meter application running on the border router SoC.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router In-Meter Gateway" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400c/wisun_soc_br_in_meter_gateway-brd4400c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_in_meter_gateway/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401a.demo.wisun_soc_br_in_meter_gateway" label="Wi-SUN - SoC Border Router In-Meter Gateway">
+    <ns1:description>The Wi-SUN Border Router In-Meter Gateway sample application is a meter application running on the border router SoC.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router In-Meter Gateway" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401a/wisun_soc_br_in_meter_gateway-brd4401a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_in_meter_gateway/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401b.demo.wisun_soc_br_in_meter_gateway" label="Wi-SUN - SoC Border Router In-Meter Gateway">
+    <ns1:description>The Wi-SUN Border Router In-Meter Gateway sample application is a meter application running on the border router SoC.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router In-Meter Gateway" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401b/wisun_soc_br_in_meter_gateway-brd4401b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_in_meter_gateway/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401c.demo.wisun_soc_br_in_meter_gateway" label="Wi-SUN - SoC Border Router In-Meter Gateway">
+    <ns1:description>The Wi-SUN Border Router In-Meter Gateway sample application is a meter application running on the border router SoC.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Border Router In-Meter Gateway" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401c/wisun_soc_br_in_meter_gateway-brd4401c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_br_in_meter_gateway/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd2705a.demo.wisun_soc_coap_collector" label="Wi-SUN - SoC CoAP Collector">
+    <ns1:description>The Wi-SUN CoAP Collector sample application demonstrates the use of the CoAP (Constrained Application Protocol) to emulate a metering-like application. The CoAP Collector purpose is to retrieve measurements from the devices running the Wi-SUN CoAP Meter application in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Collector" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd2705a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd2705a/wisun_soc_coap_collector-brd2705a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_collector/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4270a.demo.wisun_soc_coap_collector" label="Wi-SUN - SoC CoAP Collector">
+    <ns1:description>The Wi-SUN CoAP Collector sample application demonstrates the use of the CoAP (Constrained Application Protocol) to emulate a metering-like application. The CoAP Collector purpose is to retrieve measurements from the devices running the Wi-SUN CoAP Meter application in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Collector" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270a/wisun_soc_coap_collector-brd4270a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_collector/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4270b.demo.wisun_soc_coap_collector" label="Wi-SUN - SoC CoAP Collector">
+    <ns1:description>The Wi-SUN CoAP Collector sample application demonstrates the use of the CoAP (Constrained Application Protocol) to emulate a metering-like application. The CoAP Collector purpose is to retrieve measurements from the devices running the Wi-SUN CoAP Meter application in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Collector" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270b/wisun_soc_coap_collector-brd4270b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_collector/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4271a.demo.wisun_soc_coap_collector" label="Wi-SUN - SoC CoAP Collector">
+    <ns1:description>The Wi-SUN CoAP Collector sample application demonstrates the use of the CoAP (Constrained Application Protocol) to emulate a metering-like application. The CoAP Collector purpose is to retrieve measurements from the devices running the Wi-SUN CoAP Meter application in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Collector" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4271a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4271a/wisun_soc_coap_collector-brd4271a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_collector/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4272a.demo.wisun_soc_coap_collector" label="Wi-SUN - SoC CoAP Collector">
+    <ns1:description>The Wi-SUN CoAP Collector sample application demonstrates the use of the CoAP (Constrained Application Protocol) to emulate a metering-like application. The CoAP Collector purpose is to retrieve measurements from the devices running the Wi-SUN CoAP Meter application in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Collector" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4272a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4272a/wisun_soc_coap_collector-brd4272a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_collector/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4276a.demo.wisun_soc_coap_collector" label="Wi-SUN - SoC CoAP Collector">
+    <ns1:description>The Wi-SUN CoAP Collector sample application demonstrates the use of the CoAP (Constrained Application Protocol) to emulate a metering-like application. The CoAP Collector purpose is to retrieve measurements from the devices running the Wi-SUN CoAP Meter application in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Collector" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4276a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4276a/wisun_soc_coap_collector-brd4276a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_collector/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400a.demo.wisun_soc_coap_collector" label="Wi-SUN - SoC CoAP Collector">
+    <ns1:description>The Wi-SUN CoAP Collector sample application demonstrates the use of the CoAP (Constrained Application Protocol) to emulate a metering-like application. The CoAP Collector purpose is to retrieve measurements from the devices running the Wi-SUN CoAP Meter application in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Collector" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400a/wisun_soc_coap_collector-brd4400a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_collector/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400b.demo.wisun_soc_coap_collector" label="Wi-SUN - SoC CoAP Collector">
+    <ns1:description>The Wi-SUN CoAP Collector sample application demonstrates the use of the CoAP (Constrained Application Protocol) to emulate a metering-like application. The CoAP Collector purpose is to retrieve measurements from the devices running the Wi-SUN CoAP Meter application in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Collector" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400b/wisun_soc_coap_collector-brd4400b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_collector/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400c.demo.wisun_soc_coap_collector" label="Wi-SUN - SoC CoAP Collector">
+    <ns1:description>The Wi-SUN CoAP Collector sample application demonstrates the use of the CoAP (Constrained Application Protocol) to emulate a metering-like application. The CoAP Collector purpose is to retrieve measurements from the devices running the Wi-SUN CoAP Meter application in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Collector" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400c/wisun_soc_coap_collector-brd4400c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_collector/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401a.demo.wisun_soc_coap_collector" label="Wi-SUN - SoC CoAP Collector">
+    <ns1:description>The Wi-SUN CoAP Collector sample application demonstrates the use of the CoAP (Constrained Application Protocol) to emulate a metering-like application. The CoAP Collector purpose is to retrieve measurements from the devices running the Wi-SUN CoAP Meter application in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Collector" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401a/wisun_soc_coap_collector-brd4401a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_collector/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401b.demo.wisun_soc_coap_collector" label="Wi-SUN - SoC CoAP Collector">
+    <ns1:description>The Wi-SUN CoAP Collector sample application demonstrates the use of the CoAP (Constrained Application Protocol) to emulate a metering-like application. The CoAP Collector purpose is to retrieve measurements from the devices running the Wi-SUN CoAP Meter application in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Collector" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401b/wisun_soc_coap_collector-brd4401b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_collector/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401c.demo.wisun_soc_coap_collector" label="Wi-SUN - SoC CoAP Collector">
+    <ns1:description>The Wi-SUN CoAP Collector sample application demonstrates the use of the CoAP (Constrained Application Protocol) to emulate a metering-like application. The CoAP Collector purpose is to retrieve measurements from the devices running the Wi-SUN CoAP Meter application in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Collector" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401c/wisun_soc_coap_collector-brd4401c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_collector/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd2705a.demo.wisun_soc_coap_meter" label="Wi-SUN - SoC CoAP Meter">
+    <ns1:description>The Wi-SUN CoAP Meter sample application demonstrates the use of the CoAP (Constrained Application Protocol) protocol to emulate a metering-like application. The CoAP Meter purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Meter" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd2705a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd2705a/wisun_soc_coap_meter-brd2705a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_meter/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4204a.demo.wisun_soc_coap_meter" label="Wi-SUN - SoC CoAP Meter">
+    <ns1:description>The Wi-SUN CoAP Meter sample application demonstrates the use of the CoAP (Constrained Application Protocol) protocol to emulate a metering-like application. The CoAP Meter purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Meter" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4204a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4204a/wisun_soc_coap_meter-brd4204a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_meter/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4204b.demo.wisun_soc_coap_meter" label="Wi-SUN - SoC CoAP Meter">
+    <ns1:description>The Wi-SUN CoAP Meter sample application demonstrates the use of the CoAP (Constrained Application Protocol) protocol to emulate a metering-like application. The CoAP Meter purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Meter" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4204b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4204b/wisun_soc_coap_meter-brd4204b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_meter/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4204c.demo.wisun_soc_coap_meter" label="Wi-SUN - SoC CoAP Meter">
+    <ns1:description>The Wi-SUN CoAP Meter sample application demonstrates the use of the CoAP (Constrained Application Protocol) protocol to emulate a metering-like application. The CoAP Meter purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Meter" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4204c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4204c/wisun_soc_coap_meter-brd4204c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_meter/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4204d.demo.wisun_soc_coap_meter" label="Wi-SUN - SoC CoAP Meter">
+    <ns1:description>The Wi-SUN CoAP Meter sample application demonstrates the use of the CoAP (Constrained Application Protocol) protocol to emulate a metering-like application. The CoAP Meter purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Meter" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4204d" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4204d/wisun_soc_coap_meter-brd4204d.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_meter/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4210a.demo.wisun_soc_coap_meter" label="Wi-SUN - SoC CoAP Meter">
+    <ns1:description>The Wi-SUN CoAP Meter sample application demonstrates the use of the CoAP (Constrained Application Protocol) protocol to emulate a metering-like application. The CoAP Meter purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Meter" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4210a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4210a/wisun_soc_coap_meter-brd4210a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_meter/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4263a.demo.wisun_soc_coap_meter" label="Wi-SUN - SoC CoAP Meter">
+    <ns1:description>The Wi-SUN CoAP Meter sample application demonstrates the use of the CoAP (Constrained Application Protocol) protocol to emulate a metering-like application. The CoAP Meter purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Meter" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4263a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4263a/wisun_soc_coap_meter-brd4263a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_meter/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4263b.demo.wisun_soc_coap_meter" label="Wi-SUN - SoC CoAP Meter">
+    <ns1:description>The Wi-SUN CoAP Meter sample application demonstrates the use of the CoAP (Constrained Application Protocol) protocol to emulate a metering-like application. The CoAP Meter purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Meter" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4263b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4263b/wisun_soc_coap_meter-brd4263b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_meter/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4263c.demo.wisun_soc_coap_meter" label="Wi-SUN - SoC CoAP Meter">
+    <ns1:description>The Wi-SUN CoAP Meter sample application demonstrates the use of the CoAP (Constrained Application Protocol) protocol to emulate a metering-like application. The CoAP Meter purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Meter" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4263c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4263c/wisun_soc_coap_meter-brd4263c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_meter/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4264a.demo.wisun_soc_coap_meter" label="Wi-SUN - SoC CoAP Meter">
+    <ns1:description>The Wi-SUN CoAP Meter sample application demonstrates the use of the CoAP (Constrained Application Protocol) protocol to emulate a metering-like application. The CoAP Meter purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Meter" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4264a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4264a/wisun_soc_coap_meter-brd4264a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_meter/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4264b.demo.wisun_soc_coap_meter" label="Wi-SUN - SoC CoAP Meter">
+    <ns1:description>The Wi-SUN CoAP Meter sample application demonstrates the use of the CoAP (Constrained Application Protocol) protocol to emulate a metering-like application. The CoAP Meter purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Meter" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4264b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4264b/wisun_soc_coap_meter-brd4264b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_meter/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4264c.demo.wisun_soc_coap_meter" label="Wi-SUN - SoC CoAP Meter">
+    <ns1:description>The Wi-SUN CoAP Meter sample application demonstrates the use of the CoAP (Constrained Application Protocol) protocol to emulate a metering-like application. The CoAP Meter purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Meter" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4264c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4264c/wisun_soc_coap_meter-brd4264c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_meter/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4270a.demo.wisun_soc_coap_meter" label="Wi-SUN - SoC CoAP Meter">
+    <ns1:description>The Wi-SUN CoAP Meter sample application demonstrates the use of the CoAP (Constrained Application Protocol) protocol to emulate a metering-like application. The CoAP Meter purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Meter" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270a/wisun_soc_coap_meter-brd4270a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_meter/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4270b.demo.wisun_soc_coap_meter" label="Wi-SUN - SoC CoAP Meter">
+    <ns1:description>The Wi-SUN CoAP Meter sample application demonstrates the use of the CoAP (Constrained Application Protocol) protocol to emulate a metering-like application. The CoAP Meter purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Meter" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270b/wisun_soc_coap_meter-brd4270b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_meter/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4271a.demo.wisun_soc_coap_meter" label="Wi-SUN - SoC CoAP Meter">
+    <ns1:description>The Wi-SUN CoAP Meter sample application demonstrates the use of the CoAP (Constrained Application Protocol) protocol to emulate a metering-like application. The CoAP Meter purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Meter" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4271a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4271a/wisun_soc_coap_meter-brd4271a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_meter/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4272a.demo.wisun_soc_coap_meter" label="Wi-SUN - SoC CoAP Meter">
+    <ns1:description>The Wi-SUN CoAP Meter sample application demonstrates the use of the CoAP (Constrained Application Protocol) protocol to emulate a metering-like application. The CoAP Meter purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Meter" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4272a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4272a/wisun_soc_coap_meter-brd4272a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_meter/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4276a.demo.wisun_soc_coap_meter" label="Wi-SUN - SoC CoAP Meter">
+    <ns1:description>The Wi-SUN CoAP Meter sample application demonstrates the use of the CoAP (Constrained Application Protocol) protocol to emulate a metering-like application. The CoAP Meter purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Meter" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4276a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4276a/wisun_soc_coap_meter-brd4276a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_meter/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400a.demo.wisun_soc_coap_meter" label="Wi-SUN - SoC CoAP Meter">
+    <ns1:description>The Wi-SUN CoAP Meter sample application demonstrates the use of the CoAP (Constrained Application Protocol) protocol to emulate a metering-like application. The CoAP Meter purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Meter" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400a/wisun_soc_coap_meter-brd4400a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_meter/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400b.demo.wisun_soc_coap_meter" label="Wi-SUN - SoC CoAP Meter">
+    <ns1:description>The Wi-SUN CoAP Meter sample application demonstrates the use of the CoAP (Constrained Application Protocol) protocol to emulate a metering-like application. The CoAP Meter purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Meter" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400b/wisun_soc_coap_meter-brd4400b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_meter/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400c.demo.wisun_soc_coap_meter" label="Wi-SUN - SoC CoAP Meter">
+    <ns1:description>The Wi-SUN CoAP Meter sample application demonstrates the use of the CoAP (Constrained Application Protocol) protocol to emulate a metering-like application. The CoAP Meter purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Meter" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400c/wisun_soc_coap_meter-brd4400c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_meter/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401a.demo.wisun_soc_coap_meter" label="Wi-SUN - SoC CoAP Meter">
+    <ns1:description>The Wi-SUN CoAP Meter sample application demonstrates the use of the CoAP (Constrained Application Protocol) protocol to emulate a metering-like application. The CoAP Meter purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Meter" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401a/wisun_soc_coap_meter-brd4401a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_meter/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401b.demo.wisun_soc_coap_meter" label="Wi-SUN - SoC CoAP Meter">
+    <ns1:description>The Wi-SUN CoAP Meter sample application demonstrates the use of the CoAP (Constrained Application Protocol) protocol to emulate a metering-like application. The CoAP Meter purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Meter" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401b/wisun_soc_coap_meter-brd4401b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_meter/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401c.demo.wisun_soc_coap_meter" label="Wi-SUN - SoC CoAP Meter">
+    <ns1:description>The Wi-SUN CoAP Meter sample application demonstrates the use of the CoAP (Constrained Application Protocol) protocol to emulate a metering-like application. The CoAP Meter purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC CoAP Meter" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401c/wisun_soc_coap_meter-brd4401c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_coap_meter/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd2705a.demo.wisun_soc_empty" label="Wi-SUN - SoC Empty">
+    <ns1:description>The Wi-SUN Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd2705a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd2705a/wisun_soc_empty-brd2705a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4204a.demo.wisun_soc_empty" label="Wi-SUN - SoC Empty">
+    <ns1:description>The Wi-SUN Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4204a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4204a/wisun_soc_empty-brd4204a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4204b.demo.wisun_soc_empty" label="Wi-SUN - SoC Empty">
+    <ns1:description>The Wi-SUN Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4204b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4204b/wisun_soc_empty-brd4204b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4204c.demo.wisun_soc_empty" label="Wi-SUN - SoC Empty">
+    <ns1:description>The Wi-SUN Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4204c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4204c/wisun_soc_empty-brd4204c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4204d.demo.wisun_soc_empty" label="Wi-SUN - SoC Empty">
+    <ns1:description>The Wi-SUN Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4204d" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4204d/wisun_soc_empty-brd4204d.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4210a.demo.wisun_soc_empty" label="Wi-SUN - SoC Empty">
+    <ns1:description>The Wi-SUN Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4210a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4210a/wisun_soc_empty-brd4210a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4263a.demo.wisun_soc_empty" label="Wi-SUN - SoC Empty">
+    <ns1:description>The Wi-SUN Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4263a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4263a/wisun_soc_empty-brd4263a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4263b.demo.wisun_soc_empty" label="Wi-SUN - SoC Empty">
+    <ns1:description>The Wi-SUN Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4263b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4263b/wisun_soc_empty-brd4263b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4263c.demo.wisun_soc_empty" label="Wi-SUN - SoC Empty">
+    <ns1:description>The Wi-SUN Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4263c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4263c/wisun_soc_empty-brd4263c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4264a.demo.wisun_soc_empty" label="Wi-SUN - SoC Empty">
+    <ns1:description>The Wi-SUN Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4264a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4264a/wisun_soc_empty-brd4264a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4264b.demo.wisun_soc_empty" label="Wi-SUN - SoC Empty">
+    <ns1:description>The Wi-SUN Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4264b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4264b/wisun_soc_empty-brd4264b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4264c.demo.wisun_soc_empty" label="Wi-SUN - SoC Empty">
+    <ns1:description>The Wi-SUN Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4264c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4264c/wisun_soc_empty-brd4264c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4270a.demo.wisun_soc_empty" label="Wi-SUN - SoC Empty">
+    <ns1:description>The Wi-SUN Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270a/wisun_soc_empty-brd4270a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4270b.demo.wisun_soc_empty" label="Wi-SUN - SoC Empty">
+    <ns1:description>The Wi-SUN Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270b/wisun_soc_empty-brd4270b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4271a.demo.wisun_soc_empty" label="Wi-SUN - SoC Empty">
+    <ns1:description>The Wi-SUN Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4271a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4271a/wisun_soc_empty-brd4271a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4272a.demo.wisun_soc_empty" label="Wi-SUN - SoC Empty">
+    <ns1:description>The Wi-SUN Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4272a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4272a/wisun_soc_empty-brd4272a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4276a.demo.wisun_soc_empty" label="Wi-SUN - SoC Empty">
+    <ns1:description>The Wi-SUN Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4276a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4276a/wisun_soc_empty-brd4276a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400a.demo.wisun_soc_empty" label="Wi-SUN - SoC Empty">
+    <ns1:description>The Wi-SUN Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400a/wisun_soc_empty-brd4400a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400b.demo.wisun_soc_empty" label="Wi-SUN - SoC Empty">
+    <ns1:description>The Wi-SUN Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400b/wisun_soc_empty-brd4400b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400c.demo.wisun_soc_empty" label="Wi-SUN - SoC Empty">
+    <ns1:description>The Wi-SUN Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400c/wisun_soc_empty-brd4400c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401a.demo.wisun_soc_empty" label="Wi-SUN - SoC Empty">
+    <ns1:description>The Wi-SUN Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401a/wisun_soc_empty-brd4401a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401b.demo.wisun_soc_empty" label="Wi-SUN - SoC Empty">
+    <ns1:description>The Wi-SUN Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401b/wisun_soc_empty-brd4401b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401c.demo.wisun_soc_empty" label="Wi-SUN - SoC Empty">
+    <ns1:description>The Wi-SUN Empty sample application is a bare-bones application. This application can be used as a template to develop a Wi-SUN application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Empty" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401c/wisun_soc_empty-brd4401c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_empty/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd2705a.demo.wisun_soc_network_measurement" label="Wi-SUN - SoC Network Measurement">
+    <ns1:description>The Wi-SUN Network Measurement application provides a performance measurement solution based on the ping mechanism.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Network Measurement" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd2705a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd2705a/wisun_soc_network_measurement-brd2705a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_network_measurement/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4270a.demo.wisun_soc_network_measurement" label="Wi-SUN - SoC Network Measurement">
+    <ns1:description>The Wi-SUN Network Measurement application provides a performance measurement solution based on the ping mechanism.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Network Measurement" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270a/wisun_soc_network_measurement-brd4270a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_network_measurement/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4270b.demo.wisun_soc_network_measurement" label="Wi-SUN - SoC Network Measurement">
+    <ns1:description>The Wi-SUN Network Measurement application provides a performance measurement solution based on the ping mechanism.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Network Measurement" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270b/wisun_soc_network_measurement-brd4270b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_network_measurement/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4271a.demo.wisun_soc_network_measurement" label="Wi-SUN - SoC Network Measurement">
+    <ns1:description>The Wi-SUN Network Measurement application provides a performance measurement solution based on the ping mechanism.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Network Measurement" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4271a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4271a/wisun_soc_network_measurement-brd4271a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_network_measurement/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4272a.demo.wisun_soc_network_measurement" label="Wi-SUN - SoC Network Measurement">
+    <ns1:description>The Wi-SUN Network Measurement application provides a performance measurement solution based on the ping mechanism.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Network Measurement" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4272a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4272a/wisun_soc_network_measurement-brd4272a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_network_measurement/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4276a.demo.wisun_soc_network_measurement" label="Wi-SUN - SoC Network Measurement">
+    <ns1:description>The Wi-SUN Network Measurement application provides a performance measurement solution based on the ping mechanism.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Network Measurement" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4276a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4276a/wisun_soc_network_measurement-brd4276a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_network_measurement/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400a.demo.wisun_soc_network_measurement" label="Wi-SUN - SoC Network Measurement">
+    <ns1:description>The Wi-SUN Network Measurement application provides a performance measurement solution based on the ping mechanism.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Network Measurement" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400a/wisun_soc_network_measurement-brd4400a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_network_measurement/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400b.demo.wisun_soc_network_measurement" label="Wi-SUN - SoC Network Measurement">
+    <ns1:description>The Wi-SUN Network Measurement application provides a performance measurement solution based on the ping mechanism.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Network Measurement" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400b/wisun_soc_network_measurement-brd4400b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_network_measurement/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400c.demo.wisun_soc_network_measurement" label="Wi-SUN - SoC Network Measurement">
+    <ns1:description>The Wi-SUN Network Measurement application provides a performance measurement solution based on the ping mechanism.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Network Measurement" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400c/wisun_soc_network_measurement-brd4400c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_network_measurement/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401a.demo.wisun_soc_network_measurement" label="Wi-SUN - SoC Network Measurement">
+    <ns1:description>The Wi-SUN Network Measurement application provides a performance measurement solution based on the ping mechanism.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Network Measurement" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401a/wisun_soc_network_measurement-brd4401a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_network_measurement/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401b.demo.wisun_soc_network_measurement" label="Wi-SUN - SoC Network Measurement">
+    <ns1:description>The Wi-SUN Network Measurement application provides a performance measurement solution based on the ping mechanism.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Network Measurement" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401b/wisun_soc_network_measurement-brd4401b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_network_measurement/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401c.demo.wisun_soc_network_measurement" label="Wi-SUN - SoC Network Measurement">
+    <ns1:description>The Wi-SUN Network Measurement application provides a performance measurement solution based on the ping mechanism.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Network Measurement" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401c/wisun_soc_network_measurement-brd4401c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_network_measurement/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd2705a.demo.wisun_soc_ping" label="Wi-SUN - SoC Ping">
+    <ns1:description>The Wi-SUN Ping sample application demonstrates how to use the Wi-SUN application framework and the POSIX-like socket API to implement a basic ping application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Ping" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd2705a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd2705a/wisun_soc_ping-brd2705a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_ping/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4270a.demo.wisun_soc_ping" label="Wi-SUN - SoC Ping">
+    <ns1:description>The Wi-SUN Ping sample application demonstrates how to use the Wi-SUN application framework and the POSIX-like socket API to implement a basic ping application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Ping" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270a/wisun_soc_ping-brd4270a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_ping/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4270b.demo.wisun_soc_ping" label="Wi-SUN - SoC Ping">
+    <ns1:description>The Wi-SUN Ping sample application demonstrates how to use the Wi-SUN application framework and the POSIX-like socket API to implement a basic ping application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Ping" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270b/wisun_soc_ping-brd4270b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_ping/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4271a.demo.wisun_soc_ping" label="Wi-SUN - SoC Ping">
+    <ns1:description>The Wi-SUN Ping sample application demonstrates how to use the Wi-SUN application framework and the POSIX-like socket API to implement a basic ping application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Ping" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4271a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4271a/wisun_soc_ping-brd4271a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_ping/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4272a.demo.wisun_soc_ping" label="Wi-SUN - SoC Ping">
+    <ns1:description>The Wi-SUN Ping sample application demonstrates how to use the Wi-SUN application framework and the POSIX-like socket API to implement a basic ping application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Ping" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4272a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4272a/wisun_soc_ping-brd4272a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_ping/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4276a.demo.wisun_soc_ping" label="Wi-SUN - SoC Ping">
+    <ns1:description>The Wi-SUN Ping sample application demonstrates how to use the Wi-SUN application framework and the POSIX-like socket API to implement a basic ping application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Ping" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4276a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4276a/wisun_soc_ping-brd4276a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_ping/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400a.demo.wisun_soc_ping" label="Wi-SUN - SoC Ping">
+    <ns1:description>The Wi-SUN Ping sample application demonstrates how to use the Wi-SUN application framework and the POSIX-like socket API to implement a basic ping application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Ping" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400a/wisun_soc_ping-brd4400a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_ping/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400b.demo.wisun_soc_ping" label="Wi-SUN - SoC Ping">
+    <ns1:description>The Wi-SUN Ping sample application demonstrates how to use the Wi-SUN application framework and the POSIX-like socket API to implement a basic ping application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Ping" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400b/wisun_soc_ping-brd4400b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_ping/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400c.demo.wisun_soc_ping" label="Wi-SUN - SoC Ping">
+    <ns1:description>The Wi-SUN Ping sample application demonstrates how to use the Wi-SUN application framework and the POSIX-like socket API to implement a basic ping application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Ping" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400c/wisun_soc_ping-brd4400c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_ping/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401a.demo.wisun_soc_ping" label="Wi-SUN - SoC Ping">
+    <ns1:description>The Wi-SUN Ping sample application demonstrates how to use the Wi-SUN application framework and the POSIX-like socket API to implement a basic ping application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Ping" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401a/wisun_soc_ping-brd4401a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_ping/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401b.demo.wisun_soc_ping" label="Wi-SUN - SoC Ping">
+    <ns1:description>The Wi-SUN Ping sample application demonstrates how to use the Wi-SUN application framework and the POSIX-like socket API to implement a basic ping application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Ping" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401b/wisun_soc_ping-brd4401b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_ping/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401c.demo.wisun_soc_ping" label="Wi-SUN - SoC Ping">
+    <ns1:description>The Wi-SUN Ping sample application demonstrates how to use the Wi-SUN application framework and the POSIX-like socket API to implement a basic ping application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Ping" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401c/wisun_soc_ping-brd4401c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_ping/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd2705a.demo.wisun_soc_socket" label="Wi-SUN - SoC Socket">
+    <ns1:description>The Wi-SUN Socket sample application demonstrates how to use the Wi-SUN application framework and the POSIX socket APIs to implement a basic TCP/UDP client/server application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Socket" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd2705a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd2705a/wisun_soc_socket-brd2705a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_socket/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4270a.demo.wisun_soc_socket" label="Wi-SUN - SoC Socket">
+    <ns1:description>The Wi-SUN Socket sample application demonstrates how to use the Wi-SUN application framework and the POSIX socket APIs to implement a basic TCP/UDP client/server application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Socket" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270a/wisun_soc_socket-brd4270a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_socket/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4270b.demo.wisun_soc_socket" label="Wi-SUN - SoC Socket">
+    <ns1:description>The Wi-SUN Socket sample application demonstrates how to use the Wi-SUN application framework and the POSIX socket APIs to implement a basic TCP/UDP client/server application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Socket" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4270b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4270b/wisun_soc_socket-brd4270b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_socket/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4271a.demo.wisun_soc_socket" label="Wi-SUN - SoC Socket">
+    <ns1:description>The Wi-SUN Socket sample application demonstrates how to use the Wi-SUN application framework and the POSIX socket APIs to implement a basic TCP/UDP client/server application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Socket" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4271a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4271a/wisun_soc_socket-brd4271a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_socket/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4272a.demo.wisun_soc_socket" label="Wi-SUN - SoC Socket">
+    <ns1:description>The Wi-SUN Socket sample application demonstrates how to use the Wi-SUN application framework and the POSIX socket APIs to implement a basic TCP/UDP client/server application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Socket" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4272a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4272a/wisun_soc_socket-brd4272a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_socket/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4276a.demo.wisun_soc_socket" label="Wi-SUN - SoC Socket">
+    <ns1:description>The Wi-SUN Socket sample application demonstrates how to use the Wi-SUN application framework and the POSIX socket APIs to implement a basic TCP/UDP client/server application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Socket" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4276a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4276a/wisun_soc_socket-brd4276a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_socket/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400a.demo.wisun_soc_socket" label="Wi-SUN - SoC Socket">
+    <ns1:description>The Wi-SUN Socket sample application demonstrates how to use the Wi-SUN application framework and the POSIX socket APIs to implement a basic TCP/UDP client/server application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Socket" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400a/wisun_soc_socket-brd4400a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_socket/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400b.demo.wisun_soc_socket" label="Wi-SUN - SoC Socket">
+    <ns1:description>The Wi-SUN Socket sample application demonstrates how to use the Wi-SUN application framework and the POSIX socket APIs to implement a basic TCP/UDP client/server application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Socket" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400b/wisun_soc_socket-brd4400b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_socket/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4400c.demo.wisun_soc_socket" label="Wi-SUN - SoC Socket">
+    <ns1:description>The Wi-SUN Socket sample application demonstrates how to use the Wi-SUN application framework and the POSIX socket APIs to implement a basic TCP/UDP client/server application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Socket" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4400c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4400c/wisun_soc_socket-brd4400c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_socket/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401a.demo.wisun_soc_socket" label="Wi-SUN - SoC Socket">
+    <ns1:description>The Wi-SUN Socket sample application demonstrates how to use the Wi-SUN application framework and the POSIX socket APIs to implement a basic TCP/UDP client/server application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Socket" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401a/wisun_soc_socket-brd4401a.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_socket/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401b.demo.wisun_soc_socket" label="Wi-SUN - SoC Socket">
+    <ns1:description>The Wi-SUN Socket sample application demonstrates how to use the Wi-SUN application framework and the POSIX socket APIs to implement a basic TCP/UDP client/server application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Socket" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401b" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401b/wisun_soc_socket-brd4401b.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_socket/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4401c.demo.wisun_soc_socket" label="Wi-SUN - SoC Socket">
+    <ns1:description>The Wi-SUN Socket sample application demonstrates how to use the Wi-SUN application framework and the POSIX socket APIs to implement a basic TCP/UDP client/server application.</ns1:description>
+    <property key="demos.blurb" value="Wi-SUN - SoC Socket" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4401c" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/wisun_app/brd4401c/wisun_soc_socket-brd4401c.s37" />
+    <property key="core.readmeFiles" value="wisun_soc_socket/readme.md" />
+    <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Wi-SUN" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+</demos>

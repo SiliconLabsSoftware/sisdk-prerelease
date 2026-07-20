@@ -146,7 +146,7 @@ sl_status_t sli_iostream_swo_itm_8_write(void *context,
                                          sl_iostream_swo_itm_8_msg_type_t type,
                                          uint8_t seq_nbr)
 {
-  uint8_t *buf = (uint8_t *)buffer;
+  const uint8_t *buf = (const uint8_t *)buffer;
   uint32_t packet_length;
   uint8_t  output_byte;
 #if defined(SL_CATALOG_KERNEL_PRESENT)
@@ -168,7 +168,7 @@ sl_status_t sli_iostream_swo_itm_8_write(void *context,
       output_byte = '[';
     } else if ( i == 1 ) {
       // Including special byte, type and sequence number
-      output_byte = buffer_length + 4;
+      output_byte = (uint8_t)(buffer_length + 4);
     } else if ( i == 2 ) {
       // Special EDM byte
       output_byte = 0xD1;

@@ -40,7 +40,7 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_enum.h"
 
 /***************************************************************************//**
@@ -199,7 +199,7 @@ void sl_hal_letimer_reset(LETIMER_TypeDef *letimer);
 __INLINE void sl_hal_letimer_enable(LETIMER_TypeDef *letimer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
 
   if ((letimer->EN & _LETIMER_EN_EN_MASK) == LETIMER_EN_EN) {
     return;
@@ -218,7 +218,7 @@ __INLINE void sl_hal_letimer_enable(LETIMER_TypeDef *letimer)
 __INLINE void sl_hal_letimer_disable(LETIMER_TypeDef *letimer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
 
   if ((letimer->EN & _LETIMER_EN_EN_MASK) != LETIMER_EN_EN) {
     return;
@@ -237,7 +237,8 @@ __INLINE void sl_hal_letimer_disable(LETIMER_TypeDef *letimer)
 __INLINE void sl_hal_letimer_wait_ready(LETIMER_TypeDef *letimer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  (void)letimer;
 
 #if defined(_LETIMER_SWRST_RESETTING_MASK)
   while (letimer->SWRST & _LETIMER_SWRST_RESETTING_MASK) {
@@ -262,7 +263,7 @@ __INLINE void sl_hal_letimer_wait_ready(LETIMER_TypeDef *letimer)
 __INLINE void sl_hal_letimer_wait_sync(LETIMER_TypeDef *letimer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
 
   while (letimer->SYNCBUSY & _LETIMER_SYNCBUSY_MASK) {
     // Wait for the update to finish.
@@ -282,7 +283,7 @@ __INLINE void sl_hal_letimer_wait_sync(LETIMER_TypeDef *letimer)
 __INLINE uint32_t sl_hal_letimer_get_status(LETIMER_TypeDef *letimer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
 
   return letimer->STATUS;
 }
@@ -302,7 +303,7 @@ __INLINE void sl_hal_letimer_enable_interrupts(LETIMER_TypeDef *letimer,
                                                uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
 
   letimer->IEN_SET = flags;
 }
@@ -322,7 +323,7 @@ __INLINE void sl_hal_letimer_disable_interrupts(LETIMER_TypeDef *letimer,
                                                 uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
 
   letimer->IEN_CLR = flags;
 }
@@ -342,7 +343,7 @@ __INLINE void sl_hal_letimer_clear_interrupts(LETIMER_TypeDef *letimer,
                                               uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
 
   letimer->IF_CLR = flags;
 }
@@ -362,7 +363,7 @@ __INLINE void sl_hal_letimer_set_interrupts(LETIMER_TypeDef *letimer,
                                             uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
 
   letimer->IF_SET = flags;
 }
@@ -384,7 +385,7 @@ __INLINE void sl_hal_letimer_set_interrupts(LETIMER_TypeDef *letimer,
 __INLINE uint32_t sl_hal_letimer_get_pending_interrupts(LETIMER_TypeDef *letimer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
 
   return letimer->IF;
 }
@@ -411,7 +412,7 @@ __INLINE uint32_t sl_hal_letimer_get_pending_interrupts(LETIMER_TypeDef *letimer
 __INLINE uint32_t sl_hal_letimer_get_enabled_pending_interrupts(LETIMER_TypeDef *letimer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
 
   // Store LETIMER->IEN in temporary variable in order to define explicit order
   // of volatile accesses.
@@ -437,7 +438,7 @@ __INLINE uint32_t sl_hal_letimer_get_enabled_pending_interrupts(LETIMER_TypeDef 
 __INLINE void sl_hal_letimer_lock(LETIMER_TypeDef *letimer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
 
   letimer->LOCK = ~LETIMER_LOCK_LETIMERLOCKKEY_UNLOCK;
 }
@@ -452,7 +453,7 @@ __INLINE void sl_hal_letimer_lock(LETIMER_TypeDef *letimer)
 __INLINE void sl_hal_letimer_unlock(LETIMER_TypeDef *letimer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
 
   letimer->LOCK = LETIMER_LOCK_LETIMERLOCKKEY_UNLOCK;
 }
@@ -474,9 +475,9 @@ __INLINE void sl_hal_letimer_unlock(LETIMER_TypeDef *letimer)
 __INLINE void sl_hal_letimer_start(LETIMER_TypeDef *letimer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
   // Make sure module is enabled.
-  EFM_ASSERT(letimer->EN & _LETIMER_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(letimer->EN & _LETIMER_EN_EN_MASK);
 
   sl_hal_letimer_wait_sync(letimer);
   letimer->CMD_SET = LETIMER_CMD_START;
@@ -498,9 +499,9 @@ __INLINE void sl_hal_letimer_start(LETIMER_TypeDef *letimer)
 __INLINE void sl_hal_letimer_stop(LETIMER_TypeDef *letimer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
   // Make sure module is enabled.
-  EFM_ASSERT(letimer->EN & _LETIMER_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(letimer->EN & _LETIMER_EN_EN_MASK);
 
   sl_hal_letimer_wait_sync(letimer);
   letimer->CMD_SET = LETIMER_CMD_STOP;
@@ -520,11 +521,11 @@ __INLINE void sl_hal_letimer_set_counter(LETIMER_TypeDef *letimer,
                                          uint32_t value)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
   // Make sure counter value is valid.
-  EFM_ASSERT(value <= SL_HAL_LETIMER_MAX_COUNT(letimer));
+  SL_LOG_DEBUG_ASSERT(value <= SL_HAL_LETIMER_MAX_COUNT(letimer));
   // Make sure module is enabled.
-  EFM_ASSERT(letimer->EN & _LETIMER_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(letimer->EN & _LETIMER_EN_EN_MASK);
 
   sl_hal_letimer_wait_sync(letimer);
   letimer->CNT = value;
@@ -543,7 +544,7 @@ __INLINE void sl_hal_letimer_set_counter(LETIMER_TypeDef *letimer,
 __INLINE uint32_t sl_hal_letimer_get_counter(LETIMER_TypeDef *letimer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
 
   sl_hal_letimer_wait_sync(letimer);
   return letimer->CNT;
@@ -635,11 +636,11 @@ __INLINE void sl_hal_letimer_set_top(LETIMER_TypeDef *letimer,
                                      uint32_t value)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
   // Make sure top value is valid.
-  EFM_ASSERT(value <= SL_HAL_LETIMER_MAX_COUNT(letimer));
+  SL_LOG_DEBUG_ASSERT(value <= SL_HAL_LETIMER_MAX_COUNT(letimer));
   // Make sure module is enabled.
-  EFM_ASSERT(letimer->EN & _LETIMER_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(letimer->EN & _LETIMER_EN_EN_MASK);
 
   sl_hal_letimer_wait_sync(letimer);
   letimer->TOP = value;
@@ -658,7 +659,7 @@ __INLINE void sl_hal_letimer_set_top(LETIMER_TypeDef *letimer,
 __INLINE uint32_t sl_hal_letimer_get_top(LETIMER_TypeDef *letimer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
 
   sl_hal_letimer_wait_sync(letimer);
   return letimer->TOP;
@@ -685,11 +686,11 @@ __INLINE void sl_hal_letimer_set_top_buffer(LETIMER_TypeDef *letimer,
                                             uint32_t value)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
   // Make sure top buffer value is valid.
-  EFM_ASSERT(value <= SL_HAL_LETIMER_MAX_COUNT(letimer));
+  SL_LOG_DEBUG_ASSERT(value <= SL_HAL_LETIMER_MAX_COUNT(letimer));
   // Make sure module is enabled.
-  EFM_ASSERT(letimer->EN & _LETIMER_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(letimer->EN & _LETIMER_EN_EN_MASK);
 
   sl_hal_letimer_wait_sync(letimer);
   letimer->TOPBUFF = value;
@@ -708,7 +709,7 @@ __INLINE void sl_hal_letimer_set_top_buffer(LETIMER_TypeDef *letimer,
 __INLINE uint32_t sl_hal_letimer_get_top_buffer(LETIMER_TypeDef *letimer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LETIMER_REF_VALID(letimer));
 
   sl_hal_letimer_wait_sync(letimer);
   return letimer->TOPBUFF;

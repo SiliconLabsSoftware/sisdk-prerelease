@@ -17,7 +17,7 @@ requires:
 - name: cpc_secondary
 
 define:
-- name: DEBUG_EFM_USER
+- name: DEBUG_EFM
 
 source:
 - path: sl_wsrcp_cpc.h

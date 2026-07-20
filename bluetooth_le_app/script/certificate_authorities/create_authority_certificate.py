@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2025 Silicon Laboratories Inc. www.silabs.com
+# Copyright 2026 Silicon Laboratories Inc. www.silabs.com
 #
 # SPDX-License-Identifier: Zlib
 #
@@ -34,10 +34,9 @@ For intermediate CA creation, the higher level (n-1) CA must be present. (Except
 '''
 # Metadata
 __author__ = 'Silicon Laboratories, Inc'
-__copyright__ = 'Copyright 2025, Silicon Laboratories, Inc.'
+__copyright__ = 'Copyright 2026, Silicon Laboratories, Inc.'
 
 import os
-import pathlib
 import stat
 import datetime
 import argparse
@@ -45,7 +44,6 @@ import cryptography
 from cryptography import x509
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives import serialization
-from jinja2 import FileSystemLoader, Environment
 from production_line_tool import generate_serial_number, add_certificate_to_database
 
 def main(level,
@@ -79,7 +77,6 @@ def main(level,
 
     path_key = os.path.join(path_dir, 'private_key.pem')
     path_cert = os.path.join(path_dir, 'certificate.pem')
-    path_template = os.path.join(os.path.abspath(os.path.join((__file__), '..')), 'sl_bt_cbap_root_cert.h.jinja')
 
     if level == 0:
         path_database = os.path.join(path_dir, 'issued_certificates.yaml')
@@ -161,7 +158,6 @@ def main(level,
     with open(path_cert, 'wb') as f:
         f.write(cert.public_bytes(serialization.Encoding.PEM))
 
-    convert_header(path_cert, path_template) # Create header for SoC example
     print(name + ' authority certificate created.')
 
 def create_certificate(public_key, subjects, validity, policy_oid, signing_key, issuer, path_database):
@@ -202,53 +198,6 @@ def create_certificate(public_key, subjects, validity, policy_oid, signing_key, 
     cert = cert.sign(signing_key, cryptography.hazmat.primitives.hashes.SHA256())
     add_certificate_to_database(cert, path_database)
     return cert
-
-def convert_header(path_pem, path_template):
-    '''Create a header file out of a PEM certificate that can be used
-    directly by the Gecko SDK SoC sample applications.
-
-    Keyword arguments:
-    path_pem -- Path to the certificate file in PEM format.
-    path_template -- Path to the jinja2 template directory.
-    Return values:
-    path_header -- Path to the certificate header file.
-    '''
-    # Check input
-    if not os.path.exists(path_pem):
-        raise FileNotFoundError('Cannot find certificate file.')
-
-    # Load certificate
-    with open(path_pem, 'r') as f:
-        crt = f.readlines()
-
-    # Remove PEM certificate delimiters
-    crt.pop(0)
-    crt.pop()
-
-    # Format string
-    i = 0
-    while i < len(crt):
-        if i < len(crt) - 1:
-            crt[i] = crt[i] = '  "' + crt[i].strip() + '" \\\n'
-        else:
-            crt[i] = crt[i] = '  "' + crt[i].strip() + '"'
-        i = i + 1
-
-    crt = ''.join(crt)
-
-    # Load jinja template
-    env = Environment()
-    env.loader = FileSystemLoader(os.path.normpath(os.path.join(path_template, '..').replace('\\', '/')))
-
-    # Write to file
-    path_header = os.path.join(os.path.abspath(os.path.join(path_pem, '..')),
-                               pathlib.Path(path_template).stem)
-
-    with open(path_header, 'w') as f:
-        f.write(env.get_template(str(pathlib.Path(path_template).name)).render(sl_bt_cbap_root_cert = crt))
-
-    print(str(path_header) + ' created.')
-    return path_header
 
 def load_args():
     '''Parse command line arguments'''

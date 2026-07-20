@@ -98,7 +98,7 @@
       <pin defaultLabel="PD00" location="top:11" number="48" pinIndex="0" portBankIndex="3"/>
     </pinOut>
     <peripherals>
-      <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.scratchpad" displayName="SCRATCHPAD" name="SCRATCHPAD" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.scratchpad" displayName="SCRATCHPAD" name="SCRATCHPAD" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.emu" displayName="EMU" name="EMU" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.cmu" displayName="CMU" name="CMU" revision="A" category="Clocking" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.hfrco" displayName="HFRCO0" name="HFRCO0" revision="A" category="Clocking" hidden="false"/>
@@ -142,14 +142,14 @@
       <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.eusart" displayName="EUSART2" name="EUSART2" revision="A" category="Communications" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.sysrtc" displayName="SYSRTC0" name="SYSRTC0" revision="A" category="Timers" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.lcd" displayName="LCD" name="LCD" revision="A" category="Other" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.keyscan" displayName="KEYSCAN" name="KEYSCAN" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.keyscan" displayName="KEYSCAN" name="KEYSCAN" revision="A" category="Communications" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.wdog" displayName="WDOG0" name="WDOG0" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.aes" displayName="RADIOAES" name="RADIOAES" revision="A" category="Security" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.smu" displayName="SMU" name="SMU" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.letimer" displayName="LETIMER0" name="LETIMER0" revision="A" category="Timers" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.iadc" displayName="IADC0" name="IADC0" revision="A" category="Analog" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.acmp" displayName="ACMP0" name="ACMP0" revision="A" category="Other" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.acmp" displayName="ACMP1" name="ACMP1" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.acmp" displayName="ACMP0" name="ACMP0" revision="A" category="Analog" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.acmp" displayName="ACMP1" name="ACMP1" revision="A" category="Analog" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.vdac" displayName="VDAC0" name="VDAC0" revision="A" category="Analog" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.pcnt" displayName="PCNT0" name="PCNT0" revision="A" category="Timers" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.lesense" displayName="LESENSE" name="LESENSE" revision="A" category="Communications" hidden="false"/>
@@ -158,10 +158,10 @@
       <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.i2c" displayName="I2C0" name="I2C0" revision="A" category="Communications" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.wdog" displayName="WDOG1" name="WDOG1" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.eusart" displayName="EUSART0" name="EUSART0" revision="A" category="Communications" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.semailbox" displayName="SEMAILBOX" name="SEMAILBOX" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.semailbox" displayName="SEMAILBOX" name="SEMAILBOX" revision="A" category="Security" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.pti" displayName="PTI" name="PTI" revision="A" category="Radio" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.modem" displayName="MODEM" name="MODEM" revision="A" category="Radio" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.scratchpad" displayName="RFSCRATCHPAD" name="RFSCRATCHPAD" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.scratchpad" displayName="RFSCRATCHPAD" name="RFSCRATCHPAD" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32fg2d.mailbox" displayName="RFMAILBOX" name="RFMAILBOX" revision="A" category="Core" hidden="false"/>
     </peripherals>
     <script uri="../../script/entrypoint.py">

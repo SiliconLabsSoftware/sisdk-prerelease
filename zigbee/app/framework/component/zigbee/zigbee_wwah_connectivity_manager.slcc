@@ -1,0 +1,96 @@
+package: zigbee
+description: Silicon Labs implementation of the Works With All Hubs connectivity functions per the Zigbee WWAH Requirements document. This component should be included by routers and end devices only. This component manages connectivity states to both the hub and, for end devices, to the parent. In the event of connection loss, restoration is performed per the WWAH Connectivity Recovery Procedure as defined in the Zigbee WWAH Requirements specification. The component uses the Trust Center Keepalive component on routers and non-sleepy end devices to determine hub connectivity. On sleepy end devices, it uses the Poll Control Server component to determine hub connectivity. On end devices, this component also uses the End Device Support component to determine parent connectivity.
+label: SL Works With All Hubs Connectivity Manager
+quality: production
+id: zigbee_wwah_connectivity_manager
+category: Zigbee|Works With All Hubs
+provides:
+- name: zigbee_wwah_connectivity_manager
+requires:
+- name: zigbee_tc_connectivity
+recommends:
+- id: zigbee_trust_center_keepalive
+  vendor: silabs
+config_file:
+- path: app/framework/plugin/wwah-connectivity-manager/config/wwah-connectivity-manager-config.h
+source:
+- path: app/framework/plugin/wwah-connectivity-manager/wwah-connectivity-manager.c
+- path: app/framework/plugin/wwah-connectivity-manager/wwah-connectivity-manager-cli.c
+  condition:
+  - cli
+include:
+- path: app/framework/plugin/wwah-connectivity-manager
+  file_list:
+  - path: wwah-connectivity-manager.h
+  - path: wwah-connectivity-manager-tokens.h
+template_contribution:
+- name: component_catalog
+  value: zigbee_wwah_connectivity_manager
+- name: zigbee_stack_callback
+  value:
+    callback_type: stack_status
+    function_name: sl_zigbee_af_wwah_connectivity_manager_stack_status_cb
+- name: cli_group
+  value:
+    group: plugin
+    name: wwah-connectivity-manager
+    help: wwah-connectivity-manager related commands.
+- name: cli_command
+  value:
+    group: wwah-connectivity-manager
+    name: info
+    handler: sli_zigbee_af_wwah_connectivity_manager_info_command
+    help: Prints information about the WWAH Connectivity Manager state.
+- name: cli_command
+  value:
+    group: wwah-connectivity-manager
+    name: enable
+    handler: sli_zigbee_af_wwah_connectivity_manager_enable_command
+    help: Enables the WWAH Connectivity Manager rejoin algorithm.
+    argument:
+    - type: uint8
+      help: The endpoint that contains WWAH cluster
+- name: cli_command
+  value:
+    group: wwah-connectivity-manager
+    name: disable
+    handler: sli_zigbee_af_wwah_connectivity_manager_disable_command
+    help: Disables the WWAH Connectivity Manager rejoin algorithm.
+    argument:
+    - type: uint8
+      help: The endpoint that contains WWAH cluster
+- name: cli_command
+  value:
+    group: wwah-connectivity-manager
+    name: show
+    handler: sli_zigbee_af_wwah_connectivity_manager_show_command
+    help: Shows the WWAH Connectivity Manager rejoin algorithms parameters.
+- name: cli_command
+  value:
+    group: wwah-connectivity-manager
+    name: parent-recovery
+    handler: sli_zigbee_af_wwah_connectivity_manager_bad_parent_recovery_command
+    help: Disables/enables the WWAH bad parent recovery. And sets the bad parent check and rejoin period (min), if enabled.
+    argument:
+    - type: uint8
+      help: Disable ==0, enable == 1, the WWAH bad parent recovery
+    - type: uint16
+      help: the Period of time after which we check if a parent is bad and try rejoin if so. 0 means use the default value of 24 * 60 mins.
+- name: cli_command
+  value:
+    group: wwah-connectivity-manager
+    name: min-rssi
+    handler: sli_zigbee_af_wwah_connectivity_manager_set_min_rssi_command
+    help: Sets minimum acceptable RSSI for receiving packets on an SoC WWAH-enabled device.
+    argument:
+    - type: int8
+      help: min acceptable RSSI value for receiving packets
+- name: token_header
+  value: wwah-connectivity-manager-tokens.h
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/wwah-connectivity-manager
+metadata:
+  sbom:
+    license: MSLA
+root_path: zigbee

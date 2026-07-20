@@ -1,12 +1,13 @@
 project_name: mp-zb-ot-soc-light
 label: Zigbee + OpenThread - SoC Light (CMP)
-package: multiprotocol
+package: multiprotocol_app
 category: Zigbee Application
 quality: production
 description: Demonstrates a CMP (Concurrent Multiprotocol) Zigbee 3.0 Light and OpenThread FTD application sharing the same RAIL handle, enabling dual 802.15.4 stacks with CMSIS-RTOS.
 
 component:
   - id: sl_main
+  - id: watchdog_manager
   - id: cli
     instance:
       - example

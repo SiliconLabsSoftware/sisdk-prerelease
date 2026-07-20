@@ -58,7 +58,7 @@ extern __INLINE uint32_t sl_hal_sysrtc_get_counter(void);
  ******************************************************************************/
 void sl_hal_sysrtc_wait_sync_group(uint8_t group_number)
 {
-  EFM_ASSERT(SYSRTC_GROUP_VALID(group_number));
+  SL_LOG_DEBUG_ASSERT(SYSRTC_GROUP_VALID(group_number));
 
   switch (group_number) {
 #if defined(_SYSRTC_GRP0_SYNCBUSY_MASK)
@@ -182,7 +182,7 @@ void sl_hal_sysrtc_wait_sync_group(uint8_t group_number)
 #endif
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
   }
 }
 
@@ -232,7 +232,7 @@ static inline uint32_t sli_hal_sysrtc_group_get_control_register(uint8_t group_n
       return SYSRTC_INST->GRP7_CTRL;
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
       return 0;
   }
 }
@@ -292,7 +292,7 @@ static inline void sli_hal_sysrtc_group_set_control_register(uint8_t group_numbe
       break;
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
       break;
   }
 }
@@ -333,7 +333,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_enable_bit(uint8_t gro
         bit_value = ((enable ? 1UL : 0UL) << _SYSRTC_GRP0_CTRL_CMP2EN_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -350,7 +350,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_enable_bit(uint8_t gro
         bit_value = ((enable ? 1UL : 0UL) << _SYSRTC_GRP1_CTRL_CMP2EN_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -367,7 +367,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_enable_bit(uint8_t gro
         bit_value = ((enable ? 1UL : 0UL) << _SYSRTC_GRP2_CTRL_CMP2EN_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -384,7 +384,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_enable_bit(uint8_t gro
         bit_value = ((enable ? 1UL : 0UL) << _SYSRTC_GRP3_CTRL_CMP2EN_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -401,7 +401,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_enable_bit(uint8_t gro
         bit_value = ((enable ? 1UL : 0UL) << _SYSRTC_GRP4_CTRL_CMP2EN_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -418,7 +418,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_enable_bit(uint8_t gro
         bit_value = ((enable ? 1UL : 0UL) << _SYSRTC_GRP5_CTRL_CMP2EN_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -435,7 +435,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_enable_bit(uint8_t gro
         bit_value = ((enable ? 1UL : 0UL) << _SYSRTC_GRP6_CTRL_CMP2EN_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -452,12 +452,12 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_enable_bit(uint8_t gro
         bit_value = ((enable ? 1UL : 0UL) << _SYSRTC_GRP7_CTRL_CMP2EN_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
       break;
   }
 
@@ -500,7 +500,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_action_bit(uint8_t gro
         bit_value = ((uint32_t)action << _SYSRTC_GRP0_CTRL_CMP2CMOA_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -517,7 +517,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_action_bit(uint8_t gro
         bit_value = ((uint32_t)action << _SYSRTC_GRP1_CTRL_CMP2CMOA_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -534,7 +534,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_action_bit(uint8_t gro
         bit_value = ((uint32_t)action << _SYSRTC_GRP2_CTRL_CMP2CMOA_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -551,7 +551,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_action_bit(uint8_t gro
         bit_value = ((uint32_t)action << _SYSRTC_GRP3_CTRL_CMP2CMOA_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -568,7 +568,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_action_bit(uint8_t gro
         bit_value = ((uint32_t)action << _SYSRTC_GRP4_CTRL_CMP2CMOA_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -585,7 +585,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_action_bit(uint8_t gro
         bit_value = ((uint32_t)action << _SYSRTC_GRP5_CTRL_CMP2CMOA_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -602,7 +602,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_action_bit(uint8_t gro
         bit_value = ((uint32_t)action << _SYSRTC_GRP6_CTRL_CMP2CMOA_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -619,12 +619,12 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_action_bit(uint8_t gro
         bit_value = ((uint32_t)action << _SYSRTC_GRP7_CTRL_CMP2CMOA_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
       break;
   }
 
@@ -655,7 +655,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_capture_enable_bit(uint8_t gro
   uint32_t bit_value = 0;
 
   // Currently only channel 0 is supported
-  EFM_ASSERT(channel == 0);
+  SL_LOG_DEBUG_ASSERT(channel == 0);
 
   switch (group_number) {
 #if defined(SYSRTC_GRP0_CTRL_CAP0EN)
@@ -715,7 +715,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_capture_enable_bit(uint8_t gro
       break;
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
       break;
   }
 
@@ -746,7 +746,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_capture_edge_bit(uint8_t group
   uint32_t bit_value = 0;
 
   // Currently only channel 0 is supported
-  EFM_ASSERT(channel == 0);
+  SL_LOG_DEBUG_ASSERT(channel == 0);
 
   switch (group_number) {
 #if defined(SYSRTC_GRP0_CTRL_CAP0EN)
@@ -806,7 +806,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_capture_edge_bit(uint8_t group
       break;
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
       break;
   }
 
@@ -1042,7 +1042,7 @@ void sl_hal_sysrtc_init_group(uint8_t group_number,
       break;
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
   }
 }
 
@@ -1084,7 +1084,7 @@ void sl_hal_sysrtc_group_enable_compare_channel(uint8_t group_number,
         temp &= ~(1UL << _SYSRTC_GRP0_CTRL_CMP2EN_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -1101,7 +1101,7 @@ void sl_hal_sysrtc_group_enable_compare_channel(uint8_t group_number,
         temp &= ~(1UL << _SYSRTC_GRP1_CTRL_CMP2EN_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -1118,7 +1118,7 @@ void sl_hal_sysrtc_group_enable_compare_channel(uint8_t group_number,
         temp &= ~(1UL << _SYSRTC_GRP2_CTRL_CMP2EN_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -1135,7 +1135,7 @@ void sl_hal_sysrtc_group_enable_compare_channel(uint8_t group_number,
         temp &= ~(1UL << _SYSRTC_GRP3_CTRL_CMP2EN_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -1152,7 +1152,7 @@ void sl_hal_sysrtc_group_enable_compare_channel(uint8_t group_number,
         temp &= ~(1UL << _SYSRTC_GRP4_CTRL_CMP2EN_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -1169,7 +1169,7 @@ void sl_hal_sysrtc_group_enable_compare_channel(uint8_t group_number,
         temp &= ~(1UL << _SYSRTC_GRP5_CTRL_CMP2EN_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -1186,7 +1186,7 @@ void sl_hal_sysrtc_group_enable_compare_channel(uint8_t group_number,
         temp &= ~(1UL << _SYSRTC_GRP6_CTRL_CMP2EN_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -1203,12 +1203,12 @@ void sl_hal_sysrtc_group_enable_compare_channel(uint8_t group_number,
         temp &= ~(1UL << _SYSRTC_GRP7_CTRL_CMP2EN_SHIFT);
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
       break;
   }
 
@@ -1258,7 +1258,7 @@ void sl_hal_sysrtc_group_set_compare_channel_action(uint8_t group_number,
         mask = _SYSRTC_GRP0_CTRL_CMP2CMOA_MASK;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -1275,7 +1275,7 @@ void sl_hal_sysrtc_group_set_compare_channel_action(uint8_t group_number,
         mask = _SYSRTC_GRP1_CTRL_CMP2CMOA_MASK;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -1292,7 +1292,7 @@ void sl_hal_sysrtc_group_set_compare_channel_action(uint8_t group_number,
         mask = _SYSRTC_GRP2_CTRL_CMP2CMOA_MASK;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -1309,7 +1309,7 @@ void sl_hal_sysrtc_group_set_compare_channel_action(uint8_t group_number,
         mask = _SYSRTC_GRP3_CTRL_CMP2CMOA_MASK;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -1326,7 +1326,7 @@ void sl_hal_sysrtc_group_set_compare_channel_action(uint8_t group_number,
         mask = _SYSRTC_GRP4_CTRL_CMP2CMOA_MASK;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -1343,7 +1343,7 @@ void sl_hal_sysrtc_group_set_compare_channel_action(uint8_t group_number,
         mask = _SYSRTC_GRP5_CTRL_CMP2CMOA_MASK;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -1360,7 +1360,7 @@ void sl_hal_sysrtc_group_set_compare_channel_action(uint8_t group_number,
         mask = _SYSRTC_GRP6_CTRL_CMP2CMOA_MASK;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -1377,12 +1377,12 @@ void sl_hal_sysrtc_group_set_compare_channel_action(uint8_t group_number,
         mask = _SYSRTC_GRP7_CTRL_CMP2CMOA_MASK;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
       break;
   }
 
@@ -1415,7 +1415,7 @@ void sl_hal_sysrtc_group_enable_capture_channel(uint8_t group_number,
   uint32_t temp;
 
   // Currently only channel 0 is supported
-  EFM_ASSERT(channel == 0);
+  SL_LOG_DEBUG_ASSERT(channel == 0);
 
   sl_hal_sysrtc_wait_sync_group(group_number);
 
@@ -1480,7 +1480,7 @@ void sl_hal_sysrtc_group_enable_capture_channel(uint8_t group_number,
       break;
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
       break;
   }
 
@@ -1513,7 +1513,7 @@ void sl_hal_sysrtc_group_set_capture_channel_edge(uint8_t group_number,
   uint32_t mask = 0;
 
   // Currently only channel 0 is supported
-  EFM_ASSERT(channel == 0);
+  SL_LOG_DEBUG_ASSERT(channel == 0);
 
   sl_hal_sysrtc_wait_sync_group(group_number);
 
@@ -1578,7 +1578,7 @@ void sl_hal_sysrtc_group_set_capture_channel_edge(uint8_t group_number,
       break;
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
       break;
   }
 
@@ -1596,7 +1596,7 @@ void sl_hal_sysrtc_group_set_capture_channel_edge(uint8_t group_number,
 void sl_hal_sysrtc_enable_group_interrupts(uint8_t group_number,
                                            uint32_t flags)
 {
-  EFM_ASSERT(SYSRTC_GROUP_VALID(group_number));
+  SL_LOG_DEBUG_ASSERT(SYSRTC_GROUP_VALID(group_number));
 
   switch (group_number) {
 #if defined(_SYSRTC_GRP0_IEN_MASK)
@@ -1640,7 +1640,7 @@ void sl_hal_sysrtc_enable_group_interrupts(uint8_t group_number,
       break;
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
   }
 }
 
@@ -1650,7 +1650,7 @@ void sl_hal_sysrtc_enable_group_interrupts(uint8_t group_number,
 void sl_hal_sysrtc_disable_group_interrupts(uint8_t group_number,
                                             uint32_t flags)
 {
-  EFM_ASSERT(SYSRTC_GROUP_VALID(group_number));
+  SL_LOG_DEBUG_ASSERT(SYSRTC_GROUP_VALID(group_number));
 
   switch (group_number) {
 #if defined(_SYSRTC_GRP0_IEN_MASK)
@@ -1694,7 +1694,7 @@ void sl_hal_sysrtc_disable_group_interrupts(uint8_t group_number,
       break;
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
   }
 }
 
@@ -1704,7 +1704,7 @@ void sl_hal_sysrtc_disable_group_interrupts(uint8_t group_number,
 void sl_hal_sysrtc_clear_group_interrupts(uint8_t group_number,
                                           uint32_t flags)
 {
-  EFM_ASSERT(SYSRTC_GROUP_VALID(group_number));
+  SL_LOG_DEBUG_ASSERT(SYSRTC_GROUP_VALID(group_number));
 
   switch (group_number) {
 #if defined(_SYSRTC_GRP0_IF_MASK)
@@ -1748,7 +1748,7 @@ void sl_hal_sysrtc_clear_group_interrupts(uint8_t group_number,
       break;
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
   }
 }
 
@@ -1757,7 +1757,7 @@ void sl_hal_sysrtc_clear_group_interrupts(uint8_t group_number,
  ******************************************************************************/
 uint32_t sl_hal_sysrtc_get_group_interrupts(uint8_t group_number)
 {
-  EFM_ASSERT(SYSRTC_GROUP_VALID(group_number));
+  SL_LOG_DEBUG_ASSERT(SYSRTC_GROUP_VALID(group_number));
 
   switch (group_number) {
 #if defined(_SYSRTC_GRP0_IF_MASK)
@@ -1793,7 +1793,7 @@ uint32_t sl_hal_sysrtc_get_group_interrupts(uint8_t group_number)
       return SYSRTC_INST->GRP7_IF;
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
       return 0;
   }
 }
@@ -1805,7 +1805,7 @@ uint32_t sl_hal_sysrtc_get_group_enabled_interrupts(uint8_t group_number)
 {
   uint32_t ien = 0;
 
-  EFM_ASSERT(SYSRTC_GROUP_VALID(group_number));
+  SL_LOG_DEBUG_ASSERT(SYSRTC_GROUP_VALID(group_number));
 
   switch (group_number) {
 #if defined(_SYSRTC_GRP0_IEN_MASK)
@@ -1849,7 +1849,7 @@ uint32_t sl_hal_sysrtc_get_group_enabled_interrupts(uint8_t group_number)
       return SYSRTC_INST->GRP7_IF & ien;
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
       return 0;
   }
 }
@@ -1860,7 +1860,7 @@ uint32_t sl_hal_sysrtc_get_group_enabled_interrupts(uint8_t group_number)
 void sl_hal_sysrtc_set_group_interrupts(uint8_t group_number,
                                         uint32_t flags)
 {
-  EFM_ASSERT(SYSRTC_GROUP_VALID(group_number));
+  SL_LOG_DEBUG_ASSERT(SYSRTC_GROUP_VALID(group_number));
 
   switch (group_number) {
 #if defined(_SYSRTC_GRP0_IF_MASK)
@@ -1904,7 +1904,7 @@ void sl_hal_sysrtc_set_group_interrupts(uint8_t group_number,
       break;
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
   }
 }
 
@@ -1930,7 +1930,7 @@ uint32_t sl_hal_sysrtc_get_group_compare_channel_value(uint8_t group_number,
         return SYSRTC_INST->GRP0_CMP2VALUE;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
         return 0;
       }
 #endif
@@ -1947,7 +1947,7 @@ uint32_t sl_hal_sysrtc_get_group_compare_channel_value(uint8_t group_number,
         return SYSRTC_INST->GRP1_CMP2VALUE;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
         return 0;
       }
 #endif
@@ -1964,7 +1964,7 @@ uint32_t sl_hal_sysrtc_get_group_compare_channel_value(uint8_t group_number,
         return SYSRTC_INST->GRP2_CMP2VALUE;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
         return 0;
       }
 #endif
@@ -1981,7 +1981,7 @@ uint32_t sl_hal_sysrtc_get_group_compare_channel_value(uint8_t group_number,
         return SYSRTC_INST->GRP3_CMP2VALUE;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
         return 0;
       }
 #endif
@@ -1998,7 +1998,7 @@ uint32_t sl_hal_sysrtc_get_group_compare_channel_value(uint8_t group_number,
         return SYSRTC_INST->GRP4_CMP2VALUE;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
         return 0;
       }
 #endif
@@ -2015,7 +2015,7 @@ uint32_t sl_hal_sysrtc_get_group_compare_channel_value(uint8_t group_number,
         return SYSRTC_INST->GRP5_CMP2VALUE;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
         return 0;
       }
 #endif
@@ -2032,7 +2032,7 @@ uint32_t sl_hal_sysrtc_get_group_compare_channel_value(uint8_t group_number,
         return SYSRTC_INST->GRP6_CMP2VALUE;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
         return 0;
       }
 #endif
@@ -2049,12 +2049,12 @@ uint32_t sl_hal_sysrtc_get_group_compare_channel_value(uint8_t group_number,
         return SYSRTC_INST->GRP7_CMP2VALUE;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
         return 0;
       }
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
       return 0;
   }
 }
@@ -2082,7 +2082,7 @@ void sl_hal_sysrtc_set_group_compare_channel_value(uint8_t group_number,
         SYSRTC_INST->GRP0_CMP2VALUE = value;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -2099,7 +2099,7 @@ void sl_hal_sysrtc_set_group_compare_channel_value(uint8_t group_number,
         SYSRTC_INST->GRP1_CMP2VALUE = value;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -2116,7 +2116,7 @@ void sl_hal_sysrtc_set_group_compare_channel_value(uint8_t group_number,
         SYSRTC_INST->GRP2_CMP2VALUE = value;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -2133,7 +2133,7 @@ void sl_hal_sysrtc_set_group_compare_channel_value(uint8_t group_number,
         SYSRTC_INST->GRP3_CMP2VALUE = value;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -2150,7 +2150,7 @@ void sl_hal_sysrtc_set_group_compare_channel_value(uint8_t group_number,
         SYSRTC_INST->GRP4_CMP2VALUE = value;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -2167,7 +2167,7 @@ void sl_hal_sysrtc_set_group_compare_channel_value(uint8_t group_number,
         SYSRTC_INST->GRP5_CMP2VALUE = value;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -2184,7 +2184,7 @@ void sl_hal_sysrtc_set_group_compare_channel_value(uint8_t group_number,
         SYSRTC_INST->GRP6_CMP2VALUE = value;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
@@ -2201,12 +2201,12 @@ void sl_hal_sysrtc_set_group_compare_channel_value(uint8_t group_number,
         SYSRTC_INST->GRP7_CMP2VALUE = value;
 #endif
       } else {
-        EFM_ASSERT(1);
+        SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
   }
 }
 
@@ -2251,7 +2251,7 @@ uint32_t sl_hal_sysrtc_get_group_capture_channel_value(uint8_t group_number)
       return SYSRTC_INST->GRP7_CAP0VALUE;
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
       return 0;
   }
 }
@@ -2275,7 +2275,7 @@ void sl_hal_sysrtc_set_group_pretrigger(uint8_t group_number,
       SYSRTC_INST->GRP0_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP0_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP0_CTRL_CCPRETRIGEN_MASK;
 #else
       // The pre-triggers can only be used with the compare channel 0.
-      EFM_ASSERT(group_pretrigger_config->compare_channel == 0);
+      SL_LOG_DEBUG_ASSERT(group_pretrigger_config->compare_channel == 0);
 #endif
       temp = (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP0_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP0_PRETRIG_EMUWAKEUP_MASK)
              | (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP0_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP0_PRETRIG_HFXOSTART_MASK);
@@ -2284,7 +2284,7 @@ void sl_hal_sysrtc_set_group_pretrigger(uint8_t group_number,
               | ((group_pretrigger_config->hfxo_start.enable ? 1UL : 0UL) << _SYSRTC_GRP0_PRETRIG_HFXOACTIVE_SHIFT);
 #else
       // The pre-triggers can only be disabled if ticks is 0.
-      EFM_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
+      SL_LOG_DEBUG_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
 #endif
       SYSRTC_INST->GRP0_PRETRIG = temp;
       break;
@@ -2294,7 +2294,7 @@ void sl_hal_sysrtc_set_group_pretrigger(uint8_t group_number,
 #if defined(_SYSRTC_GRP1_CTRL_CCPRETRIGEN_MASK)
       SYSRTC_INST->GRP1_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP1_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP1_CTRL_CCPRETRIGEN_MASK;
 #else
-      EFM_ASSERT(group_pretrigger_config->compare_channel == 0);
+      SL_LOG_DEBUG_ASSERT(group_pretrigger_config->compare_channel == 0);
 #endif
       temp = (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP1_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP1_PRETRIG_EMUWAKEUP_MASK)
              | (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP1_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP1_PRETRIG_HFXOSTART_MASK);
@@ -2302,7 +2302,7 @@ void sl_hal_sysrtc_set_group_pretrigger(uint8_t group_number,
       temp |= ((group_pretrigger_config->emu_wakeup.enable ? 1UL : 0UL) << _SYSRTC_GRP1_PRETRIG_EMUACTIVE_SHIFT)
               | ((group_pretrigger_config->hfxo_start.enable ? 1UL : 0UL) << _SYSRTC_GRP1_PRETRIG_HFXOACTIVE_SHIFT);
 #else
-      EFM_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
+      SL_LOG_DEBUG_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
 #endif
       SYSRTC_INST->GRP1_PRETRIG = temp;
       break;
@@ -2312,7 +2312,7 @@ void sl_hal_sysrtc_set_group_pretrigger(uint8_t group_number,
 #if defined(_SYSRTC_GRP2_CTRL_CCPRETRIGEN_MASK)
       SYSRTC_INST->GRP2_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP2_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP2_CTRL_CCPRETRIGEN_MASK;
 #else
-      EFM_ASSERT(group_pretrigger_config->compare_channel == 0);
+      SL_LOG_DEBUG_ASSERT(group_pretrigger_config->compare_channel == 0);
 #endif
       temp = (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP2_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP2_PRETRIG_EMUWAKEUP_MASK)
              | (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP2_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP2_PRETRIG_HFXOSTART_MASK);
@@ -2320,7 +2320,7 @@ void sl_hal_sysrtc_set_group_pretrigger(uint8_t group_number,
       temp |= ((group_pretrigger_config->emu_wakeup.enable ? 1UL : 0UL) << _SYSRTC_GRP2_PRETRIG_EMUACTIVE_SHIFT)
               | ((group_pretrigger_config->hfxo_start.enable ? 1UL : 0UL) << _SYSRTC_GRP2_PRETRIG_HFXOACTIVE_SHIFT);
 #else
-      EFM_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
+      SL_LOG_DEBUG_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
 #endif
       SYSRTC_INST->GRP2_PRETRIG = temp;
       break;
@@ -2330,7 +2330,7 @@ void sl_hal_sysrtc_set_group_pretrigger(uint8_t group_number,
 #if defined(_SYSRTC_GRP3_CTRL_CCPRETRIGEN_MASK)
       SYSRTC_INST->GRP3_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP3_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP3_CTRL_CCPRETRIGEN_MASK;
 #else
-      EFM_ASSERT(group_pretrigger_config->compare_channel == 0);
+      SL_LOG_DEBUG_ASSERT(group_pretrigger_config->compare_channel == 0);
 #endif
       temp = (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP3_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP3_PRETRIG_EMUWAKEUP_MASK)
              | (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP3_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP3_PRETRIG_HFXOSTART_MASK);
@@ -2338,7 +2338,7 @@ void sl_hal_sysrtc_set_group_pretrigger(uint8_t group_number,
       temp |= ((group_pretrigger_config->emu_wakeup.enable ? 1UL : 0UL) << _SYSRTC_GRP3_PRETRIG_EMUACTIVE_SHIFT)
               | ((group_pretrigger_config->hfxo_start.enable ? 1UL : 0UL) << _SYSRTC_GRP3_PRETRIG_HFXOACTIVE_SHIFT);
 #else
-      EFM_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
+      SL_LOG_DEBUG_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
 #endif
       SYSRTC_INST->GRP3_PRETRIG = temp;
       break;
@@ -2348,7 +2348,7 @@ void sl_hal_sysrtc_set_group_pretrigger(uint8_t group_number,
 #if defined(_SYSRTC_GRP4_CTRL_CCPRETRIGEN_MASK)
       SYSRTC_INST->GRP4_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP4_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP4_CTRL_CCPRETRIGEN_MASK;
 #else
-      EFM_ASSERT(group_pretrigger_config->compare_channel == 0);
+      SL_LOG_DEBUG_ASSERT(group_pretrigger_config->compare_channel == 0);
 #endif
       temp = (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP4_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP4_PRETRIG_EMUWAKEUP_MASK)
              | (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP4_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP4_PRETRIG_HFXOSTART_MASK);
@@ -2356,7 +2356,7 @@ void sl_hal_sysrtc_set_group_pretrigger(uint8_t group_number,
       temp |= ((group_pretrigger_config->emu_wakeup.enable ? 1UL : 0UL) << _SYSRTC_GRP4_PRETRIG_EMUACTIVE_SHIFT)
               | ((group_pretrigger_config->hfxo_start.enable ? 1UL : 0UL) << _SYSRTC_GRP4_PRETRIG_HFXOACTIVE_SHIFT);
 #else
-      EFM_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
+      SL_LOG_DEBUG_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
 #endif
       SYSRTC_INST->GRP4_PRETRIG = temp;
       break;
@@ -2366,7 +2366,7 @@ void sl_hal_sysrtc_set_group_pretrigger(uint8_t group_number,
 #if defined(_SYSRTC_GRP5_CTRL_CCPRETRIGEN_MASK)
       SYSRTC_INST->GRP5_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP5_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP5_CTRL_CCPRETRIGEN_MASK;
 #else
-      EFM_ASSERT(group_pretrigger_config->compare_channel == 0);
+      SL_LOG_DEBUG_ASSERT(group_pretrigger_config->compare_channel == 0);
 #endif
       temp = (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP5_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP5_PRETRIG_EMUWAKEUP_MASK)
              | (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP5_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP5_PRETRIG_HFXOSTART_MASK);
@@ -2374,7 +2374,7 @@ void sl_hal_sysrtc_set_group_pretrigger(uint8_t group_number,
       temp |= ((group_pretrigger_config->emu_wakeup.enable ? 1UL : 0UL) << _SYSRTC_GRP5_PRETRIG_EMUACTIVE_SHIFT)
               | ((group_pretrigger_config->hfxo_start.enable ? 1UL : 0UL) << _SYSRTC_GRP5_PRETRIG_HFXOACTIVE_SHIFT);
 #else
-      EFM_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
+      SL_LOG_DEBUG_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
 #endif
       SYSRTC_INST->GRP5_PRETRIG = temp;
       break;
@@ -2384,7 +2384,7 @@ void sl_hal_sysrtc_set_group_pretrigger(uint8_t group_number,
 #if defined(_SYSRTC_GRP6_CTRL_CCPRETRIGEN_MASK)
       SYSRTC_INST->GRP6_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP6_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP6_CTRL_CCPRETRIGEN_MASK;
 #else
-      EFM_ASSERT(group_pretrigger_config->compare_channel == 0);
+      SL_LOG_DEBUG_ASSERT(group_pretrigger_config->compare_channel == 0);
 #endif
       temp = (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP6_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP6_PRETRIG_EMUWAKEUP_MASK)
              | (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP6_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP6_PRETRIG_HFXOSTART_MASK);
@@ -2392,7 +2392,7 @@ void sl_hal_sysrtc_set_group_pretrigger(uint8_t group_number,
       temp |= ((group_pretrigger_config->emu_wakeup.enable ? 1UL : 0UL) << _SYSRTC_GRP6_PRETRIG_EMUACTIVE_SHIFT)
               | ((group_pretrigger_config->hfxo_start.enable ? 1UL : 0UL) << _SYSRTC_GRP6_PRETRIG_HFXOACTIVE_SHIFT);
 #else
-      EFM_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
+      SL_LOG_DEBUG_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
 #endif
       SYSRTC_INST->GRP6_PRETRIG = temp;
       break;
@@ -2402,7 +2402,7 @@ void sl_hal_sysrtc_set_group_pretrigger(uint8_t group_number,
 #if defined(_SYSRTC_GRP7_CTRL_CCPRETRIGEN_MASK)
       SYSRTC_INST->GRP7_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP7_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP7_CTRL_CCPRETRIGEN_MASK;
 #else
-      EFM_ASSERT(group_pretrigger_config->compare_channel == 0);
+      SL_LOG_DEBUG_ASSERT(group_pretrigger_config->compare_channel == 0);
 #endif
       temp = (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP7_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP7_PRETRIG_EMUWAKEUP_MASK)
              | (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP7_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP7_PRETRIG_HFXOSTART_MASK);
@@ -2410,13 +2410,13 @@ void sl_hal_sysrtc_set_group_pretrigger(uint8_t group_number,
       temp |= ((group_pretrigger_config->emu_wakeup.enable ? 1UL : 0UL) << _SYSRTC_GRP7_PRETRIG_EMUACTIVE_SHIFT)
               | ((group_pretrigger_config->hfxo_start.enable ? 1UL : 0UL) << _SYSRTC_GRP7_PRETRIG_HFXOACTIVE_SHIFT);
 #else
-      EFM_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
+      SL_LOG_DEBUG_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
 #endif
       SYSRTC_INST->GRP7_PRETRIG = temp;
       break;
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
   }
 }
 
@@ -2485,7 +2485,7 @@ uint32_t sl_hal_sysrtc_get_group_pretrigger_status(uint8_t group_number)
       return SYSRTC_INST->GRP7_PRETRIG & (SYSRTC_GRP7_PRETRIG_HFXOACTIVE | SYSRTC_GRP7_PRETRIG_EMUACTIVE);
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
       return 0;
   }
 }
@@ -2580,7 +2580,7 @@ void sl_hal_sysrtc_clear_group_pretrigger_status(uint8_t group_number,
       break;
 #endif
     default:
-      EFM_ASSERT(1);
+      SL_LOG_DEBUG_ASSERT(1);
       break;
   }
 }

@@ -144,7 +144,9 @@ typedef enum {
   /// Regional regulation
   SL_WISUN_STATISTICS_TYPE_REGULATION = 5,
   /// Heap usage
-  SL_WISUN_STATISTICS_TYPE_HEAP       = 6
+  SL_WISUN_STATISTICS_TYPE_HEAP       = 6,
+  /// LXPM statistics
+  SL_WISUN_STATISTICS_TYPE_LXPM       = 7
 } sl_wisun_statistics_type_t;
 
 /// Enumerations for regulatory domain
@@ -560,6 +562,18 @@ typedef struct {
   uint32_t total;
 } sl_wisun_statistics_heap_t;
 
+/// LXPM statistics
+typedef struct {
+  /// Number of group discovery messages received
+  uint32_t rx_discovery;
+  /// Number of group discovery messages transmitted
+  uint32_t tx_discovery;
+  /// Number of unicast group messages received
+  uint32_t rx_relay;
+  /// Number of unicast group messages transmitted
+  uint32_t tx_relay;
+} sl_wisun_statistics_lxpm_t;
+
 /// Statistics
 typedef union {
   /// PHY/RF statistics
@@ -576,6 +590,8 @@ typedef union {
   sl_wisun_statistics_regulation_t regulation;
   /// Heap usage statistics
   sl_wisun_statistics_heap_t heap;
+  /// LXPM statistics
+  sl_wisun_statistics_lxpm_t lxpm;
 } sl_wisun_statistics_t;
 
 /// FAN1.0 PHY configuration
@@ -1006,6 +1022,7 @@ typedef enum {
   SL_WISUN_TRACE_GROUP_TXALG   = 44,    ///< RFC 8415 TX algorithm
   SL_WISUN_TRACE_GROUP_MAC_FSM = 45,    ///< MAC Finite state machine
   SL_WISUN_TRACE_GROUP_FB      = 46,    ///< First breath
+  SL_WISUN_TRACE_GROUP_LXPM    = 47,    ///< Local Cross-PAN Multicast
   // [...] reserved for future use
   SL_WISUN_TRACE_GROUP_INT     = 63,    ///< Internal usage
   SL_WISUN_TRACE_GROUP_COUNT   = 64     ///< Max number of trace group in this enum
@@ -1112,8 +1129,8 @@ typedef enum {
   SL_WISUN_FRAME_TYPE_DIS = 4,
   /// DODAG Information Object
   SL_WISUN_FRAME_TYPE_DIO = 5,
-  /// Reserved
-  SL_WISUN_FRAME_RESERVED1 = 6,
+  /// Local Cross-PAN Multicast State
+  SL_WISUN_FRAME_TYPE_LXPM_STATE = 6,
   /// LFN PAN Advertisement Solicit
   SL_WISUN_FRAME_TYPE_LPAS = 7,
 } sl_wisun_frame_type_t;
@@ -1286,7 +1303,7 @@ typedef enum {
   /// reception. Range from -174 (0) to +80 (254) dBm, 255 to disable.
   /// Enabling this feature may speed up connection times, but at the cost of
   /// increased simultaneous authentication traffic.
-  /// Use DBM_TO_RSL_RANGE() to convert from dBm to RSL range encoding.
+  /// Use @ref DBM_TO_RSL_RANGE to convert from dBm to RSL range encoding.
   /// Type: uint8_t
   /// Default: DBM_TO_RSL_RANGE(-60)
   /// Available: FFN
@@ -1398,6 +1415,14 @@ typedef enum {
   /// Default: 5
   /// Available: FFN, LFN, BR
   SL_WISUN_OPTION_TRAFFIC_MAX_EDFE_FRAGMENT_COUNT = 15,
+  /// Allow EDFE for non fragmented packet.
+  /// If enabled, all pending packet for a single destination will be
+  /// sent in a single EDFE transaction.
+  /// If disabled, only fragmented packets will use EDFE.
+  /// Type: uint8_t (boolean)
+  /// Default: 1
+  /// Available: FFN, LFN, BR
+  SL_WISUN_OPTION_TRAFFIC_ALLOW_EDFE_ALL_PACKETS = 68,
 
   /// Length of one backoff period in microseconds. If 0, the length will be
   /// calculated based on the PHY.
@@ -1689,7 +1714,7 @@ typedef enum {
   /// Default: 0
   /// Available: BR
   SL_WISUN_OPTION_BR_ENABLE_FFN10 = 64,
-  SL_WISUN_OPTION_MAX = 68,
+  SL_WISUN_OPTION_MAX = 69,
 } sl_wisun_option_id_t;
 
 /// Enumeration for event types
@@ -1783,7 +1808,7 @@ SL_PACK_END()
 /// Value for rssi when not applicable (e.g. TX or non-RX events)
 #define SL_WISUN_RF_TEST_RSSI_NOT_AVAILABLE  (-128)
 
-/// RF test RX event information (valid when SL_RAIL_EVENT_RX_PACKET_RECEIVED is set)
+/// RF test RX event information (valid when @ref SL_RAIL_EVENT_RX_PACKET_RECEIVED is set)
 SL_PACK_START(1)
 typedef struct {
   /// RSSI in dBm; @ref SL_WISUN_RF_TEST_RSSI_NOT_AVAILABLE when not applicable
@@ -1800,7 +1825,7 @@ typedef struct {
   uint64_t events;
   /// Event-specific data
   union {
-    /// RX packet received information (when SL_RAIL_EVENT_RX_PACKET_RECEIVED is set in events)
+    /// RX packet received information (when @ref SL_RAIL_EVENT_RX_PACKET_RECEIVED is set in events)
     sl_wisun_logger_event_rf_test_rx_t rx;
   } u;
 } SL_ATTRIBUTE_PACKED sl_wisun_logger_event_rf_test_t;

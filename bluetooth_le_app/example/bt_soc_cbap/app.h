@@ -45,9 +45,6 @@
 #define GAP_COMPLETE_128B_UUID        0x07 // Complete List of 128-bit Service Class UUIDs
 
 /// Data lengths
-#define CHAIN_LINK_DATA_LEN           192  // Length of an NVM3 chunk
-#define CHAIN_LINK_DATA_NUM           4    // Number of how many chunks needed for a certificate
-
 #define OOB_SIGNATURE_LEN             64
 #define CERT_IND_CHUNK_LEN            100
 #define EC_PUB_KEY_LEN                65

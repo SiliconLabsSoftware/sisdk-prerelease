@@ -1,7 +1,8 @@
 from siliconlabs.slc.board_gen.util.board_gen_util import Req
 
 def compatible(provides, board):
-    if board.has_component('spisensor_0'):
+    icm_20648_component = board.get_components_by_part_number("ICM-20648")
+    if board.has_component('spisensor_0') and len(icm_20648_component) == 1:
         if board.get_peripheral_options(Req('usart'), 'spisensor_0', {'copi' : 'TX', 'cipo' : 'RX', 'clk' : 'CLK'}):
             return 'spisensor_0'
     return False

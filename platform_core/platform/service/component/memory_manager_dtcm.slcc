@@ -1,0 +1,25 @@
+id: memory_manager_dtcm
+label: Memory Manager DTCM Support
+package: platform_core
+description: >
+  This component adds DTCM initialization, enables the proper retention control of
+  DTCM banks and memory allocations on the DTCM through the memory manager.
+  It provides the necessary configuration and setup to utilize the ARM Cortex-M55 DTCM as
+  an additional memory heap for dynamic allocations, enhancing the available memory
+  pool for applications requiring larger memory footprints or faster memory.
+category: Services|Memory Manager
+quality: evaluation
+ui_hints:
+  visibility: never
+metadata:
+  sbom:
+    license: Zlib
+root_path: platform_core/platform/service/memory_manager
+provides:
+- name: memory_manager_dtcm
+requires:
+- name: memory_manager
+- name: device_has_dtcm
+template_contribution:
+- name: component_catalog
+  value: memory_manager_dtcm

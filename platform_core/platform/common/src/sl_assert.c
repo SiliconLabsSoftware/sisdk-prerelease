@@ -81,6 +81,8 @@ void assertEFM(const char *file, int line)
   (void)line;  /* Unused parameter */
 
   while (true) {
+    /* Intentionally empty: spin here so a debugger can be attached to inspect
+     * the call site that triggered the failed assertion. */
   }
 }
 #endif /* DEBUG_EFM && !DEBUG_EFM_USER */

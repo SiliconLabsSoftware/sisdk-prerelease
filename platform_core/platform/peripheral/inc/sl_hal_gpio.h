@@ -42,7 +42,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stddef.h>
 #include "sl_status.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_device_gpio.h"
 #include "sl_code_classification.h"
 
@@ -497,8 +497,8 @@ __INLINE bool sl_hal_gpio_is_gpio_port(sl_gpio_port_t port)
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_HAL_GPIO, SL_CODE_CLASS_TIME_CRITICAL)
 __INLINE void sl_hal_gpio_set_pin(const sl_gpio_t *gpio)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
   if (sl_hal_gpio_is_hsio_port(gpio->port)) {
     uint8_t hsio_index = SL_HAL_HSIO_PORT_INDEX(gpio->port);
     GPIO->H_SET[hsio_index].DOUT = 1UL << gpio->pin;
@@ -516,7 +516,7 @@ __INLINE void sl_hal_gpio_set_pin(const sl_gpio_t *gpio)
 __INLINE void sl_hal_gpio_set_port(sl_gpio_port_t port,
                                   uint32_t pins)
 {
-  EFM_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
   if (sl_hal_gpio_is_hsio_port(port)) {
     uint8_t hsio_index = SL_HAL_HSIO_PORT_INDEX(port);
     GPIO->H_SET[hsio_index].DOUT = pins;
@@ -536,7 +536,7 @@ __INLINE void sl_hal_gpio_set_port_value(sl_gpio_port_t port,
                                          uint32_t val,
                                          uint32_t mask)
 {
-  EFM_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
   if (sl_hal_gpio_is_hsio_port(port)) {
     uint8_t hsio_index = SL_HAL_HSIO_PORT_INDEX(port);
     GPIO->H[hsio_index].DOUT = (GPIO->H[hsio_index].DOUT & ~mask) | (val & mask);
@@ -552,8 +552,8 @@ __INLINE void sl_hal_gpio_set_port_value(sl_gpio_port_t port,
  ******************************************************************************/
 __INLINE void sl_hal_gpio_clear_pin(const sl_gpio_t *gpio)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
   if (sl_hal_gpio_is_hsio_port(gpio->port)) {
     uint8_t hsio_index = SL_HAL_HSIO_PORT_INDEX(gpio->port);
     GPIO->H_CLR[hsio_index].DOUT = 1UL << gpio->pin;
@@ -571,7 +571,7 @@ __INLINE void sl_hal_gpio_clear_pin(const sl_gpio_t *gpio)
 __INLINE void sl_hal_gpio_clear_port(sl_gpio_port_t port,
                                     uint32_t pins)
 {
-  EFM_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
   if (sl_hal_gpio_is_hsio_port(port)) {
     uint8_t hsio_index = SL_HAL_HSIO_PORT_INDEX(port);
     GPIO->H_CLR[hsio_index].DOUT = pins;
@@ -589,8 +589,8 @@ __INLINE void sl_hal_gpio_clear_port(sl_gpio_port_t port,
  ******************************************************************************/
 __INLINE bool sl_hal_gpio_get_pin_input(const sl_gpio_t *gpio)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
   if (sl_hal_gpio_is_hsio_port(gpio->port)) {
     uint8_t hsio_index = SL_HAL_HSIO_PORT_INDEX(gpio->port);
     return ((GPIO->H[hsio_index].DIN) >> gpio->pin) & 1UL;
@@ -608,8 +608,8 @@ __INLINE bool sl_hal_gpio_get_pin_input(const sl_gpio_t *gpio)
  ******************************************************************************/
 __INLINE bool sl_hal_gpio_get_pin_output(const sl_gpio_t *gpio)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
   if (sl_hal_gpio_is_hsio_port(gpio->port)) {
     uint8_t hsio_index = SL_HAL_HSIO_PORT_INDEX(gpio->port);
     return ((GPIO->H[hsio_index].DOUT) >> gpio->pin) & 1UL;
@@ -627,7 +627,7 @@ __INLINE bool sl_hal_gpio_get_pin_output(const sl_gpio_t *gpio)
  ******************************************************************************/
 __INLINE uint32_t sl_hal_gpio_get_port_input(sl_gpio_port_t port)
 {
-  EFM_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
   if (sl_hal_gpio_is_hsio_port(port)) {
     uint8_t hsio_index = SL_HAL_HSIO_PORT_INDEX(port);
     return GPIO->H[hsio_index].DIN;
@@ -645,7 +645,7 @@ __INLINE uint32_t sl_hal_gpio_get_port_input(sl_gpio_port_t port)
  ******************************************************************************/
 __INLINE uint32_t sl_hal_gpio_get_port_output(sl_gpio_port_t port)
 {
-  EFM_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
   if (sl_hal_gpio_is_hsio_port(port)) {
     uint8_t hsio_index = SL_HAL_HSIO_PORT_INDEX(port);
     return GPIO->H[hsio_index].DOUT;
@@ -662,8 +662,8 @@ __INLINE uint32_t sl_hal_gpio_get_port_output(sl_gpio_port_t port)
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_HAL_GPIO, SL_CODE_CLASS_TIME_CRITICAL)
 __INLINE void sl_hal_gpio_toggle_pin(const sl_gpio_t *gpio)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
   if (sl_hal_gpio_is_hsio_port(gpio->port)) {
     uint8_t hsio_index = SL_HAL_HSIO_PORT_INDEX(gpio->port);
     GPIO->H_TGL[hsio_index].DOUT = 1UL << gpio->pin;
@@ -681,7 +681,7 @@ __INLINE void sl_hal_gpio_toggle_pin(const sl_gpio_t *gpio)
 __INLINE void sl_hal_gpio_toggle_port(sl_gpio_port_t port,
                                       uint32_t pins)
 {
-  EFM_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
   if (sl_hal_gpio_is_hsio_port(port)) {
     uint8_t hsio_index = SL_HAL_HSIO_PORT_INDEX(port);
     GPIO->H_TGL[hsio_index].DOUT = pins;
@@ -700,8 +700,8 @@ __INLINE void sl_hal_gpio_toggle_port(sl_gpio_port_t port,
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_HAL_GPIO, SL_CODE_CLASS_TIME_CRITICAL)
 __INLINE void sl_hal_gpio_set_pin(const sl_gpio_t *gpio)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
   GPIO->P_SET[gpio->port].DOUT = 1UL << gpio->pin;
 }
 
@@ -713,7 +713,7 @@ __INLINE void sl_hal_gpio_set_pin(const sl_gpio_t *gpio)
  ******************************************************************************/
 __INLINE void sl_hal_gpio_set_port(sl_gpio_port_t port, uint32_t pins)
 {
-  EFM_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
   GPIO->P_SET[port].DOUT = pins;
 }
 
@@ -728,7 +728,7 @@ __INLINE void sl_hal_gpio_set_port_value(sl_gpio_port_t port,
                                          uint32_t val,
                                          uint32_t mask)
 {
-  EFM_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
   GPIO->P[port].DOUT = (GPIO->P[port].DOUT & ~mask) | (val & mask);
 }
 
@@ -739,8 +739,8 @@ __INLINE void sl_hal_gpio_set_port_value(sl_gpio_port_t port,
  ******************************************************************************/
 __INLINE void sl_hal_gpio_clear_pin(const sl_gpio_t *gpio)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
   GPIO->P_CLR[gpio->port].DOUT = 1UL << gpio->pin;
 }
 
@@ -752,7 +752,7 @@ __INLINE void sl_hal_gpio_clear_pin(const sl_gpio_t *gpio)
  ******************************************************************************/
 __INLINE void sl_hal_gpio_clear_port(sl_gpio_port_t port, uint32_t pins)
 {
-  EFM_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
   GPIO->P_CLR[port].DOUT = pins;
 }
 
@@ -765,8 +765,8 @@ __INLINE void sl_hal_gpio_clear_port(sl_gpio_port_t port, uint32_t pins)
  ******************************************************************************/
 __INLINE bool sl_hal_gpio_get_pin_input(const sl_gpio_t *gpio)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
   return ((GPIO->P[gpio->port].DIN) >> gpio->pin) & 1UL;
 }
 
@@ -779,8 +779,8 @@ __INLINE bool sl_hal_gpio_get_pin_input(const sl_gpio_t *gpio)
  ******************************************************************************/
 __INLINE bool sl_hal_gpio_get_pin_output(const sl_gpio_t *gpio)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
   return ((GPIO->P[gpio->port].DOUT) >> gpio->pin) & 1UL;
 }
 
@@ -793,7 +793,7 @@ __INLINE bool sl_hal_gpio_get_pin_output(const sl_gpio_t *gpio)
  ******************************************************************************/
 __INLINE uint32_t sl_hal_gpio_get_port_input(sl_gpio_port_t port)
 {
-  EFM_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
   return GPIO->P[port].DIN;
 }
 
@@ -806,7 +806,7 @@ __INLINE uint32_t sl_hal_gpio_get_port_input(sl_gpio_port_t port)
  ******************************************************************************/
 __INLINE uint32_t sl_hal_gpio_get_port_output(sl_gpio_port_t port)
 {
-  EFM_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
   return GPIO->P[port].DOUT;
 }
 
@@ -818,8 +818,8 @@ __INLINE uint32_t sl_hal_gpio_get_port_output(sl_gpio_port_t port)
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_HAL_GPIO, SL_CODE_CLASS_TIME_CRITICAL)
 __INLINE void sl_hal_gpio_toggle_pin(const sl_gpio_t *gpio)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
   GPIO->P_TGL[gpio->port].DOUT = 1UL << gpio->pin;
 }
 
@@ -831,7 +831,7 @@ __INLINE void sl_hal_gpio_toggle_pin(const sl_gpio_t *gpio)
  ******************************************************************************/
 __INLINE void sl_hal_gpio_toggle_port(sl_gpio_port_t port, uint32_t pins)
 {
-  EFM_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
   GPIO->P_TGL[port].DOUT = pins;
 }
 
@@ -856,20 +856,20 @@ __INLINE void sl_hal_gpio_toggle_port(sl_gpio_port_t port, uint32_t pins)
 __INLINE sl_status_t sl_hal_gpio_set_slew_rate(const sl_gpio_t *gpio,
                                                uint8_t slewrate)
 {
-  EFM_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
 #if defined(_GPIO_P_CTRL_SLEWRATE_MASK)
-  EFM_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(gpio->port));
-  EFM_ASSERT(slewrate <= (_GPIO_P_CTRL_SLEWRATE_MASK >> _GPIO_P_CTRL_SLEWRATE_SHIFT));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(gpio->port));
+  SL_LOG_DEBUG_ASSERT(slewrate <= (_GPIO_P_CTRL_SLEWRATE_MASK >> _GPIO_P_CTRL_SLEWRATE_SHIFT));
 
   GPIO->P[gpio->port].CTRL = (GPIO->P[gpio->port].CTRL
                               & ~_GPIO_P_CTRL_SLEWRATE_MASK)
                              | (slewrate << _GPIO_P_CTRL_SLEWRATE_SHIFT);
 #elif defined(_GPIO_P_SLEWRATEL_MASK)
   /* Per-pin slew rate. */
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
-  EFM_ASSERT(slewrate <= (_GPIO_P_SLEWRATEL_SLEWRATE0_MASK >> _GPIO_P_SLEWRATEL_SLEWRATE0_SHIFT));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(slewrate <= (_GPIO_P_SLEWRATEL_SLEWRATE0_MASK >> _GPIO_P_SLEWRATEL_SLEWRATE0_SHIFT));
   if (!sl_hal_gpio_is_gpio_port(gpio->port)) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -908,16 +908,16 @@ __INLINE sl_status_t sl_hal_gpio_set_slew_rate(const sl_gpio_t *gpio,
 __INLINE sl_status_t sl_hal_gpio_get_slew_rate(const sl_gpio_t *gpio,
                                                uint8_t *slewrate)
 {
-  EFM_ASSERT((gpio != NULL) && (slewrate != NULL));
+  SL_LOG_DEBUG_ASSERT((gpio != NULL) && (slewrate != NULL));
 
 #if defined(_GPIO_P_CTRL_SLEWRATE_MASK)
-  EFM_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(gpio->port));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(gpio->port));
 
   *slewrate = (GPIO->P[gpio->port].CTRL & _GPIO_P_CTRL_SLEWRATE_MASK) >> _GPIO_P_CTRL_SLEWRATE_SHIFT;
 #elif defined(_GPIO_P_SLEWRATEL_MASK)
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
   if (!sl_hal_gpio_is_gpio_port(gpio->port)) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -941,10 +941,10 @@ __INLINE void sl_hal_gpio_set_slew_rate_alternate(sl_gpio_port_t port,
                                                   uint8_t slewrate_alt)
 {
   (void)slewrate_alt;
-  EFM_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
 
-  EFM_ASSERT(slewrate_alt <= (_GPIO_P_CTRL_SLEWRATEALT_MASK
-                              >> _GPIO_P_CTRL_SLEWRATEALT_SHIFT));
+  SL_LOG_DEBUG_ASSERT(slewrate_alt <= (_GPIO_P_CTRL_SLEWRATEALT_MASK
+                                       >> _GPIO_P_CTRL_SLEWRATEALT_SHIFT));
 
   GPIO->P[port].CTRL = (GPIO->P[port].CTRL
                         & ~_GPIO_P_CTRL_SLEWRATEALT_MASK)
@@ -960,7 +960,7 @@ __INLINE void sl_hal_gpio_set_slew_rate_alternate(sl_gpio_port_t port,
  ******************************************************************************/
 __INLINE uint8_t sl_hal_gpio_get_slew_rate_alternate(sl_gpio_port_t port)
 {
-  EFM_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
   return (uint8_t)((GPIO->P[port].CTRL & _GPIO_P_CTRL_SLEWRATEALT_MASK) >> _GPIO_P_CTRL_SLEWRATEALT_SHIFT);
 }
 #endif /* _GPIO_P_CTRL_SLEWRATEALT_MASK */
@@ -1077,7 +1077,7 @@ __INLINE int32_t sl_hal_gpio_get_external_interrupt_number(uint8_t pin,
  ******************************************************************************/
 __INLINE int32_t sl_hal_gpio_get_em4_interrupt_number(const sl_gpio_t *gpio)
 {
-  EFM_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
   int32_t em4_int_no;
 
   if (false) {
@@ -1140,7 +1140,7 @@ __INLINE int32_t sl_hal_gpio_get_em4_interrupt_number(const sl_gpio_t *gpio)
 *****************************************************************************/
 __INLINE void sl_hal_gpio_disable_pin_em4_wakeup(uint32_t pinmask)
 {
-  EFM_ASSERT((pinmask & ~_GPIO_EM4WUEN_MASK) == 0UL);
+  SL_LOG_DEBUG_ASSERT((pinmask & ~_GPIO_EM4WUEN_MASK) == 0UL);
 
   GPIO->EM4WUEN_CLR = pinmask;
 }
@@ -1263,12 +1263,12 @@ __INLINE void sl_hal_gpio_enable_debug_swd_io(bool enable)
 __INLINE sl_status_t sl_hal_gpio_set_pre_driver_strength(sl_gpio_t *gpio,
                                                          uint8_t predrv_strength)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
-  EFM_ASSERT(predrv_strength <= (_HSIO_P_PRDRVSTRENGTH_PRDRVSTRENGTH0_MASK
-                                 >> _HSIO_P_PRDRVSTRENGTH_PRDRVSTRENGTH0_SHIFT));
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(predrv_strength <= (_HSIO_P_PRDRVSTRENGTH_PRDRVSTRENGTH0_MASK
+                                          >> _HSIO_P_PRDRVSTRENGTH_PRDRVSTRENGTH0_SHIFT));
   if (!sl_hal_gpio_is_hsio_port(gpio->port)) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1295,11 +1295,11 @@ __INLINE sl_status_t sl_hal_gpio_set_pre_driver_strength(sl_gpio_t *gpio,
 __INLINE sl_status_t sl_hal_gpio_get_pre_driver_strength(sl_gpio_t *gpio,
                                                          uint8_t *predrv_strength)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(predrv_strength != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(predrv_strength != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
   if (!sl_hal_gpio_is_hsio_port(gpio->port)) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1326,12 +1326,12 @@ __INLINE sl_status_t sl_hal_gpio_get_pre_driver_strength(sl_gpio_t *gpio,
 __INLINE sl_status_t sl_hal_gpio_set_drive_strength(sl_gpio_t *gpio,
                                                     uint8_t drive_strength)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
-  EFM_ASSERT(drive_strength <= (_HSIO_P_DRVSTRENGTH_DRVSTRENGTH0_MASK
-                                >> _HSIO_P_DRVSTRENGTH_DRVSTRENGTH0_SHIFT));
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(drive_strength <= (_HSIO_P_DRVSTRENGTH_DRVSTRENGTH0_MASK
+                                         >> _HSIO_P_DRVSTRENGTH_DRVSTRENGTH0_SHIFT));
   if (!sl_hal_gpio_is_hsio_port(gpio->port)) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1358,11 +1358,11 @@ __INLINE sl_status_t sl_hal_gpio_set_drive_strength(sl_gpio_t *gpio,
 __INLINE sl_status_t sl_hal_gpio_get_drive_strength(sl_gpio_t *gpio,
                                                     uint8_t *drive_strength)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(drive_strength != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(drive_strength != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
   if (!sl_hal_gpio_is_hsio_port(gpio->port)) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1387,11 +1387,11 @@ __INLINE sl_status_t sl_hal_gpio_get_drive_strength(sl_gpio_t *gpio,
 __INLINE sl_status_t sl_hal_gpio_is_high_speed_rx_enabled(sl_gpio_t *gpio,
                                                           bool *is_enabled)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(is_enabled != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(is_enabled != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
   if (!sl_hal_gpio_is_hsio_port(gpio->port)) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1416,10 +1416,10 @@ __INLINE sl_status_t sl_hal_gpio_is_high_speed_rx_enabled(sl_gpio_t *gpio,
 __INLINE sl_status_t sl_hal_gpio_configure_high_speed_rx(sl_gpio_t *gpio,
                                                          bool enable)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
   if (!sl_hal_gpio_is_hsio_port(gpio->port)) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1451,11 +1451,11 @@ __INLINE sl_status_t sl_hal_gpio_configure_high_speed_rx(sl_gpio_t *gpio,
 __INLINE sl_status_t sl_hal_gpio_set_high_speed_rx_hysteresis(sl_gpio_t *gpio,
                                                                uint8_t hysteresis)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
-  EFM_ASSERT(hysteresis <= _HSIO_P_HSRXHYST_HSRXHYST_MASK);
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(hysteresis <= _HSIO_P_HSRXHYST_HSRXHYST_MASK);
   if (!sl_hal_gpio_is_hsio_port(gpio->port)) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1477,11 +1477,11 @@ __INLINE sl_status_t sl_hal_gpio_set_high_speed_rx_hysteresis(sl_gpio_t *gpio,
 __INLINE sl_status_t sl_hal_gpio_get_high_speed_rx_hysteresis(sl_gpio_t *gpio,
                                                                uint8_t *hysteresis)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(hysteresis != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(hysteresis != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
   if (!sl_hal_gpio_is_hsio_port(gpio->port)) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1512,10 +1512,10 @@ __INLINE sl_status_t sl_hal_gpio_get_high_speed_rx_hysteresis(sl_gpio_t *gpio,
 __INLINE sl_status_t sl_hal_gpio_set_non_overlap_protection_disable(sl_gpio_t *gpio,
                                                                     bool disable)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
   if (!sl_hal_gpio_is_hsio_port(gpio->port)) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1543,11 +1543,11 @@ __INLINE sl_status_t sl_hal_gpio_set_non_overlap_protection_disable(sl_gpio_t *g
 __INLINE sl_status_t sl_hal_gpio_get_non_overlap_protection_disable(sl_gpio_t *gpio,
                                                                     bool *disable)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(disable != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(disable != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
   if (!sl_hal_gpio_is_hsio_port(gpio->port)) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 

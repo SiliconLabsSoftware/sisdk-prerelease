@@ -8,7 +8,7 @@
 
 #if SUPPORT_ZW_INITIATE_SHUTDOWN
 
-#include <em_core.h>
+#include "sl_core.h"
 #include <nvm3_default.h>
 #include <AppTimer.h>
 #include <zpal_misc.h>

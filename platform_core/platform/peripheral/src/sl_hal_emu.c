@@ -34,7 +34,7 @@
 
 #include <stddef.h>
 #include "sl_common.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_hal_bus.h"
 
 /*******************************************************************************
@@ -311,6 +311,7 @@ sl_status_t sl_hal_emu_set_dcdc_mode(sl_hal_emu_dcdc_mode_t dcdc_mode)
       }
 #endif
       if (timeout >= EMU_DCDC_MODE_SET_TIMEOUT) {
+        SL_PRINT_STRING_ERROR("timeout, %d\r\n", (int)__LINE__);
         error = SL_STATUS_TIMEOUT;
       }
 #if defined(LEDSINK_PRESENT)
@@ -334,6 +335,7 @@ sl_status_t sl_hal_emu_set_dcdc_mode(sl_hal_emu_dcdc_mode_t dcdc_mode)
     }
 #endif
     if (timeout >= EMU_DCDC_MODE_SET_TIMEOUT) {
+      SL_PRINT_STRING_ERROR("timeout, %d\r\n", (int)__LINE__);
       error = SL_STATUS_TIMEOUT;
     } else {
       DCDC->IF_CLR = DCDC_IF_REGULATION;
@@ -344,6 +346,7 @@ sl_status_t sl_hal_emu_set_dcdc_mode(sl_hal_emu_dcdc_mode_t dcdc_mode)
         timeout++;
       }
       if (timeout >= EMU_DCDC_MODE_SET_TIMEOUT) {
+        SL_PRINT_STRING_ERROR("timeout, %d\r\n", (int)__LINE__);
         error = SL_STATUS_TIMEOUT;
       }
     }
@@ -386,64 +389,8 @@ sl_status_t sl_hal_emu_dcdc_power_off(void)
  ******************************************************************************/
 void sl_hal_emu_init_dcdc_boost(const sl_hal_emu_dcdc_boost_init_t *init)
 {
-  EFM_ASSERT(init != NULL);
-
-#if defined(_DCDC_DVDDBBCFG_MASK)
-#if defined(_EMU_VREGVDDCMPCTRL_THRESSEL_MASK)
-  EMU->VREGVDDCMPCTRL = ((uint32_t)init->comparator_threshold << _EMU_VREGVDDCMPCTRL_THRESSEL_SHIFT)
-                        | EMU_VREGVDDCMPCTRL_VREGINCMPEN;
-#endif
-#if defined(_DCDC_SYNCBUSY_MASK)
-  sl_hal_emu_dcdc_sync(_DCDC_SYNCBUSY_MASK);
-#endif
-
-  DCDC->DVDDBBCFG = (DCDC->DVDDBBCFG & ~((uint32_t)_DCDC_DVDDBBCFG_DVDDBBEN_MASK | (uint32_t)_DCDC_DVDDBBCFG_DVDDBSTEN_MASK))
-                    | (uint32_t)DCDC_DVDDBBCFG_DVDDBBEN
-                    | (uint32_t)DCDC_DVDDBBCFG_DVDDBSTEN;
-
-#if defined(_DCDC_OUTEN_DVDDOUTEN_MASK) && defined(_DCDC_OUTEN_DECOUTEN_MASK)
-  DCDC->OUTEN |= (uint32_t)DCDC_OUTEN_DVDDOUTEN_enable | (uint32_t)DCDC_OUTEN_DECOUTEN_enable;
-#endif
-
-  DCDC->CTRL = (DCDC->CTRL & ~((uint32_t)_DCDC_CTRL_IPKTMAXCTRL_MASK))
-               | ((uint32_t)init->ton_max << _DCDC_CTRL_IPKTMAXCTRL_SHIFT);
-  DCDC->EM01CTRL0 = ((uint32_t)init->drive_speed_em01 << _DCDC_EM01CTRL0_DRVSPEED_SHIFT)
-                    | ((uint32_t)init->peak_current_em01 << _DCDC_EM01CTRL0_IPKVAL_SHIFT)
-                    | ((uint32_t)init->led_peak_current_em01 << _DCDC_EM01CTRL0_IPKLEDVAL_SHIFT);
-  DCDC->EM23CTRL0 = ((uint32_t)init->drive_speed_em23 << _DCDC_EM23CTRL0_DRVSPEED_SHIFT)
-                    | ((uint32_t)init->peak_current_em23 << _DCDC_EM23CTRL0_IPKVAL_SHIFT)
-                    | ((uint32_t)init->led_peak_current_em23 << _DCDC_EM23CTRL0_IPKLEDVAL_SHIFT);
-
-#if defined(_DCDC_LEDVDDRAMPCFG_MASK)
-  sl_hal_bus_reg_write_mask(&DCDC->LEDVDDRAMPCFG,
-                            _DCDC_LEDVDDRAMPCFG_LEDVDDVREGSTEPSIZE_MASK,
-                            (uint32_t)init->ledvdd_ramp_stepsize << _DCDC_LEDVDDRAMPCFG_LEDVDDVREGSTEPSIZE_SHIFT);
-  sl_hal_bus_reg_write_mask(&DCDC->LEDVDDRAMPCFG,
-                            _DCDC_LEDVDDRAMPCFG_LEDVDDTOCNTLD_MASK,
-                            (uint32_t)init->ledvdd_ramp_timeout_cntld << _DCDC_LEDVDDRAMPCFG_LEDVDDTOCNTLD_SHIFT);
-  sl_hal_bus_reg_write_mask(&DCDC->LEDVDDRAMPCFG,
-                            _DCDC_LEDVDDRAMPCFG_LEDVDDSTEPUPWAIT_MASK,
-                            (uint32_t)init->ledvdd_ramp_stepup_wait << _DCDC_LEDVDDRAMPCFG_LEDVDDSTEPUPWAIT_SHIFT);
-#endif
-#if defined(_DCDC_LEDVDDBCTRL_LEDVDDEN_MASK)
-  sl_hal_bus_reg_write_mask(&DCDC->LEDVDDBCTRL,
-                            _DCDC_LEDVDDBCTRL_LEDVDDEN_MASK,
-                            (uint32_t)_DCDC_LEDVDDBCTRL_LEDVDDEN_Enable << _DCDC_LEDVDDBCTRL_LEDVDDEN_SHIFT);
-#endif
-#if defined(_DCDC_OUTEN_LEDVDDOUTEN_MASK)
-  sl_hal_bus_reg_write_mask(&DCDC->OUTEN,
-                            _DCDC_OUTEN_LEDVDDOUTEN_MASK,
-                            (uint32_t)_DCDC_OUTEN_LEDVDDOUTEN_enable << _DCDC_OUTEN_LEDVDDOUTEN_SHIFT);
-#endif
-
-  sl_hal_emu_set_dcdc_mode(SL_HAL_EMU_DCDC_MODE_REGULATION);
-
-#if defined(_DCDC_SYNCBUSY_MASK)
-  sl_hal_emu_dcdc_sync(_DCDC_SYNCBUSY_MASK);
-#endif
-
-  sl_hal_emu_dcdc_updated_hook();
-#else
+  SL_LOG_DEBUG_ASSERT(init != NULL);
+  
 #if defined(_DCDC_SYNCBUSY_MASK)
   sl_hal_emu_dcdc_sync(_DCDC_SYNCBUSY_MASK);
 #endif
@@ -470,7 +417,6 @@ void sl_hal_emu_init_dcdc_boost(const sl_hal_emu_dcdc_boost_init_t *init)
   sl_hal_emu_set_dcdc_mode(SL_HAL_EMU_DCDC_MODE_REGULATION);
 
   sl_hal_emu_dcdc_updated_hook();
-#endif
 }
 
 /***************************************************************************//**
@@ -483,15 +429,9 @@ void sl_hal_emu_set_em01_boost_peak_current(const sl_hal_emu_dcdc_boost_em01_pea
   sl_hal_emu_dcdc_sync(_DCDC_SYNCBUSY_MASK);
 #endif
 
-#if defined(_DCDC_DVDDBBCFG_MASK)
-  sl_hal_bus_reg_write_mask(&DCDC->EM01CTRL0,
-                            _DCDC_EM01CTRL0_IPKVAL_MASK,
-                            ((uint32_t)boost_peak_current_em01 << _DCDC_EM01CTRL0_IPKVAL_SHIFT));
-#else
   sl_hal_bus_reg_write_mask(&DCDC->BSTEM01CTRL,
                             _DCDC_BSTEM01CTRL_IPKVAL_MASK,
                             ((uint32_t)boost_peak_current_em01 << _DCDC_BSTEM01CTRL_IPKVAL_SHIFT));
-#endif
 
   sl_hal_emu_dcdc_updated_hook();
 }
@@ -514,13 +454,16 @@ void sl_hal_emu_set_dcdc_boost_output_voltage(const sl_hal_emu_dcdc_boost_output
   sl_hal_emu_dcdc_updated_hook();
 }
 #endif
+#endif /* defined(SL_HAL_EMU_DCDC_BOOST_PRESENT) */
 
 #if defined(_DCDC_DVDDBBCFG_MASK)
 /***************************************************************************//**
  * Set DCDC Boost output voltage.
  ******************************************************************************/
-void sl_hal_emu_set_dcdc_boost_output_voltage(const sl_hal_emu_dcdc_boost_output_voltage_t boost_voltage)
+void sl_hal_emu_set_dcdc_ledboost_output_voltage(const sl_hal_emu_dcdc_ledboost_output_voltage_t boost_voltage)
 {
+  DCDC->OUTEN_SET = DCDC_OUTEN_LEDVDDOUTEN;
+  DCDC->LEDVDDBCTRL_SET = DCDC_LEDVDDBCTRL_LEDVDDEN;
   // Wait for synchronization before writing new value.
 #if defined(_DCDC_SYNCBUSY_MASK)
   sl_hal_emu_dcdc_sync(_DCDC_SYNCBUSY_MASK);
@@ -533,7 +476,6 @@ void sl_hal_emu_set_dcdc_boost_output_voltage(const sl_hal_emu_dcdc_boost_output
   sl_hal_emu_dcdc_updated_hook();
 }
 #endif
-#endif /* defined(SL_HAL_EMU_DCDC_BOOST_PRESENT) */
 
 #if defined(SL_HAL_EMU_DCDC_BUCK_PRESENT)
 /***************************************************************************//**
@@ -541,7 +483,7 @@ void sl_hal_emu_set_dcdc_boost_output_voltage(const sl_hal_emu_dcdc_boost_output
  ******************************************************************************/
 void sl_hal_emu_init_dcdc(const sl_hal_emu_dcdc_init_t *init)
 {
-  EFM_ASSERT(init != NULL);
+  SL_LOG_DEBUG_ASSERT(init != NULL);
 
   EMU->VREGVDDCMPCTRL = ((uint32_t)init->comparator_threshold << _EMU_VREGVDDCMPCTRL_THRESSEL_SHIFT)
                         | EMU_VREGVDDCMPCTRL_VREGINCMPEN;
@@ -612,7 +554,7 @@ void sl_hal_emu_init_dcdc(const sl_hal_emu_dcdc_init_t *init)
           timeout++;
         }
         if (timeout >= EMU_DCDC_MODE_SET_TIMEOUT) {
-          EFM_ASSERT(false);
+          SL_PRINT_STRING_ERROR("timeout, %d\r\n", (int)__LINE__);
         }
         break;
       case SL_HAL_EMU_DCDC_REGULATION_TYPE_REGDEC:
@@ -620,7 +562,7 @@ void sl_hal_emu_init_dcdc(const sl_hal_emu_dcdc_init_t *init)
           timeout++;
         }
         if (timeout >= EMU_DCDC_MODE_SET_TIMEOUT) {
-          EFM_ASSERT(false);
+          SL_PRINT_STRING_ERROR("timeout, %d\r\n", (int)__LINE__);
         }
         break;
       case SL_HAL_EMU_DCDC_REGULATION_TYPE_REGDVDDDEC:
@@ -630,11 +572,11 @@ void sl_hal_emu_init_dcdc(const sl_hal_emu_dcdc_init_t *init)
           timeout++;
         }
         if (timeout >= EMU_DCDC_MODE_SET_TIMEOUT) {
-          EFM_ASSERT(false);
+          SL_PRINT_STRING_ERROR("timeout, %d\r\n", (int)__LINE__);
         }
         break;
       default:
-        EFM_ASSERT(false);
+        SL_LOG_DEBUG_ASSERT(false);
         break;
     }
   }
@@ -676,7 +618,7 @@ void sl_hal_emu_set_dcdc_pfmx_mode_peak_current(uint32_t value)
 {
   // Verification that the parameter is in range.
   // if not, restrict value to maximum allowed.
-  EFM_ASSERT(value <= (_DCDC_PFMXCTRL_IPKVAL_MASK >> _DCDC_PFMXCTRL_IPKVAL_SHIFT));
+  SL_LOG_DEBUG_ASSERT(value <= (_DCDC_PFMXCTRL_IPKVAL_MASK >> _DCDC_PFMXCTRL_IPKVAL_SHIFT));
   if (value > (_DCDC_PFMXCTRL_IPKVAL_MASK >> _DCDC_PFMXCTRL_IPKVAL_SHIFT)) {
     value = (_DCDC_PFMXCTRL_IPKVAL_MASK >> _DCDC_PFMXCTRL_IPKVAL_SHIFT);
   }
@@ -744,7 +686,7 @@ void sl_hal_emu_dcdc_set_regulation_type(sl_hal_emu_dcdc_regulation_type_t regul
       DCDC->OUTEN_CLR = DCDC_OUTEN_DVDDOUTEN | DCDC_OUTEN_DECOUTEN;
       break;
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       break;
   }
 #endif

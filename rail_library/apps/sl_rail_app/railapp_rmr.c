@@ -30,6 +30,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "sl_rail.h"
 #include "sl_core.h"
@@ -60,6 +61,8 @@ typedef struct RMR_State{
 } RMR_State_t;
 
 static RMR_State_t *rmrState = NULL;
+
+#define RMR_PHY_INFO_TIMING_CONFIG_OFFSET 4U
 
 // Internal commands
 sl_rail_status_t Rmr_writeRmrStructure(RMR_StructureIndex_t structure, uint16_t offset, uint8_t count, uint8_t *dataPtr);
@@ -99,6 +102,14 @@ sl_rail_status_t Rmr_updateConfigurationPointer(uint8_t structToModify, uint16_t
       break;
     }
     case (RMR_STRUCT_NULL): {
+      #if defined(_SILICON_LABS_32B_SERIES_3_CONFIG) \
+      && (_SILICON_LABS_32B_SERIES_3_CONFIG == 353)
+      if ((structToModify == RMR_STRUCT_PHY_INFO)
+          && (offset == RMR_PHY_INFO_TIMING_CONFIG_OFFSET)) {
+        structPointer = (uint32_t)&(rmrState->timingConfig);
+        break;
+      }
+      #endif
       structPointer = 0u; // NULL
       break;
     }
@@ -253,7 +264,7 @@ sl_rail_status_t Rmr_writeRmrStructure(RMR_StructureIndex_t structure, uint16_t 
       break;
     }
     case (RMR_STRUCT_TIMING_CONFIG): {
-      size = sizeof(rmrState->txIrCalConfig);
+      size = sizeof(rmrState->timingConfig);
       targetStruct = (uint8_t *) &(rmrState->timingConfig);
       break;
     }
@@ -283,6 +294,7 @@ static bool rmrInit(sl_cli_command_arg_t *args)
       responsePrintError(sl_cli_get_command_string(args, 0), 0x86, "Error allocating RMR memory.");
       return false;
     }
+    memset(rmrState, 0, sizeof(RMR_State_t));
     rmrState->channelConfig.phy_config_base = &(rmrState->modemConfigEntry[0]);
   #ifdef SL_RAIL_3_0
     rmrState->channelConfig.phy_config_common_base = NULL;

@@ -1,0 +1,39 @@
+id: btl_common_storage_unit
+label: Common Storage (unit test)
+package: bootloader
+description: >
+  Unit-test variant of btl_common_storage: same sources and provider,
+  uses btl_debug_unit instead of bootloader_debug (avoids bootloader_interface_s3).
+category: Platform|Bootloader|Test
+quality: production
+ui_hints:
+  visibility: never
+source:
+- path: platform/bootloader/series3/storage/btl_storage.c
+- path: platform/bootloader/series3/storage/btl_storage_library.c
+- path: platform/bootloader/series3/storage/bootloadinfo/btl_storage_bootloadinfo.c
+include:
+- path: platform/bootloader/series3
+  file_list:
+  - path: storage/ext_mem/btl_storage_ext_mem.h
+  - path: storage/btl_storage.h
+  - path: storage/bootloadinfo/btl_storage_bootloadinfo.h
+  - path: core/btl_parse.h
+requires:
+- name: btl_storage_bootloadinfo_header
+- name: btl_storage_slots
+- name: btl_debug_unit
+- name: bootloader_interface_s3_bootload_headers
+- name: btl_include_parser
+- name: btl_crc
+- name: bootloader_aes_sha_ecdsa_s3
+provides:
+- name: btl_common_storage_unit
+- name: btl_interface_bootloadinfo_provider
+config_file:
+- path: platform/bootloader/series3/config/btl_storage_cfg.h
+  file_id: btl_storage_config
+metadata:
+  sbom:
+    license: MSLA
+root_path: bootloader

@@ -104,7 +104,7 @@
       <peripheral componentIdRef="pin_tool.efr32.mgm26.lfxo" displayName="LFXO" name="LFXO" revision="A" category="Clocking" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm26.lfrco" displayName="LFRCO" name="LFRCO" revision="A" category="Clocking" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm26.ulfrco" displayName="ULFRCO" name="ULFRCO" revision="A" category="Clocking" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efr32.mgm26.keyscan" displayName="KEYSCAN" name="KEYSCAN" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.mgm26.keyscan" displayName="KEYSCAN" name="KEYSCAN" revision="A" category="Communications" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm26.msc" displayName="MSC" name="MSC" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm26.prs.asynch0" displayName="PRS Channel ASYNCH0" name="PRS.ASYNCH0" revision="A" category="PRS" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm26.prs.asynch1" displayName="PRS Channel ASYNCH1" name="PRS.ASYNCH1" revision="A" category="PRS" hidden="false"/>
@@ -157,8 +157,8 @@
       <peripheral componentIdRef="pin_tool.efr32.mgm26.smu" displayName="SMU" name="SMU" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm26.letimer" displayName="LETIMER0" name="LETIMER0" revision="A" category="Timers" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm26.iadc" displayName="IADC0" name="IADC0" revision="A" category="Analog" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efr32.mgm26.acmp" displayName="ACMP0" name="ACMP0" revision="A" category="Other" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efr32.mgm26.acmp" displayName="ACMP1" name="ACMP1" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.mgm26.acmp" displayName="ACMP0" name="ACMP0" revision="A" category="Analog" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.mgm26.acmp" displayName="ACMP1" name="ACMP1" revision="A" category="Analog" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm26.vdac" displayName="VDAC0" name="VDAC0" revision="A" category="Analog" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm26.vdac" displayName="VDAC1" name="VDAC1" revision="A" category="Analog" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm26.pcnt" displayName="PCNT0" name="PCNT0" revision="A" category="Timers" hidden="false"/>
@@ -168,10 +168,10 @@
       <peripheral componentIdRef="pin_tool.efr32.mgm26.wdog" displayName="WDOG0" name="WDOG0" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm26.wdog" displayName="WDOG1" name="WDOG1" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm26.eusart" displayName="EUSART0" name="EUSART0" revision="A" category="Communications" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efr32.mgm26.semailbox" displayName="SEMAILBOX" name="SEMAILBOX" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.mgm26.semailbox" displayName="SEMAILBOX" name="SEMAILBOX" revision="A" category="Security" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm26.pti" displayName="PTI" name="PTI" revision="A" category="Radio" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm26.modem" displayName="MODEM" name="MODEM" revision="A" category="Radio" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efr32.mgm26.scratchpad" displayName="RFSCRATCHPAD" name="RFSCRATCHPAD" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.mgm26.scratchpad" displayName="RFSCRATCHPAD" name="RFSCRATCHPAD" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm26.mailbox" displayName="RFMAILBOX" name="RFMAILBOX" revision="A" category="Core" hidden="false"/>
     </peripherals>
     <script uri="../../script/entrypoint.py">

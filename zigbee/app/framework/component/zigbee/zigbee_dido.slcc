@@ -1,0 +1,31 @@
+package: zigbee
+description: This component manages the diagnostic information data object (DIDO) interface.  It wraps diagnostic data into a single buffer to be sent out for processing.
+label: Dido
+quality: production
+id: zigbee_dido
+category: Zigbee|Utility
+provides:
+- name: zigbee_dido
+requires:
+- name: zigbee_compact_logger
+- name: zigbee_counters
+- name: zigbee_fragmentation
+- name: zigbee_ring_buffer
+- name: zigbee_event_logger
+source:
+- path: app/framework/plugin/dido/dido.c
+include:
+- path: app/framework/plugin/dido
+  file_list:
+  - path: dido.h
+template_contribution:
+- name: component_catalog
+  value: zigbee_dido
+
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/dido
+metadata:
+  sbom:
+    license: MSLA
+root_path: zigbee

@@ -1,0 +1,35 @@
+id: ddp_cmd_cert
+label: DDP commands for Certificates
+description: >
+  This component provides a Dynamic Data Provisioning (DDP) command set
+  for certificate handling.
+package: bluetooth_le
+category: Bluetooth|Application|Miscellaneous
+quality: production
+metadata:
+  sbom:
+    license: Zlib
+ui_hints:
+  visibility: never
+root_path: bluetooth_le/common/ddp
+provides:
+- name: ddp_cmd_cert
+requires:
+- name: ddp
+- name: psa_crypto
+- name: psa_crypto_sha1
+source:
+- path: src/sl_ddp_cmd_cert.c
+other_file:
+- path: script/ddp_cmd_cert.py
+  project:
+    transfer_ownership: true
+    directory: script
+define:
+- name: SL_DDP_CMD_CERT_GET_CN
+  value: 10
+template_contribution:
+- name: ddp_command
+  value:
+    id: SL_DDP_CMD_CERT_GET_CN
+    handler: sl_ddp_cmd_cert_get_cn

@@ -135,8 +135,10 @@ otPlatResetReason otPlatGetResetReason(otInstance *aInstance)
     /* clang-format off */
     else if ((sResetCause & EMU_RSTCAUSE_AVDDBOD)
              || (sResetCause & EMU_RSTCAUSE_DECBOD)
+             #if defined(EMU_RSTCAUSE_DVDDBOD)
              || (sResetCause & EMU_RSTCAUSE_DVDDBOD)
              || (sResetCause & EMU_RSTCAUSE_DVDDLEBOD)
+             #endif
              || (sResetCause & EMU_RSTCAUSE_EM4))
     /* clang-format on */
     {
@@ -167,7 +169,9 @@ otPlatResetReason otPlatGetResetReason(otInstance *aInstance)
     /* clang-format off */
     else if ((sResetCause & RMU_RSTCAUSE_AVDDBOD)
              || (sResetCause & RMU_RSTCAUSE_DECBOD)
+             #if defined(EMU_RSTCAUSE_DVDDBOD)
              || (sResetCause & RMU_RSTCAUSE_DVDDBOD)
+             #endif
              || (sResetCause & RMU_RSTCAUSE_EM4RST))
     /* clang-format on */
     {

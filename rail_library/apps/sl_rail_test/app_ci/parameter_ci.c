@@ -28,6 +28,7 @@
  *
  ******************************************************************************/
 
+#include <inttypes.h>
 #include <string.h>
 #if !defined(__ICCARM__)
 // IAR doesn't have strings.h and puts those declarations in string.h
@@ -996,3 +997,34 @@ void testNvmPowerCurves(sl_cli_command_arg_t *args)
 }
 
 #endif // ((!defined(SL_CATALOG_SL_RAIL_UTIL_PA_PRESENT))  &&  SL_RAIL_UTIL_PA_NVM_ENABLED)
+
+void getSyncWords(sl_cli_command_arg_t *args)
+{
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  sl_rail_sync_word_config_t syncWordConfig = { 0, };
+  sl_rail_status_t status = sl_rail_get_sync_words(railHandle, &syncWordConfig);
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "Result:%s,bitlength:%u,syncWord1:%" PRIu32 ",syncWord2:%" PRIu32,
+                status == SL_RAIL_STATUS_NO_ERROR ? "Success" : "Failure",
+                syncWordConfig.sync_word_bits, syncWordConfig.sync_word_0,
+                syncWordConfig.sync_word_1);
+}
+
+void configSyncWords(sl_cli_command_arg_t *args)
+{
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  if (!inRadioState(SL_RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
+    return;
+  }
+  sl_rail_sync_word_config_t syncWordConfig = { 0, };
+  syncWordConfig.sync_word_bits = sl_cli_get_argument_uint8(args, 0);
+  syncWordConfig.sync_word_0 = sl_cli_get_argument_uint32(args, 1);
+  if (sl_cli_get_argument_count(args) >= 3) {
+    syncWordConfig.sync_word_1 = sl_cli_get_argument_uint32(args, 2);
+  } else {
+    syncWordConfig.sync_word_1 = syncWordConfig.sync_word_0;
+  }
+  sl_rail_status_t status = sl_rail_config_sync_words(railHandle, &syncWordConfig);
+  responsePrint(sl_cli_get_command_string(args, 0), "Result:%s",
+                ((status == SL_RAIL_STATUS_NO_ERROR) ? "Success" : "Failure"));
+}

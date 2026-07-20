@@ -31,8 +31,6 @@ component:
   - id: cpc_security_secondary_none
   - id: cpc_secondary_recommended_uart_interface
   - id: memory_manager
-define:
-  - name: DEBUG_EFM
 configuration:
   - name: OS_CFG_FLAG_MODE_CLR_EN
     value: 1

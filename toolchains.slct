@@ -20,6 +20,7 @@ schema:
     enum:
       - fpv4-sp
       - fpv5-sp
+      - fpv5-d16
   optimize:
     type: str
     enum:
@@ -335,6 +336,13 @@ exporter:
           - tool: toolchain
             option: fpu
             value: fpv5-sp
+          - tool: toolchain
+            option: float_abi
+            value: hard
+        fpv5-d16:
+          - tool: toolchain
+            option: fpu
+            value: fpv5-d16
           - tool: toolchain
             option: float_abi
             value: hard

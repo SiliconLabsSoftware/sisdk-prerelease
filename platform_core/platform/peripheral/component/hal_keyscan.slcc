@@ -24,6 +24,7 @@ requires:
 - name: device
 - name: device_has_keyscan
 - name: hal_generic_common
+- name: log_none
 - name: cmsis_core
 - name: enum
 documentation:

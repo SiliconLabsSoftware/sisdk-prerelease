@@ -18,4 +18,5 @@ provides:
 requires:
 - name: device_has_syscfg
 - name: hal_syscfg
+- name: log_none
 root_path: platform_core/platform/peripheral

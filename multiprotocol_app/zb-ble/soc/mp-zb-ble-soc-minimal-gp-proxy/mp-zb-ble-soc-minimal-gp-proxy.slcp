@@ -1,0 +1,251 @@
+project_name: mp-zb-ble-soc-minimal-gp-proxy
+label: Zigbee BLE DMP - SoC GP Proxy
+package: multiprotocol_app
+category: Zigbee Application
+quality: production
+
+description: Minimal DMP app with Bluetooth, Zigbee, and GP Proxy. Non-compliant; use zigbee scenario application templates for full applications.
+author: Silicon Laboratories, Inc.
+
+component:
+  - id: sl_main
+  - id: watchdog_manager
+  # Zigbee Components
+  - id: zigbee_pro_router_stack
+  - id: zigbee_device_config
+  - id: zigbee_gp
+  - id: zigbee_r22_support
+
+  # Bluetooth Components
+  - id: bluetooth_stack
+  - id: gatt_configuration
+  - id: bluetooth_feature_system
+  - id: bluetooth_feature_legacy_advertiser
+  - id: bluetooth_feature_connection_role_peripheral
+  - id: bluetooth_feature_gatt_server
+  - id: bluetooth_feature_sm
+
+  # Gp Proxy Support
+  - id: zigbee_green_power_adapter
+  - id: zigbee_green_power_client
+  - id: zigbee_green_power_proxy_zap_config
+  - id: clock_manager
+  # Platform - enable LTO for gcc and llvm
+  - id: toolchain_gcc_lto
+    condition:
+      - toolchain_gcc
+  - id: toolchain_llvm_lto
+    condition:
+      - toolchain_llvm
+
+configuration:
+  - name: SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_EVENT_SYSTEM
+    value: 0
+  - name: SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_ATTRIBUTE_SYSTEM
+    value: 0
+  - name: SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_GP_STACK
+    value: 0
+  - name: SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_AF_INTERFACE
+    value: 0
+  - name: SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_TOKEN_SYSTEM
+    value: 0
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+  - name: SLI_ZIGBEE_PRIMARY_NETWORK_DEVICE_TYPE
+    value: SLI_ZIGBEE_NETWORK_DEVICE_TYPE_ROUTER
+  - name: SLI_ZIGBEE_PRIMARY_NETWORK_SECURITY_TYPE
+    value: SLI_ZIGBEE_NETWORK_SECURITY_TYPE_3_0
+  - name: SL_BT_CONFIG_USER_ADVERTISERS
+    value: 1
+  - name: SL_BT_CONFIG_MAX_CONNECTIONS
+    value: 1
+  - name: SL_STACK_SIZE
+    value: 512
+    unless:
+      - freertos
+  - name: SL_STACK_SIZE
+    value: 1024
+    condition:
+      - freertos
+      - device_series_2
+  - name: SL_STACK_SIZE
+    value: 16384
+    condition:
+      - device_series_3
+  - name: LIB_MEM_CFG_HEAP_SIZE
+    value: 0
+  - name: NVM3_DEFAULT_NVM_SIZE
+    value: 32768
+    condition:
+      - device_series_2
+  # If using zigbee_secure_key_storage we do not need to support backwards
+  # compatibility because we have never deployed images with keys in PSA
+  # As a result, these lines end up saving some code space
+  - name: SL_PSA_ITS_SUPPORT_V1_DRIVER
+    value: 0
+  - name: SL_PSA_ITS_SUPPORT_V2_DRIVER
+    value: 0
+  - name: SL_PSA_ITS_SUPPORT_V3_DRIVER
+    value: 1
+  - name: SL_CLI_EXAMPLE_TASK_STACK_SIZE
+    value: 600
+    condition:
+      - cmsis_rtos2
+  # On series 3, the bootloader requires more stack to do context parsing of OTA images
+  - name: SL_CLI_EXAMPLE_TASK_STACK_SIZE
+    value: 1500
+    condition:
+      - device_series_3
+  - name: SL_ZIGBEE_STACK_RTOS_TASK_STACK_SIZE
+    value: 4000
+    condition:
+      - device_series_2
+  - name: SL_ZIGBEE_STACK_RTOS_TASK_STACK_SIZE
+    value: 5800
+    condition:
+      - device_series_3
+  - name: SL_ZIGBEE_APP_FRAMEWORK_RTOS_TASK_STACK_SIZE
+    value: 6000
+    condition:
+      - device_series_3
+  - name: SL_ZIGBEE_AF_PLUGIN_ZCL_CLUSTER_DEFER_ATTRIBUTE_WRITES_TO_NVM_MS
+    value: 2000
+    condition:
+      - device_series_3
+
+source:
+  - path: main.c
+    unless: [cmsis_rtos2]
+  - path: app.c
+  - path: app_cli.c
+    condition:
+      - cli
+include:
+  - path: .
+    file_list:
+      - path: app.h
+
+define:
+  - name: SL_ZIGBEE_AF_ZC_AND_ZR_DEVICE_COUNT
+    value: '1'
+  - name: OS_CFG_COMPAT_INIT
+
+template_contribution:
+  - name: cli_group
+    value:
+      name: plugin
+  - name: zigbee_af_callback
+    value:
+      callback_type: event_init
+      function_name: app_cli_init
+    condition:
+      - cli
+  - name: cli_command
+    value:
+      name: reset
+      handler: hal_reboot
+      help: Reset the node
+  - name: cli_command
+    value:
+      name: form
+      handler: form_network_command
+      help: Form Network
+      argument:
+        - type: uint8
+          help: Radio channel
+        - type: uint16
+          help: Pan ID
+        - type: int8
+          help: Radio tx power
+  - name: cli_command
+    value:
+      name: join
+      handler: join_network_command
+      help: Join Network
+      argument:
+        - type: uint8
+          help: Radio channel
+        - type: uint16
+          help: Pan ID
+        - type: int8
+          help: Radio tx power
+  - name: cli_command
+    value:
+      name: permit_join
+      handler: permit_join_command
+      help: Permit join
+      argument:
+        - type: uint8
+          help: Duration in seconds
+  - name: cli_command
+    value:
+      name: set_security
+      handler: set_security_command
+      help: Join Network
+      argument:
+        - type: uint32
+          help: Security bitmask
+        - type: hex
+          help: Preconfigured key
+        - type: hex
+          help: Network key
+        - type: uint8
+          help: Key sequence number
+  - name: cli_command
+    value:
+      name: set_tc_policy
+      handler: set_trust_center_policy_command
+      help: Set the trust center policy
+      argument:
+        - type: uint8
+          help: Policy
+  - name: cli_command
+    value:
+      name: info
+      handler: info_command
+      help: Get device info
+  - name: cli_command
+    value:
+      name: keys_print
+      handler: keys_print_command
+      help: Print keys
+  - name: cli_command
+    value:
+      name: msg_buffer
+      handler: msg_buffer_command
+      help: Sends a msg buffer test request
+      argument:
+        - type: uint16
+          help: NodeId of dest
+  - name: cli_command
+    value:
+      name: set_profile
+      handler: set_profile_command
+      help: Sets stack profile
+      argument:
+        - type: uint8
+          help: Stack Profile
+  - name: zigbee_stack_callback
+    value:
+      callback_type: incoming_message
+      function_name: sli_zigbee_af_incoming_message_callback
+readme:
+  - path: ./readme.md
+
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: false
+
+filter:
+  - name: Wireless Technology
+    value: [Zigbee]
+  - name: Device Type
+    value: [SoC]
+  - name: Project Difficulty
+    value: [Advanced]
+tag:
+  - hwfilter:device:device_supports_zigbee
+  - hwfilter:!device:device_is_module
+  - hwfilter:!device:rm21z000f1024im32
+  - hwfilter:ram:64k

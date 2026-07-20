@@ -18,20 +18,13 @@ provides:
 - name: hal_generic_system
   condition: [device_series_3]
 requires:
-- name: device
-- name: hal_common
 - name: hal_system
-- name: cmsis_core
-- name: hal_syscfg
-- name: enum
-- name: status
-- name: sl_assert
 - name: emlib_cmu
   condition: [device_sdid_240]
 - name: emlib_cmu
   condition: [device_generic_family_efr32xg2b]
 - name: se_manager
-  condition: [device_generic_family_sixx301]
+  condition: [device_series_3]
 - name: se_manager_device_data
-  condition: [device_generic_family_sixx301]
+  condition: [device_series_3]
 root_path: platform_core/platform/peripheral

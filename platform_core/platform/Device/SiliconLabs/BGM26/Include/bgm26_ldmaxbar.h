@@ -48,16 +48,16 @@ typedef struct ldmaxbar_ch_typedef{
 
 /** LDMAXBAR Register Declaration. */
 typedef struct ldmaxbar_typedef{
-  __IM uint32_t       IPVERSION;                /**< IP veersion ID                                     */
+  __IM uint32_t       IPVERSION;                /**< IP version ID                                      */
   LDMAXBAR_CH_TypeDef CH[8U];                   /**< DMA Channel Registers                              */
   uint32_t            RESERVED0[1015U];         /**< Reserved for future use                            */
-  __IM uint32_t       IPVERSION_SET;            /**< IP veersion ID                                     */
+  __IM uint32_t       IPVERSION_SET;            /**< IP version ID                                      */
   LDMAXBAR_CH_TypeDef CH_SET[8U];               /**< DMA Channel Registers                              */
   uint32_t            RESERVED1[1015U];         /**< Reserved for future use                            */
-  __IM uint32_t       IPVERSION_CLR;            /**< IP veersion ID                                     */
+  __IM uint32_t       IPVERSION_CLR;            /**< IP version ID                                      */
   LDMAXBAR_CH_TypeDef CH_CLR[8U];               /**< DMA Channel Registers                              */
   uint32_t            RESERVED2[1015U];         /**< Reserved for future use                            */
-  __IM uint32_t       IPVERSION_TGL;            /**< IP veersion ID                                     */
+  __IM uint32_t       IPVERSION_TGL;            /**< IP version ID                                      */
   LDMAXBAR_CH_TypeDef CH_TGL[8U];               /**< DMA Channel Registers                              */
 } LDMAXBAR_TypeDef;
 /** @} End of group BGM26_LDMAXBAR */

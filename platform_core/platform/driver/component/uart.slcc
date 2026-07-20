@@ -1,0 +1,28 @@
+id: uart
+package: platform_core
+label: UART Driver
+description: >
+  Platform UART driver for USART, EUART, and EUSART peripherals. Declares the
+  underlying peripheral signals (TX, RX, CTS, RTS) and interrupt handlers in  per-instance configuration so users can configure pin routing through the  pin tool and initialize instances at runtime.
+category: Platform|Driver|UART
+quality: experimental
+metadata:
+  sbom:
+    license: Zlib
+root_path: platform_core/platform/driver/uart/
+instantiable:
+  prefix: inst
+provides:
+- name: uart
+  allow_multiple: true
+requires:
+- name: uart_core
+config_file:
+- path: config/sl_uart_{{instance}}_config.h
+  file_id: uart_config
+template_file:
+- path: init/sl_uart_instances.c.jinja
+- path: init/sl_uart_instances.h.jinja
+template_contribution:
+- name: uart_instances
+  value: '{{instance}}'

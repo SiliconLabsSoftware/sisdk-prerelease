@@ -207,7 +207,7 @@ void sl_cli_input_autocomplete(sl_cli_handle_t handle)
     int length = strlen(possible_matches);
     int remaining_length = length - input_length;
     char *buf_dest = &handle->input_buffer[input_length + input_position];
-    char *buf_src = &possible_matches[input_length];
+    const char *buf_src = &possible_matches[input_length];
 
     while (remaining_length > 0) {
       *buf_dest = *buf_src;
@@ -288,7 +288,7 @@ void sl_cli_input_autocomplete(sl_cli_handle_t handle)
     // Update input buffer to longest common prefix
     int prefix_length = strlen(longest_common_prefix);
     char *buf_dest = &handle->input_buffer[input_length + input_position];
-    char *buf_src = &longest_common_prefix[input_length];
+    const char *buf_src = &longest_common_prefix[input_length];
     int  remain_length = prefix_length - input_length;
     while (remain_length > 0) {
       *buf_dest = *buf_src;

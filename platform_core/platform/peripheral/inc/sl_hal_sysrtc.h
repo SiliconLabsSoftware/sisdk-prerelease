@@ -45,7 +45,7 @@ extern "C" {
 #include "sl_hal_sysrtc_compat.h"
 #include "sl_hal_sysrtc_subsystem.h"
 #include "sl_enum.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 /***************************************************************************//**
  * @addtogroup sysrtc SYSRTC - System RTC
@@ -139,7 +139,7 @@ __INLINE void sl_hal_sysrtc_wait_ready(void)
 __INLINE void sl_hal_sysrtc_start(void)
 {
   // Make sure module is enabled.
-  EFM_ASSERT(SYSRTC_INST->EN & SYSRTC_EN_EN);
+  SL_LOG_DEBUG_ASSERT(SYSRTC_INST->EN & SYSRTC_EN_EN);
 
   // Wait to synchronize before sending the command.
   sl_hal_sysrtc_wait_sync();
@@ -162,7 +162,7 @@ __INLINE void sl_hal_sysrtc_start(void)
 __INLINE void sl_hal_sysrtc_stop(void)
 {
   // Make sure module is enabled.
-  EFM_ASSERT(SYSRTC_INST->EN & SYSRTC_EN_EN);
+  SL_LOG_DEBUG_ASSERT(SYSRTC_INST->EN & SYSRTC_EN_EN);
 
   // Wait to synchronize before sending the command.
   sl_hal_sysrtc_wait_sync();
@@ -336,7 +336,7 @@ __INLINE void sl_hal_sysrtc_set_counter(uint32_t value)
 __INLINE void sl_hal_sysrtc_start_ms(void)
 {
   // Make sure module is enabled.
-  EFM_ASSERT(SYSRTC_INST->EN & SYSRTC_EN_EN);
+  SL_LOG_DEBUG_ASSERT(SYSRTC_INST->EN & SYSRTC_EN_EN);
 
   // Wait to synchronize before sending the command.
   sl_hal_sysrtc_wait_sync();
@@ -354,7 +354,7 @@ __INLINE void sl_hal_sysrtc_start_ms(void)
 __INLINE void sl_hal_sysrtc_stop_ms(void)
 {
   // Make sure module is enabled.
-  EFM_ASSERT(SYSRTC_INST->EN & SYSRTC_EN_EN);
+  SL_LOG_DEBUG_ASSERT(SYSRTC_INST->EN & SYSRTC_EN_EN);
 
   // Wait to synchronize before sending the command.
   sl_hal_sysrtc_wait_sync();

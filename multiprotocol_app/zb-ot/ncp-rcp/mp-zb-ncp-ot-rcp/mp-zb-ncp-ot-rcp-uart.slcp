@@ -1,6 +1,6 @@
 project_name: mp-zb-ncp-ot-rcp-uart
 label: Zigbee NCP + OpenThread RCP - UART (CMP)
-package: multiprotocol
+package: multiprotocol_app
 category: Zigbee + OpenThread Application
 quality: production
 description: Demonstrates a CMP (Concurrent Multiprotocol) Zigbee NCP and OpenThread RCP application over UART using CPC for host communication, with support for customizable Zigbee NCP extensions.

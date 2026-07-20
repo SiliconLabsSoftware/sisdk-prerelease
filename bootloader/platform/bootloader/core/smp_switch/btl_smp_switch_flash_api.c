@@ -78,12 +78,12 @@ static uint32_t smp_record_crc32_stream(const uint8_t *buffer, size_t length, ui
 static bool smp_switch_page_addresses_ok(uint32_t page1, uint32_t page2)
 {
 #if (FLASH_BASE > 0x0UL)
-  if ((page1 < (uint32_t)FLASH_BASE) || (page2 < (uint32_t)FLASH_BASE)) {
+  if ((page1 < FLASH_BASE) || (page2 < FLASH_BASE)) {
     return false;
   }
 #endif
-  if ((page1 >= (uint32_t)(FLASH_BASE + FLASH_SIZE))
-      || (page2 >= (uint32_t)(FLASH_BASE + FLASH_SIZE))) {
+  if ((page1 >= (FLASH_BASE + FLASH_SIZE))
+      || (page2 >= (FLASH_BASE + FLASH_SIZE))) {
     return false;
   }
   return true;

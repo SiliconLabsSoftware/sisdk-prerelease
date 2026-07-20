@@ -396,6 +396,7 @@ sl_status_t sl_se_data_region_get_location(sl_se_command_context_t *cmd_ctx,
   sl_status = sli_se_execute_and_wait(cmd_ctx);
 
   if (sl_status == SL_STATUS_OK) {
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)
     // Get SE version to figure out how to proceed
     uint32_t version = 0;
     sl_status = sl_se_get_se_version(cmd_ctx, &version);
@@ -425,7 +426,7 @@ sl_status_t sl_se_data_region_get_location(sl_se_command_context_t *cmd_ctx,
       }
       *size -= axip_overhead;
     }
-
+#endif
     offset = (uint32_t)*address - QSPI_FLASH_HOST_BASE;
     *address = (void*) (FLASH_BASE + offset);
   }
@@ -1031,15 +1032,44 @@ sl_status_t sli_se_write_spi_register(sl_se_command_context_t *cmd_ctx,
 /***************************************************************************//**
  * Write to a series of QSPI peripheral registers.
  ******************************************************************************/
-sl_status_t sli_se_write_spi_registers(sl_se_command_context_t *cmd_ctx,
+ sl_status_t sli_se_write_spi_registers(sl_se_command_context_t *cmd_ctx,
+  uint32_t spi_instance,
+  uint32_t *table,
+  uint32_t count)
+{
+  return sli_se_write_and_read_back_spi_registers(cmd_ctx, spi_instance, table, count, NULL, 0);
+}
+
+/***************************************************************************//**
+ *  Read a specific SPI register
+ ******************************************************************************/
+ sl_status_t sli_se_read_spi_register(sl_se_command_context_t *cmd_ctx,
+  uint32_t spi_instance,
+  uint32_t offset,
+  uint32_t *value)
+{
+  // To read, use the _SET variant of the register with a 0 write value
+  uint32_t set_offset = (offset & 0xFFF) | 0x1000;
+  uint32_t write_table[2] = { set_offset, 0 };
+  return sli_se_write_and_read_back_spi_registers(cmd_ctx, spi_instance, write_table, 1, value, 1);
+}
+
+/***************************************************************************//**
+ * Write to a series of QSPI peripheral registers and read back the values.
+ ******************************************************************************/
+sl_status_t sli_se_write_and_read_back_spi_registers(sl_se_command_context_t *cmd_ctx,
                                        uint32_t spi_instance,
-                                       uint32_t *table,
-                                       uint32_t count)
+                                       uint32_t *write_table,
+                                       uint32_t write_count,
+                                       uint32_t *read_table,
+                                       uint32_t read_count)
 {
   if ((cmd_ctx == NULL)
       || ((spi_instance != 0) && (spi_instance != 1))
-      || (table == NULL)
-      || (count == 0)) {
+      || (write_table == NULL)
+      || (write_count == 0)
+      || ((read_table == NULL) && (read_count > 0))
+    ) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1047,11 +1077,17 @@ sl_status_t sli_se_write_spi_registers(sl_se_command_context_t *cmd_ctx,
 
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_WRITE_SPI_REGISTERS);
 
-  sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(table, 8 * count);
+  sli_se_datatransfer_t in_data = SLI_SE_DATATRANSFER_DEFAULT(write_table, 8 * write_count);
   sli_se_mailbox_command_add_input(se_cmd, &in_data);
 
+  sli_se_datatransfer_t out_data = SLI_SE_DATATRANSFER_DEFAULT(read_table, 4 * read_count);
+  if (read_count > 0) {
+    sli_se_mailbox_command_add_output(se_cmd, &out_data);
+  }
+
   sli_se_mailbox_command_add_parameter(se_cmd, spi_instance);
-  sli_se_mailbox_command_add_parameter(se_cmd, 8 * count);
+  sli_se_mailbox_command_add_parameter(se_cmd, 8 * write_count);
+  sli_se_mailbox_command_add_parameter(se_cmd, 4 * read_count);
 
   // Execute and wait
   return sli_se_execute_and_wait(cmd_ctx);

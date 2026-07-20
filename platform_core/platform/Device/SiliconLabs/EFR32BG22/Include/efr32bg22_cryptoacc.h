@@ -828,7 +828,7 @@ typedef struct cryptoacc_rngctrl_typedef{
 #define _CRYPTOACC_RNGCTRL_NB128BITBLOCKS_MASK                0xF0000UL                                         /**< Bit mask for CRYPTOACC_NB128BITBLOCKS       */
 #define _CRYPTOACC_RNGCTRL_NB128BITBLOCKS_DEFAULT             0x00000004UL                                      /**< Mode DEFAULT for CRYPTOACC_RNGCTRL          */
 #define CRYPTOACC_RNGCTRL_NB128BITBLOCKS_DEFAULT              (_CRYPTOACC_RNGCTRL_NB128BITBLOCKS_DEFAULT << 16) /**< Shifted mode DEFAULT for CRYPTOACC_RNGCTRL  */
-#define CRYPTOACC_RNGCTRL_FIFOWRSTARTUP                       (0x1UL << 20)                                     /**< Fifo Write Start Up                         */
+#define CRYPTOACC_RNGCTRL_FIFOWRSTARTUP                       (0x1UL << 20)                                     /**< FIFO Write Start Up                         */
 #define _CRYPTOACC_RNGCTRL_FIFOWRSTARTUP_SHIFT                20                                                /**< Shift value for CRYPTOACC_FIFOWRSTARTUP     */
 #define _CRYPTOACC_RNGCTRL_FIFOWRSTARTUP_MASK                 0x100000UL                                        /**< Bit mask for CRYPTOACC_FIFOWRSTARTUP        */
 #define _CRYPTOACC_RNGCTRL_FIFOWRSTARTUP_DEFAULT              0x00000000UL                                      /**< Mode DEFAULT for CRYPTOACC_RNGCTRL          */

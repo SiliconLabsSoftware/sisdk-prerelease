@@ -167,8 +167,23 @@ static inline void *sli_mm_sv_get_return_address(void)
 #if defined(SL_CATALOG_MEMORY_MANAGER_DTCM_PRESENT)
 // Internal define to indicate that the memory manager stack is in the heap.
 #define SLI_MEMORY_MANAGER_STACK_IN_HEAP 1
+#if defined(SLI_LINKER_STACK_IN_DMEM)
+#define SLI_MEMORY_MANAGER_STACK_IN_HEAP_GENERAL_PURPOSE 1
+#define SLI_MEMORY_MANAGER_STACK_HEAP_HANDLE &sli_general_purpose_heap
+#else
 #define SLI_MEMORY_MANAGER_STACK_IN_HEAP_DTCM 1
 #define SLI_MEMORY_MANAGER_STACK_HEAP_HANDLE &sli_dtcm_heap
+#endif
+#endif
+
+#if defined(_SILICON_LABS_32B_SERIES_3) \
+  && !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301) \
+  && !defined(SL_CATALOG_MEMORY_MANAGER_DTCM_PRESENT) \
+  && defined(__CORTEXM)
+// Series 3 non-301 parts: GP heap spans through the stack at the RAM top (linker placement).
+#define SLI_MEMORY_MANAGER_STACK_IN_HEAP                   1
+#define SLI_MEMORY_MANAGER_STACK_IN_HEAP_GENERAL_PURPOSE   1
+#define SLI_MEMORY_MANAGER_STACK_HEAP_HANDLE               &sli_general_purpose_heap
 #endif
 
 #if !defined(DMEMCACHE_PRESENT)

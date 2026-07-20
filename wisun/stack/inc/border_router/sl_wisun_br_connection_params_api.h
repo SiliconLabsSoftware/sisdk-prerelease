@@ -192,7 +192,7 @@ typedef struct sl_wisun_br_params_traffic_s {
   uint16_t lowpan_mtu;
   /// Maximum Receive Unit (MRU) for fragmented IPv6 packets in bytes. A larger packet will be silently discarded.
   uint16_t ipv6_mru;
-  /// Maximum number of 6LoWPAN/IPv6 fragments to send in a single EDFE transaction (0 to 10). 0 disables EDFE for fragmented packets.
+  /// Maximum number of packets to send in a single EDFE transaction (0 to 10). 0 disables EDFE.
   uint8_t max_edfe_fragment_count;
   /// Reserved, set to zero
   uint8_t reserved[3];

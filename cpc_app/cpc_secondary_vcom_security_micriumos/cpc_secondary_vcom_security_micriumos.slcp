@@ -33,8 +33,6 @@ component:
   - id: memory_manager
   - id: simple_button
     instance: [btn0]
-define:
-  - name: DEBUG_EFM
 configuration:
   - name: SL_CPC_SECURITY_ENABLED
     value: 1

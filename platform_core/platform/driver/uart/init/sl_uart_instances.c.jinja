@@ -1,0 +1,81 @@
+/***************************************************************************//**
+ * @file
+ * @brief UART driver instances
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ ******************************************************************************/
+#include <stdint.h>
+{% set uart_instances_it = (uart_instances | default([], true) | list) + (uart_async_instances | default([], true) | list) %}
+#include "sl_common.h"
+#include "sl_device_peripheral.h"
+#include "sl_uart_instances.h"
+{% for instance in uart_instances_it %}
+#include "sl_uart_{{ instance }}_config.h"
+{% endfor %}
+#include "sl_uart.h"
+#include "sli_uart.h"
+
+#define SL_UART_PERIPHERAL(periph)        SL_CONCAT_PASTER_2(SL_PERIPHERAL_, periph)
+#define SL_UART_RX_IRQHandler(periph)     SL_CONCAT_PASTER_2(periph, _RX_IRQHandler)
+#define SL_UART_TX_IRQHandler(periph)     SL_CONCAT_PASTER_2(periph, _TX_IRQHandler)
+{% for instance in uart_instances_it %}
+sl_peripheral_t sl_uart_{{ instance }}_peripheral = SL_UART_PERIPHERAL(SL_UART_{{ instance | upper }}_PERIPHERAL);
+{% if instance in uart_instances %}
+sl_uart_handle_t sl_uart_{{ instance }}_handle;
+{% else %}
+sl_uart_handle_t sl_uart_{{ instance }}_handle = {
+  .preinit_config = {
+    .async_tx_transfer_count = 5,
+    .async_rx_transfer_count = 5,
+    .async_tx_dma_channel_number = SL_UART_ASYNC_DMA_CHANNEL_CONFIG_AUTO,
+    .async_rx_dma_channel_number = SL_UART_ASYNC_DMA_CHANNEL_CONFIG_AUTO,
+    .async_en = true,
+  },
+};
+{% endif %}
+
+const sl_uart_pin_config_t sl_uart_{{ instance }}_pin_config = {
+  .tx = { SL_UART_{{ instance | upper }}_TX_PORT, SL_UART_{{ instance | upper }}_TX_PIN },
+  .rx = { SL_UART_{{ instance | upper }}_RX_PORT, SL_UART_{{ instance | upper }}_RX_PIN },
+#if defined(SL_UART_{{ instance | upper }}_CTS_PORT) && defined(SL_UART_{{ instance | upper }}_CTS_PIN)
+  .cts = { SL_UART_{{ instance | upper }}_CTS_PORT, SL_UART_{{ instance | upper }}_CTS_PIN },
+#endif
+#if defined(SL_UART_{{ instance | upper }}_RTS_PORT) && defined(SL_UART_{{ instance | upper }}_RTS_PIN)
+  .rts = { SL_UART_{{ instance | upper }}_RTS_PORT, SL_UART_{{ instance | upper }}_RTS_PIN },
+#endif
+};
+
+void SL_UART_RX_IRQHandler(SL_UART_{{ instance | upper }}_PERIPHERAL)(void)
+{
+  sli_uart_rx_irq_handler(&sl_uart_{{ instance }}_handle);
+}
+
+void SL_UART_TX_IRQHandler(SL_UART_{{ instance | upper }}_PERIPHERAL)(void)
+{
+  sli_uart_tx_irq_handler(&sl_uart_{{ instance }}_handle);
+}
+
+{% endfor %}

@@ -6808,12 +6808,23 @@ typedef uint32_t RAIL_CalMask_t;
 /**
  * EFR32-specific IR calibration bit.
  *
+ * Only applications using SubGHz radio configurations should see
+ * \ref RAIL_EVENT_CAL_NEEDED raised with this calibration pending.
+ * RAIL implicitly IR calibrates 2.4GHz radio configurations from
+ * pre-calibrated values stored by manufacturing in DEVINFO.
+ *
  * @deprecated RAIL 2.x synonym of \ref SL_RAIL_CAL_RX_IR_CAL.
  */
 #define RAIL_CAL_RX_IRCAL         (0x00010000U)
 /**
  * EFR32-specific Tx IR calibration bit.
  * (Ignored if platform lacks \ref RAIL_SUPPORTS_OFDM_PA.)
+ *
+ * Applications may not see this pended if RAIL finds the radio
+ * configuration's frequency band has pre-calibrated values stored
+ * by manufacturing in DEVINFO.
+ * In general, Tx IR calibration is performed with Rx IR calibration
+ * so there is no API that just does Tx IR calibration.
  *
  * @deprecated RAIL 2.x synonym of \ref SL_RAIL_CAL_OFDM_TX_IR_CAL.
  */

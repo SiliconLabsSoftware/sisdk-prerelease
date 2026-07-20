@@ -1,0 +1,38 @@
+package: zigbee
+description: Silicon Labs proprietary Works With All Hubs (WWAH) end device only component.
+label: SL Works With All Hubs End Device Extension
+quality: production
+id: zigbee_wwah_end_device_extension
+category: Zigbee|Works With All Hubs
+provides:
+- name: zigbee_wwah_end_device_extension
+requires:
+- name: zigbee_wwah_server_silabs
+- name: zigbee_end_device_support
+config_file:
+- path: app/framework/plugin/wwah-end-device-extension/config/wwah-end-device-extension-config.h
+source:
+- path: app/framework/plugin/wwah-end-device-extension/wwah-end-device-extension.c
+include:
+- path: app/framework/plugin/wwah-end-device-extension
+  file_list:
+  - path: wwah-end-device-extension.h
+template_contribution:
+- name: component_catalog
+  value: zigbee_wwah_end_device_extension
+- name: zigbee_stack_callback
+  value:
+    callback_type: stack_status
+    function_name: sl_zigbee_af_wwah_end_device_extension_stack_status_cb
+- name: zigbee_af_callback
+  value:
+    callback_type: event_init
+    function_name: sli_zigbee_af_wwah_end_device_extension_init_callback
+
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/wwah-end-device-extension
+metadata:
+  sbom:
+    license: MSLA
+root_path: zigbee

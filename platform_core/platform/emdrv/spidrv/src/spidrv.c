@@ -175,11 +175,11 @@ static void     StartTransmitDMA(SPIDRV_Handle_t handle,
                                  SPIDRV_Callback_t callback);
 
 static Ecode_t  TransferApiPrologue(SPIDRV_Handle_t handle,
-                                    void *buffer,
+                                    const void *buffer,
                                     int count);
 
 static Ecode_t  TransferApiBlockingPrologue(SPIDRV_Handle_t handle,
-                                            void *buffer,
+                                            const void *buffer,
                                             int count);
 
 static void     WaitForTransferCompletion(SPIDRV_Handle_t handle);
@@ -1218,7 +1218,7 @@ Ecode_t SPIDRV_MTransfer(SPIDRV_Handle_t handle,
     return ECODE_EMDRV_SPIDRV_MODE_ERROR;
   }
 
-  if ((retVal = TransferApiPrologue(handle, (void*)txBuffer, count))
+  if ((retVal = TransferApiPrologue(handle, txBuffer, count))
       != ECODE_EMDRV_SPIDRV_OK) {
     return retVal;
   }
@@ -1264,7 +1264,7 @@ Ecode_t SPIDRV_MTransferB(SPIDRV_Handle_t handle,
     return ECODE_EMDRV_SPIDRV_MODE_ERROR;
   }
 
-  if ((retVal = TransferApiBlockingPrologue(handle, (void*)txBuffer, count))
+  if ((retVal = TransferApiBlockingPrologue(handle, txBuffer, count))
       != ECODE_EMDRV_SPIDRV_OK) {
     return retVal;
   }
@@ -1364,7 +1364,7 @@ Ecode_t SPIDRV_MTransmit(SPIDRV_Handle_t handle,
     return ECODE_EMDRV_SPIDRV_MODE_ERROR;
   }
 
-  if ((retVal = TransferApiPrologue(handle, (void*)buffer, count))
+  if ((retVal = TransferApiPrologue(handle, buffer, count))
       != ECODE_EMDRV_SPIDRV_OK) {
     return retVal;
   }
@@ -1403,7 +1403,7 @@ Ecode_t SPIDRV_MTransmitB(SPIDRV_Handle_t handle,
     return ECODE_EMDRV_SPIDRV_MODE_ERROR;
   }
 
-  if ((retVal = TransferApiBlockingPrologue(handle, (void*)buffer, count))
+  if ((retVal = TransferApiBlockingPrologue(handle, buffer, count))
       != ECODE_EMDRV_SPIDRV_OK) {
     return retVal;
   }
@@ -1745,7 +1745,7 @@ Ecode_t SPIDRV_STransfer(SPIDRV_Handle_t handle,
     return ECODE_EMDRV_SPIDRV_MODE_ERROR;
   }
 
-  if ((retVal = TransferApiPrologue(handle, (void*)txBuffer, count))
+  if ((retVal = TransferApiPrologue(handle, txBuffer, count))
       != ECODE_EMDRV_SPIDRV_OK) {
     return retVal;
   }
@@ -1805,7 +1805,7 @@ Ecode_t SPIDRV_STransferB(SPIDRV_Handle_t handle,
     return ECODE_EMDRV_SPIDRV_MODE_ERROR;
   }
 
-  if ((retVal = TransferApiBlockingPrologue(handle, (void*)txBuffer, count))
+  if ((retVal = TransferApiBlockingPrologue(handle, txBuffer, count))
       != ECODE_EMDRV_SPIDRV_OK) {
     return retVal;
   }
@@ -1864,7 +1864,7 @@ Ecode_t SPIDRV_STransmit(SPIDRV_Handle_t handle,
     return ECODE_EMDRV_SPIDRV_MODE_ERROR;
   }
 
-  if ((retVal = TransferApiPrologue(handle, (void*)buffer, count))
+  if ((retVal = TransferApiPrologue(handle, buffer, count))
       != ECODE_EMDRV_SPIDRV_OK) {
     return retVal;
   }
@@ -1918,7 +1918,7 @@ Ecode_t SPIDRV_STransmitB(SPIDRV_Handle_t handle,
     return ECODE_EMDRV_SPIDRV_MODE_ERROR;
   }
 
-  if ((retVal = TransferApiBlockingPrologue(handle, (void*)buffer, count))
+  if ((retVal = TransferApiBlockingPrologue(handle, buffer, count))
       != ECODE_EMDRV_SPIDRV_OK) {
     return retVal;
   }
@@ -2343,7 +2343,7 @@ static void StartTransmitDMA(SPIDRV_Handle_t handle,
  * @brief Parameter checking function for blocking transfer API functions.
  ******************************************************************************/
 static Ecode_t TransferApiBlockingPrologue(SPIDRV_Handle_t handle,
-                                           void *buffer,
+                                           const void *buffer,
                                            int count)
 {
   if (handle == NULL) {
@@ -2370,7 +2370,7 @@ static Ecode_t TransferApiBlockingPrologue(SPIDRV_Handle_t handle,
  * @brief Parameter checking function for non-blocking transfer API functions.
  ******************************************************************************/
 static Ecode_t TransferApiPrologue(SPIDRV_Handle_t handle,
-                                   void *buffer,
+                                   const void *buffer,
                                    int count)
 {
   if (handle == NULL) {
@@ -2415,6 +2415,7 @@ static void WaitForTransferCompletion(SPIDRV_Handle_t handle)
     }
   } else {
     while (handle->blockingCompleted == false) {
+      // Busy-wait: the DMA IRQ drives the completion callback that sets the flag.
     }
   }
 }

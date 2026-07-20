@@ -7,12 +7,23 @@
 
 // <o SL_BT_CONTROLLER_BUFFER_MEMORY> Bluetooth Controller Buffer Memory
 // <i> Default: SL_BT_CONTROLLER_BUFFER_MEMORY
-// <i> Define the amount of memory to allocate for tx/rx buffers in Bluetooth Controller
+// <i> Define the amount of memory to allocate for tx/rx buffers in builds that do not include
+// <i> the Bluetooth Core Component.
 // <i> NOTE: SL_BT_CONTROLLER_BUFFER_MEMORY is deprecated in Simplicity SDK Suite v2026.6.0 and
 // <i> marked for removal in Simplicity SDK Suite v2027.6.0. SL_BT_CONTROLLER_BUFFER_MEMORY is
 // <i> replaced by SL_BLUETOOTH_COMMON_BUFFER_MEMORY_SIZE in the Bluetooth Common Component.
+// <i> A non-zero value of SL_BT_CONTROLLER_BUFFER_MEMORY will override
+// <i> SL_BLUETOOTH_COMMON_BUFFER_MEMORY_SIZE.
 #ifndef SL_BT_CONTROLLER_BUFFER_MEMORY
 #define SL_BT_CONTROLLER_BUFFER_MEMORY     (8192)
+#endif
+
+// <o SL_BT_CONTROLLER_ISO_BUFFER_MEMORY> Bluetooth Controller ISO Buffer Memory
+// <i> Default: SL_BT_CONTROLLER_ISO_BUFFER_MEMORY
+// <i> Define additional memory to allocate for the shared bgbuf pool when the ISO Connected
+// <i> Streams or ISO Broadcast component is present.
+#ifndef SL_BT_CONTROLLER_ISO_BUFFER_MEMORY
+#define SL_BT_CONTROLLER_ISO_BUFFER_MEMORY     (8192)
 #endif
 
 // <o SL_BT_CONTROLLER_LE_BUFFER_SIZE_MAX> Bluetooth Controller ACL data packets that can be stored
@@ -20,6 +31,17 @@
 // <i> Define the total number of the maximum sized ACL data packets that can be received from the host
 #ifndef SL_BT_CONTROLLER_LE_BUFFER_SIZE_MAX
 #define SL_BT_CONTROLLER_LE_BUFFER_SIZE_MAX     (3)
+#endif
+
+// <o SL_BT_CONTROLLER_LE_ISO_BUFFER_SIZE_MAX> Bluetooth Controller HCI ISO data packets that can be stored
+// <i> Default: SL_BT_CONTROLLER_LE_ISO_BUFFER_SIZE_MAX
+// <i> Define the total number of HCI ISO data packets that can be received from the host.
+// <i> Reported to the host by LE Read Buffer Size [v2] as the host TX flow-control credit.
+// <i> Must equal the TX SDU pool size (SLI_LL_ISO_DATA_PATH_DEFAULT_TX_POOL_SIZE): this is
+// <i> both the hard buffer limit and the cap on the TX accumulation threshold, so a smaller
+// <i> value can stall accumulation while a larger value overflows the pool.
+#ifndef SL_BT_CONTROLLER_LE_ISO_BUFFER_SIZE_MAX
+#define SL_BT_CONTROLLER_LE_ISO_BUFFER_SIZE_MAX     (8)
 #endif
 
 // <o SL_BT_CONFIG_MAX_QUEUED_ADV_REPORTS> Maximum number of queued advertisement reports <1-255>

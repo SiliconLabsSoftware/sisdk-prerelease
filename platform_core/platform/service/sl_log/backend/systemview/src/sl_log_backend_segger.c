@@ -31,10 +31,10 @@ extern SEGGER_SYSVIEW_CORE_CONTEXT _ContextCaptiveCore;
  */
 uint32_t timestamp_global;
 
-sl_status_t sl_log_systemview_write(sl_log_event_t *buffer, uint32_t read_index, uint32_t event_count);
+sl_status_t sl_log_systemview_write(const sl_log_event_t *buffer, uint32_t read_index, uint32_t event_count);
 sl_status_t sl_log_systemview_init(void);
 sl_status_t sl_log_systemview_deinit(void);
-sl_status_t sl_log_systemview_record_event(sl_log_event_t *event);
+sl_status_t sl_log_systemview_record_event(const sl_log_event_t *event);
 
 sl_log_api_backend_t sl_log_api_backend={
   .backend_init = sl_log_systemview_init,
@@ -105,7 +105,7 @@ sl_status_t sl_log_systemview_deinit(void)
  *   - The first non-OK status returned by sl_log_systemview_record_event() if a failure occurs.
  *
  */
-sl_status_t sl_log_systemview_write(sl_log_event_t *buffer, uint32_t read_index, uint32_t event_count)
+sl_status_t sl_log_systemview_write(const sl_log_event_t *buffer, uint32_t read_index, uint32_t event_count)
 {
   sl_status_t status = SL_STATUS_OK;
   if(event_count == 0){
@@ -154,7 +154,7 @@ sl_status_t sl_log_systemview_write(sl_log_event_t *buffer, uint32_t read_index,
  *                  - arg_count: Number of valid arguments (0 to SL_LOG_CONFIG_ARG)
  *                  - Additional metadata (core_id, flags, version)
  */
-sl_status_t sl_log_systemview_record_event(sl_log_event_t *event)
+sl_status_t sl_log_systemview_record_event(const sl_log_event_t *event)
 {
   sl_status_t status = SL_STATUS_OK;
   U8 *pPayload;

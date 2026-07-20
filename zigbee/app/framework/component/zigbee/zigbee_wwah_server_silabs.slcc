@@ -1,0 +1,119 @@
+package: zigbee
+description: Silicon Labs proprietary Works With All Hubs (WWAH) server cluster.
+label: SL Works With All Hubs Server Cluster
+quality: production
+id: zigbee_wwah_server_silabs
+category: Zigbee|Works With All Hubs
+provides:
+- name: zigbee_wwah_server_silabs
+requires:
+- name: zigbee_aps_link_key_authorization
+- name: zigbee_update_tc_link_key
+- name: zigbee_ota_client
+- name: zigbee_critical_message_queue
+- name: zigbee_wwah_connectivity_manager
+- name: zigbee_zdo_cluster_filter
+  condition:
+  - zigbee_stack_common
+recommends:
+- id: zigbee_critical_message_queue
+  vendor: silabs
+config_file:
+- path: app/framework/plugin/wwah-server-silabs/config/wwah-server-silabs-config.h
+source:
+- path: app/framework/plugin/wwah-server-silabs/wwah-server-silabs.c
+- path: app/framework/plugin/wwah-server-silabs/wwah-server-silabs-cli.c
+  condition:
+  - cli
+
+include:
+- path: .
+- path: app/framework/plugin/wwah-server-silabs
+  file_list:
+  - path: wwah-server-silabs.h
+  - path: wwah-server-silabs-tokens.h
+template_contribution:
+- name: component_catalog
+  value: zigbee_wwah_server_silabs
+- name: cluster_service
+  value:
+    cluster_id: '0xFC57'
+    mfg_id: '0x1217'
+    side: SERVER
+    service_function: sl_zigbee_af_sl_wwah_cluster_server_command_parse
+- name: zigbee_stack_callback
+  value:
+    callback_type: stack_status
+    function_name: sl_zigbee_af_wwah_server_silabs_stack_status_cb
+- name: cli_group
+  value:
+    group: plugin
+    name: wwah-server
+    help: wwah-server related commands.
+- name: cli_command
+  value:
+    group: wwah-server
+    name: poweringOff
+    handler: sli_zigbee_af_wwah_server_send_powering_off
+    help: Sends the Powering Off Notification command.
+    argument:
+    - type: uint8
+      help: The wwah server (source) endpoint
+    - type: uint8
+      help: The wwah client (dest) endpoint
+    - type: uint8
+      help: The cause of the power off event
+    - type: uint16
+      help: The manufacturerId of the sender
+- name: cli_command
+  value:
+    group: wwah-server
+    name: poweringOn
+    handler: sli_zigbee_af_wwah_server_send_powering_on
+    help: Sends the Powering On Notification command.
+    argument:
+    - type: uint8
+      help: The wwah server (source) endpoint
+    - type: uint8
+      help: The wwah client (dest) endpoint
+    - type: uint8
+      help: The cause of the power on event
+    - type: uint16
+      help: The manufacturerId of the sender
+- name: cli_command
+  value:
+    group: wwah-server
+    name: confMode
+    handler: sli_zigbee_af_sl_wwah_server_configuration_mode
+    help: Sets the configurationModeEnabled attribute command.
+    argument:
+    - type: uint8
+      help: The wwah server configuration mode attribute
+- name: token_header
+  value: wwah-server-silabs-tokens.h
+- name: cluster_functions
+  value:
+    cluster_name: SlWwah
+    cluster_id: 0xFC57
+    cluster_type: server
+    default_response_function: sl_zigbee_af_sl_wwah_cluster_server_default_response_cb
+- name: cluster_functions
+  value:
+    cluster_name: SlWwah
+    cluster_id: 0xFC57
+    cluster_type: server
+    init_function: sl_zigbee_af_sl_wwah_cluster_server_init_cb
+- name: cluster_functions
+  value:
+    cluster_name: SlWwah
+    cluster_id: 0xFC57
+    cluster_type: server
+    manufacturer_specific_attribute_changed_function: sl_zigbee_af_sl_wwah_cluster_server_manufacturer_specific_attribute_changed_cb
+
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/wwah-server-silabs
+metadata:
+  sbom:
+    license: MSLA
+root_path: zigbee

@@ -108,7 +108,7 @@ static sl_status_t sli_token_manager_read_static_secure_token(uint32_t token,
  * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
 static sl_status_t sli_token_manager_write_static_secure_token(uint32_t token,
-                                                               void *data,
+                                                               const void *data,
                                                                uint32_t length)
 {
   sl_status_t status = SL_STATUS_OK;
@@ -138,7 +138,8 @@ static sl_status_t sli_token_manager_read_static_device_token(uint32_t token,
                                                               uint32_t offset,
                                                               uint32_t length)
 {
-  uint32_t *klv_start_addr, *klv_end_addr;
+  uint32_t *klv_start_addr; 
+  uint32_t *klv_end_addr;
   sl_status_t status = SL_STATUS_OK;
   sl_klv_handle_t klv_handle = { token, offset, length };
 
@@ -164,11 +165,12 @@ static sl_status_t sli_token_manager_read_static_device_token(uint32_t token,
  * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
 static sl_status_t sli_token_manager_write_static_device_token(uint32_t token,
-                                                               void *data,
+                                                               const void *data,
                                                                uint32_t length)
 {
   sl_status_t status = SL_STATUS_OK;
-  uint32_t klv_start_addr, klv_end_addr;
+  uint32_t klv_start_addr; 
+  uint32_t klv_end_addr;
   sl_klv_handle_t klv_handle = { token, 0, length };
 
   // Read from MTP
@@ -402,7 +404,8 @@ sl_status_t sli_token_manager_get_static_token_size(sl_token_type_t token_type,
   *size_out = ((token >> SL_TOKEN_STATIC_TOKEN_SIZE_OFFSET) & SL_TOKEN_STATIC_TOKEN_SIZE_MASK);
   return SL_STATUS_OK;
 #elif defined(SL_TOKEN_MANAGER_BACKEND_EXT_FLASH)
-  uint32_t klv_start_addr = 0, klv_end_addr = 0;
+  uint32_t klv_start_addr = 0;
+  uint32_t klv_end_addr = 0;
 
   // Determine KLV start and end addresses based on token type
   switch (token_type) {

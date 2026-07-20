@@ -18,7 +18,7 @@
 #define BTL_GBL_FORMAT_H
 
 #include <stdint.h>
-#include "api/application_properties.h"
+#include "application_properties.h"
 
 /***************************************************************************//**
  * @addtogroup Components

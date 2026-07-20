@@ -24,6 +24,7 @@ requires:
 - name: enum
 - name: device_gpio
 - name: hal_common
+- name: log_none
 conflicts:
 - name: device_series_3
 documentation:

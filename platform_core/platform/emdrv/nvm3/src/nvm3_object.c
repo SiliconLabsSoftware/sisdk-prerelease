@@ -52,12 +52,12 @@
 
 //****************************************************************************
 
-__STATIC_INLINE uint32_t hdrSmallGetBergerCode(nvm3_ObjHdrSmall_t *oh)
+__STATIC_INLINE uint32_t hdrSmallGetBergerCode(const nvm3_ObjHdrSmall_t *oh)
 {
   return ((oh->oh1 >> NVM3_OBJ_BCCB_OFFSET) & NVM3_OBJ_BCCB_MASK);
 }
 
-__STATIC_INLINE uint32_t hdrLargeGetBergerCode(nvm3_ObjHdrLarge_t *oh)
+__STATIC_INLINE uint32_t hdrLargeGetBergerCode(const nvm3_ObjHdrLarge_t *oh)
 {
   return ((oh->oh2 >> NVM3_OBJ_LBCCB_OFFSET) & NVM3_OBJ_LBCCB_MASK);
 }
@@ -74,7 +74,7 @@ __STATIC_INLINE nvm3_ObjFragType_t toObjFragType(uint32_t value)
   return (nvm3_ObjFragType_t)type;
 }
 
-__STATIC_INLINE nvm3_ObjType_t hdrGetType(nvm3_ObjHdrSmall_t *oh)
+__STATIC_INLINE nvm3_ObjType_t hdrGetType(const nvm3_ObjHdrSmall_t *oh)
 {
   return toObjType(oh->oh1 & NVM3_OBJ_LEN_MASK);
 }
@@ -174,7 +174,7 @@ nvm3_ObjFragType_t nvm3_objHdrGetFragTyp(nvm3_ObjHdrSmallPtr_t objHdrSmall)
 
 nvm3_ObjectKey_t nvm3_objHdrGetKey(nvm3_ObjHdrSmallPtr_t objHdrSmall)
 {
-  return (nvm3_ObjectKey_t)((objHdrSmall->oh1 >> NVM3_OBJ_KEY_OFFSET) & NVM3_KEY_MASK);
+  return (objHdrSmall->oh1 >> NVM3_OBJ_KEY_OFFSET) & NVM3_KEY_MASK;
 }
 
 bool nvm3_objHdrGetHdrIsLarge(nvm3_ObjHdrSmallPtr_t objHdrSmall)

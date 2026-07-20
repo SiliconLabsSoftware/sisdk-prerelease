@@ -35,8 +35,6 @@
 #include "em_cmu.h"
 #else
 #include "sl_hal_prs.h"
-#warning "gpiointerrupt to be included once suppported."
-#warning "coex needs to be adapted for the clock manager"
 #endif
 
 #ifdef __cplusplus

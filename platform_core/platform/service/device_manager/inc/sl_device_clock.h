@@ -34,7 +34,10 @@
 #include "sl_enum.h"
 #include <stdint.h>
 
-#if defined(DEVICE_CLOCK_INTERNAL_PRESENT)
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+#if defined(SL_CATALOG_DEVICE_CLOCK_INTERNAL_PRESENT)
 #include "sli_device_clock_internal.h"
 #endif
 
@@ -58,7 +61,7 @@ extern "C" {
 // ENUMS
 
 /// Oscillators
-#if !defined(DEVICE_CLOCK_INTERNAL_PRESENT)
+#if !defined(SL_CATALOG_DEVICE_CLOCK_INTERNAL_PRESENT)
 SL_ENUM(sl_oscillator_t) {
   SL_OSCILLATOR_FSRCO,      ///< FSRCO Oscillator
   SL_OSCILLATOR_HFRCODPLL,  ///< HFRCODPLL Oscillator
@@ -77,7 +80,7 @@ SL_ENUM(sl_oscillator_t) {
 #endif
 
 /// Clock Branches
-#if !defined(DEVICE_CLOCK_INTERNAL_PRESENT)
+#if !defined(SL_CATALOG_DEVICE_CLOCK_INTERNAL_PRESENT)
 SL_ENUM(sl_clock_branch_t) {
   SL_CLOCK_BRANCH_SYSCLK,        ///< SYSCLK Clock Branch
   SL_CLOCK_BRANCH_HCLK,          ///< HCLK Clock Branch

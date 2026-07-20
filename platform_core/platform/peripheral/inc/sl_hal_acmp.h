@@ -41,7 +41,7 @@ extern "C" {
 
 #include <stdbool.h>
 #include "sl_enum.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 /***************************************************************************//**
  * @addtogroup acmp ACMP - Analog Comparator
@@ -372,7 +372,7 @@ __INLINE void sl_hal_acmp_clear_interrupts(ACMP_TypeDef *acmp,
                                            uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
 
   acmp->IF_CLR = flags;
 }
@@ -392,7 +392,7 @@ __INLINE void sl_hal_acmp_disable_interrupts(ACMP_TypeDef *acmp,
                                              uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
 
   acmp->IEN_CLR = flags;
 }
@@ -417,7 +417,7 @@ __INLINE void sl_hal_acmp_enable_interrupts(ACMP_TypeDef *acmp,
                                             uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
 
   acmp->IEN_SET = flags;
 }
@@ -439,7 +439,7 @@ __INLINE void sl_hal_acmp_enable_interrupts(ACMP_TypeDef *acmp,
 __INLINE uint32_t sl_hal_acmp_get_pending_interrupts(ACMP_TypeDef *acmp)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
 
   return acmp->IF;
 }
@@ -469,7 +469,7 @@ __INLINE uint32_t sl_hal_acmp_get_enabled_pending_interrupts(ACMP_TypeDef *acmp)
 {
   uint32_t tmp;
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
 
   /* Store ACMPx->IEN in a temporary variable to define the explicit order
    * of volatile accesses. */
@@ -495,7 +495,7 @@ __INLINE uint32_t sl_hal_acmp_get_enabled_pending_interrupts(ACMP_TypeDef *acmp)
 __INLINE uint32_t sl_hal_acmp_get_enabled_interrupts(ACMP_TypeDef *acmp)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
 
   return acmp->IEN;
 }
@@ -516,7 +516,7 @@ __INLINE void sl_hal_acmp_set_interrupts(ACMP_TypeDef *acmp,
                                          uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
 
   acmp->IF_SET = flags;
 }
@@ -551,7 +551,7 @@ __INLINE sl_hal_acmp_input_t sl_hal_acmp_gpio_to_input(uint32_t port,
 __INLINE void sl_hal_acmp_wait_sync(ACMP_TypeDef *acmp)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
 
   while ((acmp->EN & _ACMP_EN_EN_MASK) && (acmp->SYNCBUSY != 0U)) {
     // Wait for synchronization to finish
@@ -567,7 +567,7 @@ __INLINE void sl_hal_acmp_wait_sync(ACMP_TypeDef *acmp)
 __INLINE void sl_hal_acmp_wait_ready(ACMP_TypeDef * acmp)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
 
   while ( 0
 #if defined(_ACMP_SWRST_RESETTING_MASK)
@@ -579,6 +579,8 @@ __INLINE void sl_hal_acmp_wait_ready(ACMP_TypeDef * acmp)
           ) {
     // Wait for all synchronizations to finish
   }
+
+  (void)acmp;
 }
 
 /***************************************************************************//**
@@ -592,7 +594,7 @@ __INLINE void sl_hal_acmp_wait_ready(ACMP_TypeDef * acmp)
 __INLINE uint32_t sl_hal_acmp_get_status(ACMP_TypeDef * acmp)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ACMP_REF_VALID(acmp));
 
   return acmp->STATUS;
 }

@@ -1,0 +1,44 @@
+id: zigbee_pro_leaf_stack_with_csl
+label: Pro Leaf Stack with CSL Support
+package: zigbee
+category: Zigbee|Stack|Pro Core
+quality: production
+description: The Zigbee PRO Stack support for end devices, along with support for the unsynchronized Coordinated Sample Listening (CSL) feature. This component also includes stubs for parent and routing code, since end devices do not need this functionality.
+
+provides:
+- name: zigbee_pro_leaf_stack_with_csl
+- name: zigbee_pro_leaf_stack
+- name: zigbee_pro_stack_support
+
+requires:
+- name: zigbee_pro_leaf_stack_with_csl_implementation
+- name: zigbee_pro_leaf_stack_with_csl_library
+  condition:
+  - zigbee_use_release_libraries
+- name: zigbee_stack_common
+
+recommends:
+- id: zigbee_pro_leaf_stack_with_csl_library_internal
+  vendor: silabs
+
+config_file:
+- path: stack/config/component_config/sl_zigbee_pro_leaf_stack_config.h
+
+validation_helper:
+  # NCP doesn't have DEVICE_TYPE before it connects to Host
+  # so we don't run the validation script for NCP
+- path: component/scripts/zigbee_pro_leaf_stack_validation.lua
+  unless:
+  - zigbee_ncp
+
+template_contribution:
+- name: component_catalog
+  value: zigbee_pro_leaf_stack_with_csl
+
+define:
+- name: CSL_SUPPORT
+- name: SL_ZIGBEE_LEAF_STACK
+metadata:
+  sbom:
+    license: MSLA
+root_path: zigbee

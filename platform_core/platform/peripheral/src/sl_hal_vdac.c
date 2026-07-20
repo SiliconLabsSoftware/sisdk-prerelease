@@ -88,10 +88,10 @@ void sl_hal_vdac_init(VDAC_TypeDef *vdac,
                       const sl_hal_vdac_init_t *init)
 {
   // Verifies that the VDAC reference is valid.
-  EFM_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
 
   // Verifies that the initialization configuration pointer is not NULL.
-  EFM_ASSERT(init != NULL);
+  SL_LOG_DEBUG_ASSERT(init != NULL);
 
   sl_hal_vdac_disable(vdac);
   sl_hal_vdac_wait_ready(vdac);
@@ -120,14 +120,14 @@ void sl_hal_vdac_init(VDAC_TypeDef *vdac,
 #if defined(VDAC_CFG_OUTENPRS)
                | ((uint32_t)init->prs_output_enable    << _VDAC_CFG_OUTENPRS_SHIFT)
 #endif
-               | ((uint32_t)init->warmup_time          << _VDAC_CFG_WARMUPTIME_SHIFT)
+               | (init->warmup_time                    << _VDAC_CFG_WARMUPTIME_SHIFT)
                | ((uint32_t)init->debug_halt           << _VDAC_CFG_DBGHALT_SHIFT)
                | ((uint32_t)init->on_demand_clk        << _VDAC_CFG_ONDEMANDCLK_SHIFT)
                | ((uint32_t)init->dma_wakeup           << _VDAC_CFG_DMAWU_SHIFT)
                | ((uint32_t)init->bias_keep_warm       << _VDAC_CFG_BIASKEEPWARM_SHIFT)
                | ((uint32_t)init->refresh              << _VDAC_CFG_REFRESHPERIOD_SHIFT)
                | ((uint32_t)init->timer_overflow       << _VDAC_CFG_TIMEROVRFLOWPERIOD_SHIFT)
-               | ((uint32_t)init->prescaler            << _VDAC_CFG_PRESC_SHIFT)
+               | (init->prescaler                      << _VDAC_CFG_PRESC_SHIFT)
                | ((uint32_t)init->reference            << _VDAC_CFG_REFRSEL_SHIFT)
                | ((uint32_t)init->ch0_reset_prescaler  << _VDAC_CFG_CH0PRESCRST_SHIFT)
                | ((uint32_t)init->sine_reset           << _VDAC_CFG_SINERESET_SHIFT)
@@ -143,13 +143,13 @@ void sl_hal_vdac_init_channel(VDAC_TypeDef *vdac,
                               uint32_t channel)
 {
   // Verifies that the VDAC reference is valid.
-  EFM_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
 
   // Verifies that the initialization configuration pointer is not NULL.
-  EFM_ASSERT(init != NULL);
+  SL_LOG_DEBUG_ASSERT(init != NULL);
 
   // Verifies that the channel is valid.
-  EFM_ASSERT(SLI_HAL_VDAC_CH_VALID(channel));
+  SL_LOG_DEBUG_ASSERT(SLI_HAL_VDAC_CH_VALID(channel));
 
   uint32_t channel_config;
   uint32_t vdac_status = vdac->STATUS;
@@ -159,7 +159,7 @@ void sl_hal_vdac_init_channel(VDAC_TypeDef *vdac,
 
   channel_config = ((uint32_t)init->warmup_keep_on             << _VDAC_CH0CFG_KEEPWARM_SHIFT)
                    | ((uint32_t)init->high_cap_load_enable     << _VDAC_CH0CFG_HIGHCAPLOADEN_SHIFT)
-                   | ((uint32_t)init->fifo_low_data_threshold  << _VDAC_CH0CFG_FIFODVL_SHIFT)
+                   | (init->fifo_low_data_threshold            << _VDAC_CH0CFG_FIFODVL_SHIFT)
                    | ((uint32_t)init->ch_refresh_source        << _VDAC_CH0CFG_REFRESHSOURCE_SHIFT)
                    | ((uint32_t)init->trigger_mode             << _VDAC_CH0CFG_TRIGMODE_SHIFT)
                    | ((uint32_t)init->power_mode               << _VDAC_CH0CFG_POWERMODE_SHIFT)
@@ -173,10 +173,10 @@ void sl_hal_vdac_init_channel(VDAC_TypeDef *vdac,
 
     sl_hal_vdac_enable(vdac);
 
-    vdac->OUTCTRL = ((uint32_t)(vdac->OUTCTRL & ~(_VDAC_OUTCTRL_ABUSPINSELCH0_MASK | _VDAC_OUTCTRL_ABUSPORTSELCH0_MASK | _VDAC_OUTCTRL_SHORTCH0_MASK
-                                                  | _VDAC_OUTCTRL_AUXOUTENCH0_MASK | _VDAC_OUTCTRL_MAINOUTENCH0_MASK)))
+    vdac->OUTCTRL = (vdac->OUTCTRL & ~(_VDAC_OUTCTRL_ABUSPINSELCH0_MASK | _VDAC_OUTCTRL_ABUSPORTSELCH0_MASK | _VDAC_OUTCTRL_SHORTCH0_MASK
+                                       | _VDAC_OUTCTRL_AUXOUTENCH0_MASK | _VDAC_OUTCTRL_MAINOUTENCH0_MASK))
 
-                    | ((uint32_t)init->pin              << _VDAC_OUTCTRL_ABUSPINSELCH0_SHIFT)
+                    | (init->pin                        << _VDAC_OUTCTRL_ABUSPINSELCH0_SHIFT)
                     | ((uint32_t)init->port             << _VDAC_OUTCTRL_ABUSPORTSELCH0_SHIFT)
                     | ((uint32_t)init->short_output     << _VDAC_OUTCTRL_SHORTCH0_SHIFT)
                     | ((uint32_t)init->aux_out_enable   << _VDAC_OUTCTRL_AUXOUTENCH0_SHIFT)
@@ -189,10 +189,10 @@ void sl_hal_vdac_init_channel(VDAC_TypeDef *vdac,
 
     sl_hal_vdac_enable(vdac);
 
-    vdac->OUTCTRL = ((uint32_t)(vdac->OUTCTRL & ~(_VDAC_OUTCTRL_ABUSPINSELCH1_MASK | _VDAC_OUTCTRL_ABUSPORTSELCH1_MASK | _VDAC_OUTCTRL_SHORTCH1_MASK
-                                                  | _VDAC_OUTCTRL_AUXOUTENCH1_MASK | _VDAC_OUTCTRL_MAINOUTENCH1_MASK)))
+    vdac->OUTCTRL = (vdac->OUTCTRL & ~(_VDAC_OUTCTRL_ABUSPINSELCH1_MASK | _VDAC_OUTCTRL_ABUSPORTSELCH1_MASK | _VDAC_OUTCTRL_SHORTCH1_MASK
+                                       | _VDAC_OUTCTRL_AUXOUTENCH1_MASK | _VDAC_OUTCTRL_MAINOUTENCH1_MASK))
 
-                    | ((uint32_t)init->pin             << _VDAC_OUTCTRL_ABUSPINSELCH1_SHIFT)
+                    | (init->pin                       << _VDAC_OUTCTRL_ABUSPINSELCH1_SHIFT)
                     | ((uint32_t)init->port            << _VDAC_OUTCTRL_ABUSPORTSELCH1_SHIFT)
                     | ((uint32_t)init->short_output    << _VDAC_OUTCTRL_SHORTCH1_SHIFT)
                     | ((uint32_t)init->aux_out_enable  << _VDAC_OUTCTRL_AUXOUTENCH1_SHIFT)
@@ -220,10 +220,10 @@ void sl_hal_vdac_enable_channel(VDAC_TypeDef *vdac,
                                 uint32_t channel)
 {
   // Verifies that the VDAC reference is valid.
-  EFM_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
 
   // Verifies that the channel is valid.
-  EFM_ASSERT(SLI_HAL_VDAC_CH_VALID(channel));
+  SL_LOG_DEBUG_ASSERT(SLI_HAL_VDAC_CH_VALID(channel));
 
   sl_hal_vdac_wait_sync(vdac);
 
@@ -247,10 +247,10 @@ void sl_hal_vdac_disable_channel(VDAC_TypeDef *vdac,
                                  uint32_t channel)
 {
   // Verifies that the VDAC reference is valid.
-  EFM_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
 
   // Verifies that the channel is valid.
-  EFM_ASSERT(SLI_HAL_VDAC_CH_VALID(channel));
+  SL_LOG_DEBUG_ASSERT(SLI_HAL_VDAC_CH_VALID(channel));
 
   sl_hal_vdac_wait_sync(vdac);
   if (channel == SL_HAL_VDAC_CHANNEL_0) {
@@ -273,24 +273,24 @@ void sl_hal_vdac_set_output_channel(VDAC_TypeDef *vdac,
                                     uint32_t value)
 {
   // Verifies that the VDAC reference is valid.
-  EFM_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
 
   // Verifies that the channel is valid.
-  EFM_ASSERT(SLI_HAL_VDAC_CH_VALID(channel));
+  SL_LOG_DEBUG_ASSERT(SLI_HAL_VDAC_CH_VALID(channel));
 
   switch (channel) {
     case SL_HAL_VDAC_CHANNEL_0:
       // Ensures the value does not exceed the maximum allowed for channel 0.
-      EFM_ASSERT(value <= _VDAC_CH0F_MASK);
+      SL_LOG_DEBUG_ASSERT(value <= _VDAC_CH0F_MASK);
       vdac->CH0F = value;
       break;
     case SL_HAL_VDAC_CHANNEL_1:
       // Ensures the value does not exceed the maximum allowed for channel 1.
-      EFM_ASSERT(value <= _VDAC_CH1F_MASK);
+      SL_LOG_DEBUG_ASSERT(value <= _VDAC_CH1F_MASK);
       vdac->CH1F = value;
       break;
     default:
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 }
@@ -303,7 +303,8 @@ uint32_t sl_hal_vdac_calculate_prescaler(VDAC_TypeDef *vdac,
                                          uint32_t reference_frequency)
 {
   // Verifies that the VDAC reference is valid.
-  EFM_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
+  (void)vdac;
 
   uint32_t prescaler = 0;
 
@@ -333,7 +334,7 @@ uint32_t sl_hal_vdac_calculate_prescaler(VDAC_TypeDef *vdac,
 void sl_hal_vdac_reset(VDAC_TypeDef *vdac)
 {
   // Verifies that the VDAC reference is valid.
-  EFM_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_VDAC_REF_VALID(vdac));
 
   sl_hal_vdac_wait_sync(vdac);
 

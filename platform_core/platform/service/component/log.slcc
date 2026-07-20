@@ -15,6 +15,7 @@ provides:
 - name: log
 requires:
 - name: log_none
+- name: sl_core
 root_path: platform_core/platform/service/sl_log
 source:
 - path: src/sl_log.c

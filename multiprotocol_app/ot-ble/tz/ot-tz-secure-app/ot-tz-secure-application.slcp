@@ -1,6 +1,6 @@
 project_name: ot-tz-secure-application
 label: Sample project for TrustZone Secure Key Library
-package: multiprotocol
+package: multiprotocol_app
 description: >
   This is a trustzone enabled application used to manage security operations from trustzone aware OpenThread applications.
 
@@ -82,9 +82,6 @@ import:
 export:
   library:
     - path: artifact/trustzone_secure_library.o
-
-post_build:
-  profile: tz_secure_application
 
 readme:
   - path: README.md

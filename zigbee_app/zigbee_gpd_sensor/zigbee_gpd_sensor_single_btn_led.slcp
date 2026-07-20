@@ -18,6 +18,7 @@ include:
 component:
 #---------------- UC/UP components -------------------
   - id: sl_main
+  - id: watchdog_manager
   - id: device_init
   - id: sleeptimer
   - id: rail_util_recommended

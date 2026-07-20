@@ -17,6 +17,8 @@ include:
   - path: sli_bgapi.h
 requires:
 - name: memory_manager
+- name: sl_core
+- name: slist
 - name: bgapi_protocol_libraries
 - name: bgapi_protocol_rtos_adaptation
   condition:

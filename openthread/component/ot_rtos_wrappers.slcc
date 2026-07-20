@@ -32,6 +32,18 @@ library:
   - cortexm33
   unless:
   - toolchain_lto
+- path: libs/build/gcc/cortex-m55/sl-openthread-wrapper-library/Debug/libsl_openthread_wrapper.a
+  condition:
+  - toolchain_gcc
+  - cortexm55
+  - toolchain_lto
+  unless: []
+- path: libs/build/gcc/cortex-m55/sl-openthread-wrapper-library/Release/libsl_openthread_wrapper.a
+  condition:
+  - toolchain_gcc
+  - cortexm55
+  unless:
+  - toolchain_lto
 - path: libs/build/llvm/cortex-m33/sl-openthread-wrapper-library/Debug/libsl_openthread_wrapper.a
   condition:
   - toolchain_llvm
@@ -42,6 +54,18 @@ library:
   condition:
   - toolchain_llvm
   - cortexm33
+  unless:
+  - toolchain_lto
+- path: libs/build/llvm/cortex-m55/sl-openthread-wrapper-library/Debug/libsl_openthread_wrapper.a
+  condition:
+  - toolchain_llvm
+  - cortexm55
+  - toolchain_lto
+  unless: []
+- path: libs/build/llvm/cortex-m55/sl-openthread-wrapper-library/Release/libsl_openthread_wrapper.a
+  condition:
+  - toolchain_llvm
+  - cortexm55
   unless:
   - toolchain_lto
 other_file:

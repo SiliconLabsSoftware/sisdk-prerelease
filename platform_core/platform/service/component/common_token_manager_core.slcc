@@ -71,4 +71,5 @@ template_contribution:
     include: sl_token_manager_api.h
     handler: sl_token_manager_init
   priority: 9900
+  unless: [se_firmware_unavailable]
 root_path: platform_core

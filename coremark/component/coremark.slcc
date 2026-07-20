@@ -22,20 +22,24 @@ include:
   - path: core_main.h
   - path: coremark.h
   - path: core_portme.h
+  - path: sl_coremark_timing.h
 source:
 - path: core_main.c
 - path: core_list_join.c
 - path: core_matrix.c
 - path: core_portme.c
+- path: sl_coremark_timing_dwt.c
 - path: core_state.c
 - path: core_util.c
 provides:
 - name: coremark
 requires:
-- name: emlib_chip
-- name: emlib_cmu
-- name: emlib_timer
+- name: hal_system
+- name: memory_manager
+- name: cycle_counter
 define:
 - name: ITERATIONS
   value: "1000"
+- name: MEM_LOCATION
+  value: "\"DTCM\""
 root_path: coremark

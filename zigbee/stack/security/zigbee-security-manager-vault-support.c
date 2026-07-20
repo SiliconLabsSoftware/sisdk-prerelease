@@ -470,11 +470,11 @@ sl_status_t sli_zigbee_stack_sec_man_get_network_key_info(sl_zigbee_sec_man_netw
 {
   tokTypeStackKeys tok;
   //Fetch Alternate nwk key info
-  sli_zigbee_stack_token_primitive(true, &tok, COMMON_TOKEN_STACK_ALTERNATE_KEY, sizeof(tokTypeStackKeys));
+  sli_zigbee_stack_token_primitive(true, &tok, COMMON_TOKEN_STACK_ALTERNATE_KEY, sizeof(tok));
   network_key_info->alt_network_key_sequence_number = tok.activeKeySeqNum;
   network_key_info->alternate_network_key_set = zb_sec_is_key_present(ZB_PSA_KEY_ID_ALTERNATE_NWK_KEY);
   //Fetch nwk key info
-  sli_zigbee_stack_token_primitive(true, &tok, COMMON_TOKEN_STACK_KEYS, sizeof(tokTypeStackKeys));
+  sli_zigbee_stack_token_primitive(true, &tok, COMMON_TOKEN_STACK_KEYS, sizeof(tok));
   network_key_info->network_key_sequence_number = tok.activeKeySeqNum;
   network_key_info->network_key_set = zb_sec_is_key_present(ZB_PSA_KEY_ID_ACTIVE_NWK_KEY);
   // Fetch nwk key frame counter info

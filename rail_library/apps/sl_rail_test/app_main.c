@@ -311,7 +311,15 @@ static void changeTxPayload(uint32_t offset,
 #ifdef _SILICON_LABS_32B_SERIES_2
 #define sl_hal_emu_get_reset_cause RMU_ResetCauseGet
 #define sl_hal_emu_clear_reset_cause RMU_ResetCauseClear
-#define sl_power_manager_em4_unlatch_pin_retention EMU_UnlatchPinRetention
+#endif
+// When Power Manager is absent it cannot supply sl_power_manager_em4_unlatch_pin_retention(),
+// so provide a replacement: the EMU function (inlined in em_emu.h) on Series-2, no-op elsewhere.
+#if !defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#if defined(_SILICON_LABS_32B_SERIES_2)
+#define sl_power_manager_em4_unlatch_pin_retention() EMU_UnlatchPinRetention()
+#else
+#define sl_power_manager_em4_unlatch_pin_retention() ((void)0)
+#endif
 #endif
 
 // Function called from sl_main_init before the main super loop.
@@ -351,6 +359,11 @@ void sl_rail_test_internal_app_init(void)
                 SL_RAIL_TEST_APP_NAME, buildDateTime, resetCause, SL_BOARD_NAME);
   printChipInfo();
   getPti(NULL);
+
+#ifdef BRD4360A_DISABLE_HVBOD0
+  // TODO RAIL_LIB-15485: Remove this workaround once BRD4360A is fixed.
+  EMU->HVBOD_CLR = EMU_HVBOD_ENABLE0;
+#endif
 
   (void) sl_rail_get_channel(railHandle, &channel);
 

@@ -44,12 +44,6 @@ void ws_dc_config_init(void)
 {
 }
 
-int ws_dc_config_store(const sl_wisun_connection_params_t *params)
-{
-    (void)params;
-    return -1;
-}
-
 int ws_dc_config_apply(struct protocol_interface_info_entry *cur)
 {
     (void)cur;

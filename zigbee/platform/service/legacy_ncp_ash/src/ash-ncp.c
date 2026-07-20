@@ -1265,7 +1265,7 @@ tokTypeMfgAshConfig sli_ash_ncp_get_config(sli_ash_ncp_config_index index)
   sl_status_t status = SL_STATUS_OK;
   tokTypeMfgAshConfig tokenData;
 
-  status = slx_zigbee_token_manager_get_data(SL_TOKEN_GET_STATIC_DEVICE_TOKEN(TOKEN_MFG_ASH_CONFIG) + index, (void *)&tokenData, sizeof(tokTypeMfgAshConfig));
+  status = slx_zigbee_token_manager_get_data(SL_TOKEN_GET_STATIC_DEVICE_TOKEN(TOKEN_MFG_ASH_CONFIG) + index, (void *)&tokenData, sizeof(tokenData));
 
   if (status != SL_STATUS_OK) {
     return INVALID_ASH_CONFIG_VALUE;

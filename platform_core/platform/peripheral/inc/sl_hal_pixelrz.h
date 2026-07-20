@@ -39,7 +39,7 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_enum.h"
 
 /***************************************************************************//**
@@ -248,7 +248,7 @@ sl_hal_pixelrz_symbol_t sl_hal_pixelrz_get_symbol_configuration(float time_high_
 __INLINE void sl_hal_pixelrz_wait_sync(PIXELRZ_TypeDef *pixelrz)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
 
   while ((pixelrz->EN & _PIXELRZ_EN_EN_MASK) && (pixelrz->STATUS & _PIXELRZ_STATUS_SYNCBUSY_MASK)) {
     // Wait for any pending previous write operation to have been completed
@@ -266,7 +266,7 @@ __INLINE void sl_hal_pixelrz_wait_sync(PIXELRZ_TypeDef *pixelrz)
 __INLINE void sl_hal_pixelrz_wait_ready(PIXELRZ_TypeDef *pixelrz)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
 
   while (pixelrz->SWRST & _PIXELRZ_SWRST_RESETTING_MASK) {
     // Wait for reset to complete.
@@ -287,7 +287,7 @@ __INLINE void sl_hal_pixelrz_wait_ready(PIXELRZ_TypeDef *pixelrz)
 __INLINE void sl_hal_pixelrz_enable(PIXELRZ_TypeDef *pixelrz)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
 
   // Enable peripheral.
   pixelrz->EN_SET = PIXELRZ_EN_EN;
@@ -303,7 +303,7 @@ __INLINE void sl_hal_pixelrz_enable(PIXELRZ_TypeDef *pixelrz)
 __INLINE void sl_hal_pixelrz_disable(PIXELRZ_TypeDef *pixelrz)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
 
   // Disable PIXELRZ.
   pixelrz->EN_CLR = PIXELRZ_EN_EN;
@@ -322,7 +322,7 @@ __INLINE void sl_hal_pixelrz_disable(PIXELRZ_TypeDef *pixelrz)
 __INLINE void sl_hal_pixelrz_tx(PIXELRZ_TypeDef *pixelrz, uint32_t data)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
 
   while (pixelrz->STATUS & _PIXELRZ_STATUS_TXFULL_MASK) {
     // Check that transmit FIFO is not full.
@@ -345,7 +345,7 @@ __INLINE void sl_hal_pixelrz_tx(PIXELRZ_TypeDef *pixelrz, uint32_t data)
 __INLINE void sl_hal_pixelrz_enable_tx(PIXELRZ_TypeDef *pixelrz)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
 
   pixelrz->CMD_SET = PIXELRZ_CMD_TXEN;
 }
@@ -360,7 +360,7 @@ __INLINE void sl_hal_pixelrz_enable_tx(PIXELRZ_TypeDef *pixelrz)
 __INLINE void sl_hal_pixelrz_disable_tx(PIXELRZ_TypeDef *pixelrz)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
 
   pixelrz->CMD_SET = PIXELRZ_CMD_TXDIS;
 }
@@ -375,7 +375,7 @@ __INLINE void sl_hal_pixelrz_disable_tx(PIXELRZ_TypeDef *pixelrz)
 __INLINE void sl_hal_pixelrz_clear_tx(PIXELRZ_TypeDef *pixelrz)
 {
   // Make sure that the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
 
   pixelrz->CMD_SET = PIXELRZ_CMD_CLEARTX;
   sl_hal_pixelrz_wait_sync(pixelrz);
@@ -395,7 +395,7 @@ __INLINE void sl_hal_pixelrz_clear_tx(PIXELRZ_TypeDef *pixelrz)
 __INLINE void sl_hal_pixelrz_reset(PIXELRZ_TypeDef *pixelrz)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
 
   pixelrz->SWRST_SET = PIXELRZ_SWRST_SWRST;
 }
@@ -412,7 +412,7 @@ __INLINE void sl_hal_pixelrz_reset(PIXELRZ_TypeDef *pixelrz)
 __INLINE uint32_t sl_hal_pixelrz_get_status(PIXELRZ_TypeDef *pixelrz)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
 
   return pixelrz->STATUS;
 }
@@ -432,7 +432,7 @@ __INLINE void sl_hal_pixelrz_clear_interrupts(PIXELRZ_TypeDef *pixelrz,
                                               uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
 
   pixelrz->IF_CLR = flags;
 }
@@ -452,7 +452,7 @@ __INLINE void sl_hal_pixelrz_set_interrupts(PIXELRZ_TypeDef *pixelrz,
                                             uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
 
   pixelrz->IF_SET = flags;
 }
@@ -472,7 +472,7 @@ __INLINE void sl_hal_pixelrz_disable_interrupts(PIXELRZ_TypeDef *pixelrz,
                                                 uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
 
   pixelrz->IEN_CLR = flags;
 }
@@ -497,7 +497,7 @@ __INLINE void sl_hal_pixelrz_enable_interrupts(PIXELRZ_TypeDef *pixelrz,
                                                uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
 
   pixelrz->IEN_SET = flags;
 }
@@ -519,7 +519,7 @@ __INLINE void sl_hal_pixelrz_enable_interrupts(PIXELRZ_TypeDef *pixelrz,
 __INLINE uint32_t sl_hal_pixelrz_get_pending_interrupts(PIXELRZ_TypeDef *pixelrz)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
 
   return pixelrz->IF;
 }
@@ -541,7 +541,7 @@ __INLINE uint32_t sl_hal_pixelrz_get_pending_interrupts(PIXELRZ_TypeDef *pixelrz
 __INLINE uint32_t sl_hal_pixelrz_get_enabled_interrupts(PIXELRZ_TypeDef *pixelrz)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
 
   return pixelrz->IEN;
 }
@@ -570,7 +570,7 @@ __INLINE uint32_t sl_hal_pixelrz_get_enabled_pending_interrupts(PIXELRZ_TypeDef 
   uint32_t ien;
 
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PIXELRZ_REF_VALID(pixelrz));
 
   // Store PIXELRZ->IEN in temporary variable in order to define explicit order.
   // of volatile accesses.

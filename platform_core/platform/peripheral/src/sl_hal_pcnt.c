@@ -86,7 +86,8 @@ void sl_hal_pcnt_init(PCNT_TypeDef *pcnt,
                       const sl_hal_pcnt_init_t *init)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(init != NULL);
 
   // Disable PCNT.
   sl_hal_pcnt_disable(pcnt);
@@ -122,12 +123,15 @@ void sl_hal_pcnt_init(PCNT_TypeDef *pcnt,
     // Enable PCNT Clock Domain Reset. The PCNT must be in reset before changing
     // the clock source to an external clock.
     pcnt->CMD_SET = PCNT_CMD_CORERST;
-    CMU->PCNT0CLKCTRL = CMU_PCNT0CLKCTRL_CLKSEL_PCNTS0;
+    CMU->PCNT0CLKCTRL = (CMU->PCNT0CLKCTRL & ~_CMU_PCNT0CLKCTRL_CLKSEL_MASK)
+                        | CMU_PCNT0CLKCTRL_CLKSEL_PCNTS0;
   } else {
 #if defined(CMU_PCNT0CLKCTRL_CLKSEL_EM23GRPACLK)
-    CMU->PCNT0CLKCTRL = CMU_PCNT0CLKCTRL_CLKSEL_EM23GRPACLK;
+    CMU->PCNT0CLKCTRL = (CMU->PCNT0CLKCTRL & ~_CMU_PCNT0CLKCTRL_CLKSEL_MASK)
+                        | CMU_PCNT0CLKCTRL_CLKSEL_EM23GRPACLK;
 #else
-    CMU->PCNT0CLKCTRL = CMU_PCNT0CLKCTRL_CLKSEL_LFRCO;
+    CMU->PCNT0CLKCTRL = (CMU->PCNT0CLKCTRL & ~_CMU_PCNT0CLKCTRL_CLKSEL_MASK)
+                        | CMU_PCNT0CLKCTRL_CLKSEL_LFRCO;
 #endif
   }
 
@@ -143,7 +147,7 @@ void sl_hal_pcnt_init(PCNT_TypeDef *pcnt,
 void sl_hal_pcnt_reset(PCNT_TypeDef *pcnt)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
 
   // Disable PCNT.
   sl_hal_pcnt_wait_sync(pcnt);
@@ -151,9 +155,11 @@ void sl_hal_pcnt_reset(PCNT_TypeDef *pcnt)
 
   // Recommended to switch to internal clock before reset.
 #if defined(CMU_PCNT0CLKCTRL_CLKSEL_EM23GRPACLK)
-  CMU->PCNT0CLKCTRL = CMU_PCNT0CLKCTRL_CLKSEL_EM23GRPACLK;
+    CMU->PCNT0CLKCTRL = (CMU->PCNT0CLKCTRL & ~_CMU_PCNT0CLKCTRL_CLKSEL_MASK)
+                        | CMU_PCNT0CLKCTRL_CLKSEL_EM23GRPACLK;
 #else
-  CMU->PCNT0CLKCTRL = CMU_PCNT0CLKCTRL_CLKSEL_LFRCO;
+    CMU->PCNT0CLKCTRL = (CMU->PCNT0CLKCTRL & ~_CMU_PCNT0CLKCTRL_CLKSEL_MASK)
+                        | CMU_PCNT0CLKCTRL_CLKSEL_LFRCO;
 #endif
 
   sl_hal_pcnt_wait_ready(pcnt);
@@ -168,11 +174,11 @@ void sl_hal_pcnt_set_main_counter(PCNT_TypeDef *pcnt,
                                   uint32_t value)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PCNT_REF_VALID(pcnt));
   // Make sure counter value is valid.
-  EFM_ASSERT(value <= SL_HAL_PCNT_MAX_COUNT(pcnt));
+  SL_LOG_DEBUG_ASSERT(value <= SL_HAL_PCNT_MAX_COUNT(pcnt));
   // Make sure module is enabled.
-  EFM_ASSERT(pcnt->EN & _PCNT_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(pcnt->EN & _PCNT_EN_EN_MASK);
 
   uint32_t top = pcnt->TOP;
   if (top != value) {

@@ -59,14 +59,18 @@
 #if defined(WDOG_PRESENT)
 // Macros to determine if WDOG instances are clocked or not
 
-#if defined(CMU_CLKEN0_WDOG0)
+#if defined(CMU_WDOG0CLKCTRL_CLKEN)
+#define WDOG0_CLOCK_ENABLED_BIT (CMU->WDOG0CLKCTRL & CMU_WDOG0CLKCTRL_CLKEN)
+#elif defined(CMU_CLKEN0_WDOG0)
 #define WDOG0_CLOCK_ENABLED_BIT (CMU->CLKEN0 & CMU_CLKEN0_WDOG0)
 #else
-// There's no CMU->CLKEN1 so assume the WDOG0 is clocked
+// There's no CMU->CLKEN0 so assume the WDOG0 is clocked
 #define WDOG0_CLOCK_ENABLED_BIT 1
 #endif
 
-#if defined(CMU_CLKEN1_WDOG1)
+#if defined(CMU_WDOG1CLKCTRL_CLKEN)
+#define WDOG1_CLOCK_ENABLED_BIT (CMU->WDOG1CLKCTRL & CMU_WDOG1CLKCTRL_CLKEN)
+#elif defined(CMU_CLKEN1_WDOG1)
 #define WDOG1_CLOCK_ENABLED_BIT (CMU->CLKEN1 & CMU_CLKEN1_WDOG1)
 #else
 // There's no CMU->CLKEN1 so assume the WDOG1 is clocked
@@ -75,11 +79,22 @@
 
 #endif
 
+/* Device with Boost DC-DC cannot enter EM4 because Boost DC-DC module does not
+ * have BYPASS switch so DC-DC converter can not be set to bypass mode. */
+#if (defined(_SILICON_LABS_DCDC_FEATURE) \
+  && (_SILICON_LABS_DCDC_FEATURE == _SILICON_LABS_DCDC_FEATURE_DCDC_BOOST))
+#define DEVICE_SUPPORTS_EM4 0
+#else
+#define DEVICE_SUPPORTS_EM4 1
+#endif
+
 /*******************************************************************************
  **************************   LOCAL FUNCTIONS   ********************************
  ******************************************************************************/
 
+#if (DEVICE_SUPPORTS_EM4 == 1)
 static bool is_em4_blocked(void);
+#endif
 
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) && (SL_POWER_MANAGER_RAMP_DVDD_EN == 1)
 static void ramp_dvdd_and_switch_to_dcdc_bypass_mode(void);
@@ -104,6 +119,14 @@ void sli_power_manager_init_em4(void)
 #endif
 }
 
+/*******************************************************************************
+ * HAL hook function for pre EM4 sleep.
+ ******************************************************************************/
+SL_WEAK void sli_power_manager_em4_presleep_operations(void)
+{
+  // No operations to do before EM4 sleep. Can be redefined in the HAL.
+}
+
 /******************************************************************************
  * Event called before entering EM4 sleep.
  *****************************************************************************/
@@ -124,13 +147,12 @@ SL_WEAK void sl_power_manager_em4_presleep_hook(void)
  ******************************************************************************/
 __NO_RETURN void sl_power_manager_enter_em4(void)
 {
-  /* Device with Boost DC-DC cannot enter EM4 because Boost DC-DC module does not
-   * have BYPASS switch so DC-DC converter can not be set to bypass mode. */
-#if (defined(_SILICON_LABS_DCDC_FEATURE) \
-  && (_SILICON_LABS_DCDC_FEATURE == _SILICON_LABS_DCDC_FEATURE_DCDC_BOOST))
+#if (DEVICE_SUPPORTS_EM4 == 0)
   EFM_ASSERT(false);
-#endif
-
+  while (true) {
+    // DC-DC unable to enter EM4 in Boost mode
+  }
+#else
   // Make sure that we are not interrupted while we are entering em4
   CORE_CRITICAL_IRQ_DISABLE();
 
@@ -158,12 +180,27 @@ __NO_RETURN void sl_power_manager_enter_em4(void)
   #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) && (SL_POWER_MANAGER_RAMP_DVDD_EN == 1)
   ramp_dvdd_and_switch_to_dcdc_bypass_mode();
   #else
-  EMU_DCDCModeSet(emuDcdcMode_Bypass);
+  if (EMU_DCDCModeSet(emuDcdcMode_Bypass) != SL_STATUS_OK) {
+    EFM_ASSERT(false);
+    while (true) {
+      // DC-DC failed to enter bypass
+    }
+  }
   #endif
+
+#if defined(_DCDC_STATUS_RUNNING_MASK)
+  if ((DCDC->STATUS & _DCDC_STATUS_RUNNING_MASK) != 0U) {
+    EFM_ASSERT(false);
+    while ((DCDC->STATUS & _DCDC_STATUS_RUNNING_MASK) != 0U) {
+      // DC-DC failed to enter bypass
+    }
+  }
+#endif
 #endif
 #endif
 
   sl_power_manager_em4_presleep_hook();
+  sli_power_manager_em4_presleep_operations();
 
   for (uint8_t i = 0; i < 4; i++) {
     EMU->EM4CTRL = em4seq2;
@@ -177,6 +214,7 @@ __NO_RETURN void sl_power_manager_enter_em4(void)
   for (;; ) {
     // __NO_RETURN
   }
+#endif // DEVICE_SUPPORTS_EM4
 }
 
 /***************************************************************************//**
@@ -194,6 +232,7 @@ void sl_power_manager_em4_unlatch_pin_retention(void)
 #endif
 }
 
+#if (DEVICE_SUPPORTS_EM4 == 1)
 /***************************************************************************//**
  * Returns true if em4 entry is blocked by a watchdog peripheral.
  ******************************************************************************/
@@ -213,6 +252,7 @@ static bool is_em4_blocked(void)
 #endif
   return false;
 }
+#endif // DEVICE_SUPPORTS_EM4
 
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) && (SL_POWER_MANAGER_RAMP_DVDD_EN == 1)
 

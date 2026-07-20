@@ -70,7 +70,7 @@
  *
  * @return a valid CRC16 value. zero otherwise.
  ******************************************************************************/
-static uint16_t sli_token_manager_cal_checksum(uint8_t* data, uint32_t len)
+static uint16_t sli_token_manager_cal_checksum(const uint8_t* data, uint32_t len)
 {
  #if defined(_CMU_CLKEN0_MASK)
   CMU->CLKEN0_SET = CMU_CLKEN0_GPCRC0;
@@ -362,7 +362,7 @@ sl_status_t sli_read_klv_object(sl_klv_handle_t const *klv_handle,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  uint32_t klv_main_start = *(uint32_t *)klv_start_address;
+  uint32_t klv_main_start = *klv_start_address;
 
   if (klv_main_start != SLI_TOKEN_KLV_STATIC_SECURE_TOKEN_MAIN_START
       && klv_main_start != SLI_TOKEN_KLV_STATIC_DEVICE_TOKEN_MAIN_START) {
@@ -399,7 +399,6 @@ sl_status_t sli_read_klv_object(sl_klv_handle_t const *klv_handle,
         uint8_t tag[SLI_CRYPTO_TAG_SIZE];
 
         // Allocate memory for decryption
-        // TODO: Optimize memory allocation
         ptr_dec = (uint8_t *)sl_malloc(klv_header_info.length);
         if (ptr_dec == NULL) {
           TOKENDBG(printf("Memory allocation failed\n"));
@@ -433,7 +432,7 @@ sl_status_t sli_read_klv_object(sl_klv_handle_t const *klv_handle,
       // and therefore CRC is not verified.
       if (klv_main_start == SLI_TOKEN_KLV_STATIC_DEVICE_TOKEN_MAIN_START) {
         // Validate CRC
-        uint16_t calculated_checksum = sli_token_manager_cal_checksum((uint8_t *)ptr_src, klv_header_info.length);
+        uint16_t calculated_checksum = sli_token_manager_cal_checksum(ptr_src, klv_header_info.length);
         if (calculated_checksum != klv_header_info.crc) {
           TOKENDBG(printf("CRC check failed\n"));
           return SL_STATUS_INVALID_PARAMETER;
@@ -587,7 +586,7 @@ sl_status_t sli_write_klv_object(sl_klv_handle_t const *klv_handle,
   const uint8_t *ptr_src = (const uint8_t *)data;
   uint32_t security_offset = SLI_TOKEN_MANAGER_GET_SECURITY_OFFSET((uint32_t *)klv_start_address);
   // Must be a multiple of 4 bytes
-  uint16_t write_length_bytes = SL_CEILING(klv_handle->length, sizeof(uint32_t));
+  uint32_t write_length_bytes = SL_CEILING(klv_handle->length, sizeof(uint32_t));
   if ((uint32_t *)((uint8_t *)current_pointer + sizeof(sl_klv_header_t) + write_length_bytes + security_offset)
       >= (uint32_t *)klv_end_address) {
     return SL_STATUS_NO_MORE_RESOURCE;
@@ -604,7 +603,7 @@ sl_status_t sli_write_klv_object(sl_klv_handle_t const *klv_handle,
   // Static secure token data is encrypted using authenticated encryption (AEAD)
   // and therefore CRC is not calculated.
   if (klv_main_start == SLI_TOKEN_KLV_STATIC_DEVICE_TOKEN_MAIN_START) {
-    klv_headers.crc = sli_token_manager_cal_checksum((uint8_t *)data, klv_handle->length);
+    klv_headers.crc = sli_token_manager_cal_checksum(data, klv_handle->length);
   }
 
   const uint8_t *buffer_ptr = (const uint8_t *)&klv_headers;
@@ -617,7 +616,6 @@ sl_status_t sli_write_klv_object(sl_klv_handle_t const *klv_handle,
     uint8_t *ptr_enc = NULL;
 
     // Allocate memory for storing encrypted data
-    // TODO: Optimize memory allocation
     ptr_enc = (uint8_t *)sl_malloc(klv_headers.length);
     if (ptr_enc == NULL) {
       TOKENDBG(printf("Memory allocation failed\n"));

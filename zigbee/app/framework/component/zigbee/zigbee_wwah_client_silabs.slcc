@@ -1,0 +1,40 @@
+package: zigbee
+description: Silicon Labs proprietary Works With All Hubs (WWAH) client cluster.
+id: zigbee_wwah_client_silabs
+label: SL Works With All Hubs Client Cluster
+category: Zigbee|Works With All Hubs
+quality: production
+provides:
+- name: zigbee_wwah_client_silabs
+requires:
+- name: zigbee_zdo_cluster_filter
+  condition:
+  - zigbee_stack_common
+source:
+- path: app/framework/plugin/wwah-client-silabs/wwah-client-silabs.c
+include:
+- path: app/framework/plugin/wwah-client-silabs
+  file_list:
+  - path: wwah-client-silabs.h
+template_contribution:
+- name: component_catalog
+  value: zigbee_wwah_client_silabs
+- name: cluster_service
+  value:
+    cluster_id: '0xFC57'
+    mfg_id: '0x1217'
+    side: CLIENT
+    service_function: sl_zigbee_af_sl_wwah_cluster_client_command_parse
+- name: cluster_functions
+  value:
+    cluster_name: SlWwah
+    cluster_id: 0xFC57
+    cluster_type: client
+    init_function: sl_zigbee_af_sl_wwah_cluster_client_init_cb
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/wwah-client-silabs
+metadata:
+  sbom:
+    license: MSLA
+root_path: zigbee

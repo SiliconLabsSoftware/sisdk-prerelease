@@ -32,6 +32,7 @@
 #if defined(GPIO_PRESENT)
 #include "sl_hal_bus.h"
 
+
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
  ******************************************************************************/
@@ -135,9 +136,9 @@ void sl_hal_gpio_set_pin_mode(const sl_gpio_t *gpio,
                               sl_gpio_mode_t mode,
                               bool output_value)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
-  EFM_ASSERT(sl_hal_gpio_get_lock_status() == 0);
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(sl_hal_gpio_get_lock_status() == 0);
 
   sl_gpio_mode_t gpio_mode = SL_GPIO_MODE_DISABLED;
 #if defined(HSIO_PRESENT)
@@ -148,7 +149,7 @@ void sl_hal_gpio_set_pin_mode(const sl_gpio_t *gpio,
   gpio_mode = sl_hal_gpio_map_gpio_mode(mode);
 #endif
 
-  EFM_ASSERT(SL_HAL_GPIO_MODE_IS_VALID(gpio_mode));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_MODE_IS_VALID(gpio_mode));
 
   // If disabling a pin, do not modify DOUT to reduce the chance of
   // a glitch/spike (may not be sufficient precaution in all use cases).
@@ -206,8 +207,8 @@ void sl_hal_gpio_set_pin_mode(const sl_gpio_t *gpio,
  ******************************************************************************/
 sl_gpio_mode_t sl_hal_gpio_get_pin_mode(const sl_gpio_t *gpio)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
 
   sl_gpio_mode_t mode = SL_GPIO_MODE_DISABLED;
 #if defined(HSIO_PRESENT)
@@ -249,14 +250,14 @@ int32_t sl_hal_gpio_configure_external_interrupt(const sl_gpio_t *gpio,
                                                  int32_t int_no,
                                                  sl_gpio_interrupt_flag_t flags)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
-  EFM_ASSERT(SL_GPIO_FLAG_IS_VALID(flags));
-  EFM_ASSERT(sl_hal_gpio_get_lock_status() == 0);
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(SL_GPIO_FLAG_IS_VALID(flags));
+  SL_LOG_DEBUG_ASSERT(sl_hal_gpio_get_lock_status() == 0);
 
   if (int_no != SL_GPIO_INTERRUPT_UNAVAILABLE && int_no >= 0) {
 #if defined(_GPIO_EXTIPINSELL_MASK)
-    EFM_ASSERT(SL_HAL_GPIO_INTNO_PIN_VALID(int_no, gpio->pin));
+    SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_INTNO_PIN_VALID(int_no, gpio->pin));
 #endif
   }
 
@@ -321,6 +322,7 @@ int32_t sl_hal_gpio_configure_external_interrupt(const sl_gpio_t *gpio,
     sl_hal_gpio_clear_interrupts(1 << int_no);
   }
 
+  SL_LOG_DEBUG_ASSERT(int_no != SL_GPIO_INTERRUPT_UNAVAILABLE);
   return int_no;
 }
 
@@ -331,8 +333,8 @@ int32_t sl_hal_gpio_configure_external_interrupt(const sl_gpio_t *gpio,
 void sl_hal_gpio_enable_pin_em4_wakeup(uint32_t pinmask,
                                        uint32_t polaritymask)
 {
-  EFM_ASSERT((pinmask & ~_GPIO_EM4WUEN_MASK) == 0);
-  EFM_ASSERT((polaritymask & ~_GPIO_EM4WUPOL_MASK) == 0);
+  SL_LOG_DEBUG_ASSERT((pinmask & ~_GPIO_EM4WUEN_MASK) == 0);
+  SL_LOG_DEBUG_ASSERT((polaritymask & ~_GPIO_EM4WUPOL_MASK) == 0);
 
   GPIO->EM4WUPOL &= ~pinmask;               // Set the wakeup polarity.
   GPIO->EM4WUPOL |= pinmask & polaritymask;
@@ -349,13 +351,14 @@ int32_t sl_hal_gpio_configure_wakeup_em4_external_interrupt(const sl_gpio_t *gpi
                                                             int32_t int_no,
                                                             bool polarity)
 {
-  EFM_ASSERT(gpio != NULL);
-  EFM_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
-  EFM_ASSERT(sl_hal_gpio_get_lock_status() == 0);
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+  SL_LOG_DEBUG_ASSERT(sl_hal_gpio_get_lock_status() == 0);
 
 #if defined(HSIO_PRESENT)
   bool is_hsio = sl_hal_gpio_is_hsio_port(gpio->port);
   if (is_hsio) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_GPIO_INTERRUPT_UNAVAILABLE;
   }
 #endif
@@ -367,6 +370,7 @@ int32_t sl_hal_gpio_configure_wakeup_em4_external_interrupt(const sl_gpio_t *gpi
   }
 
   if (em4_int_no == SL_GPIO_INTERRUPT_UNAVAILABLE || int_no != em4_int_no) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_GPIO_INTERRUPT_UNAVAILABLE;
   }
 
@@ -456,7 +460,7 @@ static sl_gpio_mode_t sl_hal_gpio_map_gpio_mode(sl_gpio_mode_t mode)
           return _GPIO_P_MODEL_MODE0_WIREDANDALTPULLUPFILTER;
     #endif
         default:
-          EFM_ASSERT(false);
+          SL_LOG_DEBUG_ASSERT(false);
           return SL_GPIO_MODE_DISABLED;
     }
 }
@@ -530,7 +534,7 @@ static sl_gpio_mode_t sl_hal_gpio_map_gpio_reg_to_mode(sl_gpio_mode_t mode)
       return SL_GPIO_MODE_WIRED_AND_ALTERNATE_PULLUP_FILTER;
 #endif
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return mode; // returning the default state
   }
 }
@@ -585,7 +589,7 @@ static sl_gpio_mode_t sl_hal_gpio_map_hsio_mode(sl_gpio_mode_t mode)
       return _HSIO_P_MODEL_MODE0_WIREDANDPULLUPFILTER;
 #endif
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return SL_GPIO_MODE_DISABLED;
   }
 }
@@ -639,7 +643,7 @@ static sl_gpio_mode_t sl_hal_gpio_map_hsio_reg_to_mode(sl_gpio_mode_t mode)
       return SL_GPIO_MODE_WIRED_AND_PULLUP_FILTER;
 #endif
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return mode;
   }
 }

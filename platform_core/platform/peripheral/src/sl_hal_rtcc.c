@@ -88,7 +88,7 @@ extern __INLINE void sl_hal_rtcc_disable(void);
  ******************************************************************************/
 void sl_hal_rtcc_init(const sl_hal_rtcc_init_t *init)
 {
-  EFM_ASSERT(init != NULL);
+  SL_LOG_DEBUG_ASSERT(init != NULL);
 
   sl_hal_rtcc_wait_sync();
 
@@ -109,8 +109,8 @@ void sl_hal_rtcc_init(const sl_hal_rtcc_init_t *init)
 void sl_hal_rtcc_channel_init(uint32_t channel,
                               const sl_hal_rtcc_cc_init_t *init)
 {
-  EFM_ASSERT(SL_HAL_RTCC_CH_VALID(channel));
-  EFM_ASSERT(init != NULL);
+  SL_LOG_DEBUG_ASSERT(SL_HAL_RTCC_CH_VALID(channel));
+  SL_LOG_DEBUG_ASSERT(init != NULL);
 
   // Configure the selected capture/compare channel.
   RTCC->CC[channel].CTRL = ( (uint32_t)init->channel_mode << _RTCC_CC_CTRL_MODE_SHIFT)

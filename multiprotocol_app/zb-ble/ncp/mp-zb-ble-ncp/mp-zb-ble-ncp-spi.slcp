@@ -1,6 +1,6 @@
 project_name: mp-zb-ble-ncp-spi
 label: Zigbee BLE DMP - NCP SPI
-package: multiprotocol
+package: multiprotocol_app
 category: Zigbee + Bluetooth NCP Application
 quality: experimental
 description: Demonstrates a DMP (Dynamic Multiprotocol) Zigbee NCP and BLE NCP application over SPI using CPC for host communication, with support for customizable Zigbee NCP extensions.

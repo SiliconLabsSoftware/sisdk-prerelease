@@ -1,0 +1,96 @@
+---
+project_name: bt_soc_cbap_ddp
+package: bluetooth_le_app
+label: Bluetooth - SoC CBAP Dynamic Data Provisioning
+description: >
+  This application enables provisioning the device with data, required by
+  Certificate Based Authentication and Pairing (CBAP). This is a RAM
+  application, therefore it leaves the original firmware untouched. Please
+  refer to the readme document for the usage.
+category: Bluetooth Examples
+quality: experimental
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Bluetooth"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+
+component:
+  - id: toolchain_gcc_lto
+  - id: sl_main
+  - id: device_init
+  - id: cbap_key_id
+  - id: ddp
+  - id: ddp_cmd_nvm
+  - id: ddp_cmd_cert
+  - id: ddp_cmd_psa
+  - id: ddp_cmd_psa_storage_local
+    condition:
+      - device_security_base
+  - id: ddp_cmd_psa_storage_local
+    condition:
+      - device_security_rot
+  - id: ddp_cmd_psa_storage_local
+    condition:
+      - device_security_se
+  - id: ddp_cmd_psa_storage_vault
+    condition:
+      - device_security_vault
+
+  - id: psa_crypto_ecdsa
+  - id: psa_crypto_ecc_secp256r1
+  - id: psa_crypto_sha256
+
+provides:
+  - name: tz_secure_execution
+  - name: tz_execution
+
+other_file:
+  - path: provision.py
+    project:
+      transfer_ownership: true
+  - path: ca_demo/certificate.pem
+    project:
+      transfer_ownership: true
+      directory: script/ca_demo
+  - path: ca_demo/private_key.pem
+    project:
+      transfer_ownership: true
+      directory: script/ca_demo
+
+configuration:
+  - name: SL_STACK_SIZE
+    value: "4096"
+  - name: BUFFER_SIZE_UP
+    value: "1200"
+    condition:
+      - iostream_rtt
+  - name: BUFFER_SIZE_DOWN
+    value: "1200"
+    condition:
+      - iostream_rtt
+  - name: NVM3_DEFAULT_MAX_OBJECT_SIZE
+    value: "1200"
+    condition:
+      - nvm3
+
+tag:
+  - toolchain:gcc
+  # Filter same hardware as for CBAP
+  - hwfilter:device:device_supports_bluetooth
+  - hwfilter:device:device_series_2
+  - hwfilter:device:armv8m.main
+  - hwfilter:board:simple_led:led0
+  - hwfilter:flash:512k
+  - hwfilter:ram:48k
+
+readme:
+  - path: readme.md
+
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true

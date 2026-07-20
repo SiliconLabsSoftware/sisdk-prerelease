@@ -121,6 +121,16 @@ library:
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
+- path: libs/build/gcc/cortex-m55/zigbee-pro-stack-mac-test-cmds/release/libzigbee-pro-stack-mac-test-cmds.a
+  condition:
+  - toolchain_gcc
+  - cortexm55
+  - zigbee_phy_2_4
+  - zigbee_multi_network
+  - zigbee_mac_test_commands_support
+  unless:
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
 - path: libs/build/gcc/cortex-m33/zigbee-pro-stack-mac-test-cmds/release_dualrail/libzigbee-pro-stack-mac-test-cmds.a
   condition:
   - toolchain_gcc
@@ -143,6 +153,16 @@ library:
   condition:
   - toolchain_gcc
   - cortexm33
+  - zigbee_phy_2_4
+  - zigbee_mac_test_commands_support
+  unless:
+  - zigbee_multi_network
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
+- path: libs/build/gcc/cortex-m55/zigbee-pro-stack-mac-test-cmds/release_singlenetwork/libzigbee-pro-stack-mac-test-cmds.a
+  condition:
+  - toolchain_gcc
+  - cortexm55
   - zigbee_phy_2_4
   - zigbee_mac_test_commands_support
   unless:
@@ -196,6 +216,17 @@ library:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
   - stack_protection_iar
+- path: libs/build/iar/cortex-m55/zigbee-pro-stack-mac-test-cmds/release/libzigbee-pro-stack-mac-test-cmds.a
+  condition:
+  - toolchain_iar
+  - cortexm55
+  - zigbee_phy_2_4
+  - zigbee_multi_network
+  - zigbee_mac_test_commands_support
+  unless:
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
+  - stack_protection_iar
 - path: libs/build/iar/cortex-m33/zigbee-pro-stack-mac-test-cmds/release_dualrail/libzigbee-pro-stack-mac-test-cmds.a
   condition:
   - toolchain_iar
@@ -227,10 +258,32 @@ library:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
   - stack_protection_iar
+- path: libs/build/iar/cortex-m55/zigbee-pro-stack-mac-test-cmds/release_singlenetwork/libzigbee-pro-stack-mac-test-cmds.a
+  condition:
+  - toolchain_iar
+  - cortexm55
+  - zigbee_phy_2_4
+  - zigbee_mac_test_commands_support
+  unless:
+  - zigbee_multi_network
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
+  - stack_protection_iar
 - path: libs/build/iar/cortex-m33/zigbee-pro-stack-mac-test-cmds/release_stackprotection/libzigbee-pro-stack-mac-test-cmds.a
   condition:
   - toolchain_iar
   - cortexm33
+  - zigbee_phy_2_4
+  - zigbee_multi_network
+  - zigbee_mac_test_commands_support
+  - stack_protection_iar
+  unless:
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
+- path: libs/build/iar/cortex-m55/zigbee-pro-stack-mac-test-cmds/release_stackprotection/libzigbee-pro-stack-mac-test-cmds.a
+  condition:
+  - toolchain_iar
+  - cortexm55
   - zigbee_phy_2_4
   - zigbee_multi_network
   - zigbee_mac_test_commands_support
@@ -262,6 +315,17 @@ library:
   condition:
   - toolchain_iar
   - cortexm33
+  - zigbee_phy_2_4
+  - zigbee_mac_test_commands_support
+  - stack_protection_iar
+  unless:
+  - zigbee_multi_network
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
+- path: libs/build/iar/cortex-m55/zigbee-pro-stack-mac-test-cmds/release_stackprotection_singlenetwork/libzigbee-pro-stack-mac-test-cmds.a
+  condition:
+  - toolchain_iar
+  - cortexm55
   - zigbee_phy_2_4
   - zigbee_mac_test_commands_support
   - stack_protection_iar
@@ -311,6 +375,16 @@ library:
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
+- path: libs/build/llvm/cortex-m55/zigbee-pro-stack-mac-test-cmds/release/libzigbee-pro-stack-mac-test-cmds.a
+  condition:
+  - toolchain_llvm
+  - cortexm55
+  - zigbee_phy_2_4
+  - zigbee_multi_network
+  - zigbee_mac_test_commands_support
+  unless:
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
 - path: libs/build/llvm/cortex-m33/zigbee-pro-stack-mac-test-cmds/release_dualrail/libzigbee-pro-stack-mac-test-cmds.a
   condition:
   - toolchain_llvm
@@ -333,6 +407,16 @@ library:
   condition:
   - toolchain_llvm
   - cortexm33
+  - zigbee_phy_2_4
+  - zigbee_mac_test_commands_support
+  unless:
+  - zigbee_multi_network
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
+- path: libs/build/llvm/cortex-m55/zigbee-pro-stack-mac-test-cmds/release_singlenetwork/libzigbee-pro-stack-mac-test-cmds.a
+  condition:
+  - toolchain_llvm
+  - cortexm55
   - zigbee_phy_2_4
   - zigbee_mac_test_commands_support
   unless:

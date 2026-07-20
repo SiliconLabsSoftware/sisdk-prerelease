@@ -45,15 +45,15 @@ config_file:
 - path: config/s2/sdid240/sl_device_init_dpll_config.h
   file_id: device_init_dpll_config
   condition: [device_sdid_240]
+- path: config/s2/sdid250/sl_device_init_dpll_config.h
+  file_id: device_init_dpll_config
+  condition: [device_sdid_250]
 - path: config/s2/sdid260/sl_device_init_dpll_config.h
   file_id: device_init_dpll_config
   condition: [device_sdid_260]
 - path: config/s2/sdid265/sl_device_init_dpll_config.h
   file_id: device_init_dpll_config
-  condition: [device_generic_family_efr32xg2e]
-- path: config/s2/sdid250/sl_device_init_dpll_config.h
-  file_id: device_init_dpll_config
-  condition: [device_generic_family_efr32xg2b]
+  condition: [device_sdid_265]
 include:
 - path: inc
   file_list:

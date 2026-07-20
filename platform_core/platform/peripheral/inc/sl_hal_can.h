@@ -402,7 +402,7 @@ typedef struct {
     .transmit_pause = 0,                                    \
     .protocol_exception = 0,                                \
     .tx_fifo_queue_mode = SL_HAL_CAN_TX_OPERATION_FIFO,     \
-    .mode = SL_HAL_CAN_OPERATION_MODE_INTERNAL_LOOPBACK,    \
+    .mode = SL_HAL_CAN_OPERATION_MODE_NORMAL,               \
     .mram_init_params = SL_HAL_CAN_MRAM_INIT,               \
     .nominal_bitrate = SL_HAL_CAN_NOMINAL_TIME(0, 0, 0, 0), \
     .data_bitrate = SL_HAL_CAN_DATA_TIME(0, 0, 0, 0)        \

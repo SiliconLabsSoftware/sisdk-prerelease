@@ -467,7 +467,7 @@ void LOWER_MAC_DEBUG_CLEAR_ACTIONS_FROM_TOKEN(void)
   tokTypeStackMacDebugAction tok;
   uint8_t i;
 
-  memset(&tok, 0, sizeof(tokTypeStackMacDebugAction));
+  memset(&tok, 0, sizeof(tok));
 
   for (i = 0; i < LOWER_MAC_DEBUG_ACTION_TOKEN_TABLE_SIZE; i++) {
     halCommonSetIndexedToken(TOKEN_STACK_MAC_DEBUG_ACTION_TABLE, i, &tok);

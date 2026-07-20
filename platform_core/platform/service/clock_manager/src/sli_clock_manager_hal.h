@@ -132,6 +132,7 @@ sl_status_t sli_clock_manager_hal_hfxo_calibrate_ctune(uint32_t ctune);
 /***************************************************************************//**
  * Gets the HFXO's average startup time.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_CLOCK_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 sl_status_t sli_clock_manager_hal_get_hfxo_average_startup_time(uint32_t *val);
 
 /***************************************************************************//**
@@ -217,7 +218,7 @@ sl_status_t sli_clock_manager_hal_get_nwp_clkmult_freqplan_config(uint8_t clkmul
                                                                   const uint8_t **nwp_clkmult_freqplan_config,
                                                                   uint8_t *target_frequency_index);
 
-#if defined(CLOCK_MANAGER_RUNTIME_HAL_INTERNAL_PRESENT)
+#if defined(SL_CATALOG_CLOCK_MANAGER_RUNTIME_HAL_INTERNAL_PRESENT)
 /***************************************************************************//**
  * Gets frequency of given internal clock branch.
  ******************************************************************************/

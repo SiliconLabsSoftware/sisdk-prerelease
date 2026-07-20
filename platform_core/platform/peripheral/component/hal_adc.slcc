@@ -27,6 +27,7 @@ requires:
 - name: device_has_adc
 - name: enum
 - name: status
+- name: log_none
 documentation:
   docset: gecko-platform
   document:

@@ -144,7 +144,7 @@
       <pin defaultLabel="PD05" location="top:16" number="68" pinIndex="5" portBankIndex="3"/>
     </pinOut>
     <peripherals>
-      <peripheral componentIdRef="pin_tool.efm32.efm32pg28.scratchpad" displayName="SCRATCHPAD" name="SCRATCHPAD" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efm32.efm32pg28.scratchpad" displayName="SCRATCHPAD" name="SCRATCHPAD" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efm32.efm32pg28.emu" displayName="EMU" name="EMU" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efm32.efm32pg28.cmu" displayName="CMU" name="CMU" revision="A" category="Clocking" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efm32.efm32pg28.hfrco" displayName="HFRCO0" name="HFRCO0" revision="A" category="Clocking" hidden="false"/>
@@ -188,12 +188,12 @@
       <peripheral componentIdRef="pin_tool.efm32.efm32pg28.eusart" displayName="EUSART2" name="EUSART2" revision="A" category="Communications" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efm32.efm32pg28.sysrtc" displayName="SYSRTC0" name="SYSRTC0" revision="A" category="Timers" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efm32.efm32pg28.lcd" displayName="LCD" name="LCD" revision="A" category="Other" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efm32.efm32pg28.keyscan" displayName="KEYSCAN" name="KEYSCAN" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efm32.efm32pg28.keyscan" displayName="KEYSCAN" name="KEYSCAN" revision="A" category="Communications" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efm32.efm32pg28.smu" displayName="SMU" name="SMU" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efm32.efm32pg28.letimer" displayName="LETIMER0" name="LETIMER0" revision="A" category="Timers" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efm32.efm32pg28.iadc" displayName="IADC0" name="IADC0" revision="A" category="Analog" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efm32.efm32pg28.acmp" displayName="ACMP0" name="ACMP0" revision="A" category="Other" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efm32.efm32pg28.acmp" displayName="ACMP1" name="ACMP1" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efm32.efm32pg28.acmp" displayName="ACMP0" name="ACMP0" revision="A" category="Analog" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efm32.efm32pg28.acmp" displayName="ACMP1" name="ACMP1" revision="A" category="Analog" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efm32.efm32pg28.vdac" displayName="VDAC0" name="VDAC0" revision="A" category="Analog" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efm32.efm32pg28.pcnt" displayName="PCNT0" name="PCNT0" revision="A" category="Timers" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efm32.efm32pg28.lesense" displayName="LESENSE" name="LESENSE" revision="A" category="Communications" hidden="false"/>
@@ -203,7 +203,7 @@
       <peripheral componentIdRef="pin_tool.efm32.efm32pg28.wdog" displayName="WDOG0" name="WDOG0" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efm32.efm32pg28.wdog" displayName="WDOG1" name="WDOG1" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efm32.efm32pg28.eusart" displayName="EUSART0" name="EUSART0" revision="A" category="Communications" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efm32.efm32pg28.semailbox" displayName="SEMAILBOX" name="SEMAILBOX" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efm32.efm32pg28.semailbox" displayName="SEMAILBOX" name="SEMAILBOX" revision="A" category="Security" hidden="false"/>
     </peripherals>
     <script uri="../../script/entrypoint.py">
       <path>../../script</path>

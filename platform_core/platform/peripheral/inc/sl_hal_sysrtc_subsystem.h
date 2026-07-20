@@ -44,7 +44,7 @@ extern "C" {
 #include <stdbool.h>
 #include "sl_hal_sysrtc_compat.h"
 #include "sl_enum.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #if defined(SL_CATALOG_HAL_SYSRTC_INTERNAL_PRESENT)
 #include "sli_hal_sysrtc_subsystem.h"
 #endif
@@ -552,6 +552,7 @@ uint32_t sl_hal_sysrtc_get_group_pretrigger_status(uint8_t group_number);
  * @param[out] flags
  *   Pre-trigger status flags for a given group.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_HAL_SYSRTC, SL_CODE_CLASS_TIME_CRITICAL)
 void sl_hal_sysrtc_clear_group_pretrigger_status(uint8_t group_number,
                                                  uint32_t flags);
 

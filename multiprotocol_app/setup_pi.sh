@@ -12,8 +12,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 INSTALL_PACKAGES_SH="${SCRIPT_DIR}/artifacts/tmp/install_silabs_packages.sh"
 SYSTEMD_SRC="${SCRIPT_DIR}/artifacts/systemd"
 
-CPCD_DEFAULT_BINDING_KEY_PATH="${HOME}/.cpcd"
-CPCD_DEFAULT_BINDING_KEY_FILE="${CPCD_DEFAULT_BINDING_KEY_PATH}/binding.key"
+# cpcd.service runs as root; packaged /etc/cpcd.conf uses ~/.cpcd/binding.key (→ /root/.cpcd).
+CPCD_SYSTEM_BINDING_KEY_PATH="/root/.cpcd"
+CPCD_SYSTEM_BINDING_KEY_FILE="${CPCD_SYSTEM_BINDING_KEY_PATH}/binding.key"
+CPCD_LEGACY_PI_BINDING_KEY_FILE="/home/pi/.cpcd/binding.key"
+CPCD_DEFAULT_BINDING_KEY_PATH="${CPCD_SYSTEM_BINDING_KEY_PATH}"
+CPCD_DEFAULT_BINDING_KEY_FILE="${CPCD_SYSTEM_BINDING_KEY_FILE}"
 
 CPCD_SECURITY_ENABLED=true
 CPCD_CONFIG_FILE=""
@@ -37,7 +41,7 @@ Options:
   -p DIR       Host package directory (contains *.deb and/or *.tgz). Passed to
                install_silabs_packages.sh. If omitted, skip package install.
   -c FILE      Path to cpcd.conf to install on the system (optional).
-  -k FILE      CPCd binding key file to use (default: ${CPCD_DEFAULT_BINDING_KEY_FILE}).
+  -k FILE      CPCd binding key file (default: ${CPCD_SYSTEM_BINDING_KEY_FILE}, used by cpcd.service).
   -K           Generate CPCd ECDH binding key (requires cpcd on PATH; RCP must be reachable).
   -X           Disable CPCd security (no binding key mount).
   --no-start   Do not start cpcd.service after setup.
@@ -47,6 +51,9 @@ Options:
 
 Environment:
   SUDO        If set, use this instead of "sudo" for privileged steps (e.g. SUDO=echo).
+
+  Jenkins RCP CI (MULTIPROT-2148) builds .deb/.tgz on the build farm, copies them to the Pi under
+  ~/host-packages, copies this tree to ~/host-container, then runs: setup_pi.sh -p ~/host-packages [-K].
 
 Examples:
   $(basename "$0") -p /artifacts/host-packages
@@ -74,6 +81,24 @@ install_cpcd_conf() {
   require_file "${CPCD_CONFIG_FILE}"
   echo "Installing cpcd.conf from ${CPCD_CONFIG_FILE}"
   run_as_root install -m 0644 "${CPCD_CONFIG_FILE}" /etc/cpcd.conf
+}
+
+ensure_cpcd_binding_key_dir() {
+  run_as_root mkdir -p "${CPCD_SYSTEM_BINDING_KEY_PATH}"
+  run_as_root chmod 700 "${CPCD_SYSTEM_BINDING_KEY_PATH}"
+}
+
+migrate_legacy_pi_binding_key() {
+  if [[ -e "${CPCD_SYSTEM_BINDING_KEY_FILE}" ]]; then
+    return 0
+  fi
+  if [[ ! -e "${CPCD_LEGACY_PI_BINDING_KEY_FILE}" ]]; then
+    return 0
+  fi
+  echo "Migrating CPCd binding key from ${CPCD_LEGACY_PI_BINDING_KEY_FILE} to ${CPCD_SYSTEM_BINDING_KEY_FILE}"
+  ensure_cpcd_binding_key_dir
+  run_as_root cp "${CPCD_LEGACY_PI_BINDING_KEY_FILE}" "${CPCD_SYSTEM_BINDING_KEY_FILE}"
+  run_as_root chmod 600 "${CPCD_SYSTEM_BINDING_KEY_FILE}"
 }
 
 install_host_packages() {
@@ -111,20 +136,17 @@ install_systemd_units() {
 }
 
 generate_binding_key() {
-  echo "Generating CPCd ECDH binding key at ${CPCD_DEFAULT_BINDING_KEY_FILE}"
+  echo "Generating CPCd ECDH binding key at ${CPCD_SYSTEM_BINDING_KEY_FILE}"
+  ensure_cpcd_binding_key_dir
   mkdir -p "${LEGACY_LOG_DIR}"
   run_as_root rm -f "${LEGACY_LOG_DIR}/binding.key"
-  run_as_root systemctl stop cpcd 2>/dev/null || true
-  run_as_root systemctl start cpcd || true
-  sleep 3
   run_as_root systemctl stop cpcd 2>/dev/null || true
   echo "Running cpcd --bind ecdh (requires RCP; may fail if RCP is bound elsewhere)"
   if run_as_root cpcd --bind ecdh --key "${LEGACY_LOG_DIR}/binding.key"; then
     if run_as_root test -s "${LEGACY_LOG_DIR}/binding.key"; then
-      run_as_root mkdir -p "${CPCD_DEFAULT_BINDING_KEY_PATH}"
-      run_as_root mv "${LEGACY_LOG_DIR}/binding.key" "${CPCD_DEFAULT_BINDING_KEY_FILE}"
-      run_as_root chown "${SUDO_USER:-$USER}:${SUDO_USER:-$USER}" "${CPCD_DEFAULT_BINDING_KEY_FILE}"
-      echo "Generated binding key at ${CPCD_DEFAULT_BINDING_KEY_FILE}"
+      run_as_root mv "${LEGACY_LOG_DIR}/binding.key" "${CPCD_SYSTEM_BINDING_KEY_FILE}"
+      run_as_root chmod 600 "${CPCD_SYSTEM_BINDING_KEY_FILE}"
+      echo "Generated binding key at ${CPCD_SYSTEM_BINDING_KEY_FILE}"
     else
       echo "Error: binding key was not written to ${LEGACY_LOG_DIR}/binding.key" >&2
       exit 1
@@ -133,20 +155,33 @@ generate_binding_key() {
     echo "Error: cpcd --bind failed. See CPCd security documentation." >&2
     exit 1
   fi
+  run_as_root systemctl reset-failed cpcd.service 2>/dev/null || true
+  run_as_root systemctl restart cpcd.service
+  sleep 2
+  if ! run_as_root systemctl is-active --quiet cpcd.service; then
+    echo "Error: cpcd.service failed to start after binding key generation" >&2
+    run_as_root journalctl -u cpcd -n 30 --no-pager || true
+    exit 1
+  fi
+  if ! run_as_root test -S "/dev/shm/cpcd/cpcd_0/ctrl.cpcd.sock"; then
+    echo "Error: CPCd control socket missing at /dev/shm/cpcd/cpcd_0/ctrl.cpcd.sock" >&2
+    exit 1
+  fi
+  echo "cpcd.service restarted with new binding key"
 }
 
 require_binding_key_file() {
   if [[ "${CPCD_SECURITY_ENABLED}" != "true" ]]; then
     return 0
   fi
-  if [[ ! -e "${CPCD_BINDING_KEY_FILE}" ]]; then
+  if ! run_as_root test -e "${CPCD_BINDING_KEY_FILE}"; then
     echo ""
     echo "No CPCd binding key file found at ${CPCD_BINDING_KEY_FILE}."
     echo "Use -K to generate one, or -X to run without security."
     echo ""
     exit 1
   fi
-  echo "Using binding key file ${CPCD_BINDING_KEY_FILE} (ensure cpcd.conf points to it)."
+  echo "Using binding key file ${CPCD_BINDING_KEY_FILE} (cpcd.service reads ~/.cpcd/binding.key as root)."
 }
 
 start_cpcd() {
@@ -219,12 +254,19 @@ install_host_packages
 install_systemd_units
 install_cpcd_conf
 
+migrate_legacy_pi_binding_key
+
 if [[ "${GENERATE_CPCD_BINDING_KEY}" == "true" ]]; then
   generate_binding_key
 fi
 
 if [[ "${CPCD_SECURITY_ENABLED}" == "true" ]]; then
-  require_binding_key_file
+  ensure_cpcd_binding_key_dir
+  if [[ "${START_CPCD}" == "true" ]]; then
+    require_binding_key_file
+  else
+    echo "Skipping binding key presence check (--no-start)."
+  fi
 fi
 
 start_cpcd

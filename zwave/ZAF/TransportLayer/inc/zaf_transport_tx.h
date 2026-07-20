@@ -26,7 +26,7 @@
 
 typedef struct {
   uint16_t dest_node_id;              ///< If provided, then the frame is only sent to this node. If zero, then it's sent to entire group
-  const agi_profile_t *agi_profile;   ///< AGI profile. If NULL, is lifeline.
+  const agi_profile_t *agi_profile;   ///< AGI profile for multicast; NULL = lifeline. May be stack-local; copied into the TX queue item (pointer not serialized).
   uint8_t source_endpoint;            ///< Endpoint that sends the frame. Zero for root device.
   uint8_t dest_endpoint;              ///< Endpoint that receives the frame. Zero for root device. Ignored if dest_node_id is zero.
   uint8_t tx_options;                 ///< Transmit option flags.

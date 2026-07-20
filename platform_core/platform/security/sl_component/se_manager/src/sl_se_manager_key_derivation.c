@@ -93,7 +93,7 @@ sl_status_t sl_se_ecdh_compute_shared_secret(sl_se_command_context_t *cmd_ctx,
     return status;
   }
 
-  #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+  #if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
   // The key out buffer size needs be large enough for non-volatile keys
   if (key_out->storage.method != SL_SE_KEY_STORAGE_INTERNAL_VOLATILE) {
     if (key_in_priv->type == SL_SE_KEY_TYPE_ECC_X25519

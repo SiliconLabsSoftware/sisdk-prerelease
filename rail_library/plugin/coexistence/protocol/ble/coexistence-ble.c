@@ -268,9 +268,12 @@ void sl_bt_ll_coex_request(bool request, bool scanPwmActive, uint8_t priority)
   if (request == true
       && scanPwmActive == false
       && (ll_coex.reqState.coexReq & COEX_REQ_ON)
-      && (priority > ll_coex.config.threshold_coex_pri)) {
-    //If requesting immediately and already requested, inherit previous request without updating
-    //If priority is high then allow increasing
+      && (!ll_coex.enablePriority
+          || (priority > ll_coex.config.threshold_coex_pri))) {
+    //If requesting immediately and already requested, inherit previous request without updating.
+    //Only continue past this point when priority signaling is enabled AND the new priority is
+    //high enough to upgrade the existing request - otherwise there is nothing the rest of this
+    //function can change, so skip it.
     return;
   }
 

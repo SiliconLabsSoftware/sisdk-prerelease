@@ -3,7 +3,7 @@ local changeset = {}
 local platform_logging_enabled = slc.config("OPENTHREAD_CONFIG_LOG_OUTPUT") ~= nil and 
       slc.config("OPENTHREAD_CONFIG_LOG_OUTPUT").value == "OPENTHREAD_CONFIG_LOG_OUTPUT_PLATFORM_DEFINED"
 
-if platform_logging_enabled and not slc.is_provided("ot_rtt_log") then
+if platform_logging_enabled and not slc.is_provided("ot_platform_defined_logger") then
   table.insert(changeset, {
     ['component'] = 'ot_rtt_log',
     ['action'] = 'add'

@@ -35,7 +35,7 @@
 #if defined(RTCC_COUNT) && (RTCC_COUNT == 1)
 
 #include <stdbool.h>
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_enum.h"
 #include "sl_common.h"
 
@@ -316,7 +316,7 @@ __INLINE void sl_hal_rtcc_stop(void)
  ******************************************************************************/
 __INLINE uint32_t sl_hal_rtcc_get_channel_compare_value(uint32_t channel)
 {
-  EFM_ASSERT(SL_HAL_RTCC_CH_VALID(channel) );
+  SL_LOG_DEBUG_ASSERT(SL_HAL_RTCC_CH_VALID(channel) );
   return RTCC->CC[channel].OCVALUE;
 }
 
@@ -333,7 +333,7 @@ __INLINE uint32_t sl_hal_rtcc_get_channel_compare_value(uint32_t channel)
 __INLINE void sl_hal_rtcc_set_channel_compare_value(uint32_t channel,
                                                     uint32_t value)
 {
-  EFM_ASSERT(SL_HAL_RTCC_CH_VALID(channel) );
+  SL_LOG_DEBUG_ASSERT(SL_HAL_RTCC_CH_VALID(channel) );
   RTCC->CC[channel].OCVALUE = value;
 }
 
@@ -349,7 +349,7 @@ __INLINE void sl_hal_rtcc_set_channel_compare_value(uint32_t channel,
  ******************************************************************************/
 __INLINE uint32_t sl_hal_rtcc_get_channel_capture_value(uint32_t channel)
 {
-  EFM_ASSERT(SL_HAL_RTCC_CH_VALID(channel) );
+  SL_LOG_DEBUG_ASSERT(SL_HAL_RTCC_CH_VALID(channel) );
   return RTCC->CC[channel].ICVALUE;
 }
 

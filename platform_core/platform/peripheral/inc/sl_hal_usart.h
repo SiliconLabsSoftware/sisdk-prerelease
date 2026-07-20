@@ -131,6 +131,11 @@ SL_ENUM_GENERIC(sl_hal_usart_clock_mode_t, uint32_t) {
   SL_HAL_USART_CLOCK_MODE_3 = USART_CTRL_CLKPOL_IDLEHIGH | USART_CTRL_CLKPHA_SAMPLETRAILING
 };
 
+SL_ENUM(sl_hal_usart_tx_buffer_interrupt_level_t) {
+  SL_HAL_USART_TX_BUFFER_INTERRUPT_LEVEL_EMPTY = _USART_CTRL_TXBIL_EMPTY,       ///< Interrupt set when TX FIFO is empty.
+  SL_HAL_USART_TX_BUFFER_INTERRUPT_LEVEL_HALFFULL = _USART_CTRL_TXBIL_HALFFULL, ///< Interrupt set when TX FIFO is half-full.
+};
+
 /// Pulse width selection for IrDA mode.
 SL_ENUM(sl_hal_usart_irda_pulse_width_t) {
   SL_HAL_USART_PULSE_WIDTH_ONE   = _USART_IRCTRL_IRPW_ONE,    ///< IrDA pulse width is 1/16 for OVS=0 and 1/8 for OVS=1
@@ -203,6 +208,9 @@ typedef struct {
 
   /// Hardware flow control mode.
   sl_hal_usart_hw_flow_control_t hw_flow_control;
+
+  /// TX buffer interrupt level.
+  sl_hal_usart_tx_buffer_interrupt_level_t tx_buffer_interrupt_level;
 } sl_hal_usart_async_init_t;
 
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
@@ -211,21 +219,22 @@ typedef sl_hal_usart_async_init_t sl_hal_usart_async_config_t;
 /** @endcond */
 
 /// Default configuration for USART asynchronous initialization structure.
-#define SL_HAL_USART_INIT_ASYNC_DEFAULT                                                    \
-  {                                                                                        \
-    false,                               /* No CS invert. */                               \
-    false,                               /* Auto CS functionality enable/disable switch */ \
-    false,                               /* Not USART PRS input mode. */                   \
-    0,                                   /* PRS channel 0. */                              \
-    0,                                   /* Auto CS Hold cycles. */                        \
-    0,                                   /* Auto CS Setup cycles. */                       \
-    0,                                   /* Clock divider default value. */                \
-    SL_HAL_USART_OVS_16,                 /* 16x oversampling. */                           \
-    SL_HAL_USART_DATA_BITS_8,            /* 8 data bits. */                                \
-    SL_HAL_USART_NO_PARITY,              /* No parity. */                                  \
-    SL_HAL_USART_STOP_BITS_1,            /* 1 stop bit. */                                 \
-    SL_HAL_USART_MAJORITY_VOTE_DISABLE,  /* Do not disable majority vote. */               \
-    SL_HAL_USART_HW_FLOW_CONTROL_NONE,   /* No HW flow control. */                         \
+#define SL_HAL_USART_INIT_ASYNC_DEFAULT                                                             \
+  {                                                                                                 \
+    false,                                        /* No CS invert. */                               \
+    false,                                        /* Auto CS functionality enable/disable switch */ \
+    false,                                        /* Not USART PRS input mode. */                   \
+    0,                                            /* PRS channel 0. */                              \
+    0,                                            /* Auto CS Hold cycles. */                        \
+    0,                                            /* Auto CS Setup cycles. */                       \
+    0,                                            /* Clock divider default value. */                \
+    SL_HAL_USART_OVS_16,                          /* 16x oversampling. */                           \
+    SL_HAL_USART_DATA_BITS_8,                     /* 8 data bits. */                                \
+    SL_HAL_USART_NO_PARITY,                       /* No parity. */                                  \
+    SL_HAL_USART_STOP_BITS_1,                     /* 1 stop bit. */                                 \
+    SL_HAL_USART_MAJORITY_VOTE_DISABLE,           /* Do not disable majority vote. */               \
+    SL_HAL_USART_HW_FLOW_CONTROL_NONE,            /* No HW flow control. */                         \
+    SL_HAL_USART_TX_BUFFER_INTERRUPT_LEVEL_EMPTY, /* TX buffer interrupt level is empty. */         \
   }
 
 /// Synchronous mode initialization structure.
@@ -313,26 +322,12 @@ typedef sl_hal_usart_irda_init_t sl_hal_usart_irda_config_t;
 /** @endcond */
 
 /// Default configuration for USART IRDA initialization structure.
-#define SL_HAL_USART_INIT_IRDA_DEFAULT                                                       \
-  {                                                                                          \
-    false,                                 /* Rx invert disabled. */                         \
-    false,                                 /* Filtering disabled. */                         \
-    SL_HAL_USART_PULSE_WIDTH_THREE,        /* Pulse width is set to THREE. */                \
-    {                                                                                        \
-      false,                               /* No CS invert. */                               \
-      false,                               /* Auto CS functionality enable/disable switch */ \
-      false,                               /* Not USART PRS input mode. */                   \
-      0,                                   /* PRS channel 0. */                              \
-      0,                                   /* Auto CS Hold cycles. */                        \
-      0,                                   /* Auto CS Setup cycles. */                       \
-      0,                                   /* Clock divider default value. */                \
-      SL_HAL_USART_OVS_16,                 /* 16x oversampling. */                           \
-      SL_HAL_USART_DATA_BITS_8,            /* 8 data bits. */                                \
-      SL_HAL_USART_NO_PARITY,              /* No parity. */                                  \
-      SL_HAL_USART_STOP_BITS_1,            /* 1 stop bit. */                                 \
-      SL_HAL_USART_MAJORITY_VOTE_DISABLE,  /* Do not disable majority vote. */               \
-      SL_HAL_USART_HW_FLOW_CONTROL_NONE,   /* No HW flow control. */                         \
-    },                                                                                       \
+#define SL_HAL_USART_INIT_IRDA_DEFAULT                                                          \
+  {                                                                                             \
+    false,                                 /* Rx invert disabled. */                            \
+    false,                                 /* Filtering disabled. */                            \
+    SL_HAL_USART_PULSE_WIDTH_THREE,        /* Pulse width is set to THREE. */                   \
+    SL_HAL_USART_INIT_ASYNC_DEFAULT,       /* Default asynchronous initialization structure. */ \
   }
 
 /// I2S mode initialization structure. Inherited from synchronous mode initialization structure.
@@ -1404,6 +1399,25 @@ __INLINE uint32_t sl_hal_usart_get_pending_interrupts(USART_TypeDef *usart)
   EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   return usart->IF;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Get enabled USART interrupt flags.
+ *
+ * @param[in] usart
+ *   Pointer to the USART/UART peripheral register block.
+ *
+ * @return
+ *   USART/UART interrupt source(s) enabled. Returns one or more valid
+ *   interrupt flags for the USART module (USART_IF_nnn) OR'ed together.
+ ******************************************************************************/
+__INLINE uint32_t sl_hal_usart_get_enabled_interrupts(USART_TypeDef *usart)
+{
+  // Make sure the module exists on the selected chip.
+  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+
+  return usart->IEN;
 }
 
 /***************************************************************************//**

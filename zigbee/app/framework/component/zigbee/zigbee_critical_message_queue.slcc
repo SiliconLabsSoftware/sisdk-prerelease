@@ -1,0 +1,53 @@
+package: zigbee
+description: Silicon Labs implementation of a critical message queue.
+id: zigbee_critical_message_queue
+label: Critical Message Queue
+category: Zigbee|Works With All Hubs
+quality: production
+provides:
+- name: zigbee_critical_message_queue
+source:
+- path: app/framework/plugin/critical-message-queue/critical-message-queue.c
+- path: app/framework/plugin/critical-message-queue/critical-message-queue-cli.c
+  condition:
+  - cli
+include:
+- path: app/framework/plugin/critical-message-queue
+  file_list:
+  - path: critical-message-queue.h
+template_contribution:
+- name: component_catalog
+  value: zigbee_critical_message_queue
+- name: zigbee_af_callback
+  value:
+    callback_type: event_init
+    function_name: sli_zigbee_af_critical_message_queue_retry_init_callback
+- name: zcl
+  value:
+    cluster: sl works with all hubs
+    side: server
+- name: cli_group
+  value:
+    group: plugin
+    name: critical-message-queue
+    help: critical-message-queue related commands.
+- name: cli_command
+  value:
+    group: critical-message-queue
+    name: print-queue
+    handler: sli_zigbee_af_critical_message_print_queue_command
+    help: Prints the CMQ.
+- name: cli_command
+  value:
+    group: critical-message-queue
+    name: print-config
+    handler: sli_zigbee_af_critical_message_print_config_command
+    help: Prints the config.
+
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/critical-message-queue
+metadata:
+  sbom:
+    license: MSLA
+root_path: zigbee

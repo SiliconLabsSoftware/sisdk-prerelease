@@ -97,6 +97,13 @@ extern "C" {
  * - Stub implementation for customers who want to manage their own watchdog
  *
  ******************************************************************************/
+/// WDOG CMU clock source selection (maps to CMU WDOGxCLKCTRL.CLKSEL).
+typedef enum {
+  SLI_WATCHDOG_MANAGER_HAL_CLK_HCLKDIV1024 = 0, ///< HCLK divided by 1024
+  SLI_WATCHDOG_MANAGER_HAL_CLK_LFRCO,           ///< Low-frequency RC oscillator
+  SLI_WATCHDOG_MANAGER_HAL_CLK_LFXO,            ///< Low-frequency crystal oscillator
+  SLI_WATCHDOG_MANAGER_HAL_CLK_ULFRCO,          ///< Ultra-low-frequency RC oscillator
+} sli_watchdog_manager_hal_clock_source_t;
 
 /***************************************************************************//**
  * @brief Initialize the hardware watchdog.
@@ -107,8 +114,8 @@ extern "C" {
  * is not started by this function.
  *
  * Configuration includes:
- * - Clock source (typically HCLK/1024)
- * - Timeout period
+ * - Timeout period (WDOG.CFG.PERSEL)
+ * - CMU WDOG clock source on re-init (first init loads Clock Manager selection)
  * - EM1RUN setting (if available)
  * - Disabling interrupts (if available)
  *
@@ -119,6 +126,62 @@ extern "C" {
  * @return Error code on failure.
  ******************************************************************************/
 sl_status_t sli_watchdog_manager_hal_init(uint8_t timeout_period);
+
+/***************************************************************************//**
+ * @brief Get the hardware watchdog timeout period index.
+ *
+ * @param[out] timeout_period Current PERSEL index (0-15).
+ *
+ * @return SL_STATUS_OK on success.
+ * @return SL_STATUS_NULL_POINTER if @p timeout_period is NULL.
+ * @return SL_STATUS_NOT_INITIALIZED if the HAL has not been initialized.
+ ******************************************************************************/
+sl_status_t sli_watchdog_manager_hal_get_timeout_period(uint8_t *timeout_period);
+
+/***************************************************************************//**
+ * @brief Set the hardware watchdog timeout period index.
+ *
+ * @details Re-initializes the WDOG with the new PERSEL and the current clock
+ *          source.
+ *
+ * @param[in] timeout_period PERSEL index to apply (0-15).
+ *
+ * @return SL_STATUS_OK on success.
+ * @return SL_STATUS_INVALID_PARAMETER if @p timeout_period is greater than 15.
+ * @return SL_STATUS_NOT_INITIALIZED if the HAL has not been initialized.
+ ******************************************************************************/
+sl_status_t sli_watchdog_manager_hal_set_timeout_period(uint8_t timeout_period);
+
+/***************************************************************************//**
+ * @brief Get the hardware watchdog CMU clock source.
+ *
+ * @param[out] clock_source Current clock source selection.
+ *
+ * @return SL_STATUS_OK on success.
+ * @return SL_STATUS_NULL_POINTER if @p clock_source is NULL.
+ * @return SL_STATUS_NOT_INITIALIZED if the HAL has not been initialized.
+ * @return SL_STATUS_NOT_SUPPORTED if the device has no WDOG CLKSEL register.
+ ******************************************************************************/
+sl_status_t sli_watchdog_manager_hal_get_clock_source(
+  sli_watchdog_manager_hal_clock_source_t *clock_source);
+
+/***************************************************************************//**
+ * @brief Set the hardware watchdog CMU clock source.
+ *
+ * @details Re-initializes the WDOG with the new clock and the current PERSEL.
+ *          LFXO is supported only when SL_CLOCK_MANAGER_LFXO_EN is enabled in
+ *          the project Clock Manager configuration.
+ *
+ * @param[in] clock_source Clock source to select.
+ *
+ * @return SL_STATUS_OK on success.
+ * @return SL_STATUS_INVALID_PARAMETER if @p clock_source is invalid.
+ * @return SL_STATUS_NOT_INITIALIZED if the HAL has not been initialized.
+ * @return SL_STATUS_NOT_SUPPORTED if the device has no CLKSEL register or the
+ *         clock source is not supported (for example LFXO when disabled).
+ ******************************************************************************/
+sl_status_t sli_watchdog_manager_hal_set_clock_source(
+  sli_watchdog_manager_hal_clock_source_t clock_source);
 
 /***************************************************************************//**
  * @brief Start the hardware watchdog.

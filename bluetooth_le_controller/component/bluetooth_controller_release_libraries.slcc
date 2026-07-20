@@ -24,7 +24,6 @@ requires:
 - name: rail_lib
 - name: sl_rail_util_compatible_pa
 - name: sl_rail_util_built_in_phys
-- name: sli_crypto
 
 library:
 - path: build/gcc/x301/release/liblinklayer.a

@@ -37,6 +37,7 @@
 #if defined(IADC_COUNT) && (IADC_COUNT > 0)
 
 #include <stdbool.h>
+#include "sl_log_helper.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -933,7 +934,7 @@ uint32_t sl_hal_iadc_get_reference_voltage(sl_hal_iadc_voltage_reference_t refer
 __INLINE void sl_hal_iadc_enable(IADC_TypeDef *iadc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   iadc->EN_SET = IADC_EN_EN;
 }
@@ -949,7 +950,7 @@ __INLINE void sl_hal_iadc_enable(IADC_TypeDef *iadc)
 __INLINE void sl_hal_iadc_wait_sync(IADC_TypeDef *iadc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   while ((iadc->EN & _IADC_EN_EN_MASK) && (iadc->STATUS & _IADC_STATUS_SYNCBUSY_MASK)) {
     // Wait for any pending previous write operation to have been completed
@@ -969,7 +970,7 @@ __INLINE void sl_hal_iadc_wait_sync(IADC_TypeDef *iadc)
 __INLINE void sl_hal_iadc_wait_ready(IADC_TypeDef *iadc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   while (iadc->EN & _IADC_EN_DISABLING_MASK) {
     // Wait for disabling to finish.
@@ -987,7 +988,7 @@ __INLINE void sl_hal_iadc_wait_ready(IADC_TypeDef *iadc)
 __INLINE void sl_hal_iadc_disable(IADC_TypeDef *iadc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
 #if defined(_IADC_STATUS_SYNCBUSY_MASK)
   sl_hal_iadc_wait_sync(iadc);
@@ -1012,9 +1013,9 @@ __INLINE void sl_hal_iadc_disable(IADC_TypeDef *iadc)
 __INLINE void sl_hal_iadc_start_scan(IADC_TypeDef *iadc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
   // Make sure the module is enabled.
-  EFM_ASSERT((iadc->EN & _IADC_EN_EN_MASK) == _IADC_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT((iadc->EN & _IADC_EN_EN_MASK) == _IADC_EN_EN_MASK);
 
   iadc->CMD_SET = IADC_CMD_SCANSTART;
 
@@ -1033,9 +1034,9 @@ __INLINE void sl_hal_iadc_start_scan(IADC_TypeDef *iadc)
 __INLINE void sl_hal_iadc_stop_scan(IADC_TypeDef *iadc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
   // Make sure the module is enabled.
-  EFM_ASSERT((iadc->EN & _IADC_EN_EN_MASK) == _IADC_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT((iadc->EN & _IADC_EN_EN_MASK) == _IADC_EN_EN_MASK);
 
   iadc->CMD_SET = IADC_CMD_SCANSTOP;
 
@@ -1058,9 +1059,9 @@ __INLINE void sl_hal_iadc_stop_scan(IADC_TypeDef *iadc)
 __INLINE void sl_hal_iadc_start_single(IADC_TypeDef *iadc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
   // Make sure the module is enabled.
-  EFM_ASSERT((iadc->EN & _IADC_EN_EN_MASK) == _IADC_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT((iadc->EN & _IADC_EN_EN_MASK) == _IADC_EN_EN_MASK);
 
   iadc->CMD_SET = IADC_CMD_SINGLESTART;
 
@@ -1079,9 +1080,9 @@ __INLINE void sl_hal_iadc_start_single(IADC_TypeDef *iadc)
 __INLINE void sl_hal_iadc_stop_single(IADC_TypeDef *iadc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
   // Make sure the module is enabled.
-  EFM_ASSERT((iadc->EN & _IADC_EN_EN_MASK) == _IADC_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT((iadc->EN & _IADC_EN_EN_MASK) == _IADC_EN_EN_MASK);
 
   iadc->CMD_SET = IADC_CMD_SINGLESTOP;
 
@@ -1100,9 +1101,9 @@ __INLINE void sl_hal_iadc_stop_single(IADC_TypeDef *iadc)
 __INLINE void sl_hal_iadc_enable_timer(IADC_TypeDef *iadc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
   // Make sure the module is enabled.
-  EFM_ASSERT((iadc->EN & _IADC_EN_EN_MASK) == _IADC_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT((iadc->EN & _IADC_EN_EN_MASK) == _IADC_EN_EN_MASK);
 
   iadc->CMD_SET = IADC_CMD_TIMEREN;
 
@@ -1121,9 +1122,9 @@ __INLINE void sl_hal_iadc_enable_timer(IADC_TypeDef *iadc)
 __INLINE void sl_hal_iadc_disable_timer(IADC_TypeDef *iadc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
   // Make sure the module is enabled.
-  EFM_ASSERT((iadc->EN & _IADC_EN_EN_MASK) == _IADC_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT((iadc->EN & _IADC_EN_EN_MASK) == _IADC_EN_EN_MASK);
 
   iadc->CMD_SET = IADC_CMD_TIMERDIS;
 
@@ -1145,7 +1146,7 @@ __INLINE void sl_hal_iadc_disable_timer(IADC_TypeDef *iadc)
 __INLINE uint32_t sl_hal_iadc_get_status(IADC_TypeDef *iadc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   return iadc->STATUS;
 }
@@ -1166,7 +1167,7 @@ __INLINE void sl_hal_iadc_clear_interrupts(IADC_TypeDef *iadc,
                                            uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   iadc->IF_CLR = flags;
 }
@@ -1188,7 +1189,7 @@ __INLINE void sl_hal_iadc_disable_interrupts(IADC_TypeDef *iadc,
                                              uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   iadc->IEN_CLR = flags;
 }
@@ -1214,7 +1215,7 @@ __INLINE void sl_hal_iadc_enable_interrupts(IADC_TypeDef *iadc,
                                             uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   iadc->IEN_SET = flags;
 }
@@ -1236,7 +1237,7 @@ __INLINE void sl_hal_iadc_enable_interrupts(IADC_TypeDef *iadc,
 __INLINE uint32_t sl_hal_iadc_get_pending_interrupts(IADC_TypeDef *iadc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   return iadc->IF;
 }
@@ -1263,7 +1264,7 @@ __INLINE uint32_t sl_hal_iadc_get_pending_interrupts(IADC_TypeDef *iadc)
 __INLINE uint32_t sl_hal_iadc_get_enable_pending_interrupts(IADC_TypeDef *iadc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   uint32_t ien;
 
@@ -1291,7 +1292,7 @@ __INLINE void sl_hal_iadc_set_pending_interrupts(IADC_TypeDef *iadc,
                                                  uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   iadc->IF_SET = flags;
 }
@@ -1313,7 +1314,7 @@ __INLINE void sl_hal_iadc_set_pending_interrupts(IADC_TypeDef *iadc,
 __INLINE uint32_t sl_hal_iadc_pull_single_fifo_data(IADC_TypeDef *iadc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   return iadc->SINGLEFIFODATA;
 }
@@ -1336,7 +1337,7 @@ __INLINE uint32_t sl_hal_iadc_pull_single_fifo_data(IADC_TypeDef *iadc)
 __INLINE uint32_t sl_hal_iadc_read_single_data(IADC_TypeDef *iadc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   return iadc->SINGLEDATA;
 }
@@ -1358,7 +1359,7 @@ __INLINE uint32_t sl_hal_iadc_read_single_data(IADC_TypeDef *iadc)
 __INLINE uint32_t sl_hal_iadc_pull_scan_fifo_data(IADC_TypeDef *iadc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   return iadc->SCANFIFODATA;
 }
@@ -1381,7 +1382,7 @@ __INLINE uint32_t sl_hal_iadc_pull_scan_fifo_data(IADC_TypeDef *iadc)
 __INLINE uint32_t sl_hal_iadc_read_scan_data(IADC_TypeDef *iadc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   return iadc->SCANDATA;
 }
@@ -1400,7 +1401,7 @@ __INLINE void sl_hal_iadc_set_command(IADC_TypeDef *iadc,
                                       sl_hal_iadc_cmd_t cmd)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   iadc->CMD = cmd;
 #if defined(_IADC_EN_DISABLING_MASK)
@@ -1421,7 +1422,7 @@ __INLINE void sl_hal_iadc_set_command(IADC_TypeDef *iadc,
 __INLINE uint32_t sl_hal_iadc_get_scan_mask(IADC_TypeDef *iadc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   return (iadc->STMASK) >> _IADC_STMASK_STMASK_SHIFT;
 }
@@ -1439,7 +1440,7 @@ __INLINE uint32_t sl_hal_iadc_get_scan_mask(IADC_TypeDef *iadc)
 __INLINE uint8_t sl_hal_iadc_get_single_fifo_cnt(IADC_TypeDef *iadc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   return (uint8_t) ((iadc->SINGLEFIFOSTAT & _IADC_SINGLEFIFOSTAT_FIFOREADCNT_MASK)
                     >> _IADC_SINGLEFIFOSTAT_FIFOREADCNT_SHIFT);
@@ -1458,7 +1459,7 @@ __INLINE uint8_t sl_hal_iadc_get_single_fifo_cnt(IADC_TypeDef *iadc)
 __INLINE uint8_t sl_hal_iadc_get_scan_fifo_cnt(IADC_TypeDef *iadc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_IADC_REF_VALID(iadc));
 
   return (uint8_t) ((iadc->SCANFIFOSTAT & _IADC_SCANFIFOSTAT_FIFOREADCNT_MASK)
                     >> _IADC_SCANFIFOSTAT_FIFOREADCNT_SHIFT);
@@ -1478,6 +1479,7 @@ __INLINE uint8_t sl_hal_iadc_get_scan_fifo_cnt(IADC_TypeDef *iadc)
  ******************************************************************************/
 __INLINE sl_hal_iadc_negative_port_input_t sl_hal_iadc_port_pin_to_neg_port(const sl_gpio_t *gpio)
 {
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
   uint32_t input = (uint32_t)gpio->port + _IADC_SCAN_PORTNEG_PORTA;
 
   return (sl_hal_iadc_negative_port_input_t) input;
@@ -1497,6 +1499,7 @@ __INLINE sl_hal_iadc_negative_port_input_t sl_hal_iadc_port_pin_to_neg_port(cons
  ******************************************************************************/
 __INLINE sl_hal_iadc_positive_port_input_t sl_hal_iadc_port_pin_to_pos_port(const sl_gpio_t *gpio)
 {
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
   uint32_t input = (uint32_t) gpio->port + _IADC_SCAN_PORTPOS_PORTA;
 
   return (sl_hal_iadc_positive_port_input_t) input;

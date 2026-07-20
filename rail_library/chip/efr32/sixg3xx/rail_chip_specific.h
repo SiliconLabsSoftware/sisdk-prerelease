@@ -410,7 +410,9 @@ struct RAIL_ChannelConfigEntryAttr {
  */
 #define RAIL_POWER_MODE_IS_ANY_DBM_POWERSETTING_MAPPING_TABLE(x) \
   (((x) == RAIL_TX_POWER_MODE_2P4GIG_HP)                         \
-   || ((x) == RAIL_TX_POWER_MODE_2P4GIG_LP))
+   || ((x) == RAIL_TX_POWER_MODE_2P4GIG_MP)                      \
+   || ((x) == RAIL_TX_POWER_MODE_2P4GIG_LP)                      \
+   || ((x) == RAIL_TX_POWER_MODE_2P4GIG_BTC))
 
 /**
  * Convenience macro to check if the power mode supports raw setting.
@@ -418,7 +420,10 @@ struct RAIL_ChannelConfigEntryAttr {
  * @deprecated RAIL 2.x. synonym of \ref SL_RAIL_POWER_MODE_SUPPORTS_RAW_SETTING().
  */
 #define RAIL_POWER_MODE_SUPPORTS_RAW_SETTING(x) \
-  (((x) == RAIL_TX_POWER_MODE_2P4GIG_HP) || ((x) == RAIL_TX_POWER_MODE_2P4GIG_LP))
+  (((x) == RAIL_TX_POWER_MODE_2P4GIG_HP)        \
+   || ((x) == RAIL_TX_POWER_MODE_2P4GIG_MP)     \
+   || ((x) == RAIL_TX_POWER_MODE_2P4GIG_LP)     \
+   || ((x) == RAIL_TX_POWER_MODE_2P4GIG_BTC))
 
 /** @} */ // end of group PA_SIXX3XX
 

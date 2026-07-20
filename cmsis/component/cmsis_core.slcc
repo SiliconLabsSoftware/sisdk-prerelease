@@ -130,6 +130,12 @@ include:
     condition:
     - device_has_pmu
     - cortexm55
+  - path: armv7m_cachel1.h
+    condition:
+    - cortexm52
+  - path: armv7m_cachel1.h
+    condition:
+    - cortexm55
 - path: Core/Include/a-profile
   file_list:
   - path: cmsis_armclang_a.h

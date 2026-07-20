@@ -135,7 +135,7 @@ static void mfglibSetupGeneric(void)
 {
 #ifndef SL_ZIGBEE_TEST
   tokTypeMfgPhyConfig phyConfigToken, phyConfig;
-  (void)sl_token_manager_get_data(SL_TOKEN_GET_STATIC_DEVICE_TOKEN(TOKEN_MFG_PHY_CONFIG), (void *)&phyConfigToken, sizeof(tokTypeMfgPhyConfig));
+  (void)sl_token_manager_get_data(SL_TOKEN_GET_STATIC_DEVICE_TOKEN(TOKEN_MFG_PHY_CONFIG), (void *)&phyConfigToken, sizeof(phyConfigToken));
   phyConfig = ~phyConfigToken;
 #else
   uint16_t phyConfig = 0;

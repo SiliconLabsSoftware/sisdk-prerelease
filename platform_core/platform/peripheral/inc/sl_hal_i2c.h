@@ -42,6 +42,7 @@ extern "C" {
 #include "sl_status.h"
 #include "sl_enum.h"
 #include "sl_device_i2c.h"
+#include "sl_log_helper.h"
 
 /***************************************************************************//**
  * @addtogroup i2c I2C - Inter-Integrated Circuit
@@ -211,7 +212,7 @@ __INLINE void sl_hal_i2c_wait_ready(I2C_TypeDef *i2c)
 {
 #if defined(_I2C_EN_DISABLING_MASK)
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   while (i2c->EN & _I2C_EN_DISABLING_MASK) {
     // Wait for disabling to finish
@@ -230,7 +231,7 @@ __INLINE void sl_hal_i2c_wait_sync(I2C_TypeDef *i2c)
 {
 #if defined(_I2C_SYNCBUSY_MASK) && defined(_I2C_STATUS_CLEARTXBUSY_MASK) && defined(_I2C_STATUS_CLEARRXBUSY_MASK)
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   while ( ((i2c->EN & _I2C_EN_EN_MASK) && (i2c->SYNCBUSY & _I2C_SYNCBUSY_MASK))
           || ((i2c->EN & _I2C_EN_EN_MASK) && (i2c->STATUS & (_I2C_STATUS_CLEARTXBUSY_MASK
@@ -250,7 +251,7 @@ __INLINE void sl_hal_i2c_wait_sync(I2C_TypeDef *i2c)
 __INLINE void sl_hal_i2c_enable(I2C_TypeDef *i2c)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   // Wait for synchronization to complete.
   sl_hal_i2c_wait_sync(i2c);
@@ -267,7 +268,7 @@ __INLINE void sl_hal_i2c_enable(I2C_TypeDef *i2c)
 __INLINE void sl_hal_i2c_disable(I2C_TypeDef *i2c)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   // Make sure module is enabled.
   if ((i2c->EN & _I2C_EN_EN_MASK) != I2C_EN_EN) {
@@ -294,7 +295,7 @@ __INLINE void sl_hal_i2c_disable(I2C_TypeDef *i2c)
 __INLINE sl_status_t sl_hal_i2c_send_ack(I2C_TypeDef *i2c)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   sl_status_t status = SL_STATUS_OK;
 
@@ -323,7 +324,7 @@ __INLINE void sl_hal_i2c_auto_ack(I2C_TypeDef *i2c,
                                   uint8_t enable)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   // Wait for synchronization to complete.
   sl_hal_i2c_wait_sync(i2c);
@@ -342,7 +343,7 @@ __INLINE void sl_hal_i2c_auto_ack(I2C_TypeDef *i2c,
 __INLINE sl_status_t sl_hal_i2c_send_nack(I2C_TypeDef *i2c)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   sl_status_t status = SL_STATUS_OK;
 
@@ -369,7 +370,7 @@ __INLINE sl_status_t sl_hal_i2c_send_nack(I2C_TypeDef *i2c)
 __INLINE uint32_t sl_hal_i2c_get_status(I2C_TypeDef *i2c)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   return i2c->STATUS;
 }
@@ -386,7 +387,7 @@ __INLINE void sl_hal_i2c_enable_interrupts(I2C_TypeDef *i2c,
                                            uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   i2c->IEN_SET = flags;
 }
@@ -403,7 +404,7 @@ __INLINE void sl_hal_i2c_disable_interrupts(I2C_TypeDef *i2c,
                                             uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   i2c->IEN_CLR = flags;
 }
@@ -420,7 +421,7 @@ __INLINE void sl_hal_i2c_set_interrupts(I2C_TypeDef *i2c,
                                         uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   i2c->IF_SET = flags;
 }
@@ -437,7 +438,7 @@ __INLINE void sl_hal_i2c_clear_interrupts(I2C_TypeDef *i2c,
                                           uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   i2c->IF_CLR = flags;
 }
@@ -451,7 +452,7 @@ __INLINE void sl_hal_i2c_clear_interrupts(I2C_TypeDef *i2c,
 __INLINE uint32_t sl_hal_i2c_get_pending_interrupts(I2C_TypeDef *i2c)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   return i2c->IF;
 }
@@ -466,7 +467,7 @@ __INLINE uint32_t sl_hal_i2c_get_pending_interrupts(I2C_TypeDef *i2c)
 __INLINE uint32_t sl_hal_i2c_get_enabled_interrupts(I2C_TypeDef *i2c)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   return i2c->IEN;
 }
@@ -481,7 +482,7 @@ __INLINE uint32_t sl_hal_i2c_get_enabled_interrupts(I2C_TypeDef *i2c)
 __INLINE uint32_t sl_hal_i2c_get_enabled_pending_interrupts(I2C_TypeDef *i2c)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   uint32_t enabled_interrupts;
 
@@ -505,7 +506,7 @@ __INLINE void sl_hal_i2c_set_follower_address(I2C_TypeDef *i2c,
                                               bool is_10bit_addr)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   // Wait for synchronization to complete.
   sl_hal_i2c_wait_sync(i2c);
@@ -528,7 +529,7 @@ __INLINE void sl_hal_i2c_set_follower_address(I2C_TypeDef *i2c,
 __INLINE uint8_t sl_hal_i2c_get_follower_address(I2C_TypeDef *i2c)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   // Wait for synchronization to complete.
   sl_hal_i2c_wait_sync(i2c);
@@ -547,7 +548,7 @@ __INLINE void sl_hal_i2c_set_follower_mask_address(I2C_TypeDef *i2c,
                                                    uint8_t mask)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   // Wait for synchronization to complete.
   sl_hal_i2c_wait_sync(i2c);
@@ -565,7 +566,7 @@ __INLINE void sl_hal_i2c_set_follower_mask_address(I2C_TypeDef *i2c,
 __INLINE uint8_t sl_hal_i2c_get_follower_mask_address(I2C_TypeDef *i2c)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   // Wait for synchronization to complete.
   sl_hal_i2c_wait_sync(i2c);
@@ -584,7 +585,7 @@ __INLINE void sl_hal_i2c_set_tx_fifo_threshold(I2C_TypeDef *i2c,
                                                sl_i2c_fifo_threshold_t threshold_value)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   // Configure the TX FIFO.
   i2c->CTRL_SET = (threshold_value << _I2C_CTRL_TXFIL_SHIFT);
@@ -599,7 +600,7 @@ __INLINE void sl_hal_i2c_set_tx_fifo_threshold(I2C_TypeDef *i2c,
 __INLINE sl_i2c_fifo_threshold_t sl_hal_i2c_get_tx_fifo_threshold(const I2C_TypeDef *i2c)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   // Return the TX FIFO value.
   return (sl_i2c_fifo_threshold_t)((i2c->CTRL >> _I2C_CTRL_TXFIL_SHIFT) & 0x0F);
@@ -617,7 +618,7 @@ __INLINE void sl_hal_i2c_set_rx_fifo_threshold(I2C_TypeDef *i2c,
                                                sl_i2c_fifo_threshold_t threshold_value)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   // Configure the TX FIFO.
   i2c->CTRL_SET = (threshold_value << _I2C_CTRL_RXFIL_SHIFT);
@@ -632,7 +633,7 @@ __INLINE void sl_hal_i2c_set_rx_fifo_threshold(I2C_TypeDef *i2c,
 __INLINE sl_i2c_fifo_threshold_t sl_hal_i2c_get_rx_fifo_threshold(const I2C_TypeDef *i2c)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   // Return the TX FIFO value.
   return (sl_i2c_fifo_threshold_t)((i2c->CTRL >> _I2C_CTRL_RXFIL_SHIFT) & 0x0F);

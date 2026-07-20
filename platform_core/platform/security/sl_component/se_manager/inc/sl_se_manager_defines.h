@@ -256,6 +256,9 @@ extern "C" {
 /// SL_SE_KEY_FLAG_NON_EXPORTABLE unless there is a specific need to access
 /// the key value outside the SE.
   #define SL_SE_KEY_STORAGE_EXTERNAL_WRAPPED 0x01
+#endif
+
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 /// Key is stored inside the SE, and will persist until system reset or
 /// explicitly deleted.
 /// Keys stored in this way should use the flag
@@ -267,7 +270,7 @@ extern "C" {
 /// in the SE. See documentation for a list of available keys.
 #define SL_SE_KEY_STORAGE_INTERNAL_IMMUTABLE 0x03
 
-#if defined(_SILICON_LABS_32B_SERIES_3)
+#if defined(SLI_SE_SUPPORTS_KSU_KEY_STORAGE)
 /// Key is stored in the KSURAM, an internal Key Slot RAM.
   #define SL_SE_KEY_STORAGE_INTERNAL_KSU      0x04
 #endif

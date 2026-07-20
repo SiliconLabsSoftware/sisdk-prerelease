@@ -36,6 +36,7 @@
 #endif
 #include "sl_clock_manager.h"
 #include "sl_assert.h"
+#include "sl_compiler.h"
 
 #include "sl_usbd_core.h"
 
@@ -44,6 +45,15 @@
 
 #if defined(_SILICON_LABS_32B_SERIES_2) || defined(_SILICON_LABS_32B_SERIES_3)
 #include "sl_usbd_driver_config.h"
+#endif
+
+#ifndef SL_USBD_DWC_OTG_ENABLE_DDMA
+#define SL_USBD_DWC_OTG_ENABLE_DDMA  0
+#endif
+
+#if !defined(_SILICON_LABS_32B_SERIES_3)
+#undef SL_USBD_DWC_OTG_ENABLE_DDMA
+#define SL_USBD_DWC_OTG_ENABLE_DDMA  0
 #endif
 
 #if defined(_SILICON_LABS_32B_SERIES_3)
@@ -94,6 +104,17 @@
 
 // With Buffer DMA, data buffers must be 32 bits aligned
 #define BUFFER_BYTE_ALIGNMENT   4u
+
+#if defined(_SILICON_LABS_32B_SERIES_2) || defined(_SILICON_LABS_32B_SERIES_3)
+#if defined(USBAHB_GHWCFG4_DESCDMAENABLED) && defined(USBAHB_GHWCFG4_DESCDMA) \
+  && defined(USBAHB_DCFG_DESCDMA)
+#define SLI_USBD_DWC_OTG_HAS_DDMA_REGS  1
+#else
+#define SLI_USBD_DWC_OTG_HAS_DDMA_REGS  0
+#endif
+#else
+#define SLI_USBD_DWC_OTG_HAS_DDMA_REGS  0
+#endif
 
 /********************************************************************************************************
  *                                   DWC OTG USB DEVICE CONSTRAINTS
@@ -461,6 +482,489 @@ typedef struct {                                         // ------ DEVICE ENDPOI
 
 sli_usbd_driver_endpoint_data_t usbd_driver_data = { 0 };
 
+#if (SLI_USBD_DWC_OTG_HAS_DDMA_REGS != 0)
+
+// Descriptor DMA is selected per endpoint type. Only bulk IN and bulk OUT
+// use descriptor chains when s_ddma_active is true; control, interrupt, and
+// isochronous endpoints keep buffer-pointer DMA.
+#define SLI_USBD_DDMA_DESC_ALIGN        4u
+#define SLI_USBD_DDMA_MAX_DESC_PER_EP   8u
+#define SLI_USBD_DDMA_SEG_BYTES         (8u * MAX_PKT_SIZE)   // 512 bytes per descriptor
+#define SLI_USBD_DDMA_MAX_XFER_BYTES    (SLI_USBD_DDMA_MAX_DESC_PER_EP * SLI_USBD_DDMA_SEG_BYTES)
+
+// DDMA bulk IN may use the full descriptor chain (8 x 512 bytes). OUT remains capped
+// until multi-descriptor OUT is fully validated.
+#ifndef SLI_USBD_DDMA_BULK_IN_MAX_XFER_BYTES
+#define SLI_USBD_DDMA_BULK_IN_MAX_XFER_BYTES   4096u
+#endif
+#ifndef SLI_USBD_DDMA_BULK_OUT_MAX_XFER_BYTES
+#define SLI_USBD_DDMA_BULK_OUT_MAX_XFER_BYTES  4096u
+#endif
+
+#if (SLI_USBD_DDMA_BULK_IN_MAX_XFER_BYTES > SLI_USBD_DDMA_MAX_XFER_BYTES)
+#error SLI_USBD_DDMA_BULK_IN_MAX_XFER_BYTES exceeds scatter/gather limit
+#endif
+#if (SLI_USBD_DDMA_BULK_OUT_MAX_XFER_BYTES > SLI_USBD_DDMA_MAX_XFER_BYTES)
+#error SLI_USBD_DDMA_BULK_OUT_MAX_XFER_BYTES exceeds scatter/gather limit
+#endif
+#if ((SLI_USBD_DDMA_BULK_IN_MAX_XFER_BYTES % SLI_USBD_DDMA_SEG_BYTES) != 0u)
+#error SLI_USBD_DDMA_BULK_IN_MAX_XFER_BYTES must be a multiple of SLI_USBD_DDMA_SEG_BYTES
+#endif
+#if ((SLI_USBD_DDMA_BULK_OUT_MAX_XFER_BYTES % SLI_USBD_DDMA_SEG_BYTES) != 0u)
+#error SLI_USBD_DDMA_BULK_OUT_MAX_XFER_BYTES must be a multiple of SLI_USBD_DDMA_SEG_BYTES
+#endif
+
+// Synopsys DWC OTG device-mode descriptor status (dev_dma_desc_sts /
+// linux/drivers/usb/dwc2/hw.h DEV_DMA_*). Descriptors are contiguous 8-byte
+// pairs (status, buf); DIEPDMA points at the first. There is no next-pointer
+// field — the core walks the array sequentially until the L (last) bit.
+#define SLI_USBD_DDMA_STS_NBYTES_SHIFT      0u
+#define SLI_USBD_DDMA_STS_NBYTES_MASK       0x0000FFFFu
+#define SLI_USBD_DDMA_STS_IOC               (1u << 25)   // Interrupt on completion
+#define SLI_USBD_DDMA_STS_SP                (1u << 26)   // Short packet (partial MPS)
+#define SLI_USBD_DDMA_STS_L                 (1u << 27)   // Last descriptor in chain
+#define SLI_USBD_DDMA_STS_BS_SHIFT          30u
+#define SLI_USBD_DDMA_STS_BS_HREADY         0u           // Host ready — hand to core
+
+// DIEPTSIZ with DCFG.DESCDMA=1: program XFRSIZ and PKTCNT for the burst; DIEPDMA
+// points at the first descriptor in the chain.
+#if defined(_USBAHB_DEVINEP_TSIZ_XFERSIZE_MASK) && defined(_USBAHB_DEVINEP_TSIZ_PKTCNT_MASK)
+#define SLI_USBD_DDMA_DIEPTSIZ_BUF_DMA_MASK  (_USBAHB_DEVINEP_TSIZ_XFERSIZE_MASK \
+                                              | _USBAHB_DEVINEP_TSIZ_PKTCNT_MASK)
+#else
+#define SLI_USBD_DDMA_DIEPTSIZ_BUF_DMA_MASK  (DIEPTSIZx_XFRSIZ_MSK | 0x1FF80000UL)
+#endif
+
+typedef struct {
+  volatile uint32_t status;
+  volatile uint32_t buf;
+} sli_usbd_dwc_otg_ddma_desc_t;
+
+static __ALIGNED(SLI_USBD_DDMA_DESC_ALIGN) sli_usbd_dwc_otg_ddma_desc_t s_ddma_in_desc[NBR_EPS_IN][SLI_USBD_DDMA_MAX_DESC_PER_EP];
+static __ALIGNED(SLI_USBD_DDMA_DESC_ALIGN) sli_usbd_dwc_otg_ddma_desc_t s_ddma_out_desc[NBR_EPS_OUT][SLI_USBD_DDMA_MAX_DESC_PER_EP];
+static uint32_t s_ddma_out_submit_len[NBR_EPS_OUT];
+static uint8_t  s_ddma_out_desc_count[NBR_EPS_OUT];
+static bool s_ddma_active = false;
+
+#if (SL_USBD_DWC_OTG_ENABLE_DDMA != 0)
+static bool sli_usbd_ddma_is_active_hw(void)
+{
+  return ((USB_REG->DCFG & USBAHB_DCFG_DESCDMA) != 0u);
+}
+#endif
+
+static bool sli_usbd_endpoint_uses_ddma(uint8_t ep_addr, uint32_t ep_type)
+{
+#if (SL_USBD_DWC_OTG_ENABLE_DDMA == 0)
+  (void)ep_addr;
+  (void)ep_type;
+  return false;
+#else
+  if (s_ddma_active == false) {
+    return false;
+  }
+
+  if (sli_usbd_ddma_is_active_hw() == false) {
+    return false;
+  }
+
+  if (SL_USBD_ENDPOINT_ADDR_TO_LOG(ep_addr) == 0u) {
+    return false;
+  }
+
+  if (ep_type != SL_USBD_ENDPOINT_TYPE_BULK) {
+    return false;
+  }
+
+  return true;
+#endif
+}
+
+static void sli_usbd_ddma_clear_desc_pool(void)
+{
+  uint32_t ep_nbr;
+  uint32_t desc_nbr;
+
+  for (ep_nbr = 0u; ep_nbr < NBR_EPS_IN; ep_nbr++) {
+    for (desc_nbr = 0u; desc_nbr < SLI_USBD_DDMA_MAX_DESC_PER_EP; desc_nbr++) {
+      s_ddma_in_desc[ep_nbr][desc_nbr].status = 0u;
+      s_ddma_in_desc[ep_nbr][desc_nbr].buf = 0u;
+    }
+  }
+
+  for (ep_nbr = 0u; ep_nbr < NBR_EPS_OUT; ep_nbr++) {
+    for (desc_nbr = 0u; desc_nbr < SLI_USBD_DDMA_MAX_DESC_PER_EP; desc_nbr++) {
+      s_ddma_out_desc[ep_nbr][desc_nbr].status = 0u;
+      s_ddma_out_desc[ep_nbr][desc_nbr].buf = 0u;
+    }
+
+    s_ddma_out_submit_len[ep_nbr] = 0u;
+    s_ddma_out_desc_count[ep_nbr] = 0u;
+  }
+}
+
+static uint32_t sli_usbd_ddma_get_seg_size(uint8_t ep_addr)
+{
+  (void)ep_addr;
+
+  return SLI_USBD_DDMA_SEG_BYTES;
+}
+
+static uint32_t sli_usbd_ddma_bulk_max_xfer_bytes(uint8_t ep_addr, uint32_t ep_type)
+{
+  if (sli_usbd_endpoint_uses_ddma(ep_addr, ep_type) == false) {
+    return 0u;
+  }
+
+  if (SL_USBD_ENDPOINT_IS_IN(ep_addr)) {
+    return SLI_USBD_DDMA_BULK_IN_MAX_XFER_BYTES;
+  }
+
+  return SLI_USBD_DDMA_BULK_OUT_MAX_XFER_BYTES;
+}
+
+static uint32_t sli_usbd_driver_get_bulk_submit_max(uint8_t ep_addr, uint32_t ep_type)
+{
+  uint8_t ep_phy_nbr;
+  uint32_t ddma_max;
+
+  if (ep_type != SL_USBD_ENDPOINT_TYPE_BULK) {
+    ep_phy_nbr = SL_USBD_ENDPOINT_ADDR_TO_PHY(ep_addr);
+    return usbd_driver_data.EP_MaxPktSize[ep_phy_nbr];
+  }
+
+  ddma_max = sli_usbd_ddma_bulk_max_xfer_bytes(ep_addr, ep_type);
+  if (ddma_max != 0u) {
+    return ddma_max;
+  }
+
+  if (SL_USBD_ENDPOINT_IS_IN(ep_addr)) {
+    return USB_BULK_IN_OPTIMIZATION_MAX_XFER_BURST_BYTES;
+  }
+
+  return USB_BULK_OUT_OPTIMIZATION_MAX_XFER_BURST_BYTES;
+}
+
+static uint32_t sli_usbd_driver_read_ep_type(uint8_t ep_addr)
+{
+  uint8_t ep_log_nbr = SL_USBD_ENDPOINT_ADDR_TO_LOG(ep_addr);
+  __IOM uint32_t *ep_ctl_ptr;
+
+  if (SL_USBD_ENDPOINT_IS_IN(ep_addr)) {
+    ep_ctl_ptr = (ep_log_nbr != 0u) ? &USB_REG->DIEP_REG[ep_log_nbr - 1u].CTL : &USB_REG->DIEP0CTL;
+  } else {
+    ep_ctl_ptr = (ep_log_nbr != 0u) ? &USB_REG->DOEP_REG[ep_log_nbr - 1u].CTL : &USB_REG->DOEP0CTL;
+  }
+
+  return ((*ep_ctl_ptr >> 18u) & 0x03u);
+}
+
+bool sli_usbd_driver_endpoint_uses_ddma_bulk(uint8_t ep_addr)
+{
+#if (SLI_USBD_DWC_OTG_HAS_DDMA_REGS != 0)
+  uint32_t ep_type = sli_usbd_driver_read_ep_type(ep_addr);
+
+  return sli_usbd_endpoint_uses_ddma(ep_addr, ep_type);
+#else
+  (void)ep_addr;
+
+  return false;
+#endif
+}
+
+uint32_t sli_usbd_driver_bulk_max_xfer_len(uint8_t ep_addr)
+{
+#if (SLI_USBD_DWC_OTG_HAS_DDMA_REGS != 0)
+  uint32_t ep_type = sli_usbd_driver_read_ep_type(ep_addr);
+
+  return sli_usbd_driver_get_bulk_submit_max(ep_addr, ep_type);
+#else
+  if (SL_USBD_ENDPOINT_IS_IN(ep_addr)) {
+    return USB_BULK_IN_OPTIMIZATION_MAX_XFER_BURST_BYTES;
+  }
+
+  return USB_BULK_OUT_OPTIMIZATION_MAX_XFER_BURST_BYTES;
+#endif
+}
+
+static uint32_t sli_usbd_ddma_calc_desc_count(uint32_t buf_len, uint32_t seg_size)
+{
+  uint32_t desc_count;
+
+  if (seg_size == 0u) {
+    return 0u;
+  }
+
+  if (buf_len == 0u) {
+    return 1u;
+  }
+
+  desc_count = (buf_len + seg_size - 1u) / seg_size;
+
+  if (desc_count > SLI_USBD_DDMA_MAX_DESC_PER_EP) {
+    return 0u;
+  }
+
+  return desc_count;
+}
+
+static uint32_t sli_usbd_ddma_build_in_desc_status(uint32_t seg_len,
+                                                   bool is_last,
+                                                   uint16_t max_pkt_size)
+{
+  uint32_t status;
+
+  // NBYTES [15:0]: segment byte count for this descriptor.
+  status = (seg_len << SLI_USBD_DDMA_STS_NBYTES_SHIFT) & SLI_USBD_DDMA_STS_NBYTES_MASK;
+
+  if (is_last) {
+    // L [27]: last descriptor in chain; IOC [25]: interrupt when this desc completes.
+    status |= SLI_USBD_DDMA_STS_L | SLI_USBD_DDMA_STS_IOC;
+
+    // SP [26]: IN short packet when final segment is not an integral MPS multiple.
+    if ((max_pkt_size != 0u) && ((seg_len % max_pkt_size) != 0u)) {
+      status |= SLI_USBD_DDMA_STS_SP;
+    }
+  }
+
+  // BS [31:30] = HREADY (0): host owns descriptor, core may fetch it.
+  status |= (SLI_USBD_DDMA_STS_BS_HREADY << SLI_USBD_DDMA_STS_BS_SHIFT);
+
+  return status;
+}
+
+static uint32_t sli_usbd_ddma_build_out_desc_status(uint32_t seg_len, bool is_last)
+{
+  uint32_t status;
+
+  status = (seg_len << SLI_USBD_DDMA_STS_NBYTES_SHIFT) & SLI_USBD_DDMA_STS_NBYTES_MASK;
+
+  if (is_last) {
+    status |= SLI_USBD_DDMA_STS_L | SLI_USBD_DDMA_STS_IOC;
+  }
+
+  status |= (SLI_USBD_DDMA_STS_BS_HREADY << SLI_USBD_DDMA_STS_BS_SHIFT);
+
+  return status;
+}
+
+static sl_status_t sli_usbd_ddma_build_in_desc_chain(uint8_t ep_addr,
+                                                     uint8_t *p_buf,
+                                                     uint32_t buf_len,
+                                                     uint32_t *p_desc_count)
+{
+  uint8_t ep_log_nbr;
+  uint8_t ep_phy_nbr;
+  uint16_t max_pkt_size;
+  uint32_t seg_size;
+  uint32_t desc_count;
+  uint32_t desc_nbr;
+  uint32_t remaining;
+  uint32_t seg_len;
+
+  if ((p_buf == NULL) || (p_desc_count == NULL)) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  if (SL_USBD_ENDPOINT_IS_IN(ep_addr) == false) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  ep_log_nbr = SL_USBD_ENDPOINT_ADDR_TO_LOG(ep_addr);
+  if (ep_log_nbr >= NBR_EPS_IN) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  ep_phy_nbr = SL_USBD_ENDPOINT_ADDR_TO_PHY(ep_addr);
+  max_pkt_size = usbd_driver_data.EP_MaxPktSize[ep_phy_nbr];
+  seg_size = sli_usbd_ddma_get_seg_size(ep_addr);
+
+  desc_count = sli_usbd_ddma_calc_desc_count(buf_len, seg_size);
+  if (desc_count == 0u) {
+    return SL_STATUS_FAIL;
+  }
+
+  if (buf_len > sli_usbd_ddma_bulk_max_xfer_bytes(ep_addr, SL_USBD_ENDPOINT_TYPE_BULK)) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  for (desc_nbr = 0u; desc_nbr < SLI_USBD_DDMA_MAX_DESC_PER_EP; desc_nbr++) {
+    s_ddma_in_desc[ep_log_nbr][desc_nbr].status = 0u;
+    s_ddma_in_desc[ep_log_nbr][desc_nbr].buf = 0u;
+  }
+
+  remaining = buf_len;
+  for (desc_nbr = 0u; desc_nbr < desc_count; desc_nbr++) {
+    bool is_last = (desc_nbr == (desc_count - 1u));
+
+    if (buf_len == 0u) {
+      seg_len = 0u;
+    } else {
+      seg_len = (remaining > seg_size) ? seg_size : remaining;
+    }
+
+    s_ddma_in_desc[ep_log_nbr][desc_nbr].status =
+      sli_usbd_ddma_build_in_desc_status(seg_len, is_last, max_pkt_size);
+    s_ddma_in_desc[ep_log_nbr][desc_nbr].buf =
+      (uint32_t)(uintptr_t)(p_buf + (desc_nbr * seg_size));
+
+    if (buf_len != 0u) {
+      remaining -= seg_len;
+    }
+  }
+
+  *p_desc_count = desc_count;
+
+  return SL_STATUS_OK;
+}
+
+static uint32_t sli_usbd_ddma_out_bytes_remaining(uint8_t ep_log_nbr)
+{
+  uint32_t bytes_rem = 0u;
+  uint32_t desc_nbr;
+  uint8_t  desc_count;
+
+  if (ep_log_nbr >= NBR_EPS_OUT) {
+    return 0u;
+  }
+
+  desc_count = s_ddma_out_desc_count[ep_log_nbr];
+  if (desc_count == 0u) {
+    return 0u;
+  }
+
+  for (desc_nbr = 0u; desc_nbr < desc_count; desc_nbr++) {
+    uint32_t status = s_ddma_out_desc[ep_log_nbr][desc_nbr].status;
+
+    bytes_rem += (status & SLI_USBD_DDMA_STS_NBYTES_MASK);
+    if ((status & SLI_USBD_DDMA_STS_L) != 0u) {
+      break;
+    }
+  }
+
+  return bytes_rem;
+}
+
+static sl_status_t sli_usbd_ddma_build_out_desc_chain(uint8_t ep_addr,
+                                                      uint8_t *p_buf,
+                                                      uint32_t buf_len,
+                                                      uint32_t *p_desc_count)
+{
+  uint8_t ep_log_nbr;
+  uint32_t seg_size;
+  uint32_t desc_count;
+  uint32_t desc_nbr;
+  uint32_t remaining;
+  uint32_t seg_len;
+
+  if ((p_buf == NULL) || (p_desc_count == NULL)) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  if (SL_USBD_ENDPOINT_IS_IN(ep_addr)) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  ep_log_nbr = SL_USBD_ENDPOINT_ADDR_TO_LOG(ep_addr);
+  if (ep_log_nbr >= NBR_EPS_OUT) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  seg_size = sli_usbd_ddma_get_seg_size(ep_addr);
+
+  desc_count = sli_usbd_ddma_calc_desc_count(buf_len, seg_size);
+  if (desc_count == 0u) {
+    return SL_STATUS_FAIL;
+  }
+
+  if (buf_len > sli_usbd_ddma_bulk_max_xfer_bytes(ep_addr, SL_USBD_ENDPOINT_TYPE_BULK)) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  for (desc_nbr = 0u; desc_nbr < SLI_USBD_DDMA_MAX_DESC_PER_EP; desc_nbr++) {
+    s_ddma_out_desc[ep_log_nbr][desc_nbr].status = 0u;
+    s_ddma_out_desc[ep_log_nbr][desc_nbr].buf = 0u;
+  }
+
+  remaining = buf_len;
+  for (desc_nbr = 0u; desc_nbr < desc_count; desc_nbr++) {
+    bool is_last = (desc_nbr == (desc_count - 1u));
+
+    if (buf_len == 0u) {
+      seg_len = 0u;
+    } else {
+      seg_len = (remaining > seg_size) ? seg_size : remaining;
+    }
+
+    s_ddma_out_desc[ep_log_nbr][desc_nbr].status =
+      sli_usbd_ddma_build_out_desc_status(seg_len, is_last);
+    s_ddma_out_desc[ep_log_nbr][desc_nbr].buf =
+      (uint32_t)(uintptr_t)(p_buf + (desc_nbr * seg_size));
+
+    if (buf_len != 0u) {
+      remaining -= seg_len;
+    }
+  }
+
+  for (desc_nbr = desc_count; desc_nbr < SLI_USBD_DDMA_MAX_DESC_PER_EP; desc_nbr++) {
+    s_ddma_out_desc[ep_log_nbr][desc_nbr].status =
+      sli_usbd_ddma_build_out_desc_status(0u, true);
+    s_ddma_out_desc[ep_log_nbr][desc_nbr].buf = 0u;
+  }
+
+  *p_desc_count = desc_count;
+
+  return SL_STATUS_OK;
+}
+
+#if (SL_USBD_DWC_OTG_ENABLE_DDMA != 0)
+static bool sli_usbd_ddma_is_supported(void)
+{
+  uint32_t ghwcfg4 = USB_REG->GHWCFG4;
+
+  return (((ghwcfg4 & USBAHB_GHWCFG4_DESCDMAENABLED) != 0u)
+          || ((ghwcfg4 & USBAHB_GHWCFG4_DESCDMA) != 0u));
+}
+
+static bool sli_usbd_ddma_enable(void)
+{
+  USB_REG->DCFG |= USBAHB_DCFG_DESCDMA;
+
+  return ((USB_REG->DCFG & USBAHB_DCFG_DESCDMA) != 0u);
+}
+#endif
+
+static void sli_usbd_ddma_init(void)
+{
+  s_ddma_active = false;
+  sli_usbd_ddma_clear_desc_pool();
+
+#if (SL_USBD_DWC_OTG_ENABLE_DDMA != 0)
+  if (sli_usbd_ddma_is_supported() && sli_usbd_ddma_enable()) {
+    s_ddma_active = true;
+  }
+#endif
+}
+#else
+
+bool sli_usbd_driver_endpoint_uses_ddma_bulk(uint8_t ep_addr)
+{
+  (void)ep_addr;
+
+  return false;
+}
+
+uint32_t sli_usbd_driver_bulk_max_xfer_len(uint8_t ep_addr)
+{
+  if (SL_USBD_ENDPOINT_IS_IN(ep_addr)) {
+    return USB_BULK_IN_OPTIMIZATION_MAX_XFER_BURST_BYTES;
+  }
+
+  return USB_BULK_OUT_OPTIMIZATION_MAX_XFER_BURST_BYTES;
+}
+
+#endif
+
 /********************************************************************************************************
  *                                             DEVICE CONFIGS
  *******************************************************************************************************/
@@ -559,13 +1063,9 @@ sl_status_t sli_usbd_driver_init(void)
       .pin = SL_USBD_DRIVER_VBUS_SENSE_PIN
   };
   sl_gpio_set_pin_mode(&gpio_usbd_driver, SL_GPIO_MODE_INPUT, 0);
-#if defined(_SILICON_LABS_32B_SERIES_3)
-  GPIO->DBUSUSBROUTE.USBVBUSSENSEROUTE = (SL_USBD_DRIVER_VBUS_SENSE_PORT << _GPIO_DBUSUSB_USBVBUSSENSEROUTE_PORT_SHIFT)
-                                         | (SL_USBD_DRIVER_VBUS_SENSE_PIN << _GPIO_DBUSUSB_USBVBUSSENSEROUTE_PIN_SHIFT);
-#else
+
   GPIO->USBROUTE.USBVBUSSENSEROUTE = (SL_USBD_DRIVER_VBUS_SENSE_PORT << _GPIO_USB_USBVBUSSENSEROUTE_PORT_SHIFT)
                                      | (SL_USBD_DRIVER_VBUS_SENSE_PIN << _GPIO_USB_USBVBUSSENSEROUTE_PIN_SHIFT);
-#endif
 
 #else //defined(_SILICON_LABS_32B_SERIES_2) || defined(_SILICON_LABS_32B_SERIES_3)
 #if defined(USBC_MEM_BASE)
@@ -744,6 +1244,10 @@ sl_status_t sli_usbd_driver_init(void)
   // Set Device Address to zero
   USB_REG->DCFG &= ~DCFG_DEVADDR_MASK;
 
+#if (SLI_USBD_DWC_OTG_HAS_DDMA_REGS != 0)
+  sli_usbd_ddma_init();
+#endif
+
   // Lock access to registers (see Note #2)
   USB_REG->PCGCCTL = PCGCCTL_BIT_PWRCLMP
                      | PCGCCTL_BIT_RSTPDWNMODULE;
@@ -793,6 +1297,7 @@ sl_status_t sli_usbd_driver_start(void)
   SL_CLEAR_BIT(USB_REG->PCGCCTL, PCGCCTL_BIT_PWRCLMP);
   SL_CLEAR_BIT(USB_REG->PCGCCTL, PCGCCTL_BIT_RSTPDWNMODULE);
   SLI_USBD_DRV_PHY_RESUME();
+
 
   // Clear any pending interrupt
   USB_REG->GINTSTS = 0xFFFFFFFFu;
@@ -1052,10 +1557,7 @@ sl_status_t sli_usbd_driver_endpoint_rx_start(uint8_t   ep_addr,
 
   if ((SL_USBD_ENDPOINT_IS_IN(ep_addr) == false) \
       && (ep_type == SL_USBD_ENDPOINT_TYPE_BULK)) {
-    // The default burst value of USB_BULK_OUT_OPTIMIZATION_MAX_XFER_BURST_BYTES is 8 64-byte packet.
-    // It allows to have burst of packets between 2 and 8 packets (if the application Rx buffer is large enough)
-    // before notifying the USB Core layer about a transfer completion.
-    pkt_size_temp = USB_BULK_OUT_OPTIMIZATION_MAX_XFER_BURST_BYTES;
+    pkt_size_temp = (uint16_t)sli_usbd_driver_bulk_max_xfer_len(ep_addr);
   } else {
     pkt_size_temp = usbd_driver_data.EP_MaxPktSize[ep_phy_nbr];
   }
@@ -1084,8 +1586,55 @@ sl_status_t sli_usbd_driver_endpoint_rx_start(uint8_t   ep_addr,
   usbd_driver_data.EP_AppBufPtr[ep_phy_nbr] = p_buf;
   usbd_driver_data.EP_AppBufLen[ep_phy_nbr] = pkt_cnt * usbd_driver_data.EP_MaxPktSize[ep_phy_nbr];
 
-  // Set buffer address to receive data
-  *doep_dmaaddr_ptr = (uint32_t)usbd_driver_data.EP_AppBufPtr[ep_phy_nbr];
+#if (SLI_USBD_DWC_OTG_HAS_DDMA_REGS != 0)
+  if (sli_usbd_endpoint_uses_ddma(ep_addr, ep_type)
+      && (p_buf != NULL)
+      && (buf_len != 0u)) {
+    sl_status_t status;
+    uint32_t desc_count;
+    uint32_t desc_base;
+    uint32_t doepint_stat;
+    __IOM uint32_t *doep_int_ptr;
+
+    status = sli_usbd_ddma_build_out_desc_chain(ep_addr,
+                                                p_buf,
+                                                (uint32_t)ep_pkt_len,
+                                                &desc_count);
+    if (status != SL_STATUS_OK) {
+      return status;
+    }
+
+    s_ddma_out_submit_len[ep_log_nbr] = (uint32_t)ep_pkt_len;
+    s_ddma_out_desc_count[ep_log_nbr] = (uint8_t)desc_count;
+
+    desc_base = (uint32_t)(uintptr_t)&s_ddma_out_desc[ep_log_nbr][0];
+    doep_int_ptr = (ep_log_nbr != 0) ? &USB_REG->DOEP_REG[ep_log_nbr - 1].INT : &USB_REG->DOEP0INT;
+
+    // Program order: DOEPDMA -> barrier -> clear DOEPINT -> DOEPTSIZ -> EPENA/CNAK.
+    *doep_dmaaddr_ptr = desc_base;
+    __DSB();
+
+    doepint_stat = *doep_int_ptr;
+    *doep_int_ptr = doepint_stat;
+
+    usbd_driver_data.EP_PktXferLen[ep_phy_nbr] = 0u;
+
+    *doep_tsiz_ptr = tsiz_reg;
+    __DSB();
+
+    ctl_reg |= DxEPCTLx_BIT_CNAK | DxEPCTLx_BIT_EPENA;
+    *doep_ctl_ptr = ctl_reg;
+    __DSB();
+
+    *p_pkt_len = ep_pkt_len;
+
+    return SL_STATUS_OK;
+  } else
+#endif
+  {
+    // Set buffer address to receive data
+    *doep_dmaaddr_ptr = (uint32_t)usbd_driver_data.EP_AppBufPtr[ep_phy_nbr];
+  }
 
   // Clear EP NAK and Enable EP for receiving
   ctl_reg |= DxEPCTLx_BIT_CNAK | DxEPCTLx_BIT_EPENA;
@@ -1096,6 +1645,7 @@ sl_status_t sli_usbd_driver_endpoint_rx_start(uint8_t   ep_addr,
   *doep_ctl_ptr = ctl_reg;
 
   *p_pkt_len = ep_pkt_len;
+
   return SL_STATUS_OK;
 }
 
@@ -1171,8 +1721,7 @@ sl_status_t sli_usbd_driver_endpoint_tx(uint8_t   ep_addr,
 
   if ((SL_USBD_ENDPOINT_IS_IN(ep_addr) == true) \
       && (ep_type == SL_USBD_ENDPOINT_TYPE_BULK)) {
-    // See Note #1.
-    pkt_size_temp = USB_BULK_IN_OPTIMIZATION_MAX_XFER_BURST_BYTES;
+    pkt_size_temp = (uint16_t)sli_usbd_driver_bulk_max_xfer_len(ep_addr);
   } else {
     pkt_size_temp = usbd_driver_data.EP_MaxPktSize[ep_phy_nbr];
   }
@@ -1181,8 +1730,23 @@ sl_status_t sli_usbd_driver_endpoint_tx(uint8_t   ep_addr,
 
   diep_dmaaddr_ptr = (ep_log_nbr != 0) ? &USB_REG->DIEP_REG[ep_log_nbr - 1].DMAADDR : &USB_REG->DIEP0DMAADDR;
 
-  // Set buffer address of the data to transmit for DMA
-  *diep_dmaaddr_ptr = (uint32_t)p_buf;
+#if (SLI_USBD_DWC_OTG_HAS_DDMA_REGS != 0)
+  if (sli_usbd_endpoint_uses_ddma(ep_addr, ep_type)
+      && (buf_len != 0u)) {
+    sl_status_t status;
+    uint32_t desc_count;
+
+    // Build descriptors for this burst chunk (next_xfer_len), not the full URB.
+    status = sli_usbd_ddma_build_in_desc_chain(ep_addr, p_buf, (uint32_t)ep_pkt_len, &desc_count);
+    if (status != SL_STATUS_OK) {
+      return status;
+    }
+  } else
+#endif
+  {
+    // Set buffer address of the data to transmit for DMA
+    *diep_dmaaddr_ptr = (uint32_t)p_buf;
+  }
 
   *p_xfer_len = ep_pkt_len;
 
@@ -1215,23 +1779,62 @@ sl_status_t sli_usbd_driver_endpoint_tx_start(uint8_t  ep_addr,
   ctl_reg = *diep_ctl_ptr;
   tsiz_reg = *diep_tsiz_ptr;
 
-  tsiz_reg &= ~DIEPTSIZx_XFRSIZ_MSK;   // Clear EP transfer size
-  tsiz_reg |= buf_len;                 // Transfer size
-
   ep_type = (*diep_ctl_ptr >> 18u) & 0x03u;
 
-  if ((SL_USBD_ENDPOINT_IS_IN(ep_addr) == true) \
-      && (ep_type == SL_USBD_ENDPOINT_TYPE_BULK)
-      && (buf_len != 0)) {
-    uint8_t   ep_phy_nbr = SL_USBD_ENDPOINT_ADDR_TO_PHY(ep_addr);
-    uint16_t  max_pkt_size = usbd_driver_data.EP_MaxPktSize[ep_phy_nbr];
-    uint32_t  pkt_cnt  = buf_len / max_pkt_size;
+#if (SLI_USBD_DWC_OTG_HAS_DDMA_REGS != 0)
+  if (sli_usbd_endpoint_uses_ddma(ep_addr, ep_type)
+      && (buf_len != 0u)) {
+    uint8_t ep_phy_nbr = SL_USBD_ENDPOINT_ADDR_TO_PHY(ep_addr);
+    uint16_t max_pkt_size = usbd_driver_data.EP_MaxPktSize[ep_phy_nbr];
+    uint32_t desc_base = (uint32_t)(uintptr_t)&s_ddma_in_desc[ep_log_nbr][0];
+    uint32_t pkt_cnt;
+    __IOM uint32_t *diep_dmaaddr_ptr = &USB_REG->DIEP_REG[ep_log_nbr - 1].DMAADDR;
+    __IOM uint32_t *diep_int_ptr = &USB_REG->DIEP_REG[ep_log_nbr - 1].INT;
+    uint32_t diepint_stat;
 
-    pkt_cnt += ((buf_len % max_pkt_size) == 0u) ? 0 : 1;
+    // DIEPTSIZ: program burst chunk (buf_len == next_xfer_len) with buffer-DMA layout.
+    tsiz_reg &= ~SLI_USBD_DDMA_DIEPTSIZ_BUF_DMA_MASK;
+    tsiz_reg |= buf_len;
+    pkt_cnt = buf_len / max_pkt_size;
+    pkt_cnt += ((buf_len % max_pkt_size) == 0u) ? 0u : 1u;
+    tsiz_reg |= (pkt_cnt << 19u);
 
-    tsiz_reg |= (pkt_cnt << 19u);               // Packet count
-  } else {
-    tsiz_reg |= (1u << 19u);               // Packet count
+    // Program order: DIEPDMA -> barrier -> clear DIEPINT -> DIEPTSIZ -> EPENA/CNAK.
+    *diep_dmaaddr_ptr = desc_base;
+    __DSB();
+
+    diepint_stat = *diep_int_ptr;
+    *diep_int_ptr = diepint_stat;
+
+    *diep_tsiz_ptr = tsiz_reg;
+    __DSB();
+
+    ctl_reg |= DxEPCTLx_BIT_CNAK | DxEPCTLx_BIT_EPENA;
+    *diep_ctl_ptr = ctl_reg;
+    __DSB();
+
+    SLI_USBD_LOG_VRB(("USBD driver EP addr 0x ", (X)ep_addr, " using DDMA has tx'd ", (u)buf_len, "bytes"));
+
+    return SL_STATUS_OK;
+  } else
+#endif
+  {
+    tsiz_reg &= ~DIEPTSIZx_XFRSIZ_MSK;   // Clear EP transfer size
+    tsiz_reg |= buf_len;                 // Transfer size
+
+    if ((SL_USBD_ENDPOINT_IS_IN(ep_addr) == true) \
+        && (ep_type == SL_USBD_ENDPOINT_TYPE_BULK)
+        && (buf_len != 0)) {
+      uint8_t   ep_phy_nbr = SL_USBD_ENDPOINT_ADDR_TO_PHY(ep_addr);
+      uint16_t  max_pkt_size = usbd_driver_data.EP_MaxPktSize[ep_phy_nbr];
+      uint32_t  pkt_cnt  = buf_len / max_pkt_size;
+
+      pkt_cnt += ((buf_len % max_pkt_size) == 0u) ? 0 : 1;
+
+      tsiz_reg |= (pkt_cnt << 19u);               // Packet count
+    } else {
+      tsiz_reg |= (1u << 19u);               // Packet count
+    }
   }
 
   // Clear EP NAK mode & Enable EP transmitting.
@@ -1754,6 +2357,12 @@ static void DWC_EP_OutProcess(void)
 
   while (dev_ep_int != 0x00u) {
     ep_log_nbr = (uint8_t)(31u - __CLZ(dev_ep_int & 0x0000FFFFu));
+
+    if (ep_log_nbr >= NBR_EPS_OUT) {
+      dev_ep_int &= ~(1u << ep_log_nbr);
+      continue;
+    }
+
     ep_phy_nbr = SL_USBD_ENDPOINT_ADDR_TO_PHY(SL_USBD_ENDPOINT_LOG_TO_ADDR_OUT(ep_log_nbr));
 
     doep_ctl_ptr = (ep_log_nbr != 0) ? &USB_REG->DOEP_REG[ep_log_nbr - 1].CTL : &USB_REG->DOEP0CTL;
@@ -1776,26 +2385,56 @@ static void DWC_EP_OutProcess(void)
 
     // Handle OUT transaction complete
     if (SL_IS_BIT_SET(ep_int_stat, DOEPINTx_BIT_XFRC)) {
-      uint16_t byte_cnt;
-
-      sl_usbd_core_endpoint_read_complete(ep_log_nbr);
-
-      // Save size of data received
-      uint32_t size_rem = *doep_tsiz_ptr & DOEPTSIZx_XFRSIZ_MSK;
-
+      uint16_t byte_cnt = 0u;
+      uint32_t size_rem = 0u;
       uint32_t ep_type = (*doep_ctl_ptr >> 18u) & 0x03u;
 
-      if (ep_type == SL_USBD_ENDPOINT_TYPE_BULK) {
-        // Bulk OUT supports transfer-level operation. The payload size in memory is equal to
-        // "application-programmed initial transfer size – core updated final transfer size".
-        // .EP_AppBufLen[] is used in sli_usbd_driver_endpoint_rx_start() to save the initial app
-        // transfer size.
-        byte_cnt = usbd_driver_data.EP_AppBufLen[ep_phy_nbr] - size_rem;
-      } else {
-        byte_cnt = usbd_driver_data.EP_MaxPktSize[ep_phy_nbr] - size_rem;
-      }
+#if (SLI_USBD_DWC_OTG_HAS_DDMA_REGS != 0)
+      uint8_t ep_addr = SL_USBD_ENDPOINT_LOG_TO_ADDR_OUT(ep_log_nbr);
 
-      usbd_driver_data.EP_PktXferLen[ep_phy_nbr] += byte_cnt;
+      if (sli_usbd_endpoint_uses_ddma(ep_addr, ep_type)) {
+        uint32_t submit_len;
+        uint32_t bytes_done;
+
+        submit_len = s_ddma_out_submit_len[ep_log_nbr];
+        size_rem = sli_usbd_ddma_out_bytes_remaining(ep_log_nbr);
+
+        if ((submit_len == 0u) || (size_rem > submit_len)) {
+          bytes_done = 0u;
+        } else {
+          bytes_done = submit_len - size_rem;
+          if (bytes_done > submit_len) {
+            bytes_done = submit_len;
+          }
+        }
+
+        byte_cnt = (uint16_t)bytes_done;
+
+        usbd_driver_data.EP_PktXferLen[ep_phy_nbr] = byte_cnt;
+
+        if (size_rem == 0u) {
+          sl_usbd_core_endpoint_read_complete(ep_log_nbr);
+        }
+      } else
+#endif
+      {
+        sl_usbd_core_endpoint_read_complete(ep_log_nbr);
+
+        // Save size of data received (buffer-DMA / non-DDMA).
+        size_rem = *doep_tsiz_ptr & DOEPTSIZx_XFRSIZ_MSK;
+
+        if (ep_type == SL_USBD_ENDPOINT_TYPE_BULK) {
+          // Bulk OUT supports transfer-level operation. The payload size in memory is equal to
+          // "application-programmed initial transfer size – core updated final transfer size".
+          // .EP_AppBufLen[] is used in sli_usbd_driver_endpoint_rx_start() to save the initial app
+          // transfer size.
+          byte_cnt = usbd_driver_data.EP_AppBufLen[ep_phy_nbr] - size_rem;
+        } else {
+          byte_cnt = usbd_driver_data.EP_MaxPktSize[ep_phy_nbr] - size_rem;
+        }
+
+        usbd_driver_data.EP_PktXferLen[ep_phy_nbr] += byte_cnt;
+      }
 
       if (ep_log_nbr == 0) {
         // Prepare for next setup transaction

@@ -59,7 +59,7 @@ extern __INLINE bool sl_hal_wdog_is_locked(WDOG_TypeDef *wdog);
  ******************************************************************************/
 void sl_hal_wdog_enable(WDOG_TypeDef *wdog)
 {
-  EFM_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
 
   // SYNCBUSY may stall when locked.
   if ((wdog->STATUS & _WDOG_STATUS_LOCK_MASK) == WDOG_STATUS_LOCK_LOCKED) {
@@ -74,7 +74,7 @@ void sl_hal_wdog_enable(WDOG_TypeDef *wdog)
  ******************************************************************************/
 void sl_hal_wdog_disable(WDOG_TypeDef *wdog)
 {
-  EFM_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
 
   // SYNCBUSY may stall when locked.
   if ((wdog->STATUS & _WDOG_STATUS_LOCK_MASK) == WDOG_STATUS_LOCK_LOCKED) {
@@ -91,7 +91,7 @@ void sl_hal_wdog_disable(WDOG_TypeDef *wdog)
  ******************************************************************************/
 void sl_hal_wdog_feed(WDOG_TypeDef *wdog)
 {
-  EFM_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
 
   // WDOG should not be fed while it is disabled.
   if ((wdog->EN & WDOG_EN_EN) == 0U) {
@@ -116,7 +116,7 @@ void sl_hal_wdog_feed(WDOG_TypeDef *wdog)
 void sl_hal_wdog_init(WDOG_TypeDef *wdog,
                       const sl_hal_wdog_init_t *init)
 {
-  EFM_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
 
   sl_hal_wdog_disable(wdog);
   sl_hal_wdog_wait_ready(wdog);

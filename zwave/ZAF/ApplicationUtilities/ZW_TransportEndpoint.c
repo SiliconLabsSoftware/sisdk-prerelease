@@ -121,6 +121,11 @@ ZAF_Transmit(
   TRANSMIT_OPTIONS_TYPE_SINGLE_EX *pTxOptionsEx,
   __attribute__((unused)) ZAF_TX_Callback_t pCallback)
 {
+  if (IS_NULL(pTxOptionsEx)) {
+    /* No invalid-argument status in EZAF_EnqueueStatus_t; TIMEOUT matches legacy behavior. */
+    return ZAF_ENQUEUE_STATUS_TIMEOUT;
+  }
+
   if (EINCLUSIONSTATE_EXCLUDED == ZAF_GetInclusionState()) {
     // We are not network included. Nothing to do.
     ZPAL_LOG_DEBUG(ZPAL_LOG_ZAF_TRANSPORT, "\r\n%s: Not network included - nothing to do.\r\n", __func__);
@@ -132,10 +137,6 @@ ZAF_Transmit(
   // Check for multi channel
   if (false == pTxOptionsEx->pDestNode->nodeInfo.BitMultiChannelEncap) {
     pTxOptionsEx->sourceEndpoint = 0;
-  }
-
-  if (IS_NULL(pTxOptionsEx)) {
-    return ZAF_ENQUEUE_STATUS_TIMEOUT;
   }
 
   //Safeguard against buffer overflow

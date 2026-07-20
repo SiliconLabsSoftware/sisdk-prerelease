@@ -48,7 +48,7 @@ requires:
 - name: device_init_emu
   condition: [device_series_2]
 - name: board_control
-  condition: [hardware_board]
+  condition: [hardware_board, device_cortexm]
 recommends:
 - id: device_init_hfrco
   condition: [device_series_2]

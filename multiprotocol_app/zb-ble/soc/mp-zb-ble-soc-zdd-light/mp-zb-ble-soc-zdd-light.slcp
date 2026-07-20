@@ -1,6 +1,6 @@
 project_name: mp-zb-ble-soc-zdd-light
 label: Zigbee BLE DMP - SoC ZDD Light
-package: multiprotocol
+package: multiprotocol_app
 category: Zigbee Application
 quality: production
 description: Demonstrates a Zigbee Direct Device (ZDD) light application using Zigbee + BLE DMP (Dynamic Multiprotocol).
@@ -8,6 +8,7 @@ author: Silicon Laboratories, Inc.
 
 component:
   - id: sl_main
+  - id: watchdog_manager
   - id: cli
     instance:
       - example

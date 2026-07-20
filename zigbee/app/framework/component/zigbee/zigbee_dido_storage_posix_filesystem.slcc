@@ -1,0 +1,31 @@
+package: zigbee
+description: File storage module for DIDO reports.  This uses a POSIX filesystem as the underlying storage device, and therefore can store any number of files.
+label: DIDO POSIX Filesystem Storage Module
+quality: production
+id: zigbee_dido_storage_posix_filesystem
+category: Zigbee|Utility
+toolchain_settings: []
+ui_hints: {}
+template_file: []
+provides:
+- name: zigbee_dido_storage_posix_filesystem
+requires:
+- name: zigbee_wwah_client_silabs
+- name: zigbee_fragmentation
+- name: device_host
+source:
+- path: app/framework/plugin-host/dido-storage-posix-filesystem/dido-storage-linux.c
+include:
+- path: app/framework/plugin-host/dido-storage-posix-filesystem
+  file_list:
+  - path: dido-storage-linux.h
+template_contribution:
+- name: component_catalog
+  value: zigbee_dido_storage_posix_filesystem
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/dido-storage-linux
+metadata:
+  sbom:
+    license: MSLA
+root_path: zigbee

@@ -1,0 +1,23 @@
+id: ddp_cmd_psa_storage_vault
+label: DDP commands for PSA Crypto secure vault
+description: >
+  Initializes PSA in order to store persistent keys in the secure vault
+  area of the device. Keys will be encrypted with the device-unique secret.
+  Only available on Secure Vault High devices.
+package: bluetooth_le
+category: Bluetooth|Application|Miscellaneous
+quality: production
+metadata:
+  sbom:
+    license: Zlib
+ui_hints:
+  visibility: never
+root_path: bluetooth_le/common/ddp
+provides:
+- name: ddp_cmd_psa_storage
+- name: ddp_cmd_psa_storage_vault
+requires:
+- name: device_security_vault
+define:
+- name: DDP_PSA_KEY_LOCATION
+  value: "SL_PSA_KEY_LOCATION_WRAPPED"

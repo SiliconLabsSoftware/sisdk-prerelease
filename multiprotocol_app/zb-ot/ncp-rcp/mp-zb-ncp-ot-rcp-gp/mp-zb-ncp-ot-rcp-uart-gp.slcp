@@ -1,6 +1,6 @@
 project_name: mp-zb-ncp-ot-rcp-uart-gp
 label: Zigbee NCP + OpenThread RCP - UART Green Power Multi-RAIL (CMP)
-package: multiprotocol
+package: multiprotocol_app
 category: Zigbee Application
 quality: production
 description: Demonstrates a CMP (Concurrent Multiprotocol) Zigbee NCP and OpenThread RCP application over UART with multi-RAIL for Green Power (GPDF) scheduling. Uses CPC for host communication.

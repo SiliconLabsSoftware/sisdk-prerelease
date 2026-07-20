@@ -40,7 +40,7 @@ extern "C" {
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 /***************************************************************************//**
  * @addtogroup gpcrc GPCRC - General Purpose CRC
@@ -195,7 +195,7 @@ void sl_hal_gpcrc_init(GPCRC_TypeDef *gpcrc,
 __INLINE void sl_hal_gpcrc_reset(GPCRC_TypeDef *gpcrc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
 
   gpcrc->CTRL = _GPCRC_CTRL_RESETVALUE;
   gpcrc->POLY = _GPCRC_POLY_RESETVALUE;
@@ -212,7 +212,7 @@ __INLINE void sl_hal_gpcrc_reset(GPCRC_TypeDef *gpcrc)
 __INLINE void sl_hal_gpcrc_enable(GPCRC_TypeDef *gpcrc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
 
   // Enable peripheral.
   gpcrc->EN_SET = GPCRC_EN_EN;
@@ -228,7 +228,7 @@ __INLINE void sl_hal_gpcrc_enable(GPCRC_TypeDef *gpcrc)
 __INLINE void sl_hal_gpcrc_disable(GPCRC_TypeDef *gpcrc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
 
   // Disable peripheral.
   gpcrc->EN_CLR = GPCRC_EN_EN;
@@ -248,7 +248,7 @@ __INLINE void sl_hal_gpcrc_disable(GPCRC_TypeDef *gpcrc)
 __INLINE void sl_hal_gpcrc_start(GPCRC_TypeDef *gpcrc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
 
   gpcrc->CMD_SET = GPCRC_CMD_INIT;
 }
@@ -269,7 +269,7 @@ __INLINE void sl_hal_gpcrc_set_init_value(GPCRC_TypeDef *gpcrc,
                                           uint32_t init_value)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
 
   gpcrc->INIT = init_value;
 }
@@ -293,7 +293,7 @@ __INLINE void sl_hal_gpcrc_write_input_32bit(GPCRC_TypeDef *gpcrc,
                                              uint32_t data)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
 
   gpcrc->INPUTDATA = data;
 }
@@ -317,7 +317,7 @@ __INLINE void sl_hal_gpcrc_write_input_16bit(GPCRC_TypeDef *gpcrc,
                                              uint16_t data)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
 
   gpcrc->INPUTDATAHWORD = data;
 }
@@ -341,7 +341,7 @@ __INLINE void sl_hal_gpcrc_write_input_8bit(GPCRC_TypeDef *gpcrc,
                                             uint8_t data)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
 
   gpcrc->INPUTDATABYTE = data;
 }
@@ -362,7 +362,7 @@ __INLINE void sl_hal_gpcrc_write_input_8bit(GPCRC_TypeDef *gpcrc,
 __INLINE uint32_t sl_hal_gpcrc_read_data(GPCRC_TypeDef *gpcrc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
 
   return gpcrc->DATA;
 }
@@ -385,7 +385,7 @@ __INLINE uint32_t sl_hal_gpcrc_read_data(GPCRC_TypeDef *gpcrc)
 __INLINE uint32_t sl_hal_gpcrc_read_data_bit_reversed(GPCRC_TypeDef *gpcrc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
 
   return gpcrc->DATAREV;
 }
@@ -406,7 +406,7 @@ __INLINE uint32_t sl_hal_gpcrc_read_data_bit_reversed(GPCRC_TypeDef *gpcrc)
 __INLINE uint32_t sl_hal_gpcrc_read_data_byte_reversed(GPCRC_TypeDef *gpcrc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPCRC_REF_VALID(gpcrc));
 
   return gpcrc->DATABYTEREV;
 }

@@ -3,7 +3,7 @@ package: platform
 quality: production
 label: Platform Security - SoC SE Manager User Data
 description: >
-  Demonstrates how to erase and write the SE user data region and verify the contents using SE Manager user data APIs on supported Series 2 devices.
+  This example project demonstrates the user data API of SE Manager.
 category: Example|Platform
 filter:
   - name: "Device Type"

@@ -28,8 +28,6 @@ component:
   - id: cpc_secondary
   - id: cpc_security_secondary
   - id: cpc_secondary_recommended_spi_interface
-define:
-  - name: DEBUG_EFM
 configuration:
   - name: SL_CPC_SECURITY_ENABLED
     value: 1

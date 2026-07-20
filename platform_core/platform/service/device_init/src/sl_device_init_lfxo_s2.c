@@ -62,7 +62,7 @@ sl_status_t sl_device_init_lfxo(void)
     ctune = SL_DEVICE_INIT_LFXO_CTUNE;
   }
 
-  lfxoInit.capTune = ctune;
+  lfxoInit.capTune = (uint8_t)ctune;
   CMU_LFXOInit(&lfxoInit);
   CMU_LFXOPrecisionSet(SL_DEVICE_INIT_LFXO_PRECISION);
 

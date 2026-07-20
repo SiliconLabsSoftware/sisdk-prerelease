@@ -797,3 +797,102 @@ sli_block_metadata_t *sli_memory_check_heap_integrity_backwards(sl_memory_heap_t
   return NULL;
 }
 #endif /* SLI_MEMORY_MANAGER_ENABLE_TEST_UTILITIES */
+
+/*******************************************************************************
+ **********************   RETENTION CONTROL FUNCTIONS   ************************
+ ******************************************************************************/
+
+#if defined(SL_CATALOG_BANK_RETENTION_CONTROL_PRESENT) \
+  || defined(SL_CATALOG_BANK_RETENTION_CONTROL_STUBBED_PRESENT)
+
+/***************************************************************************//**
+ * Increments Bank Counters between a start bank ID and an end bank ID.
+ ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_MEMORY_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
+void sli_memory_manager_increment_bank_counter(sl_memory_heap_t *heap,
+                                               uint32_t start_id,
+                                               uint32_t end_id)
+{
+  EFM_ASSERT(start_id <= end_id);
+  sli_retention_control_t *retention_control = (sli_retention_control_t *)heap->retention_control;
+  uint16_t *banks_counter = retention_control->banks_counter;
+
+  for (uint32_t id = start_id; id <= end_id; id++) {
+    banks_counter[id]++;
+    retention_control->enable_retention(id);
+  }
+}
+
+/***************************************************************************//**
+ * Decrements Bank Counters between a start bank ID and an end bank ID.
+ ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_MEMORY_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
+void sli_memory_manager_decrement_bank_counter(sl_memory_heap_t *heap,
+                                               uint32_t start_id,
+                                               uint32_t end_id)
+{
+  EFM_ASSERT(start_id <= end_id);
+  sli_retention_control_t *retention_control = (sli_retention_control_t *)heap->retention_control;
+  uint16_t *banks_counter = retention_control->banks_counter;
+
+  for (uint32_t id = start_id; id <= end_id; id++) {
+    --banks_counter[id];
+    uint16_t count = banks_counter[id];
+    if (count == 0) {
+      retention_control->disable_retention(id);
+    }
+  }
+}
+
+/***************************************************************************//**
+ * Adds size_bytes to retained_size (retention statistics). No-op when disabled.
+ ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_MEMORY_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
+void sli_memory_manager_retention_add_size(sl_memory_heap_t *heap,
+                                           size_t size_bytes)
+{
+#if (SLI_MEMORY_MANAGER_RETENTION_STATISTICS_AVAILABLE == 1)
+  if (heap != NULL && heap->retention_control != NULL) {
+    ((sli_retention_control_t *)heap->retention_control)->retained_size += size_bytes;
+  }
+#else
+  (void)heap;
+  (void)size_bytes;
+#endif
+}
+
+/***************************************************************************//**
+ * Subtracts size_bytes from retained_size (retention statistics). No-op when disabled.
+ ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_MEMORY_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
+void sli_memory_manager_retention_subtract_size(sl_memory_heap_t *heap,
+                                                size_t size_bytes)
+{
+#if (SLI_MEMORY_MANAGER_RETENTION_STATISTICS_AVAILABLE == 1)
+  if (heap != NULL && heap->retention_control != NULL) {
+    ((sli_retention_control_t *)heap->retention_control)->retained_size -= size_bytes;
+  }
+#else
+  (void)heap;
+  (void)size_bytes;
+#endif
+}
+
+/***************************************************************************//**
+ * Updates the retained high watermark from the current retained_size. No-op when disabled.
+ ******************************************************************************/
+void sli_memory_manager_retention_update_high_watermark(const sl_memory_heap_t *heap)
+{
+#if (SLI_MEMORY_MANAGER_RETENTION_STATISTICS_AVAILABLE == 1)
+  if (heap != NULL && heap->retention_control != NULL) {
+    sli_retention_control_t *retention_control = (sli_retention_control_t *)heap->retention_control;
+    if (retention_control->retained_size > retention_control->retained_high_watermark) {
+      retention_control->retained_high_watermark = retention_control->retained_size;
+    }
+  }
+#else
+  (void)heap;
+#endif
+}
+
+#endif /* SL_CATALOG_BANK_RETENTION_CONTROL_PRESENT || SL_CATALOG_BANK_RETENTION_CONTROL_STUBBED_PRESENT */

@@ -1,0 +1,57 @@
+id: health_thermometer
+label: Health Thermometer API
+package: bluetooth_le
+description: "API for the Health Thermometer GATT service\nThis is a Low-Code component. At start, the temperature sensor has to be initialized. Once the BLE connection is established, the\nsl_bt_ht_temperature_measurement_indication_changed_cb()\nfunction will be called where either a single measurement can be done, or a timer started. A reference implementation for this function can be found in Bluetooth - SoC Thermometer example, in app.c file. The result of the measurement can be send using\nsl_bt_ht_temperature_measurement_indicate()\nfunction."
+category: Bluetooth|Application|GATT Services
+metadata:
+  sbom:
+    license: Zlib
+quality: production
+root_path: bluetooth_le/common/health_thermometer
+tag:
+- Low-Code
+config_file:
+- path: config/sl_health_thermometer_config.h
+- path: health_thermometer.xml
+  directory: btconf
+source:
+- path: sl_health_thermometer.c
+include:
+- path: .
+  file_list:
+  - path: sl_health_thermometer.h
+provides:
+- name: health_thermometer
+requires:
+- name: bluetooth_stack
+- name: gatt_configuration
+- name: bluetooth_feature_connection
+- name: bluetooth_feature_gatt_server
+- name: bluetooth_feature_system
+- name: app_assert
+- name: sl_common
+template_contribution:
+- name: bluetooth_on_event
+  value:
+    include: sl_health_thermometer.h
+    function: sl_bt_ht_on_event
+  priority: 0
+- name: component_catalog
+  value: health_thermometer
+- name: agents_slab
+  value:
+    id: health_thermometer
+    context: |
+      The Health Thermometer API (health_thermometer) component is a Low-Code GATT server component.
+      No public init: `sl_bt_ht_on_event()` is auto-registered via `bluetooth_on_event` and initializes GATT on boot.
+
+      - Initialize the temperature sensor separately in `app_init()`.
+      - Override weak callbacks in app code:
+        `sl_bt_ht_temperature_measurement_indication_changed_cb`,
+        `sl_bt_ht_temperature_measurement_indication_confirmed_cb`,
+      - The Health Thermomter service XML (`health_thermometer.xml`) is bundled with this component and installed
+        automatically — do not add characteristics to the project GATT file.
+  priority: -5000
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/health-thermometer

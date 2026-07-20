@@ -36,8 +36,8 @@
 #include "sl_clock_manager_oscillator_config.h"
 #include "em_device.h"
 
-#if defined(CLOCK_MANAGER_INIT_HAL_INTERNAL_PRESENT)
-#include "sli_clock_manager_init_hal_internal.h"
+#if defined(FREQPLAN_PRESENT)
+#include "sli_clock_manager_init_hal_freqplan.h"
 #endif
 
 #ifdef __cplusplus
@@ -271,6 +271,21 @@ extern "C" {
  * Initializes Oscillators and Clock branches.
  ******************************************************************************/
 sl_status_t sli_clock_manager_hal_init(void);
+
+#if defined(SL_CATALOG_CLOCK_MANAGER_INIT_HAL_INTERNAL_PRESENT)
+/***************************************************************************//**
+ * Initializes internal oscillators.
+ * This is called in sli_clock_manager_hal_init() after other oscillators
+ * are initialized.
+ ******************************************************************************/
+void sli_clock_manager_hal_init_oscillators_internal(void);
+
+/***************************************************************************//**
+ * Initializes internal Clock branches.
+ * This is called at the end of sli_clock_manager_hal_init_clock_branches().
+ ******************************************************************************/
+void sli_clock_manager_hal_init_clock_branches_internal(void);
+#endif
 
 #ifdef __cplusplus
 }

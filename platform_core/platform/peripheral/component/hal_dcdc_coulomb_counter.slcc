@@ -23,6 +23,7 @@ provides:
 requires:
 - name: device
 - name: device_has_coulomb_counter
+- name: log_none
 - name: device_has_dcdc
 - name: emlib_common
 - name: emlib_cmu

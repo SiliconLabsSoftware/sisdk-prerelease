@@ -1122,7 +1122,7 @@ static void EUSART_SyncInitCommon(EUSART_TypeDef *eusart,
                                    | _EUSART_CFG2_FORCELOAD_MASK))
                  | (uint32_t)(init->master)
                  | (uint32_t)(init->clockMode)
-                 | (uint32_t)(EUSART_CFG2_FORCELOAD); // Force load feature enabled by default.
+                 | EUSART_CFG2_FORCELOAD; // Force load feature enabled by default.
 
   if (advancedSetting_ptr) {
     // Configure global configuration register 2.
@@ -1172,7 +1172,7 @@ static void EUSART_SyncInitCommon(EUSART_TypeDef *eusart,
   }
 
   // Configure frame format
-  eusart->FRAMECFG = (eusart->FRAMECFG & ~(_EUSART_FRAMECFG_DATABITS_MASK))
+  eusart->FRAMECFG = (eusart->FRAMECFG & ~_EUSART_FRAMECFG_DATABITS_MASK)
                      | init->databits;
 
   if (advancedSetting_ptr) {

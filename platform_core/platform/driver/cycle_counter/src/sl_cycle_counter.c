@@ -42,6 +42,9 @@ void sl_cycle_counter_enable(void)
 {
   CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
   ITM->LAR          = 0xc5acce55;
+#if defined(ITM_TCR_DWTENA_Msk)
+  ITM->TCR |= ITM_TCR_DWTENA_Msk;
+#endif
   DWT->CTRL        |= DWT_CTRL_CYCCNTENA_Msk;
 }
 

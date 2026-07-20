@@ -35,6 +35,8 @@ requires:
 - name: sl_common
 - name: code_classification
 - name: sl_core_arch
+- name: cycle_counter
+  condition: [cortexm55]
 template_contribution:
 - name: code_classification_components
   value: core

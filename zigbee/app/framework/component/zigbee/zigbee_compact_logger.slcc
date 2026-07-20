@@ -1,0 +1,63 @@
+package: zigbee
+description: This component manages a compact logger that stores log entries encoded with a 2-byte enumeration.  Another component must provide the encoding/decoding of the enumerations. This component stores log messages with the following data  UTC Time, Time Synchronization, Log Message ID, and variable log message data.  It stores the data in a ring-buffer stored in RAM.  When space is needed the oldest log message entries are deleted.
+label: Compact Logger
+quality: production
+id: zigbee_compact_logger
+category: Zigbee|Utility
+provides:
+- name: zigbee_compact_logger
+requires:
+- name: zigbee_ring_buffer
+- name: zigbee_simple_clock
+config_file:
+- path: app/framework/plugin/compact-logger/config/compact-logger-config.h
+source:
+- path: app/framework/plugin/compact-logger/compact-logger.c
+- path: app/framework/plugin/compact-logger/compact-logger-cli.c
+  condition:
+  - cli
+- path: app/framework/plugin/compact-logger/compact-logger-cb.c
+include:
+- path: app/framework/plugin/compact-logger
+  file_list:
+  - path: compact-logger.h
+template_contribution:
+- name: component_catalog
+  value: zigbee_compact_logger
+- name: cli_group
+  value:
+    group: plugin
+    name: compact-logger
+    help: compact-logger related commands.
+- name: cli_command
+  value:
+    group: compact-logger
+    name: clear
+    handler: sli_zigbee_af_compact_logger_clear_log
+    help: Clear the log
+- name: cli_command
+  value:
+    group: compact-logger
+    name: set-severity
+    handler: sli_zigbee_af_compact_logger_set_severity
+    help: Sets the minimum severity level messages must meet in order to be logged.
+    argument:
+    - type: uint8
+      help: The new severity level
+- name: cli_command
+  value:
+    group: compact-logger
+    name: set-facility
+    handler: sli_zigbee_af_compact_logger_set_facility
+    help: Sets the facility values messages must meet in order to be logged.
+    argument:
+    - type: uint16
+      help: The new facility value
+
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/compact-logger
+metadata:
+  sbom:
+    license: MSLA
+root_path: zigbee

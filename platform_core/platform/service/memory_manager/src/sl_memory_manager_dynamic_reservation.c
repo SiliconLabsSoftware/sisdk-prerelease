@@ -94,6 +94,7 @@ sl_status_t sl_memory_release_block(sl_memory_reservation_t *handle)
   sli_block_metadata_t *free_st_list_head;
   sli_block_metadata_t *current_metadata;
   uint32_t reserved_block_offset;
+  bool merged_with_prev_free = false;
 
   // Verify that the handle isn't NULL.
   if (handle == NULL) {
@@ -142,6 +143,7 @@ sl_status_t sl_memory_release_block(sl_memory_reservation_t *handle)
     // |...|Metadata Free block|Data Free block|R1||
     if ((prev_block->block_in_use == 0) && (reserved_block_offset < SLI_BLOCK_RESERVATION_MIN_SIZE_DWORD)) {
       // New freed block's previous block is free, so merge both free blocks.
+      merged_with_prev_free = true;
       new_free_block = prev_block;
       prev_block = (prev_block == heap->base_addr)
                    ? NULL
@@ -166,6 +168,9 @@ sl_status_t sl_memory_release_block(sl_memory_reservation_t *handle)
     // Make sure there's no reserved block between the freed block and the next block.
     if ((next_block->block_in_use == 0) && (reserved_block_offset < SLI_BLOCK_RESERVATION_MIN_SIZE_DWORD)) {
       // New freed block's following block is free, so merge both free blocks.
+      SLI_MEMORY_DECREMENT_BANK_COUNTER(heap,
+                                        (uint8_t *)next_block,
+                                        ((uint8_t *)next_block + SLI_BLOCK_METADATA_SIZE_BYTE - 1));
       new_free_block_length += sli_block_len_dword_decode(next_block) + reserved_block_offset + SLI_BLOCK_METADATA_SIZE_DWORD;
       // Invalidate the next block metadata.
       sli_block_len_dword_encode(next_block, 0);
@@ -185,6 +190,12 @@ sl_status_t sl_memory_release_block(sl_memory_reservation_t *handle)
   // Update the new free metadata block accordingly.
   sli_memory_metadata_init(new_free_block);
   sli_block_len_dword_encode(new_free_block, new_free_block_length);
+
+  if (!merged_with_prev_free) {
+    SLI_MEMORY_INCREMENT_BANK_COUNTER(heap,
+                                      (uint8_t *)new_free_block,
+                                      ((uint8_t *)new_free_block + SLI_BLOCK_METADATA_SIZE_BYTE - 1));
+  }
 
   if (next_block != NULL) {
     sli_block_offset_next_dword_encode(new_free_block, ((uint64_t *)next_block - (uint64_t *)new_free_block));
@@ -497,6 +508,9 @@ sl_status_t sl_memory_heap_reserve_block(sl_memory_heap_t *heap,
       }
     }
 
+    SLI_MEMORY_DECREMENT_BANK_COUNTER(heap,
+                                      (uint8_t *)free_block_metadata,
+                                      (uint8_t *)free_block_metadata + SLI_BLOCK_METADATA_SIZE_BYTE - 1);
     SLI_MEMORY_STAT_HEAP_DECREASE(heap, SLI_BLOCK_METADATA_SIZE_BYTE);
 
     // Update head pointers accordingly.

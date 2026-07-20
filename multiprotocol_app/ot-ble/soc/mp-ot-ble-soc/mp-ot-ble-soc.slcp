@@ -1,6 +1,6 @@
 project_name: mp-ot-ble-soc
 label: OpenThread BLE DMP - SoC
-package: multiprotocol
+package: multiprotocol_app
 description: >
   Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth running on FreeRTOS.
 category: OpenThread Examples
@@ -8,6 +8,7 @@ quality: production
 
 component:
   - id: sl_main
+  - id: watchdog_manager
   - id: ot_stack_ftd
   - id: ot_cli_source
   - id: bluetooth_stack
@@ -142,7 +143,6 @@ tag:
   - hwfilter:flash:768k
   - toolchain:gcc
   - toolchain:llvm
-
 readme:
   - path: ./README.md
 

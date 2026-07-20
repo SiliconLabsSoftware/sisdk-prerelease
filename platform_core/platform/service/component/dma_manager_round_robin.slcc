@@ -13,29 +13,9 @@ metadata:
     license: Zlib
 provides:
 - name: dma_manager_round_robin
-  condition: [device_sdid_200]
+  condition: [device_series_2]
 - name: dma_manager_round_robin
-  condition: [device_sdid_205]
-- name: dma_manager_round_robin
-  condition: [device_sdid_210]
-- name: dma_manager_round_robin
-  condition: [device_sdid_215]
-- name: dma_manager_round_robin
-  condition: [device_sdid_220]
-- name: dma_manager_round_robin
-  condition: [device_sdid_225]
-- name: dma_manager_round_robin
-  condition: [device_sdid_230]
-- name: dma_manager_round_robin
-  condition: [device_sdid_235]
-- name: dma_manager_round_robin
-  condition: [device_sdid_240]
-- name: dma_manager_round_robin
-  condition: [device_sdid_260]
-- name: dma_manager_round_robin
-  condition: [device_generic_family_sixx301]
-- name: dma_manager_round_robin
-  condition: [device_sdid_265]
+  condition: [device_series_3]
 requires:
 - name: dma_manager
 - name: component_catalog
@@ -70,13 +50,28 @@ config_file:
   condition: [device_sdid_240]
 - path: config/8ch/sl_dma_manager_round_robin_config.h
   file_id: dma_manager_round_robin_config
+  condition: [device_sdid_250]
+- path: config/8ch/sl_dma_manager_round_robin_config.h
+  file_id: dma_manager_round_robin_config
   condition: [device_sdid_260]
+- path: config/8ch/sl_dma_manager_round_robin_config.h
+  file_id: dma_manager_round_robin_config
+  condition: [device_sdid_265]
+- path: config/8ch/sl_dma_manager_round_robin_config.h
+  file_id: dma_manager_round_robin_config
+  condition: [device_generic_family_sixx300]
 - path: config/8ch/sl_dma_manager_round_robin_config.h
   file_id: dma_manager_round_robin_config
   condition: [device_generic_family_sixx301]
 - path: config/8ch/sl_dma_manager_round_robin_config.h
   file_id: dma_manager_round_robin_config
-  condition: [device_sdid_265]
+  condition: [device_generic_family_sixx302]
+- path: config/16ch/sl_dma_manager_round_robin_config.h
+  file_id: dma_manager_round_robin_config
+  condition: [device_generic_family_sixx353]
+- path: config/16ch/sl_dma_manager_round_robin_config.h
+  file_id: dma_manager_round_robin_config
+  condition: [device_generic_family_sixx381]
 template_contribution:
 - name: component_catalog
   value: dma_manager_round_robin

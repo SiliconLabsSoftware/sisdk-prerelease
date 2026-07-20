@@ -41,7 +41,7 @@ extern "C" {
 
 #include <stdbool.h>
 #include "sl_enum.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 /***************************************************************************//**
  * @addtogroup adc ADC - Analog to Digital Converter
@@ -778,7 +778,7 @@ void sl_hal_adc_set_clock_prescalers(ADC_TypeDef *adc,
 __INLINE void sl_hal_adc_enable(ADC_TypeDef *adc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
 
   adc->EN_SET = ADC_EN_EN;
 }
@@ -793,7 +793,7 @@ __INLINE void sl_hal_adc_enable(ADC_TypeDef *adc)
 __INLINE void sl_hal_adc_disable(ADC_TypeDef *adc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
 
   if (adc->EN & _ADC_EN_EN_MASK) {
     adc->EN_CLR = ADC_EN_EN;
@@ -814,9 +814,9 @@ __INLINE void sl_hal_adc_disable(ADC_TypeDef *adc)
 __INLINE void sl_hal_adc_start(ADC_TypeDef *adc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
   // Make sure the module is enabled.
-  EFM_ASSERT((adc->EN & _ADC_EN_EN_MASK) == _ADC_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT((adc->EN & _ADC_EN_EN_MASK) == _ADC_EN_EN_MASK);
 
   adc->CMD_SET = ADC_CMD_SCANSTART;
 }
@@ -831,9 +831,9 @@ __INLINE void sl_hal_adc_start(ADC_TypeDef *adc)
 __INLINE void sl_hal_adc_stop(ADC_TypeDef *adc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
   // Make sure the module is enabled.
-  EFM_ASSERT((adc->EN & _ADC_EN_EN_MASK) == _ADC_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT((adc->EN & _ADC_EN_EN_MASK) == _ADC_EN_EN_MASK);
 
   adc->CMD_SET = ADC_CMD_SCANSTOP;
 }
@@ -848,9 +848,9 @@ __INLINE void sl_hal_adc_stop(ADC_TypeDef *adc)
 __INLINE void sl_hal_adc_enable_timer(ADC_TypeDef *adc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
   // Make sure the module is enabled.
-  EFM_ASSERT((adc->EN & _ADC_EN_EN_MASK) == _ADC_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT((adc->EN & _ADC_EN_EN_MASK) == _ADC_EN_EN_MASK);
 
   adc->CMD_SET = ADC_CMD_TIMEREN;
 }
@@ -865,9 +865,9 @@ __INLINE void sl_hal_adc_enable_timer(ADC_TypeDef *adc)
 __INLINE void sl_hal_adc_disable_timer(ADC_TypeDef *adc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
   // Make sure the module is enabled.
-  EFM_ASSERT((adc->EN & _ADC_EN_EN_MASK) == _ADC_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT((adc->EN & _ADC_EN_EN_MASK) == _ADC_EN_EN_MASK);
 
   adc->CMD_SET = ADC_CMD_TIMERDIS;
 }
@@ -888,9 +888,9 @@ __INLINE void sl_hal_adc_disable_timer(ADC_TypeDef *adc)
 __INLINE void sl_hal_adc_flush_fifo(ADC_TypeDef *adc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
   // Make sure the module is enabled.
-  EFM_ASSERT((adc->EN & _ADC_EN_EN_MASK) == _ADC_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT((adc->EN & _ADC_EN_EN_MASK) == _ADC_EN_EN_MASK);
 
   adc->CMD_SET = ADC_CMD_SCANFIFOFLUSH;
 }
@@ -905,7 +905,7 @@ __INLINE void sl_hal_adc_flush_fifo(ADC_TypeDef *adc)
 __INLINE void sl_hal_adc_wait_sync(ADC_TypeDef *adc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
 
   while ((adc->EN & _ADC_EN_EN_MASK) && (adc->STATUS & _ADC_STATUS_SYNCBUSY_MASK)) {
     // Wait for any pending previous write operation to have been completed
@@ -923,7 +923,7 @@ __INLINE void sl_hal_adc_wait_sync(ADC_TypeDef *adc)
 __INLINE void sl_hal_adc_wait_ready(ADC_TypeDef *adc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
 
   while (adc->EN & _ADC_EN_DISABLING_MASK) {
     // Wait for disabling to finish
@@ -943,7 +943,7 @@ __INLINE void sl_hal_adc_wait_ready(ADC_TypeDef *adc)
 __INLINE uint32_t sl_hal_adc_get_status(ADC_TypeDef *adc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
 
   return adc->STATUS;
 }
@@ -963,7 +963,7 @@ __INLINE void sl_hal_adc_enable_interrupts(ADC_TypeDef *adc,
                                            uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
 
   adc->IEN_SET = flags;
 }
@@ -983,7 +983,7 @@ __INLINE void sl_hal_adc_disable_interrupts(ADC_TypeDef *adc,
                                             uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
 
   adc->IEN_CLR = flags;
 }
@@ -1003,7 +1003,7 @@ __INLINE void sl_hal_adc_clear_interrupts(ADC_TypeDef *adc,
                                           uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
 
   adc->IF_CLR = flags;
 }
@@ -1023,7 +1023,7 @@ __INLINE void sl_hal_adc_set_interrupts(ADC_TypeDef *adc,
                                         uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
 
   adc->IF_SET = flags;
 }
@@ -1041,7 +1041,7 @@ __INLINE void sl_hal_adc_set_interrupts(ADC_TypeDef *adc,
 __INLINE uint32_t sl_hal_adc_get_pending_interrupts(ADC_TypeDef *adc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
 
   return adc->IF;
 }
@@ -1062,7 +1062,7 @@ __INLINE uint32_t sl_hal_adc_get_pending_interrupts(ADC_TypeDef *adc)
 __INLINE uint32_t sl_hal_adc_get_enabled_pending_interrupts(ADC_TypeDef *adc)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_ADC_REF_VALID(adc));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
 
   uint32_t tmp;
 

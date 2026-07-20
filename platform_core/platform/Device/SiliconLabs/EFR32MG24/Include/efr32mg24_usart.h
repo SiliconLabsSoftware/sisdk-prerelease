@@ -1116,7 +1116,7 @@ typedef struct usart_typedef{
 #define _USART_I2SCTRL_EN_MASK                  0x1UL                                   /**< Bit mask for USART_EN                       */
 #define _USART_I2SCTRL_EN_DEFAULT               0x00000000UL                            /**< Mode DEFAULT for USART_I2SCTRL              */
 #define USART_I2SCTRL_EN_DEFAULT                (_USART_I2SCTRL_EN_DEFAULT << 0)        /**< Shifted mode DEFAULT for USART_I2SCTRL      */
-#define USART_I2SCTRL_MONO                      (0x1UL << 1)                            /**< Stero or Mono                               */
+#define USART_I2SCTRL_MONO                      (0x1UL << 1)                            /**< Stereo or Mono                              */
 #define _USART_I2SCTRL_MONO_SHIFT               1                                       /**< Shift value for USART_MONO                  */
 #define _USART_I2SCTRL_MONO_MASK                0x2UL                                   /**< Bit mask for USART_MONO                     */
 #define _USART_I2SCTRL_MONO_DEFAULT             0x00000000UL                            /**< Mode DEFAULT for USART_I2SCTRL              */

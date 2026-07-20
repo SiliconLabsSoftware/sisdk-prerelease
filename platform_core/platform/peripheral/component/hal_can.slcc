@@ -3,7 +3,7 @@ label: CAN
 package: platform_core
 description: >
   CAN Peripheral API
-category: Platform|Peripheral
+category: Platform|Peripheral|HAL
 quality: evaluation
 metadata:
   sbom:

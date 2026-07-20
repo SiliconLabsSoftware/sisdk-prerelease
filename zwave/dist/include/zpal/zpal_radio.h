@@ -320,7 +320,6 @@ typedef enum {
   ZPAL_RADIO_EVENT_TX_BEAM_COMPLETE,   ///< Beam sent.
   ZPAL_RADIO_EVENT_TX_FAIL,            ///< Transmit failed.
   ZPAL_RADIO_EVENT_TX_FAIL_LBT,        ///< Transmit failed because of an LBT failure.
-  ZPAL_RADIO_EVENT_TX_NONE,            ///< No transmit event.
 } zpal_radio_tx_event_t;
 
 /**

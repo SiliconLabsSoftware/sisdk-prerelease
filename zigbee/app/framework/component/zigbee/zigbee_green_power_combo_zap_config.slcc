@@ -9,7 +9,6 @@ provides:
 
 config_file:
 - path: app/framework/plugin/green-power-common/config/zcl/zcl_config_gp_combo.zap
-  directory: zcl
 
 template_contribution:
 - name: component_catalog

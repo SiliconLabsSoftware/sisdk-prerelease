@@ -2064,7 +2064,7 @@ typedef struct usbahb_ahbs_typedef{
 #define _USBAHB_DEVOUTEP_INT_PKTDRPSTS_MASK                0x800UL                                            /**< Bit mask for USBAHB_PKTDRPSTS               */
 #define _USBAHB_DEVOUTEP_INT_PKTDRPSTS_DEFAULT             0x00000000UL                                       /**< Mode DEFAULT for USBAHB_DEVOUTEP_INT        */
 #define USBAHB_DEVOUTEP_INT_PKTDRPSTS_DEFAULT              (_USBAHB_DEVOUTEP_INT_PKTDRPSTS_DEFAULT << 11)     /**< Shifted mode DEFAULT for USBAHB_DEVOUTEP_INT*/
-#define USBAHB_DEVOUTEP_INT_BBLEERR                        (0x1UL << 12)                                      /**< Babble Error Interupt                       */
+#define USBAHB_DEVOUTEP_INT_BBLEERR                        (0x1UL << 12)                                      /**< Babble Error Interrupt                      */
 #define _USBAHB_DEVOUTEP_INT_BBLEERR_SHIFT                 12                                                 /**< Shift value for USBAHB_BBLEERR              */
 #define _USBAHB_DEVOUTEP_INT_BBLEERR_MASK                  0x1000UL                                           /**< Bit mask for USBAHB_BBLEERR                 */
 #define _USBAHB_DEVOUTEP_INT_BBLEERR_DEFAULT               0x00000000UL                                       /**< Mode DEFAULT for USBAHB_DEVOUTEP_INT        */

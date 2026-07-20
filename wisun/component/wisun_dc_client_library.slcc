@@ -20,7 +20,7 @@ provides:
 - name: "wisun_dc_client_implementation"
 
 define:
-- name: "HAVE_DC_ONLY_STACK"
+- name: "HAVE_DC_CLIENT"
 
 library:
   # DC client stack (standalone):

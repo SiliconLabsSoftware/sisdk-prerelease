@@ -43,6 +43,7 @@ extern "C" {
 #include "sl_hal_dcdc_coulomb_counter_compat.h"
 #include "sl_common.h"
 #include "sl_enum.h"
+#include "sl_log_helper.h"
 #include "em_cmu.h"
 #include "em_emu.h"
 

@@ -146,18 +146,18 @@
       <peripheral componentIdRef="pin_tool.efr32.efr32mg2b.pdm" displayName="PDM" name="PDM" revision="A" category="Communications" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32mg2b.rfsense" displayName="RFSENSE" name="RFSENSE" revision="A" category="Radio" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32mg2b.etampdet" displayName="ETAMPDET" name="ETAMPDET" revision="A" category="Security" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efr32.efr32mg2b.can" displayName="CAN0" name="CAN0" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.efr32mg2b.can" displayName="CAN0" name="CAN0" revision="A" category="Communications" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32mg2b.wdog" displayName="WDOG0" name="WDOG0" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32mg2b.aes" displayName="RADIOAES" name="RADIOAES" revision="A" category="Security" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32mg2b.smu" displayName="SMU" name="SMU" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32mg2b.rtcc" displayName="RTCC" name="RTCC" revision="A" category="Timers" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32mg2b.letimer" displayName="LETIMER0" name="LETIMER0" revision="A" category="Timers" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efr32.efr32mg2b.adc" displayName="ADC0" name="ADC0" revision="A" category="Other" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efr32.efr32mg2b.acmp" displayName="ACMP0" name="ACMP0" revision="A" category="Other" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efr32.efr32mg2b.adc" displayName="ADC1" name="ADC1" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.efr32mg2b.adc" displayName="ADC0" name="ADC0" revision="A" category="Analog" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.efr32mg2b.acmp" displayName="ACMP0" name="ACMP0" revision="A" category="Analog" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.efr32mg2b.adc" displayName="ADC1" name="ADC1" revision="A" category="Analog" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32mg2b.i2c" displayName="I2C0" name="I2C0" revision="A" category="Communications" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32mg2b.eusart" displayName="EUSART0" name="EUSART0" revision="A" category="Communications" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efr32.efr32mg2b.semailbox" displayName="SEMAILBOX" name="SEMAILBOX" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.efr32mg2b.semailbox" displayName="SEMAILBOX" name="SEMAILBOX" revision="A" category="Security" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32mg2b.rtcc" displayName="PRORTC" name="PRORTC" revision="A" category="Timers" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32mg2b.pti" displayName="PTI" name="PTI" revision="A" category="Radio" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.efr32mg2b.modem" displayName="MODEM" name="MODEM" revision="A" category="Radio" hidden="false"/>

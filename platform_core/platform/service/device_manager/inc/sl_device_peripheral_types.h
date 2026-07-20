@@ -71,13 +71,33 @@ typedef struct sl_peripheral_dma {
 /// Define peripheral DMA typedef.
 typedef const sl_peripheral_dma_val_t* sl_peripheral_dma_t;
 
-/// Define peripheral I2C structure.
-typedef struct sl_peripheral_i2c {
+SL_ENUM(sl_peripheral_serial_type_t) {
+  SL_PERIPHERAL_SERIAL_TYPE_USART,
+  SL_PERIPHERAL_SERIAL_TYPE_EUSART
+};
+
+/// Define generic serial peripheral structure.
+typedef struct sl_peripheral_serial {
   uint32_t base;                         ///< Peripheral base address.
   sl_clock_branch_t clk_branch;          ///< Peripheral clock branch.
   sl_bus_clock_t bus_clock;              ///< Peripheral bus clock.
-  sl_dma_signal_t dma_signal_rxdatav;    ///< RX data available DMA channel
-  sl_dma_signal_t dma_signal_txbl;       ///< TX buffer level DMA channel
+  sl_peripheral_serial_type_t ip_type;   ///< IP type (USART, EUSART)
+  uint32_t rx_irqn;                      ///< RX interrupt number
+  uint32_t tx_irqn;                      ///< TX interrupt number
+  sl_dma_signal_t dma_signal_rx_trigger; ///< RX data available DMA signal
+  sl_dma_signal_t dma_signal_tx_trigger; ///< TX buffer level DMA signal
+} sl_peripheral_serial_val_t;
+
+/// Define peripheral serial typedef.
+typedef const sl_peripheral_serial_val_t* sl_peripheral_serial_t;
+
+/// Define peripheral I2C structure.
+typedef struct sl_peripheral_i2c {
+  uint32_t base;                            ///< Peripheral base address.
+  sl_clock_branch_t clk_branch;             ///< Peripheral clock branch.
+  sl_bus_clock_t bus_clock;                 ///< Peripheral bus clock.
+  sl_dma_signal_t dma_signal_rxdatav;       ///< RX data available DMA channel
+  sl_dma_signal_t dma_signal_txbl;          ///< TX buffer level DMA channel
 } sl_peripheral_i2c_val_t;
 
 /// Define peripheral I2C typedef.
@@ -143,11 +163,20 @@ typedef const sl_peripheral_adc_val_t* sl_peripheral_adc_t;
 
 /// Define peripheral EUSART structure.
 typedef struct sl_peripheral_eusart {
-  uint32_t base;                        ///< Peripheral base address.
-  sl_clock_branch_t clk_branch;         ///< Peripheral clock branch.
-  sl_bus_clock_t bus_clock;             ///< Peripheral bus clock.
-  sl_dma_signal_t dma_signal_rxfl;      ///< RX DMA channel
-  sl_dma_signal_t dma_signal_txfl;      ///< TX DMA channel
+  uint32_t base;                            ///< Peripheral base address.
+  sl_clock_branch_t clk_branch;             ///< Peripheral clock branch.
+  sl_bus_clock_t bus_clock;                 ///< Peripheral bus clock.
+  sl_peripheral_serial_type_t ip_type;      ///< IP type (USART, EUSART)
+  uint32_t rx_irqn;                         ///< RX interrupt number
+  uint32_t tx_irqn;                         ///< TX interrupt number
+  union {
+    sl_dma_signal_t dma_signal_rxfl;        ///< RX DMA channel
+    sl_dma_signal_t dma_signal_rx_trigger;  ///< RX data available DMA signal
+  };
+  union {
+    sl_dma_signal_t dma_signal_txfl;        ///< TX DMA channel
+    sl_dma_signal_t dma_signal_tx_trigger;  ///< TX buffer level DMA signal
+  };
 } sl_peripheral_eusart_val_t;
 
 /// Define peripheral EUSART typedef.
@@ -155,11 +184,20 @@ typedef const sl_peripheral_eusart_val_t* sl_peripheral_eusart_t;
 
 /// Define peripheral EUART structure.
 typedef struct sl_peripheral_euart {
-  uint32_t base;                        ///< Peripheral base address.
-  sl_clock_branch_t clk_branch;         ///< Peripheral clock branch.
-  sl_bus_clock_t bus_clock;             ///< Peripheral bus clock.
-  sl_dma_signal_t dma_signal_rxfl;      ///< RX DMA channel
-  sl_dma_signal_t dma_signal_txfl;      ///< TX DMA channel
+  uint32_t base;                            ///< Peripheral base address.
+  sl_clock_branch_t clk_branch;             ///< Peripheral clock branch.
+  sl_bus_clock_t bus_clock;                 ///< Peripheral bus clock.
+  sl_peripheral_serial_type_t ip_type;      ///< IP type (USART, EUSART)
+  uint32_t rx_irqn;                         ///< RX interrupt number
+  uint32_t tx_irqn;                         ///< TX interrupt number
+  union {
+    sl_dma_signal_t dma_signal_rxfl;        ///< RX DMA channel
+    sl_dma_signal_t dma_signal_rx_trigger;  ///< RX data available DMA signal
+  };
+  union {
+    sl_dma_signal_t dma_signal_txfl;        ///< TX DMA channel
+    sl_dma_signal_t dma_signal_tx_trigger;  ///< TX buffer level DMA signal
+  };
 } sl_peripheral_euart_val_t;
 
 /// Define peripheral EUART typedef.
@@ -170,9 +208,18 @@ typedef struct sl_peripheral_usart {
   uint32_t base;                           ///< Peripheral base address.
   sl_clock_branch_t clk_branch;            ///< Peripheral clock branch.
   sl_bus_clock_t bus_clock;                ///< Peripheral bus clock.
-  sl_dma_signal_t dma_signal_rxdatav;      ///< RXDATAV DMA channel
+  sl_peripheral_serial_type_t ip_type;     ///< IP type (USART, EUSART)
+  uint32_t rx_irqn;                        ///< RX interrupt number
+  uint32_t tx_irqn;                        ///< TX interrupt number
+  union {
+    sl_dma_signal_t dma_signal_rx_trigger; ///< RX data available DMA signal
+    sl_dma_signal_t dma_signal_rxdatav;    ///< RXDATAV DMA channel
+  };
+  union {
+    sl_dma_signal_t dma_signal_tx_trigger; ///< TX buffer level DMA signal
+    sl_dma_signal_t dma_signal_txbl;       ///< TXBL DMA channel
+  };
   sl_dma_signal_t dma_signal_rxdatavright; ///< RXDATAVRIGHT DMA channel
-  sl_dma_signal_t dma_signal_txbl;         ///< TXBL DMA channel
   sl_dma_signal_t dma_signal_txblright;    ///< TXBLRIGHT DMA channel
   sl_dma_signal_t dma_signal_txempty;      ///< TXEMPTY DMA channel
 } sl_peripheral_usart_val_t;

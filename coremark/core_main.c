@@ -32,6 +32,7 @@ El Dorado Hills, CA, 95762
 	This file contains the framework to acquire a block of memory, seed initial parameters, tun t he benchmark and report the results.
 */
 #include "coremark.h"
+#include "sl_memory_manager_region.h"
 
 /* Function: iterate
 	Run the benchmark for a specified number of iterations.
@@ -77,7 +78,7 @@ ee_s32 get_seed_32(int i);
 #endif
 
 #if (MEM_METHOD==MEM_STATIC)
-ee_u8 static_memblk[TOTAL_DATA_SIZE];
+ee_u8 static_memblk[TOTAL_DATA_SIZE] SL_FAST_DATA;
 #endif
 char *mem_name[3] = {"Static","Heap","Stack"};
 /* Function: main

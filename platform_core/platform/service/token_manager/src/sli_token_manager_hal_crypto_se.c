@@ -70,7 +70,7 @@ static sl_status_t hal_validate_crypto_params(const uint8_t *nonce,
                                               size_t aad_len,
                                               const uint8_t *in_data,
                                               size_t in_data_len,
-                                              uint8_t *out_data,
+                                              const uint8_t *out_data,
                                               const uint8_t *tag,
                                               hal_crypto_algo_t crypto_algo)
 {

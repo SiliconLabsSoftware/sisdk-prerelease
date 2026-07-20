@@ -148,10 +148,14 @@ typedef enum {
   SL_WISUN_MSG_SET_DHCPV6_VENDOR_DATA_REQ_ID              = 0x5C,
   SL_WISUN_MSG_SET_LAST_GASP_REQ_ID                       = 0x5E,
   SL_WISUN_MSG_SET_FIRST_BREATH_REQ_ID                    = 0x5F,
+  SL_WISUN_MSG_SET_LXPM_PREFIX_REQ_ID                     = 0x60,
   SL_WISUN_MSG_SET_OPTION_REQ_ID                          = 0x61,
   SL_WISUN_MSG_SET_FFN_ADVANCED_PARAMS_REQ_ID             = 0x62,
   SL_WISUN_MSG_SET_LFN_ADVANCED_PARAMS_REQ_ID             = 0x63,
   SL_WISUN_MSG_RESET_PARAMS_REQ_ID                        = 0x64,
+  SL_WISUN_MSG_GET_BROADCAST_SCHEDULE_TIME_REQ_ID         = 0x65,
+  SL_WISUN_MSG_GET_LXPM_GROUP_NEIGHBOR_COUNT_REQ_ID       = 0x66,
+  SL_WISUN_MSG_GET_LXPM_GROUP_NEIGHBORS_REQ_ID            = 0x67,
 } sl_wisun_msg_req_id_t;
 
 /// Wi-SUN Message API confirmation IDs
@@ -246,10 +250,14 @@ typedef enum {
   SL_WISUN_MSG_SET_DHCPV6_VENDOR_DATA_CNF_ID              = 0x5C,
   SL_WISUN_MSG_SET_LAST_GASP_CNF_ID                       = 0x5E,
   SL_WISUN_MSG_SET_FIRST_BREATH_CNF_ID                    = 0x5F,
+  SL_WISUN_MSG_SET_LXPM_PREFIX_CNF_ID                     = 0x60,
   SL_WISUN_MSG_SET_OPTION_CNF_ID                          = 0x61,
   SL_WISUN_MSG_SET_FFN_ADVANCED_PARAMS_CNF_ID             = 0x62,
   SL_WISUN_MSG_SET_LFN_ADVANCED_PARAMS_CNF_ID             = 0x63,
   SL_WISUN_MSG_RESET_PARAMS_CNF_ID                        = 0x64,
+  SL_WISUN_MSG_GET_BROADCAST_SCHEDULE_TIME_CNF_ID         = 0x65,
+  SL_WISUN_MSG_GET_LXPM_GROUP_NEIGHBOR_COUNT_CNF_ID       = 0x66,
+  SL_WISUN_MSG_GET_LXPM_GROUP_NEIGHBORS_CNF_ID            = 0x67,
 } sl_wisun_msg_cnf_id_t;
 
 /**************************************************************************//**
@@ -3653,8 +3661,6 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_advert_direct_connect_server_id_cnf_t;
 SL_PACK_END()
 
-/** @} (end SL_WISUN_MSG_ADVERT_DIRECT_CONNECT_SERVER_ID) */
-
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_START_DIRECT_CONNECT_CLIENT sl_wisun_msg_start_direct_connect_client
  * @{
@@ -4485,6 +4491,187 @@ typedef struct {
 SL_PACK_END()
 
 /** @} (end SL_WISUN_MSG_SET_FIRST_BREATH) */
+
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_SET_LXPM_PREFIX sl_wisun_msg_set_lxpm_prefix
+ * @{
+ *****************************************************************************/
+/// Request message body
+SL_PACK_START(1)
+typedef struct {
+  /// LXPM prefix
+  uint8_t prefix[16];
+  /// LXPM prefix length in bits (must be a multiple of 8)
+  uint8_t prefix_length;
+  /// Reserved, set to zero
+  uint8_t reserved[3];
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_lxpm_prefix_req_body_t;
+SL_PACK_END()
+
+/// Request message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Request message body
+  sl_wisun_msg_set_lxpm_prefix_req_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_lxpm_prefix_req_t;
+SL_PACK_END()
+
+/// Confirmation message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the request
+  uint32_t status;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_lxpm_prefix_cnf_body_t;
+SL_PACK_END()
+
+/// Confirmation message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Confirmation message body
+  sl_wisun_msg_set_lxpm_prefix_cnf_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_lxpm_prefix_cnf_t;
+SL_PACK_END()
+
+/** @} (end SL_WISUN_MSG_SET_LXPM_PREFIX) */
+
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_GET_BROADCAST_SCHEDULE_TIME sl_wisun_msg_get_broadcast_schedule_time
+ * @{
+ *****************************************************************************/
+
+/// Request message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_get_broadcast_schedule_time_req_t;
+SL_PACK_END()
+
+/// Confirmation message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the request
+  uint32_t status;
+  /// Broadcast schedule time
+  uint64_t broadcast_schedule_time_ms;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_get_broadcast_schedule_time_cnf_body_t;
+SL_PACK_END()
+
+/// Confirmation message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Confirmation message body
+  sl_wisun_msg_get_broadcast_schedule_time_cnf_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_get_broadcast_schedule_time_cnf_t;
+SL_PACK_END()
+
+/** @} (end SL_WISUN_MSG_GET_BROADCAST_SCHEDULE_TIME) */
+
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_GET_LXPM_GROUP_NEIGHBOR_COUNT sl_wisun_msg_get_lxpm_group_neighbor_count
+ * @{
+ *****************************************************************************/
+
+/// Request message body
+SL_PACK_START(1)
+typedef struct {
+  /// LXPM group address
+  in6_addr_t group_address;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_get_lxpm_group_neighbor_count_req_body_t;
+SL_PACK_END()
+
+/// Request message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Request message body
+  sl_wisun_msg_get_lxpm_group_neighbor_count_req_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_get_lxpm_group_neighbor_count_req_t;
+SL_PACK_END()
+
+/// Confirmation message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the request
+  uint32_t status;
+  /// Number of neighbors in the group
+  uint8_t neighbor_count;
+  /// Reserved, set to zero
+  uint8_t reserved[3];
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_get_lxpm_group_neighbor_count_cnf_body_t;
+SL_PACK_END()
+
+/// Confirmation message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Confirmation message body
+  sl_wisun_msg_get_lxpm_group_neighbor_count_cnf_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_get_lxpm_group_neighbor_count_cnf_t;
+SL_PACK_END()
+
+/** @} (end SL_WISUN_MSG_GET_LXPM_GROUP_NEIGHBOR_COUNT) */
+
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_GET_LXPM_GROUP_NEIGHBORS sl_wisun_msg_get_lxpm_group_neighbors
+ * @{
+ *****************************************************************************/
+
+/// Request message body
+SL_PACK_START(1)
+typedef struct {
+  /// LXPM group address
+  in6_addr_t group_address;
+  /// Maximum number of neighbors to read
+  uint8_t max_neighbor_count;
+  /// Reserved, set to zero
+  uint8_t reserved[3];
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_get_lxpm_group_neighbors_req_body_t;
+SL_PACK_END()
+
+/// Request message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Request message body
+  sl_wisun_msg_get_lxpm_group_neighbors_req_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_get_lxpm_group_neighbors_req_t;
+SL_PACK_END()
+
+/// Confirmation message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the request
+  uint32_t status;
+  /// Number of neighbors in the group
+  uint8_t read_neighbor_count;
+  /// Reserved, set to zero
+  uint8_t reserved[3];
+  /// Neighbor link-local IPv6 addresses
+  in6_addr_t neighbor_addresses[];
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_get_lxpm_group_neighbors_cnf_body_t;
+SL_PACK_END()
+
+/// Confirmation message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Confirmation message body
+  sl_wisun_msg_get_lxpm_group_neighbors_cnf_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_get_lxpm_group_neighbors_cnf_t;
+SL_PACK_END()
+
+/** @} (end SL_WISUN_MSG_GET_LXPM_GROUP_NEIGHBORS) */
 
 /**************************************************************************//**
  * @brief Send a request to the Wi-SUN stack

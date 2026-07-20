@@ -1,6 +1,6 @@
 project_name: mp-zb-ot-ble-rcp-spi
 label: Zigbee RCP + OpenThread RCP + BLE RCP - SPI (CMP, DMP)
-package: multiprotocol
+package: multiprotocol_app
 description: >
   Demonstrates a Multiprotocol 802.15.4 RCP application running OpenThread, Zigbee (CMP/multi-PAN), and BLE (DMP) over SPI using CPC for host communication.
 category: OpenThread Examples

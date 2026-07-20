@@ -82,7 +82,7 @@ static inline void entrySetKey(nvm3_Cache_t *h, size_t idx, nvm3_ObjectKey_t key
   uint32_t tmp = h->entryPtr[idx].key;
   tmp &= ~NVM3_KEY_MASK;
   tmp |= key;
-  h->entryPtr[idx].key = (nvm3_ObjectKey_t)tmp;
+  h->entryPtr[idx].key = tmp;
 }
 
 static inline void entrySetGroup(nvm3_Cache_t *h, size_t idx, nvm3_ObjGroup_t group)
@@ -90,7 +90,7 @@ static inline void entrySetGroup(nvm3_Cache_t *h, size_t idx, nvm3_ObjGroup_t gr
   uint32_t tmp = h->entryPtr[idx].key;
   tmp &= NVM3_KEY_MASK;
   tmp |= (group << NVM3_KEY_SIZE);
-  h->entryPtr[idx].key = (nvm3_ObjectKey_t)tmp;
+  h->entryPtr[idx].key = tmp;
 }
 
 static inline void entrySetPtr(nvm3_Cache_t *h, size_t idx, nvm3_ObjPtr_t obj)
@@ -482,12 +482,10 @@ void nvm3_cacheDelete(nvm3_Cache_t *h, nvm3_ObjectKey_t key)
   bool found = false;
 
   for (size_t idx = 0; idx < h->entryCount; idx++) {
-    if (isValid(h, idx)) {
-      if (entryGetKey(h, idx) == key) {
-        setInvalid(h, idx);
-        found = true;
-        break;
-      }
+    if (isValid(h, idx) && (entryGetKey(h, idx) == key)) {
+      setInvalid(h, idx);
+      found = true;
+      break;
     }
   }
 
@@ -530,15 +528,13 @@ nvm3_ObjPtr_t nvm3_cacheGet(nvm3_Cache_t *h, nvm3_ObjectKey_t key, nvm3_ObjGroup
 #endif
 
   for (size_t idx = 0; idx < h->entryCount; idx++) {
-    if (isValid(h, idx)) {
-      if (entryGetKey(h, idx) == key) {
-        *group = entryGetGroup(h, idx);
-        obj = entryGetPtr(h, idx);
+    if (isValid(h, idx) && (entryGetKey(h, idx) == key)) {
+      *group = entryGetGroup(h, idx);
+      obj = entryGetPtr(h, idx);
 #if NVM3_TRACE_PORT
-        tmp = (int)idx;
+      tmp = (int)idx;
 #endif
-        break;
-      }
+      break;
     }
   }
 
@@ -610,13 +606,11 @@ void nvm3_cacheSet(nvm3_Cache_t *h, nvm3_ObjectKey_t key, nvm3_ObjPtr_t obj, nvm
 
   // Update existing entry
   for (size_t idx = 0; idx < h->entryCount; idx++) {
-    if (isValid(h, idx)) {
-      if (entryGetKey(h, idx) == key) {
-        entrySetGroup(h, idx, group);
-        entrySetPtr(h, idx, obj);
-        nvm3_tracePrint(TRACE_LEVEL, "nvm3_cacheSet(1), key=%lu, grp=%u, obj=%p, idx=%u.\n", key, group, obj, idx);
-        return;
-      }
+    if (isValid(h, idx) && (entryGetKey(h, idx) == key)) {
+      entrySetGroup(h, idx, group);
+      entrySetPtr(h, idx, obj);
+      nvm3_tracePrint(TRACE_LEVEL, "nvm3_cacheSet(1), key=%lu, grp=%u, obj=%p, idx=%u.\n", key, group, obj, idx);
+      return;
     }
   }
 

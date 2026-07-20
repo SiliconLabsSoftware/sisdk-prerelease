@@ -47,7 +47,7 @@
       <pin defaultLabel="PC05" location="12250,7400,2500,1200" number="18" pinIndex="5" portBankIndex="2"/>
     </pinOut>
     <peripherals>
-      <peripheral componentIdRef="pin_tool.efr32.mgm24.scratchpad" displayName="SCRATCHPAD" name="SCRATCHPAD" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.mgm24.scratchpad" displayName="SCRATCHPAD" name="SCRATCHPAD" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm24.emu" displayName="EMU" name="EMU" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm24.cmu" displayName="CMU" name="CMU" revision="A" category="Clocking" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm24.hfrco" displayName="HFRCO0" name="HFRCO0" revision="A" category="Clocking" hidden="false"/>
@@ -93,13 +93,13 @@
       <peripheral componentIdRef="pin_tool.efr32.mgm24.mailbox" displayName="HOSTMAILBOX" name="HOSTMAILBOX" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm24.eusart" displayName="EUSART1" name="EUSART1" revision="A" category="Communications" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm24.sysrtc" displayName="SYSRTC0" name="SYSRTC0" revision="A" category="Timers" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efr32.mgm24.keyscan" displayName="KEYSCAN" name="KEYSCAN" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.mgm24.keyscan" displayName="KEYSCAN" name="KEYSCAN" revision="A" category="Communications" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm24.aes" displayName="RADIOAES" name="RADIOAES" revision="A" category="Security" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm24.smu" displayName="SMU" name="SMU" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm24.letimer" displayName="LETIMER0" name="LETIMER0" revision="A" category="Timers" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm24.iadc" displayName="IADC0" name="IADC0" revision="A" category="Analog" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efr32.mgm24.acmp" displayName="ACMP0" name="ACMP0" revision="A" category="Other" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efr32.mgm24.acmp" displayName="ACMP1" name="ACMP1" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.mgm24.acmp" displayName="ACMP0" name="ACMP0" revision="A" category="Analog" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.mgm24.acmp" displayName="ACMP1" name="ACMP1" revision="A" category="Analog" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm24.vdac" displayName="VDAC0" name="VDAC0" revision="A" category="Analog" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm24.vdac" displayName="VDAC1" name="VDAC1" revision="A" category="Analog" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm24.pcnt" displayName="PCNT0" name="PCNT0" revision="A" category="Timers" hidden="false"/>
@@ -109,10 +109,10 @@
       <peripheral componentIdRef="pin_tool.efr32.mgm24.wdog" displayName="WDOG0" name="WDOG0" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm24.wdog" displayName="WDOG1" name="WDOG1" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm24.eusart" displayName="EUSART0" name="EUSART0" revision="A" category="Communications" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efr32.mgm24.semailbox" displayName="SEMAILBOX" name="SEMAILBOX" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.mgm24.semailbox" displayName="SEMAILBOX" name="SEMAILBOX" revision="A" category="Security" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm24.pti" displayName="PTI" name="PTI" revision="A" category="Radio" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm24.modem" displayName="MODEM" name="MODEM" revision="A" category="Radio" hidden="false"/>
-      <peripheral componentIdRef="pin_tool.efr32.mgm24.scratchpad" displayName="RFSCRATCHPAD" name="RFSCRATCHPAD" revision="A" category="Other" hidden="false"/>
+      <peripheral componentIdRef="pin_tool.efr32.mgm24.scratchpad" displayName="RFSCRATCHPAD" name="RFSCRATCHPAD" revision="A" category="Core" hidden="false"/>
       <peripheral componentIdRef="pin_tool.efr32.mgm24.mailbox" displayName="RFMAILBOX" name="RFMAILBOX" revision="A" category="Core" hidden="false"/>
     </peripherals>
     <script uri="../../script/entrypoint.py">

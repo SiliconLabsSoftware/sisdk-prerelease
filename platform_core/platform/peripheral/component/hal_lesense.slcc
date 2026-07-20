@@ -23,6 +23,7 @@ requires:
 - name: device
 - name: device_has_lesense
 - name: hal_common
+- name: log_none
 - name: cmsis_core
 conflicts:
 - name: device_series_3

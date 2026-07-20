@@ -15,6 +15,9 @@
  *
  ******************************************************************************/
 #include PLATFORM_HEADER
+#include <inttypes.h>
+#include <stddef.h>
+#include <string.h>
 #include "hal.h"
 #include "cortexm3/diagnostic.h"
 #include "micro.h"
@@ -107,6 +110,13 @@ static const char * const cfsrBits[] =
 // Names of raw crash data items - each name is null terminated, and the
 // end of the array is flagged by two null bytes in a row.
 // NOTE: the order of these names must match HalCrashInfoType members.
+// Byte length of HalCrashInfoType before the `data` union (offsetof, not sizeof(data)).
+#define HAL_CRASH_INFO_PREFIX_BYTE_COUNT ((size_t)offsetof(HalCrashInfoType, data))
+#define HAL_CRASH_INFO_PREFIX_WORD_COUNT \
+  (HAL_CRASH_INFO_PREFIX_BYTE_COUNT / sizeof(uint32_t))
+// PRIx32 (<inttypes.h>): uint32_t hex specifier for this toolchain ("x" or "lx").
+#define HAL_CRASH_WORD_PRINT_FMT "%s = %4" PRIx32
+
 static const char nameStrings[] = "R0\0R1\0R2\0R3\0"
                                   "R4\0R5\0R6\0R7\0"
                                   "R8\0R9\0R10\0R11\0"
@@ -131,13 +141,21 @@ static HalAssertInfoType savedAssertInfo;
 void halPrintCrashData(uint8_t port)
 {
   (void)port;
-  uint32_t *data = (uint32_t*)&halCrashInfo.R0;
+  uint8_t crashInfoBytes[sizeof(HalCrashInfoType)];
+  uint32_t crashWords[HAL_CRASH_INFO_PREFIX_WORD_COUNT];
   char const *name = nameStrings;
   char const *separator;
   uint8_t i = 0;
+  uint32_t wordIndex = 0;
 
-  while (*name != '\0') {
-    sl_iostream_printf(SL_IOSTREAM_STDOUT, "%s = %4lx", name, (unsigned long)*data++);
+  memcpy(crashInfoBytes, &halCrashInfo, sizeof(crashInfoBytes));
+  if (HAL_CRASH_INFO_PREFIX_BYTE_COUNT <= sizeof(crashInfoBytes)) {
+    memcpy(crashWords, crashInfoBytes, sizeof(crashWords));
+  }
+
+  while ((*name != '\0') && (wordIndex < HAL_CRASH_INFO_PREFIX_WORD_COUNT)) {
+    sl_iostream_printf(SL_IOSTREAM_STDOUT, HAL_CRASH_WORD_PRINT_FMT, name, crashWords[wordIndex]);
+    wordIndex++;
     // increment pointer to end of name
     while (*name != '\0') {
       name++;
@@ -147,9 +165,8 @@ void halPrintCrashData(uint8_t port)
 
     /*lint -save -e448 */
     separator = ((*name != '\0') && ((i & 3) != 3)) ? ", " : "\r\n";
-
     /*lint -restore */
-    sl_iostream_printf(SL_IOSTREAM_STDOUT, separator);
+    sl_iostream_printf(SL_IOSTREAM_STDOUT, "%s", separator);
     i++;
   }
 }

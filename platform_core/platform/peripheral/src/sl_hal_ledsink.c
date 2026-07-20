@@ -90,6 +90,7 @@ sl_status_t sl_hal_ledsink_configure_auto_failsafe(LEDSINK_TypeDef *ledsink,
 {
   // Make sure the module exists on the selected chip.
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   if (auto_failsafe) {
@@ -99,6 +100,8 @@ sl_status_t sl_hal_ledsink_configure_auto_failsafe(LEDSINK_TypeDef *ledsink,
     /* Clear AUTOFAILSAFE bit */
     ledsink->CFG0 &= ~LEDSINK_CFG0_AUTOFAILSAFE;
   }
+
+  SL_PRINT_STRING_DEBUG("auto_failsafe=%d, %d\r\n", (int)auto_failsafe, (int)__LINE__);
 
   return SL_STATUS_OK;
 }
@@ -113,14 +116,17 @@ sl_status_t sl_hal_ledsink_set_drive_mode(LEDSINK_TypeDef *ledsink,
 
   // Make sure the module exists on the selected chip.
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   if (drive_mode > SL_HAL_LEDSINK_DRIVE_MODE_SWCONTROL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   cfg = ledsink->CFG0;
   cfg = (cfg & ~LEDSINK_CFG0_DRIVEMODE) | ((uint32_t)drive_mode << _LEDSINK_CFG0_DRIVEMODE_SHIFT);
   ledsink->CFG0 = cfg & _LEDSINK_CFG0_MASK;
+  SL_PRINT_STRING_DEBUG("drive_mode=%d, %d\r\n", (int)drive_mode, (int)__LINE__);
   return SL_STATUS_OK;
 }
 
@@ -134,10 +140,12 @@ sl_status_t sl_hal_ledsink_set_trigger_source(LEDSINK_TypeDef *ledsink,
   uint32_t cfg1;
 
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   if ((start_trigger > SL_HAL_LEDSINK_TRIGGER_SOURCE_PRS3)
       || (stop_trigger > SL_HAL_LEDSINK_TRIGGER_SOURCE_PRS3)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -146,6 +154,10 @@ sl_status_t sl_hal_ledsink_set_trigger_source(LEDSINK_TypeDef *ledsink,
   cfg1 |= ((uint32_t)start_trigger << _LEDSINK_CFG1_STARTTRIGSOURCESEL_SHIFT)
           | ((uint32_t)stop_trigger << _LEDSINK_CFG1_STOPTRIGSOURCESEL_SHIFT);
   ledsink->CFG1 = cfg1 & _LEDSINK_CFG1_MASK;
+
+  SL_PRINT_STRING_DEBUG("start_trigger=%d stop_trigger=%d\r\n",
+                        (int)start_trigger,
+                        (int)stop_trigger);
 
   return SL_STATUS_OK;
 }
@@ -160,16 +172,20 @@ sl_status_t sl_hal_ledsink_set_cycles_per_bit(LEDSINK_TypeDef *ledsink,
 
   // Make sure the module exists on the selected chip.
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   // Make sure the cycles per bit is valid.
   if (cycles_per_bit > max_cycles_per_bit) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   ledsink->CFG1 = ((ledsink->CFG1 & ~_LEDSINK_CFG1_CYCLESPERBIT_MASK)
                    | ((uint32_t)cycles_per_bit << _LEDSINK_CFG1_CYCLESPERBIT_SHIFT))
                   & _LEDSINK_CFG1_MASK;
+
+  SL_PRINT_STRING_DEBUG("cycles_per_bit=%d, %d\r\n", (int)cycles_per_bit, (int)__LINE__);
 
   return SL_STATUS_OK;
 }
@@ -182,15 +198,19 @@ sl_status_t sl_hal_ledsink_set_cycles_per_sec(LEDSINK_TypeDef *ledsink,
 {
   // Make sure the module exists on the selected chip.
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   // Make sure the cycles per sec is valid.
   if (cycles_per_sec > _LEDSINK_CFG2_CYCLESPERSEC_MASK) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   ledsink->CFG2 = ((ledsink->CFG2 & ~_LEDSINK_CFG2_CYCLESPERSEC_MASK)
                    | ((uint32_t)cycles_per_sec << _LEDSINK_CFG2_CYCLESPERSEC_SHIFT))
                   & _LEDSINK_CFG2_MASK;
+
+  SL_PRINT_STRING_DEBUG("cycles_per_sec=%lu, %d\r\n", (unsigned long)cycles_per_sec, (int)__LINE__);
 
   return SL_STATUS_OK;
 }
@@ -205,15 +225,19 @@ sl_status_t sl_hal_ledsink_set_analog_bias_to_led_delay(LEDSINK_TypeDef *ledsink
 
   // Make sure the module exists on the selected chip.
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   // Make sure the delay is valid.
   if (delay > max_delay) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   ledsink->CFG2 = ((ledsink->CFG2 & ~_LEDSINK_CFG2_ANABIASTOLEDDELAY_MASK)
                    | ((uint32_t)delay << _LEDSINK_CFG2_ANABIASTOLEDDELAY_SHIFT))
                   & _LEDSINK_CFG2_MASK;
+
+  SL_PRINT_STRING_DEBUG("bias_to_led_delay=%d, %d\r\n", (int)delay, (int)__LINE__);
 
   return SL_STATUS_OK;
 }
@@ -228,6 +252,7 @@ sl_status_t sl_hal_ledsink_set_prs_edge(LEDSINK_TypeDef *ledsink,
   uint32_t cfg3;
 
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -242,6 +267,10 @@ sl_status_t sl_hal_ledsink_set_prs_edge(LEDSINK_TypeDef *ledsink,
   }
   ledsink->CFG3 = cfg3;
 
+  SL_PRINT_STRING_DEBUG("prs_start_edge=%d prs_stop_edge=%d\r\n",
+                        (int)prs_start_edge,
+                        (int)prs_stop_edge);
+
   return SL_STATUS_OK;
 }
 
@@ -253,11 +282,13 @@ sl_status_t sl_hal_ledsink_start_pattern_mask(LEDSINK_TypeDef *ledsink,
 {
   // Make sure the module exists on the selected chip.
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   // Validate that channel_mask only has bits 0-3 set (channels 0-3).
   if ((channel_mask & ~SL_HAL_LEDSINK_CHANNEL_MASK) != 0U) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -265,6 +296,9 @@ sl_status_t sl_hal_ledsink_start_pattern_mask(LEDSINK_TypeDef *ledsink,
   // channel_mask bits 0-3 map directly to CMD bits 0-3 (LED0-3 STARTTRIG).
   ledsink->CMD_SET = ((channel_mask & SL_HAL_LEDSINK_CHANNEL_MASK)
                       << _LEDSINK_CMD_LED0STARTTRIG_SHIFT);
+  SL_PRINT_STRING_INFO("channel_mask=0x%02x, %d\r\n",
+                       (unsigned int)channel_mask,
+                       (int)__LINE__);
   return SL_STATUS_OK;
 }
 
@@ -276,11 +310,13 @@ sl_status_t sl_hal_ledsink_stop_pattern_mask(LEDSINK_TypeDef *ledsink,
 {
   // Make sure the module exists on the selected chip.
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   // Validate that channel_mask only has bits 0-3 set (channels 0-3).
   if ((channel_mask & ~SL_HAL_LEDSINK_CHANNEL_MASK) != 0U) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -288,6 +324,9 @@ sl_status_t sl_hal_ledsink_stop_pattern_mask(LEDSINK_TypeDef *ledsink,
   // channel_mask bits 0-3 map to CMD bits 4-7 (LED0-3 STOPTRIG).
   ledsink->CMD_SET = ((channel_mask & SL_HAL_LEDSINK_CHANNEL_MASK)
                       << _LEDSINK_CMD_LED0STOPTRIG_SHIFT);
+  SL_PRINT_STRING_INFO("channel_mask=0x%02x, %d\r\n",
+                       (unsigned int)channel_mask,
+                       (int)__LINE__);
   return SL_STATUS_OK;
 }
 
@@ -299,16 +338,22 @@ sl_status_t sl_hal_ledsink_enable_led_channels(LEDSINK_TypeDef *ledsink,
 {
   // Make sure the module exists on the selected chip.
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   // Validate that channel_mask only has bits 0-3 set (channels 0-3).
   if ((channel_mask & ~SL_HAL_LEDSINK_CHANNEL_MASK) != 0U) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   // Enable the specified channels.
   ledsink->CTRL_SET = (channel_mask & SL_HAL_LEDSINK_CHANNEL_MASK);
+
+  SL_PRINT_STRING_INFO("channel_mask=0x%02x, %d\r\n",
+                       (unsigned int)channel_mask,
+                       (int)__LINE__);
 
   return SL_STATUS_OK;
 }
@@ -321,16 +366,21 @@ sl_status_t sl_hal_ledsink_disable_led_channels(LEDSINK_TypeDef *ledsink,
 {
   // Make sure the module exists on the selected chip.
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   // Validate that channel_mask only has bits 0-3 set (channels 0-3).
   if ((channel_mask & ~SL_HAL_LEDSINK_CHANNEL_MASK) != 0U) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   // Disable the specified channels.
   ledsink->CTRL_CLR = (channel_mask & SL_HAL_LEDSINK_CHANNEL_MASK);
+  SL_PRINT_STRING_INFO("channel_mask=0x%02x, %d\r\n",
+                       (unsigned int)channel_mask,
+                       (int)__LINE__);
   return SL_STATUS_OK;
 }
 
@@ -344,18 +394,24 @@ sl_status_t sl_hal_ledsink_set_pattern(LEDSINK_TypeDef *ledsink,
                                        uint8_t pattern_length)
 {
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   if (led_channel >= SL_HAL_LEDSINK_MAX_LED_CHANNELS) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   if ((pattern_length < 1U) || (pattern_length > SL_HAL_LEDSINK_MAX_PATTERN_VALID_LENGTH)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   ledsink->CFGSEQ[led_channel].FLSHPTRNLSB = pattern_lsb & _LEDSINK_FLSHPTRNLSB_FLASHINGPATTERNLSB_MASK;
   ledsink->CFGSEQ[led_channel].FLSHPTRNMSB = pattern_msb & _LEDSINK_FLSHPTRNMSB_FLASHINGPATTERNMSB_MASK;
   ledsink->CFGSEQ[led_channel].PTRNVLDLEN = pattern_length & _LEDSINK_PTRNVLDLEN_PATTERNVALIDLENGTH_MASK;
+  SL_PRINT_STRING_DEBUG("led_channel=%d pattern_length=%d\r\n",
+                        (int)led_channel,
+                        (int)pattern_length);
   return SL_STATUS_OK;
 }
 
@@ -370,9 +426,11 @@ sl_status_t sl_hal_ledsink_set_bit_period(LEDSINK_TypeDef *ledsink,
   uint32_t cfg;
 
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   if (led_channel >= SL_HAL_LEDSINK_MAX_LED_CHANNELS) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -381,6 +439,10 @@ sl_status_t sl_hal_ledsink_set_bit_period(LEDSINK_TypeDef *ledsink,
   cfg |= ((uint32_t)bit_on_period << _LEDSINK_BITONOFFRPTCFG_BITONPERIOD_SHIFT)
          | ((uint32_t)bit_off_period << _LEDSINK_BITONOFFRPTCFG_BITOFFPERIOD_SHIFT);
   ledsink->CFGSEQ[led_channel].BITONOFFRPTCFG = cfg;
+  SL_PRINT_STRING_DEBUG("led_channel=%d bit_on_period=%d\r\n",
+                        (int)led_channel,
+                        (int)bit_on_period);
+  SL_PRINT_STRING_DEBUG("bit_off_period=%d, %d\r\n", (int)bit_off_period, (int)__LINE__);
   return SL_STATUS_OK;
 }
 
@@ -397,15 +459,19 @@ sl_status_t sl_hal_ledsink_set_repeat(LEDSINK_TypeDef *ledsink,
   uint32_t cfg;
 
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   if (led_channel >= SL_HAL_LEDSINK_MAX_LED_CHANNELS) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   if (repeat_duration > max_repeat) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   if (repeat_type > SL_HAL_LEDSINK_REPEAT_TYPE_TIME) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -415,6 +481,10 @@ sl_status_t sl_hal_ledsink_set_repeat(LEDSINK_TypeDef *ledsink,
           & _LEDSINK_BITONOFFRPTCFG_REPEATDURATION_MASK)
          | ((uint32_t)repeat_type << _LEDSINK_BITONOFFRPTCFG_REPEATTYPE_SHIFT);
   ledsink->CFGSEQ[led_channel].BITONOFFRPTCFG = cfg;
+  SL_PRINT_STRING_DEBUG("led_channel=%d repeat_duration=%d\r\n",
+                        (int)led_channel,
+                        (int)repeat_duration);
+  SL_PRINT_STRING_DEBUG("repeat_type=%d, %d\r\n", (int)repeat_type, (int)__LINE__);
   return SL_STATUS_OK;
 }
 
@@ -430,18 +500,23 @@ sl_status_t sl_hal_ledsink_configure_pwm(LEDSINK_TypeDef *ledsink,
   uint32_t cfg;
 
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   if (led_channel >= SL_HAL_LEDSINK_MAX_LED_CHANNELS) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   if (pwm_config == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   if (pwm_config->duty_cycle > max_duty) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   if (!SL_HAL_LEDSINK_PWM_CYCLE_OFFSET_IS_VALID(pwm_config->cycle_offset)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -451,6 +526,12 @@ sl_status_t sl_hal_ledsink_configure_pwm(LEDSINK_TypeDef *ledsink,
     cfg |= LEDSINK_PWMCYCLECFG_PWMEN;
   }
   ledsink->CFGSEQ[led_channel].PWMCYCLECFG = cfg & _LEDSINK_PWMCYCLECFG_MASK;
+  SL_PRINT_STRING_DEBUG("led_channel=%d pwm_enable=%d\r\n",
+                        (int)led_channel,
+                        (int)pwm_config->enable);
+  SL_PRINT_STRING_DEBUG("duty_cycle=%d cycle_offset=%d\r\n",
+                        (int)pwm_config->duty_cycle,
+                        (int)pwm_config->cycle_offset);
   return SL_STATUS_OK;
 }
 
@@ -464,22 +545,30 @@ sl_status_t sl_hal_ledsink_set_channel_current(LEDSINK_TypeDef *ledsink,
   uint32_t total_current_uA;
 
   if (!SL_HAL_LEDSINK_REF_VALID(ledsink)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   if (led_channel >= SL_HAL_LEDSINK_MAX_LED_CHANNELS) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   if (current_step > SL_HAL_LEDSINK_MAX_CURRENT_STEP) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   total_current_uA = ledsink_calculate_total_current_uA(ledsink, led_channel, current_step);
   if (total_current_uA > SL_HAL_LEDSINK_MAX_CURRENT_LIMIT_UA) {
+    SL_PRINT_STRING_ERROR("current limit exceeded, %d\r\n", (int)__LINE__);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   ledsink->CFGSEQ[led_channel].CURRCTRL = (ledsink->CFGSEQ[led_channel].CURRCTRL & ~_LEDSINK_CURRCTRL_CURRSET_MASK)
                                           | ((uint32_t)current_step << _LEDSINK_CURRCTRL_CURRSET_SHIFT);
+  SL_PRINT_STRING_DEBUG("led_channel=%d current_step=%d\r\n",
+                        (int)led_channel,
+                        (int)current_step);
+  SL_PRINT_STRING_DEBUG("total_current_uA=%lu, %d\r\n", (unsigned long)total_current_uA, (int)__LINE__);
   return SL_STATUS_OK;
 }
 

@@ -50,6 +50,8 @@ template_contribution:
     event: sleep_on_isr_exit
     include: sl_iostream_init_eusart_instances.h
     handler: sl_iostream_eusart_{{instance}}_sleep_on_isr_exit
+- name: component_catalog
+  value: iostream_eusart_{{instance}}
 documentation:
   docset: gecko-platform
   document: platform-service/iostream-eusart

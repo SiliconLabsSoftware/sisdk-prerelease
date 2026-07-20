@@ -40,27 +40,10 @@
 
 // <<< Use Configuration Wizard in Context Menu >>>
 
-// <q CSR_GENERATOR_CONFIG_GENERATE_STATIC_AUTH> Static Authentication Data
-// <i> Generating Static Authentication Data.
-#define CSR_GENERATOR_CONFIG_GENERATE_STATIC_AUTH              0
-
-// <q CSR_GENERATOR_CONFIG_GENERATE_EC_KEY> Device EC key
-// <i> Generating device EC key.
-#define CSR_GENERATOR_CONFIG_GENERATE_EC_KEY                   1
-
-// <q CSR_GENERATOR_CONFIG_CERTIFICATE_ON_DEVICE> Certificate on device
-// <i> Should the device hold the certificate or not.
-#define CSR_GENERATOR_CONFIG_CERTIFICATE_ON_DEVICE             1
-
 // <o CSR_GENERATOR_CSR_RAM_ADDRESS> Certificate Request RAM address
 // <i> Default: 0x20007C00 (31k)
 // <i> The RAM address where the Certificate Request is stored.
 #define CSR_GENERATOR_CSR_RAM_ADDRESS                          0x20007C00
-
-// <o CSR_GENERATOR_NVM3_REGION> NVM3 key region to use
-// <i> Default: 0x40000 (Bluetooth NVM3 key space)
-// <i> The NVM3 key domain which will be used to save security keys and certificates.
-#define CSR_GENERATOR_NVM3_REGION                              0x40000
 
 // <o CSR_GENERATOR_EC_KEY_USAGE> Key Usage for EC key pair
 // <KEY_USAGE_SIGN_VERIFY=> Use for message signing and verification

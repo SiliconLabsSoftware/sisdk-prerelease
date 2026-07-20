@@ -30,9 +30,7 @@
 
 #include "sl_hal_lcd.h"
 #if defined(LCD_COUNT) && (LCD_COUNT > 0)
-#include "sl_assert.h"
 #include "sl_hal_bus.h"
-#include "sl_hal_gpio.h"
 
 #include <stddef.h>
 
@@ -93,7 +91,7 @@ extern __INLINE void sl_hal_lcd_set_mode(sl_hal_lcd_mode_t mode);
  ******************************************************************************/
 void sl_hal_lcd_init(const sl_hal_lcd_init_t *init)
 {
-  EFM_ASSERT(init != (void *) 0);
+  SL_LOG_DEBUG_ASSERT(init != (void *) 0);
 
   uint32_t display_control  = LCD->DISPCTRL;
 
@@ -121,7 +119,7 @@ void sl_hal_lcd_init(const sl_hal_lcd_init_t *init)
 
   sl_hal_lcd_set_mode(init->mode);
   LCD->FRAMERATE = init->frame_rate_divider;
-  sl_hal_lcd_set_contrast(init->contrast_level);
+  sl_hal_lcd_set_contrast((uint8_t)init->contrast_level);
 }
 
 /***************************************************************************//**
@@ -129,11 +127,11 @@ void sl_hal_lcd_init(const sl_hal_lcd_init_t *init)
  ******************************************************************************/
 void sl_hal_lcd_init_frame_counter(const sl_hal_lcd_frame_counter_init_t *init)
 {
-  EFM_ASSERT(init != (void *) 0);
+  SL_LOG_DEBUG_ASSERT(init != (void *) 0);
   // Ensure LCD is disabled before writing to register.
-  EFM_ASSERT(LCD->EN != LCD_EN_EN);
+  SL_LOG_DEBUG_ASSERT(LCD->EN != LCD_EN_EN);
   // Verify that the FC Top Counter is within limits.
-  EFM_ASSERT(init->top < LCD_FRAME_COUNTER_VAL_MAX);
+  SL_LOG_DEBUG_ASSERT(init->top < LCD_FRAME_COUNTER_VAL_MAX);
 
   // Set the Blink and Animation Control Register.
   LCD->BACFG = (LCD->BACFG & ~(_LCD_BACFG_FCTOP_MASK
@@ -149,7 +147,7 @@ void sl_hal_lcd_init_animation(const sl_hal_lcd_animation_init_t *init)
 {
   uint32_t bactrl = LCD->BACTRL;
 
-  EFM_ASSERT(init != (void *) 0);
+  SL_LOG_DEBUG_ASSERT(init != (void *) 0);
 
   // Set initial Animation Register Values.
   sl_hal_lcd_wait_load_busy();
@@ -179,7 +177,7 @@ void sl_hal_lcd_init_animation(const sl_hal_lcd_animation_init_t *init)
  ******************************************************************************/
 void sl_hal_lcd_update_control(sl_hal_lcd_update_data_control_t method)
 {
-  EFM_ASSERT(LCD->EN != LCD_EN_EN);
+  SL_LOG_DEBUG_ASSERT(LCD->EN != LCD_EN_EN);
   LCD->CTRL = (LCD->CTRL & ~_LCD_CTRL_UDCTRL_MASK) | (method << _LCD_CTRL_UDCTRL_SHIFT);
 }
 
@@ -191,7 +189,7 @@ void sl_hal_lcd_segment_enable(uint32_t seg_nbr)
   // xG23 support 20 segment lines.
   // xG26 supports up to 40 segment lines
   // xG28 supports up to 28 segment lines.
-  EFM_ASSERT(seg_nbr < (uint32_t)SL_HAL_LCD_SEGMENT_LINES_MAX);
+  SL_LOG_DEBUG_ASSERT(seg_nbr < (uint32_t)SL_HAL_LCD_SEGMENT_LINES_MAX);
 
 #if defined(_GPIO_LCDSEGH_MASK)
   if (seg_nbr > 31) {
@@ -212,7 +210,7 @@ void sl_hal_lcd_segment_disable(uint32_t seg_nbr)
   // xG23 support 20 segment lines.
   // xG26 supports up to 40 segment lines
   // xG28 supports up to 28 segment lines.
-  EFM_ASSERT(seg_nbr < (uint32_t)SL_HAL_LCD_SEGMENT_LINES_MAX);
+  SL_LOG_DEBUG_ASSERT(seg_nbr < (uint32_t)SL_HAL_LCD_SEGMENT_LINES_MAX);
 
 #if defined(_GPIO_LCDSEGH_MASK)
   if (seg_nbr > 31) {
@@ -233,11 +231,11 @@ void sl_hal_lcd_segment_set(uint8_t com,
                             bool enable)
 {
   // Series 2 parts support up to 4 COM lines except for xG26 and xG28, which supports up to 8 COM lines.
-  EFM_ASSERT(com < (int)SL_HAL_LCD_COM_LINES_MAX);
+  SL_LOG_DEBUG_ASSERT(com < (int)SL_HAL_LCD_COM_LINES_MAX);
 
   // Series 2 parts support up to 20 segment lines.
   // Except for xG26 which supports up to 40 segment lines. and xG28 which supports up to 28 segment lines.
-  EFM_ASSERT(bit < (int)SL_HAL_LCD_SEGMENT_LINES_MAX);
+  SL_LOG_DEBUG_ASSERT(bit < (int)SL_HAL_LCD_SEGMENT_LINES_MAX);
 
   // Ensure no internal sync is in progress.
   sl_hal_lcd_wait_load_busy();
@@ -357,7 +355,7 @@ void sl_hal_lcd_segment_set(uint8_t com,
 #endif
 
     default:
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 }
@@ -373,12 +371,12 @@ void sl_hal_lcd_segment_set_low(uint8_t com,
   uint32_t segment_data;
 
   // Series 2 parts support up to 4 COM lines except for xG26 and xG28, which supports up to 8 COM lines.
-  EFM_ASSERT(com < (int)SL_HAL_LCD_COM_LINES_MAX);
+  SL_LOG_DEBUG_ASSERT(com < (int)SL_HAL_LCD_COM_LINES_MAX);
 
   // Series 2 parts support up to 20 segment lines.
   // Except for xG26 which supports up to 40 segment lines. and xG28 which supports up to 28 segment lines.
-  EFM_ASSERT(!(mask & (~_LCD_SEGD0_MASK)));
-  EFM_ASSERT(!(bits & (~_LCD_SEGD0_MASK)));
+  SL_LOG_DEBUG_ASSERT(!(mask & (~_LCD_SEGD0_MASK)));
+  SL_LOG_DEBUG_ASSERT(!(bits & (~_LCD_SEGD0_MASK)));
 
   // Ensure no internal sync is in progress.
   sl_hal_lcd_wait_load_busy();
@@ -449,7 +447,7 @@ void sl_hal_lcd_segment_set_low(uint8_t com,
 #endif
 
     default:
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 }
@@ -465,9 +463,9 @@ void sl_hal_lcd_segment_set_high(uint8_t com,
   uint32_t segment_data;
 
 #if defined(_LCD_SEGD7H_MASK)
-  EFM_ASSERT(com < 8);
+  SL_LOG_DEBUG_ASSERT(com < 8);
 #else
-  EFM_ASSERT(com < 4);
+  SL_LOG_DEBUG_ASSERT(com < 4);
 #endif
 
   // Ensure no internal sync is in progress.
@@ -543,7 +541,7 @@ void sl_hal_lcd_segment_set_high(uint8_t com,
 void sl_hal_lcd_enable_com_line(uint8_t com)
 {
   // Series 2 parts support up to 4 COM lines except for xG28, which supports up to 8 COM lines.
-  EFM_ASSERT(com < SL_HAL_LCD_COM_LINES_MAX);
+  SL_LOG_DEBUG_ASSERT(com < SL_HAL_LCD_COM_LINES_MAX);
 
   if (com < LCD_COM_NUM) {
     GPIO->LCDCOM_SET = 1 << com;
@@ -572,7 +570,7 @@ void sl_hal_lcd_enable_com_line(uint8_t com)
 void sl_hal_lcd_disable_com_line(uint8_t com)
 {
   // Series 2 parts support up to 4 COM lines except for xG28, which supports up to 8 COM lines.
-  EFM_ASSERT(com < SL_HAL_LCD_COM_LINES_MAX);
+  SL_LOG_DEBUG_ASSERT(com < SL_HAL_LCD_COM_LINES_MAX);
 
   if (com < LCD_COM_NUM) {
     GPIO->LCDCOM_CLR = 1 << com;
@@ -655,7 +653,7 @@ void sl_hal_lcd_bias_set_segment(uint8_t segment_line,
       break;
     default:
       segment_register = NULL;
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 
@@ -676,7 +674,7 @@ void sl_hal_lcd_bias_set_segment(uint8_t segment_line,
       break;
     default:
       segment_register = NULL;
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 #endif
@@ -714,7 +712,7 @@ void sl_hal_lcd_bias_set_com(uint8_t com_line,
       break;
     default:
       com_register = NULL;
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 

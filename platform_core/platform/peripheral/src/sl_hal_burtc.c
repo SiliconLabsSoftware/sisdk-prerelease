@@ -34,7 +34,7 @@
 
 #include <stddef.h>
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_common.h"
 
 /***************************************************************************//**
@@ -68,7 +68,7 @@ __STATIC_INLINE uint32_t div_to_log2(uint32_t div)
   uint32_t log2;
 
   /* Prescaler accepts an argument of 32768 or less, valid values being 2^n. */
-  EFM_ASSERT((div > 0UL) && (div <= 32768UL));
+  SL_LOG_DEBUG_ASSERT((div > 0UL) && (div <= 32768UL));
 
   /* Count leading zeroes and "reverse" result, Cortex-M3 intrinsic. */
   log2 = (31UL - __CLZ(div));
@@ -82,7 +82,7 @@ __STATIC_INLINE uint32_t div_to_log2(uint32_t div)
  ******************************************************************************/
 void sl_hal_burtc_init(const sl_hal_burtc_init_t *init)
 {
-  EFM_ASSERT(init != NULL);
+  SL_LOG_DEBUG_ASSERT(init != NULL);
 
   uint32_t presc;
 

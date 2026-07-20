@@ -14,12 +14,15 @@ source:
 include:
 - path: platform/bootloader/series3
   file_list:
+  - path: config/btl_config.h
   - path: security/btl_security_aes.h
   - path: security/btl_security_ecdsa.h
   - path: security/btl_security_sha256.h
   - path: security/btl_security_types.h
 requires:
 - name: se_manager
+- name: bootloader_interface_headers
+- name: bootloader_interface_s3_bootload_headers
 provides:
 - name: bootloader_aes_sha_ecdsa_common
   condition: [device_series_3]

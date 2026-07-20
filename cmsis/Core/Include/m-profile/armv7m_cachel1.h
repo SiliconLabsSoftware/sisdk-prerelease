@@ -371,6 +371,9 @@ __STATIC_FORCEINLINE void SCB_InvalidateDCache_by_Addr (volatile void *addr, int
       __DSB();
       __ISB();
     }
+  #else
+    (void)addr;
+    (void)dsize;
   #endif
 }
 
@@ -401,6 +404,9 @@ __STATIC_FORCEINLINE void SCB_CleanDCache_by_Addr (volatile void *addr, int32_t 
       __DSB();
       __ISB();
     }
+  #else
+    (void)addr;
+    (void)dsize;
   #endif
 }
 
@@ -431,6 +437,9 @@ __STATIC_FORCEINLINE void SCB_CleanInvalidateDCache_by_Addr (volatile void *addr
       __DSB();
       __ISB();
     }
+  #else
+    (void)addr;
+    (void)dsize;
   #endif
 }
 

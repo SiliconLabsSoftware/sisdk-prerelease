@@ -1,0 +1,24 @@
+id: memory_manager_itcm
+label: Memory Manager ITCM Support
+package: platform_core
+description: >
+  This component enables ITCM retention control in the memory manager.
+  When present, sl_memory_init() disables retention for ITCM banks that are
+  configured but not used by the linker (based on __itcm_used__), reducing
+  power consumption for unused instruction Tightly-Coupled Memory.
+category: Services|Memory Manager
+quality: evaluation
+ui_hints:
+  visibility: never
+metadata:
+  sbom:
+    license: Zlib
+root_path: platform_core/platform/service/memory_manager
+provides:
+- name: memory_manager_itcm
+requires:
+- name: memory_manager
+- name: device_has_itcm
+template_contribution:
+- name: component_catalog
+  value: memory_manager_itcm

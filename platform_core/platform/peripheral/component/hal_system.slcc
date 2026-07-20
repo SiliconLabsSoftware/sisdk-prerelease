@@ -25,14 +25,6 @@ requires:
 - name: enum
 - name: status
 - name: sl_assert
-- name: emlib_cmu
-  condition: [device_sdid_240]
-- name: emlib_cmu
-  condition: [device_generic_family_efr32xg2b]
-- name: se_manager
-  condition: [device_generic_family_sixx301]
-- name: se_manager_device_data
-  condition: [device_generic_family_sixx301]
 template_contribution:
 - name: component_catalog
   value: hal_system

@@ -26,6 +26,15 @@ library:
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
+- path: libs/build/gcc/cortex-m55/zigbee-cbke-dsa-verify-283k1/release/libzigbee-cbke-dsa-verify-283k1.a
+  condition:
+  - toolchain_gcc
+  - cortexm55
+  - zigbee_phy_2_4
+  - zigbee_multi_network
+  unless:
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
 - path: libs/build/gcc/cortex-m33/zigbee-cbke-dsa-verify-283k1/release_dualrail/libzigbee-cbke-dsa-verify-283k1.a
   condition:
   - toolchain_gcc
@@ -51,10 +60,29 @@ library:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
+- path: libs/build/gcc/cortex-m55/zigbee-cbke-dsa-verify-283k1/release_singlenetwork/libzigbee-cbke-dsa-verify-283k1.a
+  condition:
+  - toolchain_gcc
+  - cortexm55
+  - zigbee_phy_2_4
+  unless:
+  - zigbee_multi_network
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
 - path: libs/build/iar/cortex-m33/zigbee-cbke-dsa-verify-283k1/release/libzigbee-cbke-dsa-verify-283k1.a
   condition:
   - toolchain_iar
   - cortexm33
+  - zigbee_phy_2_4
+  - zigbee_multi_network
+  unless:
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
+  - stack_protection_iar
+- path: libs/build/iar/cortex-m55/zigbee-cbke-dsa-verify-283k1/release/libzigbee-cbke-dsa-verify-283k1.a
+  condition:
+  - toolchain_iar
+  - cortexm55
   - zigbee_phy_2_4
   - zigbee_multi_network
   unless:
@@ -89,10 +117,30 @@ library:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
   - stack_protection_iar
+- path: libs/build/iar/cortex-m55/zigbee-cbke-dsa-verify-283k1/release_singlenetwork/libzigbee-cbke-dsa-verify-283k1.a
+  condition:
+  - toolchain_iar
+  - cortexm55
+  - zigbee_phy_2_4
+  unless:
+  - zigbee_multi_network
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
+  - stack_protection_iar
 - path: libs/build/iar/cortex-m33/zigbee-cbke-dsa-verify-283k1/release_stackprotection/libzigbee-cbke-dsa-verify-283k1.a
   condition:
   - toolchain_iar
   - cortexm33
+  - zigbee_phy_2_4
+  - zigbee_multi_network
+  - stack_protection_iar
+  unless:
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
+- path: libs/build/iar/cortex-m55/zigbee-cbke-dsa-verify-283k1/release_stackprotection/libzigbee-cbke-dsa-verify-283k1.a
+  condition:
+  - toolchain_iar
+  - cortexm55
   - zigbee_phy_2_4
   - zigbee_multi_network
   - stack_protection_iar
@@ -127,10 +175,29 @@ library:
   - zigbee_multi_network
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
+- path: libs/build/iar/cortex-m55/zigbee-cbke-dsa-verify-283k1/release_stackprotection_singlenetwork/libzigbee-cbke-dsa-verify-283k1.a
+  condition:
+  - toolchain_iar
+  - cortexm55
+  - zigbee_phy_2_4
+  - stack_protection_iar
+  unless:
+  - zigbee_multi_network
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
 - path: libs/build/llvm/cortex-m33/zigbee-cbke-dsa-verify-283k1/release/libzigbee-cbke-dsa-verify-283k1.a
   condition:
   - toolchain_llvm
   - cortexm33
+  - zigbee_phy_2_4
+  - zigbee_multi_network
+  unless:
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
+- path: libs/build/llvm/cortex-m55/zigbee-cbke-dsa-verify-283k1/release/libzigbee-cbke-dsa-verify-283k1.a
+  condition:
+  - toolchain_llvm
+  - cortexm55
   - zigbee_phy_2_4
   - zigbee_multi_network
   unless:
@@ -156,6 +223,15 @@ library:
   condition:
   - toolchain_llvm
   - cortexm33
+  - zigbee_phy_2_4
+  unless:
+  - zigbee_multi_network
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
+- path: libs/build/llvm/cortex-m55/zigbee-cbke-dsa-verify-283k1/release_singlenetwork/libzigbee-cbke-dsa-verify-283k1.a
+  condition:
+  - toolchain_llvm
+  - cortexm55
   - zigbee_phy_2_4
   unless:
   - zigbee_multi_network

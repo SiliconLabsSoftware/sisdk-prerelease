@@ -1,0 +1,24 @@
+id: sl_memset
+package: platform_core
+label: Fast Memset
+description: Speed optimized memset implementation
+category: Platform|Utilities
+quality: evaluation
+metadata:
+  sbom:
+    license: Zlib
+root_path: platform_core/platform/common
+source:
+- path: src/sl_memset.c
+requires:
+- name: sl_common
+- name: device_cortexm
+provides:
+- name: sl_memset
+toolchain_settings:
+- option: gcc_linker_option
+  value: -Wl,--wrap=memset
+- option: llvm_compiler_option
+  value: -fno-builtin-memset
+- option: llvm_linker_option
+  value: -Wl,--wrap=memset

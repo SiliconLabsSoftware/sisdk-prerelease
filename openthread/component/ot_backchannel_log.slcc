@@ -6,6 +6,7 @@ quality: production
 description: This component adds support for debug backchannel logging.
 provides:
 - name: ot_backchannel_log
+- name: ot_platform_defined_logger
 requires:
 - name: ot_platform_abstraction_implementation
 - name: ot_debug_channel

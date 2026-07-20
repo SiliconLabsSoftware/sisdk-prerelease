@@ -3,7 +3,8 @@ package: platform
 quality: production
 label: Platform Security - SoC mbedTLS ECDSA
 description: >
-  Demonstrates how to sign and verify ECDSA digital signatures with mbedTLS on SECP256R1 or SECP192R1, reporting hardware-accelerated key generation and signature timing over UART.
+  This example uses hardware accelerators on the supported device to perform ECDSA
+  digital signature with mbedTLS.
 category: Example|Platform
 filter:
   - name: "Device Type"

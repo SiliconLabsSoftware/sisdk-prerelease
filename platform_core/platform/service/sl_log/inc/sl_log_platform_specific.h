@@ -22,17 +22,17 @@ extern "C" {
     /** @brief Get the frequency of the timestamp timer */
     uint32_t (*get_timestamp_timer_frequency)(uint8_t core_id);
     /** @brief Prepare logging system for sleep mode */
-    sl_status_t (*pre_sleep_process)(void * args);
+    sl_status_t (*pre_sleep_process)(const void *args);
     /** @brief Initialize logging system after wake-up */
-    sl_status_t (*post_sleep_process)(void * args);
+    sl_status_t (*post_sleep_process)(const void *args);
     /** @brief Get timestamp from captive core (1µs resolution counter) */
     uint32_t (*get_timestamp)(uint8_t core_id);
     /** @brief Set captive core-specific configuration parameters */
-    sl_status_t (*set_configuration)(void *args, uint8_t core_id);
+    sl_status_t (*set_configuration)(const void *args, uint8_t core_id);
     /** @brief Get captive core-specific configuration parameters */
     sl_status_t (*get_configuration)(void *args, uint8_t core_id);
     /** @brief Synchronize timestamps between host and captive core */
-    sl_status_t (*time_sync)(void * args, uint8_t core_id);
+    sl_status_t (*time_sync)(const void *args, uint8_t core_id);
 
   } sl_log_api_core_t;
 
@@ -46,7 +46,7 @@ extern "C" {
    /** @brief Deinitialize the backend interface */
    sl_status_t (*backend_deinit)(void);
    /** @brief Write log events to proprietary backend */
-   sl_status_t (*backend_write)(sl_log_event_t *buffer, uint32_t read_index, uint32_t event_count);
+   sl_status_t (*backend_write)(const sl_log_event_t *buffer, uint32_t read_index, uint32_t event_count);
    /**
     * @brief Optional: refresh the backend transport on EM2/EM3 wake.
     *

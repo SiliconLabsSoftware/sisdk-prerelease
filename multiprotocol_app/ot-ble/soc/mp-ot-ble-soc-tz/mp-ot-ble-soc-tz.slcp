@@ -1,6 +1,6 @@
 project_name: mp-ot-ble-soc-tz
 label: OpenThread BLE DMP - SoC (TrustZone)
-package: multiprotocol
+package: multiprotocol_app
 description: >
     Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth with TrustZone awareness enabled running on FreeRTOS.
 category: OpenThread Examples
@@ -8,6 +8,7 @@ quality: production
 
 component:
   - id: sl_main
+  - id: watchdog_manager
   - id: ot_stack_ftd
   - id: ot_cli_source
   - id: bluetooth_stack
@@ -153,8 +154,6 @@ import:
   # Import the config files from the TZ Secure application
   - id: ot-tz-secure-application
 
-post_build:
-  profile: tz_nonsecure_application
 
 tag:
   - companion:secure_app

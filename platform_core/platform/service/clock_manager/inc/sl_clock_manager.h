@@ -277,6 +277,11 @@ SL_ENUM(sl_clock_manager_export_clock_source_t) {
   SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_LFRCO,      ///< Export Clock Source LFRCO
   SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_ULFRCO,     ///< Export Clock Source ULFRCO
   SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_HCLK,       ///< Export Clock Source HCLK
+  SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_SOCPLL0,    ///< Export Clock Source SOCPLL0
+  SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_SOCPLL1,    ///< Export Clock Source SOCPLL1
+  SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_SOCPLL2,    ///< Export Clock Source SOCPLL2
+  SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_PERPLL0,    ///< Export Clock Source PERPLL0
+  SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_PERPLL1,    ///< Export Clock Source PERPLL1
 };
 
 /// Export clock output selection.
@@ -419,7 +424,12 @@ sl_status_t sl_clock_manager_is_bus_clock_enabled(sl_bus_clock_t module_bus_cloc
  *
  * @param[in] hfexp_divider       HFEXP clock divider (1 to 32).
  *                                Note: This parameter only affects the EXPCLK
- *                                      branch frequency.
+ *                                      branch frequency in Series 2 devices.
+ *                                      In Series 3 devices, this parameter will 
+ *                                      change the EXPCLK when the clock source is set to 
+ *                                      SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_HFEXPCLK.
+ *                                      Otherwise it will change the CLKOUTPRESC value.
+ *                                      CLKOUTPRESC is global to all export clock outputs.
  *
  * @param[in] port                GPIO port to output exported clock.
  *

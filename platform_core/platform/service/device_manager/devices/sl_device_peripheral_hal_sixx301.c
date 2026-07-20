@@ -118,28 +118,37 @@ const sl_peripheral_val_t sl_peripheral_val_etampdet = { .base = ETAMPDET_BASE,
 #if defined(EUSART0_BASE)
 // Define peripheral EUSART0.
 const sl_peripheral_eusart_val_t sl_peripheral_val_eusart0 = { .base = EUSART0_BASE,
-                                                        .clk_branch = SL_CLOCK_BRANCH_EUSART0CLK,
-                                                        .bus_clock = SL_BUS_CLOCK_EUSART0,
-                                                        .dma_signal_rxfl = SL_DMA_SIGNAL_EUSART0_RXFL,
-                                                        .dma_signal_txfl = SL_DMA_SIGNAL_EUSART0_TXFL };
+                                                               .clk_branch = SL_CLOCK_BRANCH_EUSART0CLK,
+                                                               .bus_clock = SL_BUS_CLOCK_EUSART0,
+                                                               .ip_type = SL_PERIPHERAL_SERIAL_TYPE_EUSART,
+                                                               .rx_irqn = EUSART0_RX_IRQn,
+                                                               .tx_irqn = EUSART0_TX_IRQn,
+                                                               .dma_signal_rx_trigger = SL_DMA_SIGNAL_EUSART0_RXFL,
+                                                               .dma_signal_tx_trigger = SL_DMA_SIGNAL_EUSART0_TXFL };
 #endif
 
 #if defined(EUSART1_BASE)
 // Define peripheral EUSART1.
 const sl_peripheral_eusart_val_t sl_peripheral_val_eusart1 = { .base = EUSART1_BASE,
-                                                        .clk_branch = SL_CLOCK_BRANCH_EM01GRPCCLK,
-                                                        .bus_clock = SL_BUS_CLOCK_EUSART1,
-                                                        .dma_signal_rxfl = SL_DMA_SIGNAL_EUSART1_RXFL,
-                                                        .dma_signal_txfl = SL_DMA_SIGNAL_EUSART1_TXFL };
+                                                               .clk_branch = SL_CLOCK_BRANCH_EM01GRPCCLK,
+                                                               .bus_clock = SL_BUS_CLOCK_EUSART1,
+                                                               .ip_type = SL_PERIPHERAL_SERIAL_TYPE_EUSART,
+                                                               .rx_irqn = EUSART1_RX_IRQn,
+                                                               .tx_irqn = EUSART1_TX_IRQn,
+                                                               .dma_signal_rx_trigger = SL_DMA_SIGNAL_EUSART1_RXFL,
+                                                               .dma_signal_tx_trigger = SL_DMA_SIGNAL_EUSART1_TXFL };
 #endif
 
 #if defined(EUSART2_BASE)
 // Define peripheral EUSART2.
 const sl_peripheral_eusart_val_t sl_peripheral_val_eusart2 = { .base = EUSART2_BASE,
-                                                        .clk_branch = SL_CLOCK_BRANCH_EM01GRPCCLK,
-                                                        .bus_clock = SL_BUS_CLOCK_EUSART2,
-                                                        .dma_signal_rxfl = SL_DMA_SIGNAL_EUSART2_RXFL,
-                                                        .dma_signal_txfl = SL_DMA_SIGNAL_EUSART2_TXFL };
+                                                               .clk_branch = SL_CLOCK_BRANCH_EM01GRPCCLK,
+                                                               .bus_clock = SL_BUS_CLOCK_EUSART2,
+                                                               .ip_type = SL_PERIPHERAL_SERIAL_TYPE_EUSART,
+                                                               .rx_irqn = EUSART2_RX_IRQn,
+                                                               .tx_irqn = EUSART2_TX_IRQn,
+                                                               .dma_signal_rx_trigger = SL_DMA_SIGNAL_EUSART2_RXFL,
+                                                               .dma_signal_tx_trigger = SL_DMA_SIGNAL_EUSART2_TXFL };
 #endif
 
 #if defined(FSRCO_BASE)

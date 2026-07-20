@@ -32,8 +32,7 @@
 #include "sl_hal_syscfg.h"
 #include "sl_status.h"
 #include "sl_hal_bus.h"
-#include "sl_assert.h"
-
+#include "sl_log_helper.h"
 /***************************************************************************//**
  * @addtogroup system config
  * @{
@@ -267,8 +266,8 @@ extern __INLINE void sl_hal_syscfg_zero_dmem0retnctrl(void);
  ******************************************************************************/
 static void SL_ECC_ASM_NOINLINE sli_hal_syscfg_ecc_read_write_existing_pio(const sli_hal_syscfg_ecc_bank_t *ecc_bank)
 {
-  EFM_ASSERT(ecc_bank != NULL);
-  EFM_ASSERT(ecc_bank->base < (ecc_bank->base + ecc_bank->size));
+  SL_LOG_DEBUG_ASSERT(ecc_bank != NULL);
+  SL_LOG_DEBUG_ASSERT(ecc_bank->base < (ecc_bank->base + ecc_bank->size));
 
   volatile const uint32_t *ram_ptr = (volatile const uint32_t *) ecc_bank->base;
   const uint32_t *end_ptr = (const uint32_t *) (ecc_bank->base + ecc_bank->size);
@@ -281,7 +280,7 @@ static void SL_ECC_ASM_NOINLINE sli_hal_syscfg_ecc_read_write_existing_pio(const
   } else if (ecc_bank->base == ECC_RAM1_MEM_BASE) {
     ctrl_reg = &ECC_CTRL1_REG;
   } else {
-    EFM_ASSERT(0);
+    SL_LOG_DEBUG_ASSERT(0);
     return;
   }
 #else
@@ -383,11 +382,11 @@ static void sli_hal_syscfg_ecc_read_write_existing_dma(uint32_t start,
                                                        const uint32_t channels[2])
 {
   // Assert that the 2 DMA channel numbers are different.
-  EFM_ASSERT(channels[0] != channels[1]);
+  SL_LOG_DEBUG_ASSERT(channels[0] != channels[1]);
   // Make sure ECC_RAM_SIZE_MAX is a multiple of ECC_DMA_DESC_SIZE in order
   // to match the total xfer size of the descriptor chain with the largest
   // ECC RAM bank.
-  EFM_ASSERT((ECC_RAM_SIZE_MAX % ECC_DMA_DESC_SIZE) == 0);
+  SL_LOG_DEBUG_ASSERT((ECC_RAM_SIZE_MAX % ECC_DMA_DESC_SIZE) == 0);
 
   uint32_t desc_cnt = 0;
   volatile uint32_t dma_desc[ECC_DMA_DESCS][4];
@@ -421,7 +420,7 @@ static void sli_hal_syscfg_ecc_read_write_existing_dma(uint32_t start,
   // dma_desc array.
   if ((desc_cnt < 2) || (desc_cnt > ECC_DMA_DESCS)) {
     while (true) {
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
     }
   }
   // Now, divide the descriptor list in two parts, one for each channel,
@@ -475,8 +474,8 @@ static void sli_hal_syscfg_ecc_read_write_existing_dma(uint32_t start,
 static void sli_hal_syscfg_ecc_init_bank(const sli_hal_syscfg_ecc_bank_t *ecc_bank,
                                          const uint32_t dma_channels[2])
 {
-  EFM_ASSERT(ecc_bank != NULL);
-  EFM_ASSERT(dma_channels[0] != dma_channels[1]);
+  SL_LOG_DEBUG_ASSERT(ecc_bank != NULL);
+  SL_LOG_DEBUG_ASSERT(dma_channels[0] != dma_channels[1]);
 
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_CRITICAL();
@@ -529,7 +528,7 @@ static void sli_hal_syscfg_ecc_init_bank(const sli_hal_syscfg_ecc_bank_t *ecc_ba
  ******************************************************************************/
 static void sli_hal_syscfg_ecc_disable_bank(const sli_hal_syscfg_ecc_bank_t *ecc_bank)
 {
-  EFM_ASSERT(ecc_bank != NULL);
+  SL_LOG_DEBUG_ASSERT(ecc_bank != NULL);
 
 #if defined(DMEM_COUNT) && (DMEM_COUNT == 2)
   // Disable ECC write (encoder) and checking (decoder).
@@ -548,7 +547,7 @@ static void sli_hal_syscfg_ecc_disable_bank(const sli_hal_syscfg_ecc_bank_t *ecc
  ******************************************************************************/
 void sl_hal_syscfg_ecc_set_config(const sl_hal_syscfg_ecc_config_t *ecc_config)
 {
-  EFM_ASSERT(ecc_config != NULL);
+  SL_LOG_DEBUG_ASSERT(ecc_config != NULL);
 
 #if defined(ECC_FAULT_CTRL_REG)
   uint32_t fault_ctrl_reg = ECC_FAULT_CTRL_REG;
@@ -578,11 +577,11 @@ void sl_hal_syscfg_set_dmem_port_map(sl_hal_syscfg_dmem_master_t master,
 {
   // make sure master is within the mask of port map that can be changed
   // and make sure port is a sensible value.
-  EFM_ASSERT(((1 << master) & _SYSCFG_DMEM0PORTMAPSEL_MASK) != 0x0);
+  SL_LOG_DEBUG_ASSERT(((1 << master) & _SYSCFG_DMEM0PORTMAPSEL_MASK) != 0x0);
 #if defined(DMEM_COUNT) && (DMEM_COUNT == 1)
-  EFM_ASSERT(port < DMEM_NUM_PORTS);
+  SL_LOG_DEBUG_ASSERT(port < DMEM_NUM_PORTS);
 #elif defined(DMEM_COUNT) && (DMEM_COUNT == 2)
-  EFM_ASSERT(port < DMEM0_NUM_PORTS);
+  SL_LOG_DEBUG_ASSERT(port < DMEM0_NUM_PORTS);
 #endif
 
 #if defined(DMEM_COUNT) && (DMEM_COUNT == 1)
@@ -605,13 +604,13 @@ void sl_hal_syscfg_set_dmem_port_map(sl_hal_syscfg_dmem_master_t master,
 void sl_hal_syscfg_set_port_priority(sl_hal_syscfg_port_priority_t port_priority)
 {
 #if defined(DMEM_COUNT) && (DMEM_COUNT == 1)
-  EFM_ASSERT(port_priority < ((DMEM_NUM_PORTS + 1) << _MPAHBRAM_CTRL_AHBPORTPRIORITY_SHIFT));
+  SL_LOG_DEBUG_ASSERT(port_priority < ((DMEM_NUM_PORTS + 1) << _MPAHBRAM_CTRL_AHBPORTPRIORITY_SHIFT));
 
   sl_hal_bus_reg_write_mask(&DMEM->CTRL,
                             _MPAHBRAM_CTRL_AHBPORTPRIORITY_MASK,
                             (uint32_t)port_priority << _MPAHBRAM_CTRL_AHBPORTPRIORITY_SHIFT);
 #elif defined(DMEM_COUNT) && (DMEM_COUNT == 2)
-  EFM_ASSERT(port_priority < ((DMEM0_NUM_PORTS + 1) << _MPAHBRAM_CTRL_AHBPORTPRIORITY_SHIFT));
+  SL_LOG_DEBUG_ASSERT(port_priority < ((DMEM0_NUM_PORTS + 1) << _MPAHBRAM_CTRL_AHBPORTPRIORITY_SHIFT));
 
   sl_hal_bus_reg_write_mask(&DMEM0->CTRL,
                             _MPAHBRAM_CTRL_AHBPORTPRIORITY_MASK,

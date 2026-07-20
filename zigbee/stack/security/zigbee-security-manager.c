@@ -359,16 +359,16 @@ void zb_sec_man_set_network_key_info(sl_zigbee_sec_man_network_key_info_t* netwo
 {
   tokTypeStackKeys tok;
 
-  sli_zigbee_stack_token_primitive(true, &tok, COMMON_TOKEN_STACK_KEYS, sizeof(tokTypeStackKeys));
+  sli_zigbee_stack_token_primitive(true, &tok, COMMON_TOKEN_STACK_KEYS, sizeof(tok));
   if (tok.activeKeySeqNum != network_key_info->network_key_sequence_number) {
     tok.activeKeySeqNum = network_key_info->network_key_sequence_number;
-    sli_zigbee_stack_token_primitive(false, &tok, COMMON_TOKEN_STACK_KEYS, sizeof(tokTypeStackKeys));
+    sli_zigbee_stack_token_primitive(false, &tok, COMMON_TOKEN_STACK_KEYS, sizeof(tok));
   }
 
-  sli_zigbee_stack_token_primitive(true, &tok, COMMON_TOKEN_STACK_ALTERNATE_KEY, sizeof(tokTypeStackKeys));
+  sli_zigbee_stack_token_primitive(true, &tok, COMMON_TOKEN_STACK_ALTERNATE_KEY, sizeof(tok));
   if (tok.activeKeySeqNum != network_key_info->alt_network_key_sequence_number) {
     tok.activeKeySeqNum = network_key_info->alt_network_key_sequence_number;
-    sli_zigbee_stack_token_primitive(false, &tok, COMMON_TOKEN_STACK_ALTERNATE_KEY, sizeof(tokTypeStackKeys));
+    sli_zigbee_stack_token_primitive(false, &tok, COMMON_TOKEN_STACK_ALTERNATE_KEY, sizeof(tok));
   }
 }
 
@@ -581,13 +581,13 @@ bool sli_zigbee_stack_sec_man_link_key_slot_available(sl_802154_long_addr_t eui6
 void sli_zigbee_stack_fetch_key_table_entry_at_index(uint8_t index, tokTypeStackKeyTable *tok)
 {
   // Set token to some invalid initial value
-  memset(tok, 0xFF, sizeof(tokTypeStackKeyTable));
+  memset(tok, 0xFF, sizeof(*tok));
   if (index < ORIGINAL_TOKEN_STACK_KEY_TABLE_MAX_INDEX) {
-    if (slx_zigbee_token_manager_get_data(COMMON_TOKEN_STACK_KEY_TABLE + index, (void *)tok, sizeof(tokTypeStackKeyTable)) != SL_STATUS_OK) {
+    if (slx_zigbee_token_manager_get_data(COMMON_TOKEN_STACK_KEY_TABLE + index, (void *)tok, sizeof(*tok)) != SL_STATUS_OK) {
       return;
     }
   } else {
-    if (slx_zigbee_token_manager_get_data(COMMON_TOKEN_STACK_KEY_TABLE_EXTENDED + (index - ORIGINAL_TOKEN_STACK_KEY_TABLE_MAX_INDEX), (void *)tok, sizeof(tokTypeStackKeyTable)) != SL_STATUS_OK) {
+    if (slx_zigbee_token_manager_get_data(COMMON_TOKEN_STACK_KEY_TABLE_EXTENDED + (index - ORIGINAL_TOKEN_STACK_KEY_TABLE_MAX_INDEX), (void *)tok, sizeof(*tok)) != SL_STATUS_OK) {
       return;
     }
   }
@@ -596,11 +596,11 @@ void sli_zigbee_stack_fetch_key_table_entry_at_index(uint8_t index, tokTypeStack
 void sli_zigbee_stack_set_key_table_entry_at_index(uint8_t index, tokTypeStackKeyTable *tok)
 {
   if (index < ORIGINAL_TOKEN_STACK_KEY_TABLE_MAX_INDEX) {
-    if (slx_zigbee_token_manager_set_data(COMMON_TOKEN_STACK_KEY_TABLE + index, (void *)tok, sizeof(tokTypeStackKeyTable)) != SL_STATUS_OK) {
+    if (slx_zigbee_token_manager_set_data(COMMON_TOKEN_STACK_KEY_TABLE + index, (void *)tok, sizeof(*tok)) != SL_STATUS_OK) {
       return;
     }
   } else {
-    if (slx_zigbee_token_manager_set_data(COMMON_TOKEN_STACK_KEY_TABLE_EXTENDED + (index - ORIGINAL_TOKEN_STACK_KEY_TABLE_MAX_INDEX), (void *)tok, sizeof(tokTypeStackKeyTable)) != SL_STATUS_OK) {
+    if (slx_zigbee_token_manager_set_data(COMMON_TOKEN_STACK_KEY_TABLE_EXTENDED + (index - ORIGINAL_TOKEN_STACK_KEY_TABLE_MAX_INDEX), (void *)tok, sizeof(*tok)) != SL_STATUS_OK) {
       return;
     }
   }

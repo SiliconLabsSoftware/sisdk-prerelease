@@ -45,8 +45,10 @@
 #include "app_common.h"
 #include "app_trx.h"
 
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
 #include "../src/sleep_loop/sli_power_manager_private.h"
+#endif
 
 #if defined(SL_CATALOG_IOSTREAM_EUSART_PRESENT)
 #include "sl_iostream_eusart_vcom_config.h"
@@ -271,35 +273,6 @@ void stopInfinitePreambleTx(sl_cli_command_arg_t *args)
   responsePrint(sl_cli_get_command_string(args, 0), "Result:%s", getStatusMessage(status));
 }
 
-void getSyncWords(sl_cli_command_arg_t *args)
-{
-  sl_rail_sync_word_config_t syncWordConfig = { 0, };
-  sl_rail_status_t status = sl_rail_get_sync_words(railHandle, &syncWordConfig);
-  responsePrint(sl_cli_get_command_string(args, 0),
-                "Result:%s,bitlength:%u,syncWord1:%" PRIu32 ",syncWord2:%" PRIu32,
-                status == SL_RAIL_STATUS_NO_ERROR ? "Success" : "Failure",
-                syncWordConfig.sync_word_bits, syncWordConfig.sync_word_0,
-                syncWordConfig.sync_word_1);
-}
-
-void configSyncWords(sl_cli_command_arg_t *args)
-{
-  if (!inRadioState(SL_RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
-    return;
-  }
-  sl_rail_sync_word_config_t syncWordConfig = { 0, };
-  syncWordConfig.sync_word_bits = sl_cli_get_argument_uint8(args, 0);
-  syncWordConfig.sync_word_0 = sl_cli_get_argument_uint32(args, 1);
-  if (sl_cli_get_argument_count(args) >= 3) {
-    syncWordConfig.sync_word_1 = sl_cli_get_argument_uint32(args, 2);
-  } else {
-    syncWordConfig.sync_word_1 = syncWordConfig.sync_word_0;
-  }
-  sl_rail_status_t status = sl_rail_config_sync_words(railHandle, &syncWordConfig);
-  responsePrint(sl_cli_get_command_string(args, 0), "Result:%s",
-                ((status == SL_RAIL_STATUS_NO_ERROR) ? "Success" : "Failure"));
-}
-
 #if SL_RAIL_IEEE802154_SUPPORTS_G_MODE_SWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
 uint16_t modeSwitchNewChannel = 0xFFFFU;
 uint16_t modeSwitchBaseChannel = 0xFFFFU;
@@ -330,6 +303,10 @@ void rx(sl_cli_command_arg_t *args)
   if ((enable && (currentState & SL_RAIL_RF_STATE_RX))
       || (!enable && (currentState <= SL_RAIL_RF_STATE_IDLE))) {
     // Do nothing since we're already in the right state
+    // But do turn off ScheduledRx if we were in it and disabling
+    if (!enable && (currentAppMode() == RX_SCHEDULED)) {
+      (void) enableAppModeSync(RX_SCHEDULED, false, NULL);
+    }
   } else if (enable) {
     status = sl_rail_start_rx(railHandle, channel, NULL);
   } else {
@@ -613,10 +590,20 @@ static const char * const rfSensitivity[] = { "High", "Low" };
 void sleep(sl_cli_command_arg_t *args)
 {
 #if defined(_SILICON_LABS_32B_SERIES_2) || defined(_SILICON_LABS_32B_SERIES_3)
+#if !defined(SL_CATALOG_POWER_MANAGER_PRESENT) && defined(_SILICON_LABS_32B_SERIES_3)
+  responsePrintError(sl_cli_get_command_string(args, 0),
+                     0x15,
+                     "Power Manager Unsupported");
+  return;
+#else
   char* em4State = "";
   uint8_t emMode = (uint8_t)sl_cli_get_argument_string(args, 0)[0] - '0';
 #if defined(_SILICON_LABS_32B_SERIES_2)
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   void (*em4Function)(void) = &sl_power_manager_enter_em4;
+#else
+  void (*em4Function)(void) = &EMU_EnterEM4;
+#endif
 #endif
 #if (SL_RAIL_SUPPORTS_RF_SENSE_ENERGY_DETECTION || SL_RAIL_SUPPORTS_RF_SENSE_SELECTIVE_OOK)
   RailRfSenseMode_t mode = RFSENSE_MODE_OFF;
@@ -935,9 +922,10 @@ void sleep(sl_cli_command_arg_t *args)
   } else {
     responsePrintError(sl_cli_get_command_string(args, 0), 1, "Invalid EM mode %u (valid 0-%u)", emMode, maxEmMode);
   }
-#else
+#endif // !defined(SL_CATALOG_POWER_MANAGER_PRESENT) && defined(_SILICON_LABS_32B_SERIES_3)
+#else // !(defined(_SILICON_LABS_32B_SERIES_2) || defined(_SILICON_LABS_32B_SERIES_3))
   responsePrintError(sl_cli_get_command_string(args, 0), 0x15, "Sleep Unsupported");
-#endif
+#endif // defined(_SILICON_LABS_32B_SERIES_2) || defined(_SILICON_LABS_32B_SERIES_3)
 }
 
 void rfSense(sl_cli_command_arg_t *args)

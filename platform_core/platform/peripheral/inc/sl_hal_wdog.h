@@ -37,6 +37,7 @@
 #include <stdbool.h>
 #include "sl_common.h"
 #include "sl_enum.h"
+#include "sl_log_helper.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -311,7 +312,7 @@ void sl_hal_wdog_init(WDOG_TypeDef *wdog,
  ******************************************************************************/
 __INLINE void sl_hal_wdog_lock(WDOG_TypeDef *wdog)
 {
-  EFM_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
 
   wdog->LOCK = _WDOG_LOCK_LOCKKEY_LOCK;
 }
@@ -326,7 +327,7 @@ __INLINE void sl_hal_wdog_lock(WDOG_TypeDef *wdog)
  ******************************************************************************/
 __INLINE void sl_hal_wdog_wait_sync(WDOG_TypeDef *wdog)
 {
-  EFM_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
 
   // Wait for synchronization to finish.
   while ((wdog->EN != 0U) && (wdog->SYNCBUSY != 0U)) ;
@@ -342,7 +343,7 @@ __INLINE void sl_hal_wdog_wait_sync(WDOG_TypeDef *wdog)
  ******************************************************************************/
 __INLINE void sl_hal_wdog_wait_ready(WDOG_TypeDef *wdog)
 {
-  EFM_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
 
 #if defined(_WDOG_EN_DISABLING_MASK)
   while (wdog->EN & _WDOG_EN_DISABLING_MASK) {
@@ -368,7 +369,7 @@ __INLINE void sl_hal_wdog_wait_ready(WDOG_TypeDef *wdog)
  ******************************************************************************/
 __INLINE void sl_hal_wdog_unlock(WDOG_TypeDef *wdog)
 {
-  EFM_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
 
   wdog->LOCK = _WDOG_LOCK_LOCKKEY_UNLOCK;
 }
@@ -387,7 +388,7 @@ __INLINE void sl_hal_wdog_unlock(WDOG_TypeDef *wdog)
 __INLINE void sl_hal_wdog_clear_interrupts(WDOG_TypeDef *wdog,
                                            uint32_t flags)
 {
-  EFM_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
 
   wdog->IF_CLR = flags;
 }
@@ -406,7 +407,7 @@ __INLINE void sl_hal_wdog_clear_interrupts(WDOG_TypeDef *wdog,
 __INLINE void sl_hal_wdog_disable_interrupts(WDOG_TypeDef *wdog,
                                              uint32_t flags)
 {
-  EFM_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
 
   wdog->IEN_CLR = flags;
 }
@@ -430,7 +431,7 @@ __INLINE void sl_hal_wdog_disable_interrupts(WDOG_TypeDef *wdog,
 __INLINE void sl_hal_wdog_enable_interrupts(WDOG_TypeDef *wdog,
                                             uint32_t flags)
 {
-  EFM_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
 
   wdog->IEN_SET = flags;
 }
@@ -451,7 +452,7 @@ __INLINE void sl_hal_wdog_enable_interrupts(WDOG_TypeDef *wdog,
  ******************************************************************************/
 __INLINE uint32_t sl_hal_wdog_get_pending_interrupts(WDOG_TypeDef *wdog)
 {
-  EFM_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
 
   return wdog->IF;
 }
@@ -474,7 +475,7 @@ __INLINE uint32_t sl_hal_wdog_get_enabled_pending_interrupts(WDOG_TypeDef *wdog)
 {
   uint32_t tmp;
 
-  EFM_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
 
   tmp = wdog->IEN;
 
@@ -496,7 +497,7 @@ __INLINE uint32_t sl_hal_wdog_get_enabled_pending_interrupts(WDOG_TypeDef *wdog)
 __INLINE void sl_hal_wdog_set_interrupts(WDOG_TypeDef *wdog,
                                          uint32_t flags)
 {
-  EFM_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
 
   wdog->IF_SET = flags;
 }
@@ -513,7 +514,7 @@ __INLINE void sl_hal_wdog_set_interrupts(WDOG_TypeDef *wdog,
  ******************************************************************************/
 __INLINE bool sl_hal_wdog_is_enabled(WDOG_TypeDef *wdog)
 {
-  EFM_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
 
   return (wdog->EN & _WDOG_EN_EN_MASK) == WDOG_EN_EN;
 }
@@ -530,7 +531,7 @@ __INLINE bool sl_hal_wdog_is_enabled(WDOG_TypeDef *wdog)
  ******************************************************************************/
 __INLINE bool sl_hal_wdog_is_locked(WDOG_TypeDef *wdog)
 {
-  EFM_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
 
   return (wdog->STATUS & _WDOG_STATUS_LOCK_MASK) == WDOG_STATUS_LOCK_LOCKED;
 }

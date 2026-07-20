@@ -54,7 +54,8 @@ static const RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfigDefault[] = {
 #elif ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7)   \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)   \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11))
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 14))
 static const RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfigDefault[] = {
   {
     .min = -287,

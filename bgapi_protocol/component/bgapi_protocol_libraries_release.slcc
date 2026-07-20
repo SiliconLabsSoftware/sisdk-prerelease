@@ -39,6 +39,10 @@ library:
   condition:
   - toolchain_gcc
   - cortexm33
+- path: build/gcc/cortex-m33/protocol/task/release/libbgapi_task.a
+  condition:
+  - toolchain_gcc
+  - cortexm33
 - path: build/gcc/cortex-m33/rtos_adaptation/release/libbgapi_protocol_rtos_adaptation_stub.a
   condition:
   - toolchain_gcc
@@ -68,6 +72,10 @@ library:
   - toolchain_gcc
   - cortexm55
 - path: build/gcc/cortex-m55/protocol/release/libbgapi_protocol.a
+  condition:
+  - toolchain_gcc
+  - cortexm55
+- path: build/gcc/cortex-m55/protocol/task/release/libbgapi_task.a
   condition:
   - toolchain_gcc
   - cortexm55
@@ -103,6 +111,10 @@ library:
   condition:
   - toolchain_iar
   - cortexm33
+- path: build/iar/cortex-m33/protocol/task/release/libbgapi_task.a
+  condition:
+  - toolchain_iar
+  - cortexm33
 - path: build/iar/cortex-m33/rtos_adaptation/release/libbgapi_protocol_rtos_adaptation_stub.a
   condition:
   - toolchain_iar
@@ -132,6 +144,10 @@ library:
   - toolchain_iar
   - cortexm55
 - path: build/iar/cortex-m55/protocol/release/libbgapi_protocol.a
+  condition:
+  - toolchain_iar
+  - cortexm55
+- path: build/iar/cortex-m55/protocol/task/release/libbgapi_task.a
   condition:
   - toolchain_iar
   - cortexm55
@@ -167,6 +183,10 @@ library:
   condition:
   - toolchain_llvm
   - cortexm33
+- path: build/llvm/cortex-m33/protocol/task/release/libbgapi_task.a
+  condition:
+  - toolchain_llvm
+  - cortexm33
 - path: build/llvm/cortex-m33/rtos_adaptation/release/libbgapi_protocol_rtos_adaptation_stub.a
   condition:
   - toolchain_llvm
@@ -196,6 +216,10 @@ library:
   - toolchain_llvm
   - cortexm55
 - path: build/llvm/cortex-m55/protocol/release/libbgapi_protocol.a
+  condition:
+  - toolchain_llvm
+  - cortexm55
+- path: build/llvm/cortex-m55/protocol/task/release/libbgapi_task.a
   condition:
   - toolchain_llvm
   - cortexm55

@@ -88,6 +88,12 @@ sl_status_t sl_btctrl_deinit_ll(void);
  */
 void sl_btctrl_configure_le_buffer_size(uint8_t count);
 
+/**
+ *  Configures how many HCI ISO data packets the controller can store. Reported
+ *  to the host by LE Read Buffer Size [v2].
+ */
+void sl_btctrl_configure_le_iso_buffer_size(uint8_t count);
+
 void sli_btctrl_set_interrupt_priorities(const struct sl_btctrl_config *config);
 
 void sli_btctrl_set_address(uint8_t *address);

@@ -19,7 +19,9 @@ requires:
 - name: device
 - name: device_has_smu
 - name: hal_common
+- name: log_none
 - name: cmsis_core
+- name: hal_smu_impl
 documentation:
   docset: gecko-platform
   document:

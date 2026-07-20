@@ -278,7 +278,7 @@ void sli_log_platform_add_sleep_offset_us(uint32_t delta_us)
  * @param[in] args Unused.
  * @return SL_STATUS_OK on success.
  */
-sl_status_t sl_log_hal_pre_sleep_process(void *args)
+sl_status_t sl_log_hal_pre_sleep_process(const void *args)
 {
   (void)args;
 
@@ -325,7 +325,7 @@ sl_status_t sl_log_hal_pre_sleep_process(void *args)
  * @param[in] args Unused.
  * @return SL_STATUS_OK, or the backend's @c on_wake error code.
  */
-sl_status_t sl_log_hal_post_sleep_process(void *args)
+sl_status_t sl_log_hal_post_sleep_process(const void *args)
 {
   (void)args;
 
@@ -347,7 +347,7 @@ sl_status_t sl_log_hal_post_sleep_process(void *args)
  * @param[in] core_id Core identifier
  * @return SL_STATUS_OK currently always returned
  */
-sl_status_t sl_log_hal_set_configuration(void *args, uint8_t core_id)
+sl_status_t sl_log_hal_set_configuration(const void *args, uint8_t core_id)
 {
   (void)args;
   (void)core_id;

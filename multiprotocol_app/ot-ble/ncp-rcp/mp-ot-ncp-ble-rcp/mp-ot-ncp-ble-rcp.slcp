@@ -1,6 +1,6 @@
 project_name: mp-ot-ncp-ble-rcp
 label: OpenThread NCP + BLE RCP - UART (DMP)
-package: multiprotocol
+package: multiprotocol_app
 description: >
   Demonstrates a Multiprotocol OpenThread (FTD) NCP and BLE RCP application using CPC over UART/EUSART for concurrent Thread and BLE with a Linux host.
 

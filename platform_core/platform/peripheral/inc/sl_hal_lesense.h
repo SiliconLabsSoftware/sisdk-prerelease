@@ -33,7 +33,6 @@
 
 #include "em_device.h"
 #include "sl_enum.h"
-#include "sl_assert.h"
 #if defined(LESENSE_COUNT) && (LESENSE_COUNT > 0)
 
 #ifdef __cplusplus
@@ -43,6 +42,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include "sl_log_helper.h"
 
 /* *INDENT-OFF* */
 /***************************************************************************//**
@@ -967,7 +967,7 @@ __INLINE void sl_hal_lesense_decoder_stop(void)
 __INLINE void sl_hal_lesense_set_scan_mode(sl_hal_lesense_scan_mode_t scan_mode)
 {
   // Make sure the module is disabled.
-  EFM_ASSERT(LESENSE->EN == 0);
+  SL_LOG_DEBUG_ASSERT(LESENSE->EN == 0);
 
   // Setting the requested scan_mode to the CTRL register.
   LESENSE->CFG = (LESENSE->CFG & ~_LESENSE_CFG_SCANMODE_MASK)
@@ -1039,9 +1039,9 @@ __INLINE void sl_hal_lesense_stop_scan(void)
 __INLINE void sl_hal_lesense_set_start_delay(uint8_t start_delay)
 {
   // Make sure the module is disabled.
-  EFM_ASSERT(LESENSE->EN == 0);
+  SL_LOG_DEBUG_ASSERT(LESENSE->EN == 0);
   // Sanity check of the start_delay.
-  EFM_ASSERT(start_delay < 4U);
+  SL_LOG_DEBUG_ASSERT(start_delay < 4U);
 
   // Setting the requested start_delay to the TIMCTRL register.
   LESENSE->TIMCTRL = (LESENSE->TIMCTRL & ~_LESENSE_TIMCTRL_STARTDLY_MASK)
@@ -1071,7 +1071,7 @@ __INLINE void sl_hal_lesense_set_start_delay(uint8_t start_delay)
 __INLINE void sl_hal_lesense_set_window_size(uint32_t window_size)
 {
   // Make sure the module is disabled.
-  EFM_ASSERT(LESENSE->EN == 0);
+  SL_LOG_DEBUG_ASSERT(LESENSE->EN == 0);
 
   LESENSE->EVALCTRL = (LESENSE->EVALCTRL & ~_LESENSE_EVALCTRL_WINSIZE_MASK)
                       | window_size;
@@ -1117,14 +1117,14 @@ __INLINE void sl_hal_lesense_decoder_config_arc(const sl_hal_lesense_transition_
                                                 uint32_t arc_index)
 {
   // Make sure the module is disabled.
-  EFM_ASSERT(LESENSE->EN == 0);
+  SL_LOG_DEBUG_ASSERT(LESENSE->EN == 0);
   // Sanity check of configuration parameters.
-  EFM_ASSERT(config_arc != NULL);
-  EFM_ASSERT(arc_index < SL_HAL_LESENSE_NUM_ARCS);
-  EFM_ASSERT((uint32_t)config_arc->compare_mask < 16U);
-  EFM_ASSERT((uint32_t)config_arc->compare_value < 16U);
-  EFM_ASSERT((uint32_t)config_arc->current_state < SLI_HAL_LESENSE_NUM_DECODER_STATES);
-  EFM_ASSERT((uint32_t)config_arc->next_state < SLI_HAL_LESENSE_NUM_DECODER_STATES);
+  SL_LOG_DEBUG_ASSERT(config_arc != NULL);
+  SL_LOG_DEBUG_ASSERT(arc_index < SL_HAL_LESENSE_NUM_ARCS);
+  SL_LOG_DEBUG_ASSERT((uint32_t)config_arc->compare_mask < 16U);
+  SL_LOG_DEBUG_ASSERT((uint32_t)config_arc->compare_value < 16U);
+  SL_LOG_DEBUG_ASSERT((uint32_t)config_arc->current_state < SLI_HAL_LESENSE_NUM_DECODER_STATES);
+  SL_LOG_DEBUG_ASSERT((uint32_t)config_arc->next_state < SLI_HAL_LESENSE_NUM_DECODER_STATES);
 
   LESENSE->ST[arc_index].ARC = (LESENSE->ST[arc_index].ARC & ~(_LESENSE_ST_ARC_PRSACT_MASK
                                                                | _LESENSE_ST_ARC_SMASK_MASK
@@ -1227,11 +1227,11 @@ __INLINE void sl_hal_lesense_channel_set_timing(uint8_t channel_index,
                                                 uint16_t measure_delay)
 {
   // Make sure the module is disabled.
-  EFM_ASSERT(LESENSE->EN == 0);
+  SL_LOG_DEBUG_ASSERT(LESENSE->EN == 0);
   // A sanity check of parameters.
-  EFM_ASSERT(excitation_time <= (_LESENSE_CH_TIMING_EXTIME_MASK >> _LESENSE_CH_TIMING_EXTIME_SHIFT));
-  EFM_ASSERT(measure_delay <= (_LESENSE_CH_TIMING_MEASUREDLY_MASK >> _LESENSE_CH_TIMING_MEASUREDLY_SHIFT));
-  EFM_ASSERT(channel_index < SL_HAL_LESENSE_NUM_CHANNELS);
+  SL_LOG_DEBUG_ASSERT(excitation_time <= (_LESENSE_CH_TIMING_EXTIME_MASK >> _LESENSE_CH_TIMING_EXTIME_SHIFT));
+  SL_LOG_DEBUG_ASSERT(measure_delay <= (_LESENSE_CH_TIMING_MEASUREDLY_MASK >> _LESENSE_CH_TIMING_MEASUREDLY_SHIFT));
+  SL_LOG_DEBUG_ASSERT(channel_index < SL_HAL_LESENSE_NUM_CHANNELS);
 
   // A channel-specific timing configuration on the scan channel channel_index.
   // Setting excitation time, sampling delay, and measurement delay.

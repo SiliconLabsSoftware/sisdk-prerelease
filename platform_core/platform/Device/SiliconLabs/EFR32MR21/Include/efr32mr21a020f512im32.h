@@ -130,7 +130,7 @@ typedef enum IRQn{
 #define __DSP_PRESENT             1U      /**< Presence of DSP  */
 #define __FPU_PRESENT             1U      /**< Presence of FPU  */
 #define __MPU_PRESENT             1U      /**< Presence of MPU  */
-#define __SAUREGION_PRESENT       1U      /**< Presence of FPU  */
+#define __SAUREGION_PRESENT       1U      /**< Presence of SAU regions  */
 #define __TZ_PRESENT              1U      /**< Presence of TrustZone */
 #define __VTOR_PRESENT            1U      /**< Presence of VTOR register in SCB  */
 #define __NVIC_PRIO_BITS          4U      /**< NVIC interrupt priority bits */

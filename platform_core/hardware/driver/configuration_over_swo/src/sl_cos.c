@@ -192,8 +192,8 @@ static uint32_t sli_cos_vcom_config(uint32_t baudrate,
   uint32_t config = 0;
 
   // Packing baudrate, and flow control info to config.
-  config |= (((baudrate) & (COS_CONFIG_BAUDRATE_MASK)) << COS_CONFIG_BAUDRATE_POS);
-  config |= (((flow_control) & (COS_CONFIG_UART_FC_MASK)) << COS_CONFIG_UART_FC_POS);
+  config |= ((baudrate & COS_CONFIG_BAUDRATE_MASK) << COS_CONFIG_BAUDRATE_POS);
+  config |= ((flow_control & COS_CONFIG_UART_FC_MASK) << COS_CONFIG_UART_FC_POS);
 
   return config;
 }
@@ -315,9 +315,9 @@ void sl_cos_config_pti(uint32_t baudrate,
   Cos_Pti_Config.optionType = COS_CONFIG_OPTION_TYPE_PTI;
 
   // Packing baudrate, mode and interface info to config
-  config |= (((baudrate) & (COS_CONFIG_BAUDRATE_MASK)) << COS_CONFIG_BAUDRATE_POS);
-  config |= (((mode) & (COS_CONFIG_PTI_MODE_MASK)) << COS_CONFIG_PTI_MODE_POS);
-  config |= (((interface) & (COS_CONFIG_PTI_INTERFACE_MASK)) << COS_CONFIG_PTI_INTERFACE_POS);
+  config |= ((baudrate & COS_CONFIG_BAUDRATE_MASK) << COS_CONFIG_BAUDRATE_POS);
+  config |= ((mode & COS_CONFIG_PTI_MODE_MASK) << COS_CONFIG_PTI_MODE_POS);
+  config |= ((interface & COS_CONFIG_PTI_INTERFACE_MASK) << COS_CONFIG_PTI_INTERFACE_POS);
 
   Cos_Pti_Config.optionValue = config;
 
@@ -345,9 +345,8 @@ void sl_cos_config_vcom(uint32_t baudrate,
 static sl_status_t sli_cos_swo_itm_8_write(const void *buffer,
                                            size_t buffer_length)
 {
-  uint8_t *buf = (uint8_t *)buffer;
+  const uint8_t *buf = (const uint8_t *)buffer;
   uint32_t packet_length;
-  uint32_t i;
   uint8_t  output_byte;
   uint8_t  seq_nbr = 0;
 
@@ -359,13 +358,13 @@ static sl_status_t sli_cos_swo_itm_8_write(const void *buffer,
 
   // The write feature is built upon the existing Ember Debug Message (EDM) protocol, which today is transmitted over SWO UART on ITM Channel 8.
   // The Protocol have the Start-byte, Length, Version, Message type, Sequence number, Message, CRC CCITT-16, and End-byte for correct communication.
-  for ( i = 0; i < packet_length; ++i ) {
+  for (uint32_t i = 0; i < packet_length; ++i) {
     if ( i == 0 ) {
       // Frame start
       output_byte = '[';
     } else if ( i == 1 ) {
       // Including special byte, type and sequence number
-      output_byte = buffer_length + 4;
+      output_byte = (uint8_t)(buffer_length + 4);
     } else if ( i == 2 ) {
       // Special EDM byte
       output_byte = 0xD1;

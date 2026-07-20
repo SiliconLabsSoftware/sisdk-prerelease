@@ -3,7 +3,8 @@ package: platform
 quality: production
 label: Platform Security - SoC mbedTLS AES
 description: >
-  Demonstrates how to perform interactive AES-256 encryption and decryption with mbedTLS, using SHA-256 for IV/key setup and HMAC for integrity, with hardware acceleration.
+  This example uses hardware accelerators to
+  accelerate the AES encryption and SHA hash functions of mbedTLS.
 category: Example|Platform
 filter:
   - name: "Device Type"

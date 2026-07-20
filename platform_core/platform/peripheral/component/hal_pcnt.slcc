@@ -23,6 +23,7 @@ requires:
 - name: device
 - name: device_has_pcnt
 - name: hal_common
+- name: log_none
 - name: cmsis_core
 documentation:
   docset: gecko-platform

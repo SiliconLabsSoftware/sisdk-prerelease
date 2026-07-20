@@ -37,7 +37,8 @@
 
 #if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 1) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 3) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8))
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
 #include "sl_rail_util_rf_path_config.h"
 #endif
 

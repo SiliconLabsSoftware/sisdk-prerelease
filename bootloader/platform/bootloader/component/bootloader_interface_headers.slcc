@@ -2,7 +2,7 @@ id: bootloader_interface_headers
 label: Bootloader interface headers (shared)
 package: bootloader
 description: >
-  Cross-series public API headers under platform/bootloader/api/common (error codes and reset info).
+  Cross-series public API headers under platform/bootloader/common/api (error codes and reset info).
   Replaces bootloader_interface_public_api_headers and bootloader_interface_s3_public_api_headers,
   which carried the same include paths. Series-specific btl_interface*.h are not listed here;
   Series 3 uses bootloader_interface_s3_bootload_headers.
@@ -11,12 +11,11 @@ quality: production
 ui_hints:
   visibility: never
 include:
-- path: platform/bootloader
 - path: platform/bootloader/common
-- path: platform/bootloader/common/api
   file_list:
-  - path: btl_errorcode.h
-  - path: btl_reset_info.h
+  - path: api/btl_errorcode.h
+  - path: api/btl_reset_info.h
+- path: platform/bootloader/common/api
 provides:
 - name: bootloader_interface_headers
 metadata:

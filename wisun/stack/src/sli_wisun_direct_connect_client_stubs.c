@@ -41,6 +41,11 @@ bool sli_wisun_dc_client_is_server_frame(const uint8_t *eui64)
   return false;
 }
 
+void sli_wisun_dc_client_restart_link_lifetime(void)
+{
+  // Empty stub
+}
+
 // Requests
 
 sl_status_t sli_wisun_dc_client_start(void)

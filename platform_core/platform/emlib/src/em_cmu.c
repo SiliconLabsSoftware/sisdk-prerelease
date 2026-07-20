@@ -3808,10 +3808,10 @@ void CMU_LFXOInit(const CMU_LFXOInit_TypeDef *lfxoInit)
               | (lfxoInit->highAmplitudeEn << _LFXO_CFG_HIGHAMPL_SHIFT)
               | (lfxoInit->agcEn           << _LFXO_CFG_AGC_SHIFT);
 
-  LFXO->CTRL = (uint32_t)((lfxoInit->failDetEM4WUEn   << _LFXO_CTRL_FAILDETEM4WUEN_SHIFT)
-                          | (lfxoInit->failDetEn      << _LFXO_CTRL_FAILDETEN_SHIFT)
-                          | (lfxoInit->disOnDemand    << _LFXO_CTRL_DISONDEMAND_SHIFT)
-                          | (lfxoInit->forceEn        << _LFXO_CTRL_FORCEEN_SHIFT));
+  LFXO->CTRL = ((uint32_t)lfxoInit->failDetEM4WUEn << _LFXO_CTRL_FAILDETEM4WUEN_SHIFT)
+               | ((uint32_t)lfxoInit->failDetEn    << _LFXO_CTRL_FAILDETEN_SHIFT)
+               | ((uint32_t)lfxoInit->disOnDemand  << _LFXO_CTRL_DISONDEMAND_SHIFT)
+               | ((uint32_t)lfxoInit->forceEn      << _LFXO_CTRL_FORCEEN_SHIFT);
 
   if (lfxoInit->regLock) {
     LFXO->LOCK = ~LFXO_LOCK_LOCKKEY_UNLOCK;
@@ -4177,7 +4177,7 @@ void CMU_PCNTClockExternalSet(unsigned int instance, bool external)
  ******************************************************************************/
 CMU_HFRCOEM23Freq_TypeDef CMU_HFRCOEM23BandGet(void)
 {
-  return (CMU_HFRCOEM23Freq_TypeDef)SystemHFRCOEM23ClockGet();
+  return SystemHFRCOEM23ClockGet();
 }
 
 /***************************************************************************//**

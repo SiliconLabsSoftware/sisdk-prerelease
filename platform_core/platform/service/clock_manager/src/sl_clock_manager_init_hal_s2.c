@@ -346,7 +346,7 @@ FUNCTION_SCOPE void init_lfxo(void)
 /***************************************************************************//**
  * Initializes Clock Input CLKIN0.
  ******************************************************************************/
-static void init_clkin0(void)
+FUNCTION_SCOPE void init_clkin0(void)
 {
 #if (defined(SL_CLOCK_MANAGER_SYSCLK_SOURCE) && (SL_CLOCK_MANAGER_SYSCLK_SOURCE == CMU_SYSCLKCTRL_CLKSEL_CLKIN0))  \
   || (defined(SL_CLOCK_MANAGER_DPLL_REFCLK) && (SL_CLOCK_MANAGER_DPLL_REFCLK == CMU_DPLLREFCLKCTRL_CLKSEL_CLKIN0)) \

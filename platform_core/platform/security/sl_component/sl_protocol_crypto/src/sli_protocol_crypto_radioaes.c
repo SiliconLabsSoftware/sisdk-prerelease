@@ -430,7 +430,7 @@ static sl_status_t aes_ccm_ble(bool                encrypt,
     b0b1[i + 1] = iv[i];
   }
 
-  b0b1[14] = (uint8_t) length >> 8;
+  b0b1[14] = (uint8_t) (length >> 8);
   b0b1[15] = (uint8_t) length;
   b0b1[16] = 0; // upper octet of AAD length
   b0b1[17] = 1; // lower octet of AAD length (BLE CCM always has only one byte of AAD)
@@ -704,10 +704,10 @@ sl_status_t sli_ccm_zigbee(bool encrypt,
     header[i + 1] = iv[i];
   }
 
-  header[14] = (uint8_t) length >> 8;
+  header[14] = (uint8_t) (length >> 8);
   header[15] = (uint8_t) length;
   if (aad_len > 0) {
-    header[16] = (uint8_t) aad_len >> 8; // upper octet of AAD length
+    header[16] = (uint8_t) (aad_len >> 8); // upper octet of AAD length
     header[17] = (uint8_t) aad_len; // lower octet of AAD length
   }
 

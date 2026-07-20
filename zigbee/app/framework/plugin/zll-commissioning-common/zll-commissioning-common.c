@@ -117,7 +117,7 @@ static void initFactoryNew(void)
 {
   // We use the node type token to indicate if we have joined a network and thus
   tokTypeStackNodeData tokNode;
-  sl_status_t status = slx_zigbee_token_manager_get_data(COMMON_TOKEN_STACK_NODE_DATA, (void *)&tokNode, sizeof(tokTypeStackNodeData));
+  sl_status_t status = slx_zigbee_token_manager_get_data(COMMON_TOKEN_STACK_NODE_DATA, (void *)&tokNode, sizeof(tokNode));
   if (status != SL_STATUS_OK) {
     sl_zigbee_af_app_println("Failed to get Stack Node Data, status: 0x%08X", status);
     return;

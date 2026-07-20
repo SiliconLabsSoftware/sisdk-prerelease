@@ -59,10 +59,18 @@ library:
   condition:
   - toolchain_gcc
   - cortexm33
+- path: libs/build/gcc/cortex-m55/sl-openthread-library/Release/libsl_openthread.a
+  condition:
+  - toolchain_gcc
+  - cortexm55
 - path: libs/build/llvm/cortex-m33/sl-openthread-library/Release/libsl_openthread.a
   condition:
   - toolchain_llvm
   - cortexm33
+- path: libs/build/llvm/cortex-m55/sl-openthread-library/Release/libsl_openthread.a
+  condition:
+  - toolchain_llvm
+  - cortexm55
 define:
 - name: RADIO_CONFIG_DMP_SUPPORT
   value: 1

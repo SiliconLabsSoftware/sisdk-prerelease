@@ -22,6 +22,7 @@ provides:
 requires:
 - name: device
 - name: device_has_ldma
+- name: log_none
 - name: hal_common
 - name: cmsis_core
 - name: enum

@@ -46,7 +46,7 @@ typedef struct lesense_ch_typedef{
   __IOM uint32_t TIMING;                             /**< Scan configuration                                 */
   __IOM uint32_t INTERACT;                           /**< Scan configuration                                 */
   __IOM uint32_t EVALCFG;                            /**< Scan configuration                                 */
-  __IOM uint32_t EVALTHRES;                          /**< Scan confguration                                  */
+  __IOM uint32_t EVALTHRES;                          /**< Scan configuration                                 */
 } LESENSE_CH_TypeDef;
 
 /** LESENSE ST Register Group Declaration. */
@@ -70,7 +70,7 @@ typedef struct lesense_typedef{
   __IM uint32_t      SCANRES;                   /**< Scan result                                        */
   __IM uint32_t      STATUS;                    /**< Status                                             */
   __IM uint32_t      RESCOUNT;                  /**< Result FIFO Count                                  */
-  __IM uint32_t      RESFIFO;                   /**< Result Fifo                                        */
+  __IM uint32_t      RESFIFO;                   /**< Result FIFO                                        */
   __IM uint32_t      CURCH;                     /**< Current channel index                              */
   __IM uint32_t      DECSTATE;                  /**< Current decoder state                              */
   __IM uint32_t      SENSORSTATE;               /**< Sensor State                                       */
@@ -98,7 +98,7 @@ typedef struct lesense_typedef{
   __IM uint32_t      SCANRES_SET;               /**< Scan result                                        */
   __IM uint32_t      STATUS_SET;                /**< Status                                             */
   __IM uint32_t      RESCOUNT_SET;              /**< Result FIFO Count                                  */
-  __IM uint32_t      RESFIFO_SET;               /**< Result Fifo                                        */
+  __IM uint32_t      RESFIFO_SET;               /**< Result FIFO                                        */
   __IM uint32_t      CURCH_SET;                 /**< Current channel index                              */
   __IM uint32_t      DECSTATE_SET;              /**< Current decoder state                              */
   __IM uint32_t      SENSORSTATE_SET;           /**< Sensor State                                       */
@@ -126,7 +126,7 @@ typedef struct lesense_typedef{
   __IM uint32_t      SCANRES_CLR;               /**< Scan result                                        */
   __IM uint32_t      STATUS_CLR;                /**< Status                                             */
   __IM uint32_t      RESCOUNT_CLR;              /**< Result FIFO Count                                  */
-  __IM uint32_t      RESFIFO_CLR;               /**< Result Fifo                                        */
+  __IM uint32_t      RESFIFO_CLR;               /**< Result FIFO                                        */
   __IM uint32_t      CURCH_CLR;                 /**< Current channel index                              */
   __IM uint32_t      DECSTATE_CLR;              /**< Current decoder state                              */
   __IM uint32_t      SENSORSTATE_CLR;           /**< Sensor State                                       */
@@ -154,7 +154,7 @@ typedef struct lesense_typedef{
   __IM uint32_t      SCANRES_TGL;               /**< Scan result                                        */
   __IM uint32_t      STATUS_TGL;                /**< Status                                             */
   __IM uint32_t      RESCOUNT_TGL;              /**< Result FIFO Count                                  */
-  __IM uint32_t      RESFIFO_TGL;               /**< Result Fifo                                        */
+  __IM uint32_t      RESFIFO_TGL;               /**< Result FIFO                                        */
   __IM uint32_t      CURCH_TGL;                 /**< Current channel index                              */
   __IM uint32_t      DECSTATE_TGL;              /**< Current decoder state                              */
   __IM uint32_t      SENSORSTATE_TGL;           /**< Sensor State                                       */

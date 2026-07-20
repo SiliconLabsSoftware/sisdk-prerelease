@@ -83,20 +83,14 @@
 // <i> Default: SL_LOG_CONFIG_LEVEL_ERROR
 #define SL_LOG_CONFIG_LEVEL_COMPILE_TIME SL_LOG_CONFIG_LEVEL_ERROR
 
-// <o SL_LOG_CONFIG_ARG> CONFIG_MAX_ARGS
-// <SL_LOG_CONFIG_ARG0 => 0
-// <SL_LOG_CONFIG_ARG1 => 1
-// <SL_LOG_CONFIG_ARG2 => 2
-// <SL_LOG_CONFIG_ARG3 => 3
-// <SL_LOG_CONFIG_ARG4 => 4
-// <SL_LOG_CONFIG_ARG5 => 5
-// <SL_LOG_CONFIG_ARG6 => 6
-// <SL_LOG_CONFIG_ARG7 => 7
-// <SL_LOG_CONFIG_ARG8 => 8
-// <SL_LOG_CONFIG_ARG9 => 9
-// <SL_LOG_CONFIG_ARG10 => 10
+// <o SL_LOG_CONFIG_ARG> CONFIG_MAX_ARGS <3-10>
+// <i> Minimum 3: sl_log_event_t args[], arg1-arg3 send paths, and crash logging require at least three argument slots.
 // <i> Default: 3
-#define SL_LOG_CONFIG_ARG SL_LOG_CONFIG_ARG3
+#define SL_LOG_CONFIG_ARG 3
+
+#if (SL_LOG_CONFIG_ARG < 3) || (SL_LOG_CONFIG_ARG > 10)
+#error "SL_LOG_CONFIG_ARG (CONFIG_MAX_ARGS) must be between 3 and 10"
+#endif
 
 // <o SL_LOG_NUMBER_OF_EVENTS> No of Logs <1-255>
 // <i> Default: 128

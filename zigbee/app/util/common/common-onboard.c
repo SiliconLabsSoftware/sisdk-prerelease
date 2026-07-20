@@ -99,7 +99,7 @@ sl_status_t getOfflineNodeParameters(sl_802154_short_addr_t *myNodeIdReturn,
                                      uint8_t* stackProfileReturn)
 {
   tokTypeStackNodeData tok;
-  sl_status_t tokStatus = slx_zigbee_token_manager_get_data(COMMON_TOKEN_STACK_NODE_DATA, (void *)&tok, sizeof(tokTypeStackNodeData));
+  sl_status_t tokStatus = slx_zigbee_token_manager_get_data(COMMON_TOKEN_STACK_NODE_DATA, (void *)&tok, sizeof(tok));
   if (tokStatus != SL_STATUS_OK) {
     return tokStatus;
   }

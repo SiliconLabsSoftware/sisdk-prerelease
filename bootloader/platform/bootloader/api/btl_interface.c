@@ -791,10 +791,16 @@ void bootloader_ppusatdnRestoreState(Bootloader_PPUSATDnCLKENnState_t *ctx)
 
 __attribute__ ((weak, noinline)) void sli_bootloader_preHook(void)
 {
+  // Weak default: intentionally empty. Applications may override this hook to
+  // run custom logic before bootloader-internal critical sections that
+  // reconfigure SMU/CLKEN state. See bootloader_ppusatdnSaveReconfigureState.
 }
 
 __attribute__ ((weak, noinline)) void sli_bootloader_postHook(void)
 {
+  // Weak default: intentionally empty. Applications may override this hook to
+  // run custom logic after bootloader-internal critical sections that restore
+  // SMU/CLKEN state. See bootloader_ppusatdnRestoreState.
 }
 
 #if defined(BOOTLOADER_ENABLE_USART_AUTO_DETECTION)

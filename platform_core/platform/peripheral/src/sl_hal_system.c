@@ -32,7 +32,7 @@
 #include "sl_hal_syscfg.h"
 #include "em_device.h"
 #include <stdbool.h>
-#if defined(_SILICON_LABS_32B_SERIES_3)
+#if defined(_SILICON_LABS_32B_SERIES_3) && !defined(SLI_SE_FIRMWARE_UNAVAILABLE)
 #include "sl_se_manager.h"
 #include "sli_se_manager_device_data.h"
 #endif
@@ -54,8 +54,16 @@
 
 #define DEVINFO_TEMPERATURE_CALTEMP_INTEGER_SHIFT  4
 
-#if defined(_SILICON_LABS_32B_SERIES_3)
+// Calibration getters read DEVINFO via an SE command; disable them without SE
+// firmware so the calls cannot hang.
+#if defined(_SILICON_LABS_32B_SERIES_3) && !defined(SLI_SE_FIRMWARE_UNAVAILABLE)
 #define HAL_SYSTEM_CALIBRATION_SUPPORT
+#endif
+
+#if defined(DEVINFO_GP_DPLL0OFFSETK0N0_DPLL0_OFFSET_K0_BAND0_MASK) \
+  && defined(DEVINFO_GP_DPLL0OFFSETK0N0_DPLL0_OFFSET_K0_BAND1_SHIFT)
+#define DPLL_K0_OFFSET_EVEN_BAND_MASK  DEVINFO_GP_DPLL0OFFSETK0N0_DPLL0_OFFSET_K0_BAND0_MASK
+#define DPLL_K0_OFFSET_ODD_BAND_SHIFT  DEVINFO_GP_DPLL0OFFSETK0N0_DPLL0_OFFSET_K0_BAND1_SHIFT
 #endif
 
 #if defined(_SYSCFG_ITCMNUMSRAMBLK_MASK)
@@ -432,7 +440,7 @@ uint32_t sl_hal_system_get_hfrcodpll_band_calibration(uint32_t frequency)
       calibration_value = DEVINFO->HFRCODPLLCAL[0].HFRCODPLLCAL;
       break;
 
-  #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4) \
+  #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)     \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
@@ -506,6 +514,59 @@ uint32_t sl_hal_system_get_hfrcodpll_band_calibration(uint32_t frequency)
       return 0;
   }
   return calibration_value;
+#else
+  (void)frequency;
+  return 0;
+#endif
+}
+
+/***************************************************************************//**
+ * Get the DPLL K0 offset value for a given HFRCODPLL frequency band.
+ ******************************************************************************/
+uint32_t sl_hal_system_get_dpll_k0_offset(uint32_t frequency)
+{
+#if defined(HAL_SYSTEM_CALIBRATION_SUPPORT) && defined(DEVINFO_GP_DPLL0OFFSETK0N0_OFFSET)
+  sl_status_t status;
+  uint8_t band_index = 0xFF;
+  sl_se_command_context_t se_command_ctx;
+  sli_se_device_data_t otp_section_id = (sli_se_device_data_t)(SLI_SE_DEVICE_DATA_DI0 + DEVINFO_GP_FRAGMENT_INDEX);
+  uint32_t offset;
+  uint32_t k0_word = 0;
+
+  for (uint8_t i = 0; i < HFRCO_DPLL_FREQUENCY_TABLE_SIZE; i++) {
+    if ((frequency >= HFRCO_DPLL_FREQUENCY_TABLE[i].min_freq)
+        && (frequency <= HFRCO_DPLL_FREQUENCY_TABLE[i].max_freq)) {
+      band_index = i;
+      break;
+    }
+  }
+
+  if (band_index >= HFRCO_DPLL_FREQUENCY_TABLE_SIZE) {
+    return 0;
+  }
+
+  // K0 values are packed two per 32-bit word: even bands at bits [11:0], odd bands at bits [27:16].
+  // Calculate the word offset for the pair containing our band.
+  offset = ((band_index / 2) * 4) + DEVINFO_GP_DPLL0OFFSETK0N0_OFFSET;
+
+  // Initialize command context.
+  status = sl_se_init_command_context(&se_command_ctx);
+  if (status != SL_STATUS_OK) {
+    return 0;
+  }
+
+  // Send the SE command to retrieve the packed K0 word from the DEVINFO OTP section.
+  status = sli_se_device_data_read_word(&se_command_ctx, otp_section_id, offset, &k0_word);
+  if (status != SL_STATUS_OK) {
+    return 0;
+  }
+
+  // Extract the 12-bit K0 value: even bands are in bits [11:0], odd bands in bits [27:16].
+  if ((band_index & 1u) != 0u) {
+    return (k0_word >> DPLL_K0_OFFSET_ODD_BAND_SHIFT) & DPLL_K0_OFFSET_EVEN_BAND_MASK;
+  } else {
+    return k0_word & DPLL_K0_OFFSET_EVEN_BAND_MASK;
+  }
 #else
   (void)frequency;
   return 0;
@@ -994,6 +1055,8 @@ void sl_hal_system_get_temperature_info(sl_hal_system_devinfo_temperature_t *inf
 #else
   info->emu_temp_room = 0;
 #endif
+#elif defined(_SILICON_LABS_32B_SERIES_3) && defined(SLI_SE_FIRMWARE_UNAVAILABLE)
+  *info = SL_HAL_SYSTEM_DEVINFO_TEMPERATURE_RESET_VALUES;
 #elif defined(_SILICON_LABS_32B_SERIES_3)
   sl_status_t status;
   sl_se_command_context_t se_command_ctx;

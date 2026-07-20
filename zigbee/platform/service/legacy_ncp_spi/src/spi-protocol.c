@@ -19,14 +19,13 @@
 #include "hal/hal.h"
 #include "serial/serial.h"
 #include "../inc/spi-protocol.h"
-#include "spidrv.h"
-
-#ifdef _SILICON_LABS_32B_SERIES_3
+#if defined(_SILICON_LABS_32B_SERIES_3)
 #include "sl_gpio.h"
 #elif defined(_SILICON_LABS_32B_SERIES_2)
 #include "em_gpio.h"
 #include "gpiointerrupt.h"
 #endif
+#include "spidrv.h"
 
 #include "../inc/spi-protocol-device.h"
 //#include "sl_spi_ncp_config.h"

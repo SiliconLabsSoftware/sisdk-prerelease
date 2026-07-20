@@ -145,8 +145,11 @@ void sl_hal_sysrtc_reset(void)
 #if !defined(SYSRTC_SWRST_SWRST)
 static void sli_hal_sysrtc_manual_reset(void)
 {
-  sl_hal_sysrtc_disable();
+  // Reset counter. The CNT register needs to be reset while SYSRTC is enabled
+  // to let the SYSRTC module reset the CNT register.
   sl_hal_sysrtc_wait_ready();
+  SYSRTC0->EN_SET = SYSRTC_EN_EN;
+  SYSRTC0->CNT = _SYSRTC_CNT_RESETVALUE;
 
   SYSRTC0->GRP0_CTRL = _SYSRTC_GRP0_CTRL_RESETVALUE;
   SYSRTC0->GRP0_IEN = _SYSRTC_GRP0_IEN_RESETVALUE;
@@ -208,14 +211,15 @@ static void sli_hal_sysrtc_manual_reset(void)
   SYSRTC0->IF_CLR = _SYSRTC_IF_MASK;
 #endif
 
-  SYSRTC0->CFG = _SYSRTC_CFG_RESETVALUE;
-  SYSRTC0->CNT = _SYSRTC_CNT_RESETVALUE;
-
 #if defined(_SYSRTC_MSCNT_MASK)
   SYSRTC0->MSCMPVAL = _SYSRTC_MSCMPVAL_RESETVALUE;
   SYSRTC0->MSCMPBUF = _SYSRTC_MSCMPBUF_RESETVALUE;
 #endif
 
+  sl_hal_sysrtc_disable();
+  sl_hal_sysrtc_wait_ready();
+
+  SYSRTC0->CFG = _SYSRTC_CFG_RESETVALUE;
 }
 #endif // !SYSRTC_SWRST_SWRST
 

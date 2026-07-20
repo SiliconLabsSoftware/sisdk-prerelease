@@ -718,7 +718,7 @@ MSC_Status_TypeDef MSC_WriteWordDma(int ch,
                                     const void *data,
                                     uint32_t numBytes)
 {
-  uint32_t words = numBytes / 4;
+  uint32_t words;
   uint32_t burstLen;
   uint32_t src = (uint32_t) data;
   uint32_t dst = (uint32_t) address;

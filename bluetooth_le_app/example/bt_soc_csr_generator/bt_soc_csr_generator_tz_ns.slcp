@@ -19,6 +19,7 @@ filter:
     value: ["Advanced"]
 
 component:
+  - id: cbap_key_id
   - id: bluetooth_stack
   - id: bootloader_interface
   - id: apploader
@@ -79,6 +80,10 @@ configuration:
     unless: [device_sdid_205]  # not xG22
   - name: CSR_GENERATOR_KEY_LOCATION
     value: "PSA_KEY_LOCATION_LOCAL_STORAGE"  # TrustZone
+  - name: NVM3_DEFAULT_MAX_OBJECT_SIZE
+    value: "1200"
+    condition:
+      - nvm3
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"
   - name: SL_IOSTREAM_USART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION

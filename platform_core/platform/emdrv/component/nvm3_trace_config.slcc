@@ -8,13 +8,15 @@ quality: production
 metadata:
   sbom:
     license: Zlib
+config_file:
+- path: platform/emdrv/nvm3/config/nvm3_config.h
+  file_id: nvm3_config
 include:
 - path: platform/emdrv/nvm3/inc
   file_list:
   - path: nvm3_trace.h
-- path: platform/emdrv/nvm3/config
-  file_list:
-  - path: nvm3_config.h
 provides:
 - name: nvm3_trace_config
+validation_helper:
+- path: platform/emdrv/nvm3/config/nvm3_time_trace_validation.lua
 root_path: platform_core

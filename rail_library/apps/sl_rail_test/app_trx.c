@@ -374,10 +374,10 @@ sl_rail_rx_packet_handle_t processRxPacket(sl_rail_handle_t railHandle,
   // In Rx overflow test mode hang in this ISR to prevent processing new
   // packets to force an overflow
   if ((currentAppMode() == RX_OVERFLOW)) {
-    enableAppMode(RX_OVERFLOW, false, NULL); // Switch back after the overflow
-    changeAppModeIfPending();
     // Trigger an overflow by waiting in the interrupt handler
     usDelay(rxOverflowDelay);
+    enableAppMode(RX_OVERFLOW, false, NULL); // Switch back after the overflow
+    changeAppModeIfPending();
   }
 
   return packetHandle;

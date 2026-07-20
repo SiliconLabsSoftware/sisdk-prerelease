@@ -62,7 +62,7 @@
  ******************************************************************************/
 
 // Time required by the hardware to come out of EM2 in microseconds.
-// This value includes HW startup, emlib and sleepdrv execution time.
+// This value includes HW startup, emlib and sleeptimer execution time.
 // Voltage scaling, HFXO startup and HFXO steady times are excluded from
 // this because they are handled separately. RTCCSYNC time is also
 // excluded and it is handled by RTCCSYNC code itself.

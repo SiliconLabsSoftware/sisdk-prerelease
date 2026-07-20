@@ -44,7 +44,7 @@
 /** LETIMER Register Declaration. */
 typedef struct letimer_typedef{
   __IM uint32_t  IPVERSION;                     /**< IP version                                         */
-  __IOM uint32_t EN;                            /**< module en                                          */
+  __IOM uint32_t EN;                            /**< Module Enable Register                             */
   __IOM uint32_t SWRST;                         /**< Software Reset Register                            */
   __IOM uint32_t CTRL;                          /**< Control Register                                   */
   __IOM uint32_t CMD;                           /**< Command Register                                   */
@@ -64,7 +64,7 @@ typedef struct letimer_typedef{
   __IOM uint32_t PRSMODE;                       /**< PRS Input mode select Register                     */
   uint32_t       RESERVED1[1003U];              /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_SET;                 /**< IP version                                         */
-  __IOM uint32_t EN_SET;                        /**< module en                                          */
+  __IOM uint32_t EN_SET;                        /**< Module Enable Register                             */
   __IOM uint32_t SWRST_SET;                     /**< Software Reset Register                            */
   __IOM uint32_t CTRL_SET;                      /**< Control Register                                   */
   __IOM uint32_t CMD_SET;                       /**< Command Register                                   */
@@ -84,7 +84,7 @@ typedef struct letimer_typedef{
   __IOM uint32_t PRSMODE_SET;                   /**< PRS Input mode select Register                     */
   uint32_t       RESERVED3[1003U];              /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_CLR;                 /**< IP version                                         */
-  __IOM uint32_t EN_CLR;                        /**< module en                                          */
+  __IOM uint32_t EN_CLR;                        /**< Module Enable Register                             */
   __IOM uint32_t SWRST_CLR;                     /**< Software Reset Register                            */
   __IOM uint32_t CTRL_CLR;                      /**< Control Register                                   */
   __IOM uint32_t CMD_CLR;                       /**< Command Register                                   */
@@ -104,7 +104,7 @@ typedef struct letimer_typedef{
   __IOM uint32_t PRSMODE_CLR;                   /**< PRS Input mode select Register                     */
   uint32_t       RESERVED5[1003U];              /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_TGL;                 /**< IP version                                         */
-  __IOM uint32_t EN_TGL;                        /**< module en                                          */
+  __IOM uint32_t EN_TGL;                        /**< Module Enable Register                             */
   __IOM uint32_t SWRST_TGL;                     /**< Software Reset Register                            */
   __IOM uint32_t CTRL_TGL;                      /**< Control Register                                   */
   __IOM uint32_t CMD_TGL;                       /**< Command Register                                   */

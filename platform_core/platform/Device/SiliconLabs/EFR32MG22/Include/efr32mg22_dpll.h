@@ -176,7 +176,7 @@ typedef struct dpll_typedef{
 #define _DPLL_IEN_LOCK_MASK                  0x1UL                                      /**< Bit mask for DPLL_LOCK                      */
 #define _DPLL_IEN_LOCK_DEFAULT               0x00000000UL                               /**< Mode DEFAULT for DPLL_IEN                   */
 #define DPLL_IEN_LOCK_DEFAULT                (_DPLL_IEN_LOCK_DEFAULT << 0)              /**< Shifted mode DEFAULT for DPLL_IEN           */
-#define DPLL_IEN_LOCKFAILLOW                 (0x1UL << 1)                               /**< LOCKFAILLOW Interrupe Enable                */
+#define DPLL_IEN_LOCKFAILLOW                 (0x1UL << 1)                               /**< LOCKFAILLOW Interrupt Enable                */
 #define _DPLL_IEN_LOCKFAILLOW_SHIFT          1                                          /**< Shift value for DPLL_LOCKFAILLOW            */
 #define _DPLL_IEN_LOCKFAILLOW_MASK           0x2UL                                      /**< Bit mask for DPLL_LOCKFAILLOW               */
 #define _DPLL_IEN_LOCKFAILLOW_DEFAULT        0x00000000UL                               /**< Mode DEFAULT for DPLL_IEN                   */

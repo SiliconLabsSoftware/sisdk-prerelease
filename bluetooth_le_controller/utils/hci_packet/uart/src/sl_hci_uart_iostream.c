@@ -7,6 +7,10 @@
 #include "sl_iostream_eusart_vcom_config.h"
 #include "sli_iostream.h"
 
+// Define UART_SYNC_MODE to enable synchronous write mode for the UART interface.
+// NOTE: This is an experimental feature for testing purposes.
+// #define UART_SYNC_MODE
+
 /**
  * @brief Reads data from the IOStream UART interface.
  *
@@ -32,9 +36,11 @@ int sl_hci_uart_read(uint8_t *data, uint16_t len)
 
 void sl_hci_uart_init(void)
 {
+#ifndef UART_SYNC_MODE
   // TODO: BG-18900 Temporary workaround for enabling async write modee
   sl_iostream_uart_context_t *ctx = (sl_iostream_uart_context_t *) sl_iostream_vcom_handle->context;
   ctx->async_tx_mode = true;
+#endif
 }
 
 void on_write_completed(sli_iostream_write_async_op_t *op, sl_status_t status, void *arg)
@@ -56,6 +62,13 @@ void on_write_completed(sli_iostream_write_async_op_t *op, sl_status_t status, v
  */
 Ecode_t sl_hci_uart_write(uint8_t *data, uint16_t len, void (*callback)(uint32_t))
 {
+#ifdef UART_SYNC_MODE
+  sl_status_t status;
+  status = sl_iostream_write(sl_iostream_vcom_handle, data, len);
+  callback(status);
+
+  return 0;
+#else
   static struct sli_iostream_write_async_op write_async_op;
   sl_status_t status;
 
@@ -71,6 +84,7 @@ Ecode_t sl_hci_uart_write(uint8_t *data, uint16_t len, void (*callback)(uint32_t
   CORE_EXIT_ATOMIC();
 
   return status;
+#endif
 }
 
 /**

@@ -138,6 +138,25 @@ uint8_t GetRadioChannel(zpal_radio_rx_parameters_t * pRxParameters)
   }
 }
 
+/** LR wakeup beam TX-power table (MAC spec); same ordering as @ref llConvertPowerDbmToIndex. */
+static uint8_t zniffer_lr_tx_dbm_to_power_index(int8_t tx_dbm)
+{
+  static const int8_t dBm_table[] = { -6, -2, 2, 6, 10, 13, 16, 19, 21, 23, 25, 26, 27, 28, 29, 30 };
+  const uint8_t max_index = (uint8_t)(sizeof(dBm_table) / sizeof(dBm_table[0])) - 1u;
+
+  if (tx_dbm < dBm_table[0]) {
+    tx_dbm = dBm_table[0];
+  } else if (tx_dbm > dBm_table[max_index]) {
+    tx_dbm = dBm_table[max_index];
+  }
+  for (uint8_t i = 0; i <= max_index; i++) {
+    if (tx_dbm <= dBm_table[i]) {
+      return i;
+    }
+  }
+  return max_index;
+}
+
 uint8_t GetBeamSpeed(zpal_radio_zwave_channel_t channel)
 {
   const zpal_radio_profile_t * pRfProfile = zpal_radio_get_rf_profile();
@@ -197,8 +216,19 @@ void beamReceiveHandler(uint16_t beamNodeId, uint16_t homeId, uint8_t channel, u
       beam_start_frame.region_no = zpal_radio_get_region();
       beam_start_frame.rssi = rssi >> 2; // TODO
       uint8_t a[4] = { 0x55, 0x00, 0x01, 0x00 };
-      a[1] = beamNodeId;
-      a[3] = homeId;
+      if (GetBeamSpeed(channel) == GetRadioSpeed(ZPAL_RADIO_SPEED_100KLR)) {
+        zpal_radio_beam_info_t beam_info = { 0 };
+        uint8_t tx_pwr_idx = 0;
+        if (ZPAL_STATUS_OK == zpal_radio_get_last_beam_info(&beam_info)
+            && beam_info.tx_power_dbm != ZPAL_RADIO_RSSI_NOT_AVAILABLE) {
+          tx_pwr_idx = zniffer_lr_tx_dbm_to_power_index(beam_info.tx_power_dbm);
+        }
+        a[1] = (uint8_t)((tx_pwr_idx << 4) | ((beamNodeId >> 8) & 0x0Fu));
+        a[2] = (uint8_t)beamNodeId;
+      } else {
+        a[1] = (uint8_t)beamNodeId;
+      }
+      a[3] = (uint8_t)homeId;
       memcpy(beam_start_frame.payload, a, 4);
       comm_interface_transmit_frame(BEAM_START, BEAM_FRAME, (uint8_t *)&beam_start_frame, 0, NULL);
     }

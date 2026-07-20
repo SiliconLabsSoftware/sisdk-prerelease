@@ -68,14 +68,19 @@ typedef clock_t CORE_TICKS;
 */
 #ifndef COMPILER_VERSION 
 #ifdef __GNUC__
+#ifdef __clang__
+#define COMPILER_VERSION __VERSION__
+#define COMPILER_FLAGS "-O3 -funroll-loops -finline-functions" /* "Please put compiler flags here (e.g. -o3)" */
+#else
 #define COMPILER_VERSION "GCC"__VERSION__
-#define COMPILER_FLAGS "-O3" /* "Please put compiler flags here (e.g. -o3)" */
+#define COMPILER_FLAGS "-O3 -funroll-loops -funroll-all-loops -finline-functions" /* "Please put compiler flags here (e.g. -o3)" */
+#endif
 #else
 #ifdef __ICCARM__
 #define SYMBHELPER(l) #l
 #define TOSTRING(l) SYMBHELPER(l)
 #define COMPILER_VERSION ("IAR " TOSTRING(__VER__))
-#define COMPILER_FLAGS "-Os" /* "Please put compiler flags here (e.g. -o3)" */
+#define COMPILER_FLAGS "-Ohs --no_size_constraints" /* "Please put compiler flags here (e.g. -o3)" */
 #else
 #ifdef __CC_ARM
 #define SYMBHELPER(l) #l

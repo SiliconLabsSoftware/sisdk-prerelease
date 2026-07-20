@@ -1,0 +1,27 @@
+id: usb_device_driver_dwc_otg_fs_descriptor_dma
+
+category: Protocol|USB|Device
+label: USB Device Driver - DWC OTG FS Descriptor DMA
+description: >
+  Enable descriptor-based scatter/gather DMA for the DWC OTG FS USB device
+  driver. Bulk IN and OUT endpoints use descriptor chains when the controller
+  reports DESCDMA support in GHWCFG4; otherwise the driver falls back to
+  buffer-pointer DMA.
+
+package: usb
+quality: production
+metadata:
+  sbom:
+    license: MSLA
+
+define:
+- name: SL_USBD_DWC_OTG_ENABLE_DDMA
+  value: '1'
+
+provides:
+- name: usb_device_driver_dwc_otg_fs_descriptor_dma
+
+requires:
+- name: usb_device_driver_dwc_otg_fs
+- name: device_series_3
+root_path: usb/protocol/usb

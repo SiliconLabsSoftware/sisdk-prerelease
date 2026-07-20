@@ -10,7 +10,7 @@ quality: production
 root_path: wisun/./app/wisun_rcp
 
 define:
-- name: DEBUG_EFM_USER
+- name: DEBUG_EFM
 
 provides:
 - name: wisun_rcp_uart_plt

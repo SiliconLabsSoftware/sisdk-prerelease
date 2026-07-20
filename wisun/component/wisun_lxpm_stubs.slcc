@@ -1,0 +1,21 @@
+id: "wisun_lxpm_stubs"
+label: "Wi-SUN LXPM (stubs)"
+package: "wisun"
+category: "Wi-SUN"
+quality: "production"
+description: "Provides stub implementations for LXPM when the LXPM library is not used"
+root_path: "wisun/./stack"
+
+ui_hints:
+  visibility: never
+
+provides:
+- name: "wisun_lxpm_implementation"
+- name: "wisun_lxpm_stubs"
+
+source:
+- path: "nanostack-stack/source/lxpm/sli_wisun_lxpm_stubs.c"
+
+metadata:
+  sbom:
+    license: MSLA

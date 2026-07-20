@@ -68,6 +68,15 @@ library:
   unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
+- path: libs/build/gcc/cortex-m55/zigbee-multi-network/release/libzigbee-multi-network.a
+  condition:
+  - toolchain_gcc
+  - cortexm55
+  - zigbee_phy_2_4
+  - zigbee_multi_network
+  unless:
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
 - path: libs/build/gcc/i386/zigbee-multi-network/release/libzigbee-multi-network.a
   condition:
   - toolchain_gcc
@@ -94,10 +103,30 @@ library:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
   - stack_protection_iar
+- path: libs/build/iar/cortex-m55/zigbee-multi-network/release/libzigbee-multi-network.a
+  condition:
+  - toolchain_iar
+  - cortexm55
+  - zigbee_phy_2_4
+  - zigbee_multi_network
+  unless:
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
+  - stack_protection_iar
 - path: libs/build/iar/cortex-m33/zigbee-multi-network/release_stackprotection/libzigbee-multi-network.a
   condition:
   - toolchain_iar
   - cortexm33
+  - zigbee_phy_2_4
+  - zigbee_multi_network
+  - stack_protection_iar
+  unless:
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
+- path: libs/build/iar/cortex-m55/zigbee-multi-network/release_stackprotection/libzigbee-multi-network.a
+  condition:
+  - toolchain_iar
+  - cortexm55
   - zigbee_phy_2_4
   - zigbee_multi_network
   - stack_protection_iar
@@ -122,6 +151,15 @@ library:
   condition:
   - toolchain_llvm
   - cortexm33
+  - zigbee_phy_2_4
+  - zigbee_multi_network
+  unless:
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
+- path: libs/build/llvm/cortex-m55/zigbee-multi-network/release/libzigbee-multi-network.a
+  condition:
+  - toolchain_llvm
+  - cortexm55
   - zigbee_phy_2_4
   - zigbee_multi_network
   unless:

@@ -1,5 +1,5 @@
 project_name: openthread-bootloader-storage-internal-single
-package: multiprotocol
+package: multiprotocol_app
 quality: production
 label: Bootloader - SoC Internal Storage (single image on 1MB device)
 description: >
@@ -95,5 +95,3 @@ readme:
   - path: readme.md
 ui_hints:
   highlight: readme.md
-post_build:
-  profile: bootloader_series_2

@@ -37,49 +37,49 @@ sl_status_t halStackInitTokens(void)
   assert(status == SL_STATUS_OK);
 
   tokTypeStackNvdataVersion tokTypeStackNvdataVersionDefault = TOKEN_STACK_NVDATA_VERSION_DEFAULT;
-  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_NVDATA_VERSION, &tokTypeStackNvdataVersionDefault, sizeof(tokTypeStackNvdataVersion));
+  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_NVDATA_VERSION, &tokTypeStackNvdataVersionDefault, sizeof(tokTypeStackNvdataVersionDefault));
   assert(status == SL_STATUS_OK);
   tokTypeStackNonceCounter tokTypeStackAPSFrameCounterDefault = TOKEN_STACK_APS_FRAME_COUNTER_DEFAULT;
-  status = sl_zigbee_initialize_counter_token(COMMON_TOKEN_STACK_APS_FRAME_COUNTER, &tokTypeStackAPSFrameCounterDefault, sizeof(tokTypeStackNonceCounter));
+  status = sl_zigbee_initialize_counter_token(COMMON_TOKEN_STACK_APS_FRAME_COUNTER, &tokTypeStackAPSFrameCounterDefault, sizeof(tokTypeStackAPSFrameCounterDefault));
   assert(status == SL_STATUS_OK);
   tokTypeStackKeys tokTypeStackAlternateKeysDefault = TOKEN_STACK_ALTERNATE_KEY_DEFAULT;
-  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_ALTERNATE_KEY, &tokTypeStackAlternateKeysDefault, sizeof(tokTypeStackKeys));
+  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_ALTERNATE_KEY, &tokTypeStackAlternateKeysDefault, sizeof(tokTypeStackAlternateKeysDefault));
   assert(status == SL_STATUS_OK);
   tokTypeStackBootCounter tokTypeStackBootCounterDefault = TOKEN_STACK_BOOT_COUNTER_DEFAULT;
-  status = sl_zigbee_initialize_counter_token(COMMON_TOKEN_STACK_BOOT_COUNTER, &tokTypeStackBootCounterDefault, sizeof(tokTypeStackBootCounter));
+  status = sl_zigbee_initialize_counter_token(COMMON_TOKEN_STACK_BOOT_COUNTER, &tokTypeStackBootCounterDefault, sizeof(tokTypeStackBootCounterDefault));
   assert(status == SL_STATUS_OK);
   tokTypeStackNonceCounter tokTypeStackNonceCounterDefault = TOKEN_STACK_NONCE_COUNTER_DEFAULT;
-  status = sl_zigbee_initialize_counter_token(COMMON_TOKEN_STACK_NONCE_COUNTER, &tokTypeStackNonceCounterDefault, sizeof(tokTypeStackNonceCounter));
+  status = sl_zigbee_initialize_counter_token(COMMON_TOKEN_STACK_NONCE_COUNTER, &tokTypeStackNonceCounterDefault, sizeof(tokTypeStackNonceCounterDefault));
   assert(status == SL_STATUS_OK);
   tokTypeStackAnalysisReboot tokTypeStackAnalysisRebootDefault = TOKEN_STACK_ANALYSIS_REBOOT_DEFAULT;
-  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_ANALYSIS_REBOOT, &tokTypeStackAnalysisRebootDefault, sizeof(tokTypeStackAnalysisReboot));
+  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_ANALYSIS_REBOOT, &tokTypeStackAnalysisRebootDefault, sizeof(tokTypeStackAnalysisRebootDefault));
   assert(status == SL_STATUS_OK);
   tokTypeStackKeys tokTypeStackKeysDefault = TOKEN_STACK_KEYS_DEFAULT;
-  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_KEYS, &tokTypeStackKeysDefault, sizeof(tokTypeStackKeys));
+  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_KEYS, &tokTypeStackKeysDefault, sizeof(tokTypeStackKeysDefault));
   assert(status == SL_STATUS_OK);
   tokTypeStackNodeData tokTypeStackNodeDataDefault = TOKEN_STACK_NODE_DATA_DEFAULT;
-  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_NODE_DATA, &tokTypeStackNodeDataDefault, sizeof(tokTypeStackNodeData));
+  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_NODE_DATA, &tokTypeStackNodeDataDefault, sizeof(tokTypeStackNodeDataDefault));
   assert(status == SL_STATUS_OK);
   tokTypeStackTrustCenter tokTypeStackTrustCenterDefault = TOKEN_STACK_TRUST_CENTER_DEFAULT;
-  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_TRUST_CENTER, &tokTypeStackTrustCenterDefault, sizeof(tokTypeStackTrustCenter));
+  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_TRUST_CENTER, &tokTypeStackTrustCenterDefault, sizeof(tokTypeStackTrustCenterDefault));
   assert(status == SL_STATUS_OK);
   tokTypeStackNetworkManagement tokTypeStackNetworkManagementDefault = TOKEN_STACK_NETWORK_MANAGEMENT_DEFAULT;
-  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_NETWORK_MANAGEMENT, &tokTypeStackNetworkManagementDefault, sizeof(tokTypeStackNetworkManagement));
+  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_NETWORK_MANAGEMENT, &tokTypeStackNetworkManagementDefault, sizeof(tokTypeStackNetworkManagementDefault));
   assert(status == SL_STATUS_OK);
   tokTypeStackParentInfo tokTypeStackParentInfoDefault = TOKEN_STACK_PARENT_INFO_DEFAULT;
-  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_PARENT_INFO, &tokTypeStackParentInfoDefault, sizeof(tokTypeStackParentInfo));
+  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_PARENT_INFO, &tokTypeStackParentInfoDefault, sizeof(tokTypeStackParentInfoDefault));
   assert(status == SL_STATUS_OK);
   tokTypeStackParentAdditionalInfo tokTypeStackParentAdditionalInfoDefault = TOKEN_STACK_PARENT_ADDITIONAL_INFO_DEFAULT;
-  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_PARENT_ADDITIONAL_INFO, &tokTypeStackParentAdditionalInfoDefault, sizeof(tokTypeStackParentAdditionalInfo));
+  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_PARENT_ADDITIONAL_INFO, &tokTypeStackParentAdditionalInfoDefault, sizeof(tokTypeStackParentAdditionalInfoDefault));
   assert(status == SL_STATUS_OK);
   tokTypeStackMultiPhyNwkInfo tokTypeStackMultiPhyNwkInfoDefault = TOKEN_STACK_MULTI_PHY_NWK_INFO_DEFAULT;
-  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_MULTI_PHY_NWK_INFO, &tokTypeStackMultiPhyNwkInfoDefault, sizeof(tokTypeStackMultiPhyNwkInfo));
+  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_MULTI_PHY_NWK_INFO, &tokTypeStackMultiPhyNwkInfoDefault, sizeof(tokTypeStackMultiPhyNwkInfoDefault));
   assert(status == SL_STATUS_OK);
   tokTypeRSSI tokTypeRSSIDefault = TOKEN_STACK_MIN_RECEIVED_RSSI_DEFAULT;
-  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_MIN_RECEIVED_RSSI, &tokTypeRSSIDefault, sizeof(tokTypeRSSI));
+  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_MIN_RECEIVED_RSSI, &tokTypeRSSIDefault, sizeof(tokTypeRSSIDefault));
   assert(status == SL_STATUS_OK);
   tokTypeStackRestoredEui64 tokTypeStackRestoredEui64Default = TOKEN_STACK_RESTORED_EUI64_DEFAULT;
-  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_RESTORED_EUI64, &tokTypeStackRestoredEui64Default, sizeof(tokTypeStackRestoredEui64));
+  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_RESTORED_EUI64, &tokTypeStackRestoredEui64Default, sizeof(tokTypeStackRestoredEui64Default));
   assert(status == SL_STATUS_OK);
 #if defined (SL_CATALOG_ZIGBEE_PRO_COMPLIANCE_PRESENT) && defined (SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
   tokStackContext tokTypeStackContextDefault = TOKEN_STACK_CONTEXT_DEFAULT;
@@ -93,31 +93,31 @@ sl_status_t halStackInitTokens(void)
 #if !defined(SL_ZIGBEE_MULTI_NETWORK_STRIPPED)
   uint8_t extra_networks_number = sl_zigbee_get_supported_networks() - 1;
   tokTypeStackKeys tokTypeMNStackKeysDefault = TOKEN_MULTI_NETWORK_STACK_KEYS_DEFAULT;
-  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_MULTI_NETWORK_STACK_KEYS, &tokTypeMNStackKeysDefault, sizeof(tokTypeStackKeys), extra_networks_number);
+  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_MULTI_NETWORK_STACK_KEYS, &tokTypeMNStackKeysDefault, sizeof(tokTypeMNStackKeysDefault), extra_networks_number);
   assert(status == SL_STATUS_OK);
   tokTypeStackNodeData tokTypeMNStackNodeDataDefault = TOKEN_MULTI_NETWORK_STACK_NODE_DATA_DEFAULT;
-  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_MULTI_NETWORK_STACK_NODE_DATA, &tokTypeMNStackNodeDataDefault, sizeof(tokTypeStackNodeData), extra_networks_number);
+  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_MULTI_NETWORK_STACK_NODE_DATA, &tokTypeMNStackNodeDataDefault, sizeof(tokTypeMNStackNodeDataDefault), extra_networks_number);
   assert(status == SL_STATUS_OK);
   tokTypeStackKeys tokTypeMNAlternateStackKeysDefault = TOKEN_MULTI_NETWORK_STACK_ALTERNATE_KEY_DEFAULT;
-  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_MULTI_NETWORK_STACK_ALTERNATE_KEY, &tokTypeMNAlternateStackKeysDefault, sizeof(tokTypeStackKeys), extra_networks_number);
+  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_MULTI_NETWORK_STACK_ALTERNATE_KEY, &tokTypeMNAlternateStackKeysDefault, sizeof(tokTypeMNAlternateStackKeysDefault), extra_networks_number);
   assert(status == SL_STATUS_OK);
   tokTypeStackTrustCenter tokTypeMNStackTrustCenterDefault = TOKEN_MULTI_NETWORK_STACK_TRUST_CENTER_DEFAULT;
-  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_MULTI_NETWORK_STACK_TRUST_CENTER, &tokTypeMNStackTrustCenterDefault, sizeof(tokTypeStackTrustCenter), extra_networks_number);
+  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_MULTI_NETWORK_STACK_TRUST_CENTER, &tokTypeMNStackTrustCenterDefault, sizeof(tokTypeMNStackTrustCenterDefault), extra_networks_number);
   assert(status == SL_STATUS_OK);
   tokTypeStackNetworkManagement tokTypeMNStackNetworkManagementDefault = TOKEN_MULTI_NETWORK_STACK_NETWORK_MANAGEMENT_DEFAULT;
-  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_MULTI_NETWORK_STACK_NETWORK_MANAGEMENT, &tokTypeMNStackNetworkManagementDefault, sizeof(tokTypeStackNetworkManagement), extra_networks_number);
+  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_MULTI_NETWORK_STACK_NETWORK_MANAGEMENT, &tokTypeMNStackNetworkManagementDefault, sizeof(tokTypeMNStackNetworkManagementDefault), extra_networks_number);
   assert(status == SL_STATUS_OK);
   tokTypeStackParentInfo tokTypeMNStackParentInfoDefault = TOKEN_MULTI_NETWORK_STACK_PARENT_INFO_DEFAULT;
-  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_MULTI_NETWORK_STACK_PARENT_INFO, &tokTypeMNStackParentInfoDefault, sizeof(tokTypeStackParentInfo), extra_networks_number);
+  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_MULTI_NETWORK_STACK_PARENT_INFO, &tokTypeMNStackParentInfoDefault, sizeof(tokTypeMNStackParentInfoDefault), extra_networks_number);
   assert(status == SL_STATUS_OK);
 #if !defined(SL_ZIGBEE_MULTI_NETWORK_STRIPPED)
   // MULTI_NETWORK_STACK_NONCE_COUNTER was always defined, even if MN was not present
   tokTypeStackNonceCounter tokTypeMNStackNonceCounterDefault = TOKEN_MULTI_NETWORK_STACK_NONCE_COUNTER_DEFAULT;
-  status = sl_zigbee_initialize_counter_token(COMMON_TOKEN_MULTI_NETWORK_STACK_NONCE_COUNTER, &tokTypeMNStackNonceCounterDefault, sizeof(tokTypeStackNonceCounter));
+  status = sl_zigbee_initialize_counter_token(COMMON_TOKEN_MULTI_NETWORK_STACK_NONCE_COUNTER, &tokTypeMNStackNonceCounterDefault, sizeof(tokTypeMNStackNonceCounterDefault));
   assert(status == SL_STATUS_OK);
 #endif  // !SL_ZIGBEE_MULTI_NETWORK_STRIPPED
   tokTypeStackParentAdditionalInfo tokTypeMNStackParentAdditionalInfoDefault = TOKEN_MULTI_NETWORK_STACK_PARENT_ADDITIONAL_INFO_DEFAULT;
-  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_MULTI_NETWORK_STACK_PARENT_ADDITIONAL_INFO, &tokTypeMNStackParentAdditionalInfoDefault, sizeof(tokTypeStackParentAdditionalInfo), extra_networks_number);
+  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_MULTI_NETWORK_STACK_PARENT_ADDITIONAL_INFO, &tokTypeMNStackParentAdditionalInfoDefault, sizeof(tokTypeMNStackParentAdditionalInfoDefault), extra_networks_number);
   assert(status == SL_STATUS_OK);
 #endif  // !SL_ZIGBEE_MULTI_NETWORK_STRIPPED
 
@@ -128,54 +128,54 @@ sl_status_t halStackInitTokens(void)
 #endif  // EZSP_HOST
   // App tokens
   tokTypeStackBindingTable tokTypeStackBindingTableDefault = TOKEN_STACK_BINDING_TABLE_DEFAULT;
-  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_BINDING_TABLE, &tokTypeStackBindingTableDefault, sizeof(tokTypeStackBindingTable), binding_table_size);
+  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_BINDING_TABLE, &tokTypeStackBindingTableDefault, sizeof(tokTypeStackBindingTableDefault), binding_table_size);
   assert(status == SL_STATUS_OK);
   tokTypeStackChildTable tokTypeStackChildTableDefault = TOKEN_STACK_CHILD_TABLE_DEFAULT;
-  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_CHILD_TABLE, &tokTypeStackChildTableDefault, sizeof(tokTypeStackChildTable), sl_zigbee_get_child_table_size());
+  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_CHILD_TABLE, &tokTypeStackChildTableDefault, sizeof(tokTypeStackChildTableDefault), sl_zigbee_get_child_table_size());
   assert(status == SL_STATUS_OK);
 #if !defined(EZSP_HOST)
   uint8_t original_key_table_max_size = sl_zigbee_get_key_table_size() < 0x80 ? sl_zigbee_get_key_table_size() : 0x7f;
   uint8_t extended_key_table_max_size = sl_zigbee_get_key_table_size() < 0x80 ? 0 : sl_zigbee_get_key_table_size() - 0x7f;
   tokTypeStackKeyTable tokTypeStackKeyTableDefault = TOKEN_STACK_KEY_TABLE_DEFAULT;
-  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_KEY_TABLE, &tokTypeStackKeyTableDefault, sizeof(tokTypeStackKeyTable), original_key_table_max_size);
+  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_KEY_TABLE, &tokTypeStackKeyTableDefault, sizeof(tokTypeStackKeyTableDefault), original_key_table_max_size);
   assert(status == SL_STATUS_OK);
   tokTypeStackKeyTable tokTypeStackKeyTableExtendedDefault = TOKEN_STACK_KEY_TABLE_EXTENDED_DEFAULT;
-  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_KEY_TABLE_EXTENDED, &tokTypeStackKeyTableExtendedDefault, sizeof(tokTypeStackKeyTable), extended_key_table_max_size);
+  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_KEY_TABLE_EXTENDED, &tokTypeStackKeyTableExtendedDefault, sizeof(tokTypeStackKeyTableExtendedDefault), extended_key_table_max_size);
   assert(status == SL_STATUS_OK);
   tokStackKeyTableAdditionalInfo tokStackKeyTableAdditionalInfoDefault = TOKEN_STACK_KEY_TABLE_ADDITIONAL_INFO_DEFAULT;
   status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_KEY_TABLE_ADDITIONAL_INFO, &tokStackKeyTableAdditionalInfoDefault, sizeof(tokStackKeyTableAdditionalInfoDefault), sl_zigbee_get_key_table_size());
   assert(status == SL_STATUS_OK);
 #endif // !defined(EZSP_HOST
   tokTypeStackCertificateTable tokTypeStackCertificateTableDefault = TOKEN_STACK_CERTIFICATE_TABLE_DEFAULT;
-  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_CERTIFICATE_TABLE, &tokTypeStackCertificateTableDefault, sizeof(tokTypeStackCertificateTable), sl_zigbee_get_certificate_table_size());
+  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_CERTIFICATE_TABLE, &tokTypeStackCertificateTableDefault, sizeof(tokTypeStackCertificateTableDefault), sl_zigbee_get_certificate_table_size());
   assert(status == SL_STATUS_OK);
   tokTypeStackAdditionalChildData tokTypeStackAdditionalChildDataDefault = TOKEN_STACK_ADDITIONAL_CHILD_DATA_DEFAULT;
-  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_ADDITIONAL_CHILD_DATA, &tokTypeStackAdditionalChildDataDefault, sizeof(tokTypeStackAdditionalChildData), sl_zigbee_get_child_table_size());
+  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_ADDITIONAL_CHILD_DATA, &tokTypeStackAdditionalChildDataDefault, sizeof(tokTypeStackAdditionalChildDataDefault), sl_zigbee_get_child_table_size());
   assert(status == SL_STATUS_OK);
 
   // ZLL tokens
   tokTypeStackZllData tokTypeStackZllDataDefault = TOKEN_STACK_ZLL_DATA_DEFAULT;
-  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_ZLL_DATA, &tokTypeStackZllDataDefault, sizeof(tokTypeStackZllData));
+  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_ZLL_DATA, &tokTypeStackZllDataDefault, sizeof(tokTypeStackZllDataDefault));
   assert(status == SL_STATUS_OK);
   tokTypeStackZllSecurity tokTypeStackZllSecurityDefault = TOKEN_STACK_ZLL_SECURITY_DEFAULT;
-  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_ZLL_SECURITY, &tokTypeStackZllSecurityDefault, sizeof(tokTypeStackZllSecurity));
+  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_ZLL_SECURITY, &tokTypeStackZllSecurityDefault, sizeof(tokTypeStackZllSecurityDefault));
   assert(status == SL_STATUS_OK);
 
 #if !defined(EZSP_HOST) && (defined(SL_CATALOG_ZIGBEE_GREEN_POWER_PRESENT) || defined(SL_ZIGBEE_TEST))
   tokTypeStackGpData tokTypeStackGpDataDefault = TOKEN_STACK_GP_DATA_DEFAULT;
-  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_GP_DATA, &tokTypeStackGpDataDefault, sizeof(tokTypeStackGpData));
+  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_STACK_GP_DATA, &tokTypeStackGpDataDefault, sizeof(tokTypeStackGpDataDefault));
   assert(status == SL_STATUS_OK);
   tokTypeStackGpProxyTableEntry tokTypeStackGpProxyTableEntryDefault = TOKEN_STACK_GP_PROXY_TABLE_DEFAULT;
-  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_GP_PROXY_TABLE, &tokTypeStackGpProxyTableEntryDefault, sizeof(tokTypeStackGpProxyTableEntry), SL_ZIGBEE_GP_PROXY_TABLE_SIZE);
+  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_GP_PROXY_TABLE, &tokTypeStackGpProxyTableEntryDefault, sizeof(tokTypeStackGpProxyTableEntryDefault), SL_ZIGBEE_GP_PROXY_TABLE_SIZE);
   assert(status == SL_STATUS_OK);
   tokTypeGPDIncomingFC tokTypeGPDIncomingFCDefault = TOKEN_STACK_GP_INCOMING_FC_DEFAULT;
-  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_GP_INCOMING_FC, &tokTypeGPDIncomingFCDefault, sizeof(tokTypeGPDIncomingFC), SL_ZIGBEE_GP_INCOMING_FC_TOKEN_TABLE_SIZE);
+  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_GP_INCOMING_FC, &tokTypeGPDIncomingFCDefault, sizeof(tokTypeGPDIncomingFCDefault), SL_ZIGBEE_GP_INCOMING_FC_TOKEN_TABLE_SIZE);
   assert(status == SL_STATUS_OK);
   tokTypeStackGpSinkTableEntry tokTypeStackGpSinkTableEntryDefault = TOKEN_STACK_GP_SINK_TABLE_DEFAULT;
-  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_GP_SINK_TABLE, &tokTypeStackGpSinkTableEntryDefault, sizeof(tokTypeStackGpSinkTableEntry), SL_ZIGBEE_GP_SINK_TABLE_SIZE);
+  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_GP_SINK_TABLE, &tokTypeStackGpSinkTableEntryDefault, sizeof(tokTypeStackGpSinkTableEntryDefault), SL_ZIGBEE_GP_SINK_TABLE_SIZE);
   assert(status == SL_STATUS_OK);
   tokTypeGPDIncomingFCInSink tokTypeGPDIncomingFCInSinkDefault = TOKEN_STACK_GP_INCOMING_FC_IN_SINK_DEFAULT;
-  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_GP_INCOMING_FC_IN_SINK, &tokTypeGPDIncomingFCInSinkDefault, sizeof(tokTypeGPDIncomingFCInSink), SL_ZIGBEE_GP_SINK_TABLE_SIZE);
+  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_STACK_GP_INCOMING_FC_IN_SINK, &tokTypeGPDIncomingFCInSinkDefault, sizeof(tokTypeGPDIncomingFCInSinkDefault), SL_ZIGBEE_GP_SINK_TABLE_SIZE);
   assert(status == SL_STATUS_OK);
 #endif // !defined(EZSP_HOST) && (defined(SL_CATALOG_ZIGBEE_GREEN_POWER_PRESENT) || defined(SL_ZIGBEE_TEST))
 
@@ -184,10 +184,10 @@ sl_status_t halStackInitTokens(void)
   // when multiple ZC and ZR devices devices are present.
   uint8_t multi_pan_child_table_token_size = sl_zigbee_get_zc_and_zr_count() >= 1 ? sl_zigbee_get_child_table_size() : 0;
   tokTypeStackChildTable tokTypeMPStackChildTableDefault = TOKEN_MULTI_PAN_STACK_CHILD_TABLE_DEFAULT;
-  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_MULTI_PAN_STACK_CHILD_TABLE, &tokTypeMPStackChildTableDefault, sizeof(tokTypeStackChildTable), multi_pan_child_table_token_size);
+  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_MULTI_PAN_STACK_CHILD_TABLE, &tokTypeMPStackChildTableDefault, sizeof(tokTypeMPStackChildTableDefault), multi_pan_child_table_token_size);
   assert(status == SL_STATUS_OK);
   tokTypeStackAdditionalChildData tokTypeMPStackAdditionalChildDataDefault = TOKEN_MULTI_PAN_STACK_ADDITIONAL_CHILD_DATA_DEFAULT;
-  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_MULTI_PAN_STACK_ADDITIONAL_CHILD_DATA, &tokTypeMPStackAdditionalChildDataDefault, sizeof(tokTypeStackAdditionalChildData), multi_pan_child_table_token_size);
+  status = sl_zigbee_initialize_index_token(COMMON_TOKEN_MULTI_PAN_STACK_ADDITIONAL_CHILD_DATA, &tokTypeMPStackAdditionalChildDataDefault, sizeof(tokTypeMPStackAdditionalChildDataDefault), multi_pan_child_table_token_size);
   assert(status == SL_STATUS_OK);
   return status;
 }

@@ -133,6 +133,7 @@ template_contribution:
     event: sleep_on_isr_exit
     include: sl_legacy_hal_integration_hooks.h
     handler: sl_legacy_hal_sleep_on_isr_exit
+  condition: [power_manager]
 - name: component_catalog
   value: legacy_hal_soc
 documentation:

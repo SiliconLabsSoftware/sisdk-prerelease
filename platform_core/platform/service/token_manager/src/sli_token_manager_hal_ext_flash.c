@@ -89,8 +89,8 @@ static bool sli_hal_external_flash_verify_range(uint32_t flash_adr,
 static sl_status_t sli_hal_external_flash_open(uint32_t flash_adr, size_t flash_size)
 {
   sl_status_t status;
-  void *startAdr;
-  size_t regSize;
+  void *data_reg_start;
+  size_t data_reg_size;
   sl_se_command_context_t cmd_ctx;
 
   status = sl_se_init();
@@ -100,15 +100,12 @@ static sl_status_t sli_hal_external_flash_open(uint32_t flash_adr, size_t flash_
   }
 
   sl_se_init_command_context(&cmd_ctx);
-  status = sl_se_data_region_get_location(&cmd_ctx, &startAdr, &regSize);
+  status = sl_se_data_region_get_location(&cmd_ctx, &data_reg_start, &data_reg_size);
 
-  if (status == SL_STATUS_OK) {
-    // Check if static secure region start and end addresses are within the data region or not
-    if (!sli_hal_external_flash_verify_range(flash_adr, flash_size, (size_t)startAdr, regSize)) {
-      return SL_STATUS_INVALID_PARAMETER;
-    }
-  } else {
-    return SL_STATUS_INVALID_STATE;
+  // Check if static secure region start and end addresses are within the data region or not
+  if ((status == SL_STATUS_OK)
+      && !sli_hal_external_flash_verify_range(flash_adr, flash_size, (size_t)data_reg_start, data_reg_size)){
+      return SL_STATUS_INVALID_RANGE;
   }
 
   return status;
@@ -149,10 +146,8 @@ static sl_status_t sli_hal_external_flash_write(uint32_t dstAdr,
   status = sl_se_data_region_write(&cmd_ctx, (void *)dstAdr, src, length);
 
 #if CHECK_DATA
-  if (status == SL_STATUS_OK) {
-    if (memcmp((void *)dstAdr, src, length) != 0) {
-      status = SL_STATUS_FLASH_VERIFY_FAILED;
-    }
+  if ((status == SL_STATUS_OK) && (memcmp((void *)dstAdr, src, length) != 0)) {
+    status = SL_STATUS_FLASH_PROGRAM_FAILED;
   }
 #endif
   return status;
@@ -177,10 +172,9 @@ static sl_status_t sli_hal_external_flash_page_erase(uint32_t address, size_t si
   status = sl_se_data_region_erase(&cmd_ctx, (void *)address, num_sectors);
 
 #if CHECK_DATA
-  if (status == SL_STATUS_OK) {
-    if (!sli_hal_external_flash_verify_erased(address, size)) {
-      status = SL_STATUS_FLASH_ERASE_FAILED;
-    }
+  if ((status == SL_STATUS_OK)
+      && !sli_hal_external_flash_verify_erased(address, size)) {
+    status = SL_STATUS_FLASH_ERASE_FAILED;
   }
 #endif
 

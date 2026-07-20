@@ -10,7 +10,7 @@ This example application demonstrates how to create secure connections with trus
 
 To get started with Silicon Labs Bluetooth and Simplicity Studio, see [QSG169: Bluetooth® Quick-Start Guide for SDK v3.x and Higher](https://www.silabs.com/documents/public/quick-start-guides/qsg169-bluetooth-sdk-v3x-quick-start-guide.pdf).
 
-This example is based on device certificates. To learn about device certificates, refer to [AN1268: Authenticating Silicon Labs Devices Using Device Certificates](https://www.silabs.com/documents/public/application-notes/an1268-efr32-secure-identity.pdf). To generate a device certificate for your device, run the **Bluetooth - SoC CSR Generator** sample app before running this sample app. To learn the usage of the CSR Generator, refer to its readme file.
+This example is based on device certificates. To learn about device certificates, refer to [AN1268: Authenticating Silicon Labs Devices Using Device Certificates](https://www.silabs.com/documents/public/application-notes/an1268-efr32-secure-identity.pdf).
 
 Certificate-based authentication and pairing means that device A will only make a pairing/bonding with device B if device B can present a valid device certificate signed by a central authority (CA) that device A knows and trusts. Similarly, device B will only accept the pairing from device A if device A can present a valid device certificate signed by a CA that device B knows and trusts. The device certificates are validated using the CA certificate (or root certificate) that is also stored on both devices.
 
@@ -24,20 +24,18 @@ Certificate-based authentication and pairing is useful in situations where multi
 
 ## Testing the Example
 
-This example application works only if the elliptic curve (EC) key pair, the device certificate and the root certificate are present on the device. These can be generated using the CSR Generator. Before using this example application, make sure you have properly-signed certificates present on your device. For further information read the readme file of the **Bluetooth SoC - CSR Generator** sample app.
+This example expects the device to be provisioned and prepared properly. This include the presence of an elliptic curve (EC) key pair, a properly signed device and the root (issuer) certificate. This can be done with the **Bluetooth - SoC CBAP Dynamic Data Provisioning** application. Before proceeding, please read the documentation of this application and complete the provisioning process.
 
 In a pairing example two devices are needed: a central and a peripheral. This example is written so that it can act both as the central and as the peripheral device. In the central role, the device looks for the peripheral, connects to it, initiates certificate-based authentication and pairing, and finally writes a characteristic that can only be written via an authenticated connection. In the peripheral role, the device accepts connections, participates in certificate-based authentication and pairing and finally turns on an LED when its dedicated characteristic is written. The role can be defined in the project configuration.
 
 To test the example:
-1. Connect two devices to your PC.
-2. Make sure you have run the CSR generator on both devices, so that you have an EC key pair and a signed device certificate on both devices. See the readme of the CSR Generator.
-3. The CA certificate must be stored in the application, so you must copy the generated `sl_bt_cbap_root_cert.h` file into this project, under the */config* folder.
-4. Build this example and flash it to one of the devices.
-5. Open the slcp file of this project.
-6. On the Overview tab, under Project Details, open the three-dots-menu, and click **Configuration**.
-7. Change the Role from Peripheral to Central.
+1. Connect two devices to your PC. (Make sure both are already provisioned.)
+2. Build this example and flash it to one of the devices.
+3. Open the slcp file of this project.
+4. On the Overview tab, under Project Details, open the three-dots-menu, and click **Configuration**.
+5. Change the Role from Peripheral to Central.
 6. Build the project again and flash it to the other device.
-7. Open a terminal program and connect to both devices to see their debug messages.
+7. Open a terminal program and connect to both devices to see their log messages.
 8. Reset both devices. The central will automatically connect to the peripheral and after some seconds you should see the LED on the peripheral turning on.
 
 ## Troubleshooting

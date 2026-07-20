@@ -14,6 +14,7 @@
 #include <ZAF_Common_interface.h>
 #include <zaf_cc_list_generator.h>
 #include <ZW_TransportEndpoint.h>
+#include <ZW_classcmd.h>
 #include "zpal_log.h"
 
 /****************************************************************************/
@@ -198,6 +199,15 @@ TransportCmdClassSupported(uint8_t commandClass,
   zaf_cc_list_t *secure_included_secure_cc;
 
   zafi_cc_list_generator_get_lists(0, &unsecure_included_cc, &secure_included_unsecure_cc, &secure_included_secure_cc);
+
+  /* Deliver MC encap at granted S0 so SECURITY_COMMANDS_SUPPORTED_GET can reach endpoints. */
+  if ((COMMAND_CLASS_MULTI_CHANNEL_V4 == commandClass)
+      && (MULTI_CHANNEL_CMD_ENCAP_V4 == command)
+      && (SECURITY_KEY_S0 == eKey)
+      && (SECURITY_KEY_S0 != GetHighestSecureLevel(ZAF_GetSecurityKeys()))
+      && (0 != (ZAF_GetSecurityKeys() & SECURITY_KEY_S0_BIT))) {
+    return true;
+  }
 
   if (use_non_included_unsecure_list()) {
     return CmdClassSupported(eKey,

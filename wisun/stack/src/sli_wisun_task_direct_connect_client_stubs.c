@@ -28,8 +28,9 @@ void sli_wisun_task_req_start_direct_connect_client(const sl_wisun_msg_start_dir
   (void)req;
 
   if (cnf) {
-    cnf->header.id = SL_WISUN_MSG_START_DIRECT_CONNECT_CLIENT_CNF_ID;
     cnf->header.length = sizeof(sl_wisun_msg_start_direct_connect_client_cnf_t);
+    cnf->header.id = SL_WISUN_MSG_START_DIRECT_CONNECT_CLIENT_CNF_ID;
+    cnf->header.info = 0;
     cnf->body.status = SL_STATUS_NOT_SUPPORTED;
   }
 }
@@ -39,8 +40,9 @@ void sli_wisun_task_req_start_direct_connect_scan(const sl_wisun_msg_start_direc
 {
   (void)req;
   if (cnf) {
-    cnf->header.id = SL_WISUN_MSG_START_DIRECT_CONNECT_SCAN_CNF_ID;
     cnf->header.length = sizeof(sl_wisun_msg_start_direct_connect_scan_cnf_t);
+    cnf->header.id = SL_WISUN_MSG_START_DIRECT_CONNECT_SCAN_CNF_ID;
+    cnf->header.info = 0;
     cnf->body.status = SL_STATUS_NOT_SUPPORTED;
   }
 }
@@ -50,8 +52,9 @@ void sli_wisun_task_req_stop_direct_connect_scan(const sl_wisun_msg_stop_direct_
 {
   (void)req;
   if (cnf) {
-    cnf->header.id = SL_WISUN_MSG_STOP_DIRECT_CONNECT_SCAN_CNF_ID;
     cnf->header.length = sizeof(sl_wisun_msg_stop_direct_connect_scan_cnf_t);
+    cnf->header.id = SL_WISUN_MSG_STOP_DIRECT_CONNECT_SCAN_CNF_ID;
+    cnf->header.info = 0;
     cnf->body.status = SL_STATUS_NOT_SUPPORTED;
   }
 }
@@ -61,8 +64,9 @@ void sli_wisun_task_req_connect_to_direct_connect_server(const sl_wisun_msg_conn
 {
   (void)req;
   if (cnf) {
-    cnf->header.id = SL_WISUN_MSG_CONNECT_TO_DIRECT_CONNECT_SERVER_CNF_ID;
     cnf->header.length = sizeof(sl_wisun_msg_connect_to_direct_connect_server_cnf_t);
+    cnf->header.id = SL_WISUN_MSG_CONNECT_TO_DIRECT_CONNECT_SERVER_CNF_ID;
+    cnf->header.info = 0;
     cnf->body.status = SL_STATUS_NOT_SUPPORTED;
   }
 }
@@ -72,8 +76,9 @@ void sli_wisun_task_req_stop_direct_connect_client(const sl_wisun_msg_stop_direc
 {
   (void)req;
   if (cnf) {
-    cnf->header.id = SL_WISUN_MSG_STOP_DIRECT_CONNECT_CLIENT_CNF_ID;
     cnf->header.length = sizeof(sl_wisun_msg_stop_direct_connect_client_cnf_t);
+    cnf->header.id = SL_WISUN_MSG_STOP_DIRECT_CONNECT_CLIENT_CNF_ID;
+    cnf->header.info = 0;
     cnf->body.status = SL_STATUS_NOT_SUPPORTED;
   }
 }

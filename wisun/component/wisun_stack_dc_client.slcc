@@ -24,12 +24,15 @@ requires:
 - name: "wisun_dc_client_implementation"
 - name: "wisun_dc_client_plugin"
   condition: [wisun_stack_ffn]
+- name: "wisun_lxpm_implementation"
 
 recommends:
 - id: "wisun_dc_client_library"
   unless: [wisun_stack_ffn]
   vendor: silabs
+- id: "wisun_lxpm_stubs"
 
+  vendor: silabs
 conflicts:
 - name: "wisun_br_stack"
 
@@ -40,12 +43,17 @@ source:
     transfer_ownership: true
 
 define:
-- name: "HAVE_DIRECT_CONNECT"
+- name: "HAVE_DC_CLIENT"
+- name: DEBUG_EFM
 
 provides:
 - name: "wisun_stack_dc_client"
 - name: "wisun_stack_device_type"
   condition: [wisun_dc_client_library]
+
+template_contribution:
+- name: component_catalog
+  value: wisun_dc_client_support
 
 metadata:
   sbom:

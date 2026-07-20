@@ -56,6 +56,7 @@ __WEAK void sli_clock_manager_notify_hfxo_ready(void);
  *          SL_STATUS_NOT_SUPPORTED if not supported.
  *
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_CLOCK_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 sl_status_t sli_clock_manager_get_hfxo_average_startup_time(uint32_t *val);
 
 /***************************************************************************//**

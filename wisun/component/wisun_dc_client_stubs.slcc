@@ -19,8 +19,6 @@ source:
 - path: "nanostack-stack/source/6lowpan/ws/dc/dc_bootstrap_stubs.c"
 - path: "nanostack-stack/source/security/authenticator/authenticator_stubs.c"
   unless: [wisun_br_stack]
-- path: nanostack-stack/source/6lowpan/ws/ws_ie_lib_stubs.c
-  unless: [wisun_stack_ffn]
 
 metadata:
   sbom:

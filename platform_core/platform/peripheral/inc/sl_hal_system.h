@@ -242,21 +242,14 @@ SL_ENUM_GENERIC(sl_hal_system_part_family_t, uint32_t) {
   SL_HAL_SYSTEM_PART_FAMILY_BLUETOOTH_301 = DEVINFO_PART0_PROTOCOL_BLUETOOTH        \
                                             | (0x33 << _DEVINFO_PART0_SERIES_SHIFT) \
                                             | (0x30 << _DEVINFO_PART0_DIECODE0_SHIFT), ///< SI Series 3 Bluetooth Config 1 Value Device Family (BG)
-  SL_HAL_SYSTEM_PART_FAMILY_PROPRIETARY_301 = DEVINFO_PART0_PROTOCOL_PROPRIETARY      \
-                                              | (0x33 << _DEVINFO_PART0_SERIES_SHIFT) \
-                                              | (0x30 << _DEVINFO_PART0_DIECODE0_SHIFT), ///< SI Series 3 Proprietary Config 1 Value Device Family (FG)
   SL_HAL_SYSTEM_PART_FAMILY_FIFTEENPFOUR_301 = DEVINFO_PART0_PROTOCOL_FIFTEENPFOUR     \
                                                | (0x33 << _DEVINFO_PART0_SERIES_SHIFT) \
                                                | (0x30 << _DEVINFO_PART0_DIECODE0_SHIFT), ///< SI Series 3 15.4 Config 1 Value Device Family (MG)
-  SL_HAL_SYSTEM_PART_FAMILY_PEARL_301 = DEVINFO_PART0_PROTOCOL_PEARL            \
-                                        | (0x33 << _DEVINFO_PART0_SERIES_SHIFT) \
-                                        | (0x30 << _DEVINFO_PART0_DIECODE0_SHIFT), ///< SI Series 3 Pearl Config 1 Value Device Family (PG)
-  SL_HAL_SYSTEM_PART_FAMILY_WIFI_301 = DEVINFO_PART0_PROTOCOL_WIFI             \
+#endif
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+  SL_HAL_SYSTEM_PART_FAMILY_WIFI_353 = DEVINFO_PART0_PROTOCOL_WIFI             \
                                        | (0x33 << _DEVINFO_PART0_SERIES_SHIFT) \
-                                       | (0x30 << _DEVINFO_PART0_DIECODE0_SHIFT), ///< SI Series 3 Wifi Config 1 Value Device Family (WG)
-  SL_HAL_SYSTEM_PART_FAMILY_ZWAVE_301 = DEVINFO_PART0_PROTOCOL_ZWAVE            \
-                                        | (0x33 << _DEVINFO_PART0_SERIES_SHIFT) \
-                                        | (0x30 << _DEVINFO_PART0_DIECODE0_SHIFT), ///< SI Series 3 Zwave Config 1 Value Device Family (ZG)
+                                       | (0x35 << _DEVINFO_PART0_DIECODE0_SHIFT), ///< SI Series 3 Wifi Config 353 Value Device Family (WG/WN)
 #endif
   SL_HAL_SYSTEM_PART_FAMILY_UNKNOWN = 0xFF  ///< Unknown Device Family. Family ID is missing on unprogrammed parts.
 };

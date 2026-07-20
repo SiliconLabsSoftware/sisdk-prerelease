@@ -31,7 +31,6 @@
 #include "sl_hal_leddrv.h"
 #if defined(LEDDRV_COUNT) && (LEDDRV_COUNT > 0)
 
-#include "sl_assert.h"
 #include "sl_hal_gpio.h"
 
 /***************************************************************************//**
@@ -99,9 +98,9 @@ void sl_hal_leddrv_init(LEDDRV_TypeDef *leddrv,
                         const sl_hal_leddrv_init_t *init)
 {
   sl_gpio_t temp;
-  EFM_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_LEDDRV_REF_VALID(leddrv));
   // Init structure must be provided.
-  EFM_ASSERT(init);
+  SL_LOG_DEBUG_ASSERT(init);
 
   sl_hal_leddrv_disable(leddrv);
   sl_hal_leddrv_wait_ready(leddrv);
@@ -184,7 +183,7 @@ static uint32_t get_leddrv_gpio_port(sl_hal_leddrv_port_select_t port)
     return (uint32_t)SL_GPIO_PORT_D;
   } else {
     // Invalid port
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return 0xFFFFFFFF;
   }
 }

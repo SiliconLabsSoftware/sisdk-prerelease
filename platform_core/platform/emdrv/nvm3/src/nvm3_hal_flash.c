@@ -183,10 +183,8 @@ static sl_status_t nvm3_halFlashWriteWords(nvm3_HalPtr_t nvmAdr, void const *src
   halSta = convertMscStatusToNvm3Status(mscSta);
 
 #if CHECK_DATA
-  if (halSta == SL_STATUS_OK) {
-    if (memcmp(pDst, pSrc, byteCnt) != 0) {
-      halSta = SL_STATUS_FLASH_PROGRAM_FAILED;
-    }
+  if ((halSta == SL_STATUS_OK) && (memcmp(pDst, pSrc, byteCnt) != 0)) {
+    halSta = SL_STATUS_FLASH_PROGRAM_FAILED;
   }
 #endif
 
@@ -202,10 +200,8 @@ static sl_status_t nvm3_halFlashPageErase(nvm3_HalPtr_t nvmAdr)
   halSta = convertMscStatusToNvm3Status(mscSta);
 
 #if CHECK_DATA
-  if (halSta == SL_STATUS_OK) {
-    if (!isErased(nvmAdr, SYSTEM_GetFlashPageSize())) {
-      halSta = SL_STATUS_FLASH_ERASE_FAILED;
-    }
+  if ((halSta == SL_STATUS_OK) && !isErased(nvmAdr, SYSTEM_GetFlashPageSize())) {
+    halSta = SL_STATUS_FLASH_ERASE_FAILED;
   }
 #endif
 

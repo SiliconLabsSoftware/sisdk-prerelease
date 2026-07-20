@@ -41,6 +41,8 @@
 // <i> and scanning. The default value is an estimation for achieving adequate throughput
 // <i> and supporting multiple simultaneous connections. Consider increasing this value for
 // <i> higher data throughput over connections, advertising or scanning long advertisement data.
+// <i> NOTE: A non-zero value of SL_BT_CONFIG_BUFFER_SIZE or SL_BT_CONTROLLER_BUFFER_MEMORY
+// <i> will override SL_BLUETOOTH_COMMON_BUFFER_MEMORY_SIZE.
 #ifndef SL_BLUETOOTH_COMMON_BUFFER_MEMORY_SIZE
 #define SL_BLUETOOTH_COMMON_BUFFER_MEMORY_SIZE     (3150)
 #endif

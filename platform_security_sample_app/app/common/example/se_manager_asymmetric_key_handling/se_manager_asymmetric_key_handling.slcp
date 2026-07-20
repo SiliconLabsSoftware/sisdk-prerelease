@@ -3,7 +3,7 @@ package: platform
 quality: production
 label: Platform Security - SoC SE Manager Asymmetric Key Handling
 description: >
-  Demonstrates how to generate, import, export, transfer, and delete asymmetric ECC keys with the SE Manager API, using plain, wrapped, and volatile key storage on Secure Vault devices.
+  This example project demonstrates the asymmetric key handling API of SE Manager.
 category: Example|Platform
 filter:
   - name: "Device Type"
