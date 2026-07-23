@@ -30,12 +30,16 @@ component:
   - id: status_string
     condition: [device_efx]
   - id: driver_mvp_hal_si91x
+    package: platform_siwx91x
     condition: [device_si91x]
   - id: si91x_memory_default_config
+    package: platform_siwx91x
     condition: [device_si91x]
   - id: sleeptimer_si91x
+    package: platform_siwx91x
     condition: [device_si91x]
   - id: syscalls
+    package: platform_siwx91x
     condition: [device_si91x]
   - id: emlib_common
 configuration:

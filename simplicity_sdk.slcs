@@ -8,15 +8,15 @@ component_path:
 - path: generative_ai/component
 - path: bgapi_protocol/component
 - path: bluetooth_mesh_srtest/component
-- path: bluetooth_common/component
 - path: bluetooth_le_controller_xg2b/component
 - path: bluetooth_mesh/component
 - path: bluetooth_le_middleware/component
-- path: bluetooth_apploader/component
-- path: bluetooth_le_controller/component
 - path: bluetooth_zvd/component
 - path: bluetooth_le_host/component
 - path: bluetooth_mesh_middleware/component
+- path: bluetooth_common/component
+- path: bluetooth_apploader/component
+- path: bluetooth_le_controller/component
 - path: boards_efr32xg2b/hardware/board/config/component
 - path: boards_efr32xg2b/hardware/board/component
 - path: boards/hardware/board/config/component
@@ -108,8 +108,8 @@ component_path:
 - path: rail_internal/component/rail_internal
 - path: rail_library_internal_chips/component/rail_library_internal_chips
 - path: rail_library_efr32xg2b/component/rail_library_efr32xg2b
-- path: rail_library/component/rail_library
 - path: rail_sdk/component
+- path: rail_library/component/rail_library
 - path: realtime_locationing/component
 - path: rtos_benchmark_internal/component
 - path: rv2_framework_internal/component
@@ -150,10 +150,10 @@ toolchain_mapping: toolchains.slct
 documentation:
 - docset: machine-learning
   version: 3.0.1
-- docset: bluetooth_le_siwx91x
-  version: 4.1.1
 - docset: btmesh-service-api
   version: 11.0.1
+- docset: bluetooth_le_siwx91x
+  version: 4.1.1
 - docset: gecko-platform
   version: 6.1.0
 - docset: mcu-bootloader
