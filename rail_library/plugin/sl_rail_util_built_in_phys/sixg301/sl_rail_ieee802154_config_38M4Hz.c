@@ -33,7 +33,13 @@
  ******************************************************************************/
 #include "em_device.h"
 #include "sl_rail_ieee802154_config_38M4Hz.h"
+#if defined(__ICCARM__)
+// IAR doesn't support copying const data (in flash) to RAM.
+#undef SL_CODE_CLASSIFY
+#define SL_CODE_CLASSIFY(a, ...) /* no-op */
+#else
 #include "sl_code_classification.h"
+#endif
 
 SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static const uint8_t irCalConfig_0[] = {
