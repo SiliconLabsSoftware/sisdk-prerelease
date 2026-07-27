@@ -20,41 +20,31 @@ include:
       - path: app.h
 component:
   - id: sl_main
-  - id: device_init
-    condition: [device_efx]
+  - id: emlib_common
   - id: math_mvp
   - id: iostream_recommended_stream
-    condition: [device_efx]
   - id: iostream_retarget_stdio
+  - id: iostream_swo_si91x
+    condition: [device_si91x]
+  - id: device_init
     condition: [device_efx]
   - id: status_string
     condition: [device_efx]
   - id: driver_mvp_hal_si91x
-    package: platform_siwx91x
     condition: [device_si91x]
   - id: si91x_memory_default_config
-    package: platform_siwx91x
     condition: [device_si91x]
   - id: sleeptimer_si91x
-    package: platform_siwx91x
     condition: [device_si91x]
-  - id: syscalls
-    package: platform_siwx91x
-    condition: [device_si91x]
-  - id: emlib_common
 configuration:
   - name: SL_BOARD_ENABLE_VCOM
     value: 1
   - name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
     value: 1
-    condition: [device_efx]
   - name: SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
     value: 1
     condition: [device_si91x]
   - name: SL_IOSTREAM_UART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
-    value: 1
-    condition: [device_si91x]
-  - name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
     value: 1
     condition: [device_si91x]
 define:

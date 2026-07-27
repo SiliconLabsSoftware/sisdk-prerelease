@@ -104,12 +104,12 @@ component_path:
 - path: proprietary_default_radio_confs_xg2b/.
 - path: proprietary_default_radio_confs/.
 - path: protocol_user_sequencer_internal/component/protocol_user_sequencer_internal
-- path: rail_library_alpha_chips/component/rail_library_alpha_chips
-- path: rail_internal/component/rail_internal
 - path: rail_library_internal_chips/component/rail_library_internal_chips
-- path: rail_library_efr32xg2b/component/rail_library_efr32xg2b
 - path: rail_sdk/component
+- path: rail_library_alpha_chips/component/rail_library_alpha_chips
 - path: rail_library/component/rail_library
+- path: rail_internal/component/rail_internal
+- path: rail_library_efr32xg2b/component/rail_library_efr32xg2b
 - path: realtime_locationing/component
 - path: rtos_benchmark_internal/component
 - path: rv2_framework_internal/component
@@ -150,10 +150,10 @@ toolchain_mapping: toolchains.slct
 documentation:
 - docset: machine-learning
   version: 3.0.1
-- docset: btmesh-service-api
-  version: 11.0.1
 - docset: bluetooth_le_siwx91x
   version: 4.1.1
+- docset: btmesh-service-api
+  version: 11.0.1
 - docset: gecko-platform
   version: 6.1.0
 - docset: mcu-bootloader
@@ -166,9 +166,9 @@ documentation:
   version: 4.3.1
 - docset: openthread
   version: 3.1.1
-- docset: platform_nwp_siwx91x
-  version: 4.1.1
 - docset: platform_siwx91x
+  version: 4.1.1
+- docset: platform_nwp_siwx91x
   version: 4.1.1
 - docset: rail
   version: 3.1.1
