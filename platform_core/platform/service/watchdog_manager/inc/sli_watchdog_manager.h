@@ -77,6 +77,13 @@ void sli_watchdog_manager_micrium_install_task_sw_hook(void);
  ******************************************************************************/
 void sli_watchdog_manager_record_state(void);
 
+/***************************************************************************//**
+ * Invoke the registered starve callback from the WDOG warning IRQ.
+ *
+ * @note FOR INTERNAL USE ONLY.
+ ******************************************************************************/
+void sli_watchdog_manager_on_starve(void);
+
 #if SLI_WATCHDOG_MANAGER_USE_EM_TRANSITION_HOOK
 /***************************************************************************//**
  * Subscribe to power manager EM transition events for watchdog disable/enable

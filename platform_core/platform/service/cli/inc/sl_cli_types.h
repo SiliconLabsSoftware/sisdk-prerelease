@@ -160,10 +160,12 @@ typedef struct sl_cli {
   size_t history_pos;                          ///< Position in history, if enabled.
 #endif
   sl_iostream_t  *iostream_handle;             ///< The iostream used by the CLI.
+  bool suspended;                              ///< A boolean indicating that the CLI is suspended.
 #if defined(SL_CLI_ACTIVE_FLAG_EN)
   bool active;                                 ///< A boolean indicating that the CLI is processing input.
 #endif
 #if defined(SL_CATALOG_KERNEL_PRESENT)
+  osThreadId_t thread_id;                      ///< Thread ID.
   uint32_t start_delay_tick;                   ///< A delay after the CLI task has started before any actions in ticks.
   uint32_t loop_delay_tick;                    ///< A delay in the CLI task loop in ticks.
 #else

@@ -25,6 +25,8 @@ requires:
 - name: "emlib_emu"
 - name: "sl_core"
 - name: "ecode"
+conflicts:
+- name: device_series_3
 documentation:
   docset: gecko-platform
   document: platform-driver/ustimer

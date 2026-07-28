@@ -61,6 +61,7 @@ static void uart_transfer_pool_free(sl_slist_node_t **pool)
  * Allocate transfers and add them to the pool.
  ******************************************************************************/
 static sl_status_t uart_transfer_pool_alloc(size_t transfer_count,
+                                            size_t transfer_size,
                                             sl_slist_node_t **pool)
 {
   sl_status_t status;
@@ -73,7 +74,7 @@ static sl_status_t uart_transfer_pool_alloc(size_t transfer_count,
     sli_uart_async_transfer_t *tfer;
 
     status = sl_memory_calloc(1,
-                              sizeof(sli_uart_async_transfer_t),
+                              transfer_size,
                               BLOCK_TYPE_LONG_TERM,
                               (void**)&tfer);
     if (status != SL_STATUS_OK) {
@@ -99,15 +100,17 @@ sl_status_t sli_uart_transfer_pool_init(sl_uart_handle_t *uart_handle)
   EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
 
   status = uart_transfer_pool_alloc(uart_handle->preinit_config.async_tx_transfer_count,
-                                    &uart_handle->async_tx_pool);
+                                    sizeof(sli_uart_async_tx_transfer_t),
+                                    &uart_handle->async_tx_free_list_head);
   if (status != SL_STATUS_OK) {
     return status;
   }
 
   status = uart_transfer_pool_alloc(uart_handle->preinit_config.async_rx_transfer_count,
-                                    &uart_handle->async_rx_pool);
+                                    sizeof(sli_uart_async_rx_transfer_t),
+                                    &uart_handle->async_rx_free_list_head);
   if (status != SL_STATUS_OK) {
-    uart_transfer_pool_free(&uart_handle->async_tx_pool);
+    uart_transfer_pool_free(&uart_handle->async_tx_free_list_head);
     return status;
   }
 
@@ -119,9 +122,10 @@ void sli_uart_transfer_pool_deinit(sl_uart_handle_t *uart_handle)
   EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
   EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
 
-  EFM_ASSERT(sl_slist_is_empty(uart_handle->async_tx_submitted_list_head));
-  EFM_ASSERT(sl_slist_is_empty(uart_handle->async_rx_submitted_list_head));
+  EFM_ASSERT(sl_slist_is_empty(uart_handle->async_tx_transfer_submitted_list_head));
+  EFM_ASSERT(sl_slist_is_empty(uart_handle->async_rx_transfer_active_list_head));
+  EFM_ASSERT(sl_slist_is_empty(uart_handle->async_rx_transfer_pending_list_head));
 
-  uart_transfer_pool_free(&uart_handle->async_tx_pool);
-  uart_transfer_pool_free(&uart_handle->async_rx_pool);
+  uart_transfer_pool_free(&uart_handle->async_tx_free_list_head);
+  uart_transfer_pool_free(&uart_handle->async_rx_free_list_head);
 }

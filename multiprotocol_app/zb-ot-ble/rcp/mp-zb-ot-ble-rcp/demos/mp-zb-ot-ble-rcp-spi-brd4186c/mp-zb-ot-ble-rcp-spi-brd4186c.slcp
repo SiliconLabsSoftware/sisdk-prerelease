@@ -88,19 +88,10 @@ component:
 - package: freertos
   vendor: silabs
   id: freertos_heap_3
-- package: openthread
-  vendor: silabs
-  id: ot_crash_handler
-- package: openthread
-  vendor: silabs
-  id: ot_ncp_cpc
-- package: openthread
-  vendor: silabs
-  id: ot_stack_rcp
-- package: openthread_stack
+- package: openthread_forks
   vendor: silabs
   id: ot_diags
-- package: openthread_stack
+- package: openthread_forks
   vendor: silabs
   id: ot_reset_utils
 - package: platform_core
@@ -121,6 +112,15 @@ component:
 - package: rail_library
   vendor: silabs
   id: rail_util_pti
+- package: thread
+  vendor: silabs
+  id: ot_crash_handler
+- package: thread
+  vendor: silabs
+  id: ot_ncp_cpc
+- package: thread
+  vendor: silabs
+  id: ot_stack_rcp
 autoselected_components:
 - package: bluetooth_common
   vendor: silabs
@@ -239,67 +239,31 @@ autoselected_components:
 - package: mbedtls
   vendor: silabs
   id: psa_its_source
-- package: openthread
-  vendor: silabs
-  id: ot_coex
-- package: openthread
-  vendor: silabs
-  id: ot_crypto_ecdsa_deterministic
-- package: openthread
-  vendor: silabs
-  id: ot_gp_interface
-- package: openthread
-  vendor: silabs
-  id: ot_mbedtls
-- package: openthread
-  vendor: silabs
-  id: ot_ncp_vendor_extension
-- package: openthread
-  vendor: silabs
-  id: ot_platform_abstraction
-- package: openthread
-  vendor: silabs
-  id: ot_platform_abstraction_core
-- package: openthread
-  vendor: silabs
-  id: ot_platform_abstraction_headers
-- package: openthread
-  vendor: silabs
-  id: ot_platform_abstraction_source
-- package: openthread
-  vendor: silabs
-  id: ot_rtos_wrappers
-- package: openthread
-  vendor: silabs
-  id: ot_subghz_board_support
-- package: openthread
-  vendor: silabs
-  id: ot_uart
-- package: openthread_stack
+- package: openthread_forks
   vendor: silabs
   id: ot_headers
-- package: openthread_stack
+- package: openthread_forks
   vendor: silabs
   id: ot_headers_tcp
-- package: openthread_stack
+- package: openthread_forks
   vendor: silabs
   id: ot_ncp_source
-- package: openthread_stack
+- package: openthread_forks
   vendor: silabs
   id: ot_ncp_spinel
-- package: openthread_stack
+- package: openthread_forks
   vendor: silabs
   id: ot_platform_abstraction_utils
-- package: openthread_stack
+- package: openthread_forks
   vendor: silabs
   id: ot_radio_ram_objects
-- package: openthread_stack
+- package: openthread_forks
   vendor: silabs
   id: ot_radio_source
-- package: openthread_stack
+- package: openthread_forks
   vendor: silabs
   id: ot_sbom_openthread
-- package: openthread_stack
+- package: openthread_forks
   vendor: silabs
   id: ot_sbom_tcplp
 - package: platform_core
@@ -884,6 +848,42 @@ autoselected_components:
 - package: simplicity_sdk
   vendor: silabs
   id: agents_md
+- package: thread
+  vendor: silabs
+  id: ot_coex
+- package: thread
+  vendor: silabs
+  id: ot_crypto_ecdsa_deterministic
+- package: thread
+  vendor: silabs
+  id: ot_gp_interface
+- package: thread
+  vendor: silabs
+  id: ot_mbedtls
+- package: thread
+  vendor: silabs
+  id: ot_ncp_vendor_extension
+- package: thread
+  vendor: silabs
+  id: ot_platform_abstraction
+- package: thread
+  vendor: silabs
+  id: ot_platform_abstraction_core
+- package: thread
+  vendor: silabs
+  id: ot_platform_abstraction_headers
+- package: thread
+  vendor: silabs
+  id: ot_platform_abstraction_source
+- package: thread
+  vendor: silabs
+  id: ot_rtos_wrappers
+- package: thread
+  vendor: silabs
+  id: ot_subghz_board_support
+- package: thread
+  vendor: silabs
+  id: ot_uart
 template_contribution:
 - name: component_catalog
   priority: 0
@@ -957,11 +957,11 @@ sdk_extension:
   id: printf
   version: 1.1.0
 - vendor: silabs
-  id: bluetooth_le_controller
-  version: 11.2.0-alpha.20
-- vendor: silabs
-  id: openthread_stack
+  id: openthread_forks
   version: 3.2.0
+- vendor: silabs
+  id: bluetooth_le_controller
+  version: 11.2.0-alpha.21
 - vendor: silabs
   id: common_15_4
   version: 1.2.0
@@ -984,9 +984,6 @@ sdk_extension:
   id: mbedtls
   version: 1.2.0
 - vendor: silabs
-  id: openthread
-  version: 3.2.0
-- vendor: silabs
   id: bootloader
   version: 3.4.0
 - vendor: silabs
@@ -1006,19 +1003,19 @@ sdk_extension:
   version: 1.1.0
 - vendor: silabs
   id: bluetooth_le_host
-  version: 11.2.0-alpha.20
+  version: 11.2.0-alpha.21
 - vendor: silabs
   id: bluetooth_common
-  version: 1.2.0-alpha.20
+  version: 1.2.0-alpha.21
 - vendor: silabs
   id: rail_library
   version: 3.2.0
 - vendor: silabs
+  id: thread
+  version: 3.2.0
+- vendor: silabs
   id: multiprotocol
   version: 1.2.0
-- vendor: silabs
-  id: bgapi_protocol
-  version: 11.2.0-alpha.20
 - vendor: silabs
   id: security_libcryptosoc
   version: 1.1.0
@@ -1028,4 +1025,7 @@ sdk_extension:
 - vendor: silabs
   id: unity_test_framework
   version: 1.1.0
+- vendor: silabs
+  id: bgapi_protocol
+  version: 11.2.0-alpha.21
 

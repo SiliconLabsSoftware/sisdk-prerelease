@@ -66,9 +66,8 @@ void sli_zigbee_af_init_cb(uint8_t init_level)
 #endif
   (void)init_level;
 
-  sl_zigbee_af_core_println("Reset info: 0x%02X (%s)",
-                            halGetResetInfo(),
-                            halGetResetString());
+  sl_zigbee_af_core_println("Reset info: 0x%02X",
+                            halGetResetInfo());
 
   // This will initialize the stack of networks maintained by the framework,
   // including setting the default network.

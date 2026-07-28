@@ -41,6 +41,12 @@ bool sli_wisun_dc_client_is_server_frame(const uint8_t *eui64)
   return false;
 }
 
+bool sli_wisun_dc_client_is_server_auth_frame(const uint8_t *eui64)
+{
+  (void)eui64;
+  return false;
+}
+
 void sli_wisun_dc_client_restart_link_lifetime(void)
 {
   // Empty stub

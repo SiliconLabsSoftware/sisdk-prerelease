@@ -49,14 +49,16 @@
 /*******************************************************************************
  *******************************   DEFINES   ************************************
  ******************************************************************************/
-
-#define HFRCO_DPLL_FREQUENCY_TABLE_SIZE  11
-
 #define DEVINFO_TEMPERATURE_CALTEMP_INTEGER_SHIFT  4
 
 // Calibration getters read DEVINFO via an SE command; disable them without SE
 // firmware so the calls cannot hang.
 #if defined(_SILICON_LABS_32B_SERIES_3) && !defined(SLI_SE_FIRMWARE_UNAVAILABLE)
+#if defined(DEVINFO_GP_HFRCODPLLBAND14_OFFSET)
+#define HFRCO_DPLL_FREQUENCY_TABLE_SIZE  15
+#else
+#define HFRCO_DPLL_FREQUENCY_TABLE_SIZE  11
+#endif
 #define HAL_SYSTEM_CALIBRATION_SUPPORT
 #endif
 
@@ -82,6 +84,7 @@
 typedef struct hfrco_dpll_cal_element {
   uint32_t min_freq;
   uint32_t max_freq;
+  uint32_t otp_offset;
 } hfrco_dpll_cal_element_t;
 #endif
 
@@ -109,17 +112,23 @@ const sl_hal_system_devinfo_temperature_t SL_HAL_SYSTEM_DEVINFO_TEMPERATURE_RESE
 
 #if defined(HAL_SYSTEM_CALIBRATION_SUPPORT)
 static const hfrco_dpll_cal_element_t HFRCO_DPLL_FREQUENCY_TABLE[HFRCO_DPLL_FREQUENCY_TABLE_SIZE] = {
-  { .min_freq = 16000000, .max_freq = 20000000 }, /// 18MHz calibration central frequency.
-  { .min_freq = 20000000, .max_freq = 24500000 }, /// 22MHz calibration central frequency.
-  { .min_freq = 24500000, .max_freq = 30000000 }, /// 27MHz calibration central frequency.
-  { .min_freq = 30000000, .max_freq = 36000000 }, /// 33MHz calibration central frequency.
-  { .min_freq = 36000000, .max_freq = 42500000 }, /// 39MHz calibration central frequency.
-  { .min_freq = 42500000, .max_freq = 50500000 }, /// 46MHz calibration central frequency.
-  { .min_freq = 50500000, .max_freq = 60000000 }, /// 55MHz calibration central frequency.
-  { .min_freq = 60000000, .max_freq = 70000000 }, /// 65MHz calibration central frequency.
-  { .min_freq = 70000000, .max_freq = 80000000 }, /// 75MHz calibration central frequency.
-  { .min_freq = 80000000, .max_freq = 90000000 }, /// 85MHz calibration central frequency.
-  { .min_freq = 90000000, .max_freq = 100000000 } /// 95MHz calibration central frequency.
+  { .min_freq = 16000000, .max_freq = 20000000, .otp_offset = DEVINFO_GP_HFRCODPLLBAND0_OFFSET }, /// 18MHz calibration central frequency.
+  { .min_freq = 20000000, .max_freq = 24500000, .otp_offset = DEVINFO_GP_HFRCODPLLBAND1_OFFSET }, /// 22MHz calibration central frequency.
+  { .min_freq = 24500000, .max_freq = 30000000, .otp_offset = DEVINFO_GP_HFRCODPLLBAND2_OFFSET }, /// 27MHz calibration central frequency.
+  { .min_freq = 30000000, .max_freq = 36000000, .otp_offset = DEVINFO_GP_HFRCODPLLBAND3_OFFSET }, /// 33MHz calibration central frequency.
+  { .min_freq = 36000000, .max_freq = 42500000, .otp_offset = DEVINFO_GP_HFRCODPLLBAND4_OFFSET }, /// 39MHz calibration central frequency.
+  { .min_freq = 42500000, .max_freq = 50500000, .otp_offset = DEVINFO_GP_HFRCODPLLBAND5_OFFSET }, /// 46MHz calibration central frequency.
+  { .min_freq = 50500000, .max_freq = 60000000, .otp_offset = DEVINFO_GP_HFRCODPLLBAND6_OFFSET }, /// 55MHz calibration central frequency.
+  { .min_freq = 60000000, .max_freq = 70000000, .otp_offset = DEVINFO_GP_HFRCODPLLBAND7_OFFSET }, /// 65MHz calibration central frequency.
+  { .min_freq = 70000000, .max_freq = 80000000, .otp_offset = DEVINFO_GP_HFRCODPLLBAND8_OFFSET }, /// 75MHz calibration central frequency.
+  { .min_freq = 80000000, .max_freq = 90000000, .otp_offset = DEVINFO_GP_HFRCODPLLBAND9_OFFSET }, /// 85MHz calibration central frequency.
+  { .min_freq = 90000000, .max_freq = 100000000, .otp_offset = DEVINFO_GP_HFRCODPLLBAND10_OFFSET }, /// 95MHz calibration central frequency.
+#if defined(DEVINFO_GP_HFRCODPLLBAND14_OFFSET)
+  { .min_freq = 100000000, .max_freq = 110000000, .otp_offset = DEVINFO_GP_HFRCODPLLBAND11_OFFSET }, /// 105MHz calibration central frequency.
+  { .min_freq = 110000000, .max_freq = 120000000, .otp_offset = DEVINFO_GP_HFRCODPLLBAND12_OFFSET }, /// 115MHz calibration central frequency.
+  { .min_freq = 120000000, .max_freq = 130000000, .otp_offset = DEVINFO_GP_HFRCODPLLBAND13_OFFSET }, /// 125MHz calibration central frequency.
+  { .min_freq = 130000000, .max_freq = 140000000, .otp_offset = DEVINFO_GP_HFRCODPLLBAND14_OFFSET }, /// 135MHz calibration central frequency.
+#endif
 };
 #endif
 
@@ -414,8 +423,8 @@ uint32_t sl_hal_system_get_hfrcodpll_band_calibration(uint32_t frequency)
     return 0;
   }
 
-  // Calculate memory offset based on the band index we want.
-  offset = (band_index * 4) + DEVINFO_GP_HFRCODPLLBAND0_OFFSET;
+  offset = HFRCO_DPLL_FREQUENCY_TABLE[band_index].otp_offset;
+
 
   // Initialize command context.
   status = sl_se_init_command_context(&se_command_ctx);

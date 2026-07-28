@@ -51,6 +51,7 @@
 #endif
 #endif
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#include "sli_sleeptimer.h"
 #include "sl_power_manager.h"
 #endif
 
@@ -100,27 +101,6 @@ sl_oscillator_t current_qspi_reference_clock = SL_OSCILLATOR_INVALID;
 // HFXO startup time.
 #if defined(SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN) && SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN
 uint16_t clock_manager_hfxo_startup_time = 0;
-
-// Mapping of HFXO timeout steady configuration to LF ticks (at 32768Hz)
-// rounded to the upper integer value.
-static const uint8_t hfxo_timeout_steady_cfg_lf_ticks[16] = {
-  1, // T4US
-  1, // T16US
-  2, // T41US
-  3, // T83US
-  5, // T125US
-  6, // T166US
-  7, // T208US
-  9, // T250US
-  11, // T333US
-  14, // T416US
-  17, // T500US
-  22, // T666US
-  28, // T833US
-  55, // T1666US
-  82, // T2500US
-  137, // T4166US
-};
 #endif
 
 /*******************************************************************************
@@ -156,7 +136,7 @@ sl_status_t sli_clock_manager_hal_runtime_init(void)
   NVIC_ClearPendingIRQ(HFXO_IRQ_NUMBER);
   NVIC_EnableIRQ(HFXO_IRQ_NUMBER);
 
-#if !defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
+#if !defined(SLI_SLEEPTIMER_SYSRTC_WITH_PRETRIGGERS)
   HFXO0->IEN_SET = HFXO_IEN_RDY;
 #endif
 
@@ -818,6 +798,11 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
           return_status =  sli_clock_manager_hal_get_clock_branch_frequency(SL_CLOCK_BRANCH_EM01GRPCCLK, frequency);
           break;
 #endif
+#if defined(CMU_EUSART0CLKCTRL_CLKSEL_FSRCO)
+        case CMU_EUSART0CLKCTRL_CLKSEL_FSRCO:
+          *frequency = SystemFSRCOClockGet();
+          break;
+#endif
         case CMU_EUSART0CLKCTRL_CLKSEL_HFRCOEM23:
           *frequency = SystemHFRCOEM23ClockGet();
           break;
@@ -843,6 +828,11 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
 #if defined(_CMU_EUSART1CLKCTRL_CLKSEL_EM01GRPCCLK)
         case CMU_EUSART1CLKCTRL_CLKSEL_EM01GRPCCLK:
           return_status =  sli_clock_manager_hal_get_clock_branch_frequency(SL_CLOCK_BRANCH_EM01GRPCCLK, frequency);
+          break;
+#endif
+#if defined(CMU_EUSART1CLKCTRL_CLKSEL_FSRCO)
+        case CMU_EUSART1CLKCTRL_CLKSEL_FSRCO:
+          *frequency = SystemFSRCOClockGet();
           break;
 #endif
         case CMU_EUSART1CLKCTRL_CLKSEL_HFRCOEM23:
@@ -1382,6 +1372,12 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
           return_status = sli_clock_manager_hal_get_clock_branch_precision(SL_CLOCK_BRANCH_EM01GRPCCLK, precision);
           break;
 #endif
+#if defined(CMU_EUSART0CLKCTRL_CLKSEL_FSRCO)
+        case CMU_EUSART0CLKCTRL_CLKSEL_FSRCO:
+          *precision = 0xFFFF;
+          return_status = SL_STATUS_NOT_AVAILABLE;
+          break;
+#endif
         case CMU_EUSART0CLKCTRL_CLKSEL_HFRCOEM23:
           *precision = 0xFFFF;
           return_status = SL_STATUS_NOT_AVAILABLE;
@@ -1408,6 +1404,12 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
 #if defined(_CMU_EUSART1CLKCTRL_CLKSEL_EM01GRPCCLK)
         case CMU_EUSART1CLKCTRL_CLKSEL_EM01GRPCCLK:
           return_status = sli_clock_manager_hal_get_clock_branch_precision(SL_CLOCK_BRANCH_EM01GRPCCLK, precision);
+          break;
+#endif
+#if defined(CMU_EUSART1CLKCTRL_CLKSEL_FSRCO)
+        case CMU_EUSART1CLKCTRL_CLKSEL_FSRCO:
+          *precision = 0xFFFF;
+          return_status = SL_STATUS_NOT_AVAILABLE;
           break;
 #endif
         case CMU_EUSART1CLKCTRL_CLKSEL_HFRCOEM23:
@@ -1939,7 +1941,7 @@ sl_status_t sli_clock_manager_hal_get_hfxo_average_startup_time(uint32_t *val)
 #if defined(SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN) && SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN
   if (clock_manager_hfxo_startup_time != 0) {
     // We got a value, return ok.
-    *val = clock_manager_hfxo_startup_time + hfxo_timeout_steady_cfg_lf_ticks[(HFXO0->XTALCFG & _HFXO_XTALCFG_TIMEOUTSTEADY_MASK) >> _HFXO_XTALCFG_TIMEOUTSTEADY_SHIFT];
+    *val = clock_manager_hfxo_startup_time;
     return SL_STATUS_OK;
   } else {
     // Still waiting for a measure, return not ready.
@@ -2201,7 +2203,13 @@ sl_status_t sli_clock_manager_hal_set_sysclk_source(sl_oscillator_t source)
 #endif
       if ((SOCPLL0->STATUS & SOCPLL_STATUS_RDY) == 0) {
         SOCPLL0->CTRL_SET = SOCPLL_CTRL_FORCEEN;
+#if defined(_SOCPLL_CTRL1_ENOPENLOOP_MASK)
+        if ((SOCPLL0->CTRL1 & SOCPLL_CTRL1_ENOPENLOOP) == 0) {
+          while ((SOCPLL0->STATUS & SOCPLL_STATUS_RDY) == 0) ;
+        }
+#else
         while ((SOCPLL0->STATUS & SOCPLL_STATUS_RDY) == 0) ;
+#endif
       }
       CMU->SYSCLKCTRL = (CMU->SYSCLKCTRL & ~_CMU_SYSCLKCTRL_CLKSEL_MASK) | CMU_SYSCLKCTRL_CLKSEL_SOCPLL;
       SOCPLL0->CTRL_CLR = SOCPLL_CTRL_FORCEEN;
@@ -2211,7 +2219,13 @@ sl_status_t sli_clock_manager_hal_set_sysclk_source(sl_oscillator_t source)
     case SL_OSCILLATOR_SOCPLL1_OUT1:
       if ((SOCPLL1->STATUS & SOCPLL_STATUS_RDY) == 0) {
         SOCPLL1->CTRL_SET = SOCPLL_CTRL_FORCEEN;
+#if defined(_SOCPLL_CTRL1_ENOPENLOOP_MASK)
+        if ((SOCPLL1->CTRL1 & SOCPLL_CTRL1_ENOPENLOOP) == 0) {
+          while ((SOCPLL1->STATUS & SOCPLL_STATUS_RDY) == 0) ;
+        }
+#else
         while ((SOCPLL1->STATUS & SOCPLL_STATUS_RDY) == 0) ;
+#endif
       }
       CMU->SYSCLKCTRL = (CMU->SYSCLKCTRL & ~_CMU_SYSCLKCTRL_CLKSEL_MASK) | CMU_SYSCLKCTRL_CLKSEL_SOCPLL1;
       SOCPLL1->CTRL_CLR = SOCPLL_CTRL_FORCEEN;
@@ -2299,7 +2313,7 @@ void HFXO_IRQ_HANDLER_FUNCTION(void)
 #endif
 
   // Ready Interrupt Flag Handling.
-#if !defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
+#if !defined(SLI_SLEEPTIMER_SYSRTC_WITH_PRETRIGGERS)
   if (irq_flag & HFXO_IF_RDY) {
     // Clear Ready flag.
     HFXO0->IF_CLR = irq_flag & HFXO_IF_RDY;

@@ -219,6 +219,10 @@ __WEAK bool sli_cli_tick(sl_cli_handle_t handle)
     return false;
   }
 
+  if (handle->suspended) {
+    return true;
+  }
+
   if (sli_cli_session_handler(handle) != SL_STATUS_OK) {
     return false;
   }
@@ -309,6 +313,7 @@ static sl_status_t create_task(sl_cli_handle_t handle,
                                sl_cli_instance_parameters_t *parameters)
 {
   osThreadAttr_t attr;
+  osThreadId_t thread_id;
 
   attr.name = parameters->task_name;
   attr.priority = parameters->prio;
@@ -319,8 +324,10 @@ static sl_status_t create_task(sl_cli_handle_t handle,
   attr.attr_bits = 0u;
   attr.tz_module = 0u;
 
-  parameters->thread_id = osThreadNew(&tick_task, handle, &attr);
-  EFM_ASSERT(parameters->thread_id != NULL);
+  thread_id = osThreadNew(&tick_task, handle, &attr);
+  EFM_ASSERT(thread_id != NULL);
+  handle->thread_id = thread_id;
+  parameters->thread_id = thread_id;
 
   return SL_STATUS_OK;
 }
@@ -354,10 +361,63 @@ void sl_cli_clear(sl_cli_handle_t handle)
   handle->prompt_string = SL_CLI_PROMPT_STRING;
   handle->req_prompt = true;
   handle->buffer_full_shown = false;
+  handle->suspended = false;
 #if SL_CLI_NUM_HISTORY_BYTES
   handle->history_pos = 0;
 #endif
   sl_slist_init(&handle->command_group);
+}
+
+sl_status_t sl_cli_instance_suspend(sl_cli_handle_t handle)
+{
+  if (handle == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  if (handle->suspended) {
+    return SL_STATUS_OK;
+  }
+
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  if (handle->thread_id == NULL) {
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  handle->suspended = true;
+
+  if (osThreadSuspend(handle->thread_id) != osOK) {
+    handle->suspended = false;
+    return SL_STATUS_FAIL;
+  }
+#else
+  handle->suspended = true;
+  #endif
+
+  return SL_STATUS_OK;
+}
+
+sl_status_t sl_cli_instance_resume(sl_cli_handle_t handle)
+{
+  if (handle == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  if (!handle->suspended) {
+    return SL_STATUS_OK;
+  }
+
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  if (handle->thread_id == NULL) {
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  if (osThreadResume(handle->thread_id) != osOK) {
+    return SL_STATUS_FAIL;
+  }
+#endif
+
+  handle->suspended = false;
+  return SL_STATUS_OK;
 }
 
 void sl_cli_redirect_command(sl_cli_handle_t handle, sl_cli_command_function_t command_function, const char *prompt, void *user)
@@ -418,6 +478,9 @@ sl_status_t sl_cli_instance_init(sl_cli_handle_t handle,
 #if !defined(SL_CATALOG_KERNEL_PRESENT)
 bool sl_cli_is_ok_to_sleep(sl_cli_handle_t handle)
 {
+  if (handle->suspended) {
+    return true;
+  }
   if (handle->input_char == EOF) {
     handle->input_char = sli_cli_io_getchar();
   }
@@ -427,7 +490,6 @@ bool sl_cli_is_ok_to_sleep(sl_cli_handle_t handle)
   if (handle->block_sleep) {
     return false;
   }
-
 #if defined(SL_CLI_ACTIVE_FLAG_EN)
   return !handle->active;
 #else
@@ -437,6 +499,9 @@ bool sl_cli_is_ok_to_sleep(sl_cli_handle_t handle)
 
 void sl_cli_tick_instance(sl_cli_handle_t handle)
 {
+  if (handle->suspended) {
+    return;
+  }
 #if defined(SL_CATALOG_CLI_DELAY_PRESENT)
   if (sl_cli_delay_tick(handle)) {
     return;

@@ -73,7 +73,7 @@
 #elif defined(LDMA_PRESENT) && (LDMA_COUNT == 1) && (_SILICON_LABS_32B_SERIES <= 2)
 #define UART_DMA_IRQ          LDMA_IRQn
 #define UART_DMA_IRQHANDLER() LDMA_IRQHandler()
-#elif defined(LDMA_PRESENT) && (LDMA_COUNT == 1) && (_SILICON_LABS_32B_SERIES > 2)
+#elif defined(LDMA_PRESENT) && (LDMA_COUNT >= 1) && (_SILICON_LABS_32B_SERIES > 2)
 #define UART_DMA_IRQ          LDMA0_CHNL0_IRQn
 #define UART_DMA_IRQHANDLER() LDMA0_CHNL0_IRQHandler()
 #else

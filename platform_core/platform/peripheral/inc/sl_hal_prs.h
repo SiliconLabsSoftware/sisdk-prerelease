@@ -40,7 +40,7 @@ extern "C" {
 #endif
 #include <stdbool.h>
 #include <stddef.h>
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_status.h"
 #include "sl_device_gpio.h"
 #include "sl_enum.h"
@@ -325,7 +325,7 @@ void sl_hal_prs_pin_output(uint8_t channel,
 __INLINE void sl_hal_prs_async_set_channel_swlevel(uint8_t channel,
                                                    bool level)
 {
-  EFM_ASSERT(channel < SL_HAL_PRS_ASYNC_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(channel < SL_HAL_PRS_ASYNC_CHAN_COUNT);
 
   level ? (PRS->ASYNC_SWLEVEL_SET = 0x1 << channel) \
   : (PRS->ASYNC_SWLEVEL_CLR = 0x1 << channel);
@@ -343,7 +343,7 @@ __INLINE void sl_hal_prs_async_set_channel_swlevel(uint8_t channel,
  ******************************************************************************/
 __INLINE bool sl_hal_prs_async_get_channel_swlevel(uint8_t channel)
 {
-  EFM_ASSERT(channel < SL_HAL_PRS_ASYNC_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(channel < SL_HAL_PRS_ASYNC_CHAN_COUNT);
 
   return (PRS->ASYNC_SWLEVEL >> channel) & _PRS_ASYNC_SWLEVEL_CH0LEVEL_MASK;
 }
@@ -366,11 +366,11 @@ __INLINE bool sl_hal_prs_get_channel_value(uint8_t channel,
                                            sl_hal_prs_channel_type_t channel_type)
 {
   if (channel_type == SL_HAL_PRS_TYPE_ASYNC) {
-    EFM_ASSERT(channel < SL_HAL_PRS_ASYNC_CHAN_COUNT);
+    SL_LOG_DEBUG_ASSERT(channel < SL_HAL_PRS_ASYNC_CHAN_COUNT);
 
     return (PRS->ASYNC_PEEK >> channel) & _PRS_ASYNC_PEEK_CH0VAL_MASK;
   } else {
-    EFM_ASSERT(channel < SL_HAL_PRS_SYNC_CHAN_COUNT);
+    SL_LOG_DEBUG_ASSERT(channel < SL_HAL_PRS_SYNC_CHAN_COUNT);
 
     return (PRS->SYNC_PEEK >> channel) & _PRS_SYNC_PEEK_CH0VAL_MASK;
   }
@@ -391,7 +391,7 @@ __INLINE bool sl_hal_prs_get_channel_value(uint8_t channel,
  ******************************************************************************/
 __INLINE void sl_hal_prs_async_set_channel_swpulse(uint8_t channel)
 {
-  EFM_ASSERT(channel < SL_HAL_PRS_ASYNC_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(channel < SL_HAL_PRS_ASYNC_CHAN_COUNT);
 
   PRS->ASYNC_SWPULSE_SET = 0x1 << channel;
 }
@@ -411,7 +411,7 @@ __INLINE void sl_hal_prs_async_set_channel_swpulse(uint8_t channel)
 __INLINE void sl_hal_prs_async_connect_channel_producer(uint8_t channel,
                                                         sl_hal_prs_async_producer_signal_t producer_signal)
 {
-  EFM_ASSERT(channel < SL_HAL_PRS_ASYNC_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(channel < SL_HAL_PRS_ASYNC_CHAN_COUNT);
 
   PRS->ASYNC_CH[channel].CTRL &= ~(_PRS_ASYNC_CH_CTRL_SIGSEL_MASK | _PRS_ASYNC_CH_CTRL_SOURCESEL_MASK);
   PRS->ASYNC_CH[channel].CTRL |= producer_signal;
@@ -432,7 +432,7 @@ __INLINE void sl_hal_prs_async_connect_channel_producer(uint8_t channel,
 __INLINE void sl_hal_prs_sync_connect_channel_producer(uint8_t channel,
                                                        sl_hal_prs_sync_producer_signal_t producer_signal)
 {
-  EFM_ASSERT(channel < SL_HAL_PRS_SYNC_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(channel < SL_HAL_PRS_SYNC_CHAN_COUNT);
 
   PRS->SYNC_CH[channel].CTRL &= ~(_PRS_SYNC_CH_CTRL_SIGSEL_MASK | _PRS_SYNC_CH_CTRL_SOURCESEL_MASK);
   PRS->SYNC_CH[channel].CTRL |= producer_signal;
@@ -462,10 +462,10 @@ __INLINE void sl_hal_prs_async_combine_signals(uint8_t channel_a,
                                                uint8_t channel_b,
                                                sl_hal_prs_logic_t logic)
 {
-  EFM_ASSERT(channel_a < SL_HAL_PRS_ASYNC_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(channel_a < SL_HAL_PRS_ASYNC_CHAN_COUNT);
 
 #if defined(_PRS_ASYNC_CH_CTRL_AUXSEL_MASK)
-  EFM_ASSERT(channel_b < SL_HAL_PRS_ASYNC_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(channel_b < SL_HAL_PRS_ASYNC_CHAN_COUNT);
 
   PRS->ASYNC_CH[channel_a].CTRL = (PRS->ASYNC_CH[channel_a].CTRL
                                    & ~(_PRS_ASYNC_CH_CTRL_FNSEL_MASK
@@ -473,7 +473,8 @@ __INLINE void sl_hal_prs_async_combine_signals(uint8_t channel_a,
                                   | ((uint32_t)logic << _PRS_ASYNC_CH_CTRL_FNSEL_SHIFT)
                                   | ((uint32_t)channel_b << _PRS_ASYNC_CH_CTRL_AUXSEL_SHIFT);
 #else
-  EFM_ASSERT(channel_a == ((channel_b + 1) % SL_HAL_PRS_ASYNC_CHAN_COUNT));
+  SL_LOG_DEBUG_ASSERT(channel_a == ((channel_b + 1) % SL_HAL_PRS_ASYNC_CHAN_COUNT));
+  (void)channel_b;
 
   PRS->ASYNC_CH[channel_a].CTRL = (PRS->ASYNC_CH[channel_a].CTRL
                                    & ~(_PRS_ASYNC_CH_CTRL_FNSEL_MASK))

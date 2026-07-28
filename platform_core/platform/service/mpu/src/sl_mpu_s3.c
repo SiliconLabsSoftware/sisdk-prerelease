@@ -208,15 +208,20 @@ void sl_mpu_disable_execute_from_ram(void)
                                            SL_MPA_MANAGER_ATTRIBUTE_NON_EXECUTABLE);
   EFM_ASSERT(status == SL_STATUS_OK);
 
-  // Configure the ITCM as read-only, since it is possible to modify RAMFuncs
-  // in ITCM to conduct code injection attacks.
-  status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
-  EFM_ASSERT(status == SL_STATUS_OK);
-  status = sl_mpa_manager_configure_region(temp_region_handle,
-                                           (void*)ITCM_BASE,
-                                           (size_t)itcm_size,
-                                           SL_MPA_MANAGER_ATTRIBUTE_READ_ONLY);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  // Configure only the RAMFUNC section in ITCM as read-only. linker
+  // layout places the RAM vector table (IVT) in ITCM before ramfuncs; that
+  // range must remain writable for IRQ handler registration. Leave ITCM
+  // before and after ramfuncs on the privileged default. Mark ramfuncs RO
+  // to prevent code-injection via modification of RAM functions.
+  if ( RAMFUNC_SECTION_SIZE > 0 ) {
+    status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
+    EFM_ASSERT(status == SL_STATUS_OK);
+    status = sl_mpa_manager_configure_region(temp_region_handle,
+                                             (void*)RAMFUNC_SECTION_NON_ALIASED_BEGIN,
+                                             (size_t)RAMFUNC_SECTION_SIZE,
+                                             SL_MPA_MANAGER_ATTRIBUTE_READ_ONLY);
+    EFM_ASSERT(status == SL_STATUS_OK);
+  }
 
   // Configure DTCM as fully non-executable.
   status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);

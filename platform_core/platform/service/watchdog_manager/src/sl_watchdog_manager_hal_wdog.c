@@ -35,6 +35,9 @@
 #include "sl_core.h"
 #include "sl_assert.h"
 #include "sl_watchdog_manager_config.h"
+#include "sli_watchdog_manager.h"
+#include "sl_interrupt_manager.h"
+#include "sl_component_catalog.h"
 #include "em_device.h"
 #if SLI_WATCHDOG_MANAGER_USE_EM_TRANSITION_HOOK
 #include "sl_power_manager.h"
@@ -53,9 +56,11 @@
 #if defined(WDOG_PRESENT) && (WDOG_COUNT > 1)
   #define WATCHDOG_PERIPHERAL     WDOG1
   #define WATCHDOG_BUS_CLOCK      SL_BUS_CLOCK_WDOG1
+  #define WATCHDOG_IRQN           WDOG1_IRQn
 #elif defined(WDOG_PRESENT) && (WDOG_COUNT == 1)
   #define WATCHDOG_PERIPHERAL     WDOG0
   #define WATCHDOG_BUS_CLOCK      SL_BUS_CLOCK_WDOG0
+  #define WATCHDOG_IRQN           WDOG0_IRQn
 #else
   #warning "No WDOG peripheral available"
 #endif
@@ -134,6 +139,69 @@ static uint8_t hal_timeout_period;
 #if SLI_WATCHDOG_MANAGER_USE_EM_TRANSITION_HOOK
 /// True if we disabled WDOG when leaving EM0; re-enable only when entering EM0 if set.
 static bool wdog_disabled_for_sleep = false;
+#endif
+
+#if defined(_WDOG_CFG_WARNSEL_MASK)
+/// True after starve IRQ handler and NVIC are installed.
+static bool starve_interrupt_enabled = false;
+
+/***************************************************************************//**
+ * @brief WDOG warning interrupt handler (starve).
+ ******************************************************************************/
+static void watchdog_starve_irq_handler(void)
+{
+  uint32_t flags = sl_hal_wdog_get_enabled_pending_interrupts(WATCHDOG_PERIPHERAL);
+
+  if ((flags & WDOG_IF_WARN) != 0u) {
+    sl_hal_wdog_clear_interrupts(WATCHDOG_PERIPHERAL, WDOG_IF_WARN);
+    sli_watchdog_manager_on_starve();
+  }
+
+#if defined(WDOG_IF_TOUT)
+  if ((flags & WDOG_IF_TOUT) != 0u) {
+    sl_hal_wdog_clear_interrupts(WATCHDOG_PERIPHERAL, WDOG_IF_TOUT);
+  }
+#endif
+}
+
+#if defined(WDOG_COUNT) && (WDOG_COUNT > 1)
+/***************************************************************************//**
+ * @brief WDOG1 IRQ vector (overrides weak Default_Handler alias in startup).
+ *
+ * @details On Series 2, sl_interrupt_manager_set_irq_handler() requires the
+ *          interrupt_manager_vector_table_in_ram component. Providing this
+ *          symbol ensures the starve handler is reachable without that component.
+ ******************************************************************************/
+void WDOG1_IRQHandler(void)
+{
+  watchdog_starve_irq_handler();
+}
+#elif defined(WDOG_COUNT) && (WDOG_COUNT == 1)
+void WDOG0_IRQHandler(void)
+{
+  watchdog_starve_irq_handler();
+}
+#endif
+
+/***************************************************************************//**
+ * @brief Map config warning period to HAL warning select.
+ ******************************************************************************/
+static sl_hal_wdog_warning_timeout_select_t hal_map_warning_time(void)
+{
+  switch (SL_WATCHDOG_MANAGER_WARNING_TIME) {
+    case SL_WATCHDOG_MANAGER_WARNING_TIME25:
+      return SL_WDOG_WARNING_TIME25;
+
+    case SL_WATCHDOG_MANAGER_WARNING_TIME50:
+      return SL_WDOG_WARNING_TIME50;
+
+    case SL_WATCHDOG_MANAGER_WARNING_TIME75:
+      return SL_WDOG_WARNING_TIME75;
+
+    default:
+      return SL_WDOG_WARNING_DISABLE;
+  }
+}
 #endif
 
 #if WATCHDOG_HAS_CLKSEL
@@ -295,8 +363,12 @@ sl_status_t sli_watchdog_manager_hal_init(uint8_t timeout_period)
   init.em3_run = (SL_WATCHDOG_MANAGER_EM3_RUN != 0);
 #endif
 
-  // Disable warning interrupt.
+  // Warning interrupt period (starve callback fires at this point before reset).
+#if defined(_WDOG_CFG_WARNSEL_MASK)
+  init.warning_time_select = hal_map_warning_time();
+#else
   init.warning_time_select = SL_WDOG_WARNING_DISABLE;
+#endif
 
   // Disable window interrupt.
   init.window_time_select = SL_WDOG_ILLEGAL_WINDOW_DISABLE;
@@ -342,6 +414,63 @@ sl_status_t sli_watchdog_manager_hal_feed(void)
 
   return SL_STATUS_OK;
 }
+
+#if defined(_WDOG_CFG_WARNSEL_MASK)
+/***************************************************************************//**
+ * Enable WDOG warning interrupt for starve callback.
+ ******************************************************************************/
+sl_status_t sli_watchdog_manager_hal_enable_starve_interrupt(void)
+{
+  if (!hal_initialized) {
+    return SL_STATUS_NOT_INITIALIZED;
+  }
+
+  if (hal_map_warning_time() == SL_WDOG_WARNING_DISABLE) {
+    return SL_STATUS_NOT_SUPPORTED;
+  }
+
+  if (!starve_interrupt_enabled) {
+    sl_hal_wdog_clear_interrupts(WATCHDOG_PERIPHERAL, WDOG_IF_WARN);
+    sl_hal_wdog_enable_interrupts(WATCHDOG_PERIPHERAL, WDOG_IF_WARN);
+    sl_interrupt_manager_clear_irq_pending(WATCHDOG_IRQN);
+    sl_interrupt_manager_enable_irq(WATCHDOG_IRQN);
+#if defined(SL_CATALOG_INTERRUPT_MANAGER_VECTOR_TABLE_IN_RAM_PRESENT)
+    {
+      sl_status_t irq_status = sl_interrupt_manager_set_irq_handler(
+        WATCHDOG_IRQN,
+        watchdog_starve_irq_handler);
+      if (irq_status != SL_STATUS_OK) {
+        return irq_status;
+      }
+    }
+#endif
+    starve_interrupt_enabled = true;
+  }
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Disable WDOG warning interrupt for starve callback.
+ ******************************************************************************/
+sl_status_t sli_watchdog_manager_hal_disable_starve_interrupt(void)
+{
+  if (!hal_initialized) {
+    return SL_STATUS_NOT_INITIALIZED;
+  }
+
+  if (!starve_interrupt_enabled) {
+    return SL_STATUS_OK;
+  }
+
+  sl_hal_wdog_clear_interrupts(WATCHDOG_PERIPHERAL, WDOG_IF_WARN);
+  sl_hal_wdog_disable_interrupts(WATCHDOG_PERIPHERAL, WDOG_IF_WARN);
+  sl_interrupt_manager_disable_irq(WATCHDOG_IRQN);
+  starve_interrupt_enabled = false;
+
+  return SL_STATUS_OK;
+}
+#endif
 
 /***************************************************************************//**
  * Disable the hardware watchdog.

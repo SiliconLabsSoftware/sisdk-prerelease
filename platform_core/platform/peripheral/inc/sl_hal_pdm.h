@@ -42,7 +42,7 @@
 extern "C" {
 #endif
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_enum.h"
 
 /***************************************************************************//**
@@ -336,6 +336,7 @@ __INLINE void sl_hal_pdm_fifo_flush(PDM_TypeDef *pdm)
  ******************************************************************************/
 __INLINE uint32_t sl_hal_pdm_rx(PDM_TypeDef *pdm)
 {
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PDM_REF_VALID(pdm));
   while ((pdm->STATUS & PDM_STATUS_EMPTY) == PDM_STATUS_EMPTY) {
     // Wait for data in FIFO.
   }
@@ -351,6 +352,7 @@ __INLINE uint32_t sl_hal_pdm_rx(PDM_TypeDef *pdm)
  ******************************************************************************/
 __INLINE uint32_t sl_hal_pdm_get_status(PDM_TypeDef *pdm)
 {
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PDM_REF_VALID(pdm));
   return pdm->STATUS;
 }
 
@@ -366,6 +368,7 @@ __INLINE uint32_t sl_hal_pdm_get_status(PDM_TypeDef *pdm)
 __INLINE void sl_hal_pdm_clear_interrupts(PDM_TypeDef *pdm,
                                           uint32_t flags)
 {
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PDM_REF_VALID(pdm));
   pdm->IF_CLR = flags;
 }
 
@@ -381,6 +384,7 @@ __INLINE void sl_hal_pdm_clear_interrupts(PDM_TypeDef *pdm,
 __INLINE void sl_hal_pdm_set_interrupts(PDM_TypeDef *pdm,
                                         uint32_t flags)
 {
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PDM_REF_VALID(pdm));
   pdm->IF_SET = flags;
 }
 
@@ -400,6 +404,7 @@ __INLINE void sl_hal_pdm_set_interrupts(PDM_TypeDef *pdm,
 __INLINE void sl_hal_pdm_enable_interrupts(PDM_TypeDef *pdm,
                                            uint32_t flags)
 {
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PDM_REF_VALID(pdm));
   pdm->IEN_SET = flags;
 }
 
@@ -415,6 +420,7 @@ __INLINE void sl_hal_pdm_enable_interrupts(PDM_TypeDef *pdm,
 __INLINE void sl_hal_pdm_disable_interrupts(PDM_TypeDef *pdm,
                                             uint32_t flags)
 {
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PDM_REF_VALID(pdm));
   pdm->IEN_CLR = flags;
 }
 
@@ -431,6 +437,7 @@ __INLINE void sl_hal_pdm_disable_interrupts(PDM_TypeDef *pdm,
  ******************************************************************************/
 __INLINE uint32_t sl_hal_pdm_get_pending_interrupts(PDM_TypeDef *pdm)
 {
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PDM_REF_VALID(pdm));
   return pdm->IF;
 }
 
@@ -449,6 +456,7 @@ __INLINE uint32_t sl_hal_pdm_get_pending_interrupts(PDM_TypeDef *pdm)
  ******************************************************************************/
 __INLINE uint32_t sl_hal_pdm_get_enabled_pending_interrupts(PDM_TypeDef *pdm)
 {
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PDM_REF_VALID(pdm));
   uint32_t ien;
 
   ien = pdm->IEN;

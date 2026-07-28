@@ -84,9 +84,8 @@ void sli_zigbee_af_init_cb(void)
   //Initialize the hal
   halInit();
 
-  sl_zigbee_af_app_println("Reset info: %d (%s)",
-                           halGetResetInfo(),
-                           halGetResetString());
+  sl_zigbee_af_app_println("Reset info: %d",
+                           halGetResetInfo());
   sl_zigbee_af_core_flush();
 
   // This will initialize the stack of networks maintained by the framework,

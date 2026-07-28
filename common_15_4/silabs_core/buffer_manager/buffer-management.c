@@ -1081,6 +1081,9 @@ void sli_legacy_buffer_manager_reclaim_unused_buffers(const BufferMarker *marker
 
 #ifndef MAC_DUAL_PRESENT
   do {
+#ifdef SL_ZIGBEE_TEST
+    (*emCompactionInterruptProc)();
+#endif // SL_ZIGBEE_TEST
     ATOMIC(
       finger = expandPointer(sli_legacy_buffer_manager_buffer_queue_remove_head(&phyToMacQueue));
       if (finger == NULL) {

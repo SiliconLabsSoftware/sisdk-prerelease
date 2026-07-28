@@ -132,7 +132,7 @@ SL_WEAK void sli_zigbee_debug_print(uint32_t group_type, bool new_line, const ch
     }
     (void)new_line;
     if (len > 0U) {
-      SL_PRINT_STRING_DEBUG("%s", (uint32_t)(uintptr_t)buf);
+      SL_PRINT_FMT_DEBUG("%s", (uint32_t)(uintptr_t)buf);
     }
   }
 #else

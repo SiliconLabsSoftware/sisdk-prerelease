@@ -256,6 +256,7 @@ uint32_t sl_hal_emu_get_reset_cause(void)
   return reset_cause;
 }
 
+#if defined(_SILICON_LABS_32B_SERIES_2)
 #if (defined(SL_HAL_EMU_DCDC_BUCK_PRESENT) \
   || defined(SL_HAL_EMU_DCDC_BOOST_PRESENT))
 /***************************************************************************//**
@@ -769,6 +770,6 @@ bool sl_hal_emu_dcdc_get_dual_ipk_enable(void)
   return result;
 }
 #endif
-
+#endif /* defined(_SILICON_LABS_32B_SERIES_2) */
 
 #endif /* defined(EMU_PRESENT) */

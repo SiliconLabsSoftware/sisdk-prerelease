@@ -2510,9 +2510,21 @@ static sl_rail_status_t fn_start_pending_tx(void)
 
       fn_set_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_SCHEDULED_TX_PENDING, false);
 
-      // This would result to assert in lower-mac code
-      EFM_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
+      if (status != SL_RAIL_STATUS_NO_ERROR) {
+        // RAIL rejected the scheduled TX synchronously (e.g. lost a DMP race
+        // right at start time). No TX was actually armed, so no scheduler
+        // status / completion event will ever arrive to clear TX_SCHEDULED
+        // for us -- roll it back and deliver the failure directly to the
+        // owning protocol now, same as the lock-denied case above.
+        fn_set_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_TX_SCHEDULED, false);
+        protocol_context[i].rail_config->events_callback(&protocol_context[i], SL_RAIL_EVENT_TX_BLOCKED);
+      }
 
+      // The return value here only acknowledges that a pending request was
+      // dequeued; actual TX outcome always travels to the caller
+      // asynchronously via RAIL/stack events (never via this return value).
+      // Some callers (including OpenThread) assert on this being NO_ERROR,
+      // so it must stay NO_ERROR regardless of the outcome above.
       return SL_RAIL_STATUS_NO_ERROR;
     }
 
@@ -2572,9 +2584,26 @@ static sl_rail_status_t fn_start_pending_tx(void)
 
       fn_set_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_START_TX_PENDING, false);
 
-      // This would result to assert in lower-mac code
-      EFM_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
+      if (status != SL_RAIL_STATUS_NO_ERROR) {
+        // RAIL rejected the immediate TX synchronously (e.g. lost a DMP race
+        // right at start time). No TX was actually armed on the radio, so
+        // none of the normal feedback paths (TX_PACKET_SENT, RX_ACK_TIMEOUT,
+        // SCHEDULER_STATUS) will ever fire to clear TX_IN_PROGRESS /
+        // WAIT_FOR_ACK -- left alone, tx_in_progress() stays stuck forever
+        // and every subsequent send is rejected with SL_STATUS_BUSY. Roll
+        // the optimistic flags back and deliver the failure directly to the
+        // owning protocol now, the same way a genuine RAIL TX_BLOCKED event
+        // would be delivered.
+        fn_set_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_TX_IN_PROGRESS, false);
+        fn_set_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_WAIT_FOR_ACK, false);
+        protocol_context[i].rail_config->events_callback(&protocol_context[i], SL_RAIL_EVENT_TX_BLOCKED);
+      }
 
+      // The return value here only acknowledges that a pending request was
+      // dequeued; actual TX outcome always travels to the caller
+      // asynchronously via RAIL/stack events (never via this return value).
+      // Some callers (including OpenThread) assert on this being NO_ERROR,
+      // so it must stay NO_ERROR regardless of the outcome above.
       return SL_RAIL_STATUS_NO_ERROR;
     }
   }

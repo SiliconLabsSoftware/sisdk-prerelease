@@ -31,7 +31,6 @@
 #include "sl_hal_pdm.h"
 #if defined(PDM_PRESENT)
 
-#include "sl_assert.h"
 #include <stddef.h>
 
 /*******************************************************************************
@@ -65,14 +64,14 @@ void sl_hal_pdm_init(PDM_TypeDef *pdm,
                      const sl_hal_pdm_init_t *init)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PDM_REF_VALID(pdm));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PDM_REF_VALID(pdm));
 
   // A sanity check of configuration parameters.
-  EFM_ASSERT(init != NULL);
-  EFM_ASSERT(init->down_sampling_rate <= (_PDM_CTRL_DSR_MASK >> _PDM_CTRL_DSR_SHIFT));
-  EFM_ASSERT(init->gain               <= (_PDM_CTRL_GAIN_MASK >> _PDM_CTRL_GAIN_SHIFT));
-  EFM_ASSERT(init->clk_prescaler      <= (_PDM_CFG1_PRESC_MASK >> _PDM_CFG1_PRESC_SHIFT));
-  EFM_ASSERT(init->number_channels    <= (_PDM_CFG0_NUMCH_MASK >> _PDM_CFG0_NUMCH_SHIFT));
+  SL_LOG_DEBUG_ASSERT(init != NULL);
+  SL_LOG_DEBUG_ASSERT(init->down_sampling_rate <= (_PDM_CTRL_DSR_MASK >> _PDM_CTRL_DSR_SHIFT));
+  SL_LOG_DEBUG_ASSERT(init->gain               <= (_PDM_CTRL_GAIN_MASK >> _PDM_CTRL_GAIN_SHIFT));
+  SL_LOG_DEBUG_ASSERT(init->clk_prescaler      <= (_PDM_CFG1_PRESC_MASK >> _PDM_CFG1_PRESC_SHIFT));
+  SL_LOG_DEBUG_ASSERT(init->number_channels    <= (_PDM_CFG0_NUMCH_MASK >> _PDM_CFG0_NUMCH_SHIFT));
 
   // Write the CFG0 register with the configurations.
 #if defined(PDM_CFG0_NUMCH_THREE)
@@ -129,7 +128,7 @@ void sl_hal_pdm_init(PDM_TypeDef *pdm,
 void sl_hal_pdm_deinit(PDM_TypeDef *pdm)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PDM_REF_VALID(pdm));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PDM_REF_VALID(pdm));
 
   if (pdm->STATUS & PDM_STATUS_ACT) {
     sl_hal_pdm_stop(pdm);
@@ -145,7 +144,7 @@ void sl_hal_pdm_deinit(PDM_TypeDef *pdm)
 void sl_hal_pdm_reset(PDM_TypeDef *pdm)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_PDM_REF_VALID(pdm));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_PDM_REF_VALID(pdm));
 
   // Wait for any pending CMD synchronization.
   sl_hal_pdm_wait_sync(pdm);

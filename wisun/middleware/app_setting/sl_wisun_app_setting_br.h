@@ -135,10 +135,11 @@ typedef struct app_setting_br {
 } SL_ATTRIBUTE_PACKED app_setting_br_t;
 SL_PACK_END()
 
+/// Wi-SUN BR Wifi setting structure
 typedef struct app_setting_wifi {
   uint8_t ssid[SL_WISUN_WIFI_SSID_SIZE + 1]; ///< SSID value
   uint8_t passphrase[SL_WISUN_WIFI_PASSPHRASE_SIZE + 1];  ///< PSK credential
-  uint8_t security_type;
+  uint8_t security_type; ///< Security type
 } app_setting_wifi_t;
 
 /** @} (end APP_SETTING_TYPES) */

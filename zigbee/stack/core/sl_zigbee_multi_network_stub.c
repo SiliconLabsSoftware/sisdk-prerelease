@@ -243,8 +243,11 @@ bool sli_zigbee_is_network_joined(uint8_t nwkIndex)
   return (sli_zigbee_state == NETWORK_JOINED
           || sli_zigbee_state == NETWORK_JOINED_UNAUTHENTICATED
           || sli_zigbee_state == NETWORK_REJOINED_UNAUTHENTICATED
+#ifdef CSL_SUPPORT
           || sli_zigbee_state == NETWORK_JOINED_S2S_INITIATOR
-          || sli_zigbee_state == NETWORK_JOINED_S2S_TARGET);
+          || sli_zigbee_state == NETWORK_JOINED_S2S_TARGET
+#endif
+          );
 }
 
 bool sli_zigbee_is_network_always_on(uint8_t nwkIndex)

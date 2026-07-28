@@ -35,6 +35,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "sl_component_catalog.h"
+#include "em_device.h"
 
 /***************************************************************************//**
  * Whether the hardware watchdog supports EMxRUN (counter runs in EM1/2/3).
@@ -261,6 +262,29 @@ bool sli_watchdog_manager_hal_has_em1run(void);
  * @param to   Energy mode we are entering.
  ******************************************************************************/
 void sli_watchdog_manager_hal_on_em_transition(uint8_t from, uint8_t to);
+#endif
+
+#if defined(_WDOG_CFG_WARNSEL_MASK)
+/***************************************************************************//**
+ * @brief Enable the WDOG warning interrupt and NVIC routing.
+ *
+ * @details Installs the HAL starve IRQ handler via the interrupt manager.
+ *          Requires @ref SL_WATCHDOG_MANAGER_WARNING_TIME to be enabled in config.
+ *
+ * @return SL_STATUS_OK on success.
+ * @return SL_STATUS_NOT_SUPPORTED if warning interrupts are unavailable.
+ ******************************************************************************/
+sl_status_t sli_watchdog_manager_hal_enable_starve_interrupt(void);
+
+/***************************************************************************//**
+ * @brief Disable the WDOG warning interrupt and NVIC routing.
+ *
+ * @details Clears pending WARN flags, disables peripheral and NVIC interrupts,
+ *          and resets the HAL enabled state. Safe to call when not enabled.
+ *
+ * @return SL_STATUS_OK on success.
+ ******************************************************************************/
+sl_status_t sli_watchdog_manager_hal_disable_starve_interrupt(void);
 #endif
 /** @} (end addtogroup watchdog_manager_hal) */
 

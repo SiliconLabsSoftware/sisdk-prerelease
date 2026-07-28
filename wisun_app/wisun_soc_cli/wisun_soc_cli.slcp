@@ -35,6 +35,8 @@ component:
   - id: "wisun_cli_util"
   - id: "errno"
   - id: "wisun_crash_handler"
+  - id: "device_init_dcdc"
+    condition: [device_has_dcdc, wisun_low_power]
 
 source:
   - path: "app.c"

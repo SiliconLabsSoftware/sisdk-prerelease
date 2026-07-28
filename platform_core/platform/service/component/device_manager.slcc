@@ -18,6 +18,8 @@ requires:
 - name: device_peripheral
 - name: device_gpio
 - name: device_i2c
+- name: device_i2s
+  condition: [device_has_i2s]
 - name: device_dma
 - name: device_emac
   condition: [device_has_emac]

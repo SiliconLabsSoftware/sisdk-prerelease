@@ -32,7 +32,6 @@
 #if defined(MSC_COUNT) && (MSC_COUNT > 0)
 #include "sl_hal_bus.h"
 #include "sl_hal_syscfg.h"
-#include "sl_assert.h"
 #include "sl_common.h"
 #include "sl_core.h"
 
@@ -101,6 +100,7 @@ sl_hal_msc_status_t sl_hal_msc_wait_status(uint32_t mask,
 
     // if INVADDR is asserted by MSC, BUSY will never go high, can be checked early.
     if ((status & MSC_STATUS_INVADDR) != 0) {
+      SL_PRINT_STRING_ERROR("invalid address, %d\r\n", (int)__LINE__);
       return SL_HAL_MSC_INVALID_ADDR;
     }
     // if requested operation fails because flash is locked, BUSY will be high
@@ -111,10 +111,12 @@ sl_hal_msc_status_t sl_hal_msc_wait_status(uint32_t mask,
     // bail out if necessary.
     if ((!(mask & MSC_STATUS_BUSY))
         && (status & (MSC_STATUS_LOCKED | MSC_STATUS_REGLOCK))) {
+      SL_PRINT_STRING_ERROR("flash is locked, %d\r\n", (int)__LINE__);
       return SL_HAL_MSC_LOCKED;
     }
     if ((status & mask) == value) {
       if ((status & (MSC_STATUS_LOCKED | MSC_STATUS_REGLOCK)) != 0) {
+        SL_PRINT_STRING_ERROR("flash is locked, %d\r\n", (int)__LINE__);
         return SL_HAL_MSC_LOCKED;
       } else {
         return SL_HAL_MSC_OK;
@@ -123,6 +125,7 @@ sl_hal_msc_status_t sl_hal_msc_wait_status(uint32_t mask,
     timeout--;
   }
 
+  SL_PRINT_STRING_ERROR("operation timed out, %d\r\n", (int)__LINE__);
   return SL_HAL_MSC_TIMEOUT;
 }
 
@@ -137,14 +140,15 @@ sl_hal_msc_status_t sl_hal_msc_write_burst(uint32_t address,
                                            uint32_t num_bytes)
 {
   // Check alignment (must be aligned to words).
-  EFM_ASSERT(((uint32_t)address & 0x3U) == 0);
-  EFM_ASSERT(data != NULL);
+  SL_LOG_DEBUG_ASSERT(((uint32_t)address & 0x3U) == 0);
+  SL_LOG_DEBUG_ASSERT(data != NULL);
   // Check number of bytes, must be divisible by four.
-  EFM_ASSERT((num_bytes & 0x3U) == 0);
+  SL_LOG_DEBUG_ASSERT((num_bytes & 0x3U) == 0);
 
   sl_hal_msc_status_t ret_val;
   MSC->ADDRB = address;
   if ((MSC->STATUS & MSC_STATUS_INVADDR) != 0) {
+    SL_PRINT_STRING_ERROR("invalid address, %d\r\n", (int)__LINE__);
     return SL_HAL_MSC_INVALID_ADDR;
   }
 
@@ -156,6 +160,7 @@ sl_hal_msc_status_t sl_hal_msc_write_burst(uint32_t address,
     ret_val = sl_hal_msc_wait_status(MSC_STATUS_WDATAREADY, MSC_STATUS_WDATAREADY);
 
     if (ret_val != SL_HAL_MSC_OK) {
+      SL_PRINT_STRING_ERROR("write failed, %d\r\n", (int)__LINE__);
       return ret_val;
     }
 
@@ -179,7 +184,7 @@ sl_hal_msc_status_t sl_hal_msc_write_burst(uint32_t address,
  ******************************************************************************/
 void sl_hal_msc_set_exec_config(const sl_hal_msc_exec_config_t *exec_config)
 {
-  EFM_ASSERT(exec_config != NULL);
+  SL_LOG_DEBUG_ASSERT(exec_config != NULL);
 
   uint32_t msc_read_ctrl;
 
@@ -211,9 +216,9 @@ void sl_hal_msc_set_exec_config(const sl_hal_msc_exec_config_t *exec_config)
 SL_HAL_MSC_CODE_RAM
 sl_hal_msc_status_t sl_hal_msc_erase_page(uint32_t *start_address)
 {
-  EFM_ASSERT(start_address != NULL);
+  SL_LOG_DEBUG_ASSERT(start_address != NULL);
   // Address must be aligned to page boundary.
-  EFM_ASSERT((((uint32_t)start_address) & (FLASH_PAGE_SIZE - 1U)) == 0);
+  SL_LOG_DEBUG_ASSERT((((uint32_t)start_address) & (FLASH_PAGE_SIZE - 1U)) == 0);
 
   sl_hal_msc_status_t ret_val;
   bool was_locked;
@@ -248,10 +253,10 @@ sl_hal_msc_status_t sl_hal_msc_write_word(uint32_t *address,
                                           void const *data,
                                           uint32_t num_bytes)
 {
-  EFM_ASSERT(address != NULL);
-  EFM_ASSERT(((uint32_t)address & 0x3U) == 0); // Check alignment (must be aligned to words).
-  EFM_ASSERT(data != NULL);
-  EFM_ASSERT((num_bytes & 0x3U) == 0); // Check number of bytes, must be divisible by four.
+  SL_LOG_DEBUG_ASSERT(address != NULL);
+  SL_LOG_DEBUG_ASSERT(((uint32_t)address & 0x3U) == 0); // Check alignment (must be aligned to words).
+  SL_LOG_DEBUG_ASSERT(data != NULL);
+  SL_LOG_DEBUG_ASSERT((num_bytes & 0x3U) == 0); // Check number of bytes, must be divisible by four.
 
   uint32_t addr;
   const uint8_t  *p_data;
@@ -298,6 +303,7 @@ sl_hal_msc_status_t sl_hal_msc_mass_erase(void)
   sl_hal_msc_status_t ret_val;
 
   if (MSC_IS_LOCKED()) {
+    SL_PRINT_STRING_ERROR("flash is locked, %d\r\n", (int)__LINE__);
     return SL_HAL_MSC_LOCKED;
   }
 
@@ -319,10 +325,10 @@ sl_hal_msc_status_t sl_hal_msc_write_word_dma(uint32_t channel,
                                               const void *data,
                                               uint32_t num_bytes)
 {
-  EFM_ASSERT(channel < DMA_CHAN_COUNT);
-  EFM_ASSERT(address != NULL);
-  EFM_ASSERT(data != NULL);
-  EFM_ASSERT((num_bytes & 0x3U) == 0); // Check number of bytes, must be divisible by four.
+  SL_LOG_DEBUG_ASSERT(channel < DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(address != NULL);
+  SL_LOG_DEBUG_ASSERT(data != NULL);
+  SL_LOG_DEBUG_ASSERT((num_bytes & 0x3U) == 0); // Check number of bytes, must be divisible by four.
 
   uint32_t words;
   uint32_t burst_len;
@@ -353,6 +359,7 @@ sl_hal_msc_status_t sl_hal_msc_write_word_dma(uint32_t channel,
     MSC->ADDRB = dst;
     // Check for an invalid address.
     if ((MSC->STATUS & MSC_STATUS_INVADDR) != 0) {
+      SL_PRINT_STRING_ERROR("invalid address, %d\r\n", (int)__LINE__);
       return SL_HAL_MSC_INVALID_ADDR;
     }
 

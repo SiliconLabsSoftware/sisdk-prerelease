@@ -3661,6 +3661,8 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_advert_direct_connect_server_id_cnf_t;
 SL_PACK_END()
 
+/** @} (end SL_WISUN_MSG_ADVERT_DIRECT_CONNECT_SERVER_ID) */
+
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_START_DIRECT_CONNECT_CLIENT sl_wisun_msg_start_direct_connect_client
  * @{

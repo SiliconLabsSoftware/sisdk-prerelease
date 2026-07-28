@@ -101,6 +101,7 @@ void sli_power_manager_update_execution_mode_requirement(bool add)
 void sli_power_manager_executions_modes_init(void)
 {
   sli_power_manager_executions_modes_hal_init();
+  performance_mode_requirement = 0;
 }
 #endif
 

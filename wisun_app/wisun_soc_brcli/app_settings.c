@@ -1382,6 +1382,32 @@ const app_settings_entry_t app_settings_entries[] =
     .description = "Wi-SUN LFN profile [uint8]"
   },
   {
+    .key = "lfn_broadcast_interval_ms",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT32,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_settings_wisun.lfn_broadcast_interval_ms,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_integer,
+    .get_handler = app_settings_get_integer,
+    .description = "LFN broadcast interval in ms [uint32]"
+  },
+  {
+    .key = "lfn_broadcast_sync_period",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_settings_wisun.lfn_broadcast_sync_period,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_integer,
+    .get_handler = app_settings_get_integer,
+    .description = "LFN broadcast sync period [uint8]"
+  },
+  {
     .key = "phy",
     .domain = app_settings_domain_statistics,
     .value_size = APP_SETTINGS_VALUE_SIZE_NONE,

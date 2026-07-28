@@ -45,6 +45,10 @@ extern "C" {
 #include "sl_enum.h"
 #include "sl_hal_syscfg.h"
 
+#if defined(SLI_HAL_DCDC_S3_PRESENT)
+#include "sl_hal_dcdc_s3.h"
+#endif
+
 // *****************************************************************************
 /// @addtogroup emu EMU - Energy management unit
 /// @brief Energy management unit control peripheral
@@ -144,6 +148,7 @@ SL_ENUM(sl_hal_emu_hdreg_stop_gear_current_limit_t) {
 };
 #endif
 
+#if defined(_SILICON_LABS_32B_SERIES_2)
 #if defined(SL_HAL_EMU_DCDC_BUCK_PRESENT) \
   || defined(SL_HAL_EMU_DCDC_BOOST_PRESENT)
 /// DCDC mode.
@@ -502,6 +507,7 @@ typedef sl_hal_emu_dcdc_init_t sl_hal_emu_dcdc_config_t;
 #endif
 #endif
 #endif /* defined(SL_HAL_EMU_DCDC_BUCK_PRESENT) */
+#endif /* defined(_SILICON_LABS_32B_SERIES_2) */
 
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 // Alias for deprecated macro names used for backward compatibility purposes.
@@ -568,6 +574,7 @@ void sl_hal_emu_ram_power_down(uint32_t start,
  ******************************************************************************/
 void sl_hal_emu_ram_power_up(void);
 
+#if defined(_SILICON_LABS_32B_SERIES_2)
 #if (defined(SL_HAL_EMU_DCDC_BUCK_PRESENT) \
   || defined(SL_HAL_EMU_DCDC_BOOST_PRESENT))
 /***************************************************************************//**
@@ -823,6 +830,7 @@ void sl_hal_emu_dcdc_dual_ipk_disable(void);
  ******************************************************************************/
 bool sl_hal_emu_dcdc_get_dual_ipk_enable(void);
 #endif /* defined(_DCDC_DOCTRL_DUALIPKEN_MASK)*/
+#endif /* defined(_SILICON_LABS_32B_SERIES_2) */
 
 /***************************************************************************//**
  * @brief

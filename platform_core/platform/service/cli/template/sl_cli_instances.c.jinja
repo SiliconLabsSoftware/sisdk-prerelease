@@ -37,7 +37,6 @@ extern sl_cli_command_group_t *SL_CLI_{{ instance  | upper }}_COMMAND_GROUP;
 #if defined(SL_CATALOG_KERNEL_PRESENT) && SL_CLI_TICK_ENABLE
 __ALIGNED(8) static uint8_t {{ instance }}_task_stack[(SL_CLI_{{ instance  | upper }}_TASK_STACK_SIZE * sizeof(void *)) & 0xFFFFFFF8u];
 __ALIGNED(4) static uint8_t {{ instance }}_thread_cb[osThreadCbSize];
-static osThreadId_t {{ instance }}_thread_id;
 #endif
 static sl_cli_t sl_cli_{{ instance }};
 sl_cli_handle_t sl_cli_{{ instance }}_handle = &sl_cli_{{ instance }};
@@ -77,7 +76,6 @@ void sl_cli_instances_init(void)
 #endif
   instance_parameters.default_command_group = sl_cli_default_command_group;
 #if defined(SL_CATALOG_KERNEL_PRESENT) && SL_CLI_TICK_ENABLE
-  instance_parameters.thread_id = &{{ instance }}_thread_id;
   instance_parameters.thread_cb = {{ instance }}_thread_cb;
   instance_parameters.stack = {{ instance }}_task_stack;
   instance_parameters.stack_size = (SL_CLI_{{ instance  | upper }}_TASK_STACK_SIZE * sizeof(void *)) & 0xFFFFFFF8u;

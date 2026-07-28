@@ -213,6 +213,10 @@ typedef uint8_t sl_uart_async_rx_event_t; ///< RX Event bitmap type.
  *       with the aborted flag set to true and value of @p size will represent
  *       the number of bytes that were successfully transmitted before the transfer was aborted.
  *
+ * @note In case a user submits a new transfer from this callback, the new transfer will be added to
+ *       the queue. If the transfer was queued when the @p aborted flag was set to true, the transfer
+ *       is conserved, allowing users to implement abortion recovery paths.
+ *
  * @note Once this function is called, it is safe to assume that the buffer
  *       pointed  to by @p data is released from the driver and can be re-used by the caller.
  *
@@ -310,8 +314,11 @@ typedef struct uart_preinit_config {
 } sl_uart_preinit_config_t;
 #endif
 
-// Forward declaration of the UART transfer structure.
-typedef struct sli_uart_async_transfer sli_uart_async_transfer_t;
+/// UART handle state
+typedef enum {
+  SL_UART_HANDLE_STATE_DISABLED = 0,
+  SL_UART_HANDLE_STATE_ENABLED,
+} sl_uart_handle_state_t;
 
 /// @brief UART handle structure.
 typedef struct uart_handle {
@@ -329,10 +336,15 @@ typedef struct uart_handle {
   void *tx_complete_cb_arg;
 #if defined(SL_CATALOG_UART_ASYNC_PRESENT)
   sl_uart_preinit_config_t preinit_config;
-  sl_slist_node_t *async_tx_submitted_list_head;
-  sl_slist_node_t *async_rx_submitted_list_head;
-  sl_slist_node_t *async_tx_pool;
-  sl_slist_node_t *async_rx_pool;
+  sl_uart_handle_state_t tx_state;
+  sl_uart_handle_state_t rx_state;
+  sl_slist_node_t *async_tx_transfer_submitted_list_head;
+  sl_slist_node_t *async_rx_transfer_pending_list_head;
+  sl_slist_node_t *async_rx_transfer_active_list_head;
+  size_t async_rx_aborted_bytes_completed;
+  sl_slist_node_t *async_rx_transfer_aborted_list_head;
+  sl_slist_node_t *async_tx_free_list_head;
+  sl_slist_node_t *async_rx_free_list_head;
   sl_uart_async_on_tx_complete_cb_t async_tx_complete_cb;
   void* async_tx_complete_cb_user_data;
   sl_uart_async_on_rx_cb_t async_rx_cb;
@@ -701,8 +713,6 @@ void sl_uart_async_set_rx_event_callback(sl_uart_handle_t *uart_handle,
  * @return @ref SL_STATUS_OK if successful.
  *         @ref SL_STATUS_EMPTY if @p size is 0.
  *         @ref SL_STATUS_BUSY if the maximum number of queued TX transfers has been reached.
- *         @ref SL_STATUS_INVALID_PARAMETER if @p size exceeds the maximum transfer size
- *         supported by a single DMA descriptor (@ref SL_DMA_CHANNEL_MAX_XFER_UNIT_COUNT).
  *         Error code otherwise.
  *
  * @note This function is non blocking. Once transfer is completed, the callback
@@ -745,7 +755,7 @@ static inline bool sl_uart_async_is_tx_active(sl_uart_handle_t *uart_handle)
   EFM_ASSERT((uart_handle)->preinit_config.async_tx_transfer_count != 0
              || (uart_handle)->preinit_config.async_rx_transfer_count != 0);
 
-  return !sl_slist_is_empty(uart_handle->async_tx_submitted_list_head);
+  return uart_handle->tx_state == SL_UART_HANDLE_STATE_ENABLED;
 }
 
 /***************************************************************************//**
@@ -758,8 +768,6 @@ static inline bool sl_uart_async_is_tx_active(sl_uart_handle_t *uart_handle)
  * @return @ref SL_STATUS_OK if successful.
  *         @ref SL_STATUS_EMPTY if @p size is 0.
  *         @ref SL_STATUS_BUSY if the maximum number of queued RX transfers has been reached.
- *         @ref SL_STATUS_INVALID_PARAMETER if @p size exceeds the maximum transfer size
- *         supported by a single DMA descriptor (@ref SL_DMA_CHANNEL_MAX_XFER_UNIT_COUNT).
  *         Error code otherwise.
  *
  * @note This function is non blocking. Once transfer is completed, the callback
@@ -797,7 +805,7 @@ static inline bool sl_uart_async_is_rx_active(sl_uart_handle_t *uart_handle)
   EFM_ASSERT((uart_handle)->preinit_config.async_tx_transfer_count != 0
              || (uart_handle)->preinit_config.async_rx_transfer_count != 0);
 
-  return !sl_slist_is_empty(uart_handle->async_rx_submitted_list_head);
+  return uart_handle->rx_state == SL_UART_HANDLE_STATE_ENABLED;
 }
 
 /***************************************************************************//**
@@ -808,10 +816,8 @@ static inline bool sl_uart_async_is_rx_active(sl_uart_handle_t *uart_handle)
  * @param[in]  new_size New size.
  *
  * @return @ref SL_STATUS_OK if successful.
- *         @ref SL_STATUS_INVALID_PARAMETER if @p new_size is 0, if more bytes have already
- *         been received than @p new_size, or if the remaining transfer size exceeds the
- *         maximum supported by a single DMA descriptor
- *         (@ref SL_DMA_CHANNEL_MAX_XFER_UNIT_COUNT).
+ *         @ref SL_STATUS_INVALID_PARAMETER if @p new_size is 0 or if more bytes
+ *         have already been received than @p new_size.
  *         Error code otherwise.
  *
  * @note This function allows to update the expected size of RX data for the active

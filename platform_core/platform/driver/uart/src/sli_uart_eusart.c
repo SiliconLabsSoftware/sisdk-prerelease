@@ -373,7 +373,6 @@ static inline void eusart_uart_set_enable_irq(sl_peripheral_t uart, bool enabled
   EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
 
   if (enabled) {
-    eusart_uart_clear_irq(uart, irq);
     sl_hal_eusart_enable_interrupts(eusart, irq);
   } else {
     sl_hal_eusart_disable_interrupts(eusart, irq);

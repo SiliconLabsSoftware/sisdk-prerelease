@@ -65,6 +65,8 @@ typedef struct {
   uint16_t protocol_id;
   uint16_t channel_id;
   uint8_t lfn_profile;
+  uint32_t lfn_broadcast_interval_ms;
+  uint8_t lfn_broadcast_sync_period;
   uint8_t crc_type;
   uint8_t preamble_length;
   uint8_t stf_length;

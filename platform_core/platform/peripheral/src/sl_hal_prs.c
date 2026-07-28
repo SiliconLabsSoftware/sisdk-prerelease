@@ -31,7 +31,7 @@
 #include "sl_hal_prs.h"
 #if defined(PRS_COUNT) && (PRS_COUNT > 0)
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 
@@ -74,7 +74,8 @@ extern __INLINE void sl_hal_prs_async_combine_signals(uint8_t channel_a,
  ******************************************************************************/
 void sl_hal_prs_async_init_channel(const sl_hal_prs_async_channel_init_t *init)
 {
-  EFM_ASSERT(init->channel < SL_HAL_PRS_ASYNC_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(init != NULL);
+  SL_LOG_DEBUG_ASSERT(init->channel < SL_HAL_PRS_ASYNC_CHAN_COUNT);
 
 #if defined(_PRS_ASYNC_CH_CTRL_AUXSEL_MASK)
   sl_hal_prs_async_combine_signals(init->channel, init->aux_prs, init->logic);
@@ -90,7 +91,8 @@ void sl_hal_prs_async_init_channel(const sl_hal_prs_async_channel_init_t *init)
  ******************************************************************************/
 void sl_hal_prs_sync_init_channel(const sl_hal_prs_sync_channel_init_t *init)
 {
-  EFM_ASSERT(init->channel < SL_HAL_PRS_SYNC_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(init != NULL);
+  SL_LOG_DEBUG_ASSERT(init->channel < SL_HAL_PRS_SYNC_CHAN_COUNT);
 
   sl_hal_prs_sync_connect_channel_producer(init->channel, init->producer_signal);
   sl_hal_prs_connect_channel_consumer(init->channel, SL_HAL_PRS_TYPE_SYNC, init->consumer_event);
@@ -102,6 +104,8 @@ void sl_hal_prs_sync_init_channel(const sl_hal_prs_sync_channel_init_t *init)
 sl_status_t sl_hal_prs_get_free_channel(uint8_t *channel,
                                         sl_hal_prs_channel_type_t channel_type)
 {
+  SL_LOG_DEBUG_ASSERT(channel != NULL);
+
   sl_status_t status = SL_STATUS_FAIL;
 
   if (channel_type == SL_HAL_PRS_TYPE_ASYNC) {
@@ -152,7 +156,7 @@ void sl_hal_prs_connect_channel_consumer(uint8_t channel,
                                          sl_hal_prs_channel_type_t channel_type,
                                          sl_hal_prs_consumer_event_t consumer_event)
 {
-  EFM_ASSERT((uint32_t)consumer_event < PER_REG_BLOCK_SET_OFFSET);
+  SL_LOG_DEBUG_ASSERT((uint32_t)consumer_event < PER_REG_BLOCK_SET_OFFSET);
 
   volatile uint32_t * addr = (volatile uint32_t *) PRS;
   uint32_t offset = consumer_event;
@@ -160,11 +164,11 @@ void sl_hal_prs_connect_channel_consumer(uint8_t channel,
 
   if (consumer_event != SL_HAL_PRS_CONSUMER_NONE) {
     if (channel_type == SL_HAL_PRS_TYPE_ASYNC) {
-      EFM_ASSERT(channel < SL_HAL_PRS_ASYNC_CHAN_COUNT);
+      SL_LOG_DEBUG_ASSERT(channel < SL_HAL_PRS_ASYNC_CHAN_COUNT);
 
       *addr = channel << _PRS_CONSUMER_TIMER0_CC0_PRSSEL_SHIFT;
     } else {
-      EFM_ASSERT(channel < SL_HAL_PRS_SYNC_CHAN_COUNT);
+      SL_LOG_DEBUG_ASSERT(channel < SL_HAL_PRS_SYNC_CHAN_COUNT);
 
       *addr = channel << _PRS_CONSUMER_TIMER0_CC0_SPRSSEL_SHIFT;
     }
@@ -272,6 +276,7 @@ sl_status_t sl_hal_prs_get_free_async_channel_for_gpio(uint8_t *channel,
                                                        const sl_gpio_t *gpio_port_pin)
 {
   if (channel == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 

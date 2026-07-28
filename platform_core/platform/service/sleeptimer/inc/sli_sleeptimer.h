@@ -67,6 +67,11 @@
 #endif
 #endif
 
+#if (SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_SYSRTC) \
+  && defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
+#define SLI_SLEEPTIMER_SYSRTC_WITH_PRETRIGGERS
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

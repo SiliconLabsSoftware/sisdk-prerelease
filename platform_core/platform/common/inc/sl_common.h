@@ -103,6 +103,9 @@ extern "C" {
 /** @brief Stringify X */
 #define STRINGIZE(X) #X
 
+/** @brief Get the size of an array. */
+#define SL_ARRAY_SIZE(_array)  (sizeof((_array)) / sizeof((_array)[0]))
+
 #if !defined(__GNUC__)
 /* Not GCC compilers */
 

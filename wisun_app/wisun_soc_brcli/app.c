@@ -960,6 +960,14 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
       status = SL_STATUS_INVALID_CONFIGURATION;
       goto cleanup;
   }
+
+  if (app_settings_wisun.lfn_broadcast_interval_ms != 0) {
+    lfn_params.lfn_broadcast_interval_ms = app_settings_wisun.lfn_broadcast_interval_ms;
+  }
+  if (app_settings_wisun.lfn_broadcast_sync_period != 0) {
+    lfn_params.lfn_broadcast_sync_period = app_settings_wisun.lfn_broadcast_sync_period;
+  }
+
   status = sl_wisun_br_set_lfn_parameters(&lfn_params);
   if (status != SL_STATUS_OK) {
     printf("[Failed: unable to set LFN parameters (%"PRIu32")]\r\n", status);

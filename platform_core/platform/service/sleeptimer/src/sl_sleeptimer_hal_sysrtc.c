@@ -108,7 +108,7 @@ void sleeptimer_hal_init_timer(void)
  * Hardware Abstraction Layer to perform initialization related to Power Manager.
  ******************************************************************************/
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) \
-  && !defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
+  && !defined(SLI_SLEEPTIMER_SYSRTC_WITH_PRETRIGGERS)
 void sli_sleeptimer_hal_power_manager_integration_init(void)
 {
   // Initialize PRS to start HFXO for early wakeup

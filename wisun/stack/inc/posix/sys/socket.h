@@ -340,8 +340,8 @@ typedef struct iovec {
  * @param[in] protocol Specifies the particular protocol to be used.
  *                   It can be:
  *                      - #IPPROTO_ICMP  - Ping
- *                      - #IPPROTO_IP and IPPROTO_TCP  - TCP stream sockets
- *                      - #IPPROTO_IP and IPPROTO_UDP  - UDP datagram sockets
+ *                      - #IPPROTO_IP and #IPPROTO_TCP  - TCP stream sockets
+ *                      - #IPPROTO_IP and #IPPROTO_UDP  - UDP datagram sockets
  * @return The socket's id on success, (-1) on failure.
  *****************************************************************************/
 int socket(int domain, int type, int protocol);

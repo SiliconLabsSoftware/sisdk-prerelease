@@ -48,8 +48,11 @@ static void adc_calibrate_config(ADC_TypeDef *adc,
 static sl_status_t adc_calculate_prescalers(uint32_t branch_clock_freq,
                                             uint8_t* hsclkrate,
                                             uint8_t* adcprescale);
-#if defined(_ADC_OFFSETSE_MASK) 
+#if defined(_ADC_OFFSETSE_MASK) || (defined(_ADC_OFFSETCAL_NYQOFFSET_MASK) && defined(_ADC_GAINCAL_CALGAIN_MASK))
 static uint32_t adc_calculate_offset(uint8_t trim);
+static uint32_t adc_translate_gain_trim_0_5x(uint8_t trim_gain_4x);
+static uint32_t adc_translate_gain_trim_1x(uint8_t trim_gain_4x);
+static uint32_t adc_translate_gain_trim_2x(uint8_t trim_gain_4x);
 #endif
 #if defined(_ADC_OFFSETCAL_MASK) && !defined(_ADC_OFFSETCAL_NYQOFFSET_MASK)
 static uint16_t adc_get_gain_trim(ADC_TypeDef *adc,
@@ -509,15 +512,8 @@ static void adc_calibrate_config(ADC_TypeDef *adc,
       // Apply 0.5x gain trim for unbuffered external reference voltage.
       if ( init->voltage_reference == SL_HAL_ADC_REFERENCE_VREFPL
            || init->voltage_reference == SL_HAL_ADC_REFERENCE_VREFPH ) {
-        // Translate 4x gain trim to 0.5x gain trim with formula
-        // b = [g6, 1, !g6, !g6, g6^g5, g4, g3]
-        uint32_t translated_trim =  (SLI_HAL_ADC_GAIN_TRIM_G6(adc_devinfo.cal_data.trim_gain_4x) << 6)
-                                   | (0x1UL << 5)
-                                   | ((SLI_HAL_ADC_GAIN_TRIM_G6(adc_devinfo.cal_data.trim_gain_4x) ^ 0x1) << 4)
-                                   | ((SLI_HAL_ADC_GAIN_TRIM_G6(adc_devinfo.cal_data.trim_gain_4x) ^ 0x1) << 3)
-                                   | ((SLI_HAL_ADC_GAIN_TRIM_G6(adc_devinfo.cal_data.trim_gain_4x) ^ SLI_HAL_ADC_GAIN_TRIM_G5(adc_devinfo.cal_data.trim_gain_4x)) << 2)
-                                   | (SLI_HAL_ADC_GAIN_TRIM_G4(adc_devinfo.cal_data.trim_gain_4x) << 1)
-                                   | (SLI_HAL_ADC_GAIN_TRIM_G3(adc_devinfo.cal_data.trim_gain_4x) << 0);
+        // Translate 4x gain trim to 0.5x gain trim.
+        uint32_t translated_trim = adc_translate_gain_trim_0_5x(adc_devinfo.cal_data.trim_gain_4x);
         adc->CFG[config_id].GAINCAL = ((translated_trim << _ADC_GAINCAL_SEPOS_SHIFT) & _ADC_GAINCAL_SEPOS_MASK)
                                       | ((translated_trim << _ADC_GAINCAL_SENEG_SHIFT) & _ADC_GAINCAL_SENEG_MASK)
                                       | ((translated_trim << _ADC_GAINCAL_DIFF_SHIFT) & _ADC_GAINCAL_DIFF_MASK);
@@ -528,15 +524,8 @@ static void adc_calibrate_config(ADC_TypeDef *adc,
       // Apply 1x gain trim for unbuffered external reference voltage.
       if ( init->voltage_reference == SL_HAL_ADC_REFERENCE_VREFPL
            || init->voltage_reference == SL_HAL_ADC_REFERENCE_VREFPH ) {
-        // Translate 4x gain trim to 1x gain trim with formula
-        // b = [g6, 1, !g6, g6^g5, g4, g3, g2]
-        uint32_t translated_trim = (SLI_HAL_ADC_GAIN_TRIM_G6(adc_devinfo.cal_data.trim_gain_4x) << 6)
-                                   | (0x1UL << 5)
-                                   | ((SLI_HAL_ADC_GAIN_TRIM_G6(adc_devinfo.cal_data.trim_gain_4x) ^ 0x1) << 4)
-                                   | ((SLI_HAL_ADC_GAIN_TRIM_G6(adc_devinfo.cal_data.trim_gain_4x) ^ SLI_HAL_ADC_GAIN_TRIM_G5(adc_devinfo.cal_data.trim_gain_4x)) << 3)
-                                   | (SLI_HAL_ADC_GAIN_TRIM_G4(adc_devinfo.cal_data.trim_gain_4x) << 2)
-                                   | (SLI_HAL_ADC_GAIN_TRIM_G3(adc_devinfo.cal_data.trim_gain_4x) << 1)
-                                   | (SLI_HAL_ADC_GAIN_TRIM_G2(adc_devinfo.cal_data.trim_gain_4x) << 0);
+        // Translate 4x gain trim to 1x gain trim.
+        uint32_t translated_trim = adc_translate_gain_trim_1x(adc_devinfo.cal_data.trim_gain_4x);
         adc->CFG[config_id].GAINCAL = ((translated_trim << _ADC_GAINCAL_SEPOS_SHIFT) & _ADC_GAINCAL_SEPOS_MASK)
                                       | ((translated_trim << _ADC_GAINCAL_SENEG_SHIFT) & _ADC_GAINCAL_SENEG_MASK)
                                       | ((translated_trim << _ADC_GAINCAL_DIFF_SHIFT) & _ADC_GAINCAL_DIFF_MASK);
@@ -547,15 +536,8 @@ static void adc_calibrate_config(ADC_TypeDef *adc,
       // Apply 2x gain trim for unbuffered external reference voltage.
       if ( init->voltage_reference == SL_HAL_ADC_REFERENCE_VREFPL
            || init->voltage_reference == SL_HAL_ADC_REFERENCE_VREFPH ) {
-        // Translate 4x gain trim to 2x gain trim with formula
-        // b = [g6, 1, g6^g5, g4, g3, g2, g1]
-        uint32_t translated_trim = (SLI_HAL_ADC_GAIN_TRIM_G6(adc_devinfo.cal_data.trim_gain_4x) << 6)
-                                   | (0x1UL << 5)
-                                   | ((SLI_HAL_ADC_GAIN_TRIM_G6(adc_devinfo.cal_data.trim_gain_4x) ^ SLI_HAL_ADC_GAIN_TRIM_G5(adc_devinfo.cal_data.trim_gain_4x)) << 4)
-                                   | (SLI_HAL_ADC_GAIN_TRIM_G4(adc_devinfo.cal_data.trim_gain_4x) << 3)
-                                   | (SLI_HAL_ADC_GAIN_TRIM_G3(adc_devinfo.cal_data.trim_gain_4x) << 2)
-                                   | (SLI_HAL_ADC_GAIN_TRIM_G2(adc_devinfo.cal_data.trim_gain_4x) << 1)
-                                   | (SLI_HAL_ADC_GAIN_TRIM_G1(adc_devinfo.cal_data.trim_gain_4x) << 0);
+        // Translate 4x gain trim to 2x gain trim.
+        uint32_t translated_trim = adc_translate_gain_trim_2x(adc_devinfo.cal_data.trim_gain_4x);
         adc->CFG[config_id].GAINCAL = ((translated_trim << _ADC_GAINCAL_SEPOS_SHIFT) & _ADC_GAINCAL_SEPOS_MASK)
                                       | ((translated_trim << _ADC_GAINCAL_SENEG_SHIFT) & _ADC_GAINCAL_SENEG_MASK)
                                       | ((translated_trim << _ADC_GAINCAL_DIFF_SHIFT) & _ADC_GAINCAL_DIFF_MASK);
@@ -621,7 +603,96 @@ static void adc_calibrate_config(ADC_TypeDef *adc,
 
   adc->CFG[config_id].OFFSETCAL = ADC_OFFSETCAL_SE_DEFAULT
                                   | ADC_OFFSETCAL_DIFF_DEFAULT;
+#elif defined(_ADC_OFFSETCAL_NYQOFFSET_MASK) && defined(_ADC_GAINCAL_CALGAIN_MASK)
+  // Nyquist SAR: per-config CALGAIN plus NYQOFFSET / OSROFFSET fields.
+  sl_hal_system_devinfo_adc_t adc_devinfo;
+  sl_hal_system_get_adc_calibration_info(&adc_devinfo);
 
+  uint8_t trim_for_nyq;
+  switch (init->config[config_id].gain) {
+    case SL_HAL_ADC_ANALOG_GAIN_0_3125:
+    case SL_HAL_ADC_ANALOG_GAIN_0_5:
+    case SL_HAL_ADC_ANALOG_GAIN_1:
+      trim_for_nyq = adc_devinfo.offset.trim_off_1x;
+      break;
+    case SL_HAL_ADC_ANALOG_GAIN_2:
+      trim_for_nyq = adc_devinfo.offset.trim_off_2x;
+      break;
+    case SL_HAL_ADC_ANALOG_GAIN_4:
+      trim_for_nyq = adc_devinfo.offset.trim_off_4x;
+      break;
+    default:
+      trim_for_nyq = adc_devinfo.offset.trim_off_1x;
+      break;
+  }
+
+  uint32_t nyqoffset_field_mask = (uint32_t)(_ADC_OFFSETCAL_NYQOFFSET_MASK >> _ADC_OFFSETCAL_NYQOFFSET_SHIFT);
+  uint32_t nyqoffset = (adc_calculate_offset(trim_for_nyq) >> 7) & nyqoffset_field_mask;
+
+  uint32_t osroffset_field_mask = (uint32_t)(_ADC_OFFSETCAL_OSROFFSET_MASK >> _ADC_OFFSETCAL_OSROFFSET_SHIFT);
+  uint32_t osr_field;
+#if defined(_ADC_CFG_OSR_MASK)
+  if (init->config[config_id].oversampling_rate == SL_HAL_ADC_OS_RATE_X1) {
+    osr_field = (_ADC_OFFSETCAL_RESETVALUE & _ADC_OFFSETCAL_OSROFFSET_MASK)
+                >> _ADC_OFFSETCAL_OSROFFSET_SHIFT;
+  } else {
+    osr_field = (adc_calculate_offset(adc_devinfo.offset.trim_off_2x) >> 7) & osroffset_field_mask;
+  }
+#else
+  osr_field = (_ADC_OFFSETCAL_RESETVALUE & _ADC_OFFSETCAL_OSROFFSET_MASK)
+              >> _ADC_OFFSETCAL_OSROFFSET_SHIFT;
+#endif
+
+  uint32_t calgain_byte;
+  switch (init->config[config_id].gain) {
+    case SL_HAL_ADC_ANALOG_GAIN_0_3125:
+      if (init->voltage_reference == SL_HAL_ADC_REFERENCE_VREFPL
+          || init->voltage_reference == SL_HAL_ADC_REFERENCE_VREFPH) {
+        calgain_byte = (uint32_t)adc_devinfo.cal_data.trim_gain_0x3_int & 0xFFUL;
+      } else {
+        calgain_byte = SLI_HAL_ADC_0X325_DEFAULT_GAIN_TRIM;
+      }
+      break;
+    case SL_HAL_ADC_ANALOG_GAIN_0_5:
+      if (init->voltage_reference == SL_HAL_ADC_REFERENCE_VREFPL
+          || init->voltage_reference == SL_HAL_ADC_REFERENCE_VREFPH) {
+        calgain_byte = adc_translate_gain_trim_0_5x(adc_devinfo.cal_data.trim_gain_4x) & 0xFFUL;
+      } else {
+        calgain_byte = _ADC_GAINCAL_RESETVALUE & _ADC_GAINCAL_CALGAIN_MASK;
+      }
+      break;
+    case SL_HAL_ADC_ANALOG_GAIN_1:
+      if (init->voltage_reference == SL_HAL_ADC_REFERENCE_VREFPL
+          || init->voltage_reference == SL_HAL_ADC_REFERENCE_VREFPH) {
+        calgain_byte = adc_translate_gain_trim_1x(adc_devinfo.cal_data.trim_gain_4x) & 0xFFUL;
+      } else {
+        calgain_byte = _ADC_GAINCAL_RESETVALUE & _ADC_GAINCAL_CALGAIN_MASK;
+      }
+      break;
+    case SL_HAL_ADC_ANALOG_GAIN_2:
+      if (init->voltage_reference == SL_HAL_ADC_REFERENCE_VREFPL
+          || init->voltage_reference == SL_HAL_ADC_REFERENCE_VREFPH) {
+        calgain_byte = adc_translate_gain_trim_2x(adc_devinfo.cal_data.trim_gain_4x) & 0xFFUL;
+      } else {
+        calgain_byte = _ADC_GAINCAL_RESETVALUE & _ADC_GAINCAL_CALGAIN_MASK;
+      }
+      break;
+    case SL_HAL_ADC_ANALOG_GAIN_4:
+      if (init->voltage_reference == SL_HAL_ADC_REFERENCE_VREFPL
+          || init->voltage_reference == SL_HAL_ADC_REFERENCE_VREFPH) {
+        calgain_byte = (uint32_t)adc_devinfo.cal_data.trim_gain_4x & 0xFFUL;
+      } else {
+        calgain_byte = _ADC_GAINCAL_RESETVALUE & _ADC_GAINCAL_CALGAIN_MASK;
+      }
+      break;
+    default:
+      calgain_byte = _ADC_GAINCAL_RESETVALUE & _ADC_GAINCAL_CALGAIN_MASK;
+      break;
+  }
+
+  adc->CFG[config_id].GAINCAL = (calgain_byte << _ADC_GAINCAL_CALGAIN_SHIFT) & _ADC_GAINCAL_CALGAIN_MASK;
+  adc->CFG[config_id].OFFSETCAL = ((nyqoffset << _ADC_OFFSETCAL_NYQOFFSET_SHIFT) & _ADC_OFFSETCAL_NYQOFFSET_MASK)
+                                  | ((osr_field << _ADC_OFFSETCAL_OSROFFSET_SHIFT) & _ADC_OFFSETCAL_OSROFFSET_MASK);
 #else
   (void)adc;
   (void)init;
@@ -683,7 +754,7 @@ static sl_status_t adc_calculate_prescalers(uint32_t branch_clock_freq,
 
   return SL_STATUS_OK;
 }
-#if defined(_ADC_OFFSETSE_MASK) 
+#if defined(_ADC_OFFSETSE_MASK) || (defined(_ADC_OFFSETCAL_NYQOFFSET_MASK) && defined(_ADC_GAINCAL_CALGAIN_MASK))
 /***************************************************************************//**
  * @brief
  *   Calculate the offset calibration to apply from the 6 bit trim value in
@@ -706,6 +777,81 @@ static uint32_t adc_calculate_offset(uint8_t trim)
          | ((b5 ^ 0x1U) << 6)
          | ((b5 ^ 0x1U) << 5)
          | (trim & 0x1F);
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Translate the 4x DEVINFO gain trim into the 0.5x gain trim.
+ *
+ * @details
+ *   Applies the formula b = [g6, 1, !g6, !g6, g6^g5, g4, g3] to the stored
+ *   4x gain trim. Used for unbuffered external reference voltages.
+ *
+ * @param[in] trim_gain_4x
+ *   The 4x gain trim value from DEVINFO calibration data.
+ *
+ * @return
+ *   The translated 7-bit 0.5x gain trim.
+ ******************************************************************************/
+static uint32_t adc_translate_gain_trim_0_5x(uint8_t trim_gain_4x)
+{
+  return (SLI_HAL_ADC_GAIN_TRIM_G6(trim_gain_4x) << 6)
+         | (0x1UL << 5)
+         | ((SLI_HAL_ADC_GAIN_TRIM_G6(trim_gain_4x) ^ 0x1) << 4)
+         | ((SLI_HAL_ADC_GAIN_TRIM_G6(trim_gain_4x) ^ 0x1) << 3)
+         | ((SLI_HAL_ADC_GAIN_TRIM_G6(trim_gain_4x) ^ SLI_HAL_ADC_GAIN_TRIM_G5(trim_gain_4x)) << 2)
+         | (SLI_HAL_ADC_GAIN_TRIM_G4(trim_gain_4x) << 1)
+         | (SLI_HAL_ADC_GAIN_TRIM_G3(trim_gain_4x) << 0);
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Translate the 4x DEVINFO gain trim into the 1x gain trim.
+ *
+ * @details
+ *   Applies the formula b = [g6, 1, !g6, g6^g5, g4, g3, g2] to the stored
+ *   4x gain trim. Used for unbuffered external reference voltages.
+ *
+ * @param[in] trim_gain_4x
+ *   The 4x gain trim value from DEVINFO calibration data.
+ *
+ * @return
+ *   The translated 7-bit 1x gain trim.
+ ******************************************************************************/
+static uint32_t adc_translate_gain_trim_1x(uint8_t trim_gain_4x)
+{
+  return (SLI_HAL_ADC_GAIN_TRIM_G6(trim_gain_4x) << 6)
+         | (0x1UL << 5)
+         | ((SLI_HAL_ADC_GAIN_TRIM_G6(trim_gain_4x) ^ 0x1) << 4)
+         | ((SLI_HAL_ADC_GAIN_TRIM_G6(trim_gain_4x) ^ SLI_HAL_ADC_GAIN_TRIM_G5(trim_gain_4x)) << 3)
+         | (SLI_HAL_ADC_GAIN_TRIM_G4(trim_gain_4x) << 2)
+         | (SLI_HAL_ADC_GAIN_TRIM_G3(trim_gain_4x) << 1)
+         | (SLI_HAL_ADC_GAIN_TRIM_G2(trim_gain_4x) << 0);
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Translate the 4x DEVINFO gain trim into the 2x gain trim.
+ *
+ * @details
+ *   Applies the formula b = [g6, 1, g6^g5, g4, g3, g2, g1] to the stored
+ *   4x gain trim. Used for unbuffered external reference voltages.
+ *
+ * @param[in] trim_gain_4x
+ *   The 4x gain trim value from DEVINFO calibration data.
+ *
+ * @return
+ *   The translated 7-bit 2x gain trim.
+ ******************************************************************************/
+static uint32_t adc_translate_gain_trim_2x(uint8_t trim_gain_4x)
+{
+  return (SLI_HAL_ADC_GAIN_TRIM_G6(trim_gain_4x) << 6)
+         | (0x1UL << 5)
+         | ((SLI_HAL_ADC_GAIN_TRIM_G6(trim_gain_4x) ^ SLI_HAL_ADC_GAIN_TRIM_G5(trim_gain_4x)) << 4)
+         | (SLI_HAL_ADC_GAIN_TRIM_G4(trim_gain_4x) << 3)
+         | (SLI_HAL_ADC_GAIN_TRIM_G3(trim_gain_4x) << 2)
+         | (SLI_HAL_ADC_GAIN_TRIM_G2(trim_gain_4x) << 1)
+         | (SLI_HAL_ADC_GAIN_TRIM_G1(trim_gain_4x) << 0);
 }
 #endif
 

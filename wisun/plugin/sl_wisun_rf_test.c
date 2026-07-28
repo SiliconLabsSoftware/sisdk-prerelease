@@ -70,7 +70,7 @@ static sl_rail_fifo_buffer_align_t rf_test_tx_fifo[SL_RAIL_MAXIMUM_FIFO_BYTES / 
 
 static sl_rail_scheduler_info_t rf_scheduler_info =
 {
-  .priority = RF_PRIORITY_BACKGROUND,
+  .priority = RF_PRIORITY_PROTECTED,
   .slip_time = 0,
   .transaction_time = 0
 };
@@ -262,10 +262,6 @@ sl_status_t sl_wisun_rf_test_start_tx(uint16_t channel,
   sl_rail_tx_options_t options = SL_RAIL_TX_OPTIONS_DEFAULT | SL_RAIL_TX_OPTION_RESEND;
   sl_rail_handle_t rail_handle;
   sl_rail_csma_config_t csma_config = SL_RAIL_CSMA_CONFIG_SINGLE_CCA;
-  sl_rail_state_transitions_t tx_transitions = {
-    .success = SL_RAIL_RF_STATE_IDLE,
-    .error = SL_RAIL_RF_STATE_IDLE
-  };
   uint16_t fifo_size_bytes = 0;
   uint16_t init_bytes = 0;
   uint8_t phr_length = 0;
@@ -322,10 +318,6 @@ sl_status_t sl_wisun_rf_test_start_tx(uint16_t channel,
                                  &init_bytes)) {
     SLI_WISUN_ERROR_SET_STATUS(SL_STATUS_INVALID_PARAMETER);
   }
-
-  rf_scheduler_info.priority = RF_PRIORITY_PROTECTED;
-  rail_status = sl_rail_set_tx_transitions(rail_handle, &tx_transitions);
-  SLI_WISUN_ERROR_CHECK_SET_STATUS(SL_RAIL_STATUS_NO_ERROR == rail_status, SL_STATUS_FAIL);
 
   sl_rail_reset_fifo(rail_handle, true, false);
 
@@ -396,7 +388,6 @@ sl_status_t sl_wisun_rf_test_start_rx(uint16_t channel, uint32_t duration)
     SLI_WISUN_ERROR_SET_STATUS(SL_STATUS_INVALID_PARAMETER);
   }
   rf_test_running = RF_TEST_RX_ACTIVE;
-  rf_scheduler_info.priority = RF_PRIORITY_PROTECTED;
   //tx power will be set during the stop proceedure
   stack_tx_power_ddbm = sl_rail_get_tx_power_dbm(rail_handle);
 
@@ -496,7 +487,7 @@ static sl_status_t stop_rf_test(uint8_t mode)
   }
   if (mode == RF_TEST_TX_ACTIVE) {
     rf_test_tx_remaining_count = 0;
-    sl_rail_stop_tx(rail_handle, SL_RAIL_STOP_MODES_ALL);
+    sl_rail_idle(rail_handle, SL_RAIL_IDLE_ABORT, true);
   }
 
   rail_status = sl_rail_set_tx_power_dbm(rail_handle, stack_tx_power_ddbm);

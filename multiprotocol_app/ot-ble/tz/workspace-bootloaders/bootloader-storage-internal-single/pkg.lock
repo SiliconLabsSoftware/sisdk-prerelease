@@ -18,7 +18,7 @@ version = "0"
   platform = [{version = "6.2.0-alpha.5", installer = "conan", type = "sdk", ref = "platform/6.2.0-alpha.5@silabs#c7f32c79e9c2b9dadcf9c54a05cca016"}]
   platform_core = [{version = "1.2.0", installer = "conan", type = "sdk", ref = "platform_core/1.2.0@silabs#55740da5bd2ad9094a6a552fed674abc"}]
   printf = [{version = "1.1.0", installer = "conan", type = "sdk", ref = "printf/1.1.0@silabs#fe75a71a35412431d99f4848883c965b"}]
-  rail_library = [{version = "3.2.0-alpha.48", installer = "conan", type = "sdk", ref = "rail_library/3.2.0-alpha.48@silabs#0526b3fdceb87e7480d93dffe5fafa353d59be15"}]
+  rail_library = [{version = "3.2.0-alpha.53", installer = "conan", type = "sdk", ref = "rail_library/3.2.0-alpha.53@silabs#91609ab6fd4cd35d5da0aab3f0026e171ae16029"}]
   realtime_locationing = [{version = "12.0.0-alpha.2", installer = "conan", type = "sdk", ref = "realtime_locationing/12.0.0-alpha.2@silabs#6c534efa9bd238b104277b4601d0d36646398acc"}]
   security_libcryptosoc = [{version = "1.1.0", installer = "conan", type = "sdk", ref = "security_libcryptosoc/1.1.0@silabs#a41bcce963865004cdd183d9f003fd37"}]
   security_sxsymcrypt = [{version = "1.1.0", installer = "conan", type = "sdk", ref = "security_sxsymcrypt/1.1.0@silabs#a9053c3f70f2a4f66d827993bac5bb2b"}]

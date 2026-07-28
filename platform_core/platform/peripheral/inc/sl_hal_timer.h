@@ -39,9 +39,9 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_enum.h"
-
+#include <stddef.h>
 /***************************************************************************//**
  * @addtogroup timer TIMER - Timer/Counter
  * @{
@@ -615,7 +615,7 @@ void sl_hal_timer_reset(TIMER_TypeDef *timer);
 __INLINE void sl_hal_timer_wait_sync(TIMER_TypeDef *timer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
 
   // Wait for any pending previous write operation to have been completed
   // in the low-frequency domain.
@@ -635,13 +635,15 @@ __INLINE void sl_hal_timer_wait_sync(TIMER_TypeDef *timer)
 __INLINE void sl_hal_timer_wait_ready(TIMER_TypeDef *timer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
 
 #if defined(_TIMER_EN_DISABLING_MASK)
   while (timer->EN & _TIMER_EN_DISABLING_MASK) {
     // Wait for disabling to finish
   }
 #endif
+
+  (void)timer;
 }
 
 /***************************************************************************//**
@@ -654,7 +656,7 @@ __INLINE void sl_hal_timer_wait_ready(TIMER_TypeDef *timer)
 __INLINE void sl_hal_timer_enable(TIMER_TypeDef *timer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
 
   if (timer->EN == TIMER_EN_EN) {
     return;
@@ -673,7 +675,7 @@ __INLINE void sl_hal_timer_enable(TIMER_TypeDef *timer)
 __INLINE void sl_hal_timer_disable(TIMER_TypeDef *timer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
 
   if (timer->EN != TIMER_EN_EN) {
     return;
@@ -692,9 +694,9 @@ __INLINE void sl_hal_timer_disable(TIMER_TypeDef *timer)
 __INLINE void sl_hal_timer_start(TIMER_TypeDef *timer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
   // Make sure module is enabled
-  EFM_ASSERT(timer->EN & _TIMER_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(timer->EN & _TIMER_EN_EN_MASK);
 
   sl_hal_timer_wait_sync(timer);
   timer->CMD = TIMER_CMD_START;
@@ -710,9 +712,9 @@ __INLINE void sl_hal_timer_start(TIMER_TypeDef *timer)
 __INLINE void sl_hal_timer_stop(TIMER_TypeDef *timer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
   // Make sure module is enabled
-  EFM_ASSERT(timer->EN & _TIMER_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(timer->EN & _TIMER_EN_EN_MASK);
 
   sl_hal_timer_wait_sync(timer);
   timer->CMD = TIMER_CMD_STOP;
@@ -734,6 +736,8 @@ __INLINE void sl_hal_timer_stop(TIMER_TypeDef *timer)
  ******************************************************************************/
 __INLINE void sl_hal_timer_channel_update_registers(TIMER_TypeDef *timer)
 {
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+
   // If UPDATEMODE is enabled send software command to write from CCB
   // to CC registers.
   if (timer->CFG & _TIMER_CFG_UPDATEMODE_MASK) {
@@ -759,9 +763,9 @@ __INLINE uint32_t sl_hal_timer_channel_get_capture(TIMER_TypeDef *timer,
                                                    uint8_t channel)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
   // Make sure channel number is valid.
-  EFM_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
+  SL_LOG_DEBUG_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
 
   sl_hal_timer_wait_sync(timer);
   return timer->CC[channel].ICF;
@@ -784,9 +788,9 @@ __INLINE uint32_t sl_hal_timer_channel_get_capture_buffer(TIMER_TypeDef *timer,
                                                           uint8_t channel)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
   // Make sure channel number is valid.
-  EFM_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
+  SL_LOG_DEBUG_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
 
   sl_hal_timer_wait_sync(timer);
   return timer->CC[channel].ICOF;
@@ -809,9 +813,9 @@ __INLINE uint32_t sl_hal_timer_channel_get_compare(TIMER_TypeDef *timer,
                                                    uint8_t channel)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
   // Make sure channel number is valid.
-  EFM_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
+  SL_LOG_DEBUG_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
 
   sl_hal_timer_wait_sync(timer);
   return timer->CC[channel].OC;
@@ -834,9 +838,9 @@ __INLINE uint32_t sl_hal_timer_channel_get_compare_buffer(TIMER_TypeDef *timer,
                                                           uint8_t channel)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
   // Make sure channel number is valid.
-  EFM_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
+  SL_LOG_DEBUG_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
 
   sl_hal_timer_wait_sync(timer);
   return timer->CC[channel].OCB;
@@ -866,13 +870,13 @@ __INLINE void sl_hal_timer_channel_set_compare_buffer(TIMER_TypeDef *timer,
                                                       uint32_t value)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
   // Make sure channel number is valid.
-  EFM_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
+  SL_LOG_DEBUG_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
   // Make sure counter value is valid.
-  EFM_ASSERT(value <= SL_HAL_TIMER_MAX_COUNT(timer));
+  SL_LOG_DEBUG_ASSERT(value <= SL_HAL_TIMER_MAX_COUNT(timer));
   // Make sure module is enabled
-  EFM_ASSERT(timer->EN & _TIMER_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(timer->EN & _TIMER_EN_EN_MASK);
 
   sl_hal_timer_wait_sync(timer);
   timer->CC[channel].OCB = value;
@@ -897,13 +901,13 @@ __INLINE void sl_hal_timer_channel_set_compare(TIMER_TypeDef *timer,
                                                uint32_t value)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
   // Make sure channel number is valid.
-  EFM_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
+  SL_LOG_DEBUG_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
   // Make sure counter value is valid.
-  EFM_ASSERT(value <= SL_HAL_TIMER_MAX_COUNT(timer));
+  SL_LOG_DEBUG_ASSERT(value <= SL_HAL_TIMER_MAX_COUNT(timer));
   // Make sure module is enabled
-  EFM_ASSERT(timer->EN & _TIMER_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(timer->EN & _TIMER_EN_EN_MASK);
 
   sl_hal_timer_wait_sync(timer);
   timer->CC[channel].OC = value;
@@ -929,13 +933,13 @@ __INLINE void sl_hal_timer_channel_set_phase(TIMER_TypeDef *timer,
                                              uint32_t phase)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
   // Make sure channel number is valid.
-  EFM_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
+  SL_LOG_DEBUG_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
   // Make sure phase value is valid.
-  EFM_ASSERT(phase <= SL_HAL_TIMER_MAX_COUNT(timer));
+  SL_LOG_DEBUG_ASSERT(phase <= SL_HAL_TIMER_MAX_COUNT(timer));
   // Make sure module is enabled
-  EFM_ASSERT(timer->EN & _TIMER_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(timer->EN & _TIMER_EN_EN_MASK);
 
   // Wait for ongoing sync of register
   sl_hal_timer_wait_sync(timer);
@@ -959,9 +963,9 @@ __INLINE uint32_t sl_hal_timer_channel_get_phase(TIMER_TypeDef *timer,
                                                  uint8_t channel)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
   // Make sure channel number is valid.
-  EFM_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
+  SL_LOG_DEBUG_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
 
   sl_hal_timer_wait_sync(timer);
   return timer->CC[channel].PHASE;
@@ -987,13 +991,13 @@ __INLINE void sl_hal_timer_channel_set_phase_buffer(TIMER_TypeDef *timer,
                                                     uint32_t phase)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
   // Make sure channel number is valid.
-  EFM_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
+  SL_LOG_DEBUG_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
   // Make sure phase value is valid.
-  EFM_ASSERT(phase <= SL_HAL_TIMER_MAX_COUNT(timer));
+  SL_LOG_DEBUG_ASSERT(phase <= SL_HAL_TIMER_MAX_COUNT(timer));
   // Make sure module is enabled
-  EFM_ASSERT(timer->EN & _TIMER_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(timer->EN & _TIMER_EN_EN_MASK);
 
   // Wait for ongoing sync of register
   sl_hal_timer_wait_sync(timer);
@@ -1017,9 +1021,9 @@ __INLINE uint32_t sl_hal_timer_channel_get_phase_buffer(TIMER_TypeDef *timer,
                                                         uint8_t channel)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
   // Make sure channel number is valid.
-  EFM_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
+  SL_LOG_DEBUG_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
 
   sl_hal_timer_wait_sync(timer);
   return timer->CC[channel].PHASEB;
@@ -1047,13 +1051,13 @@ __INLINE void sl_hal_timer_channel_set_dither(TIMER_TypeDef *timer,
                                               uint8_t dither)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
   // Make sure channel number is valid.
-  EFM_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
+  SL_LOG_DEBUG_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
   // Make sure phase value is valid.
-  EFM_ASSERT(dither <= _TIMER_CC_DITHER_DITHER_MASK);
+  SL_LOG_DEBUG_ASSERT(dither <= _TIMER_CC_DITHER_DITHER_MASK);
   // Make sure module is enabled
-  EFM_ASSERT(timer->EN & _TIMER_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(timer->EN & _TIMER_EN_EN_MASK);
 
   // Wait for ongoing sync of register
   sl_hal_timer_wait_sync(timer);
@@ -1077,9 +1081,9 @@ __INLINE uint8_t sl_hal_timer_channel_get_dither(TIMER_TypeDef *timer,
                                                  uint8_t channel)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
   // Make sure channel number is valid.
-  EFM_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
+  SL_LOG_DEBUG_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
 
   sl_hal_timer_wait_sync(timer);
   return (uint8_t)(timer->CC[channel].DITHER);
@@ -1104,13 +1108,13 @@ __INLINE void sl_hal_timer_channel_set_dither_buffer(TIMER_TypeDef *timer,
                                                      uint8_t dither)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
   // Make sure channel number is valid.
-  EFM_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
+  SL_LOG_DEBUG_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
   // Make sure phase value is valid.
-  EFM_ASSERT(dither <= _TIMER_CC_DITHER_DITHER_MASK);
+  SL_LOG_DEBUG_ASSERT(dither <= _TIMER_CC_DITHER_DITHER_MASK);
   // Make sure module is enabled
-  EFM_ASSERT(timer->EN & _TIMER_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(timer->EN & _TIMER_EN_EN_MASK);
 
   // Wait for ongoing sync of register
   sl_hal_timer_wait_sync(timer);
@@ -1135,9 +1139,9 @@ __INLINE uint8_t sl_hal_timer_channel_get_dither_buffer(TIMER_TypeDef *timer,
                                                         uint8_t channel)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
   // Make sure channel number is valid.
-  EFM_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
+  SL_LOG_DEBUG_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
 
   sl_hal_timer_wait_sync(timer);
   return (uint8_t)(timer->CC[channel].DITHERB);
@@ -1158,7 +1162,7 @@ __INLINE uint8_t sl_hal_timer_channel_get_dither_buffer(TIMER_TypeDef *timer,
 __INLINE uint32_t sl_hal_timer_get_counter(TIMER_TypeDef *timer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
 
   sl_hal_timer_wait_sync(timer);
   return timer->CNT;
@@ -1178,11 +1182,11 @@ __INLINE void sl_hal_timer_set_counter(TIMER_TypeDef *timer,
                                        uint32_t value)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
   // Make sure counter value is valid.
-  EFM_ASSERT(value <= SL_HAL_TIMER_MAX_COUNT(timer));
+  SL_LOG_DEBUG_ASSERT(value <= SL_HAL_TIMER_MAX_COUNT(timer));
   // Make sure module is enabled
-  EFM_ASSERT(timer->EN & _TIMER_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(timer->EN & _TIMER_EN_EN_MASK);
 
   sl_hal_timer_wait_sync(timer);
   timer->CNT = value;
@@ -1207,11 +1211,11 @@ __INLINE void sl_hal_timer_set_top_buffer(TIMER_TypeDef *timer,
                                           uint32_t value)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
   // Make sure counter value is valid.
-  EFM_ASSERT(value <= SL_HAL_TIMER_MAX_COUNT(timer));
+  SL_LOG_DEBUG_ASSERT(value <= SL_HAL_TIMER_MAX_COUNT(timer));
   // Make sure module is enabled
-  EFM_ASSERT(timer->EN & _TIMER_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(timer->EN & _TIMER_EN_EN_MASK);
 
   sl_hal_timer_wait_sync(timer);
   timer->TOPB = value;
@@ -1231,11 +1235,11 @@ __INLINE void sl_hal_timer_set_top(TIMER_TypeDef *timer,
                                    uint32_t value)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
   // Make sure counter value is valid.
-  EFM_ASSERT(value <= SL_HAL_TIMER_MAX_COUNT(timer));
+  SL_LOG_DEBUG_ASSERT(value <= SL_HAL_TIMER_MAX_COUNT(timer));
   // Make sure module is enabled
-  EFM_ASSERT(timer->EN & _TIMER_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(timer->EN & _TIMER_EN_EN_MASK);
 
   sl_hal_timer_wait_sync(timer);
 
@@ -1255,7 +1259,7 @@ __INLINE void sl_hal_timer_set_top(TIMER_TypeDef *timer,
 __INLINE uint32_t sl_hal_timer_get_top(TIMER_TypeDef *timer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
 
   sl_hal_timer_wait_sync(timer);
   return timer->TOP;
@@ -1274,7 +1278,7 @@ __INLINE uint32_t sl_hal_timer_get_top(TIMER_TypeDef *timer)
 __INLINE uint32_t sl_hal_timer_get_status(TIMER_TypeDef *timer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
 
   return timer->STATUS;
 }
@@ -1293,7 +1297,7 @@ __INLINE uint32_t sl_hal_timer_get_status(TIMER_TypeDef *timer)
 __INLINE uint32_t sl_hal_timer_get_status2(TIMER_TypeDef *timer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
 
   return timer->STATUS2;
 }
@@ -1318,7 +1322,7 @@ __INLINE uint32_t sl_hal_timer_get_status2(TIMER_TypeDef *timer)
 __INLINE void sl_hal_timer_lock(TIMER_TypeDef *timer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
 
   timer->LOCK = ~_TIMER_LOCK_LOCKKEY_UNLOCK;
 }
@@ -1340,7 +1344,7 @@ __INLINE void sl_hal_timer_lock(TIMER_TypeDef *timer)
 __INLINE void sl_hal_timer_unlock(TIMER_TypeDef *timer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
 
   timer->LOCK = _TIMER_LOCK_LOCKKEY_UNLOCK;
 }
@@ -1356,7 +1360,7 @@ __INLINE void sl_hal_timer_unlock(TIMER_TypeDef *timer)
 __INLINE void sl_hal_timer_dti_enable(TIMER_TypeDef *timer)
 {
   // Check if timer supports DTI.
-  EFM_ASSERT(SL_HAL_TIMER_SUPPORTS_DTI(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_SUPPORTS_DTI(timer));
 
   sl_hal_timer_disable(timer);
   sl_hal_timer_wait_ready(timer);
@@ -1374,7 +1378,7 @@ __INLINE void sl_hal_timer_dti_enable(TIMER_TypeDef *timer)
 __INLINE void sl_hal_timer_dti_disable(TIMER_TypeDef *timer)
 {
   // Check if timer supports DTI.
-  EFM_ASSERT(SL_HAL_TIMER_SUPPORTS_DTI(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_SUPPORTS_DTI(timer));
 
   sl_hal_timer_disable(timer);
   sl_hal_timer_wait_ready(timer);
@@ -1399,7 +1403,7 @@ __INLINE void sl_hal_timer_dti_disable(TIMER_TypeDef *timer)
 __INLINE uint32_t sl_hal_timer_dti_get_fault(TIMER_TypeDef *timer)
 {
   // Check if timer supports DTI.
-  EFM_ASSERT(SL_HAL_TIMER_SUPPORTS_DTI(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_SUPPORTS_DTI(timer));
 
   return timer->DTFAULT;
 }
@@ -1419,9 +1423,10 @@ __INLINE void sl_hal_timer_dti_clear_fault(TIMER_TypeDef *timer,
                                            uint32_t flags)
 {
   // Check if timer supports DTI.
-  EFM_ASSERT(SL_HAL_TIMER_SUPPORTS_DTI(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_SUPPORTS_DTI(timer));
   // Make sure module is enabled
-  EFM_ASSERT(timer->EN & TIMER_EN_EN);
+  SL_LOG_DEBUG_ASSERT(timer->EN & TIMER_EN_EN);
 
   timer->DTFAULTC = flags;
 }
@@ -1437,7 +1442,7 @@ __INLINE void sl_hal_timer_dti_clear_fault(TIMER_TypeDef *timer,
 __INLINE void sl_hal_timer_dti_unlock(TIMER_TypeDef *timer)
 {
   // Check if timer supports DTI.
-  EFM_ASSERT(SL_HAL_TIMER_SUPPORTS_DTI(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_SUPPORTS_DTI(timer));
 
   timer->DTLOCK = TIMER_DTLOCK_DTILOCKKEY_UNLOCK;
 }
@@ -1452,7 +1457,7 @@ __INLINE void sl_hal_timer_dti_unlock(TIMER_TypeDef *timer)
 __INLINE void sl_hal_timer_dti_lock(TIMER_TypeDef *timer)
 {
   // Check if timer supports DTI.
-  EFM_ASSERT(SL_HAL_TIMER_SUPPORTS_DTI(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_SUPPORTS_DTI(timer));
 
   timer->DTLOCK = ~TIMER_DTLOCK_DTILOCKKEY_UNLOCK;
 }
@@ -1473,7 +1478,7 @@ __INLINE void sl_hal_timer_clear_interrupts(TIMER_TypeDef *timer,
                                             uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
 
   timer->IF_CLR = flags;
 }
@@ -1493,7 +1498,7 @@ __INLINE void sl_hal_timer_disable_interrupts(TIMER_TypeDef *timer,
                                               uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
 
   timer->IEN_CLR = flags;
 }
@@ -1518,7 +1523,7 @@ __INLINE void sl_hal_timer_enable_interrupts(TIMER_TypeDef *timer,
                                              uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
 
   timer->IEN_SET = flags;
 }
@@ -1540,7 +1545,7 @@ __INLINE void sl_hal_timer_enable_interrupts(TIMER_TypeDef *timer,
 __INLINE uint32_t sl_hal_timer_get_pending_interrupts(TIMER_TypeDef *timer)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
 
   return timer->IF;
 }
@@ -1569,7 +1574,7 @@ __INLINE uint32_t sl_hal_timer_get_enabled_pending_interrupts(TIMER_TypeDef *tim
   uint32_t ien;
 
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
 
   /* Store TIMER->IEN in temporary variable in order to define explicit order
    * of volatile accesses. */
@@ -1594,10 +1599,189 @@ __INLINE void sl_hal_timer_set_interrupts(TIMER_TypeDef *timer,
                                           uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
 
   timer->IF_SET = flags;
 }
+
+#if defined(TIMER_CC_IEN_CCIEN)
+/***************************************************************************//**
+ * @brief
+ *   Clear one or more pending TIMER compare/capture channel interrupts.
+ *
+ * @param[in] timer
+ *   Pointer to the TIMER peripheral register block.
+ *
+ * @param[in] channel
+ *   Compare/capture channel to access.
+ *
+ * @param[in] flags
+ *   Pending TIMER channel interrupt source(s) to clear. Use one or more valid
+ *   interrupt flags for the TIMER CC module (TIMER_CC_IF_nnn) OR'ed together.
+ ******************************************************************************/
+__INLINE void sl_hal_timer_channel_clear_interrupts(TIMER_TypeDef *timer,
+                                                    uint8_t channel,
+                                                    uint32_t flags)
+{
+  // Make sure the module exists on the selected chip.
+  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  // Make sure channel number is valid.
+  EFM_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
+
+  timer->CC_CLR[channel].IF = flags;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Disable one or more TIMER compare/capture channel interrupts.
+ *
+ * @param[in] timer
+ *   Pointer to the TIMER peripheral register block.
+ *
+ * @param[in] channel
+ *   Compare/capture channel to access.
+ *
+ * @param[in] flags
+ *   TIMER channel interrupt source(s) to disable. Use one or more valid
+ *   interrupt flags for the TIMER CC module (TIMER_CC_IF_nnn) OR'ed together.
+ ******************************************************************************/
+__INLINE void sl_hal_timer_channel_disable_interrupts(TIMER_TypeDef *timer,
+                                                      uint8_t channel,
+                                                      uint32_t flags)
+{
+  // Make sure the module exists on the selected chip.
+  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  // Make sure channel number is valid.
+  EFM_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
+
+  timer->CC_CLR[channel].IEN = flags;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Enable one or more TIMER compare/capture channel interrupts.
+ *
+ * @note
+ *   Depending on the use, a pending interrupt may already be set prior to
+ *   enabling the interrupt. To ignore a pending interrupt, consider using
+ *   @ref sl_hal_timer_channel_clear_interrupts() prior to enabling the interrupt.
+ *
+ * @param[in] timer
+ *   Pointer to the TIMER peripheral register block.
+ *
+ * @param[in] channel
+ *   Compare/capture channel to access.
+ *
+ * @param[in] flags
+ *   TIMER channel interrupt source(s) to enable. Use one or more valid
+ *   interrupt flags for the TIMER CC module (TIMER_CC_IF_nnn) OR'ed together.
+ ******************************************************************************/
+__INLINE void sl_hal_timer_channel_enable_interrupts(TIMER_TypeDef *timer,
+                                                     uint8_t channel,
+                                                     uint32_t flags)
+{
+  // Make sure the module exists on the selected chip.
+  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  // Make sure channel number is valid.
+  EFM_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
+
+  timer->CC_SET[channel].IEN = flags;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Get pending TIMER compare/capture channel interrupt flags.
+ *
+ * @note
+ *   Event bits are not cleared by this function.
+ *
+ * @param[in] timer
+ *   Pointer to the TIMER peripheral register block.
+ *
+ * @param[in] channel
+ *   Compare/capture channel to access.
+ *
+ * @return
+ *   TIMER channel interrupt source(s) pending. Returns one or more valid
+ *   interrupt flags for the TIMER CC module (TIMER_CC_IF_nnn) OR'ed together.
+ ******************************************************************************/
+__INLINE uint32_t sl_hal_timer_channel_get_pending_interrupts(TIMER_TypeDef *timer,
+                                                              uint8_t channel)
+{
+  // Make sure the module exists on the selected chip.
+  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  // Make sure channel number is valid.
+  EFM_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
+
+  return timer->CC[channel].IF;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Get enabled and pending TIMER compare/capture channel interrupt flags.
+ *   Useful for handling more interrupt sources in the same interrupt handler.
+ *
+ * @param[in] timer
+ *   Pointer to the TIMER peripheral register block.
+ *
+ * @param[in] channel
+ *   Compare/capture channel to access.
+ *
+ * @note
+ *   Interrupt flags are not cleared by this function.
+ *
+ * @return
+ *   Pending and enabled TIMER channel interrupt sources.
+ *   The return value is the bitwise AND combination of
+ *   - the OR combination of enabled interrupt sources in TIMERn_CCx_IEN
+ *     register and
+ *   - the OR combination of valid interrupt flags of the TIMER CC module
+ *     (TIMERn_CCx_IF).
+ ******************************************************************************/
+__INLINE uint32_t sl_hal_timer_channel_get_enabled_pending_interrupts(TIMER_TypeDef *timer,
+                                                                      uint8_t channel)
+{
+  uint32_t ien;
+
+  // Make sure the module exists on the selected chip.
+  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  // Make sure channel number is valid.
+  EFM_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
+
+  /* Store IEN in temporary variable in order to define explicit order
+   * of volatile accesses. */
+  ien = timer->CC[channel].IEN;
+
+  /* Bitwise AND of pending and enabled interrupts */
+  return timer->CC[channel].IF & ien;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Set one or more pending TIMER compare/capture channel interrupts from SW.
+ *
+ * @param[in] timer
+ *   Pointer to the TIMER peripheral register block.
+ *
+ * @param[in] channel
+ *   Compare/capture channel to access.
+ *
+ * @param[in] flags
+ *   TIMER channel interrupt source(s) to set to pending. Use one or more valid
+ *   interrupt flags for the TIMER CC module (TIMER_CC_IF_nnn) OR'ed together.
+ ******************************************************************************/
+__INLINE void sl_hal_timer_channel_set_interrupts(TIMER_TypeDef *timer,
+                                                  uint8_t channel,
+                                                  uint32_t flags)
+{
+  // Make sure the module exists on the selected chip.
+  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  // Make sure channel number is valid.
+  EFM_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
+
+  timer->CC_SET[channel].IF = flags;
+}
+#endif // defined(TIMER_CC_IEN_CCIEN)
 /** @} (end addtogroup timer) */
 
 #ifdef __cplusplus

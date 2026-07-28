@@ -122,14 +122,12 @@ void sli_zigbee_app_framework_init_callback(void)
 
 #if defined(EXTENDED_RESET_INFO)
   #ifndef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
-  sl_zigbee_app_debug_println("Reset info: 0x%02X (%s)",
-                              halGetResetInfo(),
-                              halGetResetString());
+  sl_zigbee_app_debug_println("Reset info: 0x%02X",
+                              halGetResetInfo());
   #endif //SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 
-  sl_zigbee_app_debug_println("Extended Reset info: 0x%04X (%s)",
-                              halGetExtendedResetInfo(),
-                              halGetExtendedResetString());
+  sl_zigbee_app_debug_println("Extended Reset info: 0x%04X",
+                              halGetExtendedResetInfo());
 
   if (halResetWasCrash()) {
 #if defined(SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT)

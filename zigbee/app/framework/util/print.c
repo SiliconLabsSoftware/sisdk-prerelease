@@ -125,13 +125,13 @@ static void sli_zigbee_af_print_sl_log_string(uint32_t log_level, const char *st
 {
   uint32_t addr = (uint32_t)(uintptr_t)str;
   if (log_level == SLI_ZIGBEE_AF_PRINT_LOG_LEVEL_DEBUG) {
-    SL_PRINT_STRING_DEBUG("%s", addr);
+    SL_PRINT_FMT_DEBUG("%s", addr);
   } else if (log_level == SLI_ZIGBEE_AF_PRINT_LOG_LEVEL_WARN) {
-    SL_PRINT_STRING_WARN("%s", addr);
+    SL_PRINT_FMT_WARN("%s", addr);
   } else if (log_level == SLI_ZIGBEE_AF_PRINT_LOG_LEVEL_ERROR) {
-    SL_PRINT_STRING_ERROR("%s", addr);
+    SL_PRINT_FMT_ERROR("%s", addr);
   } else {
-    SL_PRINT_STRING_INFO("%s", addr);
+    SL_PRINT_FMT_INFO("%s", addr);
   }
 }
 #endif

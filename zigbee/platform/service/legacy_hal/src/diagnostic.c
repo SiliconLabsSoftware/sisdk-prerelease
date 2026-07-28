@@ -74,6 +74,7 @@ extern void sli_802154phy_radio_sleep(void);
 
 static const char * const cfsrBits[] =
 {
+  /*
   // Memory management (MPU) faults
   "IACCVIOL: attempted instruction fetch from a no-execute address",  // B0
   "DACCVIOL: attempted load or store at an illegal address",          // B1
@@ -105,6 +106,11 @@ static const char * const cfsrBits[] =
   "",                                                                 // B23
   "UNALIGNED: attempted an unaligned memory access",                  // B24
   "DIVBYZERO: attempted to execute SDIV or UDIV with divisor of 0"    // B25
+  */
+  "IACCVIOL", "DACCVIOL", "", "MUNSTKERR", "MSTKERR", "", "", "MMARVALID",
+  "IBUSERR", "PRECISERR", "IMPRECISERR", "UNSTKERR", "STKERR", "", "", "BFARVALID",
+  "UNDEFINSTR", "INVSTATE", "INVPC", "NOCP", "", "", "", "",
+  "UNALIGNED", "DIVBYZERO"
 };
 
 // Names of raw crash data items - each name is null terminated, and the
@@ -113,9 +119,31 @@ static const char * const cfsrBits[] =
 // Byte length of HalCrashInfoType before the `data` union (offsetof, not sizeof(data)).
 #define HAL_CRASH_INFO_PREFIX_BYTE_COUNT ((size_t)offsetof(HalCrashInfoType, data))
 #define HAL_CRASH_INFO_PREFIX_WORD_COUNT \
-  (HAL_CRASH_INFO_PREFIX_BYTE_COUNT / sizeof(uint32_t))
+        (HAL_CRASH_INFO_PREFIX_BYTE_COUNT / sizeof(uint32_t))
 // PRIx32 (<inttypes.h>): uint32_t hex specifier for this toolchain ("x" or "lx").
-#define HAL_CRASH_WORD_PRINT_FMT "%s = %4" PRIx32
+#define HAL_CRASH_WORD_PRINT_FMT "%s=%08" PRIx32
+
+static void halPrintActiveCfsrBits(uint32_t cfsrWord, uint8_t firstBit, uint8_t lastBit)
+{
+  for (uint8_t bit = firstBit; bit < lastBit; bit++) {
+    if (((cfsrWord & (1U << bit)) != 0U) && (cfsrBits[bit][0] != '\0')) {
+      sl_iostream_printf(SL_IOSTREAM_STDOUT, " CFSR.%s", cfsrBits[bit]);
+    }
+  }
+}
+
+static void halPrintActiveHfsrBits(const HalCrashInfoType *c)
+{
+  if (c->hfsr.bits.VECTTBL) {
+    sl_iostream_printf(SL_IOSTREAM_STDOUT, " HFSR.VECTTBL");
+  }
+  if (c->hfsr.bits.FORCED) {
+    sl_iostream_printf(SL_IOSTREAM_STDOUT, " HFSR.FORCED");
+  }
+  if (c->hfsr.bits.DEBUGEVT) {
+    sl_iostream_printf(SL_IOSTREAM_STDOUT, " HFSR.DEBUGEVT");
+  }
+}
 
 static const char nameStrings[] = "R0\0R1\0R2\0R3\0"
                                   "R4\0R5\0R6\0R7\0"
@@ -177,89 +205,49 @@ void halPrintCrashDetails(uint8_t port)
 
   HalCrashInfoType *c = &halCrashInfo;
   uint16_t reason = savedResetCause;
-  uint8_t bit;
-  const uint8_t numFaults = sizeof(cfsrBits) / sizeof(cfsrBits[0]);
 
   switch (reason) {
     case RESET_WATCHDOG_EXPIRED:
-      sl_iostream_printf(SL_IOSTREAM_STDOUT,
-                         "Reset cause: Watchdog expired, no reliable extra information\n");
-      break;
+      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: WDG expired\n");
+      return;
     case RESET_WATCHDOG_CAUGHT:
-      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: Watchdog caught with enhanced info\n");
-      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Instruction address: %4lx\n", (unsigned long)c->PC);
-      break;
+      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: WDG caught PC=%08" PRIx32 "\n",
+                         c->PC);
+      return;
     case RESET_CRASH_ASSERT:
       sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: Assert %s:%ld\n",
                          c->data.assertInfo.file, (long)c->data.assertInfo.line);
-      break;
+      return;
     case RESET_FAULT_HARD:
       sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: Hard Fault\n");
-      if (c->hfsr.bits.VECTTBL) {
-        sl_iostream_printf(SL_IOSTREAM_STDOUT,
-                           "HFSR.VECTTBL: error reading vector table for an exception\n");
-      }
-      if (c->hfsr.bits.FORCED) {
-        sl_iostream_printf(SL_IOSTREAM_STDOUT,
-                           "HFSR.FORCED: configurable fault could not activate\n");
-      }
-      if (c->hfsr.bits.DEBUGEVT) {
-        sl_iostream_printf(SL_IOSTREAM_STDOUT,
-                           "HFSR.DEBUGEVT: fault related to debug - e.g., executed BKPT\n");
-      }
+      halPrintActiveHfsrBits(c);
       break;
     case RESET_FAULT_MEM:
-      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: Memory Management Fault\n");
-      if (c->cfsr.bits.DACCVIOL || c->cfsr.bits.IACCVIOL) {
-        sl_iostream_printf(SL_IOSTREAM_STDOUT, "Instruction address: %4lx\n", (unsigned long)c->PC);
-      }
-      if (c->cfsr.bits.MMARVALID) {
-        sl_iostream_printf(SL_IOSTREAM_STDOUT, "Illegal access address: %4lx\n", (unsigned long)c->faultAddress);
-      }
-      for (bit = SCB_CFSR_MEMFAULTSR_Pos; bit < (SCB_CFSR_MEMFAULTSR_Pos + 8); bit++) {
-        if ((c->cfsr.word & (1 << bit)) && (*cfsrBits[bit] != '\0')) {
-          sl_iostream_printf(SL_IOSTREAM_STDOUT, "CFSR.%s\n", cfsrBits[bit]);
-        }
-      }
+      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: Mem Mgt. Fault\n");
+      halPrintActiveCfsrBits(c->cfsr.word,
+                             SCB_CFSR_MEMFAULTSR_Pos,
+                             SCB_CFSR_MEMFAULTSR_Pos + 8U);
       break;
     case RESET_FAULT_BUS:
       sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: Bus Fault\n");
-      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Instruction address: %4lx\n", (unsigned long)c->PC);
-      if (c->cfsr.bits.IMPRECISERR) {
-        sl_iostream_printf(SL_IOSTREAM_STDOUT,
-                           "Address is of an instruction after bus fault occurred, not the cause.\n");
-      }
-      if (c->cfsr.bits.BFARVALID) {
-        sl_iostream_printf(SL_IOSTREAM_STDOUT, "Illegal access address: %4lx\n",
-                           (unsigned long)c->faultAddress);
-      }
-      for (bit = SCB_CFSR_BUSFAULTSR_Pos; bit < SCB_CFSR_USGFAULTSR_Pos; bit++) {
-        if (((c->cfsr.word >> bit) & 1U) && (*cfsrBits[bit] != '\0')) {
-          sl_iostream_printf(SL_IOSTREAM_STDOUT, "CFSR.%s\n", cfsrBits[bit]);
-        }
-      }
-      if ((c->cfsr.word & 0xFF) == 0) {
-        sl_iostream_printf(SL_IOSTREAM_STDOUT, "CFSR.(none) load or store at an illegal address\n");
-      }
+      halPrintActiveCfsrBits(c->cfsr.word,
+                             SCB_CFSR_BUSFAULTSR_Pos,
+                             SCB_CFSR_USGFAULTSR_Pos);
       break;
     case RESET_FAULT_USAGE:
       sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: Usage Fault\n");
-      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Instruction address: %4lx\n", (unsigned long)c->PC);
-      for (bit = SCB_CFSR_USGFAULTSR_Pos;
-           (bit < numFaults) && (bit < (sizeof(c->cfsr.word) * 8));
-           bit++) {
-        if (((c->cfsr.word >> bit) & 1U) && (*cfsrBits[bit] != '\0')) {
-          sl_iostream_printf(SL_IOSTREAM_STDOUT, "CFSR.%s\n", cfsrBits[bit]);
-        }
-      }
+      halPrintActiveCfsrBits(c->cfsr.word,
+                             SCB_CFSR_USGFAULTSR_Pos,
+                             sizeof(cfsrBits) / sizeof(cfsrBits[0]));
       break;
     case RESET_FAULT_DBGMON:
       sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: Debug Monitor Fault\n");
-      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Instruction address: %4lx\n", (unsigned long)c->PC);
       break;
     default:
+      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: 0x%04x\n", reason);
       break;
   }
+  sl_iostream_printf(SL_IOSTREAM_STDOUT, "\n");
 }
 
 void halPrintCrashSummary(uint8_t port)
@@ -269,12 +257,11 @@ void halPrintCrashSummary(uint8_t port)
   HalCrashInfoType *c = &halCrashInfo;
   uint32_t sp, stackBegin, stackEnd, size, used;
   uint16_t pct;
-  uint8_t *mode;
   const char *stack;
-  uint8_t bit;
+  const char *mode;
 
   if (c->LR & 4) {
-    stack = "process";
+    stack = "proc";
     sp = c->processSP;
     used = c->processSPUsed;
     stackBegin = 0;
@@ -287,42 +274,42 @@ void halPrintCrashSummary(uint8_t port)
     stackEnd = (uint32_t)(uint8_t *)_CSTACK_SEGMENT_END;
   }
 
-  mode = (uint8_t *)((c->LR & 8) ? "Thread" : "Handler");
+  mode = (c->LR & 8) ? "Thr" : "Hdl";
   size = stackEnd - stackBegin;
-  pct = size ? (uint16_t)(((100 * used) + (size / 2)) / size) : 0;
-  sl_iostream_printf(SL_IOSTREAM_STDOUT, "%s mode using %s stack (%4lx to %4lx), SP = %4lx\n",
-                     mode, stack, (unsigned long)stackBegin, (unsigned long)stackEnd, (unsigned long)sp);
-  sl_iostream_printf(SL_IOSTREAM_STDOUT, "%u bytes used (%u%%) in %s stack (out of %u bytes total)\n",
-                     (uint16_t)used, pct, stack, (uint16_t)size);
+  pct = size ? (uint16_t)(((100U * used) + (size / 2U)) / size) : 0U;
+  sl_iostream_printf(SL_IOSTREAM_STDOUT,
+                     "%s %s stk %08" PRIx32 "-%08" PRIx32 " SP=%08" PRIx32
+                     " %" PRIu32 "/%" PRIu32 " (%" PRIu16 "%%)\r\n",
+                     mode, stack,
+                     stackBegin, stackEnd,
+                     sp, used, size, pct);
 
-  // Valid SP range is [stackBegin, stackEnd] inclusive, but contents
-  // of stack only go into [stackBegin, stackend).
   if ((sp > stackEnd) || (sp < stackBegin)) {
-    sl_iostream_printf(SL_IOSTREAM_STDOUT, "SP is outside %s stack range!\n", stack);
+    sl_iostream_printf(SL_IOSTREAM_STDOUT, "SP out of range\r\n");
   }
 
-  bool interrupts_active = false;
   uint8_t num_bitmasks = (sizeof(c->intActive.word) / sizeof(c->intActive.word[0]));
-  for (uint8_t mask_num = 0; mask_num < num_bitmasks; mask_num++) {
-    if (c->intActive.word[mask_num]) {
-      interrupts_active = true;
-    }
-  }
+  bool irq_header_printed = false;
 
-  if (interrupts_active) {
-    sl_iostream_printf(SL_IOSTREAM_STDOUT, "Interrupts active (or pre-empted and stacked):\n");
-    for (uint8_t mask_num = 0; mask_num < num_bitmasks; mask_num++) {
-      for (bit = 0; bit < 32; bit++) {
-        if (c->intActive.word[mask_num] & (1 << bit)) {
-          sl_iostream_printf(SL_IOSTREAM_STDOUT, " %u", bit + (mask_num * 32));
-        }
-      }
+  for (uint8_t mask_num = 0; mask_num < num_bitmasks; mask_num++) {
+    uint32_t active = c->intActive.word[mask_num];
+    if (active == 0U) {
+      continue;
     }
-    sl_iostream_printf(SL_IOSTREAM_STDOUT, "\n");
-  } else {
-    sl_iostream_printf(SL_IOSTREAM_STDOUT, "No interrupts active\n");
+    if (!irq_header_printed) {
+      sl_iostream_printf(SL_IOSTREAM_STDOUT, "irq:");
+      irq_header_printed = true;
+    }
+    for (uint8_t bit = 0; bit < 32U; bit++) {
+      if ((active & (1U << bit)) == 0U) {
+        continue;
+      }
+      sl_iostream_printf(SL_IOSTREAM_STDOUT, " %u", bit + (mask_num * 32U));
+    }
   }
-  sl_iostream_printf(SL_IOSTREAM_STDOUT, "\n");
+  if (irq_header_printed) {
+    sl_iostream_printf(SL_IOSTREAM_STDOUT, "\r\n");
+  }
 }
 
 #endif // SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
@@ -486,54 +473,12 @@ uint8_t halGetEm2xxResetInfo(void)
 
 const char * halGetResetString(void)
 {
-  // Table used to convert from reset types to reset strings.
-  #define RESET_BASE_DEF(basename, value, string)  string,
-  #define RESET_EXT_DEF(basename, extname, extvalue, string)     /*nothing*/
-  static const char resetStringTable[][4] = {
-    #include "reset-def.h"
-  };
-  #undef RESET_BASE_DEF
-  #undef RESET_EXT_DEF
-  uint8_t resetInfo = halGetResetInfo();
-  if (resetInfo >= (sizeof(resetStringTable) / sizeof(resetStringTable[0]))) {
-    return resetStringTable[0x00];   // return unknown
-  } else {
-    return resetStringTable[resetInfo];
-  }
+  return "";
 }
 
 const char * halGetExtendedResetString(void)
 {
-  // Create a table of reset strings for each extended reset type
-  typedef const char ResetStringTableType[][4];
-  // Uncrustify doesn't like the following defines
-  /* *INDENT-OFF* */
-  #define RESET_BASE_DEF(basename, value, string) \
-  }; static ResetStringTableType basename##ResetStringTable = {
-  #define RESET_EXT_DEF(basename, extname, extvalue, string)  string,
-  {
-    #include "reset-def.h"
-  };
-  /* *INDENT-ON* */
-  #undef RESET_BASE_DEF
-  #undef RESET_EXT_DEF
-
-  // Create a table of pointers to each of the above tables
-  #define RESET_BASE_DEF(basename, value, string)  (ResetStringTableType *)basename##ResetStringTable,
-  #define RESET_EXT_DEF(basename, extname, extvalue, string)     /*nothing*/
-  static ResetStringTableType * const extendedResetStringTablePtrs[] = {
-    #include "reset-def.h"
-  };
-  #undef RESET_BASE_DEF
-  #undef RESET_EXT_DEF
-
-  uint16_t extResetInfo = halGetExtendedResetInfo();
-  // access the particular table of extended strings we are interested in
-  ResetStringTableType *extendedResetStringTable =
-    extendedResetStringTablePtrs[RESET_BASE_TYPE(extResetInfo)];
-
-  // return the string from within the proper table
-  return (*extendedResetStringTable)[((extResetInfo) & 0xFF)];
+  return "";
 }
 
 void halInternalSysReset(uint16_t extendedCause)

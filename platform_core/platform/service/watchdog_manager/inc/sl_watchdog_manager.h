@@ -74,6 +74,17 @@ extern "C" {
 /// Valid values: 0 to 31, where each position corresponds to one watchdog instance.
 typedef uint32_t sl_watchdog_handle_t;
 
+/// Context passed to the starve callback when the hardware watchdog is about
+/// to expire.
+typedef struct {
+  sl_watchdog_handle_t faulty_handle; ///< First unfed enabled SW watchdog, or UINT32_MAX.
+  uint32_t watchdog_uid;              ///< UID of @p faulty_handle, or 0 if unknown.
+} sl_watchdog_manager_starve_context_t;
+
+/// Starve callback invoked from the WDOG warning interrupt before timeout reset.
+typedef void (*sl_watchdog_manager_starve_callback_t)(
+  const sl_watchdog_manager_starve_context_t *context);
+
 /// UID reserved for the platform default watchdog (do not use for application watchdogs).
 #define SL_WATCHDOG_MANAGER_PLATFORM_DEFAULT_UID  0xFFFFFFFFu
 
@@ -292,10 +303,39 @@ sl_status_t sl_watchdog_manager_force_feed(void);
  * @note This function MUST be called before sl_watchdog_manager_init() to
  *       retrieve information from the previous reset.
  *
+ * @note This function reads but does not clear the EMU reset-cause register.
+ *       The application (or another service) is responsible for calling 
+ *       sl_hal_emu_clear_reset_cause() when the reset cause has been consumed.
+ *       
  * @note Due to dynamic handle allocation, false positives may occur if handles
  *       are reused across resets. This is acceptable for debugging purposes.
  ******************************************************************************/
 sl_status_t sl_watchdog_manager_retrieve_faulty(sl_watchdog_handle_t *handle);
+
+/***************************************************************************//**
+ * @brief Registers a callback for hardware watchdog starvation.
+ *
+ * @details
+ * When @ref SL_WATCHDOG_MANAGER_WARNING_TIME is not
+ * @c SL_WATCHDOG_MANAGER_WARNING_DISABLE and a callback is registered, the
+ * service enables the WDOG warning interrupt. The callback is invoked from the
+ * WDOG IRQ when the warning period elapses (before the hardware timeout reset).
+ *
+ * Use @ref SL_WATCHDOG_MANAGER_RESET_DISABLE together with this callback when
+ * the application must react without a hard reset (for example log state,
+ * notify upper layers, or feed selectively).
+ *
+ * @param[in] callback Starve callback, or NULL to unregister.
+ *
+ * @return SL_STATUS_OK if successful.
+ * @return SL_STATUS_NOT_SUPPORTED if the device has no WDOG warning interrupt.
+ *
+ * @note The callback runs in interrupt context. Keep it minimal; do not block.
+ * @note Register before @ref sl_watchdog_manager_start(), or call again after
+ *       start to enable the warning interrupt immediately.
+ ******************************************************************************/
+sl_status_t sl_watchdog_manager_set_starve_callback(
+  sl_watchdog_manager_starve_callback_t callback);
 
 #if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT) || defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT)
 /***************************************************************************//**

@@ -594,11 +594,6 @@ SL_WEAK void sli_uart_init_irq(sl_uart_handle_t *uart_handle)
   IRQn_Type tx_irq = (IRQn_Type)sl_device_peripheral_get_serial_tx_irqn(uart);
   sl_interrupt_manager_clear_irq_pending(tx_irq);
   sl_interrupt_manager_enable_irq(tx_irq);
-
-  if (SLI_UART_HANDLE_IS_ASYNC(uart_handle)) {
-    // TXC callback is used to notify users the transfer has completed.
-    uart_handle->ops->set_enable_irq(uart, true, uart_handle->ops->irq_tx_complete_flag);
-  }
   CORE_EXIT_ATOMIC();
 }
 

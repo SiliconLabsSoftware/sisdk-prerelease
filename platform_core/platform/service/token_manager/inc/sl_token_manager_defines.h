@@ -103,106 +103,118 @@
  */
 
 /** @ingroup NVM3 key space regions
- *  @brief NVM3 Key Region for User.
+ *  @brief NVM3 Key Region for User.
  */
 #define SL_TOKEN_NVM3_REGION_USER                 (0x00000)
 
 /** @ingroup NVM3 key space regions
- *  @brief NVM3 Key Region for Zigbee EmberZnet Stack.
+ *  @brief NVM3 Key Region for Zigbee EmberZnet Stack.
  */
 #define SL_TOKEN_NVM3_REGION_ZIGBEE               (0x10000)
 
 /** @ingroup NVM3 key space regions
- *  @brief NVM3 Key Region for OpenThread Stack.
+ *  @brief NVM3 Key Region for OpenThread Stack.
  */
 #define SL_TOKEN_NVM3_REGION_THREAD               (0x20000)
 
 /** @ingroup NVM3 key space regions
- *  @brief NVM3 Key Region for Connect Stack.
+ *  @brief NVM3 Key Region for Connect Stack.
  */
 #define SL_TOKEN_NVM3_REGION_CONNECT              (0x30000)
 
 /** @ingroup NVM3 key space regions
- *  @brief NVM3 Key Region for Bluetooth Stack.
+ *  @brief NVM3 Key Region for Bluetooth Stack.
  */
 #define SL_TOKEN_NVM3_REGION_BT                   (0x40000)
 
 /** @ingroup NVM3 key space regions
- *  @brief NVM3 Key Region for Z-Wave Stack.
+ *  @brief NVM3 Key Region for Z-Wave Stack.
  */
 #define SL_TOKEN_NVM3_REGION_ZWAVE                (0x50000)
 
 /** @ingroup NVM3 key space regions
- *  @brief NVM3 Key Region for Bluetooth Mesh Stack.
+ *  @brief NVM3 Key Region for Bluetooth Mesh Stack.
  */
 #define SL_TOKEN_NVM3_REGION_BTMESH               (0x60000)
 
 /** @ingroup NVM3 key space regions
- *  @brief Reserved.
+ *  @brief Reserved.
  */
 #define SL_TOKEN_NVM3_REGION_RESERVED0            (0x70000)
 
 // NVM3 Common region
 /** @ingroup NVM3 key space regions
- *  @brief NVM3 Key Region for Apple Homekit.
+ *  @brief NVM3 Key Region for Apple Homekit.
  */
 #define SL_TOKEN_NVM3_REGION_APPLE_HK             (0x80000)
 
 /** @ingroup NVM3 key space regions
- *  @brief NVM3 Key Region for Zigbee Cluster Library (ZCL).
+ *  @brief NVM3 Key Region for Zigbee Cluster Library (ZCL).
  */
 #define SL_TOKEN_NVM3_REGION_ZCL                  (0x81000)
 
 /** @ingroup NVM3 key space regions
- *  @brief NVM3 Key Region for DotDot.
+ *  @brief NVM3 Key Region for DotDot.
  */
 #define SL_TOKEN_NVM3_REGION_DOTDOT               (0x82000)
 
 /** @ingroup NVM3 key space regions
- *  @brief NVM3 Key Region for Platform CLI SM.
+ *  @brief NVM3 Key Region for Platform CLI SM.
  */
 #define SL_TOKEN_NVM3_REGION_PLT_CLISM            (0x83000)
 
 /** @ingroup NVM3 key space regions
- *  @brief NVM3 Key Region for Platform Crypto.
+ *  @brief NVM3 Key Region for Platform Crypto.
  */
 #define SL_TOKEN_NVM3_REGION_PLT_CRYPTO           (0x83100)
 
 /** @ingroup NVM3 key space regions
- *  @brief NVM3 Key Region for Bootloader.
+ *  @brief NVM3 Key Region for Bootloader.
  */
 #define SL_TOKEN_NVM3_REGION_BTL                  (0x87100)
 
 /** @ingroup NVM3 key space regions
- *  @brief NVM3 Key Region for Matter.
+ *  @brief NVM3 Key Region for Matter.
  */
 #define SL_TOKEN_NVM3_REGION_MATTER               (0x87200)
 
 /** @ingroup NVM3 key space regions
- *  @brief NVM3 Key Region for AWS Late Provisioning.
+ *  @brief NVM3 Key Region for AWS Late Provisioning.
  */
 #define SL_TOKEN_NVM3_REGION_AWS_LATE_PRN         (0x88000)
 
 /** @ingroup NVM3 key space regions
- *  @brief NVM3 Key Region for KNX IoT.
+ *  @brief NVM3 Key Region for KNX IoT.
  */
 #define SL_TOKEN_NVM3_REGION_KNX_IOT              (0x89000)
 
 /** @ingroup NVM3 key space regions
- *  @brief NVM3 Key Region for Antenna Calibration (Platform).
+ *  @brief NVM3 Key Region for Antenna Calibration (Platform).
  */
 #define SL_TOKEN_NVM3_REGION_ANT_CAL_PLT          (0x89800)
 
 /** @ingroup NVM3 key space regions
- *  @brief NVM3 Key Region for Antenna Calibration (RAIL).
+ *  @brief NVM3 Key Region for Antenna Calibration (RAIL).
  */
 #define SL_TOKEN_NVM3_REGION_ANT_CAL_RAIL         (0x89880)
+
+/** @ingroup NVM3 key space regions
+ *  @brief NVM3 Key Region for Find Ecosystem.
+ *  @note A total of 256 key ids are allocated for Find Ecosystem.
+ */
+#define SL_TOKEN_NVM3_REGION_FIND_ECOSYSTEM       (0x89900)
 
 /** @ingroup NVM3 key space regions
  *  @brief NVM3 Key Region for Aliro.
  *  @note A total of 1536 key ids are allocated for Aliro.
  */
 #define SL_TOKEN_NVM3_REGION_ALIRO                (0x89a00)
+
+/** @ingroup NVM3 key space regions
+ *  @brief NVM3 Key Region for CBAP.
+ *  @note A total of 128 key ids are allocated for CBAP.
+ */
+#define SL_TOKEN_NVM3_REGION_CBAP                 (0x8a000)
 
 /** @ingroup NVM3 key space regions
 *   @brief NVM3 Key Region for All the platform specific tokens.
@@ -216,17 +228,17 @@
 #define SL_TOKEN_NVM3_REGION_PLATFORM            (0x8DC00)
 
 /** @ingroup NVM3 key space regions
- *  @brief NVM3 Key Region for Wi-SUN.
+ *  @brief NVM3 Key Region for Wi-SUN.
  */
 #define SL_TOKEN_NVM3_REGION_WISUN                (0x90000)
 
 /** @ingroup NVM3 key space regions
- *  @brief NVM3 Key Region for Sidewalk.
+ *  @brief NVM3 Key Region for Sidewalk.
  */
 #define SL_TOKEN_NVM3_REGION_SW                   (0xA0000)
 
 /** @ingroup NVM3 key space regions
- *  @brief NVM3 Key Region for Wi-Fi.
+ *  @brief NVM3 Key Region for Wi-Fi.
  */
 #define SL_TOKEN_NVM3_REGION_WIFI                 (0xB0000)
 
@@ -253,7 +265,7 @@
  *
  * A new token added for series 3 devices must follow the domain-specific token Id ranges mentioned above.
  * And the new tokens must not conflict with the existing tokens. Below is an example of how to define a new token:
- *       
+ *
  *       @code{.c}
  *       // Defining a new static device token for the Matter domain:
  *       #define TOKEN_MFG_MATTER_NEW_STATIC_DEVICE_TOKEN          (SL_TOKEN_STATIC_DEVICE_TOKENS | SL_TOKEN_DOMAIN_STATIC_MATTER | 0x0)
@@ -265,12 +277,12 @@
  *       @endcode
  *
  * @note The token IDs listed below are reserved and must not be used to define tokens for any specific domain.
- *       For example, the token @ref TOKEN_MFG_CTUNE (a static device token) is reserved with Id 0x100 and must not be 
- *       reused to define a static device token for the Thread domain. Similarly, the token 
- *       @ref TOKEN_MFG_CBKE_DATA (a static secure token) is reserved with Id 0x204 and must not be reused to define 
- *       a static secure token for the Bluetooth domain. These reservations exist because there are already deployed 
- *       devices using these token Id values, which are distributed across the overall token Id space. 
- *       Reusing these Id's would create compatibility issues with existing devices. 
+ *       For example, the token @ref TOKEN_MFG_CTUNE (a static device token) is reserved with Id 0x100 and must not be
+ *       reused to define a static device token for the Thread domain. Similarly, the token
+ *       @ref TOKEN_MFG_CBKE_DATA (a static secure token) is reserved with Id 0x204 and must not be reused to define
+ *       a static secure token for the Bluetooth domain. These reservations exist because there are already deployed
+ *       devices using these token Id values, which are distributed across the overall token Id space.
+ *       Reusing these Id's would create compatibility issues with existing devices.
  * @note Reserved token IDs by type (do not use below IDs for defining new tokens for the respective domains):
  *    | Static device token (Domain : Token IDs)                  | Static secure token (Domain : Token IDs)     |
  *    |-----------------------------------------------------------|----------------------------------------------|
@@ -278,65 +290,65 @@
  *    | Zigbee : 0x09C                                            | Z-Wave : 0x298                               |
  *    | Thread : 0x100                                            |                                              |
  *    | Connect : 0x1f0                                           |                                              |
- * 
+ *
  */
  /** @ingroup StaticToken
- *  @brief Static Token Domain for Common tokens. 
+ *  @brief Static Token Domain for Common tokens.
  */
 #define SL_TOKEN_DOMAIN_STATIC_COMMON       (0x000)
 
  /** @ingroup StaticToken
- *  @brief Static Token Domain for Zigbee tokens. 
+ *  @brief Static Token Domain for Zigbee tokens.
  */
 #define SL_TOKEN_DOMAIN_STATIC_ZIGBEE       (0x080)
 
  /** @ingroup StaticToken
- *  @brief Static Token Domain for Thread tokens. 
+ *  @brief Static Token Domain for Thread tokens.
  */
 #define SL_TOKEN_DOMAIN_STATIC_THREAD       (0x100)
 
  /** @ingroup StaticToken
- *  @brief Static Token Domain for Connect tokens. 
+ *  @brief Static Token Domain for Connect tokens.
  */
 #define SL_TOKEN_DOMAIN_STATIC_CONNECT      (0x180)
 
  /** @ingroup StaticToken
- *  @brief Static Token Domain for Bluetooth tokens. 
+ *  @brief Static Token Domain for Bluetooth tokens.
  */
 #define SL_TOKEN_DOMAIN_STATIC_BT           (0x200)
 
  /** @ingroup StaticToken
- *  @brief Static Token Domain for Z-Wave tokens. 
+ *  @brief Static Token Domain for Z-Wave tokens.
  */
 #define SL_TOKEN_DOMAIN_STATIC_ZWAVE        (0x280)
 
  /** @ingroup StaticToken
- *  @brief Static Token Domain for Bluetooth Mesh tokens. 
+ *  @brief Static Token Domain for Bluetooth Mesh tokens.
  */
 #define SL_TOKEN_DOMAIN_STATIC_BT_MESH      (0x300)
 
  /** @ingroup StaticToken
- *  @brief Static Token Domain for Matter tokens. 
+ *  @brief Static Token Domain for Matter tokens.
  */
 #define SL_TOKEN_DOMAIN_STATIC_MATTER       (0x380)
 
  /** @ingroup StaticToken
- *  @brief Static Token Domain for Wi-Sun tokens. 
+ *  @brief Static Token Domain for Wi-Sun tokens.
  */
 #define SL_TOKEN_DOMAIN_STATIC_WI_SUN       (0x400)
 
  /** @ingroup StaticToken
- *  @brief Static Token Domain for Sidewalk tokens. 
+ *  @brief Static Token Domain for Sidewalk tokens.
  */
 #define SL_TOKEN_DOMAIN_STATIC_SIDEWALK     (0x480)
 
  /** @ingroup StaticToken
- *  @brief Static Token Domain for Wi-Fi tokens. 
+ *  @brief Static Token Domain for Wi-Fi tokens.
  */
 #define SL_TOKEN_DOMAIN_STATIC_WI_FI        (0x500)
 
  /** @ingroup StaticToken
- *  @brief Static Token Domain for User tokens. 
+ *  @brief Static Token Domain for User tokens.
  */
 #define SL_TOKEN_DOMAIN_STATIC_USER         (0x600)
 

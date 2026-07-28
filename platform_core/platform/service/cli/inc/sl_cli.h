@@ -446,6 +446,39 @@ void sl_cli_clear(sl_cli_handle_t handle);
 
 /***************************************************************************//**
  * @brief
+ *  Suspend a CLI instance.
+ *
+ * @details
+ *   Postpones CLI input processing. Bytes may accumulate in the IOStream receive
+ *   path until @ref sl_cli_instance_resume() is called. The caller should wait for
+ *   the current command to complete before suspending.
+ *
+ * @param[in] handle
+ *   A handle to the CLI.
+ *
+ * @return
+ *   Operation status.
+ ******************************************************************************/
+sl_status_t sl_cli_instance_suspend(sl_cli_handle_t handle);
+
+/***************************************************************************//**
+ * @brief
+ *  Resume a suspended CLI instance.
+ *
+ * @details
+ *   Resumes CLI input processing. Bytes received while suspended are processed
+ *   after resume.
+ *
+ * @param[in] handle
+ *   A handle to the CLI.
+ *
+ * @return
+ *   Operation status.
+ ******************************************************************************/
+sl_status_t sl_cli_instance_resume(sl_cli_handle_t handle);
+
+/***************************************************************************//**
+ * @brief
  *  Redirect user input.
  *  Normally, an input string is passed to the CLI command handler for execution,
  *  but with the redirect function the input string will be passed to the

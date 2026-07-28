@@ -38,7 +38,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include "sl_code_classification.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_enum.h"
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
@@ -374,7 +374,7 @@ __INLINE void sl_hal_msc_lock_page(uint32_t page_number)
   (void)sli_tz_ns_interface_dispatch_simple((sli_tz_veneer_simple_fn)sli_tz_s_interface_dispatch_simple,
                                             SLI_TZ_MSC_SET_PAGELOCK_SID, page_number);
 #else
-  EFM_ASSERT(page_number < (FLASH_SIZE / FLASH_PAGE_SIZE));
+  SL_LOG_DEBUG_ASSERT(page_number < (FLASH_SIZE / FLASH_PAGE_SIZE));
 
   volatile uint32_t *pagelock_registers = &MSC->PAGELOCK0;
   pagelock_registers[page_number / 32] |= (1 << (page_number % 32));
@@ -395,7 +395,7 @@ __INLINE bool sl_hal_msc_page_is_locked(uint32_t page_number)
   return (bool)sli_tz_ns_interface_dispatch_simple((sli_tz_veneer_simple_fn)sli_tz_s_interface_dispatch_simple,
                                                    SLI_TZ_MSC_GET_PAGELOCK_SID, page_number);
 #else
-  EFM_ASSERT(page_number < (FLASH_SIZE / FLASH_PAGE_SIZE));
+  SL_LOG_DEBUG_ASSERT(page_number < (FLASH_SIZE / FLASH_PAGE_SIZE));
   const volatile uint32_t *pagelock_registers = &MSC->PAGELOCK0;
 
   return pagelock_registers[page_number / 32] & (1 << (page_number % 32));

@@ -93,7 +93,7 @@ uint8_t requirement_high_accuracy_hf_clock_counter = 0;
 bool requirement_high_accuracy_hf_clock_back_to_zero = false;
 #endif
 
-#if !defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
+#if !defined(SLI_SLEEPTIMER_SYSRTC_WITH_PRETRIGGERS)
 // Saved energy mode we are coming from when waiting for HFXO ready.
 static sl_power_manager_em_t waiting_clock_restore_from_em = SL_POWER_MANAGER_EM0;
 #endif
@@ -216,15 +216,15 @@ sl_status_t sl_power_manager_init(void)
 
     // Initialize EM4
     sli_power_manager_init_em4();
-
-#if defined(SL_POWER_MANAGER_EXECUTION_MODES_FEATURE_EN) && (SL_POWER_MANAGER_EXECUTION_MODES_FEATURE_EN == 1)
-    // Initialize execution mode feature
-    sli_power_manager_executions_modes_init();
-#endif
   }
 
   // Do all necessary hardware initialization.
   sli_power_manager_init_hardware();
+
+#if defined(SL_POWER_MANAGER_EXECUTION_MODES_FEATURE_EN) && (SL_POWER_MANAGER_EXECUTION_MODES_FEATURE_EN == 1)
+  // Initialize execution mode feature
+  sli_power_manager_executions_modes_init();
+#endif
 
 #if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
   // Set the HF minimum offtime in sleeptimer ticks
@@ -292,7 +292,7 @@ __NO_INLINE void sl_power_manager_sleep(void)
       requirement_high_accuracy_hf_clock_back_to_zero = false;
 #endif
 
-#if defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
+#if defined(SLI_SLEEPTIMER_SYSRTC_WITH_PRETRIGGERS)
       sli_power_manager_notify_em_transition(current_em, lowest_em);
 #else
       if (is_sleeping_waiting_for_clock_restore == false) {
@@ -328,7 +328,7 @@ __NO_INLINE void sl_power_manager_sleep(void)
     // Apply lowest reachable energy mode
     sli_power_manager_apply_em(current_em);
 
-#if !defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
+#if !defined(SLI_SLEEPTIMER_SYSRTC_WITH_PRETRIGGERS)
     // In case we are waiting for the restore from an early wake-up,
     // we put back the current EM to the one before the early wake-up to do the next notification correctly.
     if (is_sleeping_waiting_for_clock_restore == true) {
@@ -342,7 +342,7 @@ __NO_INLINE void sl_power_manager_sleep(void)
 
     primask_state = yield_critical_with_primask(primask_state);
 
-#if !defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
+#if !defined(SLI_SLEEPTIMER_SYSRTC_WITH_PRETRIGGERS)
     // In case the HF restore was completed from the HFXO ISR,
     // and notification not done elsewhere, do it here
     if (is_restored_from_hfxo_isr_internal == true) {
@@ -370,7 +370,7 @@ __NO_INLINE void sl_power_manager_sleep(void)
       is_hf_x_oscillator_not_preserved = false;
     }
 
-#if defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
+#if defined(SLI_SLEEPTIMER_SYSRTC_WITH_PRETRIGGERS)
     sli_power_manager_is_high_freq_accuracy_clk_ready(true);
 #else
     // If possible, go back to sleep in EM1 while waiting for HF accuracy restore
@@ -904,16 +904,16 @@ static void evaluate_wakeup(sl_power_manager_em_t to)
             uint16_t hf_accuracy_clk_flag = 0;
             if (sli_power_manager_is_high_freq_accuracy_clk_used()) {
               hf_accuracy_clk_flag = SLI_SLEEPTIMER_POWER_MANAGER_HF_ACCURACY_CLK_FLAG;
-            }
 #if (SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_SYSRTC) \
-            && defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
-            uint32_t hfxo_startup_time;
-            sli_clock_manager_get_hfxo_average_startup_time(&hfxo_startup_time);
-            wakeup_delay -= hfxo_startup_time;
-            if (wakeup_delay < 0) {
-              wakeup_delay = 0;
-            }
+              && defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
+              uint32_t hfxo_startup_time;
+              sli_clock_manager_get_hfxo_average_startup_time(&hfxo_startup_time);
+              wakeup_delay -= hfxo_startup_time;
+              if (wakeup_delay < 0) {
+                wakeup_delay = 0;
+              }
 #endif
+            }
             // Start internal sleeptimer to do the early wake-up.
             sl_sleeptimer_restart_timer(&clock_wakeup_timer_handle,
                                         (tick_remaining - (uint32_t)wakeup_delay),
@@ -1035,6 +1035,15 @@ static void clock_restore(void)
       sli_power_manager_restore_high_freq_accuracy_clk();
       is_hf_x_oscillator_not_preserved = false;
     }
+#if defined(SLI_SLEEPTIMER_SYSRTC_WITH_PRETRIGGERS)
+    // Do the entire clock restore process in one go as we don't use the HFXO RDY ISR.
+    // The HFXO should be ready most of the time anyways because of the pre-triggers.
+    sli_power_manager_is_high_freq_accuracy_clk_ready(true);
+    sli_power_manager_restore_states();
+    is_states_saved = false;
+    sli_power_manager_notify_em_transition(current_em, SL_POWER_MANAGER_EM1);
+    current_em = SL_POWER_MANAGER_EM1;
+#else
     if (sli_power_manager_is_high_freq_accuracy_clk_ready(false)) {
       // Do the clock restore if the HF oscillator is already ready
       sli_power_manager_restore_states();
@@ -1047,11 +1056,10 @@ static void clock_restore(void)
       // If the HF oscillator is not yet ready, we will go back to sleep while waiting
       is_sleeping_waiting_for_clock_restore = true;
 
-#if !defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
       // Save current EM to do the right notification later
       waiting_clock_restore_from_em = current_em;
-#endif
     }
+#endif
   }
 }
 #endif

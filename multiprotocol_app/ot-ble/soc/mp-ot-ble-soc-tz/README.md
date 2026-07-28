@@ -14,11 +14,11 @@ process:
 
 The workspace file **`mp-ot-ble-soc-tz.slcw`** references the **secure** and **bootloader**
 projects under **`multiprotocol_app/ot-ble/tz/`** (vendored copies aligned with the Thread
-**`openthread_app`** tree). Those directories are **checked in**; a normal multiprotocol clone
+**`thread_app`** tree). Those directories are **checked in**; a normal multiprotocol clone
 is enough to open this workspace.
 
 If **`ot-tz-secure-app/`** or **`workspace-bootloaders/`** are missing, restore them from
-upstream **`openthread_app`** as described in **`../../tz/README.md`**.
+upstream **`thread_app`** as described in **`../../tz/README.md`**.
 
 ## Getting Started
 
@@ -29,9 +29,9 @@ should be present when interacting with the application terminal.
 
 See the application README file for details on how to use the OpenThread CLI.
 
-## Keeping in sync with `openthread_app` (Thread repo)
+## Keeping in sync with `thread_app` (Thread repo)
 
-The non-secure **`mp-ot-ble-soc-tz.slcp`** follows **`openthread_app/ot-ble-dmp/trustzone/ot-ble-dmp-tz-ns.slcp`**, with intentional multiprotocol differences: **`project_name`**, **`package`**, **`label`**, and **`include` / `source` / `readme` paths** under **`../mp-ot-ble-soc/`** (shared SoC sources). The workspace **`mp-ot-ble-soc-tz.slcw`** mirrors **`ot-ble-dmp-tz.slcw`**, with **`path:`** entries pointing at **`../../tz/...`** (vendored secure + bootloader trees under **`multiprotocol_app/ot-ble/tz/`**). Refresh those copies when bumping OpenThread — see **`../../tz/README.md`**.
+The non-secure **`mp-ot-ble-soc-tz.slcp`** follows **`thread_app/ot-ble-dmp/trustzone/ot-ble-dmp-tz-ns.slcp`**, with intentional multiprotocol differences: **`project_name`**, **`package`**, **`label`**, and **`include` / `source` / `readme` paths** under **`../mp-ot-ble-soc/`** (shared SoC sources). The workspace **`mp-ot-ble-soc-tz.slcw`** mirrors **`ot-ble-dmp-tz.slcw`**, with **`path:`** entries pointing at **`../../tz/...`** (vendored secure + bootloader trees under **`multiprotocol_app/ot-ble/tz/`**). Refresh those copies when bumping OpenThread — see **`../../tz/README.md`**.
 
 ## Troubleshooting
 

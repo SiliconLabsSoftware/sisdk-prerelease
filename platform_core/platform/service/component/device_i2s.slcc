@@ -1,0 +1,25 @@
+id: device_i2s
+label: Device Manager I2S
+package: platform_core
+description: >
+  The Device Manager I2S component abstracts device-specific
+  I2S and I2ST attributes shared across driver and peripheral layers.
+category: Services|Device Manager
+quality: production
+metadata:
+  sbom:
+    license: Zlib
+provides:
+- name: device_i2s
+requires:
+- name: enum
+- name: device
+  condition: [device_has_i2s]
+root_path: platform_core/platform/service/device_manager
+include:
+- path: inc
+  file_list:
+  - path: sl_device_i2s.h
+documentation:
+  docset: gecko-platform
+  document: platform-service/device-manager-i2s

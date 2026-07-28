@@ -119,6 +119,25 @@
 // <d> 0
 #define SL_WATCHDOG_MANAGER_RESET_DISABLE 0
 
+// Warning period enum values (WDOG WARNSEL).
+#define SL_WATCHDOG_MANAGER_WARNING_DISABLE  0
+#define SL_WATCHDOG_MANAGER_WARNING_TIME25   1
+#define SL_WATCHDOG_MANAGER_WARNING_TIME50   2
+#define SL_WATCHDOG_MANAGER_WARNING_TIME75   3
+
+// <o SL_WATCHDOG_MANAGER_WARNING_TIME> Hardware watchdog warning period
+// <i> Select when the starve callback is invoked relative to the hardware
+// <i> watchdog timeout. Requires a registered starve callback
+// <i> (sl_watchdog_manager_set_starve_callback). Use SL_WATCHDOG_MANAGER_WARNING_DISABLE
+// <i> to disable the warning interrupt. Combine with RESET_DISABLE to handle
+// <i> starvation without a hard reset.
+// <SL_WATCHDOG_MANAGER_WARNING_DISABLE=> Disabled
+// <SL_WATCHDOG_MANAGER_WARNING_TIME25=> 25% of timeout
+// <SL_WATCHDOG_MANAGER_WARNING_TIME50=> 50% of timeout
+// <SL_WATCHDOG_MANAGER_WARNING_TIME75=> 75% of timeout
+// <d> SL_WATCHDOG_MANAGER_WARNING_TIME75
+#define SL_WATCHDOG_MANAGER_WARNING_TIME SL_WATCHDOG_MANAGER_WARNING_TIME75
+
 // <q SL_WATCHDOG_MANAGER_EM1_RUN> WDOG runs in EM1
 // <i> When enabled (1), the watchdog counter keeps running in EM1 sleep.
 // <i> When disabled (0, default), the counter stops in EM1. On parts without

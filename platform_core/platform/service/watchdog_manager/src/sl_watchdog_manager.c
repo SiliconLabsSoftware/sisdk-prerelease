@@ -75,6 +75,9 @@ typedef struct {
 /// Watchdog manager state.
 static watchdog_manager_state_t manager_state;
 
+/// Optional application starve callback (invoked from WDOG warning IRQ).
+static sl_watchdog_manager_starve_callback_t starve_callback = NULL;
+
 /// No-init state for reset cause tracking (preserved across resets).
 #if defined(__ICCARM__)
 __no_init static watchdog_manager_noinit_state_t noinit_state @ ".noinit";
@@ -183,6 +186,22 @@ static void record_faulty_watchdog(void)
   }
 }
 
+/***************************************************************************//**
+ * @brief Enable or disable starve interrupt based on callback registration.
+ ******************************************************************************/
+static sl_status_t sync_starve_interrupt(void)
+{
+#if defined(_WDOG_CFG_WARNSEL_MASK)
+  if (starve_callback != NULL
+      && SL_WATCHDOG_MANAGER_WARNING_TIME != SL_WATCHDOG_MANAGER_WARNING_DISABLE) {
+    return sli_watchdog_manager_hal_enable_starve_interrupt();
+  }
+  return sli_watchdog_manager_hal_disable_starve_interrupt();
+#else
+  return SL_STATUS_OK;
+#endif
+}
+
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
  ******************************************************************************/
@@ -224,6 +243,8 @@ void sl_watchdog_manager_start(void)
 #endif
 
     manager_state.started = true;
+
+    (void)sync_starve_interrupt();
   }
 }
 
@@ -485,7 +506,6 @@ sl_status_t sl_watchdog_manager_retrieve_faulty(sl_watchdog_handle_t *handle)
 
   // Check if reset was caused by watchdog.
   uint32_t reset_cause = sl_hal_emu_get_reset_cause();
-  sl_hal_emu_clear_reset_cause();
 
   // Check for watchdog reset (bit positions may vary by device).
   // This is a simplified check - actual implementation would need
@@ -517,6 +537,70 @@ void sli_watchdog_manager_record_state(void)
 {
   if (manager_state.initialized && manager_state.started) {
     record_faulty_watchdog();
+  }
+}
+
+/***************************************************************************//**
+ * Register starve callback.
+ ******************************************************************************/
+sl_status_t sl_watchdog_manager_set_starve_callback(
+  sl_watchdog_manager_starve_callback_t callback)
+{
+#if !defined(_WDOG_CFG_WARNSEL_MASK)
+  (void)callback;
+  return SL_STATUS_NOT_SUPPORTED;
+#else
+  if (SL_WATCHDOG_MANAGER_WARNING_TIME == SL_WATCHDOG_MANAGER_WARNING_DISABLE
+      && callback != NULL) {
+    return SL_STATUS_NOT_SUPPORTED;
+  }
+
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_ATOMIC();
+  starve_callback = callback;
+  bool started = manager_state.started;
+  CORE_EXIT_ATOMIC();
+
+  if (started) {
+    return sync_starve_interrupt();
+  }
+
+  return SL_STATUS_OK;
+#endif
+}
+
+/***************************************************************************//**
+ * Invoke starve callback from WDOG warning IRQ.
+ ******************************************************************************/
+void sli_watchdog_manager_on_starve(void)
+{
+  sl_watchdog_manager_starve_context_t context;
+  sl_watchdog_manager_starve_callback_t callback;
+
+  context.faulty_handle = UINT32_MAX;
+  context.watchdog_uid = 0;
+
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_ATOMIC();
+
+  uint32_t unfed_mask = manager_state.enabled_mask & ~manager_state.fed_mask;
+  if (unfed_mask != 0) {
+    for (uint32_t i = 0; i < SL_WATCHDOG_MANAGER_MAX_SW_WATCHDOGS; i++) {
+      if (unfed_mask & (1u << i)) {
+        context.faulty_handle = i;
+        context.watchdog_uid = manager_state.watchdog_uids[i];
+        break;
+      }
+    }
+  }
+
+  record_faulty_watchdog();
+  callback = starve_callback;
+
+  CORE_EXIT_ATOMIC();
+
+  if (callback != NULL) {
+    callback(&context);
   }
 }
 

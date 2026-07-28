@@ -268,7 +268,6 @@ static inline void usart_uart_set_enable_irq(sl_peripheral_t uart, bool enabled,
   USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
 
   if (enabled) {
-    usart_uart_clear_irq(uart, irq);
     sl_hal_usart_enable_interrupts(usart, irq);
   } else {
     sl_hal_usart_disable_interrupts(usart, irq);

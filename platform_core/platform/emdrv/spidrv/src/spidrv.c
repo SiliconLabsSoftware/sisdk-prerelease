@@ -74,11 +74,13 @@
 #if defined(DMA_PRESENT) && (DMA_COUNT == 1)
 #define SPI_DMA_IRQ   DMA_IRQn
 
-#elif defined(LDMA_PRESENT) && (LDMA_COUNT == 1)
-#if defined(_SILICON_LABS_32B_SERIES_2)
+#elif defined(LDMA_PRESENT) && (LDMA_COUNT >= 1)
+#if defined(_SILICON_LABS_32B_SERIES_2) && (LDMA_COUNT == 1)
 #define SPI_DMA_IRQ   LDMA_IRQn
-#else
+#elif (_SILICON_LABS_32B_SERIES > 2)
 #define SPI_DMA_IRQ   LDMA0_CHNL0_IRQn
+#else
+#error "No valid SPIDRV DMA engine defined."
 #endif
 
 #else

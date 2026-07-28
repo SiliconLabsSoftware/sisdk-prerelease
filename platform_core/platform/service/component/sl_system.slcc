@@ -25,7 +25,7 @@ description: |-
   The System Setup component provides a set of events that can be used by
   other components to register handlers that should be run when the system
   is initialized and is running. For a detailed list of the handlers that can be
-  registered using the Event Handler API and a usage example, please refer to 
+  registered using the Event Handler API and a usage example, please refer to
   the documentation.
 
   This component was replaced by System Setup Compatibility Layer for baremetal

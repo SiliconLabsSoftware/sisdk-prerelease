@@ -33,6 +33,8 @@ component:
   - id: "wisun_cli_util"
   - id: "wisun_low_power"
   - id: "wisun_crash_handler"
+  - id: "device_init_dcdc"
+    condition: [device_has_dcdc]
 
 source:
   - path: "app.c"

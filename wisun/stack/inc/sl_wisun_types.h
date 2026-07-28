@@ -1303,7 +1303,7 @@ typedef enum {
   /// reception. Range from -174 (0) to +80 (254) dBm, 255 to disable.
   /// Enabling this feature may speed up connection times, but at the cost of
   /// increased simultaneous authentication traffic.
-  /// Use @ref DBM_TO_RSL_RANGE to convert from dBm to RSL range encoding.
+  /// Use \c DBM_TO_RSL_RANGE to convert from dBm to RSL range encoding.
   /// Type: uint8_t
   /// Default: DBM_TO_RSL_RANGE(-60)
   /// Available: FFN
@@ -1808,7 +1808,7 @@ SL_PACK_END()
 /// Value for rssi when not applicable (e.g. TX or non-RX events)
 #define SL_WISUN_RF_TEST_RSSI_NOT_AVAILABLE  (-128)
 
-/// RF test RX event information (valid when @ref SL_RAIL_EVENT_RX_PACKET_RECEIVED is set)
+/// RF test RX event information (valid when \c SL_RAIL_EVENT_RX_PACKET_RECEIVED is set)
 SL_PACK_START(1)
 typedef struct {
   /// RSSI in dBm; @ref SL_WISUN_RF_TEST_RSSI_NOT_AVAILABLE when not applicable
@@ -1825,7 +1825,7 @@ typedef struct {
   uint64_t events;
   /// Event-specific data
   union {
-    /// RX packet received information (when @ref SL_RAIL_EVENT_RX_PACKET_RECEIVED is set in events)
+    /// RX packet received information (when \c SL_RAIL_EVENT_RX_PACKET_RECEIVED is set in events)
     sl_wisun_logger_event_rf_test_rx_t rx;
   } u;
 } SL_ATTRIBUTE_PACKED sl_wisun_logger_event_rf_test_t;

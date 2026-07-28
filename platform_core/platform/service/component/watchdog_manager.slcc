@@ -41,6 +41,7 @@ requires:
 - name: sl_core
 - name: device
 - name: device_has_wdog
+- name: interrupt_manager
 template_contribution:
 - name: event_handler
   value:

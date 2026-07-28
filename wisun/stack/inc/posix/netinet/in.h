@@ -38,6 +38,16 @@ extern "C" {
 #include <stdint.h>
 #include "sys/socket.h"
 
+/**************************************************************************//**
+ * @addtogroup SL_WISUN_SOCKET_API Socket API
+ * @ingroup SL_WISUN_API
+ *
+ * IPv4/IPv6 protocol values, address structures and socket options used by the
+ * Wi-SUN socket API.
+ *
+ * @{
+ *****************************************************************************/
+
 /// Transport layer port
 typedef uint16_t in_port_t;
 
@@ -166,6 +176,8 @@ typedef struct ipv6_mreq {
 /// 0 (fragment to path MTU). 1 (no fragmentation, TX fails if bigger than PMTU).
 #define IPV6_DONTFRAG                6
 ///@}
+
+/** @} (end SL_WISUN_SOCKET_API) */
 
 #ifdef __cplusplus
 }

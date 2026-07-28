@@ -1,0 +1,31 @@
+# HAL for I2S / I2ST
+id: hal_i2s
+label: I2S
+package: platform_core
+description: >
+  Inter-IC Sound (I2S) peripheral API
+category: Platform|Peripheral|HAL
+quality: evaluation
+metadata:
+  sbom:
+    license: Zlib
+source:
+- path: src/sl_hal_i2s.c
+include:
+- path: inc
+  file_list:
+  - path: sl_hal_i2s.h
+provides:
+- name: hal_i2s
+- name: hal_generic_i2s
+  condition: [device_series_3]
+requires:
+- name: device
+- name: device_has_i2s
+- name: device_i2s
+- name: device_peripheral
+- name: hal_common
+- name: cmsis_core
+- name: enum
+- name: clock_manager_runtime
+root_path: platform_core/platform/peripheral
