@@ -72,6 +72,12 @@ config_file:
   condition:
   - device_series_3
   - device_generic_family_sixx301
+- path: plugin/sl_rail_util_init/config/siwx353/sl_rail_util_init_{{instance}}_config.h
+  condition:
+  - device_series_3
+  - device_generic_family_sixx353
+  unless:
+  - fpga
 
 template_contribution:
 - name: sl_rail_util_init_instance

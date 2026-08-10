@@ -30,3 +30,5 @@ source:
 define:
 - name: BTL_SMP_SUPPORT
   value: 1
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/gecko-bootloader-api/smp-switch

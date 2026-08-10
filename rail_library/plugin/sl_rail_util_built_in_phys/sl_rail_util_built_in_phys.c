@@ -34,9 +34,10 @@
 #include "em_common.h"
 #endif
 
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 4) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 6) \
-  || (_SILICON_LABS_32B_SERIES_3_CONFIG == 301))
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 4)   \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 6)   \
+  || (_SILICON_LABS_32B_SERIES_3_CONFIG == 301) \
+  || (_SILICON_LABS_32B_SERIES_3_CONFIG == 353))
 #define SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS 1
 #else
 #define SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS 0
@@ -59,15 +60,25 @@
 #include "sl_rail_ble_config_39MHz.h"
 #include "sl_rail_ble_config_40MHz.h"
 
+#if (_SILICON_LABS_32B_SERIES_3_CONFIG == 353)
+#include "sl_rail_ieee802154_config.h"
+#else
 #include "sl_rail_ieee802154_config_38M4Hz.h"
 #include "sl_rail_ieee802154_config_39MHz.h"
 #include "sl_rail_ieee802154_config_40MHz.h"
+#endif // (_SILICON_LABS_32B_SERIES_3_CONFIG == 353)
 
 #if SL_RAIL_SUPPORTS_RF_SENSE_OOK_PHY
 #include "sl_rail_rfsense_ook_config_38M4Hz.h"
 #include "sl_rail_rfsense_ook_config_39MHz.h"
 #include "sl_rail_rfsense_ook_config_40MHz.h"
 #endif
+
+#if SL_RAIL_SUPPORTS_PROTOCOL_BTC
+#include "sl_rail_btc_config_38M4Hz.h"
+#include "sl_rail_btc_config_39MHz.h"
+#include "sl_rail_btc_config_40MHz.h"
+#endif // SL_RAIL_SUPPORTS_PROTOCOL_BTC
 
 #else // !SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS
 
@@ -124,7 +135,9 @@ const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsViterbi =
 #endif // SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 38400000
 #endif // SL_RAIL_BLE_SUPPORTS_2_MBPS
 
-#if SL_RAIL_BLE_SUPPORTS_2_MBPS && SL_RAIL_BLE_SUPPORTS_AOX && (_SILICON_LABS_32B_SERIES_3_CONFIG != 301)
+#if SL_RAIL_BLE_SUPPORTS_2_MBPS && SL_RAIL_BLE_SUPPORTS_AOX \
+  && (_SILICON_LABS_32B_SERIES_3_CONFIG != 301)             \
+  && (_SILICON_LABS_32B_SERIES_3_CONFIG != 353)
 #if SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 38400000
 const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsAox =
   &sl_rail_ble_phy_2Mbps_aox_38M4Hz_channelConfig;
@@ -138,10 +151,12 @@ const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsAox =
 const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsAox =
   &ble_viterbi2M_channelConfig;
 #endif // SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 38400000
-#endif // SL_RAIL_BLE_SUPPORTS_2_MBPS && SL_RAIL_BLE_SUPPORTS_AOX && (_SILICON_LABS_32B_SERIES_3_CONFIG != 301)
+#endif // SL_RAIL_BLE_SUPPORTS_2_MBPS && SL_RAIL_BLE_SUPPORTS_AOX && (_SILICON_LABS_32B_SERIES_3_CONFIG != 301) && (_SILICON_LABS_32B_SERIES_3_CONFIG != 353)
 
-// Use Standard 2mbps PHY for AOX on SIXG301 devices
-#if SL_RAIL_BLE_SUPPORTS_2_MBPS && SL_RAIL_BLE_SUPPORTS_AOX && (_SILICON_LABS_32B_SERIES_3_CONFIG == 301)
+// Use Standard 2mbps PHY for AOX on SIXG301 and SIWX353 devices.
+#if SL_RAIL_BLE_SUPPORTS_2_MBPS && SL_RAIL_BLE_SUPPORTS_AOX \
+  && ((_SILICON_LABS_32B_SERIES_3_CONFIG == 301)            \
+  || (_SILICON_LABS_32B_SERIES_3_CONFIG == 353))
 #if SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 38400000
 const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsAox =
   &sl_rail_ble_phy_2Mbps_viterbi_38M4Hz_channelConfig;
@@ -155,14 +170,23 @@ const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsAox =
 const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsAox =
   &ble_viterbi2M_channelConfig;
 #endif // SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 38400000
-#endif
+#endif // SL_RAIL_BLE_SUPPORTS_2_MBPS && SL_RAIL_BLE_SUPPORTS_AOX && ((_SILICON_LABS_32B_SERIES_3_CONFIG == 301) || (_SILICON_LABS_32B_SERIES_3_CONFIG == 353))
 
-#if SL_RAIL_BLE_SUPPORTS_CS && SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 40000000
+#if SL_RAIL_BLE_SUPPORTS_CS
+#if SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 40000000
 const RAIL_ChannelConfig_t *const RAIL_BLE_Phy1MbpsViterbiCs =
   &sl_rail_ble_phy_1Mbps_viterbi_cs_40MHz_channelConfig;
 const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsViterbiCs =
   &sl_rail_ble_phy_2Mbps_viterbi_cs_40MHz_channelConfig;
-#endif // SL_RAIL_BLE_SUPPORTS_CS && SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 40000000
+#else
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 11)
+const RAIL_ChannelConfig_t *const RAIL_BLE_Phy1MbpsViterbiCs =
+  &ble_viterbi1M_cs_channelConfig;
+const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsViterbiCs =
+  &ble_viterbi2M_cs_channelConfig;
+#endif
+#endif // SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 40000000
+#endif // SL_RAIL_BLE_SUPPORTS_CS
 
 #if SL_RAIL_BLE_SUPPORTS_CODED_PHY
 #if SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 38400000
@@ -219,6 +243,51 @@ const RAIL_ChannelConfig_t *const RAIL_BLE_PhyQuuppa =
   &quuppa_viterbi1M_channelConfig;
 #endif // SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 38400000
 #endif // SL_RAIL_BLE_SUPPORTS_QUUPPA
+
+#if SL_RAIL_SUPPORTS_PROTOCOL_BTC
+#if SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 38400000
+const RAIL_ChannelConfig_t *const sl_rail_btc_phy =
+  &sl_rail_btc_phy_38M4Hz_channelConfig;
+#elif SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 39000000
+const RAIL_ChannelConfig_t *const sl_rail_btc_phy =
+  &sl_rail_btc_phy_39MHz_channelConfig;
+#elif SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 40000000
+const RAIL_ChannelConfig_t *const sl_rail_btc_phy =
+  &sl_rail_btc_phy_40MHz_channelConfig;
+#endif // SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 38400000
+#endif // SL_RAIL_SUPPORTS_PROTOCOL_BTC
+
+#if (_SILICON_LABS_32B_SERIES_3_CONFIG == 353)
+
+#if SL_RAIL_IEEE802154_SUPPORTS_2P4_GHZ_BAND && SL_RAIL_SUPPORTS_PROTOCOL_IEEE802154
+const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHz =
+  &ieee802154_2p4_coherent_channelConfig;
+#endif // SL_RAIL_IEEE802154_SUPPORTS_2P4_GHZ_BAND && SL_RAIL_SUPPORTS_PROTOCOL_IEEE802154
+
+#if SL_RAIL_IEEE802154_SUPPORTS_2_MBPS_PHY
+const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHz1MbpsFec =
+  &ieee802154_2p4_1mbps_fec_channelConfig;
+const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHz2Mbps =
+  &ieee802154_2p4_2mbps_channelConfig;
+#endif // SL_RAIL_IEEE802154_SUPPORTS_2_MBPS_PHY
+
+#if SL_RAIL_SUPPORTS_ANTENNA_DIVERSITY && SL_RAIL_SUPPORTS_2P4_GHZ_BAND \
+  && SL_RAIL_SUPPORTS_PROTOCOL_IEEE802154
+const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHzAntDiv =
+  &ieee802154_2p4_antdiv_channelConfig;
+#endif // SL_RAIL_SUPPORTS_ANTENNA_DIVERSITY && SL_RAIL_SUPPORTS_2P4_GHZ_BAND && SL_RAIL_SUPPORTS_PROTOCOL_IEEE802154
+
+#if SL_RAIL_IEEE802154_SUPPORTS_FEM_PHY
+const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHzFem =
+  &ieee802154_2p4_fem_channelConfig;
+#endif // SL_RAIL_IEEE802154_SUPPORTS_FEM_PHY
+
+#if SL_RAIL_IEEE802154_SUPPORTS_FEM_PHY && SL_RAIL_SUPPORTS_ANTENNA_DIVERSITY
+const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHzAntDivFem =
+  &ieee802154_2p4_antdiv_fem_channelConfig;
+#endif // SL_RAIL_IEEE802154_SUPPORTS_FEM_PHY && SL_RAIL_SUPPORTS_ANTENNA_DIVERSITY
+
+#else // (_SILICON_LABS_32B_SERIES_3_CONFIG != 353)
 
 #if SL_RAIL_IEEE802154_SUPPORTS_2P4_GHZ_BAND && SL_RAIL_SUPPORTS_PROTOCOL_IEEE802154 && (_SILICON_LABS_32B_SERIES_3_CONFIG != 301)
 #if SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 38400000
@@ -414,6 +483,8 @@ const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHzAntDivCoexFem =
   &ieee802154_2p4_antdiv_coex_channelConfig;
 #endif // SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 38400000
 #endif // SL_RAIL_IEEE802154_SUPPORTS_FEM_PHY && SL_RAIL_IEEE802154_SUPPORTS_COEX_PHY && SL_RAIL_SUPPORTS_ANTENNA_DIVERSITY
+
+#endif // (_SILICON_LABS_32B_SERIES_3_CONFIG == 353)
 
 #if SL_RAIL_IEEE802154_SUPPORTS_G_SUBSET_GB868
 const RAIL_ChannelConfig_t *const RAIL_IEEE802154_PhyGB863MHz =

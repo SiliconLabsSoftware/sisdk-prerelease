@@ -17,6 +17,8 @@ provides:
 - name: bootloader_tz_utils
 - name: bootloader_nonsecure_incompatible
   condition: [bootloader_core_nonsecure]
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/gecko-bootloader-api/trust-zone
 metadata:
   sbom:
     license: MSLA

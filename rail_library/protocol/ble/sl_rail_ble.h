@@ -1065,6 +1065,11 @@ typedef struct sl_rail_ble_cs_config {
    */
   bool force_agc_gain;
   /**
+   * Flag to enable inline PCT measurements. Only valid when
+   * \ref SL_RAIL_BLE_SUPPORTS_CS_HW_BLOCK is true.
+   */
+  bool inline_pct_enable;
+  /**
    * Pointer to an FAE table of size \ref SL_RAIL_BLE_CS_NUM_ALLOWED_CHANNELS
    * that holds the FAE value for each allowed CS channel in units of
    * parts-per-32-million (pp32m). In units of parts-per-million (ppm),
@@ -1072,6 +1077,12 @@ typedef struct sl_rail_ble_cs_config {
    * Set to NULL if unused.
    */
   int8_t(*p_fae_table)[SL_RAIL_BLE_CS_NUM_ALLOWED_CHANNELS];
+  /**
+   * Debug value to apply a residual frequency offset to the FFO computation,
+   * in units of Hz. If set to zero, the residual frequency offset will not
+   * be applied.
+   */
+  int32_t residual_frequency_offset_hz;
   /**
    * Equivalent AGC STATUS0 register to force.
    */

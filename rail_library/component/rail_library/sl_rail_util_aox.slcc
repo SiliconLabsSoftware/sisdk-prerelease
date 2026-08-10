@@ -56,6 +56,13 @@ config_file:
   condition:
   - device_series_3
   - device_generic_family_sixx301
+- path: plugin/sl_rail_util_aox/config/siwx353/sl_rail_util_aox_config.h
+  file_id: rail_util_aox_config
+  condition:
+  - device_series_3
+  - device_generic_family_sixx353
+  unless:
+  - fpga
 include:
 - path: plugin/sl_rail_util_aox
   file_list:

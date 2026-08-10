@@ -1,8 +1,0 @@
-id=com.silabs.sdk.rail_sdk_sample_app
-label=Rail SDK Sample Applications
-description=Rail SDK Sample Applications
-version=1.2.0
-
-prop.file.templatesFile=rail_sdk_sample_app_templates.xml
-prop.file.demosFile=rail_sdk_sample_app_demos.xml
-prop.file.docsFile=documentation/slrail_docContent.xml

@@ -1,0 +1,27 @@
+id: ddp_flash_execution
+label: Dynamic Data Provisioning (DDP) Flash execution
+description: |
+  This component makes the DDP application to be a regular, Flash-based
+  application instead of RAM-based. This is required to support devices
+  with smaller (RAM) memory. Keep in mind that in this case the Flash will be
+  overwritten with the provisioning application, therefore the target
+  application needs to be re-programmed.
+  DDP uses IO Stream for communication.
+package: bluetooth_le
+category: Bluetooth|Application|Miscellaneous
+quality: production
+metadata:
+  sbom:
+    license: Zlib
+root_path: bluetooth_le/common/ddp
+provides:
+- name: ddp_flash_execution
+- name: ddp_execution
+requires:
+  # For some device families it is not permitted to have an open RTT connection
+  # while performing NVM operations. Let's use the recommended (USART/EUSART)
+  # IO Stream instance instead.
+- name: iostream
+  # The default toolchain recommendations do not apply with ddp_ram_execution
+  # being recommended. Need to pull directly.
+- name: toolchain_gcc_standard

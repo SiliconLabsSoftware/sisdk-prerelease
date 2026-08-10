@@ -21,6 +21,10 @@ provides:
   condition: [bootloader_core_nonsecure]
 requires:
 - name: bootloader_image_parser
+documentation:
+  docset: mcu-bootloader
+  document: bootloader-user-guide-gsdk-4/09-gecko-bootloader-security-features
+  url: https://docs.silabs.com/mcu-bootloader/latest/bootloader-user-guide-gsdk-4/09-gecko-bootloader-security-features
 metadata:
   sbom:
     license: MSLA

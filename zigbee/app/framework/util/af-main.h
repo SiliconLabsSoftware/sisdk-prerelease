@@ -135,6 +135,14 @@ void sli_zigbee_af_message_sent_handler(sl_status_t status,
                                         uint16_t messageLength,
                                         uint8_t *messageContents);
 
+#if defined(EZSP_HOST)
+bool sli_zigbee_af_is_message_tag_in_use(uint8_t tag);
+uint8_t sli_zigbee_af_allocate_message_tag(void);
+void sli_zigbee_af_mark_message_tag_in_use(uint8_t tag);
+void sli_zigbee_af_clear_message_tag_in_use(uint8_t tag);
+void sli_zigbee_af_reset_message_tags_in_use(void);
+#endif // EZSP_HOST
+
 void sli_zigbee_af_stack_status_handler(sl_status_t status);
 
 void sli_zigbee_af_network_security_init(void);

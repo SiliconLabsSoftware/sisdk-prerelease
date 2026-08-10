@@ -17,6 +17,8 @@ config_file:
   file_id: btl_storage_slot_cfg_default
 validation_helper:
 - path: platform/bootloader/component/scripts/bootloader_storage_validation.lua
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/bootloader-transitioning-guide-gsdk-v40-and-higher/10-storage-slots
 metadata:
   sbom:
     license: MSLA

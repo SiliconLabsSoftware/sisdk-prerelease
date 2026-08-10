@@ -20,6 +20,7 @@ include:
   - path: sli_uart.h
 source:
 - path: src/sl_uart.c
+- path: src/sli_uart_async.h
 - path: src/sli_uart_eusart.c
   condition: [device_has_euart]
 - path: src/sli_uart_eusart.h
@@ -39,9 +40,9 @@ requires:
 - name: hal_gpio
 - name: hal_usart
   condition: [device_has_uart]
+- name: interrupt_manager
 - name: status
 - name: sl_assert
-- name: interrupt_manager
 - name: sl_core
 template_contribution:
 - name: component_catalog

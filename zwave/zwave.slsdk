@@ -1,0 +1,11 @@
+# Properties file for Simplicity Studio metadata.
+id=com.silabs.tool.zwave
+label=Z-Wave SDK
+description=Z-Wave SDK sources and tools
+version=8.2.0
+
+# General properties are prepended with "prop."
+prop.file.templatesFile=
+prop.file.demosFile=
+prop.file.adapterPacks=cc_configurator/apack.info
+prop.file.hkconfAdkModels=

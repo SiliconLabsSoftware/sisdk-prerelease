@@ -67,6 +67,12 @@ config_file:
   condition:
   - device_series_3
   - device_generic_family_sixx301
+- path: plugin/sl_rail_util_protocol/config/siwx353/sl_rail_util_protocol_config.h
+  condition:
+  - device_series_3
+  - device_generic_family_sixx353
+  unless:
+  - fpga
 include:
 - path: plugin/sl_rail_util_protocol
   file_list:

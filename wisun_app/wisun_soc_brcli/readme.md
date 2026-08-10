@@ -82,6 +82,10 @@ The list of available commands is output on the console with the associated help
 | wisun set_phy_sens \<phy_mode_id> \<sensitivy> | Set the sensitivity for the given PhyModeID <br> - [uint8] PhyModeID <br> - [int16] sensitivy in dBm | > wisun set_phy_sens 1 -70 |
 | wisun pan_defect_advertise \<state> \<min_scan_time> \<max_scan_time> | Set PAN Defect Advertisement parameters <br> - [uint8] state: 0=disabled, 1=enabled <br> - [uint32] minimum duration in seconds for switching PANs <br> - [uint32] maximum duration in seconds for switching PANs | wisun pan_defect_advertise 1 600 1800 |
 | wisun concurrent_detection \<state> | Configure concurrent detection <br> - [uint8] state: 0=disabled, 1=enabled <br> | > wisun concurrent_detection 1 |
+| wisun set_direct_connect_state \<state> \<mode> \<dc_id> | Set Direct Connect state <br> - [uint8] state: 0=disabled, 1=enabled <br> - [uint8] mode: 0=manual (print only, user runs accept/advert commands), 1=auto (accept link and advertise DC ID) <br> - [string] dc_id (optional): DC ID (String) to advertise in auto mode; default DC_ID_DEFAULT <br> | wisun set_direct_connect_state 1 1 DC_ID_DEFAULT |
+| wisun set_dc_pmk \<pmk> | Set Direct Connect PMK <br> - [string] pmk: colon-separated hex bytes | wisun set_dc_pmk 34:ba:32:26:a0:b2:ad:66:7c:9f:66:02:e5:db:75:77:dd:bd:5d:2b:34:3a:93:06:2b:90:c0:7b:e2:8e:4e:54 |
+| wisun accept_direct_connect_link \<remote address> | Accept a Direct Connect link request | wisun accept_direct_connect_link fe80::b6e3:f9ff:fec5:83df |
+| wisun advert_direct_connect_server_id \<remote address> \<dc_id> | Advertise Direct Connect server ID to a client | wisun advert_direct_connect_server_id fe80::b6e3:f9ff:fec5:83df DC_ID_DEFAULT |
 | wisun trigger_global_repair | Increase DODAG version to trigger RPL global repair procedure | > wisun trigger_global_repair |
 | wisun routing_table | Display border router's routing table | > wisun routing_table |
 | wisun reset_duty_cycle | Reset the duty cycle counters | > wisun reset_duty_cycle |

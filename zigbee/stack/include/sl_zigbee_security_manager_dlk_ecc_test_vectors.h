@@ -35,9 +35,15 @@ typedef struct sl_zigbee_dlk_ecc_test_vector_profile_data {
   uint32_t EXPECT_pubkeys[][DLK_ECC_TEST_VECTOR_POINT_LENGTH];
 } sl_zigbee_dlk_ecc_test_vector_profile_data_t;
 
+#if defined(__has_attribute) && __has_attribute(nonstring)
+#define SL_ZIGBEE_ATTRIBUTE_NONSTRING __attribute__((nonstring))
+#else
+#define SL_ZIGBEE_ATTRIBUTE_NONSTRING
+#endif
+
 typedef struct sl_zigbee_dlk_ecc_test_vector_shared_data {
   sl_zb_dlk_ecc_config_t config;
-  uint8_t GIVEN_psk[DLK_KEY_SIZE];
+  uint8_t GIVEN_psk[DLK_KEY_SIZE] SL_ZIGBEE_ATTRIBUTE_NONSTRING;
   uint8_t EXPECT_G[DLK_ECC_TEST_VECTOR_POINT_LENGTH];
   uint8_t EXPECT_x_k[DLK_ECC_COORDINATE_SIZE];
   uint8_t EXPECT_s[MAX_SHARED_SECRET_LEN];

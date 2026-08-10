@@ -97,6 +97,20 @@ extern "C" {
  */
 #define SL_RAIL_SIXG301_STATE_BUFFER_BYTES 632U  // DO NOT HAND-EDIT THESE VALUES
 
+/**
+ * @def SL_RAIL_SIWX353_STATE_BUFFER_BYTES
+ * @brief The SIWx353 series size needed for
+ *   \ref sl_rail_state_buffer_entry_t::buffer_bytes.
+ */
+#define SL_RAIL_SIWX353_STATE_BUFFER_BYTES 648U  // DO NOT HAND-EDIT THESE VALUES
+
+/**
+ * @def SL_RAIL_SIWX353FPGA_STATE_BUFFER_BYTES
+ * @brief The SIWx353 FPGA series size needed for
+ *   \ref sl_rail_state_buffer_entry_t::buffer_bytes.
+ */
+#define SL_RAIL_SIWX353FPGA_STATE_BUFFER_BYTES 648U  // DO NOT HAND-EDIT THESE VALUES
+
 #ifndef SL_RAIL_STATE_BUFFER_BYTES
 /**
  * @def SL_RAIL_STATE_BUFFER_BYTES
@@ -109,6 +123,12 @@ extern "C" {
 #define SL_RAIL_STATE_BUFFER_BYTES SL_RAIL_SIXG301_REDUCED_STATE_BUFFER_BYTES
 #else
 #define SL_RAIL_STATE_BUFFER_BYTES SL_RAIL_SIXG301_STATE_BUFFER_BYTES
+#endif
+#elif (_SILICON_LABS_32B_SERIES_3_CONFIG == 353)
+#ifdef FPGA
+#define SL_RAIL_STATE_BUFFER_BYTES SL_RAIL_SIWX353FPGA_STATE_BUFFER_BYTES
+#else
+#define SL_RAIL_STATE_BUFFER_BYTES SL_RAIL_SIWX353_STATE_BUFFER_BYTES
 #endif
 #else
 #define SL_RAIL_STATE_BUFFER_BYTES 0 // Sate Doxygen
@@ -226,7 +246,8 @@ sl_rail_timer_tick_t sl_rail_us_to_timer_ticks(sl_rail_time_t microseconds);
  */
 
 #ifndef SL_RAIL_RF_PATHS_2P4_GHZ
-#if (_SILICON_LABS_32B_SERIES_3_CONFIG == 301)
+#if ((_SILICON_LABS_32B_SERIES_3_CONFIG == 301) \
+  || (_SILICON_LABS_32B_SERIES_3_CONFIG == 353))
 #define SL_RAIL_RF_PATHS_2P4_GHZ 1
 #else
 #define SL_RAIL_RF_PATHS_2P4_GHZ 0
@@ -319,6 +340,53 @@ struct sl_rail_channel_config_entry_attr {
  * \ref SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP mode.
  */
 #define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX (95U)
+#elif (_SILICON_LABS_32B_SERIES_3_CONFIG == 353)
+/**
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when in \ref
+ * SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP, \ref SL_RAIL_TX_POWER_MODE_2P4_GHZ_MP,
+ * or \ref SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP modes.
+ */
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MP_LP_MIN     (0U)
+/**
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when in \ref
+ * \ref SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP mode.
+ */
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN (SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MP_LP_MIN)
+/**
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
+ * \ref SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP mode.
+ */
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX (31U)
+/**
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when in \ref
+ * \ref SL_RAIL_TX_POWER_MODE_2P4_GHZ_MP mode.
+ */
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MIN (SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MP_LP_MIN)
+/**
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
+ * \ref SL_RAIL_TX_POWER_MODE_2P4_GHZ_MP mode.
+ */
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MAX (95U)
+/**
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when in \ref
+ * \ref SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP mode.
+ */
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN (SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MP_LP_MIN)
+/**
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
+ * \ref SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP mode.
+ */
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX (95U)
+/**
+ * The minimum valid value for the \ref sli_rail_tx_power_level_t when in \ref
+ * \ref SL_RAIL_TX_POWER_MODE_2P4_GHZ_BTC mode.
+ */
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_BTC_MIN    (0U)
+/**
+ * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref
+ * \ref SL_RAIL_TX_POWER_MODE_2P4_GHZ_BTC mode.
+ */
+#define SLI_RAIL_TX_POWER_LEVEL_2P4_BTC_MAX    (80U)
 #else
 #error "SLI_RAIL_TX_POWER_LEVEL not defined for this device"
 #endif
@@ -371,6 +439,8 @@ struct sl_rail_channel_config_entry_attr {
 #ifndef SL_RAIL_NUM_PA
 #if (_SILICON_LABS_32B_SERIES_3_CONFIG == 301)
 #define SL_RAIL_NUM_PA (2U)
+#elif (_SILICON_LABS_32B_SERIES_3_CONFIG == 353)
+#define SL_RAIL_NUM_PA (4U)
 #else
 #error "SL_RAIL_NUM_PA undefined for platform"
 #endif
@@ -385,6 +455,13 @@ struct sl_rail_channel_config_entry_attr {
 #define SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP      ((sl_rail_tx_power_mode_t) SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP)
 #define SL_RAIL_TX_POWER_MODE_2P4_GHZ_HIGHEST ((sl_rail_tx_power_mode_t) SL_RAIL_TX_POWER_MODE_2P4_GHZ_HIGHEST)
 #endif//_SILICON_LABS_32B_SERIES_3_CONFIG == 301
+#if (_SILICON_LABS_32B_SERIES_3_CONFIG == 353)
+#define SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP      ((sl_rail_tx_power_mode_t) SL_RAIL_TX_POWER_MODE_2P4_GHZ_HP)
+#define SL_RAIL_TX_POWER_MODE_2P4_GHZ_MP      ((sl_rail_tx_power_mode_t) SL_RAIL_TX_POWER_MODE_2P4_GHZ_MP)
+#define SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP      ((sl_rail_tx_power_mode_t) SL_RAIL_TX_POWER_MODE_2P4_GHZ_LP)
+#define SL_RAIL_TX_POWER_MODE_2P4_GHZ_HIGHEST ((sl_rail_tx_power_mode_t) SL_RAIL_TX_POWER_MODE_2P4_GHZ_HIGHEST)
+#define SL_RAIL_TX_POWER_MODE_2P4_GHZ_BTC     ((sl_rail_tx_power_mode_t) SL_RAIL_TX_POWER_MODE_2P4_GHZ_BTC)
+#endif//_SILICON_LABS_32B_SERIES_3_CONFIG == 353
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /**

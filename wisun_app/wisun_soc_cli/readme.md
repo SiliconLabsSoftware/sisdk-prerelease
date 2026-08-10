@@ -64,6 +64,7 @@ The list of available commands is output on the console with the associated help
 | wisun set_leaf \<is_leaf> | Set Leaf behavior <br> - [uint8] state: 0=disabled, 1=enabled <br> | > wisun set_leaf 1 |
 | wisun set_phy_sens \<phy_mode_id> \<sensitivy> | Set the sensitivity for the given PhyModeID <br> - [uint8] PhyModeID <br> - [int16] sensitivy in dBm | > wisun set_phy_sens 1 -70 |
 | wisun set_direct_connect_state \<state> \<mode> \<dc_id> | Set Direct Connect state <br> - [uint8] state: 0=disabled, 1=enabled <br> - [uint8] mode: 0=manual (print only, user runs accept/advert commands), 1=auto (accept link and advertise DC ID) <br> - [string] dc_id (optional): DC ID (String) to advertise in auto mode; default DC_ID_DEFAULT <br> | wisun set_direct_connect_state 1 1 DC_ID_DEFAULT |
+| wisun set_dc_pmk \<pmk> | Set Direct Connect PMK <br> - [string] pmk: colon-separated hex bytes | wisun set_dc_pmk 34:ba:32:26:a0:b2:ad:66:7c:9f:66:02:e5:db:75:77:dd:bd:5d:2b:34:3a:93:06:2b:90:c0:7b:e2:8e:4e:54 |
 | wisun accept_direct_connect_link \<remote address> | Accept a Direct Connect link request | wisun accept_direct_connect_link fe80::b6e3:f9ff:fec5:83df |
 | wisun concurrent_detection \<state> | Configure concurrent detection <br> - [uint8] state: 0=disabled, 1=enabled <br> | > wisun concurrent_detection 1 |
 | wisun reset_duty_cycle | Reset the duty cycle counters | > wisun reset_duty_cycle |
@@ -83,7 +84,6 @@ The Wi-SUN stack settings are listed with their current state/value. Some of the
 To modify the network name the Wi-SUN device should connect to, enter:
 
     wisun set wisun.network_name "My Network"
-
 Next time you issue the `wisun join_xxxxx` command, the device starts a connection process with the Wi-SUN network named "My Network".
 
 ### *wisun* Section Settings
@@ -137,7 +137,6 @@ Next time you issue the `wisun join_xxxxx` command, the device starts a connecti
 | wisun.preferred_pan_id | R/W | integer | 0 to 65535 | Preferred PAN ID (0xFFFF to disable) | |
 | wisun.keychain | R/W | integer | - automatic (0) <br> - built-in (1) <br> - NVM (2) | Keychain to use for device credentials | |
 | wisun.keychain_index | R/W | integer | 0 to 255 | Device credential index to use for built-in keychain | |
-| wisun.direct_connect_pmk \<pmk> | R/W | string | 64 hex characters | Preshared Master Key for Direct Connect |
 | wisun.max_hop_count | R/W | integer | 1 to 24 | Hop count after which the node automatically enables the RPL leaf mode |
 | wisun.lowpan_mtu | R/W | integer |  | Maximum size of 6LoWPAN packets after which packets are fragmented |
 | wisun.ipv6_mru | R/W | integer |  | Maximum size of a fragmented IPv6 packet the node is willing to accept after reassembly |

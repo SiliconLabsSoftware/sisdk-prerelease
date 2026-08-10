@@ -11,13 +11,15 @@ ui_hints:
 requires:
 - name: "wisun_dc_client_plugin"
 - name: "wisun_cli_util"
-- name: "cli"
+- name: "wisun_direct_connect_pmk"
 
 provides:
 - name: "wisun_dc_client_cli"
 
 source:
 - path: "plugin/sl_wisun_dc_client_cli.c"
+  project:
+    transfer_ownership: true
 
 include:
 - path: "plugin"
@@ -29,8 +31,10 @@ template_contribution:
   value:
     group: "wisun"
     name: "start_direct_connect_client"
-    handler: "app_wisun_start_direct_connect_client"
-    help: "Start direct connect client"
+    handler: "sl_wisun_dc_client_cli_start"
+    help: "Start direct connect client: w dcc_start"
+    shortcuts:
+    - name: "dcc_start"
     argument:
     - type: uint32
       help: "PHY configuration type"
@@ -38,14 +42,18 @@ template_contribution:
   value:
     group: "wisun"
     name: "stop_direct_connect_client"
-    handler: "app_wisun_stop_direct_connect_client"
-    help: "Stop direct connect client"
+    handler: "sl_wisun_dc_client_cli_stop"
+    help: "Stop direct connect client: w dcc_stop"
+    shortcuts:
+    - name: "dcc_stop"
 - name: "cli_command"
   value:
     group: "wisun"
     name: "start_direct_connect_client_scan"
-    handler: "app_wisun_direct_connect_scan"
-    help: "Start direct connect client scan"
+    handler: "sl_wisun_dc_client_cli_scan"
+    help: "Start direct connect client scan: w dcc_scan"
+    shortcuts:
+    - name: "dcc_scan"
     argument:
     - type: string
       help: "Direct connect identifier"
@@ -55,19 +63,26 @@ template_contribution:
   value:
     group: "wisun"
     name: "stop_direct_connect_client_scan"
-    handler: "app_wisun_stop_direct_connect_scan"
-    help: "Stop direct connect client scan"
+    handler: "sl_wisun_dc_client_cli_stop_scan"
+    help: "Stop direct connect client scan: w dcc_stop_scan"
+    shortcuts:
+    - name: "dcc_stop_scan"
 - name: "cli_command"
   value:
     group: "wisun"
     name: "connect_to_direct_connect_server"
-    handler: "app_wisun_connect_to_direct_connect_server"
-    help: "Connect to direct connect server"
+    handler: "sl_wisun_dc_client_cli_connect"
+    help: "Connect to direct connect server: w dcc_connect"
+    shortcuts:
+    - name: "dcc_connect"
     argument:
     - type: string
       help: "MAC address"
     - type: uint8
       help: "Max direct connect identity solicitations"
+
+- name: component_catalog
+  value: wisun_dc_client_cli
 
 metadata:
   sbom:

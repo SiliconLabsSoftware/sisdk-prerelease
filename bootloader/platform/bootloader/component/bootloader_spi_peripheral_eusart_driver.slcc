@@ -27,6 +27,8 @@ requires:
 config_file:
 - path: platform/bootloader/config/btl_spi_peripheral_eusart_driver_cfg.h
   file_id: btl_spi_peripheral_eusart_driver_cfg
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/gecko-bootloader-api/spi-peripheral
 metadata:
   sbom:
     license: MSLA

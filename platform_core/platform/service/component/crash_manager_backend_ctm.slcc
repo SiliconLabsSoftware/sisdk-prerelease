@@ -1,0 +1,47 @@
+id: crash_manager_backend_ctm
+label: Crash Manager Backend CTM
+package: platform_core
+description: >
+  Persists the crash log as a Common Token Manager (CTM) dynamic token backed by
+  the default NVM3 instance. Requires Common Token Manager with dynamic tokens.
+  On Series 2 without a wireless stack, add Common Token Manager Compatibility
+  (stub wireless_stack API) or another component that provides wireless_stack.
+  Uses a user-region NVM key for the crash log; avoid collisions with
+  other dynamic tokens in the default NVM instance.
+category: Services|Crash Manager
+quality: evaluation
+metadata:
+  sbom:
+    license: Zlib
+provides:
+- name: crash_manager_backend_ctm
+- name: crash_manager_backend
+conflicts:
+- name: crash_manager_backend_ram
+requires:
+- name: crash_manager
+- name: common_token_manager_dynamic
+- name: common_token_manager_core
+- name: component_catalog
+recommends:
+- id: common_token_manager_compatibility
+  condition: [device_series_2]
+  vendor: silabs
+root_path: platform_core/platform/service/sl_crash_manager
+include:
+- path: inc
+  file_list:
+  - path: sli_crash_manager_flash.h
+source:
+- path: src/sli_crash_manager_ctm.c
+template_contribution:
+- name: event_handler
+  value:
+    event: service_init
+    include: sli_crash_manager.h
+    handler: sli_crash_manager_ctm_plugin_register
+  priority: 9998
+- name: crash_manager_backend_ctm
+  value: 1
+- name: component_catalog
+  value: crash_manager_backend_ctm

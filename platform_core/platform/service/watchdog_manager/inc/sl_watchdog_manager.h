@@ -357,6 +357,30 @@ sl_status_t sl_watchdog_manager_set_starve_callback(
 void sl_watchdog_manager_user_idle_hook(void);
 #endif
 
+/***************************************************************************//**
+ * @brief Enable reset on timeout.
+ *
+ * @details
+ * Enables the reset on timeout feature of the hardware watchdog. This function
+ * will disable the watchdog, enable the reset on timeout, and then re-enable 
+ * the watchdog.
+ *
+ * @return SL_STATUS_OK if successful.
+ ******************************************************************************/
+sl_status_t sl_watchdog_manager_enable_reset(void);
+
+/***************************************************************************//**
+ * @brief Disable reset on timeout.
+ *
+ * @details
+ * Disables the reset on timeout feature of the hardware watchdog. This function
+ * will disable the watchdog, disable the reset on timeout, and then re-enable 
+ * the watchdog.
+ *
+ * @return SL_STATUS_OK if successful.
+ ******************************************************************************/
+sl_status_t sl_watchdog_manager_disable_reset(void);
+
 /** @} (end addtogroup watchdog_manager) */
 
 #ifdef __cplusplus

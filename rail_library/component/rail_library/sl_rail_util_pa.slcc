@@ -115,6 +115,12 @@ config_file:
   unless:
   - fpga
   file_id: sl_rail_util_pa_config
+- path: plugin/sl_rail_util_pa_conversions/siwx353/config/sl_rail_util_pa_config.h
+  condition:
+  - device_generic_family_sixx353
+  unless:
+  - fpga
+  file_id: sl_rail_util_pa_config
 include:
 - path: plugin/sl_rail_util_compatible_pa
   file_list:

@@ -66,10 +66,6 @@ other_file:
 configuration:
   - name: SL_STACK_SIZE
     value: "6200"
-  - name: SL_PSA_KEY_USER_SLOT_COUNT
-    value: "1"
-    condition:
-      - psa_crypto
   - name: NVM3_DEFAULT_MAX_OBJECT_SIZE
     value: "1200"
     condition:

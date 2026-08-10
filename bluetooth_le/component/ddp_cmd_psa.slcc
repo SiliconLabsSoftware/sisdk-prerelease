@@ -9,8 +9,6 @@ quality: production
 metadata:
   sbom:
     license: Zlib
-ui_hints:
-  visibility: never
 root_path: bluetooth_le/common/ddp
 provides:
 - name: ddp_cmd_psa

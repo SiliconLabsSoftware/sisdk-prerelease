@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file sl_wisun_dc_client_cli.c
- * @brief CLI commands for the Wi-SUN Direct Connect client
+ * @brief CLI commands and event handlers for the Wi-SUN Direct Connect client
  *******************************************************************************
  * # License
  * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
@@ -24,11 +24,12 @@
 #include "sl_wisun_api.h"
 #include "sl_wisun_cli_core.h"
 #include "sl_wisun_cli_util.h"
+#include "sl_wisun_ip6string.h"
+#include "sl_wisun_direct_connect_pmk_config.h"
 
 #include "app_settings.h"
-#include "sl_wisun_dc_client_cli.h"
 
-void app_wisun_start_direct_connect_client(sl_cli_command_arg_t *arguments)
+void sl_wisun_dc_client_cli_start(sl_cli_command_arg_t *arguments)
 {
   sl_status_t status;
   sl_wisun_phy_config_type_t phy_type;
@@ -79,7 +80,7 @@ cleanup:
   app_wisun_cli_mutex_unlock();
 }
 
-void app_wisun_stop_direct_connect_client(sl_cli_command_arg_t *arguments)
+void sl_wisun_dc_client_cli_stop(sl_cli_command_arg_t *arguments)
 {
   sl_status_t status;
   (void)arguments;
@@ -98,7 +99,7 @@ cleanup:
   app_wisun_cli_mutex_unlock();
 }
 
-void app_wisun_direct_connect_scan(sl_cli_command_arg_t *arguments)
+void sl_wisun_dc_client_cli_scan(sl_cli_command_arg_t *arguments)
 {
   sl_status_t status;
   uint8_t max_solicits_count = 0;
@@ -126,7 +127,7 @@ cleanup:
   app_wisun_cli_mutex_unlock();
 }
 
-void app_wisun_stop_direct_connect_scan(sl_cli_command_arg_t *arguments)
+void sl_wisun_dc_client_cli_stop_scan(sl_cli_command_arg_t *arguments)
 {
   sl_status_t status;
   (void)arguments;
@@ -145,7 +146,7 @@ cleanup:
   app_wisun_cli_mutex_unlock();
 }
 
-void app_wisun_connect_to_direct_connect_server(sl_cli_command_arg_t *arguments)
+void sl_wisun_dc_client_cli_connect(sl_cli_command_arg_t *arguments)
 {
   uint32_t ret = 0;
   sl_status_t status = SL_STATUS_OK;
@@ -167,12 +168,9 @@ void app_wisun_connect_to_direct_connect_server(sl_cli_command_arg_t *arguments)
     goto cleanup;
   }
 
-  status = app_import_direct_connect_pmk();
-  if (status != SL_STATUS_OK) {
-    goto cleanup;
-  }
-
-  status = sl_wisun_connect_to_direct_connect_server(&mac_address, app_direct_connect_pmk_key_id, max_solicits_count);
+  status = sl_wisun_connect_to_direct_connect_server(&mac_address,
+                                                     SL_WISUN_DIRECT_CONNECT_PMK_KEY_ID,
+                                                     max_solicits_count);
   if (status != SL_STATUS_OK) {
     printf("[Failed: unable to connect to Direct Connect server: %"PRIu32"]\r\n", status);
     goto cleanup;
@@ -183,4 +181,46 @@ void app_wisun_connect_to_direct_connect_server(sl_cli_command_arg_t *arguments)
 
 cleanup:
   app_wisun_cli_mutex_unlock();
+}
+
+
+// Event handlers
+
+void sl_wisun_dc_client_cli_handle_id_received(sl_wisun_evt_t *evt)
+{
+  char mac_str[24];
+
+  app_util_get_mac_address_string(mac_str, &evt->evt.direct_connect_id_received.mac_address);
+  printf("[Direct Connect identity received from server %s with ID %s]\r\n",
+         mac_str,
+         (char *)evt->evt.direct_connect_id_received.dc_id.id);
+}
+
+void sl_wisun_dc_client_cli_handle_client_state_changed(sl_wisun_evt_t *evt)
+{
+  char ipv6_string[40];
+
+  ip6tos(&evt->evt.direct_connect_client_state_changed.link_local_ipv6, ipv6_string);
+
+  switch (evt->evt.direct_connect_client_state_changed.state) {
+    case SL_WISUN_DC_CLIENT_STATE_CONNECTED:
+      printf("[DC client is connected to server %s]\r\n", ipv6_string);
+      break;
+    case SL_WISUN_DC_CLIENT_STATE_CONNECTION_LOST:
+      printf("[DC client lost connection to server %s]\r\n", ipv6_string);
+      break;
+    case SL_WISUN_DC_CLIENT_STATE_CONNECTION_FAILED:
+      printf("[DC client connection establishment failed with server %s]\r\n", ipv6_string);
+      break;
+    case SL_WISUN_DC_CLIENT_STATE_SCAN_COMPLETE:
+      printf("[DC client scan complete]\r\n");
+      break;
+    case SL_WISUN_DC_CLIENT_STATE_STOPPED:
+      printf("[DC client stopped]\r\n");
+      break;
+    default:
+      printf("[DC client state changed: unknown state %"PRIu32"]\r\n",
+             evt->evt.direct_connect_client_state_changed.state);
+      break;
+  }
 }

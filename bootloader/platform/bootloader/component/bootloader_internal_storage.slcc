@@ -35,6 +35,8 @@ config_file:
 template_file:
 - path: platform/bootloader/config/internal_storage_slot_cfg/btl_internal_storage_slot_cfg_default.h.jinja
   unless: [btl_storage_slot_cfg_default_override]
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/bootloader-user-guide-gsdk-4/07-configuring-the-gecko-bootloader
 metadata:
   sbom:
     license: MSLA

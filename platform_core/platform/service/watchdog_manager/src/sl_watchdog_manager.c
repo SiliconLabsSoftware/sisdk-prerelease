@@ -505,13 +505,19 @@ sl_status_t sl_watchdog_manager_retrieve_faulty(sl_watchdog_handle_t *handle)
   }
 
   // Check if reset was caused by watchdog.
+  #if defined(_EMU_SOFTRST_CAUSE_MASK)
+  uint32_t reset_cause = sl_hal_emu_get_soft_reset_cause();
+  #else
   uint32_t reset_cause = sl_hal_emu_get_reset_cause();
+  #endif
 
   // Check for watchdog reset (bit positions may vary by device).
   // This is a simplified check - actual implementation would need
   // device-specific handling.
   bool is_watchdog_reset = false;
-  #if defined(EMU_RSTCAUSE_WDOG1)
+  #if defined(EMU_SOFTRST_CAUSE_WDOG3)
+  is_watchdog_reset = (reset_cause & (EMU_SOFTRST_CAUSE_WDOG0 | EMU_SOFTRST_CAUSE_WDOG1 | EMU_SOFTRST_CAUSE_WDOG2 | EMU_SOFTRST_CAUSE_WDOG3)) != 0;
+  #elif defined(EMU_RSTCAUSE_WDOG1)
   is_watchdog_reset = (reset_cause & (EMU_RSTCAUSE_WDOG0 | EMU_RSTCAUSE_WDOG1)) != 0;
   #elif defined(EMU_RSTCAUSE_WDOG0)
   is_watchdog_reset = (reset_cause & (EMU_RSTCAUSE_WDOG0)) != 0;
@@ -602,6 +608,62 @@ void sli_watchdog_manager_on_starve(void)
   if (callback != NULL) {
     callback(&context);
   }
+}
+
+/***************************************************************************//**
+ * Enable reset on timeout.
+ ******************************************************************************/
+sl_status_t sl_watchdog_manager_enable_reset(void)
+{
+  sl_status_t status;
+  bool was_running = manager_state.started;
+
+  status = sli_watchdog_manager_hal_disable();
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  status = sli_watchdog_manager_hal_enable_reset();
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  if (was_running) {
+    status = sli_watchdog_manager_hal_enable();
+    if (status != SL_STATUS_OK) {
+      return status;
+    }
+  }
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Disable reset on timeout.
+ ******************************************************************************/
+sl_status_t sl_watchdog_manager_disable_reset(void)
+{
+  sl_status_t status;
+  bool was_running = manager_state.started;
+
+  status = sli_watchdog_manager_hal_disable();
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  status = sli_watchdog_manager_hal_disable_reset();
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  if (was_running) {
+    status = sli_watchdog_manager_hal_enable();
+    if (status != SL_STATUS_OK) {
+      return status;
+    }
+  }
+
+  return SL_STATUS_OK;
 }
 
 /** @} (end addtogroup watchdog_manager) */

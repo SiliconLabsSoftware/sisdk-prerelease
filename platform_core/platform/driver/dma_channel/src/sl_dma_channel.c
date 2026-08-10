@@ -493,8 +493,11 @@ sl_status_t sl_dma_channel_init(sl_dma_channel_handle_t *handle,
 sl_status_t sl_dma_channel_deinit(sl_dma_channel_handle_t *handle)
 {
   EFM_ASSERT(handle != NULL);
-  EFM_ASSERT(handle->dma_peripheral != NULL);
   EFM_ASSERT(handle->channel_number < DMA_CHAN_COUNT);
+
+  if (handle->dma_peripheral == NULL) {
+    return SL_STATUS_OK;
+  }
 
   LDMA_TypeDef *ldma = sl_device_peripheral_ldma_get_base_addr((sl_peripheral_t)handle->dma_peripheral);
   uint8_t channel_number = handle->channel_number;

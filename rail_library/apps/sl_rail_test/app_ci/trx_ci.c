@@ -865,7 +865,7 @@ void sleep(sl_cli_command_arg_t *args)
                   "ButtonWakeup:%s,"
                   "RfUs:%u"
                  #if     DEBUG_SLEEP_LOOP
-                  ",\nSleeps:%llu,"
+                  ",\nSleeps:%x%08x%08x,"
                   "\nScb[-]:0x%08x,"
                   "Nvic[-]:0x%x.%08x,Gpios[-]:0x%08x,"
                   "\nScb[0]:0x%08x,"
@@ -883,7 +883,8 @@ void sleep(sl_cli_command_arg_t *args)
                   rfUs
 #endif
                  #if     DEBUG_SLEEP_LOOP
-                  , sleeps,
+                  , (uint32_t) (sleeps >> 32),
+                  (uint32_t) sleeps,
                   wakeReasons[(sleeps - 1) & 1].scbInts,
                   wakeReasons[(sleeps - 1) & 1].nvicInts[1],
                   wakeReasons[(sleeps - 1) & 1].nvicInts[0],

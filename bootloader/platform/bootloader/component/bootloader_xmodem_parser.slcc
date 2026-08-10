@@ -20,6 +20,8 @@ requires:
   condition: [device_series_2]
 - name: btl_crc
   condition: [device_series_3]
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/gecko-bootloader-api/xmodem
 metadata:
   sbom:
     license: MSLA

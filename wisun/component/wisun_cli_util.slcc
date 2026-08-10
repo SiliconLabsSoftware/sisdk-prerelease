@@ -6,12 +6,11 @@ category: "Wi-SUN|Utility"
 quality: "production"
 root_path: "wisun/./plugin/cli_util"
 
-requires:
-- name: wisun_dc_client_cli
-  condition: [wisun_stack_dc_client]
-
 provides:
 - name: wisun_cli_util
+
+requires:
+- name: cli
 
 source:
 - path: "sl_wisun_cli_util.c"

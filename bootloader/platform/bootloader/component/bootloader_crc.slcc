@@ -26,6 +26,8 @@ provides:
 - name: bootloader_crc
 - name: bootloader_nonsecure_incompatible
   condition: [bootloader_core_nonsecure]
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/gecko-bootloader-api/crc16
 metadata:
   sbom:
     license: MSLA

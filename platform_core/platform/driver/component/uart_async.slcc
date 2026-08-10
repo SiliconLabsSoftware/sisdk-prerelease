@@ -18,6 +18,7 @@ provides:
   allow_multiple: true
 requires:
 - name: uart_async_core
+- name: uart_core
 config_file:
 - path: config/sl_uart_{{instance}}_config.h
   file_id: uart_async_config

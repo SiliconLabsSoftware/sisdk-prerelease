@@ -1,0 +1,24 @@
+id: crash_manager_backend_ram
+label: Crash Manager Backend RAM
+package: platform_core
+description: >
+  RAM-only crash log in linker region .ram_crash_data (input .ram_crash_data.noinit; no NVM persistence).
+category: Services|Crash Manager
+quality: evaluation
+metadata:
+  sbom:
+    license: Zlib
+provides:
+- name: crash_manager_backend_ram
+- name: crash_manager_backend
+conflicts:
+- name: crash_manager_backend_ctm
+requires:
+- name: crash_manager
+- name: component_catalog
+root_path: platform_core/platform/service/sl_crash_manager
+template_contribution:
+- name: crash_manager_backend_ram
+  value: 1
+- name: component_catalog
+  value: crash_manager_backend_ram

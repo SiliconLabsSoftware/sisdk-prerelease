@@ -16,6 +16,8 @@ provides:
 - name: bootloader_xmodem_parser_nonsecure
 requires:
 - name: bootloader_crc
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/gecko-bootloader-api/xmodem
 metadata:
   sbom:
     license: MSLA

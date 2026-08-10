@@ -144,9 +144,9 @@ static inline sl_hal_eusart_data_bits_t uart_data_bits_to_eusart_hal_data_bits(s
 /***************************************************************************//**
  * Initializes the EUSART pins.
  ******************************************************************************/
-static inline void eusart_uart_init_transport_pins(sl_uart_handle_t *uart_handle, sl_uart_pin_config_t pin_config)
+static void eusart_uart_init_transport_pins(sl_peripheral_t uart, sl_uart_pin_config_t pin_config)
 {
-  EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart_handle->uart);
+  EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
 
   GPIO->EUSARTROUTE[EUSART_NUM(eusart)].TXROUTE = (pin_config.tx.port << _GPIO_EUSART_TXROUTE_PORT_SHIFT)
                                                   | (pin_config.tx.pin << _GPIO_EUSART_TXROUTE_PIN_SHIFT);
@@ -158,9 +158,9 @@ static inline void eusart_uart_init_transport_pins(sl_uart_handle_t *uart_handle
 /***************************************************************************//**
  * De-initializes the EUSART transport pins.
  ******************************************************************************/
-static inline void eusart_uart_deinit_transport_pins(sl_uart_handle_t *uart_handle)
+static void eusart_uart_deinit_transport_pins(sl_peripheral_t uart)
 {
-  EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart_handle->uart);
+  EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
 
   GPIO->EUSARTROUTE[EUSART_NUM(eusart)].TXROUTE = _GPIO_EUSART_TXROUTE_RESETVALUE;
   GPIO->EUSARTROUTE[EUSART_NUM(eusart)].RXROUTE = _GPIO_EUSART_RXROUTE_RESETVALUE;
@@ -170,9 +170,9 @@ static inline void eusart_uart_deinit_transport_pins(sl_uart_handle_t *uart_hand
 /***************************************************************************//**
  * Initializes the EUSART hardware flow control pins.
  ******************************************************************************/
-static inline void eusart_uart_init_hwfc_pins(sl_uart_handle_t *uart_handle, sl_uart_pin_config_t pin_config)
+static void eusart_uart_init_hwfc_pins(sl_peripheral_t uart, sl_uart_pin_config_t pin_config)
 {
-  EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart_handle->uart);
+  EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
 
   GPIO->EUSARTROUTE[EUSART_NUM(eusart)].CTSROUTE = (pin_config.cts.port << _GPIO_EUSART_CTSROUTE_PORT_SHIFT)
                                                    | (pin_config.cts.pin << _GPIO_EUSART_CTSROUTE_PIN_SHIFT);
@@ -184,9 +184,9 @@ static inline void eusart_uart_init_hwfc_pins(sl_uart_handle_t *uart_handle, sl_
 /***************************************************************************//**
  * De-initializes the EUSART hardware flow control pins.
  ******************************************************************************/
-static inline void eusart_uart_deinit_hwfc_pins(sl_uart_handle_t *uart_handle)
+static void eusart_uart_deinit_hwfc_pins(sl_peripheral_t uart)
 {
-  EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart_handle->uart);
+  EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
 
   GPIO->EUSARTROUTE[EUSART_NUM(eusart)].CTSROUTE = _GPIO_EUSART_CTSROUTE_RESETVALUE;
   GPIO->EUSARTROUTE[EUSART_NUM(eusart)].RTSROUTE = _GPIO_EUSART_RTSROUTE_RESETVALUE;
@@ -212,9 +212,9 @@ static inline bool is_lf_mode(EUSART_TypeDef *eusart, uint32_t freq)
 /***************************************************************************//**
  * Initializes the EUART pins.
  ******************************************************************************/
-static inline void euart_uart_init_transport_pins(sl_uart_handle_t *uart_handle, sl_uart_pin_config_t pin_config)
+static void euart_uart_init_transport_pins(sl_peripheral_t uart, sl_uart_pin_config_t pin_config)
 {
-  (void) uart_handle;
+  (void) uart;
 
   GPIO->EUARTROUTE->TXROUTE = (pin_config.tx.port << _GPIO_EUART_TXROUTE_PORT_SHIFT)
                               | (pin_config.tx.pin << _GPIO_EUART_TXROUTE_PIN_SHIFT);
@@ -226,9 +226,9 @@ static inline void euart_uart_init_transport_pins(sl_uart_handle_t *uart_handle,
 /***************************************************************************//**
  * De-initializes the EUART transport pins.
  ******************************************************************************/
-static inline void euart_uart_deinit_transport_pins(sl_uart_handle_t *uart_handle)
+static void euart_uart_deinit_transport_pins(sl_peripheral_t uart)
 {
-  (void) uart_handle;
+  (void) uart;
 
   GPIO->EUARTROUTE->TXROUTE = _GPIO_EUART_TXROUTE_RESETVALUE;
   GPIO->EUARTROUTE->RXROUTE = _GPIO_EUART_RXROUTE_RESETVALUE;
@@ -238,9 +238,9 @@ static inline void euart_uart_deinit_transport_pins(sl_uart_handle_t *uart_handl
 /***************************************************************************//**
  * Initializes the EUART hardware flow control pins.
  ******************************************************************************/
-static inline void euart_uart_init_hwfc_pins(sl_uart_handle_t *uart_handle, sl_uart_pin_config_t pin_config)
+static void euart_uart_init_hwfc_pins(sl_peripheral_t uart, sl_uart_pin_config_t pin_config)
 {
-  (void) uart_handle;
+  (void) uart;
 
   GPIO->EUARTROUTE->CTSROUTE = (pin_config.cts.port << _GPIO_EUART_CTSROUTE_PORT_SHIFT)
                                | (pin_config.cts.pin << _GPIO_EUART_CTSROUTE_PIN_SHIFT);
@@ -252,9 +252,9 @@ static inline void euart_uart_init_hwfc_pins(sl_uart_handle_t *uart_handle, sl_u
 /***************************************************************************//**
  * De-initializes the EUART hardware flow control pins.
  ******************************************************************************/
-static inline void euart_uart_deinit_hwfc_pins(sl_uart_handle_t *uart_handle)
+static void euart_uart_deinit_hwfc_pins(sl_peripheral_t uart)
 {
-  (void) uart_handle;
+  (void) uart;
 
   GPIO->EUARTROUTE->CTSROUTE = _GPIO_EUART_CTSROUTE_RESETVALUE;
   GPIO->EUARTROUTE->RTSROUTE = _GPIO_EUART_RTSROUTE_RESETVALUE;
@@ -358,7 +358,7 @@ static inline bool eusart_uart_is_rx_data_available(sl_peripheral_t uart)
 /***************************************************************************//**
  * Clear the specified interrupt from the EUSART peripheral.
  ******************************************************************************/
-static inline void eusart_uart_clear_irq(sl_peripheral_t uart, uint32_t irq)
+static void eusart_uart_clear_irq(sl_peripheral_t uart, uint32_t irq)
 {
   EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
 
@@ -368,7 +368,7 @@ static inline void eusart_uart_clear_irq(sl_peripheral_t uart, uint32_t irq)
 /***************************************************************************//**
  * Enables or disables EUSART interrupt flags.
  ******************************************************************************/
-static inline void eusart_uart_set_enable_irq(sl_peripheral_t uart, bool enabled, uint32_t irq)
+static void eusart_uart_set_enable_irq(sl_peripheral_t uart, bool enabled, uint32_t irq)
 {
   EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
 
@@ -382,9 +382,8 @@ static inline void eusart_uart_set_enable_irq(sl_peripheral_t uart, bool enabled
 /***************************************************************************//**
  * Reads a single character on EUSART.
  ******************************************************************************/
-static sl_status_t eusart_uart_read_byte(sl_uart_handle_t *uart_handle, uint8_t *byte)
+static sl_status_t eusart_uart_read_byte(sl_peripheral_t uart, uint8_t *byte)
 {
-  sl_peripheral_t uart = uart_handle->uart;
   EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
 
   if (!eusart_uart_is_rx_data_available(uart)) {
@@ -401,16 +400,16 @@ static sl_status_t eusart_uart_read_byte(sl_uart_handle_t *uart_handle, uint8_t 
  * @return SL_STATUS_OK if one or more bytes were read,
  *         SL_STATUS_EMPTY if no data was available to read.
  ******************************************************************************/
-static inline sl_status_t eusart_uart_read_buffer(sl_uart_handle_t *uart_handle,
-                                                  uint8_t *data,
-                                                  size_t size,
-                                                  size_t *bytes_read)
+static sl_status_t eusart_uart_read_buffer(sl_peripheral_t uart,
+                                           uint8_t *data,
+                                           size_t size,
+                                           size_t *bytes_read)
 {
   sl_status_t status = SL_STATUS_OK;
   size_t i;
 
   for (i = 0; i < size; i++) {
-    status = eusart_uart_read_byte(uart_handle, &data[i]);
+    status = eusart_uart_read_byte(uart, &data[i]);
     if (status != SL_STATUS_OK) {
       status = (i == 0) ? SL_STATUS_EMPTY : SL_STATUS_OK;
       break;
@@ -424,9 +423,8 @@ static inline sl_status_t eusart_uart_read_buffer(sl_uart_handle_t *uart_handle,
 /***************************************************************************//**
  * Writes a single character on EUSART.
  ******************************************************************************/
-static sl_status_t eusart_uart_write_byte(sl_uart_handle_t *uart_handle, uint8_t byte)
+static sl_status_t eusart_uart_write_byte(sl_peripheral_t uart, uint8_t byte)
 {
-  sl_peripheral_t uart = uart_handle->uart;
   EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
 
   if ((sl_hal_eusart_get_status(eusart) & EUSART_STATUS_TXFL) == 0) {
@@ -444,16 +442,16 @@ static sl_status_t eusart_uart_write_byte(sl_uart_handle_t *uart_handle, uint8_t
  * @return SL_STATUS_OK if all @p size bytes were written,
  *         SL_STATUS_FULL if the TX FIFO became full before the buffer was exhausted.
  ******************************************************************************/
-static inline sl_status_t eusart_uart_write_buffer(sl_uart_handle_t *uart_handle,
-                                                   const uint8_t *data,
-                                                   size_t size,
-                                                   size_t *bytes_written)
+static sl_status_t eusart_uart_write_buffer(sl_peripheral_t uart,
+                                            const uint8_t *data,
+                                            size_t size,
+                                            size_t *bytes_written)
 {
   sl_status_t status = SL_STATUS_OK;
   size_t i;
 
   for (i = 0; i < size; i++) {
-    status = eusart_uart_write_byte(uart_handle, data[i]);
+    status = eusart_uart_write_byte(uart, data[i]);
     if (status != SL_STATUS_OK) {
       *bytes_written = i;
       return status;
@@ -467,7 +465,7 @@ static inline sl_status_t eusart_uart_write_buffer(sl_uart_handle_t *uart_handle
 /***************************************************************************//**
  * Converts the EUSART interrupt status to the RX errors.
  ******************************************************************************/
-static inline sl_uart_rx_err_t eusart_uart_rx_err_from_irq_status(uint32_t irq_status)
+static sl_uart_rx_err_t eusart_uart_rx_err_from_irq_status(uint32_t irq_status)
 {
   return ((irq_status & EUSART_IF_FERR) ? SL_UART_RX_ERR_FRAMING : 0u)
          | ((irq_status & EUSART_IF_PERR) ? SL_UART_RX_ERR_PARITY : 0u)
@@ -475,21 +473,67 @@ static inline sl_uart_rx_err_t eusart_uart_rx_err_from_irq_status(uint32_t irq_s
 }
 
 /***************************************************************************//**
- * Returns enabled and pending EUSART interrupt flags masked by @p mask.
+ * Returns enabled and pending EUSART interrupt flags.
  ******************************************************************************/
-static inline uint32_t eusart_uart_get_enabled_pending_irq(sl_peripheral_t uart, uint32_t mask)
+static uint32_t eusart_uart_get_enabled_pending_irq(sl_peripheral_t uart)
 {
   EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
 
-  return sl_hal_eusart_get_enabled_pending_interrupts(eusart) & mask;
+  return sl_hal_eusart_get_enabled_pending_interrupts(eusart);
 }
+
+/***************************************************************************//**
+ * Returns enabled EUSART interrupt flags.
+ ******************************************************************************/
+static uint32_t eusart_uart_get_enabled_irq(sl_peripheral_t uart)
+{
+  EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
+
+  return sl_hal_eusart_get_enabled_interrupts(eusart);
+}
+
+/***************************************************************************//**
+ * Checks that both the shift registers and FIFOs are empty.
+ ******************************************************************************/
+static bool eusart_uart_is_idle(sl_peripheral_t uart)
+{
+  EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
+  uint32_t status = sl_hal_eusart_get_status(eusart);
+
+  return !(status & EUSART_STATUS_RXFL)
+         && status & EUSART_STATUS_RXIDLE
+         && !(status & _EUSART_STATUS_TXFCNT_MASK)
+         && status & EUSART_STATUS_TXIDLE;
+}
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+
+/***************************************************************************//**
+ * Returns the EM requirement for the EUART.
+ ******************************************************************************/
+static sl_power_manager_em_t eusart_uart_get_em_requirement(sl_peripheral_t uart)
+{
+  sl_clock_branch_t clock_branch = sl_device_peripheral_get_clock_branch(uart);
+  EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
+  sl_status_t status;
+  uint32_t freq;
+
+  status = sl_clock_manager_get_clock_branch_frequency(clock_branch, &freq);
+  EFM_ASSERT(status == SL_STATUS_OK);
+
+  bool lf = is_lf_mode(eusart, freq);
+
+  return lf ? SL_POWER_MANAGER_EM2 : SL_POWER_MANAGER_EM1;
+}
+
+#endif
 
 #if defined(SL_CATALOG_UART_ASYNC_PRESENT)
 
 /***************************************************************************//**
  * Returns the TX register for the given UART instance.
  ******************************************************************************/
-static inline void *eusart_uart_get_tx_register(sl_peripheral_t uart)
+static void *eusart_uart_get_tx_register(sl_peripheral_t uart)
 {
   EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
   return (void *)&eusart->TXDATA;
@@ -498,7 +542,7 @@ static inline void *eusart_uart_get_tx_register(sl_peripheral_t uart)
 /***************************************************************************//**
  * Returns the RX register for the given UART instance.
  ******************************************************************************/
-static inline void *eusart_uart_get_rx_register(sl_peripheral_t uart)
+static void *eusart_uart_get_rx_register(sl_peripheral_t uart)
 {
   EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
   return (void *)&eusart->RXDATA;
@@ -507,7 +551,7 @@ static inline void *eusart_uart_get_rx_register(sl_peripheral_t uart)
 /***************************************************************************//**
  * Enables or disables EUSART transmitter.
  ******************************************************************************/
-static inline void eusart_uart_set_tx_enable(sl_peripheral_t uart, bool en)
+static void eusart_uart_set_tx_enable(sl_peripheral_t uart, bool en)
 {
   EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
 
@@ -524,7 +568,7 @@ static inline void eusart_uart_set_tx_enable(sl_peripheral_t uart, bool en)
  * @note The transmitter must have been disabled with @ref eusart_uart_set_tx_enable
  *       prior to calling.
  ******************************************************************************/
-static inline size_t eusart_uart_clear_tx_fifo(sl_peripheral_t uart)
+static size_t eusart_uart_clear_tx_fifo(sl_peripheral_t uart)
 {
   EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
 
@@ -554,7 +598,12 @@ const sli_uart_ops_t sli_uart_eusart_ops = {
   .set_enable_irq = eusart_uart_set_enable_irq,
   .clear_irq = eusart_uart_clear_irq,
   .get_enabled_pending_irq = eusart_uart_get_enabled_pending_irq,
+  .get_enabled_irq = eusart_uart_get_enabled_irq,
   .rx_err_from_irq_status = eusart_uart_rx_err_from_irq_status,
+  .is_idle = eusart_uart_is_idle,
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  .get_em_requirement = eusart_uart_get_em_requirement,
+#endif
 #if defined(SL_CATALOG_UART_ASYNC_PRESENT)
   .get_tx_register = eusart_uart_get_tx_register,
   .get_rx_register = eusart_uart_get_rx_register,
@@ -584,7 +633,12 @@ const sli_uart_ops_t sli_uart_euart_ops = {
   .set_enable_irq = eusart_uart_set_enable_irq,
   .clear_irq = eusart_uart_clear_irq,
   .get_enabled_pending_irq = eusart_uart_get_enabled_pending_irq,
+  .get_enabled_irq = eusart_uart_get_enabled_irq,
   .rx_err_from_irq_status = eusart_uart_rx_err_from_irq_status,
+  .is_idle = eusart_uart_is_idle,
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  .get_em_requirement = eusart_uart_get_em_requirement,
+#endif
 #if defined(SL_CATALOG_UART_ASYNC_PRESENT)
   .get_tx_register = eusart_uart_get_tx_register,
   .get_rx_register = eusart_uart_get_rx_register,

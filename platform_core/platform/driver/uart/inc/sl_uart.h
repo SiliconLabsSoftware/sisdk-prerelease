@@ -147,8 +147,6 @@ typedef void (*sl_uart_tx_ready_cb_t)(sl_uart_handle_t *uart_handle,
 typedef void (*sl_uart_tx_complete_cb_t)(sl_uart_handle_t *uart_handle,
                                          void *user_arg);
 
-#if defined(SL_CATALOG_UART_ASYNC_PRESENT)
-
 /***************************************************************************//**
  * @addtogroup uart_async
  * @brief Asynchronous DMA transfer APIs and types.
@@ -283,8 +281,6 @@ typedef void (*sl_uart_async_on_rx_cb_t)(sl_uart_handle_t *uart_handle,
 
 /** @} (end addtogroup uart_async) */
 
-#endif // SL_CATALOG_UART_ASYNC_PRESENT
-
 /***************************************************************************//**
  * @addtogroup uart_driver
  * @{
@@ -301,7 +297,6 @@ typedef struct uart_pin_config {
 // Forward declaration of the UART operations structure.
 typedef struct sli_uart_ops sli_uart_ops_t;
 
-#if defined(SL_CATALOG_UART_ASYNC_PRESENT)
 #define SL_UART_ASYNC_DMA_CHANNEL_CONFIG_AUTO UINT8_MAX ///< Automatically allocate the DMA channel at init.
 
 /// @brief UART pre-initialization configuration preserved across deinit.
@@ -312,12 +307,12 @@ typedef struct uart_preinit_config {
   uint8_t async_rx_dma_channel_number;
   bool async_en;
 } sl_uart_preinit_config_t;
-#endif
 
 /// UART handle state
 typedef enum {
-  SL_UART_HANDLE_STATE_DISABLED = 0,
-  SL_UART_HANDLE_STATE_ENABLED,
+  SL_UART_HANDLE_STATE_SUSPENDED = 0,
+  SL_UART_HANDLE_STATE_IDLE,
+  SL_UART_HANDLE_STATE_ACTIVE,
 } sl_uart_handle_state_t;
 
 /// @brief UART handle structure.
@@ -334,10 +329,11 @@ typedef struct uart_handle {
   void *tx_ready_cb_arg;
   sl_uart_tx_complete_cb_t tx_complete_cb;
   void *tx_complete_cb_arg;
+  uint32_t enabled_irq;
 #if defined(SL_CATALOG_UART_ASYNC_PRESENT)
   sl_uart_preinit_config_t preinit_config;
-  sl_uart_handle_state_t tx_state;
-  sl_uart_handle_state_t rx_state;
+  sl_uart_handle_state_t async_tx_state;
+  sl_uart_handle_state_t async_rx_state;
   sl_slist_node_t *async_tx_transfer_submitted_list_head;
   sl_slist_node_t *async_rx_transfer_pending_list_head;
   sl_slist_node_t *async_rx_transfer_active_list_head;
@@ -352,6 +348,7 @@ typedef struct uart_handle {
   sl_dma_channel_handle_t async_tx_dma_channel;
   sl_dma_channel_handle_t async_rx_dma_channel;
 #endif
+  sl_uart_handle_state_t state;
 } sl_uart_handle_t;
 
 /*******************************************************************************
@@ -418,6 +415,45 @@ sl_status_t sl_uart_init(sl_uart_handle_t *uart_handle,
  *         Error code otherwise.
  ******************************************************************************/
 sl_status_t sl_uart_deinit(sl_uart_handle_t *uart_handle);
+
+/***************************************************************************//**
+ * Suspends the UART peripheral hardware.
+ *
+ * De-initializes the underlying UART hardware (peripheral, clocks, pins, and
+ * interrupts as required) while leaving the driver handle and its software
+ * state unchanged. Intended to be called before EM2 entry.
+ *
+ * @note The only valid API call after this function is @ref sl_uart_resume() or
+ *       @ref sl_uart_deinit(). Calling any other function is undefined behavior.
+ *
+ * @param[in] uart_handle Handle to UART.
+ *
+ * @return @ref SL_STATUS_OK if successful.
+ *         @ref SL_STATUS_NOT_INITIALIZED if the UART is not initialized.
+ *         @ref SL_STATUS_BUSY if the UART peripheral is busy processing a transfer.
+ *         Error code otherwise.
+ *
+ * @note This is not equivalent to @ref sl_uart_deinit(). The handle remains
+ *       initialized from the driver's perspective; only the hardware is torn
+ *       down so it can be restored with @ref sl_uart_resume().
+ ******************************************************************************/
+sl_status_t sl_uart_suspend(sl_uart_handle_t *uart_handle);
+
+/***************************************************************************//**
+ * Resumes the UART peripheral hardware after @ref sl_uart_suspend().
+ *
+ * Re-initializes the underlying UART hardware using the configuration stored
+ * in the handle (line settings, pin configuration, and async resources as
+ * applicable). Does not modify the driver handle or its software state beyond
+ * what is required to bring the hardware back up. Intended to be called after EM2 exit.
+ *
+ * @param[in] uart_handle Handle to UART.
+ *
+ * @return @ref SL_STATUS_OK if successful.
+ *         @ref SL_STATUS_NOT_INITIALIZED if the UART is not initialized.
+ *         Error code otherwise.
+ ******************************************************************************/
+sl_status_t sl_uart_resume(sl_uart_handle_t *uart_handle);
 
 /***************************************************************************//**
  * Applies line configuration.
@@ -666,8 +702,6 @@ sl_status_t sl_uart_write(sl_uart_handle_t *uart_handle,
 
 /** @} (end addtogroup uart_interrupt) */
 
-#if defined(SL_CATALOG_UART_ASYNC_PRESENT)
-
 /***************************************************************************//**
  * @addtogroup uart_async
  * @{
@@ -748,15 +782,7 @@ sl_status_t sl_uart_async_abort_tx(sl_uart_handle_t *uart_handle);
  *
  * @return true if there is an active TX. False, otherwise.
  ******************************************************************************/
-static inline bool sl_uart_async_is_tx_active(sl_uart_handle_t *uart_handle)
-{
-  EFM_ASSERT((uart_handle) != NULL);
-  EFM_ASSERT((uart_handle)->uart != NULL);
-  EFM_ASSERT((uart_handle)->preinit_config.async_tx_transfer_count != 0
-             || (uart_handle)->preinit_config.async_rx_transfer_count != 0);
-
-  return uart_handle->tx_state == SL_UART_HANDLE_STATE_ENABLED;
-}
+bool sl_uart_async_is_tx_active(sl_uart_handle_t *uart_handle);
 
 /***************************************************************************//**
  * Submits buffer to read.
@@ -798,46 +824,7 @@ sl_status_t sl_uart_async_disable_rx(sl_uart_handle_t *uart_handle);
  *
  * @return true if there is an active RX. False, otherwise.
  ******************************************************************************/
-static inline bool sl_uart_async_is_rx_active(sl_uart_handle_t *uart_handle)
-{
-  EFM_ASSERT((uart_handle) != NULL);
-  EFM_ASSERT((uart_handle)->uart != NULL);
-  EFM_ASSERT((uart_handle)->preinit_config.async_tx_transfer_count != 0
-             || (uart_handle)->preinit_config.async_rx_transfer_count != 0);
-
-  return uart_handle->rx_state == SL_UART_HANDLE_STATE_ENABLED;
-}
-
-/***************************************************************************//**
- * Update size of the current read.
- *
- * @param[in]  uart_handle Handle to UART.
- *
- * @param[in]  new_size New size.
- *
- * @return @ref SL_STATUS_OK if successful.
- *         @ref SL_STATUS_INVALID_PARAMETER if @p new_size is 0 or if more bytes
- *         have already been received than @p new_size.
- *         Error code otherwise.
- *
- * @note This function allows to update the expected size of RX data for the active
- *       buffer. This function is useful in cases of, for example, the expected
- *       data follows a pattern of a header that specifies a payload size followed by
- *       the actual payload. When the header and the payload have to be in separate
- *       buffers and 0-copy is desired, the user can parse the header from the rx_event
- *       callback and call this function to update the size matching the information
- *       read from the header.
- *
- * @note Special care must be taken by the caller to ensure that the active
- *       buffer is really the one it aims at modifying.
- *
- * @note It is up to the caller to ensure that @p new_size is not larger than the
- *       buffer that was submitted earlier.
- ******************************************************************************/
-sl_status_t sl_uart_async_update_current_read_size(sl_uart_handle_t *uart_handle,
-                                                   const size_t new_size);
-
-#endif // SL_CATALOG_UART_ASYNC_PRESENT
+bool sl_uart_async_is_rx_active(sl_uart_handle_t *uart_handle);
 
 /** @} (end addtogroup uart_async) */
 

@@ -18,6 +18,8 @@ provides:
 - name: bootloader_include_parser
 - name: bootloader_nonsecure_incompatible
   condition: [bootloader_core_nonsecure]
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/bootloader-transitioning-guide-gsdk-v40-and-higher/03-components
 metadata:
   sbom:
     license: MSLA

@@ -1,0 +1,75 @@
+id: "wisun_dc_server_cli"
+label: "Wi-SUN Direct Connect server CLI"
+description: "Provides CLI commands and event handlers for Wi-SUN Direct Connect servers"
+package: "wisun"
+category: "Wi-SUN|Wi-SUN Plugin"
+quality: "production"
+
+ui_hints:
+  visibility: never
+
+requires:
+- name: "wisun_cli_util"
+- name: "wisun_direct_connect_pmk"
+
+provides:
+- name: "wisun_dc_server_cli"
+
+source:
+- path: "plugin/sl_wisun_dc_server_cli.c"
+  project:
+    transfer_ownership: true
+
+include:
+- path: "plugin"
+  file_list:
+  - path: "sl_wisun_dc_server_cli.h"
+
+template_contribution:
+- name: "cli_command"
+  value:
+    group: "wisun"
+    name: "set_direct_connect_state"
+    handler: "sl_wisun_dc_server_cli_set_state"
+    help: "Enable/disable Direct Connect: w dcs_set_state"
+    shortcuts:
+    - name: "dcs_set_state"
+    argument:
+    - type: uint8
+      help: "is_enabled: greater than 0 to enable Direct Connect"
+    - type: uint8
+      help: "mode: 0=manual (user runs advert/accept commands), 1=auto (advertise DC ID + accept link)"
+    - type: stringopt
+      help: "dc_id: DC ID (String) to advertise in auto mode (optional; default:'DC_ID_DEFAULT')"
+- name: "cli_command"
+  value:
+    group: "wisun"
+    name: "accept_direct_connect_link"
+    handler: "sl_wisun_dc_server_cli_accept_link"
+    help: "Accept a Direct Connect link: w dcs_accept"
+    shortcuts:
+    - name: "dcs_accept"
+    argument:
+    - type: string
+      help: "Client link local address"
+- name: "cli_command"
+  value:
+    group: "wisun"
+    name: "advert_direct_connect_server_id"
+    handler: "sl_wisun_dc_server_cli_advertise_id"
+    help: "Advertise DC server's DC ID: w dcs_advert_id"
+    shortcuts:
+    - name: "dcs_advert_id"
+    argument:
+    - type: string
+      help: "Client link local address"
+    - type: string
+      help: "DC ID"
+
+- name: component_catalog
+  value: wisun_dc_server_cli
+
+metadata:
+  sbom:
+    license: MSLA
+root_path: wisun

@@ -159,6 +159,20 @@ void sli_memory_manager_retention_subtract_size(sl_memory_heap_t *heap,
  ******************************************************************************/
 void sli_memory_manager_retention_update_high_watermark(const sl_memory_heap_t *heap);
 
+/***************************************************************************//**
+ * Apply memory-manager retention policy immediately before entering EM2/EM3.
+ *
+ * @note FOR INTERNAL USE ONLY. Called by the power manager around __WFI().
+ ******************************************************************************/
+void sli_memory_manager_retention_em23_presleep(void);
+
+/***************************************************************************//**
+ * Restore memory-manager retention policy immediately after exiting EM2/EM3.
+ *
+ * @note FOR INTERNAL USE ONLY. Called by the power manager around __WFI().
+ ******************************************************************************/
+void sli_memory_manager_retention_em23_postsleep(void);
+
 #ifdef __cplusplus
 }
 #endif

@@ -2,7 +2,7 @@
  * @brief RAIL Configuration
  * @details
  *   WARNING: Auto-Generated Radio Config Header  -  DO NOT EDIT
- *   Radio Configurator Version: 2602.1.1
+ *   Radio Configurator Version: 2602.5.0
  *   RAIL Adapter Version: 2.4.33
  *   RAIL Compatibility: 2.x
  *******************************************************************************
@@ -39,6 +39,7 @@
 #include "rail_types.h"
 
 extern const uint32_t ble_viterbi1M_modemConfigBase[];
+extern const uint32_t ble_viterbi1M_cs_modemConfigBase[];
 extern const uint32_t quuppa_viterbi1M_modemConfigBase[];
 
 extern const uint32_t ble_viterbi1M_modemConfig[];
@@ -46,6 +47,8 @@ extern const uint32_t ble_viterbi2M_0_34_modemConfig[];
 extern const uint32_t ble_LR_DSA_125kb_modemConfig[];
 extern const uint32_t ble_LR_DSA_500kb_modemConfig[];
 extern const uint32_t ble_LR_DSA_1Mb_modemConfig[];
+extern const uint32_t ble_viterbi1M_cs_0_78_40MHz_modemConfig[];
+extern const uint32_t ble_viterbi2M_cs_0_78_40MHz_modemConfig[];
 extern const uint32_t quuppa_viterbi1M_0_modemConfig[];
 extern const uint32_t quuppa_viterbi1M_1_modemConfig[];
 extern const uint32_t quuppa_viterbi1M_2_modemConfig[];
@@ -60,6 +63,16 @@ extern const RAIL_ChannelConfigEntry_t ble_viterbi1M_channels[];
 #define RAIL0_BLE_VITERBI2M_PROFILE_BLE
 extern const RAIL_ChannelConfig_t ble_viterbi2M_channelConfig;
 extern const RAIL_ChannelConfigEntry_t ble_viterbi2M_channels[];
+
+#define RAIL0_BLE_VITERBI1M_CS_PHY_BLUETOOTH_1M_HADM_40MHZ
+#define RAIL0_BLE_VITERBI1M_CS_PROFILE_BASE
+extern const RAIL_ChannelConfig_t ble_viterbi1M_cs_channelConfig;
+extern const RAIL_ChannelConfigEntry_t ble_viterbi1M_cs_channels[];
+
+#define RAIL0_BLE_VITERBI2M_CS_PHY_BLUETOOTH_2M_HADM_40MHZ
+#define RAIL0_BLE_VITERBI2M_CS_PROFILE_BASE
+extern const RAIL_ChannelConfig_t ble_viterbi2M_cs_channelConfig;
+extern const RAIL_ChannelConfigEntry_t ble_viterbi2M_cs_channels[];
 
 #define RAIL0_BLE_LR_DSA_125KB_PHY_BLUETOOTH_LONGRANGE_DSA_125KBPS
 #define RAIL0_BLE_LR_DSA_125KB_PROFILE_BASE

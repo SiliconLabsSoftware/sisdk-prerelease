@@ -19,6 +19,7 @@
 #define APP_SETTINGS_H
 
 #include <stdint.h>
+#include "sl_component_catalog.h"
 #include "sl_status.h"
 #include "sl_wisun_api.h"
 #include "sl_wisun_cli_util.h"
@@ -70,7 +71,6 @@ typedef struct {
   uint16_t preferred_pan_id;
   uint8_t keychain;
   uint8_t keychain_index;
-  uint8_t direct_connect_pmk[SL_WISUN_PMK_LEN];
   uint8_t max_hop_count;
   uint16_t lowpan_mtu;
   uint16_t ipv6_mru;

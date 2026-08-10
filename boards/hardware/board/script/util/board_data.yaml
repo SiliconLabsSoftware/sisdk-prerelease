@@ -473,6 +473,12 @@ brd4329a:
   hfxo_ctune: 137
 brd4332a:
   lfxo_ctune: 127
+brd4360a:
+  hfxo_ctune: 170
+  lfxo_ctune: 63
+brd6360a:
+  hfxo_ctune: 170
+  lfxo_ctune: 63
 brd4400a:
   hfxo_ctune: 96
   lfxo_ctune: 37

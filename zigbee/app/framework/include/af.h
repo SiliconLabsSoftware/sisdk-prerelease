@@ -1038,6 +1038,7 @@ bool sl_zigbee_af_is_long_string_attribute_type(sl_zigbee_af_attribute_type_t at
 /**
  * @brief The mask applied to generated message tags used by the framework when sending messages via EZSP.
  * Customers who call ezspSend functions directly must use message tags outside this mask.
+ * NOTE: message tag 0 is reserved for ZDO messages, which currently don't register a callback handler.
  */
 #define SL_ZIGBEE_AF_MESSAGE_TAG_MASK 0x7Fu
 

@@ -15,6 +15,8 @@ include:
 provides:
 - name: bootloader_spi_peripheral_driver
 - name: bootloader_spi_peripheral_driver_nonsecure
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/gecko-bootloader-api/spi-peripheral
 metadata:
   sbom:
     license: MSLA

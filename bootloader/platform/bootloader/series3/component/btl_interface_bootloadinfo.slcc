@@ -21,6 +21,8 @@ provides:
 requires:
 - name: btl_storage_bootloadinfo_header
 - name: btl_crc
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/gecko-bootloader-api/bootload-info
 metadata:
   sbom:
     license: MSLA

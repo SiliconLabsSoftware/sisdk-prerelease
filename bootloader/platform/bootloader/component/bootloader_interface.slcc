@@ -27,8 +27,7 @@ requires:
 - name: bootloader_interface_s2_trustzone
   condition: [trustzone_nonsecure, device_series_2]
 documentation:
-  docset: mcu-bootloader
-  document: group-Interface
+  url: https://docs.silabs.com/mcu-bootloader/latest/gecko-bootloader-api/interface
 metadata:
   sbom:
     license: MSLA

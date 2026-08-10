@@ -326,6 +326,8 @@ template_contribution:
 toolchain_settings:
 - option: optimize
   value: size
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/gecko-bootloader-api/core
 metadata:
   sbom:
     license: MSLA

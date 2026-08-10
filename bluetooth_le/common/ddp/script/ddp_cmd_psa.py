@@ -26,20 +26,19 @@
 __author__ = 'Silicon Laboratories, Inc'
 __copyright__ = 'Copyright 2026, Silicon Laboratories, Inc.'
 
-import os
 import struct
 from dataclasses import dataclass
 from ddp_cmd import Command, Response
 
-def psa_its_set(rtt, id, data, check=True):
-    """Store a value in PSA ITS over the DDP RTT interface.
+def psa_its_set(conn, id, data, check=True):
+    """Store a value in PSA ITS over the DDP Connection interface.
 
     Send a PSA ITS set command for the given ID. When ``check`` is enabled,
     read the entry back and verify that the stored value matches the data that
     was written. Any failure is reported via a printed message.
 
     Args:
-        rtt: RTT transport exposing ``rtt_send`` and ``rtt_receive`` methods
+        conn: Transport layer exposing ``send`` and ``receive`` methods
             used to communicate with the device.
         id (int): PSA ITS UID to write.
         data (bytes): Payload to store under ``id``.
@@ -51,31 +50,31 @@ def psa_its_set(rtt, id, data, check=True):
             ``data``.
     """
     print(f"Set PSA ITS. ID: {hex(id)}")
-    rtt.rtt_send(CommandPsaItsSet(id, data))
-    resp = ResponsePsaItsSet(rtt.rtt_receive())
+    conn.send(CommandPsaItsSet(id, data))
+    resp = ResponsePsaItsSet(conn.receive())
     if resp.status != 0:
         print(f"Set PSA ITS failure: {resp.status}")
         return resp.status
 
     if check:
-        rtt.rtt_send(CommandPsaItsGet(id))
-        resp = ResponsePsaItsGet(rtt.rtt_receive())
+        conn.send(CommandPsaItsGet(id))
+        resp = ResponsePsaItsGet(conn.receive())
         if resp.status != 0:
             print(f"Get PSA ITS failure: {resp.status}")
         elif resp.body != data:
-            print(f"PSA ITS key mismatch!{os.linesep}Original key:{os.linesep}{data}{os.linesep}Received:{os.linesep}{resp.body}")
+            print(f"PSA ITS key mismatch!\nOriginal key:\n{data}\nReceived:\n{resp.body}")
             return 1 # Set status to generic error
     return resp.status
 
-def psa_key_gen(rtt, att, check=True):
-    """Generate a PSA Crypto key on the device over the DDP RTT interface.
+def psa_key_gen(conn, att, check=True):
+    """Generate a PSA Crypto key on the device over the DDP Connection interface.
 
     Send a PSA key generation command described by ``att``. When ``check`` is
     enabled, read the key attributes back and compare them against ``att``.
     Any failure is reported via a printed message.
 
     Args:
-        rtt: RTT transport exposing ``rtt_send`` and ``rtt_receive`` methods
+        conn: Transport layer exposing ``send`` and ``receive`` methods
             used to communicate with the device.
         att (KeyAtt): Attributes describing the key to generate.
         check (bool): If True, read the key attributes back and compare them
@@ -88,8 +87,8 @@ def psa_key_gen(rtt, att, check=True):
             failed.
     """
     print(f"Generate PSA key. ID: {hex(att.key_id)}")
-    rtt.rtt_send(CommandPsaKeyGen(att))
-    resp = ResponsePsaKeyGen(rtt.rtt_receive())
+    conn.send(CommandPsaKeyGen(att))
+    resp = ResponsePsaKeyGen(conn.receive())
     if resp.status != 0:
         print(f"Generation failure: {resp.status}")
         return resp.status, None
@@ -97,18 +96,18 @@ def psa_key_gen(rtt, att, check=True):
     key = resp.key
 
     if check:
-        rtt.rtt_send(CommandPsaGetAtt(att.key_id))
-        resp = ResponsePsaGetAtt(rtt.rtt_receive())
+        conn.send(CommandPsaGetAtt(att.key_id))
+        resp = ResponsePsaGetAtt(conn.receive())
         if resp.status != 0:
             print(f"Get attributes failure: {resp.status}")
             return resp.status, None
         if resp.key_att != att:
-            print(f"Mismatching key attributes!{os.linesep}Original:{os.linesep}{att}{os.linesep}Received:{os.linesep}{resp.key_att}")
+            print(f"Mismatching key attributes!\nOriginal:\n{att}\nReceived:\n{resp.key_att}")
             return 1, None # Set status to generic error
     return resp.status, key
 
-def psa_key_inj(rtt, att, key, check=True):
-    """Inject an existing PSA Crypto key into the device over DDP RTT.
+def psa_key_inj(conn, att, key, check=True):
+    """Inject an existing PSA Crypto key into the device over DDP Connection.
 
     Send a PSA key injection command carrying ``key`` and its attributes
     ``att``. When ``check`` is enabled, read the key attributes back and
@@ -116,7 +115,7 @@ def psa_key_inj(rtt, att, key, check=True):
     message.
 
     Args:
-        rtt: RTT transport exposing ``rtt_send`` and ``rtt_receive`` methods
+        conn: Transport layer exposing ``send`` and ``receive`` methods
             used to communicate with the device.
         att (KeyAtt): Attributes describing the key being injected.
         key (bytes): Key material to inject.
@@ -128,20 +127,20 @@ def psa_key_inj(rtt, att, key, check=True):
             back attributes do not match ``att``.
     """
     print(f"Inject PSA key. ID: {hex(att.key_id)}")
-    rtt.rtt_send(CommandPsaKeyInj(att, key))
-    resp = ResponsePsaKeyInj(rtt.rtt_receive())
+    conn.send(CommandPsaKeyInj(att, key))
+    resp = ResponsePsaKeyInj(conn.receive())
     if resp.status != 0:
         print(f"Injection failure: {resp.status}")
         return resp.status
 
     if check:
-        rtt.rtt_send(CommandPsaGetAtt(att.key_id))
-        resp = ResponsePsaGetAtt(rtt.rtt_receive())
+        conn.send(CommandPsaGetAtt(att.key_id))
+        resp = ResponsePsaGetAtt(conn.receive())
         if resp.status != 0:
             print(f"Get attributes failure: {resp.status}")
             return resp.status
         if resp.key_att != att:
-            print(f"Mismatching key attributes!{os.linesep}Original:{os.linesep}{att}{os.linesep}Received:{os.linesep}{resp.key_att}")
+            print(f"Mismatching key attributes!\nOriginal:\n{att}\nReceived:\n{resp.key_att}")
             return 1 # Set status to generic error
     return resp.status
 

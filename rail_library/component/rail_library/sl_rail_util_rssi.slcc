@@ -80,6 +80,13 @@ config_file:
   - device_series_3
   - device_generic_family_sixx301
   file_id: rail_util_rssi_config
+- path: plugin/sl_rail_util_rssi/config/siwx353/sl_rail_util_rssi_config.h
+  condition:
+  - device_series_3
+  - device_generic_family_sixx353
+  unless:
+  - fpga
+  file_id: rail_util_rssi_config
 include:
 - path: plugin/sl_rail_util_rssi
   file_list:

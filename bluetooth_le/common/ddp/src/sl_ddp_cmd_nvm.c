@@ -30,8 +30,24 @@
 
 #include <string.h>
 #include "sl_status.h"
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
 #include "nvm3.h"
 #include "sl_ddp_types.h"
+
+// Logging
+#define LOG_PREFIX                    "[DDP_NVM] "
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
+#include "app_log.h"
+#define LOG_NL                        APP_LOG_NL
+#define LOG_INFO(...)                 app_log_info(LOG_PREFIX __VA_ARGS__)
+#define LOG_ERROR(...)                app_log_error(LOG_PREFIX __VA_ARGS__)
+#else // SL_CATALOG_APP_LOG_PRESENT
+#define LOG_NL
+#define LOG_INFO(...)
+#define LOG_ERROR(...)
+#endif // SL_CATALOG_APP_LOG_PRESENT
 
 // -----------------------------------------------------------------------------
 // Definitions
@@ -80,14 +96,19 @@ int sl_ddp_cmd_nvm_set(const uint8_t *input,
                       req->data,
                       (size_t)req->data_len);
   if (sc != SL_STATUS_OK) {
+    LOG_ERROR("[nvm3_writeData] 0x%04lx" LOG_NL, sc);
     return (int)sc;
   }
 
   // Do repacking if needed
   if (nvm3_repackNeeded(NVM3_HANDLE)) {
     sc = nvm3_repack(NVM3_HANDLE);
+    if (sc != SL_STATUS_OK) {
+      LOG_ERROR("[nvm3_repack] 0x%04lx" LOG_NL, sc);
+    }
   }
 
+  LOG_INFO("[%s] 0x%04lx" LOG_NL, __func__, sc);
   return (int)sc;
 }
 
@@ -118,6 +139,7 @@ int sl_ddp_cmd_nvm_get(const uint8_t *input,
                           &len);
   (void)type;
   if (sc != SL_STATUS_OK) {
+    LOG_ERROR("[nvm3_getObjectInfo] 0x%04lx" LOG_NL, sc);
     return (int)sc;
   }
 
@@ -131,5 +153,9 @@ int sl_ddp_cmd_nvm_get(const uint8_t *input,
                      (nvm3_ObjectKey_t)(req->object_key),
                      output,
                      (size_t)*output_len);
+  if (sc != SL_STATUS_OK) {
+    LOG_ERROR("[nvm3_readData] 0x%04lx" LOG_NL, sc);
+  }
+  LOG_INFO("[%s] 0x%04lx" LOG_NL, __func__, sc);
   return (int)sc;
 }

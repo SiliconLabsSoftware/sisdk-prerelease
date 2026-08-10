@@ -8,7 +8,7 @@ description: >
   Note that this Command Class supports advanced configuration.
   To use it, please make sure that configuration related to your project is added to cc_config file located in
   <app_location>/config/cc_config/<app_name>.cc_config.
-  See DevTools/cc_configurator/README.md for more details.
+  See cc_configurator/README.md for more details.
 
 package: zwave
 quality: production

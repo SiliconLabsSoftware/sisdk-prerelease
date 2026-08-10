@@ -16,6 +16,8 @@ include:
 provides:
 - name: bootloader_serial_driver
 - name: bootloader_serial_driver_nonsecure
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/gecko-bootloader-api/uart
 metadata:
   sbom:
     license: MSLA

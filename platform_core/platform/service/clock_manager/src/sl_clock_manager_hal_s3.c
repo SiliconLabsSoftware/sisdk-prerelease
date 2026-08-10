@@ -112,6 +112,159 @@ static sl_status_t bus_clock_get_register_info(sl_bus_clock_t module,
                                                volatile uint32_t **reg,
                                                uint32_t *bit);
 
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301) \
+  || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+static bool ext_flash_clk_source_depends_on_hfxo(sl_oscillator_t source)
+{
+  switch (source) {
+    case SL_OSCILLATOR_HFXO:
+      return true;
+
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)
+    case SL_OSCILLATOR_FLPLL:
+      return true;
+#endif
+
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+    case SL_OSCILLATOR_HFRCODPLL:
+      return ((DPLL0->STATUS & DPLL_STATUS_ENS) != 0)
+             && ((CMU->DPLLREFCLKCTRL & _CMU_DPLLREFCLKCTRL_CLKSEL_MASK)
+                 == CMU_DPLLREFCLKCTRL_CLKSEL_HFXO);
+
+    case SL_OSCILLATOR_SOCPLL0:
+    case SL_OSCILLATOR_SOCPLL0_OUT0:
+      {
+        uint32_t refclksel = SOCPLL0->CTRL & _SOCPLL_CTRL_REFCLKSEL_MASK;
+        return (refclksel == SOCPLL_CTRL_REFCLKSEL_REF_HFXO)
+               || (refclksel == SOCPLL_CTRL_REFCLKSEL_DEFAULT_HFXO);
+      }
+#endif
+
+    default:
+      return false;
+  }
+}
+
+/***************************************************************************//**
+ * Switches the external flash clock for HFXO tuning.
+ ******************************************************************************/
+static sl_status_t hfxo_tuning_set_flash_clk(sl_oscillator_t oscillator)
+{
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)
+  return sli_clock_manager_hal_set_ext_flash_clk(oscillator);
+#else
+  uint32_t clksel;
+  CORE_DECLARE_IRQ_STATE;
+
+  switch (oscillator) {
+    case SL_OSCILLATOR_FSRCO:
+      clksel = CMU_OSPI0CLKCTRL_CLKSEL_FSRCO;
+      break;
+
+    case SL_OSCILLATOR_HFRCODPLL:
+      clksel = CMU_OSPI0CLKCTRL_CLKSEL_HFRCODPLL;
+      break;
+
+    case SL_OSCILLATOR_HFXO:
+      clksel = CMU_OSPI0CLKCTRL_CLKSEL_HFXO;
+      break;
+
+    case SL_OSCILLATOR_SOCPLL0:
+    case SL_OSCILLATOR_SOCPLL0_OUT0:
+      clksel = CMU_OSPI0CLKCTRL_CLKSEL_SOCPLL0;
+      break;
+
+    default:
+      return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  CORE_ENTER_ATOMIC();
+  CMU->OSPI0CLKCTRL = (CMU->OSPI0CLKCTRL & ~_CMU_OSPI0CLKCTRL_CLKSEL_MASK)
+                      | clksel;
+  CORE_EXIT_ATOMIC();
+
+  return SL_STATUS_OK;
+#endif
+}
+
+/***************************************************************************//**
+ * Saves the external flash clock source and switches it to FSRCO when the
+ * source depends on HFXO.
+ ******************************************************************************/
+static sl_status_t hfxo_tuning_prepare_flash(sl_oscillator_t *ext_flash_source)
+{
+  sl_status_t status;
+
+  status = sli_clock_manager_hal_get_ext_flash_clk(ext_flash_source);
+  if ((status == SL_STATUS_OK)
+      && ext_flash_clk_source_depends_on_hfxo(*ext_flash_source)) {
+    status = hfxo_tuning_set_flash_clk(SL_OSCILLATOR_FSRCO);
+  }
+  return status;
+}
+
+/***************************************************************************//**
+ * Restores the HFXO-dependent source saved by hfxo_tuning_prepare_flash().
+ ******************************************************************************/
+static sl_status_t hfxo_tuning_restore_flash(sl_oscillator_t ext_flash_source,
+                                             uint32_t hfxo_ctrl)
+{
+  sl_status_t status = SL_STATUS_OK;
+
+  if (!ext_flash_clk_source_depends_on_hfxo(ext_flash_source)) {
+    return status;
+  }
+
+  uint32_t ready_mask = HFXO_STATUS_RDY | HFXO_STATUS_ENS;
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+  bool socpll0_temp_forceen = false;
+#endif
+
+  if ((hfxo_ctrl & HFXO_CTRL_FORCEEN) == 0) {
+    HFXO0->CTRL_SET = HFXO_CTRL_FORCEEN;
+  }
+  if ((hfxo_ctrl & HFXO_CTRL_DISONDEMAND) == 0) {
+    HFXO0->CTRL_CLR = HFXO_CTRL_DISONDEMAND;
+  }
+
+  while ((HFXO0->STATUS & ready_mask) != ready_mask) {
+    /* Wait for HFXO to become ready before restoring the flash clock source. */
+  }
+
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+  if (((ext_flash_source == SL_OSCILLATOR_SOCPLL0)
+       || (ext_flash_source == SL_OSCILLATOR_SOCPLL0_OUT0))
+      && ((SOCPLL0->STATUS & SOCPLL_STATUS_RDY) == 0)) {
+    // OSPI0 can be SOCPLL0's only consumer. Force it on until it is ready so
+    // the flash clock can be switched back to SOCPLL0.
+    SOCPLL0->CTRL_SET = SOCPLL_CTRL_FORCEEN;
+    while ((SOCPLL0->STATUS & SOCPLL_STATUS_RDY) == 0) {
+      /* Wait for SOCPLL0 to become ready before selecting it for the flash clock. */
+    }
+    socpll0_temp_forceen = true;
+  }
+#endif
+
+  status = hfxo_tuning_set_flash_clk(ext_flash_source);
+  if (status == SL_STATUS_OK) {
+    while ((HFXO0->STATUS & ready_mask) != ready_mask) {
+      /* Keep HFXO running while the restored flash clock source stabilizes. */
+    }
+  }
+
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+  if (socpll0_temp_forceen) {
+    SOCPLL0->CTRL_CLR = SOCPLL_CTRL_FORCEEN;
+  }
+#endif
+
+  if ((hfxo_ctrl & HFXO_CTRL_FORCEEN) == 0) {
+    HFXO0->CTRL_CLR = HFXO_CTRL_FORCEEN;
+  }
+  return status;
+}
+#endif
+
 /*******************************************************************************
  **********************   GLOBAL INTERNAL FUNCTIONS   **************************
  ******************************************************************************/
@@ -561,6 +714,7 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
       *frequency = SystemHCLKGet() / pclk_divider / 2U;
       break;
 
+#if defined(_CMU_TRACECLKCTRL_MASK)
     case SL_CLOCK_BRANCH_TRACECLK:
       per_divider = ((CMU->TRACECLKCTRL & _CMU_TRACECLKCTRL_PRESC_MASK) >> _CMU_TRACECLKCTRL_PRESC_SHIFT) + 1;
       switch (CMU->TRACECLKCTRL & _CMU_TRACECLKCTRL_CLKSEL_MASK) {
@@ -587,6 +741,9 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
           break;
       }
       break;
+#else
+  (void)per_divider;
+#endif
 
     case SL_CLOCK_BRANCH_EXPORTCLK:
       *frequency = SystemSYSCLKGet() / (((CMU->EXPORTCLKCTRL & _CMU_EXPORTCLKCTRL_PRESC_MASK) >> _CMU_EXPORTCLKCTRL_PRESC_SHIFT) + 1);
@@ -1156,6 +1313,7 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
       }
       break;
 
+#if defined(_CMU_TRACECLKCTRL_MASK)
     case SL_CLOCK_BRANCH_TRACECLK:
       switch (CMU->TRACECLKCTRL & _CMU_TRACECLKCTRL_CLKSEL_MASK) {
         case CMU_TRACECLKCTRL_CLKSEL_SYSCLK:
@@ -1177,6 +1335,7 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
           break;
       }
       break;
+#endif
 
 #if defined(_CMU_EM01GRPACLKCTRL_CLKSEL_MASK)
     case SL_CLOCK_BRANCH_EM01GRPACLK:
@@ -1732,17 +1891,12 @@ sl_status_t sli_clock_manager_hal_set_hfxo_calibration(uint32_t val)
   bool disondemand = false;
   sl_status_t status = SL_STATUS_OK;
 
-#if defined (_SILICON_LABS_32B_SERIES_3_CONFIG_301)
-  sl_oscillator_t initial_qspi_reference_clock;
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301) \
+  || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+  sl_oscillator_t ext_flash_source;
+  uint32_t hfxo_ctrl_backup = HFXO0->CTRL;
 
-  // Get current QSPI reference clock.
-  status = sli_clock_manager_hal_get_ext_flash_clk(&initial_qspi_reference_clock);
-  if (status != SL_STATUS_OK) {
-    return status;
-  }
-
-  // Switch QSPI clock to FSRCO.
-  status = sli_clock_manager_hal_set_ext_flash_clk(SL_OSCILLATOR_FSRCO);
+  status = hfxo_tuning_prepare_flash(&ext_flash_source);
   if (status != SL_STATUS_OK) {
     return status;
   }
@@ -1753,6 +1907,16 @@ sl_status_t sli_clock_manager_hal_set_hfxo_calibration(uint32_t val)
 
   // Make sure HFXO is disabled.
   EFM_ASSERT((HFXO0->STATUS & HFXO_STATUS_ENS) == 0);
+  if ((HFXO0->STATUS & HFXO_STATUS_ENS) != 0) {
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301) \
+  || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+    status = hfxo_tuning_restore_flash(ext_flash_source, hfxo_ctrl_backup);
+    if (status != SL_STATUS_OK) {
+      return status;
+    }
+#endif
+    return SL_STATUS_INVALID_STATE;
+  }
 
   CORE_ENTER_ATOMIC();
 
@@ -1772,9 +1936,9 @@ sl_status_t sli_clock_manager_hal_set_hfxo_calibration(uint32_t val)
     HFXO0->CTRL_CLR = HFXO_CTRL_DISONDEMAND;
   }
 
-#if defined (_SILICON_LABS_32B_SERIES_3_CONFIG_301)
-  // Switch QSPI clock to initial reference clock.
-  status = sli_clock_manager_hal_set_ext_flash_clk(initial_qspi_reference_clock);
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301) \
+  || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+  status = hfxo_tuning_restore_flash(ext_flash_source, hfxo_ctrl_backup);
 #endif
 
   CORE_EXIT_ATOMIC();
@@ -1802,26 +1966,21 @@ sl_status_t sli_clock_manager_hal_hfxo_set_ctune(uint32_t ctune)
 
   CORE_DECLARE_IRQ_STATE;
 
-#if defined (_SILICON_LABS_32B_SERIES_3_CONFIG_301)
-  sl_oscillator_t initial_qspi_reference_clock;
-
-  // Get current QSPI reference clock.
-  status = sli_clock_manager_hal_get_ext_flash_clk(&initial_qspi_reference_clock);
-  if (status != SL_STATUS_OK) {
-    return status;
-  }
-
-  // Switch QSPI clock to FSRCO.
-  status = sli_clock_manager_hal_set_ext_flash_clk(SL_OSCILLATOR_FSRCO);
-  if (status != SL_STATUS_OK) {
-    return status;
-  }
-#endif
-
   // Make sure the given CTUNE value is within the allowable range.
   if (ctune > (_HFXO_XTALCTRL_CTUNEXIANA_MASK >> _HFXO_XTALCTRL_CTUNEXIANA_SHIFT)) {
     return SL_STATUS_INVALID_PARAMETER;
   }
+
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301) \
+  || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+  sl_oscillator_t ext_flash_source;
+  uint32_t hfxo_ctrl_backup = HFXO0->CTRL;
+
+  status = hfxo_tuning_prepare_flash(&ext_flash_source);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+#endif
 
   uint32_t ctuneXoana = ctune + HFXO_CTUNE_DELTA;
   if (ctuneXoana > (_HFXO_XTALCTRL_CTUNEXOANA_MASK >> _HFXO_XTALCTRL_CTUNEXOANA_SHIFT)) {
@@ -1845,9 +2004,9 @@ sl_status_t sli_clock_manager_hal_hfxo_set_ctune(uint32_t ctune)
     HFXO0->LOCK = ~HFXO_LOCK_LOCKKEY_UNLOCK;
   }
 
-#if defined (_SILICON_LABS_32B_SERIES_3_CONFIG_301)
-  // Switch QSPI clock to initial reference clock.
-  status = sli_clock_manager_hal_set_ext_flash_clk(initial_qspi_reference_clock);
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301) \
+  || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+  status = hfxo_tuning_restore_flash(ext_flash_source, hfxo_ctrl_backup);
 #endif
 
   CORE_EXIT_ATOMIC();
@@ -1879,17 +2038,15 @@ sl_status_t sli_clock_manager_hal_hfxo_calibrate_ctune(uint32_t ctune)
   uint32_t hfxo_ctrl_backup = HFXO0->CTRL;
   sl_status_t status = SL_STATUS_OK;
 
-#if defined (_SILICON_LABS_32B_SERIES_3_CONFIG_301)
-  sl_oscillator_t initial_qspi_reference_clock;
-
-  // Get current QSPI reference clock.
-  status = sli_clock_manager_hal_get_ext_flash_clk(&initial_qspi_reference_clock);
-  if (status != SL_STATUS_OK) {
-    return status;
+  if (ctune > (_HFXO_XTALCTRL_CTUNEXIANA_MASK >> _HFXO_XTALCTRL_CTUNEXIANA_SHIFT)) {
+    return SL_STATUS_INVALID_PARAMETER;
   }
 
-  // Switch QSPI clock to FSRCO.
-  status = sli_clock_manager_hal_set_ext_flash_clk(SL_OSCILLATOR_FSRCO);
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301) \
+  || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+  sl_oscillator_t ext_flash_source;
+
+  status = hfxo_tuning_prepare_flash(&ext_flash_source);
   if (status != SL_STATUS_OK) {
     return status;
   }
@@ -1908,27 +2065,28 @@ sl_status_t sli_clock_manager_hal_hfxo_calibrate_ctune(uint32_t ctune)
   }
 
   status = sli_clock_manager_hal_hfxo_set_ctune(ctune);
-  if (status != SL_STATUS_OK) {
-    return status;
+  if (status == SL_STATUS_OK) {
+    // Start core bias optimization.
+    HFXO0->CMD_SET = HFXO_CMD_COREBIASOPT;
+
+    while ((HFXO0->STATUS & HFXO_STATUS_COREBIASOPTRDY) == HFXO_STATUS_COREBIASOPTRDY) {
+      // Wait for core bias optimization to start.
+    }
+    while ((HFXO0->STATUS & HFXO_STATUS_COREBIASOPTRDY) == 0) {
+      // Wait for core bias optimization to finish.
+    }
   }
 
-  // Start core bias optimization.
-  HFXO0->CMD_SET = HFXO_CMD_COREBIASOPT;
-
-  while ((HFXO0->STATUS & HFXO_STATUS_COREBIASOPTRDY) == HFXO_STATUS_COREBIASOPTRDY) {
-    // Wait for core bias optimization to start.
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301) \
+  || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+  sl_status_t restore_status = hfxo_tuning_restore_flash(ext_flash_source, hfxo_ctrl_backup);
+  if (status == SL_STATUS_OK) {
+    status = restore_status;
   }
-  while ((HFXO0->STATUS & HFXO_STATUS_COREBIASOPTRDY) == 0) {
-    // Wait for core bias optimization to finish.
-  }
+#endif
 
   // Retrieve initial state of the CTRL register.
   sl_hal_bus_reg_write_mask(&HFXO0->CTRL, (_HFXO_CTRL_DISONDEMAND_MASK | _HFXO_CTRL_FORCEEN_MASK), hfxo_ctrl_backup);
-
-#if defined (_SILICON_LABS_32B_SERIES_3_CONFIG_301)
-  // Switch QSPI clock to initial reference clock.
-  status = sli_clock_manager_hal_set_ext_flash_clk(initial_qspi_reference_clock);
-#endif
 
   return status;
 }
@@ -2418,6 +2576,33 @@ sl_status_t sli_clock_manager_hal_get_ext_flash_clk(sl_oscillator_t *oscillator)
   }
 
   *oscillator = current_qspi_reference_clock;
+  return SL_STATUS_OK;
+#elif defined (_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+  switch (CMU->OSPI0CLKCTRL & _CMU_OSPI0CLKCTRL_CLKSEL_MASK) {
+    case CMU_OSPI0CLKCTRL_CLKSEL_DISABLED:
+      *oscillator = SL_OSCILLATOR_INVALID;
+      break;
+
+    case CMU_OSPI0CLKCTRL_CLKSEL_FSRCO:
+      *oscillator = SL_OSCILLATOR_FSRCO;
+      break;
+
+    case CMU_OSPI0CLKCTRL_CLKSEL_SOCPLL0:
+      *oscillator = SL_OSCILLATOR_SOCPLL0_OUT0;
+      break;
+
+    case CMU_OSPI0CLKCTRL_CLKSEL_HFRCODPLL:
+      *oscillator = SL_OSCILLATOR_HFRCODPLL;
+      break;
+
+    case CMU_OSPI0CLKCTRL_CLKSEL_HFXO:
+      *oscillator = SL_OSCILLATOR_HFXO;
+      break;
+
+    default:
+      return SL_STATUS_INVALID_STATE;
+  }
+
   return SL_STATUS_OK;
 #else
   (void)oscillator;

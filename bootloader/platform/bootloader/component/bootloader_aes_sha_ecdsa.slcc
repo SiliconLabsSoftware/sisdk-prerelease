@@ -12,6 +12,8 @@ requires:
 - name: bootloader_aes_sha_ecdsa_common
 provides:
 - name: bootloader_aes_sha_ecdsa
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/gecko-bootloader-api/security
 metadata:
   sbom:
     license: MSLA AND APACHE-2.0

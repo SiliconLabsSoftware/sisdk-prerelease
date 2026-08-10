@@ -26,6 +26,8 @@ requires:
 config_file:
 - path: platform/bootloader/config/btl_xmodem_config.h
   file_id: btl_uart_xmodem_config
+documentation:
+  url: https://docs.silabs.com/shared-content/latest/using-gecko-bootloader-with-connect/02-using-the-gecko-standalone-bootloaders
 metadata:
   sbom:
     license: MSLA

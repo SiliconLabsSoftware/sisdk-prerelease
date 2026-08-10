@@ -25,6 +25,8 @@ define:
 provides:
 - name: bootloader_bgapi_uartdfu
 - name: bootloader_bgapi_uartdfu_nonsecure
+documentation:
+  url: https://docs.silabs.com/shared-content/latest/using-gecko-bootloader-with-bluetooth-apps/02-bgapi-uart-device-firmware-upgrade-dfu
 metadata:
   sbom:
     license: MSLA

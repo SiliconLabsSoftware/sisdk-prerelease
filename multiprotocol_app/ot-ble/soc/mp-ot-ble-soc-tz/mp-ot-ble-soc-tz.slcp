@@ -154,6 +154,8 @@ import:
   # Import the config files from the TZ Secure application
   - id: ot-tz-secure-application
 
+post_build:
+  profile: tz_nonsecure_application
 
 tag:
   - companion:secure_app

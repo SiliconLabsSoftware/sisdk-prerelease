@@ -22,6 +22,8 @@ define:
   value: 1
 provides:
 - name: bootloader_em4_gpio_retention
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/bootloader-user-guide-gsdk-4/07-configuring-the-gecko-bootloader
 metadata:
   sbom:
     license: MSLA

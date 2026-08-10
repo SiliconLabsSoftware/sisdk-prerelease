@@ -22,6 +22,8 @@ define:
 provides:
 - name: bootloader_ezsp_spi
 - name: bootloader_ezsp_spi_nonsecure
+documentation:
+  url: https://docs.silabs.com/zigbee/latest/ezsp-spi-host-interfacing-guide/
 metadata:
   sbom:
     license: MSLA

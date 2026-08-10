@@ -26,6 +26,8 @@ provides:
 - name: bootloader_gbl_compression_lz4
 - name: bootloader_nonsecure_incompatible
   condition: [bootloader_core_nonsecure]
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/bootloader-user-guide-gsdk-4/07-configuring-the-gecko-bootloader
 metadata:
   sbom:
     license: MSLA

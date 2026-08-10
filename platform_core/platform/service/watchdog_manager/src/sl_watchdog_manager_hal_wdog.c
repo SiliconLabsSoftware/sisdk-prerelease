@@ -634,4 +634,36 @@ void sli_watchdog_manager_hal_on_em_transition(uint8_t from, uint8_t to)
   }
 }
 #endif
+
+/***************************************************************************//**
+ * Enable reset on timeout.
+ ******************************************************************************/
+sl_status_t sli_watchdog_manager_hal_enable_reset(void)
+{
+  if (sl_hal_wdog_is_enabled(WATCHDOG_PERIPHERAL)) {
+    // Cannot perform operation on enabled watchdog.
+    return SL_STATUS_PERMISSION;
+  }
+
+  // Enable reset on timeout.
+  sl_hal_wdog_enable_reset(WATCHDOG_PERIPHERAL);
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Disable reset on timeout.
+ ******************************************************************************/
+sl_status_t sli_watchdog_manager_hal_disable_reset(void)
+{
+  if (sl_hal_wdog_is_enabled(WATCHDOG_PERIPHERAL)) {
+    // Cannot perform operation on enabled watchdog.
+    return SL_STATUS_PERMISSION;
+  }
+
+  // Disable reset on timeout.
+  sl_hal_wdog_disable_reset(WATCHDOG_PERIPHERAL);
+
+  return SL_STATUS_OK;
+}
 /** @} (end addtogroup watchdog_manager_hal) */

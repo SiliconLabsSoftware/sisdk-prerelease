@@ -33,6 +33,8 @@ provides:
   condition: [bootloader_core_nonsecure]
 - name: bootloader_secure_incompatible
   condition: [bootloader_core_secure]
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/bootloader-user-guide-gsdk-4/07-configuring-the-gecko-bootloader
 metadata:
   sbom:
     license: MSLA

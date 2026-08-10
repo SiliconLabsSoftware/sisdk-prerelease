@@ -22,6 +22,8 @@ include:
 provides:
 - name: bootloader_crc
 - name: bootloader_crc_nonsecure
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/gecko-bootloader-api/crc16
 metadata:
   sbom:
     license: MSLA

@@ -25,6 +25,8 @@ requires:
 - name: bootloader_interface_s3_bootload_headers
 provides:
 - name: btl_include_parser
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/bootloader-transitioning-guide-gsdk-v40-and-higher/03-components
 metadata:
   sbom:
     license: MSLA

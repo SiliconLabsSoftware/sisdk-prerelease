@@ -21,6 +21,8 @@ provides:
   condition: [device_series_2]
 - name: memory_manager_retention_control_hal
   condition: [device_generic_family_sixx301]
+- name: memory_manager_retention_control_hal
+  condition: [device_si91x]
 template_contribution:
 - name: component_catalog
   value: bank_retention_control_stubbed

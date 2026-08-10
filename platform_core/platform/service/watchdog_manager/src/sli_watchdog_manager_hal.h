@@ -286,6 +286,27 @@ sl_status_t sli_watchdog_manager_hal_enable_starve_interrupt(void);
  ******************************************************************************/
 sl_status_t sli_watchdog_manager_hal_disable_starve_interrupt(void);
 #endif
+/***************************************************************************//**
+ * @brief Enable reset on timeout.
+ *
+ * @details
+ * Enables the reset on timeout feature of the hardware watchdog.
+ *
+ * @return SL_STATUS_OK if successful.
+ * @return SL_STATUS_NOT_PERMISSION if the HAL has not been disabled.
+ ******************************************************************************/
+sl_status_t sli_watchdog_manager_hal_enable_reset(void);
+
+/***************************************************************************//**
+ * @brief Disable reset on timeout.
+ *
+ * @details
+ * Disables the reset on timeout feature of the hardware watchdog.
+ *
+ * @return SL_STATUS_OK if successful.
+ * @return SL_STATUS_NOT_PERMISSION if the HAL has not been disabled.
+ ******************************************************************************/
+sl_status_t sli_watchdog_manager_hal_disable_reset(void);
 /** @} (end addtogroup watchdog_manager_hal) */
 
 #ifdef __cplusplus

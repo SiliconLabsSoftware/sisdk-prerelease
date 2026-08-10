@@ -29,6 +29,8 @@ requires:
 - name: bootloader_crc
 - name: bootloader_spi_controller_driver
 - name: bootloader_storage_slots
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/gecko-bootloader-api/spi-1
 metadata:
   sbom:
     license: MSLA

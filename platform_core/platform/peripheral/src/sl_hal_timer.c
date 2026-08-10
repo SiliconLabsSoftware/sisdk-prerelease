@@ -153,8 +153,7 @@ extern __INLINE void sl_hal_timer_channel_set_interrupts(TIMER_TypeDef *timer,
 void sl_hal_timer_init(TIMER_TypeDef *timer,
                        const sl_hal_timer_init_t *init)
 {
-  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
-  SL_LOG_DEBUG_ASSERT(init != NULL);
+  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
 
   sl_hal_timer_disable(timer);
   sl_hal_timer_wait_ready(timer);
@@ -201,10 +200,9 @@ void sl_hal_timer_channel_init(TIMER_TypeDef *timer,
                                const sl_hal_timer_channel_init_t *init)
 {
   // Make sure the module exists on the selected chip.
-  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
   // Make sure channel number is valid.
-  SL_LOG_DEBUG_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
-  SL_LOG_DEBUG_ASSERT(init != NULL);
+  EFM_ASSERT(channel < SL_HAL_TIMER_CHANNEL_NUM(timer));
 
   const uint8_t channel_num = SL_HAL_TIMER_CHANNEL_NUM(timer);
   bool timer_enabled;
@@ -276,9 +274,7 @@ void sl_hal_timer_channel_init(TIMER_TypeDef *timer,
 void sl_hal_timer_dti_init(TIMER_TypeDef *timer,
                            const sl_hal_timer_dti_init_t *init)
 {
-  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
-  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_SUPPORTS_DTI(timer));
-  SL_LOG_DEBUG_ASSERT(init != NULL);
+  EFM_ASSERT(SL_HAL_TIMER_SUPPORTS_DTI(timer));
 
   // Make sure the DTI unit is disabled while initializing.
   sl_hal_timer_disable(timer);
@@ -330,7 +326,7 @@ void sl_hal_timer_reset(TIMER_TypeDef *timer)
   const uint8_t channel_num = SL_HAL_TIMER_CHANNEL_NUM(timer);
 
   // Make sure the module exists on the selected chip.
-  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
+  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
 
   // Enable timer.
   sl_hal_timer_enable(timer);

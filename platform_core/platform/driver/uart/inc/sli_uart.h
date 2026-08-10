@@ -28,21 +28,26 @@
  *
  ******************************************************************************/
 
- #ifndef SLI_UART_H
- #define SLI_UART_H
+#ifndef SLI_UART_H
+#define SLI_UART_H
 
- #include <stddef.h>
- #include <stdbool.h>
- #include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdint.h>
 
- #include "sl_assert.h"
- #include "sl_status.h"
- #include "sl_device_uart.h"
- #include "sl_uart.h"
+#include "sl_assert.h"
+#include "sl_component_catalog.h"
+#include "sl_status.h"
+#include "sl_device_uart.h"
+#include "sl_uart.h"
 
- #ifdef __cplusplus
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#include "sl_power_manager.h"
+#endif
+
+#ifdef __cplusplus
 extern "C" {
- #endif
+#endif
 
 /*******************************************************************************
  *******************************   DEFINES   ***********************************
@@ -56,6 +61,8 @@ extern "C" {
                                           && config.stop_bits <= SL_UART_STOP_BITS_2 \
                                           && config.data_bits <= SL_UART_DATA_BITS_9 \
                                           && config.flow_control <= SL_UART_FLOW_CONTROL_SOFT)
+#define SLI_UART_HANDLE_IS_SUSPENDED(uart_handle) \
+        ((uart_handle)->state == SL_UART_HANDLE_STATE_SUSPENDED)
 
 #if defined(SL_CATALOG_UART_ASYNC_PRESENT)
 #define SLI_UART_HANDLE_IS_ASYNC(uart_handle) \
@@ -78,18 +85,23 @@ struct sli_uart_ops {
   void (*reset)(sl_peripheral_t uart);
   sl_status_t (*init)(sl_peripheral_t uart, sl_uart_config_t config);
   void (*deinit)(sl_peripheral_t uart);
-  void (*init_transport_pins)(sl_uart_handle_t *uart_handle, sl_uart_pin_config_t pin_config);
-  void (*deinit_transport_pins)(sl_uart_handle_t *uart_handle);
-  void (*init_hwfc_pins)(sl_uart_handle_t *uart_handle, sl_uart_pin_config_t pin_config);
-  void (*deinit_hwfc_pins)(sl_uart_handle_t *uart_handle);
-  sl_status_t (*read_byte)(sl_uart_handle_t *uart_handle, uint8_t *byte);
-  sl_status_t (*read_buffer)(sl_uart_handle_t *uart_handle, uint8_t *data, size_t size, size_t *bytes_read);
-  sl_status_t (*write_byte)(sl_uart_handle_t *uart_handle, uint8_t byte);
-  sl_status_t (*write_buffer)(sl_uart_handle_t *uart_handle, const uint8_t *data, size_t size, size_t *bytes_written);
+  void (*init_transport_pins)(sl_peripheral_t uart, sl_uart_pin_config_t pin_config);
+  void (*deinit_transport_pins)(sl_peripheral_t uart);
+  void (*init_hwfc_pins)(sl_peripheral_t uart, sl_uart_pin_config_t pin_config);
+  void (*deinit_hwfc_pins)(sl_peripheral_t uart);
+  sl_status_t (*read_byte)(sl_peripheral_t uart, uint8_t *byte);
+  sl_status_t (*read_buffer)(sl_peripheral_t uart, uint8_t *data, size_t size, size_t *bytes_read);
+  sl_status_t (*write_byte)(sl_peripheral_t uart, uint8_t byte);
+  sl_status_t (*write_buffer)(sl_peripheral_t uart, const uint8_t *data, size_t size, size_t *bytes_written);
   void (*set_enable_irq)(sl_peripheral_t uart, bool enabled, uint32_t irq);
   void (*clear_irq)(sl_peripheral_t uart, uint32_t irq);
-  uint32_t (*get_enabled_pending_irq)(sl_peripheral_t uart, uint32_t mask);
+  uint32_t (*get_enabled_pending_irq)(sl_peripheral_t uart);
+  uint32_t (*get_enabled_irq)(sl_peripheral_t uart);
   sl_uart_rx_err_t (*rx_err_from_irq_status)(uint32_t irq_status);
+  bool (*is_idle)(sl_peripheral_t uart);
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  sl_power_manager_em_t (*get_em_requirement)(sl_peripheral_t uart);
+#endif
 #if defined(SL_CATALOG_UART_ASYNC_PRESENT)
   void *(*get_tx_register)(sl_peripheral_t uart);
   void *(*get_rx_register)(sl_peripheral_t uart);
@@ -120,10 +132,10 @@ void sli_uart_reset(sl_uart_handle_t *uart_handle);
  * initializes the UART peripheral.
  *
  * @param[in]  uart_handle Handle to UART.
- *
  * @param[in]  uart UART peripheral to use with this handle.
+ * @param[in]  pin_config Pin assignment for the specified UART.
  ******************************************************************************/
-void sli_uart_init_core(sl_uart_handle_t *uart_handle, sl_peripheral_t uart);
+void sli_uart_init_core(sl_uart_handle_t *uart_handle, sl_peripheral_t uart, sl_uart_pin_config_t pin_config);
 
 /***************************************************************************//**
  * De-initializes the core of the driver for the given UART instance.
@@ -185,6 +197,24 @@ void sli_uart_deinit_clocks(sl_uart_handle_t *uart_handle);
  * Enables NVIC RX and TX interrupts for the given UART peripheral.
  ******************************************************************************/
 void sli_uart_init_irq(sl_uart_handle_t *uart_handle);
+
+/***************************************************************************//**
+ * Enables an IRQ for the given UART instance.
+ ******************************************************************************/
+static inline void sli_uart_enable_irq(sl_uart_handle_t *uart_handle, uint32_t irq)
+{
+  uart_handle->enabled_irq |= irq;
+  uart_handle->ops->set_enable_irq(uart_handle->uart, true, irq);
+}
+
+/***************************************************************************//**
+ * Disables an IRQ for the given UART instance.
+ ******************************************************************************/
+static inline void sli_uart_disable_irq(sl_uart_handle_t *uart_handle, uint32_t irq)
+{
+  uart_handle->enabled_irq &= ~irq;
+  uart_handle->ops->set_enable_irq(uart_handle->uart, false, irq);
+}
 
 /***************************************************************************//**
  * Disables NVIC RX and TX interrupts for the given UART peripheral.

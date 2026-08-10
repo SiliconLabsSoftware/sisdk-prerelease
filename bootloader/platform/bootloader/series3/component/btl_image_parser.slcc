@@ -14,6 +14,8 @@ provides:
 requires:
 - name: bootloader_aes_sha_ecdsa
 - name: btl_include_parser
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/gecko-bootloader-api/parser-interface-s3
 metadata:
   sbom:
     license: MSLA

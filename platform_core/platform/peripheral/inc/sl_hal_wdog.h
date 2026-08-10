@@ -375,6 +375,42 @@ __INLINE void sl_hal_wdog_unlock(WDOG_TypeDef *wdog)
 }
 
 /***************************************************************************//**
+* @brief
+*   Enable the watchdog reset. A timeout will cause a WDOG reset
+*
+* @param[in] wdog
+*   Pointer to the WDOG peripheral register block.
+*
+* @note
+*   This function must be called when the watchdog is disabled.
+*******************************************************************************/
+__INLINE void sl_hal_wdog_enable_reset(WDOG_TypeDef *wdog)
+{
+  SL_LOG_DEBUG_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
+  
+  wdog->CFG = (wdog->CFG & ~_WDOG_CFG_WDOGRSTDIS_MASK)
+              | (((uint32_t)false) << _WDOG_CFG_WDOGRSTDIS_SHIFT);
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Disable the watchdog reset. A timeout will not cause a WDOG reset
+ *
+ * @param[in] wdog
+ *   Pointer to the WDOG peripheral register block.
+ *
+ * @note
+ *   This function must be called when the watchdog is disabled.
+ *******************************************************************************/
+__INLINE void sl_hal_wdog_disable_reset(WDOG_TypeDef *wdog)
+{
+  SL_LOG_DEBUG_ASSERT(SL_HAL_WDOG_REF_VALID(wdog));
+
+  wdog->CFG = (wdog->CFG & ~_WDOG_CFG_WDOGRSTDIS_MASK)
+              | (((uint32_t)true) << _WDOG_CFG_WDOGRSTDIS_SHIFT);
+}
+
+/***************************************************************************//**
  * @brief
  *   Clear one or more pending watchdog interrupts.
  *

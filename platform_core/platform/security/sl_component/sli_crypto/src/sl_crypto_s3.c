@@ -707,8 +707,8 @@ sl_status_t sli_crypto_process_rpa(sli_crypto_descriptor_t     *key_descriptor,
   EFM_ASSERT(key_descriptor != NULL);
   EFM_ASSERT(irk_index != NULL);
 
-  CMU->CLKEN0_SET = CMU_CLKEN0_LPWAES;
-  CMU->CLKEN1_SET = CMU_CLKEN1_RPA;
+  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_LPWAES);
+  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_RPA);
   RPA->SWRST_SET = RPA_SWRST_SWRST;
   while ((RPA->SWRST & _RPA_SWRST_RESETTING_MASK) == RPA_SWRST_RESETTING) ;
   RPA->EN_SET = RPA_EN_EN;
@@ -738,8 +738,8 @@ sl_status_t sli_crypto_process_rpa(sli_crypto_descriptor_t     *key_descriptor,
   // Validate the result
   if ((RPA->IF & _RPA_IF_RPADONEIF_MASK) != RPA_IF_RPADONEIF) {
     RPA->EN_CLR = RPA_EN_EN;
-    CMU->CLKEN1_CLR = CMU_CLKEN1_RPA;
-    CMU->CLKEN0_CLR = CMU_CLKEN0_LPWAES;
+    sl_clock_manager_disable_bus_clock(SL_BUS_CLOCK_RPA);
+    sl_clock_manager_disable_bus_clock(SL_BUS_CLOCK_LPWAES);
     return SL_STATUS_INVALID_STATE;
   } else {
     // RPA computation has finished
@@ -748,16 +748,16 @@ sl_status_t sli_crypto_process_rpa(sli_crypto_descriptor_t     *key_descriptor,
       if (irk_index_temp == -1) {
         // IRKNOTFOUND is not set and we did not get a match
         RPA->EN_CLR = RPA_EN_EN;
-        CMU->CLKEN1_CLR = CMU_CLKEN1_RPA;
-        CMU->CLKEN0_CLR = CMU_CLKEN0_LPWAES;
+        sl_clock_manager_disable_bus_clock(SL_BUS_CLOCK_RPA);
+        sl_clock_manager_disable_bus_clock(SL_BUS_CLOCK_LPWAES);
         return SL_STATUS_FAIL;
       }
     }
     *irk_index = irk_index_temp;
   }
   RPA->EN_CLR = RPA_EN_EN;
-  CMU->CLKEN1_CLR = CMU_CLKEN1_RPA;
-  CMU->CLKEN0_CLR = CMU_CLKEN0_LPWAES;
+  sl_clock_manager_disable_bus_clock(SL_BUS_CLOCK_RPA);
+  sl_clock_manager_disable_bus_clock(SL_BUS_CLOCK_LPWAES);
 
   return SL_STATUS_OK;
 }

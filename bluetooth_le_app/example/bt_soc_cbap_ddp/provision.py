@@ -22,408 +22,530 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-'''Dynamic Data Provisioning (DDP) Host Tool for Certificate Based Authentication and Pairing (CBAP)
+'''Dynamic Data Provisioning (DDP) Host Tool for CBAP
 
-First, this script establishes RTT connection to the device.
-Then uploads and runs the DDP RAM application.
-And finally, runs the DDP commands in order to:
-- Generate a device key pair.
-- Generate static authentication data.
-- Generate a common name, based on the device's UUID.
-- Build the device certificate and sign it with the issuer.
-- Inject the certificate into the device.
-- Inject the issuer certificate into the device as well.
+Provision a Silicon Labs device with data required by Certificate Based
+Authentication and Pairing (CBAP):
+
+    - Device EC key pair (NIST P-256)
+    - Static authentication data
+    - Device X.509 certificate, signed by an issuer Certificate Authority
+    - Issuer (root) certificate stored in device NVM
+
+Connection and application loading depend on the target family:
+
+    Non-xG22 devices
+        Connect over RTT (J-Link), upload the DDP RAM application, and run it.
+
+    xG22 family (limited memory)
+        The provisioning application must be flashed beforehand. Connect over
+        VCOM (serial) to the running application.
+
+Prerequisites:
+    - Python 3.9 or higher.
+    - The Python packages listed in `requirements.txt`. Install them with:
+          python -m pip install -r requirements.txt
+    - A valid issuer Certificate Authority. Create one with
+      ``certificate_manager.py`` or use the bundled demo CA for evaluation
+      only.
 '''
-
 # Metadata
 __author__ = 'Silicon Laboratories, Inc'
 __copyright__ = 'Copyright 2026, Silicon Laboratories, Inc.'
 
 import sys
-import os
+import re
 import argparse
 import datetime
-import cryptography
+from pathlib import Path
+from typing import Optional
+
 from cryptography import x509
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives import serialization
-sys.path.append(os.path.join(os.path.dirname(__file__), "autogen"))
-sys.path.append(os.path.join(os.path.dirname(__file__), "script"))
-from ddp_rtt import RTT
-from sl_ddp_rtt_config import *
+
+sys.path.append(str(Path(__file__).parent / "autogen"))
+sys.path.append(str(Path(__file__).parent / "script"))
+
+from ddp_conn import RttConnection, SerialConnection
+from sl_ddp_conn_config import *
 from cbap_key_id import *
 from ddp_cmd_nvm import nvm_set
 from ddp_cmd_psa import *
 from ddp_cmd_cert import common_name_gen
 
-DEFAULT_ISSUER_CERT                 = os.path.join(os.path.dirname(__file__), "script/ca_demo/certificate.pem")
-DEFAULT_ISSUER_KEY                  = os.path.join(os.path.dirname(__file__), "script/ca_demo/private_key.pem")
+from certificate_manager import (
+    CertificateAuthority,
+    add_certificate_args,
+    CustomFormatter,
+    DEFAULT_VALIDITY,
+    DEFAULT_POLICY_OID,
+    DEFAULT_COUNTRY,
+    DEFAULT_STATE,
+    DEFAULT_LOCALITY,
+    DEFAULT_ORGANIZATION,
+    DEFAULT_ORGANIZATIONAL_UNIT,
+    DEFAULT_EMAIL_ADDRESS,
+)
 
-DEFAULT_VALIDITY                    = 365
-DEFAULT_POLICY_OID                  = None
-DEFAULT_COUNTRY                     = 'US'
-DEFAULT_STATE                       = 'Texas'
-DEFAULT_LOCALITY                    = 'Austin'
-DEFAULT_ORGANIZATION                = 'Silicon Laboratories'
-DEFAULT_ORGANIZATIONAL_UNIT         = 'Wireless'
-DEFAULT_EMAIL_ADDRESS               = 'support@silabs.com'
+DEMO_CA_DIR = (Path(__file__).parent / "script" / "ca_demo").resolve()
+DEMO_CA_LEVEL = 0
 
-# Key arguments
-PSA_KEY_USAGE_EXPORT                = 0x00000001
-PSA_KEY_USAGE_SIGN_MESSAGE          = 0x00000400
-PSA_KEY_USAGE_VERIFY_MESSAGE        = 0x00000800
+DEFAULT_BAUDRATE = 115200
 
-PSA_KEY_BITS                        = (32 * 8)
+# PSA Crypto constants for device key generation.
+PSA_KEY_USAGE_EXPORT = 0x00000001
+PSA_KEY_USAGE_SIGN_MESSAGE = 0x00000400
+PSA_KEY_USAGE_VERIFY_MESSAGE = 0x00000800
 
-PSA_ALG_NONE                        = 0x00000000
-PSA_ALG_ECDSA_BASE                  = 0x06000600
-PSA_ALG_HASH_MASK                   = 0x000000ff
-PSA_ALG_SHA_256                     = 0x02000009
+PSA_KEY_BITS = (32 * 8)
 
-PSA_KEY_TYPE_RAW_DATA               = 0x1001
-PSA_KEY_TYPE_ECC_KEY_PAIR_BASE      = 0x7100
-PSA_ECC_FAMILY_SECP_R1              = 0x12
+PSA_ALG_NONE = 0x00000000
+PSA_ALG_ECDSA_BASE = 0x06000600
+PSA_ALG_HASH_MASK = 0x000000ff
+PSA_ALG_SHA_256 = 0x02000009
 
-SIGNATURE_HASH_ALGORITHM            = cryptography.hazmat.primitives.hashes.SHA256()
+PSA_KEY_TYPE_RAW_DATA = 0x1001
+PSA_KEY_TYPE_ECC_KEY_PAIR_BASE = 0x7100
+PSA_ECC_FAMILY_SECP_R1 = 0x12
+
+EPILOG = '''\
+Examples:
+    Try to autodetect device and provisioning app, while using the demo CA:
+        python %(prog)s
+    Specify issuer Certificate Authority (recommended):
+        python %(prog)s --ca_dir /path/to/issuers --ca_level 0
+    Specify provisioning app binary:
+        python %(prog)s --app build/debug/bt_soc_cbap_ddp.bin
+    Connect to device with the given J-Link serial:
+        python %(prog)s --serial 440192051
+    Connect to device over Ethernet at the given IP address:
+        python %(prog)s --ip 192.168.0.143
+    Connect to device on the given VCOM serial port:
+        python %(prog)s --port COM13
+    Override the VCOM baud rate:
+        python %(prog)s --baudrate 115200
+    Override device OPN:
+        python %(prog)s --device EFR32MG21A010F1024IM32
+    Override RAM starting address:
+        python %(prog)s --ram 536870912
+    Extend/overwrite J-Link devices database:
+        python %(prog)s --j_link_devices jlink/JLinkDevices.xml
+'''
 
 key_att = KeyAtt(
-    usage_flags = PSA_KEY_USAGE_SIGN_MESSAGE | PSA_KEY_USAGE_VERIFY_MESSAGE,
-    bits        = PSA_KEY_BITS,
-    algo        = PSA_ALG_ECDSA_BASE | (PSA_ALG_SHA_256 & PSA_ALG_HASH_MASK),
-    key_type    = PSA_KEY_TYPE_ECC_KEY_PAIR_BASE | PSA_ECC_FAMILY_SECP_R1,
-    key_id      = CBAP_PSA_DEVICE_KEY
+    usage_flags=PSA_KEY_USAGE_SIGN_MESSAGE | PSA_KEY_USAGE_VERIFY_MESSAGE,
+    bits=PSA_KEY_BITS,
+    algo=PSA_ALG_ECDSA_BASE | (PSA_ALG_SHA_256 & PSA_ALG_HASH_MASK),
+    key_type=PSA_KEY_TYPE_ECC_KEY_PAIR_BASE | PSA_ECC_FAMILY_SECP_R1,
+    key_id=CBAP_PSA_DEVICE_KEY,
 )
 
 auth_data_att = KeyAtt(
-    usage_flags = PSA_KEY_USAGE_EXPORT,
-    bits        = PSA_KEY_BITS,
-    algo        = PSA_ALG_NONE,
-    key_type    = PSA_KEY_TYPE_RAW_DATA,
-    key_id      = CBAP_PSA_AUTH_DATA
+    usage_flags=PSA_KEY_USAGE_EXPORT,
+    bits=PSA_KEY_BITS,
+    algo=PSA_ALG_NONE,
+    key_type=PSA_KEY_TYPE_RAW_DATA,
+    key_id=CBAP_PSA_AUTH_DATA,
 )
 
-def main(app=None,
-         serial=None,
-         ip=None,
-         device_opn=DEVICE_OPN,
-         ram_addr=RAM_ADDR,
-         j_link_devices=None,
-         issuer_cert=DEFAULT_ISSUER_CERT,
-         issuer_key=DEFAULT_ISSUER_KEY,
-         validity=DEFAULT_VALIDITY,
-         policy_oid=DEFAULT_POLICY_OID,
-         country=DEFAULT_COUNTRY,
-         state=DEFAULT_STATE,
-         locality=DEFAULT_LOCALITY,
-         organization=DEFAULT_ORGANIZATION,
-         organizational_unit=DEFAULT_ORGANIZATIONAL_UNIT,
-         email_address=DEFAULT_EMAIL_ADDRESS):
-    # Get provisioning application binary if not provided
-    if app == None:
-        root = os.path.dirname(__file__)
-        print(f"Provisioning application was not defined. Searching for the binary under {root} (recursively)...")
-        app = _get_default_provisioning_app(root)
 
+def main(app: Optional[Path] = None,
+         ca_dir: Path = DEMO_CA_DIR,
+         ca_level: int = DEMO_CA_LEVEL,
+         serial: Optional[int] = None,
+         ip: Optional[str] = None,
+         port: Optional[str] = None,
+         baudrate: int = DEFAULT_BAUDRATE,
+         device_opn: str = DEVICE_OPN,
+         ram_addr: int = RAM_ADDR,
+         j_link_devices: Optional[Path] = None,
+         validity: int = DEFAULT_VALIDITY,
+         policy_oid: Optional[str] = DEFAULT_POLICY_OID,
+         subj_country: str = DEFAULT_COUNTRY,
+         subj_state: str = DEFAULT_STATE,
+         subj_locality: str = DEFAULT_LOCALITY,
+         subj_organization: str = DEFAULT_ORGANIZATION,
+         subj_organizational_unit: str = DEFAULT_ORGANIZATIONAL_UNIT,
+         subj_email_address: str = DEFAULT_EMAIL_ADDRESS):
+    '''Provision a device with keys, certificate, and issuer cert.
+
+    Connects to the target, runs (or attaches to) the DDP provisioning
+    application, generates keys and a device certificate on the host, and
+    injects the certificate data into device NVM.
+
+    :param app: Path to the provisioning application ``.bin`` file. When
+        omitted on non-xG22 targets, the binary is searched under this script's
+        directory.
+    :param ca_dir: Working directory containing issuer CA sub-directories
+        (see :class:`CertificateAuthority`).
+    :param ca_level: Issuer CA level (0=root, 1=factory, 2=batch).
+    :param serial: J-Link serial number for device selection.
+    :param ip: Device IP address (Ethernet connection).
+    :param port: VCOM serial port (e.g. ``COM13`` or ``/dev/ttyACM0``).
+    :param baudrate: VCOM baud rate (xG22 serial connection only).
+    :param device_opn: Device ordering part number (OPN).
+    :param ram_addr: RAM load address for the provisioning application.
+    :param j_link_devices: Optional ``JLinkDevices.xml`` extension file.
+    :param validity: Device certificate validity period in days.
+    :param policy_oid: Optional certificate policy OID.
+    :param subj_country: Certificate subject country.
+    :param subj_state: Certificate subject state or province.
+    :param subj_locality: Certificate subject locality.
+    :param subj_organization: Certificate subject organization.
+    :param subj_organizational_unit: Certificate subject organizational unit.
+    :param subj_email_address: Certificate subject e-mail address.
+    :raises FileNotFoundError: If a required file is missing.
+    :raises FileExistsError: If multiple provisioning binaries are found.
+    :raises ValueError: If the validity period is less than one day.
+    :raises NotImplementedError: If unsupported PSA key attributes are used.
+    :raises RuntimeError: If a DDP command returns a non-zero status.
+    '''
     print("Configuration")
-    print(f"\tProvisioning application: {app}")
+
+    # Detect whether the target belongs to the xG22 family.
+    # The device OPN can be a SoC (e.g. EFR32BG22, EFR32MG22) or a module
+    # (e.g. BGM220, MGM220), so we match an optional module 'm' before '22'.
+    is_xg22_family = re.search(
+        r'[bm]gm?22', device_opn, re.IGNORECASE) is not None
+
+    if not is_xg22_family:
+        # Get provisioning application binary if not provided.
+        if app is None:
+            root = Path(__file__).parent
+            print("Provisioning application was not defined. Searching for "
+                  f"the binary under {root} (recursively)...")
+            app = _get_default_provisioning_app(root)
+        else:
+            app = Path(app).resolve()
+        print(f"\tProvisioning application: {app}")
+
+    print("\tIssuer (CA)")
+    ca_dir = ca_dir.resolve()
+    print(f"\t\tDirectory: {ca_dir}")
+    print(f"\t\tLevel: {ca_level}")
+
     if serial:
         print(f"\tDevice serial: {serial}")
     elif ip:
         print(f"\tDevice IP: {ip}")
+    elif port:
+        print(f"\tDevice port: {port}")
+        print(f"\tDevice baudrate: {baudrate}")
     else:
-        print(f"\tAuto device detection")
-    print(f"\tDEVICE_OPN: {device_opn}")
-    print(f"\tRAM_ADDR: {hex(ram_addr)}")
-    print(f"\tIssuer")
-    print(f"\t\tCertificate: {issuer_cert}")
-    print(f"\t\tPrivate key: {issuer_key}")
+        print("\tAuto device detection")
+
+    print(f"\tDEVICE_OPN: {device_opn}. xG22 family: {is_xg22_family}")
+    if not is_xg22_family:
+        print(f"\tRAM_ADDR: {hex(ram_addr)}")
+        print(f"\tJLinkDevices extension: {j_link_devices}")
+
     print(f"\tCertificate validity: {validity}[days]")
     print(f"\tCertificate object identifier: {policy_oid}")
-    print(f"\tCertificate subjects")
-    print(f"\t\tcountry: {country}")
-    print(f"\t\tstate: {state}")
-    print(f"\t\tlocality: {locality}")
-    print(f"\t\torganization: {organization}")
-    print(f"\t\torganizational_unit: {organizational_unit}")
-    print(f"\t\temail_address: {email_address}")
+    print("\tCertificate subjects")
+    print(f"\t\tcountry: {subj_country}")
+    print(f"\t\tstate: {subj_state}")
+    print(f"\t\tlocality: {subj_locality}")
+    print(f"\t\torganization: {subj_organization}")
+    print(f"\t\torganizational_unit: {subj_organizational_unit}")
+    print(f"\t\temail_address: {subj_email_address}")
 
-    # Check inputs
-    if not os.path.exists(app):
-        raise FileNotFoundError(f"Provisioning application binary cannot be found at: {app}")
-    if not app.lower().endswith('.bin'):
-        raise FileNotFoundError("Provisioning application must be a '.bin' file.")
-
-    if j_link_devices and not os.path.exists(j_link_devices):
-        raise FileNotFoundError(f"JLinkDevices.xml file was specified, but cannot be found at: {j_link_devices}")
+    # Check inputs.
+    if not is_xg22_family:
+        if not app.exists():
+            raise FileNotFoundError(
+                f"Provisioning application binary cannot be found at: {app}")
+        if app.suffix.lower() != '.bin':
+            raise FileNotFoundError(
+                "Provisioning application must be a '.bin' file.")
+        if j_link_devices is not None and not j_link_devices.exists():
+            raise FileNotFoundError(
+                "JLinkDevices.xml file was specified, but cannot be found "
+                f"at: {j_link_devices}")
 
     if validity < 1:
-        raise Exception('Valid period must be greater than or equal to one day!')
+        raise ValueError(
+            'Valid period must be greater than or equal to one day!')
 
-    if not os.path.exists(issuer_cert):
-        raise FileNotFoundError(f"Issuer (CA) certificate cannot be found at: {issuer_cert}")
-    if not issuer_cert.lower().endswith('.pem'):
-        raise FileNotFoundError("Issuer (CA) certificate must be in PEM format.")
-
-    if not os.path.exists(issuer_key):
-        raise FileNotFoundError(f"Issuer (CA) private key cannot be found at: {issuer_key}")
-    if not issuer_key.lower().endswith('.pem'):
-        raise FileNotFoundError("Issuer (CA) private key must be in PEM format.")
-
-    if os.path.samefile(issuer_cert, DEFAULT_ISSUER_CERT) or os.path.samefile(issuer_key, DEFAULT_ISSUER_KEY):
-        print("Default certificate authority is used as the issuer. This is only meant to be used for demo purposes. " \
-              "In production, make sure to create and provide your own certificate authority!")
-
-    with open(issuer_cert, 'rb') as f:
-        issuer_cert = x509.load_pem_x509_certificate(f.read())
-    with open(issuer_key, 'rb') as f:
-        issuer_key = serialization.load_pem_private_key(f.read(), password=None)
-
-    # Check device key attributes. Current implementation only supports the SECP256R1 curve.
-    if (key_att.key_type != (PSA_KEY_TYPE_ECC_KEY_PAIR_BASE | PSA_ECC_FAMILY_SECP_R1)) \
-        or (key_att.bits != PSA_KEY_BITS):
-        raise NotImplementedError("Device key EC curve was changed which is not supported. " \
+    # Current implementation only supports the SECP256R1 curve.
+    secp256r1_type = PSA_KEY_TYPE_ECC_KEY_PAIR_BASE | PSA_ECC_FAMILY_SECP_R1
+    if (key_att.key_type != secp256r1_type) or (key_att.bits != PSA_KEY_BITS):
+        raise NotImplementedError(
+            "Device key EC curve was changed which is not supported. "
             "Please update the implementation.")
 
-    # Connect to the device
-    print("Connecting...")
-    rtt = RTT(device_opn, serial, ip, xml_path=j_link_devices)
-    rtt.connect()
-    print(f"Connected to JLink chip: {rtt.chip_name}\tserial: {rtt.jlink.serial_number}")
+    # Get issuer certificate authority.
+    if ca_dir == DEMO_CA_DIR:
+        print("Default certificate authority is used as the issuer. This is "
+              "only meant to be used for demo purposes. In production, make "
+              "sure to create and provide your own certificate authority!")
+    ca = CertificateAuthority.from_level(ca_level, ca_dir)
+
+    # Connect to the device.
+    if is_xg22_family:
+        conn = SerialConnection(serial_no=serial,
+                                port=port,
+                                hostname=ip,
+                                baudrate=baudrate)
+    else:
+        conn = RttConnection(chip_name=device_opn,
+                             serial_no=serial,
+                             hostname=ip,
+                             xml_path=j_link_devices)
+    conn.connect()
 
     try:
-        print(f"Running provisioning application.{os.linesep}")
-        with open(app, 'rb') as file:
-            rtt.run_application(ram_addr, file.read())
-        rtt.rtt_start()
+        if is_xg22_family:
+            print("The provisioning application is expected to be flashed "
+                  "and running on the device.\n")
+        else:
+            with open(app, 'rb') as file:
+                print("Loading and running provisioning application...\n")
+                conn.run_application(ram_addr, file.read())
+        conn.start()
 
-        # Generate key pair. Export the raw uncompressed EC point of the public key.
+        # Generate key pair (raw uncompressed EC point of the public key).
         print("Generating device key...")
-        status, device_key = psa_key_gen(rtt, key_att)
-        assert status == 0, f"PSA key generation failure: {status:#06x}"
-        device_key_public = ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP256R1(), device_key)
-        print(f"Device public key received.{os.linesep}")
+        status, device_key = psa_key_gen(conn, key_att)
+        if status != 0:
+            raise RuntimeError(
+                f"PSA key generation failure: {status:#06x}")
+        device_key_public = ec.EllipticCurvePublicKey.from_encoded_point(
+            ec.SECP256R1(), device_key)
+        print("Device public key received.\n")
 
         # Generate and get static authentication data.
         print("Generating static authentication data...")
-        status, static_auth_data = psa_key_gen(rtt, auth_data_att)
-        assert status == 0, f"PSA key generation failure: {status:#06x}"
-        print(f"Static authentication data received.{os.linesep}") # Ready for further processing.
+        status, static_auth_data = psa_key_gen(conn, auth_data_att)
+        if status != 0:
+            raise RuntimeError(
+                f"PSA key generation failure: {status:#06x}")
+        print("Static authentication data received.")
+        # static_auth_data is ready for further processing.
 
         # Generate and get common name (UUID).
         print("Generating common name (UUID)...")
-        status, common_name = common_name_gen(rtt)
-        assert status == 0, f"Common name generation failure: {status:#06x}"
-        common_name = common_name.decode('ascii').rstrip('\x00')
-        print(f"Common name (UUID) received: {common_name}{os.linesep}")
+        status, subj_common_name = common_name_gen(conn)
+        if status != 0:
+            raise RuntimeError(
+                f"Common name generation failure: {status:#06x}")
+        subj_common_name = subj_common_name.decode('ascii').rstrip('\x00')
+        print(f"Common name (UUID) received: {subj_common_name}\n")
 
-        # Create certificate. Configure fields.
+        # Pack certificate subjects.
+        name_oid = x509.oid.NameOID
+        subjects = x509.Name([
+            x509.NameAttribute(name_oid.COMMON_NAME, subj_common_name),
+            x509.NameAttribute(name_oid.COUNTRY_NAME, subj_country),
+            x509.NameAttribute(name_oid.STATE_OR_PROVINCE_NAME, subj_state),
+            x509.NameAttribute(name_oid.LOCALITY_NAME, subj_locality),
+            x509.NameAttribute(name_oid.ORGANIZATION_NAME, subj_organization),
+            x509.NameAttribute(
+                name_oid.ORGANIZATIONAL_UNIT_NAME, subj_organizational_unit),
+            x509.NameAttribute(name_oid.EMAIL_ADDRESS, subj_email_address),
+        ])
         print("Creating device certificate...")
-        certificate = _create_certificate(device_key_public,
-                                          common_name,
-                                          validity,
-                                          policy_oid,
-                                          country,
-                                          state,
-                                          locality,
-                                          organization,
-                                          organizational_unit,
-                                          email_address,
-                                          issuer_cert,
-                                          issuer_key)
-        certificate = certificate.public_bytes(serialization.Encoding.DER) # Export in binary (DER) format
-        print(f"Device certificate was created with success ({len(certificate)}[B]).{os.linesep}")
+        certificate = _create_certificate(
+            ca,
+            device_key_public,
+            subjects,
+            validity,
+            policy_oid)
+        certificate = certificate.public_bytes(serialization.Encoding.DER)
+        print("Device certificate was created with success "
+              f"({len(certificate)}[B]).\n")
 
         # Inject device certificate.
         print("Injecting device certificate...")
-        status = nvm_set(rtt, CBAP_NVM_DEVICE_CERT, certificate)
-        assert status == 0, f"Set NVM failure: {status:#06x}"
+        status = nvm_set(conn, CBAP_NVM_DEVICE_CERT, certificate)
+        if status != 0:
+            raise RuntimeError(f"Set NVM failure: {status:#06x}")
 
-        # Inject root (issuer) certificate.
-        issuer_cert = issuer_cert.public_bytes(serialization.Encoding.DER) # Export in binary (DER) format
+        # Inject issuer certificate.
+        issuer_cert = ca.get_certificate().public_bytes(
+            serialization.Encoding.DER)
         print("Injecting root (issuer) certificate...")
-        status = nvm_set(rtt, CBAP_NVM_ROOT_CERT, issuer_cert)
-        assert status == 0, f"Set NVM failure: {status:#06x}"
+        status = nvm_set(conn, CBAP_NVM_ROOT_CERT, issuer_cert)
+        if status != 0:
+            raise RuntimeError(f"Set NVM failure: {status:#06x}")
 
     finally:
         print("Cleaning up.")
-        rtt.rtt_stop()
-        rtt.reset()
-        rtt.close()
+        conn.stop()
+        conn.close()
 
-def _create_certificate(public_key,
-                        common_name,
-                        validity,
-                        policy_oid,
-                        country,
-                        state,
-                        locality,
-                        organization,
-                        organizational_unit,
-                        email_address,
-                        issuer_cert,
-                        issuer_key):
-    # Pack certificate subjects
-    subjects = x509.Name([
-        x509.NameAttribute(x509.oid.NameOID.COMMON_NAME, common_name),
-        x509.NameAttribute(x509.oid.NameOID.COUNTRY_NAME, country),
-        x509.NameAttribute(x509.oid.NameOID.STATE_OR_PROVINCE_NAME, state),
-        x509.NameAttribute(x509.oid.NameOID.LOCALITY_NAME, locality),
-        x509.NameAttribute(x509.oid.NameOID.ORGANIZATION_NAME, organization),
-        x509.NameAttribute(x509.oid.NameOID.ORGANIZATIONAL_UNIT_NAME, organizational_unit),
-        x509.NameAttribute(x509.oid.NameOID.EMAIL_ADDRESS, email_address),
-    ])
 
-    # Create certificate
+def _create_certificate(issuer: CertificateAuthority,
+                        public_key: ec.EllipticCurvePublicKey,
+                        subject: x509.Name,
+                        validity: int,
+                        policy_oid: Optional[str] = None) -> x509.Certificate:
+    '''Build and sign a device certificate with the issuer CA.
+
+    :param issuer: Certificate Authority that signs the device certificate.
+    :param public_key: Device public key (NIST P-256).
+    :param subject: X.509 subject name (including device common name).
+    :param validity: Validity period in days.
+    :param policy_oid: Optional certificate policy OID.
+    :returns: The signed device certificate.
+    :raises Exception: If the issuer is invalid.
+    '''
+    if not issuer.is_valid:
+        raise Exception('Issuer Certificate Authority is invalid.')
+
+    # Build certificate.
     now = datetime.datetime.now(datetime.timezone.utc)
-    cert = (x509.CertificateBuilder()
+    cert = (
+        x509.CertificateBuilder()
         .public_key(public_key)
-        .subject_name(subjects)
-        .issuer_name(issuer_cert.subject)
-        .serial_number(x509.random_serial_number()) # TODO: Generate a unique serial number which is not present in the database.
+        .subject_name(subject)
+        .issuer_name(issuer.get_certificate().subject)
+        .serial_number(issuer.generate_serial_number())
         .not_valid_before(now)
-        .not_valid_after(now + datetime.timedelta(days=validity)))
+        .not_valid_after(now + datetime.timedelta(days=validity))
+    )
 
-    # Add extensions
-    cert = cert.add_extension(x509.SubjectKeyIdentifier.from_public_key(public_key), critical=False)
-    cert = cert.add_extension(x509.BasicConstraints(ca=False, path_length=None), critical=True)
-
-    # Allow the certificate's public key to be used for key agreement (needed for secure pairing).
-    cert = cert.add_extension(x509.KeyUsage(digital_signature=False,
-                                            content_commitment=False,
-                                            key_encipherment=False,
-                                            data_encipherment=False,
-                                            key_agreement=True,
-                                            key_cert_sign=False,
-                                            crl_sign=False,
-                                            encipher_only=False,
-                                            decipher_only=False),
-                              critical=True)
-
-    # Add certificate policy if present
+    # Add extensions.
+    cert = cert.add_extension(
+        x509.SubjectKeyIdentifier.from_public_key(public_key),
+        critical=False)
+    cert = cert.add_extension(
+        x509.BasicConstraints(ca=False, path_length=None),
+        critical=True)
     if policy_oid is not None:
-        obj_id = x509.ObjectIdentifier(policy_oid)
-        policy_info = [x509.PolicyInformation(obj_id, [])]
-        cert = cert.add_extension(x509.CertificatePolicies(policies=policy_info), critical=True)
+        policy_info = [
+            x509.PolicyInformation(x509.ObjectIdentifier(policy_oid), [])
+        ]
+        cert = cert.add_extension(
+            x509.CertificatePolicies(policies=policy_info),
+            critical=True)
+    cert = cert.add_extension(
+        x509.KeyUsage(digital_signature=False,
+                      content_commitment=False,
+                      key_encipherment=False,
+                      data_encipherment=False,
+                      key_agreement=True,  # Required for secure pairing
+                      key_cert_sign=False,
+                      crl_sign=False,
+                      encipher_only=False,
+                      decipher_only=False),
+        critical=True)
 
-    # Verify issuer
-    # Check the validity of the higher authority.
-    # Note: if there is a revocation list, it should be also checked if the certificate is revoked or not.
-    if now < issuer_cert.not_valid_before_utc or issuer_cert.not_valid_after_utc < now:
-        raise Exception('The validity period of the issuer (CA) has expired.')
+    # Sign certificate.
+    return issuer.sign(cert)
 
-    # Sign certificate
-    cert = cert.sign(issuer_key, SIGNATURE_HASH_ALGORITHM)
 
-    # Verify signature.
-    issuer_cert.public_key().verify(cert.signature,
-                                    cert.tbs_certificate_bytes,
-                                    ec.ECDSA(SIGNATURE_HASH_ALGORITHM))
+def _get_default_provisioning_app(root: Path) -> Path:
+    '''Locate the default provisioning application binary under ``root``.
 
-    # Check if the public key can be used for key agreement (needed for secure pairing).
-    if cert.extensions.get_extension_for_class(x509.KeyUsage).value.key_agreement != True:
-        raise Exception("KeyUsage key_agreement should be set to True!")
+    Recursively searches for ``bt_soc_cbap_ddp.bin`` (case-insensitive).
 
-    # TODO
-    #add_certificate_to_database(cert, path_database)
-
-    return cert
-
-def _get_default_provisioning_app(root):
-    candidates = []
-    for dirpath, _, filenames in os.walk(root):
-        for fname in filenames:
-            if fname.lower() == 'bt_soc_cbap_ddp.bin':
-                candidates.append(os.path.join(dirpath, fname))
+    :param root: Directory to search.
+    :returns: Path to the unique matching binary.
+    :raises FileNotFoundError: If no binary is found.
+    :raises FileExistsError: If more than one matching binary is found.
+    '''
+    candidates = [
+        path for path in root.rglob('*')
+        if path.is_file() and path.name.lower() == 'bt_soc_cbap_ddp.bin'
+    ]
 
     if not candidates:
-        raise FileNotFoundError("No provisioning application found. (Was the project built with success?)")
-    elif len(candidates) > 1:
+        raise FileNotFoundError(
+            "No provisioning application found. "
+            "(Was the project built with success?)")
+    if len(candidates) > 1:
         print("More binaries were found:")
-        for c in candidates:
-            print(c)
+        for candidate in candidates:
+            print(candidate)
         print("Please specify the provisioning application.")
         raise FileExistsError()
 
     return candidates[0]
 
-class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter, argparse.RawDescriptionHelpFormatter):
-    pass
+
+def load_args():
+    '''Parse command line arguments.
+
+    :returns: The parsed arguments namespace.
+    '''
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        epilog=EPILOG,
+        formatter_class=CustomFormatter)
+
+    # Provisioning application
+    parser.add_argument(
+        '-a', '--app',
+        type=Path,
+        help='Path to the provisioning application binary, in ".bin" format.')
+
+    # Issuer CA parameters
+    parser.add_argument(
+        '--ca_dir',
+        default=DEMO_CA_DIR,
+        type=Path,
+        help='Directory containing issuer CA sub-directories. See '
+             'certificate_manager.py for CA creation. The bundled demo CA is '
+             'for evaluation only. (default: %(default)s)')
+    parser.add_argument(
+        '--ca_level',
+        default=DEMO_CA_LEVEL,
+        type=int,
+        choices=[level.value for level in CertificateAuthority.Level],
+        help='Issuer CA level under --ca_dir (0=root, 1=factory, 2=batch). '
+             '(default: %(default)s)')
+
+    # Connection parameters
+    group = parser.add_mutually_exclusive_group(required=False)
+    group.add_argument(
+        '-s', '--serial',
+        type=int,
+        help='J-Link serial number, used to select the matching VCOM port.')
+    group.add_argument('-i', '--ip', help='IP address.')
+    group.add_argument(
+        '-p', '--port',
+        help='Serial (VCOM) port, e.g. COM13 or /dev/ttyACM0. Autodetected '
+             'if omitted.')
+    parser.add_argument(
+        '-b', '--baudrate',
+        default=DEFAULT_BAUDRATE,
+        type=int,
+        help='Serial (VCOM) baud rate. Ignored when RTT connection is used.')
+    parser.add_argument(
+        '-d', '--device',
+        default=DEVICE_OPN,
+        help='Override device OPN.')
+    parser.add_argument(
+        '-r', '--ram',
+        default=RAM_ADDR,
+        type=int,
+        help='Override RAM start address.')
+    parser.add_argument(
+        '--j_link_devices',
+        type=Path,
+        help='JLinkDevices.xml file to extend (or overwrite) the J-Link '
+             'devices database with new devices.')
+
+    # Add common certificate-related arguments, but exclude the common name.
+    # Instead, generate it on the device based on its UUID.
+    add_certificate_args(parser, common_name=False)
+    return parser.parse_args()
+
 
 if __name__ == '__main__':
-    # Parse command line arguments.
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=CustomFormatter)
-    parser.epilog = (
-        f'examples:{os.linesep}'
-        f'\t%(prog)s                                           Try to autodetect device and provisioning app.{os.linesep}'
-        f'\t%(prog)s --issuer_cert <PATH> --issuer_key <PATH>  Specify custom certificate authority as the issuer (recommended).{os.linesep}'
-        f'\t%(prog)s --app build/debug/bt_soc_cbap_ddp.bin     Specify provisioning app binary.{os.linesep}'
-        f'\t%(prog)s --serial 440192051                        Connect to device with the given J-Link serial.{os.linesep}'
-        f'\t%(prog)s --ip 192.168.0.143                        Connect to device with the given IP address.{os.linesep}'
-        f'\t%(prog)s --device EFR32MG21A010F1024IM32           Override device OPN.{os.linesep}'
-        f'\t%(prog)s --ram 536870912                           Override RAM starting address.{os.linesep}'
-        f'\t%(prog)s --j_link_devices jlink/JLinkDevices.xml   Extend/overwrite J-Link devices database.{os.linesep}'
-    )
-
-    parser.add_argument('-a', '--app', help='Path to the provisioning application binary, in ".bin" format.')
-
-    group = parser.add_mutually_exclusive_group(required=False)
-    group.add_argument('-s', '--serial', help='J-Link serial number.', type=int)
-    group.add_argument('-i', '--ip', help='IP Address.')
-
-    parser.add_argument('-d', '--device', help='Override device OPN.', default=DEVICE_OPN)
-    parser.add_argument('-r', '--ram', help='Override RAM start address.', default=RAM_ADDR, type=int)
-    parser.add_argument('--j_link_devices', help='JLinkDevices.xml file to extend (or overwrite) J-Link devices database with new devices.')
-
-    parser.add_argument('--issuer_cert',
-                        default=DEFAULT_ISSUER_CERT,
-                        help='Specifies the location for issuer (CA) certificate in PEM format. (default: %(default)s)')
-    parser.add_argument('--issuer_key',
-                        default=DEFAULT_ISSUER_KEY,
-                        help='Specifies the location for issuer (CA) EC private key in PEM format. (default: %(default)s)')
-
-    parser.add_argument('--validity',
-                        default=DEFAULT_VALIDITY,
-                        type=int,
-                        help='The valid period of the certificate in days starting '\
-                             'from the moment of generation.')
-    parser.add_argument('--policy_oid',
-                        default=DEFAULT_POLICY_OID,
-                        help='The optional Certificate Policy Information extension. '\
-                             'Only a policy OID is supported.')
-
-    parser.add_argument('--country',
-                        default=DEFAULT_COUNTRY,
-                        type=str.upper,
-                        help='The country subject of the x509 certificate.')
-    parser.add_argument('--state',
-                        default=DEFAULT_STATE,
-                        help='The state subject of the x509 certificate.')
-    parser.add_argument('--locality',
-                        default=DEFAULT_LOCALITY,
-                        help='The locality subject of the x509 certificate.')
-    parser.add_argument('--organization',
-                        default=DEFAULT_ORGANIZATION,
-                        help='The organization subject of the x509 certificate.')
-    parser.add_argument('--organizational_unit',
-                        default=DEFAULT_ORGANIZATIONAL_UNIT,
-                        help='The organizational unit subject of the x509 certificate.')
-    parser.add_argument('--email_address',
-                        default=DEFAULT_EMAIL_ADDRESS,
-                        help='The e-mail address unit subject of the x509 certificate.')
-
-    args = parser.parse_args()
-
-    if bool(args.issuer_cert) != bool(args.issuer_key):
-        parser.error("--issuer_cert and --issuer_key must be provided together.")
+    args = load_args()
 
     main(args.app,
+         args.ca_dir,
+         args.ca_level,
          args.serial,
          args.ip,
+         args.port,
+         args.baudrate,
          args.device,
          args.ram,
          args.j_link_devices,
-         args.issuer_cert,
-         args.issuer_key,
          args.validity,
          args.policy_oid,
          args.country,

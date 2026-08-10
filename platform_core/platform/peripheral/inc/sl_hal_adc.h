@@ -254,22 +254,26 @@ SL_ENUM(sl_hal_adc_data_valid_t) {
   SL_HAL_ADC_DATA_VALID_16  = _ADC_SCANFIFOCFG_DVL_VALID16    ///< 16 valid entries to set SCANFIFODVL interrupt.
 };
 
-/// Port (A, B, C, D) or special signal assigned to the negative input of the ADC.
+/// Port (A, B, C if present, D) or special signal assigned to the negative input of the ADC.
 SL_ENUM(sl_hal_adc_port_negative_t) {
   SL_HAL_ADC_PORT_NEG_GND     = _ADC_SCAN_PORTNEG_GND,       ///< Ground.
   SL_HAL_ADC_PORT_NEG_PORTA   = _ADC_SCAN_PORTNEG_PORTA,     ///< Port A.
   SL_HAL_ADC_PORT_NEG_PORTB   = _ADC_SCAN_PORTNEG_PORTB,     ///< Port B.
+#if defined(_ADC_SCAN_PORTNEG_PORTC)
   SL_HAL_ADC_PORT_NEG_PORTC   = _ADC_SCAN_PORTNEG_PORTC,     ///< Port C.
+#endif
   SL_HAL_ADC_PORT_NEG_PORTD   = _ADC_SCAN_PORTNEG_PORTD      ///< Port D.
 };
 
-/// Port (A, B, C, D) or special signal assigned to the positive input of the ADC.
+/// Port (A, B, C if present, D) or special signal assigned to the positive input of the ADC.
 SL_ENUM(sl_hal_adc_port_positive_t) {
   SL_HAL_ADC_PORT_POS_GND     = _ADC_SCAN_PORTPOS_GND,       ///< Ground.
   SL_HAL_ADC_PORT_POS_SUPPLY  = _ADC_SCAN_PORTPOS_SUPPLY,    ///< Supply.
   SL_HAL_ADC_PORT_POS_PORTA   = _ADC_SCAN_PORTPOS_PORTA,     ///< Port A.
   SL_HAL_ADC_PORT_POS_PORTB   = _ADC_SCAN_PORTPOS_PORTB,     ///< Port B.
+#if defined(_ADC_SCAN_PORTPOS_PORTC)
   SL_HAL_ADC_PORT_POS_PORTC   = _ADC_SCAN_PORTPOS_PORTC,     ///< Port C.
+#endif
   SL_HAL_ADC_PORT_POS_PORTD   = _ADC_SCAN_PORTPOS_PORTD,     ///< Port D.
 };
 

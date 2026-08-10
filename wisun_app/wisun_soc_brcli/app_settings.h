@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include "sl_status.h"
 #include "sl_wisun_cli_settings.h"
+#include "sl_component_catalog.h"
 
 #define APP_PING_PATTERN_SIZE  16
 #define APP_IPV6_PREFIX_SIZE  43

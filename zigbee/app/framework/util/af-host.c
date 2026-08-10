@@ -62,6 +62,8 @@ static bool cacheConfigIdValuesAllowed = false;
 static bool ncpNeedsResetAndInit = false;
 static uint8_t ezspSequenceNumber = 0;
 
+static bool messageTagsInUse[SL_ZIGBEE_AF_MESSAGE_TAG_MASK + 1u];
+
 typedef struct {
   sl_802154_short_addr_t nodeId;
   sl_802154_pan_id_t  panId;
@@ -74,7 +76,7 @@ typedef struct {
 void sli_zigbee_af_reset_and_init_ncp(void);
 static uint8_t getNcpConfigItem(sl_zigbee_ezsp_config_id_t id);
 static void createEndpoint(uint8_t endpointIndex);
-static uint8_t ezspNextSequence(void);
+bool sli_zigbee_af_is_message_tag_in_use(uint8_t tag);
 
 //------------------------------------------------------------------------------
 // Internal callbacks
@@ -516,6 +518,7 @@ void sli_zigbee_af_reset_and_init_ncp(void)
 
   // Initialize messageSentCallbacks table
   sli_zigbee_af_initialize_message_sent_callback_array();
+  sli_zigbee_af_reset_message_tags_in_use();
 
 #ifdef SL_CATALOG_ZIGBEE_DHC_PRESENT
   {
@@ -667,7 +670,11 @@ sl_status_t sli_zigbee_af_send(sl_zigbee_outgoing_message_type_t type,
                                uint8_t sequence)
 {
   sl_status_t status = SL_STATUS_OK;
-  *messageTag = ezspNextSequence();
+  *messageTag = sli_zigbee_af_allocate_message_tag();
+  // Tag 0 is reserved for ZDO; allocate returns 0 when the AF tag pool is exhausted.
+  if (*messageTag == 0) {
+    return SL_STATUS_FULL;
+  }
   uint8_t nwkRadius = ZA_MAX_HOPS;
   sl_802154_short_addr_t nwkAlias = SL_ZIGBEE_NULL_NODE_ID;
 
@@ -825,9 +832,44 @@ static void createEndpoint(uint8_t endpointIndex)
   (void) sl_zigbee_af_pop_network_index();
 }
 
-static uint8_t ezspNextSequence(void)
+bool sli_zigbee_af_is_message_tag_in_use(uint8_t tag)
 {
-  return ((++ezspSequenceNumber) & SL_ZIGBEE_AF_MESSAGE_TAG_MASK);
+  if (tag > SL_ZIGBEE_AF_MESSAGE_TAG_MASK) {
+    return true;
+  }
+  return messageTagsInUse[tag];
+}
+
+void sli_zigbee_af_mark_message_tag_in_use(uint8_t tag)
+{
+  if (tag > SL_ZIGBEE_AF_MESSAGE_TAG_MASK) {
+    return;
+  }
+  messageTagsInUse[tag] = true;
+}
+
+void sli_zigbee_af_clear_message_tag_in_use(uint8_t tag)
+{
+  if (tag > SL_ZIGBEE_AF_MESSAGE_TAG_MASK) {
+    return;
+  }
+  messageTagsInUse[tag] = false;
+}
+
+void sli_zigbee_af_reset_message_tags_in_use(void)
+{
+  memset(messageTagsInUse, 0, sizeof(messageTagsInUse));
+}
+
+uint8_t sli_zigbee_af_allocate_message_tag(void)
+{
+  for (uint8_t attempt = 0; attempt <= SL_ZIGBEE_AF_MESSAGE_TAG_MASK; attempt++) {
+    uint8_t tag = (uint8_t)((++ezspSequenceNumber) & SL_ZIGBEE_AF_MESSAGE_TAG_MASK);
+    if (tag != 0 && !sli_zigbee_af_is_message_tag_in_use(tag)) {
+      return tag;
+    }
+  }
+  return 0;
 }
 
 //------------------------------------------------------------------------------

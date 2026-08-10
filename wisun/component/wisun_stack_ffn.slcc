@@ -13,6 +13,7 @@ requires:
 - name: "a_wisun_stack"
 - name: "wisun_dc_client_implementation"
 - name: "wisun_lxpm_implementation"
+- name: "wisun_stack_dc_server"
 
 recommends:
 - id: wisun_stack

@@ -1419,7 +1419,7 @@ typedef struct {
   bool privilegedRFSENSE      : 1;  /**< Privileged access enabler for RFSENSE      */
   bool privilegedETAMPDET     : 1;  /**< Privileged access enabler for ETAMPDET     */
   bool privilegedDMEM         : 1;  /**< Privileged access enabler for DMEM         */
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
   bool privilegedEUSART1      : 1;  /**< Privileged access enabler for EUSART1      */
   bool privilegedRADIOAES     : 1;  /**< Privileged access enabler for RADIOAES     */
   bool privilegedSMU          : 1;  /**< Privileged access enabler for SMU          */

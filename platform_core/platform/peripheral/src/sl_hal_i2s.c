@@ -1245,7 +1245,7 @@ static sl_status_t i2s_configure_serial_clock_legacy(I2S_TypeDef_t *i2s, uint32_
                                        | _PERPLL_DCOCFG_PERPLLOUTDIV2POW_MASK))
                    | dco_cfg;
 
-  perpll->CTRL_SET = PERPLL_CTRL_ENPLLCLKOUT0 | PERPLL_CTRL_ENPLLCLKOUT1;
+  perpll->CTRL_SET = PERPLL_CTRL_ENPLLCLKOUT0;
   perpll->CTRL_SET = PERPLL_CTRL_FORCEEN;
   timeout = I2S_PERPLL1_LOCK_POLL_MAX_ITERATIONS;
   while (((perpll->STATUS & I2S_PERPLL1_LOCK_STATUS_MASK) != I2S_PERPLL1_LOCK_STATUS_MASK) && (timeout > 0U)) {

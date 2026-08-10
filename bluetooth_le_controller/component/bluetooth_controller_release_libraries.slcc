@@ -11,29 +11,6 @@ quality: production
 provides:
 - name: bluetooth_controller_libraries
 - name: bluetooth_controller_release_libraries
-requires:
-- name: bluetooth_common
-- name: bluetooth_controller_crypto
-- name: device_supports_bluetooth
-- name: emlib_system
-  condition:
-  - device_series_2
-- name: hal_system
-  condition:
-  - device_series_3
-- name: rail_lib
-- name: sl_rail_util_compatible_pa
-  condition:
-  - device_series_2
-- name: sl_rail_util_compatible_pa
-  condition:
-  - device_generic_family_sixx301
-- name: sl_rail_util_built_in_phys
-  condition:
-  - device_series_2
-- name: sl_rail_util_built_in_phys
-  condition:
-  - device_generic_family_sixx301
 
 library:
 - path: build/gcc/x301/release/liblinklayer.a

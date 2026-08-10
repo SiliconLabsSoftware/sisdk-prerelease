@@ -26,6 +26,8 @@ provides:
   condition: [bootloader_core_nonsecure]
 requires:
 - name: bootloader_serial_transport
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/gecko-bootloader-api/uart
 metadata:
   sbom:
     license: MSLA

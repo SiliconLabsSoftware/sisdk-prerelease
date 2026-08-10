@@ -34,7 +34,7 @@
 #include "sl_uart.h"
 
 #include "sli_uart.h"
-#include "sli_uart_async.h"
+#include "sli_uart_async_types.h"
 #include "sli_uart_transfer_pool.h"
 
 /*******************************************************************************

@@ -32,6 +32,9 @@
 #include "app_settings.h"
 #include "sl_wisun_cli_core.h"
 #include "sl_wisun_cli_util.h"
+#if defined(SL_CATALOG_WISUN_DC_SERVER_CLI_PRESENT)
+#include "sl_wisun_dc_server_cli.h"
+#endif
 #include "sl_wisun_version.h"
 #include "sl_wisun_keychain.h"
 #include "sl_rail_features.h"
@@ -632,6 +635,9 @@ static void app_handle_dhcp_vendor_data_ind(sl_wisun_evt_t *evt)
 static void app_handle_br_stopped_ind(sl_wisun_evt_t *evt)
 {
   if (evt->evt.br_stopped.status == SL_STATUS_OK) {
+#if defined(SL_CATALOG_WISUN_DC_SERVER_CLI_PRESENT)
+    sl_wisun_dc_server_cli_handle_dc_server_stopped();
+#endif
     printf("[Border Router stopped]\r\n");
   } else {
     printf("[Failed to stop Border Router]\r\n");
@@ -1901,6 +1907,17 @@ void sl_wisun_on_event(sl_wisun_evt_t *evt)
     case SL_WISUN_BR_MSG_ROUTING_TABLE_UPDATE_IND_ID:
       app_handle_br_routing_table_update_ind(evt);
       break;
+#if defined(SL_CATALOG_WISUN_DC_SERVER_CLI_PRESENT)
+    case SL_WISUN_MSG_DIRECT_CONNECT_LINK_AVAILABLE_IND_ID:
+      sl_wisun_dc_server_cli_handle_link_available(evt);
+      break;
+    case SL_WISUN_MSG_DIRECT_CONNECT_LINK_STATUS_IND_ID:
+      sl_wisun_dc_server_cli_handle_link_status(evt);
+      break;
+    case SL_WISUN_MSG_DIRECT_CONNECT_ID_SOLICIT_IND_ID:
+      sl_wisun_dc_server_cli_handle_id_solicit(evt);
+      break;
+#endif
     case SL_WISUN_MSG_ERROR_IND_ID:
       app_handle_error_ind(evt);
       break;

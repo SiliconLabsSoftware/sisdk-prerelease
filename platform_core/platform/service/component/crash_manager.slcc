@@ -1,0 +1,56 @@
+id: crash_manager
+label: Crash Manager
+package: platform_core
+description: >
+  Captures crashes (faults, asserts, watchdog), runs callbacks, saves logs.
+  Requires exactly one backend: crash_manager_backend_ctm (CTM / NVM3) or crash_manager_backend_ram (mutually exclusive).
+  NVM persistence uses Common Token Manager dynamic tokens when Crash Manager Backend CTM is installed.
+  Pulls log_none only (no UART/SystemView). Add log and a log backend (e.g. iostream,
+  systemview) if crash-time logging is desired.
+  Optional debug dump (registers + stack) can be enabled in config when a log backend is present.
+  When Crash Manager Backend CTM is installed, the crash log uses a user-region NVM key.
+category: Services|Crash Manager
+quality: evaluation
+metadata:
+  sbom:
+    license: Zlib
+provides:
+- name: crash_manager
+requires:
+- name: sl_common
+- name: crash_manager_backend
+- name: log_none
+- name: component_catalog
+- name: cmsis_core
+- name: device
+- name: emlib_wdog
+  condition: [device_has_wdog]
+recommends:
+- name: log
+  vendor: silabs
+- name: log_backend_iostream
+  vendor: silabs
+- name: log_backend_systemview
+  vendor: silabs
+root_path: platform_core/platform/service/sl_crash_manager
+config_file:
+- path: config/sl_crash_manager_config.h
+include:
+- path: inc
+  file_list:
+  - path: sl_crash_manager.h
+  - path: sli_crash_manager.h
+source:
+- path: src/sl_crash_manager.c
+- path: src/sl_crash_manager_hooks.c
+template_contribution:
+- name: event_handler
+  value:
+    event: service_init
+    include: sl_crash_manager.h
+    handler: sl_crash_manager_init
+  priority: 10000
+- name: component_catalog
+  value: crash_manager_component
+- name: crash_manager_enable
+  value: 1

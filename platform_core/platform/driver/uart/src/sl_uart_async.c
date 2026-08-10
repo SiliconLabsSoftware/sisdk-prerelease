@@ -45,11 +45,76 @@
 
 #include "sli_uart.h"
 #include "sli_uart_async.h"
+#include "sli_uart_async_types.h"
 #include "sli_uart_transfer_pool.h"
 
 /*******************************************************************************
  ***************************   LOCAL FUNCTIONS   *******************************
  ******************************************************************************/
+
+/***************************************************************************//**
+ * Enable TX.
+ *
+ * @return Whether the UART changed state.
+ ******************************************************************************/
+static inline bool uart_async_enable_tx(sl_uart_handle_t *uart_handle)
+{
+  if (uart_handle->async_tx_state == SL_UART_HANDLE_STATE_ACTIVE) {
+    return false;
+  }
+
+  uart_handle->async_tx_state = SL_UART_HANDLE_STATE_ACTIVE;
+
+  return true;
+}
+
+/***************************************************************************//**
+ * Disable TX.
+ *
+ * @return Whether the UART changed state.
+ ******************************************************************************/
+static inline bool uart_async_disable_tx(sl_uart_handle_t *uart_handle)
+{
+  if (uart_handle->async_tx_state == SL_UART_HANDLE_STATE_IDLE) {
+    return false;
+  }
+
+  uart_handle->async_tx_state = SL_UART_HANDLE_STATE_IDLE;
+
+  return true;
+}
+
+/***************************************************************************//**
+ * Enable RX.
+ *
+ * @return Whether the UART changed state.
+ ******************************************************************************/
+static inline bool uart_async_enable_rx(sl_uart_handle_t *uart_handle)
+{
+  if (uart_handle->async_rx_state == SL_UART_HANDLE_STATE_ACTIVE) {
+    return false;
+  }
+
+  uart_handle->async_rx_state = SL_UART_HANDLE_STATE_ACTIVE;
+
+  return true;
+}
+
+/***************************************************************************//**
+ * Disable RX.
+ *
+ * @return Whether the UART changed state.
+ ******************************************************************************/
+static inline bool uart_async_disable_rx(sl_uart_handle_t *uart_handle)
+{
+  if (uart_handle->async_rx_state == SL_UART_HANDLE_STATE_IDLE) {
+    return false;
+  }
+
+  uart_handle->async_rx_state = SL_UART_HANDLE_STATE_IDLE;
+
+  return true;
+}
 
 /***************************************************************************//**
  * Get a RX transfer.
@@ -388,8 +453,91 @@ static void rx_dma_channel_callback(sl_dma_channel_handle_t * handle,
   uart_async_release_rx_tfer(uart_handle, tfer);
 
   if (sl_slist_is_empty(*active_list_head)) {
-    uart_handle->rx_state = SL_UART_HANDLE_STATE_DISABLED;
+    (void)uart_async_disable_rx(uart_handle);
   }
+}
+
+/***************************************************************************//**
+ * Deinitialize the DMA channels for the given UART instance.
+ ******************************************************************************/
+static sl_status_t uart_async_deinit_dma(sl_uart_handle_t *uart_handle)
+{
+  // DMA deinit clears the channel number, save it so we can re-init the channel
+  // without having the store the channel number individually.
+  uint8_t tx_channel = uart_handle->async_tx_dma_channel.channel_number;
+  uint8_t rx_channel = uart_handle->async_rx_dma_channel.channel_number;
+
+  sl_status_t status = sl_dma_channel_deinit(&uart_handle->async_tx_dma_channel);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  uart_handle->async_tx_dma_channel.channel_number = tx_channel;
+
+  status = sl_dma_channel_deinit(&uart_handle->async_rx_dma_channel);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  uart_handle->async_rx_dma_channel.channel_number = rx_channel;
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Initialize the DMA channels for the given UART instance.
+ ******************************************************************************/
+static sl_status_t uart_async_init_hw(sl_uart_handle_t *uart_handle)
+{
+  uint8_t rx_channel = uart_handle->async_rx_dma_channel.channel_number;
+  uint8_t tx_channel = uart_handle->async_tx_dma_channel.channel_number;
+  sl_peripheral_t uart = uart_handle->uart;
+  sl_status_t status, _status;
+
+  status = sl_dma_channel_init(&uart_handle->async_rx_dma_channel,
+                               NULL,
+                               rx_channel,
+                               rx_dma_channel_callback,
+                               uart_handle);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  status = sl_dma_channel_init(&uart_handle->async_tx_dma_channel,
+                               NULL,
+                               tx_channel,
+                               tx_dma_channel_callback,
+                               uart_handle);
+  if (status != SL_STATUS_OK) {
+    goto deinit;
+  }
+
+  sl_dma_signal_t rx_signal = sl_device_peripheral_get_serial_dma_signal_rx_trigger(uart);
+  status = sl_dma_channel_set_peripheral_signal(&uart_handle->async_rx_dma_channel, rx_signal);
+  if (status != SL_STATUS_OK) {
+    goto deinit;
+  }
+
+  sl_dma_signal_t tx_signal = sl_device_peripheral_get_serial_dma_signal_tx_trigger(uart);
+  status = sl_dma_channel_set_peripheral_signal(&uart_handle->async_tx_dma_channel, tx_signal);
+  if (status != SL_STATUS_OK) {
+    goto deinit;
+  }
+
+  // Enable TXC callback, as it is used to notify users the transfer has completed.
+  // Clear any latent TXC interrupt that could lead to dereferencing stale lists.
+  uart_handle->ops->clear_irq(uart_handle->uart, uart_handle->ops->irq_tx_complete_flag);
+  sli_uart_enable_irq(uart_handle, uart_handle->ops->irq_tx_complete_flag);
+
+  return status;
+
+  deinit:
+  // uart_async_deinit_dma restores channel numbers after deinit zeroes the handles,
+  // so a failed resume (handle stays SUSPENDED) can still free the right channels.
+  _status = uart_async_deinit_dma(uart_handle);
+  EFM_ASSERT(_status == SL_STATUS_OK);
+
+  return status;
 }
 
 /*******************************************************************************
@@ -445,10 +593,13 @@ sl_status_t sl_uart_async_write(sl_uart_handle_t *uart_handle,
   sl_status_t status = SL_STATUS_OK;
 
   CORE_DECLARE_IRQ_STATE;
-  bool start_dma;
 
   if (size == 0) {
     return SL_STATUS_EMPTY;
+  }
+
+  if (SLI_UART_HANDLE_IS_SUSPENDED(uart_handle)) {
+    return SL_STATUS_INVALID_STATE;
   }
 
   EFM_ASSERT(data != NULL);
@@ -466,15 +617,12 @@ sl_status_t sl_uart_async_write(sl_uart_handle_t *uart_handle,
   tfer->base.data = (void*)data;
   tfer->base.size = size;
 
-  start_dma = sl_slist_is_empty(uart_handle->async_tx_transfer_submitted_list_head);
-
   sl_slist_push_back(&uart_handle->async_tx_transfer_submitted_list_head, &tfer->base.node);
-  uart_handle->tx_state = SL_UART_HANDLE_STATE_ENABLED;
 
   // In TX, we can only queue the following transfer once the previous once has been fully sent
   // over the bus, as indicated by the UART peripheral's TX complete interrupt. In other words,
   // there can only be on transfer in the active list at a time.
-  if (start_dma) {
+  if (uart_async_enable_tx(uart_handle)) {
     // Send the transfer's chunk until either all chunks are submitted, or we run out of descriptors.
     uart_async_submit_tx_chunk(uart_handle, tfer);
   } else {
@@ -498,13 +646,11 @@ sl_status_t sl_uart_async_abort_tx(sl_uart_handle_t *uart_handle)
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_ATOMIC();
 
-  if (uart_handle->tx_state == SL_UART_HANDLE_STATE_DISABLED) {
+  if (!uart_async_disable_tx(uart_handle)) {
     // Nothing to abort.
     CORE_EXIT_ATOMIC();
     return SL_STATUS_OK;
   }
-
-  uart_handle->tx_state = SL_UART_HANDLE_STATE_DISABLED;
 
   /**
    * The DMA channel driver does not provide users with the number of bytes in the transfer callback.
@@ -604,6 +750,17 @@ sl_status_t sl_uart_async_abort_tx(sl_uart_handle_t *uart_handle)
 }
 
 /***************************************************************************//**
+ * Retrieves TX status.
+ ******************************************************************************/
+bool sl_uart_async_is_tx_active(sl_uart_handle_t *uart_handle)
+{
+  SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
+  EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
+
+  return uart_handle->async_tx_state == SL_UART_HANDLE_STATE_ACTIVE;
+}
+
+/***************************************************************************//**
  * Start a RX DMA transfer on the specified UART handle.
  ******************************************************************************/
 sl_status_t sl_uart_async_read(sl_uart_handle_t *uart_handle,
@@ -613,8 +770,11 @@ sl_status_t sl_uart_async_read(sl_uart_handle_t *uart_handle,
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
   EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
 
+  if (SLI_UART_HANDLE_IS_SUSPENDED(uart_handle)) {
+    return SL_STATUS_INVALID_STATE;
+  }
+
   sl_status_t status = SL_STATUS_OK;
-  bool buf_needed;
 
   if (size == 0) {
     return SL_STATUS_EMPTY;
@@ -635,19 +795,17 @@ sl_status_t sl_uart_async_read(sl_uart_handle_t *uart_handle,
   tfer->base.data = data;
   tfer->base.size = size;
 
-  buf_needed = sl_slist_is_empty(uart_handle->async_rx_transfer_active_list_head)
-               && sl_slist_is_empty(uart_handle->async_rx_transfer_pending_list_head);
-
   sl_slist_push_back(&uart_handle->async_rx_transfer_pending_list_head, &tfer->base.node);
-  uart_handle->rx_state = SL_UART_HANDLE_STATE_ENABLED;
 
   // Notify the user to provide more buffers for continuous reception.
-  if (buf_needed && uart_handle->async_rx_cb != NULL) {
-    uart_handle->async_rx_cb(uart_handle,
-                             NULL,
-                             0,
-                             uart_handle->async_rx_cb_user_data,
-                             SL_UART_ASYNC_RX_EVENT_BUF_NEEDED);
+  if (uart_async_enable_rx(uart_handle)) {
+    if (uart_handle->async_rx_cb != NULL) {
+      uart_handle->async_rx_cb(uart_handle,
+                               NULL,
+                               0,
+                               uart_handle->async_rx_cb_user_data,
+                               SL_UART_ASYNC_RX_EVENT_BUF_NEEDED);
+    }
   }
 
   // Attempt to submit the transfer's chunks to DMA.
@@ -674,13 +832,11 @@ sl_status_t sl_uart_async_disable_rx(sl_uart_handle_t *uart_handle)
 
   CORE_ENTER_ATOMIC();
 
-  if (uart_handle->rx_state == SL_UART_HANDLE_STATE_DISABLED) {
+  if (!uart_async_disable_rx(uart_handle)) {
     // Nothing to abort.
     CORE_EXIT_ATOMIC();
     return SL_STATUS_OK;
   }
-
-  uart_handle->rx_state = SL_UART_HANDLE_STATE_DISABLED;
 
   /**
    * The DMA channel driver does not provide users with the number of bytes in the transfer callback.
@@ -720,14 +876,14 @@ sl_status_t sl_uart_async_disable_rx(sl_uart_handle_t *uart_handle)
 }
 
 /***************************************************************************//**
- * Update size of the current read.
+ * Retrieves RX status.
  ******************************************************************************/
-sl_status_t sl_uart_async_update_current_read_size(sl_uart_handle_t *uart_handle,
-                                                   const size_t new_size)
+bool sl_uart_async_is_rx_active(sl_uart_handle_t *uart_handle)
 {
-  (void)uart_handle;
-  (void)new_size;
-  return SL_STATUS_NOT_AVAILABLE;
+  SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
+  EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
+
+  return uart_handle->async_rx_state == SL_UART_HANDLE_STATE_ACTIVE;
 }
 
 /*******************************************************************************
@@ -743,12 +899,9 @@ sl_status_t sli_uart_async_init(sl_uart_handle_t *uart_handle)
 {
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
   EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
-  sl_peripheral_t uart = uart_handle->uart;
   uint8_t rx_channel = uart_handle->preinit_config.async_rx_dma_channel_number;
   uint8_t tx_channel = uart_handle->preinit_config.async_tx_dma_channel_number;
   sl_status_t status;
-  sl_dma_signal_t rx_signal;
-  sl_dma_signal_t tx_signal;
 
   status = sli_uart_transfer_pool_init(uart_handle);
   if (status != SL_STATUS_OK) {
@@ -769,52 +922,14 @@ sl_status_t sli_uart_async_init(sl_uart_handle_t *uart_handle)
     }
   }
 
-  status = sl_dma_channel_init(&uart_handle->async_rx_dma_channel,
-                               NULL,
-                               rx_channel,
-                               rx_dma_channel_callback,
-                               uart_handle);
-  if (status != SL_STATUS_OK) {
-    goto free_tx_channel;
-  }
+  uart_handle->async_rx_dma_channel.channel_number = rx_channel;
+  uart_handle->async_tx_dma_channel.channel_number = tx_channel;
 
-  status = sl_dma_channel_init(&uart_handle->async_tx_dma_channel,
-                               NULL,
-                               tx_channel,
-                               tx_dma_channel_callback,
-                               uart_handle);
-  if (status != SL_STATUS_OK) {
-    goto rx_channel_deinit;
-  }
-
-  rx_signal = sl_device_peripheral_get_serial_dma_signal_rx_trigger(uart);
-  status = sl_dma_channel_set_peripheral_signal(&uart_handle->async_rx_dma_channel, rx_signal);
-  if (status != SL_STATUS_OK) {
-    goto tx_channel_deinit;
-  }
-
-  tx_signal = sl_device_peripheral_get_serial_dma_signal_tx_trigger(uart);
-  status = sl_dma_channel_set_peripheral_signal(&uart_handle->async_tx_dma_channel, tx_signal);
-  if (status != SL_STATUS_OK) {
-    goto tx_channel_deinit;
-  }
-
-  // Enable TXC callback, as it is used to notify users the transfer has completed.
-  // Clear any latent TXC interrupt that could lead to dereferencing stale lists.
-  uart_handle->ops->clear_irq(uart, uart_handle->ops->irq_tx_complete_flag);
-  uart_handle->ops->set_enable_irq(uart, true, uart_handle->ops->irq_tx_complete_flag);
+  uart_handle->async_tx_state = SL_UART_HANDLE_STATE_IDLE;
+  uart_handle->async_rx_state = SL_UART_HANDLE_STATE_IDLE;
 
   return status;
 
-  tx_channel_deinit:
-  sl_dma_channel_deinit(&uart_handle->async_tx_dma_channel);
-  rx_channel_deinit:
-  sl_dma_channel_deinit(&uart_handle->async_rx_dma_channel);
-  free_tx_channel:
-  if (uart_handle->preinit_config.async_tx_dma_channel_number == SL_UART_ASYNC_DMA_CHANNEL_CONFIG_AUTO) {
-    // Only free the channel if it was allocated as part of this function call.
-    sl_dma_manager_free_channel(NULL, tx_channel);
-  }
   free_rx_channel:
   if (uart_handle->preinit_config.async_rx_dma_channel_number == SL_UART_ASYNC_DMA_CHANNEL_CONFIG_AUTO) {
     // Only free the channel if it was allocated as part of this function call.
@@ -851,14 +966,13 @@ sl_status_t sli_uart_async_deinit(sl_uart_handle_t *uart_handle)
   uint8_t rx_channel = uart_handle->async_rx_dma_channel.channel_number;
   uint8_t tx_channel = uart_handle->async_tx_dma_channel.channel_number;
 
-  status = sl_dma_channel_deinit(&uart_handle->async_tx_dma_channel);
-  if (status != SL_STATUS_OK) {
-    return status;
-  }
+  if (!SLI_UART_HANDLE_IS_SUSPENDED(uart_handle)) {
+    sli_uart_disable_irq(uart_handle, uart_handle->ops->irq_tx_complete_flag);
 
-  status = sl_dma_channel_deinit(&uart_handle->async_rx_dma_channel);
-  if (status != SL_STATUS_OK) {
-    return status;
+    status = uart_async_deinit_dma(uart_handle);
+    if (status != SL_STATUS_OK) {
+      return status;
+    }
   }
 
   if (uart_handle->preinit_config.async_tx_dma_channel_number == SL_UART_ASYNC_DMA_CHANNEL_CONFIG_AUTO) {
@@ -878,6 +992,33 @@ sl_status_t sli_uart_async_deinit(sl_uart_handle_t *uart_handle)
   sli_uart_transfer_pool_deinit(uart_handle);
 
   return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Suspends the UART peripheral async hardware (i.e.: DMA channel).
+ ******************************************************************************/
+sl_status_t sli_uart_async_suspend(sl_uart_handle_t *uart_handle)
+{
+  SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
+  EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
+
+  if (sl_uart_async_is_tx_active(uart_handle)
+      || sl_uart_async_is_rx_active(uart_handle)) {
+    return SL_STATUS_BUSY;
+  }
+
+  return uart_async_deinit_dma(uart_handle);
+}
+
+/***************************************************************************//**
+ * Resumes the UART peripheral hardware.
+ ******************************************************************************/
+sl_status_t sli_uart_async_resume(sl_uart_handle_t *uart_handle)
+{
+  SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
+  EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
+
+  return uart_async_init_hw(uart_handle);
 }
 
 /***************************************************************************//**
@@ -924,7 +1065,7 @@ void sli_uart_async_transmit_complete(sl_uart_handle_t *uart_handle)
   tfer = sli_uart_async_tx_transfer_from_node(*list_head);
   if (tfer == NULL) {
     // No more transfers to send.
-    uart_handle->tx_state = SL_UART_HANDLE_STATE_DISABLED;
+    (void)uart_async_disable_tx(uart_handle);
     return;
   }
 

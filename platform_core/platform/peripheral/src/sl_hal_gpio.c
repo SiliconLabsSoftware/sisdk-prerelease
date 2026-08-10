@@ -31,7 +31,9 @@
 #include "sl_hal_gpio.h"
 #if defined(GPIO_PRESENT)
 #include "sl_hal_bus.h"
-
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
 
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
@@ -340,7 +342,9 @@ void sl_hal_gpio_enable_pin_em4_wakeup(uint32_t pinmask,
   GPIO->EM4WUPOL |= pinmask & polaritymask;
   GPIO->EM4WUEN  |= pinmask;                // Enable wakeup.
 
+#if !defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   sl_hal_gpio_set_pin_em4_retention(true);  // Enable the pin retention.
+#endif
   sl_hal_gpio_clear_interrupts(pinmask);    // clear any pending interrupt.
 }
 

@@ -27,6 +27,8 @@ requires:
 - name: bootloader_aes_sha_ecdsa
 - name: bootloader_token_management
 - name: bootloader_include_parser
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/gecko-bootloader-api/gbl-parser
 metadata:
   sbom:
     license: MSLA

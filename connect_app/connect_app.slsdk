@@ -1,0 +1,7 @@
+id=com.silabs.sdk.connect_app
+version=1.2.0.0
+label=Connect SDK Applications
+description=Connect Software Development Kit Applications
+
+prop.file.templatesFile=connect_app_templates.xml
+prop.file.docsFile=documentation/slConnect_docContent.xml

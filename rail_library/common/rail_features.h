@@ -217,7 +217,8 @@ extern "C" {
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8)  \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)  \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13) \
+  || (_SILICON_LABS_32B_SERIES_3_CONFIG == 353))
 #define RAIL_SUPPORTS_EXTERNAL_THERMISTOR 1
 #else
 #define RAIL_SUPPORTS_EXTERNAL_THERMISTOR 0
@@ -485,8 +486,9 @@ extern "C" {
 /// Boolean to indicate whether the selected chip supports BLE
 /// CS (Channel Sounding).
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_BLE_SUPPORTS_CS.
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 4) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11))
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 4)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11) \
+  || (_SILICON_LABS_32B_SERIES_3_CONFIG == 353))
 #define RAIL_BLE_SUPPORTS_CS RAIL_SUPPORTS_PROTOCOL_BLE
 #else
 #define RAIL_BLE_SUPPORTS_CS 0
@@ -947,7 +949,11 @@ extern "C" {
 /// Boolean to indicate whether the selected chip supports BTC.
 /// See also runtime refinement \ref RAIL_SupportsProtocolBTC().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_SUPPORTS_PROTOCOL_BTC.
+#if (_SILICON_LABS_32B_SERIES_3_CONFIG == 353)
+#define RAIL_SUPPORTS_PROTOCOL_BTC RAIL_SUPPORTS_2P4GHZ_BAND
+#else
 #define RAIL_SUPPORTS_PROTOCOL_BTC (0U)
+#endif
 #endif//DOXYGEN_UNDOCUMENTED
 
 /// Boolean to indicate whether the selected chip supports

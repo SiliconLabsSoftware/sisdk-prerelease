@@ -1480,6 +1480,10 @@ sl_status_t sli_clock_manager_hal_init(void)
   EFM_ASSERT(status == SL_STATUS_OK);
 #endif
 
+#if defined(SL_CATALOG_CLOCK_MANAGER_INIT_HAL_INTERNAL_PRESENT)
+  sli_clock_manager_hal_preinit_oscillators_internal();
+#endif
+
   // Initialize Oscillators
 #if defined(SL_CLOCK_MANAGER_LFXO_EN) && (SL_CLOCK_MANAGER_LFXO_EN == 1)
   init_lfxo();

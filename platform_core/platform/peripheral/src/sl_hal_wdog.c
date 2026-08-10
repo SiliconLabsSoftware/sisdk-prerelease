@@ -41,6 +41,8 @@ extern __INLINE void sl_hal_wdog_lock(WDOG_TypeDef *wdog);
 extern __INLINE void sl_hal_wdog_wait_sync(WDOG_TypeDef *wdog);
 extern __INLINE void sl_hal_wdog_wait_ready(WDOG_TypeDef *wdog);
 extern __INLINE void sl_hal_wdog_unlock(WDOG_TypeDef *wdog);
+extern __INLINE void sl_hal_wdog_enable_reset(WDOG_TypeDef *wdog);
+extern __INLINE void sl_hal_wdog_disable_reset(WDOG_TypeDef *wdog);
 extern __INLINE void sl_hal_wdog_clear_interrupts(WDOG_TypeDef *wdog,
                                                   uint32_t flags);
 extern __INLINE void sl_hal_wdog_disable_interrupts(WDOG_TypeDef *wdog,

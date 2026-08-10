@@ -24,6 +24,8 @@ define:
   value: 1
 provides:
 - name: bootloader_bgapi_uartdfu
+documentation:
+  url: https://docs.silabs.com/shared-content/latest/using-gecko-bootloader-with-bluetooth-apps/02-bgapi-uart-device-firmware-upgrade-dfu
 metadata:
   sbom:
     license: MSLA

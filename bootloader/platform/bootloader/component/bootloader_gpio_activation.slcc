@@ -25,6 +25,8 @@ provides:
 config_file:
 - path: platform/bootloader/config/btl_gpio_activation_cfg.h
   file_id: btl_gpio_activation_cfg
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/gecko-bootloader-api/gpio-activation
 metadata:
   sbom:
     license: MSLA

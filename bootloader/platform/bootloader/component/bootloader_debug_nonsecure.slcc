@@ -19,6 +19,8 @@ provides:
 - name: bootloader_debug_nonsecure
 config_file:
 - path: platform/bootloader/debug/config/btl_debug_cfg.h
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/gecko-bootloader-api/debug
 metadata:
   sbom:
     license: MSLA

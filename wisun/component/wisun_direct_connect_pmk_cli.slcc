@@ -1,0 +1,50 @@
+id: "wisun_direct_connect_pmk_cli"
+label: "Wi-SUN Direct Connect PMK CLI"
+description: >
+  Adds the wisun set_dc_pmk CLI command to update and re-import the Direct
+  Connect PMK at runtime. Included automatically by wisun_cli when
+  wisun_direct_connect_pmk is present.
+package: "wisun"
+category: "Wi-SUN|Wi-SUN Plugin"
+quality: "production"
+
+ui_hints:
+  visibility: never
+
+requires:
+- name: "wisun_cli_util"
+- name: "wisun_direct_connect_pmk"
+
+provides:
+- name: "wisun_direct_connect_pmk_cli"
+
+root_path: "wisun/./plugin"
+
+source:
+- path: "sl_wisun_direct_connect_pmk_cli.c"
+  project:
+    transfer_ownership: true
+
+include:
+- path: "."
+  file_list:
+  - path: "sl_wisun_direct_connect_pmk_cli.h"
+
+template_contribution:
+- name: cli_command
+  value:
+    group: "wisun"
+    name: "set_direct_connect_pmk"
+    handler: "sl_wisun_set_direct_connect_pmk_cli"
+    help: "Set Direct Connect PMK: w set_dc_pmk"
+    shortcuts:
+    - name: "set_dc_pmk"
+    argument:
+    - type: string
+      help: "PMK as colon-separated hex bytes"
+- name: component_catalog
+  value: wisun_direct_connect_pmk_cli
+
+metadata:
+  sbom:
+    license: MSLA

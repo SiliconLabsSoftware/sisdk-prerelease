@@ -83,6 +83,9 @@ export:
   library:
     - path: artifact/trustzone_secure_library.o
 
+post_build:
+  profile: tz_secure_application
+
 readme:
   - path: README.md
 

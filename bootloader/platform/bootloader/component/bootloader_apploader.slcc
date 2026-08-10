@@ -40,6 +40,10 @@ provides:
 config_file:
 - path: platform/bootloader/config/btl_apploader_config.h
   file_id: btl_apploader_config
+documentation:
+  docset: mcu-bootloader
+  document: using-gecko-bootloader-with-bluetooth-apps/03-bluetooth-ota-upgrade
+  url: https://docs.silabs.com/shared-content/latest/using-gecko-bootloader-with-bluetooth-apps/03-bluetooth-ota-upgrade
 metadata:
   sbom:
     license: MSLA

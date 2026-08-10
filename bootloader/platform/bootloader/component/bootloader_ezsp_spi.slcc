@@ -36,6 +36,8 @@ requires:
 - name: bootloader_image_parser
 - name: bootloader_delay_driver
   condition: [bootloader_core_secure]
+documentation:
+  url: https://docs.silabs.com/zigbee/latest/ezsp-spi-host-interfacing-guide/
 metadata:
   sbom:
     license: MSLA

@@ -31,7 +31,7 @@ source:
 - path: app/em260/command-handlers-dynamic-hardware-configuration-generated.c
   condition:
   - zigbee_ncp
-- path: package_downloads/rail_library/plugin/pa-conversions/nvm/sl_rail_util_pa_nvm_configs.c
+- path: upstream/rail_library/plugin/pa-conversions/nvm/sl_rail_util_pa_nvm_configs.c
   condition:
   - zigbee_ncp
 include:
@@ -53,12 +53,12 @@ include:
   - zigbee_ncp
   file_list:
   - path: dhc-ncp.h
-- path: package_downloads/rail_library/plugin/pa-conversions/nvm
+- path: upstream/rail_library/plugin/pa-conversions/nvm
   condition:
   - device_cortexm
   file_list:
   - path: sl_rail_util_pa_nvm_configs.h
-- path: package_downloads/rail_library/plugin/pa-conversions
+- path: upstream/rail_library/plugin/pa-conversions
   condition:
   - device_cortexm
   file_list:

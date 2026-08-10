@@ -33,6 +33,8 @@ config_file:
   file_id: btl_spiflash_storage_cfg
 validation_helper:
 - path: platform/bootloader/component/scripts/bootloader_spiflash_validation.lua
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/bootloader-user-guide-gsdk-4/07-configuring-the-gecko-bootloader
 metadata:
   sbom:
     license: MSLA AND Zlib

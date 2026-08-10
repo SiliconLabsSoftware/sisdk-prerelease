@@ -42,7 +42,6 @@
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/oid.h"
 #include "mbedtls/x509_crt.h"
-#include "mbedtls/base64.h"
 #include "psa/crypto.h"
 #include "psa/crypto_values.h"
 #include "cbap_key_id.h"
@@ -108,6 +107,10 @@ sl_status_t sl_bt_cbap_init(uint8_t *device_certificate_der, uint32_t *device_ce
   sl_status_t sc;
   int mbedtls_ret = 0;
   mbedtls_x509_crt dev_certificate_context;
+  uint8_t root_certificate_der[SL_BT_CBAP_CERTIFICATE_MAX_SIZE] = { 0 };
+  size_t root_certificate_der_len;
+  psa_key_attributes_t key_attr;
+  uint32_t flags;
 
   if (device_certificate_der == NULL || device_certificate_der_len == NULL) {
     return SL_STATUS_NULL_POINTER;
@@ -142,18 +145,16 @@ sl_status_t sl_bt_cbap_init(uint8_t *device_certificate_der, uint32_t *device_ce
                                        *device_certificate_der_len);
   if (mbedtls_ret != 0) {
     LOG_ERROR("Failed to parse device certificate: %d" LOG_NL, mbedtls_ret);
-    return SL_STATUS_FAIL;
+    sc = SL_STATUS_FAIL;
+    goto exit;
   }
 
   // Get root certificate
-  uint8_t root_certificate_der[SL_BT_CBAP_CERTIFICATE_MAX_SIZE] = { 0 };
-  size_t root_certificate_der_len;
-
   sc = get_certificate(root_certificate_der, (uint32_t *)&root_certificate_der_len, CBAP_NVM_ROOT_CERT);
   if (sc != SL_STATUS_OK) {
     LOG_ERROR("Failed to get root certificate: 0x%04lx" LOG_NL, sc);
     LOG_ERROR("Please make the device was provisioned with success." LOG_NL);
-    return sc;
+    goto exit;
   }
 
   mbedtls_x509_crt_init(&root_certificate_context);
@@ -162,11 +163,11 @@ sl_status_t sl_bt_cbap_init(uint8_t *device_certificate_der, uint32_t *device_ce
                                        root_certificate_der_len);
   if (mbedtls_ret != 0) {
     LOG_ERROR("Failed to parse root certificate: %d" LOG_NL, mbedtls_ret);
-    return SL_STATUS_FAIL;
+    sc = SL_STATUS_FAIL;
+    goto exit;
   }
 
   // Validate device certificate with the root certificate
-  uint32_t flags;
   mbedtls_ret = mbedtls_x509_crt_verify(&dev_certificate_context,
                                         &root_certificate_context,
                                         NULL,
@@ -177,19 +178,28 @@ sl_status_t sl_bt_cbap_init(uint8_t *device_certificate_der, uint32_t *device_ce
   (void)flags;
   if (mbedtls_ret != 0) {
     LOG_ERROR("Failed to verify device certificate against root certificate: %d" LOG_NL, mbedtls_ret);
-    return SL_STATUS_FAIL;
+    sc = SL_STATUS_FAIL;
+    goto exit;
   }
 
   // Check the presence of the device key
-  psa_key_attributes_t key_attr;
   key_attr = psa_key_attributes_init();
   sc = psa_status_to_sl_status(psa_get_key_attributes(CBAP_PSA_DEVICE_KEY, &key_attr));
   if (sc != SL_STATUS_OK) {
     LOG_ERROR("Device key cannot be found: 0x%04lx" LOG_NL, sc);
-    return sc;
   }
 
-  return SL_STATUS_OK;
+  exit:
+  // The device certificate context is only needed for the validation above. The
+  // root certificate context is kept on success, it is needed later on to
+  // validate the certificate of the remote device. On failure it is released,
+  // so that a failed initialization leaves nothing allocated behind and the
+  // context stays in the state a repeated initialization expects.
+  mbedtls_x509_crt_free(&dev_certificate_context);
+  if (sc != SL_STATUS_OK) {
+    mbedtls_x509_crt_free(&root_certificate_context);
+  }
+  return sc;
 }
 
 /*******************************************************************************
@@ -205,6 +215,8 @@ sl_status_t sl_bt_cbap_process_remote_cert(uint8_t *remote_certificate_der, uint
   sl_status_t sc;
   int mbedtls_ret = 0;
   mbedtls_x509_crt remote_certificate_context;
+  psa_key_attributes_t remote_pub_key_attr = PSA_KEY_ATTRIBUTES_INIT;
+  uint32_t flags;
 
   if (remote_certificate_der == NULL || remote_certificate_der_len == 0) {
     return SL_STATUS_NULL_POINTER;
@@ -217,26 +229,11 @@ sl_status_t sl_bt_cbap_process_remote_cert(uint8_t *remote_certificate_der, uint
                                        remote_certificate_der_len);
   if (mbedtls_ret != 0) {
     LOG_ERROR("Failed to parse remote certificate: %d" LOG_NL, mbedtls_ret);
-    return SL_STATUS_FAIL;
-  }
-
-  unsigned char buf[1024];
-  size_t olen;
-
-  // Log
-  mbedtls_ret = mbedtls_base64_encode(buf,
-                                      sizeof(buf),
-                                      &olen,
-                                      remote_certificate_context.raw.p,
-                                      remote_certificate_context.raw.len);
-  (void)olen;
-  if (mbedtls_ret != 0) {
-    LOG_ERROR("Failed to encode remote certificate: %d" LOG_NL, mbedtls_ret);
-    return SL_STATUS_FAIL;
+    sc = SL_STATUS_FAIL;
+    goto exit;
   }
 
   // Validate it with the root certificate
-  uint32_t flags;
   mbedtls_ret = mbedtls_x509_crt_verify(&remote_certificate_context,
                                         &root_certificate_context,
                                         NULL,
@@ -247,11 +244,11 @@ sl_status_t sl_bt_cbap_process_remote_cert(uint8_t *remote_certificate_der, uint
   (void)flags;
   if (mbedtls_ret != 0) {
     LOG_ERROR("Failed to verify remote certificate against root certificate: %d" LOG_NL, mbedtls_ret);
-    return SL_STATUS_FAIL;
+    sc = SL_STATUS_FAIL;
+    goto exit;
   }
 
   // Get the public key from the remote certificate and set attributes
-  psa_key_attributes_t remote_pub_key_attr = PSA_KEY_ATTRIBUTES_INIT;
   psa_set_key_algorithm(&remote_pub_key_attr, PSA_ALG_ECDSA(PSA_ALG_SHA_256));
   psa_set_key_type(&remote_pub_key_attr, PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1));
   psa_set_key_usage_flags(&remote_pub_key_attr, PSA_KEY_USAGE_VERIFY_MESSAGE);
@@ -263,12 +260,11 @@ sl_status_t sl_bt_cbap_process_remote_cert(uint8_t *remote_certificate_der, uint
 
   if (sc != SL_STATUS_OK) {
     LOG_ERROR("Failed to import public key from remote certificate: 0x%04lx" LOG_NL, sc);
-    return sc;
   }
 
+  exit:
   mbedtls_x509_crt_free(&remote_certificate_context);
-
-  return SL_STATUS_OK;
+  return sc;
 }
 
 /*******************************************************************************

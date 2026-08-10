@@ -11,6 +11,8 @@ source:
 provides:
 - name: bootloader_image_parser
 - name: bootloader_image_parser_nonsecure
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/gecko-bootloader-api/gbl-parser
 metadata:
   sbom:
     license: MSLA

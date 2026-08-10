@@ -34,6 +34,8 @@ provides:
   condition: [device_series_2]
 - name: memory_manager
   condition: [device_series_3]
+- name: memory_manager
+  condition: [device_si91x]
 - name: sl_malloc
 requires:
 - name: device
@@ -70,6 +72,9 @@ recommends:
 - id: memory_manager_pool
   vendor: silabs
   condition: [device_series_2]
+- id: memory_manager_pool
+  vendor: silabs
+  condition: [device_si91x]
 - id: memory_manager_pool
   vendor: silabs
   condition: [device_generic_family_sixx301]

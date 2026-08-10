@@ -103,6 +103,24 @@ extern "C" {
  */
 #define RAIL_SIXG301_STATE_BUFFER_BYTES 632U  // DO NOT HAND-EDIT THESE VALUES
 
+/**
+ * @def RAIL_SIWX353_STATE_BUFFER_BYTES
+ * @brief The SIWx353 series size needed for
+ *   \ref RAIL_StateBufferEntry_t::bufferBytes.
+ *
+ * @deprecated RAIL 2.x. synonym of \ref SL_RAIL_SIWX353_STATE_BUFFER_BYTES.
+ */
+#define RAIL_SIWX353_STATE_BUFFER_BYTES 648U  // DO NOT HAND-EDIT THESE VALUES
+
+/**
+ * @def RAIL_SIWX353FPGA_STATE_BUFFER_BYTES
+ * @brief The SIWx353 FPGA series size needed for
+ *   \ref RAIL_StateBufferEntry_t::bufferBytes.
+ *
+ * @deprecated RAIL 2.x. synonym of \ref SL_RAIL_SIWX353FPGA_STATE_BUFFER_BYTES.
+ */
+#define RAIL_SIWX353FPGA_STATE_BUFFER_BYTES 648U  // DO NOT HAND-EDIT THESE VALUES
+
 #ifndef RAIL_STATE_BUFFER_BYTES
 /**
  * @def RAIL_STATE_BUFFER_BYTES
@@ -117,6 +135,12 @@ extern "C" {
 #define RAIL_STATE_BUFFER_BYTES RAIL_SIXG301_REDUCED_STATE_BUFFER_BYTES
 #else
 #define RAIL_STATE_BUFFER_BYTES RAIL_SIXG301_STATE_BUFFER_BYTES
+#endif
+#elif (_SILICON_LABS_32B_SERIES_3_CONFIG == 353)
+#ifdef FPGA
+#define RAIL_STATE_BUFFER_BYTES RAIL_SIWX353FPGA_STATE_BUFFER_BYTES
+#else
+#define RAIL_STATE_BUFFER_BYTES RAIL_SIWX353_STATE_BUFFER_BYTES
 #endif
 #else
 #define RAIL_STATE_BUFFER_BYTES 0 // Sate Doxygen
@@ -255,7 +279,8 @@ RAIL_TimerTick_t RAIL_UsToTimerTicks(RAIL_Time_t microseconds);
  * @deprecated RAIL 2.x. synonym of \ref SL_RAIL_RF_PATHS_2P4_GHZ.
  */
 #ifndef RAIL_RF_PATHS_2P4GIG
-#if (_SILICON_LABS_32B_SERIES_3_CONFIG == 301)
+#if ((_SILICON_LABS_32B_SERIES_3_CONFIG == 301) \
+  || (_SILICON_LABS_32B_SERIES_3_CONFIG == 353))
 #define RAIL_RF_PATHS_2P4GIG 1
 #else
 #define RAIL_RF_PATHS_2P4GIG 0
@@ -371,6 +396,80 @@ struct RAIL_ChannelConfigEntryAttr {
  *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_HP_MAX        (95U)
+#elif (_SILICON_LABS_32B_SERIES_3_CONFIG == 353)
+/**
+ * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
+ * RAIL_TX_POWER_MODE_2P4GIG_HP, \ref RAIL_TX_POWER_MODE_2P4GIG_MP, or
+ * \ref RAIL_TX_POWER_MODE_2P4GIG_LP modes.
+ *
+ * @deprecated This RAIL 2.x. define has been eliminated,
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MP_LP_MIN.
+ */
+#define RAIL_TX_POWER_LEVEL_2P4GIG_HP_MP_LP_MIN     (0U)
+/**
+ * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
+ * \ref RAIL_TX_POWER_MODE_2P4GIG_LP mode.
+ *
+ * @deprecated This RAIL 2.x. define has been eliminated,
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MIN.
+ */
+#define RAIL_TX_POWER_LEVEL_2P4_LP_MIN        (RAIL_TX_POWER_LEVEL_2P4GIG_HP_MP_LP_MIN)
+/**
+ * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
+ * \ref RAIL_TX_POWER_MODE_2P4GIG_LP mode.
+ *
+ * @deprecated This RAIL 2.x. define has been eliminated,
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_LP_MAX.
+ */
+#define RAIL_TX_POWER_LEVEL_2P4_LP_MAX        (31U)
+/**
+ * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
+ * \ref RAIL_TX_POWER_MODE_2P4GIG_MP mode.
+ *
+ * @deprecated This RAIL 2.x. define has been eliminated,
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MIN.
+ */
+#define RAIL_TX_POWER_LEVEL_2P4_MP_MIN        (RAIL_TX_POWER_LEVEL_2P4GIG_HP_MP_LP_MIN)
+/**
+ * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
+ * \ref RAIL_TX_POWER_MODE_2P4GIG_MP mode.
+ *
+ * @deprecated This RAIL 2.x. define has been eliminated,
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_MP_MAX.
+ */
+#define RAIL_TX_POWER_LEVEL_2P4_MP_MAX        (95U)
+/**
+ * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
+ * \ref RAIL_TX_POWER_MODE_2P4GIG_HP mode.
+ *
+ * @deprecated This RAIL 2.x. define has been eliminated,
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MIN.
+ */
+#define RAIL_TX_POWER_LEVEL_2P4_HP_MIN        (RAIL_TX_POWER_LEVEL_2P4GIG_HP_MP_LP_MIN)
+/**
+ * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
+ * \ref RAIL_TX_POWER_MODE_2P4GIG_HP mode.
+ *
+ * @deprecated This RAIL 2.x. define has been eliminated,
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_GHZ_HP_MAX.
+ */
+#define RAIL_TX_POWER_LEVEL_2P4_HP_MAX        (95U)
+/**
+ * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
+ * \ref RAIL_TX_POWER_MODE_2P4GIG_BTC mode.
+ *
+ * @deprecated This RAIL 2.x. define has been eliminated,
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_BTC_MIN.
+ */
+#define RAIL_TX_POWER_LEVEL_2P4_BTC_MIN       (0U)
+/**
+ * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
+ * \ref RAIL_TX_POWER_MODE_2P4GIG_BTC mode.
+ *
+ * @deprecated This RAIL 2.x. define has been eliminated,
+ *   temporarily a synonym of SLI_RAIL_TX_POWER_LEVEL_2P4_BTC_MAX.
+ */
+#define RAIL_TX_POWER_LEVEL_2P4_BTC_MAX       (80U)
 #else
 #error "RAIL_TX_POWER_LEVEL not defined for this device"
 #endif
@@ -384,6 +483,8 @@ struct RAIL_ChannelConfigEntryAttr {
 #ifndef RAIL_NUM_PA
 #if (_SILICON_LABS_32B_SERIES_3_CONFIG == 301)
 #define RAIL_NUM_PA (2U)
+#elif (_SILICON_LABS_32B_SERIES_3_CONFIG == 353)
+#define RAIL_NUM_PA (4U)
 #else
 #error "RAIL_NUM_PA undefined for platform"
 #endif
@@ -401,6 +502,14 @@ struct RAIL_ChannelConfigEntryAttr {
 #define RAIL_TX_POWER_MODE_2P4GIG_HIGHEST ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_2P4GIG_HIGHEST)
 #define RAIL_TX_POWER_MODE_2P4_HIGHEST ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_2P4_HIGHEST)
 #endif//_SILICON_LABS_32B_SERIES_3_CONFIG == 301
+#if (_SILICON_LABS_32B_SERIES_3_CONFIG == 353)
+#define RAIL_TX_POWER_MODE_2P4GIG_HP ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_2P4GIG_HP)
+#define RAIL_TX_POWER_MODE_2P4GIG_MP ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_2P4GIG_MP)
+#define RAIL_TX_POWER_MODE_2P4GIG_LP ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_2P4GIG_LP)
+#define RAIL_TX_POWER_MODE_2P4GIG_HIGHEST ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_2P4GIG_HIGHEST)
+#define RAIL_TX_POWER_MODE_2P4_HIGHEST ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_2P4_HIGHEST)
+#define RAIL_TX_POWER_MODE_2P4GIG_BTC ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_2P4GIG_BTC)
+#endif//_SILICON_LABS_32B_SERIES_3_CONFIG == 353
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /**

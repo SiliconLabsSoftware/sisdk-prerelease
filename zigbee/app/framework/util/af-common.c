@@ -296,7 +296,7 @@ void sli_zigbee_af_message_sent_handler(sl_status_t status,
                                         uint16_t messageLength,
                                         uint8_t *messageContents)
 {
-  sl_zigbee_af_message_sent_function_t callback;
+  sl_zigbee_af_message_sent_function_t callback = NULL;
   if (status != SL_STATUS_OK) {
     sl_zigbee_af_app_print("%stx 0x%08X, ", "ERROR: ", status); // status
     printMessage(type, apsFrame, messageLength, messageContents);
@@ -304,10 +304,30 @@ void sli_zigbee_af_message_sent_handler(sl_status_t status,
 #ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
   currentSentMessageTag = messageTag;
 #endif
+#if defined(EZSP_HOST)
+  bool isZdoMessage = (apsFrame != NULL
+                       && apsFrame->profileId == SL_ZIGBEE_ZDO_PROFILE_ID)
+                      || (messageTag == 0
+                          && apsFrame != NULL
+                          && apsFrame->sourceEndpoint == SL_ZIGBEE_ZDO_ENDPOINT);
+  if (!isZdoMessage) {
+    if (!sli_zigbee_af_is_message_tag_in_use((uint8_t)messageTag)) {
+      if (getMessageSentCallback(messageTag) != NULL) {
+        invalidateMessageSentCallbackEntry(messageTag);
+      }
+      sl_zigbee_af_remove_from_current_app_tasks(SL_ZIGBEE_AF_WAITING_FOR_DATA_ACK);
+      return;
+    }
+    callback = getMessageSentCallback(messageTag);
+    invalidateMessageSentCallbackEntry(messageTag);
+  }
+#else
   callback = getMessageSentCallback(messageTag);
   invalidateMessageSentCallbackEntry(messageTag);
+#endif
 
   if (status == SL_STATUS_OK
+      && apsFrame != NULL
       && apsFrame->profileId == SL_ZIGBEE_ZDO_PROFILE_ID
       && apsFrame->clusterId < CLUSTER_ID_RESPONSE_MINIMUM) {
     sl_zigbee_af_add_to_current_app_tasks(SL_ZIGBEE_AF_WAITING_FOR_ZDO_RESPONSE);
@@ -335,6 +355,12 @@ void sli_zigbee_af_message_sent_handler(sl_status_t status,
   if (callback != NULL) {
     (*callback)(type, indexOrDestination, apsFrame, messageLength, messageContents, status);
   }
+
+#if defined(EZSP_HOST)
+  if (!isZdoMessage) {
+    sli_zigbee_af_clear_message_tag_in_use((uint8_t)messageTag);
+  }
+#endif
 
   sl_zigbee_af_message_sent_cb(type,
                                indexOrDestination,
@@ -1340,6 +1366,9 @@ static sl_status_t send(sl_zigbee_outgoing_message_type_t type,
       && messageSentIndex < SL_ZIGBEE_AF_MESSAGE_SENT_CALLBACK_TABLE_SIZE) {
     messageSentCallbacks[messageSentIndex].tag = messageTag;
     messageSentCallbacks[messageSentIndex].callback = callback;
+#if defined(EZSP_HOST)
+    sli_zigbee_af_mark_message_tag_in_use((uint8_t)messageTag);
+#endif
   }
 
   if (status == SL_STATUS_IN_PROGRESS

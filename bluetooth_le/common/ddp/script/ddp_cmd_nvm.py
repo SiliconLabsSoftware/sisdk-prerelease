@@ -26,12 +26,11 @@
 __author__ = 'Silicon Laboratories, Inc'
 __copyright__ = 'Copyright 2026, Silicon Laboratories, Inc.'
 
-import os
 import struct
 from ddp_cmd import Command, Response
 
-def nvm_set(rtt, key, data, check=True):
-    """Write a value to an NVM key over the DDP RTT interface.
+def nvm_set(conn, key, data, check=True):
+    """Write a value to an NVM key over the DDP Connection interface.
 
     Send an NVM set command for the given key. When ``check`` is enabled,
     read the key back and verify that the stored value matches the data that
@@ -39,7 +38,7 @@ def nvm_set(rtt, key, data, check=True):
     status code.
 
     Args:
-        rtt: RTT transport exposing ``rtt_send`` and ``rtt_receive`` methods
+        conn: Transport layer exposing ``send`` and ``receive`` methods
             used to communicate with the device.
         key (int): NVM key identifier to write.
         data (bytes): Payload to store under ``key``.
@@ -52,20 +51,20 @@ def nvm_set(rtt, key, data, check=True):
             not match ``data``.
     """
     print(f"Set NVM. Key: {hex(key)}")
-    rtt.rtt_send(CommandNvmSet(key, data))
-    resp = ResponseNvmSet(rtt.rtt_receive())
+    conn.send(CommandNvmSet(key, data))
+    resp = ResponseNvmSet(conn.receive())
     if resp.status != 0:
         print(f"Set NVM failure: {resp.status:#06x}")
         return resp.status
 
     if check:
-        rtt.rtt_send(CommandNvmGet(key))
-        resp = ResponseNvmGet(rtt.rtt_receive())
+        conn.send(CommandNvmGet(key))
+        resp = ResponseNvmGet(conn.receive())
         if resp.status != 0:
             print(f"Get NVM failure: {resp.status:#06x}")
             return resp.status
         if resp.body != data:
-            print(f"NVM key mismatch!{os.linesep}Original key:{os.linesep}{data}{os.linesep}Received:{resp.body}")
+            print(f"NVM key mismatch!\nOriginal key:\n{data}\nReceived:{resp.body}")
             return 1 # Set status to generic error
     return resp.status
 

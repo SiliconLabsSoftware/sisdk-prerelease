@@ -1,0 +1,31 @@
+id: ddp_ram_execution
+label: Dynamic Data Provisioning (DDP) RAM execution
+description: |
+  This component converts the application to be RAM-based. This enables leaving
+  the original firmware untouched.
+  DDP uses RTT for communication.
+package: bluetooth_le
+category: Bluetooth|Application|Miscellaneous
+quality: production
+metadata:
+  sbom:
+    license: Zlib
+root_path: bluetooth_le/common/ddp
+provides:
+- name: ddp_ram_execution
+- name: ddp_execution
+- name: toolchain_linker_type
+requires:
+- name: iostream_rtt
+  # need to fit into RAM, let's waste no space
+- name: toolchain_gcc_lto   # linkerfile is only prepared for gcc atm
+conflicts:
+  # xG22 family does not have enough RAM
+- name: device_generic_family_efr32xg22
+template_file:
+- path: template/linkerfile_ram.ld.jinja
+toolchain_settings:
+- option: linkerfile
+  value: autogen/linkerfile_ram.ld
+define:
+- name: SL_RAM_LINKER

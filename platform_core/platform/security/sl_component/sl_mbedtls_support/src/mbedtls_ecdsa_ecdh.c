@@ -33,8 +33,6 @@
  * functions from the mbed TLS API, using the relevant accelerators incorporated
  * in devices from Silicon Labs.
  *
- * For Series-1 devices with a CRYPTO peripheral, see crypto_ecp.c.
- *
  * This alternative implementation calls the PSA Crypto drivers provided
  * by Silicon Labs. For details on these drivers, see \ref sl_psa_drivers.
  */

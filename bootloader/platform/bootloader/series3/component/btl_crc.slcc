@@ -20,6 +20,8 @@ include:
   - path: security/btl_crc16.h
 provides:
 - name: btl_crc
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/gecko-bootloader-api/crc16
 metadata:
   sbom:
     license: MSLA

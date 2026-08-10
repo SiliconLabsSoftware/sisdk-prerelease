@@ -30,6 +30,9 @@
 
 #include <string.h>
 #include "sl_common.h"
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
 #include "psa/crypto.h"
 #include "psa/crypto_types.h"
 #include "psa_crypto_its.h"
@@ -44,6 +47,19 @@
   PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION( \
     PSA_KEY_PERSISTENCE_DEFAULT,                  \
     DDP_PSA_KEY_LOCATION)
+
+// Logging
+#define LOG_PREFIX                    "[DDP_PSA] "
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
+#include "app_log.h"
+#define LOG_NL                        APP_LOG_NL
+#define LOG_INFO(...)                 app_log_info(LOG_PREFIX __VA_ARGS__)
+#define LOG_ERROR(...)                app_log_error(LOG_PREFIX __VA_ARGS__)
+#else // SL_CATALOG_APP_LOG_PRESENT
+#define LOG_NL
+#define LOG_INFO(...)
+#define LOG_ERROR(...)
+#endif // SL_CATALOG_APP_LOG_PRESENT
 
 // Input structure of DDP PSA ITS set command
 SL_PACK_START(1)
@@ -130,6 +146,7 @@ int sl_ddp_cmd_psa_its_set(const uint8_t *input,
   (void)output_len;
 
   if (!sl_ddp_cmd_psa_is_initialized()) {
+    LOG_ERROR("[%s] not initialized!" LOG_NL, __func__);
     return SL_DDP_ERROR_NOT_INITIALIZED;
   }
 
@@ -143,7 +160,11 @@ int sl_ddp_cmd_psa_its_set(const uint8_t *input,
                        req->data_len,
                        req->data,
                        PSA_STORAGE_FLAG_NONE);
+  if (status != PSA_SUCCESS) {
+    LOG_ERROR("[psa_its_set] %ld" LOG_NL, status);
+  }
 
+  LOG_INFO("[%s] %ld" LOG_NL, __func__, status);
   return (int)status;
 }
 
@@ -164,6 +185,7 @@ int sl_ddp_cmd_psa_its_get(const uint8_t *input,
   }
 
   if (!sl_ddp_cmd_psa_is_initialized()) {
+    LOG_ERROR("[%s] not initialized!" LOG_NL, __func__);
     return SL_DDP_ERROR_NOT_INITIALIZED;
   }
 
@@ -176,10 +198,12 @@ int sl_ddp_cmd_psa_its_get(const uint8_t *input,
                        output,
                        &len);
   if (status != PSA_SUCCESS) {
+    LOG_ERROR("[psa_its_get] %ld" LOG_NL, status);
     return (int)status;
   }
 
   *output_len = (uint16_t)len;
+  LOG_INFO("[%s] %ld" LOG_NL, __func__, status);
   return (int)status;
 }
 
@@ -200,6 +224,7 @@ int sl_ddp_cmd_psa_key_gen(const uint8_t *input,
   }
 
   if (!sl_ddp_cmd_psa_is_initialized()) {
+    LOG_ERROR("[%s] not initialized!" LOG_NL, __func__);
     return SL_DDP_ERROR_NOT_INITIALIZED;
   }
 
@@ -218,6 +243,7 @@ int sl_ddp_cmd_psa_key_gen(const uint8_t *input,
     status = psa_destroy_key((psa_key_id_t)(req->key_id));
 
     if (status != PSA_SUCCESS) {
+      LOG_ERROR("[psa_destroy_key] %ld" LOG_NL, status);
       return (int)status;
     }
   }
@@ -232,9 +258,11 @@ int sl_ddp_cmd_psa_key_gen(const uint8_t *input,
   status = psa_generate_key(&key_attr, &gen_key_id);
 
   if (status != PSA_SUCCESS) {
+    LOG_ERROR("[psa_generate_key] %ld" LOG_NL, status);
     return (int)status;
   }
   if ((psa_key_id_t)(req->key_id) != (psa_key_id_t)(gen_key_id)) {
+    LOG_ERROR("[psa_generate_key] invalid length!" LOG_NL);
     return SL_DDP_ERROR_LENGTH;
   }
 
@@ -247,6 +275,10 @@ int sl_ddp_cmd_psa_key_gen(const uint8_t *input,
                             rsp->key,
                             output_size,
                             &key_len);
+    if (status != PSA_SUCCESS) {
+      LOG_ERROR("[psa_export_key] %ld" LOG_NL, status);
+      return (int)status;
+    }
   } else {
     // The key is non-exportable.
     // Only export the public part, and send it back in response.
@@ -254,15 +286,15 @@ int sl_ddp_cmd_psa_key_gen(const uint8_t *input,
                                    rsp->key,
                                    output_size,
                                    &key_len);
-  }
-
-  if (status != PSA_SUCCESS) {
-    return (int)status;
+    if (status != PSA_SUCCESS) {
+      LOG_ERROR("[psa_export_public_key] %ld" LOG_NL, status);
+      return (int)status;
+    }
   }
 
   rsp->key_len = (uint32_t)key_len;
   *output_len = sizeof(*rsp) + rsp->key_len;
-
+  LOG_INFO("[%s] %ld" LOG_NL, __func__, status);
   return (int)status;
 }
 
@@ -284,6 +316,7 @@ int sl_ddp_cmd_psa_key_inj(const uint8_t *input,
   }
 
   if (!sl_ddp_cmd_psa_is_initialized()) {
+    LOG_ERROR("[%s] not initialized!" LOG_NL, __func__);
     return SL_DDP_ERROR_NOT_INITIALIZED;
   }
 
@@ -300,6 +333,7 @@ int sl_ddp_cmd_psa_key_inj(const uint8_t *input,
     status = psa_destroy_key((psa_key_id_t)(req->key_id));
 
     if (status != PSA_SUCCESS) {
+      LOG_ERROR("[psa_destroy_key] %ld" LOG_NL, status);
       return (int)status;
     }
   }
@@ -314,12 +348,15 @@ int sl_ddp_cmd_psa_key_inj(const uint8_t *input,
   status = psa_import_key(&key_attr, req->key, req->key_len, &gen_key_id);
 
   if (status != PSA_SUCCESS) {
+    LOG_ERROR("[psa_import_key] %ld" LOG_NL, status);
     return (int)status;
   }
   if ((psa_key_id_t)(req->key_id) != (psa_key_id_t)(gen_key_id)) {
+    LOG_ERROR("[psa_import_key] invalid length!" LOG_NL);
     return SL_DDP_ERROR_LENGTH;
   }
 
+  LOG_INFO("[%s] %ld" LOG_NL, __func__, status);
   return (int)status;
 }
 
@@ -340,6 +377,7 @@ int sl_ddp_cmd_psa_key_get_att(const uint8_t *input,
   }
 
   if (!sl_ddp_cmd_psa_is_initialized()) {
+    LOG_ERROR("[%s] not initialized!" LOG_NL, __func__);
     return SL_DDP_ERROR_NOT_INITIALIZED;
   }
 
@@ -356,6 +394,7 @@ int sl_ddp_cmd_psa_key_get_att(const uint8_t *input,
   key_attr = psa_key_attributes_init();
   status = psa_get_key_attributes(req->key_id, &key_attr);
   if (status != PSA_SUCCESS) {
+    LOG_ERROR("[psa_get_key_attributes] %ld" LOG_NL, status);
     return (int)status;
   }
 
@@ -366,5 +405,6 @@ int sl_ddp_cmd_psa_key_get_att(const uint8_t *input,
   rsp->key_id =       (uint32_t)psa_get_key_id(&key_attr);
   *output_len =       sizeof(*rsp);
 
+  LOG_INFO("[%s] %ld" LOG_NL, __func__, status);
   return (int)status;
 }

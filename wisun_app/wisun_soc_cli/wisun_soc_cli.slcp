@@ -33,10 +33,12 @@ component:
   - id: "cli"
     instance: [vcom]
   - id: "wisun_cli_util"
+  - id: "wisun_cli"
   - id: "errno"
   - id: "wisun_crash_handler"
   - id: "device_init_dcdc"
     condition: [device_has_dcdc, wisun_low_power]
+  - id: wisun_direct_connect_pmk
 
 source:
   - path: "app.c"
@@ -499,39 +501,6 @@ template_contribution:
       argument:
         - type: uint8
           help: "is_leaf: greater than 0 to act as RPL leaf"
-  - name: "cli_command"
-    value:
-      group: "wisun"
-      name: "set_direct_connect_state"
-      handler: "app_set_direct_connect_state"
-      help: "Enable/disable Direct Connect"
-      argument:
-        - type: uint8
-          help: "is_enabled: greater than 0 to enable Direct Connect"
-        - type: uint8
-          help: "mode: 0=manual (user runs advert/accept commands), 1=auto (advertise DC ID + accept link)"
-        - type: stringopt
-          help: "dc_id: DC ID (String) to advertise in auto mode (optional; default:'DC_ID_DEFAULT')"
-  - name: "cli_command"
-    value:
-      group: "wisun"
-      name: "accept_direct_connect_link"
-      handler: "app_accept_direct_connect_link"
-      help: "Accept a Direct Connect link"
-      argument:
-        - type: string
-          help: "Client link local address"
-  - name: "cli_command"
-    value:
-      group: "wisun"
-      name: "advert_direct_connect_server_id"
-      handler: "app_advert_direct_connect_server_id"
-      help: "Advertise DC server's DC ID"
-      argument:
-        - type: string
-          help: "Client link local address"
-        - type: string
-          help: "DC ID"
   - name: "cli_command"
     value:
       group: "wisun"

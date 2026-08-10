@@ -28,15 +28,15 @@ __copyright__ = 'Copyright 2026, Silicon Laboratories, Inc.'
 
 from ddp_cmd import Command, Response
 
-def common_name_gen(rtt):
+def common_name_gen(conn):
     """Request the device to generate a certificate Common Name.
 
-    Send a certificate get-Common-Name command over the DDP RTT interface and
-    return the device status together with the Common Name payload. On a
-    non-zero status a failure message is printed.
+    Send a certificate get-Common-Name command over the DDP Connection
+    interface and return the device status together with the Common Name
+    payload. On a non-zero status a failure message is printed.
 
     Args:
-        rtt: RTT transport exposing ``rtt_send`` and ``rtt_receive`` methods
+        conn: Transport layer exposing ``send`` and ``receive`` methods
             used to communicate with the device.
 
     Returns:
@@ -45,8 +45,8 @@ def common_name_gen(rtt):
             Common Name payload.
     """
     print("Generating a common name...")
-    rtt.rtt_send(CommandCertGetCn())
-    resp = ResponseCertGetCn(rtt.rtt_receive())
+    conn.send(CommandCertGetCn())
+    resp = ResponseCertGetCn(conn.receive())
     if resp.status != 0:
         print(f"Get Common name failure: {resp.status:#06x}")
         return resp.status, None

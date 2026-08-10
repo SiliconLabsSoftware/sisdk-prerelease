@@ -40,6 +40,12 @@ config_file:
   condition:
   - device_series_2
   - device_sdid_260
+- path: plugin/sl_rail_util_rf_path/config/siwx353/sl_rail_util_rf_path_config.h
+  file_id: rail_util_rf_path_config
+  condition:
+  - device_generic_family_sixx353
+  unless:
+  - fpga
 include:
 - path: plugin/sl_rail_util_rf_path
   file_list:

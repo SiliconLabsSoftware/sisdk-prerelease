@@ -143,6 +143,17 @@ include:
   - path: sl_rail_ieee802154_config_38M4Hz.h
   - path: sl_rail_ieee802154_config_39MHz.h
   - path: sl_rail_ieee802154_config_40MHz.h
+- path: plugin/sl_rail_util_built_in_phys/siwx353
+  condition: [device_generic_family_sixx353]
+  unless: [device_is_module, fpga]
+  file_list:
+  - path: sl_rail_ble_config_38M4Hz.h
+  - path: sl_rail_ble_config_39MHz.h
+  - path: sl_rail_ble_config_40MHz.h
+  - path: sl_rail_btc_config_38M4Hz.h
+  - path: sl_rail_btc_config_39MHz.h
+  - path: sl_rail_btc_config_40MHz.h
+  - path: sl_rail_ieee802154_config.h
 source:
 - path: plugin/sl_rail_util_built_in_phys/sl_rail_util_built_in_phys.c
   condition: [device_sdid_200]
@@ -336,6 +347,30 @@ source:
 - path: plugin/sl_rail_util_built_in_phys/sixg301/sl_rail_ieee802154_config_40MHz.c
   condition: [device_generic_family_sixx301]
   unless: [device_is_module]
+- path: plugin/sl_rail_util_built_in_phys/sl_rail_util_built_in_phys.c
+  condition: [device_generic_family_sixx353]
+  unless: [device_is_module, fpga]
+- path: plugin/sl_rail_util_built_in_phys/siwx353/sl_rail_ble_config_38M4Hz.c
+  condition: [device_generic_family_sixx353]
+  unless: [device_is_module, fpga]
+- path: plugin/sl_rail_util_built_in_phys/siwx353/sl_rail_ble_config_39MHz.c
+  condition: [device_generic_family_sixx353]
+  unless: [device_is_module, fpga]
+- path: plugin/sl_rail_util_built_in_phys/siwx353/sl_rail_ble_config_40MHz.c
+  condition: [device_generic_family_sixx353]
+  unless: [device_is_module, fpga]
+- path: plugin/sl_rail_util_built_in_phys/siwx353/sl_rail_btc_config_38M4Hz.c
+  condition: [device_generic_family_sixx353]
+  unless: [device_is_module, fpga]
+- path: plugin/sl_rail_util_built_in_phys/siwx353/sl_rail_btc_config_39MHz.c
+  condition: [device_generic_family_sixx353]
+  unless: [device_is_module, fpga]
+- path: plugin/sl_rail_util_built_in_phys/siwx353/sl_rail_btc_config_40MHz.c
+  condition: [device_generic_family_sixx353]
+  unless: [device_is_module, fpga]
+- path: plugin/sl_rail_util_built_in_phys/siwx353/sl_rail_ieee802154_config.c
+  condition: [device_generic_family_sixx353]
+  unless: [device_is_module, fpga]
 template_contribution:
 - name: component_catalog
   value: sl_rail_util_built_in_phys

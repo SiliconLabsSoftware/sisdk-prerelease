@@ -67,17 +67,17 @@ extern uint32_t SystemHfrcoFreq;     /**< System HFRCO frequency */
 #endif
 
 /*Re-direction of IRQn.*/
-#if defined (SL_TRUSTZONE_SECURE)
-#define SMU_PRIVILEGED_IRQn    SMU_S_PRIVILEGED_IRQn
-#else
+#if defined(SL_TRUSTZONE_NONSECURE) || defined(SL_TZ_NON_SECURE_EXECUTION)
 #define SMU_PRIVILEGED_IRQn    SMU_NS_PRIVILEGED_IRQn
+#else
+#define SMU_PRIVILEGED_IRQn    SMU_S_PRIVILEGED_IRQn
 #endif /* SL_TRUSTZONE_SECURE */
 
 /*Re-direction of IRQHandler.*/
-#if defined (SL_TRUSTZONE_SECURE)
-#define SMU_PRIVILEGED_IRQHandler    SMU_S_PRIVILEGED_IRQHandler
-#else
+#if defined(SL_TRUSTZONE_NONSECURE) || defined(SL_TZ_NON_SECURE_EXECUTION)
 #define SMU_PRIVILEGED_IRQHandler    SMU_NS_PRIVILEGED_IRQHandler
+#else
+#define SMU_PRIVILEGED_IRQHandler    SMU_S_PRIVILEGED_IRQHandler
 #endif /* SL_TRUSTZONE_SECURE */
 
 /*******************************************************************************

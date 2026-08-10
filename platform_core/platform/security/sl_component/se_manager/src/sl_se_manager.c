@@ -36,13 +36,6 @@
 #include "sli_se_manager_internal.h"
 #include "sli_se_manager_mailbox.h"
 #include "sl_assert.h"
-#if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
-#if defined(_SILICON_LABS_32B_SERIES_3)
-#include "sl_hal_bus.h"
-#else
-#include "em_bus.h"
-#endif
-#endif
 #if !defined(SLI_SE_MANAGER_HOST_SYSTEM)
 #include "sli_psec_osal.h"
 #endif
@@ -326,18 +319,18 @@ sl_status_t sli_se_lock_acquire(void)
   #else
   sl_status_t status = SL_STATUS_OK;
   #endif
-  #if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
+  #if defined(CMU_SEMAILBOXCLKCTRL_CLKEN) || defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
   if (status == SL_STATUS_OK) {
-  #if defined(CMU_SEMAILBOXCLKCTRL_CLKEN)
+    #if defined(CMU_SEMAILBOXCLKCTRL_CLKEN)
     CMU->SEMAILBOXCLKCTRL_SET = CMU_SEMAILBOXCLKCTRL_CLKEN;
-  #else
+    #elif defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
     CMU->CLKEN1_SET = CMU_CLKEN1_SEMAILBOXHOST;
-  #endif
+    #endif
     // Make sure the write to CMU is finished.
     __DSB();
     __ISB();
   }
-  #endif
+  #endif // #if defined(CMU_SEMAILBOXCLKCTRL_CLKEN) || defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
   return status;
 }
 
@@ -347,13 +340,12 @@ sl_status_t sli_se_lock_acquire(void)
  ******************************************************************************/
 sl_status_t sli_se_lock_release(void)
 {
-  #if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
-  #if defined(_SILICON_LABS_32B_SERIES_3)
-  sl_hal_bus_reg_write_bit(&CMU->CLKEN1, _CMU_CLKEN1_SEMAILBOXHOST_SHIFT, 0);
-  #else
-  BUS_RegBitWrite(&CMU->CLKEN1, _CMU_CLKEN1_SEMAILBOXHOST_SHIFT, 0);
+  #if defined(CMU_SEMAILBOXCLKCTRL_CLKEN)
+  CMU->SEMAILBOXCLKCTRL_CLR = CMU_SEMAILBOXCLKCTRL_CLKEN;
+  #elif defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
+  CMU->CLKEN1_CLR = CMU_CLKEN1_SEMAILBOXHOST;
   #endif
-  #endif
+
   #if defined(SL_SE_MANAGER_THREADING)
   return sli_psec_osal_give_lock(&se_lock);
   #else

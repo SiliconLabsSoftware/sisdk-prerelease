@@ -28,6 +28,9 @@ opn_override:
     brd4408a_a06: simg301m104xil_a0_8mb
     brd4277a_a01: efr32fg2db010f512im48
     brd4277a_a02: efr32fg2db010f512im48
+    # BRD4419A_A03 kit DB targets internal-only efr32xg2bb313…; keep curl/public drop
+    # on the same public Curl OPN as A01/A02 (boards_efr32xg2b).
+    brd4419a_a03: efr32bg2bb312f1016im48
 
 socket_board_opn:
     BRD1020A: efr32mg29b230f1024cm40
@@ -45,7 +48,6 @@ board_ref_ignore:
     - BRD8010
     - BRD8029
     - BRD8049
-
 socket_boards:
     - BRD1020A
     - BRD1021A
@@ -94,12 +96,14 @@ board_release_whitelist:
     - BRD4001A
     - BRD4002A
     - BRD4002B
+    - BRD6000A
     - BRD4108A
     - BRD4109A
     - BRD4110A
     - BRD4110B
     - BRD4111A
     - BRD4111B
+    - BRD4112A
     - BRD4113A
     - BRD4115A
     - BRD4115B
@@ -214,6 +218,8 @@ board_release_whitelist:
     - BRD4351A
     - BRD4356A
     - BRD4356Z
+    - BRD4360A
+    - BRD6360A
     - BRD4400A
     - BRD4400B
     - BRD4400C

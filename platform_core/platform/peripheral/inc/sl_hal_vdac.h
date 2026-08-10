@@ -113,7 +113,7 @@ SL_ENUM(sl_hal_vdac_trigger_mode_t) {
   SL_HAL_VDAC_TRIGGER_MODE_NONE           = _VDAC_CH0CFG_TRIGMODE_NONE,           ///< No conversion trigger source selected.
   SL_HAL_VDAC_TRIGGER_MODE_SW             = _VDAC_CH0CFG_TRIGMODE_SW,             ///< Channel is triggered by CHnDATA or COMBDATA write.
   SL_HAL_VDAC_TRIGGER_MODE_SYNC_PRS       = _VDAC_CH0CFG_TRIGMODE_SYNCPRS,        ///< Channel is triggered by Sync PRS input.
-#if defined(LESENSE_PRESENT)
+#if defined(_VDAC_CH0CFG_TRIGMODE_LESENSE)
   SL_HAL_VDAC_TRIGGER_MODE_LESENSE        = _VDAC_CH0CFG_TRIGMODE_LESENSE,        ///< Channel is triggered by LESENSE.
 #endif
   SL_HAL_VDAC_TRIGGER_MODE_INTERNAL_TIMER = _VDAC_CH0CFG_TRIGMODE_INTERNALTIMER,  ///< Channel is triggered by Internal Timer.

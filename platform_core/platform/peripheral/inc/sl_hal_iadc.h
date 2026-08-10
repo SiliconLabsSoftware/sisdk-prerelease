@@ -153,7 +153,9 @@ SL_ENUM(sl_hal_iadc_negative_port_input_t) {
 #endif
   SL_HAL_IADC_NEG_PORT_INPUT_PORT_A    = _IADC_SCAN_PORTNEG_PORTA,       ///< GPIO port A.
   SL_HAL_IADC_NEG_PORT_INPUT_PORT_B    = _IADC_SCAN_PORTNEG_PORTB,       ///< GPIO port B.
+#if defined(_IADC_SCAN_PORTNEG_PORTC)
   SL_HAL_IADC_NEG_PORT_INPUT_PORT_C    = _IADC_SCAN_PORTNEG_PORTC,       ///< GPIO port C.
+#endif
   SL_HAL_IADC_NEG_PORT_INPUT_PORT_D    = _IADC_SCAN_PORTNEG_PORTD        ///< GPIO port D.
 };
 
@@ -175,7 +177,9 @@ SL_ENUM(sl_hal_iadc_positive_port_input_t) {
 #endif
   SL_HAL_IADC_POS_PORT_INPUT_PORT_A    = _IADC_SCAN_PORTPOS_PORTA,       ///< GPIO port A.
   SL_HAL_IADC_POS_PORT_INPUT_PORT_B    = _IADC_SCAN_PORTPOS_PORTB,       ///< GPIO port B.
+#if defined(_IADC_SCAN_PORTPOS_PORTC)
   SL_HAL_IADC_POS_PORT_INPUT_PORT_C    = _IADC_SCAN_PORTPOS_PORTC,       ///< GPIO port C.
+#endif
   SL_HAL_IADC_POS_PORT_INPUT_PORT_D    = _IADC_SCAN_PORTPOS_PORTD        ///< GPIO port D.
 };
 

@@ -197,3 +197,17 @@ static sli_bank_coverage_t memory_manager_dmem_get_block_bank_coverage(void *sta
 
   return block_coverage;
 }
+
+/***************************************************************************//**
+ * Apply memory-manager retention policy immediately before entering EM2/EM3.
+ ******************************************************************************/
+void sli_memory_manager_retention_em23_presleep(void)
+{
+}
+
+/***************************************************************************//**
+ * Restore memory-manager retention policy immediately after exiting EM2/EM3.
+ ******************************************************************************/
+void sli_memory_manager_retention_em23_postsleep(void)
+{
+}

@@ -454,6 +454,7 @@ uint32_t SystemFSRCOClockGet(void)
 uint32_t SystemHFRCOEM23ClockGet(void)
 {
   uint32_t ret = 0UL;
+
   CMU->CLKEN0_SET = CMU_CLKEN0_HFRCOEM23;
 
   // Get oscillator frequency band

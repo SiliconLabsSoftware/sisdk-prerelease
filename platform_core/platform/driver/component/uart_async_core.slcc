@@ -14,7 +14,7 @@ metadata:
 root_path: platform_core/platform/driver/uart/
 source:
 - path: src/sl_uart_async.c
-- path: src/sli_uart_async.h
+- path: src/sli_uart_async_types.h
 - path: src/sli_uart_transfer_pool.c
 - path: src/sli_uart_transfer_pool.h
 provides:

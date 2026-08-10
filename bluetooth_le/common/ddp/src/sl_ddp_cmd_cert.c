@@ -31,6 +31,9 @@
 #include <stdio.h>
 #include <string.h>
 #include "sl_status.h"
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
 #include "em_system.h"
 #include "psa/crypto.h"
 #include "psa/crypto_values.h"
@@ -42,6 +45,19 @@
 #define UUID_LEN                  (16)
 #define UUID_STR_LEN              (37)
 #define CRYPTO_SHA_1_LEN          (20)
+
+// Logging
+#define LOG_PREFIX                    "[DDP_CERT] "
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
+#include "app_log.h"
+#define LOG_NL                        APP_LOG_NL
+#define LOG_INFO(...)                 app_log_info(LOG_PREFIX __VA_ARGS__)
+#define LOG_ERROR(...)                app_log_error(LOG_PREFIX __VA_ARGS__)
+#else // SL_CATALOG_APP_LOG_PRESENT
+#define LOG_NL
+#define LOG_INFO(...)
+#define LOG_ERROR(...)
+#endif // SL_CATALOG_APP_LOG_PRESENT
 
 // -----------------------------------------------------------------------------
 // Private function declarations and variables
@@ -101,6 +117,7 @@ int sl_ddp_cmd_cert_get_cn(const uint8_t *input,
 
   status = calculate_sha_1(tmp, sizeof(tmp), digest);
   if (status != PSA_SUCCESS) {
+    LOG_ERROR("[calculate_sha_1] %ld" LOG_NL, status);
     return (int)status;
   }
 
@@ -126,6 +143,7 @@ int sl_ddp_cmd_cert_get_cn(const uint8_t *input,
   // Set output
   *output_len = sizeof(uuid_str);
   memcpy(output, uuid_str, sizeof(uuid_str));
+  LOG_INFO("[%s] %ld" LOG_NL, __func__, status);
   return (int)status;
 }
 
@@ -151,16 +169,19 @@ static psa_status_t calculate_sha_1(const uint8_t *ptr,
 
   status = psa_hash_setup(&operation, alg);
   if (status != PSA_SUCCESS) {
+    LOG_ERROR("[psa_hash_setup] %ld" LOG_NL, status);
     return status;
   }
 
   status = psa_hash_update(&operation, ptr, len);
   if (status != PSA_SUCCESS) {
+    LOG_ERROR("[psa_hash_update] %ld" LOG_NL, status);
     return status;
   }
 
   status = psa_hash_finish(&operation, result, CRYPTO_SHA_1_LEN, &out_len);
   if (status != PSA_SUCCESS) {
+    LOG_ERROR("[psa_hash_finish] %ld" LOG_NL, status);
     return status;
   }
 

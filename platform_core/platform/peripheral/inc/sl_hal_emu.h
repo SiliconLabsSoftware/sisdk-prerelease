@@ -97,6 +97,7 @@ SL_ENUM(sl_hal_emu_reset_mode_t) {
   SL_HAL_EMU_RESET_MODE_ENABLED  = 1,  ///< Reset mode enabled.
 };
 
+#if defined(_EMU_RSTCTRL_MASK)
 /// Peripheral reset control and reset source control.
 SL_ENUM(sl_hal_emu_reset_source_t) {
 #if defined(_EMU_RSTCTRL_WDOG0RMODE_SHIFT)
@@ -133,6 +134,124 @@ SL_ENUM(sl_hal_emu_reset_source_t) {
   SL_HAL_EMU_RESET_SE_LOCKUP    = _EMU_RSTCTRL_SEM0LOCKUPRMODE_SHIFT,  ///< M0+ (SE) lockup select.
 #endif
 };
+#endif
+
+#if defined(_EMU_HARDRSTCTRL_MASK)
+/// Peripheral hard reset control and hard reset source control.
+SL_ENUM_GENERIC(sl_hal_emu_hard_reset_source_t, uint32_t) {
+#if defined(_EMU_HARDRSTCTRL_RMODE_POR)
+  SL_HAL_EMU_HARD_RESET_POR          = _EMU_HARDRSTCTRL_RMODE_POR,              ///< POR hard reset select.
+#endif
+#if defined(_EMU_HARDRSTCTRL_RMODE_PIN)
+  SL_HAL_EMU_HARD_RESET_PIN          = _EMU_HARDRSTCTRL_RMODE_PIN,              ///< PIN hard reset select.
+#endif
+#if defined(_EMU_HARDRSTCTRL_RMODE_DVDDBOD)
+  SL_HAL_EMU_HARD_RESET_DVDDBOD      = _EMU_HARDRSTCTRL_RMODE_DVDDBOD,          ///< DVDDBOD hard reset select.
+#endif
+#if defined(_EMU_HARDRSTCTRL_RMODE_DVDDLEBOD)
+  SL_HAL_EMU_HARD_RESET_DVDDLEBOD    = _EMU_HARDRSTCTRL_RMODE_DVDDLEBOD,        ///< DVDDLEBOD hard reset select.
+#endif
+#if defined(_EMU_HARDRSTCTRL_RMODE_DECBOD)
+  SL_HAL_EMU_HARD_RESET_DECBOD       = _EMU_HARDRSTCTRL_RMODE_DECBOD,           ///< DECBOD hard reset select.
+#endif
+#if defined(_EMU_HARDRSTCTRL_RMODE_DECBODHI)
+  SL_HAL_EMU_HARD_RESET_DECBODHI     = _EMU_HARDRSTCTRL_RMODE_DECBODHI,         ///< DECBODHI hard reset select.
+#endif
+#if defined(_EMU_HARDRSTCTRL_RMODE_HVBOD0)
+  SL_HAL_EMU_HARD_RESET_HVBOD0       = _EMU_HARDRSTCTRL_RMODE_HVBOD0,           ///< HVBOD0 hard reset select.
+#endif
+#if defined(_EMU_HARDRSTCTRL_RMODE_HVBOD1)
+  SL_HAL_EMU_HARD_RESET_HVBOD1       = _EMU_HARDRSTCTRL_RMODE_HVBOD1,           ///< HVBOD1 hard reset select.
+#endif
+#if defined(_EMU_HARDRSTCTRL_RMODE_TAMPER)
+  SL_HAL_EMU_HARD_RESET_TAMPER       = _EMU_HARDRSTCTRL_RMODE_TAMPER,           ///< TAMPER hard reset select.
+#endif
+#if defined(_EMU_HARDRSTCTRL_RMODE_EFSREQ)
+  SL_HAL_EMU_HARD_RESET_EFSREQ       = _EMU_HARDRSTCTRL_RMODE_EFSREQ,           ///< EFSREQ hard reset select.
+#endif
+};
+#endif
+
+#if defined(_EMU_SOFTRSTCTRL_MASK)
+/// Peripheral soft reset control and soft reset source control.
+SL_ENUM_GENERIC(sl_hal_emu_soft_reset_source_t, uint32_t) {
+#if defined(_EMU_SOFTRSTCTRL_RMODE_EM4)
+  SL_HAL_EMU_SOFT_RESET_EM4          = _EMU_SOFTRSTCTRL_RMODE_EM4,              ///< EM4 soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_WDOG0)
+  SL_HAL_EMU_SOFT_RESET_WDOG0        = _EMU_SOFTRSTCTRL_RMODE_WDOG0,            ///< WDOG0 soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_WDOG1)
+  SL_HAL_EMU_SOFT_RESET_WDOG1        = _EMU_SOFTRSTCTRL_RMODE_WDOG1,            ///< WDOG1 soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_WDOG2)
+  SL_HAL_EMU_SOFT_RESET_WDOG2        = _EMU_SOFTRSTCTRL_RMODE_WDOG2,            ///< WDOG2 soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_WDOG3)
+  SL_HAL_EMU_SOFT_RESET_WDOG3        = _EMU_SOFTRSTCTRL_RMODE_WDOG3,            ///< WDOG3 soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_CPU0LOCKUP)
+  SL_HAL_EMU_SOFT_RESET_CPU0LOCKUP   = _EMU_SOFTRSTCTRL_RMODE_CPU0LOCKUP,       ///< CPU0 lockup soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_CPU0SYSREQ)
+  SL_HAL_EMU_SOFT_RESET_CPU0SYSREQ   = _EMU_SOFTRSTCTRL_RMODE_CPU0SYSREQ,       ///< CPU0 sysreq soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_CPU1LOCKUP)
+  SL_HAL_EMU_SOFT_RESET_CPU1LOCKUP   = _EMU_SOFTRSTCTRL_RMODE_CPU1LOCKUP,       ///< CPU1 lockup soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_CPU1SYSREQ)
+  SL_HAL_EMU_SOFT_RESET_CPU1SYSREQ   = _EMU_SOFTRSTCTRL_RMODE_CPU1SYSREQ,       ///< CPU1 sysreq soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_AVDDBOD)
+  SL_HAL_EMU_SOFT_RESET_AVDDBOD      = _EMU_SOFTRSTCTRL_RMODE_AVDDBOD,          ///< AVDDBOD soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_VDDIO0BOD)
+  SL_HAL_EMU_SOFT_RESET_VDDIO0BOD    = _EMU_SOFTRSTCTRL_RMODE_VDDIO0BOD,        ///< VDDIO0BOD soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_VDDIO1BOD)
+  SL_HAL_EMU_SOFT_RESET_VDDIO1BOD    = _EMU_SOFTRSTCTRL_RMODE_VDDIO1BOD,        ///< VDDIO1BOD soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_BOD3S1BOD0)
+  SL_HAL_EMU_SOFT_RESET_BOD3S1BOD0   = _EMU_SOFTRSTCTRL_RMODE_BOD3S1BOD0,       ///< BOD3S1BOD0 soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_BOD3S1BOD1)
+  SL_HAL_EMU_SOFT_RESET_BOD3S1BOD1   = _EMU_SOFTRSTCTRL_RMODE_BOD3S1BOD1,       ///< BOD3S1BOD1 soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_BOD3S1BOD2)
+  SL_HAL_EMU_SOFT_RESET_BOD3S1BOD2   = _EMU_SOFTRSTCTRL_RMODE_BOD3S1BOD2,       ///< BOD3S1BOD2 soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_BOD3S2BOD0)
+  SL_HAL_EMU_SOFT_RESET_BOD3S2BOD0   = _EMU_SOFTRSTCTRL_RMODE_BOD3S2BOD0,       ///< BOD3S2BOD0 soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_BOD3S2BOD1)
+  SL_HAL_EMU_SOFT_RESET_BOD3S2BOD1   = _EMU_SOFTRSTCTRL_RMODE_BOD3S2BOD1,       ///< BOD3S2BOD1 soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_BOD3S2BOD2)
+  SL_HAL_EMU_SOFT_RESET_BOD3S2BOD2   = _EMU_SOFTRSTCTRL_RMODE_BOD3S2BOD2,       ///< BOD3S2BOD2 soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_LPWCORESYSREQ)
+  SL_HAL_EMU_SOFT_RESET_LPWCORESYSREQ = _EMU_SOFTRSTCTRL_RMODE_LPWCORESYSREQ,   ///< LPW core sysreq soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_LPWCORELOCKUP)
+  SL_HAL_EMU_SOFT_RESET_LPWCORELOCKUP = _EMU_SOFTRSTCTRL_RMODE_LPWCORELOCKUP,   ///< LPW core lockup soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_SECORESYSREQ)
+  SL_HAL_EMU_SOFT_RESET_SECORESYSREQ = _EMU_SOFTRSTCTRL_RMODE_SECORESYSREQ,     ///< SE core sysreq soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_SECORELOCKUP)
+  SL_HAL_EMU_SOFT_RESET_SECORELOCKUP = _EMU_SOFTRSTCTRL_RMODE_SECORELOCKUP,     ///< SE core lockup soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_EM4BU)
+  SL_HAL_EMU_SOFT_RESET_EM4BU        = _EMU_SOFTRSTCTRL_RMODE_EM4BU,            ///< EM4BU soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_LFXOFAILDET)
+  SL_HAL_EMU_SOFT_RESET_LFXOFAILDET  = _EMU_SOFTRSTCTRL_RMODE_LFXOFAILDET,      ///< LFXO fail detect soft reset select.
+#endif
+#if defined(_EMU_SOFTRSTCTRL_RMODE_HFXOFAILDET)
+  SL_HAL_EMU_SOFT_RESET_HFXOFAILDET  = _EMU_SOFTRSTCTRL_RMODE_HFXOFAILDET,      ///< HFXO fail detect soft reset select.
+#endif
+};
+#endif
 
 #if defined(_EMU_CTRL_HDREGSTOPGEAR_MASK)
 /// HDREG Stop Gear Max Current Type.
@@ -361,6 +480,35 @@ SL_ENUM(sl_hal_emu_dcdc_regulation_type_t) {
 };
 #endif
 
+#if defined(DCDC_VRLCFG_VRLEN)
+/// DCDC Variable Resistive Load (VRL) mode.
+SL_ENUM(sl_hal_emu_dcdc_vrl_mode_t) {
+  SL_HAL_EMU_DCDC_VRL_MODE_300OHM = _DCDC_VRLCFG_VRLMODE_MODE0,  ///< 300 ohm load (MODE0).
+  SL_HAL_EMU_DCDC_VRL_MODE_100OHM = _DCDC_VRLCFG_VRLMODE_MODE1   ///< 100 ohm load (MODE1).
+};
+
+/// DCDC VRL pulse count.
+SL_ENUM(sl_hal_emu_dcdc_vrl_pulse_num_t) {
+  SL_HAL_EMU_DCDC_VRL_PULSE_NUM_3  = _DCDC_VRLCFG_VRLPULSENUM_pulse3,   ///< 3 pulses.
+  SL_HAL_EMU_DCDC_VRL_PULSE_NUM_6  = _DCDC_VRLCFG_VRLPULSENUM_pulse6,   ///< 6 pulses.
+  SL_HAL_EMU_DCDC_VRL_PULSE_NUM_9  = _DCDC_VRLCFG_VRLPULSENUM_pulse9,   ///< 9 pulses.
+  SL_HAL_EMU_DCDC_VRL_PULSE_NUM_12 = _DCDC_VRLCFG_VRLPULSENUM_pulse12   ///< 12 pulses.
+};
+
+/// DCDC VRL regulator-off delay before applying the load.
+SL_ENUM(sl_hal_emu_dcdc_vrl_regulator_off_delay_t) {
+  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_0US    = _DCDC_VRLCFG_VRLCNTLOAD_regoff0us,           ///< 0 us regulator-off delay.
+  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_2P5US  = _DCDC_VRLCFG_VRLCNTLOAD_regoff2p5us,         ///< 2.5 us regulator-off delay.
+  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_5US    = _DCDC_VRLCFG_VRLCNTLOAD_regoff5us,           ///< 5 us regulator-off delay.
+  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_7P5US  = _DCDC_VRLCFG_VRLCNTLOAD_regoff7p5us,         ///< 7.5 us regulator-off delay.
+  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_10US   = _DCDC_VRLCFG_VRLCNTLOAD_regoff10us_default,  ///< 10 us regulator-off delay.
+  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_12P5US = _DCDC_VRLCFG_VRLCNTLOAD_regoff12p5us,        ///< 12.5 us regulator-off delay.
+  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_15US   = _DCDC_VRLCFG_VRLCNTLOAD_regoff15us,          ///< 15 us regulator-off delay.
+  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_17P5US = _DCDC_VRLCFG_VRLCNTLOAD_regoff17p5us,        ///< 17.5 us regulator-off delay.
+  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_20US   = _DCDC_VRLCFG_VRLCNTLOAD_regoff20us           ///< 20 us regulator-off delay.
+};
+#endif /* defined(DCDC_VRLCFG_VRLEN) */
+
 /*******************************************************************************
  *******************************   STRUCTS   ***********************************
  ******************************************************************************/
@@ -408,6 +556,16 @@ typedef struct {
 typedef sl_hal_emu_dcdc_init_t sl_hal_emu_dcdc_config_t;
 /** @endcond */
 #endif /* defined(SL_HAL_EMU_DCDC_BUCK_PRESENT) */
+
+#if defined(DCDC_VRLCFG_VRLEN)
+/// DCDC Variable Resistive Load (VRL) initialization structure.
+typedef struct {
+  sl_hal_emu_dcdc_vrl_mode_t                   mode;                   ///< VRL load mode.
+  sl_hal_emu_dcdc_vrl_pulse_num_t              pulse_num;              ///< VRL pulse count.
+  sl_hal_emu_dcdc_vrl_regulator_off_delay_t    regulator_off_delay;    ///< Regulator-off delay before applying the load.
+  bool                                         force_refresh_enable;   ///< Enable PRS forced refresh.
+} sl_hal_emu_dcdc_vrl_init_t;
+#endif /* defined(DCDC_VRLCFG_VRLEN) */
 
 #if defined(SL_HAL_EMU_DCDC_BOOST_PRESENT)
 /// Default DCDC Boost initialization.
@@ -507,6 +665,19 @@ typedef sl_hal_emu_dcdc_init_t sl_hal_emu_dcdc_config_t;
 #endif
 #endif
 #endif /* defined(SL_HAL_EMU_DCDC_BUCK_PRESENT) */
+
+
+#if defined(DCDC_VRLCFG_VRLEN)
+/// Default DCDC Variable Resistive Load (VRL) initialization.
+#define SL_HAL_EMU_DCDC_VRL_INIT_DEFAULT                                              \
+  {                                                                                   \
+    SL_HAL_EMU_DCDC_VRL_MODE_100OHM,                 /*< 100 ohm load. */             \
+    SL_HAL_EMU_DCDC_VRL_PULSE_NUM_3,                 /*< 3 pulses. */                 \
+    SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_10US,    /*< 10 us regulator-off. */      \
+    false                                            /*< PRS forced refresh off. */   \
+  }
+#endif /* defined(DCDC_VRLCFG_VRLEN) */
+
 #endif /* defined(_SILICON_LABS_32B_SERIES_2) */
 
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
@@ -830,6 +1001,52 @@ void sl_hal_emu_dcdc_dual_ipk_disable(void);
  ******************************************************************************/
 bool sl_hal_emu_dcdc_get_dual_ipk_enable(void);
 #endif /* defined(_DCDC_DOCTRL_DUALIPKEN_MASK)*/
+
+#if defined(DCDC_VRLCFG_VRLEN)
+/***************************************************************************//**
+ * @brief
+ *   Initialize the DCDC Variable Resistive Load (VRL) configuration.
+ *
+ * @details
+ *   Configures VRLCFG and loads the factory trim of the selected load mode from
+ *   DEVINFO.VRLTRIM into DCDC.TRIM0.VRLTRIM. The load itself is not applied;
+ *   call @ref sl_hal_emu_dcdc_vrl_enable() to connect it.
+ *
+ * @param[in] init
+ *   The DCDC VRL initialization structure.
+ *
+ * @note
+ *   Make sure the DCDC is enabled and unlocked before calling this function.
+ ******************************************************************************/
+void sl_hal_emu_init_dcdc_vrl(const sl_hal_emu_dcdc_vrl_init_t *init);
+
+/***************************************************************************//**
+ * @brief
+ *   Enable the DCDC Variable Resistive Load (VRL).
+ *
+ * @details
+ *   Sets VRLCFG.VRLEN, which connects the resistive load configured by
+ *   @ref sl_hal_emu_init_dcdc_vrl().
+ *
+ * @note
+ *   Make sure the DCDC is enabled and unlocked before calling this function.
+ ******************************************************************************/
+void sl_hal_emu_dcdc_vrl_enable(void);
+
+/***************************************************************************//**
+ * @brief
+ *   Disable the DCDC Variable Resistive Load (VRL).
+ *
+ * @details
+ *   Clears VRLCFG.VRLEN, which disconnects the resistive load without altering
+ *   the remaining VRL configuration.
+ *
+ * @note
+ *   Make sure the DCDC is enabled and unlocked before calling this function.
+ ******************************************************************************/
+void sl_hal_emu_dcdc_vrl_disable(void);
+#endif /* defined(DCDC_VRLCFG_VRLEN) */
+
 #endif /* defined(_SILICON_LABS_32B_SERIES_2) */
 
 /***************************************************************************//**
@@ -1039,6 +1256,7 @@ __INLINE void sl_hal_emu_clear_reset_cause(void)
   EMU->CMD_SET = EMU_CMD_RSTCAUSECLR;
 }
 
+#if defined(_EMU_RSTCTRL_MASK)
 /***************************************************************************//**
  * @brief
  *   Get the cause of the last reset.
@@ -1074,6 +1292,83 @@ __INLINE void sl_hal_emu_set_reset_control(sl_hal_emu_reset_source_t reset,
     EMU->RSTCTRL_CLR = 1U << (uint32_t)reset;
   }
 }
+#endif
+
+#if defined(_EMU_HARDRSTCTRL_MASK)
+/***************************************************************************//**
+ * @brief
+ *   Get the cause of the last hard reset.
+ *
+ * @details
+ *   To be useful, the hard reset cause must be cleared by software before a new
+ *   reset occurs. Otherwise, reset causes may accumulate, See
+ *   sl_hal_emu_clear_hard_reset_cause(). This function call will return the main cause for
+ *   hard reset, which can be a bit mask (several causes) and clear away "noise".
+ *
+ * @return
+ *   A hard reset cause mask. See the reference manual for a description
+ *   of the hard reset cause mask.
+ ******************************************************************************/
+uint32_t sl_hal_emu_get_hard_reset_cause(void);
+
+/***************************************************************************//**
+ * @brief
+ *   Disable/enable hard reset for various peripherals and signal sources.
+ *
+ * @param[in] reset
+ *   Hard reset types to enable/disable.
+ *
+ * @param[in] mode
+ *   Hard reset mode.
+ ******************************************************************************/
+__INLINE void sl_hal_emu_set_hard_reset_control(sl_hal_emu_hard_reset_source_t reset,
+                                                sl_hal_emu_reset_mode_t mode)
+{
+  if (mode == 1) {
+    EMU->HARDRSTCTRL_SET = (uint32_t)reset;
+  } else {
+    EMU->HARDRSTCTRL_CLR = (uint32_t)reset;
+  }
+}
+#endif
+
+#if defined(_EMU_SOFTRSTCTRL_MASK)
+/***************************************************************************//**
+ * @brief
+ *   Get the cause of the last soft reset.
+ *
+ * @details
+ *   To be useful, the soft reset cause must be cleared by software before a new
+ *   reset occurs. Otherwise, reset causes may accumulate, See
+ *   sl_hal_emu_clear_soft_reset_cause(). This function call will return the main cause for
+ *   soft reset, which can be a bit mask (several causes) and clear away "noise".
+ *
+ * @return
+ *   A soft reset cause mask. See the reference manual for a description
+ *   of the soft reset cause mask.
+ ******************************************************************************/
+uint32_t sl_hal_emu_get_soft_reset_cause(void);
+
+/***************************************************************************//**
+ * @brief
+ *   Disable/enable soft reset for various peripherals and signal sources.
+ *
+ * @param[in] reset
+ *   Soft reset types to enable/disable.
+ *
+ * @param[in] mode
+ *   Soft reset mode.
+ ******************************************************************************/
+__INLINE void sl_hal_emu_set_soft_reset_control(sl_hal_emu_soft_reset_source_t reset,
+                                                sl_hal_emu_reset_mode_t mode)
+{
+  if (mode == 1) {
+    EMU->SOFTRSTCTRL_SET = (uint32_t)reset;
+  } else {
+    EMU->SOFTRSTCTRL_CLR = (uint32_t)reset;
+  }
+}
+#endif
 
 #if defined(_EMU_CTRL_HDREGEM2EXITCLIM_MASK)
 /***************************************************************************//**

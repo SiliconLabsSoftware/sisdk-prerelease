@@ -62,6 +62,10 @@ config_file:
   condition:
   - device_generic_family_sixx301
   file_id: rail_util_coex_config
+- path: plugin/coexistence/config/sixg3xx/sl_rail_util_coex_config.h
+  condition:
+  - device_generic_family_sixx353
+  file_id: rail_util_coex_config
 - path: plugin/coexistence/config/sl_rail_util_coex_common_config.h
   file_id: rail_util_coex_common_config
 include:

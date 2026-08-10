@@ -132,9 +132,9 @@ static inline sl_hal_usart_hw_flow_control_t uart_hwfc_to_usart_hal_hwfc(sl_uart
 /***************************************************************************//**
  * Initializes the USART pins.
  ******************************************************************************/
-static inline void usart_uart_init_transport_pins(sl_uart_handle_t *uart_handle, sl_uart_pin_config_t pin_config)
+static void usart_uart_init_transport_pins(sl_peripheral_t uart, sl_uart_pin_config_t pin_config)
 {
-  USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart_handle->uart);
+  USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
 
   GPIO->USARTROUTE[USART_NUM(usart)].TXROUTE = (pin_config.tx.port << _GPIO_USART_TXROUTE_PORT_SHIFT)
                                                | (pin_config.tx.pin << _GPIO_USART_TXROUTE_PIN_SHIFT);
@@ -146,9 +146,9 @@ static inline void usart_uart_init_transport_pins(sl_uart_handle_t *uart_handle,
 /***************************************************************************//**
  * De-initializes the USART transport pins.
  ******************************************************************************/
-static inline void usart_uart_deinit_transport_pins(sl_uart_handle_t *uart_handle)
+static void usart_uart_deinit_transport_pins(sl_peripheral_t uart)
 {
-  USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart_handle->uart);
+  USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
 
   GPIO->USARTROUTE[USART_NUM(usart)].TXROUTE = _GPIO_USART_TXROUTE_RESETVALUE;
   GPIO->USARTROUTE[USART_NUM(usart)].RXROUTE = _GPIO_USART_RXROUTE_RESETVALUE;
@@ -158,9 +158,9 @@ static inline void usart_uart_deinit_transport_pins(sl_uart_handle_t *uart_handl
 /***************************************************************************//**
  * Initializes the USART hardware flow control pins.
  ******************************************************************************/
-static inline void usart_uart_init_hwfc_pins(sl_uart_handle_t *uart_handle, sl_uart_pin_config_t pin_config)
+static void usart_uart_init_hwfc_pins(sl_peripheral_t uart, sl_uart_pin_config_t pin_config)
 {
-  USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart_handle->uart);
+  USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
 
   GPIO->USARTROUTE[USART_NUM(usart)].CTSROUTE = (pin_config.cts.port << _GPIO_USART_CTSROUTE_PORT_SHIFT)
                                                 | (pin_config.cts.pin << _GPIO_USART_CTSROUTE_PIN_SHIFT);
@@ -172,9 +172,9 @@ static inline void usart_uart_init_hwfc_pins(sl_uart_handle_t *uart_handle, sl_u
 /***************************************************************************//**
  * De-initializes the USART hardware flow control pins.
  ******************************************************************************/
-static inline void usart_uart_deinit_hwfc_pins(sl_uart_handle_t *uart_handle)
+static void usart_uart_deinit_hwfc_pins(sl_peripheral_t uart)
 {
-  USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart_handle->uart);
+  USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
 
   GPIO->USARTROUTE[USART_NUM(usart)].CTSROUTE = _GPIO_USART_CTSROUTE_RESETVALUE;
   GPIO->USARTROUTE[USART_NUM(usart)].RTSROUTE = _GPIO_USART_RTSROUTE_RESETVALUE;
@@ -253,7 +253,7 @@ static inline bool usart_uart_is_rx_data_available(sl_peripheral_t uart)
 /***************************************************************************//**
  * Clear the specified interrupt from the USART peripheral.
  ******************************************************************************/
-static inline void usart_uart_clear_irq(sl_peripheral_t uart, uint32_t irq)
+static void usart_uart_clear_irq(sl_peripheral_t uart, uint32_t irq)
 {
   USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
 
@@ -263,7 +263,7 @@ static inline void usart_uart_clear_irq(sl_peripheral_t uart, uint32_t irq)
 /***************************************************************************//**
  * Enables or disables USART interrupt flags.
  ******************************************************************************/
-static inline void usart_uart_set_enable_irq(sl_peripheral_t uart, bool enabled, uint32_t irq)
+static void usart_uart_set_enable_irq(sl_peripheral_t uart, bool enabled, uint32_t irq)
 {
   USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
 
@@ -277,9 +277,8 @@ static inline void usart_uart_set_enable_irq(sl_peripheral_t uart, bool enabled,
 /***************************************************************************//**
  * Reads a single character on USART.
  ******************************************************************************/
-static sl_status_t usart_uart_read_byte(sl_uart_handle_t *uart_handle, uint8_t *byte)
+static sl_status_t usart_uart_read_byte(sl_peripheral_t uart, uint8_t *byte)
 {
-  sl_peripheral_t uart = uart_handle->uart;
   USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
 
   if (!usart_uart_is_rx_data_available(uart)) {
@@ -296,16 +295,16 @@ static sl_status_t usart_uart_read_byte(sl_uart_handle_t *uart_handle, uint8_t *
  * @return SL_STATUS_OK if one or more bytes were read,
  *         SL_STATUS_EMPTY if no data was available to read.
  ******************************************************************************/
-static inline sl_status_t usart_uart_read_buffer(sl_uart_handle_t *uart_handle,
-                                                 uint8_t *data,
-                                                 size_t size,
-                                                 size_t *bytes_read)
+static sl_status_t usart_uart_read_buffer(sl_peripheral_t uart,
+                                          uint8_t *data,
+                                          size_t size,
+                                          size_t *bytes_read)
 {
   sl_status_t status = SL_STATUS_OK;
   size_t i;
 
   for (i = 0; i < size; i++) {
-    status = usart_uart_read_byte(uart_handle, &data[i]);
+    status = usart_uart_read_byte(uart, &data[i]);
     if (status != SL_STATUS_OK) {
       status = (i == 0) ? SL_STATUS_EMPTY : SL_STATUS_OK;
       break;
@@ -319,9 +318,8 @@ static inline sl_status_t usart_uart_read_buffer(sl_uart_handle_t *uart_handle,
 /***************************************************************************//**
  * Writes a single character on USART.
  ******************************************************************************/
-static sl_status_t usart_uart_write_byte(sl_uart_handle_t *uart_handle, uint8_t byte)
+static sl_status_t usart_uart_write_byte(sl_peripheral_t uart, uint8_t byte)
 {
-  sl_peripheral_t uart = uart_handle->uart;
   USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
 
   if ((sl_hal_usart_get_status(usart) & USART_STATUS_TXBL) == 0U) {
@@ -339,16 +337,16 @@ static sl_status_t usart_uart_write_byte(sl_uart_handle_t *uart_handle, uint8_t 
  * @return SL_STATUS_OK if all @p size bytes were written,
  *         SL_STATUS_FULL if the TX FIFO became full before the buffer was exhausted.
  ******************************************************************************/
-static inline sl_status_t usart_uart_write_buffer(sl_uart_handle_t *uart_handle,
-                                                  const uint8_t *data,
-                                                  size_t size,
-                                                  size_t *bytes_written)
+static sl_status_t usart_uart_write_buffer(sl_peripheral_t uart,
+                                           const uint8_t *data,
+                                           size_t size,
+                                           size_t *bytes_written)
 {
   sl_status_t status = SL_STATUS_OK;
   size_t i;
 
   for (i = 0; i < size; i++) {
-    status = usart_uart_write_byte(uart_handle, data[i]);
+    status = usart_uart_write_byte(uart, data[i]);
     if (status != SL_STATUS_OK) {
       *bytes_written = i;
       return status;
@@ -362,7 +360,7 @@ static inline sl_status_t usart_uart_write_buffer(sl_uart_handle_t *uart_handle,
 /***************************************************************************//**
  * Converts the USART interrupt status to the RX errors.
  ******************************************************************************/
-static inline sl_uart_rx_err_t usart_uart_rx_err_from_irq_status(uint32_t irq_status)
+static sl_uart_rx_err_t usart_uart_rx_err_from_irq_status(uint32_t irq_status)
 {
   return ((irq_status & USART_IF_FERR) ? SL_UART_RX_ERR_FRAMING : 0u)
          | ((irq_status & USART_IF_PERR) ? SL_UART_RX_ERR_PARITY : 0u)
@@ -370,21 +368,62 @@ static inline sl_uart_rx_err_t usart_uart_rx_err_from_irq_status(uint32_t irq_st
 }
 
 /***************************************************************************//**
- * Returns enabled and pending USART interrupt flags masked by @p mask.
+ * Returns enabled and pending USART interrupt flags.
  ******************************************************************************/
-static inline uint32_t usart_uart_get_enabled_pending_irq(sl_peripheral_t uart, uint32_t mask)
+static uint32_t usart_uart_get_enabled_pending_irq(sl_peripheral_t uart)
 {
   USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
 
-  return sl_hal_usart_get_enabled_pending_interrupts(usart) & mask;
+  return sl_hal_usart_get_enabled_pending_interrupts(usart);
 }
+
+/***************************************************************************//**
+ * Returns enabled USART interrupt flags.
+ ******************************************************************************/
+static uint32_t usart_uart_get_enabled_irq(sl_peripheral_t uart)
+{
+  USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
+
+  return sl_hal_usart_get_enabled_interrupts(usart);
+}
+
+/***************************************************************************//**
+ * Returns if the USART is idle.
+ *
+ * USART does not allow checking if the RX shift register is empty, so there is
+ * a small window where the peripheral will be deemed idle even though data is
+ * still being received.
+ ******************************************************************************/
+static bool usart_uart_is_idle(sl_peripheral_t uart)
+{
+  USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
+  uint32_t status = sl_hal_usart_get_status(usart);
+
+  return !(status & USART_STATUS_RXDATAV)
+         && !(status & _USART_STATUS_TXBUFCNT_MASK)
+         && status & USART_STATUS_TXIDLE;
+}
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+
+/***************************************************************************//**
+ * Returns the EM requirement for the USART.
+ ******************************************************************************/
+static sl_power_manager_em_t usart_uart_get_em_requirement(sl_peripheral_t uart)
+{
+  (void) uart;
+
+  return SL_POWER_MANAGER_EM1;
+}
+
+#endif
 
 #if defined(SL_CATALOG_UART_ASYNC_PRESENT)
 
 /***************************************************************************//**
  * Returns the RX register for the given UART instance.
  ******************************************************************************/
-static inline void *usart_uart_get_rx_register(sl_peripheral_t uart)
+static void *usart_uart_get_rx_register(sl_peripheral_t uart)
 {
   USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
   return (void *)&usart->RXDATA;
@@ -392,7 +431,7 @@ static inline void *usart_uart_get_rx_register(sl_peripheral_t uart)
 /***************************************************************************//**
  * Returns the TX register for the given UART instance.
  ******************************************************************************/
-static inline void *usart_uart_get_tx_register(sl_peripheral_t uart)
+static void *usart_uart_get_tx_register(sl_peripheral_t uart)
 {
   USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
   return (void *)&usart->TXDATA;
@@ -401,7 +440,7 @@ static inline void *usart_uart_get_tx_register(sl_peripheral_t uart)
 /***************************************************************************//**
  * Enables or disables USART transmitter.
  ******************************************************************************/
-static inline void usart_uart_set_tx_enable(sl_peripheral_t uart, bool en)
+static void usart_uart_set_tx_enable(sl_peripheral_t uart, bool en)
 {
   USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
 
@@ -418,7 +457,7 @@ static inline void usart_uart_set_tx_enable(sl_peripheral_t uart, bool en)
  * @note The transmitter must have been disabled with @ref usart_uart_set_tx_enable
  *       prior to calling.
  ******************************************************************************/
-static inline size_t usart_uart_clear_tx_fifo(sl_peripheral_t uart)
+static size_t usart_uart_clear_tx_fifo(sl_peripheral_t uart)
 {
   USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
 
@@ -446,7 +485,12 @@ const sli_uart_ops_t sli_uart_usart_ops = {
   .set_enable_irq = usart_uart_set_enable_irq,
   .clear_irq = usart_uart_clear_irq,
   .get_enabled_pending_irq = usart_uart_get_enabled_pending_irq,
+  .get_enabled_irq = usart_uart_get_enabled_irq,
   .rx_err_from_irq_status = usart_uart_rx_err_from_irq_status,
+  .is_idle = usart_uart_is_idle,
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  .get_em_requirement = usart_uart_get_em_requirement,
+#endif
 #if defined(SL_CATALOG_UART_ASYNC_PRESENT)
   .get_rx_register = usart_uart_get_rx_register,
   .get_tx_register = usart_uart_get_tx_register,

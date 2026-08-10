@@ -94,11 +94,18 @@ extern uint32_t randLIB_get_32bit(void);
 /**
  * \brief Generate 64-bit random number.
  *
+ * Uses the internal pseudo-random generator. Not for cryptographic use.
+ *
  * \param None
  * \return 64-bit random number
  *
  */
 extern uint64_t randLIB_get_64bit(void);
+
+extern uint8_t randLIB_get_crypto_8bit(void);
+extern uint16_t randLIB_get_crypto_16bit(void);
+extern uint32_t randLIB_get_crypto_32bit(void);
+extern uint64_t randLIB_get_crypto_64bit(void);
 
 /**
  * \brief Generate n-bytes random numbers.

@@ -15,6 +15,10 @@ define:
 provides:
 - name: bootloader_apploader
 - name: bootloader_apploader_secure
+documentation:
+  docset: mcu-bootloader
+  document: using-gecko-bootloader-with-bluetooth-apps/03-bluetooth-ota-upgrade
+  url: https://docs.silabs.com/shared-content/latest/using-gecko-bootloader-with-bluetooth-apps/03-bluetooth-ota-upgrade
 metadata:
   sbom:
     license: MSLA

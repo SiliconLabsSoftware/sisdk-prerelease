@@ -23,6 +23,7 @@ component:
 - id: "iostream_stdlib_config"
 - id: "memory_manager"
 - id: "wisun_cli_util"
+- id: "wisun_cli"
 - id: "wisun_default_radioconf"
 - id: "cli"
   instance:
@@ -34,6 +35,7 @@ component:
 - id: "wisun_br_si91x"
 - id: "wisun_select"
 - id: "wisun_crash_handler"
+- id: "wisun_direct_connect_pmk"
 
 requires:
 - name: wisun_br_dhcpv6

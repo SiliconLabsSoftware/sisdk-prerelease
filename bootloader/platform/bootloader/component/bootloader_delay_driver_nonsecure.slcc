@@ -14,6 +14,8 @@ include:
 provides:
 - name: bootloader_delay_driver
 - name: bootloader_delay_driver_nonsecure
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/gecko-bootloader-api/delay
 metadata:
   sbom:
     license: MSLA

@@ -30,7 +30,21 @@
 
 #include <stdbool.h>
 #include "em_device.h"
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
 #include "sl_ddp_cmd_psa_init.h"
+
+// Logging
+#define LOG_PREFIX                    "[DDP_PSA_INIT] "
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
+#include "app_log.h"
+#define LOG_NL                        APP_LOG_NL
+#define LOG_ERROR(...)                app_log_error(LOG_PREFIX __VA_ARGS__)
+#else // SL_CATALOG_APP_LOG_PRESENT
+#define LOG_NL
+#define LOG_ERROR(...)
+#endif // SL_CATALOG_APP_LOG_PRESENT
 
 #if !defined(SEMAILBOX_PRESENT) && defined(CRYPTOACC_PRESENT)
 #include "fih.h"
@@ -38,7 +52,6 @@
 #include "sl_se_manager_util.h"
 #include "sli_se_manager_mailbox.h"
 #include "psa/internal_trusted_storage.h"
-#include "sli_psa_driver_common.h"
 
 // -----------------------------------------------------------------------------
 // Definitions
@@ -66,7 +79,7 @@ static fih_int __attribute__ ((noinline)) vse_get_reply_ptr(uint32_t **vse_reply
 static fih_int __attribute__ ((noinline)) vse_get_se_version(const uint32_t *vse_reply_ptr, uint32_t *se_version);
 static fih_int __attribute__ ((noinline)) vse_get_reply_status(const uint32_t *vse_reply_ptr, uint32_t *vse_reply_status);
 static fih_int __attribute__ ((noinline)) vse_get_data_length(const uint32_t *vse_reply_ptr, uint32_t *vse_data_length);
-static fih_int __attribute__ ((noinline)) setup_storage_root_key(void);
+static fih_int __attribute__ ((noinline)) vse_is_srk_present(const uint32_t *srk_data, size_t srk_size_words);
 static fih_int __attribute__ ((noinline)) check_se_version(uint32_t se_version);
 #endif // !SEMAILBOX_PRESENT && CRYPTOACC_PRESENT
 
@@ -82,6 +95,9 @@ void sl_ddp_cmd_psa_init(void)
   fih_int fih_rc = FIH_FAILURE;
   FIH_CALL(setup_storage_root_key, fih_rc);
   if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+    LOG_ERROR("Storage root key setup failed. Without it the provisioned data "
+              "would be encrypted with a key the target firmware cannot "
+              "reproduce. Power cycle the device and provision again." LOG_NL);
     initialized = false;
   } else {
     initialized = true;
@@ -202,18 +218,26 @@ static fih_int __attribute__ ((noinline)) setup_storage_root_key(void)
 
   FIH_CFI_STEP_DECREMENT();
 
-  // Set the ITS root key. Note that this function is not dependent on PSA Crypto
-  // being initialized.
-  status = sli_psa_its_set_root_key((uint8_t*)srk->data, sizeof(srk->data));
-  if (fih_not_eq(fih_int_encode(status), fih_int_encode(PSA_SUCCESS))) {
+  // The SRK is a one-shot resource: the first image running after a VSE boot
+  // sequence reads it and is expected to wipe it from the mailbox. A wiped
+  // block passes the checksum verification above, because an all-zero key
+  // XORs to the all-zero checksum it is stored with. Reject it explicitly,
+  // otherwise everything provisioned in this session would be encrypted with
+  // a null key and rejected by the target firmware later on.
+  FIH_CALL(vse_is_srk_present, fih_rc, srk->data,
+           sizeof(srk->data) / sizeof(uint32_t));
+  if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
     goto exit; // if fatal_error is glitched
   }
 
   FIH_CFI_STEP_DECREMENT();
 
-  // Clear the SRK from the mailbox location
-  status = PSA_ERROR_GENERIC_ERROR;
-  status = sli_psa_zeroize(srk, sizeof(vse_srk_t));
+  // Set the ITS root key. Note that this function is not dependent on PSA Crypto
+  // being initialized.
+  // The SRK is deliberately left in place in the mailbox. Wiping it would make
+  // this provisioning application single-shot per VSE boot sequence, and every
+  // repeated run would then silently fall into the all-zero case handled above.
+  status = sli_psa_its_set_root_key((uint8_t*)srk->data, sizeof(srk->data));
   if (fih_not_eq(fih_int_encode(status), fih_int_encode(PSA_SUCCESS))) {
     goto exit; // if fatal_error is glitched
   } else {
@@ -288,6 +312,20 @@ static fih_int __attribute__ ((noinline)) vse_get_reply_status(const uint32_t *v
 static fih_int __attribute__ ((noinline)) vse_get_data_length(const uint32_t *vse_reply_ptr, uint32_t *vse_data_length)
 {
   *vse_data_length = vse_reply_ptr[4];
+  FIH_RET(FIH_SUCCESS);
+}
+
+static fih_int __attribute__ ((noinline)) vse_is_srk_present(const uint32_t *srk_data, size_t srk_size_words)
+{
+  uint32_t accumulator = 0;
+
+  for (size_t i = 0; i < srk_size_words; ++i) {
+    accumulator |= srk_data[i];
+  }
+
+  if (fih_eq(fih_int_encode(accumulator), fih_int_encode(0))) {
+    FIH_RET(FIH_FAILURE);
+  }
   FIH_RET(FIH_SUCCESS);
 }
 

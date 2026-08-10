@@ -32,6 +32,8 @@ config_file:
   file_id: btl_storage_config
 - path: platform/bootloader/config/btl_storage_cfg_default.h
   file_id: btl_storage_config_default
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/gecko-bootloader-api/storage
 metadata:
   sbom:
     license: MSLA

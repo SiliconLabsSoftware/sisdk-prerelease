@@ -45,10 +45,8 @@
  * Enable hardware acceleration for the AES block cipher modes through
  * the mbed TLS APIs.
  *
- * Module:  sl_mbedtls_support/src/crypto_aes.c for devices with CRYPTO,
- *          sl_mbedtls_support/src/se_aes.c for devices with HSE,
- *          sl_mbedtls_support/src/cryptoacc_aes.c for devices with CRYPTOACC,
- *          sl_mbedtls_support/src/aes_aes.c for devices with AES
+ * Module:  sl_mbedtls_support/src/se_aes.c for devices with HSE,
+ *          sl_mbedtls_support/src/cryptoacc_aes.c for devices with CRYPTOACC
  *
  * See \ref MBEDTLS_AES_C for more information.
  */
@@ -184,37 +182,6 @@
 #if defined(SEMAILBOX_PRESENT) \
   && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   #define MBEDTLS_SHA512_ALT
-#endif
-
-/**
- * \def MBEDTLS_ECP_INTERNAL_ALT
- * \def ECP_SHORTWEIERSTRASS
- * \def MBEDTLS_ECP_ADD_MIXED_ALT
- * \def MBEDTLS_ECP_DOUBLE_JAC_ALT
- * \def MBEDTLS_ECP_NORMALIZE_JAC_MANY_ALT
- * \def MBEDTLS_ECP_NORMALIZE_JAC_ALT
- *
- * Enable hardware acceleration for the elliptic curve over GF(p) library
- * in mbed TLS. This accelerates the raw arithmetic operations.
- *
- * Module:  sl_mbedtls_support/src/crypto_ecp.c
- *
- * Caller:  library/ecp.c
- *
- * Requires: \ref MBEDTLS_BIGNUM_C, \ref MBEDTLS_ECP_C and at least one
- * MBEDTLS_ECP_DP_XXX_ENABLED and CRYPTO_PRESENT
- */
-#if defined(CRYPTO_PRESENT)                     \
-  && (defined(MBEDTLS_ECP_DP_SECP192R1_ENABLED) \
-  || defined(MBEDTLS_ECP_DP_SECP224R1_ENABLED)  \
-  || defined(MBEDTLS_ECP_DP_SECP256R1_ENABLED))
-  #define MBEDTLS_ECP_INTERNAL_ALT
-  #define ECP_SHORTWEIERSTRASS
-  #define MBEDTLS_ECP_ADD_MIXED_ALT
-  #define MBEDTLS_ECP_DOUBLE_JAC_ALT
-  #define MBEDTLS_ECP_NORMALIZE_JAC_MANY_ALT
-  #define MBEDTLS_ECP_NORMALIZE_JAC_ALT
-  #define MBEDTLS_ECP_RANDOMIZE_JAC_ALT
 #endif
 
 /**

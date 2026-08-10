@@ -166,6 +166,8 @@ toolchain_settings:
   # to override toolchain_lto's 'enabled' for the secure project specifically.
 - option: link_time_optimization
   value: disabled
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/bootloader-user-guide-gsdk-4/10-gecko-bootloader-and-trustzone
 metadata:
   sbom:
     license: MSLA

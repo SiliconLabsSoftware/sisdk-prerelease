@@ -3,35 +3,35 @@ label: Dynamic Data Provisioning (DDP) framework
 description: |
   This component provides the generic framework for Dynamic Data Provisioning
   (DDP). It converts the application to be RAM-based. This enables leaving
-  the original firmware untouched. DDP uses SEGGER RTT for communication.
+  the original firmware untouched. DDP uses IO Stream for communication.
 package: bluetooth_le
 category: Bluetooth|Application|Miscellaneous
 quality: production
 metadata:
   sbom:
     license: Zlib
-ui_hints:
-  visibility: never
 root_path: bluetooth_le/common/ddp
 provides:
 - name: ddp
-- name: toolchain_linker_type
 requires:
 - name: sl_common
-- name: iostream_rtt
-- name: toolchain_gcc   # linkerfile is only prepared for gcc atm
-- name: toolchain_lto   # need to fit into RAM, let's waste no space
+- name: component_catalog
+- name: board_control
+- name: ddp_execution
+recommends:
+- id: ddp_ram_execution
+  vendor: silabs
 include:
 - path: inc
   file_list:
   - path: sl_ddp_types.h
   - path: sl_ddp_common.h
-  - path: sl_ddp_rtt.h
+  - path: sl_ddp_com.h
 source:
 - path: src/sl_ddp_common.c
-- path: src/sl_ddp_rtt.c
+- path: src/sl_ddp_com.c
 other_file:
-- path: script/ddp_rtt.py
+- path: script/ddp_conn.py
   project:
     transfer_ownership: true
     directory: script
@@ -47,19 +47,13 @@ template_contribution:
 - name: event_handler
   value:
     event: internal_app_init
-    include: sl_ddp_rtt.h
-    handler: sl_ddp_rtt_init
+    include: sl_ddp_com.h
+    handler: sl_ddp_com_init
 - name: event_handler
   value:
     event: internal_app_process_action
-    include: sl_ddp_rtt.h
-    handler: sl_ddp_rtt_process_action
+    include: sl_ddp_com.h
+    handler: sl_ddp_com_process_action
 template_file:
 - path: template/sl_ddp_command_table.c.jinja
-- path: template/sl_ddp_rtt_config.py.jinja
-- path: template/linkerfile_ram.ld.jinja
-toolchain_settings:
-- option: linkerfile
-  value: autogen/linkerfile_ram.ld
-define:
-- name: SL_RAM_LINKER
+- path: template/sl_ddp_conn_config.py.jinja

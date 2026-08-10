@@ -41,6 +41,9 @@ requires:
 - name: power_manager
   condition:
   - device_generic_family_sixx353
+- name: sl_rail_util_coex
+  condition:
+  - device_generic_family_sixx353
 - name: power_manager
   condition:
   - device_family_sixg300xilpwh74000
@@ -109,6 +112,9 @@ config_file:
 - path: apps/sl_rail_test/config/sixg301/sl_rail_test_config.h
   condition:
   - device_generic_family_sixx301
+- path: apps/sl_rail_test/config/siwx353/sl_rail_test_config.h
+  condition:
+  - device_generic_family_sixx353
 - override:
     component: sl_rail_util_ieee802154_fast_channel_switching
     file_id: sl_rail_util_ieee802154_fast_channel_switching_config
@@ -142,6 +148,11 @@ include:
   - path: sl_rail_util_thermistor.h
   condition:
   - device_series_2
+- path: plugin/sl_rail_util_thermistor
+  file_list:
+  - path: sl_rail_util_thermistor.h
+  condition:
+  - device_generic_family_sixx353
 - path: apps/sl_rail_test
   file_list:
   - path: app_task_init.h
@@ -2176,6 +2187,26 @@ template_contribution:
     - name: getThermistorImpedance
   condition:
   - device_series_2
+
+- name: cli_command
+  value:
+    name: startThermistor
+    handler: startThermistorMeasurement
+    help: Starts a thermistor measurement.\n                    Triggers the HFXO temperature compensation if enabled.
+    shortcuts:
+    - name: startThermistorMeasurement
+  condition:
+  - device_generic_family_sixx353
+
+- name: cli_command
+  value:
+    name: getThermistor
+    handler: getThermistorImpedance
+    help: Gets the thermistor impedance.
+    shortcuts:
+    - name: getThermistorImpedance
+  condition:
+  - device_generic_family_sixx353
 
 - name: cli_command
   value:

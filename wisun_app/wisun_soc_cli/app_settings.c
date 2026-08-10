@@ -262,8 +262,6 @@ static const app_settings_wisun_t app_settings_wisun_default = {
   .preferred_pan_id = APP_SETTINGS_WISUN_DEFAULT_PREFERRED_PAN_ID,
   .keychain = APP_SETTINGS_WISUN_DEFAULT_KEYCHAIN,
   .keychain_index = APP_SETTINGS_WISUN_DEFAULT_KEYCHAIN_INDEX,
-  .direct_connect_pmk = { 0x34, 0xba, 0x32, 0x26, 0xa0, 0xb2, 0xad, 0x66, 0x7c, 0x9f, 0x66, 0x02, 0xe5, 0xdb, 0x75, 0x77,
-                          0xdd, 0xbd, 0x5d, 0x2b, 0x34, 0x3a, 0x93, 0x06, 0x2b, 0x90, 0xc0, 0x7b, 0xe2, 0x8e, 0x4e, 0x54 },
   .max_hop_count = APP_SETTINGS_WISUN_DEFAULT_MAX_HOP_COUNT,
   .lowpan_mtu = APP_SETTINGS_WISUN_DEFAULT_LOWPAN_MTU,
   .ipv6_mru = APP_SETTINGS_WISUN_DEFAULT_IPV6_MRU,
@@ -594,12 +592,6 @@ static sl_status_t app_settings_get_rpl_info(char *value_str,
                                              const char *key_str,
                                              const app_settings_entry_t *entry);
 
-static sl_status_t app_settings_set_direct_connect_pmk(const char *value_str,
-                                                       const char *key_str,
-                                                       const app_settings_entry_t *entry);
-static sl_status_t app_settings_get_direct_connect_pmk(char *value_str,
-                                                       const char *key_str,
-                                                       const app_settings_entry_t *entry);
 static sl_status_t app_settings_set_tx_power(const char *value_str,
                                              const char *key_str,
                                              const app_settings_entry_t *entry);
@@ -1473,19 +1465,6 @@ const app_settings_entry_t app_settings_entries[] =
     .set_handler = app_settings_set_integer,
     .get_handler = app_settings_get_integer,
     .description = "Built-in keychain index [uint8]"
-  },
-  {
-    .key = "direct_connect_pmk",
-    .domain = app_settings_domain_wisun,
-    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
-    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
-    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = &app_settings_wisun.direct_connect_pmk,
-    .input_enum_list = NULL,
-    .output_enum_list = NULL,
-    .set_handler = app_settings_set_direct_connect_pmk,
-    .get_handler = app_settings_get_direct_connect_pmk,
-    .description = "Set Direct Connect PMK [string]"
   },
   {
     .key = "max_hop_count",
@@ -3792,33 +3771,6 @@ static sl_status_t app_settings_get_rpl_info(char *value_str,
 
   // Prevent parent from printing anything
   return SL_STATUS_FAIL;
-}
-
-static sl_status_t app_settings_set_direct_connect_pmk(const char *value_str,
-                                                       const char *key_str,
-                                                       const app_settings_entry_t *entry)
-{
-  (void)key_str;
-
-  return app_util_get_byte_array(value_str, entry->value, SL_WISUN_PMK_LEN);
-}
-
-static sl_status_t app_settings_get_direct_connect_pmk(char *value_str,
-                                                       const char *key_str,
-                                                       const app_settings_entry_t *entry)
-{
-  (void) key_str;
-
-  const uint8_t *pmk = (uint8_t *) entry->value;
-  int offset = 0;
-
-  for (int i = 0; i < SL_WISUN_PMK_LEN; i++) {
-    offset += sprintf(value_str + offset, "%02x", pmk[i]);
-    if (i + 1 < SL_WISUN_PMK_LEN) {
-      offset += sprintf(value_str + offset, ":");
-    }
-  }
-  return SL_STATUS_OK;
 }
 
 static sl_status_t app_settings_set_tx_power(const char *value_str,

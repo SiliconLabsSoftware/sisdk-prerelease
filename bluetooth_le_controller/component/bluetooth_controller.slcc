@@ -31,6 +31,8 @@ include:
   - path: sl_btctrl_packets.h
 requires:
 - name: bluetooth_agents_controller
+- name: bluetooth_common
+- name: bluetooth_controller_crypto
 - name: bluetooth_controller_libraries
 - name: bluetooth_controller_libraries_x353
   condition:
@@ -44,6 +46,16 @@ requires:
 - name: cmsis_rtos2
   condition:
   - kernel
+- name: device_supports_bluetooth
+- name: emlib_system
+  condition:
+  - device_series_2
+- name: hal_system
+  condition:
+  - device_series_3
+- name: rail_lib
+- name: sl_rail_util_compatible_pa
+- name: sl_rail_util_built_in_phys
 recommends:
 - id: bluetooth_controller_release_libraries
   vendor: silabs

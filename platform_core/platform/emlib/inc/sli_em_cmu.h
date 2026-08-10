@@ -632,7 +632,8 @@ void sli_em_cmu_SYSTICEXTCLKENClear(void);
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)   \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)  \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)) \
   && defined(CoreDebug_DEMCR_TRCENA_Msk)
 #define CMU_TRACECLK_RESTORE_TRACE_PRE()                             \
   bool restoreTrace = CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk; \

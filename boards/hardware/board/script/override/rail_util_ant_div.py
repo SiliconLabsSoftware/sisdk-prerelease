@@ -38,6 +38,11 @@ def configure(project, hw, _):
     req = project.requirement('SL_RAIL_UTIL_ANT_DIV')
     opts = hw.get_peripheral_options(req, 'rfswitch', signals)
 
+    if not opts:
+      # rfswitch is not a 2-control antenna-diversity switch (e.g. Everest's
+      # single-ctl RF switch) -> no routing options, skip instead of crashing.
+      return
+
     # Select first matching Peripheral
     locations = opts[0]
     locs = []

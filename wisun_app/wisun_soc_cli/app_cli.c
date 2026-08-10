@@ -32,6 +32,12 @@
 #include "sl_wisun_api.h"
 #include "sl_wisun_trace_api.h"
 #include "sl_wisun_cli_core.h"
+#if defined(SL_CATALOG_WISUN_DC_SERVER_CLI_PRESENT)
+#include "sl_wisun_dc_server_cli.h"
+#endif
+#if defined(SL_CATALOG_WISUN_DC_CLIENT_CLI_PRESENT)
+#include "sl_wisun_dc_client_cli.h"
+#endif
 #include "sl_wisun_version.h"
 #include "sl_wisun_keychain.h"
 #include "psa/crypto.h"
@@ -289,11 +295,6 @@ static app_socket_entry_t app_socket_entries[APP_MAX_SOCKET_ENTRIES];
 static app_connection_state_t app_connection_state;
 static uint32_t app_connection_tick_count;
 
-static bool app_direct_connect_state = false;
-static bool app_direct_connect_auto_mode = false;  // When true, auto-advertise DC ID and auto-accept link
-#define APP_DIRECT_CONNECT_AUTO_DC_ID_DEFAULT  "DC_ID_DEFAULT"  // Default DC ID when not specified
-static sl_wisun_dc_id_t app_direct_connect_auto_dc_id = { .id = APP_DIRECT_CONNECT_AUTO_DC_ID_DEFAULT };
-uint32_t app_direct_connect_pmk_key_id = MBEDTLS_SVC_KEY_ID_INIT;
 static char crash_buff[300] = { 0 };
 
 #if defined (SL_CATALOG_WISUN_CLI_DMP_PRESENT)
@@ -726,6 +727,10 @@ static void app_handle_disconnected_ind(sl_wisun_evt_t *evt)
 
   app_connection_state = APP_CONNECTION_STATE_NOT_CONNECTED;
 
+#if defined(SL_CATALOG_WISUN_DC_SERVER_CLI_PRESENT)
+  sl_wisun_dc_server_cli_handle_dc_server_stopped();
+#endif
+
   printf("[Disconnected]\r\n");
 }
 
@@ -829,105 +834,6 @@ static void app_handle_pan_defect_ind(sl_wisun_evt_t *evt)
     evt->evt.pan_defect.pan_id);
 }
 
-static void app_handle_direct_connect_link_available_ind(sl_wisun_evt_t *evt)
-{
-  char ipv6_string[40];
-  sl_status_t status;
-
-  ip6tos(&evt->evt.direct_connect_link_available.link_local_ipv6, ipv6_string);
-
-  printf("[Direct Connection request from %s]\r\n", ipv6_string);
-
-  if (app_direct_connect_auto_mode) {
-    status = sl_wisun_accept_direct_connect_link(&evt->evt.direct_connect_link_available.link_local_ipv6);
-    if (status == SL_STATUS_OK) {
-      printf("[Accepted connection request from %s]\r\n", ipv6_string);
-    } else {
-      printf("[Failed to accept connection from %s: %"PRIu32"]\r\n", ipv6_string, status);
-    }
-  }
-}
-
-static void app_handle_direct_connect_link_status_ind(sl_wisun_evt_t *evt)
-{
-  char ipv6_string[40];
-
-  ip6tos(&evt->evt.direct_connect_link_status.link_local_ipv6, ipv6_string);
-
-  switch (evt->evt.direct_connect_link_status.link_status)
-  {
-  case SL_WISUN_DIRECT_CONNECT_LINK_STATUS_CONNECTED:
-    printf("[Direct Connect Link %s: connected]\r\n", ipv6_string);
-    break;
-  case SL_WISUN_DIRECT_CONNECT_LINK_STATUS_ERROR:
-    printf("[Direct Connect Link %s: error]\r\n", ipv6_string);
-    break;
-  case SL_WISUN_DIRECT_CONNECT_LINK_STATUS_DISCONNECTED:
-    printf("[Direct Connect Link %s: disconnected]\r\n", ipv6_string);
-    break;
-  default:
-    break;
-  }
-}
-
-static void app_handle_direct_connect_id_received_ind(sl_wisun_evt_t *evt)
-{
-  char mac_str[24];
-
-  app_util_get_mac_address_string(mac_str, &evt->evt.direct_connect_id_received.mac_address);
-  printf("[Direct Connect identity received from server %s with ID %s]\r\n", mac_str, (char *) evt->evt.direct_connect_id_received.dc_id.id);
-}
-
-static void app_handle_direct_connect_id_solicit_ind(sl_wisun_evt_t *evt)
-{
-  char ipv6_string[40];
-  sl_status_t status;
-
-  ip6tos(&evt->evt.direct_connect_id_solicit.link_local_ipv6, ipv6_string);
-
-  printf("[Direct Connect identity request from client %s with DC_ID:%s]\r\n", ipv6_string, (char *) evt->evt.direct_connect_id_solicit.dc_id.id);
-
-  if (app_direct_connect_auto_mode) {
-    /* Respond if client looks for our DC ID */
-    if (strncmp((const char *) evt->evt.direct_connect_id_solicit.dc_id.id, (const char *) app_direct_connect_auto_dc_id.id, SL_WISUN_DC_ID_LEN) == 0) {
-      status = sl_wisun_advert_direct_connect_server_id(&evt->evt.direct_connect_id_solicit.link_local_ipv6, &app_direct_connect_auto_dc_id);
-      if (status == SL_STATUS_OK) {
-        printf("[Advertised DC_ID:%s to client %s]\r\n", (char *) app_direct_connect_auto_dc_id.id, ipv6_string);
-      } else {
-        printf("[Failed to advertise DC_ID:%s to client %s: %"PRIu32"]\r\n", (char *) app_direct_connect_auto_dc_id.id, ipv6_string, status);
-      }
-    }
-  }
-}
-
-static void app_handle_direct_connect_client_state_changed_ind(sl_wisun_evt_t *evt)
-{
-  char ipv6_string[40];
-
-  ip6tos(&evt->evt.direct_connect_client_state_changed.link_local_ipv6, ipv6_string);
-
-  switch (evt->evt.direct_connect_client_state_changed.state) {
-    case SL_WISUN_DC_CLIENT_STATE_CONNECTED:
-      printf("[DC client is connected to server %s]\r\n", ipv6_string);
-      break;
-    case SL_WISUN_DC_CLIENT_STATE_CONNECTION_LOST:
-      printf("[DC client lost connection to server %s]\r\n", ipv6_string);
-      break;
-    case SL_WISUN_DC_CLIENT_STATE_CONNECTION_FAILED:
-      printf("[DC client connection establishment failed with server %s]\r\n", ipv6_string);
-      break;
-    case SL_WISUN_DC_CLIENT_STATE_SCAN_COMPLETE:
-      printf("[DC client scan complete]\r\n");
-      break;
-    case SL_WISUN_DC_CLIENT_STATE_STOPPED:
-      printf("[DC client stopped]\r\n");
-      break;
-    default:
-      printf("[DC client state changed: unknown state %"PRIu32"]\r\n", evt->evt.direct_connect_client_state_changed.state);
-      break;
-  }
-}
-
 static void app_handle_error_ind(sl_wisun_evt_t *evt)
 {
   printf("[Error: %"PRIu32"]\r\n", evt->evt.error.status);
@@ -1012,24 +918,28 @@ void sl_wisun_on_event(sl_wisun_evt_t *evt)
     case SL_WISUN_MSG_PAN_DEFECT_IND_ID:
       app_handle_pan_defect_ind(evt);
       break;
+#if defined(SL_CATALOG_WISUN_DC_SERVER_CLI_PRESENT)
     case SL_WISUN_MSG_DIRECT_CONNECT_LINK_AVAILABLE_IND_ID:
-      app_handle_direct_connect_link_available_ind(evt);
+      sl_wisun_dc_server_cli_handle_link_available(evt);
       break;
     case SL_WISUN_MSG_DIRECT_CONNECT_LINK_STATUS_IND_ID:
-      app_handle_direct_connect_link_status_ind(evt);
+      sl_wisun_dc_server_cli_handle_link_status(evt);
       break;
+    case SL_WISUN_MSG_DIRECT_CONNECT_ID_SOLICIT_IND_ID:
+      sl_wisun_dc_server_cli_handle_id_solicit(evt);
+      break;
+#endif
     case SL_WISUN_MSG_LOGGER_EVENT_IND_ID:
       app_handle_event_logger_ind(evt);
       break;
+#if defined(SL_CATALOG_WISUN_DC_CLIENT_CLI_PRESENT)
     case SL_WISUN_MSG_DIRECT_CONNECT_ID_RECEIVED_IND_ID:
-      app_handle_direct_connect_id_received_ind(evt);
-      break;
-    case SL_WISUN_MSG_DIRECT_CONNECT_ID_SOLICIT_IND_ID:
-      app_handle_direct_connect_id_solicit_ind(evt);
+      sl_wisun_dc_client_cli_handle_id_received(evt);
       break;
     case SL_WISUN_MSG_DIRECT_CONNECT_CLIENT_STATE_CHANGED_IND_ID:
-      app_handle_direct_connect_client_state_changed_ind(evt);
+      sl_wisun_dc_client_cli_handle_client_state_changed(evt);
       break;
+#endif
     case SL_WISUN_MSG_ERROR_IND_ID:
       app_handle_error_ind(evt);
       break;
@@ -3482,159 +3392,6 @@ void app_getpeername(sl_cli_command_arg_t *arguments)
            app_get_ip_address_str(&remote_address.sin6_addr), ntohs(remote_address.sin6_port));
   }
 
-  app_wisun_cli_mutex_unlock();
-}
-
-sl_status_t app_import_direct_connect_pmk(void)
-{
-  psa_key_attributes_t pmk_key_attributes = psa_key_attributes_init();
-  psa_key_location_t pmk_location = PSA_KEY_LOCATION_LOCAL_STORAGE;
-  sl_status_t status;
-  psa_status_t ret;
-
-#if defined(SEMAILBOX_PRESENT)
-  if (SYSTEM_GetSecurityCapability() == securityCapabilityVault)
-  {
-    // If the device has Secure Vault, always use wrapped keys
-    pmk_location = SL_PSA_KEY_LOCATION_WRAPPED;
-  }
-#endif
-
-  psa_set_key_lifetime(&pmk_key_attributes,
-                       PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(PSA_KEY_LIFETIME_VOLATILE, pmk_location));
-
-  if (app_direct_connect_pmk_key_id != MBEDTLS_SVC_KEY_ID_INIT) {
-    psa_destroy_key(app_direct_connect_pmk_key_id);
-  }
-
-  app_direct_connect_pmk_key_id = MBEDTLS_SVC_KEY_ID_INIT;
-
-  psa_set_key_usage_flags(&pmk_key_attributes, PSA_KEY_USAGE_SIGN_HASH);
-  psa_set_key_type(&pmk_key_attributes, PSA_KEY_TYPE_HMAC);
-  psa_set_key_algorithm(&pmk_key_attributes, PSA_ALG_HMAC(PSA_ALG_SHA_1));
-  ret = psa_import_key(&pmk_key_attributes, app_settings_wisun.direct_connect_pmk, SL_WISUN_PMK_LEN, &app_direct_connect_pmk_key_id);
-  if (ret != PSA_SUCCESS) {
-    printf("[PMK import failed: psa_import_key: %"PRIu32"]\r\n", ret);
-    status = SL_STATUS_FAIL;
-    goto error_handler;
-  }
-
-  status = sl_wisun_set_direct_connect_pmk(app_direct_connect_pmk_key_id);
-  if (status != SL_STATUS_OK) {
-    printf("[PMK import failed: sl_wisun_set_direct_connect_pmk: %"PRIu32"]\r\n", ret);
-  }
-
-error_handler:
-  psa_reset_key_attributes(&pmk_key_attributes);
-  return status;
-}
-
-void app_set_direct_connect_state(sl_cli_command_arg_t *arguments)
-{
-  sl_status_t status;
-  bool is_enabled = false;
-  bool auto_mode = false;
-  const char *dc_id = NULL;
-
-  app_wisun_cli_mutex_lock();
-
-  is_enabled = (bool)sl_cli_get_argument_uint8(arguments, 0);
-  if (sl_cli_get_argument_count(arguments) >= 2) {
-    auto_mode = (bool)sl_cli_get_argument_uint8(arguments, 1);
-  }
-  if (sl_cli_get_argument_count(arguments) >= 3) {
-    dc_id = sl_cli_get_argument_string(arguments, 2);
-  }
-
-  if (is_enabled && auto_mode) {
-    memset(&app_direct_connect_auto_dc_id, 0, sizeof(app_direct_connect_auto_dc_id));
-    if (dc_id) {
-      strncpy((char *)app_direct_connect_auto_dc_id.id, dc_id, SL_WISUN_DC_ID_LEN - 1);
-    } else {
-      strncpy((char *)app_direct_connect_auto_dc_id.id, APP_DIRECT_CONNECT_AUTO_DC_ID_DEFAULT, SL_WISUN_DC_ID_LEN - 1);
-    }
-  }
-
-  if (is_enabled && !app_direct_connect_state) {
-    status = app_import_direct_connect_pmk();
-    if (status != SL_STATUS_OK) {
-      goto cleanup;
-    }
-  }
-
-  status = sl_wisun_set_direct_connect_state(is_enabled);
-  if (status != SL_STATUS_OK) {
-    printf("[Failed: sl_wisun_set_direct_connect_state: %"PRIu32"]\r\n", status);
-  } else {
-    printf("[Direct Connect %s, mode %s, DC ID %s]\r\n",
-           is_enabled ? "enabled" : "disabled",
-           auto_mode && is_enabled ? "auto (advertise/accept)" : "manual",
-           auto_mode && is_enabled ? (const char *)app_direct_connect_auto_dc_id.id : "not used");
-    app_direct_connect_state = is_enabled;
-    app_direct_connect_auto_mode = is_enabled && auto_mode;
-  }
-
-cleanup:
-  app_wisun_cli_mutex_unlock();
-}
-
-void app_accept_direct_connect_link(sl_cli_command_arg_t *arguments)
-{
-  in6_addr_t client_address;
-  char *arg_client_address;
-  sl_status_t status;
-
-  app_wisun_cli_mutex_lock();
-
-  arg_client_address = sl_cli_get_argument_string(arguments, 0);
-  status = app_get_ip_address(&client_address, arg_client_address);
-  if (status != SL_STATUS_OK) {
-    printf("[Failed: invalid client address parameter]\r\n");
-    goto cleanup;
-  }
-
-  status = sl_wisun_accept_direct_connect_link(&client_address);
-  if (status == SL_STATUS_OK) {
-    printf("[Accepted connection request]\r\n");
-  } else {
-    printf("[Failed: error %"PRIu32" when accepting connection request]\r\n", status);
-  }
-
-cleanup:
-  app_wisun_cli_mutex_unlock();
-}
-
-void app_advert_direct_connect_server_id(sl_cli_command_arg_t *arguments)
-{
-  uint32_t ret;
-  sl_status_t status;
-  in6_addr_t client_address;
-
-  sl_wisun_dc_id_t dc_id = {0};
-
-  app_wisun_cli_mutex_lock();
-
-  if (sl_cli_get_argument_count(arguments) == 2) {
-    ret = app_get_ip_address(&client_address, sl_cli_get_argument_string(arguments, 0));
-    if (ret != SL_STATUS_OK) {
-      printf("[Failed: invalid client address: %s]\r\n", sl_cli_get_argument_string(arguments, 0));
-      goto cleanup;
-    }
-    strncpy((char *)dc_id.id, sl_cli_get_argument_string(arguments, 1), SL_WISUN_DC_ID_LEN - 1);
-  } else {
-    printf("[Failed: missing parameters]\r\n");
-    goto cleanup;
-  }
-
-  status = sl_wisun_advert_direct_connect_server_id(&client_address, &dc_id);
-  if (status != SL_STATUS_OK) {
-    printf("[Failed: unable to advertise Direct Connect server ID: %"PRIu32"]\r\n", status);
-    goto cleanup;
-  }
-
-  printf("[Direct Connect server has sent its DC_ID: %s to client %s]\r\n", (char *) dc_id.id, app_get_ip_address_str(&client_address));
-
-cleanup:
   app_wisun_cli_mutex_unlock();
 }
 

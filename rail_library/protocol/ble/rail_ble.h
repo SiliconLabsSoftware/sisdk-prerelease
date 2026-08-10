@@ -1362,6 +1362,13 @@ typedef struct RAIL_BLE_CsConfig {
    */
   bool forceAgcGain;
   /**
+   * Debug flag to enable inline PCT measurements. Only valid when
+   * \ref SL_RAIL_BLE_SUPPORTS_CS_HW_BLOCK is true.
+   *
+   * @deprecated RAIL 2.x synonym of \ref sl_rail_ble_cs_config_t::inline_pct_enable.
+   */
+  bool inlinePctEnable;
+  /**
    * Pointer to an FAE table of size \ref RAIL_BLE_CS_NUM_ALLOWED_CHANNELS
    * that holds the FAE value for each allowed CS channel in units of
    * parts-per-32-million (pp32m). In units of parts-per-million (ppm),
@@ -1371,6 +1378,14 @@ typedef struct RAIL_BLE_CsConfig {
    * @deprecated RAIL 2.x synonym of \ref sl_rail_ble_cs_config_t::p_fae_table.
    */
   int8_t(*pFaeTable)[RAIL_BLE_CS_NUM_ALLOWED_CHANNELS];
+  /**
+   * Debug value to apply a residual frequency offset to the FFO computation,
+   * in units of Hz. If set to zero, the residual frequency offset will not
+   * be applied.
+   *
+   * @deprecated RAIL 2.x synonym of \ref sl_rail_ble_cs_config_t::residual_frequency_offset_hz.
+   */
+  int32_t residualFrequencyOffsetHz;
   /**
    * Equivalent AGC STATUS0 register to force.
    *

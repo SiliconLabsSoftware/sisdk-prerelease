@@ -18,6 +18,8 @@ provides:
 requires:
 - name: bootloader_aes_sha_ecdsa
 - name: btl_include_parser
+documentation:
+  url: https://docs.silabs.com/mcu-bootloader/latest/bootloader-user-guide-series3-and-higher/
 metadata:
   sbom:
     license: MSLA
