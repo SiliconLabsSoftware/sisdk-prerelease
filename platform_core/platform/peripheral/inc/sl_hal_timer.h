@@ -2027,10 +2027,10 @@ __INLINE void sl_hal_timer_channel_set_interrupts(TIMER_TypeDef *timer,
  *  {
  *    const uint8_t channel_num = SL_HAL_TIMER_CHANNEL_NUM(TIMER0);
  *    uint8_t i;
- *    // OCB values of all channels, value of 7 represents an assumption about the maximum channels per timer.
- *    uint32_t ocb_value[7];
- *    // OCBV values of all channels, value of 7 represents an assumption about the maximum channels per timer.
- *    uint32_t ocbv[7];
+ *    // OCB values of all channels, value of 8 represents an assumption about the maximum channels per timer.
+ *    uint32_t ocb_value[8];
+ *    // OCBV values of all channels, value of 8 represents an assumption about the maximum channels per timer.
+ *    uint32_t ocbv[8];
  *    uint32_t topb_value;
  *    uint32_t topbv;
  *

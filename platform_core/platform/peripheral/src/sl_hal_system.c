@@ -37,7 +37,7 @@
 #include "sli_se_manager_device_data.h"
 #endif
 #include "sl_status.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_240) || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_250)
 #include "em_cmu.h"
 #endif
@@ -152,7 +152,7 @@ char sli_get_n_digit(uint16_t input_number,
   uint32_t number = input_number;
 
   if (position > 4) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return '0';
   }
 
@@ -429,12 +429,16 @@ uint32_t sl_hal_system_get_hfrcodpll_band_calibration(uint32_t frequency)
   // Initialize command context.
   status = sl_se_init_command_context(&se_command_ctx);
   if (status != SL_STATUS_OK) {
+    SL_PRINT_STRING_ERROR("se init 0x%08lx, %d\r\n",
+      (unsigned long)status, (int)__LINE__);
     return 0;
   }
 
   // Send the SE command to retrieve the HFRCODPLL calibration for a given band from the DEVINFO OTP section.
   status = sli_se_device_data_read_word(&se_command_ctx, otp_section_id, offset, &calibration_value);
   if (status != SL_STATUS_OK) {
+    SL_PRINT_STRING_ERROR("otp read 0x%08lx, %d\r\n",
+      (unsigned long)status, (int)__LINE__);
     return 0;
   }
 
@@ -609,12 +613,16 @@ uint32_t sl_hal_system_get_hfrcoem23_calibration(uint32_t frequency)
   // Initialize command context.
   status = sl_se_init_command_context(&se_command_ctx);
   if (status != SL_STATUS_OK) {
+    SL_PRINT_STRING_ERROR("se init 0x%08lx, %d\r\n",
+      (unsigned long)status, (int)__LINE__);
     return 0;
   }
 
   // Send the SE command to retrieve the HFRCOEM23 calibration from the DEVINFO OTP section.
   status = sli_se_device_data_read_word(&se_command_ctx, otp_section_id, offset, &calibration_value);
   if (status != SL_STATUS_OK) {
+    SL_PRINT_STRING_ERROR("otp read 0x%08lx, %d\r\n",
+      (unsigned long)status, (int)__LINE__);
     return 0;
   }
 
@@ -1075,6 +1083,8 @@ void sl_hal_system_get_temperature_info(sl_hal_system_devinfo_temperature_t *inf
   // Initialize command context.
   status = sl_se_init_command_context(&se_command_ctx);
   if (status != SL_STATUS_OK) {
+    SL_PRINT_STRING_ERROR("se init 0x%08lx, %d\r\n",
+      (unsigned long)status, (int)__LINE__);
     *info = SL_HAL_SYSTEM_DEVINFO_TEMPERATURE_RESET_VALUES;
     return;
   }
@@ -1082,6 +1092,8 @@ void sl_hal_system_get_temperature_info(sl_hal_system_devinfo_temperature_t *inf
   // Send the SE command to retrieve the temperature information from the DEVINFO OTP section.
   status = sli_se_device_data_read_word(&se_command_ctx, otp_section_id, offset, (uint32_t*)info);
   if (status != SL_STATUS_OK) {
+    SL_PRINT_STRING_ERROR("otp read 0x%08lx, %d\r\n",
+      (unsigned long)status, (int)__LINE__);
     *info = SL_HAL_SYSTEM_DEVINFO_TEMPERATURE_RESET_VALUES;
     return;
   }
@@ -1117,11 +1129,13 @@ void sl_hal_system_get_adc_calibration_info(sl_hal_system_devinfo_adc_t *info)
   #else
   uint32_t offset = DEVINFO_GP_ADC0CALDATA_OFFSET;
   #endif
-  EFM_ASSERT(info != NULL);
+  SL_LOG_DEBUG_ASSERT(info != NULL);
 
   // Initialize command context.
   status = sl_se_init_command_context(&se_command_ctx);
   if (status != SL_STATUS_OK) {
+    SL_PRINT_STRING_ERROR("se init 0x%08lx, %d\r\n",
+      (unsigned long)status, (int)__LINE__);
     *info = SL_HAL_SYSTEM_DEVINFO_ADC_RESET_VALUES;
     return;
   }
@@ -1133,6 +1147,8 @@ void sl_hal_system_get_adc_calibration_info(sl_hal_system_devinfo_adc_t *info)
                                          sizeof(sl_hal_system_devinfo_adc_t),
                                          info);
   if (status != SL_STATUS_OK) {
+    SL_PRINT_STRING_ERROR("otp read 0x%08lx, %d\r\n",
+      (unsigned long)status, (int)__LINE__);
     *info = SL_HAL_SYSTEM_DEVINFO_ADC_RESET_VALUES;
     return;
   }

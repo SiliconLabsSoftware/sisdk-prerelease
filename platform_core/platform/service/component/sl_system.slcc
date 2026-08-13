@@ -18,6 +18,8 @@ recommends:
 conflicts:
 - name: sl_main
   condition: [kernel]
+validation_helper:
+- path: platform/service/system/sl_system_validation.lua
 documentation:
   docset: gecko-platform
   document: platform-service/system

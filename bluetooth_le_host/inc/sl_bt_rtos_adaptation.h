@@ -67,6 +67,11 @@ extern "C" {
  * 3. The stack will never internally obtain the @ref sl_bt_bluetooth_pend()
  *    lock. It is safe for the application to obtain the lock also from within
  *    the sl_bt_on_event() callback.
+ *
+ * BGAPI commands are synchronous and pend on RTOS synchronization primitives.
+ * Do not call BGAPI commands or @ref sl_bt_bluetooth_pend() from an interrupt
+ * context or from any other RTOS context that prohibits pending. See the
+ * Concurrency section of @ref bgapi for details and recommended alternatives.
  */
 
 /**

@@ -26,7 +26,6 @@ component:
   - id: ddp_flash_execution
     condition:
       - device_generic_family_efr32xg22
-  - id: ddp_cmd_nvm
   - id: ddp_cmd_cert
   - id: ddp_cmd_psa
   - id: ddp_cmd_psa_storage_local
@@ -57,13 +56,19 @@ other_file:
   - path: certificate_manager.py
     project:
       transfer_ownership: true
+  - path: image/readme_img0.png
 
-  # ROOT Certificate Authority files for demonstration purposes
-  - path: ca_demo/ca0_root/certificate.pem
+  # Certificate Authority files for demonstration purposes
+  # Root CA
+  - path: ca_demo/ca0_root/362235998618210098128576986892169139681887934853.crt
     project:
       transfer_ownership: true
       directory: script/ca_demo/ca0_root
-  - path: ca_demo/ca0_root/private_key.pem
+  - path: ca_demo/ca0_root/691047099550201640568062641724369177531491670792.crt
+    project:
+      transfer_ownership: true
+      directory: script/ca_demo/ca0_root
+  - path: ca_demo/ca0_root/certificate.pem
     project:
       transfer_ownership: true
       directory: script/ca_demo/ca0_root
@@ -71,6 +76,42 @@ other_file:
     project:
       transfer_ownership: true
       directory: script/ca_demo/ca0_root
+  - path: ca_demo/ca0_root/private_key.pem
+    project:
+      transfer_ownership: true
+      directory: script/ca_demo/ca0_root
+
+  # Factory CA
+  - path: ca_demo/ca1_factory/386655857600811948380181401082165729182138098553.crt
+    project:
+      transfer_ownership: true
+      directory: script/ca_demo/ca1_factory
+  - path: ca_demo/ca1_factory/certificate.pem
+    project:
+      transfer_ownership: true
+      directory: script/ca_demo/ca1_factory
+  - path: ca_demo/ca1_factory/issued_certificates.yaml
+    project:
+      transfer_ownership: true
+      directory: script/ca_demo/ca1_factory
+  - path: ca_demo/ca1_factory/private_key.pem
+    project:
+      transfer_ownership: true
+      directory: script/ca_demo/ca1_factory
+
+  # Batch CA
+  - path: ca_demo/ca2_batch/certificate.pem
+    project:
+      transfer_ownership: true
+      directory: script/ca_demo/ca2_batch
+  - path: ca_demo/ca2_batch/issued_certificates.yaml
+    project:
+      transfer_ownership: true
+      directory: script/ca_demo/ca2_batch
+  - path: ca_demo/ca2_batch/private_key.pem
+    project:
+      transfer_ownership: true
+      directory: script/ca_demo/ca2_batch
 
 configuration:
   - name: SL_STACK_SIZE

@@ -145,6 +145,24 @@ bool sl_iperf_test_add(sl_iperf_test_t * const test);
 bool sl_iperf_test_get(sl_iperf_test_t * const test, const uint32_t timeout_ms);
 #endif
 
+/**************************************************************************//**
+ * @brief Update the iPerf status.
+ * @details Update the iPerf status.
+ *****************************************************************************/
+void sl_iperf_status_update(void);
+
+/**************************************************************************//**
+ * @brief Lock shared iPerf test statistics.
+ * @details Recursive mutex protecting test->statistic between the UDP
+ *          worker (server/client) and the status-update thread.
+ *****************************************************************************/
+void sl_iperf_stats_lock(void);
+
+/**************************************************************************//**
+ * @brief Unlock shared iPerf test statistics.
+ *****************************************************************************/
+void sl_iperf_stats_unlock(void);
+
 /** @}*/
 
 #ifdef __cplusplus

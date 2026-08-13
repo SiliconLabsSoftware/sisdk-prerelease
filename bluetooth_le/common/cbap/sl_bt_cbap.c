@@ -33,8 +33,6 @@
 #include "sl_common.h"
 #include "sl_component_catalog.h"
 
-#include "ecode.h"
-#include "nvm3.h"
 #include "mbedtls/pk.h"
 #include "mbedtls/x509.h"
 #include "mbedtls/x509_csr.h"
@@ -44,6 +42,7 @@
 #include "mbedtls/x509_crt.h"
 #include "psa/crypto.h"
 #include "psa/crypto_values.h"
+#include "psa_crypto_its.h"
 #include "cbap_key_id.h"
 #include "sl_bt_cbap.h"
 
@@ -82,11 +81,10 @@ static mbedtls_svc_key_id_t remote_pub_key_id = 0;
 // -----------------------------------------------------------------------------
 // Private function declarations
 
-// Read certificate from NVM3.
-static sl_status_t get_certificate(uint8_t *cert, uint32_t *cert_len, uint32_t nvm3_key);
-
-// Read data from NVM3 located at a specified NVM3 key.
-static sl_status_t get_nvm3_object(uint32_t key, uint8_t *buf, size_t *len, size_t maxlen);
+// Read certificate from PSA ITS.
+static sl_status_t get_certificate(uint8_t *cert,
+                                   size_t *cert_len,
+                                   psa_storage_uid_t key);
 
 // Converts PSA status code to SL status code.
 static sl_status_t psa_status_to_sl_status(psa_status_t sc);
@@ -132,7 +130,9 @@ sl_status_t sl_bt_cbap_init(uint8_t *device_certificate_der, uint32_t *device_ce
   }
 
   // Get device certificate
-  sc = get_certificate(device_certificate_der, device_certificate_der_len, CBAP_NVM_DEVICE_CERT);
+  sc = get_certificate(device_certificate_der,
+                       (size_t *)device_certificate_der_len,
+                       (psa_storage_uid_t)CBAP_PSA_DEVICE_CERT);
   if (sc != SL_STATUS_OK) {
     LOG_ERROR("Failed to get device certificate: 0x%04lx" LOG_NL, sc);
     LOG_ERROR("Please make the device was provisioned with success." LOG_NL);
@@ -150,7 +150,9 @@ sl_status_t sl_bt_cbap_init(uint8_t *device_certificate_der, uint32_t *device_ce
   }
 
   // Get root certificate
-  sc = get_certificate(root_certificate_der, (uint32_t *)&root_certificate_der_len, CBAP_NVM_ROOT_CERT);
+  sc = get_certificate(root_certificate_der,
+                       &root_certificate_der_len,
+                       (psa_storage_uid_t)CBAP_PSA_ROOT_CERT);
   if (sc != SL_STATUS_OK) {
     LOG_ERROR("Failed to get root certificate: 0x%04lx" LOG_NL, sc);
     LOG_ERROR("Please make the device was provisioned with success." LOG_NL);
@@ -365,57 +367,30 @@ sl_status_t sl_bt_cbap_destroy_key(void)
 // Private function definitions
 
 /*******************************************************************************
- * Read certificate from NVM3.
+ * Read certificate from PSA ITS.
  *
  * @param[out] cert Certificate buffer.
  * @param[out] cert_len Certificate length.
- * @param[in]  nvm3_key the NVM3 key.
+ * @param[in] key the PSA ITS key (UID).
+ * @return SL_STATUS_OK if successful, error code otherwise.
  ******************************************************************************/
-static sl_status_t get_certificate(uint8_t *cert, uint32_t *cert_len, uint32_t nvm3_key)
+static sl_status_t get_certificate(uint8_t *cert,
+                                   size_t *cert_len,
+                                   psa_storage_uid_t key)
 {
-  sl_status_t sc;
-  size_t nvm3_obj_len;
-  sc = get_nvm3_object(nvm3_key,
+  psa_status_t status;
+  status = psa_its_get(key,
+                       0,
+                       (uint32_t)SL_BT_CBAP_CERTIFICATE_MAX_SIZE,
                        cert,
-                       &nvm3_obj_len,
-                       SL_BT_CBAP_CERTIFICATE_MAX_SIZE);
-  *cert_len = (uint32_t)nvm3_obj_len;
-  return sc;
-}
-
-/*******************************************************************************
- * Read data from NVM3 located at a specified NVM3 key.
- *
- * @param[in] key the key of the NVM3 object.
- * @param[out] buf buffer to write.
- * @param[out] len the size of the NVM3 object.
- * @param[in] maxlen maximum size to read.
- * @return SL_STATUS_OK - if successful, error code otherwise.
- ******************************************************************************/
-static sl_status_t get_nvm3_object(uint32_t key, uint8_t *buf, size_t *len, size_t maxlen)
-{
-  sl_status_t sc;
-  uint32_t type;
-  size_t obj_len;
-
-  // Clamp read size to maxlen
-  sc = nvm3_getObjectInfo(CBAP_NVM3_HANDLE, key, &type, &obj_len);
-  (void)type;
-
-  if (sc != SL_STATUS_OK) {
-    *len = 0u;
-    return sc;
+                       cert_len);
+  if (status == PSA_SUCCESS && *cert_len > SL_BT_CBAP_CERTIFICATE_MAX_SIZE) {
+    LOG_ERROR("The PSA ITS object is larger (%d) than allowed maximum length (%d)!" LOG_NL,
+              *cert_len,
+              SL_BT_CBAP_CERTIFICATE_MAX_SIZE);
+    status = PSA_ERROR_BUFFER_TOO_SMALL;
   }
-
-  *len = obj_len;
-  if (*len > maxlen) {
-    LOG_ERROR("NVM3 object is larger then allowed maximum length!" LOG_NL);
-    *len = maxlen;
-  }
-
-  // Read NVM3 data
-  sc = nvm3_readData(CBAP_NVM3_HANDLE, key, buf, *len);
-  return sc;
+  return psa_status_to_sl_status(status);
 }
 
 /*******************************************************************************

@@ -169,7 +169,7 @@ bool sl_gp_intf_should_buffer_pkt(otInstance *aInstance, otRadioFrame *aFrame, b
     otEXPECT_ACTION(!otPlatDiagModeGet(), shouldBufferPacket = false);
 #endif
 
-    uint8_t *gpFrameStartIndex = efr32GetPayload(aFrame);
+    const uint8_t *gpFrameStartIndex = sli_ot_get_payload(aFrame);
     otEXPECT_ACTION(gpFrameStartIndex != NULL, shouldBufferPacket = false);
 
     // A Typical MAC Frame with GP NWK Frame in it
@@ -308,8 +308,8 @@ bool sl_gp_intf_is_gp_pkt(otRadioFrame *aFrame)
 
     /* clang-format on */
 
-    bool     isGpPkt           = false;
-    uint8_t *gpFrameStartIndex = efr32GetPayload(aFrame);
+    bool           isGpPkt           = false;
+    const uint8_t *gpFrameStartIndex = sli_ot_get_payload(aFrame);
     otEXPECT_ACTION(gpFrameStartIndex != NULL, isGpPkt = false);
     uint8_t fc = *gpFrameStartIndex;
 
@@ -321,7 +321,7 @@ bool sl_gp_intf_is_gp_pkt(otRadioFrame *aFrame)
 
     bool lengthCheck         = (aFrame->mLength >= GP_MIN_MAINTENANCE_FRAME_LENGTH);
     bool networkVersionCheck = GP_NWK_PROTOCOL_VERSION_CHECK(fc);
-    bool frameVersionCheck   = (efr32GetFrameVersion(aFrame) == IEEE802154_FRAME_VERSION_2003);
+    bool frameVersionCheck   = (sli_ot_get_frame_version(aFrame) == IEEE802154_FRAME_VERSION_2003);
 
     isGpPkt = (lengthCheck && networkVersionCheck && frameVersionCheck);
 #if 0 // Debugging

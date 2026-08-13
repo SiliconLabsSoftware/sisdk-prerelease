@@ -1,1 +1,12 @@
-{}
+362235998618210098128576986892169139681887934853:
+- common_name: Silabs_Demo_Factory
+- public_key: !!binary |
+    MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEYmIhJkIhMKM+fGFLSeWaGzbtVv91CW61Xnn8y8F5
+    bQ1pkrDm2VaqZdzINHq+pkkZ/zkDXaj80S1IaXTIYWTTNQ==
+- CA: true
+691047099550201640568062641724369177531491670792:
+- common_name: Silabs_Demo_Root
+- public_key: !!binary |
+    MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE9+gXCeXTg5ss0NW624MrhA64FukoPQ9rDWZ8VQuP
+    qf57AttJh+IGqaTdHP4nld/PHztIWBlJcI2yKtTu7PGtvg==
+- CA: true

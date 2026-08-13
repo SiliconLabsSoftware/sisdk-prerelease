@@ -40,6 +40,7 @@
 #include "sl_iperf_util.h"
 #include "sl_iperf_config.h"
 #include "sl_iperf_log.h"
+#include "sl_iperf.h"
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -495,7 +496,7 @@ void sl_iperf_test_print_udp_conn_str(sl_iperf_test_t * const test)
   }
 }
 
-void sl_iperf_test_update_status(sl_iperf_test_t * const test)
+void sl_iperf_test_update_status(sl_iperf_test_t * const test, bool reset)
 {
   static sl_iperf_ts_ms_t ts_ms_prev     =   0UL;
   static size_t data_bytes_prev          =   0UL;
@@ -504,66 +505,57 @@ void sl_iperf_test_update_status(sl_iperf_test_t * const test)
   static uint32_t out_of_order_pkt_prev  =   0UL;
   stat_update_params_t params            = { 0UL };
 
-  // init previous status if test started
-  if (test->statistic.nbr_rcv_snt_packets <= 1U) {
-    ts_ms_prev = test->opt.mode == SL_IPERF_MODE_SERVER ? test->statistic.ts_curr_recv_ms : test->statistic.ts_curr_sent_ms;
-    data_bytes_prev = test->statistic.bytes;
-    update_time_ms = 0U;
-    lost_pkt_prev = 0U;
+  if (reset) {
+    ts_ms_prev = sl_iperf_get_timestamp_ms();
+    data_bytes_prev = 0UL;
+    update_time_ms = 0UL;
+    lost_pkt_prev = 0UL;
     out_of_order_pkt_prev = 0UL;
     return;
   }
 
-  // update if interval is set
-  if (!test->opt.interval_ms) {
+  if (!test->conn.run) {
+    // Test is finished.
     return;
   }
+
+  sl_iperf_stats_lock();
 
   // Elapsed time calculation
-  if (!test->conn.run) {
-    ts_ms_prev = test->statistic.ts_start_ms;
-    params.ts_ms_cur = test->statistic.ts_end_ms;
-    params.data_bytes_delta = test->statistic.bytes;
-  } else {
-    params.data_bytes_cur = test->statistic.bytes;
-    params.data_bytes_delta = params.data_bytes_cur - data_bytes_prev;
-    params.ts_ms_cur = sl_iperf_get_timestamp_ms();
-  }
-
+  params.ts_ms_cur = sl_iperf_get_timestamp_ms();
   params.ts_ms_delta = params.ts_ms_cur - ts_ms_prev;
-  // Prevent division by zero
-  if (!params.ts_ms_delta) {
-    return;
+  params.data_bytes_cur = test->statistic.bytes;
+  params.data_bytes_delta = params.data_bytes_cur - data_bytes_prev;
+
+  ts_ms_prev = params.ts_ms_cur;
+  data_bytes_prev = params.data_bytes_cur;
+
+  sl_iperf_calc_time_from_ms(&params.start_time, update_time_ms);
+  update_time_ms += params.ts_ms_delta;
+  sl_iperf_calc_time_from_ms(&params.end_time, update_time_ms);
+
+  _calculate_formatted_bw(test->opt.bw_format, params.data_bytes_delta, (uint32_t)params.ts_ms_delta, &params.fval_bw);
+  _data_converter(params.data_bytes_delta, SL_IPERF_DATA_KBYTE_TO_BYTE_ML, &params.fval_data);
+
+  if (sl_iperf_test_is_udp_srv(test)) {
+    params.out_of_order_pkt_cnt = test->statistic.udp_out_of_order - out_of_order_pkt_prev;
+    out_of_order_pkt_prev = test->statistic.udp_out_of_order;
+    params.lost_pkt_curr = test->statistic.udp_lost_pkt - lost_pkt_prev;
+    lost_pkt_prev = test->statistic.udp_lost_pkt;
+    params.pkt_cnt = test->statistic.last_recv_pkt_cnt + params.lost_pkt_curr;
+    // reset when update it
+    test->statistic.last_recv_pkt_cnt = 0UL;
+
+    _print_udp_srv_status(test, &params);
+  } else if (sl_iperf_test_is_udp_clnt(test)) {
+    _print_udp_clnt_status(test, &params);
+  } else if (sl_iperf_test_is_tcp_srv(test)) {
+    (void) 0U;
+  } else if (sl_iperf_test_is_tcp_clnt(test)) {
+    (void) 0U;
   }
 
-  if (params.ts_ms_delta >= test->opt.interval_ms) {
-    ts_ms_prev = params.ts_ms_cur;
-    data_bytes_prev = params.data_bytes_cur;
-    sl_iperf_calc_time_from_ms(&params.start_time, update_time_ms);
-    update_time_ms += params.ts_ms_delta;
-    sl_iperf_calc_time_from_ms(&params.end_time, update_time_ms);
-
-    _calculate_formatted_bw(test->opt.bw_format, params.data_bytes_delta, (uint32_t)params.ts_ms_delta, &params.fval_bw);
-    _data_converter(params.data_bytes_delta, SL_IPERF_DATA_KBYTE_TO_BYTE_ML, &params.fval_data);
-
-    if (sl_iperf_test_is_udp_srv(test)) {
-      params.out_of_order_pkt_cnt = test->statistic.udp_out_of_order - out_of_order_pkt_prev;
-      out_of_order_pkt_prev = test->statistic.udp_out_of_order;
-      params.lost_pkt_curr = test->statistic.udp_lost_pkt - lost_pkt_prev;
-      lost_pkt_prev = test->statistic.udp_lost_pkt;
-      params.pkt_cnt = test->statistic.last_recv_pkt_cnt + params.lost_pkt_curr;
-      // reset when update it
-      test->statistic.last_recv_pkt_cnt = 0UL;
-
-      _print_udp_srv_status(test, &params);
-    } else if (sl_iperf_test_is_udp_clnt(test)) {
-      _print_udp_clnt_status(test, &params);
-    } else if (sl_iperf_test_is_tcp_srv(test)) {
-      (void) 0U;
-    } else if (sl_iperf_test_is_tcp_clnt(test)) {
-      (void) 0U;
-    }
-  }
+  sl_iperf_stats_unlock();
 }
 
 void sl_iperf_test_print_udp_srv_report_hdr(sl_iperf_test_t * const test)

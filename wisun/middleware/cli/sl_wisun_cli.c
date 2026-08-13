@@ -1978,7 +1978,7 @@ void app_disconnect(const sl_cli_command_arg_t *arguments)
 
   ret = sl_wisun_get_join_state(&join_state);
   if (ret != SL_STATUS_OK) {
-    printf("[Failed: Getting join state failed]\n");
+    printf("[Failed: getting join state: %"PRIu32"]\n", ret);
     return;
   }
   if (join_state == SL_WISUN_JOIN_STATE_DISCONNECTED) {
@@ -1987,10 +1987,8 @@ void app_disconnect(const sl_cli_command_arg_t *arguments)
   }
 
   ret = sl_wisun_disconnect();
-  if (ret == SL_STATUS_OK) {
-    printf("[Disconnecting]\n");
-  } else {
-    printf("[Disconnection failed: %"PRIu32"]\n", ret);
+  if (ret != SL_STATUS_OK) {
+    printf("[Failed: disconnecting: %"PRIu32"]\n", ret);
   }
 }
 #endif

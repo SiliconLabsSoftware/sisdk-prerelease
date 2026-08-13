@@ -1,0 +1,15 @@
+workspace_name: bootloader-spi-ezsp-workspace
+package: platform_app
+label: bootloader-spi-ezsp-workspace
+quality: production
+description: >
+  Demonstrates how to build a TrustZone-split bootloader as a unified workspace, combining the Secure and Non-Secure parts into a single dual-image build.
+project:
+  - path: bootloader-spi-ezsp-secure.slcp
+    id: bootloader-spi-ezsp-secure
+    output: bootloader-spi-ezsp-secure
+  - path: bootloader-spi-ezsp-nonsecure.slcp
+    id: bootloader-spi-ezsp-nonsecure
+    output: bootloader-spi-ezsp-nonsecure
+post_build:
+  profile: bootloader_tz_workspace

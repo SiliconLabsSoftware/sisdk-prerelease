@@ -1,0 +1,44 @@
+project_name: iostream_eusart_baremetal
+package: platform_app
+quality: production
+label: Platform - I/O Stream EUSART Bare-metal
+description: >
+  Uses the I/O Stream service to demonstrate EUSART over the kit's virtual COM port (VCOM). Characters you send are echoed back; connect via USB or Ethernet port 4902.
+category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
+source:
+  - path: app.c
+  - path: app_iostream_eusart.c
+include:
+  - path: .
+    file_list:
+    - path: app.h
+    - path: app_iostream_eusart.h
+component:
+  - id: sl_main
+  - id: device_init
+  - id: clock_manager
+  - id: iostream
+  - id: iostream_retarget_stdio
+  - id: iostream_eusart
+    instance: [vcom]
+configuration:
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+  - name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+    value: 1
+define:
+  - name: DEBUG_EFM
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
+tag:
+  - hwfilter:device:device_has_euart
+  - hwfilter:device:device_series_2

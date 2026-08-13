@@ -23,7 +23,7 @@ provides:
 requires:
 - name: device
 - name: sl_common
-- name: log_none
+- name: sl_assert
 - name: sl_core
 - name: code_classification
 template_contribution:

@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='ASCII'?>
+<ns0:MDescriptors xmlns:ns0="http://www.silabs.com/ss/Studio.ecore">
+  <descriptors name="se_manager_host_firmware_upgrade" label="Platform Security - SoC SE Manager Host Firmware Upgrade and Debug Lock" description="Demonstrates the host firmware upgrade and debug lock API of SE Manager.&#10;">
+      <properties key="namespace" value="template.uc" />
+      <properties key="keywords" value="universal\host \ firmware \ upgrade \ agreement platform\ security" />
+      <properties key="solutionReferenceId" value="platform_app_internal.example.security_sample_apps_internal.se_manager_host_firmware_upgrade.se_manager_host_firmware_upgrade.slcp" />
+      <properties key="projectFilePaths" value="example/security_sample_apps_internal/se_manager_host_firmware_upgrade/se_manager_host_firmware_upgrade.slcp" />
+      <properties key="readmeFiles" value="example/security_sample_apps_internal/se_manager_host_firmware_upgrade/readme.md" />
+      <properties key="boardCompatibility" value="com.silabs.board.none" />
+      <properties key="partCompatibility" value="" />
+      <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code" />
+      <properties key="toolchainCompatibility" value="gcc iar llvm" />
+      <properties key="category" value="Example|Platform" />
+      <properties key="quality" value="INTERNAL" />
+      <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default" />
+      <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced" />
+    </descriptors>
+</ns0:MDescriptors>

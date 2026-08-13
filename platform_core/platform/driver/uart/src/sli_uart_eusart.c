@@ -304,6 +304,13 @@ static sl_status_t eusart_uart_init(sl_peripheral_t uart, sl_uart_config_t confi
   sl_hal_eusart_uart_advanced_config_t advanced_config = SL_HAL_EUSART_UART_ADVANCED_INIT_DEFAULT;
   advanced_config.hw_flow_control_mode = uart_hwfc_to_eusart_hal_hwfc(config.flow_control);
 
+  #if defined(EUSART_CFG1_RXTIMEOUT_DEFAULT)
+  // EUART does not have the CFG1 register, so we simply cannot set the RX timeout value.
+  // Attempting to call sl_uart_async_read_set_timeout on an EUART-based UART instance will return
+  // SL_STATUS_NOT_SUPPORTED.
+  advanced_config.rx_timeout = _EUSART_CFG1_RXTIMEOUT_SEVENFRAMES;
+  #endif
+
   bool lf_mode = is_lf_mode(eusart, freq);
 
   sl_hal_eusart_uart_init_t init = lf_mode ? (sl_hal_eusart_uart_init_t)SL_HAL_EUSART_UART_INIT_DEFAULT_LF
@@ -579,6 +586,46 @@ static size_t eusart_uart_clear_tx_fifo(sl_peripheral_t uart)
   return count;
 }
 
+#if defined(EUSART_PRESENT)
+
+/***************************************************************************//**
+ * Attempts to set the RX timeout for EUSART.
+ * Returns the actual timeout set in microseconds.
+ ******************************************************************************/
+static uint32_t eusart_uart_set_rx_timeout(sl_uart_handle_t *uart_handle, uint32_t timeout_us)
+{
+  (void)timeout_us;
+
+  uint32_t baudrate = uart_handle->config.baudrate;
+  uint32_t frame_size = sl_uart_config_get_frame_size(uart_handle->config);
+  uint32_t frame_time_us = (frame_size * 1000000UL) / baudrate;
+
+  // EUSART requires to be disabled when changing the CFGx registers. This means that in order to
+  // change the RX timeout value, we would need to disable the EUSART peripheral, potentially risking
+  // data loss. To avoid this, we always set the RX timeout to its maximum value of 7 frames, making
+  // it the minimum HW timeout. For example, at 115200 8N1, the minimal HW timeout will be
+  // 7*10/115200 ~= 608us.
+  const uint8_t timeout_frames = _EUSART_CFG1_RXTIMEOUT_SEVENFRAMES;
+
+  return timeout_frames * frame_time_us;
+}
+
+#endif // EUSART_PRESENT
+
+#if defined(EUART_PRESENT)
+
+/***************************************************************************//**
+ * EUART does not support HW RX timeout.
+ ******************************************************************************/
+static uint32_t euart_uart_set_rx_timeout(sl_uart_handle_t *uart_handle, uint32_t timeout_us)
+{
+  (void)uart_handle;
+  (void)timeout_us;
+
+  return 0;
+}
+
+#endif // EUART_PRESENT
 #endif // SL_CATALOG_UART_ASYNC_PRESENT
 
 #if defined(EUSART_PRESENT)
@@ -609,6 +656,8 @@ const sli_uart_ops_t sli_uart_eusart_ops = {
   .get_rx_register = eusart_uart_get_rx_register,
   .clear_tx_fifo = eusart_uart_clear_tx_fifo,
   .set_tx_enable = eusart_uart_set_tx_enable,
+  .set_rx_timeout = eusart_uart_set_rx_timeout,
+  .irq_rx_timeout_flag = EUSART_IF_RXTO,
 #endif
   .irq_rx_err_flag = EUSART_IF_FERR | EUSART_IF_PERR | EUSART_IF_RXOF,
   .irq_rx_ready_flag = EUSART_IF_RXFL,
@@ -644,6 +693,9 @@ const sli_uart_ops_t sli_uart_euart_ops = {
   .get_rx_register = eusart_uart_get_rx_register,
   .clear_tx_fifo = eusart_uart_clear_tx_fifo,
   .set_tx_enable = eusart_uart_set_tx_enable,
+  // EUART does not support HW RX timeout.
+  .set_rx_timeout = euart_uart_set_rx_timeout,
+  .irq_rx_timeout_flag = 0,
 #endif
   .irq_rx_err_flag = EUSART_IF_FERR | EUSART_IF_PERR | EUSART_IF_RXOF,
   .irq_rx_ready_flag = EUSART_IF_RXFL,

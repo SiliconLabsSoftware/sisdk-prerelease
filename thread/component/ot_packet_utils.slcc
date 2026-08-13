@@ -1,0 +1,24 @@
+id: ot_packet_utils
+label: IEEE 802.15.4 Packet Utils
+package: thread
+category: OpenThread|Platform Abstraction
+quality: production
+description: This component provides IEEE 802.15.4 frame processing utilities for the OpenThread platform abstraction layer
+provides:
+- name: ot_packet_utils
+- name: ot_packet_utils_impl
+requires:
+- name: ot_packet_utils_core
+ui_hints:
+  visibility: never
+include:
+- path: platform-abstraction/efr32/mac
+  file_list:
+  - path: mac-config-key-policy.hpp
+define:
+- name: SL_OT_MAC_KEY_POLICY_CONFIG_HEADER
+  value: '"mac/mac-config-key-policy.hpp"'
+metadata:
+  sbom:
+    license: BSD-3-Clause
+root_path: thread

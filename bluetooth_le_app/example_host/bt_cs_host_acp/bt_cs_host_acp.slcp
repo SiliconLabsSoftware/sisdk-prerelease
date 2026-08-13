@@ -1,0 +1,108 @@
+project_name: bt_cs_host_acp
+package: bluetooth_le_app
+label: Bluetooth - CS Host (ACP)
+description: >
+  Channel Sounding (CS) host application that connects to a CS NCP target
+  running the Application Co-Processor (ACP) protocol over NCP. The host
+  configures and controls the Channel Sounding components on the target
+  (Ranging Requester (RREQ) role and distance estimation using the RTL
+  Library) and receives the results via the ACP interface. Intended to be
+  used together with the "Bluetooth - NCP for CS with ACP" target application.
+category: Bluetooth Examples
+quality: experimental
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Bluetooth"]
+  - name: "Device Type"
+    value: ["Host"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
+
+component:
+  - id: host_bluetooth_connection_config
+  - id: bluetooth_peer_security
+  - id: bluetooth_peer_manager_common
+  - id: bluetooth_peer_manager_central
+  - id: bluetooth_peer_manager_peripheral
+  - id: cs_configurator
+  - id: cs_algo
+  - id: cs_rrsp
+  - id: cs_rreq
+  - id: cs_acp_host
+  - id: cs_manager_feature_config
+  - id: cs_manager_feature_control
+  - id: cs_manager
+  - id: cs_manager_feature_initiator
+  - id: cs_manager_feature_reflector
+  - id: gatt_configuration
+  - id: ncp_gatt
+  - id: ncp_version
+  - id: host_main
+  - id: host_ncp
+  - id: app_log
+  - id: iostream_stdio
+  - id: app_assert
+  - id: native_host
+  - id: toolchain_gcc
+
+source:
+  - path: app.c
+  - path: app_cs.c
+  - path: app_cs_error.c
+  - path: app_cs_result.c
+  - path: ../../common/app_log/app_log_cli.c
+  - path: ../../common/cs/app_cs_discovery.c
+  - path: ../../common/cs/app_cs_capabilities_log.c
+
+include:
+  - path: ../../common/app_log
+    file_list:
+      - path: app_log_cli.h
+  - path: .
+    file_list:
+      - path: app.h
+  - path: ../../common/cs
+    file_list:
+      - path: app_cs_discovery.h
+      - path: app_cs_capabilities.h
+      - path: app_cs_capabilities_log.h
+
+config_file:
+  - override:
+      component: gatt_configuration
+      file_id: gatt_configuration_file_id
+    path: config/btconf/gatt_configuration.btconf
+    directory: btconf
+  - path: config/app_config.h
+
+configuration:
+  - name: APP_LOG_LEVEL_FILTER_DYNAMIC
+    value: 1
+  - name: SL_BT_PEER_MANAGER_PERIPHERAL_CONFIG_ADV_PHY
+    value: sl_bt_gap_phy_2m
+  - name: SL_BT_PEER_MANAGER_CENTRAL_CONFIG_DEFAULT_SCAN_INTERVAL
+    value: 21
+  - name: SL_BT_PEER_MANAGER_CENTRAL_CONFIG_DEFAULT_SCAN_WINDOW
+    value: 21
+  - name: CS_MANAGER_CONFIG_MAX_INSTANCES
+    value: 4
+
+readme:
+  - path: readme.md
+
+ui_hints:
+  highlight:
+    - path: config/btconf/gatt_configuration.btconf
+    - path: readme.md
+      focus: true
+
+template_contribution:
+  - name: sl_bt_peer_manager_event_handler
+    value:
+      include: app.h
+      handler: app_sl_bt_peer_manager_on_event
+
+tag:
+  - toolchain:gcc
+  - hwfilter:device:device_family_host

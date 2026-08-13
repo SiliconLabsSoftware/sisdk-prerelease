@@ -109,6 +109,9 @@ config_file:
 - path: apps/sl_rail_test/config/efr32xg2d/sl_rail_test_config.h
   condition:
   - device_sdid_260
+- path: apps/sl_rail_test/config/efr32xg2e/sl_rail_test_config.h
+  condition:
+  - device_sdid_265
 - path: apps/sl_rail_test/config/sixg301/sl_rail_test_config.h
   condition:
   - device_generic_family_sixx301

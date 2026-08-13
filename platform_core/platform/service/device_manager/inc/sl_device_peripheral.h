@@ -150,6 +150,15 @@ extern "C" {
 /// Define pointer to EUSART4 peripheral structure.
 #define SL_PERIPHERAL_EUSART4 ((sl_peripheral_t)(&sl_peripheral_val_eusart4))
 
+/// Define pointer to EUSART5 peripheral structure.
+#define SL_PERIPHERAL_EUSART5 ((sl_peripheral_t)(&sl_peripheral_val_eusart5))
+
+/// Define pointer to EUSART6 peripheral structure.
+#define SL_PERIPHERAL_EUSART6 ((sl_peripheral_t)(&sl_peripheral_val_eusart6))
+
+/// Define pointer to EUSART7 peripheral structure.
+#define SL_PERIPHERAL_EUSART7 ((sl_peripheral_t)(&sl_peripheral_val_eusart7))
+
 /// Define pointer to FSRCO peripheral structure.
 #define SL_PERIPHERAL_FSRCO (&sl_peripheral_val_fsrco)
 
@@ -725,6 +734,15 @@ extern const sl_peripheral_eusart_val_t sl_peripheral_val_eusart3;
 
 // External declaration for EUSART4 peripheral structure.
 extern const sl_peripheral_eusart_val_t sl_peripheral_val_eusart4;
+
+// External declaration for EUSART5 peripheral structure.
+extern const sl_peripheral_eusart_val_t sl_peripheral_val_eusart5;
+
+// External declaration for EUSART6 peripheral structure.
+extern const sl_peripheral_eusart_val_t sl_peripheral_val_eusart6;
+
+// External declaration for EUSART7 peripheral structure.
+extern const sl_peripheral_eusart_val_t sl_peripheral_val_eusart7;
 
 // External declaration for FSRCO peripheral structure.
 extern const sl_peripheral_val_t sl_peripheral_val_fsrco;

@@ -43,6 +43,7 @@
 #include "sl_iperf_util.h"
 #include "sl_iperf_udp_srv.h"
 #include "socket/socket.h"
+#include "sl_sleeptimer.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -79,8 +80,9 @@ static uint32_t _calc_jitter_abs_delta(const sl_iperf_test_t * const test);
  * @brief Jitter calculation
  * @details Calculate inter arrival estimated jitter based on RFC 1889
  * @param[in,out] test Test
+ * @param[in] pkt_id Received packet ID
  *****************************************************************************/
-static void _iperf_calc_jitter(sl_iperf_test_t * const test);
+static void _iperf_calc_jitter(sl_iperf_test_t * const test, const int32_t pkt_id);
 
 // -----------------------------------------------------------------------------
 //                                Static Variables
@@ -90,6 +92,13 @@ static void _iperf_calc_jitter(sl_iperf_test_t * const test);
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
 
+static void status_timer_callback(sl_sleeptimer_timer_handle_t *handle, void *data)
+{
+  (void)handle;
+  (void)data;
+  sl_iperf_status_update();
+}
+
 // UDP Server test
 void sl_iperf_test_udp_server(sl_iperf_test_t * test)
 {
@@ -98,6 +107,7 @@ void sl_iperf_test_udp_server(sl_iperf_test_t * test)
   int32_t pkt_id                        = 0;
   sl_iperf_time_t time                  = { 0U };
   static sl_iperf_socket_addr_t mc_addr = { 0U };
+  sl_sleeptimer_timer_handle_t status_timer = { 0U };
 
   // reset error, set status queued
   sl_iperf_test_set_err_and_stat(test, SL_IPERF_ERR_NONE,
@@ -157,15 +167,15 @@ void sl_iperf_test_udp_server(sl_iperf_test_t * test)
   test->statistic.nbr_rcv_snt_packets = 0U;
 
   while (sl_iperf_test_check_time(test)) {
-    sl_iperf_test_update_status(test);
     r = sl_iperf_socket_recvfrom(test->conn.socket_id, test->conn.buff,
                                  test->conn.buff_size, &test->conn.clnt_addr);
-
     // Empty buff or error
     if (!r || r == SL_IPERF_NW_API_ERROR) {
-      sl_iperf_delay_ms(1);
+      sl_iperf_delay_ms(2);
       continue;
     }
+
+    sl_iperf_stats_lock();
 
     // store previous timestamps
     test->statistic.ts_prev_recv_ms = test->statistic.ts_curr_recv_ms;
@@ -174,10 +184,16 @@ void sl_iperf_test_udp_server(sl_iperf_test_t * test)
     // get current time stamp
     test->statistic.ts_curr_recv_ms = sl_iperf_get_timestamp_ms();
 
-    ++test->statistic.nbr_rcv_snt_packets;
-    ++test->statistic.nbr_calls;
+    if (!test->statistic.nbr_rcv_snt_packets++) {
+      // Reset status on first packet reception.
+      sl_iperf_test_update_status(test, true);
+      if (test->opt.interval_ms > 0U) {
+        sl_sleeptimer_start_periodic_timer_ms(&status_timer, test->opt.interval_ms, status_timer_callback, test, 0, 0);
+      }
+    }
+    test->statistic.nbr_calls++;
     // store currently received packet counts, update resets it
-    ++test->statistic.last_recv_pkt_cnt;
+    test->statistic.last_recv_pkt_cnt++;
     test->statistic.bytes += r;
     if (test->conn.run == false) {
       test->statistic.ts_start_ms = test->statistic.ts_curr_recv_ms;
@@ -195,7 +211,7 @@ void sl_iperf_test_udp_server(sl_iperf_test_t * test)
     pkt_id = sl_iperf_network_ntohl(clnt_hdr->dtg.id);
     sl_iperf_test_log_verbose(test, "UDP Server: packet received. pkt_id = %d (%d bytes).\n", pkt_id, r);
 
-    _iperf_calc_jitter(test);
+    _iperf_calc_jitter(test, pkt_id);
 
     // 1. First packet received
     if (test->statistic.nbr_rcv_snt_packets == 1U) {
@@ -214,6 +230,8 @@ void sl_iperf_test_udp_server(sl_iperf_test_t * test)
       sl_iperf_test_log_verbose(test, "UDP Server: Received end packet.\n");
       test->statistic.ts_end_ms = sl_iperf_get_timestamp_ms();
       test->conn.run = false;
+      sl_sleeptimer_stop_timer(&status_timer);
+      sl_iperf_stats_unlock();
       _iperf_udp_finack(test);
       break;
     }
@@ -231,6 +249,8 @@ void sl_iperf_test_udp_server(sl_iperf_test_t * test)
       }
     }
     test->statistic.udp_rx_last_pkt = pkt_id;
+
+    sl_iperf_stats_unlock();
   }
 
   // calculate total packets
@@ -239,6 +259,7 @@ void sl_iperf_test_udp_server(sl_iperf_test_t * test)
   if (test->conn.run || !test->statistic.tot_packets) {
     test->statistic.ts_end_ms = sl_iperf_get_timestamp_ms();
     test->conn.run = false;
+    sl_sleeptimer_stop_timer(&status_timer);
     if (test->statistic.tot_packets) {
       _iperf_udp_finack(test);
     }
@@ -336,15 +357,20 @@ __STATIC_INLINE sl_iperf_ts_ms_t _get_ms_ts_from_clnt_header(const sl_iperf_udp_
 
 static uint32_t _calc_jitter_abs_delta(const sl_iperf_test_t * const test)
 {
-  uint32_t sender_d   = 0U;
-  uint32_t receiver_d = 0U;
-  sender_d   = (uint32_t)(test->statistic.ts_curr_sent_ms - test->statistic.ts_prev_sent_ms);
-  receiver_d = (uint32_t)(test->statistic.ts_curr_recv_ms - test->statistic.ts_prev_recv_ms);
+  int64_t sender_d   = 0L;
+  int64_t receiver_d = 0L;
+  int64_t delta      = 0L;
 
-  return sender_d >= receiver_d ? (sender_d - receiver_d) : (receiver_d - sender_d);
+  // Signed arithmetic: a reordered packet gives a negative sender delta,
+  // which would wrap if computed on unsigned types.
+  sender_d   = (int64_t)(test->statistic.ts_curr_sent_ms - test->statistic.ts_prev_sent_ms);
+  receiver_d = (int64_t)(test->statistic.ts_curr_recv_ms - test->statistic.ts_prev_recv_ms);
+  delta      = receiver_d - sender_d;
+
+  return (uint32_t)(delta < 0L ? -delta : delta);
 }
 
-static void _iperf_calc_jitter(sl_iperf_test_t * const test)
+static void _iperf_calc_jitter(sl_iperf_test_t * const test, const int32_t pkt_id)
 {
   // Jitter calculation by RFC-1889
   // Estimated jitter type is int64_t
@@ -359,6 +385,13 @@ static void _iperf_calc_jitter(sl_iperf_test_t * const test)
   if (test->statistic.nbr_rcv_snt_packets <= 1) {
     return;
   }
+
+  // Only consecutive packets carry a meaningful transit time delta.
+  // Skips reordered/lost sequences and the negative ID end packet.
+  if (pkt_id != (test->statistic.udp_rx_last_pkt + 1)) {
+    return;
+  }
+
   abs_d = _calc_jitter_abs_delta(test);
   v1 = ((int64_t)abs_d - test->statistic.udp_jitter);
   v1 = ((v1 + 8L) >> 4UL);

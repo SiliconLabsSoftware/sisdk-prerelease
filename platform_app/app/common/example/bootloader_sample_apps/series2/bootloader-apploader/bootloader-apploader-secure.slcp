@@ -1,0 +1,37 @@
+project_name: bootloader-apploader-secure
+package: platform_app
+quality: evaluation
+label: Bootloader - SoC Bluetooth AppLoader OTA DFU Secure part of Bootloader using TrustZone
+description: >
+   Demonstrates how to implement the Secure part of a TrustZone-split bootloader, in a dual-image setup where the Non-Secure part with communication interfaces is built separately.
+
+category: Example|Bootloader
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+  - name: "MCU"
+    value: ["Bootloader"]
+
+component:
+  - id: bootloader_core_secure
+  - id: bootloader_image_parser
+  - id: bootloader_apploader_secure
+  - id: bootloader_debug
+  - id: bootloader_tz_secure_config
+
+configuration:
+  - name: SL_VCOM_ENABLE
+    value: 1
+
+define:
+  - name: BOOTLOADER_SUPPORT_COMMUNICATION
+    value: 1
+
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
+tag:
+  - "companion:bootloader-apploader-nonsecure.slcp"

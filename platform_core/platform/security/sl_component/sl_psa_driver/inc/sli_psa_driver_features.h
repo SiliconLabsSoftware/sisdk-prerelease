@@ -401,4 +401,18 @@
   #define SLI_PSA_DRIVER_FEATURE_EDDSA
 #endif
 
+// RSA signature (sign/verify-message) on SE-equipped devices where the SE
+// firmware supports RSA. Requires the mbedtls RSA builtin to be compiled in,
+// both for DER key parsing (mbedtls_psa_rsa_load_representation) and as the
+// software fallback for PSA_ALG_RSA_PSS_ANY_SALT on verify (which the SE
+// cannot service directly since it takes a fixed salt length).
+#if defined(SLI_MBEDTLS_DEVICE_HSE)                                 \
+  && ((defined(PSA_WANT_ALG_RSA_PKCS1V15_SIGN)                      \
+       && defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_SIGN))       \
+  || (defined(PSA_WANT_ALG_RSA_PSS)                                 \
+      && defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PSS)))
+  #define SLI_PSA_DRIVER_FEATURE_SIGNATURE
+  #define SLI_PSA_DRIVER_FEATURE_RSA_SIGN
+#endif
+
 #endif // SLI_PSA_DRIVER_FEATURES_H

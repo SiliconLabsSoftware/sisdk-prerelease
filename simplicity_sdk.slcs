@@ -7,25 +7,25 @@ supplier: Silicon Laboratories, Inc.
 component_path:
 - path: generative_ai/component
 - path: bgapi_protocol/component
-- path: bluetooth_le_host/component
 - path: bluetooth_mesh_srtest/component
 - path: bluetooth_le/component
-- path: bluetooth_mesh_stack/component
-- path: bluetooth_le_controller/component
+- path: bluetooth_le_host/component
 - path: bluetooth_common/component
+- path: bluetooth_mesh_stack/component
 - path: bluetooth_mesh/component
+- path: bluetooth_le_controller/component
 - path: bluetooth_apploader/component
 - path: bluetooth_le_internal/component
-- path: boards_efr32xg2b/hardware/board/config/component
-- path: boards_efr32xg2b/hardware/board/component
-- path: boards/hardware/board/config/component
-- path: boards/hardware/board/component
-- path: boards/hardware/driver/component
 - path: boards_internal/hardware/kit/component
 - path: boards_internal/hardware/kit/common/component
 - path: boards_internal/hardware/board/component
 - path: boards_internal/hardware/board/config/component
 - path: boards_internal/platform/common/component
+- path: boards_efr32xg2b/hardware/board/config/component
+- path: boards_efr32xg2b/hardware/board/component
+- path: boards/hardware/board/config/component
+- path: boards/hardware/board/component
+- path: boards/hardware/driver/component
 - path: bootloader_internal/platform/common/component
 - path: bootloader_internal/platform/bootloader/component
 - path: bootloader_internal/platform/bootloader/series3/component
@@ -51,8 +51,8 @@ component_path:
 - path: cpc_tests/component
 - path: cpc/component
 - path: delta_dfu/component
-- path: freertos_internal/component
 - path: freertos/component
+- path: freertos_internal/component
 - path: mbedtls/component
 - path: micriumos_internal/platform/micrium_os/component
 - path: micriumos/platform/micrium_os/component
@@ -96,9 +96,9 @@ component_path:
 - path: proprietary_default_radio_confs/.
 - path: protocol_user_sequencer_internal/component/protocol_user_sequencer_internal
 - path: rail/component
-- path: rail_library/component/rail_library
 - path: rail_library_internal/component/rail_library_internal
 - path: rail_library_alpha_chips/component/rail_library_alpha_chips
+- path: rail_library/component/rail_library
 - path: rail_library_chips_internal/component/rail_library_chips_internal
 - path: realtime_locationing/component
 - path: rtos_benchmark_internal/component
@@ -152,7 +152,7 @@ documentation:
 - docset: btmesh-service-api
   version: 12.0.0
 - docset: gecko-platform
-  version: 6.1.0
+  version: 6.2.0
 - docset: mcu-bootloader
   version: 3.4.0
 - docset: multiprotocol
@@ -189,19 +189,19 @@ documentation:
   version: 1.1.1
 - docset: protocol-usb
   version: 1.8.0
-- docset: wifi
-  version: 4.2.0
 - docset: wifi_sqa_internal
   version: 4.2.0
 - docset: wifi_siwx353
   version: 0.1.0
+- docset: wifi
+  version: 4.2.0
 - docset: wiseconnect_common
   version: 4.2.0
 - docset: zigbee
   version: 9.2.0
 upgrade_manifest:
-- path: bluetooth_le_host/component/upgrade.slcu
 - path: bluetooth_le/upgrade.slcu
+- path: bluetooth_le_host/component/upgrade.slcu
 - path: bluetooth_mesh_stack/component/upgrade.slcu
 - path: bluetooth_mesh/upgrade.slcu
 - path: connect_stack/component/upgrade.slcu

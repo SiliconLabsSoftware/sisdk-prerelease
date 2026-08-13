@@ -19,6 +19,7 @@ provides:
   condition: [device_series_3]
 requires:
 - name: hal_system
+- name: log_none
 - name: emlib_cmu
   condition: [device_sdid_240]
 - name: emlib_cmu

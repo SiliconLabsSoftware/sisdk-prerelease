@@ -2473,6 +2473,12 @@ psa_status_t sli_se_transparent_export_public_key(
     return PSA_ERROR_NOT_SUPPORTED;
   }
 
+  // RSA key pairs are stored as DER; mbedtls_psa_rsa_export_public_key extracts
+  // the public key. The SE driver only accelerates ECC export-public.
+  if (PSA_KEY_TYPE_IS_RSA(psa_get_key_type(attributes))) {
+    return PSA_ERROR_NOT_SUPPORTED;
+  }
+
   return sli_se_driver_export_public_key(attributes,
                                          key_buffer,
                                          key_buffer_size,

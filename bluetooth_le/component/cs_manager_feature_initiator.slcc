@@ -1,0 +1,20 @@
+id: cs_manager_feature_initiator
+package: bluetooth_le
+label: CS Manager - Initiator role
+description: >
+  Initiator role feature for CS Manager.
+category: Bluetooth|Application|Miscellaneous
+metadata:
+  sbom:
+    license: Zlib
+quality: experimental
+root_path: bluetooth_le/common/cs_manager
+requires:
+- name: cs_manager
+provides:
+- name: cs_manager_feature_initiator
+- name: cs_manager_role
+  allow_multiple: true
+template_contribution:
+- name: component_catalog
+  value: cs_manager_feature_initiator

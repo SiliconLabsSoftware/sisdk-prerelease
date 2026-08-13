@@ -1,0 +1,35 @@
+id: ot_packet_utils_core
+label: IEEE 802.15.4 Packet Utils (Core)
+package: thread
+category: OpenThread|Platform Abstraction
+quality: production
+description: Shared IEEE 802.15.4 frame and transmit-security sources for ot_packet_utils
+provides:
+- name: ot_packet_utils_core
+requires:
+- name: ot_headers
+ui_hints:
+  visibility: never
+include:
+- path: platform-abstraction/efr32
+  file_list:
+  - path: sl_packet_utils.h
+- path: platform-abstraction/efr32/mac
+  file_list:
+  - path: key-storage-policy.hpp
+  - path: tx-aes-ccm.hpp
+  - path: tx-security-level.hpp
+  - path: tx-aes-ccm-lpwaes.hpp
+  - path: sli-crypto-key-desc.hpp
+source:
+- path: platform-abstraction/efr32/mac/tx-aes-ccm-radioaes.cpp
+- path: platform-abstraction/efr32/mac/tx-aes-ccm-lpwaes.cpp
+- path: platform-abstraction/efr32/mac/sli-crypto-key-desc.cpp
+- path: platform-abstraction/efr32/mac/frame-utils.cpp
+- path: platform-abstraction/efr32/mac/key-storage-ksu.cpp
+- path: platform-abstraction/efr32/mac/key-storage-plaintext.cpp
+- path: platform-abstraction/efr32/mac/tx-security.cpp
+metadata:
+  sbom:
+    license: BSD-3-Clause
+root_path: thread

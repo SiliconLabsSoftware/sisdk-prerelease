@@ -2,7 +2,7 @@ id: cbap_key_id
 label: Certificate Based Authentication and Pairing - Key IDs
 package: bluetooth_le
 description: >
-  NVM3 and PSA key IDs for Certificate Based Authentication and Pairing
+  PSA key IDs for Certificate Based Authentication and Pairing
 category: Bluetooth|Application|Miscellaneous
 metadata:
   sbom:
@@ -17,29 +17,6 @@ template_file:
 - path: template/cbap_key_id.py.jinja
 
 template_contribution:
-  # NVM3
-- name: cbap_nvm3_keys
-  value:
-    key_name: CBAP_NVM_BASE
-    key_id: "0x8A000"
-- name: cbap_nvm3_keys
-  value:
-    key_name: CBAP_NVM_ROOT_CERT
-    key_id: "CBAP_NVM_BASE + 0"
-- name: cbap_nvm3_keys
-  value:
-    key_name: CBAP_NVM_FACTORY_CERT
-    key_id: "CBAP_NVM_BASE + 1"
-- name: cbap_nvm3_keys
-  value:
-    key_name: CBAP_NVM_BATCH_CERT
-    key_id: "CBAP_NVM_BASE + 2"
-- name: cbap_nvm3_keys
-  value:
-    key_name: CBAP_NVM_DEVICE_CERT
-    key_id: "CBAP_NVM_BASE + 3"
-
-  # PSA
 - name: cbap_psa_keys
   value:
     key_name: CBAP_PSA_BASE
@@ -52,12 +29,29 @@ template_contribution:
   value:
     key_name: CBAP_PSA_AUTH_DATA
     key_id: "CBAP_PSA_BASE + 1"
+- name: cbap_psa_keys
+  value:
+    key_name: CBAP_PSA_ROOT_CERT
+    key_id: "CBAP_PSA_BASE + 2"
+- name: cbap_psa_keys
+  value:
+    key_name: CBAP_PSA_FACTORY_CERT
+    key_id: "CBAP_PSA_BASE + 3"
+- name: cbap_psa_keys
+  value:
+    key_name: CBAP_PSA_BATCH_CERT
+    key_id: "CBAP_PSA_BASE + 4"
+- name: cbap_psa_keys
+  value:
+    key_name: CBAP_PSA_DEVICE_CERT
+    key_id: "CBAP_PSA_BASE + 5"
+
 
   # Needed for the DDP (trustzone_unaware) and the secure app. However,
   # it imports the configuration from the nonsecure app (trustzone_nonsecure).
 - name: psa_its_files
   value:
     name: psa_its_files_cbap
-    count: 2
+    count: 6
   condition: [psa_its]
   unless: [trustzone_secure]

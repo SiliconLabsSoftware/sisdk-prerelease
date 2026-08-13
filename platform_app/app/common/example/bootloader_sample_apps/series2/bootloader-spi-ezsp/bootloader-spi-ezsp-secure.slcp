@@ -1,0 +1,39 @@
+project_name: bootloader-spi-ezsp-secure
+package: platform_app
+quality: evaluation
+label: Bootloader - NCP EZSP SPI Secure part of Bootloader using TrustZone
+description: >
+  Demonstrates how to implement the Secure part of a TrustZone-split bootloader, in a dual-image setup where the Non-Secure part with communication interfaces is built separately. 
+
+category: Example|Bootloader
+filter:
+  - name: "Device Type"
+    value: ["NCP"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+  - name: "MCU"
+    value: ["Bootloader"]
+
+
+component:
+  - id: bootloader_core_secure
+  - id: bootloader_aes_sha_ecdsa
+  - id: bootloader_token_management
+  - id: bootloader_crc
+  - id: bootloader_spi_peripheral_driver
+  - id: bootloader_image_parser
+  - id: bootloader_ezsp_spi
+  - id: bootloader_delay_driver
+  - id: bootloader_debug
+  - id: bootloader_ezsp_gpio_activation
+
+define:
+  - name: BOOTLOADER_SUPPORT_COMMUNICATION
+    value: 1
+
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
+tag:
+  - "companion:bootloader-spi-ezsp-nonsecure.slcp"

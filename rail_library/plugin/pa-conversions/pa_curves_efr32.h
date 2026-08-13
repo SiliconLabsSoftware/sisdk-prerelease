@@ -114,6 +114,13 @@ extern "C" {
 #else
 #include "efr32xg29/sl_rail_util_pa_curves_qfn.h"
 #endif
+#elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 14)
+// LionU (efr32xg2e): same PA variants as Lion (efr32xg29)
+#if (_SILICON_LABS_EFR32_2G4HZ_HP_PA_MAX_OUTPUT_DBM < 6)
+#include "efr32xg2e/sl_rail_util_pa_curves_csp.h"
+#else
+#include "efr32xg2e/sl_rail_util_pa_curves_qfn.h"
+#endif
 #elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 13)
 #if defined(_SILICON_LABS_EFR32_SUBGHZ_HP_PA_PRESENT)
   #if (_SILICON_LABS_EFR32_SUBGHZ_HP_PA_MAX_OUTPUT_DBM == 20)

@@ -1,0 +1,38 @@
+project_name: segment_lcd_tempsensor
+package: platform_app_internal
+quality: internal
+label: Platform - Segment LCD Tempsensor
+description: |
+  This project demonstrates how to use the on-board RHT sensor (Si70xx or SHT4x via the RHT UniDriver) to measure and record temperature values and how to use the Segment LCD to display those values.
+category: Example|Platform
+filter:
+- name: Device Type
+  value: [SoC]
+- name: MCU
+  value: [32-bit MCU]
+- name: Project Difficulty
+  value: [Beginner]
+source:
+- path: app.c
+include:
+- path: .
+  file_list:
+  - path: app.h
+component:
+- id: hal_lcd
+- id: sl_main
+- id: device_init
+- id: clock_manager
+- id: segment_lcd_driver
+- id: rht_unidriver_driver
+define:
+- name: DEBUG_EFM
+readme:
+  - path: readme.md
+tag:
+  - hardware:component:segment_lcd_driver
+  - hardware:component:si70xx
+  - hardware:component:sensor:sht40-ad1f-r2
+ui_hints:
+  highlight: readme.md
+

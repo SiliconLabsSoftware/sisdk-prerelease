@@ -37,10 +37,11 @@
 #include "em_device.h"
 #include "pa_conversions_efr32.h"
 
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11))
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 14))
 
 static const RAIL_TxPowerCurveAlt_t RAIL_piecewiseDataHpVbat = {
   RAIL_PA_CURVES_2P4_HP_VBAT_MAX_POWER,

@@ -34,6 +34,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "sl_enum.h"
+#include "sl_assert.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -101,6 +102,105 @@ typedef struct uart_config {
   sl_uart_data_bits_t data_bits;
   sl_uart_flow_control_t flow_control;
 } sl_uart_config_t;
+
+// ----------------------------------------------------------------------------
+// PROTOTYPES
+
+/***************************************************************************//**
+ * Converts the UART data bits to a number of bits.
+ *
+ * @param[in]  data_bits UART data bits.
+ *
+ * @return The number of bits of the data bits.
+ ******************************************************************************/
+static inline uint8_t sl_uart_data_bits_to_count(sl_uart_data_bits_t data_bits)
+{
+  switch (data_bits) {
+    case SL_UART_DATA_BITS_7:
+      return 7;
+    case SL_UART_DATA_BITS_8:
+      return 8;
+    case SL_UART_DATA_BITS_9:
+      return 9;
+    case SL_UART_DATA_BITS_10:
+      return 10;
+    case SL_UART_DATA_BITS_11:
+      return 11;
+    case SL_UART_DATA_BITS_12:
+      return 12;
+    case SL_UART_DATA_BITS_13:
+      return 13;
+    case SL_UART_DATA_BITS_14:
+      return 14;
+    case SL_UART_DATA_BITS_15:
+      return 15;
+    case SL_UART_DATA_BITS_16:
+      return 16;
+    default:
+      EFM_ASSERT(false);
+      return 8;
+  }
+}
+
+/***************************************************************************//**
+ * Converts the UART stop bits to a number of bits, rounding up to the closest integer.
+ *
+ * @param[in]  stop_bits UART stop bits.
+ *
+ * @return The number of stop bits.
+ ******************************************************************************/
+static inline uint8_t sl_uart_stop_bits_to_count(sl_uart_stop_bits_t stop_bits)
+{
+  switch (stop_bits) {
+    case SL_UART_STOP_BITS_0_5:
+    // Round up to closest integer
+    case SL_UART_STOP_BITS_1:
+      return 1;
+    case SL_UART_STOP_BITS_1_5:
+    // Round up to closest integer
+    case SL_UART_STOP_BITS_2:
+      return 2;
+    default:
+      EFM_ASSERT(false);
+      return 1;
+  }
+}
+
+/***************************************************************************//**
+ * Converts the UART parity to a number of bits.
+ *
+ * @param[in]  parity UART parity.
+ *
+ * @return The number of parity bits.
+ ******************************************************************************/
+static inline uint8_t sl_uart_parity_to_count(sl_uart_parity_t parity)
+{
+  switch (parity) {
+    case SL_UART_PARITY_NONE:
+      return 0;
+    case SL_UART_PARITY_ODD:
+    case SL_UART_PARITY_EVEN:
+      return 1;
+    default:
+      EFM_ASSERT(false);
+      return 0;
+  }
+}
+
+/***************************************************************************//**
+ * Calculates the frame size for the given UART configuration.
+ *
+ * @param[in]  config UART configuration.
+ *
+ * @return The frame size.
+ ******************************************************************************/
+static inline uint8_t sl_uart_config_get_frame_size(sl_uart_config_t config)
+{
+  return 1 // Start bit
+         + sl_uart_data_bits_to_count(config.data_bits)
+         + sl_uart_parity_to_count(config.parity)
+         + sl_uart_stop_bits_to_count(config.stop_bits);
+}
 
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 

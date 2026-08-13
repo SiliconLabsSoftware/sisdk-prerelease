@@ -1,0 +1,51 @@
+project_name: mbedtls_aescrypt
+package: platform_app
+quality: production
+label: Platform Security - SoC mbedTLS AES
+description: >
+  Demonstrates how to perform interactive AES-256 encryption and decryption with mbedTLS, using SHA-256 for IV/key setup and HMAC for integrity, with hardware acceleration.
+category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+source:
+   - path: app.c
+   - path: app_aescrypt.c
+include:
+   - path: .
+     file_list:
+     - path: app.h
+     - path: app_aescrypt.h
+readme:
+   - path: readme.md
+ui_hints:
+   highlight: readme.md
+tag:
+  - hardware:device:ram:8
+  - hwfilter:ram:8k
+  - hwfilter:device:device_series_2
+component:
+   - id: mbedtls_aes
+   - id: mbedtls_hash
+   - id: mbedtls_sha
+   - id: mbedtls_ccm
+   - id: sl_main
+   - id: device_init
+   - id: clock_manager
+   - id: iostream_retarget_stdio
+   - id: iostream_recommended_stream
+configuration:
+   - name: SL_BOARD_ENABLE_VCOM
+     value: 1
+   - name: SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+     value: "true"
+     condition: [iostream_usart]
+   - name: SL_IOSTREAM_UART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+     value: "true"
+     condition: [iostream_uart]
+define:
+   - name: DEBUG_EFM

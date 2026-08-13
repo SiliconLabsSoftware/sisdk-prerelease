@@ -365,6 +365,43 @@ library:
   - device_sdid_240
   - device_is_module
 
+- path: autogen/librail_release/librail_multiprotocol_efr32xg2e_iar_release.a
+  condition:
+  - toolchain_iar
+  - device_sdid_265
+  unless:
+  - device_is_module
+- path: autogen/librail_release/librail_multiprotocol_efr32xg2e_gcc_release.a
+  condition:
+  - toolchain_gcc
+  - device_sdid_265
+  unless:
+  - device_is_module
+  - toolchain_llvm
+- path: autogen/librail_release/librail_multiprotocol_efr32xg2e_llvm_release.a
+  condition:
+  - toolchain_llvm
+  - device_sdid_265
+  unless:
+  - device_is_module
+- path: autogen/librail_release/librail_multiprotocol_module_efr32xg2e_iar_release.a
+  condition:
+  - toolchain_iar
+  - device_sdid_265
+  - device_is_module
+- path: autogen/librail_release/librail_multiprotocol_module_efr32xg2e_gcc_release.a
+  condition:
+  - toolchain_gcc
+  - device_sdid_265
+  - device_is_module
+  unless:
+  - toolchain_llvm
+- path: autogen/librail_release/librail_multiprotocol_module_efr32xg2e_llvm_release.a
+  condition:
+  - toolchain_llvm
+  - device_sdid_265
+  - device_is_module
+
 - path: autogen/librail_release/librail_multiprotocol_efr32xg2d_iar_release.a
   condition:
   - toolchain_iar

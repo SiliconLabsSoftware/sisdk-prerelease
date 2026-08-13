@@ -15,7 +15,6 @@ include:
   - path: alarm.h
   - path: diag.h
   - path: ieee802154mac.h
-  - path: ieee802154-packet-utils.hpp
   - path: platform-band.h
   - path: radio_channel_switching.h
   - path: radio_csl.h

@@ -64,6 +64,16 @@
 <codeline><highlight class="normal">also<sp/>called<sp/>from<sp/>the<sp/>main<sp/>event<sp/>loop<sp/>or<sp/>an<sp/>RTOS<sp/>task<sp/>simultaneously,<sp/>concurrent</highlight></codeline>
 <codeline><highlight class="normal">BGAPI<sp/>calls<sp/>may<sp/>cause<sp/>memory<sp/>issues<sp/>in<sp/>the<sp/>stack.</highlight></codeline>
 <codeline></codeline>
+<codeline><highlight class="normal">When<sp/>running<sp/>on<sp/>an<sp/>RTOS,<sp/>BGAPI<sp/>command<sp/>functions<sp/>are<sp/>synchronous:<sp/>they<sp/>pend<sp/>on</highlight></codeline>
+<codeline><highlight class="normal">RTOS<sp/>synchronization<sp/>primitives<sp/>until<sp/>the<sp/>Bluetooth<sp/>host<sp/>stack<sp/>has<sp/>executed<sp/>the</highlight></codeline>
+<codeline><highlight class="normal">command<sp/>and<sp/>produced<sp/>the<sp/>response.<sp/>Do<sp/>not<sp/>call<sp/>BGAPI<sp/>commands<sp/>from<sp/>a<sp/>context</highlight></codeline>
+<codeline><highlight class="normal">where<sp/>the<sp/>RTOS<sp/>prohibits<sp/>pending<sp/>(for<sp/>example,<sp/>the<sp/>Micrium<sp/>OS<sp/>Timer<sp/>Task).</highlight></codeline>
+<codeline><highlight class="normal">Calling<sp/>from<sp/>such<sp/>a<sp/>context<sp/>can<sp/>return<sp/>an<sp/>error<sp/>even<sp/>though<sp/>the<sp/>command<sp/>may</highlight></codeline>
+<codeline><highlight class="normal">already<sp/>have<sp/>been<sp/>handed<sp/>to<sp/>the<sp/>Bluetooth<sp/>task,<sp/>and<sp/>it<sp/>may<sp/>disturb<sp/>BGAPI</highlight></codeline>
+<codeline><highlight class="normal">inter-process<sp/>communication<sp/>locking.<sp/>Use<sp/>a<sp/>dedicated<sp/>application<sp/>task,<sp/>or<sp/>call</highlight></codeline>
+<codeline><highlight class="normal">@ref<sp/>sl_bt_external_signal<sp/>from<sp/>the<sp/>restricted<sp/>context<sp/>and<sp/>perform<sp/>BGAPI<sp/>calls</highlight></codeline>
+<codeline><highlight class="normal">when<sp/>handling<sp/>@ref<sp/>sl_bt_evt_system_external_signal<sp/>in<sp/>a<sp/>normal<sp/>task<sp/>context.</highlight></codeline>
+<codeline></codeline>
 <codeline><highlight class="normal">#<sp/>Payload<sp/>Length<sp/>Calculation<sp/>{#bgapi_payload_length_calculation}</highlight></codeline>
 <codeline></codeline>
 <codeline><highlight class="normal">Use<sp/>@ref<sp/>SL_BGAPI_MSG_LEN<sp/>to<sp/>calculate<sp/>the<sp/>payload<sp/>length<sp/>of<sp/>a<sp/>BGAPI<sp/>message.</highlight></codeline>

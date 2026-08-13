@@ -145,8 +145,9 @@ Variables</h2></td></tr>
 <ol type="1">
 <li>The stack will never directly call sl_bt_process_event() or sl_bt_on_event() from within the same callstack that is calling a command function. The callbacks always come from a processing loop in an event task created for this purpose.</li>
 <li>The stack uses <code>sli_bgapi_lock()</code> and <code>sli_bgapi_unlock()</code> to synchronize the handling of individual BGAPI commands, and the application must never directly call these. Individual BGAPI commands are safe to be called from multiple threads without additional locking. See <a class="el" href="group__bluetooth__rtos__adaptation.html#gaa7b9592f6f990160875fc32fe5028e6c">sl_bt_bluetooth_pend()</a> for description of when an application needs to use additional locking to guarantee atomicity across multiple commands.</li>
-<li>The stack will never internally obtain the <a class="el" href="group__bluetooth__rtos__adaptation.html#gaa7b9592f6f990160875fc32fe5028e6c">sl_bt_bluetooth_pend()</a> lock. It is safe for the application to obtain the lock also from within the sl_bt_on_event() callback. </li>
+<li>The stack will never internally obtain the <a class="el" href="group__bluetooth__rtos__adaptation.html#gaa7b9592f6f990160875fc32fe5028e6c">sl_bt_bluetooth_pend()</a> lock. It is safe for the application to obtain the lock also from within the sl_bt_on_event() callback.</li>
 </ol>
+<p>BGAPI commands are synchronous and pend on RTOS synchronization primitives. Do not call BGAPI commands or <a class="el" href="group__bluetooth__rtos__adaptation.html#gaa7b9592f6f990160875fc32fe5028e6c">sl_bt_bluetooth_pend()</a> from an interrupt context or from any other RTOS context that prohibits pending. See the Concurrency section of <a class="el" href="bgapi.html">BGAPI</a> for details and recommended alternatives. </p>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="gac718122dcb73f19023423387fc9f6751" name="gac718122dcb73f19023423387fc9f6751"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gac718122dcb73f19023423387fc9f6751">&#9670;&#160;</a></span>sli_bt_rtos_adaptation_permanent_allocation()</h2>

@@ -279,6 +279,15 @@ template_contribution:
     argument:
     - type: int8
       help: The positive or negative change in length
+- name: cli_command
+  value:
+    group: test-harness
+    name: tc-link-key
+    handler: sl_zigbee_af_test_harness_tc_link_key_command
+    help: Overwrites the joiner's stored TC link key (16 bytes only).
+    argument:
+    - type: hex
+      help: TC link key (16 bytes, big-endian)
 - name: cli_group
   value:
     group: test-harness

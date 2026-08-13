@@ -43,6 +43,7 @@
 #if defined(SL_CATALOG_UART_ASYNC_PRESENT)
 #include "sl_dma_channel.h"
 #include "sl_dma_manager.h"
+#include "sl_sleeptimer.h"
 #include "sl_slist.h"
 #endif
 
@@ -347,6 +348,9 @@ typedef struct uart_handle {
   void* async_rx_cb_user_data;
   sl_dma_channel_handle_t async_tx_dma_channel;
   sl_dma_channel_handle_t async_rx_dma_channel;
+  sl_sleeptimer_timer_handle_t async_rx_timeout_timer;
+  uint32_t async_rx_timeout_us;
+  uint32_t async_rx_timeout_sw_us;
 #endif
   sl_uart_handle_state_t state;
 } sl_uart_handle_t;
@@ -622,6 +626,9 @@ void sl_uart_disable_tx_complete_interrupt(sl_uart_handle_t *uart_handle);
  *         Error code otherwise.
  *
  * @note This function can be called from IRQ context.
+ *
+ * @note This API must be called after @ref sl_uart_configure_line(), since the timeout value
+ *       is computed from the configured baud rate. Failure to do so is undefined behavior.
  ******************************************************************************/
 sl_status_t sl_uart_read_byte(sl_uart_handle_t *uart_handle, uint8_t *byte);
 
@@ -638,6 +645,9 @@ sl_status_t sl_uart_read_byte(sl_uart_handle_t *uart_handle, uint8_t *byte);
  *       until some room is available.
  *
  * @note This function can be called from IRQ context.
+ *
+ * @note This API must be called after @ref sl_uart_configure_line(), since the timeout value
+ *       is computed from the configured baud rate. Failure to do so is undefined behavior.
  ******************************************************************************/
 sl_status_t sl_uart_write_byte(sl_uart_handle_t *uart_handle, uint8_t byte);
 
@@ -668,6 +678,9 @@ sl_status_t sl_uart_write_byte(sl_uart_handle_t *uart_handle, uint8_t byte);
  *       RX FIFO is empty OR the buffer size is reached.
  *
  * @note This function can be called from IRQ context.
+ *
+ * @note This API must be called after @ref sl_uart_configure_line(), since the timeout value
+ *       is computed from the configured baud rate. Failure to do so is undefined behavior.
  ******************************************************************************/
 sl_status_t sl_uart_read(sl_uart_handle_t *uart_handle,
                          void *data,
@@ -694,6 +707,9 @@ sl_status_t sl_uart_read(sl_uart_handle_t *uart_handle,
  *       until the TX FIFO is full OR the buffer size is reached.
  *
  * @note This function can be called from IRQ context.
+ *
+ * @note This API must be called after @ref sl_uart_configure_line(), since the timeout value
+ *       is computed from the configured baud rate. Failure to do so is undefined behavior.
  ******************************************************************************/
 sl_status_t sl_uart_write(sl_uart_handle_t *uart_handle,
                           const void *data,
@@ -757,6 +773,9 @@ void sl_uart_async_set_rx_event_callback(sl_uart_handle_t *uart_handle,
  *       transmitted entirely over the bus.
  *
  * @note This function can be called from an ISR.
+ *
+ * @note This API must be called after @ref sl_uart_configure_line(), since the timeout value
+ *       is computed from the configured baud rate. Failure to do so is undefined behavior.
  ******************************************************************************/
 sl_status_t sl_uart_async_write(sl_uart_handle_t *uart_handle,
                                 const void *data,
@@ -772,6 +791,9 @@ sl_status_t sl_uart_async_write(sl_uart_handle_t *uart_handle,
  *
  * @note When calling this function, transmission will stop and all submitted
  *       transmit buffer via sl_uart_async_write() will be released.
+ *
+ * @note This API must be called after @ref sl_uart_configure_line(), since the timeout value
+ *       is computed from the configured baud rate. Failure to do so is undefined behavior.
  ******************************************************************************/
 sl_status_t sl_uart_async_abort_tx(sl_uart_handle_t *uart_handle);
 
@@ -800,6 +822,9 @@ bool sl_uart_async_is_tx_active(sl_uart_handle_t *uart_handle);
  *       specified with @ref sl_uart_async_set_rx_event_callback() will be called.
  *
  * @note This function can be called from an ISR.
+ *
+ * @note This API must be called after @ref sl_uart_configure_line(), since the timeout value
+ *       is computed from the configured baud rate. Failure to do so is undefined behavior.
  ******************************************************************************/
 sl_status_t sl_uart_async_read(sl_uart_handle_t *uart_handle,
                                void *data,
@@ -814,6 +839,9 @@ sl_status_t sl_uart_async_read(sl_uart_handle_t *uart_handle,
  *
  * @note This function will disable RX. All submitted buffers via
  *       @ref sl_uart_async_read() will be released.
+ *
+ * @note This API must be called after @ref sl_uart_configure_line(), since the timeout value
+ *       is computed from the configured baud rate. Failure to do so is undefined behavior.
  ******************************************************************************/
 sl_status_t sl_uart_async_disable_rx(sl_uart_handle_t *uart_handle);
 
@@ -825,6 +853,40 @@ sl_status_t sl_uart_async_disable_rx(sl_uart_handle_t *uart_handle);
  * @return true if there is an active RX. False, otherwise.
  ******************************************************************************/
 bool sl_uart_async_is_rx_active(sl_uart_handle_t *uart_handle);
+
+/***************************************************************************//**
+ * Sets RX timeout.
+ *
+ * @param[in]  uart_handle Handle to UART.
+ *
+ * @param[in]  timeout_us Timeout, in microseconds. 0 means wait forever.
+ *
+ * @return SL_STATUS_OK if successful.
+ *         Error code otherwise.
+ *
+ * @note The timeout specified by argument @p timeout_us is the maximum time to wait
+ *       between 2 received UART frames. It does NOT represent a timeout to fill an
+ *       entire buffer. If the timeout is reached, the RX event callback will be called
+ *       with the @ref SL_UART_ASYNC_RX_EVENT_TIMEOUT event set, without aborting the
+ *       current transfer, with the appropriate number of bytes received so far.
+ *       Upon receiving the next frame, the timeout will be reset, meaning that the timeout
+ *       can trigger multiple times for a single transfer. Once all transfers have been completed,
+ *       the timeout will be disabled, and start again upon starting the next transfer.
+ *
+ * @note If a timeout was already set and this API is called, any pending timeout will be cancelled
+ *       and the new timeout will be armed only upon receiving a new UART frame.
+ *
+ * @note This API must be called after @ref sl_uart_configure_line(), since the timeout value
+ *       is computed from the configured baud rate. Failure to do so is undefined behavior.
+ *
+ * @note If this API is never called, the default value is 0, meaning no timeout.
+ *
+ * @note This API is not supported on EUART-based instances due to the lack of
+ *       hardware RX timeout support (i.e.: xG22 devices). Calling this API on such
+ *       instances will return SL_STATUS_NOT_SUPPORTED.
+ ******************************************************************************/
+sl_status_t sl_uart_async_read_set_timeout(sl_uart_handle_t *uart_handle,
+                                           uint32_t timeout_us);
 
 /** @} (end addtogroup uart_async) */
 

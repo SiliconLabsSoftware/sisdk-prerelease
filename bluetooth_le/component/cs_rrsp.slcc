@@ -1,0 +1,31 @@
+id: cs_rrsp
+package: bluetooth_le
+label: CS Ranging Responder (RRSP)
+description: >
+  Channel Sounding (CS) Ranging Responder (RRSP) role
+  includes CS RAS Server and GATT database.
+category: Bluetooth|Application|GATT Profiles
+metadata:
+  sbom:
+    license: Zlib
+quality: experimental
+root_path: bluetooth_le/common
+config_file:
+- path: cs_ras/server/config/ras.xml
+  file_id: cs_ras_server_gatt
+  directory: btconf
+  condition:
+  - cs_acp_host
+requires:
+- name: cs_acp_state
+- name: gatt_configuration
+  condition:
+  - cs_acp_gatt
+- name: cs_ras_server
+  condition:
+  - cs_acp_with_impl
+provides:
+- name: cs_rrsp
+recommends:
+- id: cs_acp_none
+  vendor: silabs

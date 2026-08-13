@@ -217,6 +217,36 @@ __WEAK const sl_peripheral_eusart_val_t sl_peripheral_val_eusart4 = { .base = 0x
                                                                       .dma_signal_rx_trigger = SL_DMA_SIGNAL_NONE,
                                                                       .dma_signal_tx_trigger = SL_DMA_SIGNAL_NONE };
 
+// Weak definition of peripheral EUSART5.
+__WEAK const sl_peripheral_eusart_val_t sl_peripheral_val_eusart5 = { .base = 0xFFFFFFFF,
+                                                                      .clk_branch = SL_CLOCK_BRANCH_INVALID,
+                                                                      .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                      .ip_type = SL_PERIPHERAL_SERIAL_TYPE_EUSART,
+                                                                      .rx_irqn = 0xFFFFFFFF,
+                                                                      .tx_irqn = 0xFFFFFFFF,
+                                                                      .dma_signal_rx_trigger = SL_DMA_SIGNAL_NONE,
+                                                                      .dma_signal_tx_trigger = SL_DMA_SIGNAL_NONE };
+
+// Weak definition of peripheral EUSART6.
+__WEAK const sl_peripheral_eusart_val_t sl_peripheral_val_eusart6 = { .base = 0xFFFFFFFF,
+                                                                      .clk_branch = SL_CLOCK_BRANCH_INVALID,
+                                                                      .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                      .ip_type = SL_PERIPHERAL_SERIAL_TYPE_EUSART,
+                                                                      .rx_irqn = 0xFFFFFFFF,
+                                                                      .tx_irqn = 0xFFFFFFFF,
+                                                                      .dma_signal_rx_trigger = SL_DMA_SIGNAL_NONE,
+                                                                      .dma_signal_tx_trigger = SL_DMA_SIGNAL_NONE };
+
+// Weak definition of peripheral EUSART7.
+__WEAK const sl_peripheral_eusart_val_t sl_peripheral_val_eusart7 = { .base = 0xFFFFFFFF,
+                                                                      .clk_branch = SL_CLOCK_BRANCH_INVALID,
+                                                                      .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                      .ip_type = SL_PERIPHERAL_SERIAL_TYPE_EUSART,
+                                                                      .rx_irqn = 0xFFFFFFFF,
+                                                                      .tx_irqn = 0xFFFFFFFF,
+                                                                      .dma_signal_rx_trigger = SL_DMA_SIGNAL_NONE,
+                                                                      .dma_signal_tx_trigger = SL_DMA_SIGNAL_NONE };
+
 // Weak definition of peripheral FSRCO.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_fsrco = { .base = 0xFFFFFFFF,
                                                              .clk_branch = SL_CLOCK_BRANCH_INVALID,

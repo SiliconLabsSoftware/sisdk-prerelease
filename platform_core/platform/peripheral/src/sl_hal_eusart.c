@@ -664,6 +664,24 @@ void sl_hal_eusart_enable_rx_prs_trigger(EUSART_TypeDef *eusart, uint8_t channel
                                         SL_HAL_PRS_TYPE_ASYNC,
                                         SL_HAL_PRS_CONSUMER_EUSART4_TRIGGER);
 #endif
+#if defined(EUSART5)
+  } else if (eusart == EUSART5) {
+    sl_hal_prs_connect_channel_consumer(channel,
+                                        SL_HAL_PRS_TYPE_ASYNC,
+                                        SL_HAL_PRS_CONSUMER_EUSART5_TRIGGER);
+#endif
+#if defined(EUSART6)
+  } else if (eusart == EUSART6) {
+    sl_hal_prs_connect_channel_consumer(channel,
+                                        SL_HAL_PRS_TYPE_ASYNC,
+                                        SL_HAL_PRS_CONSUMER_EUSART6_TRIGGER);
+#endif
+#if defined(EUSART7)
+  } else if (eusart == EUSART7) {
+    sl_hal_prs_connect_channel_consumer(channel,
+                                        SL_HAL_PRS_TYPE_ASYNC,
+                                        SL_HAL_PRS_CONSUMER_EUSART7_TRIGGER);
+#endif
   } else {
     EFM_ASSERT(false);
   }
@@ -734,6 +752,24 @@ void sl_hal_eusart_enable_tx_prs_trigger(EUSART_TypeDef *eusart, uint8_t channel
     sl_hal_prs_connect_channel_consumer(channel,
                                         SL_HAL_PRS_TYPE_ASYNC,
                                         SL_HAL_PRS_CONSUMER_EUSART4_TRIGGER);
+#endif
+#if defined(EUSART5)
+  } else if (eusart == EUSART5) {
+    sl_hal_prs_connect_channel_consumer(channel,
+                                        SL_HAL_PRS_TYPE_ASYNC,
+                                        SL_HAL_PRS_CONSUMER_EUSART5_TRIGGER);
+#endif
+#if defined(EUSART6)
+  } else if (eusart == EUSART6) {
+    sl_hal_prs_connect_channel_consumer(channel,
+                                        SL_HAL_PRS_TYPE_ASYNC,
+                                        SL_HAL_PRS_CONSUMER_EUSART6_TRIGGER);
+#endif
+#if defined(EUSART7)
+  } else if (eusart == EUSART7) {
+    sl_hal_prs_connect_channel_consumer(channel,
+                                        SL_HAL_PRS_TYPE_ASYNC,
+                                        SL_HAL_PRS_CONSUMER_EUSART7_TRIGGER);
 #endif
   } else {
     EFM_ASSERT(false);
@@ -1014,6 +1050,27 @@ static void eusart_async_init_common(EUSART_TypeDef *eusart,
         sl_hal_prs_connect_channel_consumer(init->advanced_config->prs_rx_channel,
                                             SL_HAL_PRS_TYPE_ASYNC,
                                             SL_HAL_PRS_CONSUMER_EUSART4_RX);
+      }
+#endif
+#if defined(EUSART5)
+      else if (eusart == EUSART5) {
+        sl_hal_prs_connect_channel_consumer(init->advanced_config->prs_rx_channel,
+                                            SL_HAL_PRS_TYPE_ASYNC,
+                                            SL_HAL_PRS_CONSUMER_EUSART5_RX);
+      }
+#endif
+#if defined(EUSART6)
+      else if (eusart == EUSART6) {
+        sl_hal_prs_connect_channel_consumer(init->advanced_config->prs_rx_channel,
+                                            SL_HAL_PRS_TYPE_ASYNC,
+                                            SL_HAL_PRS_CONSUMER_EUSART6_RX);
+      }
+#endif
+#if defined(EUSART7)
+      else if (eusart == EUSART7) {
+        sl_hal_prs_connect_channel_consumer(init->advanced_config->prs_rx_channel,
+                                            SL_HAL_PRS_TYPE_ASYNC,
+                                            SL_HAL_PRS_CONSUMER_EUSART7_RX);
       }
 #endif
       else {

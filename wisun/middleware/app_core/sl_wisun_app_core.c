@@ -758,7 +758,13 @@ static sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * co
   const sl_wisun_connection_params_t *conn_param = NULL;
   sl_wisun_connection_params_t update_param = { 0 };
 
-  conn_param = sl_wisun_get_conn_param_by_nw_size((sl_wisun_network_size_t) setting->network_size);
+  if (setting->network_size != SL_WISUN_NETWORK_SIZE_AUTOMATIC) {
+    conn_param = sl_wisun_get_conn_param_by_nw_size((sl_wisun_network_size_t) setting->network_size);
+    if (conn_param == NULL) {
+      printf("[Failed: unable to get connection parameters for network size %"PRIu8"]\n", setting->network_size);
+      return SL_STATUS_INVALID_PARAMETER;
+    }
+  }
 #endif
 
   ret = sl_wisun_set_device_type((sl_wisun_device_type_t)setting->device_type);

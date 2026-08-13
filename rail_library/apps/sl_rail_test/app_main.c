@@ -362,7 +362,12 @@ void sl_rail_test_internal_app_init(void)
 
 #ifdef BRD4360A_DISABLE_HVBOD0
   // TODO RAIL_LIB-15485: Remove this workaround once BRD4360A is fixed.
+  // Disable HVBOD0 and DECBOD (RSTCAUSE 0x200) — board power faults trip them.
+  // DECBODEN defaults off; the reset is gated by RSTCTRL_DECBODRMODE (default on).
   EMU->HVBOD_CLR = EMU_HVBOD_ENABLE0;
+  EMU->DECBOD_CLR = EMU_DECBOD_DECBODEN;
+  EMU->DECBOD_SET = EMU_DECBOD_DECBODMASK;
+  EMU->RSTCTRL_CLR = EMU_RSTCTRL_DECBODRMODE;
 #endif
 
   (void) sl_rail_get_channel(railHandle, &channel);
@@ -372,10 +377,11 @@ void sl_rail_test_internal_app_init(void)
 
   sl_rail_config_rx_options(railHandle, SL_RAIL_RX_OPTIONS_ALL, rxOptions);
 
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11))
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 14))
   if (resetCause & EMU_RSTCAUSE_EM4) {
     responsePrint("sleepWoke", "EM:4s,SerialWakeup:No,RfSensed:%s",
                   sl_rail_is_rf_sensed(railHandle) ? "Yes" : "No");

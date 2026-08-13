@@ -486,6 +486,17 @@ void sli_memory_initialize_heap_region(void);
  ******************************************************************************/
 void sli_memory_create_stack(sl_memory_heap_t *heap);
 
+#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
+/***************************************************************************//**
+ * Registers Memory Manager LT/ST heaps with SEGGER SystemView.
+ *
+ * @note Must be called after SEGGER_SYSVIEW_Start(). For C++ applications,
+ *       sl_memory_init() runs from .preinit_array before SystemView is ready;
+ *       call this function from sl_main_init() instead of from sl_memory_init().
+ ******************************************************************************/
+void sli_memory_register_systemview_heaps(void);
+#endif
+
 #if defined(SLI_MEMORY_MANAGER_ENABLE_TEST_UTILITIES)
 /***************************************************************************//**
  * Get an index of sli_reservation_handle_ptr_table that is free.

@@ -54,6 +54,8 @@ extern "C" {
 #include "efr32xg28/config/sl_rail_util_pa_config.h"
 #elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)
 #include "efr32xg29/config/sl_rail_util_pa_config.h"
+#elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 14)
+#include "efr32xg2e/config/sl_rail_util_pa_config.h"
 #elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 11)
 #include "efr32xg2b/config/sl_rail_util_pa_config.h"
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)

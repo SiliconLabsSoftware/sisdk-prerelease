@@ -65,6 +65,7 @@
 #ifdef SL_CATALOG_ZIGBEE_TRUST_CENTER_NWK_KEY_UPDATE_UNICAST_PRESENT
 #include "app/framework/plugin/trust-center-nwk-key-update-unicast/trust-center-nwk-key-update-unicast.h"
 #endif
+#include "stack/include/zigbee-security-manager.h"
 
 #include "stack/include/source-route.h"
 
@@ -693,6 +694,26 @@ void sl_zigbee_af_test_harness_key_establishment_set_available_suite_command(sl_
 #else
   UNUSED_VAR(arguments);
 #endif
+}
+
+void sl_zigbee_af_test_harness_tc_link_key_command(sl_cli_command_arg_t *arguments)
+{
+  sl_zigbee_sec_man_context_t context;
+  sl_zigbee_sec_man_key_t key;
+  sl_status_t status;
+
+  if (sl_zigbee_af_get_node_id() == SL_ZIGBEE_TRUST_CENTER_NODE_ID) {
+    sl_zigbee_af_cli_println("Error: not supported on Trust Center.");
+    return;
+  }
+
+  sl_zigbee_copy_hex_arg(arguments, 0, key.key, SL_ZIGBEE_ENCRYPTION_KEY_SIZE, true);
+
+  sl_zigbee_sec_man_init_context(&context);
+  context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK;
+
+  status = sl_zigbee_sec_man_import_key(&context, &key);
+  sl_zigbee_af_cli_println("Set TC link key: 0x%08X", status);
 }
 
 void sl_zigbee_af_test_harness_status_command(sl_cli_command_arg_t *arguments)

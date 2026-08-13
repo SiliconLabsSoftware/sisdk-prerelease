@@ -1,0 +1,16 @@
+# Properties file for Simplicity Studio metadata.
+
+id=com.silabs.sdk.platform_app
+
+label=Platform App Package
+
+description=Platform App Package
+
+version=1.0.0-alpha.3
+
+prop.partCompatibility=mcu.arm.*
+
+prop.file.templatesFile=platform_production_templates.xml platform_security_production_templates.xml bootloader_production_templates.xml bootloader_evaluation_templates.xml bootloader_sixx301_templates.xml builtin_templates.xml
+
+prop.file.demosFile=platform_production_demos.xml
+

@@ -489,6 +489,14 @@ sl_status_t sli_clock_manager_hal_enable_bus_clock(sl_bus_clock_t module, bool e
   // Enable/disable bus clock.
   sl_hal_bus_reg_write_bit(reg, bit, (uint32_t)enable);
 
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+  // Read back value to ensure the operation is successful.
+  uint32_t read_value = sl_hal_bus_reg_read_bit(reg, bit);
+  if (read_value != enable) {
+    return SL_STATUS_FAIL;
+  }
+#endif
+
   return SL_STATUS_OK;
 }
 

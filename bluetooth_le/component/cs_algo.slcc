@@ -1,0 +1,119 @@
+id: cs_algo
+package: bluetooth_le
+label: CS Algo
+description: >
+  Channel Sounding (CS) Algo manages estimators for connections, gathers parameters
+  for estimator creation, and performs the distance estimation using the RTL lib.
+category: Bluetooth|Application|Miscellaneous
+metadata:
+  sbom:
+    license: Zlib
+quality: experimental
+
+include:
+- path: common/cs_common
+  file_list:
+  - path: cs_common.h
+- path: common/cs_algo/inc
+  file_list:
+  - path: cs_algo.h
+  - path: cs_algo_log_internal.h
+    unless: [cs_acp_host]
+  - path: cs_algo_internal.h
+    unless: [cs_acp_host]
+  - path: cs_algo_rtl_log.h
+    condition: [cs_acp_with_impl]
+  - path: cs_algo_acp_types.h
+    unless: [cs_acp_none]
+  - path: cs_algo_acp_host.h
+    condition: [cs_acp_host]
+  - path: cs_algo_acp_target.h
+    condition: [cs_acp_target]
+source:
+- path: common/cs_algo/src/cs_algo.c
+  unless: [cs_acp_host]
+- path: common/cs_algo/src/cs_algo_rtl_log.c
+  condition: [cs_acp_with_impl]
+- path: common/cs_algo/src/cs_algo_acp_host.c
+  condition: [cs_acp_host]
+- path: common/cs_algo/src/cs_algo_acp_target.c
+  condition: [cs_acp_target]
+
+config_file:
+- path: common/cs_algo/config/cs_algo_config.h
+- path: common/cs_algo/config/cs_algo_acp_target_config.h
+  condition: [cs_acp_target]
+
+requires:
+- name: component_catalog
+- name: cs_acp_state
+- name: sl_common
+- name: status
+- name: cs_rreq
+- name: app_rta
+
+- name: rtl_service
+  condition: [cs_acp_with_impl]
+- name: rtllib_log_api
+  condition: [cs_acp_with_impl]
+- name: cs_result
+  condition: [cs_acp_with_impl]
+- name: app_log
+  condition: [cs_acp_with_impl]
+- name: bluetooth_api
+  condition: [cs_acp_with_impl]
+- name: bluetooth_feature_cs
+  condition: [cs_acp_with_impl]
+- name: memory_manager
+  condition: [cs_acp_with_impl]
+
+recommends:
+- id: cs_acp_none
+
+  vendor: silabs
+provides:
+- name: cs_algo
+
+template_contribution:
+- name: cs_rreq_on_ras_data
+  value:
+    include: cs_algo_internal.h
+    handler: cs_algo_process_ras_data
+  unless: [cs_acp_host]
+- name: app_rta_init
+  value:
+    include: cs_algo_internal.h
+    handler: cs_algo_init
+  unless: [cs_acp_host]
+- name: app_rta_ready
+  value:
+    include: cs_algo_internal.h
+    handler: cs_algo_ready
+  unless: [cs_acp_host]
+
+  # ACP-related
+- name: app_rta_init
+  value:
+    include: cs_algo_acp_target.h
+    handler: cs_algo_acp_target_init
+  condition: [cs_acp_target]
+- name: app_rta_ready
+  value:
+    include: cs_algo_acp_target.h
+    handler: cs_algo_acp_target_ready
+  condition: [cs_acp_target]
+- name: bluetooth_on_event
+  value:
+    include: cs_algo_acp_host.h
+    function: cs_algo_acp_host_event
+  priority: 0
+  condition: [cs_acp_host]
+- name: cs_acp_target_on_command
+  value:
+    include: cs_algo_acp_target.h
+    handler: cs_algo_acp_target_on_command
+  condition: [cs_acp_target]
+
+validation_helper:
+- path: common/cs_algo/config/cs_algo_validation.lua
+root_path: bluetooth_le

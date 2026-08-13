@@ -1,0 +1,37 @@
+project_name: bootloader-uart-xmodem-nonsecure
+package: platform_app
+quality: production
+label: Bootloader - NCP UART XMODEM Non-Secure part of Bootloader using TrustZone
+description: >
+  Demonstrates how to implement the Non-Secure part of a TrustZone-split bootloader, in a dual-image setup where the Secure part with core functionalities is built separately.
+
+category: Example|Bootloader
+filter:
+  - name: "Device Type"
+    value: ["NCP"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+  - name: "MCU"
+    value: ["Bootloader"]
+
+
+component:
+  - id: bootloader_core_nonsecure
+  - id: bootloader_serial_driver_nonsecure
+  - id: bootloader_image_parser_nonsecure
+  - id: bootloader_delay_driver_nonsecure
+  - id: bootloader_uart_xmodem_nonsecure
+  - id: bootloader_debug_nonsecure
+  - id: bootloader_include_parser_nonsecure
+
+import:
+  - id: bootloader-uart-xmodem-secure
+
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
+tag:
+  - "companion:bootloader-uart-xmodem-secure.slcp"
+post_build:
+  profile: bootloader_trustzone_nonsecure

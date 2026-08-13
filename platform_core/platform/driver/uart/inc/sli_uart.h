@@ -107,6 +107,8 @@ struct sli_uart_ops {
   void *(*get_rx_register)(sl_peripheral_t uart);
   size_t (*clear_tx_fifo)(sl_peripheral_t uart);
   void (*set_tx_enable)(sl_peripheral_t uart, bool en);
+  uint32_t (*set_rx_timeout)(sl_uart_handle_t *uart_handle, uint32_t timeout);
+  uint32_t irq_rx_timeout_flag;
 #endif
   uint32_t irq_rx_err_flag;
   uint32_t irq_rx_ready_flag;
@@ -183,15 +185,21 @@ void sli_uart_deinit_hwfc_pins(sl_uart_handle_t *uart_handle);
  * Initializes the UART instance.
  *
  * @param[in]  uart_handle Handle to UART.
+ *
+ * @return Status code.
+ *          SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
-void sli_uart_init_clocks(sl_uart_handle_t *uart_handle);
+sl_status_t sli_uart_init_clocks(sl_uart_handle_t *uart_handle);
 
 /***************************************************************************//**
  * De-initializes the clocks for the given UART instance.
  *
  * @param[in]  uart_handle Handle to UART.
+ *
+ * @return Status code.
+ *          SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
-void sli_uart_deinit_clocks(sl_uart_handle_t *uart_handle);
+sl_status_t sli_uart_deinit_clocks(sl_uart_handle_t *uart_handle);
 
 /***************************************************************************//**
  * Enables NVIC RX and TX interrupts for the given UART peripheral.

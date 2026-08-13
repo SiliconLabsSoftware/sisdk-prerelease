@@ -1268,19 +1268,19 @@ void sl_hal_eusart_disable_tx_prs_trigger(EUSART_TypeDef *eusart);
 #if defined(_EUSART_CFG0_SYNC_MASK)
 /***************************************************************************//**
  * @brief
- *   Calculate SPI clock divider using given reference frequency and baudrate.
+ *   Calculate SPI clock divider using given reference frequency and bitrate.
  *
  * @param[in] ref_freq
  *   Peripheral clock frequency.
  *
- * @param[in] baudrate
+ * @param[in] bitrate
  *   Transmission speed of the SPI interface.
  *
  * @return
- *   Eusart clock divider for desired baud rate.
+ *   Eusart clock divider for desired bit rate.
  ******************************************************************************/
 uint32_t sl_hal_eusart_spi_calculate_clock_div(uint32_t ref_freq,
-                                               uint32_t baudrate);
+                                               uint32_t bitrate);
 #endif
 
 /***************************************************************************//**
@@ -1318,7 +1318,7 @@ uint32_t sl_hal_eusart_uart_calculate_clock_div(uint32_t ref_freq,
  *   The clock branch frequency to calculate the baudrate.
  *
  * @return
- *   The baudrate
+ *   The baudrate.
  ******************************************************************************/
 uint32_t sl_hal_eusart_uart_calculate_baudrate(uint32_t div,
                                                sl_hal_eusart_ovs_t ovs,
@@ -1706,7 +1706,7 @@ __INLINE void sl_hal_eusart_uart_set_clock_div(EUSART_TypeDef *eusart,
  *   Get UART mode clock divider.
  *
  * @param[in] eusart
- *   ointer to the EUSART peripheral register block.
+ *   Pointer to the EUSART peripheral register block.
  *
  * @return
  *   Clock divider value.

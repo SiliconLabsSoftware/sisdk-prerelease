@@ -1,0 +1,49 @@
+project_name: iostream_usart_kernel_micriumos
+package: platform_app
+quality: production
+label: Platform - I/O Stream USART on Micrium OS Kernel
+description: >
+  Uses the I/O Stream service with Micrium OS to demonstrate UART over VCOM. Characters you send are echoed back; connect via USB or Ethernet port 4902.
+category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
+source:
+  - path: app.c
+  - path: app_iostream_usart.c
+include:
+  - path: .
+    file_list:
+    - path: app.h
+    - path: app_iostream_usart.h
+component:
+  - id: sl_main
+  - id: device_init
+  - id: clock_manager
+  - id: micriumos_kernel
+  - id: sleeptimer
+  - id: iostream_retarget_stdio
+  - id: iostream_usart
+    instance: [vcom]
+configuration:
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+  - name: SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+    value: 1
+  - name: SL_IOSTREAM_USART_VCOM_RX_BUFFER_SIZE
+    value: 80
+define:
+  - name: DEBUG_EFM
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
+tag:
+  - hardware:device:ram:10
+  - hwfilter:device:device_has_uart
+  - hwfilter:ram:10k
+  - hwfilter:device:device_series_2

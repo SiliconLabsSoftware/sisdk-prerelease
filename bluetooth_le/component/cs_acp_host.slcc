@@ -1,0 +1,30 @@
+id: cs_acp_host
+package: bluetooth_le
+label: CS ACP Host
+description: >
+  Channel Sounding (CS) Application Co-Processor (ACP) provides the ACP commands and events to the CS device roles.
+  NCP host side.
+category: Bluetooth|Application|Miscellaneous
+metadata:
+  sbom:
+    license: Zlib
+quality: experimental
+root_path: bluetooth_le/common/cs_acp
+include:
+- path: ./
+  file_list:
+  - path: cs_acp_common.h
+  - path: cs_acp_host.h
+source:
+- path: cs_acp_host.c
+requires:
+- name: sl_common
+- name: status
+- name: enum
+- name: component_catalog
+- name: host_ncp
+- name: cs_result
+provides:
+- name: cs_acp_state
+- name: cs_acp_host
+- name: cs_acp_gatt

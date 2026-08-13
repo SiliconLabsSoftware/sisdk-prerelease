@@ -1,0 +1,43 @@
+project_name: blink_kernel_freertos
+package: platform_app
+quality: production
+label: Platform - Blink Kernel FreeRTOS
+description: >
+  Blinks an LED using a FreeRTOS task. Illustrates creating the task with either dynamic or static memory for the task stack and TCB.
+category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
+source:
+  - path: app.c
+  - path: blink.c
+include:
+  - path: .
+    file_list:
+    - path: app.h
+    - path: blink.h
+component:
+  - id: sl_main
+  - id: device_init
+  - id: clock_manager
+  - id: freertos
+  - id: sleeptimer
+  - id: simple_led
+    instance: [led0]
+define:
+  - name: DEBUG_EFM
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
+tag:
+  - hardware:component:led:1+
+  - hardware:device:ram:20
+  - hwfilter:board:simple_led:led0
+  # brd6360a: LED0 is not wired to the SoC (no GPIO/PWM board config); exclude LED-dependent examples.
+  - hwfilter:!board:brd6360a
+  - hwfilter:ram:20k

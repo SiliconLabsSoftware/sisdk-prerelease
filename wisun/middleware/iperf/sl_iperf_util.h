@@ -169,8 +169,9 @@ int16_t sl_iperf_i16_change_byte_order(const int16_t i16val);
  * @brief Update iPerf bandwidth
  * @details Calculation should be used in test cases, like iPerf UDP Server
  * @param[in,out] test Test descriptor
+ * @param[in] reset Reset status
  *****************************************************************************/
-void sl_iperf_test_update_status(sl_iperf_test_t * const test);
+void sl_iperf_test_update_status(sl_iperf_test_t * const test, bool reset);
 
 /**************************************************************************//**
  * @brief Calculate average bandwidth

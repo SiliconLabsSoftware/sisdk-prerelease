@@ -135,7 +135,6 @@ typedef struct {
 } dwt_context_t;
 
 typedef struct {
-  uint32_t dhcsr;    // Debug Halting Control and Status Register
   uint32_t demcr;    // Debug Exception and Monitor Control Register
 } core_debug_context_t;
 
@@ -434,7 +433,11 @@ __STATIC_INLINE void save_fpu_context(fpu_context_t *ctx)
   ctx->fpdscr = FPU->FPDSCR;
   ctx->fpscr = __get_FPSCR();
 
-  // Disable lazy state preservation before reading the registers.
+  // Arm forbids changing ASPEN/LSPEN while CONTROL.FPCA is set.
+  __set_CONTROL(__get_CONTROL() & ~CONTROL_FPCA_Msk);
+  __ISB();
+
+  // Disable lazy/auto state preservation before reading the registers.
   FPU->FPCCR = 0;
 
   // Save s0-s31 (single-precision registers) via VSTM
@@ -446,7 +449,8 @@ __STATIC_INLINE void save_fpu_context(fpu_context_t *ctx)
     : "memory"
     );
 
-  // Restore FPCCR.
+  // Restore FPCAR before FPCCR so enabling ASPEN cannot race with a stale FPCAR.
+  FPU->FPCAR = ctx->fpcar;
   FPU->FPCCR = ctx->fpccr;
 }
 
@@ -456,7 +460,13 @@ __STATIC_INLINE void save_fpu_context(fpu_context_t *ctx)
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 __STATIC_INLINE void restore_fpu_context(const fpu_context_t *ctx)
 {
-  // Restore s0-s31 first (before FPCCR, in case lazy stacking is active)
+  // After EM2 reset FPCCR defaults to ASPEN|LSPEN. Clear FPCA and FPCCR
+  // before touching s-regs / FPCAR so exception entry cannot clobber FPCAR,
+  // and so ASPEN/LSPEN are not changed while FPCA is set.
+  __set_CONTROL(__get_CONTROL() & ~CONTROL_FPCA_Msk);
+  __ISB();
+  FPU->FPCCR = 0;
+
   uint32_t *ptr = (uint32_t *)ctx->s;
   __ASM volatile (
     "vldm %0!, {s0-s31}"
@@ -468,9 +478,10 @@ __STATIC_INLINE void restore_fpu_context(const fpu_context_t *ctx)
   // Restore FPSCR after s-regs (vldm may clear exception flags)
   __set_FPSCR(ctx->fpscr);
 
-  FPU->FPCCR = ctx->fpccr;
+  // Restore address/default-status before restoring FPCCR (ASPEN/LSPEN).
   FPU->FPCAR = ctx->fpcar;
   FPU->FPDSCR = ctx->fpdscr;
+  FPU->FPCCR = ctx->fpccr;
 
   __DSB();
   __ISB();
@@ -484,7 +495,6 @@ __STATIC_INLINE void restore_fpu_context(const fpu_context_t *ctx)
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 __STATIC_INLINE void save_core_debug_context(core_debug_context_t *ctx)
 {
-  ctx->dhcsr = CoreDebug->DHCSR;
   ctx->demcr = CoreDebug->DEMCR;
 }
 
@@ -494,7 +504,6 @@ __STATIC_INLINE void save_core_debug_context(core_debug_context_t *ctx)
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 __STATIC_INLINE void restore_core_debug_context(const core_debug_context_t *ctx)
 {
-  CoreDebug->DHCSR = ctx->dhcsr;
   CoreDebug->DEMCR = ctx->demcr;
 }
 
@@ -579,8 +588,8 @@ void sli_power_manager_save_debug_trace_context(void)
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 void sli_power_manager_restore_debug_trace_context(void)
 {
-  restore_dwt_context(&debug_trace_context.dwt);
   restore_core_debug_context(&debug_trace_context.core_debug);
+  restore_dwt_context(&debug_trace_context.dwt);
   restore_tpiu_context(&debug_trace_context.tpiu);
   restore_itm_context(&debug_trace_context.itm);
 }

@@ -468,6 +468,35 @@ static size_t usart_uart_clear_tx_fifo(sl_peripheral_t uart)
   return count;
 }
 
+/***************************************************************************//**
+ * Attempts to set the RX timeout for USART.
+ * Returns the actual timeout set in microseconds.
+ ******************************************************************************/
+static uint32_t usart_uart_set_rx_timeout(sl_uart_handle_t *uart_handle, uint32_t timeout_us)
+{
+  USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart_handle->uart);
+
+  // Use the TCMP register to setup the RX timeout. As per the reference manual, this
+  // can be implemented by setting up TMCP to:
+  // TSTART = RXEOF
+  // TSTOP = RXACT
+  // TCMPVAL = timeout in baud times
+  // With this configuration, a timeout interrupt will get triggered every time there is an idle
+  // period greater than TCMPVAL baud times between two frames.
+
+  // The maximum timeout value is 255 baud times. Find the closest value to the specified
+  // timeout and set the timeout register.
+  uint32_t baudrate = uart_handle->config.baudrate;
+  uint32_t timeout_baud_time = SL_MIN(SL_DIV_ROUND_UP((timeout_us * baudrate), 1000000UL),
+                                      _USART_TIMECMP0_TCMPVAL_MASK);
+
+  usart->TIMECMP0 = USART_TIMECMP0_TSTART_RXEOF
+                    | USART_TIMECMP0_TSTOP_RXACT
+                    | (timeout_baud_time << _USART_TIMECMP0_TCMPVAL_SHIFT);
+
+  return (timeout_baud_time * 1000000UL) / baudrate;
+}
+
 #endif // SL_CATALOG_UART_ASYNC_PRESENT
 
 const sli_uart_ops_t sli_uart_usart_ops = {
@@ -496,6 +525,8 @@ const sli_uart_ops_t sli_uart_usart_ops = {
   .get_tx_register = usart_uart_get_tx_register,
   .clear_tx_fifo = usart_uart_clear_tx_fifo,
   .set_tx_enable = usart_uart_set_tx_enable,
+  .set_rx_timeout = usart_uart_set_rx_timeout,
+  .irq_rx_timeout_flag = USART_IF_TCMP0,
 #endif
   .irq_rx_err_flag = USART_IF_FERR | USART_IF_PERR | USART_IF_RXOF,
   .irq_rx_ready_flag = USART_IF_RXDATAV,

@@ -67,7 +67,7 @@ from cryptography import x509
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 
-DEFAULT_WORKING_DIR = Path.home() / "Silicon Labs" / "Certificates"
+DEFAULT_WORKING_DIR = Path.home() / ".silabs" / "certificates"
 DEFAULT_LEVEL = 0
 DEFAULT_VALIDITY = 365
 DEFAULT_POLICY_OID = None

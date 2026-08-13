@@ -1,0 +1,53 @@
+id: cs_rreq_display
+package: bluetooth_le
+label: CS Initiator Display
+description: >
+  Prints Channel Sounding (CS) Initiator status information to the LCD of the WSTK.
+category: Bluetooth|Application|Miscellaneous
+metadata:
+  sbom:
+    license: Zlib
+quality: experimental
+root_path: bluetooth_le/common/cs_rreq_display
+include:
+- path: ./inc
+  file_list:
+  - path: cs_rreq_display_core.h
+  - path: cs_rreq_display.h
+
+config_file:
+- path: config/cs_rreq_display_config.h
+
+source:
+- path: src/cs_rreq_display_stubs.c
+  unless:
+  - hardware_board_supports_wstk_lcd
+- path: src/cs_rreq_display_core.c
+  condition:
+  - hardware_board_supports_wstk_lcd
+- path: src/cs_rreq_display.c
+  condition:
+  - hardware_board_supports_wstk_lcd
+
+requires:
+- name: dmd_memlcd
+  condition:
+  - hardware_board_supports_wstk_lcd
+- name: glib
+  condition:
+  - hardware_board_supports_wstk_lcd
+- name: rtl_service
+  condition:
+  - hardware_board_supports_wstk_lcd
+
+provides:
+- name: cs_rreq_display
+
+template_contribution:
+- name: bluetooth_on_event
+  value:
+    include: cs_rreq_display_core.h
+    function: cs_rreq_display_on_event
+  priority: 9999
+  condition:
+  - hardware_board_supports_wstk_lcd

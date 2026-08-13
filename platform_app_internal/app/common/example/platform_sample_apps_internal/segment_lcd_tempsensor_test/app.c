@@ -1,0 +1,126 @@
+/***************************************************************************//**
+ * @file
+ * @brief Top level application functions
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ *******************************************************************************
+ * # Experimental Quality
+ * This code has not been formally tested and is provided as-is. It is not
+ * suitable for production environments. In addition, this code will not be
+ * maintained and there may be no bug maintenance planned for these resources.
+ * Silicon Labs may update projects from time to time.
+ ******************************************************************************/
+#include "sl_segmentlcd.h"
+#include "sl_clock_manager.h"
+#include "sl_gpio.h"
+#include "sl_i2cspm_instances.h"
+#include "sl_rht_unidriver.h"
+#include "sl_sleeptimer.h"
+
+#define TIMEOUT_MS         5000     // Periodic timer duration in ms
+uint32_t rh_data = 0;               // Relative humidity data
+int32_t temp_data = 0;              // Temperature data
+
+static sl_sleeptimer_timer_handle_t periodic_timer;
+
+/***************************************************************************//**
+ * Periodic timer callback function
+ ******************************************************************************/
+void on_periodic_timeout(sl_sleeptimer_timer_handle_t *handle,
+                         void *data)
+{
+  // This prevents unused parameter warnings
+  (void)&handle;
+  (void)&data;
+
+  // Measure the values for relative humidity and temperature
+  sl_rht_unidriver_measure_rh_and_temp(&rh_data, &temp_data);
+
+  // Read the values for relative humidity and temperature
+  sl_rht_unidriver_read_rh_and_temp(&rh_data, &temp_data);
+  sl_segment_lcd_temp_display(temp_data);
+}
+
+// TODO:This should be replaced with the bit SL_BOARD_ENABLE_SENSOR_RHT
+// after we fix bug about board control bug.
+
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)
+/***************************************************************************//**
+ * Initialize GPIO
+ ******************************************************************************/
+void init_gpio(void)
+{
+  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_GPIO);
+
+  // Configure PA12 (SENSOR_ENABLE) as output with filter enabled
+  sl_gpio_set_pin_mode(PA12, SL_GPIO_MODE_PUSH_PULL, 1);
+}
+#endif
+/***************************************************************************//**
+ * Initialize application.
+ ******************************************************************************/
+void app_init(void)
+{
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)
+  // Enable sensor external MUX connections
+  init_gpio();
+#endif
+  // Sleeptimer first: UniDriver probe uses delays. Then RHT (Si70xx or SHT4x) and Segment LCD.
+  sl_sleeptimer_init();
+  sl_rht_unidriver_init(sl_i2cspm_sensor);
+
+  // Configure LCD to use step down mode and disable unused segments
+  // Default display value 0
+  sl_segment_lcd_init(false);
+  LCD->BIASCTRL_SET = LCD_BIASCTRL_VDDXSEL_AVDD;
+#if defined(SL_SEGMENT_LCD_MODULE_CL010_1087)
+  // Example only used upper numeric segments; disable unused segments
+  SL_LCD_SEGMENTS_NUM_DIS();
+#endif
+#if defined(SL_SEGMENT_LCD_MODULE_CE322_1002)
+  // Display all 0's upon initialization
+  sl_segment_lcd_number(0);
+#elif defined(SL_SEGMENT_LCD_MODULE_CL010_1087)
+  // Display 25 degC upon initialization
+  sl_segment_lcd_lower_number(25000);
+  sl_segment_lcd_symbol(SL_LCD_SYMBOL_DEGC, 1);  // Display Degree C symbol
+  sl_segment_lcd_symbol(SL_LCD_SYMBOL_DP5, 1);   // Display decimal symbol
+#endif
+}
+
+/***************************************************************************//**
+ * App ticking function.
+ ******************************************************************************/
+void app_process_action(void)
+{
+  // Periodic timer for updating the temperature value displayed
+  sl_sleeptimer_start_periodic_timer_ms(&periodic_timer,
+                                        TIMEOUT_MS,
+                                        on_periodic_timeout,
+                                        NULL,
+                                        0,
+                                        0);
+}

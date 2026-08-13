@@ -24,7 +24,7 @@ requires:
 - name: hal_syscfg
 - name: enum
 - name: status
-- name: sl_assert
+- name: log_none
 template_contribution:
 - name: component_catalog
   value: hal_system

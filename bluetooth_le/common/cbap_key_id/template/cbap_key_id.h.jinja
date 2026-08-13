@@ -36,13 +36,6 @@ extern "C" {{ '{' }}
 #endif
 
 // -----------------------------------------------------------------------------
-// NVM3 key definitions
-#define CBAP_NVM3_HANDLE          (nvm3_defaultHandle)
-{% for cbap_nvm3_key in cbap_nvm3_keys -%}
-#define {{cbap_nvm3_key['key_name']|upper}} ({{cbap_nvm3_key['key_id']}})
-{% endfor -%}
-
-// -----------------------------------------------------------------------------
 // PSA key definitions
 {% for cbap_psa_key in cbap_psa_keys -%}
 #define {{cbap_psa_key['key_name']|upper}} ({{cbap_psa_key['key_id']}})

@@ -1,0 +1,158 @@
+project_name: bt_cs_ncp_acp
+package: bluetooth_le_app
+label: Bluetooth - NCP for CS with ACP
+description: >
+  Network Co-Processor (NCP) target application for Channel Sounding (CS).
+  Runs the Bluetooth stack and provides access to it by exposing the
+  Bluetooth API (BGAPI) via UART connection.
+
+  In addition to the standard NCP features, it uses custom Application
+  Co-Processor (ACP) protocol over NCP to implement Channel Sounding 
+  component/application specific communication. This communication is used
+  to let the host to configure and control Channel Sounding specific 
+  components in this NCP target example including Ranging Requester (RREQ)
+  and distance estimation (using RTL Library).
+  
+  This application also features CS RREQ Initiator role with Real Time 
+  Locating (RTL) library and CS RRSP Reflector role.
+category: Bluetooth Examples
+quality: experimental
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Bluetooth"]
+  - name: "Device Type"
+    value: ["NCP"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
+
+component:
+  - id: bluetooth_stack
+  - id: bluetooth_controller_anchor_selection
+  - id: bluetooth_feature_legacy_advertiser
+  - id: bluetooth_feature_extended_advertiser
+  - id: bluetooth_feature_periodic_advertiser
+  - id: bluetooth_feature_connection_role_central
+  - id: bluetooth_feature_connection_role_peripheral
+  - id: bluetooth_feature_gap
+  - id: bluetooth_feature_gatt
+  - id: bluetooth_feature_gatt_server
+  - id: bluetooth_feature_nvm
+  - id: bluetooth_feature_legacy_scanner
+  - id: bluetooth_feature_extended_scanner
+  - id: bluetooth_feature_sm
+  - id: bluetooth_feature_sync
+  - id: bluetooth_feature_system
+  - id: bluetooth_feature_dynamic_gattdb
+  - id: bluetooth_feature_test
+  - id: bluetooth_feature_cs
+  - id: bluetooth_utility_bgapi_trace
+  - id: ncp
+  - id: iostream_eusart
+    instance:
+      - vcom
+    condition:
+      - device_has_euart
+  - id: mpu
+  - id: sl_main
+  - id: app_os_helper
+  - id: clock_manager
+  - id: device_init
+  - id: rail_util_ble_cs_antenna_offset
+  - id: cs_result
+  - id: cs_antenna
+  - id: cs_algo
+  - id: cs_rreq
+  - id: cs_rrsp
+  - id: cs_acp_target
+  - id: iostream_bgapi_trace
+  - id: app_log
+  - id: app_assert
+
+include:
+  - path: .
+    file_list:
+      - path: app.h
+
+source:
+  - path: app.c
+
+readme:
+  - path: readme.md
+
+config_file:
+  - path: config/app_config.h
+
+other_file:
+  - path: image/readme_img0.png
+
+configuration:
+  - name: SL_CLOCK_MANAGER_HFRCO_DPLL_EN
+    value: 1
+  - name: SL_CLOCK_MANAGER_DPLL_FREQ
+    value: 80000000
+  - name: SL_CLOCK_MANAGER_SYSCLK_SOURCE
+    value: CMU_SYSCLKCTRL_CLKSEL_HFRCODPLL
+  - name: SL_CLOCK_MANAGER_HFXO_FREQ
+    value: 40000000
+    unless:
+      - hardware_board
+  - name: SL_CLOCK_MANAGER_PCLK_DIVIDER
+    value: CMU_SYSCLKCTRL_PCLKPRESC_DIV2
+  - name: SL_STACK_SIZE
+    value: 3496
+  - name: SL_BT_CONFIG_BUFFER_SIZE
+    value: 10000
+  - name: SL_BT_CONFIG_USER_ADVERTISERS
+    value: 4
+  - name: SL_BT_CONFIG_MAX_CONNECTIONS
+    value: 4
+  - name: CS_RREQ_CONFIG_MAX_CONNECTIONS
+    value: 4
+  - name: CS_ALGO_CONFIG_ESTIMATOR_COUNT
+    value: 4
+  - name: SL_BT_CONFIG_MAX_CS_PROCEDURES
+    value: 4
+  - name: SL_BT_CONTROLLER_SCANNER_RECEPTION_EARLY_ABORT
+    value: 1
+  - name: SL_BT_CONTROLLER_CONN_EVENT_LENGTH_EXTENSION
+    value: 1
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+  - name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
+    value: SL_IOSTREAM_EUSART_UART_FLOW_CTRL_CTS_RTS
+  - name: SL_IOSTREAM_USART_VCOM_FLOW_CONTROL_TYPE
+    value: usartHwFlowControlCtsAndRts
+  - name: SL_PSA_KEY_USER_SLOT_COUNT
+    value: "0"
+    condition:
+      - psa_crypto
+  - name: SL_BGAPI_TRACE_RTT_BUFFER_SIZE
+    value: 4096
+  - name: BUFFER_SIZE_UP
+    value: 4
+  - name: BUFFER_SIZE_DOWN
+    value: 4
+
+define:
+  - name: SLI_BGAPI_TRACE_DISABLE_AUTO_START
+    value: 1
+
+template_contribution:
+  - name: cs_acp_target_on_command
+    value:
+      include: app.h
+      handler: app_on_acp_command
+
+tag:
+  - toolchain:gcc
+  - toolchain:llvm
+  - hwfilter:device:device_supports_bluetooth
+  - hwfilter:device:device_generic_family_efr32xg24
+  - hwfilter:board:hardware_board_has_hfxo_freq_40mhz
+  - hwfilter:ram:128k
+
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true

@@ -109,6 +109,23 @@ static sl_status_t memory_manage_allocation_fallback(size_t size,
  **************************   GLOBAL FUNCTIONS   *******************************
  ******************************************************************************/
 
+#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
+/***************************************************************************//**
+ * Registers Memory Manager LT/ST heaps with SEGGER SystemView.
+ *
+ * @note Must be called after SEGGER_SYSVIEW_Start(). For C++ applications,
+ *       sl_memory_init() runs from .preinit_array before SystemView is ready;
+ *       call this function from sl_main_init() instead of from sl_memory_init().
+ ******************************************************************************/
+void sli_memory_register_systemview_heaps(void)
+{
+  SEGGER_SYSVIEW_HeapDefine((void *)SLI_SYSTEMVIEW_HEAP_LT_ID, (void *)__HeapBase, SLI_SYSTEMVIEW_HEAP_SIZE, SLI_BLOCK_METADATA_SIZE_BYTE);
+  SEGGER_SYSVIEW_HeapDefine((void *)SLI_SYSTEMVIEW_HEAP_ST_ID, (void *)__HeapBase, SLI_SYSTEMVIEW_HEAP_SIZE, SLI_BLOCK_METADATA_SIZE_BYTE);
+  SEGGER_SYSVIEW_NameResource((uint32_t) SLI_SYSTEMVIEW_HEAP_LT_ID, "HEAP LONG TERM");
+  SEGGER_SYSVIEW_NameResource((uint32_t) SLI_SYSTEMVIEW_HEAP_ST_ID, "HEAP SHORT TERM");
+}
+#endif
+
 /***************************************************************************//**
  * Initializes the memory manager.
  *
@@ -201,11 +218,9 @@ sl_status_t sl_memory_init(void)
                                      sli_mm_heap_reservation_name);
 #endif
 
-#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
-  SEGGER_SYSVIEW_HeapDefine((void *)SLI_SYSTEMVIEW_HEAP_LT_ID, (void *)__HeapBase, SLI_SYSTEMVIEW_HEAP_SIZE, SLI_BLOCK_METADATA_SIZE_BYTE);
-  SEGGER_SYSVIEW_HeapDefine((void *)SLI_SYSTEMVIEW_HEAP_ST_ID, (void *)__HeapBase, SLI_SYSTEMVIEW_HEAP_SIZE, SLI_BLOCK_METADATA_SIZE_BYTE);
-  SEGGER_SYSVIEW_NameResource((uint32_t) SLI_SYSTEMVIEW_HEAP_LT_ID, "HEAP LONG TERM");
-  SEGGER_SYSVIEW_NameResource((uint32_t) SLI_SYSTEMVIEW_HEAP_ST_ID, "HEAP SHORT TERM");
+  // Systemview heap registration is guaranteed to be after SEGGER_SYSVIEW_Start()
+#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW) && !defined(SL_CATALOG_CPP_SUPPORT_PRESENT)
+  sli_memory_register_systemview_heaps();
 #endif
 
   if (status == SL_STATUS_OK) {

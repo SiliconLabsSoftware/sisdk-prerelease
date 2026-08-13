@@ -111,6 +111,15 @@ __WEAK const uint32_t SL_BUS_CLOCK_EUSART3_VALUE = 0xFFFFFFFF;
 // External declaration for EUSART4 peripheral bus clock value.
 __WEAK const uint32_t SL_BUS_CLOCK_EUSART4_VALUE = 0xFFFFFFFF;
 
+// External declaration for EUSART5 peripheral bus clock value.
+__WEAK const uint32_t SL_BUS_CLOCK_EUSART5_VALUE = 0xFFFFFFFF;
+
+// External declaration for EUSART6 peripheral bus clock value.
+__WEAK const uint32_t SL_BUS_CLOCK_EUSART6_VALUE = 0xFFFFFFFF;
+
+// External declaration for EUSART7 peripheral bus clock value.
+__WEAK const uint32_t SL_BUS_CLOCK_EUSART7_VALUE = 0xFFFFFFFF;
+
 // External declaration for FRC peripheral bus clock value.
 __WEAK const uint32_t SL_BUS_CLOCK_FRC_VALUE = 0xFFFFFFFF;
 

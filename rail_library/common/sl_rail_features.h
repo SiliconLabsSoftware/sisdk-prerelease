@@ -193,7 +193,9 @@ extern "C" {
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)  \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 14) \
   || (_SILICON_LABS_32B_SERIES_3_CONFIG == 353))
+
 #define SL_RAIL_SUPPORTS_EXTERNAL_THERMISTOR 1
 #else
 #define SL_RAIL_SUPPORTS_EXTERNAL_THERMISTOR 0
@@ -216,7 +218,8 @@ extern "C" {
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8)  \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)  \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 14))
 #define SL_RAIL_SUPPORTS_AUXADC 1
 #else
 #define SL_RAIL_SUPPORTS_AUXADC 0
@@ -226,10 +229,11 @@ extern "C" {
 /// LFRCO.
 /// Best to use the runtime refinement \ref sl_rail_supports_precision_lfrco()
 /// because some chip revisions do not support it.
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11))
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 14))
 #define SL_RAIL_SUPPORTS_PRECISION_LFRCO 1
 #else
 #define SL_RAIL_SUPPORTS_PRECISION_LFRCO 0
@@ -246,10 +250,11 @@ extern "C" {
 /// Boolean to indicate whether the selected chip supports
 /// RF Sense Energy Detection Mode.
 /// See also runtime refinement \ref sl_rail_supports_rf_sense_energy_detection().
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11))
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 14))
 #define SL_RAIL_SUPPORTS_RF_SENSE_ENERGY_DETECTION 1
 #else
 #define SL_RAIL_SUPPORTS_RF_SENSE_ENERGY_DETECTION 0
@@ -258,10 +263,11 @@ extern "C" {
 /// Boolean to indicate whether the selected chip supports
 /// RF Sense Selective(OOK) Mode.
 /// See also runtime refinement \ref sl_rail_supports_rf_sense_selective_ook().
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11))
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 14))
 #define SL_RAIL_SUPPORTS_RF_SENSE_SELECTIVE_OOK 1
 #else
 #define SL_RAIL_SUPPORTS_RF_SENSE_SELECTIVE_OOK 0
@@ -345,6 +351,7 @@ extern "C" {
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7)  \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)  \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 14) \
   || (_SILICON_LABS_32B_SERIES_3_CONFIG >= 300))
 #define SL_RAIL_BLE_SUPPORTS_CODED_PHY SL_RAIL_SUPPORTS_PROTOCOL_BLE
 #else
@@ -360,6 +367,7 @@ extern "C" {
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7)  \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)  \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 14) \
   || (_SILICON_LABS_32B_SERIES_3_CONFIG >= 300))
 #define SL_RAIL_BLE_SUPPORTS_SIMULSCAN_PHY SL_RAIL_SUPPORTS_PROTOCOL_BLE
 #else
@@ -376,6 +384,7 @@ extern "C" {
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7)  \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)  \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 14) \
   || (_SILICON_LABS_32B_SERIES_3_CONFIG >= 300))
 #define SL_RAIL_BLE_SUPPORTS_CTE SL_RAIL_SUPPORTS_PROTOCOL_BLE
 #else
@@ -385,10 +394,11 @@ extern "C" {
 /// Boolean to indicate whether the selected chip supports the
 /// Quuppa PHY.
 /// See also runtime refinement \ref sl_rail_ble_supports_quuppa().
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11))
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 14))
 #define SL_RAIL_BLE_SUPPORTS_QUUPPA SL_RAIL_SUPPORTS_PROTOCOL_BLE
 #else
 #define SL_RAIL_BLE_SUPPORTS_QUUPPA 0
@@ -728,6 +738,7 @@ extern "C" {
 #if (((_SILICON_LABS_32B_SERIES_2_CONFIG >= 3) \
   && (_SILICON_LABS_32B_SERIES_2_CONFIG != 7)  \
   && (_SILICON_LABS_32B_SERIES_2_CONFIG != 9)) \
+  && (_SILICON_LABS_32B_SERIES_2_CONFIG != 14) \
   || (_SILICON_LABS_32B_SERIES_3_CONFIG >= 300))
 #define SL_RAIL_SUPPORTS_SQ_PHY 1
 #else
@@ -921,12 +932,13 @@ extern "C" {
 
 /// Boolean to indicate whether the selected chip supports RFSENSE OOK PHY.
 /// See also runtime refinement \ref sl_rail_supports_rf_sense_ook_phy().
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 4) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 6) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11))
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 4)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 6)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 14))
 #define SL_RAIL_SUPPORTS_RF_SENSE_OOK_PHY 1
 #else
 #define SL_RAIL_SUPPORTS_RF_SENSE_OOK_PHY 0

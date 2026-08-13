@@ -149,17 +149,17 @@ eg. 'iperf get options help' to get the help of all options\n\
 
 /// CLI iPerf options bandwidth help string
 #define SL_IPERF_CLI_OPT_BANDWIDTH_HELP \
-  "Unused if packet_number is set. \
-Otherwise used to compute packet_number as bandwidth*duration/buffer_length  [uint32] (default 20000)"
+  "Target send rate. Used with duration to compute packet_number when unset, \
+or with packet_number to derive duration  [uint32] (default 20000)"
 
 /// CLI iPerf options port help string
 #define SL_IPERF_CLI_OPT_BW_FORMAT_HELP \
-  "Unused if packet_number is set. \
-One of [bits/s, Kbits/s, Mbits/s, Gbits/s, bytes/s, Kbytes/s, Mbytes/s, Gbytes/s] [string] (default bits/s)"
+  "One of [bits/s, Kbits/s, Mbits/s, Gbits/s, bytes/s, Kbytes/s, Mbytes/s, Gbytes/s] [string] (default bits/s)"
 
 /// CLI iPerf options duration help string
 #define SL_IPERF_CLI_OPT_DURATION_HELP \
-  "Test duration in seconds [uint16] (default 10)"
+  "Test duration in seconds. Derived from bandwidth and packet_number when packet_number is set \
+[uint16] (default 10)"
 
 /// CLI iPerf options interval help string
 #define SL_IPERF_CLI_OPT_INTERVAL_HELP \
@@ -167,7 +167,7 @@ One of [bits/s, Kbits/s, Mbits/s, Gbits/s, bytes/s, Kbytes/s, Mbytes/s, Gbytes/s
 
 /// CLI iPerf options packet number help string
 #define SL_IPERF_CLI_OPT_PACKET_NUMBER_HELP \
-  "Number of packets to send. (Rules out bandwidth)  [uint16] (default 0=unset)"
+  "Number of packets to send. When set, duration is derived from bandwidth  [uint16] (default 0=unset)"
 
 /// CLI iPerf results json help string
 #define SL_IPERF_CLI_RES_JSON_HELP \

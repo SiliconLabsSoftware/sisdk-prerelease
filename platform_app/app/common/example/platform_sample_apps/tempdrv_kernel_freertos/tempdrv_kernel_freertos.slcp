@@ -1,0 +1,47 @@
+project_name: tempdrv_kernel_freertos
+package: platform_app
+quality: production
+label: Platform - TEMPDRV on FreeRTOS kernel
+description: >
+  This example project demonstrates how to use the internal temperature sensor in a FreeRTOS kernel task.
+category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
+source:
+  - path: app.c
+  - path: tempdrv_freertos.c
+include:
+  - path: .
+    file_list:
+    - path: app.h
+    - path: tempdrv_freertos.h
+component:
+  - id: sl_main
+  - id: device_init
+  - id: clock_manager
+  - id: freertos
+  - id: sleeptimer
+  - id: tempdrv
+  - id: simple_led_recommended_instance
+  - id: iostream_stdlib_config
+  - id: iostream_retarget_stdio
+  - id: iostream_recommended_stream
+define:
+  - name: DEBUG_EFM
+configuration:
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+tag:
+  - hardware:component:exp_header:spi
+  - hwfilter:board:simple_led:led0
+  # brd6360a: LED0 is not wired to the SoC (no GPIO/PWM board config); exclude LED-dependent examples.
+  - hwfilter:!board:brd6360a
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md

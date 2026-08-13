@@ -247,6 +247,15 @@ SL_ENUM(sl_clock_branch_t) {
 /// Define for EUSART4 peripheral bus clock pointer.
 #define SL_BUS_CLOCK_EUSART4 (&SL_BUS_CLOCK_EUSART4_VALUE)
 
+/// Define for EUSART5 peripheral bus clock pointer.
+#define SL_BUS_CLOCK_EUSART5 (&SL_BUS_CLOCK_EUSART5_VALUE)
+
+/// Define for EUSART6 peripheral bus clock pointer.
+#define SL_BUS_CLOCK_EUSART6 (&SL_BUS_CLOCK_EUSART6_VALUE)
+
+/// Define for EUSART7 peripheral bus clock pointer.
+#define SL_BUS_CLOCK_EUSART7 (&SL_BUS_CLOCK_EUSART7_VALUE)
+
 /// Define for FRC peripheral bus clock pointer.
 #define SL_BUS_CLOCK_FRC (&SL_BUS_CLOCK_FRC_VALUE)
 
@@ -598,6 +607,15 @@ extern const uint32_t SL_BUS_CLOCK_EUSART3_VALUE;
 
 // External declaration for EUSART4 peripheral bus clock value.
 extern const uint32_t SL_BUS_CLOCK_EUSART4_VALUE;
+
+// External declaration for EUSART5 peripheral bus clock value.
+extern const uint32_t SL_BUS_CLOCK_EUSART5_VALUE;
+
+// External declaration for EUSART6 peripheral bus clock value.
+extern const uint32_t SL_BUS_CLOCK_EUSART6_VALUE;
+
+// External declaration for EUSART7 peripheral bus clock value.
+extern const uint32_t SL_BUS_CLOCK_EUSART7_VALUE;
 
 // External declaration for FRC peripheral bus clock value.
 extern const uint32_t SL_BUS_CLOCK_FRC_VALUE;

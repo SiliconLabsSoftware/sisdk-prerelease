@@ -1126,6 +1126,10 @@ __INLINE int32_t sl_hal_gpio_get_em4_interrupt_number(const sl_gpio_t *gpio)
   } else if (GPIO_EM4WU10_PORT == gpio->port && GPIO_EM4WU10_PIN == gpio->pin) {
     em4_int_no = 10;
     #endif
+    #if defined(GPIO_EM4WU11_PORT)
+  } else if (GPIO_EM4WU11_PORT == gpio->port && GPIO_EM4WU11_PIN == gpio->pin) {
+    em4_int_no = 11;
+    #endif
   } else {
     em4_int_no = -1;
   }

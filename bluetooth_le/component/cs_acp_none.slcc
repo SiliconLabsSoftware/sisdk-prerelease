@@ -1,0 +1,16 @@
+id: cs_acp_none
+package: bluetooth_le
+label: CS ACP None
+description: >
+  Channel Sounding (CS) Application Co-Processor (ACP) Unaware.
+category: Bluetooth|Application|Miscellaneous
+metadata:
+  sbom:
+    license: Zlib
+quality: experimental
+provides:
+- name: cs_acp_state
+- name: cs_acp_none
+- name: cs_acp_with_impl
+- name: cs_acp_gatt
+root_path: bluetooth_le

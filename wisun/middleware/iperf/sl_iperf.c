@@ -64,6 +64,12 @@
 static void _iperf_thr_fnc (void *args);
 
 /**************************************************************************//**
+ * @brief iPerf status update thread function
+ * @details Thread function
+ *****************************************************************************/
+static void _iperf_status_update_thr_fnc(void *args);
+
+/**************************************************************************//**
  * @brief iperf UDP Server mutex acquire
  * @details Helper function
  *****************************************************************************/
@@ -141,6 +147,36 @@ static const osMutexAttr_t _iperf_mtx_attr = {
   .cb_size   = 0
 };
 
+/// Status update thread ID
+static osThreadId_t _iperf_status_update_thr = NULL;
+
+/// Status update thread attribute
+static const osThreadAttr_t _iperf_status_update_thr_attr = {
+  .name = "iPerfStatusUpdateThread",
+  .attr_bits = osThreadDetached,
+  .stack_size = (SL_IPERF_STACK_SIZE_WORD * sizeof(void *)) & 0xFFFFFFF8U,
+  .priority = osPriorityNormal6
+};
+
+/// Status update semaphore ID
+static osSemaphoreId_t _iperf_status_update_sem = NULL;
+
+/// Semaphore attribute
+static const osSemaphoreAttr_t _iperf_status_update_sem_attr = {
+  .name = "iPerfStatusUpdateSem",
+};
+
+/// Statistics protection mutex ID
+static osMutexId_t _iperf_stats_mtx = NULL;
+
+/// Statistics protection mutex attribute
+static const osMutexAttr_t _iperf_stats_mtx_attr = {
+  .name      = "iPerfStatsMtx",
+  .attr_bits = osMutexRecursive,
+  .cb_mem    = NULL,
+  .cb_size   = 0
+};
+
 #endif
 
 /// Default log instance
@@ -148,6 +184,8 @@ static sl_iperf_log_t _def_log = { 0 };
 
 void sl_iperf_service_init(void)
 {
+  static sl_iperf_test_t test = { 0 };
+
   // init network interface
   sl_iperf_nw_interface_init();
 
@@ -168,8 +206,20 @@ void sl_iperf_service_init(void)
                                                 &_iperf_test_res_msg_queue_attr);
   EFM_ASSERT(_iperf_test_res_msg_queue != NULL);
 
+  // init status update semaphore
+  _iperf_status_update_sem = osSemaphoreNew(1, 0, &_iperf_status_update_sem_attr);
+  EFM_ASSERT(_iperf_status_update_sem != NULL);
+
+  // init statistics protection mutex
+  _iperf_stats_mtx = osMutexNew(&_iperf_stats_mtx_attr);
+  EFM_ASSERT(_iperf_stats_mtx != NULL);
+
+  // init status update thread
+  _iperf_status_update_thr = osThreadNew(_iperf_status_update_thr_fnc, &test, &_iperf_status_update_thr_attr);
+  EFM_ASSERT(_iperf_status_update_thr != NULL);
+
   // init thread
-  _iperf_thr = osThreadNew(_iperf_thr_fnc, NULL, &_iperf_thr_attr);
+  _iperf_thr = osThreadNew(_iperf_thr_fnc, &test, &_iperf_thr_attr);
   EFM_ASSERT(_iperf_thr != NULL);
 #endif
 
@@ -288,32 +338,29 @@ __STATIC_INLINE void _iperf_test_release_buff(sl_iperf_test_t * const test)
 /// Thread function declaration
 static void _iperf_thr_fnc(void *args)
 {
-  static sl_iperf_test_t test = { 0 };
-  sl_iperf_test_t *pt         = &test;
-  uint8_t msg_prio            =   0U;
-  osStatus_t status           = osError;
-
-  (void) args;
+  sl_iperf_test_t *test = (sl_iperf_test_t *)args;
+  uint8_t msg_prio      =   0U;
+  osStatus_t status     = osError;
 
   // wait for network connected state
   sl_iperf_network_wait_for_connection();
 
   SL_IPERF_SERVICE_LOOP() {
     // Pop Test from the queue
-    status = osMessageQueueGet(_iperf_test_req_msg_queue, &test, &msg_prio, osWaitForever);
+    status = osMessageQueueGet(_iperf_test_req_msg_queue, test, &msg_prio, osWaitForever);
     if (status != osOK) {
       continue;
     }
 
     // Force-Reset statistics
-    memset(&test.statistic, 0, sizeof(sl_iperf_stats_t));
+    memset(&test->statistic, 0, sizeof(sl_iperf_stats_t));
 
     // check network connection
     if (!sl_iperf_network_is_connected()) {
-      sl_iperf_test_set_err_and_stat(&test, SL_IPERF_ERR_NETWORK_CONNECTION,
+      sl_iperf_test_set_err_and_stat(test, SL_IPERF_ERR_NETWORK_CONNECTION,
                                      SL_IPERF_TEST_STATUS_ERR);
-      sl_iperf_test_log(pt, "Network not connected.\n");
-      _iperf_test_release_buff(&test);
+      sl_iperf_test_log(test, "Network not connected.\n");
+      _iperf_test_release_buff(test);
       sl_iperf_delay_ms(1000UL);
       break;
     }
@@ -321,26 +368,26 @@ static void _iperf_thr_fnc(void *args)
     // Lock resources, execute particular test
     _iperf_mutex_acquire();
 
-    switch (test.opt.mode) {
+    switch (test->opt.mode) {
       case SL_IPERF_MODE_CLIENT:
-        if (sl_iperf_test_is_udp_clnt(&test)) {
-          sl_iperf_test_udp_client(&test);
-        } else if (sl_iperf_test_is_tcp_clnt(&test)) {
+        if (sl_iperf_test_is_udp_clnt(test)) {
+          sl_iperf_test_udp_client(test);
+        } else if (sl_iperf_test_is_tcp_clnt(test)) {
           (void) 0L;
         } else {
-          sl_iperf_test_log(pt, "Wrong Client mode/protocol setting.\n");
+          sl_iperf_test_log(test, "Wrong Client mode/protocol setting.\n");
         }
         break;
 
       case SL_IPERF_MODE_SERVER:
-        if (sl_iperf_test_is_udp_srv(&test)) {
+        if (sl_iperf_test_is_udp_srv(test)) {
           /// Call UDP Server
           sl_iperf_delay_ms(100UL);
-          sl_iperf_test_udp_server(&test);
-        } else if (sl_iperf_test_is_tcp_srv(&test)) {
+          sl_iperf_test_udp_server(test);
+        } else if (sl_iperf_test_is_tcp_srv(test)) {
           (void) 0L;
         } else {
-          sl_iperf_test_log(pt, "Wrong Server mode/protocol setting.\n");
+          sl_iperf_test_log(test, "Wrong Server mode/protocol setting.\n");
         }
         break;
 
@@ -349,23 +396,62 @@ static void _iperf_thr_fnc(void *args)
     }
 
     // Post test handler
-    if (test.cb != NULL) {
-      test.cb(&test);
+    if (test->cb != NULL) {
+      test->cb(test);
     }
 
-    _iperf_test_release_buff(&test);
+    _iperf_test_release_buff(test);
 
     // Release resources
     _iperf_mutex_release();
 
     // Push test content to the queue
-    osMessageQueuePut(_iperf_test_res_msg_queue, &test, 0U, osWaitForever);
+    osMessageQueuePut(_iperf_test_res_msg_queue, test, 0U, osWaitForever);
   }
 }
 
 __STATIC_INLINE bool _os_status_to_bool(const osStatus_t status)
 {
   return status == osOK ? true : false;
+}
+
+static void _iperf_status_update_thr_fnc(void *args)
+{
+  sl_iperf_test_t *test = (sl_iperf_test_t *)args;
+
+  while (1) {
+    osSemaphoreAcquire(_iperf_status_update_sem, osWaitForever);
+    sl_iperf_test_update_status(test, false);
+  }
+}
+
+void sl_iperf_status_update(void)
+{
+  osSemaphoreRelease(_iperf_status_update_sem);
+}
+
+void sl_iperf_stats_lock(void)
+{
+  EFM_ASSERT(osMutexAcquire(_iperf_stats_mtx, osWaitForever) == osOK);
+}
+
+void sl_iperf_stats_unlock(void)
+{
+  EFM_ASSERT(osMutexRelease(_iperf_stats_mtx) == osOK);
+}
+
+#else // !defined(SL_IPERF_CMSIS_RTOS_DISABLED)
+
+void sl_iperf_status_update(void)
+{
+}
+
+void sl_iperf_stats_lock(void)
+{
+}
+
+void sl_iperf_stats_unlock(void)
+{
 }
 
 #endif

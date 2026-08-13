@@ -28,12 +28,11 @@
 
 /**
  * @file
- *   This file includes the initializers for supporting Security manager.
- *
+ *   IEEE 802.15.4 packet utilities for the OpenThread platform abstraction layer.
  */
 
-#ifndef SL_PACKET_HANDLER_H
-#define SL_PACKET_HANDLER_H
+#ifndef SL_PACKET_UTILS_H_
+#define SL_PACKET_UTILS_H_
 
 #include <openthread/platform/radio.h>
 
@@ -42,64 +41,57 @@ extern "C" {
 #endif
 
 /**
- * This function performs AES CCM on the frame which is going to be sent.
+ * Performs AES-CCM on a transmit frame.
  *
- * @param[in]  aFrame       A pointer to the MAC frame buffer that is going to be sent.
- * @param[in]  aExtAddress  A pointer to the extended address, which will be used to generate nonce
- *                          for AES CCM computation.
- *
+ * @param[in,out] aFrame       A pointer to the MAC frame buffer that is going to be sent.
+ * @param[in]     aExtAddress  A pointer to the extended address used to generate the AES-CCM nonce.
  */
-void efr32PlatProcessTransmitAesCcm(otRadioFrame *aFrame, const otExtAddress *aExtAddress);
+void sli_ot_process_transmit_aes_ccm(otRadioFrame *aFrame, const otExtAddress *aExtAddress);
 
 /**
- * This function returns if the Frame Pending bit is set in any given frame.
+ * Returns whether the Frame Pending bit is set.
  *
- * @param[in]  aFrame       A pointer to the MAC frame buffer.
+ * @param[in] aFrame  A pointer to the MAC frame buffer.
  *
- * @retval  true    Frame Pending is set.
- * @retval  false   Frame Pending is not set.
+ * @retval true   Frame Pending is set.
+ * @retval false  Frame Pending is not set.
  */
-bool efr32IsFramePending(otRadioFrame *aFrame);
+bool sli_ot_is_frame_pending(const otRadioFrame *aFrame);
 
 /**
- * This function returns the Destination PanId, if present.
+ * Returns the Destination PanId, if present.
  *
- * @param[in]  aFrame       A pointer to the MAC frame buffer.
+ * @param[in] aFrame  A pointer to the MAC frame buffer.
  *
- * @retval  DstPanId    If present.
- * @retval  BcastPanId  If Dest PanId is compressed.
+ * @returns Destination PanId if present, otherwise the broadcast PanId (0xFFFF).
  */
-otPanId efr32GetDstPanId(otRadioFrame *aFrame);
+otPanId sli_ot_get_dst_pan_id(const otRadioFrame *aFrame);
 
 /**
- * This function returns the start of payload pointer.
+ * Returns a pointer to the start of the 802.15.4 payload.
  *
- * @param[in]  aFrame       A pointer to the MAC frame buffer.
+ * @param[in] aFrame  A pointer to the MAC frame buffer.
  *
- * @retval  Pointer to start of 802.15.4 payload.
+ * @returns Pointer to the start of the 802.15.4 payload.
  */
-uint8_t *efr32GetPayload(otRadioFrame *aFrame);
+const uint8_t *sli_ot_get_payload(const otRadioFrame *aFrame);
 
 /**
- * This function checks if the PAN ID Compression bit is set in the given MAC frame.
+ * Returns whether the PAN ID Compression bit is set.
  *
- * @param[in]  aFrame       A pointer to the MAC frame buffer.
- *
- * @return true if the PAN ID Compression bit is set, false otherwise.
+ * @param[in] aFrame  A pointer to the MAC frame buffer.
  */
-bool efr32FrameIsPanIdCompressed(otRadioFrame *aFrame);
+bool sli_ot_frame_is_pan_id_compressed(const otRadioFrame *aFrame);
 
 /**
- * This function returns the frame version.
+ * Returns the frame version field.
  *
- * @param[in]  aFrame       A pointer to the MAC frame buffer.
- *
- * @retval  Frame version.
+ * @param[in] aFrame  A pointer to the MAC frame buffer.
  */
-uint16_t efr32GetFrameVersion(otRadioFrame *aFrame);
+uint16_t sli_ot_get_frame_version(const otRadioFrame *aFrame);
 
 #ifdef __cplusplus
 } // extern "C"
 #endif
 
-#endif /* SL_PACKET_HANDLER_H */
+#endif // SL_PACKET_UTILS_H_

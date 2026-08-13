@@ -113,6 +113,12 @@
 #include "sl_memory_manager.h"
 #endif
 
+#if defined(SL_CATALOG_MEMORY_MANAGER_PRESENT) \
+  && defined(SL_CATALOG_SYSTEMVIEW_TRACE_PRESENT) \
+  && defined(__GNUC__)
+#include "sli_memory_manager.h"
+#endif
+
 #if defined(SL_CATALOG_CLOCK_MANAGER_PRESENT)
 #include "sl_clock_manager_init.h"
 #endif
@@ -274,6 +280,14 @@ void sl_main_init(void)
 #if defined(SL_CATALOG_SYSTEMVIEW_TRACE_PRESENT) && !defined(SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT)
   SEGGER_SYSVIEW_Conf();
   SEGGER_SYSVIEW_Start();
+#endif
+
+#if defined(SL_CATALOG_MEMORY_MANAGER_PRESENT) \
+  && defined(SL_CATALOG_SYSTEMVIEW_TRACE_PRESENT) \
+  && defined(__GNUC__) \
+  && defined(SL_CATALOG_CPP_SUPPORT_PRESENT)
+  sli_memory_register_systemview_heaps();
+  SLI_METRIC_EVENT_HANDLER_SAVE("sli_memory_register_systemview_heaps");
 #endif
 
 #if defined(SL_CATALOG_MEMORY_MANAGER_PRESENT) && !defined(SL_CATALOG_CPP_SUPPORT_PRESENT)

@@ -719,6 +719,7 @@ sl_status_t sl_dma_channel_resume(const sl_dma_channel_handle_t *handle)
  * @brief
  *   Gets the status of the given DMA channel.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
 sl_status_t sl_dma_channel_get_status(sl_dma_channel_handle_t *handle,
                                       sl_dma_channel_status_t *status)
 {

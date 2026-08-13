@@ -2627,6 +2627,7 @@ __INLINE bool sl_hal_ldma_channel_is_enabled(LDMA_TypeDef *ldma,
  *   return true if the LDMA channel is active and false if the channel is not
  *   active.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_HAL_LDMA, SL_CODE_CLASS_TIME_CRITICAL)
 __INLINE bool sl_hal_ldma_channel_is_active(LDMA_TypeDef *ldma,
                                             uint32_t channel)
 {

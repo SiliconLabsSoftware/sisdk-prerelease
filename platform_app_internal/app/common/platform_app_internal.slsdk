@@ -1,0 +1,14 @@
+# Properties file for Simplicity Studio metadata.
+
+id=com.silabs.sdk.platform_app_internal
+
+label=Platform App Internal Package
+
+description=Platform App Internal Package
+
+version=1.0.0-alpha.3
+
+prop.partCompatibility=mcu.arm.*
+
+prop.file.templatesFile=platform_internal_templates.xml platform_security_internal_templates.xml
+

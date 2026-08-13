@@ -130,7 +130,7 @@ RAIL_TxPowerCurvesConfigAlt_t powerCurvesState;
     4U,        /* SUBGIG_LLP */                  \
     /* The rest are unsupported */               \
 }
-#elif ((_SILICON_LABS_32B_SERIES_2_CONFIG == 9) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11))
+#elif ((_SILICON_LABS_32B_SERIES_2_CONFIG == 9) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 14))
 #define SUPPORTED_PA_INDICES {     \
     0U,        /* 2P4GIG_HP  */    \
     RAIL_NUM_PA, /* 2P4GIG_MP  */  \

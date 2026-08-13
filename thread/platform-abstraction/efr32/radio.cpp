@@ -70,7 +70,6 @@ extern "C" {
 #include "radio_multi_channel.h"
 #include "rail_config.h"
 #include "sl_memory_manager.h"
-#include "sl_packet_utils.h"
 #include "sl_rail.h"
 #include "sl_rail_ieee802154.h"
 

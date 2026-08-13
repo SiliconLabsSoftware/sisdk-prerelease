@@ -1,0 +1,64 @@
+project_name: adc_baremetal
+package: platform_app
+quality: production
+label: Platform - ADC Bare-metal
+description: >
+  This example project shows how to use the SAR ADC (sl_hal_adc) in a bare-metal
+  configuration: GPIO loopback, immediate single conversion on ADC0, and a
+  periodic LED toggle driven by sleeptimer (see adc_test.c for the reference flow).
+category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Intermediate"]
+source:
+  - path: app.c
+  - path: adc_app.c
+include:
+  - path: .
+    file_list:
+    - path: app.h
+    - path: adc_app.h
+component:
+  - id: sl_main
+  - id: device_init
+  - id: clock_manager
+  - id: sleeptimer
+  - id: simple_led
+    instance: [led0]
+  - id: hal_adc
+  - id: hal_gpio
+  - id: code_classification
+  - id: iostream_stdlib_config
+  - id: iostream_retarget_stdio
+  - id: iostream_recommended_stream
+define:
+  - name: DEBUG_EFM
+  - name: SIMG301_BRD4408A
+    condition: [brd4408a]
+  - name: SIMG301_BRD4407A
+    condition: [brd4407a]
+  - name: EFR32MG2B_BRD4418A
+    condition: [brd4418a]
+  - name: EFR32BG2B_BRD4419A
+    condition: [brd4419a]
+  - name: SLDK4360A_SIWG353
+    condition: [brd4360a]
+  - name: SLDK6360A_SIWG353
+    condition: [brd6360a]
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
+tag:
+  - hardware:component:led:1+
+  - hwfilter:device:device_has_adc
+  - hwfilter:board:simple_led:led0
+  # brd6360a: LED0 is not wired to the SoC (no GPIO/PWM board config); exclude LED-dependent examples.
+  - hwfilter:!board:brd6360a
+configuration:
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1

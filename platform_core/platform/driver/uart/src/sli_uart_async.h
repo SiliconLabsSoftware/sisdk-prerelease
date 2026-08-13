@@ -68,10 +68,19 @@ sl_status_t sli_uart_async_suspend(sl_uart_handle_t *uart_handle);
 sl_status_t sli_uart_async_resume(sl_uart_handle_t *uart_handle);
 
 /***************************************************************************//**
- * Handles the TX complete interrupt for the given UART instance.
+ * Handles the TX interrupt for the given async UART instance.
  *
  * @param[in]  uart_handle Handle to UART.
+ * @param[in]  irq         Interrupt flags to handle.
  ******************************************************************************/
-void sli_uart_async_transmit_complete(sl_uart_handle_t *uart_handle);
+void sli_uart_async_tx_handler(sl_uart_handle_t *uart_handle, uint32_t irq);
+
+/***************************************************************************//**
+ * Handles the RX interrupt for the given async UART instance.
+ *
+ * @param[in]  uart_handle Handle to UART.
+ * @param[in]  irq         Interrupt flags to handle.
+ ******************************************************************************/
+void sli_uart_async_rx_handler(sl_uart_handle_t *uart_handle, uint32_t irq);
 
 #endif // SLI_UART_ASYNC_H

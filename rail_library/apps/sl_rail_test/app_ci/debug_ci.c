@@ -826,15 +826,22 @@ static char pinForOFDMPRSSignal[OFDM_PRS_SIGNAL_COUNT][5];
 #define PRESENT_SYNCSENT_PRS_SIGNAL_AVAILABLE         '\0'
 
 // Set and clear addresses for MODEM_PRSCTRL register
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 7) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11))
-static uint32_t *prsctrlAddress = (uint32_t*)0xB8014240UL,
-                *prsctrlSetAddress = (uint32_t*)0xB8015240UL,
-                *prsctrlClrAddress = (uint32_t*)0xB8016240UL;
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 7)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 14))
+#define MODEM_PRSCTRL     0xB8014240UL
+#define MODEM_PRSCTRL_SET 0xB8015240UL
+#define MODEM_PRSCTRL_CLR 0xB8016240UL
 #else // For xG23, xG24, xG25 and xG28.
-static uint32_t *prsctrlAddress = (uint32_t*)0xB80141ACUL,
-                *prsctrlSetAddress = (uint32_t*)0xB80151ACUL,
-                *prsctrlClrAddress = (uint32_t*)0xB80161ACUL;
+#define MODEM_PRSCTRL     0xB80141ACUL
+#define MODEM_PRSCTRL_SET 0xB80151ACUL
+#define MODEM_PRSCTRL_CLR 0xB80161ACUL
 #endif
+
+static uint32_t *prsctrlAddress = (uint32_t*)MODEM_PRSCTRL,
+                *prsctrlSetAddress = (uint32_t*)MODEM_PRSCTRL_SET,
+                *prsctrlClrAddress = (uint32_t*)MODEM_PRSCTRL_CLR;
 
 // Tables saving the pin name used for PRESENT/SYNCSENT signals and telling if
 // these signals are already used.

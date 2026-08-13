@@ -1,0 +1,47 @@
+project_name: dmadrv_kernel_freertos
+package: platform_app
+quality: production
+label: Platform - DMA Kernel FreeRTOS
+description: >
+  This example project shows how to use the DMA driver (DMA Manager and DMA Channel Driver) to transfer data between memory and a EUSART peripheral in a freertos configuration.
+category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
+source:
+  - path: app.c
+  - path: dmadrv_app.c
+include:
+  - path: .
+    file_list:
+    - path: app.h
+    - path: dmadrv_app.h
+component:
+  - id: sl_main
+  - id: device_init
+  - id: clock_manager
+  - id: freertos
+  - id: dma_manager
+  - id: dma_channel
+  - id: power_manager
+  - id: sleeptimer
+  - id: iostream
+  - id: iostream_recommended_stream
+define:
+  - name: DEBUG_EFM
+configuration:
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
+tag:
+  - hardware:component:eusart
+  - hwfilter:device:device_has_eusart
+  # brd6360a: VCOM is on EUSART3; this app hardcodes EUSART0 DMA — no VCOM output.
+  - hwfilter:!board:brd6360a

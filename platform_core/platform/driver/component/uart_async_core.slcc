@@ -23,6 +23,7 @@ requires:
 - name: dma_channel
 - name: dma_manager
 - name: memory_manager
+- name: sleeptimer
 - name: uart_core
 template_contribution:
 - name: component_catalog

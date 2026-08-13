@@ -30,7 +30,7 @@ Authentication and Pairing (CBAP):
     - Device EC key pair (NIST P-256)
     - Static authentication data
     - Device X.509 certificate, signed by an issuer Certificate Authority
-    - Issuer (root) certificate stored in device NVM
+    - Issuer (root) certificate stored in device PSA ITS
 
 Connection and application loading depend on the target family:
 
@@ -70,7 +70,6 @@ sys.path.append(str(Path(__file__).parent / "script"))
 from ddp_conn import RttConnection, SerialConnection
 from sl_ddp_conn_config import *
 from cbap_key_id import *
-from ddp_cmd_nvm import nvm_set
 from ddp_cmd_psa import *
 from ddp_cmd_cert import common_name_gen
 
@@ -89,7 +88,7 @@ from certificate_manager import (
 )
 
 DEMO_CA_DIR = (Path(__file__).parent / "script" / "ca_demo").resolve()
-DEMO_CA_LEVEL = 0
+DEMO_CA_LEVEL = 2  # Batch certificate
 
 DEFAULT_BAUDRATE = 115200
 
@@ -172,7 +171,7 @@ def main(app: Optional[Path] = None,
 
     Connects to the target, runs (or attaches to) the DDP provisioning
     application, generates keys and a device certificate on the host, and
-    injects the certificate data into device NVM.
+    injects the certificate data into device PSA ITS.
 
     :param app: Path to the provisioning application ``.bin`` file. When
         omitted on non-xG22 targets, the binary is searched under this script's
@@ -357,17 +356,17 @@ def main(app: Optional[Path] = None,
 
         # Inject device certificate.
         print("Injecting device certificate...")
-        status = nvm_set(conn, CBAP_NVM_DEVICE_CERT, certificate)
+        status = psa_its_set(conn, CBAP_PSA_DEVICE_CERT, certificate)
         if status != 0:
-            raise RuntimeError(f"Set NVM failure: {status:#06x}")
+            raise RuntimeError(f"Set PSA ITS failure: {status:#06x}")
 
         # Inject issuer certificate.
         issuer_cert = ca.get_certificate().public_bytes(
             serialization.Encoding.DER)
         print("Injecting root (issuer) certificate...")
-        status = nvm_set(conn, CBAP_NVM_ROOT_CERT, issuer_cert)
+        status = psa_its_set(conn, CBAP_PSA_ROOT_CERT, issuer_cert)
         if status != 0:
-            raise RuntimeError(f"Set NVM failure: {status:#06x}")
+            raise RuntimeError(f"Set PSA ITS failure: {status:#06x}")
 
     finally:
         print("Cleaning up.")
