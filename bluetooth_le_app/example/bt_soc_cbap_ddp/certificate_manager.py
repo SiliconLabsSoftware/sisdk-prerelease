@@ -64,6 +64,7 @@ from typing import Optional
 
 import cryptography
 from cryptography import x509
+from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 
@@ -194,22 +195,50 @@ class CertificateAuthority:
                 return False  # Dirty
         return True
 
-    @property
-    def is_valid(self) -> bool:
-        '''True if the authority exists and its certificate is within its
-        validity period.
+    def is_valid(self,
+                 issuer: Optional["CertificateAuthority"] = None) -> bool:
+        '''True if the authority exists and its certificate is usable now.
 
-        Note: a revocation list (CRL), if used, is not checked here.
+        The authority is checked on its own for the following:
+            - every necessary files are present on disk,
+            - its certificate is within its validity period,
+            - its certificate belongs to its stored private key,
+            - its certificate is allowed to issue other certificates.
+
+        :param issuer: If given, the link between the two authorities is
+            also verified as well as the issuer.
+        :returns: True if every check passes.
+        :raises ValueError: If the issuer is not a CertificateAuthority.
         '''
+        # Existence
         if not self.exist:
+            print("CA validation failed: Does not exist!")
             return False
 
+        # Validity period
         certificate = self.get_certificate()
         now = datetime.datetime.now(datetime.timezone.utc)
         not_before = certificate.not_valid_before_utc
         not_after = certificate.not_valid_after_utc
 
         if now < not_before or not_after < now:
+            print("CA validation failed: Not in validity period!")
+            return False
+
+        # Check if the certificate and the key matches
+        if certificate.public_key() != self.get_private_key().public_key():
+            print("CA validation failed: Public key does not match!")
+            return False
+
+        if not self._can_issue_certificates(certificate):
+            print("CA validation failed: Not allowed to issue certificates!")
+            return False
+
+        if issuer is None:
+            return True
+
+        if not self.is_issued_by(issuer):
+            print("CA validation failed: Not issued by issuer!")
             return False
 
         # Note: If there is a revocation list (CRL) in use, then it should be
@@ -329,7 +358,7 @@ class CertificateAuthority:
         # A root certificate authority signs its own certificate.
         self_signed = issuer == self
 
-        if not self_signed and not issuer.is_valid:
+        if not self_signed and not issuer.is_valid():
             raise Exception('Issuer Certificate Authority is invalid.')
 
         # Create empty database.
@@ -378,7 +407,7 @@ class CertificateAuthority:
         cert = issuer.sign(cert)
         self.set_certificate(cert)
 
-        if not self.is_valid:
+        if not self.is_valid(issuer):
             raise Exception('The created certificate is invalid.')
         print(f'Certificate Authority created:\n{self}')
 
@@ -422,6 +451,129 @@ class CertificateAuthority:
         raise RuntimeError(
             "Failed to generate serial number. Max iterations reached:",
             max_iterations)
+
+    def is_issued_by(self, issuer: "CertificateAuthority") -> bool:
+        '''True if this authority's certificate was issued by the issuer.
+
+        This verifies a single link of a certificate chain:
+            - both certificates are present on disk,
+            - the subject name of the issuer matches the issuer name of this
+              certificate,
+            - the signature of this certificate verifies with the public key
+              of the issuer,
+            - the authority key identifier of this certificate matches the
+              subject key identifier of the issuer, when both are present,
+            - the issuer is allowed to issue certificates,
+            - the issuer has this certificate in its database of issued
+              certificates.
+
+        A root authority signs its own certificate, so passing this same
+        authority (or an equal one) verifies that self-signature. In that case
+        the issuer and the subject name of the certificate must be identical
+        as well.
+
+        :param issuer: The authority expected to have signed this authority's
+            certificate. Pass this same instance to check a root authority.
+        :returns: True if the issuer issued this authority's certificate.
+        :raises ValueError: If the issuer is not a CertificateAuthority.
+        '''
+        if not isinstance(issuer, CertificateAuthority):
+            raise ValueError('Issuer must be a CertificateAuthority object.')
+        if not self.certificate.exists() or not issuer.certificate.exists():
+            print("CA validation failed: Certificate does not exist!")
+            return False
+
+        certificate = self.get_certificate()
+        issuer_certificate = issuer.get_certificate()
+
+        # A root authority is its own issuer, hence its issuer and subject
+        # names are the same.
+        if issuer == self and certificate.issuer != certificate.subject:
+            print("CA validation failed: Issuer and subject names do not match!")
+            return False
+
+        # Match the issuer name against the subject name of the issuer and
+        # verify the signature with the public key of the issuer. This also
+        # rejects a signature algorithm that the signature does not match.
+        try:
+            certificate.verify_directly_issued_by(issuer_certificate)
+        except (ValueError, TypeError, InvalidSignature):
+            print("CA validation failed: Issuer verification failed!")
+            return False
+
+        if not self._is_key_identifier_matching(certificate,
+                                                issuer_certificate):
+            print("CA validation failed: Key identifier does not match!")
+            return False
+
+        if not self._can_issue_certificates(issuer_certificate):
+            print("CA validation failed: Not allowed to issue certificates!")
+            return False
+
+        # An authority keeps a record of every certificate it has signed.
+        return certificate.serial_number in issuer.get_database()
+
+    @staticmethod
+    def _can_issue_certificates(certificate: x509.Certificate) -> bool:
+        '''Check if the certificate is allowed to sign other certificates.
+
+        :param certificate: The certificate of the issuing authority.
+        :returns: True if the certificate can issue other certificates.
+        '''
+        # Check basic constraints
+        try:
+            constraints = certificate.extensions.get_extension_for_class(
+                x509.BasicConstraints).value
+        except x509.ExtensionNotFound:
+            print("CA validation failed: Basic constraints not found!")
+            return False
+
+        if not constraints.ca:
+            print("CA validation failed: Not a CA!")
+            return False
+
+        # Key usage extension
+        # If present, must allow certificate signing. According to RFC 5280
+        # a missing key usage extension means no restriction.
+        try:
+            key_usage = certificate.extensions.get_extension_for_class(
+                x509.KeyUsage).value
+        except x509.ExtensionNotFound:
+            return True
+
+        return key_usage.key_cert_sign
+
+    @staticmethod
+    def _is_key_identifier_matching(
+            certificate: x509.Certificate,
+            issuer_certificate: x509.Certificate) -> bool:
+        '''True if the certificate points to the key of the issuer.
+
+        The authority key identifier of a certificate names the key that
+        signed it. It is what tells apart issuers sharing the same subject
+        name, an authority before and after a key rollover for example. Both
+        extensions involved are optional, so a certificate missing either of
+        them passes this check.
+
+        :param certificate: The issued certificate.
+        :param issuer_certificate: The certificate of the expected issuer.
+        :returns: True if the key identifiers match or are not available.
+        '''
+        extensions = certificate.extensions
+        issuer_extensions = issuer_certificate.extensions
+        try:
+            authority_key = extensions.get_extension_for_class(
+                x509.AuthorityKeyIdentifier).value.key_identifier
+            subject_key = issuer_extensions.get_extension_for_class(
+                x509.SubjectKeyIdentifier).value.digest
+        except x509.ExtensionNotFound:
+            return True
+
+        if authority_key is None:
+            # The issuer is identified by its name and serial number instead.
+            return True
+
+        return authority_key == subject_key
 
     def _add_certificate_to_database(self, certificate: x509.Certificate):
         '''Record an issued certificate in the database and store it on disk.

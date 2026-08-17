@@ -58,6 +58,24 @@ other_file:
       transfer_ownership: true
   - path: image/readme_img0.png
 
+  # Certificate Authority chain sample configurations
+  - path: ca_configs/ca_chain_demo_config.yaml
+    project:
+      transfer_ownership: true
+      directory: script/ca_configs
+  - path: ca_configs/ca_chain_full_config.yaml
+    project:
+      transfer_ownership: true
+      directory: script/ca_configs
+  - path: ca_configs/ca_chain_prover_config.yaml
+    project:
+      transfer_ownership: true
+      directory: script/ca_configs
+  - path: ca_configs/ca_chain_verifier_config.yaml
+    project:
+      transfer_ownership: true
+      directory: script/ca_configs
+
   # Certificate Authority files for demonstration purposes
   # Root CA
   - path: ca_demo/ca0_root/362235998618210098128576986892169139681887934853.crt

@@ -1,0 +1,21 @@
+---
+certificate_authorities:
+  - name: root_ca
+    provision: false
+    private_key_path: ~/.silabs/certificates/ca0_root/private_key.pem
+    certificate_path: ~/.silabs/certificates/ca0_root/certificate.pem
+    database_path: ~/.silabs/certificates/ca0_root/issued_certificates.yaml
+  - name: factory_ca
+    provision: false
+    private_key_path: ~/.silabs/certificates/ca1_factory/private_key.pem
+    certificate_path: ~/.silabs/certificates/ca1_factory/certificate.pem
+    database_path: ~/.silabs/certificates/ca1_factory/issued_certificates.yaml
+  - name: batch_ca
+    provision: true
+    private_key_path: ~/.silabs/certificates/ca2_batch/private_key.pem
+    certificate_path: ~/.silabs/certificates/ca2_batch/certificate.pem
+    database_path: ~/.silabs/certificates/ca2_batch/issued_certificates.yaml
+
+device_certificate:
+  create_and_provision: true
+  issuer: batch_ca

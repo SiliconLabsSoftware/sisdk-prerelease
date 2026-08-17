@@ -16,7 +16,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8753" column="42" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8753" bodyend="-1"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8754" column="42" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8754" bodyend="-1"/>
       </memberdef>
     </sectiondef>
     <sectiondef kind="define">
@@ -30,7 +30,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8741" column="9" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8741" bodyend="-1"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="8742" column="9" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="8742" bodyend="-1"/>
       </memberdef>
     </sectiondef>
     <briefdescription>

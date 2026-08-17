@@ -107,6 +107,13 @@ void sl_hal_letimer_init(LETIMER_TypeDef *letimer,
                   | (((uint32_t)init->output0_polarity) << _LETIMER_CTRL_OPOL0_SHIFT)
                   | (((uint32_t)init->output1_polarity) << _LETIMER_CTRL_OPOL1_SHIFT);
 
+  SL_PRINT_STRING_DEBUG("prescaler=%d repeat=%d\r\n",
+                        (int)init->prescaler,
+                        (int)init->repeat_mode);
+  SL_PRINT_STRING_DEBUG("ufoa0=%d ufoa1=%d\r\n",
+                        (int)init->underflow_output0_action,
+                        (int)init->underflow_output1_action);
+
   sl_hal_letimer_disable(letimer);
   sl_hal_letimer_wait_ready(letimer);
 }
@@ -145,6 +152,8 @@ void sl_hal_letimer_reset(LETIMER_TypeDef *letimer)
   sl_hal_letimer_wait_sync(letimer);
   sl_hal_letimer_disable(letimer);
 #endif
+
+  SL_PRINT_STRING_INFO("reset, %d\r\n", (int)__LINE__);
 }
 
 /***************************************************************************//**

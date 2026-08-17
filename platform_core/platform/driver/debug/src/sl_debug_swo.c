@@ -44,13 +44,32 @@
 #include "sl_debug_swo_config.h"
 #include "sl_component_catalog.h"
 
+#define SL_DEBUG_SWO_ITM_LOCK_ACCESS_KEY       (0xC5ACCE55UL)
+
+#ifndef SL_DEBUG_SWO_TRACE_BUS_ID
+#define SL_DEBUG_SWO_TRACE_BUS_ID              (1UL)
+#endif
+
+#if defined(ITM_TCR_TRACEBUSID_Pos)
+#define SL_DEBUG_SWO_TRACE_BUS_ID_POS          (ITM_TCR_TRACEBUSID_Pos)
+#elif defined(ITM_TCR_TraceBusID_Pos)
+#define SL_DEBUG_SWO_TRACE_BUS_ID_POS          (ITM_TCR_TraceBusID_Pos)
+#else
+#define SL_DEBUG_SWO_TRACE_BUS_ID_POS          (16U)
+#endif
+
+#if defined(ITM_TCR_SWOENA_Pos)
+#define SL_DEBUG_SWO_TCR_SWOENA_MASK           (1UL << ITM_TCR_SWOENA_Pos)
+#else
+#define SL_DEBUG_SWO_TCR_SWOENA_MASK           (0UL)
+#endif
+
 sl_status_t sl_debug_swo_init(void)
 {
   sl_status_t status;
   uint32_t freq = 0UL;
   uint16_t cyctap = 0U;
   uint16_t postpreset = 0U;
-
   sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_GPIO);
 
 #if !defined(SL_DEBUG_SWO_ENABLE) || (SL_DEBUG_SWO_ENABLE == 1)
@@ -86,7 +105,6 @@ sl_status_t sl_debug_swo_init(void)
   }
 
   // Enable trace in core debug
-  CoreDebug->DHCSR |= CoreDebug_DHCSR_C_DEBUGEN_Msk;
   CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
   //Tap the cyctap and postpreset based on the selected interval
 #ifdef SL_DEBUG_SWO_SAMPLE_INTERVAL
@@ -109,6 +127,7 @@ sl_status_t sl_debug_swo_init(void)
                | (0xFUL << DWT_CTRL_POSTINIT_Pos)   // Post-tap counter
                | (postpreset << DWT_CTRL_POSTPRESET_Pos) // Post-tap counter reload value
                | (1UL << DWT_CTRL_CYCCNTENA_Pos));  // Enable cycle counter
+
   // Set TPIU prescaler for the current debug clock frequency. ACPR value is div - 1.
   TPIU->ACPR = ((freq + (SL_DEBUG_SWO_FREQ / 2)) / SL_DEBUG_SWO_FREQ) - 1UL;
 
@@ -119,11 +138,10 @@ sl_status_t sl_debug_swo_init(void)
   TPIU->FFCR = TPIU_FFCR_TrigIn_Msk;
 
   // Unlock ITM and output data
-  ITM->LAR = 0xC5ACCE55UL;
-  // CMSIS bitfield naming is inconsistent - 16U maps to
-  // ITM_TCR_TraceBusID_Pos (v7M) or ITM_TCR_TRACEBUSID_Pos (v8M)
-  ITM->TCR = ((1UL << 16U)
+  ITM->LAR = SL_DEBUG_SWO_ITM_LOCK_ACCESS_KEY;
+  ITM->TCR = ((SL_DEBUG_SWO_TRACE_BUS_ID << SL_DEBUG_SWO_TRACE_BUS_ID_POS)
               | (1UL << ITM_TCR_DWTENA_Pos)
+              | SL_DEBUG_SWO_TCR_SWOENA_MASK
               | (1UL << ITM_TCR_ITMENA_Pos));
 
   // Send data on the SWO channel. This avoids corrupting data

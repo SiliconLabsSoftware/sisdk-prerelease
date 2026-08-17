@@ -26,14 +26,12 @@
 
 Provision a Silicon Labs device with data required by Certificate Based
 Authentication and Pairing (CBAP):
-
     - Device EC key pair (NIST P-256)
     - Static authentication data
     - Device X.509 certificate, signed by an issuer Certificate Authority
-    - Issuer (root) certificate stored in device PSA ITS
+    - Certificate chain stored in device PSA ITS
 
 Connection and application loading depend on the target family:
-
     Non-xG22 devices
         Connect over RTT (J-Link), upload the DDP RAM application, and run it.
 
@@ -45,8 +43,8 @@ Prerequisites:
     - Python 3.9 or higher.
     - The Python packages listed in `requirements.txt`. Install them with:
           python -m pip install -r requirements.txt
-    - A valid issuer Certificate Authority. Create one with
-      ``certificate_manager.py`` or use the bundled demo CA for evaluation
+    - A valid Certificate Authority chain. Create one with
+      ``certificate_manager.py`` or use the bundled CA chain for evaluation
       only.
 '''
 # Metadata
@@ -57,6 +55,7 @@ import sys
 import re
 import argparse
 import datetime
+import yaml
 from pathlib import Path
 from typing import Optional
 
@@ -87,8 +86,7 @@ from certificate_manager import (
     DEFAULT_EMAIL_ADDRESS,
 )
 
-DEMO_CA_DIR = (Path(__file__).parent / "script" / "ca_demo").resolve()
-DEMO_CA_LEVEL = 2  # Batch certificate
+CA_DEMO_CONFIG = (Path(__file__).parent / "script" / "ca_configs" / "ca_chain_demo_config.yaml").resolve()
 
 DEFAULT_BAUDRATE = 115200
 
@@ -110,10 +108,10 @@ PSA_ECC_FAMILY_SECP_R1 = 0x12
 
 EPILOG = '''\
 Examples:
-    Try to autodetect device and provisioning app, while using the demo CA:
+    Autodetect device and provisioning app, while using the bundled CA chain:
         python %(prog)s
-    Specify issuer Certificate Authority (recommended):
-        python %(prog)s --ca_dir /path/to/issuers --ca_level 0
+    Specify CA chain configuration (recommended):
+        python %(prog)s --ca_config script/ca_configs/ca_chain_full_config.yaml
     Specify provisioning app binary:
         python %(prog)s --app build/debug/bt_soc_cbap_ddp.bin
     Connect to device with the given J-Link serial:
@@ -149,9 +147,8 @@ auth_data_att = KeyAtt(
 )
 
 
-def main(app: Optional[Path] = None,
-         ca_dir: Path = DEMO_CA_DIR,
-         ca_level: int = DEMO_CA_LEVEL,
+def main(ca_config: Path = CA_DEMO_CONFIG,
+         app: Optional[Path] = None,
          serial: Optional[int] = None,
          ip: Optional[str] = None,
          port: Optional[str] = None,
@@ -173,12 +170,10 @@ def main(app: Optional[Path] = None,
     application, generates keys and a device certificate on the host, and
     injects the certificate data into device PSA ITS.
 
+    :param ca_config: Certificate Authority configuration yaml file.
     :param app: Path to the provisioning application ``.bin`` file. When
         omitted on non-xG22 targets, the binary is searched under this script's
         directory.
-    :param ca_dir: Working directory containing issuer CA sub-directories
-        (see :class:`CertificateAuthority`).
-    :param ca_level: Issuer CA level (0=root, 1=factory, 2=batch).
     :param serial: J-Link serial number for device selection.
     :param ip: Device IP address (Ethernet connection).
     :param port: VCOM serial port (e.g. ``COM13`` or ``/dev/ttyACM0``).
@@ -219,10 +214,8 @@ def main(app: Optional[Path] = None,
             app = Path(app).resolve()
         print(f"\tProvisioning application: {app}")
 
-    print("\tIssuer (CA)")
-    ca_dir = ca_dir.resolve()
-    print(f"\t\tDirectory: {ca_dir}")
-    print(f"\t\tLevel: {ca_level}")
+    ca_config = ca_config.resolve()
+    print(f"\tCertificate Authority chain configuration file: {ca_config}")
 
     if serial:
         print(f"\tDevice serial: {serial}")
@@ -273,12 +266,13 @@ def main(app: Optional[Path] = None,
             "Device key EC curve was changed which is not supported. "
             "Please update the implementation.")
 
-    # Get issuer certificate authority.
-    if ca_dir == DEMO_CA_DIR:
-        print("Default certificate authority is used as the issuer. This is "
-              "only meant to be used for demo purposes. In production, make "
-              "sure to create and provide your own certificate authority!")
-    ca = CertificateAuthority.from_level(ca_level, ca_dir)
+    # Check and parse CA chain configuration.
+    if ca_config == CA_DEMO_CONFIG:
+        print("The bundled CA chain is used. This is only meant to be used "
+              "for testing purposes. In production, make sure to create and "
+              "provide your own certificate authority chain!")
+
+    cas = _parse_and_verify_ca_chain(ca_config)
 
     # Connect to the device.
     if is_xg22_family:
@@ -303,70 +297,76 @@ def main(app: Optional[Path] = None,
                 conn.run_application(ram_addr, file.read())
         conn.start()
 
-        # Generate key pair (raw uncompressed EC point of the public key).
-        print("Generating device key...")
-        status, device_key = psa_key_gen(conn, key_att)
-        if status != 0:
-            raise RuntimeError(
-                f"PSA key generation failure: {status:#06x}")
-        device_key_public = ec.EllipticCurvePublicKey.from_encoded_point(
-            ec.SECP256R1(), device_key)
-        print("Device public key received.\n")
+        for ca in cas:
+            if ca["provision"]:
+                # Inject CA certificate.
+                ca_cert = ca["obj"].get_certificate().public_bytes(
+                    serialization.Encoding.DER)
+                print(f"Injecting {ca['name']} certificate...")
+                status = psa_its_set(conn, ca["psa_key"], ca_cert)
+                if status != 0:
+                    raise RuntimeError(f"Set PSA ITS failure: {status:#06x}")
+                print(f"{ca['name']} was injected with success.\n")
 
-        # Generate and get static authentication data.
-        print("Generating static authentication data...")
-        status, static_auth_data = psa_key_gen(conn, auth_data_att)
-        if status != 0:
-            raise RuntimeError(
-                f"PSA key generation failure: {status:#06x}")
-        print("Static authentication data received.")
-        # static_auth_data is ready for further processing.
+            if ca["issuer"]:
+                # Issue device certificate using this CA.
+                # Generate key pair (raw uncompressed EC point of the public key).
+                print("Generating device key...")
+                status, device_key = psa_key_gen(conn, key_att)
+                if status != 0:
+                    raise RuntimeError(
+                        f"PSA key generation failure: {status:#06x}")
+                device_key_public = ec.EllipticCurvePublicKey.from_encoded_point(
+                    ec.SECP256R1(), device_key)
+                print("Device public key received.\n")
 
-        # Generate and get common name (UUID).
-        print("Generating common name (UUID)...")
-        status, subj_common_name = common_name_gen(conn)
-        if status != 0:
-            raise RuntimeError(
-                f"Common name generation failure: {status:#06x}")
-        subj_common_name = subj_common_name.decode('ascii').rstrip('\x00')
-        print(f"Common name (UUID) received: {subj_common_name}\n")
+                # Generate and get static authentication data.
+                print("Generating static authentication data...")
+                status, static_auth_data = psa_key_gen(conn, auth_data_att)
+                if status != 0:
+                    raise RuntimeError(
+                        f"PSA key generation failure: {status:#06x}")
+                print("Static authentication data received.")
+                # static_auth_data is ready for further processing.
 
-        # Pack certificate subjects.
-        name_oid = x509.oid.NameOID
-        subjects = x509.Name([
-            x509.NameAttribute(name_oid.COMMON_NAME, subj_common_name),
-            x509.NameAttribute(name_oid.COUNTRY_NAME, subj_country),
-            x509.NameAttribute(name_oid.STATE_OR_PROVINCE_NAME, subj_state),
-            x509.NameAttribute(name_oid.LOCALITY_NAME, subj_locality),
-            x509.NameAttribute(name_oid.ORGANIZATION_NAME, subj_organization),
-            x509.NameAttribute(
-                name_oid.ORGANIZATIONAL_UNIT_NAME, subj_organizational_unit),
-            x509.NameAttribute(name_oid.EMAIL_ADDRESS, subj_email_address),
-        ])
-        print("Creating device certificate...")
-        certificate = _create_certificate(
-            ca,
-            device_key_public,
-            subjects,
-            validity,
-            policy_oid)
-        certificate = certificate.public_bytes(serialization.Encoding.DER)
-        print("Device certificate was created with success "
-              f"({len(certificate)}[B]).\n")
+                # Generate and get common name (UUID).
+                print("Generating common name (UUID)...")
+                status, subj_common_name = common_name_gen(conn)
+                if status != 0:
+                    raise RuntimeError(
+                        f"Common name generation failure: {status:#06x}")
+                subj_common_name = subj_common_name.decode('ascii').rstrip('\x00')
+                print(f"Common name (UUID) received: {subj_common_name}\n")
 
-        # Inject device certificate.
-        print("Injecting device certificate...")
-        status = psa_its_set(conn, CBAP_PSA_DEVICE_CERT, certificate)
-        if status != 0:
-            raise RuntimeError(f"Set PSA ITS failure: {status:#06x}")
+                # Pack certificate subjects.
+                name_oid = x509.oid.NameOID
+                subjects = x509.Name([
+                    x509.NameAttribute(name_oid.COMMON_NAME, subj_common_name),
+                    x509.NameAttribute(name_oid.COUNTRY_NAME, subj_country),
+                    x509.NameAttribute(name_oid.STATE_OR_PROVINCE_NAME, subj_state),
+                    x509.NameAttribute(name_oid.LOCALITY_NAME, subj_locality),
+                    x509.NameAttribute(name_oid.ORGANIZATION_NAME, subj_organization),
+                    x509.NameAttribute(
+                        name_oid.ORGANIZATIONAL_UNIT_NAME, subj_organizational_unit),
+                    x509.NameAttribute(name_oid.EMAIL_ADDRESS, subj_email_address),
+                ])
+                print("Creating device certificate...")
+                certificate = _create_certificate(
+                    ca["obj"],
+                    device_key_public,
+                    subjects,
+                    validity,
+                    policy_oid)
+                certificate = certificate.public_bytes(serialization.Encoding.DER)
+                print("Device certificate was created with success "
+                    f"({len(certificate)}[B]).\n")
 
-        # Inject issuer certificate.
-        issuer_cert = ca.get_certificate().public_bytes(
-            serialization.Encoding.DER)
-        print("Injecting root (issuer) certificate...")
-        status = psa_its_set(conn, CBAP_PSA_ROOT_CERT, issuer_cert)
-        if status != 0:
-            raise RuntimeError(f"Set PSA ITS failure: {status:#06x}")
+                # Inject device certificate.
+                print("Injecting device certificate...")
+                status = psa_its_set(conn, CBAP_PSA_DEVICE_CERT, certificate)
+                if status != 0:
+                    raise RuntimeError(f"Set PSA ITS failure: {status:#06x}")
+                print("Device certificate was injected with success.")
 
     finally:
         print("Cleaning up.")
@@ -389,7 +389,7 @@ def _create_certificate(issuer: CertificateAuthority,
     :returns: The signed device certificate.
     :raises Exception: If the issuer is invalid.
     '''
-    if not issuer.is_valid:
+    if not issuer.is_valid():
         raise Exception('Issuer Certificate Authority is invalid.')
 
     # Build certificate.
@@ -463,6 +463,129 @@ def _get_default_provisioning_app(root: Path) -> Path:
     return candidates[0]
 
 
+def _parse_and_verify_ca_chain(ca_config: Path) -> list[dict]:
+    '''Parse and validate the Certificate Authority chain configuration.
+
+    Loads the YAML at ``ca_config``, walks the ``certificate_authorities``
+    list, resolves each authority's file paths (relative paths against the
+    configuration file directory), coerces the ``provision`` flag to
+    ``bool``, and builds a :class:`CertificateAuthority` for every present
+    level. The chain is then verified top-down:
+
+        - root is self-signed and valid,
+        - factory is present only with a valid root and is issued by it,
+        - batch is present only with a valid factory and is issued by it.
+
+    The ``device_certificate`` section is also applied: when
+    ``create_and_provision`` is true, the named ``issuer`` must match one of
+    the present authorities, which then gets ``issuer`` set to ``True``.
+
+    Each returned authority dictionary is the YAML entry enriched with:
+
+        - resolved ``private_key_path``, ``certificate_path``,
+          ``database_path`` (:class:`pathlib.Path`),
+        - ``provision`` (``bool``),
+        - ``issuer`` (``bool``, true only for the device-certificate issuer),
+        - ``psa_key`` (PSA ITS key identifier for the CA certificate),
+        - ``obj`` (:class:`CertificateAuthority` handle).
+
+    Authorities are returned in chain order: root, then factory, then batch
+    (omitting levels that are not listed in the configuration).
+
+    :param ca_config: Path to the CA chain configuration YAML file. Also used
+        as the base directory when resolving relative paths in the YAML.
+    :returns: List of enriched authority dictionaries in chain order.
+    :raises FileNotFoundError: If the configuration file is missing or is
+        not a ``.yaml`` / ``.yml`` file.
+    :raises ValueError: If no authority is provided, or if a present
+        authority fails validation.
+    :raises Exception: If a lower-level authority is present without its
+        required parent, or if the device-certificate issuer cannot be
+        found in the chain.
+    '''
+    if not ca_config.exists():
+        raise FileNotFoundError("CA chain configuration file cannot be "
+                                f"found at: {ca_config}")
+    if ca_config.suffix.lower() != '.yaml' and ca_config.suffix.lower() != '.yml':
+        raise FileNotFoundError("CA chain configuration must be a YAML file.")
+    with open(ca_config, mode="r", encoding="utf8") as stream:
+        ca_config_data = yaml.safe_load(stream)
+
+    root_ca, factory_ca, batch_ca = None, None, None
+
+    for ca in ca_config_data["certificate_authorities"]:
+        # Resolve paths (relative to the CA configuration file)
+        for key in ("private_key_path", "certificate_path", "database_path"):
+            path = Path(ca[key]).expanduser()
+            if not path.is_absolute():
+                path = ca_config.parent / path
+            ca[key] = path.resolve()
+        ca["provision"] = bool(ca["provision"])
+        # Initialize issuer flag.
+        ca["issuer"] = False
+
+        if ca["name"] == "root_ca":
+            root_ca = ca
+            ca["psa_key"] = CBAP_PSA_ROOT_CERT
+        elif ca["name"] == "factory_ca":
+            factory_ca = ca
+            ca["psa_key"] = CBAP_PSA_FACTORY_CERT
+        elif ca["name"] == "batch_ca":
+            batch_ca = ca
+            ca["psa_key"] = CBAP_PSA_BATCH_CERT
+
+    cas = [ca for ca in (root_ca, factory_ca, batch_ca) if ca is not None]
+    if not cas:
+        raise ValueError("No CA chain was provided!")
+
+    # Validate the given CA chain.
+    if root_ca is not None:
+        root_ca["obj"] = CertificateAuthority(root_ca["private_key_path"],
+                                              root_ca["certificate_path"],
+                                              root_ca["database_path"])
+        if not root_ca["obj"].is_valid(root_ca["obj"]):  # Check self issuing
+            raise ValueError("Root CA is invalid!")
+    if factory_ca is not None:
+        if root_ca is None:
+            raise Exception("Root CA is required if factory CA is provided!")
+        factory_ca["obj"] = CertificateAuthority(factory_ca["private_key_path"],
+                                                 factory_ca["certificate_path"],
+                                                 factory_ca["database_path"])
+        if not factory_ca["obj"].is_valid(root_ca["obj"]):
+            raise ValueError("Factory CA is invalid!")
+    if batch_ca is not None:
+        if factory_ca is None:
+            raise Exception("Factory CA is required if batch CA is provided!")
+        batch_ca["obj"] = CertificateAuthority(batch_ca["private_key_path"],
+                                               batch_ca["certificate_path"],
+                                               batch_ca["database_path"])
+        if not batch_ca["obj"].is_valid(factory_ca["obj"]):
+            raise ValueError("Batch CA is invalid!")
+
+    # Check if device certificate shall be created and provisioned and by which CA.
+    device_cert_cfg = ca_config_data["device_certificate"]
+    create_device_cert = bool(device_cert_cfg["create_and_provision"])
+
+    if create_device_cert:
+        issuer_name = device_cert_cfg["issuer"]
+        for ca in cas:
+            if ca["name"] == issuer_name:
+                ca["issuer"] = True
+                break
+        else:
+            raise Exception(
+                f"Device certificate issuer '{issuer_name}' cannot be found "
+                "in the given CA chain!")
+
+    print("Certificate Authority chain was validated with success.")
+    for ca in cas:
+        print(f"\t{ca['name']}: provision={ca['provision']}, "
+              f"issuer={ca['issuer']}")
+    print(f"\tCreate and provision device certificate: {create_device_cert}")
+
+    return cas
+
+
 def load_args():
     '''Parse command line arguments.
 
@@ -473,27 +596,23 @@ def load_args():
         epilog=EPILOG,
         formatter_class=CustomFormatter)
 
+    # CA chain configuration
+    parser.add_argument(
+        '--ca_config',
+        default=CA_DEMO_CONFIG,
+        type=Path,
+        help='CA chain configuration file. It shall contain the location of '
+             'the files for each CA, as well as which ones to provision, and '
+             'which to use to issue the device certificate. You can create '
+             'your own, or use one of the samples under the ca_configs '
+             'directory. The default configuration uses the bundled CA chain. '
+             'It is meant for testing purposes only! (default: %(default)s)')
+
     # Provisioning application
     parser.add_argument(
         '-a', '--app',
         type=Path,
         help='Path to the provisioning application binary, in ".bin" format.')
-
-    # Issuer CA parameters
-    parser.add_argument(
-        '--ca_dir',
-        default=DEMO_CA_DIR,
-        type=Path,
-        help='Directory containing issuer CA sub-directories. See '
-             'certificate_manager.py for CA creation. The bundled demo CA is '
-             'for evaluation only. (default: %(default)s)')
-    parser.add_argument(
-        '--ca_level',
-        default=DEMO_CA_LEVEL,
-        type=int,
-        choices=[level.value for level in CertificateAuthority.Level],
-        help='Issuer CA level under --ca_dir (0=root, 1=factory, 2=batch). '
-             '(default: %(default)s)')
 
     # Connection parameters
     group = parser.add_mutually_exclusive_group(required=False)
@@ -535,9 +654,8 @@ def load_args():
 if __name__ == '__main__':
     args = load_args()
 
-    main(args.app,
-         args.ca_dir,
-         args.ca_level,
+    main(args.ca_config,
+         args.app,
          args.serial,
          args.ip,
          args.port,

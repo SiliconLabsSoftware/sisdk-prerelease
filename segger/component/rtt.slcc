@@ -24,8 +24,8 @@ define:
   value: '0'
 - name: SEGGER_RTT_SECTION
   value: '"SEGGER_RTT"'
-  condition:
-  - toolchain_gcc
+  unless:
+  - toolchain_iar
 template_contribution:
 - name: linker_rtt_section
   value: 1

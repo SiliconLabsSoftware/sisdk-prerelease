@@ -44,6 +44,15 @@
 #ifndef RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
 #define RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT 0 // Set to 1 to enable debug counters in radio.c
 #endif
+
+// <q SL_OPENTHREAD_RADIO_ALT_SHORT_ADDR_ENABLE> Alternate Short Address Hardware Filter
+// <i> Enables RAIL address filter support for an alternate IEEE 802.15.4 short address
+// <i> SL_RAIL_IEEE802154_MAX_ADDRESSES = 3 provides one primary slot (index 0) and one
+// <i> alternate slot (index 1). Therefore this is incompatible with multi-instance builds
+// <i> (OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE), including but not limited to multipan.
+#ifndef SL_OPENTHREAD_RADIO_ALT_SHORT_ADDR_ENABLE
+#define SL_OPENTHREAD_RADIO_ALT_SHORT_ADDR_ENABLE 0
+#endif
 // </h>
 // <<< end of configuration section >>>
 #endif // _SL_OPENTHREAD_RADIO_CONFIG_H

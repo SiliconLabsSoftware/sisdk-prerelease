@@ -565,6 +565,10 @@ void sl_hal_syscfg_ecc_set_config(const sl_hal_syscfg_ecc_config_t *ecc_config)
       sli_hal_syscfg_ecc_disable_bank(&ecc_bank_tbl[cnt]);
     }
   }
+
+  SL_PRINT_STRING_DEBUG("dma0=%d dma1=%d\r\n",
+                        (int)ecc_config->dma_channels[0],
+                        (int)ecc_config->dma_channels[1]);
 }
 #endif /* #if defined(_SYSCFG_DMEM0ECCCTRL_MASK) || defined(_MPAHBRAM_CTRL_MASK) */
 
@@ -593,6 +597,10 @@ void sl_hal_syscfg_set_dmem_port_map(sl_hal_syscfg_dmem_master_t master,
   sl_hal_bus_reg_write_mask(&SYSCFG->DMEM0PORTMAPSEL,
                             bit_field_mask << master,
                             (uint32_t)port << master);
+
+  SL_PRINT_STRING_DEBUG("master=%d port=%d\r\n",
+                        (int)master,
+                        (int)port);
 }
 #endif
 
@@ -619,6 +627,10 @@ void sl_hal_syscfg_set_port_priority(sl_hal_syscfg_port_priority_t port_priority
                             _MPAHBRAM_CTRL_AHBPORTPRIORITY_MASK,
                             (uint32_t)port_priority << _MPAHBRAM_CTRL_AHBPORTPRIORITY_SHIFT);
 #endif
+
+  SL_PRINT_STRING_DEBUG("priority=%d, %d\r\n",
+                        (int)port_priority,
+                        (int)__LINE__);
 }
 
 /***************************************************************************//**

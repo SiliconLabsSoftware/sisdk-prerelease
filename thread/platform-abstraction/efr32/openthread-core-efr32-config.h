@@ -261,6 +261,14 @@
 #endif
 
 /**
+ * Ensure that macros in this file which depend on OPENTHREAD_RADIO (e.g.
+ * OPENTHREAD_CONFIG_MAC_SOFTWARE_RETRANSMIT_ENABLE) can be evaluated properly.
+ */
+#ifndef OPENTHREAD_RADIO
+#define OPENTHREAD_RADIO 0
+#endif
+
+/**
  * @def OPENTHREAD_CONFIG_UPTIME_ENABLE
  *
  * (For FTDs/MTDs only) Define to 1 to enable tracking the uptime of OpenThread instance.

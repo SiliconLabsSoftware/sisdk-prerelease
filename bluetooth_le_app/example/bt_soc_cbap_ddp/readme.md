@@ -2,7 +2,7 @@
 
 This application enables provisioning the device with data, required by the Certificate Based Authentication and Pairing (CBAP) application. This is a RAM application, therefore it leaves the original firmware untouched.
 
-## Prerequisites
+## Create Certificate Authority (CA) chain
 
 1. Install the required python packages:
 
@@ -13,7 +13,7 @@ This application enables provisioning the device with data, required by the Cert
   * This creates a root CA with the default configuration under this directory:
 
         ~/.silabs/certificates/ca0_root
-  * Optionally, you can continue by creating intermediate CAs. To create a factory CA (level 1) and batch CA (level 2):
+  * Continue by creating intermediate CAs. To create a factory CA (level 1) and batch CA (level 2):
 
         python certificate_manager.py --level 1
         python certificate_manager.py --level 2
@@ -24,22 +24,22 @@ This application enables provisioning the device with data, required by the Cert
 
 ![Certificate Authority chain](image/readme_img0.png)
 
-  * This completes the chain. Each CA has signed the next one. The batch CA can be used for signing the device certificate. About the possible configurations please check the help message:
+  * This completes the chain. Each CA has signed the next one. The batch CA can be used for signing the device certificate. About the possible CA configurations please check the help message:
 
         python certificate_manager.py --help
 
-## Usage
+## Provision
 
-1. Build the project. Do not flash. Since this is a special application (RAM), it requires special handling.
+1. Build the project. Only flash for xG22 devices, otherwise it is not needed.
 
 > Note: Make sure there is no other serial/RTT connection opened between your device and your host machine during the provisioning process!
 2. Run the provisioning script:
 
-        python provision.py --ca_dir <path> --ca_level <ca_level>
-  * To use the batch CA we created above:
+        python provision.py --ca_config <path-to-config-yaml>
+  * To use the CA chain we created above:
 
-        python provision.py --ca_dir ~/.silabs/certificates/ --ca_level 2
-  * For testing purposes, you can use the bundled demo CA chain. In this case, just omit these arguments:
+        python provision.py --ca_config script/ca_configs/ca_chain_full_config.yaml
+  * For testing purposes, you can use the bundled demo CA chain. In this case, just omit this argument:
 
         python provision.py
 
@@ -58,7 +58,7 @@ This provisioning script
   - Generate a common name, based on the device's UUID.
   - Build the device certificate and sign it with the issuer.
   - Inject the certificate into the device.
-  - Inject the selected CA into the device as well.
+  - Inject the CA chain certificates into the device as well.
 
 ## Devices with small memory
 

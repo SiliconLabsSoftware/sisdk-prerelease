@@ -150,7 +150,7 @@ extern void sli_set_tx_power_in_rail(int8_t aTxPower);
 // External functions from radio.cpp
 extern bool sl_rail_util_coex_is_enabled(void);
 
-static otRadioCaps sRadioCapabilities =
+static const otRadioCaps sRadioCapabilities =
     (OT_RADIO_CAPS_ACK_TIMEOUT | OT_RADIO_CAPS_CSMA_BACKOFF | OT_RADIO_CAPS_ENERGY_SCAN | OT_RADIO_CAPS_SLEEP_TO_TX
 #if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
      | OT_RADIO_CAPS_TRANSMIT_SEC
@@ -160,6 +160,9 @@ static otRadioCaps sRadioCapabilities =
      // When scheduled rx is required, we support sl_rail_start_scheduled_rx in our
      // implementation of otPlatRadioReceiveAt
      | OT_RADIO_CAPS_RECEIVE_TIMING
+#endif
+#if SL_OPENTHREAD_RADIO_ALT_SHORT_ADDR_ENABLE
+     | OT_RADIO_CAPS_ALT_SHORT_ADDR
 #endif
     );
 
@@ -553,6 +556,40 @@ sl_rail_status_t sli_ot_radio_interface_rail_set_short_address(uint16_t aAddress
 {
     return sl_rail_ieee802154_set_short_address(gRailHandle, aAddress, aPanIndex);
 }
+
+#if SL_OPENTHREAD_RADIO_ALT_SHORT_ADDR_ENABLE
+// Value RAIL requires to release an address filter slot. Per sl_rail_ieee802154.h,
+// both sl_rail_ieee802154_set_pan_id() and sl_rail_ieee802154_set_short_address()
+// document "Set to 0xFFFF to disable for this index".
+static constexpr uint16_t RAIL_ADDR_FILTER_DISABLED = 0xFFFFU;
+
+sl_rail_status_t sli_ot_radio_interface_rail_set_alternate_short_address(uint16_t aAddress,
+                                                                         uint16_t aPanId,
+                                                                         uint8_t  aPanIndex)
+{
+    // Single-instance builds only: slot 0 is primary, slot 1 is alternate.
+    OT_ASSERT(aPanIndex == 0);
+
+    // OpenThread clears the alternate address with OT_RADIO_INVALID_SHORT_ADDR
+    // (0xFFFE), but RAIL only releases a slot when it is programmed with 0xFFFF.
+    // Translate so the filter is actually disabled rather than left matching
+    // 0xFFFE.
+    if (aAddress == OT_RADIO_INVALID_SHORT_ADDR)
+    {
+        aAddress = RAIL_ADDR_FILTER_DISABLED;
+        aPanId   = RAIL_ADDR_FILTER_DISABLED;
+    }
+    else
+    {
+        OT_ASSERT(aAddress != RAIL_ADDR_FILTER_DISABLED);
+    }
+
+    // Both pan_id[1] and short_addr[1] must be set for RAIL's compound filter
+    // to accept and auto-ACK incoming frames on the alternate address.
+    OT_ASSERT(sl_rail_ieee802154_set_pan_id(gRailHandle, aPanId, 1U) == SL_RAIL_STATUS_NO_ERROR);
+    return sl_rail_ieee802154_set_short_address(gRailHandle, aAddress, 1U);
+}
+#endif // SL_OPENTHREAD_RADIO_ALT_SHORT_ADDR_ENABLE
 
 sl_rail_status_t sli_ot_radio_interface_rail_set_promiscuous_mode(bool aEnable)
 {

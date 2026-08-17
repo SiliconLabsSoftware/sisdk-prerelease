@@ -30,6 +30,7 @@
 #define OPENTHREAD_CORE_EFR32_CONFIG_CHECK_H_
 
 #include "board_config.h"
+#include "sl_openthread_radio_config.h"
 #ifndef RADIO_CONFIG_915MHZ_OQPSK_SUPPORT
 #if OPENTHREAD_CONFIG_RADIO_915MHZ_OQPSK_SUPPORT
 #error "Platform not configured to support configuration option: OPENTHREAD_CONFIG_RADIO_915MHZ_OQPSK_SUPPORT"
@@ -50,6 +51,10 @@
 
 #if defined(_SILICON_LABS_32B_SERIES_1)
 #error "EFR32 Series 1 parts are not supported."
+#endif
+
+#if SL_OPENTHREAD_RADIO_ALT_SHORT_ADDR_ENABLE && OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
+#error "SL_OPENTHREAD_RADIO_ALT_SHORT_ADDR_ENABLE is incompatible with multi-instance builds."
 #endif
 
 #endif /* OPENTHREAD_CORE_EFR32_CONFIG_CHECK_H_ */

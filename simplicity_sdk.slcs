@@ -8,13 +8,13 @@ component_path:
 - path: generative_ai/component
 - path: bgapi_protocol/component
 - path: bluetooth_mesh_srtest/component
-- path: bluetooth_le/component
+- path: bluetooth_apploader/component
 - path: bluetooth_le_host/component
+- path: bluetooth_le/component
+- path: bluetooth_le_controller/component
 - path: bluetooth_common/component
 - path: bluetooth_mesh_stack/component
 - path: bluetooth_mesh/component
-- path: bluetooth_le_controller/component
-- path: bluetooth_apploader/component
 - path: bluetooth_le_internal/component
 - path: boards_internal/hardware/kit/component
 - path: boards_internal/hardware/kit/common/component
@@ -26,12 +26,12 @@ component_path:
 - path: boards/hardware/board/config/component
 - path: boards/hardware/board/component
 - path: boards/hardware/driver/component
-- path: bootloader_internal/platform/common/component
-- path: bootloader_internal/platform/bootloader/component
-- path: bootloader_internal/platform/bootloader/series3/component
 - path: bootloader/platform/common/component
 - path: bootloader/platform/bootloader/component
 - path: bootloader/platform/bootloader/series3/component
+- path: bootloader_internal/platform/common/component
+- path: bootloader_internal/platform/bootloader/component
+- path: bootloader_internal/platform/bootloader/series3/component
 - path: cmsis/component
 - path: cmsis_dsp/component
 - path: cmsis_nn/component
@@ -62,20 +62,6 @@ component_path:
 - path: platform_riscv_internal/platform/rvlib/component
 - path: platform_riscv_internal/platform/service/component
 - path: platform_riscv_internal/platform/common/component
-- path: platform_core/app/common/component
-- path: platform_core/util/plugin/component
-- path: platform_core/hardware/driver/component
-- path: platform_core/platform/peripheral/component
-- path: platform_core/platform/common/component
-- path: platform_core/platform/driver/component
-- path: platform_core/platform/emlib/component
-- path: platform_core/util/silicon_labs/silabs_core/component
-- path: platform_core/platform/service/component
-- path: platform_core/platform/emdrv/component
-- path: platform_core/platform/Device/component
-- path: platform_core/hardware/module/config/component
-- path: platform_core/platform/middleware/glib/component
-- path: platform_core/platform/security/component
 - path: platform_core_internal/app/common/component
 - path: platform_core_internal/platform/common/component
 - path: platform_core_internal/platform/service/component
@@ -92,20 +78,34 @@ component_path:
 - path: platform_core_internal/hardware/kit/common/component
 - path: platform_core_internal/hardware/board/component
 - path: platform_core_internal/hardware/board/config/component
+- path: platform_core/app/common/component
+- path: platform_core/util/plugin/component
+- path: platform_core/hardware/driver/component
+- path: platform_core/platform/peripheral/component
+- path: platform_core/platform/common/component
+- path: platform_core/platform/driver/component
+- path: platform_core/platform/emlib/component
+- path: platform_core/util/silicon_labs/silabs_core/component
+- path: platform_core/platform/service/component
+- path: platform_core/platform/emdrv/component
+- path: platform_core/platform/Device/component
+- path: platform_core/hardware/module/config/component
+- path: platform_core/platform/middleware/glib/component
+- path: platform_core/platform/security/component
 - path: printf/component
 - path: proprietary_default_radio_confs/.
 - path: protocol_user_sequencer_internal/component/protocol_user_sequencer_internal
 - path: rail/component
-- path: rail_library_internal/component/rail_library_internal
-- path: rail_library_alpha_chips/component/rail_library_alpha_chips
-- path: rail_library/component/rail_library
 - path: rail_library_chips_internal/component/rail_library_chips_internal
+- path: rail_library_alpha_chips/component/rail_library_alpha_chips
+- path: rail_library_internal/component/rail_library_internal
+- path: rail_library/component/rail_library
 - path: realtime_locationing/component
 - path: rtos_benchmark_internal/component
 - path: rv2_framework_internal/component
-- path: security_sxsymcrypt/component
 - path: security_libcryptosoc/component
 - path: security_tfm/component
+- path: security_sxsymcrypt/component
 - path: segger/component
 - path: silabs_lwip/component
 - path: thread/component
@@ -139,9 +139,9 @@ toolchain_mapping: toolchains.slct
 documentation:
 - docset: machine-learning
   version: 3.1.0
-- docset: amazon_freertos_test_suite_internal
-  version: 1.0.0
 - docset: amazon_expresslink_sdk_internal
+  version: 1.0.0
+- docset: amazon_freertos_test_suite_internal
   version: 1.0.0
 - docset: aws_sdk
   version: 3.1.0
@@ -171,9 +171,9 @@ documentation:
   version: 2.10.0
 - docset: openthread
   version: 3.2.0
-- docset: platform_nwp_siwx91x
-  version: 4.2.0
 - docset: platform_siwx91x
+  version: 4.2.0
+- docset: platform_nwp_siwx91x
   version: 4.2.0
 - docset: rail
   version: 3.2.0
@@ -182,26 +182,26 @@ documentation:
 - docset: rtl-lib
   version: 11.0.0
 - docset: sidewalk
-  version: 2.10.0
+  version: 3.0.0
 - docset: silabs_supplicant
   version: 0.1.0
 - docset: tcose
   version: 1.1.1
 - docset: protocol-usb
   version: 1.8.0
+- docset: wifi
+  version: 4.2.0
 - docset: wifi_sqa_internal
   version: 4.2.0
 - docset: wifi_siwx353
   version: 0.1.0
-- docset: wifi
-  version: 4.2.0
 - docset: wiseconnect_common
   version: 4.2.0
 - docset: zigbee
   version: 9.2.0
 upgrade_manifest:
-- path: bluetooth_le/upgrade.slcu
 - path: bluetooth_le_host/component/upgrade.slcu
+- path: bluetooth_le/upgrade.slcu
 - path: bluetooth_mesh_stack/component/upgrade.slcu
 - path: bluetooth_mesh/upgrade.slcu
 - path: connect_stack/component/upgrade.slcu

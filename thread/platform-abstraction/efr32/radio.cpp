@@ -1403,6 +1403,24 @@ exit:
     return;
 }
 
+#if SL_OPENTHREAD_RADIO_ALT_SHORT_ADDR_ENABLE
+void otPlatRadioSetAlternateShortAddress(otInstance *aInstance, uint16_t aAddress)
+{
+    sl_rail_status_t status;
+    panIndex_t       panIndex = sli_ot_radio_instance_get_pan_index(aInstance);
+    uint16_t         panId    = otLinkGetPanId(aInstance);
+
+    otEXPECT(sl_ot_rtos_task_can_access_pal());
+    otLogInfoPlat("AltShortAddr=%X PanId=%X index=%u", aAddress, panId, panIndex);
+
+    status = sli_ot_radio_interface_rail_set_alternate_short_address(aAddress, panId, panIndex);
+    OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
+
+exit:
+    return;
+}
+#endif // SL_OPENTHREAD_RADIO_ALT_SHORT_ADDR_ENABLE
+
 otError otPlatRadioEnable(otInstance *aInstance)
 {
     otError error = OT_ERROR_NONE;

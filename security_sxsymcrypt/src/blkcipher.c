@@ -144,9 +144,9 @@ static uint32_t sx_blkcipher_key_mask(size_t keysz)
         return 1 << 25;
     case 32:
         return 1 << 26;
+    default:
+        return ~0u;
     }
-
-    return ~0u;
 }
 
 

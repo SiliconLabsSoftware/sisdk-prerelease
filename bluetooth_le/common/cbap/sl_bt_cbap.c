@@ -72,8 +72,8 @@
 // -----------------------------------------------------------------------------
 // Module variables
 
-// Root certificate context
-static mbedtls_x509_crt root_certificate_context;
+// Batch certificate context
+static mbedtls_x509_crt batch_certificate_context;
 
 // Public key ID of the remote device
 static mbedtls_svc_key_id_t remote_pub_key_id = 0;
@@ -86,14 +86,14 @@ static sl_status_t get_certificate(uint8_t *cert,
                                    size_t *cert_len,
                                    psa_storage_uid_t key);
 
-// Converts PSA status code to SL status code.
+// Convert PSA status code to SL status code.
 static sl_status_t psa_status_to_sl_status(psa_status_t sc);
 
 // -----------------------------------------------------------------------------
 // Public function definitions
 
 /******************************************************************************
- * Imports and validates the device with root certificate.
+ * Import and validate the device with batch certificate.
  *
  * @param[out] device_certificate_der device certificate in DER format.
  * @param[out] device_certificate_der_len device certificate length.
@@ -105,8 +105,8 @@ sl_status_t sl_bt_cbap_init(uint8_t *device_certificate_der, uint32_t *device_ce
   sl_status_t sc;
   int mbedtls_ret = 0;
   mbedtls_x509_crt dev_certificate_context;
-  uint8_t root_certificate_der[SL_BT_CBAP_CERTIFICATE_MAX_SIZE] = { 0 };
-  size_t root_certificate_der_len;
+  uint8_t batch_certificate_der[SL_BT_CBAP_CERTIFICATE_MAX_SIZE] = { 0 };
+  size_t batch_certificate_der_len;
   psa_key_attributes_t key_attr;
   uint32_t flags;
 
@@ -149,29 +149,29 @@ sl_status_t sl_bt_cbap_init(uint8_t *device_certificate_der, uint32_t *device_ce
     goto exit;
   }
 
-  // Get root certificate
-  sc = get_certificate(root_certificate_der,
-                       &root_certificate_der_len,
-                       (psa_storage_uid_t)CBAP_PSA_ROOT_CERT);
+  // Get batch certificate
+  sc = get_certificate(batch_certificate_der,
+                       &batch_certificate_der_len,
+                       (psa_storage_uid_t)CBAP_PSA_BATCH_CERT);
   if (sc != SL_STATUS_OK) {
-    LOG_ERROR("Failed to get root certificate: 0x%04lx" LOG_NL, sc);
+    LOG_ERROR("Failed to get batch certificate: 0x%04lx" LOG_NL, sc);
     LOG_ERROR("Please make the device was provisioned with success." LOG_NL);
     goto exit;
   }
 
-  mbedtls_x509_crt_init(&root_certificate_context);
-  mbedtls_ret = mbedtls_x509_crt_parse(&root_certificate_context,
-                                       (const unsigned char *)root_certificate_der,
-                                       root_certificate_der_len);
+  mbedtls_x509_crt_init(&batch_certificate_context);
+  mbedtls_ret = mbedtls_x509_crt_parse(&batch_certificate_context,
+                                       (const unsigned char *)batch_certificate_der,
+                                       batch_certificate_der_len);
   if (mbedtls_ret != 0) {
-    LOG_ERROR("Failed to parse root certificate: %d" LOG_NL, mbedtls_ret);
+    LOG_ERROR("Failed to parse batch certificate: %d" LOG_NL, mbedtls_ret);
     sc = SL_STATUS_FAIL;
     goto exit;
   }
 
-  // Validate device certificate with the root certificate
+  // Validate device certificate with the batch certificate
   mbedtls_ret = mbedtls_x509_crt_verify(&dev_certificate_context,
-                                        &root_certificate_context,
+                                        &batch_certificate_context,
                                         NULL,
                                         NULL,
                                         &flags,
@@ -179,7 +179,7 @@ sl_status_t sl_bt_cbap_init(uint8_t *device_certificate_der, uint32_t *device_ce
                                         NULL);
   (void)flags;
   if (mbedtls_ret != 0) {
-    LOG_ERROR("Failed to verify device certificate against root certificate: %d" LOG_NL, mbedtls_ret);
+    LOG_ERROR("Failed to verify device certificate against batch certificate: %d" LOG_NL, mbedtls_ret);
     sc = SL_STATUS_FAIL;
     goto exit;
   }
@@ -193,13 +193,13 @@ sl_status_t sl_bt_cbap_init(uint8_t *device_certificate_der, uint32_t *device_ce
 
   exit:
   // The device certificate context is only needed for the validation above. The
-  // root certificate context is kept on success, it is needed later on to
+  // batch certificate context is kept on success, it is needed later on to
   // validate the certificate of the remote device. On failure it is released,
   // so that a failed initialization leaves nothing allocated behind and the
   // context stays in the state a repeated initialization expects.
   mbedtls_x509_crt_free(&dev_certificate_context);
   if (sc != SL_STATUS_OK) {
-    mbedtls_x509_crt_free(&root_certificate_context);
+    mbedtls_x509_crt_free(&batch_certificate_context);
   }
   return sc;
 }
@@ -235,9 +235,9 @@ sl_status_t sl_bt_cbap_process_remote_cert(uint8_t *remote_certificate_der, uint
     goto exit;
   }
 
-  // Validate it with the root certificate
+  // Validate it with the batch certificate
   mbedtls_ret = mbedtls_x509_crt_verify(&remote_certificate_context,
-                                        &root_certificate_context,
+                                        &batch_certificate_context,
                                         NULL,
                                         NULL,
                                         &flags,
@@ -245,7 +245,7 @@ sl_status_t sl_bt_cbap_process_remote_cert(uint8_t *remote_certificate_der, uint
                                         NULL);
   (void)flags;
   if (mbedtls_ret != 0) {
-    LOG_ERROR("Failed to verify remote certificate against root certificate: %d" LOG_NL, mbedtls_ret);
+    LOG_ERROR("Failed to verify remote certificate against batch certificate: %d" LOG_NL, mbedtls_ret);
     sc = SL_STATUS_FAIL;
     goto exit;
   }
@@ -270,7 +270,7 @@ sl_status_t sl_bt_cbap_process_remote_cert(uint8_t *remote_certificate_der, uint
 }
 
 /*******************************************************************************
- * Signs and combines OOB data.
+ * Sign and combine OOB data.
  *
  * @param[in] device_random OOB data generated by the bt stack.
  * @param[in] device_confirm OOB data generated by the bt stack.
@@ -317,7 +317,7 @@ sl_status_t sl_bt_cbap_sign_device_oob_data(uint8_t *device_random,
 }
 
 /*******************************************************************************
- * Verifies the remote device OOB data signature.
+ * Verify the remote device OOB data signature.
  *
  * @param[in] remote_random OOB data from remote device.
  * @param[in] remote_confirm OOB data from remote device.
@@ -354,7 +354,7 @@ sl_status_t sl_bt_cbap_verify_remote_oob_data(uint8_t *remote_random,
 }
 
 /*******************************************************************************
- * Destroys the keys which were used during the CBAP process.
+ * Destroy the keys which were used during the CBAP process.
  *
  * @return SL_STATUS_OK if OK, error code otherwise.
  ******************************************************************************/
@@ -394,7 +394,7 @@ static sl_status_t get_certificate(uint8_t *cert,
 }
 
 /*******************************************************************************
- * Converts PSA status code to SL status code.
+ * Convert PSA status code to SL status code.
  *
  * @param[in] sc PSA status code
  * @return SL status code.

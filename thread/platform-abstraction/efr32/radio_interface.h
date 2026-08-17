@@ -43,6 +43,7 @@
 #include <openthread/platform/radio.h>
 
 #include "platform-band.h"
+#include "sl_openthread_radio_config.h"
 #include "sl_rail_types.h"
 
 // PHY layer constants
@@ -273,6 +274,11 @@ sl_rail_status_t sli_ot_radio_interface_rail_write_tx_fifo(const uint8_t *data, 
 sl_rail_status_t sli_ot_radio_interface_rail_set_pan_id(uint16_t panId, uint8_t panIndex);
 sl_rail_status_t sli_ot_radio_interface_rail_set_long_address(const uint8_t *address, uint8_t panIndex);
 sl_rail_status_t sli_ot_radio_interface_rail_set_short_address(uint16_t address, uint8_t panIndex);
+#if SL_OPENTHREAD_RADIO_ALT_SHORT_ADDR_ENABLE
+sl_rail_status_t sli_ot_radio_interface_rail_set_alternate_short_address(uint16_t address,
+                                                                         uint16_t panId,
+                                                                         uint8_t  panIndex);
+#endif
 sl_rail_status_t sli_ot_radio_interface_rail_set_promiscuous_mode(bool enable);
 
 // RAIL packet operations

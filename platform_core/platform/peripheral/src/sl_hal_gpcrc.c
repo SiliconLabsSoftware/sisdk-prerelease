@@ -90,6 +90,10 @@ void sl_hal_gpcrc_init(GPCRC_TypeDef *gpcrc,
 
   // Load the CRC initialization value to GPCRC_INIT.
   gpcrc->INIT = init->init_value;
+
+  SL_PRINT_STRING_DEBUG("poly=0x%lx init=0x%lx\r\n",
+                        (unsigned long)init->crc_poly,
+                        (unsigned long)init->init_value);
 }
 
 #endif // defined(GPCRC_COUNT) && (GPCRC_COUNT > 0)

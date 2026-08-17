@@ -64,6 +64,10 @@ void sl_hal_dcdc_coulomb_counter_init(const sl_hal_dcdc_coulomb_counter_init_t *
   /* interval for the coulomb counter hardware. */
   DCDC->CCTHR = ((uint32_t)(init->counter_threshold_em0) << _DCDC_CCTHR_EM0CNT_SHIFT)
                 | ((uint32_t)(init->counter_threshold_em2) << _DCDC_CCTHR_EM2CNT_SHIFT);
+
+  SL_PRINT_STRING_DEBUG("thr_em0=%lu em2=%lu\r\n",
+                        (unsigned long)init->counter_threshold_em0,
+                        (unsigned long)init->counter_threshold_em2);
 }
 
 /***************************************************************************//**
@@ -84,6 +88,7 @@ void sl_hal_dcdc_coulomb_counter_disable(void)
   /* Disable module. */
   EMU_DCDCSync(_DCDC_SYNCBUSY_MASK);
   DCDC->CCCTRL_CLR = DCDC_CCCTRL_CCEN;
+  SL_PRINT_STRING_INFO("disabled, %d\r\n", (int)__LINE__);
 }
 
 /***************************************************************************//**
@@ -136,6 +141,10 @@ void sl_hal_dcdc_coulomb_counter_cal_init(sl_hal_dcdc_coulomb_counter_calibratio
   sl_hal_dcdc_coulomb_counter_set_cal_load_level(init.cal_emode, init.cal_load_level);
   sl_hal_dcdc_coulomb_counter_enable_cal_load();
 
+  SL_PRINT_STRING_DEBUG("cal_count=%lu ref=%d\r\n",
+                        (unsigned long)init.cal_count,
+                        (int)init.reference_clk);
+
   /* Wait for at least one DC-DC pulse to settle DC-DC. */
   DCDC->IF_CLR = DCDC_IF_REGULATION;
   while ((DCDC->IF & DCDC_IF_REGULATION) == 0U) {
@@ -184,6 +193,10 @@ void sl_hal_dcdc_coulomb_counter_set_cal_load_level(sl_hal_dcdc_coulomb_counter_
   } else {
     DCDC->CCCALCTRL_CLR = DCDC_CCCALCTRL_CCCALEM2;
   }
+
+  SL_PRINT_STRING_DEBUG("emode=%d load=%d\r\n",
+                        (int)emode,
+                        (int)load_level);
 }
 
 /***************************************************************************//**

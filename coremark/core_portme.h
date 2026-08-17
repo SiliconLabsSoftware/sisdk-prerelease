@@ -70,7 +70,7 @@ typedef clock_t CORE_TICKS;
 #ifdef __GNUC__
 #ifdef __clang__
 #define COMPILER_VERSION __VERSION__
-#define COMPILER_FLAGS "-O3 -funroll-loops -finline-functions" /* "Please put compiler flags here (e.g. -o3)" */
+#define COMPILER_FLAGS "-O3 -funroll-loops -finline-functions --config=Omax.cfg" /* "Please put compiler flags here (e.g. -o3)" */
 #else
 #define COMPILER_VERSION "GCC"__VERSION__
 #define COMPILER_FLAGS "-O3 -funroll-loops -funroll-all-loops -finline-functions" /* "Please put compiler flags here (e.g. -o3)" */
