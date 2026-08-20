@@ -199,7 +199,7 @@
     <properties key="solutionReferenceId" value="platform.example.coulomb_dcdc_baremetal.coulomb_dcdc_baremetal.slcp"/>
     <properties key="projectFilePaths" value="example/coulomb_dcdc_baremetal/coulomb_dcdc_baremetal.slcp"/>
     <properties key="readmeFiles" value="example/coulomb_dcdc_baremetal/readme.md"/>
-    <properties key="boardCompatibility" value="brd1021a brd2602a brd2602b brd2715a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4194a brd4356a brd4356z brd4412a brd4413a brd4414a brd4420a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd1021a brd2602a brd2602b brd2715a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4194a brd4356a brd4356z brd4412a brd4413a brd4414a brd4420a brd1021a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm270sc22sna.* .*efr32bg27c140f768im32.* .*efr32bg27c140f768im40.* .*efr32bg27c230f768im32.* .*efr32bg27c230f768im40.* .*efr32bg27c320f768gj39.* .*efr32bg27c320f768ij39.* .*efr32bg29b140f1024im40.* .*efr32bg29b220f1024cj45.* .*efr32bg29b221f1024cj45.* .*efr32bg29b230f1024cm40.* .*efr32mg27c140f768im32.* .*efr32mg27c140f768im40.* .*efr32mg27c230f768im32.* .*efr32mg27c230f768im40.* .*efr32mg29b140f1024im40.* .*efr32mg29b230f1024cm40.* .*mgm270sc22sna.* .*mgm270sc32sna.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar llvm"/>

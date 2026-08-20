@@ -48,7 +48,7 @@
     <property key="core.priority" value="41"/>
     <property key="core.partCompatibility" value=".*efr32zg2[38].* .*zgm230.*"/>
   </contentItemData>
-  <contentItemData name="" label="Z-Wave SDK Release Notes" itemURI="https://docs.silabs.com/z-wave/8.1.1/sisdk-zwave-release-notes/">
+  <contentItemData name="" label="Z-Wave SDK Release Notes" itemURI="https://docs.silabs.com/z-wave/8.1.2/sisdk-zwave-release-notes/">
     <description>Release notes for the Z-Wave SDK, listing new features, changes, and fixes.</description>
     <property key="core.category" value="Release Notes"/>
     <property key="core.priority" value="39"/>

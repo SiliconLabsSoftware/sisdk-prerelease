@@ -132,9 +132,11 @@
   "    -w  Use wired antenna offset\n"                                             \
   "    -o  Object tracking mode, default: 2\n"                                     \
   "        Used only for initiator instances\n"                                    \
-  "        0 : moving object tracking (REAL_TIME_BASIC)\n"                         \
-  "        1 : stationary object tracking (STATIC_HIGH_ACCURACY)\n"                \
-  "        2 : moving object tracking fast (REAL_TIME_FAST)\n"                     \
+  "        0 : Tracking accuracy optimized (suitable for moving targets)\n"        \
+  "            (TRACKING_ACCURACY_OPTIMIZED)\n"                                    \
+  "        1 : Stationary (suitable for stationary targets) (STATIONARY)\n"        \
+  "        2 : Tracking latency optimized (suitable for fast moving targets)\n"    \
+  "            (TRACKING_LATENCY_OPTIMIZED)\n"                                     \
   "    -p  Pre-set parameters for channel map selection, default: 2\n"             \
   "        Used only for initiator instances\n"                                    \
   "        1 : medium (channel spacing: 2, number of channels: 38)\n"              \
@@ -348,9 +350,9 @@ void app_cli_init(int argc, char *argv[])
       {
         int object_tracking_mode = atoi(optarg);
 
-        if (object_tracking_mode != SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC
-            && object_tracking_mode != SL_RTL_CS_ALGO_MODE_STATIC_HIGH_ACCURACY
-            && object_tracking_mode != SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST) {
+        if (object_tracking_mode != SL_RTL_CS_ALGO_MODE_TRACKING_ACCURACY_OPTIMIZED
+            && object_tracking_mode != SL_RTL_CS_ALGO_MODE_STATIONARY
+            && object_tracking_mode != SL_RTL_CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED) {
           app_log_info(APP_PREFIX "Invalid object tracking mode (%d) provided!" APP_LOG_NL, object_tracking_mode);
           exit(EXIT_FAILURE);
         } else {
@@ -538,9 +540,9 @@ void app_cli_init(int argc, char *argv[])
     if (initiator_cs_sync_antenna_req_set && initiator_config.cs_main_mode == sl_bt_cs_mode_pbr) {
       app_log_warning(APP_PREFIX "RTT antenna configuration is omitted in PBR mode!" APP_LOG_NL);
     }
-    if (rtl_config.algo_mode == SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST
+    if (rtl_config.algo_mode == SL_RTL_CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED
         && initiator_config.cs_main_mode == sl_bt_cs_mode_rtt) {
-      app_log_error(APP_PREFIX "Real-time fast mode is not supported with main mode RTT!" APP_LOG_NL);
+      app_log_error(APP_PREFIX "Tracking latency optimized mode is not supported with main mode RTT!" APP_LOG_NL);
       exit(EXIT_FAILURE);
     }
     // Log mode based on max_procedure_count
@@ -971,12 +973,12 @@ static const char *antenna_usage_to_str(const cs_initiator_config_t *config)
 static const char *algo_mode_to_str(uint8_t algo_mode)
 {
   switch (algo_mode) {
-    case SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC:
-      return "real time basic (moving)";
-    case SL_RTL_CS_ALGO_MODE_STATIC_HIGH_ACCURACY:
-      return "stationary object tracking";
-    case SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST:
-      return "real time fast (moving)";
+    case SL_RTL_CS_ALGO_MODE_TRACKING_ACCURACY_OPTIMIZED:
+      return "Tracking accuracy optimized (suitable for moving targets)";
+    case SL_RTL_CS_ALGO_MODE_STATIONARY:
+      return "Stationary (suitable for stationary targets)";
+    case SL_RTL_CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED:
+      return "Tracking latency optimized (suitable for fast moving targets)";
     default:
       return "unknown";
   }
@@ -1542,7 +1544,7 @@ static void cs_on_result(const uint8_t conn_handle,
 
     // --------------------------------
     // Get velocity
-    if (rtl_config.algo_mode == SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST
+    if (rtl_config.algo_mode == SL_RTL_CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED
         && initiator_config.cs_main_mode == sl_bt_cs_mode_pbr
         && (initiator_config.channel_map_preset == CS_CHANNEL_MAP_PRESET_HIGH
             || initiator_config.channel_map_preset == CS_CHANNEL_MAP_PRESET_MEDIUM)) {

@@ -64,7 +64,7 @@
 static bool start = false;
 static uint8_t cs_main_mode = sl_bt_cs_mode_pbr;
 static uint8_t cs_sub_mode = sl_bt_cs_submode_disabled;
-static uint8_t algo_mode = SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC;
+static uint8_t algo_mode = SL_RTL_CS_ALGO_MODE_TRACKING_ACCURACY_OPTIMIZED;
 static uint8_t channel_map_preset = CHANNEL_MAP_PRESET_HIGH;
 static uint8_t antenna_config_idx = ACI_DUAL;
 static uint8_t cs_sync_antenna_usage = CS_SYNC_ANT_SWITCHING;
@@ -200,23 +200,23 @@ void cs_initiator_cli_algo_mode(sl_cli_command_arg_t *arguments)
 {
   uint8_t arg_data;
   arg_data = sl_cli_get_argument_uint8(arguments, 0);
-  if (arg_data == SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC) {
-    cli_print("OK. Initiator object tracking mode set: real time basic "
-              "(moving object tracking).\n");
+  if (arg_data == SL_RTL_CS_ALGO_MODE_TRACKING_ACCURACY_OPTIMIZED) {
+    cli_print("OK. Initiator object tracking mode set: Tracking accuracy optimized "
+              "(suitable for moving targets).\n");
     algo_mode = arg_data;
-  } else if (arg_data == SL_RTL_CS_ALGO_MODE_STATIC_HIGH_ACCURACY) {
-    cli_print("OK. Initiator object tracking mode set: static high accuracy "
-              "(stationary object tracking).\n");
+  } else if (arg_data == SL_RTL_CS_ALGO_MODE_STATIONARY) {
+    cli_print("OK. Initiator object tracking mode set: Stationary "
+              "(suitable for stationary targets).\n");
     algo_mode = arg_data;
-  } else if (arg_data == SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST) {
-    cli_print("OK. Initiator object tracking mode set: real time fast "
-              "(moving object tracking).\n");
+  } else if (arg_data == SL_RTL_CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED) {
+    cli_print("OK. Initiator object tracking mode set: Tracking latency optimized "
+              "(suitable for fast moving targets).\n");
     algo_mode = arg_data;
   } else {
     cli_print("ERROR. Object tracking mode should be %d, %d or %d\n",
-              SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC,
-              SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST,
-              SL_RTL_CS_ALGO_MODE_STATIC_HIGH_ACCURACY);
+              SL_RTL_CS_ALGO_MODE_TRACKING_ACCURACY_OPTIMIZED,
+              SL_RTL_CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED,
+              SL_RTL_CS_ALGO_MODE_STATIONARY);
   }
 }
 
