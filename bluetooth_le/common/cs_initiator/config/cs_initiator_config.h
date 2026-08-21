@@ -167,11 +167,11 @@
 // <h> Distance estimation
 
 // <o CS_INITIATOR_DEFAULT_ALGO_MODE> Object tracking mode
-// <SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC=> Real-time basic
-// <SL_RTL_CS_ALGO_MODE_STATIC_HIGH_ACCURACY=> Static high accuracy
-// <SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST=> Real-time fast
-// <i> Default: SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST
-#define CS_INITIATOR_DEFAULT_ALGO_MODE           SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST
+// <SL_RTL_CS_ALGO_MODE_TRACKING_ACCURACY_OPTIMIZED=> Tracking accuracy optimized (suitable for moving targets)
+// <SL_RTL_CS_ALGO_MODE_STATIONARY=> Stationary (suitable for stationary targets)
+// <SL_RTL_CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED=> Tracking latency optimized (suitable for fast moving targets)
+// <i> Default: SL_RTL_CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED
+#define CS_INITIATOR_DEFAULT_ALGO_MODE           SL_RTL_CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED
 
 // </h>
 

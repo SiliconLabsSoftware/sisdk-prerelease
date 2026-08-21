@@ -54,8 +54,6 @@
  *    peer connection.
  * 3. Configure the instance (must be called in this order):
  *    - sl_rtl_service_set_cs_algo_mode()
- *    - sl_rtl_service_set_cs_mode()
- *    - sl_rtl_service_set_cs_params()
  *    - sl_rtl_service_create_cs_estimator()
  *    - sl_rtl_service_set_cs_estimator_param() (optional, repeatable)
  * 4. sl_rtl_service_process_cs() or sl_rtl_service_process_ras() --
@@ -253,62 +251,22 @@ enum sl_rtl_error_code sl_rtl_service_set_cs_algo_mode(
   sl_rtl_cs_algo_mode mode);
 
 /**************************************************************************//**
- * Set the CS mode (main and sub) for an instance.
- *
- * Thread-safe: acquires the parent context's RTA guard internally.
- *
- * @param[in] inst       RTL service CS instance.
- * @param[in] main_mode  Main CS mode.
- * @param[in] sub_mode   Sub CS mode (SL_RTL_CS_MODE_NONE if unused).
- *
- * @return SL_RTL_ERROR_SUCCESS   Mode set successfully.
- * @return SL_RTL_ERROR_ARGUMENT  @p inst is NULL or not in use.
- * @return SL_RTL_ERROR_INTERNAL  Guard acquisition failed.
- * @return Other values forwarded from the underlying RTL library.
- *
- * @see sl_rtl_service_create_cs_estimator
- *****************************************************************************/
-enum sl_rtl_error_code sl_rtl_service_set_cs_mode(
-  sl_rtl_service_cs_inst_t *inst,
-  sl_rtl_cs_mode main_mode,
-  sl_rtl_cs_mode sub_mode);
-
-/**************************************************************************//**
- * Set the CS parameters for an instance.
+ * Create the estimator for an instance with the given CS parameters.
  *
  * Thread-safe: acquires the parent context's RTA guard internally.
  *
  * @param[in] inst    RTL service CS instance.
  * @param[in] params  CS parameters (e.g. channel map, timing).
  *
- * @return SL_RTL_ERROR_SUCCESS   Parameters set successfully.
+ * @return SL_RTL_ERROR_SUCCESS   Estimator created successfully.
  * @return SL_RTL_ERROR_ARGUMENT  @p inst is NULL or not in use, or
  *                                @p params is NULL.
  * @return SL_RTL_ERROR_INTERNAL  Guard acquisition failed.
  * @return Other values forwarded from the underlying RTL library.
- *
- * @see sl_rtl_service_create_cs_estimator
- *****************************************************************************/
-enum sl_rtl_error_code sl_rtl_service_set_cs_params(
-  sl_rtl_service_cs_inst_t *inst,
-  const sl_rtl_cs_params *params);
-
-/**************************************************************************//**
- * Create the estimator for an instance.
- *
- * Thread-safe: acquires the parent context's RTA guard internally.
- * Must be called after sl_rtl_service_set_cs_algo_mode(),
- * sl_rtl_service_set_cs_mode(), and sl_rtl_service_set_cs_params().
- *
- * @param[in] inst  RTL service CS instance.
- *
- * @return SL_RTL_ERROR_SUCCESS   Estimator created successfully.
- * @return SL_RTL_ERROR_ARGUMENT  @p inst is NULL or not in use.
- * @return SL_RTL_ERROR_INTERNAL  Guard acquisition failed.
- * @return Other values forwarded from the underlying RTL library.
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_service_create_cs_estimator(
-  sl_rtl_service_cs_inst_t *inst);
+  sl_rtl_service_cs_inst_t *inst,
+  const sl_rtl_cs_params *params);
 
 /**************************************************************************//**
  * Set an estimator parameter for an instance.

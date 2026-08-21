@@ -38,26 +38,28 @@
 
 #include SL_OT_MAC_KEY_POLICY_CONFIG_HEADER
 
-void sli_ot_process_transmit_aes_ccm_device(otRadioFrame &aFrame,
-                                            const uint8_t (&aNonce)[ot::Crypto::AesCcm::kNonceSize],
+void sli_ot_process_transmit_aes_ccm_device(otRadioFrame                       &aFrame,
+                                            ot::Crypto::AesCcm::Nonce           aNonce,
                                             const uint8_t                       aTagLength,
-                                            const ot::Mac::Frame::SecurityLevel aSecurityLevel)
+                                            const ot::Mac::Frame::SecurityLevel aSecurityLevel,
+                                            const otMacKeyMaterial             *aRawKey)
 {
-    LpwAesTransmitAesCcm::Process(aFrame, aNonce, aTagLength, aSecurityLevel);
+    LpwAesTransmitAesCcm::Process(aFrame, aNonce, aTagLength, aSecurityLevel, aRawKey);
 }
 
 template void LpwAesTransmitAesCcmT<PlaintextMacKeyStoragePolicy>::Process(
-    otRadioFrame &aFrame,
-    const uint8_t (&aNonce)[ot::Crypto::AesCcm::kNonceSize],
+    otRadioFrame                       &aFrame,
+    ot::Crypto::AesCcm::Nonce           aNonce,
     const uint8_t                       aTagLength,
-    const ot::Mac::Frame::SecurityLevel aSecurityLevel);
+    const ot::Mac::Frame::SecurityLevel aSecurityLevel,
+    const otMacKeyMaterial             *aRawKey);
 
 #if defined(KSU_PRESENT)
-template void LpwAesTransmitAesCcmT<KsuMacKeyStoragePolicy>::Process(
-    otRadioFrame &aFrame,
-    const uint8_t (&aNonce)[ot::Crypto::AesCcm::kNonceSize],
-    const uint8_t                       aTagLength,
-    const ot::Mac::Frame::SecurityLevel aSecurityLevel);
+template void LpwAesTransmitAesCcmT<KsuMacKeyStoragePolicy>::Process(otRadioFrame                       &aFrame,
+                                                                     ot::Crypto::AesCcm::Nonce           aNonce,
+                                                                     const uint8_t                       aTagLength,
+                                                                     const ot::Mac::Frame::SecurityLevel aSecurityLevel,
+                                                                     const otMacKeyMaterial             *aRawKey);
 #endif
 
 #endif // defined(LPWAES_PRESENT)

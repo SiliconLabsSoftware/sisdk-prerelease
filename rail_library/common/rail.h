@@ -7168,8 +7168,9 @@ RAIL_Status_t RAIL_GetThermalProtection(RAIL_Handle_t genericRailHandle,
  *
  * Values that are not populated yet or incorrect are set to 0.
  *
- * If \ref RAIL_SUPPORTS_HFXO_COMPENSATION
- * tempBuffer[3] is the HFXO temperature
+ * If \ref RAIL_SUPPORTS_HFXO_COMPENSATION, tempBuffer[3] is the last HFXO
+ * thermistor compensation temperature. It is updated only after an HFXO
+ * thermistor compensation measurement has completed.
  *
  * @deprecated RAIL 2.x synonym of \ref sl_rail_get_temperature().
  */
@@ -7406,6 +7407,23 @@ RAIL_Status_t RAIL_GetThermistorImpedance(RAIL_Handle_t railHandle,
                                           uint32_t *thermistorImpedance);
 
 /**
+ * Configure a signed adjustment applied to thermistor impedance measurements.
+ *
+ * @param[in] railHandle A radio-generic or real RAIL instance handle.
+ * @param[in] thermistorImpedanceAdjustment Signed adjustment, in Ohms, added
+ *   to the measured thermistor impedance. Defaults to 0.
+ * @return Status code indicating success of the function call.
+ *
+ * @note This API is available if supported by the chip.
+ *
+ * @deprecated RAIL 2.x synonym of
+ *   \ref sl_rail_config_thermistor_impedance_adjustment().
+ */
+RAIL_Status_t RAIL_ConfigThermistorImpedanceAdjustment(
+  RAIL_Handle_t railHandle,
+  int32_t thermistorImpedanceAdjustment);
+
+/**
  * Convert the thermistor impedance into temperature, in Celsius.
  *
  * @param[in] railHandle A radio-generic or real RAIL instance handle.
@@ -7493,6 +7511,11 @@ RAIL_Status_t RAIL_ConfigHFXOThermistor(RAIL_Handle_t railHandle,
  *
  * @note Set deltaNominal and deltaCritical to 0 to perform
  *   compensation after each transmit.
+ * @note Set zoneTemperatureC, deltaNominal, and/or deltaCritical to
+ *   \ref SL_RAIL_HFXO_COMP_ZONE_TEMPERATURE_C_DEFAULT,
+ *   \ref SL_RAIL_HFXO_COMP_DELTA_NOMINAL_C_DEFAULT, and/or
+ *   \ref SL_RAIL_HFXO_COMP_DELTA_CRITICAL_C_DEFAULT to request platform
+ *   defaults where supported.
  *
  * @deprecated RAIL 2.x synonym of \ref sl_rail_config_hfxo_compensation().
  */
@@ -7511,6 +7534,78 @@ RAIL_Status_t RAIL_ConfigHFXOCompensation(RAIL_Handle_t railHandle,
  */
 RAIL_Status_t RAIL_GetHFXOCompensationConfig(RAIL_Handle_t railHandle,
                                              RAIL_HFXOCompensationConfig_t *pHfxoCompensationConfig);
+
+/**
+ * Configure how HFXO compensation temperature thresholds are selected.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] pHfxoCompensationThresholdConfig A non-NULL pointer to the
+ *   threshold selection configuration.
+ * @return Status code indicating the result of the function call.
+ *
+ * In static mode, thresholds are selected from
+ * \ref RAIL_HFXOCompensationConfig_t. In adaptive mode, the platform uses
+ * asymmetric thresholds derived from the effective HFXO compensation curve.
+ *
+ * @note This API is available if supported by the chip.
+ *
+ * @deprecated RAIL 2.x synonym of
+ *   \ref sl_rail_config_hfxo_compensation_thresholds().
+ */
+RAIL_Status_t RAIL_ConfigHFXOCompensationThresholds(
+  RAIL_Handle_t railHandle,
+  const RAIL_HFXOCompensationThresholdConfig_t *pHfxoCompensationThresholdConfig);
+
+/**
+ * Get how HFXO compensation temperature thresholds are selected.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[out] pHfxoCompensationThresholdConfig A non-NULL pointer filled with
+ *   the threshold selection configuration.
+ * @return Status code indicating the result of the function call.
+ *
+ * @note This API is available if supported by the chip.
+ *
+ * @deprecated RAIL 2.x synonym of
+ *   \ref sl_rail_get_hfxo_compensation_thresholds().
+ */
+RAIL_Status_t RAIL_GetHFXOCompensationThresholds(
+  RAIL_Handle_t railHandle,
+  RAIL_HFXOCompensationThresholdConfig_t *pHfxoCompensationThresholdConfig);
+
+/**
+ * Configure HFXO temperature compensation polynomial coefficients.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] pHfxoTempCompensationCoefficients A non-NULL pointer to HFXO
+ *   temperature compensation polynomial coefficients.
+ * @return Status code indicating the result of the function call.
+ *
+ * @note This API is available if supported by the chip.
+ *
+ * @deprecated RAIL 2.x synonym of
+ *   \ref sl_rail_config_hfxo_temp_compensation_coefficients().
+ */
+RAIL_Status_t RAIL_ConfigHFXOTempCompensationCoefficients(
+  RAIL_Handle_t railHandle,
+  const RAIL_HFXOTempCompensationCoefficients_t *pHfxoTempCompensationCoefficients);
+
+/**
+ * Get the effective HFXO temperature compensation polynomial coefficients.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[out] pHfxoTempCompensationCoefficients A non-NULL pointer filled with
+ *   the effective HFXO temperature compensation polynomial coefficients.
+ * @return Status code indicating the result of the function call.
+ *
+ * @note This API is available if supported by the chip.
+ *
+ * @deprecated RAIL 2.x synonym of
+ *   \ref sl_rail_get_hfxo_temp_compensation_coefficients().
+ */
+RAIL_Status_t RAIL_GetHFXOTempCompensationCoefficients(
+  RAIL_Handle_t railHandle,
+  RAIL_HFXOTempCompensationCoefficients_t *pHfxoTempCompensationCoefficients);
 
 /**
  * Compute a frequency offset and compensate HFXO accordingly.

@@ -1476,7 +1476,7 @@ exit:
 }
 
 #if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
-otError otPlatRadioReceiveAt(otInstance *aInstance, uint8_t aChannel, uint32_t aStart, uint32_t aDuration)
+otError otPlatRadioReceiveAt(otInstance *aInstance, uint8_t aChannel, otRadioTime32 aStart, uint32_t aDuration)
 {
     otError error   = OT_ERROR_NONE;
     int8_t  txPower = sl_get_tx_power_for_current_channel(aInstance);
@@ -1564,12 +1564,16 @@ otError otPlatRadioTransmit(otInstance *aInstance, otRadioFrame *aFrame)
 #if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
         sli_ot_radio_csl_set_present(aInstance, aFrame->mInfo.mTxInfo.mCslPresent);
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
-        if (sli_ot_radio_csl_get_period(aInstance) > 0 && sCurrentTxPacket->frame.mInfo.mTxInfo.mTxDelay == 0)
+        if (sli_ot_radio_csl_get_period(aInstance) > 0
+            && (sCurrentTxPacket->frame.mInfo.mTxInfo.mTxDelay == 0 || aFrame->mInfo.mTxInfo.mIsARetx))
         {
             // Only called for CSL children (CSL period > 0)
             // Note: Our SSEDs "schedule" transmissions to their parent in order to know
             // exactly when in the future the data packets go out so they can calculate
             // the accurate CSL phase to send to their parent.
+            //
+            // Recompute the schedule on MAC retries so CSL phase matches the new TX time
+            // (OpenThread PR #13093 clears header/security state and re-encrypts on retry).
             sCurrentTxPacket->frame.mInfo.mTxInfo.mTxDelayBaseTime = sl_rail_get_time(SL_RAIL_EFR32_HANDLE);
             sCurrentTxPacket->frame.mInfo.mTxInfo.mTxDelay =
                 SCHEDULE_TX_DELAY_US; // Chosen after internal certification testing
@@ -1581,14 +1585,24 @@ otError otPlatRadioTransmit(otInstance *aInstance, otRadioFrame *aFrame)
 
         // Note - we need to call this outside of txCurrentPacket as for Series 2,
         // this results in calling the SE interface from a critical section which is not permitted.
-        (void)sli_ot_radio_security_process_transmit(&sCurrentTxPacket->frame, sCurrentTxPacket->instance);
+        if (sli_ot_radio_security_process_transmit(&sCurrentTxPacket->frame, sCurrentTxPacket->instance)
+            != OT_ERROR_NONE)
+        {
+            // A frame that requests security but could not be secured must never go
+            // on air in the clear. Flag the attempt as failed so it is reported to
+            // the stack as OT_ERROR_ABORT and retried, instead of being transmitted.
+            sli_ot_radio_state_set_tx_failed(true);
+        }
 #endif // OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
 
-        CORE_DECLARE_IRQ_STATE;
-        CORE_ENTER_ATOMIC();
-        sli_ot_radio_state_set_tx_data_ongoing(true);
-        tryTxCurrentPacket();
-        CORE_EXIT_ATOMIC();
+        if (!sli_ot_radio_state_has_tx_failed())
+        {
+            CORE_DECLARE_IRQ_STATE;
+            CORE_ENTER_ATOMIC();
+            sli_ot_radio_state_set_tx_data_ongoing(true);
+            tryTxCurrentPacket();
+            CORE_EXIT_ATOMIC();
+        }
 
         if (sli_ot_radio_state_has_tx_failed())
         {
@@ -2750,9 +2764,26 @@ static void processTxComplete(otInstance *aInstance)
             otLogDebgPlat("Transmit failed ErrorCode=%d", txStatus);
         }
 
-        // Clear any internally-set txDelays so future transmits are not affected.
-        sCurrentTxPacket->frame.mInfo.mTxInfo.mTxDelayBaseTime = 0;
-        sCurrentTxPacket->frame.mInfo.mTxInfo.mTxDelay         = 0;
+        // Clear scheduled TX timing when the frame is fully done, or when an SSED must
+        // recompute its PAL-added schedule on the next attempt.
+        //
+        // Preserve mTxDelay/mTxDelayBaseTime on FTD CSL-transmitter failures so SubMac
+        // MAC retries target the same CSL window (values come from the stack, not PAL).
+        bool clearTxDelay = (txStatus == OT_ERROR_NONE);
+
+#if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
+        if (txStatus != OT_ERROR_NONE && sCurrentTxPacket->instance != nullptr
+            && sli_ot_radio_csl_get_period(sCurrentTxPacket->instance) > 0)
+        {
+            clearTxDelay = true;
+        }
+#endif
+
+        if (clearTxDelay)
+        {
+            sCurrentTxPacket->frame.mInfo.mTxInfo.mTxDelayBaseTime = 0;
+            sCurrentTxPacket->frame.mInfo.mTxInfo.mTxDelay         = 0;
+        }
 
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
         CORE_DECLARE_IRQ_STATE;

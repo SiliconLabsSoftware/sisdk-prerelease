@@ -56,21 +56,29 @@ extern "C" {
         EFM_ASSERT((uart_handle) != NULL); \
         EFM_ASSERT((uart_handle)->uart != NULL)
 
-#define SLI_UART_CONFIG_IS_VALID(config) (config.baudrate != 0                       \
-                                          && config.parity <= SL_UART_PARITY_EVEN    \
-                                          && config.stop_bits <= SL_UART_STOP_BITS_2 \
-                                          && config.data_bits <= SL_UART_DATA_BITS_9 \
-                                          && config.flow_control <= SL_UART_FLOW_CONTROL_SOFT)
+#define SLI_UART_OVERSAMPLING_IS_VALID(config, ref_freq) \
+        ({ \
+    uint8_t oversampling_count = sl_uart_oversampling_to_count((config)->oversampling); \
+    oversampling_count = oversampling_count ? oversampling_count : 3; \
+    (config)->baudrate <= (ref_freq / oversampling_count); \
+  })
+
+#define SLI_UART_CONFIG_IS_VALID(config) ((config)->baudrate > 0                       \
+                                          && (config)->baudrate != SL_UART_BAUDRATE_AUTO \
+                                          && (config)->parity <= SL_UART_PARITY_EVEN    \
+                                          && (config)->stop_bits <= SL_UART_STOP_BITS_2 \
+                                          && (config)->data_bits <= SL_UART_DATA_BITS_8 \
+                                          && (config)->oversampling <= SL_UART_OVERSAMPLING_16 \
+                                          && (config)->flow_control <= SL_UART_FLOW_CONTROL_CTS_RTS)
+
 #define SLI_UART_HANDLE_IS_SUSPENDED(uart_handle) \
         ((uart_handle)->state == SL_UART_HANDLE_STATE_SUSPENDED)
 
 #if defined(SL_CATALOG_UART_ASYNC_PRESENT)
 #define SLI_UART_HANDLE_IS_ASYNC(uart_handle) \
-        ((uart_handle)->preinit_config.async_tx_transfer_count != 0 \
-         || (uart_handle)->preinit_config.async_rx_transfer_count != 0)
+        ((uart_handle)->preinit_config.async_en)
 #define SLI_UART_HANDLE_IS_SYNC(uart_handle) \
-        ((uart_handle)->preinit_config.async_tx_transfer_count == 0 \
-         && (uart_handle)->preinit_config.async_rx_transfer_count == 0)
+        (!SLI_UART_HANDLE_IS_ASYNC((uart_handle)))
 #else
 #define SLI_UART_HANDLE_IS_ASYNC(uart_handle) (false)
 #define SLI_UART_HANDLE_IS_SYNC(uart_handle) (true)
@@ -83,11 +91,11 @@ extern "C" {
 ///< UART backend operations selected at init based on peripheral IP type.
 struct sli_uart_ops {
   void (*reset)(sl_peripheral_t uart);
-  sl_status_t (*init)(sl_peripheral_t uart, sl_uart_config_t config);
+  sl_status_t (*init)(sl_peripheral_t uart, const sl_uart_config_t *config);
   void (*deinit)(sl_peripheral_t uart);
-  void (*init_transport_pins)(sl_peripheral_t uart, sl_uart_pin_config_t pin_config);
+  void (*init_transport_pins)(sl_peripheral_t uart, const sl_uart_pin_config_t *pin_config);
   void (*deinit_transport_pins)(sl_peripheral_t uart);
-  void (*init_hwfc_pins)(sl_peripheral_t uart, sl_uart_pin_config_t pin_config);
+  void (*init_hwfc_pins)(sl_peripheral_t uart, const sl_uart_pin_config_t *pin_config);
   void (*deinit_hwfc_pins)(sl_peripheral_t uart);
   sl_status_t (*read_byte)(sl_peripheral_t uart, uint8_t *byte);
   sl_status_t (*read_buffer)(sl_peripheral_t uart, uint8_t *data, size_t size, size_t *bytes_read);
@@ -100,7 +108,7 @@ struct sli_uart_ops {
   sl_uart_rx_err_t (*rx_err_from_irq_status)(uint32_t irq_status);
   bool (*is_idle)(sl_peripheral_t uart);
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
-  sl_power_manager_em_t (*get_em_requirement)(sl_peripheral_t uart);
+  sl_power_manager_em_t (*get_em_requirement)(sl_peripheral_t uart, const sl_uart_config_t *config);
 #endif
 #if defined(SL_CATALOG_UART_ASYNC_PRESENT)
   void *(*get_tx_register)(sl_peripheral_t uart);
@@ -135,9 +143,9 @@ void sli_uart_reset(sl_uart_handle_t *uart_handle);
  *
  * @param[in]  uart_handle Handle to UART.
  * @param[in]  uart UART peripheral to use with this handle.
- * @param[in]  pin_config Pin assignment for the specified UART.
+ * @param[in]  pin_config Pointer to the pin assignment for the specified UART.
  ******************************************************************************/
-void sli_uart_init_core(sl_uart_handle_t *uart_handle, sl_peripheral_t uart, sl_uart_pin_config_t pin_config);
+void sli_uart_init_core(sl_uart_handle_t *uart_handle, sl_peripheral_t uart, const sl_uart_pin_config_t *pin_config);
 
 /***************************************************************************//**
  * De-initializes the core of the driver for the given UART instance.
@@ -156,9 +164,9 @@ void sli_uart_deinit_peripheral(sl_uart_handle_t *uart_handle);
 /***************************************************************************//**
  * Initializes the pins for the given UART instance.
  *
- * @param[in]  pin_config Pin assignment for the specified UART.
+ * @param[in]  pin_config Pointer to the pin assignment for the specified UART.
  ******************************************************************************/
-void sli_uart_init_transport_pins(sl_uart_handle_t *uart_handle, sl_uart_pin_config_t pin_config);
+void sli_uart_init_transport_pins(sl_uart_handle_t *uart_handle, const sl_uart_pin_config_t *pin_config);
 
 /***************************************************************************//**
  * De-initializes the transport pins for the given UART instance.
@@ -170,9 +178,9 @@ void sli_uart_deinit_transport_pins(sl_uart_handle_t *uart_handle);
 /***************************************************************************//**
  * Initializes the pins for the given UART instance.
  *
- * @param[in]  pin_config Pin assignment for the specified UART.
+ * @param[in]  pin_config Pointer to the pin assignment for the specified UART.
  ******************************************************************************/
-void sli_uart_init_hwfc_pins(sl_uart_handle_t *uart_handle, sl_uart_pin_config_t pin_config);
+void sli_uart_init_hwfc_pins(sl_uart_handle_t *uart_handle, const sl_uart_pin_config_t *pin_config);
 
 /***************************************************************************//**
  * De-initializes the hardware flow control pins for the given UART instance.

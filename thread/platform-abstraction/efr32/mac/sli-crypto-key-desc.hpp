@@ -38,7 +38,7 @@
 
 #include "sli_crypto.h"
 
-sli_crypto_descriptor_t LpwAesKeyDescFromPlaintext(const otMacKeyMaterial &aKey);
+sli_crypto_descriptor_t LpwAesKeyDescFromPlaintext(const otMacKeyMaterial &aRawKey);
 
 #if defined(KSU_PRESENT)
 sli_crypto_descriptor_t LpwAesKeyDescFromKsuSlot(const otMacKeyMaterial &aKey);

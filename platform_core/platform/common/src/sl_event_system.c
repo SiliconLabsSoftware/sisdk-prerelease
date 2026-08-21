@@ -34,6 +34,7 @@
 #include "sl_assert.h"
 #include "sl_core.h"
 #include "sl_memory_manager.h"
+#include "sli_event_system_log.h"
 #include <stdbool.h>
 
 #ifdef __cplusplus
@@ -45,6 +46,11 @@ extern "C" {
 
 static bool is_event_system_initialized = false;
 static sl_slist_node_t *publishers;
+
+#if (SL_EVENT_SYSTEM_LOG_LEVEL_COMPILE_TIME != SL_LOG_CONFIG_LEVEL_NONE)
+volatile sl_log_level_t sl_event_system_log_level
+  = (sl_log_level_t)SL_EVENT_SYSTEM_LOG_LEVEL_COMPILE_TIME;
+#endif
 
 #if defined(SL_CATALOG_EVENT_SYSTEM_SUPERVISOR_MODE_PRESENT)
 // Publisher for IRQ events.
@@ -67,8 +73,13 @@ void sl_event_system_init(void)
   is_event_system_initialized = true;
 #if defined(SL_CATALOG_EVENT_SYSTEM_SUPERVISOR_MODE_PRESENT)
   // Create supervisor queue.
-  sl_event_queue_create(SL_EVENT_SUPERVISOR_QUEUE_COUNT, &supervisor_queue);
+  if (sl_event_queue_create(SL_EVENT_SUPERVISOR_QUEUE_COUNT,
+                            &supervisor_queue) != SL_STATUS_OK) {
+    SLI_EVENT_SYSTEM_LOG_WARN("Supervisor queue initialization failed");
+    return;
+  }
 #endif
+  SLI_EVENT_SYSTEM_LOG_INFO("Event system initialized");
 }
 
 /*******************************************************************************
@@ -322,6 +333,8 @@ sl_status_t sl_event_queue_create(uint32_t event_count,
 {
   *event_queue = osMessageQueueNew(event_count, sizeof(sl_event_t *), NULL);
   if (*event_queue == NULL) {
+    SLI_EVENT_SYSTEM_LOG_WARN("Queue creation failed (capacity %lu)",
+                              (unsigned long)event_count);
     return SL_STATUS_FAIL;
   }
 
@@ -335,6 +348,7 @@ sl_status_t sl_event_queue_create(uint32_t event_count,
 sl_status_t sl_event_queue_delete(sl_event_queue_t event_queue)
 {
   if (event_queue == NULL) {
+    SLI_EVENT_SYSTEM_LOG_WARN("Queue deletion rejected");
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -365,8 +379,11 @@ sl_status_t sl_event_queue_delete(sl_event_queue_t event_queue)
     if (os_status == osOK) {
       sl_event_process(&event);
     } else if (os_status == osErrorParameter) {
+      SLI_EVENT_SYSTEM_LOG_WARN("Queue drain failed (invalid parameter)");
       return SL_STATUS_INVALID_PARAMETER;
     } else {
+      SLI_EVENT_SYSTEM_LOG_WARN("Queue drain failed (CMSIS-RTOS2 status %ld)",
+                                (long)os_status);
       return SL_STATUS_FAIL;
     }
     // Read next event from the queue.
@@ -378,10 +395,14 @@ sl_status_t sl_event_queue_delete(sl_event_queue_t event_queue)
   if (os_status == osOK) {
     return SL_STATUS_OK;
   } else if (os_status == osErrorParameter) {
+    SLI_EVENT_SYSTEM_LOG_WARN("Queue deletion failed (invalid parameter)");
     return SL_STATUS_INVALID_PARAMETER;
   } else if (os_status == osErrorResource) {
+    SLI_EVENT_SYSTEM_LOG_WARN("Queue deletion failed (resource state)");
     return SL_STATUS_EMPTY;
   } else {
+    SLI_EVENT_SYSTEM_LOG_WARN("Queue deletion failed (CMSIS-RTOS2 status %ld)",
+                              (long)os_status);
     return SL_STATUS_FAIL;
   }
 }

@@ -124,16 +124,23 @@ otError DecodeDnssdHost(Decoder              &aDecoder,
 
     SuccessOrExit(error = aDecoder.ReadUtf8(aHost.mHostName));
     SuccessOrExit(error = aDecoder.ReadUint16(aHost.mAddressesLength));
-    aHost.mAddresses = nullptr;
-    for (uint16_t i = 0; i < aHost.mAddressesLength; i++)
+
+    if (aHost.mAddressesLength == 0)
     {
-        const otIp6Address *addrPtr;
-        SuccessOrExit(error = aDecoder.ReadIp6Address(addrPtr));
-        if (i == 0)
+        aHost.mAddresses = nullptr;
+    }
+    else
+    {
+        SuccessOrExit(error = aDecoder.ReadIp6Address(aHost.mAddresses));
+
+        for (uint16_t i = 1; i < aHost.mAddressesLength; i++)
         {
-            aHost.mAddresses = addrPtr;
+            const otIp6Address *address;
+
+            SuccessOrExit(error = aDecoder.ReadIp6Address(address));
         }
     }
+
     SuccessOrExit(error = aDecoder.ReadUint32(aRequestId));
     SuccessOrExit(error = aDecoder.ReadData(aCallbackData, aCallbackDataLen));
 

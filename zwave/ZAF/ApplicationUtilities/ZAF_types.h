@@ -369,7 +369,7 @@ extern const CC_handler_map_latest_t __stop_zw_cc_handlers_v5[];
  *                                    command pairs for the Association Group Command List Report.
  *                                    The list of mandatory command class / command pairs can be found
  *                                    under "Lifeline Reports" in
- *                                    https://sdomembers.z-wavealliance.org/wg/AWG/document/120.
+ *                                    https://github.com/Z-Wave-Alliance/AWG/blob/main/source/xml_registries/zwa_association_command_class_list_of_mandatory_lifeline_commands.xml.
  * @param[in] flags                   Reserved for future use.
  * @param[in] init_cb                 The CC init function to be invoked by ZAF_Init().
  * @param[in] reset_cb                The CC reset function to be invoked on factory reset.
@@ -406,7 +406,7 @@ extern const CC_handler_map_latest_t __stop_zw_cc_handlers_v5[];
  *                                command pairs for the Association Group Command List Report.
  *                                The list of mandatory command class / command pairs can be found
  *                                under "Lifeline Reports" in
- *                                https://sdomembers.z-wavealliance.org/wg/AWG/document/120.
+ *                                https://github.com/Z-Wave-Alliance/AWG/blob/main/source/xml_registries/zwa_association_command_class_list_of_mandatory_lifeline_commands.xml.
  * @param[in] flags               Reserved for future use.
  * @param[in] init_cb             The CC init function to be invoked by ZAF_Init().
  * @param[in] reset_cb            The CC reset function to be invoked on factory reset.
@@ -442,7 +442,7 @@ extern const CC_handler_map_latest_t __stop_zw_cc_handlers_v5[];
  *                                command pairs for the Association Group Command List Report.
  *                                The list of mandatory command class / command pairs can be found
  *                                under "Lifeline Reports" in
- *                                https://sdomembers.z-wavealliance.org/wg/AWG/document/120.
+ *                                https://github.com/Z-Wave-Alliance/AWG/blob/main/source/xml_registries/zwa_association_command_class_list_of_mandatory_lifeline_commands.xml.
  * @param[in] flags               Reserved for future use.
  * @param[in] init_cb             The CC init function to be invoked by ZAF_Init().
  * @param[in] reset_cb            The CC reset function to be invoked on factory reset.
@@ -478,7 +478,7 @@ extern const CC_handler_map_latest_t __stop_zw_cc_handlers_v5[];
  *                                command pairs for the Association Group Command List Report.
  *                                The list of mandatory command class / command pairs can be found
  *                                under "Lifeline Reports" in
- *                                https://sdomembers.z-wavealliance.org/wg/AWG/document/120.
+ *                                https://github.com/Z-Wave-Alliance/AWG/blob/main/source/xml_registries/zwa_association_command_class_list_of_mandatory_lifeline_commands.xml.
  * @param[in] flags               Reserved for future use.
  */
 #define REGISTER_CC_V3(cc, version, handler, basic_set_mapper, basic_get_mapper, lifeline_report_cb, flags)                                                                                                                                                              \

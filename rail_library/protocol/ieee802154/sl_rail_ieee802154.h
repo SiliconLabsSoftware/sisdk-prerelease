@@ -2092,35 +2092,35 @@ sl_rail_status_t sl_rail_ieee802154_calibrate_ir_2p4_ghz(sl_rail_handle_t rail_h
 
 #include "rail_ieee802154.h"
 #define sl_rail_ieee802154_phy_2p4_ghz \
-  ((const RAIL_ChannelConfig_t *const)RAIL_IEEE802154_Phy2p4GHz)
+  ((const RAIL_ChannelConfig_t *)RAIL_IEEE802154_Phy2p4GHz)
 #define sl_rail_ieee802154_phy_2p4_ghz_1_mbps_fec \
-  ((const RAIL_ChannelConfig_t *const)RAIL_IEEE802154_Phy2p4GHz1MbpsFec)
+  ((const RAIL_ChannelConfig_t *)RAIL_IEEE802154_Phy2p4GHz1MbpsFec)
 #define  sl_rail_ieee802154_phy_2p4_ghz_2_mbps \
-  ((const RAIL_ChannelConfig_t *const)RAIL_IEEE802154_Phy2p4GHz2Mbps)
+  ((const RAIL_ChannelConfig_t *)RAIL_IEEE802154_Phy2p4GHz2Mbps)
 #define sl_rail_ieee802154_phy_2p4_ghz_fcs_1_mbps_fec \
-  ((const RAIL_ChannelConfig_t *const)RAIL_IEEE802154_Phy2p4GHzFcs1MbpsFec)
+  ((const RAIL_ChannelConfig_t *)RAIL_IEEE802154_Phy2p4GHzFcs1MbpsFec)
 #define  sl_rail_ieee802154_phy_2p4_ghz_fcs_2_mbps \
-  ((const RAIL_ChannelConfig_t *const)RAIL_IEEE802154_Phy2p4GHzFcs2Mbps)
+  ((const RAIL_ChannelConfig_t *)RAIL_IEEE802154_Phy2p4GHzFcs2Mbps)
 #define sl_rail_ieee802154_phy_2p4_ghz_ant_div \
-  ((const RAIL_ChannelConfig_t *const)RAIL_IEEE802154_Phy2p4GHzAntDiv)
+  ((const RAIL_ChannelConfig_t *)RAIL_IEEE802154_Phy2p4GHzAntDiv)
 #define  sl_rail_ieee802154_phy_2p4_ghz_coex \
-  ((const RAIL_ChannelConfig_t *const)RAIL_IEEE802154_Phy2p4GHzCoex)
+  ((const RAIL_ChannelConfig_t *)RAIL_IEEE802154_Phy2p4GHzCoex)
 #define  sl_rail_ieee802154_phy_2p4_ghz_ant_div_coex \
-  ((const RAIL_ChannelConfig_t *const)RAIL_IEEE802154_Phy2p4GHzAntDivCoex)
+  ((const RAIL_ChannelConfig_t *)RAIL_IEEE802154_Phy2p4GHzAntDivCoex)
 #define  sl_rail_ieee802154_phy_2p4_ghz_fem \
-  ((const RAIL_ChannelConfig_t *const)RAIL_IEEE802154_Phy2p4GHzFem)
+  ((const RAIL_ChannelConfig_t *)RAIL_IEEE802154_Phy2p4GHzFem)
 #define  sl_rail_ieee802154_phy_2p4_ghz_ant_div_fem \
-  ((const RAIL_ChannelConfig_t *const)RAIL_IEEE802154_Phy2p4GHzAntDivFem)
+  ((const RAIL_ChannelConfig_t *)RAIL_IEEE802154_Phy2p4GHzAntDivFem)
 #define  sl_rail_ieee802154_phy_2p4_ghz_coex_fem \
-  ((const RAIL_ChannelConfig_t *const)RAIL_IEEE802154_Phy2p4GHzCoexFem)
+  ((const RAIL_ChannelConfig_t *)RAIL_IEEE802154_Phy2p4GHzCoexFem)
 #define  sl_rail_ieee802154_phy_2p4_ghz_ant_div_coex_fem \
-  ((const RAIL_ChannelConfig_t *const)RAIL_IEEE802154_Phy2p4GHzAntDivCoexFem)
+  ((const RAIL_ChannelConfig_t *)RAIL_IEEE802154_Phy2p4GHzAntDivCoexFem)
 #define  sl_rail_ieee802154_phy_gb863_mhz \
-  ((const RAIL_ChannelConfig_t *const)RAIL_IEEE802154_PhyGB863MHz)
+  ((const RAIL_ChannelConfig_t *)RAIL_IEEE802154_PhyGB863MHz)
 #define  sl_rail_ieee802154_phy_gb915_mhz \
-  ((const RAIL_ChannelConfig_t *const)RAIL_IEEE802154_PhyGB915MHz)
+  ((const RAIL_ChannelConfig_t *)RAIL_IEEE802154_PhyGB915MHz)
 #define  sl_rail_ieee802154_phy_2p4_ghz_rx_ch_switching \
-  ((const RAIL_ChannelConfig_t *const)RAIL_IEEE802154_Phy2p4GHzRxChSwitching)
+  ((const RAIL_ChannelConfig_t *)RAIL_IEEE802154_Phy2p4GHzRxChSwitching)
 
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 

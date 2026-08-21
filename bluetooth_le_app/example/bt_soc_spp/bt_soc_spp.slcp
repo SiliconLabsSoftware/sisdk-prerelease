@@ -102,12 +102,6 @@ configuration:
   - name: SL_BOARD_ENABLE_DISPLAY
     value: "1"
 
-post_build:
-  - path: ../../postbuild_profile/bt_common_s2.slpb
-    condition:
-      - device_series_2
-      - bootloader_app_properties
-
 tag:
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_series_2

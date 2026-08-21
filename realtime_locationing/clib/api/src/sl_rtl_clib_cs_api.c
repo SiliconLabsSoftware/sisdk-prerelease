@@ -60,40 +60,26 @@ enum sl_rtl_error_code sl_rtl_cs_set_algo_mode(sl_rtl_cs_libitem *item,
 #endif
 }
 
-enum sl_rtl_error_code sl_rtl_cs_set_cs_mode(sl_rtl_cs_libitem *item,
-                                             const sl_rtl_cs_mode main_mode,
-                                             const sl_rtl_cs_mode sub_mode)
+enum sl_rtl_error_code sl_rtl_cs_init_cs_params(sl_rtl_cs_params *cs_params)
 {
 #ifdef SLI_RTL_CS_API_DISABLED
-  (void)item;
-  (void)main_mode;
-  (void)sub_mode;
+  (void)cs_params;
   return SL_RTL_ERROR_FEATURE_NOT_SUPPORTED;
 #else
-  return sli_rtl_cs_set_cs_mode(item, main_mode, sub_mode);
+  return sli_rtl_cs_init_cs_params(cs_params);
 #endif
 }
 
 enum sl_rtl_error_code
-sl_rtl_cs_set_cs_params(sl_rtl_cs_libitem *item,
-                        const sl_rtl_cs_params *parameters)
+sl_rtl_cs_create_estimator(sl_rtl_cs_libitem *item,
+                           const sl_rtl_cs_params *parameters)
 {
 #ifdef SLI_RTL_CS_API_DISABLED
   (void)item;
   (void)parameters;
   return SL_RTL_ERROR_FEATURE_NOT_SUPPORTED;
 #else
-  return sli_rtl_cs_set_cs_params(item, parameters);
-#endif
-}
-
-enum sl_rtl_error_code sl_rtl_cs_create_estimator(sl_rtl_cs_libitem *item)
-{
-#ifdef SLI_RTL_CS_API_DISABLED
-  (void)item;
-  return SL_RTL_ERROR_FEATURE_NOT_SUPPORTED;
-#else
-  return sli_rtl_cs_create_estimator(item);
+  return sli_rtl_cs_create_estimator(item, parameters);
 #endif
 }
 

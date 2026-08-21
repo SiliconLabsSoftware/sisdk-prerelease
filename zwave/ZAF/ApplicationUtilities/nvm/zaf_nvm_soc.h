@@ -39,8 +39,9 @@ void zaf_nvm_app_load_configuration(void);
  * @brief Used by the application to execute actions when the current version
  * differs from the saved version
  *
- * @param current_version Version returned by zpal_get_app_version
- * @param saved_version Version stored in ZAF_FILE_ID_APP_VERSION
+ * @param current_version Packed application version from APP_VERSION, APP_REVISION, and APP_PATCH
+ *                          (same encoding as written for the application version NVM file).
+ * @param saved_version     Version word previously read from NVM for that file.
  */
 void zaf_nvm_app_load_configuration_migration(uint32_t current_version, uint32_t saved_version);
 

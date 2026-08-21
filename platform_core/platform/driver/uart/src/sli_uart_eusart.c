@@ -38,6 +38,12 @@
  *******************************   DEFINES   ***********************************
  ******************************************************************************/
 
+#define EUSART_CONFIG_IS_VALID(config) \
+        ((config)->data_bits >= SL_UART_DATA_BITS_7 \
+         && (config)->data_bits <= SL_UART_DATA_BITS_9)
+
+#define EUSART_LF_MAX_BAUDRATE 9600
+
 /*******************************************************************************
  ***************************   LOCAL FUNCTIONS   *******************************
  ******************************************************************************/
@@ -54,7 +60,7 @@ static inline sl_hal_eusart_hw_flow_control_t uart_hwfc_to_eusart_hal_hwfc(sl_ua
     case SL_UART_FLOW_CONTROL_SOFT:
       return SL_HAL_EUSART_HW_FLOW_CONTROL_NONE;
     default:
-      SL_LOG_DEBUG_ASSERT(false);
+      EFM_ASSERT(false);
       return SL_HAL_EUSART_HW_FLOW_CONTROL_NONE;
   }
 }
@@ -72,7 +78,7 @@ static inline sl_hal_eusart_parity_t uart_parity_to_eusart_hal_parity(sl_uart_pa
     case SL_UART_PARITY_EVEN:
       return SL_HAL_EUSART_EVEN_PARITY;
     default:
-      SL_LOG_DEBUG_ASSERT(false);
+      EFM_ASSERT(false);
       return SL_HAL_EUSART_NO_PARITY;
   }
 }
@@ -92,8 +98,27 @@ static inline sl_hal_eusart_stop_bits_t uart_stop_bits_to_eusart_hal_stop_bits(s
     case SL_UART_STOP_BITS_2:
       return SL_HAL_EUSART_STOP_BITS_2;
     default:
-      SL_LOG_DEBUG_ASSERT(false);
+      EFM_ASSERT(false);
       return SL_HAL_EUSART_STOP_BITS_1;
+  }
+}
+
+static inline sl_hal_eusart_ovs_t uart_oversampling_to_eusart_hal_oversampling(sl_uart_oversampling_t oversampling)
+{
+  switch (oversampling) {
+    case SL_UART_OVERSAMPLING_0:
+      return SL_HAL_EUSART_OVS_0;
+    case SL_UART_OVERSAMPLING_4:
+      return SL_HAL_EUSART_OVS_4;
+    case SL_UART_OVERSAMPLING_6:
+      return SL_HAL_EUSART_OVS_6;
+    case SL_UART_OVERSAMPLING_8:
+      return SL_HAL_EUSART_OVS_8;
+    case SL_UART_OVERSAMPLING_16:
+      return SL_HAL_EUSART_OVS_16;
+    default:
+      EFM_ASSERT(false);
+      return SL_HAL_EUSART_OVS_16;
   }
 }
 
@@ -134,9 +159,38 @@ static inline sl_hal_eusart_data_bits_t uart_data_bits_to_eusart_hal_data_bits(s
     case SL_UART_DATA_BITS_16:
     #endif
     default:
-      SL_LOG_DEBUG_ASSERT(false);
+      EFM_ASSERT(false);
       return SL_HAL_EUSART_DATA_BITS_8;
   }
+}
+
+/***************************************************************************//**
+ * Returns if the EU(S)ART peripheral is in low frequency mode.
+ ******************************************************************************/
+static inline bool eusart_uart_is_lf_mode(EUSART_TypeDef *eusart,
+                                          const sl_uart_config_t *config,
+                                          uint32_t freq)
+{
+  (void) eusart;
+  bool lf_periph = true;
+  uint32_t lf_freq;
+
+  if (config->oversampling != SL_UART_OVERSAMPLING_0) {
+    return false;
+  }
+
+  if (config->baudrate > EUSART_LF_MAX_BAUDRATE) {
+    return false;
+  }
+
+  sl_status_t status = sl_clock_manager_get_oscillator_frequency(SL_OSCILLATOR_LFRCO, &lf_freq);
+  EFM_ASSERT(status == SL_STATUS_OK);
+
+#if defined(EUSART_PRESENT)
+  lf_periph = (eusart == EUSART0);
+#endif
+
+  return ((freq <= lf_freq) && lf_periph);
 }
 
 #if defined(EUSART_PRESENT)
@@ -144,14 +198,14 @@ static inline sl_hal_eusart_data_bits_t uart_data_bits_to_eusart_hal_data_bits(s
 /***************************************************************************//**
  * Initializes the EUSART pins.
  ******************************************************************************/
-static void eusart_uart_init_transport_pins(sl_peripheral_t uart, sl_uart_pin_config_t pin_config)
+static void eusart_uart_init_transport_pins(sl_peripheral_t uart, const sl_uart_pin_config_t *pin_config)
 {
   EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
 
-  GPIO->EUSARTROUTE[EUSART_NUM(eusart)].TXROUTE = (pin_config.tx.port << _GPIO_EUSART_TXROUTE_PORT_SHIFT)
-                                                  | (pin_config.tx.pin << _GPIO_EUSART_TXROUTE_PIN_SHIFT);
-  GPIO->EUSARTROUTE[EUSART_NUM(eusart)].RXROUTE = (pin_config.rx.port << _GPIO_EUSART_RXROUTE_PORT_SHIFT)
-                                                  | (pin_config.rx.pin << _GPIO_EUSART_RXROUTE_PIN_SHIFT);
+  GPIO->EUSARTROUTE[EUSART_NUM(eusart)].TXROUTE = (pin_config->tx.port << _GPIO_EUSART_TXROUTE_PORT_SHIFT)
+                                                  | (pin_config->tx.pin << _GPIO_EUSART_TXROUTE_PIN_SHIFT);
+  GPIO->EUSARTROUTE[EUSART_NUM(eusart)].RXROUTE = (pin_config->rx.port << _GPIO_EUSART_RXROUTE_PORT_SHIFT)
+                                                  | (pin_config->rx.pin << _GPIO_EUSART_RXROUTE_PIN_SHIFT);
   GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN |= GPIO_EUSART_ROUTEEN_TXPEN | GPIO_EUSART_ROUTEEN_RXPEN;
 }
 
@@ -170,14 +224,14 @@ static void eusart_uart_deinit_transport_pins(sl_peripheral_t uart)
 /***************************************************************************//**
  * Initializes the EUSART hardware flow control pins.
  ******************************************************************************/
-static void eusart_uart_init_hwfc_pins(sl_peripheral_t uart, sl_uart_pin_config_t pin_config)
+static void eusart_uart_init_hwfc_pins(sl_peripheral_t uart, const sl_uart_pin_config_t *pin_config)
 {
   EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
 
-  GPIO->EUSARTROUTE[EUSART_NUM(eusart)].CTSROUTE = (pin_config.cts.port << _GPIO_EUSART_CTSROUTE_PORT_SHIFT)
-                                                   | (pin_config.cts.pin << _GPIO_EUSART_CTSROUTE_PIN_SHIFT);
-  GPIO->EUSARTROUTE[EUSART_NUM(eusart)].RTSROUTE = (pin_config.rts.port << _GPIO_EUSART_RTSROUTE_PORT_SHIFT)
-                                                   | (pin_config.rts.pin << _GPIO_EUSART_RTSROUTE_PIN_SHIFT);
+  GPIO->EUSARTROUTE[EUSART_NUM(eusart)].CTSROUTE = (pin_config->cts.port << _GPIO_EUSART_CTSROUTE_PORT_SHIFT)
+                                                   | (pin_config->cts.pin << _GPIO_EUSART_CTSROUTE_PIN_SHIFT);
+  GPIO->EUSARTROUTE[EUSART_NUM(eusart)].RTSROUTE = (pin_config->rts.port << _GPIO_EUSART_RTSROUTE_PORT_SHIFT)
+                                                   | (pin_config->rts.pin << _GPIO_EUSART_RTSROUTE_PIN_SHIFT);
   GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN |= GPIO_EUSART_ROUTEEN_RTSPEN;
 }
 
@@ -193,18 +247,6 @@ static void eusart_uart_deinit_hwfc_pins(sl_peripheral_t uart)
   GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN &= ~GPIO_EUSART_ROUTEEN_RTSPEN;
 }
 
-/***************************************************************************//**
- * Returns if the EUSART peripheral is in low frequency mode.
- ******************************************************************************/
-static inline bool is_lf_mode(EUSART_TypeDef *eusart, uint32_t freq)
-{
-  uint32_t lf_freq;
-  sl_status_t status = sl_clock_manager_get_oscillator_frequency(SL_OSCILLATOR_LFRCO, &lf_freq);
-  EFM_ASSERT(status == SL_STATUS_OK);
-
-  return ((freq <= lf_freq) && (eusart == EUSART0));
-}
-
 #endif // EUSART_PRESENT
 
 #if defined(EUART_PRESENT)
@@ -212,15 +254,15 @@ static inline bool is_lf_mode(EUSART_TypeDef *eusart, uint32_t freq)
 /***************************************************************************//**
  * Initializes the EUART pins.
  ******************************************************************************/
-static void euart_uart_init_transport_pins(sl_peripheral_t uart, sl_uart_pin_config_t pin_config)
+static void euart_uart_init_transport_pins(sl_peripheral_t uart, const sl_uart_pin_config_t *pin_config)
 {
   (void) uart;
 
-  GPIO->EUARTROUTE->TXROUTE = (pin_config.tx.port << _GPIO_EUART_TXROUTE_PORT_SHIFT)
-                              | (pin_config.tx.pin << _GPIO_EUART_TXROUTE_PIN_SHIFT);
+  GPIO->EUARTROUTE->TXROUTE = (pin_config->tx.port << _GPIO_EUART_TXROUTE_PORT_SHIFT)
+                              | (pin_config->tx.pin << _GPIO_EUART_TXROUTE_PIN_SHIFT);
   GPIO->EUARTROUTE->ROUTEEN = GPIO_EUART_ROUTEEN_TXPEN;
-  GPIO->EUARTROUTE->RXROUTE = (pin_config.rx.port << _GPIO_EUART_RXROUTE_PORT_SHIFT)
-                              | (pin_config.rx.pin << _GPIO_EUART_RXROUTE_PIN_SHIFT);
+  GPIO->EUARTROUTE->RXROUTE = (pin_config->rx.port << _GPIO_EUART_RXROUTE_PORT_SHIFT)
+                              | (pin_config->rx.pin << _GPIO_EUART_RXROUTE_PIN_SHIFT);
 }
 
 /***************************************************************************//**
@@ -238,14 +280,14 @@ static void euart_uart_deinit_transport_pins(sl_peripheral_t uart)
 /***************************************************************************//**
  * Initializes the EUART hardware flow control pins.
  ******************************************************************************/
-static void euart_uart_init_hwfc_pins(sl_peripheral_t uart, sl_uart_pin_config_t pin_config)
+static void euart_uart_init_hwfc_pins(sl_peripheral_t uart, const sl_uart_pin_config_t *pin_config)
 {
   (void) uart;
 
-  GPIO->EUARTROUTE->CTSROUTE = (pin_config.cts.port << _GPIO_EUART_CTSROUTE_PORT_SHIFT)
-                               | (pin_config.cts.pin << _GPIO_EUART_CTSROUTE_PIN_SHIFT);
-  GPIO->EUARTROUTE->RTSROUTE = (pin_config.rts.port << _GPIO_EUART_RTSROUTE_PORT_SHIFT)
-                               | (pin_config.rts.pin << _GPIO_EUART_RTSROUTE_PIN_SHIFT);
+  GPIO->EUARTROUTE->CTSROUTE = (pin_config->cts.port << _GPIO_EUART_CTSROUTE_PORT_SHIFT)
+                               | (pin_config->cts.pin << _GPIO_EUART_CTSROUTE_PIN_SHIFT);
+  GPIO->EUARTROUTE->RTSROUTE = (pin_config->rts.port << _GPIO_EUART_RTSROUTE_PORT_SHIFT)
+                               | (pin_config->rts.pin << _GPIO_EUART_RTSROUTE_PIN_SHIFT);
   GPIO->EUARTROUTE->ROUTEEN |= GPIO_EUART_ROUTEEN_RTSPEN;
 }
 
@@ -259,20 +301,6 @@ static void euart_uart_deinit_hwfc_pins(sl_peripheral_t uart)
   GPIO->EUARTROUTE->CTSROUTE = _GPIO_EUART_CTSROUTE_RESETVALUE;
   GPIO->EUARTROUTE->RTSROUTE = _GPIO_EUART_RTSROUTE_RESETVALUE;
   GPIO->EUARTROUTE->ROUTEEN &= ~GPIO_EUART_ROUTEEN_RTSPEN;
-}
-
-/***************************************************************************//**
- * Returns if the EUART peripheral is in low frequency mode.
- ******************************************************************************/
-static inline bool is_lf_mode(EUSART_TypeDef *euart, uint32_t freq)
-{
-  uint32_t lf_freq;
-  (void) euart;
-
-  sl_status_t status = sl_clock_manager_get_oscillator_frequency(SL_OSCILLATOR_LFRCO, &lf_freq);
-  EFM_ASSERT(status == SL_STATUS_OK);
-
-  return (freq <= lf_freq);
 }
 
 #endif // EUART_PRESENT
@@ -289,20 +317,36 @@ static void eusart_uart_reset(sl_peripheral_t uart)
 /***************************************************************************//**
  * Initializes the EUSART when used with the high frequency clock.
  ******************************************************************************/
-static sl_status_t eusart_uart_init(sl_peripheral_t uart, sl_uart_config_t config)
+static sl_status_t eusart_uart_init(sl_peripheral_t uart, const sl_uart_config_t *config)
 {
   sl_clock_branch_t clock_branch = sl_device_peripheral_get_clock_branch(uart);
   EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
   uint32_t freq;
   sl_status_t status;
 
+  if (!EUSART_CONFIG_IS_VALID(config)) {
+    return SL_STATUS_NOT_SUPPORTED;
+  }
+
   status = sl_clock_manager_get_clock_branch_frequency(clock_branch, &freq);
   if (status != SL_STATUS_OK) {
     return status;
   }
 
+  if (!SLI_UART_OVERSAMPLING_IS_VALID(config, freq)) {
+    // The oversampling rate is too high for the given baud rate. It must not exceed the
+    // peripheral's reference frequency divided by the baud rate.
+    return SL_STATUS_INVALID_CONFIGURATION;
+  }
+
+  bool lf_mode = eusart_uart_is_lf_mode(eusart, config, freq);
+  if (!lf_mode && config->oversampling == SL_UART_OVERSAMPLING_0) {
+    // HF mode does not support disabling oversampling.
+    return SL_STATUS_INVALID_CONFIGURATION;
+  }
+
   sl_hal_eusart_uart_advanced_config_t advanced_config = SL_HAL_EUSART_UART_ADVANCED_INIT_DEFAULT;
-  advanced_config.hw_flow_control_mode = uart_hwfc_to_eusart_hal_hwfc(config.flow_control);
+  advanced_config.hw_flow_control_mode = uart_hwfc_to_eusart_hal_hwfc(config->flow_control);
 
   #if defined(EUSART_CFG1_RXTIMEOUT_DEFAULT)
   // EUART does not have the CFG1 register, so we simply cannot set the RX timeout value.
@@ -311,15 +355,14 @@ static sl_status_t eusart_uart_init(sl_peripheral_t uart, sl_uart_config_t confi
   advanced_config.rx_timeout = _EUSART_CFG1_RXTIMEOUT_SEVENFRAMES;
   #endif
 
-  bool lf_mode = is_lf_mode(eusart, freq);
-
   sl_hal_eusart_uart_init_t init = lf_mode ? (sl_hal_eusart_uart_init_t)SL_HAL_EUSART_UART_INIT_DEFAULT_LF
                                    : (sl_hal_eusart_uart_init_t)SL_HAL_EUSART_UART_INIT_DEFAULT_HF;
 
-  init.data_bits = uart_data_bits_to_eusart_hal_data_bits(config.data_bits);
-  init.parity = uart_parity_to_eusart_hal_parity(config.parity);
-  init.stop_bits = uart_stop_bits_to_eusart_hal_stop_bits(config.stop_bits);
-  init.clock_div = sl_hal_eusart_uart_calculate_clock_div(freq, config.baudrate, init.oversampling);
+  init.data_bits = uart_data_bits_to_eusart_hal_data_bits(config->data_bits);
+  init.parity = uart_parity_to_eusart_hal_parity(config->parity);
+  init.stop_bits = uart_stop_bits_to_eusart_hal_stop_bits(config->stop_bits);
+  init.oversampling = uart_oversampling_to_eusart_hal_oversampling(config->oversampling);
+  init.clock_div = sl_hal_eusart_uart_calculate_clock_div(freq, config->baudrate, init.oversampling);
   init.advanced_config = &advanced_config;
 
   uint32_t enabled_interrupts = sl_hal_eusart_get_enabled_interrupts(eusart);
@@ -518,7 +561,7 @@ static bool eusart_uart_is_idle(sl_peripheral_t uart)
 /***************************************************************************//**
  * Returns the EM requirement for the EUART.
  ******************************************************************************/
-static sl_power_manager_em_t eusart_uart_get_em_requirement(sl_peripheral_t uart)
+static sl_power_manager_em_t eusart_uart_get_em_requirement(sl_peripheral_t uart, const sl_uart_config_t *config)
 {
   sl_clock_branch_t clock_branch = sl_device_peripheral_get_clock_branch(uart);
   EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
@@ -528,7 +571,7 @@ static sl_power_manager_em_t eusart_uart_get_em_requirement(sl_peripheral_t uart
   status = sl_clock_manager_get_clock_branch_frequency(clock_branch, &freq);
   EFM_ASSERT(status == SL_STATUS_OK);
 
-  bool lf = is_lf_mode(eusart, freq);
+  bool lf = eusart_uart_is_lf_mode(eusart, config, freq);
 
   return lf ? SL_POWER_MANAGER_EM2 : SL_POWER_MANAGER_EM1;
 }

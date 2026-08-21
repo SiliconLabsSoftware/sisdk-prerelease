@@ -19,6 +19,9 @@ provides:
 template_contribution:
 - name: component_catalog
   value: bluetooth_feature_use_accurate_api_address_types
+documentation:
+  docset: bluetooth
+  document: bluetooth-stack-api/sl-bt-gap
 metadata:
   sbom:
     license: MSLA

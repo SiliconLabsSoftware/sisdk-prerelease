@@ -39,6 +39,7 @@
 #include "tx-security-level.hpp"
 
 #include "sli_crypto.h"
+#include "common/const_cast.hpp"
 #include "common/debug.hpp"
 #include "crypto/aes_ccm.hpp"
 #include "mac/mac_frame.hpp"
@@ -48,50 +49,64 @@ template <typename KeyStoragePolicy> struct LpwAesKeyDescBuilder;
 
 template <> struct LpwAesKeyDescBuilder<PlaintextMacKeyStoragePolicy>
 {
-    static sli_crypto_descriptor_t Build(const otMacKeyMaterial &aKey) { return LpwAesKeyDescFromPlaintext(aKey); }
+    static sli_crypto_descriptor_t Build(const otMacKeyMaterial & /* aKey */, const otMacKeyMaterial &aRawKey)
+    {
+        return LpwAesKeyDescFromPlaintext(aRawKey);
+    }
 };
 
 #if defined(KSU_PRESENT)
 template <> struct LpwAesKeyDescBuilder<KsuMacKeyStoragePolicy>
 {
-    static sli_crypto_descriptor_t Build(const otMacKeyMaterial &aKey) { return LpwAesKeyDescFromKsuSlot(aKey); }
+    static sli_crypto_descriptor_t Build(const otMacKeyMaterial &aKey, const otMacKeyMaterial & /* aRawKey */)
+    {
+        return LpwAesKeyDescFromKsuSlot(aKey);
+    }
 };
 #endif
 
 template <typename KeyStoragePolicy> class LpwAesTransmitAesCcmT
 {
 public:
-    static void Process(otRadioFrame &aFrame,
-                        const uint8_t (&aNonce)[ot::Crypto::AesCcm::kNonceSize],
+    static void Process(otRadioFrame                       &aFrame,
+                        ot::Crypto::AesCcm::Nonce           aNonce,
                         const uint8_t                       aTagLength,
-                        const ot::Mac::Frame::SecurityLevel aSecurityLevel);
+                        const ot::Mac::Frame::SecurityLevel aSecurityLevel,
+                        const otMacKeyMaterial             *aRawKey);
 };
 
 template <typename KeyStoragePolicy>
-void LpwAesTransmitAesCcmT<KeyStoragePolicy>::Process(otRadioFrame &aFrame,
-                                                      const uint8_t (&aNonce)[ot::Crypto::AesCcm::kNonceSize],
+void LpwAesTransmitAesCcmT<KeyStoragePolicy>::Process(otRadioFrame                       &aFrame,
+                                                      ot::Crypto::AesCcm::Nonce           aNonce,
                                                       const uint8_t                       aTagLength,
-                                                      const ot::Mac::Frame::SecurityLevel aSecurityLevel)
+                                                      const ot::Mac::Frame::SecurityLevel aSecurityLevel,
+                                                      const otMacKeyMaterial             *aRawKey)
 {
-    ot::Mac::TxFrame    &txFrame        = static_cast<ot::Mac::TxFrame &>(aFrame);
-    const uint32_t       payloadLength  = txFrame.GetPayloadLength();
-    unsigned char *const payload        = txFrame.GetPayload();
+    ot::Mac::TxFrame       &txFrame = static_cast<ot::Mac::TxFrame &>(aFrame);
+    ot::Mac::Frame::Lengths lengths;
+    ot::FrameData           payload;
+
+    SuccessOrAssert(txFrame.DetermineLengths(lengths));
+    SuccessOrAssert(txFrame.GetPayload(payload));
+
+    const uint32_t       payloadLength  = lengths.mPayload;
+    unsigned char *const payloadBytes   = ot::AsNonConst(payload.GetBytes());
     const bool           encryptPayload = TxSecurityLevel::EncryptsPayload(aSecurityLevel);
     const bool includePayloadInCcm      = (payloadLength > 0) && TxSecurityLevel::IncludesPayloadInCcm(aSecurityLevel);
     const otMacKeyMaterial &aesKey      = *aFrame.mInfo.mTxInfo.mAesKey;
-    sli_crypto_descriptor_t keyDesc     = LpwAesKeyDescBuilder<KeyStoragePolicy>::Build(aesKey);
+    sli_crypto_descriptor_t keyDesc     = LpwAesKeyDescBuilder<KeyStoragePolicy>::Build(aesKey, *aRawKey);
     sl_status_t             ret;
 
     ret = sli_crypto_ccm(&keyDesc,
                          true,
-                         payload,
+                         payloadBytes,
                          includePayloadInCcm ? payloadLength : 0,
-                         encryptPayload ? payload : nullptr,
-                         aNonce,
-                         ot::Crypto::AesCcm::kNonceSize,
-                         txFrame.GetHeader(),
-                         txFrame.GetHeaderLength(),
-                         payload + payloadLength,
+                         encryptPayload ? payloadBytes : nullptr,
+                         reinterpret_cast<const unsigned char *>(&aNonce),
+                         sizeof(aNonce),
+                         txFrame.GetPsdu(),
+                         lengths.mHeader,
+                         payloadBytes + payloadLength,
                          aTagLength);
 
     OT_ASSERT(ret == SL_STATUS_OK);

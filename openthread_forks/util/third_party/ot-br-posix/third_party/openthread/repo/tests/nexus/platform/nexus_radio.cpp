@@ -156,7 +156,7 @@ exit:
     return error;
 }
 
-uint64_t otPlatRadioGetNow(otInstance *aInstance)
+otRadioTime64 otPlatRadioGetNow(otInstance *aInstance)
 {
     OT_UNUSED_VARIABLE(aInstance);
 
@@ -243,7 +243,7 @@ void otPlatRadioClearSrcMatchExtEntries(otInstance *aInstance) { AsNode(aInstanc
 
 void otPlatRadioSetMacKey(otInstance             *aInstance,
                           uint8_t                 aKeyIdMode,
-                          uint8_t                 aKeyId,
+                          uint8_t                 aKeyIndex,
                           const otMacKeyMaterial *aPrevKey,
                           const otMacKeyMaterial *aCurrKey,
                           const otMacKeyMaterial *aNextKey,
@@ -253,7 +253,7 @@ void otPlatRadioSetMacKey(otInstance             *aInstance,
 
     OT_UNUSED_VARIABLE(aKeyIdMode);
 
-    radio.mRadioContext.mKeyId   = aKeyId;
+    radio.mRadioContext.mKeyId   = aKeyIndex;
     radio.mRadioContext.mKeyType = aKeyType;
 
     if (!radio.mMacFrameCounterReset)
@@ -332,7 +332,7 @@ otError otPlatRadioResetCsl(otInstance *aInstance)
     return kErrorNone;
 }
 
-void otPlatRadioUpdateCslSampleTime(otInstance *aInstance, uint32_t aCslSampleTime)
+void otPlatRadioUpdateCslSampleTime(otInstance *aInstance, otRadioTime32 aCslSampleTime)
 {
     AsNode(aInstance).mRadio.mRadioContext.mCslSampleTime = aCslSampleTime;
 }

@@ -149,7 +149,8 @@ void cs_algo_acp_target_on_command(const void *data)
       cmd.config.T_IP1_time = cs_acp_cmd->data.cs_acp_cmd_algo_create.config.T_IP1_time;
       cmd.config.T_IP2_time = cs_acp_cmd->data.cs_acp_cmd_algo_create.config.T_IP2_time;
       cmd.config.T_FCS_time = cs_acp_cmd->data.cs_acp_cmd_algo_create.config.T_FCS_time;
-      cmd.config.num_antenna_paths = cs_acp_cmd->data.cs_acp_cmd_algo_create.config.num_antenna_paths;
+      cmd.config.remote_t_sw_us = cs_acp_cmd->data.cs_acp_cmd_algo_create.config.remote_t_sw_us;
+      cmd.config.tone_antenna_config_selection = cs_acp_cmd->data.cs_acp_cmd_algo_create.config.tone_antenna_config_selection;
       memcpy(cmd.config.channel_map.data,
              cs_acp_cmd->data.cs_acp_cmd_algo_create.config.channel_map.data,
              sizeof(cmd.config.channel_map.data));

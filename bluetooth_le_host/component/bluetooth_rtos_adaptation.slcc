@@ -35,6 +35,9 @@ template_contribution:
     handler: "sli_bt_rtos_adaptation_kernel_start"
 provides:
 - name: "bluetooth_rtos_adaptation"
+documentation:
+  docset: bluetooth
+  document: bluetooth-stack-api/bluetooth-rtos-adaptation
 metadata:
   sbom:
     license: Zlib AND MSLA

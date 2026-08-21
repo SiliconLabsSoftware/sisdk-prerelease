@@ -82,9 +82,8 @@ sudo INFRA_IF_NAME=eth0 \
      OTBR_MDNS=openthread OTBR_DHCP6_PD_CLIENT=dhcpcd NAT64=1 NAT64_SERVICE=openthread \
      OTBR_OPTIONS="-DOT_THREAD_VERSION=1.4 \
                    -DOT_PLATFORM_CONFIG=openthread-core-silabs-posix-config.h \
-                   -DOTBR_DUA_ROUTING=ON \
                    -DOTBR_DHCP6_PD=ON \
-                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.2.0.0_GitHub-717abf0dc -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.2.0.0_GitHub-fb274efe6" \
+                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.2.0.0_GitHub-6fde80701 -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.2.0.0_GitHub-22b2ec2a8" \
      ./script/setup
 
 */
@@ -102,12 +101,11 @@ sudo INFRA_IF_NAME=eth0 \
      OTBR_MDNS=mDNSResponder OTBR_DHCP6_PD_CLIENT=dhcpcd NAT64=1 NAT64_SERVICE=tayga \
      OTBR_OPTIONS="-DOT_THREAD_VERSION=1.4 \
                    -DOT_PLATFORM_CONFIG=openthread-core-silabs-posix-config.h \
-                   -DOTBR_DUA_ROUTING=ON \
                    -DOTBR_DHCP6_PD=ON \
                    -DOTBR_DNS_UPSTREAM_QUERY=OFF \
                    -DOTBR_NCP_DNS_UPSTREAM=ON \
                    -DOTBR_NCP_DNS_UPSTREAM_BIND_TO_INFRA=ON \
-                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.2.0.0_GitHub-717abf0dc -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.2.0.0_GitHub-fb274efe6" \
+                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.2.0.0_GitHub-6fde80701 -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.2.0.0_GitHub-22b2ec2a8" \
      ./script/setup
 
 */
@@ -133,9 +131,8 @@ sudo INFRA_IF_NAME=eth0 \
                    -DOT_POSIX_CONFIG_RCP_VENDOR_INTERFACE=$THREAD_DIR/platform-abstraction/posix/cpc_interface.cpp \
                    -DOT_CLI_VENDOR_EXTENSION=$THREAD_DIR/platform-abstraction/posix/posix_vendor_cli.cmake \
                    -DOT_PLATFORM_CONFIG=openthread-core-silabs-posix-config.h \
-                   -DOTBR_DUA_ROUTING=ON \
                    -DOTBR_DHCP6_PD=ON \
-                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.1.0.0_GitHub-717abf0dc -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.1.0.0_GitHub-fb274efe6" \
+                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.1.0.0_GitHub-6fde80701 -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.1.0.0_GitHub-22b2ec2a8" \
      ./script/setup
 
 */
@@ -161,12 +158,11 @@ sudo INFRA_IF_NAME=eth0 \
                    -DOT_POSIX_CONFIG_RCP_VENDOR_INTERFACE=$THREAD_DIR/platform-abstraction/posix/cpc_interface.cpp \
                    -DOT_CLI_VENDOR_EXTENSION=$THREAD_DIR/platform-abstraction/posix/posix_vendor_cli.cmake \
                    -DOT_PLATFORM_CONFIG=openthread-core-silabs-posix-config.h \
-                   -DOTBR_DUA_ROUTING=ON \
                    -DOTBR_DHCP6_PD=ON \
                    -DOTBR_DNS_UPSTREAM_QUERY=OFF \
                    -DOTBR_NCP_DNS_UPSTREAM=ON \
                    -DOTBR_NCP_DNS_UPSTREAM_BIND_TO_INFRA=ON \
-                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.1.0.0_GitHub-717abf0dc -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.1.0.0_GitHub-fb274efe6" \
+                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.1.0.0_GitHub-6fde80701 -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.1.0.0_GitHub-22b2ec2a8" \
      ./script/setup
 
 */
@@ -216,15 +212,6 @@ sudo INFRA_IF_NAME=eth0 \
  */
 #undef OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
 #define OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE 0
-
-/**
- * OPENTHREAD_CONFIG_DUA_ENABLE
- *
- * Define as 1 to support Thread 1.2 Domain Unicast Address feature.
- *
- */
-#undef OPENTHREAD_CONFIG_DUA_ENABLE
-#define OPENTHREAD_CONFIG_DUA_ENABLE (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
 
 /**
  * OPENTHREAD_CONFIG_MLR_ENABLE

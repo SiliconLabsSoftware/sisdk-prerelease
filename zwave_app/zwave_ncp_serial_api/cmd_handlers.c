@@ -30,6 +30,7 @@
 #include "utils.h"
 #include "nvm_backup_restore.h"
 #include "zaf_protocol_config.h"
+#include "zw_version_config.h"
 
 #if SUPPORT_ZW_AES_ECB
 #include <ZW_aes_api.h>
@@ -2323,7 +2324,7 @@ ZW_ADD_CMD(FUNC_ID_ZW_GET_VERSION)
   /* */
   const SProtocolInfo* protocol_info = ZAF_getProtocolInfo();
   uint8_t versionMinor = protocol_info->ProtocolVersion.Minor;
-  if (255 == zpal_get_app_version_major()) {
+  if (255 == (uint8_t)APP_VERSION) {
     // Special case when running the custom v255 file that is used for testing OTW firmware update.
     // Make ZW_GET_VERSION return a unique version string "Z-Wave 7.99" so that test tools can distinguish it from the normal builds.
     versionMinor = 99;

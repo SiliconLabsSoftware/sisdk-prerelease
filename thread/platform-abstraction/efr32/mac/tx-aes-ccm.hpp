@@ -38,9 +38,10 @@
 #include "crypto/aes_ccm.hpp"
 #include "mac/mac_frame.hpp"
 
-void sli_ot_process_transmit_aes_ccm_device(otRadioFrame &aFrame,
-                                            const uint8_t (&aNonce)[ot::Crypto::AesCcm::kNonceSize],
+void sli_ot_process_transmit_aes_ccm_device(otRadioFrame                       &aFrame,
+                                            ot::Crypto::AesCcm::Nonce           aNonce,
                                             const uint8_t                       aTagLength,
-                                            const ot::Mac::Frame::SecurityLevel aSecurityLevel);
+                                            const ot::Mac::Frame::SecurityLevel aSecurityLevel,
+                                            const otMacKeyMaterial             *aRawKey);
 
 #endif // TX_AES_CCM_HPP_

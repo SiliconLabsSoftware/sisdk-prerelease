@@ -3,6 +3,7 @@ label: Bluetooth host agents.md contributions
 package: bluetooth_le_host
 description: >
   Bluetooth Host API usage contributions for agents.md
+category: Bluetooth|Bluetooth Host (Stack)
 quality: evaluation
 provides:
 - name: bluetooth_agents_host
@@ -12,31 +13,90 @@ template_contribution:
   - bluetooth_feature_advertiser
   priority: -5300
   value:
-    id: bluetooth_feature_advertiser
+    id: bluetooth_feature_advertiser_host
     context: |
-      # Bluetooth Host for Silicon Labs Series2 and Series3 Devices
-      This provides Bluetooth Host that can be used via BGAPI commands / function calls.
-      ## Features
-      ### Advertising
-      To start advertising whether it is legacy or extended or periodic call:
-      - `sl_bt_advertiser_create_set()`
-      - [optional] `sl_bt_advertiser_configure()`
-      - [optional] `sl_bt_advertiser_set_timing()`
-      - [optional] `sl_bt_advertiser_set_tx_power()`
-      #### Legacy Advertising
-      After creating a set, start legacy advertising by calling:
-      - `sl_bt_legacy_advertiser_set_data()` or `sl_bt_legacy_advertiser_generate_data()`
-      - `sl_bt_legacy_advertiser_start()` or `sl_bt_legacy_advertiser_start_directed()`
-      #### Extended Advertising
-      After creating a set, start extended advertising by calling:
-      - `sl_bt_extended_advertiser_set_data()` or `sl_bt_extended_advertiser_set_long_data()` or
-        `sl_bt_extended_advertiser_generate_data()`
-      - [optional] `sl_bt_extended_advertiser_set_phy()`
-      - `sl_bt_extended_advertiser_start()` or `sl_bt_extended_advertiser_start_directed()`
-      #### Periodic Advertising
-      After creating a set, start periodic advertising by calling:
-      - `sl_bt_periodic_advertiser_set_data()` or `sl_bt_periodic_advertiser_set_long_data()`
-      - `sl_bt_periodic_advertiser_start()`
+      # Bluetooth Host for Silicon Labs Series 2 and Series 3 devices
+      ## Advertising (host BGAPI)
+      - Include `bluetooth_feature_legacy_advertiser` and/or
+        `bluetooth_feature_extended_advertiser`; the base feature
+        `bluetooth_feature_advertiser` alone is incomplete and will not build.
+        Periodic advertising also needs the periodic advertiser feature and uses
+        the same advertising set.
+      - Before start, create and optionally configure a set:
+        - `sl_bt_advertiser_create_set()`
+        - [optional] `sl_bt_advertiser_configure()`
+        - [optional] `sl_bt_advertiser_set_timing()`
+        - [optional] `sl_bt_advertiser_set_tx_power()`
+      - Legacy advertising (after create_set):
+        - `sl_bt_legacy_advertiser_set_data()` or
+          `sl_bt_legacy_advertiser_generate_data()`
+        - `sl_bt_legacy_advertiser_start()` or
+          `sl_bt_legacy_advertiser_start_directed()`
+      - Extended advertising (after create_set):
+        - `sl_bt_extended_advertiser_set_data()`,
+          `sl_bt_extended_advertiser_set_long_data()`, or
+          `sl_bt_extended_advertiser_generate_data()`
+        - [optional] `sl_bt_extended_advertiser_set_phy()`
+        - `sl_bt_extended_advertiser_start()` or
+          `sl_bt_extended_advertiser_start_directed()`
+      - Periodic advertising (after create_set):
+        - `sl_bt_periodic_advertiser_set_data()` or
+          `sl_bt_periodic_advertiser_set_long_data()`
+        - `sl_bt_periodic_advertiser_start()`
+- name: agents_slab
+  condition:
+  - bluetooth_feature_gatt_server
+  priority: -5300
+  value:
+    id: bluetooth_feature_gatt_server
+    context: |
+      ## GATT server
+      - For characteristics with value type `user`, handle
+        `sl_bt_evt_gatt_server_user_read_request` with
+        `sl_bt_gatt_server_send_user_read_response()`.
+      - `sl_bt_evt_gatt_server_user_write_request` covers several ATT opcodes;
+        dispatch on `att_opcode`:
+        - `sl_bt_gatt_write_request`: respond with
+          `sl_bt_gatt_server_send_user_write_response()`
+        - `sl_bt_gatt_write_command`: no ATT response
+        - `sl_bt_gatt_prepare_write_request`: respond with
+          `sl_bt_gatt_server_send_user_prepare_write_response()`, echoing
+          offset and value
+        Missing responses on opcodes that require one cause the ATT
+        procedure to time out.
+      - Notifications are unacknowledged; indications require a client
+        confirmation. Wait for confirmation (or
+        `sl_bt_evt_gatt_server_indication_timeout`) before sending another
+        indication on that connection.
+- name: agents_slab
+  condition:
+  - bluetooth_feature_sm
+  priority: -5300
+  value:
+    id: bluetooth_feature_sm
+    context: |
+      ## Security Manager
+      - Encryption and bonding are different: pairing can encrypt a link
+        without storing a long-term bond. Call `sl_bt_sm_set_bondable_mode(1)`
+        when bonding (persistent keys) is required.
+      - SM requires a bonding database component (builtin is recommended;
+        external conflicts with builtin).
+      - `sl_bt_sm_configure()` flag bit 3 enables bonding confirmation: the
+        app must handle `sl_bt_evt_sm_confirm_bonding` and call
+        `sl_bt_sm_bonding_confirm()`. Leave bit 3 clear to skip that step.
+- name: agents_slab
+  condition:
+  - bluetooth_rtos_adaptation
+  priority: -5300
+  value:
+    id: bluetooth_rtos_adaptation
+    context: |
+      ## Bluetooth RTOS adaptation
+      - Do not call BGAPI commands or `sl_bt_bluetooth_pend()` from an ISR or
+        from any RTOS context that cannot pend (for example some timer tasks).
+      - Individual BGAPI calls are thread-safe. Use
+        `sl_bt_bluetooth_pend()` / `sl_bt_bluetooth_post()` only when multiple
+        commands must run atomically across threads.
 
 ui_hints:
   visibility: never

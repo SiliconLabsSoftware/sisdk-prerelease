@@ -37,6 +37,7 @@
 #include <openthread/platform/crypto.h>
 
 #if OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA
+#include "ieee802154mac.h"
 #include "security_manager.h"
 #include <stdint.h>
 #include <string.h>
@@ -542,6 +543,137 @@ otError otPlatCryptoAesEncrypt(otCryptoContext *aContext, const uint8_t *aInput,
 exit:
     return error;
 }
+
+#if OPENTHREAD_CONFIG_CRYPTO_PLATFORM_CCM_ONE_SHOT_ENABLE
+
+/* Mle::AesCcmAuthData = two Ip6::Address (2 * 16) + SecurityHeader (10) = 42 bytes,
+ * enforced by static_assert in mle.hpp. */
+#define OT_CCM_PAL_MLE_AUTH_DATA_SIZE 42u
+
+/* Each OT message is a linked list of fixed-size Buffer nodes, each
+ * OPENTHREAD_CONFIG_MESSAGE_BUFFER_SIZE bytes in total.  sizeof(otMessageBuffer)
+ * is the per-node linkage overhead, leaving the remainder as usable data. */
+#define OT_CCM_PAL_MSG_BUF_DATA_SIZE (OPENTHREAD_CONFIG_MESSAGE_BUFFER_SIZE - sizeof(otMessageBuffer))
+
+/* AesEcb::kBlockSize = AesCcm::kMaxTagLength = 16 bytes. */
+#define OT_CCM_PAL_MAX_CCM_TAG_SIZE 16u
+
+/* IEEE 802.15.4 CCM* nonce length (AesCcm::Nonce). */
+#define OT_CCM_PAL_MAX_NONCE_SIZE 13u
+
+/* Worst-case flat [header|payload|tag] buffer needed by the fallback path below:
+ *
+ *   MAC : 127 bytes  (802.15.4 PHY limit; header + payload + tag combined).
+ *
+ *   MLE : OT_CCM_PAL_MLE_AUTH_DATA_SIZE                           =  42 bytes
+ *         + OT_CCM_PAL_MSG_BUF_DATA_SIZE (128 - 4 = 124 on ARM32) = 124 bytes
+ *         + OT_CCM_PAL_MAX_CCM_TAG_SIZE                           =  16 bytes
+ *                                                                 = 182 bytes.
+ *
+ * 2 * OPENTHREAD_CONFIG_MESSAGE_BUFFER_SIZE = 256 > 182; scales automatically
+ * if the buffer size is ever changed. */
+#define OT_CCM_PAL_MAX_FRAME_SIZE (2u * OPENTHREAD_CONFIG_MESSAGE_BUFFER_SIZE)
+
+otError otPlatCryptoAesCcmProcessOneShot(bool                            aEncrypt,
+                                         const otPlatCryptoAesCcmConfig *aConfig,
+                                         const uint8_t                  *aHeader,
+                                         uint8_t                        *aData)
+{
+    otError      error = OT_ERROR_NONE;
+    psa_status_t status;
+    uint32_t     totalLength;
+    bool         contiguous;
+    uint8_t      nonce[OT_CCM_PAL_MAX_NONCE_SIZE];
+
+    otEXPECT_ACTION(aConfig != NULL && aConfig->mNonce != NULL && aHeader != NULL && aData != NULL,
+                    error = OT_ERROR_INVALID_ARGS);
+    otEXPECT_ACTION(aConfig->mKey.mKey == NULL, error = OT_ERROR_INVALID_ARGS);
+    otEXPECT_ACTION(aConfig->mNonceLength > 0 && aConfig->mNonceLength <= sizeof(nonce), error = OT_ERROR_INVALID_ARGS);
+
+    totalLength = aConfig->mHeaderLength + aConfig->mPlainTextLength;
+    contiguous  = (aData == aHeader + aConfig->mHeaderLength);
+
+    otEXPECT_ACTION(totalLength + aConfig->mTagLength <= IEEE802154_MAX_LENGTH, error = OT_ERROR_INVALID_ARGS);
+
+    /* sl_sec_man_aes_ccm_crypt takes a non-const nonce pointer. */
+    memcpy(nonce, aConfig->mNonce, aConfig->mNonceLength);
+
+    /* Contiguous [header|payload|tag] is the normal path (always true for MAC
+     * frames). Non-contiguous is an edge-case fallback for API correctness. */
+    if (contiguous)
+    {
+        /* aData is non-const and immediately follows the header in the same
+         * buffer, so the frame base is aData - mHeaderLength (no const cast). */
+        uint8_t *frame = aData - aConfig->mHeaderLength;
+
+        status = sl_sec_man_aes_ccm_crypt(aConfig->mKey.mKeyRef,
+                                          nonce,
+                                          aEncrypt,
+                                          frame,
+                                          (uint16_t)aConfig->mHeaderLength,
+                                          (uint16_t)totalLength,
+                                          aConfig->mTagLength,
+                                          frame);
+        error  = mapPsaStatusToOtError(status);
+        goto exit;
+    }
+
+    /* Fallback: aHeader and aData are non-contiguous.
+     *
+     * `otPlatCryptoAesCcmProcessOneShot` takes separate aHeader and aData
+     * pointers and does not require them to be contiguous.
+     * sl_sec_man_aes_ccm_crypt, however, requires a single flat
+     * [header|payload|tag] buffer.  This path bridges that gap.
+     *
+     * Current OT stack: this path is unreachable in practice.
+     *   - MAC frames always satisfy the contiguous check above.
+     *   - MLE uses AesCcm::Engine::Process(Message&), which dispatches
+     *     to ProcessOneShot (and hence this PAL) only when the entire
+     *     security payload fits in the first message chunk.  On EFR32,
+     *     OPENTHREAD_CONFIG_MESSAGE_BUFFER_SIZE = sizeof(void*) * 32
+     *     = 128 bytes.  After Metadata overhead (~56 bytes) and the
+     *     UDP/IPv6 reserved header (56 bytes), the first chunk for an
+     *     MLE security payload is at most ~2 bytes, which is smaller
+     *     than the minimum AES-CCM tag length (4 bytes).  The
+     *     single-chunk check therefore never passes for MLE on this
+     *     platform.
+     *
+     * This path is kept for API correctness and forward safety.  Without it,
+     * a non-contiguous frame would silently fail authentication,
+     * indistinguishable from a genuine MIC failure, dropping the link with
+     * no diagnosable cause. */
+    {
+        uint8_t  tmpBuf[OT_CCM_PAL_MAX_FRAME_SIZE];
+        uint32_t copyPayloadSize = aConfig->mPlainTextLength + (aEncrypt ? 0u : (uint32_t)aConfig->mTagLength);
+
+        otEXPECT_ACTION(totalLength + aConfig->mTagLength <= sizeof(tmpBuf), error = OT_ERROR_NO_BUFS);
+
+        memcpy(tmpBuf, aHeader, aConfig->mHeaderLength);
+        memcpy(tmpBuf + aConfig->mHeaderLength, aData, copyPayloadSize);
+
+        status = sl_sec_man_aes_ccm_crypt(aConfig->mKey.mKeyRef,
+                                          nonce,
+                                          aEncrypt,
+                                          tmpBuf,
+                                          (uint16_t)aConfig->mHeaderLength,
+                                          (uint16_t)totalLength,
+                                          aConfig->mTagLength,
+                                          tmpBuf);
+        error  = mapPsaStatusToOtError(status);
+        otEXPECT(error == OT_ERROR_NONE);
+
+        /* For encrypt: write back ciphertext and the appended tag.
+         * For decrypt: write back plaintext only (tag is consumed). */
+        memcpy(aData,
+               tmpBuf + aConfig->mHeaderLength,
+               aConfig->mPlainTextLength + (aEncrypt ? (uint32_t)aConfig->mTagLength : 0u));
+    }
+
+exit:
+    return error;
+}
+
+#endif // OPENTHREAD_CONFIG_CRYPTO_PLATFORM_CCM_ONE_SHOT_ENABLE
 
 otError otPlatCryptoAesFree(otCryptoContext *aContext)
 {

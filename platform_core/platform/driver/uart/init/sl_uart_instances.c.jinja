@@ -31,6 +31,7 @@
 {% set uart_instances_it = (uart_instances | default([], true) | list) + (uart_async_instances | default([], true) | list) %}
 #include "sl_common.h"
 #include "sl_device_peripheral.h"
+#include "sl_device_uart.h"
 #include "sl_uart_instances.h"
 {% for instance in uart_instances_it %}
 #include "sl_uart_{{ instance }}_config.h"
@@ -66,6 +67,15 @@ const sl_uart_pin_config_t sl_uart_{{ instance }}_pin_config = {
 #if defined(SL_UART_{{ instance | upper }}_RTS_PORT) && defined(SL_UART_{{ instance | upper }}_RTS_PIN)
   .rts = { SL_UART_{{ instance | upper }}_RTS_PORT, SL_UART_{{ instance | upper }}_RTS_PIN },
 #endif
+};
+
+const sl_uart_config_t sl_uart_{{ instance }}_line_config = {
+  .baudrate = SL_UART_{{ instance | upper }}_BAUDRATE,
+  .parity = SL_UART_{{ instance | upper }}_PARITY,
+  .stop_bits = SL_UART_{{ instance | upper }}_STOP_BITS,
+  .data_bits = SL_UART_{{ instance | upper }}_DATA_BITS,
+  .flow_control = SL_UART_{{ instance | upper }}_FLOW_CONTROL,
+  .oversampling = SL_UART_{{ instance | upper }}_OVERSAMPLING
 };
 
 void SL_UART_RX_IRQHandler(SL_UART_{{ instance | upper }}_PERIPHERAL)(void)

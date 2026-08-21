@@ -32,11 +32,15 @@
 #include "sl_hal_usart.h"
 #include "sl_log_helper.h"
 
+#include "sl_status.h"
 #include "sli_uart.h"
 
 /*******************************************************************************
  *******************************   DEFINES   ***********************************
  ******************************************************************************/
+
+#define USART_CONFIG_IS_VALID(config) \
+        ((config)->oversampling >= SL_UART_OVERSAMPLING_4)
 
 /*******************************************************************************
  ***************************   LOCAL FUNCTIONS   *******************************
@@ -48,6 +52,12 @@
 static inline sl_hal_usart_data_bits_t uart_data_bits_to_usart_hal_data_bits(sl_uart_data_bits_t data_bits)
 {
   switch (data_bits) {
+    case SL_UART_DATA_BITS_4:
+      return SL_HAL_USART_DATA_BITS_4;
+    case SL_UART_DATA_BITS_5:
+      return SL_HAL_USART_DATA_BITS_5;
+    case SL_UART_DATA_BITS_6:
+      return SL_HAL_USART_DATA_BITS_6;
     case SL_UART_DATA_BITS_7:
       return SL_HAL_USART_DATA_BITS_7;
     case SL_UART_DATA_BITS_8:
@@ -69,7 +79,7 @@ static inline sl_hal_usart_data_bits_t uart_data_bits_to_usart_hal_data_bits(sl_
     case SL_UART_DATA_BITS_16:
       return SL_HAL_USART_DATA_BITS_16;
     default:
-      SL_LOG_DEBUG_ASSERT(false);
+      EFM_ASSERT(false);
       return SL_HAL_USART_DATA_BITS_8;
   }
 }
@@ -87,7 +97,7 @@ static inline sl_hal_usart_parity_t uart_parity_to_usart_hal_parity(sl_uart_pari
     case SL_UART_PARITY_EVEN:
       return SL_HAL_USART_EVEN_PARITY;
     default:
-      SL_LOG_DEBUG_ASSERT(false);
+      EFM_ASSERT(false);
       return SL_HAL_USART_NO_PARITY;
   }
 }
@@ -107,7 +117,7 @@ static inline sl_hal_usart_stop_bits_t uart_stop_bits_to_usart_hal_stop_bits(sl_
     case SL_UART_STOP_BITS_2:
       return SL_HAL_USART_STOP_BITS_2;
     default:
-      SL_LOG_DEBUG_ASSERT(false);
+      EFM_ASSERT(false);
       return SL_HAL_USART_STOP_BITS_1;
   }
 }
@@ -124,22 +134,42 @@ static inline sl_hal_usart_hw_flow_control_t uart_hwfc_to_usart_hal_hwfc(sl_uart
     case SL_UART_FLOW_CONTROL_NONE:
       return SL_HAL_USART_HW_FLOW_CONTROL_NONE;
     default:
-      SL_LOG_DEBUG_ASSERT(false);
+      EFM_ASSERT(false);
       return SL_HAL_USART_HW_FLOW_CONTROL_NONE;
+  }
+}
+
+/***************************************************************************//**
+ * Converts the UART oversampling to the HAL oversampling.
+ ******************************************************************************/
+static inline sl_hal_usart_ovs_t uart_oversampling_to_usart_hal_oversampling(sl_uart_oversampling_t oversampling)
+{
+  switch (oversampling) {
+    case SL_UART_OVERSAMPLING_4:
+      return SL_HAL_USART_OVS_4;
+    case SL_UART_OVERSAMPLING_6:
+      return SL_HAL_USART_OVS_6;
+    case SL_UART_OVERSAMPLING_8:
+      return SL_HAL_USART_OVS_8;
+    case SL_UART_OVERSAMPLING_16:
+      return SL_HAL_USART_OVS_16;
+    default:
+      EFM_ASSERT(false);
+      return SL_HAL_USART_OVS_16;
   }
 }
 
 /***************************************************************************//**
  * Initializes the USART pins.
  ******************************************************************************/
-static void usart_uart_init_transport_pins(sl_peripheral_t uart, sl_uart_pin_config_t pin_config)
+static void usart_uart_init_transport_pins(sl_peripheral_t uart, const sl_uart_pin_config_t *pin_config)
 {
   USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
 
-  GPIO->USARTROUTE[USART_NUM(usart)].TXROUTE = (pin_config.tx.port << _GPIO_USART_TXROUTE_PORT_SHIFT)
-                                               | (pin_config.tx.pin << _GPIO_USART_TXROUTE_PIN_SHIFT);
-  GPIO->USARTROUTE[USART_NUM(usart)].RXROUTE = (pin_config.rx.port << _GPIO_USART_RXROUTE_PORT_SHIFT)
-                                               | (pin_config.rx.pin << _GPIO_USART_RXROUTE_PIN_SHIFT);
+  GPIO->USARTROUTE[USART_NUM(usart)].TXROUTE = (pin_config->tx.port << _GPIO_USART_TXROUTE_PORT_SHIFT)
+                                               | (pin_config->tx.pin << _GPIO_USART_TXROUTE_PIN_SHIFT);
+  GPIO->USARTROUTE[USART_NUM(usart)].RXROUTE = (pin_config->rx.port << _GPIO_USART_RXROUTE_PORT_SHIFT)
+                                               | (pin_config->rx.pin << _GPIO_USART_RXROUTE_PIN_SHIFT);
   GPIO->USARTROUTE[USART_NUM(usart)].ROUTEEN |= GPIO_USART_ROUTEEN_TXPEN | GPIO_USART_ROUTEEN_RXPEN;
 }
 
@@ -158,14 +188,14 @@ static void usart_uart_deinit_transport_pins(sl_peripheral_t uart)
 /***************************************************************************//**
  * Initializes the USART hardware flow control pins.
  ******************************************************************************/
-static void usart_uart_init_hwfc_pins(sl_peripheral_t uart, sl_uart_pin_config_t pin_config)
+static void usart_uart_init_hwfc_pins(sl_peripheral_t uart, const sl_uart_pin_config_t *pin_config)
 {
   USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
 
-  GPIO->USARTROUTE[USART_NUM(usart)].CTSROUTE = (pin_config.cts.port << _GPIO_USART_CTSROUTE_PORT_SHIFT)
-                                                | (pin_config.cts.pin << _GPIO_USART_CTSROUTE_PIN_SHIFT);
-  GPIO->USARTROUTE[USART_NUM(usart)].RTSROUTE = (pin_config.rts.port << _GPIO_USART_RTSROUTE_PORT_SHIFT)
-                                                | (pin_config.rts.pin << _GPIO_USART_RTSROUTE_PIN_SHIFT);
+  GPIO->USARTROUTE[USART_NUM(usart)].CTSROUTE = (pin_config->cts.port << _GPIO_USART_CTSROUTE_PORT_SHIFT)
+                                                | (pin_config->cts.pin << _GPIO_USART_CTSROUTE_PIN_SHIFT);
+  GPIO->USARTROUTE[USART_NUM(usart)].RTSROUTE = (pin_config->rts.port << _GPIO_USART_RTSROUTE_PORT_SHIFT)
+                                                | (pin_config->rts.pin << _GPIO_USART_RTSROUTE_PIN_SHIFT);
   GPIO->USARTROUTE[USART_NUM(usart)].ROUTEEN |= GPIO_USART_ROUTEEN_RTSPEN;
 }
 
@@ -193,7 +223,7 @@ static void usart_uart_reset(sl_peripheral_t uart)
 /***************************************************************************//**
  * Initializes the USART when used with the high frequency clock.
  ******************************************************************************/
-static sl_status_t usart_uart_init(sl_peripheral_t uart, sl_uart_config_t config)
+static sl_status_t usart_uart_init(sl_peripheral_t uart, const sl_uart_config_t *config)
 {
   sl_clock_branch_t clock_branch = sl_device_peripheral_get_clock_branch(uart);
   USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
@@ -205,12 +235,23 @@ static sl_status_t usart_uart_init(sl_peripheral_t uart, sl_uart_config_t config
     return status;
   }
 
+  if (!USART_CONFIG_IS_VALID(config)) {
+    return SL_STATUS_NOT_SUPPORTED;
+  }
+
+  if (!SLI_UART_OVERSAMPLING_IS_VALID(config, freq)) {
+    // The oversampling rate is too high for the given baud rate. It must not exceed the
+    // peripheral's reference frequency divided by the baud rate.
+    return SL_STATUS_INVALID_CONFIGURATION;
+  }
+
   sl_hal_usart_async_init_t init = SL_HAL_USART_INIT_ASYNC_DEFAULT;
-  init.data_bits = uart_data_bits_to_usart_hal_data_bits(config.data_bits);
-  init.parity = uart_parity_to_usart_hal_parity(config.parity);
-  init.stop_bits = uart_stop_bits_to_usart_hal_stop_bits(config.stop_bits);
-  init.hw_flow_control = uart_hwfc_to_usart_hal_hwfc(config.flow_control);
-  init.clock_div = sl_hal_usart_async_calculate_clock_div(freq, config.baudrate, init.oversampling);
+  init.data_bits = uart_data_bits_to_usart_hal_data_bits(config->data_bits);
+  init.parity = uart_parity_to_usart_hal_parity(config->parity);
+  init.stop_bits = uart_stop_bits_to_usart_hal_stop_bits(config->stop_bits);
+  init.hw_flow_control = uart_hwfc_to_usart_hal_hwfc(config->flow_control);
+  init.oversampling = uart_oversampling_to_usart_hal_oversampling(config->oversampling);
+  init.clock_div = sl_hal_usart_async_calculate_clock_div(freq, config->baudrate, init.oversampling);
   /**
    * USART has a two-slot TX FIFO, and TXBL is used to indicate how many slots are used. The threshold
    * can be configured using TXBIL, which can be set to either EMPTY, meaning there are now bytes in
@@ -409,9 +450,10 @@ static bool usart_uart_is_idle(sl_peripheral_t uart)
 /***************************************************************************//**
  * Returns the EM requirement for the USART.
  ******************************************************************************/
-static sl_power_manager_em_t usart_uart_get_em_requirement(sl_peripheral_t uart)
+static sl_power_manager_em_t usart_uart_get_em_requirement(sl_peripheral_t uart, const sl_uart_config_t *config)
 {
   (void) uart;
+  (void) config;
 
   return SL_POWER_MANAGER_EM1;
 }

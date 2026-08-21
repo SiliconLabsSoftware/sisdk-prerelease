@@ -9,8 +9,6 @@
 
 #include <stdint.h>
 
-uint16_t ZAF_GetBuildNumber(void);
-
 uint8_t ZAF_GetVersionMajor(void);
 
 uint8_t ZAF_GetVersionMinor(void);

@@ -51,6 +51,43 @@
 #include "sl_rail_util_thermistor.h"
 
 static uint32_t thermistorResistance = 0;
+
+// Fetch impedance into thermistorResistance and convert to whole Celsius degrees.
+// On failure, optionally sets *errorMsg for CLI reporting.
+static bool getConvertedThermistorReading(int16_t *temperatureCelsius,
+                                          char **errorMsg)
+{
+  sl_rail_status_t status = sl_rail_get_thermistor_impedance(railHandle,
+                                                             &thermistorResistance);
+  if (status != SL_RAIL_STATUS_NO_ERROR) {
+    if (errorMsg != NULL) {
+      *errorMsg = "Thermistor measurement not done yet.";
+    }
+    return false;
+  }
+  if ((thermistorResistance == 0U)
+      || (thermistorResistance == SL_RAIL_INVALID_THERMISTOR_VALUE)) {
+    if (errorMsg != NULL) {
+      *errorMsg = "Thermistor measurement error.";
+    }
+    return false;
+  }
+
+  int16_t thermistorTemperatureC;
+  status = sl_railcb_convert_thermistor_impedance(railHandle,
+                                                  thermistorResistance,
+                                                  &thermistorTemperatureC);
+  if (status != SL_RAIL_STATUS_NO_ERROR) {
+    if (errorMsg != NULL) {
+      *errorMsg = "Conversion error.";
+    }
+    return false;
+  }
+
+  // Convert temperature (originally in eighth of Celsius degrees) in Celsius
+  *temperatureCelsius = thermistorTemperatureC / 8;
+  return true;
+}
 #endif
 
 #if SL_RAIL_SUPPORTS_HFXO_COMPENSATION
@@ -332,28 +369,16 @@ void startThermistorMeasurement(sl_cli_command_arg_t *args)
 void getThermistorImpedance(sl_cli_command_arg_t *args)
 {
 #if SL_RAIL_SUPPORTS_EXTERNAL_THERMISTOR
-  sl_rail_status_t status;
+  char *errorMsg = NULL;
+  int16_t temperatureCelsius = 0;
+
   CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
-  status = sl_rail_get_thermistor_impedance(railHandle, &thermistorResistance);
-
-  if (status == SL_RAIL_STATUS_NO_ERROR) {
-    if ((thermistorResistance != 0U) && (thermistorResistance != SL_RAIL_INVALID_THERMISTOR_VALUE)) {
-      int16_t thermistorTemperatureC;
-      status = sl_railcb_convert_thermistor_impedance(railHandle, thermistorResistance, &thermistorTemperatureC);
-
-      if (status == SL_RAIL_STATUS_NO_ERROR) {
-        // Convert temperature (originally in eighth of Celsius degrees) in Celsius
-        responsePrint(sl_cli_get_command_string(args, 0),
-                      "Ohms:%u,DegreesC:%d",
-                      thermistorResistance, thermistorTemperatureC / 8);
-      } else {
-        responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Conversion error.");
-      }
-    } else {
-      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Thermistor measurement error.");
-    }
+  if (getConvertedThermistorReading(&temperatureCelsius, &errorMsg)) {
+    responsePrint(sl_cli_get_command_string(args, 0),
+                  "Ohms:%u,DegreesC:%d",
+                  thermistorResistance, temperatureCelsius);
   } else {
-    responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Thermistor measurement not done yet.");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, errorMsg);
   }
 #else
   responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
@@ -409,7 +434,9 @@ void configHFXOCompensation(sl_cli_command_arg_t *args)
     responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Incorrect number of arguments");
     return;
   } else if (sl_cli_get_argument_count(args) == 4) {
-    localCompensationConfig.zone_temperature_celsius = sl_cli_get_argument_uint8(args, 1);
+    // int8: zone can be negative (e.g. -40 C). uint8 made the < -40 check dead.
+    localCompensationConfig.zone_temperature_celsius =
+      sl_cli_get_argument_int8(args, 1);
     localCompensationConfig.delta_nominal_celsius = sl_cli_get_argument_uint8(args, 2);
     localCompensationConfig.delta_critical_celsius = sl_cli_get_argument_uint8(args, 3);
 
@@ -431,6 +458,33 @@ void configHFXOCompensation(sl_cli_command_arg_t *args)
 
   sl_rail_status_t status = sl_rail_config_hfxo_compensation(railHandle, &localCompensationConfig);
   if (status == SL_RAIL_STATUS_NO_ERROR) {
+#if SL_RAIL_SUPPORTS_EXTERNAL_THERMISTOR
+    int16_t temperatureCelsius = 0;
+
+    if (localCompensationConfig.enable_compensation) {
+      // Start the requested pass here so the cached read is deterministic and
+      // occurs while the asynchronous thermistor measurement is in progress.
+      status = sl_rail_start_thermistor_measurement(railHandle);
+      if ((status == SL_RAIL_STATUS_NO_ERROR)
+          && getConvertedThermistorReading(&temperatureCelsius, NULL)) {
+        responsePrint(sl_cli_get_command_string(args, 0), "Configuration:Success,"
+                                                          "compensation:%s,"
+                                                          "zoneTemperatureC:%d,"
+                                                          "deltaNominal:%u,"
+                                                          "deltaCritical:%u,"
+                                                          "Ohms:%u,"
+                                                          "DegreesC:%d",
+                      "enabled",
+                      localCompensationConfig.zone_temperature_celsius,
+                      localCompensationConfig.delta_nominal_celsius,
+                      localCompensationConfig.delta_critical_celsius,
+                      thermistorResistance,
+                      temperatureCelsius);
+        return;
+      }
+    }
+#endif
+
     responsePrint(sl_cli_get_command_string(args, 0), "Configuration:Success,"
                                                       "compensation:%s,"
                                                       "zoneTemperatureC:%d,"
@@ -442,6 +496,73 @@ void configHFXOCompensation(sl_cli_command_arg_t *args)
                   localCompensationConfig.delta_critical_celsius);
   } else {
     responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Error during configuration");
+  }
+}
+
+void configHFXOCompensationThresholds(sl_cli_command_arg_t *args)
+{
+  sl_rail_hfxo_compensation_threshold_config_t localThresholdConfig;
+  sl_rail_status_t status;
+  uint8_t argCount = sl_cli_get_argument_count(args);
+
+  status = sl_rail_get_hfxo_compensation_thresholds(railHandle,
+                                                    &localThresholdConfig);
+  if (status != SL_RAIL_STATUS_NO_ERROR) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0xFF,
+                       "Error reading threshold configuration");
+    return;
+  }
+
+  if (argCount == 0U) {
+    responsePrint(sl_cli_get_command_string(args, 0), "thresholdMode:%s,"
+                                                      "marginCelsius:%d",
+                  (localThresholdConfig.mode
+                   == SL_RAIL_HFXO_COMP_THRESHOLD_ADAPTIVE)
+                  ? "adaptive" : "static",
+                  localThresholdConfig.margin_celsius);
+    return;
+  }
+
+  if (argCount > 2U) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0xFF,
+                       "Incorrect number of arguments");
+    return;
+  }
+
+  localThresholdConfig.mode =
+    (sl_rail_hfxo_compensation_threshold_mode_t)sl_cli_get_argument_uint8(args, 0);
+  // Reject raw uint8 casts that are outside the public enum before calling RFHAL.
+  if ((localThresholdConfig.mode != SL_RAIL_HFXO_COMP_THRESHOLD_STATIC)
+      && (localThresholdConfig.mode != SL_RAIL_HFXO_COMP_THRESHOLD_ADAPTIVE)) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0xFF,
+                       "Incorrect threshold mode");
+    return;
+  }
+  if (argCount == 2U) {
+    localThresholdConfig.margin_celsius =
+      (int8_t)sl_cli_get_argument_int8(args, 1);
+    // Match RFHAL margin bounds to avoid adaptive thrashing from extreme values.
+    if ((localThresholdConfig.margin_celsius < -50)
+        || (localThresholdConfig.margin_celsius > 50)) {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF,
+                         "Incorrect marginCelsius");
+      return;
+    }
+  }
+
+  status = sl_rail_config_hfxo_compensation_thresholds(railHandle,
+                                                       &localThresholdConfig);
+  if (status == SL_RAIL_STATUS_NO_ERROR) {
+    responsePrint(sl_cli_get_command_string(args, 0), "Configuration:Success,"
+                                                      "thresholdMode:%s,"
+                                                      "marginCelsius:%d",
+                  (localThresholdConfig.mode
+                   == SL_RAIL_HFXO_COMP_THRESHOLD_ADAPTIVE)
+                  ? "adaptive" : "static",
+                  localThresholdConfig.margin_celsius);
+  } else {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0xFF,
+                       "Error during configuration");
   }
 }
 

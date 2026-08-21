@@ -91,6 +91,13 @@ psa_status_t sl_sec_man_import_key(psa_key_id_t *        sl_psa_key_id,
   sl_sec_man_set_key_attributes(sl_psa_key_id, &sl_psa_key_attr, sl_psa_key_type, sl_psa_key_algorithm,
                                 sl_psa_key_usage, sl_psa_key_persistence, (sl_key_literal_len * 8));
 
+  // MAC keys are often imported as AES-ECB but may also be used with CCM*.
+  // Allow CCM with short (4-byte) MIC and above on the same key.
+  if (sl_psa_key_algorithm == PSA_ALG_ECB_NO_PADDING) {
+    psa_set_key_enrollment_algorithm(&sl_psa_key_attr,
+                                     PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 4));
+  }
+
   /* Import the key */
   status = psa_import_key(&sl_psa_key_attr, sl_psa_key_literal, sl_key_literal_len, sl_psa_key_id);
 
@@ -255,8 +262,8 @@ psa_status_t sl_sec_man_aes_ccm_crypt(psa_key_id_t sl_psa_key_id,
                                       uint8_t* nonce,
                                       bool encrypt,
                                       const uint8_t* input,
-                                      uint8_t encryption_start_index,
-                                      uint8_t length,
+                                      uint16_t encryption_start_index,
+                                      uint16_t length,
                                       uint8_t mic_length,
                                       uint8_t* output)
 {
@@ -264,7 +271,15 @@ psa_status_t sl_sec_man_aes_ccm_crypt(psa_key_id_t sl_psa_key_id,
   //contains size of output + MIC
   size_t output_length;
 
-  size_t NONCE_LENGTH = 13;
+  static const size_t NONCE_LENGTH = 13;
+
+  if (nonce == NULL || input == NULL || output == NULL) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  if (length < encryption_start_index) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
 
   //return full output packet (including unencrypted authentication data)
   memmove(output, input, encryption_start_index);

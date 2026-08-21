@@ -30,6 +30,9 @@ provides:
 template_contribution:
 - name: component_catalog
   value: apploader_lib
+documentation:
+  docset: mcu-bootloader
+  document: using-gecko-bootloader-with-bluetooth-apps/03-bluetooth-ota-upgrade
 library:
 - path: build/gcc/cortex-m33/release/libapploader.a
   condition:

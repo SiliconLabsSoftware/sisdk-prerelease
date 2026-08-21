@@ -42,6 +42,7 @@
 #include "meshcop/network_name.hpp"
 #include "net/ip6_address.hpp"
 #include "thread/mle_types.hpp"
+#include "thread/mlr_types.hpp"
 
 namespace ot {
 
@@ -149,9 +150,38 @@ typedef TlvInfo<ThreadTlv::kThreadNetworkData> ThreadNetworkDataTlv;
 #if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
 
 /**
- * Defines IPv6 Addresses TLV constants and types.
+ * Defines IPv6 Addresses TLV constants and types and helper methods.
  */
-typedef TlvInfo<ThreadTlv::kIp6Addresses> Ip6AddressesTlv;
+class Ip6AddressesTlv : public TlvInfo<ThreadTlv::kIp6Addresses>
+{
+public:
+    /**
+     * Appends an IPv6 Addresses TLV to a message.
+     *
+     * @param[in,out] aMessage       The message to append to.
+     * @param[in]     aAddresses     A pointer to an array of IPv6 addresses.
+     * @param[in]     aNumAddresses  The number of IPv6 addresses in the @p aAddresses array.
+     *
+     * @retval kErrorNone     Successfully appended the TLV.
+     * @retval kErrorNoBufs   Insufficient available buffers to grow the message.
+     */
+    static Error AppendTo(Message &aMessage, const Ip6::Address *aAddresses, uint16_t aNumAddresses);
+
+    /**
+     * Finds and parses the IPv6 Addresses TLV from a given message.
+     *
+     * @param[in]  aMessage    The message to parse.
+     * @param[out] aAddresses  An `AddressArray` to output the parsed IPv6 addresses.
+     *
+     * @retval kErrorNone       Successfully found and parsed the TLV.
+     * @retval kErrorNotFound   Could not find the TLV in the message.
+     * @retval kErrorParse      Failed to parse the TLV.
+     * @retval kErrorNoBufs     There are more addresses in the TLV than can fit in `aAddresses`.
+     */
+    static Error FindIn(const Message &aMessage, Mlr::AddressArray &aAddresses);
+
+    Ip6AddressesTlv(void) = delete;
+};
 
 #endif // OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
 

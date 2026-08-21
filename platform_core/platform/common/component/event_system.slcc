@@ -15,6 +15,9 @@ include:
 - path: inc
   file_list:
   - path: sl_event_system.h
+- path: src
+  file_list:
+  - path: sli_event_system_log.h
 source:
 - path: src/sl_event_system.c
 provides:
@@ -26,6 +29,7 @@ requires:
 - name: sl_assert
 - name: sl_core
 - name: memory_manager
+- name: log_none
 template_contribution:
 - name: event_handler
   value:

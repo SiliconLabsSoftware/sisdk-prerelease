@@ -319,10 +319,10 @@ static void app_timer_callback(app_timer_t *timer, void *data)
  * Return runtime configurable value for object tracking mode
  *****************************************************************************/
 #if (SL_SIMPLE_BUTTON_COUNT > 1)
-  #if CS_INITIATOR_DEFAULT_ALGO_MODE == SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST
-    #define CS_INITIATOR_ALTERNATIVE_ALGO_MODE SL_RTL_CS_ALGO_MODE_STATIC_HIGH_ACCURACY
+  #if CS_INITIATOR_DEFAULT_ALGO_MODE == SL_RTL_CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED
+    #define CS_INITIATOR_ALTERNATIVE_ALGO_MODE SL_RTL_CS_ALGO_MODE_STATIONARY
   #else
-    #define CS_INITIATOR_ALTERNATIVE_ALGO_MODE SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST
+    #define CS_INITIATOR_ALTERNATIVE_ALGO_MODE SL_RTL_CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED
   #endif
 static uint8_t get_algo_mode(void)
 {
@@ -376,12 +376,12 @@ static const char *antenna_usage_to_str(const cs_initiator_config_t *config)
 static const char *algo_mode_to_str(uint8_t algo_mode)
 {
   switch (algo_mode) {
-    case SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC:
-      return "real time basic (moving)";
-    case SL_RTL_CS_ALGO_MODE_STATIC_HIGH_ACCURACY:
-      return "stationary object tracking";
-    case SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST:
-      return "real time fast (moving)";
+    case SL_RTL_CS_ALGO_MODE_TRACKING_ACCURACY_OPTIMIZED:
+      return "Tracking accuracy optimized (suitable for moving targets)";
+    case SL_RTL_CS_ALGO_MODE_STATIONARY:
+      return "Stationary (suitable for stationary targets)";
+    case SL_RTL_CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED:
+      return "Tracking latency optimized (suitable for fast moving targets)";
     default:
       return "unknown";
   }
@@ -504,7 +504,7 @@ static void cs_on_result(const uint8_t conn_handle,
       }
     }
 
-    if (rtl_config.algo_mode == SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST
+    if (rtl_config.algo_mode == SL_RTL_CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED
         && initiator_config.cs_main_mode == sl_bt_cs_mode_pbr
         && (initiator_config.channel_map_preset == CS_CHANNEL_MAP_PRESET_HIGH
             || initiator_config.channel_map_preset == CS_CHANNEL_MAP_PRESET_MEDIUM)) {
@@ -678,6 +678,9 @@ static void check_supported_capabilities(const sl_bt_msg_t *evt)
                                                   NULL,
                                                   NULL);
   app_assert_status(sc);
+  // Save the remote antenna switching time capability so it can be used to
+  // compute T_SW_time for the RTL estimator.
+  initiator_config.remote_t_sw_us = evt->data.evt_cs_read_remote_supported_capabilities_complete.t_sw_times;
   // initiator config is set to CS_SYNC_PHY 2M
   // but local/remote device only supports CS_SYNC_PHY 1M
   if (initiator_config.cs_sync_phy == sl_bt_gap_phy_2m

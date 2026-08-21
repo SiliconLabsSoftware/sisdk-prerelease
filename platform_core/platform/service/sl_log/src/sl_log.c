@@ -226,28 +226,31 @@ static inline sl_status_t log_write_to_ring_buffer(sl_log_event_t *event_buffer,
     uint32_t buffer_capacity = EARLY_LOG_BUFFER_SIZE;
 #endif
   sl_log_ring_buffer_t *ring_buffer_ptr = &ring_buffer;
-  __disable_irq();
+  // Callers may already hold a critical section, so PRIMASK must be restored.
+  CORE_DECLARE_IRQ_STATE;
+
+  CORE_ENTER_CRITICAL();
   ring_buffer_ptr->available_event_slots--;
   if (ring_buffer_ptr->available_event_slots<0 &&
       sl_log_backend_status.backend_transfer_done==0) {
-      __enable_irq();
+      CORE_EXIT_CRITICAL();
       return SL_STATUS_NOT_AVAILABLE;
   }
   uint32_t write_index = ring_buffer_ptr->write_index;
   ring_buffer_ptr->write_index =
       (write_index + 1u >= buffer_capacity) ? 0u : (write_index + 1u);
-  __enable_irq();
+  CORE_EXIT_CRITICAL();
 
   ring_buffer_ptr->buffer[write_index] = *event_buffer;
 
-  __disable_irq();
+  CORE_ENTER_CRITICAL();
   if (++ring_buffer_ptr->event_count > buffer_capacity) {
     ring_buffer_ptr->event_count = buffer_capacity;
     if (++ring_buffer_ptr->read_index == buffer_capacity) {
       ring_buffer_ptr->read_index = 0;
     }
   }
-  __enable_irq();
+  CORE_EXIT_CRITICAL();
 
   return SL_STATUS_OK;
 }

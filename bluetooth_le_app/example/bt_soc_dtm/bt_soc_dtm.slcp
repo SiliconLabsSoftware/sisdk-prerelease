@@ -95,10 +95,6 @@ configuration:
   - name: SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
     value: "1"
 
-post_build:
-  - path: ../../postbuild_profile/bt_common_s2.slpb
-    condition: [device_series_2, bootloader_app_properties]
-
 tag:
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_series_2

@@ -41,16 +41,16 @@
 
 #include <openthread/platform/crypto.h>
 
-void PlaintextMacKeyStoragePolicy::PrepareKeys(otMacKeyMaterial (&aKeys)[kMacKeyCount])
+void PlaintextMacKeyStoragePolicy::PrepareKeys(const otMacKeyMaterial (&aKeys)[kMacKeyCount],
+                                               otMacKeyMaterial (&aRawKeys)[kMacKeyCount])
 {
-    for (otMacKeyMaterial &key : aKeys)
+    for (size_t i = 0; i < kMacKeyCount; i++)
     {
         size_t        keyLen = 0;
-        const otError error  = otPlatCryptoExportKey(key.mKeyMaterial.mKeyRef,
-                                                    key.mKeyMaterial.mKey.m8,
-                                                    sizeof(key.mKeyMaterial.mKey.m8),
+        const otError error  = otPlatCryptoExportKey(aKeys[i].mKeyMaterial.mKeyRef,
+                                                    aRawKeys[i].mKeyMaterial.mKey.m8,
+                                                    sizeof(aRawKeys[i].mKeyMaterial.mKey.m8),
                                                     &keyLen);
-
         OT_ASSERT(error == OT_ERROR_NONE);
     }
 }

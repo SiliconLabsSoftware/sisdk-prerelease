@@ -47,6 +47,7 @@
 #endif /* SL_CATALOG_CODE_CLASSIFICATION_VALIDATOR_PRESENT */
 
 #endif /* SL_COMPONENT_CATALOG_PRESENT */
+#include "sli_interrupt_manager_log.h"
 
 /*******************************************************************************
  *********************************   DEFINES   *********************************
@@ -79,6 +80,10 @@
 // Interrupt vector placement is in RAM
 #if defined(SL_CATALOG_INTERRUPT_MANAGER_VECTOR_TABLE_IN_RAM_PRESENT)
 #define VECTOR_TABLE_IN_RAM (1)
+#endif
+
+#if defined(SL_CATALOG_INTERRUPT_MANAGER_VECTOR_TABLE_IN_RAM_MPU_DISABLE_PRESENT)
+#define SL_INTERRUPT_MANAGER_DISABLE_MPU (1)
 #endif
 
 #if defined(SL_CATALOG_INTERRUPT_MANAGER_HOOKS_PRESENT)
@@ -117,6 +122,17 @@ VECTOR_TABLE_SECTION static sl_interrupt_manager_irq_handler_t wrapped_vector_ta
 #endif /* defined(__GNUC__) */
 #endif /* SL_INTERRUPT_MANAGER_ENABLE_HOOKS */
 
+#if defined(SL_INTERRUPT_MANAGER_DISABLE_MPU)
+#define DISABLE_MPU_VECTOR_TABLE_IN_RAM
+#define INTERRUPT_MANAGER_DISABLE_MPU() \
+  uint32_t mpu_ctrl = disable_mpu()
+#define INTERRUPT_MANAGER_ENABLE_MPU() \
+  enable_mpu(mpu_ctrl);
+#else
+#define INTERRUPT_MANAGER_DISABLE_MPU()
+#define INTERRUPT_MANAGER_ENABLE_MPU()
+#endif
+
 #endif /* VECTOR_TABLE_IN_RAM */
 
 /*******************************************************************************
@@ -136,12 +152,24 @@ SL_CODE_CLASSIFY(SL_CODE_COMPONENT_INTERRUPT_MANAGER, SL_CODE_CLASS_TIME_CRITICA
 static void sli_interrupt_manager_isr_wrapper(void);
 #endif /* SL_INTERRUPT_MANAGER_ENABLE_HOOKS */
 
+#if defined(SL_INTERRUPT_MANAGER_DISABLE_MPU)
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_INTERRUPT_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
+static uint32_t disable_mpu(void);
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_INTERRUPT_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
+static void enable_mpu(uint32_t mpu_ctrl);
+#endif /* SL_INTERRUPT_MANAGER_DISABLE_MPU */
+
 /*******************************************************************************
  *****************************   VARIABLES   ***********************************
  ******************************************************************************/
 
 // Initialization flag.
 static bool is_interrupt_manager_initialized = false;
+
+#if (SL_INTERRUPT_MANAGER_LOG_LEVEL_COMPILE_TIME != SL_LOG_CONFIG_LEVEL_NONE)
+volatile sl_log_level_t sl_interrupt_manager_log_level
+  = (sl_log_level_t)SL_INTERRUPT_MANAGER_LOG_LEVEL_COMPILE_TIME;
+#endif
 
 #if defined(SL_INTERRUPT_MANAGER_ENABLE_HOOKS)
 static volatile uint32_t interrupt_nesting_counter SL_FAST_DATA = 0U;
@@ -240,10 +268,11 @@ void sl_interrupt_manager_init(void)
     CORE_EXIT_ATOMIC();
   } else {
     CORE_EXIT_ATOMIC();
+    SLI_INTERRUPT_MANAGER_LOG_WARN("Interrupt manager already initialized");
     return;
   }
 
-  #if defined(VECTOR_TABLE_IN_RAM)
+#if defined(VECTOR_TABLE_IN_RAM)
 
   sl_interrupt_manager_irq_handler_t* current;
 
@@ -254,6 +283,8 @@ void sl_interrupt_manager_init(void)
 #endif
 
   current = (sl_interrupt_manager_irq_handler_t*)SCB->VTOR;
+
+  INTERRUPT_MANAGER_DISABLE_MPU();
 
   // copy ROM vector table to RAM table
   for (uint32_t i = 0; i < TOTAL_INTERRUPTS; i++) {
@@ -269,16 +300,20 @@ void sl_interrupt_manager_init(void)
     #endif
   }
 
+  INTERRUPT_MANAGER_ENABLE_MPU();
+
   // Set RAM table as irq table.
   sli_interrupt_manager_set_irq_table(vector_table_ram, TOTAL_INTERRUPTS);
 
   CORE_EXIT_CRITICAL();
 
-  #endif /* VECTOR_TABLE_IN_RAM */
+#endif /* VECTOR_TABLE_IN_RAM */
 
   for (IRQn_Type i = SVCall_IRQn; i < EXT_IRQ_COUNT; i++) {
     sl_interrupt_manager_set_irq_priority(i, SL_INTERRUPT_MANAGER_DEFAULT_PRIORITY);
   }
+
+  SLI_INTERRUPT_MANAGER_LOG_INFO("Interrupt manager initialized");
 }
 
 /***************************************************************************//**
@@ -315,7 +350,6 @@ void sl_interrupt_manager_enable_interrupts(void)
 void sl_interrupt_manager_disable_irq(int32_t irqn)
 {
   EFM_ASSERT((irqn >= 0) && (irqn <= EXT_IRQ_COUNT));
-
   disable_interrupt(irqn);
 }
 
@@ -326,7 +360,6 @@ void sl_interrupt_manager_disable_irq(int32_t irqn)
 void sl_interrupt_manager_enable_irq(int32_t irqn)
 {
   EFM_ASSERT((irqn >= 0) && (irqn <= EXT_IRQ_COUNT));
-
   enable_interrupt(irqn);
 }
 
@@ -438,10 +471,12 @@ sl_status_t sl_interrupt_manager_set_irq_handler(int32_t irqn,
   CORE_DECLARE_IRQ_STATE;
 
   if ((irqn < 0) || (irqn >= EXT_IRQ_COUNT)) {
+    SLI_INTERRUPT_MANAGER_LOG_WARN("Set IRQ handler: invalid irqn %d", (int)irqn);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   if (!is_interrupt_manager_initialized) {
+    SLI_INTERRUPT_MANAGER_LOG_WARN("Set IRQ handler: interrupt_manager is not initialized (irqn %d)", (int)irqn);
     return SL_STATUS_NOT_INITIALIZED;
   }
 
@@ -458,11 +493,15 @@ sl_status_t sl_interrupt_manager_set_irq_handler(int32_t irqn,
   // Disable irqn interrupt while updating the handler's address
   sl_interrupt_manager_disable_irq(irqn);
 
+  INTERRUPT_MANAGER_DISABLE_MPU();
+
   table[irqn + 16] = handler;
 
   // Make sure all explicit memory access are complete before proceeding.
   __DSB();
   __ISB();
+
+  INTERRUPT_MANAGER_ENABLE_MPU();
 
   CORE_EXIT_CRITICAL();
 
@@ -472,8 +511,9 @@ sl_status_t sl_interrupt_manager_set_irq_handler(int32_t irqn,
 
   return SL_STATUS_OK;
 #else
-  (void) irqn;
-  (void) handler;
+  SLI_INTERRUPT_MANAGER_LOG_WARN("Set IRQ handler: vector table not in RAM (irqn %d)", (int)irqn);
+  (void)irqn;
+  (void)handler;
   return SL_STATUS_INVALID_CONFIGURATION;
 #endif /* VECTOR_TABLE_IN_RAM */
 }
@@ -490,10 +530,12 @@ sl_status_t sli_interrupt_manager_set_core_exception_handler(int32_t irqn,
   CORE_DECLARE_IRQ_STATE;
 
   if ((irqn >= 0) || (irqn < -CORTEX_INTERRUPTS)) {
+    SLI_INTERRUPT_MANAGER_LOG_WARN("Set core exception handler: invalid irqn %d", (int)irqn);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   if (!is_interrupt_manager_initialized) {
+    SLI_INTERRUPT_MANAGER_LOG_WARN("Set core exception handler: interrupt_manager is not initialized (irqn %d)", (int)irqn);
     return SL_STATUS_NOT_INITIALIZED;
   }
 
@@ -505,14 +547,19 @@ sl_status_t sli_interrupt_manager_set_core_exception_handler(int32_t irqn,
   table = (sl_interrupt_manager_irq_handler_t*)SCB->VTOR;
 #endif
 
+  INTERRUPT_MANAGER_DISABLE_MPU();
+
   table[irqn + CORTEX_INTERRUPTS] = handler;
 
   __DSB();
   __ISB();
 
+  INTERRUPT_MANAGER_ENABLE_MPU();
+
   CORE_EXIT_CRITICAL();
   return SL_STATUS_OK;
 #else
+  SLI_INTERRUPT_MANAGER_LOG_WARN("Set core exception handler: vector table not in RAM (irqn %d)", (int)irqn);
   (void)irqn;
   (void)handler;
   return SL_STATUS_INVALID_CONFIGURATION;
@@ -651,6 +698,32 @@ static uint32_t get_priority(int32_t irqn)
 {
   return __NVIC_GetPriority((IRQn_Type)irqn);
 }
+
+#if defined(SL_INTERRUPT_MANAGER_DISABLE_MPU)
+/**************************************************************************//**
+ * @brief
+ *   Disable the MPU to allow writes to the RAM vector table region.
+ * @return The MPU control register value before the MPU was disabled.
+ *****************************************************************************/
+static uint32_t disable_mpu(void)
+{
+  uint32_t mpu_ctrl = MPU->CTRL;
+  ARM_MPU_Disable();
+  return mpu_ctrl;
+}
+
+/**************************************************************************//**
+ * @brief
+ *   Enable the MPU to restore RAM vector table read-only protection.
+ * @param mpu_ctrl The MPU control register value to restore.
+ *****************************************************************************/
+static void enable_mpu(uint32_t mpu_ctrl)
+{
+  if (mpu_ctrl & MPU_CTRL_ENABLE_Msk) {
+    ARM_MPU_Enable(mpu_ctrl);
+  }
+}
+#endif /* DISABLE_MPU_VECTOR_TABLE_IN_RAM */
 
 /***************************************************************************//**
  * @brief

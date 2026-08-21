@@ -107,10 +107,6 @@ template_contribution:
       include: app.h
       handler: ble_peer_manager_on_event_reflector
 
-post_build:
-  - path: ../../postbuild_profile/bt_common_s2.slpb
-    condition: [device_series_2, bootloader_app_properties]
-
 tag:
   - prebuilt_demo
   - toolchain:gcc

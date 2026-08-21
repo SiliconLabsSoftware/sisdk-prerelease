@@ -41,7 +41,7 @@ RouterTable::RouterTable(Instance &aInstance)
     , mRouters(aInstance)
     , mChangedTask(aInstance)
     , mRouterIdSequenceLastUpdated(0)
-    , mRouterIdSequence(Random::NonCrypto::GetUint8())
+    , mRouterIdSequence(Random::NonCrypto::Generate<uint8_t>())
     , mEvents(0)
 #if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
     , mMinRouterId(0)
@@ -61,10 +61,10 @@ void RouterTable::Clear(void)
     SignalTableChanged(events);
 }
 
-bool RouterTable::IsRouteTlvIdSequenceMoreRecent(const Mle::RouteTlv &aRouteTlv) const
+bool RouterTable::IsRouteTlvIdSequenceMoreRecent(const Mle::RouteTlv::Data &aRouteTlvData) const
 {
     return (GetActiveRouterCount() == 0) ||
-           SerialNumber::IsGreater(aRouteTlv.GetRouterIdSequence(), GetRouterIdSequence());
+           SerialNumber::IsGreater(aRouteTlvData.GetRouterIdSequence(), GetRouterIdSequence());
 }
 
 void RouterTable::ClearNeighbors(void)
@@ -168,7 +168,7 @@ Router *RouterTable::Allocate(void)
             // selected ID with current entry in the list with
             // probably `1/numAvailable`.
 
-            if (Random::NonCrypto::GetUint8InRange(0, numAvailable) == 0)
+            if (Random::NonCrypto::GenerateUpToExcluding(numAvailable) == 0)
             {
                 selectedRouterId = routerId;
             }
@@ -525,6 +525,14 @@ uint16_t RouterTable::GetNextHop(uint16_t aDestRloc16) const
     return nextHopRloc16;
 }
 
+void RouterTable::UpdateRouterIdMask(const Mle::RouteTlv::Data &aRouteTlvData)
+{
+    Mle::RouterIdMask routerIdMask;
+
+    aRouteTlvData.DetermineRouterIdMask(routerIdMask);
+    UpdateRouterIdMask(routerIdMask);
+}
+
 void RouterTable::UpdateRouterIdMask(const Mle::RouterIdMask &aRouterIdMask)
 {
     bool shouldAdd = false;
@@ -575,11 +583,12 @@ exit:
     return;
 }
 
-void RouterTable::UpdateRoutes(const Mle::RouteTlv &aRouteTlv, uint8_t aNeighborId)
+void RouterTable::UpdateRoutes(const Mle::RouteTlv::Data &aRouteTlvData, uint8_t aNeighborId)
 {
-    Router           *neighbor;
-    Mle::RouterIdMask finitePathCostIds;
-    uint8_t           linkCostToNeighbor;
+    Router                           *neighbor;
+    Mle::RouterIdMask                 finitePathCostIds;
+    uint8_t                           linkCostToNeighbor;
+    const Mle::RouteTlv::Data::Entry *matchingEntry;
 
     neighbor = FindRouterById(aNeighborId);
     VerifyOrExit(neighbor != nullptr);
@@ -600,66 +609,51 @@ void RouterTable::UpdateRoutes(const Mle::RouteTlv &aRouteTlv, uint8_t aNeighbor
     }
 
     // Find the entry corresponding to our Router ID in the received
-    // `aRouteTlv` to get the `LinkQualityIn` from the perspective of
-    // neighbor. We use this to update our `LinkQualityOut` to the
+    // `aRouteTlvData` to get the `LinkQualityIn` from the perspective
+    // of neighbor. We use this to update our `LinkQualityOut` to the
     // neighbor.
 
-    for (uint8_t routerId = 0, index = 0; routerId <= Mle::kMaxRouterId;
-         index += aRouteTlv.IsRouterIdSet(routerId) ? 1 : 0, routerId++)
+    matchingEntry = aRouteTlvData.GetEntries().FindMatching(Mle::RouterIdFromRloc16(Get<Mle::Mle>().GetRloc16()));
+
+    if (matchingEntry != nullptr)
     {
-        if (!Get<Mle::Mle>().MatchesRouterId(routerId))
+        LinkQuality linkQuality = matchingEntry->GetLinkQualityIn();
+
+        if (neighbor->GetLinkQualityOut() != linkQuality)
         {
-            continue;
+            neighbor->SetLinkQualityOut(linkQuality);
+            SignalTableChanged(kEventLinkQualityOutChanged);
         }
 
-        if (aRouteTlv.IsRouterIdSet(routerId))
+        // If the `aRouteTlvData` indicates that the neighboring
+        // router claims to have no link to us (by setting its
+        // `GetLinkQualityOut()` towards us as `kLinkQuality0`),
+        // and we have previously established a link with it, and
+        // our two-way link quality to this router is at least
+        // `kLinkQuality2`, we schedule a unicast Advertisement to
+        // be sent to this neighbor. This helps expedite recovery
+        // from any temporary router link quality mismatch.
+        // Otherwise, the neighboring router will continue to
+        // advertise that it has no link to us until our next
+        // trickle timer-triggered Advertisement transmission
+        // (which can be up to 32 seconds later).
+
+        if (neighbor->IsStateValid() && (matchingEntry->GetLinkQualityOut() == kLinkQuality0) &&
+            (neighbor->GetTwoWayLinkQuality() >= kLinkQuality2))
         {
-            LinkQuality linkQuality = aRouteTlv.GetLinkQualityIn(index);
-
-            if (neighbor->GetLinkQualityOut() != linkQuality)
-            {
-                neighbor->SetLinkQualityOut(linkQuality);
-                SignalTableChanged(kEventLinkQualityOutChanged);
-            }
-
-            // If the `aRouteTlv` indicates that the neighboring
-            // router claims to have no link to us (by setting its
-            // `GetLinkQualityOut()` towards us as `kLinkQuality0`),
-            // and we have previously established a link with it, and
-            // our two-way link quality to this router is at least
-            // `kLinkQuality2`, we schedule a unicast Advertisement to
-            // be sent to this neighbor. This helps expedite recovery
-            // from any temporary router link quality mismatch.
-            // Otherwise, the neighboring router will continue to
-            // advertise that it has no link to us until our next
-            // trickle timer-triggered Advertisement transmission
-            // (which can be up to 32 seconds later).
-
-            if (neighbor->IsStateValid() && (aRouteTlv.GetLinkQualityOut(index) == kLinkQuality0) &&
-                (neighbor->GetTwoWayLinkQuality() >= kLinkQuality2))
-            {
-                Get<Mle::Mle>().ScheduleUnicastAdvertisementTo(*neighbor);
-            }
+            Get<Mle::Mle>().ScheduleUnicastAdvertisementTo(*neighbor);
         }
-
-        break;
     }
 
     linkCostToNeighbor = GetLinkCost(*neighbor);
 
-    for (uint8_t routerId = 0, index = 0; routerId <= Mle::kMaxRouterId;
-         index += aRouteTlv.IsRouterIdSet(routerId) ? 1 : 0, routerId++)
+    for (const Mle::RouteTlv::Data::Entry &entry : aRouteTlvData.GetEntries())
     {
         Router *router;
         Router *nextHop;
         uint8_t cost;
 
-        if (!aRouteTlv.IsRouterIdSet(routerId))
-        {
-            continue;
-        }
-
-        router = FindRouterById(routerId);
+        router = FindRouterById(entry.GetRouterId());
 
         if (router == nullptr || Get<Mle::Mle>().HasRloc16(router->GetRloc16()) || router == neighbor)
         {
@@ -668,7 +662,7 @@ void RouterTable::UpdateRoutes(const Mle::RouteTlv &aRouteTlv, uint8_t aNeighbor
 
         nextHop = FindNextHopTowards(*router);
 
-        cost = aRouteTlv.GetRouteCost(index);
+        cost = entry.GetRouteCost();
         cost = (cost == 0) ? Mle::kMaxRouteCost : cost;
 
         if ((nextHop == nullptr) || (nextHop == neighbor))
@@ -718,28 +712,27 @@ exit:
     return;
 }
 
-void RouterTable::UpdateRouterOnFtdChild(const Mle::RouteTlv &aRouteTlv, uint8_t aParentId)
+void RouterTable::UpdateRouterOnFtdChild(const Mle::RouteTlv::Data &aRouteTlvData, uint8_t aParentId)
 {
-    for (uint8_t routerId = 0, index = 0; routerId <= Mle::kMaxRouterId;
-         index += aRouteTlv.IsRouterIdSet(routerId) ? 1 : 0, routerId++)
+    for (const Mle::RouteTlv::Data::Entry &entry : aRouteTlvData.GetEntries())
     {
         Router *router;
         uint8_t cost;
         uint8_t nextHopId;
 
-        if (!aRouteTlv.IsRouterIdSet(routerId) || (routerId == aParentId))
+        if (entry.GetRouterId() == aParentId)
         {
             continue;
         }
 
-        router = FindRouterById(routerId);
+        router = FindRouterById(entry.GetRouterId());
 
         if (router == nullptr)
         {
             continue;
         }
 
-        cost      = aRouteTlv.GetRouteCost(index);
+        cost      = entry.GetRouteCost();
         nextHopId = (cost == 0) ? Mle::kInvalidRouterId : aParentId;
 
         if (router->SetNextHopAndCost(nextHopId, cost))
@@ -763,16 +756,24 @@ void RouterTable::GetRouterIdMask(Mle::RouterIdMask &aRouterIdMask) const
     }
 }
 
-void RouterTable::FillRouteTlv(Mle::RouteTlv &aRouteTlv, const Neighbor *aNeighbor) const
+Error RouterTable::AppendRouteTlv(Message &aMessage, uint8_t aTlvType, uint16_t aDestRloc16) const
 {
-    uint8_t routerIndex;
+    Error             error;
+    Tlv::Bookmark     tlvBookmark;
+    Mle::RouterIdMask routerIdMask;
+#if OPENTHREAD_CONFIG_MLE_LONG_ROUTES_ENABLE
+    bool isEven = true;
+#endif
 
-    GetRouterIdMask(aRouteTlv.GetRouterIdMask());
+    //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Determine the Router ID mask to use.
 
-    if ((aNeighbor != nullptr) && Mle::IsRouterRloc16(aNeighbor->GetRloc16()))
+    GetRouterIdMask(routerIdMask);
+
+    if (aDestRloc16 != Mle::kInvalidRloc16)
     {
-        // Sending a Link Accept message that may require truncation
-        // of Route64 TLV.
+        // If a valid destination RLOC16 is provided, we use a compact
+        // format for the Route TLV (used for Link Accept messages).
 
         uint8_t routerCount = mRouters.GetLength();
 
@@ -785,35 +786,45 @@ void RouterTable::FillRouteTlv(Mle::RouteTlv &aRouteTlv, const Neighbor *aNeighb
                     break;
                 }
 
-                if (Get<Mle::Mle>().MatchesRouterId(routerId) || (routerId == aNeighbor->GetRouterId()) ||
+                // The Route TLV must include entries for this device, the
+                // leader, and the destination router (the neighbor itself or
+                // its parent if it is a child).
+
+                if (Get<Mle::Mle>().MatchesRouterId(routerId) || (routerId == Mle::RouterIdFromRloc16(aDestRloc16)) ||
                     (routerId == Get<Mle::Mle>().GetLeaderId()))
                 {
-                    // Route64 TLV must contain this device and the
-                    // neighboring router to ensure that at least this
-                    // link can be established.
                     continue;
                 }
 
-                if (aRouteTlv.GetRouterIdMask().IsAllocated(routerId))
+                if (routerIdMask.IsAllocated(routerId))
                 {
-                    aRouteTlv.GetRouterIdMask().Remove(routerId);
+                    routerIdMask.Remove(routerId);
                     routerCount--;
                 }
             }
 
             // Ensure that the neighbor will process the current
-            // Route64 TLV in a subsequent message exchange
-            aRouteTlv.GetRouterIdMask().SetSequence(GetRouterIdSequence() - kLinkAcceptSequenceRollback);
+            // Route TLV in a subsequent message exchange
+            routerIdMask.SetSequence(GetRouterIdSequence() - kLinkAcceptSequenceRollback);
         }
     }
 
-    routerIndex = 0;
+    //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Append TLV: Router ID Mask followed by Route Data Entries per
+    // allocated router in the mask
+
+    SuccessOrExit(error = Tlv::StartTlv(aMessage, aTlvType, tlvBookmark));
+
+    SuccessOrExit(error = aMessage.Append(routerIdMask));
 
     for (uint8_t routerId = 0; routerId <= Mle::kMaxRouterId; routerId++)
     {
-        uint16_t routerRloc16;
+        uint16_t    routerRloc16;
+        LinkQuality lqIn;
+        LinkQuality lqOut;
+        uint8_t     routeCost;
 
-        if (!aRouteTlv.GetRouterIdMask().IsAllocated(routerId))
+        if (!routerIdMask.IsAllocated(routerId))
         {
             continue;
         }
@@ -822,29 +833,31 @@ void RouterTable::FillRouteTlv(Mle::RouteTlv &aRouteTlv, const Neighbor *aNeighb
 
         if (Get<Mle::Mle>().HasRloc16(routerRloc16))
         {
-            aRouteTlv.SetRouteData(routerIndex, kLinkQuality0, kLinkQuality0, 1);
+            lqIn      = kLinkQuality0;
+            lqOut     = kLinkQuality0;
+            routeCost = 1;
         }
         else
         {
             const Router *router = FindRouterById(routerId);
-            uint8_t       pathCost;
 
-            OT_ASSERT(router != nullptr);
-
-            pathCost = GetPathCost(routerRloc16);
-
-            if (pathCost >= Mle::kMaxRouteCost)
-            {
-                pathCost = 0;
-            }
-
-            aRouteTlv.SetRouteData(routerIndex, router->GetLinkQualityIn(), router->GetLinkQualityOut(), pathCost);
+            lqIn      = router->GetLinkQualityIn();
+            lqOut     = router->GetLinkQualityOut();
+            routeCost = GetPathCost(routerRloc16);
         }
 
-        routerIndex++;
+#if !OPENTHREAD_CONFIG_MLE_LONG_ROUTES_ENABLE
+        SuccessOrExit(error = Mle::RouteTlv::AppendRouteDataEntry(aMessage, lqIn, lqOut, routeCost));
+#else
+        SuccessOrExit(error = Mle::RouteTlv::AppendRouteDataEntry(aMessage, lqIn, lqOut, routeCost, isEven));
+        isEven = !isEven;
+#endif
     }
 
-    aRouteTlv.SetRouteDataEntryCount(routerIndex);
+    error = Tlv::EndTlv(aMessage, tlvBookmark);
+
+exit:
+    return error;
 }
 
 void RouterTable::HandleTimeTick(void)

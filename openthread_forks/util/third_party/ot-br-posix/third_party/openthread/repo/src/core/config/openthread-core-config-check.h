@@ -97,7 +97,7 @@
 #endif
 
 #ifdef OPENTHREAD_ENABLE_MTD_NETWORK_DIAGNOSTIC
-#error "OPENTHREAD_ENABLE_MTD_NETWORK_DIAGNOSTIC was replaces by OPENTHREAD_CONFIG_TMF_NETWORK_DIAG_MTD_ENABLE."
+#error "OPENTHREAD_ENABLE_MTD_NETWORK_DIAGNOSTIC was replaced by OPENTHREAD_CONFIG_TMF_NETWORK_DIAG_MTD_ENABLE."
 #endif
 
 #ifdef OPENTHREAD_ENABLE_APPLICATION_COAP_SECURE
@@ -705,6 +705,16 @@
 
 #ifdef OPENTHREAD_CONFIG_MLE_IP_ADDRS_TO_REGISTER
 #error "OPENTHREAD_CONFIG_MLE_IP_ADDRS_TO_REGISTER is removed. All addresses are now registered."
+#endif
+
+#ifdef OPENTHREAD_CONFIG_MAC_MULTIPURPOSE_FRAME
+#error "OPENTHREAD_CONFIG_MAC_MULTIPURPOSE_FRAME was removed and is no longer supported. " \
+       "It was originally implemented as a provisional solution for the wake mechanism."
+#endif
+
+#ifdef OPENTHREAD_CONFIG_MAC_SOFTWARE_RX_ON_WHEN_IDLE_ENABLE
+#error "OPENTHREAD_CONFIG_MAC_SOFTWARE_RX_ON_WHEN_IDLE_ENABLE was removed. " \
+       "Software support for RxOnWhenIdle in SubMac was never implemented."
 #endif
 
 #endif // OT_CORE_CONFIG_OPENTHREAD_CORE_CONFIG_CHECK_H_

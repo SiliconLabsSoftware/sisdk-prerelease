@@ -42,6 +42,7 @@ extern "C" {
 extern sl_peripheral_t sl_uart_{{ instance }}_peripheral;
 extern sl_uart_handle_t sl_uart_{{ instance }}_handle;
 extern const sl_uart_pin_config_t sl_uart_{{ instance }}_pin_config;
+extern const sl_uart_config_t sl_uart_{{ instance }}_line_config;
 {% endfor %}
 
 #ifdef __cplusplus

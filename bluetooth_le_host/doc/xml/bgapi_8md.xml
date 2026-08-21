@@ -71,8 +71,8 @@
 <codeline><highlight class="normal">Calling<sp/>from<sp/>such<sp/>a<sp/>context<sp/>can<sp/>return<sp/>an<sp/>error<sp/>even<sp/>though<sp/>the<sp/>command<sp/>may</highlight></codeline>
 <codeline><highlight class="normal">already<sp/>have<sp/>been<sp/>handed<sp/>to<sp/>the<sp/>Bluetooth<sp/>task,<sp/>and<sp/>it<sp/>may<sp/>disturb<sp/>BGAPI</highlight></codeline>
 <codeline><highlight class="normal">inter-process<sp/>communication<sp/>locking.<sp/>Use<sp/>a<sp/>dedicated<sp/>application<sp/>task,<sp/>or<sp/>call</highlight></codeline>
-<codeline><highlight class="normal">@ref<sp/>sl_bt_external_signal<sp/>from<sp/>the<sp/>restricted<sp/>context<sp/>and<sp/>perform<sp/>BGAPI<sp/>calls</highlight></codeline>
-<codeline><highlight class="normal">when<sp/>handling<sp/>@ref<sp/>sl_bt_evt_system_external_signal<sp/>in<sp/>a<sp/>normal<sp/>task<sp/>context.</highlight></codeline>
+<codeline><highlight class="normal">sl_bt_external_signal<sp/>from<sp/>the<sp/>restricted<sp/>context<sp/>and<sp/>perform<sp/>BGAPI<sp/>calls</highlight></codeline>
+<codeline><highlight class="normal">when<sp/>handling<sp/>sl_bt_evt_system_external_signal<sp/>in<sp/>a<sp/>normal<sp/>task<sp/>context.</highlight></codeline>
 <codeline></codeline>
 <codeline><highlight class="normal">#<sp/>Payload<sp/>Length<sp/>Calculation<sp/>{#bgapi_payload_length_calculation}</highlight></codeline>
 <codeline></codeline>

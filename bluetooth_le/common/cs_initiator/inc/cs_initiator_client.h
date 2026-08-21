@@ -117,7 +117,8 @@
     .snr_control_reflector =          sl_bt_cs_snr_control_adjustment_not_applied,         \
     .use_real_time_ras_mode =         CS_INITIATOR_RAS_MODE_USE_REAL_TIME_MODE,            \
     .channel_map.data =               CS_INITIATOR_DEFAULT_CHANNEL_MAP,                    \
-    .channel_map_preset =             CS_INITIATOR_DEFAULT_CHANNEL_MAP_PRESET              \
+    .channel_map_preset =             CS_INITIATOR_DEFAULT_CHANNEL_MAP_PRESET,             \
+    .remote_t_sw_us =                 0                                                    \
   }
 
 #define RTL_CONFIG_DEFAULT                       \
@@ -270,6 +271,7 @@ typedef struct {
   uint8_t use_real_time_ras_mode;
   uint8_t channel_map_preset;
   sl_bt_cs_channel_map_t channel_map;
+  uint8_t remote_t_sw_us;
 } SL_ATTRIBUTE_PACKED cs_initiator_config_t;
 SL_PACK_END()
 

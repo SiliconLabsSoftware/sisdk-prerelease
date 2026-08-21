@@ -55,20 +55,26 @@ extern "C" {
 // ----------------------------------------------------------------------------
 // ENUMS
 
+/// UART Parity mode.
 SL_ENUM(sl_uart_parity_t) {
-  SL_UART_PARITY_NONE,
+  SL_UART_PARITY_NONE = 0,
   SL_UART_PARITY_ODD,
   SL_UART_PARITY_EVEN
 };
 
+/// Number of UART stop bits.
 SL_ENUM(sl_uart_stop_bits_t) {
-  SL_UART_STOP_BITS_0_5,
+  SL_UART_STOP_BITS_0_5 = 0,
   SL_UART_STOP_BITS_1,
   SL_UART_STOP_BITS_1_5,
   SL_UART_STOP_BITS_2
 };
 
+/// Number of UART data bits.
 SL_ENUM(sl_uart_data_bits_t) {
+  SL_UART_DATA_BITS_4 = 4,
+  SL_UART_DATA_BITS_5,
+  SL_UART_DATA_BITS_6,
   SL_UART_DATA_BITS_7,
   SL_UART_DATA_BITS_8,
   SL_UART_DATA_BITS_9,
@@ -81,26 +87,39 @@ SL_ENUM(sl_uart_data_bits_t) {
   SL_UART_DATA_BITS_16
 };
 
+/// UART Flow control mode.
 SL_ENUM(sl_uart_flow_control_t) {
-  SL_UART_FLOW_CONTROL_NONE,
+  SL_UART_FLOW_CONTROL_NONE = 0,
   SL_UART_FLOW_CONTROL_CTS_RTS,
   SL_UART_FLOW_CONTROL_SOFT
+};
+
+/// UART Oversampling mode.
+SL_ENUM(sl_uart_oversampling_t) {
+  SL_UART_OVERSAMPLING_0 = 0,
+  SL_UART_OVERSAMPLING_4 = 4,
+  SL_UART_OVERSAMPLING_6 = 6,
+  SL_UART_OVERSAMPLING_8 = 8,
+  SL_UART_OVERSAMPLING_16 = 16
 };
 
 // ----------------------------------------------------------------------------
 // DEFINES
 
+/// Auto baud rate detection.
 #define SL_UART_BAUDRATE_AUTO  0xFFFFFFFF
 
 // ----------------------------------------------------------------------------
 // TYPEDEFS
 
+/// UART configuration.
 typedef struct uart_config {
   uint32_t baudrate;
   sl_uart_parity_t parity;
   sl_uart_stop_bits_t stop_bits;
   sl_uart_data_bits_t data_bits;
   sl_uart_flow_control_t flow_control;
+  sl_uart_oversampling_t oversampling;
 } sl_uart_config_t;
 
 // ----------------------------------------------------------------------------
@@ -115,31 +134,13 @@ typedef struct uart_config {
  ******************************************************************************/
 static inline uint8_t sl_uart_data_bits_to_count(sl_uart_data_bits_t data_bits)
 {
-  switch (data_bits) {
-    case SL_UART_DATA_BITS_7:
-      return 7;
-    case SL_UART_DATA_BITS_8:
-      return 8;
-    case SL_UART_DATA_BITS_9:
-      return 9;
-    case SL_UART_DATA_BITS_10:
-      return 10;
-    case SL_UART_DATA_BITS_11:
-      return 11;
-    case SL_UART_DATA_BITS_12:
-      return 12;
-    case SL_UART_DATA_BITS_13:
-      return 13;
-    case SL_UART_DATA_BITS_14:
-      return 14;
-    case SL_UART_DATA_BITS_15:
-      return 15;
-    case SL_UART_DATA_BITS_16:
-      return 16;
-    default:
-      EFM_ASSERT(false);
-      return 8;
+  if (data_bits < SL_UART_DATA_BITS_4
+      || data_bits > SL_UART_DATA_BITS_16) {
+    EFM_ASSERT(false);
+    return 8;
   }
+
+  return (uint8_t)data_bits;
 }
 
 /***************************************************************************//**
@@ -200,6 +201,32 @@ static inline uint8_t sl_uart_config_get_frame_size(sl_uart_config_t config)
          + sl_uart_data_bits_to_count(config.data_bits)
          + sl_uart_parity_to_count(config.parity)
          + sl_uart_stop_bits_to_count(config.stop_bits);
+}
+
+/***************************************************************************//**
+ * Converts the UART oversampling to a number of bits.
+ *
+ * @param[in]  oversampling UART oversampling.
+ *
+ * @return The oversampling factor.
+ ******************************************************************************/
+static inline uint8_t sl_uart_oversampling_to_count(sl_uart_oversampling_t oversampling)
+{
+  switch (oversampling) {
+    case SL_UART_OVERSAMPLING_0:
+      return SL_UART_OVERSAMPLING_0;
+    case SL_UART_OVERSAMPLING_4:
+      return SL_UART_OVERSAMPLING_4;
+    case SL_UART_OVERSAMPLING_6:
+      return SL_UART_OVERSAMPLING_6;
+    case SL_UART_OVERSAMPLING_8:
+      return SL_UART_OVERSAMPLING_8;
+    case SL_UART_OVERSAMPLING_16:
+      return SL_UART_OVERSAMPLING_16;
+    default:
+      EFM_ASSERT(false);
+      return SL_UART_OVERSAMPLING_16;
+  }
 }
 
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN

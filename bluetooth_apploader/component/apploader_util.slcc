@@ -22,6 +22,9 @@ provides:
 template_contribution:
 - name: component_catalog
   value: apploader_util
+documentation:
+  docset: mcu-bootloader
+  document: using-gecko-bootloader-with-bluetooth-apps/03-bluetooth-ota-upgrade
 metadata:
   sbom:
     license: MSLA

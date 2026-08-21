@@ -399,7 +399,16 @@ void sl_rail_test_internal_app_init(void)
   }
 
 #if defined(SL_CATALOG_SL_RAIL_UTIL_THERMISTOR_PRESENT)
-  sl_rail_config_hfxo_compensation(railHandle, &compensationConfig);
+  // Capability probe belongs on the supports API, not a 9-float coefficient get.
+  if (sl_rail_supports_hfxo_compensation(railHandle)) {
+    compensationConfig.zone_temperature_celsius =
+      SL_RAIL_HFXO_COMP_ZONE_TEMPERATURE_C_DEFAULT;
+    compensationConfig.delta_nominal_celsius =
+      SL_RAIL_HFXO_COMP_DELTA_NOMINAL_C_DEFAULT;
+    compensationConfig.delta_critical_celsius =
+      SL_RAIL_HFXO_COMP_DELTA_CRITICAL_C_DEFAULT;
+    sl_rail_config_hfxo_compensation(railHandle, &compensationConfig);
+  }
 #endif
 
   // Change the default TX packet payload to be protocol-specific.

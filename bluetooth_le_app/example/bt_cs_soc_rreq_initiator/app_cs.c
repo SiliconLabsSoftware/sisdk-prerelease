@@ -106,7 +106,7 @@ static void select_antennas(uint8_t conn_handle,
                             uint8_t remote_antenna_count,
                             uint8_t max_antenna_paths,
                             cs_procedure_parameters_t *procedure_parameters,
-                            cs_algo_config_t *algo_config);
+                            uint8_t *num_antenna_paths_out);
 
 static void app_on_cs_manager_event(uint8_t conn_handle,
                                     uint8_t config_id,
@@ -127,6 +127,7 @@ static cs_rreq_create_config_t rreq_create_config;
 
 // Algo
 static cs_algo_config_t algo_config;
+static uint8_t negotiated_num_antenna_paths;
 
 // CS Manager
 static cs_manager_instance_config_t manager_instance_config;
@@ -315,6 +316,10 @@ void app_cs_check_supported_capabilities(const sl_bt_msg_t *evt)
   conn_handle = remote_evt->connection;
   app_cs_log_supported_capabilities(conn_handle, &local_caps, remote_evt);
 
+  // Save the remote antenna switching time capability so it can be used to
+  // compute T_SW_time in CS Algo.
+  algo_config.remote_t_sw_us = remote_evt->t_sw_times;
+
   // initiator config is set to CS_SYNC_PHY 2M
   // but local/remote device only supports CS_SYNC_PHY 1M
   if (cs_config.cs_sync_phy == sl_bt_gap_phy_2m
@@ -383,7 +388,7 @@ void app_cs_check_supported_capabilities(const sl_bt_msg_t *evt)
                   remote_evt->num_antennas,
                   max_antenna_paths,
                   &procedure_parameters,
-                  &algo_config);
+                  &negotiated_num_antenna_paths);
 }
 
 /******************************************************************************
@@ -423,9 +428,9 @@ static uint8_t get_algo_mode(void)
 
   if (latched_algo_mode == 0xFFu) {
     uint8_t alternative_mode =
-      (CS_ALGO_CONFIG_DEFAULT_ALGO_MODE == CS_ALGO_MODE_REAL_TIME_FAST)
-      ? (uint8_t)CS_ALGO_MODE_STATIC_HIGH_ACCURACY
-      : (uint8_t)CS_ALGO_MODE_REAL_TIME_FAST;
+      (CS_ALGO_CONFIG_DEFAULT_ALGO_MODE == CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED)
+      ? (uint8_t)CS_ALGO_MODE_STATIONARY
+      : (uint8_t)CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED;
 
     if ((SL_SIMPLE_BUTTON_COUNT > 1)
         && (sl_button_get_state(SL_SIMPLE_BUTTON_INSTANCE(1)) == SL_SIMPLE_BUTTON_PRESSED)) {
@@ -483,12 +488,12 @@ static const char *antenna_usage_to_str(const cs_manager_instance_config_t *mana
 static const char *algo_mode_to_str(uint8_t algo_mode)
 {
   switch (algo_mode) {
-    case CS_ALGO_MODE_REAL_TIME_BASIC:
-      return "real time basic (moving)";
-    case CS_ALGO_MODE_STATIC_HIGH_ACCURACY:
-      return "stationary object tracking";
-    case CS_ALGO_MODE_REAL_TIME_FAST:
-      return "real time fast (moving)";
+    case CS_ALGO_MODE_TRACKING_ACCURACY_OPTIMIZED:
+      return "Tracking accuracy optimized (suitable for moving targets)";
+    case CS_ALGO_MODE_STATIONARY:
+      return "Stationary (suitable for stationary targets)";
+    case CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED:
+      return "Tracking latency optimized (suitable for fast moving targets)";
     default:
       return "unknown";
   }
@@ -499,48 +504,48 @@ static void select_antennas(uint8_t conn_handle,
                             uint8_t remote_antenna_count,
                             uint8_t max_antenna_paths,
                             cs_procedure_parameters_t *procedure_parameters,
-                            cs_algo_config_t *algo_config)
+                            uint8_t *num_antenna_paths_out)
 {
   uint8_t antenna_config = procedure_parameters->tone_antenna_config_selection;
   // Prepare for the CS main mode: PBR antenna usage
   if (cs_config.main_mode_type == sl_bt_cs_mode_pbr) {
     switch (procedure_parameters->tone_antenna_config_selection) {
       case CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY:
-        algo_config->num_antenna_paths = 1;
+        *num_antenna_paths_out = 1;
         break;
       case CS_ANTENNA_CONFIG_INDEX_DUAL_LOCAL_SINGLE_REMOTE:
         if ((local_antenna_count >= 2) && (max_antenna_paths >= 2)) {
-          algo_config->num_antenna_paths = 2;
+          *num_antenna_paths_out = 2;
           log_info(APP_INSTANCE_PREFIX "CS - PBR - 2:1 antenna usage set" NL,
                    conn_handle);
         } else {
           log_warning(APP_INSTANCE_PREFIX "CS - PBR - 1:1 antenna usage is possible only!" NL,
                       conn_handle);
           antenna_config = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
-          algo_config->num_antenna_paths = 1;
+          *num_antenna_paths_out = 1;
         }
         break;
       case CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_DUAL_REMOTE:
         if ((remote_antenna_count >= 2) && (max_antenna_paths >= 2)) {
-          algo_config->num_antenna_paths = 2;
+          *num_antenna_paths_out = 2;
           log_info(APP_INSTANCE_PREFIX "CS - PBR - 1:2 antenna usage set" NL,
                    conn_handle);
         } else {
           log_warning(APP_INSTANCE_PREFIX "CS - PBR - 1:1 antenna usage is possible only!" NL,
                       conn_handle);
           antenna_config = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
-          algo_config->num_antenna_paths = 1;
+          *num_antenna_paths_out = 1;
         }
         break;
       case CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY:
         if ((remote_antenna_count >= 2) && (local_antenna_count >= 2)) {
           if (max_antenna_paths >= 4) {
-            algo_config->num_antenna_paths = 4;
+            *num_antenna_paths_out = 4;
             log_info(APP_INSTANCE_PREFIX "CS - PBR - 2:2 antenna usage set" NL,
                      conn_handle);
           } else if (max_antenna_paths >= 2) {
             // Prefer local antenna switching when max paths cannot support 2:2
-            algo_config->num_antenna_paths = 2;
+            *num_antenna_paths_out = 2;
             antenna_config = CS_ANTENNA_CONFIG_INDEX_DUAL_LOCAL_SINGLE_REMOTE;
             log_warning(APP_INSTANCE_PREFIX "CS - PBR - max antenna paths limited to %u; "
                                             "using 2:1 antenna usage" NL,
@@ -552,18 +557,18 @@ static void select_antennas(uint8_t conn_handle,
                         conn_handle,
                         max_antenna_paths);
             antenna_config = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
-            algo_config->num_antenna_paths = 1;
+            *num_antenna_paths_out = 1;
           }
         } else if ((remote_antenna_count == 1) && (local_antenna_count == 2)
                    && (max_antenna_paths >= 2)) {
-          algo_config->num_antenna_paths = 2;
+          *num_antenna_paths_out = 2;
           antenna_config = CS_ANTENNA_CONFIG_INDEX_DUAL_LOCAL_SINGLE_REMOTE;
           log_warning(APP_INSTANCE_PREFIX "CS - PBR - 2:1 antenna usage set" NL,
                       conn_handle);
         } else if ((remote_antenna_count == 2) && (local_antenna_count == 1)
                    && (max_antenna_paths >= 2)) {
           // Only one local antenna: use remote switching when max paths allow
-          algo_config->num_antenna_paths = 2;
+          *num_antenna_paths_out = 2;
           antenna_config = CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_DUAL_REMOTE;
           log_warning(APP_INSTANCE_PREFIX "CS - PBR - 1:2 antenna usage set" NL,
                       conn_handle);
@@ -571,7 +576,7 @@ static void select_antennas(uint8_t conn_handle,
           log_warning(APP_INSTANCE_PREFIX "CS - PBR - 1:1 antenna usage is possible only!" NL,
                       conn_handle);
           antenna_config = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
-          algo_config->num_antenna_paths = 1;
+          *num_antenna_paths_out = 1;
         }
         break;
       default:
@@ -579,12 +584,12 @@ static void select_antennas(uint8_t conn_handle,
                                         "Using the default setting: 1:1 antenna" NL,
                     conn_handle);
         antenna_config = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
-        algo_config->num_antenna_paths = 1;
+        *num_antenna_paths_out = 1;
         break;
     }
     log_debug(APP_INSTANCE_PREFIX "CS - PBR - using %u antenna paths" NL,
               conn_handle,
-              algo_config->num_antenna_paths);
+              *num_antenna_paths_out);
   }
 
   procedure_parameters->tone_antenna_config_selection = antenna_config;
@@ -673,6 +678,7 @@ static void app_on_cs_manager_event(uint8_t conn_handle,
       algo_config.T_IP2_time = config_out.t_ip2_time;
       algo_config.T_FCS_time = config_out.t_fcs_time;
       algo_config.channel_map = config_out.channel_map;
+      algo_config.tone_antenna_config_selection = procedure_parameters.tone_antenna_config_selection;
       // Antenna path has already been set in the select_antennas function
 
       // Create algo instance
@@ -913,7 +919,7 @@ void app_cs_optimize_parameters(uint8_t connection)
                                               algo_config.rtl_config.algo_mode,
                                               channel_map_preset,
                                               clock_frequency_hz,
-                                              algo_config.num_antenna_paths,
+                                              negotiated_num_antenna_paths,
                                               &estimation_time_us);
 
   app_assert_status(sc);
@@ -922,7 +928,7 @@ void app_cs_optimize_parameters(uint8_t connection)
   sc = cs_configurator_optimize(procedure_scheduling,
                                 channel_map_preset, estimation_time_us,
                                 CS_MANAGER_CONFIG_MAX_INSTANCES,
-                                algo_config.num_antenna_paths,
+                                negotiated_num_antenna_paths,
                                 &configurator_parameters);
   if (sc == SL_STATUS_NOT_SUPPORTED) {
     cs_on_error(connection,
@@ -953,7 +959,7 @@ void app_cs_optimize_parameters(uint8_t connection)
                                 channel_map_preset,
                                 estimation_time_us,
                                 CS_MANAGER_CONFIG_MAX_INSTANCES,
-                                algo_config.num_antenna_paths);
+                                negotiated_num_antenna_paths);
   app_assert_status(sc);
   log_info(APP_INSTANCE_PREFIX "Validated parameters for connection interval "
                                "and procedure interval." NL,
@@ -994,25 +1000,23 @@ void app_cs_set_default_connection_parameters(void)
     log_warning(APP_PREFIX "Could not estimate procedure time; keeping default "
                            "connection parameters [sc: 0x%lx]" NL,
                 (unsigned long)sc);
-    return;
-  }
-
-  sc = cs_configurator_optimize(procedure_scheduling,
-                                channel_map_preset,
-                                estimation_time_us,
-                                CS_MANAGER_CONFIG_MAX_INSTANCES,
-                                num_antenna_paths,
-                                &configurator_parameters);
-  if (sc == SL_STATUS_IDLE) {
-    // Custom scheduling: optimize leaves connection_parameters unchanged, so
-    // the configured CS Manager default is applied below.
-    log_info(APP_PREFIX "Custom procedure scheduling; using default "
-                        "connection parameters" NL);
-  } else if (sc != SL_STATUS_OK) {
-    log_warning(APP_PREFIX "Could not optimize default connection parameters; "
-                           "keeping defaults [sc: 0x%lx]" NL,
-                (unsigned long)sc);
-    return;
+  } else {
+    sc = cs_configurator_optimize(procedure_scheduling,
+                                  channel_map_preset,
+                                  estimation_time_us,
+                                  CS_MANAGER_CONFIG_MAX_INSTANCES,
+                                  num_antenna_paths,
+                                  &configurator_parameters);
+    if (sc == SL_STATUS_IDLE) {
+      // Custom scheduling: optimize leaves connection_parameters unchanged, so
+      // the configured CS Manager default is applied below.
+      log_info(APP_PREFIX "Custom procedure scheduling; using default "
+                          "connection parameters" NL);
+    } else if (sc != SL_STATUS_OK) {
+      log_warning(APP_PREFIX "Could not optimize default connection parameters; "
+                             "keeping defaults [sc: 0x%lx]" NL,
+                  (unsigned long)sc);
+    }
   }
 
   // Apply via the CS Manager so the optimized values also become the manager's

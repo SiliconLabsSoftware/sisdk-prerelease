@@ -11,7 +11,7 @@
 #include <serialapi_file.h>
 #include <ZAF_Common_interface.h>
 #include <ZAF_types.h>
-#include <ZAF_version.h>
+#include "zw_version_config.h"
 #include <string.h>
 #include <zpal_misc.h>
 
@@ -549,8 +549,8 @@ void func_id_zw_get_protocol_version(uint8_t inputLength,
   pOutputBuffer[len++] = pAppHandles->pProtocolInfo->ProtocolVersion.Major;
   pOutputBuffer[len++] = pAppHandles->pProtocolInfo->ProtocolVersion.Minor;
   pOutputBuffer[len++] = pAppHandles->pProtocolInfo->ProtocolVersion.Revision;
-  pOutputBuffer[len++] =  (uint8_t)(ZAF_GetBuildNumber() >> 8);
-  pOutputBuffer[len++] =  (uint8_t)(ZAF_GetBuildNumber() );
+  pOutputBuffer[len++] =  (uint8_t)(APP_BUILD_NO >> 8);
+  pOutputBuffer[len++] =  (uint8_t)(APP_BUILD_NO);
   for (uint32_t i = 0; i < git_hash_max_size; i++, len++) {
     pOutputBuffer[len] = git_hash_id[i];
   }

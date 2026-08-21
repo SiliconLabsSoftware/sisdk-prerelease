@@ -8,6 +8,7 @@
 #include "ZAF_PrintAppInfo.h"
 #include "ZAF_AppName.h"
 #include "ZAF_version.h"
+#include "zw_version_config.h"
 #include "zpal_log.h"
 
 void ZAF_PrintAppInfo(void)
@@ -22,5 +23,5 @@ void ZAF_PrintAppInfo(void)
                 "SDK: %d.%d.%d ZAF: %d.%d.%d.%d\n",
                 SDK_GetVersionMajor(), SDK_GetVersionMinor(), SDK_GetVersionPatch(),
                 ZAF_GetVersionMajor(), ZAF_GetVersionMinor(), ZAF_GetVersionPatch(),
-                ZAF_GetBuildNumber());
+                APP_BUILD_NO);
 }

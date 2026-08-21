@@ -48,27 +48,24 @@ def configure(project: Project_Config, hw: Hardware, _):
     board_id = get_board_id(hw)
 
     hfxo = find_hfxo(hw)
+    if hfxo:
+        configure_hfxo(project, hw, board_id, hfxo, board_data)
+
     lfxo = find_lfxo(hw)
+    if lfxo:
+        configure_lfxo(project, hw, board_id, lfxo, board_data)
 
-    # SIXX353 oscillator/tree configs come from clock_manager_freqplan_default_cfg, not clock_manager.
-    if not hw.provides('device_generic_family_sixx353'):
-        if hfxo:
-            configure_hfxo(project, hw, board_id, hfxo, board_data)
-
-        if lfxo:
-            configure_lfxo(project, hw, board_id, lfxo, board_data)
-
-        if hw.provides('device_series_3'):
-            # SIXX301 exposes SL_CLOCK_MANAGER_SOCPLL_*; SIXX353 uses SOCPLL0/1/2-specific wizard IDs instead.
-            try:
-                project.config('SL_CLOCK_MANAGER_SOCPLL_REFCLK').value = 'SOCPLL_CTRL_REFCLKSEL_REF_HFXO'
-                project.config('SL_CLOCK_MANAGER_SOCPLL_FREQ').value = '150000000'
-            except KeyError:
-                pass
-            project.config('SL_CLOCK_MANAGER_HFXO_FREQ').value = '38400000'
-            project.config('SL_CLOCK_MANAGER_HFXO_EN').value = 'SL_CLOCK_MANAGER_HFXO_EN_ENABLE'
-            # divn_value = int(project.config('SL_CLOCK_MANAGER_SOCPLL_DIVN').value)
-            # project.config('SL_CLOCK_MANAGER_SOCPLL_DIVF').value = int((((socpll_freq * 6) / hfxo_freq) - (divn_value + 2)) * 1024)
+    if hw.provides('device_series_3'):
+        # SIXX301 exposes SL_CLOCK_MANAGER_SOCPLL_*; SIXX353 uses SOCPLL0/1/2-specific wizard IDs instead.
+        try:
+            project.config('SL_CLOCK_MANAGER_SOCPLL_REFCLK').value = 'SOCPLL_CTRL_REFCLKSEL_REF_HFXO'
+            project.config('SL_CLOCK_MANAGER_SOCPLL_FREQ').value = '150000000'
+        except KeyError:
+            pass
+        project.config('SL_CLOCK_MANAGER_HFXO_FREQ').value = '38400000'
+        project.config('SL_CLOCK_MANAGER_HFXO_EN').value = 'SL_CLOCK_MANAGER_HFXO_EN_ENABLE'
+        # divn_value = int(project.config('SL_CLOCK_MANAGER_SOCPLL_DIVN').value)
+        # project.config('SL_CLOCK_MANAGER_SOCPLL_DIVF').value = int((((socpll_freq * 6) / hfxo_freq) - (divn_value + 2)) * 1024)
 
     # The `hardware_board` component is provided within the board component,
     # as both the module and board components contain overrides for the clock manager files.

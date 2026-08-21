@@ -6728,6 +6728,8 @@ typedef struct RAIL_HFXOCompensationConfig {
   /**
    * The temperature reference delimiting the nominal zone from the critical one.
    * This field is relevant if enableCompensation is set to true.
+   * Use \ref SL_RAIL_HFXO_COMP_ZONE_TEMPERATURE_C_DEFAULT to request the
+   * platform default.
    *
    * @deprecated RAIL 2.x synonym of \ref sl_rail_hfxo_compensation_config_t::zone_temperature_celsius.
    */
@@ -6735,6 +6737,8 @@ typedef struct RAIL_HFXOCompensationConfig {
   /**
    * The temperature shift used to start a new compensation, in the nominal zone.
    * This field is relevant if enableCompensation is set to true.
+   * Use \ref SL_RAIL_HFXO_COMP_DELTA_NOMINAL_C_DEFAULT to request the
+   * platform default.
    *
    * @deprecated RAIL 2.x synonym of \ref sl_rail_hfxo_compensation_config_t::delta_nominal_celsius.
    */
@@ -6742,11 +6746,115 @@ typedef struct RAIL_HFXOCompensationConfig {
   /**
    * The temperature shift used to start a new compensation, in the critical zone.
    * This field is relevant if enableCompensation is set to true.
+   * Use \ref SL_RAIL_HFXO_COMP_DELTA_CRITICAL_C_DEFAULT to request the
+   * platform default.
    *
    * @deprecated RAIL 2.x synonym of \ref sl_rail_hfxo_compensation_config_t::delta_critical_celsius.
    */
   uint8_t deltaCritical;
 } RAIL_HFXOCompensationConfig_t;
+
+/**
+ * @enum RAIL_HFXOCompensationThresholdMode_t
+ * @brief HFXO compensation temperature threshold selection mode.
+ *
+ * @deprecated RAIL 2.x synonym of
+ *   \ref sl_rail_hfxo_compensation_threshold_mode_t.
+ */
+RAIL_ENUM(RAIL_HFXOCompensationThresholdMode_t) {
+  /**
+   * Use symmetric static thresholds from \ref RAIL_HFXOCompensationConfig_t.
+   */
+  RAIL_HFXO_COMP_THRESHOLD_STATIC,
+  /**
+   * Use asymmetric adaptive thresholds derived from the effective HFXO
+   * temperature compensation curve.
+   */
+  RAIL_HFXO_COMP_THRESHOLD_ADAPTIVE,
+};
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// Self-referencing defines minimize compiler complaints when using RAIL_ENUM
+#define RAIL_HFXO_COMP_THRESHOLD_STATIC   ((RAIL_HFXOCompensationThresholdMode_t) RAIL_HFXO_COMP_THRESHOLD_STATIC)
+#define RAIL_HFXO_COMP_THRESHOLD_ADAPTIVE ((RAIL_HFXOCompensationThresholdMode_t) RAIL_HFXO_COMP_THRESHOLD_ADAPTIVE)
+#endif
+
+/**
+ * @struct RAIL_HFXOCompensationThresholdConfig_t
+ * @brief Configure how HFXO compensation temperature thresholds are selected.
+ *
+ * @deprecated RAIL 2.x synonym of
+ *   \ref sl_rail_hfxo_compensation_threshold_config_t.
+ */
+typedef struct RAIL_HFXOCompensationThresholdConfig {
+  /**
+   * Threshold selection mode.
+   *
+   * @deprecated RAIL 2.x synonym of
+   *   \ref sl_rail_hfxo_compensation_threshold_config_t::mode.
+   */
+  RAIL_HFXOCompensationThresholdMode_t mode;
+  /**
+   * Signed temperature margin, in Celsius degrees, applied by adaptive mode.
+   *
+   * @deprecated RAIL 2.x synonym of
+   *   \ref sl_rail_hfxo_compensation_threshold_config_t::margin_celsius.
+   */
+  int8_t marginCelsius;
+} RAIL_HFXOCompensationThresholdConfig_t;
+
+/**
+ * @struct RAIL_HFXOTempCompensationCoefficients_t
+ * @brief HFXO temperature compensation polynomial coefficients.
+ *
+ * @deprecated RAIL 2.x synonym of
+ *   \ref sl_rail_hfxo_temp_compensation_coefficients_t.
+ */
+typedef struct RAIL_HFXOTempCompensationCoefficients {
+  /**
+   * Force these coefficients instead of using PTE DEVINFO coefficients.
+   *
+   * @deprecated RAIL 2.x synonym of
+   *   \ref sl_rail_hfxo_temp_compensation_coefficients_t::force_coefficients.
+   */
+  bool forceCoefficients;
+  /**
+   * Cubic coefficient A for (T - T0)^3.
+   */
+  float a;
+  /**
+   * DF85G8-scaled quadratic coefficient B.
+   */
+  float b;
+  /**
+   * Quadratic coefficient C for (T - T0)^2.
+   */
+  float c;
+  /**
+   * DF85G8-scaled linear coefficient D.
+   */
+  float d;
+  /**
+   * Linear coefficient E for (T - T0).
+   */
+  float e;
+  /**
+   * Constant coefficient F.
+   */
+  float f;
+  /**
+   * Reference temperature T0, in Celsius.
+   */
+  float t0;
+  /**
+   * PTE DF85G8 tweak term used with coefficients B and D.
+   */
+  float df85g8;
+  /**
+   * PTE F30MG8 frequency offset tweak term.
+   */
+  float f30mg8;
+} RAIL_HFXOTempCompensationCoefficients_t;
 
 /** @} */ // end of group External_Thermistor
 

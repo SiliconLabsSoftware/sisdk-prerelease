@@ -35,6 +35,21 @@
 
 // <h> Event System Configuration
 
+// <o SL_EVENT_SYSTEM_LOG_LEVEL_COMPILE_TIME> Event System Log Level
+// <SL_LOG_CONFIG_LEVEL_NONE  => NONE  (all Event System logs compiled out)
+// <SL_LOG_CONFIG_LEVEL_ERROR => ERROR
+// <SL_LOG_CONFIG_LEVEL_WARN  => WARN
+// <SL_LOG_CONFIG_LEVEL_INFO  => INFO
+// <SL_LOG_CONFIG_LEVEL_DEBUG => DEBUG (most verbose)
+// <i> Requires the Debug Logger. The global compile-time level may restrict
+// <i> this setting further; the global runtime level also filters emission.
+// <i> The runtime level starts here and can be narrowed through
+// <i> sl_event_system_log_level from a debugger.
+// <i> Default: SL_LOG_CONFIG_LEVEL_NONE
+#ifndef SL_EVENT_SYSTEM_LOG_LEVEL_COMPILE_TIME
+#define SL_EVENT_SYSTEM_LOG_LEVEL_COMPILE_TIME  SL_LOG_CONFIG_LEVEL_NONE
+#endif
+
 // <q SL_EVENT_SUPERVISOR_QUEUE_COUNT> Supervisor mode queue maximum events count.
 // <i> Default: 255
 #define SL_EVENT_SUPERVISOR_QUEUE_COUNT    255

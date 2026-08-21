@@ -40,6 +40,7 @@
 #include "tx-security-level.hpp"
 
 #include "common/code_utils.hpp"
+#include "common/const_cast.hpp"
 #include "common/debug.hpp"
 #include "crypto/aes_ccm.hpp"
 #include "mac/mac_frame.hpp"
@@ -317,35 +318,45 @@ void TxSecurityProcessing::Finalize(uint8_t *aTag)
     }
 }
 
-void sli_ot_process_transmit_aes_ccm_device(otRadioFrame &aFrame,
-                                            const uint8_t (&aNonce)[Crypto::AesCcm::kNonceSize],
-                                            const uint8_t                   aTagLength,
-                                            const Mac::Frame::SecurityLevel aSecurityLevel)
+void sli_ot_process_transmit_aes_ccm_device(otRadioFrame                       &aFrame,
+                                            Crypto::AesCcm::Nonce               aNonce,
+                                            const uint8_t                       aTagLength,
+                                            const ot::Mac::Frame::SecurityLevel aSecurityLevel,
+                                            const otMacKeyMaterial             *aRawKey)
 {
-    Mac::TxFrame           &txFrame       = static_cast<Mac::TxFrame &>(aFrame);
-    const uint32_t          payloadLength = txFrame.GetPayloadLength();
-    const uint8_t *const    payload       = txFrame.GetPayload();
-    const otMacKeyMaterial &aesKey        = *aFrame.mInfo.mTxInfo.mAesKey;
+    Mac::TxFrame       &txFrame = static_cast<Mac::TxFrame &>(aFrame);
+    Mac::Frame::Lengths lengths;
+    FrameData           payload;
+
+    SuccessOrAssert(txFrame.DetermineLengths(lengths));
+    SuccessOrAssert(txFrame.GetPayload(payload));
+
+    const uint32_t payloadLength = lengths.mPayload;
+    uint8_t *const payloadBytes  = AsNonConst(payload.GetBytes());
 
     TxSecurityProcessing handler;
 
-    handler.SetKey(aesKey.mKeyMaterial.mKey.m8);
-    handler.Init(txFrame.GetHeaderLength(), payloadLength, aTagLength, aNonce, Crypto::AesCcm::kNonceSize);
-    handler.Header(txFrame.GetHeader(), txFrame.GetHeaderLength());
+    handler.SetKey(aRawKey->mKeyMaterial.mKey.m8);
+    handler.Init(lengths.mHeader,
+                 payloadLength,
+                 aTagLength,
+                 reinterpret_cast<const uint8_t *>(&aNonce),
+                 sizeof(aNonce));
+    handler.Header(txFrame.GetPsdu(), lengths.mHeader);
 
     if (payloadLength > 0)
     {
         if (TxSecurityLevel::EncryptsPayload(aSecurityLevel))
         {
-            handler.Payload(payload, txFrame.GetPayload(), payloadLength);
+            handler.Payload(payloadBytes, payloadBytes, payloadLength);
         }
         else if (TxSecurityLevel::AuthenticatesPayloadWithoutEncryption(aSecurityLevel))
         {
-            handler.PayloadAuthenticateOnly(payload, payloadLength);
+            handler.PayloadAuthenticateOnly(payloadBytes, payloadLength);
         }
     }
 
-    handler.Finalize(txFrame.GetFooter());
+    handler.Finalize(txFrame.GetPsduStartingAt(lengths.mHeader + lengths.mPayload));
 }
 
 #endif // defined(RADIOAES_PRESENT)

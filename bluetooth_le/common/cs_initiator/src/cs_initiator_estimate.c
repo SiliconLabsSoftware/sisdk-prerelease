@@ -193,6 +193,7 @@ static void report_result(cs_initiator_t *initiator)
   enum sl_rtl_error_code rtl_err = SL_RTL_ERROR_NOT_INITIALIZED;
   sl_rtl_cs_estimator_param param;
   sl_rtl_cs_distance_estimate_mode mode;
+  sl_rtl_cs_distance_estimate_mode sub_mode_estimate;
 
   float rtl_value = 0.0f;
   float last_known_distance = 0.0f;
@@ -200,10 +201,16 @@ static void report_result(cs_initiator_t *initiator)
   // initialize result data
   cs_result_initialize_results_data(&initiator->result_data);
 
+  sub_mode_estimate = (initiator->config.cs_sub_mode == sl_bt_cs_mode_pbr)
+                      ? SL_RTL_CS_SUB_MODE_PBR_ESTIMATE
+                      : SL_RTL_CS_SUB_MODE_RTT_ESTIMATE;
+
   if (initiator->config.cs_sub_mode == sl_bt_cs_submode_disabled) {
     mode = SL_RTL_CS_BEST_ESTIMATE;
   } else {
-    mode = SL_RTL_CS_MAIN_MODE_ESTIMATE;
+    mode = (initiator->config.cs_main_mode == sl_bt_cs_mode_pbr)
+           ? SL_RTL_CS_MAIN_MODE_PBR_ESTIMATE
+           : SL_RTL_CS_MAIN_MODE_RTT_ESTIMATE;
   }
 
   // --------------------------------
@@ -238,7 +245,7 @@ static void report_result(cs_initiator_t *initiator)
     // Submode requested
     rtl_err = sl_rtl_cs_get_distance_estimate(&initiator->rtl_handle,
                                               SL_RTL_CS_DISTANCE_ESTIMATE_TYPE_FILTERED,
-                                              SL_RTL_CS_SUB_MODE_ESTIMATE,
+                                              sub_mode_estimate,
                                               &last_known_distance);
     show_rtl_api_call_result(initiator, rtl_err);
     if (rtl_err == SL_RTL_ERROR_SUCCESS) {
@@ -288,7 +295,7 @@ static void report_result(cs_initiator_t *initiator)
   if (initiator->config.cs_sub_mode != sl_bt_cs_submode_disabled) {
     rtl_err = sl_rtl_cs_get_distance_estimate(&initiator->rtl_handle,
                                               SL_RTL_CS_DISTANCE_ESTIMATE_TYPE_RAW,
-                                              SL_RTL_CS_SUB_MODE_ESTIMATE,
+                                              sub_mode_estimate,
                                               &rtl_value);
     show_rtl_api_call_result(initiator, rtl_err);
     if (rtl_err == SL_RTL_ERROR_SUCCESS) {
@@ -338,7 +345,7 @@ static void report_result(cs_initiator_t *initiator)
   if (initiator->config.cs_sub_mode != sl_bt_cs_submode_disabled) {
     rtl_err = sl_rtl_cs_get_distance_estimate_confidence(&initiator->rtl_handle,
                                                          SL_RTL_CS_DISTANCE_ESTIMATE_CONFIDENCE_TYPE_LIKELINESS,
-                                                         SL_RTL_CS_SUB_MODE_ESTIMATE,
+                                                         sub_mode_estimate,
                                                          &rtl_value);
     show_rtl_api_call_result(initiator, rtl_err);
     if (rtl_err == SL_RTL_ERROR_SUCCESS) {
@@ -407,7 +414,7 @@ static void report_result(cs_initiator_t *initiator)
 
   // --------------------------------
   // Get velocity
-  if (initiator->rtl_config.algo_mode == SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST
+  if (initiator->rtl_config.algo_mode == SL_RTL_CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED
       && initiator->config.cs_main_mode == sl_bt_cs_mode_pbr
       && (initiator->config.channel_map_preset == CS_CHANNEL_MAP_PRESET_HIGH
           || initiator->config.channel_map_preset == CS_CHANNEL_MAP_PRESET_MEDIUM)) {
@@ -625,31 +632,16 @@ enum sl_rtl_error_code rtl_library_create_estimator(const uint8_t conn_handle,
 
   cs_mode_converter(cs_main_mode, &main_mode_str, &rtl_main_mode);
   cs_mode_converter(cs_sub_mode, &sub_mode_str, &rtl_sub_mode);
+  cs_parameters->main_mode = (uint8_t)rtl_main_mode;
+  cs_parameters->sub_mode  = (uint8_t)rtl_sub_mode;
 
   initiator_log_debug(INSTANCE_PREFIX "CS mode: %s, Submode: %s" LOG_NL,
                       conn_handle,
                       main_mode_str,
                       sub_mode_str);
-  rtl_err = sl_rtl_cs_set_cs_mode(handle, rtl_main_mode, rtl_sub_mode);
-  if (rtl_err != SL_RTL_ERROR_SUCCESS) {
-    initiator_log_error(INSTANCE_PREFIX "RTL - failed to set CS mode and sub mode! "
-                                        "[E: 0x%x]" LOG_NL,
-                        conn_handle,
-                        rtl_err);
-    return rtl_err;
-  }
-  rtl_err = sl_rtl_cs_set_cs_params(handle, cs_parameters);
-  if (rtl_err != SL_RTL_ERROR_SUCCESS) {
-    initiator_log_error(INSTANCE_PREFIX "RTL - failed to set CS parameters! "
-                                        "[err: 0x%x]" LOG_NL,
-                        conn_handle,
-                        rtl_err);
-    return rtl_err;
-  }
-  initiator_log_debug(INSTANCE_PREFIX "RTL - CS parameters set." LOG_NL, conn_handle);
 
   initiator_log_debug(INSTANCE_PREFIX "RTL - create estimator" LOG_NL, conn_handle);
-  rtl_err = sl_rtl_cs_create_estimator(handle);
+  rtl_err = sl_rtl_cs_create_estimator(handle, cs_parameters);
   if (rtl_err != SL_RTL_ERROR_SUCCESS) {
     initiator_log_error(INSTANCE_PREFIX "RTL - failed to create estimator! [E: 0x%x]" LOG_NL,
                         conn_handle,
@@ -660,6 +652,46 @@ enum sl_rtl_error_code rtl_library_create_estimator(const uint8_t conn_handle,
   }
   (void)conn_handle;
   return rtl_err;
+}
+
+/******************************************************************************
+ * Query and cache the local antenna-switching times capability field.
+ *****************************************************************************/
+uint8_t cs_initiator_get_local_sw_times(void)
+{
+  static bool cached = false;
+  static uint8_t local_sw_times = 0;
+
+  if (!cached) {
+    sl_status_t sc = sl_bt_cs_read_local_supported_capabilities(NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                &local_sw_times,
+                                                                NULL);
+    if (sc != SL_STATUS_OK) {
+      initiator_log_error("RTL - failed to read local CS capabilities! [sc: 0x%lx]" LOG_NL,
+                          (unsigned long)sc);
+      local_sw_times = 0;
+    }
+    cached = true;
+  }
+
+  return local_sw_times;
 }
 
 /******************************************************************************
@@ -722,9 +754,9 @@ void calculate_distance(cs_initiator_t *initiator)
       .step_channels = initiator->data.step_channels
     },
     .initiator_measurement_type = SL_RTL_RAS,
-    .initiator_ras_measurement = &initiator_measurement,
+    .initiator.ras_measurement = &initiator_measurement,
     .reflector_measurement_type = SL_RTL_RAS,
-    .reflector_ras_measurement = &reflector_measurement,
+    .reflector.ras_measurement = &reflector_measurement,
   };
 
   initiator_log_debug(INSTANCE_PREFIX "RTL RAS process start" LOG_NL, initiator->conn_handle);

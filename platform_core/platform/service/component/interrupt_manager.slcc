@@ -11,6 +11,8 @@ metadata:
   sbom:
     license: Zlib
 root_path: platform_core/platform/service/interrupt_manager
+config_file:
+- path: config/sl_interrupt_manager_config.h
 include:
 - path: inc
   file_list:
@@ -18,6 +20,7 @@ include:
 - path: src
   file_list:
   - path: sli_interrupt_manager.h
+  - path: sli_interrupt_manager_log.h
 provides:
 - name: interrupt_manager
 requires:
@@ -28,6 +31,7 @@ requires:
 - name: status
 - name: cmsis_core
 - name: component_catalog
+- name: log_none
 - name: interrupt_manager_vector_table_in_ram
   condition: [device_series_3]
 - name: memory_manager_region

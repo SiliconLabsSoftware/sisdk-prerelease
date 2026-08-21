@@ -211,8 +211,8 @@ psa_status_t sl_sec_man_aes_ccm_crypt(psa_key_id_t sl_psa_key_id,
                                       uint8_t* nonce,
                                       bool encrypt,
                                       const uint8_t* input,
-                                      uint8_t encryption_start_index,
-                                      uint8_t length,
+                                      uint16_t encryption_start_index,
+                                      uint16_t length,
                                       uint8_t mic_length,
                                       uint8_t* output);
 

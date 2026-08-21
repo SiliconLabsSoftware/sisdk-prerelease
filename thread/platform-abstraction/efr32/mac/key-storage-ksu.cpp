@@ -62,7 +62,8 @@ exit:
 
 } // namespace
 
-void KsuMacKeyStoragePolicy::PrepareKeys(otMacKeyMaterial (&aKeys)[kMacKeyCount])
+void KsuMacKeyStoragePolicy::PrepareKeys(otMacKeyMaterial (&aKeys)[kMacKeyCount],
+                                         const otMacKeyMaterial (& /* aRawKeys */)[kMacKeyCount])
 {
     for (otMacKeyMaterial &key : aKeys)
     {

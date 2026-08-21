@@ -26,12 +26,9 @@ enum sl_rtl_error_code sli_rtl_cs_init(sl_rtl_cs_libitem *item);
 enum sl_rtl_error_code sli_rtl_cs_deinit(sl_rtl_cs_libitem *item);
 enum sl_rtl_error_code sli_rtl_cs_set_algo_mode(sl_rtl_cs_libitem *item,
                                                 const sl_rtl_cs_algo_mode mode);
-enum sl_rtl_error_code sli_rtl_cs_set_cs_mode(sl_rtl_cs_libitem *item,
-                                              const sl_rtl_cs_mode main_mode,
-                                              const sl_rtl_cs_mode sub_mode);
-enum sl_rtl_error_code sli_rtl_cs_set_cs_params(sl_rtl_cs_libitem *item,
-                                                const sl_rtl_cs_params *params);
-enum sl_rtl_error_code sli_rtl_cs_create_estimator(sl_rtl_cs_libitem *item);
+enum sl_rtl_error_code sli_rtl_cs_init_cs_params(sl_rtl_cs_params *cs_params);
+enum sl_rtl_error_code sli_rtl_cs_create_estimator(sl_rtl_cs_libitem *item,
+                                                   const sl_rtl_cs_params *params);
 enum sl_rtl_error_code sli_rtl_cs_set_estimator_param(
   sl_rtl_cs_libitem *item,
   const sl_rtl_cs_estimator_param *param);

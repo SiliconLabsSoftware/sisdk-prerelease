@@ -45,8 +45,15 @@ extern "C" {
  *
  * @param[in,out] aFrame       A pointer to the MAC frame buffer that is going to be sent.
  * @param[in]     aExtAddress  A pointer to the extended address used to generate the AES-CCM nonce.
+ * @param[in]     aRawKey      A pointer to the plaintext form of the MAC key
+ *
+ * @retval OT_ERROR_NONE   The frame was secured, or does not have security enabled.
+ * @retval OT_ERROR_PARSE  The frame has security enabled but could not be parsed. The frame is
+ *                         left unsecured and must not be transmitted.
  */
-void sli_ot_process_transmit_aes_ccm(otRadioFrame *aFrame, const otExtAddress *aExtAddress);
+otError sli_ot_process_transmit_aes_ccm(otRadioFrame           *aFrame,
+                                        const otExtAddress     *aExtAddress,
+                                        const otMacKeyMaterial *aRawKey);
 
 /**
  * Returns whether the Frame Pending bit is set.

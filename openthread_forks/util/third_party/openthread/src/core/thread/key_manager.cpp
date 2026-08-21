@@ -175,6 +175,7 @@ KeyManager::KeyManager(Instance &aInstance)
     , mKeyRotationTimer(aInstance)
     , mKekFrameCounter(0)
     , mIsPskcSet(false)
+    , mIsKekSet(false)
 {
     otPlatCryptoInit();
 
@@ -339,19 +340,14 @@ void KeyManager::UpdateKeyMaterial(void)
 
 #if OPENTHREAD_CONFIG_RADIO_LINK_IEEE_802_15_4_ENABLE
     {
-        Mac::KeyMaterial curKey;
-        Mac::KeyMaterial prevKey;
-        Mac::KeyMaterial nextKey;
+        HashKeys prevHashKeys;
+        HashKeys nextHashKeys;
 
-        curKey.SetFrom(hashKeys.GetMacKey(), kExportableMacKeys);
+        ComputeKeys(mKeySequence - 1, prevHashKeys);
+        ComputeKeys(mKeySequence + 1, nextHashKeys);
 
-        ComputeKeys(mKeySequence - 1, hashKeys);
-        prevKey.SetFrom(hashKeys.GetMacKey(), kExportableMacKeys);
-
-        ComputeKeys(mKeySequence + 1, hashKeys);
-        nextKey.SetFrom(hashKeys.GetMacKey(), kExportableMacKeys);
-
-        Get<Mac::SubMac>().SetMacKey(Mac::Frame::kKeyIdMode1, (mKeySequence & 0x7f) + 1, prevKey, curKey, nextKey);
+        Get<Mac::SubMac>().SetMode1MacKeys(Mac::DetermineKeyIndexFor(mKeySequence), prevHashKeys.GetMacKey(),
+                                           hashKeys.GetMacKey(), nextHashKeys.GetMacKey());
     }
 #endif
 
@@ -512,6 +508,13 @@ void KeyManager::SetKek(const Kek &aKek)
 {
     mKek.SetFrom(aKek, /* aIsExportable */ true);
     mKekFrameCounter = 0;
+    mIsKekSet        = true;
+}
+
+void KeyManager::ClearKek(void)
+{
+    mKek.Clear();
+    mIsKekSet = false;
 }
 
 void KeyManager::SetSecurityPolicy(const SecurityPolicy &aSecurityPolicy)
@@ -695,6 +698,7 @@ void KeyManager::DestroyTemporaryKeys(void)
 {
     mMleKey.Clear();
     mKek.Clear();
+    mIsKekSet = false;
     Get<Mac::SubMac>().ClearMacKeys();
 }
 

@@ -270,7 +270,7 @@ void sli_ot_radio_instance_process_commands(void)
         switch (pendingCommand->cmdType)
         {
         case PendingCommandType::Transmit:
-            otPlatRadioTransmit(pendingCommand->instance, pendingCommand->request.txFrame);
+            IgnoreError(otPlatRadioTransmit(pendingCommand->instance, pendingCommand->request.txFrame));
             break;
 
         case PendingCommandType::EnergyScan:

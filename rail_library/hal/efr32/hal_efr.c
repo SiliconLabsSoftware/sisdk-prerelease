@@ -226,8 +226,13 @@ static const debugSignal_t debugSignals[] =
     .isPrs = true,
     .loc = {
       .prs = {
+  #if defined(_PRS_ASYNC_CH_CTRL_SOURCESEL_MOD)
+        .signal = _PRS_ASYNC_CH_CTRL_SIGSEL_MODFRAMESENT,
+        .source = _PRS_ASYNC_CH_CTRL_SOURCESEL_MOD,
+  #else
         .signal = _PRS_ASYNC_CH_CTRL_SIGSEL_MODEMFRAMESENT,
         .source = _PRS_ASYNC_CH_CTRL_SOURCESEL_MODEM,
+  #endif
       }
     }
   },

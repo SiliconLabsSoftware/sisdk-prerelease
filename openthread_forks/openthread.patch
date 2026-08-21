@@ -1,33 +1,8 @@
-diff --git a/BUILD.gn b/BUILD.gn
-index d9542f6cf93e48567ebb5a5382a6bc341df74b13..9cca5f46dc619c8595cbc6e2c201c11c20463257 100644
---- a/BUILD.gn
-+++ b/BUILD.gn
-@@ -27,6 +27,20 @@
- 
- import("etc/gn/openthread.gni")
- 
-+# Strict warnings for OpenThread sources only. Use private `configs +=` on OT
-+# targets, not `public_configs` on shared deps, so embedders (e.g. Matter with
-+# Clang) keep their own warning defaults; a late -W* can undo flags such as
-+# -Wno-unused-parameter on dependent translation units.
-+config("openthread_private_flags") {
-+  cflags = [
-+    "-Werror",
-+    "-Wall",
-+    "-Wextra",
-+    "-Wundef",
-+    "-Wformat-nonliteral",
-+  ]
-+}
-+
- config("openthread_config") {
-   defines = []
-   if (openthread_config_file != "") {
 diff --git a/etc/cmake/options.cmake b/etc/cmake/options.cmake
-index b3bfc46cc5b3685a2ef88b8abd5a6459e7a657c6..fedb3fa436e92dca5b99b22f0ef22ea9158400c6 100644
+index 82aff72d2971730dff5c073179a4d2b33d346ffc..be8b236d307359f9da537d5c712f6f259ba4e59f 100644
 --- a/etc/cmake/options.cmake
 +++ b/etc/cmake/options.cmake
-@@ -237,6 +237,7 @@ ot_option(OT_MLR OPENTHREAD_CONFIG_MLR_ENABLE "Multicast Listener Registration (
+@@ -235,6 +235,7 @@ ot_option(OT_MLR OPENTHREAD_CONFIG_MLR_ENABLE "Multicast Listener Registration (
  ot_option(OT_MULTIPAN_RCP OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE "enable multi-PAN RCP")
  ot_option(OT_MULTIPLE_INSTANCE OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE "multiple instances")
  ot_option(OT_NAT64_BORDER_ROUTING OPENTHREAD_CONFIG_NAT64_BORDER_ROUTING_ENABLE "border routing NAT64")
@@ -35,61 +10,6 @@ index b3bfc46cc5b3685a2ef88b8abd5a6459e7a657c6..fedb3fa436e92dca5b99b22f0ef22ea9
  ot_option(OT_NAT64_TRANSLATOR OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE "NAT64 translator support")
  ot_option(OT_NEIGHBOR_DISCOVERY_AGENT OPENTHREAD_CONFIG_NEIGHBOR_DISCOVERY_AGENT_ENABLE "neighbor discovery agent")
  ot_option(OT_NETDATA_PUBLISHER OPENTHREAD_CONFIG_NETDATA_PUBLISHER_ENABLE "Network Data publisher")
-diff --git a/etc/gn/toolchain/BUILD.gn b/etc/gn/toolchain/BUILD.gn
-index a67f1fd056527d435516fea773ee2e34f34db59a..e2a16d8ce8cff56a94735b6c5c25edfd1832086e 100644
---- a/etc/gn/toolchain/BUILD.gn
-+++ b/etc/gn/toolchain/BUILD.gn
-@@ -26,13 +26,6 @@
- #
- 
- toolchain("toolchain") {
--  diagnostic_cflags = [
--    "-Werror",
--    "-Wall",
--    "-Wextra",
--    "-Wundef",
--    "-Wformat-nonliteral",
--  ]
-   if (use_clang) {
-     cc = "clang"
-     cxx = "clang++"
-@@ -40,7 +33,9 @@ toolchain("toolchain") {
-     cc = "gcc"
-     cxx = "g++"
-   }
--  cflags = string_join(" ", diagnostic_cflags)
-+  # Warning/diagnostic flags come from GN target configs ({{cflags}}), not from
-+  # a global toolchain preset, so nothing is prepended here.
-+  cflags = ""
- 
-   tool("cc") {
-     depfile = "{{output}}.d"
-diff --git a/examples/apps/cli/BUILD.gn b/examples/apps/cli/BUILD.gn
-index ab08d0361ece9d59a5215e0b17ee9fb00fa58caf..065412d44e43c7260e7de46739c4f7cfc6195700 100644
---- a/examples/apps/cli/BUILD.gn
-+++ b/examples/apps/cli/BUILD.gn
-@@ -26,6 +26,7 @@
- #
- 
- static_library("cli_uart") {
-+  configs += [ "../../../:openthread_private_flags" ]
-   sources = [ "cli_uart.cpp" ]
-   include_dirs = [ "../../platforms" ]
-   deps = [
-diff --git a/examples/platforms/utils/mac_frame.cpp b/examples/platforms/utils/mac_frame.cpp
-index 0152da40af90afd4dc441fbdaf8000f646482086..7e8e56b1aac5f3378acca6e6df2a25a4b8f66c7b 100644
---- a/examples/platforms/utils/mac_frame.cpp
-+++ b/examples/platforms/utils/mac_frame.cpp
-@@ -407,7 +407,8 @@ otError otMacFrameProcessTxSfd(otRadioFrame *aFrame, uint64_t aRadioTime, otRadi
- #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
-     if (aRadioContext->mCslPresent) // CSL IE should be filled for every transmit attempt
-     {
--        otMacFrameSetCslIe(aFrame, aRadioContext->mCslPeriod, ComputeCslPhase(aRadioTime, aRadioContext));
-+        otMacFrameSetCslIe(aFrame, aRadioContext->mCslPeriod,
-+                           ComputeCslPhase(static_cast<uint32_t>(aRadioTime), aRadioContext));
-     }
- #endif
- #if OPENTHREAD_CONFIG_TIME_SYNC_ENABLE
 diff --git a/include/openthread/platform/border_routing.h b/include/openthread/platform/border_routing.h
 index 018b186e8e233369647d3acf99b13fa151b7cc89..4dbd9e18020a410aa38799bd2b80dbd0784ca3f5 100644
 --- a/include/openthread/platform/border_routing.h
@@ -142,67 +62,6 @@ index e08fad368ebc5b4209d21c061a8e1d9fd3f2b3db..0cfa4abeba6d32454229245e9334870d
  /**
   * @}
   */
-diff --git a/src/cli/BUILD.gn b/src/cli/BUILD.gn
-index e70ae4fc8902d2d7cb8e8bb68b16c8a04ade6abf..c938f095f7fffb5646665bffeb5bf0a0bb2b2bde 100644
---- a/src/cli/BUILD.gn
-+++ b/src/cli/BUILD.gn
-@@ -82,6 +82,7 @@ static_library("cli_config") {
- }
- 
- static_library("libopenthread-cli-ftd") {
-+  configs += [ "../..:openthread_private_flags" ]
-   sources = openthread_cli_sources
-   public_deps = [
-     ":cli_config",
-@@ -91,6 +92,7 @@ static_library("libopenthread-cli-ftd") {
- }
- 
- static_library("libopenthread-cli-mtd") {
-+  configs += [ "../..:openthread_private_flags" ]
-   sources = openthread_cli_sources
-   public_deps = [
-     ":cli_config",
-diff --git a/src/cli/cli_ping.cpp b/src/cli/cli_ping.cpp
-index c11166ccdf9220778f8bcd2c978c2ab5438ad05b..45a65e7f91eec5654b2c2fcdc70f453a88912de9 100644
---- a/src/cli/cli_ping.cpp
-+++ b/src/cli/cli_ping.cpp
-@@ -233,7 +233,7 @@ void PingSender::HandlePingStatistics(const otPingSenderStatistics *aStatistics)
- 
-     if (aStatistics->mReceivedCount != 0)
-     {
--        uint32_t avgRoundTripTime =
-+        uint64_t avgRoundTripTime =
-             1000 * static_cast<uint64_t>(aStatistics->mTotalRoundTripTime) / aStatistics->mReceivedCount;
- 
-         OutputFormat(" Round-trip min/avg/max = %u/%u.%03u/%u ms.", aStatistics->mMinRoundTripTime,
-diff --git a/src/core/BUILD.gn b/src/core/BUILD.gn
-index 1bc0a857a465077f6757ac36a71b7862cd7a6fae..a4f6f8919eb9933389d030b98d0811b5d4eb76db 100644
---- a/src/core/BUILD.gn
-+++ b/src/core/BUILD.gn
-@@ -959,6 +959,7 @@ group("libopenthread_platform") {
- }
- 
- static_library("libopenthread-ftd") {
-+  configs += [ "../..:openthread_private_flags" ]
-   sources = openthread_core_sources
-   if (openthread_enable_core_config_args && openthread_config_tcp_enable) {
-     deps = [ "../../third_party/tcplp" ]
-@@ -968,6 +969,7 @@ static_library("libopenthread-ftd") {
- }
- 
- static_library("libopenthread-mtd") {
-+  configs += [ "../..:openthread_private_flags" ]
-   sources = openthread_core_sources
-   if (openthread_enable_core_config_args && openthread_config_tcp_enable) {
-     deps = [ "../../third_party/tcplp" ]
-@@ -977,6 +979,7 @@ static_library("libopenthread-mtd") {
- }
- 
- static_library("libopenthread-radio") {
-+  configs += [ "../..:openthread_private_flags" ]
-   sources = openthread_radio_sources
-   public_deps = [ ":libopenthread_platform" ]
-   public_configs = [ "../..:openthread_radio_config" ]
 diff --git a/src/core/api/trel_api.cpp b/src/core/api/trel_api.cpp
 index a70d696e4278703f1a4ee1f3fa9f68d373680aad..206fab90f47cff33e0c9a19a8fbb7f7e436dd0d0 100644
 --- a/src/core/api/trel_api.cpp
@@ -218,10 +77,10 @@ index a70d696e4278703f1a4ee1f3fa9f68d373680aad..206fab90f47cff33e0c9a19a8fbb7f7e
 +
  #endif // OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
 diff --git a/src/core/border_router/routing_manager.cpp b/src/core/border_router/routing_manager.cpp
-index 8348f7faed0d577c1bf2aef4b9b83b546245bd94..6a482ecf070b0a6161b6e69ef7c2751c9b1d1653 100644
+index a72445e5f38618aebee85a4f04a53330111da24f..c637d8d4a96e06ee9ff3520779249a47140210a8 100644
 --- a/src/core/border_router/routing_manager.cpp
 +++ b/src/core/border_router/routing_manager.cpp
-@@ -2290,6 +2290,9 @@ RoutingManager::Nat64PrefixManager::Nat64PrefixManager(Instance &aInstance)
+@@ -2280,6 +2280,9 @@ RoutingManager::Nat64PrefixManager::Nat64PrefixManager(Instance &aInstance)
      mPlatformPrefix.Clear();
      mLocalPrefix.Clear();
      mPublishedPrefix.Clear();
@@ -231,7 +90,7 @@ index 8348f7faed0d577c1bf2aef4b9b83b546245bd94..6a482ecf070b0a6161b6e69ef7c2751c
  }
  
  void RoutingManager::Nat64PrefixManager::SetEnabled(bool aEnabled)
-@@ -2383,10 +2386,18 @@ void RoutingManager::Nat64PrefixManager::Evaluate(void)
+@@ -2373,10 +2376,18 @@ void RoutingManager::Nat64PrefixManager::Evaluate(void)
  
      VerifyOrExit(mEnabled);
  
@@ -252,7 +111,7 @@ index 8348f7faed0d577c1bf2aef4b9b83b546245bd94..6a482ecf070b0a6161b6e69ef7c2751c
      error = Get<NetworkData::Leader>().FindPreferredNat64Prefix(netdataPrefixConfig);
  
      // NAT64 prefix is expected to be published from this BR
-@@ -2433,6 +2444,20 @@ exit:
+@@ -2423,6 +2434,20 @@ exit:
      return;
  }
  
@@ -273,7 +132,7 @@ index 8348f7faed0d577c1bf2aef4b9b83b546245bd94..6a482ecf070b0a6161b6e69ef7c2751c
  void RoutingManager::Nat64PrefixManager::Publish(const Ip6::Prefix &aPrefix, RoutePreference aPreference)
  {
      // Publishes the given prefix and preference in the Network Data
-@@ -3080,6 +3105,11 @@ extern "C" void otPlatBorderRoutingProcessDhcp6PdPrefix(otInstance
+@@ -3070,6 +3095,11 @@ extern "C" void otPlatBorderRoutingProcessDhcp6PdPrefix(otInstance
  
  #endif // OPENTHREAD_CONFIG_BORDER_ROUTING_DHCP6_PD_ENABLE
  
@@ -352,7 +211,7 @@ index 76e4eb179bfd6cbadb8f24cb474e5e38c30c5ff0..1071a06f39b58ec71885cad0df7ddc50
   * @def OPENTHREAD_CONFIG_NAT64_PORT_TRANSLATION_ENABLE
   *
 diff --git a/src/core/config/openthread-core-config-check.h b/src/core/config/openthread-core-config-check.h
-index 4cacac022affac1a956443b469e78eb5d53e0e93..f55643e20cd72b9ef6cf7cf38ea95272fb89fa6c 100644
+index ed584ab4098743f864610c4069bbf97209212255..8c9cd7fe55c79256c3d8dae0ba84b852b641ce8f 100644
 --- a/src/core/config/openthread-core-config-check.h
 +++ b/src/core/config/openthread-core-config-check.h
 @@ -643,6 +643,11 @@
@@ -408,10 +267,10 @@ index 45b2b56a8c40b0996cc35dd20ad9a4e9cff88e22..9be3c2ed0acef441c906a6f8a2687821
   * @def OPENTHREAD_CONFIG_TREL_USE_HEAP_ENABLE
   *
 diff --git a/src/core/crypto/crypto_platform_mbedtls.cpp b/src/core/crypto/crypto_platform_mbedtls.cpp
-index e946ad3fd70608b51647985090ec7893dfb2b715..7da7dd2da7dea2c42a90e316a9b34eddcb16f330 100644
+index 1f1e0fbdf168f87acb1db79b5899a93370a8c180..e386826000e7902189b4cde2357e6ae3ba6c74bb 100644
 --- a/src/core/crypto/crypto_platform_mbedtls.cpp
 +++ b/src/core/crypto/crypto_platform_mbedtls.cpp
-@@ -237,7 +237,7 @@ exit:
+@@ -291,7 +291,7 @@ exit:
      return error;
  }
  
@@ -421,7 +280,7 @@ index e946ad3fd70608b51647985090ec7893dfb2b715..7da7dd2da7dea2c42a90e316a9b34edd
      Error error = kErrorNone;
  
 diff --git a/src/core/mac/mac.cpp b/src/core/mac/mac.cpp
-index 5a34e3670e1d8bb7063c8b0794d10814a0f3d8f2..0363c69eae062003b9dadc352bbdcda11c56d1e2 100644
+index 9737ab83e712117078ac6a0672591b69e7bce3a5..79f51e7d6df83174b232c7bfc56964308d1fb6ee 100644
 --- a/src/core/mac/mac.cpp
 +++ b/src/core/mac/mac.cpp
 @@ -37,6 +37,7 @@
@@ -430,9 +289,9 @@ index 5a34e3670e1d8bb7063c8b0794d10814a0f3d8f2..0363c69eae062003b9dadc352bbdcda1
  #include "crypto/sha256.hpp"
 +#include "crypto/storage.hpp"
  #include "instance/instance.hpp"
+ #include "mac/mac_beacon.hpp"
  #include "utils/static_counter.hpp"
- 
-@@ -1624,6 +1625,10 @@ Error Mac::ProcessReceiveSecurity(RxFrame &aFrame, const Address &aSrcAddr, Neig
+@@ -1739,6 +1740,10 @@ Error Mac::ProcessReceiveSecurity(RxFrame &aFrame, const Address &aSrcAddr, Neig
          ExitNow();
      }
  
@@ -443,7 +302,7 @@ index 5a34e3670e1d8bb7063c8b0794d10814a0f3d8f2..0363c69eae062003b9dadc352bbdcda1
      SuccessOrExit(aFrame.ProcessReceiveAesCcm(*extAddress, *macKey));
  
      if ((keyIdMode == Frame::kKeyIdMode1) && aNeighbor->IsStateValid())
-@@ -1747,6 +1752,10 @@ Error Mac::ProcessEnhAckSecurity(TxFrame &aTxFrame, RxFrame &aAckFrame)
+@@ -1852,6 +1857,10 @@ Error Mac::ProcessEnhAckSecurity(TxFrame &aTxFrame, RxFrame &aAckFrame)
          VerifyOrExit(frameCounter >= neighbor->GetLinkAckFrameCounter());
      }
  
@@ -515,19 +374,6 @@ index e715a03fb613b4e033ae2302bbf10f07463617e0..37975f8160cc2ba1fa0d50495ff0ab8e
  #endif // OPENTHREAD_CONFIG_DNS_UPSTREAM_QUERY_ENABLE
  
      /**
-diff --git a/src/core/net/srp_client.cpp b/src/core/net/srp_client.cpp
-index 769bd5c784bc0d74448459d6f1a5fc64d3e92f1a..2fad29863e47f48c6e2467f8d76aacd037570f25 100644
---- a/src/core/net/srp_client.cpp
-+++ b/src/core/net/srp_client.cpp
-@@ -2050,6 +2050,8 @@ void Client::UpdateState(void)
-         OT_FALL_THROUGH;
- 
-     case kToAdd:
-+        OT_FALL_THROUGH;
-+
-     case kToRefresh:
-         // Make sure we have at least one service and at least one
-         // host address, otherwise no need to send SRP update message.
 diff --git a/src/core/radio/trel_interface.cpp b/src/core/radio/trel_interface.cpp
 index d1cedb8a843ab6b489f50e2655de064883dfe6a7..d41ba00d00aebffef1237380c95c57ad4dd283f7 100644
 --- a/src/core/radio/trel_interface.cpp
@@ -1255,58 +1101,6 @@ index 4061a97a23445d8974802c51cfcd4cde77000215..afaa435637607688d9fd3a8dfd607300
  #endif
  };
  
-diff --git a/src/lib/hdlc/BUILD.gn b/src/lib/hdlc/BUILD.gn
-index ee46b1b39ea50efffe5d315ace68e728d9a80440..d52cbaf7c9ba7ff7a7a0160c5e146db364856b56 100644
---- a/src/lib/hdlc/BUILD.gn
-+++ b/src/lib/hdlc/BUILD.gn
-@@ -26,6 +26,7 @@
- #
- 
- static_library("libopenthread-hdlc") {
-+  configs += [ "../../../:openthread_private_flags" ]
-   sources = [
-     "hdlc.cpp",
-     "hdlc.hpp",
-diff --git a/src/lib/platform/BUILD.gn b/src/lib/platform/BUILD.gn
-index 49525340f6dabb700a74e0a9aff84f026b4b9539..c7c8d0999d3652d9d5d762386f3a5fb40585124f 100644
---- a/src/lib/platform/BUILD.gn
-+++ b/src/lib/platform/BUILD.gn
-@@ -37,6 +37,7 @@ config("platform_config") {
- }
- 
- static_library("libopenthread-platform") {
-+  configs += [ "../../..:openthread_private_flags" ]
-   sources = platform_sources
-   public_deps = [ "../../core:libopenthread_core_headers" ]
-   public_configs = [ ":platform_config" ]
-diff --git a/src/lib/spinel/BUILD.gn b/src/lib/spinel/BUILD.gn
-index 2ff58b381acd08f37a2f30261c1d714cbd1657c3..6f4dcf99accf7a61d72ca97c62553f990283a1d4 100644
---- a/src/lib/spinel/BUILD.gn
-+++ b/src/lib/spinel/BUILD.gn
-@@ -73,6 +73,7 @@ source_set("spinel-api") {
- }
- 
- static_library("libopenthread-spinel-ncp") {
-+  configs += [ "../../..:openthread_private_flags" ]
-   sources = spinel_sources
-   public_deps = [
-     ":spinel-api",
-@@ -86,6 +87,7 @@ static_library("libopenthread-spinel-ncp") {
- }
- 
- static_library("libopenthread-radio-spinel") {
-+  configs += [ "../../..:openthread_private_flags" ]
-   sources = spinel_sources
-   public_deps = [
-     ":spinel-api",
-@@ -105,6 +107,7 @@ static_library("libopenthread-radio-spinel") {
- }
- 
- static_library("libopenthread-spinel-rcp") {
-+  configs += [ "../../..:openthread_private_flags" ]
-   sources = spinel_sources
-   public_deps = [
-     ":spinel-api",
 diff --git a/src/lib/spinel/spinel.c b/src/lib/spinel/spinel.c
 index 62340241e7a7a6f6534ccaba33fff57b61b82316..d0d4a7eb25ca5453fbe086241558baff0129de8f 100644
 --- a/src/lib/spinel/spinel.c
@@ -1341,10 +1135,10 @@ index 62340241e7a7a6f6534ccaba33fff57b61b82316..d0d4a7eb25ca5453fbe086241558baff
      };
  
 diff --git a/src/lib/spinel/spinel.h b/src/lib/spinel/spinel.h
-index 8a9d5f0c830833135108a29f10661aea22effadf..c6430bde72d5c6896dc5ac547392c8601dd500aa 100644
+index c755522d04488b523500ab4723e974801d44ed8b..c71cccbcab1c6d36a9b83838b6c60199d0a356be 100644
 --- a/src/lib/spinel/spinel.h
 +++ b/src/lib/spinel/spinel.h
-@@ -4959,6 +4959,121 @@ enum
+@@ -4961,6 +4961,121 @@ enum
       */
      SPINEL_PROP_DNSSD_SRV_RESULT = SPINEL_PROP_DNSSD__BEGIN + 9,
  
@@ -1466,7 +1260,7 @@ index 8a9d5f0c830833135108a29f10661aea22effadf..c6430bde72d5c6896dc5ac547392c860
      SPINEL_PROP_DNSSD__END = 0x950,
  
      SPINEL_PROP_BORDER_AGENT__BEGIN = 0x950,
-@@ -5072,8 +5187,59 @@ enum
+@@ -5074,8 +5189,59 @@ enum
       */
      SPINEL_PROP_BORDER_ROUTER_DHCP6_PD_PREFIX = SPINEL_PROP_BORDER_ROUTER__BEGIN + 2,
  
@@ -1527,28 +1321,10 @@ index 8a9d5f0c830833135108a29f10661aea22effadf..c6430bde72d5c6896dc5ac547392c860
  
      SPINEL_PROP_NEST_STREAM_MFG = SPINEL_PROP_NEST__BEGIN + 0,
 diff --git a/src/lib/spinel/spinel_prop_codec.cpp b/src/lib/spinel/spinel_prop_codec.cpp
-index 9751d3030f973c92f1f774a6a60ef8c78b3b150f..9ca3d34e5061db6934829e53f6983071d52de46b 100644
+index 3e6e7904145ec57dad8166c23a8eb679304f901f..9641b70838c7a1e06f61755db1fed04a82c0053f 100644
 --- a/src/lib/spinel/spinel_prop_codec.cpp
 +++ b/src/lib/spinel/spinel_prop_codec.cpp
-@@ -124,7 +124,16 @@ otError DecodeDnssdHost(Decoder              &aDecoder,
- 
-     SuccessOrExit(error = aDecoder.ReadUtf8(aHost.mHostName));
-     SuccessOrExit(error = aDecoder.ReadUint16(aHost.mAddressesLength));
--    SuccessOrExit(error = aDecoder.ReadIp6Address(aHost.mAddresses));
-+    aHost.mAddresses = nullptr;
-+    for (uint16_t i = 0; i < aHost.mAddressesLength; i++)
-+    {
-+        const otIp6Address *addrPtr;
-+        SuccessOrExit(error = aDecoder.ReadIp6Address(addrPtr));
-+        if (i == 0)
-+        {
-+            aHost.mAddresses = addrPtr;
-+        }
-+    }
-     SuccessOrExit(error = aDecoder.ReadUint32(aRequestId));
-     SuccessOrExit(error = aDecoder.ReadData(aCallbackData, aCallbackDataLen));
- 
-@@ -377,5 +386,227 @@ exit:
+@@ -393,5 +393,227 @@ exit:
      return error;
  }
  
@@ -1923,34 +1699,6 @@ index 979abd1a863dc1e8bf7df7088073ce9023239e01..ebf6d8d0d19abb9b84c1e68f7dc3e7f9
  } // namespace Spinel
  } // namespace ot
  
-diff --git a/src/ncp/BUILD.gn b/src/ncp/BUILD.gn
-index 2bb99814a51c901c6e2dd8031028683df9b37ddf..13d864935dd870c9160483ca57c1cdd114306712 100644
---- a/src/ncp/BUILD.gn
-+++ b/src/ncp/BUILD.gn
-@@ -50,6 +50,7 @@ config("ncp_config") {
- }
- 
- static_library("libopenthread-ncp-ftd") {
-+  configs += [ "../..:openthread_private_flags" ]
-   sources = openthread_ncp_sources
-   public_deps = [
-     "../core:libopenthread-ftd",
-@@ -60,6 +61,7 @@ static_library("libopenthread-ncp-ftd") {
- }
- 
- static_library("libopenthread-ncp-mtd") {
-+  configs += [ "../..:openthread_private_flags" ]
-   sources = openthread_ncp_sources
-   public_deps = [
-     "../core:libopenthread-mtd",
-@@ -70,6 +72,7 @@ static_library("libopenthread-ncp-mtd") {
- }
- 
- static_library("libopenthread-rcp") {
-+  configs += [ "../..:openthread_private_flags" ]
-   sources = openthread_ncp_sources
-   public_deps = [
-     "../core:libopenthread-radio",
 diff --git a/src/ncp/CMakeLists.txt b/src/ncp/CMakeLists.txt
 index d88fbe293b5eed1a7fd6eed5033cfe84e7cb2b42..ccbbde2501d17a6d69f57a28fe649f2aa6cba0e0 100644
 --- a/src/ncp/CMakeLists.txt
@@ -1984,7 +1732,7 @@ index 3133683ff7d74c56d178a7dc574ee9804cc44c41..0f70e320a173288253c262c5a1bca8d2
  
  uint8_t ChangedPropsSet::GetNumEntries(void) const
 diff --git a/src/ncp/ncp_base.cpp b/src/ncp/ncp_base.cpp
-index 6726380d084ee3692f365d9ed15feb65ded7434d..5ff6d0343584ff366253e16a898c348b73817599 100644
+index 1fbdec903ddbf584b238670a2fd394430b75174f..a28fed60b959184fb1e26bff081f6f35cce2183a 100644
 --- a/src/ncp/ncp_base.cpp
 +++ b/src/ncp/ncp_base.cpp
 @@ -280,6 +280,10 @@ NcpBase::NcpBase(Instance *aInstance)
@@ -2223,7 +1971,7 @@ index d9aa796ae168e2eccc54078bb898bbf37cec0803..c4445cdcc5c8afd68dd288432f8e34ed
  
  } // namespace Ncp
 diff --git a/src/ncp/ncp_base_dispatcher.cpp b/src/ncp/ncp_base_dispatcher.cpp
-index 9a8fd7ee671f81e3736b36262024957097863eee..64919ef5386e7738b926d5923c0d0d19a0c30d19 100644
+index bda4d2aec7b4c4b61ac2934127bafbd368ebd824..6d0e3065a9ba916192bc15b440024b4f0c35bf47 100644
 --- a/src/ncp/ncp_base_dispatcher.cpp
 +++ b/src/ncp/ncp_base_dispatcher.cpp
 @@ -224,6 +224,10 @@ NcpBase::PropertyHandler NcpBase::FindGetPropertyHandler(spinel_prop_key_t aKey)
@@ -2249,7 +1997,7 @@ index 9a8fd7ee671f81e3736b36262024957097863eee..64919ef5386e7738b926d5923c0d0d19
  #endif
          OT_NCP_GET_HANDLER_ENTRY(SPINEL_PROP_UNSOL_UPDATE_FILTER),
          OT_NCP_GET_HANDLER_ENTRY(SPINEL_PROP_UNSOL_UPDATE_LIST),
-@@ -549,6 +558,14 @@ NcpBase::PropertyHandler NcpBase::FindSetPropertyHandler(spinel_prop_key_t aKey)
+@@ -546,6 +555,14 @@ NcpBase::PropertyHandler NcpBase::FindSetPropertyHandler(spinel_prop_key_t aKey)
          OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_DNSSD_REQUEST_RESULT),
          OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_DNSSD_BROWSE_RESULT),
          OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_DNSSD_SRV_RESULT),
@@ -2264,7 +2012,7 @@ index 9a8fd7ee671f81e3736b36262024957097863eee..64919ef5386e7738b926d5923c0d0d19
  #endif
  #if OPENTHREAD_CONFIG_BORDER_AGENT_ENABLE && OPENTHREAD_CONFIG_BORDER_AGENT_EPHEMERAL_KEY_ENABLE
          OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_BORDER_AGENT_EPHEMERAL_KEY_ENABLE),
-@@ -564,7 +581,15 @@ NcpBase::PropertyHandler NcpBase::FindSetPropertyHandler(spinel_prop_key_t aKey)
+@@ -561,7 +578,15 @@ NcpBase::PropertyHandler NcpBase::FindSetPropertyHandler(spinel_prop_key_t aKey)
          OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_BORDER_ROUTER_DHCP6_PD_PREFIX),
  #endif
  #endif
@@ -2281,7 +2029,7 @@ index 9a8fd7ee671f81e3736b36262024957097863eee..64919ef5386e7738b926d5923c0d0d19
          OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_UNSOL_UPDATE_FILTER),
  #if OPENTHREAD_CONFIG_JAM_DETECTION_ENABLE
 diff --git a/src/ncp/ncp_base_ftd.cpp b/src/ncp/ncp_base_ftd.cpp
-index cb1ed88ec48c4e60a602375aee64cff393216649..12c14f105af79330716de7b13aad71a51cbfef59 100644
+index 3cc9cbc105c44887e18bd6d10204e4cf9a4cc48c..f753732ec913a0681fea1d6231f212104a3cd181 100644
 --- a/src/ncp/ncp_base_ftd.cpp
 +++ b/src/ncp/ncp_base_ftd.cpp
 @@ -47,6 +47,21 @@
@@ -2306,7 +2054,7 @@ index cb1ed88ec48c4e60a602375aee64cff393216649..12c14f105af79330716de7b13aad71a5
  #include <openthread/ncp.h>
  #include <openthread/thread_ftd.h>
  #include <openthread/platform/misc.h>
-@@ -1532,12 +1547,19 @@ template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_INFRA_IF_STATE>(void)
+@@ -1485,12 +1500,19 @@ template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_INFRA_IF_STATE>(void)
          IgnoreError(otBorderRoutingSetEnabled(mInstance, /* aEnabled */ false));
          SuccessOrExit(error = otBorderRoutingInit(mInstance, mInfraIfIndex, isInfraRunning));
          SuccessOrExit(error = otBorderRoutingSetEnabled(mInstance, /* aEnabled */ true));
@@ -2326,7 +2074,7 @@ index cb1ed88ec48c4e60a602375aee64cff393216649..12c14f105af79330716de7b13aad71a5
  exit:
      return error;
  }
-@@ -1690,6 +1712,71 @@ exit:
+@@ -1643,6 +1665,71 @@ exit:
  
  #endif // OPENTHREAD_CONFIG_BORDER_ROUTING_ENABLE && OPENTHREAD_CONFIG_BORDER_ROUTING_DHCP6_PD_ENABLE
  
@@ -2398,7 +2146,7 @@ index cb1ed88ec48c4e60a602375aee64cff393216649..12c14f105af79330716de7b13aad71a5
  #if OPENTHREAD_CONFIG_NCP_DNSSD_ENABLE && OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE
  
  void NcpBase::DnssdRegisterHost(const otPlatDnssdHost      *aHost,
-@@ -1754,6 +1841,48 @@ void NcpBase::DnssdStopSrvResolver(const otPlatDnssdSrvResolver *aResolver)
+@@ -1707,6 +1794,48 @@ void NcpBase::DnssdStopSrvResolver(const otPlatDnssdSrvResolver *aResolver)
      DnssdUpdateDiscovery(aResolver, /* aStart */ false);
  }
  
@@ -2447,7 +2195,7 @@ index cb1ed88ec48c4e60a602375aee64cff393216649..12c14f105af79330716de7b13aad71a5
  otPlatDnssdState NcpBase::DnssdGetState(void) { return mDnssdState; }
  
  template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_DNSSD_STATE>(void)
-@@ -1787,7 +1916,10 @@ template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_DNSSD_REQUEST_RESULT>
+@@ -1740,7 +1869,10 @@ template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_DNSSD_REQUEST_RESULT>
      SuccessOrExit(error = mDecoder.ReadData(context, contextLen));
      VerifyOrExit(contextLen == sizeof(otPlatDnssdRegisterCallback), error = OT_ERROR_PARSE);
      callback = *reinterpret_cast<const otPlatDnssdRegisterCallback *>(context);
@@ -2459,7 +2207,7 @@ index cb1ed88ec48c4e60a602375aee64cff393216649..12c14f105af79330716de7b13aad71a5
  
  exit:
      return error;
-@@ -1804,7 +1936,10 @@ template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_DNSSD_BROWSE_RESULT>(
+@@ -1757,7 +1889,10 @@ template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_DNSSD_BROWSE_RESULT>(
      SuccessOrExit(error = DecodeDnssdBrowseResult(mDecoder, browseResult, context, contextLen));
      VerifyOrExit(contextLen == sizeof(otPlatDnssdBrowseCallback), error = OT_ERROR_PARSE);
      callback = *reinterpret_cast<const otPlatDnssdBrowseCallback *>(context);
@@ -2471,7 +2219,7 @@ index cb1ed88ec48c4e60a602375aee64cff393216649..12c14f105af79330716de7b13aad71a5
  
  exit:
      return error;
-@@ -1821,13 +1956,404 @@ template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_DNSSD_SRV_RESULT>(voi
+@@ -1774,13 +1909,404 @@ template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_DNSSD_SRV_RESULT>(voi
      SuccessOrExit(error = DecodeDnssdSrvResult(mDecoder, srvResult, context, contextLen));
      VerifyOrExit(contextLen == sizeof(otPlatDnssdSrvCallback), error = OT_ERROR_PARSE);
      callback = *reinterpret_cast<const otPlatDnssdSrvCallback *>(context);
@@ -2878,7 +2626,7 @@ index cb1ed88ec48c4e60a602375aee64cff393216649..12c14f105af79330716de7b13aad71a5
  
  template <> otError NcpBase::HandlePropertyGet<SPINEL_PROP_BORDER_AGENT_MESHCOP_SERVICE_STATE>(void)
 diff --git a/src/ncp/ncp_base_mtd.cpp b/src/ncp/ncp_base_mtd.cpp
-index 9095c86dcfbc39de4280a43c13de1eb5ef4ccead..98251488eeec7a06833dfbc814bfebf2bc307821 100644
+index 06ada5833d0c3d6148d626778ee7ea97dcd6d333..a7391a9f95d71b1bf62efbb04afb874f0c59f76f 100644
 --- a/src/ncp/ncp_base_mtd.cpp
 +++ b/src/ncp/ncp_base_mtd.cpp
 @@ -53,6 +53,14 @@
@@ -2906,7 +2654,7 @@ index 9095c86dcfbc39de4280a43c13de1eb5ef4ccead..98251488eeec7a06833dfbc814bfebf2
  
  #include "cli/cli_config.h"
  #include "common/code_utils.hpp"
-@@ -4191,7 +4196,72 @@ template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_DEBUG_TREL_TEST_MODE_
+@@ -4186,7 +4191,72 @@ template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_DEBUG_TREL_TEST_MODE_
  exit:
      return error;
  }
@@ -3562,7 +3310,7 @@ index 0000000000000000000000000000000000000000..799c843d1e7d231a3ab13fcbc779da32
 +
 +#endif // OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE && OPENTHREAD_CONFIG_UDP_FORWARD_ENABLE
 diff --git a/src/posix/platform/firewall.cpp b/src/posix/platform/firewall.cpp
-index 7e9d47eaea89d70263dab09323e66528aeb1bc44..9bfb3ea04a87bcd373208c55a491087438c3e1ea 100644
+index 7a0ad2dd3a4c7a070570d255d8af28a168bc72a5..c74475870b65152c1152beccb5f61477507cb7ec 100644
 --- a/src/posix/platform/firewall.cpp
 +++ b/src/posix/platform/firewall.cpp
 @@ -36,8 +36,13 @@
@@ -3579,7 +3327,7 @@ index 7e9d47eaea89d70263dab09323e66528aeb1bc44..9bfb3ea04a87bcd373208c55a4910874
  
  #include "common/code_utils.hpp"
  #include "posix/platform/utils.hpp"
-@@ -80,20 +85,15 @@ inline otError IpSetManager::SwapIpSets(const char *aSetName1, const char *aSetN
+@@ -80,44 +85,91 @@ inline otError IpSetManager::SwapIpSets(const char *aSetName1, const char *aSetN
      return ExecuteCommand("%s swap %s %s", kIpsetCommand, aSetName1, aSetName2);
  }
  
@@ -3603,10 +3351,6 @@ index 7e9d47eaea89d70263dab09323e66528aeb1bc44..9bfb3ea04a87bcd373208c55a4910874
 -    // 2. Update otbr-deny-src-swap
      while (otNetDataGetNextOnMeshPrefix(aInstance, &iterator, &config) == OT_ERROR_NONE)
      {
-         if (config.mDp)
-@@ -101,27 +101,79 @@ void UpdateIpSets(otInstance *aInstance)
-             continue;
-         }
          otIp6PrefixToString(&config.mPrefix, prefixBuf, sizeof(prefixBuf));
 -        SuccessOrExit(error = ipSetManager.AddToIpSet(kIngressDenySrcSwapIpSet, prefixBuf));
 +        aDenyPrefixes.emplace_back(prefixBuf);
@@ -3723,7 +3467,7 @@ index faaae7e6a03645a5f5b22deb8f3970052f1ed1bb..068318934bcc1304269e276e32ebb1c1
  } // namespace ot
  
 diff --git a/tests/unit/test_spinel_prop_codec.cpp b/tests/unit/test_spinel_prop_codec.cpp
-index 458d3e75f05908919fbc7a007777c7930cd97193..0c3494d9101daa0cd701e0a9aeba2e576eef66d0 100644
+index becb9569f391a9741e1709dc0c81e4e4cadadf7a..d0be3978bc9838a74029fcd63565838d73f2c69f 100644
 --- a/tests/unit/test_spinel_prop_codec.cpp
 +++ b/tests/unit/test_spinel_prop_codec.cpp
 @@ -29,6 +29,8 @@
@@ -3754,7 +3498,7 @@ index 458d3e75f05908919fbc7a007777c7930cd97193..0c3494d9101daa0cd701e0a9aeba2e57
  static constexpr uint16_t kMaxSpinelBufferSize = 2048;
  
  void TestDnssd(void)
-@@ -391,6 +405,193 @@ void TestDnssdSrvResult(void)
+@@ -454,6 +468,193 @@ void TestDnssdSrvResult(void)
      VerifyOrQuit(*reinterpret_cast<const otPlatDnssdSrvCallback *>(callbackData) == FakeDnssdSrvCallback);
  }
  
@@ -3948,7 +3692,7 @@ index 458d3e75f05908919fbc7a007777c7930cd97193..0c3494d9101daa0cd701e0a9aeba2e57
  } // namespace Spinel
  } // namespace ot
  
-@@ -401,6 +602,10 @@ int main(void)
+@@ -464,6 +665,10 @@ int main(void)
      ot::Spinel::TestDnssdBrowserResult();
      ot::Spinel::TestDnssdSrvResolver();
      ot::Spinel::TestDnssdSrvResult();
@@ -3958,45 +3702,4 @@ index 458d3e75f05908919fbc7a007777c7930cd97193..0c3494d9101daa0cd701e0a9aeba2e57
 +    ot::Spinel::TestDnssdAddressResult();
      printf("\nAll tests passed.\n");
      return 0;
- }
-diff --git a/third_party/mbedtls/BUILD.gn b/third_party/mbedtls/BUILD.gn
-index 35828980e565084f44866f5d4407f4b0bbb6ec95..cf26ebc296c668f8dd2b3dd73970921d9eabb581 100644
---- a/third_party/mbedtls/BUILD.gn
-+++ b/third_party/mbedtls/BUILD.gn
-@@ -57,6 +57,7 @@ group("warnings_fix") {
- }
- 
- static_library("mbedtls") {
-+  configs += [ ":warnings_fix_config" ]
-   sources = [
-     "repo/include/mbedtls/aes.h",
-     "repo/include/mbedtls/aria.h",
-diff --git a/third_party/tcplp/BUILD.gn b/third_party/tcplp/BUILD.gn
-index 67688ae1a2cc2a797675c71e1868a8bbb13d33f8..ad05c04c1efbbf30f8a99d7502eda99f91c538ae 100644
---- a/third_party/tcplp/BUILD.gn
-+++ b/third_party/tcplp/BUILD.gn
-@@ -35,13 +35,8 @@ config("warnings_fix_config") {
-   ]
- }
- 
--group("warnings_fix") {
--  public_configs = [
--    ":warnings_fix_config",
--  ]
--}
--
- static_library("tcplp") {
-+  configs += [ ":warnings_fix_config" ]
-   sources = [
-     "bsdtcp/tcp_seq.h",
-     "bsdtcp/tcp_output.c",
-@@ -76,8 +71,5 @@ static_library("tcplp") {
-     "lib/lbuf.c",
-     "lib/test/test_all.c",
-   ]
--  deps = [
--    ":warnings_fix",
--    "../../include/openthread",
--  ]
-+  deps = [ "../../include/openthread" ]
  }

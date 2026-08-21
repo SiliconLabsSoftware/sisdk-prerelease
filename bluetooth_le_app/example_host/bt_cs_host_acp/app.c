@@ -108,9 +108,11 @@
   "        build option; the flag is kept for CLI backward compatibility.\n"                \
   "    -o  Object tracking mode, default: 2\n"                                              \
   "        Used only for initiator instances\n"                                             \
-  "        0 : moving object tracking (REAL_TIME_BASIC)\n"                                  \
-  "        1 : stationary object tracking (STATIC_HIGH_ACCURACY)\n"                         \
-  "        2 : moving object tracking fast (REAL_TIME_FAST)\n"                              \
+  "        0 : Tracking accuracy optimized (suitable for moving targets)\n"                 \
+  "            (TRACKING_ACCURACY_OPTIMIZED)\n"                                             \
+  "        1 : Stationary (suitable for stationary targets) (STATIONARY)\n"                 \
+  "        2 : Tracking latency optimized (suitable for fast moving targets)\n"             \
+  "            (TRACKING_LATENCY_OPTIMIZED)\n"                                              \
   "    -p  Pre-set parameters for channel map selection, default: 2\n"                      \
   "        Used only for initiator instances\n"                                             \
   "        1 : medium (channel spacing: 2, number of channels: 38)\n"                       \
@@ -345,9 +347,9 @@ void app_cli_init(int argc, char *argv[])
       case 'o':
       {
         int object_tracking_mode = atoi(optarg);
-        if (object_tracking_mode != CS_ALGO_MODE_REAL_TIME_BASIC
-            && object_tracking_mode != CS_ALGO_MODE_STATIC_HIGH_ACCURACY
-            && object_tracking_mode != CS_ALGO_MODE_REAL_TIME_FAST) {
+        if (object_tracking_mode != CS_ALGO_MODE_TRACKING_ACCURACY_OPTIMIZED
+            && object_tracking_mode != CS_ALGO_MODE_STATIONARY
+            && object_tracking_mode != CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED) {
           app_log_error(APP_PREFIX "Invalid object tracking mode (%d) provided!" APP_LOG_NL,
                         object_tracking_mode);
           exit(EXIT_FAILURE);
@@ -540,9 +542,9 @@ void app_cli_init(int argc, char *argv[])
       app_log_warning(APP_PREFIX "RTT antenna configuration is omitted in PBR mode!" APP_LOG_NL);
     }
     if (cli_overrides.algo_mode_set
-        && cli_overrides.algo_mode == CS_ALGO_MODE_REAL_TIME_FAST
+        && cli_overrides.algo_mode == CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED
         && main_mode == sl_bt_cs_mode_rtt) {
-      app_log_error(APP_PREFIX "Real-time fast mode is not supported with main mode RTT!" APP_LOG_NL);
+      app_log_error(APP_PREFIX "Tracking latency optimized mode is not supported with main mode RTT!" APP_LOG_NL);
       exit(EXIT_FAILURE);
     }
     // Log mode based on synchronized flag

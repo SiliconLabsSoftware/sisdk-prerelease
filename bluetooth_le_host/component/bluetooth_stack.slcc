@@ -100,7 +100,6 @@ requires:
   - "kernel"
 - name: "sl_assert"
 - name: "memory_manager"
-- name: "memory_profiler_api"
 - name: "bluetooth_device_compatibility"
 - name: "bluetooth_agents_host"
 recommends:
@@ -115,6 +114,9 @@ provides:
 - name: "bluetooth_stack"
 - name: "wireless_stack"
   allow_multiple: true
+documentation:
+  docset: bluetooth
+  document: bluetooth-stack-api
 metadata:
   sbom:
     license: Zlib AND MSLA

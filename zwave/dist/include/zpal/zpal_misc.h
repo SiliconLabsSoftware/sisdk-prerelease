@@ -31,19 +31,6 @@ extern "C" {
  */
 
 /**
- * @brief Product id struct.
- */
-typedef struct {
-  uint16_t app_manufacturer_id;   ///< Manufacturer ID identifiers. (MFG_ID_XXX_XXX)
-  uint16_t app_product_id;        ///< Product ID. (PRODUCT_ID_XXX_XXX)
-  uint16_t app_product_type;      ///< Product type Id. (PRODUCT_TYPE_ID_ZWAVE_XXX_XXX)
-  uint16_t app_icon_type;         ///< Z-Wave+ Icon Type identifiers. (ICON_TYPE_XXX_XXX)
-  uint8_t generic_type;           ///< Generic Device Class identifier. (GENERIC_TYPE_XXX_XXX)
-  uint8_t specyfic_type;          ///< Specific Device Class identifier. (SPECYFIC_TYPE_XXX_XXX)
-  uint8_t requested_security_key; ///< Bitmask for security keys. (SECURITY_KEY_SX_XXX)
-} zpal_product_id_t;
-
-/**
  * @brief Defines for identifying the secure element type supported by the chip.
  */
 typedef enum {
@@ -121,51 +108,6 @@ uint8_t zpal_get_chip_type(void);
  * @return Chip revision.
  */
 uint8_t zpal_get_chip_revision(void);
-
-/**
- * @brief Get application version.
- *
- * @return Application version.
- *
- * @note This function exists in PAL to allow use app version by external module (e.g. bootloader).
- */
-uint32_t zpal_get_app_version(void);
-
-/**
- * @brief Get major part of application version.
- *
- * @return Major part of application version.
- *
- * @note This function exists in PAL to allow use app version by external module (e.g. bootloader).
- */
-uint8_t zpal_get_app_version_major(void);
-
-/**
- * @brief Get minor part of application version.
- *
- * @return Minor part of application version.
- *
- * @note This function exists in PAL to allow use app version by external module (e.g. bootloader).
- */
-uint8_t zpal_get_app_version_minor(void);
-
-/**
- * @brief Get patch part of application version.
- *
- * @return Patch part of application version.
- *
- * @note This function exists in PAL to allow use app version by external module (e.g. bootloader).
- */
-uint8_t zpal_get_app_version_patch(void);
-
-/**
- * @brief Get product id.
- *
- * @param[out] product_id Product id.
- *
- * @note This function exists in PAL to allow use product id by external module (e.g. bootloader).
- */
-void zpal_get_product_id(zpal_product_id_t *product_id);
 
 /**
  * @brief Initialize debug output.

@@ -14,7 +14,7 @@ id=com.silabs.sdk.stack.thread_app
 version=3.2.0.0
 label=OpenThread SDK
 description=OpenThread stack support for EFR32 devices
-prop.subLabel=OpenThread\\ 3.2.0.0\\ (GitHub-fb274efe6)
+prop.subLabel=OpenThread\\ 3.2.0.0\\ (GitHub-22b2ec2a8)
 
 prop.file.docsFile=documentation/slOpenThread_docContent.xml
 prop.file.templatesFile=thread_production_templates.xml

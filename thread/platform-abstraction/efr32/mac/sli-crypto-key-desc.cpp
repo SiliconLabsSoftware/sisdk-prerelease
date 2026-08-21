@@ -47,14 +47,14 @@
 #include "common/debug.hpp"
 #endif
 
-sli_crypto_descriptor_t LpwAesKeyDescFromPlaintext(const otMacKeyMaterial &aKey)
+sli_crypto_descriptor_t LpwAesKeyDescFromPlaintext(const otMacKeyMaterial &aRawKey)
 {
     sli_crypto_descriptor_t keyDesc;
 
     keyDesc.engine                           = SLI_CRYPTO_LPWAES;
     keyDesc.yield                            = false;
     keyDesc.location                         = SLI_CRYPTO_KEY_LOCATION_PLAINTEXT;
-    keyDesc.key.plaintext_key.buffer.pointer = const_cast<uint8_t *>(aKey.mKeyMaterial.mKey.m8);
+    keyDesc.key.plaintext_key.buffer.pointer = const_cast<uint8_t *>(aRawKey.mKeyMaterial.mKey.m8);
     keyDesc.key.plaintext_key.buffer.size    = OT_MAC_KEY_SIZE;
     keyDesc.key.plaintext_key.key_size       = OT_MAC_KEY_SIZE;
 

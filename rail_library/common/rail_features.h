@@ -231,7 +231,8 @@ extern "C" {
 /// Boolean to indicate whether the selected chip supports HFXO compensation.
 /// See also runtime refinement \ref RAIL_SupportsHFXOCompensation().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_SUPPORTS_HFXO_COMPENSATION.
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 5) \
+  || (_SILICON_LABS_32B_SERIES_3_CONFIG == 353))
 #define RAIL_SUPPORTS_HFXO_COMPENSATION RAIL_SUPPORTS_EXTERNAL_THERMISTOR
 #else
 #define RAIL_SUPPORTS_HFXO_COMPENSATION 0

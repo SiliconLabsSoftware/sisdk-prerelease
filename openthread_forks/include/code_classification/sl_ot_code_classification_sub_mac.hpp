@@ -59,6 +59,20 @@ namespace ot {
 
 namespace Mac {
 
+//----------------------------------------------------------------------------------------------------------------------
+// Derived configs
+
+#ifdef OT_CONFIG_MAC_TARGET_TIME_TX_ENABLE
+#error "OT_CONFIG_MAC_TARGET_TIME_TX_ENABLE MUST NOT be defined directly. It is derived from other configs"
+#endif
+
+#define OT_CONFIG_MAC_TARGET_TIME_TX_ENABLE                                                         \
+    (OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE || OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE || \
+     ((OPENTHREAD_RADIO || OPENTHREAD_CONFIG_LINK_RAW_ENABLE) && OPENTHREAD_CONFIG_MAC_SOFTWARE_TX_TIMING_ENABLE))
+
+//----------------------------------------------------------------------------------------------------------------------
+// Config validity checks
+
 #if OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE && (OPENTHREAD_CONFIG_THREAD_VERSION < OT_THREAD_VERSION_1_2)
 #error "Thread 1.2 or higher version is required for OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE."
 #endif
@@ -79,6 +93,8 @@ namespace Mac {
 #if OPENTHREAD_CONFIG_MAC_CSL_DEBUG_ENABLE && !OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
 #error "OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE is required for OPENTHREAD_CONFIG_MAC_CSL_DEBUG_ENABLE."
 #endif
+
+//----------------------------------------------------------------------------------------------------------------------
 
 #if OPENTHREAD_RADIO || OPENTHREAD_CONFIG_LINK_RAW_ENABLE
 class LinkRaw;
@@ -106,6 +122,9 @@ class SubMac : public InstanceLocator, private NonCopyable
     friend class LinkRaw;
 
 public:
+    using Capability   = Radio::Capability;   ///< A radio capability.
+    using Capabilities = Radio::Capabilities; ///< A bit-vector of radio capabilities.
+
     /**
      * Defines the callbacks notifying `SubMac` user of changes and events.
      */
@@ -207,18 +226,22 @@ public:
     /**
      * Gets the capabilities provided by platform radio.
      *
-     * @returns The capability bit vector (see `OT_RADIO_CAP_*` definitions).
+     * @returns The capability bit vector (see `Radio::Capability` definitions).
      */
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    otRadioCaps GetRadioCaps(void) const { return mRadioCaps; }
+    Capabilities GetRadioCaps(void) const { return mRadioCaps; }
 
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+#if OPENTHREAD_FTD || OPENTHREAD_MTD
     /**
      * Gets the capabilities provided by `SubMac` layer.
      *
-     * @returns The capability bit vector (see `OT_RADIO_CAP_*` definitions).
+     * @returns The capability bit vector (see `Radio::Capability` definitions).
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    otRadioCaps GetCaps(void) const;
+    Capabilities GetCaps(void) const;
+#elif OPENTHREAD_RADIO
+    Capabilities GetCaps(void) const { return mRadioCaps | kSwEnabledCapabilities; }
+#endif
 
     /**
      * Sets the PAN ID.
@@ -279,15 +302,11 @@ public:
     /**
      * Registers a callback to provide received packet capture for IEEE 802.15.4 frames.
      *
-     * @param[in]  aPcapCallback     A pointer to a function that is called when receiving an IEEE 802.15.4 link frame
-     *                               or `nullptr` to disable the callback.
-     * @param[in]  aCallbackContext  A pointer to application-specific context.
+     * @param[in]  aCallback   The packet capture callback, or `nullptr` to disable packet capture.
+     * @param[in]  aContext    A pointer to application-specific context.
      */
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void SetPcapCallback(otLinkPcapCallback aPcapCallback, void *aCallbackContext)
-    {
-        mPcapCallback.Set(aPcapCallback, aCallbackContext);
-    }
+    void SetPcapCallback(PcapCallback aCallback, void *aContext) { mPcapCallback.Set(aCallback, aContext); }
 
     /**
      * Indicates whether radio should stay in Receive or Sleep during idle periods.
@@ -436,55 +455,31 @@ public:
 #endif // OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
 
     /**
-     * Sets MAC keys and key index.
+     * Gets a MAC key of a given type from `SubMac`.
      *
-     * @param[in] aKeyIdMode  MAC key ID mode.
-     * @param[in] aKeyId      The key ID.
+     * @param[in] aType  The key type (`KeyTrio::kPrev`, `KeyTrio::kCur`, or `KeyTrio::kNext`).
+     *
+     * @returns A reference to the requested MAC key.
+     */
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+    const KeyMaterial &GetMacKey(KeyTrio::Type aType) const { return mKeyTrio.GetKey(aType); }
+
+    /**
+     * Sets MAC keys and key index for Key ID Mode 1.
+     *
+     * @param[in] aKeyIndex   The key index.
      * @param[in] aPrevKey    The previous MAC key.
-     * @param[in] aCurrKey    The current MAC key.
+     * @param[in] aCurKey     The current MAC key.
      * @param[in] aNextKey    The next MAC key.
      */
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void SetMacKey(uint8_t            aKeyIdMode,
-                   uint8_t            aKeyId,
-                   const KeyMaterial &aPrevKey,
-                   const KeyMaterial &aCurrKey,
-                   const KeyMaterial &aNextKey);
-
-    /**
-     * Returns a reference to the current MAC key.
-     *
-     * @returns A reference to the current MAC key.
-     */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    const KeyMaterial &GetCurrentMacKey(void) const { return mCurrKey; }
-
-    /**
-     * Returns a reference to the previous MAC key.
-     *
-     * @returns A reference to the previous MAC key.
-     */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    const KeyMaterial &GetPreviousMacKey(void) const { return mPrevKey; }
-
-    /**
-     * Returns a reference to the next MAC key.
-     *
-     * @returns A reference to the next MAC key.
-     */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    const KeyMaterial &GetNextMacKey(void) const { return mNextKey; }
+     void SetMode1MacKeys(uint8_t aKeyIndex, const Key &aPrevKey, const Key &aCurKey, const Key &aNextKey);
 
     /**
      * Clears the stored MAC keys.
      */
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void ClearMacKeys(void)
-    {
-        mPrevKey.Clear();
-        mCurrKey.Clear();
-        mNextKey.Clear();
-    }
+    void ClearMacKeys(void) { mKeyTrio.Clear(); }
 
     /**
      * Returns the current MAC frame counter value.
@@ -541,51 +536,6 @@ public:
 #endif
 
 private:
-#if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void        CslInit(void);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void        RestartCslTimerAfterSyncUpdate(void);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void        UpdateCslLastSyncTimestamp(TxFrame &aFrame, RxFrame *aAckFrame);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void        UpdateCslLastSyncTimestamp(RxFrame *aFrame, Error aError);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    static void HandleCslTimer(Timer &aTimer);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void        HandleCslTimer(void);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void        GetCslWindowEdges(uint32_t &aAhead, uint32_t &aAfter);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    uint32_t    GetNextCycleDrift(void);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    uint32_t    GetLocalTime(void);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    bool        IsCslEnabled(void) const { return mCslPeriod > 0; }
-#if OPENTHREAD_CONFIG_MAC_CSL_DEBUG_ENABLE
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void LogReceived(RxFrame *aFrame);
-#endif
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void HandleCslReceiveAt(uint32_t aTimeAhead, uint32_t aTimeAfter);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void HandleCslReceiveOrSleep(uint32_t aTimeAhead, uint32_t aTimeAfter);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void LogCslWindow(uint32_t aWinStart, uint32_t aWinDuration);
-#endif
-#if OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void        WedInit(void);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    static void HandleWedTimer(Timer &aTimer);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void        HandleWedTimer(void);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void        HandleWedReceiveAt(void);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void        HandleWedReceiveOrSleep(void);
-#endif
-
     static constexpr uint8_t  kCsmaMinBe         = 3;                  // macMinBE (IEEE 802.15.4-2006).
     static constexpr uint8_t  kCsmaMaxBe         = 5;                  // macMaxBE (IEEE 802.15.4-2006).
     static constexpr uint32_t kUnitBackoffPeriod = 20;                 // Number of symbols (IEEE 802.15.4-2006).
@@ -603,6 +553,35 @@ private:
     static constexpr uint32_t kEnergyScanRssiSampleInterval = 1000; // RSSI sample interval for energy scan, in usec
 #endif
 
+    static constexpr Capability kCapAckTimeout         = Radio::kCapAckTimeout;
+    static constexpr Capability kCapEnergyScan         = Radio::kCapEnergyScan;
+    static constexpr Capability kCapTransmitRetries    = Radio::kCapTransmitRetries;
+    static constexpr Capability kCapCsmaBackoff        = Radio::kCapCsmaBackoff;
+    static constexpr Capability kCapSleepToTx          = Radio::kCapSleepToTx;
+    static constexpr Capability kCapTransmitSec        = Radio::kCapTransmitSec;
+    static constexpr Capability kCapTransmitTiming     = Radio::kCapTransmitTiming;
+    static constexpr Capability kCapReceiveTiming      = Radio::kCapReceiveTiming;
+    static constexpr Capability kCapRxOnWhenIdle       = Radio::kCapRxOnWhenIdle;
+    static constexpr Capability kCapTransmitFramePower = Radio::kCapTransmitFramePower;
+    static constexpr Capability kCapAltShortAddr       = Radio::kCapAltShortAddr;
+
+#if OPENTHREAD_RADIO || OPENTHREAD_CONFIG_LINK_RAW_ENABLE
+
+#define ConditionalCap(kCapability, kEnableConfig) ((kEnableConfig) ? kCapability : 0)
+
+    static constexpr Capabilities kSwEnabledCapabilities =
+        ConditionalCap(kCapAckTimeout, OPENTHREAD_CONFIG_MAC_SOFTWARE_ACK_TIMEOUT_ENABLE) |
+        ConditionalCap(kCapEnergyScan, OPENTHREAD_CONFIG_MAC_SOFTWARE_ENERGY_SCAN_ENABLE) |
+        ConditionalCap(kCapTransmitRetries, OPENTHREAD_CONFIG_MAC_SOFTWARE_RETRANSMIT_ENABLE) |
+        ConditionalCap(kCapCsmaBackoff, OPENTHREAD_CONFIG_MAC_SOFTWARE_CSMA_BACKOFF_ENABLE) |
+        ConditionalCap(kCapTransmitSec, OPENTHREAD_CONFIG_MAC_SOFTWARE_TX_SECURITY_ENABLE) |
+        ConditionalCap(kCapTransmitTiming, OT_CONFIG_MAC_TARGET_TIME_TX_ENABLE) |
+        ConditionalCap(kCapSleepToTx, OPENTHREAD_RADIO);
+
+#undef ConditionalCap
+
+#endif
+
     enum State : uint8_t
     {
         kStateDisabled,    // Radio is disabled.
@@ -614,8 +593,8 @@ private:
 #if OPENTHREAD_CONFIG_MAC_ADD_DELAY_ON_NO_ACK_ERROR_BEFORE_RETRY
         kStateDelayBeforeRetx, // Delay before retx
 #endif
-#if !OPENTHREAD_MTD && OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
-        kStateCslTransmit, // CSL transmission.
+#if OT_CONFIG_MAC_TARGET_TIME_TX_ENABLE
+        kStateTimedTransmit, // Timed TX (e.g., for CSL)
 #endif
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE || OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
         kStateRadioSample, // Mac layer has requested the SubMac to enter sleep state, but the SubMac is in the periodic
@@ -639,55 +618,38 @@ private:
     static constexpr uint32_t kWedReceiveTimeAfter = OPENTHREAD_CONFIG_WED_RECEIVE_TIME_AFTER;
 #endif
 
-#if OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
-    // CSL transmitter would schedule delayed transmission `kCslTransmitTimeAhead` earlier
-    // than expected delayed transmit time. The value is in usec.
-    // Only for radios not supporting OT_RADIO_CAPS_TRANSMIT_TIMING.
-    static constexpr uint32_t kCslTransmitTimeAhead = OPENTHREAD_CONFIG_CSL_TRANSMIT_TIME_AHEAD;
+#if OT_CONFIG_MAC_TARGET_TIME_TX_ENABLE
+    // Lead time (in microseconds) to schedule a delayed tx earlier
+    // than expected target tx time. Only used when radio does not
+    // itself support `kCapTransmitTiming`.
+    static constexpr uint32_t kTimedTxLeadTime =
+        OPENTHREAD_CONFIG_CSL_TRANSMIT_TIME_AHEAD + kCcaSampleInterval + Radio::kHeaderShrDuration;
 #endif
 
-    /**
-     * Initializes the states of the sub-MAC layer.
-     */
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void Init(void);
+
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    bool RadioSupportsCsmaBackoff(void) const
-    {
-        return ((mRadioCaps & (OT_RADIO_CAPS_CSMA_BACKOFF | OT_RADIO_CAPS_TRANSMIT_RETRIES)) != 0);
-    }
+    bool RadioSupports(Capability aCapability) const { return (mRadioCaps & aCapability) != 0; }
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    bool RadioSupportsTransmitSecurity(void) const { return ((mRadioCaps & OT_RADIO_CAPS_TRANSMIT_SEC) != 0); }
+    bool ShouldHandle(Capability aCapability) const;
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    bool RadioSupportsRetries(void) const { return ((mRadioCaps & OT_RADIO_CAPS_TRANSMIT_RETRIES) != 0); }
+    bool ShouldHandleTransmitSecurity(void) const { return ShouldHandle(kCapTransmitSec); }
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    bool RadioSupportsAckTimeout(void) const { return ((mRadioCaps & OT_RADIO_CAPS_ACK_TIMEOUT) != 0); }
+    bool ShouldHandleAckTimeout(void) const { return ShouldHandle(kCapAckTimeout); }
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    bool RadioSupportsEnergyScan(void) const { return ((mRadioCaps & OT_RADIO_CAPS_ENERGY_SCAN) != 0); }
+    bool ShouldHandleRetries(void) const { return ShouldHandle(kCapTransmitRetries); }
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    bool RadioSupportsTransmitTiming(void) const { return ((mRadioCaps & OT_RADIO_CAPS_TRANSMIT_TIMING) != 0); }
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    bool RadioSupportsReceiveTiming(void) const { return ((mRadioCaps & OT_RADIO_CAPS_RECEIVE_TIMING) != 0); }
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    bool RadioSupportsRxOnWhenIdle(void) const { return ((mRadioCaps & OT_RADIO_CAPS_RX_ON_WHEN_IDLE) != 0); }
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    bool ShouldHandleTransmitSecurity(void) const;
+    bool ShouldHandleEnergyScan(void) const { return ShouldHandle(kCapEnergyScan); }
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     bool ShouldHandleCsmaBackOff(void) const;
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    bool ShouldHandleAckTimeout(void) const;
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    bool ShouldHandleRetries(void) const;
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    bool ShouldHandleEnergyScan(void) const;
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    bool ShouldHandleTransmitTargetTime(void) const;
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    bool ShouldHandleTransitionToSleep(void) const;
+
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void ProcessTransmitSecurity(void);
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void SignalFrameCounterUsed(uint32_t aFrameCounter, uint8_t aKeyId);
+    void ReprocessSecurityForRetx(TxFrame &aFrame);
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+    void SignalFrameCounterUsed(uint32_t aFrameCounter, uint8_t aKeyIndex);
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void StartCsmaBackoff(void);
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
@@ -713,8 +675,7 @@ private:
     void HandleEnergyScanDone(int8_t aMaxRssi);
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void HandleTimer(void);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    Error RadioSleep(void);
+
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void               SetState(State aState);
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
@@ -729,14 +690,55 @@ private:
     void RadioSample(void);
 #endif
 
-    using SubMacTimer =
+#if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+    void     CslInit(void);
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+    void     RestartCslTimerAfterSyncUpdate(void);
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+    void     UpdateCslLastSyncTimestamp(TxFrame &aFrame, RxFrame *aAckFrame);
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+    void     UpdateCslLastSyncTimestamp(RxFrame *aFrame, Error aError);
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+    void     SetCslLastSyncToNow(void);
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+    void     HandleCslTimer(void);
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+    void     GetCslWindowEdges(uint32_t &aAhead, uint32_t &aAfter);
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+    uint32_t DetermineClockDrift(uint32_t aIntervalUs) const;
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+    uint32_t GetNextCycleDrift(void) const;
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+    bool     IsCslEnabled(void) const { return mCslPeriod > 0; }
+#if OPENTHREAD_CONFIG_MAC_CSL_DEBUG_ENABLE
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+    void LogReceived(RxFrame *aFrame);
+#endif
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+    void HandleCslReceiveAt(uint32_t aTimeAhead, uint32_t aTimeAfter);
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+    void HandleCslReceiveOrSleep(uint32_t aTimeAhead, uint32_t aTimeAfter);
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+    void LogCslWindow(uint32_t aWinStart, uint32_t aWinDuration);
+#endif
+#if OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+    void        WedInit(void);
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+    void        HandleWedTimer(void);
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+    void        HandleWedReceiveAt(void);
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+    void        HandleWedReceiveOrSleep(void);
+#endif
 #if OPENTHREAD_CONFIG_PLATFORM_USEC_TIMER_ENABLE
-        TimerMicroIn<SubMac, &SubMac::HandleTimer>;
+    using SubMacTimer = TimerMicroIn<SubMac, &SubMac::HandleTimer>;
 #else
-        TimerMilliIn<SubMac, &SubMac::HandleTimer>;
+    using SubMacTimer = TimerMilliIn<SubMac, &SubMac::HandleTimer>;
 #endif
 
-    otRadioCaps  mRadioCaps;
+    Capabilities mRadioCaps;
     State        mState;
     uint8_t      mCsmaBackoffs;
     uint8_t      mTransmitRetries;
@@ -747,44 +749,47 @@ private:
 #if OPENTHREAD_CONFIG_MAC_FILTER_ENABLE
     bool mRadioFilterEnabled : 1;
 #endif
-    int8_t                       mEnergyScanMaxRssi;
-    TimeMilli                    mEnergyScanEndTime;
-    TxFrame                     &mTransmitFrame;
-    Callbacks                    mCallbacks;
-    Callback<otLinkPcapCallback> mPcapCallback;
-    KeyMaterial                  mPrevKey;
-    KeyMaterial                  mCurrKey;
-    KeyMaterial                  mNextKey;
-    uint32_t                     mFrameCounter;
-    uint8_t                      mKeyId;
+    int8_t                 mEnergyScanMaxRssi;
+    TimeMilli              mEnergyScanEndTime;
+    TxFrame               &mTransmitFrame;
+    Callbacks              mCallbacks;
+    Callback<PcapCallback> mPcapCallback;
+    KeyTrio                mKeyTrio;
+    uint32_t               mFrameCounter;
 #if OPENTHREAD_CONFIG_MAC_ADD_DELAY_ON_NO_ACK_ERROR_BEFORE_RETRY
     uint8_t mRetxDelayBackOffExponent;
 #endif
     SubMacTimer mTimer;
 
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
-    uint16_t mCslPeriod;             // The CSL sample period, in units of 10 symbols (160 microseconds).
-    uint8_t  mCslChannel : 7;        // The CSL sample channel.
-    bool     mIsCslSampling : 1;     // Indicates that the current time is in CSL sample window
-                                     // for platforms not supporting `Radio::ReceiveAt()`.
-    uint16_t    mCslPeerShort;       // The CSL peer short address.
-    uint32_t    mCslSampleTimeRadio; // The CSL sample time of the current period based on radio time (lower 32-bit).
-    TimeMicro   mCslSampleTimeLocal; // The CSL sample time of the current period based on local time.
-    TimeMicro   mCslLastSync;        // The timestamp of the last successful CSL synchronization.
-    CslAccuracy mCslParentAccuracy;  // The parent's CSL accuracy (clock accuracy and uncertainty).
-    TimerMicro  mCslTimer;
+    using CslTimer = TimerMicroIn<SubMac, &SubMac::HandleCslTimer>;
+
+    uint16_t mCslPeriod;                  // The CSL sample period, in units of 10 symbols (160 microseconds).
+    uint8_t  mCslChannel : 7;             // The CSL sample channel.
+    bool     mIsCslSampling : 1;          // Indicates that the current time is in CSL sample window
+                                          // for platforms not supporting `Radio::ReceiveAt()`.
+    uint16_t          mCslPeerShort;      // The CSL peer short address.
+    Radio::SyncedTime mCslSampleTime;     // The CSL sample time for current period.
+    CslAccuracy       mCslParentAccuracy; // The parent's CSL accuracy (clock accuracy and uncertainty).
+    CslTimer          mCslTimer;
+#if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_LOCAL_TIME_SYNC
+    TimeMicro mCslLastSync; // The timestamp of the last successful CSL synchronization.
+#else
+    Radio::Time64 mCslLastSync;
+#endif
 #endif
 
 #if OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
-    bool mIsWedSampling : 1;          // Indicates that the current time is in WED's sample window
-                                      // for platforms not supporting `Radio::ReceiveAt()`.
-    bool       mIsWedEnabled : 1;     // Indicates if the WED is enabled.
-    uint32_t   mWakeupListenInterval; // The wake-up listen interval, in microseconds.
-    uint32_t   mWakeupListenDuration; // The wake-up listen duration, in microseconds.
-    uint8_t    mWakeupChannel;        // The wake-up sample channel.
-    TimeMicro  mWedSampleTime;        // The WED sample time of the current interval in local time.
-    uint64_t   mWedSampleTimeRadio;   // The WED sample time of the current interval in radio time.
-    TimerMicro mWedTimer;
+    using WedTimer = TimerMicroIn<SubMac, &SubMac::HandleWedTimer>;
+
+    bool mIsWedSampling : 1;                 // Indicates that the current time is in WED's sample window
+                                             // for platforms not supporting `Radio::ReceiveAt()`.
+    bool              mIsWedEnabled : 1;     // Indicates if the WED is enabled.
+    uint32_t          mWakeupListenInterval; // The wake-up listen interval, in microseconds.
+    uint32_t          mWakeupListenDuration; // The wake-up listen duration, in microseconds.
+    uint8_t           mWakeupChannel;        // The wake-up sample channel.
+    Radio::SyncedTime mWedSampleTime;        // The WED sample time of the current interval.
+    WedTimer          mWedTimer;
 #endif
 };
 

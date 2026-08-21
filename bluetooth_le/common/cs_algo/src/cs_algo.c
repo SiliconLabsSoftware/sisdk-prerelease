@@ -58,6 +58,7 @@ typedef struct {
   bool                          estimator_created;
   uint16_t                      ranging_counter;
   uint8_t                       conn_handle;
+  uint8_t                       num_antenna_paths;
   uint8_t                       result[CS_RESULT_MAX_BUFFER_SIZE];
 } cs_algo_instance_t;
 
@@ -77,8 +78,11 @@ static void report_intermediate_result(cs_algo_instance_t *inst,
 static void cs_mode_converter(uint8_t cs_mode_bt,
                               char **cs_mode_str,
                               sl_rtl_cs_mode *cs_mode_rtl);
+static uint8_t get_local_sw_times(void);
+static uint8_t num_antenna_paths_from_aci(uint8_t aci);
 static void build_rtl_cs_params(const cs_algo_config_t *src,
-                                sl_rtl_cs_params *dst);
+                                sl_rtl_cs_params *dst,
+                                uint8_t num_antenna_paths);
 static cs_algo_instance_t *cs_algo_get_instance(uint8_t conn_handle);
 static cs_algo_instance_t *cs_algo_get_free_slot(void);
 static cs_algo_instance_t *cs_algo_find_by_rtl_inst(sl_rtl_service_cs_inst_t *rtl_inst);
@@ -272,16 +276,23 @@ static void report_result(cs_algo_instance_t *inst,
   enum sl_rtl_error_code rtl_err = SL_RTL_ERROR_NOT_INITIALIZED;
   sl_rtl_cs_estimator_param param;
   sl_rtl_cs_distance_estimate_mode mode;
+  sl_rtl_cs_distance_estimate_mode sub_mode_estimate;
 
   float rtl_value = 0.0f;
   float last_known_distance = 0.0f;
 
   cs_result_initialize_results_data(&inst->result_data);
 
+  sub_mode_estimate = (inst->config.cs_sub_mode == sl_bt_cs_mode_pbr)
+                      ? SL_RTL_CS_SUB_MODE_PBR_ESTIMATE
+                      : SL_RTL_CS_SUB_MODE_RTT_ESTIMATE;
+
   if (inst->config.cs_sub_mode == sl_bt_cs_submode_disabled) {
     mode = SL_RTL_CS_BEST_ESTIMATE;
   } else {
-    mode = SL_RTL_CS_MAIN_MODE_ESTIMATE;
+    mode = (inst->config.cs_main_mode == sl_bt_cs_mode_pbr)
+           ? SL_RTL_CS_MAIN_MODE_PBR_ESTIMATE
+           : SL_RTL_CS_MAIN_MODE_RTT_ESTIMATE;
   }
 
   // --------------------------------
@@ -309,7 +320,7 @@ static void report_result(cs_algo_instance_t *inst,
   if (inst->config.cs_sub_mode != sl_bt_cs_submode_disabled) {
     rtl_err = sl_rtl_service_get_cs_distance_estimate(result,
                                                       SL_RTL_CS_DISTANCE_ESTIMATE_TYPE_FILTERED,
-                                                      SL_RTL_CS_SUB_MODE_ESTIMATE,
+                                                      sub_mode_estimate,
                                                       &last_known_distance);
     show_rtl_api_call_result(inst, rtl_err);
     if (rtl_err == SL_RTL_ERROR_SUCCESS) {
@@ -353,7 +364,7 @@ static void report_result(cs_algo_instance_t *inst,
   if (inst->config.cs_sub_mode != sl_bt_cs_submode_disabled) {
     rtl_err = sl_rtl_service_get_cs_distance_estimate(result,
                                                       SL_RTL_CS_DISTANCE_ESTIMATE_TYPE_RAW,
-                                                      SL_RTL_CS_SUB_MODE_ESTIMATE,
+                                                      sub_mode_estimate,
                                                       &rtl_value);
     show_rtl_api_call_result(inst, rtl_err);
     if (rtl_err == SL_RTL_ERROR_SUCCESS) {
@@ -397,7 +408,7 @@ static void report_result(cs_algo_instance_t *inst,
   if (inst->config.cs_sub_mode != sl_bt_cs_submode_disabled) {
     rtl_err = sl_rtl_service_get_cs_distance_estimate_confidence(result,
                                                                  SL_RTL_CS_DISTANCE_ESTIMATE_CONFIDENCE_TYPE_LIKELINESS,
-                                                                 SL_RTL_CS_SUB_MODE_ESTIMATE,
+                                                                 sub_mode_estimate,
                                                                  &rtl_value);
     show_rtl_api_call_result(inst, rtl_err);
     if (rtl_err == SL_RTL_ERROR_SUCCESS) {
@@ -451,7 +462,7 @@ static void report_result(cs_algo_instance_t *inst,
 
   // --------------------------------
   // Get velocity
-  if (inst->config.rtl_config.algo_mode == SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST
+  if (inst->config.rtl_config.algo_mode == SL_RTL_CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED
       && inst->config.cs_main_mode == sl_bt_cs_mode_pbr
       && (inst->config.channel_map_preset == CS_CHANNEL_MAP_PRESET_HIGH
           || inst->config.channel_map_preset == CS_CHANNEL_MAP_PRESET_MEDIUM)) {
@@ -562,14 +573,93 @@ static void cs_mode_converter(uint8_t cs_mode_bt,
 }
 
 /******************************************************************************
+ * Query and cache the local antenna-switching times capability field.
+ *
+ * @return Local antenna switching times capability field.
+ *****************************************************************************/
+static uint8_t get_local_sw_times(void)
+{
+  static bool cached = false;
+  static uint8_t local_sw_times = 0;
+
+  if (!cached) {
+    sl_status_t sc = sl_bt_cs_read_local_supported_capabilities(NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL,
+                                                                &local_sw_times,
+                                                                NULL);
+    if (sc != SL_STATUS_OK) {
+      algo_log_error("RTL - failed to read local CS capabilities! [sc: 0x%lx]" LOG_NL,
+                     (unsigned long)sc);
+      local_sw_times = 0;
+    }
+    cached = true;
+  }
+
+  return local_sw_times;
+}
+
+/******************************************************************************
+ * Derive the number of antenna paths from Antenna Config Index (ACI).
+ *
+ * @param[in] aci Negotiated tone antenna configuration index (0 to 7).
+ * @return Number of antenna paths (1, 2, or 4).
+ *****************************************************************************/
+static uint8_t num_antenna_paths_from_aci(uint8_t aci)
+{
+  switch (aci) {
+    case CS_ANTENNA_CONFIG_INDEX_DUAL_LOCAL_SINGLE_REMOTE:
+    case CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_DUAL_REMOTE:
+      return 2;
+    case CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY:
+      return 4;
+    case CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY:
+    default:
+      return 1;
+  }
+}
+
+/******************************************************************************
  * Build sl_rtl_cs_params struct from the rtllib-independent cs_algo_config_t
  *
- * @param[in]  src cs_algo configuration to translate.
- * @param[out] dst sl_rtl_cs_params struct to populate.
+ * @param[in]  src               cs_algo configuration to translate.
+ * @param[out] dst               sl_rtl_cs_params struct to populate.
+ * @param[in]  num_antenna_paths Number of antenna paths, derived from the
+ *                               negotiated ACI (see num_antenna_paths_from_aci).
  *****************************************************************************/
-static void build_rtl_cs_params(const cs_algo_config_t *src, sl_rtl_cs_params *dst)
+static void build_rtl_cs_params(const cs_algo_config_t *src,
+                                sl_rtl_cs_params *dst,
+                                uint8_t num_antenna_paths)
 {
-  memset(dst, 0, sizeof(*dst));
+  sl_rtl_cs_mode rtl_main_mode;
+  sl_rtl_cs_mode rtl_sub_mode;
+  char *main_mode_str;
+  char *sub_mode_str;
+
+  sl_rtl_cs_init_cs_params(dst);
+
+  cs_mode_converter(src->cs_main_mode, &main_mode_str, &rtl_main_mode);
+  cs_mode_converter(src->cs_sub_mode, &sub_mode_str, &rtl_sub_mode);
+  dst->main_mode = (uint8_t)rtl_main_mode;
+  dst->sub_mode  = (uint8_t)rtl_sub_mode;
+  (void)main_mode_str;
+  (void)sub_mode_str;
+
   // Runtime values from cs_config_complete
   dst->connection_interval = src->connection_interval;
   memcpy(dst->channel_map, src->channel_map.data, sizeof(dst->channel_map));
@@ -578,16 +668,28 @@ static void build_rtl_cs_params(const cs_algo_config_t *src, sl_rtl_cs_params *d
   dst->T_IP1_time          = src->T_IP1_time;
   dst->T_IP2_time          = src->T_IP2_time;
   dst->T_FCS_time          = src->T_FCS_time;
-  dst->num_antenna_paths   = src->num_antenna_paths;
+  dst->num_antenna_paths   = num_antenna_paths;
   dst->min_main_mode_steps    = src->min_main_mode_steps;
   dst->max_main_mode_steps    = src->max_main_mode_steps;
   dst->main_mode_repetition   = src->main_mode_repetition;
-  dst->rtt_type               = (sl_rtl_cs_rtt_type)src->rtt_type;
+  dst->rtt_type               = src->rtt_type;
   dst->cs_sync_phy            = src->cs_sync_phy;
   dst->channel_map_repetition = src->channel_map_repetition;
   dst->channel_selection_type = src->channel_selection_type;
   dst->ch3c_shape             = src->ch3c_shape;
   dst->ch3c_jump              = src->ch3c_jump;
+
+  enum sl_rtl_error_code rtl_err =
+    sl_rtl_util_get_antenna_switching_time(get_local_sw_times(),
+                                           src->remote_t_sw_us,
+                                           true, /* is_local_initiator: cs_algo is only used in the initiator role */
+                                           src->tone_antenna_config_selection,
+                                           &dst->T_SW_time);
+  if (rtl_err != SL_RTL_ERROR_SUCCESS) {
+    algo_log_error("RTL - failed to compute antenna switching time! [E: 0x%x]" LOG_NL,
+                   rtl_err);
+    dst->T_SW_time = 0;
+  }
 }
 
 static cs_algo_instance_t *cs_algo_get_instance(uint8_t conn_handle)
@@ -775,38 +877,16 @@ static enum sl_rtl_error_code rtl_service_configure_instance(const uint8_t conn_
   sl_rtl_cs_mode rtl_sub_mode;
   char *main_mode_str;
   char *sub_mode_str;
-
   cs_mode_converter(config->cs_main_mode, &main_mode_str, &rtl_main_mode);
   cs_mode_converter(config->cs_sub_mode, &sub_mode_str, &rtl_sub_mode);
-
   algo_log_debug(INSTANCE_PREFIX "CS mode: %s, Submode: %s" LOG_NL,
                  conn_handle,
                  main_mode_str,
                  sub_mode_str);
-  rtl_err = sl_rtl_service_set_cs_mode(rtl_inst, rtl_main_mode, rtl_sub_mode);
-  if (rtl_err != SL_RTL_ERROR_SUCCESS) {
-    algo_log_error(INSTANCE_PREFIX "RTL - failed to set CS mode and sub mode! "
-                                   "[E: 0x%x]" LOG_NL,
-                   conn_handle,
-                   rtl_err);
-    algo_error(inst,
-               CS_ALGO_ERROR_CONFIGURE_FAILED,
-               (sl_status_t)rtl_err);
-    return rtl_err;
-  }
-  rtl_err = sl_rtl_service_set_cs_params(rtl_inst, rtl_cs_parameters);
-  if (rtl_err != SL_RTL_ERROR_SUCCESS) {
-    algo_log_error(INSTANCE_PREFIX "RTL - failed to set CS parameters! "
-                                   "[E: 0x%x]" LOG_NL,
-                   conn_handle,
-                   rtl_err);
-    algo_error(inst,
-               CS_ALGO_ERROR_CONFIGURE_FAILED,
-               (sl_status_t)rtl_err);
-    return rtl_err;
-  }
+  (void)rtl_main_mode;
+  (void)rtl_sub_mode;
 
-  rtl_err = sl_rtl_service_create_cs_estimator(rtl_inst);
+  rtl_err = sl_rtl_service_create_cs_estimator(rtl_inst, rtl_cs_parameters);
   if (rtl_err != SL_RTL_ERROR_SUCCESS) {
     algo_log_error(INSTANCE_PREFIX "RTL - failed to create estimator! [E: 0x%x]" LOG_NL,
                    conn_handle,
@@ -938,6 +1018,7 @@ sl_status_t cs_algo_create(uint8_t conn_handle, cs_algo_config_t config)
     inst->conn_handle       = conn_handle;
     inst->estimator_created = false;
     inst->config            = config;
+    inst->num_antenna_paths = num_antenna_paths_from_aci(config.tone_antenna_config_selection);
 
     enum sl_rtl_error_code rtl_err = sl_rtl_service_create_cs_instance(algo_rtl_svc_ctx,
                                                                        &inst->rtl_inst);
@@ -956,7 +1037,7 @@ sl_status_t cs_algo_create(uint8_t conn_handle, cs_algo_config_t config)
 
     // Translate the rtllib-independent cs_algo_config_t into an sl_rtl_cs_params
     sl_rtl_cs_params rtl_cs_parameters;
-    build_rtl_cs_params(&inst->config, &rtl_cs_parameters);
+    build_rtl_cs_params(&inst->config, &rtl_cs_parameters, inst->num_antenna_paths);
 
     rtl_err = rtl_service_configure_instance(conn_handle,
                                              inst->rtl_inst,
@@ -977,7 +1058,7 @@ sl_status_t cs_algo_create(uint8_t conn_handle, cs_algo_config_t config)
                                   "algo_mode=%u ant:%u conn_int:%u mode:%u sub:%u" LOG_NL,
                   conn_handle,
                   inst->config.rtl_config.algo_mode,
-                  inst->config.num_antenna_paths,
+                  inst->num_antenna_paths,
                   inst->config.connection_interval,
                   inst->config.cs_main_mode,
                   inst->config.cs_sub_mode);
@@ -1087,18 +1168,18 @@ void cs_algo_process_ras_data(uint8_t conn_handle,
   inst->procedure_data.cs_procedure_config.procedure_count     = proc_info.procedure_count;
   inst->procedure_data.cs_procedure_config.subevents_per_event = proc_info.subevents_per_event;
 
-  inst->procedure_data.ras_info.num_antenna_paths  = inst->config.num_antenna_paths;
+  inst->procedure_data.ras_info.num_antenna_paths  = inst->num_antenna_paths;
   inst->procedure_data.ras_info.num_steps_reported = ranging_data->num_steps;
   inst->procedure_data.ras_info.step_channels      = ranging_data->step_channels;
   inst->procedure_data.initiator_measurement_type  = SL_RTL_RAS;
-  inst->procedure_data.initiator_ras_measurement   = &inst->initiator_meas;
+  inst->procedure_data.initiator.ras_measurement   = &inst->initiator_meas;
   inst->procedure_data.reflector_measurement_type  = SL_RTL_RAS;
-  inst->procedure_data.reflector_ras_measurement   = &inst->reflector_meas;
+  inst->procedure_data.reflector.ras_measurement   = &inst->reflector_meas;
 
   algo_log_info(INSTANCE_PREFIX "RAS process start - "
                                 "ant:%u steps:%u init_data_size:%lu refl_data_size:%lu" LOG_NL,
                 inst->conn_handle,
-                inst->config.num_antenna_paths,
+                inst->num_antenna_paths,
                 ranging_data->num_steps,
                 (unsigned long)ranging_data->initiator.data_size,
                 (unsigned long)ranging_data->reflector.data_size);

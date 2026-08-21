@@ -1,0 +1,25 @@
+id: network_stack_common
+package: network_stack_sdk
+description: >
+
+label: SiWx91 Socket IP
+category: Service|IP
+quality: production
+metadata:
+  sbom:
+    license: Zlib
+provides:
+- name: network_stack_common
+source:
+- path: src/sl_net_dns_utility.c
+- path: src/sli_net_ip_config.c
+include:
+- path: inc
+  file_list:
+  - path: sl_net_ip_types.h
+  - path: sl_net_dns_utility.h
+  - path: sli_net_ip_config.h
+
+requires:
+- name: wiseconnect_common
+root_path: network_stack/network_stack_sdk/./components/service/network_stack_common

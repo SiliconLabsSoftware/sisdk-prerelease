@@ -11,17 +11,6 @@
     <property key="filters" value="Capability|Multiprotocol Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
     <property key="core.quality" value="PRODUCTION" />
   </demo>
-  <demo name="brd4407a.demo.mp-ot-ncp-ble-rcp" label="OpenThread NCP + BLE RCP - UART (DMP)">
-    <ns1:description>Demonstrates a Multiprotocol OpenThread (FTD) NCP and BLE RCP application using CPC over UART/EUSART for concurrent Thread and BLE with a Linux host.
-</ns1:description>
-    <property key="demos.blurb" value="OpenThread NCP + BLE RCP - UART (DMP)" />
-    <property key="core.partCompatibility" value=".*" />
-    <property key="core.boardCompatibility" value="brd4407a" />
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd4407a/mp-ot-ncp-ble-rcp-brd4407a.s37" />
-    <property key="core.readmeFiles" value="ot-ble/ncp-rcp/mp-ot-ncp-ble-rcp/readme-ot-ncp-ble-rcp.md" />
-    <property key="filters" value="Capability|Multiprotocol Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
-    <property key="core.quality" value="PRODUCTION" />
-  </demo>
   <demo name="brd4116a.demo.mp-ot-ncp-ble-rcp" label="OpenThread NCP + BLE RCP - UART (DMP)">
     <ns1:description>Demonstrates a Multiprotocol OpenThread (FTD) NCP and BLE RCP application using CPC over UART/EUSART for concurrent Thread and BLE with a Linux host.
 </ns1:description>
@@ -33,15 +22,15 @@
     <property key="filters" value="Capability|Multiprotocol Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
     <property key="core.quality" value="PRODUCTION" />
   </demo>
-  <demo name="brd2703a.demo.mp-ot-ble-soc-minimal" label="OpenThread BLE DMP - SoC (Minimal)">
-    <ns1:description>Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth without button UI running on FreeRTOS. For boards without buttons.
+  <demo name="brd4407a.demo.mp-ot-ncp-ble-rcp" label="OpenThread NCP + BLE RCP - UART (DMP)">
+    <ns1:description>Demonstrates a Multiprotocol OpenThread (FTD) NCP and BLE RCP application using CPC over UART/EUSART for concurrent Thread and BLE with a Linux host.
 </ns1:description>
-    <property key="demos.blurb" value="OpenThread BLE DMP - SoC (Minimal)" />
+    <property key="demos.blurb" value="OpenThread NCP + BLE RCP - UART (DMP)" />
     <property key="core.partCompatibility" value=".*" />
-    <property key="core.boardCompatibility" value="brd2703a" />
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd2703a/mp-ot-ble-soc-minimal-brd2703a.s37" />
-    <property key="core.readmeFiles" value="ot-ble/soc/mp-ot-ble-soc/README.md" />
-    <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
+    <property key="core.boardCompatibility" value="brd4407a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd4407a/mp-ot-ncp-ble-rcp-brd4407a.s37" />
+    <property key="core.readmeFiles" value="ot-ble/ncp-rcp/mp-ot-ncp-ble-rcp/readme-ot-ncp-ble-rcp.md" />
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
     <property key="core.quality" value="PRODUCTION" />
   </demo>
   <demo name="brd4186c.demo.mp-ot-ble-soc-minimal" label="OpenThread BLE DMP - SoC (Minimal)">
@@ -51,17 +40,6 @@
     <property key="core.partCompatibility" value=".*" />
     <property key="core.boardCompatibility" value="brd4186c" />
     <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd4186c/mp-ot-ble-soc-minimal-brd4186c.s37" />
-    <property key="core.readmeFiles" value="ot-ble/soc/mp-ot-ble-soc/README.md" />
-    <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
-    <property key="core.quality" value="PRODUCTION" />
-  </demo>
-  <demo name="brd4407a.demo.mp-ot-ble-soc-minimal" label="OpenThread BLE DMP - SoC (Minimal)">
-    <ns1:description>Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth without button UI running on FreeRTOS. For boards without buttons.
-</ns1:description>
-    <property key="demos.blurb" value="OpenThread BLE DMP - SoC (Minimal)" />
-    <property key="core.partCompatibility" value=".*" />
-    <property key="core.boardCompatibility" value="brd4407a" />
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd4407a/mp-ot-ble-soc-minimal-brd4407a.s37" />
     <property key="core.readmeFiles" value="ot-ble/soc/mp-ot-ble-soc/README.md" />
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
     <property key="core.quality" value="PRODUCTION" />
@@ -77,6 +55,17 @@
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
     <property key="core.quality" value="PRODUCTION" />
   </demo>
+  <demo name="brd4407a.demo.mp-ot-ble-soc-minimal" label="OpenThread BLE DMP - SoC (Minimal)">
+    <ns1:description>Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth without button UI running on FreeRTOS. For boards without buttons.
+</ns1:description>
+    <property key="demos.blurb" value="OpenThread BLE DMP - SoC (Minimal)" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4407a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd4407a/mp-ot-ble-soc-minimal-brd4407a.s37" />
+    <property key="core.readmeFiles" value="ot-ble/soc/mp-ot-ble-soc/README.md" />
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
   <demo name="brd4180a.demo.mp-ot-ble-soc-minimal" label="OpenThread BLE DMP - SoC (Minimal)">
     <ns1:description>Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth without button UI running on FreeRTOS. For boards without buttons.
 </ns1:description>
@@ -88,13 +77,13 @@
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
     <property key="core.quality" value="PRODUCTION" />
   </demo>
-  <demo name="brd2703a.demo.mp-ot-ble-soc" label="OpenThread BLE DMP - SoC">
-    <ns1:description>Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth running on FreeRTOS.
+  <demo name="brd2703a.demo.mp-ot-ble-soc-minimal" label="OpenThread BLE DMP - SoC (Minimal)">
+    <ns1:description>Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth without button UI running on FreeRTOS. For boards without buttons.
 </ns1:description>
-    <property key="demos.blurb" value="OpenThread BLE DMP - SoC" />
+    <property key="demos.blurb" value="OpenThread BLE DMP - SoC (Minimal)" />
     <property key="core.partCompatibility" value=".*" />
     <property key="core.boardCompatibility" value="brd2703a" />
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd2703a/mp-ot-ble-soc-brd2703a.s37" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd2703a/mp-ot-ble-soc-minimal-brd2703a.s37" />
     <property key="core.readmeFiles" value="ot-ble/soc/mp-ot-ble-soc/README.md" />
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
     <property key="core.quality" value="PRODUCTION" />
@@ -110,17 +99,6 @@
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
     <property key="core.quality" value="PRODUCTION" />
   </demo>
-  <demo name="brd4407a.demo.mp-ot-ble-soc" label="OpenThread BLE DMP - SoC">
-    <ns1:description>Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth running on FreeRTOS.
-</ns1:description>
-    <property key="demos.blurb" value="OpenThread BLE DMP - SoC" />
-    <property key="core.partCompatibility" value=".*" />
-    <property key="core.boardCompatibility" value="brd4407a" />
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd4407a/mp-ot-ble-soc-brd4407a.s37" />
-    <property key="core.readmeFiles" value="ot-ble/soc/mp-ot-ble-soc/README.md" />
-    <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
-    <property key="core.quality" value="PRODUCTION" />
-  </demo>
   <demo name="brd4116a.demo.mp-ot-ble-soc" label="OpenThread BLE DMP - SoC">
     <ns1:description>Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth running on FreeRTOS.
 </ns1:description>
@@ -132,6 +110,17 @@
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
     <property key="core.quality" value="PRODUCTION" />
   </demo>
+  <demo name="brd4407a.demo.mp-ot-ble-soc" label="OpenThread BLE DMP - SoC">
+    <ns1:description>Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth running on FreeRTOS.
+</ns1:description>
+    <property key="demos.blurb" value="OpenThread BLE DMP - SoC" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4407a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd4407a/mp-ot-ble-soc-brd4407a.s37" />
+    <property key="core.readmeFiles" value="ot-ble/soc/mp-ot-ble-soc/README.md" />
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
   <demo name="brd4180a.demo.mp-ot-ble-soc" label="OpenThread BLE DMP - SoC">
     <ns1:description>Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth running on FreeRTOS.
 </ns1:description>
@@ -139,6 +128,17 @@
     <property key="core.partCompatibility" value=".*" />
     <property key="core.boardCompatibility" value="brd4180a" />
     <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd4180a/mp-ot-ble-soc-brd4180a.s37" />
+    <property key="core.readmeFiles" value="ot-ble/soc/mp-ot-ble-soc/README.md" />
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd2703a.demo.mp-ot-ble-soc" label="OpenThread BLE DMP - SoC">
+    <ns1:description>Demonstrates DMP (Dynamic Multiprotocol) with OpenThread and Bluetooth running on FreeRTOS.
+</ns1:description>
+    <property key="demos.blurb" value="OpenThread BLE DMP - SoC" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd2703a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd2703a/mp-ot-ble-soc-brd2703a.s37" />
     <property key="core.readmeFiles" value="ot-ble/soc/mp-ot-ble-soc/README.md" />
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread" />
     <property key="core.quality" value="PRODUCTION" />
@@ -184,13 +184,13 @@
     <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
     <property key="core.quality" value="PRODUCTION" />
   </demo>
-  <demo name="brd4407a.demo.mp-zb-ot-ble-rcp-spi" label="Zigbee RCP + OpenThread RCP + BLE RCP - SPI (CMP, DMP)">
+  <demo name="brd4116a.demo.mp-zb-ot-ble-rcp-spi" label="Zigbee RCP + OpenThread RCP + BLE RCP - SPI (CMP, DMP)">
     <ns1:description>Demonstrates a Multiprotocol 802.15.4 RCP application running OpenThread, Zigbee (CMP/multi-PAN), and BLE (DMP) over SPI using CPC for host communication.
 </ns1:description>
     <property key="demos.blurb" value="Zigbee RCP + OpenThread RCP + BLE RCP - SPI (CMP, DMP)" />
     <property key="core.partCompatibility" value=".*" />
-    <property key="core.boardCompatibility" value="brd4407a" />
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd4407a/mp-zb-ot-ble-rcp-spi-brd4407a.s37" />
+    <property key="core.boardCompatibility" value="brd4116a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd4116a/mp-zb-ot-ble-rcp-spi-brd4116a.s37" />
     <property key="core.readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/readme-mp-zb-ot-ble-rcp-spi.md" />
     <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
     <property key="core.quality" value="PRODUCTION" />
@@ -206,13 +206,13 @@
     <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
     <property key="core.quality" value="PRODUCTION" />
   </demo>
-  <demo name="brd4116a.demo.mp-zb-ot-ble-rcp-spi" label="Zigbee RCP + OpenThread RCP + BLE RCP - SPI (CMP, DMP)">
+  <demo name="brd4407a.demo.mp-zb-ot-ble-rcp-spi" label="Zigbee RCP + OpenThread RCP + BLE RCP - SPI (CMP, DMP)">
     <ns1:description>Demonstrates a Multiprotocol 802.15.4 RCP application running OpenThread, Zigbee (CMP/multi-PAN), and BLE (DMP) over SPI using CPC for host communication.
 </ns1:description>
     <property key="demos.blurb" value="Zigbee RCP + OpenThread RCP + BLE RCP - SPI (CMP, DMP)" />
     <property key="core.partCompatibility" value=".*" />
-    <property key="core.boardCompatibility" value="brd4116a" />
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd4116a/mp-zb-ot-ble-rcp-spi-brd4116a.s37" />
+    <property key="core.boardCompatibility" value="brd4407a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd4407a/mp-zb-ot-ble-rcp-spi-brd4407a.s37" />
     <property key="core.readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/readme-mp-zb-ot-ble-rcp-spi.md" />
     <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
     <property key="core.quality" value="PRODUCTION" />
@@ -239,13 +239,13 @@
     <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
     <property key="core.quality" value="PRODUCTION" />
   </demo>
-  <demo name="brd4407a.demo.mp-zb-ot-ble-rcp-uart" label="Zigbee RCP + OpenThread RCP + BLE RCP - UART (CMP, DMP)">
+  <demo name="brd4116a.demo.mp-zb-ot-ble-rcp-uart" label="Zigbee RCP + OpenThread RCP + BLE RCP - UART (CMP, DMP)">
     <ns1:description>Demonstrates a Multiprotocol 802.15.4 RCP application running OpenThread, Zigbee (CMP/multi-PAN), and BLE (DMP) over UART using CPC for host communication.
 </ns1:description>
     <property key="demos.blurb" value="Zigbee RCP + OpenThread RCP + BLE RCP - UART (CMP, DMP)" />
     <property key="core.partCompatibility" value=".*" />
-    <property key="core.boardCompatibility" value="brd4407a" />
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd4407a/mp-zb-ot-ble-rcp-uart-brd4407a.s37" />
+    <property key="core.boardCompatibility" value="brd4116a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd4116a/mp-zb-ot-ble-rcp-uart-brd4116a.s37" />
     <property key="core.readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/readme-mp-zb-ot-ble-rcp-uart.md" />
     <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
     <property key="core.quality" value="PRODUCTION" />
@@ -261,13 +261,13 @@
     <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
     <property key="core.quality" value="PRODUCTION" />
   </demo>
-  <demo name="brd4116a.demo.mp-zb-ot-ble-rcp-uart" label="Zigbee RCP + OpenThread RCP + BLE RCP - UART (CMP, DMP)">
+  <demo name="brd4407a.demo.mp-zb-ot-ble-rcp-uart" label="Zigbee RCP + OpenThread RCP + BLE RCP - UART (CMP, DMP)">
     <ns1:description>Demonstrates a Multiprotocol 802.15.4 RCP application running OpenThread, Zigbee (CMP/multi-PAN), and BLE (DMP) over UART using CPC for host communication.
 </ns1:description>
     <property key="demos.blurb" value="Zigbee RCP + OpenThread RCP + BLE RCP - UART (CMP, DMP)" />
     <property key="core.partCompatibility" value=".*" />
-    <property key="core.boardCompatibility" value="brd4116a" />
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd4116a/mp-zb-ot-ble-rcp-uart-brd4116a.s37" />
+    <property key="core.boardCompatibility" value="brd4407a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd4407a/mp-zb-ot-ble-rcp-uart-brd4407a.s37" />
     <property key="core.readmeFiles" value="zb-ot-ble/rcp/mp-zb-ot-ble-rcp/readme-mp-zb-ot-ble-rcp-uart.md" />
     <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
     <property key="core.quality" value="PRODUCTION" />

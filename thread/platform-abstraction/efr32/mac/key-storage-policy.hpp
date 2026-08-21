@@ -50,7 +50,7 @@ class PlaintextMacKeyStoragePolicy
 public:
     static constexpr size_t kMacKeyCount = 3;
 
-    static void PrepareKeys(otMacKeyMaterial (&aKeys)[kMacKeyCount]);
+    static void PrepareKeys(const otMacKeyMaterial (&aKeys)[kMacKeyCount], otMacKeyMaterial (&aRawKeys)[kMacKeyCount]);
     static void ReleaseKeys(const otMacKeyMaterial (&aKeys)[kMacKeyCount]);
 };
 
@@ -59,7 +59,8 @@ class KsuMacKeyStoragePolicy
 public:
     static constexpr size_t kMacKeyCount = 3;
 
-    static void PrepareKeys(otMacKeyMaterial (&aKeys)[kMacKeyCount]);
+    static void PrepareKeys(otMacKeyMaterial (&aKeys)[kMacKeyCount],
+                            const otMacKeyMaterial (&aRawKeys)[kMacKeyCount]); // unused
     static void ReleaseKeys(const otMacKeyMaterial (&aKeys)[kMacKeyCount]);
 };
 

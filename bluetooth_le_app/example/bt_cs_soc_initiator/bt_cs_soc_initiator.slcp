@@ -152,10 +152,6 @@ define:
   - name: SLI_BGAPI_TRACE_DISABLE_AUTO_START
     value: 1
 
-post_build:
-  - path: ../../postbuild_profile/bt_common_s2.slpb
-    condition: [device_series_2, bootloader_app_properties]
-
 tag:
   - prebuilt_demo
   - toolchain:gcc

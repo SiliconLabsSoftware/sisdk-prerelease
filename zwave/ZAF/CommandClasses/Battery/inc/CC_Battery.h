@@ -64,15 +64,50 @@ bool CC_Battery_LevelReport_tx(
   VOID_CALLBACKFUNC(pCbFunc)(TRANSMISSION_RESULT * pTransmissionResult));
 
 /**
+ * Used to return information required by Battery Report command
+ */
+typedef struct SBatteryReportData{
+  uint8_t battery_charging_status;
+  uint8_t rechargeable;
+  bool backup_battery;
+  bool overheating;
+  bool low_fluid;
+  uint8_t replace_recharge_status_bitmask;
+  bool disconnected;
+  bool low_temperature_status;
+} SBatteryReportData;
+
+/**
  * Get current battery level from application.
  *
  * This function must be implemented in the application code.
  * Called by battery command class handler.
  *
  * @param[in] endpoint binary switch endpoint
+ * @param[out] data SBatteryReportData struct filled
  * @return current battery level
  */
-uint8_t CC_Battery_BatteryGet_handler(uint8_t endpoint);
+uint8_t CC_Battery_BatteryGet_handler(uint8_t endpoint, SBatteryReportData *data);
+
+/**
+ * Used to return information required by Battery Health Report command
+ */
+typedef struct SBatteryHealthReportData{
+  uint8_t max_capacity;
+  uint8_t precision;
+  uint8_t scale;
+  uint8_t size;
+  uint8_t battery_temperature[4];
+} SBatteryHealthReportData;
+
+/**
+ * Get current battery health information from application.
+ * Called by battery command class handler.
+ *
+ * @param[in] endpoint binary switch endpoint
+ * @param[out] data SBatteryHealthReportData struct filled
+ */
+void CC_Battery_BatteryHealthGet_handler(uint8_t endpoint, SBatteryHealthReportData *data);
 
 /**
  * Function for periodically checking if the battery level differs from what was last reported.

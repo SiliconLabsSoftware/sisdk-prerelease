@@ -7,25 +7,25 @@ supplier: Silicon Laboratories, Inc.
 component_path:
 - path: generative_ai/component
 - path: bgapi_protocol/component
-- path: bluetooth_mesh_srtest/component
-- path: bluetooth_apploader/component
-- path: bluetooth_le_host/component
-- path: bluetooth_le/component
-- path: bluetooth_le_controller/component
-- path: bluetooth_common/component
-- path: bluetooth_mesh_stack/component
 - path: bluetooth_mesh/component
+- path: bluetooth_le/component
+- path: bluetooth_le_host/component
+- path: bluetooth_mesh_stack/component
+- path: bluetooth_common/component
+- path: bluetooth_apploader/component
+- path: bluetooth_mesh_srtest/component
+- path: bluetooth_le_controller/component
 - path: bluetooth_le_internal/component
-- path: boards_internal/hardware/kit/component
-- path: boards_internal/hardware/kit/common/component
-- path: boards_internal/hardware/board/component
-- path: boards_internal/hardware/board/config/component
-- path: boards_internal/platform/common/component
 - path: boards_efr32xg2b/hardware/board/config/component
 - path: boards_efr32xg2b/hardware/board/component
 - path: boards/hardware/board/config/component
 - path: boards/hardware/board/component
 - path: boards/hardware/driver/component
+- path: boards_internal/hardware/kit/component
+- path: boards_internal/hardware/kit/common/component
+- path: boards_internal/hardware/board/component
+- path: boards_internal/hardware/board/config/component
+- path: boards_internal/platform/common/component
 - path: bootloader/platform/common/component
 - path: bootloader/platform/bootloader/component
 - path: bootloader/platform/bootloader/series3/component
@@ -54,11 +54,17 @@ component_path:
 - path: freertos/component
 - path: freertos_internal/component
 - path: mbedtls/component
-- path: micriumos_internal/platform/micrium_os/component
 - path: micriumos/platform/micrium_os/component
+- path: micriumos_internal/platform/micrium_os/component
 - path: multiprotocol/component
 - path: multiprotocol/mac/component
+- path: network_stack/network_stack_sdk/components/device/silabs/si91x/wireless/asynchronous_socket
+- path: network_stack/network_stack_sdk/components/device/silabs/si91x/wireless/socket
+- path: network_stack/network_stack_sdk/components/service/network_stack_common
+- path: network_stack/network_stack_sdk/components/service/bsd_socket
+- path: network_stack/network_stack_sdk/components/service/sl_websocket_client
 - path: openthread_forks/component_stack
+- path: network_stack/paho_mqtt_embedded/component
 - path: platform_riscv_internal/platform/rvlib/component
 - path: platform_riscv_internal/platform/service/component
 - path: platform_riscv_internal/platform/common/component
@@ -96,9 +102,9 @@ component_path:
 - path: proprietary_default_radio_confs/.
 - path: protocol_user_sequencer_internal/component/protocol_user_sequencer_internal
 - path: rail/component
-- path: rail_library_chips_internal/component/rail_library_chips_internal
 - path: rail_library_alpha_chips/component/rail_library_alpha_chips
 - path: rail_library_internal/component/rail_library_internal
+- path: rail_library_chips_internal/component/rail_library_chips_internal
 - path: rail_library/component/rail_library
 - path: realtime_locationing/component
 - path: rtos_benchmark_internal/component
@@ -107,7 +113,7 @@ component_path:
 - path: security_tfm/component
 - path: security_sxsymcrypt/component
 - path: segger/component
-- path: silabs_lwip/component
+- path: network_stack/silabs_lwip/component
 - path: thread/component
 - path: thread_internal/component/internal
 - path: unity_test_framework/component
@@ -147,12 +153,12 @@ documentation:
   version: 3.1.0
 - docset: azure_freertos_middleware
   version: 1.1.0
-- docset: bluetooth_le_siwx91x
-  version: 4.2.0
 - docset: btmesh-service-api
   version: 12.0.0
+- docset: bluetooth_le_siwx91x
+  version: 4.2.0
 - docset: gecko-platform
-  version: 6.2.0
+  version: 6.1.0
 - docset: mcu-bootloader
   version: 3.4.0
 - docset: multiprotocol
@@ -169,11 +175,11 @@ documentation:
   version: 2.9.3
 - docset: matter
   version: 2.10.0
+- docset: network_stack_sdk
+  version: 1.0.0
 - docset: openthread
   version: 3.2.0
 - docset: platform_siwx91x
-  version: 4.2.0
-- docset: platform_nwp_siwx91x
   version: 4.2.0
 - docset: rail
   version: 3.2.0
@@ -191,19 +197,19 @@ documentation:
   version: 1.8.0
 - docset: wifi
   version: 4.2.0
-- docset: wifi_sqa_internal
-  version: 4.2.0
 - docset: wifi_siwx353
   version: 0.1.0
+- docset: wifi_internal
+  version: 4.2.0
 - docset: wiseconnect_common
   version: 4.2.0
 - docset: zigbee
   version: 9.2.0
 upgrade_manifest:
-- path: bluetooth_le_host/component/upgrade.slcu
-- path: bluetooth_le/upgrade.slcu
-- path: bluetooth_mesh_stack/component/upgrade.slcu
 - path: bluetooth_mesh/upgrade.slcu
+- path: bluetooth_le/upgrade.slcu
+- path: bluetooth_le_host/component/upgrade.slcu
+- path: bluetooth_mesh_stack/component/upgrade.slcu
 - path: connect_stack/component/upgrade.slcu
 - path: cpc/upgrade.slcu
 - path: multiprotocol/component/upgrade.slcu

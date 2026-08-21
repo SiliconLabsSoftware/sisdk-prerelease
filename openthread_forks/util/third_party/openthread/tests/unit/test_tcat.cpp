@@ -36,6 +36,7 @@
 #include <openthread/ble_secure.h>
 
 #include "cli/cli_dataset.hpp"
+#include "radio/ble_secure.hpp"
 
 #define OT_TCAT_X509_CERT                                                \
     "-----BEGIN CERTIFICATE-----\n"                                      \
@@ -78,6 +79,26 @@
 #define COMM_NETWORK_NAME "OpenThread-c64e"
 #define COMM_XPAN_ID {0xde, 0xad, 0x00, 0xbe, 0xef, 0x00, 0xca, 0xfe}
 #define COMM_XPAN_ID_ALT {0xef, 0x13, 0x98, 0xc2, 0xfd, 0x50, 0x4b, 0x67}
+
+// Fake time/alarm platform, overriding the weak definitions in test_platform.cpp. Time only
+// progresses when a test calls AdvanceTime().
+static uint32_t sNow = 0;
+static uint32_t sAlarmTime;
+static bool     sAlarmOn = false;
+
+extern "C" {
+
+void otPlatAlarmMilliStop(otInstance *) { sAlarmOn = false; }
+
+void otPlatAlarmMilliStartAt(otInstance *, uint32_t aT0, uint32_t aDt)
+{
+    sAlarmOn   = true;
+    sAlarmTime = aT0 + aDt;
+}
+
+uint32_t otPlatAlarmMilliGetNow(void) { return sNow; }
+
+} // extern "C"
 
 namespace ot {
 namespace MeshCoP {
@@ -186,28 +207,67 @@ static NetworkName                              sCommNetworkName, sCommDomainNam
 static ExtendedPanId                            sCommExtPanId;
 static TcatAgent::CertificateAuthorizationField sCommAuth, sDeviceAuth;
 
-// Helper class to test BLE connection state.
+// Helper class to test the BLE Secure connection state and validate the documented connect-callback contract.
 class TestBleSecure
 {
 public:
     TestBleSecure(void)
         : mIsConnected(false)
         , mIsBleConnectionOpen(false)
+        , mConnectCallbackCount(0)
+        , mContractHonored(true)
     {
     }
 
     void HandleBleSecureConnect(bool aConnected, bool aBleConnectionOpen)
     {
+        // A TLS session cannot exist without an open BLE link to carry it.
+        if (aConnected && !aBleConnectionOpen)
+        {
+            printf("TestBleSecure: illegal pair reported (aConnected=1, aBleConnectionOpen=0)\n");
+            mContractHonored = false;
+        }
+
+        // The callback must fire only on a change of the pair, so never twice in a row with identical values.
+        if (aConnected == mIsConnected && aBleConnectionOpen == mIsBleConnectionOpen)
+        {
+            printf("TestBleSecure: pair repeated without change (aConnected=%d, aBleConnectionOpen=%d)\n", aConnected,
+                   aBleConnectionOpen);
+            mContractHonored = false;
+        }
+
         mIsConnected         = aConnected;
         mIsBleConnectionOpen = aBleConnectionOpen;
+        mConnectCallbackCount++;
     }
 
-    bool IsConnected(void) const { return mIsConnected; }
-    bool IsBleConnectionOpen(void) const { return mIsBleConnectionOpen; }
+    // Returns TRUE if the contract has been honored by every callback so far AND the currently reported state and
+    // the callback count (since the last reset) match the expected values.
+    bool Verify(bool aConnected, bool aBleConnectionOpen, uint32_t aExpectedCallbackCount) const
+    {
+        bool ok = mContractHonored && (mIsConnected == aConnected) && (mIsBleConnectionOpen == aBleConnectionOpen) &&
+                  (mConnectCallbackCount == aExpectedCallbackCount);
+
+        if (!ok)
+        {
+            printf("TestBleSecure::Verify mismatch: got (aConnected=%d, aBleConnectionOpen=%d, count=%lu, "
+                   "contractHonored=%d), expected (aConnected=%d, aBleConnectionOpen=%d, count=%lu)\n",
+                   mIsConnected, mIsBleConnectionOpen, ToUlong(mConnectCallbackCount), mContractHonored, aConnected,
+                   aBleConnectionOpen, ToUlong(aExpectedCallbackCount));
+        }
+
+        return ok;
+    }
+
+    bool     IsContractHonored(void) const { return mContractHonored; }
+    uint32_t GetConnectCallbackCount(void) const { return mConnectCallbackCount; }
+    void     ResetConnectCallbackCount(void) { mConnectCallbackCount = 0; }
 
 private:
-    bool mIsConnected;
-    bool mIsBleConnectionOpen;
+    bool     mIsConnected;
+    bool     mIsBleConnectionOpen;
+    uint32_t mConnectCallbackCount;
+    bool     mContractHonored;
 };
 
 static void HandleBleSecureConnect(otInstance *aInstance, bool aConnected, bool aBleConnectionOpen, void *aContext)
@@ -247,9 +307,28 @@ static bool SetActiveDatasetAuthorized(const TcatAgent *aAgent, const Dataset::I
     return aAgent->IsSetActiveDatasetAuthorized(&dataset);
 }
 
+// Advances fake time by aDuration, firing any expired alarms and processing tasklets along the way.
+static void AdvanceTime(Instance *aInstance, uint32_t aDuration)
+{
+    uint32_t time = sNow + aDuration;
+
+    while (sAlarmOn && TimeMilli(sAlarmTime) <= TimeMilli(time))
+    {
+        sNow     = sAlarmTime;
+        sAlarmOn = false;
+        otPlatAlarmMilliFired(aInstance);
+        otTaskletsProcess(aInstance);
+    }
+
+    sNow = time;
+    otTaskletsProcess(aInstance);
+}
+
 static Instance *TestInitInstanceTcat(void)
 {
     Instance *instance = testInitInstance();
+
+    sAlarmOn = false; // discard any pending alarm of a previous test's instance
 
     otBleSecureSetCertificate(instance, reinterpret_cast<const uint8_t *>(OT_TCAT_X509_CERT), sizeof(OT_TCAT_X509_CERT),
                               reinterpret_cast<const uint8_t *>(OT_TCAT_PRIV_KEY), sizeof(OT_TCAT_PRIV_KEY));
@@ -267,6 +346,9 @@ static Instance *TestInitInstanceTcat(void)
     memcpy(&sCommExtPanId, &kExtPanId, sizeof(sCommExtPanId));
     memcpy(&sCommAuth, &kCommCert1AuthField, sizeof(sCommAuth));
     memcpy(&sDeviceAuth, &kDeviceCert1AuthField, sizeof(sDeviceAuth));
+    sPlatBleLastAdvSetDataLen = 0;
+    memset(sPlatBleLastAdvSetData, 0, OT_TCAT_ADVERTISEMENT_MAX_LEN);
+    sPlatBleAdvertising = false;
 
     return instance;
 }
@@ -284,12 +366,12 @@ void TestTcatConnectionAndCertAttributes(void)
     VerifyOrQuit(otBleSecureStart(instance, HandleBleSecureConnect, nullptr, true, nullptr) == kErrorAlready);
     SuccessOrQuit(otBleSecureTcatStart(instance, nullptr));
 
-    // Validate connection callbacks when platform informs that peer has connected/disconnected
+    // Validate connection callbacks when platform informs that peer has connected/disconnected.
     VerifyOrQuit(!otBleSecureIsConnected(instance));
     otPlatBleGapOnConnected(instance, kConnectionId);
-    VerifyOrQuit(!ble.IsConnected() && ble.IsBleConnectionOpen());
+    VerifyOrQuit(ble.Verify(/* aConnected */ false, /* aBleConnectionOpen */ true, /* aExpectedCallbackCount */ 1));
     otPlatBleGapOnDisconnected(instance, kConnectionId);
-    VerifyOrQuit(!ble.IsConnected() && !ble.IsBleConnectionOpen());
+    VerifyOrQuit(ble.Verify(/* aConnected */ false, /* aBleConnectionOpen */ false, /* aExpectedCallbackCount */ 2));
 
     // Verify that Thread-attribute parsing isn't available yet when not connected as client or server.
     attributeLen = sizeof(attributeBuffer);
@@ -302,9 +384,12 @@ void TestTcatConnectionAndCertAttributes(void)
 
     // Validate connection callbacks when calling `otBleSecureDisconnect()`
     otPlatBleGapOnConnected(instance, kConnectionId);
-    VerifyOrQuit(!ble.IsConnected() && ble.IsBleConnectionOpen());
+    VerifyOrQuit(ble.Verify(/* aConnected */ false, /* aBleConnectionOpen */ true, /* aExpectedCallbackCount */ 3));
+    ble.ResetConnectCallbackCount();
     otBleSecureDisconnect(instance);
-    VerifyOrQuit(!ble.IsConnected() && !ble.IsBleConnectionOpen());
+    // Regression test: a locally-initiated disconnect (with no TLS session) must invoke the connect callback
+    // exactly once, with the fully-disconnected pair.
+    VerifyOrQuit(ble.Verify(/* aConnected */ false, /* aBleConnectionOpen */ false, /* aExpectedCallbackCount */ 1));
 
     // Validate TLS connection can be started (as client) only when peer is BLE-connected
     otPlatBleGapOnConnected(instance, kConnectionId);
@@ -332,6 +417,72 @@ void TestTcatConnectionAndCertAttributes(void)
     VerifyOrQuit(otBleSecureIsTcatAgentStarted(instance));
     otBleSecureStop(instance);
     VerifyOrQuit(!otBleSecureIsTcatAgentStarted(instance));
+
+    VerifyOrQuit(ble.IsContractHonored());
+
+    testFreeInstance(instance);
+}
+
+void TestTcatAdvertisementUpdates(void)
+{
+    TestBleSecure ble;
+    Instance     *instance = TestInitInstanceTcat();
+    uint8_t       advDataSnapshot[OT_TCAT_ADVERTISEMENT_MAX_LEN];
+    uint16_t      advDataSnapshotLen;
+
+    VerifyOrQuit(sPlatBleLastAdvSetDataLen == 0, "Adv data should be unset before BleSecure start");
+
+    SuccessOrQuit(otBleSecureStart(instance, HandleBleSecureConnect, nullptr, true, &ble));
+    SuccessOrQuit(otBleSecureTcatStart(instance, nullptr));
+
+    VerifyOrQuit(sPlatBleLastAdvSetDataLen > 0, "Adv data should be set after BleSecure start");
+    VerifyOrQuit(sPlatBleAdvertising, "Advertising should be started after BleSecure start");
+    advDataSnapshotLen = sPlatBleLastAdvSetDataLen;
+    memcpy(advDataSnapshot, sPlatBleLastAdvSetData, advDataSnapshotLen);
+
+    otPlatBleGapOnConnected(instance, kConnectionId);
+    sPlatBleAdvertising = false; // model BLE platform behavior: advertising stops when a client connects.
+    SuccessOrQuit(otBleSecureConnect(instance)); // mock "TLS handshake active" by initiating a client connection.
+
+    // BLE connect and initiating TLS does not change the adv data.
+    VerifyOrQuit(sPlatBleLastAdvSetDataLen == advDataSnapshotLen &&
+                     memcmp(sPlatBleLastAdvSetData, advDataSnapshot, advDataSnapshotLen) == 0,
+                 "Adv data changed unexpectedly after BLE connect");
+    advDataSnapshotLen = sPlatBleLastAdvSetDataLen;
+    memcpy(advDataSnapshot, sPlatBleLastAdvSetData, advDataSnapshotLen);
+
+    // Commissioner sets dataset, then disconnects its BLE suddenly
+    instance->Get<ActiveDatasetManager>().SaveLocal(sPartialDataset);
+    otPlatBleGapOnDisconnected(instance, kConnectionId);
+
+    // Since the TLS session teardown is ongoing, no change in advertisement state yet.
+    VerifyOrQuit(!sPlatBleAdvertising, "Advertising restarted while TLS teardown is still ongoing");
+
+    // Still within the TLS teardown guard time (kGuardTimeNewConnectionMilli). Meanwhile time advances and
+    // the advertisement data is updated to reflect the new sPartialDataset state. But not advertising yet.
+    AdvanceTime(instance, 1000);
+    VerifyOrQuit(sPlatBleLastAdvSetDataLen == advDataSnapshotLen, "Adv data length changed unexpectedly");
+    VerifyOrQuit(memcmp(sPlatBleLastAdvSetData, advDataSnapshot, advDataSnapshotLen) != 0,
+                 "Adv data did not change after processing sPartialDataset, which it should due to S flag");
+    VerifyOrQuit(!sPlatBleAdvertising, "Advertising already restarted while TLS teardown is still ongoing");
+
+    // Take new snapshot of advertisement data.
+    advDataSnapshotLen = sPlatBleLastAdvSetDataLen;
+    memcpy(advDataSnapshot, sPlatBleLastAdvSetData, advDataSnapshotLen);
+
+    // Advance time beyond the guard time, so that the TLS session fully disconnects and the (deferred)
+    // advertising restart is performed now.
+    AdvanceTime(instance, 1000 + 10);
+    VerifyOrQuit(sPlatBleAdvertising, "Advertising was not restarted after TLS teardown completed");
+
+    // Adv content itself is not changed now - it was already done while waiting for the TLS guard time.
+    VerifyOrQuit(sPlatBleLastAdvSetDataLen == advDataSnapshotLen, "Adv data length changed unexpectedly");
+    VerifyOrQuit(memcmp(sPlatBleLastAdvSetData, advDataSnapshot, advDataSnapshotLen) == 0,
+                 "Adv data changed unexpectedly after TLS guard timeout expired");
+
+    otBleSecureStop(instance);
+
+    VerifyOrQuit(ble.IsContractHonored());
 
     testFreeInstance(instance);
 }
@@ -834,6 +985,7 @@ int main(void)
     ot::MeshCoP::UnitTester::TestTcatCommissioner1AuthWithDeviceRequirements();
     ot::MeshCoP::UnitTester::TestTcatCommissioner2AuthWithDeviceRequirements();
     ot::MeshCoP::UnitTester::TestTcatCommissioner4AuthWithExistingPartialDataset();
+    ot::MeshCoP::TestTcatAdvertisementUpdates();
     printf("All tests passed\n");
 #else
     printf("TCAT feature is not enabled\n");

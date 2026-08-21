@@ -18,8 +18,8 @@
 #include "ZAF_version.h"
 #include <zaf_config_api.h>
 #include <zpal_bootloader.h>
-#include <zpal_misc.h>
 #include "zpal_log.h"
+#include "zw_version_config.h"
 
 /****************************************************************************/
 /*                      PRIVATE TYPES and DEFINITIONS                       */
@@ -95,8 +95,8 @@ static received_frame_status_t CC_Version_handler(
       pFrameOut->ZW_VersionReport1byteV2Frame.zWaveLibraryType = pAppHandles->pProtocolInfo->eLibraryType;
       pFrameOut->ZW_VersionReport1byteV2Frame.zWaveProtocolVersion = pAppHandles->pProtocolInfo->ProtocolVersion.Major;
       pFrameOut->ZW_VersionReport1byteV2Frame.zWaveProtocolSubVersion = pAppHandles->pProtocolInfo->ProtocolVersion.Minor;
-      pFrameOut->ZW_VersionReport1byteV2Frame.firmware0Version = zpal_get_app_version_major();
-      pFrameOut->ZW_VersionReport1byteV2Frame.firmware0SubVersion = zpal_get_app_version_minor();
+      pFrameOut->ZW_VersionReport1byteV2Frame.firmware0Version = APP_VERSION;
+      pFrameOut->ZW_VersionReport1byteV2Frame.firmware0SubVersion = APP_REVISION;
       pFrameOut->ZW_VersionReport1byteV2Frame.hardwareVersion = zaf_config_get_hardware_version();
       numberOfFirmwareTargets = zaf_config_get_firmware_target_count();
       if (zaf_config_get_bootloader_upgradable()) {
@@ -207,8 +207,8 @@ static received_frame_status_t CC_Version_handler(
       pFrameOut->ZW_VersionZwaveSoftwareReportV3Frame.applicationFrameworkApiVersion2 = ZAF_GetVersionMinor();
       pFrameOut->ZW_VersionZwaveSoftwareReportV3Frame.applicationFrameworkApiVersion3 = ZAF_GetVersionPatch();
 
-      pFrameOut->ZW_VersionZwaveSoftwareReportV3Frame.applicationFrameworkBuildNumber1 = (uint8_t)(ZAF_GetBuildNumber() >> 8);
-      pFrameOut->ZW_VersionZwaveSoftwareReportV3Frame.applicationFrameworkBuildNumber2 = (uint8_t)(ZAF_GetBuildNumber() & 0xFF);
+      pFrameOut->ZW_VersionZwaveSoftwareReportV3Frame.applicationFrameworkBuildNumber1 = (uint8_t)(APP_BUILD_NO >> 8);
+      pFrameOut->ZW_VersionZwaveSoftwareReportV3Frame.applicationFrameworkBuildNumber2 = (uint8_t)(APP_BUILD_NO & 0xFF);
 
       pFrameOut->ZW_VersionZwaveSoftwareReportV3Frame.hostInterfaceVersion1 = 0;
       pFrameOut->ZW_VersionZwaveSoftwareReportV3Frame.hostInterfaceVersion2 = 0;
@@ -223,11 +223,11 @@ static received_frame_status_t CC_Version_handler(
       pFrameOut->ZW_VersionZwaveSoftwareReportV3Frame.zWaveProtocolBuildNumber1 = (uint8_t)(ZW_GetProtocolBuildNumber() >> 8);
       pFrameOut->ZW_VersionZwaveSoftwareReportV3Frame.zWaveProtocolBuildNumber2 = (uint8_t)(ZW_GetProtocolBuildNumber() & 0xFF);
 
-      pFrameOut->ZW_VersionZwaveSoftwareReportV3Frame.applicationVersion1 = zpal_get_app_version_major();
-      pFrameOut->ZW_VersionZwaveSoftwareReportV3Frame.applicationVersion2 = zpal_get_app_version_minor();
-      pFrameOut->ZW_VersionZwaveSoftwareReportV3Frame.applicationVersion3 = zpal_get_app_version_patch();
-      pFrameOut->ZW_VersionZwaveSoftwareReportV3Frame.applicationBuildNumber1 = (uint8_t)(ZAF_GetBuildNumber() >> 8);
-      pFrameOut->ZW_VersionZwaveSoftwareReportV3Frame.applicationBuildNumber2 = (uint8_t)(ZAF_GetBuildNumber() & 0xFF);
+      pFrameOut->ZW_VersionZwaveSoftwareReportV3Frame.applicationVersion1 = (uint8_t)APP_VERSION;
+      pFrameOut->ZW_VersionZwaveSoftwareReportV3Frame.applicationVersion2 = (uint8_t)APP_REVISION;
+      pFrameOut->ZW_VersionZwaveSoftwareReportV3Frame.applicationVersion3 = (uint8_t)APP_PATCH;
+      pFrameOut->ZW_VersionZwaveSoftwareReportV3Frame.applicationBuildNumber1 = (uint8_t)(APP_BUILD_NO >> 8);
+      pFrameOut->ZW_VersionZwaveSoftwareReportV3Frame.applicationBuildNumber2 = (uint8_t)(APP_BUILD_NO & 0xFF);
 
       *pLengthOut = sizeof(pFrameOut->ZW_VersionZwaveSoftwareReportV3Frame);
 

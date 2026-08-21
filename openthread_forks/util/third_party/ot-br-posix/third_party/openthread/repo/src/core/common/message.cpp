@@ -663,6 +663,18 @@ exit:
     return error;
 }
 
+Error Message::ReadAndAdvance(OffsetRange &aOffsetRange, void *aBuf, uint16_t aLength) const
+{
+    Error error = Read(aOffsetRange, aBuf, aLength);
+
+    if (error == kErrorNone)
+    {
+        aOffsetRange.AdvanceOffset(aLength);
+    }
+
+    return error;
+}
+
 Error Message::ReadAtAndAdvanceOffset(void *aBuf, uint16_t aLength)
 {
     Error error;
@@ -874,7 +886,7 @@ void Message::UpdateLinkInfoFrom(const ThreadLinkInfo &aLinkInfo)
 #endif
 
 #if OPENTHREAD_CONFIG_MULTI_RADIO
-    SetRadioType(static_cast<Mac::RadioType>(aLinkInfo.mRadioType));
+    SetRadioType(static_cast<Radio::Type>(aLinkInfo.mRadioType));
 #endif
 }
 

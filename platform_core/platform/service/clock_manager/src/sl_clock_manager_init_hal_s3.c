@@ -771,6 +771,9 @@ FUNCTION_SCOPE void init_hfrcodpll(void)
     sl_status_t status;
     uint32_t freq_cal = 0;
 
+    status = sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_DEVINFO);
+    EFM_ASSERT(status == SL_STATUS_OK);
+
     // Retrieve HFRCO calibration from DEVINFO data.
     switch (SLI_CLOCK_MANAGER_HFRCO_BAND) {
       case 38000000:

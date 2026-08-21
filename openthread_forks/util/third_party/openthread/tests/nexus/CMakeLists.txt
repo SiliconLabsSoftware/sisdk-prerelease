@@ -47,7 +47,11 @@ set(COMMON_COMPILE_OPTIONS
     -DOPENTHREAD_CONFIG_USE_STD_NEW=1
 )
 
+option(OT_NEXUS_BUILD_TESTS "Build Nexus test executables" ON)
 option(OT_NEXUS_GRPC "Enable Nexus gRPC" OFF)
+
+message(STATUS "OT_NEXUS_BUILD_TESTS=\"${OT_NEXUS_BUILD_TESTS}\"")
+message(STATUS "OT_NEXUS_GRPC=\"${OT_NEXUS_GRPC}\"")
 
 if(OT_NEXUS_GRPC AND NOT EMSCRIPTEN)
     find_package(gRPC CONFIG REQUIRED)
@@ -157,12 +161,14 @@ if(OT_NEXUS_GRPC)
 endif()
 
 set(COMMON_LIBS
+    openthread-cli-ftd
     ot-nexus-platform
     openthread-ftd
     ot-nexus-platform
     ${OT_MBEDTLS}
     ot-config
     openthread-ftd
+    openthread-cli-ftd
 )
 
 #----------------------------------------------------------------------------------------------------------------------
@@ -175,33 +181,39 @@ macro(ot_nexus_test name labels)
     # file `test_{name}.cpp`. The `labels` argument assigns categories to the
     # test, allowing us to run specific subsets using `ctest -L {label}`.
 
-    add_executable(nexus_${name}
-        test_${name}.cpp ${ARGN}
-    )
+    if(OT_NEXUS_BUILD_TESTS)
 
-    target_include_directories(nexus_${name}
-    PRIVATE
-        ${COMMON_INCLUDES}
-    )
+        add_executable(nexus_${name}
+            test_${name}.cpp ${ARGN}
+        )
 
-    target_link_libraries(nexus_${name}
-    PRIVATE
-        ${COMMON_LIBS}
-    )
+        target_include_directories(nexus_${name}
+        PRIVATE
+            ${COMMON_INCLUDES}
+        )
 
-    target_compile_options(nexus_${name}
-    PRIVATE
-        ${COMMON_COMPILE_OPTIONS}
-        ${OT_CFLAGS}
-    )
+        target_link_libraries(nexus_${name}
+        PRIVATE
+            ${COMMON_LIBS}
+        )
 
-    add_test(NAME nexus_${name} COMMAND nexus_${name})
+        target_compile_options(nexus_${name}
+        PRIVATE
+            ${COMMON_COMPILE_OPTIONS}
+            ${OT_CFLAGS}
+        )
 
-    set_tests_properties(nexus_${name} PROPERTIES LABELS "${labels}")
+        add_test(NAME nexus_${name} COMMAND nexus_${name})
+
+        set_tests_properties(nexus_${name} PROPERTIES LABELS "${labels}")
+
+    endif()
+
 endmacro()
 
 
 #----------------------------------------------------------------------------------------------------------------------
+
 # Cert tests
 ot_nexus_test(1_1_5_1_1 "cert;nexus")
 ot_nexus_test(1_1_5_1_2 "cert;nexus")
@@ -381,9 +393,9 @@ ot_nexus_test(1_4_PIC_TC_1 "cert;nexus")
 ot_nexus_test(1_4_PIC_TC_3 "cert;nexus")
 ot_nexus_test(1_4_PIC_TC_4 "cert;nexus")
 ot_nexus_test(1_4_CS_TC_3 "cert;nexus")
-ot_nexus_test(inform_previous_parent_on_reattach "cert;nexus")
 
 # Misc tests
+ot_nexus_test(announce_no_flap_on_unmergeable_partitions "core;nexus")
 ot_nexus_test(anycast "core;nexus")
 ot_nexus_test(anycast_locator "core;nexus")
 ot_nexus_test(br_upgrade_router_role "core;nexus")
@@ -393,7 +405,9 @@ ot_nexus_test(border_agent_tracker "core;nexus")
 ot_nexus_test(child_supervision "core;nexus")
 ot_nexus_test(coap_block "core;nexus")
 ot_nexus_test(coap_observe "core;nexus")
+ot_nexus_test(coap_observe_cancel "core;nexus")
 ot_nexus_test(coaps "core;nexus")
+ot_nexus_test(compact_route_tlv "core;nexus")
 ot_nexus_test(dataset_updater "core;nexus")
 ot_nexus_test(discover_scan "core;nexus")
 ot_nexus_test(dnssd "core;nexus")
@@ -403,14 +417,20 @@ ot_nexus_test(dtls "core;nexus")
 ot_nexus_test(fed_rx_only_link_establishment "core;nexus")
 ot_nexus_test(form_join "core;nexus")
 ot_nexus_test(history_tracker "core;nexus")
+ot_nexus_test(inform_previous_parent_on_reattach "core;nexus")
+ot_nexus_test(ipv6_forward_ext_headers "core;nexus")
 ot_nexus_test(ipv6_fragmentation "core;nexus")
+ot_nexus_test(ipv6_recursion "core;nexus")
 ot_nexus_test(ipv6_source_selection "core;nexus")
 ot_nexus_test(key_rotation_guard_time "core;nexus")
 ot_nexus_test(leader_reboot_multiple_link_request "core;nexus")
 ot_nexus_test(log_override "core;nexus")
 ot_nexus_test(mac_scan "core;nexus")
+ot_nexus_test(mesh_diag "core;nexus")
+ot_nexus_test(mle_router_role_allowed "core;nexus")
 ot_nexus_test(mle_blocking_downgrade "core;nexus")
 ot_nexus_test(mle_msg_key_seq_jump "core;nexus")
+ot_nexus_test(mlr_manager "core;nexus")
 ot_nexus_test(nat64_translator "core;nexus")
 ot_nexus_test(netdata_publisher "core;nexus")
 ot_nexus_test(on_mesh_prefix "core;nexus")
@@ -419,6 +439,7 @@ ot_nexus_test(ping_lla_src "core;nexus")
 ot_nexus_test(radio_filter "core;nexus")
 ot_nexus_test(reed_address_solicit_rejected "core;nexus")
 ot_nexus_test(reset "core;nexus")
+ot_nexus_test(retransmission_security "core;nexus")
 ot_nexus_test(router_downgrade_on_sec_policy_change "core;nexus")
 ot_nexus_test(router_multicast_link_request "core;nexus")
 ot_nexus_test(router_reattach "core;nexus")
@@ -435,7 +456,11 @@ ot_nexus_test(srp_scale "core;nexus")
 ot_nexus_test(srp_server_anycast_mode "core;nexus")
 ot_nexus_test(srp_server_reboot_port "core;nexus")
 ot_nexus_test(srp_ttl "core;nexus")
+ot_nexus_test(tmf_origin "core;nexus")
 ot_nexus_test(zero_len_external_route "core;nexus")
+
+# CLI tests
+ot_nexus_test(cli_basic "core;cli;nexus")
 
 # Trel
 ot_nexus_test(trel "trel;nexus")

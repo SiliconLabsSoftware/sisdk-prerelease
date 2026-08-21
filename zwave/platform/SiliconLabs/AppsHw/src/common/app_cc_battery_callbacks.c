@@ -32,6 +32,7 @@
 //                                   Includes
 // -----------------------------------------------------------------------------
 #include <CC_Battery.h>
+#include "cc_battery_config.h"
 #include <ADC.h>
 #include "zpal_log.h"
 
@@ -74,12 +75,15 @@
  * - 0x00 to 0x64: Battery level in percentage (0% to 100%)
  * - 0xFF: Low-battery warning
  */
-uint8_t CC_Battery_BatteryGet_handler(__attribute__((unused)) uint8_t endpoint)
+uint8_t CC_Battery_BatteryGet_handler(__attribute__((unused)) uint8_t endpoint, SBatteryReportData *data)
 {
   uint32_t VBattery;
   uint8_t  accurateLevel;
   uint8_t  roundedLevel;
   uint8_t reporting_decrements;
+
+  data->rechargeable = CC_BATTERY_RECHARGEABLE;
+  data->backup_battery = CC_BATTERY_BACKUP_BATTERY;
 
   /*
    * Simple example how to use the ADC to measure the battery voltage

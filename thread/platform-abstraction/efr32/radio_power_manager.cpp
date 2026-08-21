@@ -40,6 +40,8 @@
 #include "radio_multi_channel.h"
 #include "radio_power_manager.h"
 
+#include "common/code_utils.hpp"
+
 extern "C" {
 #include "rail_config.h"
 #include "sl_rail_ieee802154.h"
@@ -119,7 +121,7 @@ static int8_t sli_get_max_tx_power_across_instances(uint16_t channel)
         sl_rail_ieee802154_rx_channel_switching_cfg_t channel_switching_cfg;
 
         // Get switching config
-        sl_get_channel_switching_cfg(&channel_switching_cfg);
+        IgnoreError(sl_get_channel_switching_cfg(&channel_switching_cfg));
 
         // Find the max_channel_tx_power, to be minimum of Max channel power for the
         // channels infast channel config, accross all instances. This is because, if instance_1

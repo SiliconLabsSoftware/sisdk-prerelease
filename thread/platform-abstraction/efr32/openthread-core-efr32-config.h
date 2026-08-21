@@ -70,6 +70,17 @@
 #include "em_device.h"
 
 /**
+ * @def OPENTHREAD_CONFIG_CRYPTO_PLATFORM_CCM_ONE_SHOT_ENABLE
+ *
+ * Enable platform AES-CCM* one-shot AEAD via `sl_sec_man_aes_ccm_crypt`.
+ */
+#if OPENTHREAD_FTD || OPENTHREAD_MTD
+#ifndef OPENTHREAD_CONFIG_CRYPTO_PLATFORM_CCM_ONE_SHOT_ENABLE
+#define OPENTHREAD_CONFIG_CRYPTO_PLATFORM_CCM_ONE_SHOT_ENABLE 1
+#endif
+#endif
+
+/**
  * @def OPENTHREAD_CONFIG_NET_DIAG_VENDOR_NAME
  *
  * Specifies the default Vendor Name string.
@@ -471,6 +482,21 @@
  */
 #ifndef OPENTHREAD_CONFIG_MAC_SOFTWARE_ENERGY_SCAN_ENABLE
 #define OPENTHREAD_CONFIG_MAC_SOFTWARE_ENERGY_SCAN_ENABLE 0
+#endif
+
+/**
+ * @def OPENTHREAD_CONFIG_MAC_SOFTWARE_RETX_SECURITY_ENABLE
+ *
+ * Define to 1 to enable software retry logic.
+ *
+ * When this is disabled, the radio must own retry logic (including security)
+ * itself. When enabled, SubMac decrypts the previously secured frame and
+ * clears header/security flags so the platform can update IEs and re-apply
+ * AES-CCM in hardware for the next attempt.
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_MAC_SOFTWARE_RETX_SECURITY_ENABLE
+#define OPENTHREAD_CONFIG_MAC_SOFTWARE_RETX_SECURITY_ENABLE (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
 #endif
 
 /**

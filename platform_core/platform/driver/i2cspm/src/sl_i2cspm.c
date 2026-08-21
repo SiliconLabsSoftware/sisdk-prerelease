@@ -44,8 +44,10 @@
  *******************************   DEFINES   ***********************************
  ******************************************************************************/
 
-// Transfer timeout (how many polls).
-#define SL_I2CSPM_TRANSFER_TIMEOUT 300000
+// Blocking transfer timeout in milliseconds.
+#ifndef SL_I2CSPM_TRANSFER_TIMEOUT
+#define SL_I2CSPM_TRANSFER_TIMEOUT 100
+#endif
 
 // SCL hold time in microseconds.
 #ifndef SL_I2CSPM_SCL_HOLD_TIME_US

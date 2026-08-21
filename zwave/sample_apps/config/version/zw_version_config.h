@@ -17,7 +17,7 @@
 
 // <<< Use Configuration Wizard in Context Menu >>>
 
-// <h> Override the default application version with USER_APP_* defines"
+// <h> Override the default application version with USER_APP_* defines
 
 // <q USE_USER_APP_VERSION> false: Use Default Z-Wave version numbering, true: Use Application Version Configuration numbering
 // <i> Default: 0
@@ -39,6 +39,21 @@
 #define USER_APP_PATCH  0
 
 // </h>
+// <h> Application build number override
+
+// <q USE_USER_APP_BUILD_NO> Use user-defined application build number
+// <i> If true, the custom build number USER_APP_BUILD_NO will be reported as the application build version instead of the value derived by the build environment
+// <i> Default: 0
+#define USE_USER_APP_BUILD_NO  0
+
+// </h>
+// <h> User-defined application build number
+
+// <o USER_APP_BUILD_NO> User-defined application build number <0..65535:1> <f.h>
+// <i> Default: 0xABCD
+#define USER_APP_BUILD_NO  0xABCD
+
+// </h>
 
 // <<< end of configuration section >>>
 
@@ -55,6 +70,13 @@
         #define APP_VERSION SDK_VERSION_MAJOR
         #define APP_REVISION SDK_VERSION_MINOR
         #define APP_PATCH SDK_VERSION_PATCH
+    #endif
+#endif
+#if USE_USER_APP_BUILD_NO
+    #define APP_BUILD_NO USER_APP_BUILD_NO
+#else
+    #ifndef APP_BUILD_NO
+    #define APP_BUILD_NO 0xABCD
     #endif
 #endif
 #endif /* _ZW_VERSION_CONFIG_H_ */

@@ -8,6 +8,8 @@
 #include "zpal_log.h"
 #include <zpal_watchdog.h>
 #include <zpal_misc.h>
+#include "zw_version_config.h"
+
 #include <zpal_radio.h>
 
 #include "comm_interface.h"
@@ -327,8 +329,8 @@ void run_zniffer(void)
             ZPAL_LOG_DEBUG(ZPAL_LOG_APP, "FUNC_ID_ZN_GET_VERSION\n");
             compl_workbuf[0] = zpal_get_chip_type();
             compl_workbuf[1] = zpal_get_chip_revision();
-            compl_workbuf[2] = zpal_get_app_version_major();
-            compl_workbuf[3] = zpal_get_app_version_minor();
+            compl_workbuf[2] = (uint8_t)APP_VERSION;
+            compl_workbuf[3] = (uint8_t)APP_REVISION;
             DoRespond_workbuf(4);
             break;
 

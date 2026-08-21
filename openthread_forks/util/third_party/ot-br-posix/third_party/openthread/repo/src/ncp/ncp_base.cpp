@@ -1722,8 +1722,8 @@ template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_MAC_RX_AT>(void)
     SuccessOrExit(error = mDecoder.ReadUint8(channel));
 
     {
-        uint64_t now = otPlatRadioGetNow(mInstance);
-        uint32_t start;
+        otRadioTime64 now = otPlatRadioGetNow(mInstance);
+        uint32_t      start;
 
         VerifyOrExit(when > now && (when - now) < UINT32_MAX, error = OT_ERROR_INVALID_ARGS);
 
@@ -2162,10 +2162,6 @@ template <> otError NcpBase::HandlePropertyGet<SPINEL_PROP_CAPS>(void)
 
 #if OPENTHREAD_CONFIG_MLE_LINK_METRICS_INITIATOR_ENABLE
     SuccessOrExit(error = mEncoder.WriteUintPacked(SPINEL_CAP_THREAD_LINK_METRICS));
-#endif
-
-#if OPENTHREAD_CONFIG_DUA_ENABLE
-    SuccessOrExit(error = mEncoder.WriteUintPacked(SPINEL_CAP_DUA));
 #endif
 
 #if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE

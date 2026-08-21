@@ -28,8 +28,8 @@ requires:
 - name: device_has_mpu
 - name: mpa_manager
   condition: [device_series_3]
-- name: hal_system
-  condition: [device_series_3]
+- name: interrupt_manager_vector_table_in_ram_mpu_disable
+  condition: [interrupt_manager_vector_table_in_ram, device_has_itcm]
 template_contribution:
 - name: linker_mpu
   value: true

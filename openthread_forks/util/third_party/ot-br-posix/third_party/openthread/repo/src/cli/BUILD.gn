@@ -63,6 +63,8 @@ openthread_cli_sources = [
   "cli_network_data.hpp",
   "cli_ping.cpp",
   "cli_ping.hpp",
+  "cli_plat_tcp.cpp",
+  "cli_plat_tcp.hpp",
   "cli_srp_client.cpp",
   "cli_srp_client.hpp",
   "cli_srp_server.cpp",
@@ -82,7 +84,6 @@ static_library("cli_config") {
 }
 
 static_library("libopenthread-cli-ftd") {
-  configs += [ "../..:openthread_private_flags" ]
   sources = openthread_cli_sources
   public_deps = [
     ":cli_config",
@@ -92,7 +93,6 @@ static_library("libopenthread-cli-ftd") {
 }
 
 static_library("libopenthread-cli-mtd") {
-  configs += [ "../..:openthread_private_flags" ]
   sources = openthread_cli_sources
   public_deps = [
     ":cli_config",

@@ -34,6 +34,7 @@
 #include "common/code_utils.hpp"
 
 #include "rest/json.hpp"
+#include "rest/names.hpp"
 #include "rest/network_diag_handler.hpp"
 #include "rest/rest_diagnostics_coll.hpp"
 #include "rest/rest_server_common.hpp"
@@ -206,10 +207,15 @@ bool NetworkDiagnostic::Validate(const cJSON &aJson)
     errormsg = KEY_TYPES;
     VerifyOrExit(types != nullptr);
     VerifyOrExit(cJSON_IsArray(types));
-    cJSON_ArrayForEach(item, types)
     {
-        VerifyOrExit(cJSON_IsString(item));
-        SuccessOrExit(DiagnosticTypes::FindId(item->valuestring, id));
+        std::set<uint8_t> uniqueTypes;
+        cJSON_ArrayForEach(item, types)
+        {
+            VerifyOrExit(cJSON_IsString(item));
+            SuccessOrExit(DiagnosticTypes::FindId(item->valuestring, id));
+            uniqueTypes.insert(id);
+        }
+        VerifyOrExit(uniqueTypes.size() <= DiagnosticTypes::kMaxTotalCount);
     }
 
     ok = true;

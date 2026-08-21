@@ -47,6 +47,10 @@
 #include "sl_slist.h"
 #endif
 
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#include "sl_power_manager.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -152,10 +156,11 @@ typedef void (*sl_uart_tx_complete_cb_t)(sl_uart_handle_t *uart_handle,
  * @addtogroup uart_async
  * @brief Asynchronous DMA transfer APIs and types.
  *
- * @note An async handle  must use only the APIs in this group for data transfer.
- *       The polling APIs (@ref uart_polling) and interrupt-driven transfer APIs
- *       in @ref uart_interrupt (@ref sl_uart_read, @ref sl_uart_write, and the
- *       TX/RX ready and TX complete interrupt APIs) must not be used on such a handle.
+ * @note An async handle may also use the polling APIs (@ref uart_polling) and
+ *       interrupt-driven transfer APIs in @ref uart_interrupt
+ *       (@ref sl_uart_read, @ref sl_uart_write, and the TX/RX ready and TX
+ *       complete interrupt APIs). Do not use those APIs concurrently with an
+ *       active async DMA transfer on the same direction.
  *
  * @{
  ******************************************************************************/
@@ -331,6 +336,9 @@ typedef struct uart_handle {
   sl_uart_tx_complete_cb_t tx_complete_cb;
   void *tx_complete_cb_arg;
   uint32_t enabled_irq;
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  sl_power_manager_em_t em_requirement;
+#endif
 #if defined(SL_CATALOG_UART_ASYNC_PRESENT)
   sl_uart_preinit_config_t preinit_config;
   sl_uart_handle_state_t async_tx_state;
@@ -399,7 +407,7 @@ __STATIC_INLINE size_t sl_uart_handle_get_size(void)
  *
  * @param[in]  uart UART peripheral to use with this handle.
  *
- * @param[in]  pin_config For the specified UART.
+ * @param[in]  pin_config Pointer to the pin configuration.
  *
  * @return @ref SL_STATUS_OK if successful.
  *         @ref SL_STATUS_ALREADY_INITIALIZED if the UART is already initialized.
@@ -407,7 +415,7 @@ __STATIC_INLINE size_t sl_uart_handle_get_size(void)
  ******************************************************************************/
 sl_status_t sl_uart_init(sl_uart_handle_t *uart_handle,
                          sl_peripheral_t uart,
-                         sl_uart_pin_config_t pin_config);
+                         const sl_uart_pin_config_t *pin_config);
 
 /***************************************************************************//**
  * De-initializes given UART instance.
@@ -464,7 +472,7 @@ sl_status_t sl_uart_resume(sl_uart_handle_t *uart_handle);
  *
  * @param[in]  uart_handle Handle to UART.
  *
- * @param[in]  config Line configuration.
+ * @param[in]  config Pointer to the line configuration.
  *
  * @return @ref SL_STATUS_OK if successful. Error code otherwise.
  *
@@ -473,9 +481,12 @@ sl_status_t sl_uart_resume(sl_uart_handle_t *uart_handle);
  *       cannot be called while there is any active RX/TX operations. Applying a
  *       new configuration will reset the UART peripheral and any data left in the
  *       RX or TX FIFO will be lost.
+ *
+ * @note Instances using the EUSART peripheral are limited to 7 or 8 data bits.
+ *       Instances using the USART peripheral are limited to 4 to 8 data bits.
  ******************************************************************************/
 sl_status_t sl_uart_configure_line(sl_uart_handle_t *uart_handle,
-                                   sl_uart_config_t config);
+                                   const sl_uart_config_t *config);
 
 /***************************************************************************//**
  * Gets active line configuration for the specified UART handle.
@@ -629,6 +640,10 @@ void sl_uart_disable_tx_complete_interrupt(sl_uart_handle_t *uart_handle);
  *
  * @note This API must be called after @ref sl_uart_configure_line(), since the timeout value
  *       is computed from the configured baud rate. Failure to do so is undefined behavior.
+ *
+ * @note It is the caller's responsibility to ensure that no async RX transfer is active
+ *       (@ref sl_uart_async_is_rx_active returns false). Calling this API while async RX
+ *       is active may collide with the ongoing transfer.
  ******************************************************************************/
 sl_status_t sl_uart_read_byte(sl_uart_handle_t *uart_handle, uint8_t *byte);
 
@@ -648,6 +663,10 @@ sl_status_t sl_uart_read_byte(sl_uart_handle_t *uart_handle, uint8_t *byte);
  *
  * @note This API must be called after @ref sl_uart_configure_line(), since the timeout value
  *       is computed from the configured baud rate. Failure to do so is undefined behavior.
+ *
+ * @note It is the caller's responsibility to ensure that no async TX transfer is active
+ *       (@ref sl_uart_async_is_tx_active returns false). Calling this API while async TX
+ *       is active may collide with the ongoing transfer.
  ******************************************************************************/
 sl_status_t sl_uart_write_byte(sl_uart_handle_t *uart_handle, uint8_t byte);
 
@@ -681,6 +700,10 @@ sl_status_t sl_uart_write_byte(sl_uart_handle_t *uart_handle, uint8_t byte);
  *
  * @note This API must be called after @ref sl_uart_configure_line(), since the timeout value
  *       is computed from the configured baud rate. Failure to do so is undefined behavior.
+ *
+ * @note It is the caller's responsibility to ensure that no async RX transfer is active
+ *       (@ref sl_uart_async_is_rx_active returns false). Calling this API while async RX
+ *       is active may collide with the ongoing transfer.
  ******************************************************************************/
 sl_status_t sl_uart_read(sl_uart_handle_t *uart_handle,
                          void *data,
@@ -710,6 +733,10 @@ sl_status_t sl_uart_read(sl_uart_handle_t *uart_handle,
  *
  * @note This API must be called after @ref sl_uart_configure_line(), since the timeout value
  *       is computed from the configured baud rate. Failure to do so is undefined behavior.
+ *
+ * @note It is the caller's responsibility to ensure that no async TX transfer is active
+ *       (@ref sl_uart_async_is_tx_active returns false). Calling this API while async TX
+ *       is active may collide with the ongoing transfer.
  ******************************************************************************/
 sl_status_t sl_uart_write(sl_uart_handle_t *uart_handle,
                           const void *data,

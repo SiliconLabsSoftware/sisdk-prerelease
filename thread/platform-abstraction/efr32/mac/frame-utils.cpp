@@ -35,6 +35,7 @@
 
 #include "sl_packet_utils.h"
 
+#include "common/code_utils.hpp"
 #include "mac/mac_frame.hpp"
 
 using namespace ot;
@@ -61,7 +62,15 @@ otPanId sli_ot_get_dst_pan_id(const otRadioFrame *aFrame)
 
 const uint8_t *sli_ot_get_payload(const otRadioFrame *aFrame)
 {
-    return static_cast<const Mac::RxFrame &>(*aFrame).GetPayload();
+    const Mac::RxFrame &frame = static_cast<const Mac::RxFrame &>(*aFrame);
+    Mac::Frame::Lengths lengths;
+    const uint8_t      *payload = nullptr;
+
+    SuccessOrExit(frame.DetermineLengths(lengths));
+    payload = frame.GetPsduStartingAt(lengths.mHeader);
+
+exit:
+    return payload;
 }
 
 bool sli_ot_frame_is_pan_id_compressed(const otRadioFrame *aFrame)

@@ -67,6 +67,7 @@ include:
   - path: spinel_driver_getter.hpp
   - path: spinel_manager.hpp
   - path: system.hpp
+  - path: tcp.hpp
   - path: tmp_storage.hpp
   - path: udp.hpp
   - path: vendor_interface.hpp
@@ -109,6 +110,7 @@ source:
 - path: "util/third_party/openthread/src/core/api/logging_api.cpp"
 - path: "util/third_party/openthread/src/core/common/error.cpp"
 - path: "util/third_party/openthread/src/core/common/frame_builder.cpp"
+- path: "util/third_party/openthread/src/core/common/frame_data.cpp"
 - path: "util/third_party/openthread/src/core/common/log.cpp"
 - path: "util/third_party/openthread/src/core/common/string.cpp"
 - path: "util/third_party/openthread/src/core/common/timer.cpp"

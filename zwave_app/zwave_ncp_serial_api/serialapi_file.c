@@ -56,7 +56,7 @@
 #define APP_CONFIG_FILESYS_VERSION_PRE_SEPARATE_FILESYS_VERSION 0 ///< Version from when the file system version was based solely on the application version
 #define APP_CONFIG_FILESYS_VERSION_SEPARATE_FILESYS_VERSION     1 ///< Version from when the separate file system versioning was added
 
-#define APP_AND_FILESYS_VERSION ((APP_CONFIG_FILESYS_VERSION_SEPARATE_FILESYS_VERSION << 24) | (APP_VERSION << 16) | (APP_REVISION << 8) | APP_PATCH)
+#define APP_AND_FILESYS_VERSION ((APP_CONFIG_FILESYS_VERSION_SEPARATE_FILESYS_VERSION << 24) | ((uint8_t)APP_VERSION << 16) | ((uint8_t)APP_REVISION << 8) | (uint8_t)APP_PATCH)
 
 #define APP_VERSION_GET(version)     (version & 0x00FFFFFF)
 #define FILESYS_VERSION_GET(version) ((uint8_t)(version >> 24))

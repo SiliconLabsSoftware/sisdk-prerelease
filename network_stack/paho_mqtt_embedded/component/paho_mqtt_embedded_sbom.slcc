@@ -1,0 +1,25 @@
+id: paho_mqtt_embedded_sbom
+package: paho_mqtt_embedded
+label: "paho_mqtt_embedded Software Bill of Materials"
+description: >
+  This component defines the license and other SBOM metadata shared by the
+  paho_mqtt_embedded components. The Eclipse Paho upstream sources are
+  dual-licensed under EPL-2.0 or EDL-1.0 (the declared project license per the
+  repository LICENSE/NOTICE; EDL-1.0 is the BSD-3-Clause text), while the
+  Silicon Labs Si91x lwIP integration files (MQTTSi91x_lwip.c,
+  sli_lwip_mqtt_mbedtls_config.h) are licensed under Zlib.
+category: Third Party
+quality: production
+ui_hints:
+  visibility: never
+
+metadata:
+  sbom:
+    license: "(EPL-2.0 OR BSD-3-Clause) AND Zlib"
+    upstream:
+      name: paho_mqtt_embedded
+      version: 1.1.0
+      supplier: eclipse-paho
+      url: https://github.com/eclipse-paho/paho.mqtt.embedded-c/
+      package_url: https://github.com/eclipse-paho/paho.mqtt.embedded-c/releases/tag/v1.1.0
+root_path: network_stack/paho_mqtt_embedded

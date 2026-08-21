@@ -19,7 +19,6 @@ source:
 - path: "src/sli_bgcommon_debug_efr32.c"
 - path: "src/sli_bluetooth_common_config.c"
 requires:
-- name: memory_profiler_api
 - name: bluetooth_common_libraries
 recommends:
 - id: "bluetooth_common_libraries_release"

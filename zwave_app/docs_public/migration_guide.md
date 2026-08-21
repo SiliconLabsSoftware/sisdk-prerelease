@@ -8,6 +8,27 @@ This guide shows how to migrate projects from previous SDKs to a newer one.
 
 In 8.2.0, sample application sources are published as `zwave_app` (replacing `zwave_sample_app`).
 
+## Application build number and product metadata
+
+### Build number reporting
+
+- `ZAF_GetBuildNumber()` was removed. Use the `APP_BUILD_NO` compile-time macro instead (Version Command Class, logs, and application metadata).
+- In SLC projects, configure `USE_USER_APP_BUILD_NO` and `USER_APP_BUILD_NO` under Application Version Configuration when a fixed build number is required.
+- In CMake builds, `APP_BUILD_NO` inherits `ZW_BUILD_NO` (from `-DZW_BUILD_NO`). Values outside 0..65535 are clamped with a CMake warning because Version Command Class fields are 16-bit.
+
+### Product identity and application version accessors
+
+PAL helpers were moved to the Z-Wave stack API in `ZW_product_infos.h`:
+
+| Removed (PAL) | Replacement (Z-Wave API) |
+|---------------|--------------------------|
+| `zpal_product_id_t` | `zw_version_product_id_t` |
+| `zpal_get_product_id()` | `zw_product_infos_get_product_id()` |
+| `zpal_get_app_version()` | `zw_product_infos_get_app_version()` |
+| `zpal_get_app_version_major()` / `_minor()` / `_patch()` | Decode `zw_product_infos_get_app_version()` or use `APP_VERSION` / `APP_REVISION` / `APP_PATCH` |
+
+Update includes: replace `zpal_misc.h` usage for these APIs with `ZW_product_infos.h`. Silicon Labs applications link the strong implementations from `ZW_version.c` via the `zw_versions` component.
+
 # 8.1.0 {#migrate-section-8-1-0}
 
 ## Sleeptimer peripheral configuration 
@@ -26,7 +47,9 @@ If you don't want to use app_log in your CLI files, you should:
 - Replace calls to `app_log_info(...)` with `sl_iostream_vprintf(stream, ...)`
 Note that if you get the error "app_log.h: No such file or directory" after the migration, that means your are missing the `app_log` component in your projet. It can be easly fixed by installing the `app_log` component in your project.
 
-## DC/DC configuration (`ZW_DCDC_CONFIG`) {#migrate-section-8-1-0-dcdc}
+<a id="migrate-section-8-1-0-dcdc"></a>
+
+## DC/DC configuration (ZW_DCDC_CONFIG)
 
 In 8.1.0, `ZW_DCDC_CONFIG` in `zw_hardware_config.h` (or Project Configurator) is applied when the radio platform initializes the DC/DC at startup. In 8.0.0 that setting was ignored and the firmware always used `EDCDCMODE_AUTO`.
 
@@ -97,7 +120,7 @@ These values can now be set via the Z-Wave Core Component (if using the GUI) or 
 | `SL_DEVICE_INIT_EMU_EM4_RETAIN_LFRCO`       | `ZW_EM4_RETAIN_LFRCO`         |
 | `SL_DEVICE_INIT_EMU_EM4_RETAIN_ULFRCO`      | `ZW_EM4_RETAIN_ULFRCO`        |
 
-\* The `ZW_DCDC_CONFIG` configuration value is still hard-coded to `EDCDCMODE_AUTO`, regardless of the value of this setting. A workaround is currently not available. SDK 8.1.0 applies this setting; see [DC/DC configuration (`ZW_DCDC_CONFIG`)](#migrate-section-8-1-0-dcdc).
+\* The `ZW_DCDC_CONFIG` configuration value is still hard-coded to `EDCDCMODE_AUTO`, regardless of the value of this setting. A workaround is currently not available. SDK 8.1.0 applies this setting; see [DC/DC configuration (ZW_DCDC_CONFIG)](#migrate-section-8-1-0-dcdc).
 
 ## RAIL Power Manager Initialization
 
@@ -233,6 +256,8 @@ In the following sections, an example is shown about the upgrade steps of each s
 
 > **Note:** This guide is not exhaustive. Please ensure that any changes you make follow the steps outlined above.
 
+<a id="general-steps-for-all-applications"></a>
+
 ### General steps for all applications
 
 #### All .c files
@@ -288,7 +313,7 @@ SDK upgrades are not supported for this application. To migrate, please create a
   #endif
   ```
 - Remove `zw_cli_sleeping_util_prevent_sleeping_timeout(ZW_CLI_SLEEPING_WAKEUP_TIME_AFTER_RESET);`
-- CLI baud rate was changed to 9600, which enables the device to receive CLI commands in EM2 sleep. There is no need to prevent sleeping for this application. To apply the new configuration on the baud rate, see the section [zwave_soc_door_lock_keypad.slcp](#zwave_soc_door_lock_keypadslcp).
+- CLI baud rate was changed to 9600, which enables the device to receive CLI commands in EM2 sleep. There is no need to prevent sleeping for this application. To apply the new configuration on the baud rate, see the section [zwave_soc_door_lock_keypad.slcp](#zwave_soc_door_lock_keypad_slcp).
 
 #### app_cli_cc_user_credential.c
 
@@ -307,6 +332,8 @@ SDK upgrades are not supported for this application. To migrate, please create a
 - Rename `u3c_user` struct type to `u3c_user_t`
 - Rename `u3c_credential` struct type to `u3c_credential_t`
 - Rename `u3c_credential_learn_event_data` to `u3c_event_data_learn_start_t`
+
+<a id="zwave_soc_door_lock_keypad_slcp"></a>
 
 #### zwave_soc_door_lock_keypad.slcp
 

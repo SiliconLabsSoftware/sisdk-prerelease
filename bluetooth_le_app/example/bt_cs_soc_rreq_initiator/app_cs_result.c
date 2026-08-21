@@ -141,7 +141,7 @@ void app_on_result(uint8_t conn_handle,
       }
     }
 
-    if (algo_mode == CS_ALGO_MODE_REAL_TIME_FAST
+    if (algo_mode == CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED
         && main_mode == sl_bt_cs_mode_pbr
         && (channel_map_preset == CS_CHANNEL_MAP_PRESET_HIGH
             || channel_map_preset == CS_CHANNEL_MAP_PRESET_MEDIUM)) {
@@ -191,7 +191,7 @@ void app_on_result(uint8_t conn_handle,
 
 /******************************************************************************
  * Extract intermediate results between measurement results
- * Note: only called when stationary object tracking used
+ * Note: only called when Stationary mode used
  *****************************************************************************/
 void app_on_intermediate_result(const cs_intermediate_result_t * intermediate_result)
 {

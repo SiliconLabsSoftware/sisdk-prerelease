@@ -1,0 +1,20 @@
+id: interrupt_manager_vector_table_in_ram_mpu_disable
+label: 'Interrupt Manager: Interrupt Vector Table in RAM: MPU Disable'
+package: platform_core
+description: |
+  Specify that the Interrupt Manager needs to disable the MPU when it modifies the interrupt vector table in RAM.
+category: Services|Interrupt Manager
+quality: production
+metadata:
+  sbom:
+    license: Zlib
+provides:
+- name: interrupt_manager_vector_table_in_ram_mpu_disable
+requires:
+- name: interrupt_manager_vector_table_in_ram
+- name: device_has_itcm
+- name: component_catalog
+template_contribution:
+- name: component_catalog
+  value: interrupt_manager_vector_table_in_ram_mpu_disable
+root_path: platform_core

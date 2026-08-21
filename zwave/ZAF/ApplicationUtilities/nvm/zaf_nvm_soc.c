@@ -10,16 +10,16 @@
 #include <ZAF_nvm_app.h>
 #include <ZAF_nvm.h>
 #include <zaf_nvm_soc.h>
-#include <zpal_misc.h>
 #include <ZW_typedefs.h>
 #include "zpal_log.h"
+#include "zw_version_config.h"
 
 void
 zafi_nvm_app_set_default_configuration(void)
 {
   ZAF_Reset();
 
-  uint32_t appVersion = zpal_get_app_version();
+  uint32_t appVersion = (uint8_t)APP_VERSION << 16 | (uint8_t)APP_REVISION << 8 | (uint8_t)APP_PATCH;
 
   __attribute__((unused)) const zpal_status_t status = ZAF_nvm_write(ZAF_FILE_ID_APP_VERSION, &appVersion, ZAF_FILE_SIZE_APP_VERSION);
   assert(ZPAL_STATUS_OK == status);
@@ -52,7 +52,7 @@ zafi_nvm_app_load_configuration(void)
   status = ZAF_nvm_read(ZAF_FILE_ID_APP_VERSION, &saved_version, ZAF_FILE_SIZE_APP_VERSION);
 
   if (ZPAL_STATUS_OK == status) {
-    current_version = zpal_get_app_version();
+    current_version = (uint8_t)APP_VERSION << 16 | (uint8_t)APP_REVISION << 8 | (uint8_t)APP_PATCH;
     if (current_version != saved_version) {
       zaf_nvm_app_load_configuration_migration(current_version, saved_version);
       // Add code for migration of file system to higher version here.

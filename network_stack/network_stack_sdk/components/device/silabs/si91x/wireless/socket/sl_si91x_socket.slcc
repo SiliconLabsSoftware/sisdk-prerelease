@@ -1,0 +1,31 @@
+id: sl_si91x_socket
+package: network_stack_sdk
+description: >
+  The SiWx91x Socket provides an API to manage SiWx91x internal sockets
+label: SiWx91x Socket
+category: Device|Si91x|Wireless|Socket
+quality: production
+metadata:
+  sbom:
+    license: Zlib
+provides:
+- name: sl_si91x_socket
+source:
+- path: src/sl_si91x_socket_utility.c
+include:
+- path: inc
+  file_list:
+  - path: sl_bsd_utility.h
+  - path: sl_si91x_socket_callback_framework.h
+  - path: sl_si91x_socket_constants.h
+  - path: sl_si91x_socket_types.h
+  - path: sl_si91x_socket_utility.h
+  - path: sli_si91x_socket_defs.h
+define:
+- name: SLI_SI91X_SOCKETS
+
+requires:
+- name: log_none
+- name: network_stack_common
+
+root_path: network_stack/network_stack_sdk/./components/device/silabs/si91x/wireless/socket

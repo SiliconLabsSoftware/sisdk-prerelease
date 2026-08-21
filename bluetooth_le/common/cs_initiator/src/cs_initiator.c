@@ -553,22 +553,22 @@ sl_status_t cs_initiator_create(const uint8_t               conn_handle,
          rtl_config,
          sizeof(initiator->rtl_config));
 
-  if (initiator->rtl_config.algo_mode == SL_RTL_CS_ALGO_MODE_REAL_TIME_BASIC) {
-    initiator_log_info(INSTANCE_PREFIX "RTL - algo mode selected: real-time basic"
-                                       "(moving objects tracking)" LOG_NL,
+  if (initiator->rtl_config.algo_mode == SL_RTL_CS_ALGO_MODE_TRACKING_ACCURACY_OPTIMIZED) {
+    initiator_log_info(INSTANCE_PREFIX "RTL - algo mode selected: Tracking accuracy optimized "
+                                       "(suitable for moving targets)" LOG_NL,
                        initiator->conn_handle);
-  } else if (initiator->rtl_config.algo_mode == SL_RTL_CS_ALGO_MODE_STATIC_HIGH_ACCURACY) {
-    initiator_log_info(INSTANCE_PREFIX "RTL - algo mode selected: static high accuracy "
-                                       "(stationary object tracking)" LOG_NL,
+  } else if (initiator->rtl_config.algo_mode == SL_RTL_CS_ALGO_MODE_STATIONARY) {
+    initiator_log_info(INSTANCE_PREFIX "RTL - algo mode selected: Stationary "
+                                       "(suitable for stationary targets)" LOG_NL,
                        initiator->conn_handle);
-  } else if (initiator->rtl_config.algo_mode == SL_RTL_CS_ALGO_MODE_REAL_TIME_FAST) {
-    initiator_log_info(INSTANCE_PREFIX "RTL - algo mode selected: real time fast "
-                                       "(moving object fast)" LOG_NL,
+  } else if (initiator->rtl_config.algo_mode == SL_RTL_CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED) {
+    initiator_log_info(INSTANCE_PREFIX "RTL - algo mode selected: Tracking latency optimized "
+                                       "(suitable for fast moving targets)" LOG_NL,
                        initiator->conn_handle);
   } else {
     initiator_log_warning(INSTANCE_PREFIX "unknown algo_mode: %u!"
-                                          "Will use the default setting: real-time basic "
-                                          "(moving objects tracking)!" LOG_NL,
+                                          "Will use the default setting: Tracking accuracy optimized "
+                                          "(suitable for moving targets)!" LOG_NL,
                           initiator->conn_handle, initiator->rtl_config.algo_mode);
   }
   initiator_log_debug(INSTANCE_PREFIX "ch3c_jump=%u, ch3c_shape=%u" LOG_NL,
@@ -618,6 +618,11 @@ sl_status_t cs_initiator_create(const uint8_t               conn_handle,
                      initiator->conn_handle,
                      (unsigned long)enabled_channels);
   (void)enabled_channels;
+
+  // Initialize all sl_rtl_cs_params fields to their unset defaults before
+  // any field is filled in (here, and later from sl_bt_evt_cs_config_complete_id
+  // and sl_bt_evt_cs_procedure_enable_complete_id).
+  sl_rtl_cs_init_cs_params(&initiator->cs_parameters);
 
   sl_status_t antenna_sc = cs_initiator_select_antennas(&initiator->config,
                                                         cs_initiator_local_antenna_num,
@@ -1509,6 +1514,21 @@ bool cs_initiator_on_event(sl_bt_msg_t *evt)
         memcpy(&initiator->cs_parameters.channel_map[0],
                &evt->data.evt_cs_config_complete.channel_map.data[0],
                sizeof(initiator->cs_parameters.channel_map));
+
+        // Compute the negotiated antenna switching time from the local and
+        // remote capabilities and the requested (input) antenna
+        // configuration index.
+        rtl_err = sl_rtl_util_get_antenna_switching_time(cs_initiator_get_local_sw_times(),
+                                                         initiator->config.remote_t_sw_us,
+                                                         true, /* is_local_initiator */
+                                                         initiator->config.cs_tone_antenna_config_idx,
+                                                         &initiator->cs_parameters.T_SW_time);
+        if (rtl_err != SL_RTL_ERROR_SUCCESS) {
+          initiator_log_error(INSTANCE_PREFIX "RTL - failed to compute antenna switching time! [E: 0x%x]" LOG_NL,
+                              initiator->conn_handle,
+                              rtl_err);
+          initiator->cs_parameters.T_SW_time = 0;
+        }
 
         // Create estimator with the set CS configuration parameters
         initiator_log_debug(INSTANCE_PREFIX "CS - procedure parameters set,"

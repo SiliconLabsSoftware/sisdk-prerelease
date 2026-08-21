@@ -78,7 +78,8 @@ sl_status_t cs_algo_create(uint8_t conn_handle, cs_algo_config_t config)
   cs_acp_cmd_algo_create.config.T_IP1_time = config.T_IP1_time;
   cs_acp_cmd_algo_create.config.T_IP2_time = config.T_IP2_time;
   cs_acp_cmd_algo_create.config.T_FCS_time = config.T_FCS_time;
-  cs_acp_cmd_algo_create.config.num_antenna_paths = config.num_antenna_paths;
+  cs_acp_cmd_algo_create.config.remote_t_sw_us = config.remote_t_sw_us;
+  cs_acp_cmd_algo_create.config.tone_antenna_config_selection = config.tone_antenna_config_selection;
   memcpy(cs_acp_cmd_algo_create.config.channel_map.data,
          config.channel_map.data,
          sizeof(cs_acp_cmd_algo_create.config.channel_map.data));

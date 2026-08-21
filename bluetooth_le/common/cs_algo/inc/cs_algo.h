@@ -108,7 +108,8 @@ typedef struct {
   uint8_t T_IP1_time; ///< IP1 time in milliseconds
   uint8_t T_IP2_time; ///< IP2 time in milliseconds
   uint8_t T_FCS_time; ///< FCS time in milliseconds
-  uint8_t num_antenna_paths; ///< Number of antenna paths
+  uint8_t remote_t_sw_us; ///< Remote antenna switching time in microseconds
+  uint8_t tone_antenna_config_selection; ///< Negotiated antenna configuration index (ACI)
   sl_bt_cs_channel_map_t channel_map; ///< Channel map
   rtl_config_t rtl_config; ///< RTL-specific configuration
 } cs_algo_config_t;

@@ -56,9 +56,9 @@ static sl_status_t validate_rtl_supported_combinations(sl_bt_cs_mode_t main_mode
   const bool sub_rtt = (sub_mode == sl_bt_cs_mode_rtt);
   const bool custom_map = (channel_preset == CS_CHANNEL_MAP_PRESET_CUSTOM);
 
-  if (algo_mode != CS_ALGO_MODE_REAL_TIME_BASIC
-      && algo_mode != CS_ALGO_MODE_REAL_TIME_FAST
-      && algo_mode != CS_ALGO_MODE_STATIC_HIGH_ACCURACY) {
+  if (algo_mode != CS_ALGO_MODE_TRACKING_ACCURACY_OPTIMIZED
+      && algo_mode != CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED
+      && algo_mode != CS_ALGO_MODE_STATIONARY) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -73,12 +73,12 @@ static sl_status_t validate_rtl_supported_combinations(sl_bt_cs_mode_t main_mode
   }
 
   // RTT (no sub-mode): REAL TIME FAST is not supported.
-  if (rtt_main && sub_none && algo_mode == CS_ALGO_MODE_REAL_TIME_FAST) {
+  if (rtt_main && sub_none && algo_mode == CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   if (pbr_main && sub_none) {
-    if (algo_mode == CS_ALGO_MODE_STATIC_HIGH_ACCURACY) {
+    if (algo_mode == CS_ALGO_MODE_STATIONARY) {
       if (custom_map || channel_preset != CS_CHANNEL_MAP_PRESET_HIGH) {
         return SL_STATUS_INVALID_PARAMETER;
       }
@@ -90,8 +90,8 @@ static sl_status_t validate_rtl_supported_combinations(sl_bt_cs_mode_t main_mode
     if (custom_map) {
       return SL_STATUS_INVALID_PARAMETER;
     }
-    if (algo_mode == CS_ALGO_MODE_REAL_TIME_BASIC
-        || algo_mode == CS_ALGO_MODE_STATIC_HIGH_ACCURACY) {
+    if (algo_mode == CS_ALGO_MODE_TRACKING_ACCURACY_OPTIMIZED
+        || algo_mode == CS_ALGO_MODE_STATIONARY) {
       if (channel_preset != CS_CHANNEL_MAP_PRESET_HIGH) {
         return SL_STATUS_INVALID_PARAMETER;
       }
@@ -177,15 +177,15 @@ sl_status_t cs_configurator_rtllib_get_estimation_time_us(cs_configurator_parame
 
   // Map the Algorithm Mode to the cycle count table column.
   switch (algo_mode) {
-    case CS_ALGO_MODE_REAL_TIME_BASIC:
+    case CS_ALGO_MODE_TRACKING_ACCURACY_OPTIMIZED:
       col = CS_CONF_CYCLES_TABLE_RT_BASIC_IDX;
       break;
 
-    case CS_ALGO_MODE_REAL_TIME_FAST:
+    case CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED:
       col = CS_CONF_CYCLES_TABLE_RT_FAST_IDX;
       break;
 
-    case CS_ALGO_MODE_STATIC_HIGH_ACCURACY:
+    case CS_ALGO_MODE_STATIONARY:
       col = CS_CONF_CYCLES_TABLE_STATIC_HIGH_ACC_IDX;
       break;
 

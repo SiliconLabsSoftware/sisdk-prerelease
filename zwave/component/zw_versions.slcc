@@ -22,8 +22,6 @@ define:
   value: 2
 - name: ZAF_VERSION_PATCH
   value: 0
-- name: ZAF_BUILD_NO
-  value: 0xABCD
 # SDK
 - name: SDK_VERSION_MAJOR
   value: 8
@@ -36,8 +34,12 @@ include:
 - path: "ZAF/ApplicationUtilities/"
   file_list:
   - path: "ZAF_version.h"
+- path: "ZWave/API"
+  file_list:
+  - path: "ZW_product_infos.h"
 source:
 - path: "ZAF/ApplicationUtilities/ZAF_version.c"
+- path: "ZAF/ApplicationUtilities/ZW_version.c"
 config_file:
 - path: sample_apps/config/version/zw_version_config.h
   file_id: version_config

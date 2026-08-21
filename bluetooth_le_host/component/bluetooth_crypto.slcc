@@ -17,6 +17,9 @@ recommends:
 provides:
 - name: "bluetooth_crypto"
 
+documentation:
+  docset: bluetooth
+  document: bluetooth-stack-api
 metadata:
   sbom:
     license: MSLA

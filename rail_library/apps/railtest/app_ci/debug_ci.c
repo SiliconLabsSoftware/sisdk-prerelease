@@ -57,6 +57,43 @@ uint32_t rxOverflowDelay = 10 * 1000000; // 10 seconds
 
 #if RAIL_SUPPORTS_EXTERNAL_THERMISTOR
 static uint32_t thermistorResistance = 0;
+
+// Fetch impedance into thermistorResistance and convert to whole Celsius degrees.
+// On failure, optionally sets *errorMsg for CLI reporting.
+static bool getConvertedThermistorReading(int16_t *temperatureCelsius,
+                                          char **errorMsg)
+{
+  RAIL_Status_t status = RAIL_GetThermistorImpedance(railHandle,
+                                                     &thermistorResistance);
+  if (status != RAIL_STATUS_NO_ERROR) {
+    if (errorMsg != NULL) {
+      *errorMsg = "Thermistor measurement not done yet.";
+    }
+    return false;
+  }
+  if ((thermistorResistance == 0U)
+      || (thermistorResistance == RAIL_INVALID_THERMISTOR_VALUE)) {
+    if (errorMsg != NULL) {
+      *errorMsg = "Thermistor measurement error.";
+    }
+    return false;
+  }
+
+  int16_t thermistorTemperatureC;
+  status = RAIL_ConvertThermistorImpedance(railHandle,
+                                           thermistorResistance,
+                                           &thermistorTemperatureC);
+  if (status != RAIL_STATUS_NO_ERROR) {
+    if (errorMsg != NULL) {
+      *errorMsg = "Conversion error.";
+    }
+    return false;
+  }
+
+  // Convert temperature (originally in eighth of Celsius degrees) in Celsius
+  *temperatureCelsius = thermistorTemperatureC / 8;
+  return true;
+}
 #endif
 
 #if RAIL_SUPPORTS_HFXO_COMPENSATION
@@ -320,28 +357,16 @@ void startThermistorMeasurement(sl_cli_command_arg_t *args)
 void getThermistorImpedance(sl_cli_command_arg_t *args)
 {
 #if RAIL_SUPPORTS_EXTERNAL_THERMISTOR
-  RAIL_Status_t status;
+  char *errorMsg = NULL;
+  int16_t temperatureCelsius = 0;
+
   CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
-  status = RAIL_GetThermistorImpedance(railHandle, &thermistorResistance);
-
-  if (status == RAIL_STATUS_NO_ERROR) {
-    if ((thermistorResistance != 0U) && (thermistorResistance != RAIL_INVALID_THERMISTOR_VALUE)) {
-      int16_t thermistorTemperatureC;
-      status = RAIL_ConvertThermistorImpedance(railHandle, thermistorResistance, &thermistorTemperatureC);
-
-      if (status == RAIL_STATUS_NO_ERROR) {
-        // Convert temperature (originally in eighth of Celsius degrees) in Celsius
-        responsePrint(sl_cli_get_command_string(args, 0),
-                      "Ohms:%u,DegreesC:%d",
-                      thermistorResistance, thermistorTemperatureC / 8);
-      } else {
-        responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Conversion error.");
-      }
-    } else {
-      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Thermistor measurement error.");
-    }
+  if (getConvertedThermistorReading(&temperatureCelsius, &errorMsg)) {
+    responsePrint(sl_cli_get_command_string(args, 0),
+                  "Ohms:%u,DegreesC:%d",
+                  thermistorResistance, temperatureCelsius);
   } else {
-    responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Thermistor measurement not done yet.");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, errorMsg);
   }
 #else
   responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
@@ -397,7 +422,8 @@ void configHFXOCompensation(sl_cli_command_arg_t *args)
     responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Incorrect number of arguments");
     return;
   } else if (sl_cli_get_argument_count(args) == 4) {
-    localCompensationConfig.zoneTemperatureC = sl_cli_get_argument_uint8(args, 1);
+    // int8: zone can be negative (e.g. -40 C). uint8 made the < -40 check dead.
+    localCompensationConfig.zoneTemperatureC = sl_cli_get_argument_int8(args, 1);
     localCompensationConfig.deltaNominal = sl_cli_get_argument_uint8(args, 2);
     localCompensationConfig.deltaCritical = sl_cli_get_argument_uint8(args, 3);
 
@@ -419,6 +445,33 @@ void configHFXOCompensation(sl_cli_command_arg_t *args)
 
   RAIL_Status_t status = RAIL_ConfigHFXOCompensation(railHandle, &localCompensationConfig);
   if (status == RAIL_STATUS_NO_ERROR) {
+#if RAIL_SUPPORTS_EXTERNAL_THERMISTOR
+    int16_t temperatureCelsius = 0;
+
+    if (localCompensationConfig.enableCompensation) {
+      // Start the requested pass here so the cached read is deterministic and
+      // occurs while the asynchronous thermistor measurement is in progress.
+      status = RAIL_StartThermistorMeasurement(railHandle);
+      if ((status == RAIL_STATUS_NO_ERROR)
+          && getConvertedThermistorReading(&temperatureCelsius, NULL)) {
+        responsePrint(sl_cli_get_command_string(args, 0), "Configuration:Success,"
+                                                          "compensation:%s,"
+                                                          "zoneTemperatureC:%d,"
+                                                          "deltaNominal:%u,"
+                                                          "deltaCritical:%u,"
+                                                          "Ohms:%u,"
+                                                          "DegreesC:%d",
+                      "enabled",
+                      localCompensationConfig.zoneTemperatureC,
+                      localCompensationConfig.deltaNominal,
+                      localCompensationConfig.deltaCritical,
+                      thermistorResistance,
+                      temperatureCelsius);
+        return;
+      }
+    }
+#endif
+
     responsePrint(sl_cli_get_command_string(args, 0), "Configuration:Success,"
                                                       "compensation:%s,"
                                                       "zoneTemperatureC:%d,"

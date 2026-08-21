@@ -85,7 +85,6 @@ source:
 - path: backbone_router/bbr_local.cpp
 - path: backbone_router/bbr_manager.cpp
 - path: backbone_router/multicast_listeners_table.cpp
-- path: backbone_router/ndproxy_table.cpp
 - path: border_router/br_log.cpp
 - path: border_router/br_tracker.cpp
 - path: border_router/br_types.cpp
@@ -99,6 +98,7 @@ source:
 - path: coap/coap_secure.cpp
 - path: common/appender.cpp
 - path: common/binary_search.cpp
+- path: common/bit_set.cpp
 - path: common/bit_utils.cpp
 - path: common/crc.cpp
 - path: common/data.cpp
@@ -139,9 +139,11 @@ source:
 - path: mac/data_poll_sender.cpp
 - path: mac/link_raw.cpp
 - path: mac/mac.cpp
+- path: mac/mac_beacon.cpp
 - path: mac/mac_filter.cpp
 - path: mac/mac_frame.cpp
 - path: mac/mac_links.cpp
+- path: mac/mac_ltvs.cpp
 - path: mac/mac_types.cpp
 - path: mac/sub_mac.cpp
 - path: mac/sub_mac_callbacks.cpp
@@ -194,6 +196,7 @@ source:
 - path: net/nd6.cpp
 - path: net/nd_agent.cpp
 - path: net/netif.cpp
+- path: net/plat_tcp.cpp
 - path: net/slaac_address.cpp
 - path: net/sntp_client.cpp
 - path: net/socket.cpp
@@ -221,7 +224,6 @@ source:
 - path: thread/child_table.cpp
 - path: thread/csl_tx_scheduler.cpp
 - path: thread/discover_scanner.cpp
-- path: thread/dua_manager.cpp
 - path: thread/energy_scan_server.cpp
 - path: thread/indirect_sender.cpp
 - path: thread/key_manager.cpp
@@ -239,8 +241,12 @@ source:
 - path: thread/mle_tlvs.cpp
 - path: thread/mle_types.cpp
 - path: thread/mlr_manager.cpp
+- path: thread/mlr_types.cpp
 - path: thread/neighbor.cpp
 - path: thread/neighbor_table.cpp
+- path: thread/net_diag.cpp
+- path: thread/net_diag_tlvs.cpp
+- path: thread/net_diag_types.cpp
 - path: thread/network_data.cpp
 - path: thread/network_data_leader.cpp
 - path: thread/network_data_leader_ftd.cpp
@@ -250,9 +256,6 @@ source:
 - path: thread/network_data_service.cpp
 - path: thread/network_data_tlvs.cpp
 - path: thread/network_data_types.cpp
-- path: thread/network_diagnostic.cpp
-- path: thread/network_diagnostic_tlvs.cpp
-- path: thread/network_diagnostic_types.cpp
 - path: thread/panid_query_server.cpp
 - path: thread/peer.cpp
 - path: thread/peer_table.cpp
@@ -262,6 +265,7 @@ source:
 - path: thread/src_match_controller.cpp
 - path: thread/thread_link_info.cpp
 - path: thread/thread_netif.cpp
+- path: thread/thread_tlvs.cpp
 - path: thread/time_sync_service.cpp
 - path: thread/tmf.cpp
 - path: thread/uri_paths.cpp

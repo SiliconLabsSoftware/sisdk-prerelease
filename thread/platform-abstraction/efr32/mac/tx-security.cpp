@@ -44,39 +44,47 @@ using namespace ot;
 
 extern "C" {
 
-void sli_ot_process_transmit_aes_ccm(otRadioFrame *aFrame, const otExtAddress *aExtAddress)
+otError sli_ot_process_transmit_aes_ccm(otRadioFrame           *aFrame,
+                                        const otExtAddress     *aExtAddress,
+                                        const otMacKeyMaterial *aRawKey)
 {
 #if (OPENTHREAD_RADIO && (OPENTHREAD_CONFIG_THREAD_VERSION < OT_THREAD_VERSION_1_2))
     OT_UNUSED_VARIABLE(aFrame);
     OT_UNUSED_VARIABLE(aExtAddress);
+    OT_UNUSED_VARIABLE(aRawKey);
+
+    return OT_ERROR_NONE;
 #else
 
-    uint32_t      frameCounter = 0;
-    uint8_t       securityLevelValue;
-    uint8_t       nonce[Crypto::AesCcm::kNonceSize];
-    Mac::TxFrame &txFrame = *static_cast<Mac::TxFrame *>(aFrame);
+    otError                   error        = OT_ERROR_NONE;
+    uint32_t                  frameCounter = 0;
+    Mac::Frame::SecurityLevel securityLevel;
+    Crypto::AesCcm::Nonce     nonce;
+    Mac::TxFrame             &txFrame = *static_cast<Mac::TxFrame *>(aFrame);
 
     VerifyOrExit(txFrame.GetSecurityEnabled());
 
-    SuccessOrExit(txFrame.GetSecurityLevel(securityLevelValue));
-    SuccessOrExit(txFrame.GetFrameCounter(frameCounter));
+    SuccessOrExit(error = txFrame.GetSecurityLevel(securityLevel));
+    SuccessOrExit(error = txFrame.GetFrameCounter(frameCounter));
 
     {
-        const Mac::Frame::SecurityLevel securityLevel = static_cast<Mac::Frame::SecurityLevel>(securityLevelValue);
-        const uint8_t                   tagLength     = txFrame.GetFooterLength() - txFrame.GetFcsSize();
+        Mac::Frame::Lengths lengths;
 
-        Crypto::AesCcm::GenerateNonce(*static_cast<const Mac::ExtAddress *>(aExtAddress),
-                                      frameCounter,
-                                      securityLevelValue,
-                                      nonce);
+        SuccessOrExit(error = txFrame.DetermineLengths(lengths));
 
-        sli_ot_process_transmit_aes_ccm_device(txFrame, nonce, tagLength, securityLevel);
+        const uint8_t tagLength = static_cast<uint8_t>(lengths.mFooter - txFrame.GetFcsSize());
+
+        nonce.InitFrom(*static_cast<const Mac::ExtAddress *>(aExtAddress),
+                       frameCounter,
+                       static_cast<uint8_t>(securityLevel));
+
+        sli_ot_process_transmit_aes_ccm_device(txFrame, nonce, tagLength, securityLevel, aRawKey);
     }
 
     txFrame.SetIsSecurityProcessed(true);
 
 exit:
-    return;
+    return error;
 #endif // OPENTHREAD_RADIO && (OPENTHREAD_CONFIG_THREAD_VERSION < OT_THREAD_VERSION_1_2)
 }
 

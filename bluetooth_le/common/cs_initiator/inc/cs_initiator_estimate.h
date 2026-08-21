@@ -92,6 +92,13 @@ uint32_t get_num_tones_from_channel_map(const uint8_t *ch_map,
  *****************************************************************************/
 void calculate_distance(cs_initiator_t *initiator);
 
+/******************************************************************************
+ * Query and cache the local antenna-switching times capability field.
+ *
+ * @return Local antenna switching times capability field.
+ *****************************************************************************/
+uint8_t cs_initiator_get_local_sw_times(void);
+
 #ifdef __cplusplus
 }
 #endif

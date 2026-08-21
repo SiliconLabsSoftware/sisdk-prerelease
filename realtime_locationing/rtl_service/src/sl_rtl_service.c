@@ -472,22 +472,8 @@ enum sl_rtl_error_code sl_rtl_service_set_cs_algo_mode(sl_rtl_service_cs_inst_t 
   return rc;
 }
 
-enum sl_rtl_error_code sl_rtl_service_set_cs_mode(sl_rtl_service_cs_inst_t *inst,
-                                                  sl_rtl_cs_mode             main_mode,
-                                                  sl_rtl_cs_mode             sub_mode)
-{
-  sl_rtl_service_cs_ctx_t *ctx = NULL;
-  enum sl_rtl_error_code rc = sli_lock_live_instance(inst, &ctx);
-  if (rc != SL_RTL_ERROR_SUCCESS) {
-    return rc;
-  }
-  rc = sli_rtl_cs_set_cs_mode(&inst->libitem, main_mode, sub_mode);
-  (void)app_rta_release(ctx->rta_ctx);
-  return rc;
-}
-
-enum sl_rtl_error_code sl_rtl_service_set_cs_params(sl_rtl_service_cs_inst_t *inst,
-                                                    const sl_rtl_cs_params    *params)
+enum sl_rtl_error_code sl_rtl_service_create_cs_estimator(sl_rtl_service_cs_inst_t *inst,
+                                                          const sl_rtl_cs_params *params)
 {
   if (params == NULL) {
     return SL_RTL_ERROR_ARGUMENT;
@@ -497,19 +483,7 @@ enum sl_rtl_error_code sl_rtl_service_set_cs_params(sl_rtl_service_cs_inst_t *in
   if (rc != SL_RTL_ERROR_SUCCESS) {
     return rc;
   }
-  rc = sli_rtl_cs_set_cs_params(&inst->libitem, params);
-  (void)app_rta_release(ctx->rta_ctx);
-  return rc;
-}
-
-enum sl_rtl_error_code sl_rtl_service_create_cs_estimator(sl_rtl_service_cs_inst_t *inst)
-{
-  sl_rtl_service_cs_ctx_t *ctx = NULL;
-  enum sl_rtl_error_code rc = sli_lock_live_instance(inst, &ctx);
-  if (rc != SL_RTL_ERROR_SUCCESS) {
-    return rc;
-  }
-  rc = sli_rtl_cs_create_estimator(&inst->libitem);
+  rc = sli_rtl_cs_create_estimator(&inst->libitem, params);
   (void)app_rta_release(ctx->rta_ctx);
   return rc;
 }

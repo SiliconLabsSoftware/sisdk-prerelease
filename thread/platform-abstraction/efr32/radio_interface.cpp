@@ -841,7 +841,7 @@ sl_rail_status_t sli_ot_radio_interface_rail_start_rx(uint8_t aChannel, const sl
 // OpenThread Platform Radio API Functions (Instance-Independent)
 // These functions don't use the otInstance parameter and can be moved here
 
-uint64_t otPlatRadioGetNow(otInstance *aInstance)
+otRadioTime64 otPlatRadioGetNow(otInstance *aInstance)
 {
     OT_UNUSED_VARIABLE(aInstance);
     return otPlatTimeGet();

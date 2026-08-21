@@ -737,8 +737,8 @@ const char *sl_rtl_get_lib_version(void);
  *
  * Distances are calculated by following the steps below:
  *   1. Initialize a sl_rtl_cs_libitem instance.
- *   2. Set up the algorithm mode and CS parameters.
- *   3. Create the estimator.
+ *   2. Set the algorithm mode (optional; defaults apply if omitted).
+ *   3. Create the estimator with CS parameters (including main/sub mode).
  *   4. Process the CS procedure data into distance.
  *   5. Get distance and/or likeliness estimates.
  *
@@ -869,6 +869,10 @@ typedef enum {
 typedef PACKSTRUCT (struct {
   uint8_t channel_map[SL_RTL_CS_CHANNEL_MAP_SIZE];
   /**< Bluetooth channel bitmap */
+  uint8_t main_mode;
+  /**< Main CS mode as ::sl_rtl_cs_mode */
+  uint8_t sub_mode;
+  /**< Sub CS mode as ::sl_rtl_cs_mode */
   uint8_t min_main_mode_steps;
   /**< Minimum number of CS main mode steps to be executed before a sub mode
        step. Currently only value 2 is supported. Field is ignored if sub mode
@@ -881,7 +885,8 @@ typedef PACKSTRUCT (struct {
   /**< Number of main modes steps repeated from previous subevent
        (0, 1, 2, 3). */
   uint8_t num_calib_steps;
-  sl_rtl_cs_rtt_type rtt_type : 8;
+  uint8_t rtt_type;
+  /**< RTT type as ::sl_rtl_cs_rtt_type */
   uint8_t cs_sync_phy;
   uint8_t channel_map_repetition;
   /**< Number of times the channel map is repeated. Currently only value 0x01
@@ -895,6 +900,9 @@ typedef PACKSTRUCT (struct {
   uint8_t T_IP1_time;
   uint8_t T_IP2_time;
   uint8_t T_FCS_time;
+  uint8_t T_SW_time;
+  /**< Time for the antenna switch period of the CS tones. Refer to
+     sl_rtl_util_get_antenna_switching_time for calculating the value. */
   uint8_t num_antenna_paths;       /**< Number of antenna paths supported by
                                       the local controller for the CS tone
                                       exchanges.
@@ -954,7 +962,8 @@ typedef PACKSTRUCT (union {
 }) sl_rtl_cs_estimator_param_value;
 
 typedef PACKSTRUCT (struct {
-  sl_rtl_cs_estimator_param_type type : 8;
+  uint8_t type;
+  /**< Parameter type as ::sl_rtl_cs_estimator_param_type */
   sl_rtl_cs_estimator_param_value value;
 }) sl_rtl_cs_estimator_param;
 
@@ -981,14 +990,16 @@ typedef PACKSTRUCT (struct {
 
 typedef PACKSTRUCT (struct {
   uint8_t antenna_permutation_index;
-  sl_rtl_cs_pbr_tone tones[];
-  /**< Array of tones. The arraysize is always num_antenna_paths + 1, where
+  uint8_t tones[];
+  /**< Byte array of tones. Corresponds to an array of ::sl_rtl_cs_pbr_tone.
+     The arraysize is always num_antenna_paths + 1, where
      num_antenna_paths is a member of the sl_rtl_cs_procedure_config struct.
      The additional slot (+1) accounts for the tone extension. */
 }) sl_rtl_cs_mode_pbr_data;
 
 typedef PACKSTRUCT (struct {
-  sl_rtl_cs_mode step_mode : SL_RTL_CS_STEP_MODE_BIT_LEN;
+  uint8_t step_mode;
+  /**< Step mode as ::sl_rtl_cs_mode */
   uint8_t step_channel;
   uint8_t step_data_length;
 
@@ -996,7 +1007,8 @@ typedef PACKSTRUCT (struct {
     sl_rtl_cs_mode_calib_data mode_calib_step;
     sl_rtl_cs_mode_rtt_data mode_rtt_step;
     sl_rtl_cs_mode_pbr_data mode_pbr_step;
-  });
+  }) data;
+  /**< Mode-specific step data */
 }) sl_rtl_cs_step_data;
 
 typedef PACKSTRUCT (struct {
@@ -1035,11 +1047,23 @@ typedef PACKSTRUCT (struct {
 }) sl_rtl_cs_procedure;
 
 typedef enum {
-  SL_RTL_CS_BEST_ESTIMATE = 0,     /**< The best estimate */
-  SL_RTL_CS_MAIN_MODE_ESTIMATE,    /**< Estimate based only on the main mode */
-  SL_RTL_CS_SUB_MODE_ESTIMATE      /**< Estimate based only on the sub mode
-                                        This option is available only if a valid
-                                        sub mode is set. */
+  SL_RTL_CS_BEST_ESTIMATE             = 0,  /**< The best estimate */
+  SL_RTL_CS_MAIN_MODE_PBR_ESTIMATE    = 1,
+  /**< Estimate based on the main mode PBR. This option is available only if main mode is
+        SL_RTL_CS_MODE_PBR or SL_RTL_CS_MODE_COMBINED. */
+  SL_RTL_CS_MAIN_MODE_RTT_ESTIMATE    = 2,
+  /**< Estimate based on the main mode RTT. This option is available only if main mode is
+        SL_RTL_CS_MODE_RTT or SL_RTL_CS_MODE_COMBINED. */
+  SL_RTL_CS_SUB_MODE_PBR_ESTIMATE     = 3,
+  /**< Estimate based on the sub mode PBR. This option currently is not supported. */
+  SL_RTL_CS_SUB_MODE_RTT_ESTIMATE     = 4,
+  /**< Estimate based on the sub mode RTT. This option is available only if sub mode is
+        SL_RTL_CS_MODE_RTT. */
+  SL_RTL_CS_MAIN_MODE_ESTIMATE        = 5,
+  /**< Estimate based only on the main mode. This option will be deprecated */
+  SL_RTL_CS_SUB_MODE_ESTIMATE         = 6,
+  /**< Estimate based only on the sub mode. Available only if a valid sub mode is set. This option
+        will be deprecated. */
 } sl_rtl_cs_distance_estimate_mode;
 
 typedef sl_rtl_cs_distance_estimate_mode
@@ -1137,55 +1161,44 @@ enum sl_rtl_error_code sl_rtl_cs_set_algo_mode(sl_rtl_cs_libitem *item,
                                                const sl_rtl_cs_algo_mode mode);
 
 /**************************************************************************//**
- * Set the estimation CS mode.
+ * Initialize CS parameter structure values.
  *
- * @param[in] item Pointer to the initialized CS libitem
- * @param[in] main_mode main_mode as ::sl_rtl_cs_mode
- * @param[in] sub_mode sub_mode as ::sl_rtl_cs_mode
+ * @param[out] cs_params Pointer to a caller-allocated ::sl_rtl_cs_params
+ *                       structure that will be set.
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *
- * Set the desired CS mode for main and sub modes. For example,
- * ::SL_RTL_CS_MODE_PBR uses round-trip phase based cs_mode. Sub mode should be
- * set to ::SL_RTL_CS_MODE_NONE if only main mode is enabled in CS ranging.
- * CS libitem must be initialized before calling this method, or it will fail
- * with return code ::SL_RTL_ERROR_NOT_INITIALIZED. This method should be
- * called before estimator is created for CS libitem, or it will fail with
- * error code ::SL_RTL_ERROR_ESTIMATOR_ALREADY_CREATED.
- *****************************************************************************/
-enum sl_rtl_error_code sl_rtl_cs_set_cs_mode(sl_rtl_cs_libitem *item,
-                                             const sl_rtl_cs_mode main_mode,
-                                             const sl_rtl_cs_mode sub_mode);
-
-/**************************************************************************//**
- * Set the estimation CS parameters.
+ * This is the recommended way to populate ::sl_rtl_cs_params.
+ * This function initialises all fields to special unset values.
+ * New fields may be added to the structure in future releases and calling
+ * this function ensures that no field is left uninilialized.
  *
- * @param[in] item Pointer to the initialized CS libitem
- * @param[in] cs_params cs_params as ::sl_rtl_cs_params
- * @return ::SL_RTL_ERROR_SUCCESS if successful
+ * Example:
+ * @code{.c}
+ * sl_rtl_cs_params params;
+ * sl_rtl_cs_init_cs_params(&params);
+ * params.num_antenna_paths   = 4;
+ * params.connection_interval = 6;
+ * ...
+ * sl_rtl_cs_create_estimator(&item, &params);
+ * @endcode
  *
- * Set the parameters for the estimator. CS libitem must be
- * initialized before calling this method, or it will fail with return
- * code ::SL_RTL_ERROR_NOT_INITIALIZED. This method should be called
- * before estimator is created for CS libitem, or it will fail with
- * error code ::SL_RTL_ERROR_ESTIMATOR_ALREADY_CREATED.
+ * @note Calling ::sl_rtl_cs_create_estimator with the unmodified output of
+ *       this function will produce an error.
  *****************************************************************************/
-enum sl_rtl_error_code
-sl_rtl_cs_set_cs_params(sl_rtl_cs_libitem *item,
-                        const sl_rtl_cs_params *parameters);
+enum sl_rtl_error_code sl_rtl_cs_init_cs_params(sl_rtl_cs_params *cs_params);
 
 /**************************************************************************//**
  * Create an estimator with the given parameters after initializing the libitem.
  *
  * @param[in] item Pointer to the initialized and configured CS libitem
+ * @param[in] parameters CS parameters as ::sl_rtl_cs_params
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *
- * CS libitem must be initialized before calling this method, or it
- * will fail with return code ::SL_RTL_ERROR_NOT_INITIALIZED. This
- * method should be called before estimator is created for CS libitem,
- * or it will fail with error code
- * ::SL_RTL_ERROR_ESTIMATOR_ALREADY_CREATED.
+ * @note CS libitem must be initialized before calling this method, or it
+ * will fail with return code ::SL_RTL_ERROR_NOT_INITIALIZED.
  *****************************************************************************/
-enum sl_rtl_error_code sl_rtl_cs_create_estimator(sl_rtl_cs_libitem *item);
+enum sl_rtl_error_code sl_rtl_cs_create_estimator(sl_rtl_cs_libitem *item,
+                                                  const sl_rtl_cs_params *parameters);
 
 /**************************************************************************//**
  * Set CS algorithm parameters. The function can be called any time before or
@@ -1235,7 +1248,9 @@ sl_rtl_cs_process(sl_rtl_cs_libitem *item,
  * @param[in] estimate_type Type of distance estimate
  * @param[in] estimate_mode Mode of distance estimate
  * @param[out] distance Distance out in meters.
- * @return ::SL_RTL_ERROR_SUCCESS if successful
+ * @return
+ *   - Latest estimator process status for supported mode/type.
+ *   - ::SL_RTL_ERROR_FEATURE_NOT_SUPPORTED for unsupported mode/type.
  *
  * CS libitem must be initialized before calling this method, or it
  * will fail with return code ::SL_RTL_ERROR_NOT_INITIALIZED. This
@@ -1256,9 +1271,11 @@ sl_rtl_cs_get_distance_estimate(
  * @param[in] item Pointer to the initialized CS libitem
  * @param[in] confidence_type Type of confidence estimate
  * @param[in] confidence_mode Mode of confidence estimate
- * @param[out] distance_likeliness Confidence between 0.0 - 1.0
+ * @param[out] confidence Confidence between 0.0 - 1.0
  *   (unlikely - likely) of the estimated distance
- * @return ::SL_RTL_ERROR_SUCCESS if successful
+ * @return
+ *   - Latest estimator process status for supported mode/type.
+ *   - ::SL_RTL_ERROR_FEATURE_NOT_SUPPORTED for unsupported mode/type.
  *
  * CS libitem must be initialized before calling this method, or it
  * will fail with return code ::SL_RTL_ERROR_NOT_INITIALIZED. This
@@ -1399,8 +1416,9 @@ typedef PACKSTRUCT (struct {
 
 typedef PACKSTRUCT (struct {
   sl_rtl_ras_ranging_data_header header;
-  sl_rtl_ras_subevent subevents[];           /**< An array of RAS format
-                                                subevents. */
+  uint8_t subevents[];                      /**< Byte array of RAS format
+                                                subevents. Corresponds to an
+                                                array of ::sl_rtl_ras_subevent. */
 }) sl_rtl_ras_ranging_data_body;
 
 typedef PACKSTRUCT (struct {
@@ -1435,14 +1453,14 @@ typedef PACKSTRUCT (struct {
 
 typedef PACKSTRUCT (struct {
   PACKSTRUCT(union {
-    sl_rtl_ras_measurement *initiator_ras_measurement;
-    sl_rtl_cs_measurement *initiator_cs_measurement;
-  });
+    sl_rtl_ras_measurement *ras_measurement;
+    sl_rtl_cs_measurement *cs_measurement;
+  }) initiator;
   /**< CS subevents or RAS ranging data body measured by the initiator */
   PACKSTRUCT(union {
-    sl_rtl_ras_measurement *reflector_ras_measurement;
-    sl_rtl_cs_measurement *reflector_cs_measurement;
-  });
+    sl_rtl_ras_measurement *ras_measurement;
+    sl_rtl_cs_measurement *cs_measurement;
+  }) reflector;
   /**< CS subevents or RAS ranging data body measured by the reflector */
   sl_rtl_ras_additional_info ras_info;
   /**< Additional required information for RAS measurement format */
@@ -2304,6 +2322,35 @@ enum sl_rtl_error_code sl_rtl_util_validate_bluetooth_cs_channel_map(
   const sl_rtl_cs_mode sub_mode,
   const sl_rtl_cs_algo_mode algo_mode,
   const uint8_t channel_map[10]);
+
+/**************************************************************************//**
+ * Get the negotiated antenna switching time for a Channel Sounding
+ * (CS) procedure based on the local and remote device capabilities and the
+ * selected antenna configuration index.
+ *
+ * @param[in] local_t_sw_us
+ * Antenna switching time capability of the local device in microseconds.
+ *
+ * @param[in] remote_t_sw_us
+ * Antenna switching time capability of the remote device in microseconds.
+ *
+ * @param[in] is_local_initiator
+ * True if the local device is the CS initiator, false if it is the reflector.
+ *
+ * @param[in] tone_antenna_config_selection
+ * Tone antenna configuration index (ACI) configured for the CS procedure.
+ *
+ * @param[out] t_sw_us
+ * Negotiated antenna switching time in microseconds.
+ *
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_util_get_antenna_switching_time(
+  uint8_t local_t_sw_us,
+  uint8_t remote_t_sw_us,
+  bool is_local_initiator,
+  uint8_t tone_antenna_config_selection,
+  uint8_t *t_sw_us);
 
 /** @} */ // end addtogroup sl_rtl_util
 

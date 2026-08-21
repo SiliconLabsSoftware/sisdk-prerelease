@@ -34,8 +34,10 @@
 #include <chrono>
 
 #include <arpa/inet.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <httplib.h>
+#include <string.h>
 
 #include <openthread/commissioner.h>
 
@@ -48,6 +50,7 @@
 #include "rest/rest_devices_coll.hpp"     // Devices Collection
 #include "rest/rest_diagnostics_coll.hpp" // Diagnostics Collection
 #include "rest/services.hpp"
+#include "rest/version.hpp"
 #include "utils/string_utils.hpp"
 
 #include <cJSON.h>
@@ -107,6 +110,8 @@
 
 #define OT_REST_ROUTE_DIAGNOSTICS "/api/diagnostics"
 #define OT_REST_ROUTE_DIAGNOSTICS_ID "/api/diagnostics/:id"
+
+#define OT_REST_ROUTE_WELLKNOWN_THREAD "/.well-known/thread/br-rest"
 
 using std::chrono::duration_cast;
 using std::chrono::microseconds;
@@ -185,6 +190,9 @@ RestWebServer::RestWebServer(Host::RcpHost &aHost)
     mServer.Delete(OT_REST_ROUTE_DIAGNOSTICS_ID,
                    MakeHandlerInMainLoop(&RestWebServer::ApiDiagnosticsItemDeleteHandler));
     mServer.Options(OT_REST_ROUTE_DIAGNOSTICS, MakeHandlerInMainLoop(&RestWebServer::ApiDiagnosticsHandler));
+
+    mServer.Get(OT_REST_ROUTE_WELLKNOWN_THREAD, MakeHandler(&RestWebServer::WellKnownThreadHandler));
+    mServer.Options(OT_REST_ROUTE_WELLKNOWN_THREAD, MakeHandler(&RestWebServer::WellKnownThreadHandler));
 }
 
 RestWebServer::~RestWebServer(void)
@@ -959,35 +967,40 @@ void RestWebServer::RemoveJoiner(const Request &aRequest, Response &aResponse) c
     };
     std::string body;
 
-    VerifyOrExit(otCommissionerGetState(GetInstance()) == OT_COMMISSIONER_STATE_ACTIVE,
-                 error = OTBR_ERROR_INVALID_STATE);
-
     VerifyOrExit(Json::JsonString2String(aRequest.body, body), error = OTBR_ERROR_INVALID_ARGS);
+    VerifyOrExit(!body.empty(), error = OTBR_ERROR_INVALID_ARGS);
     if (body != "*")
     {
-        error = Json::StringDiscerner2Discerner(const_cast<char *>(body.c_str()), discerner);
-        if (error == OTBR_ERROR_NOT_FOUND)
+        otbrError err = Json::StringDiscerner2Discerner(&body[0], discerner);
+        if (err == OTBR_ERROR_NOT_FOUND)
         {
-            error = OTBR_ERROR_NONE;
             VerifyOrExit(Json::Hex2BytesJsonString(body, eui64.m8, OT_EXT_ADDRESS_SIZE) == OT_EXT_ADDRESS_SIZE,
                          error = OTBR_ERROR_INVALID_ARGS);
             addrPtr = &eui64;
         }
-        else if (error != OTBR_ERROR_NONE)
+        else if (err != OTBR_ERROR_NONE)
         {
             ExitNow(error = OTBR_ERROR_INVALID_ARGS);
         }
     }
 
-    // These functions should only return OT_ERROR_NONE or OT_ERROR_NOT_FOUND both treated as successful
-    if (discerner.mLength == 0)
-    {
-        (void)otCommissionerRemoveJoiner(GetInstance(), addrPtr);
-    }
-    else
-    {
-        (void)otCommissionerRemoveJoinerWithDiscerner(GetInstance(), &discerner);
-    }
+    SuccessOrExit(error = RunInMainLoop([this, addrPtr, &discerner]() {
+                      VerifyOrReturn(otCommissionerGetState(GetInstance()) == OT_COMMISSIONER_STATE_ACTIVE,
+                                     OTBR_ERROR_INVALID_STATE);
+
+                      // These functions should only return OT_ERROR_NONE or OT_ERROR_NOT_FOUND both treated as
+                      // successful
+                      if (discerner.mLength == 0)
+                      {
+                          (void)otCommissionerRemoveJoiner(GetInstance(), addrPtr);
+                      }
+                      else
+                      {
+                          (void)otCommissionerRemoveJoinerWithDiscerner(GetInstance(), &discerner);
+                      }
+
+                      return OTBR_ERROR_NONE;
+                  }));
 
 exit:
     switch (error)
@@ -1141,8 +1154,7 @@ void RestWebServer::ApiActionsHandler(const Request &aRequest, Response &aRespon
         aResponse.set_header("Allow", "GET, POST, DELETE, OPTIONS");
         break;
     default:
-        // aResponse.SetAllowMethods(methods);
-        errorDetails = "method not supported";
+        errorDetails = "not supported";
         statusCode   = StatusCode::MethodNotAllowed_405;
         break;
     }
@@ -1513,7 +1525,6 @@ void RestWebServer::ApiDiagnosticsHandler(const Request &aRequest, Response &aRe
         break;
     case HttpMethod::kPost:
     default:
-        // aResponse.SetAllowMethods(methods);
         errorDetails = "not supported";
         statusCode   = StatusCode::MethodNotAllowed_405;
         break;
@@ -1545,7 +1556,6 @@ void RestWebServer::ApiDevicesHandler(const Request &aRequest, Response &aRespon
         aResponse.set_header("Allow", "GET, DELETE, OPTIONS");
         break;
     default:
-        // aResponse.SetAllowMethods(methods);
         errorDetails = "not supported";
         statusCode   = StatusCode::MethodNotAllowed_405;
         break;
@@ -1588,7 +1598,7 @@ exit:
     }
 }
 
-otError RestWebServer::HasValidChars(const Request &aRequest, std::string &aErrorDetails)
+otError RestWebServer::HasValidChars(const Request &aRequest, std::string &aErrorDetails) const
 {
     otError          error            = OT_ERROR_NONE;
     constexpr size_t kMaxHeaderParams = 32;
@@ -1806,6 +1816,81 @@ void RestWebServer::ApiDevicesNodeInit()
     mServices.GetNetworkDiagHandler().SetDeviceItemAttributes(thisextaddr_str, aDeviceInfo);
 }
 
+void RestWebServer::WellKnownThreadHandler(const Request &aRequest, Response &aResponse) const
+{
+    StatusCode  statusCode = StatusCode::OK_200;
+    std::string errorDetails;
+    VerifyOrExit(HasValidChars(aRequest, errorDetails) == OT_ERROR_NONE, statusCode = StatusCode::BadRequest_400);
+
+    switch (GetMethod(aRequest))
+    {
+    case HttpMethod::kGet:
+        WellKnownThreadGetHandler(aRequest, aResponse);
+        break;
+
+    case HttpMethod::kOptions:
+        aResponse.status = StatusCode::NoContent_204;
+        aResponse.set_header("Allow", "GET, OPTIONS");
+        break;
+
+    default:
+        errorDetails = "not supported";
+        statusCode   = StatusCode::MethodNotAllowed_405;
+        break;
+    }
+exit:
+    if (statusCode != StatusCode::OK_200)
+    {
+        otbrLogWarning("%s:%d Error (%d)", __FILE__, __LINE__, statusCode);
+        ErrorHandler(aResponse, statusCode, errorDetails);
+    }
+}
+
+void RestWebServer::WellKnownThreadGetHandler(const Request &aRequest, Response &aResponse) const
+{
+    OT_UNUSED_VARIABLE(aRequest);
+
+    // Static JSON discovery metadata per RFC 8615 and OpenAPI specification
+    // API version from rest/version.hpp
+    // Routes use OT_REST_ROUTE_* macros for consistency with endpoint definitions
+    static const std::string kWellKnownThreadJson = R"({
+  "api": {
+    "version": ")" OTBR_REST_API_VERSION R"(",
+    "base": "/api/"
+  },
+  "links": [
+    {
+      "href": ")" OT_REST_ROUTE_WELLKNOWN_THREAD R"(",
+      "rel": "self",
+      "type": [")" OT_REST_CONTENT_TYPE_JSON R"("]
+    },
+    {
+      "href": ")" OT_REST_ROUTE_NODE R"(",
+      "rel": "node",
+      "type": [")" OT_REST_CONTENT_TYPE_JSONAPI R"("]
+    },
+    {
+      "href": ")" OT_REST_ROUTE_ACTIONS R"(",
+      "rel": "task",
+      "type": [")" OT_REST_CONTENT_TYPE_JSONAPI R"("]
+    },
+    {
+      "href": ")" OT_REST_ROUTE_DEVICES R"(",
+      "rel": "device",
+      "type": [")" OT_REST_CONTENT_TYPE_JSONAPI R"("]
+    },
+    {
+      "href": ")" OT_REST_ROUTE_DIAGNOSTICS R"(",
+      "rel": "diagnostic",
+      "type": [")" OT_REST_CONTENT_TYPE_JSONAPI R"("]
+    }
+  ]
+})";
+
+    aResponse.set_content(kWellKnownThreadJson, OT_REST_CONTENT_TYPE_JSON);
+    aResponse.status = StatusCode::OK_200;
+}
+
 /**
  * @brief Initializes the REST web server and starts the server thread.
  *
@@ -1839,6 +1924,14 @@ void RestWebServer::Init(const std::string &aRestListenAddress, int aRestListenP
         {
             otbrLogInfo("RestWebServer listening on %s:%u", aRestListenAddress.c_str(), aRestListenPort);
             self->mServer.set_ipv6_v6only(false);
+            self->mServer.set_socket_options([](socket_t aSock) {
+                int opt = 1;
+                // cpp-httplib defaults to SO_REUSEPORT instead of SO_REUSEADDR
+                if (setsockopt(aSock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) != 0)
+                {
+                    otbrLogWarning("Failed to set SO_REUSEADDR: %s", strerror(errno));
+                }
+            });
             const httplib::Headers defaultHeaders = {
                 {"Access-Control-Allow-Origin", OTBR_REST_ACCESS_CONTROL_ALLOW_ORIGIN},
                 {"Access-Control-Allow-Methods", OTBR_REST_ACCESS_CONTROL_ALLOW_METHODS},

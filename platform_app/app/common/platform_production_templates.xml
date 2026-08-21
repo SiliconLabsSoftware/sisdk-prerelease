@@ -64,7 +64,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
-  <descriptors name="blink_pwm_baremetal" label="Platform - Blink PWM" description="This example project uses the PWM driver that uses a TIMER to gradually adjust the intensity of an LED up and down.
+  <descriptors name="blink_pwm_baremetal" label="Platform - Blink PWM Bare-metal" description="This example project uses the PWM driver that uses a TIMER to gradually adjust the intensity of an LED up and down.
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
@@ -80,7 +80,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
-  <descriptors name="blink_pwm_freertos" label="Platform - Blink PWM" description="This example project uses the PWM driver that uses a TIMER to gradually adjust the intensity of an LED up and down.
+  <descriptors name="blink_pwm_freertos" label="Platform - Blink PWM FreeRTOS" description="This example project uses the PWM driver that uses a TIMER to gradually adjust the intensity of an LED up and down.
 ">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
@@ -271,7 +271,6 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
-    <properties key="hidden" value="true"/>
   </descriptors>
   <descriptors name="empty_cpp" label="Platform - Empty C++ Example" description="This example project shows an empty configuration that can be used as a starting point to add components and functionality.
 ">
@@ -288,7 +287,6 @@
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
-    <properties key="hidden" value="true"/>
   </descriptors>
   <descriptors name="i2cspm_baremetal" label="Platform - I2C Simple Polled Master Bare-metal" description="This example project demonstrates how to use the I2C Simple Polled Master driver using the Si7021 Relative Humidity and Temperature Sensor in a bare-metal configuration.
 ">

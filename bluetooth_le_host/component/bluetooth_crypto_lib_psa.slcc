@@ -41,6 +41,9 @@ provides:
 - name: "bluetooth_crypto_lib_psa"
 - name: "bluetooth_crypto_lib"
 
+documentation:
+  docset: bluetooth
+  document: bluetooth-stack-api
 metadata:
   sbom:
     license: MSLA

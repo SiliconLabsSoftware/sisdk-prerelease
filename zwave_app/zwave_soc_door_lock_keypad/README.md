@@ -53,6 +53,8 @@ The Door Lock application implements mandatory and some optional command classes
 
 \*: The User Credential Command Class is only available on specific boards. See the section [User Credential Command Class](#user-credential-command-class).
 
+<a id="user-credential-command-class"></a>
+
 ### User Credential Command Class
 
 The User Credential Command Class is enabled by default on the following boards:

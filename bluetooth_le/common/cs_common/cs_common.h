@@ -48,14 +48,15 @@ SL_ENUM(cs_procedure_scheduling_t) {
 
 /// CS algorithm mode
 SL_ENUM(cs_algo_mode_t) {
-  CS_ALGO_MODE_REAL_TIME_BASIC =      0,    //< Medium filtering, medium response, medium CPU cost. Suitable for
-                                            //  real-time tracking.
-  CS_ALGO_MODE_STATIC_HIGH_ACCURACY = 1,    //< High filtering, high CPU cost, high accuracy. Suitable for static
-                                            //  high-accuracy use cases.
-  CS_ALGO_MODE_REAL_TIME_FAST =       2,    //< Low filtering, low CPU and RAM cost, basic accuracy. Suitable for
-                                            //  real-time tracking with constrained computational resources.
-  CS_ALGO_MODE_INVALID =              0xFF, //< Invalid algorithm mode.
+  CS_ALGO_MODE_TRACKING_ACCURACY_OPTIMIZED = 0, //< Tracking accuracy optimized (suitable for moving targets)
+  CS_ALGO_MODE_STATIONARY =                  1, //< Stationary (suitable for stationary targets)
+  CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED =  2, //< Tracking latency optimized (suitable for fast moving targets)
+  CS_ALGO_MODE_INVALID =                  0xFF, //< Invalid algorithm mode.
 };
+
+#define CS_ALGO_MODE_REAL_TIME_BASIC      CS_ALGO_MODE_TRACKING_ACCURACY_OPTIMIZED
+#define CS_ALGO_MODE_STATIC_HIGH_ACCURACY CS_ALGO_MODE_STATIONARY
+#define CS_ALGO_MODE_REAL_TIME_FAST       CS_ALGO_MODE_TRACKING_LATENCY_OPTIMIZED
 
 /// CS antenna configuration index
 SL_ENUM(cs_tone_antenna_config_index_t) {

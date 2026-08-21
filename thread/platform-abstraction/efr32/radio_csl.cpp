@@ -281,7 +281,7 @@ exit:
     return error;
 }
 
-void otPlatRadioUpdateCslSampleTime(otInstance *aInstance, uint32_t aCslSampleTime)
+void otPlatRadioUpdateCslSampleTime(otInstance *aInstance, otRadioTime32 aCslSampleTime)
 {
     otEXPECT(sl_ot_rtos_task_can_access_pal());
     sli_ot_radio_csl_set_sample_time(aInstance, aCslSampleTime);

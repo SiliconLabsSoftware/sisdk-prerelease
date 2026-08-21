@@ -71,9 +71,6 @@
 namespace ot {
 namespace Cli {
 
-Interpreter *Interpreter::sInterpreter = nullptr;
-static OT_DEFINE_ALIGNED_VAR(sInterpreterRaw, sizeof(Interpreter), uint64_t);
-
 Interpreter::Interpreter(Instance *aInstance, otCliOutputCallback aCallback, void *aContext)
     : OutputImplementer(aCallback, aContext)
     , Utils(aInstance, *this)
@@ -110,6 +107,9 @@ Interpreter::Interpreter(Instance *aInstance, otCliOutputCallback aCallback, voi
 #endif
 #if OPENTHREAD_CONFIG_TCP_ENABLE && OPENTHREAD_CONFIG_CLI_TCP_ENABLE
     , mTcp(aInstance, *this)
+#endif
+#if OPENTHREAD_CONFIG_PLATFORM_TCP_ENABLE && OPENTHREAD_CONFIG_CLI_PLAT_TCP_ENABLE
+    , mPlatTcp(aInstance, *this)
 #endif
 #if OPENTHREAD_CONFIG_COAP_API_ENABLE
     , mCoap(aInstance, *this)
@@ -400,21 +400,28 @@ otError Interpreter::ProcessUserCommands(Arg aArgs[])
 
 otError Interpreter::SetUserCommands(const otCliCommand *aCommands, uint8_t aLength, void *aContext)
 {
-    otError error = OT_ERROR_FAILED;
+    otError error = OT_ERROR_NONE;
 
     for (UserCommandsEntry &entry : mUserCommands)
     {
+        if (entry.mCommands == aCommands)
+        {
+            // Ignore if already registered.
+            ExitNow();
+        }
+
         if (entry.mCommands == nullptr)
         {
             entry.mCommands = aCommands;
             entry.mLength   = aLength;
             entry.mContext  = aContext;
-
-            error = OT_ERROR_NONE;
-            break;
+            ExitNow();
         }
     }
 
+    error = OT_ERROR_NO_BUFS;
+
+exit:
     return error;
 }
 
@@ -749,8 +756,8 @@ void Interpreter::OutputBorderAgentTxtDataInfo(uint8_t aIndentSize, const otBord
 
     if (aInfo.mHasVendorOui)
     {
-        OutputLine(aIndentSize, "VendorOui: %02X-%02X-%02X", aInfo.mVendorOui[0], aInfo.mVendorOui[1],
-                   aInfo.mVendorOui[2]);
+        OutputFormat(aIndentSize, "VendorOui: ");
+        OutputVendorOuiLine(aInfo.mVendorOui);
     }
 
     if (aInfo.mHasStateBitmap)
@@ -1097,70 +1104,6 @@ template <> otError Interpreter::Process<Cmd("domainname")>(Arg aArgs[])
      */
     return ProcessGetSet(aArgs, otThreadGetDomainName, otThreadSetDomainName);
 }
-
-#if OPENTHREAD_CONFIG_DUA_ENABLE
-template <> otError Interpreter::Process<Cmd("dua")>(Arg aArgs[])
-{
-    otError error = OT_ERROR_NONE;
-
-    /**
-     * @cli dua iid
-     * @code
-     * dua iid
-     * 0004000300020001
-     * Done
-     * @endcode
-     * @par api_copy
-     * #otThreadGetFixedDuaInterfaceIdentifier
-     */
-    if (aArgs[0] == "iid")
-    {
-        if (aArgs[1].IsEmpty())
-        {
-            const otIp6InterfaceIdentifier *iid = otThreadGetFixedDuaInterfaceIdentifier(GetInstancePtr());
-
-            if (iid != nullptr)
-            {
-                OutputBytesLine(iid->mFields.m8);
-            }
-        }
-        /**
-         * @cli dua iid (set,clear)
-         * @code
-         * dua iid 0004000300020001
-         * Done
-         * @endcode
-         * @code
-         * dua iid clear
-         * Done
-         * @endcode
-         * @cparam dua iid @ca{iid|clear}
-         * `dua iid clear` passes a `nullptr` to #otThreadSetFixedDuaInterfaceIdentifier.
-         * Otherwise, you can pass the `iid`.
-         * @par api_copy
-         * #otThreadSetFixedDuaInterfaceIdentifier
-         */
-        else if (aArgs[1] == "clear")
-        {
-            error = otThreadSetFixedDuaInterfaceIdentifier(GetInstancePtr(), nullptr);
-        }
-        else
-        {
-            otIp6InterfaceIdentifier iid;
-
-            SuccessOrExit(error = aArgs[1].ParseAsHexString(iid.mFields.m8));
-            error = otThreadSetFixedDuaInterfaceIdentifier(GetInstancePtr(), &iid);
-        }
-    }
-    else
-    {
-        error = OT_ERROR_INVALID_COMMAND;
-    }
-
-exit:
-    return error;
-}
-#endif // OPENTHREAD_CONFIG_DUA_ENABLE
 
 #endif // (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
 
@@ -2934,35 +2877,53 @@ void Interpreter::OutputEidCacheEntry(const otCacheEntryInfo &aEntry)
     OutputNewLine();
 }
 
-/**
- * @cli eidcache
- * @code
- * eidcache
- * fd49:caf4:a29f:dc0e:97fc:69dd:3c16:df7d 2000 cache canEvict=1 transTime=0 eid=fd49:caf4:a29f:dc0e:97fc:69dd:3c16:df7d
- * fd49:caf4:a29f:dc0e:97fc:69dd:3c16:df7f fffe retry canEvict=1 timeout=10 retryDelay=30
- * Done
- * @endcode
- * @par
- * Returns the EID-to-RLOC cache entries.
- * @sa otThreadGetNextCacheEntry
- */
 template <> otError Interpreter::Process<Cmd("eidcache")>(Arg aArgs[])
 {
-    OT_UNUSED_VARIABLE(aArgs);
+    otError error = OT_ERROR_NONE;
 
-    otCacheEntryIterator iterator;
-    otCacheEntryInfo     entry;
-
-    ClearAllBytes(iterator);
-
-    while (true)
+    /**
+     * @cli eidcache
+     * @code
+     * eidcache
+     * fd49:caf4:a29f:dc0e:97fc:69dd:3c16:df7d 2000 cache canEvict=1 transTime=0
+     * eid=fd49:caf4:a29f:dc0e:97fc:69dd:3c16:df7d fd49:caf4:a29f:dc0e:97fc:69dd:3c16:df7f fffe retry
+     * canEvict=1 timeout=10 retryDelay=30 Done
+     * @endcode
+     * @par
+     * Returns the EID-to-RLOC cache entries.
+     * @sa otThreadGetNextCacheEntry
+     */
+    if (aArgs[0].IsEmpty())
     {
-        SuccessOrExit(otThreadGetNextCacheEntry(GetInstancePtr(), &entry, &iterator));
-        OutputEidCacheEntry(entry);
-    }
+        otCacheEntryIterator iterator;
+        otCacheEntryInfo     entry;
 
+        ClearAllBytes(iterator);
+        while (true)
+        {
+            SuccessOrExit(otThreadGetNextCacheEntry(GetInstancePtr(), &entry, &iterator));
+            OutputEidCacheEntry(entry);
+        }
+    }
+    /**
+     * @cli eidcache clear
+     * @code
+     * eidcache clear
+     * Done
+     * @endcode
+     * @par api_copy
+     * #otThreadClearEidCache
+     */
+    else if (aArgs[0] == "clear")
+    {
+        otThreadClearEidCache(GetInstancePtr());
+    }
+    else
+    {
+        error = OT_ERROR_INVALID_ARGS;
+    }
 exit:
-    return OT_ERROR_NONE;
+    return error;
 }
 #endif
 
@@ -3193,20 +3154,6 @@ template <> otError Interpreter::Process<Cmd("fake")>(Arg aArgs[])
         SuccessOrExit(error = aArgs[3].ParseAsHexString(mlIid.mFields.m8));
         otThreadSendAddressNotification(GetInstancePtr(), &destination, &target, &mlIid);
     }
-#if OPENTHREAD_CONFIG_BACKBONE_ROUTER_DUA_NDPROXYING_ENABLE
-    else if (aArgs[0] == "/b/ba")
-    {
-        otIp6Address             target;
-        otIp6InterfaceIdentifier mlIid;
-        uint32_t                 timeSinceLastTransaction;
-
-        SuccessOrExit(error = aArgs[1].ParseAsIp6Address(target));
-        SuccessOrExit(error = aArgs[2].ParseAsHexString(mlIid.mFields.m8));
-        SuccessOrExit(error = aArgs[3].ParseAsUint32(timeSinceLastTransaction));
-
-        error = otThreadSendProactiveBackboneNotification(GetInstancePtr(), &target, &mlIid, timeSinceLastTransaction);
-    }
-#endif
 
 exit:
     return error;
@@ -5506,9 +5453,6 @@ template <> otError Interpreter::Process<Cmd("prefix")>(Arg aArgs[])
      * @endcode
      * @par
      * Get the prefix list in the local Network Data.
-     * @note For the Thread 1.2 border router with backbone capability, the local Domain Prefix
-     * is listed as well and includes the `D` flag. If backbone functionality is disabled, a dash
-     * `-` is printed before the local Domain Prefix.
      * @par
      * For more information about #otBorderRouterConfig flags, refer to @overview.
      * @sa otBorderRouterGetNextOnMeshPrefix
@@ -5522,15 +5466,6 @@ template <> otError Interpreter::Process<Cmd("prefix")>(Arg aArgs[])
         {
             mNetworkData.OutputPrefix(config);
         }
-
-#if OPENTHREAD_FTD && OPENTHREAD_CONFIG_BACKBONE_ROUTER_ENABLE
-        if (otBackboneRouterGetState(GetInstancePtr()) == OT_BACKBONE_ROUTER_STATE_DISABLED)
-        {
-            SuccessOrExit(otBackboneRouterGetDomainPrefix(GetInstancePtr(), &config));
-            OutputFormat("- ");
-            mNetworkData.OutputPrefix(config);
-        }
-#endif
     }
     /**
      * @cli prefix add
@@ -7003,6 +6938,10 @@ template <> otError Interpreter::Process<Cmd("tcat")>(Arg aArgs[]) { return mTca
 template <> otError Interpreter::Process<Cmd("tcp")>(Arg aArgs[]) { return mTcp.Process(aArgs); }
 #endif
 
+#if OPENTHREAD_CONFIG_PLATFORM_TCP_ENABLE && OPENTHREAD_CONFIG_CLI_PLAT_TCP_ENABLE
+template <> otError Interpreter::Process<Cmd("plattcp")>(Arg aArgs[]) { return mPlatTcp.Process(aArgs); }
+#endif
+
 template <> otError Interpreter::Process<Cmd("udp")>(Arg aArgs[]) { return mUdp.Process(aArgs); }
 
 template <> otError Interpreter::Process<Cmd("unsecureport")>(Arg aArgs[])
@@ -7078,6 +7017,32 @@ template <> otError Interpreter::Process<Cmd("unsecureport")>(Arg aArgs[])
 
         OutputNewLine();
     }
+#if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
+    /**
+     * @cli unsecureport allwhendisabled
+     * @code
+     * unsecureport allwhendisabled
+     * Disabled
+     * Done
+     * @endcode
+     * @par api_copy
+     * #otIp6IsUnsecureAllowedWhenDisabled
+     */
+    else if (aArgs[0] == "allwhendisabled")
+    {
+        /**
+         * @cli unsecureport allwhendisabled (enable, disable)
+         * @code
+         * unsecureport allwhendisabled enable
+         * Done
+         * @endcode
+         * @cparam unsecureport allwhendisabled @ca{enable|disable}
+         * @par api_copy
+         * #otIp6SetAllowUnsecureWhenDisabled
+         */
+        error = ProcessEnableDisable(aArgs + 1, otIp6IsUnsecureAllowedWhenDisabled, otIp6SetAllowUnsecureWhenDisabled);
+    }
+#endif // OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
     else
     {
         error = OT_ERROR_INVALID_COMMAND;
@@ -7635,23 +7600,16 @@ template <> otError Interpreter::Process<Cmd("vendor")>(Arg aArgs[])
      * Done
      * @endcode
      * @par api_copy
-     * #otThreadGetVendorOui
+     * #otThreadGetVendorOuiInfo
      */
     else if (aArgs[0] == "oui")
     {
         if (aArgs[1].IsEmpty())
         {
-            uint32_t oui = otThreadGetVendorOui(GetInstancePtr());
+            otThreadVendorOui oui;
 
-            if (oui == OT_THREAD_UNSPECIFIED_VENDOR_OUI)
-            {
-                OutputLine("unspecified");
-            }
-            else
-            {
-                OutputLine("%02X-%02X-%02X", static_cast<uint8_t>((oui >> 16) & 0xff),
-                           static_cast<uint8_t>((oui >> 8) & 0xff), static_cast<uint8_t>(oui & 0xff));
-            }
+            otThreadGetVendorOuiInfo(GetInstancePtr(), &oui);
+            OutputVendorOuiLine(oui);
 
             error = OT_ERROR_NONE;
         }
@@ -7799,6 +7757,7 @@ template <> otError Interpreter::Process<Cmd("networkdiagnostic")>(Arg aArgs[])
      * - `41`: Border Router DHCPv6-PD OMR Prefix TLV
      * - `42`: Border Router Local On-link Prefix TLV
      * - `43`: Border Router Favored On-link Prefix TLV
+     * - `44`: Vendor OUI TLV
      *
      * @par
      * Sends a network diagnostic request to retrieve specified Type Length Values (TLVs)
@@ -7968,6 +7927,10 @@ void Interpreter::HandleDiagnosticGetResponse(otError              aError,
             break;
         case OT_NETWORK_DIAGNOSTIC_TLV_VENDOR_APP_URL:
             OutputLine("Vendor App URL: %s", diagTlv.mData.mVendorAppUrl);
+            break;
+        case OT_NETWORK_DIAGNOSTIC_TLV_VENDOR_OUI:
+            OutputFormat("Vendor OUI: ");
+            OutputVendorOuiLine(diagTlv.mData.mVendorOui);
             break;
         case OT_NETWORK_DIAGNOSTIC_TLV_THREAD_STACK_VERSION:
             OutputLine("Thread Stack Version: %s", diagTlv.mData.mThreadStackVersion);
@@ -8471,11 +8434,49 @@ void Interpreter::HandleWakeupResult(otError aError) { OutputResult(aError); }
 
 #endif // OPENTHREAD_FTD || OPENTHREAD_MTD
 
-void Interpreter::Initialize(otInstance *aInstance, otCliOutputCallback aCallback, void *aContext)
-{
-    Instance *instance = static_cast<Instance *>(aInstance);
+size_t Interpreter::GetSize(void) { return sizeof(Interpreter); }
 
-    Interpreter::sInterpreter = new (&sInterpreterRaw) Interpreter(instance, aCallback, aContext);
+Interpreter *Interpreter::Init(void               *aBuffer,
+                               size_t              aSize,
+                               otInstance         *aInstance,
+                               otCliOutputCallback aCallback,
+                               void               *aContext)
+{
+    Interpreter *interpreter = nullptr;
+    Instance    *instance    = static_cast<Instance *>(aInstance);
+
+    VerifyOrExit(aSize >= sizeof(Interpreter));
+    interpreter = new (aBuffer) Interpreter(instance, aCallback, aContext);
+
+exit:
+    return interpreter;
+}
+
+#if OPENTHREAD_CONFIG_CLI_STATIC_INTERPRETER_ENABLE
+
+Interpreter *Interpreter::sInterpreter = nullptr;
+
+static OT_DEFINE_ALIGNED_VAR(sInterpreterRaw, sizeof(Interpreter), uint64_t);
+
+void Interpreter::Init(otInstance *aInstance, otCliOutputCallback aCallback, void *aContext)
+{
+    sInterpreter = Init(&sInterpreterRaw, sizeof(sInterpreterRaw), aInstance, aCallback, aContext);
+}
+
+#endif
+
+void Interpreter::Finalize(void)
+{
+    mTimer.Stop();
+
+#if (OPENTHREAD_FTD || OPENTHREAD_MTD) && OPENTHREAD_CONFIG_CLI_REGISTER_IP6_RECV_CALLBACK
+    otIp6SetReceiveCallback(GetInstancePtr(), nullptr, nullptr);
+#endif
+#if OPENTHREAD_CONFIG_DIAG_ENABLE
+    otDiagSetOutputCallback(GetInstancePtr(), nullptr, nullptr);
+#endif
+
+    this->~Interpreter();
 }
 
 void Interpreter::OutputPrompt(void)
@@ -8599,9 +8600,6 @@ otError Interpreter::ProcessCommand(Arg aArgs[])
 #if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
         CmdEntry("domainname"),
 #endif
-#if OPENTHREAD_CONFIG_DUA_ENABLE
-        CmdEntry("dua"),
-#endif
 #if OPENTHREAD_FTD
         CmdEntry("eidcache"),
 #endif
@@ -8702,6 +8700,9 @@ otError Interpreter::ProcessCommand(Arg aArgs[])
         CmdEntry("ping"),
 #endif
         CmdEntry("platform"),
+#if OPENTHREAD_CONFIG_PLATFORM_TCP_ENABLE && OPENTHREAD_CONFIG_CLI_PLAT_TCP_ENABLE
+        CmdEntry("plattcp"),
+#endif
         CmdEntry("pollperiod"),
 #if OPENTHREAD_FTD && OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
         CmdEntry("preferrouterid"),

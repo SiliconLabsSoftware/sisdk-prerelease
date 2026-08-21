@@ -25,6 +25,7 @@ source:
 - path: common/binary_search.cpp
 - path: common/error.cpp
 - path: common/frame_builder.cpp
+- path: common/frame_data.cpp
 - path: common/log.cpp
 - path: common/random.cpp
 - path: common/string.cpp
@@ -48,7 +49,9 @@ source:
 - path: mac/sub_mac_csl_receiver.cpp
 - path: radio/radio.cpp
 - path: radio/radio_callbacks.cpp
+- path: radio/radio_frame.cpp
 - path: radio/radio_platform.cpp
+- path: radio/radio_types.cpp
 - path: thread/link_quality.cpp
 - path: utils/parse_cmdline.cpp
 - path: utils/power_calibration.cpp

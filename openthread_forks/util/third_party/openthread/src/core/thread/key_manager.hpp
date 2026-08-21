@@ -457,6 +457,14 @@ public:
     const KekKeyMaterial &GetKek(void) const { return mKek; }
 
     /**
+     * Indicates whether or not the KEK is set.
+     *
+     * @retval TRUE   If the KEK is set.
+     * @retval FALSE  If the KEK is not set.
+     */
+    bool IsKekSet(void) const { return mIsKekSet; }
+
+    /**
      * Retrieves the KEK as literal `Kek` key.
      *
      * @param[out] aKek  A reference to a `Kek` to output the retrieved KEK.
@@ -476,6 +484,11 @@ public:
      * @param[in]  aKekBytes  A pointer to the KEK bytes.
      */
     void SetKek(const uint8_t *aKekBytes) { SetKek(*reinterpret_cast<const Kek *>(aKekBytes)); }
+
+    /**
+     * Clears the KEK.
+     */
+    void ClearKek(void);
 
     /**
      * Returns the current KEK Frame Counter value.
@@ -558,7 +571,6 @@ public:
 private:
     static constexpr uint16_t kDefaultKeySwitchGuardTime    = 624; // ~ 93% of 672 (default key rotation time)
     static constexpr uint32_t kKeySwitchGuardTimePercentage = 93;  // Percentage of key rotation time.
-    static constexpr bool     kExportableMacKeys            = OPENTHREAD_CONFIG_PLATFORM_MAC_KEYS_EXPORTABLE_ENABLE;
 
     static_assert(kDefaultKeySwitchGuardTime ==
                       SecurityPolicy::kDefaultKeyRotationTime * kKeySwitchGuardTimePercentage / 100,
@@ -646,6 +658,7 @@ private:
 
     SecurityPolicy mSecurityPolicy;
     bool           mIsPskcSet : 1;
+    bool           mIsKekSet : 1;
 };
 
 /**

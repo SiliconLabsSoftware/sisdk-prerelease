@@ -100,16 +100,22 @@ static inline void uart_async_rx_timeout_enable(sl_uart_handle_t *uart_handle)
 }
 
 /***************************************************************************//**
- * Stops the SW timer and disables the RXRDY interrupt.
+ * Stops the SW timer and releases the temporary RXRDY interrupt used by the timeout.
+ *
+ * The async timeout arms RXRDY in hardware only and must not clear
+ * @ref sl_uart_handle_t.enabled_irq. That bit tracks whether the caller enabled
+ * RXRDY through the interrupt APIs, and it must survive async RX completion.
  ******************************************************************************/
 static inline void uart_async_rx_timeout_timer_stop(sl_uart_handle_t *uart_handle)
 {
+  uint32_t rx_rdy = uart_handle->ops->irq_rx_ready_flag;
+
   // Ignore the return value, as the timer may not be running.
   (void)sl_sleeptimer_stop_timer(&uart_handle->async_rx_timeout_timer);
 
-  // Disable the RXRDY & RXTO interrupt used to stop the SW timer on data reception.
-  uart_handle->ops->clear_irq(uart_handle->uart, uart_handle->ops->irq_rx_ready_flag);
-  sli_uart_disable_irq(uart_handle, uart_handle->ops->irq_rx_ready_flag);
+  // Disable the temporary RXRDY interrupt used to stop the SW timer on data reception.
+  uart_handle->ops->clear_irq(uart_handle->uart, rx_rdy);
+  uart_handle->ops->set_enable_irq(uart_handle->uart, (uart_handle->enabled_irq & rx_rdy), rx_rdy);
 }
 
 /***************************************************************************//**
@@ -373,6 +379,11 @@ static inline void on_tx_complete(sl_uart_handle_t *uart_handle)
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
   EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
 
+  if (!sl_uart_async_is_tx_active(uart_handle)) {
+    // This can happen if a user has submitted a non-async transfer.
+    return;
+  }
+
   sl_slist_node_t **list_head = &uart_handle->async_tx_transfer_submitted_list_head;
   sli_uart_async_tx_transfer_t *tfer = sli_uart_async_tx_transfer_from_node(*list_head);
   EFM_ASSERT(tfer != NULL);
@@ -474,11 +485,12 @@ static inline void uart_async_rx_timeout_timer_start(sl_uart_handle_t *uart_hand
                                                    0);
   EFM_ASSERT(status == SL_STATUS_OK);
 
-  // Enable the RXRDY interrupt to stop the timer if new data is received. The IF is sticky,
-  // so make sure to clear it before enabling it, otherwise we may consider that data was received
-  // from an old frame.
+  // Enable RXRDY in hardware only to stop the timer if new data is received. Do not update
+  // enabled_irq: that bit belongs to the interrupt APIs and must remain unchanged across the
+  // temporary timeout borrow. The IF is sticky, so clear it before enabling, otherwise we may
+  // consider that data was received from an old frame.
   uart_handle->ops->clear_irq(uart_handle->uart, uart_handle->ops->irq_rx_ready_flag);
-  sli_uart_enable_irq(uart_handle, uart_handle->ops->irq_rx_ready_flag);
+  uart_handle->ops->set_enable_irq(uart_handle->uart, true, uart_handle->ops->irq_rx_ready_flag);
 }
 
 /***************************************************************************//**
@@ -717,10 +729,12 @@ static inline sl_status_t uart_async_init_hw(sl_uart_handle_t *uart_handle)
     goto deinit;
   }
 
-  // Enable TXC callback, as it is used to notify users the transfer has completed.
+  // Enable TXC in hardware only, as it is used to notify users the transfer has completed. Do not
+  // update enabled_irq: that bit tracks whether the caller enabled TXC through the interrupt APIs,
+  // and must stay independent of the arm owned by async for the lifetime of the handle.
   // Clear any latent TXC interrupt that could lead to dereferencing stale lists.
-  uart_handle->ops->clear_irq(uart_handle->uart, uart_handle->ops->irq_tx_complete_flag);
-  sli_uart_enable_irq(uart_handle, uart_handle->ops->irq_tx_complete_flag);
+  uart_handle->ops->clear_irq(uart, uart_handle->ops->irq_tx_complete_flag);
+  uart_handle->ops->set_enable_irq(uart, true, uart_handle->ops->irq_tx_complete_flag);
 
   return status;
 
@@ -782,7 +796,7 @@ sl_status_t sl_uart_async_write(sl_uart_handle_t *uart_handle,
 {
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
   EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
-  EFM_ASSERT(SLI_UART_CONFIG_IS_VALID(uart_handle->config));
+  EFM_ASSERT(SLI_UART_CONFIG_IS_VALID(&uart_handle->config));
 
   sl_status_t status = SL_STATUS_OK;
 
@@ -819,6 +833,9 @@ sl_status_t sl_uart_async_write(sl_uart_handle_t *uart_handle,
   if (uart_async_enable_tx(uart_handle)) {
     // Send the transfer's chunk until either all chunks are submitted, or we run out of descriptors.
     uart_async_submit_tx_chunk(uart_handle, tfer);
+
+    // Clear any latent TXC interrupt.
+    uart_handle->ops->clear_irq(uart_handle->uart, uart_handle->ops->irq_tx_complete_flag);
   } else {
     // The DMA is already running. The transfer will be submitted to DMA when the TX complete
     // interrupt of the previous transfer triggers.
@@ -836,7 +853,7 @@ sl_status_t sl_uart_async_abort_tx(sl_uart_handle_t *uart_handle)
 {
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
   EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
-  EFM_ASSERT(SLI_UART_CONFIG_IS_VALID(uart_handle->config));
+  EFM_ASSERT(SLI_UART_CONFIG_IS_VALID(&uart_handle->config));
 
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_ATOMIC();
@@ -964,7 +981,7 @@ sl_status_t sl_uart_async_read(sl_uart_handle_t *uart_handle,
 {
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
   EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
-  EFM_ASSERT(SLI_UART_CONFIG_IS_VALID(uart_handle->config));
+  EFM_ASSERT(SLI_UART_CONFIG_IS_VALID(&uart_handle->config));
 
   if (SLI_UART_HANDLE_IS_SUSPENDED(uart_handle)) {
     return SL_STATUS_INVALID_STATE;
@@ -1019,7 +1036,7 @@ sl_status_t sl_uart_async_disable_rx(sl_uart_handle_t *uart_handle)
 {
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
   EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
-  EFM_ASSERT(SLI_UART_CONFIG_IS_VALID(uart_handle->config));
+  EFM_ASSERT(SLI_UART_CONFIG_IS_VALID(&uart_handle->config));
 
   CORE_DECLARE_IRQ_STATE;
 
@@ -1091,7 +1108,7 @@ sl_status_t sl_uart_async_read_set_timeout(sl_uart_handle_t *uart_handle,
 {
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
   EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
-  EFM_ASSERT(SLI_UART_CONFIG_IS_VALID(uart_handle->config));
+  EFM_ASSERT(SLI_UART_CONFIG_IS_VALID(&uart_handle->config));
   CORE_DECLARE_IRQ_STATE;
 
   CORE_ENTER_ATOMIC();
@@ -1199,7 +1216,7 @@ sl_status_t sli_uart_async_deinit(sl_uart_handle_t *uart_handle)
   EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
   sl_status_t status;
 
-  if (SLI_UART_CONFIG_IS_VALID(uart_handle->config)) {
+  if (SLI_UART_CONFIG_IS_VALID(&uart_handle->config)) {
     status = sl_uart_async_abort_tx(uart_handle);
     if (status != SL_STATUS_OK) {
       return status;
@@ -1216,7 +1233,10 @@ sl_status_t sli_uart_async_deinit(sl_uart_handle_t *uart_handle)
   uint8_t tx_channel = uart_handle->async_tx_dma_channel.channel_number;
 
   if (!SLI_UART_HANDLE_IS_SUSPENDED(uart_handle)) {
-    sli_uart_disable_irq(uart_handle, uart_handle->ops->irq_tx_complete_flag);
+    // Release the async TXC arm, leaving it enabled if the caller enabled it through the
+    // interrupt APIs.
+    uint32_t tx_cmp = uart_handle->ops->irq_tx_complete_flag;
+    uart_handle->ops->set_enable_irq(uart_handle->uart, (uart_handle->enabled_irq & tx_cmp), tx_cmp);
 
     status = uart_async_deinit_dma(uart_handle);
     if (status != SL_STATUS_OK) {
@@ -1274,7 +1294,7 @@ sl_status_t sli_uart_async_resume(sl_uart_handle_t *uart_handle)
     return status;
   }
 
-  if (SLI_UART_CONFIG_IS_VALID(uart_handle->config)) {
+  if (SLI_UART_CONFIG_IS_VALID(&uart_handle->config)) {
     // Setting the timeout should never fail here, since we are re-applying the existing configuration
     // that was successfully stored in the handle.
     status = sl_uart_async_read_set_timeout(uart_handle, uart_handle->async_rx_timeout_us);
@@ -1340,10 +1360,11 @@ void sli_uart_async_rx_handler(sl_uart_handle_t *uart_handle, uint32_t irq)
     uart_rx_timeout_hw_handler(uart_handle);
   }
 
-  if (irq & rx_rdy) {
-    // In async, RXRDY is only enabled for detection of new data when pending on a SW timer.
-    // When it fires, it means new data was received, so the timeout was not reached. Stop the timer
-    // and disable the IRQ, since we don't want to trigger an interrupt on every new byte.
+  if ((irq & rx_rdy)) {
+    // In async, RXRDY is temporarily enabled for detection of new data when pending on a SW timer.
+    // When it fires, new data was received so the timeout was not reached. Stop the timer and
+    // release the temporary IRQ; uart_async_rx_timeout_timer_stop leaves it armed if the caller
+    // enabled RXRDY through the interrupt APIs.
     uart_async_rx_timeout_timer_stop(uart_handle);
   }
 }

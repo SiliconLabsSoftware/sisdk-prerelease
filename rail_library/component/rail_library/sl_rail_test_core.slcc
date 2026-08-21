@@ -2173,6 +2173,28 @@ template_contribution:
 
 - name: cli_command
   value:
+    name: configHFXOCompensation
+    handler: configHFXOCompensation
+    help: ' Configure the temperature parameters for HFXO compensation.\n                    Set deltaNominal and deltaCritical to 0 to compensate after each tx.'
+    argument:
+    - type: int8opt
+      help: 'Arg1: enableCompensation\n                    Arg2: zoneTemperatureC\n                    Arg3: deltaNominal\n                    Arg4: deltaCritical'
+  condition:
+  - device_generic_family_sixx353
+
+- name: cli_command
+  value:
+    name: configHFXOCompensationThresholds
+    handler: configHFXOCompensationThresholds
+    help: ' Configure HFXO compensation threshold mode.\n                    mode: 0=static, 1=adaptive; optional marginCelsius.'
+    argument:
+    - type: int8opt
+      help: 'Arg1: mode\n                    Arg2: marginCelsius'
+  condition:
+  - device_generic_family_sixx353
+
+- name: cli_command
+  value:
     name: startThermistor
     handler: startThermistorMeasurement
     help: Starts a thermistor measurement.\n                    Triggers the HFXO temperature compensation if enabled.
@@ -2218,6 +2240,14 @@ template_contribution:
     help: Compute the HFXO PPM deviation.\n                    Must be called after a complete thermistor measurement\n                    ie after getThermistor.
   condition:
   - device_sdid_220
+
+- name: cli_command
+  value:
+    name: getHFXOPPMError
+    handler: getHFXOPPMError
+    help: Compute the HFXO PPM deviation.\n                    Must be called after a complete thermistor measurement\n                    ie after getThermistor.
+  condition:
+  - device_generic_family_sixx353
 
 - name: cli_command
   value:

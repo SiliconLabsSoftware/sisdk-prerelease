@@ -96,10 +96,6 @@ static void CollectIpSetPrefixesFromNetData(otInstance               *aInstance,
 
     while (otNetDataGetNextOnMeshPrefix(aInstance, &iterator, &config) == OT_ERROR_NONE)
     {
-        if (config.mDp)
-        {
-            continue;
-        }
         otIp6PrefixToString(&config.mPrefix, prefixBuf, sizeof(prefixBuf));
         aDenyPrefixes.emplace_back(prefixBuf);
     }

@@ -5999,8 +5999,9 @@ sl_rail_status_t sl_rail_get_thermal_protection(sl_rail_handle_t radio_handle,
  *
  * Values that are not populated yet or incorrect are set to 0.
  *
- * If \ref SL_RAIL_SUPPORTS_HFXO_COMPENSATION
- * temp_buffer[3] is the HFXO temperature
+ * If \ref SL_RAIL_SUPPORTS_HFXO_COMPENSATION, temp_buffer[3] is the last HFXO
+ * thermistor compensation temperature. It is updated only after an HFXO
+ * thermistor compensation measurement has completed.
  */
 sl_rail_status_t sl_rail_get_temperature(sl_rail_handle_t radio_handle,
                                          int16_t temp_buffer[SL_RAIL_TEMP_MEASURE_COUNT],
@@ -6218,6 +6219,20 @@ sl_rail_status_t sl_rail_get_thermistor_impedance(sl_rail_handle_t rail_handle,
                                                   uint32_t *p_thermistor_impedance_ohms);
 
 /**
+ * Configure a signed adjustment applied to thermistor impedance measurements.
+ *
+ * @param[in] rail_handle A radio-generic or real RAIL instance handle.
+ * @param[in] thermistor_impedance_adjustment_ohms Signed adjustment, in Ohms,
+ *   added to the measured thermistor impedance. Defaults to 0.
+ * @return Status code indicating success of the function call.
+ *
+ * @note This API is available if supported by the chip.
+ */
+sl_rail_status_t sl_rail_config_thermistor_impedance_adjustment(
+  sl_rail_handle_t rail_handle,
+  int32_t thermistor_impedance_adjustment_ohms);
+
+/**
  * Callback to convert the thermistor impedance into temperature, in Celsius.
  *
  * @param[in] rail_handle A radio-generic or real RAIL instance handle.
@@ -6300,6 +6315,12 @@ sl_rail_status_t sl_rail_config_hfxo_thermistor(sl_rail_handle_t rail_handle,
  *
  * @note Set delta_nominal_celsius and delta_critical_celsius to 0 to perform
  *   compensation after each transmit.
+ * @note Set zone_temperature_celsius,
+ *   delta_nominal_celsius, and/or delta_critical_celsius to
+ *   \ref SL_RAIL_HFXO_COMP_ZONE_TEMPERATURE_C_DEFAULT,
+ *   \ref SL_RAIL_HFXO_COMP_DELTA_NOMINAL_C_DEFAULT, and/or
+ *   \ref SL_RAIL_HFXO_COMP_DELTA_CRITICAL_C_DEFAULT to request platform
+ *   defaults where supported.
  */
 sl_rail_status_t sl_rail_config_hfxo_compensation(sl_rail_handle_t rail_handle,
                                                   const sl_rail_hfxo_compensation_config_t *p_hfxo_compensation_config);
@@ -6314,6 +6335,66 @@ sl_rail_status_t sl_rail_config_hfxo_compensation(sl_rail_handle_t rail_handle,
  */
 sl_rail_status_t sl_rail_get_hfxo_compensation_config(sl_rail_handle_t rail_handle,
                                                       sl_rail_hfxo_compensation_config_t *p_hfxo_compensation_config);
+
+/**
+ * Configure how HFXO compensation temperature thresholds are selected.
+ *
+ * @param[in] rail_handle A real RAIL instance handle.
+ * @param[in] p_hfxo_compensation_threshold_config A non-NULL pointer to the
+ *   threshold selection configuration.
+ * @return Status code indicating the result of the function call.
+ *
+ * In static mode, thresholds are selected from
+ * \ref sl_rail_hfxo_compensation_config_t. In adaptive mode, the platform uses
+ * asymmetric thresholds derived from the effective HFXO compensation curve.
+ *
+ * @note This API is available if supported by the chip.
+ */
+sl_rail_status_t sl_rail_config_hfxo_compensation_thresholds(
+  sl_rail_handle_t rail_handle,
+  const sl_rail_hfxo_compensation_threshold_config_t *p_hfxo_compensation_threshold_config);
+
+/**
+ * Get how HFXO compensation temperature thresholds are selected.
+ *
+ * @param[in] rail_handle A real RAIL instance handle.
+ * @param[out] p_hfxo_compensation_threshold_config A non-NULL pointer filled
+ *   with the threshold selection configuration.
+ * @return Status code indicating the result of the function call.
+ *
+ * @note This API is available if supported by the chip.
+ */
+sl_rail_status_t sl_rail_get_hfxo_compensation_thresholds(
+  sl_rail_handle_t rail_handle,
+  sl_rail_hfxo_compensation_threshold_config_t *p_hfxo_compensation_threshold_config);
+
+/**
+ * Configure HFXO temperature compensation polynomial coefficients.
+ *
+ * @param[in] rail_handle A real RAIL instance handle.
+ * @param[in] p_hfxo_temp_compensation_coefficients A non-NULL pointer to
+ *   HFXO temperature compensation polynomial coefficients.
+ * @return Status code indicating the result of the function call.
+ *
+ * @note This API is available if supported by the chip.
+ */
+sl_rail_status_t sl_rail_config_hfxo_temp_compensation_coefficients(
+  sl_rail_handle_t rail_handle,
+  const sl_rail_hfxo_temp_compensation_coefficients_t *p_hfxo_temp_compensation_coefficients);
+
+/**
+ * Get the effective HFXO temperature compensation polynomial coefficients.
+ *
+ * @param[in] rail_handle A real RAIL instance handle.
+ * @param[out] p_hfxo_temp_compensation_coefficients A non-NULL pointer filled
+ *   with the effective HFXO temperature compensation polynomial coefficients.
+ * @return Status code indicating the result of the function call.
+ *
+ * @note This API is available if supported by the chip.
+ */
+sl_rail_status_t sl_rail_get_hfxo_temp_compensation_coefficients(
+  sl_rail_handle_t rail_handle,
+  sl_rail_hfxo_temp_compensation_coefficients_t *p_hfxo_temp_compensation_coefficients);
 
 /**
  * Compute a frequency offset and compensate HFXO accordingly.

@@ -22,6 +22,9 @@ template_contribution:
   value: bluetooth_event_system_ipc
 provides:
 - name: bluetooth_event_system_ipc
+documentation:
+  docset: bluetooth
+  document: bluetooth-stack-api/bluetooth-event-system
 metadata:
   sbom:
     license: Zlib AND MSLA
