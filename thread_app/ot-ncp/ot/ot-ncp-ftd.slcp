@@ -1,6 +1,6 @@
 project_name: ot-ncp-ftd
 label: OpenThread - NCP FTD
-package: thread
+package: thread_app
 description: >
   Demonstrates OpenThread Full Thread Device (FTD) Network Co-Processor (NCP) application.
 category: OpenThread Examples

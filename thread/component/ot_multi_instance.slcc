@@ -33,6 +33,9 @@ define:
   value: 1
 - name: SL_OPENTHREAD_MULTI_INSTANCE_CLI_ENABLE
   value: 1
+documentation:
+  docset: openthread
+  document: openthread-multi-instance
 metadata:
   sbom:
     license: Zlib

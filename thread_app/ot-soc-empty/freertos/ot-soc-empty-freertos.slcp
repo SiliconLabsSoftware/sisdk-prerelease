@@ -1,6 +1,6 @@
 project_name: ot-soc-empty-freertos
 label: OpenThread - SoC Empty FTD FreeRTOS
-package: thread
+package: thread_app
 description: >
   Demonstrates OpenThread SoC application on a Full Thread Device (FTD) using FreeRTOS, intended as a base for developing Thread applications.
 category: OpenThread Examples

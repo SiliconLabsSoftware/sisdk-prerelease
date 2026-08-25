@@ -39,6 +39,8 @@
 #define MQTT_TLS_AVAILABLE 1 // Set to 1 to enable TLS support, 0 to disable
 #endif
 
+#include "sli_mqtt_tls_alpn.h"
+
 typedef struct Timer Timer;
 struct Timer {
   uint32_t systick_period;
@@ -135,6 +137,13 @@ void NetworkInit(Network *n);
  *   - `mqtt_tcpconnection_handler` for TCP.
  *   - `mqtt_websocketconnection_handler` for WebSocket.
  * - SSL can be enabled for secure connections by setting the `ssl` parameter to `true`.
+ * - When `MQTT_TLS_ALPN_ENABLED` is set to `1`, ALPN is configured automatically during
+ *   TCP connection setup (after socket creation and TLS enable, before connect).
+ *   Set `MQTT_TLS_ALPN_PROTOCOL` to the broker's ALPN name (e.g. `"mqtt"` for Mosquitto on port 443).
+ * - ALPN applies to @ref MQTT_TRANSPORT_TCP with TLS only. The WebSocket transport
+ *   (`MQTT_TRANSPORT_WEBSOCKET`) does not configure TLS ALPN through this SDK path.
+ *   Secure WebSocket (WSS) on port 443 typically negotiates `http/1.1` at the TLS layer
+ *   rather than `mqtt`; that scenario is not covered by this ALPN integration.
  *
  * @note
  * - Ensure that the `Network` structure is initialized using `NetworkInit` before calling this function.

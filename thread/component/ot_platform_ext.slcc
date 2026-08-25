@@ -39,6 +39,9 @@ define:
   condition: [sl_ot_custom_cli]
 - name: RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
   value: 1
+documentation:
+  docset: openthread
+  document: openthread-api/platform
 metadata:
   sbom:
     license: Zlib

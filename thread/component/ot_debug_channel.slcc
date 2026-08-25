@@ -19,6 +19,9 @@ source:
 template_contribution:
 - name: component_catalog
   value: ot_debug_channel
+documentation:
+  docset: openthread
+  document: openthread-quick-start-guide/05-development-tools
 metadata:
   sbom:
     license: Zlib

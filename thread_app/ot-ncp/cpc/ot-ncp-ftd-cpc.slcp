@@ -1,6 +1,6 @@
 project_name: ot-ncp-ftd-cpc
 label: OpenThread - NCP FTD with CPC
-package: thread
+package: thread_app
 description: >
   Demonstrates OpenThread Full Thread Device (FTD) Network Co-Processor (NCP) application using CPC (Co-Processor Communication).
 category: OpenThread Examples

@@ -93,6 +93,9 @@ template_contribution:
     #   contribution will cause the logs to be printed over spinel before the
     #   RCP capabilities are sent to the host.
   unless: [freertos, ot_ncp]
+documentation:
+  docset: openthread
+  document: openthread-quick-start-guide/05-development-tools
 metadata:
   sbom:
     license: MSLA

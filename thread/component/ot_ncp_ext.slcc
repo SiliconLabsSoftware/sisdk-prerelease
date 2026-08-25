@@ -19,6 +19,9 @@ source:
 define:
 - name: OPENTHREAD_ENABLE_NCP_VENDOR_HOOK
   value: 1
+documentation:
+  docset: openthread
+  document: openthread-api/api-ncp
 metadata:
   sbom:
     license: Zlib

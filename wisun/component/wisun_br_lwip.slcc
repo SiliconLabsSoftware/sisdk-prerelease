@@ -9,9 +9,9 @@ quality: evaluation
 
 
 requires:
-- name: netstack_silabs_lwip_core
-- name: netstack_silabs_lwip_api
-- name: netstack_silabs_lwip_netif_ethernet
+- name: silabs_lwip_core
+- name: silabs_lwip_api
+- name: silabs_lwip_netif_ethernet
 
 provides:
 - name: wisun_br_lwip

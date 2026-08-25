@@ -21,6 +21,9 @@ source:
 template_contribution:
 - name: component_catalog
   value: ot_gp_interface
+documentation:
+  docset: openthread
+  document: multiprotocol-solution-linux/system-architecture
 metadata:
   sbom:
     # BSD-3-Clause covers the files from platform-abstraction/efr32

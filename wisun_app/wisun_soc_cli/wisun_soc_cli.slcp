@@ -619,8 +619,6 @@ template_contribution:
       argument:
         - type: string
           help: "LXPM prefix"
-        - type: uint8
-          help: "Prefix size in bits"
 
 # -------------------------------
   - name: "cli_group"

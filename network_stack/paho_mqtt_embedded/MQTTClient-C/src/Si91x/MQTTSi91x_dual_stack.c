@@ -31,6 +31,7 @@
 #include "sl_si91x_constants.h"
 #include "sl_si91x_protocol_types.h"
 #include "sl_si91x_socket.h"
+#include "sli_mqtt_tls_alpn.h"
 
 #ifndef UNUSED_PARAMETER
 #define UNUSED_PARAMETER(x) (void)(x)
@@ -126,7 +127,7 @@ static int mqtt_tcpconnection_handler(Network *n, uint8_t flags, char *addr, int
 
     n->socket = sl_si91x_socket(AF_INET6, type, IPPROTO_TCP);
     if (n->socket < 0) {
-      printf("\r\nSocket creation failed with error: %d\r\n", errno);
+      SL_DEBUG_LOG_V2(ERROR, "Socket creation failed with error: %d\r\n", errno);
       return -1;
     }
 
@@ -138,15 +139,22 @@ static int mqtt_tcpconnection_handler(Network *n, uint8_t flags, char *addr, int
       status =
         sl_si91x_setsockopt(n->socket, SL_SI91X_SOL_SOCKET, SL_SI91X_SO_SSL_ENABLE, &ssl_enable, sizeof(ssl_enable));
       if (status < 0) {
-        printf("\r\nSet Socket SSL option failed with error: %d\r\n", errno);
+        SL_DEBUG_LOG_V2(ERROR, "Set Socket SSL option failed with error: %d\r\n", errno);
         sl_si91x_shutdown(n->socket, 0);
         return -1;
       }
+
+#if MQTT_TLS_ALPN_ENABLED
+      if (sli_mqtt_tls_alpn_set_async(n->socket) < 0) {
+        sl_si91x_shutdown(n->socket, 0);
+        return -1;
+      }
+#endif
     }
 
     status = sl_si91x_bind(n->socket, (struct sockaddr *)&client_address_v6, socket_length_v6);
     if (status != 0) {
-      printf("\r\nSocket bind failed with error: %d\r\n", errno);
+      SL_DEBUG_LOG_V2(ERROR, "Socket bind failed with error: %d\r\n", errno);
       mqtt_tcp_disconnect(n);
       return status;
     }
@@ -165,7 +173,7 @@ static int mqtt_tcpconnection_handler(Network *n, uint8_t flags, char *addr, int
 
     n->socket = sl_si91x_socket(AF_INET, type, IPPROTO_TCP);
     if (n->socket < 0) {
-      printf("\r\nSocket creation failed with error: %d\r\n", errno);
+      SL_DEBUG_LOG_V2(ERROR, "Socket creation failed with error: %d\r\n", errno);
       return -1;
     }
 
@@ -177,15 +185,22 @@ static int mqtt_tcpconnection_handler(Network *n, uint8_t flags, char *addr, int
       status =
         sl_si91x_setsockopt(n->socket, SL_SI91X_SOL_SOCKET, SL_SI91X_SO_SSL_ENABLE, &ssl_enable, sizeof(ssl_enable));
       if (status < 0) {
-        printf("\r\nSet Socket SSL option failed with error: %d\r\n", errno);
+        SL_DEBUG_LOG_V2(ERROR, "Set Socket SSL option failed with error: %d\r\n", errno);
         sl_si91x_shutdown(n->socket, 0);
         return -1;
       }
+
+#if MQTT_TLS_ALPN_ENABLED
+      if (sli_mqtt_tls_alpn_set_async(n->socket) < 0) {
+        sl_si91x_shutdown(n->socket, 0);
+        return -1;
+      }
+#endif
     }
 
     status = sl_si91x_bind(n->socket, (struct sockaddr *)&client_address, socket_length);
     if (status != 0) {
-      printf("\r\nSocket bind failed with error: %d\r\n", errno);
+      SL_DEBUG_LOG_V2(ERROR, "Socket bind failed with error: %d\r\n", errno);
       mqtt_tcp_disconnect(n);
       return status;
     }
@@ -194,12 +209,12 @@ static int mqtt_tcpconnection_handler(Network *n, uint8_t flags, char *addr, int
   }
 
   if (rc == -1) {
-    printf("\r\nSocket Connect failed with error: %d\r\n", errno);
+    SL_DEBUG_LOG_V2(ERROR, "Socket Connect failed with error: %d\r\n", errno);
     sl_si91x_shutdown(n->socket, 0);
     n->socket = -1;
     return NETWORK_ERROR_CONNECT_FAILED;
   }
-  printf("\r\nSocket connection success\r\n");
+  SL_DEBUG_LOG_V2(INFO, "Socket connection success\r\n");
   return 0;
 }
 

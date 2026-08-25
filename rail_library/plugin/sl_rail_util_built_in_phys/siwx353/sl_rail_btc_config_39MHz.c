@@ -2,7 +2,7 @@
  * @brief RAIL Configuration
  * @details
  *   WARNING: Auto-Generated Radio Config  -  DO NOT EDIT
- *   Radio Configurator Version: 2602.2.0
+ *   Radio Configurator Version: 2604.1.0
  *   RAIL Adapter Version: 2.4.33
  *   RAIL Compatibility: 2.x
  *******************************************************************************
@@ -33,7 +33,12 @@
  ******************************************************************************/
 #include "em_device.h"
 #include "sl_rail_btc_config_39MHz.h"
+#if defined(__ICCARM__)
+// IAR doesn't support copying const data (in flash) to RAM.
+#define SL_CODE_CLASSIFY(a, ...) /* no-op */
+#else
 #include "sl_code_classification.h"
+#endif
 
 SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static const uint8_t irCalConfig[] = {
@@ -42,7 +47,7 @@ static const uint8_t irCalConfig[] = {
 
 SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static const int32_t timingConfig[] = {
-  2654, 2654, 1000, 0
+  3800, 2654, 4300, 0
 };
 
 SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
@@ -55,7 +60,6 @@ SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 __ALIGNED(4) static const uint8_t stackInfo_0[2] = { 0x0a, 0x00 };
 #endif // RADIO_CONFIG_ENABLE_STACK_INFO
 
-SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static RAIL_ChannelConfigEntryAttr_t channelConfigEntryAttr = {
 #if RAIL_SUPPORTS_OFDM_PA
   {
@@ -77,8 +81,8 @@ static RAIL_ChannelConfigEntryAttr_t channelConfigEntryAttr = {
 
 SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static const uint32_t phyInfo[] = {
-  20UL,
-  0x00200000UL, // 32.0
+  21UL,
+  0x001A41A4UL, // 26.256410256410255
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
   (uint32_t) timingConfig,
@@ -98,13 +102,16 @@ static const uint32_t phyInfo[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
+  (uint32_t) 0UL,
+  (uint32_t) 0UL,
 };
 
 SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 const uint32_t sl_rail_btc_phy_39MHz_modemConfigBase[] = {
   0x03080000UL, 0x0000803FUL,
   /*    0004 */ 0x0001007EUL,
-  0x030C0014UL, 0x00000201UL,
+  0x03100010UL, 0x00000000UL,
+  /*    0014 */ 0x00000201UL,
   /*    0018 */ 0x00000000UL,
   /*    001C */ (uint32_t) &phyInfo,
   0x00040010UL, 0x0B008700UL,
@@ -173,16 +180,17 @@ const uint32_t sl_rail_btc_phy_39MHz_modemConfigBase[] = {
   0x000CC0ECUL, 0x00200000UL,
   /*    C0F0 */ 0x10044222UL,
   /*    C0F4 */ 0x000001F8UL,
-  0x001CC10CUL, 0x02010026UL,
+  0x0038C10CUL, 0x02010026UL,
   /*    C110 */ 0x0202011EUL,
   /*    C114 */ 0x00010202UL,
   /*    C118 */ 0x1F1F1F1FUL,
   /*    C11C */ 0x00000024UL,
   /*    C120 */ 0x1E1F1F00UL,
   /*    C124 */ 0x00001F1FUL,
-  0x0004E130UL, 0xFF000000UL,
-  0x0004D130UL, 0x01000000UL,
-  0x0010C134UL, 0x00000088UL,
+  /*    C128 */ 0x211A1410UL,
+  /*    C12C */ 0x51403429UL,
+  /*    C130 */ 0x019B7E67UL,
+  /*    C134 */ 0x00000088UL,
   /*    C138 */ 0x00000000UL,
   /*    C13C */ 0x00000000UL,
   /*    C140 */ 0x00000000UL,
@@ -249,6 +257,7 @@ const uint32_t sl_rail_btc_phy_39MHz_modemConfigBase[] = {
   0x00054244UL, 0x00000014UL,
   0x0005424CUL, 0x04000008UL,
   0x00054268UL, 0x00000000UL,
+  0x00054290UL, 0x00000000UL,
   0x000942A0UL, 0x00000000UL,
   /*    42A4 */ 0x00000081UL,
   0x001542B8UL, 0x0200003FUL,
@@ -267,10 +276,9 @@ const uint32_t sl_rail_btc_phy_39MHz_modemConfigBase[] = {
   /*    436C */ 0x2F87C145UL,
   /*    4370 */ 0x00000000UL,
   /*    4374 */ 0x00000000UL,
-  0x001143C0UL, 0x00082220UL,
-  /*    43C4 */ 0x0000007AUL,
-  /*    43C8 */ 0x2BC32080UL,
-  /*    43CC */ 0x3155E258UL,
+  0x000543C0UL, 0x00082220UL,
+  0x000943C8UL, 0x2BC32080UL,
+  /*    43CC */ 0x31626258UL,
   0x00154420UL, 0x0000B16FUL,
   /*    4424 */ 0x00000000UL,
   /*    4428 */ 0x00000000UL,
@@ -288,21 +296,22 @@ const uint32_t sl_rail_btc_phy_39MHz_modemConfigBase[] = {
   0x000944C8UL, 0x00000000UL,
   /*    44CC */ 0x123556B7UL,
   0x00058030UL, 0x03000000UL,
-  0x00058038UL, 0x04789BC0UL,
+  0x00058038UL, 0x04780040UL,
   0x000D8044UL, 0x00103483UL,
   /*    8048 */ 0x0000803FUL,
   /*    804C */ 0x00000001UL,
-  0x00098068UL, 0x44455500UL,
-  /*    806C */ 0x00823344UL,
+  0x00058068UL, 0x44455500UL,
+  0x0005A06CUL, 0xFF7FFFFFUL,
+  0x0005906CUL, 0x00023344UL,
   0x00158078UL, 0x246D2240UL,
   /*    807C */ 0x00B22489UL,
   /*    8080 */ 0x3FC69018UL,
   /*    8084 */ 0x3FC00018UL,
   /*    8088 */ 0x00800005UL,
-  0x00098094UL, 0x31D2A507UL,
+  0x00098094UL, 0x21084207UL,
   /*    8098 */ 0x3212A587UL,
-  0x0005A0A0UL, 0xFFFE0000UL,
-  0x000D80A4UL, 0x9AAACCCFUL,
+  0x001180A0UL, 0x00000000UL,
+  /*    80A4 */ 0x9AAACCCFUL,
   /*    80A8 */ 0x6777BBBFUL,
   /*    80AC */ 0x0000000BUL,
   0x000580B4UL, 0x00800E03UL,
@@ -310,13 +319,15 @@ const uint32_t sl_rail_btc_phy_39MHz_modemConfigBase[] = {
   0x00060090UL, 0x00000000UL,
   0x00060098UL, 0x00000001UL,
   0x01060014UL, 0x34000028UL,
+  0x0106004CUL, 0x0000004EUL,
   0x010A005CUL, 0x8DC5A104UL,
   /*    0060 */ 0x100090BEUL,
   0x0106C034UL, 0x30830006UL,
-  0x010F8018UL, 0x00000040UL,
-  /*    801C */ 0x18CE2404UL,
+  0x010B801CUL, 0x18CE2404UL,
   /*    8020 */ 0x00000000UL,
-  0x01078028UL, 0x0034521CUL,
+  0x01078028UL, 0x0034D21CUL,
+  0x010780CCUL, 0x1443004DUL,
+  0x010780D8UL, 0x0440005DUL,
   0x0107810CUL, 0x01200000UL,
   0x01078114UL, 0x00000080UL,
   0x01078180UL, 0x00000148UL,
@@ -324,7 +335,7 @@ const uint32_t sl_rail_btc_phy_39MHz_modemConfigBase[] = {
   0x0107825CUL, 0x00000031UL,
   0x01138280UL, 0x004BF32EUL,
   /*    8284 */ 0x195871D8UL,
-  /*    8288 */ 0x00004140UL,
+  /*    8288 */ 0x00002950UL,
   /*    828C */ 0x00002448UL,
   0x01078400UL, 0x00020106UL,
   0x0113C004UL, 0x00000000UL,
@@ -376,7 +387,7 @@ const uint32_t sl_rail_btc_phy_39MHz_modemConfigBase[] = {
   /*    0078 */ 0x0000D20DUL,
   0x02040084UL, 0x00020011UL,
   0x0208008CUL, 0x00000000UL,
-  /*    0090 */ 0x00001E11UL,
+  /*    0090 */ 0x00001C11UL,
   0x0240009CUL, 0x331E0F06UL,
   /*    00A0 */ 0x7770614CUL,
   /*    00A4 */ 0x00000000UL,

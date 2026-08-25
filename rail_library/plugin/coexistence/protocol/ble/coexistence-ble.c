@@ -546,7 +546,14 @@ sl_rail_events_t sl_bt_ll_coex_get_events(void)
 #if SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_ENABLED
 static sl_rail_multi_timer_t channelSwitchTimer;
 #define RAIL_UTIL_COEX_BLE_CHANNEL_SWITCH_TIME 30U
-extern void ll_scanHopToNextChannel(uint32_t minTimeToHop);
+
+// BLE LL provides the real hop implementation. Keep a weak stub here (not in
+// coex CLI) so multiprotocol apps with Signal Identifier enabled still link
+// when the LL symbol is absent.
+SL_WEAK void ll_scanHopToNextChannel(uint32_t minTimeToHop)
+{
+  (void)minTimeToHop;
+}
 
 static void channelSwitchTimerCb(sl_rail_multi_timer_t *tmr,
                                  sl_rail_time_t expectedTimeOfEvent,

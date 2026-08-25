@@ -12,6 +12,9 @@ include:
   - path: sl_btctrl_hci_event.h
 provides:
 - name: bluetooth_hci_filter
+documentation:
+  docset: bluetooth
+  document: enabling-rcp-using-bt-hci/04-vendor-specific-hci-commands-and-events
 metadata:
   sbom:
     license: MSLA

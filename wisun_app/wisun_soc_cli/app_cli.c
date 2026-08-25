@@ -3920,22 +3920,26 @@ void app_reset_parameters(void)
 void app_set_lxpm_prefix(sl_cli_command_arg_t *arguments)
 {
   sl_status_t ret;
+  int32_t retval = SOCKET_RETVAL_ERROR;
   char *prefix_str = NULL;
-  uint8_t prefix_len = 0;
+  int_fast16_t prefix_length;
   in6_addr_t sin6_addr;
 
   app_wisun_cli_mutex_lock();
 
   prefix_str = sl_cli_get_argument_string(arguments, 0);
-  prefix_len = sl_cli_get_argument_uint8(arguments, 1);
-
-  ret = app_get_ip_address(&sin6_addr, prefix_str);
-  if (ret != SL_STATUS_OK) {
+  if (!prefix_str) {
     printf("[Failed: invalid prefix parameter]\r\n");
     goto cleanup;
   }
 
-  ret = sl_wisun_set_lxpm_prefix(sin6_addr.address, prefix_len);
+  retval = stoip6_prefix(prefix_str, sin6_addr.address, &prefix_length);
+  if (retval != 0 || prefix_length <= 0) {
+    printf("[Failed: invalid prefix: %s]\r\n", prefix_str);
+    goto cleanup;
+  }
+
+  ret = sl_wisun_set_lxpm_prefix(sin6_addr.address, (uint8_t)prefix_length);
   if (ret != SL_STATUS_OK) {
     printf("[Failed: unable to set LXPM prefix: %"PRIu32"]\r\n", ret);
   } else {

@@ -12,6 +12,9 @@ requires:
 recommends:
 - id: ot_diags
   vendor: silabs
+documentation:
+  docset: openthread
+  document: thread-fundamentals/14-thread-certification-overview
 metadata:
   sbom:
     license: Zlib

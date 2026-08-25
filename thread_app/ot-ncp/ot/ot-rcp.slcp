@@ -1,6 +1,6 @@
 project_name: ot-rcp
 label: OpenThread - RCP
-package: thread
+package: thread_app
 description: >
   Demonstrates OpenThread Radio Co-Processor (RCP) application.
 category: OpenThread Examples

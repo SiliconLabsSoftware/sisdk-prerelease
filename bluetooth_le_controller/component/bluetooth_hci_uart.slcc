@@ -46,6 +46,9 @@ template_contribution:
     include: sl_btctrl_hci_packet.h
     handler: sl_btctrl_hci_packet_step
   priority: 1
+documentation:
+  docset: bluetooth
+  document: enabling-rcp-using-bt-hci/02-enabling-hci-functionality
 metadata:
   sbom:
     license: MSLA

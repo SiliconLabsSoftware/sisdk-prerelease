@@ -85,6 +85,9 @@ template_contribution:
   value: sl_ot_ncp_init
   priority: 5
 
+documentation:
+  docset: openthread
+  document: openthread-api/api-ncp
 metadata:
   sbom:
     reference: ot_sbom_openthread

@@ -12,4 +12,8 @@ provides:
 
 config_file:
 - path: "config/sl_openthread_default_dataset_values_config.h"
+
+documentation:
+  docset: openthread
+  document: openthread-api/api-operational-dataset
 root_path: thread

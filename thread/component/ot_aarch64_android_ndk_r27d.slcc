@@ -16,6 +16,9 @@ template_contribution:
 - name: component_catalog
   value: ot_aarch64_android_ndk_r27d
 
+documentation:
+  docset: shared-content
+  document: multiprotocol-solution-linux/android
 metadata:
   sbom:
     license: Zlib

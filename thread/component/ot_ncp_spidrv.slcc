@@ -29,6 +29,9 @@ define:
   value: 0
 - name: OPENTHREAD_CONFIG_NCP_SPI_ENABLE
   value: 1
+documentation:
+  docset: openthread
+  document: using-sl-coprocessors-with-openthread-border-router
 metadata:
   sbom:
     # BSD-3-Clause covers the files from platform-abstraction/efr32

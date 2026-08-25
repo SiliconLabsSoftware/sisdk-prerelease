@@ -1,6 +1,6 @@
 project_name: cpc-spinel-proxy
 label: OpenThread - Host CPC Spinel Proxy
-package: thread
+package: thread_app
 category: OpenThread Host Tools
 quality: production
 description: >

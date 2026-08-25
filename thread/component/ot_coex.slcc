@@ -54,6 +54,9 @@ define:
 - name: OPENTHREAD_CONFIG_NCP_SPI_BUFFER_SIZE
   value: 1300
   condition: [ot_cli, ot_ncp_spidrv]
+documentation:
+  docset: openthread
+  document: zigbee-openthread-coexistence-wifi/02-configuring-wi-fi-coexistence
 metadata:
   sbom:
     license: Zlib

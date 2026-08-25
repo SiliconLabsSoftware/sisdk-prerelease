@@ -1,6 +1,6 @@
 project_name: sleepy-demo-ssed
 label: OpenThread - SoC Sleepy Demo SSED
-package: thread
+package: thread_app
 description: >
   Demonstrates Synchronous Sleepy End Device (SSED) behaviour with CSL using EFR32's low power EM2 mode.
 category: OpenThread Examples

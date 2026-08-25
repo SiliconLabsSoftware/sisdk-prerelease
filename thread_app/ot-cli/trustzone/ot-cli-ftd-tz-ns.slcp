@@ -1,6 +1,6 @@
 project_name: ot-cli-ftd-tz-ns
 label: OpenThread - SoC CLI FTD (TrustZone)
-package: thread
+package: thread_app
 description: >
   Demonstrates CLI application to test the OpenThread stack on a Full Thread Device (FTD) with TrustZone awareness enabled.
 category: OpenThread Examples

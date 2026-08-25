@@ -50,6 +50,9 @@ define:
   value: 2048
 validation_helper:
 - path: component/script/ot_multipan_config_validation.lua
+documentation:
+  docset: openthread
+  document: multiprotocol-solution-linux/system-architecture
 metadata:
   sbom:
     license: Zlib

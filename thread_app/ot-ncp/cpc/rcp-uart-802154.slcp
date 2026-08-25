@@ -1,6 +1,6 @@
 project_name: rcp-uart-802154
 label: OpenThread Zigbee CMP - RCP UART
-package: thread
+package: thread_app
 description: >
   Demonstrates Multiprotocol Radio Co-Processor (RCP) running OpenThread and Zigbee concurrently using CMP/multi-PAN on a shared 802.15.4 channel. Host communicates via CPC over UART.
 category: OpenThread Examples

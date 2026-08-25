@@ -101,6 +101,9 @@ library:
   - toolchain_llvm
   - device_generic_family_sixx301
   - ot_stack_mtd
+documentation:
+  docset: openthread
+  document: thread-fundamentals/14-thread-certification-overview
 metadata:
   sbom:
     # BSD-3-Clause covers the files included in the libraries from

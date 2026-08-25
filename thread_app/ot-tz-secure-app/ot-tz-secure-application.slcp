@@ -1,6 +1,6 @@
 project_name: ot-tz-secure-application
 label: OpenThread - SoC TrustZone Secure App
-package: thread
+package: thread_app
 description: >
   Demonstrates a TrustZone-enabled application that manages security operations for TrustZone-aware OpenThread applications.
 

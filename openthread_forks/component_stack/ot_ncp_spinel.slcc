@@ -72,6 +72,9 @@ template_contribution:
 - name: component_catalog
   value: ot_ncp_spinel
 
+documentation:
+  docset: openthread
+  document: openthread-api/api-ncp
 metadata:
   sbom:
     reference: ot_sbom_openthread

@@ -24,6 +24,9 @@ define:
 template_contribution:
 - name: component_catalog
   value: ot_sl_log
+documentation:
+  docset: openthread
+  document: openthread-api/plat-logging
 metadata:
   sbom:
     license: BSD-3-Clause

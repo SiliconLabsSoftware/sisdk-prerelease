@@ -1,5 +1,5 @@
 project_name: openthread-bootloader-storage-internal-single
-package: thread
+package: thread_app
 quality: production
 label: Bootloader - SoC Internal Storage (single image on 1MB device)
 description: >

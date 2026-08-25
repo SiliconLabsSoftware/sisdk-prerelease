@@ -27,6 +27,8 @@
 #define MQTT_TLS_ENABLE 1 // Set to 1 to enable TLS support, 0 to disable
 #endif
 
+#include "sli_mqtt_tls_alpn.h"
+
 // mbedTLS includes (only when TLS is enabled)
 #if MQTT_TLS_ENABLE
 #include "mbedtls/mbedtls_config.h"
@@ -222,6 +224,11 @@ void NetworkInit(Network *n);
  *   - `mqtt_tcpconnection_handler` for TCP.
  *   - `mqtt_websocketconnection_handler` for WebSocket.
  * - SSL can be enabled for secure connections by setting the `ssl` parameter to `true`.
+ * - When `MQTT_TLS_ALPN_ENABLED` is set to `1`, ALPN is configured during the mbedTLS
+ *   handshake (requires `MBEDTLS_SSL_ALPN`). Set `MQTT_TLS_ALPN_PROTOCOL` to the broker's
+ *   ALPN name (e.g. `"mqtt"` for Mosquitto on port 443).
+ * - ALPN applies to TCP/TLS connections only. WebSocket transport does not configure TLS
+ *   ALPN through this SDK path. WSS on port 443 typically uses `http/1.1` at the TLS layer.
  *
  * @note
  * - Ensure that the `Network` structure is initialized using `NetworkInit` before calling this function.

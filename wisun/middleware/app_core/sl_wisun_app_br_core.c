@@ -512,7 +512,9 @@ void sl_wisun_app_br_core_start(void)
         break;
     }
     params.mac = _br_setting.mac;
-    memcpy(&params.traffic, &_br_setting.traffic, sizeof(params.traffic));
+    params.traffic.lowpan_mtu = _br_setting.traffic.lowpan_mtu;
+    params.traffic.ipv6_mru = _br_setting.traffic.ipv6_mru;
+    params.traffic.max_edfe_fragment_count = _br_setting.traffic.max_edfe_fragment_count;
     EFM_ASSERT(sl_wisun_br_set_connection_parameters(&params) == SL_STATUS_OK);
   }
 

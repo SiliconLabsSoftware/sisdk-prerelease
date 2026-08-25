@@ -1,6 +1,6 @@
 project_name: sleepy-demo-mtd
 label: OpenThread - SoC Sleepy Demo MTD
-package: thread
+package: thread_app
 description: >
   Demonstrates Sleepy End Device (SED) behaviour with polling. Using OpenThread Minimal Thread Device (MTD) and low-power EM2 mode.
 category: OpenThread Examples

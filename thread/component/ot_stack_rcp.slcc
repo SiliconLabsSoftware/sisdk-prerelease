@@ -38,6 +38,9 @@ define:
 template_contribution:
 - name: component_catalog
   value: openthread_stack_rcp
+documentation:
+  docset: openthread
+  document: using-sl-coprocessors-with-openthread-border-router
 metadata:
   sbom:
     license: Zlib

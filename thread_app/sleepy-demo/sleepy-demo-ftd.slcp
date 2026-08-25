@@ -1,6 +1,6 @@
 project_name: sleepy-demo-ftd
 label: OpenThread - SoC Sleepy Demo FTD
-package: thread
+package: thread_app
 description: >
   Demonstrates Thread network formation on Full Thread Device (FTD) for sleepy-demo.
 category: OpenThread Examples

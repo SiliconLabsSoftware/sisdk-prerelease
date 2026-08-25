@@ -16,6 +16,7 @@ include_directories(./inc
                     ../../../../../../components/service/sl_websocket_client/inc
                     ../../../../../../components/device/silabs/si91x/wireless/inc
                     ../../../../../../components/device/silabs/si91x/wireless/socket/inc
+                    ../../../../../../components/service/network_stack_common/inc
                     ../../../../../../components/device/silabs/si91x/wireless/sl_net/inc
                     ../../../../../../components/sli_wifi/inc
                     ../../../../../../components/service/mdns/inc

@@ -18,6 +18,9 @@ conflicts:
 define:
 - name: OPENTHREAD_CONFIG_DETERMINISTIC_ECDSA_ENABLE
   value: 1
+documentation:
+  docset: openthread
+  document: using-secure-vault-openthread
 metadata:
   sbom:
     license: Zlib

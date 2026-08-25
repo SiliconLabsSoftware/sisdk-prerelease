@@ -1124,12 +1124,14 @@ netif_stop_timers(struct netif *netif)
 
   LWIP_ERROR("netif_stop_timers: invalid netif", netif != NULL, return);
 
+#if LWIP_IPV6
 #if SL_LWIP_ND6_DYNAMIC_TIMER
   nd6_cleanup_on_link_down(netif);
 #endif /* SL_LWIP_ND6_DYNAMIC_TIMER */
 #if SL_LWIP_MLD6_ONDEMAND_TIMER
   mld6_cleanup_on_link_down(netif);
 #endif /* SL_LWIP_MLD6_ONDEMAND_TIMER */
+#endif /* LWIP_IPV6 */
 }
 
 #endif /* SL_LWIP_ADAPTIVE_TIMERS */

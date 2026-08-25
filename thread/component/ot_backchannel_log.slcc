@@ -24,6 +24,9 @@ define:
 template_contribution:
 - name: component_catalog
   value: ot_backchannel_log
+documentation:
+  docset: openthread
+  document: openthread-quick-start-guide/05-development-tools
 metadata:
   sbom:
     license: BSD-3-Clause

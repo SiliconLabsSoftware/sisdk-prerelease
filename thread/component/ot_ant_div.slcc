@@ -47,6 +47,9 @@ source:
   unless: [ot_rcp]
 - path: platform-abstraction/ncp/ncp_ant_div.cpp
   condition: [ot_ncp]
+documentation:
+  docset: openthread
+  document: configuring-antenna-diversity-for-openthread/02-configuring-antenna-diversity
 metadata:
   sbom:
     license: Zlib

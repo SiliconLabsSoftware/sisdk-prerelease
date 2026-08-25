@@ -1,6 +1,6 @@
 project_name: rcp-spi-802154
 label: MultiProtocol (OpenThread + Zigbee) - RCP SPI
-package: thread
+package: thread_app
 description: >
   Demonstrates Multiprotocol Radio Co-Processor (RCP) running OpenThread and Zigbee concurrently using CMP/multi-PAN on a shared 802.15.4 channel. Host communicates via CPC over SPI.
 category: OpenThread Examples

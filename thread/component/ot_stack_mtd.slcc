@@ -64,6 +64,9 @@ define:
   value: 1
   condition:
   - ot_ncp
+documentation:
+  docset: openthread
+  document: thread-fundamentals
 metadata:
   sbom:
     license: Zlib

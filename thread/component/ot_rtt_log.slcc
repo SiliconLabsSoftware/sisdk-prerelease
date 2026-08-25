@@ -24,6 +24,9 @@ define:
 template_contribution:
 - name: component_catalog
   value: ot_rtt_log
+documentation:
+  docset: gecko-platform
+  document: platform-service/iostream-rtt
 metadata:
   sbom:
     license: BSD-3-Clause

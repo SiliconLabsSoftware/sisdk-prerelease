@@ -1,6 +1,6 @@
 project_name: ot-ncp-mtd
 label: OpenThread - NCP MTD
-package: thread
+package: thread_app
 description: >
   Demonstrates OpenThread Minimal Thread Device (MTD) Network Co-Processor (NCP) application.
 category: OpenThread Examples

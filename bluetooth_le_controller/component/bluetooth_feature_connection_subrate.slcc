@@ -17,6 +17,9 @@ requires:
 template_contribution:
 - name: component_catalog
   value: bluetooth_feature_connection_subrating
+documentation:
+  docset: bluetooth
+  document: bluetooth-stack-api/sl-bt-connection
 metadata:
   sbom:
     license: MSLA

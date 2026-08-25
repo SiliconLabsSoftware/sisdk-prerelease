@@ -21,6 +21,8 @@ source:
 - path: MQTTPacket/src/MQTTUnsubscribeClient.c
 - path: MQTTClient-C/src/Si91x/MQTTSi91x.c
   condition: ["sl_si91x_internal_stack"]
+- path: MQTTClient-C/src/Si91x/sli_mqtt_tls_alpn.c
+  condition: ["sl_si91x_internal_stack"]
 - path: MQTTClient-C/src/Si91x/MQTTSi91x_lwip.c
   condition: ["sl_si91x_lwip_stack"]
 
@@ -41,10 +43,14 @@ include:
     condition: ["sl_si91x_lwip_stack"]
   - path: sli_lwip_mqtt_mbedtls_config.h
     condition: ["sl_si91x_lwip_stack"]
+  - path: sli_mqtt_tls_alpn.h
+    condition: ["sl_si91x_lwip_stack"]
 
 - path: MQTTClient-C/src/Si91x
   file_list:
   - path: MQTTSi91x.h
+    condition: ["sl_si91x_internal_stack"]
+  - path: sli_mqtt_tls_alpn.h
     condition: ["sl_si91x_internal_stack"]
 
 - path: MQTTPacket/src/
@@ -114,5 +120,9 @@ requires:
 - name: mbedtls_config
   condition: ["sl_si91x_lwip_stack"]
 
-
+define:
+- name: MQTT_TLS_ALPN_ENABLED
+  value: '0'
+- name: SLI_MQTT_TLS_ALPN_USE_BSD
+  value: '1'
 root_path: network_stack/paho_mqtt_embedded

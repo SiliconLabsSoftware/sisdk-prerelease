@@ -2,7 +2,7 @@
  * @brief RAIL Configuration
  * @details
  *   WARNING: Auto-Generated Radio Config Header  -  DO NOT EDIT
- *   Radio Configurator Version: 2602.2.0
+ *   Radio Configurator Version: 2604.1.0
  *   RAIL Adapter Version: 2.4.33
  *   RAIL Compatibility: 2.x
  *******************************************************************************
@@ -40,8 +40,8 @@
 
 extern const uint32_t sl_rail_btc_phy_40MHz_modemConfigBase[];
 
-#define RAIL0_SL_RAIL_BTC_PHY_40MHZ_PHY_BLUETOOTH_BR_1MB_PROD
-#define RAIL0_SL_RAIL_BTC_PHY_40MHZ_PROFILE_BASE
+#define RAIL0_SL_RAIL_BTC_PHY_40MHZ_PHY_BLUETOOTH_CLASSIC_PROD
+#define RAIL0_SL_RAIL_BTC_PHY_40MHZ_PROFILE_BTC
 extern const RAIL_ChannelConfig_t sl_rail_btc_phy_40MHz_channelConfig;
 extern const RAIL_ChannelConfigEntry_t sl_rail_btc_phy_40MHz_channels[];
 

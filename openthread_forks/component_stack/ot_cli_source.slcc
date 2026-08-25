@@ -82,6 +82,9 @@ template_contribution:
   priority: 20
   unless:
   - ot_ncp
+documentation:
+  docset: openthread
+  document: openthread-api/api-cli
 metadata:
   sbom:
     reference: ot_sbom_openthread

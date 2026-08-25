@@ -10,6 +10,9 @@ provides:
 define:
 - name: OPENTHREAD_CONFIG_DIAG_ENABLE
   value: 1
+documentation:
+  docset: openthread
+  document: openthread-quick-start-guide/05-development-tools
 metadata:
   sbom:
     reference: ot_sbom_openthread

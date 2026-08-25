@@ -21,6 +21,9 @@ include:
 source:
 - path: platform-abstraction/posix/cpc_transport.cpp
 
+documentation:
+  docset: openthread
+  document: multiprotocol-solution-linux
 metadata:
   sbom:
     license: Zlib

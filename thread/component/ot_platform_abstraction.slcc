@@ -112,6 +112,9 @@ template_contribution:
 - name: ot_init
   value: sl_ot_create_instance
   priority: 0
+documentation:
+  docset: openthread
+  document: openthread-api/platform
 metadata:
   sbom:
     # Zlib covers the files from config.

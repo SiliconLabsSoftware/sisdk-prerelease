@@ -1,6 +1,6 @@
 project_name: ot-ncp-mtd-cpc
 label: OpenThread - NCP MTD with CPC
-package: thread
+package: thread_app
 description: >
   Demonstrates OpenThread Minimal Thread Device (MTD) Network Co-Processor (NCP) application using CPC (Co-Processor Communication).
 category: OpenThread Examples
