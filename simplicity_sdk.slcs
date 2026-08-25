@@ -9,18 +9,16 @@ component_path:
 - path: bgapi_protocol/component
 - path: bluetooth_le_middleware/component
 - path: bluetooth_zvd/component
-- path: bluetooth_le_controller/component
-- path: bluetooth_common/component
 - path: bluetooth_mesh/component
-- path: bluetooth_le_host/component
-- path: bluetooth_apploader/component
+- path: bluetooth_common/component
 - path: bluetooth_mesh_srtest/component
+- path: bluetooth_apploader/component
+- path: bluetooth_le_controller/component
+- path: bluetooth_le_host/component
 - path: bluetooth_mesh_middleware/component
 - path: boards/hardware/board/config/component
 - path: boards/hardware/board/component
 - path: boards/hardware/driver/component
-- path: boards_efr32xg2b/hardware/board/config/component
-- path: boards_efr32xg2b/hardware/board/component
 - path: boards_internal/hardware/kit/component
 - path: boards_internal/hardware/kit/common/component
 - path: boards_internal/hardware/board/component
@@ -96,10 +94,10 @@ component_path:
 - path: printf/component
 - path: proprietary_default_radio_confs/.
 - path: protocol_user_sequencer_internal/component/protocol_user_sequencer_internal
-- path: rail_library_alpha_chips/component/rail_library_alpha_chips
 - path: rail_library_internal_chips/component/rail_library_internal_chips
-- path: rail_sdk/component
 - path: rail_internal/component/rail_internal
+- path: rail_sdk/component
+- path: rail_library_alpha_chips/component/rail_library_alpha_chips
 - path: rail_library/component/rail_library
 - path: realtime_locationing/component
 - path: rtos_benchmark_internal/component
@@ -139,14 +137,14 @@ component_path:
 - path: zwave/component-internal/CommandClasses
 toolchain_mapping: toolchains.slct
 documentation:
-- docset: bluetooth_le_siwx91x
-  version: 4.1.2
 - docset: btmesh-service-api
   version: 11.0.2
+- docset: bluetooth_le_siwx91x
+  version: 4.1.2
 - docset: gecko-platform
   version: 6.1.0
 - docset: mcu-bootloader
-  version: 3.3.0
+  version: 3.3.2
 - docset: multiprotocol
   version: 1.1.2
 - docset: connect-sdk
