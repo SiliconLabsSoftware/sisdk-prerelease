@@ -1,7 +1,7 @@
 project_name: bt_cs_soc_initiator
 package: bluetooth_le_app
 label: Bluetooth - SoC CS Initiator
-description: >
+description: >-
   Channel Sounding (CS) Initiator for Bluetooth LE. This example connects to
   a CS Reflector device and starts the distance measurement. Results are
   printed on the display of the main board if available and can be read via

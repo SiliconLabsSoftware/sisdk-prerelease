@@ -1,0 +1,45 @@
+id: sl_rail_util_rf_switch
+label: RAIL Utility, RF Switch
+description: Utility to configure an external RF switch for antenna switching on EFR32xG24. Configures the antenna-to-pin mapping (polarity, single/dual-pin, custom) plus optional VDD power-gating and idle-low behavior. The control GPIO(s) themselves come from the AoX Antenna utility. Currently applied to Channel Sounding.
+package: rail_library
+category: Platform|Radio
+quality: production
+metadata:
+  sbom:
+    id: sl_rail_util_rf_switch
+    name: RAIL Utility, RF Switch
+    license: Zlib
+documentation:
+  docset: rail
+  document: rail-api/rail-util-rf-switch
+provides:
+- name: sl_rail_util_rf_switch
+requires:
+- name: gpio
+- name: rail_lib
+- name: component_catalog
+config_file:
+- path: plugin/rf_switch/config/efr32xg24/sl_rail_util_rf_switch_config.h
+  file_id: sl_rail_util_rf_switch_config
+  condition:
+  - device_sdid_215
+include:
+- path: plugin/rf_switch
+  file_list:
+  - path: sl_rail_util_rf_switch.h
+source:
+- path: plugin/rf_switch/sl_rail_util_rf_switch.c
+template_contribution:
+- name: event_handler
+  value:
+    event: stack_init
+    include: sl_rail_util_rf_switch.h
+    handler: sl_rail_util_rf_switch_init
+    # Must run after sl_rail_util_init (priority -9000). Lower priority values
+    # run earlier, so this uses a value greater than -9000 to ensure the RAIL
+    # handle and the TrustZone/secure-GPIO configuration are valid before
+    # sl_rail_ble_config_rf_switch() is called.
+  priority: -8999
+- name: component_catalog
+  value: sl_rail_util_rf_switch
+root_path: rail_library

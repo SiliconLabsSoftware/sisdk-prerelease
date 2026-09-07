@@ -176,6 +176,26 @@
       vendor: silabs
     path: brd2610a/sl_simple_led_led1_config.h
   - override:
+      component: rail_util_aox
+      file_id: rail_util_aox_config
+      vendor: silabs
+    path: brd2610a/sl_rail_util_aox_config.h
+  - override:
+      component: sl_rail_util_aox
+      file_id: rail_util_aox_config
+      vendor: silabs
+    path: brd2610a/sl_rail_util_aox_config.h
+  - override:
+      component: rail_util_ble_cs_antenna_offset
+      file_id: rail_util_cs_antenna_offset_config
+      vendor: silabs
+    path: brd2610a/sl_rail_util_cs_antenna_offset_config.h
+  - override:
+      component: sl_rail_util_ble_cs_antenna_offset
+      file_id: rail_util_cs_antenna_offset_config
+      vendor: silabs
+    path: brd2610a/sl_rail_util_cs_antenna_offset_config.h
+  - override:
       component: sl_rail_util_pti
       file_id: rail_util_pti_config
       vendor: silabs
