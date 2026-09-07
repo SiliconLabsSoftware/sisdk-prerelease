@@ -120,7 +120,8 @@ component_path:
 - path: zigbee/util/silicon_labs/silabs_core/component/zigbee
 - path: zigbee/app/framework/component/zigbee
 - path: zigbee/platform/service/component/zigbee
-- path: zigbee_wwah/app/framework/component/zigbee_wwah
+- path: zigbee_sleepy_to_sleepy/component/zigbee_sleepy_to_sleepy
+- path: zigbee_sleepy_to_sleepy/app/framework/component/zigbee_sleepy_to_sleepy
 - path: zigbee_internal/platform/radio/mac/component/zigbee_internal
 - path: zigbee_internal/platform/radio/rail_lib/plugin/component/zigbee_internal
 - path: zigbee_internal/component/zigbee_internal
@@ -128,8 +129,7 @@ component_path:
 - path: zigbee_internal/util/silicon_labs/silabs_core/component/zigbee_internal
 - path: zigbee_internal/app/framework/component/zigbee_internal
 - path: zigbee_internal/platform/service/component/zigbee_internal
-- path: zigbee_sleepy_to_sleepy/component/zigbee_sleepy_to_sleepy
-- path: zigbee_sleepy_to_sleepy/app/framework/component/zigbee_sleepy_to_sleepy
+- path: zigbee_wwah/app/framework/component/zigbee_wwah
 - path: zigbee_smart_energy/component/zigbee_smart_energy
 - path: zwave/component
 - path: zwave/component/CommandClasses
