@@ -545,10 +545,9 @@ int sl_si91x_sendto_async(int socket,
     si91x_socket->is_waiting_on_ack = false;
   }
   // Both SL_STATUS_OK (sync success) and SL_STATUS_IN_PROGRESS (async) are success for async send.
+  // Non-success here is typically TX backpressure (ENOBUFS / try again later), not a hard fault —
+  // so do not emit an ERROR-tagged PRINT_ERROR_LOGS line.
   if (status != SL_STATUS_OK && status != SL_STATUS_IN_PROGRESS) {
-    if (PRINT_ERROR_LOGS) {
-      PRINT_ERROR_STATUS(ERROR_TAG, ENOBUFS);
-    }
     errno = ENOBUFS;
     return -1;
   }

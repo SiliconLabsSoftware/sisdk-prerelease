@@ -16,6 +16,9 @@ template_contribution:
   # other components when needed.
 - name: mbedtls_mpi_max
   value: 32
+documentation:
+  # No dedicated Multi-Precision Integers page; Mbed TLS hub for related docs
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-mbedtls/
 metadata:
   sbom:
     reference: mbedtls_sbom

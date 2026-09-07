@@ -226,8 +226,8 @@ extern "C" {
 
 /// @endcond
 
-#define SL_HAL_GPIO_PORT_SIZE(port) (                     \
-    (port) == SL_GPIO_PORT_A  ? SL_HAL_GPIO_PORT_A_PIN_COUNT \
+#define SL_HAL_GPIO_PORT_SIZE(port) (                          \
+    (port) == SL_GPIO_PORT_A  ? SL_HAL_GPIO_PORT_A_PIN_COUNT   \
     : (port) == SL_GPIO_PORT_B  ? SL_HAL_GPIO_PORT_B_PIN_COUNT \
     : (port) == SL_GPIO_PORT_C  ? SL_HAL_GPIO_PORT_C_PIN_COUNT \
     : (port) == SL_GPIO_PORT_D  ? SL_HAL_GPIO_PORT_D_PIN_COUNT \
@@ -240,8 +240,8 @@ extern "C" {
     : (port) == SL_GPIO_PORT_K  ? SL_HAL_GPIO_PORT_K_PIN_COUNT \
     : 0)
 
-#define SL_HAL_GPIO_PORT_MASK(port) (                        \
-    ((int)port) == SL_GPIO_PORT_A  ? SL_HAL_GPIO_PORT_A_PIN_MASK \
+#define SL_HAL_GPIO_PORT_MASK(port) (                              \
+    ((int)port) == SL_GPIO_PORT_A  ? SL_HAL_GPIO_PORT_A_PIN_MASK   \
     : ((int)port) == SL_GPIO_PORT_B  ? SL_HAL_GPIO_PORT_B_PIN_MASK \
     : ((int)port) == SL_GPIO_PORT_C  ? SL_HAL_GPIO_PORT_C_PIN_MASK \
     : ((int)port) == SL_GPIO_PORT_D  ? SL_HAL_GPIO_PORT_D_PIN_MASK \
@@ -514,7 +514,7 @@ __INLINE void sl_hal_gpio_set_pin(const sl_gpio_t *gpio)
  * @param[in] pins Bit mask for bits to set to 1 in DOUT register.
  ******************************************************************************/
 __INLINE void sl_hal_gpio_set_port(sl_gpio_port_t port,
-                                  uint32_t pins)
+                                   uint32_t pins)
 {
   SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
   if (sl_hal_gpio_is_hsio_port(port)) {
@@ -569,7 +569,7 @@ __INLINE void sl_hal_gpio_clear_pin(const sl_gpio_t *gpio)
  * @param[in] pins Bit mask for bits to clear in DOUT register.
  ******************************************************************************/
 __INLINE void sl_hal_gpio_clear_port(sl_gpio_port_t port,
-                                    uint32_t pins)
+                                     uint32_t pins)
 {
   SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_IS_VALID(port));
   if (sl_hal_gpio_is_hsio_port(port)) {
@@ -690,7 +690,7 @@ __INLINE void sl_hal_gpio_toggle_port(sl_gpio_port_t port,
   }
 }
 
-#else  /* GPIO-only implementations */
+#else /* GPIO-only implementations */
 
 /***************************************************************************//**
  * Set a single pin in GPIO data out register to 1.
@@ -923,8 +923,8 @@ __INLINE sl_status_t sl_hal_gpio_get_slew_rate(const sl_gpio_t *gpio,
 
   uint32_t pin_shift = (uint32_t)(gpio->pin % 8) << 2;
   uint32_t reg_val = (gpio->pin < 8)
-                      ? GPIO->P[gpio->port].SLEWRATEL
-                      : GPIO->P[gpio->port].SLEWRATEH;
+                     ? GPIO->P[gpio->port].SLEWRATEL
+                     : GPIO->P[gpio->port].SLEWRATEH;
   *slewrate = (uint8_t)((reg_val >> pin_shift) & _GPIO_P_SLEWRATEL_SLEWRATE0_MASK);
 #endif
   return SL_STATUS_OK;
@@ -1453,7 +1453,7 @@ __INLINE sl_status_t sl_hal_gpio_configure_high_speed_rx(sl_gpio_t *gpio,
  *         SL_STATUS_INVALID_PARAMETER if the port is not an HSIO port.
  ******************************************************************************/
 __INLINE sl_status_t sl_hal_gpio_set_high_speed_rx_hysteresis(sl_gpio_t *gpio,
-                                                               uint8_t hysteresis)
+                                                              uint8_t hysteresis)
 {
   SL_LOG_DEBUG_ASSERT(gpio != NULL);
   SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
@@ -1479,7 +1479,7 @@ __INLINE sl_status_t sl_hal_gpio_set_high_speed_rx_hysteresis(sl_gpio_t *gpio,
  *         SL_STATUS_INVALID_PARAMETER if the port is not an HSIO port.
  ******************************************************************************/
 __INLINE sl_status_t sl_hal_gpio_get_high_speed_rx_hysteresis(sl_gpio_t *gpio,
-                                                               uint8_t *hysteresis)
+                                                              uint8_t *hysteresis)
 {
   SL_LOG_DEBUG_ASSERT(gpio != NULL);
   SL_LOG_DEBUG_ASSERT(hysteresis != NULL);
@@ -1561,6 +1561,69 @@ __INLINE sl_status_t sl_hal_gpio_get_non_overlap_protection_disable(sl_gpio_t *g
   return SL_STATUS_OK;
 }
 #endif
+
+/***************************************************************************//**
+ * Latch a pin so that it maintains its current output state across sleep.
+ *
+ * Clearing the pin's HOLD bit freezes the pad driver, preventing glitches
+ * when the controlling peripheral loses retention.
+ *
+ * @param[in] gpio  Pointer to GPIO structure with port and pin.
+ *
+ * @return SL_STATUS_OK on success.
+ *         SL_STATUS_NOT_SUPPORTED if pin latching is not available on this device.
+ ******************************************************************************/
+__INLINE sl_status_t sl_hal_gpio_latch_pin(const sl_gpio_t *gpio)
+{
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+#if defined(_GPIO_P_HOLD_HOLD_MASK)
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+#if defined(HSIO_PRESENT) && defined(_HSIO_P_HOLD_HOLD_MASK)
+  if (sl_hal_gpio_is_hsio_port(gpio->port)) {
+    uint8_t hsio_index = SL_HAL_HSIO_PORT_INDEX(gpio->port);
+    GPIO->H_CLR[hsio_index].HOLD = 1UL << gpio->pin;
+    return SL_STATUS_OK;
+  }
+#endif
+  GPIO->P_CLR[gpio->port].HOLD = 1UL << gpio->pin;
+  return SL_STATUS_OK;
+#else
+  (void)gpio;
+  return SL_STATUS_NOT_SUPPORTED;
+#endif
+}
+
+/***************************************************************************//**
+ * Unlatch a pin, returning pad control to the normal GPIO/peripheral path.
+ *
+ * Setting the pin's HOLD bit releases the latch so the pad driver follows
+ * live register state again.  Call this after the controlling peripheral has
+ * been fully restored.
+ *
+ * @param[in] gpio  Pointer to GPIO structure with port and pin.
+ *
+ * @return SL_STATUS_OK on success.
+ *         SL_STATUS_NOT_SUPPORTED if pin latching is not available on this device.
+ ******************************************************************************/
+__INLINE sl_status_t sl_hal_gpio_unlatch_pin(const sl_gpio_t *gpio)
+{
+  SL_LOG_DEBUG_ASSERT(gpio != NULL);
+#if defined(_GPIO_P_HOLD_HOLD_MASK)
+  SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
+#if defined(HSIO_PRESENT) && defined(_HSIO_P_HOLD_HOLD_MASK)
+  if (sl_hal_gpio_is_hsio_port(gpio->port)) {
+    uint8_t hsio_index = SL_HAL_HSIO_PORT_INDEX(gpio->port);
+    GPIO->H_SET[hsio_index].HOLD = 1UL << gpio->pin;
+    return SL_STATUS_OK;
+  }
+#endif
+  GPIO->P_SET[gpio->port].HOLD = 1UL << gpio->pin;
+  return SL_STATUS_OK;
+#else
+  (void)gpio;
+  return SL_STATUS_NOT_SUPPORTED;
+#endif
+}
 
 /** @} (end addtogroup gpio) */
 

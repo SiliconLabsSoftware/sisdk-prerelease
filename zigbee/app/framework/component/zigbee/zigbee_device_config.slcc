@@ -18,6 +18,9 @@ template_contribution:
 - name: component_catalog
   value: zigbee_device_config
 
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/app-framework-common
 metadata:
   sbom:
     license: MSLA

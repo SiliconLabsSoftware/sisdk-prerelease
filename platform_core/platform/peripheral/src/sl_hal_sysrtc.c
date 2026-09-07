@@ -93,6 +93,9 @@ void sl_hal_sysrtc_init(const sl_hal_sysrtc_init_t *init)
 
   // Set configuration.
   SYSRTC_INST->CFG = (init->enable_debug_run ? 1UL : 0UL) << _SYSRTC_CFG_DEBUGRUN_SHIFT;
+  SL_PRINT_STRING_DEBUG("debug_run=%d, %d\r\n",
+                        (int)init->enable_debug_run,
+                        (int)__LINE__);
 }
 
 /***************************************************************************//**
@@ -108,6 +111,7 @@ void sl_hal_sysrtc_enable(void)
 
   // Start counter.
   SYSRTC_INST->CMD = SYSRTC_CMD_START;
+  SL_PRINT_STRING_INFO("enabled, %d\r\n", (int)__LINE__);
 }
 
 /***************************************************************************//**
@@ -124,6 +128,7 @@ void sl_hal_sysrtc_disable(void)
 
   // Disable module.
   SYSRTC_INST->EN_CLR = SYSRTC_EN_EN;
+  SL_PRINT_STRING_INFO("disabled, %d\r\n", (int)__LINE__);
 }
 
 /***************************************************************************//**

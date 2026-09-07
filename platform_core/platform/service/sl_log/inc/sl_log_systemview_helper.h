@@ -33,6 +33,12 @@
  #ifndef SL_LOG_SYSTEMVIEW_HELPER_H
  #define SL_LOG_SYSTEMVIEW_HELPER_H
  
+ /** @brief Cast logging argument to uint32_t safely */
+ #define SL_LOG_U32_ARG(x) ((uint32_t)(uintptr_t)(x))
+
+ /** @brief Cast SystemView argument to U32 safely */
+ #define SL_LOG_SYSVIEW_ARG(x) ((U32)(uintptr_t)(x))
+
  /**
   * Event flag layout for SL_PRINT_* macros — must match sl_log.c.
   */
@@ -62,11 +68,11 @@
      sl_log_send_arg1( \
            (EVENT), \
            (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
-           (ARG1)); \
+           SL_LOG_U32_ARG(ARG1)); \
      } else if (((((uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE))) \
                      >> SL_LOG_FLAGS_POS) & SL_LOG_FLAGS_LEVEL_MASK) \
                     >= sl_log_get_loglevel()) { \
-     SEGGER_SYSVIEW__PrintElf_U32((EVENT), (uint32_t)(EVENT_TYPE), (ARG1)); \
+     SEGGER_SYSVIEW__PrintElf_U32((EVENT), (uint32_t)(EVENT_TYPE), SL_LOG_U32_ARG(ARG1)); \
    } \
  } while (0)
  
@@ -76,13 +82,13 @@
      sl_log_send_arg2( \
        (EVENT), \
        (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
-       (ARG1), (ARG2)); \
+       SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2)); \
    } \
    else if (((((uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE))) \
                      >> SL_LOG_FLAGS_POS) & SL_LOG_FLAGS_LEVEL_MASK) \
                     >= sl_log_get_loglevel()) { \
      SEGGER_SYSVIEW__PrintElf_U32x2((EVENT), (uint32_t)(EVENT_TYPE), \
-     (ARG1), (ARG2)); \
+     SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2)); \
    } \
  } while (0)
  
@@ -92,13 +98,13 @@
      sl_log_send_arg3( \
        (EVENT), \
        (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
-       (ARG1), (ARG2), (ARG3)); \
+       SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3)); \
    } \
    else if (((((uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE))) \
                      >> SL_LOG_FLAGS_POS) & SL_LOG_FLAGS_LEVEL_MASK) \
                     >= sl_log_get_loglevel()) { \
      SEGGER_SYSVIEW__PrintElf_U32x3((EVENT), (uint32_t)(EVENT_TYPE), \
-     (ARG1), (ARG2), (ARG3)); \
+     SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3)); \
    } \
  } while (0)
  
@@ -109,12 +115,12 @@
      sl_log_send_arg4( \
        (EVENT), \
        (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
-       (ARG1), (ARG2), (ARG3), (ARG4)); \
+       SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4)); \
    } else if (((((uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE))) \
                      >> SL_LOG_FLAGS_POS) & SL_LOG_FLAGS_LEVEL_MASK) \
                     >= sl_log_get_loglevel()) { \
      SEGGER_SYSVIEW__PrintElf_U32x4((EVENT), (uint32_t)(EVENT_TYPE), \
-     (ARG1), (ARG2), (ARG3), (ARG4)); \
+     SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4)); \
    } \
  } while (0)
  #endif
@@ -126,12 +132,12 @@
        sl_log_send_arg5( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
-         (ARG1), (ARG2), (ARG3), (ARG4), (ARG5)); \
+         SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5)); \
      } else if (((((uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE))) \
                    >> SL_LOG_FLAGS_POS) & SL_LOG_FLAGS_LEVEL_MASK) \
                   >= sl_log_get_loglevel()) { \
        SEGGER_SYSVIEW__PrintElf_U32x5((EVENT), (uint32_t)(EVENT_TYPE), \
-       (ARG1), (ARG2), (ARG3), (ARG4), (ARG5)); \
+       SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5)); \
      } \
  } while (0)
  #endif
@@ -143,12 +149,12 @@
        sl_log_send_arg6( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
-         (ARG1), (ARG2), (ARG3), (ARG4), (ARG5), (ARG6)); \
+         SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6)); \
      } else if (((((uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE))) \
                    >> SL_LOG_FLAGS_POS) & SL_LOG_FLAGS_LEVEL_MASK) \
                   >= sl_log_get_loglevel()) { \
        SEGGER_SYSVIEW__PrintElf_U32x6((EVENT), (uint32_t)(EVENT_TYPE), \
-       (ARG1), (ARG2), (ARG3), (ARG4), (ARG5), (ARG6)); \
+       SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6)); \
      } \
  } while (0)
  #endif
@@ -160,12 +166,12 @@
        sl_log_send_arg7( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
-         (ARG1), (ARG2), (ARG3), (ARG4), (ARG5), (ARG6), (ARG7)); \
+         SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7)); \
      } else if (((((uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE))) \
                    >> SL_LOG_FLAGS_POS) & SL_LOG_FLAGS_LEVEL_MASK) \
                   >= sl_log_get_loglevel()) { \
        SEGGER_SYSVIEW__PrintElf_U32x7((EVENT), (uint32_t)(EVENT_TYPE), \
-       (ARG1), (ARG2), (ARG3), (ARG4), (ARG5), (ARG6), (ARG7)); \
+       SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7)); \
      } \
  } while (0)
  #endif
@@ -177,12 +183,12 @@
        sl_log_send_arg8( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
-         (ARG1), (ARG2), (ARG3), (ARG4), (ARG5), (ARG6), (ARG7), (ARG8)); \
+         SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8)); \
      } else if (((((uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE))) \
                    >> SL_LOG_FLAGS_POS) & SL_LOG_FLAGS_LEVEL_MASK) \
                   >= sl_log_get_loglevel()) { \
        SEGGER_SYSVIEW__PrintElf_U32x8((EVENT), (uint32_t)(EVENT_TYPE), \
-       (ARG1), (ARG2), (ARG3), (ARG4), (ARG5), (ARG6), (ARG7), (ARG8)); \
+       SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8)); \
      } \
  } while (0)
  #endif
@@ -194,12 +200,12 @@
        sl_log_send_arg9( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
-         (ARG1), (ARG2), (ARG3), (ARG4), (ARG5), (ARG6), (ARG7), (ARG8), (ARG9)); \
+         SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8), SL_LOG_U32_ARG(ARG9)); \
      } else if (((((uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE))) \
                    >> SL_LOG_FLAGS_POS) & SL_LOG_FLAGS_LEVEL_MASK) \
                   >= sl_log_get_loglevel()) { \
        SEGGER_SYSVIEW__PrintElf_U32x9((EVENT), (uint32_t)(EVENT_TYPE), \
-       (ARG1), (ARG2), (ARG3), (ARG4), (ARG5), (ARG6), (ARG7), (ARG8), (ARG9)); \
+       SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8), SL_LOG_U32_ARG(ARG9)); \
      } \
  } while (0)
  #endif
@@ -211,12 +217,12 @@
        sl_log_send_arg10( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
-         (ARG1), (ARG2), (ARG3), (ARG4), (ARG5), (ARG6), (ARG7), (ARG8), (ARG9), (ARG10)); \
+         SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8), SL_LOG_U32_ARG(ARG9), SL_LOG_U32_ARG(ARG10)); \
      } else if (((((uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE))) \
                    >> SL_LOG_FLAGS_POS) & SL_LOG_FLAGS_LEVEL_MASK) \
                   >= sl_log_get_loglevel()) { \
        SEGGER_SYSVIEW__PrintElf_U32x10((EVENT), (uint32_t)(EVENT_TYPE), \
-       (ARG1), (ARG2), (ARG3), (ARG4), (ARG5), (ARG6), (ARG7), (ARG8), (ARG9), (ARG10)); \
+       SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8), SL_LOG_U32_ARG(ARG9), SL_LOG_U32_ARG(ARG10)); \
      } \
  } while (0)
  #endif
@@ -240,11 +246,11 @@
        sl_log_send_arg1( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
-         (ARG1)); \
+         SL_LOG_U32_ARG(ARG1)); \
      } else if (((((uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE))) \
                    >> SL_LOG_FLAGS_POS) & SL_LOG_FLAGS_LEVEL_MASK) \
                   >= sl_log_get_loglevel()) { \
-       SEGGER_SYSVIEW_RecordU32((unsigned int)(EVENT), (U32)(ARG1)); \
+       SEGGER_SYSVIEW_RecordU32((unsigned int)(EVENT), SL_LOG_SYSVIEW_ARG(ARG1)); \
      } \
  } while (0)
  
@@ -254,11 +260,11 @@
        sl_log_send_arg2( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
-         (ARG1), (ARG2)); \
+         SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2)); \
      } else if (((((uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE))) \
                    >> SL_LOG_FLAGS_POS) & SL_LOG_FLAGS_LEVEL_MASK) \
                   >= sl_log_get_loglevel()) { \
-       SEGGER_SYSVIEW_RecordU32x2((unsigned int)(EVENT), (U32)(ARG1), (U32)(ARG2)); \
+       SEGGER_SYSVIEW_RecordU32x2((unsigned int)(EVENT), SL_LOG_SYSVIEW_ARG(ARG1), SL_LOG_SYSVIEW_ARG(ARG2)); \
      } \
  } while (0)
  
@@ -268,11 +274,11 @@
        sl_log_send_arg3( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
-         (ARG1), (ARG2), (ARG3)); \
+         SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3)); \
      } else if (((((uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE))) \
                    >> SL_LOG_FLAGS_POS) & SL_LOG_FLAGS_LEVEL_MASK) \
                   >= sl_log_get_loglevel()) { \
-       SEGGER_SYSVIEW_RecordU32x3((unsigned int)(EVENT), (U32)(ARG1), (U32)(ARG2), (U32)(ARG3)); \
+       SEGGER_SYSVIEW_RecordU32x3((unsigned int)(EVENT), SL_LOG_SYSVIEW_ARG(ARG1), SL_LOG_SYSVIEW_ARG(ARG2), SL_LOG_SYSVIEW_ARG(ARG3)); \
      } \
  } while (0)
  
@@ -283,11 +289,11 @@
        sl_log_send_arg4( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
-         (ARG1), (ARG2), (ARG3), (ARG4)); \
+         SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4)); \
      } else if (((((uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE))) \
                    >> SL_LOG_FLAGS_POS) & SL_LOG_FLAGS_LEVEL_MASK) \
                   >= sl_log_get_loglevel()) { \
-       SEGGER_SYSVIEW_RecordU32x4((unsigned int)(EVENT), (U32)(ARG1), (U32)(ARG2), (U32)(ARG3), (U32)(ARG4)); \
+       SEGGER_SYSVIEW_RecordU32x4((unsigned int)(EVENT), SL_LOG_SYSVIEW_ARG(ARG1), SL_LOG_SYSVIEW_ARG(ARG2), SL_LOG_SYSVIEW_ARG(ARG3), SL_LOG_SYSVIEW_ARG(ARG4)); \
      } \
  } while (0)
  #endif
@@ -299,11 +305,11 @@
        sl_log_send_arg5( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
-         (ARG1), (ARG2), (ARG3), (ARG4), (ARG5)); \
+         SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5)); \
      } else if (((((uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE))) \
                    >> SL_LOG_FLAGS_POS) & SL_LOG_FLAGS_LEVEL_MASK) \
                   >= sl_log_get_loglevel()) { \
-       SEGGER_SYSVIEW_RecordU32x5((unsigned int)(EVENT), (U32)(ARG1), (U32)(ARG2), (U32)(ARG3), (U32)(ARG4), (U32)(ARG5)); \
+       SEGGER_SYSVIEW_RecordU32x5((unsigned int)(EVENT), SL_LOG_SYSVIEW_ARG(ARG1), SL_LOG_SYSVIEW_ARG(ARG2), SL_LOG_SYSVIEW_ARG(ARG3), SL_LOG_SYSVIEW_ARG(ARG4), SL_LOG_SYSVIEW_ARG(ARG5)); \
      } \
  } while (0)
  #endif
@@ -315,11 +321,11 @@
        sl_log_send_arg6( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
-         (ARG1), (ARG2), (ARG3), (ARG4), (ARG5), (ARG6)); \
+         SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6)); \
      } else if (((((uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE))) \
                    >> SL_LOG_FLAGS_POS) & SL_LOG_FLAGS_LEVEL_MASK) \
                   >= sl_log_get_loglevel()) { \
-       SEGGER_SYSVIEW_RecordU32x6((unsigned int)(EVENT), (U32)(ARG1), (U32)(ARG2), (U32)(ARG3), (U32)(ARG4), (U32)(ARG5), (U32)(ARG6)); \
+       SEGGER_SYSVIEW_RecordU32x6((unsigned int)(EVENT), SL_LOG_SYSVIEW_ARG(ARG1), SL_LOG_SYSVIEW_ARG(ARG2), SL_LOG_SYSVIEW_ARG(ARG3), SL_LOG_SYSVIEW_ARG(ARG4), SL_LOG_SYSVIEW_ARG(ARG5), SL_LOG_SYSVIEW_ARG(ARG6)); \
      } \
  } while (0)
  #endif
@@ -331,11 +337,11 @@
        sl_log_send_arg7( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
-         (ARG1), (ARG2), (ARG3), (ARG4), (ARG5), (ARG6), (ARG7)); \
+         SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7)); \
      } else if (((((uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE))) \
                    >> SL_LOG_FLAGS_POS) & SL_LOG_FLAGS_LEVEL_MASK) \
                   >= sl_log_get_loglevel()) { \
-       SEGGER_SYSVIEW_RecordU32x7((unsigned int)(EVENT), (U32)(ARG1), (U32)(ARG2), (U32)(ARG3), (U32)(ARG4), (U32)(ARG5), (U32)(ARG6), (U32)(ARG7)); \
+       SEGGER_SYSVIEW_RecordU32x7((unsigned int)(EVENT), SL_LOG_SYSVIEW_ARG(ARG1), SL_LOG_SYSVIEW_ARG(ARG2), SL_LOG_SYSVIEW_ARG(ARG3), SL_LOG_SYSVIEW_ARG(ARG4), SL_LOG_SYSVIEW_ARG(ARG5), SL_LOG_SYSVIEW_ARG(ARG6), SL_LOG_SYSVIEW_ARG(ARG7)); \
      } \
  } while (0)
  #endif
@@ -347,11 +353,11 @@
        sl_log_send_arg8( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
-         (ARG1), (ARG2), (ARG3), (ARG4), (ARG5), (ARG6), (ARG7), (ARG8)); \
+         SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8)); \
      } else if (((((uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE))) \
                    >> SL_LOG_FLAGS_POS) & SL_LOG_FLAGS_LEVEL_MASK) \
                   >= sl_log_get_loglevel()) { \
-       SEGGER_SYSVIEW_RecordU32x8((unsigned int)(EVENT), (U32)(ARG1), (U32)(ARG2), (U32)(ARG3), (U32)(ARG4), (U32)(ARG5), (U32)(ARG6), (U32)(ARG7), (U32)(ARG8)); \
+       SEGGER_SYSVIEW_RecordU32x8((unsigned int)(EVENT), SL_LOG_SYSVIEW_ARG(ARG1), SL_LOG_SYSVIEW_ARG(ARG2), SL_LOG_SYSVIEW_ARG(ARG3), SL_LOG_SYSVIEW_ARG(ARG4), SL_LOG_SYSVIEW_ARG(ARG5), SL_LOG_SYSVIEW_ARG(ARG6), SL_LOG_SYSVIEW_ARG(ARG7), SL_LOG_SYSVIEW_ARG(ARG8)); \
      } \
  } while (0)
  #endif
@@ -363,11 +369,11 @@
        sl_log_send_arg9( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
-         (ARG1), (ARG2), (ARG3), (ARG4), (ARG5), (ARG6), (ARG7), (ARG8), (ARG9)); \
+         SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8), SL_LOG_U32_ARG(ARG9)); \
      } else if (((((uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE))) \
                    >> SL_LOG_FLAGS_POS) & SL_LOG_FLAGS_LEVEL_MASK) \
                   >= sl_log_get_loglevel()) { \
-       SEGGER_SYSVIEW_RecordU32x9((unsigned int)(EVENT), (U32)(ARG1), (U32)(ARG2), (U32)(ARG3), (U32)(ARG4), (U32)(ARG5), (U32)(ARG6), (U32)(ARG7), (U32)(ARG8), (U32)(ARG9)); \
+       SEGGER_SYSVIEW_RecordU32x9((unsigned int)(EVENT), SL_LOG_SYSVIEW_ARG(ARG1), SL_LOG_SYSVIEW_ARG(ARG2), SL_LOG_SYSVIEW_ARG(ARG3), SL_LOG_SYSVIEW_ARG(ARG4), SL_LOG_SYSVIEW_ARG(ARG5), SL_LOG_SYSVIEW_ARG(ARG6), SL_LOG_SYSVIEW_ARG(ARG7), SL_LOG_SYSVIEW_ARG(ARG8), SL_LOG_SYSVIEW_ARG(ARG9)); \
      } \
  } while (0)
  #endif
@@ -379,11 +385,11 @@
        sl_log_send_arg10( \
          (EVENT), \
          (uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE)), \
-         (ARG1), (ARG2), (ARG3), (ARG4), (ARG5), (ARG6), (ARG7), (ARG8), (ARG9), (ARG10)); \
+         SL_LOG_U32_ARG(ARG1), SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8), SL_LOG_U32_ARG(ARG9), SL_LOG_U32_ARG(ARG10)); \
      } else if (((((uint8_t)((LOG_LEVEL << 1) | (EVENT_TYPE))) \
                    >> SL_LOG_FLAGS_POS) & SL_LOG_FLAGS_LEVEL_MASK) \
                   >= sl_log_get_loglevel()) { \
-       SEGGER_SYSVIEW_RecordU32x10((unsigned int)(EVENT), (U32)(ARG1), (U32)(ARG2), (U32)(ARG3), (U32)(ARG4), (U32)(ARG5), (U32)(ARG6), (U32)(ARG7), (U32)(ARG8), (U32)(ARG9), (U32)(ARG10)); \
+       SEGGER_SYSVIEW_RecordU32x10((unsigned int)(EVENT), SL_LOG_SYSVIEW_ARG(ARG1), SL_LOG_SYSVIEW_ARG(ARG2), SL_LOG_SYSVIEW_ARG(ARG3), SL_LOG_SYSVIEW_ARG(ARG4), SL_LOG_SYSVIEW_ARG(ARG5), SL_LOG_SYSVIEW_ARG(ARG6), SL_LOG_SYSVIEW_ARG(ARG7), SL_LOG_SYSVIEW_ARG(ARG8), SL_LOG_SYSVIEW_ARG(ARG9), SL_LOG_SYSVIEW_ARG(ARG10)); \
      } \
  } while (0)
  #endif

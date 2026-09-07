@@ -1743,6 +1743,104 @@ typedef struct sl_rail_ble_cs_antenna_config {
 } sl_rail_ble_cs_antenna_config_t;
 
 /**
+ * @enum sl_rail_ble_rf_switch_vdd_prs_signal_t
+ * @brief PRS signal used to gate the RF switch VDD supply pin.
+ */
+SLI_RAIL_ENUM(sl_rail_ble_rf_switch_vdd_prs_signal_t) {
+  /**
+   * VDD follows RAC PA enable OR LNA enable.
+   */
+  SL_RAIL_BLE_RF_SWITCH_VDD_PRS_SIGNAL_PAEN_OR_LNAEN = 0u,
+  /**
+   * VDD follows RAC TX active OR RX active.
+   */
+  SL_RAIL_BLE_RF_SWITCH_VDD_PRS_SIGNAL_TX_OR_RX_ACTIVE = 1u,
+};
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// Self-referencing defines minimize compiler complaints when using SLI_RAIL_ENUM
+#define SL_RAIL_BLE_RF_SWITCH_VDD_PRS_SIGNAL_PAEN_OR_LNAEN \
+  ((sl_rail_ble_rf_switch_vdd_prs_signal_t)                \
+   SL_RAIL_BLE_RF_SWITCH_VDD_PRS_SIGNAL_PAEN_OR_LNAEN)
+#define SL_RAIL_BLE_RF_SWITCH_VDD_PRS_SIGNAL_TX_OR_RX_ACTIVE \
+  ((sl_rail_ble_rf_switch_vdd_prs_signal_t)                  \
+   SL_RAIL_BLE_RF_SWITCH_VDD_PRS_SIGNAL_TX_OR_RX_ACTIVE)
+#endif//DOXYGEN_SHOULD_SKIP_THIS
+
+/** Default VDD settle time in microseconds before control pins are toggled. */
+#define SL_RAIL_BLE_RF_SWITCH_VDD_SETTLE_TIME_US_DEFAULT  2U
+
+/**
+ * @struct sl_rail_ble_rf_switch_gpio_t
+ * @brief GPIO port and pin for RF switch control.
+ */
+typedef struct sl_rail_ble_rf_switch_gpio {
+  /** GPIO port. */
+  uint8_t gpio_port;
+  /** GPIO pin number on the port. */
+  uint8_t gpio_pin;
+} sl_rail_ble_rf_switch_gpio_t;
+
+/**
+ * @struct sl_rail_ble_rf_switch_config_t
+ * @brief Contains arguments for \ref sl_rail_ble_config_rf_switch().
+ *
+ * @note This configures an external RF switch used for antenna switching. The
+ *   switch control GPIO(s) themselves are configured through \ref
+ *   sl_rail_ble_config_aox_antenna() (the same mechanism used for AoX/CS antenna
+ *   switching); this structure layers the antenna-to-pin mapping, optional VDD
+ *   power-gating, and idle behavior on top of it. Internally this is currently
+ *   applied to Channel Sounding only, but the configuration is intentionally not
+ *   CS-specific so it can be extended to other antenna-switching features.
+ */
+typedef struct sl_rail_ble_rf_switch_config {
+  /**
+   * When true, @ref antenna_gpio_pattern provides a custom antenna-id ->
+   * control-pin bit pattern; otherwise the natural binary encoding
+   * (antenna id - 1) is used, matching the historical fixed mapping.
+   */
+  bool use_antenna_gpio_pattern;
+  /**
+   * Antenna-id -> control-pin bit pattern, indexed by 0-based antenna id (entry
+   * @c i is for antenna id <tt>i + 1</tt>). bit 0 drives the first antenna-switch
+   * GPIO configured via \ref sl_rail_ble_config_aox_antenna(), bit 1 the second.
+   * Only used when @ref use_antenna_gpio_pattern is true; each entry must be in
+   * range <tt>[0, 3]</tt> and may only set bits for control pins that are
+   * actually configured.
+   *
+   * This associates a particular GPIO drive pattern with a particular antenna
+   * id, supporting configurable polarity (standard vs inverted), single-pin (one
+   * GPIO) or dual-pin complementary (two same-port GPIOs) SPDT switches, and
+   * fully custom antenna-to-pin mappings.
+   */
+  uint8_t antenna_gpio_pattern[SL_RAIL_BLE_CS_MAX_ANTENNAS];
+  /** True to enable a VDD power-gating GPIO for the external RF switch. */
+  bool vdd_enable;
+  /** VDD supply GPIO (used when vdd_enable is true). */
+  sl_rail_ble_rf_switch_gpio_t vdd_pin;
+  /**
+   * Settle time in microseconds after VDD is asserted before control pins
+   * are toggled. Default \ref SL_RAIL_BLE_RF_SWITCH_VDD_SETTLE_TIME_US_DEFAULT.
+   */
+  uint8_t vdd_settle_time_us;
+  /** PRS signal that gates the VDD pin when vdd_enable is true. */
+  sl_rail_ble_rf_switch_vdd_prs_signal_t vdd_prs_signal;
+  /**
+   * When true, the antenna-switch control pins are driven low whenever the
+   * radio is inactive (between half steps and steps) so the external switch is
+   * not left powered through a control line at idle. All LDMA-driven control
+   * pins are parked low during each pre-TX/pre-RX wait and re-driven when the
+   * next half step selects its antenna.
+   *
+   * Defaults to false (backward-compatible: the control pins hold their last
+   * selected levels between half steps, so a dual-pin complementary switch keeps
+   * the High pin powering the switch at idle). Enabling this consumes no
+   * additional PRS channels.
+   */
+  bool idle_control_pins_low;
+} sl_rail_ble_rf_switch_config_t;
+
+/**
  * @struct sl_rail_ble_cs_gd_comp_tables_t
  * @brief Contains pointers to CS group delay compensation tables.
  */
@@ -1847,6 +1945,27 @@ sl_rail_status_t sl_rail_ble_set_next_cs_step(sl_rail_handle_t rail_handle,
  */
 sl_rail_status_t sl_rail_ble_config_cs_antenna(sl_rail_handle_t rail_handle,
                                                const sl_rail_ble_cs_antenna_config_t *p_antenna_config);
+
+/**
+ * Configure an external RF switch used for antenna switching: the antenna-to-pin
+ * mapping, and optional VDD power-gating and idle behavior.
+ *
+ * @param[in] rail_handle A real RAIL instance handle.
+ * @param[in] p_rf_switch_config A pointer to the RF switch configuration.
+ * @return Status code indicating success of the function call.
+ *
+ * @note The antenna-switch control GPIO(s) are configured through \ref
+ *   sl_rail_ble_config_aox_antenna(); this API layers the antenna-to-pin
+ *   mapping (\ref sl_rail_ble_rf_switch_config_t::antenna_gpio_pattern) and the
+ *   optional VDD power-gating / idle-low behavior on top. It must be called
+ *   before \ref sl_rail_ble_enable_cs(). Internally this is currently applied to
+ *   Channel Sounding only.
+ *
+ * @warning This API is not supported if GPIO is configured as a secure
+ *   peripheral and will return \ref SL_RAIL_STATUS_INVALID_CALL.
+ */
+sl_rail_status_t sl_rail_ble_config_rf_switch(sl_rail_handle_t rail_handle,
+                                              const sl_rail_ble_rf_switch_config_t *p_rf_switch_config);
 
 /**
  * Returns the number of antennas configured for a CS event.

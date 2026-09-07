@@ -448,6 +448,14 @@
                 <param datatype="uint32" name="diff" type="uint32"/>
             </returns>
         </command>
+        <command index="61" name="set_scan_bond_lookup" >
+            <params>
+                <param datatype="uint8" name="bond_lookup" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
         <event index="0" name="initialized">
             <params>
                 <param datatype="uint8" name="provisioned" type="uint8"/>

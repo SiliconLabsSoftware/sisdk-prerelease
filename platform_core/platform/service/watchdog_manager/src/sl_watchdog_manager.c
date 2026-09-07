@@ -36,6 +36,7 @@
 #include "sl_common.h"
 #include "sl_core.h"
 #include "sl_hal_emu.h"
+#include "sl_component_catalog.h"
 
 #include <string.h>
 
@@ -84,6 +85,20 @@ __no_init static watchdog_manager_noinit_state_t noinit_state @ ".noinit";
 #else
 static watchdog_manager_noinit_state_t noinit_state SL_ATTRIBUTE_SECTION(".noinit");
 #endif
+
+#if SL_WATCHDOG_MANAGER_LOCK == 0
+/// Pending timeout period for apply_hardware_configuration_safely().
+static uint8_t pending_timeout_period;
+
+/// Pending clock source for apply_hardware_configuration_safely().
+static sli_watchdog_manager_hal_clock_source_t pending_clock_source;
+
+/// Previous timeout period used for rollback.
+static uint8_t previous_timeout_period;
+
+/// Previous clock source used for rollback.
+static sli_watchdog_manager_hal_clock_source_t previous_clock_source;
+#endif // SL_WATCHDOG_MANAGER_LOCK == 0
 
 /*******************************************************************************
  **************************   LOCAL FUNCTIONS   ********************************
@@ -192,15 +207,160 @@ static void record_faulty_watchdog(void)
 static sl_status_t sync_starve_interrupt(void)
 {
 #if defined(_WDOG_CFG_WARNSEL_MASK)
+#if defined(SL_CATALOG_CRASH_MANAGER_COMPONENT_PRESENT)
+  return sli_watchdog_manager_hal_enable_starve_interrupt();
+#else
   if (starve_callback != NULL
       && SL_WATCHDOG_MANAGER_WARNING_TIME != SL_WATCHDOG_MANAGER_WARNING_DISABLE) {
     return sli_watchdog_manager_hal_enable_starve_interrupt();
   }
   return sli_watchdog_manager_hal_disable_starve_interrupt();
+#endif
 #else
   return SL_STATUS_OK;
 #endif
 }
+
+/***************************************************************************//**
+ * @brief Convert a HAL clock source to the public representation.
+ ******************************************************************************/
+static sl_status_t clock_source_from_hal(
+  sli_watchdog_manager_hal_clock_source_t hal_clock_source,
+  sl_watchdog_manager_clock_source_t *clock_source)
+{
+  switch (hal_clock_source) {
+    case SLI_WATCHDOG_MANAGER_HAL_CLK_HCLKDIV1024:
+      *clock_source = SL_WATCHDOG_MANAGER_CLOCK_SOURCE_HCLKDIV1024;
+      break;
+
+    case SLI_WATCHDOG_MANAGER_HAL_CLK_LFRCO:
+      *clock_source = SL_WATCHDOG_MANAGER_CLOCK_SOURCE_LFRCO;
+      break;
+
+    case SLI_WATCHDOG_MANAGER_HAL_CLK_LFXO:
+      *clock_source = SL_WATCHDOG_MANAGER_CLOCK_SOURCE_LFXO;
+      break;
+
+    case SLI_WATCHDOG_MANAGER_HAL_CLK_ULFRCO:
+      *clock_source = SL_WATCHDOG_MANAGER_CLOCK_SOURCE_ULFRCO;
+      break;
+
+    case SLI_WATCHDOG_MANAGER_HAL_CLK_INVALID:
+    default:
+      return SL_STATUS_INVALID_STATE;
+  }
+
+  return SL_STATUS_OK;
+}
+
+#if SL_WATCHDOG_MANAGER_LOCK == 0
+/***************************************************************************//**
+ * @brief Convert a public clock source to the HAL representation.
+ ******************************************************************************/
+static sl_status_t clock_source_to_hal(
+  sl_watchdog_manager_clock_source_t clock_source,
+  sli_watchdog_manager_hal_clock_source_t *hal_clock_source)
+{
+  switch (clock_source) {
+    case SL_WATCHDOG_MANAGER_CLOCK_SOURCE_HCLKDIV1024:
+      *hal_clock_source = SLI_WATCHDOG_MANAGER_HAL_CLK_HCLKDIV1024;
+      break;
+
+    case SL_WATCHDOG_MANAGER_CLOCK_SOURCE_LFRCO:
+      *hal_clock_source = SLI_WATCHDOG_MANAGER_HAL_CLK_LFRCO;
+      break;
+
+    case SL_WATCHDOG_MANAGER_CLOCK_SOURCE_LFXO:
+      *hal_clock_source = SLI_WATCHDOG_MANAGER_HAL_CLK_LFXO;
+      break;
+
+    case SL_WATCHDOG_MANAGER_CLOCK_SOURCE_ULFRCO:
+      *hal_clock_source = SLI_WATCHDOG_MANAGER_HAL_CLK_ULFRCO;
+      break;
+
+    default:
+      return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * @brief Restore previous hardware configuration and running state.
+ ******************************************************************************/
+static void restore_hardware_configuration(
+  sl_status_t (*apply_previous)(void),
+  bool was_started)
+{
+  (void)apply_previous();
+  (void)sli_watchdog_manager_hal_feed();
+
+  if (was_started) {
+    (void)sli_watchdog_manager_hal_enable();
+    (void)sync_starve_interrupt();
+  }
+}
+
+/***************************************************************************//**
+ * @brief Disable WDOG, apply a configuration change, feed, and restore state.
+ ******************************************************************************/
+static sl_status_t apply_hardware_configuration_safely(
+  sl_status_t (*apply_configuration)(void),
+  sl_status_t (*apply_previous)(void))
+{
+  sl_status_t status;
+  bool was_started = manager_state.started;
+
+  status = sli_watchdog_manager_hal_disable();
+  if (status != SL_STATUS_OK && status != SL_STATUS_NOT_SUPPORTED) {
+    return status;
+  }
+
+  status = apply_configuration();
+  if (status != SL_STATUS_OK) {
+    restore_hardware_configuration(apply_previous, was_started);
+    return status;
+  }
+
+  status = sli_watchdog_manager_hal_feed();
+  if (status != SL_STATUS_OK) {
+    restore_hardware_configuration(apply_previous, was_started);
+    return status;
+  }
+
+  if (was_started) {
+    status = sli_watchdog_manager_hal_enable();
+    if (status != SL_STATUS_OK && status != SL_STATUS_NOT_SUPPORTED) {
+      restore_hardware_configuration(apply_previous, was_started);
+      return status;
+    }
+
+    status = sync_starve_interrupt();
+  }
+
+  return status;
+}
+
+static sl_status_t apply_pending_timeout_period(void)
+{
+  return sli_watchdog_manager_hal_set_timeout_period(pending_timeout_period);
+}
+
+static sl_status_t apply_previous_timeout_period(void)
+{
+  return sli_watchdog_manager_hal_set_timeout_period(previous_timeout_period);
+}
+
+static sl_status_t apply_pending_clock_source(void)
+{
+  return sli_watchdog_manager_hal_set_clock_source(pending_clock_source);
+}
+
+static sl_status_t apply_previous_clock_source(void)
+{
+  return sli_watchdog_manager_hal_set_clock_source(previous_clock_source);
+}
+#endif // SL_WATCHDOG_MANAGER_LOCK == 0
 
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
@@ -483,6 +643,106 @@ sl_status_t sl_watchdog_manager_force_feed(void)
   CORE_EXIT_ATOMIC();
 
   return status;
+}
+
+/***************************************************************************//**
+ * Get the hardware watchdog timeout period.
+ ******************************************************************************/
+sl_status_t sl_watchdog_manager_get_timeout_period(uint8_t *period)
+{
+  return sli_watchdog_manager_hal_get_timeout_period(period);
+}
+
+/***************************************************************************//**
+ * Set the hardware watchdog timeout period.
+ ******************************************************************************/
+sl_status_t sl_watchdog_manager_set_timeout_period(uint8_t period)
+{
+  sl_status_t status;
+
+  if (!manager_state.initialized) {
+    return SL_STATUS_NOT_INITIALIZED;
+  }
+
+#if SL_WATCHDOG_MANAGER_LOCK != 0
+  (void)period;
+  return SL_STATUS_PERMISSION;
+#else
+  if (period > 15) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  status = sli_watchdog_manager_hal_get_timeout_period(&previous_timeout_period);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  if (previous_timeout_period == period) {
+    return SL_STATUS_OK;
+  }
+
+  pending_timeout_period = period;
+  return apply_hardware_configuration_safely(apply_pending_timeout_period,
+                                             apply_previous_timeout_period);
+#endif
+}
+
+/***************************************************************************//**
+ * Get the hardware watchdog clock source.
+ ******************************************************************************/
+sl_status_t sl_watchdog_manager_get_clock_source(
+  sl_watchdog_manager_clock_source_t *clock_source)
+{
+  sl_status_t status;
+  sli_watchdog_manager_hal_clock_source_t hal_clock_source;
+
+  if (clock_source == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  status = sli_watchdog_manager_hal_get_clock_source(&hal_clock_source);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  return clock_source_from_hal(hal_clock_source, clock_source);
+}
+
+/***************************************************************************//**
+ * Set the hardware watchdog clock source.
+ ******************************************************************************/
+sl_status_t sl_watchdog_manager_set_clock_source(
+  sl_watchdog_manager_clock_source_t clock_source)
+{
+  sl_status_t status;
+  sli_watchdog_manager_hal_clock_source_t hal_clock_source;
+
+  if (!manager_state.initialized) {
+    return SL_STATUS_NOT_INITIALIZED;
+  }
+
+#if SL_WATCHDOG_MANAGER_LOCK != 0
+  (void)clock_source;
+  return SL_STATUS_PERMISSION;
+#else
+  status = clock_source_to_hal(clock_source, &hal_clock_source);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  status = sli_watchdog_manager_hal_get_clock_source(&previous_clock_source);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  if (previous_clock_source == hal_clock_source) {
+    return SL_STATUS_OK;
+  }
+
+  pending_clock_source = hal_clock_source;
+  return apply_hardware_configuration_safely(apply_pending_clock_source,
+                                             apply_previous_clock_source);
+#endif
 }
 
 /***************************************************************************//**

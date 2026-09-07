@@ -100,7 +100,7 @@ extern __INLINE sl_status_t sl_hal_gpio_get_drive_strength(sl_gpio_t *gpio,
 #endif
 #if defined(_HSIO_P_HSRX_MASK) && defined(HSIO_PRESENT)
 extern __INLINE sl_status_t sl_hal_gpio_is_high_speed_rx_enabled(sl_gpio_t *gpio,
-                                                                bool *is_enabled);
+                                                                 bool *is_enabled);
 extern __INLINE sl_status_t sl_hal_gpio_configure_high_speed_rx(sl_gpio_t *gpio,
                                                                 bool enable);
 #endif
@@ -112,10 +112,12 @@ extern __INLINE sl_status_t sl_hal_gpio_get_high_speed_rx_hysteresis(sl_gpio_t *
 #endif
 #if defined(_HSIO_P_NONOVRLPDIS_MASK) && defined(HSIO_PRESENT)
 extern __INLINE sl_status_t sl_hal_gpio_set_non_overlap_protection_disable(sl_gpio_t *gpio,
-                                                                          bool disable);
+                                                                           bool disable);
 extern __INLINE sl_status_t sl_hal_gpio_get_non_overlap_protection_disable(sl_gpio_t *gpio,
-                                                                          bool *disable);
+                                                                           bool *disable);
 #endif
+extern __INLINE sl_status_t sl_hal_gpio_latch_pin(const sl_gpio_t *gpio);
+extern __INLINE sl_status_t sl_hal_gpio_unlatch_pin(const sl_gpio_t *gpio);
 
 /*******************************************************************************
  ***************************   LOCAL FUNCTIONS   *******************************
@@ -174,9 +176,11 @@ void sl_hal_gpio_set_pin_mode(const sl_gpio_t *gpio,
                                 0xFu << (gpio->pin * 4),
                                 gpio_mode << (gpio->pin * 4));
     } else {
+#if defined(_HSIO_P_MODEH_MASK)
       sl_hal_bus_reg_write_mask(&(GPIO->H[hsio_index].MODEH),
                                 0xFu << ((gpio->pin - 8) * 4),
                                 gpio_mode << ((gpio->pin - 8) * 4));
+#endif
     }
   } else
 #endif
@@ -186,9 +190,11 @@ void sl_hal_gpio_set_pin_mode(const sl_gpio_t *gpio,
                                 0xFu << (gpio->pin * 4),
                                 gpio_mode << (gpio->pin * 4));
     } else {
+#if defined(_GPIO_P_MODEH_MASK)
       sl_hal_bus_reg_write_mask(&(GPIO->P[gpio->port].MODEH),
                                 0xFu << ((gpio->pin - 8) * 4),
                                 gpio_mode << ((gpio->pin - 8) * 4));
+#endif
     }
   }
 
@@ -202,6 +208,13 @@ void sl_hal_gpio_set_pin_mode(const sl_gpio_t *gpio,
       sl_hal_gpio_clear_pin(gpio);
     }
   }
+
+  SL_PRINT_STRING_DEBUG("port=%u pin=%u\r\n",
+                        (unsigned int)gpio->port,
+                        (unsigned int)gpio->pin);
+  SL_PRINT_STRING_DEBUG("mode=%d output_value=%d\r\n",
+                        (int)mode,
+                        (int)output_value);
 }
 
 /***************************************************************************//**
@@ -224,7 +237,9 @@ sl_gpio_mode_t sl_hal_gpio_get_pin_mode(const sl_gpio_t *gpio)
     if (gpio->pin < 8) {
       mode = (sl_gpio_mode_t) ((GPIO->H[hsio_index].MODEL >> (gpio->pin * 4)) & 0xF);
     } else {
+#if defined(_HSIO_P_MODEH_MASK)
       mode = (sl_gpio_mode_t) ((GPIO->H[hsio_index].MODEH >> ((gpio->pin - 8) * 4)) & 0xF);
+#endif
     }
   } else
 #endif
@@ -232,7 +247,9 @@ sl_gpio_mode_t sl_hal_gpio_get_pin_mode(const sl_gpio_t *gpio)
     if (gpio->pin < 8) {
       mode = (sl_gpio_mode_t) ((GPIO->P[gpio->port].MODEL >> (gpio->pin * 4)) & 0xF);
     } else {
+#if defined(_GPIO_P_MODEH_MASK)
       mode = (sl_gpio_mode_t) ((GPIO->P[gpio->port].MODEH >> ((gpio->pin - 8) * 4)) & 0xF);
+#endif
     }
   }
 
@@ -322,6 +339,13 @@ int32_t sl_hal_gpio_configure_external_interrupt(const sl_gpio_t *gpio,
 
     // Clear any pending interrupt.
     sl_hal_gpio_clear_interrupts(1 << int_no);
+
+    SL_PRINT_STRING_DEBUG("port=%u pin=%u\r\n",
+                          (unsigned int)gpio->port,
+                          (unsigned int)gpio->pin);
+    SL_PRINT_STRING_DEBUG("int_no=%ld flags=0x%02lx\r\n",
+                          (long)int_no,
+                          (unsigned long)flags);
   }
 
   SL_LOG_DEBUG_ASSERT(int_no != SL_GPIO_INTERRUPT_UNAVAILABLE);
@@ -395,78 +419,77 @@ int32_t sl_hal_gpio_configure_wakeup_em4_external_interrupt(const sl_gpio_t *gpi
 /*******************************************************************************
  ***************************   LOCAL FUNCTIONS   *******************************
  ******************************************************************************/
-
 static sl_gpio_mode_t sl_hal_gpio_map_gpio_mode(sl_gpio_mode_t mode)
 {
   switch (mode) {
     #if defined(_GPIO_P_MODEL_MODE0_DISABLED)
-        case SL_GPIO_MODE_DISABLED:
-          return  _GPIO_P_MODEL_MODE0_DISABLED;
+    case SL_GPIO_MODE_DISABLED:
+      return _GPIO_P_MODEL_MODE0_DISABLED;
     #endif
     #if defined(_GPIO_P_MODEL_MODE0_INPUT)
-        case SL_GPIO_MODE_INPUT:
-          return _GPIO_P_MODEL_MODE0_INPUT;
+    case SL_GPIO_MODE_INPUT:
+      return _GPIO_P_MODEL_MODE0_INPUT;
     #endif
     #if defined(_GPIO_P_MODEL_MODE0_INPUTPULL)
-        case SL_GPIO_MODE_INPUT_PULL:
-          return _GPIO_P_MODEL_MODE0_INPUTPULL;
+    case SL_GPIO_MODE_INPUT_PULL:
+      return _GPIO_P_MODEL_MODE0_INPUTPULL;
     #endif
     #if defined(_GPIO_P_MODEL_MODE0_INPUTPULLFILTER)
-        case SL_GPIO_MODE_INPUT_PULL_FILTER:
-          return _GPIO_P_MODEL_MODE0_INPUTPULLFILTER;
+    case SL_GPIO_MODE_INPUT_PULL_FILTER:
+      return _GPIO_P_MODEL_MODE0_INPUTPULLFILTER;
     #endif
     #if defined(_GPIO_P_MODEL_MODE0_PUSHPULL)
-        case SL_GPIO_MODE_PUSH_PULL:
-          return _GPIO_P_MODEL_MODE0_PUSHPULL;
+    case SL_GPIO_MODE_PUSH_PULL:
+      return _GPIO_P_MODEL_MODE0_PUSHPULL;
     #endif
     #if defined(_GPIO_P_MODEL_MODE0_PUSHPULLALT)
-        case SL_GPIO_MODE_PUSH_PULL_ALTERNATE:
-          return _GPIO_P_MODEL_MODE0_PUSHPULLALT;
+    case SL_GPIO_MODE_PUSH_PULL_ALTERNATE:
+      return _GPIO_P_MODEL_MODE0_PUSHPULLALT;
     #endif
     #if defined(_GPIO_P_MODEL_MODE0_WIREDOR)
-        case SL_GPIO_MODE_WIRED_OR:
-          return _GPIO_P_MODEL_MODE0_WIREDOR;
+    case SL_GPIO_MODE_WIRED_OR:
+      return _GPIO_P_MODEL_MODE0_WIREDOR;
     #endif
     #if defined(_GPIO_P_MODEL_MODE0_WIREDORPULLDOWN)
-        case SL_GPIO_MODE_WIRED_OR_PULL_DOWN:
-          return _GPIO_P_MODEL_MODE0_WIREDORPULLDOWN;
+    case SL_GPIO_MODE_WIRED_OR_PULL_DOWN:
+      return _GPIO_P_MODEL_MODE0_WIREDORPULLDOWN;
     #endif
     #if defined(_GPIO_P_MODEL_MODE0_WIREDAND)
-        case SL_GPIO_MODE_WIRED_AND:
-          return _GPIO_P_MODEL_MODE0_WIREDAND;
+    case SL_GPIO_MODE_WIRED_AND:
+      return _GPIO_P_MODEL_MODE0_WIREDAND;
     #endif
     #if defined(_GPIO_P_MODEL_MODE0_WIREDANDFILTER)
-        case SL_GPIO_MODE_WIRED_AND_FILTER:
-          return _GPIO_P_MODEL_MODE0_WIREDANDFILTER;
+    case SL_GPIO_MODE_WIRED_AND_FILTER:
+      return _GPIO_P_MODEL_MODE0_WIREDANDFILTER;
     #endif
     #if defined(_GPIO_P_MODEL_MODE0_WIREDANDPULLUP)
-        case SL_GPIO_MODE_WIRED_AND_PULLUP:
-          return _GPIO_P_MODEL_MODE0_WIREDANDPULLUP;
+    case SL_GPIO_MODE_WIRED_AND_PULLUP:
+      return _GPIO_P_MODEL_MODE0_WIREDANDPULLUP;
     #endif
     #if defined(_GPIO_P_MODEL_MODE0_WIREDANDPULLUPFILTER)
-        case SL_GPIO_MODE_WIRED_AND_PULLUP_FILTER:
-          return _GPIO_P_MODEL_MODE0_WIREDANDPULLUPFILTER;
+    case SL_GPIO_MODE_WIRED_AND_PULLUP_FILTER:
+      return _GPIO_P_MODEL_MODE0_WIREDANDPULLUPFILTER;
     #endif
     #if defined(_GPIO_P_MODEL_MODE0_WIREDANDALT)
-        case SL_GPIO_MODE_WIRED_AND_ALTERNATE:
-          return _GPIO_P_MODEL_MODE0_WIREDANDALT;
+    case SL_GPIO_MODE_WIRED_AND_ALTERNATE:
+      return _GPIO_P_MODEL_MODE0_WIREDANDALT;
     #endif
     #if defined(_GPIO_P_MODEL_MODE0_WIREDANDALTFILTER)
-        case SL_GPIO_MODE_WIRED_AND_ALTERNATE_FILTER:
-          return _GPIO_P_MODEL_MODE0_WIREDANDALTFILTER;
+    case SL_GPIO_MODE_WIRED_AND_ALTERNATE_FILTER:
+      return _GPIO_P_MODEL_MODE0_WIREDANDALTFILTER;
     #endif
     #if defined(_GPIO_P_MODEL_MODE0_WIREDANDALTPULLUP)
-        case SL_GPIO_MODE_WIRED_AND_ALTERNATE_PULLUP:
-          return _GPIO_P_MODEL_MODE0_WIREDANDALTPULLUP;
+    case SL_GPIO_MODE_WIRED_AND_ALTERNATE_PULLUP:
+      return _GPIO_P_MODEL_MODE0_WIREDANDALTPULLUP;
     #endif
     #if defined(_GPIO_P_MODEL_MODE0_WIREDANDALTPULLUPFILTER)
-        case SL_GPIO_MODE_WIRED_AND_ALTERNATE_PULLUP_FILTER:
-          return _GPIO_P_MODEL_MODE0_WIREDANDALTPULLUPFILTER;
+    case SL_GPIO_MODE_WIRED_AND_ALTERNATE_PULLUP_FILTER:
+      return _GPIO_P_MODEL_MODE0_WIREDANDALTPULLUPFILTER;
     #endif
-        default:
-          SL_LOG_DEBUG_ASSERT(false);
-          return SL_GPIO_MODE_DISABLED;
-    }
+    default:
+      SL_LOG_DEBUG_ASSERT(false);
+      return SL_GPIO_MODE_DISABLED;
+  }
 }
 
 static sl_gpio_mode_t sl_hal_gpio_map_gpio_reg_to_mode(sl_gpio_mode_t mode)

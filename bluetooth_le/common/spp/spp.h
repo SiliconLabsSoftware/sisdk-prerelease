@@ -95,6 +95,21 @@ typedef size_t (*spp_on_data_receive_t)(const uint8_t *data, size_t data_size);
 void spp_set_role(spp_role_t role);
 
 /***************************************************************************//**
+ * Disable the SPP component
+ *
+ * Stops SPP processing and resets connection state (write timer, transmit
+ * queue, and connection handles). Safe to call after closing a link even if
+ * the connection_closed event has not been delivered yet. When the device is
+ * in the peripheral role, advertising should also be stopped by the
+ * application.
+ *
+ * @return SL_STATUS_OK on success, or an error code otherwise. SPP is still
+ *         disabled even when an error is returned.
+ * @retval SL_STATUS_FAIL if the transmit queue could not be reinitialized
+ ******************************************************************************/
+sl_status_t spp_disable(void);
+
+/***************************************************************************//**
  * Get SPP role
  *
  * @return current role of the node
@@ -108,6 +123,7 @@ spp_role_t spp_get_role(void);
  * @param[in] data Pointer to the data to be transmitted
  * @param[in] data_size Length of the data in bytes
  * @return SL_STATUS_OK on success, or an error code otherwise
+ * @retval SL_STATUS_INVALID_STATE if SPP has been disabled via @ref spp_disable
  ******************************************************************************/
 sl_status_t spp_transmit(const uint8_t *data, const size_t data_size);
 

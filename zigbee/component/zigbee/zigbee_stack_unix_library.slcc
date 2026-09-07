@@ -9,6 +9,9 @@ provides:
 - name: zigbee_stack_unix_implementation
 - name: zigbee_stack_unix_library
 
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/linux
 metadata:
   sbom:
     license: MSLA

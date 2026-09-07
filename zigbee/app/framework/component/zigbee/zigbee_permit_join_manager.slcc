@@ -26,6 +26,9 @@ template_contribution:
     callback_type: zdo_message_received
     function_name: sl_zigbee_af_permit_join_manager_zdo_message_received_cb
 
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/permit-join-manager
 metadata:
   sbom:
     license: MSLA

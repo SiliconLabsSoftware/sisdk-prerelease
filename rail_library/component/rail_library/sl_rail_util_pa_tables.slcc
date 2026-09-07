@@ -387,9 +387,9 @@ include:
   file_list:
   - path: sl_rail_util_pa_dbm_powersetting_mapping_table.h
   - path: sl_rail_util_pa_dbm_powersetting_mapping_table_0dbm.h
-  - path: sl_rail_util_pa_dbm_powersetting_mapping_table_14dbm.h
+  - path: sl_rail_util_pa_dbm_powersetting_mapping_table_13dbm.h
   - path: sl_rail_util_pa_dbm_powersetting_mapping_table_20dbm.h
-  - path: sl_rail_util_pa_dbm_powersetting_mapping_table_automode_0_14dbm.h
+  - path: sl_rail_util_pa_dbm_powersetting_mapping_table_automode_0_13dbm.h
   - path: sl_rail_util_pa_dbm_powersetting_mapping_table_automode_0_20dbm.h
   condition:
   - device_generic_family_sixx353

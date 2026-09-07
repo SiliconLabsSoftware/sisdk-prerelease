@@ -20,6 +20,9 @@ template_contribution:
 - name: mbedtls_config
   value: MBEDTLS_PLATFORM_MEMORY
 
+documentation:
+  # Dynamic Memory — Runtime initialisation of dynamic memory allocation functions for Mbed TLS
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-mbedtls/
 metadata:
   sbom:
     reference: mbedtls_sbom

@@ -115,6 +115,9 @@ template_file:
 template_contribution:
 - name: component_catalog
   value: zigbee_green_power_adapter
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/green-power-adapter
 metadata:
   sbom:
     license: MSLA

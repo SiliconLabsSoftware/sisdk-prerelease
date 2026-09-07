@@ -1,6 +1,8 @@
 #ifndef SL_BTCTRL_CONFIG_H
 #define SL_BTCTRL_CONFIG_H
 
+#include "sl_btctrl_linklayer_defs.h"
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <h> Bluetooth Controller Configuration
@@ -204,6 +206,23 @@
 #define SL_BT_CONTROLLER_PRIMARY_EXT_PACKET_INCLUDE_ADDRESS      (0)
 // </e>
 // </h> Advertising Configuration
+
+// <h> Bluetooth Controller CTE Switching Pattern Configuration
+
+// <o SL_BT_CONTROLLER_CTE_PATTERN_LENGTH_MAX> Configured maximum CTE switching pattern length <0-74>
+// <i> Default: 66
+// <i> Define the maximum antenna switching pattern length accepted by the controller.
+// <i> This sets the value reported by LE Read Antenna Information.
+#ifndef SL_BT_CONTROLLER_CTE_PATTERN_LENGTH_MAX
+#define SL_BT_CONTROLLER_CTE_PATTERN_LENGTH_MAX  SLI_BT_CONTROLLER_CTE_PATTERN_LENGTH_DEFAULT
+#endif
+
+// </h> End Bluetooth Controller CTE Switching Pattern Configuration
+
+#if SL_BT_CONTROLLER_CTE_PATTERN_LENGTH_MAX > SLI_BT_CONTROLLER_CTE_PATTERN_LENGTH_ABSOLUTE_MAX
+#error "SL_BT_CONTROLLER_CTE_PATTERN_LENGTH_MAX exceeds supported maximum"
+#endif
+
 // </h> Bluetooth Controller Configuration
 
 // <<< end of configuration section >>>

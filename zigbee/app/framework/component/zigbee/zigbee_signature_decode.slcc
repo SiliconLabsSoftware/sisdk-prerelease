@@ -18,6 +18,9 @@ source:
 template_contribution:
 - name: component_catalog
   value: zigbee_signature_decode
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/ota-client
 metadata:
   sbom:
     license: MSLA

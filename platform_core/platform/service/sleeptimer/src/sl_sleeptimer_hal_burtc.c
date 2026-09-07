@@ -36,6 +36,7 @@
 
 #include "sl_sleeptimer.h"
 #include "sli_sleeptimer_hal.h"
+#include "sli_sleeptimer_log.h"
 
 #include "sl_core.h"
 
@@ -171,6 +172,8 @@ void sleeptimer_hal_init_timer()
   // Setup BURTC interrupt
   sl_interrupt_manager_clear_irq_pending(BURTC_IRQn);
   sl_interrupt_manager_enable_irq(BURTC_IRQn);
+
+  SLI_SLEEPTIMER_LOG_DEBUG("HAL initialized on BURTC");
 }
 
 /******************************************************************************

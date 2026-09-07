@@ -30,8 +30,22 @@ component:
     instance: [config0]
   - id: usb_device_class_hid
     instance: [mouse0]
+requires:
+  - name: clock_manager_runtime
+    condition: [device_series_3]
+  - name: se_firmware_unavailable
+    condition: [device_series_3]
 define:
   - name: DEBUG_EFM
+  - name: SL_CLOCK_MANAGER_PERPLL0_EN
+    value: 1
+    condition: [device_series_3]
+  - name: SL_CLOCK_MANAGER_PERPLL0_FREQ
+    value: 10
+    condition: [device_series_3]
+  - name: SL_CLOCK_MANAGER_USB0CLK_SOURCE
+    value: CMU_USB0CLKCTRL_CLKSEL_PERPLL0
+    condition: [device_series_3]
 configuration:
   - name: configTOTAL_HEAP_SIZE
     value: 40000

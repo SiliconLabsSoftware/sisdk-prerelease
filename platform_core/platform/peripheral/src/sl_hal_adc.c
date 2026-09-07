@@ -204,6 +204,13 @@ void sl_hal_adc_init(ADC_TypeDef *adc,
   for (uint8_t i = 0; i < ADC_CHANNELS(ADC_NUM(adc)); i++) {
     sl_hal_adc_update_scan_entry(adc, i, &init->entries[i]);
   }
+
+  SL_PRINT_STRING_DEBUG("branch_clock_freq=%lu, %d\r\n",
+                        (unsigned long)branch_clock_freq,
+                        (int)__LINE__);
+  SL_PRINT_STRING_DEBUG("hsclkrate=%d adcprescale=%d\r\n",
+                        (int)hsclkrate,
+                        (int)adcprescale);
 }
 
 /***************************************************************************//**
@@ -249,6 +256,10 @@ void sl_hal_adc_set_scan_mask(ADC_TypeDef *adc,
   SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
 
   adc->MASKREQ = (mask << _ADC_MASKREQ_MASKREQ_SHIFT) & _ADC_MASKREQ_MASKREQ_MASK;
+
+  SL_PRINT_STRING_DEBUG("mask=0x%08lx, %d\r\n",
+                        (unsigned long)mask,
+                        (int)__LINE__);
 }
 
 /***************************************************************************//**
@@ -378,6 +389,10 @@ void sl_hal_adc_set_timer_period(ADC_TypeDef *adc,
 {
   SL_LOG_DEBUG_ASSERT(SL_HAL_ADC_REF_VALID(adc));
   adc->TIMER = timer_period;
+
+  SL_PRINT_STRING_DEBUG("timer_period=%u, %d\r\n",
+                        (unsigned int)timer_period,
+                        (int)__LINE__);
 }
 
 /***************************************************************************//**
@@ -414,6 +429,13 @@ void sl_hal_adc_set_clock_prescalers(ADC_TypeDef *adc,
   // required for a duration of 1us.
   uint32_t ns_per_tick = (1000000000UL / clock_prescaled);
   adc->CTRL_SET = (((1000U /* ns */ / ns_per_tick) << _ADC_CTRL_TIMEBASE_SHIFT) & _ADC_CTRL_TIMEBASE_MASK);
+
+  SL_PRINT_STRING_DEBUG("branch_clock_freq=%lu, %d\r\n",
+                        (unsigned long)branch_clock_freq,
+                        (int)__LINE__);
+  SL_PRINT_STRING_DEBUG("hsclkrate=%d adcprescale=%d\r\n",
+                        (int)hsclkrate,
+                        (int)adcprescale);
 }
 
 #if defined(_ADC_OFFSETCAL_MASK) && !defined(_ADC_OFFSETCAL_NYQOFFSET_MASK)
@@ -727,24 +749,28 @@ static sl_status_t adc_calculate_prescalers(uint32_t branch_clock_freq,
   // Set clock prescalers to reasonable defaults with regards to the ADC's
   // branch clock frequency.
   uint32_t clock_prescaled;
+  uint8_t prescale;
   for (uint8_t i = 0; i <= SLI_HAL_ADC_HSCLKRATE_MAX; i++) {
     clock_prescaled = branch_clock_freq / (i + 1);
-    if ( clock_prescaled <= SLI_HAL_ADC_CLK_SRC_MAX ) {
-      if ( clock_prescaled >= SLI_HAL_ADC_CLK_CORE_MIN
-           && clock_prescaled <= SLI_HAL_ADC_CLK_CORE_MAX ) {
-        *hsclkrate = i;
-        *adcprescale = 0;
-        break;
-      } else {
-        clock_prescaled = clock_prescaled / (SLI_HAL_ADC_ADCPRESCALE_MAX + 1);
-        if ( clock_prescaled >= SLI_HAL_ADC_CLK_CORE_MIN
-             && clock_prescaled <= SLI_HAL_ADC_CLK_CORE_MAX ) {
-          *hsclkrate = i;
-          *adcprescale = 1;
-          break;
-        }
-      }
+    if ( clock_prescaled > SLI_HAL_ADC_CLK_SRC_MAX ) {
+      continue;
     }
+
+    if ( clock_prescaled >= SLI_HAL_ADC_CLK_CORE_MIN
+         && clock_prescaled <= SLI_HAL_ADC_CLK_CORE_MAX ) {
+      prescale = 0;
+    } else {
+      clock_prescaled = clock_prescaled / (SLI_HAL_ADC_ADCPRESCALE_MAX + 1);
+      if ( clock_prescaled < SLI_HAL_ADC_CLK_CORE_MIN
+           || clock_prescaled > SLI_HAL_ADC_CLK_CORE_MAX ) {
+        continue;
+      }
+      prescale = 1;
+    }
+
+    *hsclkrate = i;
+    *adcprescale = prescale;
+    break;
   }
 
   if ( *hsclkrate == 127 || *adcprescale == 127 ) {

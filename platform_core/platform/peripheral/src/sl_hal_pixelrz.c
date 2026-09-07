@@ -106,6 +106,24 @@ void sl_hal_pixelrz_init(PIXELRZ_TypeDef *pixelrz,
                       | ((uint32_t)init->stop_symbol.low_time << _PIXELRZ_TSTOPCFG_LOW_SHIFT);
   pixelrz->TRSTCFG = ((uint32_t)init->reset_symbol.high_time << _PIXELRZ_TRSTCFG_HIGH_SHIFT)
                      | ((uint32_t)init->reset_symbol.low_time << _PIXELRZ_TRSTCFG_LOW_SHIFT);
+  SL_PRINT_STRING_DEBUG("mode=%d trig=%d\r\n",
+                      (int)init->mode,
+                      (int)init->trigger_mode);
+
+  SL_PRINT_STRING_DEBUG("pixels=%lu width=%lu\r\n",
+                      (unsigned long)init->pixel_number,
+                      (unsigned long)init->pixel_width);
+
+  SL_PRINT_STRING_DEBUG("presc=%lu wm=%lu\r\n",
+                      (unsigned long)init->prescaler,
+                      (unsigned long)init->fifo_watermark_level);
+  SL_PRINT_STRING_DEBUG("t0h=%lu t0l=%lu\r\n",
+                        (unsigned long)init->zero_symbol.high_time,
+                        (unsigned long)init->zero_symbol.low_time);
+  
+  SL_PRINT_STRING_DEBUG("t1h=%lu t1l=%lu\r\n",
+                        (unsigned long)init->one_symbol.high_time,
+                        (unsigned long)init->one_symbol.low_time);
 }
 
 /***************************************************************************//**

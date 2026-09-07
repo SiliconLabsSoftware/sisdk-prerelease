@@ -1,0 +1,16 @@
+parameters: []
+
+constants:
+  - name: workspace_name
+    value: my_workspace
+
+steps:
+  # Create production image (CORE0 + CORE1) merged into a single flashable image.
+  # No bootloader and no GBL4 upgrade images: this profile only concatenates the
+  # two core images. For BOOTLOADER + GBL4 upgrade images use
+  # merge_dual_bootloader_ws instead.
+  - task: convert
+    input:
+      - "{{application_binary}}"
+      - "{{application_binary_core1}}"
+    output: artifact/{{workspace_name}}-full.s37

@@ -57,7 +57,8 @@ template_contribution:
 - name: mbedtls_config
   value: MBEDTLS_SSL_KEEP_PEER_CERTIFICATE
 documentation:
-  url: https://mbed-tls.readthedocs.io/projects/api/en/development/api/file/mbedtls__config_8h/#c.MBEDTLS_SSL_CLI_C
+  # No dedicated TLS Client page; Mbed TLS hub for related docs
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-mbedtls/
 metadata:
   sbom:
     reference: mbedtls_sbom

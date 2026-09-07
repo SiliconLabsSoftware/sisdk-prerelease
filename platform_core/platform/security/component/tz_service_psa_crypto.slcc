@@ -65,6 +65,10 @@ template_contribution:
   value: TZ_SERVICE_PSA_CRYPTO_PRESENT
   condition: [trustzone_nonsecure]
 
+documentation:
+  docset: mcu-bootloader
+  document:
+  - page: series2-trustzone/05-r-implementation
 metadata:
   sbom:
     license: Zlib

@@ -34,6 +34,7 @@
 #include "em_rtcc.h"
 #include "sl_sleeptimer.h"
 #include "sli_sleeptimer_hal.h"
+#include "sli_sleeptimer_log.h"
 #include "sl_core.h"
 #include "sl_clock_manager.h"
 #include "sl_interrupt_manager.h"
@@ -87,6 +88,8 @@ void sleeptimer_hal_init_timer(void)
 
   sl_interrupt_manager_clear_irq_pending(RTCC_IRQn);
   sl_interrupt_manager_enable_irq(RTCC_IRQn);
+
+  SLI_SLEEPTIMER_LOG_DEBUG("HAL initialized on RTCC");
 }
 
 /******************************************************************************

@@ -59,6 +59,10 @@
 #include "sl_cli_storage_nvm3.h"
 #endif
 
+#if defined(SL_CATALOG_WATCHDOG_MANAGER_PRESENT)
+#include "sli_watchdog_manager.h"
+#endif
+
 #ifndef __WEAK
 #define __WEAK          __attribute__((weak))
 #endif
@@ -223,8 +227,14 @@ __WEAK bool sli_cli_tick(sl_cli_handle_t handle)
     return true;
   }
 
-  if (sli_cli_session_handler(handle) != SL_STATUS_OK) {
-    return false;
+  {
+    sl_status_t session_status = sli_cli_session_handler(handle);
+    if (session_status != SL_STATUS_OK) {
+      if (session_status == SL_STATUS_PERMISSION) {
+        return true;
+      }
+      return false;
+    }
   }
 
   handle->tick_in_progress = true;
@@ -300,6 +310,10 @@ static void tick_task(void *arg)
 
     no_valid_input = sli_cli_tick(handle);
     if (no_valid_input) {
+#if defined(SL_CATALOG_WATCHDOG_MANAGER_PRESENT)
+      // Feed while CLI is idle/locked
+      sli_watchdog_manager_platform_feed();
+#endif
       EFM_ASSERT(osDelay(handle->loop_delay_tick) == osOK);
     }
   }

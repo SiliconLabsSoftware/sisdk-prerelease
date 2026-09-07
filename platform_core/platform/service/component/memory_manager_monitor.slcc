@@ -1,0 +1,42 @@
+id: memory_manager_monitor
+label: Memory Manager Monitor
+package: platform_core
+description: >
+  This component provides query APIs for monitoring RAM usage within the
+  Memory Manager. Static RAM is exposed via linker-symbol macros. Per-heap
+  dynamic statistics, instant retained-RAM query, and EM2 worst-case
+  retention snapshots are provided as runtime APIs.
+  It is a development and CI RAM-sizing aid, not Production Ready.
+  APIs remain sli_ and may change.
+category: Services|Memory Manager
+quality: evaluation
+metadata:
+  sbom:
+    license: Zlib
+root_path: platform_core/platform/service/memory_manager
+include:
+- path: inc
+  file_list:
+  - path: sli_memory_manager_monitor.h
+source:
+- path: src/sli_memory_manager_monitor.c
+provides:
+- name: memory_manager_monitor
+requires:
+- name: memory_manager
+- name: memory_manager_region
+- name: device
+- name: sl_common
+- name: status
+recommends:
+- id: power_manager
+  vendor: silabs
+template_contribution:
+- name: component_catalog
+  value: memory_manager_monitor
+- name: event_handler
+  value:
+    event: service_init
+    include: sli_memory_manager_monitor.h
+    handler: sli_memory_monitor_init
+  priority: -8000

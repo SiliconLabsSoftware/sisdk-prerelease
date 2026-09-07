@@ -1,0 +1,46 @@
+parameters: []
+
+constants:
+  - name: workspace_name
+    value: my_workspace
+
+steps:
+  # Create production image (BOOTLOADER + CORE0 + CORE1)
+  - task: convert
+    input:
+      - "{{bootloader_binary}}"
+      - "{{application_binary}}"
+      - "{{application_binary_core1}}"
+    output: artifact/{{workspace_name}}-full.s37
+
+  # Series 3 requires GBL4. One upgrade image per region: bootloader and each
+  # core image carry their own application properties.
+  - task: create_gbl4
+    data: "{{bootloader_binary}}"
+    output: artifact/{{workspace_name}}-bootloader.gbl
+
+  - task: create_gbl4
+    data: "{{application_binary}}"
+    output: artifact/{{workspace_name}}-core0.gbl
+
+  - task: create_gbl4
+    data: "{{application_binary_core1}}"
+    output: artifact/{{workspace_name}}-core1.gbl
+
+  # A single bundle holding the bootloader and both cores needs create_gbl4
+  # with several update images. Simplicity Commander 1v24p3 turns a YAML list
+  # under `data` into unsupported `data0`/`data1` options, so the bundle
+  # currently requires a config file listing the updates:
+  #
+  #   - task: create_gbl4
+  #     config: dual_core_bootloader_gbl4.yaml
+  #     output: artifact/{{workspace_name}}-full.gbl
+  #
+  # with dual_core_bootloader_gbl4.yaml holding the resolved image paths:
+  #
+  #   manifest:
+  #     product_id: "00000000000000000000000000000000"
+  #   updates:
+  #     - data: <bootloader image>
+  #     - data: <core0 image>
+  #     - data: <core1 image>

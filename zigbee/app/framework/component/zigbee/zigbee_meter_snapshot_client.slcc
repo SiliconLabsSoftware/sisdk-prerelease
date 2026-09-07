@@ -20,6 +20,9 @@ template_contribution:
     side: CLIENT
     service_function: sl_zigbee_af_simple_metering_cluster_client_snapshot_command_parse
 
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/meter-snapshot-client
 metadata:
   sbom:
     license: MSLA

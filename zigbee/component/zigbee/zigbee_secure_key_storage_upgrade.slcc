@@ -31,6 +31,9 @@ template_contribution:
   priority: -8923
   unless:
   - cmsis_rtos2
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/zigbee-security-manager
 metadata:
   sbom:
     license: MSLA

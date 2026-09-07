@@ -91,13 +91,13 @@
     <description>Z-Wave 800 Thunderboard Quick Start Guide</description>
     <property key="core.category" value="Quick Start Guides"/>
     <property key="core.priority" value="5"/>
-    <property key="core.boardCompatibility" value="brd2603a"/>
+    <property key="core.boardCompatibility" value="brd2603[ac]"/>
   </contentItemData>
   <contentItemData name="" label="Z-Wave 800 Dev Kit Quick-Start Guide with Unify" itemURI="https://www.silabs.com/documents/public/quick-start-guides/qsg185-z-wave-800-dev-kit.pdf">
     <description>Z-Wave 800 Dev Kit Quick-Start Guide with Unify</description>
     <property key="core.category" value="Quick Start Guides"/>
     <property key="core.priority" value="6"/>
-    <property key="core.boardCompatibility" value="brd2603a"/>
+    <property key="core.boardCompatibility" value="brd2603[ac]"/>
   </contentItemData>
   <contentItemData name="" label="Z-Wave Lock Bits and User Data Page Contents" itemURI="https://www.silabs.com/documents/public/reference-manuals/SDS14306.pdf">
     <description>Defines the Z-Wave extensions to the Lock Bits and User Data Page in the Zen Gecko SoCs.</description>

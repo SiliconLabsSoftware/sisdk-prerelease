@@ -26,6 +26,9 @@ template_contribution:
 - name: component_catalog
   value: zigbee_security_support
 
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/security-link-keys
 metadata:
   sbom:
     license: MSLA

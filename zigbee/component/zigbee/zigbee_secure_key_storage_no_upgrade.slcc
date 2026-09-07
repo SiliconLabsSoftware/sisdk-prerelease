@@ -17,6 +17,9 @@ requires:
 template_contribution:
 - name: component_catalog
   value: zigbee_secure_key_storage_no_upgrade
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/zigbee-security-manager
 metadata:
   sbom:
     license: MSLA

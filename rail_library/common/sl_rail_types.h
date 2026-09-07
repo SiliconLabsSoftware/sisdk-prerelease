@@ -3302,6 +3302,16 @@ typedef struct sl_rail_phy_info {
    * TRECS preamble bits in sync word.
    */
   uint32_t trecs_pre_bits_to_sync;
+  /**
+   * Preamble duration in microseconds.
+   * Available when phy info version is 21 or greater.
+   */
+  uint32_t preamble_duration_us;
+  /**
+   * Sync word duration in microseconds.
+   * Available when phy info version is 21 or greater.
+   */
+  uint32_t syncword_duration_us;
 } sl_rail_phy_info_t;
 #endif // DOXYGEN_UNDOCUMENTED
 

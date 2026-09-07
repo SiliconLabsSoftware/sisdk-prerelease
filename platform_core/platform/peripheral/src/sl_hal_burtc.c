@@ -96,6 +96,16 @@ void sl_hal_burtc_init(const sl_hal_burtc_init_t *init)
 
   BURTC->EM4WUEN = ((init->em4_comparator ? 1UL : 0UL) << _BURTC_EM4WUEN_COMPEM4WUEN_SHIFT)
                    | ((init->em4_overflow ? 1UL : 0UL) << _BURTC_EM4WUEN_OFEM4WUEN_SHIFT);
+
+  SL_PRINT_STRING_DEBUG("clock_divider=%lu, %d\r\n",
+                        (unsigned long)init->clock_divider,
+                        (int)__LINE__);
+  SL_PRINT_STRING_DEBUG("compare0_top=%d debug_run=%d\r\n",
+                        (int)init->compare0_top,
+                        (int)init->debug_run);
+  SL_PRINT_STRING_DEBUG("em4_comparator=%d em4_overflow=%d\r\n",
+                        (int)init->em4_comparator,
+                        (int)init->em4_overflow);
 }
 
 /***************************************************************************//**

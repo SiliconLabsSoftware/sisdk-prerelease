@@ -19,6 +19,9 @@ template_contribution:
 
 - name: psa_crypto_builtin_config
   value: "MBEDTLS_PSA_BUILTIN_ALG_PBKDF2_AES_CMAC_PRF_128 1"
+documentation:
+  # Key Derivation — PBKDF2 / PBKDF2-CMAC
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-api/sl-psa-key-derivation
 metadata:
   sbom:
     reference: mbedtls_sbom

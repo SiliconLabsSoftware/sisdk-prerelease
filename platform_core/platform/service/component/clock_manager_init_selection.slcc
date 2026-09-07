@@ -1,0 +1,21 @@
+id: clock_manager_init_selection
+label: Clock Manager Initialization Selection
+package: platform_core
+description: >
+  Internal helper for Clock Manager Initialization to  to select oscillator and clock branches to initialize.
+category: Services|Clock Manager
+quality: production
+metadata:
+  sbom:
+    license: Zlib
+ui_hints:
+  visibility: never
+provides:
+- name: clock_manager_init_selection
+requires:
+- name: clock_manager_init_hal
+root_path: platform_core/platform/service/clock_manager
+include:
+- path: src
+  file_list:
+  - path: sli_clock_manager_init_selection.h

@@ -49,9 +49,6 @@
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
 #endif
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-#include "sli_memory_profiler.h"
-#endif
 #include "task.h"
 
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
@@ -82,9 +79,6 @@
 
 void * pvPortMalloc(size_t xWantedSize)
 {
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  void * volatile return_address = sli_memory_profiler_get_return_address();
-#endif
   void * pvReturn = NULL;
 
   vTaskSuspendAll();
@@ -102,9 +96,6 @@ void * pvPortMalloc(size_t xWantedSize)
       pvReturn = sl_malloc(xWantedSize);
     }
 
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-    sli_memory_profiler_track_ownership(SLI_INVALID_MEMORY_TRACKER_HANDLE, pvReturn, return_address);
-#endif
     traceMALLOC(pvReturn, xWantedSize);
   }
   ( void ) xTaskResumeAll();

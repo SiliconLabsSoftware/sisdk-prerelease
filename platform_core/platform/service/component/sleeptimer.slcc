@@ -30,6 +30,7 @@ include:
 - path: platform/service/sleeptimer/src
   file_list:
   - path: sli_sleeptimer_hal.h
+  - path: sli_sleeptimer_log.h
 provides:
 - name: sleeptimer
 requires:
@@ -40,6 +41,7 @@ requires:
 - name: sl_common
 - name: sl_core
 - name: code_classification
+- name: log_none
 template_contribution:
 - name: event_handler
   value:

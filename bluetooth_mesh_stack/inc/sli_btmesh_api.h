@@ -136,6 +136,7 @@ enum sli_btmesh_command_id
     sli_btmesh_node_set_provisioning_service_scan_response_command_id = 0x39,
     sli_btmesh_node_clear_provisioning_service_scan_response_command_id = 0x3a,
     sli_btmesh_node_compare_dcd_command_id = 0x3b,
+    sli_btmesh_node_set_scan_bond_lookup_command_id = 0x3d,
     sli_btmesh_prov_init_command_id = 0x00,
     sli_btmesh_prov_scan_unprov_beacons_command_id = 0x01,
     sli_btmesh_prov_create_provisioning_session_command_id = 0x41,
@@ -671,6 +672,7 @@ enum sli_btmesh_response_id
     sli_btmesh_node_set_provisioning_service_scan_response_response_id = 0x39,
     sli_btmesh_node_clear_provisioning_service_scan_response_response_id = 0x3a,
     sli_btmesh_node_compare_dcd_response_id = 0x3b,
+    sli_btmesh_node_set_scan_bond_lookup_response_id = 0x3d,
     sli_btmesh_prov_init_response_id = 0x00,
     sli_btmesh_prov_scan_unprov_beacons_response_id = 0x01,
     sli_btmesh_prov_create_provisioning_session_response_id = 0x41,
@@ -1649,6 +1651,13 @@ PACKSTRUCT( struct sl_btmesh_cmd_node_compare_dcd_s
 });
 
 typedef struct sl_btmesh_cmd_node_compare_dcd_s sl_btmesh_cmd_node_compare_dcd_t;
+
+PACKSTRUCT( struct sl_btmesh_cmd_node_set_scan_bond_lookup_s
+{
+    uint8_t bond_lookup;
+});
+
+typedef struct sl_btmesh_cmd_node_set_scan_bond_lookup_s sl_btmesh_cmd_node_set_scan_bond_lookup_t;
 
 PACKSTRUCT( struct sl_btmesh_cmd_prov_create_provisioning_session_s
 {
@@ -5592,6 +5601,13 @@ PACKSTRUCT( struct sl_btmesh_rsp_node_compare_dcd_s
 
 typedef struct sl_btmesh_rsp_node_compare_dcd_s sl_btmesh_rsp_node_compare_dcd_t;
 
+PACKSTRUCT( struct sl_btmesh_rsp_node_set_scan_bond_lookup_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_btmesh_rsp_node_set_scan_bond_lookup_s sl_btmesh_rsp_node_set_scan_bond_lookup_t;
+
 PACKSTRUCT( struct sl_btmesh_rsp_prov_init_s
 {
     uint16_t result;
@@ -9226,6 +9242,7 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_cmd_node_clear_proxy_service_scan_response_t       cmd_node_clear_proxy_service_scan_response;
     sl_btmesh_cmd_node_set_provisioning_service_scan_response_t  cmd_node_set_provisioning_service_scan_response;
     sl_btmesh_cmd_node_compare_dcd_t                             cmd_node_compare_dcd;
+    sl_btmesh_cmd_node_set_scan_bond_lookup_t                    cmd_node_set_scan_bond_lookup;
     sl_btmesh_cmd_prov_create_provisioning_session_t             cmd_prov_create_provisioning_session;
     sl_btmesh_cmd_prov_set_provisioning_suspend_event_t          cmd_prov_set_provisioning_suspend_event;
     sl_btmesh_cmd_prov_provision_adv_device_t                    cmd_prov_provision_adv_device;
@@ -9663,6 +9680,7 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_rsp_node_set_provisioning_service_scan_response_t  rsp_node_set_provisioning_service_scan_response;
     sl_btmesh_rsp_node_clear_provisioning_service_scan_response_t rsp_node_clear_provisioning_service_scan_response;
     sl_btmesh_rsp_node_compare_dcd_t                             rsp_node_compare_dcd;
+    sl_btmesh_rsp_node_set_scan_bond_lookup_t                    rsp_node_set_scan_bond_lookup;
     sl_btmesh_rsp_prov_init_t                                    rsp_prov_init;
     sl_btmesh_rsp_prov_scan_unprov_beacons_t                     rsp_prov_scan_unprov_beacons;
     sl_btmesh_rsp_prov_create_provisioning_session_t             rsp_prov_create_provisioning_session;

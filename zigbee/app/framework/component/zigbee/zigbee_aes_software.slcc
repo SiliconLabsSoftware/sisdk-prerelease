@@ -39,6 +39,9 @@ define:
 template_contribution:
 - name: component_catalog
   value: zigbee_aes_software
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/zigbee-security-manager
 metadata:
   sbom:
     license: MSLA

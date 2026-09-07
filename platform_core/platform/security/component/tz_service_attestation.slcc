@@ -88,6 +88,10 @@ template_contribution:
     func: sli_initial_attest_get_token_size
     condition: [trustzone_nonsecure]
 
+documentation:
+  docset: mcu-bootloader
+  document:
+  - page: series2-trustzone/05-r-implementation
 metadata:
   sbom:
     license: Zlib

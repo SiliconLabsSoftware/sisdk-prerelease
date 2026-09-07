@@ -14,6 +14,9 @@ requires:
 template_contribution:
 - name: mbedtls_config
   value: MBEDTLS_X509_CRT_WRITE_C
+documentation:
+  # X.509 module — certificate writing (mbedtls_x509write_crt_*)
+  url: https://docs.silabs.com/gecko-platform/4.4.7/platform-security/x509-module
 metadata:
   sbom:
     reference: mbedtls_sbom

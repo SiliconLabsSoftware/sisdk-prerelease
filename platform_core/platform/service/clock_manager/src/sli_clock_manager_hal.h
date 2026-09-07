@@ -32,6 +32,7 @@
 #define SL_CLOCK_MANAGER_HAL_H
 
 #include "sl_clock_manager.h"
+#include "sli_clock_manager.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -217,6 +218,35 @@ sl_status_t sli_clock_manager_hal_get_nwp_socpll_freqplan_config(const uint16_t 
 sl_status_t sli_clock_manager_hal_get_nwp_clkmult_freqplan_config(uint8_t clkmult_index,
                                                                   const uint8_t **nwp_clkmult_freqplan_config,
                                                                   uint8_t *target_frequency_index);
+
+/***************************************************************************//**
+ * Sets a runtime-configurable Clock Branch's clock-select mux and prescaler.
+ ******************************************************************************/
+sl_status_t sli_clock_manager_hal_set_clock_branch_source(sl_clock_branch_t clock_branch,
+                                                          uint32_t clksel,
+                                                          uint32_t presc);
+
+/***************************************************************************//**
+ * Enables or disables a Clock Branch's functional clock (CMU <BRANCH>CTRL EN).
+ ******************************************************************************/
+sl_status_t sli_clock_manager_hal_enable_clock_branch(sl_clock_branch_t clock_branch,
+                                                      bool enable);
+
+/***************************************************************************//**
+ * Reprograms a PERPLL instance's dividers and waits for it to relock.
+ ******************************************************************************/
+sl_status_t sli_clock_manager_hal_set_perpll_frequency(uint8_t perpll_num,
+                                                       uint32_t divn,
+                                                       uint32_t divf,
+                                                       uint32_t dco_div,
+                                                       uint32_t div_2pow,
+                                                       bool fractional_en);
+
+/***************************************************************************//**
+ * Reprograms a PERPLL instance to a predefined target frequency.
+ ******************************************************************************/
+sl_status_t sli_clock_manager_hal_set_perpll_predefined_frequency(uint8_t perpll_num,
+                                                                  sli_clock_manager_perpll_predefined_frequency_t frequency);
 
 #if defined(SL_CATALOG_CLOCK_MANAGER_RUNTIME_HAL_INTERNAL_PRESENT)
 /***************************************************************************//**

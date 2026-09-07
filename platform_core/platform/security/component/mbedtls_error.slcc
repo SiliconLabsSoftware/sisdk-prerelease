@@ -15,6 +15,9 @@ requires:
 template_contribution:
 - name: mbedtls_config
   value: MBEDTLS_ERROR_C
+documentation:
+  # No dedicated Error Helpers page; Mbed TLS hub for related docs
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-mbedtls/
 metadata:
   sbom:
     reference: mbedtls_sbom

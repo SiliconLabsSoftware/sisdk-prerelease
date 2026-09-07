@@ -14,6 +14,8 @@ requires:
 - name: mbedtls_hash
 - name: psa_crypto_hmac
   condition: [psa_crypto]
+documentation:
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/psa-crypto-plugins
 metadata:
   sbom:
     reference: mbedtls_sbom

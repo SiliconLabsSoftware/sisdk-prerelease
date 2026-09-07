@@ -92,6 +92,9 @@ template_contribution:
   priority: -9600
   condition:
   - zigbee_ncp
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/af-support
 metadata:
   sbom:
     license: MSLA

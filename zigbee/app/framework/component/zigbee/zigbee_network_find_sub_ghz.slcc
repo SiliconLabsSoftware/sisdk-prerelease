@@ -15,6 +15,9 @@ validation_helper:
 template_contribution:
 - name: component_catalog
   value: zigbee_network_find_sub_ghz
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/network-find
 metadata:
   sbom:
     license: MSLA

@@ -3,7 +3,7 @@
  * @brief Certificate Based Authentication and Pairing header
  *******************************************************************************
  * # License
- * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -34,25 +34,51 @@
 // Includes
 
 #include <stdint.h>
+#include <stddef.h>
 #include "sl_status.h"
+#include "sl_bt_cbap_key_id.h"
 
 // -----------------------------------------------------------------------------
 // Defines
 
-#define SL_BT_CBAP_CERTIFICATE_MAX_SIZE     (768)
+#define SL_BT_CBAP_CERTIFICATE_MAX_SIZE     (700)
 
 // -----------------------------------------------------------------------------
 // Public function declarations
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**************************************************************************//**
- * Import and validate the device with root certificate.
+ * Validate the provisioned certificate chain.
  *
- * @param[out] device_certificate_der device certificate in DER format.
- * @param[out] device_certificate_der_len device certificate length.
- *
- * @return SL_STATUS_OK if device certificate is validated, error code otherwise.
+ * @return SL_STATUS_OK on success, error code otherwise.
  *****************************************************************************/
-sl_status_t sl_bt_cbap_init(uint8_t *device_certificate_der, uint32_t *device_certificate_der_len);
+sl_status_t sl_bt_cbap_init(void);
+
+/**************************************************************************//**
+ * Read a certificate from the persistent storage in DER format.
+ *
+ * The certificate is copied into the buffer owned by the caller, therefore it
+ * stays valid until the caller overwrites it. The component keeps no reference
+ * to the buffer. Each call reads the storage again, so callers that need the
+ * certificate repeatedly should read it once and keep the copy.
+ *
+ * @param[in] id Storage ID of the certificate, for example
+ *               SL_BT_CBAP_PSA_DEVICE_CERT. Note that the certificate IDs are
+ *               distinct from the key IDs, such as SL_BT_CBAP_PSA_DEVICE_KEY.
+ * @param[out] data Buffer receiving the certificate in DER format.
+ * @param[out] data_len Length of the certificate written to @p data. Set to
+ *                      zero if the certificate could not be read.
+ * @param[in] max_len Size of the @p data buffer in bytes.
+ *
+ * @return SL_STATUS_OK on success, error code otherwise.
+ *****************************************************************************/
+sl_status_t sl_bt_cbap_get_certificate(cbap_key_id_t id,
+                                       uint8_t *data,
+                                       size_t *data_len,
+                                       size_t max_len);
 
 /***************************************************************************//**
  * Parse and validate remote certificate and extract remote public key.
@@ -62,7 +88,8 @@ sl_status_t sl_bt_cbap_init(uint8_t *device_certificate_der, uint32_t *device_ce
  *
  * @return SL_STATUS_OK if remote certificate is verified, error code otherwise.
  ******************************************************************************/
-sl_status_t sl_bt_cbap_process_remote_cert(uint8_t *remote_certificate_der, uint32_t remote_certificate_der_len);
+sl_status_t sl_bt_cbap_process_remote_cert(uint8_t *remote_certificate_der,
+                                           uint32_t remote_certificate_der_len);
 
 /***************************************************************************//**
  * Sign and combine OOB data.
@@ -98,5 +125,9 @@ sl_status_t sl_bt_cbap_verify_remote_oob_data(uint8_t *remote_random,
  * @return SL_STATUS_OK if OK, error code otherwise.
  ******************************************************************************/
 sl_status_t sl_bt_cbap_destroy_key(void);
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif // SL_BT_CBAP_H

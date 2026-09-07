@@ -1,7 +1,7 @@
 project_name: bt_cs_host_acp
 package: bluetooth_le_app
 label: Bluetooth - CS Host (ACP)
-description: >
+description: >-
   Channel Sounding (CS) host application that connects to a CS NCP target
   running the Application Co-Processor (ACP) protocol over NCP. The host
   configures and controls the Channel Sounding components on the target

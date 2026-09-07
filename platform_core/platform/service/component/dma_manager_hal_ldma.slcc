@@ -16,7 +16,6 @@ provides:
 - name: dma_manager_hal_ldma
 requires:
 - name: device_peripheral
-- name: clock_manager_runtime
 - name: status
 - name: bit
 - name: hal_ldma

@@ -75,6 +75,9 @@ template_contribution:
     callback_type: ncp_init
     function_name: sl_zigbee_af_ncp_configuration_ncp_init_cb
 
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/ncp-framework
 metadata:
   sbom:
     license: MSLA

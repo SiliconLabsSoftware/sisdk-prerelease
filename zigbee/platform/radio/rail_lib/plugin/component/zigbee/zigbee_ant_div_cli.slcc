@@ -4,6 +4,8 @@ description: Zigbee antenna diversity CLI
 package: zigbee
 category: Platform|Radio
 quality: production
+documentation:
+  url: https://docs.silabs.com/zigbee/latest/zigbee-config-antenna-diversity/index.html
 metadata:
   sbom:
     id: zigbee_ant_div_cli

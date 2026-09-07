@@ -21,6 +21,7 @@ include:
 - path: src/common
   file_list:
   - path: sli_power_manager_common_private.h
+  - path: sli_power_manager_log.h
   - path: sli_power_manager_execution_modes_private.h
     condition: [device_series_3]
 source:

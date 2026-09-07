@@ -170,6 +170,7 @@
   - name: device_has_512kb_flash
   - name: device_supports_rail
   - name: device_supports_rail_stack
+  - name: device_supports_thread
   - name: device_supports_connect
   - name: device_supports_zwave
   - name: device_supports_zwave_end_device

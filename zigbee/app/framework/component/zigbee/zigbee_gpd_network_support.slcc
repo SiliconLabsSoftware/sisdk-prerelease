@@ -36,6 +36,9 @@ include:
 template_contribution:
 - name: component_catalog
   value: zigbee_gpd_network_support
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/gp
 metadata:
   sbom:
     license: MSLA

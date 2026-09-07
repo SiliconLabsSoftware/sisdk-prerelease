@@ -87,6 +87,9 @@ recommends:
 - id: mbedtls_platform_dynamic_memory_allocation_config_default
   condition: [device_cortexm, device_efx]
   vendor: silabs
+documentation:
+  # No dedicated Mbed TLS Configuration page; Mbed TLS hub for related docs
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-mbedtls/
 metadata:
   sbom:
     license: Zlib

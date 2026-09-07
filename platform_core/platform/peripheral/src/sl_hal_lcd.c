@@ -120,6 +120,12 @@ void sl_hal_lcd_init(const sl_hal_lcd_init_t *init)
   sl_hal_lcd_set_mode(init->mode);
   LCD->FRAMERATE = init->frame_rate_divider;
   sl_hal_lcd_set_contrast((uint8_t)init->contrast_level);
+  SL_PRINT_STRING_DEBUG("mode=%d contrast=%d\r\n",
+                        (int)init->mode,
+                        (int)init->contrast_level);
+  SL_PRINT_STRING_DEBUG("frame_div=%d prescaler=%d\r\n",
+                        (int)init->frame_rate_divider,
+                        (int)init->clock_prescaler);
 }
 
 /***************************************************************************//**
@@ -138,6 +144,9 @@ void sl_hal_lcd_init_frame_counter(const sl_hal_lcd_frame_counter_init_t *init)
                                | _LCD_BACFG_FCPRESC_MASK))
                | (init->top << _LCD_BACFG_FCTOP_SHIFT)
                | ((uint32_t)init->prescale << _LCD_BACFG_FCPRESC_SHIFT);
+  SL_PRINT_STRING_DEBUG("top=%d prescale=%d\r\n",
+                        (int)init->top,
+                        (int)init->prescale);
 }
 
 /***************************************************************************//**
@@ -170,6 +179,12 @@ void sl_hal_lcd_init_animation(const sl_hal_lcd_animation_init_t *init)
   // Reconfigure.
   sl_hal_lcd_wait_load_busy();
   LCD->BACTRL = bactrl;
+  SL_PRINT_STRING_DEBUG("A_shift=%d B_shift=%d\r\n",
+                        (int)init->A_shift,
+                        (int)init->B_shift);
+  SL_PRINT_STRING_DEBUG("logic=%d segment=%d\r\n",
+                        (int)init->animation_logic,
+                        (int)init->start_segment);
 }
 
 /***************************************************************************//**
@@ -179,6 +194,9 @@ void sl_hal_lcd_update_control(sl_hal_lcd_update_data_control_t method)
 {
   SL_LOG_DEBUG_ASSERT(LCD->EN != LCD_EN_EN);
   LCD->CTRL = (LCD->CTRL & ~_LCD_CTRL_UDCTRL_MASK) | (method << _LCD_CTRL_UDCTRL_SHIFT);
+  SL_PRINT_STRING_DEBUG("method=%d, %d\r\n",
+                        (int)method,
+                        (int)__LINE__);
 }
 
 /***************************************************************************//**

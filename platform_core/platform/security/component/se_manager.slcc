@@ -90,7 +90,8 @@ recommends:
   vendor: silabs
 documentation:
   docset: gecko-platform
-  document: service/api/group-sl-se-manager
+  document:
+  - page: platform-security-api/sl-se-manager
 
 define:
 - name: SL_CODE_COMPONENT_SE_MANAGER

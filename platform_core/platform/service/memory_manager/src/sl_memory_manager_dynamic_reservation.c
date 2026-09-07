@@ -36,6 +36,7 @@
 #include "sl_memory_manager_config.h"
 #include "sl_memory_manager.h"
 #include "sli_memory_manager.h"
+#include "sli_memory_manager_log.h"
 #include "sli_memory_manager_retention_control.h"
 
 #include "sl_assert.h"
@@ -45,10 +46,6 @@
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
-#endif
-
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-#include "sli_memory_profiler.h"
 #endif
 
 /*******************************************************************************
@@ -98,6 +95,7 @@ sl_status_t sl_memory_release_block(sl_memory_reservation_t *handle)
 
   // Verify that the handle isn't NULL.
   if (handle == NULL) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("release_block() failed: handle=NULL");
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -108,10 +106,6 @@ sl_status_t sl_memory_release_block(sl_memory_reservation_t *handle)
   free_lt_list_head = (sli_block_metadata_t *)heap->free_lt_list_head;
   free_st_list_head = (sli_block_metadata_t *)heap->free_st_list_head;
   current_metadata = (sli_block_metadata_t *)heap->base_addr;
-
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  sli_memory_profiler_track_free(sli_mm_heap_name, block_address);
-#endif
 
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_ATOMIC();
@@ -245,6 +239,8 @@ sl_status_t sl_memory_release_block(sl_memory_reservation_t *handle)
   SEGGER_SYSVIEW_HeapFree((void *)SLI_SYSTEMVIEW_HEAP_ST_ID, block_address);
 #endif
 
+  SLI_MEMORY_MANAGER_LOG_INFO("release_block(): blk=%p", (uint32_t)block_address);
+
   return SL_STATUS_OK;
 }
 
@@ -272,6 +268,12 @@ sl_status_t sl_memory_reservation_add_retention(const sl_memory_reservation_t *h
 
   CORE_EXIT_ATOMIC();
 
+#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
+  SEGGER_SYSVIEW_RecordU32x2(SLI_SYSTEMVIEW_EVENT_ID_RESERVATION_ADD_RETENTION,
+                             (U32)(uintptr_t)handle->block_address,
+                             (U32)handle->block_size);
+#endif
+
   return SL_STATUS_OK;
 }
 
@@ -298,6 +300,12 @@ sl_status_t sl_memory_reservation_remove_retention(const sl_memory_reservation_t
                                     (uint8_t *)handle->block_address + handle->block_size - 1);
 
   CORE_EXIT_ATOMIC();
+
+#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
+  SEGGER_SYSVIEW_RecordU32x2(SLI_SYSTEMVIEW_EVENT_ID_RESERVATION_REMOVE_RETENTION,
+                             (U32)(uintptr_t)handle->block_address,
+                             (U32)handle->block_size);
+#endif
 
   return SL_STATUS_OK;
 }
@@ -334,15 +342,9 @@ sl_status_t sl_memory_reservation_handle_alloc(sl_memory_reservation_t **handle)
  ******************************************************************************/
 sl_status_t sl_memory_heap_reservation_handle_alloc(sl_memory_heap_t *heap, sl_memory_reservation_t **handle)
 {
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  void * volatile return_address = sli_memory_profiler_get_return_address();
-#endif
   sl_status_t status;
 
   status = sl_memory_heap_alloc(heap, sizeof(sl_memory_reservation_t), BLOCK_TYPE_LONG_TERM, (void**)handle);
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  sli_memory_profiler_track_ownership(SLI_INVALID_MEMORY_TRACKER_HANDLE, *handle, return_address);
-#endif
   if (status != SL_STATUS_OK) {
     return status;
   }
@@ -350,6 +352,8 @@ sl_status_t sl_memory_heap_reservation_handle_alloc(sl_memory_heap_t *heap, sl_m
   // Initialize handle data.
   (*handle)->block_address = NULL;
   (*handle)->block_size = 0;
+
+  SLI_MEMORY_MANAGER_LOG_DEBUG("reservation_handle_alloc(): addr=%p", (uint32_t)*handle);
 
   return status;
 }
@@ -361,10 +365,15 @@ sl_status_t sl_memory_reservation_handle_free(sl_memory_reservation_t *handle)
 {
   // Check that block has been released before freeing handle.
   if ((handle->block_size != 0) || (handle->block_address != NULL)) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("reservation_handle_free() failed: block not released");
     return SL_STATUS_FAIL;
   }
 
-  return sl_memory_free((void *)handle);
+  sl_status_t status = sl_memory_free((void *)handle);
+  if (status == SL_STATUS_OK) {
+    SLI_MEMORY_MANAGER_LOG_DEBUG("reservation_handle_free(): handle=%p", (uint32_t)handle);
+  }
+  return status;
 }
 
 /***************************************************************************//**
@@ -388,10 +397,6 @@ sl_status_t sl_memory_heap_reserve_block(sl_memory_heap_t *heap,
                                          sl_memory_reservation_t *handle,
                                          void **block)
 {
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  void * volatile return_address = sli_memory_profiler_get_return_address();
-#endif
-
   // Check proper alignment characteristics.
   EFM_ASSERT((align == SL_MEMORY_BLOCK_ALIGN_DEFAULT)
              || (SL_MATH_IS_PWR2(align)
@@ -413,17 +418,20 @@ sl_status_t sl_memory_heap_reserve_block(sl_memory_heap_t *heap,
 
   // Verify that the handle pointer isn't NULL. See Note #1.
   if ((handle == NULL) || (block == NULL)) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("heap_reserve_block() failed: handle or block=NULL");
     return SL_STATUS_NULL_POINTER;
   }
 
   // Check that the block does not exist yet.
   if ((handle->block_size != 0) || (handle->block_address != NULL)) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("heap_reserve_block() failed: block exists");
     return SL_STATUS_FAIL;
   }
 
   *block = NULL; // No block reserved yet.
 
   if ((size == 0) || (size >= heap->size)) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("heap_reserve_block() failed: invalid size=%u", (uint32_t)size);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -446,9 +454,7 @@ sl_status_t sl_memory_heap_reserve_block(sl_memory_heap_t *heap,
 
   if ((free_block_metadata == NULL) || (size_adjusted == 0)) {
     CORE_EXIT_ATOMIC();
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-    sli_memory_profiler_track_alloc_with_ownership(sli_mm_heap_name, NULL, size, return_address);
-#endif
+    SLI_MEMORY_MANAGER_LOG_ERROR("heap_reserve_block() failed: alloc size=%u", (uint32_t)size);
     return SL_STATUS_ALLOCATION_FAILED;
   }
 
@@ -530,17 +536,13 @@ sl_status_t sl_memory_heap_reserve_block(sl_memory_heap_t *heap,
 
   CORE_EXIT_ATOMIC();
 
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  sli_memory_profiler_track_alloc(sli_mm_heap_name, handle->block_address, size_real);
-  sli_memory_profiler_track_alloc_with_ownership(sli_mm_heap_reservation_name,
-                                                 handle->block_address,
-                                                 handle->block_size,
-                                                 return_address);
-#endif
-
 #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
   SEGGER_SYSVIEW_HeapAllocEx((void *)SLI_SYSTEMVIEW_HEAP_ST_ID, handle->block_address, size, SLI_SYSTEMVIEW_TAG_RESERVED_BLOCK);
 #endif
+
+  SLI_MEMORY_MANAGER_LOG_INFO("heap_reserve_block(): blk=%p size=%u",
+                              (uint32_t)handle->block_address,
+                              (uint32_t)size);
 
   return SL_STATUS_OK;
 }

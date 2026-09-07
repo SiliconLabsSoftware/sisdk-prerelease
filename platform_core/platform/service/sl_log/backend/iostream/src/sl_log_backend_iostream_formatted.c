@@ -17,13 +17,13 @@
  * longer emitted because event encoding is not supported here.
  *
  * **Optional leading prefix** (see @ref sl_log_formatted_iostream_config.h):
- * - @c SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP: `[TIMESTAMP]` (8 hex
- *   digits) and a space.
+ * - @c SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP:
+ *   `[EEEEEEEE:TTTTTTTT]` (32-bit epoch and 32-bit timestamp) and a space.
  *
  * **Optional core ID** (when @c SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID is
  * set): `[CC]` (2 hex digits) and a space, before the formatted payload.
  *
- * Example (all options): [00005678] [00] count=-1 addr=0x00001000
+ * Example (all options): [00000000:00005678] [00] count=-1 addr=0x00001000
  *
  * The trailing CR/LF is not appended automatically: callers must include any
  * desired line terminator in the format string (matching the string-log
@@ -67,6 +67,7 @@
 #include "sl_log_formatted_iostream_config.h"
 #include "sl_iostream.h"
 #include "sl_iostream_handles.h"
+#include "log_lock.h"
 
 #ifndef SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP
 #define SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP  0
@@ -75,8 +76,9 @@
 #define SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID    0
 #endif
 
-/** Maximum size (bytes) of one printf line emitted to iostream, including the
- *  optional leading prefix(es). Lines longer than this are truncated. */
+/** Maximum bytes per formatted iostream line (stack buffer), including any
+ *  optional prefix. Default is 200 bytes to cap on-target RAM use. Lines longer
+ *  than this are truncated. */
 #ifndef SL_LOG_PRINT_LINE_MAX
 #define SL_LOG_PRINT_LINE_MAX 200
 #endif
@@ -86,10 +88,10 @@
 
 /* Worst-case prefix lengths written unchecked into line[] before the bounds
  * test in sl_log_vprint_target_ex(). Keep these in sync with the prefix
- * blocks below: '[' + 8 hex + ']' + ' ' = 11 for the timestamp; '[' + 2 hex
- * + ']' + ' ' = 5 for the core ID. */
+ * blocks below: '[' + 8 hex epoch + ':' + 8 hex timestamp + ']' + ' ' = 20
+ * for the timestamp; '[' + 2 hex + ']' + ' ' = 5 for the core ID. */
 #define SL_LOG_FORMATTED_IOSTREAM_TIMESTAMP_PREFIX_LEN \
-  (1U + SL_LOG_FORMATTED_IOSTREAM_HEX8_LEN + 1U + 1U)
+  (1U + SL_LOG_FORMATTED_IOSTREAM_HEX8_LEN + 1U + SL_LOG_FORMATTED_IOSTREAM_HEX8_LEN + 1U + 1U)
 #define SL_LOG_FORMATTED_IOSTREAM_CORE_ID_PREFIX_LEN   \
   (1U + SL_LOG_FORMATTED_IOSTREAM_HEX2_LEN + 1U + 1U)
 
@@ -134,6 +136,7 @@ static inline char* u32_to_hex8(char *p, uint32_t v)
   }
   return p;
 }
+
 #endif
 
 #if SL_LOG_FORMATTED_IOSTREAM_APPEND_CORE_ID
@@ -157,16 +160,29 @@ void sl_log_vprint_target_ex(uint32_t options, const char *fmt, va_list ap)
   size_t header_len = 0U;
   int body_len;
   size_t total;
+  size_t body_capacity;
+  size_t actual_body;
 
   if (fmt == NULL) {
     return;
   }
 
+  /* The timestamp read, the formatting and the iostream write are held under
+   * one lock so concurrent loggers cannot interleave partial lines on the
+   * shared console stream, and so line order matches timestamp order. */
+  log_lock_begin();
+
 #if SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP
   {
+    /* Read count then epoch (paired by the platform) and emit
+     * [EEEEEEEE:TTTTTTTT] so long-running logs remain ordered past a wrap. */
     uint32_t timestamp = sl_log_get_timestamp_count(SL_LOG_HOST_CORE_ID);
+    uint32_t epoch = sl_log_get_timestamp_epoch(SL_LOG_HOST_CORE_ID);
     line[header_len++] = '[';
-    char *p = u32_to_hex8(&line[header_len], timestamp);
+    char *p = u32_to_hex8(&line[header_len], epoch);
+    header_len = (size_t)(p - line);
+    line[header_len++] = ':';
+    p = u32_to_hex8(&line[header_len], timestamp);
     header_len = (size_t)(p - line);
     line[header_len++] = ']';
     line[header_len++] = ' ';
@@ -184,19 +200,18 @@ void sl_log_vprint_target_ex(uint32_t options, const char *fmt, va_list ap)
 #endif
 
   if (header_len >= sizeof(line)) {
-    return;
+    goto exit;
   }
 
-  size_t body_capacity = sizeof(line) - header_len;
+  body_capacity = sizeof(line) - header_len;
   body_len = vsnprintf(line + header_len, body_capacity, fmt, ap);
   if (body_len < 0) {
-    return;
+    goto exit;
   }
 
   /* vsnprintf returns the would-be length and writes at most body_capacity-1
    * payload bytes plus a NUL at body_capacity-1 on truncation. Clamp so the
    * NUL byte is never transmitted. */
-  size_t actual_body;
   if ((size_t)body_len < body_capacity) {
     actual_body = (size_t)body_len;
   } else {
@@ -204,7 +219,10 @@ void sl_log_vprint_target_ex(uint32_t options, const char *fmt, va_list ap)
   }
   total = header_len + actual_body;
 
-  (void)sl_iostream_write(sl_iostream_recommended_console_stream, line, total);
+  (void)sl_iostream_write(SL_LOG_IOSTREAM_HANDLE, line, total);
+
+  exit:
+  log_lock_end();
 }
 
 /**

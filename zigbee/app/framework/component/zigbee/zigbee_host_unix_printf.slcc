@@ -17,6 +17,9 @@ source:
 template_contribution:
 - name: component_catalog
   value: zigbee_host_unix_printf
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/host-framework-common
 metadata:
   sbom:
     license: MSLA

@@ -445,15 +445,15 @@ float sli_coulomb_counter_hal_compute_cpp(const sli_coulomb_counter_handle_t *ha
    */
 
   /* Parameters cal_nreq_low and cal_nreq_high are identical for DCDC. */
-  unsigned int ncal = handle->cal_nreq_low;
+  unsigned int ncal = handle->cal_nreq_low + 1;
 
   float fhf = sli_coulomb_counter_hal_get_osc_frequency();
 
   float iload_small_ua = sli_coulomb_counter_hal_cal_get_load_current(CCL_LEVEL_LOW);
   float iload_large_ua = sli_coulomb_counter_hal_cal_get_load_current(CCL_LEVEL_HIGH);
 
-  float nsm = (float)handle->cal_count_low;
-  float nlg = (float)handle->cal_count_high;
+  float nsm = (float)handle->cal_count_low + 1;
+  float nlg = (float)handle->cal_count_high + 1;
 
   /* numerator */
   cpp = nlg * nsm;

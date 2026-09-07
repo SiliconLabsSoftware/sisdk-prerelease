@@ -201,20 +201,34 @@ const struct sl_btctrl_radio_counters *sl_btctrl_radio_get_counters(void);
 void sl_btctrl_radio_reset_counters(void);
 
 /**
- * Initialize CTE receiver
+ * Configure Constant Tone Extension parameters.
+ *
+ * This must be called during initialization, before CTE is used.
+ *
+ * @param[in] config CTE configuration.
+ * @return Status of the configuration.
  */
-sl_status_t sl_btctrl_init_cte_receiver();
+sl_status_t sl_btctrl_config_cte(const struct sl_btctrl_cte_config *config);
 
 /**
- * Initialize CTE transmitter
+ * Initialize CTE receiver.
+ *
+ * @return Status of the initialization.
  */
-sl_status_t sl_btctrl_init_cte_transmitter();
+sl_status_t sl_btctrl_init_cte_receiver(void);
 
 /**
- * Initialize both CTE receiver and transmitter
+ * Initialize CTE transmitter.
+ *
+ * @return Status of the initialization.
+ */
+sl_status_t sl_btctrl_init_cte_transmitter(void);
+
+/**
+ * Initialize both CTE receiver and transmitter.
  *
  * Note: This is for backward compatibility. It is recommend to
- * use sl_btctrl_init_cte_receiver and sl_btctrl_init_cte_transmitter
+ * use sl_btctrl_init_cte_receiver() and sl_btctrl_init_cte_transmitter()
  * functions instead.
  */
 sl_status_t sl_btctrl_init_cte();

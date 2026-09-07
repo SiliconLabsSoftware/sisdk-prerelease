@@ -50,7 +50,7 @@ def nvm_set(conn, key, data, check=True):
             failing set or get command, or ``1`` if the read-back value does
             not match ``data``.
     """
-    print(f"Set NVM. Key: {hex(key)}")
+    print(f"Set NVM. Key: {hex(key)} ({len(data)}[B])")
     conn.send(CommandNvmSet(key, data))
     resp = ResponseNvmSet(conn.receive())
     if resp.status != 0:

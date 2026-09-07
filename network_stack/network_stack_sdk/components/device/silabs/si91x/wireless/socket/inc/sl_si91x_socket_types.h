@@ -74,6 +74,12 @@ typedef struct sl_si91x_fdset_s {
 } sl_si91x_fdset_t;
 #endif
 
+/* Non-blocking type flag for socket(); BSD socket.h defines this, but dual-stack
+ * (LwIP / sli_si91x_socket_defs.h) paths may not. */
+#ifndef SOCK_NONBLOCK
+#define SOCK_NONBLOCK 0x4000
+#endif
+
 /**
  * @addtogroup SI91X_SOCKET_FUNCTIONS
  * @{ 
@@ -247,8 +253,9 @@ typedef enum {
   BOUND,       // Socket attains this state when bind() has been executed successfully.
   LISTEN,      // (TCP ONLY STATE) Socket attains this state when listen() has been executed successfully.
   UDP_UNCONNECTED_READY, // (UDP ONLY STATE) Socket attains this state when sendto() or recvfrom() has been executed successfully prior connect.
-  CONNECTED,   // Socket attains this state when connect() has been executed successfully.
-  DISCONNECTED // Socket attains this state when underlying connection is lost
+  CONNECTING,   // Non-blocking TCP client connect in progress (after sync RX1 / EINPROGRESS).
+  CONNECTED,    // Socket attains this state when connect() has been executed successfully.
+  DISCONNECTED, // Socket attains this state when underlying connection is lost.
 } sli_si91x_bsd_socket_state_t;
 
 /// Internal reasons for SI91x BSD socket disconnection, applicable only when the socket state is DISCONNECTED.
@@ -342,13 +349,15 @@ typedef struct {
   bool is_receive_cmd_pending; ///< Flag to indicate if a receive command is pending
   uint8_t *domain_name;        ///< Expected domain name for TLS certificate verification
   uint8_t socket_ext_bitmap;   ///< Extended socket bitmap
+  int32_t pending_error;       ///< Per-socket SO_ERROR; cleared on getsockopt(SO_ERROR)
 } sli_si91x_socket_t;
 
 /// Socket create command request structure
 #pragma pack(1)
 typedef struct {
-  uint16_t ip_version;  ///< ip version4 or 6
-  uint16_t socket_type; ///< 0= TCP Client, 1= UDP Client, 2= TCP Server (Listening TCP)
+  uint16_t ip_version; ///< ip version4 or 6
+  uint16_t
+    socket_type; ///< 0=TCP Client, 1=UDP Client, 2=TCP Server. Can be ORed with SOCK_NONBLOCK for non-blocking TCP client.
   uint16_t local_port;  ///< Our local module port number
   uint16_t remote_port; ///< Port number of what we are connecting to
   union {

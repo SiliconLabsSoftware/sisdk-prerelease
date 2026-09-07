@@ -45,6 +45,7 @@
 #include "sl_ip_types.h"
 #endif
 #include "sli_net_utility.h"
+#include "sl_additional_status.h"
 
 /******************************************************
  *               External Variable Definitions
@@ -88,6 +89,20 @@ static void sli_free_sockets_by_port(uint16_t port_number);
  * @return True if available else false.
  */
 static bool sli_is_port_available(uint16_t port_number);
+
+static bool sli_si91x_socket_is_nonblocking(const sli_si91x_socket_t *socket);
+static void sli_si91x_mark_socket_disconnected(sli_si91x_socket_t *socket, sli_si91x_bsd_disconnect_reason_t reason);
+static sl_status_t sli_apply_socket_create_response_fields(
+  sli_si91x_socket_t *si91x_bsd_socket,
+  const sli_si91x_socket_create_response_t *socket_create_response,
+  int type);
+static sl_status_t sli_handle_socket_create_response(int socket_id_index,
+                                                     sl_status_t frame_status,
+                                                     const sli_si91x_socket_create_response_t *socket_create_response,
+                                                     int type,
+                                                     bool update_terminal_state);
+static int sli_find_host_socket_by_firmware_id(int firmware_socket_id);
+static sl_status_t sli_handle_deferred_socket_create(sl_status_t frame_status, sl_wifi_system_packet_t *rx_packet);
 
 /******************************************************
  *               Variable Definitions
@@ -199,6 +214,11 @@ int sli_handle_select_response(const sli_si91x_socket_select_rsp_t *response,
 
     // Check if the read file descriptor set is provided and if the corresponding bit is set in the response
     if (readfds != NULL && (response->read_fds.fd_array[0] & (1 << socket->id))) {
+      // Ignore premature read-ready for outbound non-blocking TCP client connect (RX1).
+      if (socket->type == SOCK_STREAM && sli_si91x_socket_is_nonblocking(socket) && socket->state == CONNECTING
+          && socket->role == SLI_SI91X_SOCKET_TCP_CLIENT) {
+        continue;
+      }
 #ifndef __ZEPHYR__
       FD_SET(host_socket_index, readfds);
 #else
@@ -209,6 +229,11 @@ int sli_handle_select_response(const sli_si91x_socket_select_rsp_t *response,
 
     // Check if the write file descriptor set is provided and if the corresponding bit is set in the response.
     if (writefds != NULL && (response->write_fds.fd_array[0] & (1 << socket->id))) {
+      // Ignore premature write-ready while a non-blocking TCP client connect is still in progress (RX1).
+      if (socket->type == SOCK_STREAM && sli_si91x_socket_is_nonblocking(socket) && socket->state == CONNECTING
+          && socket->role == SLI_SI91X_SOCKET_TCP_CLIENT) {
+        continue;
+      }
 #ifndef __ZEPHYR__
       FD_SET(host_socket_index, writefds);
 #else
@@ -313,13 +338,29 @@ sl_status_t sli_si91x_socket_deinit(void)
   return SL_STATUS_OK;
 }
 
+// Mark socket DISCONNECTED and publish a pending SO_ERROR when none is set yet.
+// Required for non-blocking connect: leaving CONNECTING without pending_error would make
+// select(writefds) + getsockopt(SO_ERROR) report a false-positive success.
+static void sli_si91x_mark_socket_disconnected(sli_si91x_socket_t *socket, sli_si91x_bsd_disconnect_reason_t reason)
+{
+  if (socket == NULL) {
+    return;
+  }
+
+  if (socket->pending_error == 0) {
+    socket->pending_error = (reason == SLI_SI91X_BSD_DISCONNECT_REASON_INTERFACE_DOWN) ? ENETDOWN : ECONNRESET;
+  }
+
+  socket->state             = DISCONNECTED;
+  socket->disconnect_reason = reason;
+}
+
 sl_status_t sli_si91x_vap_shutdown(uint8_t vap_id, sli_si91x_bsd_disconnect_reason_t disconnect_reason)
 {
   // Iterate through all BSD sockets and modify the state those associated with the given VAP ID
   for (uint8_t socket_index = 0; socket_index < SLI_NUMBER_OF_SOCKETS; socket_index++) {
     if ((sli_si91x_sockets[socket_index] != NULL) && (sli_si91x_sockets[socket_index]->vap_id == vap_id)) {
-      sli_si91x_sockets[socket_index]->state             = DISCONNECTED;
-      sli_si91x_sockets[socket_index]->disconnect_reason = disconnect_reason;
+      sli_si91x_mark_socket_disconnected(sli_si91x_sockets[socket_index], disconnect_reason);
     }
   }
 
@@ -385,8 +426,7 @@ static void sli_si91x_mark_bsd_sockets_disconnected_matching(uint8_t filter_vap_
                                                     dest_ip_address)) {
       continue;
     }
-    sli_si91x_sockets[index]->state             = DISCONNECTED;
-    sli_si91x_sockets[index]->disconnect_reason = reason;
+    sli_si91x_mark_socket_disconnected(sli_si91x_sockets[index], reason);
   }
 }
 
@@ -882,6 +922,143 @@ int32_t sli_get_socket_command_from_host_packet(sl_wifi_buffer_t *buffer)
   return (packet == NULL ? -1 : packet->command);
 }
 
+static bool sli_si91x_socket_is_nonblocking(const sli_si91x_socket_t *socket)
+{
+  return (socket != NULL) && ((socket->socket_bitmap & SLI_SI91X_SOCKET_FEAT_NON_BLOCK) != 0U);
+}
+
+int sli_si91x_socket_status_to_errno(sl_status_t status)
+{
+  switch (status) {
+    case SL_STATUS_OK:
+      return 0;
+    case SL_STATUS_SI91X_PROCESS_IN_PROGRESS:
+      return EINPROGRESS;
+    case SL_STATUS_SI91X_SOCKET_CLOSED:
+    case SL_STATUS_SI91X_TCP_SOCKET_NOT_CONNECTED:
+    case SL_STATUS_SI91X_SOCKET_IN_UNCONNECTED_STATE:
+    case SL_STATUS_SI91X_SOCKET_NOT_CONNECTED:
+      return ENOTCONN;
+    case SL_STATUS_SI91X_CONNECT_TO_NON_EXISTING_TCP_SERVER_SOCKET:
+    case SL_STATUS_SI91X_TRYING_TO_CONNECT_NON_EXISTENT_TCP_SERVER_SOCKET:
+      return ECONNREFUSED;
+    case SL_STATUS_SI91X_SOCKET_READ_TIMEOUT:
+      return ETIMEDOUT;
+    case SL_STATUS_SI91X_IP_ADDRESS_ERROR:
+      return EHOSTUNREACH;
+    default:
+      if (status == SL_STATUS_TIMEOUT) {
+        return ETIMEDOUT;
+      }
+      return ECONNABORTED;
+  }
+}
+
+static sl_status_t sli_apply_socket_create_response_fields(
+  sli_si91x_socket_t *si91x_bsd_socket,
+  const sli_si91x_socket_create_response_t *socket_create_response,
+  int type)
+{
+  si91x_bsd_socket->id = (int32_t)(socket_create_response->socket_id[0] | (socket_create_response->socket_id[1] << 8));
+  si91x_bsd_socket->local_address.sin6_port =
+    (uint16_t)(socket_create_response->module_port[0] | (socket_create_response->module_port[1] << 8));
+
+  if (type != SLI_SI91X_SOCKET_TCP_SERVER) {
+    si91x_bsd_socket->remote_address.sin6_port =
+      (uint16_t)(socket_create_response->dst_port[0] | socket_create_response->dst_port[1] << 8);
+  }
+
+  si91x_bsd_socket->mss = (uint16_t)((socket_create_response->mss[0]) | (socket_create_response->mss[1] << 8));
+
+  if (si91x_bsd_socket->state == BOUND) {
+    return SL_STATUS_OK;
+  }
+
+  if (si91x_bsd_socket->local_address.sin6_family == AF_INET) {
+    memcpy(&((struct sockaddr_in *)&si91x_bsd_socket->local_address)->sin_addr.s_addr,
+           socket_create_response->module_ip_addr.ipv4_addr,
+           SL_IPV4_ADDRESS_LENGTH);
+  } else {
+#ifdef SLI_SI91X_NETWORK_DUAL_STACK
+    memcpy(si91x_bsd_socket->local_address.sin6_addr.un.u8_addr,
+           socket_create_response->module_ip_addr.ipv6_addr,
+           SL_IPV6_ADDRESS_LENGTH);
+#else
+#ifndef __ZEPHYR__
+    memcpy(si91x_bsd_socket->local_address.sin6_addr.__u6_addr.__u6_addr8,
+           socket_create_response->module_ip_addr.ipv6_addr,
+           SL_IPV6_ADDRESS_LENGTH);
+#else
+    memcpy(si91x_bsd_socket->local_address.sin6_addr.s6_addr,
+           socket_create_response->module_ip_addr.ipv6_addr,
+           SL_IPV6_ADDRESS_LENGTH);
+#endif
+#endif
+  }
+
+  return SL_STATUS_OK;
+}
+
+static sl_status_t sli_handle_socket_create_response(int socket_id_index,
+                                                     sl_status_t frame_status,
+                                                     const sli_si91x_socket_create_response_t *socket_create_response,
+                                                     int type,
+                                                     bool update_terminal_state)
+{
+  sli_si91x_socket_t *si91x_bsd_socket = sli_get_si91x_socket(socket_id_index);
+
+  if (si91x_bsd_socket == NULL || socket_create_response == NULL) {
+    return SL_STATUS_FAIL;
+  }
+
+  (void)sli_apply_socket_create_response_fields(si91x_bsd_socket, socket_create_response, type);
+
+  // Non-blocking TCP client: RX1 is sync (update_terminal_state == false) and only allocates
+  // the firmware socket id while connect remains in progress. RX2 is deferred and is always
+  // terminal — distinguish success vs failure by frame_status alone (do not use MSS).
+  if (!update_terminal_state) {
+    si91x_bsd_socket->state = CONNECTING;
+    return SL_STATUS_IN_PROGRESS;
+  }
+
+  if (frame_status == SL_STATUS_OK) {
+    si91x_bsd_socket->pending_error = 0;
+    si91x_bsd_socket->state         = CONNECTED;
+  } else {
+    si91x_bsd_socket->state             = DISCONNECTED;
+    si91x_bsd_socket->pending_error     = sli_si91x_socket_status_to_errno(frame_status);
+    si91x_bsd_socket->disconnect_reason = SLI_SI91X_BSD_DISCONNECT_REASON_REMOTE_CLOSED;
+  }
+
+  // Connect outcome lives in state / pending_error; handler processing succeeded.
+  return SL_STATUS_OK;
+}
+
+static sl_status_t sli_handle_deferred_socket_create(sl_status_t frame_status, sl_wifi_system_packet_t *rx_packet)
+{
+  const sli_si91x_socket_create_response_t *socket_create_response =
+    (const sli_si91x_socket_create_response_t *)rx_packet->data;
+  int firmware_socket_id = sli_si91x_get_socket_id(rx_packet);
+  int host_socket_index  = sli_find_host_socket_by_firmware_id(firmware_socket_id);
+
+  if (host_socket_index < 0) {
+    return SL_STATUS_OK;
+  }
+
+  const sli_si91x_socket_t *si91x_bsd_socket = sli_si91x_sockets[host_socket_index];
+  if (si91x_bsd_socket == NULL || si91x_bsd_socket->state != CONNECTING) {
+    return SL_STATUS_OK;
+  }
+
+  // Always OK once state is applied so the event handler can run shared cleanup.
+  (void)sli_handle_socket_create_response(host_socket_index,
+                                          frame_status,
+                                          socket_create_response,
+                                          si91x_bsd_socket->role,
+                                          true);
+  return SL_STATUS_OK;
+}
+
 void sli_si91x_create_socket_request(sli_si91x_socket_t *si91x_bsd_socket,
                                      sli_si91x_socket_create_request_t *socket_create_request,
                                      int type,
@@ -915,8 +1092,13 @@ void sli_si91x_create_socket_request(sli_si91x_socket_t *si91x_bsd_socket,
   socket_create_request->local_port  = si91x_bsd_socket->local_address.sin6_port;
   socket_create_request->remote_port = si91x_bsd_socket->remote_address.sin6_port;
 
-  // Fill socket type
+  // Fill socket type (role in lower bits).
+  // Wire O_NONBLOCK is for non-blocking TCP client connect only (dual 0x42 path).
+  // TCP server listen completes on a single sync 0x42 and does not use this bit.
   socket_create_request->socket_type = (uint16_t)type;
+  if (type == SLI_SI91X_SOCKET_TCP_CLIENT && sli_si91x_socket_is_nonblocking(si91x_bsd_socket)) {
+    socket_create_request->socket_type |= SLI_SI91X_SOCKET_TYPE_O_NONBLOCK;
+  }
 
   if (type == SLI_SI91X_SOCKET_TCP_SERVER) {
     socket_create_request->max_count = (backlog == NULL) ? 0 : (uint16_t)*backlog;
@@ -1052,50 +1234,45 @@ sl_status_t sli_create_and_send_socket_request(int socketIdIndex, int type, cons
   if ((status != SL_STATUS_OK) && (buffer != NULL)) {
     sli_buffer_manager_free_buffer(buffer);
   }
-  VERIFY_STATUS_AND_RETURN(status);
+
+  if (status != SL_STATUS_OK) {
+    if (errno == 0) {
+      si91x_bsd_socket->pending_error = sli_si91x_socket_status_to_errno(status);
+    }
+    return status;
+  }
 
   // Extract socket creation response information
   packet                 = sli_wifi_host_get_buffer_data(buffer, 0, NULL);
-  socket_create_response = (sli_si91x_socket_create_response_t *)packet->data;
+  socket_create_response = (const sli_si91x_socket_create_response_t *)packet->data;
 
-  si91x_bsd_socket->id = (int32_t)(socket_create_response->socket_id[0] | (socket_create_response->socket_id[1] << 8));
-  si91x_bsd_socket->local_address.sin6_port =
-    (uint16_t)(socket_create_response->module_port[0] | (socket_create_response->module_port[1] << 8));
-
-  if (type != SLI_SI91X_SOCKET_TCP_SERVER) {
-    si91x_bsd_socket->remote_address.sin6_port =
-      (uint16_t)(socket_create_response->dst_port[0] | socket_create_response->dst_port[1] << 8);
+  // NWP sends two RSP_SOCKET_CREATE responses for non-blocking TCP client connect only.
+  // The first (sync) response allocates socket_id while connect is still in progress.
+  // The second (async) response is terminal and is handled by sli_handle_deferred_socket_create().
+  // TCP server listen completes on this single sync response (no 2nd RX).
+  if (type == SLI_SI91X_SOCKET_TCP_CLIENT && sli_si91x_socket_is_nonblocking(si91x_bsd_socket)) {
+    // Interpret as int16 so an all-ones / unallocated id (0xFFFF) is < 0.
+    const int16_t firmware_socket_id =
+      (int16_t)(socket_create_response->socket_id[0] | (socket_create_response->socket_id[1] << 8));
+    if (firmware_socket_id < 0) {
+      // Do not fall through to the success/CONNECTED path on a bad RX1 id.
+      sli_buffer_manager_free_buffer(buffer);
+      si91x_bsd_socket->state             = DISCONNECTED;
+      si91x_bsd_socket->pending_error     = ECONNABORTED;
+      si91x_bsd_socket->disconnect_reason = SLI_SI91X_BSD_DISCONNECT_REASON_REMOTE_CLOSED;
+      return SL_STATUS_FAIL;
+    }
+    sli_handle_socket_create_response(socketIdIndex, SL_STATUS_OK, socket_create_response, type, false);
+    sli_buffer_manager_free_buffer(buffer);
+    return SL_STATUS_IN_PROGRESS;
   }
 
-  si91x_bsd_socket->mss = (uint16_t)((socket_create_response->mss[0]) | (socket_create_response->mss[1] << 8));
+  sli_apply_socket_create_response_fields(si91x_bsd_socket, socket_create_response, type);
 
   // If socket is already bound to an local address and port, there is no need to copy it again.
   if (si91x_bsd_socket->state == BOUND) {
     sli_buffer_manager_free_buffer(buffer);
     return SL_STATUS_OK;
-  }
-
-  // Copy the local address (IPv4 or IPv6) based on family type
-  if (si91x_bsd_socket->local_address.sin6_family == AF_INET) {
-    memcpy(&((struct sockaddr_in *)&si91x_bsd_socket->local_address)->sin_addr.s_addr,
-           socket_create_response->module_ip_addr.ipv4_addr,
-           SL_IPV4_ADDRESS_LENGTH);
-  } else {
-#ifdef SLI_SI91X_NETWORK_DUAL_STACK
-    memcpy(si91x_bsd_socket->local_address.sin6_addr.un.u8_addr,
-           socket_create_response->module_ip_addr.ipv6_addr,
-           SL_IPV6_ADDRESS_LENGTH);
-#else
-#ifndef __ZEPHYR__
-    memcpy(si91x_bsd_socket->local_address.sin6_addr.__u6_addr.__u6_addr8,
-           socket_create_response->module_ip_addr.ipv6_addr,
-           SL_IPV6_ADDRESS_LENGTH);
-#else
-    memcpy(si91x_bsd_socket->local_address.sin6_addr.s6_addr,
-           socket_create_response->module_ip_addr.ipv6_addr,
-           SL_IPV6_ADDRESS_LENGTH);
-#endif
-#endif
   }
 
   // Free the buffer
@@ -1106,12 +1283,17 @@ sl_status_t sli_create_and_send_socket_request(int socketIdIndex, int type, cons
 
 int sli_si91x_socket(int family, int type, int protocol, sl_si91x_socket_receive_data_callback_t callback)
 {
+  const int socket_type_flags = type & ~SOCK_NONBLOCK;
+  const bool non_blocking     = (type & SOCK_NONBLOCK) != 0;
+
   // Validate the socket parameters
   SLI_SET_ERRNO_AND_RETURN_IF_TRUE(family != AF_INET && family != AF_INET6, EAFNOSUPPORT);
-  SLI_SET_ERRNO_AND_RETURN_IF_TRUE(type != SOCK_STREAM && type != SOCK_DGRAM, EINVAL);
+  SLI_SET_ERRNO_AND_RETURN_IF_TRUE(socket_type_flags != SOCK_STREAM && socket_type_flags != SOCK_DGRAM, EINVAL);
   SLI_SET_ERRNO_AND_RETURN_IF_TRUE(protocol != IPPROTO_TCP && protocol != IPPROTO_UDP && protocol != 0, EINVAL);
-  SLI_SET_ERRNO_AND_RETURN_IF_TRUE((type == SOCK_STREAM && (protocol != IPPROTO_TCP && protocol != 0)), EPROTOTYPE);
-  SLI_SET_ERRNO_AND_RETURN_IF_TRUE((type == SOCK_DGRAM && (protocol != IPPROTO_UDP && protocol != 0)), EPROTOTYPE);
+  SLI_SET_ERRNO_AND_RETURN_IF_TRUE((socket_type_flags == SOCK_STREAM && (protocol != IPPROTO_TCP && protocol != 0)),
+                                   EPROTOTYPE);
+  SLI_SET_ERRNO_AND_RETURN_IF_TRUE((socket_type_flags == SOCK_DGRAM && (protocol != IPPROTO_UDP && protocol != 0)),
+                                   EPROTOTYPE);
 
   // Initialize a new socket structure
   sli_si91x_socket_t *si91x_socket;
@@ -1125,12 +1307,16 @@ int sli_si91x_socket(int family, int type, int protocol, sl_si91x_socket_receive
   }
 
   // Populate the socket structure with provided parameters and callbacks
-  si91x_socket->type                      = type;
+  si91x_socket->type                      = socket_type_flags;
   si91x_socket->local_address.sin6_family = (uint8_t)family;
   si91x_socket->protocol                  = protocol;
   si91x_socket->state                     = INITIALIZED;
   si91x_socket->recv_data_callback        = callback;
   si91x_socket->client_id                 = -1;
+  si91x_socket->pending_error             = 0;
+  if (non_blocking) {
+    si91x_socket->socket_bitmap |= SLI_SI91X_SOCKET_FEAT_NON_BLOCK;
+  }
 
   // Return the socket index
   return socket_index;
@@ -1215,6 +1401,9 @@ int sli_si91x_accept(int socket, struct sockaddr *addr, socklen_t *addr_len, sl_
 
   sli_handle_accept_response(si91x_client_socket, ltcp);
 
+  // Sync accept completes inline; clear the reserved client slot on the listen socket.
+  si91x_server_socket->client_id = -1;
+
   // If addr_len is NULL or invalid value, just return the client socket ID
   if (addr != NULL && *addr_len > 0) {
     // Copy the remote address to the provided sockaddr structure
@@ -1296,9 +1485,10 @@ int sli_si91x_shutdown(int socket, int how)
                                  NULL,
                                  (void **)&response_buffer);
 
-  // Treat SOCKET_CLOSED and COMMAND_GIVEN_IN_INVALID_STATE (0x21, returned by the NWP after a
-  // rejoin failure already tore the socket down) as logical close success: free the host slot.
-  if (status == SL_STATUS_SI91X_SOCKET_CLOSED || status == SL_STATUS_SI91X_COMMAND_GIVEN_IN_INVALID_STATE) {
+  // Treat SOCKET_CLOSED, CLOSE_NON_EXISTENT (NWP already tore the socket down after connect
+  // failure), and COMMAND_GIVEN_IN_INVALID_STATE as logical close success: free the host slot.
+  if (status == SL_STATUS_SI91X_SOCKET_CLOSED || status == SL_STATUS_SI91X_COMMAND_GIVEN_IN_INVALID_STATE
+      || status == SL_STATUS_SI91X_TRYING_TO_CLOSE_NON_EXISTENT_SOCKET) {
     if (close_request_type == SHUTDOWN_BY_ID) {
       sli_si91x_free_socket(socket);
     } else {
@@ -1374,8 +1564,7 @@ static void sli_handle_remote_terminate(sl_wifi_system_packet_t *rx_packet)
       continue;
     }
 
-    socket->state             = DISCONNECTED;
-    socket->disconnect_reason = SLI_SI91X_BSD_DISCONNECT_REASON_REMOTE_CLOSED;
+    sli_si91x_mark_socket_disconnected(socket, SLI_SI91X_BSD_DISCONNECT_REASON_REMOTE_CLOSED);
 
     if (user_remote_socket_termination_callback != NULL) {
       // Pass host/BSD socket descriptor and remote peer port so applications can
@@ -1698,6 +1887,13 @@ sl_status_t sli_si91x_socket_event_handler(sl_status_t frame_status,
       }
       break;
     }
+    case SLI_WIFI_RSP_SOCKET_CREATE: {
+      result = sli_handle_deferred_socket_create(frame_status, rx_packet);
+      if (result != SL_STATUS_OK) {
+        return result;
+      }
+      break;
+    }
     // This block of code is executed when a TCP acknowledgment indication is received.
     case SLI_WIFI_RSP_TCP_ACK_INDICATION: {
       result = sli_handle_tcp_ack_indication(rx_packet, sdk_context);
@@ -1924,6 +2120,15 @@ int sli_si91x_connect(int socket, const struct sockaddr *addr, socklen_t addr_le
   // Check if the socket is already connected
   SLI_SET_ERRNO_AND_RETURN_IF_TRUE(si91x_socket->type == SOCK_STREAM && si91x_socket->state == CONNECTED, EISCONN);
 
+  // Check if a non-blocking connect is already in progress
+  SLI_SET_ERRNO_AND_RETURN_IF_TRUE(si91x_socket->type == SOCK_STREAM && si91x_socket->state == CONNECTING, EALREADY);
+
+  // A failed outbound connect leaves the socket unusable until close(); do not retry connect() on it.
+  if (si91x_socket->type == SOCK_STREAM && si91x_socket->state == DISCONNECTED) {
+    errno = (si91x_socket->pending_error != 0) ? si91x_socket->pending_error : EBADF;
+    return -1;
+  }
+
   // Check the socket state based on its type
   SLI_SET_ERRNO_AND_RETURN_IF_TRUE(si91x_socket->type == SOCK_STREAM && si91x_socket->state > BOUND, EBADF);
   SLI_SET_ERRNO_AND_RETURN_IF_TRUE(si91x_socket->type == SOCK_DGRAM && si91x_socket->state != INITIALIZED
@@ -1961,15 +2166,22 @@ int sli_si91x_connect(int socket, const struct sockaddr *addr, socklen_t addr_le
 
   // Verify the status of the socket operation and return errors if necessary
   // Preserve errno if already set by sli_create_and_send_socket_request (e.g., EAFNOSUPPORT)
+  if (status == SL_STATUS_IN_PROGRESS) {
+    errno = EINPROGRESS;
+    return -1;
+  }
+
   if (status != SL_STATUS_OK) {
     if (errno == 0) {
-      errno = SLI_SI91X_UNDEFINED_ERROR;
+      si91x_socket->pending_error = sli_si91x_socket_status_to_errno(status);
+      errno                       = si91x_socket->pending_error;
     }
     return -1;
   }
 
   // Update the socket state to "CONNECTED" and return success
-  si91x_socket->state = CONNECTED;
+  si91x_socket->state         = CONNECTED;
+  si91x_socket->pending_error = 0;
   return SLI_SI91X_NO_ERROR;
 }
 
@@ -2081,10 +2293,21 @@ uint8_t sli_prepare_select_request(int nfds,
       return EBADF; // Bad file descriptor
     }
 
-    // The code will reach this if clause in the case of a socket being NULL and the socket being neither set in readfds nor writefds.
     // Continue to next socket if this one is not in use
     if (socket == NULL) {
       continue;
+    }
+
+    // A host fd is selectable only once the firmware has assigned a socket id
+    if (socket->id < 0
+#ifndef __ZEPHYR__
+        && ((readfds != NULL && FD_ISSET(host_socket_index, readfds))
+            || (writefds != NULL && FD_ISSET(host_socket_index, writefds)))) {
+#else
+        && ((readfds != NULL && SL_SI91X_FD_ISSET(host_socket_index, readfds))
+            || (writefds != NULL && SL_SI91X_FD_ISSET(host_socket_index, writefds)))) {
+#endif
+      return EBADF;
     }
 
     // Check if the socket is set for read operations in the readfds set

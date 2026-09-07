@@ -4,6 +4,9 @@ description: Zigbee PHY select CLI
 package: zigbee
 category: Platform|Radio
 quality: production
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/phy-2-4
 metadata:
   sbom:
     id: zigbee_phy_select_cli

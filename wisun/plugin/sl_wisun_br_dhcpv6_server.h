@@ -56,6 +56,33 @@ typedef NS_LIST_HEAD(dhcpv6_vendor_data_t, link) dhcpv6_vendor_data_list_t;
 sl_status_t sl_wisun_br_dhcpv6_server_init(void);
 
 /***************************************************************************//**
+ * Start the DHCPv6 Server.
+ *
+ * When link_local_socket is provided, DHCPv6 Request messages received from
+ * direct neighbors are handled through that socket, and the corresponding
+ * DHCPv6 Reply messages are sent through the same socket.
+ *
+ * The dedicated link-local socket:
+ * - Isolates DHCPv6 traffic with neighbors that selected the Border Router as
+ *   their parent, preventing Relay-Reply traffic from consuming the socket
+ *   buffers needed to serve those neighbors.
+ * - Allows DHCPv6 Reply messages to those direct neighbors to use the
+ *   IP_DSCP_AF11 DSCP level, giving them priority over regular data traffic.
+ *
+ * @param[in] socket Socket open and bound to DHCPv6 Server port.
+ * @param[in] link_local_socket Set to -1 if not provided. Optional socket bound to the Border Router's
+ * link-local address and DHCPv6 Server port.
+ * @param[in] prefix DHCPv6 Server's IPv6 prefix. Must be the same IPv6 prefix set with sl_wisun_br_set_ipv6_prefix().
+ * @param[in] DUID DHCPv6 Server's DHCP Unique Identifier. Should be the equal
+ * to the border router's MAC address.
+ * @param[in] dhcp_address_lifetime Addresses' valid lifetime. Any value
+ * different than LIFETIME_INFINITE is not supported.
+ * @return SL_STATUS_OK if successful, an error code otherwise
+ ******************************************************************************/
+sl_status_t sl_wisun_br_dhcpv6_server_start_with_link_local_socket(int socket, int link_local_socket, uint8_t prefix[8],
+                                                                   uint8_t DUID[8], uint32_t dhcp_address_lifetime);
+
+/***************************************************************************//**
  * Start DHCPv6 Server.
  *
  * @param[in] socket Socket open and bound to DHCPv6 Server port.

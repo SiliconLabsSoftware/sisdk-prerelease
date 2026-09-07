@@ -2,7 +2,7 @@
  * @brief RAIL Configuration
  * @details
  *   WARNING: Auto-Generated Radio Config  -  DO NOT EDIT
- *   Radio Configurator Version: 2602.3.0
+ *   Radio Configurator Version: 2604.1.0rc3
  *   RAIL Adapter Version: 2.4.33
  *   RAIL Compatibility: 2.x
  *******************************************************************************
@@ -33,7 +33,12 @@
  ******************************************************************************/
 #include "em_device.h"
 #include "sl_rail_util_ieee802154_fast_channel_switching_radio_config.h"
+#if defined(__ICCARM__)
+// IAR doesn't support copying const data (in flash) to RAM.
+#define SL_CODE_CLASSIFY(a, ...) /* no-op */
+#else
 #include "sl_code_classification.h"
+#endif
 
 SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static const uint8_t irCalConfig[] = {
@@ -76,8 +81,8 @@ static RAIL_ChannelConfigEntryAttr_t channelConfigEntryAttr = {
 
 SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 static const uint32_t phyInfo[] = {
-  20UL,
-  0x00800000UL, // 128.0
+  21UL,
+  0x006AAA9BUL, // 106.66644255086317
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
   (uint32_t) timingConfig,
@@ -97,6 +102,8 @@ static const uint32_t phyInfo[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
+  (uint32_t) 128UL,
+  (uint32_t) 32UL,
 };
 
 SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)

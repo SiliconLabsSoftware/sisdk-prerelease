@@ -168,6 +168,12 @@ typedef struct app_setting_wifi {
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
 // -----------------------------------------------------------------------------
+/**************************************************************************//**
+ * @brief Initialize the DHCPv6 socket
+ *
+ * @return sl_status_t
+ *****************************************************************************/
+static sl_status_t app_init_dhcpv6_sockets(const struct in6_addr *addr);
 
 /**************************************************************************//**
  * @brief Acquire application mutex
@@ -301,6 +307,10 @@ static app_setting_br_t _br_setting = { 0U };
 
 /// DHCPv6 server socket
 SL_WEAK int app_dhcpv6_socket = SOCKET_INVALID_ID;
+SL_WEAK int app_dhcpv6_link_local_socket = SOCKET_INVALID_ID;
+SL_WEAK void app_service_task_sockets_ready_notify(void)
+{
+}
 
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
@@ -309,25 +319,25 @@ SL_WEAK int app_dhcpv6_socket = SOCKET_INVALID_ID;
 /* Network update event handler */
 void sl_wisun_network_update_event_hnd(sl_wisun_evt_t *evt)
 {
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  __CHECK_FOR_STATUS(evt->evt.network_update.status);
 }
 
 /* Connected event handler */
 void sl_wisun_connected_event_hnd(sl_wisun_evt_t *evt)
 {
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  __CHECK_FOR_STATUS(evt->evt.connected.status);
 }
 
 /* Disconnected event handler */
 void sl_wisun_disconnected_event_hnd(sl_wisun_evt_t *evt)
 {
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  __CHECK_FOR_STATUS(evt->evt.disconnected.status);
 }
 
 /* Connection lost event handler */
 void sl_wisun_connection_lost_event_hnd(sl_wisun_evt_t *evt)
 {
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  __CHECK_FOR_STATUS(evt->evt.connection_lost.status);
 }
 
 /* Error event handler */
@@ -355,52 +365,56 @@ void sl_wisun_join_state_event_hnd(sl_wisun_evt_t *evt)
     sl_wisun_br_lwip_pan_down();
   }
 #endif
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  __CHECK_FOR_STATUS(evt->evt.join_state.status);
 }
 
 void sl_wisun_lfn_wake_up_hnd(sl_wisun_evt_t *evt)
 {
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  __CHECK_FOR_STATUS(evt->evt.lfn_wake_up.status);
 }
 
 void sl_wisun_multicast_reg_finish_hnd(sl_wisun_evt_t *evt)
 {
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  __CHECK_FOR_STATUS(evt->evt.lfn_multicast_reg.status);
 }
 
 void sl_wisun_dhcp_vendor_data_hnd(sl_wisun_evt_t *evt)
 {
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  // Indication has no status field
+  (void)evt;
 }
 
 void sl_wisun_pan_defect_hnd(sl_wisun_evt_t *evt)
 {
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  // Indication has no status field
+  (void)evt;
 }
 
 void sl_wisun_direct_connect_link_available_hnd(sl_wisun_evt_t *evt)
 {
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  // Indication has no status field
+  (void)evt;
 }
 
 void sl_wisun_direct_connect_status_hnd(sl_wisun_evt_t *evt)
 {
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  // Indication has no status field
+  (void)evt;
 }
 
 void sl_wisun_br_stopped_hnd(sl_wisun_evt_t *evt)
 {
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  __CHECK_FOR_STATUS(evt->evt.br_stopped.status);
 }
 
 void sl_wisun_mode_switch_fallback_hnd(sl_wisun_evt_t *evt)
 {
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  __CHECK_FOR_STATUS(evt->evt.mode_switch_fallback.status);
 }
 
 void sl_wisun_regulation_tx_level_hnd(sl_wisun_evt_t *evt)
 {
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  __CHECK_FOR_STATUS(evt->evt.regulation_tx_level.status);
 }
 
 void sl_wisun_br_routing_table_update_hnd(sl_wisun_evt_t *evt)
@@ -412,7 +426,7 @@ void sl_wisun_br_routing_table_update_hnd(sl_wisun_evt_t *evt)
   }
 #endif
   printf("[Routing table update: route changed]\n");
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  __CHECK_FOR_STATUS(evt->evt.br_routing_table_update.status);
 }
 
 /* Wi-SUN app core init */
@@ -460,6 +474,9 @@ void sl_wisun_app_br_core_start(void)
   sl_wisun_keychain_credential_t *credential = NULL;
   sl_wisun_mac_address_t address = { 0 };
   sl_wisun_network_info_t app_network_info;
+  struct in6_addr global_unicast_addr = { 0 };
+  struct in6_addr link_local_addr = { 0 };
+  struct in6_addr dodagid_addr = { 0 };
 #if defined(SL_CATALOG_WISUN_APP_SETTING_PRESENT)
   uint16_t pan_id = 0U;
 #endif
@@ -617,14 +634,18 @@ void sl_wisun_app_br_core_start(void)
   phy_config.config.fan11.phy_mode_id = _br_setting.phy.config.fan11.phy_mode_id;
   phy_config.type = _br_setting.phy.type;
 
-  EFM_ASSERT(sl_wisun_get_mac_address(&address) == SL_STATUS_OK);
-  EFM_ASSERT(sl_wisun_br_dhcpv6_server_start(app_dhcpv6_socket,
-                                             ipv6_prefix,
-                                             address.address,
-                                             LIFETIME_INFINITE) == SL_STATUS_OK);
 
-  // Start Border Router
   EFM_ASSERT(sl_wisun_br_start((const uint8_t *)_br_setting.network_name, &phy_config) == SL_STATUS_OK);
+
+  EFM_ASSERT(sl_wisun_br_get_ip_addresses(link_local_addr.address, global_unicast_addr.address, dodagid_addr.address) == SL_STATUS_OK);
+  EFM_ASSERT(app_init_dhcpv6_sockets(&link_local_addr) == SL_STATUS_OK);
+  EFM_ASSERT(sl_wisun_get_mac_address(&address) == SL_STATUS_OK);
+  EFM_ASSERT(sl_wisun_br_dhcpv6_server_start_with_link_local_socket(app_dhcpv6_socket,
+                                                                    app_dhcpv6_link_local_socket,
+                                                                    ipv6_prefix,
+                                                                    address.address,
+                                                                    LIFETIME_INFINITE) == SL_STATUS_OK);
+  app_service_task_sockets_ready_notify();
 
   // Set PAN ID
   EFM_ASSERT(sl_wisun_get_network_info(&app_network_info) == SL_STATUS_OK);
@@ -648,6 +669,61 @@ void sl_wisun_app_br_core_start(void)
 // -----------------------------------------------------------------------------
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
+static sl_status_t app_init_dhcpv6_sockets(const struct in6_addr *addr)
+{
+  sockaddr_in6_t bind_addr = {
+    .sin6_family = AF_INET6,
+    .sin6_port = htons(DHCPV6_SERVER_PORT),
+    .sin6_addr = IN6ADDR_ANY_INIT,
+  };
+  int retval;
+
+  if (app_dhcpv6_socket == SOCKET_INVALID_ID) {
+    app_dhcpv6_socket = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
+    if (app_dhcpv6_socket == SOCKET_INVALID_ID) {
+      printf("[Failed: failed to open DHCPv6 socket]\n");
+      goto failure;
+    }
+    retval = bind(app_dhcpv6_socket, (const struct sockaddr *)&bind_addr, sizeof(sockaddr_in6_t));
+    if (retval < 0) {
+      printf("[Failed: failed to bind DHCPv6 socket (%d)]\n", retval);
+      goto failure;
+    }
+  }
+
+  if (app_dhcpv6_link_local_socket != SOCKET_INVALID_ID || addr == NULL) {
+    return SL_STATUS_OK;
+  }
+
+  app_dhcpv6_link_local_socket = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
+  if (app_dhcpv6_link_local_socket == SOCKET_INVALID_ID) {
+    printf("[Failed: failed to open DHCPv6 socket]\n");
+    goto failure;
+  }
+  retval = setsockopt(app_dhcpv6_link_local_socket, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int));
+  if (retval < 0) {
+    printf("[Failed: failed to set SO_REUSEADDR on DHCPv6 link-local socket (%d)]\n", retval);
+    goto failure;
+  }
+  memcpy(&bind_addr.sin6_addr, addr->address, IPV6_ADDR_SIZE);
+  retval = bind(app_dhcpv6_link_local_socket, (const struct sockaddr *)&bind_addr, sizeof(sockaddr_in6_t));
+  if (retval < 0) {
+    printf("[Failed: failed to bind DHCPv6 link-local socket (%d)]\n", retval);
+    goto failure;
+  }
+  return SL_STATUS_OK;
+
+failure:
+  if (app_dhcpv6_socket != SOCKET_INVALID_ID) {
+    close(app_dhcpv6_socket);
+    app_dhcpv6_socket = SOCKET_INVALID_ID;
+  }
+  if (app_dhcpv6_link_local_socket != SOCKET_INVALID_ID) {
+    close(app_dhcpv6_link_local_socket);
+    app_dhcpv6_link_local_socket = SOCKET_INVALID_ID;
+  }
+  return SL_STATUS_FAIL;
+}
 
 /* Mutex acquire */
 __STATIC_INLINE void _app_wisun_mutex_acquire(void)

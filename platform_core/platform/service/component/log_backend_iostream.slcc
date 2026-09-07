@@ -10,7 +10,7 @@ description: >
   The default log level is set to Error, and users can modify this configuration
   through the UC.
 category: Services|Log
-quality: evaluation
+quality: production
 metadata:
   sbom:
     license: Zlib

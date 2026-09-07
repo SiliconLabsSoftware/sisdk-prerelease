@@ -84,6 +84,9 @@ void sl_hal_prs_async_init_channel(const sl_hal_prs_async_channel_init_t *init)
 #endif
   sl_hal_prs_async_connect_channel_producer(init->channel, init->producer_signal);
   sl_hal_prs_connect_channel_consumer(init->channel, SL_HAL_PRS_TYPE_ASYNC, init->consumer_event);
+  SL_PRINT_STRING_INFO("async_ch=%d prod=%lu\r\n",
+    (int)init->channel,
+    (unsigned long)init->producer_signal);
 }
 
 /***************************************************************************//**
@@ -96,6 +99,9 @@ void sl_hal_prs_sync_init_channel(const sl_hal_prs_sync_channel_init_t *init)
 
   sl_hal_prs_sync_connect_channel_producer(init->channel, init->producer_signal);
   sl_hal_prs_connect_channel_consumer(init->channel, SL_HAL_PRS_TYPE_SYNC, init->consumer_event);
+  SL_PRINT_STRING_INFO("sync_ch=%d prod=%lu\r\n",
+    (int)init->channel,
+    (unsigned long)init->producer_signal);
 }
 
 /***************************************************************************//**
@@ -173,6 +179,9 @@ void sl_hal_prs_connect_channel_consumer(uint8_t channel,
       *addr = channel << _PRS_CONSUMER_TIMER0_CC0_SPRSSEL_SHIFT;
     }
   }
+  SL_PRINT_STRING_DEBUG("channel=%d consumer_event=%lu\r\n",
+    (int)channel,
+    (unsigned long)consumer_event);
 }
 
 /***************************************************************************//**

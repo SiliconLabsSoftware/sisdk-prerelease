@@ -7,7 +7,9 @@
  *   logger is suspended and a tick count is snapshotted from sleeptimer;
  *   on the matching wake the elapsed sleeptimer ticks are converted to
  *   microseconds and pushed into the platform timestamp accumulator
- *   before the logger is resumed.
+ *   before the logger is resumed. That offset path is omitted only when
+ *   SLI_LOG_USE_PROTIMER is set (Series 3 with RAIL); Series 2 always
+ *   uses TIMERn and needs sleeptimer compensation even if RAIL is present.
  *
  *   Sleeptimer abstracts the actual low-frequency hardware timer
  *   (RTCC / SYSRTC / BURTC / PRORTC) and is guaranteed to be running
@@ -30,6 +32,8 @@
 #include "sl_log.h"
 #include "sl_log_internal.h"
 #include "sl_log_power_manager.h"
+/* Per-series SLI_LOG_USE_PROTIMER (see sl_log_hal_inline.h). */
+#include "sl_log_hal_inline.h"
 #include "sl_power_manager.h"
 #include "sl_sleeptimer.h"
 #include "sl_status.h"
@@ -41,10 +45,12 @@
  ***************************   LOCAL VARIABLES   ******************************
  ******************************************************************************/
 
+#if !SLI_LOG_USE_PROTIMER
 /* Sleeptimer tick count sampled at the last sleep entry. The wake side
  * computes (now - this) modulo 2^32; at the typical 32768 Hz tick rate
  * that's wrap-safe for any plausible sleep duration (~36 hours). */
 static uint32_t pre_sleep_ticks;
+#endif
 
 /* Subscribe-once guard. */
 static bool subscribed;
@@ -87,20 +93,28 @@ static void sli_log_pm_em_transition_cb(sl_power_manager_em_t from,
      * the platform layer to suspend the logger. The suspended flag
      * prevents any further sl_log_send_* from running between this
      * point and the matching wake-side callback. */
+#if !SLI_LOG_USE_PROTIMER
     pre_sleep_ticks = sl_sleeptimer_get_tick_count();
+#endif
     (void)sl_log_pre_sleep_process(NULL);
   } else if ((from >= SL_POWER_MANAGER_EM2) && (to <= SL_POWER_MANAGER_EM1)) {
     /* Leaving deep sleep: convert the elapsed sleeptimer ticks to
      * microseconds via the wrap-safe helper (see the overflow analysis
      * in the sli_log_pm_lf_ticks_to_us doxygen in sl_log_internal.h),
-     * push the result into the platform offset, then resume logging. */
+     * push the result into the platform offset, then resume logging.
+     *
+     * Skipped when the PROTIMER is the timestamp source (Series 3 + RAIL);
+     * RAIL keeps it RTC-synced across sleep. Series 2 always uses TIMERn and
+     * still needs this offset even when RAIL is present. */
+#if !SLI_LOG_USE_PROTIMER
     uint32_t now_ticks = sl_sleeptimer_get_tick_count();
-    uint32_t delta_us  = sli_log_pm_lf_ticks_to_us(
+    uint64_t delta_us  = sli_log_pm_lf_ticks_to_us(
       pre_sleep_ticks,
       now_ticks,
       sl_sleeptimer_get_timer_frequency());
 
     sli_log_platform_add_sleep_offset_us(delta_us);
+#endif
     (void)sl_log_post_sleep_process(NULL);
   }
 }
@@ -109,21 +123,19 @@ static void sli_log_pm_em_transition_cb(sl_power_manager_em_t from,
  ***************************   GLOBAL FUNCTIONS   *****************************
  ******************************************************************************/
 
-uint32_t sli_log_pm_lf_ticks_to_us(uint32_t pre_ticks,
+uint64_t sli_log_pm_lf_ticks_to_us(uint32_t pre_ticks,
                                    uint32_t now_ticks,
                                    uint32_t freq_hz)
 {
   if (freq_hz == 0U) {
-    return 0U;
+    return 0ULL;
   }
 
   /* uint32_t modular subtraction - correct across any single wrap of
-   * the LF counter. The widening to uint64_t keeps the *1e6 product
-   * from overflowing; the final cast back to uint32_t intentionally
-   * truncates modulo 2^32 us so the result composes with the visible
-   * 32-bit timestamp's natural wrap. */
+   * the LF counter. Keep the *1e6 product and the result in uint64_t
+   * so a sleep longer than 2^32 us still advances the 64-bit time. */
   uint32_t delta_ticks = now_ticks - pre_ticks;
-  return (uint32_t)(((uint64_t)delta_ticks * 1000000ULL) / (uint64_t)freq_hz);
+  return ((uint64_t)delta_ticks * 1000000ULL) / (uint64_t)freq_hz;
 }
 
 void sli_log_pm_subscribe(void)

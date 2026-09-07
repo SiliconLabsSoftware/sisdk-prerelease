@@ -64,15 +64,17 @@
     }                                                            \
   } while (0)
 
-#define SLI_SOCKET_VERIFY_STATUS_AND_RETURN(status, expected_status, errno_value) \
-  do {                                                                            \
-    if (status != expected_status) {                                              \
-      if (PRINT_ERROR_LOGS) {                                                     \
-        PRINT_ERROR_STATUS(ERROR_TAG, status);                                    \
-      }                                                                           \
-      errno = errno_value;                                                        \
-      return -1;                                                                  \
-    }                                                                             \
+#define SLI_SOCKET_VERIFY_STATUS_AND_RETURN(status, expected_status, errno_value)                         \
+  do {                                                                                                    \
+    if (status != expected_status) {                                                                      \
+      /* Suppress ERROR logs for expected socket conditions (timeouts/no-data) and             \
+       * recoverable TX backpressure mapped to ENOBUFS ("try again later"). */         \
+      if (PRINT_ERROR_LOGS && !SLI_STATUS_IS_NON_ERROR_FOR_PRINT(status) && ((errno_value) != ENOBUFS)) { \
+        PRINT_ERROR_STATUS(ERROR_TAG, status);                                                            \
+      }                                                                                                   \
+      errno = errno_value;                                                                                \
+      return -1;                                                                                          \
+    }                                                                                                     \
   } while (0)
 
 #ifndef __ZEPHYR__
@@ -348,6 +350,8 @@ int sli_si91x_socket(int family, int type, int protocol, sl_si91x_socket_receive
 int sli_si91x_shutdown(int socket, int how);
 
 int sli_si91x_connect(int socket, const struct sockaddr *addr, socklen_t addr_len);
+
+int sli_si91x_socket_status_to_errno(sl_status_t status);
 
 int sli_si91x_bind(int socket, const struct sockaddr *addr, socklen_t addr_len);
 

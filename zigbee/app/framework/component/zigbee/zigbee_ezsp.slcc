@@ -131,6 +131,8 @@ include:
 - path: platform/emlib/inc/
   file_list:
   - path: em_core.h
+documentation:
+  url: https://docs.silabs.com/zigbee/latest/emberznet-serial-protocol-uart-host-interfacing-guide/index.html
 metadata:
   sbom:
     license: MSLA AND Zlib

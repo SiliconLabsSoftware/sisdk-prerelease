@@ -13,6 +13,9 @@ requires:
 - name: zigbee_arm64
   condition:
   - linux_arch_aarch64
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/linux
 metadata:
   sbom:
     license: MSLA

@@ -33,6 +33,31 @@ index 018b186e8e233369647d3acf99b13fa151b7cc89..4dbd9e18020a410aa38799bd2b80dbd0
  #ifdef __cplusplus
  }
  #endif
+diff --git a/include/openthread/thread.h b/include/openthread/thread.h
+index de5b1373accda2fba54e1cbd6146ab50c66a724a..ec08761cb2078ed943578132a30b065765450894 100644
+--- a/include/openthread/thread.h
++++ b/include/openthread/thread.h
+@@ -353,6 +353,20 @@ uint32_t otThreadGetChildTimeout(otInstance *aInstance);
+  */
+ void otThreadSetChildTimeout(otInstance *aInstance, uint32_t aTimeout);
+ 
++/**
++ * Saves the current network attachment state to non-volatile settings.
++ *
++ * This stores the current `NetworkInfo` and `ParentInfo` (if attached as a child) to the
++ * platform settings. It is intended to be called before a reset or any sleep mode that does
++ * not retain RAM.
++ *
++ * @param[in]  aInstance A pointer to an OpenThread instance.
++ *
++ * @retval OT_ERROR_NONE           Successfully stored network info.
++ * @retval OT_ERROR_INVALID_STATE  The device is not attached to a Thread network.
++ */
++otError otThreadSaveNetworkInfo(otInstance *aInstance);
++
+ /**
+  * Gets the IEEE 802.15.4 Extended PAN ID.
+  *
 diff --git a/include/openthread/trel.h b/include/openthread/trel.h
 index e08fad368ebc5b4209d21c061a8e1d9fd3f2b3db..0cfa4abeba6d32454229245e9334870dea5cf4f5 100644
 --- a/include/openthread/trel.h
@@ -62,6 +87,54 @@ index e08fad368ebc5b4209d21c061a8e1d9fd3f2b3db..0cfa4abeba6d32454229245e9334870d
  /**
   * @}
   */
+diff --git a/src/cli/cli.cpp b/src/cli/cli.cpp
+index 53b01d0231ec159e55a1be677d61044d6b4264d9..e234023001531fcbb1ae396414eadaba8495dc31 100644
+--- a/src/cli/cli.cpp
++++ b/src/cli/cli.cpp
+@@ -6529,6 +6529,20 @@ template <> otError Interpreter::Process<Cmd("thread")>(Arg aArgs[])
+     {
+         OutputLine("%u", otThreadGetVersion());
+     }
++    /**
++     * @cli thread save
++     * @code
++     * thread save
++     * Done
++     * @endcode
++     * @par
++     * Saves the current network attachment state to non-volatile settings.
++     * @sa otThreadSaveNetworkInfo
++     */
++    else if (aArgs[0] == "save")
++    {
++        error = otThreadSaveNetworkInfo(GetInstancePtr());
++    }
+     else
+     {
+         error = OT_ERROR_INVALID_COMMAND;
+diff --git a/src/core/api/thread_api.cpp b/src/core/api/thread_api.cpp
+index 6c1a910ac4a86fe95a3d911e76b6eb84ca1cdd62..bcc5efd19c07df3a6f90d2021a73619bf9fff122 100644
+--- a/src/core/api/thread_api.cpp
++++ b/src/core/api/thread_api.cpp
+@@ -46,6 +46,18 @@ void otThreadSetChildTimeout(otInstance *aInstance, uint32_t aTimeout)
+     AsCoreType(aInstance).Get<Mle::Mle>().SetTimeout(aTimeout);
+ }
+ 
++otError otThreadSaveNetworkInfo(otInstance *aInstance)
++{
++    Error     error    = kErrorNone;
++    Instance &instance = AsCoreType(aInstance);
++
++    VerifyOrExit(instance.Get<Mle::Mle>().IsAttached(), error = kErrorInvalidState);
++    instance.Get<Mle::Mle>().Store();
++
++exit:
++    return error;
++}
++
+ const otExtendedPanId *otThreadGetExtendedPanId(otInstance *aInstance)
+ {
+     return &AsCoreType(aInstance).Get<MeshCoP::NetworkIdentity>().GetExtPanId();
 diff --git a/src/core/api/trel_api.cpp b/src/core/api/trel_api.cpp
 index a70d696e4278703f1a4ee1f3fa9f68d373680aad..206fab90f47cff33e0c9a19a8fbb7f7e436dd0d0 100644
 --- a/src/core/api/trel_api.cpp
@@ -3466,6 +3539,40 @@ index faaae7e6a03645a5f5b22deb8f3970052f1ed1bb..068318934bcc1304269e276e32ebb1c1
  } // namespace Posix
  } // namespace ot
  
+diff --git a/tests/unit/test_platform.cpp b/tests/unit/test_platform.cpp
+index ae850d96da5994db673c2368ff7d37b1addc7d3d..228543fb139ac787790991be3c16305aec7b227c 100644
+--- a/tests/unit/test_platform.cpp
++++ b/tests/unit/test_platform.cpp
+@@ -940,6 +940,29 @@ otError otPlatBleGapAdvUpdateData(otInstance *aInstance, uint8_t *aAdvertisement
+     return otPlatBleGapAdvSetData(aInstance, aAdvertisementData, aAdvertisementLen);
+ }
+ 
++/* Weak stubs for callbacks defined in the FTD/MTD core library, not available for RCP targets. */
++
++OT_TOOL_WEAK void otPlatBleGapOnConnected(otInstance *aInstance, uint16_t aConnectionId)
++{
++    OT_UNUSED_VARIABLE(aInstance);
++    OT_UNUSED_VARIABLE(aConnectionId);
++}
++
++OT_TOOL_WEAK void otPlatBleGapOnDisconnected(otInstance *aInstance, uint16_t aConnectionId)
++{
++    OT_UNUSED_VARIABLE(aInstance);
++    OT_UNUSED_VARIABLE(aConnectionId);
++}
++
++OT_TOOL_WEAK void otPlatBleGattServerOnWriteRequest(otInstance             *aInstance,
++                                                    uint16_t                aHandle,
++                                                    const otBleRadioPacket *aPacket)
++{
++    OT_UNUSED_VARIABLE(aInstance);
++    OT_UNUSED_VARIABLE(aHandle);
++    OT_UNUSED_VARIABLE(aPacket);
++}
++
+ #endif // OPENTHREAD_CONFIG_BLE_TCAT_ENABLE
+ 
+ #if OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE
 diff --git a/tests/unit/test_spinel_prop_codec.cpp b/tests/unit/test_spinel_prop_codec.cpp
 index becb9569f391a9741e1709dc0c81e4e4cadadf7a..d0be3978bc9838a74029fcd63565838d73f2c69f 100644
 --- a/tests/unit/test_spinel_prop_codec.cpp

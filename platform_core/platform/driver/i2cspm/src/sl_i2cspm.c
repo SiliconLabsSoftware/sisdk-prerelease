@@ -160,10 +160,8 @@ I2C_TransferReturn_TypeDef I2CSPM_Transfer(I2C_TypeDef *i2c, I2C_TransferSeq_Typ
   // Handle different transfer types using sl_i2c driver for all series
   switch (seq->flags) {
     case I2C_FLAG_WRITE:
-      // Simple write operation
-      if (seq->buf[0].len == 0) {
-        return i2cTransferUsageFault;
-      }
+      // Write, including address-only (len == 0): S+ADDR(W)+P.
+      // Matches em_i2c / I2CSPM header: transmitting 0 bytes is legal.
       status = sl_i2c_leader_send_blocking(handle, follower_addr, seq->buf[0].data, seq->buf[0].len, timeout_ms);
       break;
 

@@ -4,6 +4,9 @@ package: zigbee
 category: Services|Ember Legacy
 description: Legacy Ember ASH implementation for Host.
 quality: production
+documentation:
+  docset: gecko-platform
+  document: platform-service/legacyhal
 metadata:
   sbom:
     license: MSLA

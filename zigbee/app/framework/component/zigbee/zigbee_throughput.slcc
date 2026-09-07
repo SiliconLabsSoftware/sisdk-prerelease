@@ -152,6 +152,9 @@ template_contribution:
     name: clear-counters
     handler: sli_zigbee_af_throughput_cli_clear_counters
     help: Clear all the stack counters
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/throughput
 metadata:
   sbom:
     license: MSLA

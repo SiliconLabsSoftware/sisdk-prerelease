@@ -34,14 +34,19 @@
 #include "sl_crash_manager.h"
 #include "sli_crash_manager.h"
 
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+
 #if defined(__ARM_ARCH) || defined(__CORTEX_M)
 #include "em_device.h"
+#include "sl_compiler.h"
 #endif
 #if defined(__clang__)
 #include "cmsis_clang.h"
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) && !defined(__ICCARM__) && !defined(__IAR_SYSTEMS_ICC__)
 #include "cmsis_gcc.h"
-#elif defined(__ICCARM__)
+#elif defined(__ICCARM__) || defined(__IAR_SYSTEMS_ICC__)
 #include "cmsis_iccarm.h"
 #endif
 
@@ -305,7 +310,8 @@ static void fault_handler_c(uint32_t *stack_pointer, sl_crash_type_t crash_type)
   }
 }
 
-#if defined(__GNUC__) || defined(__clang__)
+#if (defined(__GNUC__) && !defined(__ICCARM__) && !defined(__IAR_SYSTEMS_ICC__)) \
+  || defined(__clang__)
 
 /**
  * @brief MemManage fault (naked): pass MSP/PSP and @ref SL_CRASH_TYPE_MEMFAULT to fault_handler_c
@@ -371,7 +377,7 @@ void __attribute__((naked)) UsageFault_Handler(void)
   );
 }
 
-#elif defined(__ICCARM__)
+#elif defined(__ICCARM__) || defined(__IAR_SYSTEMS_ICC__)
 
 /**
  * @brief MemManage fault (IAR naked). r1 must match @ref sl_crash_type_t order.
@@ -446,7 +452,7 @@ __NO_PROLOGUE void UsageFault_Handler(void)
  *
  * @param[in] unfed_mask  WDOGn_IntGet() value (e.g. WDOG_IF_WARN)
  */
-static void watchdog_warning_callback(uint32_t unfed_mask)
+void sli_crash_manager_on_watchdog_warning(uint32_t unfed_mask)
 {
   volatile sl_crash_manager_data_t *record = &g_crash_manager_data;
 
@@ -472,6 +478,8 @@ static void watchdog_warning_callback(uint32_t unfed_mask)
   sl_crash_manager_handle_crash((sl_crash_manager_data_t *)record);
 }
 
+#if !defined(SL_CATALOG_WATCHDOG_MANAGER_PRESENT)
+
 #if defined(WDOG0)
 /**
  * @brief WDOG0 warning IRQ
@@ -480,7 +488,7 @@ void WDOG0_IRQHandler(void)
 {
   uint32_t flags = WDOGn_IntGet(WDOG0);
   if (flags & WDOG_IF_WARN) {
-    watchdog_warning_callback(flags);
+    sli_crash_manager_on_watchdog_warning(flags);
   }
   WDOGn_IntClear(WDOG0, flags);
 }
@@ -494,11 +502,13 @@ void WDOG1_IRQHandler(void)
 {
   uint32_t flags = WDOGn_IntGet(WDOG1);
   if (flags & WDOG_IF_WARN) {
-    watchdog_warning_callback(flags);
+    sli_crash_manager_on_watchdog_warning(flags);
   }
   WDOGn_IntClear(WDOG1, flags);
 }
 #endif
+
+#endif // !SL_CATALOG_WATCHDOG_MANAGER_PRESENT
 
 #endif /* WDOG_COUNT && WDOG_IF_WARN */
 
@@ -522,7 +532,7 @@ void assertEFM(const char *file, int line)
   uint32_t pc = (uint32_t)__builtin_return_address(0);
   void    *fp = __builtin_frame_address(0);
   uint32_t sp = (fp != ((void *)0)) ? (uint32_t)fp : 0U;
-#elif defined(__ICCARM__)
+#elif defined(__ICCARM__) || defined(__IAR_SYSTEMS_ICC__)
   uint32_t pc = 0U;
   uint32_t sp = __get_MSP();
 #else

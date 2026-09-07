@@ -87,6 +87,9 @@ extern "C" {
 #ifndef SOCK_DGRAM
 #define SOCK_DGRAM 2
 #endif
+#ifndef SOCK_NONBLOCK
+#define SOCK_NONBLOCK 0x4000
+#endif
 
 #ifndef AF_INET
 #define AF_INET 2

@@ -24,7 +24,8 @@ template_contribution:
   value: SLI_PSA_SUPPORT_GCM_IV_CALCULATION
 
 documentation:
-  url: https://armmbed.github.io/mbed-crypto/html/api/ops/aead.html#c.PSA_ALG_GCM
+  # Authenticated Encryption — AES-GCM (non-12-byte IV via SLC)
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/psa-crypto-plugins
 metadata:
   sbom:
     reference: mbedtls_sbom

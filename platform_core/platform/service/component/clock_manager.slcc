@@ -38,6 +38,7 @@ provides:
 - name: clock_manager_init_config
   condition: [device_generic_family_sixx301]
 requires:
+- name: log_none
 - name: clock_manager_runtime
 - name: clock_manager_init_hal
 - name: clock_manager_init_config

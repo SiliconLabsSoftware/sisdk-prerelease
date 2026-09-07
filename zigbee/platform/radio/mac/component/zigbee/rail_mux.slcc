@@ -55,6 +55,9 @@ template_contribution:
 - name: code_classification_components
   value: rail_mux_ieee802154_mac
 
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/pro-stack-rail-mux
 metadata:
   sbom:
     license: MSLA

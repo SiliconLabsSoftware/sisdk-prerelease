@@ -36,7 +36,9 @@
 #include "sl_clock_manager_tree_config.h"
 #include "sli_clock_manager_init_hal.h"
 #include "sli_clock_manager_hal.h"
+#include "sli_clock_manager_log.h"
 #include "sl_clock_manager_init.h"
+#include "sli_clock_manager_init_selection.h"
 #include "sl_se_manager_extmem.h"
 #include "sl_se_manager_util.h"
 #include "sl_se_manager.h"
@@ -96,15 +98,9 @@
                                                      : ((n) == 2) ? SLI_CLOCK_MANAGER_SOCPLL2_FREQ \
                                                      : 0x0UL)
 
-#define CLOCK_MANAGER_SOCPLL_FREQ0(n)               (CLOCK_MANAGER_SOCPLL_OUT0_EN(n)                                           \
-                                                     ? (CLOCK_MANAGER_SOCPLL_FREQ(n) / (CLOCK_MANAGER_SOCPLL_OUT0_DIV(n) + 2)) \
-                                                     : 0UL)
-#define CLOCK_MANAGER_SOCPLL_FREQ1(n)               (CLOCK_MANAGER_SOCPLL_OUT1_EN(n)                                           \
-                                                     ? (CLOCK_MANAGER_SOCPLL_FREQ(n) / (CLOCK_MANAGER_SOCPLL_OUT1_DIV(n) + 2)) \
-                                                     : 0UL)
-#define CLOCK_MANAGER_SOCPLL_FREQ2(n)               (CLOCK_MANAGER_SOCPLL_OUT2_EN(n)                                           \
-                                                     ? (CLOCK_MANAGER_SOCPLL_FREQ(n) / (CLOCK_MANAGER_SOCPLL_OUT2_DIV(n) + 2)) \
-                                                     : 0UL)
+#define CLOCK_MANAGER_SOCPLL_FREQ0(n)               (CLOCK_MANAGER_SOCPLL_FREQ(n) / (CLOCK_MANAGER_SOCPLL_OUT0_DIV(n) + 2))
+#define CLOCK_MANAGER_SOCPLL_FREQ1(n)               (CLOCK_MANAGER_SOCPLL_FREQ(n) / (CLOCK_MANAGER_SOCPLL_OUT1_DIV(n) + 2))
+#define CLOCK_MANAGER_SOCPLL_FREQ2(n)               (CLOCK_MANAGER_SOCPLL_FREQ(n) / (CLOCK_MANAGER_SOCPLL_OUT2_DIV(n) + 2))
 
 #elif defined(SOCPLL_COUNT) && (SOCPLL_COUNT == 1)
 // Bus Clock macros for SOCPLL instances.
@@ -139,6 +135,78 @@
 #endif
 #endif
 
+#if !defined(HFRCO)
+#if defined(HFRCO_COUNT) && (HFRCO_COUNT == 2)
+#define HFRCO(n)                                    (((n) == 0) ? HFRCO0   \
+                                                     : ((n) == 1) ? HFRCO1 \
+                                                     : ((HFRCO_TypeDef *)0))
+#else
+#define HFRCO(n)                                    (((n) == 0) ? HFRCO0 : ((HFRCO_TypeDef *)0))
+#endif
+#endif
+
+#if !defined(DPLL)
+#if defined(DPLL_COUNT) && (DPLL_COUNT == 2)
+#define DPLL(n)                                     (((n) == 0) ? DPLL0   \
+                                                     : ((n) == 1) ? DPLL1 \
+                                                     : ((DPLL_TypeDef *)0))
+#else
+#define DPLL(n)                                     (((n) == 0) ? DPLL0 : ((DPLL_TypeDef *)0))
+#endif
+#endif
+
+#if defined(HFRCO1)
+#define HFRCO_BUS_CLOCK(n)                          (((n) == 0) ? SL_BUS_CLOCK_HFRCO0   \
+                                                     : ((n) == 1) ? SL_BUS_CLOCK_HFRCO1 \
+                                                     : ((sl_bus_clock_t)0))
+#define DPLL_BUS_CLOCK(n)                           (((n) == 0) ? SL_BUS_CLOCK_DPLL0   \
+                                                     : ((n) == 1) ? SL_BUS_CLOCK_DPLL1 \
+                                                     : ((sl_bus_clock_t)0))
+#define CLOCK_MANAGER_HFRCO_BAND(n)                 (((n) == 0) ? SLI_CLOCK_MANAGER_HFRCO_BAND    \
+                                                     : ((n) == 1) ? SLI_CLOCK_MANAGER_HFRCO1_BAND \
+                                                     : 0x0UL)
+#define CLOCK_MANAGER_HFRCO_DPLL_EN(n)              (((n) == 0) ? SLI_CLOCK_MANAGER_HFRCO_DPLL_EN    \
+                                                     : ((n) == 1) ? SLI_CLOCK_MANAGER_HFRCO_DPLL1_EN \
+                                                     : false)
+#define CLOCK_MANAGER_DPLL_FREQ(n)                  (((n) == 0) ? SLI_CLOCK_MANAGER_DPLL_FREQ    \
+                                                     : ((n) == 1) ? SLI_CLOCK_MANAGER_DPLL1_FREQ \
+                                                     : 0x0UL)
+#define CLOCK_MANAGER_DPLL_N(n)                     (((n) == 0) ? SLI_CLOCK_MANAGER_DPLL_N    \
+                                                     : ((n) == 1) ? SLI_CLOCK_MANAGER_DPLL1_N \
+                                                     : 0x0UL)
+#define CLOCK_MANAGER_DPLL_M(n)                     (((n) == 0) ? SLI_CLOCK_MANAGER_DPLL_M    \
+                                                     : ((n) == 1) ? SLI_CLOCK_MANAGER_DPLL1_M \
+                                                     : 0x0UL)
+#define CLOCK_MANAGER_DPLL_REFCLK(n)                (((n) == 0) ? SL_CLOCK_MANAGER_DPLL_REFCLK    \
+                                                     : ((n) == 1) ? SL_CLOCK_MANAGER_DPLL1_REFCLK \
+                                                     : 0x0UL)
+#define CLOCK_MANAGER_DPLL_EDGE(n)                  (((n) == 0) ? SL_CLOCK_MANAGER_DPLL_EDGE    \
+                                                     : ((n) == 1) ? SL_CLOCK_MANAGER_DPLL1_EDGE \
+                                                     : 0x0UL)
+#define CLOCK_MANAGER_DPLL_LOCKMODE(n)              (((n) == 0) ? SL_CLOCK_MANAGER_DPLL_LOCKMODE    \
+                                                     : ((n) == 1) ? SL_CLOCK_MANAGER_DPLL1_LOCKMODE \
+                                                     : 0x0UL)
+#define CLOCK_MANAGER_DPLL_AUTORECOVER(n)           (((n) == 0) ? SL_CLOCK_MANAGER_DPLL_AUTORECOVER    \
+                                                     : ((n) == 1) ? SL_CLOCK_MANAGER_DPLL1_AUTORECOVER \
+                                                     : 0x0UL)
+#define CLOCK_MANAGER_DPLL_DITHER(n)                (((n) == 0) ? SL_CLOCK_MANAGER_DPLL_DITHER    \
+                                                     : ((n) == 1) ? SL_CLOCK_MANAGER_DPLL1_DITHER \
+                                                     : 0x0UL)
+#else
+#define HFRCO_BUS_CLOCK(n)                          (((n) == 0) ? SL_BUS_CLOCK_HFRCO0 : ((sl_bus_clock_t)0))
+#define DPLL_BUS_CLOCK(n)                           (((n) == 0) ? SL_BUS_CLOCK_DPLL0 : ((sl_bus_clock_t)0))
+#define CLOCK_MANAGER_HFRCO_BAND(n)                 (((n) == 0) ? SLI_CLOCK_MANAGER_HFRCO_BAND : 0x0UL)
+#define CLOCK_MANAGER_HFRCO_DPLL_EN(n)              (((n) == 0) ? SLI_CLOCK_MANAGER_HFRCO_DPLL_EN : false)
+#define CLOCK_MANAGER_DPLL_FREQ(n)                  (((n) == 0) ? SLI_CLOCK_MANAGER_DPLL_FREQ : 0x0UL)
+#define CLOCK_MANAGER_DPLL_N(n)                     (((n) == 0) ? SLI_CLOCK_MANAGER_DPLL_N : 0x0UL)
+#define CLOCK_MANAGER_DPLL_M(n)                     (((n) == 0) ? SLI_CLOCK_MANAGER_DPLL_M : 0x0UL)
+#define CLOCK_MANAGER_DPLL_REFCLK(n)                (((n) == 0) ? SL_CLOCK_MANAGER_DPLL_REFCLK : 0x0UL)
+#define CLOCK_MANAGER_DPLL_EDGE(n)                  (((n) == 0) ? SL_CLOCK_MANAGER_DPLL_EDGE : 0x0UL)
+#define CLOCK_MANAGER_DPLL_LOCKMODE(n)              (((n) == 0) ? SL_CLOCK_MANAGER_DPLL_LOCKMODE : 0x0UL)
+#define CLOCK_MANAGER_DPLL_AUTORECOVER(n)           (((n) == 0) ? SL_CLOCK_MANAGER_DPLL_AUTORECOVER : 0x0UL)
+#define CLOCK_MANAGER_DPLL_DITHER(n)                (((n) == 0) ? SL_CLOCK_MANAGER_DPLL_DITHER : 0x0UL)
+#endif
+
 /*******************************************************************************
  **************************   GLOBAL VARIABLES   *******************************
  ******************************************************************************/
@@ -163,6 +231,14 @@ bool     SLI_CLOCK_MANAGER_HFRCO_DPLL_EN  = SL_CLOCK_MANAGER_HFRCO_DPLL_EN;
 uint32_t SLI_CLOCK_MANAGER_DPLL_FREQ      = SL_CLOCK_MANAGER_DPLL_FREQ;
 uint32_t SLI_CLOCK_MANAGER_DPLL_N         = SL_CLOCK_MANAGER_DPLL_N;
 uint32_t SLI_CLOCK_MANAGER_DPLL_M         = SL_CLOCK_MANAGER_DPLL_M;
+
+#if defined(HFRCO1)
+uint32_t SLI_CLOCK_MANAGER_HFRCO1_BAND     = SL_CLOCK_MANAGER_HFRCO1_BAND;
+bool     SLI_CLOCK_MANAGER_HFRCO_DPLL1_EN  = SL_CLOCK_MANAGER_HFRCO_DPLL1_EN;
+uint32_t SLI_CLOCK_MANAGER_DPLL1_FREQ      = SL_CLOCK_MANAGER_DPLL1_FREQ;
+uint32_t SLI_CLOCK_MANAGER_DPLL1_N         = SL_CLOCK_MANAGER_DPLL1_N;
+uint32_t SLI_CLOCK_MANAGER_DPLL1_M         = SL_CLOCK_MANAGER_DPLL1_M;
+#endif
 
 #if defined(SOCPLL_PRESENT)
 #if defined(SL_CLOCK_MANAGER_SOCPLL_EN)
@@ -259,8 +335,7 @@ bool     SLI_CLOCK_MANAGER_SOCPLL2_EN_OPEN_LOOP  = false;
 /*******************************************************************************
  ***************************   LOCAL FUNCTIONS   *******************************
  ******************************************************************************/
-#if defined(SL_CLOCK_MANAGER_HFXO_EN) \
-  && (SL_CLOCK_MANAGER_HFXO_EN == 1)
+#if defined(SLI_CLOCK_MANAGER_INIT_HFXO)
 static void get_hfxo_ctune(uint8_t *ctune_xi_steady, uint8_t *ctune_xo_steady)
 {
 #if (SL_CLOCK_MANAGER_HFXO_MODE == HFXO_CFG_MODE_XTAL) || defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION)
@@ -379,6 +454,8 @@ FUNCTION_SCOPE void init_hfxo(void)
   NVIC_EnableIRQ(HFXO_IRQ_NUMBER);
 
   HFXO0->IEN_SET = HFXO_IEN_SLEEPYXTAL;
+
+  SLI_CLOCK_MANAGER_LOG_DEBUG("HFXO sleepy crystal configuration applied");
 #endif
 
 #if (SL_CLOCK_MANAGER_HFXO_MODE == HFXO_CFG_MODE_XTAL) || defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION)
@@ -513,6 +590,7 @@ FUNCTION_SCOPE void init_hfxo(void)
   // Start the measure
   HFXO0->CMD_SET = HFXO_CMD_STARTMEAS;
 
+  SLI_CLOCK_MANAGER_LOG_DEBUG("HFXO startup time measurement started");
 #endif
 
   // Keep oscillator on-demand.
@@ -523,11 +601,15 @@ FUNCTION_SCOPE void init_hfxo(void)
 
   // Update HFXO Frequency
   SystemHFXOClockSet(SLI_CLOCK_MANAGER_HFXO_FREQ);
+
+  SLI_CLOCK_MANAGER_LOG_INFO("HFXO configured, ctune_xi=%u ctune_xo=%u freq=%u",
+                             (uint32_t)ctune_xi_steady,
+                             (uint32_t)ctune_xo_steady,
+                             (uint32_t)SLI_CLOCK_MANAGER_HFXO_FREQ);
 }
 #endif
 
-#if defined(SL_CLOCK_MANAGER_LFXO_EN) \
-  && (SL_CLOCK_MANAGER_LFXO_EN == 1)
+#if defined(SLI_CLOCK_MANAGER_INIT_LFXO)
 /***************************************************************************//**
  * Initializes LFXO.
  ******************************************************************************/
@@ -580,11 +662,7 @@ FUNCTION_SCOPE void init_lfxo(void)
   ctune = (uint8_t) SL_MIN(0x59U, (uint8_t)ctune);
 
   // Enable Bus Clock for LFXO.
-#if defined(CMU_CLKEN0_LFXO)
-  CMU->CLKEN0_SET = CMU_CLKEN0_LFXO;
-#elif defined(CMU_LFXOCLKCTRL_CLKEN)
-  CMU->LFXOCLKCTRL_SET = CMU_LFXOCLKCTRL_CLKEN;
-#endif
+  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_LFXO);
 
   // Unlock register interface.
   LFXO->LOCK = LFXO_LOCK_LOCKKEY_UNLOCK;
@@ -613,17 +691,17 @@ FUNCTION_SCOPE void init_lfxo(void)
   LFXO->CTRL_CLR = LFXO_CTRL_DISONDEMAND;
 
   clock_manager_lfxo_precision = SL_CLOCK_MANAGER_LFXO_PRECISION;
+
+  SLI_CLOCK_MANAGER_LOG_INFO("LFXO configured, ctune=%u", (uint32_t)ctune);
 }
 #endif
 
+#if defined(SLI_CLOCK_MANAGER_INIT_CLKIN0)
 /***************************************************************************//**
  * Initializes Clock Input CLKIN0.
  ******************************************************************************/
 FUNCTION_SCOPE void init_clkin0(void)
 {
-#if (defined(SL_CLOCK_MANAGER_SYSCLK_SOURCE) && (SL_CLOCK_MANAGER_SYSCLK_SOURCE == CMU_SYSCLKCTRL_CLKSEL_CLKIN0)) \
-  || (defined(SL_CLOCK_MANAGER_DPLL_REFCLK) && (SL_CLOCK_MANAGER_DPLL_REFCLK == CMU_DPLLREFCLKCTRL_CLKSEL_CLKIN0))
-
 #if !defined(SL_CLOCK_MANAGER_CLKIN0_PORT) || !defined(SL_CLOCK_MANAGER_CLKIN0_PIN)
 #error "Invalid configuration: CLKIN0 reference can't be use without configuring SL_CLOCK_MANAGER_CLKIN0 with a valid port and pin."
 #endif
@@ -639,18 +717,25 @@ FUNCTION_SCOPE void init_clkin0(void)
 
   GPIO->CMUROUTE.CLKIN0ROUTE = (clkin0_gpio.port << _GPIO_CMU_CLKIN0ROUTE_PORT_SHIFT)
                                | (clkin0_gpio.pin << _GPIO_CMU_CLKIN0ROUTE_PIN_SHIFT);
-#endif
 }
+#endif
 
-#if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION) \
-  || (defined(SL_CLOCK_MANAGER_HFRCO_DPLL_EN) && (SL_CLOCK_MANAGER_HFRCO_DPLL_EN == 1))
+#if defined(SLI_CLOCK_MANAGER_INIT_DPLL0) || defined(SLI_CLOCK_MANAGER_INIT_DPLL1)
 /**************************************************************************//**
  * Initializes DPLL.
  *****************************************************************************/
-FUNCTION_SCOPE void init_dpll(void)
+FUNCTION_SCOPE void init_dpll(uint8_t hfrcodpll_num)
 {
+  sl_status_t status;
+  HFRCO_TypeDef *hfrco = HFRCO(hfrcodpll_num);
+  DPLL_TypeDef *dpll = DPLL(hfrcodpll_num);
+  sl_bus_clock_t dpll_bus_clock = DPLL_BUS_CLOCK(hfrcodpll_num);
+
+  EFM_ASSERT(hfrco != NULL);
+  EFM_ASSERT(dpll != NULL);
+
 #if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION)
-  if (SLI_CLOCK_MANAGER_HFRCO_DPLL_EN)
+  if (CLOCK_MANAGER_HFRCO_DPLL_EN(hfrcodpll_num))
 #endif
   {
 #if !defined(SL_CATALOG_CLOCK_MANAGER_PTE_PRESENT) && !defined(SLI_SE_FIRMWARE_UNAVAILABLE)
@@ -658,111 +743,117 @@ FUNCTION_SCOPE void init_dpll(void)
 #endif
 
     // Enable DPLL module's clock.
-#if defined(CMU_CLKEN0_DPLL0)
-    CMU->CLKEN0_SET = CMU_CLKEN0_DPLL0;
-#elif defined(CMU_DPLL0CLKCTRL_CLKEN)
-    CMU->DPLL0CLKCTRL_SET = CMU_DPLL0CLKCTRL_CLKEN;
-#endif
+    status = sl_clock_manager_enable_bus_clock(dpll_bus_clock);
+    EFM_ASSERT(status == SL_STATUS_OK);
 
     // Disable DPLL before configuring.
-    DPLL0->EN_CLR = DPLL_EN_EN;
-    while (DPLL0->EN & DPLL_EN_DISABLING) {
+    dpll->EN_CLR = DPLL_EN_EN;
+    while (dpll->EN & DPLL_EN_DISABLING) {
       // Wait for DPLL to be disabled before configuring.
     }
 
-    EFM_ASSERT(SLI_CLOCK_MANAGER_DPLL_N <= (_DPLL_CFG1_N_MASK >> _DPLL_CFG1_N_SHIFT));
-    EFM_ASSERT(SLI_CLOCK_MANAGER_DPLL_M <= (_DPLL_CFG1_M_MASK >> _DPLL_CFG1_M_SHIFT));
+    EFM_ASSERT(CLOCK_MANAGER_DPLL_N(hfrcodpll_num) <= (_DPLL_CFG1_N_MASK >> _DPLL_CFG1_N_SHIFT));
+    EFM_ASSERT(CLOCK_MANAGER_DPLL_M(hfrcodpll_num) <= (_DPLL_CFG1_M_MASK >> _DPLL_CFG1_M_SHIFT));
 
 #if !defined(SL_CATALOG_CLOCK_MANAGER_PTE_PRESENT) && !defined(SLI_SE_FIRMWARE_UNAVAILABLE)
     CORE_ATOMIC_SECTION(
       // Since SE Command is necessary to get the calibration value, and sl_se_init() is not yet called,
       // we need to enter atomic mode to prevent the SE Command from being interrupted.
-      hfrco_cal_val = sl_hal_system_get_hfrcodpll_band_calibration(SLI_CLOCK_MANAGER_DPLL_FREQ);
+      hfrco_cal_val = sl_hal_system_get_hfrcodpll_band_calibration(CLOCK_MANAGER_DPLL_FREQ(hfrcodpll_num));
       )
     EFM_ASSERT((hfrco_cal_val != 0UL) && (hfrco_cal_val != UINT32_MAX));
 
-    while (HFRCO0->STATUS & (HFRCO_STATUS_SYNCBUSY | HFRCO_STATUS_FREQBSY)) {
+    while (hfrco->STATUS & (HFRCO_STATUS_SYNCBUSY | HFRCO_STATUS_FREQBSY)) {
       // Updates to the CAL register are deferred if FREQBSY is high, so wait
       // until HFRCO is not busy to keep going.
     }
 
-    HFRCO0->CAL = hfrco_cal_val;
+    hfrco->CAL = hfrco_cal_val;
 
 #if defined(_DPLL_OFFSET_K0_MASK)
     uint32_t dpll_k0_val;
     CORE_ATOMIC_SECTION(
-      dpll_k0_val = sl_hal_system_get_dpll_k0_offset(SLI_CLOCK_MANAGER_DPLL_FREQ);
+      dpll_k0_val = sl_hal_system_get_dpll_k0_offset(CLOCK_MANAGER_DPLL_FREQ(hfrcodpll_num));
       )
     if ((dpll_k0_val != 0UL) && (dpll_k0_val != 0xFFFu)) {
-      DPLL0->OFFSET = (DPLL0->OFFSET & ~_DPLL_OFFSET_K0_MASK)
-                      | ((dpll_k0_val << _DPLL_OFFSET_K0_SHIFT) & _DPLL_OFFSET_K0_MASK);
+      dpll->OFFSET = (dpll->OFFSET & ~_DPLL_OFFSET_K0_MASK)
+                     | ((dpll_k0_val << _DPLL_OFFSET_K0_SHIFT) & _DPLL_OFFSET_K0_MASK);
     }
 #endif
 #endif
 
-    DPLL0->CFG1 = (DPLL0->CFG1 & ~(_DPLL_CFG1_N_MASK | _DPLL_CFG1_M_MASK))
-                  | (SLI_CLOCK_MANAGER_DPLL_N << _DPLL_CFG1_N_SHIFT)
-                  | (SLI_CLOCK_MANAGER_DPLL_M << _DPLL_CFG1_M_SHIFT);
+    dpll->CFG1 = (dpll->CFG1 & ~(_DPLL_CFG1_N_MASK | _DPLL_CFG1_M_MASK))
+                 | (CLOCK_MANAGER_DPLL_N(hfrcodpll_num) << _DPLL_CFG1_N_SHIFT)
+                 | (CLOCK_MANAGER_DPLL_M(hfrcodpll_num) << _DPLL_CFG1_M_SHIFT);
 
     // Set the DPLL clock reference.
+#if defined(_CMU_DPLL1REFCLKCTRL_MASK)
+    if (hfrcodpll_num == 1) {
+      CMU->DPLL1REFCLKCTRL = (CMU->DPLL1REFCLKCTRL & ~_CMU_DPLL1REFCLKCTRL_CLKSEL_MASK)
+                             | CLOCK_MANAGER_DPLL_REFCLK(hfrcodpll_num);
+    } else {
+      CMU->DPLLREFCLKCTRL = (CMU->DPLLREFCLKCTRL & ~_CMU_DPLLREFCLKCTRL_CLKSEL_MASK)
+                            | CLOCK_MANAGER_DPLL_REFCLK(hfrcodpll_num);
+    }
+#else
     CMU->DPLLREFCLKCTRL = (CMU->DPLLREFCLKCTRL & ~_CMU_DPLLREFCLKCTRL_CLKSEL_MASK)
-                          | SL_CLOCK_MANAGER_DPLL_REFCLK;
+                          | CLOCK_MANAGER_DPLL_REFCLK(hfrcodpll_num);
+#endif
 
-    DPLL0->CFG = (DPLL0->CFG & ~(_DPLL_CFG_AUTORECOVER_MASK | _DPLL_CFG_DITHEN_MASK
-                                 | _DPLL_CFG_EDGESEL_MASK | _DPLL_CFG_MODE_MASK))
-                 | (SL_CLOCK_MANAGER_DPLL_AUTORECOVER << _DPLL_CFG_AUTORECOVER_SHIFT)
-                 | (SL_CLOCK_MANAGER_DPLL_DITHER  << _DPLL_CFG_DITHEN_SHIFT)
-                 | (SL_CLOCK_MANAGER_DPLL_EDGE  << _DPLL_CFG_EDGESEL_SHIFT)
-                 | (SL_CLOCK_MANAGER_DPLL_LOCKMODE << _DPLL_CFG_MODE_SHIFT);
+    dpll->CFG = (dpll->CFG & ~(_DPLL_CFG_AUTORECOVER_MASK | _DPLL_CFG_DITHEN_MASK
+                               | _DPLL_CFG_EDGESEL_MASK | _DPLL_CFG_MODE_MASK))
+                | (CLOCK_MANAGER_DPLL_AUTORECOVER(hfrcodpll_num) << _DPLL_CFG_AUTORECOVER_SHIFT)
+                | (CLOCK_MANAGER_DPLL_DITHER(hfrcodpll_num)  << _DPLL_CFG_DITHEN_SHIFT)
+                | (CLOCK_MANAGER_DPLL_EDGE(hfrcodpll_num)  << _DPLL_CFG_EDGESEL_SHIFT)
+                | (CLOCK_MANAGER_DPLL_LOCKMODE(hfrcodpll_num) << _DPLL_CFG_MODE_SHIFT);
 
-    // Update CMSIS HFRCODPLL frequency.
-    SystemHFRCODPLLClockSet(SLI_CLOCK_MANAGER_DPLL_FREQ);
+    // Update CMSIS HFRCODPLL frequency for instance 0.
+    if (hfrcodpll_num == 0) {
+      SystemHFRCODPLLClockSet(CLOCK_MANAGER_DPLL_FREQ(hfrcodpll_num));
+    }
 
     // Clear some interrupt flags.
-    DPLL0->IF_CLR = DPLL_IF_LOCK | DPLL_IF_LOCKFAILLOW | DPLL_IF_LOCKFAILHIGH;
+    dpll->IF_CLR = DPLL_IF_LOCK | DPLL_IF_LOCKFAILLOW | DPLL_IF_LOCKFAILHIGH;
     // Enable DPLL and wait for lock via STATUS register.
-    DPLL0->EN_SET = DPLL_EN_EN;
+    dpll->EN_SET = DPLL_EN_EN;
 
-    while ((DPLL0->STATUS & (DPLL_STATUS_RDY | DPLL_STATUS_ENS))
+    while ((dpll->STATUS & (DPLL_STATUS_RDY | DPLL_STATUS_ENS))
            != (DPLL_STATUS_RDY | DPLL_STATUS_ENS)) {
       // Wait for DPLL lock, ready, and enabled.
     }
+
+    SLI_CLOCK_MANAGER_LOG_INFO("DPLL%u locked, freq=%u", (uint32_t)hfrcodpll_num, (uint32_t)CLOCK_MANAGER_DPLL_FREQ(hfrcodpll_num));
   }
 }
 #endif
 
+#if defined(SLI_CLOCK_MANAGER_INIT_HFRCODPLL0) || defined(SLI_CLOCK_MANAGER_INIT_HFRCODPLL1)
 /***************************************************************************//**
  * Initializes HFRCODPLL.
  ******************************************************************************/
-FUNCTION_SCOPE void init_hfrcodpll(void)
+FUNCTION_SCOPE void init_hfrco_dpll(uint8_t hfrcodpll_num)
 {
-#if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION) \
-  || (defined(SL_CLOCK_MANAGER_HFRCO_DPLL_EN) && (SL_CLOCK_MANAGER_HFRCO_DPLL_EN == 1))
+  HFRCO_TypeDef *hfrco = HFRCO(hfrcodpll_num);
+  sl_bus_clock_t hfrco_bus_clock = HFRCO_BUS_CLOCK(hfrcodpll_num);
 
-#if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION)
-  if (SLI_CLOCK_MANAGER_HFRCO_DPLL_EN)
-#else
-  if (true)
-#endif
-  {
+  EFM_ASSERT(hfrco != NULL);
+
+#if defined(SLI_CLOCK_MANAGER_INIT_DPLL0) || defined(SLI_CLOCK_MANAGER_INIT_DPLL1)
+  if (CLOCK_MANAGER_HFRCO_DPLL_EN(hfrcodpll_num)) {
     sl_status_t status;
 
-    // The System Clock should not be running from the HFRCO.
-    EFM_ASSERT((CMU->SYSCLKCTRL & _CMU_SYSCLKCTRL_CLKSEL_MASK) != CMU_SYSCLKCTRL_CLKSEL_HFRCODPLL);
-
     // Enable HFRCO module's clock.
-    status = sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_HFRCO0);
+    status = sl_clock_manager_enable_bus_clock(hfrco_bus_clock);
     EFM_ASSERT(status == SL_STATUS_OK);
 
     // Initialize DPLL.
-    init_dpll();
+    init_dpll(hfrcodpll_num);
   }
 #endif
 // Initialize HFRCO without DPLL.
-#if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION) \
-  || (defined(SL_CLOCK_MANAGER_HFRCO_DPLL_EN) && (SL_CLOCK_MANAGER_HFRCO_DPLL_EN == 0))
+#if defined(SLI_CLOCK_MANAGER_INIT_HFRCO0) || defined(SLI_CLOCK_MANAGER_INIT_HFRCO1)
 
-#if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION)
+#if defined(SLI_CLOCK_MANAGER_INIT_DPLL0) || defined(SLI_CLOCK_MANAGER_INIT_DPLL1)
   else
 #else
   if (true)
@@ -770,12 +861,16 @@ FUNCTION_SCOPE void init_hfrcodpll(void)
   {
     sl_status_t status;
     uint32_t freq_cal = 0;
+    const DPLL_TypeDef *dpll = DPLL(hfrcodpll_num);
+    sl_bus_clock_t dpll_bus_clock = DPLL_BUS_CLOCK(hfrcodpll_num);
+
+    EFM_ASSERT(dpll != NULL);
 
     status = sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_DEVINFO);
     EFM_ASSERT(status == SL_STATUS_OK);
 
     // Retrieve HFRCO calibration from DEVINFO data.
-    switch (SLI_CLOCK_MANAGER_HFRCO_BAND) {
+    switch (CLOCK_MANAGER_HFRCO_BAND(hfrcodpll_num)) {
       case 38000000:
         freq_cal = sl_hal_system_get_hfrco_default_calibration();
         break;
@@ -791,40 +886,44 @@ FUNCTION_SCOPE void init_hfrcodpll(void)
     EFM_ASSERT((freq_cal != 0UL) && (freq_cal != UINT32_MAX));
 
     // Enable HFRCO module's clock.
-    status = sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_HFRCO0);
+    status = sl_clock_manager_enable_bus_clock(hfrco_bus_clock);
     EFM_ASSERT(status == SL_STATUS_OK);
 
     // Make sure DPLL is disabled before configuring.
-    status = sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_DPLL0);
+    status = sl_clock_manager_enable_bus_clock(dpll_bus_clock);
     EFM_ASSERT(status == SL_STATUS_OK);
-    EFM_ASSERT(DPLL0->EN == 0);
-    status = sl_clock_manager_disable_bus_clock(SL_BUS_CLOCK_DPLL0);
+    EFM_ASSERT(dpll->EN == 0);
+    status = sl_clock_manager_disable_bus_clock(dpll_bus_clock);
     EFM_ASSERT(status == SL_STATUS_OK);
 
-    while (HFRCO0->STATUS & (HFRCO_STATUS_SYNCBUSY | HFRCO_STATUS_FREQBSY)) {
+    while (hfrco->STATUS & (HFRCO_STATUS_SYNCBUSY | HFRCO_STATUS_FREQBSY)) {
       // Updates to the CAL register are deferred if FREQBSY is high, so wait
       // until HFRCO is not busy to keep going.
     }
 
-    HFRCO0->CAL = freq_cal;
+    hfrco->CAL = freq_cal;
 
     // Update CMSIS HFRCODPLL frequency.
-    SystemHFRCODPLLClockSet(SLI_CLOCK_MANAGER_HFRCO_BAND);
+    if (hfrcodpll_num == 0) {
+      SystemHFRCODPLLClockSet(CLOCK_MANAGER_HFRCO_BAND(hfrcodpll_num));
+    }
+
+    SLI_CLOCK_MANAGER_LOG_INFO("HFRCODPLL%u configured, freq=%u", (uint32_t)hfrcodpll_num, (uint32_t)CLOCK_MANAGER_HFRCO_BAND(hfrcodpll_num));
   }
 #endif
 }
+#endif
 
-#if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION)                              \
-  || (defined(SL_CLOCK_MANAGER_SOCPLL_EN) && (SL_CLOCK_MANAGER_SOCPLL_EN == 1))   \
-  || (defined(SL_CLOCK_MANAGER_SOCPLL0_EN) && (SL_CLOCK_MANAGER_SOCPLL0_EN == 1)) \
-  || (defined(SL_CLOCK_MANAGER_SOCPLL1_EN) && (SL_CLOCK_MANAGER_SOCPLL1_EN == 1)) \
-  || (defined(SL_CLOCK_MANAGER_SOCPLL2_EN) && (SL_CLOCK_MANAGER_SOCPLL2_EN == 1))
+#if defined(SLI_CLOCK_MANAGER_INIT_SOCPLL0) \
+  || defined(SLI_CLOCK_MANAGER_INIT_SOCPLL1) \
+  || defined(SLI_CLOCK_MANAGER_INIT_SOCPLL2)
 /***************************************************************************//**
  * Initializes SOCPLL.
  ******************************************************************************/
 FUNCTION_SCOPE void init_socpll(uint8_t socpll_num)
 {
   sl_status_t status;
+
   SOCPLL_TypeDef *socpll = SOCPLL(socpll_num);
   EFM_ASSERT(socpll != NULL);
   sl_bus_clock_t socpll_bus_clock = SOCPLL_BUS_CLOCK(socpll_num);
@@ -834,6 +933,9 @@ FUNCTION_SCOPE void init_socpll(uint8_t socpll_num)
     return;
   }
 #endif
+
+  SLI_CLOCK_MANAGER_LOG_INFO("SOCPLL%u initialization started", (uint32_t)socpll_num);
+
   // Enable Bus Clock for SOCPLL.
   status = sl_clock_manager_enable_bus_clock(socpll_bus_clock);
   EFM_ASSERT(status == SL_STATUS_OK);
@@ -852,8 +954,18 @@ FUNCTION_SCOPE void init_socpll(uint8_t socpll_num)
   // If Integer-N mode is selected, DIVN cannot be 0.
   EFM_ASSERT(CLOCK_MANAGER_SOCPLL_FRACTIONAL_EN(socpll_num) != 0
              || CLOCK_MANAGER_SOCPLL_DIVN(socpll_num) != 0);
+  if ((CLOCK_MANAGER_SOCPLL_FRACTIONAL_EN(socpll_num) == 0)
+      && (CLOCK_MANAGER_SOCPLL_DIVN(socpll_num) == 0)) {
+    SLI_CLOCK_MANAGER_LOG_WARN("invalid SOCPLL%u configuration, DIVN=0 in integer-N mode",
+                               (uint32_t)socpll_num);
+  }
   // If Integer-N mode is selected, DIVF must be 0.
   uint32_t divf = CLOCK_MANAGER_SOCPLL_FRACTIONAL_EN(socpll_num) ? CLOCK_MANAGER_SOCPLL_DIVF(socpll_num) : 0;
+
+  SLI_CLOCK_MANAGER_LOG_DEBUG("SOCPLL configuration, divn=%u divf=%u refclk=%u",
+                              (uint32_t)CLOCK_MANAGER_SOCPLL_DIVN(socpll_num),
+                              divf,
+                              (uint32_t)CLOCK_MANAGER_SOCPLL_REFCLK(socpll_num));
 
   // Set the SOCPLL clock reference and dividers.
 #if defined(_SOCPLL_CTRL1_MASK)
@@ -873,20 +985,31 @@ FUNCTION_SCOPE void init_socpll(uint8_t socpll_num)
 
 #if defined(_SOCPLL_SOCCLK0_MASK) && defined(CLOCK_MANAGER_SOCPLL_OUT0_DIV)
   // Set the output dividers.
-  socpll->SOCCLK0 = (socpll->SOCCLK0 & ~(_SOCPLL_SOCCLK0_SOCCLK0OUTDIV_MASK | _SOCPLL_SOCCLK0_ENSOCCLK0_MASK))
-                    | (CLOCK_MANAGER_SOCPLL_OUT0_DIV(socpll_num) << _SOCPLL_SOCCLK0_SOCCLK0OUTDIV_SHIFT)
-                    | (CLOCK_MANAGER_SOCPLL_OUT0_EN(socpll_num) << _SOCPLL_SOCCLK0_ENSOCCLK0_SHIFT);
+  socpll->SOCCLK0 = (socpll->SOCCLK0 & ~_SOCPLL_SOCCLK0_SOCCLK0OUTDIV_MASK)
+                    | (CLOCK_MANAGER_SOCPLL_OUT0_DIV(socpll_num) << _SOCPLL_SOCCLK0_SOCCLK0OUTDIV_SHIFT);
 
-  socpll->SOCCLK1 = (socpll->SOCCLK1 & ~(_SOCPLL_SOCCLK1_SOCCLK1OUTDIV_MASK | _SOCPLL_SOCCLK1_ENSOCCLK1_MASK))
-                    | (CLOCK_MANAGER_SOCPLL_OUT1_DIV(socpll_num) << _SOCPLL_SOCCLK1_SOCCLK1OUTDIV_SHIFT)
-                    | (CLOCK_MANAGER_SOCPLL_OUT1_EN(socpll_num) << _SOCPLL_SOCCLK1_ENSOCCLK1_SHIFT);
+  socpll->SOCCLK1 = (socpll->SOCCLK1 & ~_SOCPLL_SOCCLK1_SOCCLK1OUTDIV_MASK)
+                    | (CLOCK_MANAGER_SOCPLL_OUT1_DIV(socpll_num) << _SOCPLL_SOCCLK1_SOCCLK1OUTDIV_SHIFT);
 
-  socpll->SOCCLK2 = (socpll->SOCCLK2 & ~(_SOCPLL_SOCCLK2_SOCCLK2OUTDIV_MASK | _SOCPLL_SOCCLK2_ENSOCCLK2_MASK))
-                    | (CLOCK_MANAGER_SOCPLL_OUT2_DIV(socpll_num) << _SOCPLL_SOCCLK2_SOCCLK2OUTDIV_SHIFT)
-                    | (CLOCK_MANAGER_SOCPLL_OUT2_EN(socpll_num) << _SOCPLL_SOCCLK2_ENSOCCLK2_SHIFT);
+  socpll->SOCCLK2 = (socpll->SOCCLK2 & ~_SOCPLL_SOCCLK2_SOCCLK2OUTDIV_MASK)
+                    | (CLOCK_MANAGER_SOCPLL_OUT2_DIV(socpll_num) << _SOCPLL_SOCCLK2_SOCCLK2OUTDIV_SHIFT);
 
   socpll->DCOCFG = (socpll->DCOCFG & ~_SOCPLL_DCOCFG_OUTDIVINSEL_MASK)
                    | (CLOCK_MANAGER_SOCPLL_OUTDIVIN(socpll_num) << _SOCPLL_DCOCFG_OUTDIVINSEL_SHIFT);
+
+  SLI_CLOCK_MANAGER_LOG_DEBUG("SOCPLL%u output dividers configured, out0=%u out1=%u",
+                              (uint32_t)socpll_num,
+                              (uint32_t)CLOCK_MANAGER_SOCPLL_OUT0_DIV(socpll_num),
+                              (uint32_t)CLOCK_MANAGER_SOCPLL_OUT1_DIV(socpll_num));
+#endif
+
+#if defined(SOCPLL_SOCCLK0_ENSOCCLK0) \
+  && defined(SOCPLL_SOCCLK1_ENSOCCLK1) \
+  && defined(SOCPLL_SOCCLK2_ENSOCCLK2)
+  // Always enable all SOCPLL outputs before requesting the SOCPLL.
+  socpll->SOCCLK0_SET = SOCPLL_SOCCLK0_ENSOCCLK0;
+  socpll->SOCCLK1_SET = SOCPLL_SOCCLK1_ENSOCCLK1;
+  socpll->SOCCLK2_SET = SOCPLL_SOCCLK2_ENSOCCLK2;
 #endif
 
 #if defined(_SOCPLL_AUTO_MASK) && defined(FREQPLAN_BASE)
@@ -907,6 +1030,8 @@ FUNCTION_SCOPE void init_socpll(uint8_t socpll_num)
          != (SOCPLL_STATUS_RDY | SOCPLL_STATUS_PLLLOCK | SOCPLL_STATUS_ENS)) {
     // Wait for SOCPLL lock and ready.
   }
+
+  SLI_CLOCK_MANAGER_LOG_INFO("SOCPLL%u locked and ready", (uint32_t)socpll_num);
 
 #if defined(_SOCPLL_CTRL1_ENOPENLOOP_MASK) && defined(CLOCK_MANAGER_SOCPLL_EN_OPEN_LOOP)
   socpll->CTRL1 = (socpll->CTRL1 & ~(_SOCPLL_CTRL1_ENOPENLOOP_MASK)) | (CLOCK_MANAGER_SOCPLL_EN_OPEN_LOOP(socpll_num) << _SOCPLL_CTRL1_ENOPENLOOP_SHIFT);
@@ -929,6 +1054,7 @@ FUNCTION_SCOPE void init_socpll(uint8_t socpll_num)
 }
 #endif
 
+#if defined(SLI_CLOCK_MANAGER_INIT_HFRCOEM23)
 /***************************************************************************//**
  * Initializes HFRCOEM23.
  ******************************************************************************/
@@ -970,9 +1096,13 @@ FUNCTION_SCOPE void init_hfrcoem23(void)
 
   // Activate new band selection
   HFRCOEM23->CAL = frequency_calibration;
-}
 
-#if defined(LFRCO_PRESENT)
+  SLI_CLOCK_MANAGER_LOG_INFO("HFRCOEM23 band configured, band=%u",
+                             (uint32_t)SL_CLOCK_MANAGER_HFRCOEM23_BAND);
+}
+#endif
+
+#if defined(SLI_CLOCK_MANAGER_INIT_LFRCO)
 /***************************************************************************//**
  * Initializes LFRCO.
  ******************************************************************************/
@@ -1022,6 +1152,12 @@ FUNCTION_SCOPE void init_lfrco(void)
 
   // Clear disable on-demand.
   LFRCO->CTRL_CLR = LFRCO_CTRL_DISONDEMAND;
+
+#if defined(SL_CLOCK_MANAGER_LFRCO_PRECISION) && (SL_CLOCK_MANAGER_LFRCO_PRECISION == 1)
+  SLI_CLOCK_MANAGER_LOG_INFO("LFRCO configured in high precision mode");
+#else
+  SLI_CLOCK_MANAGER_LOG_INFO("LFRCO configured");
+#endif
 }
 #endif
 
@@ -1031,7 +1167,7 @@ FUNCTION_SCOPE void init_lfrco(void)
 FUNCTION_SCOPE void init_clock_branches(void)
 {
   // Initialize SYSCLK clock branch.
-#if defined(SL_CLOCK_MANAGER_SYSCLK_SOURCE)
+#if defined(SLI_CLOCK_MANAGER_INIT_SYSCLK)
 #if (SL_CLOCK_MANAGER_SYSCLK_SOURCE == SL_CLOCK_MANAGER_DEFAULT_HF_CLOCK_SOURCE)
   CLOCK_MANAGER_CLOCK_SELECT_SET(SYSCLK, CLOCK_MANAGER_GET_DEFAULT_CLOCK_SOURCE(SYSCLK, SL_CLOCK_MANAGER_DEFAULT_HF_CLOCK_SOURCE_CONCATENATION));
 #elif defined(SLI_CLOCK_MANAGER_SYSCLK_SOURCE)
@@ -1057,13 +1193,18 @@ FUNCTION_SCOPE void init_clock_branches(void)
 #endif
   ;
 
-#else
+  SLI_CLOCK_MANAGER_LOG_INFO("SYSCLK source configured, source=%u",
+    (CMU->SYSCLKCTRL & _CMU_SYSCLKCTRL_CLKSEL_MASK) >> _CMU_SYSCLKCTRL_CLKSEL_SHIFT);
+
+#elif !defined(SL_CLOCK_MANAGER_SYSCLK_SOURCE)
   EFM_ASSERT(false);
 #endif
 
   SystemCoreClockUpdate();
 
   // Initialize TRACECLK clock branch.
+#if defined(_CMU_TRACECLKCTRL_MASK)
+#if defined(SLI_CLOCK_MANAGER_INIT_TRACECLK)
 #if defined(CoreDebug_DEMCR_TRCENA_Msk)
   // Disable the Core Debug module if already enabled.
   bool trace_on = CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk;
@@ -1085,130 +1226,130 @@ FUNCTION_SCOPE void init_clock_branches(void)
     CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
   }
 #endif
-  // Ensure TraceClk configs are defined if TraceClk is present.
-#if defined(_CMU_TRACECLKCTRL_MASK) && !(defined(SL_CLOCK_MANAGER_TRACECLK_SOURCE) || defined(SL_CLOCK_MANAGER_TRACECLK_DIVIDER))
+#elif !(defined(SL_CLOCK_MANAGER_TRACECLK_SOURCE) || defined(SL_CLOCK_MANAGER_TRACECLK_DIVIDER))
   EFM_ASSERT(false);
+#endif
 #endif
 
   // Initialize EM01GRPACLK clock branch.
 #if defined(_CMU_EM01GRPACLKCTRL_MASK)
-#if defined(SL_CLOCK_MANAGER_EM01GRPACLK_SOURCE)
+#if defined(SLI_CLOCK_MANAGER_INIT_EM01GRPACLK)
 #if (SL_CLOCK_MANAGER_EM01GRPACLK_SOURCE == SL_CLOCK_MANAGER_DEFAULT_HF_CLOCK_SOURCE)
   CLOCK_MANAGER_CLOCK_SELECT_SET(EM01GRPACLK, CLOCK_MANAGER_GET_DEFAULT_CLOCK_SOURCE(EM01GRPACLK, SL_CLOCK_MANAGER_DEFAULT_HF_CLOCK_SOURCE_CONCATENATION));
 #else
   CLOCK_MANAGER_CLOCK_SELECT_SET(EM01GRPACLK, SL_CLOCK_MANAGER_EM01GRPACLK_SOURCE);
 #endif
-#else
+#elif !defined(SL_CLOCK_MANAGER_EM01GRPACLK_SOURCE)
   EFM_ASSERT(false);
 #endif
 #endif
 
   // Initialize EM01GRPCCLK clock branch.
 #if defined(_CMU_EM01GRPCCLKCTRL_MASK)
-#if defined(SL_CLOCK_MANAGER_EM01GRPCCLK_SOURCE)
+#if defined(SLI_CLOCK_MANAGER_INIT_EM01GRPCCLK)
 #if (SL_CLOCK_MANAGER_EM01GRPCCLK_SOURCE == SL_CLOCK_MANAGER_DEFAULT_HF_CLOCK_SOURCE)
   CLOCK_MANAGER_CLOCK_SELECT_SET(EM01GRPCCLK, CLOCK_MANAGER_GET_DEFAULT_CLOCK_SOURCE(EM01GRPCCLK, SL_CLOCK_MANAGER_DEFAULT_HF_CLOCK_SOURCE_CONCATENATION));
 #else
   CLOCK_MANAGER_CLOCK_SELECT_SET(EM01GRPCCLK, SL_CLOCK_MANAGER_EM01GRPCCLK_SOURCE);
 #endif
-#else
+#elif !defined(SL_CLOCK_MANAGER_EM01GRPCCLK_SOURCE)
   EFM_ASSERT(false);
 #endif
 #endif
 
   // Initialize EM01GRPDCLK clock branch.
 #if defined(_CMU_EM01GRPDCLKCTRL_MASK)
-#if defined(SL_CLOCK_MANAGER_EM01GRPDCLK_SOURCE)
+#if defined(SLI_CLOCK_MANAGER_INIT_EM01GRPDCLK)
 #if (SL_CLOCK_MANAGER_EM01GRPDCLK_SOURCE == SL_CLOCK_MANAGER_DEFAULT_HF_CLOCK_SOURCE)
   CLOCK_MANAGER_CLOCK_SELECT_SET(EM01GRPDCLK, CLOCK_MANAGER_GET_DEFAULT_CLOCK_SOURCE(EM01GRPDCLK, SL_CLOCK_MANAGER_DEFAULT_HF_CLOCK_SOURCE_CONCATENATION));
 #else
   CLOCK_MANAGER_CLOCK_SELECT_SET(EM01GRPDCLK, SL_CLOCK_MANAGER_EM01GRPDCLK_SOURCE);
 #endif
-#else
+#elif !defined(SL_CLOCK_MANAGER_EM01GRPDCLK_SOURCE)
   EFM_ASSERT(false);
 #endif
 #endif
 
   // Initialize EM23GRPACLK clock branch.
 #if defined(_CMU_EM23GRPACLKCTRL_MASK)
-#if defined(SL_CLOCK_MANAGER_EM23GRPACLK_SOURCE)
+#if defined(SLI_CLOCK_MANAGER_INIT_EM23GRPACLK)
 #if (SL_CLOCK_MANAGER_EM23GRPACLK_SOURCE == SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE)
   CLOCK_MANAGER_CLOCK_SELECT_SET(EM23GRPACLK, CLOCK_MANAGER_GET_DEFAULT_CLOCK_SOURCE(EM23GRPACLK, SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE_CONCATENATION));
 #else
   CLOCK_MANAGER_CLOCK_SELECT_SET(EM23GRPACLK, SL_CLOCK_MANAGER_EM23GRPACLK_SOURCE);
 #endif
-#else
+#elif !defined(SL_CLOCK_MANAGER_EM23GRPACLK_SOURCE)
   EFM_ASSERT(false);
 #endif
 #endif
 
   // Initialize EM4GRPACLK clock branch.
 #if defined(_CMU_EM4GRPACLKCTRL_MASK)
-#if defined(SL_CLOCK_MANAGER_EM4GRPACLK_SOURCE)
+#if defined(SLI_CLOCK_MANAGER_INIT_EM4GRPACLK)
 #if (SL_CLOCK_MANAGER_EM4GRPACLK_SOURCE == SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE)
   CLOCK_MANAGER_CLOCK_SELECT_SET(EM4GRPACLK, CLOCK_MANAGER_GET_DEFAULT_CLOCK_SOURCE(EM4GRPACLK, SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE_CONCATENATION));
 #else
   CLOCK_MANAGER_CLOCK_SELECT_SET(EM4GRPACLK, SL_CLOCK_MANAGER_EM4GRPACLK_SOURCE);
 #endif
-#else
+#elif !defined(SL_CLOCK_MANAGER_EM4GRPACLK_SOURCE)
   EFM_ASSERT(false);
 #endif
 #endif
 
   // Initialize ADCCLK clock branch.
 #if defined(_CMU_ADCCLKCTRL_MASK)
-#if defined(SL_CLOCK_MANAGER_ADCCLK_SOURCE)
+#if defined(SLI_CLOCK_MANAGER_INIT_ADCCLK)
   CLOCK_MANAGER_CLOCK_SELECT_SET(ADCCLK, SL_CLOCK_MANAGER_ADCCLK_SOURCE);
-#else
+#elif !defined(SL_CLOCK_MANAGER_ADCCLK_SOURCE)
   EFM_ASSERT(false);
 #endif
 #endif
 
   // Initialize PIXELRZCLK clock branch.
 #if defined(_CMU_PIXELRZCLKCTRL_MASK)
-#if defined(SL_CLOCK_MANAGER_PIXELRZCLK_SOURCE)
+#if defined(SLI_CLOCK_MANAGER_INIT_PIXELRZCLK)
   CLOCK_MANAGER_CLOCK_SELECT_SET(PIXELRZCLK, SL_CLOCK_MANAGER_PIXELRZCLK_SOURCE);
   CMU->PIXELRZCLKCTRL = (CMU->PIXELRZCLKCTRL & ~_CMU_PIXELRZCLKCTRL_PRESC_MASK)
                         | SL_CLOCK_MANAGER_PIXELRZCLK_DIVIDER;
-#else
+#elif !defined(SL_CLOCK_MANAGER_PIXELRZCLK_SOURCE)
   EFM_ASSERT(false);
 #endif
 #endif
 
   // Initialize SYSRTC clock branch.
 #if defined(_CMU_SYSRTC0CLKCTRL_MASK)
-#if defined(SL_CLOCK_MANAGER_SYSRTCCLK_SOURCE)
+#if defined(SLI_CLOCK_MANAGER_INIT_SYSRTC0CLK)
 #if (SL_CLOCK_MANAGER_SYSRTCCLK_SOURCE == SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE)
   CLOCK_MANAGER_CLOCK_SELECT_SET(SYSRTC0CLK, CLOCK_MANAGER_GET_DEFAULT_CLOCK_SOURCE(SYSRTC0CLK, SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE_CONCATENATION));
 #else
   CLOCK_MANAGER_CLOCK_SELECT_SET(SYSRTC0CLK, SL_CLOCK_MANAGER_SYSRTCCLK_SOURCE);
 #endif
-#else
+#elif !defined(SL_CLOCK_MANAGER_SYSRTCCLK_SOURCE)
   EFM_ASSERT(false);
 #endif
 #endif
 
   // Initialize WDOG0 clock branch.
 #if defined(_CMU_WDOG0CLKCTRL_MASK)
-#if defined(SL_CLOCK_MANAGER_WDOG0CLK_SOURCE)
+#if defined(SLI_CLOCK_MANAGER_INIT_WDOG0CLK)
 #if (SL_CLOCK_MANAGER_WDOG0CLK_SOURCE == SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE)
   CLOCK_MANAGER_CLOCK_SELECT_SET(WDOG0CLK, CLOCK_MANAGER_GET_DEFAULT_CLOCK_SOURCE(WDOG0CLK, SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE_CONCATENATION));
 #else
   CLOCK_MANAGER_CLOCK_SELECT_SET(WDOG0CLK, SL_CLOCK_MANAGER_WDOG0CLK_SOURCE);
 #endif
-#else
+#elif !defined(SL_CLOCK_MANAGER_WDOG0CLK_SOURCE)
   EFM_ASSERT(false);
 #endif
 
 #if defined(_CMU_WDOG1CLKCTRL_MASK)
   // Initialize WDOG1 clock branch.
-#if defined(SL_CLOCK_MANAGER_WDOG1CLK_SOURCE)
+#if defined(SLI_CLOCK_MANAGER_INIT_WDOG1CLK)
 #if (SL_CLOCK_MANAGER_WDOG1CLK_SOURCE == SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE)
   CLOCK_MANAGER_CLOCK_SELECT_SET(WDOG1CLK, CLOCK_MANAGER_GET_DEFAULT_CLOCK_SOURCE(WDOG1CLK, SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE_CONCATENATION));
 #else
   CLOCK_MANAGER_CLOCK_SELECT_SET(WDOG1CLK, SL_CLOCK_MANAGER_WDOG1CLK_SOURCE);
 #endif
-#else
+#elif !defined(SL_CLOCK_MANAGER_WDOG1CLK_SOURCE)
   EFM_ASSERT(false);
 #endif
 #endif
@@ -1216,50 +1357,46 @@ FUNCTION_SCOPE void init_clock_branches(void)
 
   // Initialize PCNT0 clock branch.
 #if defined(_CMU_PCNT0CLKCTRL_MASK)
-#if defined(SL_CLOCK_MANAGER_PCNT0CLK_SOURCE)
+#if defined(SLI_CLOCK_MANAGER_INIT_PCNT0CLK)
   CLOCK_MANAGER_CLOCK_SELECT_SET(PCNT0CLK, SL_CLOCK_MANAGER_PCNT0CLK_SOURCE);
-#else
+#elif !defined(SL_CLOCK_MANAGER_PCNT0CLK_SOURCE)
   EFM_ASSERT(false);
 #endif
 #endif
 
   // Initialize EUSART0
 #if defined(_CMU_EUSART0CLKCTRL_MASK)
-#if defined(SL_CLOCK_MANAGER_EUSART0CLK_SOURCE)
-#if (SL_CLOCK_MANAGER_EUSART0CLK_SOURCE == SL_CLOCK_MANAGER_DEFAULT_EUSART0_LF_CLOCK_SOURCE)
-#if (SL_CLOCK_MANAGER_DEFAULT_EUSART0_LF_CLOCK_SOURCE == SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE)
-  // Default EUSART0 "SL_CLOCK_MANAGER_EUSART0CLK_SOURCE=SL_CLOCK_MANAGER_DEFAULT_EUSART0_LF_CLOCK_SOURCE"
+#if defined(SLI_CLOCK_MANAGER_INIT_EUSART0CLK)
+#if (SL_CLOCK_MANAGER_EUSART0CLK_SOURCE == SL_CLOCK_MANAGER_DEFAULT_EUSART0_LF_CLOCK_SOURCE) \
+  && (SL_CLOCK_MANAGER_DEFAULT_EUSART0_LF_CLOCK_SOURCE == SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE)
   CLOCK_MANAGER_CLOCK_SELECT_SET(EUSART0CLK, CLOCK_MANAGER_GET_DEFAULT_CLOCK_SOURCE(EUSART0CLK, SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE_CONCATENATION));
-
-#endif
 #else
-  // EUSART clock source explicitly defined i.e. SL_CLOCK_MANAGER_EUSART0CLK_SOURCE = CMU_EUSART0CLKCTRL_CLKSEL_LFRCO
   CLOCK_MANAGER_CLOCK_SELECT_SET(EUSART0CLK, SL_CLOCK_MANAGER_EUSART0CLK_SOURCE);
 #endif
-#else
+#elif !defined(SL_CLOCK_MANAGER_EUSART0CLK_SOURCE)
   EFM_ASSERT(false);
 #endif
 #endif
 
   // Initialize EUSART1
 #if defined(_CMU_EUSART1CLKCTRL_MASK)
-#if defined(SL_CLOCK_MANAGER_EUSART1CLK_SOURCE)
+#if defined(SLI_CLOCK_MANAGER_INIT_EUSART1CLK)
   CLOCK_MANAGER_CLOCK_SELECT_SET(EUSART1CLK, SL_CLOCK_MANAGER_EUSART1CLK_SOURCE);
-#else
+#elif !defined(SL_CLOCK_MANAGER_EUSART1CLK_SOURCE)
   EFM_ASSERT(false);
 #endif
 #endif
 
   // Initialize I2C0
 #if defined(_CMU_I2C0CLKCTRL_MASK)
-#if defined(SL_CLOCK_MANAGER_I2C0CLK_SOURCE)
+#if defined(SLI_CLOCK_MANAGER_INIT_I2C0CLK)
   CLOCK_MANAGER_CLOCK_SELECT_SET(I2C0CLK, SL_CLOCK_MANAGER_I2C0CLK_SOURCE);
-#else
+#elif !defined(SL_CLOCK_MANAGER_I2C0CLK_SOURCE)
   EFM_ASSERT(false);
 #endif
 #endif
 
-#if defined(SL_CLOCK_MANAGER_SYSTICKCLK_SOURCE)
+#if defined(SLI_CLOCK_MANAGER_INIT_SYSTICKCLK)
   sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_SYSCFG);
 #if (SL_CLOCK_MANAGER_SYSTICKCLK_SOURCE == 1)
   sl_hal_syscfg_set_systicextclken_cfgsystic();
@@ -1270,15 +1407,15 @@ FUNCTION_SCOPE void init_clock_branches(void)
 #else
   EFM_ASSERT(false);
 #endif
-#else
+#elif !defined(SL_CLOCK_MANAGER_SYSTICKCLK_SOURCE)
   EFM_ASSERT(false);
 #endif
 
   // Initialize VDAC0CLK clock branch.
 #if defined(_CMU_VDAC0CLKCTRL_MASK)
-#if defined(SL_CLOCK_MANAGER_VDAC0CLK_SOURCE)
+#if defined(SLI_CLOCK_MANAGER_INIT_VDAC0CLK)
   CLOCK_MANAGER_CLOCK_SELECT_SET(VDAC0CLK, SL_CLOCK_MANAGER_VDAC0CLK_SOURCE);
-#else
+#elif !defined(SL_CLOCK_MANAGER_VDAC0CLK_SOURCE)
   EFM_ASSERT(false);
 #endif
 #endif
@@ -1286,6 +1423,8 @@ FUNCTION_SCOPE void init_clock_branches(void)
 #if defined(SL_CATALOG_CLOCK_MANAGER_INIT_HAL_INTERNAL_PRESENT)
   sli_clock_manager_hal_init_clock_branches_internal();
 #endif
+
+  SLI_CLOCK_MANAGER_LOG_DEBUG("clock branches configured");
 }
 
 #if defined (_SILICON_LABS_32B_SERIES_3_CONFIG_301) \
@@ -1310,8 +1449,7 @@ static void init_se(sl_se_command_context_t *context, uint32_t  *se_fw_version)
 }
 #endif
 
-#if defined(SL_CLOCK_MANAGER_HFXO_EN) \
-  && (SL_CLOCK_MANAGER_HFXO_EN == 1)
+#if defined(SLI_CLOCK_MANAGER_INIT_HFXO)
 
 #if defined(SL_CLOCK_MANAGER_QSPICLK_ADVANCED_CONFIG_EN) \
   && (SL_CLOCK_MANAGER_QSPICLK_ADVANCED_CONFIG_EN == 0)
@@ -1355,6 +1493,9 @@ QSPI_FUNCTION_SCOPE void qspi_frequency_scale(uint32_t *qspi_frequency)
 
   // Ensure scaled frequency is less than original frequency.
   EFM_ASSERT(scaled_qspi_frequency <= *qspi_frequency);
+
+  SLI_CLOCK_MANAGER_LOG_DEBUG("QSPI frequency scaled, original=%u scaled=%u",
+                              *qspi_frequency, scaled_qspi_frequency);
 
   // Update QSPI frequency.
   *qspi_frequency = scaled_qspi_frequency;
@@ -1450,6 +1591,9 @@ static void configure_flpll(sli_se_qspi_flpll_config_t *flpll_config)
   } else {
     flpll_config->pll_clk_freq_sel = SLI_SE_QSPI_PLLCLKFREQSEL_SCLK220MHZ;
   }
+
+  SLI_CLOCK_MANAGER_LOG_INFO("FLPLL configured, qspi_freq=%u int_div=%u frac_div=%u",
+                             qspi_frequency, (uint32_t)flpll_config->int_div, (uint32_t)flpll_config->frac_div);
 }
 #endif
 #endif
@@ -1468,17 +1612,21 @@ sl_status_t sli_clock_manager_hal_init(void)
 #else
   sl_status_t status;
 
+#if defined(SLI_CLOCK_MANAGER_INIT_SYSCLK)
   // Make sure SYSCLK is on FSRCO
   CLOCK_MANAGER_CLOCK_SELECT_SET(SYSCLK, CMU_SYSCLKCTRL_CLKSEL_FSRCO);
+#endif
 
+#if defined(SLI_CLOCK_MANAGER_INIT_OSPI0CLK)
   // Make sure OSPI0CLK is on FSRCO.
 #if defined(CMU_OSPI0CLKCTRL_CLKSEL_FSRCO)
   CLOCK_MANAGER_CLOCK_SELECT_SET(OSPI0CLK, CMU_OSPI0CLKCTRL_CLKSEL_FSRCO);
 #elif defined(CMU_OSPI0CLKCTRL_CLKSEL_FSRCO40)
   CLOCK_MANAGER_CLOCK_SELECT_SET(OSPI0CLK, CMU_OSPI0CLKCTRL_CLKSEL_FSRCO40);
 #endif
+#endif
 
-#if defined(SYSRTC_PRESENT)
+#if defined(SLI_CLOCK_MANAGER_INIT_SYSRTC0CLK)
   status =  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_SYSRTC0);
   EFM_ASSERT(status == SL_STATUS_OK);
 #endif
@@ -1488,7 +1636,7 @@ sl_status_t sli_clock_manager_hal_init(void)
 #endif
 
   // Initialize Oscillators
-#if defined(SL_CLOCK_MANAGER_LFXO_EN) && (SL_CLOCK_MANAGER_LFXO_EN == 1)
+#if defined(SLI_CLOCK_MANAGER_INIT_LFXO)
   init_lfxo();
 #endif
 
@@ -1499,7 +1647,7 @@ sl_status_t sli_clock_manager_hal_init(void)
   sli_clock_manager_hal_set_ext_flash_clk(SL_OSCILLATOR_FSRCO);
 #endif
 
-#if defined(SL_CLOCK_MANAGER_HFXO_EN) && (SL_CLOCK_MANAGER_HFXO_EN == 1)
+#if defined(SLI_CLOCK_MANAGER_INIT_HFXO)
 
   init_hfxo();
 
@@ -1511,29 +1659,37 @@ sl_status_t sli_clock_manager_hal_init(void)
 #endif
 #endif
 
+#if defined(SLI_CLOCK_MANAGER_INIT_CLKIN0)
   init_clkin0();
+#endif
 
-  init_hfrcodpll();
+#if defined(SLI_CLOCK_MANAGER_INIT_HFRCODPLL0)
+  init_hfrco_dpll(0);
+#endif
 
-#if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION)                            \
-  || (defined(SL_CLOCK_MANAGER_SOCPLL_EN) && (SL_CLOCK_MANAGER_SOCPLL_EN == 1)) \
-  || (defined(SL_CLOCK_MANAGER_SOCPLL0_EN) && (SL_CLOCK_MANAGER_SOCPLL0_EN == 1))
+#if defined(SLI_CLOCK_MANAGER_INIT_HFRCODPLL1)
+  init_hfrco_dpll(1);
+#endif
+
+#if defined(SLI_CLOCK_MANAGER_INIT_SOCPLL0)
   init_socpll(0);
 #endif
 
-#if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION) && defined(SOCPLL1) \
-  || (defined(SL_CLOCK_MANAGER_SOCPLL1_EN) && (SL_CLOCK_MANAGER_SOCPLL1_EN == 1))
+#if defined(SLI_CLOCK_MANAGER_INIT_SOCPLL1)
   init_socpll(1);
 #endif
 
-#if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION) && defined(SOCPLL2) \
-  || (defined(SL_CLOCK_MANAGER_SOCPLL2_EN) && (SL_CLOCK_MANAGER_SOCPLL2_EN == 1))
+#if defined(SLI_CLOCK_MANAGER_INIT_SOCPLL2)
   init_socpll(2);
 #endif
 
+#if defined(SLI_CLOCK_MANAGER_INIT_HFRCOEM23)
   init_hfrcoem23();
+#endif
 
+#if defined(SLI_CLOCK_MANAGER_INIT_LFRCO)
   init_lfrco();
+#endif
 
 #if defined(SL_CATALOG_CLOCK_MANAGER_INIT_HAL_INTERNAL_PRESENT)
   sli_clock_manager_hal_init_oscillators_internal();

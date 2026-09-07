@@ -19,6 +19,9 @@ include:
 template_contribution:
 - name: component_catalog
   value: zigbee_ota_common
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/ota-common
 metadata:
   sbom:
     license: MSLA

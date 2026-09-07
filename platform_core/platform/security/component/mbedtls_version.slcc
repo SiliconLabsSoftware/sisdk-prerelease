@@ -16,6 +16,9 @@ template_contribution:
   value: MBEDTLS_VERSION_C
 - name: mbedtls_config
   value: MBEDTLS_VERSION_FEATURES
+documentation:
+  # No dedicated Version Helpers page; Mbed TLS hub for related docs
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-mbedtls/
 metadata:
   sbom:
     reference: mbedtls_sbom

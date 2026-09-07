@@ -156,6 +156,9 @@ template_contribution:
       help: next RX channel
     - type: uint8opt
       help: second next RX channel
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/gp
 metadata:
   sbom:
     license: MSLA

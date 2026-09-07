@@ -14,7 +14,7 @@ metadata:
     upstream:
       name: Eigen
       supplier: Tuxfamily
-      version: 3.3.4
+      version: 3.4.1
       url: https://gitlab.com/libeigen/eigen
       comment: "Eigen is a C++ template library for linear algebra: matrices, vectors, numerical solvers, and related algorithms."
 root_path: realtime_locationing

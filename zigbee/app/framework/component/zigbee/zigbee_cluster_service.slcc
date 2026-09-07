@@ -18,6 +18,9 @@ source:
 template_file:
 - path: app/framework/service-function/template/sl_cluster_service_gen.c.jinja
 - path: app/framework/service-function/template/sl_cluster_service_gen.h.jinja
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/app-framework-common
 metadata:
   sbom:
     license: MSLA

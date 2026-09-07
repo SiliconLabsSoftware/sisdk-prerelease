@@ -3,7 +3,7 @@
  * @brief Core application logic.
  *******************************************************************************
  * # License
- * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -131,11 +131,13 @@ static bool find_service_in_advertisement(const uint8_t *scan_data,
 // -----------------------------------------------------------------------------
 // Certificates
 
-// Device certificate in DER format
-static uint8_t device_certificate_der[SL_BT_CBAP_CERTIFICATE_MAX_SIZE] = { 0 };
-static uint32_t device_certificate_der_len = 0;
+// Device certificate send flags
 static uint32_t dev_cert_sending_progression = 0;
 static bool device_cert_sent = false;
+
+// Certificate buffer (able to hold a certificate in DER format)
+static uint8_t device_certificate_der[SL_BT_CBAP_CERTIFICATE_MAX_SIZE] = { 0 };
+static size_t device_certificate_der_len = 0;
 
 // Remote certificate which was sent over GATT in DER format
 static uint8_t remote_certificate_der[SL_BT_CBAP_CERTIFICATE_MAX_SIZE] = { 0 };
@@ -190,9 +192,9 @@ void app_init(void)
 {
   // Initialize CBAP component and dependencies
   sl_status_t sc;
-  sc = sl_bt_cbap_init(device_certificate_der, &device_certificate_der_len);
+  sc = sl_bt_cbap_init();
   app_assert_status(sc);
-  app_log_info("CBAP initialized. Device certificate verified." APP_LOG_NL);
+  app_log_info("CBAP initialized. Certificate chain verified." APP_LOG_NL);
 
   // Initialize candidate device data
   clear_connection_info();
@@ -683,18 +685,33 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 
       if (role == sl_bt_connection_role_peripheral) {
         if (gattdb_peripheral_cert == evt->data.evt_gatt_server_characteristic_status.characteristic) {
+          sc = sl_bt_cbap_get_certificate(SL_BT_CBAP_PSA_DEVICE_CERT,
+                                          device_certificate_der,
+                                          &device_certificate_der_len,
+                                          sizeof(device_certificate_der));
+          app_assert_status(sc);
+
           if (sl_bt_gatt_server_client_config == (sl_bt_gatt_server_characteristic_status_flag_t)evt->data.evt_gatt_server_characteristic_status.status_flags
               && sl_bt_gatt_indication == (sl_bt_gatt_client_config_flag_t)evt->data.evt_gatt_server_characteristic_status.client_config_flags
               && device_cert_sent == false) {
             uint8_t buff[CERT_IND_CHUNK_LEN + 1];
-            buff[0] = 1;
-            memcpy(&buff[1], device_certificate_der, CERT_IND_CHUNK_LEN);
+            uint8_t len = 0;
+            if (device_certificate_der_len > CERT_IND_CHUNK_LEN) {
+              buff[0] = 1;
+              len = CERT_IND_CHUNK_LEN + 1;
+            } else {
+              // The whole certificate fits into a single chunk.
+              buff[0] = 0;
+              len = (uint8_t)device_certificate_der_len + 1;
+              device_cert_sent = true;
+            }
+            memcpy(&buff[1], device_certificate_der, len - 1);
+            dev_cert_sending_progression += len - 1;
             sc = sl_bt_gatt_server_send_indication(candidate_device.connection_handle,
                                                    gattdb_peripheral_cert,
-                                                   CERT_IND_CHUNK_LEN + 1,
+                                                   len,
                                                    buff);
             app_assert_status(sc);
-            dev_cert_sending_progression += CERT_IND_CHUNK_LEN;
           }
           // Sending Peripheral certificate to Central device
           else if (sl_bt_gatt_server_confirmation == (sl_bt_gatt_server_characteristic_status_flag_t)evt->data.evt_gatt_server_characteristic_status.status_flags
@@ -812,9 +829,16 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 
           case CENTRAL_SEND_CENTRAL_CERT: {
             if (!device_cert_sent) {
+              sc = sl_bt_cbap_get_certificate(SL_BT_CBAP_PSA_DEVICE_CERT,
+                                              device_certificate_der,
+                                              &device_certificate_der_len,
+                                              sizeof(device_certificate_der));
+              app_assert_status(sc);
+
               uint32_t remaining = device_certificate_der_len - dev_cert_sending_progression;
               uint8_t buff[CERT_IND_CHUNK_LEN + 1];
               uint8_t len = 0;
+
               if (remaining > CERT_IND_CHUNK_LEN) {
                 buff[0] = 1;
                 memcpy(&buff[1], &device_certificate_der[dev_cert_sending_progression], CERT_IND_CHUNK_LEN);

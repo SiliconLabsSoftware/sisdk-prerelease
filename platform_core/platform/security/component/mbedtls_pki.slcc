@@ -22,8 +22,10 @@ requires:
 # ECDSA is the most likely backend for PK signatures.
 recommends:
 - id: psa_crypto_ecdsa
-
   vendor: silabs
+documentation:
+  # No dedicated Public-Key Abstraction Layer page; Mbed TLS hub for related docs
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-mbedtls/
 metadata:
   sbom:
     reference: mbedtls_sbom

@@ -5,7 +5,7 @@ description: >
   Watchdog Manager service provides software watchdog management for monitoring
   code execution. It manages a hardware watchdog peripheral and provides multiple
   virtual software watchdogs that can be created, fed, enabled, and disabled
-  independently.
+  independently. Software watchdog UIDs are used for debug and reset attribution.
 category: Services|Watch Dog Manager
 quality: evaluation
 metadata:

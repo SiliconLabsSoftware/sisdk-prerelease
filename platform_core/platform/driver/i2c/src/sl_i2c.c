@@ -456,17 +456,17 @@ sl_status_t sl_i2c_leader_send_blocking(sl_i2c_handle_t *i2c_handle,
   CORE_DECLARE_IRQ_STATE;
   sl_status_t status = SL_STATUS_OK;
 
-  // Validate input parameters
-  if (i2c_handle == NULL || tx_buffer == NULL) {
+  // Validate input parameters. tx_len == 0 is an address-only write
+  // (START + ADDR + STOP), so the buffer may be NULL in that case.
+  if (i2c_handle == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+  if ((tx_len > 0) && (tx_buffer == NULL)) {
     return SL_STATUS_NULL_POINTER;
   }
   // Only allow leader mode for this API
   if (i2c_handle->operating_mode != SL_I2C_LEADER_MODE) {
     return SL_STATUS_INVALID_MODE;
-  }
-  // Validate the length of data to send
-  if (tx_len == 0) {
-    return SL_STATUS_INVALID_PARAMETER;
   }
   // Validate follower address range
   if (address > 0x3FF) {

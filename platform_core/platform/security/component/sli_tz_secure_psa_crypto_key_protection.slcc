@@ -43,6 +43,10 @@ template_contribution:
   value: TZ_PSA_KEY_PROTECTION_ENABLED
   condition: [trustzone_nonsecure]
 
+documentation:
+  docset: gecko-platform
+  document:
+  - page: platform-security-psa-crypto
 metadata:
   sbom:
     license: Zlib

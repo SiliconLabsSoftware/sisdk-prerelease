@@ -23,6 +23,9 @@ template_contribution:
   value:
     callback_type: init_done
     function_name: sli_zigbee_af_heartbeat_init_callback
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/heartbeat
 metadata:
   sbom:
     license: MSLA

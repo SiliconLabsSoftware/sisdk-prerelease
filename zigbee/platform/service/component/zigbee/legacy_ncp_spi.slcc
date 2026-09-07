@@ -4,6 +4,9 @@ package: zigbee
 description: Legacy SPI implementation for NCP.
 category: Services|Ember Legacy
 quality: production
+documentation:
+  docset: gecko-platform
+  document: platform-service/legacyhal
 metadata:
   sbom:
     license: MSLA

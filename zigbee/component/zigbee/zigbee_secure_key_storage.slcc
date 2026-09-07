@@ -78,6 +78,9 @@ template_contribution:
   value:
     name: psa_its_files_zigbee_stack
     count: 127
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/zigbee-security-manager
 metadata:
   sbom:
     license: MSLA

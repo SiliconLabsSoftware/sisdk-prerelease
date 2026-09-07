@@ -17,6 +17,10 @@ requires:
 conflicts:
 - name: trustzone_unaware
 
+documentation:
+  docset: gecko-platform
+  document:
+  - page: platform-security-psa-crypto/psa-crypto-plugins
 metadata:
   sbom:
     license: Zlib

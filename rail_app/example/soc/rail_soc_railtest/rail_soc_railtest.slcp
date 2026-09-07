@@ -56,10 +56,6 @@ include:
 
 readme:
   - path: ../../../documentation/example/rail_soc_railtest/readme.md
-
-other_file:
-  - path: hw_filter_tags.yaml
-    condition: [add_hw_filter_to_project]
 # -------------------------- Configuration overrides ---------------------------
 configuration:
   - name: SL_STACK_SIZE

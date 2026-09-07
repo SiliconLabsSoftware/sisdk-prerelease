@@ -461,6 +461,17 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
 #endif
 #endif
 
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CTE_RECEIVER_PRESENT) \
+    || defined(SL_CATALOG_BLUETOOTH_FEATURE_CTE_TRANSMITTER_PRESENT)
+  struct sl_btctrl_cte_config cte_config = {
+    .max_pattern_length = SL_BT_CONTROLLER_CTE_PATTERN_LENGTH_MAX,
+  };
+
+  status = sl_btctrl_config_cte(&cte_config);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_CTE_RECEIVER_PRESENT)
   status = sl_btctrl_init_cte_receiver();
   if (status != SL_STATUS_OK) {
@@ -473,6 +484,8 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
   if (status != SL_STATUS_OK) {
     return status;
   }
+#endif
+
 #endif
 
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_ADVERTISER_PAST_PRESENT)
@@ -725,6 +738,15 @@ void sl_btctrl_deinit_functional(void)
 
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT) || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT)
   sl_btctrl_deinit_cs();
+#endif
+
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CTE_RECEIVER_PRESENT) \
+    || defined(SL_CATALOG_BLUETOOTH_FEATURE_CTE_TRANSMITTER_PRESENT)
+  struct sl_btctrl_cte_config cte_config = {
+    .max_pattern_length = 0,
+  };
+
+  sl_btctrl_config_cte(&cte_config);
 #endif
 
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_RESOLVING_LIST_PRESENT)

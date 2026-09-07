@@ -73,6 +73,11 @@ template_contribution:
 - name: simple_func_mapping_no_args
   value: sli_tz_syscfg_clear_systicextclken_cfgsystic
   condition: [trustzone_nonsecure, device_series_2]
+
+documentation:
+  docset: mcu-bootloader
+  document:
+  - page: series2-trustzone/05-r-implementation
 metadata:
   sbom:
     license: Zlib

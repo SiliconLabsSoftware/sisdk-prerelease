@@ -9,6 +9,8 @@ description: >
   systemview) if crash-time logging is desired.
   Optional debug dump (registers + stack) can be enabled in config when a log backend is present.
   When Crash Manager Backend CTM is installed, the crash log uses a user-region NVM key.
+  When Watchdog Manager is also installed, it enables the WDOG warning IRQ on its WDOG
+  instance so watchdog timeouts are recorded as SL_CRASH_TYPE_WATCHDOG before reset.
 category: Services|Crash Manager
 quality: evaluation
 metadata:

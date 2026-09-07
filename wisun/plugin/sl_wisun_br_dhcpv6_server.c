@@ -43,6 +43,7 @@
 #include "common/pktbuf.h"
 
 static int dhcpv6_server_socket = -1;
+static int dhcpv6_link_local_socket = -1;
 static uint8_t server_prefix[8], server_DUID[8];
 static uint32_t valid_lifetime, preferred_lifetime;
 dhcpv6_vendor_data_list_t vendorDataList;
@@ -246,7 +247,7 @@ static void dhcp_fill_client_id(struct pktbuf *reply,
   pktbuf_push_tail_be16(reply, DHCPV6_DUID_TYPE_LINK_LAYER);
   pktbuf_push_tail_be16(reply, hwaddr_type);
   pktbuf_push_tail(reply, hwaddr, 8);
-  }
+}
 
 static void dhcp_fill_rapid_commit(struct pktbuf *reply)
 {
@@ -290,11 +291,22 @@ static int dhcp_send_reply(struct sockaddr_in6 *dest,
                            struct pktbuf *reply)
 {
   char dst_addr_str[MAX_IPV6_STRING_LEN_WITH_TRAILING_NULL];
+  uint8_t msg_type;
+  int32_t retval;
+  int socket_id;
+
   if (reply->err) {
     sl_wisun_trace_error("dhcp: reply buffer error");
     return -1;
   }
-  int32_t retval = sendto(dhcpv6_server_socket, pktbuf_head(reply), reply->buf_len, 0, (struct sockaddr *)dest, sizeof(struct sockaddr_in6));
+
+  msg_type = pktbuf_head(reply)[0];
+  if (msg_type == DHCPV6_MSG_REPLY && IN6_IS_ADDR_LINKLOCAL(&dest->sin6_addr) && dhcpv6_link_local_socket >= 0) {
+    socket_id = dhcpv6_link_local_socket;
+  } else {
+    socket_id = dhcpv6_server_socket;
+  }
+  retval = sendto(socket_id, pktbuf_head(reply), reply->buf_len, 0, (struct sockaddr *)dest, sizeof(struct sockaddr_in6));
   if (retval <= 0) {
     sl_wisun_trace_error("dhcp: sendto failed %d", retval);
     return -1;
@@ -473,9 +485,21 @@ sl_status_t sl_wisun_br_dhcpv6_server_init(void)
   return SL_STATUS_OK;
 }
 
-sl_status_t sl_wisun_br_dhcpv6_server_start(int socket, uint8_t prefix[8], uint8_t DUID[8], uint32_t dhcp_address_lifetime)
+sl_status_t sl_wisun_br_dhcpv6_server_start_with_link_local_socket(int socket, int link_local_socket, uint8_t prefix[8],
+                                                                   uint8_t DUID[8], uint32_t dhcp_address_lifetime)
 {
+  int32_t traffic_class = IPV6_TCLASS_FROM_DSCP(IP_DSCP_AF11);
+  int retval;
+
+  if (link_local_socket >= 0) {
+    retval = setsockopt(link_local_socket, IPPROTO_IPV6, IPV6_TCLASS, &traffic_class, sizeof(traffic_class));
+    if (retval < 0) {
+      sl_wisun_trace_error("dhcp: failed to set link-local socket traffic class %d", retval);
+      return SL_STATUS_FAIL;
+    }
+  }
   dhcpv6_server_socket = socket;
+  dhcpv6_link_local_socket = link_local_socket;
   valid_lifetime = dhcp_address_lifetime;
   if (dhcp_address_lifetime == LIFETIME_INFINITE) {
     preferred_lifetime = LIFETIME_INFINITE;
@@ -487,7 +511,14 @@ sl_status_t sl_wisun_br_dhcpv6_server_start(int socket, uint8_t prefix[8], uint8
   return SL_STATUS_OK;
 }
 
-sl_status_t sl_wisun_br_dhcpv6_server_stop(void) {
+sl_status_t sl_wisun_br_dhcpv6_server_start(int socket, uint8_t prefix[8], uint8_t DUID[8], uint32_t dhcp_address_lifetime)
+{
+  return sl_wisun_br_dhcpv6_server_start_with_link_local_socket(socket, -1, prefix, DUID, dhcp_address_lifetime);
+}
+
+sl_status_t sl_wisun_br_dhcpv6_server_stop(void)
+{
   dhcpv6_server_socket = -1;
+  dhcpv6_link_local_socket = -1;
   return SL_STATUS_OK;
 }

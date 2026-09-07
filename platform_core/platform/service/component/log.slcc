@@ -5,7 +5,7 @@ description: >
   The Debug Logger System is designed to provide a reliable, efficient, and synchronized mechanism  for capturing and transmitting system logs from both the Host MCU and the Captive Core,  which handles subsystems like Wi-Fi and Bluetooth Low Energy (BLE). This logger supports real-time debugging,
   performance analysis, and error tracking in embedded applications.
 category: Services|Log
-quality: evaluation
+quality: production
 metadata:
   sbom:
     license: Zlib
@@ -19,6 +19,7 @@ requires:
 root_path: platform_core/platform/service/sl_log
 source:
 - path: src/sl_log.c
+- path: src/log_lock.c
 template_contribution:
 - name: event_handler
   value:

@@ -82,6 +82,9 @@ template_contribution:
     name: psa_its_files_minimum
     count: 1
 
+documentation:
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/psa-crypto-its
+
 metadata:
   sbom:
     license: Zlib

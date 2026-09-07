@@ -1,0 +1,53 @@
+id: aws_iot_c_sdk
+package: aws_sdk_202412_00
+description: >
+  AWS IoT Device SDK for Embedded C 202412.00 (coreMQTT v2.3.1) with SiLabs LwIP transport
+label: AWS IoT C-SDK
+category: Third Party
+quality: production
+metadata:
+  sbom:
+    license: MSLA AND MIT
+    upstream:
+      name: aws-iot-device-sdk-embedded-C
+      version: 202412.00
+      supplier: aws
+      url: https://github.com/aws/aws-iot-device-sdk-embedded-C
+      package_url: pkg:github/aws/aws-iot-device-sdk-embedded-C@202412.00
+provides:
+- name: aws_iot_c_sdk
+requires:
+- name: aws_iot_mqtt_platform
+define:
+- name: JSON_DO_NOT_USE_CUSTOM_CONFIG
+- name: SHADOW_DO_NOT_USE_CUSTOM_CONFIG
+source:
+# coreJSON
+- path: libraries/coreJSON/source/core_json.c
+# coreMQTT
+- path: libraries/coreMQTT/source/core_mqtt.c
+- path: libraries/coreMQTT/source/core_mqtt_state.c
+- path: libraries/coreMQTT/source/core_mqtt_serializer.c
+# Device Shadow
+- path: libraries/device-shadow-for-aws-iot-embedded-sdk/source/shadow.c
+include:
+# coreJSON
+- path: libraries/coreJSON/source/include
+  file_list:
+  - path: core_json.h
+# coreMQTT
+- path: libraries/coreMQTT/source/include
+  file_list:
+  - path: core_mqtt.h
+  - path: core_mqtt_state.h
+  - path: core_mqtt_serializer.h
+  - path: core_mqtt_config_defaults.h
+- path: libraries/coreMQTT/source/interface
+  file_list:
+  - path: transport_interface.h
+# Device Shadow
+- path: libraries/device-shadow-for-aws-iot-embedded-sdk/source/include
+  file_list:
+  - path: shadow.h
+  - path: shadow_config_defaults.h
+root_path: aws_sdk_202412_00/./third_party/aws_iot_c_sdk

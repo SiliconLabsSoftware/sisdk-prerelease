@@ -318,8 +318,11 @@ void sl_hal_iadc_init(IADC_TypeDef *iadc,
                             | (((uint32_t)(init->configs[config].twos_complement) << _IADC_CFG_TWOSCOMPL_SHIFT)
                                & _IADC_CFG_TWOSCOMPL_MASK);
 
-    sl_hal_iadc_calculate_gain_offset(iadc, init, adc_mode, config, adc_clk_prescale);
+  sl_hal_iadc_calculate_gain_offset(iadc, init, adc_mode, config, adc_clk_prescale);
   }
+  SL_PRINT_STRING_INFO("src_presc=%d timebase=%d\r\n",
+                      (int)src_clk_prescale,
+                      (int)timebase);
 }
 
 /***************************************************************************//**
@@ -357,7 +360,7 @@ void sl_hal_iadc_calculate_gain_offset(IADC_TypeDef *iadc,
 
   // Set ADC clock prescaler
   iadc->CFG[config].SCHED = ((adc_clk_prescale << _IADC_SCHED_PRESCALE_SHIFT)
-                             & _IADC_SCHED_PRESCALE_MASK);
+                             & _IADC_SCHED_PRESCALE_MASK);                            
 }
 
 /***************************************************************************//**
@@ -481,6 +484,9 @@ void sl_hal_iadc_init_scan(IADC_TypeDef *iadc,
                                       |  ((uint32_t) scan_table->entries[entry_num].config_id << _IADC_SCAN_CFG_SHIFT)
                                       |  (((uint32_t) scan_table->entries[entry_num].compare) << _IADC_SINGLE_CMP_SHIFT);
   }
+  SL_PRINT_STRING_INFO("scan trig_sel=%d trig_action=%d\r\n",
+                      (int)init->trigger_select,
+                      (int)init->trigger_action);
 }
 
 /***************************************************************************//**
@@ -513,6 +519,9 @@ void sl_hal_iadc_update_scan_entry(IADC_TypeDef *iadc,
   } else {
     iadc->MASKREQ_CLR = (1UL << (id & 0x1FUL)) << _IADC_MASKREQ_MASKREQ_SHIFT;
   }
+  SL_PRINT_STRING_DEBUG("entry=%d include=%d\r\n",
+                        (int)id,
+                        (int)entry->include_in_scan);
 }
 
 /***************************************************************************//**
@@ -587,6 +596,9 @@ void sl_hal_iadc_init_single(IADC_TypeDef *iadc,
   sl_hal_iadc_update_single_input(iadc, input);
 
   sl_hal_iadc_enable(iadc);
+  SL_PRINT_STRING_INFO("single trig_sel=%d trig_action=%d\r\n",
+                      (int)init->trigger_select,
+                      (int)init->trigger_action);
 }
 
 /***************************************************************************//**

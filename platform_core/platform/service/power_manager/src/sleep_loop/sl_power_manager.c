@@ -32,6 +32,7 @@
 #include "sl_power_manager_config.h"
 #include "sli_power_manager_private.h"
 #include "sli_power_manager.h"
+#include "sli_power_manager_log.h"
 #include "sli_sleeptimer.h"
 #include "sli_clock_manager.h"
 #include "sl_assert.h"
@@ -237,6 +238,8 @@ sl_status_t sl_power_manager_init(void)
 
   is_initialized = true;
   CORE_EXIT_CRITICAL();
+
+  SLI_POWER_MANAGER_LOG_INFO("initialized");
 
   return SL_STATUS_OK;
 }

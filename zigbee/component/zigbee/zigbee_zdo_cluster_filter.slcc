@@ -16,6 +16,9 @@ source:
 template_contribution:
 - name: component_catalog
   value: zigbee_zdo_cluster_filter
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/stack-common
 metadata:
   sbom:
     license: MSLA

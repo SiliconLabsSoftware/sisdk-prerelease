@@ -1,3 +1,4 @@
+
 /***************************************************************************//**
  * @brief API provided by the Bluetooth Mesh stack
  *******************************************************************************
@@ -176,6 +177,7 @@ extern "C" {
 #define sl_btmesh_cmd_node_set_provisioning_service_scan_response_id     0x39140028
 #define sl_btmesh_cmd_node_clear_provisioning_service_scan_response_id   0x3a140028
 #define sl_btmesh_cmd_node_compare_dcd_id                                0x3b140028
+#define sl_btmesh_cmd_node_set_scan_bond_lookup_id                       0x3d140028
 #define sl_btmesh_rsp_node_init_id                                       0x00140028
 #define sl_btmesh_rsp_node_set_exportable_keys_id                        0x24140028
 #define sl_btmesh_rsp_node_start_unprov_beaconing_id                     0x01140028
@@ -227,6 +229,7 @@ extern "C" {
 #define sl_btmesh_rsp_node_set_provisioning_service_scan_response_id     0x39140028
 #define sl_btmesh_rsp_node_clear_provisioning_service_scan_response_id   0x3a140028
 #define sl_btmesh_rsp_node_compare_dcd_id                                0x3b140028
+#define sl_btmesh_rsp_node_set_scan_bond_lookup_id                       0x3d140028
 
 /**
  * @brief Flags for allowed provisioning algorithms during provisioning, which
@@ -2111,6 +2114,22 @@ sl_status_t sl_btmesh_node_compare_dcd(uint8_t page_number,
                                        size_t page_data_len,
                                        const uint8_t* page_data,
                                        uint32_t *diff);
+
+/***************************************************************************//**
+ *
+ * Enable or disable resolving bonding handles from the bonding database for
+ * advertisements received while mesh scanning is active.
+ *
+ * Default is enabled (1). The setting is not persistent across reboot; the
+ * application must restore it if needed.
+ *
+ * @param[in] bond_lookup   - 0: Do not resolve bonding handles while scanning
+ *     - 1: Resolve bonding handles while scanning
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_node_set_scan_bond_lookup(uint8_t bond_lookup);
 
 /** @} */ // end addtogroup sl_btmesh_node
 

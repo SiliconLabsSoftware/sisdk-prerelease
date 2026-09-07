@@ -23,9 +23,11 @@
   - name: hardware_board_has_btn0
   - name: hardware_board_has_btn1
   - name: hardware_board_has_spiflash
+  - name: hardware_board_has_rfswitch
   - name: hardware_board_has_exclusive_button_led
   - name: board_config_clock_manager
   - name: hardware_board_has_lfxo
+  - name: hardware_board_supports_cs
 - recommends:
   - id: iostream_eusart
     instance:

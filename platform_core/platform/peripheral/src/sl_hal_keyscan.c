@@ -75,6 +75,15 @@ void sl_hal_keyscan_init(const sl_hal_keyscan_init_t *init)
   KEYSCAN->DELAY = ((init->scan_delay) << _KEYSCAN_DELAY_SCANDLY_SHIFT)
                    | ((init->debounce_delay) << _KEYSCAN_DELAY_DEBDLY_SHIFT)
                    | ((init->stable_delay) << _KEYSCAN_DELAY_STABDLY_SHIFT);
+  SL_PRINT_STRING_DEBUG("clkdiv=%d cols=%d\r\n",
+                        (int)init->clock_divider,
+                        (int)init->column_number);
+  SL_PRINT_STRING_DEBUG("rows=%d scan_delay=%d\r\n",
+                        (int)init->row_number,
+                        (int)init->scan_delay);
+  SL_PRINT_STRING_DEBUG("debounce=%d stable=%d\r\n",
+                        (int)init->debounce_delay,
+                        (int)init->stable_delay);
 }
 
 /***************************************************************************//**
@@ -89,6 +98,7 @@ void sl_hal_keyscan_enable(void)
 
   // Enable KEYSCAN module
   KEYSCAN->EN_SET = KEYSCAN_EN_EN;
+  SL_PRINT_STRING_INFO("enabled, %d\r\n", (int)__LINE__);
 }
 
 /***************************************************************************//**
@@ -111,6 +121,7 @@ void sl_hal_keyscan_disable(void)
 
   // Disable module
   KEYSCAN->EN_CLR = KEYSCAN_EN_EN;
+  SL_PRINT_STRING_INFO("disabled, %d\r\n", (int)__LINE__);
 }
 
 /***************************************************************************//**

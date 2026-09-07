@@ -79,7 +79,6 @@
 #endif
 
 // <h> System Clock Branch Settings
-
 // <o SL_CLOCK_MANAGER_SYSCLK_SOURCE> Clock Source Selection for SYSCLK branch
 //   <SL_CLOCK_MANAGER_DEFAULT_HF_CLOCK_SOURCE=> DEFAULT_HF
 //   <CMU_SYSCLKCTRL_CLKSEL_FSRCO=> FSRCO
@@ -117,7 +116,7 @@
 // </h>
 
 // <h> Trace Clock Branches Settings
-// <o SL_CLOCK_MANAGER_TRACECLK_DIVIDER> TRACECLK branch Divider
+// <o SL_CLOCK_MANAGER_TRACECLK_DIVIDER> TRACECLK branch divider
 //   <CMU_TRACECLKCTRL_PRESC_DIV1=> DIV1
 //   <CMU_TRACECLKCTRL_PRESC_DIV2=> DIV2
 //   <CMU_TRACECLKCTRL_PRESC_DIV4=> DIV4
@@ -126,7 +125,6 @@
 #ifndef SL_CLOCK_MANAGER_TRACECLK_DIVIDER
 #define SL_CLOCK_MANAGER_TRACECLK_DIVIDER    CMU_TRACECLKCTRL_PRESC_DIV1
 #endif
-
 // </h>
 
 // <h> High Frequency Clock Branches Settings
@@ -169,7 +167,6 @@
 // </h>
 
 // <h> Low Frequency Clock Branches Settings
-
 // <o SL_CLOCK_MANAGER_EM23GRPACLK_SOURCE> Clock Source Selection for EM23GRPACLK branch
 //   <SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE=> DEFAULT_LF
 //   <CMU_EM23GRPACLKCTRL_CLKSEL_LFRCO=> LFRCO
@@ -214,7 +211,6 @@
 #ifndef SL_CLOCK_MANAGER_WDOG0CLK_SOURCE
 #define SL_CLOCK_MANAGER_WDOG0CLK_SOURCE    SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE
 #endif
-
 // </h>
 
 // <h> Mixed Frequency Clock Branch Settings
@@ -237,6 +233,7 @@
 #define SL_CLOCK_MANAGER_SYSTICKCLK_SOURCE    0
 #endif
 // </h>
+
 // </h>
 
 #endif /* SL_CLOCK_MANAGER_TREE_CONFIG_H */

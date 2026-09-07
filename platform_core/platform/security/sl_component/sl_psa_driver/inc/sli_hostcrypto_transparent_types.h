@@ -50,15 +50,30 @@ typedef enum {
   SLI_HOSTCRYPTO_DECRYPT = 1
 } sli_encrypt_direction_t;
 
+#if defined(SLI_PSA_DRIVER_FEATURE_CHACHA20)
+#define MAX_CIPHER_BLOCK_SIZE  64
+#else
+#define MAX_CIPHER_BLOCK_SIZE  16
+#endif
+
 typedef struct {
   sli_encrypt_direction_t direction;  ///< Cipher direction (encrypt/decrypt)
   psa_algorithm_t alg;                ///< Algorithm (cipher and mode of operation)
   struct sxkeyref key_ref;            ///< Key reference structure
   struct sxblkcipher cipher;          ///< Cipher operation
-  uint8_t block[16];                  ///< Block for input caching
+  uint8_t block[MAX_CIPHER_BLOCK_SIZE];  ///< Block for input caching
   uint8_t iv[16];                     ///< IV
+#if defined(SLI_PSA_DRIVER_FEATURE_CHACHA20)
+  uint32_t chacha_initial_counter;    ///< Initial block counter for ChaCha20 (RFC8439)
+#endif
   size_t processed_length;            ///< Number of bytes processed
 } sli_hostcrypto_transparent_cipher_operation_t;
+
+#if defined(SLI_PSA_DRIVER_FEATURE_CHACHAPOLY)
+#define MAX_AEAD_BLOCK_SIZE  64
+#else
+#define MAX_AEAD_BLOCK_SIZE  16
+#endif
 
 typedef struct {
   sli_encrypt_direction_t direction;        ///< Encrypt/Decrypt
@@ -72,14 +87,7 @@ typedef struct {
   uint8_t iv_length;                        ///< Length of IV
   size_t processed_ad;                      ///< Current additional data length
   size_t processed_len;                     ///< Current encrypted/decrypted message length
-  union {
-#if defined(SLI_PSA_DRIVER_FEATURE_CCM) || defined(SLI_PSA_DRIVER_FEATURE_GCM)
-    uint8_t aes_block[16];                  ///< Input data saved for aes.
-#endif
-  #if defined(SLI_PSA_DRIVER_FEATURE_CHACHAPOLY)
-    uint8_t chacha_block[64];               ///< Input data saved for Chachapoly.
-  #endif
-  } block;
+  uint8_t block[MAX_AEAD_BLOCK_SIZE];       ///< Input data block buffer
 } sli_hostcrypto_transparent_aead_operation_t;
 
 typedef struct {

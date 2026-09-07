@@ -44,6 +44,11 @@
 
 #define EUSART_LF_MAX_BAUDRATE 9600
 
+#if !defined(_EUSART_CFG1_RXTIMEOUT_SEVENFRAMES)
+// PLATFORM_HYD-9283: Remove local definition once fixed.
+#define _EUSART_CFG1_RXTIMEOUT_SEVENFRAMES 7U
+#endif
+
 /*******************************************************************************
  ***************************   LOCAL FUNCTIONS   *******************************
  ******************************************************************************/

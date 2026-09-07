@@ -37,6 +37,7 @@
 #include "sl_hal_sysrtc.h"
 #include "sl_sleeptimer.h"
 #include "sli_sleeptimer_hal.h"
+#include "sli_sleeptimer_log.h"
 #include "sl_code_classification.h"
 #include "sl_core.h"
 #include "sl_clock_manager.h"
@@ -102,6 +103,8 @@ void sleeptimer_hal_init_timer(void)
 
   sl_interrupt_manager_clear_irq_pending(SYSRTC_APP_IRQn);
   sl_interrupt_manager_enable_irq(SYSRTC_APP_IRQn);
+
+  SLI_SLEEPTIMER_LOG_DEBUG("HAL initialized on SYSRTC");
 }
 
 /*******************************************************************************

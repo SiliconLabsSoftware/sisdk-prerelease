@@ -43,6 +43,11 @@
 #include "sl_component_catalog.h"
 #include "sl_memory_manager.h"
 
+OT_TOOL_WEAK bool sleepyEm4IsWakeFromEm4(void)
+{
+    return false;
+}
+
 void sleepyInit(void);
 void setNetworkConfiguration(void);
 void initUdp(void);
@@ -96,7 +101,11 @@ void sl_ot_cli_init(void)
 void app_init(void)
 {
     sleepyInit();
-    setNetworkConfiguration();
+    /* EM4 wake: Mle::Restore() already reloads network config from NVM. */
+    if (!sleepyEm4IsWakeFromEm4())
+    {
+        setNetworkConfiguration();
+    }
     initUdp();
     assert(otIp6SetEnabled(sInstance, true) == OT_ERROR_NONE);
     assert(otThreadSetEnabled(sInstance, true) == OT_ERROR_NONE);

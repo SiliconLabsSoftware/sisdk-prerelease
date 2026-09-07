@@ -34,7 +34,10 @@
 #define SL_LOG_FORMATTED_IOSTREAM_CONFIG_H
 
 // <q SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP> Formatted iostream: prefix timestamp
-// <i> When set, each line begins with an 8-digit hexadecimal timestamp inside the leading bracket.
+// <i> When set, each line begins with [EEEEEEEE:TTTTTTTT] - a 32-bit epoch and a
+// <i> 32-bit counter value, 8 hex digits each, separated by a colon.
+// <i> Breaking change: this replaced the earlier single [TTTTTTTT] field, so log
+// <i> parsers written against that format must be updated.
 // <i> Default: 0
 #define SL_LOG_FORMATTED_IOSTREAM_PREFIX_TIMESTAMP 0
 

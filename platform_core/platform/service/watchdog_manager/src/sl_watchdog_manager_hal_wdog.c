@@ -38,6 +38,9 @@
 #include "sli_watchdog_manager.h"
 #include "sl_interrupt_manager.h"
 #include "sl_component_catalog.h"
+#if defined(SL_CATALOG_CRASH_MANAGER_COMPONENT_PRESENT)
+#include "sli_crash_manager.h"
+#endif
 #include "em_device.h"
 #if SLI_WATCHDOG_MANAGER_USE_EM_TRANSITION_HOOK
 #include "sl_power_manager.h"
@@ -63,6 +66,12 @@
   #define WATCHDOG_IRQN           WDOG0_IRQn
 #else
   #warning "No WDOG peripheral available"
+#endif
+
+#if defined(SL_CATALOG_CRASH_MANAGER_COMPONENT_PRESENT)
+  #define SLI_WATCHDOG_MANAGER_CRASH_MANAGER_INTEGRATION  1
+#else
+  #define SLI_WATCHDOG_MANAGER_CRASH_MANAGER_INTEGRATION  0
 #endif
 
 // CMU clock select for the WDOG instance used by the watchdog manager
@@ -154,6 +163,9 @@ static void watchdog_starve_irq_handler(void)
 
   if ((flags & WDOG_IF_WARN) != 0u) {
     sl_hal_wdog_clear_interrupts(WATCHDOG_PERIPHERAL, WDOG_IF_WARN);
+#if SLI_WATCHDOG_MANAGER_CRASH_MANAGER_INTEGRATION
+    sli_crash_manager_on_watchdog_warning(flags);
+#endif
     sli_watchdog_manager_on_starve();
   }
 
@@ -199,7 +211,11 @@ static sl_hal_wdog_warning_timeout_select_t hal_map_warning_time(void)
       return SL_WDOG_WARNING_TIME75;
 
     default:
+#if SLI_WATCHDOG_MANAGER_CRASH_MANAGER_INTEGRATION
+      return SL_WDOG_WARNING_TIME75;
+#else
       return SL_WDOG_WARNING_DISABLE;
+#endif
   }
 }
 #endif
@@ -245,9 +261,38 @@ static sl_status_t hal_cmu_encode_clock_source(
       return SL_STATUS_NOT_SUPPORTED;
 #endif
 
+    case SLI_WATCHDOG_MANAGER_HAL_CLK_INVALID:
     default:
       return SL_STATUS_INVALID_PARAMETER;
   }
+}
+
+/***************************************************************************//**
+ * @brief Map CMU WDOGxCLKCTRL.CLKSEL value to HAL clock enum.
+ *
+ * @param[in]  cmu_clksel   CMU CLKSEL bitfield value.
+ * @param[out] clock_source HAL clock source.
+ *
+ * @return SL_STATUS_OK on success.
+ * @return SL_STATUS_INVALID_STATE if @p cmu_clksel is not a recognized selection.
+ ******************************************************************************/
+static sl_status_t hal_cmu_decode_clock_source(
+  uint32_t cmu_clksel,
+  sli_watchdog_manager_hal_clock_source_t *clock_source)
+{
+  if (WATCHDOG_CLKSEL_IS_HCLK(cmu_clksel)) {
+    *clock_source = SLI_WATCHDOG_MANAGER_HAL_CLK_HCLKDIV1024;
+  } else if (cmu_clksel == WATCHDOG_CLKSEL_LFRCO) {
+    *clock_source = SLI_WATCHDOG_MANAGER_HAL_CLK_LFRCO;
+  } else if (cmu_clksel == WATCHDOG_CLKSEL_LFXO) {
+    *clock_source = SLI_WATCHDOG_MANAGER_HAL_CLK_LFXO;
+  } else if (cmu_clksel == WATCHDOG_CLKSEL_ULFRCO) {
+    *clock_source = SLI_WATCHDOG_MANAGER_HAL_CLK_ULFRCO;
+  } else {
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  return SL_STATUS_OK;
 }
 
 /***************************************************************************//**
@@ -278,20 +323,15 @@ static sl_status_t hal_cmu_program_clock_source(
  * @brief Read CMU WDOGxCLKCTRL.CLKSEL and update hal_clock_source.
  *
  * @details Called on first HAL init only. Does not modify the CMU register.
+ *
+ * @return SL_STATUS_OK on success.
+ * @return SL_STATUS_INVALID_STATE if the CMU CLKSEL value is not recognized.
  ******************************************************************************/
-static void hal_cmu_load_clock_source(void)
+static sl_status_t hal_cmu_load_clock_source(void)
 {
   uint32_t cmu_clksel = WATCHDOG_CLKCTRL_REG & WATCHDOG_CLKCTRL_CLKSEL_MASK;
 
-  if (WATCHDOG_CLKSEL_IS_HCLK(cmu_clksel)) {
-    hal_clock_source = SLI_WATCHDOG_MANAGER_HAL_CLK_HCLKDIV1024;
-  } else if (cmu_clksel == WATCHDOG_CLKSEL_LFRCO) {
-    hal_clock_source = SLI_WATCHDOG_MANAGER_HAL_CLK_LFRCO;
-  } else if (cmu_clksel == WATCHDOG_CLKSEL_LFXO) {
-    hal_clock_source = SLI_WATCHDOG_MANAGER_HAL_CLK_LFXO;
-  } else if (cmu_clksel == WATCHDOG_CLKSEL_ULFRCO) {
-    hal_clock_source = SLI_WATCHDOG_MANAGER_HAL_CLK_ULFRCO;
-  }
+  return hal_cmu_decode_clock_source(cmu_clksel, &hal_clock_source);
 }
 
 #endif // WATCHDOG_HAS_CLKSEL
@@ -322,7 +362,10 @@ sl_status_t sli_watchdog_manager_hal_init(uint8_t timeout_period)
 
     if (!hal_initialized) {
       // Sync HAL state from clock manager; do not rewrite CMU on first init.
-      hal_cmu_load_clock_source();
+      status = hal_cmu_load_clock_source();
+      if (status != SL_STATUS_OK) {
+        return status;
+      }
     } else {
       status = hal_cmu_program_clock_source(hal_clock_source);
       if (status != SL_STATUS_OK) {
@@ -515,7 +558,7 @@ bool sli_watchdog_manager_hal_has_em1run(void)
 /***************************************************************************//**
  * @brief Get the hardware watchdog timeout period index.
  ******************************************************************************/
-sl_status_t sli_watchdog_manager_hal_get_timeout_period (uint8_t *timeout_period)
+sl_status_t sli_watchdog_manager_hal_get_timeout_period(uint8_t *timeout_period)
 {
   if (timeout_period == NULL) {
     return SL_STATUS_NULL_POINTER;
@@ -532,8 +575,10 @@ sl_status_t sli_watchdog_manager_hal_get_timeout_period (uint8_t *timeout_period
 
 /***************************************************************************//**
  * @brief Set the hardware watchdog timeout period index.
+ *
+ * @note Caller must disable the hardware watchdog before calling this function.
  ******************************************************************************/
-sl_status_t sli_watchdog_manager_hal_set_timeout_period (uint8_t timeout_period)
+sl_status_t sli_watchdog_manager_hal_set_timeout_period(uint8_t timeout_period)
 {
   if (timeout_period > 15) {
     return SL_STATUS_INVALID_PARAMETER;
@@ -546,7 +591,7 @@ sl_status_t sli_watchdog_manager_hal_set_timeout_period (uint8_t timeout_period)
   if (timeout_period == hal_timeout_period) {
     return SL_STATUS_OK;
   }
-  
+
   return sli_watchdog_manager_hal_init(timeout_period);
 }
 
@@ -556,13 +601,14 @@ sl_status_t sli_watchdog_manager_hal_set_timeout_period (uint8_t timeout_period)
 sl_status_t sli_watchdog_manager_hal_get_clock_source(
   sli_watchdog_manager_hal_clock_source_t *clock_source)
 {
-#if !WATCHDOG_HAS_CLKSEL
-  (void)clock_source;
-  return SL_STATUS_NOT_SUPPORTED;
-#else
   if (clock_source == NULL) {
     return SL_STATUS_NULL_POINTER;
   }
+
+#if !WATCHDOG_HAS_CLKSEL
+  *clock_source = SLI_WATCHDOG_MANAGER_HAL_CLK_INVALID;
+  return SL_STATUS_NOT_SUPPORTED;
+#else
   if (!hal_initialized) {
     return SL_STATUS_NOT_INITIALIZED;
   }
@@ -574,6 +620,8 @@ sl_status_t sli_watchdog_manager_hal_get_clock_source(
 
 /***************************************************************************//**
  * @brief Set the hardware watchdog CMU clock source.
+ *
+ * @note Caller must disable the hardware watchdog before calling this function.
  ******************************************************************************/
 sl_status_t sli_watchdog_manager_hal_set_clock_source(
   sli_watchdog_manager_hal_clock_source_t clock_source)
@@ -582,14 +630,19 @@ sl_status_t sli_watchdog_manager_hal_set_clock_source(
   (void)clock_source;
   return SL_STATUS_NOT_SUPPORTED;
 #else
-  if (clock_source > SLI_WATCHDOG_MANAGER_HAL_CLK_ULFRCO) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
+  sl_status_t status;
+  uint32_t cmu_clksel;
+
   if (!hal_initialized) {
     return SL_STATUS_NOT_INITIALIZED;
   }
   if (clock_source == hal_clock_source) {
     return SL_STATUS_OK;
+  }
+
+  status = hal_cmu_encode_clock_source(clock_source, &cmu_clksel);
+  if (status != SL_STATUS_OK) {
+    return status;
   }
 
   hal_clock_source = clock_source;

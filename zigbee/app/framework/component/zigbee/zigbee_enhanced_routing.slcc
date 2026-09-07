@@ -12,6 +12,9 @@ source:
 template_contribution:
 - name: component_catalog
   value: zigbee_enhanced_routing
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/source-route
 metadata:
   sbom:
     license: MSLA

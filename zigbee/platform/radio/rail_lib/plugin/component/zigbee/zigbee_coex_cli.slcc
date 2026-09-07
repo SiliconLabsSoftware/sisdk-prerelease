@@ -4,6 +4,8 @@ description: Zigbee Coexistence CLI
 package: zigbee
 category: Platform|Radio
 quality: production
+documentation:
+  url: https://docs.silabs.com/zigbee/latest/zigbee-openthread-coexistence-wifi/index.html
 metadata:
   sbom:
     id: zigbee_coex_cli

@@ -42,6 +42,7 @@ extern "C" {
 #include <stdbool.h>
 #include "sl_hal_etampdet_compat.h"
 #include "sl_enum.h"
+#include "sl_log_helper.h"
 
 /***************************************************************************//**
  * @addtogroup etampdet ETAMPDET - External Tamper Detect

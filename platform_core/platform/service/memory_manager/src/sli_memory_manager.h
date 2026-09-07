@@ -85,6 +85,11 @@ extern char __HeapLimit[];
 #define SLI_SYSTEMVIEW_EVENT_ID_REALLOC         514
 #define SLI_SYSTEMVIEW_EVENT_ID_OWNERSHIP_SITE  515
 
+// Custom SystemView event IDs for reservation retention requests.
+// Payload: (reserved block address, block size).
+#define SLI_SYSTEMVIEW_EVENT_ID_RESERVATION_ADD_RETENTION     516
+#define SLI_SYSTEMVIEW_EVENT_ID_RESERVATION_REMOVE_RETENTION  517
+
 // GCC-only return address capture helper for SystemView site annotation.
 // Must be called at the top of a function (before any other function calls)
 // to capture the immediate caller's return address.
@@ -336,11 +341,6 @@ extern uint32_t sli_reservation_alignment_table[];
 
 extern sl_memory_reservation_t sli_reservation_no_retention_table[];
 #endif
-
-// The heap name is also used as the Memory Profiler tracker handle for the heap
-// pool managed by the Memory Manager
-extern const char sli_mm_heap_name[];
-extern const char sli_mm_heap_reservation_name[];
 
 /*******************************************************************************
  *****************************   PROTOTYPES   **********************************

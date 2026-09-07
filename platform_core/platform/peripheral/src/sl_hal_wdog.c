@@ -65,10 +65,12 @@ void sl_hal_wdog_enable(WDOG_TypeDef *wdog)
 
   // SYNCBUSY may stall when locked.
   if ((wdog->STATUS & _WDOG_STATUS_LOCK_MASK) == WDOG_STATUS_LOCK_LOCKED) {
+    SL_PRINT_STRING_WARN("locked, %d\r\n", (int)__LINE__);
     return;
   }
 
   wdog->EN_SET = WDOG_EN_EN;
+  SL_PRINT_STRING_INFO("enabled, %d\r\n", (int)__LINE__);
 }
 
 /***************************************************************************//**
@@ -80,12 +82,14 @@ void sl_hal_wdog_disable(WDOG_TypeDef *wdog)
 
   // SYNCBUSY may stall when locked.
   if ((wdog->STATUS & _WDOG_STATUS_LOCK_MASK) == WDOG_STATUS_LOCK_LOCKED) {
+    SL_PRINT_STRING_WARN("locked, %d\r\n", (int)__LINE__);
     return;
   }
 
   sl_hal_wdog_wait_sync(wdog);
 
   wdog->EN_CLR = WDOG_EN_EN;
+  SL_PRINT_STRING_INFO("disabled, %d\r\n", (int)__LINE__);
 }
 
 /***************************************************************************//**
@@ -159,6 +163,12 @@ void sl_hal_wdog_init(WDOG_TypeDef *wdog,
     sl_hal_wdog_lock(wdog);
     sl_hal_wdog_wait_sync(wdog);
   }
+  SL_PRINT_STRING_DEBUG("period=%d window=%d\r\n",
+                        (int)init->period_select,
+                        (int)init->window_time_select);
+  SL_PRINT_STRING_DEBUG("warning=%d lock=%d\r\n",
+                        (int)init->warning_time_select,
+                        (int)init->lock);
 }
 
 #endif /* defined(WDOG_COUNT) && (WDOG_COUNT > 0) */

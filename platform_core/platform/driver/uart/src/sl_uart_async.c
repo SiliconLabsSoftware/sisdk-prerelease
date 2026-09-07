@@ -214,7 +214,7 @@ static inline void uart_async_submit_tx_chunk(sl_uart_handle_t *uart_handle,
                              SL_DMA_CHANNEL_MAX_XFER_UNIT_COUNT);
 
   sl_status_t status = sl_dma_channel_submit_transfer_m2p(&uart_handle->async_tx_dma_channel,
-                                                          async_tfer->base.data + async_tfer->base.bytes_submitted,
+                                                          (uint8_t *)async_tfer->base.data + async_tfer->base.bytes_submitted,
                                                           uart_handle->ops->get_tx_register(uart_handle->uart),
                                                           chunk_size,
                                                           SL_DMA_CTRL_SIZE_BYTE,

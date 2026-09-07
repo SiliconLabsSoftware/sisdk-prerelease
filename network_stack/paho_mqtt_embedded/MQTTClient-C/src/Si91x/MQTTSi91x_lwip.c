@@ -272,10 +272,11 @@ static int mqtt_tls_init(mqtt_tls_context_t *tls_ctx, int socket_fd, const char 
 
 #if MQTT_TLS_ALPN_ENABLED && defined(MBEDTLS_SSL_ALPN)
   {
-    const char *alpn_protocols[] = { MQTT_TLS_ALPN_PROTOCOL, NULL };
-    ret                          = mbedtls_ssl_conf_set_alpn_protocols(&tls_ctx->conf, alpn_protocols);
+    // mbedTLS keeps the pointer to this list, so it must outlive the SSL configuration.
+    static const char *alpn_protocols[] = { MQTT_TLS_ALPN_PROTOCOL, NULL };
+    ret                                 = mbedtls_ssl_conf_alpn_protocols(&tls_ctx->conf, alpn_protocols);
     if (ret != 0) {
-      SL_DEBUG_LOG_V2(ERROR, "mbedtls_ssl_conf_set_alpn_protocols failed: -0x%04x\r\n", (unsigned int)(-ret));
+      SL_DEBUG_LOG_V2(ERROR, "mbedtls_ssl_conf_alpn_protocols failed: -0x%04x\r\n", (unsigned int)(-ret));
       return ret;
     }
   }

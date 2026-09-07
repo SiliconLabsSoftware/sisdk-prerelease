@@ -28,6 +28,9 @@ template_contribution:
     callback_type: event_init
     function_name: sli_zigbee_af_identify_init_callback
 
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/identify-feedback
 metadata:
   sbom:
     license: MSLA

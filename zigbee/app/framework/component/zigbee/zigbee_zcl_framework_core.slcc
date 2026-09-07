@@ -970,6 +970,9 @@ template_contribution:
     group: print
     handler: printTimeCommand
     help: Prints time.
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/app-framework-common
 metadata:
   sbom:
     license: MSLA

@@ -14,15 +14,17 @@
   {%- set ram_code_alignment = 8 %}
 {%- endif %}
 
-{#- Legacy stack (before BSS): Sixx301 only. #}
-{%- set family_match = namespace(legacy_stack_placement = false) %}
+{#- Sixx301 only: Legacy stack (before BSS) and hardcoded region sizes for Co-Packaged Flash #}
+{%- set family_match = namespace(legacy_stack_placement = false, copackaged_flash_region = false) %}
 {%- for family in device_family | default([]) %}
   {%- set family_lc = family | string | lower %}
   {%- if family_lc in ['simg301', 'sibg301', 'sixg301'] %}
     {%- set family_match.legacy_stack_placement = true %}
+    {%- set family_match.copackaged_flash_region = true %}
   {%- endif %}
 {%- endfor %}
 {%- set legacy_stack_placement = family_match.legacy_stack_placement %}
+{%- set copackaged_flash_region = family_match.copackaged_flash_region %}
 
 {#- Use Secure aliases #}
 {%- if trustzone_secure is defined %}
@@ -56,19 +58,21 @@
 {#-
   Code Region 0 is usually the bootloader region. The default logical size is 32kb.
 #}
-{%- if axip_region0_enabled is defined %}
-  {%- if code_region0_size is defined %}
-    {%- set logical_code_region0_size = code_region0_size | first %}
-  {%- else %}
-    {%- set logical_code_region0_size = 32768 %}
-  {%- endif %}
-  {%- set logical_code_region0_size = ((logical_code_region0_size // 32768) * 32768) %}
+{%- if code_region0_size is defined %}
+  {%- set logical_code_region0_size = code_region0_size | first %}
+{%- else %}
+  {%- set logical_code_region0_size = 32768 %}
+{%- endif %}
+{%- set logical_code_region0_size = ((logical_code_region0_size // 32768) * 32768) %}
 
+{%- if axip_region0_enabled is defined %}
   {#-
     With AXiP enabled, every 8 logical pages effectively uses 9 physical pages.
   #}
   {%- set physical_code_region0_size = ((9 * logical_code_region0_size) // 8)  %}
   {%- set region0_axip_overhead = physical_code_region0_size - logical_code_region0_size  %}
+{%- else %}
+  {%- set physical_code_region0_size = logical_code_region0_size  %}
 {%- endif %}
 
 {#-
@@ -80,7 +84,7 @@
     {%- set logical_code_region1_size = code_region1_size | first %}
   {%- else %}
 
-    {%- if device_has_ext_mem is defined %}
+    {%- if device_has_ext_mem is defined or not copackaged_flash_region %}
       {#-
         Calculate Code Region 1 size for External Flash parts.
       #}

@@ -22,6 +22,9 @@ template_contribution:
     callback_type: init_done
     function_name: sl_zigbee_af_trust_center_nwk_key_update_periodic_init_cb
 
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/trust-center-nwk-key-update-periodic
 metadata:
   sbom:
     license: MSLA

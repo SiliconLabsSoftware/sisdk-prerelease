@@ -31,6 +31,7 @@
 #include "sl_clock_manager.h"
 #include "sli_clock_manager.h"
 #include "sli_clock_manager_hal.h"
+#include "sli_clock_manager_log.h"
 #include "sl_assert.h"
 #include "cmsis_compiler.h"
 
@@ -48,11 +49,23 @@ sl_status_t sl_clock_manager_runtime_init(void)
 sl_status_t sl_clock_manager_get_oscillator_frequency(sl_oscillator_t oscillator,
                                                       uint32_t        *frequency)
 {
+  sl_status_t status;
+
   if (frequency == NULL) {
-    return SL_STATUS_NULL_POINTER;
+    status = SL_STATUS_NULL_POINTER;
+  } else {
+    status = sli_clock_manager_hal_get_oscillator_frequency(oscillator, frequency);
   }
 
-  return sli_clock_manager_hal_get_oscillator_frequency(oscillator, frequency);
+  if ((status != SL_STATUS_OK)
+      && (status != SL_STATUS_NOT_AVAILABLE)
+      && (status != SL_STATUS_NOT_SUPPORTED)) {
+    SLI_CLOCK_MANAGER_LOG_WARN("get oscillator frequency failed, osc=%u status=0x%x",
+                               (uint32_t)oscillator,
+                               (uint32_t)status);
+  }
+
+  return status;
 }
 
 /***************************************************************************//**
@@ -61,11 +74,23 @@ sl_status_t sl_clock_manager_get_oscillator_frequency(sl_oscillator_t oscillator
 sl_status_t sl_clock_manager_get_oscillator_precision(sl_oscillator_t oscillator,
                                                       uint16_t        *precision)
 {
+  sl_status_t status;
+
   if (precision == NULL) {
-    return SL_STATUS_NULL_POINTER;
+    status = SL_STATUS_NULL_POINTER;
+  } else {
+    status = sli_clock_manager_hal_get_oscillator_precision(oscillator, precision);
   }
 
-  return sli_clock_manager_hal_get_oscillator_precision(oscillator, precision);
+  if ((status != SL_STATUS_OK)
+      && (status != SL_STATUS_NOT_AVAILABLE)
+      && (status != SL_STATUS_NOT_SUPPORTED)) {
+    SLI_CLOCK_MANAGER_LOG_WARN("get oscillator precision failed, osc=%u status=0x%x",
+                               (uint32_t)oscillator,
+                               (uint32_t)status);
+  }
+
+  return status;
 }
 
 /***************************************************************************//**
@@ -74,11 +99,23 @@ sl_status_t sl_clock_manager_get_oscillator_precision(sl_oscillator_t oscillator
 sl_status_t sl_clock_manager_get_clock_branch_frequency(sl_clock_branch_t clock_branch,
                                                         uint32_t          *frequency)
 {
+  sl_status_t status;
+
   if (frequency == NULL) {
-    return SL_STATUS_NULL_POINTER;
+    status = SL_STATUS_NULL_POINTER;
+  } else {
+    status = sli_clock_manager_hal_get_clock_branch_frequency(clock_branch, frequency);
   }
 
-  return sli_clock_manager_hal_get_clock_branch_frequency(clock_branch, frequency);
+  if ((status != SL_STATUS_OK)
+      && (status != SL_STATUS_NOT_AVAILABLE)
+      && (status != SL_STATUS_NOT_SUPPORTED)) {
+    SLI_CLOCK_MANAGER_LOG_WARN("get branch frequency failed, branch=%u status=0x%x",
+                               (uint32_t)clock_branch,
+                               (uint32_t)status);
+  }
+
+  return status;
 }
 
 /***************************************************************************//**
@@ -87,11 +124,23 @@ sl_status_t sl_clock_manager_get_clock_branch_frequency(sl_clock_branch_t clock_
 sl_status_t sl_clock_manager_get_clock_branch_precision(sl_clock_branch_t clock_branch,
                                                         uint16_t          *precision)
 {
+  sl_status_t status;
+
   if (precision == NULL) {
-    return SL_STATUS_NULL_POINTER;
+    status = SL_STATUS_NULL_POINTER;
+  } else {
+    status = sli_clock_manager_hal_get_clock_branch_precision(clock_branch, precision);
   }
 
-  return sli_clock_manager_hal_get_clock_branch_precision(clock_branch, precision);
+  if ((status != SL_STATUS_OK)
+      && (status != SL_STATUS_NOT_AVAILABLE)
+      && (status != SL_STATUS_NOT_SUPPORTED)) {
+    SLI_CLOCK_MANAGER_LOG_WARN("get branch precision failed, branch=%u status=0x%x",
+                               (uint32_t)clock_branch,
+                               (uint32_t)status);
+  }
+
+  return status;
 }
 
 /***************************************************************************//**
@@ -99,7 +148,13 @@ sl_status_t sl_clock_manager_get_clock_branch_precision(sl_clock_branch_t clock_
  ******************************************************************************/
 sl_status_t sl_clock_manager_enable_bus_clock(sl_bus_clock_t module_bus_clock)
 {
-  return sli_clock_manager_hal_enable_bus_clock(module_bus_clock, true);
+  sl_status_t status = sli_clock_manager_hal_enable_bus_clock(module_bus_clock, true);
+
+  if (status != SL_STATUS_OK) {
+    SLI_CLOCK_MANAGER_LOG_WARN("enable bus clock failed, status=0x%x", (uint32_t)status);
+  }
+
+  return status;
 }
 
 /***************************************************************************//**
@@ -107,19 +162,33 @@ sl_status_t sl_clock_manager_enable_bus_clock(sl_bus_clock_t module_bus_clock)
  ******************************************************************************/
 sl_status_t sl_clock_manager_disable_bus_clock(sl_bus_clock_t module_bus_clock)
 {
-  return sli_clock_manager_hal_enable_bus_clock(module_bus_clock, false);
+  sl_status_t status = sli_clock_manager_hal_enable_bus_clock(module_bus_clock, false);
+
+  if (status != SL_STATUS_OK) {
+    SLI_CLOCK_MANAGER_LOG_WARN("disable bus clock failed, status=0x%x", (uint32_t)status);
+  }
+
+  return status;
 }
 
 /***************************************************************************//**
  * Gets the enable status of the given module's bus clock.
  ******************************************************************************/
- sl_status_t sl_clock_manager_is_bus_clock_enabled(sl_bus_clock_t module_bus_clock, bool *enabled)
+sl_status_t sl_clock_manager_is_bus_clock_enabled(sl_bus_clock_t module_bus_clock, bool *enabled)
 {
+  sl_status_t status;
+
   if (enabled == NULL) {
-    return SL_STATUS_NULL_POINTER;
+    status = SL_STATUS_NULL_POINTER;
+  } else {
+    status = sli_clock_manager_hal_is_bus_clock_enabled(module_bus_clock, enabled);
   }
 
-  return sli_clock_manager_hal_is_bus_clock_enabled(module_bus_clock, enabled);
+  if (status != SL_STATUS_OK) {
+    SLI_CLOCK_MANAGER_LOG_WARN("get bus clock status failed, status=0x%x", (uint32_t)status);
+  }
+
+  return status;
 }
 
 /***************************************************************************//**
@@ -357,4 +426,45 @@ sl_status_t sli_clock_manager_get_nwp_clkmult_freqplan_config(uint8_t clkmult_in
     return SL_STATUS_NULL_POINTER;
   }
   return sli_clock_manager_hal_get_nwp_clkmult_freqplan_config(clkmult_index, nwp_clkmult_freqplan_config, target_frequency_index);
+}
+
+/***************************************************************************//**
+ * Sets a runtime-configurable Clock Branch's clock-select mux and prescaler.
+ ******************************************************************************/
+sl_status_t sli_clock_manager_set_clock_branch_source(sl_clock_branch_t clock_branch,
+                                                      uint32_t clksel,
+                                                      uint32_t presc)
+{
+  return sli_clock_manager_hal_set_clock_branch_source(clock_branch, clksel, presc);
+}
+
+/***************************************************************************//**
+ * Enables or disables a Clock Branch's functional clock (CMU <BRANCH>CTRL EN).
+ ******************************************************************************/
+sl_status_t sli_clock_manager_enable_clock_branch(sl_clock_branch_t clock_branch,
+                                                  bool enable)
+{
+  return sli_clock_manager_hal_enable_clock_branch(clock_branch, enable);
+}
+
+/***************************************************************************//**
+ * Reprograms a PERPLL instance's dividers and waits for it to relock.
+ ******************************************************************************/
+sl_status_t sli_clock_manager_set_perpll_frequency(uint8_t perpll_num,
+                                                   uint32_t divn,
+                                                   uint32_t divf,
+                                                   uint32_t dco_div,
+                                                   uint32_t div_2pow,
+                                                   bool fractional_en)
+{
+  return sli_clock_manager_hal_set_perpll_frequency(perpll_num, divn, divf, dco_div, div_2pow, fractional_en);
+}
+
+/***************************************************************************//**
+ * Reprograms a PERPLL instance to a predefined target frequency.
+ ******************************************************************************/
+sl_status_t sli_clock_manager_set_perpll_predefined_frequency(uint8_t perpll_num,
+                                                              sli_clock_manager_perpll_predefined_frequency_t frequency)
+{
+  return sli_clock_manager_hal_set_perpll_predefined_frequency(perpll_num, frequency);
 }

@@ -38,6 +38,9 @@ template_contribution:
 define:
 - name: CSL_SUPPORT
 - name: SL_ZIGBEE_LEAF_STACK
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/pro-leaf-stack
 metadata:
   sbom:
     license: MSLA

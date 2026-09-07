@@ -123,6 +123,9 @@ template_contribution:
     - type: uint8
       help: 0 = Standard/FCS+HDR, 1 = DC/FCS+HDR.
 
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/pro-stack-rail-mux
 metadata:
   sbom:
     license: MSLA

@@ -17,6 +17,8 @@ provides:
 template_contribution:
 - name: mbedtls_config
   value: MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS
+documentation:
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-api/sl-psa-drivers-se-builtin-keys
 metadata:
   sbom:
     license: Zlib

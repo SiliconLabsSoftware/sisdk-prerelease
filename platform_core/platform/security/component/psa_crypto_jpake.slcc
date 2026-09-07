@@ -45,6 +45,9 @@ template_contribution:
 - name: psa_crypto_builtin_config
   value: "SLI_MBEDTLS_PSA_EC_JPAKE_TLS_WORKAROUND"
   condition: [mbedtls_jpake, mbedtls_tls, device_has_semailbox]
+documentation:
+  # No dedicated EC J-PAKE PSA page; PSA Crypto hub for related docs
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/
 metadata:
   sbom:
     reference: mbedtls_sbom

@@ -41,6 +41,9 @@ template_contribution:
     handler: sl_zigbee_af_power_consumption_model_print_attributes_command
     help: Reads all power attributes.
 
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/power-consumption-model
 metadata:
   sbom:
     license: MSLA

@@ -225,6 +225,35 @@ Error Message::Read(uint16_t aOffset, void *aBuf, uint16_t aLength) const
     return OT_ERROR_NOT_IMPLEMENTED;
 }
 
+// Stubs for AesCcm::Process(Message&) — not used by zigbeed; satisfies linker only.
+
+Error Message::IncreaseLength(uint16_t aSize)
+{
+    (void) aSize;
+    return OT_ERROR_NOT_IMPLEMENTED;
+}
+
+void Message::WriteBytes(uint16_t aOffset, const void *aBuf, uint16_t aLength)
+{
+    (void) aOffset;
+    (void) aBuf;
+    (void) aLength;
+}
+
+bool Message::CompareBytes(uint16_t aOffset, const void *aBuf, uint16_t aLength, ByteMatcher aMatcher) const
+{
+    (void) aOffset;
+    (void) aBuf;
+    (void) aLength;
+    (void) aMatcher;
+    return false;
+}
+
+void Message::RemoveFooter(uint16_t aLength)
+{
+    (void) aLength;
+}
+
 // Stubs for AES-CCM GetFirstChunk/GetNextChunk operations
 
 void Message::GetFirstChunk(uint16_t aOffset, uint16_t &aLength, Chunk &aChunk) const

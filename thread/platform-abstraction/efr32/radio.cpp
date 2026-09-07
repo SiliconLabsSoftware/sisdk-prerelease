@@ -1233,10 +1233,6 @@ void efr32RadioInit(void)
     sl_status_t                 rxMemPoolStatus;
     bool                        queueStatus;
     sl_rail_timer_sync_config_t timer_sync_config = SL_RAIL_TIMER_SYNC_DEFAULT;
-#if defined(_SILICON_LABS_IP_LPW_TYPE_IS_LPWH) || defined(_SILICON_LABS_IP_LPW_TYPE_IS_LPWLN) \
-    || defined(_SILICON_LABS_IP_LPW_TYPE_IS_LPWLO)
-    timer_sync_config.sleep = SL_RAIL_SLEEP_CONFIG_TIMERSYNC_DISABLED;
-#endif
 
     // check if RAIL_TX_FIFO_SIZE is power of two..
     OT_ASSERT((RAIL_TX_FIFO_SIZE & (RAIL_TX_FIFO_SIZE - 1)) == 0);

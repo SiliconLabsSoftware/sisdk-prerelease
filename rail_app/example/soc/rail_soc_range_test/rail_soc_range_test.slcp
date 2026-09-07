@@ -98,10 +98,6 @@ requires:
 
 readme:
   - path: ../../../documentation/example/rail_soc_range_test/readme.md
-
-other_file:
-  - path: hw_filter_tags.yaml
-    condition: [add_hw_filter_to_project]
 # -------------------------- Configuration overrides ---------------------------
 configuration:
 # ------------------------------------- OS -------------------------------------
@@ -267,7 +263,6 @@ tag:
   - hwfilter:!device:device_family_bgm24
   - hwfilter:!device:device_family_mgm22
   - hwfilter:!board:brd4183b
-
 
 filter:
   - name: Wireless Technology

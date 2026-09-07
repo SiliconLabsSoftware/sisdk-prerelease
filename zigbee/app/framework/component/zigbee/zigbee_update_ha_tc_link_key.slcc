@@ -13,6 +13,9 @@ source:
 template_contribution:
 - name: component_catalog
   value: zigbee_update_ha_tc_link_key
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/update-ha-tc-link-key
 metadata:
   sbom:
     license: MSLA

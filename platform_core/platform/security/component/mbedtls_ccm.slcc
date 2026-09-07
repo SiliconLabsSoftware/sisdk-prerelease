@@ -20,6 +20,10 @@ recommends:
 template_contribution:
 - name: mbedtls_config
   value: MBEDTLS_CCM_C
+documentation:
+  docset: gecko-platform
+  document:
+  - page: platform-security/sl-crypto-ccm
 metadata:
   sbom:
     reference: mbedtls_sbom

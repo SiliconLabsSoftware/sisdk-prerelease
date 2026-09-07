@@ -1,0 +1,21 @@
+id: aws_iot_mqtt_platform
+package: aws_sdk_202412_00
+description: >
+  Everest Series3 LwIP TLS transport platform layer for AWS IoT C-SDK coreMQTT
+label: AWS IoT MQTT Platform (LwIP)
+category: Third Party
+quality: production
+metadata:
+  sbom:
+    license: Zlib
+provides:
+- name: aws_iot_mqtt_platform
+source:
+- path: platform/silabs/src/sl_aws_mqtt_transport_lwip.c
+- path: platform/silabs/src/sl_aws_mqtt_clock.c
+include:
+- path: platform/silabs/inc
+  file_list:
+  - path: sl_aws_mqtt_transport.h
+  - path: sl_aws_mqtt_clock.h
+root_path: aws_sdk_202412_00/./third_party/aws_iot_c_sdk

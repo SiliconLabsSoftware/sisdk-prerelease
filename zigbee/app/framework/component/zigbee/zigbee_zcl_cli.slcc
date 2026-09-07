@@ -24,6 +24,9 @@ template_contribution:
     callback_type: init_done
     function_name: sli_zigbee_zcl_cli_init
   priority: -9600
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/app-framework-common
 metadata:
   sbom:
     license: MSLA

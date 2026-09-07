@@ -39,6 +39,9 @@ template_contribution:
 - name: mbedtls_config
   value: MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED
   condition: [psa_crypto_ecdsa]
+documentation:
+  # Key Exchange — ECDH (basis for ECDHE TLS key exchange)
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/psa-crypto-plugins
 metadata:
   sbom:
     reference: mbedtls_sbom

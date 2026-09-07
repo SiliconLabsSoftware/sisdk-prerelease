@@ -45,7 +45,7 @@ extern "C" {
 #include "sl_enum.h"
 #include "sl_hal_syscfg.h"
 
-#if defined(SLI_HAL_DCDC_S3_PRESENT)
+#if defined(SL_CATALOG_HAL_DCDC_S3_PRESENT)
 #include "sl_hal_dcdc_s3.h"
 #endif
 

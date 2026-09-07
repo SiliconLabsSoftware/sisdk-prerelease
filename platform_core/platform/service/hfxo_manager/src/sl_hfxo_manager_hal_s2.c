@@ -32,6 +32,7 @@
 #include "sl_assert.h"
 #include "sl_core.h"
 #include "sli_hfxo_manager.h"
+#include "sli_hfxo_manager_log.h"
 #include "sl_hfxo_manager.h"
 #include "sl_hfxo_manager_config.h"
 #include "sl_status.h"
@@ -158,6 +159,8 @@ void sli_hfxo_manager_init_hardware(void)
   HFXO0->CTRL_CLR = (_HFXO_CTRL_DISONDEMANDPRS_MASK & HFXO_CTRL_DISONDEMANDPRS_DEFAULT);
   HFXO0->CTRL_SET = HFXO_CTRL_PRSSTATUSSEL1_ENS;
 #endif
+
+  SLI_HFXO_MANAGER_LOG_INFO("hardware initialized");
 }
 
 /***************************************************************************//**

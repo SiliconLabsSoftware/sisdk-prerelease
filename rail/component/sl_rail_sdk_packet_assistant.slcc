@@ -19,12 +19,6 @@ provides:
 requires:
 - name: sl_rail_sdk_packet_asm
 - name: device_has_radio
-- name: restrictions_profile_wisun_fan_1_0
-- name: restrictions_profile_wisun_fan_1_1
-- name: restrictions_profile_wisun_han
-- name: restrictions_profile_wisun_ofdm
-- name: restrictions_profile_sun
-- name: restrictions_profile_ieee802154_bpsk
 
 # according to standards the packet assembler is chosen.
 source:

@@ -41,6 +41,9 @@ template_contribution:
   value:
     name: force-sleep
     handler: sli_zigbee_app_framework_force_sleep_cli_handler
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/force-sleep-wakeup
 metadata:
   sbom:
     license: MSLA

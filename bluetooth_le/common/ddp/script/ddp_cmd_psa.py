@@ -49,7 +49,7 @@ def psa_its_set(conn, id, data, check=True):
         int: ``0`` on success, or ``1`` if the read-back value does not match
             ``data``.
     """
-    print(f"Set PSA ITS. ID: {hex(id)}")
+    print(f"Set PSA ITS. ID: {hex(id)} ({len(data)}[B])")
     conn.send(CommandPsaItsSet(id, data))
     resp = ResponsePsaItsSet(conn.receive())
     if resp.status != 0:

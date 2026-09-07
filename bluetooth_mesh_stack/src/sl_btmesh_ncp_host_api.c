@@ -1029,6 +1029,22 @@ sl_status_t sl_btmesh_node_compare_dcd(uint8_t page_number,
     return rsp->data.rsp_node_compare_dcd.result;
 }
 
+sl_status_t sl_btmesh_node_set_scan_bond_lookup(uint8_t bond_lookup)
+{
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+    size_t cmd_payload_len = sizeof(sl_btmesh_cmd_node_set_scan_bond_lookup_t);
+
+    cmd->header = SLI_BGAPI_MSG_HEADER(sli_btmesh_node_class_id,
+                                       sli_btmesh_node_set_scan_bond_lookup_command_id,
+                                       (uint8_t) sl_bgapi_msg_type_cmd | (uint8_t) sl_bgapi_dev_type_btmesh,
+                                       cmd_payload_len);
+    cmd->data.cmd_node_set_scan_bond_lookup.bond_lookup = bond_lookup;
+    sl_btmesh_host_handle_command();
+
+    return rsp->data.rsp_node_set_scan_bond_lookup.result;
+}
+
 sl_status_t sl_btmesh_prov_init(void)
 {
     struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;

@@ -24,7 +24,7 @@
 <codeline lineno="39"><highlight class="normal"></highlight></codeline>
 <codeline lineno="45" refid="group__sl__bt__version_1gabdc3b1f3ef5b86303857c56b8c89e600" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>SL_BT_VERSION_PATCH<sp/>0</highlight><highlight class="normal"></highlight></codeline>
 <codeline lineno="46"><highlight class="normal"></highlight></codeline>
-<codeline lineno="50" refid="group__sl__bt__version_1ga702d68a51ae68d689249900414058101" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>SL_BT_VERSION_HASH<sp/>{0xfa,0xe0,0x32,0x2c,0x3e,0xb7,0x05,0x15,0x12,0x80,0x30,0x08,0xae,0x49,0x82,0x20,0xc3,0x7b,0x9a,0xd9}</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="50" refid="group__sl__bt__version_1ga702d68a51ae68d689249900414058101" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>SL_BT_VERSION_HASH<sp/>{0x0d,0x8a,0x7d,0xb6,0x37,0xe5,0xea,0x69,0xab,0x93,0x25,0x14,0xd7,0x21,0xbd,0x8b,0x56,0x76,0xfe,0xa3}</highlight><highlight class="normal"></highlight></codeline>
 <codeline lineno="51"><highlight class="normal"></highlight></codeline>
 <sp/><highlight class="comment">//<sp/>end<sp/>addtogroup<sp/>sl_bt_version</highlight><codeline lineno="53"><highlight class="normal"></highlight></codeline>
 <codeline lineno="54"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>

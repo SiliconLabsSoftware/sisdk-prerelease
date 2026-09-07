@@ -67,10 +67,10 @@ extern "C" {
  ******************************************************************************/
 
 /// Define pointer to ACMP0 peripheral structure.
-#define SL_PERIPHERAL_ACMP0 (&sl_peripheral_val_acmp0)
+#define SL_PERIPHERAL_ACMP0 ((sl_peripheral_t)(&sl_peripheral_val_acmp0))
 
 /// Define pointer to ACMP1 peripheral structure.
-#define SL_PERIPHERAL_ACMP1 (&sl_peripheral_val_acmp1)
+#define SL_PERIPHERAL_ACMP1 ((sl_peripheral_t)(&sl_peripheral_val_acmp1))
 
 /// Define pointer to ADC0 peripheral structure.
 #define SL_PERIPHERAL_ADC0 ((sl_peripheral_t)&sl_peripheral_val_adc0)
@@ -103,7 +103,7 @@ extern "C" {
 #define SL_PERIPHERAL_CAN1 ((sl_peripheral_t)(&sl_peripheral_val_can1))
 
 /// Define pointer to CMU peripheral structure.
-#define SL_PERIPHERAL_CMU (&sl_peripheral_val_cmu)
+#define SL_PERIPHERAL_CMU ((sl_peripheral_t)(&sl_peripheral_val_cmu))
 
 /// Define pointer to CRYPTOACC peripheral structure.
 #define SL_PERIPHERAL_CRYPTOACC (&sl_peripheral_val_cryptoacc)
@@ -232,16 +232,16 @@ extern "C" {
 #define SL_PERIPHERAL_LESENSE ((sl_peripheral_t)(&sl_peripheral_val_lesense))
 
 /// Define pointer to LETIMER0 peripheral structure.
-#define SL_PERIPHERAL_LETIMER0 (&sl_peripheral_val_letimer0)
+#define SL_PERIPHERAL_LETIMER0 ((sl_peripheral_t)(&sl_peripheral_val_letimer0))
 
 /// Define pointer to LETIMER1 peripheral structure.
-#define SL_PERIPHERAL_LETIMER1 (&sl_peripheral_val_letimer1)
+#define SL_PERIPHERAL_LETIMER1 ((sl_peripheral_t)(&sl_peripheral_val_letimer1))
 
 /// Define pointer to LFRCO peripheral structure.
 #define SL_PERIPHERAL_LFRCO (&sl_peripheral_val_lfrco)
 
 /// Define pointer to LFXO peripheral structure.
-#define SL_PERIPHERAL_LFXO (&sl_peripheral_val_lfxo)
+#define SL_PERIPHERAL_LFXO ((sl_peripheral_t)(&sl_peripheral_val_lfxo))
 
 /// Define pointer to LPWAES peripheral structure.
 #define SL_PERIPHERAL_LPWAES (&sl_peripheral_val_lpwaes)
@@ -277,7 +277,7 @@ extern "C" {
 #define SL_PERIPHERAL_PRORTC (&sl_peripheral_val_prortc)
 
 /// Define pointer to PRS peripheral structure.
-#define SL_PERIPHERAL_PRS (&sl_peripheral_val_prs)
+#define SL_PERIPHERAL_PRS ((sl_peripheral_t)(&sl_peripheral_val_prs))
 
 /// Define pointer to RADIOAES peripheral structure.
 #define SL_PERIPHERAL_RADIOAES (&sl_peripheral_val_radioaes)
@@ -1383,7 +1383,7 @@ __STATIC_INLINE LCDRF_TypeDef *sl_device_peripheral_lcdrf_get_base_addr(const sl
  * @return  The base address of the peripheral.
  ******************************************************************************/
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DEVICE_PERIPHERAL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
-__STATIC_INLINE LDMA_TypeDef *sl_device_peripheral_ldma_get_base_addr(const sl_peripheral_t peripheral)
+__STATIC_INLINE LDMA_TypeDef * sl_device_peripheral_ldma_get_base_addr(const sl_peripheral_t peripheral)
 {
   return (LDMA_TypeDef *)peripheral->base;
 }

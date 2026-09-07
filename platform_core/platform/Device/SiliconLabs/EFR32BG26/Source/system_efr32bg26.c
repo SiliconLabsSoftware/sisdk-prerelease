@@ -242,7 +242,7 @@ uint32_t SystemHFRCODPLLClockGet(void)
 
     mdiv = DPLL0->CFG1 & _DPLL_CFG1_M_MASK;
     ndiv = (DPLL0->CFG1 & _DPLL_CFG1_N_MASK) >> _DPLL_CFG1_N_SHIFT;
-    ret  = (dpll_ref_clk / mdiv) * ndiv;
+    ret  = (uint32_t)(((uint64_t)dpll_ref_clk * (ndiv + 1UL)) / (mdiv + 1UL));
     return ret;
   }
 

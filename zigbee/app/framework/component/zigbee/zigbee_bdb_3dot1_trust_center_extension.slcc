@@ -33,6 +33,9 @@ template_contribution:
 #documentation:
 #  docset: zigbee
 #  document: zigbee-af-api/zigbee-bdb-3dot1-trust-center-extension
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/zigbee-bdb-3dot1-trust-center-extension
 metadata:
   sbom:
     license: MSLA

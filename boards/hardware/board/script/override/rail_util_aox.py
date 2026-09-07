@@ -86,6 +86,8 @@ def configure(project, hw, _):
             ('SW4000-SPDT-38-SX', ['ctl1']),
             ('SKY13575-639LF', ['ctl1', 'ctl2']),
             ('SKY13348-374LF', ['ctl1', 'ctl2']),
+            ('RTC76001', ['ctl1']),
+            ('RTC7608U', ['ctl1']),
         ]
 
         antenna_pins = {}

@@ -31,6 +31,7 @@
 #include "sl_power_manager.h"
 #include "sl_power_manager_config.h"
 #include "sli_power_manager.h"
+#include "sli_power_manager_log.h"
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"

@@ -78,6 +78,19 @@
 // <i> Default: 0
 #define SL_SLEEPTIMER_DEBUGRUN  0
 
+// <o SL_SLEEPTIMER_LOG_LEVEL_COMPILE_TIME> Sleep Timer Log Level
+// <SL_LOG_CONFIG_LEVEL_NONE  => NONE  (all Sleep Timer logs compiled out)
+// <SL_LOG_CONFIG_LEVEL_ERROR => ERROR
+// <SL_LOG_CONFIG_LEVEL_WARN  => WARN
+// <SL_LOG_CONFIG_LEVEL_INFO  => INFO
+// <SL_LOG_CONFIG_LEVEL_DEBUG => DEBUG (most verbose)
+// <i> Requires the Debug Logger. The global compile-time level may restrict
+// <i> this setting further; the global runtime level also filters emission.
+// <i> Default: SL_LOG_CONFIG_LEVEL_NONE
+#ifndef SL_SLEEPTIMER_LOG_LEVEL_COMPILE_TIME
+#define SL_SLEEPTIMER_LOG_LEVEL_COMPILE_TIME  SL_LOG_CONFIG_LEVEL_NONE
+#endif
+
 #endif /* SLEEPTIMER_CONFIG_H */
 
 // <<< end of configuration section >>>

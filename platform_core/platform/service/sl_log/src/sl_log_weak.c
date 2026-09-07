@@ -232,6 +232,11 @@ SL_WEAK uint32_t sl_log_get_timestamp_count(uint8_t core_id) {
    return 0U;
 }
 
+SL_WEAK uint32_t sl_log_get_timestamp_epoch(uint8_t core_id) {
+    (void)core_id;
+   return 0U;
+}
+
 SL_WEAK sl_status_t sl_log_platform_core_deinit(void) {
  return SL_STATUS_OK;
 }

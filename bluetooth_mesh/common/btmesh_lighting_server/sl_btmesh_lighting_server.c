@@ -115,6 +115,14 @@ static PACKSTRUCT(struct lightbulb_state {
 
 /// copy of transition delay parameter, needed for delayed on/off request
 static uint32_t delayed_onoff_trans = 0;
+/// copy of the requested on/off value, needed for delayed on/off request
+static uint8_t delayed_onoff = MESH_GENERIC_ON_OFF_STATE_OFF;
+/// true while a delayed on/off request is waiting for its delay timer
+static bool delayed_onoff_pending = false;
+/// copy of the requested on/off value, needed for the on/off transition
+static uint8_t onoff_transition_onoff = MESH_GENERIC_ON_OFF_STATE_OFF;
+/// true while an on/off transition complete timer is running
+static bool onoff_transition_pending = false;
 /// copy of transition delay parameter, needed for delayed lightness request
 static uint32_t delayed_lightness_trans = 0;
 /// copy of lightness request kind, needed for delayed lightness request
@@ -234,6 +242,52 @@ static void lighting_server_stop_all_transitions_on_off_request(void)
 #ifdef SL_CATALOG_BTMESH_CTL_SERVER_PRESENT
   sl_btmesh_ctl_server_stop_all_transitions();
 #endif
+}
+
+/*******************************************************************************
+ * Cancels bound-model transitions only for an OFF that will actually be applied.
+ * A no-op OFF must not halt an in-progress primary Generic Level, HSL, or CTL
+ * move.
+ *
+ * @param[in] onoff  Requested on/off state about to be applied
+ ******************************************************************************/
+static void onoff_stop_bound_transitions_if_applying_off(uint8_t onoff)
+{
+  if (onoff == MESH_GENERIC_ON_OFF_STATE_OFF
+      && lightbulb_state.onoff_current != onoff) {
+    lighting_server_stop_all_transitions_on_off_request();
+  }
+}
+
+/*******************************************************************************
+ * Abandons the delayed on/off request and the on/off transition which have not
+ * been applied yet. A client request is a new transaction, so it replaces an
+ * earlier request of the same model regardless of the requested state.
+ ******************************************************************************/
+static void onoff_abandon_pending_request(void)
+{
+  sl_status_t sc = app_timer_stop(&lighting_delayed_onoff_request_timer);
+  app_assert_status_f(sc, "Failed to stop Delayed ON/OFF Request timer");
+  sc = app_timer_stop(&lighting_onoff_transition_complete_timer);
+  app_assert_status_f(sc, "Failed to stop ON/OFF Transition Complete timer");
+
+  delayed_onoff_pending = false;
+  onoff_transition_pending = false;
+}
+
+/*******************************************************************************
+ * Sets the shared lightness target for an on/off request about to be applied.
+ *
+ * @param[in] onoff  Requested on/off state
+ ******************************************************************************/
+static void onoff_set_lightness_target_for_request(uint8_t onoff)
+{
+  if (onoff == MESH_GENERIC_ON_OFF_STATE_OFF) {
+    lightbulb_state.lightness_target = 0;
+  } else {
+    lightbulb_state.lightness_target =
+      lightness_validate_and_correct(lightbulb_state.lightness_last);
+  }
 }
 
 /*******************************************************************************
@@ -584,17 +638,23 @@ static void onoff_request(uint16_t model_id,
 
   lightness_kind = mesh_generic_state_on_off;
 
-  // Cancel any ongoing transitions when a non-delayed OFF OnOff request is received
-  if (!delay_ms && request->on_off == MESH_GENERIC_ON_OFF_STATE_OFF) {
-    lighting_server_stop_all_transitions_on_off_request();
+  // This request takes over from any request which is still waiting for its
+  // delay or transition to expire
+  onoff_abandon_pending_request();
+
+  // Delayed OFF waits until the delay expires, then uses the same apply check.
+  if (!delay_ms) {
+    onoff_stop_bound_transitions_if_applying_off(request->on_off);
   }
 
   lightbulb_state.transtime_ms = transition_ms;
 
-  // Set target when state changes
+  // The request defines the target even if it matches the current state,
+  // otherwise the target of the superseded request would be left behind
+  lightbulb_state.onoff_target = request->on_off;
+
   if (state_changed) {
     log_info("Turning light bulb <%s>" NL, request->on_off ? "ON" : "OFF");
-    lightbulb_state.onoff_target = request->on_off;
     if (request->on_off == MESH_GENERIC_ON_OFF_STATE_OFF) {
       lightbulb_state.lightness_target = 0;
     } else {
@@ -627,8 +687,12 @@ static void onoff_request(uint16_t model_id,
                                      NO_CALLBACK_DATA,
                                      false);
     app_assert_status_f(sc, "Failed to start Delayed ON/OFF Request timer");
-    // store transition parameter for later use
+    // store request parameters for later use. The requested value is kept
+    // separately from the shared target so that the delay can expire and notify
+    // the application without committing a target of an earlier operation.
     delayed_onoff_trans = transition_ms;
+    delayed_onoff = request->on_off;
+    delayed_onoff_pending = true;
   } else {
     // no delay but transition time has been set.
     if (state_changed) {
@@ -637,6 +701,8 @@ static void onoff_request(uint16_t model_id,
     }
 
     // Current state is updated when transition completes
+    onoff_transition_onoff = request->on_off;
+    onoff_transition_pending = true;
     sl_status_t sc = app_timer_start(&lighting_onoff_transition_complete_timer,
                                      transition_ms,
                                      lighting_onoff_transition_complete_timer_cb,
@@ -683,6 +749,9 @@ static void onoff_change(uint16_t model_id,
   (void)target;
   (void)remaining_ms;
 
+  // This event reports a state change of a bound model, so it tells what the
+  // current state already is. It is not a client request, therefore it must not
+  // touch the target of a request which is still pending.
   if (current->on_off.on != lightbulb_state.onoff_current) {
     log_info("ON/OFF state changed %u to %u" NL,
              lightbulb_state.onoff_current,
@@ -712,6 +781,11 @@ static void onoff_recall(uint16_t model_id,
   (void)model_id;
 
   log_info("Generic ON/OFF recall" NL);
+
+  // Scene recall takes over from any OnOff request still waiting for its delay
+  // or transition to expire.
+  onoff_abandon_pending_request();
+
   if (transition_ms == IMMEDIATE) {
     lightbulb_state.onoff_target = current->on_off.on;
   } else {
@@ -732,6 +806,8 @@ static void onoff_recall(uint16_t model_id,
         lightbulb_state.onoff_current = MESH_GENERIC_ON_OFF_STATE_ON;
       }
       // lightbulb current state will be updated when transition is complete
+      onoff_transition_onoff = lightbulb_state.onoff_target;
+      onoff_transition_pending = true;
       sl_status_t sc = app_timer_start(&lighting_onoff_transition_complete_timer,
                                        transition_ms,
                                        lighting_onoff_transition_complete_timer_cb,
@@ -751,23 +827,38 @@ static void onoff_recall(uint16_t model_id,
  ******************************************************************************/
 static void onoff_transition_complete(void)
 {
-  const bool state_changed = lightbulb_state.onoff_current != lightbulb_state.onoff_target;
+  if (!onoff_transition_pending) {
+    return;
+  }
+  onoff_transition_pending = false;
 
-  // transition done -> set state, update and publish
-  lightbulb_state.onoff_current = lightbulb_state.onoff_target;
+  const bool apply = (lightbulb_state.onoff_current != onoff_transition_onoff);
+
+  // Same apply-time cancel as a non-delayed OFF and a delay expiry, so a no-op
+  // OFF that becomes applicable during the transition still halts bound moves.
+  onoff_stop_bound_transitions_if_applying_off(onoff_transition_onoff);
+
+  // transition done -> set state, update and publish. Set level here so a
+  // request that was a no-op at receive still applies if a bound model
+  // changed the current state during the transition.
+  if (apply) {
+    onoff_set_lightness_target_for_request(onoff_transition_onoff);
+    lightbulb_state.onoff_current = onoff_transition_onoff;
+    lightbulb_state.lightness_current = lightbulb_state.lightness_target;
+    sl_btmesh_lighting_set_level(lightbulb_state.lightness_current, IMMEDIATE);
+  }
   lightbulb_state.transtime_ms = 0;
-  lightbulb_state.lightness_current = lightbulb_state.lightness_target;
 
   log_info("Transition complete. New state is %s" NL,
            lightbulb_state.onoff_current ? "ON" : "OFF");
 
-  if (state_changed) {
+  if (apply) {
     lightbulb_state_changed();
   }
 
-  // onoff_update_and_publish is intentionally called outside the if (state_changed)
+  // onoff_update_and_publish is intentionally called outside the if (apply)
   // block. This ensures the remaining time is always updated and prevents it
-  // from becoming stuck with stale values.
+  // from being stuck with stale values.
   onoff_update_and_publish(BTMESH_LIGHTING_SERVER_MAIN, IMMEDIATE);
 }
 
@@ -776,19 +867,24 @@ static void onoff_transition_complete(void)
  ******************************************************************************/
 static void delayed_onoff_request(void)
 {
-  const bool state_changed = lightbulb_state.onoff_current != lightbulb_state.onoff_target;
+  if (!delayed_onoff_pending) {
+    return;
+  }
+  delayed_onoff_pending = false;
+
+  const bool apply = (lightbulb_state.onoff_current != delayed_onoff);
 
   log_info("Starting delayed ON/OFF request: %u -> %u, %lu ms" NL,
            lightbulb_state.onoff_current,
-           lightbulb_state.onoff_target,
+           delayed_onoff,
            delayed_onoff_trans);
 
   if (delayed_onoff_trans == 0) {
     // no transition delay, update state immediately
-    lightbulb_state.onoff_current = lightbulb_state.onoff_target;
-    lightbulb_state.lightness_current = lightbulb_state.lightness_target;
-
-    if (state_changed) {
+    if (apply) {
+      onoff_set_lightness_target_for_request(delayed_onoff);
+      lightbulb_state.onoff_current = delayed_onoff;
+      lightbulb_state.lightness_current = lightbulb_state.lightness_target;
       sl_btmesh_lighting_set_level(lightbulb_state.lightness_current, IMMEDIATE);
       lightbulb_state_changed();
     }
@@ -796,13 +892,16 @@ static void delayed_onoff_request(void)
     onoff_update_and_publish(BTMESH_LIGHTING_SERVER_MAIN,
                              delayed_onoff_trans);
   } else {
-    if (state_changed) {
+    if (apply) {
+      onoff_set_lightness_target_for_request(delayed_onoff);
       sl_btmesh_lighting_set_level(lightbulb_state.lightness_target,
                                    delayed_onoff_trans);
       onoff_update(BTMESH_LIGHTING_SERVER_MAIN, delayed_onoff_trans);
     }
 
     // state is updated when transition is complete
+    onoff_transition_onoff = delayed_onoff;
+    onoff_transition_pending = true;
     sl_status_t sc = app_timer_start(&lighting_onoff_transition_complete_timer,
                                      delayed_onoff_trans,
                                      lighting_onoff_transition_complete_timer_cb,
@@ -2754,8 +2853,8 @@ static void lighting_onoff_transition_complete_timer_cb(app_timer_t *handle,
   (void)handle;
 
   // Invoke the OnOff change callback if registered
-  if (generic_onoff_callback) {
-    generic_onoff_callback(lightbulb_state.onoff_target);
+  if (onoff_transition_pending && generic_onoff_callback) {
+    generic_onoff_callback(onoff_transition_onoff);
   }
 
   // transition for an on/off request has completed,
@@ -2809,14 +2908,19 @@ static void lighting_delayed_onoff_request_timer_cb(app_timer_t *handle,
   (void)data;
   (void)handle;
 
-  if (lightbulb_state.onoff_target == MESH_GENERIC_ON_OFF_STATE_OFF) {
-    lighting_server_stop_all_transitions_on_off_request();
+  if (!delayed_onoff_pending) {
+    return;
   }
 
+  // The delay has expired. Cancel bound-model transitions only for OFF that
+  // will actually be applied, like a non-delayed OFF request does.
+  onoff_stop_bound_transitions_if_applying_off(delayed_onoff);
+
   // Invoke the OnOff change callback if registered, and there is no transition
-  // time to avoid double invocation of the callback
-  if (generic_onoff_callback && lightbulb_state.transtime_ms == 0) {
-    generic_onoff_callback(lightbulb_state.onoff_target);
+  // time to avoid double invocation of the callback. The application is notified
+  // about every expired delay, even if the request does not change the state.
+  if (generic_onoff_callback && delayed_onoff_trans == 0) {
+    generic_onoff_callback(delayed_onoff);
   }
 
   // delay for an on/off request has passed, now process the request

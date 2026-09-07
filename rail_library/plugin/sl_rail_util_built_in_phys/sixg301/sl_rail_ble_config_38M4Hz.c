@@ -2,7 +2,7 @@
  * @brief RAIL Configuration
  * @details
  *   WARNING: Auto-Generated Radio Config  -  DO NOT EDIT
- *   Radio Configurator Version: 2602.3.0
+ *   Radio Configurator Version: 2604.1.0rc3
  *   RAIL Adapter Version: 2.4.33
  *   RAIL Compatibility: 2.x
  *******************************************************************************
@@ -113,8 +113,8 @@ static RAIL_ChannelConfigEntryAttr_t channelConfigEntryAttr_1 = {
 };
 
 static const uint32_t phyInfo_0[] = {
-  20UL,
-  0x00924924UL, // 146.28571428571428
+  21UL,
+  0x003CF37BUL, // 60.9511105350516
   (uint32_t) NULL,
   (uint32_t) irCalConfig_0,
   (uint32_t) timingConfig_0,
@@ -134,11 +134,13 @@ static const uint32_t phyInfo_0[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
+  (uint32_t) 8UL,
+  (uint32_t) 32UL,
 };
 
 static const uint32_t phyInfo_1[] = {
-  20UL,
-  0x00666666UL, // 102.4
+  21UL,
+  0x00555549UL, // 85.33315381688944
   (uint32_t) NULL,
   (uint32_t) irCalConfig_0,
   (uint32_t) timingConfig_1,
@@ -158,11 +160,13 @@ static const uint32_t phyInfo_1[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
+  (uint32_t) 8UL,
+  (uint32_t) 16UL,
 };
 
 static const uint32_t phyInfo_2[] = {
-  20UL,
-  0x0071C71CUL, // 113.77777777777779
+  21UL,
+  0x00355509UL, // 53.33218095415174
   (uint32_t) NULL,
   (uint32_t) irCalConfig_1,
   (uint32_t) timingConfig_2,
@@ -182,11 +186,13 @@ static const uint32_t phyInfo_2[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
+  (uint32_t) 40UL,
+  (uint32_t) 64UL,
 };
 
 static const uint32_t phyInfo_3[] = {
-  20UL,
-  0x0071C71CUL, // 113.77777777777779
+  21UL,
+  0x00355509UL, // 53.33218095415174
   (uint32_t) NULL,
   (uint32_t) irCalConfig_1,
   (uint32_t) timingConfig_3,
@@ -206,11 +212,13 @@ static const uint32_t phyInfo_3[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
+  (uint32_t) 40UL,
+  (uint32_t) 64UL,
 };
 
 static const uint32_t phyInfo_4[] = {
-  20UL,
-  0x0071C71CUL, // 113.77777777777779
+  21UL,
+  0x00355509UL, // 53.33218095415174
   (uint32_t) NULL,
   (uint32_t) irCalConfig_1,
   (uint32_t) timingConfig_4,
@@ -230,6 +238,8 @@ static const uint32_t phyInfo_4[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
+  (uint32_t) 40UL,
+  (uint32_t) 64UL,
 };
 
 const uint32_t sl_rail_ble_phy_1Mbps_viterbi_38M4Hz_modemConfigBase[] = {

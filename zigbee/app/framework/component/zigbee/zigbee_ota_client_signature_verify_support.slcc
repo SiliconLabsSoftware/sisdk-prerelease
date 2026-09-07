@@ -15,6 +15,9 @@ requires:
 template_contribution:
 - name: component_catalog
   value: zigbee_ota_client_signature_verify_support
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/ota-client
 metadata:
   sbom:
     license: MSLA

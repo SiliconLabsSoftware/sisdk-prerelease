@@ -24,7 +24,8 @@ template_contribution:
 - name: mbedtls_config
   value: MBEDTLS_SSL_PROTO_TLS1_2
 documentation:
-  url: https://mbed-tls.readthedocs.io/projects/api/en/development/api/file/mbedtls__config_8h/#c.MBEDTLS_SSL_PROTO_TLS1_2
+  # No dedicated TLS 1.2 / TLS Client page; Mbed TLS hub for related docs
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-mbedtls/
 metadata:
   sbom:
     reference: mbedtls_sbom

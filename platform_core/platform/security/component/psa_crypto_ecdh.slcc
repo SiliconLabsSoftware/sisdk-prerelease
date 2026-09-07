@@ -53,7 +53,7 @@ template_contribution:
   value: "MBEDTLS_PSA_BUILTIN_ALG_ECDH 1"
   condition: [mbedtls_ecdh]
 documentation:
-  url: https://armmbed.github.io/mbed-crypto/html/api/ops/ka.html#c.PSA_ALG_ECDH
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/psa-crypto-plugins
 metadata:
   sbom:
     reference: mbedtls_sbom

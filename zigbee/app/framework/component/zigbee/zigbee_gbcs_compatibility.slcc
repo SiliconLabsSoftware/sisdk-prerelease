@@ -10,6 +10,9 @@ template_contribution:
 - name: component_catalog
   value: zigbee_gbcs_compatibility
 
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/gbcs-device-log
 metadata:
   sbom:
     license: MSLA

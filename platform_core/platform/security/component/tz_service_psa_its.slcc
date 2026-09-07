@@ -74,6 +74,10 @@ template_contribution:
     func: sli_psa_its_encrypted_req
   condition: [trustzone_nonsecure]
 
+documentation:
+  docset: gecko-platform
+  document:
+  - page: platform-security-psa-crypto/psa-crypto-its
 metadata:
   sbom:
     license: Zlib

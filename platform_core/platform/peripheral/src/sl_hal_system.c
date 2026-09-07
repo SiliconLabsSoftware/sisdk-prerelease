@@ -318,6 +318,7 @@ void sl_hal_system_init(void)
   CMU->CLKEN0_CLR = _CMU_CLKEN0_HFRCO0_MASK;
 
 #endif
+  SL_PRINT_STRING_INFO("system init\r\n");
 }
 /***************************************************************************//**
  * Get the chip revision.
@@ -1120,11 +1121,12 @@ void sl_hal_system_fpu_set_access_mode(sl_hal_system_fpu_access_t access_mode)
  ******************************************************************************/
 void sl_hal_system_get_adc_calibration_info(sl_hal_system_devinfo_adc_t *info)
 {
-#if defined(HAL_SYSTEM_CALIBRATION_SUPPORT)
+#if defined(HAL_SYSTEM_CALIBRATION_SUPPORT) \
+  && (defined(DEVINFO_GP_ADC0CAL0_OFFSET) || defined(DEVINFO_GP_ADC0CALDATA_OFFSET))
   sl_status_t status;
   sl_se_command_context_t se_command_ctx;
   sli_se_device_data_t otp_section_id = (sli_se_device_data_t)(SLI_SE_DEVICE_DATA_DI0 + DEVINFO_GP_FRAGMENT_INDEX);
-  #if defined (DEVINFO_GP_ADC0CAL0_OFFSET)
+  #if defined(DEVINFO_GP_ADC0CAL0_OFFSET)
   uint32_t offset = DEVINFO_GP_ADC0CAL0_OFFSET;
   #else
   uint32_t offset = DEVINFO_GP_ADC0CALDATA_OFFSET;

@@ -344,7 +344,7 @@ void sl_wisun_network_update_event_hnd(sl_wisun_evt_t *evt)
 
   app_wisun_trace_util_destroy_ip_str(ip_str);
   app_wisun_trace_util_destroy_time_str(time_str);
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  __CHECK_FOR_STATUS(evt->evt.network_update.status);
 }
 
 /* Connected event handler */
@@ -365,7 +365,7 @@ void sl_wisun_connected_event_hnd(sl_wisun_evt_t *evt)
   printf("[%lu s]\n", (uint32_t)_time_stat.curr_ms / 1000UL);
   _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_NETWORK_CONNECTED);
   _app_wisun_core_clear_state(SL_WISUN_APP_CORE_STATE_NETWORK_DISCONNECTED);
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  __CHECK_FOR_STATUS(evt->evt.connected.status);
 }
 
 /* Disconnected event handler */
@@ -376,7 +376,7 @@ void sl_wisun_disconnected_event_hnd(sl_wisun_evt_t *evt)
   // update internal time stat
   _update_conn_time_stats(false);
 
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  __CHECK_FOR_STATUS(evt->evt.disconnected.status);
   _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_NETWORK_DISCONNECTED);
   _app_wisun_core_clear_state(SL_WISUN_APP_CORE_STATE_NETWORK_CONNECTED);
   _join_state = SL_WISUN_JOIN_STATE_DISCONNECTED;
@@ -390,7 +390,7 @@ void sl_wisun_connection_lost_event_hnd(sl_wisun_evt_t *evt)
   _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_NETWORK_CONNECTION_LOST);
   _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_NETWORK_DISCONNECTED);
   _app_wisun_core_clear_state(SL_WISUN_APP_CORE_STATE_NETWORK_CONNECTED);
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  __CHECK_FOR_STATUS(evt->evt.connection_lost.status);
 }
 
 /* Error event handler */
@@ -419,57 +419,61 @@ void sl_wisun_join_state_event_hnd(sl_wisun_evt_t *evt)
     printf("[Join state: %s (%"PRIu32")]\n", join_state_str, evt->evt.join_state.join_state);
   }
 #endif
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  __CHECK_FOR_STATUS(evt->evt.join_state.status);
 }
 
 void sl_wisun_lfn_wake_up_hnd(sl_wisun_evt_t *evt)
 {
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  __CHECK_FOR_STATUS(evt->evt.lfn_wake_up.status);
 }
 
 void sl_wisun_multicast_reg_finish_hnd(sl_wisun_evt_t *evt)
 {
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  __CHECK_FOR_STATUS(evt->evt.lfn_multicast_reg.status);
 }
 
 void sl_wisun_dhcp_vendor_data_hnd(sl_wisun_evt_t *evt)
 {
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  // Indication has no status field
+  (void)evt;
 }
 
 void sl_wisun_pan_defect_hnd(sl_wisun_evt_t *evt)
 {
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  // Indication has no status field
+  (void)evt;
 }
 
 void sl_wisun_direct_connect_link_available_hnd(sl_wisun_evt_t *evt)
 {
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  // Indication has no status field
+  (void)evt;
 }
 
 void sl_wisun_direct_connect_status_hnd(sl_wisun_evt_t *evt)
 {
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  // Indication has no status field
+  (void)evt;
 }
 
 void sl_wisun_br_stopped_hnd(sl_wisun_evt_t *evt)
 {
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  __CHECK_FOR_STATUS(evt->evt.br_stopped.status);
 }
 
 void sl_wisun_mode_switch_fallback_hnd(sl_wisun_evt_t *evt)
 {
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  __CHECK_FOR_STATUS(evt->evt.mode_switch_fallback.status);
 }
 
 void sl_wisun_regulation_tx_level_hnd(sl_wisun_evt_t *evt)
 {
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  __CHECK_FOR_STATUS(evt->evt.regulation_tx_level.status);
 }
 
 void sl_wisun_br_routing_table_update_hnd(sl_wisun_evt_t *evt)
 {
-  __CHECK_FOR_STATUS(evt->evt.error.status);
+  __CHECK_FOR_STATUS(evt->evt.br_routing_table_update.status);
 }
 
 /* Wi-SUN app core init */

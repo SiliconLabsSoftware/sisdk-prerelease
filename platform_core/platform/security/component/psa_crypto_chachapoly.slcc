@@ -33,7 +33,8 @@ template_contribution:
   value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_CHACHA20 1"
   condition: [mbedtls_chachapoly]
 documentation:
-  url: https://armmbed.github.io/mbed-crypto/html/api/ops/aead.html#c.PSA_ALG_CHACHA20_POLY1305
+  # Authenticated Encryption — ChaCha20-Poly1305
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/psa-crypto-plugins
 metadata:
   sbom:
     reference: mbedtls_sbom

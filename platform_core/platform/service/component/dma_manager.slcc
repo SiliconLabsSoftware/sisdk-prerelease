@@ -15,6 +15,7 @@ requires:
 - name: dma_manager_init
 - name: device_peripheral
 - name: memory_manager
+- name: clock_manager_runtime
 - name: dma_manager_hal
 - name: status
 - name: sl_core

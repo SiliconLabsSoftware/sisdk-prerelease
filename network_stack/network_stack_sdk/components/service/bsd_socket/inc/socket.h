@@ -73,6 +73,8 @@ typedef	__sa_family_t	sa_family_t;	/* sockaddr address family type */
 #ifdef _KERNEL
 #define	SOCK_TYPE_MASK	0x000F		///< Mask that covers all the above socket types. This feature is not supported in the current release.
 #endif
+
+#define SOCK_NONBLOCK 0x4000		///< Non-blocking socket flag. OR into the type argument of socket() for non-blocking TCP connect.
 /** @} */
 
 /*
@@ -288,7 +290,7 @@ struct sockaddr_storage {
  * 
  * @param[in] type
  *   Specifies the semantics of communication for the socket. 
- *   Must be one of the values from BSD_SOCKET_TYPES. 
+ *   Must be one of the values from BSD_SOCKET_TYPES, optionally OR'd with @ref SOCK_NONBLOCK for non-blocking TCP connect.
  *   Currently defined types are SOCK_STREAM, SOCK_DGRAM, SOCK_RAW, SOCK_RDM, and SOCK_SEQPACKET.
  *   Only @ref SOCK_STREAM and @ref SOCK_DGRAM are supported.
  * 
@@ -594,6 +596,13 @@ int accept(int socket_id, struct sockaddr *addr, socklen_t *addr_len);
  * @retval -1/ENETUNREACH    No route to the remote peer.
  * @retval -1/EALREADY       A previous connection attempt is still in progress.
  * @retval -1/EISCONN        Socket is already connected.
+ * @retval -1/EINPROGRESS    Non-blocking connect started; wait with @c select() on @c writefds, then @ref getsockopt() with @c SO_ERROR.
+ *
+ * @note Non-blocking connect:
+ * - Create the socket with @c SOCK_STREAM | @ref SOCK_NONBLOCK.
+ * - When @ref connect() returns @c -1 and @c errno is @c EINPROGRESS, the attempt is still in progress.
+ * - Wait with @c select() on @c writefds for that fd, then call @ref getsockopt() with @c SO_ERROR.
+ * - @c SO_ERROR == 0 means connected; a non-zero value is the mapped connect failure errno.
  *
  * @note Thread safety:
  * - Not thread-safe on the same descriptor; serialize concurrent access.
@@ -1135,6 +1144,7 @@ int setsockopt(int socket_id, int option_level, int option_name, const void *opt
  *   The following options are currently supported:
  *   - `SO_RCVTIMEO`: Receive timeout.
  *   - `SO_KEEPALIVE`: Keep connections alive.
+ *   - `SO_ERROR`: Pending socket error (for non-blocking connect, returns the terminal connect result).
  *   - `TCP_ULP`: TCP upper layer protocol.
  *   - `SO_MAX_RETRANSMISSION_TIMEOUT_VALUE`: Maximum retransmission timeout value.
  *   - `IP_TOS`: Type of service.

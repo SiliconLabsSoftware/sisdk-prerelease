@@ -12,6 +12,9 @@ requires:
 - name: zigbee_ui
   condition: [hardware_board_supports_wstk_lcd, zigbee_zcl_framework_core]
 
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/zigbee-ui
 metadata:
   sbom:
     license: MSLA

@@ -60,6 +60,8 @@
 #define FTD_MESSAGE "ftd button"
 #define MTD_MESSAGE "mtd button"
 #define SSED_MESSAGE "ssed button"
+#define EM4_JOIN_SAMPLE "em4 join sample"
+#define EM4_WAKE_SAMPLE "em4 wake sample"
 
 // Forward declarations
 void        sFtdReceiveCallback(void *aContext, otMessage *aMessage, const otMessageInfo *aMessageInfo);
@@ -224,9 +226,11 @@ void sFtdReceiveCallback(void *aContext, otMessage *aMessage, const otMessageInf
     length      = otMessageRead(message, otMessageGetOffset(message), buf, sizeof(buf) - 1);
     buf[length] = '\0';
 
-    // Check that the payload matches MTD_MESSAGE or SSED_MESSAGE
+    // Accept classic button payloads and EM4 sensor-sample demo strings
     VerifyOrExit(strncmp((char *)buf, MTD_MESSAGE, sizeof(MTD_MESSAGE)) == 0
-                 || strncmp((char *)buf, SSED_MESSAGE, sizeof(SSED_MESSAGE)) == 0);
+                 || strncmp((char *)buf, SSED_MESSAGE, sizeof(SSED_MESSAGE)) == 0
+                 || strncmp((char *)buf, EM4_JOIN_SAMPLE, sizeof(EM4_JOIN_SAMPLE)) == 0
+                 || strncmp((char *)buf, EM4_WAKE_SAMPLE, sizeof(EM4_WAKE_SAMPLE)) == 0);
 
     // Store the MTD's address
     sHaveSwitchAddress = true;

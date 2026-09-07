@@ -67,6 +67,9 @@ template_contribution:
       help: The PAN ID to use for the S2S network
     - type: uint16
       help: The Node ID to use on the S2S network
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/sleepy-to-sleepy-cli
 metadata:
   sbom:
     license: MSLA

@@ -50,6 +50,9 @@ template_contribution:
     handler: sli_zigbee_af_sleep_on_isr_exit
   condition:
   - power_manager
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/app-framework-common
 metadata:
   sbom:
     license: MSLA

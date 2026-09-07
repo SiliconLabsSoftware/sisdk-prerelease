@@ -111,6 +111,13 @@ void sli_crash_capture_fault_regs(volatile sl_crash_fault_regs_t *fault);
 void sli_crash_finalize_record_crc(volatile sl_crash_manager_data_t *record);
 
 /**
+ * @brief Record watchdog warning from Watchdog Manager WDOG IRQ handler.
+ *
+ * @param[in] unfed_mask  WDOG interrupt flags (e.g. WDOG_IF_WARN).
+ */
+void sli_crash_manager_on_watchdog_warning(uint32_t unfed_mask);
+
+/**
  * @brief Build full crash record from compact sl_crash_data_t (tests and app injection).
  *
  * Writes @ref g_crash_manager_data, then finalizes CRC. Call

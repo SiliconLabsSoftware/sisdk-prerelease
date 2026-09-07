@@ -15,12 +15,16 @@ metadata:
 provides:
 - name: clock_manager_runtime
 requires:
+- name: log_none
 - name: clock_manager_runtime_hal
 - name: status
 - name: enum
 - name: device_clock
 - name: code_classification
 root_path: platform_core/platform/service/clock_manager
+config_file:
+- path: config/sl_clock_manager_log_config.h
+  file_id: sl_clock_manager_log_config
 source:
 - path: src/sl_clock_manager.c
 include:
@@ -31,6 +35,7 @@ include:
 - path: src
   file_list:
   - path: sli_clock_manager_hal.h
+  - path: sli_clock_manager_log.h
 define:
 - name: SL_CODE_COMPONENT_CLOCK_MANAGER
   value: clock_manager

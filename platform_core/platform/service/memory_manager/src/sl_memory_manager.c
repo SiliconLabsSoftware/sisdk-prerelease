@@ -34,6 +34,7 @@
 #include "sl_memory_manager_config.h"
 #include "sl_memory_manager.h"
 #include "sli_memory_manager.h"
+#include "sli_memory_manager_log.h"
 #include "sl_assert.h"
 #include "sl_bit.h"
 #include "sl_common.h"
@@ -57,26 +58,16 @@
 #include "sli_memory_manager_retention_control.h"
 #endif
 
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-#include "em_device.h" // For SRAM_BASE and SRAM_SIZE
-#include "sli_memory_profiler.h"
-
-// Names for the top-level Memory Profiler trackers provided by the Common
-// Memory Manager. The name string pointers are also used as the tracker
-// handles. Heap and reservation names are shared with other files.
-static const char sli_mm_ram_name[] = "Physical RAM";
-static const char sli_mm_stack_name[] = "C stack";
-const char sli_mm_heap_name[] = "MM Heap";
-const char sli_mm_heap_reservation_name[] = "MM reservation";
-static const char sli_mm_heap_malloc_lt_name[] = "MM malloc LT";
-static const char sli_mm_heap_malloc_st_name[] = "MM malloc ST";
-#endif
-
 /*******************************************************************************
  ***************************  LOCAL VARIABLES   ********************************
  ******************************************************************************/
 
 sl_memory_heap_t sli_general_purpose_heap SLI_MEMORY_MANAGER_GLOBAL_VARIABLE_ATTRIBUTES;
+
+#if (SL_MEMORY_MANAGER_LOG_LEVEL_COMPILE_TIME != SL_LOG_CONFIG_LEVEL_NONE)
+volatile sl_log_level_t sl_memory_manager_log_level
+  = (sl_log_level_t)SL_MEMORY_MANAGER_LOG_LEVEL_COMPILE_TIME;
+#endif
 #if defined(SL_CATALOG_MEMORY_MANAGER_PSRAM_PRESENT)
 sl_memory_heap_t sli_psram_heap SLI_MEMORY_MANAGER_GLOBAL_VARIABLE_ATTRIBUTES;
 #endif
@@ -112,10 +103,6 @@ static sl_status_t memory_manage_allocation_fallback(size_t size,
 #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
 /***************************************************************************//**
  * Registers Memory Manager LT/ST heaps with SEGGER SystemView.
- *
- * @note Must be called after SEGGER_SYSVIEW_Start(). For C++ applications,
- *       sl_memory_init() runs from .preinit_array before SystemView is ready;
- *       call this function from sl_main_init() instead of from sl_memory_init().
  ******************************************************************************/
 void sli_memory_register_systemview_heaps(void)
 {
@@ -139,6 +126,7 @@ sl_status_t sl_memory_init(void)
 
   // Check for double initialization
   if (sli_mm_initialized) {
+    SLI_MEMORY_MANAGER_LOG_WARN("already initialized");
     status = SL_STATUS_ALREADY_INITIALIZED;
     return status;
   }
@@ -177,47 +165,6 @@ sl_status_t sl_memory_init(void)
   sli_memory_create_stack(&sli_general_purpose_heap);
 #endif
 
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  // Create the pool tracker for the physical RAM
-  sli_memory_profiler_create_pool_tracker(sli_mm_ram_name,
-                                          sli_mm_ram_name,
-                                          (void *) (uintptr_t) SRAM_BASE,
-                                          SRAM_SIZE);
-
-  // Record the allocation of the stack from the physical RAM
-  sl_memory_region_t stack_region = sl_memory_get_stack_region();
-  sli_memory_profiler_track_alloc(sli_mm_ram_name,
-                                  stack_region.addr,
-                                  stack_region.size);
-
-  // Record the creation of the pool tracker for the stack
-  sli_memory_profiler_create_pool_tracker(sli_mm_stack_name,
-                                          sli_mm_stack_name,
-                                          stack_region.addr,
-                                          stack_region.size);
-
-  // Record the allocation of the heap from the physical RAM
-  sli_memory_profiler_track_alloc(sli_mm_ram_name,
-                                  heap_region.addr,
-                                  heap_region.size);
-
-  // Record the creation of the pool tracker for the heap
-  sli_memory_profiler_create_pool_tracker(sli_mm_heap_name,
-                                          sli_mm_heap_name,
-                                          heap_region.addr,
-                                          heap_region.size);
-
-  // Create the malloc family of trackers
-  sli_memory_profiler_create_tracker(sli_mm_heap_malloc_lt_name,
-                                     sli_mm_heap_malloc_lt_name);
-  sli_memory_profiler_create_tracker(sli_mm_heap_malloc_st_name,
-                                     sli_mm_heap_malloc_st_name);
-
-  // Create the reservation tracker
-  sli_memory_profiler_create_tracker(sli_mm_heap_reservation_name,
-                                     sli_mm_heap_reservation_name);
-#endif
-
   // Systemview heap registration is guaranteed to be after SEGGER_SYSVIEW_Start()
 #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW) && !defined(SL_CATALOG_CPP_SUPPORT_PRESENT)
   sli_memory_register_systemview_heaps();
@@ -225,6 +172,11 @@ sl_status_t sl_memory_init(void)
 
   if (status == SL_STATUS_OK) {
     sli_mm_initialized = true;
+    SLI_MEMORY_MANAGER_LOG_INFO("init done: heap=%p size=%u",
+                                (uint32_t)heap_region.addr,
+                                (uint32_t)heap_region.size);
+  } else {
+    SLI_MEMORY_MANAGER_LOG_ERROR("init failed: status=0x%x", (uint32_t)status);
   }
   return status;
 }
@@ -248,6 +200,13 @@ sl_status_t sl_memory_init_psram(void)
                                   SL_MEMORY_HEAP_ALLOC_EXTERNAL_RAM,
                                   &sli_psram_heap);
 
+  if (status == SL_STATUS_OK) {
+    SLI_MEMORY_MANAGER_LOG_INFO("init_psram() done: heap=%p size=%u",
+                                (uint32_t)psram_heap_region.addr,
+                                (uint32_t)psram_heap_region.size);
+  } else {
+    SLI_MEMORY_MANAGER_LOG_ERROR("init_psram() failed: status=0x%x", (uint32_t)status);
+  }
   return status;
 }
 #endif
@@ -271,11 +230,18 @@ sl_status_t sl_memory_init_dtcm(void)
                                   SL_MEMORY_HEAP_ALLOC_CPU_RAM,
                                   &sli_dtcm_heap);
 
-#if defined(SLI_MEMORY_MANAGER_STACK_IN_HEAP)      \
+#if defined(SLI_MEMORY_MANAGER_STACK_IN_HEAP) \
   && defined(SLI_MEMORY_MANAGER_STACK_IN_HEAP_DTCM)
   sli_memory_create_stack(&sli_dtcm_heap);
 #endif
 
+  if (status == SL_STATUS_OK) {
+    SLI_MEMORY_MANAGER_LOG_INFO("init_dtcm() done: heap=%p size=%u",
+                                (uint32_t)dtcm_heap_region.addr,
+                                (uint32_t)dtcm_heap_region.size);
+  } else {
+    SLI_MEMORY_MANAGER_LOG_ERROR("init_dtcm() failed: status=0x%x", (uint32_t)status);
+  }
   return status;
 }
 #endif
@@ -298,9 +264,6 @@ sl_status_t sl_memory_reserve_no_retention(size_t size,
 void *sl_malloc(size_t size)
 {
   uint8_t type;
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  void * volatile return_address = sli_memory_profiler_get_return_address();
-#endif
   void *block_avail = NULL;
 
 #if defined(SLI_MEMORY_MANAGER_SUPPORT_ALLOCATION_FALLBACK)
@@ -331,10 +294,6 @@ void *sl_malloc(size_t size)
   (void)sl_memory_alloc_advanced(size, SL_MEMORY_BLOCK_ALIGN_DEFAULT, type, &block_avail);
 #endif
 
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  sli_memory_profiler_track_ownership(SLI_INVALID_MEMORY_TRACKER_HANDLE, block_avail, return_address);
-#endif
-
   return block_avail;
 }
 
@@ -345,18 +304,7 @@ sl_status_t sl_memory_alloc(size_t size,
                             uint8_t type,
                             void **block)
 {
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  void * volatile return_address = sli_memory_profiler_get_return_address();
-#endif
-  sl_status_t status;
-
-  status = sl_memory_heap_alloc(&sli_general_purpose_heap, size, type, block);
-
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  sli_memory_profiler_track_ownership(SLI_INVALID_MEMORY_TRACKER_HANDLE, *block, return_address);
-#endif
-
-  return status;
+  return sl_memory_heap_alloc(&sli_general_purpose_heap, size, type, block);
 }
 
 /***************************************************************************//**
@@ -368,18 +316,7 @@ sl_status_t sl_memory_alloc_advanced(size_t size,
                                      uint8_t type,
                                      void **block)
 {
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  void * volatile return_address = sli_memory_profiler_get_return_address();
-#endif
-  sl_status_t status;
-
-  status = sl_memory_heap_alloc_advanced(&sli_general_purpose_heap, size, align, type, block);
-
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  sli_memory_profiler_track_ownership(SLI_INVALID_MEMORY_TRACKER_HANDLE, *block, return_address);
-#endif
-
-  return status;
+  return sl_memory_heap_alloc_advanced(&sli_general_purpose_heap, size, align, type, block);
 }
 
 /***************************************************************************//**
@@ -435,9 +372,6 @@ void *sl_calloc(size_t item_count,
                 size_t size)
 {
   uint8_t type;
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  void * volatile return_address = sli_memory_profiler_get_return_address();
-#endif
   void *block_avail = NULL;
 
 #if defined(SLI_MEMORY_MANAGER_SUPPORT_ALLOCATION_FALLBACK)
@@ -468,10 +402,6 @@ void *sl_calloc(size_t item_count,
   (void)sl_memory_calloc(item_count, size, type, &block_avail);
 #endif
 
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  sli_memory_profiler_track_ownership(SLI_INVALID_MEMORY_TRACKER_HANDLE, block_avail, return_address);
-#endif
-
   return block_avail;
 }
 
@@ -484,18 +414,7 @@ sl_status_t sl_memory_calloc(size_t item_count,
                              uint8_t type,
                              void **block)
 {
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  void * volatile return_address = sli_memory_profiler_get_return_address();
-#endif
-  sl_status_t status;
-
-  status = sl_memory_heap_calloc(&sli_general_purpose_heap, item_count, size, type, block);
-
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  sli_memory_profiler_track_ownership(SLI_INVALID_MEMORY_TRACKER_HANDLE, *block, return_address);
-#endif
-
-  return status;
+  return sl_memory_heap_calloc(&sli_general_purpose_heap, item_count, size, type, block);
 }
 
 /***************************************************************************//**
@@ -504,9 +423,6 @@ sl_status_t sl_memory_calloc(size_t item_count,
 void *sl_realloc(void *ptr,
                  size_t size)
 {
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  void * volatile return_address = sli_memory_profiler_get_return_address();
-#endif
   void *block_avail = NULL;
 
 #if (defined(DEBUG_EFM) || defined(DEBUG_EFM_USER))
@@ -535,14 +451,6 @@ void *sl_realloc(void *ptr,
   (void)sl_memory_realloc(ptr, size, &block_avail);
 #endif
 
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  // Realloc to 0 bytes is equivalent to free, so only track ownership when size
-  // is other than 0
-  if (size != 0) {
-    sli_memory_profiler_track_ownership(SLI_INVALID_MEMORY_TRACKER_HANDLE, block_avail, return_address);
-  }
-#endif
-
   return block_avail;
 }
 
@@ -564,9 +472,6 @@ sl_status_t sl_memory_realloc(void *ptr,
                               size_t size,
                               void **block)
 {
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  void * volatile return_address = sli_memory_profiler_get_return_address();
-#endif
   sl_status_t status;
 
 #if defined(SL_CATALOG_MEMORY_MANAGER_PSRAM_PRESENT) || defined (SL_CATALOG_MEMORY_MANAGER_DTCM_PRESENT)
@@ -583,14 +488,6 @@ sl_status_t sl_memory_realloc(void *ptr,
 #else
   // Assume general_purpose_heap on boards that don't have a PSRAM or a DTCM
   status = sl_memory_heap_realloc(&sli_general_purpose_heap, ptr, size, block);
-#endif
-
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  // Realloc to 0 bytes is equivalent to free, so only track ownership when size
-  // is other than 0
-  if (size != 0) {
-    sli_memory_profiler_track_ownership(SLI_INVALID_MEMORY_TRACKER_HANDLE, *block, return_address);
-  }
 #endif
 
   return status;
@@ -683,12 +580,14 @@ sl_status_t sl_memory_heap_reserve_no_retention(sl_memory_heap_t *heap,
 
   // Verify that the block pointer isn't NULL.
   if (block == NULL) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("reserve_no_retention() failed: block=NULL");
     return SL_STATUS_NULL_POINTER;
   }
 
   *block = NULL; // No block reserved yet.
 
   if ((size == 0) || (size >= heap->size)) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("reserve_no_retention() failed: invalid size=%u", (uint32_t)size);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -719,6 +618,7 @@ sl_status_t sl_memory_heap_reserve_no_retention(sl_memory_heap_t *heap,
     block_len_dw = sli_block_len_dword_decode(free_st_list_head);
     if (block_size_remaining < SLI_BLOCK_LEN_DWORD_TO_BYTE(block_len_dw)) {
       CORE_EXIT_ATOMIC();
+      SLI_MEMORY_MANAGER_LOG_ERROR("reserve_no_retention() failed: size=%u", (uint32_t)size);
       return SL_STATUS_ALLOCATION_FAILED;
     }
 
@@ -742,6 +642,14 @@ sl_status_t sl_memory_heap_reserve_no_retention(sl_memory_heap_t *heap,
   sli_memory_save_reservation_no_retention(*block, size_real);
 #endif
 
+  if (status == SL_STATUS_OK) {
+    SLI_MEMORY_MANAGER_LOG_INFO("reserve_no_retention() done: blk=%p size=%u",
+                                (uint32_t)*block,
+                                (uint32_t)size);
+  } else {
+    SLI_MEMORY_MANAGER_LOG_ERROR("reserve_no_retention() failed: size=%u", (uint32_t)size);
+  }
+
   return status;
 }
 
@@ -753,18 +661,7 @@ sl_status_t sl_memory_heap_alloc(sl_memory_heap_t *heap,
                                  uint8_t type,
                                  void **block)
 {
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  void * volatile return_address = sli_memory_profiler_get_return_address();
-#endif
-  sl_status_t status;
-
-  status = sl_memory_heap_alloc_advanced(heap, size, SL_MEMORY_BLOCK_ALIGN_DEFAULT, type, block);
-
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  sli_memory_profiler_track_ownership(SLI_INVALID_MEMORY_TRACKER_HANDLE, *block, return_address);
-#endif
-
-  return status;
+  return sl_memory_heap_alloc_advanced(heap, size, SL_MEMORY_BLOCK_ALIGN_DEFAULT, type, block);
 }
 
 /***************************************************************************//**
@@ -783,9 +680,6 @@ sl_status_t sl_memory_heap_alloc_advanced(sl_memory_heap_t *heap,
                                           uint8_t type,
                                           void **block)
 {
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  void * volatile return_address = sli_memory_profiler_get_return_address();
-#endif
 
   // Check proper alignment characteristics.
   EFM_ASSERT((align == SL_MEMORY_BLOCK_ALIGN_DEFAULT)
@@ -813,12 +707,14 @@ sl_status_t sl_memory_heap_alloc_advanced(sl_memory_heap_t *heap,
 
   // Verify that the block pointer isn't NULL.
   if (block == NULL) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("heap_alloc_advanced() failed: block=NULL");
     return SL_STATUS_NULL_POINTER;
   }
 
   *block = NULL; // No block allocated yet.
 
   if ((size == 0) || (size >= heap->size)) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("heap_alloc_advanced() failed: invalid size=%u", (uint32_t)size);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -845,14 +741,13 @@ sl_status_t sl_memory_heap_alloc_advanced(sl_memory_heap_t *heap,
                                                  type,
                                                  block);
       if (status == SL_STATUS_OK) {
+        SLI_MEMORY_MANAGER_LOG_WARN("heap_alloc_advanced() fallback: size=%u", (uint32_t)size);
         return SL_STATUS_OK;
       }
     }
 #endif
 
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-    sli_memory_profiler_track_alloc_with_ownership(sli_mm_heap_name, NULL, size, return_address);
-#endif  // defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
+    SLI_MEMORY_MANAGER_LOG_ERROR("heap_alloc_advanced() failed: size=%u", (uint32_t)size);
     return SL_STATUS_ALLOCATION_FAILED;
   }
 
@@ -997,14 +892,8 @@ sl_status_t sl_memory_heap_alloc_advanced(sl_memory_heap_t *heap,
   // Include metadata as it was removed or is new.
   SLI_MEMORY_INCREMENT_BANK_COUNTER(heap, (uint8_t *)allocated_blk, (uint8_t *)*block + SLI_BLOCK_LEN_DWORD_TO_BYTE(sli_block_len_dword_decode(allocated_blk)) - 1);
 
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  sli_memory_profiler_track_alloc(sli_mm_heap_name, allocated_blk, size_real + SLI_BLOCK_METADATA_SIZE_BYTE);
-  if (block_type == BLOCK_TYPE_LONG_TERM) {
-    sli_memory_profiler_track_alloc_with_ownership(sli_mm_heap_malloc_lt_name, *block, size, return_address);
-  } else if (block_type == BLOCK_TYPE_SHORT_TERM) {
-    sli_memory_profiler_track_alloc_with_ownership(sli_mm_heap_malloc_st_name, *block, size, return_address);
-  }
-#endif
+  SLI_MEMORY_MANAGER_LOG_DEBUG("heap_alloc_advanced(): size=%u addr=%p",
+                               (uint32_t)size, (uint32_t)*block);
 
   return SL_STATUS_OK;
 }
@@ -1042,16 +931,13 @@ sl_status_t sl_memory_heap_free(sl_memory_heap_t *heap,
   size_t total_size_free_block_dw;
 
   if (block == NULL) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("heap_free() failed: block=NULL");
     return SL_STATUS_NULL_POINTER;  // See Note #1.
   }
 
   block_heap = sli_memory_get_heap_handle(block);
   free_lt_list_head = (sli_block_metadata_t *)block_heap->free_lt_list_head;
   free_st_list_head = (sli_block_metadata_t *)block_heap->free_st_list_head;
-
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  sli_memory_profiler_track_free(sli_mm_heap_name, ((uint8_t *)block - SLI_BLOCK_METADATA_SIZE_BYTE));
-#endif
 
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_ATOMIC();
@@ -1061,6 +947,7 @@ sl_status_t sl_memory_heap_free(sl_memory_heap_t *heap,
   block_len_dw = sli_block_len_dword_decode(current_metadata);
   if (current_metadata->block_in_use == 0 || block_len_dw == 0) {
     CORE_EXIT_ATOMIC();
+    SLI_MEMORY_MANAGER_LOG_ERROR("heap_free() failed: invalid block=%p", (uint32_t)block);
     return SL_STATUS_FAIL;
   }
 
@@ -1186,6 +1073,8 @@ sl_status_t sl_memory_heap_free(sl_memory_heap_t *heap,
 
   CORE_EXIT_ATOMIC();
 
+  SLI_MEMORY_MANAGER_LOG_DEBUG("heap_free(): addr=%p", (uint32_t)block);
+
   return SL_STATUS_OK;
 }
 
@@ -1199,20 +1088,19 @@ sl_status_t sl_memory_heap_calloc(sl_memory_heap_t *heap,
                                   uint8_t type,
                                   void **block)
 {
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  void * volatile return_address = sli_memory_profiler_get_return_address();
-#endif
   size_t block_size;
   sl_status_t status = SL_STATUS_OK;
 
   // Verify that the block pointer isn't NULL.
   if (block == NULL) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("heap_calloc() failed: block=NULL");
     return SL_STATUS_NULL_POINTER;
   }
 
   *block = NULL; // No block allocated yet.
 
   if ((size == 0) || (item_count == 0)) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("heap_calloc() failed: n=%u size=%u", (uint32_t)item_count, (uint32_t)size);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1225,11 +1113,10 @@ sl_status_t sl_memory_heap_calloc(sl_memory_heap_t *heap,
   if ((status == SL_STATUS_OK) && (*block != NULL)) {
     // Clear block to zeros.
     memset(*block, 0, block_size);
+    SLI_MEMORY_MANAGER_LOG_DEBUG("heap_calloc(): n=%u size=%u addr=%p",
+                                 (uint32_t)item_count, (uint32_t)size,
+                                 (uint32_t)*block);
   }
-
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  sli_memory_profiler_track_ownership(SLI_INVALID_MEMORY_TRACKER_HANDLE, *block, return_address);
-#endif
 
   return status;
 }
@@ -1266,9 +1153,6 @@ sl_status_t sl_memory_heap_realloc(sl_memory_heap_t *heap,
   // Make sure the heap handle isn't NULL.
   EFM_ASSERT(heap != NULL);
 
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  void * volatile return_address = sli_memory_profiler_get_return_address();
-#endif
   sl_status_t status = SL_STATUS_OK;
   sli_block_metadata_t *current_block = NULL;
   sli_block_metadata_t *next_block = NULL;
@@ -1284,25 +1168,25 @@ sl_status_t sl_memory_heap_realloc(sl_memory_heap_t *heap,
 
   // Verify that the block pointer isn't NULL.
   if (block == NULL) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("heap_realloc() failed: block=NULL");
     return SL_STATUS_NULL_POINTER;
   }
 
   *block = NULL; // No block allocated yet.
 
   if (size >= heap->size) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("heap_realloc() failed: invalid size=%u", (uint32_t)size);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   if ((ptr == NULL) && (size == 0)) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("heap_realloc() failed: ptr=NULL size=0");
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   // Manage special parameters values (see Note #1).
   if (ptr == NULL) {
     status = sl_memory_heap_alloc(heap, size, BLOCK_TYPE_LONG_TERM, block);
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-    sli_memory_profiler_track_ownership(SLI_INVALID_MEMORY_TRACKER_HANDLE, *block, return_address);
-#endif
     return status;
   } else if (size == 0) {
     status = sl_memory_free(ptr);
@@ -1409,12 +1293,6 @@ sl_status_t sl_memory_heap_realloc(sl_memory_heap_t *heap,
 
         // Current block has been extended. Its payload must be returned to the caller.
         *block = ptr;
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-        sli_memory_profiler_track_realloc(sli_mm_heap_name,
-                                          (uint8_t *)ptr - SLI_BLOCK_METADATA_SIZE_BYTE,
-                                          (uint8_t *)ptr - SLI_BLOCK_METADATA_SIZE_BYTE,
-                                          size_real + SLI_BLOCK_METADATA_SIZE_BYTE);
-#endif
 #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
         // In-place extension: report old block freed then same address allocated with new size.
         systemview_realloc_inplace = true;
@@ -1442,13 +1320,7 @@ sl_status_t sl_memory_heap_realloc(sl_memory_heap_t *heap,
 
       // Copy data from current block to new block. See Note #2.
       memcpy(*block, ptr, current_block_len);
-
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-      sli_memory_profiler_track_realloc(sli_mm_heap_name,
-                                        (uint8_t *)ptr - SLI_BLOCK_METADATA_SIZE_BYTE,
-                                        (uint8_t *)*block - SLI_BLOCK_METADATA_SIZE_BYTE,
-                                        size_real + SLI_BLOCK_METADATA_SIZE_BYTE);
-#endif
+      SLI_MEMORY_MANAGER_LOG_WARN("heap_realloc() relocated: old=%p new=%p", (uint32_t)ptr, (uint32_t)*block);
 
       // Free current block. Reallocated block is different from the current one.
       status = sl_memory_free(ptr);
@@ -1579,12 +1451,6 @@ sl_status_t sl_memory_heap_realloc(sl_memory_heap_t *heap,
 
     // Current block has been reduced. Its payload must be returned to the caller.
     *block = ptr;
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-    sli_memory_profiler_track_realloc(sli_mm_heap_name,
-                                      (uint8_t *)ptr - SLI_BLOCK_METADATA_SIZE_BYTE,
-                                      (uint8_t *)ptr - SLI_BLOCK_METADATA_SIZE_BYTE,
-                                      size_real + SLI_BLOCK_METADATA_SIZE_BYTE);
-#endif
 #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
     // In-place reduction: report old block freed then same address allocated with new size.
     systemview_realloc_inplace = true;
@@ -1605,12 +1471,6 @@ sl_status_t sl_memory_heap_realloc(sl_memory_heap_t *heap,
     // If the size requested does not provoke a block extension or reduction, consider no error.
     // And return the same given address. We still track it to show that resize was requested.
     *block = ptr;
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-    sli_memory_profiler_track_realloc(sli_mm_heap_name,
-                                      (uint8_t *)ptr - SLI_BLOCK_METADATA_SIZE_BYTE,
-                                      (uint8_t *)ptr - SLI_BLOCK_METADATA_SIZE_BYTE,
-                                      size_real + SLI_BLOCK_METADATA_SIZE_BYTE);
-#endif
   }
 
 #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
@@ -1634,9 +1494,10 @@ sl_status_t sl_memory_heap_realloc(sl_memory_heap_t *heap,
 
   CORE_EXIT_ATOMIC();
 
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  sli_memory_profiler_track_ownership(SLI_INVALID_MEMORY_TRACKER_HANDLE, *block, return_address);
-#endif
+  if (status == SL_STATUS_OK) {
+    SLI_MEMORY_MANAGER_LOG_DEBUG("heap_realloc(): size=%u addr=%p",
+                                 (uint32_t)size, (uint32_t)*block);
+  }
 
   return status;
 }

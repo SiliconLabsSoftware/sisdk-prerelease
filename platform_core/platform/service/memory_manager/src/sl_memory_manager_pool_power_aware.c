@@ -32,6 +32,7 @@
 
 #include "sl_memory_manager.h"
 #include "sli_memory_manager.h"
+#include "sli_memory_manager_log.h"
 #include "sli_memory_manager_retention_control.h"
 #include "sl_assert.h"
 #include "sl_bit.h"
@@ -42,10 +43,6 @@
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
-#endif
-
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-#include "sli_memory_profiler.h"
 #endif
 
 #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
@@ -142,6 +139,7 @@ sl_status_t sl_memory_create_pool_advanced(sl_memory_reservation_t *reservation_
 
   // Verify that the handle pointers aren't NULL.
   if (pool_handle == NULL) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("create_pool_advanced() failed: handle=NULL");
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -168,6 +166,10 @@ sl_status_t sl_memory_create_pool_advanced(sl_memory_reservation_t *reservation_
     return status;
   }
 
+  SLI_MEMORY_MANAGER_LOG_INFO("create_pool_advanced(): blk_size=%u blk_cnt=%u",
+                              (uint32_t)block_size,
+                              (uint32_t)block_count);
+
   return SL_STATUS_OK;
 }
 
@@ -184,6 +186,7 @@ sl_status_t sl_memory_delete_pool(sl_memory_pool_t *pool_handle)
 
   // Verify that the handle pointer isn't NULL.
   if (pool_handle == NULL) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("delete_pool() failed: handle=NULL");
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -209,6 +212,10 @@ sl_status_t sl_memory_delete_pool(sl_memory_pool_t *pool_handle)
   }
 #endif
 
+  if (status == SL_STATUS_OK) {
+    SLI_MEMORY_MANAGER_LOG_INFO("delete_pool(): pool=%p", (uint32_t)pool_handle);
+  }
+
   return status;
 }
 
@@ -222,18 +229,15 @@ sl_status_t sl_memory_delete_pool_no_unreserve(sl_memory_pool_t *pool_handle)
 {
   // Verify that the handle pointer isn't NULL.
   if ((pool_handle == NULL) || (pool_handle->reservation == NULL)) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("delete_pool_no_unreserve() failed: handle=NULL");
     return SL_STATUS_NULL_POINTER;
   }
 
   // Verify that no blocks are allocated.
   if (pool_handle->free_blk_cnt != (uint32_t)(pool_handle->block_count)) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("delete_pool_no_unreserve() failed: blocks in use");
     return SL_STATUS_INVALID_STATE;
   }
-
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  // Delete the memory tracker.
-  sli_memory_profiler_delete_tracker(pool_handle);
-#endif
 
   // Free free_count/bank/block lists.
   (void)sl_memory_free(pool_handle->free_cnt_tbl);
@@ -242,6 +246,8 @@ sl_status_t sl_memory_delete_pool_no_unreserve(sl_memory_pool_t *pool_handle)
 
   // Reset the handle.
   memset(pool_handle, 0, sizeof(sl_memory_pool_t));
+
+  SLI_MEMORY_MANAGER_LOG_INFO("delete_pool_no_unreserve(): pool=%p", (uint32_t)pool_handle);
 
   return SL_STATUS_OK;
 }
@@ -253,9 +259,6 @@ SL_CODE_CLASSIFY(SL_CODE_COMPONENT_MEMORY_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 sl_status_t sl_memory_pool_alloc(sl_memory_pool_t *pool_handle,
                                  void **block)
 {
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  void *volatile return_address = sli_memory_profiler_get_return_address();
-#endif
   sli_memory_pool_free_cnt_entry_t *cur_free_cnt;
   sli_memory_pool_free_cnt_entry_t *new_free_cnt;
   sli_memory_pool_bank_t *cur_bank;
@@ -263,6 +266,7 @@ sl_status_t sl_memory_pool_alloc(sl_memory_pool_t *pool_handle,
   sl_memory_heap_t *heap;
 
   if ((pool_handle == NULL) || (block == NULL)) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("pool_alloc() failed: handle or block=NULL");
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -294,16 +298,17 @@ sl_status_t sl_memory_pool_alloc(sl_memory_pool_t *pool_handle,
       SEGGER_SYSVIEW_HeapAllocEx(pool_handle, *block, pool_handle->block_size, 0);
       #endif
 
+      SLI_MEMORY_MANAGER_LOG_DEBUG("pool_alloc() odd: handle=%p addr=%p",
+                                   (uint32_t)pool_handle, (uint32_t)*block);
+
       return SL_STATUS_OK;
     }
-
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-    sli_memory_profiler_track_alloc_with_ownership(pool_handle, NULL, pool_handle->block_size, return_address);
-#endif
 
     block = NULL;
 
     CORE_EXIT_ATOMIC();
+
+    SLI_MEMORY_MANAGER_LOG_WARN("pool_alloc() failed: pool empty handle=%p", (uint32_t)pool_handle);
 
     return SL_STATUS_EMPTY;
   }
@@ -383,12 +388,12 @@ sl_status_t sl_memory_pool_alloc(sl_memory_pool_t *pool_handle,
 
   CORE_EXIT_ATOMIC();
 
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  sli_memory_profiler_track_alloc_with_ownership(pool_handle, *block, pool_handle->block_size, return_address);
-#endif
 #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
   SEGGER_SYSVIEW_HeapAllocEx(pool_handle, *block, pool_handle->block_size, 0);
 #endif
+
+  SLI_MEMORY_MANAGER_LOG_DEBUG("pool_alloc(): handle=%p addr=%p",
+                               (uint32_t)pool_handle, (uint32_t)*block);
 
   return SL_STATUS_OK;
 }
@@ -409,6 +414,7 @@ sl_status_t sl_memory_pool_free(sl_memory_pool_t *pool_handle,
   const sli_retention_control_t *retention_control;
 
   if ((pool_handle == NULL) || (block == NULL)) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("pool_free() failed: handle or block=NULL");
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -416,18 +422,16 @@ sl_status_t sl_memory_pool_free(sl_memory_pool_t *pool_handle,
 
   retention_control = (sli_retention_control_t *)heap->retention_control;
 
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  sli_memory_profiler_track_free(pool_handle, block);
-#endif
-
   // Validate that the provided address is in the pool payload range.
   if (((uintptr_t)block < (uintptr_t)pool_handle->reservation->block_address)
       || ((uintptr_t)block >= ((uintptr_t)pool_handle->reservation->block_address + pool_handle->reservation->block_size))) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("pool_free() failed: addr=%p out of range", (uint32_t)block);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   if (((uintptr_t)block < (uintptr_t)pool_handle->reservation->block_address)
       || ((uintptr_t)block >= ((uintptr_t)pool_handle->reservation->block_address + pool_handle->reservation->block_size))) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("pool_free() failed: addr=%p out of range", (uint32_t)block);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -441,7 +445,7 @@ sl_status_t sl_memory_pool_free(sl_memory_pool_t *pool_handle,
   // Check if block is allocated.
   if (!IS_ALLOCATED_BLOCK(cur_block->block_addr)) {
     CORE_EXIT_ATOMIC();
-
+    SLI_MEMORY_MANAGER_LOG_ERROR("pool_free() failed: not allocated addr=%p", (uint32_t)block);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -461,6 +465,9 @@ sl_status_t sl_memory_pool_free(sl_memory_pool_t *pool_handle,
     #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
     SEGGER_SYSVIEW_HeapFree(pool_handle, block);
     #endif
+
+    SLI_MEMORY_MANAGER_LOG_DEBUG("pool_free(): handle=%p addr=%p",
+                                 (uint32_t)pool_handle, (uint32_t)block);
 
     return SL_STATUS_OK;
   }
@@ -583,6 +590,9 @@ sl_status_t sl_memory_pool_free(sl_memory_pool_t *pool_handle,
   SEGGER_SYSVIEW_HeapFree(pool_handle, block);
 #endif
 
+  SLI_MEMORY_MANAGER_LOG_DEBUG("pool_free(): handle=%p addr=%p",
+                               (uint32_t)pool_handle, (uint32_t)block);
+
   return SL_STATUS_OK;
 }
 
@@ -647,6 +657,10 @@ sl_status_t sl_memory_heap_create_pool_advanced(sl_memory_heap_t *heap,
     (void)sl_memory_reservation_handle_free(pool_handle->reservation);
     return status;
   }
+
+  SLI_MEMORY_MANAGER_LOG_INFO("create_pool_advanced(): blk_size=%u blk_cnt=%u",
+                              (uint32_t)block_size,
+                              (uint32_t)block_count);
 
   return SL_STATUS_OK;
 }
@@ -805,11 +819,6 @@ static sl_status_t create_reservation(sl_memory_heap_t *heap,
 
   // Allocate reservation handle as a long-term block.
   status = sl_memory_heap_reservation_handle_alloc(MEMORY_POOL_METADATA_HEAP, handle);
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  sli_memory_profiler_track_ownership(SLI_INVALID_MEMORY_TRACKER_HANDLE,
-                                      *handle,
-                                      return_address);
-#endif
   if (status != SL_STATUS_OK) {
     return status;
   }
@@ -824,9 +833,6 @@ static sl_status_t create_reservation(sl_memory_heap_t *heap,
                                         align,
                                         *handle,
                                         &pool_data);
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  sli_memory_profiler_track_ownership(SLI_INVALID_MEMORY_TRACKER_HANDLE, pool_data, return_address);
-#endif
   if (status != SL_STATUS_OK) {
     (void)sl_memory_reservation_handle_free(*handle);
     return status;
@@ -874,9 +880,6 @@ static sl_status_t create_pool(sl_memory_reservation_t *reservation_handle,
 #define MEMORY_POOL_METADATA_HEAP  heap
 #endif
 
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  void *volatile return_address = sli_memory_profiler_get_return_address();
-#endif
   sl_status_t status;
   size_t pool_size;
   uint32_t nb_banks_full = 0;
@@ -923,11 +926,6 @@ static sl_status_t create_pool(sl_memory_reservation_t *reservation_handle,
                                  BLOCK_TYPE_LONG_TERM,
                                  (void *)&pool_handle->block_tbl);
 
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  sli_memory_profiler_track_ownership(SLI_INVALID_MEMORY_TRACKER_HANDLE,
-                                      pool_handle->block_tbl,
-                                      return_address);
-#endif
   if (status != SL_STATUS_OK) {
     return status;
   }
@@ -1006,11 +1004,6 @@ static sl_status_t create_pool(sl_memory_reservation_t *reservation_handle,
                                  BLOCK_TYPE_LONG_TERM,
                                  (void *)&pool_handle->free_cnt_tbl);
 
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  sli_memory_profiler_track_ownership(SLI_INVALID_MEMORY_TRACKER_HANDLE,
-                                      pool_handle->free_cnt_tbl,
-                                      return_address);
-#endif
   if (status != SL_STATUS_OK) {
     (void)sl_memory_free(pool_handle->block_tbl);
     return status;
@@ -1022,11 +1015,6 @@ static sl_status_t create_pool(sl_memory_reservation_t *reservation_handle,
                                  BLOCK_TYPE_LONG_TERM,
                                  (void *)&pool_handle->bank_tbl);
 
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  sli_memory_profiler_track_ownership(SLI_INVALID_MEMORY_TRACKER_HANDLE,
-                                      pool_handle->bank_tbl,
-                                      return_address);
-#endif
   if (status != SL_STATUS_OK) {
     (void)sl_memory_free(pool_handle->block_tbl);
     (void)sl_memory_free(pool_handle->free_cnt_tbl);
@@ -1123,14 +1111,6 @@ static sl_status_t create_pool(sl_memory_reservation_t *reservation_handle,
 
   pool_handle->free_blk_cnt = block_count;
 
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  // Create the tracker for the pool with no description. The code that created
-  // the pool can add the tracker description if relevant.
-  sli_memory_profiler_create_pool_tracker(pool_handle,
-                                          NULL,
-                                          pool_handle->reservation->block_address,
-                                          block_count * block_size_real);
-#endif
 #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
   uint32_t pool_id1 = __atomic_fetch_add(&sli_cmm_pool_id_available, 1, __ATOMIC_RELAXED);
   char pool_name1[sizeof("Pool 4294967295")];

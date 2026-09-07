@@ -130,6 +130,10 @@ template_contribution:
     func: sli_tz_nvm3_enum_deleted_objects
   condition: [trustzone_nonsecure]
 
+documentation:
+  docset: mcu-bootloader
+  document:
+  - page: series2-trustzone/05-r-implementation
 metadata:
   sbom:
     license: Zlib

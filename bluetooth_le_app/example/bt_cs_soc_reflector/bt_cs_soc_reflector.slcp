@@ -1,7 +1,7 @@
 project_name: bt_cs_soc_reflector
 package: bluetooth_le_app
 label: Bluetooth - SoC CS Reflector
-description: >
+description: >-
   Channel Sounding (CS) Reflector for Bluetooth LE. This example sends
   measurement results back to the CS Initiator device via the CS Ranging
   Service. The CS Reflector has to connect to at least one CS Initiator

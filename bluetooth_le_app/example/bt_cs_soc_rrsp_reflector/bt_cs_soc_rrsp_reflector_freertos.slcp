@@ -1,7 +1,7 @@
 project_name: bt_cs_soc_rrsp_reflector_freertos
 package: bluetooth_le_app
 label: Bluetooth - SoC CS RRSP Reflector (FreeRTOS)
-description: >
+description: >-
   Channel Sounding (CS) Reflector for Bluetooth LE uses Ranging 
   Responder (RRSP) role of Ranging Profile (RAP) to share ranging data 
   with Ranging Requester (RREQ) Initiator node(s).

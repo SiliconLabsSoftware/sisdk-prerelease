@@ -112,6 +112,17 @@ void sl_hal_pdm_init(PDM_TypeDef *pdm,
   pdm->CTRL = (pdm->CTRL & ~(_PDM_CTRL_DSR_MASK | _PDM_CTRL_GAIN_MASK))
               | ((uint32_t)init->down_sampling_rate   << _PDM_CTRL_DSR_SHIFT)
               | ((uint32_t)init->gain                 << _PDM_CTRL_GAIN_SHIFT);
+  SL_PRINT_STRING_DEBUG("ch=%d fmt=%d\r\n",
+                (int)init->number_channels,
+                (int)init->data_format);
+
+  SL_PRINT_STRING_DEBUG("dsr=%lu gain=%lu\r\n",
+                (unsigned long)init->down_sampling_rate,
+                (unsigned long)init->gain);
+
+  SL_PRINT_STRING_DEBUG("presc=%lu watermark=%lu\r\n",
+                (unsigned long)init->clk_prescaler,
+                (unsigned long)init->fifo_valid_watermark);
 }
 
 /***************************************************************************//**
@@ -136,6 +147,7 @@ void sl_hal_pdm_deinit(PDM_TypeDef *pdm)
   sl_hal_pdm_clear(pdm);
   sl_hal_pdm_fifo_flush(pdm);
   sl_hal_pdm_reset(pdm);
+  SL_PRINT_STRING_INFO("pdm deinit\r\n");
 }
 
 /***************************************************************************//**

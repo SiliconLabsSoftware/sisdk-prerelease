@@ -62,6 +62,12 @@ extern "C" {
  * - Stops counting in all sleep modes (EM1/EM2/EM3)
  * - Debug support to identify which watchdog caused a reset
  *
+ * UID allocation:
+ * - 0x0000-0x00FF: Reserved for customer use.
+ * - 0x0100-0x011F: Reserved for Wi-Fi SDK watchdogs.
+ * - 0x0120-0xFFFFFFFE: Available for application or service watchdogs.
+ * - 0xFFFFFFFF: Reserved for the platform default watchdog.
+ *
  * Usage:
  * 1. Call sl_watchdog_manager_init() early in initialization
  * 2. Create software watchdogs with sl_watchdog_manager_create()
@@ -74,6 +80,14 @@ extern "C" {
 /// Valid values: 0 to 31, where each position corresponds to one watchdog instance.
 typedef uint32_t sl_watchdog_handle_t;
 
+/// Hardware watchdog clock source.
+typedef enum {
+  SL_WATCHDOG_MANAGER_CLOCK_SOURCE_HCLKDIV1024 = 0, ///< HCLK divided by 1024.
+  SL_WATCHDOG_MANAGER_CLOCK_SOURCE_LFRCO,           ///< Low-frequency RC oscillator.
+  SL_WATCHDOG_MANAGER_CLOCK_SOURCE_LFXO,            ///< Low-frequency crystal oscillator.
+  SL_WATCHDOG_MANAGER_CLOCK_SOURCE_ULFRCO,          ///< Ultra-low-frequency RC oscillator.
+} sl_watchdog_manager_clock_source_t;
+
 /// Context passed to the starve callback when the hardware watchdog is about
 /// to expire.
 typedef struct {
@@ -84,6 +98,12 @@ typedef struct {
 /// Starve callback invoked from the WDOG warning interrupt before timeout reset.
 typedef void (*sl_watchdog_manager_starve_callback_t)(
   const sl_watchdog_manager_starve_context_t *context);
+
+/// First UID reserved for Wi-Fi SDK watchdogs.
+#define SL_WATCHDOG_MANAGER_WIFI_SDK_UID_START  0x0100u
+
+/// Last UID reserved for Wi-Fi SDK watchdogs.
+#define SL_WATCHDOG_MANAGER_WIFI_SDK_UID_END    0x011Fu
 
 /// UID reserved for the platform default watchdog (do not use for application watchdogs).
 #define SL_WATCHDOG_MANAGER_PLATFORM_DEFAULT_UID  0xFFFFFFFFu
@@ -136,9 +156,11 @@ void sl_watchdog_manager_start(void);
  * @param[out] handle     Pointer to receive the handle to the created software
  *                        watchdog. Must not be NULL.
  * @param[in]  watchdog_uid Software watchdog unique identifier for debugging.
- *                        Use values 256-0xFFFFFFFE for application watchdogs.
- *                        0-255 are reserved for customer use, 0xFFFFFFFF is
- *                        reserved for platform default watchdog.
+ *                        Use values 0x0120-0xFFFFFFFE for application
+ *                        watchdogs. 0x0000-0x00FF are reserved for customer
+ *                        use, 0x0100-0x011F are reserved for Wi-Fi SDK
+ *                        watchdogs, and 0xFFFFFFFF is reserved for the
+ *                        platform default watchdog.
  *
  * @return SL_STATUS_OK if successful.
  * @return SL_STATUS_NULL_POINTER if handle is NULL.
@@ -274,6 +296,82 @@ sl_status_t sl_watchdog_manager_enable(sl_watchdog_handle_t *handle);
  *       watchdog protection mechanism.
  ******************************************************************************/
 sl_status_t sl_watchdog_manager_force_feed(void);
+
+/***************************************************************************//**
+ * @brief Gets the hardware watchdog timeout period index.
+ *
+ * @param[out] period Current hardware PERSEL index (0-15). Must not be NULL.
+ *                    This is not a duration in milliseconds; the real timeout
+ *                    depends on the selected clock source and its frequency.
+ *
+ * @return SL_STATUS_OK on success.
+ * @return SL_STATUS_NULL_POINTER if @p period is NULL.
+ * @return SL_STATUS_NOT_INITIALIZED if the hardware watchdog is not initialized.
+ *
+ * @note Use the @c SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_* macros from
+ *       @c sl_watchdog_manager_config.h for readable PERSEL values.
+ ******************************************************************************/
+sl_status_t sl_watchdog_manager_get_timeout_period(uint8_t *period);
+
+/***************************************************************************//**
+ * @brief Sets the hardware watchdog timeout period index.
+ *
+ * @details Safely reconfigures the hardware watchdog:
+ *          disable → apply PERSEL → feed → restore previous running state.
+ *          When @ref SL_WATCHDOG_MANAGER_LOCK is enabled, returns
+ *          @ref SL_STATUS_PERMISSION without changing hardware. On failure,
+ *          attempts to restore the previous configuration and running state.
+ *
+ * @param[in] period Hardware PERSEL index to apply (0-15). This is not a
+ *                   duration in milliseconds; the real timeout depends on the
+ *                   selected clock source and its frequency.
+ *
+ * @return SL_STATUS_OK on success.
+ * @return SL_STATUS_INVALID_PARAMETER if @p period is greater than 15.
+ * @return SL_STATUS_NOT_INITIALIZED if the watchdog manager is not initialized.
+ * @return SL_STATUS_PERMISSION if @ref SL_WATCHDOG_MANAGER_LOCK is enabled.
+ * @return Error code returned by the hardware watchdog implementation.
+ ******************************************************************************/
+sl_status_t sl_watchdog_manager_set_timeout_period(uint8_t period);
+
+/***************************************************************************//**
+ * @brief Gets the hardware watchdog CMU clock source.
+ *
+ * @param[out] clock_source Current clock source selection. Must not be NULL.
+ *
+ * @return SL_STATUS_OK on success.
+ * @return SL_STATUS_NULL_POINTER if @p clock_source is NULL.
+ * @return SL_STATUS_NOT_INITIALIZED if the hardware watchdog is not initialized.
+ * @return SL_STATUS_NOT_SUPPORTED if the device has no WDOG CLKSEL register.
+ ******************************************************************************/
+sl_status_t sl_watchdog_manager_get_clock_source(
+  sl_watchdog_manager_clock_source_t *clock_source);
+
+/***************************************************************************//**
+ * @brief Sets the hardware watchdog CMU clock source.
+ *
+ * @details Safely reconfigures the hardware watchdog:
+ *          disable → apply clock source → feed → restore previous running state.
+ *          When @ref SL_WATCHDOG_MANAGER_LOCK is enabled, returns
+ *          @ref SL_STATUS_PERMISSION without changing hardware. On failure,
+ *          attempts to restore the previous configuration and running state.
+ *          Changing the clock source changes the real timeout duration for the
+ *          same PERSEL index. LFXO is supported only when
+ *          SL_CLOCK_MANAGER_LFXO_EN is enabled in the project Clock Manager
+ *          configuration.
+ *
+ * @param[in] clock_source Clock source to select.
+ *
+ * @return SL_STATUS_OK on success.
+ * @return SL_STATUS_INVALID_PARAMETER if @p clock_source is invalid.
+ * @return SL_STATUS_NOT_INITIALIZED if the watchdog manager is not initialized.
+ * @return SL_STATUS_PERMISSION if @ref SL_WATCHDOG_MANAGER_LOCK is enabled.
+ * @return SL_STATUS_NOT_SUPPORTED if the device has no CLKSEL register or the
+ *         clock source is not supported (for example LFXO when disabled).
+ * @return Error code returned by the hardware watchdog implementation.
+ ******************************************************************************/
+sl_status_t sl_watchdog_manager_set_clock_source(
+  sl_watchdog_manager_clock_source_t clock_source);
 
 /***************************************************************************//**
  * @brief Retrieves the software watchdog that caused a reset.

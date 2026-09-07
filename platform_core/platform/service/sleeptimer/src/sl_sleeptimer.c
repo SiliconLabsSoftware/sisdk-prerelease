@@ -36,6 +36,7 @@
 #include "sli_sleeptimer_hal.h"
 #include "sl_atomic.h"
 #include "sl_sleeptimer_config.h"
+#include "sli_sleeptimer_log.h"
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
@@ -200,6 +201,7 @@ sl_status_t sl_sleeptimer_init(void)
     timer_frequency = sleeptimer_hal_get_timer_frequency();
     if (timer_frequency == 0) {
       CORE_EXIT_ATOMIC();
+      SLI_SLEEPTIMER_LOG_WARN("initialization failed, timer frequency=0");
       return SL_STATUS_INVALID_CONFIGURATION;
     }
 
@@ -212,6 +214,8 @@ sl_status_t sl_sleeptimer_init(void)
     is_sleeptimer_initialized = true;
   }
   CORE_EXIT_ATOMIC();
+
+  SLI_SLEEPTIMER_LOG_INFO("initialized, freq=%u", timer_frequency);
 
   return SL_STATUS_OK;
 }
@@ -773,9 +777,10 @@ sl_status_t sl_sleeptimer_set_time(sl_sleeptimer_timestamp_t time)
 }
 
 /***************************************************************************//**
- * Sets current time from 64 bit variable.
+ * Sets current time from 64 bit variable, optionally logging the result.
  ******************************************************************************/
-sl_status_t sl_sleeptimer_set_time_64(sl_sleeptimer_timestamp_64_t time)
+static sl_status_t set_time_64(sl_sleeptimer_timestamp_64_t time,
+                               bool log_result)
 {
   uint32_t freq = 0u;
   uint32_t counter_sec = 0u;
@@ -784,6 +789,9 @@ sl_status_t sl_sleeptimer_set_time_64(sl_sleeptimer_timestamp_64_t time)
 
   // convert 64 bit time to 32 bit time
   if (!is_valid_time_64(time, TIME_FORMAT_UNIX_64_BIT, 0u)) {
+    if (log_result) {
+      SLI_SLEEPTIMER_LOG_WARN("set_time, invalid time t=%u", (uint32_t)time);
+    }
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -807,12 +815,28 @@ sl_status_t sl_sleeptimer_set_time_64(sl_sleeptimer_timestamp_64_t time)
   } else {
     CORE_EXIT_ATOMIC();
 
+    if (log_result) {
+      SLI_SLEEPTIMER_LOG_WARN("set_time, time behind counter t=%u cnt=%u", second_time_32, counter_sec);
+    }
+
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   CORE_EXIT_ATOMIC();
 
+  if (log_result) {
+    SLI_SLEEPTIMER_LOG_INFO("time set, t=%u", (uint32_t)time);
+  }
+
   return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Sets current time from 64 bit variable.
+ ******************************************************************************/
+sl_status_t sl_sleeptimer_set_time_64(sl_sleeptimer_timestamp_64_t time)
+{
+  return set_time_64(time, true);
 }
 
 /***************************************************************************//**
@@ -842,6 +866,7 @@ sl_status_t sl_sleeptimer_set_datetime(sl_sleeptimer_date_t *date)
   CORE_DECLARE_IRQ_STATE;
 
   if (!is_valid_date_64(date)) {
+    SLI_SLEEPTIMER_LOG_WARN("set_datetime, invalid date");
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -852,11 +877,19 @@ sl_status_t sl_sleeptimer_set_datetime(sl_sleeptimer_date_t *date)
 
   CORE_ENTER_ATOMIC();
   // sets the 64 bit second_time value
-  err_code = sl_sleeptimer_set_time_64(time);
+  err_code = set_time_64(time, false);
   if (err_code == SL_STATUS_OK) {
-    sl_sleeptimer_set_tz(date->time_zone);
+    tz_offset = date->time_zone;
   }
   CORE_EXIT_ATOMIC();
+
+  if (err_code == SL_STATUS_OK) {
+    SLI_SLEEPTIMER_LOG_INFO("datetime set, t=%u", (uint32_t)time);
+  } else {
+    SLI_SLEEPTIMER_LOG_WARN("set_datetime failed, t=%u status=0x%x",
+                            (uint32_t)time,
+                            (uint32_t)err_code);
+  }
 
   return err_code;
 }
@@ -874,6 +907,7 @@ sl_status_t sl_sleeptimer_build_datetime(sl_sleeptimer_date_t *date,
                                          sl_sleeptimer_time_zone_offset_t tz_offset)
 {
   if (date == NULL) {
+    SLI_SLEEPTIMER_LOG_WARN("build_datetime, NULL date");
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -912,6 +946,7 @@ sl_status_t sl_sleeptimer_build_datetime_64(sl_sleeptimer_date_t *date,
                                             sl_sleeptimer_time_zone_offset_t tz_offset)
 {
   if (date == NULL) {
+    SLI_SLEEPTIMER_LOG_WARN("build_datetime_64, NULL date");
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -1119,6 +1154,8 @@ void sl_sleeptimer_set_tz(sl_sleeptimer_time_zone_offset_t offset)
   CORE_ENTER_ATOMIC();
   tz_offset = offset;
   CORE_EXIT_ATOMIC();
+
+  SLI_SLEEPTIMER_LOG_INFO("timezone set, offset=%d", (int32_t)offset);
 }
 
 /***************************************************************************//**

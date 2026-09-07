@@ -71,6 +71,9 @@ template_contribution:
     name: print
     handler: sli_zigbee_af_zigbee_event_logger_print_events
     help: Prints all stored events.
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/debug-print
 metadata:
   sbom:
     license: MSLA

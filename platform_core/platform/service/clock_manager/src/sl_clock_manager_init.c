@@ -30,11 +30,24 @@
 
 #include "sl_clock_manager_init.h"
 #include "sli_clock_manager_init_hal.h"
+#include "sli_clock_manager_log.h"
 
 /***************************************************************************//**
  * Initializes Oscillators and Clock branches.
  ******************************************************************************/
 sl_status_t sl_clock_manager_init(void)
 {
-  return sli_clock_manager_hal_init();
+  sl_status_t status;
+
+  SLI_CLOCK_MANAGER_LOG_INFO("initialization started");
+
+  status = sli_clock_manager_hal_init();
+
+  if (status == SL_STATUS_OK) {
+    SLI_CLOCK_MANAGER_LOG_INFO("initialization done, status=0x%x", (uint32_t)status);
+  } else {
+    SLI_CLOCK_MANAGER_LOG_WARN("initialization failed, status=0x%x", (uint32_t)status);
+  }
+
+  return status;
 }

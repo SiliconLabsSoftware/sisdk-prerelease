@@ -166,6 +166,9 @@ template_contribution:
     help: Force TX after failed HDR PHY CCA with specified CSMA attempts and backoff periods
   condition:
   - cli
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/pro-stack
 metadata:
   sbom:
     license: MSLA

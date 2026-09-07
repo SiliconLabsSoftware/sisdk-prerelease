@@ -13,38 +13,38 @@ provides:
 - name: cbap_key_id
 
 template_file:
-- path: template/cbap_key_id.h.jinja
+- path: template/sl_bt_cbap_key_id.h.jinja
 - path: template/cbap_key_id.py.jinja
 
 template_contribution:
 - name: cbap_psa_keys
   value:
-    key_name: CBAP_PSA_BASE
+    key_name: SL_BT_CBAP_PSA_BASE
     key_id: "0x00004700"
 - name: cbap_psa_keys
   value:
-    key_name: CBAP_PSA_DEVICE_KEY
-    key_id: "CBAP_PSA_BASE + 0"
+    key_name: SL_BT_CBAP_PSA_DEVICE_KEY
+    key_id: "SL_BT_CBAP_PSA_BASE + 0"
 - name: cbap_psa_keys
   value:
-    key_name: CBAP_PSA_AUTH_DATA
-    key_id: "CBAP_PSA_BASE + 1"
+    key_name: SL_BT_CBAP_PSA_AUTH_DATA
+    key_id: "SL_BT_CBAP_PSA_BASE + 1"
 - name: cbap_psa_keys
   value:
-    key_name: CBAP_PSA_ROOT_CERT
-    key_id: "CBAP_PSA_BASE + 2"
+    key_name: SL_BT_CBAP_PSA_ROOT_CERT
+    key_id: "SL_BT_CBAP_PSA_BASE + 2"
 - name: cbap_psa_keys
   value:
-    key_name: CBAP_PSA_FACTORY_CERT
-    key_id: "CBAP_PSA_BASE + 3"
+    key_name: SL_BT_CBAP_PSA_FACTORY_CERT
+    key_id: "SL_BT_CBAP_PSA_BASE + 3"
 - name: cbap_psa_keys
   value:
-    key_name: CBAP_PSA_BATCH_CERT
-    key_id: "CBAP_PSA_BASE + 4"
+    key_name: SL_BT_CBAP_PSA_BATCH_CERT
+    key_id: "SL_BT_CBAP_PSA_BASE + 4"
 - name: cbap_psa_keys
   value:
-    key_name: CBAP_PSA_DEVICE_CERT
-    key_id: "CBAP_PSA_BASE + 5"
+    key_name: SL_BT_CBAP_PSA_DEVICE_CERT
+    key_id: "SL_BT_CBAP_PSA_BASE + 5"
 
 
   # Needed for the DDP (trustzone_unaware) and the secure app. However,

@@ -337,6 +337,9 @@ template_contribution:
 other_file:
 - path: app/framework/plugin/dhc/readme.md
 - path: app/framework/plugin/dhc/configuration_sample.json
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/dhc
 metadata:
   sbom:
     license: MSLA

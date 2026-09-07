@@ -811,7 +811,9 @@ sl_status_t sl_si7210_wake_up(sl_i2cspm_t *i2cspm)
   seq.buf[0].data = NULL;
 
   ret = I2CSPM_Transfer(i2cspm, &seq);
-  if ( ret != i2cTransferDone ) {
+  // Address-only wake: Si7210 NACKs the first access while asleep; the
+  // transaction still wakes the part. Accept Done or Nack.
+  if ( (ret != i2cTransferDone) && (ret != i2cTransferNack) ) {
     return SL_STATUS_TRANSMIT;
   }
 

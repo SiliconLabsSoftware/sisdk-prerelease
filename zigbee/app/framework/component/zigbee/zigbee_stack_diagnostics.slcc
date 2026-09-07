@@ -46,6 +46,9 @@ template_contribution:
     name: route-table
     handler: printRouteTable
     help: Prints out the entries in the stacks route table.
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/stack-diagnostics
 metadata:
   sbom:
     license: MSLA

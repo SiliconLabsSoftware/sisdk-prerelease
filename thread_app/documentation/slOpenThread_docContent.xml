@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<contentItems xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.silabs.com/ss/ContentItem.ecore">
   <contentItemData name="" label="AN1294: Configuring Antenna Diversity for OpenThread" itemURI="https://docs.silabs.com/openthread/latest/configuring-antenna-diversity-for-openthread/index.html" category="Application Notes" priority="40">
     <description>Describes how to use Project Configurator and Component Editor in Simplicity Studio 5 to configure antenna diversity in OpenThread applications. </description>
     <property key="core.category" value="Application Notes"/>

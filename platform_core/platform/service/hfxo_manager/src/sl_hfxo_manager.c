@@ -32,6 +32,7 @@
 #include "sl_hfxo_manager.h"
 #include "sli_hfxo_manager.h"
 #include "sli_hfxo_manager_internal.h"
+#include "sli_hfxo_manager_log.h"
 #include "sl_sleeptimer.h"
 #include "sl_assert.h"
 #include "sl_status.h"
@@ -105,6 +106,8 @@ sl_status_t sl_hfxo_manager_init(void)
     hfxo_startup_time_sum_average += hfxo_startup_time_tick;
   }
 
+  SLI_HFXO_MANAGER_LOG_INFO("initialized, startup=%u ticks", hfxo_startup_time_tick);
+
   return SL_STATUS_OK;
 }
 
@@ -122,7 +125,16 @@ sl_status_t sl_hfxo_manager_init(void)
  ******************************************************************************/
 sl_status_t sl_hfxo_manager_update_sleepy_xtal_settings(const sl_hfxo_manager_sleepy_xtal_settings_t *settings)
 {
-  return sli_hfxo_manager_update_sleepy_xtal_settings_hardware(settings);
+  sl_status_t status = sli_hfxo_manager_update_sleepy_xtal_settings_hardware(settings);
+
+  if (status == SL_STATUS_OK) {
+    SLI_HFXO_MANAGER_LOG_INFO("sleepy crystal settings updated");
+  } else {
+    SLI_HFXO_MANAGER_LOG_WARN("sleepy crystal settings update failed, status=0x%x",
+                              (uint32_t)status);
+  }
+
+  return status;
 }
 
 /***************************************************************************//**

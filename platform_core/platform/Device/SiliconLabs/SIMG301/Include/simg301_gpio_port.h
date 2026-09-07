@@ -38,14 +38,14 @@
  * @brief SIMG301 GPIO PORT
  *****************************************************************************/
 typedef struct gpio_port_typedef{
-  __IOM uint32_t CTRL;                          /**< Port control            */
-  __IOM uint32_t MODEL;                         /**< mode low                */
-  uint32_t       RESERVED0[1];                  /**< Reserved for future use */
-  __IOM uint32_t MODEH;                         /**< mode high               */
-  __IOM uint32_t DOUT;                          /**< data out                */
-  __IM uint32_t  DIN;                           /**< data in                 */
-  __IOM uint32_t AMUXMODE;                      /**< amux mode               */
-  uint32_t       RESERVED1[5];                  /**< Reserved for future use */
+  __IOM uint32_t CTRL;                             /**< Port control                                       */
+  __IOM uint32_t MODEL;                            /**< mode low                                           */
+  uint32_t       RESERVED0[1U];                    /**< Reserved for future use                            */
+  __IOM uint32_t MODEH;                            /**< mode high                                          */
+  __IOM uint32_t DOUT;                             /**< data out                                           */
+  __IM uint32_t  DIN;                              /**< Data In                                            */
+  __IOM uint32_t AMUXMODE;                         /**< AMUXMODE                                           */
+  uint32_t       RESERVED1[5U];                    /**< Reserved for future use                            */
 } GPIO_PORT_TypeDef;
 
 /* Bit fields for GPIO_P CTRL */

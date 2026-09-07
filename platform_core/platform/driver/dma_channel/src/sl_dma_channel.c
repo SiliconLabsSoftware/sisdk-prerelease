@@ -37,7 +37,6 @@
 #include "sl_dma_manager.h"
 #include "sli_dma_manager_internal.h"
 #include "sl_dma_descriptor_allocator.h"
-#include "sl_clock_manager.h"
 #include "sl_memory_manager.h"
 #include "sl_assert.h"
 #include "sl_core.h"
@@ -444,12 +443,6 @@ sl_status_t sl_dma_channel_init(sl_dma_channel_handle_t *handle,
 
   // Initialize descriptor allocator for this channel
   sl_dma_descriptor_allocator_init((sl_peripheral_t)dma_peripheral, channel_number);
-
-  // Enable clocks (DMA + LDMAXBAR) – minimal required for submission.
-  sl_bus_clock_t dma_bus_clock = sl_device_peripheral_get_bus_clock((sl_peripheral_t)handle->dma_peripheral);
-  sl_clock_manager_enable_bus_clock(dma_bus_clock);
-  sl_bus_clock_t dmaxbar_bus_clock = sl_device_peripheral_get_bus_clock(SL_PERIPHERAL_LDMAXBAR0);
-  sl_clock_manager_enable_bus_clock(dmaxbar_bus_clock);
 
   // Reset peripheral signal
   sl_dma_channel_set_peripheral_signal(handle, NULL);

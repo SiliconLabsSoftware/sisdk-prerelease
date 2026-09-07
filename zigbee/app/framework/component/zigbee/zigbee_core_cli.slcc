@@ -229,6 +229,9 @@ template_contribution:
   - zigbee_simulation
   unless:
   - zigbee_ezsp
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/app-framework-common
 metadata:
   sbom:
     license: MSLA

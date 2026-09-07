@@ -5,6 +5,9 @@ description: |-
   The Slot Manager utility manages storage slots in flash (internal or external SPI flash). This feature is used with the Gecko Bootloader. A bootloader built with storage slots is necessary for Slot Manager to function. The Zigbee over-the-air bootloading feature uses Slot Manager to save to and boot from storage slots.
 category: Platform|Utilities
 quality: production
+documentation:
+  docset: mcu-bootloader
+  document: group-Interface
 metadata:
   sbom:
     license: MSLA

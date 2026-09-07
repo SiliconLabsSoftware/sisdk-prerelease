@@ -4,6 +4,9 @@ package: zigbee
 description: Ember queue-based event system.
 category: Platform|Utilities
 quality: production
+documentation:
+  docset: gecko-platform
+  document: platform-common/common
 metadata:
   sbom:
     license: MSLA

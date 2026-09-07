@@ -56,6 +56,11 @@ extern "C" {
   #define SLI_SE_COMMAND_CONFIGURE_DEEP_POWER_DOWN_MODE   0xFF430000UL
 #endif
 
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_381)
+  #define SLI_SE_COMMAND_CONFIGURE_INITIAL_VTOR         0x43510000UL
+  #define SLI_SE_COMMAND_RELEASE_CPU1                   0x43520000UL
+#endif
+
 #ifdef __cplusplus
 }
 #endif

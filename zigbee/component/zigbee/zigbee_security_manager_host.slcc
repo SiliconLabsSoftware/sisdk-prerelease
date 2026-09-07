@@ -52,6 +52,9 @@ source:
 template_contribution:
 - name: component_catalog
   value: zigbee_security_manager_host
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/zigbee-security-manager
 metadata:
   sbom:
     license: MSLA

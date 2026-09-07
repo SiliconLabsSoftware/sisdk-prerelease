@@ -17,7 +17,7 @@ template_contribution:
 - name: mbedtls_config
   value: MBEDTLS_GCM_C
 documentation:
-  url: https://mbed-tls.readthedocs.io/projects/api/en/development/api/file/gcm_8h/
+  url: https://docs.silabs.com/gecko-platform/4.4.7/platform-security/sl-crypto-gcm
 metadata:
   sbom:
     reference: mbedtls_sbom

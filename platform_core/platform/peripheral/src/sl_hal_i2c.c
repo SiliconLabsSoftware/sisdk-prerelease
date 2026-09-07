@@ -114,6 +114,8 @@ void sl_hal_i2c_init(I2C_TypeDef *i2c,
 
   // Leader or follower mode configuration.
   i2c->CTRL_SET = (mode << _I2C_CTRL_SLAVE_SHIFT);
+  SL_PRINT_STRING_DEBUG("mode=%d\r\n",
+    (int)mode);
 }
 
 /***************************************************************************//**
@@ -262,6 +264,13 @@ void sl_hal_i2c_set_clock_frequency(I2C_TypeDef *i2c,
   sl_hal_i2c_wait_sync(i2c);
 
   i2c->CLKDIV = (clkdiv & _I2C_CLKDIV_DIV_MASK);
+  SL_PRINT_STRING_DEBUG("clk=%lu scl=%lu\r\n",
+    (unsigned long)i2c_clk,
+    (unsigned long)freq_scl);
+
+  SL_PRINT_STRING_DEBUG("clhr=%d div=%ld\r\n",
+    (int)clhr,
+    (long)clkdiv);
 }
 /***************************************************************************//**
  * Get I2C clock frequency.

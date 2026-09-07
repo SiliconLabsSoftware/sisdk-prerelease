@@ -368,7 +368,9 @@ void GPIO_PinModeSet(GPIO_Port_TypeDef port,
     // Compiler assigned 8 bits for enum. Same thing for other branch.
     BUS_RegMaskedWrite(&(GPIO->P[port].MODEL), 0xFu << (pin * 4), (uint32_t)mode << (pin * 4));
   } else {
+#if defined(_GPIO_P_MODEH_MASK)
     BUS_RegMaskedWrite(&(GPIO->P[port].MODEH), 0xFu << ((pin - 8) * 4), (uint32_t)mode << ((pin - 8) * 4));
+#endif
   }
 
   if (mode == gpioModeDisabled) {
@@ -397,12 +399,16 @@ GPIO_Mode_TypeDef GPIO_PinModeGet(GPIO_Port_TypeDef port,
                                   unsigned int pin)
 {
   EFM_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
+  uint32_t mode = 0;
 
   if (pin < 8) {
-    return ((GPIO->P[port].MODEL >> (pin * 4)) & 0xF);
+    mode = (GPIO->P[port].MODEL >> (pin * 4)) & 0xF;
   } else {
-    return ((GPIO->P[port].MODEH >> ((pin - 8) * 4)) & 0xF);
+#if defined(_GPIO_P_MODEH_MASK)
+    mode = (GPIO->P[port].MODEH >> ((pin - 8) * 4)) & 0xF;
+#endif
   }
+  return mode;
 }
 
 #if defined(_GPIO_EM4WUEN_MASK)

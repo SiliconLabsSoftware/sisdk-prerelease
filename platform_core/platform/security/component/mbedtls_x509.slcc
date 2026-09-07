@@ -19,6 +19,9 @@ requires:
 - name: mbedtls_x509_crt_write
 - name: mbedtls_x509_csr_parse
 - name: mbedtls_x509_csr_write
+documentation:
+  # X.509 module — reading, writing and verification of certificates
+  url: https://docs.silabs.com/gecko-platform/4.4.7/platform-security/x509-module
 metadata:
   sbom:
     reference: mbedtls_sbom

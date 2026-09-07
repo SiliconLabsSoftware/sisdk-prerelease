@@ -5,6 +5,9 @@ description: |-
   Data store and fetch routines
 category: Platform|Utilities
 quality: production
+documentation:
+  docset: gecko-platform
+  document: platform-common/common
 metadata:
   sbom:
     license: MSLA

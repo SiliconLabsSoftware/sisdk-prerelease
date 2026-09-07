@@ -19,6 +19,8 @@ template_contribution:
   value: MBEDTLS_ECP_DP_SECP256R1_ENABLED
 - name: mbedtls_mpi_max
   value: 32
+documentation:
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/psa-crypto-plugins
 metadata:
   sbom:
     reference: mbedtls_sbom

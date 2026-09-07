@@ -17,6 +17,9 @@ template_contribution:
     mfg_id: NOT_MFG_SPECIFIC
     side: CLIENT
     service_function: sl_zigbee_af_zll_commissioning_cluster_client_command_parse
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/zll-utility-client
 metadata:
   sbom:
     license: MSLA

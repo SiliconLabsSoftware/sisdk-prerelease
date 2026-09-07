@@ -28,6 +28,8 @@ template_contribution:
   - device_cortexm
 - name: mbedtls_config
   value: MBEDTLS_CTR_DRBG_C
+documentation:
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-mbedtls/
 metadata:
   sbom:
     reference: mbedtls_sbom

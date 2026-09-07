@@ -69,17 +69,19 @@
 #define SL_SI91X_TLS_EXTENSION_ALPN_TYPE 2 ///< TLS extension for ALPN
 /** @} */
 
-#define SLI_SI91X_SOCKET_TCP_CLIENT 0x0000
-#define SLI_SI91X_SOCKET_UDP_CLIENT 0x0001
-#define SLI_SI91X_SOCKET_TCP_SERVER 0x0002
-#define SLI_SI91X_SOCKET_LUDP       0x0004
+#define SLI_SI91X_SOCKET_TCP_CLIENT      0x0000
+#define SLI_SI91X_SOCKET_UDP_CLIENT      0x0001
+#define SLI_SI91X_SOCKET_TCP_SERVER      0x0002
+#define SLI_SI91X_SOCKET_LUDP            0x0004
+#define SLI_SI91X_SOCKET_TYPE_O_NONBLOCK 0x4000
 
-// Following bits are part of socket_bitmap. BIT(3) and BIT(6) are reserved in NWP.
+// Following bits are part of socket_bitmap. BIT(6) is reserved in NWP.
 #define SLI_SI91X_SOCKET_FEAT_SSL                BIT(0) // SAPI maps both SSL and synchronous to BIT(0)
 #define SLI_SI91X_SOCKET_FEAT_SYNCHRONOUS        BIT(0)
 #define SLI_SI91X_SOCKET_FEAT_LTCP_ACCEPT        BIT(1)
 #define SLI_SI91X_WEBSOCKET_FEAT                 BIT(1)
 #define SLI_SI91X_SOCKET_FEAT_TCP_ACK_INDICATION BIT(2)
+#define SLI_SI91X_SOCKET_FEAT_NON_BLOCK          BIT(3)
 #define SLI_SI91X_SOCKET_FEAT_TCP_RX_WINDOW      BIT(4)
 #define SLI_SI91X_SOCKET_FEAT_CERT_INDEX         BIT(5)
 #define SLI_SI91X_HIGH_PERFORMANCE_SOCKET        BIT(7)

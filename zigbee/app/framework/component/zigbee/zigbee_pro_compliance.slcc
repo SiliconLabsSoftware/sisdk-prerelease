@@ -2148,6 +2148,9 @@ template_contribution:
     - type: uint8
       help: 1 - disable APS acknowledgement in outgoing frames, 0 - use default from higher layer
   # END Pro-compliance CLI Commands
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/test-harness
 metadata:
   sbom:
     license: MSLA

@@ -34,6 +34,7 @@
 #include "sl_clock_manager.h"
 #include "sli_clock_manager.h"
 #include "sli_clock_manager_hal.h"
+#include "sli_clock_manager_log.h"
 #include "sl_common.h"
 #include "sl_core.h"
 #include "sl_gpio.h"
@@ -1884,8 +1885,13 @@ sl_status_t sli_clock_manager_hal_set_rc_oscillator_calibration(sl_oscillator_t 
 #endif
 
     default:
+      SLI_CLOCK_MANAGER_LOG_WARN("unsupported oscillator for RC calibration, osc=%u",
+                                 (uint32_t)oscillator);
       return SL_STATUS_INVALID_PARAMETER;
   }
+
+  SLI_CLOCK_MANAGER_LOG_INFO("RC oscillator calibration updated, osc=%u val=%u",
+                             (uint32_t)oscillator, val);
 
   return SL_STATUS_OK;
 }
@@ -1951,6 +1957,13 @@ sl_status_t sli_clock_manager_hal_set_hfxo_calibration(uint32_t val)
 
   CORE_EXIT_ATOMIC();
 
+  if (status == SL_STATUS_OK) {
+    SLI_CLOCK_MANAGER_LOG_INFO("HFXO calibration updated, val=%u", val);
+  } else {
+    SLI_CLOCK_MANAGER_LOG_WARN("HFXO calibration update failed, val=%u status=0x%x",
+                               val, (uint32_t)status);
+  }
+
   return status;
 }
 
@@ -1968,7 +1981,7 @@ sl_status_t sli_clock_manager_hal_get_hfxo_calibration(uint32_t *val)
 /***************************************************************************//**
  * Sets the HFXO CTUNE setting.
  ******************************************************************************/
-sl_status_t sli_clock_manager_hal_hfxo_set_ctune(uint32_t ctune)
+static sl_status_t hfxo_set_ctune(uint32_t ctune, bool log_result)
 {
   sl_status_t status = SL_STATUS_OK;
 
@@ -1976,6 +1989,9 @@ sl_status_t sli_clock_manager_hal_hfxo_set_ctune(uint32_t ctune)
 
   // Make sure the given CTUNE value is within the allowable range.
   if (ctune > (_HFXO_XTALCTRL_CTUNEXIANA_MASK >> _HFXO_XTALCTRL_CTUNEXIANA_SHIFT)) {
+    if (log_result) {
+      SLI_CLOCK_MANAGER_LOG_WARN("HFXO CTUNE update rejected, val=%u", ctune);
+    }
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -2019,7 +2035,21 @@ sl_status_t sli_clock_manager_hal_hfxo_set_ctune(uint32_t ctune)
 
   CORE_EXIT_ATOMIC();
 
+  if (log_result) {
+    if (status == SL_STATUS_OK) {
+      SLI_CLOCK_MANAGER_LOG_INFO("HFXO CTUNE updated, val=%u", ctune);
+    } else {
+      SLI_CLOCK_MANAGER_LOG_WARN("HFXO CTUNE update failed, val=%u status=0x%x",
+                                 ctune, (uint32_t)status);
+    }
+  }
+
   return status;
+}
+
+sl_status_t sli_clock_manager_hal_hfxo_set_ctune(uint32_t ctune)
+{
+  return hfxo_set_ctune(ctune, true);
 }
 
 /***************************************************************************//**
@@ -2047,6 +2077,7 @@ sl_status_t sli_clock_manager_hal_hfxo_calibrate_ctune(uint32_t ctune)
   sl_status_t status = SL_STATUS_OK;
 
   if (ctune > (_HFXO_XTALCTRL_CTUNEXIANA_MASK >> _HFXO_XTALCTRL_CTUNEXIANA_SHIFT)) {
+    SLI_CLOCK_MANAGER_LOG_WARN("HFXO CTUNE calibration rejected, val=%u", ctune);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -2072,7 +2103,7 @@ sl_status_t sli_clock_manager_hal_hfxo_calibrate_ctune(uint32_t ctune)
     // Making sure HFXO is in steady state.
   }
 
-  status = sli_clock_manager_hal_hfxo_set_ctune(ctune);
+  status = hfxo_set_ctune(ctune, false);
   if (status == SL_STATUS_OK) {
     // Start core bias optimization.
     HFXO0->CMD_SET = HFXO_CMD_COREBIASOPT;
@@ -2095,6 +2126,13 @@ sl_status_t sli_clock_manager_hal_hfxo_calibrate_ctune(uint32_t ctune)
 
   // Retrieve initial state of the CTRL register.
   sl_hal_bus_reg_write_mask(&HFXO0->CTRL, (_HFXO_CTRL_DISONDEMAND_MASK | _HFXO_CTRL_FORCEEN_MASK), hfxo_ctrl_backup);
+
+  if (status == SL_STATUS_OK) {
+    SLI_CLOCK_MANAGER_LOG_INFO("HFXO CTUNE calibration completed, val=%u", ctune);
+  } else {
+    SLI_CLOCK_MANAGER_LOG_WARN("HFXO CTUNE calibration failed, val=%u status=0x%x",
+                               ctune, (uint32_t)status);
+  }
 
   return status;
 }
@@ -2154,6 +2192,8 @@ sl_status_t sli_clock_manager_hal_set_lfxo_calibration(uint32_t val)
   }
 
   CORE_EXIT_ATOMIC();
+
+  SLI_CLOCK_MANAGER_LOG_INFO("LFXO calibration updated, val=%u", val);
 
   return SL_STATUS_OK;
 }
@@ -2280,6 +2320,9 @@ sl_status_t sli_clock_manager_hal_configure_rco_calibration(uint32_t cycles,
 
   CORE_EXIT_ATOMIC();
 
+  SLI_CLOCK_MANAGER_LOG_DEBUG("RCO calibration configured, cycles=%u down=%u up=%u",
+                              cycles, (uint32_t)down_counter_selection, (uint32_t)up_counter_selection);
+
   return SL_STATUS_OK;
 }
 
@@ -2289,6 +2332,8 @@ sl_status_t sli_clock_manager_hal_configure_rco_calibration(uint32_t cycles,
 void sli_clock_manager_hal_start_rco_calibration(void)
 {
   CMU->CALCMD = CMU_CALCMD_CALSTART;
+
+  SLI_CLOCK_MANAGER_LOG_DEBUG("RCO calibration started");
 }
 
 /***************************************************************************//**
@@ -2297,6 +2342,8 @@ void sli_clock_manager_hal_start_rco_calibration(void)
 void sli_clock_manager_hal_stop_rco_calibration(void)
 {
   CMU->CALCMD = CMU_CALCMD_CALSTOP;
+
+  SLI_CLOCK_MANAGER_LOG_DEBUG("RCO calibration stopped");
 }
 
 /***************************************************************************//**
@@ -2317,6 +2364,8 @@ void sli_clock_manager_hal_wait_rco_calibration(void)
 sl_status_t sli_clock_manager_hal_get_rco_calibration_count(uint32_t *count)
 {
   *count = CMU->CALCNT;
+
+  SLI_CLOCK_MANAGER_LOG_DEBUG("RCO calibration result, count=%u", *count);
 
   return SL_STATUS_OK;
 }
@@ -2659,6 +2708,74 @@ sl_status_t sli_clock_manager_hal_get_nwp_clkmult_freqplan_config(uint8_t clkmul
   (void)target_frequency_index;
   return SL_STATUS_NOT_SUPPORTED;
 #endif
+}
+
+/***************************************************************************//**
+ * Sets a runtime-configurable Clock Branch's clock-select mux and prescaler.
+ *
+ * @note Default implementation. Devices supporting runtime Clock Branch
+ *       reconfiguration provide a strong implementation in their device
+ *       specific HAL.
+ ******************************************************************************/
+SL_WEAK sl_status_t sli_clock_manager_hal_set_clock_branch_source(sl_clock_branch_t clock_branch,
+                                                                  uint32_t clksel,
+                                                                  uint32_t presc)
+{
+  (void)clock_branch;
+  (void)clksel;
+  (void)presc;
+  return SL_STATUS_NOT_AVAILABLE;
+}
+
+/***************************************************************************//**
+ * Enables or disables a Clock Branch's functional clock (CMU <BRANCH>CTRL EN).
+ *
+ * @note Default implementation. Devices whose Clock Branches expose a
+ *       functional-clock EN bit (e.g. I2S0, CAN, EMAC, SDHC, RADIO) provide a
+ *       strong implementation in their device specific HAL.
+ ******************************************************************************/
+SL_WEAK sl_status_t sli_clock_manager_hal_enable_clock_branch(sl_clock_branch_t clock_branch,
+                                                              bool enable)
+{
+  (void)clock_branch;
+  (void)enable;
+  return SL_STATUS_NOT_AVAILABLE;
+}
+
+/***************************************************************************//**
+ * Reprograms a PERPLL instance's dividers and waits for it to relock.
+ *
+ * @note Default implementation. Devices with a runtime-configurable PERPLL
+ *       provide a strong implementation in their device specific HAL.
+ ******************************************************************************/
+SL_WEAK sl_status_t sli_clock_manager_hal_set_perpll_frequency(uint8_t perpll_num,
+                                                               uint32_t divn,
+                                                               uint32_t divf,
+                                                               uint32_t dco_div,
+                                                               uint32_t div_2pow,
+                                                               bool fractional_en)
+{
+  (void)perpll_num;
+  (void)divn;
+  (void)divf;
+  (void)dco_div;
+  (void)div_2pow;
+  (void)fractional_en;
+  return SL_STATUS_NOT_AVAILABLE;
+}
+
+/***************************************************************************//**
+ * Reprograms a PERPLL instance to a predefined target frequency.
+ *
+ * @note Default implementation. Devices with a runtime-configurable PERPLL
+ *       provide a strong implementation in their device specific HAL.
+ ******************************************************************************/
+SL_WEAK sl_status_t sli_clock_manager_hal_set_perpll_predefined_frequency(uint8_t perpll_num,
+                                                                          sli_clock_manager_perpll_predefined_frequency_t frequency)
+{
+  (void)perpll_num;
+  (void)frequency;
+  return SL_STATUS_NOT_AVAILABLE;
 }
 
 /***************************************************************************//**

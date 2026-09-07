@@ -1081,8 +1081,22 @@ typedef enum IRQn{
 #define RDMEM_SEQ_RAM_ECC_EN                 0x1UL      /**> SEQ RAM ECCEN */
 #define PRORTC_CC_NUM                        0x2UL      /**> None */
 
+/* Instance macros for DPLL */
+#define DPLL(n)                        (((n) == 0) ? DPLL0 \
+                                        : 0x0UL)
+#define DPLL_NUM(ref)                  (((ref) == DPLL0) ? 0 \
+                                        : -1)
+
 /* Instance macros for GPCRC */
 #define GPCRC_NUM(ref)                 (((ref) == GPCRC) ? 0 \
+                                        : -1)
+
+/* Instance macros for HFRCO */
+#define HFRCO(n)                       (((n) == 0) ? HFRCO0      \
+                                        : ((n) == 1) ? HFRCOEM23 \
+                                        : 0x0UL)
+#define HFRCO_NUM(ref)                 (((ref) == HFRCO0) ? 0      \
+                                        : ((ref) == HFRCOEM23) ? 1 \
                                         : -1)
 
 /* Instance macros for LDMA */

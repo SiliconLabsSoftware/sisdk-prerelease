@@ -104,6 +104,7 @@ typedef enum {
   SLI_WATCHDOG_MANAGER_HAL_CLK_LFRCO,           ///< Low-frequency RC oscillator
   SLI_WATCHDOG_MANAGER_HAL_CLK_LFXO,            ///< Low-frequency crystal oscillator
   SLI_WATCHDOG_MANAGER_HAL_CLK_ULFRCO,          ///< Ultra-low-frequency RC oscillator
+  SLI_WATCHDOG_MANAGER_HAL_CLK_INVALID,         ///< Sentinel: not a programmable clock source
 } sli_watchdog_manager_hal_clock_source_t;
 
 /***************************************************************************//**
@@ -143,7 +144,8 @@ sl_status_t sli_watchdog_manager_hal_get_timeout_period(uint8_t *timeout_period)
  * @brief Set the hardware watchdog timeout period index.
  *
  * @details Re-initializes the WDOG with the new PERSEL and the current clock
- *          source.
+ *          source. The hardware watchdog must be disabled before calling this
+ *          function.
  *
  * @param[in] timeout_period PERSEL index to apply (0-15).
  *
@@ -170,8 +172,7 @@ sl_status_t sli_watchdog_manager_hal_get_clock_source(
  * @brief Set the hardware watchdog CMU clock source.
  *
  * @details Re-initializes the WDOG with the new clock and the current PERSEL.
- *          LFXO is supported only when SL_CLOCK_MANAGER_LFXO_EN is enabled in
- *          the project Clock Manager configuration.
+ *          The hardware watchdog must be disabled before calling this function.
  *
  * @param[in] clock_source Clock source to select.
  *

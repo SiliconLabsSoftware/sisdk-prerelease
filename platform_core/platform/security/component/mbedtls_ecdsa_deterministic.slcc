@@ -15,6 +15,9 @@ template_contribution:
   value: MBEDTLS_ECDSA_DETERMINISTIC
 - name: mbedtls_config
   value: MBEDTLS_HMAC_DRBG_C
+documentation:
+  # No dedicated Deterministic ECDSA page; Mbed TLS hub for related docs
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-mbedtls/
 metadata:
   sbom:
     reference: mbedtls_sbom

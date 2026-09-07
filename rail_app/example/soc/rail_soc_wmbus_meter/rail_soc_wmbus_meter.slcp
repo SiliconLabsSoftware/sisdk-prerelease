@@ -78,10 +78,6 @@ source:
 readme:
   - path: ../../../documentation/example/wmbus/readme.md
 
-other_file:
-  - path: hw_filter_tags.yaml
-    condition: [add_hw_filter_to_project]
-
 # -------------------------- Configuration overrides ---------------------------
 configuration:
   - name: SL_STACK_SIZE

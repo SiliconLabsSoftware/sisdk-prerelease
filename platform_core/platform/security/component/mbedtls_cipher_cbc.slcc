@@ -17,6 +17,8 @@ recommends:
 template_contribution:
 - name: mbedtls_config
   value: MBEDTLS_CIPHER_MODE_CBC
+documentation:
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/psa-crypto-plugins
 metadata:
   sbom:
     reference: mbedtls_sbom

@@ -2,7 +2,7 @@
 project_name: bt_soc_cbap_ddp
 package: bluetooth_le_app
 label: Bluetooth - SoC CBAP Dynamic Data Provisioning
-description: >
+description: >-
   This application enables provisioning the device with data, required by
   Certificate Based Authentication and Pairing (CBAP). This is a RAM
   application, therefore it leaves the original firmware untouched. Please

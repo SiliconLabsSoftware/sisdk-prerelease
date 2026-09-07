@@ -1,9 +1,10 @@
 # EFR32 Sleepy Demo
 
-The EFR32 Sleepy applications demonstrate Sleepy End Device behavior using the EFR32's low power EM2 mode.
+The EFR32 Sleepy applications demonstrate Sleepy End Device behavior using the EFR32's low power EM2 and EM4 modes.
 
-Note that a Sleepy End Device can be demonstrated in two ways.
+Note that a Sleepy End Device can be demonstrated in three ways.
 **_sleepy-demo-mtd_**: Demonstrates Sleepy End Device (SED) behaviour with polling.
+**_sleepy-demo-mtd-em4_**: Demonstrates SED behaviour with EM4 deep sleep and BURTC wake.
 **_sleepy-demo-ssed_**: Demonstrates Synchronous Sleepy End Device (SSED) behaviour with CSL.
 
 The following are the steps to run the demo.
@@ -59,11 +60,38 @@ Issue the command `child table` in the FTD console and observe that the R (Rx-on
 Done
 ```
 
+When the **_sleepy-demo-mtd-em4_** device is started, the CLI should show:
+
+```
+starting (child_timeout=28800 s, wake_ms=27187000)
+```
+
+After the device attaches as a child it sends a multicast UDP sample, saves network state, and enters EM4. Example CLI output:
+
+```
+sent sample: em4 join sample
+network store ok
+store done; enter EM4 when stack idle
+entering EM4
+```
+
+On the FTD CLI you should see:
+
+```
+Message Received: em4 join sample
+```
+
+Use **_sleepy-demo-ftd_** as the parent so the sample string is displayed. After BURTC wake and reattach, the MTD sends `em4 wake sample` and then returns to EM4. The default poll period and BURTC wake interval are set in `sleepy-mtd-em4.c`. Child timeout is set with `OPENTHREAD_CONFIG_MLE_CHILD_TIMEOUT_DEFAULT` in `sleepy-demo-mtd-em4.slcp`.
+
+Issue the command `child table` in the FTD console and observe that the R (Rx-on-when-idle) flag of the child is 0, as with the classic MTD.
+
 ## 2. Buttons on the MTD/SSED
 
 Pressing button 0 on the MTD/SSED toggles between EM2 (sleep) and EM1 (idle) modes.
 
 Pressing button 1 on the MTD/SSED sends a multicast UDP message containing a pre-defined string. The FTD listens on the multicast address and displays `Message Received: <string>` in the CLI.
+
+**_sleepy-demo-mtd-em4_** does not use buttons. It sends its UDP sample automatically when it becomes a child (after join or after EM4 wake), then enters EM4. Use **_sleepy-demo-mtd_** if you need button-driven sleep toggle and interactive UDP.
 
 ## 3. Buttons on the FTD
 
@@ -77,6 +105,10 @@ When the device goes back to EM1 (idle) mode, observe that the current is in the
 
 With further configuration of GPIOs and peripherals it is possible to reduce the sleepy current consumption further.
 
+For **_sleepy-demo-mtd-em4_**, use Energy Profiler to observe EM4 current after `entering EM4`. BURTC wake is computed at runtime in `sleepy-mtd-em4.c` as `otThreadGetChildTimeout() * SLEEPY_EM4_ULFRCO_FMIN_HZ / SLEEPY_EM4_ULFRCO_FTYP_HZ` (EFR32xG24 datasheet Table 4.30 ULFRCO: 0.944 / 1.0 kHz). Child timeout comes from project configuration (for example `OPENTHREAD_CONFIG_MLE_CHILD_TIMEOUT_DEFAULT` in `sleepy-demo-mtd-em4.slcp`, CMSIS, or `otThreadSetChildTimeout()`).
+
 ## 5. Notes on sleeping, sleepy callback and interrupts
 
 To allow the EFR32 to enter sleepy mode, the application must register a callback with `efr32SetSleepCallback`. The return value of the callback is used to indicate that the application has no further work to do and that it is safe to go into a low power mode. The callback is called with interrupts disabled so should do the minimum required to check if it can sleep.
+
+**_sleepy-demo-mtd-em4_** enters EM4 from the power manager EM2 transition path once the network state has been saved and the stack is idle. After EM4 wake, network configuration is restored from NVM, so `setNetworkConfiguration()` is skipped on that boot.

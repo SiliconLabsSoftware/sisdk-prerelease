@@ -1538,241 +1538,261 @@ typedef enum IRQn{
 #define EMU_VSCALECFG                            0x0UL        /**> Voltage scaling config */
 
 /* Instance macros for ACMP */
-#define ACMP(n)                      (((n) == 0) ? ACMP0   \
-                                      : ((n) == 1) ? ACMP1 \
-                                      : 0x0UL)
-#define ACMP_NUM(ref)                (((ref) == ACMP0) ? 0   \
-                                      : ((ref) == ACMP1) ? 1 \
-                                      : -1)
-#define ACMP_DAC_INPUT(n)            (((n) == 0) ? ACMP0_DAC_INPUT   \
-                                      : ((n) == 1) ? ACMP1_DAC_INPUT \
-                                      : 0x0UL)
-#define ACMP_EXT_OVR_IF(n)           (((n) == 0) ? ACMP0_EXT_OVR_IF   \
-                                      : ((n) == 1) ? ACMP1_EXT_OVR_IF \
-                                      : 0x0UL)
+#define ACMP(n)                         (((n) == 0) ? ACMP0   \
+                                         : ((n) == 1) ? ACMP1 \
+                                         : 0x0UL)
+#define ACMP_NUM(ref)                   (((ref) == ACMP0) ? 0   \
+                                         : ((ref) == ACMP1) ? 1 \
+                                         : -1)
+#define ACMP_DAC_INPUT(n)               (((n) == 0) ? ACMP0_DAC_INPUT   \
+                                         : ((n) == 1) ? ACMP1_DAC_INPUT \
+                                         : 0x0UL)
+#define ACMP_EXT_OVR_IF(n)              (((n) == 0) ? ACMP0_EXT_OVR_IF   \
+                                         : ((n) == 1) ? ACMP1_EXT_OVR_IF \
+                                         : 0x0UL)
 
 /* Instance macros for ADC */
-#define ADC(n)                       (((n) == 0) ? ADC0 \
-                                      : 0x0UL)
-#define ADC_NUM(ref)                 (((ref) == ADC0) ? 0 \
-                                      : -1)
-#define ADC_CHANNELS(n)              (((n) == 0) ? ADC0_CHANNELS \
-                                      : 0x0UL)
-#define ADC_CONFIGNUM(n)             (((n) == 0) ? ADC0_CONFIGNUM \
-                                      : 0x0UL)
+#define ADC(n)                          (((n) == 0) ? ADC0 \
+                                         : 0x0UL)
+#define ADC_NUM(ref)                    (((ref) == ADC0) ? 0 \
+                                         : -1)
+#define ADC_CHANNELS(n)                 (((n) == 0) ? ADC0_CHANNELS \
+                                         : 0x0UL)
+#define ADC_CONFIGNUM(n)                (((n) == 0) ? ADC0_CONFIGNUM \
+                                         : 0x0UL)
+
+/* Instance macros for DPLL */
+#define DPLL(n)                         (((n) == 0) ? DPLL0 \
+                                         : 0x0UL)
+#define DPLL_NUM(ref)                   (((ref) == DPLL0) ? 0 \
+                                         : -1)
 
 /* Instance macros for EUSART */
-#define EUSART(n)                    (((n) == 0) ? EUSART0   \
-                                      : ((n) == 1) ? EUSART1 \
-                                      : ((n) == 2) ? EUSART2 \
-                                      : 0x0UL)
-#define EUSART_NUM(ref)              (((ref) == EUSART0) ? 0   \
-                                      : ((ref) == EUSART1) ? 1 \
-                                      : ((ref) == EUSART2) ? 2 \
-                                      : -1)
-#define EUSART_EM2_CAPABLE(n)        (((n) == 0) ? EUSART0_EM2_CAPABLE   \
-                                      : ((n) == 1) ? EUSART1_EM2_CAPABLE \
-                                      : ((n) == 2) ? EUSART2_EM2_CAPABLE \
-                                      : 0x0UL)
-#define EUSART_EXCLUDE_DALI(n)       (((n) == 0) ? EUSART0_EXCLUDE_DALI   \
-                                      : ((n) == 1) ? EUSART1_EXCLUDE_DALI \
-                                      : ((n) == 2) ? EUSART2_EXCLUDE_DALI \
-                                      : 0x0UL)
-#define EUSART_FIFO_DEPTH(n)         (((n) == 0) ? EUSART0_FIFO_DEPTH   \
-                                      : ((n) == 1) ? EUSART1_FIFO_DEPTH \
-                                      : ((n) == 2) ? EUSART2_FIFO_DEPTH \
-                                      : 0x0UL)
-#define EUSART_NOT_EM2_CAPABLE(n)    (((n) == 0) ? EUSART0_NOT_EM2_CAPABLE   \
-                                      : ((n) == 1) ? EUSART1_NOT_EM2_CAPABLE \
-                                      : ((n) == 2) ? EUSART2_NOT_EM2_CAPABLE \
-                                      : 0x0UL)
+#define EUSART(n)                       (((n) == 0) ? EUSART0   \
+                                         : ((n) == 1) ? EUSART1 \
+                                         : ((n) == 2) ? EUSART2 \
+                                         : 0x0UL)
+#define EUSART_NUM(ref)                 (((ref) == EUSART0) ? 0   \
+                                         : ((ref) == EUSART1) ? 1 \
+                                         : ((ref) == EUSART2) ? 2 \
+                                         : -1)
+#define EUSART_EM2_CAPABLE(n)           (((n) == 0) ? EUSART0_EM2_CAPABLE   \
+                                         : ((n) == 1) ? EUSART1_EM2_CAPABLE \
+                                         : ((n) == 2) ? EUSART2_EM2_CAPABLE \
+                                         : 0x0UL)
+#define EUSART_EXCLUDE_DALI(n)          (((n) == 0) ? EUSART0_EXCLUDE_DALI   \
+                                         : ((n) == 1) ? EUSART1_EXCLUDE_DALI \
+                                         : ((n) == 2) ? EUSART2_EXCLUDE_DALI \
+                                         : 0x0UL)
+#define EUSART_FIFO_DEPTH(n)            (((n) == 0) ? EUSART0_FIFO_DEPTH   \
+                                         : ((n) == 1) ? EUSART1_FIFO_DEPTH \
+                                         : ((n) == 2) ? EUSART2_FIFO_DEPTH \
+                                         : 0x0UL)
+#define EUSART_NOT_EM2_CAPABLE(n)       (((n) == 0) ? EUSART0_NOT_EM2_CAPABLE   \
+                                         : ((n) == 1) ? EUSART1_NOT_EM2_CAPABLE \
+                                         : ((n) == 2) ? EUSART2_NOT_EM2_CAPABLE \
+                                         : 0x0UL)
 
 /* Instance macros for GPCRC */
-#define GPCRC(n)                     (((n) == 0) ? GPCRC0 \
-                                      : 0x0UL)
-#define GPCRC_NUM(ref)               (((ref) == GPCRC0) ? 0 \
-                                      : -1)
+#define GPCRC(n)                        (((n) == 0) ? GPCRC0 \
+                                         : 0x0UL)
+#define GPCRC_NUM(ref)                  (((ref) == GPCRC0) ? 0 \
+                                         : -1)
+
+/* Instance macros for HFRCO */
+#define HFRCO(n)                        (((n) == 0) ? HFRCO0      \
+                                         : ((n) == 1) ? HFRCOEM23 \
+                                         : 0x0UL)
+#define HFRCO_NUM(ref)                  (((ref) == HFRCO0) ? 0      \
+                                         : ((ref) == HFRCOEM23) ? 1 \
+                                         : -1)
+#define HFRCO_EM23ONDEMAND(n)           (((n) == 0) ? HFRCO0_EM23ONDEMAND      \
+                                         : ((n) == 1) ? HFRCOEM23_EM23ONDEMAND \
+                                         : 0x0UL)
+#define HFRCO_EXCLUDEEM23ONDEMAND(n)    (((n) == 0) ? HFRCO0_EXCLUDEEM23ONDEMAND      \
+                                         : ((n) == 1) ? HFRCOEM23_EXCLUDEEM23ONDEMAND \
+                                         : 0x0UL)
 
 /* Instance macros for I2C */
-#define I2C(n)                       (((n) == 0) ? I2C0   \
-                                      : ((n) == 1) ? I2C1 \
-                                      : ((n) == 2) ? I2C2 \
-                                      : 0x0UL)
-#define I2C_NUM(ref)                 (((ref) == I2C0) ? 0   \
-                                      : ((ref) == I2C1) ? 1 \
-                                      : ((ref) == I2C2) ? 2 \
-                                      : -1)
-#define I2C_DELAY(n)                 (((n) == 0) ? I2C0_DELAY   \
-                                      : ((n) == 1) ? I2C1_DELAY \
-                                      : ((n) == 2) ? I2C2_DELAY \
-                                      : 0x0UL)
-#define I2C_DELAY_CHAIN_NUM(n)       (((n) == 0) ? I2C0_DELAY_CHAIN_NUM   \
-                                      : ((n) == 1) ? I2C1_DELAY_CHAIN_NUM \
-                                      : ((n) == 2) ? I2C2_DELAY_CHAIN_NUM \
-                                      : 0x0UL)
+#define I2C(n)                          (((n) == 0) ? I2C0   \
+                                         : ((n) == 1) ? I2C1 \
+                                         : ((n) == 2) ? I2C2 \
+                                         : 0x0UL)
+#define I2C_NUM(ref)                    (((ref) == I2C0) ? 0   \
+                                         : ((ref) == I2C1) ? 1 \
+                                         : ((ref) == I2C2) ? 2 \
+                                         : -1)
+#define I2C_DELAY(n)                    (((n) == 0) ? I2C0_DELAY   \
+                                         : ((n) == 1) ? I2C1_DELAY \
+                                         : ((n) == 2) ? I2C2_DELAY \
+                                         : 0x0UL)
+#define I2C_DELAY_CHAIN_NUM(n)          (((n) == 0) ? I2C0_DELAY_CHAIN_NUM   \
+                                         : ((n) == 1) ? I2C1_DELAY_CHAIN_NUM \
+                                         : ((n) == 2) ? I2C2_DELAY_CHAIN_NUM \
+                                         : 0x0UL)
 
 /* Instance macros for LDMA */
-#define LDMA(n)                      (((n) == 0) ? LDMA0 \
-                                      : 0x0UL)
-#define LDMA_NUM(ref)                (((ref) == LDMA0) ? 0 \
-                                      : -1)
-#define LDMA_AHB1_ASYNC(n)           (((n) == 0) ? LDMA0_AHB1_ASYNC \
-                                      : 0x0UL)
-#define LDMA_CH_BITS(n)              (((n) == 0) ? LDMA0_CH_BITS \
-                                      : 0x0UL)
-#define LDMA_CH_NUM(n)               (((n) == 0) ? LDMA0_CH_NUM \
-                                      : 0x0UL)
-#define LDMA_DUALDSTCHNL(n)          (((n) == 0) ? LDMA0_DUALDSTCHNL \
-                                      : 0x0UL)
-#define LDMA_DUALDSTCHNL_DIS(n)      (((n) == 0) ? LDMA0_DUALDSTCHNL_DIS \
-                                      : 0x0UL)
-#define LDMA_FIFO_BITS(n)            (((n) == 0) ? LDMA0_FIFO_BITS \
-                                      : 0x0UL)
-#define LDMA_FIFO_DEPTH(n)           (((n) == 0) ? LDMA0_FIFO_DEPTH \
-                                      : 0x0UL)
-#define LDMA_ILCHNL(n)               (((n) == 0) ? LDMA0_ILCHNL \
-                                      : 0x0UL)
-#define LDMA_ILCHNL_DIS(n)           (((n) == 0) ? LDMA0_ILCHNL_DIS \
-                                      : 0x0UL)
-#define LDMA_ULDMA_MODE(n)           (((n) == 0) ? LDMA0_ULDMA_MODE \
-                                      : 0x0UL)
-#define LDMA_ADDRDEC_DIS(n)          (((n) == 0) ? LDMA0_ADDRDEC_DIS \
-                                      : 0x0UL)
-#define LDMA_ARBSLOT_DIS(n)          (((n) == 0) ? LDMA0_ARBSLOT_DIS \
-                                      : 0x0UL)
-#define LDMA_CHAN_CFG_DIS(n)         (((n) == 0) ? LDMA0_CHAN_CFG_DIS \
-                                      : 0x0UL)
-#define LDMA_EXTENDED_DIS(n)         (((n) == 0) ? LDMA0_EXTENDED_DIS \
-                                      : 0x0UL)
-#define LDMA_IGNORESREQ_DIS(n)       (((n) == 0) ? LDMA0_IGNORESREQ_DIS \
-                                      : 0x0UL)
-#define LDMA_LOOP_DIS(n)             (((n) == 0) ? LDMA0_LOOP_DIS \
-                                      : 0x0UL)
-#define LDMA_MULTIMASTER_DIS(n)      (((n) == 0) ? LDMA0_MULTIMASTER_DIS \
-                                      : 0x0UL)
-#define LDMA_RELADDR_DIS(n)          (((n) == 0) ? LDMA0_RELADDR_DIS \
-                                      : 0x0UL)
-#define LDMA_REQMODE_DIS(n)          (((n) == 0) ? LDMA0_REQMODE_DIS \
-                                      : 0x0UL)
-#define LDMA_SYNC_NUM(n)             (((n) == 0) ? LDMA0_SYNC_NUM \
-                                      : 0x0UL)
-#define LDMA_SYNC_DIS(n)             (((n) == 0) ? LDMA0_SYNC_DIS \
-                                      : 0x0UL)
-#define LDMA_WRI_DIS(n)              (((n) == 0) ? LDMA0_WRI_DIS \
-                                      : 0x0UL)
-#define LDMA_XFERTYPE_DIS(n)         (((n) == 0) ? LDMA0_XFERTYPE_DIS \
-                                      : 0x0UL)
+#define LDMA(n)                         (((n) == 0) ? LDMA0 \
+                                         : 0x0UL)
+#define LDMA_NUM(ref)                   (((ref) == LDMA0) ? 0 \
+                                         : -1)
+#define LDMA_AHB1_ASYNC(n)              (((n) == 0) ? LDMA0_AHB1_ASYNC \
+                                         : 0x0UL)
+#define LDMA_CH_BITS(n)                 (((n) == 0) ? LDMA0_CH_BITS \
+                                         : 0x0UL)
+#define LDMA_CH_NUM(n)                  (((n) == 0) ? LDMA0_CH_NUM \
+                                         : 0x0UL)
+#define LDMA_DUALDSTCHNL(n)             (((n) == 0) ? LDMA0_DUALDSTCHNL \
+                                         : 0x0UL)
+#define LDMA_DUALDSTCHNL_DIS(n)         (((n) == 0) ? LDMA0_DUALDSTCHNL_DIS \
+                                         : 0x0UL)
+#define LDMA_FIFO_BITS(n)               (((n) == 0) ? LDMA0_FIFO_BITS \
+                                         : 0x0UL)
+#define LDMA_FIFO_DEPTH(n)              (((n) == 0) ? LDMA0_FIFO_DEPTH \
+                                         : 0x0UL)
+#define LDMA_ILCHNL(n)                  (((n) == 0) ? LDMA0_ILCHNL \
+                                         : 0x0UL)
+#define LDMA_ILCHNL_DIS(n)              (((n) == 0) ? LDMA0_ILCHNL_DIS \
+                                         : 0x0UL)
+#define LDMA_ULDMA_MODE(n)              (((n) == 0) ? LDMA0_ULDMA_MODE \
+                                         : 0x0UL)
+#define LDMA_ADDRDEC_DIS(n)             (((n) == 0) ? LDMA0_ADDRDEC_DIS \
+                                         : 0x0UL)
+#define LDMA_ARBSLOT_DIS(n)             (((n) == 0) ? LDMA0_ARBSLOT_DIS \
+                                         : 0x0UL)
+#define LDMA_CHAN_CFG_DIS(n)            (((n) == 0) ? LDMA0_CHAN_CFG_DIS \
+                                         : 0x0UL)
+#define LDMA_EXTENDED_DIS(n)            (((n) == 0) ? LDMA0_EXTENDED_DIS \
+                                         : 0x0UL)
+#define LDMA_IGNORESREQ_DIS(n)          (((n) == 0) ? LDMA0_IGNORESREQ_DIS \
+                                         : 0x0UL)
+#define LDMA_LOOP_DIS(n)                (((n) == 0) ? LDMA0_LOOP_DIS \
+                                         : 0x0UL)
+#define LDMA_MULTIMASTER_DIS(n)         (((n) == 0) ? LDMA0_MULTIMASTER_DIS \
+                                         : 0x0UL)
+#define LDMA_RELADDR_DIS(n)             (((n) == 0) ? LDMA0_RELADDR_DIS \
+                                         : 0x0UL)
+#define LDMA_REQMODE_DIS(n)             (((n) == 0) ? LDMA0_REQMODE_DIS \
+                                         : 0x0UL)
+#define LDMA_SYNC_NUM(n)                (((n) == 0) ? LDMA0_SYNC_NUM \
+                                         : 0x0UL)
+#define LDMA_SYNC_DIS(n)                (((n) == 0) ? LDMA0_SYNC_DIS \
+                                         : 0x0UL)
+#define LDMA_WRI_DIS(n)                 (((n) == 0) ? LDMA0_WRI_DIS \
+                                         : 0x0UL)
+#define LDMA_XFERTYPE_DIS(n)            (((n) == 0) ? LDMA0_XFERTYPE_DIS \
+                                         : 0x0UL)
 
 /* Instance macros for LDMAXBAR */
-#define LDMAXBAR(n)                  (((n) == 0) ? LDMAXBAR0 \
-                                      : 0x0UL)
-#define LDMAXBAR_NUM(ref)            (((ref) == LDMAXBAR0) ? 0 \
-                                      : -1)
-#define LDMAXBAR_CH_BITS(n)          (((n) == 0) ? LDMAXBAR0_CH_BITS \
-                                      : 0x0UL)
-#define LDMAXBAR_CH_NUM(n)           (((n) == 0) ? LDMAXBAR0_CH_NUM \
-                                      : 0x0UL)
-#define LDMAXBAR_SIGSEL_W(n)         (((n) == 0) ? LDMAXBAR0_SIGSEL_W \
-                                      : 0x0UL)
-#define LDMAXBAR_SOURCESEL_W(n)      (((n) == 0) ? LDMAXBAR0_SOURCESEL_W \
-                                      : 0x0UL)
+#define LDMAXBAR(n)                     (((n) == 0) ? LDMAXBAR0 \
+                                         : 0x0UL)
+#define LDMAXBAR_NUM(ref)               (((ref) == LDMAXBAR0) ? 0 \
+                                         : -1)
+#define LDMAXBAR_CH_BITS(n)             (((n) == 0) ? LDMAXBAR0_CH_BITS \
+                                         : 0x0UL)
+#define LDMAXBAR_CH_NUM(n)              (((n) == 0) ? LDMAXBAR0_CH_NUM \
+                                         : 0x0UL)
+#define LDMAXBAR_SIGSEL_W(n)            (((n) == 0) ? LDMAXBAR0_SIGSEL_W \
+                                         : 0x0UL)
+#define LDMAXBAR_SOURCESEL_W(n)         (((n) == 0) ? LDMAXBAR0_SOURCESEL_W \
+                                         : 0x0UL)
 
 /* Instance macros for LEDDRV */
-#define LEDDRV(n)                    (((n) == 0) ? LEDDRV0 \
-                                      : 0x0UL)
-#define LEDDRV_NUM(ref)              (((ref) == LEDDRV0) ? 0 \
-                                      : -1)
+#define LEDDRV(n)                       (((n) == 0) ? LEDDRV0 \
+                                         : 0x0UL)
+#define LEDDRV_NUM(ref)                 (((ref) == LEDDRV0) ? 0 \
+                                         : -1)
 
 /* Instance macros for LETIMER */
-#define LETIMER(n)                   (((n) == 0) ? LETIMER0 \
-                                      : 0x0UL)
-#define LETIMER_NUM(ref)             (((ref) == LETIMER0) ? 0 \
-                                      : -1)
-#define LETIMER_CNT_WIDTH(n)         (((n) == 0) ? LETIMER0_CNT_WIDTH \
-                                      : 0x0UL)
+#define LETIMER(n)                      (((n) == 0) ? LETIMER0 \
+                                         : 0x0UL)
+#define LETIMER_NUM(ref)                (((ref) == LETIMER0) ? 0 \
+                                         : -1)
+#define LETIMER_CNT_WIDTH(n)            (((n) == 0) ? LETIMER0_CNT_WIDTH \
+                                         : 0x0UL)
 
 /* Instance macros for PCNT */
-#define PCNT(n)                      (((n) == 0) ? PCNT0 \
-                                      : 0x0UL)
-#define PCNT_NUM(ref)                (((ref) == PCNT0) ? 0 \
-                                      : -1)
-#define PCNT_PCNT_WIDTH(n)           (((n) == 0) ? PCNT0_PCNT_WIDTH \
-                                      : 0x0UL)
+#define PCNT(n)                         (((n) == 0) ? PCNT0 \
+                                         : 0x0UL)
+#define PCNT_NUM(ref)                   (((ref) == PCNT0) ? 0 \
+                                         : -1)
+#define PCNT_PCNT_WIDTH(n)              (((n) == 0) ? PCNT0_PCNT_WIDTH \
+                                         : 0x0UL)
 
 /* Instance macros for PIXELRZ */
-#define PIXELRZ(n)                   (((n) == 0) ? PIXELRZ0   \
-                                      : ((n) == 1) ? PIXELRZ1 \
-                                      : 0x0UL)
-#define PIXELRZ_NUM(ref)             (((ref) == PIXELRZ0) ? 0   \
-                                      : ((ref) == PIXELRZ1) ? 1 \
-                                      : -1)
+#define PIXELRZ(n)                      (((n) == 0) ? PIXELRZ0   \
+                                         : ((n) == 1) ? PIXELRZ1 \
+                                         : 0x0UL)
+#define PIXELRZ_NUM(ref)                (((ref) == PIXELRZ0) ? 0   \
+                                         : ((ref) == PIXELRZ1) ? 1 \
+                                         : -1)
 
 /* Instance macros for SEMAPHORE */
-#define SEMAPHORE(n)                 (((n) == 0) ? SEMAPHORE0   \
-                                      : ((n) == 1) ? SEMAPHORE1 \
-                                      : 0x0UL)
-#define SEMAPHORE_NUM(ref)           (((ref) == SEMAPHORE0) ? 0   \
-                                      : ((ref) == SEMAPHORE1) ? 1 \
-                                      : -1)
+#define SEMAPHORE(n)                    (((n) == 0) ? SEMAPHORE0   \
+                                         : ((n) == 1) ? SEMAPHORE1 \
+                                         : 0x0UL)
+#define SEMAPHORE_NUM(ref)              (((ref) == SEMAPHORE0) ? 0   \
+                                         : ((ref) == SEMAPHORE1) ? 1 \
+                                         : -1)
 
 /* Instance macros for SOCPLL */
-#define SOCPLL(n)                    (((n) == 0) ? SOCPLL0 \
-                                      : 0x0UL)
-#define SOCPLL_NUM(ref)              (((ref) == SOCPLL0) ? 0 \
-                                      : -1)
+#define SOCPLL(n)                       (((n) == 0) ? SOCPLL0 \
+                                         : 0x0UL)
+#define SOCPLL_NUM(ref)                 (((ref) == SOCPLL0) ? 0 \
+                                         : -1)
 
 /* Instance macros for TIMER */
-#define TIMER(n)                     (((n) == 0) ? TIMER0   \
-                                      : ((n) == 1) ? TIMER1 \
-                                      : ((n) == 2) ? TIMER2 \
-                                      : ((n) == 3) ? TIMER3 \
-                                      : 0x0UL)
-#define TIMER_NUM(ref)               (((ref) == TIMER0) ? 0   \
-                                      : ((ref) == TIMER1) ? 1 \
-                                      : ((ref) == TIMER2) ? 2 \
-                                      : ((ref) == TIMER3) ? 3 \
-                                      : -1)
-#define TIMER_CC_NUM(n)              (((n) == 0) ? TIMER0_CC_NUM   \
-                                      : ((n) == 1) ? TIMER1_CC_NUM \
-                                      : ((n) == 2) ? TIMER2_CC_NUM \
-                                      : ((n) == 3) ? TIMER3_CC_NUM \
-                                      : 0x0UL)
-#define TIMER_CNTWIDTH(n)            (((n) == 0) ? TIMER0_CNTWIDTH   \
-                                      : ((n) == 1) ? TIMER1_CNTWIDTH \
-                                      : ((n) == 2) ? TIMER2_CNTWIDTH \
-                                      : ((n) == 3) ? TIMER3_CNTWIDTH \
-                                      : 0x0UL)
-#define TIMER_DITHERWIDTH(n)         (((n) == 0) ? TIMER0_DITHERWIDTH   \
-                                      : ((n) == 1) ? TIMER1_DITHERWIDTH \
-                                      : ((n) == 2) ? TIMER2_DITHERWIDTH \
-                                      : ((n) == 3) ? TIMER3_DITHERWIDTH \
-                                      : 0x0UL)
-#define TIMER_DTI(n)                 (((n) == 0) ? TIMER0_DTI   \
-                                      : ((n) == 1) ? TIMER1_DTI \
-                                      : ((n) == 2) ? TIMER2_DTI \
-                                      : ((n) == 3) ? TIMER3_DTI \
-                                      : 0x0UL)
-#define TIMER_DTI_CC_NUM(n)          (((n) == 0) ? TIMER0_DTI_CC_NUM   \
-                                      : ((n) == 1) ? TIMER1_DTI_CC_NUM \
-                                      : ((n) == 2) ? TIMER2_DTI_CC_NUM \
-                                      : ((n) == 3) ? TIMER3_DTI_CC_NUM \
-                                      : 0x0UL)
-#define TIMER_NO_DTI(n)              (((n) == 0) ? TIMER0_NO_DTI   \
-                                      : ((n) == 1) ? TIMER1_NO_DTI \
-                                      : ((n) == 2) ? TIMER2_NO_DTI \
-                                      : ((n) == 3) ? TIMER3_NO_DTI \
-                                      : 0x0UL)
+#define TIMER(n)                        (((n) == 0) ? TIMER0   \
+                                         : ((n) == 1) ? TIMER1 \
+                                         : ((n) == 2) ? TIMER2 \
+                                         : ((n) == 3) ? TIMER3 \
+                                         : 0x0UL)
+#define TIMER_NUM(ref)                  (((ref) == TIMER0) ? 0   \
+                                         : ((ref) == TIMER1) ? 1 \
+                                         : ((ref) == TIMER2) ? 2 \
+                                         : ((ref) == TIMER3) ? 3 \
+                                         : -1)
+#define TIMER_CC_NUM(n)                 (((n) == 0) ? TIMER0_CC_NUM   \
+                                         : ((n) == 1) ? TIMER1_CC_NUM \
+                                         : ((n) == 2) ? TIMER2_CC_NUM \
+                                         : ((n) == 3) ? TIMER3_CC_NUM \
+                                         : 0x0UL)
+#define TIMER_CNTWIDTH(n)               (((n) == 0) ? TIMER0_CNTWIDTH   \
+                                         : ((n) == 1) ? TIMER1_CNTWIDTH \
+                                         : ((n) == 2) ? TIMER2_CNTWIDTH \
+                                         : ((n) == 3) ? TIMER3_CNTWIDTH \
+                                         : 0x0UL)
+#define TIMER_DITHERWIDTH(n)            (((n) == 0) ? TIMER0_DITHERWIDTH   \
+                                         : ((n) == 1) ? TIMER1_DITHERWIDTH \
+                                         : ((n) == 2) ? TIMER2_DITHERWIDTH \
+                                         : ((n) == 3) ? TIMER3_DITHERWIDTH \
+                                         : 0x0UL)
+#define TIMER_DTI(n)                    (((n) == 0) ? TIMER0_DTI   \
+                                         : ((n) == 1) ? TIMER1_DTI \
+                                         : ((n) == 2) ? TIMER2_DTI \
+                                         : ((n) == 3) ? TIMER3_DTI \
+                                         : 0x0UL)
+#define TIMER_DTI_CC_NUM(n)             (((n) == 0) ? TIMER0_DTI_CC_NUM   \
+                                         : ((n) == 1) ? TIMER1_DTI_CC_NUM \
+                                         : ((n) == 2) ? TIMER2_DTI_CC_NUM \
+                                         : ((n) == 3) ? TIMER3_DTI_CC_NUM \
+                                         : 0x0UL)
+#define TIMER_NO_DTI(n)                 (((n) == 0) ? TIMER0_NO_DTI   \
+                                         : ((n) == 1) ? TIMER1_NO_DTI \
+                                         : ((n) == 2) ? TIMER2_NO_DTI \
+                                         : ((n) == 3) ? TIMER3_NO_DTI \
+                                         : 0x0UL)
 
 /* Instance macros for WDOG */
-#define WDOG(n)                      (((n) == 0) ? WDOG0   \
-                                      : ((n) == 1) ? WDOG1 \
-                                      : 0x0UL)
-#define WDOG_NUM(ref)                (((ref) == WDOG0) ? 0   \
-                                      : ((ref) == WDOG1) ? 1 \
-                                      : -1)
-#define WDOG_PCNUM(n)                (((n) == 0) ? WDOG0_PCNUM   \
-                                      : ((n) == 1) ? WDOG1_PCNUM \
-                                      : 0x0UL)
+#define WDOG(n)                         (((n) == 0) ? WDOG0   \
+                                         : ((n) == 1) ? WDOG1 \
+                                         : 0x0UL)
+#define WDOG_NUM(ref)                   (((ref) == WDOG0) ? 0   \
+                                         : ((ref) == WDOG1) ? 1 \
+                                         : -1)
+#define WDOG_PCNUM(n)                   (((n) == 0) ? WDOG0_PCNUM   \
+                                         : ((n) == 1) ? WDOG1_PCNUM \
+                                         : 0x0UL)
 
 /** @} End of group SIMG301M114LIH_Peripheral_Parameters  */
 

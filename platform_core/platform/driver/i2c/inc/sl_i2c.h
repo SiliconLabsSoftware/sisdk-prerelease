@@ -344,7 +344,8 @@ sl_status_t sl_i2c_configure_dma(sl_i2c_handle_t *i2c_handle,
  * Leader Mode: Send data to the specified follower device (blocking).
  *
  * @details Transmits data to the follower device. Blocks until the transfer
- *          completes successfully or an error occurs.
+ *          completes successfully or an error occurs. When @p tx_len is 0, this
+ *          is an address-only write (START + address + STOP with no payload).
  *
  * @param[in] i2c_handle         Pointer to the I2C instance handle.
  * @param[in] address            Address of the follower device.
@@ -352,11 +353,14 @@ sl_status_t sl_i2c_configure_dma(sl_i2c_handle_t *i2c_handle,
  * @param[in] tx_len             Length of the data to transmit.
  * @param[in] timeout            Timeout duration in milliseconds (0 = no timeout).
  *
+ * @note @p tx_buffer may be NULL only when @p tx_len is 0 (address-only write).
+ *
  * @return
  *   - SL_STATUS_OK on success.
- *   - SL_STATUS_NULL_POINTER if arguments are NULL.
+ *   - SL_STATUS_NULL_POINTER if i2c_handle is NULL, or if tx_buffer is NULL
+ *     when tx_len is greater than 0.
  *   - SL_STATUS_INVALID_MODE if not in leader mode.
- *   - SL_STATUS_INVALID_PARAMETER if length/address invalid.
+ *   - SL_STATUS_INVALID_PARAMETER if address is invalid.
  *   - SL_STATUS_TIMEOUT if operation timed out.
  *   - SL_STATUS_NOT_FOUND if address NACK received.
  *   - SL_STATUS_ABORT if data NACK received.

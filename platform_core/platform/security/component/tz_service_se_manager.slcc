@@ -236,6 +236,10 @@ template_contribution:
   condition: [trustzone_nonsecure, device_security_vault]
   unless: [device_sdid_200]
 
+documentation:
+  docset: gecko-platform
+  document:
+  - page: platform-security-api/sl-se-manager
 metadata:
   sbom:
     license: Zlib

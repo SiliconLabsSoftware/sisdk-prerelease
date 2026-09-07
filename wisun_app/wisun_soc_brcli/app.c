@@ -86,6 +86,10 @@
 #define APP_SERVICE_TASK_PRIORITY  osPriorityBelowNormal1
 #define APP_SERVICE_TASK_STACK_SIZE  500 // in units of CPU_INT32U
 
+#define APP_SERVICE_TASK_FLAG_SOCKET_NONE  (0)
+#define APP_SERVICE_TASK_FLAG_SOCKET_READY (1 << 0)
+#define APP_SERVICE_TASK_FLAG_ALL          ((1 << 1) - 1)
+
 SL_PACK_START(1)
 typedef struct {
   uint8_t type;
@@ -293,6 +297,10 @@ static app_socket_entry_t app_socket_entries[APP_MAX_SOCKET_ENTRIES];
 
 static bool app_started;
 static int app_dhcpv6_socket = SOCKET_INVALID_ID;
+#ifdef SL_CATALOG_WISUN_BR_DHCPV6_SERVER_PRESENT
+static int app_dhcpv6_link_local_socket = SOCKET_INVALID_ID;
+#endif
+static osEventFlagsId_t app_service_event_flags = NULL;
 static char crash_buff[300] = { 0 };
 
 typedef struct
@@ -702,10 +710,24 @@ static void app_service_task(void* arguments)
   static uint8_t buffer[350];
   fd_set readfds;
   int retval, max_sd = -1;
+
   (void)arguments;
   sl_wisun_trace_info("app_service_task: service task starting");
+  EFM_ASSERT((osEventFlagsWait(app_service_event_flags,
+                            APP_SERVICE_TASK_FLAG_ALL,
+                            osFlagsWaitAny,
+                            osWaitForever) & CMSIS_RTOS_ERROR_MASK) == 0);
+
   while (1) {
     FD_ZERO(&readfds);
+    max_sd = -1;
+
+#ifdef SL_CATALOG_WISUN_BR_DHCPV6_SERVER_PRESENT
+    if (app_dhcpv6_link_local_socket >= 0) {
+      FD_SET(app_dhcpv6_link_local_socket, &readfds);
+      max_sd = MAX(app_dhcpv6_link_local_socket, max_sd);
+    }
+#endif
     if (app_dhcpv6_socket >= 0) {
       FD_SET(app_dhcpv6_socket, &readfds);
       max_sd = MAX(app_dhcpv6_socket, max_sd);
@@ -719,6 +741,18 @@ static void app_service_task(void* arguments)
       sl_wisun_trace_error("app_service_task: select error %d", retval);
       goto cleanup;
     }
+
+#ifdef SL_CATALOG_WISUN_BR_DHCPV6_SERVER_PRESENT
+    if (app_dhcpv6_link_local_socket >= 0 && FD_ISSET(app_dhcpv6_link_local_socket, &readfds)) {
+      addrlen = sizeof(sockaddr_in6_t);
+      count = recvfrom(app_dhcpv6_link_local_socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&src_addr, &addrlen);
+      if (count < 0) {
+        sl_wisun_trace_error("dhcpv6_server_task: recvfrom error %d", count);
+        continue;
+      }
+      sl_wisun_br_dhcpv6_server_on_recv(buffer, count, src_addr.sin6_addr, src_addr.sin6_port);
+    }
+#endif
     if (app_dhcpv6_socket >= 0 && FD_ISSET(app_dhcpv6_socket, &readfds)) {
       addrlen = sizeof(sockaddr_in6_t);
       count = recvfrom(app_dhcpv6_socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&src_addr, &addrlen);
@@ -758,30 +792,65 @@ static sl_status_t app_service_task_start(void)
 
 #if defined(SL_CATALOG_WISUN_BR_DHCPV6_SERVER_PRESENT) || \
     defined(SL_CATALOG_WISUN_BR_DHCPV6_RELAY_PRESENT)
-static sl_status_t app_init_dhcpv6_socket(void) {
-
-  int retval;
-
-  const sockaddr_in6_t bind_addr = {
+static sl_status_t app_init_dhcpv6_sockets(const struct in6_addr *addr)
+{
+  sockaddr_in6_t bind_addr = {
     .sin6_family = AF_INET6,
     .sin6_port = htons(DHCPV6_SERVER_PORT),
-    .sin6_flowinfo = 0,
     .sin6_addr = IN6ADDR_ANY_INIT,
-    .sin6_scope_id = 0,
   };
-  app_dhcpv6_socket = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
+  int retval;
+
   if (app_dhcpv6_socket == SOCKET_INVALID_ID) {
+    app_dhcpv6_socket = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
+    if (app_dhcpv6_socket == SOCKET_INVALID_ID) {
+      printf("[Failed: failed to open DHCPv6 socket]\r\n");
+      goto failure;
+    }
+    retval = bind(app_dhcpv6_socket, (const struct sockaddr *)&bind_addr, sizeof(sockaddr_in6_t));
+    if (retval < 0) {
+      printf("[Failed: failed to bind DHCPv6 socket (%d)]\r\n", retval);
+      goto failure;
+    }
+  }
+
+#ifdef SL_CATALOG_WISUN_BR_DHCPV6_SERVER_PRESENT
+  if (app_dhcpv6_link_local_socket != SOCKET_INVALID_ID || addr == NULL) {
+    return SL_STATUS_OK;
+  }
+
+  app_dhcpv6_link_local_socket = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
+  if (app_dhcpv6_link_local_socket == SOCKET_INVALID_ID) {
     printf("[Failed: failed to open DHCPv6 socket]\r\n");
-    goto cleanup;
+    goto failure;
   }
-  retval = bind(app_dhcpv6_socket, (const struct sockaddr *)&bind_addr, sizeof(sockaddr_in6_t));
+  retval = setsockopt(app_dhcpv6_link_local_socket, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int));
   if (retval < 0) {
-    printf("[Failed: failed to bind DHCPv6 socket (%d)]\r\n", retval);
-    goto cleanup;
+    printf("[Failed: failed to set SO_REUSEADDR on DHCPv6 link-local socket (%d)]\r\n", retval);
+    goto failure;
   }
+  memcpy(&bind_addr.sin6_addr, addr->address, IPV6_ADDR_SIZE);
+  retval = bind(app_dhcpv6_link_local_socket, (const struct sockaddr *)&bind_addr, sizeof(sockaddr_in6_t));
+  if (retval < 0) {
+    printf("[Failed: failed to bind DHCPv6 link-local socket (%d)]\r\n", retval);
+    goto failure;
+  }
+#else
+  (void)addr;
+#endif
   return SL_STATUS_OK;
-cleanup:
-  close(app_dhcpv6_socket);
+
+failure:
+  if (app_dhcpv6_socket != SOCKET_INVALID_ID) {
+    close(app_dhcpv6_socket);
+    app_dhcpv6_socket = SOCKET_INVALID_ID;
+  }
+#ifdef SL_CATALOG_WISUN_BR_DHCPV6_SERVER_PRESENT
+  if (app_dhcpv6_link_local_socket != SOCKET_INVALID_ID) {
+    close(app_dhcpv6_link_local_socket);
+    app_dhcpv6_link_local_socket = SOCKET_INVALID_ID;
+  }
+#endif
   return SL_STATUS_FAIL;
 }
 #endif
@@ -842,6 +911,11 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
   sl_wisun_mac_address_t address;
   int retval;
   const sl_wisun_regulation_params_t *regulation_params;
+#ifdef SL_CATALOG_WISUN_BR_DHCPV6_SERVER_PRESENT
+  struct in6_addr global_unicast_addr = { 0 };
+  struct in6_addr link_local_addr = { 0 };
+  struct in6_addr dodagid_addr = { 0 };
+#endif
 
   app_wisun_cli_mutex_lock();
 
@@ -1176,15 +1250,46 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
     goto cleanup;
   }
 #endif
+
+  status = sl_wisun_br_start((const uint8_t *)app_settings_wisun.network_name, &phy_config);
+  if (status != SL_STATUS_OK) {
+    printf("[Failed: unable to start border router (%"PRIu32")]\r\n", status);
+    goto cleanup;
+  }
+
+#if defined(SL_CATALOG_WISUN_BR_DHCPV6_RELAY_PRESENT)
+  status = app_init_dhcpv6_sockets(NULL);
+  if (status != SL_STATUS_OK) {
+    printf("[Failed: could not open DHCPv6 socket (%"PRIu32")]\r\n", status);
+    sl_wisun_br_stop();
+    goto cleanup;
+  }
+#endif
+
 #ifdef SL_CATALOG_WISUN_BR_DHCPV6_SERVER_PRESENT
+  status = sl_wisun_br_get_ip_addresses(link_local_addr.address, global_unicast_addr.address, dodagid_addr.address);
+  if (status != SL_STATUS_OK) {
+    printf("[Failed: could not get BR addresses (%"PRIu32")]\r\n", status);
+    sl_wisun_br_stop();
+    goto cleanup;
+  }
+  status = app_init_dhcpv6_sockets(&link_local_addr);
+  if (status != SL_STATUS_OK) {
+    printf("[Failed: could not open DHCPv6 socket (%"PRIu32")]\r\n", status);
+    sl_wisun_br_stop();
+    goto cleanup;
+  }
   status = sl_wisun_get_mac_address(&address);
   if (status != SL_STATUS_OK) {
     printf("[Failed: could not get MAC address to start DHCPv6 Server (%"PRIu32")]\r\n", status);
+    sl_wisun_br_stop();
     goto cleanup;
   }
-  status = sl_wisun_br_dhcpv6_server_start(app_dhcpv6_socket, ipv6_prefix, address.address, LIFETIME_INFINITE);
+  status = sl_wisun_br_dhcpv6_server_start_with_link_local_socket(app_dhcpv6_socket, app_dhcpv6_link_local_socket,
+                                                                  ipv6_prefix, address.address, LIFETIME_INFINITE);
   if (status != SL_STATUS_OK) {
     printf("[Failed: could not start DHCPv6 Server]\r\n");
+    sl_wisun_br_stop();
     goto cleanup;
   }
 #else
@@ -1194,22 +1299,22 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
   retval = stoip6(app_settings_wisun.dhcpv6_server, strlen(app_settings_wisun.dhcpv6_server), ipv6_addr);
   if (!retval) {
     printf("[Failed: could not parse DHCPv6 Server's IPv6 address (%d)]\r\n", retval);
+    sl_wisun_br_stop();
     goto cleanup;
   }
   status = sl_wisun_br_dhcpv6_relay_start(app_dhcpv6_socket, ipv6_addr);
   if (status != SL_STATUS_OK) {
     printf("[Failed: could not start DHCPv6 Relay]\r\n");
+    sl_wisun_br_stop();
     goto cleanup;
   }
 #else
   (void)ipv6_addr;
 #endif
 
-  status = sl_wisun_br_start((const uint8_t *)app_settings_wisun.network_name, &phy_config);
-  if (status != SL_STATUS_OK) {
-    printf("[Failed: unable to start border router (%"PRIu32")]\r\n", status);
-    goto cleanup;
-  }
+#if defined(SL_CATALOG_WISUN_BR_DHCPV6_SERVER_PRESENT) || defined(SL_CATALOG_WISUN_BR_DHCPV6_RELAY_PRESENT)
+  EFM_ASSERT((osEventFlagsSet(app_service_event_flags, APP_SERVICE_TASK_FLAG_SOCKET_READY) & CMSIS_RTOS_ERROR_MASK) == 0);
+#endif
 
 #if SL_RAIL_IEEE802154_SUPPORTS_G_MODE_SWITCH
   // Configure POM-IE
@@ -1809,9 +1914,9 @@ static void app_task(void *argument)
 #endif
 #if defined(SL_CATALOG_WISUN_BR_DHCPV6_SERVER_PRESENT) || \
     defined(SL_CATALOG_WISUN_BR_DHCPV6_RELAY_PRESENT)
-  status = app_init_dhcpv6_socket();
-  if (status != SL_STATUS_OK) {
-    printf("[Failed: could not open DHCPv6 socket (%"PRIu32")]\r\n", status);
+  app_service_event_flags = osEventFlagsNew(NULL);
+  if (app_service_event_flags == NULL) {
+    printf("[Failed: could not create app service event flags]\r\n");
     osThreadExit();
   }
   status = app_service_task_start();

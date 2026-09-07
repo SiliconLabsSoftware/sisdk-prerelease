@@ -10,7 +10,7 @@ ui_hints:
 
 provides:
 - name: aes_ccm_ram_functions
-  condition: [device_generic_family_sixx301]
+  condition: [device_series_3]
 
 requires:
 - name: sxsymcrypt

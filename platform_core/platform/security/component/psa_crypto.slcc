@@ -109,7 +109,7 @@ template_contribution:
   value: psa_crypto
 
 documentation:
-  url: https://armmbed.github.io/mbed-crypto/html/
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/
 
 metadata:
   sbom:

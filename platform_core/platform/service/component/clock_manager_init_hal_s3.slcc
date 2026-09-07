@@ -16,6 +16,7 @@ provides:
 - name: clock_manager_init_hal_s3
 requires:
 - name: device_series_3
+- name: clock_manager_init_selection
 - name: status
 - name: sl_assert
 - name: sl_core

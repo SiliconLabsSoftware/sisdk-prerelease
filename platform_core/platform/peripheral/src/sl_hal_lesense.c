@@ -174,6 +174,12 @@ void sl_hal_lesense_init(const sl_hal_lesense_init_t *init)
                      | ((uint32_t)init->decoder_control.hysteresis_prs2 << _LESENSE_DECCTRL_HYSTPRS2_SHIFT)
                      | ((uint32_t)init->decoder_control.hysteresis_irq << _LESENSE_DECCTRL_HYSTIRQ_SHIFT)
                      | ((uint32_t)init->decoder_control.prs_count << _LESENSE_DECCTRL_PRSCNT_SHIFT);
+  SL_PRINT_STRING_DEBUG("start_delay=%d fifo=%d\r\n",
+                        (int)init->time_control.start_delay,
+                        (int)init->core_control.fifo_trigger_level);
+  SL_PRINT_STRING_DEBUG("scan_start=%d debug_run=%d\r\n",
+                        (int)init->core_control.scan_start,
+                        (int)init->core_control.debug_run);
 }
 
 /***************************************************************************//**
@@ -217,6 +223,12 @@ uint32_t sl_hal_lesense_set_scan_frequency(uint32_t reference_frequency,
 
   // For testing the calculation algorithm.
   calculate_scan_frequency = (reference_frequency / ((1UL + period_counter_top) * clock_divisor));
+  SL_PRINT_STRING_DEBUG("ref=%lu scan=%lu\r\n",
+                        (unsigned long)reference_frequency,
+                        (unsigned long)scan_frequency);
+  SL_PRINT_STRING_DEBUG("actual=%lu prescaler=%lu\r\n",
+                        (unsigned long)calculate_scan_frequency,
+                        (unsigned long)period_counter_prescaler);
 
   return calculate_scan_frequency;
 }
@@ -250,6 +262,9 @@ void sl_hal_lesense_set_clock_division(sl_hal_lesense_excitation_clock_t clock,
       SL_LOG_DEBUG_ASSERT(0);
       break;
   }
+  SL_PRINT_STRING_DEBUG("clock=%d divisor=%d\r\n",
+                        (int)clock,
+                        (int)clock_divisor);
 }
 
 /***************************************************************************//**

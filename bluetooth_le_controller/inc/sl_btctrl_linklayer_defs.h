@@ -150,6 +150,18 @@ struct sl_btctrl_cs_config {
   uint8_t cs_sync_antennas_max;
 };
 
+/** Absolute maximum supported CTE antenna switching pattern length. */
+#define SLI_BT_CONTROLLER_CTE_PATTERN_LENGTH_DEFAULT       (66)
+#define SLI_BT_CONTROLLER_CTE_PATTERN_LENGTH_ABSOLUTE_MAX (74)
+
+/**
+ * Constant Tone Extension configuration.
+ */
+struct sl_btctrl_cte_config {
+  /** Maximum antenna switching pattern length accepted by the controller. */
+  uint8_t max_pattern_length;
+};
+
 struct sl_btctrl_adv_config {
   enum sl_btctrl_advertiser_config_flags flags;
 };

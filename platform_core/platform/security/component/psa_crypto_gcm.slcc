@@ -19,7 +19,8 @@ template_contribution:
   value: "MBEDTLS_PSA_BUILTIN_ALG_GCM 1"
   condition: [mbedtls_gcm]
 documentation:
-  url: https://armmbed.github.io/mbed-crypto/html/api/ops/aead.html#c.PSA_ALG_GCM
+  # Authenticated Encryption — AES-GCM
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/psa-crypto-plugins
 metadata:
   sbom:
     reference: mbedtls_sbom

@@ -111,6 +111,9 @@ extern "C" {
 
 /** @} (end addtogroup sl_log_compiler_support) */
 
+/** @brief Cast logging argument to uint32_t safely */
+#define SL_LOG_U32_ARG(x) ((uint32_t)(uintptr_t)(x))
+
 
 
 
@@ -228,203 +231,203 @@ extern "C" {
 
 /** @brief Send debug log message with 1 argument */
 #define SL_PRINT_ARG1_DBG(EVENT, EVENT_TYPE, ARG1)                             \
-  sl_log_send_arg1(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, ARG1)
+  sl_log_send_arg1(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1))
 
 /** @brief Send error log message with 1 argument */
 #define SL_PRINT_ARG1_ERR(EVENT, EVENT_TYPE, ARG1)                             \
-  sl_log_send_arg1(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, ARG1)
+  sl_log_send_arg1(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1))
 
 /** @brief Send crash log message with 1 argument */
 #define SL_PRINT_ARG1_CRASH(EVENT, EVENT_TYPE, ARG1)                           \
-  sl_log_send_arg1(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, ARG1)
+  sl_log_send_arg1(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1))
 
 /** @brief Send warning log message with 1 argument */
 #define SL_PRINT_ARG1_WRN(EVENT, EVENT_TYPE, ARG1)                             \
-  sl_log_send_arg1(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, ARG1)
+  sl_log_send_arg1(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1))
 
 /** @brief Send info log message with 1 argument */
 #define SL_PRINT_ARG1_INFO(EVENT, EVENT_TYPE, ARG1)                            \
-  sl_log_send_arg1(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, ARG1)
+  sl_log_send_arg1(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1))
 
 /** @brief Send debug log message with 2 arguments */
 #define SL_PRINT_ARG2_DBG(EVENT, EVENT_TYPE, ARG1, ARG2)                       \
-  sl_log_send_arg2(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2)
+  sl_log_send_arg2(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),   \
+                   SL_LOG_U32_ARG(ARG2))
 
 /** @brief Send error log message with 2 arguments */
 #define SL_PRINT_ARG2_ERR(EVENT, EVENT_TYPE, ARG1, ARG2)                       \
-  sl_log_send_arg2(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2)
+  sl_log_send_arg2(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),   \
+                   SL_LOG_U32_ARG(ARG2))
 
 /** @brief Send crash log message with 2 arguments */
 #define SL_PRINT_ARG2_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2)                      \
-  sl_log_send_arg2(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2)
+  sl_log_send_arg2(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),   \
+                   SL_LOG_U32_ARG(ARG2))
 
 /** @brief Send warning log message with 2 arguments */
 #define SL_PRINT_ARG2_WRN(EVENT, EVENT_TYPE, ARG1, ARG2)                       \
-  sl_log_send_arg2(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2)
+  sl_log_send_arg2(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),    \
+                   SL_LOG_U32_ARG(ARG2))
 
 /** @brief Send info log message with 2 arguments */
 #define SL_PRINT_ARG2_INFO(EVENT, EVENT_TYPE, ARG1, ARG2)                      \
-  sl_log_send_arg2(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2)
+  sl_log_send_arg2(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),    \
+                   SL_LOG_U32_ARG(ARG2))
 
 /** @brief Send debug log message with 3 arguments */
 #define SL_PRINT_ARG3_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)                 \
-  sl_log_send_arg3(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3)
+  sl_log_send_arg3(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),   \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3))
 
 /** @brief Send error log message with 3 arguments */
 #define SL_PRINT_ARG3_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)                 \
-  sl_log_send_arg3(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3)
+  sl_log_send_arg3(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),   \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3))
 
 /** @brief Send crash log message with 3 arguments */
 #define SL_PRINT_ARG3_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)               \
-  sl_log_send_arg3(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3)
+  sl_log_send_arg3(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),   \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3))
 
 /** @brief Send warning log message with 3 arguments */
 #define SL_PRINT_ARG3_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)                 \
-  sl_log_send_arg3(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2, ARG3)
+  sl_log_send_arg3(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),    \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3))
 
 /** @brief Send info log message with 3 arguments */
 #define SL_PRINT_ARG3_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3)                \
-  sl_log_send_arg3(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2, ARG3)
+  sl_log_send_arg3(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),    \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3))
 
 #if (SL_LOG_CONFIG_ARG >= 4)
 /** @brief Send debug log message with 4 arguments */
 #define SL_PRINT_ARG4_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4)          \
-  sl_log_send_arg4(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4)
+  sl_log_send_arg4(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),  \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4))
 /** @brief Send error log message with 4 arguments */
 #define SL_PRINT_ARG4_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4)          \
-  sl_log_send_arg4(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3, ARG4)
+  sl_log_send_arg4(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),   \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4))
 /** @brief Send crash log message with 4 arguments */
 #define SL_PRINT_ARG4_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4)         \
-  sl_log_send_arg4(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3, ARG4)
+  sl_log_send_arg4(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),   \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4))
 /** @brief Send warning log message with 4 arguments */
 #define SL_PRINT_ARG4_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4)          \
-  sl_log_send_arg4(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2, ARG3, ARG4)
+  sl_log_send_arg4(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),    \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4))
 /** @brief Send info log message with 4 arguments */
 #define SL_PRINT_ARG4_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4)          \
-  sl_log_send_arg4(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3, ARG4)
+  sl_log_send_arg4(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),   \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4))
 #endif
 
 #if (SL_LOG_CONFIG_ARG >= 5)
 #define SL_PRINT_ARG5_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5)     \
-  sl_log_send_arg5(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3, ARG4, ARG5)
+  sl_log_send_arg5(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),   \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5))
 #define SL_PRINT_ARG5_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5)     \
-  sl_log_send_arg5(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3, ARG4, ARG5)
+  sl_log_send_arg5(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),   \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5))
 #define SL_PRINT_ARG5_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5)   \
-  sl_log_send_arg5(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3, ARG4, ARG5)
+  sl_log_send_arg5(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),   \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5))
 #define SL_PRINT_ARG5_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5)     \
-  sl_log_send_arg5(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2, ARG3, ARG4, ARG5)
+  sl_log_send_arg5(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),    \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5))
 #define SL_PRINT_ARG5_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5)    \
-  sl_log_send_arg5(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2, ARG3, ARG4, ARG5)
+  sl_log_send_arg5(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),    \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5))
 #endif
 
 #if (SL_LOG_CONFIG_ARG >= 6)
 #define SL_PRINT_ARG6_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6) \
-  sl_log_send_arg6(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3, ARG4, ARG5, ARG6)
+  sl_log_send_arg6(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),   \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6))
 #define SL_PRINT_ARG6_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6) \
-  sl_log_send_arg6(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4, ARG5, ARG6)
+  sl_log_send_arg6(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),  \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6))
 #define SL_PRINT_ARG6_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6) \
-  sl_log_send_arg6(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4, ARG5, ARG6)
+  sl_log_send_arg6(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),  \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6))
 #define SL_PRINT_ARG6_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6) \
-  sl_log_send_arg6(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2, ARG3, ARG4, ARG5, ARG6)
+  sl_log_send_arg6(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),    \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6))
 #define SL_PRINT_ARG6_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6) \
-  sl_log_send_arg6(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2, ARG3, ARG4, ARG5, ARG6)
+  sl_log_send_arg6(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),    \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6))
 #endif
 
 #if (SL_LOG_CONFIG_ARG >= 7)
 #define SL_PRINT_ARG7_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7) \
-  sl_log_send_arg7(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7)
+  sl_log_send_arg7(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),  \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7))
 #define SL_PRINT_ARG7_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7) \
-  sl_log_send_arg7(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7)
+  sl_log_send_arg7(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),  \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7))
 #define SL_PRINT_ARG7_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7) \
-  sl_log_send_arg7(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7)
+  sl_log_send_arg7(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),  \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7))
 #define SL_PRINT_ARG7_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7) \
-  sl_log_send_arg7(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7)
+  sl_log_send_arg7(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),    \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7))
 #define SL_PRINT_ARG7_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7) \
-  sl_log_send_arg7(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7)
+  sl_log_send_arg7(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),   \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7))
 #endif
 
 #if (SL_LOG_CONFIG_ARG >= 8)
 #define SL_PRINT_ARG8_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8) \
-  sl_log_send_arg8(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8)
+  sl_log_send_arg8(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),  \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8))
 #define SL_PRINT_ARG8_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8) \
-  sl_log_send_arg8(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8)
+  sl_log_send_arg8(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),  \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8))
 #define SL_PRINT_ARG8_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8) \
-  sl_log_send_arg8(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8)
+  sl_log_send_arg8(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),  \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8))
 #define SL_PRINT_ARG8_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8) \
-  sl_log_send_arg8(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8)
+  sl_log_send_arg8(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),    \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8))
 #define SL_PRINT_ARG8_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8) \
-  sl_log_send_arg8(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8)
+  sl_log_send_arg8(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),   \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8))
 #endif
 
 #if (SL_LOG_CONFIG_ARG >= 9)
 #define SL_PRINT_ARG9_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9) \
-  sl_log_send_arg9(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9)
+  sl_log_send_arg9(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),  \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8), SL_LOG_U32_ARG(ARG9))
 #define SL_PRINT_ARG9_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9) \
-  sl_log_send_arg9(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9)
+  sl_log_send_arg9(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),  \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8), SL_LOG_U32_ARG(ARG9))
 #define SL_PRINT_ARG9_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9) \
-  sl_log_send_arg9(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, ARG1,  \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9)
+  sl_log_send_arg9(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),  \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8), SL_LOG_U32_ARG(ARG9))
 #define SL_PRINT_ARG9_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9) \
-  sl_log_send_arg9(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, ARG1,    \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9)
+  sl_log_send_arg9(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),    \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8), SL_LOG_U32_ARG(ARG9))
 #define SL_PRINT_ARG9_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9) \
-  sl_log_send_arg9(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, ARG1,   \
-                   ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9)
+  sl_log_send_arg9(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),   \
+                   SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8), SL_LOG_U32_ARG(ARG9))
 #endif
 
 #if (SL_LOG_CONFIG_ARG >= 10)
 #define SL_PRINT_ARG10_DBG(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10) \
-  sl_log_send_arg10(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, ARG1,  \
-                    ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10)
+  sl_log_send_arg10(EVENT, SL_LOG_CONFIG_LEVEL_DEBUG << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),  \
+                    SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8), SL_LOG_U32_ARG(ARG9), SL_LOG_U32_ARG(ARG10))
 #define SL_PRINT_ARG10_ERR(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10) \
-  sl_log_send_arg10(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, ARG1,  \
-                    ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10)
+  sl_log_send_arg10(EVENT, SL_LOG_CONFIG_LEVEL_ERROR << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),  \
+                    SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8), SL_LOG_U32_ARG(ARG9), SL_LOG_U32_ARG(ARG10))
 #define SL_PRINT_ARG10_CRASH(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10) \
-  sl_log_send_arg10(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, ARG1,  \
-                    ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10)
+  sl_log_send_arg10(EVENT, SL_LOG_CONFIG_LEVEL_CRASH << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),  \
+                    SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8), SL_LOG_U32_ARG(ARG9), SL_LOG_U32_ARG(ARG10))
 #define SL_PRINT_ARG10_WRN(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10) \
-  sl_log_send_arg10(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, ARG1,    \
-                    ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10)
+  sl_log_send_arg10(EVENT, SL_LOG_CONFIG_LEVEL_WARN << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),    \
+                    SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8), SL_LOG_U32_ARG(ARG9), SL_LOG_U32_ARG(ARG10))
 #define SL_PRINT_ARG10_INFO(EVENT, EVENT_TYPE, ARG1, ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10) \
-  sl_log_send_arg10(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, ARG1,   \
-                    ARG2, ARG3, ARG4, ARG5, ARG6, ARG7, ARG8, ARG9, ARG10)
+  sl_log_send_arg10(EVENT, SL_LOG_CONFIG_LEVEL_INFO << 1 | EVENT_TYPE, SL_LOG_U32_ARG(ARG1),   \
+                    SL_LOG_U32_ARG(ARG2), SL_LOG_U32_ARG(ARG3), SL_LOG_U32_ARG(ARG4), SL_LOG_U32_ARG(ARG5), SL_LOG_U32_ARG(ARG6), SL_LOG_U32_ARG(ARG7), SL_LOG_U32_ARG(ARG8), SL_LOG_U32_ARG(ARG9), SL_LOG_U32_ARG(ARG10))
 #endif
 
 #endif /* !defined(SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT) */
@@ -526,7 +529,9 @@ extern "C" {
  * @param ... Variable arguments (up to 10)
  */
 #define sl_printf_common(level, fmt, ...)                                      \
-  static const char SLI_LOG_UNIQUE_NAME(logstr_)[] SL_COMPACT_STRINGS_SECTION = fmt;               \
+  SL_ALIGN(1)                                                                  \
+  static const char SLI_LOG_UNIQUE_NAME(logstr_)[] SL_COMPACT_STRINGS_SECTION  \
+    SL_ATTRIBUTE_ALIGN(1) = fmt;                                               \
   _Static_assert(SLI_LOG_COUNT_ARGS(fmt, ##__VA_ARGS__) <= SL_LOG_CONFIG_ARG, "Too many arguments!");  \
   SL_CONCAT_PASTER_2(SLI_LOG_MACRO_CHOOSER1(SLI_LOG_COUNT_ARGS(fmt, ##__VA_ARGS__)), level)     \
   ((uintptr_t)SLI_LOG_UNIQUE_NAME(logstr_), 0, ##__VA_ARGS__)
@@ -827,8 +832,8 @@ extern "C" {
  *   - I/O Stream **formatted** backend (component
  *     @c log_backend_iostream_formatted): the format string is rendered on
  *     target with vsnprintf() and emitted to the recommended console
- *     iostream as `[TIMESTAMP] [CC] <text>` (each prefix optional, see
- *     sl_log_formatted_iostream_config.h). No trailing CR/LF is appended.
+ *     iostream as `[EEEEEEEE:TTTTTTTT] [CC] <text>` (each prefix optional,
+ *     see sl_log_formatted_iostream_config.h). No trailing CR/LF is appended.
  *   - All other backends (I/O Stream **compact**, @c log_none, or no
  *     backend installed): no strong implementation of
  *     @ref sl_log_vprint_target_ex is linked, so calls fall through to the

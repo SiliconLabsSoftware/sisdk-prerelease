@@ -26,6 +26,8 @@ define:
 template_contribution:
 - name: component_catalog
   value: zigbee_ncp_cpc
+documentation:
+  url: https://docs.silabs.com/zigbee/latest/customized-ncp-zigbee7/index.html
 metadata:
   sbom:
     license: MSLA

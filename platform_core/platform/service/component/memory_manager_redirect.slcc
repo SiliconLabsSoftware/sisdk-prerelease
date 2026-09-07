@@ -22,6 +22,7 @@ include:
 - path: src
   file_list:
   - path: sli_memory_manager.h
+  - path: sli_memory_manager_log.h
 source:
 - path: src/sl_memory_manager_redirect.c
 - path: src/sl_memory_manager_pool.c
@@ -34,6 +35,7 @@ requires:
 - name: sl_core
 - name: sl_common
 - name: status
+- name: log_none
 - name: memory_manager_region
   condition: [device_cortexm]
 - name: opn_device_host

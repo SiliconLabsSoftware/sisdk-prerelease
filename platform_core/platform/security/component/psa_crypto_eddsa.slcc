@@ -16,7 +16,7 @@ template_contribution:
 - name: psa_crypto_config
   value: PSA_WANT_ALG_EDDSA 1
 documentation:
-  url: https://armmbed.github.io/mbed-crypto/html/api/ops/sign.html#c.PSA_ALG_PURE_EDDSA
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/psa-crypto-plugins
 metadata:
   sbom:
     reference: mbedtls_sbom

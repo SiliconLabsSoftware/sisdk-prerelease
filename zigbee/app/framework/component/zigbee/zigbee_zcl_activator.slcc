@@ -12,6 +12,9 @@ provides:
 config_file:
 - path: app/framework/common/zcl_config.zap
   directory: zcl
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/app-framework-common
 metadata:
   sbom:
     license: MSLA

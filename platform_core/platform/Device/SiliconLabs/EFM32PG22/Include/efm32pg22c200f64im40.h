@@ -1148,6 +1148,12 @@ typedef enum IRQn{
 #define RDMEM_SEQ_RAM_ECC_EN                 0x1UL     /**> SEQ RAM ECCEN */
 #define RDMEM_SEQ_RAM_TOTAL_SIZE             0x4000UL  /**> SEQ_RAM_TOTAL_SIZE */
 
+/* Instance macros for DPLL */
+#define DPLL(n)                        (((n) == 0) ? DPLL0 \
+                                        : 0x0UL)
+#define DPLL_NUM(ref)                  (((ref) == DPLL0) ? 0 \
+                                        : -1)
+
 /* Instance macros for EUSART */
 #define EUSART(n)                      (((n) == 0) ? EUART0 \
                                         : 0x0UL)
@@ -1160,6 +1166,12 @@ typedef enum IRQn{
 
 /* Instance macros for GPCRC */
 #define GPCRC_NUM(ref)                 (((ref) == GPCRC) ? 0 \
+                                        : -1)
+
+/* Instance macros for HFRCO */
+#define HFRCO(n)                       (((n) == 0) ? HFRCO0 \
+                                        : 0x0UL)
+#define HFRCO_NUM(ref)                 (((ref) == HFRCO0) ? 0 \
                                         : -1)
 
 /* Instance macros for I2C */

@@ -25,8 +25,11 @@ extern "C" {
     sl_status_t (*pre_sleep_process)(const void *args);
     /** @brief Initialize logging system after wake-up */
     sl_status_t (*post_sleep_process)(const void *args);
-    /** @brief Get timestamp from captive core (1µs resolution counter) */
+    /** @brief Get timestamp from captive core (raw 32-bit timestamp counter) */
     uint32_t (*get_timestamp)(uint8_t core_id);
+    /** @brief Get the epoch (timestamp overflow count) latched during the most
+     * recent get_timestamp call, forming the high part of the 64-bit time. */
+    uint32_t (*get_timestamp_epoch)(uint8_t core_id);
     /** @brief Set captive core-specific configuration parameters */
     sl_status_t (*set_configuration)(const void *args, uint8_t core_id);
     /** @brief Get captive core-specific configuration parameters */

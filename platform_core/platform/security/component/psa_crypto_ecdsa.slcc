@@ -67,7 +67,7 @@ template_contribution:
   condition: [mbedtls_uses_psa_crypto]
 
 documentation:
-  url: https://armmbed.github.io/mbed-crypto/html/api/ops/sign.html#c.PSA_ALG_ECDSA
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/psa-crypto-plugins
 metadata:
   sbom:
     reference: mbedtls_sbom

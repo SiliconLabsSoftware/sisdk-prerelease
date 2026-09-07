@@ -18,10 +18,15 @@ requires:
 - name: hal_emu
   condition: [device_series_3]
 - name: event_handler
+config_file:
+- path: config/sl_openthread_watchdog_config.h
+  condition: [watchdog_manager]
 include:
 - path: src/legacy_hal/include
   file_list:
   - path: crash_handler.h
+  - path: watchdog_crash_catch.h
+    condition: [watchdog_manager]
 - path: platform/service/legacy_hal/inc
   file_list:
   - path: asm.h
@@ -39,6 +44,8 @@ include:
 source:
 - path: src/legacy_hal/crash_handler.c
 - path: src/legacy_hal/diagnostic.c
+- path: src/legacy_hal/watchdog_crash_catch.c
+  condition: [watchdog_manager]
 - path: platform/service/legacy_hal/src/faults.s
 define:
 - name: "PLATFORM_HEADER"
@@ -73,6 +80,13 @@ template_contribution:
     include: crash_handler.h
     handler: sl_ot_crash_handler_init
   condition: [sl_main]
+- name: event_handler
+  value:
+    event: service_init
+    include: watchdog_crash_catch.h
+    handler: sl_ot_watchdog_crash_catch_init
+  priority: -9350
+  condition: [watchdog_manager]
 - name: event_handler
   value:
     event: internal_app_init

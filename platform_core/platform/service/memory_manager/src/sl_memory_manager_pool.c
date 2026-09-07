@@ -30,6 +30,7 @@
 
 #include "sl_memory_manager.h"
 #include "sli_memory_manager.h"
+#include "sli_memory_manager_log.h"
 #include "sl_memory_manager_config.h"
 
 #include "sl_assert.h"
@@ -38,10 +39,6 @@
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
-#endif
-
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-#include "sli_memory_profiler.h"
 #endif
 
 #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
@@ -118,24 +115,22 @@ sl_status_t sl_memory_delete_pool(sl_memory_pool_t *pool_handle)
   sl_status_t status;
 
   if (pool_handle == NULL) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("delete_pool() failed: handle=NULL");
     return SL_STATUS_NULL_POINTER;
   }
 
   // Verify that the pool was properly initialized.
   if (pool_handle->block_address == NULL) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("delete_pool() failed: pool not init");
     return SL_STATUS_NULL_POINTER;
   }
 
   // Verify that no blocks are allocated.
   free_block_count = sl_memory_pool_get_free_block_count(pool_handle);
   if (free_block_count != pool_handle->block_count) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("delete_pool() failed: blocks in use");
     return SL_STATUS_INVALID_STATE;
   }
-
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  // Delete the memory tracker.
-  sli_memory_profiler_delete_tracker(pool_handle);
-#endif
 
   // Free block.
   status = sl_memory_free(pool_handle->block_address);
@@ -145,6 +140,10 @@ sl_status_t sl_memory_delete_pool(sl_memory_pool_t *pool_handle)
     SEGGER_SYSVIEW_PrintfHost("Pool @0x%08lX deleted", (unsigned long)(uintptr_t)pool_handle);
   }
 #endif
+
+  if (status == SL_STATUS_OK) {
+    SLI_MEMORY_MANAGER_LOG_INFO("delete_pool(): pool=%p", (uint32_t)pool_handle);
+  }
 
   return status;
 }
@@ -169,12 +168,10 @@ sl_status_t sl_memory_delete_pool_no_unreserve(sl_memory_pool_t *pool_handle)
 sl_status_t sl_memory_pool_alloc(sl_memory_pool_t *pool_handle,
                                  void **block)
 {
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  void * volatile return_address = sli_memory_profiler_get_return_address();
-#endif
   CORE_DECLARE_IRQ_STATE;
 
   if ((pool_handle == NULL) || (block == NULL)) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("pool_alloc() failed: handle or block=NULL");
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -185,9 +182,7 @@ sl_status_t sl_memory_pool_alloc(sl_memory_pool_t *pool_handle,
 
   if ((size_t)pool_handle->block_free == SLI_MEM_POOL_OUT_OF_MEMORY) {
     CORE_EXIT_ATOMIC();
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-    sli_memory_profiler_track_alloc_with_ownership(pool_handle, NULL, pool_handle->block_size, return_address);
-#endif
+    SLI_MEMORY_MANAGER_LOG_WARN("pool_alloc() failed: pool empty handle=%p", (uint32_t)pool_handle);
     return SL_STATUS_EMPTY;
   }
 
@@ -208,15 +203,14 @@ sl_status_t sl_memory_pool_alloc(sl_memory_pool_t *pool_handle,
 
   CORE_EXIT_ATOMIC();
 
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  sli_memory_profiler_track_alloc_with_ownership(pool_handle, block_addr, pool_handle->block_size, return_address);
-#endif
-
   *block = block_addr;
 
 #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
   SEGGER_SYSVIEW_HeapAllocEx(pool_handle, *block, pool_handle->block_size, 0);
 #endif
+
+  SLI_MEMORY_MANAGER_LOG_DEBUG("pool_alloc(): handle=%p addr=%p",
+                               (uint32_t)pool_handle, (uint32_t)*block);
 
   return SL_STATUS_OK;
 }
@@ -230,12 +224,14 @@ sl_status_t sl_memory_pool_free(sl_memory_pool_t *pool_handle,
   CORE_DECLARE_IRQ_STATE;
 
   if ((pool_handle == NULL) || (block == NULL)) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("pool_free() failed: handle or block=NULL");
     return SL_STATUS_NULL_POINTER;
   }
 
   // Validate that the provided address is in the pool payload range.
   if ((block < pool_handle->block_address)
       || ((size_t)block >= ((size_t)pool_handle->block_address + (pool_handle->block_size * pool_handle->block_count)))) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("pool_free() failed: addr=%p out of range", (uint32_t)block);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -256,16 +252,13 @@ sl_status_t sl_memory_pool_free(sl_memory_pool_t *pool_handle,
     if (block_is_in_free_list(pool_handle, block)) {
       // Block is actually in the free list - this is a double-free.
       CORE_EXIT_ATOMIC();
+      SLI_MEMORY_MANAGER_LOG_ERROR("pool_free() failed: double free addr=%p", (uint32_t)block);
       return SL_STATUS_INVALID_PARAMETER;
     }
     // False positive: user data happened to look like a free list pointer.
     // Proceed with normal free.
   }
 #endif // (defined(SL_MEMORY_MANAGER_POOL_DOUBLE_FREE_PROTECTION_ENABLE) && (SL_MEMORY_MANAGER_POOL_DOUBLE_FREE_PROTECTION_ENABLE == 1))
-
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  sli_memory_profiler_track_free(pool_handle, block);
-#endif
 
   // Save the current free block address in this block and update free list head.
   *(size_t *)block = (size_t)pool_handle->block_free;
@@ -276,6 +269,9 @@ sl_status_t sl_memory_pool_free(sl_memory_pool_t *pool_handle,
 #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
   SEGGER_SYSVIEW_HeapFree(pool_handle, block);
 #endif
+
+  SLI_MEMORY_MANAGER_LOG_DEBUG("pool_free(): handle=%p addr=%p",
+                               (uint32_t)pool_handle, (uint32_t)block);
 
   return SL_STATUS_OK;
 }
@@ -329,10 +325,6 @@ sl_status_t sl_memory_heap_create_pool_advanced(sl_memory_heap_t *heap,
                                                 size_t align,
                                                 sl_memory_pool_t *pool_handle)
 {
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  void * volatile return_address = sli_memory_profiler_get_return_address();
-#endif
-
   // Check proper alignment characteristics.
   EFM_ASSERT((align == SL_MEMORY_BLOCK_ALIGN_DEFAULT)
              || (SL_MATH_IS_PWR2(align)
@@ -350,6 +342,7 @@ sl_status_t sl_memory_heap_create_pool_advanced(sl_memory_heap_t *heap,
   size_t block_align = (align == SL_MEMORY_BLOCK_ALIGN_DEFAULT) ? SLI_BLOCK_ALLOC_MIN_ALIGN : align;
 
   if (pool_handle == NULL) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("create_pool_advanced() failed: handle=NULL");
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -363,19 +356,9 @@ sl_status_t sl_memory_heap_create_pool_advanced(sl_memory_heap_t *heap,
   pool_size = pool_handle->block_size * pool_handle->block_count;
   status = sl_memory_heap_alloc_advanced(heap, pool_size, align, BLOCK_TYPE_LONG_TERM, (void **)&block);
 
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  sli_memory_profiler_track_ownership(SLI_INVALID_MEMORY_TRACKER_HANDLE, block, return_address);
-#endif
-
   if (status != SL_STATUS_OK) {
     return status;
   }
-
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  // Create the tracker for the pool with no description. The code that created
-  // the pool can add the tracker description if relevant.
-  sli_memory_profiler_create_pool_tracker(pool_handle, NULL, block, pool_size);
-#endif
 
   pool_handle->block_address = (void *)block;
 
@@ -406,6 +389,10 @@ sl_status_t sl_memory_heap_create_pool_advanced(sl_memory_heap_t *heap,
   SEGGER_SYSVIEW_NameResource((uint32_t)pool_handle, pool_name);
   SEGGER_SYSVIEW_PrintfHost("Pool %lu created", (unsigned long)pool_id);
 #endif
+
+  SLI_MEMORY_MANAGER_LOG_INFO("create_pool_advanced(): blk_size=%u blk_cnt=%u",
+                              (uint32_t)block_size,
+                              (uint32_t)block_count);
 
   return status;
 }

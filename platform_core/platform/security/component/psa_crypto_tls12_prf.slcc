@@ -16,7 +16,8 @@ template_contribution:
 - name: psa_crypto_config
   value: PSA_WANT_ALG_TLS12_PRF 1
 documentation:
-  url: https://armmbed.github.io/mbed-crypto/html/api/ops/kdf.html#c.PSA_ALG_TLS12_PRF
+  # No dedicated TLS 1.2 PRF page; PSA Crypto hub for related docs
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/
 metadata:
   sbom:
     reference: mbedtls_sbom

@@ -76,10 +76,6 @@ source:
 readme:
   - path: ../../../documentation/example/rail_soc_simple_trx_auto_ack/readme.md
 
-other_file:
-  - path: hw_filter_tags.yaml
-    condition: [add_hw_filter_to_project]
-
 # -------------------------- Configuration overrides ---------------------------
 configuration:
   - name: SL_STACK_SIZE
@@ -280,7 +276,6 @@ tag:
   - hwfilter:!device:device_family_bgm24
   - hwfilter:!board:brd4183b
   - hwfilter:!device:device_family_mgm24
-
 
 filter:
   - name: Wireless Technology

@@ -39,6 +39,8 @@ recommends:
   condition: [device]
   vendor: silabs
 
+documentation:
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-mbedtls/
 metadata:
   sbom:
     reference: mbedtls_sbom

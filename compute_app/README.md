@@ -11,6 +11,9 @@ This package contains sample applications demonstrating Silicon Labs Compute SDK
   - **Description:** Shows various examples of using the Compute Math MVP functions. This app was moved from [platform-sample-apps](https://github.com/SiliconLabsInternal/platform-sample-apps) (`app/common/example/math_mvp_demo`).
   - **Use Case:** Learning the Compute SDK, math acceleration
   - **Platforms:** EFR32xG24/xG26 (baremetal), SiWG917 (baremetal)
+
 ## Documentation
 
 For detailed information about the Compute SDK and APIs, see the [Compute package](../compute) and [Compute Math MVP API reference](https://docs.silabs.com/compute/latest).
+
+To contribute sample apps or package changes, see [CONTRIBUTING.md](.github/CONTRIBUTING.md).

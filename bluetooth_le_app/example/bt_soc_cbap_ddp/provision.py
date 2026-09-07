@@ -135,7 +135,7 @@ key_att = KeyAtt(
     bits=PSA_KEY_BITS,
     algo=PSA_ALG_ECDSA_BASE | (PSA_ALG_SHA_256 & PSA_ALG_HASH_MASK),
     key_type=PSA_KEY_TYPE_ECC_KEY_PAIR_BASE | PSA_ECC_FAMILY_SECP_R1,
-    key_id=CBAP_PSA_DEVICE_KEY,
+    key_id=SL_BT_CBAP_PSA_DEVICE_KEY,
 )
 
 auth_data_att = KeyAtt(
@@ -143,7 +143,7 @@ auth_data_att = KeyAtt(
     bits=PSA_KEY_BITS,
     algo=PSA_ALG_NONE,
     key_type=PSA_KEY_TYPE_RAW_DATA,
-    key_id=CBAP_PSA_AUTH_DATA,
+    key_id=SL_BT_CBAP_PSA_AUTH_DATA,
 )
 
 
@@ -363,7 +363,7 @@ def main(ca_config: Path = CA_DEMO_CONFIG,
 
                 # Inject device certificate.
                 print("Injecting device certificate...")
-                status = psa_its_set(conn, CBAP_PSA_DEVICE_CERT, certificate)
+                status = psa_its_set(conn, SL_BT_CBAP_PSA_DEVICE_CERT, certificate)
                 if status != 0:
                     raise RuntimeError(f"Set PSA ITS failure: {status:#06x}")
                 print("Device certificate was injected with success.")
@@ -419,7 +419,7 @@ def _create_certificate(issuer: CertificateAuthority,
             x509.CertificatePolicies(policies=policy_info),
             critical=True)
     cert = cert.add_extension(
-        x509.KeyUsage(digital_signature=False,
+        x509.KeyUsage(digital_signature=True,  # Required for OOB data signing
                       content_commitment=False,
                       key_encipherment=False,
                       data_encipherment=False,
@@ -526,13 +526,13 @@ def _parse_and_verify_ca_chain(ca_config: Path) -> list[dict]:
 
         if ca["name"] == "root_ca":
             root_ca = ca
-            ca["psa_key"] = CBAP_PSA_ROOT_CERT
+            ca["psa_key"] = SL_BT_CBAP_PSA_ROOT_CERT
         elif ca["name"] == "factory_ca":
             factory_ca = ca
-            ca["psa_key"] = CBAP_PSA_FACTORY_CERT
+            ca["psa_key"] = SL_BT_CBAP_PSA_FACTORY_CERT
         elif ca["name"] == "batch_ca":
             batch_ca = ca
-            ca["psa_key"] = CBAP_PSA_BATCH_CERT
+            ca["psa_key"] = SL_BT_CBAP_PSA_BATCH_CERT
 
     cas = [ca for ca in (root_ca, factory_ca, batch_ca) if ca is not None]
     if not cas:

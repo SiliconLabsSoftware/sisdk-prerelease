@@ -59,6 +59,9 @@ void sl_hal_etampdet_init(const sl_hal_etampdet_init_t *init)
   // Set upper and lower clock prescaler
   ETAMPDET->CLKPRESCVAL = ((uint32_t)init->upper_clk_presc_val << _ETAMPDET_CLKPRESCVAL_UPPERPRESC_SHIFT)
                           | ((uint32_t)init->lower_clk_presc_val << _ETAMPDET_CLKPRESCVAL_LOWERPRESC_SHIFT);
+  SL_PRINT_STRING_INFO("upper_presc=%lu lower_presc=%lu\r\n",
+                      (unsigned long)init->upper_clk_presc_val,
+                      (unsigned long)init->lower_clk_presc_val);
 }
 
 /***************************************************************************//**
@@ -115,6 +118,12 @@ void sl_hal_etampdet_init_channel(const sl_hal_etampdet_channel_init_t *init_cha
   } else {
     ETAMPDET->CHNLSEEDVAL1 = init_channel->channel_seed_val;
   }
+  SL_PRINT_STRING_INFO("channel=%d em4_wakeup=%d\r\n",
+                      (int)init_channel->channel,
+                      (int)init_channel->em4_wakeup_en);
+  SL_PRINT_STRING_DEBUG("seed=0x%08lx mismatch=%lu\r\n",
+                      (unsigned long)init_channel->channel_seed_val,
+                      (unsigned long)init_channel->channel_cnt_mismatch);
 }
 
 /** @} (end addtogroup etampdet) */

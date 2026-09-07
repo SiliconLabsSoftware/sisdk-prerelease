@@ -38,3 +38,7 @@ template_contribution:
   value:
     include: sl_rtl_service.h
     handler: sl_rtl_service_rta_init_cs
+
+documentation:
+  docset: rtl-lib
+  document: group-sl-rtl-service

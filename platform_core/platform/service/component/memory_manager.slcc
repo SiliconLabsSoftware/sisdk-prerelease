@@ -23,6 +23,7 @@ include:
 - path: src
   file_list:
   - path: sli_memory_manager.h
+  - path: sli_memory_manager_log.h
 source:
 - path: src/sl_memory_manager.c
 - path: src/sl_memory_manager_dynamic_reservation.c
@@ -50,6 +51,7 @@ requires:
   condition: [cpp_support]
 - name: memory_manager_retention_control
 - name: errno_error_codes
+- name: log_none
 - name: memory_manager_psram
   condition: [device_has_psram]
 - name: memory_manager_dtcm

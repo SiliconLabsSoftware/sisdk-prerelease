@@ -546,9 +546,12 @@ zpal_radio_protocol_mode_t zpal_radio_get_protocol_mode(void);
  * @brief Function for setting the LBT RSSI level.
  *
  * @param[in] channel  uint8_t channel to set LBT threshold for.
- * @param[in] level         int8_t LBT RSSI level in dBm.
+ * @param[in] level    int8_t LBT RSSI level in dBm.
+ *
+ * @return @ref ZPAL_STATUS_OK if the threshold was applied.
+ *         @ref ZPAL_STATUS_INVALID_ARGUMENT if the threshold is not accepted.
  */
-void zpal_radio_set_lbt_level(uint8_t channel, int8_t level);
+zpal_status_t zpal_radio_set_lbt_level(uint8_t channel, int8_t level);
 
 /**
  * @brief Enable or disables reception of broadcast beam.

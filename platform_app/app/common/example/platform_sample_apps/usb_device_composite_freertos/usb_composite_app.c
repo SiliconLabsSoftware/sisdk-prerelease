@@ -135,6 +135,7 @@ static QueueHandle_t queue_handle;
 // Universal buffers used to transmit and receive data. Buffers must be aligned
 __ALIGNED(4) static uint8_t acm_terminal_output_buffer[ACM_TERMINAL_BUF_LEN];
 __ALIGNED(4) static uint8_t acm_terminal_input_buffer[ACM_TERMINAL_BUF_LEN];
+__ALIGNED(4) static uint8_t acm_terminal_read_buffer[ACM_TERMINAL_BUF_LEN];
 
 __ALIGNED(4) static uint8_t hid_mouse_report_buffer[4];
 
@@ -306,6 +307,7 @@ static void terminal_task(void *p_arg)
   uint8_t cdc_acm_nbr = (uint8_t)(uint32_t)p_arg;
   uint32_t xfer_len = 0u;
   uint32_t xfer_len_dummy = 0u;
+  uint32_t read_index;
   sl_status_t status = SL_STATUS_OK;
   __ALIGNED(4) uint8_t c = 0;
   uint8_t index = 0;
@@ -364,15 +366,22 @@ static void terminal_task(void *p_arg)
                               &xfer_len_dummy);
 
         while (1) {
-          // read one character at a time. Command is parsed
-          // when end of line is reached.
+          // The host can send the whole command in a single bulk packet, so the
+          // read buffer must be able to hold it. Command is parsed when end of
+          // line is reached.
           status = sl_usbd_cdc_acm_read(cdc_acm_nbr,
-                                        &c,
-                                        1,
+                                        acm_terminal_read_buffer,
+                                        sizeof(acm_terminal_read_buffer),
                                         0u,
                                         &xfer_len);
 
-          if (status == SL_STATUS_OK && xfer_len > 0) {
+          if (status != SL_STATUS_OK) {
+            break;
+          }
+
+          for (read_index = 0u; read_index < xfer_len; read_index++) {
+            c = acm_terminal_read_buffer[read_index];
+
             // Wait for endline.
             if (c == '\r' || c == '\n') {
               acm_terminal_input_buffer[index] = '\0';
@@ -425,6 +434,10 @@ static void terminal_task(void *p_arg)
               }
             }
           }
+
+          if (state == ACM_TERMINAL_STATE_MENU) {
+            break;
+          }
         }
         break;
 
@@ -447,14 +460,24 @@ static void terminal_task(void *p_arg)
 static void mouse_task(void *p_arg)
 {
   uint8_t hid_nbr = (uint8_t)(uint32_t)p_arg;
+  bool conn = false;
   sl_status_t status;
   queue_item_t item;
   BaseType_t xReturned;
   uint32_t xfer_len;
+  const TickType_t xDelay = pdMS_TO_TICKS(TASK_DELAY_MS);
 
   while (1) {
     xReturned = xQueueReceive(queue_handle, &item, portMAX_DELAY);
     EFM_ASSERT(xReturned == pdTRUE);
+
+    status = sl_usbd_hid_is_enabled(hid_nbr, &conn);
+    EFM_ASSERT(status == SL_STATUS_OK);
+    while (conn != true) {
+      vTaskDelay(xDelay);
+      status = sl_usbd_hid_is_enabled(hid_nbr, &conn);
+      EFM_ASSERT(status == SL_STATUS_OK);
+    }
 
     ((int8_t *)hid_mouse_report_buffer)[2u] = item.x;
     ((int8_t *)hid_mouse_report_buffer)[3u] = item.y;

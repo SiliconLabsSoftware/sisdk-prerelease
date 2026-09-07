@@ -154,6 +154,9 @@ template_contribution:
     name: customizedTable-print
     handler: sl_zigbee_af_green_power_server_cli_customized_table_print
     help: Prints all entries of the customizedTable.
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/green-power-translation-table
 metadata:
   sbom:
     license: MSLA

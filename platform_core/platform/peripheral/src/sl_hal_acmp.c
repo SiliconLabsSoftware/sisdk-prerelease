@@ -142,6 +142,11 @@ void sl_hal_acmp_init(ACMP_TypeDef *acmp,
 
   sl_hal_acmp_disable(acmp);
   sl_hal_acmp_wait_ready(acmp);
+
+  SL_PRINT_STRING_DEBUG("bias_prog=%d\r\n",
+                        (int)init->bias_prog);
+  SL_PRINT_STRING_DEBUG("vref_div=%d\r\n",
+                        (int)init->vref_div);
 }
 
 /***************************************************************************//**
@@ -181,6 +186,10 @@ void sl_hal_acmp_setup_gpio_inversion(ACMP_TypeDef *acmp,
   // Set GPIO inversion
   acmp->CTRL = (acmp->CTRL & ~_ACMP_CTRL_GPIOINV_MASK)
                | ((uint32_t)invert << _ACMP_CTRL_GPIOINV_SHIFT);
+
+  SL_PRINT_STRING_DEBUG("invert=%d, %d\r\n",
+                        (int)invert,
+                        (int)__LINE__);
 }
 
 /***************************************************************************//**
@@ -222,7 +231,11 @@ void sl_hal_acmp_set_input(ACMP_TypeDef *acmp,
                     | (positive_input << _ACMP_INPUTCTRL_POSSEL_SHIFT);
 
   // Wait for sync of INPUTCTRL to complete.
-  sl_hal_acmp_wait_sync(acmp);
+  sl_hal_acmp_wait_sync(ACMP0);
+
+  SL_PRINT_STRING_DEBUG("negative_input=%d positive_input=%d\r\n",
+                        (int)negative_input,
+                        (int)positive_input);
 }
 
 /***************************************************************************//**

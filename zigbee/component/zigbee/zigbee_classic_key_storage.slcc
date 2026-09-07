@@ -48,6 +48,9 @@ include:
 template_contribution:
 - name: component_catalog
   value: zigbee_classic_key_storage
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/zigbee-security-manager
 metadata:
   sbom:
     license: MSLA

@@ -23,6 +23,7 @@ provides:
 requires:
 - name: device_has_etampdet
 - name: enum
+- name: log_none
 documentation:
   docset: gecko-platform
   document:

@@ -142,21 +142,6 @@ static psa_status_t driver_can_handle(const psa_key_attributes_t *attributes,
 
   return PSA_SUCCESS;
 }
-static uint8_t* get_aead_block(sli_hostcrypto_transparent_aead_operation_t *operation)
-{
- #if defined(SLI_PSA_DRIVER_FEATURE_CHACHAPOLY)
-  if (PSA_ALG_AEAD_WITH_SHORTENED_TAG(operation->alg,
-                                      0)
-      == PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CHACHA20_POLY1305, 0)) {
-    return operation->block.chacha_block;
-  } else {
-    return operation->block.aes_block;
-  }
- #else
-  return operation->block.aes_block;
- #endif
-}
-
 static size_t get_aead_block_size(psa_algorithm_t alg)
 {
 #if defined(SLI_PSA_DRIVER_FEATURE_CHACHAPOLY)
@@ -929,6 +914,13 @@ psa_status_t sli_hostcrypto_transparent_aead_decrypt_tag(
     return psa_status;
   }
 
+  size_t expected_tag_len = PSA_AEAD_TAG_LENGTH(psa_get_key_type(attributes),
+                                                psa_get_key_bits(attributes),
+                                                alg);
+  if (tag_length != expected_tag_len) {
+      return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
   // Check key type and buffer size.
   psa_status = driver_can_handle(attributes, alg, key_buffer_size);
   if (psa_status != PSA_SUCCESS) {
@@ -1668,7 +1660,7 @@ psa_status_t sli_hostcrypto_transparent_aead_update(
   size_t bytes_left_in_block = aead_block_size - (operation->processed_len % aead_block_size);
   size_t actual_output_length = 0;
 
-  uint8_t *block = get_aead_block(operation);
+  uint8_t *block = operation->block;
 
   // If input can fit in the block then just copy it to the block
   if (input_length < bytes_left_in_block) {
@@ -1903,7 +1895,7 @@ psa_status_t sli_hostcrypto_transparent_aead_finish(
 
   int sx_status = SX_ERR_UNITIALIZED_OBJ;
 
-  uint8_t *block = get_aead_block(operation);
+  uint8_t *block = operation->block;
 
   if (operation->aead_ctx.dma.dmamem.cfg & get_aead_ctx_save_flag(operation->alg)) {
     if (sli_sxsymcrypt_lock_cryptomaster_selection(
@@ -2052,7 +2044,7 @@ psa_status_t sli_hostcrypto_transparent_aead_verify(
 
   int sx_status = SX_ERR_UNITIALIZED_OBJ;
 
-  uint8_t *block = get_aead_block(operation);
+  uint8_t *block = operation->block;
 
   if (operation->aead_ctx.dma.dmamem.cfg & get_aead_ctx_save_flag(operation->alg)) {
     if (sli_sxsymcrypt_lock_cryptomaster_selection(

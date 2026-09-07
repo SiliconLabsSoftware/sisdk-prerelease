@@ -407,6 +407,10 @@ sl_status_t sl_hal_emu_set_dcdc_mode(sl_hal_emu_dcdc_mode_t dcdc_mode)
 
   sl_hal_emu_dcdc_updated_hook();
 
+  SL_PRINT_STRING_INFO("dcdc_mode=%d, %d\r\n",
+                       (int)dcdc_mode,
+                       (int)__LINE__);
+
   return error;
 }
 
@@ -470,6 +474,10 @@ void sl_hal_emu_init_dcdc_boost(const sl_hal_emu_dcdc_boost_init_t *init)
   sl_hal_emu_set_dcdc_mode(SL_HAL_EMU_DCDC_MODE_REGULATION);
 
   sl_hal_emu_dcdc_updated_hook();
+
+  SL_PRINT_STRING_DEBUG("external_shutdown_enable=%d, %d\r\n",
+                        (int)init->external_shutdown_enable,
+                        (int)__LINE__);
 }
 
 /***************************************************************************//**
@@ -487,6 +495,10 @@ void sl_hal_emu_set_em01_boost_peak_current(const sl_hal_emu_dcdc_boost_em01_pea
                             ((uint32_t)boost_peak_current_em01 << _DCDC_BSTEM01CTRL_IPKVAL_SHIFT));
 
   sl_hal_emu_dcdc_updated_hook();
+
+  SL_PRINT_STRING_DEBUG("boost_peak_current_em01=%d, %d\r\n",
+                        (int)boost_peak_current_em01,
+                        (int)__LINE__);
 }
 
 #if defined(_DCDC_CTRL_DVDDBSTPRG_MASK)
@@ -644,6 +656,10 @@ void sl_hal_emu_init_dcdc(const sl_hal_emu_dcdc_init_t *init)
 #endif
 
   sl_hal_emu_dcdc_updated_hook();
+
+  SL_PRINT_STRING_DEBUG("mode=%d, %d\r\n",
+                        (int)init->mode,
+                        (int)__LINE__);
 }
 
 /***************************************************************************//**
@@ -661,6 +677,10 @@ void sl_hal_emu_set_em01_peak_current(const sl_hal_emu_dcdc_peak_current_t peak_
                             ((uint32_t)peak_current_em01 << _DCDC_EM01CTRL0_IPKVAL_SHIFT));
 
   sl_hal_emu_dcdc_updated_hook();
+
+  SL_PRINT_STRING_DEBUG("peak_current_em01=%d, %d\r\n",
+                        (int)peak_current_em01,
+                        (int)__LINE__);
 }
 
 #if defined(_DCDC_PFMXCTRL_IPKVAL_MASK)
@@ -685,6 +705,10 @@ void sl_hal_emu_set_dcdc_pfmx_mode_peak_current(uint32_t value)
                     | value << _DCDC_PFMXCTRL_IPKVAL_SHIFT);
 
   sl_hal_emu_dcdc_updated_hook();
+
+  SL_PRINT_STRING_DEBUG("value=%lu, %d\r\n",
+                        (unsigned long)value,
+                        (int)__LINE__);
 }
 #endif
 
@@ -703,6 +727,10 @@ SL_WEAK void sl_hal_emu_set_dcdc_pfmx_timeout_max_control(sl_hal_emu_dcdc_ton_ma
                     | value << _DCDC_PFMXCTRL_IPKTMAXCTRL_SHIFT);
 
   sl_hal_emu_dcdc_updated_hook();
+
+  SL_PRINT_STRING_DEBUG("value=%d, %d\r\n",
+                        (int)value,
+                        (int)__LINE__);
 }
 #endif /* defined(_DCDC_PFMXCTRL_IPKTMAXCTRL_MASK) */
 #endif /* defined(SL_HAL_EMU_DCDC_BUCK_PRESENT) */
@@ -745,6 +773,10 @@ void sl_hal_emu_dcdc_set_regulation_type(sl_hal_emu_dcdc_regulation_type_t regul
 #endif
 
   sl_hal_emu_dcdc_updated_hook();
+
+  SL_PRINT_STRING_INFO("regulation_type=%d, %d\r\n",
+                       (int)regulation_type,
+                       (int)__LINE__);
 }
 
 /***************************************************************************//**

@@ -19,6 +19,9 @@ template_contribution:
   value:
     callback_type: report_attributes
     function_name: sli_zigbee_af_general_response_commands_report_attributes_callback
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/general-response-commands
 metadata:
   sbom:
     license: MSLA

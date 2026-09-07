@@ -70,6 +70,9 @@ include:
 template_contribution:
 - name: component_catalog
   value: zigbee_host_unix_library
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/host-framework-common
 metadata:
   sbom:
     license: MSLA AND Zlib

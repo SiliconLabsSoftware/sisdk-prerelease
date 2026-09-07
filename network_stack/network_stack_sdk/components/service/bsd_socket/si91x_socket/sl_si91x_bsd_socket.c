@@ -901,8 +901,8 @@ int setsockopt(int socket_id, int option_level, int option_name, const void *opt
 
 int getsockopt(int socket_id, int option_level, int option_name, void *option_value, socklen_t *option_length)
 {
-  int16_t mss                            = 0;
-  const sli_si91x_socket_t *si91x_socket = sli_get_si91x_socket(socket_id);
+  int16_t mss                      = 0;
+  sli_si91x_socket_t *si91x_socket = sli_get_si91x_socket(socket_id);
 
   // Check if the socket is valid
   SLI_SET_ERRNO_AND_RETURN_IF_TRUE(si91x_socket == NULL, EBADF);
@@ -957,10 +957,11 @@ int getsockopt(int socket_id, int option_level, int option_name, void *option_va
     }
 
     case SO_ERROR: {
-      // Retrieve and copy the socket error (errno) and reset errno to 0
-      *option_length = SLI_GET_SAFE_MEMCPY_LENGTH(*option_length, sizeof(errno));
-      memcpy(option_value, &errno, *option_length);
-      errno = 0;
+      // Retrieve and copy the per-socket pending error and clear it
+      int32_t socket_error = si91x_socket->pending_error;
+      *option_length       = SLI_GET_SAFE_MEMCPY_LENGTH(*option_length, sizeof(socket_error));
+      memcpy(option_value, &socket_error, *option_length);
+      si91x_socket->pending_error = 0;
       break;
     }
 

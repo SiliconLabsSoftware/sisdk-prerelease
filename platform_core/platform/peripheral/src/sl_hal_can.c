@@ -505,7 +505,9 @@ sl_status_t sl_hal_can_init(CAN_TypeDef *can,
 
   // Configure the CAN bit rate.
   status = sl_hal_can_set_bit_rate(can, init->nominal_bitrate, init->data_bitrate);
-
+  SL_PRINT_STRING_INFO("mode=%d fd_enable=%d\r\n",
+    (int)init->mode,
+    (int)init->fd_enable);
   return status;
 }
 
@@ -559,7 +561,7 @@ sl_status_t sl_hal_can_deinit(CAN_TypeDef *can)
   can->DMUIE  = _CAN_DMUIE_RESETVALUE;
   can->DMUC  = _CAN_DMUC_RESETVALUE;
   can->CCCR   = _CAN_CCCR_RESETVALUE;
-
+  SL_PRINT_STRING_INFO("CAN deinit\r\n");
   // Return function status.
   return SL_STATUS_OK;
 }
@@ -598,7 +600,9 @@ sl_status_t sl_hal_can_set_bit_rate(CAN_TypeDef *can,
     can->DBTP |= CAN_DBTP_TDC;
 #endif
   }
-
+  SL_PRINT_STRING_INFO("nominal_br=%d data_br=%d\r\n",
+    (int)nominal_bitrate.prescaler,
+    (int)data_bitrate.prescaler);
   // Return error code.
   return SL_STATUS_OK;
 }
@@ -663,7 +667,9 @@ sl_status_t sl_hal_can_configure_filter(CAN_TypeDef *can,
     filter_address++;
     *filter_address = filter_element_word_two;
   }
-
+  SL_PRINT_STRING_DEBUG("idx=%d type=%d\r\n",
+    (int)config_filter->filter_index,
+    (int)config_filter->id_type);
   // Return error code.
   return SL_STATUS_OK;
 }
@@ -727,7 +733,6 @@ sl_status_t sl_hal_can_config_rx_fifo_over_write(CAN_TypeDef *can,
     // The RX buffer does not support blocking or overwrite mode.
     return SL_STATUS_INVALID_PARAMETER;
   }
-
   // Return function status.
   return SL_STATUS_OK;
 }
@@ -755,7 +760,6 @@ sl_status_t sl_hal_can_config_fifo_water_mark(CAN_TypeDef *can,
     can->RXF1C &= ~(_CAN_RXF1C_F1WM_MASK);
     can->RXF1C |= (water_mark << _CAN_RXF1C_F1WM_SHIFT);
   }
-
   // Return function status.
   return SL_STATUS_OK;
 }
@@ -1192,7 +1196,7 @@ sl_status_t sl_hal_can_enable_timeout_counter(CAN_TypeDef *can,
 
 // Enable timeout counter.
   can->TOCC |= CAN_TOCC_ETOC;
-
+  
   // Return function status.
   return SL_STATUS_OK;
 }

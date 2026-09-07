@@ -12,6 +12,8 @@ provides:
 - name: bluetooth_device_compatibility
 - name: device_supports_bluetooth_cs
   condition: ["device_generic_family_efr32xg24"]
+- name: device_supports_bluetooth_cs
+  condition: ["device_generic_family_efr32xg2b"]
 
 template_contribution:
 - name: component_catalog

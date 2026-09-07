@@ -35,6 +35,9 @@ template_contribution:
     name: print_init
     handler: sli_zigbee_af_memory_usage_print_init_data
     help: Print boot memory usage stats.
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/memory-usage
 metadata:
   sbom:
     license: MSLA

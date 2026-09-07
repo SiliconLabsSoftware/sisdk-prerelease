@@ -23,6 +23,11 @@ requires:
 - name: mbedtls_slcrypto_driver
   condition: [device_has_cryptoacc]
 
+documentation:
+  # No dedicated Fault Injection Hardening page; PSA Crypto hub for related docs
+  docset: gecko-platform
+  document:
+  - page: platform-security-psa-crypto
 metadata:
   sbom:
     license: Zlib

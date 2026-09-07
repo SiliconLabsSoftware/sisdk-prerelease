@@ -75,6 +75,53 @@ sl_status_t sli_se_configure_tcm(uint32_t tcm_multiplier);
 
 #endif // defined(_SILICON_LABS_32B_SERIES_3) && defined(_SYSCFG_ITCMNUMSRAMBLK_MASK)
 
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_381)
+
+/***************************************************************************//**
+ * @brief
+ *   Configure the initial VTOR address.
+ *
+ * @param[in] address
+ *   The address of the initial VTOR.
+ * @param[in] cpu0
+ *   Whether the initial VTOR is for CPU0 or CPU1.
+ *
+ * @return
+ *   SL_STATUS_OK when the function executed successfully, else, a status code
+ *   of type @ref sl_status_t that indicates why the function was not successful
+ ******************************************************************************/
+sl_status_t sli_se_configure_initial_vtor(uint32_t address, bool cpu0);
+
+/***************************************************************************//**
+ * @brief
+ *   Configure the initial VTOR address for runtime.
+ *
+ * @details
+ *   This function configures the initial VTOR address for runtime.
+ *
+ * @param[in] address
+ *   The address of the initial VTOR.
+ * @param[in] cpu0
+ *   Whether the initial VTOR is for CPU0 or CPU1.
+ *
+ * @return
+ *   SL_STATUS_OK when the function executed successfully, else, a status code
+ *   of type @ref sl_status_t that indicates why the function was not successful
+ ******************************************************************************/
+sl_status_t sli_se_configure_initial_vtor_runtime(sl_se_command_context_t *cmd_ctx, uint32_t address, bool cpu0);
+
+/***************************************************************************//**
+ * @brief
+ *   Release the CPU1.
+ *
+ * @return
+ *   SL_STATUS_OK when the function executed successfully, else, a status code
+ *   of type @ref sl_status_t that indicates why the function was not successful
+ ******************************************************************************/
+sl_status_t sli_se_release_cpu1(void);
+
+#endif
+
 #endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 #ifdef __cplusplus

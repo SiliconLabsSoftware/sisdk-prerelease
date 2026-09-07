@@ -30,13 +30,10 @@
 
 #include "sl_memory_manager.h"
 #include "sli_memory_manager.h"
+#include "sli_memory_manager_log.h"
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
-#endif
-
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-#include "sli_memory_profiler.h"
 #endif
 
 /*******************************************************************************
@@ -61,6 +58,9 @@ sl_status_t sl_memory_pool_handle_free(sl_memory_pool_t *pool_handle)
 
   // Free memory pool_handle.
   status = sl_memory_free((void *)pool_handle);
+  if (status == SL_STATUS_OK) {
+    SLI_MEMORY_MANAGER_LOG_DEBUG("pool_handle_free(): handle=%p", (uint32_t)pool_handle);
+  }
 
   return status;
 }
@@ -107,21 +107,15 @@ uint32_t sl_memory_pool_get_used_block_count(const sl_memory_pool_t *pool_handle
 sl_status_t sl_memory_heap_pool_handle_alloc(sl_memory_heap_t *heap,
                                              sl_memory_pool_t **pool_handle)
 {
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
-  void * volatile return_address = sli_memory_profiler_get_return_address();
-#endif
   sl_status_t status;
 
   status = sl_memory_heap_alloc(heap,
                                 sizeof(sl_memory_pool_t),
                                 BLOCK_TYPE_LONG_TERM,
                                 (void **)pool_handle);
-
-#if defined(SL_CATALOG_MEMORY_PROFILER_PRESENT)
   if (status == SL_STATUS_OK) {
-    sli_memory_profiler_track_ownership(SLI_INVALID_MEMORY_TRACKER_HANDLE, *pool_handle, return_address);
+    SLI_MEMORY_MANAGER_LOG_DEBUG("pool_handle_alloc(): addr=%p", (uint32_t)*pool_handle);
   }
-#endif
 
   return status;
 }

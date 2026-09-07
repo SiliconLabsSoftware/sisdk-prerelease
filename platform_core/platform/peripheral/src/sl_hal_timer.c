@@ -189,6 +189,13 @@ void sl_hal_timer_init(TIMER_TypeDef *timer,
   sl_hal_timer_wait_sync(timer);
   sl_hal_timer_disable(timer);
   sl_hal_timer_wait_ready(timer);
+  SL_PRINT_STRING_DEBUG("mode=%d clk=%d\r\n",
+    (int)init->count_mode,
+    (int)init->clock_select);
+
+  SL_PRINT_STRING_DEBUG("presc=%d debug=%d\r\n",
+    (int)init->prescaler,
+    (int)init->debug_run);
 }
 
 /***************************************************************************//**

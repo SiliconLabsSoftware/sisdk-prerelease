@@ -67,17 +67,13 @@
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
+#define APP_SERVICE_TASK_FLAG_SOCKET_NONE  (0)
+#define APP_SERVICE_TASK_FLAG_SOCKET_READY (1 << 0)
+#define APP_SERVICE_TASK_FLAG_ALL          ((1 << 1) - 1)
 
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
 // -----------------------------------------------------------------------------
-/**************************************************************************//**
- * @brief Initialize the DHCPv6 socket
- *
- * @return sl_status_t
- *****************************************************************************/
-static sl_status_t app_init_dhcpv6_socket(void);
-
 /**************************************************************************//**
  * @brief Wi-Fi connection status handler
  *
@@ -88,9 +84,11 @@ static void app_wifi_on_join(bool connected);
 //                                Global Variables
 // -----------------------------------------------------------------------------
 int app_dhcpv6_socket = SOCKET_INVALID_ID;
+int app_dhcpv6_link_local_socket = SOCKET_INVALID_ID;
 // -----------------------------------------------------------------------------
 //                                Static Variables
 // -----------------------------------------------------------------------------
+static osEventFlagsId_t app_service_event_flags = NULL;
 
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
@@ -121,7 +119,9 @@ void app_task(void *args)
   EFM_ASSERT(sl_wisun_br_wifi_init() == SL_STATUS_OK);
   EFM_ASSERT(sl_wisun_br_wifi_set_join_handler(app_wifi_on_join) == SL_STATUS_OK);
   EFM_ASSERT(sl_wisun_br_dhcpv6_server_init() == SL_STATUS_OK);
-  EFM_ASSERT(app_init_dhcpv6_socket() == SL_STATUS_OK);
+
+  app_service_event_flags = osEventFlagsNew(NULL);
+  EFM_ASSERT(app_service_event_flags != NULL);
 
   app_service_task_init();
 
@@ -133,31 +133,53 @@ void app_task(void *args)
   }
 }
 
+void app_service_task_sockets_ready_notify(void)
+{
+  EFM_ASSERT((osEventFlagsSet(app_service_event_flags, APP_SERVICE_TASK_FLAG_SOCKET_READY) & CMSIS_RTOS_ERROR_MASK) == 0);
+}
+
 /* App DHCPv6 service task function */
 void app_service_task(void *args)
 {
   static uint8_t buffer[350] = { 0 };
   ssize_t count = 0;
   sockaddr_in6_t src_addr = { 0 };
-  socklen_t addrlen = sizeof(sockaddr_in6_t);
   fd_set readfds = { 0 };
+  socklen_t addrlen;
   int max_sd = -1;
 
   (void) args;
+  EFM_ASSERT((osEventFlagsWait(app_service_event_flags,
+                            APP_SERVICE_TASK_FLAG_ALL,
+                            osFlagsWaitAny,
+                            osWaitForever) & CMSIS_RTOS_ERROR_MASK) == 0);
 
   while (1) {
     FD_ZERO(&readfds);
+    max_sd = -1;
+
+    if (app_dhcpv6_link_local_socket >= 0) {
+      FD_SET(app_dhcpv6_link_local_socket, &readfds);
+      max_sd = MAX(app_dhcpv6_link_local_socket, max_sd);
+    }
     if (app_dhcpv6_socket >= 0) {
       FD_SET(app_dhcpv6_socket, &readfds);
       max_sd = MAX(app_dhcpv6_socket, max_sd);
     }
-
     if (max_sd < 0
         || select(max_sd + 1, &readfds, NULL, NULL, NULL) < 0) {
       break;
     }
 
+    if (app_dhcpv6_link_local_socket >= 0 && FD_ISSET(app_dhcpv6_link_local_socket, &readfds)) {
+      addrlen = sizeof(sockaddr_in6_t);
+      count = recvfrom(app_dhcpv6_link_local_socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&src_addr, &addrlen);
+      if (count >= 0) {
+        sl_wisun_br_dhcpv6_server_on_recv(buffer, count, src_addr.sin6_addr, src_addr.sin6_port);
+      }
+    }
     if ((app_dhcpv6_socket >= 0) && (FD_ISSET(app_dhcpv6_socket, &readfds))) {
+      addrlen = sizeof(sockaddr_in6_t);
       count = recvfrom(app_dhcpv6_socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&src_addr, &addrlen);
       if (count >= 0) {
         sl_wisun_br_dhcpv6_server_on_recv(buffer, count, src_addr.sin6_addr, src_addr.sin6_port);
@@ -169,33 +191,6 @@ void app_service_task(void *args)
 // -----------------------------------------------------------------------------
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
-static sl_status_t app_init_dhcpv6_socket(void)
-{
-  int retval = 0;
-
-  const sockaddr_in6_t bind_addr = {
-    .sin6_family = AF_INET6,
-    .sin6_port = htons(DHCPV6_SERVER_PORT),
-    .sin6_flowinfo = 0,
-    .sin6_addr = IN6ADDR_ANY_INIT,
-    .sin6_scope_id = 0,
-  };
-
-  app_dhcpv6_socket = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
-  if (app_dhcpv6_socket == SOCKET_INVALID_ID) {
-    printf("[Failed: failed to open DHCPv6 socket]\n");
-    close(app_dhcpv6_socket);
-    return SL_STATUS_FAIL;
-  }
-  retval = bind(app_dhcpv6_socket, (const struct sockaddr *)&bind_addr, sizeof(sockaddr_in6_t));
-  if (retval < 0) {
-    printf("[Failed: failed to bind DHCPv6 socket (%d)]\n", retval);
-    close(app_dhcpv6_socket);
-    return SL_STATUS_FAIL;
-  }
-  return SL_STATUS_OK;
-}
-
 static void app_wifi_on_join(bool connected)
 {
   printf("[wifi: connection %s]\n", connected ? "successful" : "failure");

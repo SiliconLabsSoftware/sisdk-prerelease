@@ -26,7 +26,6 @@ requires:
 - name: status
 - name: component_catalog
 - name: dma_manager
-- name: clock_manager_runtime
 - name: memory_manager
 - name: dma_descriptor_allocator
 - name: sl_assert

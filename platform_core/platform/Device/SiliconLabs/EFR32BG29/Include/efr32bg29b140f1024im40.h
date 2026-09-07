@@ -1266,215 +1266,231 @@ typedef enum IRQn{
 #define PRORTC_CC_NUM                           0x2UL       /**> None */
 
 /* Instance macros for ACMP */
-#define ACMP(n)                        (((n) == 0) ? ACMP0 \
-                                        : 0x0UL)
-#define ACMP_NUM(ref)                  (((ref) == ACMP0) ? 0 \
-                                        : -1)
-#define ACMP_DAC_INPUT(n)              (((n) == 0) ? ACMP0_DAC_INPUT \
-                                        : 0x0UL)
-#define ACMP_EXT_OVR_IF(n)             (((n) == 0) ? ACMP0_EXT_OVR_IF \
-                                        : 0x0UL)
+#define ACMP(n)                         (((n) == 0) ? ACMP0 \
+                                         : 0x0UL)
+#define ACMP_NUM(ref)                   (((ref) == ACMP0) ? 0 \
+                                         : -1)
+#define ACMP_DAC_INPUT(n)               (((n) == 0) ? ACMP0_DAC_INPUT \
+                                         : 0x0UL)
+#define ACMP_EXT_OVR_IF(n)              (((n) == 0) ? ACMP0_EXT_OVR_IF \
+                                         : 0x0UL)
+
+/* Instance macros for DPLL */
+#define DPLL(n)                         (((n) == 0) ? DPLL0 \
+                                         : 0x0UL)
+#define DPLL_NUM(ref)                   (((ref) == DPLL0) ? 0 \
+                                         : -1)
 
 /* Instance macros for EUSART */
-#define EUSART(n)                      (((n) == 0) ? EUSART0   \
-                                        : ((n) == 1) ? EUSART1 \
-                                        : 0x0UL)
-#define EUSART_NUM(ref)                (((ref) == EUSART0) ? 0   \
-                                        : ((ref) == EUSART1) ? 1 \
-                                        : -1)
-#define EUSART_EM2_CAPABLE(n)          (((n) == 0) ? EUSART0_EM2_CAPABLE   \
-                                        : ((n) == 1) ? EUSART1_EM2_CAPABLE \
-                                        : 0x0UL)
-#define EUSART_EXCLUDE_DALI(n)         (((n) == 0) ? EUSART0_EXCLUDE_DALI   \
-                                        : ((n) == 1) ? EUSART1_EXCLUDE_DALI \
-                                        : 0x0UL)
-#define EUSART_NOT_EM2_CAPABLE(n)      (((n) == 0) ? EUSART0_NOT_EM2_CAPABLE   \
-                                        : ((n) == 1) ? EUSART1_NOT_EM2_CAPABLE \
-                                        : 0x0UL)
+#define EUSART(n)                       (((n) == 0) ? EUSART0   \
+                                         : ((n) == 1) ? EUSART1 \
+                                         : 0x0UL)
+#define EUSART_NUM(ref)                 (((ref) == EUSART0) ? 0   \
+                                         : ((ref) == EUSART1) ? 1 \
+                                         : -1)
+#define EUSART_EM2_CAPABLE(n)           (((n) == 0) ? EUSART0_EM2_CAPABLE   \
+                                         : ((n) == 1) ? EUSART1_EM2_CAPABLE \
+                                         : 0x0UL)
+#define EUSART_EXCLUDE_DALI(n)          (((n) == 0) ? EUSART0_EXCLUDE_DALI   \
+                                         : ((n) == 1) ? EUSART1_EXCLUDE_DALI \
+                                         : 0x0UL)
+#define EUSART_NOT_EM2_CAPABLE(n)       (((n) == 0) ? EUSART0_NOT_EM2_CAPABLE   \
+                                         : ((n) == 1) ? EUSART1_NOT_EM2_CAPABLE \
+                                         : 0x0UL)
 
 /* Instance macros for GPCRC */
-#define GPCRC_NUM(ref)                 (((ref) == GPCRC) ? 0 \
-                                        : -1)
+#define GPCRC_NUM(ref)                  (((ref) == GPCRC) ? 0 \
+                                         : -1)
+
+/* Instance macros for HFRCO */
+#define HFRCO(n)                        (((n) == 0) ? HFRCO0 \
+                                         : 0x0UL)
+#define HFRCO_NUM(ref)                  (((ref) == HFRCO0) ? 0 \
+                                         : -1)
+#define HFRCO_EM23ONDEMAND(n)           (((n) == 0) ? HFRCO0_EM23ONDEMAND \
+                                         : 0x0UL)
+#define HFRCO_EXCLUDEEM23ONDEMAND(n)    (((n) == 0) ? HFRCO0_EXCLUDEEM23ONDEMAND \
+                                         : 0x0UL)
 
 /* Instance macros for I2C */
-#define I2C(n)                         (((n) == 0) ? I2C0   \
-                                        : ((n) == 1) ? I2C1 \
-                                        : 0x0UL)
-#define I2C_NUM(ref)                   (((ref) == I2C0) ? 0   \
-                                        : ((ref) == I2C1) ? 1 \
-                                        : -1)
-#define I2C_DELAY(n)                   (((n) == 0) ? I2C0_DELAY   \
-                                        : ((n) == 1) ? I2C1_DELAY \
-                                        : 0x0UL)
-#define I2C_DELAY_CHAIN_NUM(n)         (((n) == 0) ? I2C0_DELAY_CHAIN_NUM   \
-                                        : ((n) == 1) ? I2C1_DELAY_CHAIN_NUM \
-                                        : 0x0UL)
+#define I2C(n)                          (((n) == 0) ? I2C0   \
+                                         : ((n) == 1) ? I2C1 \
+                                         : 0x0UL)
+#define I2C_NUM(ref)                    (((ref) == I2C0) ? 0   \
+                                         : ((ref) == I2C1) ? 1 \
+                                         : -1)
+#define I2C_DELAY(n)                    (((n) == 0) ? I2C0_DELAY   \
+                                         : ((n) == 1) ? I2C1_DELAY \
+                                         : 0x0UL)
+#define I2C_DELAY_CHAIN_NUM(n)          (((n) == 0) ? I2C0_DELAY_CHAIN_NUM   \
+                                         : ((n) == 1) ? I2C1_DELAY_CHAIN_NUM \
+                                         : 0x0UL)
 
 /* Instance macros for IADC */
-#define IADC(n)                        (((n) == 0) ? IADC0 \
-                                        : 0x0UL)
-#define IADC_NUM(ref)                  (((ref) == IADC0) ? 0 \
-                                        : -1)
-#define IADC_CONFIGNUM(n)              (((n) == 0) ? IADC0_CONFIGNUM \
-                                        : 0x0UL)
-#define IADC_FULLRANGEUNIPOLAR(n)      (((n) == 0) ? IADC0_FULLRANGEUNIPOLAR \
-                                        : 0x0UL)
-#define IADC_SCANBYTES(n)              (((n) == 0) ? IADC0_SCANBYTES \
-                                        : 0x0UL)
-#define IADC_ENTRIES(n)                (((n) == 0) ? IADC0_ENTRIES \
-                                        : 0x0UL)
+#define IADC(n)                         (((n) == 0) ? IADC0 \
+                                         : 0x0UL)
+#define IADC_NUM(ref)                   (((ref) == IADC0) ? 0 \
+                                         : -1)
+#define IADC_CONFIGNUM(n)               (((n) == 0) ? IADC0_CONFIGNUM \
+                                         : 0x0UL)
+#define IADC_FULLRANGEUNIPOLAR(n)       (((n) == 0) ? IADC0_FULLRANGEUNIPOLAR \
+                                         : 0x0UL)
+#define IADC_SCANBYTES(n)               (((n) == 0) ? IADC0_SCANBYTES \
+                                         : 0x0UL)
+#define IADC_ENTRIES(n)                 (((n) == 0) ? IADC0_ENTRIES \
+                                         : 0x0UL)
 
 /* Instance macros for LDMA */
-#define LDMA_NUM(ref)                  (((ref) == LDMA) ? 0 \
-                                        : -1)
+#define LDMA_NUM(ref)                   (((ref) == LDMA) ? 0 \
+                                         : -1)
 
 /* Instance macros for LDMAXBAR */
-#define LDMAXBAR_NUM(ref)              (((ref) == LDMAXBAR) ? 0 \
-                                        : -1)
+#define LDMAXBAR_NUM(ref)               (((ref) == LDMAXBAR) ? 0 \
+                                         : -1)
 
 /* Instance macros for LETIMER */
-#define LETIMER(n)                     (((n) == 0) ? LETIMER0 \
-                                        : 0x0UL)
-#define LETIMER_NUM(ref)               (((ref) == LETIMER0) ? 0 \
-                                        : -1)
-#define LETIMER_CNT_WIDTH(n)           (((n) == 0) ? LETIMER0_CNT_WIDTH \
-                                        : 0x0UL)
+#define LETIMER(n)                      (((n) == 0) ? LETIMER0 \
+                                         : 0x0UL)
+#define LETIMER_NUM(ref)                (((ref) == LETIMER0) ? 0 \
+                                         : -1)
+#define LETIMER_CNT_WIDTH(n)            (((n) == 0) ? LETIMER0_CNT_WIDTH \
+                                         : 0x0UL)
 
 /* Instance macros for PDM */
-#define PDM_NUM(ref)                   (((ref) == PDM) ? 0 \
-                                        : -1)
+#define PDM_NUM(ref)                    (((ref) == PDM) ? 0 \
+                                         : -1)
 
 /* Instance macros for TIMER */
-#define TIMER(n)                       (((n) == 0) ? TIMER0   \
-                                        : ((n) == 1) ? TIMER1 \
-                                        : ((n) == 2) ? TIMER2 \
-                                        : ((n) == 3) ? TIMER3 \
-                                        : ((n) == 4) ? TIMER4 \
-                                        : 0x0UL)
-#define TIMER_NUM(ref)                 (((ref) == TIMER0) ? 0   \
-                                        : ((ref) == TIMER1) ? 1 \
-                                        : ((ref) == TIMER2) ? 2 \
-                                        : ((ref) == TIMER3) ? 3 \
-                                        : ((ref) == TIMER4) ? 4 \
-                                        : -1)
-#define TIMER_CC_NUM(n)                (((n) == 0) ? TIMER0_CC_NUM   \
-                                        : ((n) == 1) ? TIMER1_CC_NUM \
-                                        : ((n) == 2) ? TIMER2_CC_NUM \
-                                        : ((n) == 3) ? TIMER3_CC_NUM \
-                                        : ((n) == 4) ? TIMER4_CC_NUM \
-                                        : 0x0UL)
-#define TIMER_CNTWIDTH(n)              (((n) == 0) ? TIMER0_CNTWIDTH   \
-                                        : ((n) == 1) ? TIMER1_CNTWIDTH \
-                                        : ((n) == 2) ? TIMER2_CNTWIDTH \
-                                        : ((n) == 3) ? TIMER3_CNTWIDTH \
-                                        : ((n) == 4) ? TIMER4_CNTWIDTH \
-                                        : 0x0UL)
-#define TIMER_DTI(n)                   (((n) == 0) ? TIMER0_DTI   \
-                                        : ((n) == 1) ? TIMER1_DTI \
-                                        : ((n) == 2) ? TIMER2_DTI \
-                                        : ((n) == 3) ? TIMER3_DTI \
-                                        : ((n) == 4) ? TIMER4_DTI \
-                                        : 0x0UL)
-#define TIMER_DTI_CC_NUM(n)            (((n) == 0) ? TIMER0_DTI_CC_NUM   \
-                                        : ((n) == 1) ? TIMER1_DTI_CC_NUM \
-                                        : ((n) == 2) ? TIMER2_DTI_CC_NUM \
-                                        : ((n) == 3) ? TIMER3_DTI_CC_NUM \
-                                        : ((n) == 4) ? TIMER4_DTI_CC_NUM \
-                                        : 0x0UL)
-#define TIMER_NO_DTI(n)                (((n) == 0) ? TIMER0_NO_DTI   \
-                                        : ((n) == 1) ? TIMER1_NO_DTI \
-                                        : ((n) == 2) ? TIMER2_NO_DTI \
-                                        : ((n) == 3) ? TIMER3_NO_DTI \
-                                        : ((n) == 4) ? TIMER4_NO_DTI \
-                                        : 0x0UL)
+#define TIMER(n)                        (((n) == 0) ? TIMER0   \
+                                         : ((n) == 1) ? TIMER1 \
+                                         : ((n) == 2) ? TIMER2 \
+                                         : ((n) == 3) ? TIMER3 \
+                                         : ((n) == 4) ? TIMER4 \
+                                         : 0x0UL)
+#define TIMER_NUM(ref)                  (((ref) == TIMER0) ? 0   \
+                                         : ((ref) == TIMER1) ? 1 \
+                                         : ((ref) == TIMER2) ? 2 \
+                                         : ((ref) == TIMER3) ? 3 \
+                                         : ((ref) == TIMER4) ? 4 \
+                                         : -1)
+#define TIMER_CC_NUM(n)                 (((n) == 0) ? TIMER0_CC_NUM   \
+                                         : ((n) == 1) ? TIMER1_CC_NUM \
+                                         : ((n) == 2) ? TIMER2_CC_NUM \
+                                         : ((n) == 3) ? TIMER3_CC_NUM \
+                                         : ((n) == 4) ? TIMER4_CC_NUM \
+                                         : 0x0UL)
+#define TIMER_CNTWIDTH(n)               (((n) == 0) ? TIMER0_CNTWIDTH   \
+                                         : ((n) == 1) ? TIMER1_CNTWIDTH \
+                                         : ((n) == 2) ? TIMER2_CNTWIDTH \
+                                         : ((n) == 3) ? TIMER3_CNTWIDTH \
+                                         : ((n) == 4) ? TIMER4_CNTWIDTH \
+                                         : 0x0UL)
+#define TIMER_DTI(n)                    (((n) == 0) ? TIMER0_DTI   \
+                                         : ((n) == 1) ? TIMER1_DTI \
+                                         : ((n) == 2) ? TIMER2_DTI \
+                                         : ((n) == 3) ? TIMER3_DTI \
+                                         : ((n) == 4) ? TIMER4_DTI \
+                                         : 0x0UL)
+#define TIMER_DTI_CC_NUM(n)             (((n) == 0) ? TIMER0_DTI_CC_NUM   \
+                                         : ((n) == 1) ? TIMER1_DTI_CC_NUM \
+                                         : ((n) == 2) ? TIMER2_DTI_CC_NUM \
+                                         : ((n) == 3) ? TIMER3_DTI_CC_NUM \
+                                         : ((n) == 4) ? TIMER4_DTI_CC_NUM \
+                                         : 0x0UL)
+#define TIMER_NO_DTI(n)                 (((n) == 0) ? TIMER0_NO_DTI   \
+                                         : ((n) == 1) ? TIMER1_NO_DTI \
+                                         : ((n) == 2) ? TIMER2_NO_DTI \
+                                         : ((n) == 3) ? TIMER3_NO_DTI \
+                                         : ((n) == 4) ? TIMER4_NO_DTI \
+                                         : 0x0UL)
 
 /* Instance macros for USART */
-#define USART(n)                       (((n) == 0) ? USART0   \
-                                        : ((n) == 1) ? USART1 \
-                                        : 0x0UL)
-#define USART_NUM(ref)                 (((ref) == USART0) ? 0   \
-                                        : ((ref) == USART1) ? 1 \
-                                        : -1)
-#define USART_AUTOTX_REG(n)            (((n) == 0) ? USART0_AUTOTX_REG   \
-                                        : ((n) == 1) ? USART1_AUTOTX_REG \
-                                        : 0x0UL)
-#define USART_AUTOTX_REG_B(n)          (((n) == 0) ? USART0_AUTOTX_REG_B   \
-                                        : ((n) == 1) ? USART1_AUTOTX_REG_B \
-                                        : 0x0UL)
-#define USART_AUTOTX_TRIGGER(n)        (((n) == 0) ? USART0_AUTOTX_TRIGGER   \
-                                        : ((n) == 1) ? USART1_AUTOTX_TRIGGER \
-                                        : 0x0UL)
-#define USART_AUTOTX_TRIGGER_B(n)      (((n) == 0) ? USART0_AUTOTX_TRIGGER_B   \
-                                        : ((n) == 1) ? USART1_AUTOTX_TRIGGER_B \
-                                        : 0x0UL)
-#define USART_CLK_PRS(n)               (((n) == 0) ? USART0_CLK_PRS   \
-                                        : ((n) == 1) ? USART1_CLK_PRS \
-                                        : 0x0UL)
-#define USART_CLK_PRS_B(n)             (((n) == 0) ? USART0_CLK_PRS_B   \
-                                        : ((n) == 1) ? USART1_CLK_PRS_B \
-                                        : 0x0UL)
-#define USART_FLOW_CONTROL(n)          (((n) == 0) ? USART0_FLOW_CONTROL   \
-                                        : ((n) == 1) ? USART1_FLOW_CONTROL \
-                                        : 0x0UL)
-#define USART_FLOW_CONTROL_B(n)        (((n) == 0) ? USART0_FLOW_CONTROL_B   \
-                                        : ((n) == 1) ? USART1_FLOW_CONTROL_B \
-                                        : 0x0UL)
-#define USART_I2S(n)                   (((n) == 0) ? USART0_I2S   \
-                                        : ((n) == 1) ? USART1_I2S \
-                                        : 0x0UL)
-#define USART_I2S_B(n)                 (((n) == 0) ? USART0_I2S_B   \
-                                        : ((n) == 1) ? USART1_I2S_B \
-                                        : 0x0UL)
-#define USART_IRDA_AVAILABLE(n)        (((n) == 0) ? USART0_IRDA_AVAILABLE   \
-                                        : ((n) == 1) ? USART1_IRDA_AVAILABLE \
-                                        : 0x0UL)
-#define USART_IRDA_AVAILABLE_B(n)      (((n) == 0) ? USART0_IRDA_AVAILABLE_B   \
-                                        : ((n) == 1) ? USART1_IRDA_AVAILABLE_B \
-                                        : 0x0UL)
-#define USART_MVDIS_FUNC(n)            (((n) == 0) ? USART0_MVDIS_FUNC   \
-                                        : ((n) == 1) ? USART1_MVDIS_FUNC \
-                                        : 0x0UL)
-#define USART_MVDIS_FUNC_B(n)          (((n) == 0) ? USART0_MVDIS_FUNC_B   \
-                                        : ((n) == 1) ? USART1_MVDIS_FUNC_B \
-                                        : 0x0UL)
-#define USART_RX_PRS(n)                (((n) == 0) ? USART0_RX_PRS   \
-                                        : ((n) == 1) ? USART1_RX_PRS \
-                                        : 0x0UL)
-#define USART_RX_PRS_B(n)              (((n) == 0) ? USART0_RX_PRS_B   \
-                                        : ((n) == 1) ? USART1_RX_PRS_B \
-                                        : 0x0UL)
-#define USART_SC_AVAILABLE(n)          (((n) == 0) ? USART0_SC_AVAILABLE   \
-                                        : ((n) == 1) ? USART1_SC_AVAILABLE \
-                                        : 0x0UL)
-#define USART_SC_AVAILABLE_B(n)        (((n) == 0) ? USART0_SC_AVAILABLE_B   \
-                                        : ((n) == 1) ? USART1_SC_AVAILABLE_B \
-                                        : 0x0UL)
-#define USART_SYNC_AVAILABLE(n)        (((n) == 0) ? USART0_SYNC_AVAILABLE   \
-                                        : ((n) == 1) ? USART1_SYNC_AVAILABLE \
-                                        : 0x0UL)
-#define USART_SYNC_AVAILABLE_B(n)      (((n) == 0) ? USART0_SYNC_AVAILABLE_B   \
-                                        : ((n) == 1) ? USART1_SYNC_AVAILABLE_B \
-                                        : 0x0UL)
-#define USART_SYNC_LATE_SAMPLE(n)      (((n) == 0) ? USART0_SYNC_LATE_SAMPLE   \
-                                        : ((n) == 1) ? USART1_SYNC_LATE_SAMPLE \
-                                        : 0x0UL)
-#define USART_SYNC_LATE_SAMPLE_B(n)    (((n) == 0) ? USART0_SYNC_LATE_SAMPLE_B   \
-                                        : ((n) == 1) ? USART1_SYNC_LATE_SAMPLE_B \
-                                        : 0x0UL)
-#define USART_TIMER(n)                 (((n) == 0) ? USART0_TIMER   \
-                                        : ((n) == 1) ? USART1_TIMER \
-                                        : 0x0UL)
-#define USART_TIMER_B(n)               (((n) == 0) ? USART0_TIMER_B   \
-                                        : ((n) == 1) ? USART1_TIMER_B \
-                                        : 0x0UL)
+#define USART(n)                        (((n) == 0) ? USART0   \
+                                         : ((n) == 1) ? USART1 \
+                                         : 0x0UL)
+#define USART_NUM(ref)                  (((ref) == USART0) ? 0   \
+                                         : ((ref) == USART1) ? 1 \
+                                         : -1)
+#define USART_AUTOTX_REG(n)             (((n) == 0) ? USART0_AUTOTX_REG   \
+                                         : ((n) == 1) ? USART1_AUTOTX_REG \
+                                         : 0x0UL)
+#define USART_AUTOTX_REG_B(n)           (((n) == 0) ? USART0_AUTOTX_REG_B   \
+                                         : ((n) == 1) ? USART1_AUTOTX_REG_B \
+                                         : 0x0UL)
+#define USART_AUTOTX_TRIGGER(n)         (((n) == 0) ? USART0_AUTOTX_TRIGGER   \
+                                         : ((n) == 1) ? USART1_AUTOTX_TRIGGER \
+                                         : 0x0UL)
+#define USART_AUTOTX_TRIGGER_B(n)       (((n) == 0) ? USART0_AUTOTX_TRIGGER_B   \
+                                         : ((n) == 1) ? USART1_AUTOTX_TRIGGER_B \
+                                         : 0x0UL)
+#define USART_CLK_PRS(n)                (((n) == 0) ? USART0_CLK_PRS   \
+                                         : ((n) == 1) ? USART1_CLK_PRS \
+                                         : 0x0UL)
+#define USART_CLK_PRS_B(n)              (((n) == 0) ? USART0_CLK_PRS_B   \
+                                         : ((n) == 1) ? USART1_CLK_PRS_B \
+                                         : 0x0UL)
+#define USART_FLOW_CONTROL(n)           (((n) == 0) ? USART0_FLOW_CONTROL   \
+                                         : ((n) == 1) ? USART1_FLOW_CONTROL \
+                                         : 0x0UL)
+#define USART_FLOW_CONTROL_B(n)         (((n) == 0) ? USART0_FLOW_CONTROL_B   \
+                                         : ((n) == 1) ? USART1_FLOW_CONTROL_B \
+                                         : 0x0UL)
+#define USART_I2S(n)                    (((n) == 0) ? USART0_I2S   \
+                                         : ((n) == 1) ? USART1_I2S \
+                                         : 0x0UL)
+#define USART_I2S_B(n)                  (((n) == 0) ? USART0_I2S_B   \
+                                         : ((n) == 1) ? USART1_I2S_B \
+                                         : 0x0UL)
+#define USART_IRDA_AVAILABLE(n)         (((n) == 0) ? USART0_IRDA_AVAILABLE   \
+                                         : ((n) == 1) ? USART1_IRDA_AVAILABLE \
+                                         : 0x0UL)
+#define USART_IRDA_AVAILABLE_B(n)       (((n) == 0) ? USART0_IRDA_AVAILABLE_B   \
+                                         : ((n) == 1) ? USART1_IRDA_AVAILABLE_B \
+                                         : 0x0UL)
+#define USART_MVDIS_FUNC(n)             (((n) == 0) ? USART0_MVDIS_FUNC   \
+                                         : ((n) == 1) ? USART1_MVDIS_FUNC \
+                                         : 0x0UL)
+#define USART_MVDIS_FUNC_B(n)           (((n) == 0) ? USART0_MVDIS_FUNC_B   \
+                                         : ((n) == 1) ? USART1_MVDIS_FUNC_B \
+                                         : 0x0UL)
+#define USART_RX_PRS(n)                 (((n) == 0) ? USART0_RX_PRS   \
+                                         : ((n) == 1) ? USART1_RX_PRS \
+                                         : 0x0UL)
+#define USART_RX_PRS_B(n)               (((n) == 0) ? USART0_RX_PRS_B   \
+                                         : ((n) == 1) ? USART1_RX_PRS_B \
+                                         : 0x0UL)
+#define USART_SC_AVAILABLE(n)           (((n) == 0) ? USART0_SC_AVAILABLE   \
+                                         : ((n) == 1) ? USART1_SC_AVAILABLE \
+                                         : 0x0UL)
+#define USART_SC_AVAILABLE_B(n)         (((n) == 0) ? USART0_SC_AVAILABLE_B   \
+                                         : ((n) == 1) ? USART1_SC_AVAILABLE_B \
+                                         : 0x0UL)
+#define USART_SYNC_AVAILABLE(n)         (((n) == 0) ? USART0_SYNC_AVAILABLE   \
+                                         : ((n) == 1) ? USART1_SYNC_AVAILABLE \
+                                         : 0x0UL)
+#define USART_SYNC_AVAILABLE_B(n)       (((n) == 0) ? USART0_SYNC_AVAILABLE_B   \
+                                         : ((n) == 1) ? USART1_SYNC_AVAILABLE_B \
+                                         : 0x0UL)
+#define USART_SYNC_LATE_SAMPLE(n)       (((n) == 0) ? USART0_SYNC_LATE_SAMPLE   \
+                                         : ((n) == 1) ? USART1_SYNC_LATE_SAMPLE \
+                                         : 0x0UL)
+#define USART_SYNC_LATE_SAMPLE_B(n)     (((n) == 0) ? USART0_SYNC_LATE_SAMPLE_B   \
+                                         : ((n) == 1) ? USART1_SYNC_LATE_SAMPLE_B \
+                                         : 0x0UL)
+#define USART_TIMER(n)                  (((n) == 0) ? USART0_TIMER   \
+                                         : ((n) == 1) ? USART1_TIMER \
+                                         : 0x0UL)
+#define USART_TIMER_B(n)                (((n) == 0) ? USART0_TIMER_B   \
+                                         : ((n) == 1) ? USART1_TIMER_B \
+                                         : 0x0UL)
 
 /* Instance macros for WDOG */
-#define WDOG(n)                        (((n) == 0) ? WDOG0 \
-                                        : 0x0UL)
-#define WDOG_NUM(ref)                  (((ref) == WDOG0) ? 0 \
-                                        : -1)
-#define WDOG_PCNUM(n)                  (((n) == 0) ? WDOG0_PCNUM \
-                                        : 0x0UL)
+#define WDOG(n)                         (((n) == 0) ? WDOG0 \
+                                         : 0x0UL)
+#define WDOG_NUM(ref)                   (((ref) == WDOG0) ? 0 \
+                                         : -1)
+#define WDOG_PCNUM(n)                   (((n) == 0) ? WDOG0_PCNUM \
+                                         : 0x0UL)
 
 /** @} End of group EFR32BG29B140F1024IM40_Peripheral_Parameters  */
 

@@ -42,6 +42,8 @@ include:
 template_contribution:
 - name: component_catalog
   value: zigbee_ezsp_uart
+documentation:
+  url: https://docs.silabs.com/zigbee/latest/emberznet-serial-protocol-uart-host-interfacing-guide/index.html
 metadata:
   sbom:
     license: MSLA

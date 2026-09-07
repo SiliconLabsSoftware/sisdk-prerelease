@@ -1,0 +1,32 @@
+id: gpio_peripheral_pin_latching
+package: platform_core
+label: GPIO Peripheral Pin Latching
+description: >
+  GPIO driver for latching and unlatching peripheral pins during low-power
+  mode transitions. Latching freezes pin states before the controlling
+  peripheral loses retention; unlatching restores live pad control after
+  the peripheral is re-enabled.
+category: Platform|Driver|GPIO
+quality: evaluation
+metadata:
+  sbom:
+    license: Zlib
+root_path: platform_core/platform/driver/gpio/
+include:
+- path: inc
+  file_list:
+  - path: sl_gpio_peripheral_pin_latching.h
+source:
+- path: src/sl_gpio_peripheral_pin_latching.c
+provides:
+- name: gpio_peripheral_pin_latching
+  condition: [device_has_no_deepsleep_retention]
+requires:
+- name: device_has_no_deepsleep_retention
+- name: hal_gpio
+- name: status
+- name: device_peripheral_hal
+- name: code_classification
+define:
+- name: SL_CODE_COMPONENT_GPIO_PERIPHERAL_PIN_LATCHING
+  value: gpio_peripheral_pin_latching

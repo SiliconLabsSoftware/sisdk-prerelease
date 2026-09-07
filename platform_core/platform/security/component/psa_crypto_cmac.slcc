@@ -19,7 +19,7 @@ template_contribution:
   value: "MBEDTLS_PSA_BUILTIN_ALG_CMAC 1"
   condition: [mbedtls_cmac]
 documentation:
-  url: https://armmbed.github.io/mbed-crypto/html/api/ops/macs.html#c.PSA_ALG_CMAC
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/psa-crypto-plugins
 metadata:
   sbom:
     reference: mbedtls_sbom

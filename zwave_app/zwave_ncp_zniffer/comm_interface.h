@@ -90,7 +90,7 @@ typedef struct {
   uint8_t timestamp2;
   uint8_t ch_speed;
   uint8_t region_no;
-  uint8_t rssi;
+  int8_t rssi;
   uint8_t payload[4];
 } tx_beam_start_frame_t;
 
@@ -99,7 +99,7 @@ typedef struct {
   uint8_t type;
   uint8_t timestamp1;
   uint8_t timestamp2;
-  uint8_t rssi;
+  int8_t rssi;
   uint16_t counter;
 } tx_beam_stop_frame_t;
 

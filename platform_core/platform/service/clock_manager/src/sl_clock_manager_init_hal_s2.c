@@ -31,6 +31,7 @@
 #include "sl_clock_manager_oscillator_config.h"
 #include "sl_clock_manager_tree_config.h"
 #include "sli_clock_manager_init_hal.h"
+#include "sli_clock_manager_log.h"
 #include "sl_clock_manager.h"
 #include "sl_status.h"
 #include "sl_assert.h"
@@ -287,11 +288,17 @@ FUNCTION_SCOPE void init_hfxo(void)
     HFXO0->LOCK = ~HFXO_LOCK_LOCKKEY_UNLOCK;
   }
 #endif
+  SLI_CLOCK_MANAGER_LOG_DEBUG("HFXO crystal sharing configured");
 #endif
 
   SystemHFXOClockSet(SLI_CLOCK_MANAGER_HFXO_FREQ);
   CMU_HFXOInit(&clock_manager_hfxo_init);
   CMU_HFXOPrecisionSet(SL_CLOCK_MANAGER_HFXO_PRECISION);
+
+  SLI_CLOCK_MANAGER_LOG_INFO("HFXO configured, ctune_xi=%u ctune_xo=%u freq=%u",
+                             (uint32_t)clock_manager_hfxo_init.ctuneXiAna,
+                             (uint32_t)clock_manager_hfxo_init.ctuneXoAna,
+                             (uint32_t)SLI_CLOCK_MANAGER_HFXO_FREQ);
 
 #if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION)
   if (SLI_CLOCK_MANAGER_HFXO_CTUNE_FIXED_STEADY == SLI_CLOCK_MANAGER_HFXO_CTUNE_FIXED_STEADY_DEFAULT) {
@@ -340,6 +347,9 @@ FUNCTION_SCOPE void init_lfxo(void)
 
   CMU_LFXOInit(&clock_manager_lfxo_init);
   CMU_LFXOPrecisionSet(SL_CLOCK_MANAGER_LFXO_PRECISION);
+
+  SLI_CLOCK_MANAGER_LOG_INFO("LFXO configured, ctune=%u",
+                             (uint32_t)clock_manager_lfxo_init.capTune);
 }
 #endif
 
@@ -431,6 +441,12 @@ FUNCTION_SCOPE void init_hfrcodpll(void)
 
     // Assert if DPLL lock was unsuccessful.
     EFM_ASSERT(success == true);
+
+    if (success) {
+      SLI_CLOCK_MANAGER_LOG_INFO("DPLL locked, freq=%u", (uint32_t)SLI_CLOCK_MANAGER_DPLL_FREQ);
+    } else {
+      SLI_CLOCK_MANAGER_LOG_ERROR("DPLL failed to lock, freq=%u", (uint32_t)SLI_CLOCK_MANAGER_DPLL_FREQ);
+    }
   }
 #endif
 #if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION) \
@@ -443,6 +459,7 @@ FUNCTION_SCOPE void init_hfrcodpll(void)
 #endif
   {
     CMU_HFRCODPLLBandSet(SLI_CLOCK_MANAGER_HFRCO_BAND);
+    SLI_CLOCK_MANAGER_LOG_INFO("HFRCODPLL configured, freq=%u", (uint32_t)SLI_CLOCK_MANAGER_HFRCO_BAND);
   }
 #endif
 }
@@ -455,6 +472,9 @@ FUNCTION_SCOPE void init_hfrcodpll(void)
 FUNCTION_SCOPE void init_hfrcoem23(void)
 {
   CMU_HFRCOEM23BandSet(SL_CLOCK_MANAGER_HFRCOEM23_BAND);
+
+  SLI_CLOCK_MANAGER_LOG_INFO("HFRCOEM23 band configured, band=%u",
+                             (uint32_t)SL_CLOCK_MANAGER_HFRCOEM23_BAND);
 }
 #endif
 
@@ -474,6 +494,10 @@ FUNCTION_SCOPE void init_lfrco(void)
   EFM_ASSERT(SL_CLOCK_MANAGER_LFRCO_PRECISION != cmuPrecisionHigh);
 #endif
   CMU_LFRCOSetPrecision(SL_CLOCK_MANAGER_LFRCO_PRECISION);
+  SLI_CLOCK_MANAGER_LOG_INFO("LFRCO configured, precision=%u",
+                             (uint32_t)SL_CLOCK_MANAGER_LFRCO_PRECISION);
+#else
+  SLI_CLOCK_MANAGER_LOG_INFO("LFRCO configured");
 #endif
 }
 #endif
@@ -513,6 +537,8 @@ FUNCTION_SCOPE void init_rffpll(void)
 
   // Update RFFPLL frequency in System file
   SystemRFFPLLClockSet(rffpll_init.frequency);
+
+  SLI_CLOCK_MANAGER_LOG_INFO("RFFPLL configured, freq=%u", rffpll_init.frequency);
 
   // At this point, RFFPLL has been initialized. The clock source for SYSCLK can be
   // RFFPLLSYS input clock. If you want RFFPLLSYS, configure SL_CLOCK_MANAGER_SYSCLK_SOURCE
@@ -569,6 +595,8 @@ FUNCTION_SCOPE void init_usbpll(void)
 
   // Re-initialized without the Force Enable feature.
   CMU_USBPLLInit(&usbpll_config);
+
+  SLI_CLOCK_MANAGER_LOG_INFO("USBPLL configured, hfxo_freq=%u", hfxo_freq);
 }
 #endif
 
@@ -591,6 +619,9 @@ FUNCTION_SCOPE void init_clock_branches(void)
   CMU->SYSCLKCTRL = (CMU->SYSCLKCTRL & ~(_CMU_SYSCLKCTRL_HCLKPRESC_MASK | _CMU_SYSCLKCTRL_PCLKPRESC_MASK))
                     | SL_CLOCK_MANAGER_HCLK_DIVIDER
                     | SL_CLOCK_MANAGER_PCLK_DIVIDER;
+
+  SLI_CLOCK_MANAGER_LOG_INFO("SYSCLK source configured, source=%u",
+                             (CMU->SYSCLKCTRL & _CMU_SYSCLKCTRL_CLKSEL_MASK) >> _CMU_SYSCLKCTRL_CLKSEL_SHIFT);
 #else
   EFM_ASSERT(false);
 #endif
@@ -871,6 +902,8 @@ FUNCTION_SCOPE void init_clock_branches(void)
                          | ((SL_CLOCK_MANAGER_LEDSINK0CLK_DIVIDER - 1U) << _CMU_LEDSINK0CLKCTRL_PRESC_SHIFT);
 #endif
 #endif
+
+  SLI_CLOCK_MANAGER_LOG_DEBUG("clock branches configured");
 }
 
 /*******************************************************************************

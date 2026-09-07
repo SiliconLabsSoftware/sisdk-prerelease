@@ -31,6 +31,9 @@ source:
 template_contribution:
 - name: component_catalog
   value: zigbee_memory_usage
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/memory-usage
 metadata:
   sbom:
     license: MSLA

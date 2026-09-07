@@ -40,59 +40,81 @@
 // Weak definition of peripheral ACMP0.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_acmp0 = { .base = 0xFFFFFFFF,
                                                              .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                             .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                             .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                             .gpio_routeen_offset = 0xFFFF,
+                                                             .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral ACMP1.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_acmp1 = { .base = 0xFFFFFFFF,
                                                              .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                             .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                             .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                             .gpio_routeen_offset = 0xFFFF,
+                                                             .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral ADC0.
 __WEAK const sl_peripheral_adc_val_t sl_peripheral_val_adc0 = { .base = 0xFFFFFFFF,
                                                                 .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                 .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                .gpio_routeen_offset = 0xFFFF,
+                                                                .gpio_routeen_mask = 0,
                                                                 .dma_signal_scan = SL_DMA_SIGNAL_NONE };
 
 // Weak definition of peripheral ADC1.
 __WEAK const sl_peripheral_adc_val_t sl_peripheral_val_adc1 = { .base = 0xFFFFFFFF,
                                                                 .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                 .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                .gpio_routeen_offset = 0xFFFF,
+                                                                .gpio_routeen_mask = 0,
                                                                 .dma_signal_scan = SL_DMA_SIGNAL_NONE };
 
 // Weak definition of peripheral AES.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_aes = { .base = 0xFFFFFFFF,
                                                            .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                           .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                           .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                           .gpio_routeen_offset = 0xFFFF,
+                                                           .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral AMUXCP0.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_amuxcp0 = { .base = 0xFFFFFFFF,
                                                                .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                               .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                               .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                               .gpio_routeen_offset = 0xFFFF,
+                                                               .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral AMUXCP0.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_amuxcp1 = { .base = 0xFFFFFFFF,
                                                                .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                               .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                               .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                               .gpio_routeen_offset = 0xFFFF,
+                                                               .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral BUFC.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_bufc = { .base = 0xFFFFFFFF,
                                                             .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                            .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                            .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                            .gpio_routeen_offset = 0xFFFF,
+                                                            .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral BURAM.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_buram = { .base = 0xFFFFFFFF,
                                                              .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                             .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                             .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                             .gpio_routeen_offset = 0xFFFF,
+                                                             .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral BURTC.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_burtc = { .base = 0xFFFFFFFF,
                                                              .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                             .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                             .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                             .gpio_routeen_offset = 0xFFFF,
+                                                             .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral CAN0.
 __WEAK const sl_peripheral_can_val_t sl_peripheral_val_can0 = { .base = 0xFFFFFFFF,
                                                                 .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                 .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                .gpio_routeen_offset = 0xFFFF,
+                                                                .gpio_routeen_mask = 0,
                                                                 .dma_signal_rxfl0 = SL_DMA_SIGNAL_NONE,
                                                                 .dma_signal_rxfl1 = SL_DMA_SIGNAL_NONE,
                                                                 .dma_signal_txfl0 = SL_DMA_SIGNAL_NONE,
@@ -102,6 +124,8 @@ __WEAK const sl_peripheral_can_val_t sl_peripheral_val_can0 = { .base = 0xFFFFFF
 __WEAK const sl_peripheral_can_val_t sl_peripheral_val_can1 = { .base = 0xFFFFFFFF,
                                                                 .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                 .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                .gpio_routeen_offset = 0xFFFF,
+                                                                .gpio_routeen_mask = 0,
                                                                 .dma_signal_rxfl0 = SL_DMA_SIGNAL_NONE,
                                                                 .dma_signal_rxfl1 = SL_DMA_SIGNAL_NONE,
                                                                 .dma_signal_txfl0 = SL_DMA_SIGNAL_NONE,
@@ -110,57 +134,79 @@ __WEAK const sl_peripheral_can_val_t sl_peripheral_val_can1 = { .base = 0xFFFFFF
 // Weak definition of peripheral CMU.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_cmu = { .base = 0xFFFFFFFF,
                                                            .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                           .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                           .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                           .gpio_routeen_offset = 0xFFFF,
+                                                           .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral CRYPTOACC.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_cryptoacc = { .base = 0xFFFFFFFF,
                                                                  .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                                 .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                                 .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                 .gpio_routeen_offset = 0xFFFF,
+                                                                 .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral DCDC.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_dcdc = { .base = 0xFFFFFFFF,
                                                             .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                            .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                            .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                            .gpio_routeen_offset = 0xFFFF,
+                                                            .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral DEVINFO.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_devinfo = { .base = 0xFFFFFFFF,
                                                                .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                               .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                               .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                               .gpio_routeen_offset = 0xFFFF,
+                                                               .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral DMEM.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_dmem = { .base = 0xFFFFFFFF,
                                                             .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                            .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                            .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                            .gpio_routeen_offset = 0xFFFF,
+                                                            .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral DMEM0.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_dmem0 = { .base = 0xFFFFFFFF,
                                                              .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                             .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                             .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                             .gpio_routeen_offset = 0xFFFF,
+                                                             .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral DMEM1.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_dmem1 = { .base = 0xFFFFFFFF,
                                                              .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                             .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                             .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                             .gpio_routeen_offset = 0xFFFF,
+                                                             .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral DPLL0.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_dpll0 = { .base = 0xFFFFFFFF,
                                                              .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                             .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                             .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                             .gpio_routeen_offset = 0xFFFF,
+                                                             .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral EMU.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_emu = { .base = 0xFFFFFFFF,
                                                            .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                           .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                           .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                           .gpio_routeen_offset = 0xFFFF,
+                                                           .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral ETAMPDET.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_etampdet = { .base = 0xFFFFFFFF,
                                                                 .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                                .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                                .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                .gpio_routeen_offset = 0xFFFF,
+                                                                .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral EUART0.
 __WEAK const sl_peripheral_euart_val_t sl_peripheral_val_euart0 = { .base = 0xFFFFFFFF,
                                                                     .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                     .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                    .gpio_routeen_offset = 0xFFFF,
+                                                                    .gpio_routeen_mask = 0,
                                                                     .ip_type = SL_PERIPHERAL_SERIAL_TYPE_EUSART,
                                                                     .rx_irqn = 0xFFFFFFFF,
                                                                     .tx_irqn = 0xFFFFFFFF,
@@ -171,6 +217,8 @@ __WEAK const sl_peripheral_euart_val_t sl_peripheral_val_euart0 = { .base = 0xFF
 __WEAK const sl_peripheral_eusart_val_t sl_peripheral_val_eusart0 = { .base = 0xFFFFFFFF,
                                                                       .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                       .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                      .gpio_routeen_offset = 0xFFFF,
+                                                                      .gpio_routeen_mask = 0,
                                                                       .ip_type = SL_PERIPHERAL_SERIAL_TYPE_EUSART,
                                                                       .rx_irqn = 0xFFFFFFFF,
                                                                       .tx_irqn = 0xFFFFFFFF,
@@ -181,6 +229,8 @@ __WEAK const sl_peripheral_eusart_val_t sl_peripheral_val_eusart0 = { .base = 0x
 __WEAK const sl_peripheral_eusart_val_t sl_peripheral_val_eusart1 = { .base = 0xFFFFFFFF,
                                                                       .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                       .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                      .gpio_routeen_offset = 0xFFFF,
+                                                                      .gpio_routeen_mask = 0,
                                                                       .ip_type = SL_PERIPHERAL_SERIAL_TYPE_EUSART,
                                                                       .rx_irqn = 0xFFFFFFFF,
                                                                       .tx_irqn = 0xFFFFFFFF,
@@ -191,6 +241,8 @@ __WEAK const sl_peripheral_eusart_val_t sl_peripheral_val_eusart1 = { .base = 0x
 __WEAK const sl_peripheral_eusart_val_t sl_peripheral_val_eusart2 = { .base = 0xFFFFFFFF,
                                                                       .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                       .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                      .gpio_routeen_offset = 0xFFFF,
+                                                                      .gpio_routeen_mask = 0,
                                                                       .ip_type = SL_PERIPHERAL_SERIAL_TYPE_EUSART,
                                                                       .rx_irqn = 0xFFFFFFFF,
                                                                       .tx_irqn = 0xFFFFFFFF,
@@ -201,6 +253,8 @@ __WEAK const sl_peripheral_eusart_val_t sl_peripheral_val_eusart2 = { .base = 0x
 __WEAK const sl_peripheral_eusart_val_t sl_peripheral_val_eusart3 = { .base = 0xFFFFFFFF,
                                                                       .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                       .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                      .gpio_routeen_offset = 0xFFFF,
+                                                                      .gpio_routeen_mask = 0,
                                                                       .ip_type = SL_PERIPHERAL_SERIAL_TYPE_EUSART,
                                                                       .rx_irqn = 0xFFFFFFFF,
                                                                       .tx_irqn = 0xFFFFFFFF,
@@ -211,6 +265,8 @@ __WEAK const sl_peripheral_eusart_val_t sl_peripheral_val_eusart3 = { .base = 0x
 __WEAK const sl_peripheral_eusart_val_t sl_peripheral_val_eusart4 = { .base = 0xFFFFFFFF,
                                                                       .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                       .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                      .gpio_routeen_offset = 0xFFFF,
+                                                                      .gpio_routeen_mask = 0,
                                                                       .ip_type = SL_PERIPHERAL_SERIAL_TYPE_EUSART,
                                                                       .rx_irqn = 0xFFFFFFFF,
                                                                       .tx_irqn = 0xFFFFFFFF,
@@ -221,6 +277,8 @@ __WEAK const sl_peripheral_eusart_val_t sl_peripheral_val_eusart4 = { .base = 0x
 __WEAK const sl_peripheral_eusart_val_t sl_peripheral_val_eusart5 = { .base = 0xFFFFFFFF,
                                                                       .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                       .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                      .gpio_routeen_offset = 0xFFFF,
+                                                                      .gpio_routeen_mask = 0,
                                                                       .ip_type = SL_PERIPHERAL_SERIAL_TYPE_EUSART,
                                                                       .rx_irqn = 0xFFFFFFFF,
                                                                       .tx_irqn = 0xFFFFFFFF,
@@ -231,6 +289,8 @@ __WEAK const sl_peripheral_eusart_val_t sl_peripheral_val_eusart5 = { .base = 0x
 __WEAK const sl_peripheral_eusart_val_t sl_peripheral_val_eusart6 = { .base = 0xFFFFFFFF,
                                                                       .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                       .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                      .gpio_routeen_offset = 0xFFFF,
+                                                                      .gpio_routeen_mask = 0,
                                                                       .ip_type = SL_PERIPHERAL_SERIAL_TYPE_EUSART,
                                                                       .rx_irqn = 0xFFFFFFFF,
                                                                       .tx_irqn = 0xFFFFFFFF,
@@ -241,6 +301,8 @@ __WEAK const sl_peripheral_eusart_val_t sl_peripheral_val_eusart6 = { .base = 0x
 __WEAK const sl_peripheral_eusart_val_t sl_peripheral_val_eusart7 = { .base = 0xFFFFFFFF,
                                                                       .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                       .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                      .gpio_routeen_offset = 0xFFFF,
+                                                                      .gpio_routeen_mask = 0,
                                                                       .ip_type = SL_PERIPHERAL_SERIAL_TYPE_EUSART,
                                                                       .rx_irqn = 0xFFFFFFFF,
                                                                       .tx_irqn = 0xFFFFFFFF,
@@ -250,46 +312,64 @@ __WEAK const sl_peripheral_eusart_val_t sl_peripheral_val_eusart7 = { .base = 0x
 // Weak definition of peripheral FSRCO.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_fsrco = { .base = 0xFFFFFFFF,
                                                              .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                             .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                             .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                             .gpio_routeen_offset = 0xFFFF,
+                                                             .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral GPCRC0.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_gpcrc0 = { .base = 0xFFFFFFFF,
                                                               .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                              .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                              .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                              .gpio_routeen_offset = 0xFFFF,
+                                                              .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral GPIO.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_gpio = { .base = 0xFFFFFFFF,
                                                             .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                            .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                            .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                            .gpio_routeen_offset = 0xFFFF,
+                                                            .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral HFRCO0.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_hfrco0 = { .base = 0xFFFFFFFF,
                                                               .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                              .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                              .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                              .gpio_routeen_offset = 0xFFFF,
+                                                              .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral HFRCOEM23.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_hfrcoem23 = { .base = 0xFFFFFFFF,
                                                                  .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                                 .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                                 .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                 .gpio_routeen_offset = 0xFFFF,
+                                                                 .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral HFXO0.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_hfxo0 = { .base = 0xFFFFFFFF,
                                                              .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                             .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                             .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                             .gpio_routeen_offset = 0xFFFF,
+                                                             .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral HOSTMAILBOX.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_hostmailbox = { .base = 0xFFFFFFFF,
                                                                    .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                                   .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                                   .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                   .gpio_routeen_offset = 0xFFFF,
+                                                                   .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral HOSTPORTAL.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_hostportal = { .base = 0xFFFFFFFF,
                                                                   .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                                  .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                                  .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                  .gpio_routeen_offset = 0xFFFF,
+                                                                  .gpio_routeen_mask = 0 };
 
 __WEAK const sl_peripheral_i2c_val_t sl_peripheral_val_i2c0 = { .base = 0xFFFFFFFF,
                                                                 .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                 .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                .gpio_routeen_offset = 0xFFFF,
+                                                                .gpio_routeen_mask = 0,
                                                                 .dma_signal_rxdatav = SL_DMA_SIGNAL_NONE,
                                                                 .dma_signal_txbl = SL_DMA_SIGNAL_NONE };
 
@@ -297,6 +377,8 @@ __WEAK const sl_peripheral_i2c_val_t sl_peripheral_val_i2c0 = { .base = 0xFFFFFF
 __WEAK const sl_peripheral_i2c_val_t sl_peripheral_val_i2c1 = { .base = 0xFFFFFFFF,
                                                                 .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                 .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                .gpio_routeen_offset = 0xFFFF,
+                                                                .gpio_routeen_mask = 0,
                                                                 .dma_signal_rxdatav = SL_DMA_SIGNAL_NONE,
                                                                 .dma_signal_txbl = SL_DMA_SIGNAL_NONE };
 
@@ -304,6 +386,8 @@ __WEAK const sl_peripheral_i2c_val_t sl_peripheral_val_i2c1 = { .base = 0xFFFFFF
 __WEAK const sl_peripheral_i2c_val_t sl_peripheral_val_i2c2 = { .base = 0xFFFFFFFF,
                                                                 .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                 .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                .gpio_routeen_offset = 0xFFFF,
+                                                                .gpio_routeen_mask = 0,
                                                                 .dma_signal_rxdatav = SL_DMA_SIGNAL_NONE,
                                                                 .dma_signal_txbl = SL_DMA_SIGNAL_NONE };
 
@@ -311,6 +395,8 @@ __WEAK const sl_peripheral_i2c_val_t sl_peripheral_val_i2c2 = { .base = 0xFFFFFF
 __WEAK const sl_peripheral_i2c_val_t sl_peripheral_val_i2c3 = { .base = 0xFFFFFFFF,
                                                                 .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                 .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                .gpio_routeen_offset = 0xFFFF,
+                                                                .gpio_routeen_mask = 0,
                                                                 .dma_signal_rxdatav = SL_DMA_SIGNAL_NONE,
                                                                 .dma_signal_txbl = SL_DMA_SIGNAL_NONE };
 
@@ -318,222 +404,306 @@ __WEAK const sl_peripheral_i2c_val_t sl_peripheral_val_i2c3 = { .base = 0xFFFFFF
 __WEAK const sl_peripheral_iadc_val_t sl_peripheral_val_iadc0 = { .base = 0xFFFFFFFF,
                                                                   .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                   .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                  .gpio_routeen_offset = 0xFFFF,
+                                                                  .gpio_routeen_mask = 0,
                                                                   .dma_signal_scan = SL_DMA_SIGNAL_NONE,
                                                                   .dma_signal_single = SL_DMA_SIGNAL_NONE };
 
 // Weak definition of peripheral ICACHE0.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_icache0 = { .base = 0xFFFFFFFF,
                                                                .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                               .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                               .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                               .gpio_routeen_offset = 0xFFFF,
+                                                               .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral KEYSCAN.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_keyscan = { .base = 0xFFFFFFFF,
                                                                .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                               .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                               .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                               .gpio_routeen_offset = 0xFFFF,
+                                                               .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral L1ICACHE0.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_l1icache0 = { .base = 0xFFFFFFFF,
                                                                  .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                                 .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                                 .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                 .gpio_routeen_offset = 0xFFFF,
+                                                                 .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral L2ICACHE0.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_l2icache0 = { .base = 0xFFFFFFFF,
                                                                  .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                                 .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                                 .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                 .gpio_routeen_offset = 0xFFFF,
+                                                                 .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral LCD.
 __WEAK const sl_peripheral_lcd_val_t sl_peripheral_val_lcd = { .base = 0xFFFFFFFF,
                                                                .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                               .gpio_routeen_offset = 0xFFFF,
+                                                               .gpio_routeen_mask = 0,
                                                                .dma_signal_lcd = SL_DMA_SIGNAL_NONE };
 
 // Weak definition of peripheral LCDRF.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_lcdrf = { .base = 0xFFFFFFFF,
                                                              .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                             .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                             .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                             .gpio_routeen_offset = 0xFFFF,
+                                                             .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral LDMAXBAR0.
 __WEAK const sl_peripheral_ldmaxbar_val_t sl_peripheral_val_ldmaxbar0 = { .base = 0xFFFFFFFF,
                                                                           .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                           .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                          .gpio_routeen_offset = 0xFFFF,
+                                                                          .gpio_routeen_mask = 0,
                                                                           .dma_signal_prsreq0 = SL_DMA_SIGNAL_NONE,
                                                                           .dma_signal_prsreq1 = SL_DMA_SIGNAL_NONE };
 
 // Weak definition of peripheral LEDSINK.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_ledsink0 = { .base = 0xFFFFFFFF,
                                                                 .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                                .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                                .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                .gpio_routeen_offset = 0xFFFF,
+                                                                .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral LEDDRV0.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_leddrv0 = { .base = 0xFFFFFFFF,
                                                                .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                               .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                               .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                               .gpio_routeen_offset = 0xFFFF,
+                                                               .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral LESENSE.
 __WEAK const sl_peripheral_lesense_val_t sl_peripheral_val_lesense = { .base = 0xFFFFFFFF,
                                                                        .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                        .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                       .gpio_routeen_offset = 0xFFFF,
+                                                                       .gpio_routeen_mask = 0,
                                                                        .dma_signal_fifo = SL_DMA_SIGNAL_NONE };
 
 // Weak definition of peripheral LETIMER0.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_letimer0 = { .base = 0xFFFFFFFF,
                                                                 .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                                .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                                .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                .gpio_routeen_offset = 0xFFFF,
+                                                                .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral LFRCO.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_lfrco = { .base = 0xFFFFFFFF,
                                                              .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                             .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                             .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                             .gpio_routeen_offset = 0xFFFF,
+                                                             .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral LFXO.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_lfxo = { .base = 0xFFFFFFFF,
                                                             .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                            .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                            .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                            .gpio_routeen_offset = 0xFFFF,
+                                                            .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral LPWAES.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_lpwaes = { .base = 0xFFFFFFFF,
                                                               .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                              .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                              .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                              .gpio_routeen_offset = 0xFFFF,
+                                                              .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral LPW0PORTAL.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_lpw0portal = { .base = 0xFFFFFFFF,
                                                                   .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                                  .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                                  .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                  .gpio_routeen_offset = 0xFFFF,
+                                                                  .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral LVGD.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_lvgd = { .base = 0xFFFFFFFF,
                                                             .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                            .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                            .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                            .gpio_routeen_offset = 0xFFFF,
+                                                            .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral MSC.
 __WEAK const sl_peripheral_msc_val_t sl_peripheral_val_msc = { .base = 0xFFFFFFFF,
                                                                .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                               .gpio_routeen_offset = 0xFFFF,
+                                                               .gpio_routeen_mask = 0,
                                                                .dma_signal_wdata = SL_DMA_SIGNAL_NONE };
 
 // Weak definition of peripheral MVP.
 __WEAK const sl_peripheral_mvp_val_t sl_peripheral_val_mvp = { .base = 0xFFFFFFFF,
                                                                .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                               .gpio_routeen_offset = 0xFFFF,
+                                                               .gpio_routeen_mask = 0,
                                                                .dma_signal_req = SL_DMA_SIGNAL_NONE };
 
 // Weak definition of peripheral PCNT0.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_pcnt0 = { .base = 0xFFFFFFFF,
                                                              .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                             .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                             .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                             .gpio_routeen_offset = 0xFFFF,
+                                                             .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral PDM.
 __WEAK const sl_peripheral_pdm_val_t sl_peripheral_val_pdm = { .base = 0xFFFFFFFF,
                                                                .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                               .gpio_routeen_offset = 0xFFFF,
+                                                               .gpio_routeen_mask = 0,
                                                                .dma_signal_rxdata = SL_DMA_SIGNAL_NONE };
 
 // Weak definition of peripheral PFMXPPRF.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_pfmxpprf = { .base = 0xFFFFFFFF,
                                                                 .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                                .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                                .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                .gpio_routeen_offset = 0xFFFF,
+                                                                .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral PIXELRZ0.
 __WEAK const sl_peripheral_pixelrz_val_t sl_peripheral_val_pixelrz0 = { .base = 0xFFFFFFFF,
                                                                         .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                         .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                        .gpio_routeen_offset = 0xFFFF,
+                                                                        .gpio_routeen_mask = 0,
                                                                         .dma_signal_txf = SL_DMA_SIGNAL_NONE };
 
 // Weak definition of peripheral PIXELRZ1.
 __WEAK const sl_peripheral_pixelrz_val_t sl_peripheral_val_pixelrz1 = { .base = 0xFFFFFFFF,
                                                                         .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                         .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                        .gpio_routeen_offset = 0xFFFF,
+                                                                        .gpio_routeen_mask = 0,
                                                                         .dma_signal_txf = SL_DMA_SIGNAL_NONE };
 
 // Weak definition of peripheral PRORTC.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_prortc = { .base = 0xFFFFFFFF,
                                                               .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                              .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                              .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                              .gpio_routeen_offset = 0xFFFF,
+                                                              .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral PRS.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_prs = { .base = 0xFFFFFFFF,
                                                            .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                           .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                           .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                           .gpio_routeen_offset = 0xFFFF,
+                                                           .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral RADIOAES.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_radioaes = { .base = 0xFFFFFFFF,
                                                                 .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                                .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                                .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                .gpio_routeen_offset = 0xFFFF,
+                                                                .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral RFFPLL0.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_rffpll0 = { .base = 0xFFFFFFFF,
                                                                .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                               .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                               .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                               .gpio_routeen_offset = 0xFFFF,
+                                                               .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral RPA.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_rpa = { .base = 0xFFFFFFFF,
                                                            .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                           .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                           .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                           .gpio_routeen_offset = 0xFFFF,
+                                                           .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral RTCC.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_rtcc = { .base = 0xFFFFFFFF,
                                                             .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                            .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                            .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                            .gpio_routeen_offset = 0xFFFF,
+                                                            .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral SCRATCHPAD.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_scratchpad = { .base = 0xFFFFFFFF,
                                                                   .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                                  .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                                  .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                  .gpio_routeen_offset = 0xFFFF,
+                                                                  .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral SEMAILBOX.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_semailbox = { .base = 0xFFFFFFFF,
                                                                  .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                                 .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                                 .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                 .gpio_routeen_offset = 0xFFFF,
+                                                                 .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral SEMAPHORE0.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_semaphore0 = { .base = 0xFFFFFFFF,
                                                                   .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                                  .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                                  .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                  .gpio_routeen_offset = 0xFFFF,
+                                                                  .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral SEMAPHORE1.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_semaphore1 = { .base = 0xFFFFFFFF,
                                                                   .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                                  .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                                  .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                  .gpio_routeen_offset = 0xFFFF,
+                                                                  .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral SEPORTAL.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_seportal = { .base = 0xFFFFFFFF,
                                                                 .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                                .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                                .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                .gpio_routeen_offset = 0xFFFF,
+                                                                .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral SEPUF.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_sepuf = { .base = 0xFFFFFFFF,
                                                              .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                             .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                             .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                             .gpio_routeen_offset = 0xFFFF,
+                                                             .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral SMU.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_smu = { .base = 0xFFFFFFFF,
                                                            .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                           .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                           .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                           .gpio_routeen_offset = 0xFFFF,
+                                                           .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral SOCPLL0.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_socpll0 = { .base = 0xFFFFFFFF,
                                                                .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                               .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                               .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                               .gpio_routeen_offset = 0xFFFF,
+                                                               .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral SYMCRYPTO.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_symcrypto = { .base = 0xFFFFFFFF,
                                                                  .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                                 .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                                 .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                 .gpio_routeen_offset = 0xFFFF,
+                                                                 .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral SYSCFG.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_syscfg = { .base = 0xFFFFFFFF,
                                                               .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                              .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                              .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                              .gpio_routeen_offset = 0xFFFF,
+                                                              .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral SYSRTC0.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_sysrtc0 = { .base = 0xFFFFFFFF,
                                                                .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                               .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                               .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                               .gpio_routeen_offset = 0xFFFF,
+                                                               .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral TIMER0.
 __WEAK const sl_peripheral_timer_val_t sl_peripheral_val_timer0 = { .base = 0xFFFFFFFF,
                                                                     .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                     .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                    .gpio_routeen_offset = 0xFFFF,
+                                                                    .gpio_routeen_mask = 0,
                                                                     .dma_signal_cc0 = SL_DMA_SIGNAL_NONE,
                                                                     .dma_signal_cc1 = SL_DMA_SIGNAL_NONE,
                                                                     .dma_signal_cc2 = SL_DMA_SIGNAL_NONE,
@@ -547,6 +717,8 @@ __WEAK const sl_peripheral_timer_val_t sl_peripheral_val_timer0 = { .base = 0xFF
 __WEAK const sl_peripheral_timer_val_t sl_peripheral_val_timer1 = { .base = 0xFFFFFFFF,
                                                                     .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                     .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                    .gpio_routeen_offset = 0xFFFF,
+                                                                    .gpio_routeen_mask = 0,
                                                                     .dma_signal_cc0 = SL_DMA_SIGNAL_NONE,
                                                                     .dma_signal_cc1 = SL_DMA_SIGNAL_NONE,
                                                                     .dma_signal_cc2 = SL_DMA_SIGNAL_NONE,
@@ -560,6 +732,8 @@ __WEAK const sl_peripheral_timer_val_t sl_peripheral_val_timer1 = { .base = 0xFF
 __WEAK const sl_peripheral_timer_val_t sl_peripheral_val_timer2 = { .base = 0xFFFFFFFF,
                                                                     .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                     .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                    .gpio_routeen_offset = 0xFFFF,
+                                                                    .gpio_routeen_mask = 0,
                                                                     .dma_signal_cc0 = SL_DMA_SIGNAL_NONE,
                                                                     .dma_signal_cc1 = SL_DMA_SIGNAL_NONE,
                                                                     .dma_signal_cc2 = SL_DMA_SIGNAL_NONE,
@@ -573,6 +747,8 @@ __WEAK const sl_peripheral_timer_val_t sl_peripheral_val_timer2 = { .base = 0xFF
 __WEAK const sl_peripheral_timer_val_t sl_peripheral_val_timer3 = { .base = 0xFFFFFFFF,
                                                                     .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                     .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                    .gpio_routeen_offset = 0xFFFF,
+                                                                    .gpio_routeen_mask = 0,
                                                                     .dma_signal_cc0 = SL_DMA_SIGNAL_NONE,
                                                                     .dma_signal_cc1 = SL_DMA_SIGNAL_NONE,
                                                                     .dma_signal_cc2 = SL_DMA_SIGNAL_NONE,
@@ -586,6 +762,8 @@ __WEAK const sl_peripheral_timer_val_t sl_peripheral_val_timer3 = { .base = 0xFF
 __WEAK const sl_peripheral_timer_val_t sl_peripheral_val_timer4 = { .base = 0xFFFFFFFF,
                                                                     .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                     .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                    .gpio_routeen_offset = 0xFFFF,
+                                                                    .gpio_routeen_mask = 0,
                                                                     .dma_signal_cc0 = SL_DMA_SIGNAL_NONE,
                                                                     .dma_signal_cc1 = SL_DMA_SIGNAL_NONE,
                                                                     .dma_signal_cc2 = SL_DMA_SIGNAL_NONE,
@@ -599,6 +777,8 @@ __WEAK const sl_peripheral_timer_val_t sl_peripheral_val_timer4 = { .base = 0xFF
 __WEAK const sl_peripheral_timer_val_t sl_peripheral_val_timer5 = { .base = 0xFFFFFFFF,
                                                                     .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                     .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                    .gpio_routeen_offset = 0xFFFF,
+                                                                    .gpio_routeen_mask = 0,
                                                                     .dma_signal_cc0 = SL_DMA_SIGNAL_NONE,
                                                                     .dma_signal_cc1 = SL_DMA_SIGNAL_NONE,
                                                                     .dma_signal_cc2 = SL_DMA_SIGNAL_NONE,
@@ -612,6 +792,8 @@ __WEAK const sl_peripheral_timer_val_t sl_peripheral_val_timer5 = { .base = 0xFF
 __WEAK const sl_peripheral_timer_val_t sl_peripheral_val_timer6 = { .base = 0xFFFFFFFF,
                                                                     .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                     .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                    .gpio_routeen_offset = 0xFFFF,
+                                                                    .gpio_routeen_mask = 0,
                                                                     .dma_signal_cc0 = SL_DMA_SIGNAL_NONE,
                                                                     .dma_signal_cc1 = SL_DMA_SIGNAL_NONE,
                                                                     .dma_signal_cc2 = SL_DMA_SIGNAL_NONE,
@@ -625,6 +807,8 @@ __WEAK const sl_peripheral_timer_val_t sl_peripheral_val_timer6 = { .base = 0xFF
 __WEAK const sl_peripheral_timer_val_t sl_peripheral_val_timer7 = { .base = 0xFFFFFFFF,
                                                                     .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                     .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                    .gpio_routeen_offset = 0xFFFF,
+                                                                    .gpio_routeen_mask = 0,
                                                                     .dma_signal_cc0 = SL_DMA_SIGNAL_NONE,
                                                                     .dma_signal_cc1 = SL_DMA_SIGNAL_NONE,
                                                                     .dma_signal_cc2 = SL_DMA_SIGNAL_NONE,
@@ -638,6 +822,8 @@ __WEAK const sl_peripheral_timer_val_t sl_peripheral_val_timer7 = { .base = 0xFF
 __WEAK const sl_peripheral_timer_val_t sl_peripheral_val_timer8 = { .base = 0xFFFFFFFF,
                                                                     .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                     .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                    .gpio_routeen_offset = 0xFFFF,
+                                                                    .gpio_routeen_mask = 0,
                                                                     .dma_signal_cc0 = SL_DMA_SIGNAL_NONE,
                                                                     .dma_signal_cc1 = SL_DMA_SIGNAL_NONE,
                                                                     .dma_signal_cc2 = SL_DMA_SIGNAL_NONE,
@@ -651,6 +837,8 @@ __WEAK const sl_peripheral_timer_val_t sl_peripheral_val_timer8 = { .base = 0xFF
 __WEAK const sl_peripheral_timer_val_t sl_peripheral_val_timer9 = { .base = 0xFFFFFFFF,
                                                                     .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                     .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                    .gpio_routeen_offset = 0xFFFF,
+                                                                    .gpio_routeen_mask = 0,
                                                                     .dma_signal_cc0 = SL_DMA_SIGNAL_NONE,
                                                                     .dma_signal_cc1 = SL_DMA_SIGNAL_NONE,
                                                                     .dma_signal_cc2 = SL_DMA_SIGNAL_NONE,
@@ -663,12 +851,16 @@ __WEAK const sl_peripheral_timer_val_t sl_peripheral_val_timer9 = { .base = 0xFF
 // Weak definition of peripheral ULFRCO.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_ulfrco = { .base = 0xFFFFFFFF,
                                                               .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                              .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                              .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                              .gpio_routeen_offset = 0xFFFF,
+                                                              .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral USART0.
 __WEAK const sl_peripheral_usart_val_t sl_peripheral_val_usart0 = { .base = 0xFFFFFFFF,
                                                                     .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                     .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                    .gpio_routeen_offset = 0xFFFF,
+                                                                    .gpio_routeen_mask = 0,
                                                                     .ip_type = SL_PERIPHERAL_SERIAL_TYPE_USART,
                                                                     .rx_irqn = 0xFFFFFFFF,
                                                                     .tx_irqn = 0xFFFFFFFF,
@@ -682,6 +874,8 @@ __WEAK const sl_peripheral_usart_val_t sl_peripheral_val_usart0 = { .base = 0xFF
 __WEAK const sl_peripheral_usart_val_t sl_peripheral_val_usart1 = { .base = 0xFFFFFFFF,
                                                                     .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                     .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                    .gpio_routeen_offset = 0xFFFF,
+                                                                    .gpio_routeen_mask = 0,
                                                                     .ip_type = SL_PERIPHERAL_SERIAL_TYPE_USART,
                                                                     .rx_irqn = 0xFFFFFFFF,
                                                                     .tx_irqn = 0xFFFFFFFF,
@@ -695,6 +889,8 @@ __WEAK const sl_peripheral_usart_val_t sl_peripheral_val_usart1 = { .base = 0xFF
 __WEAK const sl_peripheral_usart_val_t sl_peripheral_val_usart2 = { .base = 0xFFFFFFFF,
                                                                     .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                     .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                    .gpio_routeen_offset = 0xFFFF,
+                                                                    .gpio_routeen_mask = 0,
                                                                     .ip_type = SL_PERIPHERAL_SERIAL_TYPE_USART,
                                                                     .rx_irqn = 0xFFFFFFFF,
                                                                     .tx_irqn = 0xFFFFFFFF,
@@ -707,22 +903,30 @@ __WEAK const sl_peripheral_usart_val_t sl_peripheral_val_usart2 = { .base = 0xFF
 // Weak definition of peripheral USB.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_usb = { .base = 0xFFFFFFFF,
                                                            .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                           .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                           .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                           .gpio_routeen_offset = 0xFFFF,
+                                                           .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral USBAHB.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_usbahb = { .base = 0xFFFFFFFF,
                                                               .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                              .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                              .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                              .gpio_routeen_offset = 0xFFFF,
+                                                              .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral USBPLL0.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_usbpll0 = { .base = 0xFFFFFFFF,
                                                                .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                               .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                               .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                               .gpio_routeen_offset = 0xFFFF,
+                                                               .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral VDAC0.
 __WEAK const sl_peripheral_vdac_val_t sl_peripheral_val_vdac0 = { .base = 0xFFFFFFFF,
                                                                   .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                   .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                  .gpio_routeen_offset = 0xFFFF,
+                                                                  .gpio_routeen_mask = 0,
                                                                   .dma_signal_ch0req = SL_DMA_SIGNAL_NONE,
                                                                   .dma_signal_ch1req = SL_DMA_SIGNAL_NONE };
 
@@ -730,21 +934,29 @@ __WEAK const sl_peripheral_vdac_val_t sl_peripheral_val_vdac0 = { .base = 0xFFFF
 __WEAK const sl_peripheral_vdac_val_t sl_peripheral_val_vdac1 = { .base = 0xFFFFFFFF,
                                                                   .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                   .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                  .gpio_routeen_offset = 0xFFFF,
+                                                                  .gpio_routeen_mask = 0,
                                                                   .dma_signal_ch0req = SL_DMA_SIGNAL_NONE,
                                                                   .dma_signal_ch1req = SL_DMA_SIGNAL_NONE };// Weak definition of peripheral WDOG0.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_wdog0 = { .base = 0xFFFFFFFF,
                                                              .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                             .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                             .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                             .gpio_routeen_offset = 0xFFFF,
+                                                             .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral WDOG1.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_wdog1 = { .base = 0xFFFFFFFF,
                                                              .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                             .bus_clock = SL_BUS_CLOCK_INVALID };
+                                                             .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                             .gpio_routeen_offset = 0xFFFF,
+                                                             .gpio_routeen_mask = 0 };
 
 // Weak definition of peripheral LDMA0.
 __WEAK const sl_peripheral_dma_val_t sl_peripheral_dma_val_ldma0 = {  .base = 0xFFFFFFFF,
                                                                       .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                                       .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                                      .gpio_routeen_offset = 0xFFFF,
+                                                                      .gpio_routeen_mask = 0,
                                                                       .nbr_channel = 0,
                                                                       .nbr_sync = 0,
                                                                       .dual_destination_map = 0x0,

@@ -14,6 +14,9 @@ requires:
 template_contribution:
 - name: mbedtls_config
   value: MBEDTLS_SSL_SRV_C
+documentation:
+  # No dedicated TLS Server page; Mbed TLS hub for related docs
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-mbedtls/
 metadata:
   sbom:
     reference: mbedtls_sbom

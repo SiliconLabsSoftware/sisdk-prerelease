@@ -1,7 +1,7 @@
 project_name: bt_cs_soc_rreq_initiator
 package: bluetooth_le_app
 label: Bluetooth - SoC CS RREQ Initiator
-description: >
+description: >-
   Channel Sounding (CS) Initiator for Bluetooth LE example uses the Ranging 
   Requester (RREQ) role of Ranging Profile (RAP) to collect ranging data and
   processes results using distance estimation algorithm with RTL Library.

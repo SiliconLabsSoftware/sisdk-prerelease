@@ -831,7 +831,8 @@ typedef enum EZwaveCommandType{
    * For instance, if a SAW filter with an insertion loss of 3 dB is inserted between the antenna feed-point
    * and the chip on a JP 500 series product, the threshold value should be set to 48(dec).
    *
-   * @warning The protocol accepts the value received from the host and does not enforce regional regulatory limits. It assumes that the host uses signed RSSI.
+   * @warning The protocol rejects threshold values that do not meet the regional
+   *          regulatory limits for the active channel.
    *
    * @param[in] SetLBTThreshold.channel Channel number the threshold should be set for.
    *                                    Valid channel numbers are 0, 1 and 2
@@ -1236,6 +1237,7 @@ typedef enum EZwaveCommandStatusType{
   EZWAVECOMMANDSTATUS_ENABLE_NODE_NLS,                              /**< EZWAVECOMMANDSTATUS_ENABLE_NODE_NLS */
   EZWAVECOMMANDSTATUS_ZW_GET_INCLUDED_NLS_NODES,                    /**< EZWAVECOMMANDSTATUS_ZW_GET_INCLUDED_NLS_NODES */
   EZWAVECOMMANDSTATUS_GET_SEVERITY_LEVEL,                           /**< EZWAVECOMMANDSTATUS_GET_SEVERITY_LEVEL */
+  EZWAVECOMMANDSTATUS_ZW_SET_LBT_THRESHOLD,                         /**< EZWAVECOMMANDSTATUS_ZW_SET_LBT_THRESHOLD */
   NUM_EZWAVECOMMANDSTATUS,                                          /**< NUM_EZWAVECOMMANDSTATUS */
   EZWAVECOMMANDSTATUS_INVALID = 0xFF
 } EZwaveCommandStatusType;
@@ -2052,6 +2054,7 @@ typedef union UCommandStatus{
   SCommandEnableNodeNLSStatus   EnableNodeNlsStatus;
   SZWaveKeepAliveStatus         KeepAliveUpdate;
   SZWaveGeneric8bStatus         GetSeverityLevelStatus;
+  SZWaveGeneric8bStatus         SetLBTThresholdStatus;
 } UCommandStatus;
 
 typedef union UReceiveCmdPayload{

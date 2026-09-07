@@ -22,6 +22,9 @@ template_contribution:
 recommends:
 - id: freertos
   vendor: silabs
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/app-framework-common
 metadata:
   sbom:
     license: MSLA

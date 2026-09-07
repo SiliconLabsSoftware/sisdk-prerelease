@@ -204,7 +204,7 @@ tx_beam_start_frame_t beam_start_frame;
 tx_beam_stop_frame_t beam_stop_frame;
 tx_data_frame_t frame;
 
-void beamReceiveHandler(uint16_t beamNodeId, uint16_t homeId, uint8_t channel, uint8_t rssi)
+void beamReceiveHandler(uint16_t beamNodeId, uint16_t homeId, uint8_t channel, int8_t rssi)
 {
   if (!stopSniffer) {
     ++counter;
@@ -216,7 +216,7 @@ void beamReceiveHandler(uint16_t beamNodeId, uint16_t homeId, uint8_t channel, u
       beam_start_frame.timestamp2 = 0;
       beam_start_frame.ch_speed = (channel << 5) | GetBeamSpeed(channel);
       beam_start_frame.region_no = zpal_radio_get_region();
-      beam_start_frame.rssi = rssi >> 2; // TODO
+      beam_start_frame.rssi = rssi;
       uint8_t a[4] = { 0x55, 0x00, 0x01, 0x00 };
       if (GetBeamSpeed(channel) == GetRadioSpeed(ZPAL_RADIO_SPEED_100KLR)) {
         zpal_radio_beam_info_t beam_info = { 0 };
@@ -248,7 +248,7 @@ void llRxFrameHandler(zpal_radio_receive_frame_t * pFrame)
     beam_stop_frame.type = BEAM_STOP;
     beam_stop_frame.timestamp1 = 0;
     beam_stop_frame.timestamp2 = 0;
-    beam_stop_frame.rssi = ((uint8_t)pFrame->rx_parameters.rssi) >> 2; // TODO
+    beam_stop_frame.rssi = pFrame->rx_parameters.rssi;
     beam_stop_frame.counter = counter;
     comm_interface_transmit_frame(BEAM_STOP, BEAM_FRAME, (uint8_t *)&beam_stop_frame, 0, NULL);
     comm_interface_wait_transmit_done();
@@ -260,7 +260,7 @@ void llRxFrameHandler(zpal_radio_receive_frame_t * pFrame)
   frame.timestamp2 = 0;
   frame.ch_speed = (GetRadioChannel(&pFrame->rx_parameters) << 5) | GetRadioSpeed(pFrame->rx_parameters.speed);
   frame.region_no = zpal_radio_get_region();
-  frame.rssi = ((uint8_t)pFrame->rx_parameters.rssi) >> 2; // TODO
+  frame.rssi = pFrame->rx_parameters.rssi;
   frame.sodm = '!';
   frame.sod = 0x3;
   frame.len = pFrame->frame_content_length;

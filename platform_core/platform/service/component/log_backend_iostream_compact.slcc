@@ -8,7 +8,7 @@ description: >
   parsing by host-side tooling. Requires the log_backend_iostream component
   for transport.
 category: Services|Log
-quality: evaluation
+quality: production
 metadata:
   sbom:
     license: Zlib

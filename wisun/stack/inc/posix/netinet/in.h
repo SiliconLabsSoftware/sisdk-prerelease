@@ -78,6 +78,10 @@ typedef struct in6_addr {
 /// IPv6 wildcard address
 extern const in6_addr_t in6addr_any;
 
+// True if the provided address is a link-local unicast address (fe80::/10).
+#define IN6_IS_ADDR_LINKLOCAL(a) \
+  ((((const uint8_t *)(a))[0] == 0xfe) && ((((const uint8_t *)(a))[1] & 0xc0) == 0x80))
+
 /// IPv6 address format
 typedef struct sockaddr_in6 {
     sa_family_t sin6_family;    ///< AF_INET6

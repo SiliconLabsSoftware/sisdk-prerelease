@@ -13,6 +13,9 @@ config_file:
 template_contribution:
 - name: component_catalog
   value: zigbee_green_power_proxy_zap_config
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/green-power-client
 metadata:
   sbom:
     license: MSLA

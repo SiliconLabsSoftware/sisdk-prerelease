@@ -18,6 +18,7 @@ provides:
 - name: power_manager_core
 - name: device_init_emu
 requires:
+- name: log_none
 - name: power_manager_core_impl
 - name: sl_core
 - name: sl_assert

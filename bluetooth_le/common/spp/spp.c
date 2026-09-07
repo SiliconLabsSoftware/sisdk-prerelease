@@ -31,6 +31,7 @@
 // -----------------------------------------------------------------------------
 // Includes
 #include <string.h>
+#include <stdbool.h>
 #include "spp.h"
 #include "spp_config.h"
 #include "sl_common.h"
@@ -91,6 +92,7 @@ static void spp_write_timer_cb(app_timer_t *handle, void *data);
 static sl_status_t spp_write(void);
 static void spp_send_freed_bytes(const size_t data_size);
 static void on_bt_evt_connection_closed(sl_bt_evt_connection_closed_t *evt);
+static sl_status_t spp_reset_connection_state(void);
 static sl_status_t spp_rta_acquire(void);
 static void spp_rta_proceed(void);
 static sl_status_t spp_rta_release(void);
@@ -102,6 +104,8 @@ static sl_status_t spp_rta_release(void);
 static spp_role_t spp_role;
 // State of the SPP connection
 static spp_state_t spp_state = SPP_UNKNOWN;
+// SPP enabled
+static bool spp_enabled = true;
 
 // Service UUID
 static const uint8_t spp_service_uuid[] = SPP_SERVICE_UUID;
@@ -471,6 +475,34 @@ static void spp_send_freed_bytes(const size_t data_size)
 }
 
 /*******************************************************************************
+ * Reset connection-related state, drain the queue, and stop the write timer.
+ *
+ * Note: Caller must hold the RTA guard when shared state may be accessed
+ * concurrently (e.g. from spp_step / spp_transmit).
+ ******************************************************************************/
+static sl_status_t spp_reset_connection_state(void)
+{
+  sl_status_t sc = SL_STATUS_OK;
+
+  spp_state = SPP_DISCONNECTED;
+  spp_connection_handle = SL_BT_INVALID_CONNECTION_HANDLE;
+  spp_service_handle = SL_BT_INVALID_SERVICE_HANDLE;
+  spp_remote_buffer_max_size = SPP_DATA_BUFFER_SIZE;
+  spp_remote_buffer_size = SPP_DATA_BUFFER_SIZE;
+
+  if (!queueInit(&data_queue, SPP_DATA_BUFFER_SIZE)) {
+    spp_log_error("Failed to reinitialize data queue" NL);
+    sc = SL_STATUS_FAIL;
+  }
+
+  (void)app_timer_stop(&spp_write_timer);
+  spp_write_timer_running = false;
+  spp_timeout_pending = false;
+
+  return sc;
+}
+
+/*******************************************************************************
  * Connection closed
  *
  * Note: Reset connection related variables, queue and stop timer.
@@ -478,22 +510,11 @@ static void spp_send_freed_bytes(const size_t data_size)
 static void on_bt_evt_connection_closed(sl_bt_evt_connection_closed_t *evt)
 {
   if (spp_connection_handle == evt->connection) {
-    spp_state = SPP_DISCONNECTED;
-
-    // Reset connection related variables
-    spp_connection_handle = SL_BT_INVALID_CONNECTION_HANDLE;
-    spp_service_handle = SL_BT_INVALID_SERVICE_HANDLE;
-    spp_remote_buffer_max_size = SPP_DATA_BUFFER_SIZE;
-    spp_remote_buffer_size = SPP_DATA_BUFFER_SIZE;
-
-    // Reset queue
-    if (!queueInit(&data_queue, SPP_DATA_BUFFER_SIZE)) {
-      spp_log_error("Failed to reinitialize data queue on disconnect" NL);
+    sl_status_t sc = spp_reset_connection_state();
+    if (sc != SL_STATUS_OK) {
+      spp_log_error("Failed to reset SPP connection state. Error = 0x%04lx." NL, sc);
     }
-    // Stop timer
-    (void)app_timer_stop(&spp_write_timer);
-    spp_write_timer_running = false;
-    spp_timeout_pending = false;
+    spp_log_info("SPP connection closed" NL);
   }
 }
 // -----------------------------------------------------------------------------
@@ -525,6 +546,12 @@ sl_status_t spp_transmit(const uint8_t *data, const size_t data_size)
   sc = spp_rta_acquire();
   if (sc != SL_STATUS_OK) {
     return sc;
+  }
+
+  // Reject after spp_disable so the queue is not refilled while spp_step is idle
+  if (!spp_enabled) {
+    sc = SL_STATUS_INVALID_STATE;
+    goto exit;
   }
 
   if (data == NULL || data_size == 0) {
@@ -590,6 +617,25 @@ void spp_init(void)
     spp_log_error("Failed to initialize data queue" NL);
     return;
   }
+  spp_enabled = true;
+}
+
+/*******************************************************************************
+ * Disable SPP component
+ *
+ * Note: Resets connection state under the RTA guard; do not rely on a later
+ * connection_closed. If acquire fails, still clear spp_enabled so step/transmit
+ * and BT event handling stop, but skip shared-state reset to avoid races.
+ ******************************************************************************/
+sl_status_t spp_disable(void)
+{
+  sl_status_t sc = spp_rta_acquire();
+  if (sc == SL_STATUS_OK) {
+    sc = spp_reset_connection_state();
+    (void)spp_rta_release();
+  }
+  spp_enabled = false;
+  return sc;
 }
 
 /*******************************************************************************
@@ -597,6 +643,11 @@ void spp_init(void)
  ******************************************************************************/
 void spp_step(void)
 {
+  // If SPP is disabled, do not process any further
+  if (!spp_enabled) {
+    return;
+  }
+
   // If enough data is available, send immediately
   if (data_queue.count >= SPP_MIN_CHUNK_SIZE) {
     if (spp_write_timer_running) {
@@ -727,6 +778,9 @@ void spp_on_bt_event(sl_bt_msg_t *evt)
   if (sc != SL_STATUS_OK) {
     return;
   }
+  if (!spp_enabled) {
+    goto exit;
+  }
   switch (SL_BT_MSG_ID(evt->header)) {
     // Connection opened
     case sl_bt_evt_connection_opened_id:
@@ -756,6 +810,8 @@ void spp_on_bt_event(sl_bt_msg_t *evt)
     default:
       break;
   }
+
+  exit:
   sc = spp_rta_release();
   if (sc != SL_STATUS_OK) {
     return;

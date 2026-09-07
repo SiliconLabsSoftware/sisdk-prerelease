@@ -32,6 +32,10 @@
 #include "sl_log.h"
 #include "sl_log_internal.h"
 #include "sl_log_platform_specific.h"
+/* Per-series inlined timestamp accessors (sli_log_hal_stamp_time and friends).
+ * The matching implementation is selected by the build via the include path
+ * (see log_platform_specific.slcc). */
+#include "sl_log_hal_inline.h"
 #include "sl_core.h"
 #include "sl_log_common_config.h"
 #include "sl_component_catalog.h"
@@ -50,6 +54,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include "sl_log_helper.h"
+#include "log_lock.h"
 // ARM architecture specific includes for CoreDebug and __BKPT intrinsic
 #if defined(__ARM_ARCH) || defined(__CORTEX_M)
 #include "em_device.h"  // Provides CoreDebug and CoreDebug_DHCSR_C_DEBUGEN_Msk
@@ -124,6 +129,28 @@ static inline bool log_should_send(uint8_t flags)
 // Sets after sl_log_init_stage2 and used to determine the early logs
 bool sli_log_init_stage2_done;
 
+/**
+ * @brief Stamp timestamp and epoch on an event about to be logged.
+ *
+ * Before sl_log_init_stage2() completes the timer backend is not ready, so
+ * early events get placeholder zeros and are re-stamped in flush_early_logs().
+ * After stage2 the inlined HAL readers are used on the hot path.
+ */
+static inline void log_stamp_event_time(sl_log_event_t *event)
+{
+  if (sli_log_init_stage2_done) {
+    uint32_t timestamp;
+    uint32_t epoch;
+
+    sli_log_hal_stamp_time(&timestamp, &epoch);
+    event->timestamp = timestamp;
+    event->epoch = epoch;
+  } else {
+    event->timestamp = 0U;
+    event->epoch = 0U;
+  }
+}
+
 #if (defined(SL_LOG_CONFIG_MODE) \
   && (SL_LOG_CONFIG_MODE != SL_LOG_CONFIG_MODE_CONSOLE) \
   && !defined(SL_CATALOG_LOG_DEFAULT_RING_BUFFER_PRESENT) \
@@ -153,7 +180,7 @@ static inline void update_over_flow_event(uint32_t overflow_count)
 {
   sl_log_event_t overflow_event_local;
 
-  overflow_event_local.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+  log_stamp_event_time(&overflow_event_local);
   overflow_event_local.core_id = 0;
   overflow_event_local.flags = (SL_LOG_CONFIG_LEVEL_WARN<<1)|1;
   overflow_event_local.arg_count = 1;
@@ -528,14 +555,36 @@ static void flush_early_logs(void)
     // Console mode uses reduced early buffer capacity
     uint32_t buffer_capacity = EARLY_LOG_BUFFER_SIZE;
 #endif
-    uint32_t current_timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    uint32_t current_timestamp;
+    uint32_t current_epoch;
+    sli_log_hal_stamp_time(&current_timestamp, &current_epoch);
+
+    /* Back-date the early events from the current time, working on the full
+     * 64-bit value and clamping at zero.
+     *
+     * Subtracting in 32 bits underflows to near-UINT32_MAX whenever the counter
+     * reads lower than the number of buffered events, which would make the
+     * oldest logs look like the newest. That is not a corner case: this runs at
+     * service_init, and on Series 3 with RAIL the PROTIMER is only primed by the
+     * stack_init handler, so every reading here is still zero. Timers that have
+     * only just been started are exposed the same way. */
+    uint64_t now = ((uint64_t)current_epoch << 32) | (uint64_t)current_timestamp;
+    uint64_t oldest_offset = (uint64_t)ring_buffer.event_count - 1U;
+    uint64_t base = (now >= oldest_offset) ? (now - oldest_offset) : 0U;
+
     for (uint32_t i = 0; i < ring_buffer.event_count; i++) {
       // Ring buffer is circular where ring_buffer.read_index+i may wrap and get array index.
       uint32_t event_slot_index = ring_buffer.read_index + i;
       if (event_slot_index >= buffer_capacity) {
         event_slot_index -= buffer_capacity;
       }
-      ring_buffer.buffer[event_slot_index].timestamp = current_timestamp - (ring_buffer.event_count - 1 - i);
+      /* Oldest event gets the smallest time and the newest the largest, so the
+       * relative order survives even when no timebase was live yet. The epoch is
+       * derived per event rather than shared, so a run that straddles a counter
+       * wrap still carries the matching high word. */
+      uint64_t stamp = base + (uint64_t)i;
+      ring_buffer.buffer[event_slot_index].timestamp = (uint32_t)stamp;
+      ring_buffer.buffer[event_slot_index].epoch = (uint32_t)(stamp >> 32);
     }
   }
 #endif
@@ -575,6 +624,9 @@ sl_status_t  sl_log_init_stage2(void) {
   if (sl_log_get_api_core() == NULL) {
     return SL_STATUS_NOT_INITIALIZED;
   }
+  // Build the lock while this is still the only running task, so that the
+  // lazy path in log_lock_begin() is never reached by concurrent loggers.
+  log_lock_create_mutex();
   sl_log_platform_core_init();
   sl_log_backend_init();
 
@@ -614,14 +666,11 @@ void sl_log_send_no_args(uint32_t event_id, uint8_t flags)
   if(log_should_send(flags)){
     sl_log_event_t event;
 
-    event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    log_stamp_event_time(&event);
     event.core_id = 0;
     event.flags = flags;
     event.arg_count = 0;
     event.event_id = event_id;
-    event.args[0] = 0;
-    event.args[1] = 0;
-    event.args[2] = 0;
     event.version = 1;
     if (!sli_log_init_stage2_done) {
       // Early logging into the ring buffer before stage2 init is complete
@@ -660,7 +709,7 @@ void sl_log_send_arg1(uint32_t event_id, uint8_t flags, uint32_t arg1)
   if(log_should_send(flags)){
     sl_log_event_t event;
 
-    event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    log_stamp_event_time(&event);
     event.core_id = 0;
     event.flags = flags;
     event.arg_count = 1;
@@ -703,7 +752,7 @@ void sl_log_send_arg2(uint32_t event_id, uint8_t flags, uint32_t arg1,
   if(log_should_send(flags)){
     sl_log_event_t event;
 
-    event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    log_stamp_event_time(&event);
     event.core_id = 0;
     event.flags = flags;
     event.arg_count = 2;
@@ -752,7 +801,7 @@ void sl_log_send_arg3(uint32_t event_id, uint8_t flags, uint32_t arg1,
   if(log_should_send(flags)){
     sl_log_event_t event;
 
-    event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    log_stamp_event_time(&event);
     event.core_id = 0;
     event.flags = flags;
     event.arg_count = 3;
@@ -783,7 +832,7 @@ void sl_log_send_arg4(uint32_t event_id, uint8_t flags, uint32_t arg1,
   if(log_should_send(flags)){
     sl_log_event_t event;
 
-    event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    log_stamp_event_time(&event);
     event.core_id = 0;
     event.flags = flags;
     event.arg_count = 4;
@@ -817,7 +866,7 @@ void sl_log_send_arg5(uint32_t event_id, uint8_t flags, uint32_t arg1,
   if(log_should_send(flags)){
     sl_log_event_t event;
 
-    event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    log_stamp_event_time(&event);
     event.core_id = 0;
     event.flags = flags;
     event.arg_count = 5;
@@ -852,7 +901,7 @@ void sl_log_send_arg6(uint32_t event_id, uint8_t flags, uint32_t arg1,
   if(log_should_send(flags)){
     sl_log_event_t event;
 
-    event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    log_stamp_event_time(&event);
     event.core_id = 0;
     event.flags = flags;
     event.arg_count = 6;
@@ -888,7 +937,7 @@ void sl_log_send_arg7(uint32_t event_id, uint8_t flags, uint32_t arg1,
   if(log_should_send(flags)){
     sl_log_event_t event;
 
-    event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    log_stamp_event_time(&event);
     event.core_id = 0;
     event.flags = flags;
     event.arg_count = 7;
@@ -926,7 +975,7 @@ void sl_log_send_arg8(uint32_t event_id, uint8_t flags, uint32_t arg1,
   if(log_should_send(flags)){
     sl_log_event_t event;
 
-    event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    log_stamp_event_time(&event);
     event.core_id = 0;
     event.flags = flags;
     event.arg_count = 8;
@@ -965,7 +1014,7 @@ void sl_log_send_arg9(uint32_t event_id, uint8_t flags, uint32_t arg1,
   if(log_should_send(flags)){
     sl_log_event_t event;
 
-    event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    log_stamp_event_time(&event);
     event.core_id = 0;
     event.flags = flags;
     event.arg_count = 9;
@@ -1005,7 +1054,7 @@ void sl_log_send_arg10(uint32_t event_id, uint8_t flags, uint32_t arg1,
   if(log_should_send(flags)){
     sl_log_event_t event;
 
-    event.timestamp = sl_log_get_api_core()->get_timestamp(SL_LOG_HOST_CORE_ID);
+    log_stamp_event_time(&event);
     event.core_id = 0;
     event.flags = flags;
     event.arg_count = 10;
@@ -1240,6 +1289,22 @@ uint32_t sl_log_get_timestamp_count(uint8_t core_id)
   }
 
   return sl_log_get_api_core()->get_timestamp(core_id);
+}
+
+/**
+ * @brief Get the epoch (timestamp overflow count) paired with the most recent
+ *        sl_log_get_timestamp_count() call.
+ *
+ * @param[in] core_id Core identifier (0 = host core, >0 = captive cores)
+ * @return uint32_t Epoch (high part of the 64-bit time), or 0 if unavailable.
+ */
+uint32_t sl_log_get_timestamp_epoch(uint8_t core_id)
+{
+  if (sl_log_get_api_core() == NULL) {
+    return 0U;
+  }
+
+  return sl_log_get_api_core()->get_timestamp_epoch(core_id);
 }
 /**
  * @brief De-initializes the core platform logging infrastructure.

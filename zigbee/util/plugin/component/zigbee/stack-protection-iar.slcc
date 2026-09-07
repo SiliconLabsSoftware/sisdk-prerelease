@@ -6,6 +6,9 @@ quality: production
 
 description: This component enables stack protection and also provides stack protection definitions for IAR.
 
+documentation:
+  docset: gecko-platform
+  document: platform-common/common
 metadata:
   sbom:
     license: MSLA

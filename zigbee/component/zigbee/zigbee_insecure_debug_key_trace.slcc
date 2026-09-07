@@ -28,6 +28,9 @@ template_contribution:
     argument:
     - type: uint8opt
       help: optional boolean indicating state of the toggle (default true)
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/debug-basic
 metadata:
   sbom:
     license: MSLA

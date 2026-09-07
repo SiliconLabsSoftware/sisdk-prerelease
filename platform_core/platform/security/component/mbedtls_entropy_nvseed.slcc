@@ -25,6 +25,9 @@ template_contribution:
   value: MBEDTLS_PLATFORM_STD_NV_SEED_READ sli_nv_seed_read
 - name: mbedtls_config
   value: MBEDTLS_PLATFORM_STD_NV_SEED_WRITE sli_nv_seed_write
+documentation:
+  # Device-Unique Seed Entropy Source (NVM3-backed NV seed)
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-mbedtls/
 metadata:
   sbom:
     license: Zlib
